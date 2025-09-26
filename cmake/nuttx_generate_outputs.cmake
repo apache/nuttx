@@ -22,26 +22,22 @@
 
 function(nuttx_generate_outputs target)
   if(CONFIG_INTELHEX_BINARY)
-    if(NOT CONFIG_ARCH_TOOLCHAIN_TASKING)
-      add_custom_command(
-        OUTPUT ${target}.hex
-        COMMAND ${CMAKE_OBJCOPY} -O ihex ${target} ${target}.hex
-        DEPENDS ${target})
-      add_custom_target(${target}-hex ALL DEPENDS ${target}.hex)
-      add_dependencies(nuttx_post ${target}-hex)
-    endif()
+    add_custom_command(
+      OUTPUT ${target}.hex
+      COMMAND ${CMAKE_OBJCOPY} -O ihex ${target} ${target}.hex
+      DEPENDS ${target})
+    add_custom_target(${target}-hex ALL DEPENDS ${target}.hex)
+    add_dependencies(nuttx_post ${target}-hex)
     file(APPEND ${CMAKE_BINARY_DIR}/nuttx.manifest "${target}.hex\n")
   endif()
 
   if(CONFIG_MOTOROLA_SREC)
-    if(NOT CONFIG_ARCH_TOOLCHAIN_TASKING)
-      add_custom_command(
-        OUTPUT ${target}.srec
-        COMMAND ${CMAKE_OBJCOPY} -O srec ${target} ${target}.srec
-        DEPENDS ${target})
-      add_custom_target(${target}-srec ALL DEPENDS ${target}.srec)
-      add_dependencies(nuttx_post ${target}-srec)
-    endif()
+    add_custom_command(
+      OUTPUT ${target}.srec
+      COMMAND ${CMAKE_OBJCOPY} -O srec ${target} ${target}.srec
+      DEPENDS ${target})
+    add_custom_target(${target}-srec ALL DEPENDS ${target}.srec)
+    add_dependencies(nuttx_post ${target}-srec)
     file(APPEND ${CMAKE_BINARY_DIR}/nuttx.manifest "${target}.srec\n")
   endif()
 
