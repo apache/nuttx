@@ -143,6 +143,7 @@ ULP_READELF = $(CROSSDEV)readelf
 ULP_MAPGEN_TOOL_PATH = chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)ulp$(DELIM)esp32ulp_mapgen.py
 ULP_PREFIX = ulp_
 ULP_BASE = 0
+ULP_VAR_MAP_HEADER_STRING = '\#include "nuttx/symtab.h"\n\nstruct ulp_var_map_s\n{\n  struct symtab_s sym;\n  size_t size;\n};\n'
 
 # To prevent redefining error of other header files in nuttx folder, nuttx/config.h file
 # will be moved during ULP compilation. This step will only effect ULP
@@ -224,11 +225,35 @@ $(ULP_ELF_FILE): $(ULP_OBJS)
 	$(Q) $(CC) $(ULP_LDFLAGS) $(ULP_OBJS) -o $@
 
 $(ULP_BIN_FILE): $(ULP_ELF_FILE) checkpython3
+	$(Q) echo -e $(ULP_VAR_MAP_HEADER_STRING) > $(ULP_FOLDER)$(DELIM)ulp_var_map.h
+	$(Q) echo -e "\n\nstruct ulp_var_map_s ulp_var_map[] =\n{\n" >> $(ULP_FOLDER)$(DELIM)ulp_var_map.h
+	$(Q) echo -e "\n};" >> $(ULP_FOLDER)$(DELIM)ulp_var_map.h
 ifneq ($(suffix $(ULP_PROJECT_PATH)),.bin)
 	$(Q) echo "Creating bin for ULP"
 	$(Q) $(OBJCOPY) -O binary $(ULP_ELF_FILE) $(ULP_BIN_FILE)
 	$(Q) $(ULP_READELF) -sW $(ULP_ELF_FILE) > $(ULP_SYM_FILE)
 	$(Q) python3 $(ULP_MAPGEN_TOOL_PATH) -s $(ULP_SYM_FILE) -o $(ULP_FOLDER)$(DELIM)ulp_main --base $(ULP_BASE) --prefix $(ULP_PREFIX)
+# Creating map header file for accessing shared memory region of ULP variables
+	$(Q) echo -e $(ULP_VAR_MAP_HEADER_STRING) > $(ULP_FOLDER)$(DELIM)ulp_var_map.h
+	$(Q) grep "extern uint32_t" $(ULP_FOLDER)$(DELIM)ulp_main.h >> $(ULP_FOLDER)$(DELIM)ulp_var_map.h
+	$(Q) echo -e "\n\nstruct ulp_var_map_s ulp_var_map[] =\n{\n" >> $(ULP_FOLDER)$(DELIM)ulp_var_map.h
+	$(Q) grep "$(ULP_PREFIX)" $(ULP_FOLDER)$(DELIM)ulp_main.h | while IFS= read -r line; do \
+					var=$$(echo $$line | grep -oP "$${ULP_PREFIX}\w+(?=[;\[])"); \
+					if [ -n "$$var" ]; then \
+						size=$$(echo "$$line" | grep -oP "\[\d+\]" | grep -oP "\d+"); \
+						if [ -n "$$size" ]; then \
+										size=$$(( $$size * 4 )); \
+						else \
+										size=4; \
+						fi; \
+						echo -e "  {" >> $(ULP_FOLDER)$(DELIM)ulp_var_map.h; \
+						echo -e "    .sym.sym_name = \"$${var}\"," >> $(ULP_FOLDER)$(DELIM)ulp_var_map.h; \
+						echo -e "    .sym.sym_value = &$${var}," >> $(ULP_FOLDER)$(DELIM)ulp_var_map.h; \
+						echo -e "    .size = $${size}," >> $(ULP_FOLDER)$(DELIM)ulp_var_map.h; \
+						echo -e "  }," >> $(ULP_FOLDER)$(DELIM)ulp_var_map.h; \
+					fi; \
+	done
+	$(Q) echo -e "\n};" >> $(ULP_FOLDER)$(DELIM)ulp_var_map.h
 endif
 	$(Q) echo "Converting bin for ULP into header file"
 	$(Q) xxd -i $(ULP_BIN_FILE_PATH) >$(ULP_CODE_HEADER) || { echo "xxd of $< failed" ; exit 1 ; }
@@ -243,6 +268,7 @@ $(ULP_FOLDER):
 context:: $(ULP_FOLDER)
 	$(Q) touch $(ULP_CODE_HEADER)
 	$(Q) touch $(ULP_FOLDER)$(DELIM)ulp_main.h
+	$(Q) touch $(ULP_FOLDER)$(DELIM)ulp_var_map.h
 
 depend: $(ULP_BIN_FILE)
 
