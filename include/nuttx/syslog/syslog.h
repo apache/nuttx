@@ -361,6 +361,8 @@ int syslog_flush(void);
 #  define syslog_flush()
 #endif
 
+#ifdef CONFIG_SYSLOG
+
 /****************************************************************************
  * Name: nx_vsyslog
  *
@@ -374,8 +376,22 @@ int syslog_flush(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SYSLOG
 int nx_vsyslog(int priority, FAR const IPTR char *src, FAR va_list *ap);
+
+#if defined(CONFIG_SYSLOG_DEFAULT) && defined(CONFIG_ARCH_LOWPUTC)
+
+/****************************************************************************
+ * Name: nx_vsyslog_lowout
+ *
+ * Description:
+ *   This function is an extension of nx_vsyslog(). It handles the case where
+ *   the user wants to log messages only to the console in a simple,
+ *   synchronous manner for debugging purposes.
+ *
+ ****************************************************************************/
+
+int nx_vsyslog_lowout(FAR const IPTR char *fmt, FAR va_list *ap);
+#endif
 #endif
 
 #undef EXTERN
