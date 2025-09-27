@@ -2045,6 +2045,7 @@ config ARCH_BOARD_RASPBERRYPI_PICO_W
 config ARCH_BOARD_RASPBERRYPI_4B
 	bool "Raspberry Pi Model 4B"
 	depends on ARCH_CHIP_BCM2711
+    select ARCH_HAVE_LEDS
 	---help---
 		This is a port to the Raspberry Pi Model 4B.
 

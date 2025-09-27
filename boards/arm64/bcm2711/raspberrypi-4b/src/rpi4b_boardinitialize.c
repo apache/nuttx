@@ -24,10 +24,13 @@
  * Included Files
  ****************************************************************************/
 
-#include "rpi4b.h"
-#include <nuttx/board.h>
 #include <nuttx/config.h>
+
 #include <stdint.h>
+
+#include <nuttx/board.h>
+
+#include "rpi4b.h"
 
 /****************************************************************************
  * Public Functions

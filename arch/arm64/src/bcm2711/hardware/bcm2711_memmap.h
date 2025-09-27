@@ -115,4 +115,8 @@
 #define BCM_ARMLOCAL_BASEADDR 0x4c0000000
 #endif /* defined(CONFIG_BCM2711_LOW_PERIPHERAL) */
 
+/* VideoCore mailbox base address */
+
+#define BCM_VC_MBOX_BASEADDR (BCM_PERIPHERAL_BASEADDR + 0xb880)
+
 #endif /* __ARCH_ARM64_SRC_BCM2711_MM_H */

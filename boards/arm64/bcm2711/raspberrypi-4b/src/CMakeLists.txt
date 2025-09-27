@@ -20,6 +20,10 @@
 
 set(SRCS rpi4b_boardinitialize.c rpi4b_bringup.c)
 
+if(CONFIG_ARCH_LEDS)
+  list(APPEND SRCS rpi4b_autoleds.c)
+endif()
+
 if(CONFIG_BOARDCTL)
   list(APPEND SRCS rpi4b_appinit.c)
 endif()

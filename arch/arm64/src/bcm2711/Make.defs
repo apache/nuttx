@@ -23,6 +23,7 @@ include common/Make.defs
 # BCM2711 specific C source files
 
 CHIP_CSRCS += bcm2711_boot.c
+CHIP_CSRCS += bcm2711_mailbox.c
 CHIP_CSRCS += bcm2711_serial.c
 CHIP_CSRCS += bcm2711_gpio.c
 CHIP_CSRCS += bcm2711_timer.c

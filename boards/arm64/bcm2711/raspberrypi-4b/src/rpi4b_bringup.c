@@ -26,6 +26,8 @@
 #include <sys/types.h>
 #include <syslog.h>
 
+#include <arch/board/board.h>
+
 #if defined(CONFIG_BCM2711_I2C_DRIVER)
 #include "bcm2711_i2cdev.h"
 #endif /* defined(CONFIG_BCM2711_I2C) */
@@ -33,6 +35,8 @@
 #ifdef CONFIG_BCM2711_I2C
 #include "bcm2711_i2c.h"
 #endif
+
+#include "bcm2711_mailbox.h"
 
 #include "rpi4b.h"
 
