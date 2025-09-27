@@ -274,6 +274,12 @@
       &entry->member != (list); entry = temp, \
       temp = list_container_of(temp->member.next, type, member))
 
+/* Iterate from a given entry node */
+
+#define list_for_every_entry_from(list, cur, type, member) \
+  for (; &(cur)->member != (list); \
+       (cur) = list_next_entry(cur, type, member))
+
 /* Iterate from a given entry node in a safe way */
 
 #define list_for_every_entry_safe_from(list, cur, temp, type, member) \
