@@ -1,0 +1,58 @@
+From a120e0e698ff3f7af8bfee34a47051f13b74aac0 Mon Sep 17 00:00:00 2001
+From: chao an <anchao.archer@bytedance.com>
+Date: Thu, 9 Oct 2025 19:39:01 +0800
+Subject: [PATCH] libmetal/nuttx: Update function prototype changes
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+clock_systime_timespec() always returns 0, so there is no need to
+check the return value in the caller code, let us remove the return
+value directly.
+
+From:
+	int clock_systime_timespec(FAR struct timespec *ts)
+To:
+	void clock_systime_timespec(FAR struct timespec *ts)
+
+Fix build break:
+
+libmetal/lib/system/nuttx/time.c: In function ‘metal_get_timestamp’:
+libmetal/lib/system/nuttx/time.c:21:11: error: void value not ignored as it ought to be
+   21 |         r = clock_systime_timespec(&tp);
+      |           ^
+make[1]: *** [Makefile:46: libmetal/lib/system/nuttx/time.o] Error 1
+
+Change-Id: I88443c4a5725bd269a05c8a503bd5095b082bfbe
+---
+ lib/system/nuttx/time.c | 13 ++++++-------
+ 1 file changed, 6 insertions(+), 7 deletions(-)
+
+diff --git a/lib/system/nuttx/time.c libmetal/lib/system/nuttx/time.c
+index 986f1ba..f06725d 100644
+--- a/lib/system/nuttx/time.c
++++ libmetal/lib/system/nuttx/time.c
+@@ -14,14 +14,13 @@
+ 
+ unsigned long long metal_get_timestamp(void)
+ {
+-	unsigned long long t = 0;
++	unsigned long long t;
+ 	struct timespec tp;
+-	int r;
+ 
+-	r = clock_systime_timespec(&tp);
+-	if (!r) {
+-		t = (unsigned long long)tp.tv_sec * NSEC_PER_SEC;
+-		t += tp.tv_nsec;
+-	}
++	clock_systime_timespec(&tp);
++
++	t = (unsigned long long)tp.tv_sec * NSEC_PER_SEC;
++	t += tp.tv_nsec;
++
+ 	return t;
+ }
+-- 
+2.43.0
+

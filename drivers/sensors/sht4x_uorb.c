@@ -835,14 +835,7 @@ int sht4x_register(FAR struct i2c_master_s *i2c, int devno, uint8_t addr)
   priv->addr = addr;
   priv->precision = SHT4X_PREC_HIGH;
   priv->interval = 1000000; /* 1s interval */
-  err = clock_systime_timespec(&priv->last_heat);
-
-  if (err < 0)
-    {
-      snerr("ERROR: Failed to get timespec: %d\n", err);
-      kmm_free(priv);
-      return err;
-    }
+  clock_systime_timespec(&priv->last_heat);
 
   /* Allow heat immediately after registration since in theory the sensor has
    * never had its heater activated yet.

@@ -64,12 +64,7 @@ static void clear_mic_boot_time(void)
 static void set_mic_boot_time(void)
 {
   struct timespec start;
-  if (clock_systime_timespec(&start) < 0)
-    {
-      g_mic_boot_start_time = 0x0ull;
-      return;
-    }
-
+  clock_systime_timespec(&start);
   g_mic_boot_start_time = (uint64_t)start.tv_sec * 1000 +
                           (uint64_t)start.tv_nsec / 1000000;
 }
@@ -79,11 +74,7 @@ static void wait_mic_boot_finish(void)
   if (g_mic_boot_start_time != 0x0ull)
     {
       struct timespec end;
-      if (clock_systime_timespec(&end) < 0)
-        {
-          return;
-        }
-
+      clock_systime_timespec(&end);
       uint64_t time = (uint64_t)end.tv_sec * 1000 +
                       (uint64_t)end.tv_nsec / 1000000 -
                        g_mic_boot_start_time;

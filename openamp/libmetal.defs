@@ -88,6 +88,7 @@ libmetal.zip:
 	$(Q) patch -p0 < 0004-lib-system-nuttx-fix-unused-parameter-compile-error.patch
 	$(Q) patch -p0 < 0005-libmetal-cmake-set-HAVE_STDATOMIC_H-default-true-in-.patch
 	$(Q) patch -p0 < 0006-lib-system-nuttx-io.c-include-stddef.h-in-nuttx-io.c.patch
+	$(Q) patch -p0 < 0007-libmetal-nuttx-Update-function-prototype-changes.patch
 
 .libmetal_headers: libmetal.zip
 else
