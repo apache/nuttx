@@ -1139,7 +1139,7 @@ config ESPRESSIF_WIFI_ENABLE_WPA3_OWE_STA
 choice ESPRESSIF_WIFI_MGMT_RX_BUFFER
 	prompt "Type of WiFi RX MGMT buffers"
 	default ESPRESSIF_WIFI_STATIC_RX_MGMT_BUFFER
-	help
+	---help---
 		Select type of WiFi RX MGMT buffers:
 
 		If "Static" is selected, WiFi RX MGMT buffers are allocated when WiFi is initialized and released
@@ -1194,7 +1194,7 @@ config ESPRESSIF_WIFI_DYNAMIC_RX_BUFFER_NUM
 choice ESPRESSIF_WIFI_TX_BUFFER
 	prompt "Type of WiFi TX buffers"
 	default ESPRESSIF_WIFI_DYNAMIC_TX_BUFFER
-	help
+	---help---
 		Select type of WiFi TX buffers:
 
 		If "Static" is selected, WiFi TX buffers are allocated when WiFi is initialized and released
@@ -1255,7 +1255,7 @@ config ESPRESSIF_WIFI_RX_MGMT_BUF_NUM_DEF
 	int "Max number of WiFi RX MGMT buffers"
 	range 1 10
 	default 5
-	help
+	---help---
 		Set the number of WiFi RX_MGMT buffers.
 		For Management buffers, the number of dynamic and static management buffers is the same.
 
