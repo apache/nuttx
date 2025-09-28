@@ -671,6 +671,7 @@ struct tcb_s
 
 #if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
   FAR struct pthread_mutex_s *mhead;     /* List of mutexes held by thread  */
+  spinlock_t mhead_lock;
 #endif
 
   /* CPU load monitoring support ********************************************/
@@ -725,10 +726,6 @@ struct tcb_s
   size_t caller_deepest;
   size_t level_deepest;
   size_t level;
-#endif
-
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-  spinlock_t mutex_lock;
 #endif
 };
 
