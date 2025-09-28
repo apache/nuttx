@@ -6,3 +6,6 @@
 /arm/stm32/stm32vldiscovery,CONFIG_ARM_TOOLCHAIN_CLANG
 
 /arm/stm32/viewtool-stm32f107,CONFIG_ARM_TOOLCHAIN_CLANG
+
+# cURL error 60 SSL certificate expired
+-stm32f4discovery:cxxtest
