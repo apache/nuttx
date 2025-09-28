@@ -26,10 +26,6 @@ ifneq ($(CONFIG_APP_REGISTRY),)
 
 CSRCS += lib_builtin_getname.c lib_builtin_isavail.c lib_builtin_forindex.c
 
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CSRCS += lib_builtin_setlist.c
-endif
-
 ifeq ($(CONFIG_SCHED_USER_IDENTITY),y)
 CSRCS += lib_builtin_getuid.c lib_builtin_getgid.c lib_builtin_getmode.c
 endif
