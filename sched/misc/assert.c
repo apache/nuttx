@@ -82,8 +82,8 @@
 #  undef CONFIG_ARCH_USBDUMP
 #endif
 
-#define DUMP_PTR(p, x) ((uintptr_t)(&(p)[(x)]) < stack_top ? (p)[(x)] : 0)
-#define DUMP_STRIDE    (sizeof(FAR void *) * 8)
+#define DUMP_PTR(p, x) ((uintptr_t)(&(p)[(x)]) < stack_top ? (p)[(x)] : 0u)
+#define DUMP_STRIDE    (sizeof(FAR void *) * 8u)
 
 #if UINTPTR_MAX <= UINT32_MAX
 #  define DUMP_FORMAT " %08" PRIxPTR ""
@@ -113,25 +113,8 @@ static noreturn_function int pause_cpu_handler(FAR void *arg);
 static bool g_cpu_paused[CONFIG_SMP_NCPUS];
 #endif
 
-static spinlock_t g_assert_lock = SP_UNLOCKED;
-
 static uintptr_t g_last_regs[CONFIG_SMP_NCPUS][XCPTCONTEXT_REGS]
                  aligned_data(XCPTCONTEXT_ALIGN);
-
-#ifdef CONFIG_DEBUG_ALERT
-static FAR const char * const g_policy[4] =
-{
-  "FIFO", "RR", "SPORADIC"
-};
-
-static FAR const char * const g_ttypenames[4] =
-{
-  "Task",
-  "pthread",
-  "Kthread",
-  "Invalid"
-};
-#endif
 
 #ifdef CONFIG_SMP
 static struct smp_call_data_s g_call_data =
@@ -180,11 +163,11 @@ static void stack_dump(uintptr_t sp, uintptr_t stack_top)
     {
       FAR uintptr_t *ptr = (FAR uintptr_t *)stack;
 
-      _alert("%p:"DUMP_FORMAT DUMP_FORMAT DUMP_FORMAT DUMP_FORMAT
+      _alert(DUMP_FORMAT ":" DUMP_FORMAT DUMP_FORMAT DUMP_FORMAT DUMP_FORMAT
              DUMP_FORMAT DUMP_FORMAT DUMP_FORMAT DUMP_FORMAT "\n",
-             (FAR void *)stack, DUMP_PTR(ptr, 0), DUMP_PTR(ptr , 1),
+             stack, DUMP_PTR(ptr, 0), DUMP_PTR(ptr, 1),
              DUMP_PTR(ptr, 2), DUMP_PTR(ptr, 3), DUMP_PTR(ptr, 4),
-             DUMP_PTR(ptr, 5), DUMP_PTR(ptr , 6), DUMP_PTR(ptr, 7));
+             DUMP_PTR(ptr, 5), DUMP_PTR(ptr, 6), DUMP_PTR(ptr, 7));
     }
 }
 
@@ -198,12 +181,12 @@ static void dump_stackinfo(FAR const char *tag, uintptr_t sp,
   uintptr_t top = base + size;
 
   _alert("%s Stack:\n", tag);
-  _alert("  base: %p\n", (FAR void *)base);
+  _alert("  base: 0x%" PRIxPTR "\n", base);
   _alert("  size: %08zu\n", size);
 
-  if (sp != 0)
+  if (sp)
     {
-      _alert("    sp: %p\n", (FAR void *)sp);
+      _alert("    sp: 0x%" PRIxPTR "\n", sp);
 
       /* Get more information */
 
@@ -290,7 +273,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
     }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
-  if (intstack_sp != 0 || force)
+  if (intstack_sp || force)
     {
       dump_stackinfo("IRQ",
                      intstack_sp,
@@ -306,7 +289,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
       /* Try to restore SP from current_regs if assert from interrupt. */
 
       tcbstack_sp = up_interrupt_context() ?
-                    up_getusrsp((FAR void *)running_regs()) : 0;
+                    up_getusrsp((FAR void *)running_regs()) : 0u;
       if (tcbstack_sp < tcbstack_base || tcbstack_sp >= tcbstack_top)
         {
           _alert("ERROR: Stack pointer %" PRIxPTR " is not within the"
@@ -319,7 +302,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
 #endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
-  if (kernelstack_sp != 0 || force)
+  if (kernelstack_sp || force)
     {
       dump_stackinfo("Kernel",
                      kernelstack_sp,
@@ -329,7 +312,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
     }
 #endif
 
-  if (tcbstack_sp != 0 || force)
+  if (tcbstack_sp || force)
     {
       dump_stackinfo("User",
                      tcbstack_sp,
@@ -360,29 +343,41 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
   size_t stack_filled = 0;
   size_t stack_used;
 #endif
+  static FAR const char * const g_policy[4] =
+  {
+    "FIFO", "RR", "SPORADIC"
+  };
+
+  static FAR const char * const g_ttypenames[4] =
+  {
+    "Task",
+    "pthread",
+    "Kthread",
+    "Invalid"
+  };
+
 #ifndef CONFIG_SCHED_CPULOAD_NONE
   struct cpuload_s cpuload;
   size_t fracpart = 0;
   size_t intpart = 0;
   size_t tmp;
 
-  clock_cpuload(tcb->pid, &cpuload);
-
-  if (cpuload.total > 0)
+  if (clock_cpuload(tcb->pid, &cpuload) == OK &&
+      cpuload.total > 0u)
     {
-      tmp      = (1000 * cpuload.active) / cpuload.total;
-      intpart  = tmp / 10;
-      fracpart = tmp - 10 * intpart;
+      tmp      = (size_t)((1000u * cpuload.active) / cpuload.total);
+      intpart  = tmp / 10u;
+      fracpart = tmp - 10u * intpart;
     }
 #endif
 
 #ifdef CONFIG_STACK_COLORATION
   stack_used = up_check_tcbstack(tcb, tcb->adj_stack_size);
-  if (tcb->adj_stack_size > 0 && stack_used > 0)
+  if (tcb->adj_stack_size > 0u && stack_used > 0u)
     {
       /* Use fixed-point math with one decimal place */
 
-      stack_filled = 10 * 100 * stack_used / tcb->adj_stack_size;
+      stack_filled = 10u * 100u * stack_used / tcb->adj_stack_size;
     }
 #endif
 
@@ -393,7 +388,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
   /* get the task_state */
 
   nxsched_get_stateinfo(tcb, state, sizeof(state));
-  if ((s = strchr(state, ',')) != NULL)
+  if ((s = strchr(state, (int)',')) != NULL)
     {
       *s = ' ';
     }
@@ -437,8 +432,8 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
          , tcb->adj_stack_size
 #ifdef CONFIG_STACK_COLORATION
          , up_check_tcbstack(tcb, tcb->adj_stack_size)
-         , stack_filled / 10, stack_filled % 10
-         , (stack_filled >= 10 * 80 ? '!' : ' ')
+         , stack_filled / 10u, stack_filled % 10u
+         , (stack_filled >= 10u * 80u ? '!' : ' ')
 #endif
 #ifndef CONFIG_SCHED_CPULOAD_NONE
          , intpart, fracpart
@@ -505,15 +500,15 @@ static void dump_tasks(void)
   for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
     {
 #  ifdef CONFIG_STACK_COLORATION
-      size_t stack_used = up_check_intstack(cpu, 0);
-      size_t stack_filled = 0;
+      size_t stack_used = up_check_intstack(cpu, 0u);
+      size_t stack_filled = 0u;
 
-      if (stack_used > 0)
+      if (stack_used > 0u)
         {
           /* Use fixed-point math with one decimal place */
 
-          stack_filled = 10 * 100 *
-                         stack_used / CONFIG_ARCH_INTERRUPTSTACK;
+          stack_filled = 10u * 100u * stack_used /
+                         (size_t)CONFIG_ARCH_INTERRUPTSTACK;
         }
 #  endif
 
@@ -525,7 +520,7 @@ static void dump_tasks(void)
              " ------- ---"
              " ------- ----------"
              " ----------------"
-             " %p"
+             " 0x%" PRIxPTR
              "   %7u"
 #  ifdef CONFIG_STACK_COLORATION
              "   %7zu   %3zu.%1zu%%%c"
@@ -537,12 +532,13 @@ static void dump_tasks(void)
 #ifdef CONFIG_SMP
              , cpu
 #endif
-             , (FAR void *)up_get_intstackbase(cpu)
+             , up_get_intstackbase(cpu)
              , CONFIG_ARCH_INTERRUPTSTACK
 #  ifdef CONFIG_STACK_COLORATION
              , stack_used
-             , stack_filled / 10, stack_filled % 10,
-             (stack_filled >= 10 * 80 ? '!' : ' ')
+             , stack_filled / 10u
+             , stack_filled % 10u
+             , (stack_filled >= 10u * 80u ? '!' : ' ')
 #  endif
             );
     }
@@ -838,6 +834,8 @@ void _assert(FAR const char *filename, int linenum,
   FAR struct tcb_s *rtcb = running_task();
   struct panic_notifier_s notifier_data;
   irqstate_t flags;
+
+  static spinlock_t g_assert_lock = SP_UNLOCKED;
 
   if (OSINIT_IS_PANIC())
     {
