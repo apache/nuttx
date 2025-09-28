@@ -48,6 +48,8 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libmetal)
       ${CMAKE_CURRENT_LIST_DIR}/0005-libmetal-cmake-set-HAVE_STDATOMIC_H-default-true-in-.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
       ${CMAKE_CURRENT_LIST_DIR}/0006-lib-system-nuttx-io.c-include-stddef.h-in-nuttx-io.c.patch
+      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0007-libmetal-nuttx-Update-function-prototype-changes.patch
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 
