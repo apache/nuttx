@@ -1,6 +1,9 @@
 /sim/*/*/*/c[j-z]*
 /sim/*/*/*/[d-n]*
 
+# cURL error 60 SSL certificate expired
+-sim:cxxtest
+
 # macOS doesn't have V4L2
 -Darwin,sim:nxcamera
 
