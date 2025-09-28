@@ -29,6 +29,7 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <nuttx/userspace.h>
 
 #ifdef CONFIG_APP_REGISTRY
 
@@ -66,18 +67,10 @@ extern "C"
 #endif
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)
-/* In the PROTECTED build, the builtin arrays are only needed by BINFS.
- * in this case, the user-space globals are not accessible and must be
- * provided to the OS via the boardctl(BOARDIOC_BUILTINS) call.  In this
- * case, the PROTECTED kernel will keep its own copy of the user-space
- * array.
- *
- * The call to boardctl(BOARDIOC_BUILTINS) must be provided by the
- * application layer.
- */
+/* In the PROTECTED build, We use USERSPACE to get builtin information. */
 
-EXTERN FAR const struct builtin_s *g_builtins;
-EXTERN int g_builtin_count;
+#define g_builtins (USERSPACE->builtins)
+#define g_builtin_count (*USERSPACE->builtin_count)
 
 #else
 /* In the FLAT build, the builtin list is just a global global array and
@@ -92,35 +85,6 @@ EXTERN const int g_builtin_count;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: builtin_setlist
- *
- * Description:
- *   Saves the user-space list of built-in applications for use by BINFS in
- *   protected mode.  Normally this is small set of globals provided by
- *   user-space logic.  It provides name-value pairs for associating
- *   built-in application names with user-space entry point addresses.
- *   These globals are only needed for use by BINFS which executes built-in
- *   applications from kernel-space in PROTECTED mode.  In the FLAT build,
- *   the user space globals are readily available.  (BINFS is not
- *   supportable in KERNEL mode since user-space address have no general
- *   meaning that configuration).
- *
- * Input Parameters:
- *   builtins - The list of built-in functions.  Each entry is a name-value
- *              pair that maps a built-in function name to its user-space
- *              entry point address.
- *   count    - The number of name-value pairs in the built-in list.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)
-void builtin_setlist(FAR const struct builtin_s *builtins, int count);
-#endif
 
 /****************************************************************************
  * Name: builtin_isavail
