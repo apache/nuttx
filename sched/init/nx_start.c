@@ -185,7 +185,7 @@ struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
  * hardware resources may not yet be available to the kernel logic.
  */
 
-volatile uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
+volatile enum nx_initstate_e g_nx_initstate;  /* See enum nx_initstate_e */
 
 /* This is an array of task control block (TCB) for the IDLE thread of each
  * CPU.  For the non-SMP case, this is a a single TCB; For the SMP case,
