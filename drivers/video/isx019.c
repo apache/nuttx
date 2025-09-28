@@ -1230,11 +1230,7 @@ static bool try_repeat(int sec, int usec, FAR isx019_dev_t *priv,
   struct timespec now;
   struct timespec delta;
 
-  ret = clock_systime_timespec(&start);
-  if (ret < 0)
-    {
-      return false;
-    }
+  clock_systime_timespec(&start);
 
   while (1)
     {
@@ -1245,12 +1241,7 @@ static bool try_repeat(int sec, int usec, FAR isx019_dev_t *priv,
         }
       else
         {
-          ret = clock_systime_timespec(&now);
-          if (ret < 0)
-            {
-              return false;
-            }
-
+          clock_systime_timespec(&now);
           clock_timespec_subtract(&now, &start, &delta);
           if ((delta.tv_sec > sec) ||
               ((delta.tv_sec == sec) &&

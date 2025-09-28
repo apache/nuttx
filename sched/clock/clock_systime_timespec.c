@@ -52,14 +52,13 @@
  *   ts - Location to return the time
  *
  * Returned Value:
- *   Current version almost always returns OK. Currently errors are
- *   possible with CONFIG_RTC_HIRES only.
+ *   None
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int clock_systime_timespec(FAR struct timespec *ts)
+void clock_systime_timespec(FAR struct timespec *ts)
 {
 #ifdef CONFIG_RTC_HIRES
   if (g_rtc_enabled)
@@ -84,6 +83,4 @@ int clock_systime_timespec(FAR struct timespec *ts)
 #else
   clock_ticks2time(ts, g_system_ticks);
 #endif
-  return 0;
 }
-

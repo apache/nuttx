@@ -731,13 +731,13 @@ clock_t clock_systime_ticks(void);
  *   ts - Location to return the time
  *
  * Returned Value:
- *   OK (0) on success; a negated errno value on failure.
+ *   None
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int clock_systime_timespec(FAR struct timespec *ts);
+void clock_systime_timespec(FAR struct timespec *ts);
 
 /****************************************************************************
  * Name:  clock_cpuload
