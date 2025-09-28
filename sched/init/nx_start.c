@@ -445,7 +445,7 @@ static void idle_group_initialize(void)
       nxtask_joininit(tcb);
 
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-      spin_lock_init(&tcb->mutex_lock);
+      spin_lock_init(&tcb->mhead_lock);
 #endif
 
 #ifdef CONFIG_SMP

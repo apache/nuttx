@@ -127,7 +127,7 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
 #endif
 
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-  spin_lock_init(&tcb->cmn.mutex_lock);
+  spin_lock_init(&tcb->cmn.mhead_lock);
 #endif
 
   /* Duplicate the parent tasks environment */
