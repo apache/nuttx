@@ -71,7 +71,6 @@ struct rptun_priv_s
   FAR struct rptun_dev_s      *dev;
   struct remoteproc           rproc;
   struct metal_list           node;
-  struct notifier_block       nbpanic;
   bool                        rreset;
   bool                        stop;
   pid_t                       pid;
@@ -140,6 +139,9 @@ static void rptun_send_command(FAR struct rptun_priv_s *priv,
                                uint32_t cmd, bool wait);
 static uint32_t rptun_recv_command(FAR struct rptun_priv_s *priv, bool ack);
 
+static int rptun_panic_notifier(FAR struct notifier_block *block,
+                                unsigned long action, void *data);
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -186,6 +188,11 @@ static const struct virtio_memory_ops g_rptun_mmops =
 
 static struct metal_list g_rptun_priv = METAL_INIT_LIST(g_rptun_priv);
 static rmutex_t g_rptun_lock = NXRMUTEX_INITIALIZER;
+
+static struct notifier_block g_rptun_panic_nb =
+{
+  .notifier_call = rptun_panic_notifier,
+};
 
 /****************************************************************************
  * Private Functions
@@ -1336,14 +1343,12 @@ static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
 static int rptun_panic_notifier(FAR struct notifier_block *block,
                                 unsigned long action, void *data)
 {
-  FAR struct rptun_priv_s *priv =
-    container_of(block, struct rptun_priv_s, nbpanic);
-
   if (action == PANIC_KERNEL_FINAL)
     {
       /* PANIC all the remote core */
 
-      rptun_dev_reset(priv, (unsigned long)BOARDIOC_SOFTRESETCAUSE_PANIC);
+      rptun_ioctl_foreach(NULL, RPTUNIOC_RESET,
+                          (unsigned long)BOARDIOC_SOFTRESETCAUSE_PANIC);
     }
 
   return 0;
@@ -1383,8 +1388,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
 
           if (ret >= 0)
             {
-              priv->nbpanic.notifier_call = rptun_panic_notifier;
-              panic_notifier_chain_register(&priv->nbpanic);
+              panic_notifier_chain_register(&g_rptun_panic_nb);
 
               nxrmutex_lock(&g_rptun_lock);
               metal_list_add_tail(&g_rptun_priv, &priv->node);
