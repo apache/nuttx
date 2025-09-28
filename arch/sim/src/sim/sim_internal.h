@@ -256,6 +256,7 @@ int host_unlinkshmem(const char *name);
 
 /* sim_hosttime.c ***********************************************************/
 
+int host_inittimer(void);
 uint64_t host_gettime(bool rtc);
 void host_sleep(uint64_t nsec);
 void host_sleepuntil(uint64_t nsec);
