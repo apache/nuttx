@@ -326,6 +326,13 @@ config SPINLOCK_DEBUG
 	---help---
 		Enable to support debug tools for spinlock.
 
+config SPINLOCK_BACKTRACE
+	bool "Enable spinlock backtrace"
+	depends on SPINLOCK_DEBUG && LIBC_BACKTRACE_DEPTH > 0
+	default n
+	---help---
+		Enable to record backtrace when a task holds a spinlock.
+
 config SPINLOCK_INLINE
 	bool "Inline spinlock helpers"
 	default !DEFAULT_SMALL

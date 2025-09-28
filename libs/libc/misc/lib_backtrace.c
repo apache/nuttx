@@ -43,8 +43,8 @@
  ****************************************************************************/
 
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-#  define backtrace_lock(bp) spin_lock_irqsave(&(bp)->lock)
-#  define backtrace_unlock(bp, flags) spin_unlock_irqrestore(&(bp)->lock, flags)
+#  define backtrace_lock(bp) spin_lock_irqsave_notrace(&(bp)->lock)
+#  define backtrace_unlock(bp, flags) spin_unlock_irqrestore_notrace(&(bp)->lock, flags)
 #else
 #  define backtrace_lock(bp) ((irqstate_t)nxmutex_lock(&(bp)->lock))
 #  define backtrace_unlock(bp, flags) \
