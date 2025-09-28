@@ -207,6 +207,10 @@ int aio_fsync(int op, FAR struct aiocb *aiocbp)
   sigwork_init(&aiocbp->aio_sigwork);
   aiocbp->aio_result = -EINPROGRESS;
 
+  /* Initialize list_node using aiocbp for the first time */
+
+  list_initialize(&aiocbp->lio_link);
+
   /* Create a container for the AIO control block.  This may cause us to
    * block if there are insufficient resources to satisfy the request.
    */
