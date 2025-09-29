@@ -49,9 +49,11 @@
 #include "hal/mcpwm_hal.h"
 #include "hal/mcpwm_ll.h"
 #include "soc/mcpwm_periph.h"
+#include "soc/ledc_periph.h"
 #include "periph_ctrl.h"
 #include "hal/clk_tree_hal.h"
 #include "esp_clk_tree.h"
+#include "esp_private/esp_clk_tree_common.h"
 
 #ifdef CONFIG_ESP_MCPWM
 
@@ -87,6 +89,18 @@
 #endif
 #ifdef CONFIG_ESP_MCPMW_MOTOR_CH0_FAULT
 #  define ESP_MCPMW_MOTOR_FAULT
+#endif
+
+#if SOC_PERIPH_CLK_CTRL_SHARED
+#  define MCPWM_CLOCK_SRC_ATOMIC() PERIPH_RCC_ATOMIC()
+#else
+#  define MCPWM_CLOCK_SRC_ATOMIC()
+#endif
+
+#if !SOC_RCC_IS_INDEPENDENT
+#  define MCPWM_RCC_ATOMIC() PERIPH_RCC_ATOMIC()
+#else
+#  define MCPWM_RCC_ATOMIC()
 #endif
 
 /****************************************************************************
@@ -1584,13 +1598,29 @@ static void esp_mcpwm_group_start(void)
 
   /* HAL and MCPWM Initialization */
 
-  periph_module_enable(PERIPH_MCPWM0_MODULE);
+  MCPWM_RCC_ATOMIC()
+    {
+      mcpwm_ll_enable_bus_clock(g_mcpwm_common.group.group_id, true);
+      mcpwm_ll_reset_register(g_mcpwm_common.group.group_id);
+    }
+
+  MCPWM_CLOCK_SRC_ATOMIC()
+    {
+      mcpwm_ll_group_enable_clock(g_mcpwm_common.group.group_id, true);
+    }
+
   mcpwm_hal_init(hal, &g_mcpwm_common.group);
-  mcpwm_ll_group_set_clock_source(g_mcpwm_common.group.group_id,
-                                  MCPWM_DEV_CLK_SOURCE);
-  mcpwm_ll_group_set_clock_prescale(g_mcpwm_common.group.group_id,
-                                    g_mcpwm_common.group_prescale);
-  mcpwm_ll_group_enable_clock(g_mcpwm_common.group.group_id, true);
+
+  esp_clk_tree_enable_src((soc_module_clk_t)MCPWM_DEV_CLK_SOURCE, true);
+
+  MCPWM_CLOCK_SRC_ATOMIC()
+    {
+      mcpwm_ll_group_set_clock_source(g_mcpwm_common.group.group_id,
+                                      MCPWM_DEV_CLK_SOURCE);
+
+      mcpwm_ll_group_set_clock_prescale(g_mcpwm_common.group.group_id,
+                                        g_mcpwm_common.group_prescale);
+    }
 
   g_mcpwm_common.initialized = true;
 }
@@ -1666,7 +1696,7 @@ static int esp_mcpwm_isr_register(int (*fn)(int, void *, void *),
       return -ENOMEM;
     }
 
-  ret = irq_attach(ESP_IRQ_MCPWM0,
+  ret = irq_attach(ESP_SOURCE2IRQ(mcpwm_periph_signals.groups[0].irq_id),
                    fn,
                    &g_mcpwm_common);
   if (ret < 0)
@@ -1676,7 +1706,7 @@ static int esp_mcpwm_isr_register(int (*fn)(int, void *, void *),
       return ret;
     }
 
-  up_enable_irq(ESP_IRQ_MCPWM0);
+  up_enable_irq(ESP_SOURCE2IRQ(mcpwm_periph_signals.groups[0].irq_id));
 
   return ret;
 }
