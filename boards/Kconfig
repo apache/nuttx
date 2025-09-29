@@ -2045,7 +2045,7 @@ config ARCH_BOARD_RASPBERRYPI_PICO_W
 config ARCH_BOARD_RASPBERRYPI_4B
 	bool "Raspberry Pi Model 4B"
 	depends on ARCH_CHIP_BCM2711
-    select ARCH_HAVE_LEDS
+	select ARCH_HAVE_LEDS
 	---help---
 		This is a port to the Raspberry Pi Model 4B.
 
@@ -3431,7 +3431,7 @@ config ARCH_BOARD_CUSTOM
 		Don't see the board you want?  You must first select the exact MCU part
 		number, then the boards supporting that part will be available for selection.
 
-endchoice
+endchoice # Select target board
 
 if ARCH_BOARD_CUSTOM
 menu "Custom Board Configuration"
@@ -3487,7 +3487,7 @@ config BOARD_CUSTOM_INTERRUPT
 	select ARCH_PHY_INTERRUPT
 
 endmenu # Custom Board Configuration
-endif #ARCH_BOARD_CUSTOM
+endif # ARCH_BOARD_CUSTOM
 
 config ARCH_BOARD
 	string
