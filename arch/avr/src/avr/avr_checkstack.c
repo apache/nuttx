@@ -150,10 +150,14 @@ size_t up_check_tcbstack(FAR struct tcb_s *tcb, size_t check_size)
 }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-size_t up_check_intstack(int cpu)
+size_t up_check_intstack(int cpu, size_t check_size)
 {
-  uintptr_t start = (uintptr_t)g_intstackalloc;
-  return avr_stack_check(start, CONFIG_ARCH_INTERRUPTSTACK & ~3);
+  if (check_size == 0)
+    {
+      check_size = CONFIG_ARCH_INTERRUPTSTACK & ~3;
+    }
+
+  return avr_stack_check((uintptr_t)g_intstackalloc, check_size);
 }
 #endif
 

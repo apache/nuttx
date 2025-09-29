@@ -143,10 +143,14 @@ size_t up_check_tcbstack(struct tcb_s *tcb, size_t check_size)
 }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
-size_t up_check_intstack(int cpu)
+size_t up_check_intstack(int cpu, size_t check_size)
 {
-  return tricore_stack_check((uintptr_t)g_intstackalloc,
-                           (CONFIG_ARCH_INTERRUPTSTACK & ~15));
+  if (check_size == 0)
+    {
+      check_size = CONFIG_ARCH_INTERRUPTSTACK & ~15;
+    }
+
+  return tricore_stack_check((uintptr_t)g_intstackalloc, check_size);
 }
 #endif
 

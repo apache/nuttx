@@ -144,10 +144,14 @@ size_t up_check_tcbstack(struct tcb_s *tcb, size_t check_size)
   return ceva_stack_check((uintptr_t)tcb->stack_alloc_ptr, check_size);
 }
 
-size_t up_check_intstack(int cpu)
+size_t up_check_intstack(int cpu, size_t check_size)
 {
-  return ceva_stack_check((uintptr_t)g_intstackalloc,
-                          g_intstackbase - g_intstackalloc);
+  if (check_size == 0)
+    {
+      check_size = g_intstackbase - g_intstackalloc;
+    }
+
+  return ceva_stack_check((uintptr_t)g_intstackalloc, check_size);
 }
 
 #endif /* CONFIG_STACK_COLORATION */
