@@ -387,6 +387,13 @@ static int _inode_search(FAR struct inode_search_s *desc)
               above = inode;
               left  = NULL;
               inode = inode->i_child;
+              if (!INODE_IS_PSEUDODIR(above))
+                {
+                  /* The prefix of the path is not a directory */
+
+                  ret = -ENOTDIR;
+                  break;
+                }
             }
         }
     }
