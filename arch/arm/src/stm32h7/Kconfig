@@ -587,7 +587,7 @@ config STM32H7_CORTEXM7_BOOTM4
 	default y if STM32H7_CORTEXM4_ENABLED
 	default n
 
-endif
+endif # ARCH_CHIP_STM32H7_CORTEXM7
 
 config STM32H7_CORTEXM7_FLASH_SIZE
 	int "Flash reserved for M7 core"
@@ -605,7 +605,7 @@ config STM32H7_SHMEM_SRAM3
 	depends on STM32H7_CORTEXM7_SHMEM
 	default y
 
-endif
+endif # ARCH_STM32H7_DUALCORE
 
 config STM32_HAVE_OTA_PARTITION
 	bool
@@ -1126,7 +1126,7 @@ config STM32H7_LPTIM5
 	default n
 	select STM32H7_LPTIM
 
-endmenu # STM32H7 Timer Selection
+endmenu # STM32H7 Low-power Timer Selection
 
 menu "STM32H7 U[S]ART Selection"
 
@@ -1322,7 +1322,7 @@ config STM32H7_OTGHS_USBDEV
 
 endchoice # "STM32H7 OTGHS role"
 
-endmenu
+endmenu # OTG Configuration
 
 menu "SPI Configuration"
 	depends on STM32H7_SPI
@@ -1953,7 +1953,7 @@ config STM32H7_ADC3_DMA_BATCH
 		By default, this value is 1, which means that data is transferred after
 		each group conversion.
 
-endmenu
+endmenu # ADC Configuration
 
 menu "SD/MMC Configuration"
 	depends on STM32H7_SDMMC
@@ -2209,7 +2209,7 @@ config STM32H7_QSPI_DMA
 	---help---
 		Use DMA to improve QSPI transfer performance.
 
-endchoice
+endchoice # Transfer technique
 
 choice
 	prompt "Bank selection"
@@ -2227,7 +2227,7 @@ config STM32H7_QSPI_MODE_BANK2
 config STM32H7_QSPI_MODE_DUAL
 	bool "Dual Bank"
 
-endchoice
+endchoice # Bank selection
 
 choice
 	prompt "DMA Priority"
@@ -2263,7 +2263,7 @@ config STM32H7_QSPI_DMAPRIORITY_LOW
 	---help---
 		'Low' priority.
 
-endchoice
+endchoice # DMA Priority
 
 config STM32H7_QSPI_DMATHRESHOLD
 	int "QSPI DMA threshold"
@@ -2292,7 +2292,7 @@ config STM32H7_QSPI_REGDEBUG
 		Output detailed register-level QSPI device debug information.
 		Requires also CONFIG_DEBUG_SPI_INFO.
 
-endmenu
+endmenu # QuadSPI Configuration
 
 config STM32H7_BYPASS_CLOCKCONFIG
 	bool "Bypass clock configuration"
@@ -4317,7 +4317,7 @@ config STM32H7_TIM1_ADC3
 	---help---
 		Reserve TIM1 to trigger ADC3
 
-endchoice
+endchoice # Select ADC for use with TIM1
 
 config STM32H7_TIM2_ADC
 	bool "TIM2 ADC"
@@ -4359,7 +4359,7 @@ config STM32H7_TIM2_ADC3
 	---help---
 		Reserve TIM2 to trigger ADC3
 
-endchoice
+endchoice # Select ADC for use with TIM2
 
 config STM32H7_TIM3_ADC
 	bool "TIM3 ADC"
@@ -4401,7 +4401,7 @@ config STM32H7_TIM3_ADC3
 	---help---
 		Reserve TIM3 to trigger ADC3
 
-endchoice
+endchoice # Select ADC for use with TIM3
 
 config STM32H7_TIM4_ADC
 	bool "TIM4 ADC"
@@ -4443,7 +4443,7 @@ config STM32H7_TIM4_ADC3
 	---help---
 		Reserve TIM4 to trigger ADC3
 
-endchoice
+endchoice # Select ADC for use with TIM4
 
 config STM32H7_TIM6_ADC
 	bool "TIM6 ADC"
@@ -4485,7 +4485,7 @@ config STM32H7_TIM6_ADC3
 	---help---
 		Reserve TIM6 to trigger ADC3
 
-endchoice
+endchoice # Select ADC for use with TIM6
 
 config STM32H7_TIM8_ADC
 	bool "TIM8 ADC"
@@ -4527,7 +4527,7 @@ config STM32H7_TIM8_ADC3
 	---help---
 		Reserve TIM8 to trigger ADC3
 
-endchoice
+endchoice # Select ADC for use with TIM8
 
 config STM32H7_TIM15_ADC
 	bool "TIM15 ADC"
@@ -4569,7 +4569,7 @@ config STM32H7_TIM15_ADC3
 	---help---
 		Reserve TIM15 to trigger ADC3
 
-endchoice
+endchoice # Select ADC for use with TIM15
 
 config STM32H7_HAVE_ADC1_TIMER
 	bool
@@ -5023,7 +5023,7 @@ endif # STM32H7_LPTIM3_CAP
 config STM32H7_LPTIM4_CAP
 	bool "LPTIM4 Capture"
 	default n
-  select STM32H7_TIMX_CAP
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_LPTIM4
 	---help---
 		Reserve low-power timer 4 for use by the capture driver.
@@ -5835,7 +5835,7 @@ config STM32H7_MII_EXTCLK
 	---help---
 		Clocking is provided by external logic.
 
-endchoice
+endchoice # MII clock configuration
 
 config STM32H7_AUTONEG
 	bool "Use autonegotiation"
@@ -6212,7 +6212,7 @@ config STM32H7_LTDC_REGDEBUG
 		Additionally, you have to select "Low-level LCD Debug Features"
 		to enable the debug messages.
 
-endmenu
+endmenu # LTDC Configuration
 
 endif # STM32H7_LTDC
 
@@ -6236,7 +6236,7 @@ config STM32H7_TIM1_QEPSC
 		This prescaler divides the number of recorded encoder pulses,
 		limiting the count rate at the expense of resolution.
 
-endif
+endif # STM32H7_TIM1_QE
 
 config STM32H7_TIM2_QE
 	bool "TIM2"
@@ -6254,7 +6254,7 @@ config STM32H7_TIM2_QEPSC
 		This prescaler divides the number of recorded encoder pulses,
 		limiting the count rate at the expense of resolution.
 
-endif
+endif # STM32H7_TIM2_QE
 
 config STM32H7_TIM3_QE
 	bool "TIM3"
@@ -6272,7 +6272,7 @@ config STM32H7_TIM3_QEPSC
 		This prescaler divides the number of recorded encoder pulses,
 		limiting the count rate at the expense of resolution.
 
-endif
+endif # STM32H7_TIM3_QE
 
 config STM32H7_TIM4_QE
 	bool "TIM4"
@@ -6290,7 +6290,7 @@ config STM32H7_TIM4_QEPSC
 		This prescaler divides the number of recorded encoder pulses,
 		limiting the count rate at the expense of resolution.
 
-endif
+endif # STM32H7_TIM4_QE
 
 config STM32H7_TIM5_QE
 	bool "TIM5"
@@ -6308,7 +6308,7 @@ config STM32H7_TIM5_QEPSC
 		This prescaler divides the number of recorded encoder pulses,
 		limiting the count rate at the expense of resolution.
 
-endif
+endif # STM32H7_TIM5_QE
 
 config STM32H7_TIM8_QE
 	bool "TIM8"
@@ -6326,7 +6326,7 @@ config STM32H7_TIM8_QEPSC
 		This prescaler divides the number of recorded encoder pulses,
 		limiting the count rate at the expense of resolution.
 
-endif
+endif # STM32H7_TIM8_QE
 
 config STM32H7_QENCODER_FILTER
 	bool "Enable filtering on STM32 QEncoder input"
@@ -6358,7 +6358,7 @@ config STM32H7_QENCODER_SAMPLE_FDTS_16
 config STM32H7_QENCODER_SAMPLE_FDTS_32
 	bool "fDTS/32"
 
-endchoice
+endchoice # Input channel sampling frequency
 
 choice
 	depends on STM32H7_QENCODER_FILTER
@@ -6389,7 +6389,7 @@ config STM32H7_QENCODER_SAMPLE_EVENT_8
 	depends on !STM32H7_QENCODER_SAMPLE_FDTS
 	bool "8"
 
-endchoice
+endchoice # Input channel event count
 
 endmenu # QEncoder Driver
 
@@ -6477,7 +6477,7 @@ config STM32H7_FDCAN_LOOPBACK_EXTERNAL
 		All transmitted frames are treated as received frames and processed
 		accordingly.
 
-endchoice # CAN Loopback Mode
+endchoice # FDCAN Loopback Mode
 
 choice
 	prompt "FDCAN WorkQueue Selection"
@@ -6495,7 +6495,7 @@ config STM32H7_FDCAN_HPWORK
 		Use the high-priority (HP) work queue for reception and transmission
 		of new frames and for processing of transmission timeouts.
 
-endchoice
+endchoice # FDCAN WorkQueue Selection
 
 endmenu # FDCAN Driver
 
