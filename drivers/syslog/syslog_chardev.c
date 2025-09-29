@@ -78,7 +78,12 @@ static const struct file_operations g_syslog_fops =
 static ssize_t syslog_chardev_write(FAR struct file *filep,
                                     FAR const char *buffer, size_t len)
 {
-  syslog(LOG_INFO, "%.*s", (int)len, buffer);
+  struct lib_syslograwstream_s stream;
+
+  lib_syslograwstream_open(&stream);
+  lib_stream_puts(&stream.common, buffer, len);
+  lib_syslograwstream_close(&stream);
+
   return len;
 }
 
