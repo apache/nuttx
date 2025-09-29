@@ -168,7 +168,7 @@ static int _inode_linktarget(FAR struct inode *inode,
 
       /* Look up inode associated with the target of the symbolic link */
 
-      ret = _inode_search(desc);
+      ret = inode_search(desc);
       if (ret < 0)
         {
           break;
