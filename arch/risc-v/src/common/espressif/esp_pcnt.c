@@ -70,6 +70,12 @@
 #define GET_CHAN_ID_FROM_RET_CHAN(unit_id, chan_id) (chan_id - (SOC_PCNT_CHANNELS_PER_UNIT * unit_id))
 #define CREATE_RET_CHAN_ID(unit_id, chan_id)        ((SOC_PCNT_CHANNELS_PER_UNIT * unit_id) + chan_id)
 
+#if !SOC_RCC_IS_INDEPENDENT
+#  define PCNT_RCC_ATOMIC() PERIPH_RCC_ATOMIC()
+#else
+#  define PCNT_RCC_ATOMIC()
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -101,6 +107,7 @@ struct esp_pcnt_priv_s
 {
   const struct cap_ops_s *ops;
   int unit_id;                                                          /* PCNT unit id */
+  int group_id;                                                         /* PCNT group id */
   volatile enum esp_pcntstate_e state;                                  /* PCNT unit work state (see enum esp_pcntstate_e) */
   struct esp_pcnt_unit_config_s config;                                 /* Configuration struct */
   bool unit_used;                                                       /* PCNT unit usage flag */
@@ -155,10 +162,14 @@ static struct esp_pcnt_priv_s pcnt_units[PCNT_UNIT_COUNT] =
     0
 };
 
-static pcnt_hal_context_t ctx;                    /* Struct of the common layer */
-static mutex_t g_pcnt_lock = NXMUTEX_INITIALIZER; /* Mutual exclusion mutex */
-static int g_pcnt_refs = 0;                       /* Reference count */
-static bool g_pcnt_intr = false;                  /* ISR register flag for peripheral */
+static pcnt_hal_context_t ctx;                     /* Struct of the common layer */
+static mutex_t g_pcnt_mutex = NXMUTEX_INITIALIZER; /* Mutual exclusion m:utex */
+static bool g_pcnt_intr = false;                   /* ISR register flag for peripheral */
+static spinlock_t g_pcnt_lock = SP_UNLOCKED;       /* PCNT unit lock */
+static int g_pcnt_refs[SOC_PCNT_GROUPS] =          /* Reference count */
+  {
+    0
+  };
 
 /****************************************************************************
  * Private Functions
@@ -813,6 +824,7 @@ struct cap_lowerhalf_s *esp_pcnt_new_unit(
   struct esp_pcnt_unit_config_s *config)
 {
   int unit_id;
+  int group_id;
   int cpuint;
   int cpu = this_cpu();
   int ret;
@@ -837,48 +849,56 @@ struct cap_lowerhalf_s *esp_pcnt_new_unit(
       return NULL;
     }
 
-  flags = spin_lock_irqsave(&pcnt_units[unit_id].lock);
+  flags = spin_lock_irqsave(&g_pcnt_lock);
 
-  if (g_pcnt_refs++ == 0)
-    {
-      periph_module_enable(PERIPH_PCNT_MODULE);
-      periph_module_reset(PERIPH_PCNT_MODULE);
-      pcnt_hal_init(&ctx, 0);
-    }
+  /* Find a free PCNT unit */
 
   for (unit_id = 0; unit_id < PCNT_UNIT_COUNT; unit_id++)
     {
       if (!pcnt_units[unit_id].unit_used)
         {
           pcnt_units[unit_id].unit_used = true;
+          group_id = unit_id / SOC_PCNT_UNITS_PER_GROUP;
+          pcnt_units[unit_id].group_id = group_id;
           break;
         }
+    }
+
+  if (g_pcnt_refs[group_id]++ == 0)
+    {
+      PCNT_RCC_ATOMIC()
+        {
+          pcnt_ll_enable_bus_clock(group_id, true);
+          pcnt_ll_reset_register(group_id);
+        }
+
+      pcnt_hal_init(&ctx, group_id);
     }
 
   if (unit_id == PCNT_UNIT_COUNT)
     {
       cperr("No available PCNT unit for allocation\n");
 
-      spin_unlock_irqrestore(&pcnt_units[unit_id].lock, flags);
+      spin_unlock_irqrestore(&g_pcnt_lock, flags);
       return NULL;
     }
 
-  spin_unlock_irqrestore(&pcnt_units[unit_id].lock, flags);
+  spin_unlock_irqrestore(&g_pcnt_lock, flags);
   cpinfo("Allocated pcnt unit: %" PRId16 "\n", unit_id);
 
   if (!g_pcnt_intr)
     {
-      nxmutex_lock(&g_pcnt_lock);
+      nxmutex_lock(&g_pcnt_mutex);
       ret = esp_pcnt_isr_register(esp_pcnt_isr_default, 0);
       if (ret < 0)
         {
           pcnt_units[unit_id].unit_used = false;
-          nxmutex_unlock(&g_pcnt_lock);
+          nxmutex_unlock(&g_pcnt_mutex);
           return NULL;
         }
 
       g_pcnt_intr = true;
-      nxmutex_unlock(&g_pcnt_lock);
+      nxmutex_unlock(&g_pcnt_mutex);
     }
 
   pcnt_ll_disable_all_events(ctx.dev, unit_id);
@@ -968,10 +988,14 @@ int esp_pcnt_del_unit(struct cap_lowerhalf_s *dev)
 
   flags = spin_lock_irqsave(&priv->lock);
   priv->unit_used = false;
-  g_pcnt_refs--;
-  if (g_pcnt_refs == 0)
+  g_pcnt_refs[priv->group_id]--;
+  if (g_pcnt_refs[priv->group_id] == 0)
     {
-      periph_module_disable(PERIPH_PCNT_MODULE);
+      PCNT_RCC_ATOMIC()
+        {
+          pcnt_ll_enable_bus_clock(priv->group_id, false);
+        }
+
       esp_teardown_irq(pcnt_periph_signals.groups[0].irq, -ENOMEM);
     }
 
