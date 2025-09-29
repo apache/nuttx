@@ -296,7 +296,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
                      intstack_base,
                      intstack_size,
 #ifdef CONFIG_STACK_COLORATION
-                     up_check_intstack(cpu)
+                     up_check_intstack(cpu, 0)
 #else
                      0
 #endif
@@ -500,7 +500,7 @@ static void dump_tasks(void)
   for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
     {
 #  ifdef CONFIG_STACK_COLORATION
-      size_t stack_used = up_check_intstack(cpu);
+      size_t stack_used = up_check_intstack(cpu, 0);
       size_t stack_filled = 0;
 
       if (stack_used > 0)
