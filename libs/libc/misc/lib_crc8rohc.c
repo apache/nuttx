@@ -88,3 +88,12 @@ uint8_t crc8rohc(FAR const uint8_t *src, size_t len)
 {
   return crc8rohcpart(src, len, 0xff);
 }
+
+/****************************************************************************
+ * Name: crc8rohcincr
+ ****************************************************************************/
+
+uint8_t crc8rohcincr(uint8_t data_byte, uint8_t crc8val)
+{
+  return g_crc8_tab[crc8val ^ data_byte];
+}
