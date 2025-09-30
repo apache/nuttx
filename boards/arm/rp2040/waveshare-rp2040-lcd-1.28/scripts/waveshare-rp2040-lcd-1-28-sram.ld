@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp2040/raspberrypi-pico/scripts/raspberrypi-pico-sram.ld
+ * boards/arm/rp2040/waveshare-rp2040-lcd-1.28/scripts/waveshare-rp2040-lcd-1-28-sram.ld
  *
  * SPDX-License-Identifier: Apache-2.0
  *
