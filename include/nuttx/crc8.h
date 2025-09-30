@@ -118,6 +118,12 @@ uint8_t crc8rohcpart(FAR const uint8_t *src, size_t len, uint8_t crc8val);
 
 uint8_t crc8rohc(FAR const uint8_t *src, size_t len);
 
+/****************************************************************************
+ * Name: crc8rohcincr
+ ****************************************************************************/
+
+uint8_t crc8rohcincr(uint8_t data_byte, uint8_t crc8val);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
