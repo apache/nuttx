@@ -46,8 +46,8 @@ extern "C"
 
 /* CPU interrupt types. */
 
-#define ESP32S2_CPUINT_LEVEL   0
-#define ESP32S2_CPUINT_EDGE    1
+#define ESP32S2_CPUINT_LEVEL   ESP32S2_CPUINT_FLAG_LEVEL
+#define ESP32S2_CPUINT_EDGE    ESP32S2_CPUINT_FLAG_EDGE
 
 /****************************************************************************
  * Public Functions Prototypes
@@ -81,7 +81,9 @@ int esp32s2_cpuint_initialize(void);
  *   periphid - The peripheral number from irq.h to be assigned to
  *              a CPU interrupt.
  *   priority - Interrupt's priority (1 - 5).
- *   type     - Interrupt's type (level or edge).
+ *   flags    - An ORred mask of the ESP32S3_CPUINT_FLAG_* defines. These
+ *              restrict the choice of interrupts that this routine can
+ *              choose from.
  *
  * Returned Value:
  *   The allocated CPU interrupt on success, a negated errno value on
@@ -89,7 +91,7 @@ int esp32s2_cpuint_initialize(void);
  *
  ****************************************************************************/
 
-int esp32s2_setup_irq(int periphid, int priority, int type);
+int esp32s2_setup_irq(int periphid, int priority, int flags);
 
 /****************************************************************************
  * Name:  esp32s2_teardown_irq
@@ -111,6 +113,86 @@ int esp32s2_setup_irq(int periphid, int priority, int type);
  ****************************************************************************/
 
 void esp32s2_teardown_irq(int periphid, int cpuint);
+
+/****************************************************************************
+ * Name:  esp32s2_irq_noniram_disable
+ *
+ * Description:
+ *   Disable interrupts that aren't specifically marked as running from IRAM
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Input Parameters:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32s2_irq_noniram_disable(void);
+
+/****************************************************************************
+ * Name:  esp32s2_irq_noniram_enable
+ *
+ * Description:
+ *   Re-enable interrupts disabled by esp32s2_irq_noniram_disable
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Input Parameters:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32s2_irq_noniram_enable(void);
+
+/****************************************************************************
+ * Name:  esp32s2_irq_noniram_status
+ *
+ * Description:
+ *   Get the current status of non-IRAM interrupts.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   True if non-IRAM interrupts are enabled, false otherwise.
+ *
+ ****************************************************************************/
+
+bool esp32s2_irq_noniram_status(void);
+
+/****************************************************************************
+ * Name:  esp32s2_irq_set_iram_isr
+ *
+ * Description:
+ *   Set the ISR associated to an IRQ as a IRAM-enabled ISR.
+ *
+ * Input Parameters:
+ *   irq - The associated IRQ to set
+ *
+ * Returned Value:
+ *   OK on success; A negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int esp32s2_irq_set_iram_isr(int irq);
+
+/****************************************************************************
+ * Name:  esp32s2_irq_unset_iram_isr
+ *
+ * Description:
+ *   Set the ISR associated to an IRQ as a non-IRAM ISR.
+ *
+ * Input Parameters:
+ *   irq - The associated IRQ to set
+ *
+ * Returned Value:
+ *   OK on success; A negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int esp32s2_irq_unset_iram_isr(int irq);
 
 #undef EXTERN
 #if defined(__cplusplus)
