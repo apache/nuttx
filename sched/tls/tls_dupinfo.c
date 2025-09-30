@@ -52,40 +52,43 @@
 int tls_dup_info(FAR struct tcb_s *dst, FAR struct tcb_s *src)
 {
   FAR struct tls_info_s *info;
+  int ret = OK;
 
   /* Allocate thread local storage */
 
   info = up_stack_frame(dst, tls_info_size());
   if (info == NULL)
     {
-      return -ENOMEM;
+      ret = -ENOMEM;
     }
+  else
+    {
+      DEBUGASSERT(info == dst->stack_alloc_ptr);
 
-  DEBUGASSERT(info == dst->stack_alloc_ptr);
+      /* Copy thread local storage */
 
-  /* Copy thread local storage */
+      memcpy(info, src->stack_alloc_ptr, tls_info_size());
 
-  memcpy(info, src->stack_alloc_ptr, tls_info_size());
+      /* Attach per-task info in group to TLS */
 
-  /* Attach per-task info in group to TLS */
+      info->tl_task = dst->group->tg_info;
 
-  info->tl_task = dst->group->tg_info;
+      /* Initialize the starting address of argv to NULL to prevent
+       * it from being misused.
+       */
 
-  /* Initialize the starting address of argv to NULL to prevent
-   * it from being misused.
-   */
-
-  info->tl_argv = NULL;
+      info->tl_argv = NULL;
 
 #ifdef CONFIG_TLS_EMUTLS
-  /* The parent's copies of the __thread variables stay with the parent */
+      /* The parent's copies of the __thread variables stay with the parent */
 
-  info->tl_emutls = NULL;
+      info->tl_emutls = NULL;
 #endif
 
-  /* Thread ID */
+      /* Thread ID */
 
-  info->tl_tid = dst->pid;
+      info->tl_tid = dst->pid;
+    }
 
-  return OK;
+  return ret;
 }

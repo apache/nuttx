@@ -50,39 +50,42 @@
 int tls_init_info(FAR struct tcb_s *tcb)
 {
   FAR struct tls_info_s *info;
+  int ret = OK;
 
   /* Allocate thread local storage */
 
   info = up_stack_frame(tcb, tls_info_size());
   if (info == NULL)
     {
-      return -ENOMEM;
+      ret = -ENOMEM;
+    }
+  else
+    {
+      DEBUGASSERT(info == tcb->stack_alloc_ptr);
+
+      /* Initialize thread local storage */
+
+      up_tls_initialize(info);
+
+      /* Derive tl_size w/o arch knowledge */
+
+      info->tl_size = (uint16_t)((FAR char *)tcb->stack_base_ptr -
+                                 (FAR char *)tcb->stack_alloc_ptr);
+
+      /* Attach per-task info in group to TLS */
+
+      info->tl_task = tcb->group->tg_info;
+
+      /* Thread ID */
+
+      info->tl_tid = tcb->pid;
+
+      /* Initialize the starting address of argv to NULL to prevent
+       * it from being misused.
+       */
+
+      info->tl_argv = NULL;
     }
 
-  DEBUGASSERT(info == tcb->stack_alloc_ptr);
-
-  /* Initialize thread local storage */
-
-  up_tls_initialize(info);
-
-  /* Derive tl_size w/o arch knowledge */
-
-  info->tl_size = (uint16_t)((FAR char *)tcb->stack_base_ptr -
-                             (FAR char *)tcb->stack_alloc_ptr);
-
-  /* Attach per-task info in group to TLS */
-
-  info->tl_task = tcb->group->tg_info;
-
-  /* Thread ID */
-
-  info->tl_tid = tcb->pid;
-
-  /* Initialize the starting address of argv to NULL to prevent
-   * it from being misused.
-   */
-
-  info->tl_argv = NULL;
-
-  return OK;
+  return ret;
 }

@@ -110,6 +110,7 @@ static void task_init_stream(FAR struct streamlist *list)
 int task_init_info(FAR struct task_group_s *group)
 {
   FAR struct task_info_s *info;
+  int ret = OK;
 
   /* Allocate task info for group */
 
@@ -117,33 +118,36 @@ int task_init_info(FAR struct task_group_s *group)
   info = group_zalloc(group, sizeof(struct task_info_s));
   if (info == NULL)
     {
-      return -ENOMEM;
+      ret = -ENOMEM;
     }
 #else
   info = &group->tg_info_;
 #endif
 
-  /* Initialize user space mutex */
+  if (ret == OK)
+    {
+      /* Initialize user space mutex */
 
-  nxrmutex_init(&info->ta_lock);
-  group->tg_info = info;
+      nxrmutex_init(&info->ta_lock);
+      group->tg_info = info;
 
 #ifdef CONFIG_PTHREAD_ATFORK
-  list_initialize(&info->ta_atfork);
+      list_initialize(&info->ta_atfork);
 #endif
 
 #if defined(CONFIG_LIBC_ELF) || defined(CONFIG_BINFMT_LOADABLE)
-  /* The ELF objects that the task group loads with dlopen() */
+      /* The ELF objects that the task group loads with dlopen() */
 
-  nxrmutex_init(&info->ta_modlock);
-  list_initialize(&info->ta_modules);
+      nxrmutex_init(&info->ta_modlock);
+      list_initialize(&info->ta_modules);
 #endif
 
 #ifdef CONFIG_FILE_STREAM
-  /* Initialize file streams for the task group */
+      /* Initialize file streams for the task group */
 
-  task_init_stream(&info->ta_streamlist);
+      task_init_stream(&info->ta_streamlist);
 #endif
+    }
 
-  return OK;
+  return ret;
 }
