@@ -24,8 +24,6 @@
 
 #include <nuttx/devfreq.h>
 
-#ifdef CONFIG_DEVFREQ_DEFAULT_GOV_POWERSAVE
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -55,9 +53,7 @@ static uint32_t devfreq_powersave_limit(FAR struct devfreq_s *devfreq)
  * Public Functions
  ****************************************************************************/
 
-FAR struct devfreq_governor_s *devfreq_default_governor(void)
+FAR struct devfreq_governor_s *devfreq_powersave(void)
 {
   return &g_devfreq_gov_powersave;
 }
-
-#endif /* CONFIG_DEVFREQ_DEFAULT_GOV_POWERSAVE */
