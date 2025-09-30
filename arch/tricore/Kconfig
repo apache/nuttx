@@ -24,6 +24,7 @@ endchoice # Tricore Toolchain Selection
 
 config ARCH_TC1V6
 	bool
+	select ARCH_HAVE_DEBUG
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_HAVE_PERF_EVENTS
@@ -37,6 +38,7 @@ config ARCH_TC1V6
 config ARCH_TC1V8
 	bool
 	select ARCH_DCACHE
+	select ARCH_HAVE_DEBUG
 	select ARCH_ICACHE
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_IRQTRIGGER
