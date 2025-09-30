@@ -41,7 +41,9 @@
 #include "esp_sha.h"
 
 #include "esp_private/periph_ctrl.h"
+#include "esp_private/esp_crypto_lock_internal.h"
 #include "soc/periph_defs.h"
+#include "hal/sha_ll.h"
 #include "hal/sha_hal.h"
 #include "soc/soc_caps.h"
 #include "rom/cache.h"
@@ -593,7 +595,17 @@ int esp_sha_init(void)
 {
   if (!g_sha_inited)
     {
-      periph_module_enable(PERIPH_SHA_MODULE);
+      SHA_RCC_ATOMIC()
+        {
+          sha_ll_enable_bus_clock(true);
+          sha_ll_reset_register();
+
+#if SOC_SHA_CRYPTO_DMA
+          crypto_dma_ll_enable_bus_clock(true);
+          crypto_dma_ll_reset_register();
+#endif
+        }
+
       g_sha_inited = true;
     }
   else
