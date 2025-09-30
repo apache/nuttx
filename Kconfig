@@ -2457,7 +2457,7 @@ config STACK_COLORATION
 
 config STACKCHECK_SOFTWARE
 	bool "Software detection of stack overflow"
-	depends on STACK_COLORATION && DEBUG_ASSERTIONS && SCHED_SUSPENDSCHEDULER
+	depends on STACK_COLORATION && DEBUG_ASSERTIONS
 	---help---
 		When switching contexts, it will detect whether a stack overflow occurs.
 		Two methods are used here.
@@ -2467,8 +2467,8 @@ config STACKCHECK_SOFTWARE
 
 config STACKCHECK_MARGIN
 	int "Stack overflow check size (bytes)"
-	depends on STACKCHECK_SOFTWARE
-	default 16
+	depends on STACK_COLORATION && DEBUG_ASSERTIONS
+	default 0
 	---help---
 		Specifies the number of bytes at the end of the stack to check for overflow.
 		A value of 0 disables additional checking. Increase this value for stricter

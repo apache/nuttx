@@ -48,6 +48,11 @@ set(SRCS
     sched_sysinfo.c
     sched_get_stateinfo.c)
 
+if(CONFIG_STACKCHECK_SOFTWARE OR (DEFINED CONFIG_STACKCHECK_MARGIN
+                                  AND CONFIG_STACKCHECK_MARGIN GREATER 0))
+  list(APPEND SRCS nxsched_checkstackoverflow.c)
+endif()
+
 if(CONFIG_PRIORITY_INHERITANCE)
   list(APPEND SRCS sched_reprioritize.c)
 endif()

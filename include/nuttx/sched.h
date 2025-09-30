@@ -1261,6 +1261,31 @@ void nxsched_suspend_scheduler(FAR struct tcb_s *tcb);
 #endif
 
 /****************************************************************************
+ * Name: nxsched_checkstackoverflow
+ *
+ * Description:
+ *   Perform a stack overflow check for the specified task.
+ *
+ *   This function is enabled when either software-based stack checking is
+ *   configured (CONFIG_STACKCHECK_SOFTWARE) or a non-zero stack margin
+ *   (CONFIG_STACKCHECK_MARGIN > 0) is defined.  It will verify that the
+ *   task's stack has not overflowed beyond the allowed margin.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the task whose stack is to be checked.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_STACKCHECK_SOFTWARE) || (CONFIG_STACKCHECK_MARGIN > 0)
+void nxsched_checkstackoverflow(FAR struct tcb_s *tcb);
+#else
+#  define nxsched_checkstackoverflow(tcb)
+#endif
+
+/****************************************************************************
  * Name: nxsched_switch_context
  *
  * Description:
@@ -1277,6 +1302,7 @@ void nxsched_suspend_scheduler(FAR struct tcb_s *tcb);
 static inline void nxsched_switch_context(FAR struct tcb_s *from,
                                           FAR struct tcb_s *to)
 {
+  nxsched_checkstackoverflow(from);
   nxsched_suspend_scheduler(from);
   nxsched_resume_scheduler(to);
 }

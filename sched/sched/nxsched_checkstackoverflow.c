@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sched/sched_suspendscheduler.c
+ * sched/sched/nxsched_checkstackoverflow.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -37,54 +37,52 @@
 #include "clock/clock.h"
 #include "sched/sched.h"
 
-#ifdef CONFIG_SCHED_SUSPENDSCHEDULER
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsched_suspend_scheduler
+ * Name: nxsched_checkstackoverflow
  *
  * Description:
- *   Called by architecture specific implementations that starts task
- *   execution.  This function prepares the scheduler for the thread that is
- *   about to be restarted.
+ *   Verify that the given thread has not overflowed its stack.  This check
+ *   is enabled when either CONFIG_STACKCHECK_SOFTWARE is selected or a
+ *   non-zero CONFIG_STACKCHECK_MARGIN is defined.
+ *
+ *   - When CONFIG_STACKCHECK_SOFTWARE is enabled, the current stack pointer
+ *     is compared against the thread’s allocated stack boundaries.
+ *   - When CONFIG_STACKCHECK_MARGIN is non-zero, additional margin checking
+ *     is performed to ensure the stack does not exceed the reserved safety
+ *     area.
  *
  * Input Parameters:
- *   tcb - The TCB of the thread that is being suspended.
+ *   tcb - The TCB of the thread to be checked.
  *
  * Returned Value:
- *   None
+ *   None.  This function will assert if a stack overflow condition is
+ *   detected.
  *
  ****************************************************************************/
 
-void nxsched_suspend_scheduler(FAR struct tcb_s *tcb)
+void nxsched_checkstackoverflow(FAR struct tcb_s *tcb)
 {
-  /* Handle the task exiting case */
-
   if (tcb == NULL)
     {
       return;
     }
 
-#ifdef CONFIG_SCHED_SPORADIC
-  /* Perform sporadic schedule operations */
-
-  if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+#ifdef CONFIG_STACKCHECK_SOFTWARE
+  if (tcb->xcp.regs != NULL)
     {
-      DEBUGVERIFY(nxsched_suspend_sporadic(tcb));
+      uintptr_t sp   = up_getusrsp(tcb->xcp.regs);
+      uintptr_t top  = (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size;
+      uintptr_t bot  = (uintptr_t)tcb->stack_base_ptr;
+
+      DEBUGASSERT(sp > bot && sp <= top);
     }
 #endif
 
-  /* Indicate that the task has been suspended */
-
-#ifdef CONFIG_SCHED_CRITMONITOR
-  nxsched_suspend_critmon(tcb);
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION
-  sched_note_suspend(tcb);
+#if CONFIG_STACKCHECK_MARGIN > 0
+  DEBUGASSERT(up_check_tcbstack(tcb, CONFIG_STACKCHECK_MARGIN) == 0);
 #endif
 }
-
-#endif /* CONFIG_SCHED_SUSPENDSCHEDULER */
