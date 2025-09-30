@@ -64,8 +64,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define DEADLOCK_MAX 8
-
 /* The dump_lockholder() buffer must hold the deeper of the two backtrace
  * sources: the spinlock backtrace (CONFIG_LIBC_BACKTRACE_DEPTH) and this
  * tree's fixed mutex backtrace (CONFIG_LIBC_MUTEX_BACKTRACE, an
@@ -647,8 +645,9 @@ static void dump_lockholder(pid_t tid)
 
 static void dump_deadlock(void)
 {
-  pid_t deadlock[DEADLOCK_MAX];
-  size_t i = nxsched_collect_deadlock(deadlock, DEADLOCK_MAX);
+  pid_t deadlock[CONFIG_ARCH_DEADLOCKDUMP_MAX];
+  size_t i = nxsched_collect_deadlock(deadlock,
+                                      CONFIG_ARCH_DEADLOCKDUMP_MAX);
 
   while (i-- > 0)
     {
