@@ -35,8 +35,10 @@ function(pico_define_boot_stage2 NAME path_chip)
   set(PICO_BOOT_STAGE2_DIR "${PICO_SDK_PATH}/src/rp2040/boot_stage2")
   set(BOOT2SRC "${PICO_BOOT_STAGE2_DIR}/boot2_${CONFIG_RP2040_FLASH_CHIP}.S")
 
+  string(REPLACE "." "-" NUTTX_BOARD_NAME "${NUTTX_BOARD}")
+
   set(BOOT2CFLAGSLIST
-      "-T${NUTTX_BOARD_DIR}/scripts/${NUTTX_BOARD}-flash.ld"
+      "-T${NUTTX_BOARD_DIR}/scripts/${NUTTX_BOARD_NAME}-flash.ld"
       -DPICO_BOARD=\"pico\" -DPICO_BUILD=1 -DPICO_NO_HARDWARE=0
       -DPICO_ON_DEVICE=1)
 
