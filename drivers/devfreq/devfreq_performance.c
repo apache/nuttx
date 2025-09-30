@@ -24,8 +24,6 @@
 
 #include <nuttx/devfreq.h>
 
-#ifdef CONFIG_DEVFREQ_DEFAULT_GOV_PERFORMANCE
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -55,9 +53,7 @@ static uint32_t devfreq_performance_limit(FAR struct devfreq_s *devfreq)
  * Public Functions
  ****************************************************************************/
 
-FAR struct devfreq_governor_s *devfreq_default_governor(void)
+FAR struct devfreq_governor_s *devfreq_performance(void)
 {
   return &g_devfreq_gov_performance;
 }
-
-#endif /* CONFIG_DEVFREQ_DEFAULT_GOV_PERFORMANCE */

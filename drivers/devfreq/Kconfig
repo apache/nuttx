@@ -12,27 +12,6 @@ config DEVFREQ
 
 if DEVFREQ
 
-choice
-	prompt "DEVFREQ_DEFAULT_GOVERNOR"
-	default DEVFREQ_DEFAULT_GOV_PERFORMANCE
-
-config DEVFREQ_DEFAULT_GOV_PERFORMANCE
-	bool "devfreq_performance"
-	---help---
-		devfreq performance governor, always choose the highest frequency
-
-config DEVFREQ_DEFAULT_GOV_POWERSAVE
-	bool "devfreq_powersave"
-	---help---
-		devfreq powersave governor, always choose the lowest frequency
-
-config DEVFREQ_DEFAULT_GOV_PASSIVE
-	bool "devfreq_passive"
-	---help---
-		devfreq passive governor, a device-defined governor
-
-endchoice
-
 config DEVFREQ_PROCFS
 	bool "devfreq_procfs"
 	default n

@@ -222,7 +222,7 @@ int devfreq_unregister_notifier(FAR struct devfreq_s *devfreq,
                                 FAR struct notifier_block *nb);
 
 /****************************************************************************
- * Name: devfreq_get
+ * Name: devfreq_get_frequency
  *
  * Description:
  *   get the current device frequency (in kHz)
@@ -342,11 +342,8 @@ FAR struct devfreq_s *devfreq_find_by_index(size_t index);
 
 void devfreq_procfs_initialize(void);
 
-#ifdef CONFIG_DEVFREQ_DEFAULT_GOV_PASSIVE
-#define devfreq_default_governor() NULL
-#else
-FAR struct devfreq_governor_s *devfreq_default_governor(void);
-#endif
+FAR struct devfreq_governor_s *devfreq_performance(void);
+FAR struct devfreq_governor_s *devfreq_powersave(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

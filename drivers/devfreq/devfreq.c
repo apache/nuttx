@@ -485,6 +485,9 @@ FAR struct devfreq_s *devfreq_register(
   devfreq->priv       = priv;
   devfreq->suspended  = false;
   devfreq->freq_table = driver->get_table(devfreq);
+  devfreq->min        = 0;
+  devfreq->max        = UINT32_MAX;
+  devfreq->cur        = driver->get_frequency(devfreq);
   if (!devfreq->freq_table)
     {
       goto out;
@@ -497,12 +500,10 @@ FAR struct devfreq_s *devfreq_register(
 
   if (!governor)
     {
-      devfreq->governor = devfreq_default_governor();
+      goto out;
     }
-  else
-    {
-      devfreq->governor = governor;
-    }
+
+  devfreq->governor = governor;
 
   if (devfreq_init_governor(devfreq) < 0)
     {
