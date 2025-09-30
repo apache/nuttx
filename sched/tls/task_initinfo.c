@@ -83,7 +83,7 @@ static void task_init_stream(FAR struct streamlist *list)
        * file descriptor locks this stream.
        */
 
-      stream[i].fs_cookie   = (FAR void *)(intptr_t)i;
+      stream[i].fs_cookie   = (FAR char *)(intptr_t)i;
       stream[i].fs_oflags   = i ? O_WRONLY : O_RDONLY;
     }
 }
