@@ -35,6 +35,7 @@
 #include <nuttx/board.h>
 #include <arch/irq.h>
 #include <arch/board/board.h>
+#include <irq/irq.h>
 
 #include "xtensa.h"
 #ifdef CONFIG_ESP32S2_GPIO_IRQ
@@ -100,6 +101,24 @@ static volatile uint8_t g_irqmap[NR_IRQS];
 /* g_intenable is a shadow copy of the per-CPU INTENABLE register content */
 
 static uint32_t g_intenable;
+
+/* g_non_iram_int_mask is a bitmask of the interrupts that should be
+ * disabled during a SPI flash operation. Non-IRAM interrupts should always
+ * be disabled, but interrupts place on IRAM are able to run during a SPI
+ * flash operation.
+ */
+
+static uint32_t g_non_iram_int_mask;
+
+/* g_non_iram_int_disabled[] keeps track of the interrupts disabled during
+ * a SPI flash operation.
+ */
+
+static uint32_t g_non_iram_int_disabled;
+
+/* Flag to indicate that non-IRAM interrupts were disabled */
+
+static bool g_non_iram_int_disabled_flag;
 
 /* Bitsets for free, unallocated CPU interrupts available to peripheral
  * devices.
@@ -286,6 +305,9 @@ static void esp32s2_free_cpuint(int cpuint)
 void up_irqinitialize(void)
 {
   int i;
+
+  g_non_iram_int_mask = UINT32_MAX;
+
   for (i = 0; i < NR_IRQS; i++)
     {
       g_irqmap[i] = IRQ_UNMAPPED;
@@ -399,6 +421,21 @@ void up_enable_irq(int irq)
     }
   else
     {
+      /* Check if the registered ISR for this IRQ is intended to be run from
+       * IRAM. If so, check if its interrupt handler is located in IRAM.
+       */
+
+      bool isr_in_iram = !((g_non_iram_int_mask & (1 << cpuint)) > 0);
+
+      xcpt_t handler = g_irqvector[irq].handler;
+
+      if (isr_in_iram && handler && !esp32s2_ptr_iram(handler))
+        {
+          irqerr("Interrupt handler isn't in IRAM (%08" PRIxPTR ")",
+                  (intptr_t)handler);
+          PANIC();
+        }
+
       /* For peripheral interrupts, attach the interrupt to the peripheral;
        * the CPU interrupt was already enabled when allocated.
        */
@@ -481,7 +518,9 @@ int esp32s2_cpuint_initialize(void)
  *   periphid - The peripheral number from irq.h to be assigned to
  *              a CPU interrupt.
  *   priority - Interrupt's priority (1 - 5).
- *   type     - Interrupt's type (level or edge).
+ *   flags    - An ORred mask of the ESP32S3_CPUINT_FLAG_* defines. These
+ *              restrict the choice of interrupts that this routine can
+ *              choose from.
  *
  * Returned Value:
  *   The allocated CPU interrupt on success, a negated errno value on
@@ -489,12 +528,22 @@ int esp32s2_cpuint_initialize(void)
  *
  ****************************************************************************/
 
-int esp32s2_setup_irq(int periphid, int priority, int type)
+int esp32s2_setup_irq(int periphid, int priority, int flags)
 {
   irqstate_t irqstate;
   uintptr_t regaddr;
   int irq;
   int cpuint;
+  int type;
+
+  if ((flags & ESP32S2_CPUINT_EDGE) != 0)
+    {
+      type = ESP32S2_CPUINT_EDGE;
+    }
+  else
+    {
+      type = ESP32S2_CPUINT_LEVEL;
+    }
 
   irqstate = enter_critical_section();
 
@@ -523,6 +572,15 @@ int esp32s2_setup_irq(int periphid, int priority, int type)
   g_cpu_intmap[cpuint] = CPUINT_ASSIGN(periphid + XTENSA_IRQ_FIRSTPERIPH);
   g_irqmap[irq] = cpuint;
   regaddr = CORE_MAP_REGADDR(periphid);
+
+  if ((flags & ESP32S2_CPUINT_FLAG_IRAM) != 0)
+    {
+      esp32s2_irq_set_iram_isr(irq);
+    }
+  else
+    {
+      esp32s2_irq_unset_iram_isr(irq);
+    }
 
   putreg32(cpuint, regaddr);
 
@@ -648,4 +706,163 @@ uint32_t *xtensa_int_decode(uint32_t *cpuints, uint32_t *regs)
     }
 
   return regs;
+}
+
+/****************************************************************************
+ * Name:  esp32s2_irq_noniram_disable
+ *
+ * Description:
+ *   Disable interrupts that aren't specifically marked as running from IRAM
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Input Parameters:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32s2_irq_noniram_disable(void)
+{
+  irqstate_t irqstate;
+  uint32_t mask;
+  int bit;
+  uint32_t oldint;
+  uint32_t non_iram_ints;
+
+  irqstate = enter_critical_section();
+  non_iram_ints = g_non_iram_int_mask;
+
+  ASSERT(!g_non_iram_int_disabled_flag);
+
+  g_non_iram_int_disabled_flag = true;
+  oldint = g_intenable;
+
+  for (bit = 0; bit < ESP32S2_NCPUINTS; bit++)
+    {
+      mask = 1 << bit;
+      if ((non_iram_ints & mask) != 0)
+        {
+          xtensa_disable_cpuint(&g_intenable, bit);
+        }
+    }
+
+  g_non_iram_int_disabled = oldint & non_iram_ints;
+
+  leave_critical_section(irqstate);
+}
+
+/****************************************************************************
+ * Name:  esp32s2_irq_noniram_enable
+ *
+ * Description:
+ *   Re-enable interrupts disabled by esp32s2_irq_noniram_disable
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Input Parameters:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32s2_irq_noniram_enable(void)
+{
+  irqstate_t irqstate;
+  uint32_t mask;
+  int bit;
+  uint32_t non_iram_ints;
+
+  irqstate = enter_critical_section();
+  non_iram_ints = g_non_iram_int_disabled;
+
+  ASSERT(g_non_iram_int_disabled_flag);
+
+  g_non_iram_int_disabled_flag = false;
+
+  for (bit = 0; bit < ESP32S2_NCPUINTS; bit++)
+    {
+      mask = 1 << bit;
+      if ((non_iram_ints & mask) != 0)
+        {
+          xtensa_enable_cpuint(&g_intenable, bit);
+        }
+    }
+
+  leave_critical_section(irqstate);
+}
+
+/****************************************************************************
+ * Name:  esp32s2_irq_noniram_status
+ *
+ * Description:
+ *   Get the current status of non-IRAM interrupts on a specific CPU core
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   True if non-IRAM interrupts are enabled. False otherwise.
+ *
+ ****************************************************************************/
+
+bool esp32s2_irq_noniram_status()
+{
+  return !g_non_iram_int_disabled_flag;
+}
+
+/****************************************************************************
+ * Name:  esp32s3_irq_set_iram_isr
+ *
+ * Description:
+ *   Set the ISR associated to an IRQ as a IRAM-enabled ISR.
+ *
+ * Input Parameters:
+ *   irq - The associated IRQ to set
+ *
+ * Returned Value:
+ *   OK on success; A negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int esp32s2_irq_set_iram_isr(int irq)
+{
+  int cpuint = CPUINT_GETIRQ(g_cpu_intmap[irq]);
+
+  if (cpuint == IRQ_UNMAPPED)
+    {
+      return -EINVAL;
+    }
+
+  g_non_iram_int_mask &= ~(1 << cpuint);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name:  esp32s2_irq_unset_iram_isr
+ *
+ * Description:
+ *   Set the ISR associated to an IRQ as a non-IRAM ISR.
+ *
+ * Input Parameters:
+ *   irq - The associated IRQ to set
+ *
+ * Returned Value:
+ *   OK on success; A negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int esp32s2_irq_unset_iram_isr(int irq)
+{
+  int cpuint = CPUINT_GETIRQ(g_cpu_intmap[irq]);
+
+  if (cpuint == IRQ_UNMAPPED)
+    {
+      return -EINVAL;
+    }
+
+  g_non_iram_int_mask |= (1 << cpuint);
+
+  return OK;
 }
