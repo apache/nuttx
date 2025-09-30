@@ -81,4 +81,8 @@ void up_initialize(void)
 #ifdef USE_SERIALDRIVER
   tricore_serialinit();
 #endif
+
+#ifdef CONFIG_ARCH_HAVE_DEBUG
+  tricore_init_dbgmonitor();
+#endif
 }
