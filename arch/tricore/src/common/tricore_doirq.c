@@ -109,7 +109,8 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
        * crashes.
        */
 
-      g_running_tasks[this_cpu()] = tcb;
+      running_task = tcb;
+      g_running_tasks[this_cpu()] = running_task;
 
       __mtcr(CPU_PCXI, (uintptr_t)up_current_regs());
       __isync();
