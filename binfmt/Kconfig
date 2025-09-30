@@ -89,3 +89,9 @@ config BINFMT_ELF_EXECUTABLE
 		Produce a full linked executable object as output.
 
 endchoice
+
+config BINFMT_STORE_FILENAME
+	bool "Store the binary filename"
+	default n
+	---help---
+		Store the filename of the loaded binary
