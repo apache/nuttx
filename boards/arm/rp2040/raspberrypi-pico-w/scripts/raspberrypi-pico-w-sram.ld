@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp2040/raspberrypi-pico/scripts/raspberrypi-pico-sram.ld
+ * boards/arm/rp2040/raspberrypi-pico-w/scripts/raspberrypi-pico-w-sram.ld
  *
  * SPDX-License-Identifier: Apache-2.0
  *
