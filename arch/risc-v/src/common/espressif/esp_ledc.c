@@ -44,8 +44,10 @@
 #include "hal/ledc_hal.h"
 #include "hal/ledc_types.h"
 #include "soc/soc_caps.h"
+#include "soc/ledc_periph.h"
 #include "clk_ctrl_os.h"
 #include "esp_clk_tree.h"
+#include "esp_private/esp_clk_tree_common.h"
 #include "esp_attr.h"
 
 /****************************************************************************
@@ -462,7 +464,6 @@ static bool ledc_ctx_create(void)
           ledc_hal_init(&(ledc_new_mode_obj->ledc_hal), LEDC_LOW_SPEED_MODE);
           ledc_new_mode_obj->glb_clk = LEDC_SLOW_CLK_UNINIT;
           p_ledc_obj = ledc_new_mode_obj;
-          periph_module_enable(PERIPH_LEDC_MODULE);
       }
   }
 
@@ -861,7 +862,11 @@ static int ledc_set_timer_div(ledc_timer_t timer_num,
   if (p_ledc_obj->glb_clk != glb_clk)
     {
       p_ledc_obj->glb_clk = glb_clk;
-      ledc_hal_set_slow_clk_sel(&(p_ledc_obj->ledc_hal), glb_clk);
+      esp_clk_tree_enable_src((soc_module_clk_t)p_ledc_obj->glb_clk, true);
+      LEDC_FUNC_CLOCK_ATOMIC()
+        {
+          ledc_hal_set_slow_clk_sel(&(p_ledc_obj->ledc_hal), glb_clk);
+        }
     }
 
   leave_critical_section(flags);
@@ -1324,8 +1329,7 @@ static void setup_channel(struct esp_ledc_s *priv, int cn)
       pwmerr("ERROR: No memory for LEDC context\n");
       PANIC();
     }
-
-#ifndef CONFIG_ARCH_CHIP_ESP32H2
+#if !(defined(CONFIG_ARCH_CHIP_ESP32H2) || defined(CONFIG_ARCH_CHIP_ESP32P4))
   /* On such targets, the default ledc core(global) clock does not connect to
    * any clock source. Setting channel configurations and updating bits
    * before core clock is enabled could lead to an error.
@@ -1342,8 +1346,11 @@ static void setup_channel(struct esp_ledc_s *priv, int cn)
 
       if (p_ledc_obj->glb_clk == LEDC_SLOW_CLK_UNINIT)
         {
-          ledc_hal_set_slow_clk_sel(&(p_ledc_obj->ledc_hal),
-                                    LEDC_LL_GLOBAL_CLK_DEFAULT);
+          LEDC_FUNC_CLOCK_ATOMIC()
+            {
+              ledc_hal_set_slow_clk_sel(&(p_ledc_obj->ledc_hal),
+                                        LEDC_LL_GLOBAL_CLK_DEFAULT);
+            }
         }
 
       leave_critical_section(flags);
@@ -1405,8 +1412,8 @@ static int pwm_setup(struct pwm_lowerhalf_s *dev)
 
       esp_configgpio(priv->chans[i].pin, OUTPUT | PULLUP);
       esp_gpio_matrix_out(priv->chans[i].pin,
-                          LEDC_LS_SIG_OUT0_IDX + priv->chans[i].num,
-                          0, 0);
+                          ledc_periph_signal[0].sig_out0_idx +
+                          priv->chans[i].num, 0, 0);
     }
 
   return OK;
@@ -1454,10 +1461,20 @@ static int pwm_shutdown(struct pwm_lowerhalf_s *dev)
 
   if (p_ledc_obj != NULL)
     {
-      periph_module_disable(PERIPH_LEDC_MODULE);
       kmm_free(p_ledc_obj);
       p_ledc_obj = NULL;
       s_ledc_slow_clk_rc_fast_freq = 0;
+
+      LEDC_BUS_CLOCK_ATOMIC()
+        {
+          ledc_ll_enable_bus_clock(false);
+          ledc_ll_enable_reset_reg(true);
+        }
+
+      LEDC_FUNC_CLOCK_ATOMIC()
+        {
+          ledc_ll_enable_clock(LEDC_LL_GET_HW(), false);
+        }
     }
   else
     {
