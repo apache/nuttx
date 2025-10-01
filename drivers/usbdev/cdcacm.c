@@ -313,6 +313,10 @@ static const struct uart_ops_s g_uartops =
   cdcuart_sendbuf        /* sendbuf */
 };
 
+/* Mutex to protect device initialization / uninitialization*****************/
+
+static mutex_t g_init_lock = NXMUTEX_INITIALIZER;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -3377,9 +3381,16 @@ int cdcacm_initialize(int minor, FAR void **handle)
   devinfo.epno[CDCACM_EP_BULKIN_IDX]  = CONFIG_CDCACM_EPBULKIN;
   devinfo.epno[CDCACM_EP_BULKOUT_IDX] = CONFIG_CDCACM_EPBULKOUT;
 
+  ret = nxmutex_lock(&g_init_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Get an instance of the serial driver class object */
 
   ret = cdcacm_classobject(minor, &devinfo, &drvr);
+
   if (ret == OK)
     {
       /* Register the USB serial class driver */
@@ -3391,6 +3402,8 @@ int cdcacm_initialize(int minor, FAR void **handle)
                    (uint16_t)-ret);
         }
     }
+
+  nxmutex_unlock(&g_init_lock);
 
   /* Return the driver instance (if any) if the caller has requested it
    * by provided a pointer to the location to return it.
@@ -3430,8 +3443,60 @@ void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev)
 {
   FAR struct cdcacm_driver_s *drvr = (FAR struct cdcacm_driver_s *)classdev;
   FAR struct cdcacm_dev_s    *priv = drvr->dev;
-  char devname[CDCACM_DEVNAME_SIZE];
+
+  cdcacm_uninitialize_instance(priv->minor, classdev);
+}
+
+/****************************************************************************
+ * Name: cdcacm_uninitialize_instance
+ *
+ * Description:
+ *   Function to uninitialize specific cdcacm instance
+ *
+ * Input Parameters:
+ *   minor - CDCACM node minor number
+ *
+ * Returned Value:
+ *   OK when successful, -ENODEV if cdcacm is not initialized
+ *
+ ****************************************************************************/
+
+int cdcacm_uninitialize_instance(int minor,
+                                 FAR struct usbdevclass_driver_s *classdev)
+{
   int ret;
+  FAR struct cdcacm_driver_s *drvr = (FAR struct cdcacm_driver_s *)classdev;
+  FAR struct cdcacm_dev_s *priv;
+  char devname[CDCACM_DEVNAME_SIZE];
+
+  /* Create device node path from minor number */
+
+  snprintf(devname, sizeof(devname), CDCACM_DEVNAME_FORMAT, minor);
+
+  ret = nxmutex_lock(&g_init_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* If classdev is not provided, find it from the file system */
+
+  if (!classdev)
+    {
+      FAR struct cdcacm_alloc_s *cdcacm_alloc = find_driver(devname);
+      if (cdcacm_alloc)
+        {
+          drvr = &cdcacm_alloc->drvr;
+          classdev = &drvr->drvr;
+        }
+      else
+        {
+          ret = -ENODEV;
+          goto out;
+        }
+    }
+
+  priv = drvr->dev;
 
 #ifdef CONFIG_SYSLOG_CDCACM
   if (g_syslog_cdcacm == priv)
@@ -3445,18 +3510,21 @@ void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev)
   cdcacm_disconnect(classdev, priv->usbdev);
 
 #ifndef CONFIG_CDCACM_COMPOSITE
-  usbdev_unregister(&drvr->drvr);
+  usbdev_unregister(classdev);
 #endif
 
   /* Un-register the CDC/ACM TTY device */
 
-  snprintf(devname, sizeof(devname), CDCACM_DEVNAME_FORMAT, priv->minor);
   ret = unregister_driver(devname);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UARTUNREGISTER),
                (uint16_t)-ret);
     }
+
+out:
+  nxmutex_unlock(&g_init_lock);
+  return ret;
 }
 
 /****************************************************************************
