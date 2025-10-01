@@ -41,26 +41,22 @@
 #define STM32_PWR_CR1_OFFSET   0x0000  /* Power control register 1 */
 #define STM32_PWR_CR2_OFFSET   0x0004  /* Power control register 2 */
 #define STM32_PWR_CR3_OFFSET   0x0008  /* Power control register 3 */
-#define STM32_PWR_CR4_OFFSET   0x000C  /* Power control register 4 */
+#define STM32_PWR_CR4_OFFSET   0x000c  /* Power control register 4 */
 #define STM32_PWR_SR1_OFFSET   0x0010  /* Power status register 1 */
 #define STM32_PWR_SR2_OFFSET   0x0014  /* Power status register 2 */
 #define STM32_PWR_SCR_OFFSET   0x0018  /* Power status clear register */
 #define STM32_PWR_PUCRA_OFFSET 0x0020  /* Power Port A pull-up control register */
 #define STM32_PWR_PDCRA_OFFSET 0x0024  /* Power Port A pull-down control register */
 #define STM32_PWR_PUCRB_OFFSET 0x0028  /* Power Port B pull-up control register */
-#define STM32_PWR_PDCRB_OFFSET 0x002C  /* Power Port B pull-down control register */
+#define STM32_PWR_PDCRB_OFFSET 0x002c  /* Power Port B pull-down control register */
 #define STM32_PWR_PUCRC_OFFSET 0x0030  /* Power Port C pull-up control register */
 #define STM32_PWR_PDCRC_OFFSET 0x0034  /* Power Port C pull-down control register */
 #define STM32_PWR_PUCRD_OFFSET 0x0038  /* Power Port D pull-up control register */
-#define STM32_PWR_PDCRD_OFFSET 0x003C  /* Power Port D pull-down control register */
-#define STM32_PWR_PUCRF_OFFSET 0x0048  /* Power Port F pull-up control register */
-#define STM32_PWR_PDCRF_OFFSET 0x004C  /* Power Port F pull-down control register */
-#define STM32_PWR_PUCRG_OFFSET 0x0050  /* Power Port G pull-up control register */
-#define STM32_PWR_PDCRG_OFFSET 0x0054  /* Power Port G pull-down control register */
-#define STM32_PWR_PUCRH_OFFSET 0x0058  /* Power Port H pull-up control register */
-#define STM32_PWR_PDCRH_OFFSET 0x005C  /* Power Port H pull-down control register */
-#define STM32_PWR_PUCRI_OFFSET 0x0060  /* Power Port I pull-up control register */
-#define STM32_PWR_PDCRI_OFFSET 0x0064  /* Power Port I pull-down control register */
+#define STM32_PWR_PDCRD_OFFSET 0x003c  /* Power Port D pull-down control register */
+#define STM32_PWR_BKP0R_OFFSET 0x0070  /* PWR backup 0 register  */
+#define STM32_PWR_BKP1R_OFFSET 0x0074  /* PWR backup 1 register  */
+#define STM32_PWR_BKP2R_OFFSET 0x0078  /* PWR backup 2 register  */
+#define STM32_PWR_BKP3R_OFFSET 0x007c  /* PWR backup 3 register  */
 
 /* Register Addresses *******************************************************/
 
@@ -79,16 +75,10 @@
 #define STM32_PWR_PDCRC        (STM32_PWR_BASE+STM32_PWR_PDCRC_OFFSET)
 #define STM32_PWR_PUCRD        (STM32_PWR_BASE+STM32_PWR_PUCRD_OFFSET)
 #define STM32_PWR_PDCRD        (STM32_PWR_BASE+STM32_PWR_PDCRD_OFFSET)
-#define STM32_PWR_PUCRE        (STM32_PWR_BASE+STM32_PWR_PUCRE_OFFSET)
-#define STM32_PWR_PDCRE        (STM32_PWR_BASE+STM32_PWR_PDCRE_OFFSET)
-#define STM32_PWR_PUCRF        (STM32_PWR_BASE+STM32_PWR_PUCRF_OFFSET)
-#define STM32_PWR_PDCRF        (STM32_PWR_BASE+STM32_PWR_PDCRF_OFFSET)
-#define STM32_PWR_PUCRG        (STM32_PWR_BASE+STM32_PWR_PUCRG_OFFSET)
-#define STM32_PWR_PDCRG        (STM32_PWR_BASE+STM32_PWR_PDCRG_OFFSET)
-#define STM32_PWR_PUCRH        (STM32_PWR_BASE+STM32_PWR_PUCRH_OFFSET)
-#define STM32_PWR_PDCRH        (STM32_PWR_BASE+STM32_PWR_PDCRH_OFFSET)
-#define STM32_PWR_PUCRI        (STM32_PWR_BASE+STM32_PWR_PUCRI_OFFSET)
-#define STM32_PWR_PDCRI        (STM32_PWR_BASE+STM32_PWR_PDCRI_OFFSET)
+#define STM32_PWR_BKP0R        (STM32_PWR_BASE+STM32_PWR_BKP0R_OFFSET)
+#define STM32_PWR_BKP1R        (STM32_PWR_BASE+STM32_PWR_BKP1R_OFFSET)
+#define STM32_PWR_BKP2R        (STM32_PWR_BASE+STM32_PWR_BKP2R_OFFSET)
+#define STM32_PWR_BKP3R        (STM32_PWR_BASE+STM32_PWR_BKP3R_OFFSET)
 
 /* Register Bitfield Definitions ********************************************/
 
@@ -155,5 +145,9 @@
 #define PWR_SCR_CWUF4            (1 << 3) /* Bit 3: Clear wakeup flag 4 */
 #define PWR_SCR_CWUF5            (1 << 4) /* Bit 4: Clear wakeup flag 5 */
 #define PWR_SCR_CSBF             (1 << 8) /* Bit 8: Clear standby flag */
+
+/* Backup registers */
+
+#define PWR_BKPR_MASK            (0xffff) /* Bits 0-16: Backup bitfield */
 
 #endif /* __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32C0_PWR_H */
