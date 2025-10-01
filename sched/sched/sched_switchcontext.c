@@ -49,20 +49,7 @@
 
 void nxsched_switch_context(FAR struct tcb_s *from, FAR struct tcb_s *to)
 {
-#ifdef CONFIG_STACKCHECK_SOFTWARE
-  if (from->xcp.regs)
-    {
-      uintptr_t sp = up_getusrsp(from->xcp.regs);
-      uintptr_t top = (uintptr_t)from->stack_base_ptr + from->adj_stack_size;
-      uintptr_t bottom = (uintptr_t)from->stack_base_ptr;
-      DEBUGASSERT(sp > bottom && sp <= top);
-    }
-
-#if CONFIG_STACKCHECK_MARGIN > 0
-    DEBUGASSERT(up_check_tcbstack(from, CONFIG_STACKCHECK_MARGIN) == 0);
-#endif
-
-#endif
+  nxsched_checkstackoverflow(from);
 
 #ifdef CONFIG_SCHED_SPORADIC
   /* Perform sporadic schedule operations */

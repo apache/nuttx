@@ -49,6 +49,12 @@ set(SRCS
     sched_get_stateinfo.c
     sched_switchcontext.c)
 
+if(DEFINED CONFIG_STACKCHECK_MARGIN)
+  if(NOT CONFIG_STACKCHECK_MARGIN EQUAL -1)
+    list(APPEND SRCS nxsched_checkstackoverflow.c)
+  endif()
+endif()
+
 if(CONFIG_PRIORITY_INHERITANCE)
   list(APPEND SRCS sched_reprioritize.c)
 endif()

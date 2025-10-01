@@ -32,6 +32,12 @@ CSRCS += sched_idletask.c sched_self.c sched_get_stackinfo.c sched_get_tls.c
 CSRCS += sched_sysinfo.c sched_get_stateinfo.c sched_getcpu.c
 CSRCS += sched_switchcontext.c
 
+ifneq ($(CONFIG_STACKCHECK_MARGIN),)
+  ifneq ($(CONFIG_STACKCHECK_MARGIN),-1)
+    CSRCS += nxsched_checkstackoverflow.c
+  endif
+endif
+
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 CSRCS += sched_reprioritize.c
 endif
