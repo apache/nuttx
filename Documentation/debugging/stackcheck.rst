@@ -56,8 +56,7 @@ Stack Overflow Software Check During Context Switching
 2. Check if the sp register is out of bounds.
 
 Usage:
-    Enable CONFIG_STACKCHECK_SOFTWARE
-    You can set the detection length by STACKCHECK_MARGIN
+    Set the detection length by STACKCHECK_MARGIN
 
 Stack Overflow Hardware Check
 -----------------------------

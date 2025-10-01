@@ -2455,23 +2455,13 @@ config STACK_COLORATION
 
 		Only supported by a few architectures.
 
-config STACKCHECK_SOFTWARE
-	bool "Software detection of stack overflow"
-	depends on STACK_COLORATION && DEBUG_ASSERTIONS
-	---help---
-		When switching contexts, it will detect whether a stack overflow occurs.
-		Two methods are used here.
-		The first is to check the legitimacy of the value of the sp register;
-		the second is to check the specified number of bytes at the bottom of the stack.
-		If either of these two methods fails, an ASSERT will be triggered.
-
 config STACKCHECK_MARGIN
 	int "Stack overflow check size (bytes)"
-	depends on STACKCHECK_SOFTWARE
-	default 16
+	depends on DEBUG_ASSERTIONS
+	default -1
 	---help---
 		Specifies the number of bytes at the end of the stack to check for overflow.
-		A value of 0 disables additional checking. Increase this value for stricter
+		A value of -1 disables additional checking. Increase this value for stricter
 		overflow detection, at the cost of additional overhead.
 
 config STACK_CANARIES
