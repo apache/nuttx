@@ -29,7 +29,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/timers/oneshot.h>
-
+#include <nuttx/hrtimer.h>
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
