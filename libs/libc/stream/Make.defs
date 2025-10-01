@@ -33,6 +33,12 @@ CSRCS += lib_hexdumpstream.c lib_base64outstream.c lib_mtdsostream.c
 CSRCS += lib_fileinstream.c lib_fileoutstream.c lib_libbsprintf.c
 CSRCS += lib_libvscanf.c lib_libvsprintf.c lib_ultoa_invert.c
 
+ifeq ($(CONFIG_SYSLOG_DEFAULT),y)
+  ifeq ($(CONFIG_ARCH_LOWPUTC),y)
+    CSRCS += lib_sysloglowoutstream.c
+  endif
+endif
+
 ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
 CSRCS += lib_dtoa_engine.c lib_dtoa_data.c
 endif

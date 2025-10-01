@@ -32,6 +32,12 @@ if(CONFIG_SYSLOG)
     list(APPEND SRCS vsyslog.c)
   endif()
 
+  if(CONFIG_SYSLOG_DEFAULT)
+    if(CONFIG_ARCH_LOWPUTC)
+      list(APPEND SRCS vsyslog_lowout.c)
+    endif()
+  endif()
+
   list(APPEND SRCS syslog_channel.c syslog_write.c syslog_flush.c)
 endif()
 
