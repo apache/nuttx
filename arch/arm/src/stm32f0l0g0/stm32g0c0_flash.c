@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32f0l0g0/stm32g0_flash.c
+ * arch/arm/src/stm32f0l0g0/stm32g0c0_flash.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -98,29 +98,35 @@
 #endif
 
 #if defined(CONFIG_STM32F0L0G0_FLASH_CONFIG_4)
-#  define FLASH_NBLOCKS     8
+#  define FLASH_NBLOCKS      8
 #elif defined(CONFIG_STM32F0L0G0_FLASH_CONFIG_6)
-#  define FLASH_NBLOCKS     16
+#  define FLASH_NBLOCKS      16
 #elif defined(CONFIG_STM32F0L0G0_FLASH_CONFIG_8)
-#  define FLASH_NBLOCKS     32
+#  define FLASH_NBLOCKS      32
 #elif defined(CONFIG_STM32F0L0G0_FLASH_CONFIG_B)
-#  define FLASH_NBLOCKS     64
+#  define FLASH_NBLOCKS      64
 #elif defined(CONFIG_STM32F0L0G0_FLASH_CONFIG_C)
-#  define FLASH_NBLOCKS     128
-#  define FLASH_DUAL_BANK   1
-#  define FLASH_BANK2_BASE  0x08020000
+#  define FLASH_NBLOCKS      128
+#  ifdef CONFIG_ARCH_CHIP_STM32G0
+#    define FLASH_DUAL_BANK  1
+#    define FLASH_BANK2_BASE 0x08020000
+#  endif
 #elif defined(CONFIG_STM32F0L0G0_FLASH_CONFIG_E)
-#  define FLASH_NBLOCKS     256
-#  define FLASH_DUAL_BANK   1
-#  define FLASH_BANK2_BASE  0x08040000
+#  define FLASH_NBLOCKS      256
+#  ifdef CONFIG_ARCH_CHIP_STM32G0
+#    define FLASH_DUAL_BANK  1
+#    define FLASH_BANK2_BASE 0x08040000
+#  endif
 #else
 #  error "Invalid flash configuration defined"
 #endif
 
 #ifdef FLASH_DUAL_BANK
 #  define FLASH_BANKSIZE    (FLASH_NBLOCKS * FLASH_BLOCK_SIZE / 2)
+#  define FLASH_SR_BSY      (FLASH_SR_BSY1 | FLASH_SR_BSY2)
 #else
 #  define FLASH_BANKSIZE    (FLASH_NBLOCKS * FLASH_BLOCK_SIZE)
+#  define FLASH_SR_BSY      (FLASH_SR_BSY1)
 #endif
 
 /* Dual bank G0B1 MCUs have a non-linear mapping of block number between
@@ -301,8 +307,7 @@ static int flash_wait_for_operation(void)
 
   for (i = 0; i < FLASH_TIMEOUT; i += 10)
     {
-      if (!(getreg32(STM32_FLASH_SR) &
-          (FLASH_SR_CFGBSY | FLASH_SR_BSY1 | FLASH_SR_BSY2)))
+      if (!(getreg32(STM32_FLASH_SR) & (FLASH_SR_CFGBSY | FLASH_SR_BSY)))
         {
           timeout = false;
           break;
@@ -852,7 +857,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
           goto exit_with_unlock;
         }
 
-      /* Future improvements may add ECC checking here. */
+      /* Future improvements may add ECC checking here (STM32G0 only). */
     }
 
   modifyreg32(STM32_FLASH_CR, FLASH_CR_PG, 0);
@@ -877,7 +882,7 @@ exit_with_unlock:
               break;
             }
 
-          /* Future improvements may add ECC checking here. */
+          /* Future improvements may add ECC checking here (STM32G0 only). */
         }
 
       modifyreg32(STM32_FLASH_SR, 0, FLASH_SR_CLEAR_ERROR_FLAGS);
@@ -893,4 +898,4 @@ uint8_t up_progmem_erasestate(void)
   return FLASH_ERASEDVALUE;
 }
 
-#endif /* CONFIG_ARCH_HAVE_PROGMEM*/
+#endif /* CONFIG_ARCH_HAVE_PROGMEM */
