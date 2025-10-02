@@ -38,6 +38,16 @@
 #  include "kinetis_alarm.h"
 #endif
 
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
+
+#ifdef CONFIG_EXAMPLES_LEDS_DEVPATH
+#  define LED_DRIVER_PATH CONFIG_EXAMPLES_LEDS_DEVPATH
+#else
+#  define LED_DRIVER_PATH "/dev/userleds"
+#endif
+
 #include "freedom-k64f.h"
 
 #if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
@@ -59,6 +69,17 @@ int k64_bringup(void)
   int ret;
 #ifdef HAVE_RTC_DRIVER
   struct rtc_lowerhalf_s *lower;
+#endif
+
+#ifdef HAVE_LEDS
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize(LED_DRIVER_PATH);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+      return ret;
+    }
 #endif
 
 #ifdef HAVE_PROC
