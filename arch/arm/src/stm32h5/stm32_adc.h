@@ -113,6 +113,25 @@
 #  define ADC2_HAVE_OVERSAMPLE 1
 #endif
 
+#undef ADC_HAVE_WDG1
+#if defined(CONFIG_STM32H5_ADC1_WDG1) || defined(CONFIG_STM32H5_ADC2_WDG1)
+#  define ADC_HAVE_WDG1
+#endif
+
+#undef ADC_HAVE_WDG2
+#if defined(CONFIG_STM32H5_ADC1_WDG2) || defined(CONFIG_STM32H5_ADC2_WDG2)
+#  define ADC_HAVE_WDG2
+#endif
+
+#undef ADC_HAVE_WDG3
+#if defined(CONFIG_STM32H5_ADC1_WDG3) || defined(CONFIG_STM32H5_ADC2_WDG3)
+#  define ADC_HAVE_WDG3
+#endif
+
+#if defined(ADC_HAVE_WDG1) || defined (ADC_HAVE_WDG2) || \
+    defined(ADC_HAVE_WDG3)
+#  define ADC_HAVE_WDG
+#endif
 /* Timer configuration:  If a timer trigger is specified, then get
  * information about the timer.
  */
