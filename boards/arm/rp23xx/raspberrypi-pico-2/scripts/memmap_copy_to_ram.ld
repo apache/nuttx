@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/xiao-rp2350/scripts/memmap_copy_to_ram.ld
+ * boards/arm/rp23xx/raspberrypi-pico-2/scripts/memmap_copy_to_ram.ld
  *
  * SPDX-License-Identifier: Apache-2.0
  *
