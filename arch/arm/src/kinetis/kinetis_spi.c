@@ -970,7 +970,7 @@ static uint16_t spi_send_data(struct kinetis_spidev_s *priv, uint16_t wd,
   if (0 == (spi_getreg(priv, KINETIS_SPI_SR_OFFSET) & SPI_SR_TXRXS))
     {
       spi_run(priv, true);
-      spi_write_control(priv, SPI_PUSHR_CTAS_CTAR0 | SPI_PUSHR_CTCNT);
+      // spi_write_control(priv, SPI_PUSHR_CTAS_CTAR0 | SPI_PUSHR_CTCNT);
     }
 
   spi_writeword(priv, wd);
