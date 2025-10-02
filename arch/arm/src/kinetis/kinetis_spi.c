@@ -134,7 +134,7 @@ static inline void     spi_putreg8(struct kinetis_spidev_s *priv,
                                    uint8_t offset, uint8_t value);
 static inline uint16_t spi_readword(struct kinetis_spidev_s *priv);
 static inline void     spi_writeword(struct kinetis_spidev_s *priv,
-                                     uint16_t word);
+                                     uint16_t word, bool first_word);
 
 static inline void     spi_run(struct kinetis_spidev_s *priv,
                                bool enable);
@@ -559,11 +559,14 @@ static inline void spi_write_control(struct kinetis_spidev_s *priv,
  * Name: spi_writeword
  *
  * Description:
- *   Write one 16 bit word to SPI TX FIFO
+ *   Write one word to SPI TX FIFO or single-entry buffer.
+ *   In non-FIFO mode, performs 32-bit write including control bits.
+ *   In FIFO-enabled mode, writes only the data (control handled separately).
  *
  * Input Parameters:
  *   priv - Device-specific state data
  *   word - word to send
+ *   first_word - Flag to set control in case of FIFO disabled
  *
  * Returned Value:
  *   None
@@ -571,15 +574,36 @@ static inline void spi_write_control(struct kinetis_spidev_s *priv,
  ****************************************************************************/
 
 static inline void spi_writeword(struct kinetis_spidev_s *priv,
-                                 uint16_t word)
+                                 uint16_t word, bool first_word)
 {
+  uint32_t mcr = spi_getreg(priv, KINETIS_SPI_MCR_OFFSET);
+  uint32_t pushr_val;
+
   /* Wait until there is space in the fifo */
 
   spi_wait_status(priv, SPI_SR_TFFF);
 
-  /* Write the data to transmitted to the SPI Data Register */
+  if (mcr & SPI_MCR_DIS_TXF)
+    {
+      /* FIFO disabled: 32-bit write including control + data */
 
-  spi_putreg16(priv, KINETIS_SPI_PUSHR_OFFSET, SPI_PUSHR_TXDATA(word));
+      pushr_val = SPI_PUSHR_TXDATA(word);
+
+      if (first_word)
+        {
+          /* Set Control word */
+
+          pushr_val |= SPI_PUSHR_CTAS_CTAR0 | SPI_PUSHR_CTCNT;
+        }
+
+      spi_putreg(priv, KINETIS_SPI_PUSHR_OFFSET, pushr_val);
+    }
+  else
+    {
+      /* FIFO enabled: write only data; control handled separately */
+
+      spi_putreg16(priv, KINETIS_SPI_PUSHR_OFFSET, SPI_PUSHR_TXDATA(word));
+    }
 }
 
 /****************************************************************************
@@ -964,16 +988,27 @@ static uint16_t spi_send_data(struct kinetis_spidev_s *priv, uint16_t wd,
                               bool last)
 {
   uint16_t ret;
+  uint32_t mcr = spi_getreg(priv, KINETIS_SPI_MCR_OFFSET);
+  bool first_word = false;
 
-  /* On first write set control word and start transfer */
+  /* Start module and write control if FIFO enabled on first transfer */
 
-  if (0 == (spi_getreg(priv, KINETIS_SPI_SR_OFFSET) & SPI_SR_TXRXS))
+  if ((spi_getreg(priv, KINETIS_SPI_SR_OFFSET) & SPI_SR_TXRXS) == 0)
     {
       spi_run(priv, true);
-      spi_write_control(priv, SPI_PUSHR_CTAS_CTAR0 | SPI_PUSHR_CTCNT);
+      first_word = true;
+
+      if ((mcr & SPI_MCR_DIS_TXF) == 0)
+        {
+          /* FIFO enabled: safe to write control separately */
+
+          spi_write_control(priv, SPI_PUSHR_CTAS_CTAR0 | SPI_PUSHR_CTCNT);
+        }
+
+      /* Non-FIFO mode: first_word flag used in spi_writeword() */
     }
 
-  spi_writeword(priv, wd);
+  spi_writeword(priv, wd, first_word);
   ret = spi_readword(priv);
 
   if (!last)
@@ -1037,15 +1072,14 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_STM32_SPI_DMA) || defined(CONFIG_STM32_SPI_DMATHRESHOLD)
-#  if !defined(CONFIG_KINETIS_SPI_DMA)
+#if !defined(CONFIG_KINETIS_SPI_DMA)
 static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords)
-#  else
+#else
 static void spi_exchange_nodma(struct spi_dev_s *dev,
                                const void *txbuffer,
                                void *rxbuffer, size_t nwords)
-#  endif
+#endif
 {
   struct kinetis_spidev_s *priv = (struct kinetis_spidev_s *)dev;
   uint8_t        *brxptr = (uint8_t *)rxbuffer;
@@ -1117,7 +1151,6 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
         }
     }
 }
-#endif /* !defined(CONFIG_STM32_SPI_DMA) || defined(CONFIG_STM32_SPI_DMATHRESHOLD) */
 
 /****************************************************************************
  * Name: spi_exchange (with DMA capability)
@@ -1620,13 +1653,13 @@ struct spi_dev_s *kinetis_spibus_initialize(int port)
    *   Peripheral Chip Select Strobe    - Peripheral Chip Select[5] signal
    *   Receive FIFO Overflow Overwrite  - Ignore incoming
    *   Chip Select x Inactive State     - High
-   *   Doze                             -  Disabled
+   *   Doze                             - Disabled
    *   Module Disable                   - Enables the module clocks.
    *   Disable Transmit FIFO            - yes
    *   Disable Receive FIFO             - yes
    *   Clear TX FIFO                    - No
    *   Clear RX FIFO                    - No
-   *   Sample Point                     -  0 clocks between edge and sample
+   *   Sample Point                     - 0 clocks between edge and sample
    *
    */
 

@@ -213,6 +213,9 @@
 #define GPIO_LED_G         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTE | PIN26)
 #define GPIO_LED_B         (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTB | PIN21)
 
+/* SPI CS,   Arduino D10      Pin 93, PTD0, PIN_SPI0_PCS0_2 */
+#define GPIO_SPI0_CS       (GPIO_LOWDRIVE | GPIO_OUTPUT_ONE | PIN_PORTC | PIN4)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
