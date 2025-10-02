@@ -297,4 +297,17 @@
 #define PIN_I2C0_SCL      PIN_I2C0_SCL_4
 #define PIN_I2C0_SDA      PIN_I2C0_SDA_4
 
+/* SPI Bus 0
+ *
+ *   Arduino   Pin              FRDM-K64F J1 Connector
+ *   ------------------------ -----------------------
+ *   SPI CLK,  Arduino D13      Pin 94, PTD1, SPI0_SCK
+ *   SPI MISO, Arduino D12      Pin 95, PTD3, SPI0_SOUT
+ *   SPI MOSI, Arduino D11      Pin 96, PTD2, SPI0_SIN
+ */
+
+#define PIN_SPI0_SCK    PIN_SPI0_SCK_3
+#define PIN_SPI0_SIN    PIN_SPI0_SIN_3
+#define PIN_SPI0_OUT    PIN_SPI0_SOUT_3
+
 #endif /* __BOARDS_ARM_FREEDOM_K64F_INCLUDE_BOARD_H */
