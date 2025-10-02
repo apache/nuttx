@@ -46,7 +46,7 @@
 
 int rp23xx_bringup(void);
 
-#ifdef CONFIG_DEV_GPIO
+#if defined(CONFIG_DEV_GPIO) && !defined(CONFIG_ARCH_BOARD_COMMON)
 int rp23xx_dev_gpio_init(void);
 #endif
 
