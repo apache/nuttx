@@ -33,7 +33,7 @@
 
 #if defined(CONFIG_STM32F0L0G0_STM32G0)
 #  include "stm32g0_pwr.c"
-#else
+#elif defined(CONFIG_STM32F0L0G0_STM32F0) || defined(CONFIG_STM32F0L0G0_STM32L0)
 #  include "stm32f0l0_pwr.c"
 #endif
 
