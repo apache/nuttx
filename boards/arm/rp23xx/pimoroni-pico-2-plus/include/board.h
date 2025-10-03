@@ -53,6 +53,7 @@
 #define BOARD_PERI_FREQ         (150 * MHZ)
 #define BOARD_USB_FREQ          (48 * MHZ)
 #define BOARD_ADC_FREQ          (48 * MHZ)
+#define BOARD_HSTX_FREQ         (150 * MHZ)
 
 #define BOARD_UART_BASEFREQ     BOARD_PERI_FREQ
 
