@@ -63,7 +63,7 @@ echo "=== [4/5] Building OOT ==="
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
-cmake .. -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN_FILE" -DBUILD_OOTCPP=ON
+cmake .. -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN_FILE"
 make -j"$(nproc)"
 
 echo "=== [5/5] Verifying Output ==="
