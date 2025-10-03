@@ -320,7 +320,7 @@ static void IRAM_ATTR esp32s3_suspend_uarts(void)
                   UART_SW_FLOW_CON_EN | UART_FORCE_XOFF);
       do
         {
-          uart_fsm = REG_GET_FIELD(UART_STATUS_REG(i), UART_ST_UTX_OUT);
+          uart_fsm = REG_GET_FIELD(UART_FSM_STATUS_REG(i), UART_ST_UTX_OUT);
         }
       while (!(uart_fsm == UART_FSM_IDLE ||
                uart_fsm == UART_FSM_TX_WAIT_SEND));
