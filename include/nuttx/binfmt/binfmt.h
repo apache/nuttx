@@ -96,6 +96,11 @@ struct binary_s
 
   uint8_t priority;                    /* Task execution priority */
   size_t stacksize;                    /* Size of the stack in bytes (unallocated) */
+
+#ifdef CONFIG_BINFMT_STORE_FILENAME
+  char fname[NAME_MAX];
+#endif
+
 #ifdef CONFIG_SCHED_USER_IDENTITY
   uid_t uid;                           /* File owner user identity */
   gid_t gid;                           /* File owner group user identity */
