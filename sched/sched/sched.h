@@ -393,6 +393,13 @@ static inline_function FAR struct tcb_s *this_task(void)
 }
 #endif
 
+#if defined(CONFIG_STACKCHECK_MARGIN) && \
+           (CONFIG_STACKCHECK_MARGIN != -1)
+void nxsched_checkstackoverflow(FAR struct tcb_s *tcb);
+#else
+#  define nxsched_checkstackoverflow(tcb)
+#endif
+
 #ifdef CONFIG_SMP
 bool nxsched_switch_running(int cpu, bool switch_equal);
 void nxsched_process_delivered(int cpu);

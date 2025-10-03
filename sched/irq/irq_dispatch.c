@@ -158,7 +158,7 @@ void irq_dispatch(int irq, FAR void *context)
     }
 #endif
 
-#if defined(CONFIG_STACKCHECK_SOFTWARE) && CONFIG_STACKCHECK_MARGIN > 0
+#if defined(CONFIG_STACKCHECK_MARGIN) && (CONFIG_STACKCHECK_MARGIN > 0)
     DEBUGASSERT(up_check_intstack(this_cpu(),
                                   CONFIG_STACKCHECK_MARGIN) == 0);
 #endif
