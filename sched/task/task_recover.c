@@ -27,17 +27,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/wdog.h>
 #include <nuttx/sched.h>
-
-#include "semaphore/semaphore.h"
-#include "wdog/wdog.h"
-#include "mqueue/mqueue.h"
-#include "pthread/pthread.h"
-#include "sched/sched.h"
-#include "task/task.h"
 
 /****************************************************************************
  * Public Functions
