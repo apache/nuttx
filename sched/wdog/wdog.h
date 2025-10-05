@@ -36,16 +36,11 @@
 #include <nuttx/clock.h>
 #include <nuttx/queue.h>
 #include <nuttx/wdog.h>
-#include <nuttx/list.h>
 #include <nuttx/spinlock_type.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Redefine to the standard list */
-
-#define list_node wdlist_node
 
 /****************************************************************************
  * Public Data
