@@ -40,7 +40,7 @@
 
 #ifdef CONFIG_ARCH_CHIP_ESP32
 #include "xtensa.h"
-#include "soc/apb_ctrl_reg.h"
+#include "soc/syscon_reg.h"
 #include "esp_efuse_table.h"
 #endif
 
@@ -352,7 +352,7 @@ uint32_t esp_efuse_hal_chip_revision(void)
                             &minor_chip_version,
                             ESP_EFUSE_WAFER_VERSION_MINOR[0]->bit_count);
 
-  eco_bit2 = (getreg32(APB_CTRL_DATE_REG) & 0x80000000) >> 31;
+  eco_bit2 = (getreg32(SYSCON_DATE_REG) & 0x80000000) >> 31;
   combine_value = (eco_bit2 << 2) | (eco_bit1 << 1) | eco_bit0;
 
   switch (combine_value)
