@@ -1,0 +1,264 @@
+.. Licensed to the Apache Software Foundation (ASF) under one or more
+.. contributor license agreements.  See the NOTICE file distributed with
+.. this work for additional information regarding copyright ownership.  The
+.. ASF licenses this file to you under the Apache License, Version 2.0 (the
+.. "License"); you may not use this file except in compliance with the
+.. License.  You may obtain a copy of the License at
+..
+..   http://www.apache.org/licenses/LICENSE-2.0
+..
+.. Unless required by applicable law or agreed to in writing, software
+.. distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+.. WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+.. License for the specific language governing permissions and limitations
+.. under the License.
+
+.. _make_build_system:
+
+=================
+Make Build System
+=================
+
+Currently, NuttX supports both CMake and Make build systems.
+This guide explains the NuttX `make`-based build system.
+
+Due to *requirements, constraints, and the complexity of the build process*, NuttX divides
+this work into multiple files, each handling specific parts of the build process.
+
+Stated in :doc:`/introduction/inviolables`, multiple platforms should be supported:
+
+- :ref:`win_mk`: handles windows platform support.
+- :ref:`unix_mk`: handles unix-like platforms support.
+
+NuttX supports multiple build modes. See :doc:`protected_build`:
+
+- :ref:`flatlibs_mk`: Kernel and user-space built into a single `blob`.
+- :ref:`protectedlibs_mk`: Kernel and user-space built as two separate `blobs`.
+- :ref:`kernelibs_mk`: Kernel build into single `blob`. User apps must be loaded 
+  into memory for execution.
+
+NuttX targets multiple libs, or `silos`, each handling it's own compilation:
+
+.. note::
+
+    Gregory Nutt have a nice presetation about 
+    `NuttX architecture <https://cwiki.apache.org/confluence/pages/viewpage.action?
+    pageId=139629399&preview=/139629402/140774623/nuttx-3-archoverview.pdf>`_
+
+    There the `silo` concept is explained. Only the `silos` there are listed below as libs.
+    The build modes influences the needed libs.
+
+.. code-block:: console
+
+  $ ls -l staging/
+  drwxr-xr-x  2 xxx xxx    4096 Oct  6 16:02 .
+  drwxr-xr-x 27 xxx xxx    4096 Oct  6 16:02 ..
+  -rw-r--r--  1 xxx xxx  323640 Oct  6 16:02 libapps.a
+  -rw-r--r--  1 xxx xxx  384352 Oct  6 16:02 libarch.a
+  -rw-r--r--  1 xxx xxx   62182 Oct  6 16:02 libbinfmt.a
+  -rw-r--r--  1 xxx xxx    6468 Oct  6 16:01 libboards.a
+  -rw-r--r--  1 xxx xxx 2820054 Oct  6 16:02 libc.a
+  -rw-r--r--  1 xxx xxx  161486 Oct  6 16:01 libdrivers.a
+  -rw-r--r--  1 xxx xxx  981638 Oct  6 16:02 libfs.a
+  -rw-r--r--  1 xxx xxx  224446 Oct  6 16:02 libmm.a
+  -rw-r--r--  1 xxx xxx 2435746 Oct  6 16:01 libsched.a
+  -rw-r--r--  1 xxx xxx   51768 Oct  6 16:02 libxx.a
+
+Verbosity
+---------
+
+The ``V`` variable can be passed to make to control the build verbosity.
+
+- **Quiet (Default):** The build output is minimal.
+- **Verbose (`V=1 V=2`):** Shows the full compiler commands *(enables command echo)*.
+- **Verbose Tools (`V=2`):** Enables verbose output for tools and scripts.
+
+.. code-block:: console
+
+  # V=1,2: Enable echo of commands
+  $ make V=1
+
+  # V=2:   Enable bug/verbose options in tools and scripts
+  $ make V=2
+
+Build Flow
+----------
+
+The root **Makefile** is the build process entrypoint. Its main job is
+to check for a ``.config`` file and include the appropriate **host-specific Makefile**.
+
+.. _win_mk:
+
+Win.mk
+------
+
+Although targeting different platforms, both **Win.mk** and **Unix.mk** aims the same output.
+The need for independent files is due to the differences in the platforms approaches.
+
+forward vs back slashes
+^^^^^^^^^^^^^^^^^^^^^^^
+
+One of the main differences is the use of forward slashes
+(``/``) on unix-like platforms versus backslashes (``\``) on windows
+
+${HOSTEXEEXT} ${HOSTDYNEXT}
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+These variables are used by the build system to configure the executable suffix required
+by the used platform. They are defined in :ref:`config_mk`.
+
+For windows platform:
+
+- ``${HOSTEXEEXT}`` is set to ``.exe``.
+- ``${HOSTDYNEXT}`` is set to ``.dll``.
+
+Symbolic Linking
+^^^^^^^^^^^^^^^^
+
+For the windows platform, the build system handles symbolic links differently.
+
+The differences and drawbacks of the windows platform are explained in 
+:ref:`build_system_linking`.
+
+.. _unix_mk:
+
+Unix.mk
+-------
+
+Versioning
+^^^^^^^^^^
+
+The build system will impact versioning if NuttX is cloned as a repo. See :ref:`versioning`.
+
+config.h .config mkconfig
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+NuttX's build system defers the ``config.h`` generation to a separate tool called
+``mkconfig``. See :ref:`makefile_host`.
+
+.. code-block:: makefile
+
+  tools/mkconfig$(HOSTEXEEXT): prebuild
+	    $(Q) $(MAKE) -C tools -f Makefile.host mkconfig$(HOSTEXEEXT)
+
+The ``include/nuttx/config.h`` recipe calls the ``mkconfig`` executable generated by the
+rule above to create the ``config.h`` file from the current ``.config`` file.
+
+Symlinks & dirlinks
+^^^^^^^^^^^^^^^^^^^
+
+Dirlinks are symbolic links that allow the build system to use generic paths while pointing
+to architecture-specific, chip-specific, or board-specific directories. This enables a single 
+build system workflow across many different hardware configurations.
+
+- Symlink ``arch/<arch-name>/include`` to ``include/arch``
+- Symlink ``boards/<arch>/<chip>/<board>/include`` to ``include/arch/board``
+- Symlink ``arch/<arch-name>/include/<chip-name>`` to ``include/arch/chip``
+- Symlink ``boards/<arch>/<chip>/<board>`` to ``arch/<arch-name>/src/board/<board>``
+
+.. note::
+
+  Some boards make use of a ``common`` directory. In that case:
+
+  - ``boards/<arch>/<chip>/common`` is symlinked to ``arch/<arch-name>/src/bb oard``
+  - ``boards/<arch>/<chip>/<board>`` is symlinked to ``arch/<arch-name>/src/board/<board>``
+
+- Symlink ``arch/<arch-name>/src/<chip-name>`` to ``arch/<arch-name>/src/chip``
+
+The ``.dirlinks`` file itself is just a timestamp marker that indicates all dirlinks have been 
+created.
+
+Dummies
+^^^^^^^
+
+The main reason for the use of dummies is to handle some specific scenarios, such as external
+code bases, custom chips and boards or overcome tooling limitation. If any of the features below
+are not used, the build system will fallback to a dummy.
+
+- **${EXTERNALDIR}**
+
+  Possible values for ``$(EXTERNALDIR)`` are ``external`` or ``dummy``.
+  
+  NuttX code base can be extended by using ``$(TOPDIR)/external/`` directory.
+  The build system searches for a ``Kconfig`` file in that directory. If found,
+  the build system defines the ``EXTERNALDIR`` variable to ``external`` and also
+  appends another lib (``libexternal``) to the build process.
+
+  .. code-block:: makefile
+
+    # External code support
+    # If external/ contains a Kconfig, we define the EXTERNALDIR variable to 'external'
+    # so that main Kconfig can find it. Otherwise, we redirect it to a dummy Kconfig
+    # This is due to kconfig inability to do conditional inclusion.
+
+    EXTERNALDIR := $(shell if [ -r $(TOPDIR)/external/Kconfig ]; then echo 'external'; else echo 'dummy'; fi)
+
+- **dummy/Kconfig**
+
+  The ``dummy/Kconfig`` is used to handle custom chips and boards.
+    
+  If in-tree chip/board is used, the build system will resolve to dummy_kconfig files.
+  - ``$(CHIP_KCONFIG)`` is set to ``$(TOPDIR)$(DELIM)arch$(DELIM)dummy$(DELIM)dummy_kconfig``
+  - ``$(BOARD_KCONFIG)`` is set to ``$(TOPDIR)$(DELIM)boards$(DELIM)dummy$(DELIM)dummy_kconfig``
+
+  If custom chip/board is used, the build system will resolve to their custom paths.
+
+  .. code-block:: makefile
+
+    # Copy $(CHIP_KCONFIG) to arch/dummy/Kconfig
+
+    arch/dummy/Kconfig:
+    	@echo "CP: $@ to $(CHIP_KCONFIG)"
+    	$(Q) cp -f $(CHIP_KCONFIG) $@
+
+    # Copy $(BOARD_KCONFIG) to boards/dummy/Kconfig
+
+    boards/dummy/Kconfig:
+    	@echo "CP: $@ to $(BOARD_KCONFIG)"
+    	$(Q) cp -f $(BOARD_KCONFIG) $@
+
+- **boards/dummy.c**
+
+  A special ``boards/dummy.c`` file is used by the build system to generate a useless object. 
+  The purpose of the useless object is to assure that libboards.a/lib is created. Some archivers 
+  (ZDS-II, SDCC) require a non-empty library or they will generate errors.
+
+.. _flatlibs_mk:
+
+FlatLibs.mk
+-----------
+
+placeholder
+
+.. _protectedlibs_mk:
+
+ProtectedLibs.mk
+----------------
+
+placeholder
+
+.. _kernelibs_mk:
+
+KernelLibs.mk
+-------------
+
+placeholder
+
+.. _directories_mk:
+
+Directories.mk
+--------------
+
+placeholder
+
+.. _libtargets_mk:
+
+LibTargets.mk
+-------------
+
+placeholder
+
+.. _config_mk:
+
+Config.mk
+---------
