@@ -455,6 +455,10 @@ config ESPRESSIF_SPI
 	bool
 	default n
 
+config ESPRESSIF_SPI_SLAVE
+	bool
+	default n
+
 config ESPRESSIF_SPI_PERIPH
 	bool
 	depends on ESPRESSIF_SPI2
@@ -1652,13 +1656,25 @@ config ESPRESSIF_SPI2_DMATHRESHOLD
 		When SPI GDMA is enabled, GDMA transfers whose size are below the
 		defined threshold will be performed by polling logic.
 
+choice ESPRESSIF_SPI2_MODE
+	prompt "SPI2 mode"
+	default ESPRESSIF_SPI2_MODE_MASTER
+
+config ESPRESSIF_SPI2_MODE_MASTER
+	bool "SPI2 Master mode"
+	depends on SPI_DRIVER
+	---help---
+		Configure SPI2 to operate in Master mode.
+
 config ESPRESSIF_SPI2_SLAVE
 	bool "SPI2 Slave mode"
-	default n
 	depends on SPI_SLAVE
 	select ESPRESSIF_GPIO_IRQ
+	select ESPRESSIF_SPI_SLAVE
 	---help---
 		Configure SPI2 to operate in Slave mode.
+
+endchoice # ESPRESSIF_SPI2_MODE
 
 config ESPRESSIF_SPI2_SLAVE_BUFSIZE
 	int "SPI2 Slave buffer size"
@@ -1672,49 +1688,80 @@ config ESPRESSIF_SPI2_CSPIN
 	default 10 if ARCH_CHIP_ESP32C3_GENERIC
 	default 16 if ARCH_CHIP_ESP32C6
 	default 1 if ARCH_CHIP_ESP32H2
-	range 0 21
+	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 30 if ARCH_CHIP_ESP32C6
+	range 0 27 if ARCH_CHIP_ESP32H2
 
 config ESPRESSIF_SPI2_CLKPIN
 	int "SPI2 CLK Pin"
-	default 6 if !ARCH_CHIP_ESP32H2
+	default 6 if ARCH_CHIP_ESP32C3_GENERIC
+	default 6 if ARCH_CHIP_ESP32C6
 	default 4 if ARCH_CHIP_ESP32H2
-	range 0 21
+	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 30 if ARCH_CHIP_ESP32C6
+	range 0 27 if ARCH_CHIP_ESP32H2
 
 config ESPRESSIF_SPI2_MOSIPIN
 	int "SPI2 MOSI Pin"
-	default 7 if !ARCH_CHIP_ESP32H2
+	default 7 if ARCH_CHIP_ESP32C3_GENERIC
+	default 7 if ARCH_CHIP_ESP32C6
 	default 5 if ARCH_CHIP_ESP32H2
-	range 0 21
+	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 30 if ARCH_CHIP_ESP32C6
+	range 0 27 if ARCH_CHIP_ESP32H2
 
 config ESPRESSIF_SPI2_MISOPIN
 	int "SPI2 MISO Pin"
-	default 2 if !ARCH_CHIP_ESP32H2
+	default 2 if ARCH_CHIP_ESP32C3_GENERIC
+	default 2 if ARCH_CHIP_ESP32C6
 	default 0 if ARCH_CHIP_ESP32H2
-	range 0 21
+	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 30 if ARCH_CHIP_ESP32C6
+	range 0 27 if ARCH_CHIP_ESP32H2
 
 endif # ESPRESSIF_SPI2
 
 if ESPRESSIF_SPI_BITBANG
 
+choice ESPRESSIF_SPI_BITBANG_OPERATION_MODE
+	prompt "SPI Bitbang mode"
+	default ESPRESSIF_SPI_BITBANG_OPERATION_MODE_MASTER
+
+config ESPRESSIF_SPI_BITBANG_OPERATION_MODE_MASTER
+	bool "SPI Bitbang Master mode"
+	depends on SPI_DRIVER
+	---help---
+		Configure SPI Bitbang to operate in Master mode.
+
+endchoice # ESPRESSIF_SPI_BITBANG_OPERATION_MODE
+
 config ESPRESSIF_SPI_BITBANG_CSPIN
 	int "SPI Bitbang CS Pin"
 	default 0
-	range 0 21
+	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 30 if ARCH_CHIP_ESP32C6
+	range 0 27 if ARCH_CHIP_ESP32H2
 
 config ESPRESSIF_SPI_BITBANG_CLKPIN
 	int "SPI Bitbang CLK Pin"
 	default 1
-	range 0 21
+	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 30 if ARCH_CHIP_ESP32C6
+	range 0 27 if ARCH_CHIP_ESP32H2
 
 config ESPRESSIF_SPI_BITBANG_MOSIPIN
 	int "SPI Bitbang MOSI Pin"
 	default 2
-	range 0 21
+	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 30 if ARCH_CHIP_ESP32C6
+	range 0 27 if ARCH_CHIP_ESP32H2
 
 config ESPRESSIF_SPI_BITBANG_MISOPIN
 	int "SPI Bitbang MISO Pin"
 	default 3
-	range 0 21
+	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 30 if ARCH_CHIP_ESP32C6
+	range 0 27 if ARCH_CHIP_ESP32H2
 
 choice ESPRESSIF_SPI_BITBANG_MODE
 	prompt "SPI Bitbang mode"
