@@ -57,10 +57,7 @@
 #include "soc/reg_base.h"
 #include "spi_flash_mmap.h"
 #include "rom/cache.h"
-
-#ifdef CONFIG_ARCH_CHIP_ESP32H2
 #include "soc/rtc.h"
-#endif
 
 #include "bootloader_init.h"
 
@@ -409,14 +406,17 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_CHIP_ESP32H2
+#if defined(CONFIG_ARCH_CHIP_ESP32C6) || defined(CONFIG_ARCH_CHIP_ESP32H2)
 static void IRAM_ATTR NOINLINE_ATTR recalib_bbpll(void)
 {
     rtc_cpu_freq_config_t old_config;
     rtc_clk_cpu_freq_get_config(&old_config);
 
-  if (old_config.source == SOC_CPU_CLK_SRC_PLL ||
-      old_config.source == SOC_CPU_CLK_SRC_FLASH_PLL)
+  if (old_config.source == SOC_CPU_CLK_SRC_PLL
+#ifdef CONFIG_ARCH_CHIP_ESP32H2
+      || old_config.source == SOC_CPU_CLK_SRC_FLASH_PLL
+#endif
+      )
     {
       rtc_clk_cpu_freq_set_xtal();
       rtc_clk_cpu_freq_set_config(&old_config);
@@ -489,6 +489,10 @@ void __esp_start(void)
 
   esp_cpu_configure_region_protection();
 #endif
+
+  /* Configure the power related stuff. */
+
+  esp_rtc_init();
 
   /* Configure SPI Flash chip state */
 
