@@ -19,6 +19,9 @@
 # the License.
 #
 # ##############################################################################
+
+# Include BCM43xxx drivers into the build
+
 if(CONFIG_IEEE80211_BROADCOM_FULLMAC)
   set(SRCS)
 
@@ -29,10 +32,26 @@ if(CONFIG_IEEE80211_BROADCOM_FULLMAC)
     bcmf_cdc.c
     bcmf_bdc.c
     bcmf_utils.c
-    bcmf_netdev.c)
+    bcmf_netdev.c
+    bcmf_gpio.c)
 
   if(CONFIG_IEEE80211_BROADCOM_FULLMAC_SDIO)
-    list(APPEND SRCS mmc_sdio.c bcmf_sdio.c bcmf_core.c bcmf_sdpcm.c)
+    list(APPEND SRCS bcmf_sdio.c bcmf_interface.c bcmf_core.c bcmf_sdpcm.c)
+  endif()
+
+  if(CONFIG_IEEE80211_BROADCOM_FULLMAC_GSPI)
+    list(
+      APPEND
+      SRCS
+      bcmf_gspi.c
+      bcmf_gspi_f2_frame.c
+      bcmf_interface.c
+      bcmf_core.c
+      bcmf_sdpcm.c)
+  endif()
+
+  if(CONFIG_IEEE80211_BROADCOM_BCM4301X)
+    list(APPEND SRCS bcmf_chip_4301x.c)
   endif()
 
   if(CONFIG_IEEE80211_BROADCOM_BCM43362)
@@ -41,6 +60,14 @@ if(CONFIG_IEEE80211_BROADCOM_FULLMAC)
 
   if(CONFIG_IEEE80211_BROADCOM_BCM43438)
     list(APPEND SRCS bcmf_chip_43438.c)
+  endif()
+
+  if(CONFIG_IEEE80211_BROADCOM_BCM43455)
+    list(APPEND SRCS bcmf_chip_43455.c)
+  endif()
+
+  if(CONFIG_IEEE80211_INFINEON_CYW43439)
+    list(APPEND SRCS cyw_chip_43439.c)
   endif()
 
   target_sources(drivers PRIVATE ${SRCS})
