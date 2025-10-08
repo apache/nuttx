@@ -32,6 +32,7 @@
 #include "mpfs_memorymap.h"
 #include "riscv_internal.h"
 #include "riscv_macros.S"
+#include "mpfs_e51_csr.h"
 
 /****************************************************************************
  * Public Symbols
@@ -108,6 +109,7 @@ __start:
   li   x31, 0
 
   /* Skip delegation register, mmu and floating point initializations if E51 */
+
   csrr a0, CSR_MHARTID
   beqz a0, .skip_e51
 
@@ -125,7 +127,21 @@ __start:
 
   sfence.vma x0, x0
 
+  /* Skip the following E51 specific settings for u54 */
+
+  beqz x0, .skip_u54
+
 .skip_e51:
+
+  /* Enable/disable L1 caches with vendor specific CSR on E51 */
+
+#ifdef CONFIG_MPFS_E51_ENABLE_CACHE
+  csrw CSR_E51_MCACHE_CTL, (E51_MCACHE_CTL_DCACHE_EN | E51_MCACHE_CTL_ICACHE_EN)
+#else
+  csrw CSR_E51_MCACHE_CTL, 0
+#endif
+
+.skip_u54:
 
 /* initialize global pointer, global data
  * The __global_pointer is allocated in the linker script.

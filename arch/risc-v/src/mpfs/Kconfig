@@ -195,6 +195,12 @@ config MPFS_DDR_MANUAL_ADDCMD_TRAINING
 	---help---
 		This adds code for manual addcmd training. To use it also enable bit 1 in LIBERO_SETTING_TRAINING_SKIP_SETTING to skip the automatic one
 
+config MPFS_E51_ENABLE_CACHE
+	bool "Enable L1 cache on E51 core"
+	default y
+	---help---
+		Enables L1 cache for E51 core. Note: if this is disabled, also L2 cache won't work on E51, regardless of cache lane configuration.
+
 config MPFS_ENABLE_CACHE
 	bool "Enable L2 cache"
 	depends on MPFS_BOOTLOADER
