@@ -283,7 +283,18 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
 
           /* Update RTO timeout if the work exceeds expire */
 
-          tcp_update_timer(conn);
+          if (conn->sconn.s_linger == 0)
+            {
+              /* Directly set timeout to avoid the priority of the
+               * schedule tcp_timer_expiry and tcp_send_txnotify
+               */
+
+              conn->timeout = true;
+            }
+          else
+            {
+              tcp_update_timer(conn);
+            }
         }
 #endif
 
