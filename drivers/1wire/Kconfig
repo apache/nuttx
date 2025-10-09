@@ -18,4 +18,27 @@ config 1WIRE_DS28E17
 	---help---
 		Enable support for the Maxim DS28E17 1-wire to I2C converter
 
+config 1WIRE_EE_DS2XXX
+	bool "Support for Maxim/Analog Devices 1wire DS2XXX EEPROM devices"
+	default n
+	depends on 1WIRE
+	---help---
+		Enable support for 1WIRE DS2XXX EEPROMs.
+		The list of supported devices:
+		DS2430:   32 bytes, 1 page
+		DS2431:   128 bytes, 4 pages
+		DS2432:   128 bytes, 4 pages
+		DS2433:   512 bytes, 16 pages
+		DS28E04:  512 bytes, 16 pages
+		DS28E07:  128 bytes, 4 pages
+		DS28EC20: 2560 bytes, 32 pages
+
+if 1WIRE_EE_DS2XXX
+
+config 1WIRE_EE_DS2XXX_MEMSONBUS
+	int "Maximum number of DS2XXX eeproms on the same bus"
+	default 10
+
+endif # 1WIRE_EE_DS2XXX
+
 endif # 1WIRE
