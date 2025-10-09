@@ -1903,7 +1903,7 @@ void up_disable_irq(int irq);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
+#ifndef CONFIG_ARCH_NOINTC
 void up_affinity_irq(int irq, cpu_set_t cpuset);
 #endif
 
