@@ -98,8 +98,8 @@ require any specific configuration (it is selectable by default if no other
 of 2nd stage bootloaders, the commands ``make bootloader`` and the ``ESPTOOL_BINDIR``
 option (for the ``make flash``) are kept (and ignored if Simple Boot is used).
 
-If other features are required, an externally-built 2nd stage bootloader is needed.
-The bootloader is built using the ``make bootloader`` command. This command generates
+If features like `Flash Encryption`_ are required, an externally-built 2nd stage bootloader is needed.
+The MCUBoot bootloader is built using the ``make bootloader`` command. This command generates
 the firmware in the ``nuttx`` folder. The ``ESPTOOL_BINDIR`` is used in the
 ``make flash`` command to specify the path to the bootloader. For compatibility
 among other SoCs and future options of 2nd stage bootloaders, the commands
@@ -394,6 +394,233 @@ Then, it can be customized in the menu :menuselection:`System Type --> ADC Confi
 3           4
 4           5
 ========== ===========
+
+.. _MCUBoot H2:
+
+MCUBoot
+=======
+
+The ESP32-H2 supports MCUBoot.
+
+Read more about the MCUBoot for Espressif devices `here <https://docs.mcuboot.com/readme-espressif.html>`__.
+
+Flash Encryption
+----------------
+
+Flash encryption is intended for encrypting the contents of the ESP32-H2's off-chip flash memory. Once this feature is enabled,
+firmware is flashed as plaintext, and then the data is encrypted in place on the first boot. As a result, physical readout
+of flash will not be sufficient to recover most flash contents.
+
+The current state of flash encryption for ESP32-H2 allows the use of Virtual E-Fuses and development mode, which permit users to evaluate and test the firmware before making definitive changes such as burning E-Fuses.
+
+Flash encryption supports the following features:
+
+  .. list-table::
+    :header-rows: 1
+
+    * - Feature
+      - Description
+    * - **Flash Encryption with Virtual E-Fuses**
+      - Use flash encryption without burning E-Fuses. Default selection when flash encryption is enabled.
+    * - **Flash Encryption in Development mode**
+      - Allows reflashing an encrypted device by appending the ``--encrypt`` argument to the ``esptool.py write_flash`` command. This is done automatically if ``ESPRESSIF_SECURE_FLASH_ENC_FLASH_DEVICE_ENCRYPTED`` is set.
+    * - **Flash Encryption in Release mode**
+      - Does not allow reflashing the device. This is a permanent setting.
+    * - **Flash Encryption key**
+      - A user-generated key is required by default. Alternatively, a device-generated key is possible, but it will not be recoverable by the user (not recommended). See ``ESPRESSIF_SECURE_FLASH_ENC_USE_HOST_KEY``.
+    * - **Encrypted MTD Partition**
+      - If SPI Flash is enabled, an empty user MTD partition will be automatically encrypted on first flash.
+
+.. note::
+
+   It is **strongly suggested** to read the following before working on flash encryption:
+
+   - `MCUBoot Flash Encryption <https://docs.mcuboot.com/readme-espressif.html#flash-encryption>`_
+   - `General E-Fuse documentation <https://docs.espressif.com/projects/esp-idf/en/latest/esp32h2/api-reference/system/efuse.html>`_
+   - `Flash Encryption Relevant E-Fuses <https://docs.espressif.com/projects/esp-idf/en/latest/esp32h2/security/flash-encryption.html#relevant-efuses>`_
+
+Flash Encryption Requirements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Flash encryption requires burning E-Fuses to enable it on chip. This is not a reversible operation and should be done with caution.
+There is, however, a way to test the flash encryption by simulating them on flash. Both paths are described below.
+
+Build System Features
+'''''''''''''''''''''
+
+The build system contains some safeguards to avoid accidentally burning E-Fuses and automations for convenience. Those are summarized below:
+
+  1. A yellow warning will show up during build alerting that flash encryption is enabled (same for Virtual E-Fuses).
+  2. If ``ESPRESSIF_SECURE_FLASH_ENC_USE_HOST_KEY`` is set, build will fail if the flash encryption key is not found.
+  3. If SPI Flash is enabled, the user MTD partition is automatically encrypted with the provided encryption key.
+  4. ``make flash`` command will prompt the user for confirmation before burning the E-Fuse, if Virtual E-Fuses are disabled.
+
+
+Simulating Flash Encryption with Virtual E-Fuses
+'''''''''''''''''''''''''''''''''''''''''''''''''
+
+It is highly recommended to use this method for testing the flash encryption before actually burning the E-Fuses.
+The E-Fuses are stored in flash and persist between reboots. No real E-Fuses are changed.
+
+To enable virtual E-Fuses for flash encryption testing, open ``menuconfig`` and:
+  1. Enable flash encryption on boot on: :menuselection:`System Type --> Bootloader and Image Configuration`
+  2. Verify Virtual E-Fuses are enabled (this is done by default): :menuselection:`System Type --> Peripheral Support --> E-Fuse support`
+
+Now build the bootloader and the firmware. Flashing the device (or opening on QEMU) will trigger the following:
+  1. On the first boot, the bootloader will encrypt the flash::
+
+      ...
+      [esp32h2] [WRN] eFuse virtual mode is enabled. If Secure boot or Flash encryption is enabled then it does not provide any security. FOR TESTING ONLY!
+      [esp32h2] [WRN] [efuse] [Virtual] try loading efuses from flash: 0x10000 (offset)
+      ...
+      [esp32h2] [INF] [flash_encrypt] Encrypting bootloader...
+      [esp32h2] [INF] [flash_encrypt] Bootloader encrypted successfully
+      [esp32h2] [INF] [flash_encrypt] Encrypting primary slot...
+      [esp32h2] [INF] [flash_encrypt] Encrypting remaining flash...
+      [esp32h2] [INF] [flash_encrypt] Flash encryption completed
+      ...
+      [esp32h2] [INF] Resetting with flash encryption enabled...
+
+  2. Device will reset and it should be now operating similar to an actual encrypted device::
+
+      ...
+      [esp32h2] [INF] Checking flash encryption...
+      [esp32h2] [INF] [flash_encrypt] flash encryption is enabled (1 plaintext flashes left)
+      [esp32h2] [INF] Disabling RNG early entropy source...
+      [esp32h2] [INF] br_image_off = 0x20000
+      [esp32h2] [INF] ih_hdr_size = 0x20
+      [esp32h2] [INF] Loading image 0 - slot 0 from flash, area id: 1
+      ...
+      NuttShell (NSH) NuttX-12.8.0
+      nsh>
+
+Actual encryption and burning E-Fuses
+'''''''''''''''''''''''''''''''''''''
+
+E-Fuses are burned by esptool and the bootloader on the first boot after flashing with encryption enabled.
+This process is automated on NuttX build system.
+
+.. warning::  Burning E-Fuses is NOT a reversible operation and should be done with caution.
+
+To build a firmware with E-Fuse support and flash encryption enabled, open ``menuconfig`` and:
+  1. Enable flash encryption on boot on: :menuselection:`System Type --> Bootloader and Image Configuration`
+  2. Disable Virtual E-Fuses :menuselection:`System Type --> Peripheral Support --> E-Fuse support`
+  3. Check usage mode is Development (this allows reflashing, while Release mode does not).
+
+.. note::  If using development mode of flash encryption (see menuconfig and documentation above), it is still possible to re-flash the device with esptool by
+  setting ``ESPRESSIF_SECURE_FLASH_ENC_FLASH_DEVICE_ENCRYPTED`` which adds ``--encrypt`` argument to the ``esptool.py write_flash`` command.
+  This will apply the burned encryption key to the image while flashing.
+
+Flash Allocation for MCUBoot
+----------------------------
+
+When MCUBoot is enabled on ESP32-H2, the flash memory is organized as follows
+based on the default KConfig values:
+
+.. note:: Even though OTA is not available on ESP32-H2 (no Wi-Fi), firmware
+  binaries can still be uploaded to flash using other means, such as an SD card.
+
+**Flash Layout (MCUBoot Enabled)**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 20 20
+   :align: left
+
+   * - Region
+     - Offset
+     - Size
+   * - Bootloader
+     - 0x000000
+     - 64KB
+   * - E-Fuse Virtual (see Note)
+     - 0x010000
+     - 64KB
+   * - Primary Application Slot (/dev/ota0)
+     - 0x020000
+     - 1MB
+   * - Secondary Application Slot (/dev/ota1)
+     - 0x120000
+     - 1MB
+   * - Scratch Partition (/dev/otascratch)
+     - 0x220000
+     - 256KB
+   * - Storage MTD (optional)
+     - 0x260000
+     - 1MB
+   * - Available Flash
+     - 0x360000+
+     - Remaining
+
+.. raw:: html
+
+   <div style="clear: both"></div>
+
+
+**Note**: The E-Fuse Virtual region is optional and only used when
+``ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH`` is enabled. However, this 64KB
+location is always allocated in the memory layout to prevent accidental
+erasure during board flashing operations, ensuring data preservation if
+virtual E-Fuses are later enabled.
+
+.. code-block:: text
+
+    Memory Map (Addresses in hex):
+
+    0x000000  ┌─────────────────────────────┐
+              │                             │
+              │      MCUBoot Bootloader     │
+              │           (64KB)            │
+              │                             │
+    0x010000  ├─────────────────────────────┤
+              │       E-Fuse Virtual        │
+              │           (64KB)            │
+    0x020000  ├─────────────────────────────┤
+              │                             │
+              │      Primary App Slot       │
+              │            (1MB)            │
+              │          /dev/ota0          │
+              │                             │
+    0x120000  ├─────────────────────────────┤
+              │                             │
+              │     Secondary App Slot      │
+              │            (1MB)            │
+              │          /dev/ota1          │
+              │                             │
+    0x220000  ├─────────────────────────────┤
+              │                             │
+              │      Scratch Partition      │
+              │           (256KB)           │
+              │       /dev/otascratch       │
+              │                             │
+    0x260000  ├─────────────────────────────┤
+              │                             │
+              │    Storage MTD (optional)   │
+              │            (1MB)            │
+              │                             │
+    0x360000  ├─────────────────────────────┤
+              │                             │
+              │       Available Flash       │
+              │         (Remaining)         │
+              │                             │
+              └─────────────────────────────┘
+
+The key KConfig options that control this layout:
+
+- ``ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET`` (default: 0x20000)
+- ``ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET`` (default: 0x120000)
+- ``ESPRESSIF_OTA_SLOT_SIZE`` (default: 0x100000)
+- ``ESPRESSIF_OTA_SCRATCH_OFFSET`` (default: 0x220000)
+- ``ESPRESSIF_OTA_SCRATCH_SIZE`` (default: 0x40000)
+- ``ESPRESSIF_STORAGE_MTD_OFFSET`` (default: 0x260000 when MCUBoot enabled)
+- ``ESPRESSIF_STORAGE_MTD_SIZE`` (default: 0x100000)
+
+For MCUBoot operation:
+
+- The **Primary Slot** contains the currently running application
+- The **Secondary Slot** receives OTA updates
+- The **Scratch Partition** is used by MCUBoot for image swapping during updates
+- MCUBoot manages image validation, confirmation, and rollback functionality
 
 _`Managing esptool on virtual environment`
 ==========================================

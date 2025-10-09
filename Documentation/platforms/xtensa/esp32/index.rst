@@ -724,6 +724,8 @@ Then, it can be customized in the menu :menuselection:`System Type --> ADC Confi
 
 .. warning:: ADC2 channels 1, 2 and 3 are used as strapping pins and can present undefined behavior.
 
+.. _using_qemu_esp32:
+
 Using QEMU
 ==========
 
@@ -867,34 +869,15 @@ The Secure Boot process on the ESP32 involves the following steps performed:
    updated images once Secure Boot is enabled. You can find more information about the ESP32's Secure boot
    `here <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/security/secure-boot-v2.html>`__.
 
-.. note:: As the bootloader image is built on top of the Hardware Abstraction Layer component
-   of `ESP-IDF <https://github.com/espressif/esp-idf>`_, the
-   `API port by Espressif <https://docs.mcuboot.com/readme-espressif.html>`_ will be used
-   by MCUboot rather than the original NuttX port.
-
-Flash Encryption
-^^^^^^^^^^^^^^^^
-
-Flash encryption is intended for encrypting the contents of the ESP32's off-chip flash memory. Once this feature is enabled,
-firmware is flashed as plaintext, and then the data is encrypted in place on the first boot. As a result, physical readout
-of flash will not be sufficient to recover most flash contents.
-
-.. warning::  After enabling Flash Encryption, an encryption key is generated internally by the device and
-   cannot be accessed by the user for re-encrypting data and re-flashing the system, hence it will be permanently encrypted.
-   Re-flashing an encrypted system is complicated and not always possible. You can find more information about the ESP32's Flash Encryption
-   `here <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/security/flash-encryption.html>`__.
-
-Prerequisites
-^^^^^^^^^^^^^
+Requirements
+^^^^^^^^^^^^
 
 First of all, we need to install ``imgtool`` (a MCUboot utility application to manipulate binary
-images) and ``esptool`` (the ESP32 toolkit)::
+images) and ``esptool`` on our compilation environment.
+See the :ref:`Managing esptool on virtual environment <Managing esptool on virtual environment>` section
+for recommendations on how to setup the Python environment to install these tools::
 
-    $ pip install imgtool esptool==4.8.dev4
-
-We also need to make sure that the python modules are added to ``PATH``::
-
-    $ echo "PATH=$PATH:/home/$USER/.local/bin" >> ~/.bashrc
+    $ pip install imgtool esptool
 
 Now, we will create a folder to store the generated keys (such as ``~/signing_keys``)::
 
@@ -947,6 +930,117 @@ to ``Application image secondary slot``.
    :menuselection:`System Type --> Application Image Configuration --> UART ROM download mode`
    and change usage mode to ``Release`` in `System Type --> Application Image Configuration --> Enable usage mode`.
    **After disabling UART Download Mode you will not be able to flash other images through UART.**
+
+Flash Encryption
+----------------
+
+Flash encryption is intended for encrypting the contents of the ESP32's off-chip flash memory. Once this feature is enabled,
+firmware is flashed as plaintext, and then the data is encrypted in place on the first boot. As a result, physical readout
+of flash will not be sufficient to recover most flash contents.
+
+The current state of flash encryption for ESP32 allows the use of Virtual E-Fuses and development mode, which permit users to evaluate and test the firmware before making definitive changes such as burning E-Fuses.
+
+Flash encryption supports the following features:
+
+  .. list-table::
+    :header-rows: 1
+
+    * - Feature
+      - Description
+    * - **Flash Encryption with Virtual E-Fuses**
+      - Use flash encryption without burning E-Fuses. Default selection when flash encryption is enabled.
+    * - **Flash Encryption in Development mode**
+      - Allows reflashing an encrypted device by appending the ``--encrypt`` argument to the ``esptool.py write_flash`` command. This is done automatically if ``ESP32_SECURE_FLASH_ENC_FLASH_DEVICE_ENCRYPTED`` is set.
+    * - **Flash Encryption in Release mode**
+      - Does not allow reflashing the device. This is a permanent setting.
+    * - **Flash Encryption key**
+      - A user-generated key is required by default. Alternatively, a device-generated key is possible, but it will not be recoverable by the user (not recommended). See ``ESP32_SECURE_FLASH_ENC_USE_HOST_KEY``.
+    * - **Encrypted MTD Partition**
+      - If SPI Flash is enabled, an empty user MTD partition will be automatically encrypted on first flash.
+
+.. note::
+
+   It is **strongly suggested** to read the following before working on flash encryption:
+
+   - `MCUBoot Flash Encryption <https://docs.mcuboot.com/readme-espressif.html#flash-encryption>`_
+   - `General E-Fuse documentation <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/efuse.html>`_
+   - `Flash Encryption Relevant E-Fuses <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/security/flash-encryption.html#relevant-efuses>`_
+
+Flash Encryption Requirements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Flash encryption requires burning E-Fuses to enable it on chip. This is not a reversible operation and should be done with caution.
+There is, however, a way to test the flash encryption by simulating them on flash. Both paths are described below.
+
+Build System Features
+'''''''''''''''''''''
+
+The build system contains some safeguards to avoid accidentally burning E-Fuses and automations for convenience. Those are summarized below:
+
+  1. A yellow warning will show up during build alerting that flash encryption is enabled (same for Virtual E-Fuses).
+  2. If ``ESP32_SECURE_FLASH_ENC_USE_HOST_KEY`` is set, build will fail if the flash encryption key is not found.
+  3. If SPI Flash is enabled, the user MTD partition is automatically encrypted with the provided encryption key.
+  4. ``make flash`` command will prompt the user for confirmation before burning the E-Fuse, if Virtual E-Fuses are disabled.
+
+
+Simulating Flash Encryption with Virtual E-Fuses
+'''''''''''''''''''''''''''''''''''''''''''''''''
+
+It is highly recommended to use this method for testing the flash encryption before actually burning the E-Fuses.
+The E-Fuses are stored in flash and persist between reboots. No real E-Fuses are changed.
+
+To enable virtual E-Fuses for flash encryption testing, open ``menuconfig`` and:
+  1. Enable flash encryption on boot on: :menuselection:`System Type --> Bootloader and Image Configuration`
+  2. Verify Virtual E-Fuses are enabled (this is done by default): :menuselection:`System Type --> ESP32 Peripheral Support --> E-Fuse support`
+
+.. note:: On ESP32, testing is possible with QEMU. If that is the case, on step 2 disable Virtual E-Fuse and use normal E-Fuse support.
+  See `ESP32 QEMU <https://github.com/espressif/esp-toolchain-docs/tree/main/qemu/esp32>`_ and :ref:`using_qemu_esp32` for instructions on setting up
+  QEMU with E-Fuse support
+
+Now build the bootloader and the firmware. Flashing the device (or opening on QEMU) will trigger the following:
+  1. On the first boot, the bootloader will encrypt the flash::
+
+      ...
+      [esp32] [WRN] eFuse virtual mode is enabled. If Secure boot or Flash encryption is enabled then it does not provide any security. FOR TESTING ONLY!
+      [esp32] [WRN] [efuse] [Virtual] try loading efuses from flash: 0x10000 (offset)
+      ...
+      [esp32] [INF] [flash_encrypt] Encrypting bootloader...
+      [esp32] [INF] [flash_encrypt] Bootloader encrypted successfully
+      [esp32] [INF] [flash_encrypt] Encrypting primary slot...
+      [esp32] [INF] [flash_encrypt] Encrypting remaining flash...
+      [esp32] [INF] [flash_encrypt] Flash encryption completed
+      ...
+      [esp32] [INF] Resetting with flash encryption enabled...
+
+  2. Device will reset and it should be now operating similar to an actual encrypted device::
+
+      ...
+      [esp32] [INF] Checking flash encryption...
+      [esp32] [INF] [flash_encrypt] flash encryption is enabled (1 plaintext flashes left)
+      [esp32] [INF] Disabling RNG early entropy source...
+      [esp32] [INF] br_image_off = 0x20000
+      [esp32] [INF] ih_hdr_size = 0x20
+      [esp32] [INF] Loading image 0 - slot 0 from flash, area id: 1
+      ...
+      NuttShell (NSH) NuttX-12.8.0
+      nsh>
+
+Actual encryption and burning E-Fuses
+'''''''''''''''''''''''''''''''''''''
+
+E-Fuses are burned by esptool and the bootloader on the first boot after flashing with encryption enabled.
+This process is automated on NuttX build system.
+
+.. warning::  Burning E-Fuses is NOT a reversible operation and should be done with caution.
+
+To build a firmware with E-Fuse support and flash encryption enabled, open ``menuconfig`` and:
+  1. Enable flash encryption on boot on: :menuselection:`System Type --> Bootloader and Image Configuration`
+  2. Disable Virtual E-Fuses :menuselection:`System Type --> ESP32 Peripheral Selection --> E-Fuse support`
+  3. Check usage mode is Development (this allows reflashing, while Release mode does not).
+
+.. note::  If using development mode of flash encryption (see menuconfig and documentation above), it is still possible to re-flash the device with esptool by
+  setting ``ESP32_SECURE_FLASH_ENC_FLASH_DEVICE_ENCRYPTED`` which adds ``--encrypt`` argument to the ``esptool.py write_flash`` command.
+  This will apply the burned encryption key to the image while flashing.
 
 Flash Allocation for MCUBoot
 ----------------------------
