@@ -107,6 +107,29 @@ static inline uint32_t onewire_leuint32(uint32_t x)
 #endif
 
 /****************************************************************************
+ * Name: onewire_addslave_on_search
+ *
+ * Description:
+ *   A default callback used to save scanned romcodes into
+ *   the onewire_master_s struct. Currently used in GETFAMILYROMS.
+ *
+ ****************************************************************************/
+
+static void onewire_addslave_on_search(int family, uint64_t romcode,
+                                       FAR void *arg)
+{
+  DEBUGASSERT(arg != NULL);
+  FAR struct onewire_master_s *master = (FAR struct onewire_master_s *)arg;
+  DEBUGASSERT(master->available_roms != NULL);
+
+  if (master->nslaves < master->maxslaves)
+    {
+      master->available_roms[master->nslaves] = romcode;
+      master->nslaves += 1;
+    }
+}
+
+/****************************************************************************
  * Name: onewire_pm_prepare
  *
  * Description:
@@ -607,6 +630,37 @@ int onewire_removeslave(FAR struct onewire_master_s *master,
   return OK;
 }
 
+int onewire_ioctl_setrom(FAR struct onewire_master_s *master, uint64_t rom)
+{
+  DEBUGASSERT(master != NULL);
+  master->selected_rom = rom;
+  return OK;
+}
+
+int onewire_ioctl_getfamilyroms(FAR struct onewire_master_s *master,
+                                FAR struct onewire_availroms_s *avail,
+                                int family)
+{
+  DEBUGASSERT(master != NULL && avail != NULL);
+
+  /* Perform scan of the bus, but first restore the count */
+
+  master->nslaves = 0;
+  onewire_search(master, family, false, onewire_addslave_on_search, master);
+
+  /* Very secure for loop! */
+
+  avail->actual = 0;
+  for (int i = 0; (i < master->nslaves) && (i < avail->maxroms) &&
+                  (i < master->maxslaves); ++i)
+    {
+      avail->roms[i] = master->available_roms[i];
+      avail->actual += 1;
+    }
+
+  return OK;
+}
+
 /****************************************************************************
  * Name: onewire_initialize
  *
@@ -623,6 +677,7 @@ FAR struct onewire_master_s *
 onewire_initialize(FAR struct onewire_dev_s *dev, int maxslaves)
 {
   FAR struct onewire_master_s *master;
+  FAR uint64_t *roms_array;
 
   DEBUGASSERT(dev != NULL);
   DEBUGASSERT(maxslaves > 0);
@@ -635,6 +690,14 @@ onewire_initialize(FAR struct onewire_dev_s *dev, int maxslaves)
       return NULL;
     }
 
+  roms_array = (FAR uint64_t *)kmm_malloc(sizeof(uint64_t) * maxslaves);
+  if (roms_array == NULL)
+    {
+      i2cerr("ERROR: Failed to allocate\n");
+      kmm_free(master);
+      return NULL;
+    }
+
   /* Initialize the device structure */
 
   master->dev = dev;
@@ -642,6 +705,7 @@ onewire_initialize(FAR struct onewire_dev_s *dev, int maxslaves)
   master->nslaves = 0;
   master->maxslaves = maxslaves;
   master->insearch = false;
+  master->available_roms = roms_array;
 
 #ifdef CONFIG_PM
   master->pm_cb.prepare = onewire_pm_prepare;
@@ -676,6 +740,7 @@ int onewire_uninitialize(FAR struct onewire_master_s *master)
   /* Release resources. This does not touch the underlying onewire_dev_s */
 
   nxrmutex_destroy(&master->devlock);
+  kmm_free(master->available_roms);
   kmm_free(master);
   return OK;
 }

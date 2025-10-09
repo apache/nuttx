@@ -31,6 +31,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -47,6 +48,11 @@
 #define ONEWIRE_CMD_READ_ROM         0x33
 #define ONEWIRE_CMD_MATCH_ROM        0x55
 #define ONEWIRE_CMD_RESUME           0xa5
+
+/* Supported ioctl commands */
+
+#define ONEWIREIOC_SETROM          _1WIREIOC(0x0001)
+#define ONEWIREIOC_GETFAMILYROMS   _1WIREIOC(0x0002)
 
 /****************************************************************************
  * Name: ONEWIRE_RESET
@@ -200,6 +206,20 @@ struct onewire_ops_s
 struct onewire_dev_s
 {
   FAR const struct onewire_ops_s *ops; /* 1-Wire vtable */
+};
+
+/* A struct to be passed to the ONEWIREIOC_GETFAMILYROMS ioctl call.
+ * The user fills in the target roms array in the userspace application
+ * to get all the available roms. The user can limit the number obtained
+ * roms using the maxroms field. The actual count of roms on the bus
+ * is then stored in the actual field.
+ */
+
+struct onewire_availroms_s
+{
+  uint64_t *roms;
+  int maxroms;
+  int actual;
 };
 
 /****************************************************************************
