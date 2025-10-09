@@ -458,9 +458,9 @@ static int devfreq_driver_target(FAR struct devfreq_s *devfreq,
  ****************************************************************************/
 
 FAR struct devfreq_s *devfreq_register(
-                          const char *name,
-                          FAR struct devfreq_governor_s *governor,
-                          FAR struct devfreq_driver_s *driver,
+                          FAR const char *name,
+                          FAR const struct devfreq_governor_s *governor,
+                          FAR const struct devfreq_driver_s *driver,
                           FAR void *priv)
 {
   FAR struct devfreq_s *devfreq = devfreq_find_by_name(name);
