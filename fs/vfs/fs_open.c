@@ -373,6 +373,11 @@ int file_open(FAR struct file *filep, FAR const char *path, int oflags, ...)
   ret = file_vopen(filep, path, oflags, 0, ap);
   va_end(ap);
 
+  if (ret >= OK)
+    {
+      atomic_fetch_add(&filep->f_refs, 1);
+    }
+
   return ret;
 }
 
