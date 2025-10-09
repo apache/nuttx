@@ -89,19 +89,3 @@ int vsock_addr_get(FAR const struct sockaddr_vm *vmaddr,
   *addrlen = sizeof(struct sockaddr_vm);
   return 0;
 }
-
-void vsock_addr_init(FAR struct sockaddr_vm *addr, uint64_t cid,
-                     uint32_t port)
-{
-  memset(addr, 0, sizeof(*addr));
-  addr->svm_family = AF_VSOCK;
-  addr->svm_cid    = cid;
-  addr->svm_port   = port;
-}
-
-bool vsock_addr_equal(FAR const struct sockaddr_vm *addr1,
-                      FAR const struct sockaddr_vm *addr2)
-{
-  return addr1->svm_cid == addr2->svm_cid &&
-         addr1->svm_port == addr2->svm_port;
-}
