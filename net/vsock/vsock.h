@@ -98,6 +98,17 @@ vsock_pkt2hdr(FAR struct vsock_pkt_s *pkt)
   return (FAR struct vsock_hdr_s *)pkt->vb[0].buf;
 }
 
+static inline_function void vsock_post(FAR sem_t *sem)
+{
+  int semcount = 0;
+
+  nxsem_get_value(sem, &semcount);
+  if (semcount < 1)
+    {
+      nxsem_post(sem);
+    }
+}
+
 void vsock_recv_pkt(FAR struct vsock_transport_s *t,
                     FAR struct vsock_pkt_s *pkt);
 
@@ -114,6 +125,23 @@ void vsock_transport_register(FAR struct vsock_transport_s *t);
  * vsock_addr.c
  */
 
+static inline_function void vsock_addr_init(FAR struct sockaddr_vm *addr,
+                                            uint64_t cid, uint32_t port)
+{
+  memset(addr, 0, sizeof(*addr));
+  addr->svm_family = AF_VSOCK;
+  addr->svm_cid    = cid;
+  addr->svm_port   = port;
+}
+
+static inline_function bool
+vsock_addr_equal(FAR const struct sockaddr_vm *addr1,
+                 FAR const struct sockaddr_vm *addr2)
+{
+  return addr1->svm_cid == addr2->svm_cid &&
+         addr1->svm_port == addr2->svm_port;
+}
+
 int vsock_addr_is_valid(FAR const struct sockaddr *addr, socklen_t addrlen);
 int vsock_addr_set(FAR struct sockaddr_vm *vmaddr,
                    FAR const struct sockaddr *addr,
@@ -121,10 +149,6 @@ int vsock_addr_set(FAR struct sockaddr_vm *vmaddr,
 int vsock_addr_get(FAR const struct sockaddr_vm *vmaddr,
                    FAR struct sockaddr *addr,
                    FAR socklen_t *addrlen);
-void vsock_addr_init(FAR struct sockaddr_vm *addr, uint64_t cid,
-                     uint32_t port);
-bool vsock_addr_equal(FAR const struct sockaddr_vm *addr1,
-                      FAR const struct sockaddr_vm *addr2);
 
 /* Virtual socket initialize */
 

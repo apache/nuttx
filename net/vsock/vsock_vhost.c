@@ -111,7 +111,7 @@ static const struct vsock_transport_ops_s g_vsock_vhost_transport_ops =
  * Name: vsock_vhost_trans2priv
  ****************************************************************************/
 
-static FAR struct vsock_vhost_priv_s *
+static inline_function FAR struct vsock_vhost_priv_s *
 vsock_vhost_trans2priv(FAR struct vsock_transport_s *t)
 {
   return container_of(t, struct vsock_vhost_priv_s, t);
