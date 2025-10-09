@@ -22287,7 +22287,6 @@ sched/addrenv/addrenv.c ville.juven@unikie.com hujun5@xiaomi.com alin.jerpelea@s
 sched/clock/clock.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
 sched/clock/clock.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com jussi.kivilinna@haltian.com jpa@git.mail.kapsi.fi
 sched/clock/clock_adjtime.c jpa@git.mail.kapsi.fi michallenc@seznam.cz hujun5@xiaomi.com anchao@xiaomi.com ouyangxiangzhen@xiaomi.com
-sched/clock/clock_dow.c alin.jerpelea@sony.com gustavo.nihei@espressif.com arjun@zglue.com
 sched/clock/clock_gettime.c liguiding1@xiaomi.com guoshichao@xiaomi.com xiaoxiang@xiaomi.com alin.jerpelea@sony.com
 sched/clock/clock_initialize.c jussi.kivilinna@haltian.com xiaoxiang@xiaomi.com michallenc@seznam.cz jpa@git.mail.kapsi.fi
 sched/clock/clock_perf.c yinshengkai@xiaomi.com ouyangxiangzhen@xiaomi.com liguiding1@xiaomi.com alin.jerpelea@sony.com
