@@ -398,8 +398,11 @@ struct boardioc_boot_info_s
 };
 #endif
 
-#if defined(CONFIG_BOARDCTL_RESET) || defined(CONFIG_BOARDCTL_RESET_CAUSE)
-/* Describes the reason of last reset */
+#endif /* CONFIG_BOARDCTL */
+
+/* Describes the reason of last reset.  rptun also exchanges these with its
+ * peer as the reset reason, so they do not depend on CONFIG_BOARDCTL.
+ */
 
 enum boardioc_reset_cause_e
 {
@@ -433,13 +436,14 @@ enum boardioc_softreset_subreason_e
   BOARDIOC_SOFTRESETCAUSE_MAX
 };
 
+#ifdef CONFIG_BOARDCTL
+
 struct boardioc_reset_cause_s
 {
   enum boardioc_reset_cause_e cause;  /* The reason of last reset */
   uint32_t flag;                      /* watchdog number when watchdog reset,
                                        * or soft-reset subreason */
 };
-#endif
 
 #ifdef CONFIG_BOARDCTL_MACADDR
 struct boardioc_macaddr_s
