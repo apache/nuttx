@@ -37,5 +37,9 @@ if(CONFIG_USBMISC)
     list(APPEND SRCS fusb303.c)
   endif()
 
+  if(CONFIG_STUSB4500)
+    list(APPEND SRCS stusb4500.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()
