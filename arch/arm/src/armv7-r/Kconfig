@@ -27,6 +27,8 @@ endif # ARMV7R_GIC_EOIMODE
 config ARMV7R_HAVE_PTM
 	bool
 	default n
+	select ONESHOT
+	select ONESHOT_COUNT
 	---help---
 		Selected by the configuration tool if the architecture supports the
 		per-processor Private Timers (PTMs)
