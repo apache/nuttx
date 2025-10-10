@@ -181,7 +181,7 @@
 
 /* Execution time constants (not supported) */
 
-#undef  _POSIX_CHOWN_RESTRICTED
+#define _POSIX_CHOWN_RESTRICTED 1
 #undef  _POSIX_NO_TRUNC
 
 /* The value of a c_cc entry of struct termios that disables the special
@@ -220,6 +220,7 @@
 #define _PC_SYMLINK_MAX                  0x0011
 #define _PC_SYNC_IO                      0x0012
 #define _PC_VDISABLE                     0x0013
+#define _PC_REC_MAX_XFER_SIZE            0x0014
 
 /* Constants used with POSIX sysconf().  sysconf() returns -1 for the
  * options and limits that NuttX does not have.
