@@ -27,6 +27,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/arch.h>
 #include <nuttx/atomic.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
