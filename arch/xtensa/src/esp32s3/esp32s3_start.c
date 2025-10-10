@@ -332,21 +332,6 @@ noinstrument_function void noreturn_function IRAM_ATTR __esp32s3_start(void)
 
   esp32s3_region_protection();
 
-#ifndef CONFIG_ESPRESSIF_SIMPLE_BOOT
-  /* Move CPU0 exception vectors to IRAM */
-
-  __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (_init_start));
-
-  /* Clear .bss. We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
-
-  for (uint32_t *dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
-    {
-      *dest++ = 0;
-    }
-#endif
-
 #ifndef CONFIG_SMP
   /* Make sure that the APP_CPU is disabled for now */
 
@@ -496,7 +481,7 @@ noinstrument_function void IRAM_ATTR __start(void)
   uint32_t app_drom_size  = (uint32_t)_image_drom_size;
   uint32_t app_drom_vaddr = (uint32_t)_image_drom_vma;
 
-#  ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
+#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
   __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (_init_start));
 
   if (bootloader_init() != 0)
@@ -504,7 +489,22 @@ noinstrument_function void IRAM_ATTR __start(void)
       ets_printf("Hardware init failed, aborting\n");
       while (true);
     }
-#  endif
+#endif
+
+#ifndef CONFIG_ESPRESSIF_SIMPLE_BOOT
+  /* Move CPU0 exception vectors to IRAM */
+
+  __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (_init_start));
+
+  /* Clear .bss. We'll do this inline (vs. calling memset) just to be
+   * certain that there are no issues with the state of global variables.
+   */
+
+  for (uint32_t *dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
+    {
+      *dest++ = 0;
+    }
+#endif
 
   if (map_rom_segments(app_drom_start, app_drom_vaddr, app_drom_size,
                        app_irom_start, app_irom_vaddr, app_irom_size) != 0)
