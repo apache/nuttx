@@ -142,11 +142,41 @@ long fpathconf(int fildes, int name)
       case _PC_VDISABLE:
         return _POSIX_VDISABLE;
 
+      case _PC_CHOWN_RESTRICTED:
+        return _POSIX_CHOWN_RESTRICTED;
+
+      case _PC_ALLOC_SIZE_MIN:
+        return -1;
+
+      case _PC_REC_INCR_XFER_SIZE:
+        return -1;
+
+      case _PC_REC_MAX_XFER_SIZE:
+        return -1;
+
+      case _PC_REC_MIN_XFER_SIZE:
+        return -1;
+
+      case _PC_REC_XFER_ALIGN:
+        return -1;
+
+      case _PC_2_SYMLINKS:
+        return -1;
+
       default:
+        if (name >= 0)
+          {
+            /* Valid but not implemented for the time being */
 
-        /* Assume valid but not implemented for the time being */
+            set_errno(ENOSYS);
+          }
+        else
+          {
+            /* Invalid value */
 
-        set_errno(ENOSYS);
+            set_errno(EINVAL);
+          }
+
         return ERROR;
     }
 }
