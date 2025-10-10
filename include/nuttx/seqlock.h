@@ -29,16 +29,13 @@
 
 #include <nuttx/atomic.h>
 #include <nuttx/irq.h>
+#include <nuttx/arch.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
-#define SEQLOCK_INITIALIZER { 1u, 1u }
-#else
 #define SEQLOCK_INITIALIZER { 0u }
-#endif
 
 /****************************************************************************
  * Public Data Types
@@ -52,7 +49,6 @@ typedef struct seqclock
 {
 #ifdef CONFIG_SMP
   atomic_t sequence;
-  uint32_t next_sequence;
 #else
   volatile uint32_t sequence;
 #endif
@@ -88,8 +84,7 @@ extern "C"
 static inline_function void seqlock_init(FAR seqcount_t *s)
 {
 #ifdef CONFIG_SMP
-  atomic_init(&s->sequence, 1u);
-  s->next_sequence = 1u;
+  atomic_init(&s->sequence, 0u);
 #else
   s->sequence = 0u;
 #endif
@@ -116,13 +111,7 @@ uint32_t read_seqbegin(FAR const seqcount_t *s)
   uint32_t seq;
 
 #ifdef CONFIG_SMP
-  do
-    {
-      /* Ensure no load operation is re-ordered before the acquire load. */
-
-      seq = atomic_read_acquire(&s->sequence);
-    }
-  while (seq == 0u);
+  seq = atomic_read_acquire(&s->sequence) & ~1;
 #else
   seq = s->sequence;
   SMP_RMB();
@@ -189,11 +178,11 @@ irqstate_t write_seqlock_irqsave(FAR seqcount_t *s)
     {
       uint32_t sequence = atomic_read(&s->sequence);
 
-      if (predict_true(sequence != 0u))
+      if (predict_true((sequence & 1u) == 0u))
         {
           /* Try to acquire the lock ownership. */
 
-          if (atomic_cmpxchg_acquire(&s->sequence, &sequence, 0u))
+          if (atomic_cmpxchg_acquire(&s->sequence, &sequence, sequence + 1u))
             {
               break;
             }
@@ -228,9 +217,7 @@ static inline_function
 void write_sequnlock_irqrestore(seqcount_t *s, irqstate_t flags)
 {
 #ifdef CONFIG_SMP
-  uint32_t next = s->next_sequence + 2;
-  s->next_sequence = next;
-  atomic_set_release(&s->sequence, next);
+  atomic_set_release(&s->sequence, s->sequence + 1u);
 #endif
   up_irq_restore(flags);
 }
