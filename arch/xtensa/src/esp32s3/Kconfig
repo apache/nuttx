@@ -2786,7 +2786,7 @@ endchoice
 
 config ESP32S3_MCUBOOT_VERSION
 	string "MCUboot version"
-	default "aa4fa2b6e17361dd3ce16a60883059778fd147a9"
+	default "8a07053d42e592c85cb35b79c4de1b7749943387"
 	depends on ESP32S3_APP_FORMAT_MCUBOOT
 
 config ESP32S3_APP_MCUBOOT_HEADER_SIZE

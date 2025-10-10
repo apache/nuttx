@@ -53,15 +53,11 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32_OTA_PARTITION_ENCRYPT
-#  define OTA_ENCRYPT true
-#else
-#  define OTA_ENCRYPT false
+#  warning "CONFIG_ESP32_OTA_PARTITION_ENCRYPT is deprecated"
 #endif
 
 #ifdef CONFIG_ESP32_STORAGE_MTD_ENCRYPT
-#  define STORAGE_ENCRYPT true
-#else
-#  define STORAGE_ENCRYPT false
+#  warning "CONFIG_ESP32_STORAGE_MTD_ENCRYPT is deprecated"
 #endif
 
 /****************************************************************************

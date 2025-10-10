@@ -103,6 +103,8 @@ config ESP32_SECURE_FLASH_ENC_ENABLED
 	bool "Enable Flash Encryption on boot (READ HELP FIRST)"
 	default n
 	depends on ESP32_APP_FORMAT_MCUBOOT
+	select ESPRESSIF_EFUSE
+	select ESPRESSIF_SECURE_FLASH_ENC_ENABLED
 	---help---
 		If this option is set, flash contents will be encrypted by the bootloader on first boot.
 
