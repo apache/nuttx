@@ -122,6 +122,12 @@ static int load_absmodule(FAR struct binary_s *bin, FAR const char *filename,
 
           binfo("Successfully loaded module %s\n", filename);
 
+          /* Save the filename of the loaded module */
+
+#ifdef CONFIG_BINFMT_STORE_FILENAME
+          strlcpy(bin->fname, filename, sizeof(bin->fname));
+#endif
+
           /* Save the unload method for use by unload_module */
 
           bin->unload = binfmt->unload;
