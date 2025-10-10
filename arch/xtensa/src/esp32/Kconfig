@@ -1830,9 +1830,9 @@ if ESP32_HAVE_OTA_PARTITION
 comment "Application Image OTA Update support"
 
 config ESP32_OTA_PARTITION_ENCRYPT
-	bool "Encrypt OTA partitions"
-	default y
-	depends on ESP32_SECURE_FLASH_ENC_ENABLED
+	bool
+	---help---
+		This option is deprecated.
 
 config ESP32_OTA_PRIMARY_SLOT_OFFSET
 	hex "Application image primary slot offset"
@@ -1873,14 +1873,14 @@ if ESP32_SPIFLASH
 comment "General storage MTD Configuration"
 
 config ESP32_STORAGE_MTD_ENCRYPT
-	bool "Encrypt Storage MTD partition"
-	default y
-	depends on ESP32_SECURE_FLASH_ENC_ENABLED
+	bool
+	---help---
+		This option is deprecated.
 
 config ESP32_STORAGE_MTD_OFFSET
 	hex "Storage MTD base address in SPI Flash"
 	default 0x180000 if !ESP32_HAVE_OTA_PARTITION
-	default 0x250000 if ESP32_HAVE_OTA_PARTITION
+	default 0x260000 if ESP32_HAVE_OTA_PARTITION
 	---help---
 		MTD base address in SPI Flash.
 
@@ -2794,7 +2794,7 @@ endchoice
 config ESP32_MCUBOOT_VERSION
 	string "MCUboot version"
 	depends on ESP32_APP_FORMAT_MCUBOOT
-	default "aa4fa2b6e17361dd3ce16a60883059778fd147a9"
+	default "8a07053d42e592c85cb35b79c4de1b7749943387"
 
 config ESP32_APP_MCUBOOT_HEADER_SIZE
 	int "Application image header size (in bytes)"
