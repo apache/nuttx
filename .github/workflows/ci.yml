@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-name: Build
+name: CI Pipeline
 
 on:
   pull_request:
@@ -34,13 +34,83 @@ permissions:
   contents: read
 
 concurrency:
-  group: build-${{ github.event.pull_request.number || github.ref }}
+  group: ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
+  # --- Draft guard ---
+  draft-check:
+    runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.check.outputs.skip }}
+    steps:
+      - id: check
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.event.pull_request.draft }}" = "true" ]; then
+            echo "Draft PR detected — skipping pipeline."
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "PR is ready or push event — continuing pipeline."
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
 
+  # --- Check job ---
+  check:
+    needs: draft-check
+    if: ${{ needs.draft-check.outputs.skip != 'true' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout nuttx repo
+        uses: actions/checkout@v5
+        with:
+          repository: apache/nuttx
+          path: nuttx
+          fetch-depth: 0
+
+      - name: Check Pull Request
+        run: |
+          echo "::add-matcher::nuttx/.github/nxstyle.json"
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install codespell cmake-format black isort flake8 cvt2utf
+          cd nuttx
+          commits="${{ github.event.pull_request.base.sha }}..HEAD"
+          git log --oneline $commits
+          echo "../nuttx/tools/checkpatch.sh -c -u -m -g $commits"
+          ../nuttx/tools/checkpatch.sh -c -u -m -g $commits
+
+  # --- Lint job ---
+  lint:
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      statuses: write
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - run: mkdir super-linter.report
+
+      - name: Lint
+        uses: github/super-linter@v7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_ALL_CODEBASE: false
+          VALIDATE_PYTHON_BLACK: true
+          VALIDATE_PYTHON_FLAKE8: true
+          PYTHON_FLAKE8_CONFIG_FILE: setup.cfg
+          VALIDATE_PYTHON_ISORT: true
+          PYTHON_ISORT_CONFIG_FILE: setup.cfg
+          VALIDATE_YAML: true
+
+  # --- Build job ---
   # Fetch the source from nuttx and nuttx-apps repos
   Fetch-Source:
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - name: Determine Target Branches
@@ -124,8 +194,8 @@ jobs:
 
   # Select the Linux Builds based on PR Arch Label
   Linux-Arch:
-    uses: apache/nuttx/.github/workflows/arch.yml@master
     needs: Fetch-Source
+    uses: apache/nuttx/.github/workflows/arch.yml@master
     with:
       os: Linux
       boards: |
@@ -248,8 +318,8 @@ jobs:
 
   # Select the macOS Builds based on PR Arch Label
   macOS-Arch:
-    uses: apache/nuttx/.github/workflows/arch.yml@master
     needs: Fetch-Source
+    uses: apache/nuttx/.github/workflows/arch.yml@master
     with:
       os: macOS
       boards: |
@@ -257,10 +327,10 @@ jobs:
 
   # Run the selected macOS Builds
   macOS:
+    needs: macOS-Arch
+    runs-on: macos-13
     permissions:
       contents: none
-    runs-on: macos-13
-    needs: macOS-Arch
     if: ${{ needs.macOS-Arch.outputs.skip_all_builds != '1' }}
     strategy:
       max-parallel: 2
@@ -308,8 +378,8 @@ jobs:
 
   # Select the msys2 Builds based on PR Arch Label
   msys2-Arch:
-    uses: apache/nuttx/.github/workflows/arch.yml@master
     needs: Fetch-Source
+    uses: apache/nuttx/.github/workflows/arch.yml@master
     with:
       os: msys2
       boards: |
@@ -390,8 +460,8 @@ jobs:
 
   # Select the msvc Builds based on PR Arch Label
   msvc-Arch:
-    uses: apache/nuttx/.github/workflows/arch.yml@master
     needs: Fetch-Source
+    uses: apache/nuttx/.github/workflows/arch.yml@master
     with:
       os: msvc
       boards: |
