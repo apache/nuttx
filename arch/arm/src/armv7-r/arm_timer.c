@@ -119,7 +119,11 @@ static void arm_oneshot_start_absolute(struct oneshot_lowerhalf_s *lower,
 static void arm_oneshot_start(struct oneshot_lowerhalf_s *lower,
                               clkcnt_t delta)
 {
+<<<<<<< HEAD
   arm_timer_phy_set_relative(MIN(UINT32_MAX, delta));
+=======
+  arm_timer_phy_set_relative(delta);
+>>>>>>> 704a08f0949 ([feature] Add armv7r timer driver.)
   arm_timer_phy_set_irq_mask(false);
 }
 
