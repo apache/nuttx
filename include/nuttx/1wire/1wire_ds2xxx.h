@@ -23,8 +23,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_EEPROM_1WIRE_DS2XXX_H
-#define __INCLUDE_NUTTX_EEPROM_1WIRE_DS2XXX_H
+#ifndef __INCLUDE_NUTTX_1WIRE_1WIRE_DS2XXX_H
+#define __INCLUDE_NUTTX_1WIRE_1WIRE_DS2XXX_H
 
 /****************************************************************************
  * Included Files
@@ -76,7 +76,7 @@ enum ds2xxx_eeproms_e
 /****************************************************************************
  * Name: ds2xxx_initialize
  *
- * Description: Bind a onewire_master_s struct to this driver,
+ * Description: Bind a onewire_dev_s struct to this driver,
  * capable of interfacing DS2XXX 1Wire EEPROMs. The user must specify
  * the device type and also the name of the device (e.g. /dev/ds2xxx).
  *
@@ -85,4 +85,4 @@ enum ds2xxx_eeproms_e
 int ds2xxx_initialize(FAR struct onewire_dev_s *dev,
                       enum ds2xxx_eeproms_e devtype, FAR char *devname);
 
-#endif /* __INCLUDE_NUTTX_EEPROM_1WIRE_DS2XXX_H */
+#endif /* __INCLUDE_NUTTX_1WIRE_1WIRE_DS2XXX_H */
