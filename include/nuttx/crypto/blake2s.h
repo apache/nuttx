@@ -88,7 +88,7 @@ typedef struct blake2s_param__
   uint8_t personal[BLAKE2S_PERSONALBYTES];      /* 32 */
 } blake2s_param;
 
-#ifdef __GNUC__ > 3
+#if defined(__GNUC__) && __GNUC__ > 3
 #define BLAKE2_UNALIGNED 1
 typedef uint32_t uint32_alias_t __attribute__((may_alias));
 typedef uint16_t uint16_alias_t __attribute__((may_alias));
