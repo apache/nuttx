@@ -768,6 +768,7 @@ savedefconfig: apps_preconfig
 	$(Q) rm -f warning.tmp
 	$(Q) rm -f defconfig.tmp
 	$(Q) rm -f sortedconfig.tmp
+	$(info "The defconfig was generated successfully at $(PWD)/defconfig .If you're building out-of-tree configuration, then don't forget to copy it into your defconfig original location")
 
 # export
 #
