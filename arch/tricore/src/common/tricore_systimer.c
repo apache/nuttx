@@ -28,6 +28,7 @@
 #include <nuttx/kmalloc.h>
 
 #include <nuttx/timers/oneshot.h>
+#include <nuttx/hrtimer.h>
 #include <nuttx/timers/arch_alarm.h>
 
 #include "tricore_internal.h"
@@ -47,6 +48,7 @@ struct tricore_systimer_lowerhalf_s
 {
   struct oneshot_lowerhalf_s lower;
   volatile void              *tbase;
+  int                         irq;
   uint64_t                   freq;
   uint64_t                   alarm;
   oneshot_callback_t         callback;
@@ -332,6 +334,13 @@ tricore_systimer_tick_start(struct oneshot_lowerhalf_s *lower,
 
 static int tricore_systimer_interrupt(int irq, void *context, void *arg)
 {
+#ifdef CONFIG_HRTIMER
+  (void)irq;
+  (void)context;
+  (void)arg;
+
+  hrtimer_upper_process(&g_default_hrtimer_upperhalf);
+#else
   struct tricore_systimer_lowerhalf_s *priv = arg;
 
   tricore_systimer_set_timecmp(priv, UINT64_MAX);
@@ -339,6 +348,7 @@ static int tricore_systimer_interrupt(int irq, void *context, void *arg)
     {
       priv->callback(&priv->lower, priv->arg);
     }
+#endif
 
   return 0;
 }
@@ -356,13 +366,15 @@ static int tricore_systimer_interrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-struct oneshot_lowerhalf_s *
-tricore_systimer_initialize(volatile void *tbase, int irq, uint64_t freq)
+void tricore_systimer_initialize(volatile void *tbase,
+                                 int irq,
+                                 uint64_t freq)
 {
   struct tricore_systimer_lowerhalf_s *priv = &g_systimer_lower;
 
   priv->tbase = tbase;
   priv->freq  = freq;
+  priv->irq = irq;
   spin_lock_init(&priv->lock);
 
   IfxStm_setCompareControl(tbase,
@@ -376,7 +388,39 @@ tricore_systimer_initialize(volatile void *tbase, int irq, uint64_t freq)
   IfxStm_enableComparatorInterrupt(tbase, IfxStm_Comparator_0);
 
   irq_attach(irq, tricore_systimer_interrupt, priv);
-  up_enable_irq(irq);
 
-  return (struct oneshot_lowerhalf_s *)priv;
+  up_alarm_set_lowerhalf((struct oneshot_lowerhalf_s *)priv);
+
+#ifdef CONFIG_HRTIMER
+  hrtimer_upper_start(&g_default_hrtimer_upperhalf,
+                      HRTIMER_CLOCK_ALARM);
+#endif
+  up_enable_irq(irq);
+}
+
+int up_alarm_start(const struct timespec *ts)
+{
+  struct tricore_systimer_lowerhalf_s *priv = &g_systimer_lower;
+  uint64_t mtime = ts->tv_sec * priv->freq +
+                   ts->tv_nsec * priv->freq / NSEC_PER_SEC;
+
+  IfxStm_updateCompare(priv->tbase, IfxStm_Comparator_0, mtime);
+  up_enable_irq(priv->irq);
+}
+
+int up_alarm_gettime(FAR struct timespec *ts)
+{
+  struct tricore_systimer_lowerhalf_s *priv = &g_systimer_lower;
+  uint64_t mtime = IfxStm_get(priv->tbase);
+  uint64_t nsecs = mtime * NSEC_PER_SEC / priv->freq;
+
+  ts->tv_sec = nsecs / NSEC_PER_SEC;
+  ts->tv_nsec = nsecs % NSEC_PER_SEC;
+}
+
+int up_alarm_trigger(void)
+{
+  struct tricore_systimer_lowerhalf_s *priv = &g_systimer_lower;
+
+  up_trigger_irq(priv->irq, 0);
 }
