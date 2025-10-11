@@ -321,6 +321,9 @@
 #define FBIOGET_FSCREENINFO   _FBIOC(0x001c)  /* Get video fix info */
                                               /* Argument: writable struct
                                                *           fb_fix_screeninfo */
+#define FBIOGET_PANINFOCNT    _FBIOC(0x001d)  /* Get pan info count */
+                                              /* Argument: read-only
+                                               *           unsigned long */
 
 #define FB_TYPE_PACKED_PIXELS        0      /* Packed Pixels */
 #define FB_TYPE_PLANES               1      /* Non interleaved planes */
