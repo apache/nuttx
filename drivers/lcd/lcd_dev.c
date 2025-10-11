@@ -31,9 +31,10 @@
 #include <string.h>
 #include <poll.h>
 #include <errno.h>
-#include <nuttx/debug.h>
 #include <stdio.h>
+#include <assert.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>

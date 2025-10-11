@@ -55,9 +55,11 @@
  ****************************************************************************/
 
 #include <errno.h>
-#include <nuttx/kmalloc.h>
 #include <string.h>
 #include <sys/endian.h>
+#include <assert.h>
+
+#include <nuttx/kmalloc.h>
 
 #include "mnemofs.h"
 

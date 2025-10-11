@@ -28,6 +28,7 @@
 
 #include <nuttx/debug.h>
 #include <sys/param.h>
+#include <assert.h>
 
 #include "riscv_internal.h"
 #include "hardware/bl808_glb.h"

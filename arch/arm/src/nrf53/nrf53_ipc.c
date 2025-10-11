@@ -31,6 +31,7 @@
 #include <stdint.h>
 
 #include <nuttx/arch.h>
+#include <assert.h>
 
 #include "arm_internal.h"
 #include "nrf53_ipc.h"

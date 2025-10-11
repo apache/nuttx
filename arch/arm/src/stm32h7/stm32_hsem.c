@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/debug.h>
+#include <assert.h>
 
 #include "nvic.h"
 
