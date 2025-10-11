@@ -51,7 +51,7 @@
  *
  ****************************************************************************/
 
-#undef malloc /* See mm/README.txt */
+#undef malloc
 FAR void *malloc(size_t size)
 {
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
