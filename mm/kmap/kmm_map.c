@@ -28,6 +28,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <assert.h>
 
 #include <nuttx/addrenv.h>
 #include <nuttx/arch.h>

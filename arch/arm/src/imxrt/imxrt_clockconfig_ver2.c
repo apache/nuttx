@@ -46,6 +46,7 @@
 #include "imxrt_gpio.h"
 
 #include <stdlib.h>
+#include <assert.h>
 
 /****************************************************************************
  * Pre-processor Definitions

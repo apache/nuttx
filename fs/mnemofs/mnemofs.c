@@ -61,6 +61,7 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/statfs.h>
+#include <assert.h>
 
 #include "mnemofs.h"
 
