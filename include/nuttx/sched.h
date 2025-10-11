@@ -238,16 +238,6 @@
 
 #define SMP_CALL_INITIALIZER(func, arg) {(func), (arg)}
 
-/* These are macros to access the current CPU and the current task on a CPU.
- * These macros are intended to support a future SMP implementation.
- */
-
-#ifdef CONFIG_SMP
-#  define this_cpu()                 up_this_cpu()
-#else
-#  define this_cpu()                 (0)
-#endif
-
 #define running_regs()               ((FAR void **)(g_running_tasks[this_cpu()]->xcp.regs))
 
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
