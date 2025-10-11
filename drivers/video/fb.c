@@ -1308,6 +1308,12 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      case FBIOGET_PANINFOCNT:
+        {
+          ret = fb_paninfo_count(fb->vtable, (int)arg);
+        }
+        break;
+
       default:
         if (fb->vtable->ioctl != NULL)
           {
