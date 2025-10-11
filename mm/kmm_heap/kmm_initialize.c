@@ -36,7 +36,9 @@
 
 /* This is the kernel heap */
 
-FAR struct mm_heap_s *g_kmmheap;
+#undef g_kmmheap
+DEFINE_PER_CPU_BSS_BMP(FAR struct mm_heap_s *, g_kmmheap);
+#define g_kmmheap this_cpu_var_bmp(g_kmmheap)
 
 /****************************************************************************
  * Public Functions
@@ -66,7 +68,7 @@ void kmm_initialize(FAR void *heap_start, size_t heap_size)
   config.name  = "Kmem";
   config.start = heap_start;
   config.size  = heap_size;
-  g_kmmheap = mm_initialize_pool(&config, NULL);
+  g_kmmheap    = mm_initialize_pool(&config, NULL);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */

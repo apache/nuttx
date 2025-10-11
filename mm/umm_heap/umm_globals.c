@@ -51,7 +51,8 @@
 #else
 /* Otherwise, the user heap data structures are in common .bss */
 
-FAR struct mm_heap_s *g_mmheap;
+#  undef g_mmheap
+DEFINE_PER_CPU_BMP(FAR struct mm_heap_s *, g_mmheap);
 #endif
 
 /****************************************************************************
