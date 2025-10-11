@@ -61,7 +61,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_LIBC_ARCH_STPCPY
-#undef stpcpy /* See mm/README.txt */
+#undef stpcpy
 nosanitize_address
 FAR char *stpcpy(FAR char *dest, FAR const char *src)
 {

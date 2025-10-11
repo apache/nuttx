@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_STRLCPY) && defined(LIBC_BUILD_STRLCPY)
-#undef strlcpy /* See mm/README.txt */
+#undef strlcpy
 size_t strlcpy(FAR char *dst, FAR const char *src, size_t dsize)
 {
   FAR const char *osrc = src;

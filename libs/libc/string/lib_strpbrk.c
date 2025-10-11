@@ -32,7 +32,7 @@
  * Public Functions
  ****************************************************************************/
 
-#undef strpbrk /* See mm/README.txt */
+#undef strpbrk
 FAR char *strpbrk(FAR const char *str, FAR const char *charset)
 {
   /* Check each character in the string */

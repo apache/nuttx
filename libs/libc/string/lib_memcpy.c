@@ -39,7 +39,7 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_MEMCPY) && defined(LIBC_BUILD_MEMCPY)
-#undef memcpy /* See mm/README.txt */
+#undef memcpy
 no_builtin("memcpy")
 FAR void *memcpy(FAR void *dest, FAR const void *src, size_t n)
 {

@@ -50,7 +50,7 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_STRCMP) && defined(LIBC_BUILD_STRCMP)
-#undef strcmp /* See mm/README.txt */
+#undef strcmp
 nosanitize_address
 int strcmp(FAR const char *cs, FAR const char *ct)
 {
