@@ -55,13 +55,13 @@ def check_version(min_esptool_version: str) -> bool:
         False: package installed and up-to-date
     """
     try:
-        # Run esptool.py version command
+        # Run esptool version command
         result = subprocess.run(
-            ["esptool.py", "version"], capture_output=True, text=True, check=True
+            ["esptool", "version"], capture_output=True, text=True, check=True
         )
         version_str = result.stdout.strip()
     except (subprocess.CalledProcessError, FileNotFoundError):
-        print("esptool.py not found. Please run: 'pip install esptool'")
+        print("esptool not found. Please run: 'pip install esptool'")
         print("Run make again to create the nuttx.bin image.")
         return True
 
