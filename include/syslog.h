@@ -121,6 +121,10 @@
 #define LOG_INFO      6  /* Informational message */
 #define LOG_DEBUG     7  /* Debug-level message */
 
+#define LOG_LOWOUT    8  /* Log to console straightly
+                          * for debugging
+                          */
+
 /* Used with setlogmask() */
 
 #define LOG_MASK(p)   (1 << (p))

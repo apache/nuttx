@@ -230,6 +230,21 @@ void syslog_flush_intbuffer(bool force);
 #endif
 
 /****************************************************************************
+ * Name: nx_vsyslog_lowout
+ *
+ * Description:
+ *   This function is an extension of nx_vsyslog(). It handles the case where
+ *   the user wants to log messages only to the console in a simple,
+ *   synchronous manner for debugging purposes.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SYSLOG_DEFAULT) && \
+    defined(CONFIG_ARCH_LOWPUTC)
+int nx_vsyslog_lowout(FAR const IPTR char *fmt, FAR va_list *ap);
+#endif
+
+/****************************************************************************
  * Name: syslog_write_foreach
  *
  * Description:

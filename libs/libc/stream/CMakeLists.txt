@@ -50,6 +50,10 @@ list(
   lib_libvsprintf.c
   lib_ultoa_invert.c)
 
+if(CONFIG_SYSLOG_DEFAULT AND CONFIG_ARCH_LOWPUTC)
+  list(APPEND SRCS lib_sysloglowoutstream.c)
+endif()
+
 if(CONFIG_LIBC_FLOATINGPOINT)
   list(APPEND SRCS lib_dtoa_engine.c lib_dtoa_data.c)
 endif()
