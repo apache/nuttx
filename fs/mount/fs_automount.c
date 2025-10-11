@@ -40,6 +40,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/mutex.h>
 #include <nuttx/fs/automount.h>
 #include <nuttx/lib/lib.h>
 

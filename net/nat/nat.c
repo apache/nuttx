@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/mutex.h>
 #include <nuttx/debug.h>
 
 #include "icmp/icmp.h"

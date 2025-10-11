@@ -50,6 +50,7 @@
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
 #include <nuttx/usb/rndis.h>
+#include <nuttx/mutex.h>
 #include <nuttx/wqueue.h>
 
 #ifdef CONFIG_BOARD_USBDEV_SERIALSTR

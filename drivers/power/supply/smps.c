@@ -39,7 +39,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/power/smps.h>
-
+#include <nuttx/mutex.h>
 #include <nuttx/irq.h>
 
 /****************************************************************************
