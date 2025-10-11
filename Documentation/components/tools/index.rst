@@ -740,6 +740,8 @@ these problems::
      -   option env="APPSDIR"
      +   default "../apps"
 
+.. _build_system_linking:
+
 link.sh, link.bat, copydir.sh, copydir.bat, unlink.sh, and unlink.bat
 ---------------------------------------------------------------------
 
@@ -779,6 +781,8 @@ Note that this will copy directories.  link.bat might also be used in
 this case.  link.bat will attempt to create a symbolic link using the
 NTFS mklink.exe command instead of copying files.  That logic, however,
 has not been verified as of this writing.
+
+.. _makefile_host:
 
 Makefile.host
 -------------
