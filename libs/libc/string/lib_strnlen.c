@@ -35,7 +35,7 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_STRNLEN) && defined(LIBC_BUILD_STRNLEN)
-#undef strnlen /* See mm/README.txt */
+#undef strnlen
 size_t strnlen(FAR const char *s, size_t maxlen)
 {
   FAR const char *sc;

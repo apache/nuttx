@@ -70,7 +70,7 @@
  *
  ****************************************************************************/
 
-#undef memrchr /* See mm/README.txt */
+#undef memrchr
 FAR void *memrchr(FAR const void *s, int c, size_t n)
 {
   FAR const unsigned char *src0 =

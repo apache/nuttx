@@ -77,7 +77,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_LIBC_ARCH_STPNCPY
-#undef stpncpy /* See mm/README.txt */
+#undef stpncpy
 FAR char *stpncpy(FAR char *dest, FAR const char *src, size_t n)
 {
   FAR char *ret = NULL;
