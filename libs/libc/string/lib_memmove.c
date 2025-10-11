@@ -35,7 +35,7 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_MEMMOVE) && defined(LIBC_BUILD_MEMMOVE)
-#undef memmove /* See mm/README.txt */
+#undef memmove
 no_builtin("memmove")
 FAR void *memmove(FAR void *dest, FAR const void *src, size_t count)
 {

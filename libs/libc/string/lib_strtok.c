@@ -68,7 +68,7 @@ static FAR char *g_saveptr = NULL;
  *
  ****************************************************************************/
 
-#undef strtok /* See mm/README.txt */
+#undef strtok
 FAR char *strtok(FAR char *str, FAR const char *delim)
 {
   return strtok_r(str, delim, &g_saveptr);

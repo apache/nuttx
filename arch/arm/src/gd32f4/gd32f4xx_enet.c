@@ -78,10 +78,6 @@
 
 /* Configuration ************************************************************/
 
-/* See boards/arm/gd32/gd3240g-eval/README.txt for an explanation of the
- * configuration settings.
- */
-
 #if GD32_NETHERNET > 1
 #  error "Logic to support multiple Ethernet interfaces is incomplete"
 #endif

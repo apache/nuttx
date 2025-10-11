@@ -261,7 +261,7 @@
  *
  * The STM32F4 Discovery has no on-board serial devices, but the console is
  * brought out to PA2 (TX) and PA3 (RX) for connection to an external serial
- * device. (See the README.txt file for other options)
+ * device.
  *
  * These pins selections, however, conflict with pin usage on the
  * STM32F4DIS-BB.
@@ -384,7 +384,7 @@
 #define GPIO_I2C1_SCL     GPIO_I2C1_SCL_1
 #define GPIO_I2C1_SDA     GPIO_I2C1_SDA_2
 
-/* Timer Inputs/Outputs (see the README.txt file for options) */
+/* Timer Inputs/Outputs */
 
 #define GPIO_TIM2_CH1IN   GPIO_TIM2_CH1IN_2
 #define GPIO_TIM2_CH2IN   GPIO_TIM2_CH2IN_1

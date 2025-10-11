@@ -99,7 +99,7 @@ static void stm32_backlight(struct ssd1289_lcd_s *dev, int power);
  * Private Data
  ****************************************************************************/
 
-/* LCD pin mapping (see boards/arm/stm32/stm324discovery/README.txt
+/* LCD pin mapping
  * MAPPING TO STM32 F4:
  *
  *  ---------------- ------------- ----------------------------------

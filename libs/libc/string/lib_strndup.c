@@ -92,7 +92,7 @@ FAR char *nx_strndup(FAR const char *s, size_t size)
  *
  ****************************************************************************/
 
-#undef strndup /* See mm/README.txt */
+#undef strndup
 FAR char *strndup(FAR const char *s, size_t size)
 {
   FAR char *news = NULL;

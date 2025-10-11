@@ -33,7 +33,7 @@
  * Public Functions
  ****************************************************************************/
 
-#undef posix_memalign /* See mm/README.txt */
+#undef posix_memalign
 int posix_memalign(FAR void **mem, size_t align, size_t size)
 {
   *mem = lib_memalign(align, size);

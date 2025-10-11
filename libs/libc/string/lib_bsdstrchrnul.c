@@ -45,7 +45,7 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_STRCHRNUL) && defined(LIBC_BUILD_STRCHRNUL)
-#undef strchrnul /* See mm/README.txt */
+#undef strchrnul
 FAR char *strchrnul(FAR const char *s, int c)
 {
   FAR char *s1 = strchr(s, c);

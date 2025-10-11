@@ -11,4 +11,4 @@ config GNSSUTILS_MINMEA_LIB
 
 		NOTE: This library depends on having some version of math.h
 		at include/nuttx.  There are some different ways to accomplish
-		this.  See the discussion in the top-level nuttx/README.txt file.
+		this.  See the discussion in the Documentation/legacy_README.md file.

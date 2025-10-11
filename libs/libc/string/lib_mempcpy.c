@@ -53,7 +53,7 @@
  *
  ****************************************************************************/
 
-#undef mempcpy /* See mm/README.txt */
+#undef mempcpy
 FAR void *mempcpy(FAR void *dest, FAR const void *src, size_t n)
 {
   return (FAR char *)memcpy(dest, src, n) + n;

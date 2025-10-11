@@ -73,10 +73,6 @@
 
 /* Configuration ************************************************************/
 
-/* See boards/arm/at32/at3240g-eval/README.txt for an explanation of the
- * configuration settings.
- */
-
 #if AT32_NETHERNET > 1
 #  error "Logic to support multiple Ethernet interfaces is incomplete"
 #endif

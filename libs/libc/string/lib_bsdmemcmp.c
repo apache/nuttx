@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_MEMCMP) && defined(LIBC_BUILD_MEMCMP)
-#undef memcmp /* See mm/README.txt */
+#undef memcmp
 no_builtin("memcmp")
 int memcmp(FAR const void *s1, FAR const void *s2, size_t n)
 {

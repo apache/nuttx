@@ -21,7 +21,7 @@ config FS_RAMMAP
 		into RAM.  These copied files have some of the properties of
 		standard memory mapped files.
 
-		See nuttx/fs/mmap/README.txt for additional information.
+		See Documentation/components/filesystem/mmap.rst for additional information.
 
 config FS_ANONMAP
 	bool "Anonymous mapping emulation"

@@ -2936,7 +2936,6 @@ config ARCH_BOARD_B_G474E_DPOW1
 	---help---
 		ST Micro B-G474E-DPOW1 Discovery Kit, based on the STM32G474RET6
 		MCU, a Cortex-M4 with FPU, 170 MHz, 128 KB SRAM, 512 KB code.
-		See boards/arm/stm32/b-g474e-dpow1/README.txt.
 
 config ARCH_BOARD_B_G431B_ESC1
 	bool "ST Micro B-G431B-ESC1 Discovery Kit"
@@ -2972,7 +2971,6 @@ config ARCH_BOARD_NUCLEO_G474RE
 	---help---
 		STMicro Nucleo-G474RE board based on the STMicro STM32G474RET6
 		MCU, a Cortex-M4 with FPU, 170 MHz, 128 KB SRAM, 512 KB code.
-		See boards/arm/stm32/nucleo-g474re/README.txt.
 
 config ARCH_BOARD_B_L072Z_LRWAN1
 	bool "B-L072Z-LRWAN1"

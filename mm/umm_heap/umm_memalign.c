@@ -50,7 +50,7 @@
  *
  ****************************************************************************/
 
-#undef memalign /* See mm/README.txt */
+#undef memalign
 FAR void *memalign(size_t alignment, size_t size)
 {
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)

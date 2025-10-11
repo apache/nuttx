@@ -36,7 +36,7 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_STRCASECMP) && defined(LIBC_BUILD_STRCASECMP)
-#undef strcasecmp /* See mm/README.txt */
+#undef strcasecmp
 int strcasecmp(FAR const char *cs, FAR const char *ct)
 {
   register int result;

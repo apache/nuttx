@@ -34,7 +34,7 @@
  * Public Functions
  ****************************************************************************/
 
-#undef strdup /* See mm/README.txt */
+#undef strdup
 FAR char *strdup(FAR const char *s)
 {
   size_t size = strlen(s) + 1;
