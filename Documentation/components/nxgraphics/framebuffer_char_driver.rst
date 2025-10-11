@@ -249,7 +249,7 @@ IOCTL Commands
   in the framebuffer. Some hardware requires that there be 
   such a notification when a change is made to the 
   framebuffer (see, for example, the discussion of LCD drivers 
-  below). This IOTCL command is if ``CONFIG_NX_UPDATE=y`` is 
+  below). This IOCTL command is if ``CONFIG_NX_UPDATE=y`` is 
   defined. It takes a pointer to a read-only instance of 
   ``struct nxgl_rect_s`` that describes the region to be updated:
 
@@ -260,6 +260,9 @@ IOCTL Commands
         struct nxgl_point_s pt1; /* Upper, left-hand corner */
         struct nxgl_point_s pt2; /* Lower, right-hand corner */
     };
+
+* ``FBIOGET_PANINFOCNT``. Retrieves the current number of pan info 
+  structures. This IOCTL command requires the overlay index as a parameter.
 
 ``mmap()``
 ==========
