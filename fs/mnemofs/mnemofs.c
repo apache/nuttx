@@ -57,6 +57,7 @@
 #include <nuttx/crc8.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/mutex.h>
 
 #include <errno.h>
 #include <string.h>

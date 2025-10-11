@@ -41,6 +41,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/board.h>
+#include <nuttx/mutex.h>
 
 #include <nuttx/lcd/lcd_dev.h>
 
