@@ -552,6 +552,17 @@ static int  imx9_ioctl(struct net_driver_s *dev, int cmd,
                        unsigned long arg);
 #endif
 
+/* CAN ID filtering */
+
+#ifdef CONFIG_NETDEV_CAN_FILTER_IOCTL
+static uint32_t imx9_add_filter(struct imx9_driver_s *priv,
+                                 uint8_t filter_type,
+                                 bool ext_id,
+                                 uint32_t filter_id1,
+                                 uint32_t filter_id2);
+static uint8_t imx9_reset_filter(struct imx9_driver_s *priv);
+#endif
+
 /* Initialization */
 
 static int  imx9_initialize(struct imx9_driver_s *priv);
@@ -1645,6 +1656,35 @@ static int imx9_ioctl(struct net_driver_s *dev, int cmd,
         }
         break;
 #endif
+
+#ifdef CONFIG_NETDEV_CAN_FILTER_IOCTL
+      case SIOCACANSTDFILTER: /* Set STD ID CAN filter */
+        {
+          struct imx9_driver_s *priv = (struct imx9_driver_s *)dev;
+          struct can_ioctl_filter_s *req =
+            (struct can_ioctl_filter_s *)((uintptr_t)arg);
+          ret = imx9_add_filter(priv, req->ftype, 0, req->fid1, req->fid2);
+        }
+        break;
+
+      case SIOCACANEXTFILTER: /* Set EXT ID CAN filter */
+        {
+          struct imx9_driver_s *priv = (struct imx9_driver_s *)dev;
+          struct can_ioctl_filter_s *req =
+            (struct can_ioctl_filter_s *)((uintptr_t)arg);
+          ret = imx9_add_filter(priv, req->ftype, 1, req->fid1, req->fid2);
+        }
+        break;
+
+      case SIOCDCANSTDFILTER: /* Reset STD ID CAN filter */
+      case SIOCDCANEXTFILTER: /* Reset EXT ID CAN filter */
+        {
+          struct imx9_driver_s *priv = (struct imx9_driver_s *)dev;
+          ret = imx9_reset_filter(priv);
+        }
+        break;
+#endif
+
       default:
         ret = -ENOTTY;
         break;
@@ -1653,6 +1693,158 @@ static int imx9_ioctl(struct net_driver_s *dev, int cmd,
   return ret;
 }
 #endif /* CONFIG_NETDEV_IOCTL */
+
+/****************************************************************************
+ * Name: imx9_add_filter
+ *
+ * Description:
+ *   Add new MB filter. Currently only support single ID mask filter.
+ *   TODO: add support for multiple ID mask filters
+ *
+ * Input Parameters:
+ *   priv          - Pointer to the private CAN driver state structure
+ *   filter_type   - The type of the filter: mask, range or dual filter
+ *   ext_id        - true: extended id, false: standard id
+ *   filter_id1    - filter id 1 (refer to can_ioctl_filter_s in if.h)
+ *   filter_id2    - filter id 2 (refer to can_ioctl_filter_s in if.h)
+ *
+ * Returned Value:
+ *   return OK on success, negated error number on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_CAN_FILTER_IOCTL
+static uint32_t imx9_add_filter(struct imx9_driver_s *priv,
+                               uint8_t filter_type,
+                               bool ext_id,
+                               uint32_t filter_id1,
+                               uint32_t filter_id2)
+{
+  volatile struct mb_s *mb;
+  uint32_t mbi = 0;
+
+  /* Enter freeze mode */
+
+  if (!imx9_setfreeze(priv->base, true))
+    {
+      canerr("FLEXCAN: freeze fail\n");
+      return ERROR;
+    }
+
+  if (filter_type == CAN_FILTER_MASK)
+    {
+      if (ext_id)
+        {
+          for (mbi = 0; mbi < RXMBCOUNT; mbi++)
+            {
+              /* Set individual mask register */
+
+              putreg32(filter_id2 & CAN_MB_ID_ID_MASK,
+                       priv->base + IMX9_CAN_RXIMR_OFFSET(mbi));
+
+              /* Set the acceptance EXT ID filter in MB */
+
+              mb = flexcan_get_mb(priv, mbi);
+              mb->id = filter_id1 & CAN_MB_ID_ID_MASK;
+            }
+        }
+      else
+        {
+          for (mbi = 0; mbi < RXMBCOUNT; mbi++)
+            {
+              /* Set individual mask register */
+
+              putreg32(((filter_id2 & CAN_SFF_MASK)
+                       << CAN_MB_ID_ID_STD_SHIFT)
+                       & CAN_MB_ID_ID_STD_MASK,
+                       priv->base + IMX9_CAN_RXIMR_OFFSET(mbi));
+
+              /* Set the acceptance STD ID filter in MB */
+
+              mb = flexcan_get_mb(priv, mbi);
+              mb->id = ((filter_id1 & CAN_SFF_MASK)
+                       << CAN_MB_ID_ID_STD_SHIFT)
+                       & CAN_MB_ID_ID_STD_MASK;
+            }
+        }
+    }
+  else if (filter_type == CAN_FILTER_RANGE)
+    {
+      canerr("Range filter type not supported\n");
+      return -EINVAL;
+    }
+  else if (filter_type == CAN_FILTER_DUAL)
+    {
+      canerr("Dual filter type not supported\n");
+      return -EINVAL;
+    }
+  else
+    {
+      canerr("FLEXCAN: invalid filter type\n");
+      return -EINVAL;
+    }
+
+  /* Exit freeze mode */
+
+  if (!imx9_setfreeze(priv->base, false))
+    {
+      canerr("FLEXCAN: unfreeze fail\n");
+      return ERROR;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: imx9_reset_filter
+ *
+ * Description:
+ *   Clear all ID filters in the MBs
+ *
+ * Input Parameters:
+ *   priv - Reference to the private FLEXCAN driver state structure
+ *
+ * Returned Value:
+ *   return OK on success, negated error number on failure
+ *
+ ****************************************************************************/
+
+static uint8_t imx9_reset_filter(struct imx9_driver_s *priv)
+{
+  volatile struct mb_s *mb;
+  uint32_t mbi = 0;
+
+  /* Enter freeze mode */
+
+  if (!imx9_setfreeze(priv->base, true))
+    {
+      canerr("FLEXCAN: freeze fail\n");
+      return ERROR;
+    }
+
+  for (mbi = 0; mbi < RXMBCOUNT; mbi++)
+    {
+      /* Clear individual mask register */
+
+      putreg32(0, priv->base + IMX9_CAN_RXIMR_OFFSET(mbi));
+
+      /* clear the acceptance ID filter */
+
+      mb = flexcan_get_mb(priv, mbi);
+      mb->id = 0;
+    }
+
+  /* Exit freeze mode */
+
+  if (!imx9_setfreeze(priv->base, false))
+    {
+      canerr("FLEXCAN: unfreeze fail\n");
+      return ERROR;
+    }
+
+  return OK;
+}
+#endif /* CONFIG_NETDEV_CAN_FILTER_IOCTL */
 
 /****************************************************************************
  * Function: imx9_init_eccram
