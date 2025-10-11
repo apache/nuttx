@@ -163,3 +163,14 @@ set(TASKING_WARNINGS
     500,507,508,525,526,527,529,544,549,553,560,562,557,558,587,588,589)
 
 add_compile_options(--pass-c=--no-warnings=${TASKING_WARNINGS})
+
+set(NUTTX_FIND_TOOLCHAIN_LIB_DEFINED true)
+function(nuttx_find_toolchain_lib)
+  get_filename_component(TASKING_ROOT_PATH "${CMAKE_C_COMPILER}" DIRECTORY)
+  string(REGEX REPLACE "^/([a-zA-Z])/(.*)$" "\\1:/\\2" TASKING_ROOT_TEMP_PATH
+                       "${TASKING_ROOT_PATH}")
+  string(STRIP "${TASKING_ROOT_TEMP_PATH}" TASKING_ROOT_PATH)
+  if(ARGN)
+    nuttx_add_extra_library(${TASKING_ROOT_PATH}/../lib/tc18/${ARGN})
+  endif()
+endfunction()
