@@ -52,7 +52,7 @@
 #define GPIO_FLASH_LED (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTF | GPIO_PIN0)
 #define GPIO_ERROR_LED (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTF | GPIO_PIN1)
 
-/* LCD pin mapping (see boards/sure-pic32mx/README.txt)
+/* LCD pin mapping
  *
  *  --------------------- ---------- ----------------------------------
  *  PIC32                  Sure JP1   Sure Signal Description

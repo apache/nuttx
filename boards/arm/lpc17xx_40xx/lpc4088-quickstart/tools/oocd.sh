@@ -1,7 +1,6 @@
 #!/bin/sh
 #
-# See boards/lpc4088-quickstart/README.txt for information about
-# this file.
+# See board documentation page for information about this file.
 
 TOPDIR=$1
 USAGE="$0 <TOPDIR> [-d]"
