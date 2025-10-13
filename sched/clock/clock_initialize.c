@@ -376,11 +376,7 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
       clock_t diff_ticks = SEC2TICK(rtc_diff->tv_sec) +
                            NSEC2TICK(rtc_diff->tv_nsec);
 
-#ifdef CONFIG_SYSTEM_TIME64
-      atomic64_fetch_add((FAR atomic64_t *)&g_system_ticks, diff_ticks);
-#else
-      atomic_fetch_add((FAR atomic_t *)&g_system_ticks, diff_ticks);
-#endif
+      clock_increase_sched_ticks(diff_ticks);
     }
 }
 #endif
