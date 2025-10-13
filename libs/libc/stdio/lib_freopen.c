@@ -113,6 +113,11 @@ FAR FILE *freopen(FAR const char *path, FAR const char *mode,
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
       lib_rdflush_unlocked(stream);
 #endif
+#if CONFIG_NUNGET_CHARS > 0
+      /* Clear any characters pushed back onto the stream */
+
+      stream->fs_nungotten = 0;
+#endif
 
       funlockfile(stream);
 
