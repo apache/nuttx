@@ -131,7 +131,10 @@ FAR FILE *fdopen(int fd, FAR const char *mode)
 #  ifdef CONFIG_STDIO_LINEBUFFER
   /* Setup buffer flags */
 
-  filep->fs_flags   |= __FS_FLAG_LBF; /* Line buffering */
+  if ((oflags & O_WRONLY) != 0 && isatty(fd))
+    {
+      filep->fs_flags |= __FS_FLAG_LBF; /* Enable LBF only for terminals */
+    }
 
 #  endif /* CONFIG_STDIO_LINEBUFFER */
 #endif /* !CONFIG_STDIO_DISABLE_BUFFERING && CONFIG_STDIO_BUFFER_SIZE > 0 */
