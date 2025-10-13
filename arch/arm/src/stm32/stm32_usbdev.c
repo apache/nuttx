@@ -48,6 +48,7 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include <nuttx/irq.h>
+#include <arch/board/board.h>
 
 #include "arm_internal.h"
 #include "stm32.h"
