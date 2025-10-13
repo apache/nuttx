@@ -595,6 +595,11 @@ struct audio_enc_sbc_s
   uint8_t bitpool;
 };
 
+struct audio_enc_lc3_s
+{
+  float frame_duration;
+};
+
 struct audio_enc_generic_s
 {
   uint32_t bw;
@@ -641,6 +646,11 @@ struct audio_dec_ape_s
   uint32_t seek_table_present;
 };
 
+struct audio_dec_lc3_s
+{
+  float frame_duration;
+};
+
 union audio_codec_options_u
 {
   struct audio_enc_wma_s wma;
@@ -648,11 +658,13 @@ union audio_codec_options_u
   struct audio_enc_real_s real;
   struct audio_enc_flac_s flac;
   struct audio_enc_sbc_s sbc;
+  struct audio_enc_lc3_s lc3;
   struct audio_enc_generic_s generic;
   struct audio_dec_flac_s flac_d;
   struct audio_dec_wma_s wma_d;
   struct audio_dec_alac_s alac_d;
   struct audio_dec_ape_s ape_d;
+  struct audio_dec_lc3_s lc3_d;
 };
 
 struct audio_codec_s
