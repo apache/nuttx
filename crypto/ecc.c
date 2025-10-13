@@ -1505,6 +1505,8 @@ int ecc_make_key(uint8_t publickey[ECC_BYTES + 1],
   eccpoint_t l_public;
   unsigned l_tries = 0;
 
+  memset(&l_public, 0, sizeof(eccpoint_t));
+
   do
     {
       if (l_tries++ >= MAX_TRIES)
@@ -1590,6 +1592,9 @@ int ecdh_shared_secret(const uint8_t publickey[ECC_BYTES + 1],
   uint64_t l_private[NUM_ECC_DIGITS];
   uint64_t l_random[NUM_ECC_DIGITS];
 
+  memset(&l_product, 0, sizeof(eccpoint_t));
+  memset(&l_public, 0, sizeof(eccpoint_t));
+
   arc4random_buf(l_random, NUM_ECC_DIGITS);
   ecc_point_decompress(&l_public, publickey);
   ecc_bytes2native(l_private, privatekey);
@@ -1610,6 +1615,8 @@ int ecdsa_sign(const uint8_t privatekey[ECC_BYTES],
   uint64_t l_s[NUM_ECC_DIGITS];
   unsigned l_tries = 0;
   eccpoint_t p;
+
+  memset(&p, 0, sizeof(eccpoint_t));
 
   do
     {
