@@ -394,12 +394,14 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
        * MTU.  We provide no support for fragmenting forwarded packets.
        */
 
+#ifndef CONFIG_NET_IPFRAG
       if (NET_LL_HDRLEN(fwddev) + dev->d_len > NETDEV_PKTSIZE(fwddev))
         {
           nwarn("WARNING: Packet > MTU... Dropping\n");
           ret = -EFBIG;
           goto errout;
         }
+#endif
 
       /* Get a pre-allocated forwarding structure,  This structure will be
        * completely zeroed when we receive it.
