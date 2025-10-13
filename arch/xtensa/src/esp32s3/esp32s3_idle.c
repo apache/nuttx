@@ -90,6 +90,18 @@ static void up_idlepm(void)
   static enum pm_state_e oldstate = PM_NORMAL;
   enum pm_state_e newstate;
   int ret;
+  int count;
+
+  count = pm_staycount(PM_IDLE_DOMAIN, PM_NORMAL);
+  if (oldstate != PM_NORMAL && count == 0)
+    {
+      pm_stay(PM_IDLE_DOMAIN, PM_NORMAL);
+
+      /* Keep working in normal stage */
+
+      pm_changestate(PM_IDLE_DOMAIN, PM_NORMAL);
+      newstate = PM_NORMAL;
+    }
 
   /* Decide, which power saving level can be obtained */
 
