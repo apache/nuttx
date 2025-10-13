@@ -80,10 +80,6 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
   else
     {
-      /* Update scheduler parameters */
-
-      nxsched_switch_context(rtcb, tcb);
-
       /* Then switch contexts */
 
       tricore_switchcontext(&rtcb->xcp.regs, tcb->xcp.regs);

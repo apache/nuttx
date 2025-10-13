@@ -56,10 +56,17 @@
 
 void tricore_svcall(volatile void *trap)
 {
+  struct tcb_s *running_task;
+  struct tcb_s *tcb;
+  int cpu = this_cpu();
+
   uintptr_t *regs;
   uint32_t cmd;
 
   regs = (uintptr_t *)__mfcr(CPU_PCXI);
+
+  running_task = g_running_tasks[cpu];
+  tcb = this_task();
 
   /* DSYNC instruction should be executed immediately prior to the MTCR */
 
@@ -115,12 +122,16 @@ void tricore_svcall(volatile void *trap)
 
   if (regs != up_current_regs())
     {
+      /* Update scheduler parameters */
+
+      nxsched_switch_context(running_task, tcb);
+
       /* Record the new "running" task when context switch occurred.
        * g_running_tasks[] is only used by assertion logic for reporting
        * crashes.
        */
 
-      g_running_tasks[this_cpu()] = this_task();
+      g_running_tasks[cpu] = this_task();
 
       regs[REG_UPCXI] = (uintptr_t)up_current_regs();
 
