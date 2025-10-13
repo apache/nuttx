@@ -74,7 +74,7 @@ if MM_KASAN_INSTRUMENT
 
 config MM_KASAN_REGIONS
 	int "Kasan region count"
-	default 16
+	default 64
 
 config MM_KASAN_WATCHPOINT
 	int "Kasan watchpoint maximum number"
