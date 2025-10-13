@@ -38,6 +38,9 @@
 #include <nuttx/timers/arch_alarm.h>
 #include <nuttx/timers/oneshot.h>
 
+#include <sys/param.h>
+
+#include "gic.h"
 #include "arm_timer.h"
 #include "arm_internal.h"
 
@@ -151,7 +154,7 @@ static void arm_oneshot_start_absolute(struct oneshot_lowerhalf_s *lower,
 static void arm_oneshot_start(struct oneshot_lowerhalf_s *lower,
                               clkcnt_t delta)
 {
-  arm_timer_phy_set_relative(delta <= UINT32_MAX ? delta : UINT32_MAX);
+  arm_timer_phy_set_relative(MIN(UINT32_MAX, delta));
 }
 
 static void arm_oneshot_cancel(struct oneshot_lowerhalf_s *lower)
