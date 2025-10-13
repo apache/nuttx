@@ -52,6 +52,30 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: avr_color_intstack
+ *
+ * Description:
+ *   Set the interrupt stack to a value so that later we can determine how
+ *   much stack space was used by interrupt handling logic
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+void avr_color_intstack(void)
+{
+  uint8_t *ptr = g_intstackalloc;
+  ssize_t size;
+
+  for (size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
+       size > 0;
+       size -= sizeof(uint8_t))
+    {
+      *ptr++ = STACK_COLOR;
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: avr_stack_check
  *
  * Description:

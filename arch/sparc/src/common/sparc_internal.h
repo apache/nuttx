@@ -250,5 +250,12 @@ size_t sparc_stack_check(void *stackbase, size_t nbytes);
 void sparc_stack_color(void *stackbase, size_t nbytes);
 #endif
 
+#if defined(CONFIG_STACK_COLORATION) && \
+    defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 7
+void sparc_color_intstack(void);
+#else
+#  define sparc_color_intstack()
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif  /* __ARCH_SPARC_SRC_COMMON_UP_INTERNAL_H */

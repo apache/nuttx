@@ -433,7 +433,7 @@ static inline void up_idtinit(void)
 }
 
 /****************************************************************************
- * Name: arm_color_intstack
+ * Name: x86_64_color_intstack
  *
  * Description:
  *   Set the interrupt stack to a value so that later we can determine how
@@ -504,10 +504,6 @@ void up_irqinitialize(void)
 
   x86_64_cpu_tss_init(cpu);
 
-  /* Colorize the interrupt stack */
-
-  x86_64_color_intstack();
-
   /* Initialize the APIC */
 
   up_apic_init();
@@ -536,6 +532,7 @@ void up_irqinitialize(void)
   /* And finally, enable interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
+  x86_64_color_intstack();
   up_irq_restore(X86_64_RFLAGS_IF);
 #endif
 

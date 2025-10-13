@@ -157,6 +157,7 @@ void up_irqinitialize(void)
 
   /* And finally, enable interrupts globally */
 
+  arm_color_intstack();
   up_irq_enable();
 #endif
 }

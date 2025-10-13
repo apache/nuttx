@@ -364,6 +364,13 @@ size_t riscv_stack_check(uintptr_t alloc, size_t size);
 void riscv_stack_color(void *stackbase, size_t nbytes);
 #endif
 
+#if defined(CONFIG_STACK_COLORATION) && \
+    defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 15
+void riscv_color_intstack(void);
+#else
+#  define riscv_color_intstack()
+#endif
+
 #ifdef CONFIG_SMP
 void riscv_cpu_boot(int cpu);
 int riscv_smp_call_handler(int irq, void *c, void *arg);

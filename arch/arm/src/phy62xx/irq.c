@@ -345,6 +345,7 @@ void up_irqinitialize(void)
 
   /* svc(SVC_CALL_WR); */
 
+  arm_color_intstack();
   up_irq_enable();
 
 #endif

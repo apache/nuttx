@@ -90,33 +90,6 @@
 volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_color_intstack
- *
- * Description:
- *   Set the interrupt stack to a value so that later we can determine how
- *   much stack space was used by interrupt handling logic
- *
- ****************************************************************************/
-
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 7
-static inline void up_color_intstack(void)
-{
-  int cpu;
-
-  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
-    {
-      sparc_stack_color((void *)up_get_intstackbase(cpu), INTSTACK_SIZE);
-    }
-}
-#else
-#  define up_color_intstack()
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -139,10 +112,6 @@ static inline void up_color_intstack(void)
 
 void up_initialize(void)
 {
-  /* Colorize the interrupt stack */
-
-  up_color_intstack();
-
   /* Add any extra memory fragments to the memory manager */
 
   sparc_addregion();

@@ -116,6 +116,7 @@ void up_irqinitialize(void)
           getreg32(0x98800020));
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
+  arm_color_intstack();
   up_irq_restore(PSR_MODE_SYS | PSR_F_BIT);
 #endif
 }

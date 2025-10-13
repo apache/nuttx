@@ -145,6 +145,7 @@ void up_irqinitialize(void)
   /* And finally, enable cpu interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
+  sparc_color_intstack();
   up_irq_enable();
 #endif
 }

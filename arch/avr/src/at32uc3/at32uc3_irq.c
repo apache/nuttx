@@ -221,6 +221,7 @@ void up_irqinitialize(void)
   /* And finally, enable interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
+  avr_color_intstack();
   up_irq_restore(0);
 #endif
 }
