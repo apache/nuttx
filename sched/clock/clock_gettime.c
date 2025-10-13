@@ -88,10 +88,18 @@ static clock_t clock_process_runtime(FAR struct tcb_s *tcb)
 
 void nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp)
 {
-  if (clock_id == CLOCK_MONOTONIC || clock_id == CLOCK_BOOTTIME)
+  if (clock_id == CLOCK_MONOTONIC)
     {
       /* The the time elapsed since the timer was initialized at power on
-       * reset.
+       * reset, excluding the time that the system is suspended.
+       */
+
+      clock_ticks2time(tp, clock_get_sched_ticks());
+    }
+  else if (clock_id == CLOCK_BOOTTIME)
+    {
+      /* The the time elapsed since the timer was initialized at power on
+       * reset, including the time that the system is suspended..
        */
 
       clock_systime_timespec(tp);
