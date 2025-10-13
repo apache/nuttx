@@ -33,6 +33,8 @@
 #include <arch/barriers.h>
 #include <arch/irq.h>
 
+#include <sys/param.h>
+
 #include "arm_timer.h"
 #include "gic.h"
 
@@ -102,7 +104,7 @@ static int arm_timer_interrupt(int irq, void *regs, void *arg)
 
 static clkcnt_t arm_oneshot_max_delay(struct oneshot_lowerhalf_s *lower)
 {
-  return UINT32_MAX;
+  return UINT64_MAX;
 }
 
 static clkcnt_t arm_oneshot_current(struct oneshot_lowerhalf_s *lower)
@@ -121,7 +123,7 @@ static void arm_oneshot_start_absolute(struct oneshot_lowerhalf_s *lower,
 static void arm_oneshot_start(struct oneshot_lowerhalf_s *lower,
                               clkcnt_t delta)
 {
-  arm_timer_phy_set_relative(delta);
+  arm_timer_phy_set_relative(MIN(UINT32_MAX, delta));
 }
 
 static void arm_oneshot_cancel(struct oneshot_lowerhalf_s *lower)
