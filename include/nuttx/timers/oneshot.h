@@ -508,7 +508,10 @@ int oneshot_start_absolute(FAR struct oneshot_lowerhalf_s *lower,
       up_irq_restore(flags);
     }
 #else
-  struct timespec curr;
+  struct timespec curr =
+  {
+    0
+  };
 
   /* Some timer drivers may not have current() function.
    * Since only arch_alarm uses the function, it should be OK.
@@ -534,7 +537,10 @@ int oneshot_tick_max_delay(FAR struct oneshot_lowerhalf_s *lower,
   clkcnt_t max = lower->ops->max_delay(lower);
   *tick = clkcnt_max_tick(max, lower->frequency);
 #else
-  struct timespec ts;
+  struct timespec ts =
+  {
+    0
+  };
 
   ret = lower->ops->max_delay(lower, &ts);
   *tick = clock_time2ticks(&ts);
@@ -601,7 +607,10 @@ int oneshot_tick_current(FAR struct oneshot_lowerhalf_s *lower,
   cnt   -= sec * freq;
   *tick  = sec * TICK_PER_SEC + oneshot_delta_cnt2tick(lower, cnt);
 #else
-  struct timespec ts;
+  struct timespec ts =
+  {
+    0
+  };
 
   /* Some timer drivers may not have current() function.
    * Since only arch_alarm uses the function, it should be OK.
@@ -667,7 +676,10 @@ int oneshot_tick_cancel(FAR struct oneshot_lowerhalf_s *lower,
   lower->ops->cancel(lower);
   oneshot_tick_current(lower, tick);
 #else
-  struct timespec ts;
+  struct timespec ts =
+  {
+    0
+  };
 
   ret = lower->ops->cancel(lower, &ts);
 
