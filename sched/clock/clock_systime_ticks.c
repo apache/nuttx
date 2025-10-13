@@ -88,31 +88,7 @@ clock_t clock_systime_ticks(void)
 
   up_timer_gettick(&ticks);
   return ticks;
-#elif defined(CONFIG_SYSTEM_TIME64)
-  clock_t sample;
-  clock_t verify;
-
-  /* 64-bit accesses are not atomic on most architectures.  The following
-   * loop samples the 64-bit timer twice and loops in the rare event that
-   * there was 32-bit rollover between samples.
-   *
-   * If there is no 32-bit rollover, then:
-   *
-   *  - The MS 32-bits of each sample will be the same, and
-   *  - The LS 32-bits of the second sample will be greater than or equal
-   *    to the LS 32-bits for the first sample.
-   */
-
-  do
-    {
-      verify = g_system_ticks;
-      sample = g_system_ticks;
-    }
-  while ((sample &  TIMER_MASK32)  < (verify &  TIMER_MASK32) ||
-         (sample & ~TIMER_MASK32) != (verify & ~TIMER_MASK32));
-
-  return sample;
 #else
-  return g_system_ticks;
+  return clock_get_sched_ticks();
 #endif
 }
