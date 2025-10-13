@@ -127,7 +127,11 @@ FAR FILE *fdopen(int fd, FAR const char *mode)
   filep->fs_bufpos   = filep->fs_bufstart;
   filep->fs_bufread  = filep->fs_bufstart;
   filep->fs_flags    = __FS_FLAG_UBF; /* Fake setvbuf and fclose */
+#if CONFIG_NUNGET_CHARS > 0
+  /* clear any characters pushed back onto the stream */
 
+  filep->fs_nungotten = 0;
+#endif
 #  ifdef CONFIG_STDIO_LINEBUFFER
   /* Setup buffer flags */
 
