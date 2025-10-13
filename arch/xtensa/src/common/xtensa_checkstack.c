@@ -49,6 +49,27 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: xtensa_color_intstack
+ *
+ * Description:
+ *   Set the interrupt stack to a value so that later we can determine how
+ *   much stack space was used by interrupt handling logic
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 15
+void xtensa_color_intstack(void)
+{
+  int cpu;
+
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
+      xtensa_stack_color((void *)up_get_intstackbase(cpu), INTSTACK_SIZE);
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: xtensa_stack_check
  *
  * Description:

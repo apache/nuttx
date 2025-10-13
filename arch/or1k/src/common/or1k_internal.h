@@ -325,6 +325,13 @@ size_t or1k_stack_check(uintptr_t alloc, size_t size);
 void or1k_stack_color(void *stackbase, size_t nbytes);
 #endif
 
+#if defined(CONFIG_STACK_COLORATION) && \
+    defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+void or1k_color_intstack(void);
+#else
+#  define or1k_color_intstack()
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

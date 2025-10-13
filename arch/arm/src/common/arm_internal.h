@@ -479,6 +479,13 @@ size_t arm_stack_check(void *stackbase, size_t nbytes);
 void arm_stack_color(void *stackbase, size_t nbytes);
 #endif
 
+#if defined(CONFIG_STACK_COLORATION) &&\
+    defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+void arm_color_intstack(void);
+#else
+#  define arm_color_intstack()
+#endif
+
 #ifdef CONFIG_ARCH_TRUSTZONE_SECURE
 int arm_gen_nonsecurefault(int irq, uint32_t *regs);
 #else

@@ -37,36 +37,6 @@
 volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_color_intstack
- *
- * Description:
- *   Set the interrupt stack to a value so that later we can determine how
- *   much stack space was used by interrupt handling logic
- *
- ****************************************************************************/
-
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 15
-static inline void up_color_intstack(void)
-{
-  uint32_t *ptr = (uint32_t *)g_intstackalloc;
-  ssize_t size;
-
-  for (size = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
-       size > 0;
-       size -= sizeof(uint32_t))
-    {
-      *ptr++ = INTSTACK_COLOR;
-    }
-}
-#else
-#  define up_color_intstack()
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -89,10 +59,6 @@ static inline void up_color_intstack(void)
 
 void up_initialize(void)
 {
-  /* Colorize the interrupt stack */
-
-  up_color_intstack();
-
   /* Initialize the serial device driver */
 
 #ifdef USE_SERIALDRIVER

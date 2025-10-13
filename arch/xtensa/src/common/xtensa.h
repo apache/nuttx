@@ -334,5 +334,12 @@ size_t xtensa_stack_check(uintptr_t alloc, size_t size);
 void xtensa_stack_color(void *stackbase, size_t nbytes);
 #endif
 
+#if defined(CONFIG_STACK_COLORATION) && \
+    defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 15
+void xtensa_color_intstack(void);
+#else
+#  define xtensa_color_intstack()
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_XTENSA_SRC_COMMON_XTENSA_H */
