@@ -60,12 +60,8 @@ struct vsock_virtio_priv_s
   uint64_t                  host_cid;
 
   /* Rx buffer management
-   * rx_buf_list: rx free buffer list
-   * rx_buf_num : rx free buffer number in rx_buf_list
    */
 
-  struct list_node          rx_buf_list;
-  int                       rx_buf_num;
   FAR void                 *rx_buf_alloc;
 
   /* Tx buffer management
@@ -222,23 +218,6 @@ static int vsock_virtio_alloc_pkt(FAR struct vsock_transport_s *t,
 }
 
 /****************************************************************************
- * Name: vsock_virtio_free_rx_pkt
- ****************************************************************************/
-
-static void vsock_virtio_free_rx_pkt(FAR struct vsock_virtio_priv_s *priv,
-                                     FAR struct vsock_pkt_s *pkt)
-{
-  size_t i;
-
-  for (i = 0; i < pkt->vbcnt; i++)
-    {
-      list_add_head(&priv->rx_buf_list,
-                    (FAR struct list_node *)pkt->vb[i].buf);
-      priv->rx_buf_num++;
-    }
-}
-
-/****************************************************************************
  * Name: vsock_virtio_send_pkt_work
  ****************************************************************************/
 
@@ -271,45 +250,40 @@ static ssize_t vsock_virtio_send_pkt(FAR struct vsock_transport_s *t,
 
 /****************************************************************************
  * Name: vsock_virtio_rx_fill
- *
- * Description:
- *   Fill the rx buffer to the RX virtqueue.
- *
  ****************************************************************************/
 
-static void vsock_virtio_rx_fill(FAR struct vsock_virtio_priv_s *priv)
+static int vsock_virtio_rx_fill(FAR struct vsock_virtio_priv_s *priv)
 {
   FAR struct virtqueue *vq;
+  struct virtqueue_buf vb;
+  size_t size;
+  int num;
   int ret;
+  int i;
 
   vq = priv->vdev->vrings_info[VSOCK_VQ_RX].vq;
-
-  for (; ; )
+  num = MIN(vq->vq_nentries, CONFIG_NET_VSOCK_VQ_BUFCOUNT);
+  size = VIRTIO_VSOCK_HDR_LEN + CONFIG_NET_VSOCK_PKT_BUFSIZE;
+  priv->rx_buf_alloc = virtio_malloc_buf(priv->vdev, num * size, 16);
+  if (priv->rx_buf_alloc == NULL)
     {
-      struct virtqueue_buf vb;
-      FAR void *buf;
+      return -ENOMEM;
+    }
 
-      buf = list_remove_head(&priv->rx_buf_list);
-      if (buf == NULL)
-        {
-          break;
-        }
-
-      vb.buf = buf;
+  for (i = 0; i < num; i++)
+    {
+      vb.buf = priv->rx_buf_alloc + i * size;
       vb.len = VIRTIO_VSOCK_HDR_LEN + CONFIG_NET_VSOCK_PKT_BUFSIZE;
 
-      ret = virtqueue_add_buffer(vq, &vb, 0, 1, buf);
+      ret = virtqueue_add_buffer(vq, &vb, 0, 1, vb.buf);
       if (ret < 0)
         {
           vrterr("Add rx buffer failed, ret=%d\n", ret);
-          list_add_head(&priv->rx_buf_list, (FAR struct list_node *)buf);
-          break;
+          return ret;
         }
-
-      priv->rx_buf_num--;
     }
 
-  virtqueue_kick(vq);
+  return 0;
 }
 
 /****************************************************************************
@@ -320,7 +294,10 @@ static void vsock_virtio_rx_work(FAR void *arg)
 {
   FAR struct vsock_virtio_priv_s *priv = arg;
   FAR struct virtqueue *vq;
+  struct virtqueue_buf vb;
   struct vsock_pkt_s pkt;
+  bool returned = false;
+  size_t i;
   int ret;
 
   vq = priv->vdev->vrings_info[VSOCK_VQ_RX].vq;
@@ -340,12 +317,27 @@ static void vsock_virtio_rx_work(FAR void *arg)
           pkt.vboff = VIRTIO_VSOCK_HDR_LEN;
           pkt.vbcnt = ret;
           vsock_recv_pkt(&priv->t, &pkt);
-          vsock_virtio_free_rx_pkt(priv, &pkt);
+          for (i = 0; i < pkt.vbcnt; i++)
+            {
+              vb.buf = pkt.vb[i].buf;
+              vb.len = VIRTIO_VSOCK_HDR_LEN + CONFIG_NET_VSOCK_PKT_BUFSIZE;
+              ret = virtqueue_add_buffer(vq, &vb, 0, 1, pkt.vb[i].buf);
+              if (ret < 0)
+                {
+                  vrterr("Add rx buffer failed, ret=%d\n", ret);
+                  break;
+                }
+            }
+
+          returned = true;
         }
     }
   while (virtqueue_enable_cb(vq));
 
-  vsock_virtio_rx_fill(priv);
+  if (returned)
+    {
+      virtqueue_kick(vq);
+    }
 }
 
 /****************************************************************************
@@ -427,6 +419,7 @@ static void vsock_virtio_tx_done(struct virtqueue *vq)
 
 static int vsock_virtio_tx_buf_init(FAR struct vsock_virtio_priv_s *priv)
 {
+  FAR struct virtqueue *vq;
   size_t size;
   int i;
 
@@ -434,7 +427,9 @@ static int vsock_virtio_tx_buf_init(FAR struct vsock_virtio_priv_s *priv)
   list_initialize(&priv->tx_buf_list);
   nxsem_init(&priv->tx_sem, 0, 0);
 
+  vq = priv->vdev->vrings_info[VSOCK_VQ_TX].vq;
   size = VIRTIO_VSOCK_HDR_LEN + CONFIG_NET_VSOCK_PKT_BUFSIZE;
+  priv->tx_buf_num = MIN(vq->vq_nentries, CONFIG_NET_VSOCK_VQ_BUFCOUNT);
   priv->tx_buf_alloc = virtio_malloc_buf(priv->vdev,
                                          size * priv->tx_buf_num, 16);
   if (priv->tx_buf_alloc == NULL)
@@ -446,34 +441,6 @@ static int vsock_virtio_tx_buf_init(FAR struct vsock_virtio_priv_s *priv)
     {
       list_add_tail(&priv->tx_buf_list,
                     (FAR struct list_node *)(priv->tx_buf_alloc + i * size));
-    }
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: vsock_virtio_rx_buf_init
- ****************************************************************************/
-
-static int vsock_virtio_rx_buf_init(FAR struct vsock_virtio_priv_s *priv)
-{
-  size_t size;
-  int i;
-
-  list_initialize(&priv->rx_buf_list);
-
-  size = VIRTIO_VSOCK_HDR_LEN + CONFIG_NET_VSOCK_PKT_BUFSIZE;
-  priv->rx_buf_alloc = virtio_malloc_buf(priv->vdev,
-                                         priv->rx_buf_num * size, 16);
-  if (priv->rx_buf_alloc == NULL)
-    {
-      return -ENOMEM;
-    }
-
-  for (i = 0; i < priv->rx_buf_num; i++)
-    {
-      list_add_tail(&priv->rx_buf_list,
-                   (FAR struct list_node *)(priv->rx_buf_alloc + i * size));
     }
 
   return 0;
@@ -528,13 +495,6 @@ static int vsock_virtio_init(FAR struct vsock_virtio_priv_s *priv,
       priv->host_cid = VMADDR_CID_HOST;
     }
 
-  /* Get tx/tx vq size */
-
-  priv->tx_buf_num = MIN(vdev->vrings_info[VSOCK_VQ_TX].vq->vq_nentries,
-                         CONFIG_NET_VSOCK_VQ_BUFCOUNT);
-  priv->rx_buf_num = MIN(vdev->vrings_info[VSOCK_VQ_RX].vq->vq_nentries,
-                         CONFIG_NET_VSOCK_VQ_BUFCOUNT);
-
   virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_DRIVER_OK);
 
   /* Init the tx buffer list */
@@ -548,14 +508,12 @@ static int vsock_virtio_init(FAR struct vsock_virtio_priv_s *priv,
 
   /* Fill the rx buffer list and virtqueue */
 
-  ret = vsock_virtio_rx_buf_init(priv);
+  ret = vsock_virtio_rx_fill(priv);
   if (ret < 0)
     {
-      vrterr("vsock_virtio_rx_buf_init failed, ret=%d\n", ret);
+      vrterr("vsock_virtio_rx_fill failed, ret=%d\n", ret);
       goto err_with_rx;
     }
-
-  vsock_virtio_rx_fill(priv);
 
   /* Enable the virtqueue interrupt */
 
