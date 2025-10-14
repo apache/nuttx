@@ -127,32 +127,31 @@ static int safety_handler(FAR void *arg, FAR void *result,
   FAR struct safety_priv_s *priv = arg;
   FAR struct safety_user_s *user;
   irqstate_t flags;
+  int ret = -EINVAL;
 
-  if (offset + len > priv->result_size)
+  if (offset + len <= priv->result_size)
     {
-      return -EINVAL;
-    }
+      flags = spin_lock_irqsave_nopreempt(&priv->spinlock);
 
-  flags = spin_lock_irqsave(&priv->spinlock);
-  sched_lock();
+      priv->has_data = true;
+      memcpy(priv->data + offset, result, len);
 
-  priv->has_data = true;
-  memcpy(priv->data + offset, result, len);
+      /* Notify all active users */
 
-  /* Notify all active users */
-
-  list_for_every_entry(&priv->users, user, struct safety_user_s, node)
-    {
-      user->has_data = true;
-      if (user->fds)
+      list_for_every_entry(&priv->users, user, struct safety_user_s, node)
         {
-          poll_notify(&user->fds, 1, POLLIN);
+          user->has_data = true;
+          if (user->fds)
+            {
+              poll_notify(&user->fds, 1, POLLIN);
+            }
         }
+
+      spin_unlock_irqrestore_nopreempt(&priv->spinlock, flags);
+      ret = OK;
     }
 
-  sched_unlock();
-  spin_unlock_irqrestore(&priv->spinlock, flags);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -171,37 +170,40 @@ static int safety_open(FAR struct file *filep)
   /* Allocate new user context */
 
   user = kmm_zalloc(sizeof(struct safety_user_s));
-  if (user == NULL)
+  if (user != NULL)
     {
-      return -ENOMEM;
-    }
+      nxmutex_lock(&priv->mutex);
 
-  nxmutex_lock(&priv->mutex);
+      user->has_data = priv->has_data;
 
-  user->has_data = priv->has_data;
+      /* Initialize module on first open */
 
-  /* Initialize module on first open */
-
-  if (list_is_empty(&priv->users))
-    {
-      if (lower->ops->setup != NULL)
+      if (list_is_empty(&priv->users))
         {
-          ret = lower->ops->setup(lower);
-          if (ret < 0)
+          if (lower->ops->setup != NULL)
             {
-              kmm_free(user);
-              goto errout;
+              ret = lower->ops->setup(lower);
+              if (ret < 0)
+                {
+                  kmm_free(user);
+                  nxmutex_unlock(&priv->mutex);
+                }
             }
         }
+
+      if (ret >= 0)
+        {
+          flags = spin_lock_irqsave(&priv->spinlock);
+          list_add_tail(&priv->users, &user->node);
+          filep->f_priv = user;
+          spin_unlock_irqrestore(&priv->spinlock, flags);
+        }
+    }
+  else
+    {
+      ret = -ENOMEM;
     }
 
-  flags = spin_lock_irqsave(&priv->spinlock);
-  list_add_tail(&priv->users, &user->node);
-  filep->f_priv = user;
-  spin_unlock_irqrestore(&priv->spinlock, flags);
-
-errout:
-  nxmutex_unlock(&priv->mutex);
   return ret;
 }
 
@@ -274,27 +276,29 @@ static ssize_t safety_read(FAR struct file *filep, FAR char *buffer,
   FAR struct safety_priv_s *priv  = inode->i_private;
   FAR struct safety_user_s *user  = filep->f_priv;
   irqstate_t flags;
+  ssize_t ret = -EINVAL;
 
-  if (len != priv->result_size || buffer == NULL)
+  if (len == priv->result_size && buffer != NULL)
     {
-      return -EINVAL;
+      flags = spin_lock_irqsave(&priv->spinlock);
+
+      if (priv->has_data)
+        {
+          /* Copy result data to user buffer */
+
+          memcpy(buffer, priv->data, priv->result_size);
+          user->has_data = false;
+          ret = priv->result_size;
+        }
+      else
+        {
+          ret = -EAGAIN;
+        }
+
+        spin_unlock_irqrestore(&priv->spinlock, flags);
     }
 
-  flags = spin_lock_irqsave(&priv->spinlock);
-
-  if (!priv->has_data)
-    {
-      spin_unlock_irqrestore(&priv->spinlock, flags);
-      return -EAGAIN;
-    }
-
-  /* Copy result data to user buffer */
-
-  memcpy(buffer, priv->data, priv->result_size);
-  user->has_data = false;
-
-  spin_unlock_irqrestore(&priv->spinlock, flags);
-  return priv->result_size;
+  return ret;
 }
 
 /****************************************************************************
@@ -383,9 +387,9 @@ static int safety_poll(FAR struct file *filep, FAR struct pollfd *fds,
   FAR struct safety_priv_s *priv  = inode->i_private;
   FAR struct safety_user_s *user  = filep->f_priv;
   irqstate_t flags;
+  int ret = OK;
 
-  flags = spin_lock_irqsave(&priv->spinlock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&priv->spinlock);
 
   if (setup)
     {
@@ -393,19 +397,19 @@ static int safety_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (user->fds)
         {
-          sched_unlock();
-          spin_unlock_irqrestore(&priv->spinlock, flags);
-          return -EBUSY;
+          ret = -EBUSY;
         }
-
-      user->fds = fds;
-      fds->priv = user;
-
-      /* Check for data already available */
-
-      if (user->has_data)
+      else
         {
-          poll_notify(&fds, 1, POLLIN);
+          user->fds = fds;
+          fds->priv = user;
+
+          /* Check for data already available */
+
+          if (user->has_data)
+            {
+              poll_notify(&fds, 1, POLLIN);
+            }
         }
     }
   else if (fds->priv == user)
@@ -416,9 +420,9 @@ static int safety_poll(FAR struct file *filep, FAR struct pollfd *fds,
       fds->priv = NULL;
     }
 
-  sched_unlock();
-  spin_unlock_irqrestore(&priv->spinlock, flags);
-  return OK;
+  spin_unlock_irqrestore_nopreempt(&priv->spinlock, flags);
+
+  return ret;
 }
 
 /****************************************************************************
@@ -435,56 +439,61 @@ int safety_register(FAR struct safety_lowerhalf_s *lower,
 {
   FAR struct safety_priv_s *priv;
   char path[32];
-  int ret;
+  int ret = OK;
 
   /* Parameter check */
 
-  if (lower == NULL || lower->ops == NULL ||
-      module >= SAFETY_MODULE_MAX)
+  if (lower != NULL && lower->ops != NULL &&
+      module < SAFETY_MODULE_MAX)
     {
-      return -EINVAL;
-    }
-
-  priv = kmm_zalloc(sizeof(struct safety_priv_s) + result_size);
-  if (priv == NULL)
-    {
-      return -ENOMEM;
-    }
-
-  /* Initialize private data */
-
-  spin_lock_init(&priv->spinlock);
-  nxmutex_init(&priv->mutex);
-  list_initialize(&priv->users);
-  priv->lower = lower;
-  priv->result_size = result_size;
-
-  /* Set the fault handler */
-
-  if (lower->ops->set_callback)
-    {
-      ret = lower->ops->set_callback(lower, safety_handler, priv);
-      if (ret < 0)
+      priv = kmm_zalloc(sizeof(struct safety_priv_s) + result_size);
+      if (priv != NULL)
         {
-          saerr("set_callback failed!\n");
-          goto errout_with_priv;
+          /* Initialize private data */
+
+          spin_lock_init(&priv->spinlock);
+          nxmutex_init(&priv->mutex);
+          list_initialize(&priv->users);
+          priv->lower = lower;
+          priv->result_size = result_size;
+
+          /* Set the fault handler */
+
+          if (lower->ops->set_callback)
+            {
+              ret = lower->ops->set_callback(lower, safety_handler, priv);
+              if (ret < 0)
+                {
+                  saerr("set_callback failed!\n");
+                  nxmutex_destroy(&priv->mutex);
+                  kmm_free(priv);
+                }
+            }
+
+          /* Register device node */
+
+          if (ret >= 0)
+            {
+              snprintf(path, sizeof(path), "/dev/safety/%s",
+                       g_safety_modules[module]);
+              ret = register_driver(path, &g_safety_fops, 0666, priv);
+              if (ret < 0)
+                {
+                  saerr("register_driver failed!\n");
+                  nxmutex_destroy(&priv->mutex);
+                  kmm_free(priv);
+                }
+            }
+        }
+      else
+        {
+          ret = -ENOMEM;
         }
     }
-
-  /* Register device node */
-
-  snprintf(path, sizeof(path), "/dev/safety/%s", g_safety_modules[module]);
-  ret = register_driver(path, &g_safety_fops, 0666, priv);
-  if (ret < 0)
+  else
     {
-      saerr("register_driver failed!\n");
-      goto errout_with_priv;
+      ret = -EINVAL;
     }
 
-  return ret;
-
-errout_with_priv:
-  nxmutex_destroy(&priv->mutex);
-  kmm_free(priv);
   return ret;
 }
