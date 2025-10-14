@@ -224,15 +224,8 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
 
       if (conn->timestamp)
         {
-          struct timespec timestamp;
-          recvlen = iob_copyout((FAR uint8_t *)&timestamp, iob,
-                                sizeof(struct timespec), offset);
-          DEBUGASSERT(recvlen == sizeof(struct timespec));
-
-          udp_store_cmsg_timestamp(pstate, &timestamp);
+          udp_store_cmsg_timestamp(pstate, &iob->io_time);
         }
-
-      offset += sizeof(struct timespec);
 #endif
 
       /* Copy to user */
@@ -472,7 +465,7 @@ static uint32_t udp_eventhandler(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_TIMESTAMP
           if (pstate->ir_conn->timestamp)
             {
-              udp_store_cmsg_timestamp(pstate, &dev->d_rxtime);
+              udp_store_cmsg_timestamp(pstate, &dev->d_iob->io_time);
             }
 #endif
 

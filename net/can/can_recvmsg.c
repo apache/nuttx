@@ -135,8 +135,11 @@ static size_t can_recvfrom_newdata(FAR struct net_driver_s *dev,
   if (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP) &&
       pstate->pr_msglen == sizeof(struct timeval))
     {
-      iob_copyout(pstate->pr_msgbuf, dev->d_iob, sizeof(struct timeval),
-                  -CONFIG_NET_LL_GUARDSIZE);
+      struct timeval tv;
+
+      tv.tv_sec = dev->d_iob->io_time.tv_sec;
+      tv.tv_usec = dev->d_iob->io_time.tv_nsec / 1000;
+      memcpy(pstate->pr_msgbuf, &tv, sizeof(struct timeval));
     }
 #endif
 
@@ -249,8 +252,11 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
       if (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP) &&
           pstate->pr_msglen == sizeof(struct timeval))
         {
-          iob_copyout(pstate->pr_msgbuf, iob, sizeof(struct timeval),
-                      -CONFIG_NET_LL_GUARDSIZE);
+          struct timeval tv;
+
+          tv.tv_sec = iob->io_time.tv_sec;
+          tv.tv_usec = iob->io_time.tv_nsec / 1000;
+          memcpy(pstate->pr_msgbuf, &tv, sizeof(struct timeval));
         }
 #endif
 
@@ -309,15 +315,7 @@ static uint32_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
           if (!_SO_GETOPT(conn->sconn.s_options, CAN_RAW_FD_FRAMES))
 #endif
             {
-#ifdef CONFIG_NET_TIMESTAMP
-              if ((_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP) &&
-                   dev->d_len > sizeof(struct can_frame) +
-                   sizeof(struct timeval)) ||
-                  (!_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP) &&
-                   dev->d_len > sizeof(struct can_frame)))
-#else
               if (dev->d_len > sizeof(struct can_frame))
-#endif
                 {
                   /* DO WE NEED TO CLEAR FLAGS?? */
 
