@@ -286,8 +286,11 @@ static void host_libusb_inttransfer_cb(struct libusb_transfer *transfer)
 #ifndef CONFIG_USBHOST_ISOC_DISABLE
 static void host_libusb_isotransfer_cb(struct libusb_transfer *transfer)
 {
-  struct host_libusb_hostdev_s *dev = &g_libusb_dev;
+  struct libusb_iso_packet_descriptor *packet;
   struct host_usb_datareq_s *datareq;
+  usbhost_asynch_t callback;
+  size_t length;
+  int i;
 
   if (!transfer)
     {
@@ -298,18 +301,24 @@ static void host_libusb_isotransfer_cb(struct libusb_transfer *transfer)
     }
 
   datareq = (struct host_usb_datareq_s *)transfer->user_data;
+  callback = datareq->callback;
 
-  if (transfer->status == LIBUSB_TRANSFER_COMPLETED)
+  for (i = 0; i < transfer->num_iso_packets; i++)
     {
-      datareq->success = true;
-      datareq->xfer += transfer->actual_length;
-    }
-  else
-    {
-      datareq->success = false;
+      packet = &transfer->iso_packet_desc[i];
+      length = packet->status == LIBUSB_TRANSFER_COMPLETED ?
+                                      packet->actual_length : 0;
+
+      /* If there are multiple isoc packages, only the actual length
+       * of the data in each package is returned here. Because each
+       * package has the same size, the number of packages returned
+       * needs to be recorded in class driver.
+       */
+
+      callback(datareq->priv, length);
     }
 
-  host_libusb_fifopush(&dev->completed, datareq);
+  free(datareq);
   host_uninterruptible_no_return(libusb_free_transfer, transfer);
 }
 #endif
@@ -486,9 +495,7 @@ host_libusb_isotransfer(struct host_libusb_hostdev_s *dev, uint8_t addr,
   int num_iso_pack;
   int ret;
 
-  max_packet_size = host_uninterruptible(libusb_get_max_iso_packet_size,
-                                         dev->priv,
-                                         addr);
+  max_packet_size = datareq->maxpacketsize;
   num_iso_pack = (datareq->len + max_packet_size - 1) / max_packet_size;
   transfer = host_uninterruptible(libusb_alloc_transfer, num_iso_pack);
   if (!transfer)
