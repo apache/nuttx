@@ -679,6 +679,13 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
       nbytes = can_dlc2bytes(msg->cm_hdr.ch_dlc);
       msglen = CAN_MSGLEN(nbytes);
 
+      if (nsent + msglen > buflen)
+        {
+          /* Do not send message if not fully passed. */
+
+          break;
+        }
+
       can_add_sendnode(sender, msg, msglen);
 
       /* Increment the number of bytes that were sent */
