@@ -195,7 +195,7 @@ static ssize_t signalfd_file_read(FAR struct file *filep,
   siginfo = (FAR struct signalfd_siginfo *)buffer;
   do
     {
-      ret = nxsig_waitinfo(&pendmask, &info);
+      ret = nxsig_timedwait(&pendmask, &info, NULL);
       if (ret < 0)
         {
           goto errout;

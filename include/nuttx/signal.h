@@ -444,32 +444,6 @@ int nxsig_kill(pid_t pid, int signo);
 int nxsig_tgkill(pid_t pid, pid_t tid, int signo);
 
 /****************************************************************************
- * Name: nxsig_waitinfo
- *
- * Description:
- *   This function is equivalent to nxsig_timedwait with a NULL timeout
- *   parameter.
- *
- *   This is an internal OS interface.  It is functionally equivalent to
- *   sigwaitinfo() except that:
- *
- *   - It is not a cancellation point, and
- *   - It does not modify the errno value.
- *
- * Input Parameters:
- *   set - The pending signal set
- *   info - The returned value
- *
- * Returned Value:
- *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure.
- *
- ****************************************************************************/
-
-#define nxsig_waitinfo(s,i) nxsig_timedwait(s,i,NULL)
-
-/****************************************************************************
  * Name: nxsig_clockwait
  *
  * Description:
