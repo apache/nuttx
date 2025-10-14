@@ -78,6 +78,7 @@ struct host_usb_datareq_s
   struct host_usb_datareq_s  *flink;
   uint8_t                     addr;
   uint8_t                     xfrtype;
+  uint16_t                    maxpacketsize;
   uint8_t                    *data;
   uint16_t                    len;
   uint16_t                    xfer;

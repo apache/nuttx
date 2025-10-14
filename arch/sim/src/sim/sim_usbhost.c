@@ -77,9 +77,9 @@ struct sim_epinfo_s
   uint8_t toggle:1;            /* Next data toggle */
   uint8_t interval;            /* Polling interval */
   uint8_t status;              /* Retained token status bits (for debug purposes) */
-  uint16_t maxpacket:11;       /* Maximum packet size */
+  uint16_t maxpacket:14;       /* Maximum packet size */
   uint16_t xfrtype:2;          /* See USB_EP_ATTR_XFER_* definitions in usb.h */
-  uint16_t speed:2;            /* See USB_*_SPEED definitions */
+  uint8_t speed;               /* See USB_*_SPEED definitions */
   int result;                  /* The result of the transfer */
   ssize_t xfrd;                /* On completion, will hold the number of bytes transferred */
   sem_t iocsem;                /* Semaphore used to wait for transfer completion */
@@ -406,7 +406,8 @@ static int sim_usbhost_epalloc(struct usbhost_driver_s *drvr,
   epinfo->dirin     = epdesc->in;
   epinfo->devaddr   = hport->funcaddr;
   epinfo->interval  = epdesc->interval;
-  epinfo->maxpacket = epdesc->mxpacketsize;
+  epinfo->maxpacket = (epdesc->mxpacketsize & USB_EP_MAXP_MASK) *
+                      (USB_EP_MAX_PACKET_MULT(epdesc->mxpacketsize) + 1);
   epinfo->xfrtype   = epdesc->xfrtype;
   epinfo->speed     = hport->speed;
   nxsem_init(&epinfo->iocsem, 0, 0);
@@ -610,6 +611,7 @@ static int sim_usbhost_asynch(struct usbhost_driver_s *drvr,
   datareq->addr = (epinfo->dirin << 7) + epinfo->epno;
   datareq->len = buflen;
   datareq->xfrtype = epinfo->xfrtype;
+  datareq->maxpacketsize = epinfo->maxpacket;
   datareq->callback = callback;
   datareq->data = buffer;
   datareq->priv = arg;
