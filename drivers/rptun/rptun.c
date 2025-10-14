@@ -37,6 +37,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/nuttx.h>
+#include <nuttx/rpmsg/rpmsg_virtio.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/vhost/vhost.h>
 #include <nuttx/virtio/virtio.h>
@@ -473,6 +474,7 @@ static int rptun_register_device(FAR struct virtio_device *vdev)
 {
   int ret = -ENODEV;
 
+#ifdef CONFIG_DRIVERS_VIRTIO
   if (vdev->role == VIRTIO_DEV_DRIVER)
     {
       ret = virtio_register_device(vdev);
@@ -482,7 +484,10 @@ static int rptun_register_device(FAR struct virtio_device *vdev)
           return ret;
         }
     }
-  else if (vdev->role == VIRTIO_DEV_DEVICE)
+  else
+#endif
+#ifdef CONFIG_DRIVERS_VHOST
+  if (vdev->role == VIRTIO_DEV_DEVICE)
     {
       ret = vhost_register_device(vdev);
       if (ret < 0)
@@ -490,6 +495,21 @@ static int rptun_register_device(FAR struct virtio_device *vdev)
           rptunerr("vhost_register_device failed, ret=%d\n", ret);
           return ret;
         }
+    }
+  else
+#endif
+  if (vdev->id.device == VIRTIO_ID_RPMSG)
+    {
+      ret = rpmsg_virtio_probe(vdev);
+      if (ret < 0)
+        {
+          rptunerr("rpmsg_virtio_probe failed, ret=%d\n", ret);
+        }
+    }
+  else
+    {
+      rptunerr("virtio device id = %"PRIu32" not supported\n",
+               vdev->id.device);
     }
 
   return ret;
@@ -501,13 +521,23 @@ static int rptun_register_device(FAR struct virtio_device *vdev)
 
 static void rptun_unregister_device(FAR struct virtio_device *vdev)
 {
+#ifdef CONFIG_DRIVERS_VIRTIO
   if (vdev->role == VIRTIO_DEV_DRIVER)
     {
       virtio_unregister_device(vdev);
     }
-  else if (vdev->role == VIRTIO_DEV_DEVICE)
+  else
+#endif
+#ifdef CONFIG_DRIVERS_VHOST
+  if (vdev->role == VIRTIO_DEV_DEVICE)
     {
       vhost_unregister_device(vdev);
+    }
+  else
+#endif
+  if (vdev->id.device == VIRTIO_ID_RPMSG)
+    {
+      rpmsg_virtio_remove(vdev);
     }
 }
 
