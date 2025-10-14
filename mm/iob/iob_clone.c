@@ -127,6 +127,10 @@ int iob_clone_partial(FAR struct iob_s *iob1, unsigned int len,
 
   iob2->io_pktlen = len + offset2;
 
+#ifdef CONFIG_NET_TIMESTAMP
+  iob2->io_time = iob1->io_time;
+#endif
+
   /* Handle special case where there are empty buffers at the head
    * the list, Skip I/O buffer containing the data offset.
    */

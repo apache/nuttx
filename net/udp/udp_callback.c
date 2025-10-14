@@ -159,22 +159,6 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
    */
 
   offset = (dev->d_appdata - iob->io_data) - iob->io_offset;
-
-#ifdef CONFIG_NET_TIMESTAMP
-  /* Store timestamp while packet is being queued.
-   * This is done unconditionally to avoid race condition when SO_TIMESTAMP
-   * gets enabled after packet is received but before it is read.
-   */
-
-  offset -= sizeof(struct timespec);
-  ret = iob_trycopyin(iob, (FAR const uint8_t *)&dev->d_rxtime,
-                      sizeof(struct timespec), offset, true);
-  if (ret < 0)
-    {
-      goto errout;
-    }
-#endif
-
   offset -= src_addr_size;
   ret = iob_trycopyin(iob, src_addr, src_addr_size, offset, true);
   if (ret < 0)

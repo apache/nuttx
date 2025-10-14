@@ -163,7 +163,7 @@ static void pkt_recvfrom_newdata(FAR struct net_driver_s *dev,
   if (_SO_GETOPT(pstate->pr_conn->sconn.s_options, SO_TIMESTAMP) ||
       _SO_GETOPT(pstate->pr_conn->sconn.s_options, SO_TIMESTAMPNS))
     {
-      pkt_store_cmsg_timestamp(pstate, &dev->d_rxtime);
+      pkt_store_cmsg_timestamp(pstate, &dev->d_iob->io_time);
     }
 #endif
 
@@ -392,13 +392,7 @@ static inline void pkt_readahead(FAR struct pkt_recvfrom_s *pstate)
       if (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP) ||
           _SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMPNS))
         {
-          struct timespec ts;
-          recvlen = iob_copyout((FAR uint8_t *)&ts, iob,
-                                sizeof(struct timespec),
-                                -sizeof(struct timespec));
-          DEBUGASSERT(recvlen == sizeof(struct timespec));
-
-          pkt_store_cmsg_timestamp(pstate, &ts);
+          pkt_store_cmsg_timestamp(pstate, &iob->io_time);
         }
 #endif
 
