@@ -70,22 +70,6 @@ static uint16_t pkt_datahandler(FAR struct net_driver_s *dev,
       return 0;
     }
 
-#ifdef CONFIG_NET_TIMESTAMP
-  if (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP) ||
-      _SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMPNS))
-    {
-      ret = iob_trycopyin(iob, (FAR const uint8_t *)&dev->d_rxtime,
-                          sizeof(struct timespec), 0, true);
-      if (ret != sizeof(struct timespec))
-        {
-          nerr("ERROR: Failed to write timestamp: %d\n", ret);
-          goto errout;
-        }
-
-      iob_reserve(iob, sizeof(struct timespec));
-    }
-#endif
-
   /* Clone an I/O buffer chain of the L2 data, use throttled IOB to avoid
    * overconsumption.
    * TODO: Optimize IOB clone after we support shared IOB.
@@ -179,7 +163,7 @@ static int pkt_in(FAR struct net_driver_s *dev)
       if (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP) ||
           _SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMPNS))
         {
-          clock_gettime(CLOCK_REALTIME, &dev->d_rxtime);
+          clock_gettime(CLOCK_REALTIME, &dev->d_iob->io_time);
         }
 #endif /* CONFIG_NET_TIMESTAMP */
 
