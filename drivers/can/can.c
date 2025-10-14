@@ -675,8 +675,16 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
        * CAN message at sutibal.
        */
 
-      msg    = (FAR struct can_msg_s *)&buffer[nsent];
-      nbytes = can_dlc2bytes(msg->cm_hdr.ch_dlc);
+      msg = (FAR struct can_msg_s *)&buffer[nsent];
+      if (msg->cm_hdr.ch_rtr)
+        {
+          nbytes = 0;
+        }
+      else
+        {
+          nbytes = can_dlc2bytes(msg->cm_hdr.ch_dlc);
+        }
+
       msglen = CAN_MSGLEN(nbytes);
 
       if (nsent + msglen > buflen)
