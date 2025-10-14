@@ -428,7 +428,7 @@ pid_t nxsched_waitpid(pid_t pid, int *stat_loc, int options)
 
       /* Wait for any death-of-child signal */
 
-      ret = nxsig_waitinfo(&set, &info);
+      ret = nxsig_timedwait(&set, &info, NULL);
       if (ret < 0)
         {
           goto errout;

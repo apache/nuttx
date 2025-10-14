@@ -77,11 +77,11 @@ int pause(void)
 
   sigemptyset(&set);
 
-  /* sigtwaitinfo() cannot succeed.  It should always return error EINTR
+  /* nxsig_timedwait() cannot succeed.  It should always return error EINTR
    * meaning that some unblocked signal was caught.
    */
 
-  ret = nxsig_waitinfo(&set, NULL);
+  ret = nxsig_timedwait(&set, NULL, NULL);
   if (ret < 0)
     {
       set_errno(-ret);
