@@ -632,6 +632,10 @@
 
 #  define deprecated_function  __attribute__((deprecated))
 
+/* Memory barrier. */
+
+#  define memory_barrier()  __asm__ __volatile__ ("" : : : "memory")
+
 /* SDCC-specific definitions ************************************************/
 
 #elif defined(SDCC) || defined(__SDCC)
@@ -809,6 +813,10 @@
 
 #  define deprecated_function
 
+/* Memory barrier. */
+
+#  define memory_barrier()
+
 /* Zilog-specific definitions ***********************************************/
 
 #elif defined(__ZILOG__)
@@ -970,6 +978,10 @@
 
 #  define deprecated_function
 
+/* Memory barrier. */
+
+#  define memory_barrier()
+
 /* ICCARM-specific definitions **********************************************/
 
 #elif defined(__ICCARM__)
@@ -1059,6 +1071,10 @@
 /* Warning about usage of deprecated features. */
 
 #  define deprecated_function
+
+/* Memory barrier. */
+
+#  define memory_barrier()
 
 /* MSVC(Microsoft Visual C++)-specific definitions **************************/
 
@@ -1158,6 +1174,10 @@
 
 #  define deprecated_function
 
+/* Memory barrier. */
+
+#  define memory_barrier()
+
 /* TASKING (Infineon AURIX C/C++)-specific definitions **********************/
 
 #elif defined(__TASKING__)
@@ -1255,6 +1275,10 @@
 
 #  define deprecated_function
 
+/* Memory barrier. */
+
+#  define memory_barrier()  __asm__ __volatile__ ("" : : : "memory")
+
 /* Unknown compiler *********************************************************/
 
 #else
@@ -1342,6 +1366,10 @@
 /* Warning about usage of deprecated features. */
 
 #  define deprecated_function
+
+/* Memory barrier. */
+
+#  define memory_barrier()
 
 #endif
 

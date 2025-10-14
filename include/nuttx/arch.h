@@ -134,9 +134,9 @@
 #  define SMP_RMB() UP_RMB()
 #  define SMP_WMB() UP_WMB()
 #else	/* !CONFIG_SMP */
-#  define SMP_MB()  asm volatile ("" : : : "memory")
-#  define SMP_RMB() asm volatile ("" : : : "memory")
-#  define SMP_WMB() asm volatile ("" : : : "memory")
+#  define SMP_MB()  memory_barrier()
+#  define SMP_RMB() memory_barrier()
+#  define SMP_WMB() memory_barrier()
 #endif
 
 /****************************************************************************
