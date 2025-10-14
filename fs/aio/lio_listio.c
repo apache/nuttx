@@ -495,6 +495,25 @@ int lio_listio(int mode, FAR struct aiocb * const list[], int nent,
            * removed, so manually signal the client
            */
 
+          /* Find a non-NULL aiocbp */
+
+          if (aiocbp == NULL)
+            {
+              for (i = 0; i < nent; i++)
+                {
+                  if (list[i])
+                    {
+                      aiocbp = list[i];
+                      break;
+                    }
+                }
+
+              if (aiocbp == NULL)
+                {
+                  goto out;
+                }
+            }
+
           status = nxsig_notification(nxsched_getpid(),
                                       &aiocbp->lio_sigevent,
                                       SI_ASYNCIO,
@@ -516,6 +535,7 @@ int lio_listio(int mode, FAR struct aiocb * const list[], int nent,
    *   Just return now.
    */
 
+out:
   if (ret < 0)
     {
       set_errno(retcode);
