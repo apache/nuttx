@@ -231,6 +231,12 @@ static int ipv4_in(FAR struct net_driver_s *dev)
   bool isfrag;
   int ret = OK;
 
+  /* Store reception timestamp if enabled and not provided by hardware. */
+
+#if defined(CONFIG_NET_TIMESTAMP) && !defined(CONFIG_ARCH_HAVE_NETDEV_TIMESTAMP)
+  clock_gettime(CLOCK_REALTIME, &dev->d_iob->io_time);
+#endif
+
   /* Handle ARP on input then give the IPv4 packet to the network layer */
 
   arp_ipin(dev);
@@ -572,12 +578,6 @@ int ipv4_input(FAR struct net_driver_s *dev)
   int ret;
 
   netdev_lock(dev);
-
-  /* Store reception timestamp if enabled and not provided by hardware. */
-
-#if defined(CONFIG_NET_TIMESTAMP) && !defined(CONFIG_ARCH_HAVE_NETDEV_TIMESTAMP)
-  clock_gettime(CLOCK_REALTIME, &dev->d_rxtime);
-#endif
 
   if (dev->d_iob != NULL)
     {

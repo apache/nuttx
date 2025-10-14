@@ -36,14 +36,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TIMESTAMP
 #  define CAN_BUFFER_SIZE ALIGN_UP(sizeof(struct iob_s) + NET_CAN_PKTSIZE + \
                                    CONFIG_NET_LL_GUARDSIZE + IOB_ALIGNMENT - \
                                    1, IOB_ALIGNMENT)
-#else
-#  define CAN_BUFFER_SIZE ALIGN_UP(sizeof(struct iob_s) + NET_CAN_PKTSIZE + \
-                                   IOB_ALIGNMENT - 1, IOB_ALIGNMENT)
-#endif
 
 /****************************************************************************
  * Private Data
@@ -117,10 +112,7 @@ FAR struct iob_s *can_iob_clone(FAR struct net_driver_s *dev)
       return NULL;
     }
 
-#ifdef CONFIG_NET_TIMESTAMP
   iob_reserve(iob, CONFIG_NET_LL_GUARDSIZE);
-#endif
-
   /* CAN data length is fixed, So when we use iob_clone_partial to copy
    * data, we don't have to worry about distributing other iob.
    */

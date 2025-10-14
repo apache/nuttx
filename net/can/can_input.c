@@ -229,6 +229,12 @@ static int can_in(FAR struct net_driver_s *dev)
       return OK;
     }
 
+  /* Store reception timestamp if enabled and not provided by hardware. */
+
+#if defined(CONFIG_NET_TIMESTAMP) && !defined(CONFIG_ARCH_HAVE_NETDEV_TIMESTAMP)
+  clock_gettime(CLOCK_REALTIME, &dev->d_iob->io_time);
+#endif
+
   can_conn_list_lock();
 
   /* Do we have second connection that can hold this packet? */

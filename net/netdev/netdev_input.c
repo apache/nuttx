@@ -80,6 +80,10 @@ int netdev_input(FAR struct net_driver_s *dev,
       return ret;
     }
 
+#if defined(CONFIG_NET_TIMESTAMP) && defined(CONFIG_ARCH_HAVE_NETDEV_TIMESTAMP)
+  dev->d_iob->io_time = dev->d_rxtime;
+#endif
+
   /* Copy data to iob entry */
 
   ret = iob_trycopyin(dev->d_iob, buf, dev->d_len, -llhdrlen, false);
