@@ -79,36 +79,6 @@ static int     safety_handler(FAR void *arg, FAR void *result,
  * Private Data
  ****************************************************************************/
 
-/* Module information table */
-
-static FAR const char *g_safety_modules[] =
-{
-  "clock",
-  "power",
-  "cpu",
-  "flash",
-  "ram",
-  "mpu",
-  "bus",
-  "temperature",
-  "error_report",
-  "smu",
-  "reg"
-};
-
-static const struct file_operations g_safety_fops =
-{
-  safety_open,    /* open  */
-  safety_close,   /* close */
-  safety_read,    /* read  */
-  NULL,           /* write */
-  NULL,           /* seek  */
-  safety_ioctl,   /* ioctl */
-  NULL,           /* mmap */
-  NULL,           /* truncate */
-  safety_poll     /* poll  */
-};
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -437,6 +407,34 @@ int safety_register(FAR struct safety_lowerhalf_s *lower,
                     enum safety_module_e module,
                     size_t result_size)
 {
+  static FAR const char *g_safety_modules[] =
+  {
+    "clock",
+    "power",
+    "cpu",
+    "flash",
+    "ram",
+    "mpu",
+    "bus",
+    "temperature",
+    "error_report",
+    "smu",
+    "reg"
+  };
+
+  static const struct file_operations g_safety_fops =
+  {
+    safety_open,    /* open  */
+    safety_close,   /* close */
+    safety_read,    /* read  */
+    NULL,           /* write */
+    NULL,           /* seek  */
+    safety_ioctl,   /* ioctl */
+    NULL,           /* mmap */
+    NULL,           /* truncate */
+    safety_poll     /* poll  */
+  };
+
   FAR struct safety_priv_s *priv;
   char path[32];
   int ret = OK;
