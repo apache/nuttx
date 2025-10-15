@@ -1170,6 +1170,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
   int                      ret = -ENOMEM;
   int                      i;
   int                      sval;
+  bool                     was_empty;
 
   caninfo("ID: %" PRId32 " DLC: %d\n", (uint32_t)hdr->ch_id, hdr->ch_dlc);
 
@@ -1234,6 +1235,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
     {
       FAR struct can_reader_s *reader = (FAR struct can_reader_s *)node;
       fifo = &reader->fifo;
+      was_empty = fifo->rx_head == fifo->rx_tail;
 
       nexttail = fifo->rx_tail + 1;
       if (nexttail >= CONFIG_CAN_RXFIFOSIZE)
@@ -1270,22 +1272,12 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 
           fifo->rx_tail = nexttail;
 
-          if (nxsem_get_value(&fifo->rx_sem, &sval) < 0)
-            {
-#ifdef CONFIG_CAN_ERRORS
-              /* Report unspecified error */
-
-              fifo->rx_error |= CAN_ERROR5_UNSPEC;
-#endif
-              continue;
-            }
-
           /* Unlock the binary semaphore, waking up can_read if it is
            * blocked. If can_read were not blocked, we would not be
            * executing this because interrupts would be disabled.
            */
 
-          if (sval <= 0)
+          if (was_empty)
             {
               nxsem_post(&fifo->rx_sem);
             }
