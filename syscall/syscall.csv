@@ -18,6 +18,7 @@
 "clock_settime","time.h","","int","clockid_t","const struct timespec*"
 "close","unistd.h","","int","int"
 "connect","sys/socket.h","defined(CONFIG_NET)","int","int","FAR const struct sockaddr *","socklen_t"
+"coredump","nuttx/coredump.h","defined(CONFIG_COREDUMP)","int","FAR const struct memory_region_s *","FAR struct lib_outstream_s *","pid_t"
 "dup","unistd.h","","int","int"
 "dup2","unistd.h","","int","int","int"
 "epoll_close","sys/epoll.h","","void","int"
