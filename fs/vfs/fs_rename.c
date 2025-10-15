@@ -30,7 +30,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <libgen.h>
 #include <assert.h>
 #include <errno.h>
 #include <unistd.h>
@@ -39,7 +38,6 @@
 #include <nuttx/lib/lib.h>
 
 #include "inode/inode.h"
-#include "fs_heap.h"
 #include "vfs.h"
 
 /****************************************************************************
@@ -72,7 +70,6 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
 {
   struct inode_search_s newdesc;
   FAR struct inode *newinode;
-  FAR char *subdir = NULL;
   bool isdir = INODE_IS_PSEUDODIR(oldinode);
   size_t oldlen;
   int ret;
@@ -110,9 +107,7 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
       goto errout_with_newsearch;
     }
 
-  /* According to POSIX, any new inode at this path should be removed
-   * first, provided that it is not a directory.
-   */
+  /* POSIX permits replacing a file or an empty directory. */
 
   ret = inode_search(&newdesc, &newinode);
   if (ret >= 0)
@@ -141,64 +136,35 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
         }
 #endif
 
-      /* We found it and it appears to be a "normal" inode.  Is it a
-       * directory (i.e, an operation-less inode or an inode with children)?
-       */
-
-      if ((newinode->u.i_ops == NULL || newinode->i_child != NULL)
-#ifdef CONFIG_FS_LINKS
-          && !INODE_IS_HARDLINK(newinode)
-#endif
-         )
+      if (INODE_IS_PSEUDODIR(newinode))
         {
-          FAR char *subdirname;
-
-          /* Yes.. In this case, the target of the rename must be a
-           * subdirectory of newinode, not the newinode itself.  For
-           * example: mv b a/ must move b to a/b.
-           */
-
-          subdirname = basename((FAR char *)oldpath);
-          ret = fs_heap_asprintf(&subdir, "%s/%s", newpath, subdirname);
-          if (ret < 0)
+          if (!isdir)
             {
-              subdir = NULL;
-              ret = -ENOMEM;
+              ret = -EISDIR;
               goto errout_with_newsearch;
             }
 
-          newpath = subdir;
+          if (newinode->i_child != NULL)
+            {
+              ret = -ENOTEMPTY;
+              goto errout_with_newsearch;
+            }
         }
-      else
+      else if (isdir)
         {
-          /* Not a directory... remove it.  It may still be something
-           * important (like a driver), but we will just have to suffer
-           * the consequences.
-           *
-           * NOTE (1) that we not bother to check the error.  If we
-           * failed to remove the inode for some reason, then
-           * inode_reserve() will complain below, and (2) the inode
-           * won't really be removed until we call inode_release();
-           */
+          ret = -ENOTDIR;
+          goto errout_with_newsearch;
+        }
 
-          if (isdir)
-            {
-              /* It is an error to rename a directory to a file */
-
-              ret = -ENOTDIR;
-              goto errout_with_newsearch;
-            }
-
-          ret = inode_remove(newpath);
-          if (ret < 0 && ret != -EBUSY)
-            {
-              goto errout_with_newsearch;
-            }
+      ret = inode_remove(newpath);
+      if (ret < 0 && ret != -EBUSY)
+        {
+          goto errout_with_newsearch;
+        }
 
 #ifdef CONFIG_FS_NOTIFY
-          notify_unlink(newpath);
+      notify_unlink(newpath);
 #endif
-        }
     }
 
   /* Create a new, empty inode at the destination location.
@@ -275,11 +241,6 @@ errout_with_lock:
       notify_rename(oldpath, isdir, newpath, isdir);
     }
 #endif
-
-  if (subdir != NULL)
-    {
-      fs_heap_free(subdir);
-    }
 
   return ret;
 }
