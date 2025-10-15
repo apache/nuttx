@@ -1499,6 +1499,10 @@ int netdev_lower_register(FAR struct netdev_lowerhalf_s *dev,
 #endif
   dev->netdev.d_private = upper;
 
+#ifdef CONFIG_NET_CANFORWARD
+  sq_init(&dev->netdev.d_cangw_rules);
+#endif
+
   ret = netdev_register(&dev->netdev, lltype);
   if (ret < 0)
     {

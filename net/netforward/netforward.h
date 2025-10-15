@@ -33,7 +33,7 @@
 #include <stdint.h>
 
 #undef HAVE_FWDALLOC
-#ifdef CONFIG_NET_IPFORWARD
+#ifdef CONFIG_NET_FORWARD
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -45,8 +45,14 @@
 #  define CONFIG_NET_FORWARD_NSTRUCT 4
 #endif
 
+#if defined(CONFIG_NET_CANFORWARD) && defined(CONFIG_NET_CAN_NBUFFERS)
+static_assert(CONFIG_IOB_NBUFFERS + CONFIG_NET_CAN_NBUFFERS >
+              CONFIG_NET_FORWARD_NSTRUCT,
+              "net forward may consume all the IOB and break netdev logic");
+#else
 static_assert(CONFIG_IOB_NBUFFERS > CONFIG_NET_FORWARD_NSTRUCT,
-              "IP forward may consume all the IOB and break netdev logic");
+              "net forward may consume all the IOB and break netdev logic");
+#endif
 
 /* Allocate a new IP forwarding data callback */
 
@@ -71,9 +77,8 @@ struct forward_s
   FAR struct net_driver_s     *f_dev;     /* Forwarding device */
   FAR struct iob_s            *f_iob;     /* IOB chain containing the packet */
   FAR struct devif_callback_s *f_cb;      /* Reference to callback instance */
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-  uint8_t                      f_domain;  /* Domain: PF_INET or PF_INET6 */
-#endif
+  uint8_t                      f_domain;  /* Domain: PF_INET or PF_INET6
+                                           * or PF_CAN */
 };
 
 /****************************************************************************
@@ -251,6 +256,31 @@ void netfwd_poll(FAR struct net_driver_s *dev);
 void netfwd_dropstats(FAR struct forward_s *fwd);
 #else
 #  define netfwd_dropstats(fwd)
+#endif
+
+/****************************************************************************
+ * Name: can_forward
+ *
+ * Description:
+ *   This function is called from can_input when a packet is received that
+ *   is not destined for us.  In this case, the packet may need to be
+ *   forwarded to another device depending routing table information.
+ *
+ * Input Parameters:
+ *   dev   - The device on which the packet was received and which contains
+ *           the can packet.
+ *
+ *   On input:
+ *   - dev->d_buf holds the received packet.
+ *   - dev->d_len holds the length of the received packet
+ *
+ * Returned Value:
+ *   Always return Zero to let the packet be continue received by can_input;
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_CANFORWARD
+int can_forward(FAR struct net_driver_s *dev);
 #endif
 
 /****************************************************************************

@@ -44,7 +44,6 @@
 #include "neighbor/neighbor.h"
 #include "netforward/netforward.h"
 
-#ifdef CONFIG_NET_IPFORWARD
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -86,7 +85,7 @@ static inline void forward_ipselect(FAR struct forward_s *fwd)
 
       dev->d_appdata = IPBUF(IPv4UDP_HDRLEN);
     }
-  else
+  else if (fwd->f_domain == PF_INET6)
     {
       /* Set a bit in the d_flags to distinguish this from an IPv6 packet */
 
@@ -267,5 +266,3 @@ int netfwd_forward(FAR struct net_driver_s *dev, FAR struct forward_s *fwd)
 
   return -EBUSY;
 }
-
-#endif /* CONFIG_NET_IPFORWARD */

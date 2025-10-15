@@ -36,8 +36,6 @@
 #include "sixlowpan/sixlowpan.h"
 #include "netforward/netforward.h"
 
-#ifdef CONFIG_NET_IPFORWARD
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -192,5 +190,3 @@ void netfwd_poll(FAR struct net_driver_s *dev)
   UNUSED(flags);
 #endif
 }
-
-#endif /* CONFIG_NET_ARP_SEND */

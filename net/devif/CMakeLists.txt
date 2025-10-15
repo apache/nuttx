@@ -38,7 +38,7 @@ if(CONFIG_MM_IOB)
 
   # IP forwarding
 
-  if(CONFIG_NET_IPFORWARD)
+  if(CONFIG_NET_FORWARD)
     list(APPEND SRCS devif_forward.c)
   endif()
 

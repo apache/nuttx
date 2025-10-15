@@ -69,6 +69,9 @@
 #ifdef CONFIG_NET_CAN
 #  include <nuttx/net/can.h>
 #endif
+#ifdef CONFIG_NET_CANFORWARD
+#  include <nuttx/net/cangw.h>
+#endif
 
 #ifdef CONFIG_NET_STATISTICS
 
@@ -120,6 +123,10 @@ struct net_stats_s
 
 #ifdef CONFIG_NET_CAN
   struct can_stats_s  can;      /* CAN statistics */
+#endif
+
+#ifdef CONFIG_NET_CANFORWARD
+  struct cangw_stats_s cangw;   /* CANGW statistics */
 #endif
 };
 
