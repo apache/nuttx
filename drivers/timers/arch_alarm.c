@@ -51,7 +51,7 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
 
   ONESHOT_TICK_CURRENT(g_oneshot_lower, &now);
 #ifdef CONFIG_SCHED_TICKLESS
-  nxsched_alarm_tick_expiration(now);
+  nxsched_tick_expiration(now);
 #else
   /* Start the next tick first, in order to minimize latency. Ideally
    * the ONESHOT_TICK_START would also return the current tick so that
