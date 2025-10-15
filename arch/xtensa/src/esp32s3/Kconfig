@@ -1298,6 +1298,24 @@ endmenu # SPI configuration
 menu "UART Configuration"
 	depends on ESP32S3_UART
 
+config ESP32S3_RX_FIFO_THRD
+	int "RX Fifo full threshold"
+	default 120
+	---help---
+		Set how many received bytes must accumulate in the hardware RX FIFO
+		before an RX FIFO full interrupt is generated. The ESP32-S3 UART FIFO
+		can hold 128 bytes, so leaving some headroom here helps prevent overflow
+		while the interrupt handler drains the buffer.
+
+config ESP32S3_RX_FIFO_TOUT
+	int "RX Fifo timeout"
+	default 10
+	---help---
+		Generate an RX timeout interrupt when the UART RX line stays idle for
+		this many bit periods and the FIFO has not reached the full threshold.
+		Lower values move data to the software FIFO sooner; higher values reduce
+		the interrupt rate on continuous transfers.
+
 if ESP32S3_UART0
 
 config ESP32S3_UART0_RS485
