@@ -159,6 +159,10 @@ struct stm32_dma_ops_s
 
   void (*dma_setup)(DMA_HANDLE handle, stm32_dmacfg_t *cfg);
 
+  /* Free the DMA */
+
+  void (*dma_free)(DMA_HANDLE handle);
+
   /* Start the DMA */
 
   void (*dma_start)(DMA_HANDLE handle, dma_callback_t callback,
@@ -185,6 +189,7 @@ struct stm32_dma_ops_s
 static void stm32_mdma_disable(DMA_CHANNEL dmachan);
 static int stm32_mdma_interrupt(int irq, void *context, void *arg);
 static void stm32_mdma_setup(DMA_HANDLE handle, stm32_dmacfg_t *cfg);
+static void stm32_mdma_free(DMA_HANDLE handle);
 static void stm32_mdma_start(DMA_HANDLE handle, dma_callback_t callback,
                              void *arg, bool half);
 static size_t stm32_mdma_residual(DMA_HANDLE handle);
@@ -200,6 +205,7 @@ static void stm32_mdma_dump(DMA_HANDLE handle, const char *msg);
 static void stm32_sdma_disable(DMA_CHANNEL dmachan);
 static int stm32_sdma_interrupt(int irq, void *context, void *arg);
 static void stm32_sdma_setup(DMA_HANDLE handle, stm32_dmacfg_t *cfg);
+static void stm32_sdma_free(DMA_HANDLE handle);
 static void stm32_sdma_start(DMA_HANDLE handle, dma_callback_t callback,
                              void *arg, bool half);
 static size_t stm32_sdma_residual(DMA_HANDLE handle);
@@ -215,6 +221,7 @@ static void stm32_sdma_dump(DMA_HANDLE handle, const char *msg);
 static void stm32_bdma_disable(DMA_CHANNEL dmachan);
 static int stm32_bdma_interrupt(int irq, void *context, void *arg);
 static void stm32_bdma_setup(DMA_HANDLE handle, stm32_dmacfg_t *cfg);
+static void stm32_bdma_free(DMA_HANDLE handle);
 static void stm32_bdma_start(DMA_HANDLE handle, dma_callback_t callback,
                              void *arg, bool half);
 static size_t stm32_bdma_residual(DMA_HANDLE handle);
@@ -265,6 +272,7 @@ struct stm32_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
       .dma_disable   = stm32_mdma_disable,
       .dma_interrupt = stm32_mdma_interrupt,
       .dma_setup     = stm32_mdma_setup,
+      .dma_free      = stm32_mdma_free,
       .dma_start     = stm32_mdma_start,
       .dma_residual  = stm32_mdma_residual,
 #ifdef CONFIG_STM32H7_DMACAPABLE
@@ -287,6 +295,7 @@ struct stm32_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
       .dma_disable   = stm32_sdma_disable,
       .dma_interrupt = stm32_sdma_interrupt,
       .dma_setup     = stm32_sdma_setup,
+      .dma_free      = stm32_sdma_free,
       .dma_start     = stm32_sdma_start,
       .dma_residual  = stm32_sdma_residual,
 #ifdef CONFIG_STM32H7_DMACAPABLE
@@ -309,6 +318,7 @@ struct stm32_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
       .dma_disable   = stm32_sdma_disable,
       .dma_interrupt = stm32_sdma_interrupt,
       .dma_setup     = stm32_sdma_setup,
+      .dma_free      = stm32_sdma_free,
       .dma_start     = stm32_sdma_start,
       .dma_residual  = stm32_sdma_residual,
 #ifdef CONFIG_STM32H7_DMACAPABLE
@@ -331,6 +341,7 @@ struct stm32_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
       .dma_disable   = stm32_bdma_disable,
       .dma_interrupt = stm32_bdma_interrupt,
       .dma_setup     = stm32_bdma_setup,
+      .dma_free      = stm32_bdma_free,
       .dma_start     = stm32_bdma_start,
       .dma_residual  = stm32_bdma_residual,
 #ifdef CONFIG_STM32H7_DMACAPABLE
@@ -960,6 +971,21 @@ static void stm32_mdma_setup(DMA_HANDLE handle, stm32_dmacfg_t *cfg)
 }
 
 /****************************************************************************
+ * Name: stm32_mdma_free
+ *
+ * Description:
+ *   Free master DMA
+ *
+ ****************************************************************************/
+
+static void stm32_mdma_free(DMA_HANDLE handle)
+{
+  DMA_CHANNEL dmachan = (DMA_CHANNEL)handle;
+
+  dmachan_putreg(dmachan, STM32_BDMACH_CNDTR_OFFSET, 0);
+}
+
+/****************************************************************************
  * Name: stm32_mdma_start
  *
  * Description:
@@ -1391,6 +1417,21 @@ static void stm32_sdma_setup(DMA_HANDLE handle, stm32_dmacfg_t *cfg)
               DMA_SCR_PBURST_MASK | DMA_SCR_MBURST_MASK | DMA_SCR_TRBUFF);
   regval |= scr;
   dmachan_putreg(dmachan, STM32_DMA_SCR_OFFSET, regval);
+}
+
+/****************************************************************************
+ * Name: stm32_sdma_sfree
+ *
+ * Description:
+ *   Free master DMA
+ *
+ ****************************************************************************/
+
+static void stm32_sdma_free(DMA_HANDLE handle)
+{
+  DMA_CHANNEL dmachan = (DMA_CHANNEL)handle;
+
+  dmachan_putreg(dmachan, STM32_DMA_SNDTR_OFFSET, 0);
 }
 
 /****************************************************************************
@@ -1962,6 +2003,21 @@ static void stm32_bdma_setup(DMA_HANDLE handle, stm32_dmacfg_t *cfg)
 }
 
 /****************************************************************************
+ * Name: stm32_bdma_sfree
+ *
+ * Description:
+ *   Free master DMA
+ *
+ ****************************************************************************/
+
+static void stm32_bdma_free(DMA_HANDLE handle)
+{
+  DMA_CHANNEL dmachan = (DMA_CHANNEL)handle;
+
+  dmachan_putreg(dmachan, STM32_BDMACH_CNDTR_OFFSET, 0);
+}
+
+/****************************************************************************
  * Name: stm32_bdma_start
  *
  * Description:
@@ -2470,6 +2526,10 @@ void stm32_dmafree(DMA_HANDLE handle)
 
   controller = dmachan->ctrl;
   DEBUGASSERT(controller >= MDMA && controller <= BDMA);
+
+  /* Do controller specific free */
+
+  g_dma_ops[controller].dma_free(handle);
 
   /* Get DMAMUX associated with DMA controller */
 
