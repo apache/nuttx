@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/ipforward/ipv4_forward.c
+ * net/netforward/ipv4_forward.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -41,7 +41,7 @@
 #include "sixlowpan/sixlowpan.h"
 #include "icmp/icmp.h"
 #include "ipfilter/ipfilter.h"
-#include "ipforward/ipforward.h"
+#include "netforward/netforward.h"
 #include "nat/nat.h"
 #include "devif/devif.h"
 
@@ -87,37 +87,37 @@ static int ipv4_hdrsize(FAR struct ipv4_hdr_s *ipv4)
   switch (ipv4->proto)
     {
 #ifdef CONFIG_NET_TCP
-    case IP_PROTO_TCP:
-      {
-        FAR struct tcp_hdr_s *tcp =
-          (FAR struct tcp_hdr_s *)((FAR uint8_t *)ipv4 + iphdrlen);
-        unsigned int tcpsize;
+      case IP_PROTO_TCP:
+        {
+          FAR struct tcp_hdr_s *tcp =
+            (FAR struct tcp_hdr_s *)((FAR uint8_t *)ipv4 + iphdrlen);
+          unsigned int tcpsize;
 
-        /* The TCP header length is encoded in the top 4 bits of the
-         * tcpoffset field (in units of 32-bit words).
-         */
+          /* The TCP header length is encoded in the top 4 bits of the
+           * tcpoffset field (in units of 32-bit words).
+           */
 
-        tcpsize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
-        return iphdrlen + tcpsize;
-      }
-      break;
+          tcpsize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
+          return iphdrlen + tcpsize;
+        }
+        break;
 #endif
 
 #ifdef CONFIG_NET_UDP
-    case IP_PROTO_UDP:
-      return iphdrlen + UDP_HDRLEN;
-      break;
+      case IP_PROTO_UDP:
+        return iphdrlen + UDP_HDRLEN;
+        break;
 #endif
 
 #ifdef CONFIG_NET_ICMP
-    case IP_PROTO_ICMP:
-      return iphdrlen + ICMP_HDRLEN;
-      break;
+      case IP_PROTO_ICMP:
+        return iphdrlen + ICMP_HDRLEN;
+        break;
 #endif
 
-    default:
-      nwarn("WARNING: Unrecognized proto: %u\n", ipv4->proto);
-      return -EPROTONOSUPPORT;
+      default:
+        nwarn("WARNING: Unrecognized proto: %u\n", ipv4->proto);
+        return -EPROTONOSUPPORT;
     }
 }
 #endif
@@ -270,7 +270,7 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
    * completely zeroed when we receive it.
    */
 
-  fwd = ipfwd_alloc();
+  fwd = netfwd_alloc();
   if (fwd == NULL)
     {
       nwarn("WARNING: Failed to allocate forwarding structure\n");
@@ -336,7 +336,7 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
 
   /* Then set up to forward the packet according to the protocol. */
 
-  ret = ipfwd_forward(fwd);
+  ret = netfwd_forward(fwd);
   if (ret >= 0)
     {
       netdev_iob_clear(dev);
@@ -346,7 +346,7 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
 errout_with_fwd:
   if (fwd != NULL)
     {
-      ipfwd_free(fwd);
+      netfwd_free(fwd);
     }
 
 errout:

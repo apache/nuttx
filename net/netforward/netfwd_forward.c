@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/ipforward/ipfwd_forward.c
+ * net/netforward/netfwd_forward.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -42,7 +42,7 @@
 #include "netdev/netdev.h"
 #include "arp/arp.h"
 #include "neighbor/neighbor.h"
-#include "ipforward/ipforward.h"
+#include "netforward/netforward.h"
 
 #ifdef CONFIG_NET_IPFORWARD
 /****************************************************************************
@@ -120,7 +120,7 @@ static inline void forward_ipselect(FAR struct forward_s *fwd)
  *
  ****************************************************************************/
 
-static uint32_t ipfwd_eventhandler(FAR struct net_driver_s *dev,
+static uint32_t netfwd_eventhandler(FAR struct net_driver_s *dev,
                                    FAR void *pvpriv, uint32_t flags)
 {
   FAR struct forward_s *fwd = pvpriv;
@@ -141,7 +141,7 @@ static uint32_t ipfwd_eventhandler(FAR struct net_driver_s *dev,
           /* Terminate the transfer with an error. */
 
           nwarn("WARNING: Network is down... Dropping\n");
-          ipfwd_dropstats(fwd);
+          netfwd_dropstats(fwd);
         }
 
       /* Check if the outgoing packet is available.  It may have been claimed
@@ -185,7 +185,7 @@ static uint32_t ipfwd_eventhandler(FAR struct net_driver_s *dev,
       fwd->f_cb->priv  = NULL;
       fwd->f_cb->event = NULL;
 
-      ipfwd_callback_free(dev, fwd->f_cb);
+      netfwd_callback_free(dev, fwd->f_cb);
 
       /* Free any IOBs */
 
@@ -196,7 +196,7 @@ static uint32_t ipfwd_eventhandler(FAR struct net_driver_s *dev,
 
       /* And release the forwarding state structure */
 
-      ipfwd_free(fwd);
+      netfwd_free(fwd);
     }
 
   return flags;
@@ -207,7 +207,7 @@ static uint32_t ipfwd_eventhandler(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ipfwd_forward
+ * Name: netfwd_forward
  *
  * Description:
  *   Called by the IP forwarding logic when a packet is received on one
@@ -229,18 +229,18 @@ static uint32_t ipfwd_eventhandler(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int ipfwd_forward(FAR struct forward_s *fwd)
+int netfwd_forward(FAR struct forward_s *fwd)
 {
   DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
 
   /* Set up the callback in the connection */
 
-  fwd->f_cb = ipfwd_callback_alloc(fwd->f_dev);
+  fwd->f_cb = netfwd_callback_alloc(fwd->f_dev);
   if (fwd->f_cb != NULL)
     {
       fwd->f_cb->flags   = (IPFWD_POLL | NETDEV_DOWN);
       fwd->f_cb->priv    = (FAR void *)fwd;
-      fwd->f_cb->event   = ipfwd_eventhandler;
+      fwd->f_cb->event   = netfwd_eventhandler;
 
       /* Notify the device driver of the availability of TX data */
 

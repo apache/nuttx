@@ -105,7 +105,7 @@
 #include "icmp/icmp.h"
 #include "igmp/igmp.h"
 
-#include "ipforward/ipforward.h"
+#include "netforward/netforward.h"
 #include "devif/devif.h"
 #include "nat/nat.h"
 #include "ipfilter/ipfilter.h"

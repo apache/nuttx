@@ -50,7 +50,7 @@
 
 #include "nat/nat.h"
 #include "netdev/netdev.h"
-#include "ipforward/ipforward.h"
+#include "netforward/netforward.h"
 #include "inet/inet.h"
 #include "devif/devif.h"
 #include "ipfilter/ipfilter.h"

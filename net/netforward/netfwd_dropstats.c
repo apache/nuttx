@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/ipforward/ipfwd_dropstats.c
+ * net/netforward/netfwd_dropstats.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -32,7 +32,7 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netstats.h>
 
-#include "ipforward/ipforward.h"
+#include "netforward/netforward.h"
 
 #if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_STATISTICS)
 
@@ -60,25 +60,25 @@ static int proto_dropstats(int proto)
   switch (proto)
     {
 #ifdef CONFIG_NET_TCP
-    case IP_PROTO_TCP:
-      g_netstats.tcp.drop++;
-      break;
+      case IP_PROTO_TCP:
+        g_netstats.tcp.drop++;
+        break;
 #endif
 
 #ifdef CONFIG_NET_UDP
-    case IP_PROTO_UDP:
-      g_netstats.udp.drop++;
-      break;
+      case IP_PROTO_UDP:
+        g_netstats.udp.drop++;
+        break;
 #endif
 
 #ifdef CONFIG_NET_ICMPv6
-    case IP_PROTO_ICMP6:
-      g_netstats.icmpv6.drop++;
-      break;
+      case IP_PROTO_ICMP6:
+        g_netstats.icmpv6.drop++;
+        break;
 #endif
 
-    default:
-      return -EPROTONOSUPPORT;
+      default:
+        return -EPROTONOSUPPORT;
     }
 
   return OK;
@@ -149,7 +149,7 @@ void ipv4_dropstats(FAR struct ipv4_hdr_s *ipv4)
 #endif
 
 /****************************************************************************
- * Name: ipfwd_dropstats
+ * Name: netfwd_dropstats
  *
  * Description:
  *   Update statistics for a dropped packet.
@@ -162,7 +162,7 @@ void ipv4_dropstats(FAR struct ipv4_hdr_s *ipv4)
  *
  ****************************************************************************/
 
-void ipfwd_dropstats(FAR struct forward_s *fwd)
+void netfwd_dropstats(FAR struct forward_s *fwd)
 {
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
