@@ -439,18 +439,22 @@ function(nuttx_link_libraries)
   set(TARGET ${ARGV0})
   if(TARGET ${TARGET})
     foreach(dep ${ARGN})
-      target_compile_options(
-        ${TARGET}
-        PRIVATE
-          $<GENEX_EVAL:$<TARGET_PROPERTY:${dep},INTERFACE_COMPILE_OPTIONS>>)
-      target_compile_definitions(
-        ${TARGET}
-        PRIVATE
-          $<GENEX_EVAL:$<TARGET_PROPERTY:${dep},INTERFACE_COMPILE_DEFINITIONS>>)
-      target_include_directories(
-        ${TARGET}
-        PRIVATE
-          $<GENEX_EVAL:$<TARGET_PROPERTY:${dep},INTERFACE_INCLUDE_DIRECTORIES>>)
+      if(NOT "${dep}" STREQUAL "${TARGET}")
+        target_compile_options(
+          ${TARGET}
+          PUBLIC
+            $<GENEX_EVAL:$<TARGET_PROPERTY:${dep},INTERFACE_COMPILE_OPTIONS>>)
+        target_compile_definitions(
+          ${TARGET}
+          PUBLIC
+            $<GENEX_EVAL:$<TARGET_PROPERTY:${dep},INTERFACE_COMPILE_DEFINITIONS>>
+        )
+        target_include_directories(
+          ${TARGET}
+          PUBLIC
+            $<GENEX_EVAL:$<TARGET_PROPERTY:${dep},INTERFACE_INCLUDE_DIRECTORIES>>
+        )
+      endif()
     endforeach()
   endif()
 endfunction()
