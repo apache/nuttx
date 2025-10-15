@@ -470,15 +470,20 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_TICKLESS_ALARM
-void nxsched_alarm_tick_expiration(clock_t ticks)
+void nxsched_tick_expiration(clock_t ticks)
 {
   clock_t elapsed;
   clock_t nexttime;
+  clock_t previous;
 
-  /* Save the time that the alarm occurred */
+  previous = update_time_tick(ticks);
 
-  elapsed = ticks - update_time_tick(ticks);
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
+  elapsed = ticks - previous;
+#else
+  UNUSED(previous);
+  elapsed = atomic_read(&g_timer_interval);
+#endif
 
   clock_increase_sched_ticks(elapsed);
 
@@ -490,6 +495,7 @@ void nxsched_alarm_tick_expiration(clock_t ticks)
   atomic_set(&g_timer_interval, elapsed);
 }
 
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
 void nxsched_alarm_expiration(FAR const struct timespec *ts)
 {
   clock_t ticks;
@@ -497,7 +503,7 @@ void nxsched_alarm_expiration(FAR const struct timespec *ts)
   DEBUGASSERT(ts);
 
   ticks = clock_time2ticks_floor(ts);
-  nxsched_alarm_tick_expiration(ticks);
+  nxsched_tick_expiration(ticks);
 }
 #endif
 
@@ -521,23 +527,12 @@ void nxsched_alarm_expiration(FAR const struct timespec *ts)
 void nxsched_timer_expiration(void)
 {
   clock_t ticks;
-  clock_t elapsed;
-  clock_t nexttime;
 
   /* Get the interval associated with last expiration */
 
   up_timer_gettick(&ticks);
-  update_time_tick(ticks);
-  elapsed = atomic_read(&g_timer_interval);
 
-  clock_increase_sched_ticks(elapsed);
-
-  /* Process the timer ticks and set up the next interval (or not) */
-
-  nexttime = nxsched_timer_process(ticks, elapsed, false);
-
-  elapsed = nxsched_timer_start(ticks, nexttime);
-  atomic_set(&g_timer_interval, elapsed);
+  nxsched_tick_expiration(ticks);
 }
 #endif
 

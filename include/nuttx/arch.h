@@ -2488,8 +2488,8 @@ void nxsched_timer_expiration(void);
 
 #if defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM)
 void nxsched_alarm_expiration(FAR const struct timespec *ts);
-void nxsched_alarm_tick_expiration(clock_t ticks);
 #endif
+void nxsched_tick_expiration(clock_t ticks);
 
 /****************************************************************************
  * Name:  nxsched_get_next_expired
