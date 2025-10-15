@@ -112,7 +112,8 @@ endfunction()
 function(nuttx_wildcard_sources)
   cmake_parse_arguments(ARGS "" "" EXCLUDE ${ARGN})
 
-  file(GLOB SRCS ${ARGN})
+  # `SRCS` just collect all source files instead of EXCLUDE arguments
+  file(GLOB SRCS ${ARGS_UNPARSED_ARGUMENTS})
   if(ARGS_EXCLUDE)
     file(GLOB RM_SRCS ${ARGS_EXCLUDE})
     list(REMOVE_ITEM SRCS ${RM_SRCS})
