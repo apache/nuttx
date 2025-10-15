@@ -3,13 +3,29 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config NET_FORWARD
+	bool
+	default n
+	--help--
+		Enable forwarding function.
+
 config NET_IPFORWARD
 	bool "Enable L2 forwarding"
 	default n
+	select NET_FORWARD
 	---help---
 		Enable forwarding of packets.  Packets received with IP addresses
 		that are not supported by this platform will be forwarded to the
 		appropriate network device.  Routing table support may be required.
+
+config NET_CANFORWARD
+	bool "Enable CAN forward function"
+	default n
+	depends on NET_CAN
+	select NET_FORWARD
+	---help---
+		Enable CAN forward function. Packets received will be forwarded to the
+		appropriate network device. Routing table support is required.
 
 config NET_IPFORWARD_BROADCAST
 	bool "Forward broadcast/multicast packets"
@@ -22,7 +38,7 @@ config NET_IPFORWARD_BROADCAST
 config NET_FORWARD_NSTRUCT
 	int "Number of pre-allocated forwarding structures"
 	default 4
-	depends on NET_IPFORWARD
+	depends on NET_FORWARD
 	---help---
 		When packets are forwarded from on device to another, a structure
 		must be allocated to hold the state of forwarding across several

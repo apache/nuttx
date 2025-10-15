@@ -64,6 +64,7 @@
 #define MAX_HDRLEN (L2_MAXHDRLEN + L3_MAXHDRLEN)
 
 static_assert(MAX_HDRLEN <= CONFIG_IOB_BUFSIZE, "IOB buffer size too small");
+#endif /* CONFIG_NET_IPFORWARD */
 
 /****************************************************************************
  * Private Data
@@ -114,5 +115,3 @@ void netfwd_free(FAR struct forward_s *fwd)
 {
   NET_BUFPOOL_FREE(g_fwdpool, fwd);
 }
-
-#endif /* CONFIG_NET_IPFORWARD */

@@ -34,8 +34,6 @@
 
 #include "netforward/netforward.h"
 
-#if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_STATISTICS)
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -55,6 +53,7 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_IPFORWARD
 static int proto_dropstats(int proto)
 {
   switch (proto)
@@ -83,6 +82,7 @@ static int proto_dropstats(int proto)
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -103,7 +103,7 @@ static int proto_dropstats(int proto)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv6
+#if defined(CONFIG_NET_IPv6) && defined(CONFIG_NET_IPFORWARD)
 void ipv6_dropstats(FAR struct ipv6_hdr_s *ipv6)
 {
   int ret;
@@ -133,7 +133,7 @@ void ipv6_dropstats(FAR struct ipv6_hdr_s *ipv6)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IPv4
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPFORWARD)
 void ipv4_dropstats(FAR struct ipv4_hdr_s *ipv4)
 {
   int ret;
@@ -164,22 +164,30 @@ void ipv4_dropstats(FAR struct ipv4_hdr_s *ipv4)
 
 void netfwd_dropstats(FAR struct forward_s *fwd)
 {
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  if (fwd->f_domain == PF_INET)
-#endif
+  switch (fwd->f_domain)
     {
-      ipv4_dropstats((FAR struct ipv4_hdr_s *)IOB_DATA(fwd->f_iob));
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPFORWARD)
+      case PF_INET:
+        {
+          ipv4_dropstats((FAR struct ipv4_hdr_s *)IOB_DATA(fwd->f_iob));
+        }
+        break;
+#endif
+#if defined(CONFIG_NET_IPv6) && defined(CONFIG_NET_IPFORWARD)
+      case PF_INET6:
+        {
+          ipv6_dropstats((FAR struct ipv6_hdr_s *)IOB_DATA(fwd->f_iob));
+        }
+        break;
+#endif
+#ifdef CONFIG_NET_CANFORWARD
+      case PF_CAN:
+        {
+          g_netstats.cangw.drop++;
+        }
+        break;
+#endif
+      default:
+        break;
     }
-#endif
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  else
-#endif
-    {
-      ipv6_dropstats((FAR struct ipv6_hdr_s *)IOB_DATA(fwd->f_iob));
-    }
-#endif
 }
-
-#endif /* CONFIG_NET_IPFORWARD && CONFIG_NET_STATISTICS */

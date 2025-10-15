@@ -576,6 +576,10 @@ struct net_driver_s
                       unsigned long arg);
 #endif
 
+#ifdef CONFIG_NET_CANFORWARD
+  sq_queue_t d_cangw_rules; /* CAN gateway rules */
+#endif /* CONFIG_NET_CANFORWARD */
+
   /* Drivers may attached device-specific, private information */
 
   FAR void *d_private;
