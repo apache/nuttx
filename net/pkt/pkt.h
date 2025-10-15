@@ -169,13 +169,20 @@ void pkt_free(FAR struct pkt_conn_s *conn);
  *   Find a connection structure that is the appropriate connection to be
  *   used with the provided network device
  *
+ * Input Parameters:
+ *   dev  - The device driver structure containing the received packet
+ *   conn - A pointer to the PKT connection structure
+ *   loopback - Indicate whether it is a loopback packet
+ *
+ *
  * Assumptions:
  *   This function is called from network logic at with the network locked.
  *
  ****************************************************************************/
 
 FAR struct pkt_conn_s *pkt_active(FAR struct net_driver_s *dev,
-                                  FAR struct pkt_conn_s *conn);
+                                  FAR struct pkt_conn_s *conn,
+                                  bool loopback);
 
 /****************************************************************************
  * Name: pkt_nextconn()
