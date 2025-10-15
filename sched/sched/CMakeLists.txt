@@ -47,7 +47,8 @@ set(SRCS
     sched_get_tls.c
     sched_sysinfo.c
     sched_get_stateinfo.c
-    sched_switchcontext.c)
+    sched_switchcontext.c
+    sched_sleep.c)
 
 if(DEFINED CONFIG_STACKCHECK_MARGIN)
   if(NOT CONFIG_STACKCHECK_MARGIN EQUAL -1)
