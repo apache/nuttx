@@ -65,7 +65,7 @@ class Registers:
 
                 # Name         Nr  Rel Offset    Size  Type            Rmt Nr  g/G Offset
                 match = re.match(
-                    r"\s(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\S+)(?:\s+(\d+)\s+(\d+))?",
+                    r"\s*(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\S+)(?:\s+(\d+)\s+(\d+))?",
                     line,
                 )
                 if not match:
