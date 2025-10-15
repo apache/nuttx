@@ -568,10 +568,12 @@ void nx_start(void)
   /* Initialize the logic that determine unique process IDs. */
 
   i = 1 << LOG2_CEIL(CONFIG_PID_INITIAL_COUNT);
+#if CONFIG_SMP_NCPUS >= CONFIG_PID_INITIAL_COUNT
   while (i <= CONFIG_SMP_NCPUS)
     {
       i <<= 1;
     }
+#endif
 
   g_pidhash = kmm_zalloc(sizeof(*g_pidhash) * i);
   DEBUGASSERT(g_pidhash);
