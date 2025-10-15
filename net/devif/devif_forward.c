@@ -36,8 +36,6 @@
 #include "netforward/netforward.h"
 #include "devif/devif.h"
 
-#ifdef CONFIG_NET_IPFORWARD
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -71,5 +69,3 @@ void devif_forward(FAR struct forward_s *fwd)
   fwd->f_dev->d_sndlen = 0;
   fwd->f_iob = NULL;
 }
-
-#endif /* CONFIG_NET_IPFORWARD */
