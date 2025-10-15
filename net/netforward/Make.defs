@@ -1,5 +1,5 @@
 ############################################################################
-# net/ipforward/Make.defs
+# net/netforward/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -24,7 +24,7 @@
 
 ifeq ($(CONFIG_NET_IPFORWARD),y)
 
-NET_CSRCS += ipfwd_alloc.c ipfwd_forward.c ipfwd_poll.c
+NET_CSRCS += netfwd_alloc.c netfwd_forward.c netfwd_poll.c
 
 ifeq ($(CONFIG_NET_IPv4),y)
 NET_CSRCS += ipv4_forward.c
@@ -35,12 +35,12 @@ NET_CSRCS += ipv6_forward.c
 endif
 
 ifeq ($(CONFIG_NET_STATISTICS),y)
-NET_CSRCS += ipfwd_dropstats.c
+NET_CSRCS += netfwd_dropstats.c
 endif
 
 # Include IP forwarding build support
 
-DEPPATH += --dep-path ipforward
-VPATH += :ipforward
+DEPPATH += --dep-path netforward
+VPATH += :netforward
 
 endif

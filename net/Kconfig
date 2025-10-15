@@ -430,7 +430,7 @@ menuconfig NET_6LOWPAN
 		for IEEE 802.15.4 or other packet radios.
 
 source "net/sixlowpan/Kconfig"
-source "net/ipforward/Kconfig"
+source "net/netforward/Kconfig"
 source "net/nat/Kconfig"
 source "net/ipfilter/Kconfig"
 source "net/netfilter/Kconfig"

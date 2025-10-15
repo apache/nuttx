@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/ipforward/ipfwd_alloc.c
+ * net/netforward/netfwd_alloc.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -36,7 +36,7 @@
 #include <nuttx/net/icmp.h>
 #include <nuttx/net/icmpv6.h>
 
-#include "ipforward/ipforward.h"
+#include "netforward/netforward.h"
 #include "utils/utils.h"
 
 #ifdef CONFIG_NET_IPFORWARD
@@ -72,8 +72,8 @@ static_assert(MAX_HDRLEN <= CONFIG_IOB_BUFSIZE, "IOB buffer size too small");
 /* This is the state of the global forwarding structures */
 
 NET_BUFPOOL_DECLARE(g_fwdpool, sizeof(struct forward_s),
-                    CONFIG_NET_IPFORWARD_NSTRUCT,
-                    CONFIG_NET_IPFORWARD_ALLOC_STRUCT,
+                    CONFIG_NET_FORWARD_NSTRUCT,
+                    CONFIG_NET_FORWARD_ALLOC_STRUCT,
                     CONFIG_IOB_NBUFFERS - CONFIG_IOB_THROTTLE);
 
 /****************************************************************************
@@ -81,7 +81,7 @@ NET_BUFPOOL_DECLARE(g_fwdpool, sizeof(struct forward_s),
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ipfwd_alloc
+ * Name: netfwd_alloc
  *
  * Description:
  *   Allocate a forwarding structure by removing a pre-allocated entry from
@@ -93,13 +93,13 @@ NET_BUFPOOL_DECLARE(g_fwdpool, sizeof(struct forward_s),
  *
  ****************************************************************************/
 
-FAR struct forward_s *ipfwd_alloc(void)
+FAR struct forward_s *netfwd_alloc(void)
 {
   return NET_BUFPOOL_TRYALLOC(g_fwdpool);
 }
 
 /****************************************************************************
- * Name: ipfwd_free
+ * Name: netfwd_free
  *
  * Description:
  *   Free a forwarding structure by adding it to a free list.
@@ -110,7 +110,7 @@ FAR struct forward_s *ipfwd_alloc(void)
  *
  ****************************************************************************/
 
-void ipfwd_free(FAR struct forward_s *fwd)
+void netfwd_free(FAR struct forward_s *fwd)
 {
   NET_BUFPOOL_FREE(g_fwdpool, fwd);
 }
