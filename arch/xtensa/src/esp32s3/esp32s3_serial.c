@@ -312,6 +312,7 @@ static int uart_handler(int irq, void *context, void *arg)
   struct esp32s3_uart_s *priv = dev->priv;
   uint32_t tx_mask = UART_TXFIFO_EMPTY_INT_ST_M | UART_TX_DONE_INT_ST_M;
   uint32_t rx_mask = UART_RXFIFO_TOUT_INT_ST_M | UART_RXFIFO_FULL_INT_ST_M;
+  uint32_t rx_ovf_mask = UART_RXFIFO_OVF_INT_ST_M;
   uint32_t int_status;
 
   int_status = getreg32(UART_INT_ST_REG(priv->id));
@@ -342,6 +343,12 @@ static int uart_handler(int irq, void *context, void *arg)
     {
       uart_recvchars(dev);
       modifyreg32(UART_INT_CLR_REG(priv->id), rx_mask, rx_mask);
+    }
+
+  if ((int_status & rx_ovf_mask) != 0)
+    {
+      esp32s3_lowputc_rst_rxfifo(priv);
+      modifyreg32(UART_INT_CLR_REG(priv->id), rx_ovf_mask, rx_ovf_mask);
     }
 
   return OK;
@@ -385,11 +392,18 @@ static int esp32s3_setup(struct uart_dev_s *dev)
   modifyreg32(UART_CONF1_REG(priv->id), UART_TXFIFO_EMPTY_THRHD_M, 0);
 
   /* Define a threshold to trigger an RX FIFO FULL interrupt.
-   * Define just one byte to read data immediately.
    */
 
   modifyreg32(UART_CONF1_REG(priv->id), UART_RXFIFO_FULL_THRHD_M,
-              1 << UART_RXFIFO_FULL_THRHD_S);
+              CONFIG_ESP32S3_RX_FIFO_THRD << UART_RXFIFO_FULL_THRHD_S);
+
+  /* Define a rx fifo timeout to trigger RX TOUT interrupt.
+   */
+
+  modifyreg32(UART_CONF1_REG(priv->id),
+            UART_RX_TOUT_THRHD_M | UART_RX_TOUT_EN_M,
+            (CONFIG_ESP32S3_RX_FIFO_TOUT << UART_RX_TOUT_THRHD_S) |
+            UART_RX_TOUT_EN_M);
 
   /* Define the maximum FIFO size for RX and TX FIFO.
    * That means, 1 block = 128 bytes.
