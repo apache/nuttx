@@ -18,7 +18,6 @@ Network Support
        +- ieee802154 - PF_IEEE802154 socket interface
        +- igmp       - IGMPv2 client
        +- inet       - PF_INET/PF_INET6 socket interface
-       +- ipforward  - IP forwarding logic
        +- ipfrag     - Fragmentation and reassembly
        +- local      - Unix domain (local) sockets
        +- mld        - Multicast Listener Discovery (MLD)
@@ -26,6 +25,7 @@ Network Support
        +- neighbor   - Neighbor Discovery Protocol (IPv6)
        +- netdev     - Socket network device interface
        +- netfilter  - Iptables Interface
+       +- netforward - Packet forwarding logic
        +- netlink    - Netlink IPC socket interface
        +- pkt        - "Raw" packet socket support
        +- procfs     - net devices PROCFS support

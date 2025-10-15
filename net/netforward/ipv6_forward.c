@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/ipforward/ipv6_forward.c
+ * net/netforward/ipv6_forward.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -43,7 +43,7 @@
 #include "devif/devif.h"
 #include "icmpv6/icmpv6.h"
 #include "ipfilter/ipfilter.h"
-#include "ipforward/ipforward.h"
+#include "netforward/netforward.h"
 
 #if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_IPv6)
 
@@ -83,43 +83,43 @@ static int ipv6_hdrsize(FAR struct ipv6_hdr_s *ipv6)
   switch (ipv6->proto)
     {
 #ifdef CONFIG_NET_TCP
-    case IP_PROTO_TCP:
-      {
-        FAR struct tcp_hdr_s *tcp =
-          (FAR struct tcp_hdr_s *)((FAR uint8_t *)ipv6 + IPv6_HDRLEN);
-        unsigned int tcpsize;
+      case IP_PROTO_TCP:
+        {
+          FAR struct tcp_hdr_s *tcp =
+            (FAR struct tcp_hdr_s *)((FAR uint8_t *)ipv6 + IPv6_HDRLEN);
+          unsigned int tcpsize;
 
-        /* The TCP header length is encoded in the top 4 bits of the
-         * tcpoffset field (in units of 32-bit words).
-         */
+          /* The TCP header length is encoded in the top 4 bits of the
+           * tcpoffset field (in units of 32-bit words).
+           */
 
-        tcpsize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
-        return IPv6_HDRLEN + tcpsize;
-      }
-      break;
+          tcpsize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
+          return IPv6_HDRLEN + tcpsize;
+        }
+        break;
 #endif
 
 #ifdef CONFIG_NET_UDP
-    case IP_PROTO_UDP:
-      return IPv6_HDRLEN + UDP_HDRLEN;
-      break;
+      case IP_PROTO_UDP:
+        return IPv6_HDRLEN + UDP_HDRLEN;
+        break;
 #endif
 
 #ifdef CONFIG_NET_ICMPv6
-    case IP_PROTO_ICMP6:
-      return IPv6_HDRLEN + ICMPv6_HDRLEN;
-      break;
+      case IP_PROTO_ICMP6:
+        return IPv6_HDRLEN + ICMPv6_HDRLEN;
+        break;
 #endif
 
 #ifdef CONFIG_NET_IPFRAG
-    case NEXT_FRAGMENT_EH:
-      return IPv6_HDRLEN + EXTHDR_FRAG_LEN;
-      break;
+      case NEXT_FRAGMENT_EH:
+        return IPv6_HDRLEN + EXTHDR_FRAG_LEN;
+        break;
 #endif
 
-    default:
-      nwarn("WARNING: Unrecognized proto: %u\n", ipv6->proto);
-      return -EPROTONOSUPPORT;
+      default:
+        nwarn("WARNING: Unrecognized proto: %u\n", ipv6->proto);
+        return -EPROTONOSUPPORT;
     }
 }
 #endif
@@ -407,7 +407,7 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
        * completely zeroed when we receive it.
        */
 
-      fwd = ipfwd_alloc();
+      fwd = netfwd_alloc();
       if (fwd == NULL)
         {
           nwarn("WARNING: Failed to allocate forwarding structure\n");
@@ -473,7 +473,7 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
 
       /* Then set up to forward the packet according to the protocol. */
 
-      ret = ipfwd_forward(fwd);
+      ret = netfwd_forward(fwd);
       if (ret >= 0)
         {
           netdev_iob_clear(dev);
@@ -484,7 +484,7 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
 errout_with_fwd:
   if (fwd != NULL)
     {
-      ipfwd_free(fwd);
+      netfwd_free(fwd);
     }
 
 errout:
@@ -697,14 +697,13 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
           goto drop;
         }
     }
-
 #else /* CONFIG_NET_6LOWPAN */
-    {
-      nwarn(
-         "WARNING: Packet forwarding not supported in this configuration\n");
-      ret = -ENOSYS;
-      goto drop;
-    }
+  {
+    nwarn("WARNING: Packet forwarding not supported in this "
+          "configuration\n");
+    ret = -ENOSYS;
+    goto drop;
+  }
 #endif /* CONFIG_NET_6LOWPAN */
 
   /* Return success.  ipv6_input will return to the network driver with

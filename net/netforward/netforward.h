@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/ipforward/ipforward.h
+ * net/netforward/netforward.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -41,19 +41,19 @@
 
 #define HAVE_FWDALLOC 1
 
-#ifndef CONFIG_NET_IPFORWARD_NSTRUCT
-#  define CONFIG_NET_IPFORWARD_NSTRUCT 4
+#ifndef CONFIG_NET_FORWARD_NSTRUCT
+#  define CONFIG_NET_FORWARD_NSTRUCT 4
 #endif
 
-static_assert(CONFIG_IOB_NBUFFERS > CONFIG_NET_IPFORWARD_NSTRUCT,
+static_assert(CONFIG_IOB_NBUFFERS > CONFIG_NET_FORWARD_NSTRUCT,
               "IP forward may consume all the IOB and break netdev logic");
 
 /* Allocate a new IP forwarding data callback */
 
-#define ipfwd_callback_alloc(dev)   devif_callback_alloc(dev, \
-                                                         &(dev)->d_conncb, \
-                                                         &(dev)->d_conncb_tail)
-#define ipfwd_callback_free(dev,cb) devif_dev_callback_free(dev, cb)
+#define netfwd_callback_alloc(dev)   devif_callback_alloc(dev, \
+                                                          &(dev)->d_conncb, \
+                                                          &(dev)->d_conncb_tail)
+#define netfwd_callback_free(dev,cb) devif_dev_callback_free(dev, cb)
 
 /****************************************************************************
  * Public Types
@@ -84,7 +84,7 @@ struct ipv4_hdr_s; /* Forward reference */
 struct ipv6_hdr_s; /* Forward reference */
 
 /****************************************************************************
- * Name: ipfwd_alloc
+ * Name: netfwd_alloc
  *
  * Description:
  *   Allocate a forwarding structure by removing a pre-allocated entry from
@@ -96,10 +96,10 @@ struct ipv6_hdr_s; /* Forward reference */
  *
  ****************************************************************************/
 
-FAR struct forward_s *ipfwd_alloc(void);
+FAR struct forward_s *netfwd_alloc(void);
 
 /****************************************************************************
- * Name: ipfwd_free
+ * Name: netfwd_free
  *
  * Description:
  *   Free a forwarding structure by adding it to a free list.
@@ -110,7 +110,7 @@ FAR struct forward_s *ipfwd_alloc(void);
  *
  ****************************************************************************/
 
-void ipfwd_free(FAR struct forward_s *fwd);
+void netfwd_free(FAR struct forward_s *fwd);
 
 /****************************************************************************
  * Name: ipv4_forward_broadcast
@@ -217,10 +217,10 @@ void devif_forward(FAR struct forward_s *fwd);
  *
  ****************************************************************************/
 
-int ipfwd_forward(FAR struct forward_s *fwd);
+int netfwd_forward(FAR struct forward_s *fwd);
 
 /****************************************************************************
- * Name: ipfwd_poll
+ * Name: netfwd_poll
  *
  * Description:
  *   Poll all pending transfer for ARP requests to send.
@@ -231,10 +231,10 @@ int ipfwd_forward(FAR struct forward_s *fwd);
  *
  ****************************************************************************/
 
-void ipfwd_poll(FAR struct net_driver_s *dev);
+void netfwd_poll(FAR struct net_driver_s *dev);
 
 /****************************************************************************
- * Name: ipfwd_dropstats
+ * Name: netfwd_dropstats
  *
  * Description:
  *   Update statistics for a dropped packet.
@@ -248,9 +248,9 @@ void ipfwd_poll(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_STATISTICS
-void ipfwd_dropstats(FAR struct forward_s *fwd);
+void netfwd_dropstats(FAR struct forward_s *fwd);
 #else
-#  define ipfwd_dropstats(fwd)
+#  define netfwd_dropstats(fwd)
 #endif
 
 /****************************************************************************

@@ -33,7 +33,7 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/netdev.h>
 
-#include "ipforward/ipforward.h"
+#include "netforward/netforward.h"
 #include "devif/devif.h"
 
 #ifdef CONFIG_NET_IPFORWARD

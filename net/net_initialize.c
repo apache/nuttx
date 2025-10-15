@@ -34,7 +34,7 @@
 #include "socket/socket.h"
 #include "devif/devif.h"
 #include "netdev/netdev.h"
-#include "ipforward/ipforward.h"
+#include "netforward/netforward.h"
 #include "sixlowpan/sixlowpan.h"
 #include "icmp/icmp.h"
 #include "icmpv6/icmpv6.h"

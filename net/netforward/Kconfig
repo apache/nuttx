@@ -19,7 +19,7 @@ config NET_IPFORWARD_BROADCAST
 		If selected, broadcast packets received on one network device will
 		be forwarded though other network devices.
 
-config NET_IPFORWARD_NSTRUCT
+config NET_FORWARD_NSTRUCT
 	int "Number of pre-allocated forwarding structures"
 	default 4
 	depends on NET_IPFORWARD
@@ -41,7 +41,7 @@ config NET_IPFORWARD_NSTRUCT
 		CONFIG_IOB_NBUFFERS, otherwise it may consume all the IOB and let
 		netdev fail to work.
 
-config NET_IPFORWARD_ALLOC_STRUCT
+config NET_FORWARD_ALLOC_STRUCT
 	int "Dynamic forwarding structures allocation"
 	default 1
 	---help---
