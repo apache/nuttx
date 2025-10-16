@@ -276,7 +276,7 @@ static inline int bq2425x_reset(FAR struct bq2425x_dev_s *priv)
 
   /* Wait a little bit to clear registers */
 
-  nxsig_usleep(500);
+  nxsched_usleep(500);
 
   /* There is a BUG in BQ2425X the RESET bit is always read as 1 */
 

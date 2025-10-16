@@ -123,7 +123,7 @@ bcmf_interface_frame_t
 
       nxmutex_unlock(&ibus->queue_lock);
 
-      nxsig_usleep(10 * 1000);
+      nxsched_usleep(10 * 1000);
 
       if (!block)
         {

@@ -86,7 +86,7 @@ int board_isx019_power_on(void)
     {
       /* Need to wait for a while after power-on */
 
-      nxsig_usleep(POWER_CHECK_TIME);
+      nxsched_usleep(POWER_CHECK_TIME);
 
       if (board_power_monitor(POWER_IMAGE_SENSOR))
         {
@@ -112,7 +112,7 @@ int board_isx019_power_off(void)
 
   /* Need to wait for power-off to be reflected */
 
-  nxsig_usleep(POWER_OFF_TIME);
+  nxsched_usleep(POWER_OFF_TIME);
 
   ret = -ETIMEDOUT;
   for (i = 0; i < POWER_CHECK_RETRY; i++)
@@ -123,7 +123,7 @@ int board_isx019_power_off(void)
           break;
         }
 
-      nxsig_usleep(POWER_CHECK_TIME);
+      nxsched_usleep(POWER_CHECK_TIME);
     }
 
   return ret;
@@ -153,7 +153,7 @@ struct i2c_master_s *board_isx019_initialize(void)
     {
       /* ISX019 requires stable RTC */
 
-      nxsig_usleep(100 * USEC_PER_MSEC);
+      nxsched_usleep(100 * USEC_PER_MSEC);
     }
 
   cxd56_gpio_config(IMAGER_RST, false);

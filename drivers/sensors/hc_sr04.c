@@ -128,7 +128,7 @@ static int hcsr04_start_measuring(FAR struct hcsr04_dev_s *priv)
   /* Send to 10uS trigger pulse */
 
   priv->config->set_trigger(priv->config, true);
-  nxsig_usleep(10);
+  nxsched_usleep(10);
   priv->config->set_trigger(priv->config, false);
 
   return 0;

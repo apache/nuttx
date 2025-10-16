@@ -3237,7 +3237,7 @@ int esp32_bt_controller_disable(void)
       async_wakeup_request(BTDM_ASYNC_WAKEUP_REQ_CTRL_DISA);
       while (btdm_power_state_active() == false)
         {
-          nxsig_usleep(1000);
+          nxsched_usleep(1000);
         }
     }
 

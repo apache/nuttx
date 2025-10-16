@@ -560,7 +560,7 @@ static int apds9922_reset(FAR struct apds9922_dev_s *priv)
 
   /* Wait for device to power up properly after reset */
 
-  nxsig_usleep(50000);
+  nxsched_usleep(50000);
 
   return OK;
 }

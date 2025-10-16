@@ -215,7 +215,7 @@ static int mlx90614_write_word(FAR struct mlx90614_dev_s *priv, uint8_t cmd,
 
   /* Wait the EEPROM erase */
 
-  nxsig_usleep(10 * 1000);
+  nxsched_usleep(10 * 1000);
 
   /* Create the I2C command that will be sent to device */
 

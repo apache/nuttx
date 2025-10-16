@@ -295,7 +295,7 @@ static int hyt271_mr(FAR struct hyt271_dev_s *dev,
 
   /* Wait until measure cycle is done. This takes between 60 - 100 ms. */
 
-  nxsig_usleep(100000);
+  nxsched_usleep(100000);
   return ret;
 }
 
@@ -368,7 +368,7 @@ static int hyt271_cmd_response(FAR struct hyt271_dev_s *dev,
 
   /* Sleep for usec µs until response is ready */
 
-  nxsig_usleep(usec);
+  nxsched_usleep(usec);
 
   /* Read response and return */
 
@@ -857,7 +857,7 @@ static int hyt271_thread(int argc, char** argv)
 
       /* Sleeping thread before fetching the next sensor data */
 
-      nxsig_usleep(priv->interval);
+      nxsched_usleep(priv->interval);
     }
 
   return OK;

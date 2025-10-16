@@ -226,12 +226,12 @@ uint16_t stmpe811_adcread(STMPE811_HANDLE handle, int pin)
   for (i = 0; i < 3; i++)
     {
       /* The worst case ADC conversion time is (nominally) 56.4 uS. The
-       * following nxsig_usleep() looks nice but in reality, nxsig_usleep()
-       * normal does not have that kind of precision (it will probably end
-       * up waiting 10 MS).
+       * following nxsched_usleep() looks nice but in reality,
+       * nxsched_usleep() normal does not have that kind of precision
+       * (it will probably end up waiting 10 MS).
        */
 
-      nxsig_usleep(57);
+      nxsched_usleep(57);
 
       /* Check if the conversion is complete */
 

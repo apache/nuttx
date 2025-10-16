@@ -847,7 +847,7 @@ static int gyro_thread(int argc, char **argv)
 
       /* Wait for next measurement cycle */
 
-      nxsig_usleep(ODR_INTERVAL[dev->gyro.odr]);
+      nxsched_usleep(ODR_INTERVAL[dev->gyro.odr]);
     }
 
   return err;
@@ -890,7 +890,7 @@ static int accel_thread(int argc, char **argv)
 
       /* Wait for next measurement cycle */
 
-      nxsig_usleep(ODR_INTERVAL[dev->accel.odr]);
+      nxsched_usleep(ODR_INTERVAL[dev->accel.odr]);
     }
 
   return err;
@@ -1036,7 +1036,7 @@ static int gyro_selftest(FAR struct lsm6dso32_dev_s *dev)
 
   /* Wait for 100ms for stable output */
 
-  nxsig_usleep(100000);
+  nxsched_usleep(100000);
 
   /* Discard first measurement */
 
@@ -1089,7 +1089,7 @@ static int gyro_selftest(FAR struct lsm6dso32_dev_s *dev)
 
   /* Wait 100ms for stable output */
 
-  nxsig_usleep(100000);
+  nxsched_usleep(100000);
 
   /* Discard first measurement */
 
@@ -1167,7 +1167,7 @@ static int gyro_selftest(FAR struct lsm6dso32_dev_s *dev)
       goto early_restore;
     }
 
-  nxsig_usleep(100000);
+  nxsched_usleep(100000);
 
 early_restore:
 
@@ -1186,7 +1186,7 @@ early_restore:
             err);
     }
 
-  nxsig_usleep(100000);
+  nxsched_usleep(100000);
 
 early_ret:
   nxmutex_unlock(&dev->devlock);
@@ -1251,7 +1251,7 @@ static int accel_selftest(FAR struct lsm6dso32_dev_s *dev)
 
   /* Wait for 100ms for stable output */
 
-  nxsig_usleep(100000);
+  nxsched_usleep(100000);
 
   /* Discard first measurement */
 
@@ -1305,7 +1305,7 @@ static int accel_selftest(FAR struct lsm6dso32_dev_s *dev)
 
   /* Wait 100ms for stable output */
 
-  nxsig_usleep(100000);
+  nxsched_usleep(100000);
 
   /* Discard first measurement */
 
@@ -1384,7 +1384,7 @@ static int accel_selftest(FAR struct lsm6dso32_dev_s *dev)
       goto early_restore;
     }
 
-  nxsig_usleep(100000);
+  nxsched_usleep(100000);
 
 early_restore:
 

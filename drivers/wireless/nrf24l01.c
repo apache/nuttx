@@ -772,7 +772,7 @@ static void nrf24l01_tostate(FAR struct nrf24l01_dev_s *dev,
       /* Leaving power down (note: new state cannot be power down here) */
 
       nrf24l01_setregbit(dev, NRF24L01_CONFIG, NRF24L01_PWR_UP, true);
-      nxsig_usleep(NRF24L01_TPD2STBY_DELAY);
+      nxsched_usleep(NRF24L01_TPD2STBY_DELAY);
     }
 
   /* Entering new state */

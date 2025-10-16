@@ -352,7 +352,7 @@ static int fakesensor_thread(int argc, char** argv)
         {
           /* Sleeping thread for interval */
 
-          nxsig_usleep(sensor->batch ? sensor->batch : sensor->interval);
+          nxsched_usleep(sensor->batch ? sensor->batch : sensor->interval);
 
           /* Notify upper */
 

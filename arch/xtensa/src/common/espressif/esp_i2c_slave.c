@@ -778,14 +778,14 @@ static int esp_i2c_slave_thread(int argc, char **argv)
       (struct esp_i2c_priv_s *)((uintptr_t)strtoul(argv[1], NULL, 16));
   int ret;
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
   while (true)
     {
       esp_i2c_slave_polling_waitdone(priv);
 
       /* Sleeping thread before checking i2c peripheral */
 
-      nxsig_usleep(100);
+      nxsched_usleep(100);
     }
 
   return OK;

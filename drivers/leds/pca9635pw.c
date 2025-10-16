@@ -203,7 +203,7 @@ static int pca9635pw_open(FAR struct file *filep)
    * was left.
    */
 
-  nxsig_usleep(500);
+  nxsched_usleep(500);
 
   /* Turn all led drivers to mode 2 in which the led brightness is controlled
    * by the individual pwm registers.

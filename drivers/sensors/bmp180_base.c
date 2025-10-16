@@ -259,7 +259,7 @@ void bmp180_read_press_temp(FAR struct bmp180_dev_s *priv)
 
   /* Wait 5ms */
 
-  nxsig_usleep(5000);
+  nxsched_usleep(5000);
 
   /* Read temperature */
 
@@ -271,7 +271,7 @@ void bmp180_read_press_temp(FAR struct bmp180_dev_s *priv)
 
   /* Delay 25.5ms (to OverSampling 8X) */
 
-  nxsig_usleep(25500);
+  nxsched_usleep(25500);
 
   /* Read pressure */
 

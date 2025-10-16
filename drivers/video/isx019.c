@@ -1210,14 +1210,14 @@ static int set_drive_mode(FAR isx019_dev_t *priv)
 #endif
     };
 
-  nxsig_usleep(TRANSITION_TIME_TO_STARTUP);
+  nxsched_usleep(TRANSITION_TIME_TO_STARTUP);
 
   isx019_i2c_write(priv, CAT_CONFIG, MODE_SENSSEL,      &drv[INDEX_SENS], 1);
   isx019_i2c_write(priv, CAT_CONFIG, MODE_POSTSEL,      &drv[INDEX_POST], 1);
   isx019_i2c_write(priv,
     CAT_CONFIG, MODE_SENSPOST_SEL, &drv[INDEX_SENSPOST], 1);
 
-  nxsig_usleep(TRANSITION_TIME_TO_STREAMING);
+  nxsched_usleep(TRANSITION_TIME_TO_STREAMING);
 
   return OK;
 }
@@ -2925,7 +2925,7 @@ static int set_jpg_quality(FAR isx019_dev_t *priv,
 
   /* Wait for swap of non-active side and active side. */
 
-  nxsig_usleep(DELAY_TIME_JPEGDQT_SWAP);
+  nxsched_usleep(DELAY_TIME_JPEGDQT_SWAP);
 
   /* Update non-active side in preparation for other activation trigger. */
 

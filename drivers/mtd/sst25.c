@@ -447,7 +447,7 @@ static uint8_t sst25_waitwritecomplete(struct sst25_dev_s *priv)
       if ((status & SST25_SR_BUSY) != 0)
         {
           sst25_unlock(priv->dev);
-          nxsig_usleep(1000);
+          nxsched_usleep(1000);
           sst25_lock(priv->dev);
         }
 #endif

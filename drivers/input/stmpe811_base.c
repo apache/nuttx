@@ -224,7 +224,7 @@ static void stmpe811_reset(FAR struct stmpe811_dev_s *priv)
 
   /* Wait a bit */
 
-  nxsig_usleep(20 * 1000);
+  nxsched_usleep(20 * 1000);
 
   /* Then power on again.  All registers will be in their reset state. */
 

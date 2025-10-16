@@ -116,11 +116,11 @@
         } \
       else \
         { \
-          nxsig_usleep(usec); \
+          nxsched_usleep(usec); \
         } \
     } while (0)
 #else
-#  define MMCSD_USLEEP(usec) nxsig_usleep(usec)
+#  define MMCSD_USLEEP(usec) nxsched_usleep(usec)
 #endif
 
 /****************************************************************************

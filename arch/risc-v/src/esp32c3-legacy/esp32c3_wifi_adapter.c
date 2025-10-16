@@ -2053,7 +2053,7 @@ static void esp_task_delay(uint32_t tick)
 {
   useconds_t us = TICK2USEC(tick);
 
-  nxsig_usleep(us);
+  nxsched_usleep(us);
 }
 
 /****************************************************************************
@@ -6929,6 +6929,6 @@ void esp_wifi_stop_callback(void)
     }
   else
     {
-      nxsig_sleep(1);
+      nxsched_sleep(1);
     }
 }

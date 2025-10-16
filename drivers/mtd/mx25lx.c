@@ -462,7 +462,7 @@ static void mx25l_waitwritecomplete(FAR struct mx25l_dev_s *priv)
       if ((status & MX25L_SR_WIP) != 0)
         {
           mx25l_unlock(priv->dev);
-          nxsig_usleep(1000);
+          nxsched_usleep(1000);
           mx25l_lock(priv->dev);
         }
     }

@@ -490,11 +490,7 @@ static int sps30_read_values(FAR struct sps30_dev_s *priv,
                   return ret;
                 }
 
-              ret = nxsig_usleep(500 * 1000);
-              if (ret == -EINTR)
-                {
-                  return ret;
-                }
+              nxsched_usleep(500 * 1000);
             }
           else
             {

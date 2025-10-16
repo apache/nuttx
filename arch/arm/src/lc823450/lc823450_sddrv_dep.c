@@ -182,7 +182,7 @@ SINT_T sddep1_hw_init(struct sddrcfg_s *cfg)
 
   /* wait 15ms */
 
-  nxsig_usleep(15000);
+  nxsched_usleep(15000);
 
   irqstate_t flags = enter_critical_section();
 
@@ -276,7 +276,7 @@ void sddep_voltage_switch(struct sddrcfg_s *cfg)
 
   lc823450_gpio_config(GPIO_PORT0 | GPIO_PIN6 |
                        GPIO_MODE_OUTPUT | GPIO_VALUE_ONE);
-  nxsig_usleep(200 * 1000);
+  nxsched_usleep(200 * 1000);
 #endif
 }
 
@@ -333,7 +333,7 @@ SINT_T sddep_wait(UI_32 ms, struct sddrcfg_s *cfg)
     }
   else
     {
-      nxsig_usleep(ms * 1000);
+      nxsched_usleep(ms * 1000);
     }
 #endif
 

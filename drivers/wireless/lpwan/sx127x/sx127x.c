@@ -2882,7 +2882,7 @@ static int sx127x_lora_opmode_set(FAR struct sx127x_dev_s *dev,
 
   /* Wait for mode ready. REVISIT: do we need this ? */
 
-  nxsig_usleep(250);
+  nxsched_usleep(250);
 
 errout:
   sx127x_unlock(dev->spi);
@@ -3685,7 +3685,7 @@ static bool sx127x_channel_scan(FAR struct sx127x_dev_s *dev,
 
       /* Wait some time */
 
-      nxsig_usleep(1000);
+      nxsched_usleep(1000);
     }
   while (tstart.tv_sec + chanscan->stime > tnow.tv_sec);
 
@@ -4046,7 +4046,7 @@ static int sx127x_calibration(FAR struct sx127x_dev_s *dev, uint32_t freq)
     {
       /* Wait 10ms */
 
-      nxsig_usleep(10000);
+      nxsched_usleep(10000);
 
       /* Get register */
 

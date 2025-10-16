@@ -1927,11 +1927,11 @@ static void stm32_reset(struct sdio_dev_s *dev)
 
   regval = getreg32(regaddress);
   putreg32(regval | restval, regaddress);
-  nxsig_usleep(2);
+  nxsched_usleep(2);
   putreg32(regval, regaddress);
 
   stm32_setpwrctrl(priv, STM32_SDMMC_POWER_PWRCTRL_CYCLE);
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* Put SDIO registers in their default, reset state */
 
@@ -1960,7 +1960,7 @@ static void stm32_reset(struct sdio_dev_s *dev)
   /* Configure the SDIO peripheral */
 
   stm32_setpwrctrl(priv, STM32_SDMMC_POWER_PWRCTRL_OFF);
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
   stm32_setpwrctrl(priv, STM32_SDMMC_POWER_PWRCTRL_ON);
 
   stm32_setclkcr(priv, STM32_CLCKCR_INIT);

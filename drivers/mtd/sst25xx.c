@@ -345,7 +345,7 @@ static void sst25xx_waitwritecomplete(struct sst25xx_dev_s *priv)
       if ((status & SST25_SR_WIP) != 0)
         {
           sst25xx_unlock(priv->dev);
-          nxsig_usleep(1000);
+          nxsched_usleep(1000);
           sst25xx_lock(priv->dev);
         }
     }

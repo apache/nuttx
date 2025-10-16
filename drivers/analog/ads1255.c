@@ -278,7 +278,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   spi = priv->spi;
 
   adc_lock(spi);
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   SPI_SELECT(spi, priv->devno, true);
   SPI_SEND(spi, ADS125X_WREG + 0x03);  /* WRITE SPS REG */
@@ -329,7 +329,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
       SPI_SEND(spi, priv->mux[0]);
       SPI_SEND(spi, priv->pga);            /* REG2 ADCON PGA=2 */
       SPI_SEND(spi, getspsreg(priv->sps));
-      nxsig_usleep(1000);
+      nxsched_usleep(1000);
       SPI_SEND(spi, ADS125X_SELFCAL);
       SPI_SELECT(spi, priv->devno, false);
 

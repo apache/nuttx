@@ -310,7 +310,7 @@ int s32k3xx_tja1153_initialize(int bus)
 
   /* Sleep for 100 ms to ensure that CAN frames have been transmitted */
 
-  nxsig_usleep(100 * 1000);
+  nxsched_usleep(100 * 1000);
 
   /* TJA1153 must be taken out of STB mode */
 

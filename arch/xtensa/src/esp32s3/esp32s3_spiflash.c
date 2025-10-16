@@ -867,7 +867,7 @@ static inline void IRAM_ATTR spiflash_os_yield(void)
   /* Delay 1 tick */
 
   useconds_t us = TICK2USEC(1);
-  nxsig_usleep(us);
+  nxsched_usleep(us);
 }
 #endif /* CONFIG_ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE */
 

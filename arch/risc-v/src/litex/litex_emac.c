@@ -776,7 +776,7 @@ static int litex_linkup(struct litex_emac_s *priv)
 
   for (i = 0; i < LITEX_WAITLINKTIMEOUT; ++i)
     {
-      nxsig_usleep(1000);
+      nxsched_usleep(1000);
 
       ret = litex_phyread(priv, priv->phyaddr, MII_MSR, &msr);
       if (ret < 0)
@@ -1292,9 +1292,9 @@ static int litex_phyinit(struct litex_emac_s *priv)
 
   ninfo("%s: PHY RESET\n", BOARD_PHY_NAME);
   putreg32(1, LITEX_ETHPHY_CRG_RESET);
-  nxsig_usleep(LITEX_PHY_RESETTIMEOUT);
+  nxsched_usleep(LITEX_PHY_RESETTIMEOUT);
   putreg32(0, LITEX_ETHPHY_CRG_RESET);
-  nxsig_usleep(LITEX_PHY_RESETTIMEOUT);
+  nxsched_usleep(LITEX_PHY_RESETTIMEOUT);
 
   /* Check the PHY responds at configured address */
 

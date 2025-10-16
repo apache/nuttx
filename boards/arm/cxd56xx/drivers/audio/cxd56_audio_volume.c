@@ -115,7 +115,7 @@ static CXD56_AUDIO_ECODE set_mute(cxd56_audio_volid_t id,
 
   if (wait)
     {
-      nxsig_usleep(waittime);
+      nxsched_usleep(waittime);
     }
 
   g_volparam[id].mute_bit |= type;
@@ -181,7 +181,7 @@ static CXD56_AUDIO_ECODE set_unmute(cxd56_audio_volid_t id,
 
       if (wait)
         {
-          nxsig_usleep(waittime);
+          nxsched_usleep(waittime);
         }
     }
 

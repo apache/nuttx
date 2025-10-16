@@ -616,7 +616,7 @@ static int ds18b20_measure_read(FAR struct ds18b20_dev_s *dev,
       return ret;
     }
 
-  nxsig_usleep(g_res_timeout[DS18B20_RES_VAL(dev->reg.res)]);
+  nxsched_usleep(g_res_timeout[DS18B20_RES_VAL(dev->reg.res)]);
 
   ret = ds18b20_read_spad(dev, data->spad);
   if (ret < 0)
@@ -857,7 +857,7 @@ static int ds18b20_thread(int argc, char** argv)
                * is up to date.
                */
 
-              nxsig_usleep(g_res_timeout[DS18B20_RES_VAL(priv->reg.res)]);
+              nxsched_usleep(g_res_timeout[DS18B20_RES_VAL(priv->reg.res)]);
 
               /* Check for existing temperature alarm */
 
@@ -896,7 +896,7 @@ static int ds18b20_thread(int argc, char** argv)
 
       /* Sleeping thread before fetching the next sensor data */
 
-      nxsig_usleep(priv->interval);
+      nxsched_usleep(priv->interval);
     }
 
   return OK;

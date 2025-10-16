@@ -2957,7 +2957,7 @@ static int cxd56_start(struct audio_lowerhalf_s *lower)
 
           if (time < CXD56_MIC_BOOT_WAIT)
             {
-              nxsig_usleep((CXD56_MIC_BOOT_WAIT - time) * 1000);
+              nxsched_usleep((CXD56_MIC_BOOT_WAIT - time) * 1000);
             }
         }
     }

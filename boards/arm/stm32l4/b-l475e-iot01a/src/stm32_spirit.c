@@ -135,7 +135,7 @@ static int stm32l4_reset(const struct spirit_lower_s *lower)
 
   /* Wait minimum 1.5 ms to allow Spirit a proper boot-up sequence */
 
-  nxsig_usleep(1500);
+  nxsched_usleep(1500);
   return OK;
 }
 

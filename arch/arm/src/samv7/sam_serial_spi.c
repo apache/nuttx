@@ -246,7 +246,7 @@ static inline void serial_flush(struct sam_serial_spi_s *priv)
   status = serial_getreg(priv, SAM_UART_SR_OFFSET);
   while ((status & UART_INT_TXRDY) == 0)
     {
-      nxsig_usleep(100);
+      nxsched_usleep(100);
       status = serial_getreg(priv, SAM_UART_SR_OFFSET);
     }
 
@@ -639,7 +639,7 @@ static void serial_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       status = serial_getreg(priv, SAM_UART_SR_OFFSET);
       while ((status & UART_INT_TXRDY) == 0)
         {
-          nxsig_usleep(100);
+          nxsched_usleep(100);
           status = serial_getreg(priv, SAM_UART_SR_OFFSET);
         }
 
@@ -652,7 +652,7 @@ static void serial_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       status = serial_getreg(priv, SAM_UART_SR_OFFSET);
       while ((status & UART_INT_RXRDY) == 0)
         {
-          nxsig_usleep(100);
+          nxsched_usleep(100);
           status = serial_getreg(priv, SAM_UART_SR_OFFSET);
         }
 

@@ -2007,7 +2007,7 @@ int fb_register_device(int display, int plane,
 
   if (SPLASH_SLEEP != 0)
     {
-      nxsig_sleep(SPLASH_SLEEP);
+      nxsched_sleep(SPLASH_SLEEP);
     }
 
 #  ifdef VIDEO_FB_SPLASHSCREEN_CLR_ON_EXIT

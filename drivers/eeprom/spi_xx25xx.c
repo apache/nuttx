@@ -404,7 +404,7 @@ static void ee25xx_waitwritecomplete(struct ee25xx_dev_s *priv)
 
       if ((status & EE25XX_SR_WIP) != 0)
         {
-          nxsig_usleep(1000);
+          nxsched_usleep(1000);
         }
     }
   while ((status & EE25XX_SR_WIP) != 0);

@@ -1398,7 +1398,7 @@ static int usbhost_kbdpoll(int argc, FAR char *argv[])
 
   priv->polling = true;
   nxsem_post(&priv->syncsem);
-  nxsig_sleep(1);
+  nxsched_sleep(1);
 
   /* Loop here until the device is disconnected */
 
@@ -1532,7 +1532,7 @@ static int usbhost_kbdpoll(int argc, FAR char *argv[])
           delay = CONFIG_HIDKBD_POLLUSEC;
         }
 
-      nxsig_usleep(delay);
+      nxsched_usleep(delay);
     }
 
   /* We get here when the driver is removed.. or when too many errors have

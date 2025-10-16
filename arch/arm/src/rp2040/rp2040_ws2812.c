@@ -143,7 +143,7 @@ static void update_pixels(struct ws2812_dev_s  *dev_data)
 
   if (time_delta < 50)
     {
-      nxsig_usleep(50 - time_delta);
+      nxsched_usleep(50 - time_delta);
     }
 
   rp2040_dmastart(dma_handle, dma_complete, dev_data);

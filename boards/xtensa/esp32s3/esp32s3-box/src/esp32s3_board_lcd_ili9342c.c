@@ -494,11 +494,11 @@ static struct ili9341_lcd_s *esp32s3_initializa_ili9342c(int spi_port)
 
   /* Reset LCD */
 
-  nxsig_usleep(10 * 1000);
+  nxsched_usleep(10 * 1000);
   esp32s3_gpiowrite(DISPLAY_RST, true);
-  nxsig_usleep(10 * 1000);
+  nxsched_usleep(10 * 1000);
   esp32s3_gpiowrite(DISPLAY_RST, false);
-  nxsig_usleep(50 * 1000);
+  nxsched_usleep(50 * 1000);
 
   /* Turn on LCD backlight */
 

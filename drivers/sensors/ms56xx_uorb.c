@@ -266,7 +266,7 @@ static inline void baro_measure_read(FAR struct ms56xx_dev_s *priv,
 
   /* Wait data acquisition */
 
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
 
   /* Send command to start a read sequence */
 
@@ -303,7 +303,7 @@ static inline void baro_measure_read(FAR struct ms56xx_dev_s *priv,
 
   /* Wait data acquisition */
 
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
 
   /* Send command to start a read sequence */
 
@@ -384,7 +384,7 @@ static int ms56xx_thread(int argc, char **argv)
 
       /* Sleeping thread before fetching the next sensor data */
 
-      nxsig_usleep(priv->interval);
+      nxsched_usleep(priv->interval);
     }
 
   return OK;
@@ -417,7 +417,7 @@ static int ms56xx_initialize(FAR struct ms56xx_dev_s *priv)
 
   /* We have to wait before the prom is ready is be read */
 
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
 
   for (i = 0; i < 8; i++)
     {

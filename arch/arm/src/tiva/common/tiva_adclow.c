@@ -603,7 +603,7 @@ static int tiva_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
           tiva_adc_proc_trig(priv->devno, (uint8_t)SSE_PROC_TRIG(sse));
           while (!tiva_adc_sse_int_status(priv->devno, sse))
             {
-              nxsig_usleep(100);
+              nxsched_usleep(100);
             }
 
           tiva_adc_sse_clear_int(priv->devno, sse);

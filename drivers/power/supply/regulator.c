@@ -766,7 +766,7 @@ int regulator_enable_delay(FAR struct regulator_s *regulator, int ms)
   ret = regulator_enable(regulator);
   if (!ret)
     {
-      nxsig_usleep(1000 * ms);
+      nxsched_usleep(1000 * ms);
     }
 
   return ret;

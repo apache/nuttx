@@ -257,7 +257,7 @@ int highpri_main(int argc, char *argv[])
       /* Flush stdout and wait a bit */
 
       fflush(stdout);
-      nxsig_sleep(1);
+      nxsched_sleep(1);
       seconds++;
 
       /* Sample counts so that they are not volatile.  Missing a count now

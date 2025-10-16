@@ -119,13 +119,7 @@ static void optee_rpc_cmd_suspend(FAR struct optee_msg_arg *arg)
 
   if (usec_to_wait)
     {
-      int ret = nxsig_usleep(usec_to_wait);
-
-      if (ret < 0 && ret != -EINTR)
-        {
-            arg->ret = TEE_ERROR_GENERIC;
-            return;
-        }
+      nxsched_usleep(usec_to_wait);
     }
 
   arg->ret = TEE_SUCCESS;

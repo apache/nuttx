@@ -985,7 +985,7 @@ static int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
     {
       /* Wait some time to collect next batch of FIFO data */
 
-      nxsig_usleep(FIFO_PAUSE_TIME);
+      nxsched_usleep(FIFO_PAUSE_TIME);
 
       /* Get the contents of the STATUS register. Is data still valid? */
 
@@ -1081,7 +1081,7 @@ static int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
         {
           /* Determine best guessed gesture and clean up */
 
-          nxsig_usleep(FIFO_PAUSE_TIME);
+          nxsched_usleep(FIFO_PAUSE_TIME);
           apds9960_decodegesture(priv);
           motion = priv->gesture_motion;
 
@@ -1226,7 +1226,7 @@ int apds9960_register(FAR const char *devpath,
 
   /* Wait 100ms */
 
-  nxsig_usleep(100000);
+  nxsched_usleep(100000);
 
   /* Initialize the device (leave RESET) */
 

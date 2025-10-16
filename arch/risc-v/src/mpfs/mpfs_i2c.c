@@ -813,7 +813,7 @@ static int mpfs_i2c_force_idle(struct mpfs_i2c_priv_s *priv)
 
       /* Wait for a while for the command to go through */
 
-      nxsig_usleep(1000);
+      nxsched_usleep(1000);
     }
   while (retries--);
 

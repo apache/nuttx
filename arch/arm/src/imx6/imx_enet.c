@@ -2043,7 +2043,7 @@ static inline int imx_initphy(struct imx_driver_s *priv, bool renogphy)
       retries = 0;
       do
         {
-          nxsig_usleep(LINK_WAITUS);
+          nxsched_usleep(LINK_WAITUS);
 
           ninfo("%s: Read PHYID1, retries=%d\n",
                 BOARD_PHY_NAME, retries + 1);
@@ -2216,7 +2216,7 @@ static inline int imx_initphy(struct imx_driver_s *priv, bool renogphy)
               break;
             }
 
-          nxsig_usleep(LINK_WAITUS);
+          nxsched_usleep(LINK_WAITUS);
         }
 
       if (phydata & MII_MSR_ANEGCOMPLETE)

@@ -685,7 +685,7 @@ static void nrf91_usrsock_poll_work(void *arg)
         {
           while (g_usrsock.sock[pollfd->fd].recvpending == true)
             {
-              nxsig_usleep(100);
+              nxsched_usleep(100);
             }
         }
 

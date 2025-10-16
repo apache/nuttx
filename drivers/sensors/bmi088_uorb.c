@@ -321,7 +321,7 @@ static void bmi088_gyro_enable(FAR struct bmi088_gyro_dev_uorb_s *priv,
       bmi088_put_gyro_reg8(&priv->dev, BMI088_GYRO_LPM1 ,
                                        BMI088_GYRO_PM_NORMAL);
 
-      nxsig_usleep(30000);
+      nxsched_usleep(30000);
 
       idx_odr   = bmi088_find_parameter(priv->interval,
                                         g_bmi088_gyro_odr,
@@ -730,7 +730,7 @@ static int bmi088_register_accel(int devno,
   /* BMI088 detects communication bus is SPI by rising edge of CS. */
 
   bmi088_get_acc_reg8(&priv->dev , BMI088_ACC_CHIP_ID);
-  nxsig_usleep(200);
+  nxsched_usleep(200);
 
 #endif
 

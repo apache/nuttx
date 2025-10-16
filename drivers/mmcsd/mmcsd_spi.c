@@ -468,7 +468,7 @@ static int mmcsd_waitready(FAR struct mmcsd_slot_s *slot)
         {
           /* Give other threads time to run */
 
-          nxsig_usleep(10000);
+          nxsched_usleep(10000);
         }
     }
   while (elapsed < MMCSD_DELAY_500MS);

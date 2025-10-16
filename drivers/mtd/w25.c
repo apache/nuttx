@@ -579,7 +579,7 @@ static uint8_t w25_waitwritecomplete(struct w25_dev_s *priv)
       if (priv->prev_instr != W25_PP && (status & W25_SR_BUSY) != 0)
         {
           w25_unlock(priv->spi);
-          nxsig_usleep(1000);
+          nxsched_usleep(1000);
           w25_lock(priv->spi);
         }
     }

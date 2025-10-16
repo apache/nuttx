@@ -569,7 +569,7 @@ static int ltr308_thread(int argc, char** argv)
                                  sizeof(struct sensor_light));
 
 thread_sleep:
-      nxsig_usleep(CONFIG_SENSORS_LTR308_POLL_INTERVAL);
+      nxsched_usleep(CONFIG_SENSORS_LTR308_POLL_INTERVAL);
     }
 
   return OK;

@@ -2226,7 +2226,7 @@ static int imxrt_determine_phy(struct imxrt_driver_s *priv)
           retries = 0;
           do
             {
-              nxsig_usleep(100);
+              nxsched_usleep(100);
               phydata = 0xffff;
               ret = imxrt_readmii(priv, phyaddr, MII_PHYID1, &phydata);
             }
@@ -2237,7 +2237,7 @@ static int imxrt_determine_phy(struct imxrt_driver_s *priv)
             {
               do
                 {
-                  nxsig_usleep(100);
+                  nxsched_usleep(100);
                   phydata = 0xffff;
                   ret = imxrt_readmii(priv, phyaddr, MII_PHYID2, &phydata);
                 }
@@ -2550,7 +2550,7 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
       retries = 0;
       do
         {
-          nxsig_usleep(LINK_WAITUS);
+          nxsched_usleep(LINK_WAITUS);
 
           ninfo("%s: Read PHYID1, retries=%d\n",
                 BOARD_PHY_NAME, retries + 1);
@@ -2786,7 +2786,7 @@ static inline int imxrt_initphy(struct imxrt_driver_s *priv, bool renogphy)
                   break;
                 }
 
-              nxsig_usleep(LINK_WAITUS);
+              nxsched_usleep(LINK_WAITUS);
             }
 
           if (phydata & MII_MSR_ANEGCOMPLETE)

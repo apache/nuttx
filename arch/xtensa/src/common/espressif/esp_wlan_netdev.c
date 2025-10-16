@@ -448,7 +448,7 @@ static int esp_wlan_connect(struct netdev_lowerhalf_s *dev)
               break;
             }
 
-          nxsig_usleep(timeout);
+          nxsched_usleep(timeout);
           timeout_count--;
         }
 

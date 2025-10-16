@@ -2172,7 +2172,7 @@ static int imx9_determine_phy(struct imx9_driver_s *priv)
           retries = 0;
           do
             {
-              nxsig_usleep(100);
+              nxsched_usleep(100);
               phydata = 0xffff;
               ret = imx9_readmii(priv, MII_PHYID1, &phydata);
               ninfo("phy %s addr %d received PHYID1 %x\n",
@@ -2186,7 +2186,7 @@ static int imx9_determine_phy(struct imx9_driver_s *priv)
             {
               do
                 {
-                  nxsig_usleep(100);
+                  nxsched_usleep(100);
                   phydata = 0xffff;
                   ret = imx9_readmii(priv, MII_PHYID2, &phydata);
                   ninfo("phy %s addr %d received PHYID2 %x\n",
@@ -2448,7 +2448,7 @@ int imx9_reset_phy(struct imx9_driver_s *priv)
   ret = -ETIMEDOUT;
   for (timeout = 0; timeout < PHY_RESET_WAIT_COUNT; timeout++)
     {
-      nxsig_usleep(100);
+      nxsched_usleep(100);
       result = imx9_readmii(priv, MII_MCR, &mcr);
       if (result < 0)
         {
@@ -2670,7 +2670,7 @@ static int imx9_phy_wait_autoneg_complete(struct imx9_driver_s *priv)
           break;
         }
 
-      nxsig_usleep(LINK_WAITUS);
+      nxsched_usleep(LINK_WAITUS);
     }
 
   if (timeout == LINK_NLOOPS)
@@ -2821,7 +2821,7 @@ static inline int imx9_initphy(struct imx9_driver_s *priv, bool renogphy)
       retries = 0;
       do
         {
-          nxsig_usleep(LINK_WAITUS);
+          nxsched_usleep(LINK_WAITUS);
 
           ninfo("%s: Read PHYID1, retries=%d\n", phy_name, retries + 1);
 

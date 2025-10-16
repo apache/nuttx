@@ -409,7 +409,7 @@ static int rpmsg_port_uart_tx_thread(int argc, FAR char *argv[])
     {
       while (!rpuart->connected)
         {
-          nxsig_usleep(100000);
+          nxsched_usleep(100000);
         }
 
       while ((hdr = rpmsg_port_queue_get_buffer(txq, true)) != NULL)

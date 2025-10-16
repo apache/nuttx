@@ -668,7 +668,7 @@ void classd_enable_audio(struct classd_dev_s *priv, bool pmc_clock_enable)
 
   /* wait for Audio PLL startup time */
 
-  nxsig_usleep(100);
+  nxsched_usleep(100);
 #endif
 }
 
