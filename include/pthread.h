@@ -452,7 +452,7 @@ struct pthread_spinlock_s
 #  ifndef __PTHREAD_SPINLOCK_T_DEFINED
 /* It is referenced via this standard type */
 
-typedef FAR struct pthread_spinlock_s pthread_spinlock_t;
+typedef struct pthread_spinlock_s pthread_spinlock_t;
 #    define __PTHREAD_SPINLOCK_T_DEFINED 1
 #  endif
 #endif /* CONFIG_PTHREAD_SPINLOCKS */
@@ -891,7 +891,7 @@ typedef struct pthread_rwlock_s pthread_rwlock_t;
 #ifdef CONFIG_PTHREAD_SPINLOCKS
 #  ifndef __PTHREAD_SPINLOCK_T_DEFINED
 struct pthread_spinlock_s;
-typedef FAR struct pthread_spinlock_s pthread_spinlock_t;
+typedef struct pthread_spinlock_s pthread_spinlock_t;
 #    define __PTHREAD_SPINLOCK_T_DEFINED 1
 #  endif
 #endif /* CONFIG_PTHREAD_SPINLOCKS */

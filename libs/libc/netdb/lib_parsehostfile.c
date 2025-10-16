@@ -255,7 +255,7 @@ ssize_t parse_hostfile(FAR FILE *stream, FAR struct hostent_s *host,
                        FAR char *buf, size_t buflen)
 {
   FAR struct hostent_info_s *info;
-  FAR char addrstring[48];
+  char addrstring[48];
   FAR char *ptr;
   FAR char *start;
   socklen_t addrlen;

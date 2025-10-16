@@ -180,7 +180,7 @@ begin_packed_struct struct dns_answer_s
 
 typedef CODE int (*dns_callback_t)(FAR void *arg,
                                    FAR struct sockaddr *addr,
-                                   FAR socklen_t addrlen);
+                                   socklen_t addrlen);
 
 /****************************************************************************
  * Public Function Prototypes

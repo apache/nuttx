@@ -220,7 +220,7 @@ pid_t nxsched_waitpid(pid_t pid, int *stat_loc, int options)
   FAR struct child_status_s *child = NULL;
   bool retains;
 #endif
-  FAR struct siginfo info;
+  struct siginfo info;
   irqstate_t flags;
   sigset_t set;
   int ret;
