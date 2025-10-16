@@ -843,7 +843,7 @@ static void dns_query_error(FAR const char *prompt, int ret,
  ****************************************************************************/
 
 static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
-                              FAR socklen_t addrlen)
+                              socklen_t addrlen)
 {
   FAR struct dns_query_data_s *qdata = arg;
   FAR struct dns_query_s      *query = &qdata->query;
