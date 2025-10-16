@@ -36,7 +36,6 @@
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
-#include "fs_heap.h"
 
 /****************************************************************************
  * Private Function Prototypes
@@ -351,19 +350,19 @@ static int _inode_search(FAR struct inode_search_s *desc)
                                 {
                                   FAR char *buffer = NULL;
 
-                                  ret = fs_heap_asprintf(&buffer, "%s/%s",
-                                                         desc->relpath,
-                                                         name);
-                                  if (ret > 0)
+                                  buffer = lib_get_tempbuffer(PATH_MAX);
+                                  if (buffer == NULL)
                                     {
-                                      fs_heap_free(desc->buffer);
-                                      desc->buffer = buffer;
-                                      relpath = buffer;
-                                      ret = OK;
+                                      ret = -ENOMEM;
                                     }
                                   else
                                     {
-                                      ret = -ENOMEM;
+                                      snprintf(buffer, PATH_MAX, "%s/%s",
+                                               desc->relpath, name);
+                                      lib_put_tempbuffer(desc->buffer);
+                                      desc->buffer = buffer;
+                                      relpath = buffer;
+                                      ret = OK;
                                     }
                                 }
                               else
@@ -493,13 +492,13 @@ int inode_search(FAR struct inode_search_s *desc)
 
   if (*desc->path != '/')
     {
-      ret = fs_heap_asprintf(&desc->buffer, "%s/%s",
-                             _inode_getcwd(), desc->path);
-      if (ret < 0)
+      desc->buffer = lib_get_tempbuffer(PATH_MAX);
+      if (desc->buffer == NULL)
         {
           return -ENOMEM;
         }
 
+      snprintf(desc->buffer, PATH_MAX, "%s/%s", _inode_getcwd(), desc->path);
       desc->path = desc->buffer;
     }
 

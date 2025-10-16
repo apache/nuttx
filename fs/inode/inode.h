@@ -41,8 +41,6 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/lib/lib.h>
 
-#include "fs_heap.h"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -65,7 +63,7 @@
     { \
       if ((d)->buffer != NULL) \
         { \
-          fs_heap_free((d)->buffer); \
+          lib_put_tempbuffer((d)->buffer); \
           (d)->buffer  = NULL; \
         } \
     } \
