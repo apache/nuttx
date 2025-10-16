@@ -48,7 +48,7 @@ static ssize_t filesistream_gets(FAR struct lib_sistream_s *self,
   size_t left = len;
   ssize_t ret = 0;
 
-  while (left >= 0)
+  while (left > 0)
     {
       ret = file_read(&stream->file, buf, left);
       if (ret == -EINTR)
