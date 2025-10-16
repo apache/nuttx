@@ -6,6 +6,7 @@
 # modifications.
 #
 # CONFIG_ARCH_RAMFUNCS is not set
+# CONFIG_LIBC_TEMPBUFFER is not set
 # CONFIG_MMCSD_HAVE_CARDDETECT is not set
 # CONFIG_MMCSD_MMCSUPPORT is not set
 # CONFIG_NSH_DISABLE_IFCONFIG is not set
