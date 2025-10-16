@@ -347,14 +347,14 @@ static int can_close(FAR struct file *filep)
 
   while (!TX_EMPTY(&dev->cd_sender))
     {
-      nxsig_usleep(HALF_SECOND_USEC);
+      nxsched_usleep(HALF_SECOND_USEC);
     }
 
   /* And wait for the hardware sender to drain */
 
   while (!dev_txempty(dev))
     {
-      nxsig_usleep(HALF_SECOND_USEC);
+      nxsched_usleep(HALF_SECOND_USEC);
     }
 
   /* Free the IRQ and disable the CAN device */

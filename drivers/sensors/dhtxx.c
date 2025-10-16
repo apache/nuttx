@@ -419,7 +419,7 @@ static int dhtxx_open(FAR struct file *filep)
 
   dht_standby_mode(priv);
 
-  nxsig_sleep(DHTXX_SAMPLING_PERIOD_S);
+  nxsched_sleep(DHTXX_SAMPLING_PERIOD_S);
 
   /* Sensor ready. */
 
@@ -503,7 +503,7 @@ out:
    * consecutive readings.
    */
 
-  nxsig_sleep(DHTXX_SAMPLING_PERIOD_S);
+  nxsched_sleep(DHTXX_SAMPLING_PERIOD_S);
 
   /* Sensor ready for new reading */
 

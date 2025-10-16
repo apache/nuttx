@@ -564,7 +564,7 @@ static void m25p_waitwritecomplete(struct m25p_dev_s *priv)
       if ((status & M25P_SR_WIP) != 0)
         {
           m25p_unlock(priv->dev);
-          nxsig_usleep(1000);
+          nxsched_usleep(1000);
           m25p_lock(priv->dev);
         }
     }

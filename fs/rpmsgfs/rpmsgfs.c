@@ -267,7 +267,7 @@ static void rpmsgfs_mkpath(FAR struct rpmsgfs_mountpt_s *fs,
           break;
         }
 
-      nxsig_usleep(RPMSGFS_RETRY_DELAY_MS * USEC_PER_MSEC);
+      nxsched_usleep(RPMSGFS_RETRY_DELAY_MS * USEC_PER_MSEC);
       fs->timeout -= RPMSGFS_RETRY_DELAY_MS;
     }
 }

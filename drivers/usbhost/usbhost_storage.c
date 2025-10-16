@@ -1227,7 +1227,7 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
 
       /* Wait just a bit */
 
-      nxsig_usleep(USBHOST_RETRY_USEC);
+      nxsched_usleep(USBHOST_RETRY_USEC);
 
       /* Send TESTUNITREADY to see if the unit is ready.  The most likely
        * error error that can occur here is a a stall which simply means

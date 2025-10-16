@@ -357,7 +357,7 @@ static int check_forceusbboot(void)
   modifyreg32(MCLKCNTAPB, 0, MCLKCNTAPB_ADC_CLKEN);
   modifyreg32(MRSTCNTAPB, 0, MRSTCNTAPB_ADC_RSTB);
 
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
 
   /* start ADC0,1 */
 
@@ -416,7 +416,7 @@ static void sysreset(void)
 {
   /* workaround to flush eMMC cache */
 
-  nxsig_usleep(100000);
+  nxsched_usleep(100000);
 
   up_systemreset();
 }
@@ -520,7 +520,7 @@ static void chg_disable(void)
             }
           else
             {
-              nxsig_usleep(20);
+              nxsched_usleep(20);
             }
         }
 
@@ -568,7 +568,7 @@ static int msc_enable(int forced)
           return 0;
         }
 
-      nxsig_usleep(10000);
+      nxsched_usleep(10000);
     }
 
 #else
@@ -576,7 +576,7 @@ static int msc_enable(int forced)
 
   while (g_update_flag == 0)
     {
-      nxsig_usleep(10000);
+      nxsched_usleep(10000);
     }
 #endif
 
@@ -585,7 +585,7 @@ static int msc_enable(int forced)
   /* check recovery kernel update */
 
   nx_mount(CONFIG_MTD_CP_DEVPATH, "/mnt/sd0", "evfat", 0, NULL);
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
 
   /* recovery kernel install from UPG.img */
 
@@ -677,7 +677,7 @@ int ipl2_main(int argc, char *argv[])
       /* check recovery kernel update */
 
       nx_mount(CONFIG_MTD_CP_DEVPATH, "/mnt/sd0", "evfat", 0, NULL);
-      nxsig_usleep(10000);
+      nxsched_usleep(10000);
 
       /* recovery kernel install from UPG.img */
 

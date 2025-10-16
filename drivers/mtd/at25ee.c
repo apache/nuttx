@@ -388,7 +388,7 @@ static void at25ee_waitwritecomplete(struct at25ee_dev_s *priv)
 
       if ((status & AT25EE_SR_WIP) != 0)
         {
-          nxsig_usleep(1000);
+          nxsched_usleep(1000);
         }
     }
   while ((status & AT25EE_SR_WIP) != 0);

@@ -2488,7 +2488,7 @@ static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv)
 
   while ((lpc17_40_phyread(phyaddr, MII_DP83848C_STS) & 0x0001) == 0)
     {
-      nxsig_usleep(40000);
+      nxsched_usleep(40000);
     }
 #endif
 

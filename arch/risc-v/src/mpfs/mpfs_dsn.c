@@ -99,7 +99,7 @@ int mpfs_read_dsn(uint8_t *dsn, size_t len)
   while ((getreg32(SERVICES_SR) & SCBCTRL_SERVICESSR_BUSY) && --retries > 0)
     {
       spin_unlock_irqrestore(&g_dsn_lock, flags);
-      nxsig_usleep(1000);
+      nxsched_usleep(1000);
       flags = spin_lock_irqsave(&g_dsn_lock);
     }
 

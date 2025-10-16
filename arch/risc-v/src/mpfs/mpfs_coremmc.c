@@ -1039,19 +1039,19 @@ static bool mpfs_device_reset(struct sdio_dev_s *dev)
 
   modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR, 0, SYSREG_SUBBLK_CLOCK_CR_FIC0);
 
-  nxsig_usleep(100);
+  nxsched_usleep(100);
 
   /* Perform module and slave reset */
 
   mpfs_modifyreg8(MPFS_COREMMC_CTRL, 0, COREMMC_CTRL_SLRST |
                   COREMMC_CTRL_SWRST);
 
-  nxsig_usleep(100);
+  nxsched_usleep(100);
 
   mpfs_modifyreg8(MPFS_COREMMC_CTRL, COREMMC_CTRL_SLRST | COREMMC_CTRL_SWRST,
                   0);
 
-  nxsig_usleep(100);
+  nxsched_usleep(100);
 
   /* Clear interrupt status and disable interrupts */
 
@@ -1067,7 +1067,7 @@ static bool mpfs_device_reset(struct sdio_dev_s *dev)
 
   mpfs_setclkrate(priv, MPFS_MMC_CLOCK_400KHZ);
 
-  nxsig_usleep(100);
+  nxsched_usleep(100);
 
   /* Store fifo size for later to check no fifo overruns occur */
 
@@ -1351,7 +1351,7 @@ static void mpfs_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
     {
       /* Need to settle a bit before issuing this CMD6 after clk change */
 
-      nxsig_usleep(100);
+      nxsched_usleep(100);
 
       mpfs_set_4bit_mode(dev);
     }

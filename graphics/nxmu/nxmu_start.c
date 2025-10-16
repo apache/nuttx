@@ -234,7 +234,7 @@ int nxmu_start(int display, int plane)
        * this operation cannot be done from the IDLE thread!
        */
 
-      nxsig_usleep(50 * 1000);
+      nxsched_usleep(50 * 1000);
     }
 
   return OK;

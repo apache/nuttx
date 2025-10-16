@@ -1082,7 +1082,7 @@ static int lis2dh_handle_selftest(FAR struct lis2dh_dev_s *priv)
       goto out;
     }
 
-  nxsig_usleep(20000);
+  nxsched_usleep(20000);
 
   /* Now INT1 should have been latched high and INT2 should be still low */
 
@@ -1114,7 +1114,7 @@ static int lis2dh_handle_selftest(FAR struct lis2dh_dev_s *priv)
           goto out;
         }
 
-      nxsig_usleep(20000);
+      nxsched_usleep(20000);
 
       if (priv->config->read_int2_pin() != 1)
         {
@@ -1221,7 +1221,7 @@ static FAR const struct lis2dh_vector_s *
 
   while (--retries_left > 0)
     {
-      nxsig_usleep(20000);
+      nxsched_usleep(20000);
       if (lis2dh_data_available(dev))
         {
           if (lis2dh_access(dev, ST_LIS2DH_OUT_X_L_REG, retval,
@@ -1676,7 +1676,7 @@ static int lis2dh_reboot(FAR struct lis2dh_dev_s *dev)
           return -ETIMEDOUT;
         }
 
-       nxsig_usleep(1);
+       nxsched_usleep(1);
     }
   while (true);
 

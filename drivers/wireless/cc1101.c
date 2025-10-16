@@ -661,7 +661,7 @@ void cc1101_access_begin(FAR struct cc1101_dev_s *dev)
     }
   else
     {
-      nxsig_usleep(150 * 1000);
+      nxsched_usleep(150 * 1000);
     }
 }
 

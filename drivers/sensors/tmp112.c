@@ -107,7 +107,7 @@ static uint16_t tmp112_getreg16(FAR struct tmp112_dev_s *priv,
 
   if (ms_delay > 0)
     {
-      nxsig_usleep(ms_delay * 1000);
+      nxsched_usleep(ms_delay * 1000);
     }
 
   /* Read register */

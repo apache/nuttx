@@ -277,7 +277,7 @@ static void kxtj9_soft_reset(FAR struct kxtj9_dev_s *priv)
 
   /* Delay 10ms for the accel parts to re-initialize */
 
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
 }
 
 /****************************************************************************

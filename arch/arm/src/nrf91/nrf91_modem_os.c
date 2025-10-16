@@ -389,7 +389,7 @@ int nrf_modem_os_sleep(uint32_t timeout)
 {
   /* Timeout in ms */
 
-  nxsig_usleep(timeout * 1000);
+  nxsched_usleep(timeout * 1000);
   return OK;
 }
 

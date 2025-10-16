@@ -225,7 +225,7 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
 
   /* Delay for state transition */
 
-  nxsig_usleep(100);
+  nxsched_usleep(100);
 
   /* Wait for the device to enter STANDBY */
 
@@ -263,7 +263,7 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
 
   /* Delay for state transition */
 
-  nxsig_usleep(100);
+  nxsched_usleep(100);
 
   /* Make sure that the device becomes READY */
 

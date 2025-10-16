@@ -311,7 +311,7 @@ static int send_command(l86xxx_dev_s *dev,
   if (cmd == SET_NMEA_BAUDRATE)
   {
 #ifdef CONFIG_SERIAL_TERMIOS
-    nxsig_usleep(20000); /* Should wait for a bit before changing interface baud rate */
+    nxsched_usleep(20000); /* Should wait for a bit before changing interface baud rate */
     err = set_baud_rate(dev, (int)arg);
 #else
     err = -EINVAL;

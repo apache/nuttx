@@ -510,7 +510,7 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv,
       g_magnetofactor = 1;
     }
 
-  nxsig_usleep(100000);         /* 100ms */
+  nxsched_usleep(100000);         /* 100ms */
 
   /* Read the output registers after checking XLDA bit 5 times */
 
@@ -532,7 +532,7 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv,
         }
     }
 
-  nxsig_usleep(100000);         /* 100ms */
+  nxsched_usleep(100000);         /* 100ms */
 
   /* Read OUT registers Gyro is starting at 22h and Accelero at 28h */
 
@@ -618,7 +618,7 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv,
       lsm303agr_writereg8(priv, LSM303AGR_CFG_REG_C_M, 0x12);
     }
 
-  nxsig_usleep(100000);         /* 100ms */
+  nxsched_usleep(100000);         /* 100ms */
 
   checkbit = false;
   while (checkbit)
@@ -635,7 +635,7 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv,
         }
     }
 
-  nxsig_usleep(100000);    /* 100ms */
+  nxsched_usleep(100000);    /* 100ms */
 
   /* Now do all the ST values */
 
@@ -673,7 +673,7 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv,
           checkbit = lsm303agr_isbitset(value, LSM303AGR_STATUS_REG_M_ZYXDA);
         }
 
-      nxsig_usleep(100000);    /* 100ms */
+      nxsched_usleep(100000);    /* 100ms */
 
       lsm303agr_readreg8(priv,
                          LSM303AGR_OUT_X_L_A + registershift,
@@ -812,7 +812,7 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv,
       sninfo("\n");
     }
 
-  nxsig_sleep(2);
+  nxsched_sleep(2);
 
   /* Disable test */
 

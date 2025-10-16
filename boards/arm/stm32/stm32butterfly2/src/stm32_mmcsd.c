@@ -98,7 +98,7 @@ static void *stm32_cd_thread(void *arg)
            * rest for a millisecond or so.
            */
 
-          nxsig_usleep(1 * 1000);
+          nxsched_usleep(1 * 1000);
           g_chmediaclbk(g_chmediaarg);
         }
     }

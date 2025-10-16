@@ -881,7 +881,7 @@ static int lis2mdl_selftest(FAR struct sensor_lowerhalf_s *lower,
 
       /* Wait for the measurement interval */
 
-      nxsig_usleep(ODR_TO_INTERVAL[dev->odr]);
+      nxsched_usleep(ODR_TO_INTERVAL[dev->odr]);
     }
 
   sninfo("LIS2MDL regular samples complete.");
@@ -896,7 +896,7 @@ static int lis2mdl_selftest(FAR struct sensor_lowerhalf_s *lower,
     }
 
   sninfo("LIS2MDL waiting for self-test.");
-  nxsig_usleep(60000); /* Wait 60ms as per AN5069 */
+  nxsched_usleep(60000); /* Wait 60ms as per AN5069 */
   sninfo("LIS2MDL waiting for self-test over.");
 
   for (uint8_t i = 0; i < SELFTEST_SAMPLES; i++)
@@ -922,7 +922,7 @@ static int lis2mdl_selftest(FAR struct sensor_lowerhalf_s *lower,
 
       /* Wait for the measurement interval */
 
-      nxsig_usleep(ODR_TO_INTERVAL[dev->odr]);
+      nxsched_usleep(ODR_TO_INTERVAL[dev->odr]);
     }
 
   sninfo("LIS2MDL self-test samples complete.");
@@ -1222,7 +1222,7 @@ static int lis2mdl_thread(int argc, char **argv)
 
       /* Wait for next measurement cycle */
 
-      nxsig_usleep(ODR_TO_INTERVAL[dev->odr]);
+      nxsched_usleep(ODR_TO_INTERVAL[dev->odr]);
     }
 
   return err;

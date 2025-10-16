@@ -596,7 +596,7 @@ static int uart_tcdrain(FAR uart_dev_t *dev,
             {
               clock_t elapsed;
 
-              nxsig_usleep(POLL_DELAY_USEC);
+              nxsched_usleep(POLL_DELAY_USEC);
 
               /* Check for a timeout */
 
@@ -666,7 +666,7 @@ static int uart_tcsendbreak(FAR uart_dev_t *dev, FAR struct file *filep,
             {
               /* Wait 400 ms or the requested Break duration */
 
-              nxsig_usleep((ms == 0) ? 400000 : ms * 1000);
+              nxsched_usleep((ms == 0) ? 400000 : ms * 1000);
 
               /* Request lower half driver to end the Break */
 

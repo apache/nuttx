@@ -2657,12 +2657,12 @@ static int usbmsc_cmdfinishstate(FAR struct usbmsc_dev_s *priv)
                * endpoint
                */
 
-              nxsig_usleep (100000);
+              nxsched_usleep (100000);
               EP_STALL(priv->epbulkin);
 
               /* now wait for stall to go away .... */
 
-              nxsig_usleep (100000);
+              nxsched_usleep (100000);
 #else
               EP_STALL(priv->epbulkin);
 #endif

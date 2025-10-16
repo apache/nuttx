@@ -570,7 +570,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
     {
       /* Give time to oscillator to change its status */
 
-      nxsig_usleep(10000);
+      nxsched_usleep(10000);
 
       ret = I2C_TRANSFER(g_mcp794xx.i2c, msg, 2);
       if (ret < 0)
@@ -674,7 +674,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
     {
       /* Give time to oscillator to change its status */
 
-      nxsig_usleep(10000);
+      nxsched_usleep(10000);
 
       ret = I2C_TRANSFER(g_mcp794xx.i2c, msg, 2);
       if (ret < 0)

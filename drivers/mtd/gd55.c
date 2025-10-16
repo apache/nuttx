@@ -710,7 +710,7 @@ static int gd55_erase_sector(FAR struct gd55_dev_s *priv, off_t sector)
 
   do
     {
-      nxsig_usleep(10 * 1000); /* Typical sector erase time is 30ms */
+      nxsched_usleep(10 * 1000); /* Typical sector erase time is 30ms */
       status = gd55_read_status1(priv);
     }
   while ((status & GD55_SR_WIP) != 0);
@@ -780,7 +780,7 @@ static int gd55_erase_64kblock(FAR struct gd55_dev_s *priv, off_t sector)
 
   do
     {
-      nxsig_usleep(50 * 1000); /* typical 64k erase time is 220ms */
+      nxsched_usleep(50 * 1000); /* typical 64k erase time is 220ms */
       status = gd55_read_status1(priv);
     }
   while ((status & GD55_SR_WIP) != 0);
@@ -848,7 +848,7 @@ static int gd55_erase_32kblock(FAR struct gd55_dev_s *priv, off_t sector)
 
   do
     {
-      nxsig_usleep(50 * 1000); /* typical 32k erase time is 150ms */
+      nxsched_usleep(50 * 1000); /* typical 32k erase time is 150ms */
       status = gd55_read_status1(priv);
     }
   while ((status & GD55_SR_WIP) != 0);
@@ -900,7 +900,7 @@ static int gd55_erase_chip(FAR struct gd55_dev_s *priv)
 
   while ((status & GD55_SR_WIP) != 0)
     {
-      nxsig_sleep(2);
+      nxsched_sleep(2);
       status = gd55_read_status1(priv);
     }
 

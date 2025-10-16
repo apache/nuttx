@@ -2276,7 +2276,7 @@ static ssize_t efm32_out_transfer(struct efm32_usbhost_s *priv,
            * transfer using the same buffer pointer and length.
            */
 
-          nxsig_usleep(20 * 1000);
+          nxsched_usleep(20 * 1000);
         }
       else
         {
@@ -3960,7 +3960,7 @@ static int efm32_rh_enumerate(struct efm32_usbhost_s *priv,
 
   /* USB 2.0 spec says at least 50ms delay before port reset. wait 100ms. */
 
-  nxsig_usleep(100 * 1000);
+  nxsched_usleep(100 * 1000);
 
   /* Reset the host port */
 

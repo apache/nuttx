@@ -268,7 +268,7 @@ static int lpc17_40_poweron(struct ubxmdm_lower * lower)
 
   /* Min. time for power_on_n being low is 5 ms */
 
-  nxsig_usleep(10 * 1000);
+  nxsched_usleep(10 * 1000);
 
   if (priv->usb_used)
     {
@@ -287,7 +287,7 @@ static int lpc17_40_poweron(struct ubxmdm_lower * lower)
 
   /* Delay to obtain correct voltage on shifters */
 
-  nxsig_usleep(1 * 1000);
+  nxsched_usleep(1 * 1000);
 
   /* UART shifter enabled */
 
@@ -339,7 +339,7 @@ static int lpc17_40_reset(struct ubxmdm_lower * lower)
 
   /* The minimum reset_n low time is 50 ms */
 
-  nxsig_usleep(75 * 1000);
+  nxsched_usleep(75 * 1000);
 
   /* Modem not in reset */
 

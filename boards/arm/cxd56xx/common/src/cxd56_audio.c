@@ -292,13 +292,13 @@ int board_external_amp_mute_control(bool en)
       /* Mute ON */
 
       ret = board_power_control(POWER_AUDIO_MUTE, false);
-      nxsig_usleep(MUTE_ON_DELAY);
+      nxsched_usleep(MUTE_ON_DELAY);
     }
   else
     {
       /* Mute OFF */
 
-      nxsig_usleep(MUTE_OFF_DELAY);
+      nxsched_usleep(MUTE_OFF_DELAY);
       ret = board_power_control(POWER_AUDIO_MUTE, true);
     }
 

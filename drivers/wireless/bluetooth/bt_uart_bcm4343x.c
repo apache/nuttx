@@ -354,7 +354,7 @@ static int load_bcm4343x_firmware(FAR const struct btuart_lowerhalf_s *lower)
 
       /* Give everything time to start up */
 
-      nxsig_usleep(1000000);
+      nxsched_usleep(1000000);
 
       /* Once the firmware has booted it goes back to low speed,
        * so kick it up again

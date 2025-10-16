@@ -310,7 +310,7 @@ static int pn532_wait_rx_ready(FAR struct pn532_dev_s *dev, int timeout)
           return -ETIMEDOUT;
         }
 
-      nxsig_usleep(1000);
+      nxsched_usleep(1000);
     }
 
   dev->state = PN532_STATE_DATA_READY;
@@ -340,7 +340,7 @@ static void pn532_writecommand(FAR struct pn532_dev_s *dev, uint8_t cmd)
 
   pn532_lock(dev->spi);
   pn532_select(dev);
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
 
   SPI_SEND(dev->spi, PN532_SPI_DATAWRITE);
   SPI_SNDBLOCK(dev->spi, f, FRAME_SIZE(f));
@@ -449,7 +449,7 @@ int pn532_write_frame(FAR struct pn532_dev_s *dev, FAR struct pn532_frame *f)
 
   pn532_lock(dev->spi);
   pn532_select(dev);
-  nxsig_usleep(2000);
+  nxsched_usleep(2000);
 
   SPI_SEND(dev->spi, PN532_SPI_DATAWRITE);
   SPI_SNDBLOCK(dev->spi, f, FRAME_SIZE(f));
@@ -862,7 +862,7 @@ static int _open(FAR struct file *filep)
   pn532_configspi(dev->spi);
 
   dev->config->reset(1);
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
 
   pn532_sam_config(dev, NULL);
   pn532_get_fw_version(dev, NULL);

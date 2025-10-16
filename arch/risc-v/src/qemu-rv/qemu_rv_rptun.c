@@ -253,7 +253,7 @@ static struct rptun_rsc_s *rp_get_resource(struct rptun_dev_s *dev)
 
       while (priv->shmem->base == 0)
         {
-          nxsig_usleep(100);
+          nxsched_usleep(100);
         }
     }
 

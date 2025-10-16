@@ -630,7 +630,7 @@ int spwm_main(int argc, char *argv[])
 
       /* Sleep */
 
-      nxsig_sleep(1);
+      nxsched_sleep(1);
     }
 
 errout:

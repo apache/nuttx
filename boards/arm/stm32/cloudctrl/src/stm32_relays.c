@@ -231,11 +231,11 @@ void relays_onoff(int relays, uint32_t mdelay)
           if (relays_getstat(relays))
             {
               relays_setstat(relays, false);
-              nxsig_usleep(RELAYS_MIN_RESET_TIME * 1000 * 1000);
+              nxsched_usleep(RELAYS_MIN_RESET_TIME * 1000 * 1000);
             }
 
           relays_setstat(relays, true);
-          nxsig_usleep(mdelay * 100 * 1000);
+          nxsched_usleep(mdelay * 100 * 1000);
           relays_setstat(relays, false);
         }
     }

@@ -3524,7 +3524,7 @@ static int sam_wakeup(struct usbdev_s *dev)
 
   /* Wait 5msec in case we just entered the resume state */
 
-  nxsig_usleep(5 * 1000);
+  nxsched_usleep(5 * 1000);
 
   /* Set the ESR bit to send the remote resume */
 

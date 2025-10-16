@@ -159,7 +159,7 @@ static int ncp5623c_open(FAR struct file *filep)
 
   /* Let the chip settle a bit */
 
-  nxsig_usleep(1);
+  nxsched_usleep(1);
   return OK;
 }
 

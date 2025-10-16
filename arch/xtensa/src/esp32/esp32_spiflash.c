@@ -683,7 +683,7 @@ static inline void IRAM_ATTR esp32_spiflash_oposyield(void)
   /* Delay 1 tick */
 
   useconds_t us = TICK2USEC(1);
-  nxsig_usleep(us);
+  nxsched_usleep(us);
 }
 
 /****************************************************************************

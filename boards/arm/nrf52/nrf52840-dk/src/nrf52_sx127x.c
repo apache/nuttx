@@ -110,7 +110,7 @@ static void sx127x_chip_reset(void)
 
   /* Wait 1 ms */
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* Configure reset as input */
 
@@ -118,7 +118,7 @@ static void sx127x_chip_reset(void)
 
   /* Wait 10 ms */
 
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
 }
 
 /****************************************************************************

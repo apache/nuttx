@@ -543,9 +543,9 @@ static void mx8mp_i2c_set_frequency(struct mx8mp_i2c_s *priv,
 static void mx8mp_i2c_reset_bus(struct mx8mp_i2c_s *priv)
 {
   mx8mp_i2c_disable(priv);
-  nxsig_usleep(50);
+  nxsched_usleep(50);
   mx8mp_i2c_enable(priv);
-  nxsig_usleep(50);
+  nxsched_usleep(50);
 }
 
 /****************************************************************************
@@ -679,7 +679,7 @@ error:
           break;
         }
 
-      nxsig_usleep(10);
+      nxsched_usleep(10);
     }
 
   /* Release access to I2C bus */

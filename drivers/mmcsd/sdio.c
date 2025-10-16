@@ -532,7 +532,7 @@ int sdio_enable_function(FAR struct sdio_dev_s *dev, uint8_t function)
 
   while (loops-- > 0)
     {
-      nxsig_usleep(10 * 1000);
+      nxsched_usleep(10 * 1000);
 
       ret = sdio_io_rw_direct(dev, false, 0, SDIO_CCCR_IORDY, 0, &value);
       if (ret != OK)

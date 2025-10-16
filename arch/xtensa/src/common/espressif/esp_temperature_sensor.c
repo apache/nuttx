@@ -682,7 +682,7 @@ static int esp_temperature_sensor_thread(int argc, char **argv)
 
       /* Sleeping thread before fetching the next sensor data */
 
-      nxsig_usleep(priv->interval);
+      nxsched_usleep(priv->interval);
     }
 
   return OK;

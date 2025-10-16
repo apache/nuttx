@@ -154,7 +154,7 @@ static int usbmonitor_daemon(int argc, FAR char **argv)
 
   while (!g_usbmonitor.stop)
     {
-      nxsig_sleep(CONFIG_USBMONITOR_INTERVAL);
+      nxsched_sleep(CONFIG_USBMONITOR_INTERVAL);
 #ifdef CONFIG_USBDEV_TRACE
       usbtrace_enumerate(usbmonitor_tracecallback, NULL);
 #endif

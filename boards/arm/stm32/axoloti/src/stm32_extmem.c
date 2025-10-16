@@ -237,7 +237,7 @@ int stm32_sdram_initialize(void)
    * power-up).
    */
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* Step 5:
    * Set MODE bits to ‘010’ and configure the Target Bank bits (CTB1

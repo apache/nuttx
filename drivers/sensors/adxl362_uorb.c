@@ -550,7 +550,7 @@ static int adxl362_thread(int argc, FAR char **argv)
 
       /* Sleeping thread before fetching the next sensor data */
 
-      nxsig_usleep(priv->interval);
+      nxsched_usleep(priv->interval);
     }
 
   return OK;

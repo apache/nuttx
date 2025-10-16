@@ -214,7 +214,7 @@ static uint8_t as726x_read8(FAR struct as726x_dev_s *priv, uint8_t regaddr)
           break;  /* If TX bit is clear, it is ok to write */
         }
 
-      nxsig_usleep(AS726X_POLLING_DELAY);
+      nxsched_usleep(AS726X_POLLING_DELAY);
     }
 
   /* Send the virtual register address (bit 7 should be 0 to indicate we are
@@ -233,7 +233,7 @@ static uint8_t as726x_read8(FAR struct as726x_dev_s *priv, uint8_t regaddr)
           break;  /* Read data is ready. */
         }
 
-      nxsig_usleep(AS726X_POLLING_DELAY);
+      nxsched_usleep(AS726X_POLLING_DELAY);
     }
 
   uint8_t incoming = read_register(priv, AS72XX_SLAVE_READ_REG);
@@ -289,7 +289,7 @@ static void as726x_write8(FAR struct as726x_dev_s *priv, uint8_t regaddr,
           break;
         }
 
-      nxsig_usleep(AS726X_POLLING_DELAY);
+      nxsched_usleep(AS726X_POLLING_DELAY);
     }
 
   /* Send the virtual register address (setting bit 7 to indicate we are
@@ -310,7 +310,7 @@ static void as726x_write8(FAR struct as726x_dev_s *priv, uint8_t regaddr,
           break;
         }
 
-      nxsig_usleep(AS726X_POLLING_DELAY);
+      nxsched_usleep(AS726X_POLLING_DELAY);
     }
 
   /* Send the data to complete the operation. */

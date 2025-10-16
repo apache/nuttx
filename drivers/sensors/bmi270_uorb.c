@@ -549,7 +549,7 @@ static int bmi270_thread(int argc, FAR char **argv)
       /* Sleeping thread before fetching the next sensor data */
 
       min_interval = MIN(accel->interval, gyro->interval);
-      nxsig_usleep(min_interval);
+      nxsched_usleep(min_interval);
     }
 
   return OK;

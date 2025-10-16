@@ -400,7 +400,7 @@ void rtw_yield_os(void)
 
 void rtw_usleep_os(int us)
 {
-  nxsig_usleep(us);
+  nxsched_usleep(us);
 }
 
 void rtw_msleep_os(int ms)

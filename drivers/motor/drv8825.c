@@ -147,7 +147,7 @@ static int drv8825_work(FAR struct stepper_lowerhalf_s *dev,
   if (priv->auto_idle)
     {
       priv->ops->idle(false);
-      nxsig_usleep(USEC_PER_MSEC * 2);
+      nxsched_usleep(USEC_PER_MSEC * 2);
     }
 
   dev->status.state = STEPPER_STATE_RUN;
@@ -225,7 +225,7 @@ static int drv8825_idle(FAR struct stepper_lowerhalf_s *dev, uint8_t idle)
   else
     {
       priv->ops->idle(false);
-      nxsig_usleep(USEC_PER_MSEC * 2);
+      nxsched_usleep(USEC_PER_MSEC * 2);
       dev->status.state = STEPPER_STATE_READY;
     }
 

@@ -330,7 +330,7 @@ static int hci_load_firmware(struct file *filep)
       command[1] = 0x20;
       command[2] = 0xfc;
       buffer_size = header_size + command[3];
-      nxsig_usleep(10);
+      nxsched_usleep(10);
       ret = hci_send(filep, command, buffer_size);
       if (ret != buffer_size)
         {

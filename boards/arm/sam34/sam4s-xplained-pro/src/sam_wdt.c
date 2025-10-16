@@ -105,10 +105,10 @@ static int wdog_daemon(int argc, char *argv[])
       goto errout_with_dev;
     }
 
-  nxsig_usleep(200);
+  nxsched_usleep(200);
   while (1)
     {
-      nxsig_usleep((CONFIG_WDT_THREAD_INTERVAL)*1000);
+      nxsched_usleep((CONFIG_WDT_THREAD_INTERVAL)*1000);
 
       wdinfo("ping\n");
       ret = file_ioctl(&filestruct, WDIOC_KEEPALIVE, 0);

@@ -1951,7 +1951,7 @@ static ssize_t stm32l4_in_transfer(struct stm32l4_usbhost_s *priv,
                    * Small delays could require more resolution than is
                    * provided by the system timer.  For example, if the
                    * system timer resolution is 10MS, then
-                   * nxsig_usleep(1000) will actually request a delay 20MS
+                   * nxsched_usleep(1000) will actually request a delay 20MS
                    * (due to both quantization and rounding).
                    *
                    * REVISIT: So which is better?  To ignore tiny delays and
@@ -1961,7 +1961,7 @@ static ssize_t stm32l4_in_transfer(struct stm32l4_usbhost_s *priv,
 
                   if (delay > CONFIG_USEC_PER_TICK)
                     {
-                      nxsig_usleep(delay - CONFIG_USEC_PER_TICK);
+                      nxsched_usleep(delay - CONFIG_USEC_PER_TICK);
                     }
                 }
             }
@@ -2267,7 +2267,7 @@ static ssize_t stm32l4_out_transfer(struct stm32l4_usbhost_s *priv,
            * transfer using the same buffer pointer and length.
            */
 
-          nxsig_usleep(20 * 1000);
+          nxsched_usleep(20 * 1000);
         }
       else
         {
@@ -3961,7 +3961,7 @@ static int stm32l4_rh_enumerate(struct stm32l4_usbhost_s *priv,
    * 100ms.
    */
 
-  nxsig_usleep(100 * 1000);
+  nxsched_usleep(100 * 1000);
 
   /* Reset the host port */
 

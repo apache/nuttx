@@ -299,7 +299,7 @@ static void slip_transmit(FAR struct slip_driver_s *self)
                            self->txlen - self->txsent);
           if (ssz <= 0)
             {
-              nxsig_usleep(10000);
+              nxsched_usleep(10000);
               i++;
               continue;
             }

@@ -471,11 +471,11 @@ static void w5500_reset(FAR struct w5500_driver_s *self, bool keep)
 
   if (!keep)
     {
-      nxsig_usleep(500);   /* [W5500]: T_RC (Reset Cycle Time) min 500 us   */
+      nxsched_usleep(500);   /* [W5500]: T_RC (Reset Cycle Time) min 500 us   */
 
       self->lower->reset(self->lower, false);
 
-      nxsig_usleep(1000);  /* [W5500]: T_PL (RSTn to internal PLL lock) 1ms */
+      nxsched_usleep(1000);  /* [W5500]: T_PL (RSTn to internal PLL lock) 1ms */
     }
 }
 
@@ -1054,7 +1054,7 @@ static int w5500_unfence(FAR struct w5500_driver_s *self)
                           W5500_BSB_COMMON_REGS,
                           W5500_PHYCFGR);
 
-      nxsig_usleep(100000); /* 100 ms x 100 = 10 sec */
+      nxsched_usleep(100000); /* 100 ms x 100 = 10 sec */
     }
 
   if (value & PHYCFGR_LNK)

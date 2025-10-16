@@ -216,7 +216,7 @@ static int fs3000_thread(int argc, char** argv)
                                  sizeof(struct sensor_velocity));
 
 thread_sleep:
-      nxsig_usleep(CONFIG_SENSORS_FS3000_POLL_INTERVAL);
+      nxsched_usleep(CONFIG_SENSORS_FS3000_POLL_INTERVAL);
     }
 
   return OK;

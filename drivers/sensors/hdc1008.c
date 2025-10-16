@@ -200,7 +200,7 @@ static int hdc1008_measure_trh(FAR struct hdc1008_dev_s *priv, int *t,
    * both temperature and humidity.
    */
 
-  nxsig_usleep(20000);
+  nxsched_usleep(20000);
 
   ret = i2c_read(priv->i2c, &config, buf, 4);
   if (ret < 0)
@@ -250,7 +250,7 @@ static int hdc1008_measure_t_or_rh(FAR struct hdc1008_dev_s *priv,
    * margin for either temperature/humidity at maximum resolution.
    */
 
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
 
   ret = i2c_read(priv->i2c, &config, buf, 2);
   if (ret < 0)
@@ -902,7 +902,7 @@ static int hdc1008_reset(FAR struct hdc1008_dev_s *priv)
   do
     {
       ret = hdc1008_getreg(priv, HDC1008_REG_CONFIGURATION, &reg);
-      nxsig_usleep(1000);
+      nxsched_usleep(1000);
       --count;
     }
   while ((reg & HDC1008_CONFIGURATION_RST) && (ret == OK) && count);
@@ -974,7 +974,7 @@ int hdc1008_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
    * sure that it is ready.
    */
 
-  nxsig_usleep(15000);
+  nxsched_usleep(15000);
 
   /* Set default configuration */
 

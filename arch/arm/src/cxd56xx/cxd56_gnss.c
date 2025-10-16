@@ -452,7 +452,7 @@ static int cxd56_gnss_start(struct file *filep, unsigned long arg)
     {
       /* GNSS requires stable RTC */
 
-      nxsig_usleep(100 * 1000);
+      nxsched_usleep(100 * 1000);
     }
 
   ret = cxd56_gnss_cpufifo_api(filep, CXD56_GNSS_GD_GNSS_START,
@@ -1453,7 +1453,7 @@ static int cxd56_gnss_start_test(struct file *filep, unsigned long arg)
         {
           /* GNSS requires stable RTC */
 
-          nxsig_usleep(100 * 1000);
+          nxsched_usleep(100 * 1000);
         }
 
       /* set parameter */
@@ -2768,7 +2768,7 @@ static int cxd56_gnss_open(struct file *filep)
     {
       /* GNSS requires stable RTC */
 
-      nxsig_usleep(100 * 1000);
+      nxsched_usleep(100 * 1000);
     }
 
   ret = nxmutex_lock(&priv->devlock);

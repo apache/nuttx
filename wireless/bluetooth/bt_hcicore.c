@@ -1539,7 +1539,7 @@ static void cmd_queue_deinit(void)
 
   while (g_btdev.tx_status == ENOTCONN)
     {
-      nxsig_usleep(1000);
+      nxsched_usleep(1000);
     }
 
   /* Deinitialization */

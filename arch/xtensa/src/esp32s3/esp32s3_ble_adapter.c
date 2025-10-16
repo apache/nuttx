@@ -3576,7 +3576,7 @@ int esp32s3_bt_controller_disable(void)
   async_wakeup_request(BTDM_ASYNC_WAKEUP_SRC_DISA);
   while (!btdm_power_state_active())
     {
-      nxsig_usleep(1000); /* wait */
+      nxsched_usleep(1000); /* wait */
     }
 
   btdm_controller_disable();

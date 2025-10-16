@@ -1601,7 +1601,7 @@ static int bme688_thread(int argc, char **argv)
         }
 
     thread_sleep:
-      nxsig_usleep(CONFIG_SENSORS_BME688_POLL_INTERVAL);
+      nxsched_usleep(CONFIG_SENSORS_BME688_POLL_INTERVAL);
     }
 
   return OK;

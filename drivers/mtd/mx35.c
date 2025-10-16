@@ -382,7 +382,7 @@ static bool mx35_waitstatus(FAR struct mx35_dev_s *priv,
        * case will allow other peripherals to access the SPI bus.
        */
     }
-  while (((status & MX35_SR_OIP) != 0) && (!nxsig_usleep(1000)));
+  while (((status & MX35_SR_OIP) != 0) && (!nxsched_usleep(1000)));
 
   mx35info("Complete\n");
   return successif ? ((status & mask) != 0) : ((status & mask) == 0);

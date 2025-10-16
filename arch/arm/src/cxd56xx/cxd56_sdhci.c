@@ -3338,7 +3338,7 @@ void cxd56_sdhci_mediachange(struct sdio_dev_s *dev)
               break;
             }
 
-          nxsig_usleep(100000);
+          nxsched_usleep(100000);
           timeout -= 100000;
         }
     }

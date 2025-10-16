@@ -119,9 +119,9 @@ int board_bluetooth_uart_pin_cfg(void)
 void board_bluetooth_reset(void)
 {
   cxd56_gpio_write(BCM20707_RST_N, false);
-  nxsig_usleep(BCM20707_RST_DELAY);
+  nxsched_usleep(BCM20707_RST_DELAY);
   cxd56_gpio_write(BCM20707_RST_N, true);
-  nxsig_usleep(BCM20707_RST_DELAY);
+  nxsched_usleep(BCM20707_RST_DELAY);
 }
 
 /****************************************************************************

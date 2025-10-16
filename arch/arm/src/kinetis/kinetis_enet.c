@@ -1564,7 +1564,7 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
       retries = 0;
       do
         {
-          nxsig_usleep(LINK_WAITUS);
+          nxsched_usleep(LINK_WAITUS);
           ninfo("%s: Read PHYID1, retries=%d\n",
                 BOARD_PHY_NAME, retries + 1);
           phydata = 0xffff;
@@ -1646,7 +1646,7 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
           break;
         }
 
-      nxsig_usleep(LINK_WAITUS);
+      nxsched_usleep(LINK_WAITUS);
     }
 
   if (phydata & MII_MSR_ANEGCOMPLETE)
