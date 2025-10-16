@@ -86,7 +86,7 @@ static void addrenv_destroy(FAR void *arg)
 
   /* Then finally release the memory */
 
-  kmm_free(addrenv);
+  kmm_delayfree(addrenv);
 }
 
 /****************************************************************************
