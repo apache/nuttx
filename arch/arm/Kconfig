@@ -85,6 +85,15 @@ config ARCH_CHIP_AM335X
 	---help---
 		TI AM335X family: AM3356, AM3357, AM3358, AM3359 (ARM Cortex-A8)
 
+config ARCH_CHIP_AM67
+	bool "AM67"
+	select ARCH_CORTEXR5
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_LOWVECTORS
+	select ARCH_HAVE_TICKLESS
+	---help---
+		TI AM67 family
+
 config ARCH_CHIP_FVP_ARMV8R_AARCH32
 	bool "ARM FVP virt platform (ARMv8r AARCH32)"
 	select ARCH_CORTEXR52
@@ -1149,6 +1158,7 @@ config ARCH_CHIP
 	string
 	default "a1x"		if ARCH_CHIP_A1X
 	default "am335x"	if ARCH_CHIP_AM335X
+	default "am67"		if ARCH_CHIP_AM67
 	default "fvp-v8r-aarch32"	if ARCH_CHIP_FVP_ARMV8R_AARCH32
 	default "c5471"		if ARCH_CHIP_C5471
 	default "dm320"		if ARCH_CHIP_DM320
@@ -1573,6 +1583,9 @@ source "arch/arm/src/a1x/Kconfig"
 endif
 if ARCH_CHIP_AM335X
 source "arch/arm/src/am335x/Kconfig"
+endif
+if ARCH_CHIP_AM67
+source "arch/arm/src/am67/Kconfig"
 endif
 if ARCH_CHIP_FVP_ARMV8R_AARCH32
 source "arch/arm/src/fvp-v8r-aarch32/Kconfig"
