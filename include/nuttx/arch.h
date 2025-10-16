@@ -85,6 +85,7 @@
 #include <arch/types.h>
 
 #include <nuttx/compiler.h>
+#include <nuttx/percpu.h>
 #include <nuttx/cache.h>
 #include <nuttx/sched.h>
 
@@ -147,31 +148,6 @@
 #  define SMP_MB()  memory_barrier()
 #  define SMP_RMB() memory_barrier()
 #  define SMP_WMB() memory_barrier()
-#endif
-
-/****************************************************************************
- * Name: up_cpu_index
- *
- * Description:
- *   Return the real core number regardless CONFIG_SMP setting
- *
- ****************************************************************************/
-
-#ifndef CONFIG_ARCH_HAVE_MULTICPU
-#  define up_cpu_index() 0
-#endif /* CONFIG_ARCH_HAVE_MULTICPU */
-
-/****************************************************************************
- * Name: up_this_cpu
- *
- * Description:
- *   Return the logical core number. Default implementation is 1:1 mapping,
- *   i.e. physical=logical.
- *
- ****************************************************************************/
-
-#ifndef CONFIG_ARCH_HAVE_CPUID_MAPPING
-#  define up_this_cpu() up_cpu_index()
 #endif
 
 /****************************************************************************
