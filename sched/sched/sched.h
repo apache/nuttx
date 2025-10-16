@@ -197,7 +197,7 @@ extern enum task_deliver_e g_delivertasks[CONFIG_SMP_NCPUS];
 
 /* This is the list of idle tasks */
 
-extern FAR struct tcb_s g_idletcb[CONFIG_SMP_NCPUS];
+extern struct tcb_s g_idletcb[CONFIG_SMP_NCPUS];
 
 #endif
 

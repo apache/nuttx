@@ -987,7 +987,7 @@ int userfs_run(FAR const char *mountpt,
                FAR void *volinfo, size_t mxwrite)
 {
   FAR struct userfs_info_s *info;
-  FAR struct userfs_config_s config;
+  struct userfs_config_s config;
   struct sockaddr_in server;
   unsigned int iolen;
   socklen_t addrlen;

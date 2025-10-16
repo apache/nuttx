@@ -60,7 +60,7 @@
 
 struct ubxmdm_regval
 {
-  FAR char name[3];
+  char name[3];
   bool val;
 };
 
