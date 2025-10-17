@@ -652,6 +652,37 @@ config MPFS_COREPWM1_NCHANNELS
 	range 1 16
 	depends on MPFS_COREPWM1
 
+comment "MSS CAN 2.0 Options"
+
+config MPFS_MSS_CAN
+	bool
+	default n
+	select CAN
+	select NET_CAN
+	select NET_CAN_HAVE_CANFD
+	select ARCH_HAVE_CAN_ERRORS
+	select NET_CAN_HAVE_TX_DEADLINE
+
+config MPFS_MSS_CAN0
+	bool "Enable MSS CAN block 0"
+	default n
+	select MPFS_MSS_CAN
+
+config MPFS_MSS_CAN1
+	bool "Enable MSS CAN block 1"
+	default n
+	select MPFS_MSS_CAN
+
+config MPFS_MSS_CAN_BITRATE0
+	int "MSS CAN block 0 bitrate"
+	default 1000000
+	depends on MPFS_MSS_CAN0
+
+config MPFS_MSS_CAN_BITRATE1
+	int "MSS CAN block 1 bitrate"
+	default 1000000
+	depends on MPFS_MSS_CAN1
+
 endmenu
 
 config MPFS_DMA
