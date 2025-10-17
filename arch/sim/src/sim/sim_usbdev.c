@@ -1080,8 +1080,8 @@ static void sim_usbdev_work(void *arg)
         }
     }
 
-  work_queue_next(HPWORK, &priv->work, sim_usbdev_work, priv,
-                  SIM_USB_PERIOD);
+  work_queue_next_wq(g_work_queue, &priv->work, sim_usbdev_work, priv,
+                     SIM_USB_PERIOD);
 }
 
 /****************************************************************************
@@ -1139,7 +1139,8 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 #endif
     }
 
-  work_queue(HPWORK, &priv->work, sim_usbdev_work, priv, SIM_USB_PERIOD);
+  work_queue_wq(g_work_queue, &priv->work, sim_usbdev_work, priv,
+                SIM_USB_PERIOD);
 
   return ret;
 }

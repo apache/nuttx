@@ -710,7 +710,7 @@ static void sim_usbhost_rqcomplete(struct sim_usbhost_s *drvr)
 }
 
 /****************************************************************************
- * Name: sim_usbhost_interrupt
+ * Name: sim_usbhost_work
  ****************************************************************************/
 
 static void sim_usbhost_work(void *arg)
@@ -779,8 +779,8 @@ static void sim_usbhost_work(void *arg)
         }
     }
 
-  work_queue_next(HPWORK, &priv->work, sim_usbhost_work, priv,
-                  SIM_USBHOST_PERIOD);
+  work_queue_next_wq(g_work_queue, &priv->work, sim_usbhost_work, priv,
+                     SIM_USBHOST_PERIOD);
 }
 
 /****************************************************************************
@@ -853,7 +853,8 @@ int sim_usbhost_initialize(void)
       return -ENODEV;
     }
 
-  work_queue(HPWORK, &priv->work, sim_usbhost_work, priv, SIM_USBHOST_PERIOD);
+  work_queue_wq(g_work_queue, &priv->work, sim_usbhost_work, priv,
+                SIM_USBHOST_PERIOD);
 
   return OK;
 }

@@ -60,6 +60,12 @@ static struct work_s g_x11update_work;  /* Watchdog for update loop */
 #endif
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+struct kwork_wqueue_s *g_work_queue;
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -92,8 +98,8 @@ static void sim_init_cmdline(void)
 static void sim_x11event_work(void *arg)
 {
   sim_x11events();
-  work_queue_next(HPWORK, &g_x11event_work, sim_x11event_work,
-                  NULL, SIM_X11EVENT_PERIOD);
+  work_queue_next_wq(g_work_queue, &g_x11event_work, sim_x11event_work,
+                     NULL, SIM_X11EVENT_PERIOD);
 }
 #endif
 
@@ -109,8 +115,8 @@ static void sim_x11event_work(void *arg)
 static void sim_x11update_work(void *arg)
 {
   sim_x11loop();
-  work_queue_next(HPWORK, &g_x11update_work, sim_x11update_work,
-                  NULL, SIM_X11UPDATE_PERIOD);
+  work_queue_next_wq(g_work_queue, &g_x11update_work, sim_x11update_work,
+                     NULL, SIM_X11UPDATE_PERIOD);
 }
 #endif
 
@@ -246,6 +252,10 @@ void up_initialize(void)
   host_init_cwd();
 #endif
 
+  g_work_queue = work_queue_create("sim_loop_wq",
+                                   CONFIG_SCHED_HPWORKPRIORITY, NULL,
+                                   CONFIG_SCHED_HPWORKSTACKSIZE, 1u);
+
 #ifdef CONFIG_PM
   /* Initialize the power management subsystem.  This MCU-specific function
    * must be called *very* early in the initialization sequence *before* any
@@ -318,12 +328,12 @@ void up_initialize(void)
 
 #if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
     defined(CONFIG_SIM_BUTTONS)
-  work_queue(HPWORK, &g_x11event_work, sim_x11event_work,
-             NULL, SIM_X11EVENT_PERIOD);
+  work_queue_wq(g_work_queue, &g_x11event_work, sim_x11event_work,
+                NULL, SIM_X11EVENT_PERIOD);
 #endif
 
 #ifdef CONFIG_SIM_X11FB
-  work_queue(HPWORK, &g_x11update_work, sim_x11update_work,
-             NULL, SIM_X11UPDATE_PERIOD);
+  work_queue_wq(g_work_queue, &g_x11update_work, sim_x11update_work,
+                NULL, SIM_X11UPDATE_PERIOD);
 #endif
 }

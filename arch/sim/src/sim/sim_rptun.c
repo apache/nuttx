@@ -327,7 +327,7 @@ static void sim_rptun_check_reset(struct sim_rptun_dev_s *priv)
     }
 }
 
-static void sim_rptun_work(wdparm_t arg)
+static void sim_rptun_work(void *arg)
 {
   struct sim_rptun_dev_s *dev = (struct sim_rptun_dev_s *)arg;
 
@@ -358,8 +358,8 @@ static void sim_rptun_work(wdparm_t arg)
         }
     }
 
-  work_queue_next(HPWORK, &dev->work, sim_rptun_work, dev,
-                  SIM_RPTUN_WORK_DELAY);
+  work_queue_next_wq(g_work_queue, &dev->work, sim_rptun_work, dev,
+                     SIM_RPTUN_WORK_DELAY);
 }
 
 /****************************************************************************
@@ -406,6 +406,5 @@ int sim_rptun_init(const char *shmemname, const char *cpuname, int master)
       return ret;
     }
 
-  return work_queue(HPWORK, &dev->work, sim_rptun_work, dev,
-                    SIM_RPTUN_WORK_DELAY);
+  return work_queue_wq(g_work_queue, &dev->work, sim_rptun_work, dev, 0);
 }

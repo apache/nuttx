@@ -1132,14 +1132,14 @@ fail:
   return 0;
 }
 
-static void sim_audio_work_handler(FAR void *arg)
+static void sim_audio_work(FAR void *arg)
 {
   struct sim_audio_s *priv = (struct sim_audio_s *)arg;
 
   sim_audio_process(priv);
 
-  work_queue_next(HPWORK, &priv->work, sim_audio_work_handler, priv,
-                  SIM_AUDIO_PERIOD);
+  work_queue_next_wq(g_work_queue, &priv->work, sim_audio_work, priv,
+                     SIM_AUDIO_PERIOD);
 }
 
 /****************************************************************************
@@ -1169,8 +1169,8 @@ struct audio_lowerhalf_s *sim_audio_initialize(bool playback, bool offload)
     }
 
   memset(&priv->work, 0, sizeof(struct work_s));
-  work_queue(HPWORK, &priv->work, sim_audio_work_handler, priv,
-             SIM_AUDIO_PERIOD);
+  work_queue_wq(g_work_queue, &priv->work, sim_audio_work, priv,
+                SIM_AUDIO_PERIOD);
 
   /* Setting default config */
 

@@ -189,8 +189,8 @@ static void sim_rpmsg_virtio_work(void *arg)
         }
     }
 
-  work_queue_next(HPWORK, &dev->work, sim_rpmsg_virtio_work, dev,
-                  SIM_RPMSG_VIRTIO_WORK_DELAY);
+  work_queue_next_wq(g_work_queue, &dev->work, sim_rpmsg_virtio_work, dev,
+                     SIM_RPMSG_VIRTIO_WORK_DELAY);
 }
 
 static int sim_rpmsg_virtio_notify(struct rpmsg_virtio_lite_s *dev,
@@ -252,6 +252,6 @@ int sim_rpmsg_virtio_init(const char *shmemname, const char *cpuname,
       return ret;
     }
 
-  return work_queue(HPWORK, &priv->work, sim_rpmsg_virtio_work, priv,
-                    SIM_RPMSG_VIRTIO_WORK_DELAY);
+  return work_queue_wq(g_work_queue, &priv->work, sim_rpmsg_virtio_work,
+                       priv, 0);
 }
