@@ -84,6 +84,7 @@ The following peripherals are configured:
 - UART0-4
 - CorePWM (nb. needs the FPGA IP installed to work)
 - CoreSPI (nb. needs the FPGA IP installed to work)
+- CAN0 & CAN1 (work with flat mode but there is still rare frame corruption issue in protected mode)
 
 The following applications are available:
 - TelnetD (at address 10.0.0.2)
