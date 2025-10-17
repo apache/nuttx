@@ -108,6 +108,7 @@ void up_schedule_sigaction(struct tcb_s *tcb)
    * disabled
    */
 
+  tcb->xcp.regs[REG_LR]    = 0; /* Avoid backtracing back. */
   tcb->xcp.regs[REG_PC]    = (uint32_t)arm_sigdeliver;
   tcb->xcp.regs[REG_CPSR]  = (PSR_MODE_SYS | PSR_I_BIT | PSR_F_BIT);
 #ifdef CONFIG_ARM_THUMB
