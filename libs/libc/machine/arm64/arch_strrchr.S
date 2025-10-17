@@ -124,10 +124,10 @@ def_fn ARCH_LIBCFUN(strrchr)
 	addp	vhas_chr1.16b, vhas_chr1.16b, vhas_chr2.16b	// 256->128
 	addp	vhas_nul1.16b, vhas_nul1.16b, vhas_nul1.16b	// 128->64
 	addp	vhas_chr1.16b, vhas_chr1.16b, vhas_chr1.16b	// 128->64
-	mov	nul_match, vhas_nul1.2d[0]
+	mov	nul_match, vhas_nul1.d[0]
 	lsl	tmp1, tmp1, #1
 	mov	const_m1, #~0
-	mov	chr_match, vhas_chr1.2d[0]
+	mov	chr_match, vhas_chr1.d[0]
 	lsr	tmp3, const_m1, tmp1
 
 	bic	nul_match, nul_match, tmp3	// Mask padding bits.
