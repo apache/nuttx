@@ -278,8 +278,8 @@ static void sim_netdev_work(void *arg)
       netdev_lower_rxready(dev);
     }
 
-  work_queue_next(HPWORK, &priv->work, sim_netdev_work, arg,
-                  SIM_NETDEV_PERIOD);
+  work_queue_next_wq(g_work_queue, &priv->work, sim_netdev_work, arg,
+                     SIM_NETDEV_PERIOD);
 }
 
 /****************************************************************************
@@ -330,9 +330,9 @@ int sim_netdriver_init(void)
 
       netdev_lower_register(dev, devidx < CONFIG_SIM_WIFIDEV_NUMBER ?
                                  NET_LL_IEEE80211 : NET_LL_ETHERNET);
-      work_queue(HPWORK, &g_sim_dev[devidx].work,
-                 sim_netdev_work, &g_sim_dev[devidx],
-                 SIM_NETDEV_PERIOD);
+      work_queue_wq(g_work_queue, &g_sim_dev[devidx].work,
+                    sim_netdev_work, &g_sim_dev[devidx],
+                    SIM_NETDEV_PERIOD);
     }
 
   return OK;

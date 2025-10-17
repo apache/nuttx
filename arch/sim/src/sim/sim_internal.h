@@ -198,6 +198,7 @@ struct i2c_master_s;
 
 extern int g_argc;
 extern char **g_argv;
+extern struct kwork_wqueue_s *g_work_queue;
 
 /****************************************************************************
  * Public Function Prototypes
