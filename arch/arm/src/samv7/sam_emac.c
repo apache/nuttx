@@ -66,6 +66,7 @@
 #include "sam_gpio.h"
 #include "sam_periphclks.h"
 #include "sam_ethernet.h"
+#include "sam_chipid.h"
 
 #include <arch/board/board.h>
 
@@ -4755,9 +4756,6 @@ int sam_emac_initialize(int intf)
 {
   struct sam_emac_s *priv;
   const struct sam_emacattr_s *attr;
-#ifndef CONFIG_ARCH_CHIP_PIC32CZCA70
-  uint32_t regval;
-#endif
   uint8_t *pktbuf;
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
   uint8_t phytype;
@@ -4776,15 +4774,10 @@ int sam_emac_initialize(int intf)
    * PIC32CZ CA70 family is always a revision B, therefore it has 6 queues.
    */
 
-#ifdef CONFIG_ARCH_CHIP_PIC32CZCA70
-  g_emac_nqueues = EMAC_NQUEUES_REVB;
-#else
-  regval = getreg32(SAM_CHIPID_CIDR);
-  if (((regval & CHIPID_CIDR_VERSION_MASK) >> CHIPID_CIDR_VERSION_SHIFT) > 0)
+  if (sam_has_revb_periphs())
     {
-      g_emac_nqueues = EMAC_NQUEUES_REVB;  /* Change to Rev. B with 6 queues */
+      g_emac_nqueues = EMAC_NQUEUES_REVB;
     }
-#endif
 
 #if defined(CONFIG_SAMV7_EMAC0)
   if (intf == EMAC0_INTF)
