@@ -29,6 +29,13 @@
 
 #include <stdbool.h>
 
+#define NEED_ATOMIC_MACROS
+#if defined(__has_include)
+#  if __has_include(<atomic>) && defined(__cplusplus)
+#    undef NEED_ATOMIC_MACROS
+#  endif
+#endif
+
 #if defined(__has_include) && !defined(CONFIG_LIBC_ARCH_ATOMIC)
 #  if __has_include(<atomic>) && defined(__cplusplus)
 extern "C++"
@@ -97,6 +104,8 @@ typedef volatile int64_t atomic64_t;
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifdef NEED_ATOMIC_MACROS
 
 #define atomic_set(obj, val)                  ATOMIC_FUNC(store, 4)(obj, val, __ATOMIC_RELAXED)
 #define atomic_set_release(obj, val)          ATOMIC_FUNC(store, 4)(obj, val, __ATOMIC_RELEASE)
@@ -197,6 +206,8 @@ typedef volatile int64_t atomic64_t;
   ATOMIC_FUNC(compare_exchange_weak, 8)(obj, (FAR int64_t *)expected, desired, __ATOMIC_RELEASE, __ATOMIC_RELAXED)
 #define atomic64_try_cmpxchg_relaxed(obj, expected, desired) \
   ATOMIC_FUNC(compare_exchange_weak, 8)(obj, (FAR int64_t *)expected, desired, __ATOMIC_RELAXED, __ATOMIC_RELAXED)
+
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
