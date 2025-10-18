@@ -480,6 +480,8 @@ void nxsched_alarm_tick_expiration(clock_t ticks)
 
   elapsed = ticks - update_time_tick(ticks);
 
+  clock_increase_sched_ticks(elapsed);
+
   /* Process the timer ticks and set up the next interval (or not) */
 
   nexttime = nxsched_timer_process(ticks, elapsed, false);
@@ -527,6 +529,8 @@ void nxsched_timer_expiration(void)
   up_timer_gettick(&ticks);
   update_time_tick(ticks);
   elapsed = atomic_read(&g_timer_interval);
+
+  clock_increase_sched_ticks(elapsed);
 
   /* Process the timer ticks and set up the next interval (or not) */
 

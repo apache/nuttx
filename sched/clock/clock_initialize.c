@@ -51,10 +51,7 @@
  * Public Data
  ****************************************************************************/
 
-#if !defined(CONFIG_SCHED_TICKLESS) && \
-    !defined(CONFIG_ALARM_ARCH) && !defined(CONFIG_TIMER_ARCH)
 volatile clock_t g_system_ticks = INITIAL_SYSTEM_TIMER_TICKS;
-#endif
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
 struct timespec   g_basetime;
@@ -379,35 +376,7 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
       clock_t diff_ticks = SEC2TICK(rtc_diff->tv_sec) +
                            NSEC2TICK(rtc_diff->tv_nsec);
 
-#ifdef CONFIG_SYSTEM_TIME64
-      atomic64_fetch_add((FAR atomic64_t *)&g_system_ticks, diff_ticks);
-#else
-      atomic_fetch_add((FAR atomic_t *)&g_system_ticks, diff_ticks);
-#endif
+      clock_increase_sched_ticks(diff_ticks);
     }
-}
-#endif
-
-/****************************************************************************
- * Name: clock_timer
- *
- * Description:
- *   This function must be called once every time the real time clock
- *   interrupt occurs.  The interval of this clock interrupt must be
- *   USEC_PER_TICK
- *
- ****************************************************************************/
-
-#if !defined(CONFIG_SCHED_TICKLESS) && \
-    !defined(CONFIG_ALARM_ARCH) && !defined(CONFIG_TIMER_ARCH)
-void clock_timer(void)
-{
-  /* Increment the per-tick system counter */
-
-#ifdef CONFIG_SYSTEM_TIME64
-  atomic64_fetch_add((FAR atomic64_t *)&g_system_ticks, 1);
-#else
-  atomic_fetch_add((FAR atomic_t *)&g_system_ticks, 1);
-#endif
 }
 #endif

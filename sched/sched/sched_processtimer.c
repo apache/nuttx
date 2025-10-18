@@ -184,7 +184,7 @@ void nxsched_process_timer(void)
 
   /* Increment the system time (if in the link) */
 
-  clock_timer();
+  clock_increase_sched_ticks(1);
 
   /* Check if the currently executing task has exceeded its
    * timeslice.

@@ -28,6 +28,7 @@ set(SRCS
     clock_realtime2absticks.c
     clock_systime_ticks.c
     clock_systime_timespec.c
+    clock_sched_ticks.c
     clock_perf.c)
 
 # Unless a driver with a more accurate version of up_*delay is enabled, always

@@ -39,6 +39,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* 32-bit mask for 64-bit timer values */
+
+#define TIMER_MASK32 0x00000000ffffffff
+
 /* Configuration ************************************************************/
 
 /* If CONFIG_SYSTEM_TIME64 is selected and the CPU supports long long types,
@@ -77,12 +81,10 @@ extern spinlock_t g_basetime_lock;
 int  clock_basetime(FAR struct timespec *tp);
 
 void clock_initialize(void);
-#if !defined(CONFIG_SCHED_TICKLESS) && \
-    !defined(CONFIG_ALARM_ARCH) && !defined(CONFIG_TIMER_ARCH)
-void clock_timer(void);
-#else
-#  define clock_timer()
-#endif
+
+void clock_increase_sched_ticks(clock_t ticks);
+
+clock_t clock_get_sched_ticks(void);
 
 /****************************************************************************
  * perf_init
