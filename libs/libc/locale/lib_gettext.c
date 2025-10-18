@@ -90,7 +90,7 @@ static mutex_t g_lock = NXMUTEX_INITIALIZER;
 static FAR struct mofile_s *g_mofile;
 
 #ifdef CONFIG_BUILD_KERNEL
-static FAR char g_domain[NAME_MAX];
+static char g_domain[NAME_MAX];
 #endif
 
 /****************************************************************************
