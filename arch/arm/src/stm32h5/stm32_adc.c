@@ -649,7 +649,12 @@ static void adc_enable(struct stm32_dev_s *priv)
 
   /* Wait for voltage regulator to power up */
 
-  up_udelay(20);
+  /* Datasheet recommends a _minimum_ of 20ms but it will depend
+   * on temperature, supply ramp and whether we've recently
+   * powered up ADC. So give a larger delay for safety.
+   */
+
+  up_udelay(50);
 
   /* Perform single-ended and/or differential calibration if necessary */
 
@@ -679,6 +684,17 @@ static void adc_enable(struct stm32_dev_s *priv)
    * as ADC clock source, this is the same as time taken to execute 4
    * ARM instructions.
    */
+
+  /* ES0565 document (STM32H562/563/573 series) : As noted above, we
+   * can't set ADEN until 4 ADC clock cycles from now. This will depend
+   * on what we use for ADC clock. To ensure we give enough guard time
+   * we are delaying ADEN by at least 1 microsecond. This will ensure
+   * even a slow clock will have enough time before we try to set ADEN.
+   * Also, clear ADRDY to ensure we are waiting for a fresh event.
+   */
+
+  adc_modifyreg(priv, STM32_ADC_ISR_OFFSET, 0, ADC_INT_ADRDY);
+  up_udelay(1);
 
   regval  = adc_getreg(priv, STM32_ADC_CR_OFFSET);
   regval |= ADC_CR_ADEN;
