@@ -164,8 +164,8 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
 
   nxtask_joininit(&child->cmn);
 
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-  spin_lock_init(&child->cmn.mutex_lock);
+#if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
+  spin_lock_init(&child->cmn.mhead_lock);
 #endif
 
   /* Allocate a new task group with the same privileges as the parent */
