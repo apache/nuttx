@@ -9,6 +9,14 @@ config NETDEV_IOCTL
 	bool
 	default n
 
+config NETDEV_ETHTOOL_IOCTL
+	bool "Enable ETHTOOL ioctl()"
+	depends on NET_ETHERNET
+	default n
+	select NETDEV_IOCTL
+	---help---
+		Enable support for ioctl() commands to config eth device
+
 config NETDEV_PHY_IOCTL
 	bool "Enable PHY ioctl()"
 	default n

@@ -39,6 +39,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/wireless/wireless.h>
+#include <nuttx/ethtool.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -109,11 +110,17 @@ enum netdev_rx_e
 
 struct netdev_ops_s;
 struct wireless_ops_s;
+struct ethtool_ops_s;
+
 struct netdev_lowerhalf_s
 {
   FAR const struct netdev_ops_s *ops;
 
   /* Extended operations. */
+
+#ifdef CONFIG_NETDEV_ETHTOOL_IOCTL
+  FAR const struct ethtool_ops_s *eth_ops;
+#endif
 
 #ifdef CONFIG_NETDEV_WIRELESS_HANDLER
   FAR const struct wireless_ops_s *iw_ops;
@@ -219,6 +226,34 @@ struct wireless_ops_s
   /* Get-only attributes. */
 
   iw_handler_ro range;
+};
+#endif
+
+#ifdef CONFIG_NETDEV_ETHTOOL_IOCTL
+
+/* This structure is a set of callback functions used to call from the lower-
+ * half, support ethtool tools. Driver can get/set parameter of hardware
+ * through these api. At present, only some apis are supported in the
+ * framework layer, and others need to be improved.
+ *
+ * get_channels: Get number of channels.
+ * set_channels: Set number of channels.  Returns a negative error code or
+ *               zero.
+ * get_channels2: Get channels status, and return in form of bitmap.
+ * set_channels2: Turn on/off channels, and input parameter in the form of
+ *                bitmap.
+ */
+
+struct ethtool_ops_s
+{
+  CODE int (*get_channels)(FAR struct netdev_lowerhalf_s *dev,
+                           FAR struct ethtool_chns *chns);
+  CODE int (*set_channels)(FAR struct netdev_lowerhalf_s *dev,
+                           FAR struct ethtool_chns *chns);
+  CODE int (*get_channels2)(FAR struct netdev_lowerhalf_s *dev,
+                            FAR struct ethtool_chns2 *chns);
+  CODE int (*set_channels2)(FAR struct netdev_lowerhalf_s *dev,
+                            FAR struct ethtool_chns2 *chns);
 };
 #endif
 
