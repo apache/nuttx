@@ -1001,6 +1001,80 @@ static int netdev_upper_txavail(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
+ * Name: netdev_upper_ethtool_ioctl
+ *
+ * Description:
+ *   Handle upper layer ethtool IOCTL commands for a network device.
+ *   This function processes ethtool-related IOCTL requests that are handled
+ *   at the upper network layer, interacting with the specified network
+ *   device.
+ *
+ * Input Parameters:
+ *   dev - Pointer to the network driver structure (struct net_driver_s)
+ *         representing the network device to operate on.
+ *   arg - IOCTL command argument. The specific type and interpretation
+ *         depend on the ethtool command being processed (e.g., may point to
+ *         an struct ethtool_cmd or other ethtool-related data structure).
+ *
+ * Returned Value:
+ *   On success, returns 0.
+ *   On failure, returns a negative error code.
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_ETHTOOL_IOCTL
+static int netdev_upper_ethtool_ioctl(FAR struct net_driver_s *dev,
+                                      unsigned long arg)
+{
+  FAR struct netdev_upperhalf_s *upper = dev->d_private;
+  FAR struct netdev_lowerhalf_s *lower = upper->lower;
+  uint32_t cmd = *(FAR const uint32_t *)arg;
+  int ret = -EOPNOTSUPP;
+
+  switch (cmd)
+    {
+      case ETHTOOL_GCHANNELS:
+        if (lower->eth_ops->get_channels)
+          {
+            ret = lower->eth_ops->get_channels(lower,
+                                  (FAR struct ethtool_chns *)arg);
+          }
+        break;
+
+      case ETHTOOL_SCHANNELS:
+        if (lower->eth_ops->set_channels)
+          {
+            ret = lower->eth_ops->set_channels(lower,
+                                  (FAR struct ethtool_chns *)arg);
+          }
+        break;
+
+      case ETHTOOL_GCHANNELS2:
+        if (lower->eth_ops->get_channels2)
+          {
+            ret = lower->eth_ops->get_channels2(lower,
+                                  (FAR struct ethtool_chns2 *)arg);
+          }
+        break;
+
+      case ETHTOOL_SCHANNELS2:
+        if (lower->eth_ops->set_channels2)
+          {
+            ret = lower->eth_ops->set_channels2(lower,
+                                  (FAR struct ethtool_chns2 *)arg);
+          }
+        break;
+
+      default:
+        ret = -ENOTTY;
+        nerr("ERROR: No such cmd in ethtool opt!");
+        break;
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Name: netdev_upper_wireless_ioctl
  *
  * Description:
@@ -1451,6 +1525,17 @@ static int netdev_upper_ioctl(FAR struct net_driver_s *dev, int cmd,
   if (lower->phydev != NULL)
     {
       ret = phy_ioctl(lower->phydev, cmd, arg);
+      if (ret != -ENOTTY)
+        {
+          return ret;
+        }
+    }
+#endif
+
+#ifdef CONFIG_NETDEV_ETHTOOL_IOCTL
+  if (cmd == SIOCETHTOOL && lower->eth_ops)
+    {
+      ret = netdev_upper_ethtool_ioctl(dev, arg);
       if (ret != -ENOTTY)
         {
           return ret;
