@@ -32,4 +32,8 @@ ifeq ($(CONFIG_LIBC_FDT),y)
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)fdt$(DELIM)dtc$(DELIM)libfdt
 endif
 
+ifeq ($(CONFIG_FS_ROMFS),y)
+RCSRCS  = etc/init.d/init.rc
+endif
+
 include $(TOPDIR)/boards/Board.mk

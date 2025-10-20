@@ -30,4 +30,8 @@ if(CONFIG_LIBC_FDT)
                              PRIVATE ${NUTTX_DIR}/libs/libc/fdt/dtc/libfdt)
 endif()
 
+if(CONFIG_FS_ROMFS)
+  list(APPEND RCSRCS etc/init.d/init.rc)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
