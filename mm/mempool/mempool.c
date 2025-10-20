@@ -79,7 +79,8 @@ mempool_remove_queue(FAR struct mempool_s *pool, FAR sq_queue_t *queue)
           queue->tail = NULL;
         }
       else if (pool->initialbase == NULL || addr < pool->initialbase ||
-               addr >= pool->initialbase + pool->initialsize)
+               addr >= (void *)((char *)pool->initialbase +
+                                pool->initialsize))
         {
           pool->check(pool, addr);
         }
