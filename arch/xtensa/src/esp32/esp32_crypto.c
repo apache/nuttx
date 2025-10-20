@@ -32,6 +32,7 @@
 #include <nuttx/crypto/crypto.h>
 
 #include "esp32_sha.h"
+#include "esp32_aes.h"
 #include <stdio.h>
 
 /****************************************************************************
@@ -368,6 +369,10 @@ static int esp32_newsession(uint32_t *sid, struct cryptoini *cri)
 
       switch (cri->cri_alg)
         {
+          case CRYPTO_AES_CBC:
+            break;
+          case CRYPTO_AES_CTR:
+            break;
           case CRYPTO_SHA1:
             axf = &g_auth_hash_sha1_esp32;
             goto common;
@@ -519,6 +524,30 @@ static int esp32_process(struct cryptop *crp)
 
       switch (data->alg)
         {
+          case CRYPTO_AES_CBC:
+            err = aes_cypher(crp->crp_dst, crp->crp_buf, crd->crd_len,
+                             crp->crp_iv, crd->crd_key, 16, AES_MODE_CBC,
+                             crd->crd_flags & CRD_F_ENCRYPT);
+            if (err < 0)
+              {
+                return err;
+              }
+
+            break;
+          case CRYPTO_AES_CTR:
+            memset(iv, 0, sizeof(iv));
+            memcpy(iv, crd->crd_key + crd->crd_klen / 8 - 4, 4);
+            memcpy(iv + 4, crp->crp_iv, 8);
+            iv[15] = 0x1;
+            err = aes_cypher(crp->crp_dst, crp->crp_buf, crd->crd_len, iv,
+                             crd->crd_key, crd->crd_klen / 8 - 4,
+                             AES_MODE_CTR, crd->crd_flags & CRD_F_ENCRYPT);
+            if (err < 0)
+              {
+                return err;
+              }
+
+            break;
           case CRYPTO_SHA1:
           case CRYPTO_SHA2_256:
           case CRYPTO_SHA2_384:
@@ -556,6 +585,8 @@ void hwcr_init(void)
 
   memset(algs, 0, sizeof(algs));
 
+  algs[CRYPTO_AES_CBC] = CRYPTO_ALG_FLAG_SUPPORTED;
+  algs[CRYPTO_AES_CTR] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_SHA1] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_SHA2_256] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_SHA2_384] = CRYPTO_ALG_FLAG_SUPPORTED;
