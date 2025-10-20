@@ -127,7 +127,7 @@ static int rpmsg_dev_ioctl_(FAR struct rpmsg_s *rpmsg, int cmd,
       case RPMSGIOC_DUMP:
         if (rpmsg->ops->dump)
           {
-            rpmsg->ops->dump(rpmsg);
+            rpmsg->ops->dump(rpmsg, (bool)arg);
             ret = OK;
           }
 

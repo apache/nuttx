@@ -100,7 +100,7 @@ static void rpmsg_virtio_tx_wakeup(FAR struct rpmsg_virtio_priv_s *priv);
 
 static int rpmsg_virtio_wait(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
 static int rpmsg_virtio_post(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
-static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg);
+static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg, bool verbose);
 
 static void rpmsg_virtio_rx_callback(FAR struct virtqueue *vq);
 static void rpmsg_virtio_tx_callback(FAR struct virtqueue *vq);
@@ -491,7 +491,7 @@ static void rpmsg_virtio_dump_buffer(FAR struct rpmsg_virtio_device *rvdev,
  * Name: rpmsg_virtio_dump
  ****************************************************************************/
 
-static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg)
+static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg, bool verbose)
 {
   FAR struct rpmsg_virtio_priv_s *priv =
     (FAR struct rpmsg_virtio_priv_s *)rpmsg;
@@ -509,22 +509,28 @@ static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg)
     }
 
   metal_mutex_acquire(&rdev->lock);
-  metal_log(METAL_LOG_EMERGENCY,
-            "Dump rpmsg info between cpu (master: %s)%s <==> %s:\n",
-            rpmsg_virtio_get_role(rvdev) == RPMSG_HOST ? "yes" : "no",
-            priv->rpmsg.local_cpuname, priv->rpmsg.cpuname);
+  if (verbose)
+    {
+      metal_log(METAL_LOG_EMERGENCY,
+                "Dump rpmsg info between cpu (master: %s)%s <==> %s:\n",
+                rpmsg_virtio_get_role(rvdev) == RPMSG_HOST ?
+                "yes" : "no", priv->rpmsg.local_cpuname,
+                priv->rpmsg.cpuname);
+
+      rpmsg_dump_epts(rdev);
+    }
 
   metal_log(METAL_LOG_EMERGENCY, "rpmsg vq RX:\n");
   virtqueue_dump(rvdev->rvq);
   metal_log(METAL_LOG_EMERGENCY, "rpmsg vq TX:\n");
   virtqueue_dump(rvdev->svq);
 
-  rpmsg_dump_epts(rdev);
-
-  metal_log(METAL_LOG_EMERGENCY, "  rpmsg buffer list:\n");
-
-  rpmsg_virtio_dump_buffer(rvdev, true);
-  rpmsg_virtio_dump_buffer(rvdev, false);
+  if (verbose)
+    {
+      metal_log(METAL_LOG_EMERGENCY, "  rpmsg buffer list:\n");
+      rpmsg_virtio_dump_buffer(rvdev, true);
+      rpmsg_virtio_dump_buffer(rvdev, false);
+    }
 
   metal_mutex_release(&rdev->lock);
 }
