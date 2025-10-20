@@ -193,11 +193,7 @@ struct sensor_rpmsg_ioctl_s
 
   int32_t                        request;
   uint32_t                       arglen;
-  union
-    {
-      uint64_t                   arg;
-      char                       argbuf[0];
-    };
+  char                           arg[];
 };
 
 /****************************************************************************
@@ -431,6 +427,7 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
   FAR struct sensor_rpmsg_ioctl_s *msg;
   FAR struct rpmsg_endpoint *ept;
   uint64_t pcookie;
+  size_t send_len;
   uint32_t space;
   int ret = -ENOTTY;
   bool empty;
@@ -464,6 +461,7 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
       nxsem_init(&cookie.sem, 0, 0);
     }
 
+  send_len = len > 0 ? len : sizeof(uint64_t);
   sensor_rpmsg_lock(dev);
   list_for_every_entry_safe(&dev->proxylist, proxy, ptmp,
                             struct sensor_rpmsg_proxy_s, node)
@@ -495,14 +493,14 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
       msg->arglen  = len;
       if (len > 0)
         {
-          memcpy(msg->argbuf, (FAR void *)(uintptr_t)arg, len);
+          memcpy(msg->arg, (FAR void *)(uintptr_t)arg, len);
         }
       else
         {
-          msg->arg = arg;
+          *(FAR uint64_t *)msg->arg = arg;
         }
 
-      ret = rpmsg_send_nocopy(ept, msg, sizeof(*msg) + len);
+      ret = rpmsg_send_nocopy(ept, msg, sizeof(*msg) + send_len);
       if (ret < 0)
         {
           rpmsg_release_tx_buffer(ept, msg);
@@ -1457,8 +1455,8 @@ static int sensor_rpmsg_ioctl_handler(FAR struct rpmsg_endpoint *ept,
   unsigned long arg;
   int ret;
 
-  arg = msg->arglen > 0 ? (unsigned long)(uintptr_t)msg->argbuf :
-                          msg->arg;
+  arg = msg->arglen > 0 ? (unsigned long)(uintptr_t)msg->arg :
+                          *(FAR uint64_t *)msg->arg;
   dev = (FAR struct sensor_rpmsg_dev_s *)(uintptr_t)msg->proxy;
   sensor_rpmsg_lock(dev);
   list_for_every_entry_safe(&dev->stublist, stub, stmp,
@@ -1509,7 +1507,7 @@ static int sensor_rpmsg_ioctlack_handler(FAR struct rpmsg_endpoint *ept,
   cookie->result = msg->result;
   if (msg->result >= 0 && msg->arglen > 0)
     {
-      memcpy(cookie->data, msg->argbuf, msg->arglen);
+      memcpy(cookie->data, msg->arg, msg->arglen);
     }
 
   rpmsg_post(ept, &cookie->sem);
