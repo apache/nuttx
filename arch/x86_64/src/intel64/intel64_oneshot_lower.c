@@ -57,14 +57,13 @@ struct intel64_oneshot_lowerhalf_s
 
 static void intel64_oneshot_handler(void *arg);
 
-static int intel64_max_delay(struct oneshot_lowerhalf_s *lower,
-                           struct timespec *ts);
-static int intel64_start(struct oneshot_lowerhalf_s *lower,
-                         const struct timespec *ts);
-static int intel64_cancel(struct oneshot_lowerhalf_s *lower,
-                          struct timespec *ts);
-static int intel64_current(struct oneshot_lowerhalf_s *lower,
-                           struct timespec *ts);
+static clkcnt_t intel64_timer_max_delay(struct oneshot_lowerhalf_s *lower);
+static clkcnt_t intel64_timer_current(struct oneshot_lowerhalf_s *lower);
+static void intel64_timer_start_absolute(struct oneshot_lowerhalf_s *lower,
+                                         clkcnt_t expected);
+static void intel64_timer_start(struct oneshot_lowerhalf_s *lower,
+                                clkcnt_t delta);
+static void intel64_timer_cancel(struct oneshot_lowerhalf_s *lower);
 
 /****************************************************************************
  * Private Data
@@ -74,10 +73,11 @@ static int intel64_current(struct oneshot_lowerhalf_s *lower,
 
 static const struct oneshot_operations_s g_oneshot_ops =
 {
-  .max_delay      = intel64_max_delay,
-  .start          = intel64_start,
-  .cancel         = intel64_cancel,
-  .current        = intel64_current
+  .current        = intel64_timer_current,
+  .start          = intel64_timer_start,
+  .start_absolute = intel64_timer_start_absolute,
+  .cancel         = intel64_timer_cancel,
+  .max_delay      = intel64_timer_max_delay
 };
 
 static spinlock_t g_oneshotlow_spin;
@@ -114,173 +114,82 @@ static void intel64_oneshot_handler(void *arg)
   oneshot_process_callback(&priv->lh);
 }
 
-/****************************************************************************
- * Name: intel64_max_delay
- *
- * Description:
- *   Determine the maximum delay of the one-shot timer (in microseconds)
- *
- * Input Parameters:
- *   lower   An instance of the lower-half oneshot state structure.  This
- *           structure must have been previously initialized via a call to
- *           oneshot_initialize();
- *   ts      The location in which to return the maximum delay.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned
- *   on failure.
- *
- ****************************************************************************/
-
-static int intel64_max_delay(struct oneshot_lowerhalf_s *lower,
-                             struct timespec *ts)
+static clkcnt_t intel64_timer_max_delay(struct oneshot_lowerhalf_s *lower)
 {
   struct intel64_oneshot_lowerhalf_s *priv =
     (struct intel64_oneshot_lowerhalf_s *)lower;
   uint64_t usecs;
-  uint64_t sec;
   int      ret;
 
-  DEBUGASSERT(priv != NULL && ts != NULL);
   ret = intel64_oneshot_max_delay(&priv->oneshot, &usecs);
-  if (ret >= 0)
-    {
-      sec = usecs / 1000000;
-      usecs -= 1000000 * sec;
 
-      ts->tv_sec  = (time_t)sec;
-      ts->tv_nsec = (long)(usecs * 1000);
-    }
+  DEBUGASSERT(ret == OK);
 
-  return ret;
+  return usecs;
 }
 
-/****************************************************************************
- * Name: intel64_start
- *
- * Description:
- *   Start the oneshot timer
- *
- * Input Parameters:
- *   lower   An instance of the lower-half oneshot state structure.  This
- *           structure must have been previously initialized via a call to
- *           oneshot_initialize();
- *   handler The function to call when when the oneshot timer expires.
- *   arg     An opaque argument that will accompany the callback.
- *   ts      Provides the duration of the one shot timer.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned
- *   on failure.
- *
- ****************************************************************************/
-
-static int intel64_start(struct oneshot_lowerhalf_s *lower,
-                         const struct timespec *ts)
-{
-  struct intel64_oneshot_lowerhalf_s *priv =
-    (struct intel64_oneshot_lowerhalf_s *)lower;
-  irqstate_t flags;
-  int        ret;
-
-  DEBUGASSERT(priv != NULL && ts != NULL);
-
-  /* Save the callback information and start the timer */
-
-  flags = spin_lock_irqsave(&g_oneshotlow_spin);
-  ret   = intel64_oneshot_start(&priv->oneshot, intel64_oneshot_handler,
-                                priv, ts);
-  spin_unlock_irqrestore(&g_oneshotlow_spin, flags);
-
-  if (ret < 0)
-    {
-      tmrerr("ERROR: intel64_oneshot_start failed\n");
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: intel64_cancel
- *
- * Description:
- *   Cancel the oneshot timer and return the time remaining on the timer.
- *
- *   NOTE: This function may execute at a high rate with no timer running (as
- *   when pre-emption is enabled and disabled).
- *
- * Input Parameters:
- *   lower   Caller allocated instance of the oneshot state structure.  This
- *           structure must have been previously initialized via a call to
- *           oneshot_initialize();
- *   ts      The location in which to return the time remaining on the
- *           oneshot timer.  A time of zero is returned if the timer is
- *           not running.
- *
- * Returned Value:
- *   Zero (OK) is returned on success.  A call to up_timer_cancel() when
- *   the timer is not active should also return success; a negated errno
- *   value is returned on any failure.
- *
- ****************************************************************************/
-
-static int intel64_cancel(struct oneshot_lowerhalf_s *lower,
-                          struct timespec *ts)
-{
-  struct intel64_oneshot_lowerhalf_s *priv =
-    (struct intel64_oneshot_lowerhalf_s *)lower;
-  irqstate_t flags;
-  int        ret;
-
-  DEBUGASSERT(priv != NULL);
-
-  /* Cancel the timer */
-
-  flags = spin_lock_irqsave(&g_oneshotlow_spin);
-  ret   = intel64_oneshot_cancel(&priv->oneshot, ts);
-  spin_unlock_irqrestore(&g_oneshotlow_spin, flags);
-
-  if (ret < 0)
-    {
-      tmrerr("ERROR: intel64_oneshot_cancel failed\n");
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: intel64_current
- *
- * Description:
- *  Get the current time.
- *
- * Input Parameters:
- *   lower   Caller allocated instance of the oneshot state structure.  This
- *           structure must have been previously initialized via a call to
- *           oneshot_initialize();
- *   ticks   The location in which to return the current time.
- *
- * Returned Value:
- *   Zero (OK) is returned on success, a negated errno value is returned on
- *   any failure.
- *
- ****************************************************************************/
-
-static int intel64_current(struct oneshot_lowerhalf_s *lower,
-                           struct timespec *ts)
+static clkcnt_t intel64_timer_current(struct oneshot_lowerhalf_s *lower)
 {
   struct intel64_oneshot_lowerhalf_s *priv =
     (struct intel64_oneshot_lowerhalf_s *)lower;
   uint64_t current_us;
+  int ret = intel64_oneshot_current(&priv->oneshot, &current_us);
 
-  DEBUGASSERT(priv != NULL && ts != NULL);
+  DEBUGASSERT(ret == OK);
 
-  intel64_oneshot_current(&priv->oneshot, &current_us);
-  ts->tv_sec  = current_us / USEC_PER_SEC;
-  current_us  = current_us - ts->tv_sec * USEC_PER_SEC;
-  ts->tv_nsec = current_us * NSEC_PER_USEC;
+  return current_us;
+}
 
-  return OK;
+static void intel64_timer_start_absolute(struct oneshot_lowerhalf_s *lower,
+                                         clkcnt_t expected)
+{
+  struct timespec ts;
+  uint64_t current_us;
+  struct intel64_oneshot_lowerhalf_s *priv =
+    (struct intel64_oneshot_lowerhalf_s *)lower;
+  irqstate_t flags    = spin_lock_irqsave(&g_oneshotlow_spin);
+  int        ret      = intel64_oneshot_current(&priv->oneshot, &current_us);
+  uint64_t   delta_us = expected - current_us;
+
+  DEBUGASSERT(ret == OK);
+
+  ts.tv_sec  = delta_us / USEC_PER_SEC;
+  ts.tv_nsec = delta_us % USEC_PER_SEC * 1000ull;
+  ret = intel64_oneshot_start(&priv->oneshot, intel64_oneshot_handler,
+                              priv, &ts);
+
+  DEBUGASSERT(ret == OK);
+
+  spin_unlock_irqrestore(&g_oneshotlow_spin, flags);
+}
+
+static void intel64_timer_start(struct oneshot_lowerhalf_s *lower,
+                                clkcnt_t delta)
+{
+  struct intel64_oneshot_lowerhalf_s *priv =
+    (struct intel64_oneshot_lowerhalf_s *)lower;
+  struct timespec ts =
+    {
+      delta / USEC_PER_SEC,
+      (delta % USEC_PER_SEC) * 1000ull
+    };
+
+  irqstate_t flags = spin_lock_irqsave(&g_oneshotlow_spin);
+  int ret = intel64_oneshot_start(&priv->oneshot, intel64_oneshot_handler,
+                                  priv, &ts);
+  DEBUGASSERT(ret == OK);
+  spin_unlock_irqrestore(&g_oneshotlow_spin, flags);
+}
+
+static void intel64_timer_cancel(struct oneshot_lowerhalf_s *lower)
+{
+  struct timespec ts;
+  struct intel64_oneshot_lowerhalf_s *priv =
+    (struct intel64_oneshot_lowerhalf_s *)lower;
+  irqstate_t flags = spin_lock_irqsave(&g_oneshotlow_spin);
+  int ret = intel64_oneshot_cancel(&priv->oneshot, &ts);
+  DEBUGASSERT(ret == OK);
+  spin_unlock_irqrestore(&g_oneshotlow_spin, flags);
 }
 
 /****************************************************************************
@@ -334,6 +243,8 @@ struct oneshot_lowerhalf_s *oneshot_initialize(int chan, uint16_t resolution)
       kmm_free(priv);
       return NULL;
     }
+
+  oneshot_count_init(&priv->lh, USEC_PER_SEC);
 
   return &priv->lh;
 }
