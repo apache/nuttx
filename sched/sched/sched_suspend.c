@@ -36,6 +36,7 @@
 
 #include "sched/sched.h"
 #include "sched/queue.h"
+#include "signal/signal.h"
 
 #ifdef CONFIG_SMP
 /****************************************************************************
@@ -102,10 +103,23 @@ void nxsched_suspend(FAR struct tcb_s *tcb)
 {
   irqstate_t flags;
   bool switch_needed;
+  FAR sq_entry_t *entry;
 
   DEBUGASSERT(tcb != NULL);
 
   flags = enter_critical_section();
+
+  /* Check if received SIGCONT */
+
+  sq_for_every(&tcb->sigpendactionq, entry)
+    {
+      FAR sigq_t *sigq = (FAR sigq_t *)entry;
+      if (sigq->info.si_signo == SIGCONT)
+        {
+          leave_critical_section(flags);
+          return;
+        }
+    }
 
   /* Check the current state of the task */
 
