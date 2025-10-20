@@ -62,6 +62,7 @@ long ulimit(int cmd, long newlimit)
       case UL_SETFSIZE:
         {
           struct rlimit rlp;
+          rlp.rlim_max = RLIM_INFINITY;
           rlp.rlim_cur = newlimit * 512UL;
           ret = setrlimit(RLIMIT_FSIZE, &rlp);
         }
