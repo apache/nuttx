@@ -29,6 +29,11 @@ if(CONFIG_I2C)
 
   if(CONFIG_I2C_BITBANG)
     list(APPEND SRCS i2c_bitbang.c)
+
+    if(CONFIG_I2C_BITBANG_IOEXPANDER)
+      list(APPEND SRCS i2c_bitbang_ioexpander.c)
+    endif()
+
   endif()
 
   if(CONFIG_I2C_SLAVE_DRIVER)
