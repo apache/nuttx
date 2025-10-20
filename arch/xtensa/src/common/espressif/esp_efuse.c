@@ -286,6 +286,7 @@ int esp_efuse_initialize(const char *devpath)
 {
   struct esp_efuse_lowerhalf_s *lower = NULL;
   int ret = OK;
+  irqstate_t flags;
 
   DEBUGASSERT(devpath != NULL);
 
@@ -293,6 +294,7 @@ int esp_efuse_initialize(const char *devpath)
 
   /* Register the efuse upper driver */
 
+  flags = enter_critical_section();
   lower->upper = efuse_register(devpath,
                                 (struct efuse_lowerhalf_s *)lower);
 
@@ -312,6 +314,7 @@ int esp_efuse_initialize(const char *devpath)
   esp_efuse_utility_update_virt_blocks();
 #endif
 
+  leave_critical_section(flags);
   return ret;
 }
 #endif
