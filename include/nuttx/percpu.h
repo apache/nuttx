@@ -82,13 +82,13 @@
 
 /* Compile time percpu .data & .bss size */
 
-extern char _percpu_size[];
-#  define PERCPU_SIZE                  (size_t)_percpu_size
+extern char _percpu_offset[];
+#  define PERCPU_OFFSET                (size_t)_percpu_offset
 
 /* For BMP case per_cpu_var is not supported */
 
-#  define per_cpu_var_smp(v, c)        (*(FAR typeof(v) *)((unsigned long)&(v) + PERCPU_SIZE * (c)))
-#  define this_cpu_var(v)              (*(FAR typeof(v) *)((unsigned long)&(v) + PERCPU_SIZE * up_cpu_index()))
+#  define per_cpu_var_smp(v, c)        (*(FAR typeof(v) *)((unsigned long)&(v) + PERCPU_OFFSET * (c)))
+#  define this_cpu_var(v)              (*(FAR typeof(v) *)((unsigned long)&(v) + PERCPU_OFFSET * up_cpu_index()))
 #endif
 
 #ifdef CONFIG_SMP
