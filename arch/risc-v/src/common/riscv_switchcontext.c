@@ -80,12 +80,6 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
   else
     {
-      /* Update scheduler parameters */
-
-      nxsched_switch_context(rtcb, tcb);
-
-      /* Then switch contexts */
-
       riscv_switchcontext();
 
       /* riscv_switchcontext forces a context switch to the task at the
