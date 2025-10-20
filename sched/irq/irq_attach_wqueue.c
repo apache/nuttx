@@ -57,6 +57,10 @@ struct irq_work_info_s
   FAR struct kwork_wqueue_s *wqueue;   /* Work queue. */
 };
 
+typedef uint8_t irq_work_stack_t[CONFIG_IRQ_WORK_STACKSIZE];
+typedef irq_work_stack_t irq_nwork_stack_t[CONFIG_IRQ_NWORKS];
+typedef FAR struct kwork_wqueue_s *irq_nworkq_t[CONFIG_IRQ_NWORKS];
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -64,16 +68,20 @@ struct irq_work_info_s
 static
 inline_function FAR struct kwork_wqueue_s *irq_get_wqueue(int priority)
 {
+  static aligned_data(STACK_ALIGNMENT)
+  DEFINE_PER_CPU_BSS_BMP(irq_nwork_stack_t, irq_work_stack)
 #ifdef IRQ_WORK_SECTION
-  static aligned_data(STACK_ALIGNMENT) uint8_t
-  irq_work_stack[CONFIG_IRQ_NWORKS][CONFIG_IRQ_WORK_STACKSIZE]
-  locate_data(CONFIG_IRQ_WORK_SECTION);
-#else
-  static aligned_data(STACK_ALIGNMENT) uint8_t
-  irq_work_stack[CONFIG_IRQ_NWORKS][CONFIG_IRQ_WORK_STACKSIZE];
+  locate_data(CONFIG_IRQ_WORK_SECTION)
 #endif
-  static mutex_t irq_wqueue_lock = NXMUTEX_INITIALIZER;
-  static FAR struct kwork_wqueue_s *irq_wqueue[CONFIG_IRQ_NWORKS];
+  ;
+
+  static
+  DEFINE_PER_CPU_BMP(mutex_t, irq_wqueue_lock) = NXMUTEX_INITIALIZER;
+  static DEFINE_PER_CPU_BSS_BMP(irq_nworkq_t, irq_wqueue);
+
+#define irq_work_stack this_cpu_var_bmp(irq_work_stack)
+#define irq_wqueue_lock this_cpu_var_bmp(irq_wqueue_lock)
+#define irq_wqueue this_cpu_var_bmp(irq_wqueue)
 
   FAR struct kwork_wqueue_s *queue = NULL;
   int wqueue_priority;
@@ -172,11 +180,14 @@ int irq_attach_wqueue(int irq, xcpt_t isr, xcpt_t isrwork,
                       FAR void *arg, int priority)
 {
 #ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
-  static struct irq_work_info_s
-  irq_work_vector[CONFIG_ARCH_NUSER_INTERRUPTS];
+  static DEFINE_PER_CPU_BSS_BMP(struct irq_work_info_s,
+    irq_work_vector[CONFIG_ARCH_NUSER_INTERRUPTS]);
 #else
-  static struct irq_work_info_s irq_work_vector[NR_IRQS];
+  static DEFINE_PER_CPU_BSS_BMP(struct irq_work_info_s,
+                                 irq_work_vector[NR_IRQS]);
 #endif
+
+#define irq_work_vector this_cpu_var_bmp(irq_work_vector)
 
   FAR struct irq_work_info_s *info;
   int ret = OK;
