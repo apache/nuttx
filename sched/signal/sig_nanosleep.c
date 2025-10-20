@@ -117,33 +117,30 @@ int clock_nanosleep(clockid_t clockid, int flags,
                     FAR const struct timespec *rqtp,
                     FAR struct timespec *rmtp)
 {
-  int ret;
+  int ret = EINVAL;
 
   /* clock_nanosleep() is a cancellation point */
 
   enter_cancellation_point();
 
-  if (clockid < CLOCK_REALTIME || clockid > CLOCK_BOOTTIME)
+  if (clockid >= CLOCK_REALTIME && clockid <= CLOCK_BOOTTIME)
     {
-      leave_cancellation_point();
-      return EINVAL;
-    }
+      /* Just a wrapper around nxsig_clockwait() */
 
-  /* Just a wrapper around nxsig_clockwait() */
+      ret = nxsig_clockwait(clockid, flags, rqtp, rmtp);
 
-  ret = nxsig_clockwait(clockid, flags, rqtp, rmtp);
+      /* Check if nxsig_clockwait() succeeded */
 
-  /* Check if nxsig_clockwait() succeeded */
+      if (ret == -EAGAIN)
+        {
+          ret = OK;
+        }
+      else if (ret < 0)
+        {
+          /* If not return the errno */
 
-  if (ret == -EAGAIN)
-    {
-      ret = OK;
-    }
-  else if (ret < 0)
-    {
-      /* If not return the errno */
-
-      ret = -ret;
+          ret = -ret;
+        }
     }
 
   leave_cancellation_point();
