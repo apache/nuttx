@@ -1,0 +1,10 @@
+on init
+    class_start core
+
+service console sh
+    class core
+    restart_period 1000
+
+service fastboot fastbootd
+    class core
+    restart_period 7000
