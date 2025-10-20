@@ -1933,6 +1933,88 @@ int up_timer_gettick(FAR clock_t *ticks);
 void up_timer_getmask(FAR clock_t *mask);
 
 /****************************************************************************
+ * Name: up_alarm_gettime
+ *
+ * Description:
+ *   Return the current time according to the underlying high-resolution
+ *   alarm timer.  This is the time base used by the alarm hardware.
+ *
+ *   Provided by platform-specific code and called from the RTOS base code.
+ *
+ * Input Parameters:
+ *   ts - Location to return the current time.  Must not be NULL.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated errno value is returned on
+ *   any failure.
+ *
+ * Assumptions:
+ *   May be called from interrupt level handling or from the normal tasking
+ *   level.
+ *
+ ****************************************************************************/
+
+#if (defined(CONFIG_HRTIMER) && defined(CONFIG_ALARM_ARCH))
+int up_alarm_gettime(FAR struct timespec *ts);
+int up_alarm_gettick(FAR clock_t *ticks);
+#endif
+
+/****************************************************************************
+ * Name: up_alarm_trigger
+ *
+ * Description:
+ *   Force the expiration of the alarm immediately, causing the alarm
+ *   handler nxsched_alarm_expiration() to be invoked as soon as possible.
+ *
+ *   Provided by platform-specific code and called from the RTOS base code.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated errno value is returned on
+ *   any failure.
+ *
+ * Assumptions:
+ *   May be called from interrupt level handling or from the normal tasking
+ *   level.  Interrupts may need to be disabled internally to assure
+ *   non-reentrancy.
+ *
+ ****************************************************************************/
+
+#if (defined(CONFIG_HRTIMER) && defined(CONFIG_ALARM_ARCH))
+int up_alarm_trigger(void);
+#endif
+
+/****************************************************************************
+ * Name: up_timer_trigger
+ *
+ * Description:
+ *   Force the expiration of the interval timer immediately, causing the
+ *   system tick or equivalent timer handler to be invoked as soon as
+ *   possible.  This is typically used for testing or debugging purposes.
+ *
+ *   Provided by platform-specific code and called from the RTOS base code.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated errno value is returned on
+ *   any failure.
+ *
+ * Assumptions:
+ *   May be called from interrupt level handling or from the normal tasking
+ *   level.  Interrupts may need to be disabled internally to assure
+ *   non-reentrancy.
+ *
+ ****************************************************************************/
+
+#if (defined(CONFIG_HRTIMER) && defined(CONFIG_TIMER_ARCH))
+int up_timer_trigger(void);
+#endif
+
+/****************************************************************************
  * Name: up_alarm_cancel
  *
  * Description:
@@ -1966,12 +2048,12 @@ void up_timer_getmask(FAR clock_t *mask);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM)
-#  ifndef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
+#if (defined(CONFIG_HRTIMER) && defined(CONFIG_ALARM_ARCH)) || \
+    (defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM))
 int up_alarm_cancel(FAR struct timespec *ts);
-#  else
+#ifdef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
 int up_alarm_tick_cancel(FAR clock_t *ticks);
-#  endif
+# endif
 #endif
 
 /****************************************************************************
@@ -1999,12 +2081,12 @@ int up_alarm_tick_cancel(FAR clock_t *ticks);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM)
-#  ifndef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
+#if (defined(CONFIG_HRTIMER) && defined(CONFIG_ALARM_ARCH)) || \
+    (defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM))
 int up_alarm_start(FAR const struct timespec *ts);
-#  else
+#ifdef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
 int up_alarm_tick_start(clock_t ticks);
-#  endif
+# endif
 #endif
 
 /****************************************************************************
@@ -2043,12 +2125,12 @@ int up_alarm_tick_start(clock_t ticks);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_TICKLESS_ALARM)
-#  ifndef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
+#if (defined(CONFIG_HRTIMER) && defined(CONFIG_TIMER_ARCH)) || \
+    (defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_TICKLESS_ALARM))
 int up_timer_cancel(FAR struct timespec *ts);
-#  else
+#ifdef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
 int up_timer_tick_cancel(FAR clock_t *ticks);
-#  endif
+#endif
 #endif
 
 /****************************************************************************
@@ -2075,15 +2157,13 @@ int up_timer_tick_cancel(FAR clock_t *ticks);
  *   non-reentrancy.
  *
  ****************************************************************************/
-
-#if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_TICKLESS_ALARM)
-#  ifndef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
+#if (defined(CONFIG_HRTIMER) && defined(CONFIG_TIMER_ARCH)) || \
+    (defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_TICKLESS_ALARM))
 int up_timer_start(FAR const struct timespec *ts);
-#  else
-int up_timer_tick_start(clock_t ticks);
-#  endif
+#ifdef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
+int up_timer_tick_start(FAR clock_t *ticks);
 #endif
-
+#endif
 /****************************************************************************
  * Name: up_getsp
  *
