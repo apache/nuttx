@@ -647,6 +647,7 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
 
   /* Traverse all of the active TCP connections and perform the poll action */
 
+  tcp_conn_list_lock();
   while (!bstop && (conn = tcp_nextconn(conn)))
     {
       /* Skip TCP connections that are bound to other polling devices */
@@ -667,6 +668,7 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
         }
     }
 
+  tcp_conn_list_unlock();
   return bstop;
 }
 #else
