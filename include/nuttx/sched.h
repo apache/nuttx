@@ -1735,6 +1735,26 @@ int nxsched_smp_call_async(cpu_set_t cpuset,
 void nxsched_ticksleep(unsigned int ticks);
 
 /****************************************************************************
+ * Name: nxsched_wakeup
+ *
+ * Description:
+ *   The nxsched_wakeup() function is used to wake up a task that is
+ *   currently in the sleeping state before its timeout expires.
+ *
+ *   This function can be used by internal scheduler logic or by
+ *   system-level components that need to resume a sleeping task early.
+ *
+ * Input Parameters:
+ *   tcb - Pointer to the TCB of the task to be awakened.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxsched_wakeup(FAR struct tcb_s *tcb);
+
+/****************************************************************************
  * Name: nxsched_usleep
  *
  * Description:

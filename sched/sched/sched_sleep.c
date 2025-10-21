@@ -137,7 +137,12 @@ void nxsched_ticksleep(unsigned int ticks)
 
   up_switch_context(this_task(), rtcb);
 
-  wd_cancel(&rtcb->waitdog);
+  /* Cancel the wdog only if wdog is still alive */
+
+  if (WDOG_ISACTIVE(&rtcb->waitdog))
+    {
+      wd_cancel(&rtcb->waitdog);
+    }
 
   leave_critical_section(flags);
 }
