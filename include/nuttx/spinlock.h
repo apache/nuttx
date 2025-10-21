@@ -122,7 +122,14 @@ void spinlock_switch_context(FAR struct tcb_s *from);
  ****************************************************************************/
 
 #define spin_lock_init(l) \
-   do { memset((FAR void *)l, 0, sizeof(*(l))); } while (0)
+  do \
+    { \
+      if (sizeof(*(l)) > 0) \
+        { \
+          memset((FAR void *)(l), 0, sizeof(*(l))); \
+        } \
+    } \
+  while (0)
 
 /****************************************************************************
  * Name: rspin_lock_init
