@@ -120,6 +120,13 @@ SECTIONS
 
     *libcoexist.a:(.coexiram .coexiram.*)
 
+    *libpp.a:wifi_iram.*(.literal .text .literal.* .text.*)
+    *libpp.a:wifi_rx_iram.*(.literal .text .literal.* .text.*)
+    *libpp.a:wifi_extra_iram.*(.literal .text .literal.* .text.*)
+    *libpp.a:wifi_slp_iram.*(.literal .text .literal.* .text.*)
+    *libpp.a:wifi_or_slp_iram.*(.literal .text .literal.* .text.*)
+    *libpp.a:wifi_slp_rx_iram.*(.literal .text .literal.* .text.*)
+
     *libsched.a:irq_dispatch.*(.text .text.* .literal .literal.*)
     *libsched.a:sched_lock.*(.text .text.* .literal .literal.*)
     *libsched.a:sched_unlock.*(.text .text.* .literal .literal.*)
@@ -175,9 +182,6 @@ SECTIONS
     *libarch.a:*esp_rom_uart.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_rom_sys.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_rom_spiflash.*(.text .text.* .literal .literal.*)
-    *libarch.a:*esp_efuse_fields.*(.text .text.* .literal .literal.*)
-    *libarch.a:*esp_efuse_api_key.*(.text .text.* .literal .literal.*)
-    *libarch.a:*esp_efuse_utility.*(.text .text.* .literal .literal.*)
     *libarch.a:*efuse_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:esp_spiflash.*(.literal .text .literal.* .text.*)
     *libarch.a:*apm_hal.*(.text .text.* .literal .literal.*)
@@ -306,9 +310,6 @@ SECTIONS
     *libarch.a:*esp_rom_uart.*(.rodata .rodata.*)
     *libarch.a:*esp_rom_sys.*(.rodata .rodata.*)
     *libarch.a:*esp_rom_spiflash.*(.rodata .rodata.*)
-    *libarch.a:*esp_efuse_fields.*(.rodata .rodata.*)
-    *libarch.a:*esp_efuse_api_key.*(.rodata .rodata.*)
-    *libarch.a:*esp_efuse_utility.*(.rodata .rodata.*)
     *libarch.a:*efuse_hal.*(.rodata .rodata.*)
     *libarch.a:*log.*(.rodata .rodata.*)
     *libarch.a:*log_noos.*(.rodata .rodata.*)
