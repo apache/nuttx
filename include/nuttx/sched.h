@@ -136,6 +136,10 @@
 #define SPORADIC_FLAG_REPLENISH    (1 << 2)                      /* Bit 2: Replenishment cycle */
                                                                  /* Bits 3-7: Available */
 
+/* Map TSTATE_SLEEPING to TSTATE_WAIT_SIG for nxsched_sleep() compatibility */
+
+#define TSTATE_SLEEPING            TSTATE_WAIT_SIG
+
 /* Most internal nxsched_* interfaces are not available in the user space in
  * PROTECTED and KERNEL builds.  In that context, the application semaphore
  * interfaces must be used.  The differences between the two sets of
@@ -251,7 +255,6 @@ enum tstate_e
   TSTATE_TASK_RUNNING,        /* READY_TO_RUN - And running */
 
   TSTATE_TASK_INACTIVE,       /* BLOCKED      - Initialized but not yet activated */
-  TSTATE_SLEEPING,            /* BLOCKED      - Waiting for wakeup or timeout */
   TSTATE_WAIT_SEM,            /* BLOCKED      - Waiting for a semaphore */
   TSTATE_WAIT_SIG,            /* BLOCKED      - Waiting for a signal */
 #if !defined(CONFIG_DISABLE_MQUEUE) || !defined(CONFIG_DISABLE_MQUEUE_SYSV)

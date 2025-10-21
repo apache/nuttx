@@ -48,8 +48,7 @@ set(SRCS
     sched_sysinfo.c
     sched_get_stateinfo.c
     sched_switchcontext.c
-    sched_sleep.c
-    sched_wakeup.c)
+    sched_sleep.c)
 
 if(DEFINED CONFIG_STACKCHECK_MARGIN)
   if(NOT CONFIG_STACKCHECK_MARGIN EQUAL -1)

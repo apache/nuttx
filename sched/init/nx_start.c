@@ -137,10 +137,6 @@ dq_queue_t g_pendingtasks;
 
 dq_queue_t g_waitingforsignal;
 
-/* This is the list of all tasks that are sleeping */
-
-dq_queue_t g_sleepingtasks;
-
 #ifdef CONFIG_LEGACY_PAGING
 /* This is the list of all tasks that are blocking waiting for a page fill */
 
