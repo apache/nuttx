@@ -29,7 +29,9 @@ CSRCS += clock_perf.c clock_realtime2absticks.c
 # don't want the weak references to conflict.
 
 ifneq ($(CONFIG_TIMER_ARCH),y)
-  CSRCS += delay.c
+  ifneq ($(CONFIG_ALARM_ARCH),y)
+    CSRCS += delay.c
+  endif
 endif
 
 ifeq ($(CONFIG_CLOCK_TIMEKEEPING),y)
