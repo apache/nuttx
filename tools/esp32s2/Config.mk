@@ -58,6 +58,10 @@ else
 	ESPTOOL_WRITEFLASH_OPTS := -fs $(FLASH_SIZE) -fm dio -ff $(FLASH_FREQ)
 endif
 
+ifeq ($(CONFIG_ESP32S2_SECURE_FLASH_ENC_FLASH_DEVICE_ENCRYPTED),y)
+	ESPTOOL_WRITEFLASH_OPTS += --encrypt
+endif
+
 ifneq ($(CONFIG_ESP32S2_SECURE_BOOT)$(CONFIG_ESP32S2_SECURE_FLASH_ENC_ENABLED),)
 	ESPTOOL_RESET_OPTS += --after no_reset
 endif
@@ -86,7 +90,7 @@ ifdef ESPTOOL_BINDIR
 
 		FLASH_BL         := $(BL_OFFSET) $(BOOTLOADER)
 
-		ifneq ($(CONFIG_ESP32S2_SECURE_BOOT)$(CONFIG_ESP32S2_SECURE_FLASH_ENC_ENABLED),)
+		ifneq ($(CONFIG_ESP32S2_SECURE_BOOT),)
 			ESPTOOL_BINS :=
 		else
 			ESPTOOL_BINS := $(FLASH_BL)
@@ -115,6 +119,12 @@ ifeq ($(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT),y)
 	FLASH_APP      := $(APP_OFFSET) $(APP_IMAGE)
 
 	ifeq ($(CONFIG_ESP32S2_SECURE_FLASH_ENC_ENABLED),y)
+		ifeq ($(CONFIG_ESPRESSIF_SPIFLASH),y)
+			ENC_APP := $(CONFIG_ESPRESSIF_STORAGE_MTD_OFFSET) enc_mtd.bin
+		endif
+	endif
+
+	ifeq ($(CONFIG_ESP32S2_SECURE_FLASH_ENC_ENABLED),y)
 		IMGTOOL_ALIGN_ARGS := --align 32 --max-align 32
 	else
 		IMGTOOL_ALIGN_ARGS := --align 4
@@ -132,7 +142,7 @@ else
 	ESPTOOL_BINDIR := .
 endif
 
-ESPTOOL_BINS += $(FLASH_APP)
+ESPTOOL_BINS += $(FLASH_APP) $(ENC_APP)
 
 # Commands for colored and formatted output
 
@@ -151,12 +161,73 @@ define HELP_SIGN_APP
 	$(Q) echo ""
 endef
 
-define HELP_FLASH_BOOTLOADER
-	$(Q) echo ""
-	$(Q) echo "$(YELLOW)Security features enabled, so bootloader not flashed automatically.$(RST)"
-	$(Q) echo "Use the following command to flash the bootloader:"
-	$(Q) echo "    esptool.py $(ESPTOOL_OPTS) write_flash $(ESPTOOL_WRITEFLASH_OPTS) $(FLASH_BL)"
-	$(Q) echo ""
+# Commands for colored and formatted output
+
+RED    = \033[1;31m
+YELLOW = \033[1;33m
+BOLD   = \033[1m
+RST    = \033[0m
+
+# Flash encryption procedure
+
+define FLASH_ENC
+	$(Q) echo -e "$(YELLOW)Flash Encryption is enabled!$(RST)";
+
+	$(Q) if [ "$(CONFIG_ESPRESSIF_EFUSE_VIRTUAL)" = "y" ]; then \
+		echo -e "$(YELLOW)WARN: Virtual E-Fuses are enabled! E-Fuses will not be burned. $(RST)"; \
+	fi
+
+	$(Q) if [ "$(CONFIG_ESP32S2_SECURE_FLASH_ENC_USE_HOST_KEY)" = "y" ]; then \
+		if [ ! -f "$(CONFIG_ESP32S2_SECURE_FLASH_ENC_HOST_KEY_NAME)" ]; then \
+			echo -e "$(RED)FLASH ENCRYPTION error: Key file '$(CONFIG_ESP32S2_SECURE_FLASH_ENC_HOST_KEY_NAME)' not found.$(RST)"; \
+			echo -e "$(YELLOW)Generate the encryption key using: espsecure.py generate_flash_encryption_key <key_name.bin>$(RST)"; \
+			echo -e "$(YELLOW)Refer to the documentation on flash encryption before proceeding.$(RST)"; \
+			exit 1; \
+		fi; \
+	fi
+
+	$(Q) if [ "$(CONFIG_ESPRESSIF_SPIFLASH)" = "y" ]; then \
+		echo "Applying encryption to user MTD partition on flash."; \
+		if [ ! -f "$(CONFIG_ESP32S2_SECURE_FLASH_ENC_HOST_KEY_NAME)" ]; then \
+			echo -e "$(RED)Flash encryption key is required for user MTD partition encryption. Key file: '$(CONFIG_ESP32S2_SECURE_FLASH_ENC_HOST_KEY_NAME)'$(RST)"; \
+			echo -e "$(RED)Make sure CONFIG_ESP32S2_SECURE_FLASH_ENC_HOST_KEY_NAME is set or disable SPI Flash.$(RST)"; \
+			exit 1; \
+		fi; \
+		size_int=$$(( $(CONFIG_ESPRESSIF_STORAGE_MTD_SIZE) )); \
+		echo -e "Encrypting user MTD partition offset: $(CONFIG_ESPRESSIF_STORAGE_MTD_OFFSET), size: $(CONFIG_ESPRESSIF_STORAGE_MTD_SIZE) ($$size_int)"; \
+		dd if=/dev/zero ibs=1 count=$$size_int | LC_ALL=C tr "\000" "\377" > blank_mtd.bin; \
+        espsecure.py encrypt_flash_data --aes_xts --keyfile $(CONFIG_ESP32S2_SECURE_FLASH_ENC_HOST_KEY_NAME) --address 0 --output enc_mtd.bin blank_mtd.bin; \
+		rm blank_mtd.bin; \
+	fi
+
+endef
+
+# BURN_EFUSES -- Burn the flash encryption key E-Fuses if: not already burned, not virtual, not device already encrypted
+
+define BURN_EFUSES
+	$(Q) if [ "$(CONFIG_ESP32S2_SECURE_FLASH_ENC_FLASH_DEVICE_ENCRYPTED)" = "y" ]; then \
+		echo -e "$(YELLOW)WARN: Device is already encrypted. Skipping flash encryption key burning. $(RST)"; \
+	elif [ "$(CONFIG_ESPRESSIF_EFUSE_VIRTUAL)" = "y" ]; then \
+		echo -e "$(YELLOW)WARN: Virtual E-Fuses are enabled! Skipping flash encryption key burning. $(RST)"; \
+	else \
+		if [ "$(CONFIG_ESP32S2_SECURE_FLASH_ENC_USE_HOST_KEY)" = "y" ]; then \
+			echo -e "$(YELLOW)Proceeding will burn the flash encryption key E-Fuses using: $(CONFIG_ESP32S2_SECURE_FLASH_ENC_HOST_KEY_NAME).$(RST)"; \
+		else \
+			echo -e "$(YELLOW)Proceeding will burn a *randomly generated* flash encryption key (NOT user-provided).$(RST)"; \
+		fi; \
+		echo -e "$(YELLOW)This operation is NOT REVERSIBLE! Make sure to have read the documentation.$(RST)"; \
+		efuse_summary=$$(espefuse.py --port $(ESPTOOL_PORT) summary | grep -A 1 BLOCK1); \
+		if echo "$$efuse_summary" | grep -q '?? ??'; then \
+			echo -e "$(YELLOW)Encryption key already burned. Skipping...$(RST)"; \
+		else \
+			echo -e "$(YELLOW)Burning flash encryption key...$(RST)"; \
+			if [ -z "$(NOCHECK)" ] ; then \
+				espefuse.py --port $(ESPTOOL_PORT) burn_key BLOCK_KEY0 $(CONFIG_ESP32S2_SECURE_FLASH_ENC_HOST_KEY_NAME) XTS_AES_128_KEY; \
+			else \
+				espefuse.py --do-not-confirm --port $(ESPTOOL_PORT) burn_key BLOCK_KEY0 $(CONFIG_ESP32S2_SECURE_FLASH_ENC_HOST_KEY_NAME) XTS_AES_128_KEY; \
+			fi; \
+		fi; \
+	fi
 endef
 
 # MERGEBIN -- Merge raw binary files into a single file
@@ -251,6 +322,7 @@ endif
 define POSTBUILD
 	$(call MKIMAGE)
 	$(if $(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),$(call MAKE_VIRTUAL_EFUSE_BIN))
+	$(if $(CONFIG_ESP32S2_SECURE_FLASH_ENC_ENABLED),$(call FLASH_ENC))
 	$(if $(CONFIG_ESP32S2_MERGE_BINS),$(call MERGEBIN))
 endef
 
@@ -266,8 +338,8 @@ define FLASH
 		echo "USAGE: make flash ESPTOOL_PORT=<port> [ ESPTOOL_BAUD=<baud> ] [ ESPTOOL_BINDIR=<dir> ]"; \
 		exit 1; \
 	fi
+
+	$(if $(CONFIG_ESP32S2_SECURE_FLASH_ENC_ENABLED),$(call BURN_EFUSES))
 	$(eval ESPTOOL_OPTS := -c esp32s2 -p $(ESPTOOL_PORT) -b $(ESPTOOL_BAUD) $(ESPTOOL_RESET_OPTS) $(if $(CONFIG_ESP32S2_ESPTOOLPY_NO_STUB),--no-stub))
 	esptool.py $(ESPTOOL_OPTS) write_flash $(ESPTOOL_WRITEFLASH_OPTS) $(ESPTOOL_BINS)
-
-	$(if $(CONFIG_ESP32S2_SECURE_BOOT)$(CONFIG_ESP32S2_SECURE_FLASH_ENC_ENABLED),$(call HELP_FLASH_BOOTLOADER))
 endef
