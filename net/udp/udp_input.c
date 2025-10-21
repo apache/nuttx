@@ -216,7 +216,7 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 #endif
   unsigned int udpiplen;
 #ifdef CONFIG_NET_UDP_CHECKSUMS
-  uint16_t chksum;
+  uint16_t chksum = 0;
 #endif
   int ret = OK;
 
@@ -245,7 +245,11 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
   dev->d_appdata = IPBUF(udpiplen);
 
 #ifdef CONFIG_NET_UDP_CHECKSUMS
-  chksum = udp->udpchksum;
+  if ((dev->d_features & NETDEV_RX_CSUM) == 0)
+    {
+      chksum = udp->udpchksum;
+    }
+
   if (chksum != 0)
     {
 #ifdef CONFIG_NET_IPv6
