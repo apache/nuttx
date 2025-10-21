@@ -818,10 +818,6 @@ void tcp_free(FAR struct tcp_conn_s *conn)
       return;
     }
 
-  /* Cancel tcp timer */
-
-  tcp_stop_timer(conn);
-
   /* Make sure monitor is stopped. */
 
   conn_dev_lock(&conn->sconn, conn->dev);
@@ -851,6 +847,10 @@ void tcp_free(FAR struct tcp_conn_s *conn)
       dq_rem(&conn->sconn.node, &g_active_tcp_connections);
       tcp_conn_list_unlock();
     }
+
+  /* Cancel tcp timer */
+
+  tcp_stop_timer(conn);
 
   nxrmutex_destroy(&conn->sconn.s_lock);
   tcp_free_rx_buffers(conn);
