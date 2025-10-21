@@ -69,13 +69,13 @@ static void nxsched_timeout(wdparm_t arg)
    * still waiting for a signal
    */
 
-  if (wtcb->task_state == TSTATE_WAIT_SIG)
+  if (wtcb->task_state == TSTATE_SLEEPING)
     {
       FAR struct tcb_s *rtcb = this_task();
 
       /* Remove the task from waiting list */
 
-      dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
+      dq_rem((FAR dq_entry_t *)wtcb, list_sleepingtasks());
 
       /* Add the task to ready-to-run task list, and
        * perform the context switch if one is needed
@@ -130,8 +130,8 @@ void nxsched_ticksleep(unsigned int ticks)
 
   /* Add the task to the specified blocked task list */
 
-  rtcb->task_state = TSTATE_WAIT_SIG;
-  dq_addlast((FAR dq_entry_t *)rtcb, list_waitingforsignal());
+  rtcb->task_state = TSTATE_SLEEPING;
+  dq_addlast((FAR dq_entry_t *)rtcb, list_sleepingtasks());
 
   /* Now, perform the context switch if one is needed */
 

@@ -57,6 +57,7 @@
 #define list_pendingtasks()      (&g_pendingtasks)
 #endif
 #define list_waitingforsignal()  (&g_waitingforsignal)
+#define list_sleepingtasks()     (&g_sleepingtasks)
 #define list_waitingforfill()    (&g_waitingforfill)
 #define list_stoppedtasks()      (&g_stoppedtasks)
 #define list_inactivetasks()     (&g_inactivetasks)
@@ -214,6 +215,10 @@ extern dq_queue_t g_pendingtasks;
 /* This is the list of all tasks that are blocked waiting for a signal */
 
 extern dq_queue_t g_waitingforsignal;
+
+/* This is the list of all tasks that are sleeping */
+
+extern dq_queue_t g_sleepingtasks;
 
 /* This is the list of all tasks that are blocking waiting for a page fill */
 
