@@ -100,10 +100,15 @@
 #define RTC_UART0_TRIG_EN         BIT(6)  /* UART0 wakeup (light sleep only) */
 #define RTC_UART1_TRIG_EN         BIT(7)  /* UART1 wakeup (light sleep only) */
 #define RTC_BT_TRIG_EN            BIT(10) /* BT wakeup (light sleep only) */
+#define RTC_COCPU_TRIG_EN         BIT(11) /* ULP RISC-V Coprocessor wakeup */
 #define RTC_XTAL32K_DEAD_TRIG_EN  BIT(12)
+#define RTC_COCPU_TRAP_TRIG_EN    BIT(13)
 #define RTC_USB_TRIG_EN           BIT(14)
 #define RTC_BROWNOUT_DET_TRIG_EN  BIT(16)
 
+#define ULP_INTR_CLR_FLAGS (RTC_CNTL_RTC_ULP_CP_INT_CLR | \
+                            RTC_CNTL_RTC_COCPU_INT_CLR  | \
+                            RTC_CNTL_RTC_COCPU_TRAP_INT_CLR)
 #define PERIPH_INFORM_OUT_SLEEP_OVERHEAD_NO (1)
 #define PERIPH_SKIP_SLEEP_NO                (1)
 
@@ -638,6 +643,12 @@ static int IRAM_ATTR esp32s3_sleep_start(uint32_t pd_flags)
       esp32s3_ext1_wakeup_prepare();
     }
 
+  if (g_config.wakeup_triggers &
+      (RTC_COCPU_TRIG_EN | RTC_COCPU_TRAP_TRIG_EN))
+    {
+      modifyreg32(RTC_CNTL_INT_CLR_RTC_REG, 0, ULP_INTR_CLR_FLAGS);
+    }
+
   result = esp32s3_rtc_sleep_start(g_config.wakeup_triggers, 0);
 
   /* Restore CPU frequency */
@@ -1016,6 +1027,25 @@ void IRAM_ATTR esp32s3_sleep_enable_timer_wakeup(uint64_t time_in_us)
 }
 
 /****************************************************************************
+ * Name:  esp32s3_sleep_enable_ulp_wakeup
+ *
+ * Description:
+ *   Enable wakeup by ULP RISC-V coprocessor
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR esp32s3_sleep_enable_ulp_wakeup(void)
+{
+  g_config.wakeup_triggers |= (RTC_COCPU_TRIG_EN | RTC_COCPU_TRAP_TRIG_EN);
+}
+
+/****************************************************************************
  * Name:  esp32s3_sleep_enable_wifi_wakeup
  *
  * Description:
@@ -1159,6 +1189,10 @@ void esp32s3_pmstandby(uint64_t time_in_us)
   esp32s3_sleep_enable_ext1_wakeup();
   #endif
 
+#ifdef CONFIG_PM_ULP_WAKEUP
+  esp32s3_sleep_enable_ulp_wakeup();
+#endif
+
   /* Don't power down XTAL - powering it up takes different time on. */
 
   esp32s3_sleep_enable_timer_wakeup(time_in_us);
@@ -1231,6 +1265,10 @@ void esp32s3_pmsleep(uint64_t time_in_us)
   #ifdef CONFIG_PM_EXT1_WAKEUP
   esp32s3_sleep_enable_ext1_wakeup();
   #endif
+
+#ifdef CONFIG_PM_ULP_WAKEUP
+  esp32s3_sleep_enable_ulp_wakeup();
+#endif
 
   esp32s3_sleep_enable_timer_wakeup(time_in_us);
   esp32s3_deep_sleep_start();
