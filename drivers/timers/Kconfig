@@ -976,5 +976,28 @@ config PTP_PPS_FAKE_DEVNO
 	depends on PTP_PPS_FAKE
 
 endif # PTP_PPS
+config RPMSG_BOOTTIME
+	bool "Sync boot time by rpmsg"
+	depends on RPMSG
+	---help---
+		Client requests time from remote proc to sync monotonic clock.
+
+if RPMSG_BOOTTIME
+
+config RPMSG_BOOTTIME_SERVER_NAME
+	string "The name of boottime Rpmsg server"
+	---help---
+		The proc name of boottime server. Client requests time from
+		specified name of remote proc.
+
+config RPMSG_BOOTTIME_SETTIME_THRESHOLD_MS
+	int "The boottime threshold for changing system time (ms)"
+	default 500
+
+config RPMSG_BOOTTIME_DELAY_REQ_INTERVAL
+	int "The interval of delay request (s)"
+	default 600
+
+endif # RPMSG_BOOTTIME
 
 endmenu # Timer Driver Support
