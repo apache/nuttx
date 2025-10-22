@@ -2301,7 +2301,7 @@ config DEBUG_RESET_INFO
 endif # DEBUG_RESET
 
 config DEBUG_IPC
-	bool "IPC (Interprocessor communication) Debug Features"
+	bool "IPC (Inter-Process Communication) Debug Features"
 	default n
 	---help---
 		Enable IPC debug features.
