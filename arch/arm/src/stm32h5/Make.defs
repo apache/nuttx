@@ -36,12 +36,16 @@ endif
 # Required STM32H5 files
 
 CHIP_CSRCS += stm32_gpio.c stm32_irq.c stm32_lowputc.c stm32_rcc.c
-CHIP_CSRCS += stm32_serial.c stm32_start.c stm32_pwr.c stm32_timerisr.c
+CHIP_CSRCS += stm32_start.c stm32_pwr.c stm32_timerisr.c
 CHIP_CSRCS += stm32_lse.c stm32_lsi.c
 CHIP_CSRCS += stm32_uid.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += stm32_idle.c
+endif
+
+ifeq ($(CONFIG_STM32H5_USART),y)
+CHIP_CSRCS += stm32_serial.c
 endif
 
 ifeq ($(CONFIG_TIMER),y)
@@ -94,6 +98,10 @@ endif
 
 ifeq ($(CONFIG_STM32H5_DTS),y)
 CHIP_CSRCS += stm32_dts.c
+endif
+
+ifeq ($(CONFIG_STM32H5_PWM),y)
+CHIP_CSRCS += stm32_pwm.c
 endif
 
 # Required chip type specific files

@@ -323,6 +323,11 @@ config STM32H5_FDCAN
 	bool
 	default n
 
+config STM32H5_PWM
+	bool
+	default n
+	select ARCH_HAVE_PWM_PULSECOUNT
+
 config STM32H5_SPI
 	bool
 	default n

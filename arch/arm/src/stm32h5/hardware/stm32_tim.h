@@ -34,6 +34,10 @@
  * Pre-porcessor Definitions
  ****************************************************************************/
 
+/* The STM32H5 family uses STM32 TIMER IP version 2 */
+
+#define HAVE_IP_TIMERS_V2 1
+
 /* Register Offsets *********************************************************/
 
 /* Basic Timers - TIM6 and TIM7 */
