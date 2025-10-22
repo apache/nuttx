@@ -473,7 +473,7 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
 
       /* Then set up to forward the packet according to the protocol. */
 
-      ret = netfwd_forward(fwd);
+      ret = netfwd_forward(dev, fwd);
       if (ret >= 0)
         {
           netdev_iob_clear(dev);
