@@ -273,6 +273,17 @@ config XMC4_USIC0_CHAN0_RX_BUFFER_SIZE
 		The sum of Rx and Tx buffers sizes of both
 		channels should be inferior to 64
 
+config XMC4_USIC0_CHAN0_RX_BUFFER_LIMIT
+	int "Rx Fifo Buffer Limit"
+	depends on XMC4_USIC0_CHAN0_ISUART
+	range 1 XMC4_USIC0_CHAN0_RX_BUFFER_SIZE
+	default XMC4_USIC0_CHAN0_RX_BUFFER_SIZE
+	---help---
+		Defines the filling level of the Rx buffer that triggers an interruption.
+		By default it is set to XMC4_USIC0_CHAN0_RX_BUFFER_SIZE to limit interrupt rate,
+		but it can be reduced to prevent buffer overflow during reception at high baudrate.
+		Must be set between 1 and XMC4_USIC0_CHAN0_RX_BUFFER_SIZE.
+
 endmenu # USIC0 Channel 0 Configuration
 
 
@@ -370,6 +381,17 @@ config XMC4_USIC0_CHAN1_RX_BUFFER_SIZE
 		The sum of Rx and Tx buffers sizes of both
 		channels should be inferior to 64
 
+config XMC4_USIC0_CHAN1_RX_BUFFER_LIMIT
+	int "Rx Fifo Buffer Limit"
+	depends on XMC4_USIC0_CHAN1_ISUART
+	range 1 XMC4_USIC0_CHAN1_RX_BUFFER_SIZE
+	default XMC4_USIC0_CHAN1_RX_BUFFER_SIZE
+	---help---
+		Defines the filling level of the Rx buffer that triggers an interruption.
+		By default it is set to XMC4_USIC0_CHAN1_RX_BUFFER_SIZE to limit interrupt rate,
+		but it can be reduced to prevent buffer overflow during reception at high baudrate.
+		Must be set between 1 and XMC4_USIC0_CHAN1_RX_BUFFER_SIZE.
+
 endmenu # USIC0 Channel 1 Configuration
 
 menu "USIC1 Channel 0 Configuration"
@@ -439,6 +461,17 @@ config XMC4_USIC1_CHAN0_RX_BUFFER_SIZE
 		Should be a power of 2 between 2 and 64
 		The sum of Rx and Tx buffers sizes of both
 		channels should be inferior to 64
+
+config XMC4_USIC1_CHAN0_RX_BUFFER_LIMIT
+	int "Rx Fifo Buffer Limit"
+	depends on XMC4_USIC1_CHAN0_ISUART
+	range 1 XMC4_USIC1_CHAN0_RX_BUFFER_SIZE
+	default XMC4_USIC1_CHAN0_RX_BUFFER_SIZE
+	---help---
+		Defines the filling level of the Rx buffer that triggers an interruption.
+		By default it is set to XMC4_USIC1_CHAN0_RX_BUFFER_SIZE to limit interrupt rate,
+		but it can be reduced to prevent buffer overflow during reception at high baudrate.
+		Must be set between 1 and XMC4_USIC1_CHAN0_RX_BUFFER_SIZE.
 
 endmenu # USIC1 Channel 0 Configuration
 
@@ -536,6 +569,17 @@ config XMC4_USIC1_CHAN1_RX_BUFFER_SIZE
 		The sum of Rx and Tx buffers sizes of both
 		channels should be inferior to 64
 
+config XMC4_USIC1_CHAN1_RX_BUFFER_LIMIT
+	int "Rx Fifo Buffer Limit"
+	depends on XMC4_USIC1_CHAN1_ISUART
+	range 1 XMC4_USIC1_CHAN1_RX_BUFFER_SIZE
+	default XMC4_USIC1_CHAN1_RX_BUFFER_SIZE
+	---help---
+		Defines the filling level of the Rx buffer that triggers an interruption.
+		By default it is set to XMC4_USIC1_CHAN1_RX_BUFFER_SIZE to limit interrupt rate,
+		but it can be reduced to prevent buffer overflow during reception at high baudrate.
+		Must be set between 1 and XMC4_USIC1_CHAN1_RX_BUFFER_SIZE.
+
 endmenu # USIC1 Channel 1 Configuration
 
 menu "USIC2 Channel 0 Configuration"
@@ -605,6 +649,17 @@ config XMC4_USIC2_CHAN0_RX_BUFFER_SIZE
 		Should be a power of 2 between 2 and 64
 		The sum of Rx and Tx buffers sizes of both
 		channels should be inferior to 64
+
+config XMC4_USIC2_CHAN0_RX_BUFFER_LIMIT
+	int "Rx Fifo Buffer Limit"
+	depends on XMC4_USIC2_CHAN0_ISUART
+	range 1 XMC4_USIC2_CHAN0_RX_BUFFER_SIZE
+	default XMC4_USIC2_CHAN0_RX_BUFFER_SIZE
+	---help---
+		Defines the filling level of the Rx buffer that triggers an interruption.
+		By default it is set to XMC4_USIC2_CHAN0_RX_BUFFER_SIZE to limit interrupt rate,
+		but it can be reduced to prevent buffer overflow during reception at high baudrate.
+		Must be set between 1 and XMC4_USIC2_CHAN0_RX_BUFFER_SIZE.
 
 endmenu # USIC2 Channel 0 Configuration
 
@@ -700,6 +755,17 @@ config XMC4_USIC2_CHAN1_RX_BUFFER_SIZE
 		Should be a power of 2 between 2 and 64
 		The sum of Rx and Tx buffers sizes of both
 		channels should be inferior to 64
+
+config XMC4_USIC2_CHAN1_RX_BUFFER_LIMIT
+	int "Rx Fifo Buffer Limit"
+	depends on XMC4_USIC2_CHAN1_ISUART
+	range 1 XMC4_USIC2_CHAN1_RX_BUFFER_SIZE
+	default XMC4_USIC2_CHAN1_RX_BUFFER_SIZE
+	---help---
+		Defines the filling level of the Rx buffer that triggers an interruption.
+		By default it is set to XMC4_USIC2_CHAN1_RX_BUFFER_SIZE to limit interrupt rate,
+		but it can be reduced to prevent buffer overflow during reception at high baudrate.
+		Must be set between 1 and XMC4_USIC2_CHAN1_RX_BUFFER_SIZE.
 
 endmenu # USIC2 Channel 1 Configuration
 

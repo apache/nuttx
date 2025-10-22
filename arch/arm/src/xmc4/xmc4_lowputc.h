@@ -51,6 +51,7 @@ struct uart_config_s
   uint8_t  startbufferptr; /* Hardware Tx buffer start pointer */
   uint8_t  txbuffersize;   /* Hardware Tx Buffer Size */
   uint8_t  rxbuffersize;   /* Hardware Rx Buffer Size */
+  uint8_t  rxbufferlimit;  /* Filling level of Rx Buffer for event trigger */
 };
 
 /****************************************************************************

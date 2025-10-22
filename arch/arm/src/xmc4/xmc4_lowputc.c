@@ -187,7 +187,7 @@
 
 #if defined(CONFIG_XMC4_USIC1_CHAN0_ISUART) && defined(CONFIG_XMC4_USIC1_CHAN1_ISUART)
 #if CONFIG_XMC4_USIC1_CHAN0_TX_BUFFER_SIZE + CONFIG_XMC4_USIC1_CHAN0_RX_BUFFER_SIZE + \
-    CONFIG_XMC4_USIC1_CHAN1_TX_BUFFER_SIZE + CONFIG_XMC4_USIC1_CHAN1_RX_BUFFER_SIZE > 64 
+    CONFIG_XMC4_USIC1_CHAN1_TX_BUFFER_SIZE + CONFIG_XMC4_USIC1_CHAN1_RX_BUFFER_SIZE > 64
 #  error The sum of Rx and Tx Buffers sizes should be inferior to 64
 #endif
 #endif
@@ -230,7 +230,7 @@
 
 #if defined(CONFIG_XMC4_USIC2_CHAN0_ISUART) && defined(CONFIG_XMC4_USIC2_CHAN1_ISUART)
 #if CONFIG_XMC4_USIC2_CHAN0_TX_BUFFER_SIZE + CONFIG_XMC4_USIC2_CHAN0_RX_BUFFER_SIZE + \
-    CONFIG_XMC4_USIC2_CHAN1_TX_BUFFER_SIZE + CONFIG_XMC4_USIC2_CHAN1_RX_BUFFER_SIZE > 64 
+    CONFIG_XMC4_USIC2_CHAN1_TX_BUFFER_SIZE + CONFIG_XMC4_USIC2_CHAN1_RX_BUFFER_SIZE > 64
 #  error The sum of Rx and Tx Buffers sizes should be inferior to 64
 #endif
 #endif
@@ -516,7 +516,7 @@ int xmc4_uart_configure(enum usic_channel_e channel,
   regval &= ~(USIC_RBCTR_DPTR_MASK | USIC_RBCTR_LIMIT_MASK |
               USIC_RBCTR_SIZE_MASK);
   regval |= (USIC_RBCTR_DPTR(config->startbufferptr + config->txbuffersize) |
-              USIC_RBCTR_LIMIT(config->rxbuffersize) |
+              USIC_RBCTR_LIMIT(config->rxbufferlimit) |
               USIC_RBCTR_SIZE(config->rxbuffersize) |
              USIC_RBCTR_LOF);
   putreg32(regval, base + XMC4_USIC_RBCTR_OFFSET);

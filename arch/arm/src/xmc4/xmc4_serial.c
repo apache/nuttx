@@ -327,6 +327,7 @@ static struct xmc4_dev_s g_uart0priv =
     .startbufferptr = 0,
     .txbuffersize   = CONFIG_XMC4_USIC0_CHAN0_TX_BUFFER_SIZE,
     .rxbuffersize   = CONFIG_XMC4_USIC0_CHAN0_RX_BUFFER_SIZE,
+    .rxbufferlimit  = CONFIG_XMC4_USIC0_CHAN0_RX_BUFFER_LIMIT,
   },
   .lock = SP_UNLOCKED,
 };
@@ -367,6 +368,7 @@ static struct xmc4_dev_s g_uart1priv =
                     + CONFIG_XMC4_USIC0_CHAN0_RX_BUFFER_SIZE,
     .txbuffersize   = CONFIG_XMC4_USIC0_CHAN1_TX_BUFFER_SIZE,
     .rxbuffersize   = CONFIG_XMC4_USIC0_CHAN1_RX_BUFFER_SIZE,
+    .rxbufferlimit  = CONFIG_XMC4_USIC0_CHAN1_RX_BUFFER_LIMIT,
   },
   .lock = SP_UNLOCKED,
 };
@@ -406,6 +408,7 @@ static struct xmc4_dev_s g_uart2priv =
     .startbufferptr = 0,
     .txbuffersize   = CONFIG_XMC4_USIC1_CHAN0_TX_BUFFER_SIZE,
     .rxbuffersize   = CONFIG_XMC4_USIC1_CHAN0_RX_BUFFER_SIZE,
+    .rxbufferlimit  = CONFIG_XMC4_USIC1_CHAN0_RX_BUFFER_LIMIT,
   },
   .lock = SP_UNLOCKED,
 };
@@ -446,6 +449,7 @@ static struct xmc4_dev_s g_uart3priv =
                     + CONFIG_XMC4_USIC1_CHAN0_RX_BUFFER_SIZE,
     .txbuffersize   = CONFIG_XMC4_USIC1_CHAN1_TX_BUFFER_SIZE,
     .rxbuffersize   = CONFIG_XMC4_USIC1_CHAN1_RX_BUFFER_SIZE,
+    .rxbufferlimit  = CONFIG_XMC4_USIC1_CHAN1_RX_BUFFER_LIMIT,
   },
   .lock = SP_UNLOCKED,
 };
@@ -485,6 +489,7 @@ static struct xmc4_dev_s g_uart4priv =
     .startbufferptr = 0,
     .txbuffersize   = CONFIG_XMC4_USIC2_CHAN0_TX_BUFFER_SIZE,
     .rxbuffersize   = CONFIG_XMC4_USIC2_CHAN0_RX_BUFFER_SIZE,
+    .rxbufferlimit  = CONFIG_XMC4_USIC2_CHAN0_RX_BUFFER_LIMIT,
   },
   .lock = SP_UNLOCKED,
 };
@@ -525,6 +530,7 @@ static struct xmc4_dev_s g_uart5priv =
                     + CONFIG_XMC4_USIC2_CHAN0_RX_BUFFER_SIZE,
     .txbuffersize   = CONFIG_XMC4_USIC2_CHAN1_TX_BUFFER_SIZE,
     .rxbuffersize   = CONFIG_XMC4_USIC2_CHAN1_RX_BUFFER_SIZE,
+    .rxbufferlimit  = CONFIG_XMC4_USIC2_CHAN1_RX_BUFFER_LIMIT,
   },
   .lock = SP_UNLOCKED,
 };
