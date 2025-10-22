@@ -154,4 +154,8 @@ if(CONFIG_PTP_PPS)
   list(APPEND SRCS ptp_pps.c)
 endif()
 
+if(CONFIG_RPMSG_BOOTTIME)
+  list(APPEND SRCS rpmsg_boottime.c)
+endif()
+
 target_sources(drivers PRIVATE ${SRCS})
