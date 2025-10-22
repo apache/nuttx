@@ -140,6 +140,14 @@ This configuration configures ADC1_IN3 and ADC1_IN10, which can be
 accessed at the CN9 A0 and A1 pins respectively. Modify
 nucleo-h563zi/src/stm32_adc.c to enable more channels.
 
+pwm:
+--------
+
+This configuration configures TIM1_CH1OUT, which can be
+accessed at pin D6 on the CN10 A0 connector. TIM1_CH1 is configured
+as a pwm output at /dev/pwm0, and can be tested with the example pwm
+application.
+
 adc_watchdog:
 --------------
 

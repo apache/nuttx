@@ -322,6 +322,10 @@
 #define GPIO_ADC1_INP3   (GPIO_ADC1_INP3_0)
 #define GPIO_ADC1_INP10  (GPIO_ADC1_INP10_0)
 
+/* Timers / PWM */
+
+#define GPIO_TIM1_CH1OUT GPIO_TIM1_CH1OUT_2 /* PE9 */
+
 /* USART3 GPIOs *************************************************************/
 
 /* USART3 (Nucleo Virtual Console): Default board solder bridge configuration
