@@ -229,7 +229,7 @@ static uint32_t netfwd_eventhandler(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int netfwd_forward(FAR struct forward_s *fwd)
+int netfwd_forward(FAR struct net_driver_s *dev, FAR struct forward_s *fwd)
 {
   DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
 
@@ -238,13 +238,30 @@ int netfwd_forward(FAR struct forward_s *fwd)
   fwd->f_cb = netfwd_callback_alloc(fwd->f_dev);
   if (fwd->f_cb != NULL)
     {
+      FAR struct iob_s *iob = dev->d_iob;
+      FAR uint8_t *buf = dev->d_buf;
+      int len = dev->d_len;
+
       fwd->f_cb->flags   = (IPFWD_POLL | NETDEV_DOWN);
       fwd->f_cb->priv    = (FAR void *)fwd;
       fwd->f_cb->event   = netfwd_eventhandler;
 
+      /* Save the current state of the device, avoid damaging the current
+       * d_iob and other resources when forwarding recursion
+       */
+
+      dev->d_iob = NULL;
+      dev->d_buf = NULL;
+      dev->d_len = 0;
+
       /* Notify the device driver of the availability of TX data */
 
       netdev_txnotify_dev(fwd->f_dev, IPFWD_POLL);
+
+      dev->d_iob = iob;
+      dev->d_buf = buf;
+      dev->d_len = len;
+
       return OK;
     }
 
