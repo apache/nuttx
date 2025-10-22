@@ -217,7 +217,7 @@ void devif_forward(FAR struct forward_s *fwd);
  *
  ****************************************************************************/
 
-int netfwd_forward(FAR struct forward_s *fwd);
+int netfwd_forward(FAR struct net_driver_s *dev, FAR struct forward_s *fwd);
 
 /****************************************************************************
  * Name: netfwd_poll
