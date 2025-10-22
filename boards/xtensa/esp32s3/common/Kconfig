@@ -232,6 +232,15 @@ config PM_EXT1_WAKEUP_TRIGGER_MODE
 
 endif # PM_EXT1_WAKEUP
 
+config PM_ULP_WAKEUP
+	bool "PM ULP Wakeup"
+	default n
+	---help---
+		Enable ULP RISC-V coprocessor wakeup functionality.
+		This allows the system to wake up from PM_STANDBY or PM_SLEEP
+		when ULP app triggers HP core to wakeup with "ulp_riscv_wakeup_main_processor"
+		call on ULP app.
+
 config PM_ALARM_SEC
 	int "PM_STANDBY delay (seconds)"
 	default 15
