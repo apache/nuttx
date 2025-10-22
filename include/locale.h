@@ -75,20 +75,20 @@ struct lconv
   FAR char *mon_grouping;
   FAR char *positive_sign;
   FAR char *negative_sign;
-  FAR char int_frac_digits;
-  FAR char frac_digits;
-  FAR char p_cs_precedes;
-  FAR char p_sep_by_space;
-  FAR char n_cs_precedes;
-  FAR char n_sep_by_space;
-  FAR char p_sign_posn;
-  FAR char n_sign_posn;
-  FAR char int_n_cs_precedes;
-  FAR char int_n_sep_by_space;
-  FAR char int_n_sign_posn;
-  FAR char int_p_cs_precedes;
-  FAR char int_p_sep_by_space;
-  FAR char int_p_sign_posn;
+  char int_frac_digits;
+  char frac_digits;
+  char p_cs_precedes;
+  char p_sep_by_space;
+  char n_cs_precedes;
+  char n_sep_by_space;
+  char p_sign_posn;
+  char n_sign_posn;
+  char int_n_cs_precedes;
+  char int_n_sep_by_space;
+  char int_n_sign_posn;
+  char int_p_cs_precedes;
+  char int_p_sep_by_space;
+  char int_p_sign_posn;
 };
 
 /* OpenGroup.org:  The locale.h header shall define the locale_t type,

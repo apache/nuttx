@@ -2,7 +2,8 @@
  * include/nuttx/net/dns.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2007-2009, 2011-2012, 2014-2015, 2018 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2007-2009, 2011-2012,
+ *                         2014-2015, 2018 Gregory Nutt. All rights reserved.
  * SPDX-FileCopyrightText: 2002-2003, Adam Dunkels. All rights reserved.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Adam Dunkels <adam@dunkels.com>
@@ -177,7 +178,7 @@ begin_packed_struct struct dns_answer_s
 
 typedef CODE int (*dns_callback_t)(FAR void *arg,
                                    FAR struct sockaddr *addr,
-                                   FAR socklen_t addrlen);
+                                   socklen_t addrlen);
 
 /****************************************************************************
  * Public Function Prototypes
