@@ -99,7 +99,7 @@ static int safety_handler(FAR void *arg, FAR void *result,
   irqstate_t flags;
   int ret = -EINVAL;
 
-  if (offset + len <= priv->result_size)
+  if ((size_t)offset + len <= priv->result_size)
     {
       flags = spin_lock_irqsave_nopreempt(&priv->spinlock);
 
@@ -258,7 +258,7 @@ static ssize_t safety_read(FAR struct file *filep, FAR char *buffer,
 
           memcpy(buffer, priv->data, priv->result_size);
           user->has_data = false;
-          ret = priv->result_size;
+          ret = (ssize_t)priv->result_size;
         }
       else
         {
