@@ -30,7 +30,6 @@
 #include <nuttx/config.h>
 
 #include <nuttx/list.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/spinlock.h>
 
 /****************************************************************************

@@ -24,6 +24,7 @@
 
 ifeq ($(CONFIG_SCHED_EVENTS),y)
   CSRCS += event_init.c event_post.c event_reset.c event_destroy.c event_wait.c event_clear.c event_getmask.c
+  CSRCS += event_waitirq.c
 endif
 
 # Include event build support
