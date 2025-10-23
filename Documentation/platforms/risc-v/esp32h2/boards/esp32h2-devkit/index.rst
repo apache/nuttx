@@ -321,6 +321,59 @@ ostest
 This is the NuttX test at ``apps/testing/ostest`` that is run against all new
 architecture ports to assure a correct implementation of the OS.
 
+pm
+-------
+
+This config demonstrate the use of power management.
+You can use the ``pmconfig`` command to check current power state and time spent in other power states.
+Also you can define time will spend in standby mode::
+
+    $ make menuconfig
+    -> Board Selection
+        -> (15) PM_STANDBY delay (seconds)
+           (0)  PM_STANDBY delay (nanoseconds)
+
+Timer wakeup is not only way to wake up the chip. Other wakeup modes include:
+
+- EXT1 wakeup mode: Uses RTC GPIO pins to wake up the chip. Enabled with ``CONFIG_PM_EXT1_WAKEUP`` option.
+- ULP coprocessor wakeup mode: Uses ULP co-processor to wake up the chip. Enabled with ``CONFIG_PM_ULP_WAKEUP`` option.
+- GPIO wakeup mode: Uses GPIO pins to wakeup the chip. Only wakes up the chip from ``PM_STANDBY`` mode and requires ``CONFIG_PM_GPIO_WAKEUP``.
+- UART wakeup mode: Uses UART to wakeup the chip. Only wakes up the chip from ``PM_STANDBY`` mode and requires ``CONFIG_PM_GPIO_WAKEUP``.
+
+Before switching PM status, you need to query the current PM status to call correct number of relax command to correct modes::
+
+    nsh> pmconfig
+    Last state 0, Next state 0
+
+    /proc/pm/state0:
+    DOMAIN0           WAKE         SLEEP         TOTAL
+    normal          0s 00%        0s 00%        0s 00%
+    idle            0s 00%        0s 00%        0s 00%
+    standby         0s 00%        0s 00%        0s 00%
+    sleep           0s 00%        0s 00%        0s 00%
+
+    /proc/pm/wakelock0:
+    DOMAIN0      STATE     COUNT      TIME
+    system       normal        2        1s
+    system       idle          1        1s
+    system       standby       1        1s
+    system       sleep         1        1s
+
+In this case, needed commands to switch the system into PM idle mode::
+
+    nsh> pmconfig relax normal
+    nsh> pmconfig relax normal
+
+In this case, needed commands to switch the system into PM standby mode::
+
+    nsh> pmconfig relax idle
+    nsh> pmconfig relax normal
+    nsh> pmconfig relax normal
+
+Note: When normal mode COUNT is 0, it will switch to the next PM state where COUNT is not 0.
+
+Note: During light sleep, overall current consumption of board should drop from 14mA (without any system load) to 880 μA on ESP32-H2 DevkitM-1.
+
 pwm
 ---
 
