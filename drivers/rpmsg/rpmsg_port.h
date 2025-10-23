@@ -40,6 +40,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define rpmsgvbs                rpmsgerr
+
 #define RPMSG_PORT_DROP_TXQ     0x01
 #define RPMSG_PORT_DROP_RXQ     0x02
 #define RPMSG_PORT_DROP_ALL     0x03

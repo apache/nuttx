@@ -812,6 +812,7 @@ int rpmsg_port_register(FAR struct rpmsg_port_s *port,
       strlcpy(port->rpmsg.local_cpuname, local_cpuname, RPMSG_NAME_SIZE);
     }
 
+  rpmsgvbs("start register %s\n", port->rpmsg.cpuname);
   snprintf(name, sizeof(name), "/dev/rpmsg/%s", port->rpmsg.cpuname);
   ret = rpmsg_register(name, &port->rpmsg, &g_rpmsg_port_ops);
   if (ret < 0)
@@ -823,6 +824,7 @@ int rpmsg_port_register(FAR struct rpmsg_port_s *port,
                           RPMSG_NS_EPT_ADDR, RPMSG_NS_EPT_ADDR,
                           rpmsg_port_ns_callback, NULL, port);
   rpmsg_device_created(&port->rpmsg);
+  rpmsgvbs("register %s success\n", port->rpmsg.cpuname);
   return ret;
 }
 
@@ -834,10 +836,12 @@ void rpmsg_port_unregister(FAR struct rpmsg_port_s *port)
 {
   char name[64];
 
+  rpmsgvbs("start unregister %s\n", port->rpmsg.cpuname);
   snprintf(name, sizeof(name), "/dev/rpmsg/%s", port->rpmsg.cpuname);
 
   rpmsg_device_destroy(&port->rpmsg);
   rpmsg_unregister(name, &port->rpmsg);
+  rpmsgvbs("unregister %s success\n", port->rpmsg.cpuname);
 }
 
 /****************************************************************************
