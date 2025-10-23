@@ -99,7 +99,6 @@
 #endif
 
 #define rpmsgerrdump(m,b,s)                lib_dumpbuffer(m, (FAR const uint8_t *)b, s)
-#define rpmsgvbs                           rpmsgerr
 
 #define rpmsg_port_uart_staywake(r)        rpmsg_port_uart_staywake_times(r, ~0)
 
