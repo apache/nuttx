@@ -1004,6 +1004,9 @@ this example will demonstrate how to add ULP code into a custom application:
              }
            }
 
+       /* If HP core is in sleep, this call will wake the HP core up */
+
+       ulp_riscv_wakeup_main_processor();
        return 0;
     }
 

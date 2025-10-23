@@ -647,6 +647,10 @@ GPIO will be used and the logic level that will trigger it::
                     [ ] RTC_GPIO<N>
               (0) PM EXT1 Wakeup Trigger Mode
 
+To enable ULP coprocessor wakeup ``CONFIG_PM_ULP_WAKEUP`` option needs to be enabled.
+After that, ULP core can wake up HP core using ``ulp_riscv_wakeup_main_processor`` function
+which needs to be called in the ULP app.
+
 Before switching PM status, you need to query the current PM status::
 
     nsh> pmconfig
