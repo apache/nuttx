@@ -58,11 +58,11 @@ nxevent_mask_t nxevent_getmask(FAR nxevent_t *event)
 
   DEBUGASSERT(event != NULL);
 
-  flags = spin_lock_irqsave(&event->lock);
+  flags = enter_critical_section();
 
   events = event->events;
 
-  spin_unlock_irqrestore(&event->lock, flags);
+  leave_critical_section(flags);
 
   return events;
 }

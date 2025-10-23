@@ -81,7 +81,7 @@ int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
       return -EINVAL;
     }
 
-  flags = spin_lock_irqsave_nopreempt(&event->lock);
+  flags = enter_critical_section();
 
   if ((eflags & NXEVENT_POST_SET) != 0)
     {
@@ -135,7 +135,7 @@ int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
         }
     }
 
-  spin_unlock_irqrestore_nopreempt(&event->lock, flags);
+  leave_critical_section(flags);
 
   return ret;
 }
