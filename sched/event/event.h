@@ -36,7 +36,9 @@
 #include <nuttx/event.h>
 
 /****************************************************************************
- * Public Type Definitions
+ * Public Function Definitions
  ****************************************************************************/
+
+void nxevent_wait_irq(FAR struct tcb_s *wtcb, int errcode);
 
 #endif /* __SCHED_EVENT_EVENT_H */
