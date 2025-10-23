@@ -20,7 +20,9 @@
 
 include common/Make.defs
 
+ifeq ($(CONFIG_ALLOW_DOWNLOADS),y)
 STORAGETMP = $(if $(wildcard $(NXTMPDIR)/.*),y,)
+endif
 
 # The start-up, "head", file.  May be either a .S or a .c file.
 
@@ -221,6 +223,7 @@ endif
 
 # Fetch source files and add them to build
 
+ifeq ($(CONFIG_ALLOW_DOWNLOADS),y)
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
 	ESP_HAL_3RDPARTY_VERSION = b6fa6c9098318007a61acc7c9f0f180443bb80c2
@@ -253,6 +256,7 @@ chip/$(ESP_HAL_3RDPARTY_REPO):
 	$(Q) $(call CLONE_ESP_HAL_3RDPARTY_REPO)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: ${ESP_HAL_3RDPARTY_VERSION}"
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
+endif # CONFIG_ALLOW_DOWNLOADS
 
 # Silent preprocessor warnings
 
@@ -272,6 +276,7 @@ include chip/hal.mk
 
 include common/espressif/Make.defs
 
+ifeq ($(CONFIG_ALLOW_DOWNLOADS),y)
 context:: chip/$(ESP_HAL_3RDPARTY_REPO)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: initializing submodules..."
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/mbedtls/mbedtls components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32 components/esp_coex/lib
@@ -281,9 +286,12 @@ context:: chip/$(ESP_HAL_3RDPARTY_REPO)
 ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32 components/esp_coex/lib
 endif
+endif
 
 distclean::
+ifeq ($(CONFIG_ALLOW_DOWNLOADS),y)
 	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
+endif
 	$(call DELFILE,../../../vefuse.bin)
 
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif

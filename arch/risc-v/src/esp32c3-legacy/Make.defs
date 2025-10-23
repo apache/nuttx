@@ -22,7 +22,9 @@
 
 include common/Make.defs
 
+ifeq ($(CONFIG_ALLOW_DOWNLOADS),y)
 STORAGETMP = $(if $(wildcard $(NXTMPDIR)/.*),y,)
+endif
 
 # Specify our HEAD assembly file.  This will be linked as
 # the first object file, so it will appear at address 0
@@ -239,6 +241,7 @@ endif
 
 # Fetch source files and add them to build
 
+ifeq ($(CONFIG_ALLOW_DOWNLOADS),y)
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
 	ESP_HAL_3RDPARTY_VERSION = e3899a2324c8e326db20f99f208e890fdd7a5b92
@@ -264,6 +267,7 @@ chip/$(ESP_HAL_3RDPARTY_REPO):
 	$(Q) $(call CLONE_ESP_HAL_3RDPARTY_REPO)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: ${ESP_HAL_3RDPARTY_VERSION}"
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
+endif
 
 # Silent preprocessor warnings
 
@@ -272,4 +276,6 @@ CFLAGS += -Wno-undef -Wno-unused-variable
 include chip/Bootloader.mk
 
 distclean::
+ifeq ($(CONFIG_ALLOW_DOWNLOADS),y)
 	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
+endif

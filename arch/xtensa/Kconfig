@@ -22,6 +22,7 @@ config ARCH_CHIP_ESP32
 	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_TEXT_HEAP
 	select ARCH_VECNOTIRQ
+	select ALLOW_DOWNLOADS
 	select LIBC_PREVENT_STRING_KERNEL
 	select LIBC_ARCH_MEMCPY if BUILD_FLAT
 	select LIBC_ARCH_MEMCHR if BUILD_FLAT
@@ -68,6 +69,7 @@ config ARCH_CHIP_ESP32S2
 	select LIBC_ARCH_STRNCPY
 	select LIBC_ARCH_STRLEN
 	select LIBC_ARCH_STRNLEN
+	select ALLOW_DOWNLOADS
 	---help---
 		ESP32-S2 is a truly secure, highly integrated, low-power, 2.4 GHz Wi-Fi
 		Microcontroller SoC supporting Wi-Fi HT40 and having 43 GPIOs.
@@ -92,6 +94,7 @@ config ARCH_CHIP_ESP32S3
 	select ARCH_DCACHE
 	select ARCH_ICACHE
 	select ARCH_VECNOTIRQ
+	select ALLOW_DOWNLOADS
 	select LIBC_PREVENT_STRING_KERNEL
 	select LIBC_ARCH_MEMCPY if BUILD_FLAT
 	select LIBC_ARCH_MEMCHR if BUILD_FLAT
