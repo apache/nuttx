@@ -211,7 +211,7 @@ ifndef ESP_HAL_3RDPARTY_VERSION
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
-	ESP_HAL_3RDPARTY_URL = https://github.com/espressif/esp-hal-3rdparty.git
+	ESP_HAL_3RDPARTY_URL = https://github.com/espressif/esp-hal-3rdparty
 endif
 
 ifndef DISABLE_GIT_DEPTH
@@ -221,22 +221,15 @@ endif
 	GIT_DEPTH_PARAMETER = --depth=$(GIT_DEPTH)
 endif
 
-ifeq ($(STORAGETMP),y)
-define CLONE_ESP_HAL_3RDPARTY_REPO
-	$(call CHECK_COMMITSHA, $(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO),$(ESP_HAL_3RDPARTY_VERSION))
-	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),chip/$(ESP_HAL_3RDPARTY_REPO),$(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO))
-endef
-else
-define CLONE_ESP_HAL_3RDPARTY_REPO
-	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),chip/$(ESP_HAL_3RDPARTY_REPO))
-endef
-endif
-
 chip/$(ESP_HAL_3RDPARTY_REPO):
-	$(Q) echo "Cloning Espressif HAL for 3rd Party Platforms"
-	$(Q) $(call CLONE_ESP_HAL_3RDPARTY_REPO)
-	$(Q) echo "Espressif HAL for 3rd Party Platforms: ${ESP_HAL_3RDPARTY_VERSION}"
-	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
+ifeq ($(wildcard chip/$(ESP_HAL_3RDPARTY_REPO)/.git),)
+	$(Q) echo "Downloading Espressif HAL for 3rd Party Platforms"
+	$(Q) wget -q -O - $(ESP_HAL_3RDPARTY_URL)/archive/$(ESP_HAL_3RDPARTY_VERSION).tar.gz | tar -xz -C chip/
+	$(Q) mv chip/$(ESP_HAL_3RDPARTY_REPO)-$(ESP_HAL_3RDPARTY_VERSION) chip/$(ESP_HAL_3RDPARTY_REPO)
+ifeq ($(STORAGETMP),y)
+	$(Q) cp -r chip/$(ESP_HAL_3RDPARTY_REPO) $(NXTMPDIR)
+endif
+endif
 
 # Silent preprocessor warnings
 
@@ -270,5 +263,18 @@ ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
 endif
 
 distclean::
+ifeq ($(wildcard chip/$(ESP_HAL_3RDPARTY_REPO)/.git),)
 	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
+else
+	$(Q) echo "Espressif HAL for 3rd Party Platforms: uninitializing submodules..."
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule deinit -f components/mbedtls/mbedtls
+	$(Q) rm -rf chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls
+ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule deinit -f components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32_family components/esp_coex/lib
+	$(Q) rm -rf chip/$(ESP_HAL_3RDPARTY_REPO)/components/esp_phy/lib
+	$(Q) rm -rf chip/$(ESP_HAL_3RDPARTY_REPO)/components/esp_wifi/lib
+	$(Q) rm -rf chip/$(ESP_HAL_3RDPARTY_REPO)/components/bt/controller/lib_esp32c3_family
+	$(Q) rm -rf chip/$(ESP_HAL_3RDPARTY_REPO)/components/esp_coex/lib
+endif
+endif
 	$(call DELFILE,../../../vefuse.bin)
