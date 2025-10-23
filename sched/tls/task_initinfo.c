@@ -84,7 +84,7 @@ static void task_init_stream(FAR struct streamlist *list)
        */
 
       stream[i].fs_cookie   = (FAR char *)(intptr_t)i;
-      stream[i].fs_oflags   = i ? O_WRONLY : O_RDONLY;
+      stream[i].fs_oflags   = (uint16_t)(i ? O_WRONLY : O_RDONLY);
     }
 }
 #endif
