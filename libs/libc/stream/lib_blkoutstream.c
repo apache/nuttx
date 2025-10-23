@@ -58,6 +58,11 @@ static int blkoutstream_flush(FAR struct lib_sostream_s *self)
                                            self->nput / sectorsize, 1);
     }
 
+  if (stream->inode->u.i_bops->ioctl)
+    {
+      stream->inode->u.i_bops->ioctl(stream->inode, BIOC_FLUSH, 0);
+    }
+
   return ret;
 }
 
