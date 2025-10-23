@@ -301,7 +301,7 @@ static int safety_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           if (lower->ops->inject)
             {
-              ret = lower->ops->inject(lower, (FAR void *)arg);
+              ret = lower->ops->inject(lower, (FAR char *)((uintptr_t)arg));
             }
         }
         break;
