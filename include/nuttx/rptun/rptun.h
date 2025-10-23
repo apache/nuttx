@@ -335,7 +335,7 @@ begin_packed_struct struct rptun_cmd_s
   uint32_t cmd_slave;
 } end_packed_struct;
 
-struct aligned_data(8) rptun_rsc_s
+begin_packed_struct struct rptun_rsc_s
 {
   struct resource_table    rsc_tbl_hdr;
   uint32_t                 offset[3];
@@ -345,7 +345,7 @@ struct aligned_data(8) rptun_rsc_s
   struct fw_rsc_vdev_vring rpmsg_vring1;
   struct fw_rsc_config     config;
   struct fw_rsc_carveout   carveout;
-};
+} end_packed_struct;
 
 struct rptun_dev_s;
 struct rptun_ops_s
