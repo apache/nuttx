@@ -57,14 +57,32 @@
  * Private Types
  ****************************************************************************/
 
+#ifdef CONFIG_CAPTURE_NOTIFY
+struct cap_signal_s
+{
+  pid_t                    pid;    /* The pid of the registering task */
+  struct cap_notify_s      notify; /* The notification callback info */
+#ifdef CONFIG_SIG_EVTHREAD
+  struct sigwork_s         work;   /* The signal work structure */
+#endif
+};
+#endif
+
 /* This structure describes the state of the upper half driver */
 
 struct cap_upperhalf_s
 {
-  uint8_t                    crefs;    /* The number of times the device has been opened */
-  uint8_t                    nchan;    /* The number of channels, only invalid for multi channels */
-  mutex_t                    lock;     /* Supports mutual exclusion */
-  FAR struct cap_lowerhalf_s **lower;  /* lower-half state */
+  uint8_t                      crefs; /* The number of times the device has been opened */
+  uint8_t                      nchan; /* The number of channels, only invalid for multi channels */
+  mutex_t                      lock;  /* Supports mutual exclusion */
+  FAR struct cap_lowerhalf_s **lower; /* lower-half state */
+#ifdef CONFIG_CAPTURE_NOTIFY
+  /* The array of signal structures, the length of the array is nchan,
+   * save signal info for each channel.
+   */
+
+  struct cap_signal_s          signals[1];
+#endif
 };
 
 /****************************************************************************
@@ -96,6 +114,41 @@ static const struct file_operations g_capops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: cap_notify_cb
+ *
+ * Description:
+ *   Capture edge interrupt notification callback
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAPTURE_NOTIFY
+static void cap_notify_cb(FAR struct cap_lowerhalf_s *lower, FAR void *priv)
+{
+  FAR struct cap_upperhalf_s *upper = priv;
+  uint8_t i;
+
+  DEBUGASSERT(upper != NULL);
+
+  for (i = 0; i < upper->nchan; i++)
+    {
+      if (lower == upper->lower[i])
+        {
+          FAR struct cap_signal_s *signal = &upper->signals[i];
+
+#  ifdef CONFIG_SIG_EVTHREAD
+          nxsig_notification(signal->pid, &signal->notify.event,
+                             SI_QUEUE, &signal->work);
+#  else
+          nxsig_notification(signal->pid, &signal->notify.event,
+                             SI_QUEUE, NULL);
+#  endif
+          break;
+        }
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: cap_open
@@ -383,6 +436,69 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
         }
         break;
+
+      /* CAPIOC_REGISTER - Register to receive a signal whenever there is
+       * an interrupt received on an input capture pin. This feature,
+       * of course, depends upon interrupt capture support from the platform.
+       * Argument: The event of signal to be generated when the interrupt
+       * occurs.
+       *
+       * the argument is a pointer to a struct cap_notify_s, that contains
+       * the channel number, edge type and signal event info.
+       */
+
+#ifdef CONFIG_CAPTURE_NOTIFY
+      case CAPIOC_REGISTER:
+        {
+          FAR struct cap_signal_s *tmp;
+          FAR struct cap_notify_s *new;
+          pid_t pid;
+
+          new = (FAR struct cap_notify_s *)(uintptr_t)arg;
+          if (!new || (new->chan >= upper->nchan && new->chan < 0))
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          pid = nxsched_getpid();
+          tmp = &upper->signals[new->chan];
+          if (tmp->pid != 0 && tmp->pid != pid)
+            {
+              ret = -EBUSY;
+              break;
+            }
+
+          tmp->pid = pid;
+          memcpy(&tmp->notify, new, sizeof(*new));
+          DEBUGASSERT(lower[new->chan]->ops->bind != NULL);
+          ret = lower[new->chan]->ops->bind(lower[new->chan], new->type,
+                                            cap_notify_cb, upper);
+        }
+        break;
+
+      /* CAPIOC_UNREGISTER - Stop receiving signals for capture interrupts.
+       * Argument: The channel number
+       */
+
+      case CAPIOC_UNREGISTER:
+        {
+#  ifdef CONFIG_SIG_EVTHREAD
+          FAR struct sigwork_s *work;
+#  endif
+          int chan = (int)arg;
+
+          upper->signals[chan].pid = 0;
+#  ifdef CONFIG_SIG_EVTHREAD
+          work = &upper->signals[chan].work;
+          nxsig_cancel_notification(work);
+#  endif
+
+          DEBUGASSERT(lower[chan]->ops->unbind != NULL);
+          ret = lower[chan]->ops->unbind(lower[chan]);
+        }
+        break;
+#endif
 
       /* Any unrecognized IOCTL commands might be platform-specific ioctl
        * commands
