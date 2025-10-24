@@ -31,6 +31,8 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/signal.h>
 
+#include <nuttx/signal.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -273,6 +275,27 @@ int cap_register(FAR const char *devpath,
 
 int cap_register_multiple(FAR const char *devpath,
                           FAR struct cap_lowerhalf_s **lower, int n);
+
+/****************************************************************************
+ * Name: fake_capture_initialize
+ *
+ * Description:
+ *   This function is called by board-specific logic to initialize
+ *   fake capture.
+ *
+ * Input Parameters:
+ *   channel - The capture channel number to initialize.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.  The following
+ *   possible error values may be returned (most are returned by
+ *   register_driver()):
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FAKE_CAPTURE
+int fake_capture_initialize(int channels);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

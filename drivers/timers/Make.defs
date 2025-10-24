@@ -114,6 +114,11 @@ endif
 
 ifeq ($(CONFIG_CAPTURE),y)
   CSRCS += capture.c
+
+  ifeq ($(CONFIG_FAKE_CAPTURE),y)
+    CSRCS += fake_capture.c
+  endif
+
   TMRDEPPATH = --dep-path timers
   TMRVPATH = :timers
 endif
