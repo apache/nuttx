@@ -252,10 +252,6 @@ void up_initialize(void)
   host_init_cwd();
 #endif
 
-  g_work_queue = work_queue_create("sim_loop_wq",
-                                   CONFIG_SCHED_HPWORKPRIORITY, NULL,
-                                   CONFIG_SCHED_HPWORKSTACKSIZE, 1u);
-
 #ifdef CONFIG_PM
   /* Initialize the power management subsystem.  This MCU-specific function
    * must be called *very* early in the initialization sequence *before* any
@@ -336,4 +332,23 @@ void up_initialize(void)
   work_queue_wq(g_work_queue, &g_x11update_work, sim_x11update_work,
                 NULL, SIM_X11UPDATE_PERIOD);
 #endif
+}
+
+/****************************************************************************
+ * Name: up_irqinitialize
+ *
+ * Description:
+ *   initialize the high-priority work queue used for handling
+ *   periodic or async tasks within the simulator, then invokes the
+ *   platform-specific IRQ initialize.
+ *
+ ****************************************************************************/
+
+void up_irqinitialize(void)
+{
+  g_work_queue = work_queue_create("sim_loop_wq",
+                                   CONFIG_SCHED_HPWORKPRIORITY, NULL,
+                                   CONFIG_SCHED_HPWORKSTACKSIZE, 1u);
+
+  host_irqinitialize();
 }
