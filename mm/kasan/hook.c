@@ -146,7 +146,7 @@ static void kasan_show_memory(FAR const uint8_t *addr, size_t size,
   _alert("Shadow bytes around the buggy address:\n");
   for (p = start; p < end; p += 16)
     {
-      int ret = sprintf(buffer, "  %p: ", p);
+      int ret = sprintf(buffer, "%p: ", p);
       int i;
 
       for (i = 0; i < 16; i++)
