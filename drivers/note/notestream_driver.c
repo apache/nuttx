@@ -47,7 +47,8 @@ struct notestream_file_s
  ****************************************************************************/
 
 static void notestream_add(FAR struct note_driver_s *drv,
-                           FAR const void *note, size_t len);
+                           FAR const void *note, size_t len,
+                           bool noswitches)
 
 /****************************************************************************
  * Private Data
@@ -88,7 +89,8 @@ struct notestream_driver_s g_notestream_lowerout =
  ****************************************************************************/
 
 static void notestream_add(FAR struct note_driver_s *drv,
-                           FAR const void *note, size_t len)
+                           FAR const void *note, size_t len,
+                           bool noswitches)
 {
   FAR struct notestream_driver_s *drivers =
       (FAR struct notestream_driver_s *)drv;
