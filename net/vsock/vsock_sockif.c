@@ -1368,7 +1368,10 @@ static void vsock_recv_closing(FAR struct vsock_conn_s *conn,
     {
       work_cancel_sync_wq(g_vsock_wqueue, &conn->close_work);
       vsock_remove_conn(conn);
-      vsock_sub_ref(conn);
+      if (_SS_ISCLOSED(conn->sconn.s_flags))
+        {
+          vsock_sub_ref(conn);
+        }
     }
 }
 
@@ -2136,6 +2139,8 @@ static int vsock_close(FAR struct socket *psock)
   int ret = OK;
 
   vsock_lock(conn);
+
+  conn->sconn.s_flags |= _SF_CLOSED;
 
   /* Condition 1: socket()  created connection, bind or connect waiting
    * Condition 2: socket()  created connection, listen
