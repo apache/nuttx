@@ -102,6 +102,13 @@ config CAPTURE_NOTIFY
 		occurs.  If the hardware will support notification, then this
 		configuration should be set to enable the capability.
 
+config FAKE_CAPTURE
+	bool "Fake Capture Driver"
+	default n
+	depends on CAPTURE_NSIGNALS > 0
+	---help---
+		Enables a fake capture driver for testing purposes.
+
 endif # CAPTURE
 
 config TIMER

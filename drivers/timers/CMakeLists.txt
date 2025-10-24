@@ -84,6 +84,10 @@ endif()
 
 if(CONFIG_CAPTURE)
   list(APPEND SRCS capture.c)
+
+  if(CONFIG_FAKE_CAPTURE)
+    list(APPEND SRCS fake_capture.c)
+  endif()
 endif()
 
 if(CONFIG_GOLDFISH_TIMER)
