@@ -219,6 +219,10 @@ int host_errno_convert(int errcode);
 int host_errno_get(void);
 void host_errno_set(int errcode);
 
+/* sim_hostirq.c ************************************************************/
+
+void host_irqinitialize(void);
+
 /* sim_hostmisc.c ***********************************************************/
 
 void host_abort(int status);
