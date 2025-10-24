@@ -604,6 +604,14 @@ struct audio_enc_lc3_s
   float frame_duration;
 };
 
+struct audio_enc_spx_s
+{
+  uint8_t abr;
+  uint8_t cbr_quality;
+  uint8_t frames_per_packet;
+  uint8_t compression_level;
+};
+
 struct audio_enc_generic_s
 {
   uint32_t bw;
@@ -663,6 +671,7 @@ union audio_codec_options_u
   struct audio_enc_flac_s flac;
   struct audio_enc_sbc_s sbc;
   struct audio_enc_lc3_s lc3;
+  struct audio_enc_spx_s spx;
   struct audio_enc_generic_s generic;
   struct audio_dec_flac_s flac_d;
   struct audio_dec_wma_s wma_d;
