@@ -49,6 +49,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 
 #include "rp2040_flash_mtd.h"
 #include "rp2040_rom.h"
@@ -94,10 +95,6 @@
 #define FLASH_SECTOR_COUNT (CONFIG_RP2040_FLASH_LENGTH - FLASH_START_OFFSET)\
                            / FLASH_SECTOR_SIZE
 
-#ifdef CONFIG_SMP
-#  define OTHER_CPU (this_cpu() == 0 ? 1 : 0)
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -115,6 +112,28 @@ typedef void (*flash_range_erase_f)(uint32_t, size_t, uint32_t, uint8_t);
 typedef void (*flash_range_program_f)(uint32_t, const uint8_t *, size_t);
 typedef void (*flash_flush_cache_f)(void);
 typedef void (*flash_enable_xip_f)(void);
+
+#ifdef CONFIG_SMP
+/* The locks are used for coordinating "pause" and "resume" with the handler
+ * used for blocking a CPU.
+ */
+
+struct smp_isolation_data_s
+{
+  volatile spinlock_t cpu_wait;
+  volatile spinlock_t cpu_pause;
+  volatile spinlock_t cpu_resume;
+  struct smp_call_data_s call_data;
+};
+
+struct smp_isolation_s
+{
+  /* The id of the single CPU which is exempted from pausing. */
+
+  int isolated_cpuid;
+  struct smp_isolation_data_s cpu_data[CONFIG_SMP_NCPUS];
+};
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -191,6 +210,179 @@ void *boot_2_copy = NULL;
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_SMP
+/****************************************************************************
+ * Name: pause_cpu_handler
+ *
+ * Description:
+ *   Busy-wait for "leave_smp_isolation" to release our lock.
+ *   "enter_smp_isolation" triggers the execution of this function on all
+ *   CPUs to be blocked temporarily.
+ *
+ ****************************************************************************/
+
+static int pause_cpu_handler(void *const context)
+{
+  struct smp_isolation_data_s *const cpu_data =
+    (struct smp_isolation_data_s *)context;
+
+  /* Reserve the resumption lock. To be released after resuming. */
+
+  spin_lock(&cpu_data->cpu_resume);
+
+  /* Notify "enter_smp_isolation", that we are pausing now. */
+
+  spin_unlock(&cpu_data->cpu_pause);
+
+  /* Wait for "leave_smp_isolation". */
+
+  spin_lock(&cpu_data->cpu_wait);
+  spin_unlock(&cpu_data->cpu_wait);
+
+  /* Notify "leave_smp_isolation", that we have resumed. */
+
+  spin_unlock(&cpu_data->cpu_resume);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: init_smp_isolation
+ *
+ * Description:
+ *   Initialize an SMP isolation environment.
+ *
+ * Input Parameters:
+ *   data - SMP isolation environment.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void init_smp_isolation(struct smp_isolation_s *const data)
+{
+  struct smp_isolation_data_s *cpu_data;
+
+  for (int cpuid = 0; cpuid < CONFIG_SMP_NCPUS; cpuid++)
+    {
+      cpu_data = &data->cpu_data[cpuid];
+      spin_lock_init(&cpu_data->cpu_wait);
+      spin_lock_init(&cpu_data->cpu_pause);
+      spin_lock_init(&cpu_data->cpu_resume);
+    }
+}
+
+/****************************************************************************
+ * Name: enter_smp_isolation
+ *
+ * Description:
+ *   Force all CPUs except for the currently active one to pause execution
+ *   via a busy loop.
+ *   Scheduling of the current CPU is disabled until the isolation is lifted
+ *   again by calling "leave_smp_isolation".
+ *
+ * Input Parameters:
+ *   data - SMP isolation environment.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void enter_smp_isolation(struct smp_isolation_s *const data)
+{
+  struct smp_isolation_data_s *cpu_data;
+
+  /* TODO: remove "sched_lock" after "nxsched_smp_call_async" does not try to
+   * run the handler directly anymore, if the current CPU is part of the
+   * given cpuset.
+   */
+
+  sched_lock();
+
+  data->isolated_cpuid = this_cpu();
+
+  /* Pause all other CPUs. */
+
+  for (int other_cpuid = 0; other_cpuid < CONFIG_SMP_NCPUS; other_cpuid++)
+    {
+      cpu_data = &data->cpu_data[other_cpuid];
+
+      if (other_cpuid != data->isolated_cpuid)
+        {
+          spin_lock(&cpu_data->cpu_wait);
+          spin_lock(&cpu_data->cpu_pause);
+          spin_unlock(&cpu_data->cpu_resume);
+        }
+
+      nxsched_smp_call_init(&cpu_data->call_data, pause_cpu_handler,
+                            cpu_data);
+      nxsched_smp_call_single_async(other_cpuid, &cpu_data->call_data);
+    }
+
+  /* Wait until all other CPUs are paused. */
+
+  for (int other_cpuid = 0; other_cpuid < CONFIG_SMP_NCPUS; other_cpuid++)
+    {
+      cpu_data = &data->cpu_data[other_cpuid];
+
+      if (other_cpuid != data->isolated_cpuid)
+        {
+          spin_lock(&cpu_data->cpu_pause);
+          spin_unlock(&cpu_data->cpu_pause);
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: leave_smp_isolation
+ *
+ * Description:
+ *   Release all blocked CPUs.
+ *   Call this function as early as possible after "enter_smp_isolation".
+ *
+ * Input Parameters:
+ *   data - SMP isolation environment.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void leave_smp_isolation(struct smp_isolation_s *const data)
+{
+  struct smp_isolation_data_s *cpu_data;
+
+  /* Tell all other CPUs to resume. */
+
+  for (int other_cpuid = 0; other_cpuid < CONFIG_SMP_NCPUS; other_cpuid++)
+    {
+      cpu_data = &data->cpu_data[other_cpuid];
+
+      if (other_cpuid != data->isolated_cpuid)
+        {
+          spin_unlock(&cpu_data->cpu_wait);
+        }
+    }
+
+  /* Wait until all other CPUs have resumed. */
+
+  for (int other_cpuid = 0; other_cpuid < CONFIG_SMP_NCPUS; other_cpuid++)
+    {
+      cpu_data = &data->cpu_data[other_cpuid];
+
+      if (other_cpuid != data->isolated_cpuid)
+        {
+          spin_lock(&cpu_data->cpu_resume);
+          spin_unlock(&cpu_data->cpu_resume);
+        }
+    }
+
+  sched_unlock();
+}
+#endif
+
 /****************************************************************************
  * Name: do_erase
  ****************************************************************************/
@@ -261,26 +453,31 @@ static int     rp2040_flash_erase(struct mtd_dev_s *dev,
          nblocks,
          FLASH_BLOCK_SIZE * nblocks);
 
+#ifdef CONFIG_SMP
+  struct smp_isolation_s smp_isolation;
+  init_smp_isolation(&smp_isolation);
+#endif
+
   ret = nxmutex_lock(&rp_dev->lock);
   if (ret < 0)
     {
       return ret;
     }
 
-  flags = enter_critical_section();
-
 #ifdef CONFIG_SMP
-  up_cpu_pause(OTHER_CPU);
+  enter_smp_isolation(&smp_isolation);
 #endif
+
+  flags = enter_critical_section();
 
   do_erase(FLASH_BLOCK_SIZE * startblock + FLASH_START_OFFSET,
             FLASH_BLOCK_SIZE * nblocks);
 
-#ifdef CONFIG_SMP
-  up_cpu_resume(OTHER_CPU);
-#endif
-
   leave_critical_section(flags);
+
+#ifdef CONFIG_SMP
+  leave_smp_isolation(&smp_isolation);
+#endif
 
   ret = nblocks;
 
@@ -344,27 +541,32 @@ static ssize_t rp2040_flash_block_write(struct mtd_dev_s *dev,
   irqstate_t          flags;
   int                 ret;
 
+#ifdef CONFIG_SMP
+  struct smp_isolation_s smp_isolation;
+  init_smp_isolation(&smp_isolation);
+#endif
+
   ret = nxmutex_lock(&rp_dev->lock);
   if (ret < 0)
     {
       return ret;
     }
 
-  flags = enter_critical_section();
-
 #ifdef CONFIG_SMP
-  up_cpu_pause(OTHER_CPU);
+  enter_smp_isolation(&smp_isolation);
 #endif
+
+  flags = enter_critical_section();
 
   do_write(FLASH_SECTOR_SIZE * startblock + FLASH_START_OFFSET,
            buffer,
            FLASH_SECTOR_SIZE * nblocks);
 
-#ifdef CONFIG_SMP
-  up_cpu_resume(OTHER_CPU);
-#endif
-
   leave_critical_section(flags);
+
+#ifdef CONFIG_SMP
+  leave_smp_isolation(&smp_isolation);
+#endif
 
   finfo("FLASH: write sector: %8u (0x%08x) count:%5u\n",
          (unsigned)(startblock),
