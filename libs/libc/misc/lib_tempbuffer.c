@@ -84,7 +84,7 @@ static struct tempbuffer_s g_tempbuffer =
  *
  ****************************************************************************/
 
-FAR char *lib_get_tempbuffer(size_t nbytes)
+FAR void *lib_get_tempbuffer(size_t nbytes)
 {
   if (nbytes <= TEMP_MAX_SIZE)
     {
@@ -134,9 +134,10 @@ FAR char *lib_get_tempbuffer(size_t nbytes)
  *
  ****************************************************************************/
 
-void lib_put_tempbuffer(FAR char *buffer)
+void lib_put_tempbuffer(FAR void *buffer)
 {
-  int index = (buffer - &g_tempbuffer.buffer[0][0]) / TEMP_MAX_SIZE;
+  int index = ((FAR char *)buffer - &g_tempbuffer.buffer[0][0]) /
+              TEMP_MAX_SIZE;
 
   if (index >= 0 && index < CONFIG_LIBC_MAX_TEMPBUFFER)
     {

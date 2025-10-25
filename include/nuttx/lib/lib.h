@@ -125,8 +125,8 @@ size_t lib_get_stacksize(size_t size);
 /* Functions defined in lib_tempbuffer.c ************************************/
 
 #ifdef CONFIG_LIBC_TEMPBUFFER
-FAR char *lib_get_tempbuffer(size_t nbytes);
-void lib_put_tempbuffer(FAR char *buffer);
+FAR void *lib_get_tempbuffer(size_t nbytes);
+void lib_put_tempbuffer(FAR void *buffer);
 #else
 #  define lib_get_tempbuffer(n) alloca(n)
 #  define lib_put_tempbuffer(b)
