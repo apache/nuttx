@@ -55,6 +55,7 @@
 #include "sam_periphclks.h"
 #include "sam_gpio.h"
 #include "sam_mcan.h"
+#include "sam_chipid.h"
 
 #if defined(CONFIG_CAN) && defined(CONFIG_SAMV7_MCAN)
 
@@ -4380,14 +4381,7 @@ struct can_dev_s *sam_mcan_initialize(int port)
 
       /* Get the revision of the chip (A or B) */
 
-#ifdef CONFIG_ARCH_CHIP_PIC32CZCA70
-      /* PIC32CZ CA70 series always have revision B MCAN */
-
-      priv->rev = 1;
-#else
-      regval = getreg32(SAM_CHIPID_CIDR);
-      priv->rev = regval & CHIPID_CIDR_VERSION_MASK;
-#endif
+      priv->rev = sam_has_revb_periphs();
 
       /* Set the initial bit timing.  This might change subsequently
        * due to IOCTL command processing.
@@ -4400,17 +4394,12 @@ struct can_dev_s *sam_mcan_initialize(int port)
           priv->btp  = priv->config->btp;
           priv->fbtp = priv->config->fbtp;
         }
-      else if (priv->rev == 1)
+      else
         {
           /* Revision B */
 
           priv->btp  = priv->config->nbtp;
           priv->fbtp = priv->config->dbtp;
-        }
-      else
-        {
-          canerr("ERROR: Incorrect chip revision: %d\n", priv->rev);
-          return NULL;
         }
 
       /* And put the hardware in the initial state */
