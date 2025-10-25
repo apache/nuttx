@@ -35,7 +35,7 @@ set(SRCS
 # include the base delay definition (busy-loop) as a minimum-viable product. We
 # don't want the weak references to conflict.
 
-if(NOT CONFIG_TIMER_ARCH)
+if(NOT CONFIG_TIMER_ARCH AND NOT CONFIG_ALARM_ARCH)
   list(APPEND SRCS delay.c)
 endif()
 
