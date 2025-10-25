@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/event/event_getmask.c
+ * sched/event/event_waitirq.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,45 +24,54 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/sched.h>
+#include <nuttx/config.h>
 
-#include "event.h"
+#include <sched.h>
+#include <assert.h>
+#include <errno.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+
+#include "sched/sched.h"
+#include "event/event.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxevent_getmask
+ * Name: nxevent_wait_irq
  *
  * Description:
- *   Get the event mask of the given event object.
- *
- * Input Parameters:
- *   event - Address of the event object
- *
- * Returned Value:
- *   Returns the event mask value of the event object.
- *
- * Notes:
- *   - This is an internal OS interface and must not be invoked directly
- *     by user applications.
- *   - This function is safe to call from an interrupt handler.
+ *   An error event has occurred and the event wait must be terminated with
+ *   an error.
  *
  ****************************************************************************/
 
-nxevent_mask_t nxevent_getmask(FAR nxevent_t *event)
+void nxevent_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 {
-  nxevent_mask_t events;
-  irqstate_t flags;
+  FAR struct tcb_s *rtcb = this_task();
+  FAR nxevent_t *event = wtcb->waitobj;
 
-  DEBUGASSERT(event != NULL);
+  /* Remove task from waiting list */
 
-  flags = enter_critical_section();
+  dq_rem((FAR dq_entry_t *)wtcb, EVENT_WAITLIST(event));
 
-  events = event->events;
+  /* Indicate that the wait is over. */
 
-  leave_critical_section(flags);
+  wtcb->waitobj = NULL;
 
-  return events;
+  /* Mark the errno value for the thread. */
+
+  wtcb->errcode = errcode;
+
+  /* Add the task to ready-to-run task list and
+   * perform the context switch if one is needed
+   */
+
+  if (nxsched_add_readytorun(wtcb))
+    {
+      up_switch_context(this_task(), rtcb);
+    }
 }

@@ -30,13 +30,14 @@
 #include <nuttx/config.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/list.h>
-#include <nuttx/semaphore.h>
-
+#include <nuttx/queue.h>
 #include <nuttx/event.h>
+#include <nuttx/sched.h>
 
 /****************************************************************************
- * Public Type Definitions
+ * Public Function Definitions
  ****************************************************************************/
+
+void nxevent_wait_irq(FAR struct tcb_s *wtcb, int errcode);
 
 #endif /* __SCHED_EVENT_EVENT_H */

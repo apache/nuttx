@@ -24,7 +24,12 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/sched.h>
+#include <nuttx/config.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/clock.h>
+
+#include "sched/sched.h"
 
 #include "event.h"
 
@@ -40,48 +45,49 @@
  * Name: nxevent_post
  *
  * Description:
- *   Post one or more events to an event object.
- *
- *   This routine posts one or more events to an event object. All tasks
- *   waiting on the event object event whose waiting conditions become
- *   met by this posting immediately unpend.
- *
- *   Posting differs from setting in that posted events are merged together
- *   with the current set of events tracked by the event object.
+ *   Post one or more events to the specified event object.  This function
+ *   wakes up any tasks that are waiting for the posted events, depending
+ *   on their wait condition (any/all).
  *
  * Input Parameters:
- *   event  - Address of the event object
- *   events - Set of events to post to event
- *          - Set events to 0 will be considered as any,
- *            waking up the waiting thread immediately.
+ *   event  - Pointer to the event object.
+ *   events - Bitmask of events to post.
+ *   eflags - Posting behavior flags, such as:
+ *              NXEVENT_POST_SET: overwrite existing events.
+ *              NXEVENT_POST_ALL: wake all waiting tasks.
  *
  * Returned Value:
- *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure.
- *
- * Assumptions:
- *   This function may be called from an interrupt handler.
+ *   OK on success; -EINVAL if the event pointer is NULL.
  *
  ****************************************************************************/
 
 int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
                  nxevent_flags_t eflags)
 {
+  FAR struct tcb_s *wtcb;
+  FAR struct tcb_s *rtcb;
+  FAR dq_entry_t *entry;
+  FAR dq_entry_t *tmp;
   nxevent_mask_t clear = 0;
-  FAR nxevent_wait_t *wait;
-  FAR nxevent_wait_t *tmp;
   irqstate_t flags;
+  dq_queue_t *waitlist = EVENT_WAITLIST(event);
   bool waitall;
   bool postall;
-  int ret = 0;
+  bool need_switch = false;
+
+  /* Sanity check */
 
   if (event == NULL)
     {
       return -EINVAL;
     }
 
-  flags = spin_lock_irqsave_nopreempt(&event->lock);
+  flags = enter_critical_section();
+
+  /* Update event bits:
+   * - If NXEVENT_POST_SET is set, overwrite existing bits.
+   * - Otherwise, OR the bits to accumulate events.
+   */
 
   if ((eflags & NXEVENT_POST_SET) != 0)
     {
@@ -92,50 +98,74 @@ int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
       event->events |= events ? events : ~0;
     }
 
-  if (!list_is_empty(&event->list))
+  postall = ((eflags & NXEVENT_POST_ALL) != 0);
+  rtcb    = this_task();
+
+  /* Process waiting tasks */
+
+  dq_for_every_safe(waitlist, entry, tmp)
     {
-      postall = ((eflags & NXEVENT_POST_ALL) != 0);
+      wtcb = (FAR struct tcb_s *)entry;
+      waitall = ((wtcb->eflags & NXEVENT_WAIT_ALL) != 0);
 
-      list_for_every_entry_safe(&event->list, wait, tmp,
-                                nxevent_wait_t, node)
+      /* Check if this task's wait condition is satisfied */
+
+      if ((!waitall && (wtcb->expect & event->events) != 0) ||
+          (waitall && ((wtcb->expect & event->events) == wtcb->expect)))
         {
-          waitall = ((wait->eflags & NXEVENT_WAIT_ALL) != 0);
+          dq_rem((FAR dq_entry_t *)wtcb, waitlist);
 
-          if ((!waitall && ((wait->expect & event->events) != 0)) ||
-              (waitall && ((wait->expect & event->events) == wait->expect)))
+          /* Stop timeout watchdog */
+
+          wd_cancel(&wtcb->waitdog);
+          wtcb->waitobj = NULL;
+
+          /* Make task ready-to-run */
+
+          if (nxsched_add_readytorun(wtcb) && !need_switch)
             {
-              list_delete(&wait->node);
+              /* Higher priority task is ready */
 
-              ret = nxsem_post(&wait->sem);
-              if (ret < 0)
-                {
-                  continue;
-                }
-
-              if (!waitall)
-                {
-                  wait->expect &= event->events;
-                }
-
-              if ((wait->eflags & NXEVENT_WAIT_NOCLEAR) == 0)
-                {
-                  clear |= wait->expect;
-                }
-
-              if (!postall && (event->events & ~clear) == 0)
-                {
-                  break;
-                }
+              need_switch = true;
             }
-        }
 
-      if (clear)
-        {
-          event->events &= ~clear;
+          /* If waiting for any event, mark received ones */
+
+          if (!waitall)
+            {
+              wtcb->expect &= event->events;
+            }
+
+          /* Clear handled events unless NXEVENT_WAIT_NOCLEAR is set */
+
+          if ((wtcb->eflags & NXEVENT_WAIT_NOCLEAR) == 0)
+            {
+              clear |= wtcb->expect;
+            }
+
+          /* If not posting to all and no more unhandled events, exit loop */
+
+          if (!postall && (event->events & ~clear) == 0)
+            {
+              break;
+            }
         }
     }
 
-  spin_unlock_irqrestore_nopreempt(&event->lock, flags);
+  /* Clear event bits if needed */
 
-  return ret;
+  if (clear)
+    {
+      event->events &= ~clear;
+    }
+
+  /* Perform context switch if a higher priority task was unblocked */
+
+  if (need_switch)
+    {
+      up_switch_context(this_task(), rtcb);
+    }
+
+  leave_critical_section(flags);
+  return OK;
 }
