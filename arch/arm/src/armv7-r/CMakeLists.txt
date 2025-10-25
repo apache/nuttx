@@ -57,7 +57,7 @@ if(CONFIG_ARMV7R_HAVE_PTM)
   list(APPEND SRCS arm_timer.c)
 endif()
 
-if(CONFIG_BUILD_PROTECTED)
+if(CONFIG_ARM_MPU OR CONFIG_BUILD_PROTECTED)
   list(APPEND SRCS arm_mpu.c)
 endif()
 
