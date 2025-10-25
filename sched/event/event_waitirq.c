@@ -51,48 +51,27 @@
 
 void nxevent_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 {
-  /* It is possible that an interrupt/context switch beat us to the punch
-   * and already changed the task's state.
+  FAR struct tcb_s *rtcb = this_task();
+  FAR nxevent_t *event = wtcb->waitobj;
+
+  /* Remove task from waiting list */
+
+  dq_rem((FAR dq_entry_t *)wtcb, EVENT_WAITLIST(event));
+
+  /* Indicate that the wait is over. */
+
+  wtcb->waitobj = NULL;
+
+  /* Mark the errno value for the thread. */
+
+  wtcb->errcode = errcode;
+
+  /* Add the task to ready-to-run task list and
+   * perform the context switch if one is needed
    */
 
-  DEBUGASSERT(wtcb != NULL);
-
-  /* Ensure the task is still waiting for an event */
-
-  if (wtcb->task_state == TSTATE_WAIT_EVENT)
+  if (nxsched_add_readytorun(wtcb))
     {
-      FAR struct tcb_s *rtcb = this_task();
-      FAR nxevent_wait_t *wait = wtcb->waitobj;
-
-      DEBUGASSERT(wait != NULL);
-
-      /* Remove the wait structure from the event's waiting list */
-
-      if (list_in_list(&(wait->node)))
-        {
-          list_delete(&(wait->node));
-        }
-
-      /* Remove the task from the event waiting list */
-
-      dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
-
-      /* Indicate that the wait is over */
-
-      wtcb->waitobj = NULL;
-
-      /* Store the error code for the thread */
-
-      wtcb->errcode = errcode;
-
-      /* Add the task to the ready-to-run list and perform a context
-       * switch if one is needed.
-       */
-
-      if (nxsched_add_readytorun(wtcb))
-        {
-          up_switch_context(this_task(), rtcb);
-        }
+      up_switch_context(this_task(), rtcb);
     }
 }
-
