@@ -136,6 +136,10 @@
 #define SPORADIC_FLAG_REPLENISH    (1 << 2)                      /* Bit 2: Replenishment cycle */
                                                                  /* Bits 3-7: Available */
 
+/* Map TSTATE_SLEEPING to TSTATE_WAIT_SIG for nxsched_sleep() compatibility */
+
+#define TSTATE_SLEEPING            TSTATE_WAIT_SIG
+
 /* Most internal nxsched_* interfaces are not available in the user space in
  * PROTECTED and KERNEL builds.  In that context, the application semaphore
  * interfaces must be used.  The differences between the two sets of
@@ -1732,6 +1736,26 @@ int nxsched_smp_call_async(cpu_set_t cpuset,
  ****************************************************************************/
 
 void nxsched_ticksleep(unsigned int ticks);
+
+/****************************************************************************
+ * Name: nxsched_wakeup
+ *
+ * Description:
+ *   The nxsched_wakeup() function is used to wake up a task that is
+ *   currently in the sleeping state before its timeout expires.
+ *
+ *   This function can be used by internal scheduler logic or by
+ *   system-level components that need to resume a sleeping task early.
+ *
+ * Input Parameters:
+ *   tcb - Pointer to the TCB of the task to be awakened.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxsched_wakeup(FAR struct tcb_s *tcb);
 
 /****************************************************************************
  * Name: nxsched_usleep

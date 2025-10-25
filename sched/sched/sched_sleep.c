@@ -52,43 +52,12 @@
 
 static void nxsched_timeout(wdparm_t arg)
 {
-  FAR struct tcb_s *wtcb;
-  irqstate_t flags;
-
-  /* Get waiting tcb from parameter */
-
-  wtcb = (FAR struct tcb_s *)(uintptr_t)arg;
-
-  /* We must be in a critical section in order to call up_switch_context()
-   * below.
-   */
-
-  flags = enter_critical_section();
-
-  /* There may be a race condition -- make sure the task is
-   * still waiting for a signal
-   */
-
-  if (wtcb->task_state == TSTATE_WAIT_SIG)
-    {
-      FAR struct tcb_s *rtcb = this_task();
-
-      /* Remove the task from waiting list */
-
-      dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
-
-      /* Add the task to ready-to-run task list, and
-       * perform the context switch if one is needed
-       */
-
-      if (nxsched_add_readytorun(wtcb))
-        {
-          up_switch_context(this_task(), rtcb);
-        }
-    }
-
-  leave_critical_section(flags);
+  nxsched_wakeup((FAR struct tcb_s *)(uintptr_t)arg);
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: nxsched_ticksleep
@@ -130,21 +99,71 @@ void nxsched_ticksleep(unsigned int ticks)
 
   /* Add the task to the specified blocked task list */
 
-  rtcb->task_state = TSTATE_WAIT_SIG;
+  rtcb->task_state = TSTATE_SLEEPING;
   dq_addlast((FAR dq_entry_t *)rtcb, list_waitingforsignal());
 
   /* Now, perform the context switch if one is needed */
 
   up_switch_context(this_task(), rtcb);
 
-  wd_cancel(&rtcb->waitdog);
+  /* Cancel the wdog only if wdog is still alive */
+
+  if (WDOG_ISACTIVE(&rtcb->waitdog))
+    {
+      wd_cancel(&rtcb->waitdog);
+    }
 
   leave_critical_section(flags);
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: nxsched_wakeup
+ *
+ * Description:
+ *   The nxsched_wakeup() function is used to wake up a task that is
+ *   currently in the sleeping state before its timeout expires.
+ *
+ *   This function can be used by internal scheduler logic or by
+ *   system-level components that need to resume a sleeping task early.
+ *
+ * Input Parameters:
+ *   tcb - Pointer to the TCB of the task to be awakened.
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
+
+void nxsched_wakeup(FAR struct tcb_s *tcb)
+{
+  irqstate_t flags;
+
+  DEBUGASSERT(tcb != NULL);
+
+  flags = enter_critical_section();
+
+  if (tcb->task_state == TSTATE_SLEEPING)
+    {
+      FAR struct tcb_s *rtcb = this_task();
+
+      /* Remove the task from sleeping list */
+
+      dq_rem((FAR dq_entry_t *)tcb, list_waitingforsignal());
+
+      wd_cancel(&tcb->waitdog);
+
+      /* Add the task to ready-to-run task list, and
+       * perform the context switch if one is needed
+       */
+
+      if (nxsched_add_readytorun(tcb))
+        {
+          up_switch_context(this_task(), rtcb);
+        }
+    }
+
+  leave_critical_section(flags);
+}
 
 /****************************************************************************
  * Name: nxsched_usleep
