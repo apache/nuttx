@@ -24,9 +24,86 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/sched.h>
+#include <nuttx/config.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/clock.h>
+
+#include "sched/sched.h"
 
 #include "event.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxevent_timeout
+ *
+ * Description:
+ *   A timeout elapsed while waiting for timeout.
+ *
+ * Assumptions:
+ *   This function executes in the context of the timer interrupt handler.
+ *   Local interrupts are assumed to be disabled on entry.
+ *
+ * Input Parameters:
+ *   arg - Parameter to pass to wdentry.
+ *
+ ****************************************************************************/
+
+static void nxevent_timeout(wdparm_t arg)
+{
+  FAR struct tcb_s *wtcb;
+  FAR nxevent_wait_t *wait;
+  irqstate_t flags;
+
+  /* Get waiting tcb from parameter */
+
+  wtcb = (FAR struct tcb_s *)(uintptr_t)arg;
+  wait = wtcb->waitobj;
+
+  /* We must be in a critical section in order to call up_switch_context()
+   * below.
+   */
+
+  flags = enter_critical_section();
+
+  /* There may be a race condition -- make sure the task is
+   * still waiting for a signal
+   */
+
+  if (wtcb->task_state == TSTATE_WAIT_EVENT)
+    {
+      /* Remove the wait from the event's waiting list */
+
+      if (list_in_list(&(wait->node)))
+        {
+          list_delete(&(wait->node));
+        }
+
+      wtcb->waitobj = NULL;
+
+      wait->eflags |= NXEVENT_WAIT_TIMEOUT;
+
+      FAR struct tcb_s *rtcb = this_task();
+
+      /* Remove the task from waiting list */
+
+      dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
+
+      /* Add the task to ready-to-run task list, and
+       * perform the context switch if one is needed
+       */
+
+      if (nxsched_add_readytorun(wtcb))
+        {
+          up_switch_context(this_task(), rtcb);
+        }
+    }
+
+  leave_critical_section(flags);
+}
 
 /****************************************************************************
  * Public Functions
@@ -66,9 +143,9 @@ nxevent_mask_t nxevent_tickwait_wait(FAR nxevent_t *event,
                                      nxevent_flags_t eflags,
                                      uint32_t delay)
 {
+  FAR struct tcb_s *wtcb;
   irqstate_t flags;
   bool waitany;
-  int ret;
 
   DEBUGASSERT(event != NULL && wait != NULL &&
               up_interrupt_context() == false);
@@ -80,7 +157,7 @@ nxevent_mask_t nxevent_tickwait_wait(FAR nxevent_t *event,
       events = ~0;
     }
 
-  flags = spin_lock_irqsave(&event->lock);
+  flags = enter_critical_section();
 
   if ((eflags & NXEVENT_WAIT_RESET) != 0)
     {
@@ -121,46 +198,44 @@ nxevent_mask_t nxevent_tickwait_wait(FAR nxevent_t *event,
     {
       /* Initialize event wait */
 
-      nxsem_init(&(wait->sem), 0, 0);
+      wtcb = this_task();
+      wtcb->waitobj = (FAR void *)wait;
       wait->expect = events;
-      wait->eflags = eflags;
+      wait->eflags = eflags & (~NXEVENT_WAIT_TIMEOUT);
+      wait->wtcb = wtcb;
 
       list_add_tail(&event->list, &(wait->node));
-      spin_unlock_irqrestore(&event->lock, flags);
 
       /* Wait for the event */
 
-      if (delay == UINT32_MAX)
+      wd_start(&wtcb->waitdog, delay, nxevent_timeout, (uintptr_t)wtcb);
+
+      /* Remove the tcb task from the ready-to-run list. */
+
+      nxsched_remove_self(wtcb);
+
+      /* Add the task to the specified blocked task list */
+
+      wtcb->task_state = TSTATE_WAIT_EVENT;
+      dq_addlast((FAR dq_entry_t *)wtcb, list_waitingforsignal());
+
+      /* Now, perform the context switch if one is needed */
+
+      up_switch_context(this_task(), wtcb);
+
+      DEBUGASSERT(!list_in_list(&(wait->node)));
+
+      if (wait->eflags & NXEVENT_WAIT_TIMEOUT)
         {
-          ret = nxsem_wait_uninterruptible(&(wait->sem));
+          events = 0;
         }
       else
-        {
-          ret = nxsem_tickwait_uninterruptible(&(wait->sem), delay);
-        }
-
-      /* Destroy local variables */
-
-      nxsem_destroy(&(wait->sem));
-
-      flags = spin_lock_irqsave(&event->lock);
-      if (ret == 0)
         {
           events = wait->expect;
-          DEBUGASSERT(!list_in_list(&(wait->node)));
-        }
-      else
-        {
-          if (list_in_list(&(wait->node)))
-            {
-              list_delete(&(wait->node));
-            }
-
-          events = 0;
         }
     }
 
-  spin_unlock_irqrestore(&event->lock, flags);
+  leave_critical_section(flags);
 
   return events;
 }

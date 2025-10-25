@@ -30,7 +30,6 @@
 #include <nuttx/config.h>
 
 #include <nuttx/list.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/spinlock.h>
 
 /****************************************************************************
@@ -46,6 +45,7 @@
 #define NXEVENT_WAIT_ALL     (1 << 0) /* Bit 0: Wait ALL */
 #define NXEVENT_WAIT_RESET   (1 << 1) /* Bit 1: Reset events before wait */
 #define NXEVENT_WAIT_NOCLEAR (1 << 2) /* Bit 2: Do not clear events after wait */
+#define NXEVENT_WAIT_TIMEOUT (1 << 3) /* Bit 3: Event wait is timeout */
 
 /* Event Post Flags */
 
@@ -66,14 +66,13 @@ struct nxevent_wait_s
   struct list_node        node;    /* Wait node of current task */
   nxevent_mask_t          expect;  /* Expect events of wait task */
   nxevent_flags_t         eflags;  /* Event flags of wait task */
-  sem_t                   sem;     /* Wait sem of current task */
+  FAR struct tcb_s        *wtcb;   /* The wait task */
 };
 
 struct nxevent_s
 {
   struct list_node         list;   /* Waiting list of nxevent_wait_t */
   volatile nxevent_mask_t  events; /* Pending Events */
-  spinlock_t               lock;   /* Spinlock */
 };
 
 #ifdef CONFIG_FS_NAMED_EVENTS

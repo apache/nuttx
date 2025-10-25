@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/event/event_getmask.c
+ * sched/event/event_waitirq.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,45 +24,75 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/sched.h>
+#include <nuttx/config.h>
 
-#include "event.h"
+#include <sched.h>
+#include <assert.h>
+#include <errno.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+
+#include "sched/sched.h"
+#include "event/event.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxevent_getmask
+ * Name: nxevent_wait_irq
  *
  * Description:
- *   Get the event mask of the given event object.
- *
- * Input Parameters:
- *   event - Address of the event object
- *
- * Returned Value:
- *   Returns the event mask value of the event object.
- *
- * Notes:
- *   - This is an internal OS interface and must not be invoked directly
- *     by user applications.
- *   - This function is safe to call from an interrupt handler.
+ *   An error event has occurred and the event wait must be terminated with
+ *   an error.
  *
  ****************************************************************************/
 
-nxevent_mask_t nxevent_getmask(FAR nxevent_t *event)
+void nxevent_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 {
-  nxevent_mask_t events;
-  irqstate_t flags;
+  /* It is possible that an interrupt/context switch beat us to the punch
+   * and already changed the task's state.
+   */
 
-  DEBUGASSERT(event != NULL);
+  DEBUGASSERT(wtcb != NULL);
 
-  flags = enter_critical_section();
+  /* Ensure the task is still waiting for an event */
 
-  events = event->events;
+  if (wtcb->task_state == TSTATE_WAIT_EVENT)
+    {
+      FAR struct tcb_s *rtcb = this_task();
+      FAR nxevent_wait_t *wait = wtcb->waitobj;
 
-  leave_critical_section(flags);
+      DEBUGASSERT(wait != NULL);
 
-  return events;
+      /* Remove the wait structure from the event's waiting list */
+
+      if (list_in_list(&(wait->node)))
+        {
+          list_delete(&(wait->node));
+        }
+
+      /* Remove the task from the event waiting list */
+
+      dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
+
+      /* Indicate that the wait is over */
+
+      wtcb->waitobj = NULL;
+
+      /* Store the error code for the thread */
+
+      wtcb->errcode = errcode;
+
+      /* Add the task to the ready-to-run list and perform a context
+       * switch if one is needed.
+       */
+
+      if (nxsched_add_readytorun(wtcb))
+        {
+          up_switch_context(this_task(), rtcb);
+        }
+    }
 }
+
