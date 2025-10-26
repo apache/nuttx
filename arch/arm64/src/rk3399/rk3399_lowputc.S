@@ -50,15 +50,6 @@
  * Public Functions
  ****************************************************************************/
 
-/* Initialize A64 UART
- * xb: Register that contains the UART Base Address
- * c:  Scratch register number
- */
-
-GTEXT(arm64_earlyprintinit)
-SECTION_FUNC(text, arm64_earlyprintinit)
-    ret  /* Do nothing because U-Boot has already initialized UART */
-
 /* Wait for RK3399 UART to be ready to transmit
  * xb: Register that contains the UART Base Address
  * wt: Scratch register number
