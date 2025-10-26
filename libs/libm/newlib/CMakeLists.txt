@@ -97,7 +97,7 @@ if(CONFIG_LIBM_NEWLIB)
     file(GLOB_RECURSE ARCH_CSRCS ${NEWLIB_DIR}/newlib/libm/fenv/*.c)
   endif()
 
-  set(CSRCS ${COMMON_CSRCS} ${COMPLEX_CSRCS} ${ARCH_CSRCS})
+  set(CSRCS ${COMMON_CSRCS} ${COMPLEX_CSRCS})
 
   # aggressive optimisation can replace occurrences of sinl() and cosl() with
   # sincosl(), but sincosl() is missing in newlib which causes error. So let's
@@ -122,6 +122,23 @@ if(CONFIG_LIBM_NEWLIB)
     file(GLOB_RECURSE MATH_CSRCS ${NEWLIB_DIR}/newlib/libm/math/*.c)
     list(APPEND CSRCS ${MATH_CSRCS})
   endif()
+
+  set(ARCH_FILENAMES "")
+  foreach(arch_file ${ARCH_CSRCS})
+    get_filename_component(arch_filename ${arch_file} NAME)
+    list(APPEND ARCH_FILENAMES ${arch_filename})
+  endforeach()
+
+  set(FILTERED_CSRCS "")
+  foreach(file ${CSRCS})
+    get_filename_component(filename ${file} NAME)
+    list(FIND ARCH_FILENAMES ${filename} index)
+    if(index EQUAL -1)
+      list(APPEND FILTERED_CSRCS ${file})
+    endif()
+  endforeach()
+
+  set(CSRCS ${FILTERED_CSRCS} ${ARCH_CSRCS})
 
   # ############################################################################
   # Include Directory
