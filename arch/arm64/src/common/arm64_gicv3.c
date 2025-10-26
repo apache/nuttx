@@ -1078,14 +1078,17 @@ int arm64_gic_initialize(void)
       return err;
     }
 
-  gicv3_dist_init();
+  if (this_cpu() == 0)
+    {
+      gicv3_dist_init();
+    }
 
   arm64_gic_init();
 
   return 0;
 }
 
-#ifdef CONFIG_SMP
+#ifndef CONFIG_UP
 void arm64_gic_secondary_init(void)
 {
   arm64_gic_init();

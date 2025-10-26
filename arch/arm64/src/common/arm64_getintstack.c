@@ -38,9 +38,9 @@
  * Name: up_get_intstackbase
  ****************************************************************************/
 
-#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
 uintptr_t up_get_intstackbase(int cpu)
 {
-  return (uintptr_t)g_interrupt_stack;
+  return (uintptr_t)g_interrupt_stack[cpu];
 }
 #endif

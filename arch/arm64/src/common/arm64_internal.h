@@ -96,13 +96,8 @@
 #define STACK_COLOR    0xdeaddead
 #define HEAP_COLOR     'h'
 
-#ifdef CONFIG_SMP
-/* The size of interrupt and idle stack.  This is the configured
- * value aligned the 8-bytes as required by the ARM EABI.
- */
-
-#  define SMP_STACK_SIZE    STACKFRAME_ALIGN_UP(CONFIG_IDLETHREAD_STACKSIZE)
-#  define SMP_STACK_WORDS   (SMP_STACK_SIZE >> 2)
+#ifndef CONFIG_UP
+#  define STACK_WORDS   (CONFIG_IDLETHREAD_STACKSIZE >> 2)
 #endif
 
 /* Context switching */
@@ -151,28 +146,16 @@ extern "C"
 
 #define INTSTACK_SIZE        STACKFRAME_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK)
 
-#ifndef CONFIG_UP
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+INIT_STACK_ARRAY_DEFINE_EXTERN(g_interrupt_fiq_stack, CONFIG_NCPUS,
+                               INTSTACK_SIZE);
+#endif
 
 INIT_STACK_ARRAY_DEFINE_EXTERN(g_cpu_idlestackalloc, CONFIG_NCPUS,
-                          SMP_STACK_SIZE);
-INIT_STACK_ARRAY_DEFINE_EXTERN(g_interrupt_stacks, CONFIG_NCPUS,
-                          INTSTACK_SIZE);
+                               CONFIG_IDLETHREAD_STACKSIZE);
 
-#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
-INIT_STACK_ARRAY_DEFINE_EXTERN(g_interrupt_fiq_stacks, CONFIG_NCPUS,
-                          INTSTACK_SIZE);
-#endif
-#else
-/* idle thread stack for primary core */
-
-INIT_STACK_DEFINE_EXTERN(g_idle_stack, CONFIG_IDLETHREAD_STACKSIZE);
-INIT_STACK_DEFINE_EXTERN(g_interrupt_stack, INTSTACK_SIZE);
-
-#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
-INIT_STACK_DEFINE_EXTERN(g_interrupt_fiq_stack, INTSTACK_SIZE);
-#endif
-
-#endif
+INIT_STACK_ARRAY_DEFINE_EXTERN(g_interrupt_stack, CONFIG_NCPUS,
+                               INTSTACK_SIZE);
 
 /* This is the beginning of heap as provided from arm64_head.S.
  * This is the first address in DRAM after the loaded
@@ -396,6 +379,25 @@ void arm64_stack_color(void *stackbase, size_t nbytes);
 
 #ifdef CONFIG_ARCH_HAVE_DEBUG
 void arm64_enable_dbgmonitor(void);
+#endif
+
+/****************************************************************************
+ * Name: arm64_color_intstack
+ *
+ * Description:
+ *   Set the interrupt stack to a value so that later we can determine how
+ *   much stack space was used by interrupt handling logic
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
+static inline_function void arm64_color_intstack(void)
+{
+  arm64_stack_color((void *)up_get_intstackbase(this_cpu()),
+                    INTSTACK_SIZE);
+}
+#else
+#  define arm64_color_intstack()
 #endif
 
 #ifdef __cplusplus

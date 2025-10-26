@@ -144,13 +144,9 @@ void up_initial_state(struct tcb_s *tcb)
   if (tcb->pid == IDLE_PROCESS_ID)
     {
       /* Initialize the idle thread stack */
-#ifdef CONFIG_SMP
-      tcb->stack_alloc_ptr = (void *)(g_cpu_idlestackalloc[0]);
-#else
-      tcb->stack_alloc_ptr = (void *)(g_idle_stack);
-#endif
-      tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
-      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
+
+      up_cpu_idlestack(this_cpu(), tcb,
+                       CONFIG_IDLETHREAD_STACKSIZE);
 
       /* set initialize idle thread tcb core 0, idle0 */
 
