@@ -58,21 +58,21 @@
 
 uint64_t *const g_cpu_int_stacktop[CONFIG_NCPUS] =
 {
-  (uint64_t *)(g_interrupt_stacks[0] + INTSTACK_SIZE),
+  (uint64_t *)(g_interrupt_stack[0] + INTSTACK_SIZE),
 #if CONFIG_NCPUS > 1
-  (uint64_t *)(g_interrupt_stacks[1] + INTSTACK_SIZE),
+  (uint64_t *)(g_interrupt_stack[1] + INTSTACK_SIZE),
 #if CONFIG_NCPUS > 2
-  (uint64_t *)(g_interrupt_stacks[2] + INTSTACK_SIZE),
+  (uint64_t *)(g_interrupt_stack[2] + INTSTACK_SIZE),
 #if CONFIG_NCPUS > 3
-  (uint64_t *)(g_interrupt_stacks[3] + INTSTACK_SIZE),
+  (uint64_t *)(g_interrupt_stack[3] + INTSTACK_SIZE),
 #if CONFIG_NCPUS > 4
-  (uint64_t *)(g_interrupt_stacks[4] + INTSTACK_SIZE),
+  (uint64_t *)(g_interrupt_stack[4] + INTSTACK_SIZE),
 #if CONFIG_NCPUS > 5
-  (uint64_t *)(g_interrupt_stacks[5] + INTSTACK_SIZE),
+  (uint64_t *)(g_interrupt_stack[5] + INTSTACK_SIZE),
 #if CONFIG_NCPUS > 6
-  (uint64_t *)(g_interrupt_stacks[6] + INTSTACK_SIZE),
+  (uint64_t *)(g_interrupt_stack[6] + INTSTACK_SIZE),
 #if CONFIG_NCPUS > 7
-  (uint64_t *)(g_interrupt_stacks[7] + INTSTACK_SIZE),
+  (uint64_t *)(g_interrupt_stack[7] + INTSTACK_SIZE),
 #if CONFIG_NCPUS > 8
 #  error This logic needs to extended for CONFIG_NCPUS > 8
 #endif /* CONFIG_NCPUS > 8 */
@@ -85,26 +85,24 @@ uint64_t *const g_cpu_int_stacktop[CONFIG_NCPUS] =
 #endif /* CONFIG_NCPUS > 1 */
 };
 
-uint32_t g_smp_busy_wait_flag;
-
 #ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 uint64_t *const g_cpu_int_fiq_stacktop[CONFIG_NCPUS] =
 {
-  (uint64_t *)(g_interrupt_fiq_stacks[0] + INTSTACK_SIZE),
+  (uint64_t *)(g_interrupt_fiq_stack[0] + INTSTACK_SIZE),
 #if CONFIG_NCPUS > 1
-  (uint64_t *)(g_interrupt_fiq_stacks[1] + INTSTACK_SIZE),
+  (uint64_t *)(g_interrupt_fiq_stack[1] + INTSTACK_SIZE),
 #if CONFIG_NCPUS > 2
-  (uint64_t *)(g_interrupt_fiq_stacks[2] + INTSTACK_SIZE),
+  (uint64_t *)(g_interrupt_fiq_stack[2] + INTSTACK_SIZE),
 #if CONFIG_NCPUS > 3
-  (uint64_t *)(g_interrupt_fiq_stacks[3] + INTSTACK_SIZE),
+  (uint64_t *)(g_interrupt_fiq_stack[3] + INTSTACK_SIZE),
 #if CONFIG_NCPUS > 4
-  (uint64_t *)(g_interrupt_fiq_stacks[4] + INTSTACK_SIZE),
+  (uint64_t *)(g_interrupt_fiq_stack[4] + INTSTACK_SIZE),
 #if CONFIG_NCPUS > 5
-  (uint64_t *)(g_interrupt_fiq_stacks[5] + INTSTACK_SIZE),
+  (uint64_t *)(g_interrupt_fiq_stack[5] + INTSTACK_SIZE),
 #if CONFIG_NCPUS > 6
-  (uint64_t *)(g_interrupt_fiq_stacks[6] + INTSTACK_SIZE),
+  (uint64_t *)(g_interrupt_fiq_stack[6] + INTSTACK_SIZE),
 #if CONFIG_NCPUS > 7
-  (uint64_t *)(g_interrupt_fiq_stacks[7] + INTSTACK_SIZE),
+  (uint64_t *)(g_interrupt_fiq_stack[7] + INTSTACK_SIZE),
 #if CONFIG_NCPUS > 8
 #  error This logic needs to extended for CONFIG_NCPUS > 8
 #endif /* CONFIG_NCPUS > 8 */
@@ -126,6 +124,7 @@ uint64_t *const g_cpu_int_fiq_stacktop[CONFIG_NCPUS] =
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_SMP
 static void arm64_smp_init_top(void)
 {
   struct tcb_s *tcb = current_task(this_cpu());
@@ -141,10 +140,15 @@ static void arm64_smp_init_top(void)
 #endif /* CONFIG_STACK_COLORATION */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
+  arm64_gic_secondary_init();
+  arm64_color_intstack();
+
   /* And finally, enable interrupts */
 
   up_irq_enable();
 #endif
+
+  arm64_timer_secondary_init();
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
 
@@ -157,6 +161,7 @@ static void arm64_smp_init_top(void)
 
   nx_idle_trampoline();
 }
+#endif
 
 static void arm64_start_cpu(int cpu_num)
 {
@@ -225,13 +230,6 @@ int up_cpu_start(int cpu)
   sched_note_cpu_start(this_task(), cpu);
 #endif
 
-#ifdef CONFIG_SMP
-  uint32_t *address = &g_smp_busy_wait_flag;
-
-  *address = 1;
-  up_flush_dcache((uintptr_t)address, (uintptr_t)address + sizeof(address));
-#endif
-
   arm64_start_cpu(cpu);
 
   return 0;
@@ -254,16 +252,21 @@ void arm64_boot_secondary_c_routine(void)
 #endif
 
   /* We need to confirm that current_task has been initialized. */
+#undef g_nx_initstate
+  while (OSINIT_OS_INITIALIZING());
 
-  while (!current_task(this_cpu()));
+#ifdef CONFIG_ARCH_PERF_EVENTS
+  up_perf_init((void *)up_perf_getfreq());
+#endif
+
+#if defined(CONFIG_BMP)
+  nx_start();
+#elif defined(CONFIG_SMP)
 
   /* Init idle task to percpu reg */
 
   up_update_task(current_task(this_cpu()));
 
-  arm64_gic_secondary_init();
-
-  arm64_timer_secondary_init();
-
   arm64_smp_init_top();
+#endif
 }

@@ -40,7 +40,7 @@ CMN_CSRCS += arm64_nputs.c arm64_createstack.c
 CMN_CSRCS += arm64_releasestack.c arm64_stackframe.c arm64_usestack.c
 CMN_CSRCS += arm64_exit.c arm64_fork.c
 CMN_CSRCS += arm64_getintstack.c arm64_registerdump.c
-CMN_CSRCS += arm64_perf.c arm64_tcbinfo.c
+CMN_CSRCS += arm64_perf.c arm64_tcbinfo.c arm64_cpuidlestack.c
 
 # Common C source files ( hardware BSP )
 CMN_CSRCS += arm64_arch_timer.c arm64_cache.c
@@ -114,8 +114,11 @@ ifeq ($(CONFIG_ARM64_PSCI),y)
 CMN_CSRCS += arm64_cpu_psci.c
 endif
 
+ifneq ($(CONFIG_UP),y)
+CMN_CSRCS += arm64_cpustart.c
+endif
+
 ifeq ($(CONFIG_SMP),y)
-CMN_CSRCS += arm64_cpuidlestack.c arm64_cpustart.c
 CMN_CSRCS += arm64_smpcall.c
 endif
 

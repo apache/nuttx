@@ -56,48 +56,19 @@
 static struct notifier_block g_fpu_panic_block;
 #endif
 
-#if CONFIG_NCPUS > 1
 INIT_STACK_ARRAY_DEFINE(g_cpu_idlestackalloc, CONFIG_NCPUS,
-                          SMP_STACK_SIZE);
-INIT_STACK_ARRAY_DEFINE(g_interrupt_stacks, CONFIG_NCPUS,
-                          INTSTACK_SIZE);
+                        CONFIG_IDLETHREAD_STACKSIZE);
+
+INIT_STACK_ARRAY_DEFINE(g_interrupt_stack, CONFIG_NCPUS,
+                        INTSTACK_SIZE);
 
 #ifdef CONFIG_ARCH_HIPRI_INTERRUPT
-INIT_STACK_ARRAY_DEFINE(g_interrupt_fiq_stacks, CONFIG_NCPUS,
-                          INTSTACK_SIZE);
+INIT_STACK_ARRAY_DEFINE(g_interrupt_fiq_stack, CONFIG_NCPUS,
+                        INTSTACK_SIZE);
 #endif
-
-#else
-/* idle thread stack for primary core */
-
-INIT_STACK_DEFINE(g_idle_stack, CONFIG_IDLETHREAD_STACKSIZE);
-INIT_STACK_DEFINE(g_interrupt_stack, INTSTACK_SIZE);
-
-#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
-INIT_STACK_DEFINE(g_interrupt_fiq_stack, INTSTACK_SIZE);
-#endif
-
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: up_get_intstackbase
- *
- * Description:
- *   Return a pointer to the "alloc" the correct interrupt stack allocation
- *   for the current CPU.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SMP
-uintptr_t up_get_intstackbase(int cpu)
-{
-  return (uintptr_t)(g_interrupt_stacks[cpu]);
-}
-#endif
 
 /****************************************************************************
  * Name: arm64_panic_disable_fpu

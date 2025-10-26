@@ -49,33 +49,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm64_color_intstack
- *
- * Description:
- *   Set the interrupt stack to a value so that later we can determine how
- *   much stack space was used by interrupt handling logic
- *
- ****************************************************************************/
-
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
-static inline void arm64_color_intstack(void)
-{
-#ifdef CONFIG_SMP
-  int cpu;
-
-  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
-    {
-      arm64_stack_color((void *)up_get_intstackbase(cpu), INTSTACK_SIZE);
-    }
-#else
-  arm64_stack_color((void *)g_interrupt_stack, INTSTACK_SIZE);
-#endif
-}
-#else
-#  define arm64_color_intstack()
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
