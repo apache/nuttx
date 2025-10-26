@@ -218,14 +218,6 @@ primary_core:
 
     bl     __reset_prep_c
 
-#ifdef CONFIG_ARCH_EARLY_PRINT
-    /* Initialize the UART for early print.
-     * Should only be called on the boot CPU
-     */
-
-    bl    arm64_earlyprintinit
-#endif
-
 #ifndef CONFIG_ARCH_SKIP_ZERO_BSS
     bl    arm64_data_initialize
 #endif

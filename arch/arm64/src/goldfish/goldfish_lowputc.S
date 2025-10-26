@@ -50,16 +50,6 @@
  * Public Functions
  ****************************************************************************/
 
-/* PL011 UART initialization
- */
-
-GTEXT(arm64_earlyprintinit)
-SECTION_FUNC(text, arm64_earlyprintinit)
-    /* it's seem we can do nothing at the qemu platform
-     * for qemu pl011, the QEMU has already initialized UART
-     */
-    ret
-
 /* PL011 UART wait UART to be ready to transmit
  * xb: register which contains the UART base address
  * c: scratch register number
