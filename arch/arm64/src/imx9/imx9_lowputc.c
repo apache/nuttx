@@ -475,19 +475,6 @@ int imx9_lpuart_configure(uint32_t base, int uartnum,
 }
 
 /****************************************************************************
- * Name: arm64_earlyprintinit
- *
- * Description:
- *   Configure LPUART1 for non-interrupt driven operation
- *
- ****************************************************************************/
-
-void arm64_earlyprintinit(char ch)
-{
-  /* Assume bootloader has already set up the LPUART1 */
-}
-
-/****************************************************************************
  * Name: arm64_lowputc
  *
  * Description:
