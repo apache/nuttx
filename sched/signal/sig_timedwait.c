@@ -140,58 +140,32 @@ static void nxsig_timeout(wdparm_t arg)
 #ifdef CONFIG_CANCELLATION_POINTS
 void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 {
-#ifdef CONFIG_SMP
-  irqstate_t flags;
+  FAR struct tcb_s *rtcb = this_task();
 
-  /* We must be in a critical section in order to call up_switch_context()
-   * below.  If we are running on a single CPU architecture, then we know
-   * interrupts a disabled an there is no need to explicitly call
-   * enter_critical_section().  However, in the SMP case,
-   * enter_critical_section() does much more than just disable interrupts on
-   * the local CPU; it also manages spinlocks to assure the stability of the
-   * TCB that we are manipulating.
-   */
-
-  flags = enter_critical_section();
-#endif
-
-  /* There may be a race condition -- make sure the task is
-   * still waiting for a signal
-   */
-
-  if (wtcb->task_state == TSTATE_WAIT_SIG)
+  if (wtcb->sigunbinfo != NULL)
     {
-      FAR struct tcb_s *rtcb = this_task();
-
-      if (wtcb->sigunbinfo != NULL)
-        {
-          wtcb->sigunbinfo->si_signo           = SIG_CANCEL_TIMEOUT;
-          wtcb->sigunbinfo->si_code            = SI_USER;
-          wtcb->sigunbinfo->si_errno           = errcode;
-          wtcb->sigunbinfo->si_value.sival_int = 0;
+      wtcb->sigunbinfo->si_signo           = SIG_CANCEL_TIMEOUT;
+      wtcb->sigunbinfo->si_code            = SI_USER;
+      wtcb->sigunbinfo->si_errno           = errcode;
+      wtcb->sigunbinfo->si_value.sival_int = 0;
 #ifdef CONFIG_SCHED_HAVE_PARENT
-          wtcb->sigunbinfo->si_pid             = 0;  /* Not applicable */
-          wtcb->sigunbinfo->si_status          = OK;
+      wtcb->sigunbinfo->si_pid             = 0;  /* Not applicable */
+      wtcb->sigunbinfo->si_status          = OK;
 #endif
-        }
-
-      /* Remove the task from waiting list */
-
-      dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
-
-      /* Add the task to ready-to-run task list, and
-       * perform the context switch if one is needed
-       */
-
-      if (nxsched_add_readytorun(wtcb))
-        {
-          up_switch_context(this_task(), rtcb);
-        }
     }
 
-#ifdef CONFIG_SMP
-  leave_critical_section(flags);
-#endif
+  /* Remove the task from waiting list */
+
+  dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
+
+  /* Add the task to ready-to-run task list, and
+    * perform the context switch if one is needed
+    */
+
+  if (nxsched_add_readytorun(wtcb))
+    {
+      up_switch_context(this_task(), rtcb);
+    }
 }
 #endif /* CONFIG_CANCELLATION_POINTS */
 
