@@ -41,6 +41,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* These are special values of si_signo that mean that either the wait was
+ * awakened with a timeout, or the wait was canceled... not the receipt of a
+ * signal.
+ */
+
+#define SIG_CANCEL_TIMEOUT 0xfe
+#define SIG_WAIT_TIMEOUT   0xff
+
 /* The following definition determines the number of signal structures to
  * allocate in a block
  */
@@ -181,9 +189,8 @@ void               nxsig_release(FAR struct task_group_s *group);
 
 /* sig_timedwait.c */
 
-#ifdef CONFIG_CANCELLATION_POINTS
-void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode);
-#endif
+void nxsig_wait_irq(FAR struct tcb_s *wtcb, uint8_t signo,
+                    uint8_t code, int errcode);
 
 /* In files of the same name */
 
