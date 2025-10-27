@@ -59,16 +59,6 @@ struct note_driver_ops_s
                          FAR struct tcb_s *tcb, int cpu);
   CODE void (*cpu_started)(FAR struct note_driver_s *drv,
                            FAR struct tcb_s *tcb);
-#  ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
-  CODE void (*cpu_pause)(FAR struct note_driver_s *drv,
-                         FAR struct tcb_s *tcb, int cpu);
-  CODE void (*cpu_paused)(FAR struct note_driver_s *drv,
-                          FAR struct tcb_s *tcb);
-  CODE void (*cpu_resume)(FAR struct note_driver_s *drv,
-                          FAR struct tcb_s *tcb, int cpu);
-  CODE void (*cpu_resumed)(FAR struct note_driver_s *drv,
-                           FAR struct tcb_s *tcb);
-#  endif
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
   CODE void (*preemption)(FAR struct note_driver_s *drv,
