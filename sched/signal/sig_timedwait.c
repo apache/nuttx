@@ -51,14 +51,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* These are special values of si_signo that mean that either the wait was
- * awakened with a timeout, or the wait was canceled... not the receipt of a
- * signal.
- */
-
-#define SIG_CANCEL_TIMEOUT 0xfe
-#define SIG_WAIT_TIMEOUT   0xff
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -93,32 +85,7 @@ static void nxsig_timeout(wdparm_t arg)
 
   if (wtcb->task_state == TSTATE_WAIT_SIG)
     {
-      FAR struct tcb_s *rtcb = this_task();
-
-      if (wtcb->sigunbinfo != NULL)
-        {
-          wtcb->sigunbinfo->si_signo           = SIG_WAIT_TIMEOUT;
-          wtcb->sigunbinfo->si_code            = SI_TIMER;
-          wtcb->sigunbinfo->si_errno           = ETIMEDOUT;
-          wtcb->sigunbinfo->si_value.sival_int = 0;
-#ifdef CONFIG_SCHED_HAVE_PARENT
-          wtcb->sigunbinfo->si_pid             = 0;  /* Not applicable */
-          wtcb->sigunbinfo->si_status          = OK;
-#endif
-        }
-
-      /* Remove the task from waiting list */
-
-      dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
-
-      /* Add the task to ready-to-run task list, and
-       * perform the context switch if one is needed
-       */
-
-      if (nxsched_add_readytorun(wtcb))
-        {
-          up_switch_context(this_task(), rtcb);
-        }
+      nxsig_wait_irq(wtcb, SIG_WAIT_TIMEOUT, SI_TIMER, ETIMEDOUT);
     }
 
   leave_critical_section(flags);
@@ -137,15 +104,15 @@ static void nxsig_timeout(wdparm_t arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CANCELLATION_POINTS
-void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode)
+void nxsig_wait_irq(FAR struct tcb_s *wtcb, uint8_t signo,
+                    uint8_t code, int errcode)
 {
   FAR struct tcb_s *rtcb = this_task();
 
   if (wtcb->sigunbinfo != NULL)
     {
-      wtcb->sigunbinfo->si_signo           = SIG_CANCEL_TIMEOUT;
-      wtcb->sigunbinfo->si_code            = SI_USER;
+      wtcb->sigunbinfo->si_signo           = signo;
+      wtcb->sigunbinfo->si_code            = code;
       wtcb->sigunbinfo->si_errno           = errcode;
       wtcb->sigunbinfo->si_value.sival_int = 0;
 #ifdef CONFIG_SCHED_HAVE_PARENT
@@ -159,15 +126,14 @@ void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode)
   dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
 
   /* Add the task to ready-to-run task list, and
-    * perform the context switch if one is needed
-    */
+   * perform the context switch if one is needed
+   */
 
   if (nxsched_add_readytorun(wtcb))
     {
       up_switch_context(this_task(), rtcb);
     }
 }
-#endif /* CONFIG_CANCELLATION_POINTS */
 
 /****************************************************************************
  * Name: nxsig_clockwait
