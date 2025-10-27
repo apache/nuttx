@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <signal.h>
+#include <sys/param.h>
 
 #include <nuttx/clock.h>
 #include <nuttx/signal.h>
@@ -92,7 +93,7 @@ unsigned int nxsig_sleep(unsigned int seconds)
 
       if (ret < 0)
         {
-          remaining = rmtp.tv_sec;
+          remaining = (unsigned int)MAX(rmtp.tv_sec, 0);
           if (remaining < seconds && rmtp.tv_nsec >= 500000000)
             {
               /* Round up */
