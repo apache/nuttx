@@ -52,42 +52,7 @@
 
 static void nxsched_timeout(wdparm_t arg)
 {
-  FAR struct tcb_s *wtcb;
-  irqstate_t flags;
-
-  /* Get waiting tcb from parameter */
-
-  wtcb = (FAR struct tcb_s *)(uintptr_t)arg;
-
-  /* We must be in a critical section in order to call up_switch_context()
-   * below.
-   */
-
-  flags = enter_critical_section();
-
-  /* There may be a race condition -- make sure the task is
-   * still waiting for a signal
-   */
-
-  if (wtcb->task_state == TSTATE_WAIT_SIG)
-    {
-      FAR struct tcb_s *rtcb = this_task();
-
-      /* Remove the task from waiting list */
-
-      dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
-
-      /* Add the task to ready-to-run task list, and
-       * perform the context switch if one is needed
-       */
-
-      if (nxsched_add_readytorun(wtcb))
-        {
-          up_switch_context(this_task(), rtcb);
-        }
-    }
-
-  leave_critical_section(flags);
+  nxsched_wakeup((FAR struct tcb_s *)(uintptr_t)arg);
 }
 
 /****************************************************************************
