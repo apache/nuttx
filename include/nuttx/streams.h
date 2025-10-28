@@ -99,6 +99,7 @@ struct lib_outstream_s
                                    * by put method, readable by user */
   lib_putc_t             putc;    /* Put one character to the outstream */
   lib_puts_t             puts;    /* Writes the string to the outstream */
+  FAR void              *none;    /* Placeholder */
   lib_flush_t            flush;   /* Flush any buffered characters in the outstream */
 };
 
