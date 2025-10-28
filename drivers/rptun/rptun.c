@@ -1329,7 +1329,7 @@ static int rptun_notifier(FAR struct notifier_block *block,
     {
       if (action == SYS_RESTART || action == SYS_POWER_OFF)
         {
-          rptun_ioctl_foreach(NULL, RPTUNIOC_STOP, (unsigned long)data);
+          rptun_ioctl_foreach(NULL, RPTUNIOC_RESET, (unsigned long)data);
         }
     }
   else if (action == PANIC_KERNEL_FINAL)
