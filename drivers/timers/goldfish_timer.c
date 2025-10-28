@@ -86,7 +86,7 @@ static inline_function uint64_t goldfish_timer_get_nsec(uintptr_t base)
 static inline_function
 void goldfish_timer_set_nsec(uintptr_t base, uint64_t expected)
 {
-  putreg32(1, base + GOLDFISH_TIMER_IRQ_ENABLED);
+  putreg32(1, base + GOLDFISH_TIMER_CLEAR_ALARM);
   putreg32(expected >> 32, base + GOLDFISH_TIMER_ALARM_HIGH);
   putreg32(expected, base + GOLDFISH_TIMER_ALARM_LOW);
 }
@@ -106,7 +106,6 @@ static int goldfish_timer_interrupt(int irq,
 
   flags = spin_lock_irqsave(&lower->lock);
 
-  putreg32(1, lower->base + GOLDFISH_TIMER_CLEAR_ALARM);
   putreg32(1, lower->base + GOLDFISH_TIMER_CLEAR_INTERRUPT);
 
   spin_unlock_irqrestore(&lower->lock, flags);
@@ -185,8 +184,7 @@ static void goldfish_timer_cancel(struct oneshot_lowerhalf_s *lower_)
 
   flags = spin_lock_irqsave(&lower->lock);
 
-  putreg32(0, lower->base + GOLDFISH_TIMER_IRQ_ENABLED);
-  putreg32(1, lower->base + GOLDFISH_TIMER_CLEAR_ALARM);
+  goldfish_timer_set_nsec(lower->base, UINT64_MAX);
 
   spin_unlock_irqrestore(&lower->lock, flags);
 }
@@ -226,9 +224,9 @@ goldfish_timer_initialize(uintptr_t base, int irq)
 
   oneshot_count_init(&lower->lh, NSEC_PER_SEC);
 
-  putreg32(1, base + GOLDFISH_TIMER_CLEAR_ALARM);
-  putreg32(1, base + GOLDFISH_TIMER_CLEAR_INTERRUPT);
-  putreg32(0, base + GOLDFISH_TIMER_IRQ_ENABLED);
+  putreg32(1, lower->base + GOLDFISH_TIMER_CLEAR_INTERRUPT);
+  goldfish_timer_set_nsec(lower->base, UINT64_MAX);
+  putreg32(1, base + GOLDFISH_TIMER_IRQ_ENABLED);
 
   irq_attach(irq, goldfish_timer_interrupt, lower);
   up_enable_irq(irq);
