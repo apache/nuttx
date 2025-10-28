@@ -1,5 +1,5 @@
 # ##############################################################################
-# arch/tricore/src/tc3xx/CMakeLists.txt
+# arch/tricore/src/tc397/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
