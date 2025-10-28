@@ -34,6 +34,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wqueue.h>
 
 #include <nuttx/net/dns.h>
@@ -73,6 +74,7 @@ struct net_rpmsg_drv_s
 {
   char                  cpuname[RPMSG_NAME_SIZE];
   netpkt_queue_t        rxqueue; /* RX packet queue */
+  spinlock_t            lock;    /* Spinlock for protecting rxqueue */
   FAR void             *priv;    /* Private data for upper layer */
   net_rpmsg_drv_cb_t    cb;      /* IFUP/DOWN Callback function */
   sem_t                 wait;    /* Wait sem, used for preventing any
@@ -264,7 +266,14 @@ net_rpmsg_drv_receive(FAR struct netdev_lowerhalf_s *dev)
 {
   FAR struct net_rpmsg_drv_s *drv =
                               container_of(dev, struct net_rpmsg_drv_s, dev);
-  return netpkt_remove_queue(&drv->rxqueue);
+  FAR netpkt_t *pkt;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&drv->lock);
+  pkt = netpkt_remove_queue(&drv->rxqueue);
+  spin_unlock_irqrestore(&drv->lock, flags);
+
+  return pkt;
 }
 
 /* RPMSG related functions */
@@ -423,6 +432,8 @@ static int net_rpmsg_drv_transfer_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct net_rpmsg_drv_s *drv = priv;
   FAR struct netdev_lowerhalf_s *dev = &drv->dev;
   FAR netpkt_t *pkt;
+  irqstate_t flags;
+  int ret;
 
   if (transfer->length > len - sizeof(*transfer))
     {
@@ -446,7 +457,10 @@ static int net_rpmsg_drv_transfer_handler(FAR struct rpmsg_endpoint *ept,
       goto free;
     }
 
-  if (netpkt_tryadd_queue(pkt, &drv->rxqueue) < 0)
+  flags = spin_lock_irqsave(&drv->lock);
+  ret = netpkt_tryadd_queue(pkt, &drv->rxqueue);
+  spin_unlock_irqrestore(&drv->lock, flags);
+  if (ret < 0)
     {
       nerr("ERROR: Failed to add pkt to queue!\n");
       goto free;
@@ -925,6 +939,7 @@ net_rpmsg_drv_alloc(FAR const char *devname, enum net_lltype_e lltype)
   drv->ept.ns_bound_cb = net_rpmsg_drv_ns_bound;
 
   nxsem_init(&drv->wait, 0, 0);
+  spin_lock_init(&drv->lock);
 
   /* Init a random MAC address, the caller can override it. */
 
