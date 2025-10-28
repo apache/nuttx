@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/imxrt/arcx-socket-grid/src/Makefile
+# boards/arm/imxrt/arcx-socket-grid/src/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
