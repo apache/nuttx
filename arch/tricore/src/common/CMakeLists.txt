@@ -53,6 +53,10 @@ if(CONFIG_BUILD_PROTECTED OR CONFIG_BUILD_KERNEL)
   if(CONFIG_BUILD_PROTECTED)
     target_sources(arch_interface PRIVATE tricore_signal_handler.c)
   endif()
+
+  if(CONFIG_ARCH_PERF_EVENTS_USER_ACCESS)
+    target_sources(arch_interface PRIVATE tricore_perf.c)
+  endif()
 endif()
 
 if(CONFIG_SCHED_BACKTRACE)
