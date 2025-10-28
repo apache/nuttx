@@ -435,8 +435,8 @@ static int codec_qbuf(FAR struct file *filep,
         }
 
       container->buf.length    = buf_size;
-      container->buf.m.userptr = (unsigned long)(type_inf->bufheap +
-                                 container->buf.length * buf->index);
+      container->buf.m.vaddr   = type_inf->bufheap +
+                                 container->buf.length * buf->index;
     }
 
   video_framebuff_queue_container(&type_inf->bufinf, container);
@@ -482,6 +482,12 @@ static int codec_dqbuf(FAR struct file *filep,
 
   memcpy(buf, &container->buf, sizeof(struct v4l2_buffer));
   video_framebuff_free_container(&type_inf->bufinf, container);
+
+  if (buf->memory == V4L2_MEMORY_MMAP)
+    {
+      buf->m.offset = buf->length * buf->index +
+          V4L2_TYPE_IS_OUTPUT(buf->type) ? 0 : CAPTURE_BUF_OFFSET;
+    }
 
   vinfo("%s dequeue done\n", V4L2_TYPE_IS_OUTPUT(buf->type) ?
                              "output" : "capture");

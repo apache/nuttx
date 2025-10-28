@@ -846,6 +846,7 @@ struct v4l2_plane
     uint32_t      mem_offset;
     unsigned long userptr;
     int           fd;
+    void          *vaddr;
   } m;
   uint32_t        data_offset;
   uint32_t        reserved[11];
@@ -876,6 +877,7 @@ struct v4l2_buffer
     unsigned long      userptr;   /* Address of buffer */
     struct v4l2_plane  *planes;
     int                fd;
+    void               *vaddr;    /* The real kernel address of image data */
   } m;
   uint32_t             length;    /* User set the buffer size */
 };
