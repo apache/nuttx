@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/mpfs/icicle/scripts/ld-envm.script
+ * boards/risc-v/mpfs/icicle/scripts/ld-envm-opensbi.script
  *
  * SPDX-License-Identifier: Apache-2.0
  *

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/hpm6000/hpm6360evk/scripts/ld.script
+ * boards/risc-v/hpm6000/hpm6360evk/scripts/flash.script
  *
  * SPDX-License-Identifier: Apache-2.0
  *
