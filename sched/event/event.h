@@ -30,9 +30,9 @@
 #include <nuttx/config.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/list.h>
-
+#include <nuttx/queue.h>
 #include <nuttx/event.h>
+#include <nuttx/sched.h>
 
 /****************************************************************************
  * Public Function Definitions

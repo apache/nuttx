@@ -29,7 +29,7 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/list.h>
+#include <nuttx/queue.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -37,7 +37,8 @@
 
 /* Initializers */
 
-#define NXEVENT_INITIALIZER(e, v) {LIST_INITIAL_VALUE((e).list), (v)}
+#define EVENT_WAITLIST_INITIALIZER {NULL, NULL}
+#define NXEVENT_INITIALIZER(e, v) {EVENT_WAITLIST_INITIALIZER, (v)}
 
 /* Event Wait Flags */
 
@@ -50,26 +51,18 @@
 #define NXEVENT_POST_ALL     (1 << 0) /* Bit 0: Post ALL */
 #define NXEVENT_POST_SET     (1 << 1) /* Bit 1: Set event after post */
 
+#define EVENT_WAITLIST(event)  (&((event)->waitlist))
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
 
 typedef struct nxevent_s      nxevent_t;
-typedef struct nxevent_wait_s nxevent_wait_t;
 typedef unsigned long         nxevent_mask_t;
 typedef unsigned long         nxevent_flags_t;
-
-struct nxevent_wait_s
-{
-  struct list_node        node;    /* Wait node of current task */
-  nxevent_mask_t          expect;  /* Expect events of wait task */
-  nxevent_flags_t         eflags;  /* Event flags of wait task */
-  FAR struct tcb_s        *wtcb;   /* The waiting task */
-};
-
 struct nxevent_s
 {
-  struct list_node         list;   /* Waiting list of nxevent_wait_t */
+  dq_queue_t             waitlist; /* Waiting list of nxevent_wait_t */
   volatile nxevent_mask_t  events; /* Pending Events */
 };
 
@@ -214,40 +207,6 @@ int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
 
 nxevent_mask_t nxevent_wait(FAR nxevent_t *event, nxevent_mask_t events,
                             nxevent_flags_t eflags);
-
-/****************************************************************************
- * Name: nxevent_tickwait_wait
- *
- * Description:
- *   Wait for all of the specified events for the specified tick time.
- *
- *   This routine waits on event object event until all of the specified
- *   events have been delivered to the event object, or the maximum wait time
- *   timeout has expired. A thread may wait on up to 32 distinctly numbered
- *   events that are expressed as bits in a single 32-bit word.
- *
- * Input Parameters:
- *   event  - Address of the event object
- *   wait   - Address of the event wait object
- *   events - Set of events to wait
- *          - Set events to 0 will indicate wait from any events
- *   eflags - Events flags
- *   delay  - Ticks to wait from the start time until the event is
- *            posted.  If ticks is zero, then this function is equivalent
- *            to nxevent_trywait().
- *
- * Returned Value:
- *   This is an internal OS interface and should not be used by applications.
- *   Return of matching events upon success.
- *   0 if matching events were not received within the specified time.
- *
- ****************************************************************************/
-
-nxevent_mask_t nxevent_tickwait_wait(FAR nxevent_t *event,
-                                     FAR nxevent_wait_t *wait,
-                                     nxevent_mask_t events,
-                                     nxevent_flags_t eflags,
-                                     uint32_t delay);
 
 /****************************************************************************
  * Name: nxevent_tickwait
