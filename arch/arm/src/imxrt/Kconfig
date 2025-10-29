@@ -2633,7 +2633,17 @@ config IMXRT_DTCM_HEAP
 	bool "Add DTCM to heap"
 	depends on IMXRT_DTCM > 0
 	---help---
-		Select to add the entire DTCM to the heap
+		Select to add the DTCM to the heap
+
+config IMXRT_DTCM_HEAP_SIZE
+	int "DTCM heap Size in K"
+	depends on IMXRT_DTCM_HEAP
+	default IMXRT_DTCM
+	---help---
+		By default, the full configured DTCM region is assigned to the heap for
+		dynamic allocation. In scenarios requiring deterministic memory regions
+		for static buffers or control structures, you can reduce the heap
+		allocation to reserve part of DTCM for manual/static use.
 
 config IMXRT_BOOTLOADER_HEAP
 	bool "Add ROM bootloader 40Kib RAM to heap"
