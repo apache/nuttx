@@ -84,6 +84,18 @@ extern "C"
 
 #define SPI_BITBANG_LOOPSPERMSEC CONFIG_BOARD_LOOPSPERMSEC
 
+/* Ensure that LOOPSPERMSEC is not the default, invalid value. If it is, let
+ * the user know that they need to change it and then calibrate it.
+ */
+
+static_assert(
+    CONFIG_BOARD_LOOPSPERMSEC >= 0,
+    "Please set a non-negative value for CONFIG_BOARD_LOOPSPERMSEC to pass "
+    "compilation. It is recommended that after your initial build, you use "
+    "the example 'calib_udelay' to get a precise value for this option. "
+    "Please search the NuttX documentation for calib_udelay for more "
+    "information.");
+
 /* SPI_PERBIT_NSEC is the minimum time to transfer one bit. This determines
  * the maximum frequency and is also used to calculate delays to achieve
  * other SPI frequencies.
