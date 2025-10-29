@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/a527-rv/rv-virt/scripts/ld.script
+ * boards/arm64/a527/avaota-a1/scripts/ld.script
  *
  * SPDX-License-Identifier: Apache-2.0
  *

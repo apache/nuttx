@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/qemu-rv/rv-virt/scripts/ld.script
+ * boards/arm64/qemu/qemu-armv8a/scripts/ld.script
  *
  * SPDX-License-Identifier: Apache-2.0
  *
