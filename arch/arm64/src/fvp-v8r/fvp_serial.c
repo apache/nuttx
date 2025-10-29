@@ -34,6 +34,9 @@
 #include <errno.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/rptun/rptun.h>
+#include <nuttx/serial/uart_rpmsg.h>
+
 #include <nuttx/serial/uart_pl011.h>
 #include "arm64_internal.h"
 
@@ -70,7 +73,40 @@ void arm64_earlyserialinit(void)
 
 void arm64_serialinit(void)
 {
-  pl011_serialinit();
+  if (this_cpu() == 0)
+    {
+      pl011_serialinit();
+    }
 }
+
+#ifdef CONFIG_RPMSG_UART
+void rpmsg_serialinit(void)
+{
+  switch (this_cpu())
+    {
+      case 0:
+        uart_rpmsg_init("core1", "CORE1", 256, false);
+        uart_rpmsg_init("core2", "CORE2", 256, false);
+        uart_rpmsg_init("core3", "CORE3", 256, false);
+        break;
+
+      case 1:
+        uart_rpmsg_init("core0", "CORE1", 256, true);
+        break;
+
+      case 2:
+        uart_rpmsg_init("core0", "CORE2", 256, true);
+        break;
+
+      case 3:
+        uart_rpmsg_init("core0", "CORE3", 256, true);
+        break;
+
+      default:
+        PANIC();
+        break;
+    }
+}
+#endif
 
 #endif /* USE_SERIALDRIVER */
