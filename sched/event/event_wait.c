@@ -60,8 +60,8 @@ static void nxevent_timeout(wdparm_t arg)
 
   /* Get waiting tcb from parameter */
 
-  wait = (FAR nxevent_wait_t *)(uintptr_t)arg;
-  wtcb = wait->wtcb;
+  wtcb = (FAR struct tcb_s *)(uintptr_t)arg;
+  wait = wtcb->waitobj;
 
   /* We must be in a critical section in order to call up_switch_context()
    * below.
@@ -81,6 +81,8 @@ static void nxevent_timeout(wdparm_t arg)
         {
           list_delete(&(wait->node));
         }
+
+      wtcb->waitobj = NULL;
 
       /* Mark the errno value for the thread. */
 
@@ -199,13 +201,14 @@ nxevent_mask_t nxevent_tickwait_wait(FAR nxevent_t *event,
       /* Initialize event wait */
 
       wtcb = this_task();
+      wtcb->waitobj = (FAR void *)wait;
       wait->expect = events;
       wait->eflags = eflags;
       wait->wtcb = wtcb;
 
       list_add_tail(&event->list, &(wait->node));
 
-      wd_start(&wtcb->waitdog, delay, nxevent_timeout, (uintptr_t)&wait);
+      wd_start(&wtcb->waitdog, delay, nxevent_timeout, (uintptr_t)wtcb);
 
       /* Remove the tcb task from the ready-to-run list. */
 

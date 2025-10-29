@@ -118,6 +118,8 @@ int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
 
               wtcb = wait->wtcb;
 
+              wtcb->waitobj = NULL;
+
               /* Remove the task from waiting list */
 
               dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
