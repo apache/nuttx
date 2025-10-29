@@ -24,7 +24,12 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/sched.h>
+#include <nuttx/config.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/clock.h>
+
+#include "sched/sched.h"
 
 #include "event.h"
 
@@ -68,13 +73,15 @@
 int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
                  nxevent_flags_t eflags)
 {
+  FAR struct tcb_s *wtcb;
+  FAR struct tcb_s *rtcb;
   nxevent_mask_t clear = 0;
   FAR nxevent_wait_t *wait;
   FAR nxevent_wait_t *tmp;
   irqstate_t flags;
   bool waitall;
   bool postall;
-  int ret = 0;
+  bool need_switch;
 
   if (event == NULL)
     {
@@ -92,6 +99,9 @@ int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
       event->events |= events ? events : ~0;
     }
 
+  need_switch = false;
+  rtcb = this_task();
+
   if (!list_is_empty(&event->list))
     {
       postall = ((eflags & NXEVENT_POST_ALL) != 0);
@@ -106,10 +116,21 @@ int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
             {
               list_delete(&wait->node);
 
-              ret = nxsem_post(&wait->sem);
-              if (ret < 0)
+              wtcb = wait->wtcb;
+
+              /* Remove the task from waiting list */
+
+              dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
+
+              wd_cancel(&wtcb->waitdog);
+
+              /* Add the task to ready-to-run task list, and
+               * perform the context switch if one is needed
+               */
+
+              if (nxsched_add_readytorun(wtcb) && !need_switch)
                 {
-                  continue;
+                  need_switch = true;
                 }
 
               if (!waitall)
@@ -135,7 +156,14 @@ int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
         }
     }
 
+  if (need_switch)
+    {
+      /* Switch context to the highest priority ready-to-run task */
+
+      up_switch_context(this_task(), rtcb);
+    }
+
   leave_critical_section(flags);
 
-  return ret;
+  return OK;
 }
