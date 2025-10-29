@@ -49,5 +49,5 @@
 void nxevent_init(FAR nxevent_t *event, nxevent_mask_t events)
 {
   event->events = events;
-  list_initialize(&event->list);
+  dq_init(EVENT_WAITLIST(event));
 }

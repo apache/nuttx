@@ -42,6 +42,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/event.h>
 #include <nuttx/queue.h>
 #include <nuttx/wdog.h>
 #include <nuttx/fs/fs.h>
@@ -652,6 +653,11 @@ struct tcb_s
   /* POSIX Semaphore and Message Queue Control Fields ***********************/
 
   FAR void *waitobj;                     /* Object thread waiting on        */
+
+#ifdef CONFIG_SCHED_EVENTS
+  nxevent_mask_t expect;                 /* expected event mask */
+  nxevent_flags_t eflags;                /* event wait flags */
+#endif
 
   /* POSIX Signal Control Fields ********************************************/
 

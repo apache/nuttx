@@ -51,27 +51,12 @@
 
 void nxevent_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 {
-  /* It is possible that an interrupt/context switch beat us to the punch
-   * and already changed the task's state.
-   */
-
-  DEBUGASSERT(wtcb != NULL);
-
   FAR struct tcb_s *rtcb = this_task();
-  FAR nxevent_wait_t *wait = wtcb->waitobj;
-
-  DEBUGASSERT(wait != NULL);
-
-  /* Remove the wait structure from the event's waiting list */
-
-  if (list_in_list(&(wait->node)))
-    {
-      list_delete(&(wait->node));
-    }
+  FAR nxevent_t *event = wtcb->waitobj;
 
   /* Remove the task from the event waiting list */
 
-  dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
+  dq_rem((FAR dq_entry_t *)wtcb, EVENT_WAITLIST(event));
 
   /* Indicate that the wait is over */
 
