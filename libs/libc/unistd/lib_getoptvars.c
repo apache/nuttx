@@ -38,7 +38,7 @@
  * access to process-specific global data is needed.
  */
 
-FAR struct getopt_s g_getopt_vars =
+struct getopt_s g_getopt_vars =
 {
   NULL,
   0,

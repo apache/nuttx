@@ -91,7 +91,7 @@ config SCHED_TICKLESS_TICK_ARGUMENT
 		Otherwise, these additional interfaces are expected:
 
 			int up_timer_tick_cancel(FAR clock_t *ticks);
-			int up_timer_tick_start(FAR clock_t ticks);
+			int up_timer_tick_start(clock_t ticks);
 
 config SCHED_TICKLESS_ALARM
 	bool "Tickless alarm"
