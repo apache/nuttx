@@ -357,61 +357,76 @@ static FAR sigpendq_t *nxsig_add_pendingsignal(FAR struct tcb_s *stcb,
  *
  ****************************************************************************/
 
-static irqstate_t nxsig_alloc_dyn_pending(irqstate_t flags)
+static int nxsig_alloc_dyn_pending(FAR irqstate_t *flags)
 {
-  if (!up_interrupt_context())
+  int ret = OK;
+  bool alloc_signal = sq_empty(&g_sigpendingsignal);
+  bool alloc_sigact = sq_empty(&g_sigpendingaction);
+
+  if (alloc_signal || alloc_sigact)
     {
-      bool alloc_signal = sq_empty(&g_sigpendingsignal);
-      bool alloc_sigact = sq_empty(&g_sigpendingaction);
+      FAR sigpendq_t *sigpend = NULL;
+      FAR sigq_t *sigq = NULL;
 
-      /* Signals are not dispatched from the idle task */
+      /* We can't do memory allocations in idle task or interrupt */
 
-      DEBUGASSERT(!sched_idletask());
-
-      if (alloc_signal || alloc_sigact)
+      if (up_interrupt_context() || sched_idletask())
         {
-          FAR sigpendq_t *sigpend = NULL;
-          FAR sigq_t *sigq = NULL;
+          return -EAGAIN;
+        }
 
-          /* Leave critical section for the duration of heap operations */
+      /* Leave critical section for the duration of heap operations */
 
-          leave_critical_section(flags);
+      leave_critical_section(*flags);
 
-          /* Allocate more pending signals if there are no more */
+      /* Allocate more pending signals if there are no more */
 
-          if (alloc_signal)
-            {
-              sigpend = kmm_malloc(sizeof(sigpendq_t));
-            }
+      if (alloc_signal)
+        {
+          sigpend = kmm_malloc(sizeof(sigpendq_t));
+        }
 
-          /* Allocate more pending signal actions if there are no more */
+      /* Allocate more pending signal actions if there are no more */
 
-          if (alloc_sigact)
-            {
-              sigq = kmm_malloc(sizeof(sigq_t));
-            }
+      if (alloc_sigact)
+        {
+          sigq = kmm_malloc(sizeof(sigq_t));
+        }
 
-          /* Restore critical section and add the allocated structures to
-           * the free pending queues
-           */
+      /* Restore critical section and add the allocated structures to
+       * the free pending queues
+       */
 
-          flags = enter_critical_section();
+      *flags = enter_critical_section();
 
+      if (alloc_signal)
+        {
           if (sigpend)
             {
               sigpend->type = SIG_ALLOC_DYN;
               sq_addfirst((sq_entry_t *)sigpend, &g_sigpendingsignal);
             }
+          else
+            {
+              ret = -EAGAIN;
+            }
+        }
 
+      if (alloc_sigact)
+        {
           if (sigq)
             {
               sigq->type = SIG_ALLOC_DYN;
               sq_addfirst((sq_entry_t *)sigq, &g_sigpendingaction);
             }
+          else
+            {
+              ret = -EAGAIN;
+            }
         }
     }
 
-  return flags;
+  return ret;
 }
 
 /****************************************************************************
@@ -485,7 +500,12 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
    * needs to be done here before using the task state or sigprocmask.
    */
 
-  flags = nxsig_alloc_dyn_pending(flags);
+  ret = nxsig_alloc_dyn_pending(&flags);
+  if (ret < 0)
+    {
+      leave_critical_section(flags);
+      return ret;
+    }
 
   masked = nxsig_ismember(&stcb->sigprocmask, info->si_signo);
 
