@@ -40,7 +40,7 @@
 #define GPIO_LCD_RST        (-1)
 #define SZPI_LCD_CS_PATH    "/dev/gpio0"
 #define SZPI_LCD_PWM_PATH   "/dev/pwm0"
-#define SZPI_LCD_PWM_FREQ   (100)
+#define SZPI_LCD_PWM_FREQ   (10000)
 #define SZPI_LCD_PWM_DUTY   (0xe666)       /* 0x1 ~ 0xffff */
 
 #define FT5X06_I2C_ADDRESS  (0x38)
