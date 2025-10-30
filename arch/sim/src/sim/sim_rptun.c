@@ -332,14 +332,6 @@ static int sim_rptun_stop(struct rptun_dev_s *dev)
 {
   struct sim_rptun_dev_s *priv = container_of(dev,
                               struct sim_rptun_dev_s, rptun);
-  struct rptun_cmd_s *cmd = RPTUN_RSC2CMD(&priv->shmem->rsc);
-
-  /* Don't send RPTUN_CMD_STOP when slave recovery */
-
-  if (priv->shmem->boots & SIM_RPTUN_STATUS_OK)
-    {
-      cmd->cmd_master = RPTUN_CMD(RPTUN_CMD_STOP, 0);
-    }
 
   if ((priv->master & SIM_RPTUN_BOOT) && priv->pid > 0)
     {
@@ -388,22 +380,6 @@ static int sim_rptun_register_callback(struct rptun_dev_s *dev,
   return 0;
 }
 
-static void sim_rptun_check_cmd(struct sim_rptun_dev_s *priv)
-{
-  struct rptun_cmd_s *rcmd = RPTUN_RSC2CMD(&priv->shmem->rsc);
-  uint32_t cmd = priv->master ? rcmd->cmd_slave : rcmd->cmd_master;
-
-  switch (RPTUN_GET_CMD(cmd))
-    {
-      case RPTUN_CMD_STOP:
-        host_abort(RPTUN_GET_CMD_VAL(cmd));
-        break;
-
-      default:
-        break;
-    }
-}
-
 static void sim_rptun_check_reset(struct sim_rptun_dev_s *priv)
 {
   if (priv->master &&
@@ -427,8 +403,6 @@ static void sim_rptun_work(void *arg)
   if (dev->shmem != NULL)
     {
       bool should_notify = false;
-
-      sim_rptun_check_cmd(dev);
 
       /* Check if master/slave need to reset */
 
