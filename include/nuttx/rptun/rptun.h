@@ -49,9 +49,8 @@
 #define RPTUN_NOTIFY_ALL      UINT32_MAX
 
 #define RPTUN_CMD_DONE        0x0u
-#define RPTUN_CMD_READY       0x1u
-#define RPTUN_CMD_RESET       0x2u
-#define RPTUN_CMD_STOP        0x3u
+#define RPTUN_CMD_RESET       0x1u
+#define RPTUN_CMD_STOP        0x2u
 #define RPTUN_CMD_ACK         0xffffu
 #define RPTUN_CMD_MASK        0xffffu
 #define RPTUN_CMD_SHIFT       16u
