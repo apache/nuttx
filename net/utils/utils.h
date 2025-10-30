@@ -32,6 +32,7 @@
 
 #include <stdlib.h>
 
+#include <nuttx/mutex.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
@@ -614,14 +615,37 @@ FAR void *cmsg_append(FAR struct msghdr *msg, int level, int type,
  *
  ****************************************************************************/
 
-void conn_lock(FAR struct socket_conn_s *sconn);
-void conn_unlock(FAR struct socket_conn_s *sconn);
+static inline_function void conn_lock(FAR struct socket_conn_s *sconn)
+{
+  nxrmutex_lock(&sconn->s_lock);
+}
 
-void conn_dev_lock(FAR struct socket_conn_s *sconn,
-                   FAR struct net_driver_s *dev);
+static inline_function void conn_unlock(FAR struct socket_conn_s *sconn)
+{
+  nxrmutex_unlock(&sconn->s_lock);
+}
 
-void conn_dev_unlock(FAR struct socket_conn_s *sconn,
-                     FAR struct net_driver_s *dev);
+static inline_function void conn_dev_lock(FAR struct socket_conn_s *sconn,
+                                          FAR struct net_driver_s *dev)
+{
+  if (dev != NULL)
+    {
+      netdev_lock(dev);
+    }
+
+  nxrmutex_lock(&sconn->s_lock);
+}
+
+static inline_function void conn_dev_unlock(FAR struct socket_conn_s *sconn,
+                                            FAR struct net_driver_s *dev)
+{
+  nxrmutex_unlock(&sconn->s_lock);
+
+  if (dev != NULL)
+    {
+      netdev_unlock(dev);
+    }
+}
 
 #undef EXTERN
 #ifdef __cplusplus
