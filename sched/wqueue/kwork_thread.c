@@ -211,8 +211,7 @@ static int work_thread(int argc, FAR char *argv[])
        * so ourselves, and (2) there will be no changes to the work queue
        */
 
-      flags = spin_lock_irqsave(&wqueue->lock);
-      sched_lock();
+       flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
 
       /* If the wqueue timer is expired and non-active, it indicates that
        * there might be expired work in the pending queue.
@@ -247,16 +246,14 @@ static int work_thread(int argc, FAR char *argv[])
 
           kworker->work = work;
 
-          spin_unlock_irqrestore(&wqueue->lock, flags);
-          sched_unlock();
+          spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
 
           /* Do the work.  Re-enable interrupts while the work is being
            * performed... we don't have any idea how long this will take!
            */
 
           CALL_WORKER(worker, arg);
-          flags = spin_lock_irqsave(&wqueue->lock);
-          sched_lock();
+          flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
 
           /* Mark the thread un-busy */
 
@@ -271,8 +268,7 @@ static int work_thread(int argc, FAR char *argv[])
             }
         }
 
-      spin_unlock_irqrestore(&wqueue->lock, flags);
-      sched_unlock();
+      spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
 
       /* Wait for the semaphore to be posted by the wqueue timer. */
 
