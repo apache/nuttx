@@ -376,6 +376,48 @@ int syslog_flush(void);
 
 #ifdef CONFIG_SYSLOG
 int nx_vsyslog(int priority, FAR const IPTR char *src, FAR va_list *ap);
+
+int early_vsyslog(FAR const IPTR char *fmt, FAR va_list *ap);
+
+/****************************************************************************
+ * Name: early_syslog
+ *
+ * Description:
+ *   Provides a minimal SYSLOG output facility that can be used during the
+ *   very early boot phase or when the system is in a down state, before the
+ *   full SYSLOG subsystem or scheduler becomes available.
+ *
+ *   This function supports basic formatted output similar to printf(), and
+ *   sends the resulting characters directly to the low-level output device
+ *   using up_putc().  It is primarily intended for debugging or diagnostic
+ *   messages in contexts where interrupts may be disabled and locking is
+ *   not yet functional.
+ *
+ *   The function automatically appends a newline character ('\n') if the
+ *   formatted message does not already end with one, to keep log output
+ *   properly aligned in serial consoles or early boot traces.
+ *
+ * Input Parameters:
+ *   fmt - A printf-style format string.
+ *   ... - Variable arguments corresponding to the format specifiers.
+ *
+ * Returned Value:
+ *   Returns the total number of characters output, including any newline
+ *   character appended automatically.
+ *
+ * Notes:
+ *   - This function performs no buffering or synchronization.
+ *     It directly outputs each character through up_putc(), which should
+ *     be safe for use before full system initialization or during panic.
+ *   - The internal output stream (early_syslograwstream_s) is simplified
+ *     and only supports character and string operations.
+ *   - Once the SYSLOG subsystem is initialized, standard syslog_xxx()
+ *     interfaces should be used instead.
+ *
+ ****************************************************************************/
+
+void early_syslog(FAR const char *fmt, ...);
+
 #endif
 
 #undef EXTERN
