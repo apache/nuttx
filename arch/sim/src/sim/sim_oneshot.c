@@ -72,7 +72,6 @@ static struct list_node g_oneshot_list = LIST_INITIAL_VALUE(g_oneshot_list);
  * Private Functions
  ****************************************************************************/
 
-#ifdef CONFIG_SIM_WALLTIME_SIGNAL
 /****************************************************************************
  * Name: sim_timer_update_internal
  *
@@ -105,10 +104,14 @@ sim_timer_update_internal(struct sim_oneshot_lowerhalf_s *priv)
 
   /* Set the earliest expired timer */
 
+#ifdef CONFIG_SIM_WALLTIME_SIGNAL
   if (is_head)
     {
       host_settimer(priv->expire_time);
     }
+#else
+  UNUSED(is_head);
+#endif /* CONFIG_SIM_WALLTIME_SIGNAL */
 
   leave_critical_section(flags);
 }
@@ -152,9 +155,6 @@ static int sim_timer_handler(int irq, void *context, void *arg)
 
   return OK;
 }
-#else
-#  define sim_timer_update_internal(priv)
-#endif /* CONFIG_SIM_WALLTIME_SIGNAL */
 
 static inline_function
 void sim_oneshot_set_timer(struct sim_oneshot_lowerhalf_s *priv,
@@ -314,6 +314,6 @@ void sim_timer_update(void)
   host_sleepuntil(until);
 
 #ifdef CONFIG_SIM_WALLTIME_SLEEP
-  sim_timer_update_internal();
+  sim_timer_handler(0, NULL, NULL);
 #endif
 }
