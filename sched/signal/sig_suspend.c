@@ -93,7 +93,6 @@ int sigsuspend(FAR const sigset_t *set)
    * can only be eliminated by disabling interrupts!
    */
 
-  sched_lock();  /* Not necessary */
   flags = enter_critical_section();
 
   /* Save a copy of the old sigprocmask and install
@@ -152,7 +151,6 @@ int sigsuspend(FAR const sigset_t *set)
       nxsig_unmask_pendingsignal();
     }
 
-  sched_unlock();
   leave_cancellation_point();
   set_errno(EINTR);
   return ERROR;
