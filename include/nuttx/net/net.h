@@ -100,6 +100,11 @@
 
 #define netdev_lock(dev)    nxrmutex_lock(&(dev)->d_lock)
 #define netdev_unlock(dev)  nxrmutex_unlock(&(dev)->d_lock)
+#define netdev_trylock(dev) nxrmutex_trylock(&(dev)->d_lock)
+#define netdev_breaklock(dev, pcount) \
+                            nxrmutex_breaklock(&(dev)->d_lock, pcount)
+#define netdev_restorelock(dev, count) \
+                            nxrmutex_restorelock(&(dev)->d_lock, count)
 
 /****************************************************************************
  * Public Types
