@@ -3508,17 +3508,32 @@ static int mpfs_training_verify(void)
           t_status |= 0x01;
         }
 
-      /* Check that DQ/DQS calculated window is above 5 taps
-       * and centered with margin
-       */
-
       off_taps = getreg32(MPFS_CFG_DDR_SGMII_PHY_DQDQS_STATUS1);
       width_taps = getreg32(MPFS_CFG_DDR_SGMII_PHY_DQDQS_STATUS2);
 
-      if (width_taps < DQ_DQS_NUM_TAPS ||
-          width_taps + off_taps <= 16 + DQ_DQS_NUM_TAPS / 2)
+      /* Check that DQ/DQS calculated window is above 5 taps */
+
+      if (width_taps < DQ_DQS_NUM_TAPS) /* eye is long enough */
         {
           t_status |= 0x01;
+        }
+
+      /* Check that DQ/DQS calculated window is centered; starts
+       * at > 2 taps left and ends at > 2 taps right from
+       * the center
+       */
+
+      if (width_taps + off_taps <= 16 + DQ_DQS_NUM_TAPS / 2 ||
+          off_taps >= 16 - DQ_DQS_NUM_TAPS / 2)
+        {
+          t_status |= 0x01;
+        }
+
+      /* Check that the calculated window ends within the 32-taps */
+
+      if (off_taps + width_taps > 32)
+        {
+           t_status |= 0x01;
         }
 
       /* Extra checks */
