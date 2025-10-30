@@ -435,6 +435,8 @@ class TaskState(Enum):
     Inactive = auto()
     Waiting_Semaphore = auto()
     Waiting_Signal = auto()
+    if utils.get_symbol_value("CONFIG_SCHED_EVENTS"):
+        Waiting_Event = auto()
     if not utils.get_symbol_value(
         "CONFIG_DISABLE_MQUEUE"
     ) or not utils.get_symbol_value("CONFIG_DISABLE_MQUEUE_SYSV"):
