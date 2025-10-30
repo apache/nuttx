@@ -1255,6 +1255,10 @@ static FAR netpkt_t *ctucanfd_sock_recv(FAR struct netdev_lowerhalf_s *dev)
   regval = ctucanfd_getreg(priv, CTUCANFD_RXSETSTAT);
   if ((regval & CTUCANFD_RXSTAT_RXE) != 0)
     {
+      /* Clear RX interrupt before re-enabling interrupts */
+
+      ctucanfd_putreg(priv, CTUCANFD_INTSTAT, CTUCANFD_SOCK_RXINT);
+
       /* Re-enable RX interrupts if no more messages to read */
 
       ctucanfd_rxint(priv, true);
