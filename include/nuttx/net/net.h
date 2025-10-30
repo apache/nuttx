@@ -96,6 +96,11 @@
 #define _PS_INITD(psock)    (_SS_INITD((psock)->s_flags))
 #define _PS_VALID(psock)    (_PS_ALLOCD(psock) && _PS_INITD(psock))
 
+/* Network device locking macros */
+
+#define netdev_lock(dev)    nxrmutex_lock(&(dev)->d_lock)
+#define netdev_unlock(dev)  nxrmutex_unlock(&(dev)->d_lock)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -1500,26 +1505,6 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype);
  ****************************************************************************/
 
 int netdev_unregister(FAR struct net_driver_s *dev);
-
-/****************************************************************************
- * Name: netdev_lock
- *
- * Description:
- *   Lock the network device.
- *
- ****************************************************************************/
-
-void netdev_lock(FAR struct net_driver_s *dev);
-
-/****************************************************************************
- * Name: netdev_unlock
- *
- * Description:
- *   Unlock the network device.
- *
- ****************************************************************************/
-
-void netdev_unlock(FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Name: netdev_findbyname
