@@ -360,8 +360,7 @@ void work_notifier_signal(enum work_evtype_e evtype,
    * the notifications have been sent.
    */
 
-  flags = spin_lock_irqsave(&g_notifier_lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&g_notifier_lock);
 
   /* Process the notification at the head of the pending list until the
    * pending list is empty
@@ -404,8 +403,7 @@ void work_notifier_signal(enum work_evtype_e evtype,
         }
     }
 
-  spin_unlock_irqrestore(&g_notifier_lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&g_notifier_lock, flags);
 }
 
 #endif /* CONFIG_WQUEUE_NOTIFIER */
