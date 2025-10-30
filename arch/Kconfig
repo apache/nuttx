@@ -206,6 +206,7 @@ config ARCH_TRICORE
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_TCBINFO
 	select ARCH_HAVE_REGCPY
+	select LIBC_ATOMIC_ARCH if !TRICORE_TOOLCHAIN_TASKING
 	---help---
 		Infineon 32-bit AURIX TriCore architectures
 
