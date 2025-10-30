@@ -193,6 +193,35 @@ static int _inode_linktarget(FAR struct inode *inode,
 #endif
 
 /****************************************************************************
+ * Name: _compute_path_depth
+ ****************************************************************************/
+
+static int _compute_path_depth(FAR const char *path)
+{
+  FAR const char *name = path;
+  int depth = 0;
+
+  while (*name != '\0')
+    {
+      if (strncmp(name, "../", 3) == 0)
+        {
+          if (--depth < 0)
+            {
+              break;
+            }
+        }
+      else
+        {
+          depth++;
+        }
+
+      name = inode_nextname(name);
+    }
+
+  return depth;
+}
+
+/****************************************************************************
  * Name: _inode_search
  *
  * Description:
@@ -280,7 +309,8 @@ static int _inode_search(FAR struct inode_search_s *desc)
            */
 
           name = inode_nextname(name);
-          if (*name == '\0' || INODE_IS_MOUNTPT(inode))
+          if (*name == '\0' ||
+              (INODE_IS_MOUNTPT(inode) && _compute_path_depth(name) > 0))
             {
               /* Either (1) we are at the end of the path, so this must be
                * the node we are looking for or else (2) this node is a
@@ -291,6 +321,22 @@ static int _inode_search(FAR struct inode_search_s *desc)
               relpath = name;
               ret = OK;
               break;
+            }
+          else if (strncmp(name, "../", 3) == 0)
+            {
+              above = inode;
+              left  = NULL;
+              inode = inode->i_child;
+
+              while (strncmp(name, "../", 3) == 0)
+                {
+                  name = inode_nextname(name);
+                  if (above != g_root_inode)
+                    {
+                      above = above->i_parent;
+                      inode = above->i_child;
+                    }
+                }
             }
           else
             {
