@@ -185,7 +185,7 @@ static const struct virtio_memory_ops g_rptun_mmops =
 };
 
 static struct metal_list g_rptun_priv = METAL_INIT_LIST(g_rptun_priv);
-static metal_mutex_t g_rptun_lock = METAL_MUTEX_INIT(g_rptun_lock);
+static rmutex_t g_rptun_lock = NXRMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
@@ -1183,7 +1183,7 @@ static int rptun_ioctl_foreach(FAR const char *cpuname, int cmd,
 
   if (!up_interrupt_context())
     {
-      metal_mutex_acquire(&g_rptun_lock);
+      nxrmutex_lock(&g_rptun_lock);
     }
 
   metal_list_for_each(&g_rptun_priv, node)
@@ -1204,7 +1204,7 @@ static int rptun_ioctl_foreach(FAR const char *cpuname, int cmd,
 
   if (!up_interrupt_context())
     {
-      metal_mutex_release(&g_rptun_lock);
+      nxrmutex_unlock(&g_rptun_lock);
     }
 
   return ret;
@@ -1392,9 +1392,9 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
               priv->nbpanic.notifier_call = rptun_panic_notifier;
               panic_notifier_chain_register(&priv->nbpanic);
 
-              metal_mutex_acquire(&g_rptun_lock);
+              nxrmutex_lock(&g_rptun_lock);
               metal_list_add_tail(&g_rptun_priv, &priv->node);
-              metal_mutex_release(&g_rptun_lock);
+              nxrmutex_unlock(&g_rptun_lock);
             }
         }
       else
