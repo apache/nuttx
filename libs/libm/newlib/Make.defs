@@ -88,12 +88,11 @@ VPATH += :newlib/newlib/newlib/libm/complex
 DEPPATH += --dep-path newlib/newlib/newlib/libm/common
 DEPPATH += --dep-path newlib/newlib/newlib/libm/complex
 
-ifeq ($(CONFIG_ARCH_X86_64),y)
 CSRCS += $(wildcard newlib/newlib/newlib/libm/fenv/*.c)
 VPATH += :newlib/newlib/newlib/libm/fenv
 DEPPATH += --dep-path newlib/newlib/newlib/libm/fenv
 
-
+ifneq ($(CONFIG_ARCH_X86_64)$(CONFIG_ARCH_X86),)
 CFLAGS += ${INCDIR_PREFIX}newlib/newlib/newlib/libc/machine/shared_x86/sys
 endif
 
