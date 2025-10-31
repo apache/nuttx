@@ -67,6 +67,26 @@ The above are all standard interfaces as defined at
 Those interfaces are available for use by application software.
 The remaining interfaces discussed in this section are non-standard, OS-internal interfaces.
 
+Early Syslog Interfaces
+-----------------------
+
+Provides a minimal SYSLOG output facility that can be used during the
+very early boot phase or when the system is in a down state, before the
+full SYSLOG subsystem or scheduler becomes available.
+
+.. c::function:: void early_syslog(FAR const char *fmt, ...);
+
+  See ``include/nuttx/syslog/syslog.h``.
+  This function provides basic formatted output similar to printf(),
+  and writes the resulting characters directly to the low-level output
+  device via up_putc(). It is primarily intended for debugging or
+  diagnostic messages in early system contexts, where interrupts may
+  be disabled and locking mechanisms are not yet available.
+
+  The function automatically appends a newline character ('\n') if
+  the formatted message does not already end with one, ensuring proper
+  alignment of log output in serial consoles or early boot traces.
+
 Debug Interfaces
 ----------------
 
