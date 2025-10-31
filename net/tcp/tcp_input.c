@@ -726,7 +726,8 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
 #ifdef CONFIG_NET_TCP_CHECKSUMS
   /* Start of TCP input header processing code. */
 
-  if (tcp_chksum(dev) != 0xffff)
+  if (((dev->d_features & NETDEV_RX_CSUM) == 0)
+      && (tcp_chksum(dev) != 0xffff))
     {
       /* Compute and check the TCP checksum. */
 
