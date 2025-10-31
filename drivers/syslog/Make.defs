@@ -23,7 +23,7 @@
 ############################################################################
 # Include SYSLOG Infrastructure
 
-if(CONFIG_ARCH_LOWPUTC)
+ifeq ($(CONFIG_ARCH_LOWPUTC),y)
   CSRCS += syslog_early.c
 endif
 
