@@ -872,7 +872,7 @@ static int ftl_unlink(FAR struct inode *inode)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ftl_initialize_by_path
+ * Name: ftl_initialize
  *
  * Description:
  *   Initialize to provide a block driver wrapper around an MTD interface
@@ -883,8 +883,8 @@ static int ftl_unlink(FAR struct inode *inode)
  *
  ****************************************************************************/
 
-int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd,
-                           int oflags)
+int ftl_initialize(FAR const char *path, FAR struct mtd_dev_s *mtd,
+                   int oflags)
 {
   struct ftl_struct_s *dev;
   int ret = -ENOMEM;
@@ -979,36 +979,4 @@ out:
     }
 
   return ret;
-}
-
-/****************************************************************************
- * Name: ftl_initialize
- *
- * Description:
- *   Initialize to provide a block driver wrapper around an MTD interface
- *
- * Input Parameters:
- *   minor - The minor device number.  The MTD block device will be
- *           registered as as /dev/mtdblockN where N is the minor number.
- *   mtd   - The MTD device that supports the FLASH interface.
- *
- ****************************************************************************/
-
-int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd)
-{
-  char path[DEV_NAME_MAX];
-
-#ifdef CONFIG_DEBUG_FEATURES
-  /* Sanity check */
-
-  if (minor < 0 || minor > 255)
-    {
-      return -EINVAL;
-    }
-#endif
-
-  /* Do the real work by ftl_initialize_by_path */
-
-  snprintf(path, DEV_NAME_MAX, "/dev/mtdblock%d", minor);
-  return ftl_initialize_by_path(path, mtd, O_RDWR);
 }
