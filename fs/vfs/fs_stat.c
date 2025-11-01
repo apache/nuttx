@@ -35,6 +35,7 @@
 
 #include "inode/inode.h"
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/eeprom/eeprom.h>
 #include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
@@ -439,6 +440,27 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
 #endif
             {
               buf->st_mode |= S_IFCHR;
+
+              /* If it is an EEPROM driver, populate the st_size as well (to
+               * allow exporting it as filemtd or loop device)
+               */
+
+              if (inode->u.i_ops->ioctl != NULL)
+                {
+                  struct eeprom_geometry_s geo;
+
+                  /* The file ioctl takes a file pointer as argument, create
+                   * a dummy one
+                   */
+
+                  struct file filep;
+                  filep.f_inode = inode;
+                  if (inode->u.i_ops->ioctl(&filep, EEPIOC_GEOMETRY,
+                      (unsigned long)((uintptr_t)&geo)) >= 0)
+                    {
+                      buf->st_size = geo.npages * geo.pagesize;
+                    }
+                }
             }
         }
     }
