@@ -20,7 +20,9 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_ALLOW_DOWNLOADS),y)
 STORAGETMP = $(if $(wildcard $(NXTMPDIR)/.*),y,)
+endif
 
 # The start-up, "head", file. May be either a .S or a .c file.
 
@@ -196,6 +198,7 @@ endif
 
 # Fetch source files and add them to build
 
+ifeq ($(CONFIG_ALLOW_DOWNLOADS),y)
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
 	ESP_HAL_3RDPARTY_VERSION = 4eed03a15b2678a81dfd1ed0f3bde042b1fdd4c4
@@ -236,6 +239,7 @@ ifeq ($(CONFIG_ESP_WIRELESS),y)
 	$(Q) echo "Applying patches..."
 	$(Q) cd chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls && git apply ../../../nuttx/patches/components/mbedtls/mbedtls/*.patch
 endif
+endif
 
 include common$(DELIM)espressif$(DELIM)Bootloader.mk
 
@@ -261,7 +265,9 @@ distclean::
 	$(call DELFILE,../include/chip/gpio_sig_map.h)
 	$(call DELFILE,../include/chip/irq.h)
 	$(call DELFILE,../../../vefuse.bin)
+ifeq ($(CONFIG_ALLOW_DOWNLOADS),y)
 	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
+endif
 ifeq ($(CONFIG_ESPRESSIF_USE_LP_CORE),y)
 	$(call DELDIR,chip/ulp)
 endif

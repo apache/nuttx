@@ -90,6 +90,7 @@ config ARCH_CHIP_ESP32C3
 	select ARCH_HAVE_PERF_EVENTS
 	select ARCH_HAVE_DEBUG
 	select ARCH_HAVE_RAMFUNCS
+	select ALLOW_DOWNLOADS
 	---help---
 		Espressif ESP32-C3 (RV32IMC).
 
@@ -121,6 +122,7 @@ config ARCH_CHIP_ESP32C3_GENERIC
 	select ARCH_CHIP_ESPRESSIF
 	select ARCH_HAVE_DEBUG
 	select ARCH_HAVE_RAMFUNCS
+	select ALLOW_DOWNLOADS
 	---help---
 		ESP32-C3 chip with a single RISC-V IMC core, no embedded Flash memory
 
@@ -152,6 +154,7 @@ config ARCH_CHIP_ESP32C6
 	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 	select ARCH_CHIP_ESPRESSIF
 	select ARCH_HAVE_RAMFUNCS
+	select ALLOW_DOWNLOADS
 	---help---
 		Espressif ESP32-C6 (RV32IMAC).
 
@@ -182,6 +185,7 @@ config ARCH_CHIP_ESP32H2
 	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 	select ARCH_CHIP_ESPRESSIF
 	select ARCH_HAVE_RAMFUNCS
+	select ALLOW_DOWNLOADS
 	---help---
 		Espressif ESP32-H2 (RV32IMC).
 

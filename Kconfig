@@ -264,6 +264,13 @@ config APPS_DIR
 		example, to include makefile fragments (e.g., .config or Make.defs)
 		or to set up include file paths.
 
+config ALLOW_DOWNLOADS
+	bool "Allow the NuttX build system to automatically download external packages from the Internet"
+	---help---
+		This will allow to automatically download external packages from the Internet.
+		If not set, the developer will need to provide external packages manually. If
+		a necessary package cannot be found, an error will occur and the build will be aborted.
+
 config BASE_DEFCONFIG
 	string "Base Configuration"
 	default ""
