@@ -805,6 +805,8 @@ may be mounted under /etc in the NuttX pseudo file system.
 TIP: Edit the resulting header file and mark the generated data values
 as 'const' so that they will be stored in FLASH.
 
+.. _mkdeps:
+
 mkdeps.c, cnvwindeps.c, mkwindeps.sh, and mknulldeps.sh
 -------------------------------------------------------
 
