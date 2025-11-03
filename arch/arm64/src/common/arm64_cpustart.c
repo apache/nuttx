@@ -56,65 +56,65 @@
  * Public data
  ****************************************************************************/
 
-uint64_t *const g_cpu_int_stacktop[CONFIG_SMP_NCPUS] =
+uint64_t *const g_cpu_int_stacktop[CONFIG_NCPUS] =
 {
   (uint64_t *)(g_interrupt_stacks[0] + INTSTACK_SIZE),
-#if CONFIG_SMP_NCPUS > 1
+#if CONFIG_NCPUS > 1
   (uint64_t *)(g_interrupt_stacks[1] + INTSTACK_SIZE),
-#if CONFIG_SMP_NCPUS > 2
+#if CONFIG_NCPUS > 2
   (uint64_t *)(g_interrupt_stacks[2] + INTSTACK_SIZE),
-#if CONFIG_SMP_NCPUS > 3
+#if CONFIG_NCPUS > 3
   (uint64_t *)(g_interrupt_stacks[3] + INTSTACK_SIZE),
-#if CONFIG_SMP_NCPUS > 4
+#if CONFIG_NCPUS > 4
   (uint64_t *)(g_interrupt_stacks[4] + INTSTACK_SIZE),
-#if CONFIG_SMP_NCPUS > 5
+#if CONFIG_NCPUS > 5
   (uint64_t *)(g_interrupt_stacks[5] + INTSTACK_SIZE),
-#if CONFIG_SMP_NCPUS > 6
+#if CONFIG_NCPUS > 6
   (uint64_t *)(g_interrupt_stacks[6] + INTSTACK_SIZE),
-#if CONFIG_SMP_NCPUS > 7
+#if CONFIG_NCPUS > 7
   (uint64_t *)(g_interrupt_stacks[7] + INTSTACK_SIZE),
-#if CONFIG_SMP_NCPUS > 8
-#  error This logic needs to extended for CONFIG_SMP_NCPUS > 8
-#endif /* CONFIG_SMP_NCPUS > 8 */
-#endif /* CONFIG_SMP_NCPUS > 7 */
-#endif /* CONFIG_SMP_NCPUS > 6 */
-#endif /* CONFIG_SMP_NCPUS > 5 */
-#endif /* CONFIG_SMP_NCPUS > 4 */
-#endif /* CONFIG_SMP_NCPUS > 3 */
-#endif /* CONFIG_SMP_NCPUS > 2 */
-#endif /* CONFIG_SMP_NCPUS > 1 */
+#if CONFIG_NCPUS > 8
+#  error This logic needs to extended for CONFIG_NCPUS > 8
+#endif /* CONFIG_NCPUS > 8 */
+#endif /* CONFIG_NCPUS > 7 */
+#endif /* CONFIG_NCPUS > 6 */
+#endif /* CONFIG_NCPUS > 5 */
+#endif /* CONFIG_NCPUS > 4 */
+#endif /* CONFIG_NCPUS > 3 */
+#endif /* CONFIG_NCPUS > 2 */
+#endif /* CONFIG_NCPUS > 1 */
 };
 
 uint32_t g_smp_busy_wait_flag;
 
 #ifdef CONFIG_ARCH_HIPRI_INTERRUPT
-uint64_t *const g_cpu_int_fiq_stacktop[CONFIG_SMP_NCPUS] =
+uint64_t *const g_cpu_int_fiq_stacktop[CONFIG_NCPUS] =
 {
   (uint64_t *)(g_interrupt_fiq_stacks[0] + INTSTACK_SIZE),
-#if CONFIG_SMP_NCPUS > 1
+#if CONFIG_NCPUS > 1
   (uint64_t *)(g_interrupt_fiq_stacks[1] + INTSTACK_SIZE),
-#if CONFIG_SMP_NCPUS > 2
+#if CONFIG_NCPUS > 2
   (uint64_t *)(g_interrupt_fiq_stacks[2] + INTSTACK_SIZE),
-#if CONFIG_SMP_NCPUS > 3
+#if CONFIG_NCPUS > 3
   (uint64_t *)(g_interrupt_fiq_stacks[3] + INTSTACK_SIZE),
-#if CONFIG_SMP_NCPUS > 4
+#if CONFIG_NCPUS > 4
   (uint64_t *)(g_interrupt_fiq_stacks[4] + INTSTACK_SIZE),
-#if CONFIG_SMP_NCPUS > 5
+#if CONFIG_NCPUS > 5
   (uint64_t *)(g_interrupt_fiq_stacks[5] + INTSTACK_SIZE),
-#if CONFIG_SMP_NCPUS > 6
+#if CONFIG_NCPUS > 6
   (uint64_t *)(g_interrupt_fiq_stacks[6] + INTSTACK_SIZE),
-#if CONFIG_SMP_NCPUS > 7
+#if CONFIG_NCPUS > 7
   (uint64_t *)(g_interrupt_fiq_stacks[7] + INTSTACK_SIZE),
-#if CONFIG_SMP_NCPUS > 8
-#  error This logic needs to extended for CONFIG_SMP_NCPUS > 8
-#endif /* CONFIG_SMP_NCPUS > 8 */
-#endif /* CONFIG_SMP_NCPUS > 7 */
-#endif /* CONFIG_SMP_NCPUS > 6 */
-#endif /* CONFIG_SMP_NCPUS > 5 */
-#endif /* CONFIG_SMP_NCPUS > 4 */
-#endif /* CONFIG_SMP_NCPUS > 3 */
-#endif /* CONFIG_SMP_NCPUS > 2 */
-#endif /* CONFIG_SMP_NCPUS > 1 */
+#if CONFIG_NCPUS > 8
+#  error This logic needs to extended for CONFIG_NCPUS > 8
+#endif /* CONFIG_NCPUS > 8 */
+#endif /* CONFIG_NCPUS > 7 */
+#endif /* CONFIG_NCPUS > 6 */
+#endif /* CONFIG_NCPUS > 5 */
+#endif /* CONFIG_NCPUS > 4 */
+#endif /* CONFIG_NCPUS > 3 */
+#endif /* CONFIG_NCPUS > 2 */
+#endif /* CONFIG_NCPUS > 1 */
 };
 #endif
 
@@ -216,7 +216,7 @@ static void arm64_start_cpu(int cpu_num)
 
 int up_cpu_start(int cpu)
 {
-  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
+  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_NCPUS && cpu != this_cpu());
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
 
