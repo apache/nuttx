@@ -90,10 +90,10 @@
 
 int up_cpu_idlestack(int cpu, struct tcb_s *tcb, size_t stack_size)
 {
-#if CONFIG_SMP_NCPUS > 1
+#ifndef CONFIG_UP
   uintptr_t stack_alloc;
 
-  DEBUGASSERT(cpu > 0 && cpu < CONFIG_SMP_NCPUS && tcb != NULL &&
+  DEBUGASSERT(cpu < CONFIG_NCPUS && tcb != NULL &&
               stack_size <= SMP_STACK_SIZE);
 
   /* Get the top of the stack */

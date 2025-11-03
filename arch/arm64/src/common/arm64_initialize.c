@@ -56,14 +56,14 @@
 static struct notifier_block g_fpu_panic_block;
 #endif
 
-#ifdef CONFIG_SMP
-INIT_STACK_ARRAY_DEFINE(g_cpu_idlestackalloc, CONFIG_SMP_NCPUS,
+#if CONFIG_NCPUS > 1
+INIT_STACK_ARRAY_DEFINE(g_cpu_idlestackalloc, CONFIG_NCPUS,
                           SMP_STACK_SIZE);
-INIT_STACK_ARRAY_DEFINE(g_interrupt_stacks, CONFIG_SMP_NCPUS,
+INIT_STACK_ARRAY_DEFINE(g_interrupt_stacks, CONFIG_NCPUS,
                           INTSTACK_SIZE);
 
 #ifdef CONFIG_ARCH_HIPRI_INTERRUPT
-INIT_STACK_ARRAY_DEFINE(g_interrupt_fiq_stacks, CONFIG_SMP_NCPUS,
+INIT_STACK_ARRAY_DEFINE(g_interrupt_fiq_stacks, CONFIG_NCPUS,
                           INTSTACK_SIZE);
 #endif
 
