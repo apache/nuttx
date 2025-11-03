@@ -1021,6 +1021,7 @@ static int hostfs_rewinddir(FAR struct inode *mountpt,
 static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
                        FAR void **handle)
 {
+  size_t data_size = strlen(data) + 1;
   FAR struct hostfs_mountpt_s *fs;
   FAR char *options;
   FAR char *saveptr;
@@ -1053,13 +1054,14 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
    *  "fs=whatever", remote dir
    */
 
-  options = fs_heap_strdup(data);
+  options = lib_get_tempbuffer(data_size);
   if (!options)
     {
       fs_heap_free(fs);
       return -ENOMEM;
     }
 
+  memcpy(options, data, data_size);
   ptr = strtok_r(options, ",", &saveptr);
   while (ptr != NULL)
     {
@@ -1071,7 +1073,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       ptr = strtok_r(NULL, ",", &saveptr);
     }
 
-  fs_heap_free(options);
+  lib_put_tempbuffer(options);
 
   /* Take the lock for the mount */
 
