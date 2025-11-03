@@ -845,3 +845,41 @@ int up_set_irq_type(int irq, int mode)
 
   return 0;
 }
+
+/****************************************************************************
+ * Name: up_affinity_irq
+ *
+ * Description:
+ *   Set an IRQ affinity by software.
+ *
+ ****************************************************************************/
+
+void up_affinity_irq(int irq, cpu_set_t cpuset)
+{
+  irqstate_t flags = spin_lock_irqsave(&g_irq_spinlock);
+  uint32_t data;
+  int cpu;
+
+  if (irq >= IRQ_MSI_START && irq <= g_msi_now)
+    {
+      /* Affinity for MSI is not supported now.
+       * For x86 this must be done on PCI level as MSI/MSI-X interrupts
+       * bypass IOAPIC.
+       */
+
+      spin_unlock_irqrestore(&g_irq_spinlock, flags);
+      return;
+    }
+
+  for (cpu = 0; cpu < CONFIG_NCPUS; cpu++)
+    {
+      if (CPU_ISSET(cpu, &cpuset))
+        {
+          data = x86_64_cpu_to_loapic(cpu) << 24;
+          up_ioapic_write(IOAPIC_REG_TABLE + (irq - IRQ0) * 2 + 1, data);
+          break;
+        }
+    }
+
+  spin_unlock_irqrestore(&g_irq_spinlock, flags);
+}
