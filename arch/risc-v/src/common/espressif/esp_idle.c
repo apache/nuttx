@@ -55,6 +55,12 @@
 #  ifndef CONFIG_PM_ALARM_NSEC
 #    define CONFIG_PM_ALARM_NSEC 0
 #  endif
+#  ifndef CONFIG_PM_SLEEP_WAKEUP_SEC
+#    define CONFIG_PM_SLEEP_WAKEUP_SEC 20
+#  endif
+#  ifndef CONFIG_PM_SLEEP_WAKEUP_NSEC
+#    define CONFIG_PM_SLEEP_WAKEUP_NSEC 0
+#  endif
 #endif
 
 /****************************************************************************
@@ -149,10 +155,13 @@ static void up_idlepm(void)
           break;
 
         case PM_SLEEP:
-
+          {
             /* Enter Deep-sleep mode */
 
-            break;
+            esp_pmsleep(CONFIG_PM_SLEEP_WAKEUP_SEC * 1000000 +
+                        CONFIG_PM_SLEEP_WAKEUP_NSEC / 1000);
+          }
+          break;
 
         default:
           break;

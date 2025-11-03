@@ -556,20 +556,59 @@ SECTIONS
   .rtc.text :
   {
     . = ALIGN(4);
+    _rtc_fast_start = ABSOLUTE(.);
+    _rtc_text_start = ABSOLUTE(.);
     *(.rtc.literal .rtc.text)
     *(.rtc.entry.text)
     /* 16B padding for possible CPU prefetch and 4B alignment for PMS split lines */
     . += 16;
     . = ALIGN(4);
+    _rtc_text_end = ABSOLUTE(.);
+  } > lp_ram_seg AT > ROM
 
+  /* RTC fast memory section */
+
+  .rtc.force_fast :
+  {
+    . = ALIGN(4);
+    _rtc_force_fast_start = ABSOLUTE(.);
+
+    *(.rtc.force_fast .rtc.force_fast.*)
+    . = ALIGN(4);
+    _rtc_force_fast_end = ABSOLUTE(.);
   } > lp_ram_seg AT > ROM
 
   /* RTC BSS section. */
 
   .rtc.bss (NOLOAD) :
   {
+    _rtc_bss_start = ABSOLUTE(.);
     *(.rtc.bss)
+    _rtc_bss_end = ABSOLUTE(.);
   } > lp_ram_seg
+
+
+  /* RTC NOINIT section. */
+
+  .rtc_noinit (NOLOAD) :
+  {
+    . = ALIGN(4);
+    _rtc_noinit_start = ABSOLUTE(.);
+    *(.rtc_noinit .rtc_noinit.*)
+    . = ALIGN(4) ;
+    _rtc_noinit_end = ABSOLUTE(.);
+  } > lp_ram_seg
+
+  /* RTC slow memory section */
+
+  .rtc.force_slow :
+  {
+    . = ALIGN(4);
+    _rtc_force_slow_start = ABSOLUTE(.);
+    *(.rtc.force_slow .rtc.force_slow.*)
+    . = ALIGN(4);
+    _rtc_force_slow_end = ABSOLUTE(.);
+  } > lp_ram_seg AT > ROM
 
   .rtc.data :
   {

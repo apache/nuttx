@@ -558,6 +558,19 @@ SECTIONS
     *(.rtc.entry.text)
 
     *(.rtc.literal .rtc.text)
+    _rtc_text_end = ABSOLUTE(.);
+  } >rtc_iram_seg
+
+  /* RTC fast memory section */
+
+  .rtc.force_fast :
+  {
+    . = ALIGN(4);
+    _rtc_force_fast_start = ABSOLUTE(.);
+
+    *(.rtc.force_fast .rtc.force_fast.*)
+    . = ALIGN(4);
+    _rtc_force_fast_end = ABSOLUTE(.);
   } >rtc_iram_seg
 
   /* RTC BSS section. */
@@ -575,6 +588,28 @@ SECTIONS
     *(.rtc.data.*)
     *(.rtc.rodata)
     *(.rtc.rodata.*)
+  } >rtc_iram_seg
+
+  /* RTC NOINIT section. */
+
+  .rtc_noinit (NOLOAD) :
+  {
+    . = ALIGN(4);
+    _rtc_noinit_start = ABSOLUTE(.);
+    *(.rtc_noinit .rtc_noinit.*)
+    . = ALIGN(4) ;
+    _rtc_noinit_end = ABSOLUTE(.);
+  } >rtc_iram_seg
+
+  /* RTC slow memory section */
+
+  .rtc.force_slow :
+  {
+    . = ALIGN(4);
+    _rtc_force_slow_start = ABSOLUTE(.);
+    *(.rtc.force_slow .rtc.force_slow.*)
+    . = ALIGN(4);
+    _rtc_force_slow_end = ABSOLUTE(.);
   } >rtc_iram_seg
 
   /* This section holds RTC data that should have fixed addresses.

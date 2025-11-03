@@ -67,7 +67,23 @@ extern "C"
 int esp_pm_light_sleep_start(uint64_t *sleep_time);
 
 /****************************************************************************
- * Name: esp_pmstandby
+ * Name:  esp_pm_deep_sleep_start
+ *
+ * Description:
+ *   Enter deep sleep mode
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_pm_deep_sleep_start(void);
+
+/****************************************************************************
+ * Name: esp_pm_pmstandby
  *
  * Description:
  *   Enter pm standby (light sleep) mode.
@@ -81,6 +97,22 @@ int esp_pm_light_sleep_start(uint64_t *sleep_time);
  ****************************************************************************/
 
 void esp_pmstandby(uint64_t time_in_us);
+
+/****************************************************************************
+ * Name: esp_pmsleep
+ *
+ * Description:
+ *   Enter pm sleep (deep sleep) mode.
+ *
+ * Input Parameters:
+ *   time_in_us - The maximum time to sleep in microseconds.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_pmsleep(uint64_t time_in_us);
 
 #endif /* CONFIG_PM */
 
