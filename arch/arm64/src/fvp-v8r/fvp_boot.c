@@ -114,6 +114,17 @@ int arm64_get_cpuid(uint64_t mpid)
 
 void arm64_chip_boot(void)
 {
+#ifdef CONFIG_PERCPU_SECTION
+  /* Copy the percpu data segment of cpu0 to the other CPUs. */
+
+  for (int cpu = 1; cpu < CONFIG_NCPUS; cpu++)
+    {
+      memcpy((void *)((uintptr_t)_sdata_percpu + PERCPU_OFFSET * cpu),
+             _ldata_percpu,
+             (uintptr_t)_edata_percpu - (uintptr_t)_sdata_percpu);
+    }
+#endif
+
 #ifdef CONFIG_BUILD_PROTECTED
   fvp_userspace();
 #endif
@@ -146,6 +157,14 @@ void arm64_mpu_init_regions(void)
   mpu_configure_region((uintptr_t)_stext, _etext -  _stext,
                        P_RO_U_NA_MSK | SHAREABLE_MSK,
                        MPU_MAIR_INDEX_SRAM);
+
+  /* Per-CPU data region */
+#ifdef CONFIG_PERCPU_SECTION
+  mpu_configure_region((uintptr_t)_sdata_percpu,
+                       PERCPU_OFFSET * CONFIG_NCPUS,
+                       NOT_EXEC | P_RW_U_NA_MSK | SHAREABLE_MSK,
+                       MPU_MAIR_INDEX_SRAM);
+#endif
 
   /* Kernel data base and size */
 
