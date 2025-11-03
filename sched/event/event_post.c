@@ -68,7 +68,7 @@ int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
   dq_queue_t *waitlist;
   bool waitall;
   bool postall;
-  bool need_switch;
+  bool need_switch = false;
 
   if (event == NULL)
     {
@@ -133,11 +133,11 @@ int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
               break;
             }
         }
+    }
 
-      if (clear)
-        {
-          event->events &= ~clear;
-        }
+  if (clear != 0)
+    {
+      event->events &= ~clear;
     }
 
   if (need_switch)
