@@ -87,7 +87,14 @@ struct backtrace_pool_s
  * Private Data
  ****************************************************************************/
 
-static struct backtrace_pool_s g_backtrace_pool;
+static struct backtrace_pool_s g_backtrace_pool =
+{
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  .lock = SP_UNLOCKED,
+#else
+  .lock = NXMUTEX_INITIALIZER,
+#endif
+};
 #endif
 
 /****************************************************************************
