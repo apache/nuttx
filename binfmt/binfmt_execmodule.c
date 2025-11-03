@@ -444,6 +444,7 @@ errout_with_tcbinit:
 #endif
 
   nxtask_uninit(tcb);
+  tcb = NULL;
 
 errout_with_addrenv:
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
