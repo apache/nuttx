@@ -274,7 +274,7 @@ config PM_EXT1_WAKEUP
 	default n
 	---help---
 		Enable EXT1 wakeup functionality.
-		This allows the system to wake up from PM_STANDBY
+		This allows the system to wake up from PM_STANDBY or PM_SLEEP
 		when a GPIO pin configured as an EXT1 wakeup source is triggered.
 
 menu "PM EXT1 Wakeup Sources"
@@ -405,7 +405,7 @@ config PM_ULP_WAKEUP
 	default n
 	---help---
 		Enable ULP coprocessor wakeup functionality.
-		This allows the system to wake up from PM_STANDBY
+		This allows the system to wake up from PM_STANDBY or PM_SLEEP
 		when ULP app triggers HP core to wakeup with "ulp_lp_core_wakeup_main_processor"
 		call on ULP app.
 
@@ -706,6 +706,18 @@ config PM_ALARM_NSEC
 	default 0
 	---help---
 		Number of additional nanoseconds to wait in PM_STANDBY mode.
+
+config PM_SLEEP_WAKEUP_SEC
+	int "PM_SLEEP delay (seconds)"
+	default 20
+	---help---
+		Number of seconds to wait in PM_SLEEP.
+
+config PM_SLEEP_WAKEUP_NSEC
+	int "PM_SLEEP delay (nanoseconds)"
+	default 0
+	---help---
+		Number of additional nanoseconds to wait in PM_SLEEP.
 
 endif # PM
 

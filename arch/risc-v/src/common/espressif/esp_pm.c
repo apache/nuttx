@@ -198,6 +198,8 @@ static void IRAM_ATTR esp_pm_ext1_wakeup_prepare(void)
           esp_sleep_enable_ext1_wakeup_io(pin_mask, level_mode);
         }
     }
+
+  esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
 }
 #endif /* CONFIG_PM_EXT1_WAKEUP */
 
@@ -463,6 +465,31 @@ int esp_pm_light_sleep_start(uint64_t *sleep_time)
 }
 
 /****************************************************************************
+ * Name:  esp_pm_deep_sleep_start
+ *
+ * Description:
+ *   Enter deep sleep mode
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_pm_deep_sleep_start(void)
+{
+  esp_deep_sleep_start();
+
+  /* Because RTC is in a slower clock domain than the CPU, it
+   * can take several CPU cycles for the sleep mode to start.
+   */
+
+  while (1);
+}
+
+/****************************************************************************
  * Name: esp_pmstandby
  *
  * Description:
@@ -525,4 +552,30 @@ void esp_pmstandby(uint64_t time_in_us)
       pwrinfo("GPIO wakeup mask: %" PRIu64 "\n", gpio_mask);
     }
 #endif
+}
+
+/****************************************************************************
+ * Name: esp_pmsleep
+ *
+ * Description:
+ *   Enter pm sleep (deep sleep) mode.
+ *
+ * Input Parameters:
+ *   time_in_us - The maximum time to sleep in microseconds.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_pmsleep(uint64_t time_in_us)
+{
+#ifdef CONFIG_PM_EXT1_WAKEUP
+  esp_pm_ext1_wakeup_prepare();
+#endif
+#ifdef CONFIG_PM_ULP_WAKEUP
+  esp_sleep_enable_ulp_wakeup();
+#endif
+  esp_pm_sleep_enable_timer_wakeup(time_in_us);
+  esp_pm_deep_sleep_start();
 }
