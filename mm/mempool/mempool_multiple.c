@@ -405,6 +405,7 @@ mempool_multiple_init(FAR const char *name,
   FAR struct mempool_s *pools;
   size_t maxpoolszie;
   size_t minpoolsize;
+  size_t mempoolsize;
   int ret;
   int i;
 
@@ -428,15 +429,15 @@ mempool_multiple_init(FAR const char *name,
         }
     }
 
-  ret = sizeof(struct mempool_multiple_s) +
-        npools * sizeof(struct mempool_s);
-  mpool = alloc(arg, sizeof(uintptr_t), ret);
+  mempoolsize = sizeof(struct mempool_multiple_s) +
+                npools * sizeof(struct mempool_s);
+  mpool = alloc(arg, sizeof(uintptr_t), mempoolsize);
   if (mpool == NULL)
     {
       return NULL;
     }
 
-  memset(mpool, 0, ret);
+  memset(mpool, 0, mempoolsize);
 
   pools = (FAR struct mempool_s *)
           ((uintptr_t)mpool + sizeof(struct mempool_multiple_s));
