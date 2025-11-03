@@ -56,6 +56,13 @@
 
 #define RPTUN_RETRY_PERIOD_US  1000000
 
+#define RPTUN_STATUS_CHECK(s, v) ((s) & (1u << (v))) != 0
+#define RPTUN_STATUS_SET(s, v)   ((s) |= (1u << (v)))
+#define RPTUN_REASON_GET(s)      (ffs(s) - 1u)
+
+#define RPTUN_RSC2STATUS(r)      \
+  ((FAR struct rptun_status_s *)&((FAR struct resource_table *)(r))->reserved[0])
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -82,6 +89,12 @@ struct rptun_store_s
   struct file file;
   FAR char   *buf;
 };
+
+begin_packed_struct struct rptun_status_s
+{
+  uint32_t master;
+  uint32_t slave;
+} end_packed_struct;
 
 /****************************************************************************
  * Private Function Prototypes
@@ -136,9 +149,8 @@ static void rptun_unmap_buf(FAR struct virtio_device *vdev,
                             FAR void *buf, size_t len,
                             enum virtio_dma_map dir, FAR void *mapped);
 
-static void rptun_send_command(FAR struct rptun_priv_s *priv,
-                               uint32_t cmd, bool wait);
-static uint32_t rptun_recv_command(FAR struct rptun_priv_s *priv, bool ack);
+static void rptun_set_status(FAR struct rptun_priv_s *priv,
+                             unsigned long reason);
 
 static int rptun_notifier(FAR struct notifier_block *block,
                           unsigned long action, void *data);
@@ -849,109 +861,59 @@ static int rptun_create_devices(FAR struct rptun_priv_s *priv)
   return ret;
 }
 
-static void rptun_send_command(FAR struct rptun_priv_s *priv,
-                               uint32_t cmd, bool wait)
+static void rptun_set_status(FAR struct rptun_priv_s *priv,
+                             unsigned long reason)
 {
-  FAR struct rptun_cmd_s *rptun_cmd;
+  FAR struct rptun_status_s *status;
 
   if (priv->rproc.rsc_table == NULL)
     {
       return;
     }
 
-  rptun_cmd = RPTUN_RSC2CMD(priv->rproc.rsc_table);
+  status = RPTUN_RSC2STATUS(priv->rproc.rsc_table);
+
   if (RPTUN_IS_MASTER(priv->dev))
     {
-      rptun_cmd->cmd_master = cmd;
+      RPTUN_STATUS_SET(status->master, reason);
     }
   else
     {
-      rptun_cmd->cmd_slave = cmd;
+      RPTUN_STATUS_SET(status->slave, reason);
     }
 
   rptun_notify(&priv->rproc, RPTUN_NOTIFY_ALL);
-
-  if (wait)
-    {
-      uint32_t timeout = CONFIG_RPTUN_CMD_TIMEOUT_MS;
-
-      while (timeout-- > 0u)
-        {
-          uint32_t ack = rptun_recv_command(priv, false);
-
-          if (RPTUN_GET_CMD(ack) == RPTUN_CMD_ACK)
-            {
-              break;
-            }
-
-          up_mdelay(1);
-        }
-    }
 }
 
-static uint32_t rptun_recv_command(FAR struct rptun_priv_s *priv, bool ack)
+static void rptun_check_peer_status(FAR struct rptun_priv_s *priv)
 {
-  FAR struct rptun_cmd_s *rptun_cmd = RPTUN_RSC2CMD(priv->rproc.rsc_table);
-  uint32_t cmd = RPTUN_CMD_DONE;
+  FAR struct rptun_status_s *rsc_status =
+    RPTUN_RSC2STATUS(priv->rproc.rsc_table);
+  uint32_t status;
 
-  if (RPTUN_IS_MASTER(priv->dev))
+  status = RPTUN_IS_MASTER(priv->dev)? rsc_status->slave :
+           rsc_status->master;
+
+  if (RPTUN_STATUS_CHECK(status, BOARDIOC_SOFTRESETCAUSE_PANIC))
     {
-      if (rptun_cmd->cmd_slave != RPTUN_CMD_DONE)
-        {
-          cmd = rptun_cmd->cmd_slave;
-          rptun_cmd->cmd_slave = RPTUN_CMD_DONE;
-        }
+      metal_log(METAL_LOG_EMERGENCY,
+                "FATAL: Panic by remote core: %s\n",
+                RPTUN_GET_CPUNAME(priv->dev));
+      PANIC();
     }
-  else
-    {
-      if (rptun_cmd->cmd_master != RPTUN_CMD_DONE)
-        {
-          cmd = rptun_cmd->cmd_master;
-          rptun_cmd->cmd_master = RPTUN_CMD_DONE;
-        }
-    }
-
-  if (ack && cmd != RPTUN_CMD_DONE)
-    {
-      rptun_send_command(priv, RPTUN_CMD(RPTUN_CMD_ACK, 0u), false);
-    }
-
-  return cmd;
-}
-
-static void rptun_check_command(FAR struct rptun_priv_s *priv)
-{
-  uint32_t cmd = rptun_recv_command(priv, true);
-  unsigned long val = RPTUN_GET_CMD_VAL(cmd);
-
-  switch (RPTUN_GET_CMD(cmd))
-    {
-      case RPTUN_CMD_RESET:
-        priv->rreset = true;
-        if (val == (unsigned long)BOARDIOC_SOFTRESETCAUSE_PANIC)
-          {
-            metal_log(METAL_LOG_EMERGENCY,
-                      "FATAL: Panic by remote core: %s\n",
-                      RPTUN_GET_CPUNAME(priv->dev));
-            PANIC();
-          }
 #ifdef CONFIG_BOARDCTL_RESET
-        else
-          {
-            boardctl(BOARDIOC_RESET, val);
-          }
-#endif
-        break;
-      default:
-        break;
+  else if(status != 0u)
+    {
+      boardctl(BOARDIOC_RESET, RPTUN_REASON_GET(status));
     }
+#endif
 }
 
 static int rptun_callback(FAR void *arg, uint32_t vqid)
 {
   FAR struct rptun_priv_s *priv = arg;
 
-  rptun_check_command(priv);
+  rptun_check_peer_status(priv);
   return remoteproc_get_notification(&priv->rproc, vqid);
 }
 
@@ -1120,23 +1082,13 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
 
 static void rptun_dev_reset(FAR struct rptun_priv_s *priv, unsigned long val)
 {
-  if (!priv->rreset)
+  if (priv->dev->ops->reset)
     {
-      if (priv->dev->ops->reset)
-        {
-          priv->dev->ops->reset(priv->dev, val);
-        }
-      else
-        {
-          rptun_send_command(priv, RPTUN_CMD(RPTUN_CMD_RESET, val), true);
-        }
-
-      priv->rreset = true;
+      priv->dev->ops->reset(priv->dev, val);
     }
   else
     {
-      metal_log(METAL_LOG_EMERGENCY, "Remote cpu %s already Reset val=%lu\n",
-                RPTUN_GET_CPUNAME(priv->dev), val);
+      rptun_set_status(priv, val);
     }
 }
 
