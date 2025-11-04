@@ -649,7 +649,7 @@ static void rptun_remove_devices(FAR struct rptun_priv_s *priv)
 
 static int rptun_create_devices(FAR struct rptun_priv_s *priv)
 {
-  FAR struct virtio_device *vdev;
+  FAR struct virtio_device *vdev = NULL;
   bool remain = false;
   int ret;
   int i;
