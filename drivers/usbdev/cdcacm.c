@@ -464,15 +464,12 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
           spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
           goto out;
         }
-
-      flags = spin_lock_irqsave(&priv->lock);
-      priv->wrcontainer = NULL;
-      spin_unlock_irqrestore(&priv->lock, flags);
     }
 
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
+  priv->wrcontainer = NULL;
   if (!sq_empty(&priv->txfree))
     {
-      flags = spin_lock_irqsave_nopreempt(&priv->lock);
       priv->wrcontainer = (FAR struct cdcacm_wrreq_s *)
                           sq_remfirst(&priv->txfree);
       dev->xmit.buffer  = (FAR char *)priv->wrcontainer->req->buf;
@@ -480,8 +477,9 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
       dev->xmit.head = 0;
       dev->xmit.tail = 0;
       uart_datasent(dev);
-      spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
     }
+
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
 #else
   if (!sq_empty(&priv->txfree))
     {
