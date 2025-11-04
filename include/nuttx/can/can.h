@@ -286,7 +286,7 @@
  *                   nature of the error.
  *   Dependencies:   None
  *
- * CANIOC_SET_TRANSV_STATE
+ * CANIOC_SET_TRANSVSTATE
  *   Description:    Set specific can transceiver state
  *
  *   Argument:       A pointer to an int type that describes the CAN
@@ -296,7 +296,7 @@
  *                   nature of the error.
  *   Dependencies:   None
  *
- * CANIOC_GET_TRANSV_STATE
+ * CANIOC_GET_TRANSVSTATE
  *   Description:    Get specific can transceiver state
  *
  *   Argument:       A pointer to an int type that describes the CAN
