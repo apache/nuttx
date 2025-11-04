@@ -31,29 +31,11 @@
 #include <nuttx/atomic.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock_type.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define SEQLOCK_INITIALIZER { 0u }
-
-/****************************************************************************
- * Public Data Types
- ****************************************************************************/
-
-/****************************************************************************
- * Sequence counters (seqcount_t)
- ****************************************************************************/
-
-typedef struct seqclock
-{
-#ifdef CONFIG_SMP
-  atomic_t sequence;
-#else
-  volatile uint32_t sequence;
-#endif
-} seqcount_t;
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -84,11 +66,7 @@ extern "C"
 
 static inline_function void seqlock_init(FAR seqcount_t *s)
 {
-#ifdef CONFIG_SMP
-  atomic_init(&s->sequence, 0u);
-#else
   s->sequence = 0u;
-#endif
 }
 
 /****************************************************************************
