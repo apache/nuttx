@@ -54,7 +54,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define RPTUN_RETRY_PERIOD_US  1000000
+#define RPTUN_RETRY_PERIOD_US    1000000
 
 #define RPTUN_STATUS_CHECK(s, v) ((s) & (1u << (v))) != 0
 #define RPTUN_STATUS_SET(s, v)   ((s) |= (1u << (v)))
@@ -62,6 +62,8 @@
 
 #define RPTUN_RSC2STATUS(r)      \
   ((FAR struct rptun_status_s *)&((FAR struct resource_table *)(r))->reserved[0])
+
+#define rptunvbs(format, ...)    syslog(LOG_ALERT, format, ##__VA_ARGS__)
 
 /****************************************************************************
  * Private Types
@@ -1421,6 +1423,50 @@ static int rptun_notifier(FAR struct notifier_block *block,
 }
 #endif
 
+static void rptun_dump_vdev_rsc(FAR void *rsc, uint32_t index)
+{
+  FAR struct fw_rsc_vdev *vdev = rsc;
+  uint8_t i;
+
+  rptunvbs("[vdev] Rsc %" PRIu32 " %p\n", index, rsc);
+  rptunvbs("[vdev] VirtIO %s\n", virtio_dev_name(vdev->id));
+  rptunvbs("[vdev] id %" PRIu32 " notifyid %" PRIu32
+           " dfeatures 0x%08" PRIx32 " gfeatures 0x%08" PRIx32 "\n",
+           vdev->id, vdev->notifyid, vdev->dfeatures, vdev->gfeatures);
+  rptunvbs("[vdev] config_len %" PRIu32 " status %u num_of_vrings %u"
+           " reserved[0] %u reserved[1] %u\n",
+           vdev->config_len, vdev->status, vdev->num_of_vrings,
+           vdev->reserved[0], vdev->reserved[1]);
+
+  for (i = 0; i < vdev->num_of_vrings; i++)
+    {
+      FAR struct fw_rsc_vdev_vring *vr = &vdev->vring[i];
+
+      rptunvbs("[vdev] [vring%u] da 0x%08" PRIx32 " align %" PRIu32
+               " num %" PRIu32 " notifyid %" PRIu32
+               " reserved %" PRIx32 "\n",
+               i, vr->da, vr->align, vr->num, vr->notifyid, vr->reserved);
+    }
+
+  if (vdev->config_len != 0)
+    {
+      lib_dumpbuffer("[vdev] [config]",
+                     (FAR uint8_t *)&vdev->vring[vdev->num_of_vrings],
+                     vdev->config_len);
+    }
+}
+
+static void rptun_dump_carveout_rsc(FAR void *rsc, uint32_t index)
+{
+  FAR struct fw_rsc_carveout *car = rsc;
+
+  rptunvbs("[carveout] Rsc %" PRIu32 " %p\n", index, rsc);
+  rptunvbs("[carveout] Carveout %s\n", car->name);
+  rptunvbs("[carveout] da 0x%08" PRIx32 " pa 0x%08" PRIx32 " len %" PRIu32
+           " flags 0x%" PRIx32 " reserved %" PRIx32 "\n",
+           car->da, car->pa, car->len, car->flags, car->reserved);
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -1475,6 +1521,31 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
     }
 
   return ret;
+}
+
+void rptun_dump_resource(FAR const struct resource_table *rsc)
+{
+  FAR struct fw_rsc_hdr *hdr;
+  uint32_t i;
+
+  rptunvbs("Dump resource table: %p num: %" PRIu32 "\n", rsc, rsc->num);
+  for (i = 0; i < rsc->num; i++)
+    {
+      hdr = (FAR struct fw_rsc_hdr *)((FAR char *)rsc + rsc->offset[i]);
+      switch (hdr->type)
+        {
+          case RSC_VDEV:
+            rptun_dump_vdev_rsc(hdr, i);
+            break;
+          case RSC_CARVEOUT:
+            rptun_dump_carveout_rsc(hdr, i);
+            break;
+          default:
+            rptunerr("Not support rsc type: %" PRIu32 " %" PRIu32 "\n",
+                     i, hdr->type);
+            break;
+        }
+    }
 }
 
 int rptun_boot(FAR const char *cpuname)
