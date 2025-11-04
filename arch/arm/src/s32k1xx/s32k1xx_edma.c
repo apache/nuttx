@@ -448,8 +448,7 @@ static void s32k1xx_dmaterminate(struct s32k1xx_dmach_s *dmach, int result)
   uint8_t regval8;
   uint8_t chan;
 
-  flags = spin_lock_irqsave(&g_edma.lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&g_edma.lock);
 
   /* Disable channel ERROR interrupts */
 
@@ -498,8 +497,7 @@ static void s32k1xx_dmaterminate(struct s32k1xx_dmach_s *dmach, int result)
   dmach->callback = NULL;
   dmach->arg      = NULL;
   dmach->state    = S32K1XX_DMA_IDLE;
-  spin_unlock_irqrestore(&g_edma.lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&g_edma.lock, flags);
 }
 
 /****************************************************************************
