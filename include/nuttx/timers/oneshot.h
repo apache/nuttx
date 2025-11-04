@@ -316,7 +316,7 @@ uint32_t oneshot_delta_cnt2nsec(FAR struct oneshot_lowerhalf_s *lower,
   DEBUGASSERT(delta <= lower->frequency);
 
   /* Here we use a multiply-shift method to convert the clock
-   * count to nanoseconds. This will reduce at least one divsion
+   * count to nanoseconds. This will reduce at least one division
    * operation and improve the performance. Note that this is an
    * approximate method that trades accuracy for performance, it may lead
    * to 1-3 nanoseconds of error when converting the cycles that
@@ -337,7 +337,7 @@ clock_t oneshot_delta_cnt2tick(FAR struct oneshot_lowerhalf_s *lower,
   DEBUGASSERT(delta <= lower->frequency);
 
   /* Be careful of using mult-shift fast converting here.
-   * Since ticks are realted to the scheduling, inaccurate converting
+   * Since ticks are related to the scheduling, inaccurate converting
    * results may lead to wrong scheduling.
    */
 
@@ -526,7 +526,7 @@ int oneshot_start_absolute(FAR struct oneshot_lowerhalf_s *lower,
   return ret;
 }
 
-/* Tick-based compatiable layer for oneshot */
+/* Tick-based compatible layer for oneshot */
 
 static inline_function
 int oneshot_tick_max_delay(FAR struct oneshot_lowerhalf_s *lower,

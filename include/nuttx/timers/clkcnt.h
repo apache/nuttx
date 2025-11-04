@@ -347,7 +347,7 @@ uint64_t clkcnt_delta_cnt2time_invdiv(clkcnt_t delta, uint32_t scale,
  * Input Parameters:
  *   delta - Delta clock count, requires delta <= CLKCNT_MAX / scale
  *   mul   - Multiply parameter.
- *   sh    - Right-shift paramter.
+ *   sh    - Right-shift parameter.
  *
  * Returned Value:
  *   The converted delta time in nano-second.
