@@ -65,8 +65,6 @@ config ARCH_CHIP_BL602
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_MISALIGN_EXCEPTION
 	select ONESHOT
-	select ONESHOT_COUNT
-	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		BouffaloLab BL602(rv32imfc)
