@@ -123,9 +123,13 @@ typedef struct rspinlock_s
 
 #define SEQLOCK_INITIALIZER { 0u }
 
-typedef struct seqcount_s
+typedef struct seqclock
 {
-  uint32_t sequence;
+#ifdef CONFIG_SMP
+  atomic_t sequence;
+#else
+  volatile uint32_t sequence;
+#endif
 } seqcount_t;
 
 #if defined(__cplusplus)
