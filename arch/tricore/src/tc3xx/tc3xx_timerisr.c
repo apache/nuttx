@@ -50,8 +50,8 @@ void up_timer_initialize(void)
 {
   struct oneshot_lowerhalf_s *lower;
 
-  lower = tricore_systimer_initialize(TRICORE_STM0_BASE, TRICORE_STM0_IRQ,
-                                      SCU_FREQUENCY);
+  lower = tricore_systimer_initialize(TRICORE_STM0_BASE, 0,
+                                      TRICORE_STM0_IRQ, SCU_FREQUENCY);
 
   DEBUGASSERT(lower != NULL);
 
