@@ -179,7 +179,7 @@ static struct up_dev_s g_uart0priv =
   .uartbase  = &MODULE_ASCLIN0,
   .pins      = &g_uart0_pins,
   .baud      = CONFIG_UART0_BAUD,
-  .irq       = 21,
+  .irq       = TRICORE_UART_RX_IRQ,
 };
 
 static uart_dev_t g_uart0port =
