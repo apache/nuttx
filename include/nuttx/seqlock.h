@@ -31,29 +31,11 @@
 #include <nuttx/atomic.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock_type.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define SEQLOCK_INITIALIZER { 0u }
-
-/****************************************************************************
- * Public Data Types
- ****************************************************************************/
-
-/****************************************************************************
- * Sequence counters (seqcount_t)
- ****************************************************************************/
-
-typedef struct seqclock
-{
-#ifdef CONFIG_SMP
-  atomic_t sequence;
-#else
-  volatile uint32_t sequence;
-#endif
-} seqcount_t;
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -85,7 +67,7 @@ extern "C"
 static inline_function void seqlock_init(FAR seqcount_t *s)
 {
 #ifdef CONFIG_SMP
-  atomic_init(&s->sequence, 0u);
+  atomic_init((FAR atomic_t *)&s->sequence, 0u);
 #else
   s->sequence = 0u;
 #endif
@@ -112,7 +94,7 @@ uint32_t read_seqbegin(FAR const seqcount_t *s)
   uint32_t seq;
 
 #ifdef CONFIG_SMP
-  seq = atomic_read_acquire(&s->sequence) & ~1;
+  seq = atomic_read_acquire((FAR atomic_t *)&s->sequence) & ~1;
 #else
   seq = s->sequence;
   SMP_RMB();
@@ -146,7 +128,7 @@ uint32_t read_seqretry(FAR const seqcount_t *s, uint32_t start)
   SMP_RMB();
 
 #ifdef CONFIG_SMP
-  seq = atomic_read(&s->sequence);
+  seq = atomic_read((FAR atomic_t *)&s->sequence);
 #else
   seq = s->sequence;
 #endif
@@ -177,13 +159,15 @@ irqstate_t write_seqlock_irqsave(FAR seqcount_t *s)
 #ifdef CONFIG_SMP
   for (; ; )
     {
-      uint32_t sequence = atomic_read(&s->sequence);
+      uint32_t sequence = atomic_read((FAR atomic_t *)&s->sequence);
 
       if (predict_true((sequence & 1u) == 0u))
         {
           /* Try to acquire the lock ownership. */
 
-          if (atomic_cmpxchg_acquire(&s->sequence, &sequence, sequence + 1u))
+          if (atomic_cmpxchg_acquire((FAR atomic_t *)&s->sequence,
+                                     (FAR atomic_t *)&sequence,
+                                     sequence + 1u))
             {
               break;
             }
@@ -215,10 +199,10 @@ irqstate_t write_seqlock_irqsave(FAR seqcount_t *s)
  ****************************************************************************/
 
 static inline_function
-void write_sequnlock_irqrestore(seqcount_t *s, irqstate_t flags)
+void write_sequnlock_irqrestore(FAR seqcount_t *s, irqstate_t flags)
 {
 #ifdef CONFIG_SMP
-  atomic_set_release(&s->sequence, s->sequence + 1u);
+  atomic_set_release((FAR atomic_t *)&s->sequence, s->sequence + 1u);
 #endif
   up_irq_restore(flags);
 }
