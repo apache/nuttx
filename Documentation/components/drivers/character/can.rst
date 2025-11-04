@@ -34,8 +34,12 @@ is used to store the timestamp of the CAN message.
 **Usage Note**: When reading from the CAN driver multiple messages
 may be returned, depending on (1) the size the returned can
 messages, and (2) the size of the buffer provided to receive CAN
-messages. *Never assume that a single message will be returned*...
+messages. *Do not assume that a single message will be returned*...
 if you do this, *you will lose CAN data* under conditions where
-your read buffer can hold more than one small message. Below is an
-example about how you should think of the CAN read operation:
+your read buffer can hold more than one small message. This
+behavior can be controlled by using
+``ioctl(fd, CANIOC_SET_IWATERMARK, &(size_t)0)`` that limits the
+last message to be placed at most zero bytes since buffer start
+(thus only one message is provided).
+
 **Examples**: ``drivers/can/mcp2515.c``.

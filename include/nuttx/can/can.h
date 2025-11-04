@@ -305,6 +305,29 @@
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error.
  *   Dependencies:   None
+ *
+ * CANIOC_SET_IWATERMARK
+ *   Description:    Set read watermark. This watermark limits number of
+ *                   bytes multiple frames can take in read. The frame is not
+ *                   placed to the provided buffer if it would start after
+ *                   the watermark offset (thus value 0 ensures only one
+ *                   frame to be placed into the buffer). The default valued
+ *                   is SIZE_MAX.
+ *
+ *   Argument:       A pointer to an size_t type with watermark value.
+ *   returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   None
+ *
+ * CANIOC_GET_IWATERMARK
+ *   Description:    Get read watermark.
+ *
+ *   Argument:       A pointer to an size_t type for watermark value.
+ *   returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   None
  */
 
 #define CANIOC_RTR                _CANIOC(1)
@@ -326,9 +349,11 @@
 #define CANIOC_GET_STATE          _CANIOC(17)
 #define CANIOC_SET_TRANSVSTATE    _CANIOC(18)
 #define CANIOC_GET_TRANSVSTATE    _CANIOC(19)
+#define CANIOC_SET_IWATERMARK     _CANIOC(20)
+#define CANIOC_GET_IWATERMARK     _CANIOC(21)
 
 #define CAN_FIRST                 0x0001         /* First common command */
-#define CAN_NCMDS                 19             /* 20 common commands   */
+#define CAN_NCMDS                 21             /* 21 common commands   */
 
 /* User defined ioctl commands are also supported. These will be forwarded
  * by the upper-half CAN driver to the lower-half CAN driver via the
@@ -796,13 +821,15 @@ struct can_ops_s
  *
  *   The elements of 'cd_ops', and 'cd_priv'
  *
- * The common logic will initialize all semaphores.
+ * The common logic will initialize all semaphores and set 'watermark' to
+ * 'SIZE_MAX'.
  */
 
 struct can_reader_s
 {
   struct list_node     list;
   struct can_rxfifo_s  fifo;             /* Describes receive FIFO */
+  size_t               rxwatermark;
   FAR struct pollfd   *cd_fds;
 };
 

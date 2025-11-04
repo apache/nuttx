@@ -193,6 +193,7 @@ static FAR struct can_reader_s *init_can_reader(FAR struct file *filep)
   DEBUGASSERT(reader != NULL);
 
   nxsem_init(&reader->fifo.rx_sem, 0, 0);
+  reader->rxwatermark = SIZE_MAX;
   filep->f_priv = reader;
 
   return reader;
@@ -489,7 +490,7 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
               fifo->rx_head = 0;
             }
         }
-      while (fifo->rx_head != fifo->rx_tail);
+      while (fifo->rx_head != fifo->rx_tail && ret < reader->rxwatermark);
 
       if (fifo->rx_head != fifo->rx_tail)
         {
@@ -961,6 +962,22 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               canerr("dev->cd_transv->cts_ops is NULL!");
               ret = -ENOTTY;
             }
+        }
+        break;
+
+      /* Set read watermark */
+
+      case CANIOC_SET_IWATERMARK:
+        {
+          reader->rxwatermark = *(FAR size_t *)arg;
+        }
+        break;
+
+      /* Set read watermark */
+
+      case CANIOC_GET_IWATERMARK:
+        {
+          *(FAR size_t *)arg = reader->rxwatermark;
         }
         break;
 
