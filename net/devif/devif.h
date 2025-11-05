@@ -96,7 +96,7 @@
  *   PKT_POLL             (1) timed operations, and (2) to check if the
  *   BLUETOOTH_POLL       socket layer has data that it wants to send.
  *   IEEE802154_POLL      These are socket oriented callbacks where the
- *                        context depends on the specific set.
+ *   CAN_POLL             context depends on the specific set.
  *                   OUT: Not used
  *
  *   TCP_BACKLOG      IN: There is a new connection in the backlog list set
@@ -137,9 +137,10 @@
  *   ARP_POLL         IN: Used for polling the socket layer.  This is
  *                        provided periodically from the drivers to support
  *                        (1) timed operations, and (2) to check if the ARP
- *                        layer needs to send an ARP request.  This is a
- *                        device oriented event, not associated with a
- *                        socket.
+ *                        layer needs to send an ARP request, and (3) polling
+ *                        the ARP send queue to send out pending ARP
+ *                        requests. This is a device oriented event,
+ *                        not associated with a socket.
  *                   OUT: Not used
  *
  *   ICMP_POLL        IN: Used for polling the socket layer.  This is
@@ -167,9 +168,26 @@
  *                        event, not associated with a socket.  The appdata
  *                        pointer is not used in this case.
  *                   OUT: Not used
+ *   IGMP_POLL        IN: Used for polling the socket layer.  This is
+ *                        provided periodically from the drivers to support
+ *                        (1) timed operations, and (2) to check if the IGMP
+ *                        layer needs to send an IGMP report.  This is a
+ *                        device oriented event, not associated with a
+ *                        socket.
+ *                   OUT: Not used
+ *   MLD_POLL         IN: Used for polling the socket layer.  This is
+ *                        provided periodically from the drivers to support
+ *                        (1) timed operations, and (2) to check if the MLD
+ *                        layer needs to send an MLD report.  This is a
+ *                        device oriented event, not associated with a
+ *                        socket.
+ *   IPFRAG_POLL      IN: Used for polling the IP fragment send queue to send
+ *                        out pending IP fragments.  This is a device
+ *                        oriented event, not associated with a socket.
+ *                   OUT: Not used
  */
 
-/* Bits 0-11: Connection specific event bits */
+/* Bits 0-10: Connection specific event bits */
 
 #define TCP_ACKDATA        (1 << 0)
 #define TCP_NEWDATA        (1 << 1)
@@ -185,37 +203,36 @@
 #define TCP_SNDACK         (1 << 2)
 #define TCP_REXMIT         (1 << 3)
 #define TCP_POLL           (1 << 4)
-#define UDP_POLL           TCP_POLL
-#define PKT_POLL           TCP_POLL
-#define CAN_POLL           TCP_POLL
-#define BLUETOOTH_POLL     TCP_POLL
-#define IEEE802154_POLL    TCP_POLL
-#define WPAN_POLL          TCP_POLL
-#define TCP_BACKLOG        (1 << 5)
-#define TCP_ABORT          (1 << 6)
-#define TCP_CONNECTED      (1 << 7)
-#define TCP_TIMEDOUT       (1 << 8)
-#define TCP_WAITALL        (1 << 9)
-#define TCP_TXCLOSE        (1 << 10)
-#define TCP_RXCLOSE        (1 << 11)
+#define UDP_POLL           (1 << 5)
+#define PKT_POLL           (1 << 6)
+#define CAN_POLL           (1 << 7)
+#define BLUETOOTH_POLL     (1 << 8)
+#define IEEE802154_POLL    (1 << 9)
+#define TCP_BACKLOG        (1 << 10)
+#define TCP_ABORT          (1 << 11)
+#define TCP_CONNECTED      (1 << 12)
+#define TCP_TIMEDOUT       (1 << 13)
+#define TCP_WAITALL        (1 << 14)
+#define TCP_TXCLOSE        (1 << 15)
+#define TCP_RXCLOSE        (1 << 16)
 
-/* Bit 12: Device specific event bits */
+/* Bit 17: Device specific event bits */
 
-#define NETDEV_DOWN        (1 << 12)
+#define NETDEV_DOWN        (1 << 17)
 
-/* Bits 13-15: Encoded device specific poll events.  Unlike connection
+/* Bits 18-24: device specific poll events.  Unlike connection
  * oriented poll events, device related poll events must distinguish
  * between what is being polled for since the callbacks all reside in
  * the same list in the network device structure.
  */
 
-#define DEVPOLL_SHIFT      (13)
-#define DEVPOLL_MASK       (7 << DEVPOLL_SHIFT)
-#  define DEVPOLL_NONE     (0 << DEVPOLL_SHIFT)
-#  define ARP_POLL         (1 << DEVPOLL_SHIFT)
-#  define ICMP_POLL        (2 << DEVPOLL_SHIFT)
-#  define ICMPv6_POLL      (3 << DEVPOLL_SHIFT)
-#  define IPFWD_POLL       (4 << DEVPOLL_SHIFT)
+#define IPFRAG_POLL        (1 << 18)
+#define ARP_POLL           (1 << 19)
+#define IGMP_POLL          (1 << 20)
+#define MLD_POLL           (1 << 21)
+#define ICMP_POLL          (1 << 22)
+#define ICMPv6_POLL        (1 << 23)
+#define IPFWD_POLL         (1 << 24)
 
 /* The set of events that and implications to the TCP connection state */
 

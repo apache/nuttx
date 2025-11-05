@@ -133,7 +133,7 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
           /* Notify the device driver that new TX data is available. */
 
-          netdev_txnotify_dev(dev);
+          netdev_txnotify_dev(dev, CAN_POLL);
         }
       else
         {
@@ -378,12 +378,12 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       /* Set up the callback in the connection */
 
       conn->sndcb->flags = CAN_POLL;
-      conn->sndcb->priv = (FAR void *)conn;
+      conn->sndcb->priv  = (FAR void *)conn;
       conn->sndcb->event = psock_send_eventhandler;
 
       /* Notify the device driver that new TX data is available. */
 
-      netdev_txnotify_dev(dev);
+      netdev_txnotify_dev(dev, CAN_POLL);
     }
 
   /* unlock */

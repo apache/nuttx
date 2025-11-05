@@ -103,11 +103,11 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
     {
       /* Set up the connection event handler */
 
-      pstate->tc_cb->flags   = (TCP_NEWDATA | TCP_ABORT | TCP_TIMEDOUT |
-                                TCP_CONNECTED | NETDEV_DOWN);
-      pstate->tc_cb->priv    = (FAR void *)pstate;
-      pstate->tc_cb->event   = psock_connect_eventhandler;
-      ret                    = OK;
+      pstate->tc_cb->flags = (TCP_NEWDATA | TCP_ABORT | TCP_TIMEDOUT |
+                              TCP_CONNECTED | NETDEV_DOWN);
+      pstate->tc_cb->priv  = (FAR void *)pstate;
+      pstate->tc_cb->event = psock_connect_eventhandler;
+      ret                  = OK;
     }
 
   return ret;
@@ -379,7 +379,7 @@ int psock_tcp_connect(FAR struct socket *psock,
 
               /* Notify the device driver that new connection is available. */
 
-              netdev_txnotify_dev(conn->dev);
+              netdev_txnotify_dev(conn->dev, TCP_POLL);
 
               /* Wait for either the connect to complete or for an
                * error/timeout to occur.
@@ -442,7 +442,7 @@ int psock_tcp_connect(FAR struct socket *psock,
 
           /* Notify the device driver that new connection is available. */
 
-          netdev_txnotify_dev(conn->dev);
+          netdev_txnotify_dev(conn->dev, TCP_POLL);
         }
     }
 

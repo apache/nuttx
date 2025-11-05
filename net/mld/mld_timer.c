@@ -159,7 +159,7 @@ static void mld_gendog_work(FAR void *arg)
 
       /* Notify the device that we have a packet to send */
 
-      netdev_txnotify_dev(dev);
+      netdev_txnotify_dev(dev, MLD_POLL);
 
       /* Restart the Querier timer */
 

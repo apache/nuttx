@@ -156,7 +156,7 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
           /* Notify the device driver that new TX data is available. */
 
-          netdev_txnotify_dev(dev);
+          netdev_txnotify_dev(dev, PKT_POLL);
         }
       else
         {
@@ -375,7 +375,7 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
 
       /* Notify the device driver that new TX data is available. */
 
-      netdev_txnotify_dev(dev);
+      netdev_txnotify_dev(dev, PKT_POLL);
       conn_dev_unlock(&conn->sconn, dev);
     }
 

@@ -166,7 +166,7 @@ static uint32_t ipfwd_eventhandler(FAR struct net_driver_s *dev,
           /* Copy the user data into d_appdata and send it. */
 
           devif_forward(fwd);
-          flags &= ~DEVPOLL_MASK;
+          flags &= ~IPFWD_POLL;
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
           /* If both IPv4 and IPv6 support are enabled, then we will need to
@@ -244,7 +244,7 @@ int ipfwd_forward(FAR struct forward_s *fwd)
 
       /* Notify the device driver of the availability of TX data */
 
-      netdev_txnotify_dev(fwd->f_dev);
+      netdev_txnotify_dev(fwd->f_dev, IPFWD_POLL);
       return OK;
     }
 

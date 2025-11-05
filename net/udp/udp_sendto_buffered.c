@@ -357,7 +357,7 @@ static int sendto_next_transfer(FAR struct udp_conn_s *conn)
 
   /* Notify the device driver of the availability of TX data */
 
-  netdev_txnotify_dev(dev);
+  netdev_txnotify_dev(dev, UDP_POLL);
 
 out:
   conn_dev_unlock(&conn->sconn, dev);

@@ -626,8 +626,7 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                        */
 
                       conn->timeout = true;
-
-                      netdev_txnotify_dev(conn->dev);
+                      netdev_txnotify_dev(conn->dev, TCP_POLL);
                       netdev_iob_replace(dev, iob);
                       dev->d_buf = buf;
                       dev->d_appdata = appdata;

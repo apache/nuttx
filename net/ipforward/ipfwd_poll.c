@@ -175,7 +175,7 @@ void ipfwd_poll(FAR struct net_driver_s *dev)
   flags = devif_conn_event(dev, IPFWD_POLL, dev->d_conncb);
 
 #ifdef CONFIG_NET_6LOWPAN
-  if ((flags & DEVPOLL_MASK) == 0)
+  if ((flags & IPFWD_POLL) == 0)
     {
       /* Get the L2 protocol of packet in the device's d_buf */
 

@@ -471,13 +471,13 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   state.st_cb = udp_callback_alloc(state.st_dev, conn);
   if (state.st_cb)
     {
-      state.st_cb->flags   = (UDP_POLL | NETDEV_DOWN);
-      state.st_cb->priv    = (FAR void *)&state;
-      state.st_cb->event   = sendto_eventhandler;
+      state.st_cb->flags = (UDP_POLL | NETDEV_DOWN);
+      state.st_cb->priv  = (FAR void *)&state;
+      state.st_cb->event = sendto_eventhandler;
 
       /* Notify the device driver of the availability of TX data */
 
-      netdev_txnotify_dev(state.st_dev);
+      netdev_txnotify_dev(state.st_dev, UDP_POLL);
 
       /* Wait for either the receive to complete or for an error/timeout to
        * occur. NOTES:  net_sem_timedwait will also terminate if a signal

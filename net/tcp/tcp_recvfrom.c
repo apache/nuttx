@@ -839,7 +839,7 @@ static ssize_t tcp_recvfrom_one(FAR struct tcp_conn_s *conn, FAR void *buf,
     {
       conn_unlock(&conn->sconn);
       netdev_lock(conn->dev);
-      netdev_txnotify_dev(conn->dev);
+      netdev_txnotify_dev(conn->dev, TCP_POLL);
       netdev_unlock(conn->dev);
       conn_lock(&conn->sconn);
     }

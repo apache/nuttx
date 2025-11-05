@@ -239,7 +239,7 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
           /* Notify the device driver that new TX data is available. */
 
-          netdev_txnotify_dev(dev);
+          netdev_txnotify_dev(dev, PKT_POLL);
 
           /* Wait for the send to complete or an error to occur.
            * net_sem_wait will also terminate if a signal is received.

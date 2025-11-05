@@ -699,7 +699,7 @@ void tcp_send_txnotify(FAR struct socket *psock,
     {
       /* Notify the device driver that send data is available */
 
-      netdev_ipv4_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
+      netdev_ipv4_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr, TCP_POLL);
     }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -711,7 +711,7 @@ void tcp_send_txnotify(FAR struct socket *psock,
       /* Notify the device driver that send data is available */
 
       DEBUGASSERT(psock->s_domain == PF_INET6);
-      netdev_ipv6_txnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
+      netdev_ipv6_txnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr, TCP_POLL);
     }
 #endif /* CONFIG_NET_IPv6 */
 }

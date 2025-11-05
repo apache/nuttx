@@ -224,7 +224,7 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
 
   /* Notify the device driver that new TX data is available. */
 
-  netdev_txnotify_dev(dev);
+  netdev_txnotify_dev(dev, ICMPv6_POLL);
 
   /* Wait for the send to complete or an error to occur
    * net_sem_wait will also terminate if a signal is received.

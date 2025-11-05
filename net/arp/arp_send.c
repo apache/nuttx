@@ -371,7 +371,7 @@ int arp_send(in_addr_t ipaddr)
 
       /* Notify the device driver that new TX data is available. */
 
-      netdev_txnotify_dev(dev);
+      netdev_txnotify_dev(dev, ARP_POLL);
 
       /* Wait for the send to complete or an error to occur.
        * net_sem_wait will also terminate if a signal is received.
@@ -504,7 +504,7 @@ int arp_send_async(in_addr_t ipaddr, arp_send_finish_cb_t cb)
 
   /* Notify the device driver that new TX data is available. */
 
-  netdev_txnotify_dev(dev);
+  netdev_txnotify_dev(dev, ARP_POLL);
 
 errout_with_lock:
   netdev_unlock(dev);

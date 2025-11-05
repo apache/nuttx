@@ -133,7 +133,7 @@ static uint32_t send_eventhandler(FAR struct net_driver_s *dev,
 
   if ((flags & WPAN_NEWDATA) == 0)
     {
-      DEBUGASSERT((flags & WPAN_POLL) != 0);
+      DEBUGASSERT((flags & UDP_POLL) != 0);
 
       /* Transfer the frame list to the IEEE802.15.4 MAC device */
 
@@ -142,7 +142,7 @@ static uint32_t send_eventhandler(FAR struct net_driver_s *dev,
                                sinfo->s_ipv6hdr, sinfo->s_buf, sinfo->s_len,
                                sinfo->s_destmac);
 
-      flags &= ~WPAN_POLL;
+      flags &= ~UDP_POLL;
       neighbor_reachable(dev);
       goto end_wait;
     }
@@ -239,13 +239,13 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
 
           /* Set up the callback in the connection */
 
-          sinfo.s_cb->flags = (NETDEV_DOWN | WPAN_POLL);
+          sinfo.s_cb->flags = (NETDEV_DOWN | UDP_POLL);
           sinfo.s_cb->priv  = (FAR void *)&sinfo;
           sinfo.s_cb->event = send_eventhandler;
 
           /* Notify the IEEE802.15.4 MAC that we have data to send. */
 
-          netdev_txnotify_dev(dev);
+          netdev_txnotify_dev(dev, UDP_POLL);
 
           /* Wait for the send to complete or an error to occur.
            * net_sem_timedwait will also terminate if a signal is received.

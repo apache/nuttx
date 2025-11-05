@@ -263,7 +263,7 @@ static void ip_fragin_timerwork(FAR void *arg)
 
                   ninfo("Send Time Exceeded ICMP%s Message to source "
                         "host\n", node->frags->isipv4 ? "v4" : "v6");
-                  netdev_txnotify_dev(dev);
+                  netdev_txnotify_dev(dev, IPFRAG_POLL);
                 }
 
               net_unlock();

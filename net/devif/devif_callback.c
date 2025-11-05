@@ -216,30 +216,11 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static bool devif_event_trigger(uint32_t events, uint32_t triggers)
+static inline bool devif_event_trigger(uint32_t events, uint32_t triggers)
 {
-  /* The events are divided into a set of individual bits that may be ORed
-   * together PLUS a field that encodes a single poll event.
-   *
-   * First check if any of the individual event bits will trigger the
-   * callback.
-   */
+  /* check if any of the individual event bits will trigger the callback. */
 
-  if ((events & triggers & ~DEVPOLL_MASK) != 0)
-    {
-      return true;
-    }
-
-  /* No... check the encoded device event. */
-
-  if ((events & DEVPOLL_MASK) == (triggers & DEVPOLL_MASK))
-    {
-      return (triggers & DEVPOLL_MASK) != 0;
-    }
-
-  /* No.. this event set will not generate the callback */
-
-  return false;
+  return (events & triggers) != 0;
 }
 
 /****************************************************************************
