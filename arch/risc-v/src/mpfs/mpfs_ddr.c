@@ -3449,6 +3449,7 @@ static int mpfs_training_verify(void)
   if ((LIBERO_SETTING_TRAINING_SKIP_SETTING & ADDCMD_BIT) != ADDCMD_BIT)
     {
       unsigned low_ca_dly_count = 0;
+      unsigned decrease_count = 0;
       uint8_t ca_status[8] =
         {
           ((addcmd_status0) & 0xff),
@@ -3467,21 +3468,28 @@ static int mpfs_training_verify(void)
        * Expected result is increasing numbers, starting at index n and
        * wrapping around. For example:
        *   [0x35, 0x3b, 0x4, 0x14, 0x1b, 0x21, 0x28, 0x2f].
-       *
-       * Also they need to be separated by at least 5
        */
 
       for (i = 0; i < 8; i++)
         {
-          if (ca_status[i] < last + 5)
+          if (ca_status[i] < 5)
             {
               low_ca_dly_count++;
+            }
+
+          if (ca_status[i] <= last)
+            {
+              decrease_count++;
             }
 
           last = ca_status[i];
         }
 
-      if (low_ca_dly_count > 1)
+      /* Check against thresholds. Allow one low and one extra
+       * backwards jump, in addition to the wrap-around point
+       */
+
+      if (low_ca_dly_count > 1 || decrease_count > 2)
         {
           /* Retrain via reset */
 
