@@ -80,6 +80,49 @@
 
 #define WDIOC_MINTIME    _WDIOC(0x080)
 
+/* Start the watchdog timer, resetting the time to the current timeout */
+
+#define WD_START(l) \
+  (((l)->ops->start) ? ((l)->ops->start(l)) : -ENOSYS)
+
+/* Stop the watchdog timer */
+
+#define WD_STOP(l) \
+  (((l)->ops->stop) ? ((l)->ops->stop(l)) : -ENOSYS)
+
+/* Reset the watchdog timer to the current timeout value, prevent any
+ * imminent watchdog timeouts.  This is sometimes referred as "pinging" the
+ * watchdog timer or "petting the dog".
+ */
+
+#define WD_KEEPALIVE(l) \
+  (((l)->ops->keepalive) ? ((l)->ops->keepalive(l)) : -ENOSYS)
+
+/* Get the current watchdog timer status */
+
+#define WD_GETSTATUS(l, s) \
+  (((l)->ops->getstatus) ? ((l)->ops->getstatus(l, s)) : -ENOSYS)
+
+/* Set a new timeout value (and reset the watchdog timer) */
+
+#define WD_SETTIMEOUT(l, t) \
+  (((l)->ops->settimeout) ? ((l)->ops->settimeout(l, t)) : -ENOSYS)
+
+/* Don't reset on watchdog timer timeout; instead, call this user provider
+ * timeout handler.  NOTE:  Providing handler==NULL will restore the reset
+ * behavior.
+ */
+
+#define WD_CAPTURE(l, h) \
+  (((l)->ops->capture) ? ((l)->ops->capture(l, h)) : NULL)
+
+/* Any ioctl commands that are not recognized by the "upper-half" driver
+ * are forwarded to the lower half driver through this method.
+ */
+
+#define WD_IOCTL(l, c, a) \
+  (((l)->ops->ioctl) ? ((l)->ops->ioctl(l, c, a)) : -ENOTTY)
+
 /* Bit Settings *************************************************************/
 
 /* Bit settings for the struct watchdog_status_s flags field */
