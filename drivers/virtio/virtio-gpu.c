@@ -58,24 +58,25 @@
  * Private Types
  ****************************************************************************/
 
-struct virtio_gpu_priv_s
+union virtio_gpu_cmd_u
 {
-  struct fb_vtable_s vtable;        /* Must be cast compatible with virtio_gpu_priv_s */
-  FAR struct virtio_device *vdev;   /* Contained virtio device */
-  FAR uint8_t *fbmem;               /* Allocated framebuffer */
-  size_t fblen;                     /* Size of the framebuffer in bytes */
-  fb_coord_t xres;                  /* Horizontal resolution in pixel columns */
-  fb_coord_t yres;                  /* Vertical resolution in pixel rows */
-  fb_coord_t stride;                /* Width of a row in bytes */
-  uint8_t display;                  /* Display number */
-  spinlock_t lock;                  /* Lock */
-  struct work_s work;               /* Work structure for vsync loop */
+  FAR union virtio_gpu_cmd_u *next;
+  struct virtio_gpu_resource_flush flush;
 };
 
-struct virtio_gpu_cookie_s
+struct virtio_gpu_priv_s
 {
-  bool blocking;
-  FAR void *p;
+  struct fb_vtable_s vtable;           /* Must be cast compatible with virtio_gpu_priv_s */
+  FAR struct virtio_device *vdev;      /* Contained virtio device */
+  FAR union virtio_gpu_cmd_u *freecmd; /* Command data free list */
+  FAR uint8_t *fbmem;                  /* Allocated framebuffer */
+  size_t fblen;                        /* Size of the framebuffer in bytes */
+  fb_coord_t xres;                     /* Horizontal resolution in pixel columns */
+  fb_coord_t yres;                     /* Vertical resolution in pixel rows */
+  fb_coord_t stride;                   /* Width of a row in bytes */
+  uint8_t display;                     /* Display number */
+  spinlock_t lock;                     /* Lock */
+  struct work_s work;                  /* Work structure for vsync loop */
 };
 
 struct virtio_gpu_backing_s
@@ -146,6 +147,47 @@ static FAR struct virtio_gpu_priv_s *g_virtio_gpu[VIRTIO_GPU_MAX_DISP];
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: virtio_gpu_zalloc_cmd
+ ****************************************************************************/
+
+static FAR void *virtio_gpu_zalloc_cmd(FAR struct virtio_gpu_priv_s *priv)
+{
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
+  FAR union virtio_gpu_cmd_u *cmd = priv->freecmd;
+  if (cmd != NULL)
+    {
+      priv->freecmd = cmd->next;
+    }
+
+  spin_unlock_irqrestore(&priv->lock, flags);
+
+  if (cmd != NULL)
+    {
+      memset(cmd, 0, sizeof(*cmd));
+    }
+  else
+    {
+      cmd = virtio_zalloc_buf(priv->vdev, sizeof(*cmd), 16);
+    }
+
+  return cmd;
+}
+
+/****************************************************************************
+ * Name: virtio_gpu_free_cmd
+ ****************************************************************************/
+
+static void virtio_gpu_free_cmd(FAR struct virtio_gpu_priv_s *priv,
+                                FAR void *cmd)
+{
+  FAR union virtio_gpu_cmd_u *node = cmd;
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
+  node->next = priv->freecmd;
+  priv->freecmd = node;
+  spin_unlock_irqrestore(&priv->lock, flags);
+}
+
+/****************************************************************************
  * Name: virtio_gpu_send_cmd
  * Note: the caller should not touch `buf` after calling this, as it will be
  *       freed either here or in virtio_gpu_done().
@@ -162,14 +204,16 @@ static int virtio_gpu_send_cmd(FAR struct virtqueue *vq,
   if (writable > 0)
     {
       sem_t sem;
-      struct virtio_gpu_cookie_s cookie;
 
-      virtio_free_buf(vq->vq_dev, buf);
+      if (buf)
+        {
+          virtio_gpu_free_cmd(priv, buf);
+        }
+
       nxsem_init(&sem, 0, 0);
-      cookie.blocking = true;
-      cookie.p = &sem;
       flags = spin_lock_irqsave(&priv->lock);
-      ret = virtqueue_add_buffer(vq, buf_list, readable, writable, &cookie);
+      ret = virtqueue_add_buffer(vq, buf_list, readable, writable,
+                                 (FAR void *)((uintptr_t)&sem | 0x01));
       if (ret >= 0)
         {
           virtqueue_kick(vq);
@@ -185,36 +229,18 @@ static int virtio_gpu_send_cmd(FAR struct virtqueue *vq,
     }
   else
     {
-      FAR struct virtio_gpu_cookie_s *cookie;
+      flags = spin_lock_irqsave(&priv->lock);
+      ret = virtqueue_add_buffer(vq, buf_list, readable, writable, buf);
+      if (ret >= 0)
+        {
+          virtqueue_kick(vq);
+        }
 
-      cookie = kmm_malloc(sizeof(*cookie));
-      if (cookie == NULL)
-        {
-          vrterr("ERROR: Failed to allocate cookie memory");
-          ret = -ENOMEM;
-        }
-      else
-        {
-          cookie->blocking = false;
-          cookie->p = buf;
-          flags = spin_lock_irqsave(&priv->lock);
-          ret = virtqueue_add_buffer(vq, buf_list, readable, writable,
-                                     cookie);
-          if (ret >= 0)
-            {
-              virtqueue_kick(vq);
-              spin_unlock_irqrestore(&priv->lock, flags);
-            }
-          else
-            {
-              spin_unlock_irqrestore(&priv->lock, flags);
-              kmm_free(cookie);
-            }
-        }
+      spin_unlock_irqrestore(&priv->lock, flags);
 
       if (buf && ret < 0)
         {
-          virtio_free_buf(vq->vq_dev, buf);
+          virtio_gpu_free_cmd(priv, buf);
         }
     }
 
@@ -228,19 +254,18 @@ static int virtio_gpu_send_cmd(FAR struct virtqueue *vq,
 static void virtio_gpu_done(FAR struct virtqueue *vq)
 {
   FAR struct virtio_gpu_priv_s *priv = vq->vq_dev->priv;
-  FAR struct virtio_gpu_cookie_s *cookie;
+  FAR void *cookie;
 
   while ((cookie =
           virtqueue_get_buffer_lock(vq, NULL, NULL, &priv->lock)) != NULL)
     {
-      if (cookie->blocking)
+      if ((uintptr_t)cookie & 0x01)
         {
-          nxsem_post((FAR sem_t *)cookie->p);
+          nxsem_post((FAR sem_t *)((uintptr_t)cookie ^ 0x01));
         }
       else
         {
-          virtio_free_buf(vq->vq_dev, cookie->p);
-          kmm_free(cookie);
+          virtio_gpu_free_cmd(priv, cookie);
         }
     }
 }
@@ -483,7 +508,7 @@ static int virtio_gpu_flush_resource(FAR struct virtio_gpu_priv_s *priv,
   FAR struct virtio_gpu_resource_flush *cmd;
   struct virtqueue_buf vb;
 
-  cmd = virtio_zalloc_buf(priv->vdev, sizeof(*cmd), 16);
+  cmd = virtio_gpu_zalloc_cmd(priv);
   if (cmd == NULL)
     {
       vrterr("ERROR: Failed to allocate cmd buffer");
