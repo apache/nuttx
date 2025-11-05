@@ -137,11 +137,21 @@ static inline_function void wd_expiration(clock_t ticks)
     {
       wdog = list_first_entry(&g_wdactivelist, struct wdog_s, node);
 
-      /* Check if expected time is expired */
+      /* Check if watchdog has expired;
+       * re-evaluate after updating current ticks if needed
+       */
 
-      if (!clock_compare(wdog->expired, ticks))
+      bool expired = clock_compare(wdog->expired, ticks);
+
+      if (!expired)
         {
-          break;
+          ticks = clock_systime_ticks();
+          expired = clock_compare(wdog->expired, ticks);
+
+          if (!expired)
+            {
+              break;
+            }
         }
 
       /* Remove the watchdog from the head of the list */
