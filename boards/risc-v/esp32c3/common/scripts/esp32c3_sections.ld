@@ -569,7 +569,8 @@ SECTIONS
   .rtc.text :
   {
     . = ALIGN(4);
-    *(.rtc.literal .rtc.text)
+    *(.rtc.literal .rtc.literal.*)
+    *(.rtc.text .rtc.text.*)
     *(.rtc.entry.text)
     . += 16;
     . = ALIGN(4);
