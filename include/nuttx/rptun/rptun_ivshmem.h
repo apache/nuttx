@@ -53,6 +53,33 @@ extern "C"
 
 int pci_register_rptun_ivshmem_driver(void);
 
+/****************************************************************************
+ * Name: pci_register_rptun_ivshmem_slave_driver
+ *
+ * Description:
+ *   Register the RPMsg RPTUN ivshmem driver configuration.
+ *   This function initializes the shared resource table for RPMsg
+ *   communication and registers the ivshmem driver with the specified
+ *   CPU name and driver ID. It is typically called during system
+ *   initialization to set up inter-processor communication (IPC)
+ *   between RPMsg peers.
+ *
+ * Input Parameters:
+ *   cpuname   - The remote CPU name string
+ *   drvid     - Driver ID for registration
+ *   rsc_table - Pointer to the resource table header
+ *   rsc_size  - Size of the resource table header
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int pci_register_rptun_ivshmem_slave_driver(
+      FAR const char *cpuname, int drvid,
+      FAR const struct resource_table *rsc_table,
+      size_t rsc_size);
+
 #ifdef __cplusplus
 }
 #endif
