@@ -95,6 +95,8 @@ struct audio_upperhalf_s
   FAR struct audio_lowerhalf_s *dev;     /* lower-half state */
   FAR struct audio_openpriv_s  *head;    /* Appl private info list */
   struct audio_status_s        *status;  /* lowerhalf driver status */
+  struct file                  file;     /* dump file */
+  bool                         dump;     /* dump started */
 };
 
 /****************************************************************************
@@ -866,6 +868,48 @@ static int audio_enqueuebuffer(FAR struct file *filep,
   return ret;
 }
 
+static int audio_dump(FAR struct audio_upperhalf_s *upper, FAR char *path)
+{
+  int ret = OK;
+
+  if (path == NULL)
+    {
+      if (upper->dump)
+        {
+          ret = file_close(&upper->file);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          upper->dump = false;
+        }
+
+      return ret;
+    }
+
+  if (upper->dump)
+    {
+      ret = file_close(&upper->file);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      upper->dump = false;
+    }
+
+  ret = file_open(&upper->file, path,
+                  O_WRONLY | O_TRUNC | O_CREAT | O_CLOEXEC, 0666);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  upper->dump = true;
+  return ret;
+}
+
 /****************************************************************************
  * Name: audio_ioctl
  *
@@ -1232,6 +1276,12 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      case AUDIOIOC_DUMP:
+        {
+          ret = audio_dump(upper, (FAR char *)arg);
+        }
+        break;
+
       /* Any unrecognized IOCTL commands might be
        * platform-specific ioctl commands
        */
@@ -1436,6 +1486,11 @@ static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
   irqstate_t flags;
 
   audinfo("Entry\n");
+
+  if (upper->dump && !up_interrupt_context())
+    {
+      file_write(&upper->file, apb->samp, apb->nbytes);
+    }
 
   if (upper->info.type == AUDIO_TYPE_OUTPUT)
     {

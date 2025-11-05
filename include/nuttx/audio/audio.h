@@ -120,6 +120,7 @@
 #define AUDIOIOC_GETAUDIOINFO       _AUDIOIOC(22)
 #define AUDIOIOC_GETSTATUS          _AUDIOIOC(23)
 #define AUDIOIOC_RESETSTATUS        _AUDIOIOC(24)
+#define AUDIOIOC_DUMP               _AUDIOIOC(25)
 
 /* Audio Device Types *******************************************************/
 
