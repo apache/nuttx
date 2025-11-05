@@ -917,12 +917,21 @@ static void rptun_check_peer_status(FAR struct rptun_priv_s *priv)
              RPTUN_GET_CPUNAME(priv->dev));
       PANIC();
     }
-#ifdef CONFIG_BOARDCTL_RESET
   else if(status != 0u)
     {
-      boardctl(BOARDIOC_RESET, RPTUN_REASON_GET(status));
-    }
+      if (RPTUN_STATUS_CHECK(status, BOARDIOC_SOFTRESETCAUSE_POWEROFF))
+        {
+#ifdef CONFIG_BOARDCTL_POWEROFF
+          boardctl(BOARDIOC_POWEROFF, 0u);
 #endif
+        }
+      else
+        {
+#ifdef CONFIG_BOARDCTL_RESET
+          boardctl(BOARDIOC_RESET, RPTUN_REASON_GET(status));
+#endif
+        }
+    }
 }
 
 static int rptun_callback(FAR void *arg, uint32_t vqid)
@@ -1098,6 +1107,7 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
 
 static int rptun_dev_reset(FAR struct rptun_priv_s *priv, unsigned long val)
 {
+  int timeout = CONFIG_RPTUN_STATUS_TIMEOUT_MS;
   int ret = -ENOTSUP;
 
   if (priv->rproc.rsc_table == NULL)
@@ -1113,7 +1123,18 @@ static int rptun_dev_reset(FAR struct rptun_priv_s *priv, unsigned long val)
   if (ret == -ENOTSUP)
     {
       rptun_set_status(priv, val);
-      ret = OK;
+
+      ret = -ETIMEDOUT;
+      while (timeout-- > 0)
+        {
+          if (RPTUN_STATUS_CHECK(rptun_get_peer_status(priv), val))
+            {
+              ret = OK;
+              break;
+            }
+
+          up_udelay(1000);
+        }
     }
 
   return ret;
@@ -1325,12 +1346,24 @@ static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
 static int rptun_notifier(FAR struct notifier_block *block,
                           unsigned long action, void *data)
 {
+  unsigned long val;
+
   if (block == &g_rptun_reboot_nb)
     {
-      if (action == SYS_RESTART || action == SYS_POWER_OFF)
+      if (action == SYS_POWER_OFF)
         {
-          rptun_ioctl_foreach(NULL, RPTUNIOC_RESET, (unsigned long)data);
+          val = BOARDIOC_SOFTRESETCAUSE_POWEROFF;
         }
+      else if (action == SYS_HALT)
+        {
+          val = BOARDIOC_SOFTRESETCAUSE_ASSERT;
+        }
+      else
+        {
+          val = (unsigned long)data;
+        }
+
+      rptun_ioctl_foreach(NULL, RPTUNIOC_RESET, val);
     }
   else if (action == PANIC_KERNEL_FINAL)
     {
