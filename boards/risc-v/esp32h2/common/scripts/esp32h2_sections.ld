@@ -149,6 +149,7 @@ SECTIONS
     *libarch.a:*rtc_clk_init.*(.text .text.* .literal .literal.*)
     *libarch.a:*pmu_sleep.*(.text .text.* .literal .literal.*)
     *libarch.a:*pmu_param.*(.text .text.* .literal .literal.*)
+    *libarch.a:*sleep_modes.*(.text .text.* .literal .literal.*)
     *libarch.a:*rtc_time.*(.text .text.* .literal .literal.*)
     *libarch.a:*systimer.*(.text .text.* .literal .literal.*)
     *libarch.a:*systimer_hal.*(.text .text.* .literal .literal.*)
@@ -312,6 +313,7 @@ SECTIONS
     *libarch.a:*rtc_clk_init.*(.rodata .rodata.*)
     *libarch.a:*pmu_param.*(.rodata .rodata.*)
     *libarch.a:*pmu_sleep.*(.rodata .rodata.*)
+    *libarch.a:*sleep_modes.*(.rodata .rodata.*)
     *libarch.a:*rtc_time.*(.rodata .rodata.*)
     *libarch.a:*systimer.*(.rodata .rodata.*)
     *libarch.a:*systimer_hal.*(.rodata .rodata.*)
@@ -557,7 +559,8 @@ SECTIONS
     _rtc_text_start = ABSOLUTE(.);
     *(.rtc.entry.text)
 
-    *(.rtc.literal .rtc.text)
+    *(.rtc.literal .rtc.literal.*)
+    *(.rtc.text .rtc.text.*)
     _rtc_text_end = ABSOLUTE(.);
   } >rtc_iram_seg
 
