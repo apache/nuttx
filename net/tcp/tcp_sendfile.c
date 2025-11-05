@@ -511,10 +511,10 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
 
   /* Set up the callback in the connection */
 
-  state.snd_cb->flags    = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
-                            TCP_DISCONN_EVENTS);
-  state.snd_cb->priv     = (FAR void *)&state;
-  state.snd_cb->event    = sendfile_eventhandler;
+  state.snd_cb->flags = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
+                         TCP_DISCONN_EVENTS);
+  state.snd_cb->priv  = (FAR void *)&state;
+  state.snd_cb->event = sendfile_eventhandler;
 
   /* Notify the device driver of the availability of TX data */
 

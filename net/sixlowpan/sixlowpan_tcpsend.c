@@ -628,7 +628,7 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
           /* Set up the callback in the connection */
 
           sinfo.s_cb->flags = (NETDEV_DOWN | TCP_ACKDATA | TCP_REXMIT |
-                               TCP_DISCONN_EVENTS | WPAN_POLL);
+                               TCP_DISCONN_EVENTS | TCP_POLL);
           sinfo.s_cb->priv  = (FAR void *)&sinfo;
           sinfo.s_cb->event = tcp_send_eventhandler;
 
@@ -640,7 +640,7 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
 
           /* Notify the IEEE802.15.4 MAC that we have data to send. */
 
-          netdev_txnotify_dev(dev);
+          netdev_txnotify_dev(dev, TCP_POLL);
 
           /* Wait for the send to complete or an error to occur.
            * net_sem_timedwait will also terminate if a signal is received.

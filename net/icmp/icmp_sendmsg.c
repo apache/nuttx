@@ -403,7 +403,7 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
       /* Notify the device driver of the availability of TX data */
 
-      netdev_txnotify_dev(dev);
+      netdev_txnotify_dev(dev, ICMP_POLL);
 
       /* Wait for either the send to complete or for timeout to occur.
        * net_sem_timedwait will also terminate if a signal is received.

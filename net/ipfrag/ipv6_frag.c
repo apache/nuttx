@@ -662,7 +662,7 @@ int32_t ipv6_fragout(FAR struct net_driver_s *dev, uint16_t mtu)
   g_netstats.ipv6.sent += nfrags - 1;
 #endif
 
-  netdev_txnotify_dev(dev);
+  netdev_txnotify_dev(dev, IPFRAG_POLL);
 
   return OK;
 

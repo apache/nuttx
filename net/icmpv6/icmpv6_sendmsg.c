@@ -384,9 +384,9 @@ ssize_t icmpv6_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   state.snd_cb = icmpv6_callback_alloc(dev, conn);
   if (state.snd_cb)
     {
-      state.snd_cb->flags   = (ICMPv6_POLL | NETDEV_DOWN);
-      state.snd_cb->priv    = (FAR void *)&state;
-      state.snd_cb->event   = sendto_eventhandler;
+      state.snd_cb->flags = (ICMPv6_POLL | NETDEV_DOWN);
+      state.snd_cb->priv  = (FAR void *)&state;
+      state.snd_cb->event = sendto_eventhandler;
 
       /* Setup to receive ICMPv6 ECHO replies */
 
@@ -399,7 +399,7 @@ ssize_t icmpv6_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
       /* Notify the device driver of the availability of TX data */
 
-      netdev_txnotify_dev(dev);
+      netdev_txnotify_dev(dev, ICMPv6_POLL);
 
       /* Wait for either the send to complete or for timeout to occur.
        * net_sem_timedwait will also terminate if a signal is received.

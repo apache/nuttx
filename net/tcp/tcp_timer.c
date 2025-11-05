@@ -155,7 +155,7 @@ static void tcp_timer_expiry(FAR void *arg)
           tcp_conn_list_unlock();
           conn->timeout = true;
           netdev_lock(conn->dev);
-          netdev_txnotify_dev(conn->dev);
+          netdev_txnotify_dev(conn->dev, TCP_POLL);
           netdev_unlock(conn->dev);
           return;
         }

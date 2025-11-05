@@ -597,10 +597,10 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
           /* Set up the callback in the connection */
 
-          state.snd_cb->flags   = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
-                                   TCP_DISCONN_EVENTS | TCP_TXCLOSE);
-          state.snd_cb->priv    = (FAR void *)&state;
-          state.snd_cb->event   = tcpsend_eventhandler;
+          state.snd_cb->flags = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
+                                 TCP_DISCONN_EVENTS | TCP_TXCLOSE);
+          state.snd_cb->priv  = (FAR void *)&state;
+          state.snd_cb->event = tcpsend_eventhandler;
 
           /* Notify the device driver of the availability of TX data */
 

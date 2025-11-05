@@ -411,6 +411,10 @@ struct net_driver_s
 
   net_ipv6addr_t d_ipv6draddr;  /* Default router IPv6 address */
 #endif /* CONFIG_NET_IPv6 */
+  uint32_t d_polltype;          /* The collection of protocols that need to
+                                 * be processed in devif_poll
+                                 */
+
   /* This is a new design that uses d_iob as packets input and output
    * buffer which used by some NICs such as celluler net driver. Case for
    * data input, note that d_iob maybe a linked chain only when using

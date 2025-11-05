@@ -412,7 +412,7 @@ int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
 
       dev->d_iob = NULL;
       dev->d_buf = NULL;
-      netdev_txnotify_dev(dev);
+      netdev_txnotify_dev(dev, ARP_POLL);
       netdev_iob_replace(dev, iob);
       dev->d_len = len;
     }

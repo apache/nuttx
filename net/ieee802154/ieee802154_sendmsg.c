@@ -492,13 +492,13 @@ static ssize_t ieee802154_sendto(FAR struct socket *psock,
         {
           /* Set up the callback in the connection */
 
-          state.is_cb->flags = PKT_POLL;
+          state.is_cb->flags = IEEE802154_POLL;
           state.is_cb->priv  = (FAR void *)&state;
           state.is_cb->event = ieee802154_sendto_eventhandler;
 
           /* Notify the device driver that new TX data is available. */
 
-          netdev_txnotify_dev(&radio->r_dev);
+          netdev_txnotify_dev(&radio->r_dev, IEEE802154_POLL);
 
           /* Wait for the send to complete or an error to occur.
            * net_sem_wait will also terminate if a signal is received.

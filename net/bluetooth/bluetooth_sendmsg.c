@@ -338,13 +338,13 @@ static ssize_t bluetooth_sendto(FAR struct socket *psock,
         {
           /* Set up the callback in the connection */
 
-          state.is_cb->flags = PKT_POLL;
+          state.is_cb->flags = BLUETOOTH_POLL;
           state.is_cb->priv  = (FAR void *)&state;
           state.is_cb->event = bluetooth_sendto_eventhandler;
 
           /* Notify the device driver that new TX data is available. */
 
-          netdev_txnotify_dev(&radio->r_dev);
+          netdev_txnotify_dev(&radio->r_dev, BLUETOOTH_POLL);
 
           /* Wait for the send to complete or an error to occur.
            * net_sem_wait will also terminate if a signal is received.
