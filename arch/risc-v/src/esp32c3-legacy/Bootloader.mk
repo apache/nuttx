@@ -143,17 +143,17 @@ ifeq ($(CONFIG_ESP32C3_SECURE_BOOT_BUILD_SIGNED_BINARIES),y)
 		echo ""; \
 		echo "$(RED)bootloader error:$(RST) Bootloader signing key $(BOLD)$(CONFIG_ESP32C3_SECURE_BOOT_BOOTLOADER_SIGNING_KEY)$(RST) does not exist."; \
 		echo "Generate using:"; \
-		echo "    espsecure.py generate_signing_key --version 2 $(CONFIG_ESP32C3_SECURE_BOOT_BOOTLOADER_SIGNING_KEY)"; \
+		echo "    espsecure generate_signing_key --version 2 $(CONFIG_ESP32C3_SECURE_BOOT_BOOTLOADER_SIGNING_KEY)"; \
 		echo ""; \
 		exit 1; \
 	fi
 	$(Q) echo "Signing Bootloader"
-	espsecure.py sign_data --version 2 --keyfile $(BOOTLOADER_SIGN_KEY) -o $(BOOTLOADER_SIGNED_BIN) $(BOOTLOADER_BIN)
+	espsecure sign_data --version 2 --keyfile $(BOOTLOADER_SIGN_KEY) -o $(BOOTLOADER_SIGNED_BIN) $(BOOTLOADER_BIN)
 else
 	$(Q) echo ""
 	$(Q) echo "$(YELLOW)Bootloader not signed. Sign the bootloader before flashing.$(RST)"
 	$(Q) echo "To sign the bootloader, you can use this command:"
-	$(Q) echo "    espsecure.py sign_data --version 2 --keyfile $(BOOTLOADER_SIGN_KEY) -o mcuboot-esp32c3.signed.bin mcuboot-esp32c3.bin"
+	$(Q) echo "    espsecure sign_data --version 2 --keyfile $(BOOTLOADER_SIGN_KEY) -o mcuboot-esp32c3.signed.bin mcuboot-esp32c3.bin"
 	$(Q) echo ""
 endif
 endif
