@@ -413,3 +413,114 @@ the following paragraphs.
   -  ``NOBUFS``. Insufficient resources are available in the system to
      complete the call.
 
+=============
+DNS Functions
+=============
+
+NuttX provides DNS resolver functions for configuring and managing DNS
+servers. These functions are defined in ``nuttx/net/dns.h`` and allow
+applications to add, remove, and query DNS nameservers.
+
+  - :c:func:`dns_add_nameserver`
+  - :c:func:`dns_del_nameserver`
+  - :c:func:`dns_del_nameserver_by_index`
+  - :c:func:`dns_default_nameserver`
+  - :c:func:`dns_foreach_nameserver`
+  - :c:func:`dns_register_notify`
+  - :c:func:`dns_unregister_notify`
+  - :c:func:`dns_set_queryfamily`
+
+.. c:function:: int dns_add_nameserver(const struct sockaddr *addr, socklen_t addrlen);
+
+  Configure a DNS server to use for queries. Set the port number to zero
+  to use the default DNS server port (53).
+
+  :param addr: Address of the DNS server (sockaddr_in or sockaddr_in6).
+  :param addrlen: Length of the address structure.
+
+  :return: 0 on success; -1 on error with ``errno`` set appropriately:
+
+    -  ``EINVAL``. Invalid argument.
+    -  ``ENOMEM``. Insufficient memory to add the new DNS server.
+
+.. c:function:: int dns_del_nameserver(const struct sockaddr *addr, socklen_t addrlen);
+
+  Remove a DNS server from the list by address.
+
+  :param addr: Address of the DNS server to remove.
+  :param addrlen: Length of the address structure.
+
+  :return: 0 on success; -1 on error with ``errno`` set appropriately:
+
+    -  ``EINVAL``. Invalid argument.
+    -  ``ENOENT``. The specified DNS server was not found.
+
+.. c:function:: int dns_del_nameserver_by_index(int index);
+
+  Remove a DNS server from the list by index (0-based).
+
+  :param index: Index of the DNS server in the list (0-based).
+
+  :return: 0 on success; -1 on error with ``errno`` set appropriately:
+
+    -  ``EINVAL``. Invalid index.
+
+.. c:function:: int dns_default_nameserver(void);
+
+  Reset the resolver to use only the default DNS server, if any. This function
+  clears all added DNS servers and restores the default configuration.
+
+  :return: 0 on success; -1 on error.
+
+.. c:function:: int dns_foreach_nameserver(dns_callback_t callback, void *arg);
+
+  Traverse each nameserver entry and perform the provided callback.
+
+  :param callback: Callback function to invoke for each DNS server. The callback
+                   prototype is: ``int (*callback)(void *arg, struct sockaddr *addr, socklen_t addrlen)``
+  :param arg: User argument to pass to the callback function.
+
+  :return: 0 on success; -1 on error with ``errno`` set appropriately.
+           If the callback returns a non-zero value, traversal stops and that value is returned.
+
+    -  ``EINVAL``. Callback function pointer is NULL.
+
+.. c:function:: int dns_register_notify(dns_callback_t callback, void *arg);
+
+  Register a callback function to receive nameserver change notifications. When the
+  DNS server list changes (servers added or removed), registered callbacks will be invoked.
+
+  :param callback: Callback function to invoke on nameserver changes.
+  :param arg: User argument to pass to the callback function.
+
+  :return: 0 on success; -1 on error with ``errno`` set appropriately:
+
+    -  ``EINVAL``. Callback function pointer is NULL.
+    -  ``ENOMEM``. Insufficient memory to register the notification.
+
+.. c:function:: int dns_unregister_notify(dns_callback_t callback, void *arg);
+
+  Unsubscribe from nameserver change notifications.
+
+  :param callback: Callback function to unregister.
+  :param arg: User argument provided during registration.
+
+  :return: 0 on success; -1 on error with ``errno`` set appropriately:
+
+    -  ``EINVAL``. Callback function pointer is NULL.
+    -  ``ENOENT``. The specified callback was not found.
+
+.. c:function:: int dns_set_queryfamily(sa_family_t family);
+
+  Configure the address family to be used for queries.
+
+  :param family: Address family, can be:
+
+    -  ``AF_INET``: Use IPv4 for DNS queries.
+    -  ``AF_INET6``: Use IPv6 for DNS queries.
+    -  ``AF_UNSPEC``: Automatic selection (prefer IPv6, fallback to IPv4).
+
+  :return: 0 on success; -1 on error with ``errno`` set appropriately:
+
+    -  ``EINVAL``. Unsupported address family.
+
