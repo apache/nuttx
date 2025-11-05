@@ -459,6 +459,9 @@ static int audio_configure(FAR struct file *filep,
 
   DEBUGASSERT(lower->ops->configure != NULL);
 
+  audinfo("configure: status=%d ac_type: %" PRIu8 " \n",
+    upper->status->state, caps->ac_type);
+
   if (upper->status->state == AUDIO_STATE_OPEN ||
       (caps->ac_type != AUDIO_TYPE_INPUT &&
        caps->ac_type != AUDIO_TYPE_OUTPUT))
@@ -514,6 +517,7 @@ static int audio_pause(FAR struct file *filep)
   DEBUGASSERT(upper != NULL && lower->ops->pause != NULL);
 
   nstate = audio_getnstate(upper, priv);
+  audinfo("pause: nstate=%d, status=%d\n", nstate, upper->status->state);
   if (upper->status->state == AUDIO_STATE_RUNNING &&
       nstate <= AUDIO_STATE_PAUSED)
     {
@@ -555,6 +559,8 @@ static int audio_resume(FAR struct file *filep)
   int ret;
 
   DEBUGASSERT(upper != NULL && lower->ops->resume != NULL);
+
+  audinfo("resume: status=%d\n", upper->status->state);
 
   if (upper->status->state == AUDIO_STATE_PAUSED ||
       upper->status->state == AUDIO_STATE_XRUN)
@@ -604,6 +610,7 @@ static int audio_start(FAR struct file *filep)
     }
   else if (upper->status->state == AUDIO_STATE_PAUSED)
     {
+      audinfo("resume: status=%d\n", upper->status->state);
       return audio_resume(filep);
     }
 
@@ -613,6 +620,8 @@ static int audio_start(FAR struct file *filep)
       upper->status->state == AUDIO_STATE_XRUN)
     {
       /* Invoke the bottom half method to start the audio stream */
+
+      audinfo("start: status=%d\n", upper->status->state);
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
       ret = lower->ops->start(lower, session);
@@ -663,6 +672,7 @@ static int audio_stop(FAR struct file *filep)
        upper->status->state == AUDIO_STATE_PAUSED) &&
       nstate == AUDIO_STATE_OPEN)
     {
+      audinfo("stop: nstate=%d status=%d\n", nstate, upper->status->state);
 #ifdef CONFIG_AUDIO_MULTI_SESSION
       ret = lower->ops->stop(lower, session);
 #else
@@ -684,6 +694,7 @@ static int audio_stop(FAR struct file *filep)
     }
   else if (nstate == AUDIO_STATE_PAUSED)
     {
+      audinfo("pause: nstate=%d status=%d\n", nstate, upper->status->state);
       ret = audio_pause(filep);
       if (ret != OK)
         {
