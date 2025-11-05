@@ -453,6 +453,9 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
 
       if (fifo->rx_head == fifo->rx_tail)
         {
+          /* This happens either due to bug or on reader close. */
+
+          ret = -EIO;
           canerr("RX FIFO sem posted but FIFO is empty.\n");
           goto return_with_irqdisabled;
         }
