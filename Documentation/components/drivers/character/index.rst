@@ -62,6 +62,7 @@ Character device drivers have these properties:
   crypto/index.rst
   eeprom.rst
   efuse.rst
+  gpio.rst
   i2s.rst
   input/index.rst
   ipcc.rst
