@@ -37,7 +37,7 @@ ifneq ($(CONFIG_FS_LOCK_BUCKET_SIZE),0)
 CSRCS += fs_lock.c
 endif
 
-ifneq ($(CONFIG_PSEUDOFS_SOFTLINKS),0)
+ifneq ($(CONFIG_FS_LINKS),0)
 CSRCS += fs_symlink.c fs_readlink.c
 endif
 

@@ -156,7 +156,7 @@ int nx_unlink(FAR const char *pathname)
         }
 #endif
       else if (
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
       INODE_IS_SOFTLINK(inode) || INODE_IS_HARDLINK(inode) ||
 #endif
       INODE_IS_PSEUDODIR(inode))

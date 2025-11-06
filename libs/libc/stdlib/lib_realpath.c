@@ -41,7 +41,7 @@
 FAR char *lib_realpath(FAR const char *path, FAR char *resolved,
                        bool notfollow)
 {
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
   FAR char *wbuf[2] =
     {
     };
@@ -124,7 +124,7 @@ loop:
 
       *p = '\0';
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
       if (wbuf[0] != NULL)
         {
           lib_free(wbuf[0]);
@@ -198,7 +198,7 @@ loop:
       goto out;
     }
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
   if (S_ISLNK(sb.st_mode))
     {
       if (nlnk++ >= SYMLOOP_MAX)
@@ -267,7 +267,7 @@ loop:
 
 out:
   lib_free(fres);
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
   if (wbuf[0] != NULL)
     {
       lib_free(wbuf[0]);

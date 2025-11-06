@@ -66,7 +66,7 @@ if(NOT "${CONFIG_FS_LOCK_BUCKET_SIZE}" STREQUAL "0")
   list(APPEND SRCS fs_lock.c)
 endif()
 
-if(NOT "${CONFIG_PSEUDOFS_SOFTLINKS}" STREQUAL "0")
+if(NOT "${CONFIG_FS_LINKS}" STREQUAL "0")
   list(APPEND SRCS fs_symlink.c fs_readlink.c)
 endif()
 

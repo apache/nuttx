@@ -322,7 +322,7 @@ static int read_pseudodir(FAR struct fs_dirent_s *dir,
 
   strlcpy(entry->d_name, next->i_name, sizeof(entry->d_name));
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
   if (INODE_IS_HARDLINK(next))
     {
       DEBUGASSERT(next->i_private != NULL);
@@ -350,7 +350,7 @@ static int read_pseudodir(FAR struct fs_dirent_s *dir,
         }
       else
 #endif
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
       if (INODE_IS_SOFTLINK(next))
         {
           entry->d_type = DTYPE_LINK;

@@ -44,7 +44,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
 
 /****************************************************************************
  * Public Functions
@@ -211,15 +211,15 @@ errout:
   return ERROR;
 }
 
-#else /* CONFIG_PSEUDOFS_SOFTLINKS */
+#else /* CONFIG_FS_LINKS */
 
 /****************************************************************************
  * Name: link
  *
  * Description:
- *   When CONFIG_PSEUDOFS_SOFTLINKS is disabled, link() is not supported.
- *   The symbol is still provided so that applications referencing link()
- *   continue to link, but the call always fails with ENOSYS.
+ *   When CONFIG_FS_LINKS is disabled, link() is not supported.  The symbol
+ *   is still provided so that applications referencing link() continue to
+ *   link, but the call always fails with ENOSYS.
  *
  ****************************************************************************/
 
@@ -232,4 +232,4 @@ int link(FAR const char *path1, FAR const char *path2)
   return ERROR;
 }
 
-#endif /* CONFIG_PSEUDOFS_SOFTLINKS */
+#endif /* CONFIG_FS_LINKS */

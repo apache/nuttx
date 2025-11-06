@@ -425,7 +425,7 @@ int inode_chstat(FAR struct inode *inode,
 
   DEBUGASSERT(inode != NULL && buf != NULL);
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
   /* Handle softlinks differently.  Just call chstat() recursively on the
    * target of the softlink.
    */

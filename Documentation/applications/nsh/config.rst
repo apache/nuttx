@@ -73,7 +73,7 @@ Command                Depends on Configuration                    Can Be Disabl
 :ref:`cmdkill`         ``CONFIG_NSH_DISABLE_KILL``                 .
 :ref:`cmdlosetup`      ! ``CONFIG_DISABLE_MOUNTPOINT`` &&          ``CONFIG_NSH_DISABLE_LOSETUP``
                        ``CONFIG_DEV_LOOP``
-:ref:`cmdln`           ``CONFIG_PSEUDOFS_SOFTLINKS``               ``CONFIG_NSH_DISABLE_LN``
+:ref:`cmdln`           ``CONFIG_FS_LINKS``                         ``CONFIG_NSH_DISABLE_LN``
 :ref:`cmdls`           ``CONFIG_NSH_DISABLE_LS``                   .
 :ref:`cmdlsmod`        ``CONFIG_MODULE`` && ``CONFIG_FS_PROCFS``   ``CONFIG_NSH_DISABLE_MODCMDS``
                        && |br|
@@ -106,7 +106,7 @@ Command                Depends on Configuration                    Can Be Disabl
 :ref:`cmdput`          ``CONFIG_NET`` && ``CONFIG_NET_UDP`` &&     ``CONFIG_NSH_DISABLE_PUT``
                        ``MTU >= 558`` [#1]_, [#2]_
 :ref:`cmdpwd`          !  ``CONFIG_DISABLE_ENVIRON``               ``CONFIG_NSH_DISABLE_PWD``
-:ref:`cmdreadlink`     ``CONFIG_PSEUDOFS_SOFTLINKS``               ``CONFIG_NSH_DISABLE_READLINK``
+:ref:`cmdreadlink`     ``CONFIG_FS_LINKS``                         ``CONFIG_NSH_DISABLE_READLINK``
 :ref:`cmdreboot`       ``CONFIG_BOARD_RESET``                      ``CONFIG_NSH_DISABLE_REBOOT``
 :ref:`cmdrm`           ! ``CONFIG_DISABLE_MOUNTPOINT`` \|\|        ``CONFIG_NSH_DISABLE_RM``
                        ! ``CONFIG_DISABLE_PSEUDOFS_OPERATIONS``
