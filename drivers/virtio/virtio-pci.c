@@ -33,6 +33,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/percpu.h>
 #include <nuttx/virtio/virtio-pci.h>
 
 #include "virtio-pci.h"
@@ -70,12 +71,13 @@ static const struct pci_device_id_s g_virtio_pci_id_table[] =
   { 0, }
 };
 
-static struct pci_driver_s g_virtio_pci_drv =
+static DEFINE_PER_CPU_BMP(struct pci_driver_s, g_virtio_pci_drv) =
 {
   g_virtio_pci_id_table,
   virtio_pci_probe,
   virtio_pci_remove
 };
+#define g_virtio_pci_drv this_cpu_var_bmp(g_virtio_pci_drv)
 
 static const struct virtio_memory_ops g_virtio_pci_mmops =
 {
