@@ -302,6 +302,7 @@ config ARCH_FAMILY_K60
 	bool
 	default n
 	select KINETIS_HAVE_UART5
+	select KINETIS_HAVE_FTM3
 
 config ARCH_FAMILY_K64
 	bool

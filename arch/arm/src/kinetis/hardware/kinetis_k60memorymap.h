@@ -142,6 +142,7 @@
 #define KINETIS_SPI2_BASE      0x400ac000  /* DSPI 2 */
 #define KINETIS_SDHC_BASE      0x400b1000  /* SDHC */
 #define KINETIS_FTM2_BASE      0x400b8000  /* FlexTimer 2 */
+#define KINETIS_FTM3_BASE      0x400b9000  /* FlexTimer 3 */
 #define KINETIS_ADC1_BASE      0x400bb000  /* Analog-to-digital converter (ADC) 1 */
 #define KINETIS_EMAC_BASE      0x400c0000  /* Ethernet MAC and IEEE 1588 timers */
 #define KINETIS_DAC0_BASE      0x400cc000  /* 12-bit digital-to-analog converter (DAC) 0 */
