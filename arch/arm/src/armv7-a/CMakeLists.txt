@@ -44,7 +44,6 @@ list(
   arm_mmu.c
   arm_prefetchabort.c
   arm_syscall.c
-  arm_tcbinfo.c
   arm_undefinedinsn.c
   arm_userfault.c
   arm_perf.c
