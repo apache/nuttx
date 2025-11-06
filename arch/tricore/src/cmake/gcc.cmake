@@ -202,3 +202,7 @@ endif()
 if(CONFIG_DEBUG_LINK_ORPHAN_WARN)
   add_link_options(-Wl,--orphan-handling=warn)
 endif()
+
+if(NOT CONFIG_ARCH_HAVE_FPU)
+  list(APPEND PLATFORM_FLAGS -msoft-sp-float -msoft-dp-float)
+endif()
