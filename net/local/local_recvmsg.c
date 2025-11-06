@@ -177,8 +177,7 @@ static void local_recvctl(FAR struct local_conn_s *conn,
     {
       fds[i] = file_dup(peer->lc_cfps[i], 0,
                         flags & MSG_CMSG_CLOEXEC ? O_CLOEXEC : 0);
-      file_close(peer->lc_cfps[i]);
-      kmm_free(peer->lc_cfps[i]);
+      file_put(peer->lc_cfps[i]);
       peer->lc_cfps[i] = NULL;
       peer->lc_cfpcount--;
       if (fds[i] < 0)
