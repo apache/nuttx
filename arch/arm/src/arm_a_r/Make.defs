@@ -22,6 +22,8 @@
 
 # Common ARM_A_R files
 
+CMN_CSRCS += arm_tcbinfo.c
+
 ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
   CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
 endif
