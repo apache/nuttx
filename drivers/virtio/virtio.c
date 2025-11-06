@@ -51,6 +51,7 @@ struct virtio_bus_s
   struct list_node device;     /* Wait match virtio device list */
   struct list_node driver;     /* Virtio driver list */
 };
+
 struct virtio_device_item_s
 {
   struct list_node      node;    /* list node */
