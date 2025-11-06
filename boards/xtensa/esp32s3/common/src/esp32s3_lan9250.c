@@ -187,8 +187,11 @@ static void lan9250_disable(const struct lan9250_lower_s *lower)
 static int lan9250_getmac(const struct lan9250_lower_s *lower, uint8_t *mac)
 {
   int fd;
-  int i;
   int ret;
+#ifndef CONFIG_ESP32S3_UNIVERSAL_MAC_ADDRESSES_FOUR
+  int i;
+  uint8_t tmp;
+#endif
 
   struct efuse_param_s param;
   struct efuse_desc_s mac_addr =
@@ -228,7 +231,7 @@ static int lan9250_getmac(const struct lan9250_lower_s *lower, uint8_t *mac)
   mac[5] += 3;
 #else
   mac[5] += 1;
-  uint8_t tmp = mac[0];
+  tmp = mac[0];
   for (i = 0; i < 64; i++)
     {
       mac[0] = tmp | 0x02;
