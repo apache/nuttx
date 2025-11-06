@@ -242,7 +242,7 @@ struct perf_event_s
   int oncpu;                                /* CPU number this event running on */
   int state;                                /* Event state */
   int attach_state;                         /* Attach states for this event */
-  uint64_t count;                           /* Count vaule for this event */
+  atomic_t count;                           /* Count vaule for this event */
   uint64_t child_count;                     /* Detached child events count */
   uint32_t sibling_num;                     /* sibling number for sibling_list */
   uint32_t child_num;                       /* Child number for child_list */
