@@ -105,16 +105,6 @@ int link(FAR const char *path1, FAR const char *path2)
 
   target = desc_path1.node;
 
-  /* Check if target inode is a mountpoint. */
-
-  if (INODE_IS_MOUNTPT(target))
-    {
-      /* Hard links within the mounted volume are not supported */
-
-      errcode = ENOSYS;
-      goto errout_with_target;
-    }
-
   if (INODE_GET_NLINK(target) >= _POSIX_LINK_MAX)
     {
       /* Too many links to the target inode */
@@ -144,9 +134,35 @@ int link(FAR const char *path1, FAR const char *path2)
       DEBUGASSERT(newinode != NULL);
       if (INODE_IS_MOUNTPT(newinode))
         {
-          /* Hard links within the mounted volume are not supported */
+          /* Check if path1 and path2 are on the same mountpoint */
 
-          errcode = ENOSYS;
+          if (newinode != target)
+            {
+              errcode = EXDEV;
+              goto errout_with_newinode;
+            }
+
+          if (target->u.i_mops && target->u.i_mops->link)
+            {
+              /* Perform the link operation using the relative path at the
+               * mountpoint.
+               */
+
+              ret = target->u.i_mops->link(target, desc_path1.relpath,
+                                           desc_path2.relpath);
+              if (ret < 0)
+                {
+                  errcode = -ret;
+                  goto errout_with_newinode;
+                }
+            }
+          else
+            {
+              /* Hard links within this type of fs are not supported */
+
+              errcode = ENOSYS;
+              goto errout_with_newinode;
+            }
         }
       else
 #endif
@@ -154,9 +170,8 @@ int link(FAR const char *path1, FAR const char *path2)
           /* A node already exists in the pseudofs at 'path2' */
 
           errcode = EEXIST;
+          goto errout_with_newinode;
         }
-
-      goto errout_with_newinode;
     }
 
   /* No inode exists that contains this path.  Create a new inode in the
@@ -165,6 +180,14 @@ int link(FAR const char *path1, FAR const char *path2)
 
   else
     {
+      /* Cannot link between pseudofs and other mountpoints */
+
+      if (INODE_IS_MOUNTPT(target))
+        {
+          errcode = EXDEV;
+          goto errout_with_target;
+        }
+
       /* Create an inode in the pseudo-filesystem at this path. */
 
       inode_lock();
