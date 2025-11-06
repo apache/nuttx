@@ -162,7 +162,6 @@ static inline_function void wd_expiration(clock_t ticks)
 
       func = wdog->func;
       arg  = wdog->arg;
-      wdog->func = NULL;
 
       /* Execute the watchdog function */
 
@@ -310,7 +309,6 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
     {
       reassess |= list_is_head(&g_wdactivelist, &wdog->node);
       list_delete(&wdog->node);
-      wdog->func = NULL;
     }
 
   reassess |= wd_insert(wdog, ticks, wdentry, arg);
@@ -337,7 +335,6 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
   if (WDOG_ISACTIVE(wdog))
     {
       list_delete(&wdog->node);
-      wdog->func = NULL;
     }
 
   wd_insert(wdog, ticks, wdentry, arg);

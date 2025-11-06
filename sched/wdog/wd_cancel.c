@@ -86,9 +86,6 @@ int wd_cancel(FAR struct wdog_s *wdog)
 
   list_delete(&wdog->node);
 
-  /* Mark the watchdog inactive */
-
-  wdog->func = NULL;
   spin_unlock_irqrestore(&g_wdspinlock, flags);
 
   if (head)
