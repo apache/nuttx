@@ -267,7 +267,7 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
 
   RESET_BUF(buf);
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
   if (INODE_IS_HARDLINK(inode))
     {
       DEBUGASSERT(inode->i_private != NULL);
@@ -326,7 +326,7 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
     }
   else
 #endif
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
   /* Handle softlinks differently.  Just call stat() recursively on the
    * target of the softlink.
    *
@@ -477,7 +477,7 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
   buf->st_ctim  = inode->i_ctime;
 #endif
   buf->st_ino   = inode->i_ino;
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
   buf->st_nlink = INODE_GET_NLINK(inode);
 #endif
 

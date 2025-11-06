@@ -29,7 +29,7 @@
 
 #include "libc.h"
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
 
 /****************************************************************************
  * Public Functions
@@ -119,4 +119,4 @@ int linkat(int olddirfd, FAR const char *path1,
   return ret;
 }
 
-#endif /* CONFIG_PSEUDOFS_SOFTLINKS */
+#endif /* CONFIG_FS_LINKS */

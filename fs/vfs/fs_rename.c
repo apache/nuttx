@@ -136,7 +136,7 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
        */
 
       if ((newinode->u.i_ops == NULL || newinode->i_child != NULL)
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
           && !INODE_IS_HARDLINK(newinode)
 #endif
          )
@@ -221,7 +221,7 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
 #endif
   newinode->i_private = oldinode->i_private; /* Per inode driver private data */
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
   /* Prevent the link target string from being deallocated.  The pointer to
    * the allocated link target path was copied above (under the guise of
    * u.i_ops).  Now we must nullify the u.i_link pointer so that it is not

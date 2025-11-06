@@ -285,7 +285,7 @@ SYSCALL_LOOKUP(munmap,                     2)
 SYSCALL_LOOKUP(munlock,                    2)
 SYSCALL_LOOKUP(munlockall,                 0)
 
-#if defined(CONFIG_PSEUDOFS_SOFTLINKS)
+#if defined(CONFIG_FS_LINKS)
   SYSCALL_LOOKUP(link,                     2)
   SYSCALL_LOOKUP(symlink,                  2)
   SYSCALL_LOOKUP(readlink,                 3)

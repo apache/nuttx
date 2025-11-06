@@ -128,7 +128,7 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
   inode = desc.node;
   DEBUGASSERT(inode != NULL);
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
   if (INODE_IS_HARDLINK(inode))
     {
       /* The inode is a hard link.  The actual inode is referenced

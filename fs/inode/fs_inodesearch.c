@@ -43,7 +43,7 @@
  ****************************************************************************/
 
 static int _inode_compare(FAR const char *fname, FAR struct inode *inode);
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
 static int _inode_linktarget(FAR struct inode *inode,
                              FAR struct inode_search_s *desc);
 #endif
@@ -144,7 +144,7 @@ static int _inode_compare(FAR const char *fname, FAR struct inode *inode)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
 static int _inode_linktarget(FAR struct inode *inode,
                              FAR struct inode_search_s *desc)
 {
@@ -297,7 +297,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
             {
               /* More nodes to be examined in the path "below" this one. */
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
               /* Was the node a soft link?  If so, then we need need to
                * continue below the target of the link, not the link itself.
                */
@@ -493,7 +493,7 @@ int inode_search(FAR struct inode_search_s *desc)
 
   ret = _inode_search(desc);
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
   if (ret >= 0)
     {
       FAR struct inode *inode;

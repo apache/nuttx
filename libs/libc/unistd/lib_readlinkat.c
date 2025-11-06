@@ -29,7 +29,7 @@
 
 #include "libc.h"
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
 
 /****************************************************************************
  * Public Functions
@@ -93,4 +93,4 @@ ssize_t readlinkat(int dirfd, FAR const char *path, FAR char *buf,
   return ret;
 }
 
-#endif /* CONFIG_PSEUDOFS_SOFTLINKS */
+#endif /* CONFIG_FS_LINKS */

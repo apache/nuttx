@@ -433,7 +433,7 @@ union inode_ops_u
 #ifdef CONFIG_FS_NAMED_EVENTS
   FAR struct nevent_inode_s            *i_nevent; /* Named event */
 #endif
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
   FAR char                             *i_link;   /* Full path to link target */
 #endif
 };

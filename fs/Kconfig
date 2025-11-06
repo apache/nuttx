@@ -115,7 +115,7 @@ config FS_PERMISSION
 	comment "UNIX filesystem permission support requires SCHED_USER_IDENTITY=y, PSEUDOFS_ATTRIBUTES=y and DISABLE_PSEUDOFS_OPERATIONS=n"
 		depends on !SCHED_USER_IDENTITY || !PSEUDOFS_ATTRIBUTES || DISABLE_PSEUDOFS_OPERATIONS
 
-config PSEUDOFS_SOFTLINKS
+config FS_LINKS
 	bool "Pseudo-filesystem soft links"
 	default n
 	depends on !DISABLE_PSEUDOFS_OPERATIONS

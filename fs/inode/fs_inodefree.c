@@ -53,7 +53,7 @@ void inode_free(FAR struct inode *inode)
 
   if (inode != NULL)
     {
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
       /* Symbol links should never have peers or children */
 
       DEBUGASSERT(!INODE_IS_SOFTLINK(inode) ||
@@ -65,7 +65,7 @@ void inode_free(FAR struct inode *inode)
       inode_free(inode->i_peer);
       inode_free(inode->i_child);
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
       /* If the inode is a symbolic link, the free the path to the linked
        * entity.
        */

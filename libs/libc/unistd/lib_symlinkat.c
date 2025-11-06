@@ -29,7 +29,7 @@
 
 #include "libc.h"
 
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#ifdef CONFIG_FS_LINKS
 
 /****************************************************************************
  * Public Functions
@@ -90,4 +90,4 @@ int symlinkat(FAR const char *path1, int dirfd, FAR const char *path2)
   return ret;
 }
 
-#endif /* CONFIG_PSEUDOFS_SOFTLINKS */
+#endif /* CONFIG_FS_LINKS */
