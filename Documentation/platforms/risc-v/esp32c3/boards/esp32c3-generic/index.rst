@@ -380,12 +380,14 @@ pm
 
 This config demonstrate the use of power management.
 You can use the ``pmconfig`` command to check current power state and time spent in other power states.
-Also you can define time will spend in standby mode::
+Also you can define time will spend in standby and sleep modes::
 
     $ make menuconfig
     -> Board Selection
         -> (15) PM_STANDBY delay (seconds)
            (0)  PM_STANDBY delay (nanoseconds)
+           (20) PM_SLEEP delay (seconds)
+           (0)  PM_SLEEP delay (nanoseconds)
 
 Timer wakeup is not only way to wake up the chip. Other wakeup modes include:
 
@@ -418,6 +420,13 @@ In this case, needed commands to switch the system into PM idle mode::
 
 In this case, needed commands to switch the system into PM standby mode::
 
+    nsh> pmconfig relax idle
+    nsh> pmconfig relax normal
+    nsh> pmconfig relax normal
+
+System switch to the PM sleep mode, you need to enter::
+
+    nsh> pmconfig relax standby
     nsh> pmconfig relax idle
     nsh> pmconfig relax normal
     nsh> pmconfig relax normal
