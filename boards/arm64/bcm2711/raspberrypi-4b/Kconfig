@@ -53,4 +53,11 @@ config RPI4B_MOUNT_BOOT
 		Mounts the boot partition of the micro SD card to NuttX as a read/write
 		file system.
 
+config RPI4B_FRAMEBUFFER
+	bool "Register frame buffer driver"
+	depends on BCM2711_FRAMEBUFFER
+	default BCM2711_FRAMEBUFFER
+	---help---
+		Registers a frame buffer character driver for graphical output.
+
 endif # ARCH_BOARD_RASPBERRYPI_4B

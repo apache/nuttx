@@ -41,6 +41,10 @@
 #include <nuttx/fs/fs.h>
 #endif
 
+#ifdef CONFIG_RPI4B_FRAMEBUFFER
+#include <nuttx/video/fb.h>
+#endif
+
 #include "rpi4b.h"
 
 /****************************************************************************
@@ -138,6 +142,16 @@ int rpi4b_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Couldn't initialize SDMMC: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RPI4B_FRAMEBUFFER
+  /* Initialize and register the frame buffer driver */
+
+  ret = fb_register(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Couldn't register framebuffer driver: %d", ret);
     }
 #endif
 
