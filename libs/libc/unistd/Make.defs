@@ -60,6 +60,10 @@ ifeq ($(CONFIG_CRYPTO),y)
 CSRCS += lib_crypt.c lib_crypt_r.c
 endif
 
+ifeq ($(CONFIG_PIPES),y)
+CSRCS += lib_pipe.c
+endif
+
 # Add the unistd directory to the build
 
 DEPPATH += --dep-path unistd
