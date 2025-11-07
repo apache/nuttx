@@ -428,7 +428,7 @@ static void netlink_response_available(FAR void *arg)
    * condition?
    */
 
-  net_lock();
+  netlink_lock();
 
   if (conn->fds != NULL)
     {
@@ -445,7 +445,7 @@ static void netlink_response_available(FAR void *arg)
 
   conn->fds = NULL;
 
-  net_unlock();
+  netlink_unlock();
 }
 
 /****************************************************************************
@@ -491,7 +491,7 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
        * immediately (maybe).
        */
 
-      net_lock();
+      netlink_lock();
       if (netlink_check_response(conn))
         {
           revents |= POLLIN;
@@ -504,7 +504,7 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
       poll_notify(&fds, 1, revents);
       if (fds->revents != 0)
         {
-          net_unlock();
+          netlink_unlock();
           return OK;
         }
 
@@ -521,7 +521,7 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
           if (conn->fds != NULL)
             {
               nerr("ERROR: Multiple polls() on socket not supported.\n");
-              net_unlock();
+              netlink_unlock();
               return -EBUSY;
             }
 
@@ -538,7 +538,7 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
             }
         }
 
-      net_unlock();
+      netlink_unlock();
     }
   else
     {
