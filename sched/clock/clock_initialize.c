@@ -151,7 +151,6 @@ int clock_basetime(FAR struct timespec *tp)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RTC
 static void clock_inittime(FAR const struct timespec *tp)
 {
   /* (Re-)initialize the time value to match the RTC */
@@ -187,7 +186,6 @@ static void clock_inittime(FAR const struct timespec *tp)
   clock_inittimekeeping(tp);
 #endif
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -220,12 +218,13 @@ void clock_initialize(void)
 
   up_rtc_initialize();
 
-#if !defined(CONFIG_RTC_EXTERNAL)
+#endif
+
+#if !defined(CONFIG_RTC_EXTERNAL) || \
+    !defined(CONFIG_RTC)
   /* Initialize the time value to match the RTC */
 
   clock_inittime(NULL);
-#endif
-
 #endif
 
   perf_init();
