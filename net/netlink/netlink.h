@@ -631,6 +631,26 @@ void netlink_conntrack_notify(uint8_t type, uint8_t domain,
 
 #endif /* CONFIG_NETLINK_NETFILTER */
 
+/****************************************************************************
+ * Name: netlink_lock
+ *
+ * Description:
+ *   Take the global netlink lock
+ *
+ ****************************************************************************/
+
+void netlink_lock(void);
+
+/****************************************************************************
+ * Name: netlink_unlock
+ *
+ * Description:
+ *   Release the global netlink lock
+ *
+ ****************************************************************************/
+
+void netlink_unlock(void);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

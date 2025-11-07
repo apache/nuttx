@@ -70,6 +70,10 @@ NET_BUFPOOL_DECLARE(g_netlink_connections, sizeof(struct netlink_conn_s),
 
 static dq_queue_t g_active_netlink_connections;
 
+/* Global protection lock for netlink */
+
+static rmutex_t g_netlink_lock = NXRMUTEX_INITIALIZER;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -256,13 +260,13 @@ void netlink_add_response(NETLINK_HANDLE handle,
 
   /* Add the response to the end of the FIFO list */
 
-  net_lock();
+  netlink_lock();
   sq_addlast(&resp->flink, &conn->resplist);
 
   /* Notify any waiters that a response is available */
 
   netlink_notifier_signal(conn);
-  net_unlock();
+  netlink_unlock();
 }
 
 /****************************************************************************
@@ -332,7 +336,7 @@ void netlink_add_broadcast(int group, FAR struct netlink_response_s *data)
 
   DEBUGASSERT(data != NULL);
 
-  net_lock();
+  netlink_lock();
 
   while ((conn = netlink_nextconn(conn)) != NULL)
     {
@@ -370,7 +374,7 @@ void netlink_add_broadcast(int group, FAR struct netlink_response_s *data)
       netlink_notifier_signal(conn);
     }
 
-  net_unlock();
+  netlink_unlock();
 
   /* Drop the package if nobody is interested in */
 
@@ -408,9 +412,9 @@ netlink_tryget_response(FAR struct netlink_conn_s *conn)
    * NULL).
    */
 
-  net_lock();
+  netlink_lock();
   resp = (FAR struct netlink_response_s *)sq_remfirst(&conn->resplist);
-  net_unlock();
+  netlink_unlock();
 
   return resp;
 }
@@ -450,7 +454,7 @@ int netlink_get_response(FAR struct netlink_conn_s *conn,
    * priority waiter will get the response.
    */
 
-  net_lock();
+  netlink_lock();
   while ((*response = netlink_tryget_response(conn)) == NULL)
     {
       sem_t waitsem;
@@ -471,10 +475,14 @@ int netlink_get_response(FAR struct netlink_conn_s *conn,
         }
       else
         {
+          unsigned int count;
+
           /* Wait for a response to be queued */
 
           tls_cleanup_push(tls_get_info(), netlink_notifier_teardown, conn);
+          nxrmutex_breaklock(&g_netlink_lock, &count);
           ret = net_sem_wait(&waitsem);
+          nxrmutex_restorelock(&g_netlink_lock, count);
           tls_cleanup_pop(tls_get_info(), 0);
         }
 
@@ -491,7 +499,7 @@ int netlink_get_response(FAR struct netlink_conn_s *conn,
         }
     }
 
-  net_unlock();
+  netlink_unlock();
   return ret;
 }
 
@@ -515,6 +523,32 @@ bool netlink_check_response(FAR struct netlink_conn_s *conn)
    */
 
   return (sq_peek(&conn->resplist) != NULL);
+}
+
+/****************************************************************************
+ * Name: netlink_lock
+ *
+ * Description:
+ *   Take the global netlink lock
+ *
+ ****************************************************************************/
+
+void netlink_lock(void)
+{
+  nxrmutex_lock(&g_netlink_lock);
+}
+
+/****************************************************************************
+ * Name: netlink_unlock
+ *
+ * Description:
+ *   Release the global netlink lock
+ *
+ ****************************************************************************/
+
+void netlink_unlock(void)
+{
+  nxrmutex_unlock(&g_netlink_lock);
 }
 
 #endif /* CONFIG_NET_NETLINK */
