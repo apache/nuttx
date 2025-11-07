@@ -105,4 +105,8 @@ if(CONFIG_CRYPTO)
   list(APPEND SRCS lib_crypt.c lib_crypt_r.c)
 endif()
 
+if(CONFIG_PIPES)
+  list(APPEND SRCS lib_pipe.c)
+endif()
+
 target_sources(c PRIVATE ${SRCS})

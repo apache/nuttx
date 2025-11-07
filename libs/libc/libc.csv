@@ -192,6 +192,7 @@
 "ntohs","arpa/inet.h","","uint16_t","uint16_t"
 "opendir","dirent.h","","FAR DIR *","FAR const char *"
 "perror","stdio.h","defined(CONFIG_FILE_STREAM)","void","FAR const char *"
+"pipe","unistd.h","defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0","int","int [2]|FAR int *"
 "posix_fallocate","fcntl.h","","int","int","off_t","off_t"
 "posix_memalign","stdlib.h","","int","FAR void **","size_t","size_t"
 "preadv","sys/uio.h","","ssize_t","int","FAR const struct iovec *","int","off_t"
