@@ -329,6 +329,17 @@ config BCM2711_EMMC2_XFERSPEED
 
 endif # BCM2711_EMMC
 
+#####################################################################
+# Graphics
+#####################################################################
+
+config BCM2711_FRAMEBUFFER
+	bool "Frame buffer graphics support"
+	depends on VIDEO_FB
+	default n
+	---help---
+		Support for the VideoCore frame buffer interface.
+
 endmenu # Broadcom BCM2711 Peripheral Selection
 
 endif # ARCH_CHIP_BCM2711

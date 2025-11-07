@@ -160,4 +160,22 @@
 
 #define BCM_VC_MBOX_FIFO_DEPTH (8) /* 8-deep FIFO of 32-bit words */
 
+/* We assume L2 cache enabled. The user can disable this from config.txt but
+ * that's their problem.
+ */
+
+#define L2_CACHE_EN 1
+
+/* Physical address mappings between VideoCore and ARM bus */
+
+#ifdef L2_CACHE_EN
+#define PHY_MEM_START (0x40000000)
+#else
+#define PHY_MEM_START (0xc0000000)
+#endif /* L2_CACHE_EN */
+
+/* Maps VideoCore addresses to ARM addresses. As seen in LLD */
+
+#define VCADDR_TO_ARM(addr) (((addr) | PHY_MEM_START) & ~(0xc0000000))
+
 #endif /* __ARCH_ARM64_SRC_BCM2711_MAILBOX_H */

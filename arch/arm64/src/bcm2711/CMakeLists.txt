@@ -47,4 +47,10 @@ if(CONFIG_BCM2711_EMMC)
   list(APPEND SRCS bcm2711_sdio.c)
 endif()
 
+# Graphics
+
+if(CONFIG_BCM2711_FRAMEBUFFER)
+  list(APPEND SRCS bcm2711_fb.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})
