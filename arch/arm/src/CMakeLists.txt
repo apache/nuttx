@@ -20,6 +20,7 @@
 #
 # ##############################################################################
 
+# ARCH_SUBDIR_ARM contains shared sources for the ARM A/R and ARM M families.
 add_subdirectory(${ARCH_SUBDIR})
 add_subdirectory(${NUTTX_CHIP_ABS_DIR} exclude_chip EXCLUDE_FROM_ALL)
 add_subdirectory(common)

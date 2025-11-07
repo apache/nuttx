@@ -23,13 +23,12 @@
 # Common ARM files
 
 include common/Make.defs
+include arm_m/Make.defs
 
 CMN_ASRCS += arm_exception.S arm_saveusercontext.S
 
 CMN_CSRCS += arm_cpuinfo.c arm_doirq.c arm_hardfault.c arm_initialstate.c
-CMN_CSRCS += arm_svcall.c
-CMN_CSRCS += arm_systemreset.c arm_tcbinfo.c
-CMN_CSRCS += arm_trigger_irq.c
+CMN_CSRCS += arm_svcall.c arm_systemreset.c arm_trigger_irq.c
 
 ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
@@ -50,3 +49,5 @@ endif
 ifeq ($(CONFIG_LIB_SYSCALL),y)
   CMN_ASRCS += arm_dispatch_syscall.S
 endif
+
+VPATH += arm_m

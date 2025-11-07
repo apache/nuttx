@@ -39,10 +39,13 @@ elseif(CONFIG_ARCH_ARMV8R) # ARMv8-R
   set(ARCH_SUBDIR_ARM arm_a_r)
 elseif(CONFIG_ARCH_ARMV7M) # ARMv7-M
   set(ARCH_SUBDIR armv7-m)
+  set(ARCH_SUBDIR_ARM arm_m)
 elseif(CONFIG_ARCH_ARMV8M) # ARMv8-M
   set(ARCH_SUBDIR armv8-m)
+  set(ARCH_SUBDIR_ARM arm_m)
 elseif(CONFIG_ARCH_ARMV6M) # ARMv6-M
   set(ARCH_SUBDIR armv6-m)
+  set(ARCH_SUBDIR_ARM arm_m)
 else() # ARM9, ARM7TDMI, etc.
   set(ARCH_SUBDIR arm)
   set(ARCH_SUBDIR_ARM arm_a_r)

@@ -38,7 +38,6 @@ set(SRCS
     arm_secure_irq.c
     arm_svcall.c
     arm_systemreset.c
-    arm_tcbinfo.c
     arm_trigger_irq.c
     arm_usagefault.c)
 
