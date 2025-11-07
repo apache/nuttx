@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv6-m/arm_tcbinfo.c
+ * arch/arm/src/arm_m/arm_tcbinfo.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
