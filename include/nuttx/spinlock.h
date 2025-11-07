@@ -314,7 +314,7 @@ static inline_function void
 spin_unlock_notrace(FAR volatile spinlock_t *lock)
 {
 #ifdef CONFIG_TICKET_SPINLOCK
-  atomic_add_release(&lock->owner, 1);
+  atomic_set_release(&lock->owner, lock->owner + 1);
 #else
   atomic_set_release((FAR atomic_t *)lock, SP_UNLOCKED);
 #endif
