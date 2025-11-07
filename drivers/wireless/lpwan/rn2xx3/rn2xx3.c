@@ -60,6 +60,10 @@
 
 #define MAC_PAUSE_DUR "4294967245"
 
+/* Size of backing array for buffering packets during parsing */
+
+#define PACKETBUFSIZ (64)
+
 /* Helper to get array length */
 
 #define array_len(arr) ((sizeof(arr)) / sizeof((arr)[0]))
@@ -88,14 +92,17 @@ struct txlvl_s
 
 struct rn2xx3_dev_s
 {
-  FAR struct file uart;     /* UART interface */
-  bool receiving;           /* Currently receiving */
-  mutex_t devlock;          /* Exclusive access */
-  enum rn2xx3_type_e model; /* Transceiver model */
-  enum rn2xx3_mod_e mod;    /* Modulation mode */
+  FAR struct file uart;            /* UART interface */
+  mutex_t devlock;                 /* Exclusive access */
+  char packet_bytes[PACKETBUFSIZ]; /* Bytes being parsed */
+  size_t unparsed;                 /* Length of packet_bytes */
+  enum rn2xx3_type_e model;        /* Transceiver model */
+  enum rn2xx3_mod_e mod;           /* Modulation mode */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   int16_t crefs; /* Number of open references */
 #endif
+  bool receiving; /* Currently receiving */
+  bool pdone;     /* Packet being parsed is done */
 };
 
 /****************************************************************************
@@ -210,6 +217,102 @@ static const struct txlvl_s RN2483_TXLVLS[] =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: char_to_byte
+ *
+ * Description:
+ *   Converts an ASCII hex character into a real byte.
+ *   NOTE: assume character is a valid hex character
+ *
+ * Returns: The real byte value of the ASCII hex character.
+ *
+ ****************************************************************************/
+
+static uint8_t char_to_byte(char c)
+{
+  if (c > 47 && c < 58)
+    {
+      return c - 48;
+    }
+  else if (c > 64 && c < 71)
+    {
+      return c - 55;
+    }
+  else if (c > 96 && c < 103)
+    {
+      return c - 87;
+    }
+
+  return -1;
+}
+
+/****************************************************************************
+ * Name: hex_to_byte
+ *
+ * Description:
+ *   Converts a two-character ASCII hex byte into a real byte.
+ *   NOTE: Assumes it is always passed a valid ASCII hex byte
+ *
+ ****************************************************************************/
+
+#define hex_to_byte(hex) char_to_byte((hex)[0]) + char_to_byte((hex)[1])
+
+/****************************************************************************
+ * Name: parse_bytes
+ *
+ * Description:
+ *   Parse the remaining bytes in the device's `packet_bytes` buffer and
+ *   store them into the user buffer.
+ *
+ *   NOTE: when this function encounters the '\r\n' terminating characters,
+ *   it internally marks the packet parsing being done with `priv->pdone`
+ *   set to true.
+ *
+ * Arguments:
+ *    priv - The device with the buffer to parse
+ *    buf - The user buffer to put parsed data into
+ *    buflen - The user buffer length in bytes
+ *
+ * Return Value: Returns the number of bytes put in to the user buffer.
+ *
+ ****************************************************************************/
+
+static size_t parse_bytes(FAR struct rn2xx3_dev_s *priv, FAR uint8_t *buf,
+                          size_t buflen)
+{
+  size_t parsed = 0;
+  const char *curbytes;
+
+  /* Loop while unparsed > 1 because we process ASCII hex in pairs of two
+   * bytes. So if we have an odd number of unparsed bytes, we can only parse
+   * until there is still 1 remaining byte left. If it's an even number,
+   * there will be 0 bytes left.
+   */
+
+  while (priv->unparsed > 1 && parsed < buflen)
+    {
+      /* `2 * parsed` because we process 2 ASCII hex bytes per real byte.
+       * If we encounter the \r\n characters while parsing, we're done
+       * with this packet.
+       */
+
+      curbytes = &priv->packet_bytes[2 * parsed];
+      if (curbytes[0] == '\r' && curbytes[1] == '\n')
+        {
+          priv->pdone = true;
+          priv->unparsed -= 2;
+          DEBUGASSERT(priv->unparsed == 0);
+          break;
+        }
+
+      buf[parsed] = hex_to_byte(curbytes);
+      parsed++;
+      priv->unparsed -= 2;
+    }
+
+  return parsed;
+}
 
 /****************************************************************************
  * Name: radio_flush
@@ -1377,10 +1480,6 @@ static ssize_t rn2xx3_read(FAR struct file *filep, FAR char *buffer,
   ssize_t ret = 0;
   ssize_t received = 0;
   char response[30];
-  char hex_byte[3] =
-  {
-    0, 0 /* Extra space for null terminator */
-  };
 
   /* Exclusive access */
 
@@ -1470,38 +1569,43 @@ static ssize_t rn2xx3_read(FAR struct file *filep, FAR char *buffer,
    */
 
 parse_packet:
-
-  hex_byte[2] = '\0'; /* Appease strtoul */
-
   while (received < buflen)
     {
-      ret = file_read(&priv->uart, &hex_byte, 2);
-      if (ret < 2)
+      /* Read in some more unparsed bytes starting after the leftover ones.
+       */
+
+      ret = file_read(&priv->uart, &priv->packet_bytes[priv->unparsed],
+                      sizeof(priv->packet_bytes) - priv->unparsed);
+      if (ret < 0)
         {
           goto early_ret;
         }
 
-      if (hex_byte[0] == '\r' && hex_byte[1] == '\n')
-        {
-          break;
-        }
+      priv->unparsed += ret; /* Record unparsed bytes */
 
       /* Convert ASCII hex byte into real bytes to store in the buffer */
 
-      buffer[received] = strtoul(hex_byte, NULL, 16);
-      received++;
+      received += parse_bytes(priv, (uint8_t *)buffer, buflen);
+
+      if (priv->pdone)
+        {
+          break; /* Done parsing */
+        }
     }
 
   /* We've received everything we can possibly receive, let the user know by
    * returning how much of the buffer we've filled.
+   *
    * If we've seen the end of packet indicator (\r\n), we'll mark the receive
    * as complete. However, if we only stopped to not exceed the buffer
    * length, we will leave our status as receiving to continue on the next
-   * read call.
+   * read call. We can use whatever is left in the device's `packet_bytes`
+   * buffer.
    */
 
-  if (hex_byte[0] == '\r' && hex_byte[1] == '\n')
+  if (priv->pdone)
     {
+      priv->pdone = false; /* For next receive */
       priv->receiving = false;
     }
 
@@ -1875,6 +1979,8 @@ int rn2xx3_register(FAR const char *devpath, FAR const char *uartpath)
 
   priv->receiving = false;     /* Not receiving yet */
   priv->mod = RN2XX3_MOD_LORA; /* Starts in LoRa */
+  priv->unparsed = 0;
+  priv->pdone = false;
 
   /* Initialize mutex */
 
