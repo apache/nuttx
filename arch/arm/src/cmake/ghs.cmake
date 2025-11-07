@@ -61,6 +61,7 @@ endif()
 
 add_link_options(-entry=__start)
 add_compile_options(--no_commons -Wall -Wshadow -Wundef -nostdlib)
+add_compile_options(--option=305)
 
 if(CONFIG_DEBUG_CUSTOMOPT)
   add_compile_options(${CONFIG_DEBUG_OPTLEVEL})
