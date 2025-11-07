@@ -959,9 +959,12 @@ static int devif_iob_poll(FAR struct net_driver_s *dev,
 
   bstop = devif_poll_connections(dev, callback);
 
-  /* Device polling completed, release iob */
+  /* Device polling completed, release iob only if data was consumed */
 
-  netdev_iob_release(dev);
+  if (bstop)
+    {
+      netdev_iob_release(dev);
+    }
 
   return bstop;
 }
