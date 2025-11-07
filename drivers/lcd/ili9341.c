@@ -148,7 +148,7 @@
  * MX:          0
  * MV:          1
  * ML:          0
- * BGR:         0/1 Depending on endian mode of the mcu?
+ * BGR:         0/1
  * MH:          0
  */
 
@@ -156,10 +156,10 @@
 #define ILI9341_MADCTL_LANDSCAPE_MX     0
 #define ILI9341_MADCTL_LANDSCAPE_MV     ILI9341_MEMORY_ACCESS_CONTROL_MV
 #define ILI9341_MADCTL_LANDSCAPE_ML     0
-#ifdef CONFIG_ENDIAN_BIG
-#  define ILI9341_MADCTL_LANDSCAPE_BGR  0
-#else
+#ifdef CONFIG_ILI9341_BGR
 #  define ILI9341_MADCTL_LANDSCAPE_BGR  ILI9341_MEMORY_ACCESS_CONTROL_BGR
+#else
+#  define ILI9341_MADCTL_LANDSCAPE_BGR  0
 #endif
 #define ILI9341_MADCTL_LANDSCAPE_MH     0
 
@@ -176,7 +176,7 @@
  * MX:          0
  * MV:          0
  * ML:          0
- * BGR:         0/1 Depending on endian mode of the mcu?
+ * BGR:         0/1
  * MH:          0
  */
 
@@ -184,10 +184,10 @@
 #define ILI9341_MADCTL_PORTRAIT_MX      ILI9341_MEMORY_ACCESS_CONTROL_MX
 #define ILI9341_MADCTL_PORTRAIT_MV      0
 #define ILI9341_MADCTL_PORTRAIT_ML      ILI9341_MEMORY_ACCESS_CONTROL_ML
-#ifdef CONFIG_ENDIAN_BIG
-#  define ILI9341_MADCTL_PORTRAIT_BGR   0
-#else
+#ifdef CONFIG_ILI9341_BGR
 #  define ILI9341_MADCTL_PORTRAIT_BGR   ILI9341_MEMORY_ACCESS_CONTROL_BGR
+#else
+#  define ILI9341_MADCTL_PORTRAIT_BGR   0
 #endif
 #define ILI9341_MADCTL_PORTRAIT_MH      0
 
@@ -203,7 +203,7 @@
  * MX:          1
  * MV:          1
  * ML:          0
- * BGR:         0/1 Depending on endian mode of the mcu?
+ * BGR:         0/1
  * MH:          0
  */
 
@@ -211,10 +211,10 @@
 #define ILI9341_MADCTL_RLANDSCAPE_MX    ILI9341_MEMORY_ACCESS_CONTROL_MX
 #define ILI9341_MADCTL_RLANDSCAPE_MV    ILI9341_MEMORY_ACCESS_CONTROL_MV
 #define ILI9341_MADCTL_RLANDSCAPE_ML    0
-#ifdef CONFIG_ENDIAN_BIG
-#  define ILI9341_MADCTL_RLANDSCAPE_BGR 0
-#else
+#ifdef CONFIG_ILI9341_BGR
 #  define ILI9341_MADCTL_RLANDSCAPE_BGR ILI9341_MEMORY_ACCESS_CONTROL_BGR
+#else
+#  define ILI9341_MADCTL_RLANDSCAPE_BGR 0
 #endif
 #define ILI9341_MADCTL_RLANDSCAPE_MH    0
 
@@ -232,7 +232,7 @@
  * MX:          1
  * MV:          0
  * ML:          0
- * BGR:         0/1 Depending on endian mode of the mcu?
+ * BGR:         0/1
  * MH:          0
  *
  */
@@ -241,10 +241,10 @@
 #define ILI9341_MADCTL_RPORTRAIT_MX     0
 #define ILI9341_MADCTL_RPORTRAIT_MV     0
 #define ILI9341_MADCTL_RPORTRAIT_ML     ILI9341_MEMORY_ACCESS_CONTROL_ML
-#ifdef CONFIG_ENDIAN_BIG
-#  define ILI9341_MADCTL_RPORTRAIT_BGR  0
-#else
+#ifdef CONFIG_ILI9341_BGR
 #  define ILI9341_MADCTL_RPORTRAIT_BGR  ILI9341_MEMORY_ACCESS_CONTROL_BGR
+#else
+#  define ILI9341_MADCTL_RPORTRAIT_BGR  0
 #endif
 #define ILI9341_MADCTL_RPORTRAIT_MH     0
 

@@ -1434,6 +1434,13 @@ config LCD_ILI9341
 		LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
 		LCD_MAXPOWER should be 1:  0=off, 1=on
 
+config LCD_ILI9341_BGR
+	bool "Use BGR order for RGB colors."
+	default n
+	depends on LCD_ILI9341
+	---help---
+		Use BGR color order instead of RGB (Memory Access Control).
+
 config LCD_ILI9341_NINTERFACES
 	int "Number of supported display driver"
 	range 1 2
