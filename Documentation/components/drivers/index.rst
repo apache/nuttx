@@ -12,6 +12,7 @@ divided in three classes:
   block/index.rst
   special/index.rst
   thermal/index.rst
+  timers/oneshot/index.rst
 
 .. note::
   Device driver support depends on the *in-memory*, *pseudo*
