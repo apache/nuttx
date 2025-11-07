@@ -60,6 +60,25 @@ FAR struct inode *g_root_inode = NULL;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: _inode_isdotdot
+ ****************************************************************************/
+
+static inline bool _inode_isdotdot(FAR const char *name)
+{
+  return name[0] == '.' && name[1] == '.' &&
+         (name[2] == '\0' || name[2] == '/');
+}
+
+/****************************************************************************
+ * Name: _inode_isdot
+ ****************************************************************************/
+
+static inline bool _inode_isdot(FAR const char *name)
+{
+  return name[0] == '.' && (name[1] == '\0' || name[1] == '/');
+}
+
+/****************************************************************************
  * Name: _inode_compare
  *
  * Description:
@@ -203,7 +222,7 @@ static int _compute_path_depth(FAR const char *path)
 
   while (*name != '\0')
     {
-      if (strncmp(name, "../", 3) == 0)
+      if (_inode_isdotdot(name))
         {
           if (--depth < 0)
             {
@@ -322,21 +341,30 @@ static int _inode_search(FAR struct inode_search_s *desc)
               ret = OK;
               break;
             }
-          else if (strncmp(name, "../", 3) == 0)
+          else if (_inode_isdotdot(name))
             {
+              do
+                {
+                  if (above != NULL)
+                    {
+                      inode = above;
+                      above = above->i_parent;
+                    }
+
+                  name = inode_nextname(name);
+                }
+              while (_inode_isdotdot(name));
+
+              if (*name == '\0')
+                {
+                  relpath = name;
+                  ret = OK;
+                  break;
+                }
+
               above = inode;
               left  = NULL;
               inode = inode->i_child;
-
-              while (strncmp(name, "../", 3) == 0)
-                {
-                  name = inode_nextname(name);
-                  if (above != g_root_inode)
-                    {
-                      above = above->i_parent;
-                      inode = above->i_child;
-                    }
-                }
             }
           else
             {
@@ -632,7 +660,7 @@ FAR const char *inode_nextname(FAR const char *name)
    * ".", rather than resolving to the node the search already reached.
    */
 
-  if (*name == '.' && (*(name + 1) == '/' || *(name + 1) == '\0'))
+  if (_inode_isdot(name))
     {
       if (*(name + 1) == '/')
         {
