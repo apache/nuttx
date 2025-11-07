@@ -553,32 +553,26 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
               else if (
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-#  ifdef CONFIG_NET_SENDFILE
-                  (!conn->sendfile && conn->expired > 0) ||
-                  (conn->sendfile && conn->nrtx >= TCP_MAXRTX) ||
-#  else
                   conn->expired > 0 ||
-#  endif
-#else
-                  conn->nrtx >= TCP_MAXRTX ||
 #endif
+                  (conn->tcpstateflags != TCP_SYN_SENT &&
+                   conn->nrtx >= TCP_MAXRTX) ||
                   (conn->tcpstateflags == TCP_SYN_SENT &&
-                   conn->nrtx >= TCP_MAXSYNRTX)
-                 )
+                   conn->nrtx >= TCP_MAXSYNRTX))
                 {
                   conn->tcpstateflags = TCP_CLOSED;
                   ninfo("TCP state: TCP_CLOSED\n");
 
-                  /* We call tcp_callback() with TCP_TIMEDOUT to
+                  /* We send a reset packet to the remote host. */
+
+                  tcp_send(dev, conn, TCP_RST | TCP_ACK, hdrlen);
+
+                  /* We also call tcp_callback() with TCP_TIMEDOUT to
                    * inform the application that the connection has
                    * timed out.
                    */
 
                   tcp_callback(dev, conn, TCP_TIMEDOUT);
-
-                  /* We also send a reset packet to the remote host. */
-
-                  tcp_send(dev, conn, TCP_RST | TCP_ACK, hdrlen);
                   goto done;
                 }
 
