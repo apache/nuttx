@@ -72,9 +72,22 @@ ifeq ($(shell expr "$(GCCVER)" \>= 12), 1)
 endif
 
 CPPSRCS += $(wildcard libcxx/libcxx/src/*.cpp)
-CPPSRCS += $(wildcard libcxx/libcxx/src/experimental/*.cpp)
-CPPSRCS += $(wildcard libcxx/libcxx/src/filesystem/*.cpp)
-CPPSRCS += $(wildcard libcxx/libcxx/src/ryu/*.cpp)
+CPP_STD_VER := $(shell echo $(CONFIG_CXX_STANDARD) | sed -E 's/.*\+\+([0-9]+)$$/\1/')
+ifeq ($(shell [ $(CPP_STD_VER) -ge 20 ] && echo true),true)
+  CPPSRCS += $(wildcard libcxx/libcxx/src/experimental/*.cpp)
+  CPPSRCS += $(wildcard libcxx/libcxx/src/filesystem/*.cpp)
+  CPPSRCS += $(wildcard libcxx/libcxx/src/ryu/*.cpp)
+endif
+
+ifeq ($(shell [ $(CPP_STD_VER) -le 14 ] && echo true),true)
+  EXCLUDE_CPP := libcxx/libcxx/src/any.cpp
+  EXCLUDE_CPP += libcxx/libcxx/src/variant.cpp
+  EXCLUDE_CPP += libcxx/libcxx/src/optional.cpp
+  EXCLUDE_CPP += libcxx/libcxx/src/memory_resource.cpp
+  EXCLUDE_CPP += libcxx/libcxx/src/legacy_debug_handler.cpp
+  EXCLUDE_CPP += $(wildcard libcxx/libcxx/src/pstl/*.cpp)
+  CPPSRCS := $(filter-out $(EXCLUDE_FILES), $(CPPSRCS))
+endif
 
 ifeq ($(CONFIG_CXX_LOCALIZATION),)
   LOCALE_CPPSRCS := libcxx/libcxx/src/ios.cpp
