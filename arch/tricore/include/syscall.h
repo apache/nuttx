@@ -126,7 +126,7 @@
  * Inline functions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+#if !defined(__ASSEMBLY__) && !defined(__cplusplus)
 
 /* SVC with SYS_ call number and no parameters */
 
@@ -452,5 +452,5 @@ extern "C"
 }
 #endif
 
-#endif /* __ASSEMBLY__ */
+#endif /* !defined(__ASSEMBLY__) && !defined(__cplusplus) */
 #endif /* __ARCH_TRICORE_INCLUDE_SYSCALL_H */
