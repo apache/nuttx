@@ -1934,6 +1934,13 @@ config ARCH_BOARD_OPENH743I
 	---help---
 		Waveshare OpenH743I board based on the STMicro STM32H743II MCU.
 
+config ARCH_BOARD_PORTENTA_H7
+	bool "Arduino Portenta H7"
+	depends on ARCH_CHIP_STM32H747XI
+	select ARCH_HAVE_LEDS
+	---help---
+		Arduino Portenta H7 board based on STMicro STM32H747XI MCU.
+
 config ARCH_BOARD_NUCLEO_L152RE
 	bool "STM32L152 Nucleo L152RE"
 	depends on ARCH_CHIP_STM32L152RE
@@ -3658,6 +3665,7 @@ config ARCH_BOARD
 	default "stm32h750b-dk"             if ARCH_BOARD_STM32H750B_DK
 	default "linum-stm32h753bi"         if ARCH_BOARD_LINUM_STM32H753BI
 	default "openh743i"                 if ARCH_BOARD_OPENH743I
+	default "portenta-h7"               if ARCH_BOARD_PORTENTA_H7
 	default "nucleo-l073rz"             if ARCH_BOARD_NUCLEO_L073RZ
 	default "nucleo-l152re"             if ARCH_BOARD_NUCLEO_L152RE
 	default "nucleo-l432kc"             if ARCH_BOARD_NUCLEO_L432KC
@@ -4400,6 +4408,9 @@ source "boards/arm/stm32h7/linum-stm32h753bi/Kconfig"
 endif
 if ARCH_BOARD_OPENH743I
 source "boards/arm/stm32h7/openh743i/Kconfig"
+endif
+if ARCH_BOARD_PORTENTA_H7
+source "boards/arm/stm32h7/portenta-h7/Kconfig"
 endif
 if ARCH_BOARD_B_L475E_IOT01A
 source "boards/arm/stm32l4/b-l475e-iot01a/Kconfig"

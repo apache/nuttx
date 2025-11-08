@@ -1,0 +1,17 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_PORTENTA_H7
+
+config PORTENTAH7_ARDUINO_BOOTLOADER
+	bool "Use Arduino bootloader"
+	default y
+	---help---
+		Use the Arduino bootloader to load the NuttX binary.
+		Don't disable this option unless you know exactly what you're doing!
+		It may cause the boards to brick because the bootloader initializes
+		PMIC (problem known as "orange LED of death").
+
+endif # ARCH_BOARD_PORTENTA_H7
