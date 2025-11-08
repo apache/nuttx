@@ -91,12 +91,29 @@ if(CONFIG_LIBCXX)
   endif()
 
   file(GLOB SRCS ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/*.cpp)
-  file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/experimental/*.cpp)
-  list(APPEND SRCS ${SRCSTMP})
-  file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/filesystem/*.cpp)
-  list(APPEND SRCS ${SRCSTMP})
-  file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/ryu/*.cpp)
-  list(APPEND SRCS ${SRCSTMP})
+
+  string(REGEX MATCH "[0-9]+$" CPP_STD_VER "${CONFIG_CXX_STANDARD}")
+  if(${CPP_STD_VER} GREATER_EQUAL 20)
+    file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/experimental/*.cpp)
+    list(APPEND SRCS ${SRCSTMP})
+    file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/filesystem/*.cpp)
+    list(APPEND SRCS ${SRCSTMP})
+    file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/ryu/*.cpp)
+    list(APPEND SRCS ${SRCSTMP})
+  endif()
+
+  if(${CPP_STD_VER} LESS_EQUAL 14)
+    file(
+      GLOB
+      SRCSTMP
+      ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/any.cpp
+      ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/variant.cpp
+      ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/optional.cpp
+      ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/memory_resource.cpp
+      ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/pstl/*.cpp
+      ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/legacy_debug_handler.cpp)
+    list(REMOVE_ITEM SRCS ${SRCSTMP})
+  endif()
 
   if(NOT CONFIG_CXX_LOCALIZATION)
     file(
@@ -111,8 +128,10 @@ if(CONFIG_LIBCXX)
     list(REMOVE_ITEM SRCS ${SRCSTMP})
   endif()
 
-  set(FLAGS -Wno-attributes -Wno-deprecated-declarations -Wno-shadow
-            -Wno-sign-compare -Wno-cpp)
+  if(NOT CONFIG_TRICORE_TOOLCHAIN_TASKING)
+    set(FLAGS -Wno-attributes -Wno-deprecated-declarations -Wno-shadow
+              -Wno-sign-compare -Wno-cpp)
+  endif()
 
   if(GCCVER GREATER_EQUAL 12)
     list(APPEND FLAGS -Wno-maybe-uninitialized -Wno-alloc-size-larger-than)

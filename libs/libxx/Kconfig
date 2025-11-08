@@ -104,6 +104,7 @@ config LIBCXXABI_VERSION
 
 config CXX_STANDARD
 	string "Language standard"
+	default "c++14"   if TRICORE_TOOLCHAIN_TASKING
 	default "gnu++20" if LIBCXX
 	default "gnu++17" if !LIBCXX
 	---help---
