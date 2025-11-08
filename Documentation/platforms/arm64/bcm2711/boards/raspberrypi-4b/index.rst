@@ -49,7 +49,7 @@ NuttX for the Raspberry Pi 4 supports these on-board peripherals:
 Peripheral               Support
 ======================== =======
 AV port                  No
-HDMI                     No
+HDMI                     Yes, frame buffer support
 WiFi                     No
 Ethernet                 No
 USB 3.0                  No
@@ -57,6 +57,16 @@ USB 2.0                  No
 Bluetooth                No
 microSD card             Yes (see notes in BCM2711 page)
 ======================== =======
+
+.. note::
+
+   The HDMI support has been tested using the frame buffer driver for graphics
+   on both HDMI0 and HDMI1. They have not been tested both at the same. They
+   have also only been tested with a single display monitor.
+
+   The current frame-buffer driver is also not very performant; it is basically
+   CPU rendering pixel-by-pixel. This could be improved with DMA or GPU access,
+   but that is yet to be done.
 
 Buttons and LEDs
 ================
@@ -204,3 +214,46 @@ system to ``/sd``. It can be written to and read from.
 
    This configuration enables BSD components since the :doc:`sdstress
    </applications/testing/sd_stress/index>` application is BSD licensed.
+
+fb
+--
+
+Configuration with graphics support in the form of a frame buffer driver for the
+two HDMI outputs. This configuration is equipped with the ``fb`` frame buffer
+example, which displays some centered, colourful rectangles on the screen.
+
+.. warning::
+
+   This has only been tested with a display plugged into one HDMI interface at a
+   time, not both connected. Whichever HDMI interface is plugged in will be
+   referred to as display 0 (i.e. ``/dev/fb0``).
+
+   The display **must** be plugged in to the Raspberry Pi 4B and powered on at
+   boot time. The BCM2711 VideoCore will refuse to allocate a frame buffer if
+   not, and registering ``/dev/fb0`` will fail.
+
+   The rendered image may exhibit gaps in the pixels. This is because rendering
+   directly to the framebuffer is too slow compared to the HDMI output in some
+   cases. If the image is rendered to a RAM buffer of the same size and then
+   ``memcpy``'d to the frame buffer, the image will be clear. I have not
+   modified the frame buffer example though since this is its own limitation.
+
+.. todo::
+
+   The frame-buffer driver always sets the physical and virtual display
+   resolution to 1080 x 1920 pixels with a depth of 32 bits per pixel. Other
+   options cannot yet be configured via Kconfig, nor is there any kind of
+   negotiation with the display to agree on some maximum quality options.
+
+lvgl
+----
+
+This configuration boots into an LVGL demonstration
+(:doc:`/applications/examples/lvgldemo/index`). It is using the 'widgets'
+variant of the demo. There is currently no way to interact with it since input
+devices aren't supported, but it's pretty! This configuration does nothing else,
+but could be modified to boot into your own LVGL application.
+
+This configuration has the same warnings and limitations as those in the ``fb``
+configuration, with the exception of the pixel gaps. This is because LVGL uses
+the dual-buffer approach to rendering.
