@@ -71,6 +71,12 @@ extern uint8_t _vector_start[]; /* Beginning of vector block */
 #ifdef CONFIG_SMP
 void arm_cpu_boot(int cpu)
 {
+#ifdef CONFIG_ARCH_PERF_EVENTS
+  /* Perf init */
+
+  up_perf_init(0);
+#endif
+
   /* Enable SMP cache coherency for the CPU */
 
   arm_enable_smp(cpu);

@@ -85,6 +85,12 @@ void arm_cpu_boot(int cpu)
 
   arm_fpuconfig();
 
+#ifdef CONFIG_ARCH_PERF_EVENTS
+  /* Perf init */
+
+  up_perf_init(0);
+#endif
+
   /* Initialize the Generic Interrupt Controller (GIC) for CPUn (n != 0) */
 
   up_irqinitialize();
