@@ -33,6 +33,7 @@
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/tls.h>
 
 #include "environ/environ.h"
 
@@ -63,31 +64,34 @@
 
 void env_release(FAR struct task_group_s *group)
 {
+  FAR struct task_info_s *info;
   int i;
 
-  DEBUGASSERT(group != NULL);
+  DEBUGASSERT(group != NULL && group->tg_info != NULL);
 
-  if (group->tg_envp)
+  info = group->tg_info;
+
+  if (info->ta_envp)
     {
       /* Free any allocate environment strings */
 
-      for (i = 0; group->tg_envp[i] != NULL; i++)
+      for (i = 0; info->ta_envp[i] != NULL; i++)
         {
-          group_free(group, group->tg_envp[i]);
+          group_free(group, info->ta_envp[i]);
         }
 
       /* Free the environment */
 
-      group_free(group, group->tg_envp);
+      group_free(group, info->ta_envp);
     }
 
   /* In any event, make sure that all environment-related variables in the
    * task group structure are reset to initial values.
    */
 
-  group->tg_envp  = NULL;
-  group->tg_envpc = 0;
-  group->tg_envc  = 0;
+  info->ta_envp  = NULL;
+  info->ta_envpc = 0;
+  info->ta_envc  = 0;
 }
 
 #endif /* CONFIG_DISABLE_ENVIRON */

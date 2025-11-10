@@ -36,6 +36,8 @@
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
+#include <nuttx/tls.h>
 
 #include "sched/sched.h"
 #include "environ/environ.h"
@@ -71,6 +73,7 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
 {
   FAR struct tcb_s *rtcb;
   FAR struct task_group_s *group;
+  FAR struct task_info_s *info;
   FAR char *pvar;
   FAR char **envp;
   ssize_t envc;
@@ -112,13 +115,15 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
 
   rtcb  = this_task();
   group = rtcb->group;
-  DEBUGASSERT(group);
+  DEBUGASSERT(group && group->tg_info);
+
+  info = group->tg_info;
 
   nxrmutex_lock(&group->tg_mutex);
 
   /* Check if the variable already exists */
 
-  if (group->tg_envp && (ret = env_findvar(group, name)) >= 0)
+  if (info->ta_envp && (ret = env_findvar(group, name)) >= 0)
     {
       /* It does! Do we have permission to overwrite the existing value? */
 
@@ -140,7 +145,7 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
 
   /* Check current envirments count */
 
-  DEBUGASSERT(group->tg_envc < SSIZE_MAX);
+  DEBUGASSERT(info->ta_envc < SSIZE_MAX);
 
   /* Get the size of the new name=value string.
    * The +2 is for the '=' and for null terminator
@@ -157,9 +162,9 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
       goto errout_with_lock;
     }
 
-  envc = group->tg_envc;
+  envc = info->ta_envc;
 
-  if (group->tg_envp == NULL)
+  if (info->ta_envp == NULL)
     {
       envpc = SCHED_ENVIRON_RESERVED + 2;
 
@@ -170,29 +175,29 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
           goto errout_with_var;
         }
 
-      group->tg_envp  = envp;
-      group->tg_envpc = envpc;
+      info->ta_envp  = envp;
+      info->ta_envpc = envpc;
     }
-  else if (envc >= group->tg_envpc - 1)
+  else if (envc >= info->ta_envpc - 1)
     {
       envpc = envc + SCHED_ENVIRON_RESERVED + 2;
 
-      envp = group_realloc(group, group->tg_envp, sizeof(*envp) * envpc);
+      envp = group_realloc(group, info->ta_envp, sizeof(*envp) * envpc);
       if (envp == NULL)
         {
           ret = ENOMEM;
           goto errout_with_var;
         }
 
-      group->tg_envp  = envp;
-      group->tg_envpc = envpc;
+      info->ta_envp  = envp;
+      info->ta_envpc = envpc;
     }
 
   /* Save the new buffer and count */
 
-  group->tg_envp[envc++] = pvar;
-  group->tg_envp[envc]   = NULL;
-  group->tg_envc = envc;
+  info->ta_envp[envc++] = pvar;
+  info->ta_envp[envc]   = NULL;
+  info->ta_envc = envc;
 
   /* Now, put the new name=value string into the environment buffer */
 

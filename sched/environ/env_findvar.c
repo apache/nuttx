@@ -33,6 +33,8 @@
 #include <sched.h>
 #include <assert.h>
 
+#include <nuttx/tls.h>
+
 #include "environ/environ.h"
 
 /****************************************************************************
@@ -87,22 +89,25 @@ static bool env_cmpname(const char *pszname, const char *peqname)
 
 ssize_t env_findvar(FAR struct task_group_s *group, FAR const char *pname)
 {
+  FAR struct task_info_s *info;
   ssize_t i;
 
   /* Verify input parameters */
 
-  DEBUGASSERT(group != NULL && pname != NULL);
+  DEBUGASSERT(group != NULL && group->tg_info != NULL && pname != NULL);
 
-  if (group->tg_envp == NULL)
+  info = group->tg_info;
+
+  if (info->ta_envp == NULL)
     {
       return -ENOENT;
     }
 
   /* Search for a name=value string with matching name */
 
-  for (i = 0; group->tg_envp[i] != NULL; i++)
+  for (i = 0; info->ta_envp[i] != NULL; i++)
     {
-      if (env_cmpname(pname, group->tg_envp[i]))
+      if (env_cmpname(pname, info->ta_envp[i]))
         {
           return i;
         }

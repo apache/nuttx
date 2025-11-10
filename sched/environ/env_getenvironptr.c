@@ -30,6 +30,8 @@
 
 #include <sched.h>
 #include <stdlib.h>
+#include <nuttx/tls.h>
+
 #include "sched/sched.h"
 
 #undef get_environ_ptr
@@ -58,7 +60,7 @@ FAR char **get_environ_ptr(void)
 {
   FAR struct tcb_s *tcb = this_task();
 
-  return tcb->group->tg_envp;
+  return tcb->group->tg_info->ta_envp;
 }
 
 #endif /* CONFIG_DISABLE_ENVIRON */
