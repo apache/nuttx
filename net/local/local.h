@@ -196,6 +196,40 @@ extern "C"
 
 EXTERN const struct sock_intf_s g_local_sockif;
 
+/* Global protection lock for local socket */
+
+extern mutex_t g_local_lock;
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: local_lock
+ *
+ * Description:
+ *   Take the global local socket lock
+ *
+ ****************************************************************************/
+
+static inline_function void local_lock(void)
+{
+  nxmutex_lock(&g_local_lock);
+}
+
+/****************************************************************************
+ * Name: local_unlock
+ *
+ * Description:
+ *   Release the global local socket lock
+ *
+ ****************************************************************************/
+
+static inline_function void local_unlock(void)
+{
+  nxmutex_unlock(&g_local_lock);
+}
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
