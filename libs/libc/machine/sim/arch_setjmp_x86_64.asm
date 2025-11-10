@@ -66,9 +66,13 @@ longjmp:
 	; Setup return value
 
 	mov rax, rdx
+	test rax, rax
+	jnz @F
+	inc rax
 
 	; Restore registers
 
+@@:
 	mov rbx, [rcx]
 	mov rsp, [rcx+8]
 	mov rbp, [rcx+10h]
