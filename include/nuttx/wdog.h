@@ -337,6 +337,38 @@ int wd_start_next(FAR struct wdog_s *wdog, clock_t delay,
 }
 
 /****************************************************************************
+ * Name: wd_restart
+ *
+ * Description:
+ *   This function restarts the specified watchdog timer using the same
+ *   function and argument that were specified in the previous wd_start()
+ *   call, but with a new delay value. It can be used when the user wants
+ *   to restart the same watchdog with a different timeout value, or to
+ *   refresh (feed) an existing watchdog before it expires.
+ *
+ * Input Parameters:
+ *   wdog  - Pointer to the watchdog timer to restart.
+ *   delay - New delay time in system ticks before the watchdog expires.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ * Assumptions:
+ *   - The watchdog routine runs in the context of the timer interrupt
+ *     handler and is subject to all ISR restrictions.
+ *   - The watchdog must have been previously started so that the stored
+ *     function (wdog->func) and argument (wdog->arg) are valid.
+ *
+ ****************************************************************************/
+
+static inline_function
+int wd_restart(FAR struct wdog_s *wdog, clock_t delay)
+{
+  return wd_start(wdog, delay, wdog->func, wdog->arg);
+}
+
+/****************************************************************************
  * Name: wd_cancel
  *
  * Description:
