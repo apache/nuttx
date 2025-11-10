@@ -490,6 +490,7 @@ use ``mq_send()``, ``sigqueue()``, or ``kill()`` to communicate
 with NuttX tasks.
 
 - :c:func:`wd_start`
+- :c:func:`wd_start_next`
 - :c:func:`wd_restart`
 - :c:func:`wd_restart_next`
 - :c:func:`wd_cancel`
@@ -539,6 +540,30 @@ with NuttX tasks.
   -  The present implementation supports multiple parameters passed
      to wdentry; VxWorks supports only a single parameter. The
      maximum number of parameters is determined by
+
+.. c:function:: int wd_start_next(FAR struct wdog_s *wdog, clock_t delay, \
+                 wdentry_t wdentry, wdparm_t arg)
+
+   This function restart watchdog timer based on the last expiration time.
+   It can be used to implement a periodic watchdog timer. E.g, Call this
+   function instead of wd_start in the watchdog callback to restart the
+   next timer for better timing accuracy.
+   Note that calling this function outside the watchdog callback requires
+   the wdog->expired being set.
+
+  :param wdog: Watchdog ID
+  :param delay: Delay count in clock ticks
+  :param wdentry: Function to call on timeout
+  :param arg: The parameter to pass to wdentry.
+
+  **NOTE**: The parameter must be of type ``wdparm_t``.
+
+  :return: Zero (``OK``) is returned on success; a negated ``errno`` value
+    is return to indicate the nature of any failure.
+
+  **Assumptions/Limitations:** The watchdog routine runs in the
+  context of the timer interrupt handler and is subject to all ISR
+  restrictions.
 
 .. c:function:: int wd_restart(FAR struct wdog_s *wdog, clock_t delay)
 
