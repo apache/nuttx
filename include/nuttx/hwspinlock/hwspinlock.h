@@ -28,8 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/compiler.h>
-#include <nuttx/spinlock.h>
-
+#include <nuttx/irq.h>
 #include <stdbool.h>
 
 /****************************************************************************
@@ -40,16 +39,15 @@ struct hwspinlock_dev_s;
 
 struct hwspinlock_ops_s
 {
-  CODE bool (*trylock)(FAR struct hwspinlock_dev_s *dev,
-                       int id, int priority);
-  CODE void (*relax)(FAR struct hwspinlock_dev_s *dev,
-                     int id, int priority);
-  CODE void (*unlock)(FAR struct hwspinlock_dev_s *dev, int id);
+  CODE bool (*trylock)(FAR struct hwspinlock_dev_s *dev);
+  CODE void (*relax)(FAR struct hwspinlock_dev_s *dev);
+  CODE void (*unlock)(FAR struct hwspinlock_dev_s *dev);
 };
 
 struct hwspinlock_dev_s
 {
-  spinlock_t lock;
+  int id;
+  int priority;
   FAR const struct hwspinlock_ops_s *ops;
 };
 
@@ -65,57 +63,53 @@ extern "C"
 #define EXTERN extern
 #endif
 
-static inline bool hwspin_trylock(FAR struct hwspinlock_dev_s *dev,
-                                  int id, int priority)
+static inline bool hwspin_trylock(FAR struct hwspinlock_dev_s *dev)
 {
-  return dev->ops->trylock(dev, id, priority);
+  return dev->ops->trylock(dev);
 }
 
 static inline bool hwspin_trylock_irqsave(FAR struct hwspinlock_dev_s *dev,
-                                          int id, int priority,
                                           FAR irqstate_t *flags)
 {
-  *flags = spin_lock_irqsave(&dev->lock);
-  if (hwspin_trylock(dev, id, priority))
+  *flags = up_irq_save();
+  if (hwspin_trylock(dev))
     {
       return true;
     }
 
-  spin_unlock_irqrestore(&dev->lock, *flags);
+  up_irq_restore(*flags);
   return false;
 }
 
-static inline void hwspin_lock(FAR struct hwspinlock_dev_s *dev,
-                               int id, int priority)
+static inline void hwspin_lock(FAR struct hwspinlock_dev_s *dev)
 {
-  while (!dev->ops->trylock(dev, id, priority))
+  while (!dev->ops->trylock(dev))
     {
       if (dev->ops->relax)
         {
-          dev->ops->relax(dev, id, priority);
+          dev->ops->relax(dev);
         }
     }
 }
 
 static inline irqstate_t
-hwspin_lock_irqsave(FAR struct hwspinlock_dev_s *dev,
-                    int id, int priority)
+hwspin_lock_irqsave(FAR struct hwspinlock_dev_s *dev)
 {
-  irqstate_t flags = spin_lock_irqsave(&dev->lock);
-  hwspin_lock(dev, id, priority);
+  irqstate_t flags = up_irq_save();
+  hwspin_lock(dev);
   return flags;
 }
 
-static inline void hwspin_unlock(FAR struct hwspinlock_dev_s *dev, int id)
+static inline void hwspin_unlock(FAR struct hwspinlock_dev_s *dev)
 {
-  dev->ops->unlock(dev, id);
+  dev->ops->unlock(dev);
 }
 
 static inline void hwspin_unlock_restore(FAR struct hwspinlock_dev_s *dev,
-                                         int id, irqstate_t flags)
+                                         irqstate_t flags)
 {
-  hwspin_unlock(dev, id);
-  spin_unlock_irqrestore(&dev->lock, flags);
+  hwspin_unlock(dev);
+  up_irq_restore(flags);
 }
 
 #ifdef __cplusplus
