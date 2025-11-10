@@ -33,6 +33,9 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#include <nuttx/mutex.h>
+#include <nuttx/tls.h>
+
 #include "sched/sched.h"
 #include "environ/environ.h"
 
@@ -95,7 +98,7 @@ FAR char *getenv(FAR const char *name)
 
   /* It does!  Get the value sub-string from the name=value string */
 
-  pvalue = strchr(group->tg_envp[ret], '=');
+  pvalue = strchr(group->tg_info->ta_envp[ret], '=');
   if (pvalue == NULL)
     {
       nxrmutex_unlock(&group->tg_mutex);

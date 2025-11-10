@@ -150,6 +150,13 @@ struct task_info_s
   struct list_node ta_atfork; /* Holds the pthread_atfork_s list */
 #endif
   pid_t ta_pid; /* Process ID */
+#ifndef CONFIG_DISABLE_ENVIRON
+  /* Environment variables **************************************************/
+
+  FAR char            **ta_envp;    /* Allocated environment strings        */
+  ssize_t               ta_envpc;   /* Maximum entries of environment array */
+  ssize_t               ta_envc;    /* Number of environment strings        */
+#endif
 };
 
 /* struct tls_cleanup_s *****************************************************/

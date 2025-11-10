@@ -535,14 +535,6 @@ struct task_group_s
   sigset_t tg_sigdefault;           /* Set of signals set to the default action */
 #endif
 
-#ifndef CONFIG_DISABLE_ENVIRON
-  /* Environment variables **************************************************/
-
-  FAR char **tg_envp;               /* Allocated environment strings        */
-  ssize_t    tg_envpc;              /* Maximum entries of environment array */
-  ssize_t    tg_envc;               /* Number of environment strings        */
-#endif
-
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
   /* Interval timer *********************************************************/
 

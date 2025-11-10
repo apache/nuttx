@@ -34,6 +34,7 @@
 #include <assert.h>
 
 #include <nuttx/environ.h>
+#include <nuttx/tls.h>
 
 #include "environ/environ.h"
 
@@ -67,23 +68,26 @@ int env_foreach(FAR struct task_group_s *group,
                 env_foreach_t cb,
                 FAR void *arg)
 {
+  FAR struct task_info_s *info;
   int ret = OK;
   size_t i;
 
   /* Verify input parameters */
 
-  DEBUGASSERT(group != NULL && cb != NULL);
+  DEBUGASSERT(group != NULL && group->tg_info != NULL && cb != NULL);
 
-  if (group->tg_envp == NULL)
+  info = group->tg_info;
+
+  if (info->ta_envp == NULL)
     {
       return ret;
     }
 
-  for (i = 0; group->tg_envp[i] != NULL; i++)
+  for (i = 0; info->ta_envp[i] != NULL; i++)
     {
       /* Perform the callback */
 
-      ret = cb(arg, group->tg_envp[i]);
+      ret = cb(arg, info->ta_envp[i]);
 
       /* Terminate the traversal early if the callback so requests by
        * returning a non-zero value.
@@ -95,7 +99,7 @@ int env_foreach(FAR struct task_group_s *group,
         }
     }
 
-  DEBUGASSERT(ret != OK || group->tg_envc == i);
+  DEBUGASSERT(ret != OK || info->ta_envc == i);
 
   return ret;
 }

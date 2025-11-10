@@ -33,6 +33,7 @@
 #include <assert.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/tls.h>
 
 #include "environ/environ.h"
 
@@ -63,43 +64,49 @@
 
 void env_removevar(FAR struct task_group_s *group, ssize_t index)
 {
-  DEBUGASSERT(group != NULL && index >= 0 && index < group->tg_envc);
+  FAR struct task_info_s *info;
+
+  DEBUGASSERT(group != NULL && group->tg_info != NULL);
+
+  info = group->tg_info;
+
+  DEBUGASSERT(index >= 0 && index < info->ta_envc);
 
   /* Free the allocate environment string */
 
-  group_free(group, group->tg_envp[index]);
+  group_free(group, info->ta_envp[index]);
 
   /* Exchange the last env and the index env */
 
-  group->tg_envc--;
-  if (index == group->tg_envc)
+  info->ta_envc--;
+  if (index == info->ta_envc)
     {
-      group->tg_envp[index] = NULL;
+      info->ta_envp[index] = NULL;
     }
   else
     {
-      group->tg_envp[index] = group->tg_envp[group->tg_envc];
-      group->tg_envp[group->tg_envc] = NULL;
+      info->ta_envp[index] = info->ta_envp[info->ta_envc];
+      info->ta_envp[info->ta_envc] = NULL;
     }
 
   /* Free the old environment (if there was one) */
 
-  if (group->tg_envc == 0)
+  if (info->ta_envc == 0)
     {
-      group_free(group, group->tg_envp);
-      group->tg_envp = NULL;
-      group->tg_envpc = 0;
+      group_free(group, info->ta_envp);
+      info->ta_envp = NULL;
+      info->ta_envpc = 0;
     }
-  else if (group->tg_envc <=
-           (group->tg_envpc - SCHED_ENVIRON_RESERVED * 2))
+  else if (info->ta_envc <=
+           (info->ta_envpc - SCHED_ENVIRON_RESERVED * 2))
     {
       /* Reallocate the environment to reclaim a little memory */
 
-      group->tg_envpc = group->tg_envc + SCHED_ENVIRON_RESERVED + 1;
+      info->ta_envpc = info->ta_envc + SCHED_ENVIRON_RESERVED + 1;
 
-      group->tg_envp = group_realloc(group, group->tg_envp,
-         sizeof(*group->tg_envp) * group->tg_envpc);
-      DEBUGASSERT(group->tg_envp != NULL);
+      info->ta_envp = group_realloc(group, info->ta_envp,
+         sizeof(*info->ta_envp) * info->ta_envpc);
+      DEBUGASSERT(info->ta_envp != NULL);
     }
 }
 

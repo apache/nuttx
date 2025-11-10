@@ -35,6 +35,8 @@
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
+#include <nuttx/tls.h>
 
 #include "sched/sched.h"
 #include "environ/environ.h"
@@ -65,16 +67,19 @@
 
 int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
 {
+  FAR struct task_info_s *info;
   FAR char **envp = NULL;
   size_t envc = 0;
   size_t size;
   int ret = OK;
 
-  DEBUGASSERT(group != NULL);
+  DEBUGASSERT(group != NULL && group->tg_info != NULL);
+
+  info = group->tg_info;
 
   /* Is there an environment ? */
 
-  if (envcp != NULL && group->tg_envp == NULL)
+  if (envcp != NULL && info->ta_envp == NULL)
     {
       /* Pre-emption must be disabled throughout the following because the
        * environment may be shared.
@@ -89,8 +94,8 @@ int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
           envc++;
         }
 
-      group->tg_envc = envc;
-      group->tg_envpc = (envc + SCHED_ENVIRON_RESERVED + 1);
+      info->ta_envc = envc;
+      info->ta_envpc = (envc + SCHED_ENVIRON_RESERVED + 1);
 
       /* A special case is that the parent has an "empty" environment
        * allocation, i.e., there is an allocation in place but it
@@ -101,7 +106,7 @@ int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
         {
           /* There is an environment, duplicate it */
 
-          envp = group_malloc(group, sizeof(*envp) * group->tg_envpc);
+          envp = group_malloc(group, sizeof(*envp) * info->ta_envpc);
           if (envp == NULL)
             {
               /* The parent's environment can not be inherited due to a
@@ -140,7 +145,7 @@ int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
 
       /* Save the child environment allocation. */
 
-      group->tg_envp = envp;
+      info->ta_envp = envp;
       nxrmutex_unlock(&group->tg_mutex);
     }
 

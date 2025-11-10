@@ -81,6 +81,10 @@ static inline void group_release(FAR struct task_group_s *group)
 
   nxrmutex_destroy(&group->tg_mutex);
 
+  /* Release all shared environment variables */
+
+  env_release(group);
+
   task_uninit_info(group);
 
 #if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
@@ -118,10 +122,6 @@ static inline void group_release(FAR struct task_group_s *group)
       group->tg_root = NULL;
     }
 #endif
-
-  /* Release all shared environment variables */
-
-  env_release(group);
 
   /* Destroy the mm_map list */
 
