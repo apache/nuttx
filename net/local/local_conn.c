@@ -39,6 +39,14 @@
 #include "local/local.h"
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Global protection lock for local socket */
+
+mutex_t g_local_lock = NXMUTEX_INITIALIZER;
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -168,6 +176,7 @@ FAR struct local_conn_s *local_alloc(void)
 
       nxmutex_init(&conn->lc_sendlock);
       nxmutex_init(&conn->lc_polllock);
+      nxrmutex_init(&conn->lc_conn.s_lock);
 
 #ifdef CONFIG_NET_LOCAL_SCM
       conn->lc_cred.pid = nxsched_getpid();
@@ -347,6 +356,7 @@ void local_free(FAR struct local_conn_s *conn)
 
   nxmutex_destroy(&conn->lc_sendlock);
   nxmutex_destroy(&conn->lc_polllock);
+  nxrmutex_destroy(&conn->lc_conn.s_lock);
 
   /* And free the connection structure */
 
