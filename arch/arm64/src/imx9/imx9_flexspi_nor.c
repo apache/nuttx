@@ -252,6 +252,8 @@
 #define M25P_WECR      0x61  /* 1 Write Enhanched config    0   0     1     */
 #define M25P_RFSR      0x70  /* 1 Read Flag Status Register 0   0     1     */
 #define M25P_4B_ENTER  0xB7  /* 1 Enter 4byte addressing    0   0     0     */
+#define M25P_RSTEN     0x66  /* 1 Reset Enable              0   0     0     */
+#define M25P_RSTMEM    0x99  /* 1 Reset Memory              0   0     0     */
 
 /* Quad commands */
 #define M25P_Q_FAST_RD 0x6c  /* 1 Quad output fast read     4   0     1-256 */
@@ -281,6 +283,8 @@ enum
   ENTER_DDR,
   READ_FAST,
   ENTER_4BYTE,
+  RESET_ENABLE,
+  RESET_MEMORY,
 
   /* Quad SPI instructions */
 
@@ -375,6 +379,18 @@ static const uint32_t g_flexspi_nor_lut[][4] =
         FLEXSPI_COMMAND_RADDR_SDR, FLEXSPI_1PAD, ADDRESS_32BIT),
     FLEXSPI_LUT_SEQ(FLEXSPI_COMMAND_DUMMY_SDR, FLEXSPI_1PAD, 0x08,
         FLEXSPI_COMMAND_READ_SDR,  FLEXSPI_1PAD, 0x04)
+  },
+
+  [RESET_ENABLE] =
+  {
+    FLEXSPI_LUT_SEQ(FLEXSPI_COMMAND_SDR, FLEXSPI_1PAD, M25P_RSTEN,
+        FLEXSPI_COMMAND_STOP, FLEXSPI_1PAD, 0x00),
+  },
+
+  [RESET_MEMORY] =
+  {
+    FLEXSPI_LUT_SEQ(FLEXSPI_COMMAND_SDR, FLEXSPI_1PAD, M25P_RSTMEM,
+        FLEXSPI_COMMAND_STOP, FLEXSPI_1PAD, 0x00),
   },
 };
 
@@ -972,6 +988,23 @@ static int imx9_flexspi_nor_ioctl(struct mtd_dev_s *dev,
 
         /* TODO */
 
+        break;
+
+      case MTDIOC_RESET:
+        {
+          /* Reset the memory */
+
+          imx9_flexspi_nor_write_cmd(priv, RESET_ENABLE);
+          up_udelay(1);
+          ret = imx9_flexspi_nor_write_cmd(priv, RESET_MEMORY);
+          if (ret)
+            {
+              ferr("reset memory failed\n");
+            }
+
+          imx9_flexspi_nor_wait_bus_busy(priv);
+          FLEXSPI_SOFTWARE_RESET(priv->flexspi);
+        }
         break;
 
       default:
