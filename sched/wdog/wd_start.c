@@ -346,55 +346,6 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
 }
 
 /****************************************************************************
- * Name: wd_start
- *
- * Description:
- *   This function adds a watchdog timer to the active timer queue.  The
- *   specified watchdog function at 'wdentry' will be called from the
- *   interrupt level after the specified number of ticks has elapsed.
- *   Watchdog timers may be started from the interrupt level.
- *
- *   Watchdog timers execute in the address environment that was in effect
- *   when wd_start() is called.
- *
- *   Watchdog timers execute only once.
- *
- *   To replace either the timeout delay or the function to be executed,
- *   call wd_start again with the same wdog; only the most recent wdStart()
- *   on a given watchdog ID has any effect.
- *
- * Input Parameters:
- *   wdog     - Watchdog ID
- *   delay    - Delay count in clock ticks
- *   wdentry  - Function to call on timeout
- *   arg      - Parameter to pass to wdentry
- *
- *   NOTE:  The parameter must be of type wdparm_t.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is return to
- *   indicate the nature of any failure.
- *
- * Assumptions:
- *   The watchdog routine runs in the context of the timer interrupt handler
- *   and is subject to all ISR restrictions.
- *
- ****************************************************************************/
-
-int wd_start(FAR struct wdog_s *wdog, clock_t delay,
-             wdentry_t wdentry, wdparm_t arg)
-{
-  /* Ensure delay is within the range the wdog can handle. */
-
-  if (delay >= WDOG_MAX_DELAY)
-    {
-      return -EINVAL;
-    }
-
-  return wd_start_abstick(wdog, clock_delay2abstick(delay), wdentry, arg);
-}
-
-/****************************************************************************
  * Name: wd_timer
  *
  * Description:
