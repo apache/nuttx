@@ -58,9 +58,13 @@ setjmp:
 longjmp:
 	mov	ecx, dword ptr [esp+4]	; jmpbuf in ecx.
 	mov	eax, dword ptr [esp+8]	; Second argument is return value
+	test	eax, eax
+	jnz	@F
+	inc	eax
 
 	; Save the return address now
 
+@@:
 	mov	edx, dword ptr [ecx+14h]
 
 	; Restore registers
