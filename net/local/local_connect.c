@@ -88,9 +88,7 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
       return -ECONNREFUSED;
     }
 
-  net_lock();
   ret = local_alloc_accept(server, client, &conn);
-  net_unlock();
   if (ret < 0)
     {
       nerr("ERROR: Failed to alloc accept conn %s: %d\n",
@@ -151,9 +149,9 @@ errout_with_outfd:
 errout_with_conn:
   local_release_fifos(conn);
   client->lc_state = LOCAL_STATE_BOUND;
-  net_lock();
+  local_lock();
   local_free(conn);
-  net_unlock();
+  local_unlock();
 
   return ret;
 }
@@ -175,7 +173,7 @@ int32_t local_generate_instance_id(void)
   static int32_t g_next_instance_id = 0;
   int32_t id;
 
-  /* Called from local_connect with net_lock held. */
+  /* Called from local_connect with local_lock held. */
 
   id = g_next_instance_id++;
   if (g_next_instance_id < 0)
@@ -232,7 +230,7 @@ int psock_local_connect(FAR struct socket *psock,
 
   /* Find the matching server connection */
 
-  net_lock();
+  local_lock();
   while ((conn = local_nextconn(conn)) != NULL)
     {
       /* Self found, continue */
@@ -275,7 +273,7 @@ int psock_local_connect(FAR struct socket *psock,
               ret = local_stream_connect(client, conn,
                           _SS_ISNONBLOCK(client->lc_conn.s_flags));
 
-              net_unlock();
+              local_unlock();
               return ret;
             }
 
@@ -283,12 +281,12 @@ int psock_local_connect(FAR struct socket *psock,
 
         default:        /* Bad, memory must be corrupted */
           DEBUGPANIC(); /* PANIC if debug on */
-          net_unlock();
+          local_unlock();
           return -EINVAL;
         }
     }
 
-  net_unlock();
+  local_unlock();
   ret = nx_stat(unpath, &buf, 1);
   return ret < 0 ? ret : -ECONNREFUSED;
 }
