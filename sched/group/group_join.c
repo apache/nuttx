@@ -36,7 +36,6 @@
 
 #include "sched/sched.h"
 #include "group/group.h"
-#include "environ/environ.h"
 
 #ifndef CONFIG_DISABLE_PTHREAD
 

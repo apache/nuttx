@@ -36,9 +36,9 @@
 #include <nuttx/queue.h>
 #include <nuttx/sched.h>
 #include <nuttx/trace.h>
+#include <nuttx/environ.h>
 
 #include "sched/sched.h"
-#include "environ/environ.h"
 #include "group/group.h"
 #include "task/task.h"
 #include "tls/tls.h"
@@ -128,7 +128,7 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
 
   /* Duplicate the parent tasks environment */
 
-  ret = env_dup(tcb->group, envp);
+  ret = env_dup(tcb->group->tg_info, envp);
   if (ret < 0)
     {
       goto errout_with_group;

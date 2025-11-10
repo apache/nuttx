@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/environ/env_putenv.c
+ * libs/libc/environ/env_removevar.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,81 +24,75 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <assert.h>
 
-#ifndef CONFIG_DISABLE_ENVIRON
+#include <nuttx/tls.h>
 
-#include <stdlib.h>
-#include <sched.h>
-#include <string.h>
-#include <errno.h>
-
-#include <nuttx/lib/lib.h>
+#include "environ/environ.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: putenv
+ * Name: env_removevar
  *
  * Description:
- *   The putenv() function adds or changes the value of environment
- *   variables.
- *   The argument string is of the form name=value. If name does not already
- *   exist in  the  environment, then string is added to the environment. If
- *   name does exist, then the value of name in the environment is changed to
- *   value.
+ *   Remove the referenced name=value pair from the environment
  *
  * Input Parameters:
- *   name=value string describing the environment setting to add/modify
+ *   info  - The task with the environment containing the name=value
+ *           pair
+ *   index - A index to the name=value pair in the restroom
  *
  * Returned Value:
- *   Zero on success
+ *   None
  *
  * Assumptions:
- *   Not called from an interrupt handler
+ *   - Not called from an interrupt handler
+ *   - Caller has pre-emption disabled
+ *   - Caller will reallocate the environment structure to the correct size
  *
  ****************************************************************************/
 
-int putenv(FAR const char *string)
+void env_removevar(FAR struct task_info_s *info, ssize_t index)
 {
-  FAR char *pname;
-  FAR char *pequal;
-  int ret = OK;
+  DEBUGASSERT(info != NULL && index >= 0 && index < info->ta_envc);
 
-  /* Verify that a string was passed */
+  /* Free the allocate environment string */
 
-  if (!string)
+  lib_ufree(info->ta_envp[index]);
+
+  /* Exchange the last env and the index env */
+
+  info->ta_envc--;
+  if (index == info->ta_envc)
     {
-      ret = EINVAL;
-      goto errout;
+      info->ta_envp[index] = NULL;
+    }
+  else
+    {
+      info->ta_envp[index] = info->ta_envp[info->ta_envc];
+      info->ta_envp[info->ta_envc] = NULL;
     }
 
-  /* Parse the name=value string */
+  /* Free the old environment (if there was one) */
 
-  pname = strdup(string);
-  if (!pname)
+  if (info->ta_envc == 0)
     {
-      ret = ENOMEM;
-      goto errout;
+      lib_ufree(info->ta_envp);
+      info->ta_envp = NULL;
+      info->ta_envpc = 0;
     }
-
-  pequal = strchr(pname, '=');
-  if (pequal)
+  else if (info->ta_envc <=
+           (info->ta_envpc - SCHED_ENVIRON_RESERVED * 2))
     {
-      /* Then let setenv do all of the work */
+      /* Reallocate the environment to reclaim a little memory */
 
-      *pequal = '\0';
-      ret = setenv(pname, pequal + 1, TRUE);
+      info->ta_envpc = info->ta_envc + SCHED_ENVIRON_RESERVED + 1;
+
+      info->ta_envp = lib_urealloc(info->ta_envp,
+         sizeof(*info->ta_envp) * info->ta_envpc);
+      DEBUGASSERT(info->ta_envp != NULL);
     }
-
-  kmm_free(pname);
-  return ret;
-
-errout:
-  set_errno(ret);
-  return ERROR;
 }
-
-#endif /* CONFIG_DISABLE_ENVIRON */

@@ -137,7 +137,7 @@ struct pthread_atfork_s
 
 struct task_info_s
 {
-  mutex_t         ta_lock;
+  rmutex_t        ta_lock;
 #if CONFIG_TLS_TASK_NELEM > 0
   uintptr_t       ta_telem[CONFIG_TLS_TASK_NELEM]; /* Task local storage elements */
 #endif

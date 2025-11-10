@@ -42,7 +42,6 @@
 #  include <nuttx/binfmt/binfmt.h>
 #endif
 
-#include "environ/environ.h"
 #include "signal/signal.h"
 #include "pthread/pthread.h"
 #include "mqueue/mqueue.h"
@@ -80,10 +79,6 @@ static inline void group_release(FAR struct task_group_s *group)
   /* Destroy the mutex */
 
   nxrmutex_destroy(&group->tg_mutex);
-
-  /* Release all shared environment variables */
-
-  env_release(group);
 
   task_uninit_info(group);
 

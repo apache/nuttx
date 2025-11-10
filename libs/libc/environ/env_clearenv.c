@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/environ/env_release.c
+ * libs/libc/environ/env_clearenv.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,35 +24,22 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#ifndef CONFIG_DISABLE_ENVIRON
-
-#include <sched.h>
-#include <assert.h>
-#include <errno.h>
-
-#include <nuttx/kmalloc.h>
+#include <nuttx/environ.h>
 #include <nuttx/tls.h>
-
-#include "environ/environ.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: env_release
+ * Name: clearenv
  *
  * Description:
- *   env_release() is called only from group_leave() when the last member of
- *   a task group exits.  The env_release() function clears the environment
- *   of all name-value pairs and sets the value of the external variable
- *   environ to NULL.
+ *   The clearenv() function clears the environment of all name-value pairs
+ *   and sets the value of the external variable environ to NULL.
  *
  * Input Parameters:
- *   group - Identifies the task group containing the environment structure
- *           to be released.
+ *   None
  *
  * Returned Value:
  *   None
@@ -62,36 +49,12 @@
  *
  ****************************************************************************/
 
-void env_release(FAR struct task_group_s *group)
+int clearenv(void)
 {
-  FAR struct task_info_s *info;
-  int i;
+  FAR struct task_info_s *info = task_get_info();
 
-  DEBUGASSERT(group != NULL && group->tg_info != NULL);
-
-  info = group->tg_info;
-
-  if (info->ta_envp)
-    {
-      /* Free any allocate environment strings */
-
-      for (i = 0; info->ta_envp[i] != NULL; i++)
-        {
-          group_free(group, info->ta_envp[i]);
-        }
-
-      /* Free the environment */
-
-      group_free(group, info->ta_envp);
-    }
-
-  /* In any event, make sure that all environment-related variables in the
-   * task group structure are reset to initial values.
-   */
-
-  info->ta_envp  = NULL;
-  info->ta_envpc = 0;
-  info->ta_envc  = 0;
+  nxrmutex_lock(&info->ta_lock);
+  env_release(info);
+  nxrmutex_unlock(&info->ta_lock);
+  return OK;
 }
-
-#endif /* CONFIG_DISABLE_ENVIRON */

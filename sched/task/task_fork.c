@@ -37,9 +37,9 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/environ.h>
 
 #include "sched/sched.h"
-#include "environ/environ.h"
 #include "group/group.h"
 #include "task/task.h"
 #include "tls/tls.h"
@@ -317,7 +317,7 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr, bool vfork)
 
   /* Duplicate the parent tasks environment */
 
-  ret = env_dup(child->group, environ);
+  ret = env_dup(child->group->tg_info, environ);
   if (ret < 0)
     {
       goto errout_with_tcb;

@@ -29,6 +29,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/list.h>
 #include <nuttx/lib/lib.h>
+#include <nuttx/environ.h>
 
 #include "tls.h"
 
@@ -145,7 +146,11 @@ void task_uninit_info(FAR struct task_group_s *group)
   task_uninit_stream(group);
 #endif /* CONFIG_FILE_STREAM */
 
-  nxmutex_destroy(&info->ta_lock);
+  /* Release all environment variables */
+
+  env_release(info);
+
+  nxrmutex_destroy(&info->ta_lock);
 #ifdef CONFIG_MM_KERNEL_HEAP
   group_free(group, info);
 #endif

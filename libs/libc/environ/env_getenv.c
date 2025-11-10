@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/environ/env_unsetenv.c
+ * libs/libc/environ/env_getenv.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,18 +24,12 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#ifndef CONFIG_DISABLE_ENVIRON
-
-#include <sched.h>
-#include <string.h>
-#include <assert.h>
 #include <errno.h>
+#include <string.h>
 
-#include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
+#include <nuttx/tls.h>
 
-#include "sched/sched.h"
 #include "environ/environ.h"
 
 /****************************************************************************
@@ -43,50 +37,68 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: unsetenv
+ * Name: getenv
  *
  * Description:
- *   The unsetenv() function deletes the variable name from the environment.
+ *   The getenv() function searches the environment list for a string that
+ *   matches the string pointed to by name.
  *
  * Input Parameters:
- *   name - The name of the variable to delete
+ *   name - The name of the variable to find.
  *
  * Returned Value:
- *   Zero on success
+ *   The value of the variable (read-only) or NULL on failure
  *
  * Assumptions:
  *   Not called from an interrupt handler
  *
  ****************************************************************************/
 
-int unsetenv(FAR const char *name)
+FAR char *getenv(FAR const char *name)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct task_group_s *group = rtcb->group;
-  ssize_t idx;
+  FAR struct task_info_s *info = task_get_info();
+  FAR char *pvalue = NULL;
+  ssize_t ret = OK;
 
-  DEBUGASSERT(group);
+  /* Verify that a string was passed */
 
-  /* Check the incoming parameter */
-
-  if (name == NULL || *name == '\0' || strchr(name, '=') != NULL)
+  if (name == NULL || info == NULL
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+      || up_interrupt_context() || sched_idletask()
+#endif
+     )
     {
-      set_errno(EINVAL);
-      return ERROR;
+      ret = -EINVAL;
+      goto errout;
     }
 
-  /* Check if the variable exists */
-
-  nxrmutex_lock(&group->tg_mutex);
-  if (group && (idx = env_findvar(group, name)) >= 0)
+  nxrmutex_lock(&info->ta_lock);
+  ret = env_findvar(info, name);
+  if (ret < 0)
     {
-      /* It does!  Remove the name=value pair from the environment. */
-
-      env_removevar(group, idx);
+      nxrmutex_unlock(&info->ta_lock);
+      goto errout;
     }
 
-  nxrmutex_unlock(&group->tg_mutex);
-  return OK;
+  /* It does!  Get the value sub-string from the name=value string */
+
+  pvalue = strchr(info->ta_envp[ret], '=');
+  if (pvalue == NULL)
+    {
+      /* The name=value string has no '='  This is a bug! */
+
+      nxrmutex_unlock(&info->ta_lock);
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  /* Adjust the pointer so that it points to the value right after the '=' */
+
+  pvalue++;
+  nxrmutex_unlock(&info->ta_lock);
+  return pvalue;
+
+errout:
+  set_errno(-ret);
+  return NULL;
 }
-
-#endif /* CONFIG_DISABLE_ENVIRON */

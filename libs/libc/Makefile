@@ -29,6 +29,7 @@ include builtin/Make.defs
 include ctype/Make.defs
 include dirent/Make.defs
 include dlfcn/Make.defs
+include environ/Make.defs
 include errno/Make.defs
 include eventfd/Make.defs
 include fixedmath/Make.defs

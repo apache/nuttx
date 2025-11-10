@@ -71,12 +71,12 @@ int pthread_key_delete(pthread_key_t key)
        * modification of the group TLS index set.
        */
 
-      ret = nxmutex_lock(&info->ta_lock);
+      ret = nxrmutex_lock(&info->ta_lock);
       if (ret == OK)
         {
           info->ta_tlsdtor[key] = NULL;
           tls->tl_elem[key]     = 0;
-          nxmutex_unlock(&info->ta_lock);
+          nxrmutex_unlock(&info->ta_lock);
         }
       else
         {

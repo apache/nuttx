@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/environ/env_findvar.c
+ * libs/libc/environ/env_foreach.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,96 +24,72 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#ifndef CONFIG_DISABLE_ENVIRON
-
-#include <stdbool.h>
-#include <string.h>
-#include <sched.h>
 #include <assert.h>
 
+#include <nuttx/environ.h>
 #include <nuttx/tls.h>
 
 #include "environ/environ.h"
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: env_cmpname
- ****************************************************************************/
-
-static bool env_cmpname(const char *pszname, const char *peqname)
-{
-  /* Search until we find anything different in the two names */
-
-  for (; *pszname == *peqname; pszname++, peqname++)
-    {
-    }
-
-  /* On success, pszname will end with '\0' and peqname with '=' */
-
-  if (*pszname == '\0' && *peqname == '=')
-    {
-      return true;
-    }
-
-  return false;
-}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: env_findvar
+ * Name: env_foreach
  *
  * Description:
- *   Search the provided environment structure for the variable of the
- *   specified name.
+ *   Visit each name-value pair in the environment.
  *
  * Input Parameters:
- *   group - The task group containing environment array to be searched.
- *   pname - The variable name to find
+ *   info  - The task containing environment array to be searched.
+ *   cb    - The callback function to be invoked for each environment
+ *           variable.
  *
  * Returned Value:
- *   A index to the name=value string in the environment
+ *   Zero if the all environment variables have been traversed.  A non-zero
+ *   value means that the callback function requested early termination by
+ *   returning a nonzero value.
  *
  * Assumptions:
  *   - Not called from an interrupt handler
- *   - Pre-emption is disabled by caller
+ *   - Pre-emptions is disabled by caller
  *
  ****************************************************************************/
 
-ssize_t env_findvar(FAR struct task_group_s *group, FAR const char *pname)
+int env_foreach(FAR struct task_info_s *info,
+                env_foreach_t cb,
+                FAR void *arg)
 {
-  FAR struct task_info_s *info;
-  ssize_t i;
+  int ret = OK;
+  size_t i;
 
   /* Verify input parameters */
 
-  DEBUGASSERT(group != NULL && group->tg_info != NULL && pname != NULL);
-
-  info = group->tg_info;
+  DEBUGASSERT(info != NULL && cb != NULL);
 
   if (info->ta_envp == NULL)
     {
-      return -ENOENT;
+      return ret;
     }
-
-  /* Search for a name=value string with matching name */
 
   for (i = 0; info->ta_envp[i] != NULL; i++)
     {
-      if (env_cmpname(pname, info->ta_envp[i]))
+      /* Perform the callback */
+
+      ret = cb(arg, info->ta_envp[i]);
+
+      /* Terminate the traversal early if the callback so requests by
+       * returning a non-zero value.
+       */
+
+      if (ret != 0)
         {
-          return i;
+          break;
         }
     }
 
-  return -ENOENT;
-}
+  DEBUGASSERT(ret != OK || info->ta_envc == i);
 
-#endif /* CONFIG_DISABLE_ENVIRON */
+  return ret;
+}

@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/environ/environ.h
+ * libs/libc/environ/environ.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,24 +20,24 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_ENVIRON_ENVIRON_H
-#define __SCHED_ENVIRON_ENVIRON_H
+#ifndef __LIBS_LIBC_ENVIRON_ENVIRON_H
+#define __LIBS_LIBC_ENVIRON_ENVIRON_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/sched.h>
+
+#include <sys/types.h>
+
+#include <nuttx/lib/lib.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_DISABLE_ENVIRON
-#  define env_dup(group, envp) (0)
-#  define env_release(group)   ((void)0)
-#else
+#ifndef CONFIG_DISABLE_ENVIRON
 
 #  define SCHED_ENVIRON_RESERVED (4)
 
@@ -58,66 +58,6 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: env_dup
- *
- * Description:
- *   Copy the internal environment structure of a task.  This is the action
- *   that is performed when a new task is created:
- *   The new task has a private, exact duplicate of the parent task's
- *    environment.
- *
- * Input Parameters:
- *   group - The child task group to receive the newly allocated copy of the
- *           parent task groups environment structure.
- *   envp  - Pointer to the environment strings.
- *
- * Returned Value:
- *   zero on success
- *
- * Assumptions:
- *   Not called from an interrupt handler.
- *
- ****************************************************************************/
-
-int env_dup(FAR struct task_group_s *group, FAR char * const *envp);
-
-/****************************************************************************
- * Name: env_release
- *
- * Description:
- *   env_release() is called only from group_leave() when the last member of
- *   a task group exits.  The env_release() function clears the environment
- *   of all name-value pairs and sets the value of the external variable
- *   environ to NULL.
- *
- * Input Parameters:
- *   group - Identifies the task group containing the environment structure
- *           to be released.
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Not called from an interrupt handler
- *
- ****************************************************************************/
-
-void env_release(FAR struct task_group_s *group);
-
-#ifdef CONFIG_SCHED_USER_IDENTITY
-/****************************************************************************
- * Name: env_sanitize_secure
- *
- * Description:
- *   Remove environment variables that must not be inherited by a secure
- *   (set-user-ID or set-group-ID) executable.
- *
- ****************************************************************************/
-
-void env_sanitize_secure(FAR struct task_group_s *group);
-#endif
-
-/****************************************************************************
  * Name: env_findvar
  *
  * Description:
@@ -125,7 +65,7 @@ void env_sanitize_secure(FAR struct task_group_s *group);
  *   specified name.
  *
  * Input Parameters:
- *   group - The task group containing environment array to be searched.
+ *   info  - The task containing environment array to be searched.
  *   pname - The variable name to find
  *
  * Returned Value:
@@ -137,7 +77,7 @@ void env_sanitize_secure(FAR struct task_group_s *group);
  *
  ****************************************************************************/
 
-ssize_t env_findvar(FAR struct task_group_s *group, FAR const char *pname);
+ssize_t env_findvar(FAR struct task_info_s *info, FAR const char *pname);
 
 /****************************************************************************
  * Name: env_removevar
@@ -146,7 +86,7 @@ ssize_t env_findvar(FAR struct task_group_s *group, FAR const char *pname);
  *   Remove the referenced name=value pair from the environment
  *
  * Input Parameters:
- *   group - The task group with the environment containing the name=value
+ *   info  - The task with the environment containing the name=value
  *           pair
  *   index - A index to the name=value pair in the restroom
  *
@@ -160,7 +100,7 @@ ssize_t env_findvar(FAR struct task_group_s *group, FAR const char *pname);
  *
  ****************************************************************************/
 
-void env_removevar(FAR struct task_group_s *group, ssize_t index);
+void env_removevar(FAR struct task_info_s *info, ssize_t index);
 
 #undef EXTERN
 #ifdef __cplusplus
@@ -168,4 +108,4 @@ void env_removevar(FAR struct task_group_s *group, ssize_t index);
 #endif
 
 #endif /* !CONFIG_DISABLE_ENVIRON */
-#endif /* __SCHED_ENVIRON_ENVIRON_H */
+#endif /* __LIBS_LIBC_ENVIRON_ENVIRON_H */

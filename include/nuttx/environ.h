@@ -28,8 +28,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
-#ifndef CONFIG_DISABLE_ENVIRON
+#ifdef CONFIG_DISABLE_ENVIRON
+#  define env_dup(info, envp) (0)
+#  define env_release(info)   ((void)0)
+#else
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -54,6 +58,8 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+struct task_info_s;  /* Forward reference */
 
 /****************************************************************************
  * Name: env_foreach
@@ -80,9 +86,68 @@ extern "C"
  *
  ****************************************************************************/
 
-struct task_group_s;  /* Forward reference */
-int env_foreach(FAR struct task_group_s *group, env_foreach_t cb,
+int env_foreach(FAR struct task_info_s *info, env_foreach_t cb,
                 FAR void *arg);
+
+/****************************************************************************
+ * Name: env_dup
+ *
+ * Description:
+ *   Copy the internal environment structure of a task.  This is the action
+ *   that is performed when a new task is created:
+ *   The new task has a private, exact duplicate of the parent task's
+ *    environment.
+ *
+ * Input Parameters:
+ *   info  - The child task to receive the newly allocated copy of the
+ *           parent task groups environment structure.
+ *   envp  - Pointer to the environment strings.
+ *
+ * Returned Value:
+ *   zero on success
+ *
+ * Assumptions:
+ *   Not called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+int env_dup(FAR struct task_info_s *info, FAR char * const *envp);
+
+/****************************************************************************
+ * Name: env_release
+ *
+ * Description:
+ *   env_release() is called only from group_leave() when the last member of
+ *   a task group exits.  The env_release() function clears the environment
+ *   of all name-value pairs and sets the value of the external variable
+ *   environ to NULL.
+ *
+ * Input Parameters:
+ *   info - Identifies the task containing the environment structure
+ *          to be released.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Not called from an interrupt handler
+ *
+ ****************************************************************************/
+
+void env_release(FAR struct task_info_s *info);
+
+#ifdef CONFIG_SCHED_USER_IDENTITY
+/****************************************************************************
+ * Name: env_sanitize_secure
+ *
+ * Description:
+ *   Remove environment variables that must not be inherited by a secure
+ *   (set-user-ID or set-group-ID) executable.
+ *
+ ****************************************************************************/
+
+void env_sanitize_secure(FAR struct task_info_s *info);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

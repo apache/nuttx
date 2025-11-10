@@ -125,7 +125,7 @@ int task_init_info(FAR struct task_group_s *group)
 
   /* Initialize user space mutex */
 
-  nxmutex_init(&info->ta_lock);
+  nxrmutex_init(&info->ta_lock);
   group->tg_info = info;
 
 #ifdef CONFIG_PTHREAD_ATFORK

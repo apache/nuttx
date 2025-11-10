@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/environ/env_clearenv.c
+ * libs/libc/environ/env_putenv.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,50 +24,73 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <string.h>
+#include <errno.h>
 
-#ifndef CONFIG_DISABLE_ENVIRON
-
-#include <sched.h>
-#include <stdlib.h>
-#include <assert.h>
-
-#include "sched/sched.h"
-#include "environ/environ.h"
+#include <nuttx/lib/lib.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: clearenv
+ * Name: putenv
  *
  * Description:
- *   The clearenv() function clears the environment of all name-value pairs
- *   and sets the value of the external variable environ to NULL.
+ *   The putenv() function adds or changes the value of environment
+ *   variables.
+ *   The argument string is of the form name=value. If name does not already
+ *   exist in  the  environment, then string is added to the environment. If
+ *   name does exist, then the value of name in the environment is changed to
+ *   value.
  *
  * Input Parameters:
- *   None
+ *   name=value string describing the environment setting to add/modify
  *
  * Returned Value:
- *   None
+ *   Zero on success
  *
  * Assumptions:
  *   Not called from an interrupt handler
  *
  ****************************************************************************/
 
-int clearenv(void)
+int putenv(FAR const char *string)
 {
-  FAR struct tcb_s *tcb = this_task();
-  FAR struct task_group_s *group = tcb->group;
+  FAR char *pname;
+  FAR char *pequal;
+  int ret = OK;
 
-  DEBUGASSERT(group);
+  /* Verify that a string was passed */
 
-  nxrmutex_lock(&group->tg_mutex);
-  env_release(group);
-  nxrmutex_unlock(&group->tg_mutex);
-  return OK;
+  if (!string)
+    {
+      ret = EINVAL;
+      goto errout;
+    }
+
+  /* Parse the name=value string */
+
+  pname = strdup(string);
+  if (!pname)
+    {
+      ret = ENOMEM;
+      goto errout;
+    }
+
+  pequal = strchr(pname, '=');
+  if (pequal)
+    {
+      /* Then let setenv do all of the work */
+
+      *pequal = '\0';
+      ret = setenv(pname, pequal + 1, TRUE);
+    }
+
+  lib_ufree(pname);
+  return ret;
+
+errout:
+  set_errno(ret);
+  return ERROR;
 }
-
-#endif /* CONFIG_DISABLE_ENVIRON */
