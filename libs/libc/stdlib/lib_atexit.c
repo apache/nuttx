@@ -82,7 +82,7 @@ int atexit_register(int type, CODE void (*func)(void), FAR void *arg,
 
   if (func)
     {
-      ret = nxmutex_lock(&info->ta_lock);
+      ret = nxrmutex_lock(&info->ta_lock);
       if (ret < 0)
         {
           return -ret;
@@ -101,7 +101,7 @@ int atexit_register(int type, CODE void (*func)(void), FAR void *arg,
           ret = ERROR;
         }
 
-      nxmutex_unlock(&info->ta_lock);
+      nxrmutex_unlock(&info->ta_lock);
     }
 
   return ret;
@@ -128,7 +128,7 @@ void atexit_call_exitfuncs(int status, bool quick)
        * before the older remaining ones, as documented in exit(3).
        */
 
-      if (nxmutex_lock(&info->ta_lock) < 0)
+      if (nxrmutex_lock(&info->ta_lock) < 0)
         {
           break;
         }
@@ -145,7 +145,7 @@ void atexit_call_exitfuncs(int status, bool quick)
       aehead->funcs[idx].arg  = NULL;
       aehead->nfuncs--;
 
-      nxmutex_unlock(&info->ta_lock);
+      nxrmutex_unlock(&info->ta_lock);
 
       if (!func)
         {

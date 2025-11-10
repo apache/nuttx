@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/environ/env_getenvironptr.c
+ * libs/libc/environ/env_unsetenv.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,43 +24,58 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <errno.h>
+#include <string.h>
 
-#ifndef CONFIG_DISABLE_ENVIRON
-
-#include <sched.h>
-#include <stdlib.h>
+#include <nuttx/mutex.h>
 #include <nuttx/tls.h>
 
-#include "sched/sched.h"
-
-#undef get_environ_ptr
+#include "environ/environ.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: get_environ_ptr
+ * Name: unsetenv
  *
  * Description:
- *   Return a pointer to the thread specific environ variable.
+ *   The unsetenv() function deletes the variable name from the environment.
  *
  * Input Parameters:
- *   None
+ *   name - The name of the variable to delete
  *
  * Returned Value:
- *   A pointer to the per-thread environ variable.
+ *   Zero on success
  *
  * Assumptions:
+ *   Not called from an interrupt handler
  *
  ****************************************************************************/
 
-FAR char **get_environ_ptr(void)
+int unsetenv(FAR const char *name)
 {
-  FAR struct tcb_s *tcb = this_task();
+  FAR struct task_info_s *info = task_get_info();
+  ssize_t idx;
 
-  return tcb->group->tg_info->ta_envp;
+  /* Check the incoming parameter */
+
+  if (name == NULL || *name == '\0' || strchr(name, '=') != NULL)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  /* Check if the variable exists */
+
+  nxrmutex_lock(&info->ta_lock);
+  if (info && (idx = env_findvar(info, name)) >= 0)
+    {
+      /* It does!  Remove the name=value pair from the environment. */
+
+      env_removevar(info, idx);
+    }
+
+  nxrmutex_unlock(&info->ta_lock);
+  return OK;
 }
-
-#endif /* CONFIG_DISABLE_ENVIRON */

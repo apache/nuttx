@@ -98,7 +98,7 @@ int pthread_key_create(FAR pthread_key_t *key,
    * avoid concurrent modification of the group TLS index set.
    */
 
-  ret = nxmutex_lock(&info->ta_lock);
+  ret = nxrmutex_lock(&info->ta_lock);
   if (ret < 0)
     {
       return -ret;
@@ -129,7 +129,7 @@ int pthread_key_create(FAR pthread_key_t *key,
         }
     }
 
-  nxmutex_unlock(&info->ta_lock);
+  nxrmutex_unlock(&info->ta_lock);
   return ret;
 }
 

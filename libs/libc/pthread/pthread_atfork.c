@@ -79,9 +79,9 @@ int pthread_atfork(CODE void (*prepare)(void),
   entry->parent = parent;
   entry->child = child;
 
-  nxmutex_lock(&info->ta_lock);
+  nxrmutex_lock(&info->ta_lock);
   list_add_head(list, &entry->node);
-  nxmutex_unlock(&info->ta_lock);
+  nxrmutex_unlock(&info->ta_lock);
 #endif
 
   return OK;

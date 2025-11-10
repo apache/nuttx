@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/environ/env_dup.c
+ * libs/libc/environ/env_dup.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,21 +24,13 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#ifndef CONFIG_DISABLE_ENVIRON
-
-#include <sys/types.h>
-#include <sched.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/tls.h>
 
-#include "sched/sched.h"
 #include "environ/environ.h"
 
 /****************************************************************************
@@ -54,7 +46,7 @@
  *   private, exact duplicate of the parent task's environment.
  *
  * Input Parameters:
- *   group - The child task group to receive the newly allocated copy of
+ *   info  - The child task to receive the newly allocated copy of
  *           the parent task groups environment structure.
  *   envcp - Pointer to the environment strings to copy.
  * Returned Value:
@@ -65,17 +57,14 @@
  *
  ****************************************************************************/
 
-int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
+int env_dup(FAR struct task_info_s *info, FAR char * const *envcp)
 {
-  FAR struct task_info_s *info;
   FAR char **envp = NULL;
   size_t envc = 0;
   size_t size;
   int ret = OK;
 
-  DEBUGASSERT(group != NULL && group->tg_info != NULL);
-
-  info = group->tg_info;
+  DEBUGASSERT(info != NULL);
 
   /* Is there an environment ? */
 
@@ -85,7 +74,7 @@ int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
        * environment may be shared.
        */
 
-      nxrmutex_lock(&group->tg_mutex);
+      nxrmutex_lock(&info->ta_lock);
 
       /* Count the strings */
 
@@ -106,7 +95,7 @@ int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
         {
           /* There is an environment, duplicate it */
 
-          envp = group_malloc(group, sizeof(*envp) * info->ta_envpc);
+          envp = lib_umalloc(sizeof(*envp) * info->ta_envpc);
           if (envp == NULL)
             {
               /* The parent's environment can not be inherited due to a
@@ -124,15 +113,15 @@ int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
               while (envc-- > 0)
                 {
                   size = strlen(envcp[envc]) + 1;
-                  envp[envc] = group_malloc(group, size);
+                  envp[envc] = lib_umalloc(size);
                   if (envp[envc] == NULL)
                     {
                       while (envp[++envc] != NULL)
                         {
-                          group_free(group, envp[envc]);
+                          lib_ufree(envp[envc]);
                         }
 
-                      group_free(group, envp);
+                      lib_ufree(envp);
                       envp = NULL;
                       ret = -ENOMEM;
                       break;
@@ -146,10 +135,8 @@ int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
       /* Save the child environment allocation. */
 
       info->ta_envp = envp;
-      nxrmutex_unlock(&group->tg_mutex);
+      nxrmutex_unlock(&info->ta_lock);
     }
 
   return ret;
 }
-
-#endif /* CONFIG_DISABLE_ENVIRON */

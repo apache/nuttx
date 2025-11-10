@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/environ/env_setenv.c
+ * libs/libc/environ/env_setenv.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,22 +24,14 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#ifndef CONFIG_DISABLE_ENVIRON
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <sched.h>
-#include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <stdio.h>
+#include <string.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/tls.h>
 
-#include "sched/sched.h"
 #include "environ/environ.h"
 
 /****************************************************************************
@@ -71,8 +63,6 @@
 
 int setenv(FAR const char *name, FAR const char *value, int overwrite)
 {
-  FAR struct tcb_s *rtcb;
-  FAR struct task_group_s *group;
   FAR struct task_info_s *info;
   FAR char *pvar;
   FAR char **envp;
@@ -113,17 +103,15 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
 
   /* Get a reference to the thread-private environ in the TCB. */
 
-  rtcb  = this_task();
-  group = rtcb->group;
-  DEBUGASSERT(group && group->tg_info);
+  info = task_get_info();
 
-  info = group->tg_info;
+  DEBUGASSERT(info != NULL);
 
-  nxrmutex_lock(&group->tg_mutex);
+  nxrmutex_lock(&info->ta_lock);
 
   /* Check if the variable already exists */
 
-  if (info->ta_envp && (ret = env_findvar(group, name)) >= 0)
+  if (info->ta_envp && (ret = env_findvar(info, name)) >= 0)
     {
       /* It does! Do we have permission to overwrite the existing value? */
 
@@ -131,7 +119,7 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
         {
           /* No.. then just return success */
 
-          nxrmutex_unlock(&group->tg_mutex);
+          nxrmutex_unlock(&info->ta_lock);
           return OK;
         }
 
@@ -140,7 +128,7 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
        * the environment buffer; this will happen below.
        */
 
-      env_removevar(group, ret);
+      env_removevar(info, ret);
     }
 
   /* Check current envirments count */
@@ -155,7 +143,7 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
 
   /* Then allocate or reallocate the environment buffer */
 
-  pvar = group_malloc(group, varlen);
+  pvar = lib_umalloc(varlen);
   if (pvar == NULL)
     {
       ret = ENOMEM;
@@ -168,7 +156,7 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
     {
       envpc = SCHED_ENVIRON_RESERVED + 2;
 
-      envp = group_malloc(group, sizeof(*envp) * envpc);
+      envp = lib_umalloc(sizeof(*envp) * envpc);
       if (envp == NULL)
         {
           ret = ENOMEM;
@@ -182,7 +170,7 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
     {
       envpc = envc + SCHED_ENVIRON_RESERVED + 2;
 
-      envp = group_realloc(group, info->ta_envp, sizeof(*envp) * envpc);
+      envp = lib_urealloc(info->ta_envp, sizeof(*envp) * envpc);
       if (envp == NULL)
         {
           ret = ENOMEM;
@@ -202,16 +190,14 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
   /* Now, put the new name=value string into the environment buffer */
 
   snprintf(pvar, varlen, "%s=%s", name, value);
-  nxrmutex_unlock(&group->tg_mutex);
+  nxrmutex_unlock(&info->ta_lock);
   return OK;
 
 errout_with_var:
-  group_free(group, pvar);
+  lib_ufree(pvar);
 errout_with_lock:
-  nxrmutex_unlock(&group->tg_mutex);
+  nxrmutex_unlock(&info->ta_lock);
 errout:
   set_errno(ret);
   return ERROR;
 }
-
-#endif /* CONFIG_DISABLE_ENVIRON */

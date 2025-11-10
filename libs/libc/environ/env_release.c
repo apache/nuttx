@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/environ/env_getenv.c
+ * libs/libc/environ/env_release.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,19 +24,10 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <assert.h>
 
-#ifndef CONFIG_DISABLE_ENVIRON
-
-#include <sched.h>
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
-
-#include <nuttx/mutex.h>
 #include <nuttx/tls.h>
 
-#include "sched/sched.h"
 #include "environ/environ.h"
 
 /****************************************************************************
@@ -44,80 +35,51 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getenv
+ * Name: env_release
  *
  * Description:
- *   The getenv() function searches the environment list for a string that
- *   matches the string pointed to by name.
+ *   env_release() is called only from task_uninit_info() when the task is
+ *   uninit. The env_release() function clears the environment of all
+ *   name-value pairs and sets the value of the external variable
+ *   environ to NULL.
  *
  * Input Parameters:
- *   name - The name of the variable to find.
+ *   info - Identifies the task containing the environment structure
+ *          to be released.
  *
  * Returned Value:
- *   The value of the variable (read-only) or NULL on failure
+ *   None
  *
  * Assumptions:
  *   Not called from an interrupt handler
  *
  ****************************************************************************/
 
-FAR char *getenv(FAR const char *name)
+void env_release(FAR struct task_info_s *info)
 {
-  FAR struct tcb_s *rtcb;
-  FAR struct task_group_s *group;
-  FAR char *pvalue = NULL;
-  ssize_t ret = OK;
+  int i;
 
-  /* Verify that a string was passed */
+  DEBUGASSERT(info != NULL);
 
-  if (name == NULL || up_interrupt_context())
+  if (info->ta_envp)
     {
-      ret = -EINVAL;
-      goto errout;
+      /* Free any allocate environment strings */
+
+      for (i = 0; info->ta_envp[i] != NULL; i++)
+        {
+          lib_ufree(info->ta_envp[i]);
+        }
+
+      /* Free the environment */
+
+      lib_ufree(info->ta_envp);
     }
 
-  /* Get a reference to the thread-private environ in the TCB. */
+  /* In any event, make sure that all environment-related variables in the
+   * task group structure are reset to initial values.
+   */
 
-  rtcb  = this_task();
-  group = rtcb->group;
-
-  /* Check if the variable exists */
-
-  if (group == NULL)
-    {
-      goto errout;
-    }
-
-  nxrmutex_lock(&group->tg_mutex);
-  ret = env_findvar(group, name);
-  if (ret < 0)
-    {
-      nxrmutex_unlock(&group->tg_mutex);
-      goto errout;
-    }
-
-  /* It does!  Get the value sub-string from the name=value string */
-
-  pvalue = strchr(group->tg_info->ta_envp[ret], '=');
-  if (pvalue == NULL)
-    {
-      nxrmutex_unlock(&group->tg_mutex);
-
-      /* The name=value string has no '='  This is a bug! */
-
-      ret = -EINVAL;
-      goto errout;
-    }
-
-  /* Adjust the pointer so that it points to the value right after the '=' */
-
-  pvalue++;
-  nxrmutex_unlock(&group->tg_mutex);
-  return pvalue;
-
-errout:
-  set_errno(-ret);
-  return NULL;
+  info->ta_envp  = NULL;
+  info->ta_envpc = 0;
+  info->ta_envc  = 0;
 }
-
-#endif /* CONFIG_DISABLE_ENVIRON */

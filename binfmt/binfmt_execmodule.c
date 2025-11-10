@@ -44,9 +44,9 @@
 #include <task/spawn.h>
 #include <nuttx/spawn.h>
 #include <nuttx/binfmt/binfmt.h>
+#include <nuttx/environ.h>
 
 #include "binfmt.h"
-#include "environ/environ.h"
 
 #ifndef CONFIG_BINFMT_DISABLE
 
@@ -349,7 +349,7 @@ int exec_module(FAR struct binary_s *binp,
       group->tg_flags |= GROUP_FLAG_SECURE_EXEC;
       group->tg_flags &= ~(GROUP_FLAG_FD_BACKTRACE | GROUP_FLAG_DUMPABLE);
 #ifndef CONFIG_DISABLE_ENVIRON
-      env_sanitize_secure(group);
+      env_sanitize_secure(group->tg_info);
 #endif
     }
 #endif
