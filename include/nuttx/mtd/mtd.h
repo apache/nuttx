@@ -77,6 +77,10 @@
                                              *      erased state of the MTD cell */
 #define MTDIOC_ERASESECTORS _MTDIOC(0x000c) /* IN: Pointer to mtd_erase_s structure
                                              * OUT: None */
+#define MTDIOC_RESET        _MTDIOC(0x000d) /* IN: None
+                                             * OUT: None
+                                             *      Resets the device to the power-on
+                                             *      default condition */
 
 /* Macros to hide implementation */
 
