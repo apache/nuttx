@@ -63,7 +63,7 @@
  * These macros are intended to support a future SMP implementation.
  */
 
-#ifdef CONFIG_SMP
+#ifndef CONFIG_UP
 #  define this_cpu()                   up_this_cpu()
 #else
 #  define this_cpu()                   (0)
@@ -88,7 +88,7 @@ extern char _percpu_offset[];
 /* For BMP case per_cpu_var is not supported */
 
 #  define per_cpu_var_smp(v, c)        (*(FAR typeof(v) *)((unsigned long)&(v) + PERCPU_OFFSET * (c)))
-#  define this_cpu_var(v)              (*(FAR typeof(v) *)((unsigned long)&(v) + PERCPU_OFFSET * up_cpu_index()))
+#  define this_cpu_var(v)              (*(FAR typeof(v) *)((unsigned long)&(v) + PERCPU_OFFSET * this_cpu()))
 #endif
 
 #ifdef CONFIG_SMP
@@ -114,5 +114,16 @@ extern char _percpu_offset[];
 #  define DECLARE_PER_CPU_BMP(t, v)    extern t v
 #  define this_cpu_var_bmp(v)          v
 #endif
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+/* The up_cpu_index possible a inline function, we should include to avoid
+ * dependency issue, g_interrupt_context needs percpu.h, have to put irq.h at
+ * tail of percpu.h
+ */
+
+#include <nuttx/irq.h>
 
 #endif
