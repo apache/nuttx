@@ -260,7 +260,7 @@ Tickless Configuration Options
    simulated platform:
 
    .. code-block:: console
- 
+
      config ARCH_SIM
         bool "Simulation"
         select ARCH_HAVE_TICKLESS
@@ -490,6 +490,7 @@ use ``mq_send()``, ``sigqueue()``, or ``kill()`` to communicate
 with NuttX tasks.
 
 - :c:func:`wd_start`
+- :c:func:`wd_restart`
 - :c:func:`wd_cancel`
 - :c:func:`wd_gettime`
 - Watchdog Timer Callback
@@ -537,6 +538,22 @@ with NuttX tasks.
   -  The present implementation supports multiple parameters passed
      to wdentry; VxWorks supports only a single parameter. The
      maximum number of parameters is determined by
+
+.. c:function:: int wd_restart(FAR struct wdog_s *wdog, clock_t delay)
+
+  This function restarts the specified watchdog timer using the same
+  function and argument that were specified in the previous wd_start()
+  call, but with a new delay value. It can be used when the user wants
+  to restart the same watchdog with a different timeout value, or to
+  refresh (feed) an existing watchdog before it expires.
+
+  :param wdog: Pointer to the watchdog timer to restart
+  :param delay: Delay count in clock ticks
+
+  **NOTE**: The parameter must be of type ``wdparm_t``.
+
+  :return: Zero (``OK``) is returned on success; a negated ``errno`` value
+    is return to indicate the nature of any failure.
 
 .. c:function:: int wd_cancel(FAR struct wdog_s *wdog)
 
