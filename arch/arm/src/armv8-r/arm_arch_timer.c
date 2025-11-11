@@ -417,3 +417,10 @@ void arm_arch_timer_secondary_init()
 #endif
 }
 #endif
+
+int up_timer_trigger(void)
+{
+  up_trigger_irq(ARM_ARCH_TIMER_IRQ, 0);
+
+  return OK;
+}
