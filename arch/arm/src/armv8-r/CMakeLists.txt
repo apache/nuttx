@@ -33,7 +33,6 @@ list(
   arm_cache.c
   arm_cpuinfo.c
   arm_dataabort.c
-  arm_doirq.c
   arm_gicv3.c
   arm_initialstate.c
   arm_prefetchabort.c
