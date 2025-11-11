@@ -667,7 +667,7 @@ static ssize_t at25ee_write(FAR struct mtd_dev_s *dev, off_t offset,
 
   /* Forbid writes past the end of the device */
 
-  if (nbytes + offset >= priv->size)
+  if (nbytes + offset > priv->size)
     {
       return 0;
     }
