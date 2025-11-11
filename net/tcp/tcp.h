@@ -35,6 +35,7 @@
 #include <nuttx/queue.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/iob.h>
+#include <nuttx/mutex.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/tcp.h>
@@ -492,6 +493,38 @@ extern "C"
 {
 #endif
 
+extern rmutex_t g_tcp_connections_lock;
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: tcp_conn_list_lock
+ *
+ * Description:
+ *   Lock the TCP connection list.
+ *
+ ****************************************************************************/
+
+static inline_function void tcp_conn_list_lock(void)
+{
+  nxrmutex_lock(&g_tcp_connections_lock);
+}
+
+/****************************************************************************
+ * Name: tcp_conn_list_unlock
+ *
+ * Description:
+ *   Unlock the TCP connection list.
+ *
+ ****************************************************************************/
+
+static inline_function void tcp_conn_list_unlock(void)
+{
+  nxrmutex_unlock(&g_tcp_connections_lock);
+}
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -791,26 +824,6 @@ void tcp_removeconn(FAR struct tcp_conn_s *conn);
  ****************************************************************************/
 
 void tcp_remove_syn_backlog(FAR struct tcp_conn_s *listener);
-
-/****************************************************************************
- * Name: tcp_conn_list_lock
- *
- * Description:
- *   Lock the TCP connection list.
- *
- ****************************************************************************/
-
-void tcp_conn_list_lock(void);
-
-/****************************************************************************
- * Name: tcp_conn_list_unlock
- *
- * Description:
- *   Unlock the TCP connection list.
- *
- ****************************************************************************/
-
-void tcp_conn_list_unlock(void);
 
 /****************************************************************************
  * Name: psock_tcp_connect
