@@ -52,6 +52,7 @@ struct tricore_systimer_lowerhalf_s
   oneshot_callback_t         callback;
   void                       *arg;
   spinlock_t                 lock;
+  int                         irq;
 };
 
 /****************************************************************************
@@ -363,6 +364,7 @@ tricore_systimer_initialize(volatile void *tbase, int irq, uint64_t freq)
 
   priv->tbase = tbase;
   priv->freq  = freq;
+  priv->irq = irq;
   spin_lock_init(&priv->lock);
 
   IfxStm_setCompareControl(tbase,
@@ -379,4 +381,11 @@ tricore_systimer_initialize(volatile void *tbase, int irq, uint64_t freq)
   up_enable_irq(irq);
 
   return (struct oneshot_lowerhalf_s *)priv;
+}
+
+int up_timer_trigger(void)
+{
+  up_trigger_irq(g_systimer_lower.irq, 0);
+
+  return OK;
 }
