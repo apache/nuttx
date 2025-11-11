@@ -42,6 +42,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/mm/iob.h>
+#include <nuttx/mm/mempool.h>
 
 #include "utils/utils.h"
 #include "tcp/tcp.h"
@@ -54,9 +55,9 @@
 
 /* This is the state of the global write buffer resource */
 
-NET_BUFPOOL_DECLARE(g_wrbuffer, sizeof(struct tcp_wrbuffer_s),
-                    CONFIG_NET_TCP_NWRBCHAINS,
-                    CONFIG_NET_TCP_ALLOC_WRBCHAINS, 0);
+MEMPOOL_DEFINE(g_wrbuffer, sizeof(struct tcp_wrbuffer_s),
+               CONFIG_NET_TCP_NWRBCHAINS, 0,
+               CONFIG_NET_TCP_ALLOC_WRBCHAINS);
 
 /****************************************************************************
  * Public Functions
@@ -95,7 +96,7 @@ tcp_wrbuffer_timedalloc(FAR struct socket_conn_s *sconn,
    * buffer
    */
 
-  wrb = NET_BUFPOOL_TIMEDALLOC(g_wrbuffer, timeout);
+  wrb = mempool_allocate(&g_wrbuffer, timeout);
   if (wrb == NULL)
     {
       return NULL;
@@ -176,7 +177,7 @@ void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb)
 
   /* Then free the write buffer structure */
 
-  NET_BUFPOOL_FREE(g_wrbuffer, wrb);
+  mempool_release(&g_wrbuffer, wrb);
 }
 
 /****************************************************************************
@@ -232,7 +233,7 @@ uint32_t tcp_wrbuffer_inqueue_size(FAR struct tcp_conn_s *conn)
 
 int tcp_wrbuffer_test(void)
 {
-  return NET_BUFPOOL_TEST(g_wrbuffer);
+  return mempool_navail(&g_wrbuffer) > 0 ? OK : -ENOSPC;
 }
 
 #endif /* CONFIG_NET_TCP && CONFIG_NET_TCP_WRITE_BUFFERS */
