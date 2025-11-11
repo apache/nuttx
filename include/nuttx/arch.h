@@ -1933,6 +1933,27 @@ int up_timer_gettick(FAR clock_t *ticks);
 void up_timer_getmask(FAR clock_t *mask);
 
 /****************************************************************************
+ * Name: up_timer_trigger
+ *
+ * Description:
+ *   Trigger a timer interrupt manually from software. This function is
+ *   intended for testing or to simulate a timer tick in tickless mode.
+ *   It should generate the same effect as if a hardware timer interrupt
+ *   had occurred.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
+int up_timer_trigger(void);
+#endif
+
+/****************************************************************************
  * Name: up_alarm_cancel
  *
  * Description:
