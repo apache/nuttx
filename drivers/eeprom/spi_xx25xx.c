@@ -177,6 +177,7 @@ struct ee25xx_geom_s
 struct ee25xx_dev_s
 {
   struct spi_dev_s *spi;     /* SPI device where the EEPROM is attached */
+  uint16_t         devid;    /* SPI device ID to manage CS lines in board */
   uint32_t         size;     /* in bytes, expanded from geometry */
   uint16_t         pgsize;   /* write block size, in bytes, expanded from geometry */
   uint32_t         secsize;  /* write sector size, in bytes, expanded from geometry */
@@ -390,7 +391,7 @@ static void ee25xx_waitwritecomplete(struct ee25xx_dev_s *priv)
       /* Select this FLASH part */
 
       ee25xx_lock(priv->spi);
-      SPI_SELECT(priv->spi, SPIDEV_EEPROM(0), true);
+      SPI_SELECT(priv->spi, SPIDEV_EEPROM(priv->devid), true);
 
       /* Send "Read Status Register (RDSR)" command */
 
@@ -404,7 +405,7 @@ static void ee25xx_waitwritecomplete(struct ee25xx_dev_s *priv)
 
       /* Deselect the FLASH */
 
-      SPI_SELECT(priv->spi, SPIDEV_EEPROM(0), false);
+      SPI_SELECT(priv->spi, SPIDEV_EEPROM(priv->devid), false);
       ee25xx_unlock(priv->spi);
 
       /* Given that writing could take up to a few milliseconds,
@@ -429,15 +430,15 @@ static void ee25xx_waitwritecomplete(struct ee25xx_dev_s *priv)
  *
  ****************************************************************************/
 
-static void ee25xx_writeenable(FAR struct spi_dev_s *spi, int enable)
+static void ee25xx_writeenable(FAR struct ee25xx_dev_s *eedev, int enable)
 {
-  ee25xx_lock(spi);
-  SPI_SELECT(spi, SPIDEV_EEPROM(0), true);
+  ee25xx_lock(eedev->spi);
+  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), true);
 
-  SPI_SEND(spi, enable ? EE25XX_CMD_WREN : EE25XX_CMD_WRDIS);
+  SPI_SEND(eedev->spi, enable ? EE25XX_CMD_WREN : EE25XX_CMD_WRDIS);
 
-  SPI_SELECT(spi, SPIDEV_EEPROM(0), false);
-  ee25xx_unlock(spi);
+  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), false);
+  ee25xx_unlock(eedev->spi);
 }
 
 /****************************************************************************
@@ -453,12 +454,12 @@ static void ee25xx_writepage(FAR struct ee25xx_dev_s *eedev,
                              size_t len)
 {
   ee25xx_lock(eedev->spi);
-  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(0), true);
+  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), true);
 
   ee25xx_sendcmd(eedev->spi, EE25XX_CMD_WRITE, eedev->addrlen, devaddr);
   SPI_SNDBLOCK(eedev->spi, data, len);
 
-  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(0), false);
+  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), false);
   ee25xx_unlock(eedev->spi);
 }
 
@@ -645,7 +646,7 @@ static ssize_t ee25xx_read(FAR struct file *filep, FAR char *buffer,
     }
 
   ee25xx_lock(eedev->spi);
-  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(0), true);
+  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), true);
 
   /* STM32F4Disco: There is a 25 us delay here */
 
@@ -657,7 +658,7 @@ static ssize_t ee25xx_read(FAR struct file *filep, FAR char *buffer,
 
   /* STM32F4Disco: There is a 20 us delay here */
 
-  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(0), false);
+  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), false);
   ee25xx_unlock(eedev->spi);
 
   /* Update the file position */
@@ -733,7 +734,7 @@ static ssize_t ee25xx_write(FAR struct file *filep, FAR const char *buffer,
 
   if (pageoff > 0)
     {
-      ee25xx_writeenable(eedev->spi, true);
+      ee25xx_writeenable(eedev, true);
       ee25xx_writepage(eedev, filep->f_pos, buffer, cnt);
       ee25xx_waitwritecomplete(eedev);
       len          -= cnt;
@@ -751,7 +752,7 @@ static ssize_t ee25xx_write(FAR struct file *filep, FAR const char *buffer,
           cnt = eedev->pgsize;
         }
 
-      ee25xx_writeenable(eedev->spi, true);
+      ee25xx_writeenable(eedev, true);
       ee25xx_writepage(eedev, filep->f_pos, buffer, cnt);
       ee25xx_waitwritecomplete(eedev);
       len          -= cnt;
@@ -816,14 +817,25 @@ static int ee25xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 /****************************************************************************
  * Name: ee25xx_initialize
  *
- * Description: Bind a EEPROM driver to an SPI bus. The user MUST provide
- * a description of the device geometry, since it is not possible to read
- * this information from the device (contrary to the SPI flash devices).
+ * Description:
+ *   Bind an EEPROM driver to an SPI bus. The user MUST provide a description
+ *   of the device geometry, since it is not possible to read this
+ *   information from the device (contrary to the SPI flash devices).
+ *
+ * Parameters:
+ *   dev       - Pointer to the SPI device instance
+ *   spi_devid - SPI device ID to manage CS lines in board
+ *   devname   - Device name
+ *   devtype   - 25xx device type, the geometry is derived from it
+ *   readonly  - Sets driver to be readonly
+ *
+ * Returned Values:
+ *   OK on success; A negated errno value is returned on any failure.
  *
  ****************************************************************************/
 
-int ee25xx_initialize(FAR struct spi_dev_s *dev, FAR char *devname,
-                      int devtype, int readonly)
+int ee25xx_initialize(FAR struct spi_dev_s *dev, uint16_t spi_devid,
+                      FAR char *devname, int devtype, int readonly)
 {
   FAR struct ee25xx_dev_s *eedev;
 
@@ -845,6 +857,7 @@ int ee25xx_initialize(FAR struct spi_dev_s *dev, FAR char *devname,
   nxmutex_init(&eedev->lock);
 
   eedev->spi      = dev;
+  eedev->devid    = spi_devid;
   eedev->size     =           128 << g_ee25xx_devices[devtype].bytes;
   eedev->pgsize   =             8 << g_ee25xx_devices[devtype].pagesize;
   eedev->secsize  = eedev->pgsize << g_ee25xx_devices[devtype].secsize;
