@@ -64,7 +64,7 @@ void sched_unlock(void)
 
       /* rtcb may be NULL only during early boot-up phases */
 
-      DEBUGASSERT(rtcb && rtcb->lockcount > 0);
+      DEBUGASSERT(rtcb->lockcount > 0);
 
       /* Check if the lock counter has decremented to zero. If so,
        * then pre-emption has been re-enabled.
