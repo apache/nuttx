@@ -23,7 +23,7 @@
 include common/Make.defs
 
 # C Source Files specific to SoC
-CHIP_CSRCS  = a527_boot.c a527_serial.c a527_timer.c
+CHIP_CSRCS  = a527_boot.c a527_serial.c
 
 ifeq ($(CONFIG_ARCH_EARLY_PRINT),y)
 CHIP_ASRCS  = a527_lowputc.S

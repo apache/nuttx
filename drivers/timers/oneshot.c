@@ -215,8 +215,7 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           /* Start the oneshot timer */
 
-          ret = ONESHOT_START(priv->od_lower, oneshot_callback, priv,
-                              &start->ts);
+          ret = ONESHOT_START(priv->od_lower, &start->ts);
         }
         break;
 
@@ -311,6 +310,10 @@ int oneshot_register(FAR const char *devname,
   /* Initialize the new oneshot timer driver instance */
 
   priv->od_lower = lower;
+
+  lower->callback = oneshot_callback;
+  lower->arg      = lower;
+
   nxmutex_init(&priv->od_lock);
 
   /* And register the oneshot timer driver */

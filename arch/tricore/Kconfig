@@ -41,6 +41,7 @@ config ARCH_CHIP_TC397
 	select ARCH_TC3XX
 	select ALARM_ARCH
 	select ONESHOT
+	select ONESHOT_COUNT
 	---help---
 		AURIX TC39x family: TC397
 

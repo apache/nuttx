@@ -198,6 +198,13 @@
 
 #  define noreturn_function __attribute__((noreturn))
 
+/* The pure function attribute informs the compiler that
+ * the function is pure or const.
+ */
+
+#  define pure_function  __attribute__((pure))
+#  define const_function __attribute__((const))
+
 /* The farcall_function attribute informs GCC that is should use long calls
  * (even though -mlong-calls does not appear in the compilation options)
  */
@@ -212,6 +219,25 @@
 
 #  define predict_true(x)  __builtin_expect(!!(x), 1)
 #  define predict_false(x) __builtin_expect(!!(x), 0)
+
+/* `x` can be evaluated at compile time */
+
+#  define is_constexpr(x) __builtin_constant_p(x)
+
+/* Assume the condition is satisfied.
+ * We can use this to perform more aggressive compiler optimizations.
+ * Please use this with caution, as it may cause runtime errors if you fail
+ * to ensure that the condition is satisfied.
+ */
+
+#  if defined(__clang__)
+#    define compiler_assume(x) __builtin_assume(x)
+#  elif __GNUC__ >= 13 /* The assume(x) is supported since GCC 13. */
+#    define compiler_assume(x) __attribute__((assume(x)))
+#  else
+#    define compiler_assume(x) \
+     do { if (!(x)) { __builtin_unreachable(); } } while(0)
+#  endif
 
 /* Code locate */
 
@@ -654,8 +680,12 @@
  */
 
 #  define noreturn_function
+#  define pure_function
+#  define const_function
 #  define predict_true(x) (x)
 #  define predict_false(x) (x)
+#  define is_constexpr(x)  (0)
+#  define compiler_assume(x)
 #  define locate_code(n)
 #  define aligned_data(n)
 #  define locate_data(n)
@@ -823,8 +853,12 @@
  */
 
 #  define noreturn_function
+#  define pure_function
+#  define const_function
 #  define predict_true(x) (x)
 #  define predict_false(x) (x)
+#  define is_constexpr(x)  (0)
+#  define compiler_assume(x)
 #  define aligned_data(n)
 #  define locate_code(n)
 #  define locate_data(n)
@@ -948,8 +982,12 @@
 #  define weak_const_function
 #  define noreturn_function
 #  define farcall_function
+#  define pure_function
+#  define const_function
 #  define predict_true(x) (x)
 #  define predict_false(x) (x)
+#  define is_constexpr(x)  (0)
+#  define compiler_assume(x)
 #  define locate_code(n)
 #  define aligned_data(n)
 #  define locate_data(n)
@@ -1053,8 +1091,12 @@
 #  define restrict
 #  define noreturn_function
 #  define farcall_function
+#  define pure_function
+#  define const_function
 #  define predict_true(x) (x)
 #  define predict_false(x) (x)
+#  define is_constexpr(x)  (0)
+#  define compiler_assume(x) __assume(x)
 #  define aligned_data(n)
 #  define locate_code(n)
 #  define locate_data(n)
@@ -1147,8 +1189,12 @@
 #  define restrict
 #  define noreturn_function
 #  define farcall_function              __attribute__((long_call))
+#  define pure_function
+#  define const_function
 #  define predict_true(x) (x)
 #  define predict_false(x) (x)
+#  define is_constexpr(x)  (0)
+#  define compiler_assume(x)
 #  define aligned_data(n)               __attribute__((aligned(n)))
 #  define locate_code(n)                __attribute__((section(n)))
 #  define locate_data(n)                __attribute__((section(n)))
@@ -1227,8 +1273,12 @@
 #  define restrict
 #  define noreturn_function
 #  define farcall_function
+#  define pure_function
+#  define const_function
 #  define predict_true(x) (x)
 #  define predict_false(x) (x)
+#  define is_constexpr(x)  (0)
+#  define compiler_assume(x)
 #  define aligned_data(n)
 #  define locate_code(n)
 #  define locate_data(n)

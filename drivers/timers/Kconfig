@@ -123,6 +123,24 @@ config ONESHOT
 
 if ONESHOT
 
+config ONESHOT_COUNT
+	bool
+	default n
+	---help---
+		This option enables the oneshot implementation to be based on the
+		new clock device driver interfaces.
+
+config ONESHOT_FAST_DIVISION
+	bool # Convert Clock Count Using Invariant-divisor Division
+	default n
+	depends on ONESHOT_COUNT
+	---help---
+		This option will enable the invariant-divisor division optimization in
+		the clock device driver implementation, which can improve performance
+		for certain architectures. It is recommended to enable it on 32-bit
+		architecture that do not support hardware division and 64-bit
+		architecture that hardware division is slow.
+
 config ALARM_ARCH
 	bool "Alarm Arch Implementation"
 	select ARCH_HAVE_TICKLESS
@@ -527,6 +545,7 @@ endif # TIMERS_CS2100CP
 config GOLDFISH_TIMER
 	bool "Enable GOLDFISH_TIMER"
 	default n
+	select ONESHOT_COUNT
 	---help---
 		Goldfish timer is a virtual timer device that is used in the Android
 		emulator. It is used to provide a virtual timer to the guest OS.

@@ -54,5 +54,7 @@ void x86_64_restore_auxstate(struct tcb_s *rtcb)
 {
   /* Set PCID, avoid TLB flush */
 
+#ifdef CONFIG_ARCH_INTEL64_HAVE_PCID
   set_pcid(rtcb->pid);
+#endif
 }

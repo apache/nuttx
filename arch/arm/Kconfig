@@ -1134,6 +1134,7 @@ config ARCH_ARMV8R
 	select ARCH_HAVE_CPUINFO
 	select ARCH_HAVE_PERF_EVENTS
 	select ONESHOT
+	select ONESHOT_COUNT
 	select ALARM_ARCH
 
 
