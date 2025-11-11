@@ -2,10 +2,42 @@
 Network Interfaces
 ==================
 
+.. _network_interfaces_overview:
+
+Network Interfaces Overview
+============================
+
+**Overview**. NuttX includes a comprehensive network stack that provides
+standard BSD socket interface and DNS resolution capabilities. The network
+subsystem is optional and can be configured based on application requirements.
+
+**BSD Socket Interface**. NuttX supports a BSD-compatible socket interface layer
+that provides familiar networking APIs for application developers. These socket
+interfaces can be enabled by settings in the architecture configuration file.
+The socket layer supports multiple protocol families including IPv4 (AF_INET)
+and IPv6 (AF_INET6), as well as various socket types such as stream sockets
+(SOCK_STREAM), datagram sockets (SOCK_DGRAM), and raw sockets.
+
+**DNS Resolution**. The NuttX network stack includes a lightweight DNS resolver
+that allows applications to resolve hostnames to IP addresses. The DNS resolver
+supports multiple nameservers, both IPv4 and IPv6 queries, and provides a
+callback mechanism for nameserver change notifications.
+
+**Programming Interface**. The network interfaces provided by NuttX closely
+follow POSIX standards, making it easy to port existing network applications
+to NuttX.
+
+Network Functions
+=================
+
+Socket Functions (``sys/socket.h``)
+-----------------------------------
+
 NuttX supports a BSD-compatible socket interface layer. These socket
 interface can be enabled by settings in the architecture configuration
 file. Those socket APIs are discussed in
 the following paragraphs.
+
 
   - :c:func:`socket`
   - :c:func:`bind`
@@ -413,9 +445,8 @@ the following paragraphs.
   -  ``NOBUFS``. Insufficient resources are available in the system to
      complete the call.
 
-=============
-DNS Functions
-=============
+DNS Functions (``net/dns.h``)
+-----------------------------------
 
 NuttX provides DNS resolver functions for configuring and managing DNS
 servers. These functions are defined in ``nuttx/net/dns.h`` and allow
