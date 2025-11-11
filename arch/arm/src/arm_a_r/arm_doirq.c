@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/arm/arm_doirq.c
+ * arch/arm/src/arm_a_r/arm_doirq.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -27,35 +27,30 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
 #include <assert.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/addrenv.h>
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 #include <sched/sched.h>
 
 #include "arm_internal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include "gic.h"
 
 /****************************************************************************
  * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: arm_doirq
+ *
+ * Description:
+ *   Receives the decoded GIC interrupt information and dispatches control
+ *   to the attached interrupt handler.
+ *
  ****************************************************************************/
 
 uint32_t *arm_doirq(int irq, uint32_t *regs)
@@ -70,21 +65,30 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   DEBUGASSERT(!up_interrupt_context());
 
-  /* Set irq flag */
-
-  up_set_interrupt_context(true);
-  tcb->xcp.regs = regs;
-
   /* Acknowledge the interrupt */
 
   arm_ack_irq(irq);
+
+  /* if irq == GIC_SMP_CPUSTART
+   * We are initiating the multi-core jumping state to up_idle,
+   * and we will use this_task(). Therefore, it cannot be overridden.
+   */
+
+#ifdef CONFIG_SMP
+  if (irq != GIC_SMP_CPUSTART)
+#endif
+    {
+      tcb->xcp.regs = regs;
+    }
+
+  /* Set irq flag */
+
+  up_set_interrupt_context(true);
 
   /* Deliver the IRQ */
 
   irq_dispatch(irq, regs);
   tcb = this_task();
-
-  /* Check for a context switch. */
 
   if (regs != tcb->xcp.regs)
     {
@@ -111,7 +115,6 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
        */
 
       *running_task = tcb;
-
       regs = tcb->xcp.regs;
     }
 
@@ -119,6 +122,13 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   up_set_interrupt_context(false);
 #endif
+
   board_autoled_off(LED_INIRQ);
+
+  /* tcb->xcp.regs is about to become invalid
+   * and will be marked as NULL to avoid misusage.
+   */
+
+  tcb->xcp.regs = NULL;
   return regs;
 }
