@@ -327,3 +327,29 @@ void up_perf_convert(clock_t elapsed, FAR struct timespec *ts)
   clock_nsec2time(ts, elapsed);
 }
 #endif /* CONFIG_ARCH_PERF_EVENTS */
+
+/****************************************************************************
+ * Name: up_timer_trigger
+ *
+ * Description:
+ *   Manually trigger a timer interrupt from software.
+ *
+ *   This function may be provided by the architecture to simulate a
+ *   hardware timer interrupt. It is primarily intended for testing or
+ *   for improving timer and watchdog behavior in tickless mode.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Returns OK (zero) on success. Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
+int weak_function up_timer_trigger(void)
+{
+  return EINVAL;
+}
+#endif
