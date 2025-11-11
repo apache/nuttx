@@ -419,47 +419,14 @@ static int nrf53_i2c_transfer(struct i2c_master_s *dev,
           regval = priv->dcnt;
           nrf53_i2c_putreg(priv, NRF53_TWIM_TXDMAXCNT_OFFSET, regval);
 
+          /* Shortcut from LASTTX to STOP */
+
+          nrf53_i2c_putreg(priv, NRF53_TWIM_SHORTS_OFFSET,
+                           TWIM_SHORTS_LASTTX_STOP);
+
           /* Start TX sequence */
 
           nrf53_i2c_putreg(priv, NRF53_TWIM_TASKS_STARTTX_OFFSET, 1);
-
-          /* Wait for last TX event */
-
-#ifdef CONFIG_I2C_POLLED
-          while (nrf53_i2c_getreg(priv,
-                                  NRF53_TWIM_EVENTS_LASTTX_OFFSET) != 1);
-          while (1)
-            {
-              regval = nrf53_i2c_getreg(priv,
-                                        NRF53_TWIM_ERRORSRC_OFFSET) & 0x7;
-              if (regval != 0)
-                {
-                  i2cerr("Error SRC: 0x%08" PRIx32 "\n", regval);
-                  ret = -1;
-                  nrf53_i2c_putreg(priv,
-                                  NRF53_TWIM_ERRORSRC_OFFSET, 0x7);
-                  goto errout;
-                }
-
-              if (nrf53_i2c_getreg(priv,
-                                  NRF53_TWIM_EVENTS_LASTTX_OFFSET) == 1)
-                {
-                  break;
-                }
-            }
-
-          /* Clear event */
-
-          nrf53_i2c_putreg(priv, NRF53_TWIM_EVENTS_LASTTX_OFFSET, 0);
-#else
-          nxsem_wait(&priv->sem_isr);
-
-          if (priv->status < 0)
-            {
-              ret = priv->status;
-              goto errout;
-            }
-#endif
         }
       else
         {
@@ -474,46 +441,51 @@ static int nrf53_i2c_transfer(struct i2c_master_s *dev,
           regval = priv->dcnt;
           nrf53_i2c_putreg(priv, NRF53_TWIM_RXDMAXCNT_OFFSET, regval);
 
+          /* Shortcuts from LASTRX to STOP */
+
+          nrf53_i2c_putreg(priv, NRF53_TWIM_SHORTS_OFFSET,
+                           TWIM_SHORTS_LASTRX_STOP);
+
           /* Start RX sequence */
 
           nrf53_i2c_putreg(priv, NRF53_TWIM_TASKS_STARTRX_OFFSET, 1);
+        }
 
-          /* Wait for last RX done */
+      /* Wait for stop event */
 
 #ifdef CONFIG_I2C_POLLED
-        while (1)
-          {
-            regval = nrf53_i2c_getreg(priv,
-                                      NRF53_TWIM_ERRORSRC_OFFSET) & 0x7;
-            if (regval != 0)
-              {
-                i2cerr("Error SRC: 0x%08" PRIx32 "\n", regval);
-                ret = -1;
-                nrf53_i2c_putreg(priv,
-                                 NRF53_TWIM_ERRORSRC_OFFSET, 0x7);
-                goto errout;
-              }
-
-            if (nrf53_i2c_getreg(priv,
-                                 NRF53_TWIM_EVENTS_LASTRX_OFFSET) == 1)
-              {
-                break;
-              }
-          }
-
-          /* Clear event */
-
-          nrf53_i2c_putreg(priv, NRF53_TWIM_EVENTS_LASTRX_OFFSET, 0);
-#else
-          nxsem_wait(&priv->sem_isr);
-
-          if (priv->status < 0)
+      while (1)
+        {
+          regval = nrf53_i2c_getreg(priv,
+                                    NRF53_TWIM_ERRORSRC_OFFSET) & 0x7;
+          if (regval != 0)
             {
-              ret = priv->status;
+              i2cerr("Error SRC: 0x%08" PRIx32 "\n", regval);
+              ret = -1;
+              nrf53_i2c_putreg(priv,
+                              NRF53_TWIM_ERRORSRC_OFFSET, 0x7);
               goto errout;
             }
-#endif
+
+          if (nrf53_i2c_getreg(priv,
+                              NRF53_TWIM_EVENTS_STOPPED_OFFSET) == 1)
+            {
+              break;
+            }
         }
+
+      /* Clear event */
+
+      nrf53_i2c_putreg(priv, NRF53_TWIM_EVENTS_STOPPED_OFFSET, 0);
+#else
+      nxsem_wait(&priv->sem_isr);
+
+      if (priv->status < 0)
+        {
+          ret = priv->status;
+          goto errout;
+        }
+#endif
 
       /* Next message */
 
@@ -521,46 +493,6 @@ static int nrf53_i2c_transfer(struct i2c_master_s *dev,
       priv->msgv += 1;
     }
   while (priv->msgc > 0);
-
-  /* TWIM stop */
-
-  nrf53_i2c_putreg(priv, NRF53_TWIM_TASKS_STOP_OFFSET, 1);
-
-  /* Wait for stop event */
-
-#ifdef CONFIG_I2C_POLLED
-  while (1)
-    {
-      regval = nrf53_i2c_getreg(priv,
-                                NRF53_TWIM_ERRORSRC_OFFSET) & 0x7;
-      if (regval != 0)
-        {
-          i2cerr("Error SRC: 0x%08" PRIx32 "\n", regval);
-          ret = -1;
-          nrf53_i2c_putreg(priv,
-                           NRF53_TWIM_ERRORSRC_OFFSET, 0x7);
-          goto errout;
-        }
-
-      if (nrf53_i2c_getreg(priv,
-                           NRF53_TWIM_EVENTS_STOPPED_OFFSET) == 1)
-        {
-          break;
-        }
-    }
-
-  /* Clear event */
-
-  nrf53_i2c_putreg(priv, NRF53_TWIM_EVENTS_STOPPED_OFFSET, 0);
-#else
-  nxsem_wait(&priv->sem_isr);
-
-  if (priv->status < 0)
-    {
-      ret = priv->status;
-      goto errout;
-    }
-#endif
 
 errout:
 #ifndef CONFIG_NRF53_I2C_MASTER_DISABLE_NOSTART
@@ -619,10 +551,6 @@ static int nrf53_i2c_isr(int irq, void *context, void *arg)
         {
           i2cinfo("I2C LASTTX\n");
 
-          /* TX done */
-
-          nxsem_post(&priv->sem_isr);
-
           /* Clear event */
 
           nrf53_i2c_putreg(priv, NRF53_TWIM_EVENTS_LASTTX_OFFSET, 0);
@@ -635,10 +563,6 @@ static int nrf53_i2c_isr(int irq, void *context, void *arg)
       if (nrf53_i2c_getreg(priv, NRF53_TWIM_EVENTS_LASTRX_OFFSET) == 1)
         {
           i2cinfo("I2C LASTRX\n");
-
-          /* RX done */
-
-          nxsem_post(&priv->sem_isr);
 
           /* Clear event */
 
@@ -744,8 +668,7 @@ static int nrf53_i2c_init(struct nrf53_i2c_priv_s *priv)
 #ifndef CONFIG_I2C_POLLED
   /* Enable I2C interrupts */
 
-  regval = (TWIM_INT_LASTRX | TWIM_INT_LASTTX | TWIM_INT_STOPPED |
-            TWIM_INT_ERROR);
+  regval = (TWIM_INT_STOPPED | TWIM_INT_ERROR);
   nrf53_i2c_putreg(priv, NRF53_TWIM_INTEN_OFFSET, regval);
 
   /* Attach error and event interrupts to the ISRs */
