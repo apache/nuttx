@@ -185,6 +185,21 @@ static void rtc_prepare_alarm(void)
     }
 }
 
+static void rtc_cancel_ack(void)
+{
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  NRF91_RTC_DISABLEINT(g_tickless_dev.rtc, NRF91_RTC_EVT_COMPARE0);
+  NRF91_RTC_ACKINT(g_tickless_dev.rtc, NRF91_RTC_EVT_COMPARE0);
+  g_tickless_dev.alarm_set = false;
+
+  leave_critical_section(flags);
+
+  return OK;
+}
+
 /****************************************************************************
  * Name: rtc_handler
  ****************************************************************************/
@@ -219,15 +234,13 @@ static int rtc_handler(int irq, void *context, void *arg)
 
   if (NRF91_RTC_CHECKINT(g_tickless_dev.rtc, NRF91_RTC_EVT_COMPARE0))
     {
-      struct timespec now;
+      /* cancel the alarm and ack the event */
 
-      /* cancel alarm and get current time */
-
-      up_alarm_cancel(&now);
+      rtc_cancel_ack();
 
       /* let scheduler now of alarm firing */
 
-      nxsched_alarm_expiration(&now);
+      nxsched_timer_expiration();
     }
 
   leave_critical_section(flags);
@@ -252,12 +265,13 @@ int up_alarm_cancel(struct timespec *ts)
 
   NRF91_RTC_DISABLEINT(g_tickless_dev.rtc, NRF91_RTC_EVT_COMPARE0);
   NRF91_RTC_GETCOUNTER(g_tickless_dev.rtc, &counter);
-  rtc_counter_to_ts(counter, ts);
 
   NRF91_RTC_ACKINT(g_tickless_dev.rtc, NRF91_RTC_EVT_COMPARE0);
   g_tickless_dev.alarm_set = false;
 
   leave_critical_section(flags);
+
+  rtc_counter_to_ts(counter, ts);
 
   return OK;
 }
@@ -308,8 +322,6 @@ int up_timer_gettime(struct timespec *ts)
 
 void up_timer_initialize(void)
 {
-  struct timespec ts;
-
   memset(&g_tickless_dev, 0, sizeof(struct nrf91_tickless_dev_s));
 
   g_tickless_dev.rtc = nrf91_rtc_init(CONFIG_NRF91_SYSTIMER_RTC_INSTANCE);
@@ -339,6 +351,5 @@ void up_timer_initialize(void)
 
   /* kick off alarm scheduling */
 
-  ts.tv_sec = ts.tv_nsec = 0;
-  nxsched_alarm_expiration(&ts);
+  nxsched_timer_expiration();
 }
