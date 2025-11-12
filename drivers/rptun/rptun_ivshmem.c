@@ -351,6 +351,7 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
 
       priv->shmem->rsc_size           = sizeof(struct rptun_ivshmem_rsc_s);
 
+      UP_DMB();
       rsc->hdr.num                    = RPTUN_IVSHMEM_RSC_NUM;
       rsc->hdr.ver                    = 1;
 
