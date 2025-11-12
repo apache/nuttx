@@ -952,22 +952,28 @@ static int virtio_snd_allocbuffer(FAR struct audio_lowerhalf_s *dev,
                                   FAR struct audio_buf_desc_s *desc)
 {
   FAR struct virtio_snd_dev_s *sdev = (FAR struct virtio_snd_dev_s *)dev;
-  FAR struct virtio_snd_s *priv = sdev->priv;
   FAR struct virtio_snd_buffer_s *buf;
-
-  DEBUGASSERT(desc->u.pbuffer != NULL);
+#ifndef CONFIG_BUILD_PROTECTED
+  FAR struct virtio_snd_s *priv = sdev->priv;
 
   buf = virtio_zalloc_buf(priv->vdev,
                           sizeof(*buf) +
                           sizeof(struct virtio_snd_pcm_xfer) +
                           desc->numbytes +
                           sizeof(struct virtio_snd_pcm_status), 16);
+#else
+  buf = kumm_calloc(sizeof(*buf) +
+                    sizeof(struct virtio_snd_pcm_xfer) +
+                    desc->numbytes +
+                    sizeof(struct virtio_snd_pcm_status), 16);
+#endif
   if (buf == NULL)
     {
       vrterr("failed to allocate apb buffer\n");
       return -ENOMEM;
     }
 
+  DEBUGASSERT(desc->u.pbuffer != NULL);
   *desc->u.pbuffer = &buf->apb;
 
   buf->apb.crefs = 1;
@@ -990,9 +996,11 @@ static int virtio_snd_allocbuffer(FAR struct audio_lowerhalf_s *dev,
 static int virtio_snd_freebuffer(FAR struct audio_lowerhalf_s *dev,
                                  FAR struct audio_buf_desc_s *desc)
 {
+#ifndef CONFIG_BUILD_PROTECTED
   FAR struct virtio_snd_dev_s *sdev = (FAR struct virtio_snd_dev_s *)dev;
   FAR struct virtio_snd_s *priv = sdev->priv;
   FAR struct virtio_device *vdev = priv->vdev;
+#endif
   FAR struct ap_buffer_s *apb = desc->u.buffer;
   int refcount;
 
@@ -1002,7 +1010,11 @@ static int virtio_snd_freebuffer(FAR struct audio_lowerhalf_s *dev,
   if (refcount <= 1)
     {
       nxmutex_destroy(&apb->lock);
+#ifdef CONFIG_BUILD_PROTECTED
+      kumm_free(apb);
+#else
       virtio_free_buf(vdev, apb);
+#endif
     }
 
   return sizeof(struct audio_buf_desc_s);
