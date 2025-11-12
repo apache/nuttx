@@ -1228,7 +1228,7 @@ static int vsock_recv_listening(FAR struct vsock_conn_s *conn,
   vsock_addr_init(&newconn->local_addr, hdr->dst_cid, hdr->dst_port);
   vsock_addr_init(&newconn->remote_addr, hdr->src_cid, hdr->src_port);
   newconn->transport = t;
-  ret = circbuf_resize(&conn->rx_buf, conn->rx_buf_alloc);
+  ret = circbuf_resize(&newconn->rx_buf, newconn->rx_buf_alloc);
   if (ret < 0)
     {
       vsock_free(newconn);
