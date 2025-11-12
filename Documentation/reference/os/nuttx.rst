@@ -32,16 +32,6 @@ OS List Management APIs
   **Assumptions**: Base code implementation assumes that this
   function is called from interrupt handling logic with interrupts disabled.
 
-.. c:function:: void nxsched_alarm_expiration(void);
-
-  If ``CONFIG_SCHED_TICKLESS`` is defined, then this
-  function is provided by the RTOS base code and called from
-  platform-specific code when the interval timer used to implemented
-  the tick-less OS expires.
-
-  **Assumptions**: Base code implementation assumes that this
-  function is called from interrupt handling logic with interrupts disabled.
-
 .. c:function:: void irq_dispatch(int irq, FAR void *context)
 
   This function must be called from the

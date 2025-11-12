@@ -277,8 +277,7 @@ static void avrdx_check_alarm_expired(uint8_t context)
        */
 
       avrdx_deactivate_alarm();
-      up_timer_gettime(&tv);
-      nxsched_alarm_expiration(&tv);
+      nxsched_timer_expiration();
     }
   else
     {

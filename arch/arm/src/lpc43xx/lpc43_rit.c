@@ -68,7 +68,6 @@
 static double sec_per_tick;
 static uint64_t g_internal_timer;
 static uint64_t g_alarm;
-struct timespec g_ts;
 
 /****************************************************************************
  * Private Functions
@@ -87,9 +86,7 @@ static int lpc43_rit_isr(int irq, void *context, void *arg)
     {
       /* handle expired alarm */
 
-      g_ts.tv_sec = (uint32_t)(g_internal_timer / 1000000000);
-      g_ts.tv_nsec = (uint32_t)(g_internal_timer % 1000000000);
-      nxsched_alarm_expiration(&g_ts);
+      nxsched_timer_expiration();
     }
 
   leave_critical_section(flags);
