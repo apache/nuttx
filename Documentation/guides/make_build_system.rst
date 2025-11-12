@@ -1,5 +1,3 @@
-.. _make_build_system:
-
 =================
 Make Build System
 =================
@@ -49,6 +47,8 @@ NuttX targets multiple libs, or `silos`, each handling its own compilation:
   -rw-r--r--  1 xxx xxx 2435746 Oct  6 16:01 libsched.a
   -rw-r--r--  1 xxx xxx   51768 Oct  6 16:02 libxx.a
 
+.. _verbosity:
+
 Verbosity
 ---------
 
@@ -71,26 +71,25 @@ Build Process
 
 .. note::
 
-  Most of the configuration step documentation and adjacent tooling should be
-  documented separately. Most of what is presented here will be moved.
+	Keep the configuration step and board folder layout short.
+	Separate docs should be created.
 
 The ``Make`` based build process starts with the NuttX tree configuration.
 This is done by running ``tools/configure.sh`` script.
+The configuration step, prepares the NuttX kernel tree, setting the board specfic
+arch, chip and board files.
 
-During configuration, some symlinks are created.
+The ``Make`` build system refers the needed subsystems using *generic* naming:
 
-- the "current" chip directory gets symlinked to ``nutt/include/arch/chip``.
-- the "current" board directory gets symlinked to ``nutt/include/arch/board``.
-- the "current" arch directory gets symlinked to ``nutt/include/arch``.
+- The *current* architecture is refered as ``arch``
+- The *current* chip is refered as ``chip``
+- The *current* board is refered as ``board``
 
-Each board should also supply an ``scripts/Make.defs`` file.
-The board ``Make.defs`` file should:
+These *generic* names are mapped to the *actual* names by symlinks:
 
-- include the complete .config file.
-- include the :ref:`config_mk`
-- include the arch-specific toolchain.
-- set the linker file used for linking. (``LDSCRIPT``)
-- set the compiler flags needed for the board.
+- The *current* chip directory gets symlinked to ``nutt/include/arch/chip``.
+- The *current* board directory gets symlinked to ``nutt/include/arch/board``.
+- The *current* arch directory gets symlinked to ``nutt/include/arch``.
 
 The board config is stored as ``defconfig`` file, which is a minimal config,
 storing only the configs that differs from default config values. 
@@ -143,12 +142,15 @@ Built-in dependency mechanism
 
 .. note::
 
-	The documentation for :ref:`mkdeps` should be extended. Lots of details
-	are missing. Part of the documentation here should be moved.
+  The documentation for :ref:`mkdeps` should be extended. Lots of details
+  are missing. Part of the documentation here should be moved.
 
 NuttX implements a built-in dependency mechanism. See :ref:`mkdeps`.
-This mechanism is kick-started by the ``depend`` target, which in turn
-triggers ``pass1dep`` and ``pass2dep``. 
+This mechanism uses ``gcc`` to generate a ``*.d`` like dependency files that can be
+included by the **Makefile** to track file dependencies.
+This mechanism is kick-started by the ``depend`` target, and targets specific  
+directories in the NuttX tree based on the build mode. It is *required* by both 
+``pass1dep`` and ``pass2dep``. 
 
 .. code-block:: makefile
 
@@ -161,11 +163,8 @@ triggers ``pass1dep`` and ``pass2dep``.
   	  $(MAKE) -C $$dir EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)" depend || exit; \
   	done
 
-Both targets will the ``depend`` target in each of the directories listed in the
-``$(USERDEPDIRS)`` and ``$(KERNDEPDIRS)`` variables, respectively.
-See :ref:`directories_mk`.
-
-The dependency mechanism runs before the final target.
+Both ``pass1dep`` and ``pass2dep`` sets different directories and orders
+in which the ``depend`` target is ran. See :ref:`directories_mk`.
 
 Building NuttX libs
 ^^^^^^^^^^^^^^^^^^^
@@ -186,7 +185,7 @@ but rather will influence the dependencies pulled by those targets.
 - ``pass1`` target depends on the ``$(USERLIBS)``.
 - ``pass2`` target depends on the ``$(NUTTXLIBS)``.
 
-.. code-block:: 
+.. code-block:: makefile
 
   all: pass1 pass2
 
@@ -372,6 +371,23 @@ The content of each file referenced above is documented in its own section.
 Config.mk
 ---------
 
+``Config.mk`` contains common definitions used by many configuration files.
+
+* It defines the login behind the :ref:`verbosity`
+* It resolves the build *tools*, file extensions, sets delim based on the host platform.
+
+This file (along with *<nuttx>*/.config) must be included at the top of
+each configuration-specific Make.defs file like
+
+.. code-block:: makefile
+
+  include $(TOPDIR)/.config
+  include $(TOPDIR)/tools/Config.mk
+
+Subsequent logic within the configuration-specific Make.defs file may then
+override these default definitions as necessary.
+
+
 .. _flatlibs_mk:
 
 FlatLibs.mk
@@ -398,7 +414,36 @@ placeholder
 Directories.mk
 --------------
 
-placeholder
+This file defines the directories that will be used during the build process.
+Some useful information can be fount inside the file itself:
+
+.. code-block:: bash
+
+  # Lists of build directories.
+  #
+  # CONTEXTDIRS include directories that have special, one-time pre-build
+  #   requirements.  Normally this includes things like auto-generation of
+  #   configuration specific files or creation of configurable symbolic links
+  # CLEANDIRS are the directories that the clean target will executed in.
+  #   These are all directories that we know about.
+  # CCLEANDIRS are directories that the clean_context target will execute in.
+  #   The clean_context target "undoes" the actions of the context target.
+  #   Only directories known to require cleaning are included.
+  # KERNDEPDIRS are the directories in which we will build target dependencies.
+  #   If NuttX and applications are built separately (CONFIG_BUILD_PROTECTED or
+  #   CONFIG_BUILD_KERNEL), then this holds only the directories containing
+  #   kernel files.
+  # USERDEPDIRS. If NuttX and applications are built separately (CONFIG_BUILD_PROTECTED),
+  #   then this holds only the directories containing user files. If
+  #   CONFIG_BUILD_KERNEL is selected, then applications are not build at all.
+
+It defines the following variables:
+
+- ``KERNDEPDIRS``: Directories for kernel dependency checking.
+- ``USERDEPDIRS``: Directories for user-space dependency checking.
+- ``CCLEANDIRS``: Directories for context cleaning targets.
+- ``CLEANDIRS``: Directories for cleaning build ouput.
+- ``CONTEXTDIRS``: Directories that have special, one-time pre-build requirements
 
 .. _libtargets_mk:
 

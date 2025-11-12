@@ -13,19 +13,6 @@ cmpconfig.c
 This C file can be used to build a utility for comparing two NuttX
 configuration files.
 
-Config.mk
----------
-
-Config.mk contains common definitions used by many configuration files.
-This file (along with <nuttx>/.config) must be included at the top of
-each configuration-specific Make.defs file like::
-
-    include $(TOPDIR)/.config
-    include $(TOPDIR)/tools/Config.mk
-
-Subsequent logic within the configuration-specific Make.defs file may then
-override these default definitions as necessary.
-
 checkpatch.sh
 -------------
 
