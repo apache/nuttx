@@ -1918,7 +1918,7 @@ int smartfs_extendfile(FAR struct smartfs_mountpt_s *fs,
    * will, unfortunately, need to allocate one.
    */
 
-  buffer = fs_heap_malloc(SMARTFS_TRUNCBUFFER_SIZE);
+  buffer = (FAR uint8_t *)lib_get_tempbuffer(SMARTFS_TRUNCBUFFER_SIZE);
   if (buffer == NULL)
     {
       return -ENOMEM;
@@ -2115,7 +2115,7 @@ errout_with_buffer:
 #ifndef CONFIG_SMARTFS_USE_SECTOR_BUFFER
   /* Release the allocated buffer */
 
-  fs_heap_free(buffer);
+  lib_put_tempbuffer((FAR char *)buffer);
 #endif
   /* Restore the original file position */
 
