@@ -589,11 +589,17 @@ config WATCHDOG_AUTOMONITOR_BY_WDOG
 	---help---
 		Feed watchdog through wdog functions periodically
 
-config WATCHDOG_AUTOMONITOR_BY_WORKER
-	bool "Worker callback"
+config WATCHDOG_AUTOMONITOR_BY_LPWORK
+	bool "Low priority worker callback"
 	depends on SCHED_WORKQUEUE
 	---help---
-		Feed watchdog through wqueue functions periodically
+		Feed watchdog through low priority wqueue functions periodically
+
+config WATCHDOG_AUTOMONITOR_BY_HPWORK
+	bool "High priority worker callback"
+	depends on SCHED_WORKQUEUE
+	---help---
+		Feed watchdog through high priority wqueue functions periodically
 
 config WATCHDOG_AUTOMONITOR_BY_IDLE
 	bool "Idle callback"

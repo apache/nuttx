@@ -82,7 +82,8 @@
 #  define WATCHDOG_NOTIFIER_ACTION WATCHDOG_KEEPALIVE_BY_TIMER
 #elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_WDOG)
 #  define WATCHDOG_NOTIFIER_ACTION WATCHDOG_KEEPALIVE_BY_WDOG
-#elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_WORKER)
+#elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_LPWORK) || \
+      defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_HPWORK)
 #  define WATCHDOG_NOTIFIER_ACTION WATCHDOG_KEEPALIVE_BY_WORKER
 #elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_CAPTURE)
 #  define WATCHDOG_NOTIFIER_ACTION WATCHDOG_KEEPALIVE_BY_CAPTURE
@@ -132,7 +133,8 @@ struct watchdog_upperhalf_s
   FAR struct timer_lowerhalf_s   *timer;
 #  elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_WDOG)
   struct wdog_s                   wdog;
-#  elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_WORKER)
+#  elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_LPWORK) || \
+        defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_HPWORK)
   struct work_s                   work;
 #  elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_IDLE)
   struct pm_callback_s            idle;
@@ -418,7 +420,8 @@ static void watchdog_automonitor_wdog(wdparm_t arg)
                watchdog_automonitor_wdog, (wdparm_t)upper);
     }
 }
-#elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_WORKER)
+#elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_LPWORK) || \
+      defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_HPWORK)
 static void watchdog_automonitor_worker(FAR void *arg)
 {
   FAR struct watchdog_upperhalf_s *upper = arg;
@@ -426,8 +429,13 @@ static void watchdog_automonitor_worker(FAR void *arg)
   if (upper->monitor)
     {
       watchdog_automonitor_keepalive(upper);
+#ifdef CONFIG_WATCHDOG_AUTOMONITOR_BY_HPWORK
+      work_queue(HPWORK, &upper->work, watchdog_automonitor_worker,
+                 upper, WATCHDOG_AUTOMONITOR_PING_INTERVAL_TICK);
+#else
       work_queue(LPWORK, &upper->work, watchdog_automonitor_worker,
                  upper, WATCHDOG_AUTOMONITOR_PING_INTERVAL_TICK);
+#endif
     }
 }
 #elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_IDLE)
@@ -483,7 +491,10 @@ watchdog_automonitor_start(FAR struct watchdog_upperhalf_s *upper)
 #  elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_WDOG)
       wd_start(&upper->wdog, WATCHDOG_AUTOMONITOR_PING_INTERVAL_TICK,
                watchdog_automonitor_wdog, (wdparm_t)upper);
-#  elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_WORKER)
+#  elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_HPWORK)
+      work_queue(HPWORK, &upper->work, watchdog_automonitor_worker,
+                 upper, WATCHDOG_AUTOMONITOR_PING_INTERVAL_TICK);
+#  elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_LPWORK)
       work_queue(LPWORK, &upper->work, watchdog_automonitor_worker,
                  upper, WATCHDOG_AUTOMONITOR_PING_INTERVAL_TICK);
 #  elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_IDLE)
@@ -513,7 +524,9 @@ static void watchdog_automonitor_stop(FAR struct watchdog_upperhalf_s *upper)
       upper->timer->ops->stop(upper->timer);
 #  elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_WDOG)
       wd_cancel(&upper->wdog);
-#  elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_WORKER)
+#  elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_HPWORK)
+      work_cancel(HPWORK, &upper->work);
+#  elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_LPWORK)
       work_cancel(LPWORK, &upper->work);
 #  elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_IDLE)
       pm_unregister(&upper->idle);
@@ -1244,8 +1257,10 @@ void watchdog_unregister(FAR void *handle)
 
 #ifdef CONFIG_WATCHDOG_AUTOMONITOR
   watchdog_automonitor_stop(upper);
-#  ifdef CONFIG_WATCHDOG_AUTOMONITOR_BY_WORKER
+#  if defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_LPWORK)
   work_cancel_sync(LPWORK, &upper->work);
+#  elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_HPWORK)
+  work_cancel_sync(HPWORK, &upper->work);
 #  endif
 #endif
 
