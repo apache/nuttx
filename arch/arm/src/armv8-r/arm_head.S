@@ -132,7 +132,11 @@
 	.syntax	unified
 	.arm
 	.global	__start
+#ifdef __ghs__
+	.type	__start, $function
+#else
 	.type	__start, #function
+#endif
 
 __start:
 	/* Get cpuindex, cpu0 continue boot, others wait event from cpu0 */
@@ -275,7 +279,11 @@ __cpu0_start:
  ***************************************************************************/
 
 	.global	arm_data_initialize
+#ifdef __ghs__
+	.type	arm_data_initialize, $function
+#else
 	.type	arm_data_initialize, #function
+#endif
 
 arm_data_initialize:
 
@@ -354,7 +362,11 @@ arm_data_initialize:
  ***************************************************************************/
 
 	.global	hsctlr_initialize
+#ifdef __ghs__
+	.type	hsctlr_initialize, $function
+#else
 	.type	hsctlr_initialize, #function
+#endif
 
 hsctlr_initialize:
 	mrc		CP15_HSCTLR(r0)		/* Get Hyp System Control Register */
@@ -386,7 +398,11 @@ hsctlr_initialize:
  ***************************************************************************/
 
 	.global	sctlr_initialize
+#ifdef __ghs__
+	.type	sctlr_initialize, $function
+#else
 	.type	sctlr_initialize, #function
+#endif
 
 sctlr_initialize:
 	/* Configure the system control register (see sctrl.h) */
@@ -553,7 +569,11 @@ sctlr_initialize:
 	 * end of memory.  See g_idle_topstack below.
 	 */
 
+#ifdef __ghs__
+	.type	.Linitparms, $object
+#else
 	.type	.Linitparms, %object
+#endif
 .Linitparms:
 	.long	_sbss
 	.long	_ebss
@@ -564,7 +584,11 @@ sctlr_initialize:
 	.long	_sys_vector_start
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
+#ifdef __ghs__
+	.type	.Ldatainit, $object
+#else
 	.type	.Ldatainit, %object
+#endif
 .Ldatainit:
 	.long	_eronly					/* Where .data defaults are stored in FLASH */
 	.long	_sdata					/* Where .data needs to reside in SDRAM */
@@ -572,7 +596,11 @@ sctlr_initialize:
 #endif
 
 #ifdef CONFIG_ARCH_RAMFUNCS
+#ifdef __ghs__
+	.type	.Lfuncinit, $object
+#else
 	.type	.Lfuncinit, %object
+#endif
 .Lfuncinit:
 	.long	_framfuncs				/* Where RAM functions are stored in FLASH */
 .Lramfuncs:
@@ -593,7 +621,11 @@ sctlr_initialize:
 	.section	.rodata, "a"
 	.align	4
 	.globl	g_idle_topstack
+#ifdef __ghs__
+	.type	g_idle_topstack, $object
+#else
 	.type	g_idle_topstack, object
+#endif
 
 g_idle_topstack:
 

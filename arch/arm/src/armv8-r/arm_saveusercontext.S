@@ -54,7 +54,11 @@
 
 	.globl	up_saveusercontext
 	.globl	up_saveusercontext
+#ifdef __ghs__
+	.type	up_saveusercontext, $function
+#else
 	.type	up_saveusercontext, %function
+#endif
 
 up_saveusercontext:
 
