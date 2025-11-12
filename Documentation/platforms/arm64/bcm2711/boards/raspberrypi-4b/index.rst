@@ -219,8 +219,9 @@ fb
 --
 
 Configuration with graphics support in the form of a frame buffer driver for the
-two HDMI outputs. This configuration is equipped with the ``fb`` frame buffer
-example, which displays some centered, colourful rectangles on the screen.
+two HDMI outputs. This configuration is equipped with the :doc:`fb
+</applications/examples/fb/index>` example, which displays some centered,
+colourful rectangles on the screen.
 
 .. warning::
 
@@ -257,3 +258,12 @@ but could be modified to boot into your own LVGL application.
 This configuration has the same warnings and limitations as those in the ``fb``
 configuration, with the exception of the pixel gaps. This is because LVGL uses
 the dual-buffer approach to rendering.
+
+cgol
+----
+
+This configuration includes the :doc:`/applications/games/cgol/index` game
+application. It renders a Game of Life simulation to the HDMI video output.
+Since this configuration also enables the frame buffer, it comes with the same
+limitations as those in ``fb``. However, the ``cgol`` application is double
+buffered, so it will not experience any rendering artifacts.
