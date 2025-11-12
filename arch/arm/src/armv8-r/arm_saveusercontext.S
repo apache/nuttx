@@ -30,7 +30,9 @@
 	.file	"arm_saveusercontext.S"
 
 	.text
+#ifndef __ghs__
 	.syntax	unified
+#endif
 	.arm
 
 /****************************************************************************

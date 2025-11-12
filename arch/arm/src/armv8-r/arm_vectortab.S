@@ -40,7 +40,9 @@
 	.eabi_attribute Tag_ABI_align_preserved, 1
 #endif
 
+#ifndef __ghs__
 	.syntax	unified
+#endif
 	.arm
 
 	.globl		_sys_vector_start
