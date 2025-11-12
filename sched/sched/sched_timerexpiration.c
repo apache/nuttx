@@ -471,11 +471,6 @@ clock_t nxsched_timer_update(clock_t ticks, bool noswitches)
  *
  ****************************************************************************/
 
-void nxsched_tick_expiration(clock_t ticks)
-{
-  nxsched_timer_update(ticks, false);
-}
-
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
 void nxsched_alarm_expiration(FAR const struct timespec *ts)
 {
@@ -484,7 +479,7 @@ void nxsched_alarm_expiration(FAR const struct timespec *ts)
   DEBUGASSERT(ts);
 
   ticks = clock_time2ticks_floor(ts);
-  nxsched_tick_expiration(ticks);
+  nxsched_timer_update(ticks, false);
 }
 #endif
 
@@ -504,7 +499,6 @@ void nxsched_alarm_expiration(FAR const struct timespec *ts)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SCHED_TICKLESS_ALARM
 void nxsched_timer_expiration(void)
 {
   clock_t ticks;
@@ -515,7 +509,6 @@ void nxsched_timer_expiration(void)
 
   nxsched_timer_update(ticks, false);
 }
-#endif
 
 /****************************************************************************
  * Name:  nxsched_reassess_timer
