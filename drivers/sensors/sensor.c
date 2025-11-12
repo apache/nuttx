@@ -269,6 +269,17 @@ static void sensor_unlock(FAR void *priv)
   nxrmutex_unlock(&upper->lock);
 }
 
+static void sensor_notify_interval(FAR void *priv, uint32_t interval)
+{
+  FAR struct sensor_upperhalf_s *upper = priv;
+
+  nxrmutex_lock(&upper->lock);
+  upper->state.min_interval = interval;
+  sensor_pollnotify(upper, POLLPRI, SENSOR_ROLE_WR);
+  nxrmutex_unlock(&upper->lock);
+  sminfo(upper->name, "notify interval %" PRIu32, interval);
+}
+
 static int sensor_update_interval(FAR struct file *filep,
                                   FAR struct sensor_upperhalf_s *upper,
                                   FAR struct sensor_user_s *user,
@@ -276,11 +287,11 @@ static int sensor_update_interval(FAR struct file *filep,
 {
   FAR struct sensor_lowerhalf_s *lower = upper->lower;
   FAR struct sensor_user_s *tmp;
-  uint32_t min_interval = interval;
   uint32_t min_latency = interval != UINT32_MAX ?
                          user->state.latency : UINT32_MAX;
-  uint32_t orig_min_interval;
+  uint32_t orig_min_interval = upper->state.min_interval;
   uint32_t orig_min_latency;
+  uint32_t min_interval;
   int ret = 0;
 
   if (interval == user->state.interval)
@@ -290,6 +301,7 @@ static int sensor_update_interval(FAR struct file *filep,
 
   nxrmutex_lock(&upper->lock);
 again:
+  min_interval = interval;
   list_for_every_entry(&upper->userlist, tmp, struct sensor_user_s, node)
     {
       if (tmp == user || tmp->state.interval == UINT32_MAX)
@@ -313,18 +325,12 @@ again:
       if (min_interval != UINT32_MAX &&
           min_interval != upper->state.min_interval)
         {
-          uint32_t expected_interval = min_interval;
-
           orig_min_interval = upper->state.min_interval;
           nxrmutex_unlock(&upper->lock);
           ret = lower->ops->set_interval(lower, filep, &min_interval);
           if (ret < 0)
             {
               return ret;
-            }
-          else if (min_interval > expected_interval)
-            {
-              return -EINVAL;
             }
 
           nxrmutex_lock(&upper->lock);
@@ -371,9 +377,22 @@ again:
         }
     }
 
-  upper->state.min_interval = min_interval;
+  /* Intercept updating the upper mini interval when setting up the batch.
+   *   -> set_interval
+   *   -> batch (unlock)
+   *   -> notify_interval
+   *   -> upper->state.min_interval is updated, mini interval still old value
+   * This logic will set the wrong interval for the driver.
+   */
+
+  if (upper->state.min_interval != min_interval &&
+      orig_min_interval != min_interval)
+    {
+      upper->state.min_interval = min_interval;
+      sensor_pollnotify(upper, POLLPRI, SENSOR_ROLE_WR);
+    }
+
   user->state.interval = interval;
-  sensor_pollnotify(upper, POLLPRI, SENSOR_ROLE_WR);
   nxrmutex_unlock(&upper->lock);
   return ret;
 }
@@ -1490,9 +1509,10 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
 
   /* Bind the lower half data structure member */
 
-  lower->priv          = upper;
-  lower->sensor_lock   = sensor_lock;
-  lower->sensor_unlock = sensor_unlock;
+  lower->priv            = upper;
+  lower->sensor_lock     = sensor_lock;
+  lower->sensor_unlock   = sensor_unlock;
+  lower->notify_interval = sensor_notify_interval;
 
   if (!lower->ops->fetch)
     {

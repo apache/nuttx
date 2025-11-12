@@ -550,7 +550,8 @@ typedef CODE ssize_t (*sensor_push_event_t)(FAR void *priv,
                                             FAR const void *data,
                                             size_t bytes);
 typedef CODE void (*sensor_notify_event_t)(FAR void *priv);
-
+typedef CODE void (*sensor_notify_interval_t)(FAR void *priv,
+                                              uint32_t interval);
 struct sensor_lowerhalf_s
 {
   /* The type of sensor device */
@@ -615,6 +616,19 @@ struct sensor_lowerhalf_s
 
       sensor_notify_event_t notify_event;
     };
+
+/****************************************************************************
+ * Name: notify_interval
+ *
+ * Description:
+ *   Lower half driver can notify upper half driver when interval changed.
+ *
+ * Input Parameters:
+ *   priv       - Upper half driver handle
+ *   interval   - The changed interval of the driver
+ ****************************************************************************/
+
+  sensor_notify_interval_t notify_interval;
 
 /****************************************************************************
  * Name: sensor_lock/sensor_unlock
