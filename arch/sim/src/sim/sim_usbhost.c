@@ -404,7 +404,7 @@ static int sim_usbhost_epalloc(struct usbhost_driver_s *drvr,
   epinfo->dirin     = epdesc->in;
   epinfo->devaddr   = hport->funcaddr;
   epinfo->interval  = epdesc->interval;
-  epinfo->maxpacket = (epdesc->mxpacketsize & USB_EP_MAXP_MASK) *
+  epinfo->maxpacket = (epdesc->mxpacketsize & USB_EP_MAX_PACKET_MASK) *
                       (USB_EP_MAX_PACKET_MULT(epdesc->mxpacketsize) + 1);
   epinfo->xfrtype   = epdesc->xfrtype;
   epinfo->speed     = hport->speed;
