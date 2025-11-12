@@ -618,8 +618,18 @@ bool rspin_lock_is_recursive(FAR volatile rspinlock_t *lock)
 static inline_function
 bool rspin_lock_is_hold(FAR volatile rspinlock_t *lock)
 {
-  return RSPINLOCK_OWNER(atomic_read(&lock->val)) ==
-         (uint32_t)this_cpu() + 1u;
+  bool ret;
+
+  /* If this interface is not called while holding the rspinlock, the current
+   * task may be switched to another CPU during a context switch,
+   * leading to incorrect judgment.
+   */
+
+  irqstate_t flags = up_irq_save();
+  ret = (RSPINLOCK_OWNER(atomic_read(&lock->val)) ==
+         (uint32_t)this_cpu() + 1u);
+  up_irq_restore(flags);
+  return ret;
 }
 
 /****************************************************************************
