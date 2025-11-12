@@ -245,8 +245,8 @@ void pkt_conn_list_unlock(void);
  *
  ****************************************************************************/
 
-uint16_t pkt_callback(FAR struct net_driver_s *dev,
-                      FAR struct pkt_conn_s *conn, uint16_t flags);
+uint32_t pkt_callback(FAR struct net_driver_s *dev,
+                      FAR struct pkt_conn_s *conn, uint32_t flags);
 
 /****************************************************************************
  * Name: pkt_input

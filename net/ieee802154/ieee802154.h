@@ -268,9 +268,9 @@ FAR struct ieee802154_conn_s *
  *
  ****************************************************************************/
 
-uint16_t ieee802154_callback(FAR struct radio_driver_s *radio,
+uint32_t ieee802154_callback(FAR struct radio_driver_s *radio,
                              FAR struct ieee802154_conn_s *conn,
-                             uint16_t flags);
+                             uint32_t flags);
 
 /****************************************************************************
  * Name: ieee802154_recvmsg

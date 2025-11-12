@@ -302,8 +302,8 @@ static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
  *
  ****************************************************************************/
 
-static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
-                                      FAR void *pvpriv, uint16_t flags)
+static uint32_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
+                                      FAR void *pvpriv, uint32_t flags)
 {
   FAR struct sixlowpan_send_s *sinfo = pvpriv;
   FAR struct tcp_conn_s *conn = sinfo->s_conn;
@@ -339,7 +339,7 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
       return flags;
     }
 
-  ninfo("flags: %04x acked: %" PRIu32 " sent: %zu\n",
+  ninfo("flags: %" PRIx32 " acked: %" PRIu32 " sent: %zu\n",
         flags, sinfo->s_acked, sinfo->s_sent);
 
   /* If this packet contains an acknowledgement, then update the count of

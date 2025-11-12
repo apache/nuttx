@@ -170,9 +170,9 @@ static size_t tcp_recvfrom_newdata(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static inline uint16_t tcp_newdata(FAR struct net_driver_s *dev,
+static inline uint32_t tcp_newdata(FAR struct net_driver_s *dev,
                                    FAR struct tcp_recvfrom_s *pstate,
-                                   uint16_t flags)
+                                   uint32_t flags)
 {
   FAR struct tcp_conn_s *conn = pstate->ir_conn;
 
@@ -391,13 +391,13 @@ static inline void tcp_sender(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
-                                FAR void *pvpriv, uint16_t flags)
+static uint32_t tcp_recvhandler(FAR struct net_driver_s *dev,
+                                FAR void *pvpriv, uint32_t flags)
 {
   FAR struct tcp_recvfrom_s *pstate = pvpriv;
   FAR struct iob_s *iob = NULL;
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 

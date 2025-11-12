@@ -729,8 +729,8 @@ udp_find_raddr_device(FAR struct udp_conn_s *conn,
  *
  ****************************************************************************/
 
-uint16_t udp_callback(FAR struct net_driver_s *dev,
-                      FAR struct udp_conn_s *conn, uint16_t flags);
+uint32_t udp_callback(FAR struct net_driver_s *dev,
+                      FAR struct udp_conn_s *conn, uint32_t flags);
 
 /****************************************************************************
  * Name: udp_callback_cleanup

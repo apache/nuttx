@@ -55,11 +55,11 @@
  *
  ****************************************************************************/
 
-uint16_t ieee802154_callback(FAR struct radio_driver_s *radio,
+uint32_t ieee802154_callback(FAR struct radio_driver_s *radio,
                              FAR struct ieee802154_conn_s *conn,
-                             uint16_t flags)
+                             uint32_t flags)
 {
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   /* Some sanity checking */
 

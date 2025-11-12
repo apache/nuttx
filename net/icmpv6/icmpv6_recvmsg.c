@@ -94,13 +94,13 @@ struct icmpv6_recvfrom_s
  *
  ****************************************************************************/
 
-static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
-                                      FAR void *pvpriv, uint16_t flags)
+static uint32_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
+                                      FAR void *pvpriv, uint32_t flags)
 {
   FAR struct icmpv6_recvfrom_s *pstate = pvpriv;
   FAR struct ipv6_hdr_s *ipv6;
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   if (pstate != NULL)
     {

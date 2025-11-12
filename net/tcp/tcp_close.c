@@ -70,12 +70,12 @@ static void tcp_close_work(FAR void *param)
  * Name: tcp_close_eventhandler
  ****************************************************************************/
 
-static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
-                                       FAR void *pvpriv, uint16_t flags)
+static uint32_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
+                                       FAR void *pvpriv, uint32_t flags)
 {
   FAR struct tcp_conn_s *conn = pvpriv;
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   /* TCP_DISCONN_EVENTS:
    *   TCP_ABORT:    The remote host has aborted the connection

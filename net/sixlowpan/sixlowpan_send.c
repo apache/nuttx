@@ -99,12 +99,12 @@ struct sixlowpan_send_s
  *
  ****************************************************************************/
 
-static uint16_t send_eventhandler(FAR struct net_driver_s *dev,
-                                  FAR void *pvpriv, uint16_t flags)
+static uint32_t send_eventhandler(FAR struct net_driver_s *dev,
+                                  FAR void *pvpriv, uint32_t flags)
 {
   FAR struct sixlowpan_send_s *sinfo = pvpriv;
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   /* Verify that this is a compatible network driver. */
 

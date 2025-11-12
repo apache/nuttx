@@ -160,7 +160,7 @@ static void ipfwd_packet_conversion(FAR struct net_driver_s *dev, int proto)
 
 void ipfwd_poll(FAR struct net_driver_s *dev)
 {
-  uint16_t flags;
+  uint32_t flags;
 
   /* Setup for the callback (most of these do not apply) */
 

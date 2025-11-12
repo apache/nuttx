@@ -144,8 +144,8 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
-                                    FAR void *pvpriv, uint16_t flags)
+static uint32_t sendto_eventhandler(FAR struct net_driver_s *dev,
+                                    FAR void *pvpriv, uint32_t flags)
 {
   FAR struct sendto_s *pstate = pvpriv;
 
@@ -163,7 +163,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
           return flags;
         }
 
-      ninfo("flags: %04x\n", flags);
+      ninfo("flags: %" PRIx32 "\n", flags);
 
       /* If the network device has gone down, then we will have terminate
        * the wait now with an error.

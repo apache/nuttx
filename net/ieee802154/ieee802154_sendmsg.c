@@ -270,9 +270,9 @@ static void ieee802154_meta_data(FAR struct radio_driver_s *radio,
  * Name: ieee802154_sendto_eventhandler
  ****************************************************************************/
 
-static uint16_t ieee802154_sendto_eventhandler(FAR struct net_driver_s *dev,
+static uint32_t ieee802154_sendto_eventhandler(FAR struct net_driver_s *dev,
                                                FAR void *pvpriv,
-                                               uint16_t flags)
+                                               uint32_t flags)
 {
   FAR struct radio_driver_s *radio;
   FAR struct ieee802154_sendto_s *pstate;
@@ -297,7 +297,7 @@ static uint16_t ieee802154_sendto_eventhandler(FAR struct net_driver_s *dev,
   pstate = pvpriv;
   radio  = (FAR struct radio_driver_s *)dev;
 
-  ninfo("flags: %04x sent: %zd\n", flags, pstate->is_sent);
+  ninfo("flags: %" PRIx32 " sent: %zd\n", flags, pstate->is_sent);
 
   if (pstate != NULL && (flags & IEEE802154_POLL) != 0)
     {

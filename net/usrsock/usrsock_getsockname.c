@@ -45,8 +45,8 @@
  * Private Functions
  ****************************************************************************/
 
-static uint16_t getsockname_event(FAR struct net_driver_s *dev,
-                                  FAR void *pvpriv, uint16_t flags)
+static uint32_t getsockname_event(FAR struct net_driver_s *dev,
+                                  FAR void *pvpriv, uint32_t flags)
 {
   FAR struct usrsock_data_reqstate_s *pstate = pvpriv;
   FAR struct usrsock_conn_s *conn = pstate->reqstate.conn;

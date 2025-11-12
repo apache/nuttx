@@ -60,9 +60,9 @@
  *
  ****************************************************************************/
 
-static inline uint16_t
+static inline uint32_t
 tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
-               uint16_t flags)
+               uint32_t flags)
 {
   uint16_t recvlen;
 
@@ -109,9 +109,9 @@ tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP_OUT_OF_ORDER
-static uint16_t tcp_ofoseg_data_event(FAR struct net_driver_s *dev,
+static uint32_t tcp_ofoseg_data_event(FAR struct net_driver_s *dev,
                                       FAR struct tcp_conn_s *conn,
-                                      uint16_t flags)
+                                      uint32_t flags)
 {
   FAR struct tcp_ofoseg_s *seg;
   uint32_t rcvseq;
@@ -257,11 +257,11 @@ int tcp_ofoseg_bufsize(FAR struct tcp_conn_s *conn)
  *
  ****************************************************************************/
 
-uint16_t tcp_callback(FAR struct net_driver_s *dev,
-                      FAR struct tcp_conn_s *conn, uint16_t flags)
+uint32_t tcp_callback(FAR struct net_driver_s *dev,
+                      FAR struct tcp_conn_s *conn, uint32_t flags)
 {
 #if defined(CONFIG_NET_TCP_NOTIFIER) || defined(CONFIG_NET_TCP_OUT_OF_ORDER)
-  uint16_t orig = flags;
+  uint32_t orig = flags;
 #endif
 
   /* Prepare device buffer */
@@ -277,7 +277,7 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
    * must be explicitly set in the callback.
    */
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   /* Perform the data callback.  When a data callback is executed from
    * 'list', the input flags are normally returned, however, the

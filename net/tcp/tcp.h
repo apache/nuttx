@@ -806,7 +806,7 @@ int tcp_start_monitor(FAR struct socket *psock);
  *
  ****************************************************************************/
 
-void tcp_stop_monitor(FAR struct tcp_conn_s *conn, uint16_t flags);
+void tcp_stop_monitor(FAR struct tcp_conn_s *conn, uint32_t flags);
 
 /****************************************************************************
  * Name: tcp_lost_connection
@@ -832,7 +832,7 @@ void tcp_stop_monitor(FAR struct tcp_conn_s *conn, uint16_t flags);
  ****************************************************************************/
 
 void tcp_lost_connection(FAR struct tcp_conn_s *conn,
-                         FAR struct devif_callback_s *cb, uint16_t flags);
+                         FAR struct devif_callback_s *cb, uint32_t flags);
 
 /****************************************************************************
  * Name: tcp_close
@@ -1399,8 +1399,8 @@ void tcp_ipv6_input(FAR struct net_driver_s *dev, unsigned int iplen);
  *
  ****************************************************************************/
 
-uint16_t tcp_callback(FAR struct net_driver_s *dev,
-                      FAR struct tcp_conn_s *conn, uint16_t flags);
+uint32_t tcp_callback(FAR struct net_driver_s *dev,
+                      FAR struct tcp_conn_s *conn, uint32_t flags);
 
 /****************************************************************************
  * Name: tcp_datahandler
@@ -1939,7 +1939,7 @@ int tcp_wrbuffer_test(void);
 #ifdef CONFIG_DEBUG_FEATURES
 void tcp_event_handler_dump(FAR struct net_driver_s *dev,
                             FAR void *pvpriv,
-                            uint16_t flags,
+                            uint32_t flags,
                             FAR struct tcp_conn_s *conn);
 #endif
 
@@ -2381,7 +2381,7 @@ void tcp_cc_recv_ack(FAR struct tcp_conn_s *conn, FAR struct tcp_hdr_s *tcp);
  *
  ****************************************************************************/
 
-void tcp_set_zero_probe(FAR struct tcp_conn_s *conn, uint16_t flags);
+void tcp_set_zero_probe(FAR struct tcp_conn_s *conn, uint32_t flags);
 
 #endif /* NET_TCP_HAVE_STACK */
 #endif /* __NET_TCP_TCP_H */

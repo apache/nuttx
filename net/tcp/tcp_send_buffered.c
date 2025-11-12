@@ -431,8 +431,8 @@ static int parse_sack(FAR struct tcp_conn_s *conn, FAR struct tcp_hdr_s *tcp,
  *
  ****************************************************************************/
 
-static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
-                                        FAR void *pvpriv, uint16_t flags)
+static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
+                                        FAR void *pvpriv, uint32_t flags)
 {
   FAR struct tcp_conn_s *conn = pvpriv;
 #ifdef CONFIG_NET_TCP_SELECTIVE_ACK
@@ -459,7 +459,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
       return flags;
     }
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   /* The TCP_ACKDATA, TCP_REXMIT and TCP_DISCONN_EVENTS flags are expected to
    * appear here strictly one at a time, except for the FIN + ACK case.
@@ -505,7 +505,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
       /* Get the ACK number from the TCP header */
 
       ackno = tcp_getsequence(tcp->ackno);
-      ninfo("ACK: ackno=%" PRIu32 " flags=%04x\n", ackno, flags);
+      ninfo("ACK: ackno=%" PRIu32 " flags=%" PRIx32 "\n", ackno, flags);
 
       /* Look at every write buffer in the unacked_q.  The unacked_q
        * holds write buffers that have been entirely sent, but which
@@ -707,7 +707,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
   if ((flags & TCP_DISCONN_EVENTS) != 0)
     {
-      ninfo("Lost connection: %04x\n", flags);
+      ninfo("Lost connection: %" PRIx32 "\n", flags);
 
       /* We could get here recursively through the callback actions of
        * tcp_lost_connection().  So don't repeat that action if we have
@@ -893,7 +893,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
       FAR struct tcp_wrbuffer_s *wrb;
       FAR sq_entry_t *entry;
 
-      ninfo("REXMIT: %04x\n", flags);
+      ninfo("REXMIT: %" PRIx32 "\n", flags);
 
       /* If there is a partially sent write buffer at the head of the
        * write_q?  Has anything been sent from that write buffer?
