@@ -340,6 +340,12 @@ static int ptp_clock_ioctl(FAR struct file *filep, int cmd,
         break;
 
       default:
+        {
+          if (lower->ops->control)
+            {
+              ret = lower->ops->control(lower, cmd, arg);
+            }
+        }
         break;
     }
 
