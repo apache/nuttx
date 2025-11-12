@@ -44,9 +44,9 @@
  ****************************************************************************/
 
 static void tcp_close_connection(FAR struct tcp_conn_s *conn,
-                                 uint16_t flags);
-static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
-                                  FAR void *pvpriv, uint16_t flags);
+                                 uint32_t flags);
+static uint32_t tcp_monitor_event(FAR struct net_driver_s *dev,
+                                  FAR void *pvpriv, uint32_t flags);
 
 /****************************************************************************
  * Private Functions
@@ -70,7 +70,7 @@ static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static void tcp_close_connection(FAR struct tcp_conn_s *conn, uint16_t flags)
+static void tcp_close_connection(FAR struct tcp_conn_s *conn, uint32_t flags)
 {
   /* These loss-of-connection events may be reported:
    *
@@ -130,14 +130,15 @@ static void tcp_close_connection(FAR struct tcp_conn_s *conn, uint16_t flags)
  *
  ****************************************************************************/
 
-static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
-                                  FAR void *pvpriv, uint16_t flags)
+static uint32_t tcp_monitor_event(FAR struct net_driver_s *dev,
+                                  FAR void *pvpriv, uint32_t flags)
 {
   FAR struct tcp_conn_s *conn = pvpriv;
 
   if (conn != NULL)
     {
-      ninfo("flags: %04x s_flags: %02x\n", flags, conn->sconn.s_flags);
+      ninfo("flags: %" PRIx32 " s_flags: %02x\n", flags,
+            conn->sconn.s_flags);
 
       /* TCP_DISCONN_EVENTS: TCP_ABORT, TCP_TIMEDOUT, or NETDEV_DOWN.
        * All loss-of-connection events.
@@ -205,7 +206,7 @@ static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static void tcp_shutdown_monitor(FAR struct tcp_conn_s *conn, uint16_t flags)
+static void tcp_shutdown_monitor(FAR struct tcp_conn_s *conn, uint32_t flags)
 {
   /* Perform callbacks to assure that all sockets, including dup'ed copies,
    * are informed of the loss of connection event.
@@ -335,7 +336,7 @@ int tcp_start_monitor(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-void tcp_stop_monitor(FAR struct tcp_conn_s *conn, uint16_t flags)
+void tcp_stop_monitor(FAR struct tcp_conn_s *conn, uint32_t flags)
 {
   DEBUGASSERT(conn != NULL);
 
@@ -368,7 +369,7 @@ void tcp_stop_monitor(FAR struct tcp_conn_s *conn, uint16_t flags)
  ****************************************************************************/
 
 void tcp_lost_connection(FAR struct tcp_conn_s *conn,
-                         FAR struct devif_callback_s *cb, uint16_t flags)
+                         FAR struct devif_callback_s *cb, uint32_t flags)
 {
   DEBUGASSERT(conn != NULL);
 

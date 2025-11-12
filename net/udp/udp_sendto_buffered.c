@@ -94,8 +94,8 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
                                    FAR struct udp_conn_s *conn);
 #endif
 static int sendto_next_transfer(FAR struct udp_conn_s *conn);
-static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
-                                    FAR void *pvpriv, uint16_t flags);
+static uint32_t sendto_eventhandler(FAR struct net_driver_s *dev,
+                                    FAR void *pvpriv, uint32_t flags);
 
 /****************************************************************************
  * Private Functions
@@ -386,20 +386,20 @@ out:
  *
  ****************************************************************************/
 
-static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
-                                    FAR void *pvpriv, uint16_t flags)
+static uint32_t sendto_eventhandler(FAR struct net_driver_s *dev,
+                                    FAR void *pvpriv, uint32_t flags)
 {
   FAR struct udp_conn_s *conn = pvpriv;
 
   DEBUGASSERT(dev != NULL && conn != NULL);
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   /* Check if the network device has gone down  */
 
   if ((flags & NETDEV_DOWN) != 0)
     {
-      ninfo("Device down: %04x\n", flags);
+      ninfo("Device down: %" PRIx32 "\n", flags);
 
       /* Free the write buffer at the head of the queue and attempt to setup
        * the next transfer.

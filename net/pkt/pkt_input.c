@@ -160,7 +160,7 @@ static int pkt_in(FAR struct net_driver_s *dev)
   conn = pkt_active(dev);
   if (conn)
     {
-      uint16_t flags;
+      uint32_t flags;
 
       if (conn->pendiob == dev->d_iob)
         {

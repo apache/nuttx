@@ -237,8 +237,8 @@ FAR struct can_conn_s *can_active(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-uint16_t can_callback(FAR struct net_driver_s *dev,
-                      FAR struct can_conn_s *conn, uint16_t flags);
+uint32_t can_callback(FAR struct net_driver_s *dev,
+                      FAR struct can_conn_s *conn, uint32_t flags);
 
 /****************************************************************************
  * Name: can_datahandler

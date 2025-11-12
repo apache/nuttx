@@ -267,9 +267,9 @@
 
 struct net_driver_s;       /* Forward reference */
 
-typedef CODE uint16_t (*devif_callback_event_t)(FAR struct net_driver_s *dev,
+typedef CODE uint32_t (*devif_callback_event_t)(FAR struct net_driver_s *dev,
                                                 FAR void *pvpriv,
-                                                uint16_t flags);
+                                                uint32_t flags);
 
 struct devif_callback_s
 {
@@ -278,7 +278,7 @@ struct devif_callback_s
   FAR struct devif_callback_s *nxtdev;
   FAR devif_callback_event_t event;
   FAR void *priv;
-  uint16_t flags;
+  uint32_t flags;
   uint8_t free_flags;
 };
 
@@ -386,7 +386,7 @@ void devif_dev_callback_free(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-uint16_t devif_conn_event(FAR struct net_driver_s *dev, uint16_t flags,
+uint32_t devif_conn_event(FAR struct net_driver_s *dev, uint32_t flags,
                           FAR struct devif_callback_s *list);
 
 /****************************************************************************
@@ -408,7 +408,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, uint16_t flags,
  *
  ****************************************************************************/
 
-uint16_t devif_dev_event(FAR struct net_driver_s *dev, uint16_t flags);
+uint32_t devif_dev_event(FAR struct net_driver_s *dev, uint32_t flags);
 
 /****************************************************************************
  * Name: devif_send

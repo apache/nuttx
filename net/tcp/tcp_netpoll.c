@@ -66,12 +66,12 @@
  *
  ****************************************************************************/
 
-static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
-                                      FAR void *pvpriv, uint16_t flags)
+static uint32_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
+                                      FAR void *pvpriv, uint32_t flags)
 {
   FAR struct tcp_poll_s *info = pvpriv;
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   DEBUGASSERT(info == NULL || (info->conn != NULL && info->fds != NULL));
 

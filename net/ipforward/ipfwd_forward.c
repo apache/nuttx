@@ -120,12 +120,12 @@ static inline void forward_ipselect(FAR struct forward_s *fwd)
  *
  ****************************************************************************/
 
-static uint16_t ipfwd_eventhandler(FAR struct net_driver_s *dev,
-                                   FAR void *pvpriv, uint16_t flags)
+static uint32_t ipfwd_eventhandler(FAR struct net_driver_s *dev,
+                                   FAR void *pvpriv, uint32_t flags)
 {
   FAR struct forward_s *fwd = pvpriv;
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
   DEBUGASSERT(fwd != NULL && fwd->f_iob != NULL && fwd->f_dev != NULL);
 
   /* Make sure that this is from the forwarding device */

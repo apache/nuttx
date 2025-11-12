@@ -81,12 +81,12 @@ static void arp_send_terminate(FAR struct net_driver_s *dev,
  * Name: arp_send_eventhandler
  ****************************************************************************/
 
-static uint16_t arp_send_eventhandler(FAR struct net_driver_s *dev,
-                                      FAR void *priv, uint16_t flags)
+static uint32_t arp_send_eventhandler(FAR struct net_driver_s *dev,
+                                      FAR void *priv, uint32_t flags)
 {
   FAR struct arp_send_s *state = (FAR struct arp_send_s *)priv;
 
-  ninfo("flags: %04x sent: %d\n", flags, state->snd_sent);
+  ninfo("flags: %" PRIx32 " sent: %d\n", flags, state->snd_sent);
 
   if (state)
     {

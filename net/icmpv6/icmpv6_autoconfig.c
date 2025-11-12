@@ -92,12 +92,12 @@ static void icmpv6_router_terminate(FAR struct icmpv6_router_s *state,
  * Name: icmpv6_router_eventhandler
  ****************************************************************************/
 
-static uint16_t icmpv6_router_eventhandler(FAR struct net_driver_s *dev,
-                                           FAR void *priv, uint16_t flags)
+static uint32_t icmpv6_router_eventhandler(FAR struct net_driver_s *dev,
+                                           FAR void *priv, uint32_t flags)
 {
   FAR struct icmpv6_router_s *state = (FAR struct icmpv6_router_s *)priv;
 
-  ninfo("flags: %04x sent: %d\n", flags, state->snd_sent);
+  ninfo("flags: %" PRIx32 " sent: %d\n", flags, state->snd_sent);
 
   if (state)
     {

@@ -138,7 +138,7 @@ static bool udp_is_broadcast(FAR struct net_driver_s *dev)
 static int udp_input_conn(FAR struct net_driver_s *dev,
                           FAR struct udp_conn_s *conn, unsigned int udpiplen)
 {
-  uint16_t flags;
+  uint32_t flags;
 
   /* Set-up for the application callback */
 

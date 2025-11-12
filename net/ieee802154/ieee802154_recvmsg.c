@@ -206,15 +206,15 @@ static ssize_t
  *
  ****************************************************************************/
 
-static uint16_t
-  ieee802154_recvfrom_eventhandler(FAR struct net_driver_s *dev,
-                                   FAR void *pvpriv, uint16_t flags)
+static uint32_t
+ieee802154_recvfrom_eventhandler(FAR struct net_driver_s *dev,
+                                 FAR void *pvpriv, uint32_t flags)
 {
   FAR struct ieee802154_recvfrom_s *pstate;
   FAR struct radio_driver_s *radio;
   ssize_t ret;
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   DEBUGASSERT(pvpriv != NULL && dev != NULL);
 

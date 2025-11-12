@@ -696,8 +696,8 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
   FAR struct tcp_hdr_s *tcp;
   union ip_binding_u uaddr;
   unsigned int tcpiplen;
+  uint32_t flags;
   uint16_t tmp16;
-  uint16_t flags;
   uint16_t result;
   int      len;
 

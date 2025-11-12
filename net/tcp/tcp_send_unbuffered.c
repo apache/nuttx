@@ -125,8 +125,8 @@ struct send_s
  *
  ****************************************************************************/
 
-static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
-                                     FAR void *pvpriv, uint16_t flags)
+static uint32_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
+                                     FAR void *pvpriv, uint32_t flags)
 {
   FAR struct send_s *pstate = pvpriv;
   FAR struct tcp_conn_s *conn;
@@ -151,7 +151,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
       return flags;
     }
 
-  ninfo("flags: %04x acked: %" PRId32 " sent: %zd\n",
+  ninfo("flags: %" PRIx32 " acked: %" PRId32 " sent: %zd\n",
         flags, pstate->snd_acked, pstate->snd_sent);
 
   /* The TCP_ACKDATA, TCP_REXMIT and TCP_DISCONN_EVENTS flags are expected to

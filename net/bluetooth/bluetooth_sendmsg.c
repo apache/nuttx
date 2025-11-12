@@ -83,9 +83,9 @@ struct bluetooth_sendto_s
  * Name: bluetooth_sendto_eventhandler
  ****************************************************************************/
 
-static uint16_t bluetooth_sendto_eventhandler(FAR struct net_driver_s *dev,
-                                               FAR void *pvpriv,
-                                               uint16_t flags)
+static uint32_t bluetooth_sendto_eventhandler(FAR struct net_driver_s *dev,
+                                              FAR void *pvpriv,
+                                              uint32_t flags)
 {
   FAR struct radio_driver_s *radio;
   FAR struct bluetooth_sendto_s *pstate;
@@ -110,7 +110,7 @@ static uint16_t bluetooth_sendto_eventhandler(FAR struct net_driver_s *dev,
   pstate = pvpriv;
   radio  = (FAR struct radio_driver_s *)dev;
 
-  ninfo("flags: %04x sent: %zd\n", flags, pstate->is_sent);
+  ninfo("flags: %" PRIx32 " sent: %zd\n", flags, pstate->is_sent);
 
   if (pstate != NULL && (flags & BLUETOOTH_POLL) != 0)
     {

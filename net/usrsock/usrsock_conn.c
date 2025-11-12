@@ -203,7 +203,7 @@ FAR struct usrsock_conn_s *usrsock_active(int16_t usockid)
 int usrsock_setup_request_callback(FAR struct usrsock_conn_s *conn,
                                    FAR struct usrsock_reqstate_s *pstate,
                                    FAR devif_callback_event_t event,
-                                   uint16_t flags)
+                                   uint32_t flags)
 {
   int ret = -EBUSY;
 
@@ -248,7 +248,7 @@ int usrsock_setup_data_request_callback(
       FAR struct usrsock_conn_s *conn,
       FAR struct usrsock_data_reqstate_s *pstate,
       FAR devif_callback_event_t event,
-      uint16_t flags)
+      uint32_t flags)
 {
   pstate->valuelen = 0;
   pstate->valuelen_nontrunc = 0;

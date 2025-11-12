@@ -82,8 +82,8 @@ static void pkt_sendbuffer_notify(FAR struct pkt_conn_s *conn)
  * Name: psock_send_eventhandler
  ****************************************************************************/
 
-static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
-                                        FAR void *pvpriv, uint16_t flags)
+static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
+                                        FAR void *pvpriv, uint32_t flags)
 {
   FAR struct pkt_conn_s *conn = pvpriv;
 

@@ -112,8 +112,8 @@ const struct sock_intf_s g_can_sockif =
  *
  ****************************************************************************/
 
-static uint16_t can_poll_eventhandler(FAR struct net_driver_s *dev,
-                                      FAR void *pvpriv, uint16_t flags)
+static uint32_t can_poll_eventhandler(FAR struct net_driver_s *dev,
+                                      FAR void *pvpriv, uint32_t flags)
 {
   FAR struct can_poll_s *info = pvpriv;
 

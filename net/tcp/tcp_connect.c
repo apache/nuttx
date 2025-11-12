@@ -72,8 +72,8 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
                                         FAR struct tcp_connect_s *pstate);
 static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
                                      int status);
-static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
-                                           FAR void *pvpriv, uint16_t flags);
+static uint32_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
+                                           FAR void *pvpriv, uint32_t flags);
 
 /****************************************************************************
  * Private Functions
@@ -159,13 +159,13 @@ static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
  *
  ****************************************************************************/
 
-static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
-                                           FAR void *pvpriv, uint16_t flags)
+static uint32_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
+                                           FAR void *pvpriv, uint32_t flags)
 {
   struct tcp_connect_s *pstate = pvpriv;
   FAR struct tcp_conn_s *conn;
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 

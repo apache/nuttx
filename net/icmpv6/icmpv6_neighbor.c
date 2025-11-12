@@ -74,12 +74,12 @@ struct icmpv6_neighbor_s
  * Name: icmpv6_neighbor_eventhandler
  ****************************************************************************/
 
-static uint16_t icmpv6_neighbor_eventhandler(FAR struct net_driver_s *dev,
-                                             FAR void *priv, uint16_t flags)
+static uint32_t icmpv6_neighbor_eventhandler(FAR struct net_driver_s *dev,
+                                             FAR void *priv, uint32_t flags)
 {
   FAR struct icmpv6_neighbor_s *state = (FAR struct icmpv6_neighbor_s *)priv;
 
-  ninfo("flags: %04x sent: %d\n", flags, state->snd_sent);
+  ninfo("flags: %" PRIx32 " sent: %d\n", flags, state->snd_sent);
 
   if (state)
     {

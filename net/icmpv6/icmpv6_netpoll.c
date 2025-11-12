@@ -63,15 +63,15 @@
  *
  ****************************************************************************/
 
-static uint16_t icmpv6_poll_eventhandler(FAR struct net_driver_s *dev,
-                                         FAR void *pvpriv, uint16_t flags)
+static uint32_t icmpv6_poll_eventhandler(FAR struct net_driver_s *dev,
+                                         FAR void *pvpriv, uint32_t flags)
 {
   FAR struct icmpv6_poll_s *info = pvpriv;
   FAR struct icmpv6_conn_s *conn;
   FAR struct socket *psock;
   pollevent_t eventset;
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   DEBUGASSERT(info == NULL || info->fds != NULL);
 

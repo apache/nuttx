@@ -216,7 +216,7 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static bool devif_event_trigger(uint16_t events, uint16_t triggers)
+static bool devif_event_trigger(uint32_t events, uint32_t triggers)
 {
   /* The events are divided into a set of individual bits that may be ORed
    * together PLUS a field that encodes a single poll event.
@@ -451,7 +451,7 @@ void devif_dev_callback_free(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-uint16_t devif_conn_event(FAR struct net_driver_s *dev, uint16_t flags,
+uint32_t devif_conn_event(FAR struct net_driver_s *dev, uint32_t flags,
                           FAR struct devif_callback_s *list)
 {
   FAR struct devif_callback_s *next;
@@ -508,7 +508,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, uint16_t flags,
  *
  ****************************************************************************/
 
-uint16_t devif_dev_event(FAR struct net_driver_s *dev, uint16_t flags)
+uint32_t devif_dev_event(FAR struct net_driver_s *dev, uint32_t flags)
 {
   FAR struct devif_callback_s *cb;
   FAR struct devif_callback_s *next;

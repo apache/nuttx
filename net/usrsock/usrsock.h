@@ -211,7 +211,7 @@ FAR struct usrsock_conn_s *usrsock_active(int16_t usockid);
 int usrsock_setup_request_callback(FAR struct usrsock_conn_s *conn,
                                    FAR struct usrsock_reqstate_s *pstate,
                                    FAR devif_callback_event_t event,
-                                   uint16_t flags);
+                                   uint32_t flags);
 
 /****************************************************************************
  * Name: usrsock_setup_data_request_callback()
@@ -220,7 +220,7 @@ int usrsock_setup_request_callback(FAR struct usrsock_conn_s *conn,
 int usrsock_setup_data_request_callback(FAR struct usrsock_conn_s *conn,
                                 FAR struct usrsock_data_reqstate_s *pstate,
                                 FAR devif_callback_event_t event,
-                                uint16_t flags);
+                                uint32_t flags);
 
 /****************************************************************************
  * Name: usrsock_teardown_request_callback()

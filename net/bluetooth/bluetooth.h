@@ -254,9 +254,9 @@ FAR struct bluetooth_conn_s *
  *
  ****************************************************************************/
 
-uint16_t bluetooth_callback(FAR struct radio_driver_s *radio,
-                             FAR struct bluetooth_conn_s *conn,
-                             uint16_t flags);
+uint32_t bluetooth_callback(FAR struct radio_driver_s *radio,
+                            FAR struct bluetooth_conn_s *conn,
+                            uint32_t flags);
 
 /****************************************************************************
  * Name: bluetooth_recvmsg
