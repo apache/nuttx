@@ -168,7 +168,6 @@ static uint64_t imxrt_get_counter(void)
 
 static void imxrt_interval_handler(void)
 {
-  struct timespec tv;
   uint32_t regval;
 
   /* Disable the compare interrupt for now */
@@ -184,8 +183,7 @@ static void imxrt_interval_handler(void)
 
   g_tickless.pending = false;
 
-  up_timer_gettime(&tv);
-  nxsched_alarm_expiration(&tv);
+  nxsched_timer_expiration();
 }
 
 /****************************************************************************
@@ -479,7 +477,7 @@ int up_timer_gettime(struct timespec *ts)
  * Name: up_alarm_start
  *
  * Description:
- *   Start the alarm.  nxsched_alarm_expiration() will be called when the
+ *   Start the alarm.  nxsched_timer_expiration() will be called when the
  *   alarm occurs (unless up_alaram_cancel is called to stop it).
  *
  *   Provided by platform-specific code and called from the RTOS base code.
@@ -487,7 +485,7 @@ int up_timer_gettime(struct timespec *ts)
  * Input Parameters:
  *   ts - The time in the future at the alarm is expected to occur.  When
  *        the alarm occurs the timer logic will call
- *        nxsched_alarm_expiration().
+ *        nxsched_timer_expiration().
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -555,7 +553,7 @@ int up_alarm_start(const struct timespec *ts)
  * Description:
  *   Cancel the alarm and return the time of cancellation of the alarm.
  *   These two steps need to be as nearly atomic as possible.
- *   nxsched_alarm_expiration() will not be called unless the alarm is
+ *   nxsched_timer_expiration() will not be called unless the alarm is
  *   restarted with up_alarm_start().
  *
  *   If, as a race condition, the alarm has already expired when this

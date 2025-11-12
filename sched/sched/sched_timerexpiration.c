@@ -452,38 +452,6 @@ clock_t nxsched_timer_update(clock_t ticks, bool noswitches)
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  nxsched_alarm_expiration
- *
- * Description:
- *   if CONFIG_SCHED_TICKLESS is defined, then this function is provided by
- *   the RTOS base code and called from platform-specific code when the
- *   alarm used to implement the tick-less OS expires.
- *
- * Input Parameters:
- *   ts - The time that the alarm expired
- *
- * Returned Value:
- *   None
- *
- * Assumptions/Limitations:
- *   Base code implementation assumes that this function is called from
- *   interrupt handling logic with interrupts disabled.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SCHED_TICKLESS_ALARM
-void nxsched_alarm_expiration(FAR const struct timespec *ts)
-{
-  clock_t ticks;
-
-  DEBUGASSERT(ts);
-
-  ticks = clock_time2ticks_floor(ts);
-  nxsched_timer_update(ticks, false);
-}
-#endif
-
-/****************************************************************************
  * Name: nxsched_timer_expiration
  *
  * Description:
