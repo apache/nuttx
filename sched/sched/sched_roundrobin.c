@@ -124,8 +124,8 @@ static int nxsched_roundrobin_handler(FAR void *cookie)
  *
  ****************************************************************************/
 
-uint32_t nxsched_process_roundrobin(FAR struct tcb_s *tcb, uint32_t ticks,
-                                    bool noswitches)
+clock_t nxsched_process_roundrobin(FAR struct tcb_s *tcb, clock_t ticks,
+                                   bool noswitches)
 {
   uint32_t ret;
   int decr;

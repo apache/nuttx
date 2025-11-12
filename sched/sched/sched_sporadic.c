@@ -1181,8 +1181,8 @@ int nxsched_suspend_sporadic(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-uint32_t nxsched_process_sporadic(FAR struct tcb_s *tcb, uint32_t ticks,
-                                bool noswitches)
+clock_t nxsched_process_sporadic(FAR struct tcb_s *tcb, clock_t ticks,
+                                 bool noswitches)
 {
   FAR struct sporadic_s *sporadic;
 
