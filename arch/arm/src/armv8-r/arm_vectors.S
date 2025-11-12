@@ -154,7 +154,11 @@
 
 	.globl	arm_decodeirq
 	.globl	arm_vectorirq
+#ifdef __ghs__
+	.type	arm_vectorirq, $function
+#else
 	.type	arm_vectorirq, %function
+#endif
 
 arm_vectorirq:
 
@@ -265,7 +269,11 @@ arm_vectorirq:
 
 	.globl	arm_syscall
 	.globl	arm_vectorsvc
+#ifdef __ghs__
+	.type	arm_vectorsvc, $function
+#else
 	.type	arm_vectorsvc, %function
+#endif
 
 arm_vectorsvc:
 
@@ -375,7 +383,11 @@ arm_vectorsvc:
 
 	.globl	arm_dataabort
 	.globl	arm_vectordata
+#ifdef __ghs__
+	.type	arm_vectordata, $function
+#else
 	.type	arm_vectordata, %function
+#endif
 
 arm_vectordata:
 
@@ -466,7 +478,11 @@ arm_vectordata:
 
 	.globl	arm_prefetchabort
 	.globl	arm_vectorprefetch
+#ifdef __ghs__
+	.type	arm_vectorprefetch, $function
+#else
 	.type	arm_vectorprefetch, %function
+#endif
 
 arm_vectorprefetch:
 
@@ -549,7 +565,11 @@ arm_vectorprefetch:
 
 	.globl	arm_undefinedinsn
 	.globl	arm_vectorundefinsn
+#ifdef __ghs__
+	.type	arm_vectorundefinsn, $function
+#else
 	.type	arm_vectorundefinsn, %function
+#endif
 
 arm_vectorundefinsn:
 
@@ -631,7 +651,11 @@ arm_vectorundefinsn:
 	.globl	arm_decodefiq
 #endif
 	.globl	arm_vectorfiq
+#ifdef __ghs__
+	.type	arm_vectorfiq, $function
+#else
 	.type	arm_vectorfiq, %function
+#endif
 
 arm_vectorfiq:
 #ifdef CONFIG_ARCH_HIPRI_INTERRUPT
@@ -728,7 +752,12 @@ arm_vectorfiq:
  ****************************************************************************/
 
 	.globl	arm_vectoraddrexcptn
+#ifdef __ghs__
+	.type	arm_vectoraddrexcptn, $function
+#else
 	.type	arm_vectoraddrexcptn, %function
+#endif
+
 arm_vectoraddrexcptn:
 	b		arm_vectoraddrexcptn
 	.size	arm_vectoraddrexcptn, . - arm_vectoraddrexcptn
@@ -742,9 +771,17 @@ arm_vectoraddrexcptn:
 	.balign	8
 
 	.globl	g_intstackalloc
+#ifdef __ghs__
+	.type	g_intstackalloc, $object
+#else
 	.type	g_intstackalloc, object
+#endif
 	.globl	g_intstacktop
+#ifdef __ghs__
+	.type	g_intstacktop, $object
+#else
 	.type	g_intstacktop, object
+#endif
 
 g_intstackalloc:
 	.skip	((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)
@@ -758,9 +795,17 @@ g_intstacktop:
 
 #ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 	.globl	g_fiqstackalloc
+#ifdef __ghs__
+	.type	g_fiqstackalloc, $object
+#else
 	.type	g_fiqstackalloc, object
+#endif
 	.globl	g_fiqstacktop
+#ifdef __ghs__
+	.type	g_fiqstacktop, $object
+#else
 	.type	g_fiqstacktop, object
+#endif
 
 g_fiqstackalloc:
 	.skip	((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)
