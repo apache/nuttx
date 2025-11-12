@@ -26,7 +26,9 @@
 
 #include <nuttx/config.h>
 
+#ifndef __ghs__
 	.syntax		unified
+#endif
 	.file		"arm_fetchadd.S"
 
 /****************************************************************************

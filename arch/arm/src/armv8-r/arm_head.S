@@ -129,7 +129,9 @@
  */
 
 	.text
+#ifndef __ghs__
 	.syntax	unified
+#endif
 	.arm
 	.global	__start
 #ifdef __ghs__
