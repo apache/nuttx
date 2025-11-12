@@ -72,8 +72,11 @@ static const struct file_operations g_pipe_fops =
   pipecommon_writev    /* writev */
 };
 
-static mutex_t g_pipelock = NXMUTEX_INITIALIZER;
-static int     g_pipeno;
+static DEFINE_PER_CPU_BMP(mutex_t, g_pipelock) = NXMUTEX_INITIALIZER;
+#define g_pipelock this_cpu_var_bmp(g_pipelock)
+
+static DEFINE_PER_CPU_BSS_BMP(int, g_pipeno);
+#define g_pipeno this_cpu_var_bmp(g_pipeno)
 
 /****************************************************************************
  * Private Functions
