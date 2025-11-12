@@ -97,6 +97,7 @@ struct sensor_rpmsg_dev_s
   int16_t                        nsubscribers;
   FAR void                      *upper;
   sensor_push_event_t            push_event;
+  sensor_notify_interval_t       notify_interval;
   FAR const char                *name;
   char                           path[1];
 };
@@ -1164,6 +1165,14 @@ static ssize_t sensor_rpmsg_push_event(FAR void *priv, FAR const void *data,
   return ret;
 }
 
+static void
+sensor_rpmsg_notify_interval(FAR void *priv, uint32_t interval)
+{
+  FAR struct sensor_rpmsg_dev_s *dev = priv;
+
+  dev->notify_interval(dev->upper, interval);
+}
+
 static FAR struct sensor_rpmsg_dev_s *
 sensor_rpmsg_find_dev(FAR const char *path)
 {
@@ -1698,15 +1707,17 @@ sensor_rpmsg_register(FAR struct sensor_lowerhalf_s *lower,
   list_initialize(&dev->proxylist);
   strlcpy(dev->path, path, size + 1);
 
-  dev->name           = basename(dev->path);
-  dev->nadvertisers   = lower->ops->activate ? 1 : -1;
-  dev->push_event     = lower->push_event;
-  dev->upper          = lower->priv;
-  lower->push_event   = sensor_rpmsg_push_event;
-  lower->priv         = dev;
+  dev->name              = basename(dev->path);
+  dev->nadvertisers      = lower->ops->activate ? 1 : -1;
+  dev->push_event        = lower->push_event;
+  dev->notify_interval   = lower->notify_interval;
+  dev->upper             = lower->priv;
+  lower->push_event      = sensor_rpmsg_push_event;
+  lower->notify_interval = sensor_rpmsg_notify_interval;
+  lower->priv            = dev;
   memcpy(&dev->lower, lower, sizeof(*lower));
-  dev->lower.ops      = &g_sensor_rpmsg_ops;
-  dev->drv            = lower;
+  dev->lower.ops         = &g_sensor_rpmsg_ops;
+  dev->drv               = lower;
 
   /* If openamp is ready, send advertisement to remote proc */
 
