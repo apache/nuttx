@@ -50,9 +50,14 @@
 #define PTP_SYS_OFFSET_PRECISE2  _PTPIOC(0xb)
 #define PTP_SYS_OFFSET_EXTENDED2 _PTPIOC(0xc)
 
+#define PTP_CLOCK_SETSTATS       _PTPIOC(0xd)
+#define PTP_CLOCK_GETSTATS       _PTPIOC(0xe)
+
 /* Maximum allowed offset measurement samples. */
 
 #define PTP_MAX_SAMPLES          25
+
+#define PTP_STATS_NUM            10
 
 /****************************************************************************
  * Inline Functions
@@ -61,6 +66,25 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/*  PTP statistics info */
+
+struct ptp_statistics_s
+{
+  struct timespec origin_time[PTP_STATS_NUM];
+  struct timespec correction_time[PTP_STATS_NUM];
+  int64_t delta_ns[PTP_STATS_NUM];
+  int64_t adjustment_ns[PTP_STATS_NUM];
+  int32_t drift_ppb[PTP_STATS_NUM];
+  int32_t follow_up_error;
+  int32_t sync_error;
+  int32_t announce;
+  int32_t sync;
+  int32_t follow_up;
+  int32_t delay_resp;
+  int32_t delay_req;
+  int32_t unknown;
+};
 
 /* struct system_device_crosststamp - system/device cross-timestamp
  * (synchronized capture)
@@ -273,6 +297,26 @@ struct ptp_ops_s
 
   CODE int (*getres)(FAR struct ptp_lowerhalf_s *lower,
                      FAR struct timespec *res);
+
+  /**************************************************************************
+   * Name: control
+   *
+   * Description:
+   *   Performs platform-specific operations.
+   *
+   * Input Parameters:
+   *   lower - The instance of lower half ptp driver.
+   *   cmd   - The command to perform.
+   *   arg   - The argument of the command.
+   *
+   * Returned Value:
+   *   Zero (OK) or positive on success; a negated errno value on failure.
+   *   -ENOTTY - The cmd don't support.
+   *
+   **************************************************************************/
+
+  CODE int (*control)(FAR struct ptp_lowerhalf_s *lower,
+                      int cmd, unsigned long arg);
 };
 
 /* The ptp lower half driver interface, describes a PTP hardware
