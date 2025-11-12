@@ -180,6 +180,16 @@ static void kasan_report(FAR const void *addr, size_t size,
   irqstate_t flags;
 
   flags = enter_critical_section();
+  bool dump_only = (is_write && MM_KASAN_DISABLE_WRITE_PANIC) ||
+                   (!is_write && MM_KASAN_DISABLE_READ_PANIC);
+
+#ifdef CONFIG_MM_KASAN
+  if (!dump_only)
+    {
+      kasan_stop();
+    }
+
+#endif
   _alert("kasan detected a %s access error, address at %p,"
          "size is %zu, return address: %p\n",
          is_write ? "write" : "read",
@@ -187,8 +197,7 @@ static void kasan_report(FAR const void *addr, size_t size,
 
   kasan_show_memory(addr, size, 80);
 
-  if ((is_write && MM_KASAN_DISABLE_WRITE_PANIC) ||
-      (!is_write && MM_KASAN_DISABLE_READ_PANIC))
+  if (dump_only)
     {
       dump_stack();
     }
