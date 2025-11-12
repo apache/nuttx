@@ -108,8 +108,8 @@ static int nxsched_roundrobin_handler(FAR void *cookie)
  *
  * Returned Value:
  *   The number if ticks remaining until the next time slice expires.
- *   Zero is returned if there is no time slicing (i.e., the task at the
- *   head of the ready-to-run list does not support round robin
+ *   CLOCK_MAX is returned if there is no time slicing (i.e., the task at
+ *   the head of the ready-to-run list does not support round robin
  *   scheduling).
  *
  *   The value one may returned under certain circumstances that probably
@@ -127,7 +127,7 @@ static int nxsched_roundrobin_handler(FAR void *cookie)
 clock_t nxsched_process_roundrobin(FAR struct tcb_s *tcb, clock_t ticks,
                                    bool noswitches)
 {
-  uint32_t ret;
+  clock_t ret;
   int decr;
 
   /* How much can we decrement the timeslice delay?  If 'ticks' is greater
@@ -164,7 +164,7 @@ clock_t nxsched_process_roundrobin(FAR struct tcb_s *tcb, clock_t ticks,
 
       if (noswitches)
         {
-          ret = 1;
+          ret = 0;
         }
       else
         {
@@ -208,6 +208,10 @@ clock_t nxsched_process_roundrobin(FAR struct tcb_s *tcb, clock_t ticks,
                 }
             }
         }
+    }
+  else if (tcb->timeslice == 0)
+    {
+      ret = CLOCK_MAX;
     }
 
   return ret;
