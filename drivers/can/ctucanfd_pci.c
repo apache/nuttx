@@ -929,6 +929,10 @@ static void ctucanfd_chardev_interrupt(FAR struct ctucanfd_driver_s *priv)
       stat = ctucanfd_getreg(&priv->devs[i], CTUCANFD_INTSTAT);
       if (stat == 0)
         {
+          /* Re-enable RX/TX interrupts */
+
+          ctucanfd_txint(&priv->devs[i], true);
+          ctucanfd_rxint(&priv->devs[i], true);
           continue;
         }
 
@@ -1482,6 +1486,10 @@ static void ctucanfd_sock_interrupt(FAR struct ctucanfd_driver_s *priv)
       stat = ctucanfd_getreg(&priv->devs[i], CTUCANFD_INTSTAT);
       if (stat == 0)
         {
+          /* Re-enable RX/TX interrupts */
+
+          ctucanfd_txint(&priv->devs[i], true);
+          ctucanfd_rxint(&priv->devs[i], true);
           continue;
         }
 
@@ -1543,21 +1551,11 @@ static int ctucanfd_interrupt(int irq, FAR void *context, FAR void *arg)
 
   DEBUGASSERT(priv != NULL);
 
+  /* Check for any pending interrupt */
+
   for (i = 0; i < priv->count; i++)
     {
       regval |= ctucanfd_getreg(&priv->devs[i], CTUCANFD_INTSTAT);
-
-      /* Break now if interrupt is pending */
-
-      if (regval != 0)
-        {
-          /* Disable RX/TX interrupts until we are done */
-
-          ctucanfd_rxint(&priv->devs[i], false);
-          ctucanfd_txint(&priv->devs[i], false);
-
-          break;
-        }
     }
 
   /* Check for pending interrupts for this card */
@@ -1565,6 +1563,19 @@ static int ctucanfd_interrupt(int irq, FAR void *context, FAR void *arg)
   if (regval == 0)
     {
       return OK;
+    }
+
+  else
+    {
+      /* Disable all RX/TX interrupts for this card until all pending
+       * interrupts are handled.
+       */
+
+      for (i = 0; i < priv->count; i++)
+        {
+          ctucanfd_rxint(&priv->devs[i], false);
+          ctucanfd_txint(&priv->devs[i], false);
+        }
     }
 
 #ifdef CONFIG_CAN_CTUCANFD_CHARDEV
