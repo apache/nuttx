@@ -363,7 +363,7 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
  *
  * Returned Value:
  *   If CONFIG_SCHED_TICKLESS is defined then the number of ticks for the
- *   next delay is provided (zero if no delay).  Otherwise, this function
+ *   next delay is provided (CLOCK_MAX if no delay). Otherwise, this function
  *   has no returned value.
  *
  * Assumptions:
@@ -392,7 +392,7 @@ clock_t wd_timer(clock_t ticks, bool noswitches)
   if (list_is_empty(&g_wdactivelist))
     {
       spin_unlock_irqrestore(&g_wdspinlock, flags);
-      return 0;
+      return CLOCK_MAX;
     }
 
   /* Notice that if noswitches, expired - g_wdtickbase
@@ -406,7 +406,7 @@ clock_t wd_timer(clock_t ticks, bool noswitches)
 
   /* Return the delay for the next watchdog to expire */
 
-  return MAX(ret, 1);
+  return MAX(ret, 0);
 }
 
 #else
