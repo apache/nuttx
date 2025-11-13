@@ -219,9 +219,9 @@ static uint32_t sendto_eventhandler(FAR struct net_driver_s *dev,
                 iob_update_pktlen(dev->d_iob, udpip_hdrsize(pstate->st_conn),
                                   false);
                 dev->d_sndlen = 0;
-                dev->d_len = dev->d_iob->io_pktlen;
             }
 
+          dev->d_len = dev->d_iob->io_pktlen;
 #ifdef NEED_IPDOMAIN_SUPPORT
           /* If both IPv4 and IPv6 support are enabled, then we will need to
            * select which one to use when generating the outgoing packet.
