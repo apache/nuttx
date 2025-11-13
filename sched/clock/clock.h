@@ -61,14 +61,6 @@
  * Public Data
  ****************************************************************************/
 
-#if !defined(__HAVE_KERNEL_GLOBALS)
-  /* The system clock exists (CONFIG_SCHED_TICKLESS), but it not prototyped
-   * globally in include/nuttx/clock.h.
-   */
-
-extern volatile clock_t g_system_ticks;
-#endif
-
 #ifndef CONFIG_CLOCK_TIMEKEEPING
 extern struct timespec  g_basetime;
 extern spinlock_t g_basetime_lock;

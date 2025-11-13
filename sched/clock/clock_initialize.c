@@ -51,8 +51,6 @@
  * Public Data
  ****************************************************************************/
 
-volatile clock_t g_system_ticks = INITIAL_SYSTEM_TIMER_TICKS;
-
 #ifndef CONFIG_CLOCK_TIMEKEEPING
 struct timespec   g_basetime;
 spinlock_t g_basetime_lock = SP_UNLOCKED;
