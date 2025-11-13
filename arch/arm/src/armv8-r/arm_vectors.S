@@ -259,7 +259,11 @@ arm_vectorirq:
 #endif
 	.size	arm_vectorirq, . - arm_vectorirq
 
+#ifdef __ghs__
+	.align	32
+#else
 	.align	5
+#endif
 
 /****************************************************************************
  * Function: arm_vectorsvc
@@ -370,7 +374,11 @@ arm_vectorsvc:
 	rfeia		r14
 	.size	arm_vectorsvc, . - arm_vectorsvc
 
+#ifdef __ghs__
+	.align	32
+#else
 	.align	5
+#endif
 
 /****************************************************************************
  * Name: arm_vectordata
@@ -465,7 +473,11 @@ arm_vectordata:
 	rfeia		r14
 	.size	arm_vectordata, . - arm_vectordata
 
+#ifdef __ghs__
+	.align	32
+#else
 	.align	5
+#endif
 
 /****************************************************************************
  * Name: arm_vectorprefetch
@@ -554,7 +566,11 @@ arm_vectorprefetch:
 	rfeia		r14
 	.size	arm_vectorprefetch, . - arm_vectorprefetch
 
+#ifdef __ghs__
+	.align	32
+#else
 	.align	5
+#endif
 
 /****************************************************************************
  * Name: arm_vectorundefinsn
@@ -638,7 +654,11 @@ arm_vectorundefinsn:
 	rfeia		r14
 	.size	arm_vectorundefinsn, . - arm_vectorundefinsn
 
+#ifdef __ghs__
+	.align	32
+#else
 	.align	5
+#endif
 
 /****************************************************************************
  * Name: arm_vectorfiq
