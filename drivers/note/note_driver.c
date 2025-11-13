@@ -215,7 +215,12 @@ static void note_common(FAR struct tcb_s *tcb,
 
   note->nc_length = length;
   note->nc_type   = type;
+
+#ifdef CONFIG_DRIVERS_NOTE_CPUID
+  note->nc_cpu    = CONFIG_DRIVERS_NOTE_CPUID;
+#else
   note->nc_cpu    = this_cpu();
+#endif
 
   if (tcb == NULL)
     {
