@@ -52,7 +52,6 @@ Guides
   fully_linked_elf.rst
   building_nuttx_with_app_out_of_src_tree.rst
   building_uclibcpp.rst
-  make_build_system.rst
   custom_app_directories.rst
   multiple_nsh_sessions.rst
   nsh_network_link_management.rst
