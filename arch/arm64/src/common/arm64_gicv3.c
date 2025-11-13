@@ -431,11 +431,6 @@ void arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list)
 
 static void gicv3_rdist_enable(unsigned long rdist)
 {
-  if (!(getreg32(rdist + GICR_WAKER) & BIT(GICR_WAKER_CA)))
-    {
-      return;
-    }
-
   /* Power up sequence of the Redistributors for GIC600/GIC700
    * please check GICR_PWRR define at trm of GIC600/GIC700
    */
@@ -1055,14 +1050,14 @@ static void arm64_gic_init(void)
   g_gic_rdists[cpu] = CONFIG_GICR_BASE +
                       up_cpu_index() * CONFIG_GICR_OFFSET;
 
+  gicv3_rdist_enable(gic_get_rdist());
+
   err = gic_validate_redist_version();
   if (err)
     {
       swarn("no redistributor detected, giving up ret=%d\n", err);
       return;
     }
-
-  gicv3_rdist_enable(gic_get_rdist());
 
   gicv3_cpuif_init();
 
