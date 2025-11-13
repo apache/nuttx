@@ -170,13 +170,12 @@ void nxsched_suspend(FAR struct tcb_s *tcb)
         {
           switch_needed = nxsched_remove_readytorun(tcb);
 
-          if (switch_needed || !nxsched_islocked_tcb(rtcb))
+          if (switch_needed)
             {
 #ifdef CONFIG_SMP
-              switch_needed |= nxsched_deliver_task(cpu, tcb->cpu,
-                                                    SWITCH_HIGHER);
+              nxsched_deliver_task(cpu, tcb->cpu, SWITCH_HIGHER);
 #else
-              switch_needed |= nxsched_merge_pending();
+              nxsched_merge_pending();
 #endif
             }
 
