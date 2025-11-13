@@ -37,9 +37,9 @@
 #include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
-#include <nuttx/list.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/nuttx.h>
+#include <nuttx/queue.h>
 #include <nuttx/rpmsg/rpmsg_virtio.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/vhost/vhost.h>
@@ -78,7 +78,7 @@ struct rptun_priv_s
 {
   FAR struct rptun_dev_s      *dev;
   struct remoteproc           rproc;
-  struct list_node            node;
+  dq_entry_t                  entry;
   bool                        rreset;
   bool                        stop;
   pid_t                       pid;
@@ -199,7 +199,7 @@ static const struct virtio_memory_ops g_rptun_mmops =
   .unmap        = rptun_unmap_buf,
 };
 
-static struct list_node g_rptun_priv = LIST_INITIAL_VALUE(g_rptun_priv);
+static dq_queue_t g_rptun_priv;
 static rmutex_t g_rptun_lock = NXRMUTEX_INITIALIZER;
 
 static struct notifier_block g_rptun_panic_nb =
@@ -1173,7 +1173,7 @@ static int rptun_ioctl_foreach(FAR const char *cpuname, int cmd,
       nxrmutex_lock(&g_rptun_lock);
     }
 
-  list_for_every_entry(&g_rptun_priv, priv, struct rptun_priv_s, node)
+  dq_for_every_entry(&g_rptun_priv, priv, struct rptun_priv_s, entry)
     {
       if (!cpuname || !strcmp(RPTUN_GET_CPUNAME(priv->dev), cpuname))
         {
@@ -1379,7 +1379,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
               register_reboot_notifier(&g_rptun_reboot_nb);
 
               nxrmutex_lock(&g_rptun_lock);
-              list_add_tail(&g_rptun_priv, &priv->node);
+              dq_addlast(&priv->entry, &g_rptun_priv);
               nxrmutex_unlock(&g_rptun_lock);
             }
         }
