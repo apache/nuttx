@@ -324,18 +324,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* Access to raw system clock ***********************************************/
-
-/* Direct access to the system timer/counter is supported only if (1) the
- * system timer counter is available (i.e., we are not configured to use
- * a hardware periodic timer), and (2) the execution environment has direct
- * access to kernel global data
- */
-
-#ifdef __HAVE_KERNEL_GLOBALS
-EXTERN volatile clock_t g_system_ticks;
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
