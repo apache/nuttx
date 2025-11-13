@@ -174,7 +174,7 @@ static int libelf_symname(FAR struct mod_loadinfo_s *loadinfo,
           return ret;
         }
 
-      offset += CONFIG_LIBC_ELF_BUFFERINCR;
+      offset += readlen;
     }
 
   /* We will not get here */
