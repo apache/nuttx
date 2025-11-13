@@ -27,4 +27,7 @@
  * Included Files
  ****************************************************************************/
 
+#define UART_PIN_RX IfxAsclin0_RXA_P14_1_IN     /* UART receive port pin  */
+#define UART_PIN_TX IfxAsclin0_TX_P14_0_OUT     /* UART transmit port pin */
+
 #endif /* __ARCH_TRICORE_SRC_TC397_CHIP_H */
