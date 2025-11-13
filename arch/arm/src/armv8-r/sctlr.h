@@ -496,6 +496,29 @@
 
 /* Get the device ID */
 
+#ifdef __ghs__
+.macro cp15_rdid id
+  mrc p15, 0, id, c0, c0, 0
+.endm
+
+/* Read/write the system control register (SCTLR) */
+
+.macro cp15_rdsctlr sctlr
+  mrc p15, 0, sctlr, c1, c0, 0
+.endm
+
+.macro cp15_wrsctlr sctlr
+  mcr p15, 0, sctlr, c1, c0, 0
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+.endm
+#else
 .macro cp15_rdid, id
   mrc p15, 0, \id, c0, c0, 0
 .endm
@@ -517,6 +540,7 @@
   nop
   nop
 .endm
+#endif
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************
