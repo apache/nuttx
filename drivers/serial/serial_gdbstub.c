@@ -31,6 +31,8 @@
 #include <nuttx/gdbstub.h>
 #include <nuttx/nuttx.h>
 
+#include <fcntl.h>
+#include <poll.h>
 #include <string.h>
 #include <nuttx/debug.h>
 
@@ -43,8 +45,8 @@ struct uart_gdbstub_s
   FAR struct uart_dev_s *dev;
   FAR struct uart_dev_s *console;
   FAR struct gdb_state_s *state;
-  FAR const struct uart_ops_s *org_ops;
-  struct uart_ops_s ops;
+  struct file file;
+  struct pollfd_s fds;
   struct notifier_block nb;
 };
 
@@ -65,22 +67,23 @@ static int uart_gdbstub_ctrlc(FAR struct uart_dev_s *dev,
  * Private Functions
  ****************************************************************************/
 
-static void uart_gdbstub_attach(FAR struct uart_gdbstub_s *uart_gdbstub,
-                                bool replace)
+static void uart_gdbstub_poll(FAR struct pollfd_s *fds)
 {
-  FAR uart_dev_t *dev = uart_gdbstub->dev;
+  FAR struct uart_gdbstub_s *uart_gdbstub = fds->arg;
 
-  if (replace && uart_gdbstub->org_ops == NULL)
+  if (fds->revents & POLLIN)
     {
-      memcpy(&uart_gdbstub->ops, dev->ops, sizeof(struct uart_ops_s));
-      uart_gdbstub->org_ops = dev->ops;
-      uart_gdbstub->ops.receive = uart_gdbstub_ctrlc;
-      dev->ops = &uart_gdbstub->ops;
+      fds->revents &= ~POLLIN;
+      uart_gdbstub_ctrlc(uart_gdbstub->dev, NULL);
     }
+}
 
-  uart_setup(dev);
-  uart_attach(dev);
-  uart_enablerxint(dev);
+static void uart_gdbstub_attach(FAR struct uart_gdbstub_s *uart_gdbstub)
+{
+  uart_gdbstub->fds.arg = uart_gdbstub;
+  uart_gdbstub->fds.events = POLLIN;
+  uart_gdbstub->fds.cb = uart_gdbstub_poll;
+  file_poll(&uart_gdbstub->file, &uart_gdbstub->fds, true);
 }
 
 /****************************************************************************
@@ -117,21 +120,10 @@ static int uart_gdbstub_panic_callback(FAR struct notifier_block *nb,
 
   if (uart_gdbstub->console == NULL)
     {
-#ifndef CONFIG_SERIAL_GDBSTUB_AUTO_ATTACH
-      uart_gdbstub_attach(uart_gdbstub, false);
-#endif
       uart_gdbstub->console = uart_gdbstub->dev;
     }
 
-  if (uart_gdbstub->console == uart_gdbstub->dev &&
-      uart_gdbstub->org_ops != NULL)
-    {
-      ops = uart_gdbstub->org_ops;
-    }
-  else
-    {
-      ops = uart_gdbstub->console->ops;
-    }
+  ops = uart_gdbstub->console->ops;
 
   base = clock_systime_ticks();
   while (true)
@@ -168,7 +160,7 @@ static int uart_gdbstub_panic_callback(FAR struct notifier_block *nb,
 #endif
 
 #ifndef CONFIG_SERIAL_GDBSTUB_AUTO_ATTACH
-  uart_gdbstub_attach(uart_gdbstub, true);
+  uart_gdbstub_attach(uart_gdbstub);
 #endif
 
   _alert("Enter panic gdbstub mode, please use gdb connect to debug\n");
@@ -213,21 +205,36 @@ static ssize_t uart_gdbstub_receive(FAR void *priv, FAR void *buf,
 {
   FAR struct uart_gdbstub_s *uart_gdbstub = priv;
   FAR uart_dev_t *dev = uart_gdbstub->dev;
+  FAR struct uart_buffer_s *rxbuf = &dev->recv;
   FAR char *ptr = buf;
   unsigned int state;
+  size_t tail = rxbuf->tail;
+  size_t head = rxbuf->head;
+  size_t avail = head >= tail ? head - tail : rxbuf->size - tail + head;
   size_t i = 0;
+
+  while (i < len && avail-- > 0)
+    {
+      ptr[i++] = rxbuf->buffer[tail++];
+      if (tail >= rxbuf->size)
+        {
+          tail = 0;
+        }
+    }
+
+  rxbuf->tail = tail;
 
   while (i < len)
     {
-      if (uart_gdbstub->org_ops->rxavailable(dev))
+      if (dev->ops->rxavailable(dev))
         {
-          if (uart_gdbstub->org_ops->recvbuf)
+          if (dev->ops->recvbuf)
             {
-              i += uart_gdbstub->org_ops->recvbuf(dev, ptr + i, len - i);
+              i += dev->ops->recvbuf(dev, ptr + i, len - i);
             }
           else
             {
-              ptr[i++] = uart_gdbstub->org_ops->receive(dev, &state);
+              ptr[i++] = dev->ops->receive(dev, &state);
             }
         }
     }
@@ -252,20 +259,20 @@ static ssize_t uart_gdbstub_send(FAR void *priv, FAR const char *buf,
 
   while (i < len)
     {
-      if (uart_gdbstub->org_ops->txready(dev))
+      if (dev->ops->txready(dev))
         {
-          if (uart_gdbstub->org_ops->sendbuf)
+          if (dev->ops->sendbuf)
             {
-              i += uart_gdbstub->org_ops->sendbuf(dev, buf + i, len - i);
+              i += dev->ops->sendbuf(dev, buf + i, len - i);
             }
           else
             {
-              uart_gdbstub->org_ops->send(dev, buf[i++]);
+              dev->ops->send(dev, buf[i++]);
             }
         }
     }
 
-  while (!uart_gdbstub->org_ops->txempty(dev));
+  while (!dev->ops->txempty(dev));
 
   return len;
 }
@@ -286,6 +293,7 @@ static ssize_t uart_gdbstub_send(FAR void *priv, FAR const char *buf,
 int uart_gdbstub_register(FAR uart_dev_t *dev, FAR const char *path)
 {
   FAR struct uart_gdbstub_s *uart_gdbstub;
+  int ret;
 
   if (g_uart_gdbstub == NULL)
     {
@@ -309,7 +317,13 @@ int uart_gdbstub_register(FAR uart_dev_t *dev, FAR const char *path)
 
   if (strcmp(path, CONFIG_SERIAL_GDBSTUB_PATH) != 0)
     {
-      return -EINVAL;
+      return 0;
+    }
+
+  ret = file_open(&uart_gdbstub->file, path, O_RDWR | O_NONBLOCK);
+  if (ret < 0)
+    {
+      return ret;
     }
 
   uart_gdbstub->state = gdb_state_init(uart_gdbstub_send,
@@ -326,12 +340,10 @@ int uart_gdbstub_register(FAR uart_dev_t *dev, FAR const char *path)
   panic_notifier_chain_register(&uart_gdbstub->nb);
 
 #ifdef CONFIG_SERIAL_GDBSTUB_AUTO_ATTACH
-  uart_gdbstub_attach(uart_gdbstub, true);
+  uart_gdbstub_attach(uart_gdbstub);
 #  ifdef CONFIG_SERIAL_GDBSTUB_WAIT_CONNECT
   uart_gdbstub_ctrlc(dev, NULL);
 #  endif
-  return 0;
-#else
-  return 1;
 #endif
+  return 0;
 }

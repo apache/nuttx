@@ -2513,6 +2513,8 @@ static void uart_wakeup(FAR sem_t *sem)
 
 int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 {
+  int ret;
+
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
   /* Initialize  of the task that will receive SIGINT signals. */
 
@@ -2567,17 +2569,17 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 
   /* Register the serial driver */
 
-#ifdef CONFIG_SERIAL_GDBSTUB
-  if (uart_gdbstub_register(dev, path) == 0)
-    {
-      /* No need register the device if it is used by gdbstub */
-
-      return 0;
-    }
-#endif
-
   sinfo("Registering %s\n", path);
-  return register_driver(path, &g_serialops, 0600, dev);
+  ret = register_driver(path, &g_serialops, 0600, dev);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+#ifdef CONFIG_SERIAL_GDBSTUB
+  ret = uart_gdbstub_register(dev, path);
+#endif
+  return ret;
 }
 
 /****************************************************************************
