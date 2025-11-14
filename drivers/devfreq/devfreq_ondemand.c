@@ -136,12 +136,12 @@ static int devfreq_gov_ondemand_init(FAR struct devfreq_s *dev)
       return -ENOMEM;
     }
 
-  data->req = devfreq_qos_add_request(dev, dev->min, dev->max);
   data->threshold = MIN(DEVFREQ_LOAD_THRESHOLD_MAX,
                         CONFIG_DEVFREQ_LOAD_THRESHOLD);
   data->sample_rate = MAX(DEVFREQ_MIN_SAMPLING_INTERVAL,
                           CONFIG_DEVFREQ_SAMPLE_RATE);
   dev->governor_data = data;
+  data->req = devfreq_qos_add_request(dev, dev->min, dev->max);
   return 0;
 }
 
