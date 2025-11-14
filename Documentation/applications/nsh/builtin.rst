@@ -16,6 +16,8 @@ Built-in application support is enabled with these configuration option:
   -  ``CONFIG_BUILTIN``: Enable NuttX support for builtin applications.
   -  ``CONFIG_NSH_BUILTIN_APPS``: Enable NSH support for builtin
      applications.
+  -  ``CONFIG_NSH_BUILTIN_AS_COMMAND``: Enable NSH run builtin applications
+     directly without creating a separate thread (optional).
 
 When these configuration options are set, you will also be able to see
 the built-in applications if you enter "nsh> help". They will appear at

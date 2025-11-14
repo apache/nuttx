@@ -35,7 +35,9 @@ There are currently be three ways to execute applications from NSH:
    This functionality depends on these configuration settings:
 
      * ``CONFIG_BUILTIN=y`` Enables NuttX support for builtin applications, and
-     * ``CONFIG_NSH_BUILTIN_APPS=y`` Enables NSH support for builtin applications
+     * ``CONFIG_NSH_BUILTIN_APPS=y`` Enables NSH support for builtin applications, and
+     * ``CONFIG_NSH_BUILTIN_AS_COMMAND``: Enable NSH run builtin applications directly
+       without creating a separate thread (optional).
 
    In additional to other configuration needed by NSH.
 
