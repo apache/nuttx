@@ -297,17 +297,17 @@ check_msg() {
 
   while IFS= read -r REPLY; do
     if [[ $REPLY =~  ^Change-Id ]]; then
-      echo "Remove Gerrit Change-ID's before submitting upstream"
+      echo "❌ Remove Gerrit Change-ID's before submitting upstream"
       fail=1
     fi
 
     if [[ $REPLY =~  ^VELAPLATO ]]; then
-      echo "Remove VELAPLATO before submitting upstream"
+      echo "❌ Remove VELAPLATO before submitting upstream"
       fail=1
     fi
 
     if [[ $REPLY =~  ^[Ww][Ii][Pp]: ]]; then
-      echo "Remove WIP before submitting upstream"
+      echo "❌ Remove WIP before submitting upstream"
       fail=1
     fi
 
@@ -319,22 +319,22 @@ check_msg() {
   done <<< "$msg"
 
   if ! [[ $first =~  : ]]; then
-    echo "Commit subject missing colon (e.g. 'subsystem: msg')"
+    echo "❌ Commit subject missing colon (e.g. 'subsystem: msg')"
     fail=1
   fi
 
   if (( ${#first} > $max_line_len )); then
-    echo "Commit subject too long > $max_line_len"
+    echo "❌ Commit subject too long > $max_line_len"
     fail=1
   fi
 
   if ! [ $signedoffby_found == 1 ]; then
-    echo "Missing Signed-off-by"
+    echo "❌ Missing Signed-off-by"
     fail=1
   fi
 
   if (( $num_lines < $min_num_lines && $signedoffby_found == 1 )); then
-    echo "Missing git commit message"
+    echo "❌ Missing git commit message"
     fail=1
   fi
 }
@@ -409,12 +409,11 @@ for arg in $@; do
   $check $arg
 done
 
-
 if [ $fail == 1 ]; then
     echo "Some checks failed. For contributing guidelines, see:"
     echo "  $COMMIT_URL"
 else
-    echo "All checks pass."
+    echo "✔️ All checks pass."
 fi
 
 exit $fail
