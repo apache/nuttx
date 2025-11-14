@@ -867,7 +867,8 @@ static void oa_tc6_handle_rx_chunk(FAR struct oa_tc6_driver_s *priv,
         }
 
       netpkt_copyin(&priv->dev, priv->rx_pkt, rxbuf,
-                    rxlen, priv->rx_pkt_idx);
+                    rxlen, priv->rx_pkt_idx,
+                    NETPKT_RX);
       priv->rx_pkt_idx = newlen;
 
       if (oa_tc6_end_valid(footer))

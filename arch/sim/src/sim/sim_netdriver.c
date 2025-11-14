@@ -181,7 +181,7 @@ static netpkt_t *netdriver_recv(struct netdev_lowerhalf_s *dev)
 #ifdef SIM_NETDEV_RECV_OFFLOAD
       netpkt_setdatalen(dev, pkt, len);
 #else
-      netpkt_copyin(dev, pkt, DEVBUF(dev), len, 0);
+      netpkt_copyin(dev, pkt, DEVBUF(dev), len, 0, NETPKT_RX);
 #endif
     }
 

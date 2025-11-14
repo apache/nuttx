@@ -369,6 +369,7 @@ void netpkt_free(FAR struct netdev_lowerhalf_s *dev, FAR netpkt_t *pkt,
  *   src    - The source buffer
  *   len    - How many bytes to copy
  *   offset - The offset of netpkt to put the data
+ *   type   - Whether used for TX or RX
  *
  * Returned Value:
  *   0:Success; negated errno on failure
@@ -376,7 +377,8 @@ void netpkt_free(FAR struct netdev_lowerhalf_s *dev, FAR netpkt_t *pkt,
  ****************************************************************************/
 
 int netpkt_copyin(FAR struct netdev_lowerhalf_s *dev, FAR netpkt_t *pkt,
-                  FAR const uint8_t *src, unsigned int len, int offset);
+                  FAR const uint8_t *src, unsigned int len, int offset,
+                  enum netpkt_type_e type);
 
 /****************************************************************************
  * Name: netpkt_copyout

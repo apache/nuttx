@@ -977,7 +977,7 @@ static int cdcncm_packet_handler(FAR struct cdcncm_driver_s *self,
       return ret;
     }
 
-  ret = netpkt_copyin(&self->dev, pkt, dgram, dglen, 0);
+  ret = netpkt_copyin(&self->dev, pkt, dgram, dglen, 0, NETPKT_RX);
   if (ret < 0)
     {
       netpkt_free(&self->dev, pkt, NETPKT_RX);
