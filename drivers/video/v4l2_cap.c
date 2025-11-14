@@ -84,6 +84,7 @@ struct video_format_s
   uint16_t width;
   uint16_t height;
   uint32_t pixelformat;
+  uint32_t sizeimage;
 };
 
 typedef struct video_format_s video_format_t;
@@ -1341,6 +1342,11 @@ static size_t get_bufsize(FAR video_format_t *vf)
   uint32_t height = vf->height;
   size_t ret = width * height;
 
+  if (vf->sizeimage > 0 && vf->pixelformat == V4L2_PIX_FMT_JPEG)
+    {
+      return vf->sizeimage;
+    }
+
   switch (vf->pixelformat)
     {
       case V4L2_PIX_FMT_NV12:
@@ -2494,6 +2500,7 @@ static int capture_g_fmt(FAR struct file *filep,
   fmt->fmt.pix.width = type_inf->fmt[CAPTURE_FMT_MAIN].width;
   fmt->fmt.pix.height = type_inf->fmt[CAPTURE_FMT_MAIN].height;
   fmt->fmt.pix.pixelformat = type_inf->fmt[CAPTURE_FMT_MAIN].pixelformat;
+  fmt->fmt.pix.sizeimage = type_inf->fmt[CAPTURE_FMT_MAIN].sizeimage;
 
   return OK;
 }
@@ -2540,6 +2547,7 @@ static int capture_s_fmt(FAR struct file *filep,
 
         type_inf->fmt[CAPTURE_FMT_SUB].width  = fmt->fmt.pix.width;
         type_inf->fmt[CAPTURE_FMT_SUB].height = fmt->fmt.pix.height;
+        type_inf->fmt[CAPTURE_FMT_SUB].sizeimage = fmt->fmt.pix.sizeimage;
         type_inf->fmt[CAPTURE_FMT_SUB].pixelformat =
             fmt->fmt.pix.pixelformat == V4L2_PIX_FMT_SUBIMG_UYVY ?
               V4L2_PIX_FMT_UYVY : V4L2_PIX_FMT_RGB565;
@@ -2549,6 +2557,7 @@ static int capture_s_fmt(FAR struct file *filep,
       default:
         type_inf->fmt[CAPTURE_FMT_MAIN].width  = fmt->fmt.pix.width;
         type_inf->fmt[CAPTURE_FMT_MAIN].height = fmt->fmt.pix.height;
+        type_inf->fmt[CAPTURE_FMT_MAIN].sizeimage = fmt->fmt.pix.sizeimage;
         type_inf->fmt[CAPTURE_FMT_MAIN].pixelformat =
                                           fmt->fmt.pix.pixelformat;
         type_inf->nr_fmt = 1;
@@ -2602,6 +2611,7 @@ static int capture_try_fmt(FAR struct file *filep,
                sizeof(video_format_t));
         vf[CAPTURE_FMT_SUB].width       = fmt->fmt.pix.width;
         vf[CAPTURE_FMT_SUB].height      = fmt->fmt.pix.height;
+        vf[CAPTURE_FMT_SUB].sizeimage   = fmt->fmt.pix.sizeimage;
         vf[CAPTURE_FMT_SUB].pixelformat =
             fmt->fmt.pix.pixelformat == V4L2_PIX_FMT_SUBIMG_UYVY ?
               V4L2_PIX_FMT_UYVY : V4L2_PIX_FMT_RGB565;
@@ -2618,6 +2628,7 @@ static int capture_try_fmt(FAR struct file *filep,
         vf[CAPTURE_FMT_MAIN].width       = fmt->fmt.pix.width;
         vf[CAPTURE_FMT_MAIN].height      = fmt->fmt.pix.height;
         vf[CAPTURE_FMT_MAIN].pixelformat = fmt->fmt.pix.pixelformat;
+        vf[CAPTURE_FMT_MAIN].sizeimage   = fmt->fmt.pix.sizeimage;
         break;
 
       default:
