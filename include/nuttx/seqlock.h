@@ -66,10 +66,9 @@ extern "C"
 
 static inline_function void seqlock_init(FAR seqcount_t *s)
 {
-#ifdef CONFIG_SMP
-  atomic_init((FAR atomic_t *)&s->sequence, 0u);
-#else
   s->sequence = 0u;
+#ifdef CONFIG_SMP
+  SMP_WMB();
 #endif
 }
 
