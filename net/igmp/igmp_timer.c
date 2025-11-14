@@ -113,7 +113,6 @@ static void igmp_timeout_work(FAR void *arg)
    * the timer is cancelled before sending the IGMP_LEAVE_GROUP during leave.
    */
 
-  net_lock();
   if (!IS_IDLEMEMBER(group->flags))
     {
       /* Schedule (and forget) the Membership Report.  NOTE:
@@ -136,8 +135,6 @@ static void igmp_timeout_work(FAR void *arg)
        * once or twice after short delays [Unsolicited Report Interval]..."
        */
     }
-
-  net_unlock();
 }
 
 /****************************************************************************

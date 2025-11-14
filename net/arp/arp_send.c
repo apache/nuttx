@@ -359,8 +359,6 @@ int arp_send(in_addr_t ipaddr)
       state.snd_cb->event = arp_send_eventhandler;
       state.finish_cb     = NULL;
 
-      netdev_unlock(dev);
-
       /* MAC address marked with all zeros to limit concurrent task
        * send ARP request for same destination.
        */
@@ -378,6 +376,8 @@ int arp_send(in_addr_t ipaddr)
       /* Wait for the send to complete or an error to occur.
        * net_sem_wait will also terminate if a signal is received.
        */
+
+      netdev_unlock(dev);
 
       do
         {

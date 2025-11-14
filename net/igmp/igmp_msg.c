@@ -105,7 +105,9 @@ int igmp_schedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
 
   /* Notify the device that we have a packet to send */
 
+  netdev_lock(dev);
   netdev_txnotify_dev(dev);
+  netdev_unlock(dev);
   return OK;
 }
 

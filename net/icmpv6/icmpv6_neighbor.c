@@ -342,6 +342,8 @@ int icmpv6_neighbor(FAR struct net_driver_s *dev,
        * net_sem_wait will also terminate if a signal is received.
        */
 
+      netdev_unlock(dev);
+
       do
         {
           net_sem_wait(&state.snd_sem);
@@ -353,6 +355,8 @@ int icmpv6_neighbor(FAR struct net_driver_s *dev,
        */
 
       ret = icmpv6_wait(&notify, CONFIG_ICMPv6_NEIGHBOR_DELAYMSEC);
+
+      netdev_lock(dev);
 
       /* icmpv6_wait will return OK if and only if the matching Neighbor
        * Advertisement is received.  Otherwise, it will return -ETIMEDOUT.

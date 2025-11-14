@@ -80,7 +80,9 @@ int mld_schedmsg(FAR struct mld_group_s *group, uint8_t msgtype)
 
   /* Notify the device that we have a packet to send */
 
+  netdev_lock(dev);
   netdev_txnotify_dev(dev);
+  netdev_unlock(dev);
   return OK;
 }
 

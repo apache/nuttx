@@ -137,9 +137,7 @@ static inline int tcp_send_fin(FAR struct socket *psock)
 
       /* Notify the device driver of the availability of TX data */
 
-      conn_dev_unlock(&conn->sconn, conn->dev);
       tcp_send_txnotify(psock, conn);
-      return ret;
     }
 
 out:
