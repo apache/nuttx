@@ -34,7 +34,8 @@
 
 #include <arch/irq.h>
 
-#include "tricore_mpu.h"
+#include <arch/mpu.h>
+
 #include "sched/sched.h"
 
 /****************************************************************************

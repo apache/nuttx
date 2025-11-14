@@ -26,8 +26,8 @@
 #include <nuttx/debug.h>
 
 #include <arch/barriers.h>
+#include <arch/mpu.h>
 
-#include "tricore_mpu.h"
 #include "tricore_internal.h"
 
 /****************************************************************************
@@ -1353,36 +1353,6 @@ unsigned int mpu_get_active_set(void)
 
   return ((psw_value & (0x1 << 15)) >> 15) << 2 |
          ((psw_value & (0x3 << 12)) >> 12);
-}
-
-/****************************************************************************
- * Name: mpu_set_active_set
- *
- * Description:
- *   Set active protection set
- *
- * Input Parameters:
- *   Protection set .
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void mpu_set_active_set(unsigned int set)
-{
-  /* Check that the set valid */
-
-  DEBUGASSERT(set < CONFIG_ARCH_MPU_NSETS);
-
-  uint32_t psw_value = tricore_mfcr(TRICORE_CPU_PSW);
-
-  psw_value &= ~((0x3 << 12) | (0x1 << 15));
-  psw_value |= (set >> 2) << 15;
-  psw_value |= (set & 0x03) << 12;
-  tricore_mtcr(TRICORE_CPU_PSW, psw_value);
-
-  UP_ISB();
 }
 
 /****************************************************************************
