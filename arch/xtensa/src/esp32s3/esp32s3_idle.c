@@ -32,7 +32,7 @@
 #include <nuttx/spinlock.h>
 
 #include "xtensa.h"
-#include "esp32s3_pm.h"
+#include "espressif/esp_pm.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -149,8 +149,8 @@ static void up_idlepm(void)
           {
             /* Enter Force-sleep mode */
 
-            esp32s3_pmstandby(CONFIG_PM_ALARM_SEC * 1000000 +
-                              CONFIG_PM_ALARM_NSEC / 1000);
+            esp_pmstandby(CONFIG_PM_ALARM_SEC * 1000000 +
+                          CONFIG_PM_ALARM_NSEC / 1000);
           }
           break;
 
@@ -158,8 +158,8 @@ static void up_idlepm(void)
           {
             /* Enter Deep-sleep mode */
 
-            esp32s3_pmsleep(CONFIG_PM_SLEEP_WAKEUP_SEC * 1000000 +
-                            CONFIG_PM_SLEEP_WAKEUP_NSEC / 1000);
+            esp_pmsleep(CONFIG_PM_SLEEP_WAKEUP_SEC * 1000000 +
+                        CONFIG_PM_SLEEP_WAKEUP_NSEC / 1000);
           }
 
         default:
