@@ -373,6 +373,7 @@ static int codec_querybuf(FAR struct file *filep,
       return -EINVAL;
     }
 
+  memset(&format, 0, sizeof(format));
   if (V4L2_TYPE_IS_OUTPUT(buf->type))
     {
       bufsize = CODEC_OUTPUT_G_BUFSIZE(cmng->codec, cfile->priv);
@@ -467,6 +468,7 @@ static int codec_qbuf(FAR struct file *filep,
       return -EAGAIN;
     }
 
+  memset(&format, 0, sizeof(format));
   if (V4L2_TYPE_IS_OUTPUT(buf->type))
     {
       CODEC_OUTPUT_G_FMT(cmng->codec, cfile->priv, &format);
@@ -569,6 +571,7 @@ static int codec_dqbuf(FAR struct file *filep,
       return -EAGAIN;
     }
 
+  memset(&format, 0, sizeof(format));
   if (V4L2_TYPE_IS_OUTPUT(buf->type))
     {
       CODEC_OUTPUT_G_FMT(cmng->codec, cfile->priv, &format);
