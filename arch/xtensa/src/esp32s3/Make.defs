@@ -181,13 +181,6 @@ ifeq ($(CONFIG_ESP32S3_AES_ACCELERATOR),y)
 CHIP_CSRCS += esp32s3_aes.c
 endif
 
-ifeq ($(CONFIG_PM),y)
-ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
-CHIP_CSRCS += esp32s3_pminitialize.c
-endif
-CHIP_CSRCS += esp32s3_pm.c
-endif
-
 ifeq ($(CONFIG_ESP32S3_OPENETH),y)
 CHIP_CSRCS += esp_openeth.c
 endif
@@ -209,7 +202,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 4eed03a15b2678a81dfd1ed0f3bde042b1fdd4c4
+	ESP_HAL_3RDPARTY_VERSION = 6b4f19b48c5ba0e847511b5b21584e797ec795dc
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL

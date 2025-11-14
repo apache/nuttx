@@ -398,6 +398,478 @@ config ESPRESSIF_USE_ULP_RISCV_CORE
 
 endmenu # LP Core (Low-power core) Coprocessor Configuration
 
+menu "PM Configuration"
+
+if PM && !ARCH_CHIP_ESP32
+
+config PM_EXT1_WAKEUP
+	bool "PM EXT1 Wakeup"
+	default n
+	---help---
+		Enable EXT1 wakeup functionality.
+		This allows the system to wake up from PM_STANDBY or PM_SLEEP
+		when a GPIO pin configured as an EXT1 wakeup source is triggered.
+
+menu "PM EXT1 Wakeup Sources"
+	depends on PM_EXT1_WAKEUP
+
+config PM_EXT1_WAKEUP_RTC_GPIO0
+	bool "RTC_GPIO0"
+	default n
+	---help---
+		Enable RTC GPIO0 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO1
+	bool "RTC_GPIO1"
+	default n
+	---help---
+		Enable RTC GPIO1 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO2
+	bool "RTC_GPIO2"
+	default n
+	---help---
+		Enable RTC GPIO2 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO3
+	bool "RTC_GPIO3"
+	default n
+	---help---
+		Enable RTC GPIO3 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO4
+	bool "RTC_GPIO4"
+	default n
+	---help---
+		Enable RTC GPIO4 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO5
+	bool "RTC_GPIO5"
+	default n
+	---help---
+		Enable RTC GPIO5 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO6
+	bool "RTC_GPIO6"
+	default n
+	---help---
+		Enable RTC GPIO6 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO7
+	bool "RTC_GPIO7"
+	default n
+	---help---
+		Enable RTC GPIO7 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO8
+	bool "RTC_GPIO8"
+	default n
+	---help---
+		Enable RTC GPIO8 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO9
+	bool "RTC_GPIO9"
+	default n
+	---help---
+		Enable RTC GPIO9 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO10
+	bool "RTC_GPIO10"
+	default n
+	---help---
+		Enable RTC GPIO10 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO11
+	bool "RTC_GPIO11"
+	default n
+	---help---
+		Enable RTC GPIO11 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO12
+	bool "RTC_GPIO12"
+	default n
+	---help---
+		Enable RTC GPIO12 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO13
+	bool "RTC_GPIO13"
+	default n
+	---help---
+		Enable RTC GPIO13 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO14
+	bool "RTC_GPIO14"
+	default n
+	---help---
+		Enable RTC GPIO14 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO15
+	bool "RTC_GPIO15"
+	default n
+	---help---
+		Enable RTC GPIO15 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO16
+	bool "RTC_GPIO16"
+	default n
+	---help---
+		Enable RTC GPIO16 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO17
+	bool "RTC_GPIO17"
+	default n
+	---help---
+		Enable RTC GPIO17 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO18
+	bool "RTC_GPIO18"
+	default n
+	---help---
+		Enable RTC GPIO18 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO19
+	bool "RTC_GPIO19"
+	default n
+	---help---
+		Enable RTC GPIO19 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO20
+	bool "RTC_GPIO20"
+	default n
+	---help---
+		Enable RTC GPIO20 as an EXT1 wakeup source.
+
+choice PM_EXT1_WAKEUP_TRIGGER_MODE
+	prompt "PM EXT1 Wakeup Trigger Mode"
+	default PM_EXT1_WAKEUP_TRIGGER_ANY_LOW
+
+config PM_EXT1_WAKEUP_TRIGGER_ANY_LOW
+	bool "Wake the chip when any of the selected GPIOs go low"
+
+config PM_EXT1_WAKEUP_TRIGGER_ANY_HIGH
+	bool "Wake the chip when any of the selected GPIOs go high"
+
+endchoice # PM_EXT1_WAKEUP_TRIGGER_MODE
+
+endmenu # PM_EXT1_WAKEUP_SOURCES
+
+config PM_EXT0_WAKEUP
+	bool "PM EXT0 Wakeup"
+	default n
+	---help---
+		Enable EXT0 wakeup functionality.
+		This allows the system to wake up from PM_STANDBY or PM_SLEEP
+		when a GPIO pin configured as an EXT0 wakeup source is triggered.
+
+menu "PM EXT0 Wakeup Sources"
+	depends on PM_EXT0_WAKEUP
+
+config PM_EXT0_WAKEUP_GPIO
+	int "EXT0 Wakeup GPIO"
+	depends on PM_EXT0_WAKEUP
+	default 0
+	range 0 20
+	---help---
+		GPIO to wake the device up from PM_STANDBY or PM_SLEEP using as EXT0 wakeup GPIO
+
+choice PM_EXT0_WAKEUP_TRIGGER_MODE
+	prompt "PM EXT0 Wakeup Trigger Mode"
+	default PM_EXT0_WAKEUP_TRIGGER_LOW
+
+config PM_EXT0_WAKEUP_TRIGGER_LOW
+	bool "Wake the chip when the selected GPIO go low"
+
+config PM_EXT0_WAKEUP_TRIGGER_HIGH
+	bool "Wake the chip when the selected GPIO go high"
+
+endchoice # PM_EXT0_WAKEUP_TRIGGER_MODE
+
+endmenu # PM_EXT0_WAKEUP_SOURCES
+
+config PM_ULP_WAKEUP
+	bool "PM ULP Wakeup"
+	default n
+	---help---
+		Enable ULP coprocessor wakeup functionality.
+		This allows the system to wake up from PM_STANDBY or PM_SLEEP
+		when ULP app triggers HP core to wakeup with "ulp_lp_core_wakeup_main_processor"
+		call on ULP app.
+
+config PM_GPIO_WAKEUP
+	bool "PM GPIO Wakeup"
+	default n
+	---help---
+		Enable GPIO wakeup functionality.
+		This allows the system to wake up from PM_STANDBY
+		when a GPIO pin configured as wakeup source is triggered.
+
+menu "PM GPIO Wakeup Sources"
+	depends on PM_GPIO_WAKEUP
+
+config PM_GPIO_WAKEUP_GPIO1
+	bool "GPIO1"
+	default n
+	---help---
+		Enable GPIO1 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO2
+	bool "GPIO2"
+	default n
+	---help---
+		Enable GPIO2 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO3
+	bool "GPIO3"
+	default n
+	---help---
+		Enable GPIO3 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO4
+	bool "GPIO4"
+	default n
+	---help---
+		Enable GPIO4 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO5
+	bool "GPIO5"
+	default n
+	---help---
+		Enable GPIO5 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO6
+	bool "GPIO6"
+	default n
+	---help---
+		Enable GPIO6 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO7
+	bool "GPIO7"
+	default n
+	---help---
+		Enable GPIO7 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO8
+	bool "GPIO8"
+	default n
+	---help---
+		Enable GPIO8 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO9
+	bool "GPIO9"
+	default n
+	---help---
+		Enable GPIO9 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO10
+	bool "GPIO10"
+	default n
+	---help---
+		Enable GPIO10 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO11
+	bool "GPIO11"
+	default n
+	---help---
+		Enable GPIO11 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO12
+	bool "GPIO12"
+	default n
+	---help---
+		Enable GPIO12 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO13
+	bool "GPIO13"
+	default n
+	---help---
+		Enable GPIO13 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO14
+	bool "GPIO14"
+	default n
+	---help---
+		Enable GPIO14 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO15
+	bool "GPIO15"
+	default n
+	---help---
+		Enable GPIO15 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO16
+	bool "GPIO16"
+	default n
+	---help---
+		Enable GPIO16 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO17
+	bool "GPIO17"
+	default n
+	---help---
+		Enable GPIO17 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO18
+	bool "GPIO18"
+	default n
+	---help---
+		Enable GPIO18 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO19
+	bool "GPIO19"
+	default n
+	---help---
+		Enable GPIO19 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO20
+	bool "GPIO20"
+	default n
+	---help---
+		Enable GPIO20 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO21
+	bool "GPIO21"
+	default n
+	---help---
+		Enable GPIO21 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO22
+	bool "GPIO22"
+	depends on !ARCH_CHIP_ESP32C3_GENERIC
+	default n
+	---help---
+		Enable GPIO22 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO23
+	bool "GPIO23"
+	depends on !ARCH_CHIP_ESP32C3_GENERIC
+	default n
+	---help---
+		Enable GPIO23 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO24
+	bool "GPIO24"
+	depends on !ARCH_CHIP_ESP32C3_GENERIC
+	default n
+	---help---
+		Enable GPIO24 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO25
+	bool "GPIO25"
+	depends on !ARCH_CHIP_ESP32C3_GENERIC
+	default n
+	---help---
+		Enable GPIO25 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO26
+	bool "GPIO26"
+	depends on !ARCH_CHIP_ESP32C3_GENERIC
+	default n
+	---help---
+		Enable GPIO26 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO27
+	bool "GPIO27"
+	depends on !ARCH_CHIP_ESP32C3_GENERIC
+	default n
+	---help---
+		Enable GPIO27 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO28
+	bool "GPIO28"
+	depends on ARCH_CHIP_ESP32C6
+	default n
+	---help---
+		Enable GPIO28 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO29
+	bool "GPIO29"
+	depends on ARCH_CHIP_ESP32C6
+	default n
+	---help---
+		Enable GPIO29 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO30
+	bool "GPIO30"
+	depends on ARCH_CHIP_ESP32C6
+	default n
+	---help---
+		Enable GPIO30 as an GPIO wakeup source.
+
+choice PM_GPIO_WAKEUP_TRIGGER_MODE
+	prompt "PM GPIO Wakeup Trigger Mode"
+	default PM_GPIO_WAKEUP_TRIGGER_ANY_LOW
+
+config PM_GPIO_WAKEUP_TRIGGER_ANY_LOW
+	bool "Wake the chip when any of the selected GPIOs go low"
+
+config PM_GPIO_WAKEUP_TRIGGER_ANY_HIGH
+	bool "Wake the chip when any of the selected GPIOs go high"
+
+endchoice # PM_GPIO_WAKEUP_TRIGGER_MODE
+
+endmenu # PM_GPIO_WAKEUP_SOURCES
+
+config PM_UART_WAKEUP
+	bool "PM UART Wakeup"
+	depends on ESP32S3_UART0 || ESP32S3_UART1
+	default n
+	---help---
+		Enable UART wakeup functionality.
+		This allows the system to wake up from PM_STANDBY
+		when a UART configured as an UART wakeup source is triggered.
+
+menu "PM UART Wakeup Sources"
+	depends on PM_UART_WAKEUP
+
+choice PM_UART_WAKEUP_UART_NUM
+	prompt "PM UART Wakeup UART Number"
+	default PM_UART_WAKEUP_UART0 if ESP32S3_UART0
+	default PM_UART_WAKEUP_UART1 if ESP32S3_UART1
+
+config PM_UART_WAKEUP_UART0
+	depends on ESP32S3_UART0
+	bool "Wake the chip up when UART0 gets a data"
+
+config PM_UART_WAKEUP_UART1
+	depends on ESP32S3_UART1
+	bool "Wake the chip up when UART1 gets a data"
+
+endchoice # PM_UART_WAKEUP_UART_NUM
+
+config PM_UART_WAKEUP_ACTIVE_EDGE_THRESHOLD
+	int "Number of RXD edge changes to to trigger wake-up"
+	default 3
+
+endmenu # PM UART Wakeup Sources
+
+config PM_ALARM_SEC
+	int "PM_STANDBY delay (seconds)"
+	default 15
+	---help---
+		Number of seconds to wait in PM_STANDBY mode.
+
+config PM_ALARM_NSEC
+	int "PM_STANDBY delay (nanoseconds)"
+	default 0
+	---help---
+		Number of additional nanoseconds to wait in PM_STANDBY mode.
+
+config PM_SLEEP_WAKEUP_SEC
+	int "PM_SLEEP delay (seconds)"
+	default 20
+	---help---
+		Number of seconds to wait in PM_SLEEP.
+
+config PM_SLEEP_WAKEUP_NSEC
+	int "PM_SLEEP delay (nanoseconds)"
+	default 0
+	---help---
+		Number of additional nanoseconds to wait in PM_SLEEP.
+
+endif # PM && !ARCH_CHIP_ESP32
+
+endmenu # PM Configuration
+
 menu "Pulse Counter (PCNT) Configuration"
 	depends on ESP_PCNT
 

@@ -53,7 +53,7 @@
 #include "periph_ctrl.h"
 
 #ifdef CONFIG_PM
-#  include "esp32s3_pm.h"
+#  include "espressif/esp_pm.h"
 #endif
 
 #ifdef CONFIG_ESPRESSIF_BLE

@@ -117,6 +117,16 @@ ifeq ($(CONFIG_ESPRESSIF_ADC),y)
 CHIP_CSRCS += esp_adc.c
 endif
 
+ifneq ($(CONFIG_ARCH_CHIP_ESP32),y)
+ifeq ($(CONFIG_PM),y)
+ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
+CHIP_CSRCS += esp_pm_initialize.c
+endif
+CHIP_CSRCS += esp_pm.c
+LDFLAGS += -u esp_timer_init_include_func
+endif
+endif
+
 CHIP_CSRCS += esp_efuse.c
 
 LDFLAGS += -u esp_system_include_startup_funcs
