@@ -180,6 +180,7 @@ SECTIONS
     *libarch.a:*rtc_init.*(.text .text.* .literal .literal.*)
     *libarch.a:*rtc_sleep.*(.text .text.* .literal .literal.*)
     *libarch.a:*rtc_time.*(.text .text.* .literal .literal.*)
+    *libarch.a:*sleep_modes.*(.text .text.* .literal .literal.*)
     *libarch.a:*regi2c_ctrl.*(.text .text.* .literal .literal.*)
     *libarch.a:*uart_hal_iram.*(.text .text.* .literal .literal.*)
     *libarch.a:*wdt_hal_iram.*(.text .text.* .literal .literal.*)
@@ -354,6 +355,7 @@ SECTIONS
     *libarch.a:*rtc_clk_init.*(.rodata .rodata.*)
     *libarch.a:*rtc_sleep.*(.rodata .rodata.*)
     *libarch.a:*rtc_time.*(.rodata .rodata.*)
+    *libarch.a:*sleep_modes.*(.rodata .rodata.*)
     *libarch.a:*regi2c_ctrl.*(.rodata .rodata.*)
     *libarch.a:*uart_hal_iram.*(.rodata .rodata.*)
     *libarch.a:*wdt_hal_iram.*(.rodata .rodata.*)
@@ -606,6 +608,7 @@ SECTIONS
   {
     . = ALIGN(4);
     *(.rtc.literal .rtc.text)
+    *(.rtc.literal* .rtc.text*)
   } >rtc_iram_seg AT>ROM
 
   .rtc.dummy (NOLOAD) :
@@ -622,11 +625,13 @@ SECTIONS
   .rtc.bss (NOLOAD) :
   {
     *(.rtc.bss)
+    *(.rtc.bss*)
   } >rtc_slow_seg
 
   .rtc.data :
   {
     . = ALIGN(4);
+    _rtc_data_start = ABSOLUTE(.);
     *(.rtc.data)
     *(.rtc.data.*)
     *(.rtc.rodata)
@@ -637,6 +642,17 @@ SECTIONS
     . = ALIGN (4);
     _srtcheap = ABSOLUTE(.);
   } >rtc_slow_seg AT>ROM
+
+  .rtc.force_slow :
+  {
+    . = ALIGN(4);
+    *(.rtc.force_slow .rtc.force_slow.*)
+    . = ALIGN(4);
+    _rtc_force_slow_end = ABSOLUTE(.);
+  } >rtc_slow_seg AT>ROM
+
+  /* Get size of rtc slow data */
+  _rtc_slow_length = (_rtc_force_slow_end - _rtc_data_start);
 
   /* This section holds RTC data that should have fixed addresses.
    * The data are not initialized at power-up and are retained during deep sleep.
