@@ -67,6 +67,9 @@ extern "C"
 static inline_function void seqlock_init(FAR seqcount_t *s)
 {
   s->sequence = 0u;
+#ifdef CONFIG_SMP
+  SMP_WMB();
+#endif
 }
 
 /****************************************************************************
@@ -90,7 +93,7 @@ uint32_t read_seqbegin(FAR const seqcount_t *s)
   uint32_t seq;
 
 #ifdef CONFIG_SMP
-  seq = atomic_read_acquire(&s->sequence) & ~1;
+  seq = atomic_read_acquire((atomic_t *)&s->sequence) & (~1u);
 #else
   seq = s->sequence;
   SMP_RMB();
