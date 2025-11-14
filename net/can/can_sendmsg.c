@@ -259,8 +259,6 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       state.snd_cb->priv  = (FAR void *)&state;
       state.snd_cb->event = psock_send_eventhandler;
 
-      conn_dev_unlock(&conn->sconn, dev);
-
       /* Notify the device driver that new TX data is available. */
 
       netdev_txnotify_dev(dev);
@@ -269,6 +267,7 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
        * net_sem_timedwait will also terminate if a signal is received.
        */
 
+      conn_dev_unlock(&conn->sconn, dev);
       if (_SS_ISNONBLOCK(conn->sconn.s_flags) || (flags & MSG_DONTWAIT) != 0)
         {
           ret = net_sem_timedwait(&state.snd_sem, 0);

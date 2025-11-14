@@ -372,11 +372,11 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
       conn->sndcb->flags = PKT_POLL;
       conn->sndcb->priv  = conn;
       conn->sndcb->event = psock_send_eventhandler;
-      conn_dev_unlock(&conn->sconn, dev);
 
       /* Notify the device driver that new TX data is available. */
 
       netdev_txnotify_dev(dev);
+      conn_dev_unlock(&conn->sconn, dev);
     }
 
   return len;

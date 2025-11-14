@@ -475,8 +475,6 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       state.st_cb->priv    = (FAR void *)&state;
       state.st_cb->event   = sendto_eventhandler;
 
-      conn_dev_unlock(&conn->sconn, state.st_dev);
-
       /* Notify the device driver of the availability of TX data */
 
       netdev_txnotify_dev(state.st_dev);
@@ -486,6 +484,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
        * is received.
        */
 
+      conn_dev_unlock(&conn->sconn, state.st_dev);
       ret = net_sem_timedwait(&state.st_sem,
                           _SO_TIMEOUT(conn->sconn.s_sndtimeo));
       if (ret >= 0)

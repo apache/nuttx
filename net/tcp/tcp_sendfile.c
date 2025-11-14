@@ -515,12 +515,12 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
                             TCP_DISCONN_EVENTS);
   state.snd_cb->priv     = (FAR void *)&state;
   state.snd_cb->event    = sendfile_eventhandler;
-  conn_dev_unlock(&conn->sconn, conn->dev);
 
   /* Notify the device driver of the availability of TX data */
 
   tcp_send_txnotify(psock, conn);
 
+  conn_dev_unlock(&conn->sconn, conn->dev);
   for (; ; )
     {
       uint32_t acked = state.snd_acked;

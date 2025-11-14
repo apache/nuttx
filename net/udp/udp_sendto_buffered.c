@@ -248,6 +248,7 @@ static int sendto_next_transfer(FAR struct udp_conn_s *conn)
 {
   FAR struct udp_wrbuffer_s *wrb;
   FAR struct net_driver_s *dev;
+  int ret = OK;
 
   /* Set the UDP "connection" to the destination address of the write buffer
    * at the head of the queue.
@@ -329,11 +330,10 @@ static int sendto_next_transfer(FAR struct udp_conn_s *conn)
    * callback is not already in place.
    */
 
+  conn_dev_lock(&conn->sconn, dev);
   if (conn->sndcb == NULL)
     {
-      conn_dev_lock(&conn->sconn, dev);
       conn->sndcb = udp_callback_alloc(dev, conn);
-      conn_dev_unlock(&conn->sconn, dev);
     }
 
   /* Test if the callback has been allocated */
@@ -343,8 +343,8 @@ static int sendto_next_transfer(FAR struct udp_conn_s *conn)
       /* A buffer allocation error occurred */
 
       nerr("ERROR: Failed to allocate callback\n");
-      conn_lock(&conn->sconn);
-      return -ENOMEM;
+      ret = -ENOMEM;
+      goto out;
     }
 
   conn->dev = dev;
@@ -359,9 +359,11 @@ static int sendto_next_transfer(FAR struct udp_conn_s *conn)
 
   netdev_txnotify_dev(dev);
 
+out:
+  conn_dev_unlock(&conn->sconn, dev);
   conn_lock(&conn->sconn);
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************

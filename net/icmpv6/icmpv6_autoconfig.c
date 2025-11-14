@@ -231,11 +231,13 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
    */
 
   netdev_unlock(dev);
+
   do
     {
       net_sem_wait(&state.snd_sem);
     }
   while (!state.snd_sent);
+
   netdev_lock(dev);
 
   ret = state.snd_result;
