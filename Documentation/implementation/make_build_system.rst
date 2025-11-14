@@ -3,7 +3,7 @@ Make Build System
 =================
 
 Currently, NuttX supports both CMake and Make build systems.
-This guide explains the NuttX `make`-based build system.
+This guide explains the NuttX ``make``-based build system.
 
 Due to *requirements, constraints, and the complexity of the build process*, NuttX divides
 this work into multiple files, each handling specific parts of the build process.
@@ -15,12 +15,12 @@ As stated in :doc:`/introduction/inviolables`, multiple platforms should be supp
 
 NuttX supports multiple build modes. See :doc:`/guides/protected_build`:
 
-- :ref:`flatlibs_mk`: Kernel and user-space built into a single `blob`.
-- :ref:`protectedlibs_mk`: Kernel and user-space built as two separate `blobs`.
-- :ref:`kernelibs_mk`: Kernel built into single `blob`. User apps must be loaded
+- :ref:`flatlibs_mk`: Kernel and user-space built into a single ``blob``.
+- :ref:`protectedlibs_mk`: Kernel and user-space built as two separate ``blobs``.
+- :ref:`kernelibs_mk`: Kernel built into single ``blob``. User apps must be loaded
   into memory for execution.
 
-NuttX targets multiple libs, or `silos`, each handling its own compilation:
+NuttX targets multiple libs, or ``silos``, each handling its own compilation:
 
 .. note::
 
@@ -28,10 +28,10 @@ NuttX targets multiple libs, or `silos`, each handling its own compilation:
   `NuttX architecture <https://cwiki.apache.org/confluence/pages/viewpage.action?
   pageId=139629399&preview=/139629402/140774623/nuttx-3-archoverview.pdf>`_
 
-  There the `silo` concept is explained. Only the `silos` there are listed below as libs.
+  There the ``silo`` concept is explained. Only the ``silos`` there are listed below as libs.
   The build mode influences the needed libs.
 
-.. code-block:: bash
+.. code-block:: console
 
   $ ls -l staging/
   drwxr-xr-x  2 xxx xxx    4096 Oct  6 16:02 .
@@ -100,7 +100,7 @@ script. This script takes a "base" input file (the boards ``defconfig`` file),
 additional include paths (the most relevant being the ``apps`` top directory),
 and generate an output file (the ``$(TOPDIR)/.config`` file).
 
-.. code-block:: bash
+.. code-block:: console
 
   # part of configure.sh shell script, starting at line 240
   #
@@ -127,14 +127,18 @@ The "actual" first steps of the build process are handled by the host-specific
 
 Early on, during parsing, both host-specific **Makefile** will also include
 
-- board's ``Make.defs`` file mentioned above. this will include also
+- board's ``Make.defs`` file mentioned above. This will include also
+
   - the main ``.config`` file.
   - the tools ``config.mk`` file.
   - the arch ``toolchain.defs`` file.
+
 - based on the build mode, one of the following files:
+
   - :ref:`flatlibs_mk`
   - :ref:`protectedlibs_mk`
   - :ref:`kernelibs_mk`
+
 - :ref:`directories_mk`
 
 Built-in dependency mechanism
@@ -221,7 +225,7 @@ Although targeting different platforms, both **Win.mk** and **Unix.mk** aim to p
 the same output. The need for independent files is due to the differences in the
 platform's approaches.
 
-forward vs back slashes
+Forward vs Back slashes
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 One of the main differences is the use of forward slashes
@@ -253,8 +257,8 @@ Versioning
 
 The build system will impact versioning if NuttX is cloned as a repo. See :ref:`versioning`.
 
-config.h .config mkconfig
-^^^^^^^^^^^^^^^^^^^^^^^^^
+config.h, .config, mkconfig
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 NuttX's build system defers the ``config.h`` generation to a separate tool called
 ``mkconfig``. See :ref:`makefile_host`.
