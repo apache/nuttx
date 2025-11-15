@@ -313,6 +313,16 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
 
   reassess |= wd_insert(wdog, ticks, wdentry, arg);
 
+  if (clock_compare(wdog->expired, clock_systime_ticks()))
+    {
+#  ifdef CONFIG_SCHED_TICKLESS_ALARM
+      up_alarm_tick_start(clock_systime_ticks() + 1);
+#  else
+      up_timer_tick_start(clock_systime_ticks() + 1);
+#  endif
+      reassess = false;
+    }
+
   if (!g_wdtimernested && reassess)
     {
       /* Resume the interval timer that will generate the next
