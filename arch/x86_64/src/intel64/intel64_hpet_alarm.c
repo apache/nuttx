@@ -41,4 +41,9 @@ void up_timer_initialize(void)
     oneshot_initialize(CONFIG_ARCH_INTEL64_HPET_ALARM_CHAN, 10);
   up_alarm_set_lowerhalf(lower);
 }
+
+void intel64_timer_secondary_init(void)
+{
+  /* Secondary CPU initialization is not required. */
+}
 #endif

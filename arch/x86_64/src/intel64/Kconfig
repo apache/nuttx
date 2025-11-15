@@ -21,6 +21,14 @@ endchoice # "Intel64 Chip Selection"
 config ARCH_INTEL64_HAVE_TSC
 	bool
 
+config ARCH_INTEL64_HAS_TSC_ADJUST
+	bool "MSR_IA32_TSC_ADJUST support"
+	depends on ARCH_INTEL64_HAVE_TSC
+	default y
+	---help---
+	MSR_IA32_TSC_ADJUST is used to adjust the offset of the Time Stamp Counter (TSC).
+
+
 config ARCH_INTEL64_CACHE_LINESIZE
 	int "Cache line size (hardcoded)"
 	depends on ARCH_DCACHE || ARCH_ICACHE

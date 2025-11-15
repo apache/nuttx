@@ -269,6 +269,7 @@
 #  define MTRR_ENABLE                  0x00000800
 
 #define MSR_IA32_TSC_DEADLINE          0x6e0
+#define MSR_IA32_TSC_ADJUST            0x3b
 
 #define MSR_IA32_APIC_BASE             0x01b
 #  define MSR_IA32_APIC_EN             0x800

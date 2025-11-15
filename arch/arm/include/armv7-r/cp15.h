@@ -159,9 +159,10 @@
 #define CP15_CNTV_TVAL(r)  _CP15(0, r, c14, c3, 0)  /* Virtual TimerValue register */
 #define CP15_CNTV_CTL(r)   _CP15(0, r, c14, c3, 1)  /* Virtual Timer Control register */
 
-#define CP15_CNTPCT(lo,hi) _CP15_64(0, lo, hi, c14)   /* Physical Count register */
-
+#define CP15_CNTPCT(lo,hi)    _CP15_64(0, lo, hi, c14) /* Physical Count register */
+#define CP15_CNTVCT(lo,hi)    _CP15_64(1, lo, hi, c14) /* Virtual Count register */
 #define CP15_CNTP_CVAL(lo,hi) _CP15_64(2, lo, hi, c14) /* Physical Timer CompareValue register */
+#define CP15_CNTV_CVAL(lo,hi) _CP15_64(3, lo, hi, c14) /* Virtual Timer CompareValue register */
 
 #define CP15_DCIALLU(r)    _CP15(0, r, c15, c5, 0)   /* Invalidate data cache */
 

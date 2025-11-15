@@ -54,6 +54,7 @@
 extern void __ap_entry(void);
 extern int x86_64_smp_call_handler(int irq, void *c, void *arg);
 extern int x86_64_smp_sched_handler(int irq, void *c, void *arg);
+extern uint64_t get_tsc_adjust(void);
 
 /****************************************************************************
  * Private Functions
@@ -191,6 +192,8 @@ void x86_64_ap_boot(void)
 
   x86_64_stack_color(tcb->stack_alloc_ptr, 0);
 #endif
+
+  intel64_timer_secondary_init();
 
   /* CPU ready */
 

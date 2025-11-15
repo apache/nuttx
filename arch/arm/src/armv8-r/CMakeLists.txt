@@ -33,7 +33,7 @@ list(APPEND SRCS arm_head.S arm_vectors.S arm_saveusercontext.S)
 list(
   APPEND
   SRCS
-  arm_arch_timer.c
+  arm_timer.c
   arm_cache.c
   arm_cpuinfo.c
   arm_dataabort.c

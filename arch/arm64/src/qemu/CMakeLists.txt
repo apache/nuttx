@@ -19,7 +19,7 @@
 # the License.
 #
 # ##############################################################################
-set(SRCS qemu_boot.c qemu_serial.c qemu_timer.c)
+set(SRCS qemu_boot.c qemu_serial.c)
 
 if(CONFIG_ARCH_EARLY_PRINT)
   list(APPEND SRCS qemu_lowputc.S)

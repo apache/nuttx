@@ -125,6 +125,10 @@ void arm64_boot_el2_init(void)
 {
   uint64_t reg;
 
+  /* Before we disable dcache, we should flush all dcache. */
+
+  up_flush_dcache_all();
+
   reg = 0U;                   /* RES0 */
   reg = (SCTLR_EL2_RES1 |     /* RES1 */
 #ifndef CONFIG_ARM64_ICACHE_DISABLE
@@ -195,6 +199,10 @@ void arm64_boot_el1_init(void)
   /* TODO: CONFIG_FLOAT_*_FORBIDDEN */
 
   write_sysreg(reg, cpacr_el1);
+
+  /* Before we disable dcache, we should flush all dcache. */
+
+  up_flush_dcache_all();
 
   reg = 0U;                   /* RES0 */
   reg = (SCTLR_EL1_RES1 |     /* RES1 */

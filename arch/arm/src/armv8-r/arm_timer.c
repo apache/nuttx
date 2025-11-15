@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-r/arm_arch_timer.c
+ * arch/arm/src/armv8-r/arm_timer.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -30,14 +30,39 @@
 #include <stdio.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/bits.h>
 #include <arch/barriers.h>
 #include <arch/irq.h>
 #include <arch/chip/chip.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/timers/arch_alarm.h>
+#include <nuttx/timers/oneshot.h>
+#include <nuttx/kmalloc.h>
 
-#include "arm_gic.h"
-#include "arm_arch_timer.h"
+#include "arm_timer.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define CNT_CTL_ENABLE_BIT       0
+#define CNT_CTL_IMASK_BIT        1
+#define CNT_CTL_ISTATUS_BIT      2
+
+#define GIC_IRQ_HYP_TIMER        26 /* Hypervisor Timer (HTM) IRQ */
+#define GIC_IRQ_VIRT_TIMER       27 /* Virtual Timer (VTM) IRQ */
+#define GIC_IRQ_SEC_PHY_TIMER    29 /* Secure Physical Timer IRQ */
+#define GIC_IRQ_NONSEC_PHY_TIMER 30 /* Non-secure Physical Timer IRQ */
+
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
+#  define GIC_IRQ_PHY_TIMER      GIC_IRQ_SEC_PHY_TIMER
+#else
+#  define GIC_IRQ_PHY_TIMER      GIC_IRQ_NONSEC_PHY_TIMER
+#endif
+
+#define ARM_ARCH_TIMER_IRQ       GIC_IRQ_VIRT_TIMER
+#define ARM_ARCH_TIMER_PRIO      IRQ_DEFAULT_PRIORITY
+#define ARM_ARCH_TIMER_FLAGS     IRQ_TYPE_LEVEL
 
 /****************************************************************************
  * Private Types
@@ -64,60 +89,36 @@ struct arm_oneshot_lowerhalf_s
  * Private Functions
  ****************************************************************************/
 
-static inline void arm_arch_timer_set_compare(uint64_t value)
+static inline void arm_timer_set_freq(uint32_t freq)
 {
-  CP15_SET64(CNTV_CVAL, value);
+  CP15_SET(CNTFRQ, freq);
 }
 
-static inline uint64_t arm_arch_timer_get_compare(void)
+static inline uint64_t arm_timer_phy_count(void)
 {
-  return CP15_GET64(CNTV_CVAL);
+  return CP15_GET64(CNTPCT);
 }
 
-static inline void arm_arch_timer_enable(bool enable)
+static inline void arm_timer_phy_set_relative(uint32_t tval)
 {
-  uint64_t value;
-
-  value = CP15_GET(CNTV_CTL);
-
-  if (enable)
-    {
-      value |= CNTV_CTL_ENABLE_BIT;
-    }
-  else
-    {
-      value &= ~CNTV_CTL_ENABLE_BIT;
-    }
-
-  CP15_SET(CNTV_CTL, value);
+  CP15_SET(CNTP_TVAL, tval);
 }
 
-static inline void arm_arch_timer_set_irq_mask(bool mask)
+static inline void arm_timer_phy_set_absolute(uint64_t cval)
 {
-  uint64_t value;
-
-  value = CP15_GET(CNTV_CTL);
-
-  if (mask)
-    {
-      value |= CNTV_CTL_IMASK_BIT;
-    }
-  else
-    {
-      value &= ~CNTV_CTL_IMASK_BIT;
-    }
-
-  CP15_SET(CNTV_CTL, value);
+  CP15_SET64(CNTP_CVAL, cval);
 }
 
-static inline uint64_t arm_arch_timer_count(void)
+static inline void arm_timer_phy_enable(bool enable)
 {
-  return CP15_GET64(CNTVCT);
+  CP15_MODIFY((uint32_t)enable << CNT_CTL_ENABLE_BIT,
+              BIT(CNT_CTL_ENABLE_BIT), CNTP_CTL);
 }
 
-static inline uint64_t arm_arch_timer_get_cntfrq(void)
+static inline void arm_timer_phy_set_irq_mask(bool mask)
 {
-  return CP15_GET(CNTFRQ);
+  CP15_MODIFY((uint32_t)mask << CNT_CTL_IMASK_BIT,
+              BIT(CNT_CTL_IMASK_BIT), CNTP_CTL);
 }
 
 /****************************************************************************
@@ -140,6 +141,10 @@ static int arm_arch_timer_compare_isr(int irq, void *regs, void *arg)
 {
   struct arm_oneshot_lowerhalf_s *priv =
     (struct arm_oneshot_lowerhalf_s *)arg;
+
+  /* Suspend the timer irq, restart again when call tick_start */
+
+  arm_timer_phy_set_irq_mask(true);
 
   if (priv->callback)
     {
@@ -212,7 +217,7 @@ static int arm_tick_cancel(struct oneshot_lowerhalf_s *lower,
 
   /* Disable int */
 
-  arm_arch_timer_set_irq_mask(true);
+  arm_timer_phy_set_irq_mask(true);
 
   return OK;
 }
@@ -253,14 +258,14 @@ static int arm_tick_start(struct oneshot_lowerhalf_s *lower,
 
   /* Set the timeout */
 
-  arm_arch_timer_set_compare(arm_arch_timer_count() +
-                               priv->cycle_per_tick * ticks);
+  arm_timer_phy_set_absolute(arm_timer_phy_count() +
+                             priv->cycle_per_tick * ticks);
 
   /* Try to unmask the timer irq in timer controller
    * in case of arm_tick_cancel is called.
    */
 
-  arm_arch_timer_set_irq_mask(false);
+  arm_timer_phy_set_irq_mask(false);
 
   return OK;
 }
@@ -291,7 +296,7 @@ static int arm_tick_current(struct oneshot_lowerhalf_s *lower,
 
   DEBUGASSERT(ticks != NULL);
 
-  *ticks = arm_arch_timer_count() / priv->cycle_per_tick;
+  *ticks = arm_timer_phy_count() / priv->cycle_per_tick;
 
   return OK;
 }
@@ -342,13 +347,17 @@ static struct oneshot_lowerhalf_s *arm_oneshot_initialize(void)
   /* Initialize the lower-half driver structure */
 
   priv->lh.ops = &g_oneshot_ops;
-  priv->cycle_per_tick = arm_arch_timer_get_cntfrq() / TICK_PER_SEC;
+  priv->cycle_per_tick = arm_timer_get_freq() / TICK_PER_SEC;
   tmrinfo("cycle_per_tick %" PRIu64 "\n", priv->cycle_per_tick);
 
   /* Attach handler */
 
   irq_attach(ARM_ARCH_TIMER_IRQ,
              arm_arch_timer_compare_isr, priv);
+
+  /* Avoid early timer irq cause abort. */
+
+  arm_timer_phy_set_irq_mask(true);
 
   tmrinfo("oneshot_initialize ok %p \n", &priv->lh);
 
@@ -372,18 +381,18 @@ void up_timer_initialize(void)
 {
   uint64_t freq;
 
-  freq = arm_arch_timer_get_cntfrq();
+  freq = arm_timer_get_freq();
   tmrinfo("%s: cp15 timer(s) running at %" PRIu64 ".%" PRIu64 "MHz\n",
           __func__, freq / 1000000, (freq / 10000) % 100);
 
   up_alarm_set_lowerhalf(arm_oneshot_initialize());
   up_enable_irq(ARM_ARCH_TIMER_IRQ);
-  arm_arch_timer_enable(true);
+  arm_timer_phy_enable(true);
 }
 
 #ifdef CONFIG_SMP
 /****************************************************************************
- * Function:  arm_arch_timer_secondary_init
+ * Function: arm_timer_secondary_init
  *
  * Description:
  *   This function is called during start-up to initialize the system timer
@@ -402,7 +411,7 @@ void up_timer_initialize(void)
  * timer interrupt
  ****************************************************************************/
 
-void arm_arch_timer_secondary_init()
+void arm_timer_secondary_init(void)
 {
 #ifdef CONFIG_SCHED_TICKLESS
   tmrinfo("arm_arch_timer_secondary_init\n");
@@ -413,7 +422,7 @@ void arm_arch_timer_secondary_init()
 
   /* Start timer */
 
-  arm_arch_timer_enable(true);
+  arm_timer_phy_enable(true);
 #endif
 }
 #endif

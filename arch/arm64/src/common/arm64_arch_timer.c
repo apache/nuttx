@@ -79,7 +79,7 @@ struct arm64_oneshot_lowerhalf_s
 };
 
 /****************************************************************************
- * Private Functions
+ * Inline Functions
  ****************************************************************************/
 
 static inline void arm64_arch_timer_set_compare(uint64_t value)
@@ -135,65 +135,46 @@ static inline uint64_t arm64_arch_timer_get_cntfrq(void)
 
 static inline uint64_t arm64_arch_cnt2tick(uint64_t count, uint64_t freq)
 {
-  uint64_t multiply_safe_count = UINT64_MAX / TICK_PER_SEC;
-  uint64_t result_ticks = 0;
+  uint64_t sec;
+  uint64_t ticks;
 
-  /* We convert count to ticks via
-   *   ticks = count / cycle_per_tick.
-   * Concretely, we have:
-   *   ticks = count / (freq / TICK_PER_SEC).
-   * However, the `freq / TICK_PER_SEC` might be inaccurate
-   * due to the integer division.
-   * So we transform it to:
-   *   ticks = count * TICK_PER_SEC / freq.
+  /* In case of count * TICK_PER_SEC overflow.
+   * We should divide the count into two parts:
+   * The second part and sub-second part.
    */
 
-  if (count > multiply_safe_count)
-    {
-      /* In case of count * TICK_PER_SEC overflow.
-       * We divide the count into two parts:
-       * The multiply overflow part and non-overflow part.
-       * We convert the overflow part to ticks first,
-       * and then add the non-overflow part.
-       */
+  sec    = count / freq;
+  ticks  = sec * TICK_PER_SEC;
 
-      result_ticks += count / multiply_safe_count *
-                      (multiply_safe_count * TICK_PER_SEC / freq);
-      count         = count % multiply_safe_count;
-    }
+  /* Here we convert the sub-second part to ticks. */
 
-  /* Here we convert the non-overflow part to ticks. */
+  count -= sec * freq;
+  ticks += count * TICK_PER_SEC / freq;
 
-  result_ticks += count * TICK_PER_SEC / freq;
-
-  return result_ticks;
+  return ticks;
 }
 
 static inline uint64_t arm64_arch_tick2cnt(uint64_t ticks, uint64_t freq)
 {
-  uint64_t multiply_safe_ticks = UINT64_MAX / freq;
-  uint64_t result_count = 0;
+  uint64_t count;
+  uint64_t sec;
 
-  if (ticks > multiply_safe_ticks)
-    {
-      /* In case of count * freq overflow.
-       * We divide the ticks into two parts:
-       * The multiply overflow part and non-overflow part.
-       * We convert the overflow part to count first,
-       * and then add the non-overflow part.
-       */
+  /* First we convert the second part to count. */
 
-      result_count += ticks / multiply_safe_ticks *
-                      (multiply_safe_ticks * freq / TICK_PER_SEC);
-      ticks         = ticks % multiply_safe_ticks;
-    }
+  sec    = div_const(ticks, TICK_PER_SEC);
+  count  = sec * freq;
 
-  /* Here we convert the non-overflow part to count. */
+  /* Here we convert the sub-second part to count. */
 
-  result_count += ticks * freq / TICK_PER_SEC;
+  ticks -= sec * TICK_PER_SEC;
+  count += div_const(ticks * freq, TICK_PER_SEC);
 
-  return result_count;
+  return count;
 }
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: arm64_arch_timer_compare_isr
@@ -334,7 +315,11 @@ static int arm64_tick_start(struct oneshot_lowerhalf_s *lower,
 
   priv->running = this_cpu();
 
-  /* Align the timer count to the tick boundary */
+  /* Align the timer count to the tick boundary.
+   * Notice that this is just a work-around. We should pass both
+   * the current system ticks and the delay ticks as input parameters.
+   * But we only have the delay tick here due to the oneshot interface.
+   */
 
   next_tick = arm64_arch_cnt2tick(arm64_arch_timer_count(), freq) + ticks;
   next_cnt  = arm64_arch_tick2cnt(next_tick, freq);
@@ -351,15 +336,11 @@ static int arm64_tick_start(struct oneshot_lowerhalf_s *lower,
  *
  * Description:
  *  Get the current time.
- *
- * Input Parameters:
- *   lower   Caller allocated instance of the oneshot state structure.  This
  *           structure must have been previously initialized via a call to
  *           oneshot_initialize();
  *   ticks   The location in which to return the current time.
  *
  * Returned Value:
- *   Zero (OK) is returned on success, a negated errno value is returned on
  *   any failure.
  *
  ****************************************************************************/
@@ -378,6 +359,28 @@ static int arm64_tick_current(struct oneshot_lowerhalf_s *lower,
   *ticks = arm64_arch_cnt2tick(count, priv->frequency);
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: arm64_oneshot_initialize_per_cpu
+ *
+ * Description:
+ *   Initialize the ARM generic timer for secondary CPUs.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void arm64_oneshot_initialize_per_cpu(void)
+{
+  /* Enable int */
+
+  up_enable_irq(ARM_ARCH_TIMER_IRQ);
+
+  /* Start timer */
+
+  arm64_arch_timer_enable(true);
 }
 
 /****************************************************************************
@@ -438,31 +441,19 @@ struct oneshot_lowerhalf_s *arm64_oneshot_initialize(void)
   irq_attach(ARM_ARCH_TIMER_IRQ,
              arm64_arch_timer_compare_isr, priv);
 
-  arm64_oneshot_secondary_init();
+  arm64_oneshot_initialize_per_cpu();
 
   tmrinfo("oneshot_initialize ok %p \n", &priv->lh);
 
   return &priv->lh;
 }
 
-/****************************************************************************
- * Name: arm64_arch_timer_secondary_init
- *
- * Description:
- *   Initialize the ARM generic timer for secondary CPUs.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void arm64_oneshot_secondary_init(void)
+void up_timer_initialize(void)
 {
-  /* Enable int */
+  up_alarm_set_lowerhalf(arm64_oneshot_initialize());
+}
 
-  up_enable_irq(ARM_ARCH_TIMER_IRQ);
-
-  /* Start timer */
-
-  arm64_arch_timer_enable(true);
+void arm64_timer_secondary_init(void)
+{
+  arm64_oneshot_initialize_per_cpu();
 }

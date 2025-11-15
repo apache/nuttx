@@ -17,7 +17,7 @@
 # the License.
 #
 # ##############################################################################
-set(SRCS fvp_boot.c fvp_serial.c fvp_timer.c)
+set(SRCS fvp_boot.c fvp_serial.c)
 
 if(CONFIG_ARCH_EARLY_PRINT)
   list(APPEND SRCS fvp_lowputc.S)

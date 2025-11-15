@@ -19,7 +19,7 @@
 # the License.
 #
 # ##############################################################################
-set(SRCS goldfish_boot.c goldfish_serial.c goldfish_timer.c)
+set(SRCS goldfish_boot.c goldfish_serial.c)
 
 if(CONFIG_RTC_PL031)
   list(APPEND SRCS goldfish_rtc.c)
