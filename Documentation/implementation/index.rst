@@ -6,6 +6,7 @@ Implementation Details
    :maxdepth: 2
    :caption: Contents:
    
+   make_build_system.rst
    drivers_design.rst
    device_drivers.rst
    processes_vs_tasks.rst

@@ -13,19 +13,6 @@ cmpconfig.c
 This C file can be used to build a utility for comparing two NuttX
 configuration files.
 
-Config.mk
----------
-
-Config.mk contains common definitions used by many configuration files.
-This file (along with <nuttx>/.config) must be included at the top of
-each configuration-specific Make.defs file like::
-
-    include $(TOPDIR)/.config
-    include $(TOPDIR)/tools/Config.mk
-
-Subsequent logic within the configuration-specific Make.defs file may then
-override these default definitions as necessary.
-
 checkpatch.sh
 -------------
 
@@ -740,6 +727,8 @@ these problems::
      -   option env="APPSDIR"
      +   default "../apps"
 
+.. _build_system_linking:
+
 link.sh, link.bat, copydir.sh, copydir.bat, unlink.sh, and unlink.bat
 ---------------------------------------------------------------------
 
@@ -780,6 +769,8 @@ this case.  link.bat will attempt to create a symbolic link using the
 NTFS mklink.exe command instead of copying files.  That logic, however,
 has not been verified as of this writing.
 
+.. _makefile_host:
+
 Makefile.host
 -------------
 
@@ -800,6 +791,8 @@ may be mounted under /etc in the NuttX pseudo file system.
 
 TIP: Edit the resulting header file and mark the generated data values
 as 'const' so that they will be stored in FLASH.
+
+.. _mkdeps:
 
 mkdeps.c, cnvwindeps.c, mkwindeps.sh, and mknulldeps.sh
 -------------------------------------------------------
