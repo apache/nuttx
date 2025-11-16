@@ -32,4 +32,8 @@ ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += ra4m1_appinit.c
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CSRCS += ra4m1_pwm.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
