@@ -63,6 +63,7 @@
 #define PORT7 (7)
 #define PORT8 (8)
 #define PORT9 (9)
+#define PORT_INVALID (0xFF)
 
 #define PIN0 (0)
 #define PIN1 (1)
@@ -80,6 +81,7 @@
 #define PIN13 (13)
 #define PIN14 (14)
 #define PIN15 (15)
+#define PIN_INVALID (0xFF)
 
 /* Relative PORT Registers */
 

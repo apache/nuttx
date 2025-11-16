@@ -74,8 +74,8 @@
 #define R_MSTP_MSTPCRD_DAC8            (1 << 19) /* 80000: 8-bit D/A Converter Module Stop */
 #define R_MSTP_MSTPCRD_ADC14           (1 << 16) /* 10000: 14-Bit A/D Converter Module Stop */
 #define R_MSTP_MSTPCRD_POEG            (1 << 14) /* 4000: Port Output Enable for GPT Module Stop */
-#define R_MSTP_MSTPCRD_GPT_1           (1 <<  6) /* 40: General PWM Timer 169 to 164 Module Stop */
-#define R_MSTP_MSTPCRD_GPT_2           (1 <<  5) /* 20: General PWM Timer 323 to 320 Module Stop */
+#define R_MSTP_MSTPCRD_GPT_16          (1 <<  6) /* 40: General PWM Timer 167 to 162 Module Stop */
+#define R_MSTP_MSTPCRD_GPT_32          (1 <<  5) /* 20: General PWM Timer 321 to 320 Module Stop */
 #define R_MSTP_MSTPCRD_AGT0            (1 <<  3) /* 08: Asynchronous General Purpose Timer 0 Module Stop */
 #define R_MSTP_MSTPCRD_AGT1            (1 <<  2) /* 04: Asynchronous General Purpose Timer 1 Module Stop */
 
