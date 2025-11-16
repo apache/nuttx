@@ -77,6 +77,23 @@
 #define GPIO_SCI9_RX   GPIO_RXD9_MISO9_SCL9_1  /* P110 */
 #define GPIO_SCI9_TX   GPIO_TXD9_MOSI9_SDA9_1  /* P109 */
 
+/* PWM Pins *****************************************************************/
+
+/* PWM output pins:
+ *   D3 - P104
+ *   D5 - P102
+ *   D6 - P106
+ *   D9 - P303
+ *   D10 - P112
+ *   D11 - P109
+ */
+#define GPIO_GPT1_GTIOCB  GPIO_GPT_GTIOC1B_P104
+#define GPIO_GPT2_GTIOCB  GPIO_GPT_GTIOC2B_P102
+#define GPIO_GPT0_GTIOCB  GPIO_GPT_GTIOC0B_P106
+#define GPIO_GPT7_GTIOCB  GPIO_GPT_GTIOC7B_P303
+#define GPIO_GPT3_GTIOCB  GPIO_GPT_GTIOC3B_P112
+#define GPIO_GPT1_GTIOCA  GPIO_GPT_GTIOC1A_P109
+
 /* LED pin selections */
 
 #define GPIO_L_LED    (gpio_pinset_t){ PORT1,PIN11, (GPIO_OUPUT | GPIO_LOW_DRIVE | GPIO_OUTPUT_LOW)}   /* P111 */

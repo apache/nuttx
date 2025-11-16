@@ -26,6 +26,10 @@ else()
   list(APPEND SRCS ra4m1_userleds.c)
 endif()
 
+if(CONFIG_PWM)
+  list(APPEND SRCS ra4m1_pwm.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT

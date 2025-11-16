@@ -1,5 +1,7 @@
 /****************************************************************************
- * boards/arm/ra4/arduino-r4-minima/src/ra4m1_bringup.c
+ * boards/arm/ra4/arduino-r4-minima/src/ra4m1_pwm.c
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,71 +26,92 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <syslog.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <debug.h>
 
 #include <nuttx/board.h>
-#include <nuttx/fs/fs.h>
-#include <nuttx/leds/userled.h>
-#include <nuttx/spi/spi_transfer.h>
-
-#include "arduino-r4-minima.h"
+#include <nuttx/timers/pwm.h>
 
 #include <arch/board/board.h>
+
+#include "ra_pwm.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-#undef HAVE_LEDS
 
-#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
-#  define HAVE_LEDS 1
+/* Configuration ************************************************************/
+
+/* PWM.
+ * There are no dedicated PWM output pins available to the user for PWM
+ * testing.
+ */
+
+#ifndef CONFIG_ARDUINO_R4_MINIMA_PWM_CHANNEL
+#  if defined(CONFIG_RA4M1_PWM_CHAN0)
+#    warning Assuming PWM channel 0
+#    define CONFIG_ARDUINO_R4_MINIMA_PWM_CHANNEL 0
+#  elif defined(CONFIG_RA4M1_PWM_CHAN1)
+#    warning Assuming PWM channel 1
+#    define CONFIG_ARDUINO_R4_MINIMA_PWM_CHANNEL 1
+#  elif defined(CONFIG_RA4M1_PWM_CHAN2)
+#    warning Assuming PWM channel 2
+#    define CONFIG_ARDUINO_R4_MINIMA_PWM_CHANNEL 2
+#  elif defined(CONFIG_RA4M1_PWM_CHAN3)
+#    warning Assuming PWM channel 3
+#    define CONFIG_ARDUINO_R4_MINIMA_PWM_CHANNEL 3
+#  endif
 #endif
 
-#ifdef CONFIG_PWM
-extern int ra4m1_pwm_setup(void);
-#endif
+#if defined(CONFIG_PWM) && defined(CONFIG_RA_PWM)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ra4m1_bringup
+ * Name: ra4m1_pwm_setup
  *
  * Description:
- *   Perform architecture-specific initialization
- *
+ *   Initialize PWM and register the PWM device.
  *
  ****************************************************************************/
 
-int ra4m1_bringup(void)
+int ra4m1_pwm_setup(void)
 {
+  static bool initialized = false;
+  struct pwm_lowerhalf_s *pwm;
   int ret;
 
-#ifdef HAVE_LEDS
-  board_userled_initialize();
+  /* Have we already initialized? */
 
-  /* Register the LED driver */
-
-  ret = userled_lower_initialize(LED_DRIVER_PATH);
-  if (ret < 0)
+  if (!initialized)
     {
-      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
-      return ret;
+      /* Call ra_pwminitialize() to get an instance of the PWM interface */
+
+      pwm = ra_pwminitialize(CONFIG_ARDUINO_R4_MINIMA_PWM_CHANNEL);
+      if (!pwm)
+        {
+          _err("ERROR: Failed to get the RA4M1 PWM lower half\n");
+          return -ENODEV;
+        }
+
+      /* Register the PWM driver at "/dev/pwm0" */
+
+      ret = pwm_register("/dev/pwm0", pwm);
+      if (ret < 0)
+        {
+          aerr("ERROR: pwm_register failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Now we are initialized */
+
+      initialized = true;
     }
-#endif
 
-#ifdef CONFIG_PWM
-  /* Initialize PWM and register the PWM device. */
-
-  ret = ra4m1_pwm_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: ra4m1_pwm_setup() failed: %d\n", ret);
-    }
-#endif
-
-  UNUSED(ret);
   return OK;
 }
+
+#endif /* CONFIG_PWM */
