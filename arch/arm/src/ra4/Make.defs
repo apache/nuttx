@@ -35,3 +35,4 @@ CHIP_CSRCS += ra_serial.c
 CHIP_CSRCS += ra_lowputc.c
 CHIP_CSRCS += ra_allocateheap.c
 CHIP_CSRCS += ra_timerisr.c
+CHIP_CSRCS += ra_pwm.c
