@@ -40,14 +40,6 @@
  * Private Types
  ****************************************************************************/
 
-struct section_mapping_s
-{
-  uint32_t physbase;   /* Physical address of the region to be mapped */
-  uint32_t virtbase;   /* Virtual address of the region to be mapped */
-  uint32_t mmuflags;   /* MMU settings for the region (e.g., cache-able) */
-  uint32_t nsections;  /* Number of mappings in the region */
-};
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/

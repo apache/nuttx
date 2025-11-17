@@ -32,7 +32,6 @@ list(
   arm_timer.c
   arm_cache.c
   arm_cpuinfo.c
-  arm_dataabort.c
   arm_gicv3.c
   arm_initialstate.c
   arm_prefetchabort.c

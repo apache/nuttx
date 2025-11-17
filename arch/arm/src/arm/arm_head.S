@@ -29,6 +29,7 @@
 #include "arm.h"
 #include "chip.h"
 #include "arm_internal.h"
+#include "mmu.h"
 
 #ifdef CONFIG_LEGACY_PAGING
 #  include <nuttx/page.h>

@@ -36,7 +36,6 @@ list(
   SRCS
   arm_cache.c
   arm_cpuinfo.c
-  arm_dataabort.c
   arm_gicv2.c
   arm_gicv2_dump.c
   arm_initialstate.c
@@ -50,10 +49,6 @@ list(
 
 if(CONFIG_ARMV7A_GICv2M)
   list(APPEND SRCS arm_gicv2m.c)
-endif()
-
-if(CONFIG_ARCH_HAVE_DEBUG)
-  list(APPEND SRCS arm_hwdebug.c)
 endif()
 
 if(CONFIG_ARMV7A_HAVE_PTM)

@@ -1056,6 +1056,7 @@ config ARCH_ARM7TDMI
 	select ARCH_DCACHE
 	select ARCH_ICACHE
 	select LIBC_ATOMIC_IRQ
+	select ARCH_HAVE_DEBUG
 	---help---
 		The Arm7TDMI-S is an excellent workhorse processor capable of a wide
 		array of applications. Traditionally used in mobile handsets, the
@@ -1066,6 +1067,7 @@ config ARCH_ARM920T
 	default n
 	select ARCH_DCACHE
 	select ARCH_ICACHE
+	select ARCH_HAVE_DEBUG
 	select ARCH_HAVE_MMU
 	select ARCH_USE_MMU
 	---help---
@@ -1083,6 +1085,7 @@ config ARCH_ARM926EJS
 	default n
 	select ARCH_DCACHE
 	select ARCH_ICACHE
+	select ARCH_HAVE_DEBUG
 	select ARCH_HAVE_MMU
 	select ARCH_USE_MMU
 	select LIBC_ATOMIC_IRQ
@@ -1107,6 +1110,7 @@ config ARCH_ARM1136J
 	default n
 	select ARCH_DCACHE
 	select ARCH_ICACHE
+	select ARCH_HAVE_DEBUG
 	select ARCH_HAVE_MMU
 	select ARCH_USE_MMU
 	---help---
@@ -1119,6 +1123,7 @@ config ARCH_ARM1156T2
 	default n
 	select ARCH_DCACHE
 	select ARCH_ICACHE
+	select ARCH_HAVE_DEBUG
 	select ARCH_HAVE_MMU
 	select ARCH_USE_MMU
 	---help---
@@ -1130,6 +1135,7 @@ config ARCH_ARM1176JZ
 	default n
 	select ARCH_DCACHE
 	select ARCH_ICACHE
+	select ARCH_HAVE_DEBUG
 	select ARCH_HAVE_MMU
 	select ARCH_USE_MMU
 	---help---
@@ -1261,6 +1267,7 @@ config ARCH_ARMV7R
 	bool
 	default n
 	select ARCH_HAVE_CPUINFO
+	select ARCH_HAVE_DEBUG
 	select ARCH_HAVE_PERF_EVENTS
 	select ARCH_HAVE_PERF_EVENTS_USER_ACCESS
 	select ARM_HAVE_WFE_SEV
@@ -1400,6 +1407,7 @@ config ARCH_ARMV8R
 	select ONESHOT_COUNT
 	select ALARM_ARCH
 	select ARM_HAVE_WFE_SEV
+	select ARCH_HAVE_DEBUG
 
 config ARM_GIC_VERSION
 	int "GIC version"

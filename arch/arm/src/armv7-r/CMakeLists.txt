@@ -35,7 +35,6 @@ list(
   SRCS
   arm_cache.c
   arm_cpuinfo.c
-  arm_dataabort.c
   arm_initialstate.c
   arm_prefetchabort.c
   arm_syscall.c

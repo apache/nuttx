@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-a/arm_hwdebug.c
+ * arch/arm/src/arm_a_r/arm_hwdebug.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
