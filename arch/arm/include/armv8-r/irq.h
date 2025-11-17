@@ -38,7 +38,7 @@
 #  include <stdint.h>
 #endif
 
-#include <arch/armv8-r/cp15.h>
+#include <arch/arm_a_r/cp15.h>
 
 /****************************************************************************
  * Pre-processor Prototypes
