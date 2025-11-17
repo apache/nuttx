@@ -25,7 +25,6 @@ target_sources(nuttx PRIVATE arm_head.S)
 list(
   APPEND
   SRCS
-  arm_dataabort.c
   arm_initialstate.c
   arm_prefetchabort.c
   arm_syscall.c

@@ -45,14 +45,6 @@
  * Private Types
  ****************************************************************************/
 
-struct section_mapping_s
-{
-  uint32_t physbase;   /* Physical address of the region to be mapped */
-  uint32_t virtbase;   /* Virtual address of the region to be mapped */
-  uint32_t mmuflags;   /* MMU settings for the region (e.g., cache-able) */
-  uint32_t nsections;  /* Number of mappings in the region */
-};
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -216,7 +208,7 @@ static void  up_vectorpermissions(uint32_t mmuflags)
 
   /* Invalid the TLB for this address */
 
-  tlb_invalidate_single(PG_L2_VECT_VADDR);
+  cp15_invalidate_tlb_bymva(PG_L2_VECT_VADDR);
 }
 #endif
 

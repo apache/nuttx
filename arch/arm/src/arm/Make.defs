@@ -27,7 +27,7 @@ include arm_a_r/Make.defs
 
 HEAD_ASRC  = arm_head.S
 
-CMN_CSRCS += arm_dataabort.c arm_initialstate.c
+CMN_CSRCS += arm_initialstate.c
 CMN_CSRCS += arm_prefetchabort.c
 CMN_CSRCS += arm_syscall.c
 CMN_CSRCS += arm_undefinedinsn.c

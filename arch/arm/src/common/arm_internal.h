@@ -376,11 +376,11 @@ uint32_t *arm_undefinedinsn(uint32_t *regs);
 #ifdef CONFIG_LEGACY_PAGING
 void arm_pginitialize(void);
 uint32_t *arm_va2pte(uintptr_t vaddr);
-void arm_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr);
 #else /* CONFIG_LEGACY_PAGING */
 #  define arm_pginitialize()
-void arm_dataabort(uint32_t *regs);
 #endif /* CONFIG_LEGACY_PAGING */
+
+uint32_t * arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr);
 
 /* Exception handlers */
 
@@ -538,6 +538,9 @@ void arm_stack_check_init(void) noinstrument_function;
 #ifdef CONFIG_ARCH_HAVE_DEBUG
 int arm_enable_dbgmonitor(void);
 int arm_dbgmonitor(int irq, void *context, void *arg);
+#else
+#  define arm_enable_dbgmonitor()
+#  define arm_dbgmonitor(i, c, a)
 #endif
 
 #ifdef __cplusplus
