@@ -35,6 +35,7 @@
 #ifdef CONFIG_RPMSG
 
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/semaphore.h>
 #include <openamp/rpmsg.h>
 #include <openamp/rpmsg_internal.h>
 
@@ -51,6 +52,8 @@
 #define RPMSGIOC_RELEASE_WAKELOCK   _RPMSGIOC(7)
 
 #define RPMSG_SIGNAL_RUNNING        TIOCM_CD
+
+#define rpmsg_wait(e, s)            rpmsg_tickwait(e, s, CLOCK_MAX)
 
 /****************************************************************************
  * Public Types
@@ -92,7 +95,8 @@ extern "C"
 
 void rpmsg_initialize(void);
 
-int rpmsg_wait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem);
+int rpmsg_tickwait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem,
+                   clock_t delay);
 int rpmsg_post(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem);
 
 FAR const char *rpmsg_get_local_cpuname(FAR struct rpmsg_device *rdev);
