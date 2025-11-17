@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-a/sctlr.h
+ * arch/arm/src/arm_a_r/sctlr.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -29,8 +29,8 @@
  *  All rights reserved. ARM DDI 0406C.b (ID072512)
  */
 
-#ifndef __ARCH_ARM_SRC_ARMV7_A_SCTLR_H
-#define __ARCH_ARM_SRC_ARMV7_A_SCTLR_H
+#ifndef __ARCH_ARM_SRC_ARM_A_R_SCTLR_H
+#define __ARCH_ARM_SRC_ARM_A_R_SCTLR_H
 
 /****************************************************************************
  * Included Files
@@ -38,6 +38,7 @@
 
 #include <arch/barriers.h>
 #include <arch/irq.h>
+#include <arch/arm_a_r/cp15.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -129,38 +130,76 @@
  * (2) Not available on A5
  */
 
-#define SCTLR_M                  (1 << 0)  /* Bit 0:  Enables the MMU */
-#define SCTLR_A                  (1 << 1)  /* Bit 1:  Enables strict alignment of data */
-#define SCTLR_C                  (1 << 2)  /* Bit 2:  Determines if data can be cached */
-                                           /* Bits 3-9: Reserved */
-#define SCTLR_SW                 (1 << 10) /* Bit 10: SWP/SWPB Enable bit */
-#define SCTLR_Z                  (1 << 11) /* Bit 11: Program flow prediction control (1) */
-#define SCTLR_I                  (1 << 12) /* Bit 12: Determines if instructions can be cached */
-#define SCTLR_V                  (1 << 13) /* Bit 13: Vectors bit */
-#define SCTLR_RR                 (1 << 14) /* Bit 14: Cache replacement strategy (2) */
-                                           /* Bits 15-16: Reserved */
-#define SCTLR_HA                 (1 << 17) /* Bit 17: Hardware management access disabled (2) */
-                                           /* Bits 18-24: Reserved */
-#define SCTLR_EE                 (1 << 25) /* Bit 25: Determines the value the CPSR.E */
-                                           /* Bit 26: Reserved */
-#define SCTLR_NMFI               (1 << 27) /* Bit 27: Non-maskable FIQ support (Cortex-A9) */
-#define SCTLR_TRE                (1 << 28) /* Bit 28: TEX remap */
-#define SCTLR_AFE                (1 << 29) /* Bit 29: Access Flag Enable bit */
-#define SCTLR_TE                 (1 << 30) /* Bit 30: Thumb exception enable */
-                                           /* Bit 31: Reserved */
+#define SCTLR_M                       (1 << 0)  /* Bit 0:  Enables the MMU/MPU enable bit */
+#define SCTLR_A                       (1 << 1)  /* Bit 1:  Enables strict alignment of data */
+#define SCTLR_C                       (1 << 2)  /* Bit 2:  Determines if data can be cached */
+                                                /* Bits 3-9: Reserved */
+#define SCTLR_CCP15BEN                (1 << 5)  /* Bit 5:  CP15 barrier enable */
+                                                /* Bit 6:  Reserved */
+#define SCTLR_B                       (1 << 7)  /* Bit 7:  Should be zero on ARMv7-R */
+#define SCTLR_SW                      (1 << 10) /* Bit 10: SWP/SWPB Enable bit */
+#define SCTLR_Z                       (1 << 11) /* Bit 11: Program flow prediction control (1) */
+#define SCTLR_I                       (1 << 12) /* Bit 12: Determines if instructions can be cached */
+#define SCTLR_V                       (1 << 13) /* Bit 13: Vectors bit */
+#define SCTLR_RR                      (1 << 14) /* Bit 14: Cache replacement strategy (2) */
+                                                /* Bits 15-16: Reserved */
+#define SCTLR_HA                      (1 << 17) /* Bit 17: Hardware management access disabled (2) */
+                                                /* Bits 18-24: Reserved */
+#define SCTLR_BR                      (1 << 17) /* Bit 17: Background Region bit */
+                                                /* Bit 18: Reserved */
+#define SCTLR_DZ                      (1 << 19) /* Bit 19: Divide by Zero fault enable bit */
+                                                /* Bit 20: Reserved */
+#define SCTLR_FI                      (1 << 21) /* Bit 21: Fast interrupts configuration enable bit */
+#define SCTLR_U                       (1 << 22) /* Bit 22: Unaligned access model (always one) */
+#define SCTLR_VE                      (1 << 24) /* Bit 24: Interrupt Vectors Enable bit */
+#define SCTLR_EE                      (1 << 25) /* Bit 25: Determines the value the CPSR.E */
+                                                /* Bit 26: Reserved */
+#define SCTLR_NMFI                    (1 << 27) /* Bit 27: Non-maskable FIQ support (Cortex-A9)/Non-maskable FIQ (NMFI) support */
+#define SCTLR_TRE                     (1 << 28) /* Bit 28: TEX remap */
+#define SCTLR_AFE                     (1 << 29) /* Bit 29: Access Flag Enable bit */
+#define SCTLR_TE                      (1 << 30) /* Bit 30: Thumb exception enable */
+                                                /* Bit 31: Reserved */
+
+/* Hyp Auxiliary Control Register */
+
+#define HACTLR_CPUACTLR               (1 << 0)  /* Bit 0: Enable write access IMP_CPUACTLR from EL1 */
+#define HACTLR_CDBGDCI                (1 << 1)  /* Bit 1: Enable access CDBGDCI from EL1 */
+                                                /* Bits 2-6: Reserved */
+#define HACTLR_FLASHIFREGIONR         (1 << 7)  /* Bit 7: Enable access IMP_FLASHIFREGIONR from EL1 */
+#define HACTLR_PERIPHPREGIONR         (1 << 8)  /* Bit 8: Enable access IMP_PERIPHPREGIONR from EL1 */
+#define HACTLR_QOSR_BIT               (1 << 9)  /* Bit 9: Enable access QOSR from EL1 */
+#define HACTLR_BUSTIMEOUTR_BIT        (1 << 10) /* Bit 10: Enable access IMP_BUSTIMEOUTR from EL1 */
+                                                /* Bit 11: Reserved */
+#define HACTLR_INTMONR_BIT            (1 << 12) /* Bit 12: Enable access IMP_INTMONR from EL1 */
+#define HACTLR_ERR_BIT                (1 << 13) /* Bit 13: Enable access IMP_*ERR registers from EL1 */
+                                                /* Bit 14: Reserved */
+#define HACTLR_TESTR1_BIT             (1 << 15) /* Bit 15: Enable access IMP_TESTR1 registers from EL0 and EL1 */
+                                                /* Bits 16-31: Reserved */
+
+/* Enable all IMP DEF registers access from EL1 except for TESTR1 */
+
+#define HACTLR_INIT                   (HACTLR_ERR_BIT | HACTLR_INTMONR_BIT | \
+                                       HACTLR_BUSTIMEOUTR_BIT | HACTLR_QOSR_BIT | \
+                                       HACTLR_PERIPHPREGIONR | HACTLR_FLASHIFREGIONR | \
+                                       HACTLR_CDBGDCI | HACTLR_CPUACTLR) 
 
 /* Auxiliary Control Register (ACTLR) */
 
-#define ACTLR_FW                 (1 << 0)  /* Bit 0: Enable Cache/TLB maintenance broadcast */
-#define ACTLR_L2_PREFECTH        (1 << 1)  /* Bit 1: L2 pre-fetch hint enable */
-#define ACTLR_L1_PREFETCH        (1 << 2)  /* Bit 2: L1 Dside pre-fetch enable */
-#define ACTLR_LINE_ZERO          (1 << 3)  /* Bit 3: Enable write full line zero mode */
-                                           /* Bits 4-5: Reserved */
-#define ACTLR_SMP                (1 << 6)  /* Bit 6: Cortex-A9 taking part in coherency */
-#define ACTLR_EXCL               (1 << 7)  /* Bit 7: Exclusive cache bit */
-#define ACTLR_ALLOC_1WAY         (1 << 8)  /* Bit 8: Allocation in 1-way cache only */
-#define ACTLR_PARITY             (1 << 9)  /* Bit 9: Parity ON */
-                                           /* Bits 10-31: Reserved */
+#define ACTLR_FW                      (1 << 0)  /* Bit 0: Enable Cache/TLB maintenance broadcast */
+#define ACTLR_L2_PREFECTH             (1 << 1)  /* Bit 1: L2 pre-fetch hint enable */
+#define ACTLR_L1_PREFETCH             (1 << 2)  /* Bit 2: L1 Dside pre-fetch enable */
+#define ACTLR_LINE_ZERO               (1 << 3)  /* Bit 3: Enable write full line zero mode */
+#define ACTLR_MRP                     (1 << 3)  /* Bit 3: Enable MRP */
+                                                /* Bits 4-5: Reserved */
+                                                /* Bits 4-5: Reserved */
+#define ACTLR_SMP                     (1 << 6)  /* Bit 6: Cortex-A9 taking part in coherency */
+#define ACTLR_EXCL                    (1 << 7)  /* Bit 7: Exclusive cache bit */
+#define ACTLR_ALLOC_1WAY              (1 << 8)  /* Bit 8: Allocation in 1-way cache only */
+#define ACTLR_PARITY                  (1 << 9)  /* Bit 9: Parity ON */
+#define ACTLR_DTCM_ECC                (1 << 9)  /* Bit 9: ECC on caches and DTCM */
+#define ACTLR_ITCM_ECC                (1 << 10) /* Bit 10: ECC on caches and ITCM */
+#define ACTLR_ITCM_QOS                (1 << 11) /* Bit 11: Enable QoS*/
+                                                /* Bits 12-31: Reserved */
 
 /* Coprocessor Access Control Register (CPACR) */
 
@@ -168,18 +207,18 @@
 
 /* Secure Configuration Register (SCR) */
 
-#define SCR_NS                   (1 << 0)  /* Bit 0: Non-secure */
-#define SCR_IRQ                  (1 << 1)  /* Bit 1: IRQs taken in Monitor mode */
-#define SCR_FIQ                  (1 << 2)  /* Bit 2: FIQs taken in Monitor mode */
-#define SCR_EA                   (1 << 3)  /* Bit 3: External aborts taken in Monitor mode */
-#define SCR_FW                   (1 << 4)  /* Bit 4: F bit writable */
-#define SCR_AW                   (1 << 5)  /* Bit 5: A bit writable */
-#define SCR_NET                  (1 << 6)  /* Bit 6: Not Early Termination */
-#define SCR_SCD                  (1 << 7)  /* Bit 7: Secure Monitor Call disable */
-#define SCR_HCE                  (1 << 8)  /* Bit 8: Hyp Call enable */
-#define SCR_SIF                  (1 << 9)  /* Bit 9: Secure state instruction fetches from
-                                            *        Non-secure memory are not permitted */
-                                           /* Bits 10-31: Reserved */
+#define SCR_NS                        (1 << 0)  /* Bit 0: Non-secure */
+#define SCR_IRQ                       (1 << 1)  /* Bit 1: IRQs taken in Monitor mode */
+#define SCR_FIQ                       (1 << 2)  /* Bit 2: FIQs taken in Monitor mode */
+#define SCR_EA                        (1 << 3)  /* Bit 3: External aborts taken in Monitor mode */
+#define SCR_FW                        (1 << 4)  /* Bit 4: F bit writable */
+#define SCR_AW                        (1 << 5)  /* Bit 5: A bit writable */
+#define SCR_NET                       (1 << 6)  /* Bit 6: Not Early Termination */
+#define SCR_SCD                       (1 << 7)  /* Bit 7: Secure Monitor Call disable */
+#define SCR_HCE                       (1 << 8)  /* Bit 8: Hyp Call enable */
+#define SCR_SIF                       (1 << 9)  /* Bit 9: Secure state instruction fetches from
+                                                 *        Non-secure memory are not permitted */
+                                                /* Bits 10-31: Reserved */
 
 /* Secure Debug Enable Register (SDER) */
 
@@ -187,15 +226,15 @@
 
 /* Non-secure Access Control Register (NSACR) */
 
-                                           /* Bits 0-9: Reserved */
-#define NSACR_CP10               (1 << 10) /* Bit 10: Permission to access coprocessor 10 */
-#define NSACR_CP11               (1 << 11) /* Bit 11: Permission to access coprocessor 11 */
-                                           /* Bits 12-13: Reserved */
-#define NSACR_NSD32DIS           (1 << 14) /* Bit 14: Disable the Non-secure use of VFP D16-D31 */
-#define NSACR_NSASEDIS           (1 << 15) /* Bit 15: Disable Non-secure Advanced SIMD Extension */
-                                           /* Bits 16-17: Reserved */
-#define NSACR_NSSMP              (1 << 18) /* Bit 18: ACR SMP bit writable */
-                                           /* Bits 19-31: Reserved */
+                                                /* Bits 0-9: Reserved */
+#define NSACR_CP10                    (1 << 10) /* Bit 10: Permission to access coprocessor 10 */
+#define NSACR_CP11                    (1 << 11) /* Bit 11: Permission to access coprocessor 11 */
+                                                /* Bits 12-13: Reserved */
+#define NSACR_NSD32DIS                (1 << 14) /* Bit 14: Disable the Non-secure use of VFP D16-D31 */
+#define NSACR_NSASEDIS                (1 << 15) /* Bit 15: Disable Non-secure Advanced SIMD Extension */
+                                                /* Bits 16-17: Reserved */
+#define NSACR_NSSMP                   (1 << 18) /* Bit 18: ACR SMP bit writable */
+                                                /* Bits 19-31: Reserved */
 
 /* Virtualization Control Register (VCR) */
 
@@ -249,7 +288,7 @@
 
 /* Vector Base Address Register (VBAR) */
 
-#define VBAR_MASK                (0xffffffe0)
+#define VBAR_MASK                     (0xffffffe0)
 
 /* Monitor Vector Base Address Register (MVBAR) */
 
@@ -265,10 +304,10 @@
 
 /* Context ID Register (CONTEXTIDR) */
 
-#define CONTEXTIDR_ASID_SHIFT    (0)   /* Bits 0-7: Address Space Identifier */
-#define CONTEXTIDR_ASID_MASK     (0xff << CONTEXTIDR_ASID_SHIFT)
-#define CONTEXTIDR_PROCID_SHIFT  (8) /* Bits 8-31: Process Identifier */
-#define CONTEXTIDR_PROCID_MASK   (0x00ffffff << CONTEXTIDR_PROCID_SHIFT)
+#define CONTEXTIDR_ASID_SHIFT         (0)   /* Bits 0-7: Address Space Identifier */
+#define CONTEXTIDR_ASID_MASK          (0xff << CONTEXTIDR_ASID_SHIFT)
+#define CONTEXTIDR_PROCID_SHIFT       (8) /* Bits 8-31: Process Identifier */
+#define CONTEXTIDR_PROCID_MASK        (0x00ffffff << CONTEXTIDR_PROCID_SHIFT)
 
 /* Configuration Base Address Register (CBAR) */
 
@@ -280,42 +319,42 @@
  * CRn=c9, opc1=0, CRm=c12, opc2=0
  */
 
-#define PMCR_E             (1 << 0)  /* Enable all counters */
-#define PMCR_P             (1 << 1)  /* Reset all counter events (except PMCCNTR) */
-#define PMCR_C             (1 << 2)  /* Reset cycle counter (PMCCNTR) to zero */
-#define PMCR_D             (1 << 3)  /* Enable cycle counter clock (PMCCNTR) divider */
-#define PMCR_X             (1 << 4)  /* Export of events is enabled */
-#define PMCR_DP            (1 << 5)  /* Disable PMCCNTR if event counting is prohibited */
-#define PMCR_N_SHIFT       (11)      /* Bits 11-15:  Number of event counters */
-#define PMCR_N_MASK        (0x1f << PMCR_N_SHIFT)
-#define PMCR_IDCODE_SHIFT  (16)      /* Bits 16-23: Identification code */
-#define PMCR_IDCODE_MASK   (0xff << PMCR_IDCODE_SHIFT)
-#define PMCR_IMP_SHIFT     (24)      /* Bits 24-31: Implementer code */
-#define PMCR_IMP_MASK      (0xff << PMCR_IMP_SHIFT)
+#define PMCR_E                        (1 << 0)  /* Enable all counters */
+#define PMCR_P                        (1 << 1)  /* Reset all counter events (except PMCCNTR) */
+#define PMCR_C                        (1 << 2)  /* Reset cycle counter (PMCCNTR) to zero */
+#define PMCR_D                        (1 << 3)  /* Enable cycle counter clock (PMCCNTR) divider */
+#define PMCR_X                        (1 << 4)  /* Export of events is enabled */
+#define PMCR_DP                       (1 << 5)  /* Disable PMCCNTR if event counting is prohibited */
+#define PMCR_N_SHIFT                  (11)      /* Bits 11-15:  Number of event counters */
+#define PMCR_N_MASK                   (0x1f << PMCR_N_SHIFT)
+#define PMCR_IDCODE_SHIFT             (16)      /* Bits 16-23: Identification code */
+#define PMCR_IDCODE_MASK              (0xff << PMCR_IDCODE_SHIFT)
+#define PMCR_IMP_SHIFT                (24)      /* Bits 24-31: Implementer code */
+#define PMCR_IMP_MASK                 (0xff << PMCR_IMP_SHIFT)
 
 /* 32-bit Performance Monitors Count Enable Set register (PMCNTENSET):
  * CRn=c9, opc1=0, CRm=c12, opc2=1
  */
 
-#define PMCESR_CCES        (1 << 31) /* Bits 31: Count Enable Set Register */
+#define PMCESR_CCES                   (1 << 31) /* Bits 31: Count Enable Set Register */
 
 /* 32-bit Performance Monitors Count Enable Clear register (PMCNTENCLR):
  * CRn=c9, opc1=0, CRm=c12, opc2=2
  */
 
-#define PMCECR_CCEC        (1 << 31) /* Bits 31: Count Enable Clear Register */
+#define PMCECR_CCEC                   (1 << 31) /* Bits 31: Count Enable Clear Register */
 
 /* 32-bit Performance Monitors Overflow Flag Status Register (PMOVSR):
  * CRn=c9, opc1=0, CRm=c12, opc2=3
  */
 
-#define PMOFSR_COF0        (1 << 0)  /* Bits  0: Counter 0 overflow flag */
-#define PMOFSR_COF1        (1 << 1)  /* Bits  1: Counter 1 overflow flag */
-#define PMOFSR_COF2        (1 << 2)  /* Bits  2: Counter 2 overflow flag */
-#define PMOFSR_COF3        (1 << 3)  /* Bits  3: Counter 3 overflow flag */
-#define PMOFSR_COF4        (1 << 4)  /* Bits  4: Counter 4 overflow flag */
-#define PMOFSR_COF5        (1 << 5)  /* Bits  5: Counter 5 overflow flag */
-#define PMOFSR_CCOF        (1 << 31) /* Bits 31: Cycle counter overflow flag */
+#define PMOFSR_COF0                   (1 << 0)  /* Bits  0: Counter 0 overflow flag */
+#define PMOFSR_COF1                   (1 << 1)  /* Bits  1: Counter 1 overflow flag */
+#define PMOFSR_COF2                   (1 << 2)  /* Bits  2: Counter 2 overflow flag */
+#define PMOFSR_COF3                   (1 << 3)  /* Bits  3: Counter 3 overflow flag */
+#define PMOFSR_COF4                   (1 << 4)  /* Bits  4: Counter 4 overflow flag */
+#define PMOFSR_COF5                   (1 << 5)  /* Bits  5: Counter 5 overflow flag */
+#define PMOFSR_CCOF                   (1 << 31) /* Bits 31: Cycle counter overflow flag */
 
 /* 32-bit Performance Monitors Software Increment register (PMSWINC):
  * CRn=c9, opc1=0, CRm=c12, opc2=4
@@ -326,7 +365,7 @@
  * CRn=c9, opc1=0, CRm=c12, opc2=5
  */
 
-#define PMECSR_CS_MASK     (0x1f)    /* Bits 0-5: Counter select */
+#define PMECSR_CS_MASK                (0x1f)    /* Bits 0-5: Counter select */
 
 /* 32-bit Performance Monitors Common Event Identification (PMCEID0):
  * CRn=c9, opc1=0, CRm=c12, opc2=6
@@ -388,22 +427,22 @@
  * CRn=c9, opc1=0, CRm=c14, opc2=0
  */
 
-#define PMUER_UME_SHIFT      (0)       /* Bits 0: User mode enable */
-#define PMUER_UME            (1 << PMUER_UME_SHIFT)
+#define PMUER_UME_SHIFT               (0)       /* Bits 0: User mode enable */
+#define PMUER_UME                     (1 << PMUER_UME_SHIFT)
 
 /* 32-bit Performance Monitors Interrupt Enable Set register (PMINTENSET):
  * CRn=c9, opc1=0, CRm=c14, opc2=1
  */
 
-#define PMIESR_CCNTOIE_SHIFT (31)    /* Bits 31: CCNT overflow interrupt enable. */
-#define PMIESR_CCNTOIE       (1 << PMIESR_CCNTOIE_SHIFT)
+#define PMIESR_CCNTOIE_SHIFT          (31)    /* Bits 31: CCNT overflow interrupt enable. */
+#define PMIESR_CCNTOIE                (1 << PMIESR_CCNTOIE_SHIFT)
 
 /* 32-bit Performance Monitors Interrupt Enable Clear register (PMINTENCLR):
  * CRn=c9, opc1=0, CRm=c14, opc2=2
  */
 
-#define PMIECR_CCNTOIE_SHIFT (31)    /* Bits 31: CCNT overflow interrupt enable. */
-#define PMIECR_CCNTOIE       (1 << PMIECR_CCNTOIE_SHIFT)
+#define PMIECR_CCNTOIE_SHIFT          (31)    /* Bits 31: CCNT overflow interrupt enable. */
+#define PMIECR_CCNTOIE                (1 << PMIECR_CCNTOIE_SHIFT)
 
 /****************************************************************************
  * Assembly Macros
@@ -756,4 +795,4 @@ extern "C"
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* __ARCH_ARM_SRC_ARMV7_A_SCTLR_H */
+#endif /* __ARCH_ARM_SRC_ARM_A_R_SCTLR_H */
