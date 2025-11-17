@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#include <nuttx/mutex.h>
 #include <nuttx/net/net.h>
 
 #include <nuttx/wireless/bluetooth/bt_hci.h>
@@ -118,6 +119,40 @@ extern "C"
 /* The Bluetooth socket interface */
 
 EXTERN const struct sock_intf_s g_bluetooth_sockif;
+
+/* The Bluetooth connections rmutex */
+
+extern rmutex_t g_bluetooth_connections_lock;
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: bluetooth_conn_list_lock
+ *
+ * Description:
+ *   Lock the Bluetooth connection list.
+ *
+ ****************************************************************************/
+
+static inline_function void bluetooth_conn_list_lock(void)
+{
+  nxrmutex_lock(&g_bluetooth_connections_lock);
+}
+
+/****************************************************************************
+ * Name: bluetooth_conn_list_unlock
+ *
+ * Description:
+ *   Unlock the Bluetooth connection list.
+ *
+ ****************************************************************************/
+
+static inline_function void bluetooth_conn_list_unlock(void)
+{
+  nxrmutex_unlock(&g_bluetooth_connections_lock);
+}
 
 /****************************************************************************
  * Public Function Prototypes

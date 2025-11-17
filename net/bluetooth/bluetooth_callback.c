@@ -37,6 +37,7 @@
 #include <nuttx/net/bluetooth.h>
 
 #include "devif/devif.h"
+#include "utils/utils.h"
 #include "bluetooth/bluetooth.h"
 
 #ifdef CONFIG_NET_BLUETOOTH
@@ -71,7 +72,9 @@ uint32_t bluetooth_callback(FAR struct radio_driver_s *radio,
     {
       /* Perform the callback */
 
+      conn_lock(&conn->bc_conn);
       flags = devif_conn_event(&radio->r_dev, flags, conn->bc_conn.list);
+      conn_unlock(&conn->bc_conn);
     }
 
   return flags;
