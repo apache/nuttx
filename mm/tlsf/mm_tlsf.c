@@ -64,6 +64,21 @@ struct mm_delaynode_s
   FAR struct mm_delaynode_s *flink;
 };
 
+struct mm_delayhead_s
+{
+  FAR struct mm_delaynode_s *head;
+
+#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
+  size_t delaycount;
+#endif
+};
+
+#ifdef CONFIG_SMP
+typedef struct mm_delayhead_s mm_delaylist_t[CONFIG_SMP_NCPUS];
+#else
+typedef struct mm_delayhead_s mm_delaylist_t;
+#endif
+
 struct mm_heap_s
 {
   /* Mutually exclusive access to this data set is enforced with
@@ -104,11 +119,7 @@ struct mm_heap_s
 
   /* Free delay list, for some situation can't do free immediately */
 
-  struct mm_delaynode_s *mm_delaylist[CONFIG_SMP_NCPUS];
-
-#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
-  size_t mm_delaycount[CONFIG_SMP_NCPUS];
-#endif
+  mm_delaylist_t delay;
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
   struct procfs_meminfo_entry_s mm_procfs;
@@ -341,6 +352,20 @@ static void memdump_backtrace(FAR struct mm_heap_s *heap,
 #endif
 
 /****************************************************************************
+ * Name: get_delayhead
+ ****************************************************************************/
+
+static inline_function
+FAR struct mm_delayhead_s *get_delayhead(FAR struct mm_heap_s *heap)
+{
+#ifdef CONFIG_SMP
+  return &heap->delay[this_cpu()];
+#else
+  return &heap->delay;
+#endif
+}
+
+/****************************************************************************
  * Name: add_delaylist
  ****************************************************************************/
 
@@ -348,12 +373,14 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem,
                           bool asan_check)
 {
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  FAR struct mm_delayhead_s *delay;
   FAR struct mm_delaynode_s *tmp = mem;
   irqstate_t flags;
 
   /* Delay the deallocation until a more appropriate time. */
 
   flags = mm_lock_irq(heap);
+  delay = get_delayhead(heap);
 
   if (asan_check)
     {
@@ -365,12 +392,12 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem,
       UNUSED(size);
     }
 
-  tmp->flink = heap->mm_delaylist[this_cpu()];
-  heap->mm_delaylist[this_cpu()] = tmp;
+  tmp->flink  = delay->head;
+  delay->head = tmp;
 
-#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
-  heap->mm_delaycount[this_cpu()]++;
-#endif
+#  if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
+  delay->delaycount++;
+#  endif
 
   mm_unlock_irq(heap, flags);
 #endif
@@ -431,28 +458,29 @@ static bool free_delaylist(FAR struct mm_heap_s *heap, bool force)
 {
   bool ret = false;
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  FAR struct mm_delayhead_s *delay;
   FAR struct mm_delaynode_s *tmp;
   irqstate_t flags;
 
   /* Move the delay list to local */
 
   flags = mm_lock_irq(heap);
+  delay = get_delayhead(heap);
 
-  tmp = heap->mm_delaylist[this_cpu()];
+  tmp = delay->head;
 
-#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
-  if (tmp == NULL ||
-      (!force &&
-        heap->mm_delaycount[this_cpu()] < CONFIG_MM_FREE_DELAYCOUNT_MAX))
+#  if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
+  if (tmp == NULL || (!force &&
+      delay->delaycount < CONFIG_MM_FREE_DELAYCOUNT_MAX))
     {
       mm_unlock_irq(heap, flags);
       return false;
     }
 
-  heap->mm_delaycount[this_cpu()] = 0;
-#endif
+  delay->delaycount = 0;
+#  endif
 
-  heap->mm_delaylist[this_cpu()] = NULL;
+  delay->head = NULL;
 
   mm_unlock_irq(heap, flags);
 

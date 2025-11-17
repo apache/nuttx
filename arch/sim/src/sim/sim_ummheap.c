@@ -109,16 +109,28 @@ struct mm_delaynode_s
   struct mm_delaynode_s *flink;
 };
 
+struct mm_delayhead_s
+{
+  struct mm_delaynode_s *head;
+
+#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
+  size_t delaycount;
+#endif
+};
+
+#ifdef CONFIG_SMP
+typedef struct mm_delayhead_s mm_delaylist_t[CONFIG_SMP_NCPUS];
+#else
+typedef struct mm_delayhead_s mm_delaylist_t;
+#endif
+
 struct mm_heap_s
 {
   spinlock_t lock;
 
-  struct mm_delaynode_s *delaylist[CONFIG_SMP_NCPUS];
   struct list_node alloclist;
 
-#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
-  size_t delaycount[CONFIG_SMP_NCPUS];
-#endif
+  mm_delaylist_t delay;
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
   struct procfs_meminfo_entry_s procfs;
@@ -251,8 +263,19 @@ static void *init_allocnode(struct mm_heap_s *heap, void *alloc_mem,
   return mem;
 }
 
+static inline_function
+struct mm_delayhead_s *get_delayhead(struct mm_heap_s *heap)
+{
+#ifdef CONFIG_SMP
+  return &heap->delay[this_cpu()];
+#else
+  return &heap->delay;
+#endif
+}
+
 static void add_delaylist(struct mm_heap_s *heap, void *mem)
 {
+  struct mm_delayhead_s *delay = get_delayhead(heap);
   struct mm_delaynode_s *tmp = mem;
   irqstate_t flags;
 
@@ -260,11 +283,11 @@ static void add_delaylist(struct mm_heap_s *heap, void *mem)
 
   flags = spin_lock_irqsave(&heap->lock);
 
-  tmp->flink = heap->delaylist[this_cpu()];
-  heap->delaylist[this_cpu()] = tmp;
+  tmp->flink  = delay->head;
+  delay->head = tmp;
 
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
-  heap->delaycount[this_cpu()]++;
+  delay->delaycount++;
 #endif
 
   spin_unlock_irqrestore(&heap->lock, flags);
@@ -305,28 +328,28 @@ static void forcefree(struct mm_heap_s *heap, void *mem)
 
 static bool free_delaylist(struct mm_heap_s *heap, bool force)
 {
-  bool ret = false;
+  struct mm_delayhead_s *delay = get_delayhead(heap);
   struct mm_delaynode_s *tmp;
   irqstate_t flags;
+  bool ret = false;
 
   /* Move the delay list to local */
 
   flags = spin_lock_irqsave(&heap->lock);
 
-  tmp = heap->delaylist[this_cpu()];
+  tmp = delay->head;
 
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
-  if (tmp == NULL ||
-      (!force &&
-        heap->delaycount[this_cpu()] < CONFIG_MM_FREE_DELAYCOUNT_MAX))
+  if (tmp == NULL || (!force &&
+       delay->delaycount < CONFIG_MM_FREE_DELAYCOUNT_MAX))
     {
       spin_unlock_irqrestore(&heap->lock, flags);
       return false;
     }
 
-  heap->delaycount[this_cpu()] = 0;
+  delay->delaycount = 0;
 #endif
-  heap->delaylist[this_cpu()] = NULL;
+  delay->head = NULL;
 
   spin_unlock_irqrestore(&heap->lock, flags);
 
