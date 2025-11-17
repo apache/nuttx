@@ -45,6 +45,7 @@
 #include "netdev/netdev.h"
 #include "devif/devif.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
 #include "ieee802154/ieee802154.h"
 
 #ifdef CONFIG_NET_IEEE802154
@@ -341,7 +342,6 @@ ssize_t ieee802154_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
    * locked because we don't want anything to happen until we are ready.
    */
 
-  net_lock();
   memset(&state, 0, sizeof(struct ieee802154_recvfrom_s));
 
   state.ir_buflen = len;
@@ -358,6 +358,8 @@ ssize_t ieee802154_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       goto errout_with_lock;
     }
 
+  conn_dev_lock(&conn->sconn, &radio->r_dev);
+
   /* Before we wait for data, let's check if there are already frame(s)
    * waiting in the RX queue.
    */
@@ -367,7 +369,7 @@ ssize_t ieee802154_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
     {
       /* Good newe!  We have a frame and we are done. */
 
-      net_unlock();
+      conn_dev_unlock(&conn->sconn, &radio->r_dev);
       return ret;
     }
 
@@ -388,7 +390,8 @@ ssize_t ieee802154_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
        * the task sleeps and automatically re-locked when the task restarts.
        */
 
-      net_sem_wait(&state.ir_sem);
+      conn_dev_sem_timedwait(&state.ir_sem, true, UINT_MAX,
+                             &conn->sconn, &radio->r_dev);
 
       /* Make sure that no further events are processed */
 
@@ -403,7 +406,7 @@ ssize_t ieee802154_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   nxsem_destroy(&state.ir_sem);
 
 errout_with_lock:
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, &radio->r_dev);
   return ret;
 }
 

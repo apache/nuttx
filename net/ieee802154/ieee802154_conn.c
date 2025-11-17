@@ -55,6 +55,14 @@
 #endif
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* The IEEE 802.15.4 connections rmutex */
+
+rmutex_t g_ieee802154_connections_lock = NXRMUTEX_INITIALIZER;
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -91,7 +99,7 @@ FAR struct ieee802154_conn_s *ieee802154_conn_alloc(void)
 
   /* The free list is protected by the network lock. */
 
-  net_lock();
+  ieee802154_conn_list_lock();
 
   conn = NET_BUFPOOL_TRYALLOC(g_ieee802154_connections);
   if (conn)
@@ -99,7 +107,7 @@ FAR struct ieee802154_conn_s *ieee802154_conn_alloc(void)
       dq_addlast(&conn->sconn.node, &g_active_ieee802154_connections);
     }
 
-  net_unlock();
+  ieee802154_conn_list_unlock();
   return conn;
 }
 
@@ -123,7 +131,7 @@ void ieee802154_conn_free(FAR struct ieee802154_conn_s *conn)
 
   /* Remove the connection from the active list */
 
-  net_lock();
+  ieee802154_conn_list_lock();
   dq_rem(&conn->sconn.node, &g_active_ieee802154_connections);
 
   /* Check if there any any frames attached to the container */
@@ -151,7 +159,7 @@ void ieee802154_conn_free(FAR struct ieee802154_conn_s *conn)
 
   NET_BUFPOOL_FREE(g_ieee802154_connections, conn);
 
-  net_unlock();
+  ieee802154_conn_list_unlock();
 }
 
 /****************************************************************************

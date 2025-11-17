@@ -469,7 +469,7 @@ static ssize_t ieee802154_sendto(FAR struct socket *psock,
    * ready.
    */
 
-  net_lock();
+  conn_dev_lock(&conn->sconn, &radio->r_dev);
   memset(&state, 0, sizeof(struct ieee802154_sendto_s));
   nxsem_init(&state.is_sem, 0, 0); /* Doesn't really fail */
 
@@ -504,7 +504,8 @@ static ssize_t ieee802154_sendto(FAR struct socket *psock,
            * net_sem_wait will also terminate if a signal is received.
            */
 
-          ret = net_sem_wait(&state.is_sem);
+          ret = conn_dev_sem_timedwait(&state.is_sem, true, UINT_MAX,
+                                       &conn->sconn, &radio->r_dev);
 
           /* Make sure that no further events are processed */
 
@@ -513,7 +514,7 @@ static ssize_t ieee802154_sendto(FAR struct socket *psock,
     }
 
   nxsem_destroy(&state.is_sem);
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, &radio->r_dev);
 
   /* Check for a errors, Errors are signaled by negative errno values
    * for the send length
