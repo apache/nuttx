@@ -189,7 +189,7 @@ int usrsock_getsockopt(FAR struct socket *psock, int level, int option,
       return -ENOPROTOOPT;
     }
 
-  net_lock();
+  usrsock_lock();
 
   if (conn->state == USRSOCK_CONN_STATE_UNINITIALIZED ||
       conn->state == USRSOCK_CONN_STATE_ABORTED)
@@ -227,7 +227,7 @@ int usrsock_getsockopt(FAR struct socket *psock, int level, int option,
     {
       /* Wait for completion of request. */
 
-      net_sem_wait_uninterruptible(&state.reqstate.recvsem);
+      usrsock_sem_timedwait(&state.reqstate.recvsem, false, UINT_MAX);
       ret = state.reqstate.result;
 
       DEBUGASSERT(state.valuelen <= *value_len);
@@ -251,7 +251,7 @@ int usrsock_getsockopt(FAR struct socket *psock, int level, int option,
     }
 
 errout_unlock:
-  net_unlock();
+  usrsock_unlock();
   return ret;
 }
 

@@ -166,7 +166,7 @@ int usrsock_getpeername(FAR struct socket *psock,
   socklen_t outaddrlen = 0;
   int ret;
 
-  net_lock();
+  usrsock_lock();
 
   if (conn->state == USRSOCK_CONN_STATE_UNINITIALIZED ||
       conn->state == USRSOCK_CONN_STATE_ABORTED)
@@ -204,7 +204,7 @@ int usrsock_getpeername(FAR struct socket *psock,
     {
       /* Wait for completion of request. */
 
-      net_sem_wait_uninterruptible(&state.reqstate.recvsem);
+      usrsock_sem_timedwait(&state.reqstate.recvsem, false, UINT_MAX);
       ret = state.reqstate.result;
 
       DEBUGASSERT(state.valuelen <= *addrlen);
@@ -222,7 +222,7 @@ int usrsock_getpeername(FAR struct socket *psock,
   usrsock_teardown_data_request_callback(&state);
 
 errout_unlock:
-  net_unlock();
+  usrsock_unlock();
 
   *addrlen = outaddrlen;
   return ret;
