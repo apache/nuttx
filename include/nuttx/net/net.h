@@ -516,6 +516,31 @@ int net_sem_timedwait_uninterruptible(FAR sem_t *sem, unsigned int timeout);
 
 int net_sem_wait_uninterruptible(FAR sem_t *sem);
 
+/****************************************************************************
+ * Name: net_sem_timedwait2
+ *
+ * Description:
+ *   Atomically wait for sem (or a timeout) while temporarily releasing
+ *   the lock on the conn and device.
+ *
+ * Input Parameters:
+ *   sem           - A reference to the semaphore to be taken.
+ *   interruptible - An indication of whether the wait is interruptible
+ *   timeout       - The relative time to wait until a timeout is declared.
+ *   mutex1        - The lock to be released during waiting and restored
+ *                   later, can be NULL.
+ *   mutex2        - Same as mutex1, but released after mutex1.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int net_sem_timedwait2(FAR sem_t *sem, bool interruptible,
+                       unsigned int timeout, FAR rmutex_t *mutex1,
+                       FAR rmutex_t *mutex2);
+
 #ifdef CONFIG_MM_IOB
 
 /****************************************************************************
