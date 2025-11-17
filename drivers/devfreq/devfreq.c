@@ -27,6 +27,7 @@
 #include <nuttx/devfreq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
+#include <nuttx/spinlock.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -37,7 +38,7 @@
  ****************************************************************************/
 
 static struct list_node g_devfreq_list = LIST_INITIAL_VALUE(g_devfreq_list);
-static mutex_t g_devfreq_list_lock = NXMUTEX_INITIALIZER;
+static spinlock_t g_devfreq_list_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Function Prototypes
@@ -464,6 +465,7 @@ FAR struct devfreq_s *devfreq_register(
                           FAR void *priv)
 {
   FAR struct devfreq_s *devfreq = devfreq_find_by_name(name);
+  irqstate_t flags;
 
   if (devfreq || !driver)
     {
@@ -512,9 +514,9 @@ FAR struct devfreq_s *devfreq_register(
 
   devfreq_start_governor(devfreq);
 
-  nxmutex_lock(&g_devfreq_list_lock);
+  flags = spin_lock_irqsave(&g_devfreq_list_lock);
   list_add_tail(&g_devfreq_list, &devfreq->node);
-  nxmutex_unlock(&g_devfreq_list_lock);
+  spin_unlock_irqrestore(&g_devfreq_list_lock, flags);
 
   return devfreq;
 
@@ -541,14 +543,16 @@ out:
 
 int devfreq_unregister(FAR struct devfreq_s *devfreq)
 {
+  irqstate_t flags;
+
   if (!devfreq)
     {
       return -EINVAL;
     }
 
-  nxmutex_lock(&g_devfreq_list_lock);
+  flags = spin_lock_irqsave(&g_devfreq_list_lock);
   list_delete(&devfreq->node);
-  nxmutex_unlock(&g_devfreq_list_lock);
+  spin_unlock_irqrestore(&g_devfreq_list_lock, flags);
 
   devfreq_stop_governor(devfreq);
   devfreq_exit_governor(devfreq);
@@ -836,24 +840,25 @@ int devfreq_qos_remove_request(FAR struct devfreq_s *devfreq,
 FAR struct devfreq_s *devfreq_find_by_name(FAR const char *name)
 {
   FAR struct devfreq_s *devfreq;
+  irqstate_t flags;
 
   if (!name)
     {
       return NULL;
     }
 
-  nxmutex_lock(&g_devfreq_list_lock);
+  flags = spin_lock_irqsave(&g_devfreq_list_lock);
 
   list_for_every_entry(&g_devfreq_list, devfreq, struct devfreq_s, node)
     {
       if (!strcmp(devfreq->name, name))
         {
-          nxmutex_unlock(&g_devfreq_list_lock);
+          spin_unlock_irqrestore(&g_devfreq_list_lock, flags);
           return devfreq;
         }
     }
 
-  nxmutex_unlock(&g_devfreq_list_lock);
+  spin_unlock_irqrestore(&g_devfreq_list_lock, flags);
   return NULL;
 }
 
@@ -874,19 +879,20 @@ FAR struct devfreq_s *devfreq_find_by_name(FAR const char *name)
 FAR struct devfreq_s *devfreq_find_by_index(size_t index)
 {
   FAR struct devfreq_s *devfreq;
+  irqstate_t flags;
   size_t i = 0;
 
-  nxmutex_lock(&g_devfreq_list_lock);
+  flags = spin_lock_irqsave(&g_devfreq_list_lock);
 
   list_for_every_entry(&g_devfreq_list, devfreq, struct devfreq_s, node)
     {
       if (index == i++)
         {
-          nxmutex_unlock(&g_devfreq_list_lock);
+          spin_unlock_irqrestore(&g_devfreq_list_lock, flags);
           return devfreq;
         }
     }
 
-  nxmutex_unlock(&g_devfreq_list_lock);
+  spin_unlock_irqrestore(&g_devfreq_list_lock, flags);
   return NULL;
 }
