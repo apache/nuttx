@@ -31,6 +31,8 @@
 #include <errno.h>
 #include <nuttx/debug.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -54,7 +56,10 @@ int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
                                   int protocol)
 {
   linfo("attr=%p protocol=%d\n", attr, protocol);
-  DEBUGASSERT(attr != NULL);
+  if (!PTHREAD_MUTEXATTR_IS_VALID(attr))
+    {
+      return EINVAL;
+    }
 
   switch (protocol)
     {
@@ -81,7 +86,7 @@ int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
 #endif /* CONFIG_PRIORITY_PROTECT */
 
       default:
-        return EINVAL;
+        return ENOTSUP;
     }
 
   return OK;

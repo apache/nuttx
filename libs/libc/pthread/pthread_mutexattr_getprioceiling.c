@@ -28,6 +28,8 @@
 #include <pthread.h>
 #include <errno.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -54,7 +56,7 @@ int pthread_mutexattr_getprioceiling(FAR const pthread_mutexattr_t *attr,
                                      FAR int *prioceiling)
 {
 #ifdef CONFIG_PRIORITY_PROTECT
-  if (attr != NULL && prioceiling != NULL)
+  if (PTHREAD_MUTEXATTR_IS_VALID(attr) && prioceiling != NULL)
     {
       *prioceiling = attr->ceiling;
       return OK;

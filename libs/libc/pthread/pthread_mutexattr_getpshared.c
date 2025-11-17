@@ -30,6 +30,8 @@
 #include <errno.h>
 #include <nuttx/debug.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -58,7 +60,7 @@ int pthread_mutexattr_getpshared(FAR const pthread_mutexattr_t *attr,
 
   linfo("attr=%p pshared=%p\n", attr, pshared);
 
-  if (!attr || !pshared)
+  if (!PTHREAD_MUTEXATTR_IS_VALID(attr) || !pshared)
     {
       ret = EINVAL;
     }

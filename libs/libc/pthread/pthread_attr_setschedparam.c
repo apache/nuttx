@@ -32,6 +32,8 @@
 #include <nuttx/debug.h>
 #include <errno.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -59,7 +61,12 @@ int pthread_attr_setschedparam(FAR pthread_attr_t *attr,
 
   linfo("attr=%p param=%p\n", attr, param);
 
-  if (!attr || !param)
+  /* When the attribute object specified by attr is invalid,
+   * then a call to pthread_attr_setschedparam(attr, param)
+   * returns EINVAL.
+   */
+
+  if (!PTHREAD_ATTR_IS_VALID(attr) || !param)
     {
       ret = EINVAL;
     }

@@ -29,6 +29,8 @@
 
 #include <pthread.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -59,6 +61,17 @@ int pthread_mutex_setprioceiling(FAR pthread_mutex_t *mutex,
   int ret = EINVAL;
 
 #ifdef CONFIG_PRIORITY_PROTECT
+  /* the implementation detects that the mutex argument does
+   * not refer to an initialized mutex:
+   * a call to pthread_mutex_setprioceiling(mutex, prioceiling, old_ceiling)
+   * returns EINVAL.
+   */
+
+  if (!PTHREAD_MUTEX_IS_VALID(mutex))
+    {
+      return EINVAL;
+    }
+
   ret = pthread_mutex_lock(mutex);
   if (ret != OK)
     {

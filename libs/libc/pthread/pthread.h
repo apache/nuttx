@@ -75,6 +75,73 @@
 
 #define COND_WAIT_COUNT(cond) ((FAR atomic_t *)&(cond)->wait_count)
 
+/* Validate if a pthread_attr_t object is valid.
+ *
+ * This macro checks:
+ * - The attribute pointer is not NULL
+ * - The priority field is within valid scheduling priority range
+ */
+
+#define PTHREAD_ATTR_IS_VALID(attr) \
+  ((attr) != NULL && \
+   (attr)->priority >= SCHED_PRIORITY_MIN && \
+   (attr)->priority <= SCHED_PRIORITY_MAX)
+
+/* Validate if a pthread_condattr_t object is valid.
+ *
+ * This macro checks:
+ * - The attribute pointer is not NULL
+ * - The pshared field contains a valid value
+ */
+
+#define PTHREAD_CONDATTR_IS_VALID(attr) \
+  ((attr) != NULL && \
+   ((attr)->pshared == PTHREAD_PROCESS_PRIVATE || \
+    (attr)->pshared == PTHREAD_PROCESS_SHARED))
+
+/* Validate if a pthread_cond_t object is valid.
+ *
+ * This macro checks:
+ * - The condition pointer is not NULL
+ * - The clockid field contains a valid value
+ */
+
+#define PTHREAD_COND_IS_VALID(cond) \
+  ((cond) != NULL && \
+   ((cond)->clockid == CLOCK_REALTIME || \
+    (cond)->clockid == CLOCK_MONOTONIC))
+
+/* Validate if a pthread_mutexattr_t object is valid.
+ *
+ * This macro checks:
+ * - The attribute pointer is not NULL
+ * - The pshared field contains a valid value
+ */
+
+#define PTHREAD_MUTEXATTR_IS_VALID(attr) \
+  ((attr) != NULL && \
+   ((attr)->pshared == PTHREAD_PROCESS_PRIVATE || \
+    (attr)->pshared == PTHREAD_PROCESS_SHARED))
+
+/* Validate if a pthread_mutex_t object is valid.
+ *
+ * This macro checks:
+ * - The mutex pointer is not NULL
+ * - The underlying semaphore is a mutex,
+ *   when initialized, the flag SEM_TYPE_MUTEX is set.
+ *   when destroyed, the flag SEM_TYPE_MUTEX is cleared.
+ */
+
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
+#  define PTHREAD_MUTEX_IS_VALID(mutex) \
+    ((mutex) != NULL && \
+     ((mutex)->mutex.mutex.sem.flags & SEM_TYPE_MUTEX))
+#else
+#  define PTHREAD_MUTEX_IS_VALID(mutex) \
+    ((mutex) != NULL && \
+     ((mutex)->mutex.sem.flags & SEM_TYPE_MUTEX))
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

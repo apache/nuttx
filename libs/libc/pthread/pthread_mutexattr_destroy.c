@@ -30,6 +30,8 @@
 #include <errno.h>
 #include <nuttx/debug.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -56,7 +58,12 @@ int pthread_mutexattr_destroy(FAR pthread_mutexattr_t *attr)
 
   linfo("attr=%p\n", attr);
 
-  if (!attr)
+  /* If the implementation detects that the value specified
+   * by attr is invalid:
+   * a call to pthread_mutexattr_destroy(attr) returns EINVAL.
+   */
+
+  if (!PTHREAD_MUTEXATTR_IS_VALID(attr))
     {
       ret = EINVAL;
     }

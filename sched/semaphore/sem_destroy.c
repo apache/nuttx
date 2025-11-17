@@ -90,5 +90,6 @@ int nxsem_destroy(FAR sem_t *sem)
   /* Release holders of the semaphore */
 
   nxsem_destroyholder(sem);
+  sem->flags = 0;
   return OK;
 }

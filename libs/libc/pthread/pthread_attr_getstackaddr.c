@@ -27,6 +27,8 @@
 #include <pthread.h>
 #include <errno.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -54,7 +56,12 @@ int pthread_attr_getstackaddr(FAR const pthread_attr_t *attr,
 {
   int ret;
 
-  if (!attr || !stackaddr)
+  /* When the attribute object specified by attr is invalid,
+   * then a call to pthread_attr_getstackaddr(attr, stackaddr)
+   * returns EINVAL.
+   */
+
+  if (!PTHREAD_ATTR_IS_VALID(attr) || !stackaddr)
     {
       ret = EINVAL;
     }

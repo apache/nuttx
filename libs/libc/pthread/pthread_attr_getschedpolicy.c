@@ -30,6 +30,8 @@
 #include <nuttx/debug.h>
 #include <errno.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -58,7 +60,12 @@ int pthread_attr_getschedpolicy(FAR const pthread_attr_t *attr,
 
   linfo("attr=%p policy=%p\n", attr, policy);
 
-  if (!attr || !policy)
+  /* When the attribute object specified by attr is invalid,
+   * then a call to pthread_attr_getschedpolicy(attr, policy)
+   * returns EINVAL.
+   */
+
+  if (!PTHREAD_ATTR_IS_VALID(attr) || !policy)
     {
       ret = EINVAL;
     }

@@ -28,6 +28,8 @@
 #include <pthread.h>
 #include <errno.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -52,7 +54,7 @@
 
 int pthread_mutexattr_settype(FAR pthread_mutexattr_t *attr, int type)
 {
-  if (attr && type >= PTHREAD_MUTEX_NORMAL &&
+  if (PTHREAD_MUTEXATTR_IS_VALID(attr) && type >= PTHREAD_MUTEX_NORMAL &&
       type <= PTHREAD_MUTEX_RECURSIVE)
     {
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES

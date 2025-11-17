@@ -63,28 +63,50 @@
  * forward and backward as the system time-of-day clock is changed.
  */
 
-#define CLOCK_REALTIME            0
+#define CLOCK_REALTIME            1
 
 /* Clock that cannot be set and represents monotonic time since some
  * unspecified starting point. It is not affected by changes in the
  * system time-of-day clock.
  */
 
-#define CLOCK_MONOTONIC           1
+#define CLOCK_MONOTONIC           2
 
 /* Clock that measures CPU time consumed by this process (i.e., CPU
  * time consumed by all threads in the process).
  */
 
-#define CLOCK_PROCESS_CPUTIME_ID  2
+#define CLOCK_PROCESS_CPUTIME_ID  3
 
 /* Clock that measures CPU time consumed by this thread */
 
-#define CLOCK_THREAD_CPUTIME_ID   3
+#define CLOCK_THREAD_CPUTIME_ID   4
 
 /* Monotonic system-wide clock that includes time spent in suspension. */
 
-#define CLOCK_BOOTTIME            4
+#define CLOCK_BOOTTIME            5
+
+/* Clock sources that are managed via file descriptors(e.g. PTP driver) */
+
+#define CLOCK_FD                  6
+
+/* The following are the bit fields of the clockid_t
+ * bit 0~2: the clock type
+ * CLOCK_REALTIME           - 1
+ * CLOCK_MONOTONIC          - 2
+ * CLOCK_PROCESS_CPUTIME_ID - 3
+ * CLOCK_THREAD_CPUTIME_ID  - 4
+ * CLOCK_BOOTTIME           - 5
+ * CLOCK_FD                 - 6
+ *
+ * if the clockid value exceeds CLOCK_MASK, it indicates a dynamic clockid.
+ * bit 3~31: the fd, pid or tid value
+ *
+ * CLOCK_MASK extracts the clock type from the clockid_t
+ */
+
+#define CLOCK_MASK                7
+#define CLOCK_SHIFT               3
 
 /* This is a flag that may be passed to the timer_settime() and
  * clock_nanosleep() functions.

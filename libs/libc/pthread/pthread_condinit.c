@@ -31,6 +31,8 @@
 #include <nuttx/debug.h>
 #include <errno.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -58,7 +60,16 @@ int pthread_cond_init(FAR pthread_cond_t *cond,
 
   sinfo("cond=%p attr=%p\n", cond, attr);
 
-  if (cond == NULL)
+  /* If the implementation detects that the attributes object
+   * specified by attr is invalid:
+   * a call to pthread_cond_init(cond, attr) returns EINVAL without
+   * modifying the state of the condition variable.
+   */
+
+  if (cond == NULL ||
+      (attr &&
+       attr->pshared != PTHREAD_PROCESS_PRIVATE &&
+       attr->pshared != PTHREAD_PROCESS_SHARED))
     {
       ret = EINVAL;
     }

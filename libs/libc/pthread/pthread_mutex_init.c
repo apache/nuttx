@@ -62,7 +62,16 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
 
   sinfo("mutex=%p attr=%p\n", mutex, attr);
 
-  if (!mutex)
+  /* If the implementation detects that the mutex attributes object
+   * specified by attr is invalid:
+   * a call to pthread_mutex_init(mutex, attr) returns EINVAL
+   * without modifying the state of the mutex.
+   */
+
+  if (!mutex ||
+      (attr &&
+       attr->pshared != PTHREAD_PROCESS_PRIVATE &&
+       attr->pshared != PTHREAD_PROCESS_SHARED))
     {
       return EINVAL;
     }

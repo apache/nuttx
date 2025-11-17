@@ -30,6 +30,8 @@
 #include <errno.h>
 #include <nuttx/debug.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -58,7 +60,12 @@ int pthread_condattr_getpshared(FAR const pthread_condattr_t *attr,
 {
   int ret = OK;
 
-  if (!attr || !pshared)
+  /* When the attribute object specified by attr is invalid,
+   * then a call to pthread_condattr_getpshared(attr, pshared)
+   * returns EINVAL.
+   */
+
+  if (!PTHREAD_CONDATTR_IS_VALID(attr) || !pshared)
     {
       ret = EINVAL;
     }
