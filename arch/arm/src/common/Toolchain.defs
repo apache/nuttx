@@ -32,6 +32,10 @@
 #                   reliable code generation.
 #
 
+ifneq ($(filter y,$(CONFIG_ARCH_ARMV7A) $(CONFIG_ARCH_ARMV7R) $(CONFIG_ARCH_ARMV8R)),)
+  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)arm$(DELIM)src$(DELIM)arm_a_r
+endif
+
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   ARCHOPTIMIZATION += $(CONFIG_DEBUG_OPTLEVEL)
 else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
