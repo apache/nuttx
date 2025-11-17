@@ -45,12 +45,14 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem,
                           bool asan_check)
 {
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  FAR struct mm_delayhead_s *delay;
   FAR struct mm_delaynode_s *tmp = mem;
   irqstate_t flags;
 
   /* Delay the deallocation until a more appropriate time. */
 
   flags = mm_lock_irq(heap);
+  delay = get_delayhead(heap);
   kasan_bypass(true);
 
 #ifdef CONFIG_DEBUG_ASSERTIONS
@@ -76,11 +78,11 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem,
       kasan_poison(mem, size);
     }
 
-  tmp->flink = heap->mm_delaylist[this_cpu()];
-  heap->mm_delaylist[this_cpu()] = tmp;
+  tmp->flink  = delay->head;
+  delay->head = tmp;
 
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
-  heap->mm_delaycount[this_cpu()]++;
+  delay->delaycount++;
 #endif
 
   kasan_bypass(false);
@@ -96,7 +98,7 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem,
  * Name: mm_forcefree
  *
  * Description:
- *   Heap mem relase, add to chunk.
+ *   Heap mem release, add to chunk.
  *
  ****************************************************************************/
 

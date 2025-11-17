@@ -60,29 +60,30 @@ static bool free_delaylist(FAR struct mm_heap_s *heap, bool force)
 {
   bool ret = false;
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  FAR struct mm_delayhead_s *delay;
   FAR struct mm_delaynode_s *tmp;
   irqstate_t flags;
 
   /* Move the delay list to local */
 
   flags = mm_lock_irq(heap);
+  delay = get_delayhead(heap);
   kasan_bypass(true);
 
-  tmp = heap->mm_delaylist[this_cpu()];
+  tmp = delay->head;
 
-#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
-  if (tmp == NULL ||
-      (!force &&
-        heap->mm_delaycount[this_cpu()] < CONFIG_MM_FREE_DELAYCOUNT_MAX))
+#  if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
+  if (tmp == NULL || (!force &&
+      delay->delaycount < CONFIG_MM_FREE_DELAYCOUNT_MAX))
     {
       mm_unlock_irq(heap, flags);
       return false;
     }
 
-  heap->mm_delaycount[this_cpu()] = 0;
-#endif
+  delay->delaycount = 0;
+#  endif
 
-  heap->mm_delaylist[this_cpu()] = NULL;
+  delay->head = NULL;
 
   kasan_bypass(false);
   mm_unlock_irq(heap, flags);
