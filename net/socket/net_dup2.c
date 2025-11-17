@@ -39,6 +39,7 @@
 #include "inet/inet.h"
 #include "tcp/tcp.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
 
 /****************************************************************************
  * Public Functions
@@ -65,7 +66,7 @@ int psock_dup2(FAR struct socket *psock1, FAR struct socket *psock2)
 {
   /* Parts of this operation need to be atomic */
 
-  net_lock();
+  conn_lock(psock1->s_conn);
 
   /* Duplicate the relevant socket state (zeroing everything else) */
 
@@ -84,7 +85,7 @@ int psock_dup2(FAR struct socket *psock1, FAR struct socket *psock2)
               psock2->s_sockif->si_addref != NULL);
   psock2->s_sockif->si_addref(psock2);
 
-  net_unlock();
+  conn_unlock(psock1->s_conn);
 
   return OK;
 }
