@@ -241,8 +241,9 @@ void tricore_earlyserialinit(void);
 
 /* System Timer *************************************************************/
 
-struct oneshot_lowerhalf_s *
-tricore_systimer_initialize(volatile void *tbase, int irq, uint64_t freq);
+void tricore_systimer_initialize(volatile void *tbase,
+                                 int irq,
+                                 uint64_t freq);
 
 /* Debug ********************************************************************/
 
