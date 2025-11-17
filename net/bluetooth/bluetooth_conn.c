@@ -56,6 +56,14 @@
 #endif
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* The Bluetooth connections rmutex */
+
+rmutex_t g_bluetooth_connections_lock = NXRMUTEX_INITIALIZER;
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -96,7 +104,7 @@ FAR struct bluetooth_conn_s *bluetooth_conn_alloc(void)
 
   /* The free list is protected by the network lock */
 
-  net_lock();
+  bluetooth_conn_list_lock();
 
   conn = NET_BUFPOOL_TRYALLOC(g_bluetooth_connections);
   if (conn)
@@ -110,7 +118,7 @@ FAR struct bluetooth_conn_s *bluetooth_conn_alloc(void)
       dq_addlast(&conn->bc_conn.node, &g_active_bluetooth_connections);
     }
 
-  net_unlock();
+  bluetooth_conn_list_unlock();
   return conn;
 }
 
@@ -134,7 +142,7 @@ void bluetooth_conn_free(FAR struct bluetooth_conn_s *conn)
 
   /* Remove the connection from the active list */
 
-  net_lock();
+  bluetooth_conn_list_lock();
   dq_rem(&conn->bc_conn.node, &g_active_bluetooth_connections);
 
   /* Check if there any any frames attached to the container */
@@ -162,7 +170,7 @@ void bluetooth_conn_free(FAR struct bluetooth_conn_s *conn)
 
   NET_BUFPOOL_FREE(g_bluetooth_connections, conn);
 
-  net_unlock();
+  bluetooth_conn_list_unlock();
 }
 
 /****************************************************************************
