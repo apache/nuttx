@@ -54,6 +54,14 @@
 #endif
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Global protection lock for usrsock socket */
+
+rmutex_t g_usrsock_lock = NXRMUTEX_INITIALIZER;
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -95,6 +103,7 @@ FAR struct usrsock_conn_s *usrsock_alloc(void)
       /* Make sure that the connection is marked as uninitialized */
 
       nxsem_init(&conn->resp.sem, 0, 1);
+      nxrmutex_init(&conn->sconn.s_lock);
       conn->usockid = USRSOCK_USOCKID_INVALID;
       conn->state = USRSOCK_CONN_STATE_UNINITIALIZED;
 
@@ -131,6 +140,7 @@ void usrsock_free(FAR struct usrsock_conn_s *conn)
   /* Reset structure */
 
   nxsem_destroy(&conn->resp.sem);
+  nxrmutex_destroy(&conn->sconn.s_lock);
 
   /* Free the connection. */
 
@@ -214,7 +224,7 @@ int usrsock_setup_request_callback(FAR struct usrsock_conn_s *conn,
 
       if ((flags & USRSOCK_EVENT_REQ_COMPLETE) != 0)
         {
-          net_sem_wait_uninterruptible(&conn->resp.sem);
+          usrsock_sem_timedwait(&conn->resp.sem, false, UINT_MAX);
           pstate->unlock = true;
         }
 

@@ -150,7 +150,7 @@ int usrsock_listen(FAR struct socket *psock, int backlog)
 
   int ret;
 
-  net_lock();
+  usrsock_lock();
 
   if (conn->state == USRSOCK_CONN_STATE_UNINITIALIZED ||
       conn->state == USRSOCK_CONN_STATE_ABORTED)
@@ -210,7 +210,7 @@ int usrsock_listen(FAR struct socket *psock, int backlog)
 
   /* Wait for completion of request (or signal). */
 
-  ret = net_sem_wait(&state.recvsem);
+  ret = usrsock_sem_timedwait(&state.recvsem, true, UINT_MAX);
   if (ret < 0)
     {
       /* Wait interrupted, exit early. */
@@ -223,7 +223,7 @@ int usrsock_listen(FAR struct socket *psock, int backlog)
 errout_teardown:
   usrsock_teardown_request_callback(&state);
 errout_unlock:
-  net_unlock();
+  usrsock_unlock();
   return ret;
 }
 
