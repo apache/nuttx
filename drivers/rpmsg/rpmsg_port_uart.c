@@ -37,6 +37,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/mutex.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/power/pm.h>
 #include <nuttx/reboot_notifier.h>
 #include <nuttx/semaphore.h>
@@ -441,7 +442,7 @@ static void rpmsg_port_uart_dump(FAR struct rpmsg_port_s *port)
     (FAR struct rpmsg_port_uart_s *)port;
 
   rpmsgvbs("Dump rpmsg port uart:\n");
-  rpmsgvbs("Event: 0x%x\n", rpuart->event.events);
+  rpmsgvbs("Event: 0x%lx\n", rpuart->event.events);
   if (rpuart->rx_tid != 0)
     {
       rpmsgvbs("Dump rx thread: %d\n", rpuart->rx_tid);
@@ -473,7 +474,7 @@ rpmsg_port_uart_process_rx_conn(FAR struct rpmsg_port_uart_s *rpuart,
 {
   if (ch == RPMSG_PORT_UART_CONNREQ)
     {
-      rpmsgvbs("Connect Request Command 0x%x\n", rpuart->event.events);
+      rpmsgvbs("Connect Request Command 0x%lx\n", rpuart->event.events);
       if (rpmsg_port_uart_set(rpuart, RPMSG_PORT_UART_EVT_CONNED))
         {
           rpmsg_port_drop_packets(&rpuart->port, RPMSG_PORT_DROP_TXQ);
@@ -486,7 +487,7 @@ rpmsg_port_uart_process_rx_conn(FAR struct rpmsg_port_uart_s *rpuart,
     }
   else if (ch == RPMSG_PORT_UART_CONNACK)
     {
-      rpmsgvbs("Connect Ack Command 0x%x\n", rpuart->event.events);
+      rpmsgvbs("Connect Ack Command 0x%lx\n", rpuart->event.events);
       if (!rpmsg_port_uart_set(rpuart, RPMSG_PORT_UART_EVT_CONNED))
         {
           rpmsg_port_drop_packets(&rpuart->port, RPMSG_PORT_DROP_ALL);
@@ -530,7 +531,7 @@ rpmsg_port_uart_process_rx_cmd(FAR struct rpmsg_port_uart_s *rpuart,
         break;
       case RPMSG_PORT_UART_POWEROFF:
         count = pm_wakelock_staycount(&rpuart->rx_wakelock);
-        rpmsgvbs("Received poweroff command %d 0x%x\n",
+        rpmsgvbs("Received poweroff command %d 0x%lx\n",
                  count, rpuart->event.events);
         if (rpmsg_port_uart_check(rpuart, RPMSG_PORT_UART_EVT_WAKING))
           {
