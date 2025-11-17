@@ -274,6 +274,7 @@ extern "C"
 #define V4L2_PIX_FMT_VP8      v4l2_fourcc('V', 'P', '8', '0')
 #define V4L2_PIX_FMT_VP9      v4l2_fourcc('V', 'P', '9', '0')
 #define V4L2_PIX_FMT_HEVC     v4l2_fourcc('H', 'E', 'V', 'C')
+#define V4L2_PIX_FMT_ENTROPY  v4l2_fourcc('E', 'N', 'T', 'R')
 
 /* JPEG + sub image */
 
