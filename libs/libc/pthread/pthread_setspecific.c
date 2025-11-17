@@ -75,19 +75,20 @@
 
 int pthread_setspecific(pthread_key_t key, FAR const void *value)
 {
-  FAR struct tls_info_s *info;
+  FAR struct task_info_s *info = task_get_info();
+  FAR struct tls_info_s *tls;
 
-  DEBUGASSERT(key >= 0 && key < CONFIG_TLS_NELEM);
-  if (key >= 0 && key < CONFIG_TLS_NELEM)
+  if (key >= 0 && key < CONFIG_TLS_NELEM &&
+      info->ta_tlsdtor[key] != NULL)
     {
       /* Get the TLS info structure from the current threads stack */
 
-      info = tls_get_info();
-      DEBUGASSERT(info != NULL);
+      tls = tls_get_info();
+      DEBUGASSERT(tls != NULL);
 
-      /* Set the element value int the TLS info. */
+      /* Set the element value in the TLS info. */
 
-      info->tl_elem[key] = (uintptr_t)value;
+      tls->tl_elem[key] = (uintptr_t)value;
       return OK;
     }
 
