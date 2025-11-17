@@ -125,6 +125,12 @@
 #  define CONFIG_STM32H5_PM_SERIAL_ACTIVITY  10
 #endif
 
+/* USART Unconfigure bits */
+
+#define USART_UNCONFIGURE_RX                    (1 << 0)
+#define USART_UNCONFIGURE_TX                    (1 << 1)
+#define USART_UNCONFIGURE_DIR                   (1 << 2)
+
 /* Keep track if a Break was set
  *
  * Note:
@@ -214,10 +220,13 @@ struct stm32_serial_s
 #endif
 
 #ifdef HAVE_RS485
-  const uint32_t    rs485_dir_gpio;     /* U[S]ART RS-485 DIR GPIO pin configuration */
-  const bool        rs485_dir_polarity; /* U[S]ART RS-485 DIR pin state for TX enabled */
+  const uint32_t    rs485_dir_gpio; /* U[S]ART RS-485 DIR GPIO pin configuration */
+  uint8_t           rs485_flags;    /* U[S]ART RS-485 flags
+                                     * (compatible with struct serial_rs485)
+                                     */
 #endif
-  const bool        islpuart;  /* Is this device a Low Power UART? */
+  const uint8_t     unconfigure; /* Unconfigure pins on close */
+  const bool        islpuart;    /* Is this device a Low Power UART? */
   spinlock_t        lock;
 };
 
@@ -472,12 +481,26 @@ static struct stm32_serial_s g_lpuart1priv =
 #  ifdef CONFIG_USART1_RS485
   .rs485_dir_gpio = GPIO_LPUART1_RS485_DIR,
 #    if (CONFIG_USART1_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_AFTER_SEND,
 #    else
-  .rs485_dir_polarity = true,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_ON_SEND,
 #    endif
 #  endif
   .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_LPUART1_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_LPUART1_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+#if defined(CONFIG_LPUART1_UNCONFIG_DIR_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_DIR
+#endif
+      ,
 };
 #endif
 
@@ -533,12 +556,26 @@ static struct stm32_serial_s g_usart1priv =
 #  ifdef CONFIG_USART1_RS485
   .rs485_dir_gpio = GPIO_USART1_RS485_DIR,
 #    if (CONFIG_USART1_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_AFTER_SEND,
 #    else
-  .rs485_dir_polarity = true,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_ON_SEND,
 #    endif
 #  endif
   .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_USART1_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_USART1_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+#if defined(CONFIG_USART1_UNCONFIG_DIR_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_DIR
+#endif
+      ,
 };
 #endif
 
@@ -596,12 +633,26 @@ static struct stm32_serial_s g_usart2priv =
 #  ifdef CONFIG_USART2_RS485
   .rs485_dir_gpio = GPIO_USART2_RS485_DIR,
 #    if (CONFIG_USART2_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_AFTER_SEND,
 #    else
-  .rs485_dir_polarity = true,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_ON_SEND,
 #    endif
 #  endif
   .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_USART2_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_USART2_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+#if defined(CONFIG_USART2_UNCONFIG_DIR_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_DIR
+#endif
+      ,
 };
 #endif
 
@@ -659,12 +710,26 @@ static struct stm32_serial_s g_usart3priv =
 #  ifdef CONFIG_USART3_RS485
   .rs485_dir_gpio = GPIO_USART3_RS485_DIR,
 #    if (CONFIG_USART3_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_AFTER_SEND,
 #    else
-  .rs485_dir_polarity = true,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_ON_SEND,
 #    endif
 #  endif
   .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_USART3_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_USART3_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+#if defined(CONFIG_USART3_UNCONFIG_DIR_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_DIR
+#endif
+      ,
 };
 #endif
 
@@ -722,12 +787,26 @@ static struct stm32_serial_s g_uart4priv =
 #  ifdef CONFIG_UART4_RS485
   .rs485_dir_gpio = GPIO_UART4_RS485_DIR,
 #    if (CONFIG_UART4_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_AFTER_SEND,
 #    else
-  .rs485_dir_polarity = true,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_ON_SEND,
 #    endif
 #  endif
   .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_UART4_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_UART4_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+#if defined(CONFIG_UART4_UNCONFIG_DIR_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_DIR
+#endif
+      ,
 };
 #endif
 
@@ -785,12 +864,26 @@ static struct stm32_serial_s g_uart5priv =
 #  ifdef CONFIG_UART5_RS485
   .rs485_dir_gpio = GPIO_UART5_RS485_DIR,
 #    if (CONFIG_UART5_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_AFTER_SEND,
 #    else
-  .rs485_dir_polarity = true,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_ON_SEND,
 #    endif
 #  endif
   .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_UART5_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_UART5_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+#if defined(CONFIG_UART5_UNCONFIG_DIR_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_DIR
+#endif
+      ,
 };
 #endif
 
@@ -848,12 +941,26 @@ static struct stm32_serial_s g_usart6priv =
 #  ifdef CONFIG_USART6_RS485
   .rs485_dir_gpio = GPIO_USART6_RS485_DIR,
 #    if (CONFIG_USART6_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_AFTER_SEND,
 #    else
-  .rs485_dir_polarity = true,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_ON_SEND,
 #    endif
 #  endif
   .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_USART6_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_USART6_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+#if defined(CONFIG_USART6_UNCONFIG_DIR_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_DIR
+#endif
+      ,
 };
 #endif
 
@@ -911,12 +1018,26 @@ static struct stm32_serial_s g_uart7priv =
 #  ifdef CONFIG_UART7_RS485
   .rs485_dir_gpio = GPIO_UART7_RS485_DIR,
 #    if (CONFIG_UART7_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_AFTER_SEND,
 #    else
-  .rs485_dir_polarity = true,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_ON_SEND,
 #    endif
 #  endif
   .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_UART7_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_UART7_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+#if defined(CONFIG_UART7_UNCONFIG_DIR_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_DIR
+#endif
+      ,
 };
 #endif
 
@@ -974,12 +1095,26 @@ static struct stm32_serial_s g_uart8priv =
 #  ifdef CONFIG_UART8_RS485
   .rs485_dir_gpio = GPIO_UART8_RS485_DIR,
 #    if (CONFIG_UART8_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_AFTER_SEND,
 #    else
-  .rs485_dir_polarity = true,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_ON_SEND,
 #    endif
 #  endif
   .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_UART8_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_UART8_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+#if defined(CONFIG_UART8_UNCONFIG_DIR_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_DIR
+#endif
+      ,
 };
 #endif
 
@@ -1037,12 +1172,26 @@ static struct stm32_serial_s g_uart9priv =
 #  ifdef CONFIG_UART9_RS485
   .rs485_dir_gpio = GPIO_UART9_RS485_DIR,
 #    if (CONFIG_UART9_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_AFTER_SEND,
 #    else
-  .rs485_dir_polarity = true,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_ON_SEND,
 #    endif
 #  endif
   .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_UART9_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_UART9_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+#if defined(CONFIG_UART9_UNCONFIG_DIR_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_DIR
+#endif
+      ,
 };
 #endif
 
@@ -1100,12 +1249,26 @@ static struct stm32_serial_s g_usart10priv =
 #  ifdef CONFIG_USART10_RS485
   .rs485_dir_gpio = GPIO_USART10_RS485_DIR,
 #    if (CONFIG_USART10_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_AFTER_SEND,
 #    else
-  .rs485_dir_polarity = true,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_ON_SEND,
 #    endif
 #  endif
   .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_USART10_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_USART10_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+#if defined(CONFIG_USART10_UNCONFIG_DIR_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_DIR
+#endif
+      ,
 };
 #endif
 
@@ -1163,12 +1326,26 @@ static struct stm32_serial_s g_usart11priv =
 #  ifdef CONFIG_USART11_RS485
   .rs485_dir_gpio = GPIO_USART11_RS485_DIR,
 #    if (CONFIG_USART11_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_AFTER_SEND,
 #    else
-  .rs485_dir_polarity = true,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_ON_SEND,
 #    endif
 #  endif
   .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_USART11_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_USART11_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+#if defined(CONFIG_USART11_UNCONFIG_DIR_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_DIR
+#endif
+      ,
 };
 #endif
 
@@ -1226,12 +1403,26 @@ static struct stm32_serial_s g_uart12priv =
 #  ifdef CONFIG_UART12_RS485
   .rs485_dir_gpio = GPIO_UART12_RS485_DIR,
 #    if (CONFIG_UART12_RS485_DIR_POLARITY == 0)
-  .rs485_dir_polarity = false,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_AFTER_SEND,
 #    else
-  .rs485_dir_polarity = true,
+  .rs485_flags = SER_RS485_ENABLED | SER_RS485_RTS_ON_SEND,
 #    endif
 #  endif
   .lock               = SP_UNLOCKED,
+  .unconfigure        = 0
+#if defined(CONFIG_UART12_UNCONFIG_RX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_RX
+#endif
+#if defined(CONFIG_UART12_UNCONFIG_TX_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_TX
+#endif
+#if defined(CONFIG_UART12_UNCONFIG_DIR_ON_CLOSE)
+                      |
+                      USART_UNCONFIGURE_DIR
+#endif
+      ,
 };
 #endif
 
@@ -2005,10 +2196,11 @@ static int stm32serial_setup(struct uart_dev_s *dev)
 #endif
 
 #ifdef HAVE_RS485
-  if (priv->rs485_dir_gpio != 0)
+  if ((priv->rs485_flags & SER_RS485_ENABLED) != 0)
     {
       stm32_configgpio(priv->rs485_dir_gpio);
-      stm32_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
+      stm32_gpiowrite(priv->rs485_dir_gpio,
+                     (bool) (priv->rs485_flags & SER_RS485_RTS_AFTER_SEND));
     }
 #endif
 
@@ -2242,8 +2434,15 @@ static void stm32serial_shutdown(struct uart_dev_s *dev)
    * then this may need to be a configuration option.
    */
 
-  stm32_unconfiggpio(priv->tx_gpio);
-  stm32_unconfiggpio(priv->rx_gpio);
+  if (priv->unconfigure & USART_UNCONFIGURE_TX)
+    {
+      stm32_unconfiggpio(priv->tx_gpio);
+    }
+
+  if (priv->unconfigure & USART_UNCONFIGURE_RX)
+    {
+      stm32_unconfiggpio(priv->rx_gpio);
+    }
 
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   if (priv->cts_gpio != 0)
@@ -2260,7 +2459,8 @@ static void stm32serial_shutdown(struct uart_dev_s *dev)
 #endif
 
 #ifdef HAVE_RS485
-  if (priv->rs485_dir_gpio != 0)
+  if ((priv->rs485_dir_gpio != 0) &&
+      (priv->unconfigure & USART_UNCONFIGURE_DIR))
     {
       stm32_unconfiggpio(priv->rs485_dir_gpio);
     }
@@ -2429,7 +2629,9 @@ static int stm32serial_interrupt(int irq, void *context, void *arg)
           (priv->ie & USART_CR1_TCIE) != 0 &&
           (priv->ie & USART_CR1_TXEIE) == 0)
         {
-          stm32_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
+          stm32_gpiowrite(priv->rs485_dir_gpio,
+                         (bool) (priv->rs485_flags &
+                          SER_RS485_RTS_AFTER_SEND));
           stm32serial_restoreusartint(priv, priv->ie & ~USART_CR1_TCIE);
         }
 #endif
@@ -2478,6 +2680,110 @@ static int stm32serial_interrupt(int irq, void *context, void *arg)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: stm32serial_set_rs485_mode
+ *
+ * Description:
+ *   Handle mode set ioctl (TIOCSRS485) to enable
+ *   and disable RS-485 mode.  This is part of the serial ioctl logic.
+ *
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_RS485
+static inline int stm32serial_set_rs485_mode(struct stm32_serial_s *priv,
+                                    const struct serial_rs485 *mode)
+{
+  irqstate_t flags;
+
+  DEBUGASSERT(priv && mode);
+  if (priv->rs485_dir_gpio == 0)
+    {
+      /* Can't configure RS485 dir pin if pin is not defined */
+
+      return -ENOTTY;
+    }
+
+  flags = enter_critical_section();
+  priv->sr = stm32serial_getreg(priv, STM32_USART_ISR_OFFSET);
+
+  priv->rs485_flags = mode->flags &
+                     (SER_RS485_ENABLED |
+                      SER_RS485_RTS_ON_SEND |
+                      SER_RS485_RTS_AFTER_SEND |
+                      SER_RS485_RX_DURING_TX);
+/* Cases:
+ * Enabling, serial transfer currently in progress:
+ *  Set the pin to the transfer in progress state and let the interrupt take
+ *  care of it
+ * Enabling, no serial transfer currently in progress:
+ *  Set the pin to the no transfer in progress state.
+ */
+
+  if (mode->flags & SER_RS485_ENABLED)
+    {
+      stm32_configgpio(priv->rs485_dir_gpio);
+      if ((priv->sr & USART_ISR_TC) != 0)
+        {
+          /* Transmission is complete, set to "after send' state */
+
+          stm32_gpiowrite(priv->rs485_dir_gpio, (bool) (priv->rs485_flags &
+                          SER_RS485_RTS_AFTER_SEND));
+        }
+      else
+        {
+          /* Transmission is currently in progress, set to "on send" state */
+
+          stm32_gpiowrite(priv->rs485_dir_gpio, (bool) (priv->rs485_flags &
+                          SER_RS485_RTS_ON_SEND));
+        }
+    }
+  else
+    {
+      if (priv->unconfigure & USART_UNCONFIGURE_DIR)
+        {
+          stm32_unconfiggpio(priv->rs485_dir_gpio);
+        }
+    }
+
+  leave_critical_section(flags);
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32serial_get_rs485_mode
+ *
+ * Description:
+ *   Handle RS485 mode get ioctl (TIOCGRS485) to get the
+ *   current RS-485 mode.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_RS485
+static inline int stm32serial_get_rs485_mode(struct stm32_serial_s *priv,
+                                    struct serial_rs485 *mode)
+{
+  irqstate_t flags;
+
+  DEBUGASSERT(priv && mode);
+  flags = enter_critical_section();
+
+  /* Assume disabled */
+
+  memset(mode, 0, sizeof(struct serial_rs485));
+
+  mode->flags = priv->rs485_flags &
+              (SER_RS485_ENABLED |
+               SER_RS485_RTS_ON_SEND |
+               SER_RS485_RTS_AFTER_SEND |
+               SER_RS485_RX_DURING_TX);
+
+  leave_critical_section(flags);
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: stm32serial_ioctl
@@ -2852,7 +3158,21 @@ static int stm32serial_ioctl(struct file *filep, int cmd,
       break;
 #  endif
 #endif
+#ifdef HAVE_RS485
+    case TIOCSRS485:  /* Set RS485 mode, arg: pointer to struct serial_rs485 */
+      {
+        ret = stm32serial_set_rs485_mode(
+          priv, (const struct serial_rs485 *)((uintptr_t)arg));
+      }
+      break;
 
+    case TIOCGRS485:  /* Get RS485 mode, arg: pointer to struct serial_rs485 */
+      {
+        ret = stm32serial_get_rs485_mode(
+          priv, (struct serial_rs485 *)((uintptr_t)arg));
+      }
+      break;
+#endif
     default:
       ret = -ENOTTY;
       break;
@@ -3308,9 +3628,10 @@ static void stm32serial_send(struct uart_dev_s *dev, int ch)
     (struct stm32_serial_s *)dev->priv;
 
 #ifdef HAVE_RS485
-  if (priv->rs485_dir_gpio != 0)
+  if ((priv->rs485_flags & SER_RS485_ENABLED) != 0)
     {
-      stm32_gpiowrite(priv->rs485_dir_gpio, priv->rs485_dir_polarity);
+      stm32_gpiowrite(priv->rs485_dir_gpio, (bool) (priv->rs485_flags &
+                      SER_RS485_RTS_ON_SEND));
     }
 #endif
 
@@ -3353,7 +3674,7 @@ static void stm32serial_txint(struct uart_dev_s *dev, bool enable)
        */
 
 #  ifdef HAVE_RS485
-      if (priv->rs485_dir_gpio != 0)
+      if ((priv->rs485_flags & SER_RS485_ENABLED) != 0)
         {
           ie |= USART_CR1_TCIE;
         }

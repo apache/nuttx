@@ -4525,6 +4525,19 @@ config LPUART1_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
+config LPUART1_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure LPUART1 RX pin on close"
+	default n
+
+config LPUART1_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure LPUART1 TX pin on close"
+	default n
+
+config LPUART1_UNCONFIG_DIR_ON_CLOSE
+	depends on LPUART1_RS485
+	bool "Unconfigure LPUART1 DIR pin on close"
+	default n
+
 endif # LPUART1_SERIALDRIVER
 
 choice
@@ -4565,6 +4578,19 @@ config USART1_RXDMA
 	depends on STM32H5_USART1 && (STM32H5_DMA1 || STM32H5_DMA2)
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config USART1_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure USART1 RX pin on close"
+	default n
+
+config USART1_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure USART1 TX pin on close"
+	default n
+
+config USART1_UNCONFIG_DIR_ON_CLOSE
+	depends on USART1_RS485
+	bool "Unconfigure USART1 DIR pin on close"
+	default n
 
 endif # USART1_SERIALDRIVER
 
@@ -4607,6 +4633,19 @@ config USART2_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
+config USART2_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure USART2 RX pin on close"
+	default n
+
+config USART2_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure USART2 TX pin on close"
+	default n
+
+config USART2_UNCONFIG_DIR_ON_CLOSE
+	depends on USART2_RS485
+	bool "Unconfigure USART2 DIR pin on close"
+	default n
+
 endif # USART2_SERIALDRIVER
 
 choice
@@ -4647,6 +4686,19 @@ config USART3_RXDMA
 	depends on STM32H5_USART3 && (STM32H5_DMA1 || STM32H5_DMA2)
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config USART3_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure USART3 RX pin on close"
+	default n
+
+config USART3_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure USART3 TX pin on close"
+	default n
+
+config USART3_UNCONFIG_DIR_ON_CLOSE
+	depends on USART3_RS485
+	bool "Unconfigure USART3 DIR pin on close"
+	default n
 
 endif # USART3_SERIALDRIVER
 
@@ -4689,6 +4741,19 @@ config UART4_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
+config UART4_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure UART4 RX pin on close"
+	default n
+
+config UART4_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure UART4 TX pin on close"
+	default n
+
+config UART4_UNCONFIG_DIR_ON_CLOSE
+	depends on UART4_RS485
+	bool "Unconfigure UART4 DIR pin on close"
+	default n
+
 endif # UART4_SERIALDRIVER
 
 choice
@@ -4729,6 +4794,19 @@ config UART5_RXDMA
 	depends on STM32H5_UART5 && (STM32H5_DMA1 || STM32H5_DMA2)
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config UART5_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure UART5 RX pin on close"
+	default n
+
+config UART5_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure UART5 TX pin on close"
+	default n
+
+config UART5_UNCONFIG_DIR_ON_CLOSE
+	depends on UART5_RS485
+	bool "Unconfigure UART5 DIR pin on close"
+	default n
 
 endif # UART5_SERIALDRIVER
 
@@ -4771,6 +4849,19 @@ config USART6_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
+config USART6_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure USART6 RX pin on close"
+	default n
+
+config USART6_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure USART6 TX pin on close"
+	default n
+
+config USART6_UNCONFIG_DIR_ON_CLOSE
+	depends on USART6_RS485
+	bool "Unconfigure USART6 DIR pin on close"
+	default n
+
 endif # USART6_SERIALDRIVER
 
 if UART7_SERIALDRIVER
@@ -4799,6 +4890,19 @@ config UART7_RXDMA
 	depends on STM32H5_UART7 && (STM32H5_DMA1 || STM32H5_DMA2)
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config UART7_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure UART7 RX pin on close"
+	default n
+
+config UART7_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure UART7 TX pin on close"
+	default n
+
+config UART7_UNCONFIG_DIR_ON_CLOSE
+	depends on UART7_RS485
+	bool "Unconfigure UART7 DIR pin on close"
+	default n
 
 endif # UART7_SERIALDRIVER
 
@@ -4829,6 +4933,19 @@ config UART8_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
+config UART8_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure UART8 RX pin on close"
+	default n
+
+config UART8_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure UART8 TX pin on close"
+	default n
+
+config UART8_UNCONFIG_DIR_ON_CLOSE
+	depends on UART8_RS485
+	bool "Unconfigure UART8 DIR pin on close"
+	default n
+
 endif # UART8_SERIALDRIVER
 
 if UART9_SERIALDRIVER
@@ -4857,6 +4974,19 @@ config UART9_RXDMA
 	depends on STM32H5_UART9 && (STM32H5_DMA1 || STM32H5_DMA2)
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config UART9_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure UART9 RX pin on close"
+	default n
+
+config UART9_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure UART9 TX pin on close"
+	default n
+
+config UART9_UNCONFIG_DIR_ON_CLOSE
+	depends on UART9_RS485
+	bool "Unconfigure UART9 DIR pin on close"
+	default n
 
 endif # UART9_SERIALDRIVER
 
@@ -4887,6 +5017,19 @@ config USART10_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
+config USART10_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure USART10 RX pin on close"
+	default n
+
+config USART10_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure USART10 TX pin on close"
+	default n
+
+config USART10_UNCONFIG_DIR_ON_CLOSE
+	depends on USART10_RS485
+	bool "Unconfigure USART10 DIR pin on close"
+	default n
+
 endif # USART10_SERIALDRIVER
 
 if USART11_SERIALDRIVER
@@ -4916,6 +5059,19 @@ config USART11_RXDMA
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
+config USART11_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure USART11 RX pin on close"
+	default n
+
+config USART11_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure USART11 TX pin on close"
+	default n
+
+config USART11_UNCONFIG_DIR_ON_CLOSE
+	depends on USART11_RS485
+	bool "Unconfigure USART11 DIR pin on close"
+	default n
+
 endif # USART11_SERIALDRIVER
 
 if UART12_SERIALDRIVER
@@ -4944,6 +5100,19 @@ config UART12_RXDMA
 	depends on STM32H5_UART12 && (STM32H5_DMA1 || STM32H5_DMA2)
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config UART12_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure UART12 RX pin on close"
+	default n
+
+config UART12_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure UART12 TX pin on close"
+	default n
+
+config UART12_UNCONFIG_DIR_ON_CLOSE
+	depends on UART12_RS485
+	bool "Unconfigure UART12 DIR pin on close"
+	default n
 
 endif # UART12_SERIALDRIVER
 
