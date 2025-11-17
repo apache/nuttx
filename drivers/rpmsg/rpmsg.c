@@ -30,14 +30,17 @@
 #include <limits.h>
 #include <stdio.h>
 #include <syslog.h>
+#include <time.h>
 
 #include <metal/sys.h>
+#include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/list.h>
 #include <nuttx/mutex.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/rwsem.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 
 #include "rpmsg.h"
@@ -340,10 +343,12 @@ void rpmsg_initialize(void)
 #endif
 }
 
-int rpmsg_wait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem)
+int rpmsg_tickwait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem,
+                   clock_t delay)
 {
   FAR struct rpmsg_wqueue_s *wqueue;
   FAR struct rpmsg_s *rpmsg;
+  clock_t end;
   int ret;
 
   if (!ept || !sem)
@@ -352,17 +357,16 @@ int rpmsg_wait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem)
     }
 
   rpmsg = rpmsg_get_by_rdev(ept->rdev);
-  if (!rpmsg || !rpmsg->ops->wait)
-    {
-      return nxsem_wait_uninterruptible(sem);
-    }
-
-  wqueue = rpmsg_get_current_wqueue(rpmsg);
+  wqueue = rpmsg && rpmsg->ops->wait ?
+           rpmsg_get_current_wqueue(rpmsg) : NULL;
   if (wqueue == NULL)
     {
-      return nxsem_wait_uninterruptible(sem);
+      return delay >= WDOG_MAX_DELAY ?
+             nxsem_wait_uninterruptible(sem) :
+             nxsem_tickwait_uninterruptible(sem, delay);
     }
 
+  end = delay >= WDOG_MAX_DELAY ? 0 : clock_systime_ticks() + delay;
   for (; ; )
     {
       ret = nxsem_trywait(sem);
@@ -371,19 +375,30 @@ int rpmsg_wait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem)
           return ret;
         }
 
-      rpmsg->ops->wait(rpmsg);
-
-      if (wqueue->recursive >= RPMSG_RECURSIVE_LIMIT)
+      if (delay < WDOG_MAX_DELAY)
         {
-          return RPMSG_EOPNOTSUPP;
+          clock_t now = clock_systime_ticks();
+
+          if (clock_compare(end, now))
+            {
+              return -ETIMEDOUT;
+            }
+
+          delay = end - now;
         }
 
-      wqueue->recursive++;
-      work_queue_dispatch(wqueue->kwqueue);
-      wqueue->recursive--;
-    }
+      /* Keep running the queued works until the semaphore is posted: a
+       * deeper level than the limit only waits, so the wait still ends.
+       */
 
-  return OK;
+      rpmsg->ops->wait(rpmsg, delay);
+      if (wqueue->recursive < RPMSG_RECURSIVE_LIMIT)
+        {
+          wqueue->recursive++;
+          work_queue_dispatch(wqueue->kwqueue);
+          wqueue->recursive--;
+        }
+    }
 }
 
 int rpmsg_post(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem)

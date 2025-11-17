@@ -88,7 +88,7 @@ struct rpmsg_s
 
 struct rpmsg_ops_s
 {
-  CODE int (*wait)(FAR struct rpmsg_s *rpmsg);
+  CODE int (*wait)(FAR struct rpmsg_s *rpmsg, clock_t delay);
   CODE int (*post)(FAR struct rpmsg_s *rpmsg);
   CODE int (*ioctl)(FAR struct rpmsg_s *rpmsg, int cmd, unsigned long arg);
   CODE void (*panic)(FAR struct rpmsg_s *rpmsg);

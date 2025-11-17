@@ -86,7 +86,7 @@ struct rpmsg_virtio_priv_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int rpmsg_virtio_wait(FAR struct rpmsg_s *rpmsg);
+static int rpmsg_virtio_wait(FAR struct rpmsg_s *rpmsg, clock_t delay);
 static int rpmsg_virtio_post(FAR struct rpmsg_s *rpmsg);
 static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg, bool verbose);
 
@@ -295,12 +295,17 @@ static void rpmsg_virtio_rx_worker(FAR struct rpmsg_s *rpmsg, FAR void *arg)
  * Name: rpmsg_virtio_wait
  ****************************************************************************/
 
-static int rpmsg_virtio_wait(FAR struct rpmsg_s *rpmsg)
+static int rpmsg_virtio_wait(FAR struct rpmsg_s *rpmsg, clock_t delay)
 {
   FAR struct rpmsg_virtio_priv_s *priv =
     (FAR struct rpmsg_virtio_priv_s *)rpmsg;
 
-  return nxsem_tickwait(&priv->semtx, MSEC2TICK(RPMSG_VIRTIO_TIMEOUT_MS));
+  if (delay > MSEC2TICK(RPMSG_VIRTIO_TIMEOUT_MS))
+    {
+      delay = MSEC2TICK(RPMSG_VIRTIO_TIMEOUT_MS);
+    }
+
+  return nxsem_tickwait(&priv->semtx, delay);
 }
 
 /****************************************************************************
@@ -655,8 +660,11 @@ static int rpmsg_virtio_notify_wait(FAR struct rpmsg_device *rdev,
 {
   FAR struct rpmsg_virtio_priv_s *priv =
     container_of(rdev, struct rpmsg_virtio_priv_s, rvdev);
+  int ret;
 
-  return rpmsg_wait(&priv->rvdev.rdev.ns_ept, &priv->semtx);
+  ret = rpmsg_tickwait(&priv->rvdev.rdev.ns_ept, &priv->semtx,
+                       MSEC2TICK(RPMSG_VIRTIO_TIMEOUT_MS));
+  return ret == -ETIMEDOUT ? 0 : ret;
 }
 
 /****************************************************************************
