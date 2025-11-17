@@ -30,6 +30,8 @@
 #include <errno.h>
 #include <nuttx/debug.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -87,7 +89,13 @@ int pthread_condattr_setpshared(FAR pthread_condattr_t *attr, int pshared)
 {
   int ret = OK;
 
-  if (!attr || (pshared != PTHREAD_PROCESS_SHARED &&
+  /* When the attribute object specified by attr is invalid,
+   * then a call to pthread_condattr_setpshared(attr, pshared)
+   * returns EINVAL.
+   */
+
+  if (!PTHREAD_CONDATTR_IS_VALID(attr) ||
+      (pshared != PTHREAD_PROCESS_SHARED &&
        pshared != PTHREAD_PROCESS_PRIVATE))
     {
       ret = EINVAL;

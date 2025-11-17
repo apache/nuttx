@@ -64,7 +64,16 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
   int status;
 
   sinfo("mutex=%p\n", mutex);
-  DEBUGASSERT(mutex != NULL);
+
+  /* If the implementation detects that the mutex referenced by the
+   * argument mutex is invalid: a call to pthread_mutex_destroy(mutex)
+   * returns EINVAL.
+   */
+
+  if (!PTHREAD_MUTEX_IS_VALID(mutex))
+    {
+      return EINVAL;
+    }
 
   if (mutex != NULL)
     {

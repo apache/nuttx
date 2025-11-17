@@ -77,25 +77,6 @@
 #  define __HAVE_KERNEL_GLOBALS 1
 #endif
 
-/* The following are the bit fields of the clockid_t
- * bit 0~2: the clock type
- * CLOCK_REALTIME           - 0
- * CLOCK_MONOTONIC          - 1
- * CLOCK_PROCESS_CPUTIME_ID - 2
- * CLOCK_THREAD_CPUTIME_ID  - 3
- * CLOCK_BOOTTIME           - 4
- * CLOCK_FD                 - 5
- *
- * if the clockid value exceeds CLOCK_MASK, it indicates a dynamic clockid.
- * bit 3~32: the fd, pid or tid value
- *
- * The CLOCK_MASK are using to extract the clock_type from the clockid_t
- */
-
-#define CLOCK_FD              5
-#define CLOCK_MASK            7
-#define CLOCK_SHIFT           3
-
 /* Timing constants *********************************************************/
 
 #define NSEC_PER_SEC          1000000000L /* Seconds */

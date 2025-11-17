@@ -29,6 +29,8 @@
 #include <errno.h>
 #include <sched.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -55,7 +57,8 @@ int pthread_mutexattr_setprioceiling(FAR pthread_mutexattr_t *attr,
                                      int prioceiling)
 {
 #ifdef CONFIG_PRIORITY_PROTECT
-  if (attr && prioceiling >= sched_get_priority_min(SCHED_FIFO) &&
+  if (PTHREAD_MUTEXATTR_IS_VALID(attr) &&
+      prioceiling >= sched_get_priority_min(SCHED_FIFO) &&
       prioceiling <= sched_get_priority_max(SCHED_FIFO))
     {
       attr->ceiling = prioceiling;

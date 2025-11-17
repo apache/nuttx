@@ -29,6 +29,8 @@
 #include <pthread.h>
 #include <errno.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -53,7 +55,12 @@
 int pthread_condattr_getclock(FAR const pthread_condattr_t *attr,
                               FAR clockid_t *clock_id)
 {
-  if (!attr)
+  /* When the attribute object specified by attr is invalid,
+   * then a call to pthread_condattr_getclock(attr, clock_id)
+   * returns EINVAL.
+   */
+
+  if (!PTHREAD_CONDATTR_IS_VALID(attr) || clock_id == NULL)
     {
       return EINVAL;
     }

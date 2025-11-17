@@ -26,6 +26,8 @@
 
 #include <pthread.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -53,7 +55,12 @@ int pthread_attr_getguardsize(FAR const pthread_attr_t *attr,
 {
   int ret;
 
-  if (!guardsize)
+  /* When the attribute object specified by attr is invalid,
+   * then a call to pthread_attr_getguardsize(attr, guardsize)
+   * returns EINVAL.
+   */
+
+  if (!PTHREAD_ATTR_IS_VALID(attr) || !guardsize)
     {
       ret = EINVAL;
     }

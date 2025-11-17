@@ -30,6 +30,8 @@
 #include <nuttx/debug.h>
 #include <errno.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -56,9 +58,18 @@ int pthread_condattr_destroy(FAR pthread_condattr_t *attr)
 
   linfo("attr=%p\n", attr);
 
-  if (!attr)
+  /* When the attribute object specified by attr is invalid,
+   * then a call to pthread_condattr_destroy(attr)
+   * returns EINVAL.
+   */
+
+  if (!PTHREAD_CONDATTR_IS_VALID(attr))
     {
       ret = EINVAL;
+    }
+  else
+    {
+      memset(attr, 0, sizeof(pthread_condattr_t));
     }
 
   linfo("Returning %d\n", ret);

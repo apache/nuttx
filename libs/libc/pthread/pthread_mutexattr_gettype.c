@@ -28,6 +28,8 @@
 #include <pthread.h>
 #include <errno.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -53,7 +55,7 @@
 int pthread_mutexattr_gettype(FAR const pthread_mutexattr_t *attr,
                               FAR int *type)
 {
-  if (attr != NULL && type != NULL)
+  if (PTHREAD_MUTEXATTR_IS_VALID(attr) && type != NULL)
     {
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
       *type = attr->type;

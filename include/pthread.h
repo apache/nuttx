@@ -49,8 +49,8 @@
 
 /* Values for the process shared (pshared) attribute */
 
-#define PTHREAD_PROCESS_PRIVATE       0
-#define PTHREAD_PROCESS_SHARED        1
+#define PTHREAD_PROCESS_PRIVATE       1
+#define PTHREAD_PROCESS_SHARED        2
 
 /* Values for the mutext type attribute:
  *
@@ -264,7 +264,7 @@ typedef struct pthread_cond_s pthread_cond_t;
 
 struct pthread_mutexattr_s
 {
-  uint8_t pshared : 1;  /* PTHREAD_PROCESS_PRIVATE or PTHREAD_PROCESS_SHARED */
+  uint8_t pshared : 2;  /* PTHREAD_PROCESS_PRIVATE or PTHREAD_PROCESS_SHARED */
 #if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
   uint8_t prio    : 2;  /* See PTHREAD_PRIO_* definitions */
 #endif
@@ -319,13 +319,13 @@ typedef struct pthread_mutex_s pthread_mutex_t;
 #ifdef CONFIG_PTHREAD_MUTEX_DEFAULT_PRIO_INHERIT
 #  define PTHREAD_MUTEX_DEFAULT_PRIO_INHERIT SEM_PRIO_INHERIT
 #else
-#  define PTHREAD_MUTEX_DEFAULT_PRIO_INHERIT 0
+#  define PTHREAD_MUTEX_DEFAULT_PRIO_INHERIT SEM_PRIO_NONE
 #endif
 
 #ifdef CONFIG_PTHREAD_MUTEX_DEFAULT_PRIO_PROTECT
 #  define PTHREAD_MUTEX_DEFAULT_PRIO_PROTECT SEM_PRIO_PROTECT
 #else
-#  define PTHREAD_MUTEX_DEFAULT_PRIO_PROTECT 0
+#  define PTHREAD_MUTEX_DEFAULT_PRIO_PROTECT SEM_PRIO_NONE
 #endif
 
 #define PTHREAD_MUTEX_DEFAULT_PRIO_FLAGS (PTHREAD_MUTEX_DEFAULT_PRIO_INHERIT | \

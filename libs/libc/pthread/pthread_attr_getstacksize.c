@@ -27,6 +27,8 @@
 #include <pthread.h>
 #include <errno.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -54,7 +56,12 @@ int pthread_attr_getstacksize(FAR const pthread_attr_t *attr,
 {
   int ret;
 
-  if (!stacksize)
+  /* When the attribute object specified by attr is invalid,
+   * then a call to pthread_attr_getstacksize(attr, stacksize)
+   * returns EINVAL.
+   */
+
+  if (!PTHREAD_ATTR_IS_VALID(attr) || !stacksize)
     {
       ret = EINVAL;
     }

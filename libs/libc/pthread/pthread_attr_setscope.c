@@ -27,6 +27,8 @@
 #include <pthread.h>
 #include <errno.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -70,6 +72,15 @@
 
 int pthread_attr_setscope(FAR pthread_attr_t *attr, int scope)
 {
+  /* When the attribute object specified by attr is invalid,
+   * then a call to pthread_attr_setscope(attr, scope) returns EINVAL.
+   */
+
+  if (!PTHREAD_ATTR_IS_VALID(attr))
+    {
+      return EINVAL;
+    }
+
   switch (scope)
     {
       case PTHREAD_SCOPE_SYSTEM:

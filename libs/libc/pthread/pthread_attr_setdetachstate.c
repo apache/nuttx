@@ -29,6 +29,8 @@
 #include <pthread.h>
 #include <errno.h>
 
+#include "pthread.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -49,8 +51,14 @@
 int pthread_attr_setdetachstate(FAR pthread_attr_t *attr,
                                 int detachstate)
 {
-  if (!attr || (detachstate != PTHREAD_CREATE_DETACHED &&
-      detachstate != PTHREAD_CREATE_JOINABLE))
+  /* When the attribute object specified by attr is invalid,
+   * then a call to pthread_attr_setdetachstate(attr, detachstate)
+   * returns EINVAL.
+   */
+
+  if (!PTHREAD_ATTR_IS_VALID(attr) ||
+      (detachstate != PTHREAD_CREATE_DETACHED &&
+       detachstate != PTHREAD_CREATE_JOINABLE))
     {
       return EINVAL;
     }

@@ -61,7 +61,7 @@ int pthread_mutexattr_init(FAR pthread_mutexattr_t *attr)
     }
   else
     {
-      attr->pshared = 0;
+      attr->pshared = PTHREAD_PROCESS_PRIVATE;
 
 #ifdef CONFIG_PRIORITY_PROTECT
       attr->prio    = PTHREAD_PRIO_NONE;

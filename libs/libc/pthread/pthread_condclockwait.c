@@ -86,7 +86,7 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
 
   /* Make sure that non-NULL references were provided. */
 
-  if (!cond || !mutex)
+  if (!PTHREAD_COND_IS_VALID(cond) || !PTHREAD_MUTEX_IS_VALID(mutex))
     {
       ret = EINVAL;
     }
@@ -105,6 +105,17 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
   else if (!abstime)
     {
       ret = pthread_cond_wait(cond, mutex);
+    }
+
+  /* When abstime is invalid, then pthread_cond_timedwait fails and
+   * returns EINVAL without modifying the state of the condition variable
+   * specified by cond or the mutex specified by mutex.
+   */
+
+  else if (abstime && (abstime->tv_nsec < 0 ||
+           abstime->tv_nsec >= NSEC_PER_SEC))
+    {
+      ret = EINVAL;
     }
 
   else
