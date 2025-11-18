@@ -39,11 +39,14 @@
  * Private Data
  ****************************************************************************/
 
-static struct list_node g_pci_epf_device_list =
-                        LIST_INITIAL_VALUE(g_pci_epf_device_list);
-static struct list_node g_pci_epf_driver_list =
-                        LIST_INITIAL_VALUE(g_pci_epf_driver_list);
-static mutex_t g_pci_epf_lock = NXMUTEX_INITIALIZER;
+static DEFINE_PER_CPU_BSS_BMP(dq_queue_t, g_pci_epf_device_queue);
+#define g_pci_epf_device_queue this_cpu_var_bmp(g_pci_epf_device_queue)
+
+static DEFINE_PER_CPU_BSS_BMP(dq_queue_t, g_pci_epf_driver_queue);
+#define g_pci_epf_driver_queue this_cpu_var_bmp(g_pci_epf_driver_queue)
+
+static DEFINE_PER_CPU_BMP(mutex_t, g_pci_epf_lock) = NXMUTEX_INITIALIZER;
+#define g_pci_epf_lock this_cpu_var_bmp(g_pci_epf_lock)
 
 /****************************************************************************
  * Private Functions
@@ -306,10 +309,10 @@ int pci_epf_device_register(FAR struct pci_epf_device_s *epf)
       return ret;
     }
 
-  list_add_tail(&g_pci_epf_device_list, &epf->node);
+  dq_addlast(&epf->node, &g_pci_epf_device_queue);
 
-  list_for_every_entry(&g_pci_epf_driver_list, drv,
-                       struct pci_epf_driver_s, node)
+  dq_for_every_entry(&g_pci_epf_driver_queue, drv,
+                     struct pci_epf_driver_s, node)
     {
       epf->id = pci_epf_match_device(epf, drv);
       if (epf->id == NULL)
@@ -388,7 +391,7 @@ int pci_epf_device_unregister(FAR struct pci_epf_device_s *epf)
     }
 
   epf->driver = NULL;
-  list_delete(&epf->node);
+  dq_rem(&epf->node, &g_pci_epf_device_queue);
 
   nxmutex_unlock(&g_pci_epf_lock);
   return ret;
@@ -428,10 +431,10 @@ int pci_epf_register_driver(FAR struct pci_epf_driver_s *drv)
 
   /* Add the driver to the pci epf driver list */
 
-  list_add_tail(&g_pci_epf_driver_list, &drv->node);
+  dq_addlast(&drv->node, &g_pci_epf_driver_queue);
 
-  list_for_every_entry(&g_pci_epf_device_list, epf, struct pci_epf_device_s,
-                       node)
+  dq_for_every_entry(&g_pci_epf_device_queue, epf, struct pci_epf_device_s,
+                     node)
     {
       if (epf->driver != NULL)
         {
@@ -507,8 +510,8 @@ int pci_epf_unregister_driver(FAR struct pci_epf_driver_s *drv)
       return ret;
     }
 
-  list_for_every_entry(&g_pci_epf_device_list, epf, struct pci_epf_device_s,
-                       node)
+  dq_for_every_entry(&g_pci_epf_device_queue, epf, struct pci_epf_device_s,
+                     node)
     {
       if (epf->driver == drv)
         {
@@ -518,7 +521,7 @@ int pci_epf_unregister_driver(FAR struct pci_epf_driver_s *drv)
         }
     }
 
-  list_delete(&drv->node);
+  dq_rem(&drv->node, &g_pci_epf_driver_queue);
 
   nxmutex_unlock(&g_pci_epf_lock);
   return ret;

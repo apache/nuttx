@@ -32,7 +32,7 @@
 #include <stdint.h>
 
 #include <nuttx/compiler.h>
-#include <nuttx/list.h>
+#include <nuttx/queue.h>
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
 #include <nuttx/pci/pci_regs.h>
@@ -109,7 +109,8 @@ struct pci_epf_device_id_s
  * epc: The EPC device to which this EPF device is bound
  * driver: The EPF driver to which this EPF device is bound
  * id: Pointer to the EPF device ID
- * node: To add pci_epf as a list of PCI endpoint functions to pci_epc_ctrl_s
+ * node: To add pci_epf as a queue of PCI endpoint functions to
+ *   pci_epc_ctrl_s
  * lock: mutex to protect pci_epf_ops_s
  * is_bound: Indicates if bind notification to function driver has been
  *   invoked
@@ -130,8 +131,8 @@ struct pci_epf_device_s
   FAR struct pci_epc_ctrl_s *epc;
   FAR struct pci_epf_driver_s *driver;
   FAR const struct pci_epf_device_id_s *id;
-  struct list_node node;
-  struct list_node epc_node;
+  dq_entry_t node;
+  dq_entry_t epc_node;
 
   /* Mutex to protect against concurrent access of pci_epf_ops_s */
 
@@ -177,7 +178,7 @@ struct pci_epc_event_ops_s
  *    driver
  * remove: Ops to perform when the binding between the EPF device and EPF
  *    driver is broken
- * node: EPF driver list node
+ * node: EPF driver queue node
  * ops: Set of function pointers for performing EPF operations
  * id_table: Identifies EPF devices for probing
  */
@@ -187,7 +188,7 @@ struct pci_epf_driver_s
   CODE int (*probe)(FAR struct pci_epf_device_s *epf);
   CODE void (*remove)(FAR struct pci_epf_device_s *epf);
 
-  struct list_node node;
+  dq_entry_t node;
   FAR const struct pci_epf_ops_s *ops;
   FAR const struct pci_epf_device_id_s *id_table;
 };
