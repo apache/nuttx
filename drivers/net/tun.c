@@ -517,6 +517,11 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
 
   if (priv->dev.d_len > 0)
     {
+#ifdef CONFIG_NET_PKT
+      /* When packet sockets are enabled, feed the frame into the tap */
+
+      pkt_input(dev);
+#endif
       /* And send the packet */
 
       DEBUGASSERT(priv->write_buf == NULL);
@@ -599,6 +604,13 @@ static void tun_net_receive_tun(FAR struct tun_device_s *priv)
 
   if (dev->d_len > 0)
     {
+#ifdef CONFIG_NET_PKT
+      /* When packet sockets are enabled, feed the frame into the tap */
+
+      pkt_input(dev);
+#endif
+      /* And send the packet */
+
       DEBUGASSERT(priv->write_buf == NULL);
       priv->write_d_len = dev->d_len;
       priv->write_buf   = dev->d_iob;
