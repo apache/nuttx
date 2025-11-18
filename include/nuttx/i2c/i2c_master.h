@@ -206,8 +206,36 @@
 #define I2C_SHUTDOWN(d) ((d)->ops->shutdown(d))
 
 /****************************************************************************
+ * Name: I2C_STATUS
+ *
+ * Description:
+ *   Get I2C status.  Optional.
+ *   This function can be used to determine whether an I2C transmission is
+ *   in progress.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ * Returned Value:
+ *   Returns a bitset of status values (see I2C_STATUS_* defines)
+ *
+ ****************************************************************************/
+
+#define I2C_STATUS(d) \
+  ((d)->ops->status ? (d)->ops->status(d) : I2C_STATUS_PRESENT)
+
+/* I2C status bits */
+
+#define I2C_STATUS_PRESENT     0x01 /* Bit 0=1: I2C bus has been init */
+#define I2C_STATUS_BUSY        0x02 /* Bit 1=1: I2C bus busy */
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* The type of the i2c state change callback function */
+
+typedef CODE void (*i2c_statechange_t)(FAR void *arg);
 
 /* The I2C lower half driver interface */
 
@@ -222,6 +250,7 @@ struct i2c_ops_s
 #endif
   CODE int (*setup)(FAR struct i2c_master_s *dev);
   CODE int (*shutdown)(FAR struct i2c_master_s *dev);
+  CODE uint8_t (*status)(FAR struct i2c_master_s *dev);
 };
 
 /* This structure contains the full state of I2C as needed for a specific
@@ -239,6 +268,16 @@ struct i2c_config_s
 /* I2C transaction segment beginning with a START. A number of these can
  * be transferred together to form an arbitrary sequence of write/read
  * transfer to an I2C slave device.
+ *
+ * If a callback function is not NULL, asynchronous operations will be
+ * performed in I2C_TRANSFER.
+ *   lowerhalf reference Summarize:
+ *   1. lock i2c device.
+ *   2. Check if the callback function has been registered.
+ *   3. Assemble the msgs info into a DMA link info.
+ *   4. Configure I2C.
+ *   5. Configure and start DMA.
+ *   6. Call the callback function and unlock i2c device in interrupt.
  */
 
 struct i2c_msg_s
@@ -248,6 +287,8 @@ struct i2c_msg_s
   uint16_t flags;             /* See I2C_M_* definitions */
   FAR uint8_t *buffer;        /* Buffer to be transferred */
   ssize_t length;             /* Length of the buffer in bytes */
+  i2c_statechange_t callback; /* Callback function */
+  FAR void *arg;              /* Argument for the callback function */
 };
 
 /* I2C private data.  This structure only defines the initial fields of the
