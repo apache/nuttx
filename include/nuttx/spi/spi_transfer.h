@@ -113,6 +113,14 @@ struct spi_sequence_s
   /* A pointer to the list of transfers to be be performed. */
 
   FAR struct spi_trans_s *trans;
+
+  /* Pointers to the sequence callback function and parameter.
+   * If the callback function is not NULL, asynchronous operations can
+   * be performed.
+   */
+
+  spi_mediachange_t callback;
+  FAR void *arg;
 };
 
 /****************************************************************************
@@ -137,6 +145,30 @@ struct spi_sequence_s
  ****************************************************************************/
 
 int spi_transfer(FAR struct spi_dev_s *spi, FAR struct spi_sequence_s *seq);
+
+/****************************************************************************
+ * Name: spi_transferseqs
+ *
+ * Description:
+ *   This is a helper function that can be used to encapsulate and manage
+ *   n sequence of SPI transfers.  The SPI bus will be locked and the
+ *   SPI device selected for the duration of the transfers.
+ *
+ * Input Parameters:
+ *   spi    - An instance of the SPI device to use for the transfer
+ *   seqs   - A pointer to the spi sequence info to be exchanged
+ *   nseqs  - The number of sequences to be exchanged
+ *   cookie - A pointer to the cookie info to return a unique identifier
+ *            for the spi sequences being exchanged.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int spi_transferseqs(FAR struct spi_dev_s *spi,
+                     FAR struct spi_sequence_s *seqs, size_t nseqs,
+                     FAR void **cookie);
 
 /****************************************************************************
  * Name: spi_register
