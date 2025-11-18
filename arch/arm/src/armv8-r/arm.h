@@ -93,6 +93,15 @@
 
 #ifndef __ASSEMBLY__
 
+static inline_function void arm_finish_busy_wait(void)
+{
+#if defined(CONFIG_ARM_BUSY_WAIT) && defined(CONFIG_SMP)
+  uintptr_t address = CONFIG_ARM_BUSY_WAIT_FLAG_ADDR;
+  *(uint32_t *)address = 1;
+  up_flush_dcache(address, address + sizeof(uint32_t));
+#endif
+}
+
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************
