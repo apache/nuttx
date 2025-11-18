@@ -86,23 +86,20 @@ int nxsem_protect_wait(FAR sem_t *sem)
  * Name: nxsem_protect_post
  *
  * Description:
- *   This function attempts to unlock the protected semaphore, restore the
- *   holder tcb priority.
- *
- *   This is an internal OS interface.  It is functionally equivalent to
- *   sem_wait except that:
- *
- *   - It is not a cancellation point, and
- *   - It does not modify the errno value.
+ *   Restore the priority that the holder had before it took the
+ *   PTHREAD_PRIO_PROTECT semaphore.  POSIX does not let the thread move
+ *   to the tail of the scheduling queue of its priority here, so set the
+ *   priority to the saved priority plus one first, then write the saved
+ *   priority back without requeueing the thread.
  *
  * Input Parameters:
  *   sem - Semaphore descriptor.
  *
  * Returned Value:
- *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure.
- *   Possible returned errors:
+ *   None
+ *
+ * Assumptions:
+ *   sem->saved holds the priority to restore.
  *
  ****************************************************************************/
 
@@ -110,7 +107,27 @@ void nxsem_protect_post(FAR sem_t *sem)
 {
   if (sem->saved > 0)
     {
-      nxsched_set_priority(this_task(), sem->saved);
+      if (sem->saved < SCHED_PRIORITY_MAX)
+        {
+          /* Temporary priority boost to trigger scheduler re-evaluation
+           * and prevent moving to the tail of the scheduling queue
+           */
+
+          nxsched_set_priority(this_task(), sem->saved + 1);
+
+          /* Restore original priority but keep queue position */
+
+          this_task()->sched_priority = sem->saved;
+        }
+      else
+        {
+          /* Already at max priority, just trigger scheduler re-evaluation */
+
+          nxsched_set_priority(this_task(), sem->saved);
+        }
+
+      /* Clear saved priority */
+
       sem->saved = 0;
     }
 }
