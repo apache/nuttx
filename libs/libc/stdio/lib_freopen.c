@@ -31,6 +31,10 @@
 #include <errno.h>
 #include <unistd.h>
 
+#ifdef CONFIG_FDSAN
+#  include <android/fdsan.h>
+#endif
+
 #include "libc.h"
 
 /****************************************************************************
@@ -113,11 +117,22 @@ FAR FILE *freopen(FAR const char *path, FAR const char *mode,
 
       /* close the old fd */
 
+#ifdef CONFIG_FDSAN
+      android_fdsan_close_with_tag(fileno(stream),
+              android_fdsan_create_owner_tag(ANDROID_FDSAN_OWNER_TYPE_FILE,
+                                             (uintptr_t)stream));
+#else
       close(fileno(stream));
+#endif
 
       /* Open the new file and reused the fd */
 
       fd = open(path, oflags, 0666);
+#ifdef CONFIG_FDSAN
+      android_fdsan_exchange_owner_tag(fd, 0,
+          android_fdsan_create_owner_tag(ANDROID_FDSAN_OWNER_TYPE_FILE,
+                                        (uintptr_t)stream));
+#endif
       flockfile(stream);
       stream->fs_cookie = (FAR void *)(intptr_t)fd;
       funlockfile(stream);
