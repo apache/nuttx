@@ -33,7 +33,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/list.h>
 #include <nuttx/mutex.h>
 #include <nuttx/pci/pci.h>
 #include <nuttx/pci/pci_ivshmem.h>
@@ -59,9 +58,9 @@
 
 struct ivshmem_bus_s
 {
-  mutex_t          lock; /* Lock for the list */
-  struct list_node dev;  /* Wait match ivshmem device list */
-  struct list_node drv;  /* Ivshmem driver list */
+  mutex_t          lock; /* Lock for the queue */
+  dq_queue_t       dev;  /* Wait match ivshmem device queue */
+  dq_queue_t       drv;  /* Ivshmem driver queue */
 };
 
 struct ivshmem_device_s
@@ -69,7 +68,7 @@ struct ivshmem_device_s
   FAR struct pci_device_s     *dev;
 
   FAR struct ivshmem_driver_s *drv;
-  struct list_node             node;
+  dq_entry_t                   node;
 
   int                          id;
 
@@ -95,14 +94,14 @@ static int ivshmem_unregister_device(FAR struct ivshmem_device_s *dev);
  * Private Data
  ****************************************************************************/
 
-static int g_ivshmem_next_id = 0;
+static DEFINE_PER_CPU_BSS_BMP(int, g_ivshmem_next_id);
+#define g_ivshmem_next_id this_cpu_var_bmp(g_ivshmem_next_id)
 
-static struct ivshmem_bus_s g_ivshmem_bus =
+static DEFINE_PER_CPU_BMP(struct ivshmem_bus_s, g_ivshmem_bus) =
 {
   NXMUTEX_INITIALIZER,
-  LIST_INITIAL_VALUE(g_ivshmem_bus.dev),
-  LIST_INITIAL_VALUE(g_ivshmem_bus.drv),
 };
+#define g_ivshmem_bus this_cpu_var_bmp(g_ivshmem_bus)
 
 static const struct pci_device_id_s g_ivshmem_id_table[] =
 {
@@ -136,18 +135,17 @@ static int ivshmem_register_device(FAR struct ivshmem_device_s *dev)
       return ret;
     }
 
-  /* Add the device to the ivshmem_bus device list */
+  /* Add the device to the ivshmem_bus device queue */
 
-  list_add_tail(&g_ivshmem_bus.dev, &dev->node);
+  dq_addlast(&dev->node, &g_ivshmem_bus.dev);
 
   /* Match the driver has registered in the ivshmem_bus */
 
-  list_for_every_entry(&g_ivshmem_bus.drv, drv, struct ivshmem_driver_s,
-                       node)
+  dq_for_every_entry(&g_ivshmem_bus.drv, drv, struct ivshmem_driver_s, node)
     {
       if (drv->id == dev->id)
         {
-          /* If found the driver in the driver list, call driver probe,
+          /* If found the driver in the driver queue, call driver probe,
            * if probe success, assign item->driver to indicate the device
            * matched.
            */
@@ -180,9 +178,9 @@ static int ivshmem_unregister_device(FAR struct ivshmem_device_s *dev)
       return ret;
     }
 
-  /* Remove the device from the device list */
+  /* Remove the device from the device queue */
 
-  list_delete(&dev->node);
+  dq_rem(&dev->node, &g_ivshmem_bus.dev);
 
   nxmutex_unlock(&g_ivshmem_bus.lock);
 
@@ -485,18 +483,17 @@ int ivshmem_register_driver(FAR struct ivshmem_driver_s *drv)
       return ret;
     }
 
-  /* Add the driver to the ivshmem_bus driver list */
+  /* Add the driver to the ivshmem_bus driver queue */
 
-  list_add_tail(&g_ivshmem_bus.drv, &drv->node);
+  dq_addlast(&drv->node, &g_ivshmem_bus.drv);
 
   /* Match all the devices has registered in the ivshmem_bus */
 
-  list_for_every_entry(&g_ivshmem_bus.dev, dev,
-                       struct ivshmem_device_s, node)
+  dq_for_every_entry(&g_ivshmem_bus.dev, dev, struct ivshmem_device_s, node)
     {
       if (drv->id == dev->id)
         {
-          /* If found the device in the device list, call driver probe,
+          /* If found the device in the device queue, call driver probe,
            * if probe success, assign item->driver to indicate the device
            * matched.
            */
@@ -530,10 +527,9 @@ int ivshmem_unregister_driver(FAR struct ivshmem_driver_s *drv)
       return ret;
     }
 
-  /* Find all the devices matched with driver in device list */
+  /* Find all the devices matched with driver in device queue */
 
-  list_for_every_entry(&g_ivshmem_bus.dev, dev,
-                       struct ivshmem_device_s, node)
+  dq_for_every_entry(&g_ivshmem_bus.dev, dev, struct ivshmem_device_s, node)
     {
       if (dev->drv == drv)
         {
@@ -546,9 +542,9 @@ int ivshmem_unregister_driver(FAR struct ivshmem_driver_s *drv)
         }
     }
 
-  /* Remove the driver from the driver list */
+  /* Remove the driver from the driver queue */
 
-  list_delete(&drv->node);
+  dq_rem(&drv->node, &g_ivshmem_bus.drv);
 
   nxmutex_unlock(&g_ivshmem_bus.lock);
   return ret;

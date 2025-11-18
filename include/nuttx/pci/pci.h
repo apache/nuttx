@@ -30,7 +30,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <nuttx/list.h>
+#include <nuttx/queue.h>
 #include <nuttx/pci/pci_ids.h>
 #include <nuttx/pci/pci_regs.h>
 
@@ -285,8 +285,8 @@ struct pci_device_id_s
 
 struct pci_device_s
 {
-  struct list_node node;
-  struct list_node bus_list;         /* Node in per-bus list */
+  dq_entry_t node;
+  dq_entry_t bus_node;               /* Node in per-bus queue */
   FAR struct pci_bus_s *bus;         /* Bus this device is on */
   FAR struct pci_bus_s *subordinate; /* Bus this device bridges to */
 
@@ -313,9 +313,9 @@ struct pci_bus_s
   FAR struct pci_controller_s *ctrl; /* Associated host controller */
   FAR struct pci_bus_s *parent_bus;  /* Parent bus */
 
-  struct list_node node;     /* Node in list of buses */
-  struct list_node children; /* List of child buses */
-  struct list_node devices;  /* List of devices on this bus */
+  dq_entry_t node;     /* Node in queue of buses */
+  dq_queue_t children; /* queue of child buses */
+  dq_queue_t devices;  /* queue of devices on this bus */
 
   uint8_t number; /* Bus number */
 };
@@ -369,7 +369,7 @@ struct pci_controller_s
   FAR const struct pci_ops_s *ops;
 
   FAR struct pci_bus_s *bus;
-  struct list_node node;
+  dq_entry_t node;
   uint16_t domain;     /* PCI domain/segment id */
   uint8_t busno;
 };
@@ -386,7 +386,7 @@ struct pci_driver_s
 
   CODE void (*remove)(FAR struct pci_device_s *dev);
 
-  struct list_node node;
+  dq_entry_t node;
 };
 
 /****************************************************************************

@@ -28,7 +28,7 @@
  ****************************************************************************/
 
 #include <stdbool.h>
-#include <nuttx/list.h>
+#include <nuttx/queue.h>
 #include <nuttx/mutex.h>
 #include <nuttx/pci/pci_epf.h>
 #include <nuttx/pci/pci_regs.h>
@@ -181,7 +181,7 @@ struct pci_epc_mem_s
  * mem: Array of address space of the endpoint controlle
  * num_windows: Number of mem supported by device
  * max_functions: Max number of functions that can be configured in this EPC
- * node: The node of epc list
+ * node: The node of epc queue
  * dmaheap: The dma heap
  * lock: Mutex to protect pci_epc ops
  * funcno_map: Bitmap to manage physical function number
@@ -191,12 +191,12 @@ struct pci_epc_mem_s
 
 struct pci_epc_ctrl_s
 {
-  struct list_node epf;
+  dq_queue_t epf;
   FAR const struct pci_epc_ops_s *ops;
   FAR struct pci_epc_mem_s *mem;
   unsigned int num_windows;
   uint8_t max_functions;
-  struct list_node node;
+  dq_entry_t node;
   FAR struct mm_heap_s *dmaheap;
 
   /* Mutex to protect against concurrent access of EP controller */

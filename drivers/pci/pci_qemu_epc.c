@@ -477,7 +477,7 @@ qemu_epc_get_bar_addr_from_funcno(FAR struct pci_epc_ctrl_s *epc,
 {
   FAR struct pci_epf_device_s *epf;
 
-  list_for_every_entry(&epc->epf, epf, struct pci_epf_device_s, epc_node)
+  dq_for_every_entry(&epc->epf, epf, struct pci_epf_device_s, epc_node)
     {
       if (epf->funcno == funcno)
         {
