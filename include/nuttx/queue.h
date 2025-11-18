@@ -41,6 +41,9 @@
 #  define STATIC_INLINE
 #endif
 
+#define sq_container_of(p, t, m) \
+  ((p) ? ((FAR t *)((uintptr_t)(p) - offsetof(t, m))) : NULL)
+
 #define sq_init(q) \
   do \
     { \
@@ -168,12 +171,27 @@
 #define sq_for_every(q, p) \
   for ((p) = (q)->head; (p) != NULL; (p) = (p)->flink)
 
+#define sq_for_every_entry(q, e, t, m) \
+  for((e) = sq_container_of((q)->head, t, m); \
+      (e) != NULL; \
+      (e) = sq_container_of((e)->m.flink, t, m))
+
 #define sq_for_every_safe(q, p, tmp) \
   for((p) = (q)->head, (tmp) = (p) ? (p)->flink : NULL; \
       (p) != NULL; (p) = (tmp), (tmp) = (p) ? (p)->flink : NULL)
 
+#define sq_for_every_entry_safe(q, e, tmp, t, m) \
+  for((e) = sq_container_of((q)->head, t, m), \
+      ((tmp) = (e) ? sq_container_of((e)->m.flink, t, m) : NULL); \
+      (e) != NULL; (e) = (tmp), \
+      ((tmp) = (tmp) ? sq_container_of((tmp)->m.flink, t, m) : NULL))
+
 #define dq_for_every(q, p) sq_for_every(q, p)
+#define dq_for_every_entry(q, e, t, m) \
+        sq_for_every_entry(q, e, t, m)
 #define dq_for_every_safe(q, p, tmp) sq_for_every_safe(q, p, tmp)
+#define dq_for_every_entry_safe(q, e, tmp, t, m) \
+        sq_for_every_entry_safe(q, e, tmp, t, m)
 
 #define sq_rem(p, q) \
   do \
