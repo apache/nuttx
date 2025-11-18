@@ -158,7 +158,7 @@ pci_do_find_device_from_bus(FAR struct pci_bus_s *bus, uint8_t busno,
   FAR struct pci_bus_s *bus_tmp;
   FAR struct pci_device_s *dev;
 
-  list_for_every_entry(&bus->devices, dev, struct pci_device_s, node)
+  list_for_every_entry(&bus->devices, dev, struct pci_device_s, bus_list)
     {
       if (dev->bus->number == busno && devfn == dev->devfn)
         {
