@@ -1014,6 +1014,8 @@ static int ctucanfd_sock_ifup(FAR struct netdev_lowerhalf_s *dev)
   ctucanfd_txint(priv, true);
   ctucanfd_rxint(priv, true);
 
+  netdev_lower_carrier_on(dev);
+
   return OK;
 }
 
@@ -1041,6 +1043,8 @@ static int ctucanfd_sock_ifdown(FAR struct netdev_lowerhalf_s *dev)
   /* Shutdown */
 
   ctucanfd_shutdown(priv);
+
+  netdev_lower_carrier_off(dev);
 
   return OK;
 }
@@ -1773,12 +1777,6 @@ static int ctucanfd_probe(FAR struct pci_device_s *dev)
       netdev->quota[NETPKT_RX] = CTUCANFD_RX_QUOTA;
       netdev->ops = &g_ctucanfd_net_ops;
 
-      /* Put the interface in the down state.  This usually amounts to
-       * resetting the device and/or calling ctucanfd_sock_ifdown().
-       */
-
-      ctucanfd_sock_ifdown(&priv->devs[i].dev);
-
       /* Register the network interface. */
 
       ret = netdev_lower_register(netdev, NET_LL_CAN);
@@ -1787,6 +1785,12 @@ static int ctucanfd_probe(FAR struct pci_device_s *dev)
           pcierr("ERROR: failed to register count=%d, %d\n", i, ret);
           goto errout;
         }
+
+      /* Put the interface in the down state.  This usually amounts to
+       * resetting the device and/or calling ctucanfd_sock_ifdown().
+       */
+
+      ctucanfd_sock_ifdown(&priv->devs[i].dev);
 #endif
     }
 
