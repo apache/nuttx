@@ -420,12 +420,15 @@ static int mtdlog_write_data(FAR struct mtdlog_s *mtdlog,
   uint32_t tmp_buf_size = mtdlog->progsize;
   uint8_t tmp_buf[tmp_buf_size];
 
-  ret = MTD_BWRITE(mtdlog->mtd, (offset / mtdlog->progsize),
-                   (length / mtdlog->progsize), buf);
-  if (ret < 0)
+  if (length >= mtdlog->progsize)
     {
-      ferr("ERROR: MTD_BWRITE failed: %d, %d, %d\n", offset, length, ret);
-      return ret;
+      ret = MTD_BWRITE(mtdlog->mtd, (offset / mtdlog->progsize),
+                       (length / mtdlog->progsize), buf);
+      if (ret < 0)
+        {
+          ferr("ERROR: MTD_BWRITE failed: %d, %d\n", offset, ret);
+          return ret;
+        }
     }
 
   remain = length % mtdlog->progsize;
@@ -437,7 +440,7 @@ static int mtdlog_write_data(FAR struct mtdlog_s *mtdlog,
 
       offset += length - remain;
       ret = MTD_BWRITE(mtdlog->mtd, (offset / mtdlog->progsize),
-                      (tmp_buf_size / mtdlog->progsize), tmp_buf);
+                       (tmp_buf_size / mtdlog->progsize), tmp_buf);
       if (ret < 0)
         {
           ferr("ERROR: MTD_BWRITE failed: %d, %d\n", offset, ret);
@@ -857,7 +860,7 @@ static int mtdlog_read_log_entry(FAR struct mtdlog_s *mtdlog,
     {
       if (!mtdlog_is_valid_pos(mtdlog, &upriv->rpos))
         {
-          return -EINVAL;
+          upriv->rpos = mtdlog->headpos;
         }
 
       if (mtdlog_is_tailpos(mtdlog, &upriv->rpos))
@@ -944,7 +947,8 @@ static int mtdlog_write_log_entry(FAR struct mtdlog_s *mtdlog,
   blk_remain = mtdlog->tailpos.entryoff -
     mtdlog->tailpos.dataoff;
   blk_remain -= MTDLOG_ALIGN(mtdlog, sizeof(struct mtdlog_entry_s));
-  if (len > blk_remain)
+  if ((MTDLOG_ALIGN(mtdlog, len) +
+       MTDLOG_ALIGN(mtdlog, sizeof(struct mtdlog_entry_s))) > blk_remain)
     {
       ret = mtdlog_move_tail_to_nextblk(mtdlog,
                                           mtdlog->tailpos.blkgrp);
@@ -1001,7 +1005,7 @@ static int mtdlog_query_cur_loginfo(FAR struct mtdlog_s *mtdlog,
     {
       if (!mtdlog_is_valid_pos(mtdlog, &upriv->rpos))
         {
-          return -EINVAL;
+          upriv->rpos = mtdlog->headpos;
         }
 
       if (mtdlog_is_tailpos(mtdlog, &upriv->rpos))
@@ -1218,7 +1222,7 @@ static int mtdlog_seek_cur_log_entry(FAR struct mtdlog_s *mtdlog,
     {
       if (!mtdlog_is_valid_pos(mtdlog, &log_rpos))
         {
-          return -EINVAL;
+          log_rpos = mtdlog->headpos;
         }
 
       if (mtdlog_is_tailpos(mtdlog, &log_rpos))
