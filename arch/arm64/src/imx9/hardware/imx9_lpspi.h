@@ -284,16 +284,11 @@
 #define LPSPI_TCR_BYSW                 (1 << 22) /* Bit 22: Byte Swap (BYSW) */
 #define LPSPI_TCR_LSBF                 (1 << 23) /* Bit 23: LSB First (LSBF) */
 #  define LPSPI_TCR_MSBF               (0 << 23) /*         MSB First */
-#define LPSPI_TCR_PCS_SHIFT            (24)      /* Bits 24-26: Peripheral Chip Select (PCS) */
-#define LPSPI_TCR_PCS_MASK             (0x07 << LPSPI_TCR_PCS_SHIFT)
+#define LPSPI_TCR_PCS_SHIFT            (24)      /* Bits 24-25: Peripheral Chip Select (PCS) */
+#define LPSPI_TCR_PCS_MASK             (0x03 << LPSPI_TCR_PCS_SHIFT)
 #  define LPSPI_TCR_PCS_0              (0x00 << LPSPI_TCR_PCS_SHIFT) /* Transfer using PCS[0] */
 #  define LPSPI_TCR_PCS_1              (0x01 << LPSPI_TCR_PCS_SHIFT) /* Transfer using PCS[1] */
 #  define LPSPI_TCR_PCS_2              (0x02 << LPSPI_TCR_PCS_SHIFT) /* Transfer using PCS[2] */
-#  define LPSPI_TCR_PCS_3              (0x03 << LPSPI_TCR_PCS_SHIFT) /* Transfer using PCS[3] */
-#  define LPSPI_TCR_PCS_4              (0x04 << LPSPI_TCR_PCS_SHIFT) /* Transfer using PCS[4] */
-#  define LPSPI_TCR_PCS_5              (0x05 << LPSPI_TCR_PCS_SHIFT) /* Transfer using PCS[5] */
-#  define LPSPI_TCR_PCS_6              (0x06 << LPSPI_TCR_PCS_SHIFT) /* Transfer using PCS[6] */
-#  define LPSPI_TCR_PCS_7              (0x07 << LPSPI_TCR_PCS_SHIFT) /* Transfer using PCS[7] */
 
 #define LPSPI_TCR_PRESCALE_SHIFT       (27)      /* Bits 27-29: Prescaler Value (PRESCALE) */
 #define LPSPI_TCR_PRESCALE_MASK        (0x07 << LPSPI_TCR_PRESCALE_SHIFT)
