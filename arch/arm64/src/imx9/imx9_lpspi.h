@@ -148,6 +148,27 @@ int imx9_lpspi_register(struct spi_dev_s *dev,
                         void *arg);
 #endif
 
+/****************************************************************************
+ * Name: imx9_lpspi_select_cs
+ *
+ * Description:
+ *   Assert or de-assert internal PCS0 or PCS1 line. Can be called by
+ *   board-specific chip-select logic. Assertion of the CS is done at the
+ *   start of the next transfer and de-assertion after this function is
+ *   called again to de-assert the cs and the transfer has ended.
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   cs     - Chip select 0 or 1
+ *   select - true: assert CS, false: de-assert CS
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void imx9_lpspi_select_cs(struct spi_dev_s *dev, int cs, bool select);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
