@@ -73,9 +73,15 @@ extern "C"
 #define V4L2_PIX_FMT_BGR32    v4l2_fourcc('B', 'G', 'R', '4')
 #define V4L2_PIX_FMT_ABGR32   v4l2_fourcc('A', 'R', '2', '4')
 #define V4L2_PIX_FMT_XBGR32   v4l2_fourcc('X', 'R', '2', '4')
+#define V4L2_PIX_FMT_BGRA32   v4l2_fourcc('R', 'A', '2', '4')
+#define V4L2_PIX_FMT_BGRX32   v4l2_fourcc('R', 'X', '2', '4')
 #define V4L2_PIX_FMT_RGB32    v4l2_fourcc('R', 'G', 'B', '4')
+#define V4L2_PIX_FMT_RGBA32   v4l2_fourcc('A', 'B', '2', '4')
+#define V4L2_PIX_FMT_RGBX32   v4l2_fourcc('X', 'B', '2', '4')
 #define V4L2_PIX_FMT_ARGB32   v4l2_fourcc('B', 'A', '2', '4')
 #define V4L2_PIX_FMT_XRGB32   v4l2_fourcc('B', 'X', '2', '4')
+#define V4L2_PIX_FMT_BGR48    v4l2_fourcc('B', 'G', 'R', '6')
+#define V4L2_PIX_FMT_RGB48    v4l2_fourcc('R', 'G', 'B', '6')
 
 /* Grey formats */
 
@@ -90,6 +96,10 @@ extern "C"
 /* Grey bit-packed formats */
 
 #define V4L2_PIX_FMT_Y10BPACK v4l2_fourcc('Y', '1', '0', 'B')
+#define V4L2_PIX_FMT_Y10P     v4l2_fourcc('Y', '1', '0', 'P')
+#define V4L2_PIX_FMT_IPU3_Y10 v4l2_fourcc('i', 'p', '3', 'y')
+#define V4L2_PIX_FMT_Y12P     v4l2_fourcc('Y', '1', '2', 'P')
+#define V4L2_PIX_FMT_Y14P     v4l2_fourcc('Y', '1', '4', 'P')
 
 /* Palette formats */
 
@@ -110,7 +120,14 @@ extern "C"
 #define V4L2_PIX_FMT_YUV444   v4l2_fourcc('Y', '4', '4', '4')
 #define V4L2_PIX_FMT_YUV555   v4l2_fourcc('Y', 'U', 'V', 'O')
 #define V4L2_PIX_FMT_YUV565   v4l2_fourcc('Y', 'U', 'V', 'P')
+#define V4L2_PIX_FMT_YUV24    v4l2_fourcc('Y', 'U', 'V', '3')
 #define V4L2_PIX_FMT_YUV32    v4l2_fourcc('Y', 'U', 'V', '4')
+#define V4L2_PIX_FMT_AYUV32   v4l2_fourcc('A', 'Y', 'U', 'V')
+#define V4L2_PIX_FMT_XYUV32   v4l2_fourcc('X', 'Y', 'U', 'V')
+#define V4L2_PIX_FMT_VUYA32   v4l2_fourcc('V', 'U', 'Y', 'A')
+#define V4L2_PIX_FMT_VUYX32   v4l2_fourcc('V', 'U', 'Y', 'X')
+#define V4L2_PIX_FMT_YUVA32   v4l2_fourcc('Y', 'U', 'V', 'A')
+#define V4L2_PIX_FMT_YUVX32   v4l2_fourcc('Y', 'U', 'V', 'X')
 #define V4L2_PIX_FMT_HI240    v4l2_fourcc('H', 'I', '2', '4')
 #define V4L2_PIX_FMT_HM12     v4l2_fourcc('H', 'M', '1', '2')
 #define V4L2_PIX_FMT_M420     v4l2_fourcc('M', '4', '2', '0')
@@ -191,10 +208,52 @@ extern "C"
 #define V4L2_PIX_FMT_SGRBG16      v4l2_fourcc('G', 'R', '1', '6')
 #define V4L2_PIX_FMT_SRGGB16      v4l2_fourcc('R', 'G', '1', '6')
 
+/* 12bit raw bayer packed, 6 bytes for every 4 pixels */
+
+#define V4L2_PIX_FMT_SBGGR12P     v4l2_fourcc('p', 'B', 'C', 'C')
+#define V4L2_PIX_FMT_SGBRG12P     v4l2_fourcc('p', 'G', 'C', 'C')
+#define V4L2_PIX_FMT_SGRBG12P     v4l2_fourcc('p', 'g', 'C', 'C')
+#define V4L2_PIX_FMT_SRGGB12P     v4l2_fourcc('p', 'R', 'C', 'C')
+#define V4L2_PIX_FMT_SBGGR14      v4l2_fourcc('B', 'G', '1', '4')
+#define V4L2_PIX_FMT_SGBRG14      v4l2_fourcc('G', 'B', '1', '4')
+#define V4L2_PIX_FMT_SGRBG14      v4l2_fourcc('G', 'R', '1', '4')
+#define V4L2_PIX_FMT_SRGGB14      v4l2_fourcc('R', 'G', '1', '4')
+
+/* 14bit raw bayer packed, 7 bytes for every 4 pixels */
+
+#define V4L2_PIX_FMT_SBGGR14P     v4l2_fourcc('p', 'B', 'E', 'E')
+#define V4L2_PIX_FMT_SGBRG14P     v4l2_fourcc('p', 'G', 'E', 'E')
+#define V4L2_PIX_FMT_SGRBG14P     v4l2_fourcc('p', 'g', 'E', 'E')
+#define V4L2_PIX_FMT_SRGGB14P     v4l2_fourcc('p', 'R', 'E', 'E')
+#define V4L2_PIX_FMT_SBGGR16      v4l2_fourcc('B', 'Y', 'R', '2')
+#define V4L2_PIX_FMT_SGBRG16      v4l2_fourcc('G', 'B', '1', '6')
+#define V4L2_PIX_FMT_SGRBG16      v4l2_fourcc('G', 'R', '1', '6')
+#define V4L2_PIX_FMT_SRGGB16      v4l2_fourcc('R', 'G', '1', '6')
+
 /* HSV formats */
 
 #define V4L2_PIX_FMT_HSV24    v4l2_fourcc('H', 'S', 'V', '3')
 #define V4L2_PIX_FMT_HSV32    v4l2_fourcc('H', 'S', 'V', '4')
+
+/* 10bit raw packed, 32 bytes for every 25 pixels, last LSB 6 bits unused */
+
+#define V4L2_PIX_FMT_IPU3_SBGGR10  v4l2_fourcc('i', 'p', '3', 'b')
+#define V4L2_PIX_FMT_IPU3_SGBRG10  v4l2_fourcc('i', 'p', '3', 'g')
+#define V4L2_PIX_FMT_IPU3_SGRBG10  v4l2_fourcc('i', 'p', '3', 'G')
+#define V4L2_PIX_FMT_IPU3_SRGGB10  v4l2_fourcc('i', 'p', '3', 'r')
+
+/* Raspberry Pi PiSP compressed formats. */
+
+#define V4L2_PIX_FMT_PISP_COMP1_RGGB  v4l2_fourcc('P', 'C', '1', 'R')
+#define V4L2_PIX_FMT_PISP_COMP1_GRBG  v4l2_fourcc('P', 'C', '1', 'G')
+#define V4L2_PIX_FMT_PISP_COMP1_GBRG  v4l2_fourcc('P', 'C', '1', 'g')
+#define V4L2_PIX_FMT_PISP_COMP1_BGGR  v4l2_fourcc('P', 'C', '1', 'B')
+#define V4L2_PIX_FMT_PISP_COMP1_MONO  v4l2_fourcc('P', 'C', '1', 'M')
+#define V4L2_PIX_FMT_PISP_COMP2_RGGB  v4l2_fourcc('P', 'C', '2', 'R')
+#define V4L2_PIX_FMT_PISP_COMP2_GRBG  v4l2_fourcc('P', 'C', '2', 'G')
+#define V4L2_PIX_FMT_PISP_COMP2_GBRG  v4l2_fourcc('P', 'C', '2', 'g')
+#define V4L2_PIX_FMT_PISP_COMP2_BGGR  v4l2_fourcc('P', 'C', '2', 'B')
+#define V4L2_PIX_FMT_PISP_COMP2_MONO  v4l2_fourcc('P', 'C', '2', 'M')
 
 /* Compressed formats */
 
@@ -228,9 +287,32 @@ extern "C"
 
 #define V4L2_PIX_FMT_SUBIMG_RGB565 v4l2_fourcc('S', 'R', 'G', 'B')
 
+/* Line-based metadata formats */
+
+#define V4L2_META_FMT_GENERIC_8         v4l2_fourcc('M', 'E', 'T', '8')
+#define V4L2_META_FMT_GENERIC_CSI2_10   v4l2_fourcc('M', 'C', '1', 'A')
+#define V4L2_META_FMT_GENERIC_CSI2_12   v4l2_fourcc('M', 'C', '1', 'C')
+#define V4L2_META_FMT_GENERIC_CSI2_14   v4l2_fourcc('M', 'C', '1', 'E')
+#define V4L2_META_FMT_GENERIC_CSI2_16   v4l2_fourcc('M', 'C', '1', 'G')
+#define V4L2_META_FMT_GENERIC_CSI2_20   v4l2_fourcc('M', 'C', '1', 'K')
+#define V4L2_META_FMT_GENERIC_CSI2_24   v4l2_fourcc('M', 'C', '1', 'O')
+
+/* Flags */
+
+#define V4L2_PIX_FMT_FLAG_PREMUL_ALPHA 0x00000001
+#define V4L2_PIX_FMT_FLAG_SET_CSC      0x00000002
+
 /* MAX length of v4l2_fmtdesc description string */
 
 #define V4L2_FMT_DSC_MAX       (32)
+
+#define V4L2_CTRL_ID_MASK           (0x0fffffff)
+#define V4L2_CTRL_ID2CLASS(id)      ((id) & 0x0fff0000UL)
+#define V4L2_CTRL_ID2WHICH(id)      ((id) & 0x0fff0000UL)
+#define V4L2_CTRL_DRIVER_PRIV(id)   (((id) & 0xffff) >= 0x1000)
+#define V4L2_CTRL_WHICH_CUR_VAL     0
+#define V4L2_CTRL_WHICH_DEF_VAL     0x0f000000
+#define V4L2_CTRL_WHICH_REQUEST_VAL 0x0f010000
 
 /* MAX length of v4l2_query_ext_ctrl dims array */
 
@@ -239,10 +321,6 @@ extern "C"
 /* MAX value of VIDIOC_REQBUFS count parameter */
 
 #define V4L2_REQBUFS_COUNT_MAX CONFIG_VIDEO_REQBUFS_COUNT_MAX
-
-/* Buffer error flag */
-
-#define V4L2_BUF_FLAG_ERROR    (0x0001)
 
 /* Values for v4l2_std_id */
 
@@ -421,10 +499,13 @@ enum v4l2_capabilities
   V4L2_CAP_SDR_CAPTURE            = 0x00100000,  /* Is a SDR capture device */
   V4L2_CAP_EXT_PIX_FORMAT         = 0x00200000,  /* Supports the extended pixel format */
   V4L2_CAP_SDR_OUTPUT             = 0x00400000,  /* Is a SDR output device */
+  V4L2_CAP_META_CAPTURE           = 0x00800000,  /* Is a metadata capture device */
   V4L2_CAP_READWRITE              = 0x01000000,  /* Read/write systemcalls */
   V4L2_CAP_ASYNCIO                = 0x02000000,  /* Async I/O */
   V4L2_CAP_STREAMING              = 0x04000000,  /* Streaming I/O ioctls */
+  V4L2_CAP_META_OUTPUT            = 0x08000000,  /* Is a metadata output device */
   V4L2_CAP_TOUCH                  = 0x10000000,  /* Is a touch device */
+  V4L2_CAP_IO_MC                  = 0x20000000,  /* Is input/output controlled by the media controller */
   V4L2_CAP_DEVICE_CAPS            = 0x80000000,  /* Sets device capabilities field */
 };
 
@@ -815,6 +896,7 @@ struct v4l2_fmtdesc
   uint32_t flags;
   char     description[V4L2_FMT_DSC_MAX];   /* Description string */
   uint32_t pixelformat;                     /* Format fourcc      */
+  uint32_t mbus_code;                       /* Media bus code    */
 };
 
 enum v4l2_fmt_flag
@@ -970,6 +1052,15 @@ struct v4l2_pix_format_mplane
   uint8_t                      reserved[7];
 };
 
+struct v4l2_meta_format
+{
+    uint32_t                   dataformat;
+    uint32_t                   buffersize;
+    uint32_t                   width;
+    uint32_t                   height;
+    uint32_t                   bytesperline;
+};
+
 struct v4l2_format
 {
   uint32_t  type;                         /* enum #v4l2_buf_type. */
@@ -977,6 +1068,7 @@ struct v4l2_format
   {
     struct v4l2_pix_format        pix;    /* Image format */
     struct v4l2_pix_format_mplane pix_mp; /* V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE */
+    struct v4l2_meta_format       meta;   /* V4L2_BUF_TYPE_META_CAPTURE */
   } fmt;
 };
 
@@ -1195,6 +1287,34 @@ struct v4l2_querymenu
     int64_t value;          /* Value of menu */
   };
 };
+
+/* Control flags */
+
+#define V4L2_CTRL_FLAG_DISABLED         0x0001
+#define V4L2_CTRL_FLAG_GRABBED          0x0002
+#define V4L2_CTRL_FLAG_READ_ONLY        0x0004
+#define V4L2_CTRL_FLAG_UPDATE           0x0008
+#define V4L2_CTRL_FLAG_INACTIVE         0x0010
+#define V4L2_CTRL_FLAG_SLIDER           0x0020
+#define V4L2_CTRL_FLAG_WRITE_ONLY       0x0040
+#define V4L2_CTRL_FLAG_VOLATILE         0x0080
+#define V4L2_CTRL_FLAG_HAS_PAYLOAD      0x0100
+#define V4L2_CTRL_FLAG_EXECUTE_ON_WRITE 0x0200
+#define V4L2_CTRL_FLAG_MODIFY_LAYOUT    0x0400
+#define V4L2_CTRL_FLAG_DYNAMIC_ARRAY    0x0800
+
+/*  Query flags, to be ORed with the control ID */
+
+#define V4L2_CTRL_FLAG_NEXT_CTRL        0x80000000
+#define V4L2_CTRL_FLAG_NEXT_COMPOUND    0x40000000
+
+/*  User-class control IDs defined by V4L2 */
+
+#define V4L2_CID_MAX_CTRLS              1024
+
+/*  IDs reserved for driver specific controls */
+
+#define V4L2_CID_PRIVATE_BASE           0x08000000
 
 struct v4l2_input
 {
@@ -1586,9 +1706,13 @@ struct v4l2_decoder_cmd
 
 #define VIDIOC_DQEVENT                _VIDIOC(0x0059)
 
-/* Subscribe or unsubscribe event */
+/* Subscribe event */
 
 #define VIDIOC_SUBSCRIBE_EVENT        _VIDIOC(0x005a)
+
+/* Unsubscribe event */
+
+#define VIDIOC_UNSUBSCRIBE_EVENT      _VIDIOC(0x005b)
 
 /* Get clip
  * Address pointing to struct v4l2_selection
