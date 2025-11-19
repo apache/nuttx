@@ -70,8 +70,8 @@ config ARCH_CHIP_BL602
 	---help---
 		BouffaloLab BL602(rv32imfc)
 
-config ARCH_CHIP_ESP32C3
-	bool "Espressif ESP32-C3"
+config ARCH_CHIP_ESP32C3_LEGACY
+	bool "Espressif ESP32-C3 (Legacy)"
 	select ARCH_RV32
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_C
@@ -98,9 +98,9 @@ config ARCH_CHIP_ESP32C3
 	select ONESHOT_COUNT if ONESHOT
 	select ONESHOT_FAST_DIVISION if ONESHOT
 	---help---
-		Espressif ESP32-C3 (RV32IMC).
+		Espressif ESP32-C3 (RV32IMC). Legacy implementation.
 
-config ARCH_CHIP_ESP32C3_GENERIC
+config ARCH_CHIP_ESP32C3
 	bool "ESP32-C3"
 	select ARCH_RV32
 	select ARCH_RV_ISA_M
@@ -600,8 +600,8 @@ config ARCH_CHIP
 	default "k210"                  if ARCH_CHIP_K210
 	default "litex"                 if ARCH_CHIP_LITEX
 	default "bl602"                 if ARCH_CHIP_BL602
-	default "esp32c3-legacy"        if ARCH_CHIP_ESP32C3
-	default "esp32c3"               if ARCH_CHIP_ESP32C3_GENERIC
+	default "esp32c3-legacy"        if ARCH_CHIP_ESP32C3_LEGACY
+	default "esp32c3"               if ARCH_CHIP_ESP32C3
 	default "esp32c6"               if ARCH_CHIP_ESP32C6
 	default "esp32h2"               if ARCH_CHIP_ESP32H2
 	default "c906"                  if ARCH_CHIP_C906
@@ -814,10 +814,10 @@ endif
 if ARCH_CHIP_BL602
 source "arch/risc-v/src/bl602/Kconfig"
 endif
-if ARCH_CHIP_ESP32C3
+if ARCH_CHIP_ESP32C3_LEGACY
 source "arch/risc-v/src/esp32c3-legacy/Kconfig"
 endif
-if ARCH_CHIP_ESP32C3_GENERIC
+if ARCH_CHIP_ESP32C3
 source "arch/risc-v/src/esp32c3/Kconfig"
 endif
 if ARCH_CHIP_ESP32C6
