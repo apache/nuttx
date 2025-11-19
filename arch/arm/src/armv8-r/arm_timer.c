@@ -37,9 +37,9 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/timers/arch_alarm.h>
 #include <nuttx/timers/oneshot.h>
-#include <nuttx/kmalloc.h>
 
 #include "arm_timer.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -177,6 +177,17 @@ static struct oneshot_lowerhalf_s g_arm_oneshot_lowerhalf =
   .ops = &g_arm_oneshot_ops
 };
 
+static void arm_oneshot_secondary_init(void)
+{
+  arm_timer_phy_set_absolute(UINT64_MAX);
+
+  /* Enable interrupt */
+
+  up_enable_irq(ARM_ARCH_TIMER_IRQ);
+  arm_timer_phy_enable(true);
+  arm_timer_phy_set_irq_mask(false);
+}
+
 /****************************************************************************
  * Name: oneshot_initialize
  *
@@ -195,8 +206,6 @@ static struct oneshot_lowerhalf_s *arm_oneshot_initialize(void)
   struct oneshot_lowerhalf_s *priv = &g_arm_oneshot_lowerhalf;
   uint64_t freq;
 
-  tmrinfo("oneshot_initialize\n");
-
   /* Attach handler */
 
   irq_attach(ARM_ARCH_TIMER_IRQ, arm_oneshot_compare_isr, priv);
@@ -205,7 +214,12 @@ static struct oneshot_lowerhalf_s *arm_oneshot_initialize(void)
 
   DEBUGASSERT(freq <= UINT32_MAX);
 
+  tmrinfo("%s: cp15 timer(s) running at %" PRIu64 ".%" PRIu64 "MHz\n",
+          __func__, freq / 1000000, (freq / 10000) % 100);
+
   oneshot_count_init(priv, (uint32_t)freq);
+
+  arm_oneshot_secondary_init();
 
   tmrinfo("oneshot_initialize ok %p \n", priv);
 
@@ -227,19 +241,7 @@ static struct oneshot_lowerhalf_s *arm_oneshot_initialize(void)
 
 void up_timer_initialize(void)
 {
-  uint64_t freq;
-
-  freq = arm_timer_get_freq();
-  tmrinfo("%s: cp15 timer(s) running at %" PRIu64 ".%" PRIu64 "MHz\n",
-          __func__, freq / 1000000, (freq / 10000) % 100);
-
-  arm_timer_phy_set_absolute(UINT64_MAX);
-
   up_alarm_set_lowerhalf(arm_oneshot_initialize());
-
-  up_enable_irq(ARM_ARCH_TIMER_IRQ);
-  arm_timer_phy_enable(true);
-  arm_timer_phy_set_irq_mask(false);
 }
 
 #ifdef CONFIG_SMP
@@ -268,16 +270,7 @@ void arm_timer_secondary_init(unsigned int freq)
 #ifdef CONFIG_SCHED_TICKLESS
   tmrinfo("arm_arch_timer_secondary_init\n");
 
-  arm_timer_phy_set_absolute(UINT64_MAX);
-
-  /* Enable int */
-
-  up_enable_irq(ARM_ARCH_TIMER_IRQ);
-
-  /* Start timer */
-
-  arm_timer_phy_enable(true);
-  arm_timer_phy_set_irq_mask(false);
+  arm_oneshot_secondary_init();
 #endif
 }
 #endif
