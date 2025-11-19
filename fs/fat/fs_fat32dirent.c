@@ -607,6 +607,13 @@ static inline int fat_parselfname(FAR const char **path,
 
           dirinfo->fd_lfname[ndx] = '\0';
 
+          /* Ignore sequences of //... in the filename */
+
+          while (node && *node == '/')
+            {
+              node++;
+            }
+
           /* Return the remaining sub-string and the terminating character. */
 
           *terminator = (char)ch;
