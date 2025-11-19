@@ -117,6 +117,8 @@ function(nuttx_generate_kconfig)
     nuttx_generate_kconfig
     ONE_VALUE
     MENUDESC
+    MULTI_VALUE
+    EXTERNAL_DIRECTORIES
     REQUIRED
     ARGN
     ${ARGN})
@@ -143,12 +145,21 @@ function(nuttx_generate_kconfig)
     LIST_DIRECTORIES false
     ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}/*/CMakeLists.txt)
 
+  if(NOT MENUDESC)
+    set(EXTERNAL_CMAKESCRIPTS)
+    foreach(external_dir ${EXTERNAL_DIRECTORIES})
+      if(EXISTS ${external_dir}/CMakeLists.txt)
+        list(APPEND EXTERNAL_CMAKESCRIPTS "${external_dir}/CMakeLists.txt")
+      endif()
+    endforeach()
+  endif()
+
   # we need to recursively generate the Kconfig menus of multi-level
   # directories.
   #
   # when generating a Kconfig file for the current directory, it should include
   # and invoke all the Kconfig files gathered from its subdirectories.
-  foreach(SUB_CMAKESCRIPT ${SUB_CMAKESCRIPTS})
+  foreach(SUB_CMAKESCRIPT ${SUB_CMAKESCRIPTS} ${EXTERNAL_CMAKESCRIPTS})
     string(REPLACE "CMakeLists.txt" "Kconfig" SUB_KCONFIG ${SUB_CMAKESCRIPT})
     string(REPLACE "/" "_" MENUCONFIG ${SUB_KCONFIG})
     if(WIN32)
