@@ -138,7 +138,7 @@ This example shows how to build and flash the ``nsh`` defconfig for the ESP32-C3
 
     $ cd nuttx
     $ make distclean
-    $ ./tools/configure.sh esp32c3-generic:nsh
+    $ ./tools/configure.sh esp32c3-devkit:nsh
     $ make -j$(nproc)
 
 When the build is complete, the firmware can be flashed to the board using the command::
@@ -176,7 +176,7 @@ Now opening the serial port with a terminal emulator should show the NuttX conso
   $ picocom -b 115200 /dev/ttyUSB0
   NuttShell (NSH) NuttX-12.8.0
   nsh> uname -a
-  NuttX 12.8.0 759d37b97c-dirty Mar  5 2025 19:58:56 risc-v esp32c3-generic
+  NuttX 12.8.0 759d37b97c-dirty Mar  5 2025 19:58:56 risc-v esp32c3-devkit
 
 Debugging
 =========
@@ -424,7 +424,7 @@ This section describes how to execute OTA update using MCUBoot.
 
 1. First build the default ``mcuboot_update_agent`` config. This image defaults to the primary slot and already comes with Wi-Fi settings enabled::
 
-    ./tools/configure.sh esp32c3-generic:mcuboot_update_agent
+    ./tools/configure.sh esp32c3-devkit:mcuboot_update_agent
 
 2. Build the MCUBoot bootloader::
 

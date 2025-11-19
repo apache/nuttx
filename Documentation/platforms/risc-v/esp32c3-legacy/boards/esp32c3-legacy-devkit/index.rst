@@ -1,6 +1,6 @@
-===============
-ESP32-C3 DevKit
-===============
+========================
+ESP32-C3 DevKit (Legacy)
+========================
 
 The ESP32-C3 DevKit is an entry-level development board equipped with either
 an ESP32-C3-WROOM-02 or an ESP32-C3-MINI-1.
@@ -47,7 +47,7 @@ Configurations
 
 All of the configurations presented below can be tested by running the following commands::
 
-    $ ./tools/configure.sh esp32c3-devkit:<config_name>
+    $ ./tools/configure.sh esp32c3-legacy-devkit:<config_name>
     $ make flash ESPTOOL_PORT=/dev/ttyUSB0 -j
 
 Where <config_name> is the name of board configuration you want to use, i.e.: nsh, buttons, wifi...

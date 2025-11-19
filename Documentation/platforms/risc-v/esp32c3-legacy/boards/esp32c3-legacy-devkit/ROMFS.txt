@@ -68,12 +68,12 @@ README
   directory structure. You can directly modify files under etc/ folder,
   The build system will regenerate nsh_romfsimg.h automatically.
 
-  See the esp32c3-devkit/nsh configuration for an example of the use of this file
+  See the esp32c3-legacy-devkit/nsh configuration for an example of the use of this file
   system.
 
   Replacing the Password File
   ---------------------------
-  The esp32c3-devkit/nsh configuration can also be used to create a new password file.
+  The esp32c3-legacy-devkit/nsh configuration can also be used to create a new password file.
   First, make these configuration changes:
 
     1. Disable logins
