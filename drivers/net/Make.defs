@@ -28,6 +28,9 @@ ifeq ($(CONFIG_NET),y)
 
 ifeq ($(CONFIG_MM_IOB),y)
   CSRCS += netdev_upperhalf.c
+ifeq ($(CONFIG_DRIVERS_NOTENET),y)
+  CSRCS += netdev_drivers.c
+endif
 endif
 
 ifeq ($(CONFIG_MDIO_BUS),y)

@@ -170,4 +170,47 @@ config DRIVERS_NOTERPMSG_WORK_DELAY
 
 endif
 
+config DRIVERS_NOTENET
+	bool "Note to netdev"
+	depends on NETDEVICES && NET_NETPOLL
+	depends on SCHED_WORKQUEUE
+	default n
+	---help---
+		Use the netdev as a Note output device. Notes are sent as UDP
+		packets through netpoll.
+
+if DRIVERS_NOTENET
+
+config DRIVERS_NOTENET_INTF
+	string "Note netdev interface"
+	default "eth0"
+	---help---
+		Network interface used for netdev Note.
+
+config DRIVERS_NOTENET_IPADDR
+	hex "Note netdev destination IP address"
+	default 0xffffffff
+	---help---
+		Address where netdev sends Note output.
+		Default: broadcast IP address.
+
+config DRIVERS_NOTENET_MAC
+	string "Note netdev destination MAC address"
+	default "ff:ff:ff:ff:ff:ff"
+	---help---
+		MAC address where netdev sends Note output.
+		Default: broadcast MAC address.
+
+config DRIVERS_NOTENET_PORT
+	int "Note netdev port"
+	default 50000
+	---help---
+		UDP port for Note output.
+
+config DRIVERS_NOTENET_WORK_DELAY
+	int "Note netdev work delay (ms)"
+	default 100
+
+endif
+
 endif # DRIVERS_NOTE

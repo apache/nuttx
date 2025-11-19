@@ -59,5 +59,9 @@ ifneq ($(CONFIG_DRIVERS_NOTERAM_SECTION),"")
   CFLAGS += ${DEFINE_PREFIX}DRIVERS_NOTERAM_SECTION=CONFIG_DRIVERS_NOTERAM_SECTION
 endif
 
+ifeq ($(CONFIG_DRIVERS_NOTENET),y)
+  CSRCS += notenet_driver.c
+endif
+
 DEPPATH += --dep-path note
 VPATH += :note
