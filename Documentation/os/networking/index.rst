@@ -69,6 +69,7 @@ Network Support
   netdev.rst
   netdriver.rst
   netpoll.rst
+  note.rst
   mdio.rst
   netguardsize.rst
   netlink.rst

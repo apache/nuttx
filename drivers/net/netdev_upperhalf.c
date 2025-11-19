@@ -44,6 +44,10 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/spinlock.h>
 
+#ifdef CONFIG_DRIVERS_NOTENET
+#  include "netdev_drivers.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -1277,6 +1281,7 @@ static int netdev_upper_ifup(FAR struct net_driver_s *dev)
 {
   FAR struct netdev_upperhalf_s *upper = dev->d_private;
   int cpu = 1;
+  int ret;
 
   switch (upper->lower->rxtype)
     {
@@ -1318,7 +1323,21 @@ static int netdev_upper_ifup(FAR struct net_driver_s *dev)
 
   if (upper->lower->ops->ifup)
     {
-      return upper->lower->ops->ifup(upper->lower);
+      ret = upper->lower->ops->ifup(upper->lower);
+
+#ifdef CONFIG_DRIVERS_NOTENET
+      /* Bind the netdev drivers.  The interface is already up, so a
+       * failure here must not fail ifup.
+       */
+
+      if (ret >= 0 && netdev_drivers_init(upper->lower) < 0)
+        {
+          nwarn("WARNING: failed to bind netdev drivers to %s\n",
+                dev->d_ifname);
+        }
+#endif
+
+      return ret;
     }
 
   return -ENOSYS;

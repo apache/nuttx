@@ -27,6 +27,9 @@ if(CONFIG_NET)
 
   if(CONFIG_MM_IOB)
     list(APPEND SRCS netdev_upperhalf.c)
+    if(CONFIG_DRIVERS_NOTENET)
+      list(APPEND SRCS netdev_drivers.c)
+    endif()
   endif()
 
   if(CONFIG_MDIO_BUS)

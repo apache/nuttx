@@ -50,5 +50,9 @@ if(CONFIG_DRIVERS_NOTERPMSG)
   list(APPEND SRCS noterpmsg_driver.c)
 endif()
 
+if(CONFIG_DRIVERS_NOTENET)
+  list(APPEND SRCS notenet_driver.c)
+endif()
+
 target_sources(drivers PRIVATE ${SRCS})
 target_include_directories(drivers PRIVATE ${NUTTX_DIR}/sched)

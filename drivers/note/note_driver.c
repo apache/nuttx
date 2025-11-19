@@ -41,6 +41,9 @@
 #include <nuttx/note/noteram_driver.h>
 #include <nuttx/note/notelog_driver.h>
 #include <nuttx/note/notestream_driver.h>
+#ifdef CONFIG_DRIVERS_NOTENET
+#  include <nuttx/note/notenet_driver.h>
+#endif
 #include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
 
@@ -162,6 +165,9 @@ FAR static struct note_driver_s *
 #endif
 #ifdef CONFIG_DRIVERS_NOTERPMSG
   (FAR struct note_driver_s *)&g_noterpmsg_driver,
+#endif
+#ifdef CONFIG_DRIVERS_NOTENET
+  (FAR struct note_driver_s *)&g_notenet,
 #endif
   NULL
 };
