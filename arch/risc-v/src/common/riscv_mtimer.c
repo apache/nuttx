@@ -26,7 +26,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/kmalloc.h>
 
 #include "riscv_mtimer.h"
 
