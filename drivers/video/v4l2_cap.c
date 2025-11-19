@@ -3422,7 +3422,7 @@ static int capture_enum_fmt(FAR struct file *filep,
 
   if (cmng->imgsensor && cmng->imgsensor->fmtdescs)
     {
-      if (f->index > cmng->imgsensor->fmtdescs_num)
+      if (f->index >= cmng->imgsensor->fmtdescs_num)
         {
           return -EINVAL;
         }
@@ -3460,7 +3460,7 @@ static int capture_enum_frmsize(FAR struct file *filep,
 
   if (cmng->imgsensor && cmng->imgsensor->frmsizes)
     {
-      if (f->index > cmng->imgsensor->frmsizes_num)
+      if (f->index >= cmng->imgsensor->frmsizes_num)
         {
           return -EINVAL;
         }
@@ -3505,7 +3505,7 @@ static int capture_enum_frminterval(FAR struct file *filep,
 
   if (cmng->imgsensor && cmng->imgsensor->frmintervals)
     {
-      if (f->index > cmng->imgsensor->frmintervals_num)
+      if (f->index >= cmng->imgsensor->frmintervals_num)
         {
           return -EINVAL;
         }
