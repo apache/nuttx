@@ -58,12 +58,12 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_CHIP_ESP32C3_GENERIC
+#ifdef CONFIG_ARCH_CHIP_ESP32C3
 #ifdef CONFIG_ESPRESSIF_RTCIO_IRQ
 static int g_rtcio_cpuint;
 static uint32_t last_status;
 
-#ifdef CONFIG_ARCH_CHIP_ESP32C3_GENERIC
+#ifdef CONFIG_ARCH_CHIP_ESP32C3
 static const int rtc_irq_reg_shift[ESP_NIRQ_RTCIO] =
 {
   RTC_CNTL_SLP_WAKEUP_INT_ENA_S,
@@ -269,7 +269,7 @@ void esp_rtcioirqdisable(int irq)
   up_enable_irq(ESP_IRQ_RTC_CORE);
 }
 #endif /* CONFIG_ESPRESSIF_RTCIO_IRQ */
-#endif /* CONFIG_ARCH_CHIP_ESP32C3_GENERIC */
+#endif /* CONFIG_ARCH_CHIP_ESP32C3 */
 
 #ifdef CONFIG_ARCH_CHIP_ESP32C6
 /****************************************************************************

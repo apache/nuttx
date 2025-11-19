@@ -95,11 +95,11 @@
 #  endif
 #endif
 
-#ifdef CONFIG_ARCH_CHIP_ESP32C3_GENERIC
+#ifdef CONFIG_ARCH_CHIP_ESP32C3
 #  define INT_ENA_REG(hw)       hw->interrupt_enable_reg.val
 #else
 #  define INT_ENA_REG(hw)       hw->interrupt_enable.val
-#endif /* CONFIG_ARCH_CHIP_ESP32C3_GENERIC */
+#endif /* CONFIG_ARCH_CHIP_ESP32C3 */
 
 #if !SOC_RCC_IS_INDEPENDENT
 #  define TWAI_RCC_ATOMIC() PERIPH_RCC_ATOMIC()
