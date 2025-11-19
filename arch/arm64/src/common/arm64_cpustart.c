@@ -143,9 +143,6 @@ static void arm64_smp_init_top(void)
   sched_note_cpu_started(tcb);
 #endif
 
-  /* core n, idle n */
-
-  write_sysreg(0, tpidrro_el0);
   UNUSED(tcb);
 
   nx_idle_trampoline();

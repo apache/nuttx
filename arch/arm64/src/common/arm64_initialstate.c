@@ -152,11 +152,8 @@ void up_initial_state(struct tcb_s *tcb)
       tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
       tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
 
-      /* set initialize idle thread tcb and exception depth
-       * core 0, idle0
-       */
+      /* set initialize idle thread tcb core 0, idle0 */
 
-      write_sysreg(0, tpidrro_el0);
       write_sysreg(tcb->stack_alloc_ptr, tpidr_el0);
 
 #ifdef CONFIG_STACK_COLORATION
