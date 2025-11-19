@@ -425,21 +425,6 @@ void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
 void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
 void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
 
-/****************************************************************************
- * Name:
- *   arch_get_exception_depth
- *
- * Description:
- *   tpidrro_el0 is used to record exception depth, it's used for fpu trap
- * happened at exception context (like IRQ).
- *
- ****************************************************************************/
-
-static inline int arch_get_exception_depth(void)
-{
-  return read_sysreg(tpidrro_el0);
-}
-
 void arch_cpu_idle(void);
 
 /****************************************************************************
