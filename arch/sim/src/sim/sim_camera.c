@@ -138,6 +138,14 @@ static const struct v4l2_frmsizeenum g_frmsizes[] =
   }
 };
 
+static struct v4l2_fmtdesc g_fmts[] =
+{
+  {
+    .pixelformat = V4L2_PIX_FMT_YUV420,
+    .description = "YUV420",
+  }
+};
+
 static sim_camera_priv_t g_sim_camera_priv =
 {
   .data =
@@ -149,6 +157,8 @@ static sim_camera_priv_t g_sim_camera_priv =
     .ops = &g_sim_camera_ops,
     .frmsizes_num = 1,
     .frmsizes = g_frmsizes,
+    .fmtdescs_num = 1,
+    .fmtdescs = g_fmts,
   }
 };
 
