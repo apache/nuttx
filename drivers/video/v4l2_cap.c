@@ -2180,6 +2180,11 @@ static int capture_reqbufs(FAR struct file *filep,
       return -EINVAL;
     }
 
+  if (reqbufs->count == 0)
+    {
+      return 0;
+    }
+
   imgdata  = cmng->imgdata;
   type_inf = get_capture_type_inf(cmng, reqbufs->type);
   if (type_inf == NULL)
