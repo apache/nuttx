@@ -1,6 +1,6 @@
-=====================
-ESP32C3 DevKit RUST-1
-=====================
+==============================
+ESP32C3 DevKit RUST-1 (Legacy)
+==============================
 
 .. tags:: arch:riscv, vendor:espressif
 
@@ -67,7 +67,7 @@ To configure NuttX for this board, you can use the following command:
 
 .. code:: console
 
-   $ ./tools/configure.sh esp32c3-devkit-rust-1:<config>
+   $ ./tools/configure.sh esp32c3-legacy-devkit-rust-1:<config>
 
 Where ``<config>`` is one of the configurations listed below.
 
