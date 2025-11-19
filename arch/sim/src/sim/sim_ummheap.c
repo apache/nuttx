@@ -232,6 +232,14 @@ static void update_stats(struct mm_heap_s *heap, void *mem, size_t size,
             }
         }
       while (!atomic_try_cmpxchg(&heap->usmblks, &usmblks, uordblks));
+
+      if (uordblks > SIM_HEAP_SIZE)
+        {
+          merr("WARNING: Heap usage %d exceeds limit %d\n",
+                uordblks, SIM_HEAP_SIZE);
+
+          DEBUGPANIC();
+        }
     }
   else
     {
