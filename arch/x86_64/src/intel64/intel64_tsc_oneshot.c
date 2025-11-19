@@ -36,6 +36,7 @@
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/timers/arch_alarm.h>
 
+#include "intel64_lowsetup.h"
 #include "x86_64_internal.h"
 
 /****************************************************************************
@@ -246,6 +247,10 @@ struct oneshot_lowerhalf_s *intel64_tsc_initialize(void)
 
   /* Attach handler */
 
+  irq_attach(TMR_IRQ, (xcpt_t)intel64_tsc_compare_isr, NULL);
+
+  intel64_timer_secondary_init();
+
   freq = intel64_tsc_freq();
 
   DEBUGASSERT(freq <= UINT32_MAX);
@@ -262,13 +267,8 @@ void up_timer_initialize(void)
   uint64_t tsc = intel64_tsc_count();
 
   g_tsc_offset = 0ull - tsc;
-  intel64_tsc_set_offset(g_tsc_offset);
 
   up_alarm_set_lowerhalf(intel64_tsc_initialize());
-  irq_attach(TMR_IRQ, (xcpt_t)intel64_tsc_compare_isr, NULL);
-
-  intel64_tsc_set_compare(UINT64_MAX);
-  intel64_unmask_tmr();
 }
 
 void intel64_timer_secondary_init(void)
