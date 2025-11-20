@@ -35,6 +35,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/iob.h>
+#include <nuttx/mm/mempool.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -70,11 +71,10 @@ rmutex_t g_ieee802154_connections_lock = NXRMUTEX_INITIALIZER;
  * network lock.
  */
 
-NET_BUFPOOL_DECLARE(g_ieee802154_connections,
-                    sizeof(struct ieee802154_conn_s),
-                    CONFIG_NET_IEEE802154_PREALLOC_CONNS,
-                    CONFIG_NET_IEEE802154_ALLOC_CONNS,
-                    CONFIG_NET_IEEE802154_MAX_CONNS);
+MEMPOOL_DEFINE(g_ieee802154_connections, sizeof(struct ieee802154_conn_s),
+               CONFIG_NET_IEEE802154_PREALLOC_CONNS,
+               CONFIG_NET_IEEE802154_MAX_CONNS,
+               CONFIG_NET_IEEE802154_ALLOC_CONNS);
 
 /* A list of all allocated packet socket connections */
 
@@ -101,9 +101,11 @@ FAR struct ieee802154_conn_s *ieee802154_conn_alloc(void)
 
   ieee802154_conn_list_lock();
 
-  conn = NET_BUFPOOL_TRYALLOC(g_ieee802154_connections);
+  conn = mempool_allocate(&g_ieee802154_connections, 0);
   if (conn)
     {
+      memset(conn, 0, sizeof(*conn));
+
       dq_addlast(&conn->sconn.s_node, &g_active_ieee802154_connections);
     }
 
@@ -157,7 +159,7 @@ void ieee802154_conn_free(FAR struct ieee802154_conn_s *conn)
 
   /* Free the connection. */
 
-  NET_BUFPOOL_FREE(g_ieee802154_connections, conn);
+  mempool_release(&g_ieee802154_connections, conn);
 
   ieee802154_conn_list_unlock();
 }
