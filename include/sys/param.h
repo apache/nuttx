@@ -53,6 +53,51 @@
 #  define nitems(_a)    (sizeof(_a) / sizeof(0[(_a)]))
 #endif /* nitems */
 
+/* Macros for counting and rounding.
+ *
+ * These macros accept value to be rounded or checked as 'a' and base as 'b'.
+ * They are consistent with those provided by some BSDs.
+ *
+ * howmany() calculates how many b fit into a.
+ *
+ * rounddown() and roundup() round a to the next b.
+ *
+ * rounddown2() and roundup2() are for powers of 2 only.
+ *
+ * powerof2() returns 1 if a is a power of 2, 0 otherwise.
+ *
+ * Warning: rounddown2() and roundup2() can be used only if b is power of 2,
+ * otherwise they will produce wrong result.
+ *
+ * In all of these macros, outcome is undefined if b is 0.
+ *
+ * All parameters are assumed to be unsigned integers.
+ */
+
+#ifndef howmany
+#  define howmany(a, b)	(((a) + ((b) - 1)) / (b))
+#endif /* howmany */
+
+#ifndef rounddown
+#  define	rounddown(a, b)	(((a) / (b)) * (b))
+#endif /* rounddown */
+
+#ifndef rounddown2
+#  define	rounddown2(a, b) ((a) & ~((b) - 1))
+#endif /* rounddown2 */
+
+#ifndef roundup
+#  define	roundup(a, b)	((((a) + ((b) - 1)) / (b)) * (b))
+#endif /* roundup */
+
+#ifndef roundup2
+#  define	roundup2(a, b)	(((a) + ((b) - 1)) & ~((b) - 1))
+#endif /* roundup2 */
+
+#ifndef powerof2
+#  define powerof2(a)	(!(((a) - 1) & (a)))
+#endif /* powerof2 */
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
