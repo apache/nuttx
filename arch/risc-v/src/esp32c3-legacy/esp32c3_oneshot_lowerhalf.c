@@ -125,8 +125,7 @@ static void esp32c3_lh_handler(void *arg)
 
 static clkcnt_t esp32c3_lh_max_delay(struct oneshot_lowerhalf_s *lower)
 {
-  return ((uint64_t)UINT32_MAX * NSEC_PER_SEC + NSEC_PER_SEC - 1u) /
-         NSEC_PER_USEC;
+  return UINT64_MAX;
 }
 
 static clkcnt_t esp32c3_lh_current(struct oneshot_lowerhalf_s *lower)
