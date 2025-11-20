@@ -65,7 +65,9 @@
 void nx_pthread_exit(FAR void *exit_value)
 {
   FAR struct tcb_s *tcb = this_task();
+#ifndef CONFIG_DISABLE_SIGNALS
   sigset_t set;
+#endif
   int status;
 
   sinfo("exit_value=%p\n", exit_value);

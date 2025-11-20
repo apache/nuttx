@@ -716,7 +716,7 @@ void nxsig_cancel_notification(FAR struct sigwork_s *work);
 #  define nxsig_nanosleep(rqtp,rmtp)       -EAGAIN
 #  define nxsig_sleep(s)                   up_mdelay((s) * MSEC_PER_SEC)
 #  define nxsig_usleep(us)                 up_udelay(us)
-#  define nxsig_notification(p,e,c,w)
+#  define nxsig_notification(p,e,c,w)      OK
 #  define nxsig_cancel_notification(w)
 #endif
 
