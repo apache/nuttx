@@ -325,6 +325,24 @@ static void cxd56_rtc_initialize(wdparm_t arg)
 }
 
 /****************************************************************************
+ * Name: cxd56_update_basetime
+ *
+ * Description:
+ *   Update the g_basetime value from RTC saved offset data.
+ *
+ * Input Parameters:
+ *   tp - Pointer to timespec structure to update the g_basetime.
+ *
+ ****************************************************************************/
+
+static void cxd56_update_basetime(struct timespec *tp)
+{
+  tp->tv_sec  = g_rtc_save->offset / CONFIG_RTC_FREQUENCY;
+  tp->tv_nsec = (g_rtc_save->offset % CONFIG_RTC_FREQUENCY) *
+                (NSEC_PER_SEC / CONFIG_RTC_FREQUENCY);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -406,6 +424,9 @@ int up_rtc_gettime(struct timespec *tp)
 
   count = cxd56_rtc_count_nolock();
   count += g_rtc_save->offset;
+
+  cxd56_update_basetime(&g_basetime);
+
   spin_unlock_irqrestore(&g_rtc_lock, flags);
 
   /* Then we can save the time in seconds and fractional seconds. */
@@ -462,6 +483,8 @@ int up_rtc_settime(const struct timespec *tp)
   count = SEC_TO_CNT(tp->tv_sec) | NSEC_TO_PRECNT(tp->tv_nsec);
   g_rtc_save->offset = (int64_t)count - (int64_t)cxd56_rtc_count();
 #endif
+
+  cxd56_update_basetime(&g_basetime);
 
   spin_unlock_irqrestore(&g_rtc_lock, flags);
 
