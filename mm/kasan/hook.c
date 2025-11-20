@@ -128,6 +128,8 @@ static uint32_t g_region_init;
 #  endif
 #endif
 
+static spinlock_t g_kasan_lock = SP_UNLOCKED;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -178,6 +180,7 @@ static void kasan_show_memory(FAR const uint8_t *addr, size_t size,
 static void kasan_report(FAR const void *addr, size_t size,
                          bool is_write, FAR void *return_address)
 {
+  irqstate_t flags = spin_lock_irqsave_nopreempt(&g_kasan_lock);
   bool dump_only = (is_write && MM_KASAN_DISABLE_WRITE_PANIC) ||
                    (!is_write && MM_KASAN_DISABLE_READ_PANIC);
 
@@ -203,6 +206,8 @@ static void kasan_report(FAR const void *addr, size_t size,
     {
       PANIC();
     }
+
+  spin_unlock_irqrestore_nopreempt(&g_kasan_lock, flags);
 }
 
 #if MM_KASAN_WATCHPOINT > 0
