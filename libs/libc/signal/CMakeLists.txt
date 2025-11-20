@@ -19,28 +19,29 @@
 # the License.
 #
 # ##############################################################################
-
-target_sources(
-  c
-  PRIVATE sig_addset.c
-          sig_delset.c
-          sig_emptyset.c
-          sig_fillset.c
-          sig_nandset.c
-          sig_andset.c
-          sig_orset.c
-          sig_xorset.c
-          sig_isemptyset.c
-          sig_killpg.c
-          sig_altstack.c
-          sig_interrupt.c
-          sig_hold.c
-          sig_ignore.c
-          sig_ismember.c
-          sig_pause.c
-          sig_psignal.c
-          sig_raise.c
-          sig_relse.c
-          sig_set.c
-          sig_signal.c
-          sig_wait.c)
+if(NOT CONFIG_DISABLE_SIGNALS)
+  target_sources(
+    c
+    PRIVATE sig_addset.c
+            sig_delset.c
+            sig_emptyset.c
+            sig_fillset.c
+            sig_nandset.c
+            sig_andset.c
+            sig_orset.c
+            sig_xorset.c
+            sig_isemptyset.c
+            sig_killpg.c
+            sig_altstack.c
+            sig_interrupt.c
+            sig_hold.c
+            sig_ignore.c
+            sig_ismember.c
+            sig_pause.c
+            sig_psignal.c
+            sig_raise.c
+            sig_relse.c
+            sig_set.c
+            sig_signal.c
+            sig_wait.c)
+endif()

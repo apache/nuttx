@@ -75,9 +75,10 @@ void nx_pthread_exit(FAR void *exit_value)
   /* Block any signal actions that would awaken us while were
    * are performing the JOIN handshake.
    */
-
+#ifndef CONFIG_DISABLE_SIGNALS
   sigfillset(&set);
   nxsig_procmask(SIG_SETMASK, &set, NULL);
+#endif
 
   /* Complete pending join operations */
 

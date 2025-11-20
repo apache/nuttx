@@ -457,11 +457,13 @@ static int nxthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
       nxtask_inherit_affinity(tcb);
 #endif
 
+#ifndef CONFIG_DISABLE_SIGNALS
       /* exec(), pthread_create(), task_create(), and vfork() all
        * inherit the signal mask of the parent thread.
        */
 
       tcb->sigprocmask = rtcb->sigprocmask;
+#endif
 
       /* Initialize the task state.  It does not get a valid state
        * until it is activated.
