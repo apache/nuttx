@@ -88,6 +88,7 @@ struct audio_upperhalf_s
 {
   struct audio_info_s          info;     /* Record the last playing audio format */
   mutex_t                      lock;     /* Supports mutual exclusion */
+  uint8_t                      nbuffers; /* Max ap buffers number */
   spinlock_t                   spinlock; /* Supports spin lock */
   uint8_t                      periods;  /* Ap buffers number */
   FAR struct ap_buffer_s       **apbs;   /* Ap buffers list */
@@ -767,6 +768,11 @@ static int audio_allocbuffer(FAR struct audio_upperhalf_s *upper,
   FAR void *newaddr;
   int ret;
 
+  if (upper->periods >= upper->nbuffers)
+    {
+      return 0;
+    }
+
   if (bufdesc->u.pbuffer == NULL)
     {
       bufdesc->u.pbuffer = &apb;
@@ -1176,6 +1182,40 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           while (priv->head < target)
             {
               audio_enqueuebuffer(filep, &buf_desc);
+            }
+        }
+        break;
+
+      /* AUDIOIOC_SETBUFFERINFO - Set buffer information
+       *
+       *   ioctl argument - pointer to set the buffer information
+       */
+
+      case AUDIOIOC_SETBUFFERINFO:
+        {
+          audinfo("AUDIOIOC_SETBUFFERINFO\n");
+
+          if (upper->periods == 0)
+            {
+              ret = lower->ops->ioctl(lower, AUDIOIOC_SETBUFFERINFO, arg);
+            }
+        }
+        break;
+
+      /* AUDIOIOC_GETBUFFERINFO - Get buffer information
+       *
+       *   ioctl argument - pointer to get the buffer information
+       */
+
+      case AUDIOIOC_GETBUFFERINFO:
+        {
+          audinfo("AUDIOIOC_GETBUFFERINFO\n");
+
+          ret = lower->ops->ioctl(lower, AUDIOIOC_GETBUFFERINFO, arg);
+          if (ret >= 0)
+            {
+              upper->nbuffers =
+                  ((FAR struct ap_buffer_info_s *)arg)->nbuffers;
             }
         }
         break;
