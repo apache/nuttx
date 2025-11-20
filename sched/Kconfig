@@ -44,6 +44,16 @@ config DISABLE_ENVIRON
 	bool "Disable environment variable support"
 	default DEFAULT_SMALL
 
+config DISABLE_SIGNALS
+	bool "Disable signal support"
+	default DEFAULT_SMALL
+	---help---
+		Disabling the signal mechanism significantly reduces system footprint and complexity.
+		It can also improve real-time performance during thread creation and context switching.
+		However, it removes or degrades several major POSIX features, including signal handling,
+		thread cancellation, timers, and process-related notifications. This configuration
+		should be enabled only when such functionality is not required.
+
 endif # DISABLE_OS_API
 
 config DISABLE_IDLE_LOOP

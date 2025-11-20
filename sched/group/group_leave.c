@@ -87,8 +87,9 @@ group_release(FAR struct task_group_s *group, uint8_t ttype)
 #endif
 
   /* Release pending signals */
-
+#ifndef CONFIG_DISABLE_SIGNALS
   nxsig_release(group);
+#endif
 
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Release pthread resources */

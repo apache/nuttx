@@ -41,7 +41,6 @@ set(SRCS
     lib_alarm.c
     lib_fstatvfs.c
     lib_statvfs.c
-    lib_sleep.c
     lib_nice.c
     lib_setreuid.c
     lib_setregid.c
@@ -61,7 +60,6 @@ set(SRCS
     lib_readlinkat.c
     lib_symlinkat.c
     lib_unlinkat.c
-    lib_usleep.c
     lib_getpgrp.c
     lib_getpgid.c
     lib_lockf.c
@@ -83,6 +81,10 @@ if(NOT CONFIG_SCHED_USER_IDENTITY)
     lib_setegid.c
     lib_geteuid.c
     lib_getegid.c)
+endif()
+
+if(NOT CONFIG_DISABLE_SIGNALS)
+  list(APPEND SRCS lib_sleep.c lib_usleep.c)
 endif()
 
 if(NOT CONFIG_DISABLE_ENVIRON)
