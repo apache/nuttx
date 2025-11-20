@@ -46,6 +46,7 @@
 #include <nuttx/virtio/virtio.h>
 #include <nuttx/panic_notifier.h>
 #include <nuttx/reboot_notifier.h>
+#include <nuttx/syslog/syslog_rpmsg.h>
 #include <openamp/remoteproc_loader.h>
 #include <openamp/remoteproc_virtio.h>
 #include <openamp/rsc_table_parser.h>
@@ -84,6 +85,7 @@ struct rptun_priv_s
   bool                        rreset;
   bool                        stop;
   pid_t                       pid;
+  FAR const void             *trace_va;
 #if defined(CONFIG_BOARDCTL_RESET) || defined(CONFIG_BOARDCTL_POWEROFF)
   struct work_s               work;
 #endif
@@ -1032,6 +1034,18 @@ static int rptun_do_start(FAR struct remoteproc *rproc)
           ret = remoteproc_start(rproc);
           if (ret >= 0)
             {
+              size_t off = find_rsc((FAR char *)rsc, RSC_TRACE, 0);
+
+              if (off != 0u)
+                {
+                  FAR struct fw_rsc_trace *trace =
+                    (FAR struct fw_rsc_trace *)((FAR char *)rsc + off);
+                  metal_phys_addr_t da = trace->da;
+
+                  priv->trace_va = remoteproc_mmap(rproc, NULL, &da,
+                                                   trace->len, 0, NULL);
+                }
+
               /* Register callback to mbox for receiving remote message */
 
               RPTUN_REGISTER_CALLBACK(priv->dev, rptun_callback, priv);
@@ -1185,6 +1199,16 @@ static int rptun_dev_reset(FAR struct rptun_priv_s *priv, unsigned long val)
   return ret;
 }
 
+#ifdef CONFIG_SYSLOG_RPMSG_SERVER
+static void rptun_dev_dump(FAR struct rptun_priv_s *priv)
+{
+  if (priv->trace_va != NULL)
+    {
+      syslog_rpmsg_dump(priv->trace_va);
+    }
+}
+#endif
+
 static int rptun_do_ioctl(FAR struct rptun_priv_s *priv, int cmd,
                           unsigned long arg)
 {
@@ -1212,6 +1236,11 @@ static int rptun_do_ioctl(FAR struct rptun_priv_s *priv, int cmd,
       case RPTUNIOC_RESET:
         ret = rptun_dev_reset(priv, arg);
         break;
+#ifdef CONFIG_SYSLOG_RPMSG_SERVER
+      case RPTUNIOC_DUMP:
+        rptun_dev_dump(priv);
+        break;
+#endif
       default:
         ret = -ENOTTY;
         break;
@@ -1410,6 +1439,13 @@ static int rptun_notifier(FAR struct notifier_block *block,
         }
 
       rptun_ioctl_foreach(NULL, RPTUNIOC_RESET, val);
+
+#ifdef CONFIG_SYSLOG_RPMSG_SERVER
+      if (action == SYS_HALT)
+        {
+          rptun_ioctl_foreach(NULL, RPTUNIOC_DUMP, 0);
+        }
+#endif
     }
 #ifdef CONFIG_RPTUN_AUTO_RESET_IN_PANIC_NOTIFIER
   else if (action == PANIC_KERNEL_FINAL)
