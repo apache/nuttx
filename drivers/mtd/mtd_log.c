@@ -290,7 +290,7 @@ static int mtdlog_read_block(FAR struct mtdlog_s *mtdlog,
                  sizeof(struct mtdlog_block_s), (uint8_t *)info);
   if (ret != sizeof(struct mtdlog_block_s))
     {
-      ferr("ERROR: MTD_READ failed: %d, %d\n", offset, ret);
+      ferr("ERROR: MTD_READ failed: %" PRIu32 ", %d\n", offset, ret);
       return ret < 0 ? ret : -EIO;
     }
 
@@ -326,7 +326,7 @@ static int mtdlog_write_block(FAR struct mtdlog_s *mtdlog,
                    (tmp_buf_size / mtdlog->progsize), tmp_buf);
   if (ret < 0)
     {
-      ferr("ERROR: MTD_BWRITE failed: %d, %d\n", offset, ret);
+      ferr("ERROR: MTD_BWRITE failed: %" PRIu32 ", %d\n", offset, ret);
       return ret;
     }
 
@@ -350,7 +350,7 @@ static int mtdlog_read_entry(FAR struct mtdlog_s *mtdlog,
                  sizeof(struct mtdlog_entry_s), (uint8_t *)info);
   if (ret != sizeof(struct mtdlog_entry_s))
     {
-      ferr("ERROR: MTD_READ failed: %d, %d\n", offset, ret);
+      ferr("ERROR: MTD_READ failed: %" PRIu32 ", %d\n", offset, ret);
       return ret < 0 ? ret : -EIO;
     }
 
@@ -380,7 +380,7 @@ static int mtdlog_write_entry(FAR struct mtdlog_s *mtdlog,
                    (tmp_buf_size / mtdlog->progsize), tmp_buf);
   if (ret < 0)
     {
-      ferr("ERROR: MTD_BWRITE failed: %d, %d\n", offset, ret);
+      ferr("ERROR: MTD_BWRITE failed: %" PRIu32 ", %d\n", offset, ret);
       return ret;
     }
 
@@ -400,7 +400,7 @@ static int mtdlog_read_data(FAR struct mtdlog_s *mtdlog,
   ret = MTD_READ(mtdlog->mtd, offset, length, (uint8_t *)buf);
   if (ret != length)
     {
-      ferr("ERROR: MTD_READ failed: %d, %d\n", offset, ret);
+      ferr("ERROR: MTD_READ failed: %" PRIu32 ", %d\n", offset, ret);
       return ret < 0 ? ret : -EIO;
     }
 
@@ -426,7 +426,7 @@ static int mtdlog_write_data(FAR struct mtdlog_s *mtdlog,
                        (length / mtdlog->progsize), buf);
       if (ret < 0)
         {
-          ferr("ERROR: MTD_BWRITE failed: %d, %d\n", offset, ret);
+          ferr("ERROR: MTD_BWRITE failed: %" PRIu32 ", %d\n", offset, ret);
           return ret;
         }
     }
@@ -443,7 +443,7 @@ static int mtdlog_write_data(FAR struct mtdlog_s *mtdlog,
                        (tmp_buf_size / mtdlog->progsize), tmp_buf);
       if (ret < 0)
         {
-          ferr("ERROR: MTD_BWRITE failed: %d, %d\n", offset, ret);
+          ferr("ERROR: MTD_BWRITE failed: %" PRIu32 ", %d\n", offset, ret);
           return ret;
         }
     }
