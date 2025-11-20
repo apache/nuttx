@@ -201,8 +201,9 @@ static void devif_packet_conversion(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPFILTER
-static int devif_poll_local_out(FAR struct net_driver_s *dev,
-                                devif_poll_callback_t callback)
+static inline_function int
+devif_poll_local_out(FAR struct net_driver_s *dev,
+                     devif_poll_callback_t callback)
 {
   /* Maybe we need to reply REJECT to ourself, so filter before loopback. */
 
@@ -226,8 +227,9 @@ static int devif_poll_local_out(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_PKT
-static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
-                                      devif_poll_callback_t callback)
+static inline_function int
+devif_poll_pkt_connections(FAR struct net_driver_s *dev,
+                           devif_poll_callback_t callback)
 {
   FAR struct pkt_conn_s *pkt_conn = NULL;
   int bstop = 0;
@@ -278,8 +280,9 @@ static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_CAN
-static int devif_poll_can_connections(FAR struct net_driver_s *dev,
-                                      devif_poll_callback_t callback)
+static inline_function int
+devif_poll_can_connections(FAR struct net_driver_s *dev,
+                           devif_poll_callback_t callback)
 {
   FAR struct can_conn_s *can_conn = NULL;
   int bstop = 0;
@@ -326,8 +329,9 @@ static int devif_poll_can_connections(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_BLUETOOTH
-static int devif_poll_bluetooth_connections(FAR struct net_driver_s *dev,
-                                            devif_poll_callback_t callback)
+static inline_function int
+devif_poll_bluetooth_connections(FAR struct net_driver_s *dev,
+                                 devif_poll_callback_t callback)
 {
   FAR struct bluetooth_conn_s *bluetooth_conn = NULL;
   int bstop = 0;
@@ -367,8 +371,9 @@ static int devif_poll_bluetooth_connections(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IEEE802154
-static int devif_poll_ieee802154_connections(FAR struct net_driver_s *dev,
-                                             devif_poll_callback_t callback)
+static inline_function int
+devif_poll_ieee802154_connections(FAR struct net_driver_s *dev,
+                                  devif_poll_callback_t callback)
 {
   FAR struct ieee802154_conn_s *ieee802154_conn = NULL;
   int bstop = 0;
@@ -404,8 +409,8 @@ static int devif_poll_ieee802154_connections(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_SOCKET)
-static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
-                                  devif_poll_callback_t callback)
+static inline_function int devif_poll_icmp(FAR struct net_driver_s *dev,
+                                           devif_poll_callback_t callback)
 {
   FAR struct icmp_conn_s *conn = NULL;
   int bstop = 0;
@@ -449,8 +454,8 @@ static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_ICMPv6_SOCKET) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
-static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
-                                    devif_poll_callback_t callback)
+static inline_function int devif_poll_icmpv6(FAR struct net_driver_s *dev,
+                                             devif_poll_callback_t callback)
 {
   FAR struct icmpv6_conn_s *conn = NULL;
   int bstop = 0;
@@ -497,8 +502,8 @@ static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPFORWARD
-static inline int devif_poll_forward(FAR struct net_driver_s *dev,
-                                     devif_poll_callback_t callback)
+static inline_function int devif_poll_forward(FAR struct net_driver_s *dev,
+                                              devif_poll_callback_t callback)
 {
   /* Perform the forwarding poll */
 
@@ -528,8 +533,8 @@ static inline int devif_poll_forward(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static inline int devif_poll_igmp(FAR struct net_driver_s *dev,
-                                  devif_poll_callback_t callback)
+static inline_function int devif_poll_igmp(FAR struct net_driver_s *dev,
+                                           devif_poll_callback_t callback)
 {
   /* Perform the IGMP TX poll */
 
@@ -558,8 +563,8 @@ static inline int devif_poll_igmp(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MLD
-static inline int devif_poll_mld(FAR struct net_driver_s *dev,
-                                 devif_poll_callback_t callback)
+static inline_function int devif_poll_mld(FAR struct net_driver_s *dev,
+                                          devif_poll_callback_t callback)
 {
   /* Perform the MLD TX poll */
 
@@ -588,8 +593,9 @@ static inline int devif_poll_mld(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef NET_UDP_HAVE_STACK
-static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
-                                      devif_poll_callback_t callback)
+static inline_function int
+devif_poll_udp_connections(FAR struct net_driver_s *dev,
+                           devif_poll_callback_t callback)
 {
   FAR struct udp_conn_s *conn = NULL;
   int bstop = 0;
@@ -639,8 +645,9 @@ static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef NET_TCP_HAVE_STACK
-static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
-                                             devif_poll_callback_t callback)
+static inline_function int
+devif_poll_tcp_connections(FAR struct net_driver_s *dev,
+                           devif_poll_callback_t callback)
 {
   FAR struct tcp_conn_s *conn  = NULL;
   int bstop = 0;
@@ -766,8 +773,8 @@ static int devif_poll_queue(FAR struct iob_queue_s *iobq,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPFRAG
-static int devif_poll_ipfrag(FAR struct net_driver_s *dev,
-                             devif_poll_callback_t callback)
+static inline_function int devif_poll_ipfrag(FAR struct net_driver_s *dev,
+                                             devif_poll_callback_t callback)
 {
   return devif_poll_queue(&dev->d_fragout, dev, callback);
 }
@@ -793,8 +800,8 @@ static int devif_poll_ipfrag(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_ARP_SEND_QUEUE) || defined(CONFIG_NET_ARP_SEND)
-static int devif_poll_arp(FAR struct net_driver_s *dev,
-                          devif_poll_callback_t callback)
+static inline_function int devif_poll_arp(FAR struct net_driver_s *dev,
+                                          devif_poll_callback_t callback)
 {
   int bstop;
 
@@ -1037,8 +1044,8 @@ static int devif_poll_connections(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static int devif_iob_poll(FAR struct net_driver_s *dev,
-                          devif_poll_callback_t callback)
+static inline_function int devif_iob_poll(FAR struct net_driver_s *dev,
+                                          devif_poll_callback_t callback)
 {
   int bstop;
 
