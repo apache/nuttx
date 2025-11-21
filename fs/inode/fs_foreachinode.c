@@ -35,7 +35,6 @@
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
-#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -173,7 +172,7 @@ int foreach_inode(foreach_inode_t handler, FAR void *arg)
 
   /* Allocate the mountpoint info structure */
 
-  info = fs_heap_malloc(sizeof(struct inode_path_s));
+  info = lib_get_tempbuffer(sizeof(struct inode_path_s));
   if (!info)
     {
       return -ENOMEM;
@@ -193,7 +192,7 @@ int foreach_inode(foreach_inode_t handler, FAR void *arg)
 
   /* Free the info structure and return the result */
 
-  fs_heap_free(info);
+  lib_put_tempbuffer(info);
   return ret;
 
 #else

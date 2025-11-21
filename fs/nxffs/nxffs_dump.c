@@ -36,7 +36,6 @@
 #include <nuttx/mtd/mtd.h>
 
 #include "nxffs.h"
-#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -446,7 +445,7 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
 
   /* Allocate a buffer to hold one block */
 
-  blkinfo.buffer = fs_heap_malloc(blkinfo.geo.blocksize);
+  blkinfo.buffer = lib_get_tempbuffer(blkinfo.geo.blocksize);
   if (!blkinfo.buffer)
     {
       ferr("ERROR: Failed to allocate block cache\n");
@@ -473,7 +472,7 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
           /* Read errors are fatal */
 
           ferr("ERROR: Failed to read block %d\n", blkinfo.block);
-          fs_heap_free(blkinfo.buffer);
+          lib_put_tempbuffer(blkinfo.buffer);
           return ret;
 #else
           /* A read error is probably fatal on all media but NAND.
@@ -496,7 +495,7 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
 
   syslog(LOG_NOTICE, "%" PRIiOFF " blocks analyzed\n", blkinfo.nblocks);
 
-  fs_heap_free(blkinfo.buffer);
+  lib_put_tempbuffer(blkinfo.buffer);
   return OK;
 
 #else
