@@ -32,7 +32,6 @@
 #include <nuttx/kmalloc.h>
 
 #include "partition.h"
-#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -112,7 +111,7 @@ int parse_mbr_partition(FAR struct partition_state_s *state,
   int i;
 
   num = (MBR_SIZE + state->blocksize - 1) / state->blocksize;
-  buffer = fs_heap_malloc(num * state->blocksize);
+  buffer = lib_get_tempbuffer(num * state->blocksize);
   if (!buffer)
     {
       return -ENOMEM;
@@ -121,13 +120,13 @@ int parse_mbr_partition(FAR struct partition_state_s *state,
   ret = read_partition_block(state, buffer, 0, num);
   if (ret < 0)
     {
-      fs_heap_free(buffer);
+      lib_put_tempbuffer(buffer);
       return ret;
     }
 
   if (buffer[0x1fe] != 0x55 || buffer[0x1ff] != 0xaa)
     {
-      fs_heap_free(buffer);
+      lib_put_tempbuffer(buffer);
       return -EINVAL;
     }
 
@@ -214,6 +213,6 @@ int parse_mbr_partition(FAR struct partition_state_s *state,
     }
 
 out:
-  fs_heap_free(buffer);
+  lib_put_tempbuffer(buffer);
   return ret;
 }

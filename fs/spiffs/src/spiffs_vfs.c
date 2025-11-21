@@ -1700,7 +1700,7 @@ static int spiffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
        */
 
       fobj = (FAR struct spiffs_file_s *)
-        fs_heap_zalloc(sizeof(struct spiffs_file_s));
+        lib_get_tempbuffer(sizeof(struct spiffs_file_s));
       if (fobj == NULL)
         {
           fwarn("WARNING: Failed to allocate fobj\n");
@@ -1714,14 +1714,14 @@ static int spiffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
       if (ret < 0)
         {
           ferr("ERROR: spiffs_fobj_open_bypage failed: %d\n", ret);
-          fs_heap_free(fobj);
+          lib_put_tempbuffer(fobj);
           goto errout_with_lock;
         }
 
       /* Now we can remove the file by truncating it to zero length */
 
       ret = spiffs_fobj_truncate(fs, fobj, 0, true);
-      fs_heap_free(fobj);
+      lib_put_tempbuffer(fobj);
 
       if (ret < 0)
         {

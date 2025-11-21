@@ -2163,6 +2163,7 @@ static int unionfs_rewinddir(FAR struct inode *mountpt,
 static int unionfs_bind(FAR struct inode *blkdriver, FAR const void *data,
                         FAR void **handle)
 {
+  size_t data_size = strlen(data) + 1;
   FAR const char *fspath1 = "";
   FAR const char *prefix1 = "";
   FAR const char *fspath2 = "";
@@ -2174,11 +2175,13 @@ static int unionfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Parse options from mount syscall */
 
-  dup = tmp = fs_heap_strdup(data);
+  dup = tmp = lib_get_tempbuffer(data_size);
   if (!dup)
     {
       return -ENOMEM;
     }
+
+  memcpy(dup, data, data_size);
 
   while ((tok = strsep(&tmp, ",")))
     {
@@ -2203,7 +2206,7 @@ static int unionfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   /* Call unionfs_dobind to do the real work. */
 
   ret = unionfs_dobind(fspath1, prefix1, fspath2, prefix2, handle);
-  fs_heap_free(dup);
+  lib_put_tempbuffer(dup);
 
   return ret;
 }
