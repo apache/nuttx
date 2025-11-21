@@ -550,7 +550,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
 
       if (stcb->task_state == TSTATE_WAIT_SIG &&
           (masked == 0 ||
-           nxsig_ismember(&stcb->sigwaitmask, info->si_signo)))
+           (nxsig_ismember(&stcb->sigwaitmask, info->si_signo) == 1)))
         {
           if (stcb->sigunbinfo != NULL)
             {

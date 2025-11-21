@@ -419,7 +419,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
            * that we were waiting for?
            */
 
-          if (nxsig_ismember(set, rtcb->sigunbinfo->si_signo))
+          if (nxsig_ismember(set, rtcb->sigunbinfo->si_signo) == 1)
             {
               /* Yes.. the return value is the number of the signal that
                * awakened us.
