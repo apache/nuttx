@@ -209,7 +209,10 @@ static void bl602_start_absolute(struct oneshot_lowerhalf_s *lower,
   uint64_t   curr;
 
   curr = bl602_current(lower);
-  delay = expected - curr < curr ? 0 : expected - curr;
+
+  /* In case of overflow. */
+
+  delay = expected - curr > expected ? 0 : expected - curr;
 
   bl602_start(lower, delay);
 }
