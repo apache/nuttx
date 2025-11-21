@@ -555,6 +555,37 @@ retry:
 }
 
 /****************************************************************************
+ * Name: mempool_zallocate
+ *
+ * Description:
+ *   Allocate an block from a specific memory pool and zero the allocated
+ *   block.
+ *
+ *   If there isn't enough memory blocks, This function will expand memory
+ *   pool if expandsize isn't zero.
+ *
+ * Input Parameters:
+ *   pool    - Address of the memory pool to be used.
+ *   timeout - The maximum time (ms) to wait for a buffer to become
+ *             available.
+ *
+ * Returned Value:
+ *   The pointer to the allocated block on success; NULL on any failure.
+ *
+ ****************************************************************************/
+
+FAR void *mempool_zallocate(FAR struct mempool_s *pool, unsigned int timeout)
+{
+  FAR void *blk = mempool_allocate(pool, timeout);
+  if (blk != NULL)
+    {
+      memset(blk, 0, pool->blocksize);
+    }
+
+  return blk;
+}
+
+/****************************************************************************
  * Name: mempool_release
  *
  * Description:
