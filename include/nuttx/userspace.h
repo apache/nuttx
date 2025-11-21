@@ -76,10 +76,18 @@
 #  define this_cpu_var_user(v)       v[this_cpu()]
 #elif defined(__KERNEL__)
 #  define per_cpu_var_user_smp(v, c) (*(FAR typeof(v) *)((uintptr_t)&(v) + USERSPACE->us_offset_percpu * (c)))
-#  define this_cpu_var_user(v)       (*(FAR typeof(v) *)((uintptr_t)&(v) + USERSPACE->us_offset_percpu * this_cpu()))
+#  ifndef up_this_cpu_var_user
+#    define this_cpu_var_user(v)       (*(FAR typeof(v) *)((uintptr_t)&(v) + USERSPACE->us_offset_percpu * this_cpu()))
+#  else
+#    define this_cpu_var_user(v)       up_this_cpu_var_user(v)
+#  endif
 #else
 #  define per_cpu_var_user_smp(v, c) (*(FAR typeof(v) *)((uintptr_t)&(v) + PERCPU_OFFSET * (c)))
-#  define this_cpu_var_user(v)       (*(FAR typeof(v) *)((uintptr_t)&(v) + PERCPU_OFFSET * this_cpu()))
+#  ifndef up_this_cpu_var_user
+#    define this_cpu_var_user(v)       (*(FAR typeof(v) *)((uintptr_t)&(v) + PERCPU_OFFSET * this_cpu()))
+#  else
+#    define this_cpu_var_user(v)       up_this_cpu_var_user(v)
+#  endif
 #endif
 
 #ifdef CONFIG_SMP

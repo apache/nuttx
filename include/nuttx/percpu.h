@@ -30,6 +30,8 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <arch/arch.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -87,8 +89,12 @@ extern char _percpu_offset[];
 
 /* For BMP case per_cpu_var is not supported */
 
-#  define per_cpu_var_smp(v, c)        (*(FAR typeof(v) *)((unsigned long)&(v) + PERCPU_OFFSET * (c)))
-#  define this_cpu_var(v)              (*(FAR typeof(v) *)((unsigned long)&(v) + PERCPU_OFFSET * this_cpu()))
+#  define per_cpu_var_smp(v, c)        (*(FAR typeof(v) *)((uintptr_t)&(v) + PERCPU_OFFSET * (c)))
+#  ifndef up_this_cpu_var
+#    define this_cpu_var(v)              (*(FAR typeof(v) *)((uintptr_t)&(v) + PERCPU_OFFSET * this_cpu()))
+#  else
+#    define this_cpu_var(v)              up_this_cpu_var(v)
+#endif
 #endif
 
 #ifdef CONFIG_SMP
@@ -114,16 +120,5 @@ extern char _percpu_offset[];
 #  define DECLARE_PER_CPU_BMP(t, v)    extern t v
 #  define this_cpu_var_bmp(v)          v
 #endif
-
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-/* The up_cpu_index possible a inline function, we should include to avoid
- * dependency issue, g_interrupt_context needs percpu.h, have to put irq.h at
- * tail of percpu.h
- */
-
-#include <nuttx/irq.h>
 
 #endif
