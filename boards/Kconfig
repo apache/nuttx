@@ -1584,6 +1584,12 @@ config ARCH_BOARD_BEAGLEBONE_BLACK
 	---help---
 		This is the port of NuttX to the TI Beaglebone Black board.
 
+config ARCH_BOARD_T3_GEM_O1
+	bool "T3 Gemstone O1"
+	depends on ARCH_CHIP_AM67
+	---help---
+		This is the port of NuttX to the T3 Gemstone O1 board.
+
 config ARCH_BOARD_PIC32MX_STARTERKIT
 	bool "Microchip PIC32MX Ethernet Starter Kit (DM320004)"
 	depends on ARCH_CHIP_PIC32MX795F512L
@@ -3697,6 +3703,7 @@ config ARCH_BOARD
 	default "p112"                      if ARCH_BOARD_P112
 	default "pcduino-a10"               if ARCH_BOARD_PCDUINO_A10
 	default "beaglebone-black"          if ARCH_BOARD_BEAGLEBONE_BLACK
+	default "t3-gem-o1"                 if ARCH_BOARD_T3_GEM_O1
 	default "pic32mx-starterkit"        if ARCH_BOARD_PIC32MX_STARTERKIT
 	default "pic32mx7mmb"               if ARCH_BOARD_PIC32MX7MMB
 	default "pic32mz-starterkit"        if ARCH_BOARD_PIC32MZ_STARTERKIT
@@ -3910,6 +3917,9 @@ source "boards/arm/a1x/pcduino-a10/Kconfig"
 endif
 if ARCH_BOARD_BEAGLEBONE_BLACK
 source "boards/arm/am335x/beaglebone-black/Kconfig"
+endif
+if ARCH_BOARD_T3_GEM_O1
+source "boards/arm/am67/t3-gem-o1/Kconfig"
 endif
 if ARCH_BOARD_C5471EVM
 source "boards/arm/c5471/c5471evm/Kconfig"
