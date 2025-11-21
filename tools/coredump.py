@@ -46,26 +46,28 @@ def try_extract(filepath) -> io.BytesIO:
     in_coredump = False
     bas64 = False
     coredump = []
-    with open(filepath, "r") as f:
-        try:
-            for line in f.readlines():
-                if "Start coredump" in line:
-                    in_coredump = True
-                    if coredump:
-                        print("Warning: multiple core dump found.")
-                        break
-                elif "Finish coredump" in line:
-                    bas64 = "base64 formatted" in line
-                    in_coredump = False
-                elif in_coredump:
-                    index = line.rfind(" ")
-                    if index > 0:
-                        line = line[index + 1 :]
-                    line = line.rstrip("\n\r")
-                    if line:
-                        coredump += line
-        except (UnicodeDecodeError, UnicodeError):
-            pass
+    with open(filepath, "r", errors="ignore") as f:
+        for line in f.readlines():
+            line = line.rstrip("\n\r")
+            if "Start coredump" in line:
+                in_coredump = True
+                print(f"Found coredump start marker at '{line}'")
+                if coredump:
+                    print("Warning: multiple core dump found.")
+                    break
+            elif "Finish coredump" in line:
+                bas64 = "base64 formatted" in line
+                line = line.strip("\n\r")
+                print(f"Found finish coredump marker at '{line}'")
+                in_coredump = False
+            elif in_coredump:
+                index = line.rfind(" ")
+                if index > 0:
+                    line = line[index + 1 :]
+                if line:
+                    coredump += line
+
+    print(f"Found {len(coredump)} lines of coredump data")
 
     try:
         return coredump and io.BytesIO(
