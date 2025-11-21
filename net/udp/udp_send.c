@@ -250,27 +250,30 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 #ifdef CONFIG_NET_UDP_CHECKSUMS
       /* Calculate UDP checksum. */
 
+      if ((dev->d_features & NETDEV_TX_CSUM) == 0)
+        {
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv4(dev->d_flags))
+          if (IFF_IS_IPv4(dev->d_flags))
 #endif
-        {
-          udp->udpchksum = ~udp_ipv4_chksum(dev);
-        }
+            {
+              udp->udpchksum = ~udp_ipv4_chksum(dev);
+            }
 #endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
-      else
+          else
 #endif
-        {
-          udp->udpchksum = ~udp_ipv6_chksum(dev);
-        }
+            {
+              udp->udpchksum = ~udp_ipv6_chksum(dev);
+            }
 #endif /* CONFIG_NET_IPv6 */
 
-      if (udp->udpchksum == 0)
-        {
-          udp->udpchksum = 0xffff;
+          if (udp->udpchksum == 0)
+            {
+              udp->udpchksum = 0xffff;
+            }
         }
 #endif /* CONFIG_NET_UDP_CHECKSUMS */
 
