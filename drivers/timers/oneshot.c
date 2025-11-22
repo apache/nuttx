@@ -312,7 +312,7 @@ int oneshot_register(FAR const char *devname,
   priv->od_lower = lower;
 
   lower->callback = oneshot_callback;
-  lower->arg      = lower;
+  lower->arg      = priv;
 
   nxmutex_init(&priv->od_lock);
 

@@ -80,7 +80,6 @@ struct esp_oneshot_lowerhalf_s
 {
   struct oneshot_lowerhalf_s lh;          /* Lower half instance */
   timer_hal_context_t        hal;         /* HAL context */
-  uint16_t                   resolution;  /* Timer resolution in microseconds */
   bool                       running;     /* True: the timer is running */
 };
 
@@ -94,14 +93,13 @@ static int esp_oneshot_isr(int irq, void *context, void *arg);
 
 /* "Lower half" driver methods **********************************************/
 
-static int esp_oneshot_maxdelay(struct oneshot_lowerhalf_s *lower,
-                                struct timespec *ts);
-static int esp_oneshot_start(struct oneshot_lowerhalf_s *lower,
-                             const struct timespec *ts);
-static int esp_oneshot_cancel(struct oneshot_lowerhalf_s *lower,
-                              struct timespec *ts);
-static int esp_oneshot_current(struct oneshot_lowerhalf_s *lower,
-                               struct timespec *ts);
+static clkcnt_t esp_oneshot_max_delay(struct oneshot_lowerhalf_s *lower);
+static clkcnt_t esp_oneshot_current(struct oneshot_lowerhalf_s *lower);
+static void esp_oneshot_start_absolute(struct oneshot_lowerhalf_s *lower,
+                                              clkcnt_t expected);
+static void esp_oneshot_start(struct oneshot_lowerhalf_s *lower,
+                                  clkcnt_t delta);
+static void esp_oneshot_cancel(struct oneshot_lowerhalf_s *lower);
 
 /****************************************************************************
  * Private Data
@@ -111,10 +109,11 @@ static int esp_oneshot_current(struct oneshot_lowerhalf_s *lower,
 
 static const struct oneshot_operations_s g_oneshot_ops =
 {
-  .max_delay = esp_oneshot_maxdelay,
-  .start     = esp_oneshot_start,
-  .cancel    = esp_oneshot_cancel,
-  .current   = esp_oneshot_current
+  .current        = esp_oneshot_current,
+  .start          = esp_oneshot_start,
+  .start_absolute = esp_oneshot_start_absolute,
+  .cancel         = esp_oneshot_cancel,
+  .max_delay      = esp_oneshot_max_delay
 };
 
 /* Oneshot Timer lower-half */
@@ -141,36 +140,25 @@ static struct esp_oneshot_lowerhalf_s g_oneshot_lowerhalf =
  *   lower         - An instance of the lower-half oneshot state structure.
  *                   This structure must have been previously initialized via
  *                   a call to oneshot_initialize().
- *   ts            - The location in which to return the maximum delay.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned
- *   on failure.
+ *   The maximum delay.
  *
  ****************************************************************************/
 
-static int esp_oneshot_maxdelay(struct oneshot_lowerhalf_s *lower,
-                                struct timespec *ts)
+static clkcnt_t esp_oneshot_max_delay(struct oneshot_lowerhalf_s *lower)
 {
-  DEBUGASSERT(ts != NULL);
-
   /* The real maximum delay surpass the limit that timespec can represent.
    * Even if considering the best case scenario of 1us resolution.
    * Therefore, here, fill the timespec with the maximum value supported
    * value.
    */
 
-  ts->tv_sec  = UINT32_MAX;
-  ts->tv_nsec = NSEC_PER_SEC - 1;
-
-  tmrinfo("max sec=%" PRIu32 "\n", ts->tv_sec);
-  tmrinfo("max nsec=%ld\n", ts->tv_nsec);
-
-  return OK;
+  return UINT64_MAX;
 }
 
 /****************************************************************************
- * Name: esp_oneshot_start
+ * Name: esp_oneshot_start/esp_oneshot_start_absolute
  *
  * Description:
  *   Start the oneshot timer.
@@ -178,29 +166,22 @@ static int esp_oneshot_maxdelay(struct oneshot_lowerhalf_s *lower,
  * Input Parameters:
  *   lower         - A pointer the publicly visible representation of the
  *                   "lower-half" driver state structure.
- *   callback      - Function to call when when the oneshot timer expires.
- *                   Inside the handler scope.
- *   arg           - A pointer to the argument that will accompany the
- *                   callback.
- *   ts            - Provides the duration of the oneshot timer.
+ *   delta         - The count to start the oneshot.
  *
  * Returned Values:
- *   Zero (OK) is returned on success; a negated errno value is returned
- *   on failure.
+ *   None.
  *
  ****************************************************************************/
 
-static int esp_oneshot_start(struct oneshot_lowerhalf_s *lower,
-                             const struct timespec *ts)
+static void esp_oneshot_start(struct oneshot_lowerhalf_s *lower,
+                              clkcnt_t delta)
 {
   struct esp_oneshot_lowerhalf_s *priv =
     (struct esp_oneshot_lowerhalf_s *)lower;
-  uint64_t timeout_us;
 
   DEBUGASSERT(priv != NULL);
-  DEBUGASSERT(ts != NULL);
 
-  tmrinfo("ts=(%lu, %ld)\n", (unsigned long)ts->tv_sec, ts->tv_nsec);
+  tmrinfo("count=(%llu)\n", delta);
 
   if (priv->running)
     {
@@ -210,22 +191,7 @@ static int esp_oneshot_start(struct oneshot_lowerhalf_s *lower,
        * restart.
        */
 
-      esp_oneshot_cancel(lower, NULL);
-    }
-
-  /* Retrieve the duration from timespec in microsecond */
-
-  timeout_us = (uint64_t)ts->tv_sec * USEC_PER_SEC +
-               (uint64_t)(ts->tv_nsec / NSEC_PER_USEC);
-
-  /* Verify if it is a multiple of the configured resolution.
-   * In case it isn't, warn the user.
-   */
-
-  if ((timeout_us % priv->resolution) != 0)
-    {
-      tmrwarn("The interval is not multiple of the resolution.\n"
-              "Adjust the resolution in your bringup file.\n");
+      esp_oneshot_cancel(lower);
     }
 
   timer_hal_context_t *hal = &(priv->hal);
@@ -250,8 +216,7 @@ static int esp_oneshot_start(struct oneshot_lowerhalf_s *lower,
 
   /* Set the timeout */
 
-  timer_ll_set_alarm_value(hal->dev, hal->timer_id,
-                           timeout_us / priv->resolution);
+  timer_ll_set_alarm_value(hal->dev, hal->timer_id, delta);
 
   /* Enable timer alarm */
 
@@ -271,8 +236,24 @@ static int esp_oneshot_start(struct oneshot_lowerhalf_s *lower,
   timer_ll_enable_counter(hal->dev, hal->timer_id, true);
 
   priv->running = true;
+}
 
-  return OK;
+static void esp_oneshot_start_absolute(struct oneshot_lowerhalf_s *lower,
+                                       clkcnt_t expected)
+{
+  struct esp_oneshot_lowerhalf_s *priv =
+    (struct esp_oneshot_lowerhalf_s *)lower;
+
+  DEBUGASSERT(priv != NULL);
+
+  uint64_t alarm   = expected;
+  uint64_t counter = timer_hal_capture_and_get_counter_value(&priv->hal);
+
+  /* In case of overflow. */
+
+  counter = alarm - counter >= alarm ? 0 : alarm - counter;
+
+  esp_oneshot_start(lower, counter);
 }
 
 /****************************************************************************
@@ -287,20 +268,13 @@ static int esp_oneshot_start(struct oneshot_lowerhalf_s *lower,
  * Input Parameters:
  *   lower         - A pointer the publicly visible representation of the
  *                   "lower-half" driver state structure.
- *   ts            - The location in which to return the time remaining on
- *                   the oneshot timer. A time of zero is returned if the
- *                   timer is not running. ts may be zero in which case the
- *                   time remaining is not returned.
  *
  * Returned Value:
- *   Zero (OK) is returned on success.  A call to up_timer_cancel() when
- *   the timer is not active should also return success; a negated errno
- *   value is returned on any failure.
+ *   None.
  *
  ****************************************************************************/
 
-static int esp_oneshot_cancel(struct oneshot_lowerhalf_s *lower,
-                              struct timespec *ts)
+static void esp_oneshot_cancel(struct oneshot_lowerhalf_s *lower)
 {
   struct esp_oneshot_lowerhalf_s *priv =
     (struct esp_oneshot_lowerhalf_s *)lower;
@@ -315,44 +289,16 @@ static int esp_oneshot_cancel(struct oneshot_lowerhalf_s *lower,
   if (!priv->running)
     {
       tmrinfo("Trying to cancel a non started oneshot timer.\n");
-      ts->tv_sec  = 0;
-      ts->tv_nsec = 0;
-
-      return -EFAULT;
     }
-
-  timer_hal_context_t *hal = &(priv->hal);
-  timer_ll_enable_intr(hal->dev, TIMER_LL_EVENT_ALARM(hal->timer_id),
-                       false);
-  timer_ll_enable_counter(hal->dev, hal->timer_id, false);
-
-  if (ts != NULL)
+  else
     {
-      /* Get the current counter value */
-
-      counter_value = timer_hal_capture_and_get_counter_value(hal);
-
-      /* Get the current configured timeout */
-
-      volatile timg_hwtimer_reg_t *hw_timer =
-        &(hal->dev->hw_timer[hal->timer_id]);
-      alarm_value = ((uint64_t)hw_timer->alarmhi.tx_alarm_hi << 32) |
-                    (hw_timer->alarmlo.tx_alarm_lo);
-
-      current_us = counter_value * priv->resolution;
-      timeout_us = alarm_value   * priv->resolution;
-
-      /* Remaining time (us) = timeout (us) - current (us) */
-
-      remaining_us = timeout_us - current_us;
-      ts->tv_sec   = remaining_us / USEC_PER_SEC;
-      remaining_us = remaining_us - ts->tv_sec * USEC_PER_SEC;
-      ts->tv_nsec  = remaining_us * NSEC_PER_USEC;
+      timer_hal_context_t *hal = &(priv->hal);
+      timer_ll_enable_intr(hal->dev, TIMER_LL_EVENT_ALARM(hal->timer_id),
+                           false);
+      timer_ll_enable_counter(hal->dev, hal->timer_id, false);
     }
 
   priv->running = false;
-
-  return OK;
 }
 
 /****************************************************************************
@@ -364,39 +310,22 @@ static int esp_oneshot_cancel(struct oneshot_lowerhalf_s *lower,
  * Input Parameters:
  *   lower         - A pointer the publicly visible representation of the
  *                   "lower-half" driver state structure.
- *   ts            - The location in which to return the current time. A time
- *                   of zero is returned for the initialization moment.
  *
  * Returned Value:
- *   Zero (OK) is returned on success, a negated errno value is returned on
- *   any failure.
+ *   The current timer count.
  *
  ****************************************************************************/
 
-static int esp_oneshot_current(struct oneshot_lowerhalf_s *lower,
-                               struct timespec *ts)
+static clkcnt_t esp_oneshot_current(struct oneshot_lowerhalf_s *lower)
 {
   struct esp_oneshot_lowerhalf_s *priv =
     (struct esp_oneshot_lowerhalf_s *)lower;
-  uint64_t current_us;
-  uint64_t current_counter_value;
-  uint64_t alarm_value;
 
   DEBUGASSERT(priv != NULL);
-  DEBUGASSERT(ts != NULL);
-
-  timer_hal_context_t *hal = &(priv->hal);
 
   /* Get the current counter value */
 
-  current_counter_value = timer_hal_capture_and_get_counter_value(hal);
-  current_us = current_counter_value * priv->resolution;
-
-  ts->tv_sec  = current_us / USEC_PER_SEC;
-  current_us  = current_us - ts->tv_sec * USEC_PER_SEC;
-  ts->tv_nsec = current_us * NSEC_PER_USEC;
-
-  return OK;
+  return timer_hal_capture_and_get_counter_value(&priv->hal);
 }
 
 /****************************************************************************
@@ -481,7 +410,6 @@ struct oneshot_lowerhalf_s *oneshot_initialize(int chan, uint16_t resolution)
 
   /* Initialize the elements of lower half state structure */
 
-  lower->resolution = resolution;
   lower->running    = false;
 
   periph = timer_group_periph_signals.groups[GROUP_ID].module;
@@ -529,6 +457,8 @@ struct oneshot_lowerhalf_s *oneshot_initialize(int chan, uint16_t resolution)
   esp_setup_irq(irq,
                 ESP_IRQ_PRIORITY_DEFAULT,
                 ESP_IRQ_TRIGGER_LEVEL);
+
+  oneshot_count_init(&lower->lh, USEC_PER_SEC / resolution);
 
   /* Attach the handler for the timer IRQ */
 

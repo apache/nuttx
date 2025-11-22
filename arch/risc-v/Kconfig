@@ -17,6 +17,8 @@ config ARCH_CHIP_FE310
 	select ARCH_RV_ISA_A
 	select ARCH_RV_ISA_C
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		SiFive FE310 processor (E31 RISC-V Core with MAC extensions).
@@ -34,6 +36,8 @@ config ARCH_CHIP_K210
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_MISALIGN_EXCEPTION
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		Kendryte K210 processor (RISC-V 64bit core with GC extensions)
@@ -55,12 +59,13 @@ config ARCH_CHIP_BL602
 	bool "BouffaloLab BL602"
 	select ARCH_RV32
 	select ARCH_RV_ISA_M
-	select ARCH_RV_ISA_A
 	select ARCH_RV_ISA_C
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_MISALIGN_EXCEPTION
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		BouffaloLab BL602(rv32imfc)
@@ -90,6 +95,8 @@ config ARCH_CHIP_ESP32C3
 	select ARCH_HAVE_PERF_EVENTS
 	select ARCH_HAVE_DEBUG
 	select ARCH_HAVE_RAMFUNCS
+	select ONESHOT_COUNT if ONESHOT
+	select ONESHOT_FAST_DIVISION if ONESHOT
 	---help---
 		Espressif ESP32-C3 (RV32IMC).
 
@@ -121,6 +128,8 @@ config ARCH_CHIP_ESP32C3_GENERIC
 	select ARCH_CHIP_ESPRESSIF
 	select ARCH_HAVE_DEBUG
 	select ARCH_HAVE_RAMFUNCS
+	select ONESHOT_COUNT if ONESHOT
+	select ONESHOT_FAST_DIVISION if ONESHOT
 	---help---
 		ESP32-C3 chip with a single RISC-V IMC core, no embedded Flash memory
 
@@ -152,6 +161,8 @@ config ARCH_CHIP_ESP32C6
 	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 	select ARCH_CHIP_ESPRESSIF
 	select ARCH_HAVE_RAMFUNCS
+	select ONESHOT_COUNT if ONESHOT
+	select ONESHOT_FAST_DIVISION if ONESHOT
 	---help---
 		Espressif ESP32-C6 (RV32IMAC).
 
@@ -182,6 +193,8 @@ config ARCH_CHIP_ESP32H2
 	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 	select ARCH_CHIP_ESPRESSIF
 	select ARCH_HAVE_RAMFUNCS
+	select ONESHOT_COUNT if ONESHOT
+	select ONESHOT_FAST_DIVISION if ONESHOT
 	---help---
 		Espressif ESP32-H2 (RV32IMC).
 
@@ -195,6 +208,8 @@ config ARCH_CHIP_C906
 	select ARCH_HAVE_DPFPU
 	select ARCH_HAVE_MPU
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		THEAD C906 processor (RISC-V 64bit core with GCVX extensions).
@@ -220,6 +235,8 @@ config ARCH_CHIP_MPFS
 	select ARCH_RV_CPUID_MAP
 	select ARCH_HAVE_PERF_EVENTS
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		MicroChip Polarfire processor (RISC-V 64bit core with GCVX extensions).
@@ -229,6 +246,10 @@ config ARCH_CHIP_RV32M1
 	select ARCH_RV32
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_C
+	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
+	select ALARM_ARCH
 	---help---
 		NXP RV32M1 processor (RISC-V Core with PULP extensions).
 
@@ -246,6 +267,8 @@ config ARCH_CHIP_QEMU_RV
 	select ARCH_HAVE_S_MODE
 	select ARCH_HAVE_ELF_EXECUTABLE
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	select ARCH_HAVE_DEBUG
 	---help---
@@ -258,6 +281,8 @@ config ARCH_CHIP_HPM6000
 	select ARCH_RV_ISA_A
 	select ARCH_RV_ISA_C
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		Hpmicro HPM6000 processor (D45 RISC-V Core with MAC extensions).
@@ -269,6 +294,8 @@ config ARCH_CHIP_HPM6750
 	select ARCH_RV_ISA_A
 	select ARCH_RV_ISA_C
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		Hpmicro HPM6750 processor (D45 RISC-V Core with MAC extensions).
@@ -288,6 +315,8 @@ config ARCH_CHIP_JH7110
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_S_MODE
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		StarFive JH7110 SoC.
@@ -308,6 +337,8 @@ config ARCH_CHIP_BL808
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_S_MODE
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		Bouffalo Lab BL808 SoC.
@@ -330,6 +361,8 @@ config ARCH_CHIP_K230
 	select ARCH_NEED_ADDRENV_MAPPING
 	select NUTTSBI_LATE_INIT if NUTTSBI
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		Kendryte K230 SoC (RV64GCV and RV64GCVX C908 cores).
@@ -350,6 +383,8 @@ config ARCH_CHIP_SG2000
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_S_MODE
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		SOPHGO SG2000 SoC.
@@ -369,6 +404,8 @@ config ARCH_CHIP_EIC7700X
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_S_MODE
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		ESWIN EIC7700X SoC.
@@ -385,6 +422,8 @@ config ARCH_CHIP_RP23XX_RV
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_TICKLESS
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	select ARCH_HAVE_I2CRESET
 	select ARCH_BOARD_COMMON

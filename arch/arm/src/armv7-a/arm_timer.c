@@ -33,6 +33,8 @@
 #include <arch/barriers.h>
 #include <arch/irq.h>
 
+#include <sys/param.h>
+
 #include "arm_timer.h"
 #include "gic.h"
 
@@ -51,58 +53,13 @@
 #endif
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/* This structure provides the private representation of the "lower-half"
- * driver state structure.  This structure must be cast-compatible with the
- * oneshot_lowerhalf_s structure.
- */
-
-struct arm_timer_lowerhalf_s
-{
-  struct oneshot_lowerhalf_s lh;        /* Lower half operations */
-  uint32_t                   freq;      /* Timer working clock frequency(Hz) */
-
-  /* which cpu timer is running, -1 indicate timer stoppd */
-
-  int running;
-};
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-static int arm_timer_maxdelay(struct oneshot_lowerhalf_s *lower,
-                              struct timespec *ts);
-static int arm_timer_start(struct oneshot_lowerhalf_s *lower,
-                           const struct timespec *ts);
-static int arm_timer_cancel(struct oneshot_lowerhalf_s *lower,
-                            struct timespec *ts);
-static int arm_timer_current(struct oneshot_lowerhalf_s *lower,
-                             struct timespec *ts);
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static const struct oneshot_operations_s g_arm_timer_ops =
-{
-  .max_delay = arm_timer_maxdelay,
-  .start     = arm_timer_start,
-  .cancel    = arm_timer_cancel,
-  .current   = arm_timer_current,
-};
-
-static struct arm_timer_lowerhalf_s g_arm_timer_lowerhalf;
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 static inline void arm_timer_set_freq(uint32_t freq)
 {
   CP15_SET(CNTFRQ, freq);
+  UP_ISB();
 }
 
 static inline uint64_t arm_timer_phy_count(void)
@@ -124,118 +81,54 @@ static inline void arm_timer_phy_enable(bool enable)
 {
   CP15_MODIFY((uint32_t)enable << CNT_CTL_ENABLE_BIT,
               BIT(CNT_CTL_ENABLE_BIT), CNTP_CTL);
+  UP_ISB();
 }
 
 static inline void arm_timer_phy_set_irq_mask(bool mask)
 {
   CP15_MODIFY((uint32_t)mask << CNT_CTL_IMASK_BIT,
               BIT(CNT_CTL_IMASK_BIT), CNTP_CTL);
+  UP_ISB();
 }
 
-static inline void arm_timer_virt_set_irq_mask(bool mask)
+static int arm_timer_interrupt(int irq, void *regs, void *arg)
 {
-  CP15_MODIFY((uint32_t)mask << CNT_CTL_IMASK_BIT,
-              BIT(CNT_CTL_IMASK_BIT), CNTV_CTL);
+  struct oneshot_lowerhalf_s *priv = (struct oneshot_lowerhalf_s *)arg;
+
+  arm_timer_phy_set_absolute(UINT64_MAX);
+
+  oneshot_process_callback(priv);
+
+  return OK;
 }
 
-static inline uint64_t nsec_from_count(uint64_t count, uint32_t freq)
+static clkcnt_t arm_oneshot_max_delay(struct oneshot_lowerhalf_s *lower)
 {
-  uint64_t sec = count / freq;
-  uint64_t nsec = (count % freq) * NSEC_PER_SEC / freq;
-  return sec * NSEC_PER_SEC + nsec;
+  return UINT64_MAX;
 }
 
-static inline uint64_t nsec_to_count(uint32_t nsec, uint32_t freq)
+static clkcnt_t arm_oneshot_current(struct oneshot_lowerhalf_s *lower)
 {
-  return (uint64_t)nsec * freq / NSEC_PER_SEC;
+  /* We do not need memory barrier here. */
+
+  return arm_timer_phy_count();
 }
 
-static inline uint64_t sec_to_count(uint32_t sec, uint32_t freq)
+static void arm_oneshot_start_absolute(struct oneshot_lowerhalf_s *lower,
+                                       clkcnt_t expected)
 {
-  return (uint64_t)sec * freq;
+  arm_timer_phy_set_absolute(expected);
 }
 
-static int arm_timer_maxdelay(struct oneshot_lowerhalf_s *lower_,
-                              struct timespec *ts)
+static void arm_oneshot_start(struct oneshot_lowerhalf_s *lower,
+                              clkcnt_t delta)
 {
-  uint64_t maxnsec = nsec_from_count(UINT64_MAX, arm_timer_get_freq());
-
-  ts->tv_sec  = maxnsec / NSEC_PER_SEC;
-  ts->tv_nsec = maxnsec % NSEC_PER_SEC;
-
-  return 0;
+  arm_timer_phy_set_relative(MIN(UINT32_MAX, delta));
 }
 
-static int arm_timer_start(struct oneshot_lowerhalf_s *lower_,
-                           const struct timespec *ts)
+static void arm_oneshot_cancel(struct oneshot_lowerhalf_s *lower)
 {
-  struct arm_timer_lowerhalf_s *lower =
-    (struct arm_timer_lowerhalf_s *)lower_;
-  irqstate_t flags;
-  uint64_t count;
-
-  flags = up_irq_save();
-
-  lower->running = this_cpu();
-
-  count = sec_to_count(ts->tv_sec, lower->freq) +
-          nsec_to_count(ts->tv_nsec, lower->freq);
-
-  arm_timer_phy_set_relative(count > UINT32_MAX ? UINT32_MAX : count);
-
-  arm_timer_phy_set_irq_mask(false);
-
-  up_irq_restore(flags);
-
-  return 0;
-}
-
-static int arm_timer_cancel(struct oneshot_lowerhalf_s *lower_,
-                            struct timespec *ts)
-{
-  struct arm_timer_lowerhalf_s *lower =
-    (struct arm_timer_lowerhalf_s *)lower_;
-  irqstate_t flags;
-
-  flags = up_irq_save();
-
-  lower->running  = -1;
-
-  arm_timer_phy_set_irq_mask(true);
-
-  up_irq_restore(flags);
-
-  return 0;
-}
-
-static int arm_timer_current(struct oneshot_lowerhalf_s *lower_,
-                             struct timespec *ts)
-{
-  struct arm_timer_lowerhalf_s *lower =
-    (struct arm_timer_lowerhalf_s *)lower_;
-  uint64_t nsec = nsec_from_count(arm_timer_phy_count(),
-                                  lower->freq);
-
-  ts->tv_sec  = nsec / NSEC_PER_SEC;
-  ts->tv_nsec = nsec % NSEC_PER_SEC;
-
-  return 0;
-}
-
-static int arm_timer_interrupt(int irq, void *context, void *arg)
-{
-  struct arm_timer_lowerhalf_s *lower = arg;
-
-  DEBUGASSERT(lower != NULL);
-
-  arm_timer_phy_set_irq_mask(true);
-
-  if (lower->running == this_cpu())
-    {
-      oneshot_process_callback(&lower->lh);
-    }
-
-  return 0;
+  arm_timer_phy_set_absolute(UINT64_MAX);
 }
 
 static void arm_timer_initialize_per_cpu(unsigned int freq)
@@ -247,11 +140,30 @@ static void arm_timer_initialize_per_cpu(unsigned int freq)
       arm_timer_set_freq(freq);
     }
 
-  arm_timer_phy_set_irq_mask(true);
+  arm_timer_phy_set_absolute(UINT64_MAX);
   arm_timer_phy_enable(true);
+  arm_timer_phy_set_irq_mask(false);
 
   up_enable_irq(GIC_IRQ_TIMER);
 }
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static const struct oneshot_operations_s g_arm_oneshot_ops =
+{
+  .current        = arm_oneshot_current,
+  .start          = arm_oneshot_start,
+  .start_absolute = arm_oneshot_start_absolute,
+  .cancel         = arm_oneshot_cancel,
+  .max_delay      = arm_oneshot_max_delay,
+};
+
+static struct oneshot_lowerhalf_s g_arm_oneshot_lowerhalf =
+{
+  .ops = &g_arm_oneshot_ops
+};
 
 /****************************************************************************
  * Public Functions
@@ -259,17 +171,19 @@ static void arm_timer_initialize_per_cpu(unsigned int freq)
 
 struct oneshot_lowerhalf_s *arm_timer_initialize(unsigned int freq)
 {
-  struct arm_timer_lowerhalf_s *lower = &g_arm_timer_lowerhalf;
+  struct oneshot_lowerhalf_s *lower = &g_arm_oneshot_lowerhalf;
+
+  /* The init freq is for trust-zone only since CNTFRQ is only
+   * allowed to access in secure state.
+   */
 
   arm_timer_initialize_per_cpu(freq);
 
-  lower->freq    = arm_timer_get_freq();
-  lower->lh.ops  = &g_arm_timer_ops;
-  lower->running = -1;
+  oneshot_count_init(lower, arm_timer_get_freq());
 
   irq_attach(GIC_IRQ_TIMER, arm_timer_interrupt, lower);
 
-  return (struct oneshot_lowerhalf_s *)lower;
+  return lower;
 }
 
 void arm_timer_secondary_init(unsigned int freq)

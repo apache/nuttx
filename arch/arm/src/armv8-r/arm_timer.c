@@ -37,9 +37,9 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/timers/arch_alarm.h>
 #include <nuttx/timers/oneshot.h>
-#include <nuttx/kmalloc.h>
 
 #include "arm_timer.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -65,31 +65,13 @@
 #define ARM_ARCH_TIMER_FLAGS     IRQ_TYPE_LEVEL
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-struct arm_oneshot_lowerhalf_s
-{
-  /* This is the part of the lower half driver that is visible to the upper-
-   * half client of the driver.  This must be the first thing in this
-   * structure so that pointers to struct oneshot_lowerhalf_s are cast
-   * compatible to struct arm64_oneshot_lowerhalf_s and vice versa.
-   */
-
-  struct oneshot_lowerhalf_s lh;      /* Common lower-half driver fields */
-
-  /* Private lower half data follows */
-
-  uint32_t           frequency;       /* Frequency */
-};
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 static inline void arm_timer_set_freq(uint32_t freq)
 {
   CP15_SET(CNTFRQ, freq);
+  UP_ISB();
 }
 
 static inline uint64_t arm_timer_phy_count(void)
@@ -111,16 +93,18 @@ static inline void arm_timer_phy_enable(bool enable)
 {
   CP15_MODIFY((uint32_t)enable << CNT_CTL_ENABLE_BIT,
               BIT(CNT_CTL_ENABLE_BIT), CNTP_CTL);
+  UP_ISB();
 }
 
 static inline void arm_timer_phy_set_irq_mask(bool mask)
 {
   CP15_MODIFY((uint32_t)mask << CNT_CTL_IMASK_BIT,
               BIT(CNT_CTL_IMASK_BIT), CNTP_CTL);
+  UP_ISB();
 }
 
 /****************************************************************************
- * Name: arm_arch_timer_compare_isr
+ * Name: arm_oneshot_compare_isr
  *
  * Description:
  *   Common timer interrupt callback.  When any oneshot timer interrupt
@@ -135,188 +119,74 @@ static inline void arm_timer_phy_set_irq_mask(bool mask)
  *
  ****************************************************************************/
 
-static int arm_arch_timer_compare_isr(int irq, void *regs, void *arg)
+static int arm_oneshot_compare_isr(int irq, void *regs, void *arg)
 {
-  struct arm_oneshot_lowerhalf_s *priv =
-    (struct arm_oneshot_lowerhalf_s *)arg;
+  struct oneshot_lowerhalf_s *priv = (struct oneshot_lowerhalf_s *)arg;
 
-  /* Suspend the timer irq, restart again when call tick_start */
+  arm_timer_phy_set_absolute(UINT64_MAX);
 
-  arm_timer_phy_set_irq_mask(true);
-
-  /* Then perform the callback */
-
-  oneshot_process_callback(&priv->lh);
+  oneshot_process_callback(priv);
 
   return OK;
 }
 
-/****************************************************************************
- * Name: arm_max_delay
- *
- * Description:
- *   Determine the maximum delay of the one-shot timer (in microseconds)
- *
- * Input Parameters:
- *   lower   An instance of the lower-half oneshot state structure.  This
- *           structure must have been previously initialized via a call to
- *           oneshot_initialize();
- *   ts      The location in which to return the maximum delay.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned
- *   on failure.
- *
- ****************************************************************************/
-
-static int arm_max_delay(struct oneshot_lowerhalf_s *lower,
-                         struct timespec *ts)
+static clkcnt_t arm_oneshot_max_delay(struct oneshot_lowerhalf_s *lower)
 {
-  struct arm_oneshot_lowerhalf_s *priv =
-    (struct arm_oneshot_lowerhalf_s *)lower;
-  uint32_t freq = priv->frequency;
-
-  DEBUGASSERT(ts != NULL);
-
-  ts->tv_sec  = UINT64_MAX / freq;
-  ts->tv_nsec = UINT64_MAX % freq * NSEC_PER_SEC / freq;
-
-  return OK;
+  return UINT64_MAX;
 }
 
-/****************************************************************************
- * Name: arm_cancel
- *
- * Description:
- *   Cancel the oneshot timer and return the time remaining on the timer.
- *
- *   NOTE: This function may execute at a high rate with no timer running (as
- *   when pre-emption is enabled and disabled).
- *
- * Input Parameters:
- *   lower   Caller allocated instance of the oneshot state structure.  This
- *           structure must have been previously initialized via a call to
- *           oneshot_initialize();
- *   ts      The location in which to return the time remaining on the
- *           oneshot timer.
- *
- * Returned Value:
- *   Zero (OK) is returned on success.  A call to up_timer_cancel() when
- *   the timer is not active should also return success; a negated errno
- *   value is returned on any failure.
- *
- ****************************************************************************/
-
-static int arm_cancel(struct oneshot_lowerhalf_s *lower,
-                      struct timespec *ts)
+static clkcnt_t arm_oneshot_current(struct oneshot_lowerhalf_s *lower)
 {
-  struct arm_oneshot_lowerhalf_s *priv =
-    (struct arm_oneshot_lowerhalf_s *)lower;
+  /* We do not need memory barrier here. */
 
-  DEBUGASSERT(priv != NULL && ts != NULL);
-
-  /* Disable int */
-
-  arm_timer_phy_set_irq_mask(true);
-
-  return OK;
+  return arm_timer_phy_count();
 }
 
-/****************************************************************************
- * Name: arm_start
- *
- * Description:
- *   Start the oneshot timer
- *
- * Input Parameters:
- *   lower    An instance of the lower-half oneshot state structure.  This
- *            structure must have been previously initialized via a call to
- *            oneshot_initialize();
- *   handler  The function to call when when the oneshot timer expires.
- *   arg      An opaque argument that will accompany the callback.
- *   ts       Provides the duration of the one shot timer.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned
- *   on failure.
- *
- ****************************************************************************/
-
-static int arm_start(struct oneshot_lowerhalf_s *lower,
-                     const struct timespec *ts)
+static void arm_oneshot_start_absolute(struct oneshot_lowerhalf_s *lower,
+                                       clkcnt_t expected)
 {
-  uint64_t count;
-  struct arm_oneshot_lowerhalf_s *priv =
-    (struct arm_oneshot_lowerhalf_s *)lower;
-  uint64_t freq = priv->frequency;
-
-  DEBUGASSERT(priv && ts);
-
-  /* Set the timeout */
-
-  count  = arm_timer_phy_count();
-  count += (uint64_t)ts->tv_sec * freq +
-           (uint64_t)ts->tv_nsec * freq / NSEC_PER_SEC;
-
-  arm_timer_phy_set_absolute(count);
-
-  /* Try to unmask the timer irq in timer controller
-   * in case of arm_tick_cancel is called.
-   */
-
-  arm_timer_phy_set_irq_mask(false);
-
-  return OK;
+  arm_timer_phy_set_absolute(expected);
 }
 
-/****************************************************************************
- * Name: arm_current
- *
- * Description:
- *  Get the current time.
- *
- * Input Parameters:
- *   lower   Caller allocated instance of the oneshot state structure.  This
- *           structure must have been previously initialized via a call to
- *           oneshot_initialize();
- *   ts      The location in which to return the current time.
- *
- * Returned Value:
- *   Zero (OK) is returned on success, a negated errno value is returned on
- *   any failure.
- *
- ****************************************************************************/
-
-static int arm_current(struct oneshot_lowerhalf_s *lower,
-                       struct timespec *ts)
+static void arm_oneshot_start(struct oneshot_lowerhalf_s *lower,
+                              clkcnt_t delta)
 {
-  uint64_t count;
-  uint32_t freq;
-  struct arm_oneshot_lowerhalf_s *priv =
-    (struct arm_oneshot_lowerhalf_s *)lower;
+  arm_timer_phy_set_relative(delta <= UINT32_MAX ? delta : UINT32_MAX);
+}
 
-  DEBUGASSERT(ts != NULL);
-
-  freq  = priv->frequency;
-  count = arm_timer_phy_count();
-
-  ts->tv_sec  = count / freq;
-  ts->tv_nsec = (count % freq) * NSEC_PER_SEC / freq;
-
-  return OK;
+static void arm_oneshot_cancel(struct oneshot_lowerhalf_s *lower)
+{
+  arm_timer_phy_set_absolute(UINT64_MAX);
 }
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct oneshot_operations_s g_oneshot_ops =
+static const struct oneshot_operations_s g_arm_oneshot_ops =
 {
-  .start     = arm_start,
-  .current   = arm_current,
-  .max_delay = arm_max_delay,
-  .cancel    = arm_cancel,
+  .current        = arm_oneshot_current,
+  .start          = arm_oneshot_start,
+  .start_absolute = arm_oneshot_start_absolute,
+  .cancel         = arm_oneshot_cancel,
+  .max_delay      = arm_oneshot_max_delay
 };
+
+static struct oneshot_lowerhalf_s g_arm_oneshot_lowerhalf =
+{
+  .ops = &g_arm_oneshot_ops
+};
+
+static void arm_oneshot_secondary_init(void)
+{
+  arm_timer_phy_set_absolute(UINT64_MAX);
+
+  /* Enable interrupt */
+
+  up_enable_irq(ARM_ARCH_TIMER_IRQ);
+  arm_timer_phy_enable(true);
+  arm_timer_phy_set_irq_mask(false);
+}
 
 /****************************************************************************
  * Name: oneshot_initialize
@@ -333,41 +203,27 @@ static const struct oneshot_operations_s g_oneshot_ops =
 
 static struct oneshot_lowerhalf_s *arm_oneshot_initialize(void)
 {
-  struct arm_oneshot_lowerhalf_s *priv;
-
-  tmrinfo("oneshot_initialize\n");
-
-  /* Allocate an instance of the lower half driver */
-
-  priv = (struct arm_oneshot_lowerhalf_s *)
-    kmm_zalloc(sizeof(struct arm_oneshot_lowerhalf_s));
-
-  if (priv == NULL)
-    {
-      tmrerr("ERROR: Failed to initialized state structure\n");
-
-      return NULL;
-    }
-
-  /* Initialize the lower-half driver structure */
-
-  DEBUGASSERT(arm_timer_get_freq() <= UINT32_MAX);
-
-  priv->lh.ops = &g_oneshot_ops;
-  priv->frequency = arm_timer_get_freq();
+  struct oneshot_lowerhalf_s *priv = &g_arm_oneshot_lowerhalf;
+  uint64_t freq;
 
   /* Attach handler */
 
-  irq_attach(ARM_ARCH_TIMER_IRQ,
-             arm_arch_timer_compare_isr, priv);
+  irq_attach(ARM_ARCH_TIMER_IRQ, arm_oneshot_compare_isr, priv);
 
-  /* Avoid early timer irq cause abort. */
+  freq = arm_timer_get_freq();
 
-  arm_timer_phy_set_irq_mask(true);
+  DEBUGASSERT(freq <= UINT32_MAX);
 
-  tmrinfo("oneshot_initialize ok %p \n", &priv->lh);
+  tmrinfo("%s: cp15 timer(s) running at %" PRIu64 ".%" PRIu64 "MHz\n",
+          __func__, freq / 1000000, (freq / 10000) % 100);
 
-  return &priv->lh;
+  oneshot_count_init(priv, (uint32_t)freq);
+
+  arm_oneshot_secondary_init();
+
+  tmrinfo("oneshot_initialize ok %p \n", priv);
+
+  return priv;
 }
 
 /****************************************************************************
@@ -385,15 +241,7 @@ static struct oneshot_lowerhalf_s *arm_oneshot_initialize(void)
 
 void up_timer_initialize(void)
 {
-  uint64_t freq;
-
-  freq = arm_timer_get_freq();
-  tmrinfo("%s: cp15 timer(s) running at %" PRIu64 ".%" PRIu64 "MHz\n",
-          __func__, freq / 1000000, (freq / 10000) % 100);
-
   up_alarm_set_lowerhalf(arm_oneshot_initialize());
-  up_enable_irq(ARM_ARCH_TIMER_IRQ);
-  arm_timer_phy_enable(true);
 }
 
 #ifdef CONFIG_SMP
@@ -422,13 +270,7 @@ void arm_timer_secondary_init(unsigned int freq)
 #ifdef CONFIG_SCHED_TICKLESS
   tmrinfo("arm_arch_timer_secondary_init\n");
 
-  /* Enable int */
-
-  up_enable_irq(ARM_ARCH_TIMER_IRQ);
-
-  /* Start timer */
-
-  arm_timer_phy_enable(true);
+  arm_oneshot_secondary_init();
 #endif
 }
 #endif

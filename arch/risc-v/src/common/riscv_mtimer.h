@@ -77,9 +77,11 @@ void riscv_mtimer_set(uintreg_t mtime_addr,
   else
 #  endif
     {
+      irqstate_t flags = up_irq_save();
       putreg32(UINT32_MAX, mtimecmp_addr + 4);
       putreg32(value, mtimecmp_addr);
       putreg32(value >> 32, mtimecmp_addr + 4);
+      up_irq_restore(flags);
     }
 
   UP_DSB();
@@ -93,8 +95,10 @@ static inline void riscv_write_stime(uint64_t value)
 #    ifdef CONFIG_ARCH_RV64
   WRITE_CSR(CSR_STIMECMP, value);
 #    else
+  irqstate_t flags = up_irq_save();
   WRITE_CSR(CSR_STIMECMP, (uint32_t)value);
   WRITE_CSR(CSR_STIMECMPH, (uint32_t)(value >> 32));
+  up_irq_restore(flags);
 #    endif /* CONFIG_ARCH_RV64 */
 }
 #  endif /* CONFIG_ARCH_RV_EXT_SSTC */

@@ -67,6 +67,10 @@ choice
 config ARCH_INTEL64_TSC_DEADLINE
 	bool "TSC DEADLINE timer support"
 	select ARCH_INTEL64_HAVE_TSC
+	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
+	select ALARM_ARCH
 	---help---
 		Select to enable the use of TSC DEADLINE timer of x86_64
 
@@ -78,7 +82,7 @@ config ARCH_INTEL64_TSC
 
 config ARCH_INTEL64_HPET_ALARM
 	bool "HPET timer alarm support"
-	depends on ALARM_ARCH
+	select ALARM_ARCH
 	---help---
 		With this option you can enable ALARM_ARCH features that works on top of
 		the HPET timer instance. This is an alternative method to TSC timer to
@@ -172,7 +176,7 @@ config INTEL64_HPET_MIN_DELAY
 endif # INTEL64_HPET
 
 config INTEL64_ONESHOT
-	bool "Oneshot timer support"
+	bool "Oneshot HPET timer support"
 	select INTEL64_HPET
 	default n
 	---help---

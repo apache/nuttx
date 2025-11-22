@@ -1,8 +1,6 @@
 /****************************************************************************
  * arch/sim/src/sim/sim_oneshot.c
  *
- * SPDX-License-Identifier: Apache-2.0
- *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,8 +32,8 @@
 #include <nuttx/nuttx.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
-#include <nuttx/kmalloc.h>
-#include <nuttx/queue.h>
+#include <nuttx/list.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/timers/arch_alarm.h>
 
@@ -60,121 +58,19 @@ struct sim_oneshot_lowerhalf_s
 
   /* Private lower half data follows */
 
-  sq_entry_t link;
-  struct timespec alarm;
-  int running;
+  struct list_node           node;
+  uint64_t                   expire_time;
 };
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-static void sim_process_tick(sq_entry_t *entry);
-
-static int sim_max_delay(struct oneshot_lowerhalf_s *lower,
-                         struct timespec *ts);
-static int sim_start(struct oneshot_lowerhalf_s *lower,
-                     const struct timespec *ts);
-static int sim_cancel(struct oneshot_lowerhalf_s *lower,
-                      struct timespec *ts);
-static int sim_current(struct oneshot_lowerhalf_s *lower,
-                       struct timespec *ts);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static sq_queue_t g_oneshot_list;
-
-/* Lower half operations */
-
-static const struct oneshot_operations_s g_oneshot_ops =
-{
-  .max_delay = sim_max_delay,
-  .start     = sim_start,
-  .cancel    = sim_cancel,
-  .current   = sim_current,
-};
+static struct list_node g_oneshot_list = LIST_INITIAL_VALUE(g_oneshot_list);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: sim_timer_current
- *
- * Description:
- *   Get current time from host.
- *
- ****************************************************************************/
-
-static inline void sim_timer_current(struct timespec *ts)
-{
-  uint64_t nsec = host_gettime(false);
-
-  ts->tv_sec  = nsec / NSEC_PER_SEC;
-  ts->tv_nsec = nsec % NSEC_PER_SEC;
-}
-
-/****************************************************************************
- * Name: sim_reset_alarm
- *
- * Description:
- *   Reset the alarm to MAX
- *
- ****************************************************************************/
-
-static inline void sim_reset_alarm(struct timespec *alarm)
-{
-  alarm->tv_sec  = UINT_MAX;
-  alarm->tv_nsec = NSEC_PER_SEC - 1;
-}
-
-/****************************************************************************
- * Name: sim_update_hosttimer
- *
- * Description:
- *   This function is called periodically to deliver the tick events to the
- *   NuttX simulation.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SIM_WALLTIME_SIGNAL
-static void sim_update_hosttimer(void)
-{
-  struct timespec *next = NULL;
-  struct timespec current;
-  sq_entry_t *entry;
-  uint64_t nsec;
-
-  for (entry = sq_peek(&g_oneshot_list); entry; entry = sq_next(entry))
-    {
-      struct sim_oneshot_lowerhalf_s *priv =
-        container_of(entry, struct sim_oneshot_lowerhalf_s, link);
-
-      if (next == NULL)
-        {
-          next = &priv->alarm;
-          continue;
-        }
-
-      if (clock_timespec_compare(next, &priv->alarm) > 0)
-        {
-          next = &priv->alarm;
-        }
-    }
-
-  sim_timer_current(&current);
-  clock_timespec_subtract(next, &current, &current);
-
-  nsec  = current.tv_sec * NSEC_PER_SEC;
-  nsec += current.tv_nsec;
-
-  host_settimer(nsec);
-}
-#else
-#  define sim_update_hosttimer()
-#endif
 
 /****************************************************************************
  * Name: sim_timer_update_internal
@@ -185,213 +81,41 @@ static void sim_update_hosttimer(void)
  *
  ****************************************************************************/
 
-static void sim_timer_update_internal(void)
+static void
+sim_timer_update_internal(struct sim_oneshot_lowerhalf_s *priv)
 {
-  sq_entry_t *entry;
-  irqstate_t flags;
+  struct sim_oneshot_lowerhalf_s *node;
+  bool       is_head;
+  irqstate_t flags = enter_critical_section();
 
-  flags = enter_critical_section();
+  /* Insert the new oneshot timer to the list. */
 
-  for (entry = sq_peek(&g_oneshot_list); entry; entry = sq_next(entry))
+  list_for_every_entry(&g_oneshot_list, node,
+                       struct sim_oneshot_lowerhalf_s, node)
     {
-      sim_process_tick(entry);
+      if ((int64_t)(priv->expire_time - node->expire_time) < 0)
+        {
+          break;
+        }
     }
 
-  sim_update_hosttimer();
+  is_head = list_is_head(&g_oneshot_list, &node->node);
+  list_add_before(&node->node, &priv->node);
 
-  leave_critical_section(flags);
-}
-
-/****************************************************************************
- * Name: sim_process_tick
- *
- * Description:
- *   Timer expiration handler
- *
- * Input Parameters:
- *   entry - Point to the link field of sim_oneshot_lowerhalf_s.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void sim_process_tick(sq_entry_t *entry)
-{
-  struct sim_oneshot_lowerhalf_s *priv =
-    container_of(entry, struct sim_oneshot_lowerhalf_s, link);
-
-  DEBUGASSERT(priv != NULL);
-
-  struct timespec current;
-
-  sim_timer_current(&current);
-  if (clock_timespec_compare(&priv->alarm, &current) > 0)
-    {
-      return; /* Alarm doesn't expire yet */
-    }
-
-  sim_reset_alarm(&priv->alarm);
-
-  if (priv->running == 1)
-    {
-      priv->running = 0;
-      oneshot_process_callback(&priv->lh);
-    }
-}
-
-/****************************************************************************
- * Name: sim_max_delay
- *
- * Description:
- *   Determine the maximum delay of the one-shot timer
- *
- * Input Parameters:
- *   lower   An instance of the lower-half oneshot state structure.  This
- *           structure must have been previously initialized via a call to
- *           oneshot_initialize();
- *   ts      The location in which to return the maximum delay.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned
- *   on failure.
- *
- ****************************************************************************/
-
-static int sim_max_delay(struct oneshot_lowerhalf_s *lower,
-                         struct timespec *ts)
-{
-  DEBUGASSERT(ts != NULL);
-
-  ts->tv_sec  = UINT_MAX;
-  ts->tv_nsec = NSEC_PER_SEC - 1;
-  return OK;
-}
-
-/****************************************************************************
- * Name: sim_start
- *
- * Description:
- *   Start the oneshot timer
- *
- * Input Parameters:
- *   lower   An instance of the lower-half oneshot state structure.  This
- *           structure must have been previously initialized via a call to
- *           oneshot_initialize();
- *   handler The function to call when when the oneshot timer expires.
- *   arg     An opaque argument that will accompany the callback.
- *   ts      Provides the duration of the one shot timer.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned
- *   on failure.
- *
- ****************************************************************************/
-
-static int sim_start(struct oneshot_lowerhalf_s *lower,
-                     const struct timespec *ts)
-{
-  struct sim_oneshot_lowerhalf_s *priv =
-    (struct sim_oneshot_lowerhalf_s *)lower;
-  struct timespec current;
-  irqstate_t flags;
-
-  DEBUGASSERT(priv != NULL && ts != NULL);
-
-  flags = enter_critical_section();
-
-  priv->running = 1;
-
-  sim_timer_current(&current);
-  clock_timespec_add(&current, ts, &priv->alarm);
-
-  sim_update_hosttimer();
-
-  leave_critical_section(flags);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: sim_cancel
- *
- * Description:
- *   Cancel the oneshot timer and return the time remaining on the timer.
- *
- *   NOTE: This function may execute at a high rate with no timer running (as
- *   when pre-emption is enabled and disabled).
- *
- * Input Parameters:
- *   lower   Caller allocated instance of the oneshot state structure.  This
- *           structure must have been previously initialized via a call to
- *           oneshot_initialize();
- *   ts      The location in which to return the time remaining on the
- *           oneshot timer.  A time of zero is returned if the timer is
- *           not running.
- *
- * Returned Value:
- *   Zero (OK) is returned on success.  A call to up_timer_cancel() when
- *   the timer is not active should also return success; a negated errno
- *   value is returned on any failure.
- *
- ****************************************************************************/
-
-static int sim_cancel(struct oneshot_lowerhalf_s *lower,
-                      struct timespec *ts)
-{
-  struct sim_oneshot_lowerhalf_s *priv =
-    (struct sim_oneshot_lowerhalf_s *)lower;
-  struct timespec current;
-  irqstate_t flags;
-
-  DEBUGASSERT(priv != NULL);
-
-  flags = enter_critical_section();
-
-  if (ts != NULL)
-    {
-      sim_timer_current(&current);
-      clock_timespec_subtract(&priv->alarm, &current, ts);
-    }
-
-  sim_reset_alarm(&priv->alarm);
-  sim_update_hosttimer();
-
-  leave_critical_section(flags);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: sim_current
- *
- * Description:
- *  Get the current time.
- *
- * Input Parameters:
- *   lower   Caller allocated instance of the oneshot state structure.  This
- *           structure must have been previously initialized via a call to
- *           oneshot_initialize();
- *   ts      The location in which to return the current time. A time of zero
- *           is returned for the initialization moment.
- *
- * Returned Value:
- *   Zero (OK) is returned on success, a negated errno value is returned on
- *   any failure.
- *
- ****************************************************************************/
-
-static int sim_current(struct oneshot_lowerhalf_s *lower,
-                       struct timespec *ts)
-{
-  DEBUGASSERT(ts != NULL);
-
-  sim_timer_current(ts);
-
-  return OK;
-}
+  /* Set the earliest expired timer */
 
 #ifdef CONFIG_SIM_WALLTIME_SIGNAL
+  if (is_head)
+    {
+      host_settimer(priv->expire_time);
+    }
+#else
+  UNUSED(is_head);
+#endif /* CONFIG_SIM_WALLTIME_SIGNAL */
+
+  leave_critical_section(flags);
+}
+
 /****************************************************************************
  * Name: sim_timer_handler
  *
@@ -408,10 +132,98 @@ static int sim_current(struct oneshot_lowerhalf_s *lower,
 
 static int sim_timer_handler(int irq, void *context, void *arg)
 {
-  sim_timer_update_internal();
+  struct sim_oneshot_lowerhalf_s *priv;
+  irqstate_t flags = enter_critical_section();
+  uint64_t   curr  = host_gettime(false);
+
+  /* Perform the callback if the timer is expired */
+
+  while (!list_is_empty(&g_oneshot_list))
+    {
+      priv = list_first_entry(&g_oneshot_list,
+                              struct sim_oneshot_lowerhalf_s, node);
+      if ((int64_t)(curr - priv->expire_time) < 0)
+        {
+          break;
+        }
+
+      list_delete_init(&priv->node);
+      oneshot_process_callback(&priv->lh);
+    }
+
+  leave_critical_section(flags);
+
   return OK;
 }
-#endif /* CONFIG_SIM_WALLTIME_SIGNAL */
+
+static inline_function
+void sim_oneshot_set_timer(struct sim_oneshot_lowerhalf_s *priv,
+                           uint64_t expected_ns)
+{
+  irqstate_t flags = enter_critical_section();
+
+  list_delete(&priv->node);
+  priv->expire_time = expected_ns;
+
+  sim_timer_update_internal(priv);
+  leave_critical_section(flags);
+}
+
+static clkcnt_t sim_oneshot_max_delay(struct oneshot_lowerhalf_s *lower)
+{
+  return UINT64_MAX;
+}
+
+static clkcnt_t sim_oneshot_current(struct oneshot_lowerhalf_s *lower)
+{
+  return host_gettime(false);
+}
+
+static void sim_oneshot_start_absolute(struct oneshot_lowerhalf_s *lower,
+                                       clkcnt_t expected)
+{
+  sim_oneshot_set_timer((struct sim_oneshot_lowerhalf_s *)lower, expected);
+}
+
+static void sim_oneshot_start(struct oneshot_lowerhalf_s *lower,
+                              clkcnt_t delta)
+{
+  sim_oneshot_set_timer((struct sim_oneshot_lowerhalf_s *)lower,
+                        host_gettime(false) + delta);
+}
+
+static void sim_oneshot_cancel(struct oneshot_lowerhalf_s *lower)
+{
+  sim_oneshot_set_timer((struct sim_oneshot_lowerhalf_s *)lower, UINT64_MAX);
+}
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static const struct oneshot_operations_s g_sim_oneshot_ops =
+{
+  .current        = sim_oneshot_current,
+  .start          = sim_oneshot_start,
+  .start_absolute = sim_oneshot_start_absolute,
+  .cancel         = sim_oneshot_cancel,
+  .max_delay      = sim_oneshot_max_delay
+};
+
+static struct sim_oneshot_lowerhalf_s g_sim_oneshot_lowerhalf[2] =
+{
+    {
+      .lh.ops = &g_sim_oneshot_ops,
+      .node = LIST_INITIAL_VALUE(g_sim_oneshot_lowerhalf[0].node),
+      .expire_time = 0,
+    },
+
+    {
+      .lh.ops = &g_sim_oneshot_ops,
+      .node = LIST_INITIAL_VALUE(g_sim_oneshot_lowerhalf[1].node),
+      .expire_time = 0,
+    }
+};
 
 /****************************************************************************
  * Public Functions
@@ -439,27 +251,13 @@ static int sim_timer_handler(int irq, void *context, void *arg)
 struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
                                                uint16_t resolution)
 {
-  struct sim_oneshot_lowerhalf_s *priv;
-
-  /* Allocate an instance of the lower half driver */
-
-  priv = (struct sim_oneshot_lowerhalf_s *)
-    kmm_zalloc(sizeof(struct sim_oneshot_lowerhalf_s));
-
-  if (priv == NULL)
-    {
-      tmrerr("ERROR: Failed to initialized state structure\n");
-      return NULL;
-    }
+  struct oneshot_lowerhalf_s *priv = &g_sim_oneshot_lowerhalf[chan].lh;
 
   /* Initialize the lower-half driver structure */
 
-  priv->running = 0;
+  oneshot_count_init(priv, NSEC_PER_SEC);
 
-  sq_addlast(&priv->link, &g_oneshot_list);
-  priv->lh.ops = &g_oneshot_ops;
-
-  return &priv->lh;
+  return priv;
 }
 
 /****************************************************************************
@@ -473,16 +271,23 @@ struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
 
 void up_timer_initialize(void)
 {
+  /* Since the "/dev/oneshot" has already used channel 0, we
+   * use channel 1 here.
+   */
+
+  struct oneshot_lowerhalf_s *priv = oneshot_initialize(1, 0);
+
+  VERIFY(host_inittimer());
+  up_alarm_set_lowerhalf(priv);
+
 #ifdef CONFIG_SIM_WALLTIME_SIGNAL
   int timer_irq = host_timerirq();
 
-  /* Enable the alarm handler and attach the interrupt to the NuttX logic */
+  /* Attach the interrupt to the NuttX logic and enable the alarm handler. */
 
-  up_enable_irq(timer_irq);
   irq_attach(timer_irq, sim_timer_handler, NULL);
+  up_enable_irq(timer_irq);
 #endif
-
-  up_alarm_set_lowerhalf(oneshot_initialize(0, 0));
 }
 
 /****************************************************************************
@@ -509,6 +314,6 @@ void sim_timer_update(void)
   host_sleepuntil(until);
 
 #ifdef CONFIG_SIM_WALLTIME_SLEEP
-  sim_timer_update_internal();
+  sim_timer_handler(0, NULL, NULL);
 #endif
 }

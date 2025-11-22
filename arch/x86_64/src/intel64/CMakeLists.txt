@@ -83,11 +83,11 @@ endif()
 
 if(CONFIG_ARCH_INTEL64_HAVE_TSC)
   if(CONFIG_SCHED_TICKLESS)
-    list(APPEND SRCS intel64_tsc_tickless.c)
+    list(APPEND SRCS intel64_tsc_oneshot.c)
   else()
     list(APPEND SRCS intel64_tsc_timerisr.c)
+    list(APPEND SRCS intel64_tsc_ndelay.c)
   endif()
-  list(APPEND SRCS intel64_tsc_ndelay.c)
 endif()
 
 if(CONFIG_INTEL64_HPET)

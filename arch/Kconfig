@@ -40,6 +40,7 @@ config ARCH_ARM64
 	select ARCH_HAVE_PERF_EVENTS
 	select ONESHOT
 	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
+	select ONESHOT_COUNT
 	---help---
 		The ARM64 architectures
 
@@ -118,6 +119,7 @@ config ARCH_SIM
 	select ARCH_SETJMP_H
 	select ALARM_ARCH
 	select ONESHOT
+	select ONESHOT_COUNT
 	select SERIAL_CONSOLE
 	select SERIAL_IFLOWCONTROL
 	select SCHED_HPWORK
