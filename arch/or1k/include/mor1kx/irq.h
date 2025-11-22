@@ -171,6 +171,7 @@ struct xcptcontext
 
   uint32_t regs[XCPTCONTEXT_REGS];
 
+#ifndef CONFIG_DISABLE_SIGNALS
   /* These are saved copies of LR and CPSR used during
    * signal processing.
    *
@@ -182,6 +183,7 @@ struct xcptcontext
 
   uint32_t saved_pc;
   uint32_t saved_flags;
+#endif
 };
 #endif
 
