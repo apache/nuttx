@@ -31,11 +31,45 @@ Files supporting CAN can be found in the following locations:
 ``can_hdr_s`` structure depends on ``CONFIG_CAN_TIMESTAMP`` and
 is used to store the timestamp of the CAN message.
 
-**Usage Note**: When reading from the CAN driver multiple messages
-may be returned, depending on (1) the size the returned can
-messages, and (2) the size of the buffer provided to receive CAN
-messages. *Never assume that a single message will be returned*...
-if you do this, *you will lose CAN data* under conditions where
-your read buffer can hold more than one small message. Below is an
-example about how you should think of the CAN read operation:
+The upper half driver supports the following ``ioctl`` commands:
+
+- **CANIOC_RTR**: Send the given message (passed as ``ioctl`` argument) as a
+  remote request. On successful return, the passed message structure is updated
+  with the contents of the received message; i.e. the message ID and the
+  standard/extended ID indication bit stay the same, but the DLC and data bits
+  are updated with the contents of the received message.  If no response is
+  received after the specified timeout, ioctl will return.
+- **CANIOC_GET_BITTIMING**: Return the current bit timing settings.
+- **CANIOC_SET_BITTIMING**: Set new current bit timing values.
+- **CANIOC_ADD_STDFILTER**: Add an address filter for a standard 11 bit address.
+- **CANIOC_ADD_EXTFILTER**: Add an address filter for a extended 29 bit address.
+- **CANIOC_DEL_STDFILTER**: Remove an address filter for a standard 11 bit
+  address.
+- **CANIOC_DEL_EXTFILTER**: Remove an address filter for a standard 29 bit
+  address.
+- **CANIOC_GET_CONNMODES**: Get the current bus connection modes.
+- **CANIOC_SET_CONNMODES**: Set new bus connection modes values.
+- **CANIOC_BUSOFF_RECOVERY**: Initiates the BUS-OFF recovery sequence.
+- **CANIOC_SET_NART**: Enable/Disable NART (No Automatic Retry).
+- **CANIOC_SET_ABOM**: Enable/Disable ABOM (Automatic Bus-off Management).
+- **CANIOC_IFLUSH**: Flush data received but not read.
+- **CANIOC_OFLUSH**: Flush data written but not transmitted.
+- **CANIOC_IOFLUSH**: Flush data received but not read and data written but not
+  transmitted.
+- **CANIOC_SET_STATE**: Set specific can controller state.
+- **CANIOC_GET_STATE**: Get specific can controller state.
+- **CANIOC_SET_TRANSVSTATE**: Set specific can transceiver state.
+- **CANIOC_GET_TRANSVSTATE**: Get specific can transceiver state.
+- **CANIOC_SET_MSGALIGN**: Set messages alignment. Read and written messages can
+  be configured to be aligned to multiple of given bytes by this. The default
+  value is 1. The alignment affects both read and write operation. The value 0
+  has a special meaning where write behaves the same way as with 1, but read
+  will always provide only a single message.
+- **CANIOC_GET_MSGALIGN**: Get messages alignment. See CANIOC_SET_MSGALIGN for
+  explanation.
+
+**Usage Note**: The default behavior of the upper half driver is to return
+multiple messages on ``read``. See the `guide on this subject
+</guides/reading_can_msgs.html>`_.
+
 **Examples**: ``drivers/can/mcp2515.c``.

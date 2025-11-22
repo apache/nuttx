@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/param.h>
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -193,6 +194,7 @@ static FAR struct can_reader_s *init_can_reader(FAR struct file *filep)
   DEBUGASSERT(reader != NULL);
 
   nxsem_init(&reader->fifo.rx_sem, 0, 0);
+  reader->msgalign = 1;
   filep->f_priv = reader;
 
   return reader;
@@ -380,6 +382,7 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct can_reader_s *reader;
   FAR struct can_rxfifo_s *fifo;
+  unsigned int             msgalign;
   irqstate_t               flags;
   int                      ret = 0;
 
@@ -395,6 +398,7 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
       DEBUGASSERT(filep->f_priv != NULL);
       reader = (FAR struct can_reader_s *)filep->f_priv;
       fifo = &reader->fifo;
+      msgalign = reader->msgalign;
 
       /* Interrupts must be disabled while accessing the cd_recv FIFO */
 
@@ -482,6 +486,13 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
           memcpy(&buffer[ret], msg, msglen);
           ret += msglen;
 
+          if (msgalign > 1)
+            {
+              ret = powerof2(msgalign)
+                ? roundup2(ret, msgalign)
+                : roundup(ret, msgalign);
+            }
+
           /* Increment the head of the circular message buffer */
 
           if (++fifo->rx_head >= CONFIG_CAN_RXFIFOSIZE)
@@ -489,7 +500,7 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
               fifo->rx_head = 0;
             }
         }
-      while (fifo->rx_head != fifo->rx_tail);
+      while (fifo->rx_head != fifo->rx_tail && msgalign != 0);
 
       if (fifo->rx_head != fifo->rx_tail)
         {
@@ -505,7 +516,9 @@ return_with_irqdisabled:
       leave_critical_section(flags);
     }
 
-  return ret;
+  /* ret can be more than buflen due to roundup, so return at most buflen */
+
+  return ret ? MIN(ret, buflen) : -EMSGSIZE;
 }
 
 /****************************************************************************
@@ -595,9 +608,11 @@ static int can_xmit(FAR struct can_dev_s *dev)
 static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
                          size_t buflen)
 {
-  FAR struct inode         *inode   = filep->f_inode;
-  FAR struct can_dev_s     *dev     = inode->i_private;
-  FAR struct can_txcache_s *sender  = &dev->cd_sender;
+  FAR struct inode         *inode    = filep->f_inode;
+  FAR struct can_dev_s     *dev      = inode->i_private;
+  FAR struct can_txcache_s *sender   = &dev->cd_sender;
+  FAR struct can_reader_s  *reader   = filep->f_priv;
+  unsigned int              msgalign = reader->msgalign;
   FAR struct can_msg_s     *msg;
   bool                      inactive;
   ssize_t                   nsent   = 0;
@@ -702,6 +717,18 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
       /* Increment the number of bytes that were sent */
 
       nsent += msglen;
+
+      if (msgalign > 1)
+        {
+          nsent = powerof2(msgalign)
+            ? roundup2(nsent, msgalign)
+            : roundup(nsent, msgalign);
+        }
+
+      if (msgalign == 0)
+        {
+          break;
+        }
     }
 
   /* We get here after all messages have been added to the sender.  Check if
@@ -713,9 +740,11 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
       can_xmit(dev);
     }
 
-  /* Return the number of bytes that were sent */
+  /* Return the number of bytes that were sent, but at most buflen as nsent
+   * can be more due to roundup.
+   */
 
-  ret = nsent;
+  ret = MIN(nsent, buflen);
 
 return_with_irqdisabled:
   leave_critical_section(flags);
@@ -961,6 +990,22 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               canerr("dev->cd_transv->cts_ops is NULL!");
               ret = -ENOTTY;
             }
+        }
+        break;
+
+      /* Set message alignment for read and write operations */
+
+      case CANIOC_SET_MSGALIGN:
+        {
+          reader->msgalign = *(FAR unsigned int *)arg;
+        }
+        break;
+
+      /* Get message alignment for read and write operations */
+
+      case CANIOC_GET_MSGALIGN:
+        {
+          *(FAR unsigned int *)arg = reader->msgalign;
         }
         break;
 
