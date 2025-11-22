@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <nuttx/board.h>
 #include <nuttx/arch.h>
+#include <sys/mount.h>
 
 #ifdef CONFIG_BOARDCTL_RESET
 
@@ -62,6 +63,13 @@
 
 int board_reset(int status)
 {
+#if defined(CONFIG_LITEX_SDIO_USE_CACHE)
+
+  /* Unmounting the filesystem forces flushing of any cached blocks */
+
+  nx_umount2(CONFIG_LITEX_SDIO_MOUNT_MOUNTPOINT, MNT_FORCE);
+#endif
+
   switch (status)
     {
       case CONFIG_BOARD_ASSERT_RESET_VALUE:
