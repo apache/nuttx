@@ -127,7 +127,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
 
   /* Is this signal unblocked on this thread? */
 
-  if (!nxsig_ismember(&tcb->sigprocmask, info->siginfo->si_signo) &&
+  if ((nxsig_ismember(&tcb->sigprocmask, info->siginfo->si_signo) != 1) &&
       !info->ptcb && tcb != info->atcb)
     {
       /* Yes.. remember this TCB if we have not encountered any
