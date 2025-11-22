@@ -67,6 +67,7 @@ Drivers that are available also with the new sensor framework are marked with ``
 - ms58xx
 - msa301
 - qencoder
+- :doc:`qmi8658`
 - scd30
 - scd41
 - sgp30
