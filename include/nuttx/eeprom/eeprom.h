@@ -47,13 +47,20 @@
 /* EEPROM IOCTL Commands ************************************************************/
 
 #define EEPIOC_GEOMETRY     _EEPIOC(0x000)  /* Similar to BIOC_GEOMETRY:
-                                             * Return the geometry of the EEPROM
-                                             * device.
-                                             * IN:  Pointer to writable instance  of
-                                             *      struct eeprom_geometry_s in which
-                                             *      to return the geometry.
-                                             * OUT: Data return in user-provided
-                                             *      buffer. */
+                                             * Return the geometry of the
+                                             * EEPROM device.
+                                             * IN:  Pointer to writable
+                                             *      instance  of struct
+                                             *      eeprom_geometry_s to be
+                                             *      populated
+                                             * OUT: Data return in user-
+                                             *      provided buffer.        */
+
+#define EEPIOC_SETSPEED     _EEPIOC(0x001)  /* Overwrite the SPI/I2C bus speed
+                                             * IN:  Bus speed in Hz
+                                             * OUT: None (ioctl return value
+                                             *      provides success/failure
+                                             *      indication).            */
 
 /************************************************************************************
  * Type Definitions

@@ -24,12 +24,45 @@ if SPI_EE_25XX
 config EE25XX_SPIMODE
 	int "SPI mode (0-3)"
 	default 0
-	depends on SPI_EE_25XX
 
 config EE25XX_FREQUENCY
 	int "SPI EEPROM SCK frequency"
 	default 10000000
-	depends on SPI_EE_25XX
+	---help---
+		Default SPI bus frequency, it can be overwritten at runtime using the
+		EEPIOC_SETSPEED ioctl. See eeprom/eeprom.h.
+
+config EE25XX_START_DELAY
+	int "SPI start delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 5000
+	---help---
+		The delay between CS active and first CLK. In ns.
+
+config EE25XX_STOP_DELAY
+	int "SPI stop delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 5000
+	---help---
+		The delay between last CLK and CS inactive. In ns.
+
+config EE25XX_CS_DELAY
+	int "SPI CS delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 5000
+	---help---
+		The delay between CS inactive and CS active again. In ns.
+
+config EE25XX_IFDELAY
+	int "SPI interface delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 5000
+	---help---
+		The delay between frames. In ns.
 
 endif # SPI_EE_25XX
 
@@ -46,12 +79,13 @@ if I2C_EE_24XX
 config EE24XX_FREQUENCY
 	int "I2C EEPROM frequency (100000 or 400000)"
 	default 100000
-	depends on I2C_EE_24XX
+	---help---
+		Default I2C bus frequency, it can be overwritten at runtime using the
+		EEPIOC_SETSPEED ioctl. See eeprom/eeprom.h.
 
 config AT24CS_UUID
 	bool "Device driver support for Atmel AT24CSxx UUID"
 	default n
-	depends on I2C_EE_24XX
 	---help---
 		The Atmel AT24CSxx family have a 128-bit UUID which appears as
 		another I2C slave whose address is offset from the EEPROM by +8.
