@@ -43,6 +43,7 @@
 #include "sched/sched.h"
 #include "group/group.h"
 #include "semaphore/semaphore.h"
+#include "event/event.h"
 #include "signal/signal.h"
 #include "mqueue/mqueue.h"
 
@@ -654,6 +655,17 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info,
         {
           nxsem_wait_irq(stcb, EINTR);
         }
+
+#ifdef CONFIG_SCHED_EVENTS
+      /* If the task is blocked waiting for a event, then that task must
+       * be unblocked when a signal is received.
+       */
+
+      else if (stcb->task_state == TSTATE_WAIT_EVENT)
+        {
+          nxevent_wait_irq(stcb, EINTR);
+        }
+#endif
 
 #if !defined(CONFIG_DISABLE_MQUEUE) || !defined(CONFIG_DISABLE_MQUEUE_SYSV)
       /* If the task is blocked waiting on a message queue, then that task
