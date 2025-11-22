@@ -285,8 +285,11 @@ We avoid breaking changes unless absolutely necessary and unavoidable
  8. Change must be well documented (build / runtime test logs, pr, git
     commit, documentation, release notes, etc) with clear notes on how to
     fix the introduced problems.
- 9. Breaking Change must be clearly marked with a `[BREAKING]` tag in the
-    git commit topic and PR title that will propagate to Release Notes.
+ 9. Breaking change must be clearly identified with inclusion of an
+    exclamation mark `!` as the first character of the commit title and a
+    `BREAKING CHANGE:` in the git commit log message, followed by a short
+    comment about how the user should adapt their code. This change
+    description will be used to create the Release Notes.
 
 See: https://github.com/apache/nuttx/blob/master/INVIOLABLES.md
 
