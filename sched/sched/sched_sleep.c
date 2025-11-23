@@ -221,3 +221,76 @@ void nxsched_sleep(unsigned int sec)
 {
   nxsched_ticksleep(SEC2TICK(sec));
 }
+
+/****************************************************************************
+ * Name: nxsched_nanosleep
+ *
+ * Description:
+ *   Internal nanosleep implementation used by the scheduler.  This function
+ *   converts the requested sleep interval into system ticks, performs a
+ *   tick-based blocking sleep, and optionally returns the remaining time if
+ *   the sleep is interrupted by a signal.
+ *
+ * Input Parameters:
+ *   rqtp - Requested sleep interval (may be NULL)
+ *   rmtp - Remaining time returned when interrupted (optional, may be NULL)
+ *
+ * Returned Value:
+ *   Returns OK (0) on success.  Returns -EINVAL for an invalid timespec
+ *   argument and -EAGAIN for a zero-length timeout, as required by POSIX.
+ *
+ ****************************************************************************/
+
+int nxsched_nanosleep(FAR const struct timespec *rqtp,
+                      FAR struct timespec *rmtp)
+{
+  clock_t ticks;
+  clock_t expect = 0;
+  clock_t stop;
+
+  /* Validate the input timespec */
+
+  if (rqtp && (rqtp->tv_nsec < 0 || rqtp->tv_nsec >= 1000000000))
+    {
+      return -EINVAL;
+    }
+
+  /* Zero-length sleep: Yield the processor and return -EAGAIN */
+
+  if (rqtp && rqtp->tv_sec == 0 && rqtp->tv_nsec == 0)
+    {
+      sched_yield();
+      return -EAGAIN;
+    }
+
+  /* Convert the requested interval to system ticks */
+
+  ticks = clock_time2ticks(rqtp);
+
+  /* Compute the absolute tick value when the sleep should expire.
+   * This is used later to determine the remaining time after interruption.
+   */
+
+  expect = clock_delay2abstick(ticks);
+
+  /* Perform the blocking tick-based sleep */
+
+  nxsched_ticksleep(ticks);
+
+  /* Capture the current tick count after waking up */
+
+  stop = clock_systime_ticks();
+
+  /* If the caller provided a buffer for the remaining time, compute how much
+   * of the original interval is left.  If the sleep expired normally,
+   * expect <= stop and the remaining time becomes zero.
+   */
+
+  if (rmtp)
+    {
+      clock_ticks2time(rmtp,
+                       clock_compare(stop, expect) ? expect - stop : 0);
+    }
+
+  return OK;
+}
