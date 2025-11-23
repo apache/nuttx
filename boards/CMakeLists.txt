@@ -41,7 +41,8 @@ if(CONFIG_BOARDCTL)
   target_sources(board PRIVATE boardctl.c)
 endif()
 
-# obtain include directories exported by libarch
+# Obtain the chip, architecture family, and common family include directories
+# exported by libarch.
 target_include_directories(board
                            PRIVATE $<TARGET_PROPERTY:arch,INCLUDE_DIRECTORIES>)
 
