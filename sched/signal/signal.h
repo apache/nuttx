@@ -116,6 +116,12 @@ typedef struct sigq_s sigq_t;
  * Public Data
  ****************************************************************************/
 
+/* The g_sigactions data structure a pool of pre-allocated signal action
+ * structures buffers structures.
+ */
+
+extern  sigactq_t  g_sigactions[CONFIG_SIG_PREALLOC_ACTIONS];
+
 /* The g_sigfreeaction data structure is a list of available signal action
  * structures.
  */
