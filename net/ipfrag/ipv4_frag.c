@@ -350,7 +350,7 @@ int32_t ipv4_fragin(FAR struct net_driver_s *dev)
  *   0 if success or a negative value if fail.
  *
  * Assumptions:
- *   Data length(dev->d_iob->io_pktlen) is grater than the MTU of
+ *   Data length(dev->d_iob->io_pktlen) is greater than the MTU of
  *   current NIC
  *
  ****************************************************************************/

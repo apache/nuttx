@@ -286,7 +286,7 @@ static netpkt_t *openeth_receive(struct netdev_lowerhalf_s *dev)
           goto err;
         }
 
-      netpkt_copyin(dev, pkt, desc_val.rxpnt, desc_val.len, 0);
+      netpkt_copyin(dev, pkt, desc_val.rxpnt, desc_val.len, 0, NETPKT_RX);
 
       /* Free up the descriptor */
 
