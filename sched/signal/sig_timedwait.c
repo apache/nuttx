@@ -238,19 +238,25 @@ int nxsig_clockwait(int clockid, int flags,
       if ((flags & TIMER_ABSTIME) == 0)
         {
           expect = clock_delay2abstick(clock_time2ticks(rqtp));
-          wd_start_abstick(&rtcb->waitdog, expect,
-                           nxsig_timeout, (uintptr_t)rtcb);
         }
       else if (clockid == CLOCK_REALTIME)
         {
-          wd_start_realtime(&rtcb->waitdog, rqtp,
-                            nxsig_timeout, (uintptr_t)rtcb);
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+          clock_t delay;
+
+          clock_abstime2ticks(CLOCK_REALTIME, rqtp, &delay);
+          expect = clock_delay2abstick(delay);
+#else
+          clock_realtime2absticks(rqtp, &expect);
+#endif
         }
       else
         {
-          wd_start_abstime(&rtcb->waitdog, rqtp,
-                           nxsig_timeout, (uintptr_t)rtcb);
+          expect = clock_time2ticks(rqtp);
         }
+
+        wd_start_abstick(&rtcb->waitdog, expect,
+                          nxsig_timeout, (uintptr_t)rtcb);
     }
 
   /* Remove the tcb task from the ready-to-run list. */
