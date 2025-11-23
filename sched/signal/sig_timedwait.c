@@ -276,7 +276,6 @@ int nxsig_clockwait(int clockid, int flags,
 
   if (rqtp)
     {
-      wd_cancel(&rtcb->waitdog);
       stop = clock_systime_ticks();
     }
 
