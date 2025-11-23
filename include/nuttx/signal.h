@@ -133,6 +133,8 @@ extern "C"
 
 struct timespec;  /* Forward reference */
 
+#ifndef CONFIG_DISABLE_SIGNALS
+
 /****************************************************************************
  * Name: nxsig_ismember
  *
@@ -694,6 +696,28 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
 void nxsig_cancel_notification(FAR struct sigwork_s *work);
 #else
 #  define nxsig_cancel_notification(work)
+#endif
+
+#else
+
+#  define nxsig_ismember(set,sig)          -EINVAL
+#  define nxsig_addset(set,sig)            -EINVAL
+#  define nxsig_delset(set,sig)            -EINVAL
+#  define nxsig_nandset(s,l,r)             -EINVAL
+#  define nxsig_xorset(s,l,r)              -EINVAL
+#  define nxsig_pendingset(t)              0
+#  define nxsig_procmask(h,n,o)            -EINVAL
+#  define nxsig_action(s,n,o,f)            -EINVAL
+#  define nxsig_queue(p,s,v)               -EINVAL
+#  define nxsig_kill(p,s)                  -EINVAL
+#  define nxsig_tgkill(p,t,s)              -EINVAL
+#  define nxsig_clockwait(c,f,rqtp,rmtp)   -EAGAIN
+#  define nxsig_timedwait(s,i,t)           -EAGAIN
+#  define nxsig_nanosleep(rqtp,rmtp)       -EAGAIN
+#  define nxsig_sleep(s)                   up_mdelay((s) * MSEC_PER_SEC)
+#  define nxsig_usleep(us)                 up_udelay(us)
+#  define nxsig_notification(p,e,c,w)      OK
+#  define nxsig_cancel_notification(w)
 #endif
 
 #ifdef __cplusplus
