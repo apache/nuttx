@@ -38,7 +38,7 @@
 #  include <stdint.h>
 #endif
 
-#include <arch/arm_a_r/cp15.h>
+#include <arch/arch.h>
 
 /****************************************************************************
  * Pre-processor Prototypes
@@ -205,20 +205,6 @@
  */
 
 #define REG_PIC             REG_R9
-
-/* Multiprocessor Affinity Register (MPIDR): CRn=c0, opc1=0, CRm=c0, opc2=5 */
-
-#define MPIDR_CPUID_SHIFT   (0)       /* Bits 0-1: CPU ID */
-#define MPIDR_CPUID_MASK    (3 << MPIDR_CPUID_SHIFT)
-#  define MPIDR_CPUID_CPU0  (0 << MPIDR_CPUID_SHIFT)
-#  define MPIDR_CPUID_CPU1  (1 << MPIDR_CPUID_SHIFT)
-#  define MPIDR_CPUID_CPU2  (2 << MPIDR_CPUID_SHIFT)
-#  define MPIDR_CPUID_CPU3  (3 << MPIDR_CPUID_SHIFT)
-                                      /* Bits 2-7: Reserved */
-#define MPIDR_CLUSTID_SHIFT (8)       /* Bits 8-11: Cluster ID value */
-#define MPIDR_CLUSTID_MASK  (15 << MPIDR_CLUSTID_SHIFT)
-                                      /* Bits 12-29: Reserved */
-#define MPIDR_U             (1 << 30) /* Bit 30: Multiprocessing Extensions. */
 
 /****************************************************************************
  * Public Types
@@ -436,30 +422,6 @@ void up_irq_restore(irqstate_t flags)
       : "memory"
     );
 }
-
-/****************************************************************************
- * Name: up_cpu_index
- *
- * Description:
- *   Return the real core number regardless CONFIG_SMP setting
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_HAVE_MULTICPU
-noinstrument_function
-static inline_function int up_cpu_index(void)
-{
-  uint32_t mpidr;
-
-  /* Read the Multiprocessor Affinity Register (MPIDR) */
-
-  mpidr = CP15_GET(MPIDR);
-
-  /* And return the CPU ID field */
-
-  return (mpidr & MPIDR_CPUID_MASK) >> MPIDR_CPUID_SHIFT;
-}
-#endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
 /* Return program counter */
 

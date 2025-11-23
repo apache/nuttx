@@ -317,6 +317,24 @@
 #define MPIDR_AFF1_SHIFT    (8)
 #define MPIDR_AFF2_SHIFT    (16)
 
+/* Multiprocessor Affinity Register (MPIDR): CRn=c0, opc1=0, CRm=c0, opc2=5 */
+
+#define MPIDR_CPUID_SHIFT   (0)       /* Bits 0-2: CPU ID */
+#define MPIDR_CPUID_MASK    (7 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU0  (0 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU1  (1 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU2  (2 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU3  (3 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU4  (4 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU5  (5 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU6  (6 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU7  (7 << MPIDR_CPUID_SHIFT)
+                                      /* Bits 3-7: Reserved */
+#define MPIDR_CLUSTID_SHIFT (8)       /* Bits 8-11: Cluster ID value */
+#define MPIDR_CLUSTID_MASK  (15 << MPIDR_CLUSTID_SHIFT)
+                                      /* Bits 12-29: Reserved */
+#define MPIDR_U             (1 << 30) /* Bit 30: Multiprocessing Extensions. */
+
 /* mpidr register, the register is define:
  *   - bit 0~7:   Aff0
  *   - bit 8~15:  Aff1

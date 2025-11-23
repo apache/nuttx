@@ -36,6 +36,7 @@
 #  include <stdbool.h>
 #  include <arch/syscall.h>
 #endif
+#include <arch/arch.h>
 
 /****************************************************************************
  * Public Function Prototypes
