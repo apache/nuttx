@@ -49,6 +49,7 @@ config ARCH_TC1V8
 	select ARCH_HAVE_PERF_EVENTS
 	select ARCH_HAVE_PERF_EVENTS_USER_ACCESS
 	select ARCH_HAVE_POWEROFF
+	select ARCH_HAVE_PPRS
 	select ARCH_HAVE_SETJMP
 	select ARCH_HAVE_RESET
 	select ARCH_SETJMP_H
@@ -125,6 +126,12 @@ config ARCH_MPU_CODE_NREGIONS
 	default 16
 	---help---
 		The code regions count
+
+config ARCH_HAVE_PPRS
+	bool
+	--help--
+		The saving process for MPU PRS differs between TC1V6 and TC1V8.TC1V6
+		saves PRS in the PSW, while TC1V8 saves PRS in the PPRS register.
 
 config HAVE_SECURITY_CORE
 	bool

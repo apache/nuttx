@@ -110,6 +110,7 @@ void tricore_svcall(volatile void *trap)
   if (cmd != SYS_restore_context)
     {
       (*running_task)->xcp.regs = plregs;
+      tricore_store_pprs(*running_task);
     }
   else
     {
@@ -144,6 +145,8 @@ void tricore_svcall(volatile void *trap)
           puregs[REG_D8] = ret;
           rtcb->xcp.nsyscalls = index;
           rtcb->xcp.regs = plregs;
+          tricore_change_pprs(rtcb,
+                              tricore_syscall_load_pprs(rtcb, index));
           tricore_mtcr(TRICORE_CPU_PCXI,
                        tricore_addr2csa(rtcb->xcp.regs));
           UP_ISB();
@@ -192,6 +195,8 @@ void tricore_svcall(volatile void *trap)
           puregs[REG_PSW] =
             (puregs[REG_PSW] & (~PSW_MODE_MASK) & (~PSW_PRS_MASK)) |
             (PSW_IO_USER0 | PSW_PRS_USER);
+
+          tricore_change_pprs(tcb, PSW_PRS_USER_SET);
         }
         break;
 #endif
@@ -235,6 +240,8 @@ void tricore_svcall(volatile void *trap)
           puregs[REG_PSW] =
             (puregs[REG_PSW] & (~PSW_MODE_MASK) & (~PSW_PRS_MASK)) |
             (PSW_IO_USER0 | PSW_PRS_USER);
+
+          tricore_change_pprs(tcb, PSW_PRS_USER_SET);
         }
         break;
 #endif
@@ -283,6 +290,8 @@ void tricore_svcall(volatile void *trap)
           puregs[REG_PSW] =
             (puregs[REG_PSW] & (~PSW_MODE_MASK) & (~PSW_PRS_MASK)) |
             (PSW_IO_USER0 | PSW_PRS_USER);
+
+          tricore_change_pprs(rtcb, PSW_PRS_USER_SET);
         }
         break;
 #endif
@@ -309,6 +318,8 @@ void tricore_svcall(volatile void *trap)
           puregs[REG_PSW] =
             (puregs[REG_PSW] & (~PSW_MODE_MASK) & (~PSW_PRS_MASK)) |
             (PSW_IO_SUPERVISOR);
+
+          tricore_change_pprs(rtcb, PSW_PRS_KERNEL_SET);
         }
         break;
 #endif
@@ -328,6 +339,8 @@ void tricore_svcall(volatile void *trap)
 
           /* Setup to return to dispatch_syscall in privileged mode. */
 
+          tricore_syscall_store_pprs(rtcb, index);
+
           rtcb->xcp.syscall_regs[index] = plregs;
           rtcb->xcp.nsyscalls = index + 1;
 
@@ -340,6 +353,8 @@ void tricore_svcall(volatile void *trap)
             (PSW_IO_SUPERVISOR),
             !(plregs[REG_LPCXI] & PCXI_PIE));
           puregs = tricore_csa2addr(plregs[REG_LPCXI]);
+
+          tricore_change_pprs(rtcb, PSW_PRS_KERNEL_SET);
 
           /* Args passed to dispatch_syscall */
 
@@ -362,6 +377,19 @@ void tricore_svcall(volatile void *trap)
         }
         break;
     }
+
+  /* Updata PPRS register */
+
+  tricore_restore_pprs(tcb);
+  UP_ISB();
+
+  /* (*running_task)->xcp.regs is about to become invalid and
+   * will be marked as NULL to avoid misusage. the same applies
+   * to (*running_task)->xcp.pprs.
+   */
+
+  (*running_task)->xcp.regs = NULL;
+  tricore_change_pprs(*running_task, UINT32_MAX);
 
   /* Return to the caller, tricore_svcall is entered by a jump */
 
