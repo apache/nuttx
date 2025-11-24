@@ -330,7 +330,7 @@ struct rptun_ops_s
   CODE int (*register_callback)(FAR struct rptun_dev_s *dev,
                                 rptun_callback_t callback, FAR void *arg);
 
-  CODE void (*reset)(FAR struct rptun_dev_s *dev, unsigned long value);
+  CODE int (*reset)(FAR struct rptun_dev_s *dev, unsigned long value);
 };
 
 struct rptun_dev_s
