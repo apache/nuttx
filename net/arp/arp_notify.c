@@ -156,7 +156,7 @@ int arp_wait(FAR struct arp_notify_s *notify, unsigned int timeout)
 
   /* And wait for the ARP response (or a timeout). */
 
-  net_sem_timedwait_uninterruptible(&notify->nt_sem, timeout);
+  nxsem_tickwait_uninterruptible(&notify->nt_sem, MSEC2TICK(timeout));
 
   /* Then get the real result of the transfer */
 

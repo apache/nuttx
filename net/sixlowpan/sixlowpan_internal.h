@@ -250,6 +250,7 @@ struct devif_callback_s;    /* Forward reference */
 struct ipv6_hdr_s;          /* Forward reference */
 struct netdev_varaddr_s;    /* Forward reference */
 struct iob_s;               /* Forward reference */
+struct udp_conn_s;          /* Forward reference */
 
 /****************************************************************************
  * Name: sixlowpan_send
@@ -284,12 +285,9 @@ struct iob_s;               /* Forward reference */
  *
  ****************************************************************************/
 
-int sixlowpan_send(FAR struct net_driver_s *dev,
-                   FAR struct devif_callback_s **list,
-                   FAR struct devif_callback_s **list_tail,
+int sixlowpan_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
                    FAR const struct ipv6_hdr_s *ipv6hdr, FAR const void *buf,
-                   size_t len, FAR const struct netdev_varaddr_s *destmac,
-                   unsigned int timeout);
+                   size_t len, FAR const struct netdev_varaddr_s *destmac);
 
 /****************************************************************************
  * Name: sixlowpan_meta_data

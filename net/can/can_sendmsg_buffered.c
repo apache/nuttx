@@ -263,8 +263,9 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
           goto errout_with_lock;
         }
 
-      ret = net_sem_timedwait_uninterruptible(&conn->sndsem,
-        _SO_TIMEOUT(conn->sconn.s_sndtimeo));
+      ret = conn_dev_sem_timedwait(&conn->sndsem, false,
+                                   _SO_TIMEOUT(conn->sconn.s_sndtimeo),
+                                   &conn->sconn, dev);
       if (ret < 0)
         {
           goto errout_with_lock;

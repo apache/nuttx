@@ -383,22 +383,23 @@ int psock_tcp_connect(FAR struct socket *psock,
 
               /* Wait for either the connect to complete or for an
                * error/timeout to occur.
-               * NOTES:  net_sem_wait will also terminate if a
+               * NOTES:  conn_dev_sem_timedwait will also terminate if a
                * signal is received.
                */
 
-              conn_dev_unlock(&conn->sconn, conn->dev);
               tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
-              ret = net_sem_wait(&state.tc_sem);
+              ret = conn_dev_sem_timedwait(&state.tc_sem, true, UINT_MAX,
+                                           &conn->sconn, conn->dev);
 
               tls_cleanup_pop(tls_get_info(), 0);
-              conn_dev_lock(&conn->sconn, conn->dev);
 
               /* Uninitialize the state structure */
 
               nxsem_destroy(&state.tc_sem);
 
-              /* If net_sem_wait failed, negated errno was returned. */
+              /* If conn_dev_sem_timedwait failed, negated errno was
+               * returned.
+               */
 
               if (ret >= 0)
                 {

@@ -258,7 +258,8 @@ int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify)
  *
  ****************************************************************************/
 
-int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify, unsigned int timeout)
+int icmpv6_rwait(FAR struct net_driver_s *dev,
+                 FAR struct icmpv6_rnotify_s *notify, unsigned int timeout)
 {
   int ret;
 
@@ -266,7 +267,7 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify, unsigned int timeout)
 
   /* And wait for the Neighbor Advertisement (or a timeout). */
 
-  ret = net_sem_timedwait(&notify->rn_sem, timeout);
+  ret = conn_dev_sem_timedwait(&notify->rn_sem, true, timeout, NULL, dev);
   if (ret >= 0)
     {
       ret = notify->rn_result;

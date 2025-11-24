@@ -272,12 +272,11 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       conn->accept          = accept_eventhandler;
 
       /* Wait for the send to complete or an error to occur:  NOTES:
-       * net_sem_wait will also terminate if a signal is received.
+       * conn_dev_sem_timedwait will also terminate if a signal is received.
        */
 
-      conn_unlock(&conn->sconn);
-      ret = net_sem_wait(&state.acpt_sem);
-      conn_lock(&conn->sconn);
+      ret = conn_dev_sem_timedwait(&state.acpt_sem, true, UINT_MAX,
+                                   &conn->sconn, NULL);
 
       /* Make sure that no further events are processed */
 
@@ -296,9 +295,9 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
           ret = -state.acpt_result;
         }
 
-      /* If net_sem_wait failed, then we were probably reawakened by a
-       * signal.  In this case, net_sem_wait will have returned negated
-       * errno appropriately.
+      /* If conn_dev_sem_timedwait failed, then we were probably reawakened
+       * by a signal.  In this case, conn_dev_sem_timedwait will have
+       * returned negated errno appropriately.
        */
 
       if (ret < 0)

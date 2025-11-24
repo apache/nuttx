@@ -1475,13 +1475,12 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
           info.tc_conn = conn;
           info.tc_cb   = &conn->sndcb;
           info.tc_sem  = &conn->snd_sem;
-          conn_dev_unlock(&conn->sconn, conn->dev);
           tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
 
-          ret = net_sem_timedwait_uninterruptible(&conn->snd_sem,
-            tcp_send_gettimeout(start, timeout));
+          ret = conn_dev_sem_timedwait(&conn->snd_sem, false,
+                                       tcp_send_gettimeout(start, timeout),
+                                       &conn->sconn, conn->dev);
           tls_cleanup_pop(tls_get_info(), 0);
-          conn_dev_lock(&conn->sconn, conn->dev);
           if (ret < 0)
             {
               if (ret == -ETIMEDOUT)

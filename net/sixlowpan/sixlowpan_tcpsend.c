@@ -597,7 +597,7 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
 
   memset(&sinfo, 0, sizeof(struct sixlowpan_send_s));
 
-  net_lock();
+  conn_dev_lock(&conn->sconn, dev);
   if (len > 0)
     {
       /* Allocate resources to receive a callback.
@@ -643,7 +643,8 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
           netdev_txnotify_dev(dev, TCP_POLL);
 
           /* Wait for the send to complete or an error to occur.
-           * net_sem_timedwait will also terminate if a signal is received.
+           * conn_dev_sem_timedwait will also terminate if a signal is
+           * received.
            */
 
           ninfo("Wait for send complete\n");
@@ -652,7 +653,8 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
             {
               uint32_t acked = sinfo.s_acked;
 
-              ret = net_sem_timedwait(&sinfo.s_waitsem, timeout);
+              ret = conn_dev_sem_timedwait(&sinfo.s_waitsem, true, timeout,
+                                           &conn->sconn, dev);
               if (ret != -ETIMEDOUT || acked == sinfo.s_acked)
                 {
                   if (ret == -ETIMEDOUT)
@@ -676,7 +678,7 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
     }
 
   nxsem_destroy(&sinfo.s_waitsem);
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, dev);
 
   return (sinfo.s_result < 0 ? sinfo.s_result : len);
 }

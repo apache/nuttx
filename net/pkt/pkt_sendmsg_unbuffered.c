@@ -242,12 +242,12 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
           netdev_txnotify_dev(dev, PKT_POLL);
 
           /* Wait for the send to complete or an error to occur.
-           * net_sem_wait will also terminate if a signal is received.
+           * conn_dev_sem_timedwait will also terminate if a signal is
+           * received.
            */
 
-          conn_dev_unlock(&conn->sconn, dev);
-          ret = net_sem_wait(&state.snd_sem);
-          conn_dev_lock(&conn->sconn, dev);
+          ret = conn_dev_sem_timedwait(&state.snd_sem, true, UINT_MAX,
+                                       &conn->sconn, dev);
 
           /* Make sure that no further events are processed */
 
@@ -267,9 +267,9 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       return state.snd_sent;
     }
 
-  /* If net_sem_wait failed, then we were probably reawakened by a signal.
-   * In this case, net_sem_wait will have returned negated errno
-   * appropriately.
+  /* If conn_dev_sem_timedwait failed, then we were probably reawakened by a
+   * signal. In this case, conn_dev_sem_timedwait will have returned negated
+   * errno appropriately.
    */
 
   if (ret < 0)

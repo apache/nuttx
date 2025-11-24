@@ -44,6 +44,7 @@
 #include "inet/inet.h"
 #include "neighbor/neighbor.h"
 #include "route/route.h"
+#include "utils/utils.h"
 #include "icmpv6/icmpv6.h"
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
@@ -339,14 +340,12 @@ int icmpv6_neighbor(FAR struct net_driver_s *dev,
       netdev_txnotify_dev(dev, ICMPv6_POLL);
 
       /* Wait for the send to complete or an error to occur.
-       * net_sem_wait will also terminate if a signal is received.
+       * nxsem_wait will also terminate if a signal is received.
        */
-
-      netdev_unlock(dev);
 
       do
         {
-          net_sem_wait(&state.snd_sem);
+          conn_dev_sem_timedwait(&state.snd_sem, true, UINT_MAX, NULL, dev);
         }
       while (!state.snd_sent);
 
@@ -354,9 +353,7 @@ int icmpv6_neighbor(FAR struct net_driver_s *dev,
        * received.
        */
 
-      ret = icmpv6_wait(&notify, CONFIG_ICMPv6_NEIGHBOR_DELAYMSEC);
-
-      netdev_lock(dev);
+      ret = icmpv6_wait(dev, &notify, CONFIG_ICMPv6_NEIGHBOR_DELAYMSEC);
 
       /* icmpv6_wait will return OK if and only if the matching Neighbor
        * Advertisement is received.  Otherwise, it will return -ETIMEDOUT.

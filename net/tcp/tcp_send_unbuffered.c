@@ -607,7 +607,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
           tcp_send_txnotify(psock, conn);
 
           /* Wait for the send to complete or an error to occur:  NOTES:
-           * net_sem_wait will also terminate if a signal is received.
+           * conn_dev_sem_timedwait will also terminate if a signal is
+           * received.
            */
 
           for (; ; )
@@ -621,13 +622,12 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
               info.tc_conn = conn;
               info.tc_cb   = &state.snd_cb;
               info.tc_sem  = &state.snd_sem;
-              conn_dev_unlock(&conn->sconn, conn->dev);
               tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
 
-              ret = net_sem_timedwait(&state.snd_sem,
-                                  _SO_TIMEOUT(conn->sconn.s_sndtimeo));
+              ret = conn_dev_sem_timedwait(&state.snd_sem, true,
+                                         _SO_TIMEOUT(conn->sconn.s_sndtimeo),
+                                         &conn->sconn, conn->dev);
               tls_cleanup_pop(tls_get_info(), 0);
-              conn_dev_lock(&conn->sconn, conn->dev);
               if (ret != -ETIMEDOUT || acked == state.snd_acked)
                 {
                   if (ret == -ETIMEDOUT)
@@ -658,8 +658,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
       goto errout;
     }
 
-  /* If net_sem_timedwait failed, then we were probably reawakened by a
-   * signal. In this case, net_sem_timedwait will have returned negated
+  /* If conn_dev_sem_timedwait failed, then we were probably reawakened by a
+   * signal. In this case, conn_dev_sem_timedwait will have returned negated
    * errno appropriately.
    */
 

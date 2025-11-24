@@ -145,7 +145,7 @@ int igmp_waitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
     {
       /* Wait for the semaphore to be posted */
 
-      ret = net_sem_wait_uninterruptible(&group->sem);
+      ret = nxsem_wait_uninterruptible(&group->sem);
       if (ret < 0)
         {
           break;

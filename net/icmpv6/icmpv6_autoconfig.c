@@ -227,18 +227,14 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
   netdev_txnotify_dev(dev, ICMPv6_POLL);
 
   /* Wait for the send to complete or an error to occur
-   * net_sem_wait will also terminate if a signal is received.
+   * nxsem_wait will also terminate if a signal is received.
    */
-
-  netdev_unlock(dev);
 
   do
     {
-      net_sem_wait(&state.snd_sem);
+      conn_dev_sem_timedwait(&state.snd_sem, true, UINT_MAX, NULL, dev);
     }
   while (!state.snd_sent);
-
-  netdev_lock(dev);
 
   ret = state.snd_result;
   devif_dev_callback_free(dev, state.snd_cb);
@@ -395,7 +391,7 @@ got_lladdr:
 
       /* Wait to receive the Router Advertisement message */
 
-      ret = icmpv6_rwait(&notify, CONFIG_ICMPv6_AUTOCONF_DELAYMSEC);
+      ret = icmpv6_rwait(dev, &notify, CONFIG_ICMPv6_AUTOCONF_DELAYMSEC);
       if (ret != -ETIMEDOUT)
         {
           /* ETIMEDOUT is the only expected failure.  We will retry on that

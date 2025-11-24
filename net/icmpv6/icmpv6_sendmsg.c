@@ -402,13 +402,12 @@ ssize_t icmpv6_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       netdev_txnotify_dev(dev, ICMPv6_POLL);
 
       /* Wait for either the send to complete or for timeout to occur.
-       * net_sem_timedwait will also terminate if a signal is received.
+       * conn_dev_sem_timedwait will also terminate if a signal is received.
        */
 
-      conn_dev_unlock(&conn->sconn, dev);
-      ret = net_sem_timedwait(&state.snd_sem,
-                          _SO_TIMEOUT(conn->sconn.s_sndtimeo));
-      conn_dev_lock(&conn->sconn, dev);
+      ret = conn_dev_sem_timedwait(&state.snd_sem, true,
+                                   _SO_TIMEOUT(conn->sconn.s_sndtimeo),
+                                   &conn->sconn, dev);
       if (ret < 0)
         {
           if (ret == -ETIMEDOUT)
