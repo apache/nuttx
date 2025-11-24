@@ -23,7 +23,7 @@
 include $(TOPDIR)/Make.defs
 include chip/Make.defs
 
-ifeq ($(CONFIG_ARCH_TC3XX),y)
+ifeq ($(CONFIG_ARCH_CHIP_TC3XX),y)
 ARCH_SUBDIR = tc3xx
 include $(ARCH_SUBDIR)/Make.defs
 endif

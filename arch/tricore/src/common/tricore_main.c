@@ -68,10 +68,10 @@ void core0_main(void)
    * to ensure the normal startup of the system.
    */
 
-#if defined(CONFIG_ARCH_CHIP_AURIX_TC3XX)
+#if defined(CONFIG_ARCH_CHIP_TC3XX)
   IfxScuWdt_disableCpuWatchdog(IfxScuWdt_getCpuWatchdogPassword());
   IfxScuWdt_disableSafetyWatchdog(IfxScuWdt_getSafetyWatchdogPassword());
-#elif defined(CONFIG_ARCH_CHIP_AURIX_TC4XX)
+#elif defined(CONFIG_ARCH_CHIP_TC4XX)
   IfxWtu_disableCpuWatchdog(IfxWtu_getCpuWatchdogPassword());
   IfxWtu_disableSystemWatchdog(IfxWtu_getSystemWatchdogPassword());
 #endif
