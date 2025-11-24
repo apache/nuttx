@@ -175,8 +175,8 @@ static int lcddrv_spiif_recv(FAR struct lcddrv_lcd_s *lcd,
 {
   FAR struct lcddrv_spiif_lcd_s *priv = (FAR struct lcddrv_spiif_lcd_s *)lcd;
 
-  lcdinfo("param=%04x\n", param);
   SPI_RECVBLOCK(priv->spi, param, 1);
+  lcdinfo("param=%04x\n", *param);
   return OK;
 }
 
@@ -254,7 +254,7 @@ static int lcddrv_spiif_recvmulti(FAR struct lcddrv_lcd_s *lcd,
 {
   FAR struct lcddrv_spiif_lcd_s *priv = (FAR struct lcddrv_spiif_lcd_s *)lcd;
 
-  lcdinfo("wd=%p, nwords=%d\n", wd, nwords);
+  lcdinfo("wd=%p, nwords=%lu\n", wd, nwords);
   SPI_SETBITS(priv->spi, 16);
   SPI_RECVBLOCK(priv->spi, wd, nwords);
   SPI_SETBITS(priv->spi, 8);
