@@ -385,9 +385,10 @@ ssize_t bluetooth_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       state.ir_cb->event = bluetooth_recvfrom_eventhandler;
 
       /* Wait for either the receive to complete or for an error/timeout to
-       * occur. NOTES:  (1) net_sem_wait will also terminate if a signal
-       * is received, (2) the network is locked!  It will be un-locked while
-       * the task sleeps and automatically re-locked when the task restarts.
+       * occur. NOTES:  (1) conn_dev_sem_timedwait will also terminate if a
+       * signal is received, (2) the network is locked!  It will be un-locked
+       * while the task sleeps and automatically re-locked when the task
+       * restarts.
        */
 
       conn_dev_sem_timedwait(&state.ir_sem, true, UINT_MAX,

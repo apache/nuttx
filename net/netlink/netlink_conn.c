@@ -475,14 +475,11 @@ int netlink_get_response(FAR struct netlink_conn_s *conn,
         }
       else
         {
-          unsigned int count;
-
           /* Wait for a response to be queued */
 
           tls_cleanup_push(tls_get_info(), netlink_notifier_teardown, conn);
-          nxrmutex_breaklock(&g_netlink_lock, &count);
-          ret = net_sem_wait(&waitsem);
-          nxrmutex_restorelock(&g_netlink_lock, count);
+          ret = net_sem_timedwait2(&waitsem, true, UINT_MAX, &g_netlink_lock,
+                                   NULL);
           tls_cleanup_pop(tls_get_info(), 0);
         }
 

@@ -417,9 +417,10 @@ int icmpv6_wait_cancel(FAR struct icmpv6_notify_s *notify);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
-int icmpv6_wait(FAR struct icmpv6_notify_s *notify, unsigned int timeout);
+int icmpv6_wait(FAR struct net_driver_s *dev,
+                FAR struct icmpv6_notify_s *notify, unsigned int timeout);
 #else
-#  define icmpv6_wait(n,t) (0)
+#  define icmpv6_wait(d,n,t) (0)
 #endif
 
 /****************************************************************************
@@ -538,9 +539,10 @@ int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
-int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify, unsigned int timeout);
+int icmpv6_rwait(FAR struct net_driver_s *dev,
+                 FAR struct icmpv6_rnotify_s *notify, unsigned int timeout);
 #else
-#  define icmpv6_rwait(n,t) (0)
+#  define icmpv6_rwait(d,n,t) (0)
 #endif
 
 /****************************************************************************

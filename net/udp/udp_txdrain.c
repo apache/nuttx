@@ -85,9 +85,8 @@ int udp_txdrain(FAR struct socket *psock, unsigned int timeout)
   if (!sq_empty(&conn->write_q))
     {
       conn->txdrain_sem = &waitsem;
-      conn_unlock(&conn->sconn);
-      ret = net_sem_timedwait_uninterruptible(&waitsem, timeout);
-      conn_lock(&conn->sconn);
+      ret = conn_dev_sem_timedwait(&waitsem, false, timeout,
+                                   &conn->sconn, NULL);
       conn->txdrain_sem = NULL;
     }
 

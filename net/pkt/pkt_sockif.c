@@ -377,10 +377,9 @@ static int pkt_close(FAR struct socket *psock)
 
                   while (iob_get_queue_entry_count(&conn->write_q) != 0)
                     {
-                      conn_dev_unlock(&conn->sconn, dev);
-                      ret = net_sem_timedwait_uninterruptible(&conn->sndsem,
-                            _SO_TIMEOUT(conn->sconn.s_sndtimeo));
-                      conn_dev_lock(&conn->sconn, dev);
+                      ret = conn_dev_sem_timedwait(&conn->sndsem, false,
+                                         _SO_TIMEOUT(conn->sconn.s_sndtimeo),
+                                         &conn->sconn, dev);
                       if (ret < 0)
                         {
                           break;

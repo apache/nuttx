@@ -562,7 +562,7 @@ static void udp_recvfrom_initialize(FAR struct udp_conn_s *conn,
  *   Evaluate the result of the recv operations
  *
  * Input Parameters:
- *   result   The result of the net_sem_timedwait operation
+ *   result   The result of the conn_dev_sem_timedwait operation
  *            (may indicate EINTR)
  *   pstate   A pointer to the state structure to be initialized
  *
@@ -588,8 +588,8 @@ static ssize_t udp_recvfrom_result(int result, struct udp_recvfrom_s *pstate)
       return pstate->ir_result;
     }
 
-  /* If net_sem_timedwait failed, then we were probably reawakened by a
-   * signal. In this case, net_sem_timedwait will have returned negated
+  /* If conn_dev_sem_timedwait failed, then we were probably reawakened by a
+   * signal. In this case, conn_dev_sem_timedwait will have returned negated
    * errno appropriately.
    */
 
@@ -765,14 +765,13 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
           tls_cleanup_push(tls_get_info(), udp_callback_cleanup, &info);
 
           /* Wait for either the receive to complete or for an error/timeout
-           * to occur.  net_sem_timedwait will also terminate if a signal is
-           * received.
+           * to occur.  conn_dev_sem_timedwait will also terminate if a
+           * signal is received.
            */
 
-          conn_dev_unlock(&conn->sconn, dev);
-          ret = net_sem_timedwait(&state.ir_sem,
-                              _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
-          conn_dev_lock(&conn->sconn, dev);
+          ret = conn_dev_sem_timedwait(&state.ir_sem, true,
+                                       _SO_TIMEOUT(conn->sconn.s_rcvtimeo),
+                                       &conn->sconn, dev);
           tls_cleanup_pop(tls_get_info(), 0);
           if (ret == -ETIMEDOUT)
             {

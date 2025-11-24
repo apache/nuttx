@@ -347,7 +347,8 @@ static ssize_t bluetooth_sendto(FAR struct socket *psock,
           netdev_txnotify_dev(&radio->r_dev, BLUETOOTH_POLL);
 
           /* Wait for the send to complete or an error to occur.
-           * net_sem_wait will also terminate if a signal is received.
+           * conn_dev_sem_timedwait will also terminate if a signal is
+           * received.
            */
 
           ret = conn_dev_sem_timedwait(&state.is_sem, true, UINT_MAX,
@@ -371,9 +372,9 @@ static ssize_t bluetooth_sendto(FAR struct socket *psock,
       return state.is_sent;
     }
 
-  /* If net_sem_wait failed, then we were probably reawakened by a signal.
-   * In this case, net_sem_wait will have returned negated errno
-   * appropriately.
+  /* If conn_dev_sem_timedwait failed, then we were probably reawakened by
+   * a signal. In this case, conn_dev_sem_timedwait will have returned
+   * negated errno appropriately.
    */
 
   if (ret < 0)

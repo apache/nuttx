@@ -525,8 +525,9 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
     {
       uint32_t acked = state.snd_acked;
 
-      ret = net_sem_timedwait_uninterruptible(
-              &state.snd_sem, _SO_TIMEOUT(conn->sconn.s_sndtimeo));
+      ret = conn_dev_sem_timedwait(&state.snd_sem, false,
+                                   _SO_TIMEOUT(conn->sconn.s_sndtimeo),
+                                   &conn->sconn, conn->dev);
       if (ret != -ETIMEDOUT || acked == state.snd_acked)
         {
           if (ret == -ETIMEDOUT)

@@ -374,15 +374,15 @@ int arp_send(in_addr_t ipaddr)
       netdev_txnotify_dev(dev, ARP_POLL);
 
       /* Wait for the send to complete or an error to occur.
-       * net_sem_wait will also terminate if a signal is received.
+       * nxsem_tickwait will also terminate if a signal is received.
        */
 
       netdev_unlock(dev);
 
       do
         {
-          ret = net_sem_timedwait_uninterruptible(&state.snd_sem,
-                                              CONFIG_ARP_SEND_DELAYMSEC);
+          ret = nxsem_tickwait(&state.snd_sem,
+                               MSEC2TICK(CONFIG_ARP_SEND_DELAYMSEC));
           if (ret == -ETIMEDOUT)
             {
               arp_wait_cancel(&notify);

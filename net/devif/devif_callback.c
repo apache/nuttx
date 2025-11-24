@@ -256,11 +256,12 @@ devif_callback_alloc(FAR struct net_driver_s *dev,
    */
 
   /* Note: dev->d_flags may be asynchronously changed by netdev_ifdown()
-   * (in net/netdev/netdev_ioctl.c). Nevertheless, net_lock() / net_unlock()
-   * are not required in netdev_ifdown() to prevent dev->d_flags from
-   * asynchronous change here. There is not an issue because net_lock() and
-   * net_unlock() present inside of devif_dev_event(). That should be enough
-   * to de-allocate connection callbacks reliably on NETDEV_DOWN event.
+   * (in net/netdev/netdev_ioctl.c). Nevertheless, netdev_lock() /
+   * netdev_unlock() are not required in netdev_ifdown() to prevent
+   * dev->d_flags from asynchronous change here. There is not an issue
+   * because netdev_lock() and netdev_unlock() present inside of
+   * devif_dev_event(). That should be enough to de-allocate connection
+   * callbacks reliably on NETDEV_DOWN event.
    */
 
   if (dev && !netdev_verify(dev))

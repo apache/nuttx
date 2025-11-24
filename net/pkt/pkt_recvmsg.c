@@ -312,7 +312,8 @@ static void pkt_recvfrom_initialize(FAR struct pkt_conn_s *conn,
  *   Evaluate the result of the recv operations
  *
  * Input Parameters:
- *   result   The result of the net_sem_wait operation (may indicate EINTR)
+ *   result   The result of the conn_dev_sem_timedwait operation
+ *            (may indicate EINTR)
  *   pstate   A pointer to the state structure to be initialized
  *
  * Returned Value:
@@ -338,9 +339,9 @@ static ssize_t pkt_recvfrom_result(int result,
       return pstate->pr_result;
     }
 
-  /* If net_sem_wait failed, then we were probably reawakened by a signal.
-   * In this case, net_sem_wait will have returned negated errno
-   * appropriately.
+  /* If conn_dev_sem_timedwait failed, then we were probably reawakened by a
+   * signal. In this case, conn_dev_sem_timedwait will have returned negated
+   * errno appropriately.
    */
 
   if (result < 0)
@@ -559,15 +560,14 @@ ssize_t pkt_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
           state.pr_cb->event  = pkt_recvfrom_eventhandler;
 
           /* Wait for either the receive to complete or for an error/timeout
-           * to occur. NOTES:  (1) net_sem_wait will also terminate if a
-           * signal is received, (2) the network is locked!  It will be
+           * to occur. NOTES:  (1) conn_dev_sem_timedwait will also terminate
+           * if a signal is received, (2) the network is locked!  It will be
            * un-locked while the task sleeps and automatically re-locked when
            * the task restarts.
            */
 
-          conn_dev_unlock(&conn->sconn, dev);
-          ret = net_sem_wait(&state.pr_sem);
-          conn_dev_lock(&conn->sconn, dev);
+          ret = conn_dev_sem_timedwait(&state.pr_sem, true, UINT_MAX,
+                                       &conn->sconn, dev);
 
           /* Make sure that no further events are processed */
 

@@ -480,13 +480,13 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       netdev_txnotify_dev(state.st_dev, UDP_POLL);
 
       /* Wait for either the receive to complete or for an error/timeout to
-       * occur. NOTES:  net_sem_timedwait will also terminate if a signal
+       * occur. NOTES: conn_dev_sem_timedwait will also terminate if a signal
        * is received.
        */
 
-      conn_dev_unlock(&conn->sconn, state.st_dev);
-      ret = net_sem_timedwait(&state.st_sem,
-                          _SO_TIMEOUT(conn->sconn.s_sndtimeo));
+      ret = conn_dev_sem_timedwait(&state.st_sem, true,
+                                   _SO_TIMEOUT(conn->sconn.s_sndtimeo),
+                                   &conn->sconn, state.st_dev);
       if (ret >= 0)
         {
           /* The result of the sendto operation is the number of bytes
@@ -495,8 +495,6 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
           ret = state.st_sndlen;
         }
-
-      conn_dev_lock(&conn->sconn, state.st_dev);
 
       /* Make sure that no further events are processed */
 

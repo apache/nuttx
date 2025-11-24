@@ -145,9 +145,8 @@ int tcp_txdrain(FAR struct socket *psock, unsigned int timeout)
            * wait for it to drain or be be disconnected.
            */
 
-          conn_dev_unlock(&conn->sconn, conn->dev);
-          ret = net_sem_timedwait_uninterruptible(&waitsem, timeout);
-          conn_dev_lock(&conn->sconn, conn->dev);
+          ret = conn_dev_sem_timedwait(&waitsem, false, timeout,
+                                       &conn->sconn, conn->dev);
 
           /* Tear down the disconnect notifier */
 

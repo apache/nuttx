@@ -36,6 +36,7 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/net/net.h>
 
+#include "utils/utils.h"
 #include "icmpv6/icmpv6.h"
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
@@ -165,13 +166,14 @@ int icmpv6_wait_cancel(FAR struct icmpv6_notify_s *notify)
  *
  ****************************************************************************/
 
-int icmpv6_wait(FAR struct icmpv6_notify_s *notify, unsigned int timeout)
+int icmpv6_wait(FAR struct net_driver_s *dev,
+                FAR struct icmpv6_notify_s *notify, unsigned int timeout)
 {
   int ret;
 
   /* And wait for the Neighbor Advertisement (or a timeout). */
 
-  ret = net_sem_timedwait(&notify->nt_sem, timeout);
+  ret = conn_dev_sem_timedwait(&notify->nt_sem, true, timeout, NULL, dev);
   if (ret >= 0)
     {
       ret = notify->nt_result;
