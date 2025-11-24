@@ -69,10 +69,10 @@
   static struct mempool_s name = \
     { \
       CONCATENATE(name, _buffer), \
-      MEMPOOL_REALBLOCKSIZE(blksize) * (prealloc), \
+      MEMPOOL_REALBLOCKSIZE(blksize) * (prealloc) + MEMPOOL_HEADER_SIZE, \
       (blksize), \
       0, \
-      MEMPOOL_REALBLOCKSIZE(blksize) * (dynalloc), \
+      MEMPOOL_REALBLOCKSIZE(blksize) * (dynalloc) + MEMPOOL_HEADER_SIZE, \
       (maxalloc), \
       true, \
       NULL, \
