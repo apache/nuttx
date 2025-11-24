@@ -7,10 +7,12 @@ The NuttX timing subsystem consists of four layers:
   * 1 Hardware Timer Drivers: Includes implementations of various hardware
                               timer drivers.
   * 2 Timer Driver Abstraction: Such as Oneshot and Timer, which provide
-                                timer hardware abstraction.
-  * 3 OS Timer Interfaces: Timer and Alarm, offering relative and
-                           absolute timer interfaces.
-  * 4 OS Timer Abstraction: The wdog (watchdog) module manages software timers
+                                oneshot/periodical timer hardware abstraction.
+  * 3 OS Timer Interfaces: Arch_Timer(up_timer_*) and Arch_Alarm(up_alarm_*), 
+                           offering relative timer (trigger an event with a certain delay)
+                           and absolute timer (trigger an event at a certain time)
+                           interfaces.
+  * 4 OS Timer Abstraction: The wdog timer manages software timers
                             and provides a unified timer API to upper layers.
 
 Here we focus on the oneshot timer driver abstraction.
