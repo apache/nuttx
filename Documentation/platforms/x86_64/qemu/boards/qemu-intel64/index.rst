@@ -330,3 +330,8 @@ Nano-X configuration that boots directly into the ``nxterm`` terminal
 emulator, using framebuffer, USB HID keyboard in event mode (``/dev/kbda``),
 and USB HID mouse.  See :doc:`/applications/graphics/microwindows/index` for
 details.
+
+eth_console
+-----------
+
+Configuration demonstrates Console over e1000 network device.
