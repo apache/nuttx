@@ -1288,7 +1288,7 @@ config ARCH_HAVE_REGCPY
 config ARCH_STACKDUMP_MAX_LENGTH
 	int "The maximum length for dump stack on assertions"
 	depends on ARCH_STACKDUMP
-	default 0
+	default 4096
 
 config ARCH_USBDUMP
 	bool "Dump USB trace data"
