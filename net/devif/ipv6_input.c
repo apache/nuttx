@@ -229,11 +229,16 @@ static int ipv6_in(FAR struct net_driver_s *dev)
   bool isfrag = false;
 #endif
 
-  /* Store reception timestamp if enabled and not provided by hardware. */
+  /* Storing reception timestamp provided by realtime
+   * if timestamp no provided by hardware.
+   */
 
-#if defined(CONFIG_NET_TIMESTAMP) && !defined(CONFIG_ARCH_HAVE_NETDEV_TIMESTAMP)
-  clock_gettime(CLOCK_REALTIME, &dev->d_iob->io_time);
-#endif
+#ifdef CONFIG_NET_TIMESTAMP
+  if ((dev->d_features & NETDEV_RX_STAMP) == 0)
+    {
+      clock_gettime(CLOCK_REALTIME, &dev->d_iob->io_time);
+    }
+#endif /* CONFIG_NET_TIMESTAMP */
 
   /* This is where the input processing starts. */
 
