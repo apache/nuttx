@@ -128,6 +128,10 @@
 #  include "espressif/esp_aes.h"
 #endif
 
+#ifdef CONFIG_PM
+#  include "espressif/esp_pm.h"
+#endif
+
 #ifdef CONFIG_MMCSD_SPI
 #  include "esp_board_mmcsd.h"
 #endif
