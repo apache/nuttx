@@ -125,6 +125,10 @@
 #  include "espressif/esp_aes.h"
 #endif
 
+#ifdef CONFIG_PM
+#  include "espressif/esp_pm.h"
+#endif
+
 #ifdef CONFIG_MMCSD_SPI
 #  include "esp_board_mmcsd.h"
 #endif
@@ -444,6 +448,16 @@ int esp_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_pcnt_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
+  /* Configure PM */
+
+  ret = esp_pmconfigure();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_pmconfigure failed: %d\n", ret);
     }
 #endif
 
