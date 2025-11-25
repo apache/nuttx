@@ -76,10 +76,8 @@ uint32_t g_oneshot_maxticks = UINT32_MAX;
 static clock_t nxsched_cpu_scheduler(int cpu, clock_t ticks,
                                      clock_t elapsed, bool noswitches);
 #endif
-#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
 static clock_t nxsched_process_scheduler(clock_t ticks, clock_t elapsed,
                                          bool noswitches);
-#endif
 static clock_t nxsched_timer_process(clock_t ticks, clock_t elapsed,
                                      bool noswitches);
 static clock_t nxsched_timer_start(clock_t ticks, clock_t interval);
@@ -289,13 +287,14 @@ static clock_t nxsched_cpu_scheduler(int cpu, clock_t ticks,
  *
  ****************************************************************************/
 
-#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static clock_t nxsched_process_scheduler(clock_t ticks, clock_t elapsed,
-                                         bool noswitches)
+static inline_function
+clock_t nxsched_process_scheduler(clock_t ticks, clock_t elapsed,
+                                  bool noswitches)
 {
   clock_t minslice = CLOCK_MAX;
+#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
+  irqstate_t flags = enter_critical_section();
   clock_t timeslice;
-  irqstate_t flags;
   int i;
 
   /* Single CPU case:
@@ -309,25 +308,19 @@ static clock_t nxsched_process_scheduler(clock_t ticks, clock_t elapsed,
    * TCB that we are manipulating.
    */
 
-  flags = enter_critical_section();
-
   /* Perform scheduler operations on all CPUs */
 
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
       timeslice = nxsched_cpu_scheduler(i, ticks, elapsed, noswitches);
-      if (timeslice < minslice)
-        {
-          minslice = timeslice;
-        }
+      minslice  = MIN(timeslice, minslice);
     }
 
   leave_critical_section(flags);
+#endif
+
   return minslice;
 }
-#else
-#  define nxsched_process_scheduler(t, e, n) (CLOCK_MAX)
-#endif
 
 /****************************************************************************
  * Name:  nxsched_timer_process
