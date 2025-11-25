@@ -461,3 +461,42 @@ int host_chstat(const char *path, const struct nuttx_stat_s *buf, int flags)
 {
   return -ENOSYS;
 }
+
+/****************************************************************************
+ * Name: host_link
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_LINKS
+int host_link(const char *path1, const char *path2)
+{
+  return -ENOSYS;
+}
+
+/****************************************************************************
+ * Name: host_symlink
+ ****************************************************************************/
+
+int host_symlink(const char *target, const char *linkpath)
+{
+  return -ENOSYS;
+}
+
+/****************************************************************************
+ * Name: host_readlink
+ ****************************************************************************/
+
+nuttx_ssize_t host_readlink(const char *path, char *buf,
+                            nuttx_size_t bufsize)
+{
+  return -ENOSYS;
+}
+
+/****************************************************************************
+ * Name: host_lstat
+ ****************************************************************************/
+
+int host_lstat(const char *path, struct nuttx_stat_s *buf)
+{
+  return -ENOSYS;
+}
+#endif /* CONFIG_FS_LINKS */

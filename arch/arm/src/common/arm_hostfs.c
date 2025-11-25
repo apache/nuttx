@@ -370,3 +370,31 @@ int host_chstat(const char *path, const struct stat *buf, int flags)
 {
   return -ENOSYS;
 }
+
+#ifdef CONFIG_FS_LINKS
+int host_link(const char *path1, const char *path2)
+{
+  /* ARM semihosting doesn't support hard links */
+
+  return -ENOSYS;
+}
+
+int host_symlink(const char *target, const char *linkpath)
+{
+  /* ARM semihosting doesn't support symbolic links */
+
+  return -ENOSYS;
+}
+
+ssize_t host_readlink(const char *path, char *buf, size_t bufsize)
+{
+  /* ARM semihosting doesn't support symbolic links */
+
+  return -ENOSYS;
+}
+
+int host_lstat(const char *path, struct stat *buf)
+{
+  return -ENOSYS;
+}
+#endif /* CONFIG_FS_LINKS */

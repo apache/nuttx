@@ -256,6 +256,13 @@ int           host_rename(const char *oldpath, const char *newpath);
 int           host_stat(const char *path, struct nuttx_stat_s *buf);
 int           host_chstat(const char *path,
                           const struct nuttx_stat_s *buf, int flags);
+#ifdef CONFIG_FS_LINKS
+int           host_link(const char *path1, const char *path2);
+int           host_symlink(const char *target, const char *linkpath);
+nuttx_ssize_t host_readlink(const char *path, char *buf,
+                            nuttx_size_t bufsize);
+int           host_lstat(const char *path, struct nuttx_stat_s *buf);
+#endif
 #else
 int           host_open(const char *pathname, int flags, int mode);
 int           host_close(int fd);
@@ -280,6 +287,12 @@ int           host_rename(const char *oldpath, const char *newpath);
 int           host_stat(const char *path, struct stat *buf);
 int           host_chstat(const char *path,
                           const struct stat *buf, int flags);
+#ifdef CONFIG_FS_LINKS
+int           host_link(const char *path1, const char *path2);
+int           host_symlink(const char *target, const char *linkpath);
+ssize_t       host_readlink(const char *path, char *buf, size_t bufsize);
+int           host_lstat(const char *path, struct stat *buf);
+#endif
 #endif /* __SIM__ */
 
 #endif /* __INCLUDE_NUTTX_FS_HOSTFS_H */

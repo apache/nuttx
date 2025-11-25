@@ -820,3 +820,74 @@ int host_chstat(const char *path, const struct nuttx_stat_s *buf, int flags)
 
   return 0;
 }
+
+/****************************************************************************
+ * Name: host_link
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_LINKS
+int host_link(const char *path1, const char *path2)
+{
+  int ret = link(path1, path2);
+  if (ret < 0)
+    {
+      ret = -errno;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: host_symlink
+ ****************************************************************************/
+
+int host_symlink(const char *target, const char *linkpath)
+{
+  int ret = symlink(target, linkpath);
+  if (ret < 0)
+    {
+      ret = -errno;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: host_readlink
+ ****************************************************************************/
+
+nuttx_ssize_t host_readlink(const char *path, char *buf,
+                            nuttx_size_t bufsize)
+{
+  ssize_t ret = readlink(path, buf, bufsize);
+  if (ret < 0)
+    {
+      ret = -errno;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: host_lstat
+ ****************************************************************************/
+
+int host_lstat(const char *path, struct nuttx_stat_s *buf)
+{
+  struct stat hostbuf;
+  int ret;
+
+  /* Call the host's lstat routine */
+
+  ret = lstat(path, &hostbuf);
+  if (ret < 0)
+    {
+      ret = -errno;
+    }
+
+  /* Map the return values */
+
+  host_stat_convert(&hostbuf, buf);
+  return ret;
+}
+#endif /* CONFIG_FS_LINKS */
