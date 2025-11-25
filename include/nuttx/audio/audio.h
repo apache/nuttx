@@ -767,6 +767,7 @@ struct ap_buffer_s
   uint16_t              flags;      /* Buffer flags */
   uint16_t              crefs;      /* Number of reference counts */
   FAR uint8_t           *samp;      /* Offset of the first sample */
+  FAR void              *userdata;  /* For the application, unused by the OS */
 };
 
 /* Structure defining the messages passed to a listening audio thread
