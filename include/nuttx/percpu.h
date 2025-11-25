@@ -36,6 +36,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
+
 /****************************************************************************
  * Name: up_cpu_index
  *
@@ -120,5 +122,7 @@ extern char _percpu_offset[];
 #  define DECLARE_PER_CPU_BMP(t, v)    extern t v
 #  define this_cpu_var_bmp(v)          v
 #endif
+
+#endif /* __ASSEMBLY__ */
 
 #endif
