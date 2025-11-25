@@ -132,10 +132,10 @@ struct iob_s
 
 #ifdef CONFIG_NET_TIMESTAMP
   /* timestamp of the packet.
-   * If CONFIG_ARCH_HAVE_NETDEV_TIMESTAMP is true, the timestamp is provided
-   * by hardware driver. Otherwise it is filled in by kernel when the packet
-   * is passed into respective protocol layer. The timestamp is in
-   * CLOCK_REALTIME.
+   * d_features is the member of net_driver_s struct, if the NETDEV_RX_STAMP
+   * bit of d_features is set, the timestamp is provided by hardware driver.
+   * Otherwise it is filled in by kernel when the packet is passed into
+   * respective protocol layer. The timestamp is in CLOCK_REALTIME.
    */
 
   struct timespec io_time;
