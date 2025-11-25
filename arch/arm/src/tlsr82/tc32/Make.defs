@@ -48,8 +48,6 @@ CMN_ASRCS := $(filter-out $(TC32_ASRCS_FILTER), $(CMN_ASRCS))
 
 # Common files in arch/arm/src/armv6-m
 
-CMN_CSRCS += arm_sigdeliver.c
-
 # Common files in arch/arm/src/tlsr82/tc32
 
 CMN_ASRCS += tc32_fullcontextrestore.S tc32_switchcontext.S
@@ -57,6 +55,10 @@ CMN_ASRCS += tc32_saveusercontext.S tc32_exception.S
 
 CMN_CSRCS += tc32_doirq.c tc32_initialstate.c tc32_schedulesigaction.c
 CMN_CSRCS += tc32_syscall.c tc32_udelay.c
+
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+  CMN_CSRCS +=tc32_schedulesigaction.c arm_sigdeliver.c
+endif
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
   CMN_CSRCS += tc32_backtrace.c

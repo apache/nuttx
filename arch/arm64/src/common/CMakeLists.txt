@@ -32,7 +32,6 @@ list(APPEND SRCS arm64_initialize.c arm64_initialstate.c arm64_boot.c)
 list(APPEND SRCS arm64_nputs.c arm64_createstack.c)
 list(APPEND SRCS arm64_releasestack.c arm64_stackframe.c arm64_usestack.c)
 list(APPEND SRCS arm64_exit.c arm64_fork.c)
-list(APPEND SRCS arm64_schedulesigaction.c arm64_sigdeliver.c)
 list(APPEND SRCS arm64_getintstack.c arm64_registerdump.c)
 list(APPEND SRCS arm64_perf.c arm64_tcbinfo.c)
 
@@ -43,6 +42,10 @@ list(APPEND SRCS arm64_syscall.c)
 
 # Use common heap allocation for now (may need to be customized later)
 list(APPEND SRCS arm64_allocateheap.c)
+
+if(NOT CONFIG_DISABLE_SIGNALS)
+  list(APPEND SRCS arm64_schedulesigaction.c arm64_sigdeliver.c)
+endif()
 
 if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS arm64_idle.c)

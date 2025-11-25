@@ -27,13 +27,15 @@ set(SRCS
     arm_doirq.c
     arm_hardfault.c
     arm_initialstate.c
-    arm_schedulesigaction.c
-    arm_sigdeliver.c
     arm_svcall.c
     arm_systemreset.c
     arm_tcbinfo.c
     arm_trigger_irq.c
     arm_vectors.c)
+
+if(NOT CONFIG_DISABLE_SIGNALS)
+  list(APPEND SRCS arm_schedulesigaction.c arm_sigdeliver.c)
+endif()
 
 if((DEFINED CONFIG_DEBUG_FEATURES AND CONFIG_DEBUG_FEATURES)
    OR (DEFINED CONFIG_ARM_COREDUMP_REGION AND CONFIG_ARM_COREDUMP_REGION))
