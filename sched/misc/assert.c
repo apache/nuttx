@@ -226,6 +226,7 @@ static void dump_stackinfo(FAR const char *tag, uintptr_t sp,
   if (sp != 0)
     {
       uintptr_t top = base + size;
+      uintptr_t dump_end = top;
 
       _emerg("    sp: %p\n", (FAR void *)sp);
 
@@ -236,7 +237,14 @@ static void dump_stackinfo(FAR const char *tag, uintptr_t sp,
           sp -= DUMP_STRIDE;
         }
 
-      stack_dump(sp, top);
+#if CONFIG_ARCH_STACKDUMP_MAX_LENGTH > 0
+      if (top - sp > CONFIG_ARCH_STACKDUMP_MAX_LENGTH)
+        {
+          dump_end = sp + CONFIG_ARCH_STACKDUMP_MAX_LENGTH;
+        }
+#endif
+
+      stack_dump(sp, dump_end);
     }
   else
     {
