@@ -63,6 +63,24 @@ expectation that requires pressed button to read as logical 1 and depressed
 button as logical 0 while allowing the board to operate without external
 components (internal pull-ups are used.)
 
+I\ :sup:`2`\ C temperature sensor TC74Ax
+----------------------------------------
+
+The board has readymade configuration for TC74Ax temperature sensor
+from Microchip.
+
+To enable it, it is needed to:
+
+  - enable :menuselection:`Device Drivers --> I2C Driver Support`
+  - enable :menuselection:`System Type --> AVR DA/DB Peripheral Selections --> Enable TWI (I2C) driver for interface 0`
+  - enable :menuselection:`Device Drivers --> Sensor Device Support --> Microchip TC74Ax Digital Thermal Sensor`
+  - configure the driver for requested mode of operation with regards
+    to multimaster and power management
+  - enable :menuselection:`Board Selection --> Enable initializing I2C TC74Ax sensor`
+  - configure variant of the connected sensor
+
+The sensor is made available as ``/dev/tc74ax``. Further information regarding usage of the sensor is available in its driver's documentation: :doc:`/components/drivers/special/sensors/tc74ax`
+
 Compile & Flash
 ===============
 
