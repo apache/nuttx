@@ -54,6 +54,7 @@ CHIP_ASRCS = avrdx_exceptions.S
 CHIP_CSRCS = avrdx_lowconsole.c avrdx_lowinit.c avrdx_init.c
 CHIP_CSRCS += avrdx_serial.c avrdx_serial_early.c
 CHIP_CSRCS += avrdx_peripherals.c
+CHIP_CSRCS += avrdx_twi.c
 
 # Configuration-dependent files
 
