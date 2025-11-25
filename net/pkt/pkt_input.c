@@ -155,12 +155,15 @@ static int pkt_in(FAR struct net_driver_s *dev)
           return OK;
         }
 
-#if defined(CONFIG_NET_TIMESTAMP) && !defined(CONFIG_ARCH_HAVE_NETDEV_TIMESTAMP)
-      /* Get system as timestamp if no hardware timestamp */
-
-      if (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP) ||
-          _SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMPNS))
+#ifdef CONFIG_NET_TIMESTAMP
+      if ((dev->d_features & NETDEV_RX_STAMP) == 0 &&
+          (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP) ||
+           _SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMPNS)))
         {
+          /* Storing reception timestamp provided by realtime
+           * if timestamp no provided by hardware.
+           */
+
           clock_gettime(CLOCK_REALTIME, &dev->d_iob->io_time);
         }
 #endif /* CONFIG_NET_TIMESTAMP */

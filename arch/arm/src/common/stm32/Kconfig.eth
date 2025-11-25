@@ -188,7 +188,6 @@ config STM32_ETH_PTP_RTC_HIRES
 config STM32_ETH_TIMESTAMP_RX
 	bool "Hardware timestamping of received packets"
 	depends on STM32_COMMON_LEGACY && STM32_ETH_PTP && NET_TIMESTAMP && STM32_ETH_ENHANCEDDESC
-	select ARCH_HAVE_NETDEV_TIMESTAMP
 	default n
 	---help---
 		Timestamp all received Ethernet packets.
