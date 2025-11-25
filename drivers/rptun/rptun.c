@@ -603,9 +603,9 @@ static int rptun_create_device(FAR struct rptun_priv_s *priv,
   FAR struct virtio_device *vdev;
   FAR struct metal_list *node;
   FAR char *rsc = rproc->rsc_table;
-  FAR char *shmbase;
+  FAR char *shmbase = NULL;
   unsigned int role;
-  size_t shmlen;
+  size_t shmlen = 0;
   size_t off;
   int ret = OK;
 
