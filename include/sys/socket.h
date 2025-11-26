@@ -223,6 +223,22 @@
 #define SO_TIMESTAMPNS  20 /* Generates a timestamp in ns for each incoming packet
                             * arg: integer value
                             */
+#define SO_TIMESTAMPING 21 /* Generates timestamp for each output packet
+                            */
+
+/* Protocol-level socket options may begin with this value */
+
+#define __SO_PROTOCOL   16
+
+/* Timestamp generation */
+
+#define SOF_TIMESTAMPING_TX_HARDWARE  (1 << SO_TIMESTAMPING)
+#define SOF_TIMESTAMPING_TX_SOFTWARE  SOF_TIMESTAMPING_TX_HARDWARE
+
+/* Timestamp reporting */
+
+#define SOF_TIMESTAMPING_SOFTWARE     SOF_TIMESTAMPING_TX_SOFTWARE
+#define SOF_TIMESTAMPING_RAW_HARDWARE SOF_TIMESTAMPING_TX_HARDWARE
 
 /* The options are unsupported but included for compatibility
  * and portability
@@ -248,10 +264,6 @@
 #define SOL_RFCOMM      18 /* See options in include/netpacket/bluetooth.h */
 
 #define SOL_PACKET      19
-
-/* Protocol-level socket options may begin with this value */
-
-#define __SO_PROTOCOL  16
 
 /* Values for the 'how' argument of shutdown() */
 

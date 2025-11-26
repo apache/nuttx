@@ -52,6 +52,7 @@
  * Input Parameters:
  *   dev    - Device instance only the input packet in d_buf, length = d_len;
  *   conn   - A pointer to the PKT connection structure
+ *   iobq   - A pointer to the buffer queue
  *
  * Returned Value:
  *   The number of bytes actually buffered is returned.  This will be either
@@ -60,7 +61,8 @@
  ****************************************************************************/
 
 static uint16_t pkt_datahandler(FAR struct net_driver_s *dev,
-                                FAR struct pkt_conn_s *conn)
+                                FAR struct pkt_conn_s *conn,
+                                FAR struct iob_queue_s *iobq)
 {
   FAR struct iob_s *iob = iob_tryalloc(true);
   int ret;
@@ -88,7 +90,7 @@ static uint16_t pkt_datahandler(FAR struct net_driver_s *dev,
    */
 
   conn_lock(&conn->sconn);
-  ret = iob_tryadd_queue(iob, &conn->readahead);
+  ret = iob_tryadd_queue(iob, iobq);
   conn_unlock(&conn->sconn);
 
   if (ret < 0)
@@ -157,10 +159,32 @@ static int pkt_in(FAR struct net_driver_s *dev)
           return OK;
         }
 
+#ifdef CONFIG_NET_TIMESTAMPING
+
+      /* Handle hardware timestamp */
+
+      if (dev->d_iob->io_conn == &conn->sconn)
+        {
+          if (pkt_datahandler(dev, conn, &conn->errahead) > 0)
+            {
+              pkt_callback(dev, conn, PKT_NEWDATA);
+            }
+
+          pkt_conn_list_unlock();
+          return OK;
+        }
+
+      if (dev->d_iob->io_conn != NULL)
+        {
+          /* Skip no related pkt conn */
+
+          pkt_conn_list_unlock();
+          return OK;
+        }
+#endif
+
 #ifdef CONFIG_NET_TIMESTAMP
-      if ((dev->d_features & NETDEV_RX_STAMP) == 0 &&
-          (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP) ||
-           _SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMPNS)))
+      if ((dev->d_features & NETDEV_RX_STAMP) == 0)
         {
           /* Storing reception timestamp provided by realtime
            * if timestamp no provided by hardware.
@@ -187,7 +211,7 @@ static int pkt_in(FAR struct net_driver_s *dev)
         {
           /* Add the PKT to the socket read-ahead buffer. */
 
-          if (pkt_datahandler(dev, conn) == 0)
+          if (pkt_datahandler(dev, conn, &conn->readahead) == 0)
             {
               /* No.. the packet was not processed now.  Return -EAGAIN so
                * that the driver may retry again later.
