@@ -368,6 +368,10 @@ static int pkt_close(FAR struct socket *psock)
 
               iob_free_queue(&conn->readahead);
 
+#ifdef CONFIG_NET_TIMESTAMPING
+              iob_free_queue(&conn->errahead);
+#endif
+
 #ifdef CONFIG_NET_PKT_WRITE_BUFFERS
               /* Free write buffer callback. */
 
