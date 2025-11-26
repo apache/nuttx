@@ -259,7 +259,7 @@ jobs:
   macOS:
     permissions:
       contents: none
-    runs-on: macos-13
+    runs-on: macos-15-intel
     needs: macOS-Arch
     if: ${{ needs.macOS-Arch.outputs.skip_all_builds != '1' }}
     strategy:
