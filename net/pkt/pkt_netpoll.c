@@ -124,7 +124,7 @@ static uint32_t pkt_poll_eventhandler(FAR struct net_driver_s *dev,
 
       if ((flags & NETDEV_DOWN) != 0)
         {
-          eventset |= (POLLHUP | POLLERR);
+          eventset |= POLLHUP | POLLERR;
         }
 
       /* A poll is a sign that we are free to send data. */
@@ -133,6 +133,15 @@ static uint32_t pkt_poll_eventhandler(FAR struct net_driver_s *dev,
         {
           eventset |= POLLOUT;
         }
+
+#ifdef CONFIG_NET_TIMESTAMPING
+      /* Check for timestamping data */
+
+      if (!IOB_QEMPTY(&info->conn->errahead))
+        {
+          eventset |= POLLPRI | POLLERR;
+        }
+#endif
 
       /* Awaken the caller of poll() is requested event occurred. */
 
@@ -236,6 +245,13 @@ int pkt_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
     {
       cb->flags |= PKT_NEWDATA;
     }
+
+#ifdef CONFIG_NET_TIMESTAMPING
+  if ((fds->events & POLLPRI) != 0)
+    {
+      cb->flags |= PKT_NEWDATA;
+    }
+#endif
 
   /* Save the reference in the poll info structure as fds private as well
    * for use during poll teardown as well.

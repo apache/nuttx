@@ -151,6 +151,9 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
       case SO_TIMESTAMP:   /* Generates a timestamp in us for each incoming packet */
       case SO_TIMESTAMPNS: /* Generates a timestamp in ns for each incoming packet */
 #endif
+#ifdef CONFIG_NET_TIMESTAMPING
+      case SO_TIMESTAMPING: /* Timestamping options */
+#endif
         {
           sockopt_t optionset;
 

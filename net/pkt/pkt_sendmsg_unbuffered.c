@@ -131,6 +131,14 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           pstate->snd_sent          = pstate->snd_buflen;
           pstate->snd_conn->pendiob = dev->d_iob;
 
+#ifdef CONFIG_NET_TIMESTAMPING
+          if (_SO_GETOPT(pstate->snd_conn->sconn.s_options,
+                         SO_TIMESTAMPING))
+            {
+              dev->d_iob->io_conn = &pstate->snd_conn->sconn;
+            }
+#endif
+
           if (pstate->snd_sock->s_type == SOCK_DGRAM)
             {
               FAR struct eth_hdr_s *ethhdr = NETLLBUF;
