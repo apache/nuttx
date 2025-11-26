@@ -724,6 +724,9 @@ void rpmsg_device_created(FAR struct rpmsg_s *rpmsg)
 #ifdef CONFIG_RPMSG_WAKELOCK
   rpmsg_wakelock_init(rdev, &rpmsg->wakelock);
 #endif
+#ifdef CONFIG_RPMSG_HEAP
+  rpmsg_heap_init(rdev, &rpmsg->heap);
+#endif
 }
 
 void rpmsg_device_destroy(FAR struct rpmsg_s *rpmsg)
@@ -747,6 +750,10 @@ void rpmsg_device_destroy(FAR struct rpmsg_s *rpmsg)
 
 #ifdef CONFIG_RPMSG_WAKELOCK
   rpmsg_wakelock_deinit(&rpmsg->wakelock);
+#endif
+
+#ifdef CONFIG_RPMSG_HEAP
+  rpmsg_heap_deinit(&rpmsg->heap);
 #endif
 
   nxrmutex_lock(&rpmsg->lock);

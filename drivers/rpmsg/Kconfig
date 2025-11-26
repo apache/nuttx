@@ -117,6 +117,13 @@ config RPMSG_WAKELOCK
 		RPMSGIOC_ACQUIRE_WAKELOCK and RPMSGIOC_RELEASE_WAKELOCK ioctls.
 		Both sides of the link must enable it.
 
+config RPMSG_HEAP
+	bool "rpmsg heap manage support"
+	default n
+	---help---
+		This is for rpmsg heap manage, it can be used to allocate/free
+		shm for slave.
+
 config RPMSG_PANIC_DUMP_LEVEL
 	int "rpmsg panic dump level"
 	default 1 if DEFAULT_SMALL

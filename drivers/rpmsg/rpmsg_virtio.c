@@ -487,7 +487,9 @@ static FAR void *rpmsg_virtio_alloc_buf(FAR struct rpmsg_s *rpmsg,
   FAR struct rpmsg_virtio_priv_s *priv =
     (FAR struct rpmsg_virtio_priv_s *)rpmsg;
 
-  return virtio_malloc_buf(priv->vdev, size, align);
+  return priv->vdev->role == VIRTIO_DEV_DRIVER ?
+         virtio_malloc_buf(priv->vdev, size, align):
+         rpmsg_heap_alloc(&rpmsg->heap, size, align);
 }
 
 /****************************************************************************
@@ -500,7 +502,14 @@ static void rpmsg_virtio_free_buf(FAR struct rpmsg_s *rpmsg,
   FAR struct rpmsg_virtio_priv_s *priv =
     (FAR struct rpmsg_virtio_priv_s *)rpmsg;
 
-  virtio_free_buf(priv->vdev, addr);
+  if (priv->vdev->role == VIRTIO_DEV_DRIVER)
+    {
+      virtio_free_buf(priv->vdev, addr);
+    }
+  else
+    {
+      rpmsg_heap_free(&rpmsg->heap, addr);
+    }
 }
 
 /****************************************************************************
