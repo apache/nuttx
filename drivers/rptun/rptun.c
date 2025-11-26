@@ -1082,11 +1082,14 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
 
 static void rptun_dev_reset(FAR struct rptun_priv_s *priv, unsigned long val)
 {
+  int ret = -ENOTSUP;
+
   if (priv->dev->ops->reset)
     {
-      priv->dev->ops->reset(priv->dev, val);
+      ret = priv->dev->ops->reset(priv->dev, val);
     }
-  else
+
+  if (ret == -ENOTSUP)
     {
       rptun_set_status(priv, val);
     }
