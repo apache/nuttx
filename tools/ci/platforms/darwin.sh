@@ -92,8 +92,28 @@ arm64_gcc_toolchain() {
 
 avr_gcc_toolchain() {
   if ! type avr-gcc > /dev/null 2>&1; then
-    brew tap osx-cross/avr
-    brew install avr-gcc
+    # Latest version not available for Intel,
+    # so it needs to be built from source, which takes over an hour.
+    # The latest version prebuilt for Intel is 9.4.0
+    # This is a workaround for installation.
+
+    local basefile
+    basefile=avr-gcc@9-9.4.0_1
+    cd /usr/local/Homebrew
+
+    git checkout 4.6.3
+    cd "${NUTTXTOOLS}"
+    curl -O -L -s https://github.com/osx-cross/homebrew-avr/archive/refs/tags/${basefile}.tar.gz
+    tar zxf ${basefile}.tar.gz
+
+    cd "${NUTTXTOOLS}"/homebrew-avr-avr-gcc-9-9.4.0_1/Formula
+    brew install --formula ./avr-binutils.rb
+    brew install --formula ./avr-gcc@9.rb
+    cd ../..
+    rm -f ${basefile}.tar.gz
+    rm -rf homebrew-avr-avr-gcc-9-9.4.0_1
+    cd /usr/local/Homebrew
+    git checkout main
   fi
 
   command avr-gcc --version
@@ -132,7 +152,7 @@ bloaty() {
     # https://github.com/google/bloaty/pull/326
     # https://github.com/google/bloaty/pull/347
     # https://github.com/google/bloaty/pull/385
-    git checkout 8026607280ef139bc0ea806e88cfe4fd0af60bad
+    # git checkout 8026607280ef139bc0ea806e88cfe4fd0af60bad
     mkdir -p "${NUTTXTOOLS}"/bloaty
     cmake -B build/bloaty -GNinja -D BLOATY_PREFER_SYSTEM_CAPSTONE=NO -D CMAKE_INSTALL_PREFIX="${NUTTXTOOLS}"/bloaty
     cmake --build build/bloaty
