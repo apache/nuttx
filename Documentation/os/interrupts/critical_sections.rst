@@ -214,10 +214,11 @@ you only focus on specific feature, we isolate the crtimon features to differenc
 configurations. Allow you only open some of the features to minimum the side effect
 of the performance etc.
 
-The scheduler calls ``nxsched_switch_critmon()`` whenever the running thread
-changes.  It accounts for the elapsed execution time of the outgoing thread and
-starts timing the incoming thread.  It also updates pre-emption and
-critical-section timing across the context switch.
+The scheduler calls ``nxsched_suspend_critmon()`` for the outgoing thread and
+``nxsched_resume_critmon()`` for the incoming thread whenever the running
+thread changes.  Together they account for the elapsed execution time of the
+outgoing thread and start timing the incoming thread.  They also update
+pre-emption and critical-section timing across the context switch.
 
 The Critical Section Monitor is enabled with the following setting in the
 configurations::

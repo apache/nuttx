@@ -445,7 +445,8 @@ void nxsched_process_cpuload_ticks(clock_t ticks);
 void nxsched_switch_context(FAR struct tcb_s *from, FAR struct tcb_s *to);
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-void nxsched_switch_critmon(FAR struct tcb_s *from, FAR struct tcb_s *to);
+void nxsched_suspend_critmon(FAR struct tcb_s *tcb);
+void nxsched_resume_critmon(FAR struct tcb_s *tcb);
 #endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
