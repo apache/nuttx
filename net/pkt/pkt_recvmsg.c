@@ -185,6 +185,18 @@ static uint32_t pkt_recvfrom_eventhandler(FAR struct net_driver_s *dev,
     {
       /* If a new packet is available, then complete the read action. */
 
+#ifdef CONFIG_NET_TIMESTAMPING
+      if ((flags & PKT_NEWDATA) != 0 && dev->d_iob->io_conn != NULL)
+        {
+          pstate->pr_cb->flags = 0;
+          pstate->pr_cb->priv  = NULL;
+          pstate->pr_cb->event = NULL;
+          pstate->pr_result    = -EAGAIN;
+          nxsem_post(&pstate->pr_sem);
+        }
+      else
+#endif
+
       if ((flags & PKT_NEWDATA) != 0)
         {
           /* Copy the packet */
@@ -197,9 +209,9 @@ static uint32_t pkt_recvfrom_eventhandler(FAR struct net_driver_s *dev,
 
           /* Don't allow any further call backs. */
 
-          pstate->pr_cb->flags   = 0;
-          pstate->pr_cb->priv    = NULL;
-          pstate->pr_cb->event   = NULL;
+          pstate->pr_cb->flags = 0;
+          pstate->pr_cb->priv  = NULL;
+          pstate->pr_cb->event = NULL;
 
           /* Save the sender's address in the caller's 'from' location */
 
@@ -308,23 +320,56 @@ static ssize_t pkt_recvfrom_result(int result,
 }
 
 /****************************************************************************
- * Name: pkt_readahead
+ * Name: pkt_readdata
  *
  * Description:
- *   Copy the buffered read-ahead data to the user buffer.
+ *   Copy the buffered data to the user buffer based on the flag errmsg.
  *
  * Input Parameters:
  *   pstate       The state structure of the recv operation
  *
  * Returned Value:
- *   None
+ *   copy length or -ENODATA
  *
  * Assumptions:
  *   The network is locked.
  *
  ****************************************************************************/
 
-static inline void pkt_readahead(FAR struct pkt_recvfrom_s *pstate)
+static void append_timestamp(FAR struct pkt_recvfrom_s *pstate,
+                             FAR struct iob_s *iob)
+{
+#ifdef CONFIG_NET_TIMESTAMP
+  FAR struct pkt_conn_s *conn = pstate->pr_conn;
+  cmsg_store_timestamp(pstate->pr_msg, &iob->io_time,
+                       conn->sconn.s_options);
+#endif
+}
+
+#ifdef CONFIG_NET_TIMESTAMPING
+static void append_timestamping(FAR struct pkt_recvfrom_s *pstate,
+                                FAR struct iob_s *iob)
+{
+  FAR struct pkt_conn_s *conn = pstate->pr_conn;
+  struct timespec ts[3];
+
+  memset(&ts, 0, sizeof(ts));
+
+  ts[0].tv_sec = iob->io_time.tv_sec;
+  ts[0].tv_nsec = iob->io_time.tv_nsec;
+  ts[2].tv_sec = iob->io_time.tv_sec;
+  ts[2].tv_nsec = iob->io_time.tv_nsec;
+
+  cmsg_append(pstate->pr_msg, SOL_SOCKET, SO_TIMESTAMPING, &ts,
+              sizeof(ts));
+  pstate->pr_msg->msg_flags |= MSG_ERRQUEUE;
+}
+#endif
+
+static inline int pkt_readdata(FAR struct pkt_recvfrom_s *pstate,
+                            FAR struct iob_queue_s *iobq,
+                            CODE void (*tsfunc)(FAR struct pkt_recvfrom_s *,
+                                                FAR struct iob_s *))
 {
   FAR struct pkt_conn_s *conn = pstate->pr_conn;
   FAR struct iob_s *iob;
@@ -335,14 +380,11 @@ static inline void pkt_readahead(FAR struct pkt_recvfrom_s *pstate)
 
   pstate->pr_recvlen = -ENODATA;
 
-  if ((iob = iob_peek_queue(&conn->readahead)) != NULL)
+  if ((iob = iob_remove_queue(iobq)) != NULL)
     {
       DEBUGASSERT(iob->io_pktlen > 0);
 
-#ifdef CONFIG_NET_TIMESTAMP
-      cmsg_store_timestamp(pstate->pr_msg, &iob->io_time,
-                           conn->sconn.s_options);
-#endif
+
 
       /* Copy to user */
 
@@ -370,16 +412,14 @@ static inline void pkt_readahead(FAR struct pkt_recvfrom_s *pstate)
 
       ninfo("Received %d bytes (of %u)\n", recvlen, iob->io_pktlen);
 
-      /* Remove the I/O buffer chain from the head of the read-ahead
-       * buffer queue.
-       */
-
-      iob_remove_queue(&conn->readahead);
+      tsfunc(pstate, iob);
 
       /* And free the I/O buffer chain */
 
       iob_free_chain(iob);
     }
+
+    return pstate->pr_recvlen;
 }
 
 /****************************************************************************
@@ -462,14 +502,28 @@ ssize_t pkt_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   conn_dev_lock(&conn->sconn, dev);
 
+#ifdef CONFIG_NET_TIMESTAMPING
+  if (flags & MSG_ERRQUEUE)
+    {
+      if (!IOB_QEMPTY(&conn->errahead))
+        {
+          ret = pkt_readdata(&state, &conn->errahead, append_timestamping);
+        }
+      else
+        {
+          ret = -EAGAIN;
+        }
+    }
+  else
+#endif
+
   /* Check if there is buffered read-ahead data for this socket.  We may have
    * already received the response to previous command.
    */
 
   if (!IOB_QEMPTY(&conn->readahead))
     {
-      pkt_readahead(&state);
-      ret = pkt_recvfrom_result(ret, &state);
+      ret = pkt_readdata(&state, &conn->readahead, append_timestamp);
     }
   else if (_SS_ISNONBLOCK(conn->sconn.s_flags) ||
            (flags & MSG_DONTWAIT) != 0)
