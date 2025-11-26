@@ -212,9 +212,14 @@
    *          Do not set the LASTXFER-Bit at the last word of the next
    *          exchange, Flag is auto-resetting after the next LASTXFER
    *          condition. (see spi_exchange)
-   *   Bit 4: HWFEAT_LSBFIRST
+   *   Bit 4: HWFEAT_AUTO_CS_CONTROL
+   *          CS is automatically controlled by the Hardware spi controller
+   *          with programmable timings.
+   *   Bit 5: HWFEAT_INVERT_CS_LEVEL
+   *          Invert the CS level (active high)
+   *   Bit 6: HWFEAT_LSBFIRST
    *          Data transferred LSB first (default is MSB first)
-   *   Bit 5: Turn deferred trigger mode on or off.  Primarily used for DMA
+   *   Bit 7: Turn deferred trigger mode on or off.  Primarily used for DMA
    *          mode.  If a transfer is deferred then the DMA will not actually
    *          be triggered until a subsequent call to SPI_TRIGGER to set it
    *          off.
@@ -225,19 +230,21 @@
 #  endif
 
 #  ifdef CONFIG_SPI_CS_CONTROL
-#    define HWFEAT_FORCE_CS_CONTROL_MASK             (7 << 1)
+#    define HWFEAT_FORCE_CS_CONTROL_MASK             (31 << 1)
 #    define HWFEAT_FORCE_CS_INACTIVE_AFTER_TRANSFER  (1 << 1)
 #    define HWFEAT_FORCE_CS_ACTIVE_AFTER_TRANSFER    (1 << 2)
 #    define HWFEAT_ESCAPE_LASTXFER                   (1 << 3)
+#    define HWFEAT_AUTO_CS_CONTROL                   (1 << 4)
+#    define HWFEAT_INVERT_CS_LEVEL                   (1 << 5)
 #  endif
 
 #  ifdef CONFIG_SPI_BITORDER
-#    define HWFEAT_MSBFIRST                          (0 << 4)
-#    define HWFEAT_LSBFIRST                          (1 << 4)
+#    define HWFEAT_MSBFIRST                          (0 << 6)
+#    define HWFEAT_LSBFIRST                          (1 << 6)
 #  endif
 
 #  ifdef CONFIG_SPI_TRIGGER
-#    define HWFEAT_TRIGGER                           (1 << 5)
+#    define HWFEAT_TRIGGER                           (1 << 7)
 #  endif
 
 #else
