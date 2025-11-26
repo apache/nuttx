@@ -74,6 +74,9 @@ struct rpmsg_s
 #ifdef CONFIG_RPMSG_WAKELOCK
   struct rpmsg_endpoint        wakelock;
 #endif
+#ifdef CONFIG_RPMSG_HEAP
+  struct rpmsg_endpoint        heap;
+#endif
 #ifdef CONFIG_RPMSG_CHAR
   struct rpmsg_char_s          chr;
 #endif
@@ -155,6 +158,18 @@ void rpmsg_queue_rx_work(FAR struct rpmsg_s *rpmsg, uint8_t priority,
 
 int rpmsg_foreach(rpmsg_foreach_t handler, FAR void *args);
 void rpmsg_dump_epts(FAR struct rpmsg_device *rdev);
+
+#ifdef CONFIG_RPMSG_HEAP
+int rpmsg_heap_init(FAR struct rpmsg_device *rdev,
+                    FAR struct rpmsg_endpoint *ept);
+void rpmsg_heap_deinit(FAR struct rpmsg_endpoint *ept);
+FAR void *rpmsg_heap_alloc(FAR struct rpmsg_endpoint *ept,
+                           size_t size, size_t align);
+void rpmsg_heap_free(FAR struct rpmsg_endpoint *ept, FAR void *addr);
+#else
+#  define rpmsg_heap_alloc(ept, size, align) (NULL)
+#  define rpmsg_heap_free(ept, addr)
+#endif
 
 #endif /* CONFIG_RPMSG */
 #endif /* __DRIVERS_RPMSG_RPMSG_H */
