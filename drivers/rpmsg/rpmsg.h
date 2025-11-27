@@ -143,10 +143,10 @@ int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
 void rpmsg_unregister(FAR const char *path, FAR struct rpmsg_s *rpmsg);
 
 #ifdef CONFIG_RPMSG_WQUEUE_GLOBAL
-#  define rpmsg_init_wqueues(rpmsg) (0)
+#  define rpmsg_init_wqueues(rpmsg, priority) (0)
 #  define rpmsg_deinit_wqueues(rpmsg)
 #else
-int rpmsg_init_wqueues(FAR struct rpmsg_s *rpmsg);
+int rpmsg_init_wqueues(FAR struct rpmsg_s *rpmsg, uint8_t priority);
 void rpmsg_deinit_wqueues(FAR struct rpmsg_s *rpmsg);
 #endif
 
