@@ -410,7 +410,7 @@ RSA          No
 RTC          Yes
 SD/MMC       Yes    SPI based SD card driver
 SDIO         No
-SHA          Yes
+SHA          Yes    Also supports HMAC-SHA(1/256) 
 SPI          Yes
 SPIFLASH     Yes
 SPIRAM       Yes
