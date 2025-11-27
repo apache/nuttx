@@ -60,18 +60,28 @@ bool sched_idletask(void)
 {
   FAR struct tcb_s *rtcb = this_task();
 
-  DEBUGASSERT(rtcb);
-
-  /* The IDLE task TCB is distinguishable by a few things:
-   *
-   * (1) It always lies at the end of the task list,
-   * (2) It always has priority zero, and
-   * (3) It should have the TCB_FLAG_CPU_LOCKED flag set.
-   *
-   * In the non-SMP case, the IDLE task will also have PID=0, but that
-   * is not a portable test because there are multiple IDLE tasks with
-   * different PIDs in the SMP configuration.
+  /* If called early in the initialization sequence, the tasks lists may not
+   * have been initialized and, in that case, rtcb may be NULL.
    */
 
-  return is_idle_task(rtcb);
+  DEBUGASSERT(rtcb != NULL || !OSINIT_TASK_READY());
+  if (rtcb != NULL)
+    {
+      /* The IDLE task TCB is distinguishable by a few things:
+       *
+       * (1) It always lies at the end of the task list,
+       * (2) It always has priority zero, and
+       * (3) It should have the TCB_FLAG_CPU_LOCKED flag set.
+       *
+       * In the non-SMP case, the IDLE task will also have PID=0, but that
+       * is not a portable test because there are multiple IDLE tasks with
+       * different PIDs in the SMP configuration.
+       */
+
+      return is_idle_task(rtcb);
+    }
+
+  /* We must be on the IDLE thread if we are early in initialization */
+
+  return true;
 }
