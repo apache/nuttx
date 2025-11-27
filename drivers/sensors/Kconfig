@@ -93,24 +93,25 @@ config SENSORS_APDS9922
 	---help---
 		Enable driver support for the Broadcom APDS-9922 proximity and ambient light sensor.
 
+if SENSORS_APDS9922
+
 config APDS9922_I2C_FREQUENCY
 	int "APDS-9922 I2C frequency"
 	default 400000
-	depends on SENSORS_APDS9922
 
 config APDS9922_ALS_NPOLLWAITERS
 	int "APDS-9922 - number of ALS poll waiters"
 	default 2
-	depends on SENSORS_APDS9922
 	---help---
 		Sets the number of poll waiters for the ambient light sensor
 
 config APDS9922_PS_NPOLLWAITERS
 	int "APDS-9922 - number of PS poll waiters"
 	default 2
-	depends on SENSORS_APDS9922
 	---help---
 		Sets the number of poll waiters for the proximity sensor
+
+endif # SENSORS_APDS9922
 
 config SENSORS_AK09912
 	bool "Asahi AK09911/AK09912 Compass Sensor"
@@ -199,6 +200,11 @@ config SENSORS_BH1750FVI
 	---help---
 		Enable driver support for the Rohm BH1750FVI light sensor.
 
+config BH1750FVI_I2C_FREQUENCY
+	int "BH1750FVI I2C frequency"
+	default 400000
+	depends on SENSORS_BH1750FVI
+
 config SENSORS_NAU7802
 	bool "Adafruit NAU7802 ADC sensor support"
 	default n
@@ -219,11 +225,6 @@ config SENSORS_NAU7802_THREAD_STACKSIZE
 		The stack size for the worker threads that perform measurements.
 
 endif # SENSORS_NAU7802
-
-config BH1750FVI_I2C_FREQUENCY
-	int "BH1750FVI I2C frequency"
-	default 400000
-	depends on SENSORS_BH1750FVI
 
 config SENSORS_BMG160
 	bool "Bosch BMG160 Gyroscope Sensor support"
@@ -285,6 +286,7 @@ config BMI160_I2C_ADDR_69
 		If SDO pin is pulled to VDDIO, use 0x69
 
 endchoice # I2C Address
+
 endif # SENSORS_BMI160_I2C
 
 endif # SENSORS_BMI160
@@ -950,18 +952,18 @@ config SENSORS_LSM6DSO32
 	---help---
 		Enable driver support for the STMicro LSM6DSO32 IMU.
 
+if SENSORS_LSM6DSO32
+
 config SENSORS_LSM6DSO32_I2C_FREQUENCY
 	int "LSM6DSO32 frequency"
 	default 400000
 	range 1 400000
-	depends on SENSORS_LSM6DSO32
 	---help---
 		The I2C frequency used to communicate with the LSM6DSO32.
 
 config SENSORS_LSM6DSO32_THREAD_STACKSIZE
 	int "LSM6DSO32 worker thread stack size"
 	default 1024
-	depends on SENSORS_LSM6DSO32
 	---help---
 		The stack size for the worker threads that perform measurements.
 
@@ -969,7 +971,6 @@ config SENSORS_LSM6DSO32_ACCEL_ORB_BUFSIZE
 	int "LSM6DSO32 accelerometer uORB buffer size"
 	default 10
 	range 0 500
-	depends on SENSORS_LSM6DSO32
 	---help---
 		The circular buffer size for the accelerometer uORB measurements
 
@@ -977,9 +978,10 @@ config SENSORS_LSM6DSO32_GYRO_ORB_BUFSIZE
 	int "LSM6DSO32 gyro uORB buffer size"
 	default 10
 	range 0 500
-	depends on SENSORS_LSM6DSO32
 	---help---
 		The circular buffer size for the gyroscope uORB measurements
+
+endif # SENSORS_LSM6DSO32
 
 config SENSORS_LSM9DS1
 	bool "STMicro LSM9DS1 support"
@@ -1156,12 +1158,10 @@ config MCP9600_I2C_FREQUENCY
 	int "MCP9600 I2C frequency"
 	default 100000
 	range 10000 100000
-	depends on SENSORS_MCP9600
 
 config SENSORS_MCP9600_POLL
 	bool "MCP9600 polling"
 	default y
-	depends on SENSORS_MCP9600
 	---help---
 		Enable the worker thread for polling the MCP9600 and collecting
 		measurements
@@ -1169,7 +1169,6 @@ config SENSORS_MCP9600_POLL
 config MCP9600_THREAD_STACKSIZE
 	int "MCP9600 stack size"
 	default 1024
-	depends on SENSORS_MCP9600
 	---help---
 		Stack size of the worker thread polling the MCP9600 for measurements
 
@@ -1244,16 +1243,18 @@ config SENSORS_MS58XX
 	---help---
 		Enable driver support for MEAS MS58XX altimeters.
 
+if SENSORS_MS58XX
+
 config MS58XX_I2C_FREQUENCY
 	int "MS58XX I2C frequency"
 	default 400000
 	range 1 400000
-	depends on SENSORS_MS58XX
 
 config MS58XX_VDD
 	int "MEAS MS58XX VDD"
 	default 30
-	depends on SENSORS_MS58XX
+
+endif # SENSORS_MS58XX
 
 config SENSORS_MPL115A
 	bool "Freescale MPL115A Barometer Sensor support"
