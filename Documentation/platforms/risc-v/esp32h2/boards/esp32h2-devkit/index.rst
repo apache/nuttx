@@ -108,6 +108,12 @@ show in units of mV)::
     3: channel: 2 value: 1
     4: channel: 3 value: 0
 
+autopm
+------
+
+This configuration makes the device automatically enter the low power consumption mode
+when in the idle state, powering off the cpu and other peripherals.
+
 bmp180
 ------
 
