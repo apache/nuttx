@@ -1352,6 +1352,38 @@ config W25_SPIFREQUENCY
 	int "W25 SPI Frequency"
 	default 20000000
 
+config W25_START_DELAY
+	int "W25 SPI start delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 0
+	---help---
+		The delay between CS active and first CLK. In ns.
+
+config W25_STOP_DELAY
+	int "W25 SPI stop delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 0
+	---help---
+		The delay between last CLK and CS inactive. In ns.
+
+config W25_CS_DELAY
+	int "W25 SPI chip select delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 0
+	---help---
+		The delay between CS inactive and CS active again. In ns.
+
+config W25_IFDELAY
+	int "W25 SPI frames delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 0
+	---help---
+		The delay between consecutive frames. In ns.
+
 config W25_READONLY
 	bool "W25 Read-Only FLASH"
 	default n
