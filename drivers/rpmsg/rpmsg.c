@@ -312,7 +312,7 @@ static void rpmsg_rx_worker(FAR void *arg)
 }
 
 static int rpmsg_create_wqueues(FAR struct rpmsg_wqueue_s *wqueues,
-                                FAR const char *name)
+                                FAR const char *name, uint8_t priority)
 {
   FAR struct rpmsg_wqueue_s *wqueue;
   char wqname[64];
@@ -324,11 +324,8 @@ static int rpmsg_create_wqueues(FAR struct rpmsg_wqueue_s *wqueues,
       snprintf(wqname, sizeof(wqname), "rpmsg-%.*s-%d", RPMSG_NAME_SIZE,
                name, i);
       wqueue = &wqueues[i];
-      wqueue->kwqueue = work_queue_create(wqname,
-                                          CONFIG_RPMSG_WQUEUE_PRIORITY + i,
-                                          NULL,
-                                          CONFIG_RPMSG_WQUEUE_STACKSIZE,
-                                          1);
+      wqueue->kwqueue = work_queue_create(wqname, priority + i, NULL,
+                                          CONFIG_RPMSG_WQUEUE_STACKSIZE, 1);
       if (wqueue->kwqueue == NULL)
         {
           rpmsgerr("rpmsg wqueue [%d] create failed\n", i);
@@ -353,7 +350,7 @@ void rpmsg_initialize(void)
 {
   rpmsg_procfs_initialize();
 #ifdef CONFIG_RPMSG_WQUEUE_GLOBAL
-  rpmsg_create_wqueues(g_rpmsg_wqueues, "glb");
+  rpmsg_create_wqueues(g_rpmsg_wqueues, "glb", CONFIG_RPMSG_WQUEUE_PRIORITY);
 #endif
 }
 
@@ -1016,9 +1013,9 @@ void rpmsg_modify_signals(FAR struct rpmsg_s *rpmsg,
 }
 
 #ifndef CONFIG_RPMSG_WQUEUE_GLOBAL
-int rpmsg_init_wqueues(FAR struct rpmsg_s *rpmsg)
+int rpmsg_init_wqueues(FAR struct rpmsg_s *rpmsg, uint8_t priority)
 {
-  return rpmsg_create_wqueues(rpmsg->wqueues, rpmsg->cpuname);
+  return rpmsg_create_wqueues(rpmsg->wqueues, rpmsg->cpuname, priority);
 }
 
 void rpmsg_deinit_wqueues(FAR struct rpmsg_s *rpmsg)
