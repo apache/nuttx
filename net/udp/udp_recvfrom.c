@@ -67,19 +67,6 @@ struct udp_recvfrom_s
  * Private Functions
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TIMESTAMP
-static void udp_store_cmsg_timestamp(FAR struct udp_recvfrom_s *pstate,
-                                     FAR struct timespec *timestamp)
-{
-  FAR struct msghdr *msg = pstate->ir_msg;
-  struct timeval tv;
-
-  TIMESPEC_TO_TIMEVAL(&tv, timestamp);
-  cmsg_append(msg, SOL_SOCKET, SO_TIMESTAMP,
-              &tv, sizeof(struct timeval));
-}
-#endif
-
 #ifdef CONFIG_NET_SOCKOPTS
 static void udp_recvpktinfo(FAR struct udp_recvfrom_s *pstate,
                             FAR void *srcaddr, uint8_t ifindex)
@@ -224,7 +211,8 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
 
       if (conn->timestamp)
         {
-          udp_store_cmsg_timestamp(pstate, &iob->io_time);
+          cmsg_store_timestamp(pstate->ir_msg, &iob->io_time,
+                               conn->sconn.s_options);
         }
 #endif
 
@@ -465,7 +453,8 @@ static uint32_t udp_eventhandler(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_TIMESTAMP
           if (pstate->ir_conn->timestamp)
             {
-              udp_store_cmsg_timestamp(pstate, &dev->d_iob->io_time);
+              cmsg_store_timestamp(pstate->ir_msg, &dev->d_iob->io_time,
+                                   pstate->ir_conn->sconn.s_options);
             }
 #endif
 

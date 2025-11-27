@@ -66,46 +66,6 @@ struct pkt_recvfrom_s
 };
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: pkt_store_cmsg_timestamp
- *
- * Description:
- *   Store the timestamp in the cmsg
- *
- * Input Parameters:
- *   pstate     Recicve state information
- *   timestamp  Timestamp  information
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_TIMESTAMP
-static void pkt_store_cmsg_timestamp(FAR struct pkt_recvfrom_s *pstate,
-                                     FAR struct timespec *timestamp)
-{
-  FAR struct msghdr *msg = pstate->pr_msg;
-  struct timeval tv;
-
-  if (_SO_GETOPT(pstate->pr_conn->sconn.s_options, SO_TIMESTAMPNS))
-    {
-      cmsg_append(msg, SOL_SOCKET, SO_TIMESTAMPNS, timestamp,
-                  sizeof(struct timespec));
-    }
-  else
-    {
-      TIMESPEC_TO_TIMEVAL(&tv, timestamp);
-      cmsg_append(msg, SOL_SOCKET, SO_TIMESTAMP, &tv,
-                  sizeof(struct timeval));
-    }
-}
-#endif
-
-/****************************************************************************
  * Name: pkt_add_recvlen
  *
  * Description:
@@ -158,13 +118,8 @@ static void pkt_recvfrom_newdata(FAR struct net_driver_s *dev,
   size_t recvlen;
 
 #ifdef CONFIG_NET_TIMESTAMP
-  /* Unpack stored timestamp if SO_TIMESTAMP socket option is enabled */
-
-  if (_SO_GETOPT(pstate->pr_conn->sconn.s_options, SO_TIMESTAMP) ||
-      _SO_GETOPT(pstate->pr_conn->sconn.s_options, SO_TIMESTAMPNS))
-    {
-      pkt_store_cmsg_timestamp(pstate, &dev->d_iob->io_time);
-    }
+  cmsg_store_timestamp(pstate->pr_msg, &dev->d_iob->io_time,
+                       pstate->pr_conn->sconn.s_options);
 #endif
 
   recvlen = MIN(pstate->pr_msg->msg_iov->iov_len, dev->d_len);
@@ -385,15 +340,8 @@ static inline void pkt_readahead(FAR struct pkt_recvfrom_s *pstate)
       DEBUGASSERT(iob->io_pktlen > 0);
 
 #ifdef CONFIG_NET_TIMESTAMP
-      /* Unpack stored timestamp if SO_TIMESTAMP/SO_TIMESTAMPNS socket option
-       * is enabled
-       */
-
-      if (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP) ||
-          _SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMPNS))
-        {
-          pkt_store_cmsg_timestamp(pstate, &iob->io_time);
-        }
+      cmsg_store_timestamp(pstate->pr_msg, &iob->io_time,
+                           conn->sconn.s_options);
 #endif
 
       /* Copy to user */

@@ -28,6 +28,7 @@
 
 #include <sys/socket.h>
 
+#include "socket/socket.h"
 #include "utils/utils.h"
 
 /****************************************************************************
@@ -60,7 +61,7 @@
  ****************************************************************************/
 
 FAR void *cmsg_append(FAR struct msghdr *msg, int level, int type,
-                      FAR void *value, int value_len)
+                      FAR const void *value, int value_len)
 {
   FAR struct cmsghdr *cmsg;
   unsigned long cmsgspace = CMSG_SPACE(value_len);
@@ -86,3 +87,37 @@ FAR void *cmsg_append(FAR struct msghdr *msg, int level, int type,
 
   return cmsgdata;
 }
+
+/****************************************************************************
+ * Name: cmsg_store_timestamp
+ *
+ * Description:
+ *   Store the timestamp in the cmsg
+ *
+ * Input Parameters:
+ *   msg    - Pointer to the msghdr containing ancillary data (CMSG).
+ *   tstamp - Timestamp information.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TIMESTAMP
+void cmsg_store_timestamp(FAR struct msghdr *msg,
+                          FAR const struct timespec *tstamp, sockopt_t opt)
+{
+  if (_SO_GETOPT(opt, SO_TIMESTAMP))
+    {
+      struct timeval tv;
+      TIMESPEC_TO_TIMEVAL(&tv, tstamp);
+      cmsg_append(msg, SOL_SOCKET, SO_TIMESTAMP, &tv,
+                  sizeof(struct timeval));
+    }
+  else if (_SO_GETOPT(opt, SO_TIMESTAMPNS))
+    {
+      cmsg_append(msg, SOL_SOCKET, SO_TIMESTAMPNS, tstamp,
+                  sizeof(struct timespec));
+    }
+}
+#endif /* CONFIG_NET_TIMESTAMP */
