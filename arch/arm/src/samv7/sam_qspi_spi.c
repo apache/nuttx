@@ -112,6 +112,11 @@ static void qspi_spi_select(struct spi_dev_s *dev, uint32_t devid,
                             bool selected);
 static uint32_t qspi_spi_setfrequency(struct spi_dev_s *dev,
                                       uint32_t frequency);
+#ifdef CONFIG_SPI_DELAY_CONTROL
+static int qspi_spi_setdelay(struct spi_dev_s *dev, uint32_t startdelay,
+                             uint32_t stopdelay, uint32_t csdelay,
+                             uint32_t ifdelay);
+#endif
 static void qspi_spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
 static void qspi_spi_setbits(struct spi_dev_s *dev, int nbits);
 static uint32_t qspi_spi_send(struct spi_dev_s *dev, uint32_t wd);
@@ -135,6 +140,9 @@ static const struct spi_ops_s g_spiops =
   .lock              = qspi_spi_lock,
   .select            = qspi_spi_select,
   .setfrequency      = qspi_spi_setfrequency,
+#ifdef CONFIG_SPI_DELAY_CONTROL
+  .setdelay          = qspi_spi_setdelay,
+#endif
   .setmode           = qspi_spi_setmode,
   .setbits           = qspi_spi_setbits,
   .status            = sam_qspi_status,
@@ -397,6 +405,102 @@ static uint32_t qspi_spi_setfrequency(struct spi_dev_s *dev,
   spiinfo("Frequency %ld->%ld\n", frequency, actual);
   return actual;
 }
+
+/****************************************************************************
+ * Name: qspi_spi_setdelay
+ *
+ * Description:
+ *   Set the QSPI Delays in nanoseconds. Optional.
+ *
+ * Input Parameters:
+ *   dev        - Device-specific state data
+ *   startdelay - The delay between CS active and first CLK
+ *   stopdelay  - The delay between last CLK and CS inactive
+ *   csdelay    - The delay between CS inactive and CS active again
+ *   ifdelay    - The delay between frames
+ *
+ * Returned Value:
+ *   Returns 0 if ok
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_DELAY_CONTROL
+static int qspi_spi_setdelay(struct spi_dev_s *dev, uint32_t startdelay,
+                             uint32_t stopdelay, uint32_t csdelay,
+                             uint32_t ifdelay)
+{
+  struct sam_spidev_s *spi = &g_spidev;
+  uint64_t dlybs;
+  uint64_t dlybct;
+  uint64_t dlybcs;
+  uint32_t regval;
+
+  spiinfo("startdelay=%" PRIu32 "\n", startdelay);
+  spiinfo("stopdelay=%" PRIu32 "\n", stopdelay);
+  spiinfo("csdelay=%" PRIu32 "\n", csdelay);
+  spiinfo("ifdelay=%" PRIu32 "\n", ifdelay);
+
+  /* startdelay = DLYBS: Delay Before SPCK.
+   * This field defines the delay from NPCS valid to the first valid SPCK
+   * transition. When DLYBS equals zero, the NPCS valid to SPCK transition is
+   * 1/2 the SPCK clock period.
+   * Otherwise, the following equations determine the delay:
+   *
+   *   Delay Before SPCK = DLYBS / SPI_CLK
+   *
+   * For a 2uS delay
+   *
+   *   DLYBS = SPI_CLK * 0.000002 = SPI_CLK / 500000
+   *
+   * TODO: Check for boundaries!
+   */
+
+  dlybs   = (SAM_QSPI_CLOCK * startdelay) / 1000000000;
+  regval  = qspi_getreg(spi, SAM_QSPI_SCR_OFFSET);
+  regval &= ~QSPI_SCR_DLYBS_MASK;
+  regval |= (uint32_t) dlybs << QSPI_SCR_DLYBS_SHIFT;
+  qspi_putreg(spi, regval, SAM_QSPI_SCR_OFFSET);
+
+  /* ifdelay = DLYBCT: Delay Between Consecutive Transfers.
+   * This field defines the delay between two consecutive transfers with the
+   * same peripheral without removing the chip select. The delay is always
+   * inserted after each transfer and before removing the chip select if
+   * needed.
+   *
+   *   Delay Between Consecutive Transfers = (32 x DLYBCT) / SPI_CLK
+   *
+   * For a 5uS delay:
+   *
+   *   DLYBCT = SPI_CLK * 0.000005 / 32 = SPI_CLK / 200000 / 32
+   */
+
+  dlybct  = (SAM_QSPI_CLOCK * ifdelay) / 1000000000 / 32;
+  regval  = qspi_getreg(spi, SAM_QSPI_MR_OFFSET);
+  regval &= ~(QSPI_MR_DLYBCT_MASK);
+  regval |= (uint32_t) dlybct << QSPI_MR_DLYBCT_SHIFT;
+  qspi_putreg(spi, regval, SAM_QSPI_MR_OFFSET);
+
+  /* csdelay = DLYBCS: Delay Between Chip Selects.
+   * This field defines the delay between the inactivation and the activation
+   * of NPCS. The DLYBCS time guarantees non-overlapping chip selects and
+   * solves bus contentions in case of peripherals having long data float
+   * times. If DLYBCS is lower than 6, six peripheral clock periods are
+   * inserted by default.
+   *
+   *   Delay Between Chip Selects = DLYBCS / SPI_CLK
+   *
+   *   DLYBCS = SPI_CLK * Delay
+   */
+
+  dlybcs  = (SAM_QSPI_CLOCK * csdelay) / 1000000000;
+  regval  = qspi_getreg(spi, SAM_QSPI_MR_OFFSET);
+  regval &= ~(QSPI_MR_DLYCS_MASK);
+  regval |= (uint32_t) dlybcs << QSPI_MR_DLYCS_SHIFT;
+  qspi_putreg(spi, regval, SAM_QSPI_MR_OFFSET);
+
+  return 0;
+}
+#endif
 
 /****************************************************************************
  * Name: qspi_spi_setmode
