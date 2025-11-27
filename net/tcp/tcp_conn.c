@@ -1175,9 +1175,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
        * Interrupts should already be disabled in this context.
        */
 
-      tcp_conn_list_lock();
-      dq_addlast(&conn->sconn.node, &g_active_tcp_connections);
-      tcp_conn_list_unlock();
+      tcp_add_active_conn(conn);
 
       tcp_update_retrantimer(conn, TCP_RTO);
     }
@@ -1482,13 +1480,6 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   sq_init(&conn->write_q);
   sq_init(&conn->unacked_q);
 #endif
-
-  /* And, finally, put the connection structure into the active list. */
-
-  tcp_conn_list_lock();
-  dq_addlast(&conn->sconn.node, &g_active_tcp_connections);
-  tcp_conn_list_unlock();
-
   return OK;
 }
 
@@ -1516,6 +1507,24 @@ void tcp_conn_list_lock(void)
 void tcp_conn_list_unlock(void)
 {
   NET_BUFPOOL_UNLOCK(g_tcp_connections);
+}
+
+/****************************************************************************
+ * Name: tcp_add_active_conn
+ *
+ * Description:
+ *   Add the connection to the list of active TCP connections
+ *
+ * Assumptions:
+ *   This function is called from normal user level code.
+ *
+ ****************************************************************************/
+
+void tcp_add_active_conn(FAR struct tcp_conn_s *conn)
+{
+  tcp_conn_list_lock();
+  dq_addlast(&conn->sconn.node, &g_active_tcp_connections);
+  tcp_conn_list_unlock();
 }
 
 /****************************************************************************

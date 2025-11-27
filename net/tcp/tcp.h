@@ -699,6 +699,19 @@ int tcp_connect(FAR struct tcp_conn_s *conn,
                 FAR const struct sockaddr *addr);
 
 /****************************************************************************
+ * Name: tcp_add_active_conn
+ *
+ * Description:
+ *   Add the connection to the list of active TCP connections
+ *
+ * Assumptions:
+ *   This function is called from normal user level code.
+ *
+ ****************************************************************************/
+
+void tcp_add_active_conn(FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
  * Name: tcp_removeconn
  *
  * Description:

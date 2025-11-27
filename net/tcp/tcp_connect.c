@@ -359,6 +359,7 @@ int psock_tcp_connect(FAR struct socket *psock,
 
       if (_SS_ISNONBLOCK(conn->sconn.s_flags))
         {
+          tcp_add_active_conn(conn);
           ret = -EINPROGRESS;
         }
       else
@@ -366,6 +367,7 @@ int psock_tcp_connect(FAR struct socket *psock,
           /* Set up the callbacks in the connection */
 
           conn_dev_lock(&conn->sconn, conn->dev);
+          tcp_add_active_conn(conn);
           ret = psock_setup_callbacks(psock, &state);
           if (ret >= 0)
             {
