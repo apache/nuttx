@@ -74,6 +74,18 @@ show in units of mV)::
     3: channel: 2 value: 0
     4: channel: 3 value: 0
 
+autopm
+------
+
+This configuration makes the device automatically enter the low power consumption mode
+when in the idle state, powering off the cpu and other peripherals.
+
+In minimum power save mode, the station wakes up every DTIM to receive a beacon. The broadcast
+data will not be lost because it is transmitted after DTIM. However, it can not save much more
+power if DTIM is short as the DTIM is determined by the access point.
+
+During ping operation power consumption should drop from 90-100mA to 40-50mA.
+
 ble
 ---
 
