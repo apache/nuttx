@@ -445,7 +445,7 @@ LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 CELFFLAGS = $(CFLAGS) -fvisibility=hidden
 CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
 
-LDELFFLAGS = -e __start
+LDELFFLAGS = -e _start
 
 ifeq ($(CONFIG_BINFMT_ELF_RELOCATABLE),y)
   LDELFFLAGS += -r
@@ -455,6 +455,13 @@ ifeq ($(CONFIG_ARCH_RV32),y)
   LDELFFLAGS += --oformat elf32-littleriscv
 else
   LDELFFLAGS += --oformat elf64-littleriscv
+endif
+
+ifneq ($(CONFIG_BUILD_KERNEL),y)
+  # Flat build and protected elf entry point use crt0,
+  # Kernel build will use apps/import/scripts/crt0
+
+  LDELFFLAGS += $(TOPDIR)$(DELIM)arch$(DELIM)risc-v$(DELIM)src$(DELIM)crt0.o
 endif
 
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
