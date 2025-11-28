@@ -118,7 +118,7 @@ ifneq ($(CONFIG_UP),y)
 CMN_CSRCS += arm64_cpustart.c
 endif
 
-ifeq ($(CONFIG_SMP),y)
+ifneq ($(CONFIG_UP),y)
 CMN_CSRCS += arm64_smpcall.c
 endif
 

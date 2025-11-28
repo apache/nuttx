@@ -67,11 +67,13 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SMP
 int arm64_smp_sched_handler(int irq, void *context, void *arg)
 {
   nxsched_process_delivered(this_cpu());
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: up_send_smp_sched

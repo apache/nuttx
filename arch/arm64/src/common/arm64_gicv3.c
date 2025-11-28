@@ -1063,6 +1063,8 @@ static void arm64_gic_init(void)
 
 #ifdef CONFIG_SMP
   up_enable_irq(GIC_SMP_SCHED);
+#endif
+#ifndef CONFIG_UP
   up_enable_irq(GIC_SMP_CALL);
 #endif
 }
