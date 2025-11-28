@@ -198,6 +198,8 @@
 #define AUDIO_SUBFMT_PCM_U32_BE            0x11
 #define AUDIO_SUBFMT_PCM_S32_LE            0x12
 #define AUDIO_SUBFMT_PCM_S32_BE            0x13
+#define AUDIO_SUBFMT_PCM_FLOAT_LE          0x14
+#define AUDIO_SUBFMT_PCM_FLOAT_BE          0x15
 
 #define AUDIO_SUBFMT_MIDI_0                0x01
 #define AUDIO_SUBFMT_MIDI_1                0x02
