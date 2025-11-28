@@ -1013,6 +1013,15 @@ config IMX9_ENET_USE_OTP_MAC
 	default n
 	depends on IMX9_ENET
 
+config IMX9_ENET_HPWORK
+	bool "Use high priority work queue for ethernet"
+	depends on IMX9_ENET
+	depends on SCHED_HPWORK
+	default n
+	---help---
+		Use high-priority work-queue for ethernet packet handling.
+		Enable if low-latency ethernet packet handling is required.
+
 config IMX9_ENET1_OTP_MAC_ADDR
 	hex "MAC address offset in OCOTP"
 	default 0x4ec

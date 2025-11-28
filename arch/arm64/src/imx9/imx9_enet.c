@@ -74,15 +74,22 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* If processing is not done at the interrupt level, then work queue support
- * is required.
+/* Select work queue for normal operation */
+
+#  if defined(CONFIG_IMX9_ENET_HPWORK)
+#    define ETHWORK HPWORK
+#  else
+#    define ETHWORK LPWORK
+#  endif
+
+/* LPWORK support is always required. Even if HPWORK were used for normal
+ * operation, timeouts are only handled in LPWORK since phy communication
+ * might cause delays due to polling
  */
 
-#if !defined(CONFIG_SCHED_LPWORK)
-#  error LPWORK queue support is required
-#endif
-
-#define ETHWORK LPWORK
+#  if !defined(CONFIG_SCHED_LPWORK)
+#    error LPWORK queue support is required
+#  endif
 
 /* We need at least two TX buffers for reliable operation */
 
@@ -1282,10 +1289,13 @@ static void imx9_txtimeout_expiry(wdparm_t arg)
   priv->ints = 0;
 
   /* Schedule to perform the TX timeout processing on the worker thread,
-   * canceling any pending interrupt work.
+   * canceling any pending interrupt work. Note: this runs always in the
+   * low-priority queue instead of ETHWORK. It is too intrusive for the
+   * high-priority queue, running ifdown / ifup sequence and communicating
+   * with PHY.
    */
 
-  work_queue(ETHWORK, &priv->irqwork, imx9_txtimeout_work, priv, 0);
+  work_queue(LPWORK, &priv->irqwork, imx9_txtimeout_work, priv, 0);
 }
 
 /****************************************************************************
