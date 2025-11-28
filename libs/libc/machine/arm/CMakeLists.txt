@@ -48,6 +48,11 @@ elseif(CONFIG_ARCH_ARMV8R) # All ARMv8-R
   add_subdirectory(armv8-r)
 endif()
 
+list(APPEND SRCS aeabi_memclr.c aeabi_memclr4.c aeabi_memclr8.c)
+list(APPEND SRCS aeabi_memcpy.c aeabi_memcpy4.c aeabi_memcpy8.c)
+list(APPEND SRCS aeabi_memmove.c aeabi_memmove4.c aeabi_memmove8.c)
+list(APPEND SRCS aeabi_memset.c aeabi_memset4.c aeabi_memset8.c)
+
 if(NOT CONFIG_LIBSUPCXX_TOOLCHAIN)
   list(APPEND SRCS arch_atexit.c)
 endif()
