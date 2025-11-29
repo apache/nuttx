@@ -418,6 +418,12 @@ ifeq ($(CONFIG_SENSORS_MPU9250),y)
   CSRCS += mpu9250_uorb.c
 endif
 
+# QMI8658 6-axis IMU
+
+ifeq ($(CONFIG_SENSORS_QMI8658),y)
+  CSRCS += qmi8658_uorb.c
+endif
+
 # Quadrature encoder upper half
 
 ifeq ($(CONFIG_SENSORS_QENCODER),y)
