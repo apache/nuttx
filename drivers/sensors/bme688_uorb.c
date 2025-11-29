@@ -49,6 +49,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Only float data type supported now */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  error fixed-point data type not supported yet
+#endif
+
 #define BME688_ADDR                0x76 /* I2C Slave Address */
 #define BME688_FREQ                CONFIG_BME688_I2C_FREQUENCY
 #define BME688_DEVID               0x61

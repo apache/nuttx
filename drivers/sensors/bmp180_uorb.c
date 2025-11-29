@@ -37,6 +37,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Only float data type supported now */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  error fixed-point data type not supported yet
+#endif
+
 #define BMP180_MIN_INTERVAL 30000
 
 /****************************************************************************

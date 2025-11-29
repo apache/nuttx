@@ -49,6 +49,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Only float data type supported now */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  error fixed-point data type not supported yet
+#endif
+
 #define CONSTANTS_ONE_G 9.8f
 
 /****************************************************************************
