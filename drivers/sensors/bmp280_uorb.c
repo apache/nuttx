@@ -45,12 +45,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Only float data type supported now */
-
-#ifdef CONFIG_SENSORS_USE_B16
-#  error fixed-point data type not supported yet
-#endif
-
 #ifdef  CONFIG_BMP280_I2C_ADDR_76
 #define BMP280_ADDR         0x76
 #else
@@ -665,8 +659,8 @@ static int bmp280_fetch(FAR struct sensor_lowerhalf_s *lower,
   clock_systime_timespec(&ts);
 
   baro_data.timestamp = 1000000ull * ts.tv_sec + ts.tv_nsec / 1000;
-  baro_data.pressure = press / 100.0f;
-  baro_data.temperature = temp / 100.0f;
+  baro_data.pressure = sensor_data_divi(press, 100);
+  baro_data.temperature = sensor_data_divi(temp, 100);
 
   memcpy(buffer, &baro_data, sizeof(baro_data));
 
