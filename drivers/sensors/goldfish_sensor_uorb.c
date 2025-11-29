@@ -44,6 +44,31 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Only float data type supported now */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  error fixed-point data type not supported yet
+#endif
+
+#define GOLDFISH_ACCELERATION 0
+#define GOLDFISH_GYROSCOPE 1
+#define GOLDFISH_MAGNETIC_FIELD 2
+#define GOLDFISH_ORIENTATION 3
+#define GOLDFISH_AMBIENT_TEMPERATURE 4
+#define GOLDFISH_PROXIMITY 5
+#define GOLDFISH_LIGHT 6
+#define GOLDFISH_PRESSURE 7
+#define GOLDFISH_RELATIVE_HUMIDITY 8
+#define GOLDFISH_MAGNETIC_FIELD_UNCALIBRATED 9
+#define GOLDFISH_GYROSCOPE_UNCALIBRATED 10
+#define GOLDFISH_HINGE_ANGLE0 11
+#define GOLDFISH_HINGE_ANGLE1 12
+#define GOLDFISH_HINGE_ANGLE2 13
+#define GOLDFISH_HEART_RATE 14
+#define GOLDFISH_RGBC_LIGHT 15
+#define GOLDFISH_WRIST_TILT 16
+#define GOLDFISH_ACCELERATION_UNCALIBRATED 17
+
 #define GOLDFISH_LIST_SENSOR_CMD "list-sensors"
 
 /****************************************************************************
