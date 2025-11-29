@@ -74,6 +74,7 @@ Drivers that are available also with the new sensor framework are marked with ``
 - sht3x
 - sps30
 - t67xx
+- :doc:`tc74ax`
 - veml6070
 - vl53l1x
 - xen1210

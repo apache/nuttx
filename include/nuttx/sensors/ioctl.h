@@ -216,9 +216,14 @@
 #define SNIOC_DISTANCELONG         _SNIOC(0x0061) /* Arg: None */
 #define SNIOC_TEMPUPDATE           _SNIOC(0x0063) /* Arg: b16_t value */
 
-/* IOCTL commands unique to the ISL29023 */
+/* IOCTL command originally unique to the ISL29023,
+ * now used by multiple drivers.
+ */
 
 #define SNIOC_SET_OPERATIONAL_MODE _SNIOC(0x0064) /* Arg: uint8_t value */
+
+/* IOCTL commands unique to the ISL29023 */
+
 #define SNIOC_SET_RESOLUTION       _SNIOC(0x0065) /* Arg: uint8_t value */
 #define SNIOC_SET_RANGE            _SNIOC(0x0066) /* Arg: uint8_t value */
 
@@ -510,6 +515,14 @@
 #define SNIOC_WARM_START              _SNIOC(0X00A6)
 #define SNIOC_COLD_START              _SNIOC(0X00A7)
 #define SNIOC_FULL_COLD_START         _SNIOC(0X00A8)
+
+/* IOCTL commands unique to TC74Ax */
+
+/* Command:      SNIOC_SET_OPERATIONAL_MODE
+ * Description:  Control power mode: Operating / Standby
+ *               Reuse from ISL29023
+ * Arg:          tc74ax_operation_mode_e pointer
+ */
 
 /****************************************************************************
  * Public types

@@ -344,6 +344,10 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS tmp112.c)
     endif()
 
+    if(CONFIG_SENSORS_TC74AX)
+      list(APPEND SRCS tc74ax.c)
+    endif()
+
   endif() # CONFIG_I2C
 
   # These drivers depend on SPI support

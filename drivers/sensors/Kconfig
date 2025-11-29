@@ -2152,4 +2152,106 @@ config TMP112_I2C_FREQUENCY
 
 endif #SENSORS_TMP112
 
+config SENSORS_TC74AX
+	bool "Microchip TC74Ax Digital Thermal Sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for Microchip TC74Ax Digital Thermal Sensor.
+
+		Say Y if your board uses these sensors
+
+if SENSORS_TC74AX
+
+config SENSORS_TC74AX_I2C_FREQ
+	int "TC74Ax I2C frequency"
+	default 25000
+	range 10000 100000
+	---help---
+		I2C clock frequency used when communicating with this sensor.
+		According to the datasheet, the range from minimal to maximal
+		frequency is 10-100kHz.
+
+choice
+	prompt "TC74Ax Power Management"
+	default SENSORS_TC74AX_CLOSE_STANDBY
+	---help---
+		Select how the driver should manage power state of the sensor
+
+config SENSORS_TC74AX_CLOSE_STANDBY
+	bool "Keep the device in standby mode until opened"
+		---help---
+		Select this option to make the driver automatically keep
+		the sensor in standby mode from startup, until corresponding
+		character device is opened.
+
+		When that happens, the driver wakes the sensor from standby
+		mode to running mode. As soon as the character device is closed
+		again, the driver will put the sensor back to standby mode.
+
+config SENSORS_TC74AX_POWER_IOCTL
+	bool "Provide ioctl() interface for power management"
+		---help---
+		The driver will provide ioctl() call usable to manage power state
+		of the sensor.
+
+config SENSORS_TC74AX_POWER_NONE
+	bool "No power management"
+		---help---
+		The driver will provide no options to manage power state
+		of the sensor. It will be kept in its initial state.
+
+endchoice
+
+if SENSORS_TC74AX_POWER_IOCTL
+
+config SENSORS_TC74AX_RESET_STANDBY
+	bool "Put the device to standby mode during startup"
+	default n
+	---help---
+		The sensor should be in running state when it resets. Nevertheless,
+		the driver attempts to wake it up from standby during initialization.
+		Select this option to put the sensor into standby mode instead.
+
+		This configuration option is only available when the power management
+		is done manually using ioctl() calls. (It is implied if the device
+		is always in standby mode until opened and would make the device
+		unusable when no power management is provided.)
+
+endif # SENSORS_TC74AX_POWER_IOCTL
+
+config SENSORS_TC74AX_MULTIMASTER
+	bool "Enable multimaster mode"
+	default n
+	---help---
+		If this option is NOT selected, the driver assumes this MCU
+		is the only master on every I2C bus (or, at least, on every
+		I2C bus with a TC74Ax device connected to it.)
+
+		This assumption allows the driver to track internal state
+		of the sensor and, for example, only send read I2C messages
+		when it knows that the correct register in the sensor
+		is addressed.
+
+		If the MCU is not the only master on the I2C bus(es) this
+		TC74Ax device is connected to but you know that the other
+		master(s) will not ever use it, you can still keep this unset.
+
+		Otherwise - when other master(s) use this device on at least
+		one I2C bus, you should say Y here. The driver will not track
+		the internal state of the device because it can be changed
+		at any point by the other master(s).
+
+		The driver will determine device state on every read.
+		If the device reports it is in standby mode, the driver
+		will wake it up and attempt a re-read. (Unless power management
+		is set to none, in which case the read returns EIO.)
+
+		Incidentally, this mode reduces program memory size since
+		the code that tracks device state is not built. You can therefore
+		also use it as a tradeoff between code size and I2C bus usage time.
+		(Smaller code but every read needs four I2C messages instead of one.)
+
+endif # SENSORS_TC74AX
+
 endif # SENSORS

@@ -320,6 +320,10 @@ ifeq ($(CONFIG_SENSORS_T67XX),y)
   CSRCS += t67xx.c
 endif
 
+ifeq ($(CONFIG_SENSORS_TC74AX),y)
+  CSRCS += tc74ax.c
+endif
+
 ifeq ($(CONFIG_SENSORS_LTR308),y)
   CSRCS += ltr308_uorb.c
 endif
