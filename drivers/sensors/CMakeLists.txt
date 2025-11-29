@@ -344,6 +344,12 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS tmp112.c)
     endif()
 
+    # QMI8658 6-axis IMU
+
+    if(CONFIG_SENSORS_QMI8658)
+      list(APPEND SRCS qmi8658_uorb.c)
+    endif()
+
   endif() # CONFIG_I2C
 
   # These drivers depend on SPI support

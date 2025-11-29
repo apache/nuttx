@@ -2152,4 +2152,35 @@ config TMP112_I2C_FREQUENCY
 
 endif #SENSORS_TMP112
 
+config SENSORS_QMI8658
+	bool "QST QMI8658 6-Axis IMU Sensor support"
+	default n
+	depends on I2C && UORB
+	---help---
+		Enable driver support for the QST QMI8658 6-axis IMU sensor.
+
+if SENSORS_QMI8658
+
+config SENSORS_QMI8658_POLL
+	bool "Enables polling sensor data"
+	default n
+	---help---
+		Enables polling of sensor data.
+
+config SENSORS_QMI8658_POLL_INTERVAL
+	int "Polling interval in microseconds, default 1s"
+	depends on SENSORS_QMI8658_POLL
+	default 1000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config QMI8658_I2C_FREQUENCY
+	int "QMI8658 I2C frequency"
+	default 400000
+	---help---
+		I2C frequency used to communicate with QMI8658.
+
+endif # SENSORS_QMI8658
+
 endif # SENSORS

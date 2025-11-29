@@ -30,6 +30,7 @@ general interface.
     sensors/mcp9600.rst
     sensors/mpl115a.rst
     sensors/nau7802.rst
+    sensors/qmi8658.rst
     sensors/sht4x.rst
     sensors/lsm6dso32.rst
     sensors/lis2mdl.rst
