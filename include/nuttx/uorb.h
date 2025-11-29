@@ -36,9 +36,75 @@
 
 #include <nuttx/sensors/ioctl.h>
 
+#ifdef CONFIG_SENSORS_USE_B16
+#  include <fixedmath.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Sensor data math operations. Sensors driver must use these macros to
+ * create portable code!
+ *
+ * Available macros:
+ *
+ *   - sensor_data_ftof(f1) - convert float to sensor data number.
+ *     Should be used only for compile-time constants.
+ *
+ *   - sensor_data_itof(i) - convert int to sensor data number.
+ *
+ *   - sensor_data_inv(i) - invert int and convert to sensor data
+ *     number
+ *
+ *   - sensor_data_add(f1, f2) - add two sensor data numbers
+ *
+ *   - sensor_data_sub(f1, f2) - subtract two sensor data numbers
+ *
+ *   - sensor_data_subi(f1, i) - subtract int from sensor data number
+ *
+ *   - sensor_data_mul(f1, f2) - multiplicate two sensor data numbers
+ *
+ *   - sensor_data_muli(f1, i) - multiplicate sensor data with int
+ *
+ *   - sensor_data_div(f1, f2) - divide two sensor data numbers
+ *
+ *   - sensor_data_divi(f1, i) - divide sensor data with int
+ *
+ *   - sensor_data_abs(f1) - get absolute value for sensor data
+ *     number
+ *
+ *   - sensor_data_sqrt(f1) - get sqrt for sensro data number
+ *
+ */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  define sensor_data_ftof(f1)    ftob16(((float)f1))
+#  define sensor_data_itof(i)     itob16((i))
+#  define sensor_data_inv(i)      b16inv((i))
+#  define sensor_data_add(f1, f2) b16addb16((f1), (f2))
+#  define sensor_data_sub(f1, f2) b16subb16((f1), (f2))
+#  define sensor_data_subi(f1, i) b16subi((f1), (i))
+#  define sensor_data_mul(f1, f2) b16mulb16((f1), (f2))
+#  define sensor_data_muli(f1, i) b16muli((f1), (i))
+#  define sensor_data_div(f1, f2) b16divb16((f1), (f2))
+#  define sensor_data_divi(f1, i) b16divi((f1), (i))
+#  define sensor_data_abs(f1)     b16abs((f1))
+#  define sensor_data_sqrt(f1)    b16sqrt((f1))
+#else
+#  define sensor_data_ftof(f1)    ((float)f1)
+#  define sensor_data_itof(i)     ((float)i)
+#  define sensor_data_inv(i)      ((1.0f) / (i))
+#  define sensor_data_add(f1, f2) ((f1) + (f2))
+#  define sensor_data_sub(f1, f2) ((f1) - (f2))
+#  define sensor_data_subi(f1, i) ((f1) - ((float)i))
+#  define sensor_data_mul(f1, f2) ((f1) * (f2))
+#  define sensor_data_muli(f1, i) ((f1) * ((float)i))
+#  define sensor_data_div(f1, f2) ((f1) / (f2))
+#  define sensor_data_divi(f1, i) ((f1) / ((float)i))
+#  define sensor_data_abs(f1)     absf(f1)
+#  define sensor_data_sqrt(f1)    sqrtf(f1)
+#endif
 
 /* sensor type definition */
 
@@ -625,238 +691,246 @@
  * Public Types
  ****************************************************************************/
 
+/* Data type for sensors */
+
+#ifdef CONFIG_SENSORS_USE_B16
+typedef b16_t sensor_data_t;
+#else
+typedef float sensor_data_t;
+#endif
+
 /* These structures prefixed with sensor_event are sensor data, and member
  * that are not used must be written as NAN or INT_MIN/INT_MAX, than
  * reported.
  */
 
-struct sensor_event  /* Type: Sensor Common Event */
+struct sensor_event          /* Type: Sensor Common Event */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  uint32_t event;           /* Common events */
+  uint64_t timestamp;        /* Units is microseconds */
+  uint32_t event;            /* Common events */
 };
 
-struct sensor_accel         /* Type: Accerometer */
+struct sensor_accel          /* Type: Accerometer */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float x;                  /* Axis X in m/s^2 */
-  float y;                  /* Axis Y in m/s^2 */
-  float z;                  /* Axis Z in m/s^2 */
-  float temperature;        /* Temperature in degrees celsius */
+  uint64_t      timestamp;   /* Units is microseconds */
+  sensor_data_t x;           /* Axis X in m/s^2 */
+  sensor_data_t y;           /* Axis Y in m/s^2 */
+  sensor_data_t z;           /* Axis Z in m/s^2 */
+  sensor_data_t temperature; /* Temperature in degrees celsius */
 };
 
-struct sensor_mag           /* Type: Magnetic Field */
+struct sensor_mag            /* Type: Magnetic Field */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float x;                  /* Axis X in Gauss or micro Tesla (uT) */
-  float y;                  /* Axis Y in Gauss or micro Tesla (uT) */
-  float z;                  /* Axis Z in Gauss or micro Tesla (uT) */
-  float temperature;        /* Temperature in degrees celsius */
-  int32_t status;           /* Status of calibration */
+  uint64_t      timestamp;   /* Units is microseconds */
+  sensor_data_t x;           /* Axis X in Gauss or micro Tesla (uT) */
+  sensor_data_t y;           /* Axis Y in Gauss or micro Tesla (uT) */
+  sensor_data_t z;           /* Axis Z in Gauss or micro Tesla (uT) */
+  sensor_data_t temperature; /* Temperature in degrees celsius */
+  int32_t       status;      /* Status of calibration */
 };
 
-struct sensor_orientation   /* Type: Orientation */
+struct sensor_orientation    /* Type: Orientation */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float    x;               /* azimuth */
-  float    y;               /* pitch */
-  float    z;               /* roll */
+  uint64_t      timestamp;   /* Units is microseconds */
+  sensor_data_t x;           /* azimuth */
+  sensor_data_t y;           /* pitch */
+  sensor_data_t z;           /* roll */
 };
 
-struct sensor_gyro          /* Type: Gyroscope */
+struct sensor_gyro           /* Type: Gyroscope */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float x;                  /* Axis X in rad/s */
-  float y;                  /* Axis Y in rad/s */
-  float z;                  /* Axis Z in rad/s */
-  float temperature;        /* Temperature in degrees celsius */
+  uint64_t      timestamp;   /* Units is microseconds */
+  sensor_data_t x;           /* Axis X in rad/s */
+  sensor_data_t y;           /* Axis Y in rad/s */
+  sensor_data_t z;           /* Axis Z in rad/s */
+  sensor_data_t temperature; /* Temperature in degrees celsius */
 };
 
-struct sensor_light         /* Type: Light */
+struct sensor_light          /* Type: Light */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float light;              /* in SI lux units */
-  float ir;                 /* in SI lux units */
+  uint64_t      timestamp;   /* Units is microseconds */
+  sensor_data_t light;       /* in SI lux units */
+  sensor_data_t ir;          /* in SI lux units */
 };
 
-struct sensor_baro          /* Type: Barometer */
+struct sensor_baro           /* Type: Barometer */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float pressure;           /* pressure measurement in millibar or hpa */
-  float temperature;        /* Temperature in degrees celsius */
+  uint64_t      timestamp;   /* Units is microseconds */
+  sensor_data_t pressure;    /* pressure measurement in millibar or hpa */
+  sensor_data_t temperature; /* Temperature in degrees celsius */
 };
 
-struct sensor_noise         /* Type: Noise Loudness */
+struct sensor_noise          /* Type: Noise Loudness */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float db;                 /* in SI units db */
+  uint64_t      timestamp;   /* Units is microseconds */
+  sensor_data_t db;          /* in SI units db */
 };
 
-struct sensor_prox          /* Type: proximity */
+struct sensor_prox           /* Type: proximity */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float proximity;          /* distance to the nearest object in centimeters */
+  uint64_t      timestamp;   /* Units is microseconds */
+  sensor_data_t proximity;   /* distance to the nearest object in centimeters */
 };
 
-struct sensor_rgb           /* Type: RGB */
+struct sensor_rgb            /* Type: RGB */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float r;                  /* Units is percent */
-  float g;                  /* Units is percent */
-  float b;                  /* Units is percent */
+  uint64_t      timestamp;   /* Units is microseconds */
+  sensor_data_t r;           /* Units is percent */
+  sensor_data_t g;           /* Units is percent */
+  sensor_data_t b;           /* Units is percent */
 };
 
-struct sensor_rotation      /* Type: Rotation */
+struct sensor_rotation       /* Type: Rotation */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float    x;               /* x*sin(θ/2) */
-  float    y;               /* y*sin(θ/2) */
-  float    z;               /* z*sin(θ/2) */
-  float    w;               /* cos(θ/2) */
-  float    status;          /* estimated heading Accuracy (in radians) (-1 if unavailable) */
+  uint64_t      timestamp;   /* Units is microseconds */
+  sensor_data_t x;           /* x*sin(θ/2) */
+  sensor_data_t y;           /* y*sin(θ/2) */
+  sensor_data_t z;           /* z*sin(θ/2) */
+  sensor_data_t w;           /* cos(θ/2) */
+  sensor_data_t status;      /* estimated heading Accuracy (in radians) (-1 if unavailable) */
 };
 
-struct sensor_humi          /* Type: Relative Humidity */
+struct sensor_humi           /* Type: Relative Humidity */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float humidity;           /* in percent  */
+  uint64_t      timestamp;   /* Units is microseconds */
+  sensor_data_t humidity;    /* in percent  */
 };
 
-struct sensor_temp          /* Type: Ambient Temperature */
+struct sensor_temp           /* Type: Ambient Temperature */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float temperature;        /* Temperature in degrees celsius */
+  uint64_t      timestamp;   /* Units is microseconds */
+  sensor_data_t temperature; /* Temperature in degrees celsius */
 };
 
-struct sensor_pm25          /* Type: PM25 */
+struct sensor_pm25           /* Type: PM25 */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float pm25;               /* in SI units ug/m^3 */
+  uint64_t      timestamp;   /* Units is microseconds */
+  sensor_data_t pm25;        /* in SI units ug/m^3 */
 };
 
-struct sensor_pm1p0         /* Type: PM1P0 */
+struct sensor_pm1p0          /* Type: PM1P0 */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float pm1p0;              /* in SI units ug/m^3 */
+  uint64_t      timestamp;   /* Units is microseconds */
+  sensor_data_t pm1p0;       /* in SI units ug/m^3 */
 };
 
-struct sensor_pm10          /* Type: PM10 */
+struct sensor_pm10           /* Type: PM10 */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float pm10;               /* in SI units ug/m^3 */
+  uint64_t      timestamp;   /* Units is microseconds */
+  sensor_data_t pm10;        /* in SI units ug/m^3 */
 };
 
-struct sensor_step_counter  /* Type: Step Coun */
+struct sensor_step_counter   /* Type: Step Coun */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  uint32_t steps;           /* Step counting */
-  uint32_t cadence;         /* Stride frequency */
+  uint64_t timestamp;        /* Units is microseconds */
+  uint32_t steps;            /* Step counting */
+  uint32_t cadence;          /* Stride frequency */
 };
 
-struct sensor_ph            /* Type: PH */
+struct sensor_ph             /* Type: PH */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float ph;                 /* PH = 7.0 neutral, PH < 7.0 acidic, PH > 7.0 alkaline */
+  uint64_t      timestamp;   /* Units is microseconds */
+  sensor_data_t ph;          /* PH = 7.0 neutral, PH < 7.0 acidic, PH > 7.0 alkaline */
 };
 
-struct sensor_hrate         /* Type: Heart Rate */
+struct sensor_hrate          /* Type: Heart Rate */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float bpm;                /* is SI units BPM */
+  uint64_t      timestamp;   /* Units is microseconds */
+  sensor_data_t bpm;         /* is SI units BPM */
 };
 
-struct sensor_pose_6dof     /* Type: Pose 6dof */
+struct sensor_pose_6dof      /* Type: Pose 6dof */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float    x;               /* x*sin(theta/2) */
-  float    y;               /* y*sin(theta/2) */
-  float    z;               /* z*sin(theta/2) */
-  float    w;               /* cos(theta/2) */
-  float    tx;              /* Translation along x axis from an arbitrary origin. */
-  float    ty;              /* Translation along y axis from an arbitrary origin. */
-  float    tz;              /* Translation along z axis from an arbitrary origin. */
-  float    dx;              /* Delta quaternion rotation x*sin(theta/2) */
-  float    dy;              /* Delta quaternion rotation y*sin(theta/2) */
-  float    dz;              /* Delta quaternion rotation z*sin(theta/2) */
-  float    dw;              /* Delta quaternion rotation cos(theta/2) */
-  float    dtx;             /* Delta translation along x axis. */
-  float    dty;             /* Delta translation along y axis. */
-  float    dtz;             /* Delta translation along z axis. */
-  uint64_t number;          /* Sequence number; ascending sequentially from 0 */
+  uint64_t      timestamp;   /* Units is microseconds */
+  sensor_data_t x;           /* x*sin(theta/2) */
+  sensor_data_t y;           /* y*sin(theta/2) */
+  sensor_data_t z;           /* z*sin(theta/2) */
+  sensor_data_t w;           /* cos(theta/2) */
+  sensor_data_t tx;          /* Translation along x axis from an arbitrary origin. */
+  sensor_data_t ty;          /* Translation along y axis from an arbitrary origin. */
+  sensor_data_t tz;          /* Translation along z axis from an arbitrary origin. */
+  sensor_data_t dx;          /* Delta quaternion rotation x*sin(theta/2) */
+  sensor_data_t dy;          /* Delta quaternion rotation y*sin(theta/2) */
+  sensor_data_t dz;          /* Delta quaternion rotation z*sin(theta/2) */
+  sensor_data_t dw;          /* Delta quaternion rotation cos(theta/2) */
+  sensor_data_t dtx;         /* Delta translation along x axis. */
+  sensor_data_t dty;         /* Delta translation along y axis. */
+  sensor_data_t dtz;         /* Delta translation along z axis. */
+  uint64_t      number;      /* Sequence number; ascending sequentially from 0 */
 };
 
-struct sensor_gas           /* Type: Gas */
+struct sensor_gas            /* Type: Gas */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float gas_resistance;     /* Gas resistance in kOhm */
+  uint64_t      timestamp;      /* Units is microseconds */
+  sensor_data_t gas_resistance; /* Gas resistance in kOhm */
 };
 
 struct sensor_hbeat         /* Type: Heart Beat */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float beat;               /* Units is times/minutes */
+  uint64_t      timestamp;  /* Units is microseconds */
+  sensor_data_t beat;       /* Units is times/minutes */
 };
 
 struct sensor_force         /* Type: Force */
 {
-  uint64_t timestamp;       /* Unit is microseconds */
-  float force;              /* Force value, units is N */
-  int32_t event;            /* Force event */
+  uint64_t      timestamp;  /* Unit is microseconds */
+  sensor_data_t force;      /* Force value, units is N */
+  int32_t       event;      /* Force event */
 };
 
 struct sensor_velocity      /* Type: Velocity */
 {
-  uint64_t timestamp;       /* Unit is microseconds */
-  float velocity;           /* Velocity value, units is m/s (SI) */
+  uint64_t      timestamp;  /* Unit is microseconds */
+  sensor_data_t velocity;   /* Velocity value, units is m/s (SI) */
 };
 
 struct sensor_hall          /* Type: HALL */
 {
   uint64_t timestamp;       /* Units is microseconds */
-  int32_t hall;             /* Hall state */
+  int32_t  hall;            /* Hall state */
 };
 
 struct sensor_uv            /* Type: Ultraviolet Light */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float uvi;                /* the value range is 0 - 15 */
+  uint64_t      timestamp;  /* Units is microseconds */
+  sensor_data_t uvi;        /* the value range is 0 - 15 */
 };
 
 struct sensor_angle         /* Type: Angle */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float    angle;           /* Angle. Unit is degree */
+  uint64_t      timestamp;  /* Units is microseconds */
+  sensor_data_t angle;      /* Angle. Unit is degree */
 };
 
 struct sensor_ir            /* Type: Infrared Ray */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float ir;                 /* in SI units lux */
+  uint64_t      timestamp;  /* Units is microseconds */
+  sensor_data_t ir;         /* in SI units lux */
 };
 
 struct sensor_hcho          /* Type: HCHO */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float hcho;               /* in SI units ppm */
+  uint64_t      timestamp;  /* Units is microseconds */
+  sensor_data_t hcho;       /* in SI units ppm */
 };
 
 struct sensor_tvoc          /* Type: TVOC */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float tvoc;               /* in SI units ppm */
+  uint64_t      timestamp;  /* Units is microseconds */
+  sensor_data_t tvoc;       /* in SI units ppm */
 };
 
 struct sensor_dust          /* Type: DUST */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float dust;               /* is SI units ug/m^3 */
+  uint64_t      timestamp;  /* Units is microseconds */
+  sensor_data_t dust;       /* is SI units ug/m^3 */
 };
 
 struct sensor_ecg           /* Type: ECG */
 {
-  uint64_t timestamp;       /* Unit is microseconds */
-  float ecg;                /* Unit is μV */
-  uint32_t status;          /* Status info */
+  uint64_t      timestamp;  /* Unit is microseconds */
+  sensor_data_t ecg;        /* Unit is μV */
+  uint32_t      status;     /* Status info */
 };
 
 struct sensor_ppgd          /* Type: PPGD */
@@ -877,29 +951,29 @@ struct sensor_ppgq          /* Type: PPDQ */
 
 struct sensor_impd          /* Type: Impedance */
 {
-  uint64_t timestamp;       /* Unit is microseconds */
-  float real;               /* Real part, unit is Ohm(Ω) */
-  float imag;               /* Imaginary part, unit is Ohm(Ω) */
+  uint64_t      timestamp;  /* Unit is microseconds */
+  sensor_data_t real;       /* Real part, unit is Ohm(Ω) */
+  sensor_data_t imag;       /* Imaginary part, unit is Ohm(Ω) */
 };
 
 struct sensor_ots           /* Type: OTS */
 {
   uint64_t timestamp;       /* Unit is microseconds */
-  int32_t x;                /* Axis X in counts */
-  int32_t y;                /* Axis Y in counts */
+  int32_t  x;               /* Axis X in counts */
+  int32_t  y;               /* Axis Y in counts */
 };
 
 struct sensor_co2           /* Type: CO2 */
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float co2;                /* in SI units ppm */
+  uint64_t      timestamp;  /* Units is microseconds */
+  sensor_data_t co2;        /* in SI units ppm */
 };
 
 struct sensor_cap           /* Type: Capacitance */
 {
   uint64_t timestamp;       /* Unit is microseconds */
-  int32_t status;           /* Detection status */
-  int32_t rawdata[4];       /* in SI units pF */
+  int32_t  status;          /* Detection status */
+  int32_t  rawdata[4];      /* in SI units pF */
 };
 
 struct sensor_gnss          /* Type: GNSS */
@@ -913,25 +987,25 @@ struct sensor_gnss          /* Type: GNSS */
 
   uint64_t time_utc;
 
-  float latitude;           /* Unit is degrees */
-  float longitude;          /* Unit is degrees */
-  float altitude;           /* Altitude above MSL(mean seal level), Unit is SI m */
-  float altitude_ellipsoid; /* Altitude bove Ellipsoid, Unit is SI m */
+  sensor_data_t latitude;           /* Unit is degrees */
+  sensor_data_t longitude;          /* Unit is degrees */
+  sensor_data_t altitude;           /* Altitude above MSL(mean seal level), Unit is SI m */
+  sensor_data_t altitude_ellipsoid; /* Altitude bove Ellipsoid, Unit is SI m */
 
-  float eph;                /* GNSS horizontal position accuracy (metres) */
-  float epv;                /* GNSS vertical position accuracy (metres) */
+  sensor_data_t eph;                /* GNSS horizontal position accuracy (metres) */
+  sensor_data_t epv;                /* GNSS vertical position accuracy (metres) */
 
-  float hdop;               /* Horizontal dilution of precision */
-  float pdop;               /* Position dilution of precision */
-  float vdop;               /* Vertical dilution of precision */
+  sensor_data_t hdop;               /* Horizontal dilution of precision */
+  sensor_data_t pdop;               /* Position dilution of precision */
+  sensor_data_t vdop;               /* Vertical dilution of precision */
 
-  float ground_speed;       /* GNSS ground speed, Unit is m/s */
+  sensor_data_t ground_speed;       /* GNSS ground speed, Unit is m/s */
 
   /* Course over ground (NOT heading, but direction of movement),
    * Unit is Si degrees
    */
 
-  float course;
+  sensor_data_t course;
 
   uint32_t satellites_used; /* Number of satellites used */
   uint32_t firmware_ver;    /* Version of GNSS firmware */
@@ -966,7 +1040,7 @@ struct sensor_gnss_satellite
    * Flag: SENSOR_GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY
    */
 
-  float cf;
+  sensor_data_t cf;
 
   struct satellite
   {
@@ -1017,14 +1091,14 @@ struct sensor_gnss_measurement
    * nanoseconds.
    */
 
-  float    time_offset_ns;
+  sensor_data_t time_offset_ns;
 
   /* The received GNSS Time-of-Week at the measurement time, in
    * nanoseconds.
    */
 
-  int64_t  received_sv_time_in_ns;
-  int64_t  received_sv_time_uncertainty_in_ns;
+  int64_t received_sv_time_in_ns;
+  int64_t received_sv_time_uncertainty_in_ns;
 
   /* GNSS measurement state, see SENSOR_GNSS_MEASUREMENT_STATE_*. */
 
@@ -1032,18 +1106,18 @@ struct sensor_gnss_measurement
 
   /* dBHz, Carrier-to-noise density. */
 
-  float    c_n0_dbhz;
+  sensor_data_t c_n0_dbhz;
 
   /* Pseudorange rate(m/s) at the timestamp. */
 
-  float    pseudorange_rate_mps;
-  float    pseudorange_rate_uncertainty_mps;
+  sensor_data_t pseudorange_rate_mps;
+  sensor_data_t pseudorange_rate_uncertainty_mps;
 
   /* Accumulated delta range. */
 
-  uint32_t accumulated_delta_range_state;
-  float    accumulated_delta_range_m;
-  float    accumulated_delta_range_uncertainty_m;
+  uint32_t      accumulated_delta_range_state;
+  sensor_data_t accumulated_delta_range_m;
+  sensor_data_t accumulated_delta_range_uncertainty_m;
 
   /* Carrier related between the satellite and the receiver.
    * flags:
@@ -1053,10 +1127,10 @@ struct sensor_gnss_measurement
    *   SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_PHASE_UNCERTAINTY
    */
 
-  float    carrier_frequency_hz;
-  int64_t  carrier_cycles;
-  float    carrier_phase;
-  float    carrier_phase_uncertainty;
+  sensor_data_t carrier_frequency_hz;
+  int64_t       carrier_cycles;
+  sensor_data_t carrier_phase;
+  sensor_data_t carrier_phase_uncertainty;
 
   uint32_t multipath_indicator;
 
@@ -1088,8 +1162,8 @@ struct sensor_gnss_clock
    *   SENSOR_GNSS_CLOCK_HAS_TIME_UNCERTAINTY
    */
 
-  int64_t  time_ns;
-  float    time_uncertainty_ns;
+  int64_t       time_ns;
+  sensor_data_t time_uncertainty_ns;
 
   /* Discontinuities in the HW clock. */
 
@@ -1104,9 +1178,9 @@ struct sensor_gnss_clock
    *   SENSOR_GNSS_CLOCK_HAS_BIAS_UNCERTAINTY
    */
 
-  int64_t  full_bias_ns;
-  float    bias_ns;             /* Sub-nanosecond bias */
-  float    bias_uncertainty_ns;
+  int64_t       full_bias_ns;
+  sensor_data_t bias_ns;             /* Sub-nanosecond bias */
+  sensor_data_t bias_uncertainty_ns;
 
   /* The clock's drift in nanoseconds (per second).
    * A positive value means that the frequency is higher than
@@ -1116,8 +1190,8 @@ struct sensor_gnss_clock
    *   SENSOR_GNSS_CLOCK_HAS_DRIFT_UNCERTAINTY
    */
 
-  float    drift_nsps;
-  float    drift_uncertainty_nsps;
+  sensor_data_t drift_nsps;
+  sensor_data_t drift_uncertainty_nsps;
 };
 
 /* GNSS Geofence events */
@@ -1170,9 +1244,9 @@ struct sensor_gnss_geofence_param
   int32_t            type;
 
   int32_t            geofence_id;
-  float              latitude;
-  float              longitude;
-  float              radius_meters;
+  sensor_data_t      latitude;
+  sensor_data_t      longitude;
+  sensor_data_t      radius_meters;
 
   /* Which transitions to monitor.
    * Available: see SENSOR_GNSS_GEOFENCE_TRANS_*.
@@ -1242,15 +1316,15 @@ struct sensor_device_info_s
 
   /* Rough estimate of this sensor's power consumption in mA. */
 
-  float         power;
+  sensor_data_t power;
 
   /* Maximum range of this sensor's value in SI units. */
 
-  float         max_range;
+  sensor_data_t max_range;
 
   /* Smallest difference between two values reported by this sensor. */
 
-  float         resolution;
+  sensor_data_t resolution;
 
   /* This value depends on the reporting mode:
    *
