@@ -104,7 +104,7 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Specify thumb mode */
 
-  xcp->regs[REG_XPSR]    = ARMV6M_XPSR_T;
+  xcp->regs[REG_XPSR]    = ARM_XPSR_T;
 
   /* All tasks need set to pic address to special register */
 

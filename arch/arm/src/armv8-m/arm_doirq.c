@@ -83,7 +83,7 @@ void exception_direct(void)
       "mov r0, %0\n"
       "vmsr fpscr, r0\n"
       :
-      : "i" (ARMV8M_FPSCR_LTPSIZE_NONE)
+      : "i" (ARM_FPSCR_LTPSIZE_NONE)
       : "r0"
     );
 #endif

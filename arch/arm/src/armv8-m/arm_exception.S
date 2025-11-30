@@ -174,7 +174,7 @@ exception_common:
 	 * "Tail predication not applied" as it's reset value.
 	 */
 
-	mov		r0, #ARMV8M_FPSCR_LTPSIZE_NONE
+	mov		r0, #ARM_FPSCR_LTPSIZE_NONE
 	vmsr		fpscr, r0
 #endif
 #endif
