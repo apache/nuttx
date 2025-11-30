@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/arm_dispatch_syscall.S
+ * arch/arm/src/arm_m/arm_dispatch_syscall.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -43,6 +43,9 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: dispatch_syscall
+ *
+ * Description:
  *   Call the stub function corresponding to the system call.  NOTE the non-
  *   standard parameter passing:
  *
@@ -78,26 +81,28 @@
 arm_dispatch_syscall:
 	.cfi_sections	.debug_frame
 	.cfi_startproc
-	sub	sp, sp, #32
+	sub sp, sp, #32                            /* Create a stack frame to hold params */
 	.cfi_def_cfa_offset 32
-	str	r4, [sp, #0]
+	str r4, [sp, #0]                           /* Move parameter 4 (if any) into position */
 	.cfi_offset r4, -32
-	str	r5, [sp, #4]
+	str r5, [sp, #4]                           /* Move parameter 5 (if any) into position */
 	.cfi_offset r5, -28
-	str	r6, [sp, #8]
+	str r6, [sp, #8]                           /* Move parameter 6 (if any) into position */
 	.cfi_offset r6, -24
-	str	lr, [sp, #12]
+	str lr, [sp, #12]                          /* Save lr and make able to find by CFI */
 	.cfi_offset lr, -20
-	str	ip, [sp, #16]
+	str ip, [sp, #16]                          /* Save ip is pc backup */
 	.cfi_offset pc, -16
-	ldr	ip, =g_stublookup
-	ldr	ip, [ip, r0, lsl #2]
-	blx	ip
-	ldr	lr, [sp, #12]
-	add	sp, sp, #32
-	mov	r2, r0
-	mov	r0, SYS_syscall_return
-	svc	SYS_syscall
+	ldr r4, =g_stublookup                      /* R4=The base of the stub lookup table */
+	lsl r0, r0, #2                             /* R0=Offset of the stub for this syscall */
+	ldr r4, [r4, r0]                           /* R4=Address of the stub for this syscall */
+	blx r4                                     /* Call the stub (modifies lr) */
+	ldr r4, [sp, #0]                           /* Restore r4 */
+	ldr lr, [sp, #12]
+	add sp, sp, #32                            /* Destroy the stack frame */
+	mov r2, r0                                 /* R2=Save return value in R2 */
+	mov r0, SYS_syscall_return                 /* R0=SYS_syscall_return */
+	svc SYS_syscall                            /* Return from the SYSCALL */
 	.cfi_endproc
 	.size	arm_dispatch_syscall, .-arm_dispatch_syscall
 	.end

@@ -21,3 +21,8 @@
 # Common ARM_M files
 
 CMN_CSRCS += arm_tcbinfo.c
+
+ifeq ($(CONFIG_LIB_SYSCALL),y)
+  CMN_ASRCS += arm_dispatch_syscall.S
+endif
+

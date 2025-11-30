@@ -21,3 +21,7 @@
 list(APPEND CSRCS arm_tcbinfo.c)
 
 target_sources(arch PRIVATE ${CSRCS})
+
+if(CONFIG_LIB_SYSCALL)
+  list(APPEND SRCS arm_dispatch_syscall.S)
+endif()
