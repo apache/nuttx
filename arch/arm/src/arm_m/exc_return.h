@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/exc_return.h
+ * arch/arm/src/arm_m/exc_return.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV8_M_EXC_RETURN_H
-#define __ARCH_ARM_SRC_ARMV8_M_EXC_RETURN_H
+#ifndef __ARCH_ARM_SRC_ARM_M_EXC_RETURN_H
+#define __ARCH_ARM_SRC_ARM_M_EXC_RETURN_H
 
 /****************************************************************************
  * Included Files
@@ -58,13 +58,15 @@
  * was saved using the main stack pointer)
  */
 
-#define EXC_RETURN_PROCESS_STACK (1 << 2)
+#define EXC_RETURN_PROCESS_BITNO (2)
+#define EXC_RETURN_PROCESS_STACK (1 << EXC_RETURN_PROCESS_BITNO)
 
 /* EXC_RETURN_THREAD_MODE: The exception will return to thread mode (if not
  * set, return stays in handler mode)
  */
 
-#define EXC_RETURN_THREAD_MODE   (1 << 3)
+#define EXC_RETURN_THREAD_BITNO  (3)
+#define EXC_RETURN_THREAD_MODE   (1 << EXC_RETURN_THREAD_BITNO)
 
 /* EXC_RETURN_STD_CONTEXT: The state saved on the stack does not include the
  * volatile FP registers and FPSCR.  If this bit is clear, the state does
@@ -157,4 +159,4 @@
  * Inline Functions
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_ARMV8_M_EXC_RETURN_H */
+#endif /* __ARCH_ARM_SRC_ARM_M_EXC_RETURN_H */
