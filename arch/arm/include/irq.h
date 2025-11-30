@@ -63,12 +63,9 @@
 #  include <arch/armv7-r/irq.h>
 #elif defined(CONFIG_ARCH_ARMV8R)
 #  include <arch/armv8-r/irq.h>
-#elif defined(CONFIG_ARCH_ARMV7M)
-#  include <arch/armv7-m/irq.h>
-#elif defined(CONFIG_ARCH_ARMV8M)
-#  include <arch/armv8-m/irq.h>
-#elif defined(CONFIG_ARCH_ARMV6M)
-#  include <arch/armv6-m/irq.h>
+#elif defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARCH_ARMV7M) || \
+      defined(CONFIG_ARCH_ARMV8M)
+#  include <arch/arm_m/irq.h>
 #else
 #  include <arch/arm/irq.h>
 #endif

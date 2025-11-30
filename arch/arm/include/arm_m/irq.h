@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/armv8-m/irq.h
+ * arch/arm/include/arm_m/irq.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -24,8 +24,8 @@
  * through nuttx/irq.h
  */
 
-#ifndef __ARCH_ARM_INCLUDE_ARMV8_M_IRQ_H
-#define __ARCH_ARM_INCLUDE_ARMV8_M_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_ARM_M_IRQ_H
+#define __ARCH_ARM_INCLUDE_ARM_M_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -45,7 +45,13 @@
  ****************************************************************************/
 
 #ifdef __ghs__
-#  define __ARM_ARCH 8
+#  ifdef CONFIG_ARCH_ARMV8M
+#    define __ARM_ARCH 8
+#  elif defined(CONFIG_ARCH_ARMV7M)
+#    define __ARM_ARCH 7
+#  elif defined(CONFIG_ARCH_ARMV6M)
+#    define __ARM_ARCH 6
+#  endif
 #endif
 
 /* Configuration ************************************************************/
@@ -65,7 +71,11 @@
  */
 
 #define REG_R13             (0)  /* R13 = SP at time of interrupt */
-#define REG_BASEPRI         (1)  /* BASEPRI */
+#ifdef CONFIG_ARCH_ARMV6M
+#  define REG_PRIMASK       (1)  /* PRIMASK */
+#else
+#  define REG_BASEPRI       (1)  /* BASEPRI */
+#endif
 #define REG_R4              (2)  /* R4 */
 #define REG_R5              (3)  /* R5 */
 #define REG_R6              (4)  /* R6 */
@@ -350,11 +360,98 @@ static always_inline_function void setbasepri(uint32_t basepri)
       : "memory");
 }
 
+#ifdef CONFIG_ARMV7M_BASEPRI_WAR  /* Cortex-M7 r0p1 Errata 837070 Workaround */
+/* Set the BASEPRI register (possibly increasing the priority).
+ *
+ * This may be retaining or raising priority.  Cortex-M7 r0p1 Errata
+ * 837070 Workaround may be required if we are raising the priority.
+ */
+
+static always_inline_function void raisebasepri(uint32_t basepri)
+{
+  register uint32_t primask;
+
+  /* 1. Retain the previous value of the PRIMASK register,
+   * 2  Disable all interrupts via the PRIMASK register.  NOTE:  They
+   *    could possibly already be disabled.
+   * 3. Set the BASEPRI register as requested (possibly increasing the
+   *    priority)
+   * 4. Restore the original value of the PRIMASK register, probably re-
+   *    enabling interrupts.  This avoids the possibly undesirable side-
+   *    effect of unconditionally re-enabling interrupts.
+   */
+
+#pragma GCC diagnostic push /* primask is initialized in ASM */
+#pragma GCC diagnostic ignored "-Wuninitialized"
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+  __asm__ __volatile__
+    (
+     "\tmrs   %0, primask\n"
+     "\tcpsid i\n"
+     "\tmsr   basepri, %1\n"
+     "\tmsr   primask, %0\n"
+     : "+r" (primask)
+     : "r"  (basepri)
+     : "memory");
+#pragma GCC diagnostic pop
+}
+#else
 #  define raisebasepri(b) setbasepri(b);
+#endif
 
 /* Disable IRQs */
 
-static always_inline_function void up_irq_disable(void)
+#ifdef CONFIG_ARCH_ARMV6M
+static inline_function void up_irq_disable(void)
+{
+  __asm__ __volatile__ ("\tcpsid  i\n");
+}
+
+/* Save the current primask state & disable IRQs */
+
+static inline_function irqstate_t up_irq_save(void)
+{
+  unsigned short primask;
+
+  /* Return the current value of primask register and set
+   * bit 0 of the primask register to disable interrupts
+   */
+
+  __asm__ __volatile__
+    (
+     "\tmrs    %0, primask\n"
+     "\tcpsid  i\n"
+     : "=r" (primask)
+     :
+     : "memory");
+
+  return primask;
+}
+
+/* Enable IRQs */
+
+static inline_function void up_irq_enable(void)
+{
+  __asm__ __volatile__ ("\tcpsie  i\n");
+}
+
+/* Restore saved primask state */
+
+static inline_function void up_irq_restore(irqstate_t flags)
+{
+  /* If bit 0 of the primask is 0, then we need to restore
+   * interrupts.
+   */
+
+  __asm__ __volatile__
+    (
+      "\tmsr primask, %0\n"
+      :
+      : "r" (flags)
+      : "memory");
+}
+#else
+static inline_function void up_irq_disable(void)
 {
   /* Probably raising priority */
 
@@ -391,6 +488,7 @@ void up_irq_restore(irqstate_t flags)
 
   setbasepri((uint32_t)flags);
 }
+#endif
 
 /* Get/set IPSR */
 
@@ -536,4 +634,4 @@ extern "C"
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* __ARCH_ARM_INCLUDE_ARMV8_M_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_ARM_M_IRQ_H */
