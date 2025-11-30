@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/armv8-m/barriers.h
+ * arch/arm/include/arm_m/barriers.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,31 +20,41 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_ARMV8_M_BARRIERS_H
-#define __ARCH_ARM_INCLUDE_ARMV8_M_BARRIERS_H
+#ifndef __ARCH_ARM_INCLUDE_ARM_M_BARRIERS_H
+#define __ARCH_ARM_INCLUDE_ARM_M_BARRIERS_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* ARMv8-M memory barriers */
+/* ARM-M memory barriers */
 
-#define arm_isb()  __asm__ __volatile__ ("isb " : : : "memory")
-#define arm_dmb()  __asm__ __volatile__ ("dmb " : : : "memory")
-#define arm_rmb()  __asm__ __volatile__ ("dmb " : : : "memory")
-#define arm_wmb()  __asm__ __volatile__ ("dmb " : : : "memory")
-#define arm_dsb(n) __asm__ __volatile__ ("dsb " #n : : : "memory")
+#define arm_isb()  __asm__ __volatile__ ("isb" : : : "memory")
+#define arm_dmb()  __asm__ __volatile__ ("dmb" : : : "memory")
+
+#if defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
+#  define arm_dmb_ish()   __asm__ __volatile__ ("dmb ish"   : : : "memory")
+#  define arm_dmb_ishst() __asm__ __volatile__ ("dmb ishst" : : : "memory")
+#  define arm_dsb_sy()    __asm__ __volatile__ ("dsb sy"    : : : "memory")
+#  define arm_rmb()       arm_dmb_ish()
+#  define arm_wmb()       arm_dmb_ishst()
+#  define arm_dsb()       arm_dsb_sy()
+#else
+#  define arm_rmb()       arm_dmb()
+#  define arm_wmb()       arm_dmb()
+#  define arm_dsb()       __asm__ __volatile__ ("dsb" : : : "memory")
+#endif
 
 #define UP_ISB()  arm_isb()
-
 #define UP_DMB()  arm_dmb()
 #define UP_RMB()  arm_rmb()
 #define UP_WMB()  arm_wmb()
+#define UP_DSB()  arm_dsb()
 
-#define UP_DSB()  arm_dsb(15)
-
-#endif /* __ARCH_ARM_INCLUDE_ARMV8_M_BARRIERS_H */
+#endif /* __ARCH_ARM_INCLUDE_ARM_M_BARRIERS_H */
