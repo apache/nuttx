@@ -107,12 +107,6 @@
 #define sim_savestate(regs) sim_copyfullstate(regs, up_current_regs())
 #define sim_restorestate(regs) up_set_current_regs(regs)
 
-/* Provide a common interface, which should have different conversions
- * on different platforms.
- */
-
-#define host_errno_convert(errcode) (errcode)
-
 #define sim_saveusercontext(saveregs, ret)                      \
     do                                                          \
       {                                                         \
@@ -123,6 +117,8 @@
         val[0] = flags & UINT32_MAX;                            \
         val[1] = (flags >> 32) & UINT32_MAX;                    \
                                                                 \
+        int *errcode = (int *)&env[JB_ERRNO];                   \
+        *errcode          = host_errno_get();                   \
         ret = setjmp(saveregs);                                 \
       }                                                         \
     while (0)
@@ -134,6 +130,9 @@
         uint32_t *flags = (uint32_t *)&env[JB_FLAG];            \
                                                                 \
         up_irq_restore(((uint64_t)flags[1] << 32) | flags[0]);  \
+                                                                \
+        int *errcode = (int *)&env[JB_ERRNO];                   \
+        host_errno_set(*errcode);                               \
         longjmp(env, 1);                                        \
       }                                                         \
     while (0)
@@ -159,11 +158,11 @@
     ({                                                          \
         uint64_t flags_ = up_irq_save();                        \
         typeof(func(__VA_ARGS__)) ret_ = func(__VA_ARGS__);     \
+        up_irq_restore(flags_);                                 \
         if (ret_ < 0)                                           \
           {                                                     \
             ret_ = host_errno_convert(-errno);                  \
           }                                                     \
-        up_irq_restore(flags_);                                 \
         ret_;                                                   \
     })
 
@@ -226,6 +225,12 @@ void up_irq_restore(uint64_t flags);
 void sim_copyfullstate(xcpt_reg_t *dest, xcpt_reg_t *src);
 void *sim_doirq(int irq, void *regs);
 void  sim_unlock(void);
+
+/* sim_errno.c */
+
+int host_errno_convert(int negative_errcode);
+int host_errno_get(void);
+void host_errno_set(int errcode);
 
 /* sim_hostmisc.c ***********************************************************/
 
