@@ -38,7 +38,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
 #include <nuttx/kmalloc.h>
-#include <arch/armv8-m/nvicpri.h>
+#include <arch/arm_m/nvicpri.h>
 #include <nuttx/wqueue.h>
 
 #include "arm_internal.h"

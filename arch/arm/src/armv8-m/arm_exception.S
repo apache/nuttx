@@ -42,7 +42,7 @@
 #include <nuttx/config.h>
 
 #include <arch/irq.h>
-#include <arch/armv8-m/nvicpri.h>
+#include <arch/arm_m/nvicpri.h>
 
 #include "chip.h"
 #include "exc_return.h"

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/armv8-m/nvicpri.h
+ * arch/arm/include/arm_m/nvicpri.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_ARMV8_M_NVICPRI_H
-#define __ARCH_ARM_INCLUDE_ARMV8_M_NVICPRI_H
+#ifndef __ARCH_ARM_INCLUDE_ARM_M_NVICPRI_H
+#define __ARCH_ARM_INCLUDE_ARM_M_NVICPRI_H
 
 /****************************************************************************
  * Included Files
@@ -75,4 +75,4 @@
 #define NVIC_SYSH_DISABLE_PRIORITY    NVIC_SYSH_PRIORITY_DEFAULT
 #define NVIC_SYSH_SVCALL_PRIORITY     (NVIC_SYSH_PRIORITY_DEFAULT - 1*NVIC_SYSH_PRIORITY_STEP)
 
-#endif /* __ARCH_ARM_INCLUDE_ARMV8_M_NVICPRI_H */
+#endif /* __ARCH_ARM_INCLUDE_ARM_M_NVICPRI_H */

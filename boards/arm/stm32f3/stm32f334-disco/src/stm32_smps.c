@@ -48,7 +48,7 @@
 #include <nuttx/analog/ioctl.h>
 #include <nuttx/power/smps.h>
 
-#include <arch/armv7-m/nvicpri.h>
+#include <arch/arm_m/nvicpri.h>
 
 #include "arm_internal.h"
 #include "ram_vectors.h"

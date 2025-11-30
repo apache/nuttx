@@ -36,7 +36,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
-#include <arch/armv8-m/nvicpri.h>
+#include <arch/arm_m/nvicpri.h>
 #include <arch/nrf53/nrf5340_irq_cpunet.h>
 #include <nuttx/wqueue.h>
 

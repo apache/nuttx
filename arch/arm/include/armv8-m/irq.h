@@ -36,7 +36,7 @@
 #include <nuttx/irq.h>
 #ifndef __ASSEMBLY__
 #  include <nuttx/compiler.h>
-#  include <arch/armv8-m/nvicpri.h>
+#  include <arch/arm_m/nvicpri.h>
 #  include <stdint.h>
 #endif
 
