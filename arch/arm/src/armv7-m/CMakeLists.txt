@@ -24,7 +24,6 @@
 
 set(SRCS
     arm_exception.S
-    arm_saveusercontext.S
     arm_busfault.c
     arm_cache.c
     arm_cpuinfo.c
