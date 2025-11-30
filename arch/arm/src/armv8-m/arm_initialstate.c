@@ -32,7 +32,7 @@
 
 #include <nuttx/arch.h>
 #include <tls/tls.h>
-#include <arch/armv8-m/nvicpri.h>
+#include <arch/arm_m/nvicpri.h>
 
 #include "arm_internal.h"
 #include "psr.h"
