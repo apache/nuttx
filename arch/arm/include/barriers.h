@@ -31,12 +31,9 @@
 #  include <arch/armv7-r/barriers.h>
 #elif defined(CONFIG_ARCH_ARMV8R)
 #  include <arch/armv8-r/barriers.h>
-#elif defined(CONFIG_ARCH_ARMV7M)
-#  include <arch/armv7-m/barriers.h>
-#elif defined(CONFIG_ARCH_ARMV8M)
-#  include <arch/armv8-m/barriers.h>
-#elif defined(CONFIG_ARCH_ARMV6M)
-#  include <arch/armv6-m/barriers.h>
+#elif defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARCH_ARMV7M) || \
+      defined(CONFIG_ARCH_ARMV8M)
+#  include <arch/arm_m/barriers.h>
 #else
 #  include <arch/arm/barriers.h>
 #endif
