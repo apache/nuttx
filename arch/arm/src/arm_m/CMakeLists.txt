@@ -18,7 +18,7 @@
 #
 # ##############################################################################
 
-list(APPEND CSRCS arm_tcbinfo.c)
+list(APPEND CSRCS arm_saveusercontext.S arm_tcbinfo.c)
 
 target_sources(arch PRIVATE ${CSRCS})
 

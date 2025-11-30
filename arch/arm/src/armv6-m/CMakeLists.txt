@@ -22,7 +22,6 @@
 
 set(SRCS
     arm_exception.S
-    arm_saveusercontext.S
     arm_cpuinfo.c
     arm_doirq.c
     arm_hardfault.c
