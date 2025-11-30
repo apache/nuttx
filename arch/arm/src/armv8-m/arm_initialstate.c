@@ -122,7 +122,7 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Specify thumb mode */
 
-  xcp->regs[REG_XPSR]    = ARMV8M_XPSR_T;
+  xcp->regs[REG_XPSR]    = ARM_XPSR_T;
 
   /* All tasks need to set pic address to special register */
 
@@ -167,7 +167,7 @@ void up_initial_state(struct tcb_s *tcb)
                             CONTROL_PACBTI_MASK;
 
 #ifdef CONFIG_ARCH_FPU
-  xcp->regs[REG_FPSCR]  |= ARMV8M_FPSCR_LTPSIZE_NONE;
+  xcp->regs[REG_FPSCR]  |= ARM_FPSCR_LTPSIZE_NONE;
 #endif /* CONFIG_ARCH_FPU */
 
   /* Enable or disable interrupts, based on user configuration */
