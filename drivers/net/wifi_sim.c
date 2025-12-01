@@ -2004,15 +2004,18 @@ int wifi_sim_init(FAR struct wifi_sim_lowerhalf_s *netdev)
 
 void wifi_sim_remove(FAR struct wifi_sim_lowerhalf_s *netdev)
 {
-  FAR struct wifi_sim_s *sta = (FAR struct wifi_sim_s *)netdev->wifi;
+  FAR struct wifi_sim_s *wifidev = (FAR struct wifi_sim_s *)netdev->wifi;
 
-  if (sta && sta->state == WLAN_STA_STATE_CONNECTED)
+  if (wifidev)
     {
-       wifidriver_start_disconnect(sta);
-    }
+      if (wifidev->state == WLAN_STA_STATE_CONNECTED)
+        {
+          wifidriver_start_disconnect(wifidev);
+        }
 
-  nxmutex_destroy(&sta->ap_lock);
-  kmm_free(netdev->wifi);
+      nxmutex_destroy(&wifidev->ap_lock);
+      kmm_free(wifidev);
+    }
 }
 
 /****************************************************************************
