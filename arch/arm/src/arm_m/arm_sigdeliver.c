@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/arm_sigdeliver.c
+ * arch/arm/src/arm_m/arm_sigdeliver.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -27,7 +27,6 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <string.h>
 #include <sched.h>
 #include <assert.h>
 
@@ -58,9 +57,6 @@ void arm_sigdeliver(void)
 {
   struct tcb_s *rtcb = this_task();
   uint32_t *regs = rtcb->xcp.saved_regs;
-  uint32_t *new_regs;
-  uint32_t desired_sp;
-  uint32_t implied_sp;
 
 #ifdef CONFIG_SMP
   /* In the SMP case, we must terminate the critical section while the signal
@@ -93,7 +89,7 @@ retry:
 
   while (rtcb->irqcount > 0)
     {
-      leave_critical_section((uint8_t)regs[REG_BASEPRI]);
+      leave_critical_section((irqstate_t)regs[REG_IRQSTATE]);
     }
 #endif /* CONFIG_SMP */
 
@@ -139,7 +135,7 @@ retry:
       (rtcb->flags & TCB_FLAG_SIGNAL_ACTION) == 0)
     {
 #ifdef CONFIG_SMP
-      leave_critical_section((uint8_t)regs[REG_BASEPRI]);
+      leave_critical_section((irqstate_t)regs[REG_IRQSTATE]);
 #endif
       goto retry;
     }
@@ -166,27 +162,6 @@ retry:
 
   leave_critical_section(up_irq_save());
 #endif
-
-  /* If the signal handler modified SP (REG_R13), relocate the saved
-   * context so that the hardware exception return produces the correct SP.
-   *
-   * On ARMv7-M, the exception return path sets PSP to the HW frame address
-   * and hardware computes final SP = PSP + frame_size.  The implied SP is
-   * determined by the physical location of the context, not by REG_R13.
-   * To honor a modified SP, we memmove the entire context frame to the
-   * address where the end of the frame equals the desired SP.
-   */
-
-  desired_sp = regs[REG_R13];
-  implied_sp = (uint32_t)regs + XCPTCONTEXT_SIZE;
-
-  if (desired_sp != implied_sp)
-    {
-      new_regs = (uint32_t *)(desired_sp - XCPTCONTEXT_SIZE);
-      memmove(new_regs, regs, XCPTCONTEXT_SIZE);
-      regs = new_regs;
-      rtcb->xcp.saved_regs = new_regs;
-    }
 
   rtcb->xcp.regs = rtcb->xcp.saved_regs;
   rtcb->xcp.saved_regs = NULL;

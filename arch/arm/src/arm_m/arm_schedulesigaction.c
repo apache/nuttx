@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/arm_schedulesigaction.c
+ * arch/arm/src/arm_m/arm_schedulesigaction.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -115,6 +115,11 @@ void up_schedule_sigaction(struct tcb_s *tcb)
 
       tcb->xcp.saved_regs           = tcb->xcp.regs;
 
+      /* Stack pointer should be 8-byte aligned */
+
+      tcb->xcp.regs                 = (void *)STACKFRAME_ALIGN_DOWN(
+                                      (uint32_t)tcb->xcp.regs);
+
       /* Duplicate the register context.  These will be
        * restored by the signal trampoline after the signal has been
        * delivered.
@@ -134,11 +139,17 @@ void up_schedule_sigaction(struct tcb_s *tcb)
        */
 
       tcb->xcp.regs[REG_PC]         = (uint32_t)arm_sigdeliver;
+#ifdef CONFIG_ARCH_ARMV6M
+      tcb->xcp.regs[REG_PRIMASK]    = 1;
+#else
       tcb->xcp.regs[REG_BASEPRI]    = NVIC_SYSH_DISABLE_PRIORITY;
+#endif
       tcb->xcp.regs[REG_XPSR]       = ARM_XPSR_T;
 #ifdef CONFIG_BUILD_PROTECTED
       tcb->xcp.regs[REG_LR]         = EXC_RETURN_THREAD;
       tcb->xcp.regs[REG_EXC_RETURN] = EXC_RETURN_THREAD;
+      tcb->xcp.regs[REG_CONTROL]    = (getcontrol() & ~CONTROL_NPRIV) |
+                                       CONTROL_PACBTI_MASK;
       tcb->xcp.regs[REG_CONTROL]    = getcontrol() & ~CONTROL_NPRIV;
 #else
       tcb->xcp.regs[REG_LR]         = 0; /* Avoid backtracing back. */

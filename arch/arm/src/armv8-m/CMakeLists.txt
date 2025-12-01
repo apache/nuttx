@@ -40,10 +40,6 @@ set(SRCS
     arm_trigger_irq.c
     arm_usagefault.c)
 
-if(CONFIG_ENABLE_ALL_SIGNALS)
-  list(APPEND SRCS arm_schedulesigaction.c arm_sigdeliver.c)
-endif()
-
 if(NOT CONFIG_ARCH_HAVE_CUSTOM_VECTORS)
   list(APPEND SRCS arm_vectors.c)
 endif()
