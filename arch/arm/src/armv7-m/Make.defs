@@ -33,10 +33,6 @@ CMN_CSRCS += arm_memfault.c arm_perf.c
 CMN_CSRCS += arm_svcall.c arm_systemreset.c
 CMN_CSRCS += arm_trigger_irq.c arm_usagefault.c arm_dbgmonitor.c
 
-ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
-CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
-endif
-
 ifneq ($(CONFIG_ARCH_HAVE_CUSTOM_VECTORS),y)
   CMN_CSRCS += arm_vectors.c
 endif

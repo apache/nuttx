@@ -30,10 +30,6 @@ CMN_ASRCS += arm_exception.S
 CMN_CSRCS += arm_cpuinfo.c arm_doirq.c arm_hardfault.c arm_initialstate.c
 CMN_CSRCS += arm_svcall.c arm_systemreset.c arm_trigger_irq.c
 
-ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
-CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
-endif
-
 ifneq ($(CONFIG_ARCH_HAVE_CUSTOM_VECTORS),y)
   CMN_CSRCS += arm_vectors.c
 endif

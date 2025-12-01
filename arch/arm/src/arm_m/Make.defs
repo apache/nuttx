@@ -27,3 +27,7 @@ ifeq ($(CONFIG_LIB_SYSCALL),y)
 endif
 
 CMN_CSRCS += arm_tcbinfo.c
+
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+  CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
+endif
