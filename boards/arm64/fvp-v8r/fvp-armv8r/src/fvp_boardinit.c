@@ -176,15 +176,15 @@ static int fvp_rpmsg_virtio_init(void)
       case 0:
         rptun_setup_shmem(rsc, "core0", "core1");
         CPU_SET(1, &cpuset);
-        ret = rptun_bmp_init("core1", true, rsc, GIC_IRQ_SGI1,
-                            GIC_IRQ_SGI2, cpuset);
+        ret = rptun_bmp_init("core1", true, rsc, GIC_IRQ_SGI15,
+                            GIC_IRQ_SGI14, cpuset);
         DEBUGASSERT(ret >= 0);
 
         rsc = &g_rptun_rsc[1].rsc;
         rptun_setup_shmem(rsc, "core0", "core2");
         CPU_ZERO(&cpuset);
         CPU_SET(2, &cpuset);
-        ret = rptun_bmp_init("core2", true, rsc, GIC_IRQ_SGI3,
+        ret = rptun_bmp_init("core2", true, rsc, GIC_IRQ_SGI13,
                             GIC_IRQ_SGI4, cpuset);
         DEBUGASSERT(ret >= 0);
 
@@ -199,15 +199,15 @@ static int fvp_rpmsg_virtio_init(void)
       case 1:
         rsc = &g_rptun_rsc[0].rsc;
         CPU_SET(0, &cpuset);
-        ret = rptun_bmp_init("core0", false, rsc, GIC_IRQ_SGI2,
-                            GIC_IRQ_SGI1, cpuset);
+        ret = rptun_bmp_init("core0", false, rsc, GIC_IRQ_SGI14,
+                            GIC_IRQ_SGI15, cpuset);
         DEBUGASSERT(ret >= 0);
         break;
       case 2:
         rsc = &g_rptun_rsc[1].rsc;
         CPU_SET(0, &cpuset);
         ret = rptun_bmp_init("core0", false, rsc, GIC_IRQ_SGI4,
-                            GIC_IRQ_SGI3, cpuset);
+                            GIC_IRQ_SGI13, cpuset);
         DEBUGASSERT(ret >= 0);
         break;
       case 3:
