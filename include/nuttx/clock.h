@@ -728,6 +728,30 @@ clock_t clock_systime_ticks(void);
 void clock_systime_timespec(FAR struct timespec *ts);
 
 /****************************************************************************
+ * Name: clock_systime_nsec
+ *
+ * Description:
+ *   Return the current value of the system timer counter as
+ *   uint64_t nanoseconds.
+ *
+ * Input Parameters:
+ *   ts - Location to return the time
+ *
+ * Returned Value:
+ *   OK (0) on success; a negated errno value on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static inline_function uint64_t clock_systime_nsec(void)
+{
+  struct timespec ts;
+  clock_systime_timespec(&ts);
+  return (uint64_t)ts.tv_sec * NSEC_PER_SEC + ts.tv_nsec;
+}
+
+/****************************************************************************
  * Name:  clock_cpuload
  *
  * Description:
