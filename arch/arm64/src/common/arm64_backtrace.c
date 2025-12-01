@@ -44,6 +44,19 @@
  * Description:
  *  backtrace() parsing the return address through frame pointer
  *
+ * Note:
+ *
+ *  The stack layout is as follows:
+ *
+ *    Stack (grows downward):
+ *                +--------------------+
+ *    high addr   |  locals of A       |
+ *                +--------------------+
+ *                | prev_fp(A)=0       | ← FP of A (first frame)
+ *                | saved_lr(A)        |
+ *                +--------------------+
+ *                | locals of B        |
+ *
  ****************************************************************************/
 
 nosanitize_address
@@ -57,7 +70,7 @@ static int backtrace(uintptr_t *base, uintptr_t *limit,
     {
       if ((*skip)-- <= 0)
         {
-          buffer[i++] = pc;
+          buffer[i++] = (void *)((uintptr_t)pc - sizeof(void *));
         }
     }
 
@@ -70,7 +83,7 @@ static int backtrace(uintptr_t *base, uintptr_t *limit,
 
       if ((*skip)-- <= 0)
         {
-          buffer[i++] = (void *)*(fp + 1);
+          buffer[i++] = (void *)(*(fp + 1) - sizeof(void *));
         }
     }
 
