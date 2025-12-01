@@ -43,6 +43,7 @@
 
 #include "sched/sched.h"
 #include "wdog/wdog.h"
+#include "hrtimer/hrtimer.h"
 #include "clock/clock.h"
 
 /****************************************************************************
@@ -176,6 +177,8 @@ static inline void nxsched_process_scheduler(void)
 
 void nxsched_process_timer(void)
 {
+  clock_t ticks;
+
 #ifdef CONFIG_CLOCK_TIMEKEEPING
   /* Process wall time */
 
@@ -194,7 +197,13 @@ void nxsched_process_timer(void)
 
   /* Process watchdogs */
 
-  wd_timer(clock_systime_ticks());
+  ticks = clock_systime_ticks();
+
+#ifdef CONFIG_HRTIMER
+  hrtimer_expiry_tick(ticks, false);
+#endif
+
+  wd_timer(ticks);
 
 #ifdef CONFIG_SYSTEMTICK_HOOK
   /* Call out to a user-provided function in order to perform board-specific,

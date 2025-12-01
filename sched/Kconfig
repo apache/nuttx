@@ -55,6 +55,31 @@ config DISABLE_IDLE_LOOP
 
 menu "Clocks and Timers"
 
+config HRTIMER
+	bool "Enable the high-resolution timer"
+	default n
+	depends on SYSTEM_TIME64
+	---help---
+		Enable the high-resolution timer, which provide nanoseconds
+		precision for the system timer.
+
+if HRTIMER
+
+config HRTIMER_LIST
+	bool "Use the double-linked list for the high-resolution timer"
+	default n
+	---help---
+		Enable the double-linked list for the high-resolution timer.
+		The original red-black tree implementation provide O(lgn) complexity
+		for the timer queue insertion and deletion, while the double-linked
+		list implementation provide O(n) complexity for the timer queue
+		insertion and O(1) deletion.
+		Due to the red-black trees implementation is complex, it is
+		difficult to verify the functional correctness, making them
+		unsuitable for functional safety applications.
+
+endif # HRTIMER
+
 config ARCH_HAVE_TICKLESS
 	bool
 
