@@ -18,10 +18,10 @@
 #
 # ##############################################################################
 
-list(APPEND CSRCS arm_saveusercontext.S arm_tcbinfo.c)
-
-target_sources(arch PRIVATE ${CSRCS})
+list(APPEND SRCS arm_saveusercontext.S arm_tcbinfo.c)
 
 if(CONFIG_LIB_SYSCALL)
   list(APPEND SRCS arm_dispatch_syscall.S)
 endif()
+
+target_sources(arch PRIVATE ${SRCS})
