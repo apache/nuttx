@@ -49,6 +49,8 @@
  * 40 CPU cycles (100ns at 400Mhz) ~ 10 timer cycles (for 100 Mhz timer).
  */
 
+#define IFX_CFG_CPU_CLOCK_FREQUENCY 100000000
+
 #define TRICORE_SYSTIMER_MIN_DELAY \
   (40ull * SCU_FREQUENCY / IFX_CFG_CPU_CLOCK_FREQUENCY)
 
@@ -65,6 +67,7 @@ struct tricore_systimer_lowerhalf_s
 {
   struct oneshot_lowerhalf_s lower;
   volatile void             *tbase;
+  spinlock_t                lock;
 };
 
 /****************************************************************************
