@@ -62,6 +62,7 @@
 #include "init/init.h"
 #include "instrument/instrument.h"
 #include "tls/tls.h"
+#include "hrtimer/hrtimer.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -520,6 +521,12 @@ void nx_start(void)
   /* Initialize the IDLE task TCB *******************************************/
 
   idle_task_initialize();
+
+#ifdef CONFIG_HRTIMER
+  /* Initialize hrtimer list ************************************************/
+
+  hrtimer_initialize();
+#endif
 
   /* Task lists are initialized */
 
