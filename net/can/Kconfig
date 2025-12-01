@@ -165,5 +165,12 @@ config NET_CAN_NBUFFERS
 		This setting determines the number of preallocated CAN buffers
 		available for packet data.
 
+config NET_CAN_NPOLLWAITERS
+	int "Number of poll threads"
+	default 4
+	---help---
+		Maximum number of threads than can be waiting for POLL events.
+		Default: 4
+
 endif # NET_CAN
 endmenu # CAN Socket Support
