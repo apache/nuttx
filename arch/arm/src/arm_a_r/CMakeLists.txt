@@ -28,6 +28,10 @@ if(CONFIG_ARCH_HAVE_DEBUG)
   list(APPEND CSRCS arm_hwdebug.c)
 endif()
 
+if(CONFIG_LIB_SYSCALL)
+  list(APPEND CSRCS arm_dispatch_syscall.S)
+endif()
+
 list(APPEND CSRCS arm_tcbinfo.c arm_doirq.c arm_dataabort.c)
 
 target_sources(arch PRIVATE ${CSRCS})

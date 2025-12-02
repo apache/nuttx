@@ -304,6 +304,12 @@ void arm_ack_irq(int irq);
 
 uint32_t *arm_doirq(int irq, uint32_t *regs);
 
+/* System call handling */
+
+#ifdef CONFIG_LIB_SYSCALL
+void arm_dispatch_syscall(void);
+#endif
+
 /* Exception handling logic unique to the Cortex-M family */
 
 #if defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARCH_ARMV7M) || \
@@ -319,10 +325,6 @@ uint32_t *arm_doirq(int irq, uint32_t *regs);
 extern const void *__vector_table[];
 #else
 extern const void * const _vectors[];
-#endif
-
-#ifdef CONFIG_LIB_SYSCALL
-void arm_dispatch_syscall(void);
 #endif
 
 /* Exception Handlers */
