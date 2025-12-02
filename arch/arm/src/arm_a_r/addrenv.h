@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-a/addrenv.h
+ * arch/arm/src/arm_a_r/addrenv.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV7_A_ADDRENV_H
-#define __ARCH_ARM_SRC_ARMV7_A_ADDRENV_H
+#ifndef __ARCH_ARM_SRC_ARM_A_R_ADDRENV_H
+#define __ARCH_ARM_SRC_ARM_A_R_ADDRENV_H
 
 /****************************************************************************
  * Included Files
@@ -121,4 +121,4 @@ uintptr_t arm_addrenv_va_to_pa(uintptr_t *l1table, uintptr_t va);
 #endif /* __ASSEMBLY__ */
 
 #endif /* CONFIG_ARCH_ADDRENV */
-#endif /* __ARCH_ARM_SRC_ARMV7_A_ADDRENV_H */
+#endif /* __ARCH_ARM_SRC_ARM_A_R_ADDRENV_H */

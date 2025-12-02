@@ -22,7 +22,7 @@
 
 # Common ARM_A_R files
 
-CMN_CSRCS += arm_tcbinfo.c arm_doirq.c arm_dataabort.c
+CMN_CSRCS += arm_tcbinfo.c arm_doirq.c arm_dataabort.c arm_syscall.c
 
 ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
   CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
