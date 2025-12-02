@@ -184,10 +184,6 @@ if(CONFIG_STM32L4_IWDG)
   list(APPEND SRCS stm32l4_iwdg.c)
 endif()
 
-if(CONFIG_STM32L4_IWDG)
-  list(APPEND SRCS stm32l4_iwdg.c)
-endif()
-
 if(CONFIG_STM32L4_SDMMC1)
   list(APPEND SRCS stm32l4_sdmmc.c)
 endif()
