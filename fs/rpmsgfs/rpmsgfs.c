@@ -147,6 +147,21 @@ static int     rpmsgfs_chstat(FAR struct inode *mountpt,
                               FAR const char *relpath,
                               FAR const struct stat *buf, int flags);
 
+#ifdef CONFIG_FS_LINKS
+static int     rpmsgfs_link(FAR struct inode *mountpt,
+                            FAR const char *relpath1,
+                            FAR const char *relpath2);
+static int     rpmsgfs_symlink(FAR struct inode *mountpt,
+                               FAR const char *target,
+                               FAR const char *relpath);
+static ssize_t rpmsgfs_readlink(FAR struct inode *mountpt,
+                                FAR const char *relpath,
+                                FAR char *buf, size_t bufsize);
+static int     rpmsgfs_lstat(FAR struct inode *mountpt,
+                             FAR const char *relpath,
+                             FAR struct stat *buf);
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -190,6 +205,16 @@ const struct mountpt_operations g_rpmsgfs_operations =
   rpmsgfs_rename,        /* rename */
   rpmsgfs_stat,          /* stat */
   rpmsgfs_chstat,        /* chstat */
+  NULL,                  /* syncfs */
+  NULL,                  /* ioctldir */
+  NULL,                  /* permission */
+
+#ifdef CONFIG_FS_LINKS
+  rpmsgfs_link,          /* link */
+  rpmsgfs_symlink,       /* symlink */
+  rpmsgfs_readlink,      /* readlink */
+  rpmsgfs_lstat,         /* lstat */
+#endif
 };
 
 /****************************************************************************
@@ -1551,3 +1576,217 @@ static int rpmsgfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
   lib_put_pathbuffer(path);
   return ret;
 }
+
+#ifdef CONFIG_FS_LINKS
+/****************************************************************************
+ * Name: rpmsgfs_link
+ *
+ * Description: Create a hard link
+ *
+ ****************************************************************************/
+
+static int rpmsgfs_link(FAR struct inode *mountpt, FAR const char *relpath1,
+                        FAR const char *relpath2)
+{
+  FAR struct rpmsgfs_mountpt_s *fs;
+  FAR char *path1;
+  FAR char *path2;
+  int ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt && mountpt->i_private);
+
+  /* Get the mountpoint private data from the inode structure */
+
+  fs = mountpt->i_private;
+
+  path1 = lib_get_tempbuffer(PATH_MAX);
+  if (path1 == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  path2 = lib_get_tempbuffer(PATH_MAX);
+  if (path2 == NULL)
+    {
+      ret = -ENOMEM;
+      goto errout_with_path1;
+    }
+
+  ret = nxmutex_lock(&fs->fs_lock);
+  if (ret < 0)
+    {
+      goto errout_with_path2;
+    }
+
+  /* Append to the host's root directory */
+
+  rpmsgfs_mkpath(fs, relpath1, path1, PATH_MAX);
+  rpmsgfs_mkpath(fs, relpath2, path2, PATH_MAX);
+
+  /* Call the host FS to do the link operation */
+
+  ret = rpmsgfs_client_link(fs->handle, path1, path2);
+
+  nxmutex_unlock(&fs->fs_lock);
+
+errout_with_path2:
+  lib_put_tempbuffer(path2);
+errout_with_path1:
+  lib_put_tempbuffer(path1);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: rpmsgfs_symlink
+ *
+ * Description: Create a symbolic link
+ *
+ ****************************************************************************/
+
+static int rpmsgfs_symlink(FAR struct inode *mountpt, FAR const char *target,
+                           FAR const char *relpath)
+{
+  FAR struct rpmsgfs_mountpt_s *fs;
+  FAR char *linkpath;
+  int ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt && mountpt->i_private);
+
+  /* Get the mountpoint private data from the inode structure */
+
+  fs = mountpt->i_private;
+
+  linkpath = lib_get_tempbuffer(PATH_MAX);
+  if (linkpath == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  ret = nxmutex_lock(&fs->fs_lock);
+  if (ret < 0)
+    {
+      goto errout_with_path;
+    }
+
+  /* Append to the host's root directory.
+   * Note: target is stored as-is (it's a path in the remote system),
+   * only linkpath needs to be converted to host path.
+   */
+
+  rpmsgfs_mkpath(fs, relpath, linkpath, PATH_MAX);
+
+  /* Call the host FS to do the symlink operation */
+
+  ret = rpmsgfs_client_symlink(fs->handle, target, linkpath);
+
+  nxmutex_unlock(&fs->fs_lock);
+
+errout_with_path:
+  lib_put_tempbuffer(linkpath);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: rpmsgfs_readlink
+ *
+ * Description: Read the target of a symbolic link
+ *
+ ****************************************************************************/
+
+static ssize_t rpmsgfs_readlink(FAR struct inode *mountpt,
+                                FAR const char *relpath, FAR char *buf,
+                                size_t bufsize)
+{
+  FAR struct rpmsgfs_mountpt_s *fs;
+  FAR char *path;
+  ssize_t ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt && mountpt->i_private);
+
+  /* Get the mountpoint private data from the inode structure */
+
+  fs = mountpt->i_private;
+
+  path = lib_get_tempbuffer(PATH_MAX);
+  if (path == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  ret = nxmutex_lock(&fs->fs_lock);
+  if (ret < 0)
+    {
+      goto errout_with_path;
+    }
+
+  /* Append to the host's root directory */
+
+  rpmsgfs_mkpath(fs, relpath, path, PATH_MAX);
+
+  /* Call the host FS to do the readlink operation */
+
+  ret = rpmsgfs_client_readlink(fs->handle, path, buf, bufsize);
+
+  nxmutex_unlock(&fs->fs_lock);
+
+errout_with_path:
+  lib_put_tempbuffer(path);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: rpmsgfs_lstat
+ *
+ * Description: Return information about a file or directory (without
+ *              following symlinks)
+ *
+ ****************************************************************************/
+
+static int rpmsgfs_lstat(FAR struct inode *mountpt, FAR const char *relpath,
+                         FAR struct stat *buf)
+{
+  FAR struct rpmsgfs_mountpt_s *fs;
+  FAR char *path;
+  int ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt && mountpt->i_private);
+
+  /* Get the mountpoint private data from the inode structure */
+
+  fs = mountpt->i_private;
+
+  path = lib_get_tempbuffer(PATH_MAX);
+  if (path == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  ret = nxmutex_lock(&fs->fs_lock);
+  if (ret < 0)
+    {
+      goto errout_with_path;
+    }
+
+  /* Append to the host's root directory */
+
+  rpmsgfs_mkpath(fs, relpath, path, PATH_MAX);
+
+  /* Call the host FS to do the lstat operation */
+
+  ret = rpmsgfs_client_lstat(fs->handle, path, buf);
+
+  nxmutex_unlock(&fs->fs_lock);
+
+errout_with_path:
+  lib_put_tempbuffer(path);
+  return ret;
+}
+#endif

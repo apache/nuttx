@@ -126,7 +126,20 @@ static int rpmsgfs_fchstat_handler(FAR struct rpmsg_endpoint *ept,
 static int rpmsgfs_chstat_handler(FAR struct rpmsg_endpoint *ept,
                                   FAR void *data, size_t len,
                                   uint32_t src, FAR void *priv);
-
+#ifdef CONFIG_FS_LINKS
+static int rpmsgfs_symlink_handler(FAR struct rpmsg_endpoint *ept,
+                                   FAR void *data, size_t len,
+                                   uint32_t src, FAR void *priv);
+static int rpmsgfs_readlink_handler(FAR struct rpmsg_endpoint *ept,
+                                    FAR void *data, size_t len,
+                                    uint32_t src, FAR void *priv);
+static int rpmsgfs_link_handler(FAR struct rpmsg_endpoint *ept,
+                                FAR void *data, size_t len,
+                                uint32_t src, FAR void *priv);
+static int rpmsgfs_lstat_handler(FAR struct rpmsg_endpoint *ept,
+                                 FAR void *data, size_t len,
+                                 uint32_t src, FAR void *priv);
+#endif
 static bool rpmsgfs_ns_match(FAR struct rpmsg_device *rdev,
                              FAR void *priv_, FAR const char *name,
                              uint32_t dest);
@@ -165,6 +178,12 @@ static const rpmsg_ept_cb g_rpmsgfs_handler[] =
   [RPMSGFS_STAT]      = rpmsgfs_stat_handler,
   [RPMSGFS_FCHSTAT]   = rpmsgfs_fchstat_handler,
   [RPMSGFS_CHSTAT]    = rpmsgfs_chstat_handler,
+#ifdef CONFIG_FS_LINKS
+  [RPMSGFS_SYMLINK]   = rpmsgfs_symlink_handler,
+  [RPMSGFS_READLINK]  = rpmsgfs_readlink_handler,
+  [RPMSGFS_LINK]      = rpmsgfs_link_handler,
+  [RPMSGFS_LSTAT]     = rpmsgfs_lstat_handler,
+#endif
 };
 
 /****************************************************************************
@@ -311,6 +330,48 @@ static FAR void *rpmsgfs_get_dir(
     }
 
   return dir;
+}
+
+static void rpmsgfs_get_statbuf(FAR struct stat *st,
+                                FAR struct rpmsgfs_stat_priv_s *rst)
+{
+  st->st_dev           = rst->dev;
+  st->st_ino           = rst->ino;
+  st->st_mode          = rst->mode;
+  st->st_nlink         = rst->nlink;
+  st->st_uid           = rst->uid;
+  st->st_gid           = rst->gid;
+  st->st_rdev          = rst->rdev;
+  st->st_size          = rst->size;
+  st->st_atim.tv_sec   = rst->atim_sec;
+  st->st_atim.tv_nsec  = rst->atim_nsec;
+  st->st_mtim.tv_sec   = rst->mtim_sec;
+  st->st_mtim.tv_nsec  = rst->mtim_nsec;
+  st->st_ctim.tv_sec   = rst->ctim_sec;
+  st->st_ctim.tv_nsec  = rst->ctim_nsec;
+  st->st_blksize       = rst->blksize;
+  st->st_blocks        = rst->blocks;
+}
+
+static void rpmsgfs_set_statbuf(FAR struct rpmsgfs_stat_priv_s *rst,
+                                FAR const struct stat *st)
+{
+  rst->dev        = st->st_dev;
+  rst->ino        = st->st_ino;
+  rst->mode       = st->st_mode;
+  rst->nlink      = st->st_nlink;
+  rst->uid        = st->st_uid;
+  rst->gid        = st->st_gid;
+  rst->rdev       = st->st_rdev;
+  rst->size       = st->st_size;
+  rst->atim_sec   = st->st_atim.tv_sec;
+  rst->atim_nsec  = st->st_atim.tv_nsec;
+  rst->mtim_sec   = st->st_mtim.tv_sec;
+  rst->mtim_nsec  = st->st_mtim.tv_nsec;
+  rst->ctim_sec   = st->st_ctim.tv_sec;
+  rst->ctim_nsec  = st->st_ctim.tv_nsec;
+  rst->blksize    = st->st_blksize;
+  rst->blocks     = st->st_blocks;
 }
 
 static int rpmsgfs_open_handler(FAR struct rpmsg_endpoint *ept,
@@ -538,22 +599,7 @@ static int rpmsgfs_fstat_handler(FAR struct rpmsg_endpoint *ept,
       ret = file_fstat(filep, &buf);
       if (ret >= 0)
         {
-          msg->buf.dev       = buf.st_dev;
-          msg->buf.ino       = buf.st_ino;
-          msg->buf.mode      = buf.st_mode;
-          msg->buf.nlink     = buf.st_nlink;
-          msg->buf.uid       = buf.st_uid;
-          msg->buf.gid       = buf.st_gid;
-          msg->buf.rdev      = buf.st_rdev;
-          msg->buf.size      = buf.st_size;
-          msg->buf.atim_sec  = buf.st_atim.tv_sec;
-          msg->buf.atim_nsec = buf.st_atim.tv_nsec;
-          msg->buf.mtim_sec  = buf.st_mtim.tv_sec;
-          msg->buf.mtim_nsec = buf.st_mtim.tv_nsec;
-          msg->buf.ctim_sec  = buf.st_ctim.tv_sec;
-          msg->buf.ctim_nsec = buf.st_ctim.tv_nsec;
-          msg->buf.blksize   = buf.st_blksize;
-          msg->buf.blocks    = buf.st_blocks;
+          rpmsgfs_set_statbuf(&msg->buf, &buf);
         }
     }
 
@@ -760,22 +806,7 @@ static int rpmsgfs_stat_handler(FAR struct rpmsg_endpoint *ept,
   ret = nx_stat(msg->pathname, &buf, 1);
   if (ret >= 0)
     {
-      msg->buf.dev       = buf.st_dev;
-      msg->buf.ino       = buf.st_ino;
-      msg->buf.mode      = buf.st_mode;
-      msg->buf.nlink     = buf.st_nlink;
-      msg->buf.uid       = buf.st_uid;
-      msg->buf.gid       = buf.st_gid;
-      msg->buf.rdev      = buf.st_rdev;
-      msg->buf.size      = buf.st_size;
-      msg->buf.atim_sec  = buf.st_atim.tv_sec;
-      msg->buf.atim_nsec = buf.st_atim.tv_nsec;
-      msg->buf.mtim_sec  = buf.st_mtim.tv_sec;
-      msg->buf.mtim_nsec = buf.st_mtim.tv_nsec;
-      msg->buf.ctim_sec  = buf.st_ctim.tv_sec;
-      msg->buf.ctim_nsec = buf.st_ctim.tv_nsec;
-      msg->buf.blksize   = buf.st_blksize;
-      msg->buf.blocks    = buf.st_blocks;
+      rpmsgfs_set_statbuf(&msg->buf, &buf);
     }
 
   msg->header.result = ret;
@@ -794,22 +825,7 @@ static int rpmsgfs_fchstat_handler(FAR struct rpmsg_endpoint *ept,
   filep = rpmsgfs_get_file(priv, msg->fd);
   if (filep != NULL)
     {
-      buf.st_dev          = msg->buf.dev;
-      buf.st_ino          = msg->buf.ino;
-      buf.st_mode         = msg->buf.mode;
-      buf.st_nlink        = msg->buf.nlink ;
-      buf.st_uid          = msg->buf.uid ;
-      buf.st_gid          = msg->buf.gid;
-      buf.st_rdev         = msg->buf.rdev;
-      buf.st_size         = msg->buf.size;
-      buf.st_atim.tv_sec  = msg->buf.atim_sec;
-      buf.st_atim.tv_nsec = msg->buf.atim_nsec;
-      buf.st_mtim.tv_sec  = msg->buf.mtim_sec;
-      buf.st_mtim.tv_nsec = msg->buf.mtim_nsec;
-      buf.st_ctim.tv_sec  = msg->buf.ctim_sec;
-      buf.st_ctim.tv_nsec = msg->buf.ctim_nsec;
-      buf.st_blksize      = msg->buf.blksize;
-      buf.st_blocks       = msg->buf.blocks;
+      rpmsgfs_get_statbuf(&buf, &msg->buf);
 
       ret = file_fchstat(filep, &buf, msg->flags);
     }
@@ -882,6 +898,68 @@ out:
   msg->header.result = ret;
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
+
+#ifdef CONFIG_FS_LINKS
+static int rpmsgfs_symlink_handler(FAR struct rpmsg_endpoint *ept,
+                                   FAR void *data, size_t len,
+                                   uint32_t src, FAR void *priv)
+{
+  FAR struct rpmsgfs_symlink_s *msg = data;
+  FAR const char *target = msg->pathname;
+  FAR const char *linkpath = target + strlen(target) + 1;
+  int ret;
+
+  ret = symlink(target, linkpath);
+  msg->header.result = ret ? -get_errno() : 0;
+  return rpmsg_send(ept, msg, sizeof(*msg));
+}
+
+static int rpmsgfs_readlink_handler(FAR struct rpmsg_endpoint *ept,
+                                    FAR void *data, size_t len,
+                                    uint32_t src, FAR void *priv)
+{
+  FAR struct rpmsgfs_readlink_s *msg = data;
+  ssize_t ret;
+  uint32_t space;
+
+  space = rpmsg_get_tx_buffer_size(ept);
+  ret = readlink(msg->pathname, msg->pathname, space - sizeof(*msg));
+  msg->header.result = ret < 0 ? -get_errno() : ret;
+  return rpmsg_send(ept, msg, sizeof(*msg) + (ret > 0 ? ret : 0));
+}
+
+static int rpmsgfs_link_handler(FAR struct rpmsg_endpoint *ept,
+                                FAR void *data, size_t len,
+                                uint32_t src, FAR void *priv)
+{
+  FAR struct rpmsgfs_link_s *msg = data;
+  FAR const char *path1 = msg->pathname;
+  FAR const char *path2 = path1 + strlen(path1) + 1;
+  int ret;
+
+  ret = link(path1, path2);
+  msg->header.result = ret ? -get_errno() : 0;
+  return rpmsg_send(ept, msg, sizeof(*msg));
+}
+
+static int rpmsgfs_lstat_handler(FAR struct rpmsg_endpoint *ept,
+                                 FAR void *data, size_t len,
+                                 uint32_t src, FAR void *priv)
+{
+  FAR struct rpmsgfs_lstat_s *msg = data;
+  struct stat buf;
+  int ret;
+
+  ret = nx_stat(msg->pathname, &buf, 0);
+  if (ret >= 0)
+    {
+      rpmsgfs_set_statbuf(&msg->buf, &buf);
+    }
+
+  msg->header.result = ret;
+  return rpmsg_send(ept, msg, sizeof(*msg));
+}
+#endif
 
 static bool rpmsgfs_ns_match(FAR struct rpmsg_device *rdev,
                              FAR void *priv_, FAR const char *name,
