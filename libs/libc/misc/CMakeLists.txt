@@ -93,7 +93,6 @@ list(
   lib_crc32hf4acfb13.c
   lib_crc16.c
   lib_crc16ccitt.c
-  lib_crc16ibm.c
   lib_crc16xmodem.c
   lib_crc16h1021.c
   lib_crc16h8005.c

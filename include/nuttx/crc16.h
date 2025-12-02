@@ -136,8 +136,7 @@ uint16_t crc16ccitt(FAR const uint8_t *src, size_t len);
  *
  ****************************************************************************/
 
-uint16_t crc16ibmpart(FAR const uint8_t *src, size_t len,
-                       uint16_t crc16val);
+#define crc16ibmpart crc16h8005_part
 
 /****************************************************************************
  * Name: crc16ibm
@@ -159,7 +158,7 @@ uint16_t crc16ibmpart(FAR const uint8_t *src, size_t len,
  *
  ****************************************************************************/
 
-uint16_t crc16ibm(FAR const uint8_t *src, size_t len);
+#define crc16ibm crc16h8005
 
 /****************************************************************************
  * Name: crc16xmodempart
