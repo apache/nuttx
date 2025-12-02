@@ -85,6 +85,15 @@ if(CONFIG_STACK_CANARIES)
   add_compile_options(${CONFIG_STACK_CANARIES_LEVEL})
 endif()
 
+if(CONFIG_STACK_USAGE)
+  add_compile_options(-fstack-usage)
+endif()
+
+if(CONFIG_STACK_USAGE_WARNING AND NOT "${CONFIG_STACK_USAGE_WARNING}" STREQUAL
+                                  "0")
+  add_compile_options(-Wstack-usage=${CONFIG_STACK_USAGE_WARNING})
+endif()
+
 if(CONFIG_COVERAGE_ALL)
   add_compile_options(-fprofile-arcs -ftest-coverage -fno-inline)
 endif()
