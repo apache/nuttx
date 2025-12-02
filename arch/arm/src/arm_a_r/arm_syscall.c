@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-a/arm_syscall.c
+ * arch/arm/src/arm_a_r/arm_syscall.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -108,7 +108,7 @@ uint32_t *arm_syscall(uint32_t *regs)
   struct tcb_s **running_task = &g_running_tasks[cpu];
   struct tcb_s *tcb = this_task();
   uint32_t cmd;
-#ifdef CONFIG_BUILD_KERNEL
+#ifndef CONFIG_BUILD_FLAT
   uint32_t cpsr;
 #endif
 
@@ -172,10 +172,11 @@ uint32_t *arm_syscall(uint32_t *regs)
            */
 
           regs[REG_PC]        = rtcb->xcp.syscall[index].sysreturn;
-#ifdef CONFIG_BUILD_KERNEL
-          regs[REG_CPSR]      = rtcb->xcp.syscall[index].cpsr;
+#ifndef CONFIG_BUILD_FLAT
+          regs[REG_CPSR]      = rtcb->xcp.syscall[index].cpsr |
+                                (regs[REG_CPSR] & (PSR_F_BIT | PSR_I_BIT));
 #endif
-          /* The return value must be in R0-R1.  dispatch_syscall()
+          /* The return value must be in R0-R1.  arm_dispatch_syscall()
            * temporarily moved the value for R0 into R2.
            */
 
@@ -251,7 +252,7 @@ uint32_t *arm_syscall(uint32_t *regs)
        *   R3 = argv
        */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifndef CONFIG_BUILD_FLAT
       case SYS_task_start:
         {
           /* Set up to return to the user-space _start function in
@@ -263,9 +264,16 @@ uint32_t *arm_syscall(uint32_t *regs)
            *   CSPR = user mode
            */
 
+#ifdef CONFIG_BUILD_KERNEL
           regs[REG_PC]   = regs[REG_R1];
           regs[REG_R0]   = regs[REG_R2];
           regs[REG_R1]   = regs[REG_R3];
+#else
+          regs[REG_PC]   = (uint32_t)USERSPACE->task_startup & ~1;
+          regs[REG_R0]   = regs[REG_R1];
+          regs[REG_R1]   = regs[REG_R2];
+          regs[REG_R2]   = regs[REG_R3];
+#endif
 
           cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
           regs[REG_CPSR] = cpsr | PSR_MODE_USR;
@@ -307,7 +315,7 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
 #endif
 
-#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_ENABLE_ALL_SIGNALS)
+#if !defined(CONFIG_BUILD_FLAT) && defined(CONFIG_ENABLE_ALL_SIGNALS)
       /* R0=SYS_signal_handler:  This a user signal handler callback
        *
        * void signal_handler(_sa_sigaction_t sighand, int signo,
@@ -335,7 +343,11 @@ uint32_t *arm_syscall(uint32_t *regs)
            * unprivileged mode.
            */
 
+#ifdef CONFIG_BUILD_KERNEL
           regs[REG_PC]   = (uint32_t)ARCH_DATA_RESERVE->ar_sigtramp;
+#else
+          regs[REG_PC]   = (uint32_t)USERSPACE->signal_handler & ~1;
+#endif
           cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
           regs[REG_CPSR] = cpsr | PSR_MODE_USR;
 
@@ -387,7 +399,9 @@ uint32_t *arm_syscall(uint32_t *regs)
 #endif
         }
         break;
+#endif /* !CONFIG_BUILD_FLAT && CONFIG_ENABLE_ALL_SIGNALS */
 
+#if !defined(CONFIG_BUILD_FLAT) && defined(CONFIG_ENABLE_ALL_SIGNALS)
       /* R0=SYS_signal_handler_return:  This a user signal handler callback
        *
        *   void signal_handler_return(void);
@@ -426,7 +440,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 #endif
         }
         break;
-#endif /* CONFIG_BUILD_KERNEL && CONFIG_ENABLE_ALL_SIGNALS */
+#endif /* !CONFIG_BUILD_FLAT && CONFIG_ENABLE_ALL_SIGNALS */
 
       /* This is not an architecture-specific system call.  If NuttX is built
        * as a standalone kernel with a system call interface, then all of the
@@ -446,10 +460,16 @@ uint32_t *arm_syscall(uint32_t *regs)
               break;
             }
 
-          /* Setup to return to dispatch_syscall in privileged mode. */
+          /* Use ip to create a debug frame.
+           * we can use gdb backtrace from syscall to user space.
+           */
+
+          regs[REG_IP] = regs[REG_PC];
+
+          /* Setup to return to arm_dispatch_syscall in privileged mode. */
 
           rtcb->xcp.syscall[index].sysreturn = regs[REG_PC];
-#ifdef CONFIG_BUILD_KERNEL
+#ifndef CONFIG_BUILD_FLAT
           rtcb->xcp.syscall[index].cpsr      = regs[REG_CPSR];
 #endif
 
@@ -468,7 +488,7 @@ uint32_t *arm_syscall(uint32_t *regs)
             }
 
           regs[REG_PC]   = (uint32_t)arm_dispatch_syscall;
-#ifdef CONFIG_BUILD_KERNEL
+#ifndef CONFIG_BUILD_FLAT
           cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
           regs[REG_CPSR] = cpsr | PSR_MODE_SYS;
 #endif

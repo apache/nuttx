@@ -27,7 +27,6 @@ list(
   SRCS
   arm_initialstate.c
   arm_prefetchabort.c
-  arm_syscall.c
   arm_undefinedinsn.c
   arm_cache.S
   arm_vectors.S
