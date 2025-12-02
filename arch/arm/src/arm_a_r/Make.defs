@@ -28,6 +28,10 @@ ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
   CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
 endif
 
+ifeq ($(CONFIG_LIB_SYSCALL),y)
+  CMN_ASRCS += arm_dispatch_syscall.S
+endif
+
 ifeq ($(CONFIG_ARCH_HAVE_DEBUG),y)
   CMN_CSRCS += arm_hwdebug.c
 endif
