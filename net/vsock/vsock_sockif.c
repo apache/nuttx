@@ -161,8 +161,8 @@ static FAR const char *g_vsock_op[] =
 };
 #endif
 
-static_assert(SHUT_RD == VIRTIO_VSOCK_SHUTDOWN_RECV);
-static_assert(SHUT_WR == VIRTIO_VSOCK_SHUTDOWN_SEND);
+static_assert(SHUT_RD == VIRTIO_VSOCK_SHUTDOWN_RECV, "");
+static_assert(SHUT_WR == VIRTIO_VSOCK_SHUTDOWN_SEND, "");
 
 /****************************************************************************
  * Private Function Prototypes
@@ -757,7 +757,7 @@ vsock_alloc_tx_credit(FAR struct vsock_conn_s *conn, uint32_t credit)
  * Name: vsock_free_tx_credit
  ****************************************************************************/
 
-static inline_function void
+static unused_code inline_function void
 vsock_free_tx_credit(FAR struct vsock_conn_s *conn, uint32_t credit)
 {
   irqstate_t flags;
