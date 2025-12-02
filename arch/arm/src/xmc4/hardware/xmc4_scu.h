@@ -465,7 +465,7 @@
 #define SCU_ECAT0CON_PHY_OFFSET (1 << SCU_ECAT0CON_PHY_OFFSET_SHIFT)
 
 #define SCU_ECAT0CON_ECATRSTEN_SHIFT  (0)
-#define SCU_ECAT0CON_ECATRSTEN        (0 << SCU_ECAT0CON_ECATRSTEN_SHIFT)
+#define SCU_ECAT0CON_ECATRSTEN        (1 << SCU_ECAT0CON_ECATRSTEN_SHIFT)
 
 /* Port 0 */
 #define SCU_ECAT0CON_RXD0_SHIFT  (0)
@@ -1096,6 +1096,12 @@
 #define SCU_DSLEEPCR_EBUCR          (1 << 19) /* Bit 19: EBU Clock Control in Deep Sleep Mode */
 #define SCU_DSLEEPCR_CCUCR          (1 << 20) /* Bit 20: CCU Clock Control in Deep Sleep Mod */
 #define SCU_DSLEEPCR_WDTCR          (1 << 21) /* Bit 21: WDT Clock Control in Deep Sleep Mode */
+
+/* EtherCAT clocking */
+#define SCU_ECATCLKCR_ECADIV_SHIFT (0)   /* Bit 0-1: EtherCAT Clock Divider Value */
+#define SCU_ECATCLKCR_ECATSEL_SHIFT (16) /* Bit 16: EtherCAT Clock Selection Value */
+#  define SCU_ECATCLKCR_ECATSEL_FPLLUSB (0 << SCU_ECATCLKCR_ECATSEL_SHIFT)
+#  define SCU_ECATCLKCR_ECATSEL_FPLL    (1 << SCU_ECATCLKCR_ECATSEL_SHIFT)
 
 /* Peripheral 0 Clock Gating Status, Peripheral 0 Clock Gating Set,
  * Peripheral 0 Clock Gating Clear

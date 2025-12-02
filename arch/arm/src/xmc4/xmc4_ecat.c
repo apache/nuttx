@@ -35,6 +35,274 @@
 #include "debug.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define GET_GPIO(p)   ((p) & (GPIO_PORT_MASK | GPIO_PIN_MASK))
+
+/* MDIO configuration */
+
+#if   GET_GPIO(ECAT_MDO) == (GPIO_PORT0 | GPIO_PIN12)
+    #define MDIO  SCU_ECAT0CON_MDIOA
+#elif GET_GPIO(ECAT_MDO) == (GPIO_PORT4 | GPIO_PIN2)
+    #define MDIO  SCU_ECAT0CON_MDIOB
+#elif GET_GPIO(ECAT_MDO) == (GPIO_PORT9 | GPIO_PIN7)
+    #define MDIO  SCU_ECAT0CON_MDIOC
+#else
+    #error "EtherCAT : Unknown MDIO configuration"
+#endif
+
+#if defined(CONFIG_XMC4_ECAT_P0)
+
+/* Port 0 RX D0 */
+
+#if   GET_GPIO(ECAT_P0_RXD0) == (GPIO_PORT1 | GPIO_PIN4)
+    #define P0_RXD0  SCU_ECAT0CON_PORT0_RXD0A
+#elif GET_GPIO(ECAT_P0_RXD0) == (GPIO_PORT5 | GPIO_PIN0)
+    #define P0_RXD0  SCU_ECAT0CON_PORT0_RXD0B
+#elif GET_GPIO(ECAT_P0_RXD0) == (GPIO_PORT7 | GPIO_PIN4)
+    #define P0_RXD0  SCU_ECAT0CON_PORT0_RXD0C
+#else
+    #error "EtherCAT : Unknown P0_RXD0 configuration"
+#endif
+
+/* Port 0 RX D1 */
+
+#if   GET_GPIO(ECAT_P0_RXD1) == (GPIO_PORT1 | GPIO_PIN5)
+    #define P0_RXD1  SCU_ECAT0CON_PORT0_RXD1A
+#elif GET_GPIO(ECAT_P0_RXD1) == (GPIO_PORT5 | GPIO_PIN1)
+    #define P0_RXD1  SCU_ECAT0CON_PORT0_RXD1B
+#elif GET_GPIO(ECAT_P0_RXD1) == (GPIO_PORT7 | GPIO_PIN5)
+    #define P0_RXD1  SCU_ECAT0CON_PORT0_RXD1C
+#else
+    #error "EtherCAT : Unknown P0_RXD1 configuration"
+#endif
+
+/* Port 0 RX D2 */
+
+#if   GET_GPIO(ECAT_P0_RXD2) == (GPIO_PORT1 | GPIO_PIN10)
+    #define P0_RXD2  SCU_ECAT0CON_PORT0_RXD2A
+#elif GET_GPIO(ECAT_P0_RXD2) == (GPIO_PORT5 | GPIO_PIN2)
+    #define P0_RXD2  SCU_ECAT0CON_PORT0_RXD2B
+#elif GET_GPIO(ECAT_P0_RXD2) == (GPIO_PORT7 | GPIO_PIN6)
+    #define P0_RXD2  SCU_ECAT0CON_PORT0_RXD2C
+#else
+    #error "EtherCAT : Unknown P0_RXD2 configuration"
+#endif
+
+/* Port 0 RX D3 */
+
+#if   GET_GPIO(ECAT_P0_RXD3) == (GPIO_PORT1 | GPIO_PIN11)
+    #define P0_RXD3  SCU_ECAT0CON_PORT0_RXD3A
+#elif GET_GPIO(ECAT_P0_RXD3) == (GPIO_PORT5 | GPIO_PIN7)
+    #define P0_RXD3  SCU_ECAT0CON_PORT0_RXD3B
+#elif GET_GPIO(ECAT_P0_RXD3) == (GPIO_PORT7 | GPIO_PIN7)
+    #define P0_RXD3  SCU_ECAT0CON_PORT0_RXD3C
+#else
+    #error "EtherCAT : Unknown P0_RXD3 configuration"
+#endif
+
+/* Port 0 RX CLK */
+
+#if   GET_GPIO(ECAT_P0_RX_CLK) == (GPIO_PORT1 | GPIO_PIN1)
+    #define P0_RX_CLK  SCU_ECAT0CON_PORT0_RX_CLKA
+#elif GET_GPIO(ECAT_P0_RX_CLK) == (GPIO_PORT5 | GPIO_PIN4)
+    #define P0_RX_CLK  SCU_ECAT0CON_PORT0_RX_CLKB
+#elif GET_GPIO(ECAT_P0_RX_CLK) == (GPIO_PORT7 | GPIO_PIN10)
+    #define P0_RX_CLK  SCU_ECAT0CON_PORT0_RX_CLKC
+#else
+    #error "EtherCAT : Unknown P0_RX_CLK configuration"
+#endif
+
+/* Port 0 RX DV */
+
+#if   GET_GPIO(ECAT_P0_RX_DV) == (GPIO_PORT1 | GPIO_PIN9)
+    #define P0_RX_DV  SCU_ECAT0CON_PORT0_RX_DVA
+#elif GET_GPIO(ECAT_P0_RX_DV) == (GPIO_PORT5 | GPIO_PIN6)
+    #define P0_RX_DV  SCU_ECAT0CON_PORT0_RX_DVB
+#elif GET_GPIO(ECAT_P0_RX_DV) == (GPIO_PORT7 | GPIO_PIN11)
+    #define P0_RX_DV  SCU_ECAT0CON_PORT0_RX_DVC
+#else
+    #error "EtherCAT : Unknown P0_RX_DV configuration"
+#endif
+
+/* Port 0 RX ERR */
+
+#if   GET_GPIO(ECAT_P0_RX_ERR) == (GPIO_PORT4 | GPIO_PIN0)
+    #define P0_RX_ERR  SCU_ECAT0CON_PORT0_RX_ERRA
+#elif GET_GPIO(ECAT_P0_RX_ERR) == (GPIO_PORT2 | GPIO_PIN6)
+    #define P0_RX_ERR  SCU_ECAT0CON_PORT0_RX_ERRB
+#elif GET_GPIO(ECAT_P0_RX_ERR) == (GPIO_PORT7 | GPIO_PIN9)
+    #define P0_RX_ERR  SCU_ECAT0CON_PORT0_RX_ERRC
+#else
+    #error "EtherCAT : Unknown P0_RX_ERR configuration"
+#endif
+
+/* Port 0 LINK */
+
+#if   GET_GPIO(ECAT_P0_LINK_STATUS) == (GPIO_PORT4 | GPIO_PIN1)
+    #define P0_LINK_STATUS  SCU_ECAT0CON_PORT0_LINKA
+#elif GET_GPIO(ECAT_P0_LINK_STATUS) == (GPIO_PORT1 | GPIO_PIN15)
+    #define P0_LINK_STATUS  SCU_ECAT0CON_PORT0_LINKB
+#elif GET_GPIO(ECAT_P0_LINK_STATUS) == (GPIO_PORT9 | GPIO_PIN10)
+    #define P0_LINK_STATUS  SCU_ECAT0CON_PORT0_LINKC
+#else
+    #error "EtherCAT : Unknown P0_LINK_STATUS configuration"
+#endif
+
+/* Port 0 TX CLK */
+
+#if   GET_GPIO(ECAT_P0_TX_CLK) == (GPIO_PORT1 | GPIO_PIN0)
+    #define P0_TX_CLK  SCU_ECAT0CON_PORT0_TX_CLKA
+#elif GET_GPIO(ECAT_P0_TX_CLK) == (GPIO_PORT5 | GPIO_PIN5)
+    #define P0_TX_CLK  SCU_ECAT0CON_PORT0_TX_CLKB
+#elif GET_GPIO(ECAT_P0_TX_CLK) == (GPIO_PORT9 | GPIO_PIN1)
+    #define P0_TX_CLK  SCU_ECAT0CON_PORT0_TX_CLKC
+#else
+    #error "EtherCAT : Unknown P0_TX_CLK configuration"
+#endif
+
+#else /* not CONFIG_XMC4_ECAT_P0 */
+/* When port 0 is not available, the unused MII need to be tied
+ * to not connected pins.
+ */
+#define P0_RXD0 SCU_ECAT0CON_PORT0_RXD0D;
+#define P0_RXD1 SCU_ECAT0CON_PORT0_RXD1D;
+#define P0_RXD2 SCU_ECAT0CON_PORT0_RXD2D;
+#define P0_RXD3 SCU_ECAT0CON_PORT0_RXD3D;
+#define P0_RX_CLK SCU_ECAT0CON_PORT0_RX_CLKD;
+#define P0_RX_DV SCU_ECAT0CON_PORT0_RX_DVD;
+#define P0_RX_ERR SCU_ECAT0CON_PORT0_RX_ERRD;
+#define P0_LINK_STATUS SCU_ECAT0CON_PORT0_LINKB;
+#define P0_TX_CLK SCU_ECAT0CON_PORT0_TX_CLKD;
+#endif /* CONFIG_XMC4_ECAT_P0 */
+
+#if defined(CONFIG_XMC4_ECAT_P1)
+
+/* Port 1 RX D0 */
+
+#if   GET_GPIO(ECAT_P1_RXD0) == (GPIO_PORT0 | GPIO_PIN11)
+    #define P1_RXD0  SCU_ECAT0CON_PORT1_RXD0A
+#elif GET_GPIO(ECAT_P1_RXD0) == (GPIO_PORT14 | GPIO_PIN7)
+    #define P1_RXD0  SCU_ECAT0CON_PORT1_RXD0B
+#elif GET_GPIO(ECAT_P1_RXD0) == (GPIO_PORT8 | GPIO_PIN4)
+    #define P1_RXD0  SCU_ECAT0CON_PORT1_RXD0C
+#else
+    #error "EtherCAT : Unknown P1_RXD0 configuration"
+#endif
+
+/* Port 1 RX D1 */
+
+#if   GET_GPIO(ECAT_P1_RXD1) == (GPIO_PORT0 | GPIO_PIN6)
+    #define P1_RXD1  SCU_ECAT0CON_PORT1_RXD1A
+#elif GET_GPIO(ECAT_P1_RXD1) == (GPIO_PORT14 | GPIO_PIN12)
+    #define P1_RXD1  SCU_ECAT0CON_PORT1_RXD1B
+#elif GET_GPIO(ECAT_P1_RXD1) == (GPIO_PORT8 | GPIO_PIN5)
+    #define P1_RXD1  SCU_ECAT0CON_PORT1_RXD1C
+#else
+    #error "EtherCAT : Unknown P1_RXD1 configuration"
+#endif
+
+/* Port 1 RX D2 */
+
+#if   GET_GPIO(ECAT_P1_RXD2) == (GPIO_PORT0 | GPIO_PIN5)
+    #define P1_RXD2  SCU_ECAT0CON_PORT1_RXD2A
+#elif GET_GPIO(ECAT_P1_RXD2) == (GPIO_PORT14 | GPIO_PIN13)
+    #define P1_RXD2  SCU_ECAT0CON_PORT1_RXD2B
+#elif GET_GPIO(ECAT_P1_RXD2) == (GPIO_PORT8 | GPIO_PIN6)
+    #define P1_RXD2  SCU_ECAT0CON_PORT1_RXD2C
+#else
+    #error "EtherCAT : Unknown P1_RXD2 configuration"
+#endif
+
+/* Port 1 RX D3 */
+
+#if   GET_GPIO(ECAT_P1_RXD3) == (GPIO_PORT0 | GPIO_PIN4)
+    #define P1_RXD3  SCU_ECAT0CON_PORT1_RXD3A
+#elif GET_GPIO(ECAT_P1_RXD3) == (GPIO_PORT14 | GPIO_PIN14)
+    #define P1_RXD3  SCU_ECAT0CON_PORT1_RXD3B
+#elif GET_GPIO(ECAT_P1_RXD3) == (GPIO_PORT8 | GPIO_PIN7)
+    #define P1_RXD3  SCU_ECAT0CON_PORT1_RXD3C
+#else
+    #error "EtherCAT : Unknown P1_RXD3 configuration"
+#endif
+
+/* Port 1 RX CLK */
+
+#if   GET_GPIO(ECAT_P1_RX_CLK) == (GPIO_PORT0 | GPIO_PIN1)
+    #define P1_RX_CLK  SCU_ECAT0CON_PORT1_RX_CLKA
+#elif GET_GPIO(ECAT_P1_RX_CLK) == (GPIO_PORT14 | GPIO_PIN6)
+    #define P1_RX_CLK  SCU_ECAT0CON_PORT1_RX_CLKB
+#elif GET_GPIO(ECAT_P1_RX_CLK) == (GPIO_PORT8 | GPIO_PIN10)
+    #define P1_RX_CLK  SCU_ECAT0CON_PORT1_RX_CLKC
+#else
+    #error "EtherCAT : Unknown P1_RX_CLK configuration"
+#endif
+
+/* Port 1 RX DV */
+
+#if   GET_GPIO(ECAT_P1_RX_DV) == (GPIO_PORT0 | GPIO_PIN9)
+    #define P1_RX_DV  SCU_ECAT0CON_PORT1_RX_DVA
+#elif GET_GPIO(ECAT_P1_RX_DV) == (GPIO_PORT14 | GPIO_PIN15)
+    #define P1_RX_DV  SCU_ECAT0CON_PORT1_RX_DVB
+#elif GET_GPIO(ECAT_P1_RX_DV) == (GPIO_PORT8 | GPIO_PIN11)
+    #define P1_RX_DV  SCU_ECAT0CON_PORT1_RX_DVC
+#else
+    #error "EtherCAT : Unknown P1_RX_DV configuration"
+#endif
+
+/* Port 1 RX ERR */
+
+#if   GET_GPIO(ECAT_P1_RX_ERR) == (GPIO_PORT3 | GPIO_PIN5)
+    #define P1_RX_ERR  SCU_ECAT0CON_PORT1_RX_ERRA
+#elif GET_GPIO(ECAT_P1_RX_ERR) == (GPIO_PORT15 | GPIO_PIN2)
+    #define P1_RX_ERR  SCU_ECAT0CON_PORT1_RX_ERRB
+#elif GET_GPIO(ECAT_P1_RX_ERR) == (GPIO_PORT8 | GPIO_PIN9)
+    #define P1_RX_ERR  SCU_ECAT0CON_PORT1_RX_ERRC
+#else
+    #error "EtherCAT : Unknown P1_RX_ERR configuration"
+#endif
+
+/* Port 1 LINK */
+
+#if   GET_GPIO(ECAT_P1_LINK_STATUS) == (GPIO_PORT3 | GPIO_PIN4)
+    #define P1_LINK_STATUS  SCU_ECAT0CON_PORT1_LINKA
+#elif GET_GPIO(ECAT_P1_LINK_STATUS) == (GPIO_PORT15 | GPIO_PIN3)
+    #define P1_LINK_STATUS  SCU_ECAT0CON_PORT1_LINKB
+#elif GET_GPIO(ECAT_P1_LINK_STATUS) == (GPIO_PORT9 | GPIO_PIN11)
+    #define P1_LINK_STATUS  SCU_ECAT0CON_PORT1_LINKC
+#else
+    #error "EtherCAT : Unknown P1_LINK_STATUS configuration"
+#endif
+
+/* Port 1 TX CLK */
+
+#if   GET_GPIO(ECAT_P1_TX_CLK) == (GPIO_PORT0 | GPIO_PIN10)
+    #define P1_TX_CLK  SCU_ECAT0CON_PORT1_TX_CLKA
+#elif GET_GPIO(ECAT_P1_TX_CLK) == (GPIO_PORT5 | GPIO_PIN9)
+    #define P1_TX_CLK  SCU_ECAT0CON_PORT1_TX_CLKB
+#elif GET_GPIO(ECAT_P1_TX_CLK) == (GPIO_PORT9 | GPIO_PIN0)
+    #define P1_TX_CLK  SCU_ECAT0CON_PORT1_TX_CLKC
+#else
+    #error "EtherCAT : Unknown P1_TX_CLK configuration"
+#endif
+
+#else /* not CONFIG_XMC4_ECAT_P1 */
+/* When port 1 is not available, the unused MII need to be tied
+ * to not connected pins.
+ */
+#define P1_RXD0 SCU_ECAT0CON_PORT1_RXD0D;
+#define P1_RXD1 SCU_ECAT0CON_PORT1_RXD1D;
+#define P1_RXD2 SCU_ECAT0CON_PORT1_RXD2D;
+#define P1_RXD3 SCU_ECAT0CON_PORT1_RXD3D;
+#define P1_RX_CLK SCU_ECAT0CON_PORT1_RX_CLKD;
+#define P1_RX_DV SCU_ECAT0CON_PORT1_RX_DVD;
+#define P1_RX_ERR SCU_ECAT0CON_PORT1_RX_ERRD;
+#define P1_LINK_STATUS SCU_ECAT0CON_PORT1_LINKB;
+#define P1_TX_CLK SCU_ECAT0CON_PORT1_TX_CLKD;
+#endif /* CONFIG_XMC4_ECAT_P1 */
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -93,10 +361,16 @@ void xmc4_ecat_initialize()
   xmc4_gpio_config(ECAT_MCLK);
   xmc4_gpio_config(ECAT_PHY_RESET);
 
-  /* configure PLL */
+  /* Configure clocks */
 
-  #define SCU_ECATCLKCR_PLL ((0 << 16) | (1 << 0))
-  putreg32(SCU_ECATCLKCR_PLL, XMC4_SCU_ECATCLKCR);
+#ifndef BOARD_ENABLE_USBPLL
+#  error "EtherCAT need USBPLL clock enabled !"
+#endif
+
+  uint32_t ecatclkcr = 0;
+  ecatclkcr |= SCU_ECATCLKCR_ECATSEL_FPLLUSB;
+  ecatclkcr |= (BOARD_ECAT_DIV << SCU_ECATCLKCR_ECADIV_SHIFT);
+  putreg32(ecatclkcr, XMC4_SCU_ECATCLKCR);
 
   /* ECAT reset */
 
@@ -129,581 +403,37 @@ void xmc4_ecat_initialize_port_control()
 {
   /* common */
 
-  uint32_t mdio_conf = 0;
-  switch (ECAT_MDO & (GPIO_PORT_MASK | GPIO_PIN_MASK))
-  {
-    case GPIO_PORT0 | GPIO_PIN12:
-    {
-      mdio_conf = SCU_ECAT0CON_MDIOA;
-      break;
-    }
-
-    case GPIO_PORT4 | GPIO_PIN2:
-    {
-      mdio_conf = SCU_ECAT0CON_MDIOB;
-      break;
-    }
-
-    case GPIO_PORT9 | GPIO_PIN7:
-    {
-      mdio_conf = SCU_ECAT0CON_MDIOC;
-      break;
-    }
-
-    default:
-    {
-      nerr("Unknown mdio config \n");
-    }
-  }
-
-  uint32_t ecat0_con_conf = 0;
-  ecat0_con_conf |= SCU_ECAT0CON_PHY_OFFSET;
-  ecat0_con_conf |= SCU_ECAT0CON_ECATRSTEN;
-  ecat0_con_conf |= mdio_conf;
+  uint32_t ecat0_con_conf = 0;                          /* Default value to 0x0000 0000 but described here for reference */
+  ecat0_con_conf |= 0 << SCU_ECAT0CON_ECATRSTEN_SHIFT;  /* Reset request by master disabled */
+  ecat0_con_conf |= 0 << SCU_ECAT0CON_PHY_OFFSET_SHIFT; /* Offset of the PHY address offset (port 0) */
+  ecat0_con_conf |= MDIO;                               /* MDIO input select */
+  putreg32(ecat0_con_conf, XMC4_SCU_ECAT0CON);
 
   /* port0 */
 
-  uint32_t port0_rxd0_conf = 0;
-  switch (ECAT_P0_RXD0 & (GPIO_PORT_MASK | GPIO_PIN_MASK))
-  {
-      case GPIO_PORT1 | GPIO_PIN4:
-      {
-          port0_rxd0_conf = SCU_ECAT0CON_PORT0_RXD0A;
-          break;
-      }
-
-      case GPIO_PORT5 | GPIO_PIN0:
-      {
-          port0_rxd0_conf = SCU_ECAT0CON_PORT0_RXD0B;
-          break;
-      }
-
-      case GPIO_PORT7 | GPIO_PIN4:
-      {
-          port0_rxd0_conf = SCU_ECAT0CON_PORT0_RXD0C;
-          break;
-      }
-
-      default:
-      {
-          nerr("Unknown port0_rxd0 config \n");
-      }
-  }
-
-  uint32_t port0_rxd1_conf = 0;
-  switch (ECAT_P0_RXD1 & (GPIO_PORT_MASK | GPIO_PIN_MASK))
-  {
-      case GPIO_PORT1 | GPIO_PIN5:
-      {
-          port0_rxd1_conf = SCU_ECAT0CON_PORT0_RXD1A;
-          break;
-      }
-
-      case GPIO_PORT5 | GPIO_PIN1:
-      {
-          port0_rxd1_conf = SCU_ECAT0CON_PORT0_RXD1B;
-          break;
-      }
-
-      case GPIO_PORT7 | GPIO_PIN5:
-      {
-          port0_rxd1_conf = SCU_ECAT0CON_PORT0_RXD1C;
-          break;
-      }
-
-      default:
-      {
-          nerr("Unknown port0_rxd1 config \n");
-      }
-  }
-
-  uint32_t port0_rxd2_conf = 0;
-  switch (ECAT_P0_RXD2 & (GPIO_PORT_MASK | GPIO_PIN_MASK))
-  {
-      case GPIO_PORT1 | GPIO_PIN10:
-      {
-          port0_rxd2_conf = SCU_ECAT0CON_PORT0_RXD2A;
-          break;
-      }
-
-      case GPIO_PORT5 | GPIO_PIN2:
-      {
-          port0_rxd2_conf = SCU_ECAT0CON_PORT0_RXD2B;
-          break;
-      }
-
-      case GPIO_PORT7 | GPIO_PIN6:
-      {
-          port0_rxd2_conf = SCU_ECAT0CON_PORT0_RXD2C;
-          break;
-      }
-
-      default:
-      {
-          nerr("Unknown port0_rxd2 config \n");
-      }
-  }
-
-  uint32_t port0_rxd3_conf = 0;
-  switch (ECAT_P0_RXD3 & (GPIO_PORT_MASK | GPIO_PIN_MASK))
-  {
-      case GPIO_PORT1 | GPIO_PIN11:
-      {
-          port0_rxd3_conf = SCU_ECAT0CON_PORT0_RXD3A;
-          break;
-      }
-
-      case GPIO_PORT5 | GPIO_PIN7:
-      {
-          port0_rxd3_conf = SCU_ECAT0CON_PORT0_RXD3B;
-          break;
-      }
-
-      case GPIO_PORT7 | GPIO_PIN7:
-      {
-          port0_rxd3_conf = SCU_ECAT0CON_PORT0_RXD3C;
-          break;
-      }
-
-      default:
-      {
-          nerr("Unknown port0_rxd2 config \n");
-      }
-  }
-
-  uint32_t port0_rx_clk_conf = 0;
-  switch (ECAT_P0_RX_CLK & (GPIO_PORT_MASK | GPIO_PIN_MASK))
-  {
-      case GPIO_PORT1 | GPIO_PIN1:
-      {
-          port0_rx_clk_conf = SCU_ECAT0CON_PORT0_RX_CLKA;
-          break;
-      }
-
-      case GPIO_PORT5 | GPIO_PIN4:
-      {
-          port0_rx_clk_conf = SCU_ECAT0CON_PORT0_RX_CLKB;
-          break;
-      }
-
-      case GPIO_PORT7 | GPIO_PIN10:
-      {
-          port0_rx_clk_conf = SCU_ECAT0CON_PORT0_RX_CLKC;
-          break;
-      }
-
-      default:
-      {
-          nerr("Unknown port0_rx_clk config \n");
-      }
-  }
-
-  uint32_t port0_rx_dv_conf = 0;
-  switch (ECAT_P0_RX_DV & (GPIO_PORT_MASK | GPIO_PIN_MASK))
-  {
-      case GPIO_PORT1 | GPIO_PIN9:
-      {
-          port0_rx_dv_conf = SCU_ECAT0CON_PORT0_RX_DVA;
-          break;
-      }
-
-      case GPIO_PORT5 | GPIO_PIN6:
-      {
-          port0_rx_dv_conf = SCU_ECAT0CON_PORT0_RX_DVB;
-          break;
-      }
-
-      case GPIO_PORT7 | GPIO_PIN11:
-      {
-          port0_rx_dv_conf = SCU_ECAT0CON_PORT0_RX_DVC;
-          break;
-      }
-
-      default:
-      {
-          nerr("Unknown port0_rx_dv config \n");
-      }
-  }
-
-  uint32_t port0_rx_err_conf = 0;
-  switch (ECAT_P0_RX_ERR & (GPIO_PORT_MASK | GPIO_PIN_MASK))
-  {
-      case GPIO_PORT4 | GPIO_PIN0:
-      {
-          port0_rx_err_conf = SCU_ECAT0CON_PORT0_RX_ERRA;
-          break;
-      }
-
-      case GPIO_PORT2 | GPIO_PIN6:
-      {
-          port0_rx_err_conf = SCU_ECAT0CON_PORT0_RX_ERRB;
-          break;
-      }
-
-      case GPIO_PORT7 | GPIO_PIN9:
-      {
-          port0_rx_err_conf = SCU_ECAT0CON_PORT0_RX_ERRC;
-          break;
-      }
-
-      default:
-      {
-          nerr("Unknown port0_rx_err config \n");
-      }
-  }
-
-  uint32_t port0_link_conf = 0;
-  switch (ECAT_P0_LINK_STATUS & (GPIO_PORT_MASK | GPIO_PIN_MASK))
-  {
-      case GPIO_PORT4 | GPIO_PIN1:
-      {
-          port0_link_conf = SCU_ECAT0CON_PORT0_LINKA;
-          break;
-      }
-
-      case GPIO_PORT1 | GPIO_PIN15:
-      {
-          port0_link_conf = SCU_ECAT0CON_PORT0_LINKB;
-          break;
-      }
-
-      case GPIO_PORT9 | GPIO_PIN10:
-      {
-          port0_link_conf = SCU_ECAT0CON_PORT0_LINKC;
-          break;
-      }
-
-      default:
-      {
-          nerr("Unknown port0_link config \n");
-      }
-  }
-
-  uint32_t port0_tx_clk_conf = 0;
-  switch (ECAT_P0_TX_CLK & (GPIO_PORT_MASK | GPIO_PIN_MASK))
-  {
-      case GPIO_PORT1 | GPIO_PIN0:
-      {
-          port0_tx_clk_conf = SCU_ECAT0CON_PORT0_TX_CLKA;
-          break;
-      }
-
-      case GPIO_PORT5 | GPIO_PIN5:
-      {
-          port0_tx_clk_conf = SCU_ECAT0CON_PORT0_TX_CLKB;
-          break;
-      }
-
-      case GPIO_PORT9 | GPIO_PIN1:
-      {
-          port0_tx_clk_conf = SCU_ECAT0CON_PORT0_TX_CLKC;
-          break;
-      }
-
-      default:
-      {
-          nerr("Unknown port0_tx_clk config \n");
-      }
-  }
-
   uint32_t ecat0_port0_conf = 0;
-#ifndef CONFIG_XMC4_ECAT_P0
-  /* When port 0 is not available, the unused MII need to be tied
-  * to not connected pins.
-  */
-
-  port0_rxd0_conf   = SCU_ECAT0CON_PORT0_RXD0D;
-  port0_rxd1_conf   = SCU_ECAT0CON_PORT0_RXD1D;
-  port0_rxd2_conf   = SCU_ECAT0CON_PORT0_RXD2D;
-  port0_rxd3_conf   = SCU_ECAT0CON_PORT0_RXD3D;
-  port0_rx_clk_conf = SCU_ECAT0CON_PORT0_RX_CLKD;
-  port0_rx_dv_conf  = SCU_ECAT0CON_PORT0_RX_DVD;
-  port0_rx_err_conf = SCU_ECAT0CON_PORT0_RX_ERRD;
-  port0_link_conf   = SCU_ECAT0CON_PORT0_LINKB;
-  port0_tx_clk_conf = SCU_ECAT0CON_PORT0_TX_CLKD;
-#endif
-  ecat0_port0_conf |= port0_rxd0_conf;
-  ecat0_port0_conf |= port0_rxd1_conf;
-  ecat0_port0_conf |= port0_rxd2_conf;
-  ecat0_port0_conf |= port0_rxd3_conf;
-  ecat0_port0_conf |= port0_rx_clk_conf;
-  ecat0_port0_conf |= port0_rx_dv_conf;
-  ecat0_port0_conf |= port0_rx_err_conf;
-  ecat0_port0_conf |= port0_link_conf;
-  ecat0_port0_conf |= port0_tx_clk_conf;
-
+  ecat0_port0_conf |= P0_RXD0;
+  ecat0_port0_conf |= P0_RXD1;
+  ecat0_port0_conf |= P0_RXD2;
+  ecat0_port0_conf |= P0_RXD3;
+  ecat0_port0_conf |= P0_RX_CLK;
+  ecat0_port0_conf |= P0_RX_DV;
+  ecat0_port0_conf |= P0_RX_ERR;
+  ecat0_port0_conf |= P0_LINK_STATUS;
+  ecat0_port0_conf |= P0_TX_CLK;
   putreg32(ecat0_port0_conf, XMC4_SCU_ECAT0CONP0);
 
   /* port 1 */
 
-  uint32_t port1_rxd0_conf = 0;
-  switch (ECAT_P1_RXD0 & (GPIO_PORT_MASK | GPIO_PIN_MASK))
-  {
-      case GPIO_PORT0 | GPIO_PIN11:
-      {
-          port1_rxd0_conf = SCU_ECAT0CON_PORT1_RXD0A;
-          break;
-      }
-
-      case GPIO_PORT14 | GPIO_PIN7:
-      {
-          port1_rxd0_conf = SCU_ECAT0CON_PORT1_RXD0B;
-          break;
-      }
-
-      case GPIO_PORT8 | GPIO_PIN4:
-      {
-          port1_rxd0_conf = SCU_ECAT0CON_PORT1_RXD0C;
-          break;
-      }
-
-      default:
-      {
-          nerr("Unknown port1_rxd0 config \n");
-      }
-  }
-
-  uint32_t port1_rxd1_conf = 0;
-  switch (ECAT_P1_RXD1 & (GPIO_PORT_MASK | GPIO_PIN_MASK))
-  {
-      case GPIO_PORT0 | GPIO_PIN6:
-      {
-          port1_rxd1_conf = SCU_ECAT0CON_PORT1_RXD1A;
-          break;
-      }
-
-      case GPIO_PORT14 | GPIO_PIN12:
-      {
-          port1_rxd1_conf = SCU_ECAT0CON_PORT1_RXD1B;
-          break;
-      }
-
-      case GPIO_PORT8 | GPIO_PIN5:
-      {
-          port1_rxd1_conf = SCU_ECAT0CON_PORT1_RXD1C;
-          break;
-      }
-
-      default:
-      {
-          nerr("Unknown port1_rxd1 config \n");
-      }
-  }
-
-  uint32_t port1_rxd2_conf = 0;
-  switch (ECAT_P1_RXD2 & (GPIO_PORT_MASK | GPIO_PIN_MASK))
-  {
-      case GPIO_PORT0 | GPIO_PIN5:
-      {
-          port1_rxd2_conf = SCU_ECAT0CON_PORT1_RXD2A;
-          break;
-      }
-
-      case GPIO_PORT14 | GPIO_PIN13:
-      {
-          port1_rxd2_conf = SCU_ECAT0CON_PORT1_RXD2B;
-          break;
-      }
-
-      case GPIO_PORT8 | GPIO_PIN6:
-      {
-          port1_rxd2_conf = SCU_ECAT0CON_PORT1_RXD2C;
-          break;
-      }
-
-      default:
-      {
-          nerr("Unknown port1_rxd2 config \n");
-      }
-  }
-
-  uint32_t port1_rxd3_conf = 0;
-  switch (ECAT_P1_RXD3 & (GPIO_PORT_MASK | GPIO_PIN_MASK))
-  {
-      case GPIO_PORT0 | GPIO_PIN4:
-      {
-          port1_rxd3_conf = SCU_ECAT0CON_PORT1_RXD3A;
-          break;
-      }
-
-      case GPIO_PORT14 | GPIO_PIN14:
-      {
-          port1_rxd3_conf = SCU_ECAT0CON_PORT1_RXD3B;
-          break;
-      }
-
-      case GPIO_PORT8 | GPIO_PIN7:
-      {
-          port1_rxd3_conf = SCU_ECAT0CON_PORT1_RXD3C;
-          break;
-      }
-
-      default:
-      {
-          nerr("Unknown port1_rxd3 config \n");
-      }
-  }
-
-  uint32_t port1_rx_clk_conf = 0;
-  switch (ECAT_P1_RX_CLK & (GPIO_PORT_MASK | GPIO_PIN_MASK))
-  {
-      case GPIO_PORT0 | GPIO_PIN1:
-      {
-          port1_rx_clk_conf = SCU_ECAT0CON_PORT1_RX_CLKA;
-          break;
-      }
-
-      case GPIO_PORT14 | GPIO_PIN6:
-      {
-          port1_rx_clk_conf = SCU_ECAT0CON_PORT1_RX_CLKB;
-          break;
-      }
-
-      case GPIO_PORT8 | GPIO_PIN10:
-      {
-          port1_rx_clk_conf = SCU_ECAT0CON_PORT1_RX_CLKC;
-          break;
-      }
-
-      default:
-      {
-          nerr("Unknown port1_rx_clk config \n");
-      }
-  }
-
-  uint32_t port1_rx_dv_conf = 0;
-  switch (ECAT_P1_RX_DV & (GPIO_PORT_MASK | GPIO_PIN_MASK))
-  {
-      case GPIO_PORT0 | GPIO_PIN9:
-      {
-          port1_rx_dv_conf = SCU_ECAT0CON_PORT1_RX_DVA;
-          break;
-      }
-
-      case GPIO_PORT14 | GPIO_PIN15:
-      {
-          port1_rx_dv_conf = SCU_ECAT0CON_PORT1_RX_DVB;
-          break;
-      }
-
-      case GPIO_PORT8 | GPIO_PIN11:
-      {
-          port1_rx_dv_conf = SCU_ECAT0CON_PORT1_RX_DVC;
-          break;
-      }
-
-      default:
-      {
-          nerr("Unknown port1_rx_dv config \n");
-      }
-  }
-
-  uint32_t port1_link_conf = 0;
-  switch (ECAT_P1_LINK_STATUS & (GPIO_PORT_MASK | GPIO_PIN_MASK))
-  {
-      case GPIO_PORT3 | GPIO_PIN4:
-      {
-          port1_link_conf = SCU_ECAT0CON_PORT1_LINKA;
-          break;
-      }
-
-      case GPIO_PORT15 | GPIO_PIN3:
-      {
-          port1_link_conf = SCU_ECAT0CON_PORT1_LINKB;
-          break;
-      }
-
-      case GPIO_PORT9 | GPIO_PIN11:
-      {
-          port1_link_conf = SCU_ECAT0CON_PORT1_LINKC;
-          break;
-      }
-
-      default:
-      {
-          nerr("Unknown port1_link config \n");
-      }
-  }
-
-  uint32_t port1_tx_clk_conf = 0;
-  switch (ECAT_P1_TX_CLK & (GPIO_PORT_MASK | GPIO_PIN_MASK))
-  {
-      case GPIO_PORT0 | GPIO_PIN10:
-      {
-          port1_tx_clk_conf = SCU_ECAT0CON_PORT1_TX_CLKA;
-          break;
-      }
-
-      case GPIO_PORT5 | GPIO_PIN9:
-      {
-          port1_tx_clk_conf = SCU_ECAT0CON_PORT1_TX_CLKB;
-          break;
-      }
-
-      case GPIO_PORT9 | GPIO_PIN0:
-      {
-          port1_tx_clk_conf = SCU_ECAT0CON_PORT1_TX_CLKC;
-          break;
-      }
-
-      default:
-      {
-          nerr("Unknown port1_tx_clk config \n");
-      }
-  }
-
-  uint32_t port1_rx_err_conf = 0;
-  switch (ECAT_P1_RX_ERR & (GPIO_PORT_MASK | GPIO_PIN_MASK))
-  {
-      case GPIO_PORT3 | GPIO_PIN5:
-      {
-          port1_rx_err_conf = SCU_ECAT0CON_PORT1_RX_ERRA;
-          break;
-      }
-
-      case GPIO_PORT15 | GPIO_PIN2:
-      {
-          port1_rx_err_conf = SCU_ECAT0CON_PORT1_RX_ERRB;
-          break;
-      }
-
-      case GPIO_PORT8 | GPIO_PIN9:
-      {
-          port1_rx_err_conf = SCU_ECAT0CON_PORT1_RX_ERRC;
-          break;
-      }
-
-      default:
-      {
-          nerr("Unknown port1_rx_err config \n");
-      }
-  }
-
   uint32_t ecat0_port1_conf = 0;
-#ifndef CONFIG_XMC4_ECAT_P1
-  /* When port 1 is not available, the unused MII need to be tied
-  * to not connected pins.
-  */
-
-  port1_rxd0_conf   = SCU_ECAT0CON_PORT1_RXD0D;
-  port1_rxd1_conf   = SCU_ECAT0CON_PORT1_RXD1D;
-  port1_rxd2_conf   = SCU_ECAT0CON_PORT1_RXD2D;
-  port1_rxd3_conf   = SCU_ECAT0CON_PORT1_RXD3D;
-  port1_rx_clk_conf = SCU_ECAT0CON_PORT1_RX_CLKD;
-  port1_rx_dv_conf  = SCU_ECAT0CON_PORT1_RX_DVD;
-  port1_rx_err_conf = SCU_ECAT0CON_PORT1_RX_ERRD;
-  port1_link_conf   = SCU_ECAT0CON_PORT1_LINKB;
-  port1_tx_clk_conf = SCU_ECAT0CON_PORT1_TX_CLKD;
-#endif
-  ecat0_port1_conf |= port1_rxd0_conf;
-  ecat0_port1_conf |= port1_rxd1_conf;
-  ecat0_port1_conf |= port1_rxd2_conf;
-  ecat0_port1_conf |= port1_rxd3_conf;
-  ecat0_port1_conf |= port1_rx_clk_conf;
-  ecat0_port1_conf |= port1_rx_dv_conf;
-  ecat0_port1_conf |= port1_rx_err_conf;
-  ecat0_port1_conf |= port1_link_conf;
-  ecat0_port1_conf |= port1_tx_clk_conf;
-
+  ecat0_port1_conf |= P1_RXD0;
+  ecat0_port1_conf |= P1_RXD1;
+  ecat0_port1_conf |= P1_RXD2;
+  ecat0_port1_conf |= P1_RXD3;
+  ecat0_port1_conf |= P1_RX_CLK;
+  ecat0_port1_conf |= P1_RX_DV;
+  ecat0_port1_conf |= P1_RX_ERR;
+  ecat0_port1_conf |= P1_LINK_STATUS;
+  ecat0_port1_conf |= P1_TX_CLK;
   putreg32(ecat0_port1_conf, XMC4_SCU_ECAT0CONP1);
 }

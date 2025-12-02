@@ -125,7 +125,7 @@
  *   .... .... ..CC .....  .... .... .... ....
  */
 
-#define GPIO_PINCTRL_SHIFT         (20)       /* Bits 20-21: Pad driver strength */
+#define GPIO_PINCTRL_SHIFT         (20)       /* Bits 20-21: Pin Control */
 #define GPIO_PINCTRL_MASK          (3                      << GPIO_PINCTRL_SHIFT)
 
 /* See chip/xmc4_ports.h for the PDR definitions */
