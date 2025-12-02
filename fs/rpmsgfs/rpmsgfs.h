@@ -61,6 +61,10 @@
 #define RPMSGFS_STAT            20
 #define RPMSGFS_FCHSTAT         21
 #define RPMSGFS_CHSTAT          22
+#define RPMSGFS_SYMLINK         23
+#define RPMSGFS_READLINK        24
+#define RPMSGFS_LINK            25
+#define RPMSGFS_LSTAT           26
 
 /****************************************************************************
  * Public Types
@@ -202,6 +206,10 @@ begin_packed_struct struct rpmsgfs_mkdir_s
 #define rpmsgfs_rmdir_s rpmsgfs_opendir_s
 #define rpmsgfs_rename_s rpmsgfs_opendir_s
 #define rpmsgfs_stat_s rpmsgfs_fstat_s
+#define rpmsgfs_lstat_s rpmsgfs_fstat_s
+#define rpmsgfs_symlink_s rpmsgfs_opendir_s
+#define rpmsgfs_readlink_s rpmsgfs_opendir_s
+#define rpmsgfs_link_s rpmsgfs_opendir_s
 
 begin_packed_struct struct rpmsgfs_fchstat_s
 {
@@ -258,6 +266,16 @@ int       rpmsgfs_client_stat(FAR void *handle, FAR const char *path,
                               FAR struct stat *buf);
 int       rpmsgfs_client_chstat(FAR void *handle, FAR const char *path,
                                 FAR const struct stat *buf, int flags);
+#ifdef CONFIG_FS_LINKS
+int       rpmsgfs_client_symlink(FAR void *handle, FAR const char *target,
+                                 FAR const char *linkpath);
+ssize_t   rpmsgfs_client_readlink(FAR void *handle, FAR const char *pathname,
+                                  FAR char *buf, size_t bufsize);
+int       rpmsgfs_client_link(FAR void *handle, FAR const char *path1,
+                              FAR const char *path2);
+int       rpmsgfs_client_lstat(FAR void *handle, FAR const char *path,
+                               FAR struct stat *buf);
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
