@@ -414,11 +414,13 @@ void xmc4_clock_configure(void)
   putreg32(USBCLKCR_VALUE | USB_DIV, XMC4_SCU_USBCLKCR);
 #endif
 
+#if BOARD_EXTCKL_ENABLE
   /* Setup EXT */
 
   regval  = (BOARD_EXT_SOURCE << SCU_EXTCLKCR_ECKSEL_SHIFT);
   regval |= SCU_EXTCLKCR_ECKDIV(BOARD_PLL_ECKDIV);
   putreg32(regval, XMC4_SCU_EXTCLKCR);
+#endif
 
 #if BOARD_ENABLE_PLL
   /* PLL frequency stepping... */
@@ -528,8 +530,8 @@ void xmc4_clock_configure(void)
 
   /* Setup Divider settings for USB PLL */
 
-  regval = (SCU_USBPLLCON_NDIV(BOARD_USB_NDIV) |
-            SCU_USBPLLCON_PDIV(BOARD_USB_PDIV));
+  regval = (SCU_USBPLLCON_NDIV(BOARD_USBPLL_NDIV) |
+            SCU_USBPLLCON_PDIV(BOARD_USBPLL_PDIV));
   putreg32(regval, XMC4_SCU_USBPLLCON);
 
   /* Set OSCDISCDIS */

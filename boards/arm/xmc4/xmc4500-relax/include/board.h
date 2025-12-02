@@ -101,13 +101,13 @@
 
 /*      120 MHz
  *
- * fVCO = 12MHz * 40 / 2  = 480MHz
- * fPLL = 480MHz / 2  = 240MHz
- * fSYS = fPLL / 2    = 120MHz
- * fCCU = fSYS / 2    =  60MHz
- * fCPU = fSYS / 1    = 120MHz
- * fPB  = fCPU / 2    =  60MHz
- * fETH = fSYS / 2    =  60MHz
+ * fVCO = 12MHz * 40 / 1 = 480MHz
+ * fPLL = 480MHz / 4     = 120MHz
+ * fSYS = fPLL / 1       = 120MHz
+ * fCCU = fSYS / 2       =  60MHz
+ * fCPU = fSYS / 1       = 120MHz
+ * fPERIPH  = fCPU / 2   =  60MHz
+ * fETH = fSYS / 2       =  60MHz
  */
 
 #  define BOARD_PLL_NDIV            40
@@ -160,9 +160,6 @@
 #  define BOARD_WDTDIV              1
 #  define BOARD_WDT_FREQUENCY       24000000
 
-#  define BOARD_EXT_SOURCE          EXT_CLKSRC_FPLL
-#  define BOARD_PLL_ECKDIV          480     /* [1,512] */
-
 #  define kHz_1     1000
 #  define MHz_1     (kHz_1 * kHz_1)
 #  define MHz_50    ( 50 * MHz_1)
@@ -206,12 +203,10 @@
 #  define EXTCLK_PIN_P1_15          15
 #  define BOARD_EXTCLK_PIN          EXTCLK_PIN_P0_8
 #  define BOARD_EXT_SOURCE          EXT_CLKSRC_FPLL
-#  define BOARD_EXT_FREQUENCY       (250 * kHz_1)   /* Desired output freq */
-#  define BOARD_EXTDIV              (BOARD_PLL_FREQUENCY / BOARD_EXT_FREQUENCY)
+#  define BOARD_PLL_ECKDIV          480     /* [1,512] */
 
 /* range check EXTDIV */
-
-#  if BOARD_EXTDIV > 512
+#  if BOARD_PLL_ECKDIV > 512
 #    error "EXTCLK Divisor out of range!"
 #  endif
 #endif
@@ -235,8 +230,8 @@
  */
 
 #undef  BOARD_ENABLE_USBPLL
-#define BOARD_USB_PDIV            2
-#define BOARD_USB_NDIV            64
+#define BOARD_USBPLL_PDIV            2
+#define BOARD_USBPLL_NDIV            64
 
 /* FLASH wait states */
 
