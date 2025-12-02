@@ -728,6 +728,9 @@ static int ili9341_hwinitialize(FAR struct ili9341_dev_s *dev)
   lcd->sendcmd(lcd, ILI9341_SOFTWARE_RESET);
   up_mdelay(5);
 
+  lcd->deselect(lcd);
+  lcd->select(lcd);
+
   lcdinfo("ili9341 LCD driver: set Memory Access Control: %04x\n",
           dev->orient);
   lcd->sendcmd(lcd, ILI9341_MEMORY_ACCESS_CONTROL);
@@ -1040,6 +1043,10 @@ FAR struct lcd_dev_s *
           /* Initialize the LCD driver */
 
           ret = ili9341_hwinitialize(priv);
+
+          /* Clear the display after initialization. */
+
+          ili9341_clear(dev, 0x0000);
 
           if (ret == OK)
             {
