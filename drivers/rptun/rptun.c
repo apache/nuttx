@@ -82,6 +82,9 @@ struct rptun_priv_s
   bool                        rreset;
   bool                        stop;
   pid_t                       pid;
+#if defined(CONFIG_BOARDCTL_RESET) || defined(CONFIG_BOARDCTL_POWEROFF)
+  struct work_s               work;
+#endif
 };
 
 struct rptun_store_s
@@ -899,6 +902,20 @@ static void rptun_set_status(FAR struct rptun_priv_s *priv,
   rptun_notify(&priv->rproc, RPTUN_NOTIFY_ALL);
 }
 
+#if defined(CONFIG_BOARDCTL_RESET) || defined(CONFIG_BOARDCTL_POWEROFF)
+static void rptun_boardctl_work(FAR void *arg)
+{
+  if ((unsigned long)arg == BOARDIOC_SOFTRESETCAUSE_POWEROFF)
+    {
+      boardctl(BOARDIOC_POWEROFF, 0u);
+    }
+  else
+    {
+      boardctl(BOARDIOC_RESET, (unsigned long)arg);
+    }
+}
+#endif
+
 static void rptun_check_peer_status(FAR struct rptun_priv_s *priv)
 {
   uint32_t status;
@@ -922,13 +939,15 @@ static void rptun_check_peer_status(FAR struct rptun_priv_s *priv)
       if (RPTUN_STATUS_CHECK(status, BOARDIOC_SOFTRESETCAUSE_POWEROFF))
         {
 #ifdef CONFIG_BOARDCTL_POWEROFF
-          boardctl(BOARDIOC_POWEROFF, 0u);
+          work_queue(HPWORK, &priv->work, rptun_boardctl_work,
+            (FAR void *)(uintptr_t)BOARDIOC_SOFTRESETCAUSE_POWEROFF, 0);
 #endif
         }
       else
         {
 #ifdef CONFIG_BOARDCTL_RESET
-          boardctl(BOARDIOC_RESET, RPTUN_REASON_GET(status));
+          work_queue(HPWORK, &priv->work, rptun_boardctl_work,
+                     (FAR void *)(uintptr_t)RPTUN_REASON_GET(status), 0);
 #endif
         }
     }
