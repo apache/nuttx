@@ -66,8 +66,9 @@ struct trng_dev_s
 {
   mutex_t lock;             /* Enforces exclusive access to the TRNG */
   sem_t waitsem;            /* Wait for buffer full  */
-  uint32_t *samples;        /* Current buffer being filled */
-  size_t maxsamples;        /* Size of the current buffer (in 32-bit words) */
+  uint32_t odata;           /* last random value */
+  uint8_t *samples;         /* Current buffer being filled */
+  size_t maxsamples;        /* Size of the current buffer (in bytes) */
   volatile size_t nsamples; /* Number of samples currently buffered */
   volatile bool first;      /* The first random number must be handled differently */
 };
@@ -145,14 +146,14 @@ static int sam_interrupt(int irq, void *context, void *arg)
        * number generator test).
        */
 
-      if (g_trngdev.nsamples == 0)
+      if (g_trngdev.first)
         {
           /* This is the first sample we have taken.  Save it for subsequent
            * comparison.
            */
 
-          g_trngdev.samples[0] = odata;
-          g_trngdev.nsamples   = 1;
+          g_trngdev.odata = odata;
+          g_trngdev.first      = false;
           continue;
         }
 
@@ -160,7 +161,7 @@ static int sam_interrupt(int irq, void *context, void *arg)
        * the preceding sample.
        */
 
-      else if (odata == g_trngdev.samples[g_trngdev.nsamples - 1])
+      if (odata == g_trngdev.odata)
         {
           /* Two samples with the same value.  Discard this one and try
            * again.
@@ -169,33 +170,25 @@ static int sam_interrupt(int irq, void *context, void *arg)
           continue;
         }
 
-      /* This sample differs from the previous value.  Have we discarded the
-       * first sample yet?
-       */
+      g_trngdev.odata = odata;
 
-      if (g_trngdev.first)
+      /* Add the new random number to the buffer */
+
+      if (g_trngdev.nsamples + 4 <= g_trngdev.maxsamples)
         {
-          /* No, discard it now by replacing it with the new sample */
+          /* copy all 4 bytes */
 
-          g_trngdev.samples[0] = odata;
-          g_trngdev.nsamples   = 1;
-          g_trngdev.first      = false;
+          *((uint32_t *)&g_trngdev.samples[g_trngdev.nsamples]) = odata;
+          g_trngdev.nsamples += 4;
         }
-
-      /* Yes.. the first sample has been discarded */
-
       else
         {
-          /* Add the new random number to the buffer */
+          /* copy the remaining bytes */
 
-          g_trngdev.samples[g_trngdev.nsamples] = odata;
-          g_trngdev.nsamples++;
-        }
+          memcpy(&g_trngdev.samples[g_trngdev.nsamples], &odata,
+            (g_trngdev.maxsamples - g_trngdev.nsamples));
+          g_trngdev.nsamples = g_trngdev.maxsamples;
 
-      /* Have all of the requested samples been saved? */
-
-      if (g_trngdev.nsamples == g_trngdev.maxsamples)
-        {
           /* Yes.. disable any further interrupts */
 
           putreg32(TRNG_INT_DATRDY, SAM_TRNG_IDR);
@@ -249,7 +242,7 @@ static ssize_t sam_read(struct file *filep, char *buffer, size_t buflen)
   DEBUGASSERT(((uintptr_t)buffer & 3) == 0);
 
   g_trngdev.samples    = (uint32_t *)buffer;
-  g_trngdev.maxsamples = buflen >> 2;
+  g_trngdev.maxsamples = buflen;
   g_trngdev.nsamples   = 0;
   g_trngdev.first      = true;
 
@@ -294,7 +287,7 @@ static ssize_t sam_read(struct file *filep, char *buffer, size_t buflen)
 
   /* Success... calculate the number of bytes to return */
 
-  retval = g_trngdev.nsamples << 2;
+  retval = g_trngdev.nsamples;
 
 errout:
 
