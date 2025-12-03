@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/arm/arm_prefetchabort.c
+ * arch/arm/src/arm_a_r/arm_prefetchabort.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#include <inttypes.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <assert.h>
 
@@ -36,20 +36,10 @@
 #  include <nuttx/page.h>
 #endif
 
+#include "mmu.h"
+#include "arm.h"
 #include "sched/sched.h"
 #include "arm_internal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -65,34 +55,36 @@
  *
  ****************************************************************************/
 
-void arm_prefetchabort(uint32_t *regs)
+#ifdef CONFIG_LEGACY_PAGING
+
+uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 {
   struct tcb_s *tcb = this_task();
-
-#ifdef CONFIG_LEGACY_PAGING
   uint32_t *saveregs;
   bool savestate;
 
   savestate = up_interrupt_context();
   saveregs = tcb->xcp.regs;
-#endif
   tcb->xcp.regs = regs;
   up_set_interrupt_context(true);
 
-#ifdef CONFIG_LEGACY_PAGING
   /* Get the (virtual) address of instruction that caused the prefetch
-   * abort.  When the exception occurred, this address was provided in the
-   * lr register and this value was saved in the context save area as the PC
-   * at the REG_R15 index.
+   * abort. When the exception occurred, this address was provided in the
+   * lr register and this value was saved in the context save area as the
+   * PC at the REG_R15 index.
    *
    * Check to see if this miss address is within the configured range of
    * virtual addresses.
    */
 
-  pginfo("VADDR: %08" PRIx32 " VBASE: %08x VEND: %08x\n",
-         regs[REG_PC], PG_PAGED_VBASE, PG_PAGED_VEND);
+  pginfo("VADDR: %08" PRIx32 " VBASE: %08" PRIx32 " VEND: %08" PRIx32 "n",
+         regs[REG_PC], (uint32_t)PG_PAGED_VBASE, (uint32_t)PG_PAGED_VEND);
 
-  if (regs[REG_R15] >= PG_PAGED_VBASE && regs[REG_R15] < PG_PAGED_VEND)
+  if (FSR_FAULT(ifsr) == FSR_FAULT_DEBUG)
+    {
+      arm_dbgmonitor(0, (void *)regs[REG_PC], regs);
+    }
+  else if (regs[REG_R15] >= PG_PAGED_VBASE && regs[REG_R15] < PG_PAGED_VEND)
     {
       /* Save the offending PC as the fault address in the TCB of the
        * currently executing task.  This value is, of course, already known
@@ -100,7 +92,7 @@ void arm_prefetchabort(uint32_t *regs)
        * paging logic for both prefetch and data aborts.
        */
 
-      tcb->xcp.far  = regs[REG_R15];
+      tcb->xcp.far = regs[REG_R15];
 
       /* Call pg_miss() to schedule the page fill.  A consequences of this
        * call are:
@@ -115,16 +107,47 @@ void arm_prefetchabort(uint32_t *regs)
        */
 
       pg_miss();
-
-      /* Restore the previous value of saveregs. */
-
-      up_set_interrupt_context(savestate);
-      tcb->xcp.regs = saveregs;
     }
   else
-#endif
     {
-      _alert("Prefetch abort. PC: %08" PRIx32 "\n", regs[REG_PC]);
+      _alert("Prefetch abort. PC: %08" PRIx32 " IFAR: %08" PRIx32
+             " IFSR: %08" PRIx32 "\n", regs[REG_PC], ifar, ifsr);
       PANIC_WITH_REGS("panic", regs);
     }
+
+  /* Restore the previous value of saveregs. */
+
+  up_set_interrupt_context(savestate);
+  tcb->xcp.regs = saveregs;
+
+  return regs;
 }
+
+#else /* CONFIG_LEGACY_PAGING */
+
+uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
+{
+  struct tcb_s *tcb = this_task();
+
+  tcb->xcp.regs = regs;
+  up_set_interrupt_context(true);
+
+  /* Crash -- possibly showing diagnostic debug information. */
+
+  _alert("Prefetch abort. PC: %08" PRIx32 " IFAR: %08" PRIx32 " IFSR: %08"
+         PRIx32 "\n", regs[REG_PC], ifar, ifsr);
+
+  if (FSR_FAULT(ifsr) == FSR_FAULT_DEBUG)
+    {
+      arm_dbgmonitor(0, (void *)regs[REG_PC], regs);
+    }
+  else if (!arm_fault_kill(regs))
+    {
+      PANIC_WITH_REGS("panic", regs);
+    }
+
+  up_set_interrupt_context(false);
+  return regs; /* To keep the compiler happy */
+}
+
+#endif /* CONFIG_LEGACY_PAGING */

@@ -32,6 +32,13 @@ if(CONFIG_LIB_SYSCALL)
   list(APPEND CSRCS arm_dispatch_syscall.S)
 endif()
 
-list(APPEND CSRCS arm_tcbinfo.c arm_doirq.c arm_dataabort.c arm_syscall.c)
+list(
+  APPEND
+  CSRCS
+  arm_tcbinfo.c
+  arm_doirq.c
+  arm_dataabort.c
+  arm_syscall.c
+  arm_prefetchabort.c)
 
 target_sources(arch PRIVATE ${CSRCS})

@@ -489,6 +489,9 @@ arm_vectorprefetch:
 	savefpu	r0, r1
 #endif
 
+	mrc	CP15_IFAR(r1)	/* Get R1=IFAR */
+	mrc	CP15_IFSR(r2)	/* Get r2=IFSR */
+
 	/* Then call the prefetch abort handler with interrupts disabled.
 	 * void arm_prefetchabort(struct xcptcontext *xcp)
 	 */

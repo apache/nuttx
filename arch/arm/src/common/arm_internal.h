@@ -386,7 +386,7 @@ uint32_t * arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr);
 
 /* Exception handlers */
 
-void arm_prefetchabort(uint32_t *regs);
+uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr);
 uint32_t *arm_syscall(uint32_t *regs);
 void arm_undefinedinsn(uint32_t *regs);
 
