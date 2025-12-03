@@ -717,8 +717,8 @@ static void st7789_fill(FAR struct st7789_dev_s *dev, uint16_t color)
 
   for (i = 0; i < ST7789_XRES * ST7789_YRES; i++)
     {
-      SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | (color & 0xff));
       SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | (color & 0xff00) >> 8);
+      SPI_SEND(dev->spi, LCD_ST7789_DATA_PREFIX | (color & 0xff));
     }
 #else
   st7789_select(dev->spi, ST7789_BYTESPP * LCD_ST7789_SPI_BITS);
