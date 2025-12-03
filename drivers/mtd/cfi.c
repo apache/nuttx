@@ -810,7 +810,7 @@ static ssize_t cfi_write_unalign(FAR struct cfi_dev_s *cfi, off_t offset,
 
   /* handle unaligned start */
 
-  if ((delta = offset - wp) == 0)
+  if ((delta = offset - wp) == 0 && nbytes >= cfi->bankwidth)
     {
       return 0;
     }
@@ -1096,7 +1096,7 @@ int cfi_write(FAR struct cfi_dev_s *cfi, off_t offset, size_t nbytes,
 
           if (size > nbytes)
             {
-              size = nbytes;
+              size = ALIGN_DOWN(nbytes, cfi->bankwidth);
             }
 
           ret = cfi_write_buffer(cfi, offset, size, buffer);
