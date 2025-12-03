@@ -116,7 +116,9 @@ struct cdcacm_dev_s
   FAR struct usbdev_ep_s *epbulkin;    /* Bulk IN endpoint structure */
   FAR struct usbdev_ep_s *epbulkout;   /* Bulk OUT endpoint structure */
   FAR struct usbdev_req_s *ctrlreq;    /* Allocated control request */
+#ifndef CONFIG_CDCACM_DISABLE_RXBUF
   struct wdog_s rxfailsafe;            /* Failsafe timer to prevent RX stalls */
+#endif
   struct sq_queue_s txfree;            /* Available write request containers */
   struct sq_queue_s rxpending;         /* Pending read request containers */
 
@@ -173,7 +175,9 @@ static void    cdcacm_rcvpacket(FAR struct cdcacm_dev_s *priv);
 static int     cdcacm_requeue_rdrequest(FAR struct cdcacm_dev_s *priv,
                  FAR struct cdcacm_rdreq_s *rdcontainer);
 static int     cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv);
+#ifndef CONFIG_CDCACM_DISABLE_RXBUF
 static void    cdcacm_rxtimeout(wdparm_t arg);
+#endif
 
 /* Flow Control *************************************************************/
 
@@ -628,7 +632,9 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
 
   /* Cancel any pending failsafe timer */
 
+#ifndef CONFIG_CDCACM_DISABLE_RXBUF
   wd_cancel(&priv->rxfailsafe);
+#endif
 
   /* If RX "interrupts" are enabled and if input flow control is not in
    * effect, then pass the packet at the head of the pending RX packet list
@@ -673,16 +679,20 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
    * that data cannot stall in priv->rxpending.
    */
 
+#ifndef CONFIG_CDCACM_DISABLE_RXBUF
   if (!sq_empty(&priv->rxpending))
     {
       wd_start(&priv->rxfailsafe, CDCACM_RXDELAY,
                cdcacm_rxtimeout, (wdparm_t)priv);
     }
+#endif
 
 out:
   spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
   return ret;
 }
+
+#ifndef CONFIG_CDCACM_DISABLE_RXBUF
 
 /****************************************************************************
  * Name: cdcacm_rxtimeout
@@ -703,6 +713,8 @@ static void cdcacm_rxtimeout(wdparm_t arg)
   DEBUGASSERT(priv != NULL);
   cdcacm_release_rxpending(priv);
 }
+
+#endif
 
 /****************************************************************************
  * Name: cdcacm_serialstate
@@ -2974,7 +2986,9 @@ static int cdcuart_release(FAR struct uart_dev_s *dev)
 
   /* And free the memory resources. */
 
+#ifndef CONFIG_CDCACM_DISABLE_RXBUF
   wd_cancel(&priv->rxfailsafe);
+#endif
   kmm_free(priv);
   return OK;
 }
