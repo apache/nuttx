@@ -54,7 +54,6 @@
 #include <nuttx/serial/uart_ram.h>
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/syslog/syslog_console.h>
-#include <nuttx/syslog/syslog_rpmsg.h>
 #include <nuttx/thermal.h>
 #include <nuttx/timers/ptp_clock_dummy.h>
 #include <nuttx/timers/ptp_pps.h>
@@ -101,10 +100,6 @@
 
 void drivers_early_initialize(void)
 {
-#if defined(CONFIG_SYSLOG_RPMSG_BUFSIZE) && CONFIG_SYSLOG_RPMSG_BUFSIZE != 0
-  syslog_rpmsg_init_early(NULL, 0);
-#endif
-
 #ifdef CONFIG_DRIVERS_NOTE
   note_early_initialize();
 #endif
