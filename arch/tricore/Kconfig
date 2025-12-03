@@ -92,6 +92,12 @@ config ARCH_MPU_CODE_NREGIONS
 	---help---
 		The code regions count
 
+config ARCH_TRICORE_CPU_COUNT
+	int "TRICORE CPU count"
+	default 1
+	---help---
+		Tricore CPU count
+
 choice
 	prompt "Tricore Toolchain Selection"
 	default TRICORE_TOOLCHAIN_GNUC
