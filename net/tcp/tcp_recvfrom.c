@@ -420,7 +420,7 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
 
               iob_reserve(iob, CONFIG_NET_LL_GUARDSIZE);
               int ret = iob_clone_partial(dev->d_iob, dev->d_iob->io_pktlen,
-                                          0, iob, 0, false, false);
+                                          0, iob, 0, true, false);
               if (ret < 0)
                 {
                   iob_free_chain(iob);

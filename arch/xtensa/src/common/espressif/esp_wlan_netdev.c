@@ -1018,7 +1018,7 @@ static int wlan_rx_done(struct esp_wlan_priv_s *priv,
       goto out;
     }
 
-  ret = netpkt_copyin(&priv->dev, pkt, buffer, len, 0);
+  ret = netpkt_copyin(&priv->dev, pkt, buffer, len, 0, NETPKT_RX);
   if (ret < 0)
     {
       wlerr("ERROR: Failed to copy packet\n");

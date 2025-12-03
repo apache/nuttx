@@ -998,7 +998,7 @@ static ssize_t tun_write(FAR struct file *filep, FAR const char *buffer,
         {
           net_lock();
           netdev_iob_release(&priv->dev);
-          ret = netdev_iob_prepare(&priv->dev, false, 0);
+          ret = netdev_iob_prepare(&priv->dev, true, 0);
           priv->dev.d_buf = NULL;
           if (ret < 0)
             {

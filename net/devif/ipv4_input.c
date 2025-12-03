@@ -209,7 +209,7 @@ static int ipv4_in(FAR struct net_driver_s *dev)
   totlen = (ipv4->len[0] << 8) + ipv4->len[1];
   if (totlen < dev->d_len)
     {
-      iob_update_pktlen(dev->d_iob, totlen, false);
+      iob_update_pktlen(dev->d_iob, totlen, true);
       dev->d_len = totlen;
     }
   else if (totlen > dev->d_len)
