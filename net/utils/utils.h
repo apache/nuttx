@@ -211,7 +211,8 @@ conn_dev_sem_timedwait(FAR sem_t *sem, bool interruptible,
                        unsigned int timeout, FAR struct socket_conn_s *sconn,
                        FAR struct net_driver_s *dev)
 {
-  return net_sem_timedwait2(sem, interruptible, timeout, &sconn->s_lock,
+  return net_sem_timedwait2(sem, interruptible, timeout,
+                            sconn ? &sconn->s_lock : NULL,
                             dev ? &dev->d_lock : NULL);
 }
 
