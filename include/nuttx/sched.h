@@ -1821,14 +1821,16 @@ void nxsched_sleep(unsigned int sec);
  * Name: nxsched_nanosleep
  *
  * Description:
- *   Internal nanosleep implementation used by the scheduler.  This function
+ *   Internal nanosleep implementation used by the scheduler. This function
  *   converts the requested sleep interval into system ticks, performs a
  *   tick-based blocking sleep, and optionally returns the remaining time if
  *   the sleep is interrupted by a signal.
  *
  * Input Parameters:
  *   rqtp - Requested sleep interval (may be NULL)
- *   rmtp - Remaining time returned when interrupted (optional, may be NULL)
+ *   rmtp - If the rmtp argument is non-NULL, the timespec structure
+ *          referenced by it is updated to contain the amount of time
+ *          remaining.
  *
  * Returned Value:
  *   Returns OK (0) on success.  Returns -EINVAL for an invalid timespec
