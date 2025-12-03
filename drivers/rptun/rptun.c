@@ -887,10 +887,15 @@ static void rptun_set_status(FAR struct rptun_priv_s *priv,
 
 static void rptun_check_peer_status(FAR struct rptun_priv_s *priv)
 {
-  FAR struct rptun_status_s *rsc_status =
-    RPTUN_RSC2STATUS(priv->rproc.rsc_table);
+  FAR struct rptun_status_s *rsc_status;
   uint32_t status;
 
+  if (priv->rproc.rsc_table == NULL)
+    {
+      return;
+    }
+
+  rsc_status = RPTUN_RSC2STATUS(priv->rproc.rsc_table);
   status = RPTUN_IS_MASTER(priv->dev)? rsc_status->slave :
            rsc_status->master;
 
@@ -1083,6 +1088,11 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
 static void rptun_dev_reset(FAR struct rptun_priv_s *priv, unsigned long val)
 {
   int ret = -ENOTSUP;
+
+  if (priv->rproc.rsc_table == NULL)
+    {
+      return;
+    }
 
   if (priv->dev->ops->reset)
     {
