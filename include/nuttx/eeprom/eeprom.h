@@ -84,6 +84,11 @@
                                              *      provides success/failure
                                              *      indication).            */
 
+#define EEPIOC_BLOCKPROTECT _EEPIOC(0x005)  /* Set which memory blocks to
+                                             * protect.
+                                             * IN:  Which blocks as integer.
+                                             * OUT: OK (0) on success.      */
+
 /************************************************************************************
  * Type Definitions
  ************************************************************************************/

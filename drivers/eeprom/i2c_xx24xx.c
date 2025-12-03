@@ -964,6 +964,8 @@ static int ee24xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         ret = ee24xx_eraseall(eedev);
         break;
 
+      /* TODO: add "case EEPIOC_BLOCKPROTECT:" */
+
       default:
         ret = -ENOTTY;
     }
