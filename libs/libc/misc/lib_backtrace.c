@@ -472,7 +472,7 @@ int backtrace_format(FAR char *buffer, int size,
   int len = 0;
   int i;
 
-  if (size < 1)
+  if (buffer == NULL || backtrace == NULL || size < 1)
     {
       return 0;
     }
