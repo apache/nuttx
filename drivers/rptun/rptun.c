@@ -1085,13 +1085,13 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
   return ret;
 }
 
-static void rptun_dev_reset(FAR struct rptun_priv_s *priv, unsigned long val)
+static int rptun_dev_reset(FAR struct rptun_priv_s *priv, unsigned long val)
 {
   int ret = -ENOTSUP;
 
   if (priv->rproc.rsc_table == NULL)
     {
-      return;
+      return -EINVAL;
     }
 
   if (priv->dev->ops->reset)
@@ -1102,7 +1102,10 @@ static void rptun_dev_reset(FAR struct rptun_priv_s *priv, unsigned long val)
   if (ret == -ENOTSUP)
     {
       rptun_set_status(priv, val);
+      ret = OK;
     }
+
+  return ret;
 }
 
 static int rptun_do_ioctl(FAR struct rptun_priv_s *priv, int cmd,
@@ -1130,7 +1133,7 @@ static int rptun_do_ioctl(FAR struct rptun_priv_s *priv, int cmd,
         ret = rptun_dev_stop(&priv->rproc);
         break;
       case RPTUNIOC_RESET:
-        rptun_dev_reset(priv, arg);
+        ret = rptun_dev_reset(priv, arg);
         break;
       default:
         ret = -ENOTTY;
