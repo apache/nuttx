@@ -184,6 +184,17 @@ The full list of ``ioctl()`` commands can be found in
     Erase the full EEPROM, a dedicated command is used if supported by the
     device.
 
+- ``EEPIOC_BLOCKPROTECT``
+    *Argument:* ``uint8_t``
+
+    Set EEPROM's Block Protect bits. For 25AA160-compatible EEPROM with
+    two Block Protect bits in Status Register, the argument may be:
+
+    - ``0`` for no write protect,
+    - ``1`` to set Block Protection 0 bit of Status Register,
+    - ``2`` to set Block Protection 1 bit of Status Register,
+    - ``3`` to set both Block Protection bits 0 and 1.
+
 File Systems
 ============
 

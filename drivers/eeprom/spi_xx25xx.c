@@ -732,6 +732,50 @@ static int ee25xx_erasesector(FAR struct ee25xx_dev_s *eedev,
 }
 
 /****************************************************************************
+ * Name: ee25xx_rdsr
+ *
+ * Description: Read status register.
+ *
+ ****************************************************************************/
+
+static uint8_t ee25xx_rdsr(FAR struct ee25xx_dev_s *eedev)
+{
+  uint8_t tx[2];
+  uint8_t rx[2];
+
+  tx[0] = EE25XX_CMD_RDSR;
+  tx[1] = EE25XX_DUMMY;
+
+  ee25xx_lock(eedev);
+  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), true);
+  SPI_EXCHANGE(eedev->spi, tx, rx, 2);
+  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), false);
+  ee25xx_unlock(eedev);
+  return rx[1];
+}
+
+/****************************************************************************
+ * Name: ee25xx_wrsr
+ *
+ * Description: Write status register.
+ *
+ ****************************************************************************/
+
+static void ee25xx_wrsr(FAR struct ee25xx_dev_s *eedev, uint8_t what)
+{
+  uint8_t tx[2];
+
+  tx[0] = EE25XX_CMD_WRSR;
+  tx[1] = what;
+
+  ee25xx_lock(eedev);
+  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), true);
+  SPI_EXCHANGE(eedev->spi, tx, NULL, 2);
+  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), false);
+  ee25xx_unlock(eedev);
+}
+
+/****************************************************************************
  * Driver Functions
  ****************************************************************************/
 
@@ -1092,6 +1136,29 @@ static int ee25xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case EEPIOC_CHIPERASE:
         ret = ee25xx_eraseall(eedev);
+        break;
+
+      case EEPIOC_BLOCKPROTECT:
+        {
+          /* Get current value of status register. */
+
+          ret = ee25xx_rdsr(eedev);
+
+          /* Clear Block Protection bits. */
+
+          ret &= ~(EE25XX_SR_BP0 | EE25XX_SR_BP1);
+
+          /* Set Block Protection bits. */
+
+          ret |= ((uint8_t)arg << 2) & (EE25XX_SR_BP0 | EE25XX_SR_BP1);
+
+          /* Write status register. */
+
+          ee25xx_writeenable(eedev, true);
+          ee25xx_wrsr(eedev, ret);
+          ee25xx_waitwritecomplete(eedev);
+          ret = OK;
+        }
         break;
 
       default:
