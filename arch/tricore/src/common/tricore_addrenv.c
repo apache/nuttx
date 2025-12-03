@@ -390,10 +390,11 @@ int up_addrenv_ustackswitch(struct tcb_s *tcb)
       g_addrenv_stack_region = mpu_allocdataregion();
     }
 
+#ifdef CONFIG_BUILD_FLAT
   mpu_modify_region(PSW_PRS_KERNEL_SET, g_addrenv_stack_region,
                     conf.base, conf.size,
                     conf.flags[PSW_PRS_KERNEL_SET]);
-#ifdef CONFIG_BUILD_PROTECTED
+#else
   mpu_modify_region(PSW_PRS_USER_SET, g_addrenv_stack_region,
                     conf.base, conf.size,
                     conf.flags[PSW_PRS_USER_SET]);
@@ -439,11 +440,6 @@ int up_addrenv_kstackswitch(struct tcb_s *tcb)
   mpu_modify_region(PSW_PRS_KERNEL_SET, g_addrenv_stack_region,
                     conf.base, conf.size,
                     conf.flags[PSW_PRS_KERNEL_SET]);
-#ifdef CONFIG_BUILD_PROTECTED
-  mpu_modify_region(PSW_PRS_USER_SET, g_addrenv_stack_region,
-                    conf.base, conf.size,
-                    conf.flags[PSW_PRS_USER_SET]);
-#endif
   return OK;
 }
 #endif
