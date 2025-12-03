@@ -60,13 +60,13 @@ int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
     {
       case PTHREAD_PRIO_NONE:
 #if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
-        attr->proto = PTHREAD_PRIO_NONE;
+        attr->prio = PTHREAD_PRIO_NONE;
 #endif
         break;
 
       case PTHREAD_PRIO_INHERIT:
 #ifdef CONFIG_PRIORITY_INHERITANCE
-        attr->proto = PTHREAD_PRIO_INHERIT;
+        attr->prio = PTHREAD_PRIO_INHERIT;
         break;
 #else
         return ENOTSUP;
@@ -74,7 +74,7 @@ int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
 
       case PTHREAD_PRIO_PROTECT:
 #ifdef CONFIG_PRIORITY_PROTECT
-        attr->proto = PTHREAD_PRIO_PROTECT;
+        attr->prio = PTHREAD_PRIO_PROTECT;
         break;
 #else
         return ENOTSUP;

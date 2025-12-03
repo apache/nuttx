@@ -266,7 +266,7 @@ struct pthread_mutexattr_s
 {
   uint8_t pshared : 1;  /* PTHREAD_PROCESS_PRIVATE or PTHREAD_PROCESS_SHARED */
 #if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
-  uint8_t proto   : 2;  /* See PTHREAD_PRIO_* definitions */
+  uint8_t prio    : 2;  /* See PTHREAD_PRIO_* definitions */
 #endif
 #ifdef CONFIG_PRIORITY_PROTECT
   uint8_t ceiling;      /* Priority ceiling */
