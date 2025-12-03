@@ -40,7 +40,6 @@ list(
   arm_gicv2_dump.c
   arm_initialstate.c
   arm_mmu.c
-  arm_prefetchabort.c
   arm_undefinedinsn.c
   arm_userfault.c
   arm_perf.c

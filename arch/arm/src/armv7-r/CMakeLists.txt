@@ -36,7 +36,6 @@ list(
   arm_cache.c
   arm_cpuinfo.c
   arm_initialstate.c
-  arm_prefetchabort.c
   arm_undefinedinsn.c
   arm_perf.c
   cp15_cacheops.c)
