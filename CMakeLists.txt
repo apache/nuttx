@@ -426,6 +426,18 @@ if(CONFIG_ARCH_BOARD_COMMON)
     "${NUTTX_DIR}/boards/${CONFIG_ARCH}/${CONFIG_ARCH_CHIP}/common")
 endif()
 
+# Setup ccache ###############################################################
+
+if(CONFIG_CCACHE)
+  find_program(CCACHE_PROGRAM ccache)
+  if(CCACHE_PROGRAM)
+    message(STATUS "Using ccache: ${CCACHE_PROGRAM}")
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+  else()
+    message(STATUS "Could not find ccache, skipping!")
+  endif()
+endif()
+
 # Setup toolchain ############################################################
 
 # This needs to happen before project() when binaries are searched for
