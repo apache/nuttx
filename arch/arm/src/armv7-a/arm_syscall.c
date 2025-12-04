@@ -359,7 +359,7 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
 #endif
 
-#ifdef CONFIG_BUILD_KERNEL
+#if defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
       /* R0=SYS_signal_handler:  This a user signal handler callback
        *
        * void signal_handler(_sa_sigaction_t sighand, int signo,
@@ -439,9 +439,9 @@ uint32_t *arm_syscall(uint32_t *regs)
 #endif
         }
         break;
-#endif
+#endif /* CONFIG_BUILD_KERNEL && !CONFIG_DISABLE_SIGNALS */
 
-#ifdef CONFIG_BUILD_KERNEL
+#if defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
       /* R0=SYS_signal_handler_return:  This a user signal handler callback
        *
        *   void signal_handler_return(void);

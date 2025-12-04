@@ -153,6 +153,7 @@
 #ifndef __ASSEMBLY__
 struct xcptcontext
 {
+#ifndef CONFIG_DISABLE_SIGNALS
   /* These are saved copies of instruction pointer and EFLAGS used during
    * signal processing.
    *
@@ -164,6 +165,7 @@ struct xcptcontext
 
   uint32_t saved_eip;
   uint32_t saved_eflags;
+#endif
 
   /* Register save area */
 
