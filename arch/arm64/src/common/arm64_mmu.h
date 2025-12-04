@@ -156,6 +156,7 @@
 #define TCR_TG0_64K                 (1ULL << 14)
 #define TCR_TG0_16K                 (2ULL << 14)
 #define TCR_EPD1_DISABLE            (1ULL << 23)
+#define TCR_DS                      (1ULL << 59)
 
 #define TCR_AS_SHIFT                36U
 #define TCR_ASID_8                  (0ULL << TCR_AS_SHIFT)
@@ -181,6 +182,7 @@
 #define TCR_PS_BITS_4TB             0x3ULL
 #define TCR_PS_BITS_16TB            0x4ULL
 #define TCR_PS_BITS_256TB           0x5ULL
+#define TCR_PS_BITS_4PB             0x6ULL
 
 #define CTR_EL0_DMINLINE_SHIFT      16
 #define CTR_EL0_DMINLINE_MASK       BIT_MASK(4)
