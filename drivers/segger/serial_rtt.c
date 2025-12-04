@@ -29,7 +29,7 @@
 #include <syslog.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/segger/rtt.h>
+#include <nuttx/rtt.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/wdog.h>
 
