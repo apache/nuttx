@@ -32,8 +32,7 @@
 #include <nuttx/note/notectl_driver.h>
 #include <nuttx/note/notesnap_driver.h>
 #include <nuttx/note/notestream_driver.h>
-#include <nuttx/segger/note_rtt.h>
-#include <nuttx/segger/sysview.h>
+#include <nuttx/rtt.h>
 
 #include "noterpmsg.h"
 

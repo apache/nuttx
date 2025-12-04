@@ -24,7 +24,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/segger/rtt.h>
+#include <nuttx/rtt.h>
 
 #include <SEGGER_RTT.h>
 

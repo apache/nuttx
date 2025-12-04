@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/segger/rtt.h
+ * include/nuttx/rtt.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -106,6 +106,42 @@ ssize_t syslog_rtt_write(FAR syslog_channel_t *channel,
 
 #ifdef CONFIG_SERIAL_RTT
 void serial_rtt_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: note_sysview_initialize
+ *
+ * Description:
+ *   Initializes the SYSVIEW module.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero on succress. A negated errno value is returned on a failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SEGGER_SYSVIEW
+int note_sysview_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: notertt_register
+ *
+ * Description:
+ *   Register RTT note driver
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero on success. A negated errno value is returned on a failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NOTE_RTT
+int notertt_register(void);
 #endif
 
 #ifdef __cplusplus

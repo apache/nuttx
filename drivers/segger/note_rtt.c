@@ -25,8 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/note/note_driver.h>
-#include <nuttx/segger/note_rtt.h>
-#include <nuttx/segger/rtt.h>
+#include <nuttx/rtt.h>
 
 /****************************************************************************
  * Private Types

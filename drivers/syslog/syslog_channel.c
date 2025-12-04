@@ -44,7 +44,7 @@
 #endif
 
 #ifdef CONFIG_SYSLOG_RTT
-#  include <nuttx/segger/rtt.h>
+#  include <nuttx/rtt.h>
 #endif
 
 #ifdef CONFIG_SYSLOG_CDCACM

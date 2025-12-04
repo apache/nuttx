@@ -32,7 +32,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/sched_note.h>
 #include <nuttx/note/note_driver.h>
-#include <nuttx/segger/sysview.h>
+#include <nuttx/rtt.h>
 
 #include <SEGGER_RTT.h>
 #include <SEGGER_SYSVIEW.h>
