@@ -450,10 +450,12 @@ static int pci_qemu_edu_probe(FAR struct pci_device_s *dev)
 
   irq_attach(irq, pci_qemu_edu_interrupt, &priv);
   up_enable_irq(irq);
+  pci_enable_irq(dev, irq);
 
   pci_qemu_edu_test_intx(&priv);
   pci_qemu_edu_test_dma(&priv);
 
+  pci_disable_irq(dev);
   up_disable_irq(irq);
   irq_detach(irq);
 
