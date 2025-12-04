@@ -154,6 +154,16 @@ jobs:
 
     steps:
 
+      - name: Show Disk Space
+        run: df -h
+
+      - name: Free Disk Space (Ubuntu)
+        run: |
+          sudo rm -rf /usr/local/lib/android
+
+      - name: After CLEAN-UP Disk Space
+        run: df -h
+
       - name: Download Source Artifact
         uses: actions/download-artifact@v6
         with:
@@ -193,6 +203,10 @@ jobs:
                 ( sleep 7200 ; echo Killing pytest after timeout... ; pkill -f pytest )&
                 ./cibuild.sh -c -A -N -R -S testlist/${{matrix.boards}}.dat
             fi
+
+      - name: Post-build Disk Space
+        if: always()
+        run: df -h
 
       - uses: actions/upload-artifact@v5
         if: ${{ always() }}
