@@ -34,5 +34,9 @@ CHIP_CSRCS += minerva_decodeirq.c minerva_doirq.c minerva_doexceptions.c
 CHIP_CSRCS += minerva_exit.c minerva_flushcache.c minerva_idle.c minerva_irq.c
 CHIP_CSRCS += minerva_initialstate.c minerva_registerdump.c minerva_releasestack.c
 CHIP_CSRCS += minerva_stackframe.c minerva_swint.c minerva_saveusercontext.c
-CHIP_CSRCS += minerva_switchcontext.c minerva_schedulesigaction.c minerva_sigdeliver.c
+CHIP_CSRCS += minerva_switchcontext.c
 CHIP_CSRCS += minerva_usetack.c
+
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+  CMN_CSRCS +=minerva_schedulesigaction.c minerva_sigdeliver.c
+endif

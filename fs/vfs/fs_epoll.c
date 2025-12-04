@@ -724,7 +724,9 @@ int epoll_pwait(int epfd, FAR struct epoll_event *evs,
 {
   FAR struct file *filep;
   FAR epoll_head_t *eph;
+#ifndef CONFIG_DISABLE_SIGNALS
   sigset_t oldsigmask;
+#endif
   int ret;
 
   eph = epoll_head_from_fd(epfd, &filep);
