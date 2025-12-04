@@ -599,7 +599,7 @@ static int imx_attach(struct uart_dev_s *dev)
     {
       /* Configure as a (high) level interrupt */
 
-      arm_gic_irq_trigger(priv->irq, false);
+      up_set_irq_type(priv->irq, IRQ_HIGH_LEVEL);
 
       /* Enable the interrupt (RX and TX interrupts are still disabled
        * in the UART
