@@ -114,7 +114,7 @@ FAR char *nl_langinfo(nl_item item)
       case ABMON_11:
         return "Nov";
       case ABMON_12:
-        return "Dev";
+        return "Dec";
       case MON_1:
         return "January";
       case MON_2:
