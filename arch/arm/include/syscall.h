@@ -425,9 +425,7 @@
 /* semihosting(SMH) call with call number and one parameter */
 
 #ifdef __ghs__
-#  if defined(CONFIG_ARCH_ARMV6M) || \
-      defined(CONFIG_ARCH_ARMV7M) || \
-      defined(CONFIG_ARCH_ARMV8M)
+#  ifdef CONFIG_ARCH_ARM_M
 
 #    define smh_call(nbr, parm1)                                   \
 ({                                                                 \
@@ -462,9 +460,7 @@
 })
 #  endif
 #else
-#  if defined(CONFIG_ARCH_ARMV6M) || \
-      defined(CONFIG_ARCH_ARMV7M) || \
-      defined(CONFIG_ARCH_ARMV8M)
+#  ifdef CONFIG_ARCH_ARM_M
 
 #    define smh_call(nbr, parm1)                              \
 ({                                                            \

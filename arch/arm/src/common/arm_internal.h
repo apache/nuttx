@@ -308,8 +308,7 @@ void arm_dispatch_syscall(void);
 
 /* Exception handling logic unique to the Cortex-M family */
 
-#if defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARCH_ARMV7M) || \
-    defined(CONFIG_ARCH_ARMV8M)
+#ifdef CONFIG_ARCH_ARM_M
 
 /* This is the address of the  exception vector table (determined by the
  * linker script).

@@ -39,6 +39,10 @@
 
 #include <arch/barriers.h>
 
+#if defined(CONFIG_ARCH_ARM_A_R)
+#  include <arch/arm_a_r/arch.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Prototypes
  ****************************************************************************/
