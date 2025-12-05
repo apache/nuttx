@@ -1418,6 +1418,18 @@ config ARM_GIC_VERSION
 	---help---
 		Version of Generic Interrupt Controller (GIC) supported.
 
+config ARCH_ARM_A_R
+	bool
+	default ARCH_ARM7TDMI || ARCH_ARM920T || ARCH_ARM926EJS || ARCH_ARM1136J || ARCH_ARM1156T2 || ARCH_ARM1176JZ || ARCH_ARMV7A || ARCH_ARMV7R || ARCH_ARMV8R
+	---help---
+		General ARM Cortex A/R
+
+config ARCH_ARM_M
+	bool
+	default ARCH_ARMV6M || ARCH_ARMV7M || ARCH_ARMV8M
+	---help---
+		General ARM Cortex M
+
 config ARCH_FAMILY
 	string
 	default "arm"		if ARCH_ARM7TDMI || ARCH_ARM920T || ARCH_ARM926EJS || ARCH_ARM1136J || ARCH_ARM1156T2 || ARCH_ARM1176JZ
@@ -1430,13 +1442,13 @@ config ARCH_FAMILY
 
 config ARCH_FAMILY_COMMON
 	string
-	default "arm_a_r"	if ARCH_ARM7TDMI || ARCH_ARM920T || ARCH_ARM926EJS || ARCH_ARM1136J || ARCH_ARM1156T2 || ARCH_ARM1176JZ
-	default "arm_m"		if ARCH_ARMV6M
-	default "arm_a_r"	if ARCH_ARMV7A
-	default "arm_m"		if ARCH_ARMV7M
-	default "arm_a_r"	if ARCH_ARMV7R
-	default "arm_m"		if ARCH_ARMV8M
-	default "arm_a_r"	if ARCH_ARMV8R
+	default "arm_a_r"	if ARCH_ARM_A_R
+	default "arm_m"		if ARCH_ARM_M
+	default "arm_a_r"	if ARCH_ARM_A_R
+	default "arm_m"		if ARCH_ARM_M
+	default "arm_a_r"	if ARCH_ARM_A_R
+	default "arm_m"		if ARCH_ARM_M
+	default "arm_a_r"	if ARCH_ARM_A_R
 
 config ARCH_CHIP
 	string

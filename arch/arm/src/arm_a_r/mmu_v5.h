@@ -45,11 +45,6 @@
 #define FSR_FAULT_TRANSLATION_L1 5
 #define FSR_FAULT_TRANSLATION_L2 7
 
-#ifdef __ASSEMBLY__
-#  define CP15_IFSR(r)           p15, 0, r, c5, c0, 1
-#  define CP15_IFAR(r)           p15, 0, r, c6, c0, 2
-#endif
-
 /* System control register */
 
 #define SCTLR_M                  (1 << 0)
