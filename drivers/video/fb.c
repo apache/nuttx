@@ -1181,7 +1181,8 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           DEBUGASSERT(pinfo != NULL && fb->vtable != NULL);
           memcpy(&paninfo, pinfo, sizeof(*pinfo));
 
-          if (fb->vtable->pandisplay != NULL)
+          ret = fb_add_paninfo(fb, &paninfo, FB_NO_OVERLAY);
+          if (fb->vtable->pandisplay != NULL && ret == OK)
             {
               ret = fb->vtable->pandisplay(fb->vtable, pinfo);
               if (ret < 0)
@@ -1189,8 +1190,6 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                   break;
                 }
             }
-
-          ret = fb_add_paninfo(fb, &paninfo, FB_NO_OVERLAY);
         }
         break;
 
