@@ -123,10 +123,17 @@ static int stat_recursive(FAR const char *path,
        * supports the stat() method
        */
 
+#  ifdef CONFIG_FS_LINKS
+      /* use lstat() if available to avoid following symlinks */
+
+      if (!resolve && inode->u.i_mops && inode->u.i_mops->lstat)
+        {
+          ret = inode->u.i_mops->lstat(inode, desc.relpath, buf);
+        }
+      else
+#  endif
       if (inode->u.i_mops && inode->u.i_mops->stat)
         {
-          /* Perform the stat() operation */
-
           ret = inode->u.i_mops->stat(inode, desc.relpath, buf);
         }
       else
@@ -428,6 +435,7 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
               (inode->u.i_bops->geometry != NULL))
             {
               struct geometry geo;
+
               if (inode->u.i_bops->geometry(inode, &geo) >= 0 &&
                   geo.geo_available)
                 {
