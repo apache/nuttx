@@ -156,7 +156,6 @@ static int safety_open(FAR struct file *filep)
               if (ret < 0)
                 {
                   kmm_free(user);
-                  nxmutex_unlock(&priv->mutex);
                 }
             }
         }
@@ -168,6 +167,8 @@ static int safety_open(FAR struct file *filep)
           filep->f_priv = user;
           spin_unlock_irqrestore(&priv->spinlock, flags);
         }
+
+      nxmutex_unlock(&priv->mutex);
     }
   else
     {
