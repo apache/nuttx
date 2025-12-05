@@ -361,12 +361,28 @@ static int mountptrename(FAR const char *oldpath, FAR struct inode *oldinode,
    * then the rename should fail with the error ENOTEMPTY.
    */
 
+#ifdef CONFIG_FS_LINKS
+  if (oldinode->u.i_mops->lstat != NULL || oldinode->u.i_mops->stat != NULL)
+#else
   if (oldinode->u.i_mops->stat != NULL)
+#endif
     {
       struct stat oldbuf;
       struct stat newbuf;
 
-      ret = oldinode->u.i_mops->stat(oldinode, oldrelpath, &oldbuf);
+#ifdef CONFIG_FS_LINKS
+      /* Use lstat if available to avoid dereferencing symlinks */
+
+      if (oldinode->u.i_mops->lstat)
+        {
+          ret = oldinode->u.i_mops->lstat(oldinode, oldrelpath, &oldbuf);
+        }
+      else
+#endif
+        {
+          ret = oldinode->u.i_mops->stat(oldinode, oldrelpath, &oldbuf);
+        }
+
       if (ret < 0)
         {
           goto errout_with_newinode;
@@ -374,7 +390,19 @@ static int mountptrename(FAR const char *oldpath, FAR struct inode *oldinode,
 
       oldisdir = S_ISDIR(oldbuf.st_mode);
 
-      ret = oldinode->u.i_mops->stat(oldinode, newrelpath, &newbuf);
+#ifdef CONFIG_FS_LINKS
+      /* Use lstat if available to avoid dereferencing symlinks */
+
+      if (oldinode->u.i_mops->lstat)
+        {
+          ret = oldinode->u.i_mops->lstat(oldinode, newrelpath, &newbuf);
+        }
+      else
+#endif
+        {
+          ret = oldinode->u.i_mops->stat(oldinode, newrelpath, &newbuf);
+        }
+
       if (ret >= 0)
         {
           newisdir = S_ISDIR(newbuf.st_mode);
@@ -425,9 +453,9 @@ static int mountptrename(FAR const char *oldpath, FAR struct inode *oldinode,
                    * method should check that.
                    */
 
-                   oldinode->u.i_mops->unlink(oldinode, newrelpath);
+                  oldinode->u.i_mops->unlink(oldinode, newrelpath);
 #ifdef CONFIG_FS_NOTIFY
-                   notify_unlink(newrelpath);
+                  notify_unlink(newrelpath);
 #endif
                 }
             }
@@ -522,15 +550,13 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
     }
   else
 #endif /* CONFIG_DISABLE_MOUNTPOINT */
+    {
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-    {
       ret = pseudorename(oldpath, oldinode, olddesc.parent, newpath);
-    }
 #else
-    {
       ret = -ENXIO;
-    }
 #endif
+    }
 
   inode_release(oldinode);
 
