@@ -62,7 +62,6 @@
 NET_BUFPOOL_DECLARE(g_can_connections, sizeof(struct can_conn_s),
                     CONFIG_CAN_PREALLOC_CONNS, CONFIG_CAN_ALLOC_CONNS,
                     CONFIG_CAN_MAX_CONNS);
-static mutex_t g_free_lock = NXMUTEX_INITIALIZER;
 
 /* A list of all allocated NetLink connections */
 
@@ -100,7 +99,7 @@ FAR struct can_conn_s *can_alloc(void)
 
   /* The free list is protected by a a mutex. */
 
-  nxmutex_lock(&g_free_lock);
+  NET_BUFPOLL_LOCK(g_can_connections);
 
   conn = NET_BUFPOOL_TRYALLOC(g_can_connections);
   if (conn != NULL)
@@ -128,7 +127,7 @@ FAR struct can_conn_s *can_alloc(void)
       dq_addlast(&conn->sconn.node, &g_active_can_connections);
     }
 
-  nxmutex_unlock(&g_free_lock);
+  NET_BUFPOLL_UNLOCK(g_can_connections);
   return conn;
 }
 
@@ -147,7 +146,7 @@ void can_free(FAR struct can_conn_s *conn)
 
   DEBUGASSERT(conn->crefs == 0);
 
-  nxmutex_lock(&g_free_lock);
+  NET_BUFPOLL_LOCK(g_can_connections);
 
   /* Remove the connection from the active list */
 
@@ -157,7 +156,7 @@ void can_free(FAR struct can_conn_s *conn)
 
   NET_BUFPOOL_FREE(g_can_connections, conn);
 
-  nxmutex_unlock(&g_free_lock);
+  NET_BUFPOLL_UNLOCK(g_can_connections);
 }
 
 /****************************************************************************

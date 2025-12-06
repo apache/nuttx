@@ -63,7 +63,6 @@ NET_BUFPOOL_DECLARE(g_icmpv6_connections, sizeof(struct icmpv6_conn_s),
                     CONFIG_NET_ICMPv6_PREALLOC_CONNS,
                     CONFIG_NET_ICMPv6_ALLOC_CONNS,
                     CONFIG_NET_ICMPv6_MAX_CONNS);
-static mutex_t g_free_lock = NXMUTEX_INITIALIZER;
 
 /* A list of all allocated IPPROTO_ICMP socket connections */
 
@@ -86,23 +85,20 @@ static dq_queue_t g_active_icmpv6_connections;
 FAR struct icmpv6_conn_s *icmpv6_alloc(void)
 {
   FAR struct icmpv6_conn_s *conn = NULL;
-  int ret;
 
   /* The free list is protected by a mutex. */
 
-  ret = nxmutex_lock(&g_free_lock);
-  if (ret >= 0)
+  NET_BUFPOLL_LOCK(g_icmpv6_connections);
+
+  conn = NET_BUFPOOL_TRYALLOC(g_icmpv6_connections);
+  if (conn != NULL)
     {
-      conn = NET_BUFPOOL_TRYALLOC(g_icmpv6_connections);
-      if (conn != NULL)
-        {
-          /* Enqueue the connection into the active list */
+      /* Enqueue the connection into the active list */
 
-          dq_addlast(&conn->sconn.node, &g_active_icmpv6_connections);
-        }
-
-      nxmutex_unlock(&g_free_lock);
+      dq_addlast(&conn->sconn.node, &g_active_icmpv6_connections);
     }
+
+  NET_BUFPOLL_UNLOCK(g_icmpv6_connections);
 
   return conn;
 }
@@ -124,7 +120,7 @@ void icmpv6_free(FAR struct icmpv6_conn_s *conn)
 
   /* Take the mutex (perhaps waiting) */
 
-  nxmutex_lock(&g_free_lock);
+  NET_BUFPOLL_LOCK(g_icmpv6_connections);
 
   /* Remove the connection from the active list */
 
@@ -134,7 +130,7 @@ void icmpv6_free(FAR struct icmpv6_conn_s *conn)
 
   NET_BUFPOOL_FREE(g_icmpv6_connections, conn);
 
-  nxmutex_unlock(&g_free_lock);
+  NET_BUFPOLL_UNLOCK(g_icmpv6_connections);
 }
 
 /****************************************************************************
