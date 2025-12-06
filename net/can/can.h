@@ -93,6 +93,25 @@ struct can_conn_s
   int32_t recv_buffnum;              /* Recv buffer number */
 #endif
 
+#if CONFIG_NET_SEND_BUFSIZE > 0
+  int32_t  sndbufs;                  /* Maximum amount of bytes queued in send */
+  sem_t    sndsem;                   /* Semaphore signals send completion */
+#endif
+
+#ifdef CONFIG_NET_CAN_WRITE_BUFFERS
+  /* Write buffering
+   *
+   *   write_q   - The queue of unsent I/O buffers.  The head of this
+   *               list may be partially sent.  FIFO ordering.
+   */
+
+  struct iob_queue_s write_q;        /* Write buffering for can messages */
+
+  /* Callback instance for can send */
+
+  FAR struct devif_callback_s *sndcb;
+#endif
+
   /* CAN-specific content follows */
 
   int16_t crefs;                     /* Reference count */
@@ -355,6 +374,24 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 #ifdef CONFIG_NET_CAN_NOTIFIER
 void can_readahead_signal(FAR struct can_conn_s *conn);
 #endif
+
+/****************************************************************************
+ * Name: can_sendbuffer_notify
+ *
+ * Description:
+ *   Notify the send buffer semaphore
+ *
+ * Input Parameters:
+ *   conn - The CAN connection of interest
+ *
+ * Assumptions:
+ *   Called from user logic with the network locked.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NET_SEND_BUFSIZE > 0
+void can_sendbuffer_notify(FAR struct can_conn_s *conn);
+#endif /* CONFIG_NET_SEND_BUFSIZE */
 
 /****************************************************************************
  * Name: can_setsockopt

@@ -564,6 +564,11 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   /* Get the device driver that will service this transfer */
 
   dev = conn->dev;
+  if (dev == NULL && _SS_ISBOUND(conn->sconn.s_flags))
+    {
+      dev = netdev_default();
+    }
+
   if (dev == NULL)
     {
       ret = -ENODEV;
