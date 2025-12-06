@@ -53,7 +53,7 @@ struct adxl372_sensor_s
 {
   struct sensor_lowerhalf_s  lower;
   FAR struct spi_dev_s      *spi;
-  float                      scale;
+  sensor_data_t              scale;
   int                        devno;
 #ifdef CONFIG_SENSORS_ADXL372_POLL
   bool                       enabled;
@@ -447,9 +447,9 @@ static int adxl372_fetch(FAR struct sensor_lowerhalf_s *lower,
   adxl372_getregs(priv, ADXL372_XDATA_H, (FAR uint8_t *)data, 6);
 
   accel.timestamp   = sensor_get_timestamp();
-  accel.x           = (float)adxl372_data(&data[0]) * priv->scale;
-  accel.y           = (float)adxl372_data(&data[2]) * priv->scale;
-  accel.z           = (float)adxl372_data(&data[4]) * priv->scale;
+  accel.x           = sensor_data_muli(priv->scale, adxl372_data(&data[0]));
+  accel.y           = sensor_data_muli(priv->scale, adxl372_data(&data[2]));
+  accel.z           = sensor_data_muli(priv->scale, adxl372_data(&data[4]));
   accel.temperature = 0;
 
   memcpy(buffer, &accel, sizeof(accel));
@@ -504,9 +504,12 @@ static int adxl372_thread(int argc, FAR char **argv)
           adxl372_getregs(priv, ADXL372_XDATA_H, (FAR uint8_t *)data, 6);
 
           accel.timestamp   = sensor_get_timestamp();
-          accel.x           = (float)adxl372_data(&data[0]) * priv->scale;
-          accel.y           = (float)adxl372_data(&data[2]) * priv->scale;
-          accel.z           = (float)adxl372_data(&data[4]) * priv->scale;
+          accel.x           = sensor_data_muli(priv->scale,
+                                               adxl372_data(&data[0]));
+          accel.y           = sensor_data_muli(priv->scale,
+                                               adxl372_data(&data[2]));
+          accel.z           = sensor_data_muli(priv->scale,
+                                               adxl372_data(&data[4]));
           accel.temperature = 0;
 
           priv->lower.push_event(priv->lower.priv, &accel, sizeof(accel));
@@ -566,7 +569,7 @@ int adxl372_register_uorb(int devno, FAR struct spi_dev_s *spi)
   priv->lower.ops     = &g_adxl372_accel_ops;
   priv->lower.type    = SENSOR_TYPE_ACCELEROMETER;
   priv->lower.nbuffer = 1;
-  priv->scale         = (CONSTANTS_ONE_G / 10.0f);
+  priv->scale         = sensor_data_ftof(CONSTANTS_ONE_G / 10.0f);
   priv->devno         = devno;
 #ifdef CONFIG_SENSORS_ADXL372_POLL
   priv->enabled       = false;

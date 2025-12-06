@@ -42,6 +42,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Only float data type supported now */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  error fixed-point data type not supported yet
+#endif
+
 #define GOLDFISH_ACCELERATION 0
 #define GOLDFISH_GYROSCOPE 1
 #define GOLDFISH_MAGNETIC_FIELD 2

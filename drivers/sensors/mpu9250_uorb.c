@@ -51,6 +51,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Only float data type supported now */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  error fixed-point data type not supported yet
+#endif
+
 #define  MPU9250_AKM_DEV_ID                 0x48  /* Magnetometer device ID */
 #define  MIN(x, y)         (x) > (y) ? (y) : (x)
 
