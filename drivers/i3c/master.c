@@ -2241,6 +2241,14 @@ int i3c_master_register(FAR struct i3c_master_controller *master,
 
   master->init_done = true;
 
+  /* The initialization of &struct i3c_device must be completed, otherwise
+   * desc->dev == NULL.
+   */
+
+  i3c_bus_normaluse_lock(&master->bus);
+  i3c_master_register_new_i3c_devs(master);
+  i3c_bus_normaluse_unlock(&master->bus);
+
   /* Expose I3C driver node by the i3c_driver on our I3C Bus, i3c driver id
    * equal to i3c bus id.
    */
