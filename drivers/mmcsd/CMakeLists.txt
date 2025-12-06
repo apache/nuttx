@@ -26,7 +26,7 @@ if(CONFIG_MMCSD)
   # Include MMC/SD drivers
 
   if(CONFIG_MMCSD_SDIO)
-    list(APPEND SRCS mmcsd_sdio.c)
+    list(APPEND SRCS mmcsd_sdio.c sdio.c)
   endif()
 
   if(CONFIG_MMCSD_SPI)
