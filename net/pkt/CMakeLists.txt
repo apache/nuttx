@@ -23,16 +23,28 @@
 # Packet socket support
 
 if(CONFIG_NET_PKT)
-  target_sources(
-    net
-    PRIVATE # Socket layer
-            pkt_sockif.c
-            pkt_sendmsg.c
-            pkt_recvmsg.c
-            # Transport layer
-            pkt_conn.c
-            pkt_input.c
-            pkt_callback.c
-            pkt_poll.c
-            pkt_finddev.c)
+
+  set(SRCS # Socket layer
+      pkt_sockif.c
+      pkt_recvmsg.c
+      # Transport layer
+      pkt_conn.c
+      pkt_input.c
+      pkt_callback.c
+      pkt_poll.c
+      pkt_netpoll.c
+      pkt_finddev.c)
+
+  if(CONFIG_NET_PKT_WRITE_BUFFERS)
+    list(APPEND SRCS pkt_sendmsg_buffered.c) # Socket layer
+  else()
+    list(APPEND SRCS pkt_sendmsg_unbuffered.c) # Socket layer
+
+  endif()
+
+  if(CONFIG_NET_PKTPROTO_OPTIONS)
+    list(APPEND SRCS pkt_setsockopt.c pkt_getsockopt.c) # Socket layer
+  endif()
+
+  target_sources(net PRIVATE ${SRCS})
 endif()

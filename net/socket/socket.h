@@ -65,6 +65,7 @@
 #define _SO_SNDTIMEO     _SO_BIT(SO_SNDTIMEO)
 #define _SO_TYPE         _SO_BIT(SO_TYPE)
 #define _SO_TIMESTAMP    _SO_BIT(SO_TIMESTAMP)
+#define _SO_TIMESTAMPNS  _SO_BIT(SO_TIMESTAMPNS)
 #define _SO_BINDTODEVICE _SO_BIT(SO_BINDTODEVICE)
 
 /* This is the largest option value.  REVISIT: belongs in sys/socket.h */

@@ -46,8 +46,10 @@
 #define ETH_MIN_MTU 68      /* Min IPv4 MTU per RFC791  */
 #define ETH_MAX_MTU 0xFFFFU /* 65535, same as IP_MAX_MTU  */
 
-#define ETH_P_IP  ETHERTYPE_IP
-#define ETH_P_ARP ETHERTYPE_ARP
+#define ETH_P_ALL   0x0003  /* Every packet (be careful!!!) */
+#define ETH_P_IP    ETHERTYPE_IP
+#define ETH_P_IPV6  ETHERTYPE_IPV6
+#define ETH_P_ARP   ETHERTYPE_ARP
 
 /****************************************************************************
  * Public Type Definitions

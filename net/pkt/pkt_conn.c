@@ -32,6 +32,7 @@
 #include <debug.h>
 
 #include <arch/irq.h>
+#include <netinet/if_ether.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
@@ -139,6 +140,12 @@ void pkt_free(FAR struct pkt_conn_s *conn)
 
   dq_rem(&conn->sconn.node, &g_active_pkt_connections);
 
+#ifdef CONFIG_NET_PKT_WRITE_BUFFERS
+  /* Free the write queue */
+
+  iob_free_queue(&conn->write_q);
+#endif
+
   /* Free the connection. */
 
   NET_BUFPOOL_FREE(g_pkt_connections, conn);
@@ -162,10 +169,18 @@ FAR struct pkt_conn_s *pkt_active(FAR struct net_driver_s *dev)
 {
   FAR struct pkt_conn_s *conn =
     (FAR struct pkt_conn_s *)g_active_pkt_connections.head;
+  uint16_t ethertype = 0;
+
+  if (dev->d_lltype == NET_LL_ETHERNET || dev->d_lltype == NET_LL_IEEE80211)
+    {
+      FAR struct eth_hdr_s *ethhdr = NETLLBUF;
+      ethertype = ethhdr->type;
+    }
 
   while (conn)
     {
-      if (dev->d_ifindex == conn->ifindex)
+      if (dev->d_ifindex == conn->ifindex &&
+          (conn->type == HTONS(ETH_P_ALL) || conn->type == ethertype))
         {
           /* Matching connection found.. return a reference to it */
 

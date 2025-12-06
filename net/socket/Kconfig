@@ -60,6 +60,12 @@ config NET_CANPROTO_OPTIONS
 	---help---
 		Enable or disable support for CAN protocol level socket option
 
+config NET_PKTPROTO_OPTIONS
+	bool
+	default n
+	---help---
+		Enable or disable support for PKT protocol level socket option
+
 if NET_SOCKOPTS
 
 config NET_SOLINGER

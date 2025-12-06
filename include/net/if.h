@@ -59,6 +59,10 @@
 #define IFF_MULTICAST      (1 << 12) /* Supports multicast. */
 #define IFF_BROADCAST      (1 << 13) /* Broadcast address valid. */
 #define IFF_DYNAMIC        (1 << 15) /* Dialup device with changing addresses. */
+#define IFF_DEBUG          (1 << 16) /* Turn on debugging. */
+#define IFF_NOTRAILERS     (1 << 17) /* Avoid use of trailers. */
+#define IFF_PROMISC        (1 << 18) /* Receive all packets. */
+#define IFF_ALLMULTI       (1 << 19) /* Receive all multicast packets. */
 
 /* Interface flag helpers */
 

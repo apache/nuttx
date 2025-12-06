@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/pkt/pkt_sendmsg.c
+ * net/pkt/pkt_sendmsg_unbuffered.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -60,6 +60,7 @@ struct send_s
 {
   FAR struct socket      *snd_sock;    /* Points to the parent socket structure */
   FAR struct devif_callback_s *snd_cb; /* Reference to callback instance */
+  FAR struct pkt_conn_s  *snd_conn;    /* Reference to the packet connection */
   sem_t                   snd_sem;     /* Used to wake up the waiting thread */
   FAR const uint8_t      *snd_buffer;  /* Points to the buffer of data to send */
   size_t                  snd_buflen;  /* Number of bytes in the buffer to send */
@@ -115,8 +116,9 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
               goto end_wait;
             }
 
-          dev->d_len       = dev->d_sndlen;
-          pstate->snd_sent = pstate->snd_buflen;
+          dev->d_len                = dev->d_sndlen;
+          pstate->snd_sent          = pstate->snd_buflen;
+          pstate->snd_conn->pendiob = dev->d_iob;
 
           /* Make sure no ARP request overwrites this ARP request.  This
            * flag will be cleared in arp_out().
@@ -224,9 +226,10 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   memset(&state, 0, sizeof(struct send_s));
   nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
 
-  state.snd_sock      = psock;          /* Socket descriptor to use */
-  state.snd_buflen    = len;            /* Number of bytes to send */
-  state.snd_buffer    = buf;            /* Buffer to send from */
+  state.snd_sock   = psock;          /* Socket descriptor to use */
+  state.snd_buflen = len;            /* Number of bytes to send */
+  state.snd_buffer = buf;            /* Buffer to send from */
+  state.snd_conn   = psock->s_conn;  /* Connection info */
 
   if (len > 0)
     {
