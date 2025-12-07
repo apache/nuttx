@@ -42,7 +42,12 @@
 
 #include <nuttx/spinlock.h>
 
+#if defined (CONFIG_CLK)
+#  include <nuttx/clk/clk_provider.h>
+#endif
+
 #include "clock/clock.h"
+#include "timer/timer.h"
 #ifdef CONFIG_CLOCK_TIMEKEEPING
 #  include "clock/clock_timekeeping.h"
 #endif
@@ -205,6 +210,11 @@ void clock_initialize(void)
 {
   sched_trace_begin();
 
+#if defined(CONFIG_CLK)
+  up_clk_register();
+  up_clk_initialize();
+#endif
+
 #if !defined(CONFIG_SUPPRESS_INTERRUPTS) && \
     !defined(CONFIG_SUPPRESS_TIMER_INTS) && \
     !defined(CONFIG_SYSTEMTICK_EXTCLK)
@@ -232,6 +242,10 @@ void clock_initialize(void)
 
 #ifdef CONFIG_SCHED_CPULOAD_SYSCLK
   cpuload_init();
+#endif
+
+#ifndef CONFIG_DISABLE_POSIX_TIMERS
+  timer_initialize();
 #endif
 
   sched_trace_end();

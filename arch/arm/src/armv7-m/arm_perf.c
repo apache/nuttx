@@ -32,8 +32,6 @@
 #include "itm.h"
 #include "nvic.h"
 
-#ifdef CONFIG_ARCH_HAVE_PERF_EVENTS
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -78,4 +76,3 @@ void up_perf_convert(clock_t elapsed, struct timespec *ts)
   left        = elapsed - ts->tv_sec * g_cpu_freq;
   ts->tv_nsec = NSEC_PER_SEC * (uint64_t)left / g_cpu_freq;
 }
-#endif

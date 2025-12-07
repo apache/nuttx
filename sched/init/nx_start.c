@@ -56,7 +56,6 @@
 #include "mqueue/mqueue.h"
 #include "mqueue/msg.h"
 #include "clock/clock.h"
-#include "timer/timer.h"
 #include "irq/irq.h"
 #include "group/group.h"
 #include "init/init.h"
@@ -634,13 +633,9 @@ void nx_start(void)
 
   irq_initialize();
 
-  /* Initialize the POSIX timer facility (if included in the link) */
+  /* Initialize system clocking and POSIX timer facility (if included) */
 
   clock_initialize();
-
-#ifndef CONFIG_DISABLE_POSIX_TIMERS
-  timer_initialize();
-#endif
 
   /* Initialize the signal facility (if in link) */
 

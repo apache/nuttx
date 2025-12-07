@@ -58,6 +58,7 @@
 #define CLK_DIVIDER_MAX_HALF            0x10
 #define CLK_DIVIDER_DIV_NEED_EVEN       0x20
 #define CLK_DIVIDER_POWER_OF_TWO        0x40
+#define CLK_DIVIDER_APPLY_OFFSET        0x80
 #define CLK_DIVIDER_MINDIV_OFF          8
 #define CLK_DIVIDER_MINDIV_MSK          0xff00
 
@@ -69,6 +70,8 @@
 #define CLK_MULT_HIWORD_MASK            0x04
 #define CLK_MULT_MAX_HALF               0x08
 #define CLK_MULT_ROUND_CLOSEST          0x10
+#define CLK_MULT_MINMULT_OFF            8
+#define CLK_MULT_MINMULT_MSK            0xff00
 
 #define CLK_MUX_HIWORD_MASK             0x01
 #define CLK_MUX_READ_ONLY               0x02
@@ -205,57 +208,88 @@ FAR struct clk_s *clk_register(FAR const char *name,
 
 FAR struct clk_s *clk_register_gate(FAR const char *name,
                                     FAR const char *parent_name,
-                                    uint8_t flags, uint32_t reg,
-                                    uint8_t bit_idx,
-                                    uint8_t clk_gate_flags);
+                                    uint8_t flags,
+                                    FAR struct clk_gate_s *gate);
 
 FAR struct clk_s *clk_register_fixed_rate(FAR const char *name,
                                           FAR const char *parent_name,
                                           uint8_t flags,
-                                          uint32_t fixed_rate);
+                                          FAR struct clk_fixed_rate_s *fixed);
 
 FAR struct clk_s *clk_register_fixed_factor(FAR const char *name,
                                             FAR const char *parent_name,
-                                            uint8_t flags, uint8_t mult,
-                                            uint8_t div);
+                                            uint8_t flags,
+                                            FAR struct clk_fixed_factor_s *fixed);
 
 FAR struct clk_s *clk_register_divider(FAR const char *name,
                                        FAR const char *parent_name,
-                                       uint8_t flags, uint32_t reg,
-                                       uint8_t shift, uint8_t width,
-                                       uint16_t clk_divider_flags);
+                                       uint8_t flags,
+                                       FAR struct clk_divider_s *div);
 
 FAR struct clk_s *clk_register_phase(FAR const char *name,
                                      FAR const char *parent_name,
-                                     uint8_t flags, uint32_t reg,
-                                     uint8_t shift, uint8_t width,
-                                     uint8_t clk_phase_flags);
+                                     uint8_t flags,
+                                     FAR struct clk_phase_s *phase);
 
 FAR struct clk_s *
 clk_register_fractional_divider(FAR const char *name,
                                 FAR const char *parent_name,
-                                uint8_t flags, uint32_t reg,
-                                uint8_t mshift, uint8_t mwidth,
-                                uint8_t nshift, uint8_t nwidth,
-                                uint8_t clk_divider_flags);
+                                uint8_t flags,
+                                FAR struct clk_fractional_divider_s *fd);
 
 FAR struct clk_s *clk_register_multiplier(FAR const char *name,
                                           FAR const char *parent_name,
-                                          uint8_t flags, uint32_t reg,
-                                          uint8_t shift, uint8_t width,
-                                          uint8_t clk_multiplier_flags);
+                                          uint8_t flags,
+                                          FAR struct clk_multiplier_s *mult);
 
 FAR struct clk_s *clk_register_mux(FAR const char *name,
                                    FAR const char * const *parent_names,
                                    uint8_t num_parents, uint8_t flags,
-                                   uint32_t reg, uint8_t shift,
-                                   uint8_t width, uint8_t clk_mux_flags);
+                                   FAR struct clk_mux_s *mux);
 
 #ifdef CONFIG_CLK_RPMSG
 FAR struct clk_s *clk_register_rpmsg(FAR const char *name, uint8_t flags);
 
 int clk_rpmsg_server_initialize(void);
 #endif
+
+/****************************************************************************
+ * Name: up_clk_initialize
+ *
+ * Description:
+ *   Called to establish the clock settings based on the values in board.h.
+ *   This function (by default) will reset most everything, enable the PLL,
+ *   and enable peripheral clocking for all peripherals enabled in the NuttX
+ *   configuration file.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_clk_register(void);
+
+/****************************************************************************
+ * Name: up_clk_initialize
+ *
+ * Description:
+ *   Called to establish the clock settings based on the values in board.h.
+ *   This function (by default) will reset most everything, enable the PLL,
+ *   and enable peripheral clocking for all peripherals enabled in the NuttX
+ *   configuration file.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_clk_initialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

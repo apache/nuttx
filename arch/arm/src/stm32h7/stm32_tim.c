@@ -34,6 +34,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <nuttx/clk/clk.h>
 
 #include <arch/board/board.h>
 
@@ -242,9 +243,12 @@
 
 struct stm32_tim_priv_s
 {
-  const struct stm32_tim_ops_s *ops;
-  stm32_tim_mode_t        mode;
-  uint32_t                base;   /* TIMn base address */
+  const struct stm32_tim_ops_s  *ops;
+  const char                    *clkbase;
+  const int                      vectorno;
+  const int                      width;
+  stm32_tim_mode_t               mode;
+  uint32_t                       base;   /* TIMn base address */
 };
 
 /****************************************************************************
@@ -316,6 +320,9 @@ static const struct stm32_tim_ops_s stm32_tim_ops =
 struct stm32_tim_priv_s stm32_tim1_priv =
 {
   .ops        = &stm32_tim_ops,
+  .clkbase    = "tim1_ker_ck",
+  .vectorno   = STM32_IRQ_TIM1UP,
+  .width      = 16,
   .mode       = STM32_TIM_MODE_UNUSED,
   .base       = STM32_TIM1_BASE,
 };
@@ -324,6 +331,9 @@ struct stm32_tim_priv_s stm32_tim1_priv =
 struct stm32_tim_priv_s stm32_tim2_priv =
 {
   .ops        = &stm32_tim_ops,
+  .clkbase    = "tim2_ker_ck",
+  .vectorno   = STM32_IRQ_TIM2,
+  .width      = 32,
   .mode       = STM32_TIM_MODE_UNUSED,
   .base       = STM32_TIM2_BASE,
 };
@@ -333,6 +343,9 @@ struct stm32_tim_priv_s stm32_tim2_priv =
 struct stm32_tim_priv_s stm32_tim3_priv =
 {
   .ops        = &stm32_tim_ops,
+  .clkbase    = "tim3_ker_ck",
+  .vectorno   = STM32_IRQ_TIM3,
+  .width      = 16,
   .mode       = STM32_TIM_MODE_UNUSED,
   .base       = STM32_TIM3_BASE,
 };
@@ -342,6 +355,9 @@ struct stm32_tim_priv_s stm32_tim3_priv =
 struct stm32_tim_priv_s stm32_tim4_priv =
 {
   .ops        = &stm32_tim_ops,
+  .clkbase    = "tim4_ker_ck",
+  .vectorno   = STM32_IRQ_TIM4,
+  .width      = 16,
   .mode       = STM32_TIM_MODE_UNUSED,
   .base       = STM32_TIM4_BASE,
 };
@@ -351,6 +367,9 @@ struct stm32_tim_priv_s stm32_tim4_priv =
 struct stm32_tim_priv_s stm32_tim5_priv =
 {
   .ops        = &stm32_tim_ops,
+  .clkbase    = "tim5_ker_ck",
+  .vectorno   = STM32_IRQ_TIM5,
+  .width      = 32,
   .mode       = STM32_TIM_MODE_UNUSED,
   .base       = STM32_TIM5_BASE,
 };
@@ -360,6 +379,9 @@ struct stm32_tim_priv_s stm32_tim5_priv =
 struct stm32_tim_priv_s stm32_tim6_priv =
 {
   .ops        = &stm32_tim_ops,
+  .clkbase    = "tim6_ker_ck",
+  .vectorno   = STM32_IRQ_TIM6,
+  .width      = 16,
   .mode       = STM32_TIM_MODE_UNUSED,
   .base       = STM32_TIM6_BASE,
 };
@@ -369,6 +391,9 @@ struct stm32_tim_priv_s stm32_tim6_priv =
 struct stm32_tim_priv_s stm32_tim7_priv =
 {
   .ops        = &stm32_tim_ops,
+  .clkbase    = "tim7_ker_ck",
+  .vectorno   = STM32_IRQ_TIM7,
+  .width      = 16,
   .mode       = STM32_TIM_MODE_UNUSED,
   .base       = STM32_TIM7_BASE,
 };
@@ -378,6 +403,9 @@ struct stm32_tim_priv_s stm32_tim7_priv =
 struct stm32_tim_priv_s stm32_tim8_priv =
 {
   .ops        = &stm32_tim_ops,
+  .clkbase    = "tim8_ker_ck",
+  .vectorno   = STM32_IRQ_TIM8UP,
+  .width      = 16,
   .mode       = STM32_TIM_MODE_UNUSED,
   .base       = STM32_TIM8_BASE,
 };
@@ -387,6 +415,9 @@ struct stm32_tim_priv_s stm32_tim8_priv =
 struct stm32_tim_priv_s stm32_tim12_priv =
 {
   .ops        = &stm32_tim_ops,
+  .clkbase    = "tim12_ker_ck",
+  .vectorno   = STM32_IRQ_TIM12,
+  .width      = 16,
   .mode       = STM32_TIM_MODE_UNUSED,
   .base       = STM32_TIM12_BASE,
 };
@@ -396,6 +427,9 @@ struct stm32_tim_priv_s stm32_tim12_priv =
 struct stm32_tim_priv_s stm32_tim13_priv =
 {
   .ops        = &stm32_tim_ops,
+  .clkbase    = "tim13_ker_ck",
+  .vectorno   = STM32_IRQ_TIM13,
+  .width      = 16,
   .mode       = STM32_TIM_MODE_UNUSED,
   .base       = STM32_TIM13_BASE,
 };
@@ -405,6 +439,9 @@ struct stm32_tim_priv_s stm32_tim13_priv =
 struct stm32_tim_priv_s stm32_tim14_priv =
 {
   .ops        = &stm32_tim_ops,
+  .clkbase    = "tim14_ker_ck",
+  .vectorno   = STM32_IRQ_TIM14,
+  .width      = 16,
   .mode       = STM32_TIM_MODE_UNUSED,
   .base       = STM32_TIM14_BASE,
 };
@@ -414,6 +451,9 @@ struct stm32_tim_priv_s stm32_tim14_priv =
 struct stm32_tim_priv_s stm32_tim15_priv =
 {
   .ops        = &stm32_tim_ops,
+  .clkbase    = "tim15_ker_ck",
+  .vectorno   = STM32_IRQ_TIM15,
+  .width      = 16,
   .mode       = STM32_TIM_MODE_UNUSED,
   .base       = STM32_TIM15_BASE,
 };
@@ -423,6 +463,9 @@ struct stm32_tim_priv_s stm32_tim15_priv =
 struct stm32_tim_priv_s stm32_tim16_priv =
 {
   .ops        = &stm32_tim_ops,
+  .clkbase    = "tim16_ker_ck",
+  .vectorno   = STM32_IRQ_TIM16,
+  .width      = 16,
   .mode       = STM32_TIM_MODE_UNUSED,
   .base       = STM32_TIM16_BASE,
 };
@@ -432,6 +475,9 @@ struct stm32_tim_priv_s stm32_tim16_priv =
 struct stm32_tim_priv_s stm32_tim17_priv =
 {
   .ops        = &stm32_tim_ops,
+  .clkbase    = "tim17_ker_ck",
+  .vectorno   = STM32_IRQ_TIM17,
+  .width      = 16,
   .mode       = STM32_TIM_MODE_UNUSED,
   .base       = STM32_TIM17_BASE,
 };
@@ -496,7 +542,14 @@ static void stm32_tim_reload_counter(struct stm32_tim_dev_s *dev)
 
 static void stm32_tim_enable(struct stm32_tim_dev_s *dev)
 {
-  uint16_t val = stm32_getreg16(dev, STM32_GTIM_CR1_OFFSET);
+  struct stm32_tim_priv_s *priv = (struct stm32_tim_priv_s *)dev;
+  struct clk_s *clk;
+  uint16_t val;
+
+  clk = clk_get(priv->clkbase);
+  clk_enable(clk);
+
+  val = stm32_getreg16(dev, STM32_GTIM_CR1_OFFSET);
   val |= GTIM_CR1_CEN;
   stm32_tim_reload_counter(dev);
   stm32_putreg16(dev, STM32_GTIM_CR1_OFFSET, val);
@@ -504,9 +557,16 @@ static void stm32_tim_enable(struct stm32_tim_dev_s *dev)
 
 static void stm32_tim_disable(struct stm32_tim_dev_s *dev)
 {
-  uint16_t val = stm32_getreg16(dev, STM32_GTIM_CR1_OFFSET);
+  struct stm32_tim_priv_s *priv = (struct stm32_tim_priv_s *)dev;
+  struct clk_s *clk;
+  uint16_t val;
+
+  val = stm32_getreg16(dev, STM32_GTIM_CR1_OFFSET);
   val &= ~GTIM_CR1_CEN;
   stm32_putreg16(dev, STM32_GTIM_CR1_OFFSET, val);
+
+  clk = clk_get(priv->clkbase);
+  clk_disable(clk);
 }
 
 /****************************************************************************
@@ -515,25 +575,7 @@ static void stm32_tim_disable(struct stm32_tim_dev_s *dev)
 
 static int stm32_tim_getwidth(struct stm32_tim_dev_s *dev)
 {
-  /* Only TIM2 and TIM5 timers may be 32-bits in width */
-
-  switch (((struct stm32_tim_priv_s *)dev)->base)
-    {
-#if defined(CONFIG_STM32H7_TIM2)
-      case STM32_TIM2_BASE:
-        return 32;
-#endif
-
-#if defined(CONFIG_STM32H7_TIM5)
-      case STM32_TIM5_BASE:
-        return 32;
-#endif
-
-      /* All others are 16-bit times */
-
-      default:
-        return 16;
-    }
+  return ((struct stm32_tim_priv_s *)dev)->width;
 }
 
 /****************************************************************************
@@ -605,6 +647,8 @@ static void stm32_tim_gpioconfig(uint32_t cfg, stm32_tim_channel_t mode)
 
 static int stm32_tim_setclock(struct stm32_tim_dev_s *dev, uint32_t freq)
 {
+  struct stm32_tim_priv_s *priv = (struct stm32_tim_priv_s *)dev;
+  struct clk_s *clk;
   uint32_t freqin;
   int prescaler;
 
@@ -618,87 +662,12 @@ static int stm32_tim_setclock(struct stm32_tim_dev_s *dev, uint32_t freq)
       return 0;
     }
 
-  /* Get the input clock frequency for this timer.  These vary with
-   * different timer clock sources, MCU-specific timer configuration, and
-   * board-specific clock configuration.  The correct input clock frequency
-   * must be defined in the board.h header file.
-   */
+  /* Get the input clock frequency for this timer from the clock framework */
 
-  switch (((struct stm32_tim_priv_s *)dev)->base)
-    {
-#ifdef CONFIG_STM32H7_TIM1
-      case STM32_TIM1_BASE:
-        freqin = STM32_APB2_TIM1_CLKIN;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM2
-      case STM32_TIM2_BASE:
-        freqin = STM32_APB1_TIM2_CLKIN;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM3
-      case STM32_TIM3_BASE:
-        freqin = STM32_APB1_TIM3_CLKIN;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM4
-      case STM32_TIM4_BASE:
-        freqin = STM32_APB1_TIM4_CLKIN;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM5
-      case STM32_TIM5_BASE:
-        freqin = STM32_APB1_TIM5_CLKIN;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM6
-      case STM32_TIM6_BASE:
-        freqin = STM32_APB1_TIM6_CLKIN;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM7
-      case STM32_TIM7_BASE:
-        freqin = STM32_APB1_TIM7_CLKIN;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM8
-      case STM32_TIM8_BASE:
-        freqin = STM32_APB2_TIM8_CLKIN;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM12
-      case STM32_TIM12_BASE:
-        freqin = STM32_APB1_TIM12_CLKIN;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM13
-      case STM32_TIM13_BASE:
-        freqin = STM32_APB1_TIM13_CLKIN;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM14
-      case STM32_TIM14_BASE:
-        freqin = STM32_APB1_TIM14_CLKIN;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM15
-      case STM32_TIM15_BASE:
-        freqin = STM32_APB2_TIM15_CLKIN;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM16
-      case STM32_TIM16_BASE:
-        freqin = STM32_APB2_TIM16_CLKIN;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM17
-      case STM32_TIM17_BASE:
-        freqin = STM32_APB2_TIM17_CLKIN;
-        break;
-#endif
-      default:
-        return -EINVAL;
-    }
+  clk = clk_get(priv->clkbase);
+  DEBUGASSERT(clk != NULL);
+
+  freqin = clk_get_rate(clk_get_parent(clk));
 
   /* Select a pre-scaler value for this timer using the input clock
    * frequency.
@@ -738,106 +707,29 @@ static void stm32_tim_setperiod(struct stm32_tim_dev_s *dev,
 static int stm32_tim_setisr(struct stm32_tim_dev_s *dev,
                             xcpt_t handler, void *arg, int source)
 {
-  int vectorno;
+  struct stm32_tim_priv_s *priv = (struct stm32_tim_priv_s *)dev;
 
   DEBUGASSERT(dev != NULL);
   DEBUGASSERT(source == 0);
-
-  switch (((struct stm32_tim_priv_s *)dev)->base)
-    {
-#ifdef CONFIG_STM32H7_TIM1
-      case STM32_TIM1_BASE:
-        vectorno = STM32_IRQ_TIM1UP;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM2
-      case STM32_TIM2_BASE:
-        vectorno = STM32_IRQ_TIM2;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM3
-      case STM32_TIM3_BASE:
-        vectorno = STM32_IRQ_TIM3;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM4
-      case STM32_TIM4_BASE:
-        vectorno = STM32_IRQ_TIM4;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM5
-      case STM32_TIM5_BASE:
-        vectorno = STM32_IRQ_TIM5;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM6
-      case STM32_TIM6_BASE:
-        vectorno = STM32_IRQ_TIM6;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM7
-      case STM32_TIM7_BASE:
-        vectorno = STM32_IRQ_TIM7;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM8
-      case STM32_TIM8_BASE:
-        vectorno = STM32_IRQ_TIM8UP;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM12
-      case STM32_TIM12_BASE:
-        vectorno = STM32_IRQ_TIM12;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM13
-      case STM32_TIM13_BASE:
-        vectorno = STM32_IRQ_TIM13;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM14
-      case STM32_TIM14_BASE:
-        vectorno = STM32_IRQ_TIM14;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM15
-      case STM32_TIM15_BASE:
-        vectorno = STM32_IRQ_TIM15;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM16
-      case STM32_TIM16_BASE:
-        vectorno = STM32_IRQ_TIM16;
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM17
-      case STM32_TIM17_BASE:
-        vectorno = STM32_IRQ_TIM17;
-        break;
-#endif
-
-      default:
-        return -EINVAL;
-    }
 
   /* Disable interrupt when callback is removed */
 
   if (!handler)
     {
-      up_disable_irq(vectorno);
-      irq_detach(vectorno);
+      up_disable_irq(priv->vectorno);
+      irq_detach(priv->vectorno);
       return OK;
     }
 
   /* Otherwise set callback and enable interrupt */
 
-  irq_attach(vectorno, handler, arg);
-  up_enable_irq(vectorno);
+  irq_attach(priv->vectorno, handler, arg);
+  up_enable_irq(priv->vectorno);
 
 #ifdef CONFIG_ARCH_IRQPRIO
   /* Set the interrupt priority */
 
-  up_prioritize_irq(vectorno, NVIC_SYSH_PRIORITY_DEFAULT);
+  up_prioritize_irq(priv->vectorno, NVIC_SYSH_PRIORITY_DEFAULT);
 #endif
 
   return OK;
@@ -1362,95 +1254,8 @@ struct stm32_tim_dev_s *stm32_tim_init(int timer)
 
   /* Get structure and enable power */
 
-  switch (timer)
-    {
-#ifdef CONFIG_STM32H7_TIM1
-      case 1:
-        dev = (struct stm32_tim_dev_s *)&stm32_tim1_priv;
-        modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_TIM1EN);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM2
-      case 2:
-        dev = (struct stm32_tim_dev_s *)&stm32_tim2_priv;
-        modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM2EN);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM3
-      case 3:
-        dev = (struct stm32_tim_dev_s *)&stm32_tim3_priv;
-        modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM3EN);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM4
-      case 4:
-        dev = (struct stm32_tim_dev_s *)&stm32_tim4_priv;
-        modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM4EN);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM5
-      case 5:
-        dev = (struct stm32_tim_dev_s *)&stm32_tim5_priv;
-        modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM5EN);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM6
-      case 6:
-        dev = (struct stm32_tim_dev_s *)&stm32_tim6_priv;
-        modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM6EN);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM7
-      case 7:
-        dev = (struct stm32_tim_dev_s *)&stm32_tim7_priv;
-        modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM7EN);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM8
-      case 8:
-        dev = (struct stm32_tim_dev_s *)&stm32_tim8_priv;
-        modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_TIM8EN);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM12
-      case 12:
-        dev = (struct stm32_tim_dev_s *)&stm32_tim12_priv;
-        modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM12EN);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM13
-      case 13:
-        dev = (struct stm32_tim_dev_s *)&stm32_tim13_priv;
-        modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM13EN);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM14
-      case 14:
-        dev = (struct stm32_tim_dev_s *)&stm32_tim14_priv;
-        modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM14EN);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM15
-      case 15:
-        dev = (struct stm32_tim_dev_s *)&stm32_tim15_priv;
-        modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_TIM15EN);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM16
-      case 16:
-        dev = (struct stm32_tim_dev_s *)&stm32_tim16_priv;
-        modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_TIM16EN);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM17
-      case 17:
-        dev = (struct stm32_tim_dev_s *)&stm32_tim17_priv;
-        modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_TIM17EN);
-        break;
-#endif
-      default:
-        return NULL;
-    }
+  struct clk_s *clk = clk_get(((struct stm32_tim_priv_s *)dev)->clkbase);
+  clk_enable(clk);
 
   /* Is device already allocated */
 
@@ -1472,81 +1277,8 @@ int stm32_tim_deinit(struct stm32_tim_dev_s * dev)
 
   /* Disable power */
 
-  switch (((struct stm32_tim_priv_s *)dev)->base)
-    {
-#ifdef CONFIG_STM32H7_TIM1
-      case STM32_TIM1_BASE:
-        modifyreg32(STM32_RCC_APB2ENR, RCC_APB2ENR_TIM1EN, 0);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM2
-      case STM32_TIM2_BASE:
-        modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM2EN, 0);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM3
-      case STM32_TIM3_BASE:
-        modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM3EN, 0);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM4
-      case STM32_TIM4_BASE:
-        modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM4EN, 0);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM5
-      case STM32_TIM5_BASE:
-        modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM5EN, 0);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM6
-      case STM32_TIM6_BASE:
-        modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM6EN, 0);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM7
-      case STM32_TIM7_BASE:
-        modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM7EN, 0);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM8
-      case STM32_TIM8_BASE:
-        modifyreg32(STM32_RCC_APB2ENR, RCC_APB2ENR_TIM8EN, 0);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM12
-      case STM32_TIM12_BASE:
-        modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM12EN, 0);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM13
-      case STM32_TIM13_BASE:
-        modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM13EN, 0);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM14
-      case STM32_TIM14_BASE:
-        modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM14EN, 0);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM15
-      case STM32_TIM15_BASE:
-        modifyreg32(STM32_RCC_APB2ENR, RCC_APB2ENR_TIM15EN, 0);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM16
-      case STM32_TIM16_BASE:
-        modifyreg32(STM32_RCC_APB2ENR, RCC_APB2ENR_TIM16EN, 0);
-        break;
-#endif
-#ifdef CONFIG_STM32H7_TIM17
-      case STM32_TIM17_BASE:
-        modifyreg32(STM32_RCC_APB2ENR, RCC_APB2ENR_TIM17EN, 0);
-        break;
-#endif
-      default:
-        return -EINVAL;
-    }
+  struct clk_s *clk = clk_get(((struct stm32_tim_priv_s *)dev)->clkbase);
+  clk_disable(clk);
 
   /* Mark it as free */
 

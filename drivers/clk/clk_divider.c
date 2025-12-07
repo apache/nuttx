@@ -244,10 +244,11 @@ static uint32_t clk_divider_bestdiv(FAR struct clk_s *clk, uint32_t rate,
     }
 
   mindiv = 0;
-  if (divider->flags & CLK_DIVIDER_MINDIV_MSK)
+  if ((divider->flags & CLK_DIVIDER_MINDIV_MSK) &&
+      (divider->flags & CLK_DIVIDER_APPLY_OFFSET))
     {
       mindiv = (divider->flags & CLK_DIVIDER_MINDIV_MSK)
-                >> CLK_DIVIDER_MINDIV_OFF;
+        >> CLK_DIVIDER_MINDIV_OFF;
       mindiv -= 1;
     }
 
@@ -363,17 +364,15 @@ const struct clk_ops_s g_clk_divider_ops =
 
 FAR struct clk_s *clk_register_divider(FAR const char *name,
                                        FAR const char *parent_name,
-                                       uint8_t flags, uint32_t reg,
-                                       uint8_t shift, uint8_t width,
-                                       uint16_t clk_divider_flags)
+                                       uint8_t flags,
+                                       FAR struct clk_divider_s *div)
 {
-  struct clk_divider_s div;
   FAR const char **parent_names;
   uint8_t num_parents;
 
-  if (clk_divider_flags & CLK_DIVIDER_HIWORD_MASK)
+  if (div->flags & CLK_DIVIDER_HIWORD_MASK)
     {
-      if (width + shift > 16)
+      if (div->width + div->shift > 16)
         {
           return NULL;
         }
@@ -382,11 +381,6 @@ FAR struct clk_s *clk_register_divider(FAR const char *name,
   parent_names = parent_name ? &parent_name: NULL;
   num_parents = parent_name ? 1 : 0;
 
-  div.reg = reg;
-  div.shift = shift;
-  div.width = width;
-  div.flags = clk_divider_flags;
-
   return clk_register(name, parent_names, num_parents, flags,
-                      &g_clk_divider_ops, &div, sizeof(div));
+                      &g_clk_divider_ops, div, sizeof(*div));
 }

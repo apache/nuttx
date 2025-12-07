@@ -82,19 +82,15 @@ const struct clk_ops_s g_clk_fixed_factor_ops =
 
 FAR struct clk_s *clk_register_fixed_factor(FAR const char *name,
                                             FAR const char *parent_name,
-                                            uint8_t flags, uint8_t mult,
-                                            uint8_t div)
+                                            uint8_t flags,
+                                            FAR struct clk_fixed_factor_s *fixed)
 {
-  struct clk_fixed_factor_s fixed;
   FAR const char **parent_names;
   uint8_t num_parents;
 
   parent_names = parent_name ? &parent_name : NULL;
   num_parents = parent_name ? 1 : 0;
 
-  fixed.mult = mult;
-  fixed.div = div;
-
   return clk_register(name, parent_names, num_parents, flags,
-                      &g_clk_fixed_factor_ops, &fixed, sizeof(fixed));
+                      &g_clk_fixed_factor_ops, fixed, sizeof(*fixed));
 }

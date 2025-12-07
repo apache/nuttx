@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/clk/clk_fixed_rate.c
+ * arch/arm/src/stm32h7/stm32_rcc.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,54 +20,44 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_STM32H7_STM32_RCC_H
+#define __ARCH_ARM_SRC_STM32H7_STM32_RCC_H
+
+#ifndef __ASSEMBLY__
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+ /* Oscillator frequencies */
+
+#define STM32_HSI_FREQUENCY     64000000u
+#define STM32_CSI_FREQUENCY     4000000u
+#define STM32_HSI48_FREQUENCY   48000000u
+#define STM32_LSI_FREQUENCY     32000u
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/clk/clk.h>
 #include <nuttx/clk/clk_provider.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define to_clk_fixed_rate(_clk) (FAR struct clk_fixed_rate_s *) \
-                                (_clk->private_data)
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
 
 /****************************************************************************
- * Private Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
-static uint32_t clk_fixed_rate_recalc_rate(FAR struct clk_s *clk,
-                                           uint32_t parent_rate)
-{
-  FAR struct clk_fixed_rate_s *fixed = to_clk_fixed_rate(clk);
-  return fixed->fixed_rate;
+#if defined(__cplusplus)
 }
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-const struct clk_ops_s clk_fixed_rate_ops =
-{
-  .recalc_rate = clk_fixed_rate_recalc_rate,
-};
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-FAR struct clk_s *clk_register_fixed_rate(FAR const char *name,
-                                          FAR const char *parent_name,
-                                          uint8_t flags,
-                                          FAR struct clk_fixed_rate_s *fixed)
-{
-  FAR const char **parent_names;
-  uint8_t num_parents;
-
-  parent_names = parent_name ? &parent_name: NULL;
-  num_parents = parent_name ? 1 : 0;
-
-  return clk_register(name, parent_names, num_parents, flags,
-                      &clk_fixed_rate_ops, fixed, sizeof(*fixed));
-}
+#endif
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_STM32H7_STM32_RCC_H */

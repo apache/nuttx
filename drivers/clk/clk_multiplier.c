@@ -97,8 +97,21 @@ static uint32_t clk_multiplier_recalc_rate(FAR struct clk_s *clk,
         {
           return -EINVAL;
         }
+	  else
+	    {
+          return parent_rate;
+		}
+    }
 
-      return parent_rate;
+  if (multiplier->flags & CLK_MULT_MINMULT_MSK)
+    {
+      uint32_t minmult = (multiplier->flags & CLK_MULT_MINMULT_MSK)
+        >> CLK_MULT_MINMULT_OFF;
+
+      if (mult < minmult)
+        {
+          return -EINVAL;
+        }
     }
 
   return parent_rate * mult;
@@ -193,11 +206,22 @@ static int clk_multiplier_set_rate(FAR struct clk_s *clk, uint32_t rate,
       value = MASK(multiplier->width);
     }
 
+  if (multiplier->flags & CLK_MULT_MINMULT_MSK)
+    {
+      uint32_t minmult = (multiplier->flags & CLK_MULT_MINMULT_MSK)
+        >> CLK_MULT_MINMULT_OFF;
+
+      if (mult < minmult)
+        {
+          return -EINVAL;
+        }
+    }
+
+
   if (multiplier->flags & CLK_MULT_HIWORD_MASK)
     {
       val = MASK(multiplier->width) << (multiplier->shift + 16);
     }
-
   else
     {
       val = clk_read(multiplier->reg);
@@ -227,18 +251,15 @@ const struct clk_ops_s g_clk_multiplier_ops =
 
 FAR struct clk_s *clk_register_multiplier(FAR const char *name,
                                           FAR const char *parent_name,
-                                          uint8_t flags, uint32_t reg,
-                                          uint8_t shift,
-                                          uint8_t width,
-                                          uint8_t clk_multiplier_flags)
+                                          uint8_t flags,
+                                          FAR struct clk_multiplier_s *mult)
 {
-  struct clk_multiplier_s mult;
   FAR const char **parent_names;
   uint8_t num_parents;
 
-  if (clk_multiplier_flags & CLK_MULT_HIWORD_MASK)
+  if (mult->flags & CLK_MULT_HIWORD_MASK)
     {
-      if (width + shift > 16)
+      if (mult->width + mult->shift > 16)
         {
           return NULL;
         }
@@ -247,11 +268,6 @@ FAR struct clk_s *clk_register_multiplier(FAR const char *name,
   parent_names = parent_name ? &parent_name : NULL;
   num_parents  = parent_name ? 1 : 0;
 
-  mult.reg   = reg;
-  mult.shift = shift;
-  mult.width = width;
-  mult.flags = clk_multiplier_flags;
-
   return clk_register(name, parent_names, num_parents, flags,
-                      &g_clk_multiplier_ops, &mult, sizeof(mult));
+                      &g_clk_multiplier_ops, mult, sizeof(*mult));
 }

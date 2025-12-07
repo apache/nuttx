@@ -42,7 +42,7 @@
 #  include "stm32_mpuinit.h"
 #endif
 
-#include "stm32_rcc.h"
+#include "stm32_clk.h"
 #include "stm32_userspace.h"
 #include "stm32_lowputc.h"
 #include "stm32_start.h"
@@ -92,20 +92,6 @@ const uintptr_t g_idle_topstack = HEAP_BASE;
 /****************************************************************************
  * Private Function prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: showprogress
- *
- * Description:
- *   Print a character on the UART to show boot status.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c) arm_lowputc(c)
-#else
-#  define showprogress(c)
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -246,10 +232,7 @@ void __start(void)
 
   /* Configure the UART so that we can get debug output as soon as possible */
 
-  stm32_clockconfig();
   arm_fpuconfig();
-  stm32_lowsetup();
-  showprogress('A');
 
 #ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM7
   /* Enable/disable tightly coupled memories */
@@ -260,7 +243,6 @@ void __start(void)
   /* Initialize onboard resources */
 
   stm32_boardinitialize();
-  showprogress('B');
 
 #ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM7
   /* Enable I- and D-Caches */
@@ -268,18 +250,10 @@ void __start(void)
   up_enable_icache();
   up_enable_dcache();
 #endif
-  showprogress('C');
 
 #ifdef CONFIG_ARCH_PERF_EVENTS
   up_perf_init((void *)STM32_CPUCLK_FREQUENCY);
 #endif
-
-  /* Perform early serial initialization */
-
-#ifdef USE_EARLYSERIALINIT
-  arm_earlyserialinit();
-#endif
-  showprogress('D');
 
   /* For the case of the separate user-/kernel-space build, perform whatever
    * platform specific initialization of the user memory is required.
@@ -296,12 +270,6 @@ void __start(void)
 
   stm32_mpuinitialize();
 #endif
-  showprogress('E');
-
-  /* Then start NuttX */
-
-  showprogress('\r');
-  showprogress('\n');
 
 #if defined(CONFIG_ARCH_STM32H7_DUALCORE) && \
     defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7) && \
