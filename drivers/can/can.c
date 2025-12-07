@@ -518,7 +518,7 @@ return_with_irqdisabled:
 
   /* ret can be more than buflen due to roundup, so return at most buflen */
 
-  return ret ? MIN(ret, buflen) : -EMSGSIZE;
+  return ret ? MIN(ret, (ssize_t)buflen) : -EMSGSIZE;
 }
 
 /****************************************************************************
@@ -744,7 +744,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
    * can be more due to roundup.
    */
 
-  ret = MIN(nsent, buflen);
+  ret = MIN(nsent, (ssize_t)buflen);
 
 return_with_irqdisabled:
   leave_critical_section(flags);
