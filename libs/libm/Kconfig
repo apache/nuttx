@@ -25,7 +25,7 @@ config LIBM
 		math library and that the corresponding math.h file resides at
 		arch/<architecture>/include/math.h.  The option is selected via
 		CONFIG_ARCH_MATH_H.  If ARCH_MATH_H is selected,then the
-		include/nuttx/libmath.h header file will be copied to include/math.h
+		include/nuttx/lib/math.h header file will be copied to include/math.h
 		where it can be used by your applications.
 
 		If ARCH_MATH_H is not defined, then this option can be selected to
