@@ -119,17 +119,15 @@ const struct clk_ops_s g_clk_gate_ops =
 
 FAR struct clk_s *clk_register_gate(FAR const char *name,
                                     FAR const char *parent_name,
-                                    uint8_t flags, uint32_t reg,
-                                    uint8_t bit_idx,
-                                    uint8_t clk_gate_flags)
+                                    uint8_t flags,
+                                    FAR struct clk_gate_s *gate)
 {
-  FAR struct clk_gate_s gate;
   FAR const char **parent_names;
   uint8_t num_parents;
 
-  if (clk_gate_flags & CLK_GATE_HIWORD_MASK)
+  if (gate->flags & CLK_GATE_HIWORD_MASK)
     {
-      if (bit_idx > 16)
+      if (gate->bit_idx > 16)
         {
           return NULL;
         }
@@ -138,10 +136,6 @@ FAR struct clk_s *clk_register_gate(FAR const char *name,
   parent_names = parent_name ? &parent_name : NULL;
   num_parents = parent_name ? 1 : 0;
 
-  gate.reg = reg;
-  gate.bit_idx = bit_idx;
-  gate.flags = clk_gate_flags;
-
   return clk_register(name, parent_names, num_parents, flags,
-                      &g_clk_gate_ops, &gate, sizeof(gate));
+                      &g_clk_gate_ops, gate, sizeof(*gate));
 }

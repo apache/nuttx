@@ -177,25 +177,18 @@ const struct clk_ops_s g_clk_mux_ro_ops =
 FAR struct clk_s *clk_register_mux(FAR const char *name,
                                    FAR const char * const *parent_names,
                                    uint8_t num_parents,
-                                   uint8_t flags, uint32_t reg,
-                                   uint8_t shift, uint8_t width,
-                                   uint8_t clk_mux_flags)
+                                   uint8_t flags,
+                                   FAR struct clk_mux_s *mux)
 {
-  struct clk_mux_s mux;
 
-  mux.reg   = reg;
-  mux.shift = shift;
-  mux.width = width;
-  mux.flags = clk_mux_flags;
-
-  if (clk_mux_flags & CLK_MUX_READ_ONLY)
+  if (mux->flags & CLK_MUX_READ_ONLY)
     {
       return clk_register(name, parent_names, num_parents, flags,
-                          &g_clk_mux_ro_ops, &mux, sizeof(mux));
+                          &g_clk_mux_ro_ops, mux, sizeof(*mux));
     }
   else
     {
       return clk_register(name, parent_names, num_parents, flags,
-                          &g_clk_mux_ops, &mux, sizeof(mux));
+                          &g_clk_mux_ops, mux, sizeof(*mux));
     }
 }

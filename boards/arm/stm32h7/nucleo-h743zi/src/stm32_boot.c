@@ -30,6 +30,7 @@
 
 #include <nuttx/board.h>
 #include <arch/board/board.h>
+#include <nuttx/board.h>
 
 #include "arm_internal.h"
 #include "stm32_start.h"
@@ -90,4 +91,16 @@ void board_late_initialize(void)
 {
   stm32_bringup();
 }
+#endif
+
+
+#ifdef CONFIG_BOARD_EARLY_INITIALIZE
+  /* Call the board-specific up_initialize() extension to support
+   * early initialization of board-specific drivers and resources
+   * that cannot wait until board_late_initialize.
+   */
+
+  void board_early_initialize()
+  {
+  }
 #endif

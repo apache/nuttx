@@ -30,10 +30,13 @@ list(
   stm32_gpio.c
   stm32_irq.c
   stm32_start.c
-  stm32_rcc.c
   stm32_lowputc.c
   stm32_serial.c
   stm32_uid.c)
+
+if(CONFIG_CLK)
+  list(APPEND SRCS stm32_clk.c)
+endif()
 
 if(CONFIG_STM32H7_PROGMEM)
   list(APPEND SRCS stm32_flash.c)

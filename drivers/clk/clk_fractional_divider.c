@@ -159,25 +159,15 @@ const struct clk_ops_s g_clk_fractional_divider_ops =
 FAR struct clk_s *
 clk_register_fractional_divider(FAR const char *name,
                                 FAR const char *parent_name,
-                                uint8_t flags, uint32_t reg,
-                                uint8_t mshift, uint8_t mwidth,
-                                uint8_t nshift, uint8_t nwidth,
-                                uint8_t clk_divider_flags)
+                                uint8_t flags,
+                                FAR struct clk_fractional_divider_s *fd)
 {
-  struct clk_fractional_divider_s fd;
   FAR const char **parent_names;
   uint8_t num_parents;
 
   parent_names = parent_name ? &parent_name : NULL;
   num_parents = parent_name ? 1 : 0;
 
-  fd.reg = reg;
-  fd.mshift = mshift;
-  fd.mwidth = mwidth;
-  fd.nshift = nshift;
-  fd.nwidth = nwidth;
-  fd.flags = clk_divider_flags;
-
   return clk_register(name, parent_names, num_parents, flags,
-                      &g_clk_fractional_divider_ops, &fd, sizeof(fd));
+                      &g_clk_fractional_divider_ops, fd, sizeof(*fd));
 }

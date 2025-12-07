@@ -52,7 +52,8 @@
 #include "stm32_gpio.h"
 #include "hardware/stm32_pinmap.h"
 #include "stm32_dma.h"
-#include "stm32_rcc.h"
+#include "stm32_clk.h"
+#include "hardware/stm32_rcc.h"
 #include "stm32_uart.h"
 
 #include <arch/board/board.h>
@@ -506,7 +507,6 @@
 #  define USART_CR1_IE_BREAK_INPROGRESS (1 << USART_CR1_IE_BREAK_INPROGRESS_SHFTS)
 #endif
 
-#ifdef USE_SERIALDRIVER
 #ifdef HAVE_UART
 
 /* Warnings for potentially unsafe configuration combinations. */
@@ -590,6 +590,7 @@ struct up_dev_s
 
 #ifdef CONFIG_SERIAL_TERMIOS
   uint8_t           rxftcfg;   /* Rx FIFO threshold level */
+  bool              over8;     /* True: oversampling by 8, False: oversampling by 16 */
   uint8_t           parity;    /* 0=none, 1=odd, 2=even */
   uint8_t           bits;      /* Number of bits (7 or 8) */
   bool              stopbits2; /* True: Configure with 2 stop bits instead of 1 */
@@ -602,6 +603,7 @@ struct up_dev_s
   uint32_t          baud;      /* Configured baud */
 #else
   const uint8_t     rxftcfg;   /* Rx FIFO threshold level */
+  const bool        over8;     /* True: oversampling by 8, False: oversampling by 16 */
   const uint8_t     parity;    /* 0=none, 1=odd, 2=even */
   const uint8_t     bits;      /* Number of bits (7 or 8) */
   const bool        stopbits2; /* True: Configure with 2 stop bits instead of 1 */
@@ -615,8 +617,8 @@ struct up_dev_s
 #endif
 
   const uint8_t     irq;       /* IRQ associated with this USART */
-  const uint32_t    apbclock;  /* PCLK 1 or 2 frequency */
   const uint32_t    usartbase; /* Base address of USART registers */
+  const char *const clkbase;   /* Common Clock Framework device name */
   const uint32_t    tx_gpio;   /* U[S]ART TX GPIO pin configuration */
   const uint32_t    rx_gpio;   /* U[S]ART RX GPIO pin configuration */
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
@@ -669,7 +671,6 @@ struct pm_config_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void up_set_format(struct uart_dev_s *dev);
 static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
@@ -954,7 +955,7 @@ static struct up_dev_s g_usart1priv =
   .bits          = CONFIG_USART1_BITS,
   .stopbits2     = CONFIG_USART1_2STOP,
   .baud          = CONFIG_USART1_BAUD,
-  .apbclock      = STM32_PCLK2_FREQUENCY,
+  .clkbase       = "usart1_ker_ck",
   .usartbase     = STM32_USART1_BASE,
   .tx_gpio       = GPIO_USART1_TX,
   .rx_gpio       = GPIO_USART1_RX,
@@ -1024,7 +1025,7 @@ static struct up_dev_s g_usart2priv =
   .bits          = CONFIG_USART2_BITS,
   .stopbits2     = CONFIG_USART2_2STOP,
   .baud          = CONFIG_USART2_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .clkbase       = "usart2_ker_ck",
   .usartbase     = STM32_USART2_BASE,
   .tx_gpio       = GPIO_USART2_TX,
   .rx_gpio       = GPIO_USART2_RX,
@@ -1090,11 +1091,12 @@ static struct up_dev_s g_usart3priv =
 
   .irq           = STM32_IRQ_USART3,
   .rxftcfg       = CONFIG_USART3_RXFIFO_THRES,
+  .over8         = false,
   .parity        = CONFIG_USART3_PARITY,
   .bits          = CONFIG_USART3_BITS,
   .stopbits2     = CONFIG_USART3_2STOP,
   .baud          = CONFIG_USART3_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .clkbase       = "usart3_ker_ck",
   .usartbase     = STM32_USART3_BASE,
   .tx_gpio       = GPIO_USART3_TX,
   .rx_gpio       = GPIO_USART3_RX,
@@ -1172,7 +1174,7 @@ static struct up_dev_s g_uart4priv =
   .rts_gpio      = GPIO_UART4_RTS,
 #endif
   .baud          = CONFIG_UART4_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .clkbase       = "uart4_ker_ck",
   .usartbase     = STM32_UART4_BASE,
   .tx_gpio       = GPIO_UART4_TX,
   .rx_gpio       = GPIO_UART4_RX,
@@ -1242,7 +1244,7 @@ static struct up_dev_s g_uart5priv =
   .rts_gpio      = GPIO_UART5_RTS,
 #endif
   .baud          = CONFIG_UART5_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .clkbase       = "uart5_ker_ck",
   .usartbase     = STM32_UART5_BASE,
   .tx_gpio       = GPIO_UART5_TX,
   .rx_gpio       = GPIO_UART5_RX,
@@ -1304,7 +1306,7 @@ static struct up_dev_s g_usart6priv =
   .bits          = CONFIG_USART6_BITS,
   .stopbits2     = CONFIG_USART6_2STOP,
   .baud          = CONFIG_USART6_BAUD,
-  .apbclock      = STM32_PCLK2_FREQUENCY,
+  .clkbase       = "usart6_ker_ck",
   .usartbase     = STM32_USART6_BASE,
   .tx_gpio       = GPIO_USART6_TX,
   .rx_gpio       = GPIO_USART6_RX,
@@ -1374,7 +1376,7 @@ static struct up_dev_s g_uart7priv =
   .bits          = CONFIG_UART7_BITS,
   .stopbits2     = CONFIG_UART7_2STOP,
   .baud          = CONFIG_UART7_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .clkbase       = "uart7_ker_ck",
   .usartbase     = STM32_UART7_BASE,
   .tx_gpio       = GPIO_UART7_TX,
   .rx_gpio       = GPIO_UART7_RX,
@@ -1444,7 +1446,7 @@ static struct up_dev_s g_uart8priv =
   .bits          = CONFIG_UART8_BITS,
   .stopbits2     = CONFIG_UART8_2STOP,
   .baud          = CONFIG_UART8_BAUD,
-  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .clkbase       = "uart8_ker_ck",
   .usartbase     = STM32_UART8_BASE,
   .tx_gpio       = GPIO_UART8_TX,
   .rx_gpio       = GPIO_UART8_RX,
@@ -1662,162 +1664,6 @@ static int up_dma_nextrx(struct up_dev_s *priv)
 #endif
 
 /****************************************************************************
- * Name: up_set_format
- *
- * Description:
- *   Set the serial line format and speed.
- *
- ****************************************************************************/
-
-#ifndef CONFIG_SUPPRESS_UART_CONFIG
-static void up_set_format(struct uart_dev_s *dev)
-{
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-  uint32_t regval;
-  uint32_t usartdiv8;
-  uint32_t cr1;
-  uint32_t cr1_ue;
-  uint32_t brr;
-  irqstate_t flags;
-
-  flags = enter_critical_section();
-
-  /* Get the original state of UE */
-
-  cr1  = up_serialin(priv, STM32_USART_CR1_OFFSET);
-  cr1_ue = cr1 & USART_CR1_UE;
-  cr1 &= ~USART_CR1_UE;
-
-  /* Disable UE as the format bits and baud rate registers can not be
-   * updated while UE = 1
-   */
-
-  up_serialout(priv, STM32_USART_CR1_OFFSET, cr1);
-
-  /* In case of oversampling by 8, the equation is:
-   *
-   *   baud      = 2 * fCK / usartdiv8
-   *   usartdiv8 = 2 * fCK / baud
-   */
-
-  usartdiv8 = ((priv->apbclock << 1) + (priv->baud >> 1)) / priv->baud;
-
-  /* Baud rate for standard USART (SPI mode included):
-   *
-   * In case of oversampling by 16, the equation is:
-   *   baud       = fCK / usartdiv16
-   *   usartdiv16 = fCK / baud
-   *              = 2 * usartdiv8
-   */
-
-  /* Use oversamply by 8 only if the divisor is small.  But what is small? */
-
-  if (usartdiv8 > 100)
-    {
-      /* Use usartdiv16 */
-
-      brr  = (usartdiv8 + 1) >> 1;
-
-      /* Clear oversampling by 8 to enable oversampling by 16 */
-
-      cr1 &= ~USART_CR1_OVER8;
-    }
-  else
-    {
-      DEBUGASSERT(usartdiv8 >= 8);
-
-      /* Perform mysterious operations on bits 0-3 */
-
-      brr  = ((usartdiv8 & 0xfff0) | ((usartdiv8 & 0x000f) >> 1));
-
-      /* Set oversampling by 8 */
-
-      cr1 |= USART_CR1_OVER8;
-    }
-
-  up_serialout(priv, STM32_USART_CR1_OFFSET, cr1);
-  up_serialout(priv, STM32_USART_BRR_OFFSET, brr);
-
-  /* Configure parity mode */
-
-  cr1 &= ~(USART_CR1_PCE | USART_CR1_PS | USART_CR1_M0 | USART_CR1_M1);
-
-  if (priv->parity == 1)       /* Odd parity */
-    {
-      cr1 |= (USART_CR1_PCE | USART_CR1_PS);
-    }
-  else if (priv->parity == 2)  /* Even parity */
-    {
-      cr1 |= USART_CR1_PCE;
-    }
-
-  /* Configure word length (parity uses one of configured bits)
-   *
-   * Default: 1 start, 8 data (no parity), n stop, OR
-   *          1 start, 7 data + parity, n stop
-   */
-
-  if (priv->bits == 9 || (priv->bits == 8 && priv->parity != 0))
-    {
-      /* Select: 1 start, 8 data + parity, n stop, OR
-       *         1 start, 9 data (no parity), n stop.
-       */
-
-      cr1 |= USART_CR1_M0;
-    }
-  else if (priv->bits == 7 && priv->parity == 0)
-    {
-      /* Select: 1 start, 7 data (no parity), n stop, OR
-       */
-
-      cr1 |= USART_CR1_M1;
-    }
-
-  /* Else Select: 1 start, 7 data + parity, n stop, OR
-   *              1 start, 8 data (no parity), n stop.
-   */
-
-  up_serialout(priv, STM32_USART_CR1_OFFSET, cr1);
-
-  /* Configure STOP bits */
-
-  regval = up_serialin(priv, STM32_USART_CR2_OFFSET);
-  regval &= ~(USART_CR2_STOP_MASK);
-
-  if (priv->stopbits2)
-    {
-      regval |= USART_CR2_STOP2;
-    }
-
-  up_serialout(priv, STM32_USART_CR2_OFFSET, regval);
-
-  /* Configure hardware flow control */
-
-  regval  = up_serialin(priv, STM32_USART_CR3_OFFSET);
-  regval &= ~(USART_CR3_CTSE | USART_CR3_RTSE);
-
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && \
-   !defined(CONFIG_STM32H7_FLOWCONTROL_BROKEN)
-  if (priv->iflow && (priv->rts_gpio != 0))
-    {
-      regval |= USART_CR3_RTSE;
-    }
-#endif
-
-#ifdef CONFIG_SERIAL_OFLOWCONTROL
-  if (priv->oflow && (priv->cts_gpio != 0))
-    {
-      regval |= USART_CR3_CTSE;
-    }
-#endif
-
-  up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
-  up_serialout(priv, STM32_USART_CR1_OFFSET, cr1 | cr1_ue);
-  leave_critical_section(flags);
-}
-#endif /* CONFIG_SUPPRESS_UART_CONFIG */
-
-/****************************************************************************
  * Name: up_setsuspend
  *
  * Description:
@@ -1967,92 +1813,6 @@ static void up_pm_setsuspend(bool suspend)
 #endif
 
 /****************************************************************************
- * Name: up_set_apb_clock
- *
- * Description:
- *   Enable or disable APB clock for the USART peripheral
- *
- * Input Parameters:
- *   dev - A reference to the UART driver state structure
- *   on  - Enable clock if 'on' is 'true' and disable if 'false'
- *
- ****************************************************************************/
-
-static void up_set_apb_clock(struct uart_dev_s *dev, bool on)
-{
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-  uint32_t rcc_en;
-  uint32_t regaddr;
-
-  /* Determine which USART to configure */
-
-  switch (priv->usartbase)
-    {
-    default:
-      return;
-#ifdef CONFIG_STM32H7_USART1
-    case STM32_USART1_BASE:
-      rcc_en = RCC_APB2ENR_USART1EN;
-      regaddr = STM32_RCC_APB2ENR;
-      break;
-#endif
-#ifdef CONFIG_STM32H7_USART2
-    case STM32_USART2_BASE:
-      rcc_en = RCC_APB1LENR_USART2EN;
-      regaddr = STM32_RCC_APB1LENR;
-      break;
-#endif
-#ifdef CONFIG_STM32H7_USART3
-    case STM32_USART3_BASE:
-      rcc_en = RCC_APB1LENR_USART3EN;
-      regaddr = STM32_RCC_APB1LENR;
-      break;
-#endif
-#ifdef CONFIG_STM32H7_UART4
-    case STM32_UART4_BASE:
-      rcc_en = RCC_APB1LENR_UART4EN;
-      regaddr = STM32_RCC_APB1LENR;
-      break;
-#endif
-#ifdef CONFIG_STM32H7_UART5
-    case STM32_UART5_BASE:
-      rcc_en = RCC_APB1LENR_UART5EN;
-      regaddr = STM32_RCC_APB1LENR;
-      break;
-#endif
-#ifdef CONFIG_STM32H7_USART6
-    case STM32_USART6_BASE:
-      rcc_en = RCC_APB2ENR_USART6EN;
-      regaddr = STM32_RCC_APB2ENR;
-      break;
-#endif
-#ifdef CONFIG_STM32H7_UART7
-    case STM32_UART7_BASE:
-      rcc_en = RCC_APB1LENR_UART7EN;
-      regaddr = STM32_RCC_APB1LENR;
-      break;
-#endif
-#ifdef CONFIG_STM32H7_UART8
-    case STM32_UART8_BASE:
-      rcc_en = RCC_APB1LENR_UART8EN;
-      regaddr = STM32_RCC_APB1LENR;
-      break;
-#endif
-    }
-
-  /* Enable/disable APB 1/2 clock for USART */
-
-  if (on)
-    {
-      modifyreg32(regaddr, 0, rcc_en);
-    }
-  else
-    {
-      modifyreg32(regaddr, rcc_en, 0);
-    }
-}
-
-/****************************************************************************
  * Name: up_setup
  *
  * Description:
@@ -2063,22 +1823,24 @@ static void up_set_apb_clock(struct uart_dev_s *dev, bool on)
 
 static int up_setup(struct uart_dev_s *dev)
 {
+
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+
+  if (priv->initialized == true)
+    {
+      return OK;
+    }
+
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
+
+  uint32_t regval;
+
+  struct clk_s *clk = clk_get(priv->clkbase);
+  clk_enable(clk);
 
   /* Make sure that USART is disabled */
 
   up_serialout(priv, STM32_USART_CR1_OFFSET, 0);
-
-#ifndef CONFIG_SUPPRESS_UART_CONFIG
-  uint32_t regval;
-
-  /* Note: The logic here depends on the fact that that the USART module
-   * was enabled in stm32_lowsetup().
-   */
-
-  /* Enable USART APB1/2 clock */
-
-  up_set_apb_clock(dev, true);
 
   /* Configure pins for USART use */
 
@@ -2116,11 +1878,11 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Configure CR2
    *
-   * Clear STOP, CLKEN, CPOL, CPHA, LBCL, and interrupt enable bits
+   * Clear STOP, CPOL, CPHA, LBCL, and interrupt enable bits
    */
 
   regval  = up_serialin(priv, STM32_USART_CR2_OFFSET);
-  regval &= ~(USART_CR2_STOP_MASK | USART_CR2_CLKEN | USART_CR2_CPOL |
+  regval &= ~(USART_CR2_STOP_MASK | USART_CR2_CPOL |
               USART_CR2_CPHA | USART_CR2_LBCL | USART_CR2_LBDIE);
 
   /* Configure STOP bits */
@@ -2131,16 +1893,6 @@ static int up_setup(struct uart_dev_s *dev)
     }
 
   up_serialout(priv, STM32_USART_CR2_OFFSET, regval);
-
-  /* Configure CR1
-   *
-   * Clear TE, REm and all interrupt enable bits
-   */
-
-  regval  = up_serialin(priv, STM32_USART_CR1_OFFSET);
-  regval &= ~(USART_CR1_TE | USART_CR1_RE | USART_CR1_ALLINTS);
-
-  up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
 
   /* Configure CR3
    *
@@ -2155,23 +1907,117 @@ static int up_setup(struct uart_dev_s *dev)
 
   regval |= USART_CR3_RXFTCFG(priv->rxftcfg);
 
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && \
+   !defined(CONFIG_STM32H7_FLOWCONTROL_BROKEN)
+  if (priv->iflow && (priv->rts_gpio != 0))
+    {
+      regval |= USART_CR3_RTSE;
+    }
+#endif
+
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  if (priv->oflow && (priv->cts_gpio != 0))
+    {
+      regval |= USART_CR3_CTSE;
+    }
+#endif
+
   up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
 
-  /* Configure the USART line format and speed. */
+  /* Configure the USART Baud Rate */
 
-  up_set_format(dev);
+  /* Calculate USART BAUD rate divider */
+
+  /* Baud rate for standard USART (SPI mode included):
+   *
+   * In case of oversampling by 16, the equation is:
+   *   baud    = fCK / UARTDIV
+   *   UARTDIV = fCK / baud
+   *
+   * In case of oversampling by 8, the equation is:
+   *
+   *   baud    = 2 * fCK / UARTDIV
+   *   UARTDIV = 2 * fCK / baud
+   */
+
+  regval = clk_get_rate(clk);
+
+  if (priv->over8)
+    {
+      regval = (regval << 1);
+    }
+
+  regval = (regval + (priv->baud >> 1)) / priv->baud;
+
+  up_serialout(priv, STM32_USART_BRR_OFFSET, regval);
+
+  /* Configure CR1
+   *
+   * Clear TE, RE and all interrupt enable bits
+   */
+
+  regval  = up_serialin(priv, STM32_USART_CR1_OFFSET);
+  regval &= ~(USART_CR1_ALLINTS);
 
   /* Enable Rx, Tx, and the USART */
 
-  /* Enable FIFO */
-
-  regval  = up_serialin(priv, STM32_USART_CR1_OFFSET);
   regval |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
+
 #ifdef SERIAL_HAVE_RXDMA
   regval |= USART_CR1_IDLEIE;
 #endif
 
+  /* Enable FIFO */
+
   regval |= USART_CR1_FIFOEN;
+
+  /* Configure parity mode */
+
+  regval &= ~(USART_CR1_PCE | USART_CR1_PS | USART_CR1_M0 | USART_CR1_M1);
+
+  if (priv->parity == 1)       /* Odd parity */
+    {
+      regval |= (USART_CR1_PCE | USART_CR1_PS);
+    }
+  else if (priv->parity == 2)  /* Even parity */
+    {
+      regval |= USART_CR1_PCE;
+    }
+
+  if (priv->over8)
+    {
+      regval |= USART_CR1_OVER8;
+    }
+
+  /* Configure word length (parity uses one of configured bits)
+   *
+   * Default: 1 start, 8 data (no parity), n stop, OR
+   *          1 start, 7 data + parity, n stop
+   */
+
+  if (priv->bits == 9 || (priv->bits == 8 && priv->parity != 0))
+    {
+      /* Select: 1 start, 8 data + parity, n stop, OR
+       *         1 start, 9 data (no parity), n stop.
+       */
+
+      regval |= USART_CR1_M0;
+    }
+  else if (priv->bits == 7 && priv->parity == 0)
+    {
+      /* Select: 1 start, 7 data (no parity), n stop, OR
+       */
+
+      regval |= USART_CR1_M1;
+    }
+
+  /* Else Select: 1 start, 7 data + parity, n stop, OR
+   *              1 start, 8 data (no parity), n stop.
+   */
+
+  /* Enable Rx, Tx and the USART */
+
+  regval |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
 
   up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
 
@@ -2294,10 +2140,6 @@ static void up_shutdown(struct uart_dev_s *dev)
   /* Disable all interrupts */
 
   up_disableusartint(priv, NULL);
-
-  /* Disable USART APB1/2 clock */
-
-  up_set_apb_clock(dev, false);
 
   /* Disable Rx, Tx, and the UART */
 
@@ -3783,13 +3625,10 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
 }
 #endif
 #endif /* HAVE_UART */
-#endif /* USE_SERIALDRIVER */
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-#ifdef USE_SERIALDRIVER
 
 /****************************************************************************
  * Name: stm32_serial_get_uart
@@ -3817,46 +3656,10 @@ uart_dev_t *stm32_serial_get_uart(int uart_num)
 }
 
 /****************************************************************************
- * Name: arm_earlyserialinit
- *
- * Description:
- *   Performs the low level USART initialization early in debug so that the
- *   serial console will be available during boot up.  This must be called
- *   before arm_serialinit.
- *
- ****************************************************************************/
-
-#ifdef USE_EARLYSERIALINIT
-void arm_earlyserialinit(void)
-{
-#ifdef HAVE_UART
-  unsigned i;
-
-  /* Disable all USART interrupts */
-
-  for (i = 0; i < STM32_NSERIAL; i++)
-    {
-      if (g_uart_devs[i])
-        {
-          up_disableusartint(g_uart_devs[i], NULL);
-        }
-    }
-
-  /* Configure whichever one is the console */
-
-#if CONSOLE_UART > 0
-  up_setup(&g_uart_devs[CONSOLE_UART - 1]->dev);
-#endif
-#endif /* HAVE UART */
-}
-#endif
-
-/****************************************************************************
  * Name: arm_serialinit
  *
  * Description:
- *   Register serial console and serial ports.  This assumes
- *   that arm_earlyserialinit was called previously.
+ *   Register serial console and serial ports.
  *
  ****************************************************************************/
 
@@ -3869,6 +3672,7 @@ void arm_serialinit(void)
 #ifdef CONFIG_PM
   int ret;
 #endif
+  irqstate_t flags = enter_critical_section();
 
 #ifdef CONFIG_PM
   /* Register to receive power management callbacks */
@@ -3877,10 +3681,13 @@ void arm_serialinit(void)
   DEBUGASSERT(ret == OK);
   UNUSED(ret);
 #endif
-
+  
   /* Register the console */
 
 #if CONSOLE_UART > 0
+
+  up_setup(&g_uart_devs[CONSOLE_UART - 1]->dev);
+
   uart_register("/dev/console", &g_uart_devs[CONSOLE_UART - 1]->dev);
 
 #ifndef CONFIG_STM32H7_SERIAL_DISABLE_REORDERING
@@ -3923,9 +3730,13 @@ void arm_serialinit(void)
 
       /* Register USARTs as devices in increasing order */
 
+      up_setup(&g_uart_devs[i]->dev);
       devname[9] = '0' + minor++;
       uart_register(devname, &g_uart_devs[i]->dev);
     }
+
+  leave_critical_section(flags);
+
 #endif /* HAVE UART */
 }
 
@@ -4022,27 +3833,8 @@ void up_putc(int ch)
   uint16_t ie;
 
   up_disableusartint(priv, &ie);
-  arm_lowputc(ch);
+  up_send(&priv->dev, ch);
   up_restoreusartint(priv, ie);
 
 #endif
 }
-
-#else /* USE_SERIALDRIVER */
-
-/****************************************************************************
- * Name: up_putc
- *
- * Description:
- *   Provide priority, low-level access to support OS debug writes
- *
- ****************************************************************************/
-
-void up_putc(int ch)
-{
-#if CONSOLE_UART > 0
-  arm_lowputc(ch);
-#endif
-}
-
-#endif /* USE_SERIALDRIVER */

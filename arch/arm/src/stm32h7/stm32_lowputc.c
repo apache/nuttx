@@ -31,6 +31,7 @@
 #include "arm_internal.h"
 #include "chip.h"
 
+#include "hardware/stm32_rcc.h"
 #include "hardware/stm32_pinmap.h"
 #include "stm32_rcc.h"
 #include "stm32_gpio.h"
@@ -313,16 +314,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_lowputc
+ * Name: up_putc
  *
  * Description:
- *   Output one byte on the serial console
+ *   Provide priority, low-level access to support OS debug writes
  *
  ****************************************************************************/
 
-void arm_lowputc(char ch)
-{
 #ifdef HAVE_CONSOLE
+void up_putc(int ch)
+{
   /* Wait until the TX data register is empty */
 
   while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_ISR_OFFSET) &
@@ -341,9 +342,8 @@ void arm_lowputc(char ch)
   stm32_gpiowrite(STM32_CONSOLE_RS485_DIR,
                   !STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
-
-#endif /* HAVE_CONSOLE */
 }
+#endif /* HAVE_CONSOLE */
 
 /****************************************************************************
  * Name: stm32_lowsetup

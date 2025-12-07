@@ -92,22 +92,15 @@ const struct clk_ops_s g_clk_phase_ops =
 
 FAR struct clk_s *clk_register_phase(FAR const char *name,
                                      FAR const char *parent_name,
-                                     uint8_t flags, uint32_t reg,
-                                     uint8_t shift, uint8_t width,
-                                     uint8_t clk_phase_flags)
+                                     uint8_t flags,
+                                     FAR struct clk_phase_s *phase)
 {
-  struct clk_phase_s phase;
   FAR const char **parent_names;
   uint8_t num_parents;
 
   parent_names = parent_name ? &parent_name : NULL;
   num_parents = parent_name ? 1 : 0;
 
-  phase.reg = reg;
-  phase.shift = shift;
-  phase.width = width;
-  phase.flags = clk_phase_flags;
-
   return clk_register(name, parent_names, num_parents, flags,
-                      &g_clk_phase_ops, &phase, sizeof(phase));
+                      &g_clk_phase_ops, phase, sizeof(*phase));
 }
