@@ -12,13 +12,6 @@ config LPWAN_RN2XX3
 	---help---
 		Enable driver support for the RN2xx3 LoRa radio transceiver family.
 
-config LPWAN_SX127X
-	bool "SX127X Low Power Long Range transceiver support"
-	default n
-	select SPI
-	---help---
-		This options adds driver support for the Samtech SX127X chip.
-
 config LPWAN_SX126X
 	bool "SX126X Low Power Long Range transceiver support"
 	default n
@@ -27,6 +20,13 @@ config LPWAN_SX126X
 		This options adds driver support for the Samtech SX126X chip.
 
 source "drivers/wireless/lpwan/sx126x/Kconfig"
+
+config LPWAN_SX127X
+	bool "SX127X Low Power Long Range transceiver support"
+	default n
+	select SPI
+	---help---
+		This options adds driver support for the Samtech SX127X chip.
 
 if LPWAN_SX127X
 
