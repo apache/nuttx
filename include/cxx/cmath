@@ -99,6 +99,9 @@ namespace std
   isnan(float __x)
   { return __builtin_isnan(__x); }
 
+  constexpr float
+  nextafter(float from, float to)
+  { return ::nextafterf(from, to); }
 
 #endif
 
@@ -152,6 +155,10 @@ namespace std
   isnan(double __x)
   { return __builtin_isnan(__x); }
 
+  constexpr double
+  nextafter(double from, double to)
+  { return ::nextafter(from, to); }
+
 #endif
 
 #ifdef CONFIG_HAVE_LONG_DOUBLE
@@ -201,6 +208,10 @@ namespace std
   constexpr bool
   isnan(long double __x)
   { return __builtin_isnan(__x); }
+
+  constexpr long double
+  nextafter(long double from, long double to)
+  { return ::nextafterl(from, to); }
 
 #endif
 
