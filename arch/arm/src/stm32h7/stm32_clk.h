@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/arm_perf.c
+ * arch/arm/src/stm32h7/stm32_rcc.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,59 +20,35 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_STM32H7_STM32_RCC_H
+#define __ARCH_ARM_SRC_STM32H7_STM32_RCC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/arch.h>
-#include <nuttx/clock.h>
-
-#include "arm_internal.h"
-#include "dwt.h"
-#include "itm.h"
-#include "nvic.h"
-
 /****************************************************************************
- * Private Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-static unsigned long g_cpu_freq = ULONG_MAX;
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
-void up_perf_init(void *arg)
-{
-  g_cpu_freq = (unsigned long)(uintptr_t)arg;
-
-  /* Enable ITM and DWT resources, if not left enabled by debugger. */
-
-  modifyreg32(NVIC_DEMCR, 0, NVIC_DEMCR_TRCENA);
-
-  /* Make sure the high speed cycle counter is running.  It will be started
-   * automatically only if a debugger is connected.
-   */
-
-  putreg32(0xc5acce55, ITM_LAR);
-  modifyreg32(DWT_CTRL, 0, DWT_CTRL_CYCCNTENA_MASK);
+#undef EXTERN
+#if defined(__cplusplus)
 }
-
-unsigned long up_perf_getfreq(void)
-{
-  return g_cpu_freq;
-}
-
-clock_t up_perf_gettime(void)
-{
-  return getreg32(DWT_CYCCNT);
-}
-
-void up_perf_convert(clock_t elapsed, struct timespec *ts)
-{
-  clock_t left;
-
-  ts->tv_sec  = elapsed / g_cpu_freq;
-  left        = elapsed - ts->tv_sec * g_cpu_freq;
-  ts->tv_nsec = NSEC_PER_SEC * (uint64_t)left / g_cpu_freq;
-}
+#endif
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_STM32H7_STM32_RCC_H */

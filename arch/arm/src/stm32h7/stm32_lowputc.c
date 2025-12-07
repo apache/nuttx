@@ -31,6 +31,7 @@
 #include "arm_internal.h"
 #include "chip.h"
 
+#include "hardware/stm32_rcc.h"
 #include "hardware/stm32_pinmap.h"
 #include "stm32_rcc.h"
 #include "stm32_gpio.h"

@@ -36,8 +36,6 @@
 #include "nucleo-h743zi.h"
 #include <arch/board/board.h>
 
-#ifdef CONFIG_ARCH_BUTTONS
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -104,4 +102,3 @@ int board_button_irq(int id, xcpt_t irqhandler, void *arg)
   return ret;
 }
 #endif
-#endif /* CONFIG_ARCH_BUTTONS */

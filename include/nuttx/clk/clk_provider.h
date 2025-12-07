@@ -58,6 +58,7 @@
 #define CLK_DIVIDER_MAX_HALF            0x10
 #define CLK_DIVIDER_DIV_NEED_EVEN       0x20
 #define CLK_DIVIDER_POWER_OF_TWO        0x40
+#define CLK_DIVIDER_APPLY_OFFSET        0x80
 #define CLK_DIVIDER_MINDIV_OFF          8
 #define CLK_DIVIDER_MINDIV_MSK          0xff00
 
@@ -69,6 +70,8 @@
 #define CLK_MULT_HIWORD_MASK            0x04
 #define CLK_MULT_MAX_HALF               0x08
 #define CLK_MULT_ROUND_CLOSEST          0x10
+#define CLK_MULT_MINMULT_OFF            8
+#define CLK_MULT_MINMULT_MSK            0xff00
 
 #define CLK_MUX_HIWORD_MASK             0x01
 #define CLK_MUX_READ_ONLY               0x02
@@ -256,6 +259,44 @@ FAR struct clk_s *clk_register_rpmsg(FAR const char *name, uint8_t flags);
 
 int clk_rpmsg_server_initialize(void);
 #endif
+
+/****************************************************************************
+ * Name: up_clk_initialize
+ *
+ * Description:
+ *   Called to establish the clock settings based on the values in board.h.
+ *   This function (by default) will reset most everything, enable the PLL,
+ *   and enable peripheral clocking for all peripherals enabled in the NuttX
+ *   configuration file.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_clk_register(void);
+
+/****************************************************************************
+ * Name: up_clk_initialize
+ *
+ * Description:
+ *   Called to establish the clock settings based on the values in board.h.
+ *   This function (by default) will reset most everything, enable the PLL,
+ *   and enable peripheral clocking for all peripherals enabled in the NuttX
+ *   configuration file.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_clk_initialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

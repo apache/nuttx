@@ -431,6 +431,17 @@
 
 /* Bit definitions for RCC_PLL1DIVR register */
 
+#define RCC_PLLDIVR_N_SHIFT           (0ul)
+#define RCC_PLLDIVR_N(x)              (((x) - 1) << RCC_PLL1DIVR_N_SHIFT)  /* Multiplication factor for VCO: 4 - 512 */
+#define RCC_PLLDIVR_P_SHIFT           (9ul)
+#define RCC_PLLDIVR_P(x)              (((x) - 1) << RCC_PLL1DIVR_P_SHIFT)  /* DIVP division factor: 2 - 128, must be even */
+#define RCC_PLLDIVR_Q_SHIFT           (16ul)
+#define RCC_PLLDIVR_Q(x)              (((x) - 1) << RCC_PLL1DIVR_Q_SHIFT)  /* DIVQ division factor: 2 - 128 */
+#define RCC_PLLDIVR_R_SHIFT           (24ul)
+#define RCC_PLLDIVR_R(x)              (((x) - 1) << RCC_PLL1DIVR_R_SHIFT)  /* DIVR division factor: 2 - 128 */
+
+/* Bit definitions for RCC_PLL1DIVR register */
+
 #define RCC_PLL1DIVR_N1_SHIFT           (0ul)
 #define RCC_PLL1DIVR_N1(x)              (((x) - 1) << RCC_PLL1DIVR_N1_SHIFT)  /* Multiplication factor for VCO: 4 - 512 */
 #define RCC_PLL1DIVR_P1_SHIFT           (9ul)

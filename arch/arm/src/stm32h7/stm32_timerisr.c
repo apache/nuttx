@@ -30,12 +30,12 @@
 #include <time.h>
 #include <debug.h>
 #include <nuttx/arch.h>
-#include <arch/board/board.h>
 
 #include "nvic.h"
 #include "clock/clock.h"
 #include "arm_internal.h"
 #include "chip.h"
+#include <nuttx/clk/clk.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -64,40 +64,6 @@
  *     value by 8 in STK_LOAD register (take care that the maximum value is
  *     224-1).
  */
-
-#undef CONFIG_STM32H7_SYSTICK_HCLKd8
-
-/* REVISIT:
- *   It looks like SYSTICK for H7 is always clocked from CPUCLK and doesn't
- *   depend on the SYSTICK_CTRL_CLKSOURCE bit settings.
- */
-
-#ifdef CONFIG_STM32H7_SYSTICK_HCLKd8
-#  define STM32_SYSTICK_CLOCK  (STM32_HCLK_FREQUENCY / 8)
-#else
-#  define STM32_SYSTICK_CLOCK  (STM32_CPUCLK_FREQUENCY)
-#endif
-
-/* The desired timer interrupt frequency is provided by the definition
- * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
- * system clock ticks per second.  That value is a user configurable setting
- * that defaults to 100 (100 ticks per second = 10 MS interval).
- *
- * For example, suppose HCLK = 216 MHz and CLK_TCK = 100, then:
- *
- *   STM32_SYSTICK_CLOCK = 216 MHz / 8 = 27 MHz
- *   SYSTICK_RELOAD      = (27,000,000 / 100) - 1 = 269,999
- */
-
-#define SYSTICK_RELOAD ((STM32_SYSTICK_CLOCK / CLK_TCK) - 1)
-
-/* The size of the reload field is 24 bits.  Verify that the reload value
- * will fit in the reload register.
- */
-
-#if SYSTICK_RELOAD > 0x00ffffff
-#  error SYSTICK_RELOAD exceeds the range of the RELOAD register
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -135,11 +101,30 @@ static int stm32_timerisr(int irq, uint32_t *regs, void *arg)
 
 void up_timer_initialize(void)
 {
-  uint32_t regval;
+  struct clk_s *clk = clk_get("hpre");
+  uint32_t regval = clk_get_rate(clk);
+
+  /* The desired timer interrupt frequency is provided by the definition
+   * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
+   * system clock ticks per second.  That value is a user configurable setting
+   * that defaults to 100 (100 ticks per second = 10 MS interval).
+   *
+   * For example, suppose HCLK = 216 MHz and CLK_TCK = 100, then:
+   *
+   *   STM32_SYSTICK_CLOCK = 216 MHz / 8 = 27 MHz
+   *   SYSTICK_RELOAD      = (27,000,000 / 100) - 1 = 269,999
+   */
+
+  regval = (regval / CLK_TCK) - 1;
+
+  if (regval > 0x00ffffff)
+  {
+    /* PANIC */
+  }
 
   /* Configure SysTick to interrupt at the requested rate */
 
-  putreg32(SYSTICK_RELOAD, NVIC_SYSTICK_RELOAD);
+  putreg32(regval, NVIC_SYSTICK_RELOAD);
   putreg32(0, NVIC_SYSTICK_CURRENT);
 
   /* Attach the timer interrupt vector */
@@ -154,11 +139,6 @@ void up_timer_initialize(void)
    */
 
   regval  = (NVIC_SYSTICK_CTRL_TICKINT | NVIC_SYSTICK_CTRL_ENABLE);
-#ifndef CONFIG_STM32H7_SYSTICK_HCLKd8
-  regval |= NVIC_SYSTICK_CTRL_CLKSOURCE;
-#else
-  regval &= ~NVIC_SYSTICK_CTRL_CLKSOURCE;
-#endif
   putreg32(regval, NVIC_SYSTICK_CTRL);
 
   /* And enable the timer interrupt */

@@ -405,4 +405,9 @@ int stm32_progmem_init(void);
 int stm32_mmcsd_initialize(int minor);
 #endif
 
+
+#ifdef CONFIG_CLK
+int stm32_clk_initialize(void);
+#endif
+
 #endif /* __BOARDS_ARM_STM32H7_NUCLEO_H743ZI_SRC_NUCLEO_H743ZI_H */
