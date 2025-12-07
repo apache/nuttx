@@ -53,6 +53,8 @@ namespace std
   using ::socklen_t;
   using ::sa_family_t;
 #if __cplusplus >= 201103L
+  using ::max_align_t;
+
   using nullptr_t = decltype(nullptr);
 #endif
 }
