@@ -244,10 +244,11 @@ static uint32_t clk_divider_bestdiv(FAR struct clk_s *clk, uint32_t rate,
     }
 
   mindiv = 0;
-  if (divider->flags & CLK_DIVIDER_MINDIV_MSK)
+  if ((divider->flags & CLK_DIVIDER_MINDIV_MSK) &&
+      (divider->flags & CLK_DIVIDER_APPLY_OFFSET))
     {
       mindiv = (divider->flags & CLK_DIVIDER_MINDIV_MSK)
-                >> CLK_DIVIDER_MINDIV_OFF;
+        >> CLK_DIVIDER_MINDIV_OFF;
       mindiv -= 1;
     }
 

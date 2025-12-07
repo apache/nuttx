@@ -78,6 +78,25 @@ int      clk_get_phase(FAR struct clk_s *clk);
 void clk_disable_unused(void);
 FAR const char *clk_get_name(FAR const struct clk_s *clk);
 
+/****************************************************************************
+ * Name: up_clk_initialize
+ *
+ * Description:
+ *   Called to establish the clock settings based on the values in board.h.
+ *   This function (by default) will reset most everything, enable the PLL,
+ *   and enable peripheral clocking for all peripherals enabled in the NuttX
+ *   configuration file.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_clk_initialize(void);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
