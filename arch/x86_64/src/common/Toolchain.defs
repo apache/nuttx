@@ -258,7 +258,7 @@ LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 CELFFLAGS = $(CFLAGS) -fvisibility=hidden
 CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
 
-LDELFFLAGS = -r -e __start
+LDELFFLAGS = -r -e _start
 ifneq ($(CONFIG_BUILD_KERNEL),y)
   # Flat build and protected elf entry point use crt0,
   # Kernel build will use apps/import/scripts/crt0

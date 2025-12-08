@@ -22,8 +22,9 @@ set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES
 add_compile_options(-nostdlib)
 add_compile_options(-ffunction-sections -fdata-sections)
 
-# same entry used for all build modes in crt0.c and arch/.../xxx_start.c
-set(ENTRY_NAME "__start")
+# same entry used for all build modes in crt0.c
+
+set(ENTRY_NAME "_start")
 
 set(CMAKE_C_LINK_EXECUTABLE
     "<CMAKE_LINKER> ${LDFLAGS} --entry=${ENTRY_NAME} -T${LINKER_SCRIPT} <OBJECTS> -o <TARGET> <LINK_LIBRARIES> -L${NUTTX_PATH}/libs --start-group ${LDLIBS} ${EXTRA_LIBS} --end-group"
