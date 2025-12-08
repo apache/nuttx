@@ -122,6 +122,46 @@ static clkcnt_t tricore_systimer_max_delay(struct oneshot_lowerhalf_s *lower)
 }
 
 /****************************************************************************
+ * Name: tricore_systimer_update
+ ****************************************************************************/
+
+static void tricore_systimer_update(struct oneshot_lowerhalf_s *lower,
+                                    clkcnt_t clkcnt, bool relative)
+{
+  struct tricore_systimer_lowerhalf_s *priv =
+    (struct tricore_systimer_lowerhalf_s *)lower;
+  irqstate_t flags;
+  uint64_t   expected;
+  uint64_t   current;
+
+  flags = up_irq_save();
+
+  current = tricore_systimer_get_time(priv->tbase);
+  expected = relative ? clkcnt + current : clkcnt;
+
+  /* Time synchronization between cores */
+
+  if (priv->freerun_tbase)
+    {
+      expected = expected + current -
+                 tricore_systimer_get_time(priv->freerun_tbase);
+    }
+
+  /* Mini_delay time processing */
+
+  expected = expected < current + TRICORE_SYSTIMER_MIN_DELAY ?
+             current + TRICORE_SYSTIMER_MIN_DELAY : expected;
+
+  /* The comparator register is 32-bits. */
+
+  DEBUGASSERT(expected <= current + UINT32_MAX);
+
+  tricore_systimer_set_timecmp(priv->tbase, expected);
+
+  up_irq_restore(flags);
+}
+
+/****************************************************************************
  * Name: tricore_systimer_start
  *
  * Description:
@@ -143,19 +183,7 @@ static clkcnt_t tricore_systimer_max_delay(struct oneshot_lowerhalf_s *lower)
 static void tricore_systimer_start(struct oneshot_lowerhalf_s *lower,
                                    clkcnt_t delta)
 {
-  struct tricore_systimer_lowerhalf_s *priv =
-    (struct tricore_systimer_lowerhalf_s *)lower;
-  irqstate_t flags;
-  uint64_t   mtime;
-
-  delta = delta < TRICORE_SYSTIMER_MIN_DELAY ?
-                  TRICORE_SYSTIMER_MIN_DELAY : delta;
-  flags = up_irq_save();
-  mtime = tricore_systimer_get_time(priv->tbase);
-
-  tricore_systimer_set_timecmp(priv->tbase, mtime + delta);
-
-  up_irq_restore(flags);
+  tricore_systimer_update(lower, delta, true);
 }
 
 /****************************************************************************
@@ -181,25 +209,7 @@ static void
 tricore_systimer_start_absolute(struct oneshot_lowerhalf_s *lower,
                                 clkcnt_t expected)
 {
-  struct tricore_systimer_lowerhalf_s *priv =
-    (struct tricore_systimer_lowerhalf_s *)lower;
-  irqstate_t flags;
-  uint64_t   current;
-  uint64_t   min_expected;
-
-  flags = up_irq_save();
-  current = tricore_systimer_get_time(priv->tbase);
-  if (priv->freerun_tbase)
-    {
-      expected = expected + current -
-                 tricore_systimer_get_time(priv->freerun_tbase);
-    }
-
-  min_expected = current + TRICORE_SYSTIMER_MIN_DELAY;
-  expected = expected < min_expected ? min_expected : expected;
-  tricore_systimer_set_timecmp(priv->tbase, expected);
-
-  up_irq_restore(flags);
+  tricore_systimer_update(lower, expected, false);
 }
 
 /****************************************************************************
