@@ -203,6 +203,16 @@ static int epoll_do_close(FAR struct file *filep)
           file_put(epn->filep);
         }
 
+      list_for_every_entry(&eph->teardown, epn, epoll_node_t, node)
+        {
+          file_put(epn->filep);
+        }
+
+      list_for_every_entry(&eph->oneshot, epn, epoll_node_t, node)
+        {
+          file_put(epn->filep);
+        }
+
       list_for_every_entry_safe(&eph->extend, epn, tmp, epoll_node_t, node)
         {
           list_delete(&epn->node);
