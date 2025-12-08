@@ -110,7 +110,7 @@ uint32_t g_devfreed;
  * Private Data
  ****************************************************************************/
 
-static mutex_t g_netdevices_lock = NXMUTEX_INITIALIZER;
+static rmutex_t g_netdevices_lock = NXRMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
@@ -200,6 +200,7 @@ static int get_ifindex(void)
   for (ndx = 0; ndx < MAX_IFINDEX; ndx++)
     {
       uint32_t bit = 1UL << ndx;
+
       if ((devset & bit) == 0)
         {
           /* Indicate that this index is in use */
@@ -233,7 +234,7 @@ static int get_ifindex(void)
 
 void netdev_list_lock(void)
 {
-  nxmutex_lock(&g_netdevices_lock);
+  nxrmutex_lock(&g_netdevices_lock);
 }
 
 /****************************************************************************
@@ -246,7 +247,7 @@ void netdev_list_lock(void)
 
 void netdev_list_unlock(void)
 {
-  nxmutex_unlock(&g_netdevices_lock);
+  nxrmutex_unlock(&g_netdevices_lock);
 }
 
 /****************************************************************************
