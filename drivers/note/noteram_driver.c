@@ -790,11 +790,9 @@ static int noteram_dump_header(FAR struct lib_outstream_s *s,
   int cpu = 0;
 #endif
 
-  note_get_taskname(pid, buf, TASK_NAME_SIZE);
-
   ret = lib_sprintf(s, "%8s-%-3u [%d] %3" PRIu64 ".%09lu: ",
-                    buf, get_pid(pid), cpu,
-                    (uint64_t)ts.tv_sec, ts.tv_nsec);
+                    note_get_taskname(pid, buf, TASK_NAME_SIZE),
+                    get_pid(pid), cpu, (uint64_t)ts.tv_sec, ts.tv_nsec);
 
   return ret;
 }
@@ -830,16 +828,15 @@ static int noteram_dump_sched_switch(FAR struct lib_outstream_s *s,
   current_priority = cctx->current_priority;
   next_priority = cctx->next_priority;
 
-  note_get_taskname(current_pid, current_buf, TASK_NAME_SIZE);
-  note_get_taskname(next_pid, next_buf, TASK_NAME_SIZE);
-
   ret = lib_sprintf(s, "sched_switch: prev_comm=%s prev_pid=%u "
                     "prev_prio=%u prev_state=%c ==> "
                     "next_comm=%s next_pid=%u next_prio=%u\n",
-                    current_buf, get_pid(current_pid),
-                    current_priority, get_task_state(cctx->current_state),
-                    next_buf, get_pid(next_pid),
-                    next_priority);
+                    note_get_taskname(current_pid, current_buf,
+                                      TASK_NAME_SIZE),
+                    get_pid(current_pid), current_priority,
+                    get_task_state(cctx->current_state),
+                    note_get_taskname(next_pid, next_buf, TASK_NAME_SIZE),
+                    get_pid(next_pid), next_priority);
 
   cctx->current_pid = cctx->next_pid;
   cctx->current_priority = cctx->next_priority;
@@ -942,11 +939,11 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
     case NOTE_START:
       {
-        note_get_taskname(pid, buf, TASK_NAME_SIZE);
         ret += noteram_dump_header(s, note, ctx);
         ret += lib_sprintf(s, "sched_wakeup_new: comm=%s pid=%d "
                            "target_cpu=%d\n",
-                           buf, get_pid(pid), cpu);
+                           note_get_taskname(pid, buf, TASK_NAME_SIZE),
+                           get_pid(pid), cpu);
       }
       break;
 
@@ -996,11 +993,12 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
              * until leaving the interrupt handler.
              */
 
-            note_get_taskname(cctx->next_pid, buf, TASK_NAME_SIZE);
             ret += noteram_dump_header(s, note, ctx);
             ret += lib_sprintf(s, "sched_waking: comm=%s "
                                "pid=%d target_cpu=%d\n",
-                               buf, get_pid(cctx->next_pid), cpu);
+                               note_get_taskname(cctx->next_pid, buf,
+                                                 TASK_NAME_SIZE),
+                               get_pid(cctx->next_pid), cpu);
             cctx->pendingswitch = true;
           }
       }

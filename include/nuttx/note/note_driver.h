@@ -191,11 +191,11 @@ int note_initialize(void);
  *   len - The length of the buffer
  *
  * Returned Value:
- *   None
+ *   Return name if task name can be retrieved, otherwise "<noname>"
  *
  ****************************************************************************/
 
-void note_get_taskname(pid_t pid, FAR char *buf, size_t len);
+FAR char *note_get_taskname(pid_t pid, FAR char *buf, size_t len);
 
 /****************************************************************************
  * Name: note_driver_register

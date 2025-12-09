@@ -2097,11 +2097,11 @@ void sched_note_filter_tag(FAR struct note_filter_named_tag_s *oldf,
  *   len - The length of the buffer
  *
  * Returned Value:
- *   None
+ *   Return name if task name can be retrieved, otherwise "<noname>"
  *
  ****************************************************************************/
 
-void note_get_taskname(pid_t pid, FAR char *buf, size_t len)
+FAR char *note_get_taskname(pid_t pid, FAR char *buf, size_t len)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
   FAR struct tcb_s *tcb = nxsched_get_tcb(pid);
@@ -2109,28 +2109,25 @@ void note_get_taskname(pid_t pid, FAR char *buf, size_t len)
   if (tcb != NULL)
     {
       strlcpy(buf, tcb->name, len);
+      return buf;
     }
-  else
-    {
+
 #  if defined(CONFIG_SCHED_INSTRUMENTATION_SWITCH) && \
       (CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0)
+  else
+    {
       FAR struct note_taskname_info_s *ti = note_find_taskname(pid);
 
       if (ti != NULL)
         {
           strlcpy(buf, ti->name, len);
+          return buf;
         }
-      else
-        {
-          strlcpy(buf, "<noname>", len);
-        }
-#  else
-      strlcpy(buf, "<noname>", len);
-#  endif
     }
-#else
-  strlcpy(buf, "<noname>", len);
+#  endif
 #endif
+
+  return "<noname>";
 }
 
 /****************************************************************************
