@@ -60,7 +60,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define RAMLOG_MAGIC_NUMBER 0x12345678
+#define RAMLOG_MAGIC_INIT  0x12340000
+#define RAMLOG_MAGIC_READY (0x56780000 | sizeof(struct ramlog_header_s))
 
 /****************************************************************************
  * Private Types
@@ -399,10 +400,10 @@ static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
     }
 
 #ifdef CONFIG_RAMLOG_SYSLOG
-  if (header->rl_magic != RAMLOG_MAGIC_NUMBER && priv == &g_sysdev)
+  if (header->rl_magic != RAMLOG_MAGIC_READY && priv == &g_sysdev)
     {
       memset(header, 0, sizeof(g_sysbuffer));
-      header->rl_magic = RAMLOG_MAGIC_NUMBER;
+      header->rl_magic = RAMLOG_MAGIC_READY;
     }
 #endif
 
