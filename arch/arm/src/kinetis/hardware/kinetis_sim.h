@@ -990,7 +990,7 @@
 #    define SIM_SCGC3_FLEXCAN1                (1 << 4)  /* Bit 4:  FlexCAN1 Clock Gate Control */
 #  endif
 #  if defined(KINETIS_SIM_HAS_SCGC3_NFC)
-#    define SIM_SCGC3_FLEXCAN1                (1 << 8)  /* Bit 8:  NFC Clock Gate Control */
+#    define SIM_SCGC3_NFC                     (1 << 8)  /* Bit 8:  NFC Clock Gate Control */
 #  endif
 #  if defined(KINETIS_SIM_HAS_SCGC3_SPI2)
 #    define SIM_SCGC3_SPI2                    (1 << 12) /* Bit 12: SPI2 Clock Gate Control */
