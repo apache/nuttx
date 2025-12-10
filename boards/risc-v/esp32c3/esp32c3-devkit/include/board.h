@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32C3_ESP32C3_GENERIC_INCLUDE_BOARD_H
-#define __BOARDS_RISCV_ESP32C3_ESP32C3_GENERIC_INCLUDE_BOARD_H
+#ifndef __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_INCLUDE_BOARD_H
+#define __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -38,4 +38,4 @@
 
 #define BUTTON_BOOT  9
 
-#endif /* __BOARDS_RISCV_ESP32C3_ESP32C3_GENERIC_INCLUDE_BOARD_H */
+#endif /* __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_INCLUDE_BOARD_H */
