@@ -27,6 +27,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <stddef.h>
+#include <string.h>
 
 #include <nuttx/streams.h>
 #include <nuttx/syslog/syslog.h>
@@ -43,7 +44,7 @@
 static int syslograwstream_flush(FAR struct lib_outstream_s *self)
 {
   FAR struct lib_syslograwstream_s *stream = (FAR void *)self;
-  int ret = OK;
+  ssize_t ret = OK;
 
   DEBUGASSERT(stream != NULL);
 
@@ -51,24 +52,48 @@ static int syslograwstream_flush(FAR struct lib_outstream_s *self)
 
   if (stream->offset > 0)
     {
+      ssize_t nbytes = stream->offset;
+      ssize_t written = 0;
+
       /* Yes write the buffered data */
+
+      if (stream->offset == CONFIG_SYSLOG_BUFSIZE + 1)
+        {
+          FAR char *newline;
+
+          nbytes = --stream->offset;
+          newline = memrchr(stream->buffer, '\n', nbytes);
+          if (newline != NULL)
+            {
+              nbytes = newline - stream->buffer + 1;
+            }
+        }
 
       do
         {
-          ssize_t nbytes = syslog_write(stream->buffer, stream->offset);
-          if (nbytes < 0)
+          ret = syslog_write(stream->buffer + written, nbytes - written);
+          if (ret < 0)
             {
-              ret = nbytes;
+              if (ret != -EINTR)
+                {
+                  break;
+                }
             }
           else
             {
-              ret = OK;
+              written += ret;
+              stream->offset -= ret;
             }
         }
-      while (ret == -EINTR);
+      while (nbytes != written);
+
+      if (ret >= 0 && stream->offset > 0)
+        {
+          memmove(stream->buffer, stream->buffer + nbytes,
+                  stream->offset);
+        }
     }
 
-  stream->offset = 0;
   return ret;
 }
 
@@ -92,6 +117,10 @@ static void syslograwstream_addchar(FAR struct lib_syslograwstream_s *stream,
 
   if (stream->offset >= CONFIG_SYSLOG_BUFSIZE)
     {
+      /* Mark the buffer to be flushed when ending with \n */
+
+      stream->offset = CONFIG_SYSLOG_BUFSIZE + 1;
+
       /* Yes.. then flush the buffer */
 
       syslograwstream_flush(&stream->common);
@@ -120,6 +149,10 @@ syslograwstream_addstring(FAR struct lib_syslograwstream_s *stream,
 
       if (stream->offset >= CONFIG_SYSLOG_BUFSIZE)
         {
+          /* Mark the buffer to be flushed when ending with \n */
+
+          stream->offset = CONFIG_SYSLOG_BUFSIZE + 1;
+
           /* Yes.. then flush the buffer */
 
           syslograwstream_flush(&stream->common);
