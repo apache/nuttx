@@ -29,6 +29,8 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
+
 #include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/spinlock.h>
@@ -91,6 +93,25 @@ ssize_t syslog_rpmsg_write(FAR syslog_channel_t *channel,
 #ifdef CONFIG_SYSLOG_RPMSG_SERVER
 int syslog_rpmsg_server_init(void);
 #endif
+
+static inline_function void syslog_rpmsg_dump(FAR const void *buffer)
+{
+  FAR const struct syslog_rpmsg_buffer_header_s *header =
+    (FAR const struct syslog_rpmsg_buffer_header_s *)buffer;
+  uint32_t head = header->head;
+  uint32_t tail = header->tail;
+  uint32_t size = header->size;
+
+  if (head > tail)
+    {
+      _alert("%.*s\n", (int)(head - tail), &header->buffer[tail]);
+    }
+  else if (head < tail)
+    {
+      _alert("%.*s%.*s\n", (int)(size - tail), &header->buffer[tail],
+             (int)head, &header->buffer[0]);
+    }
+}
 
 #ifdef __cplusplus
 }
