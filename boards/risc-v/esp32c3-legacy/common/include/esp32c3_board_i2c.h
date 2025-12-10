@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_I2C_H
-#define __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_I2C_H
+#ifndef __BOARDS_RISCV_ESP32C3_LEGACY_COMMON_INCLUDE_ESP32C3_BOARD_I2C_H
+#define __BOARDS_RISCV_ESP32C3_LEGACY_COMMON_INCLUDE_ESP32C3_BOARD_I2C_H
 
 /****************************************************************************
  * Included Files
@@ -73,4 +73,4 @@ int board_i2c_init(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_I2C_H */
+#endif /* __BOARDS_RISCV_ESP32C3_LEGACY_COMMON_INCLUDE_ESP32C3_BOARD_I2C_H */

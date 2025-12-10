@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32C3_ESP32C3_GENERIC_SRC_ESP32C3_GENERIC_H
-#define __BOARDS_RISCV_ESP32C3_ESP32C3_GENERIC_SRC_ESP32C3_GENERIC_H
+#ifndef __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_SRC_ESP32C3_DEVKIT_H
+#define __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_SRC_ESP32C3_DEVKIT_H
 
 /****************************************************************************
  * Included Files
@@ -118,4 +118,4 @@ int esp_gpio_init(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32C3_ESP32C3_GENERIC_SRC_ESP32C3_GENERIC_H */
+#endif /* __BOARDS_RISCV_ESP32C3_ESP32C3_DEVKIT_SRC_ESP32C3_DEVKIT_H */
