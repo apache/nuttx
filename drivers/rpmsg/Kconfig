@@ -138,11 +138,13 @@ config RPMSG_PANIC_DUMP_LEVEL
 
 config RPMSG_POOL_COUNT
 	int "rpmsg pool buffer count"
-	default 0
+	default 16 if ARCH_STACK_PROTECT || ARCH_KSTACK_PROTECT
+	default 0 if !(ARCH_STACK_PROTECT || ARCH_KSTACK_PROTECT)
 	---help---
 		This macro sets the count of rpmsg pool buffers, each pool
-		can be used to allocate rpmsg buffers. 0 means disable
-		rpmsg pool.
+		can be used to allocate rpmsg buffers. When stack protection
+		is enabled, must be at least 1 to avoid stack overflow. When
+		disabled, 0 means using stack allocation (alloca).
 
 config RPMSG_POOL_SIZE
 	int "rpmsg pool size"
