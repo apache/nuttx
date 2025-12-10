@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_SPIDEV_H
-#define __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_SPIDEV_H
+#ifndef __BOARDS_RISCV_ESP32C3_LEGACY_COMMON_INCLUDE_ESP32C3_BOARD_SPIDEV_H
+#define __BOARDS_RISCV_ESP32C3_LEGACY_COMMON_INCLUDE_ESP32C3_BOARD_SPIDEV_H
 
 /****************************************************************************
  * Included Files
@@ -73,4 +73,4 @@ int board_spidev_initialize(int bus);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_SPIDEV_H */
+#endif /* __BOARDS_RISCV_ESP32C3_LEGACY_COMMON_INCLUDE_ESP32C3_BOARD_SPIDEV_H */
