@@ -759,7 +759,7 @@ static void coredump_dump_dev(pid_t pid)
       return;
     }
 
-  _alert("Finish coredump, write %zu bytes to %s\n",
+  _alert("Finish coredump, write %" PRIdOFF " bytes to %s\n",
          g_devstream.common.nput, CONFIG_BOARD_COREDUMP_DEVPATH);
 }
 #endif
