@@ -1607,7 +1607,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
            * we risk a deadlock with other threads competing on IOBs.
            */
 
-          iob = net_iobtimedalloc(true, tcp_send_gettimeout(start, timeout));
+          iob = net_iobtimedalloc(false,
+                                  tcp_send_gettimeout(start, timeout));
           if (iob != NULL)
             {
               iob_free_chain(iob);

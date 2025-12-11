@@ -904,7 +904,7 @@ static bool rndis_allocrxreq(FAR struct rndis_dev_s *priv)
 
   /* Prepare buffer to receivce data from usb driver */
 
-  iob = iob_tryalloc(false);
+  iob = iob_tryalloc(true);
   if (iob == NULL)
     {
       return false;
@@ -1291,7 +1291,7 @@ static inline int rndis_recvpacket(FAR struct rndis_dev_s *priv,
                   iob_trycopyin(priv->rx_req->iob,
                                 &reqbuf[priv->current_rx_datagram_offset],
                                 reqlen - priv->current_rx_datagram_offset,
-                                -NET_LL_HDRLEN(&priv->netdev), false);
+                                -NET_LL_HDRLEN(&priv->netdev), true);
                 }
             }
           else
@@ -1316,7 +1316,7 @@ static inline int rndis_recvpacket(FAR struct rndis_dev_s *priv,
           if ((index + copysize) <= CONFIG_NET_ETH_PKTSIZE)
             {
               iob_trycopyin(priv->rx_req->iob, reqbuf, copysize,
-                            priv->rx_req->iob->io_pktlen, false);
+                            priv->rx_req->iob->io_pktlen, true);
             }
           else
             {

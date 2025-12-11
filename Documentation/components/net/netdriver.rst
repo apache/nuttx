@@ -229,7 +229,8 @@ Here is a guide to do so:
          */
 
         len = receive_data_into(devbuf);
-        netpkt_copyin(dev, pkt, devbuf + sizeof(struct <chip>_rxhead_s), len, 0);
+        netpkt_copyin(dev, pkt, devbuf + sizeof(struct <chip>_rxhead_s), len, 0,
+                      NETPKT_RX);
   #endif
       }
 

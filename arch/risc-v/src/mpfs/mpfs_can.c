@@ -678,7 +678,8 @@ static netpkt_t *mpfs_receive(struct netdev_lowerhalf_s *dev)
           if (pkt != NULL)
             {
               netpkt_copyin(dev, pkt, (uint8_t *)&cf,
-                           sizeof(struct can_frame), 0);
+                            sizeof(struct can_frame), 0,
+                            NETPKT_RX);
             }
 
           ninfo("Received CAN message (ID: 0x%X, DLC: %d) "
