@@ -52,6 +52,12 @@
 
 #define MTDLOG_MAGIC (0xa5a5)
 
+/* The minimum allowed block size. A size smaller than this
+ * will affect storage performance.
+ */
+
+#define MTDLOG_MIN_BLKSIZE (512)
+
 /* The maximum block sequence number, the number of blocks of
  * the mtdlog device must be less than this value.
  */
@@ -135,6 +141,7 @@ struct mtdlog_s
   uint32_t             progsize;   /* Size of one read/write block */
   uint32_t             blocksize;  /* Size of one logical block */
   uint32_t             nblocks;    /* Number of logical blocks */
+  uint32_t             erasesize;  /* Size of one erase block */
   uint8_t              erasestate; /* The erase value */
 };
 
@@ -311,8 +318,14 @@ static int mtdlog_write_block(FAR struct mtdlog_s *mtdlog,
                                        sizeof(struct mtdlog_block_s));
   uint8_t tmp_buf[tmp_buf_size];
 
-  ret = MTD_ERASE(mtdlog->mtd, blkidx, 1);
-  if (ret < 0)
+  /* Some mtd devices do not require erasing before writing,
+   * and thus do not have an erase interface.
+   */
+
+  ret = MTD_ERASE(mtdlog->mtd,
+                  blkidx * (mtdlog->blocksize / mtdlog->erasesize),
+                  (mtdlog->blocksize / mtdlog->erasesize));
+  if (ret < 0 && ret != -ENOSYS)
     {
       ferr("ERROR: MTD_ERASE failed: %d, %d\n", blkidx, ret);
       return ret;
@@ -818,7 +831,7 @@ static int mtdlog_init(FAR struct mtdlog_s *mtdlog)
       (mtdlog->progsize >= mtdlog->blocksize) ||
       (mtdlog->blocksize % mtdlog->progsize != 0))
     {
-      ferr("mtdlog: invalid parameters\n");
+      ferr("mtdlog: invalid mtd geometry parameters\n");
       return -EINVAL;
     }
 
@@ -1842,10 +1855,18 @@ int mtdlog_register(FAR const char *path, FAR struct mtd_dev_s *mtd)
     }
 
   mtdlog->mtd = mtd;
-  mtdlog->blocksize = geo.erasesize;
-  mtdlog->nblocks = geo.neraseblocks;
+  mtdlog->blocksize = CONFIG_MTDLOG_BLOCKSIZE_MULTIPLE * geo.erasesize;
+  mtdlog->nblocks = geo.neraseblocks / CONFIG_MTDLOG_BLOCKSIZE_MULTIPLE;
   mtdlog->progsize = geo.blocksize;
+  mtdlog->erasesize = geo.erasesize;
   spin_lock_init(&mtdlog->lock);
+
+  if (mtdlog->blocksize < MTDLOG_MIN_BLKSIZE)
+    {
+      mtdlog->blocksize = ALIGN_UP(MTDLOG_MIN_BLKSIZE, geo.erasesize);
+      mtdlog->nblocks = geo.neraseblocks /
+                        (mtdlog->blocksize / geo.erasesize);
+    }
 
   ret = mtdlog_init(mtdlog);
   if (ret < 0)

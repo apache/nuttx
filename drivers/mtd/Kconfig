@@ -231,6 +231,13 @@ config MTDLOG
 	---help---
 		Build support for a MTD LOG driver.
 
+config MTDLOG_BLOCKSIZE_MULTIPLE
+	int "Set MTD LOG blocksize multiple"
+	default 1
+	depends on MTDLOG
+	---help---
+		The size of a multiple of blocksize compared to erasize
+
 comment "MTD Device Drivers"
 
 menuconfig MTD_NAND
