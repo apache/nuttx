@@ -40,6 +40,16 @@
 #include <nuttx/sensors/gnss.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Only float data type supported now */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  error fixed-point data type not supported yet
+#endif
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 

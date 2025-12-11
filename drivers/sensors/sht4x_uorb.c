@@ -47,6 +47,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Only float data type supported now */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  error fixed-point data type not supported yet
+#endif
+
 #define SHT4X_CRC_INIT 0xFF /* Initial value of the calculated CRC. */
 #define SHT4X_CRC_POLY 0x31 /* CRC calculation polynomial. */
 

@@ -47,6 +47,16 @@
 #if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_L3GD20)
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Only float data type supported now */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  error fixed-point data type not supported yet
+#endif
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
