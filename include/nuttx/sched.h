@@ -661,11 +661,13 @@ struct tcb_s
 
   /* POSIX Signal Control Fields ********************************************/
 
+#ifndef CONFIG_DISABLE_SIGNALS
   sigset_t   sigprocmask;                /* Signals that are blocked        */
   sigset_t   sigwaitmask;                /* Waiting for pending signals     */
   sq_queue_t sigpendactionq;             /* List of pending signal actions  */
   sq_queue_t sigpostedq;                 /* List of posted signals          */
   siginfo_t  *sigunbinfo;                /* Signal info when task unblocked */
+#endif
 
   /* Robust mutex support ***************************************************/
 
@@ -712,7 +714,10 @@ struct tcb_s
    * to be processed.
    */
 
+#ifndef CONFIG_DISABLE_SIGNALS
   sig_deliver_t sigdeliver;
+#endif
+
 #if CONFIG_TASK_NAME_SIZE > 0
   char name[CONFIG_TASK_NAME_SIZE + 1];  /* Task name (with NUL terminator) */
 #endif
