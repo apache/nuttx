@@ -170,3 +170,8 @@ libs/libc/tre-mem.c
  * | 0  | 1  | x  | EXT  |  RIN    |   IN    |     off       |
    * FIFO mode, INT1 , THS 0
  *   REG03[3] ITERM Termination Current Limit  128-1024mA Default: 256mA
+  FAR usbdev_fs_waiter_sem_t *sems;       /* List of blocking request */
+  FAR usbdev_fs_waiter_sem_t *cur_sem = fs_ep->sems;
+  fs_ep->sems = NULL;
+            fs_ep, &fs_ep->sems, queue);
+            fs_ep, &fs_ep->sems, &fs_ep->reqq);
