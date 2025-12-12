@@ -118,4 +118,8 @@ if(CONFIG_SMP)
   list(APPEND SRCS sched_smp.c)
 endif()
 
+if(CONFIG_HRTIMER)
+  list(APPEND SRCS sched_processhrtimer.c)
+endif()
+
 target_sources(sched PRIVATE ${SRCS})
