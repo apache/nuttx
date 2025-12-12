@@ -53,9 +53,13 @@ void obstack_free(FAR struct obstack *h, FAR void *object)
 
   while (h->chunk)
     {
-      if (object >=
-          (FAR void *)((FAR char *)&h->chunk + sizeof(struct _obstack_chunk))
-          && object < (FAR void *)h->chunk->limit)
+      /* Object has to be after chunk + chunk' header. We can use pointer
+       * arithmetic here as h->chunk + 1 is the same as
+       * (FAR char *)h->chunk + sizeof(struct _obstack_chunk)
+       */
+
+      if (object >= (FAR void *)(h->chunk + 1)
+          && object <= (FAR void *)h->chunk->limit)
         {
           /* The object is in this chunk so just move object base.
            * Note: this keeps the last chunk allocated. This is desirable
