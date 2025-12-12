@@ -470,7 +470,7 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
  *
  ****************************************************************************/
 
-void nxsched_tick_expiration(clock_t ticks)
+clock_t nxsched_tick_expiration(clock_t ticks)
 {
   clock_t elapsed;
   clock_t nexttime;
@@ -491,8 +491,14 @@ void nxsched_tick_expiration(clock_t ticks)
 
   nexttime = nxsched_timer_process(ticks, elapsed, false);
 
+#ifdef CONFIG_HRTIMER
+  elapsed = nexttime;
+#else
   elapsed = nxsched_timer_start(ticks, nexttime);
+#endif
   atomic_set(&g_timer_interval, elapsed);
+
+  return nexttime;
 }
 
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
