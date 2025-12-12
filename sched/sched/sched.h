@@ -37,6 +37,7 @@
 #include <nuttx/queue.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/spinlock.h>
+#include "hrtimer/hrtimer.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -306,6 +307,10 @@ extern volatile spinlock_t g_cpu_tasklistlock;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+#if defined(CONFIG_HRTIMER) && defined(CONFIG_SCHED_TICKLESS)
+void nxsched_hrtimer_start(clock_t ticks);
+#endif
 
 int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
                     FAR void *stack_addr, int stack_size, main_t entry,

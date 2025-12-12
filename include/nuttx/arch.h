@@ -2442,6 +2442,10 @@ void up_ndelay(unsigned long nanoseconds);
 void nxsched_process_timer(void);
 #endif
 
+#ifdef CONFIG_HRTIMER
+void nxsched_process_hrtimer(void);
+#endif
+
 /****************************************************************************
  * Name:  nxsched_timer_expiration
  *

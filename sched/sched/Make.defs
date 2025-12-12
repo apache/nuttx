@@ -100,6 +100,10 @@ ifeq ($(CONFIG_SMP),y)
 CSRCS += sched_smp.c
 endif
 
+ifeq ($(CONFIG_HRTIMER),y)
+CSRCS += sched_processhrtimer.c
+endif
+
 # Include sched build support
 
 DEPPATH += --dep-path sched
