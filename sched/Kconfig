@@ -2020,3 +2020,9 @@ config CUSTOM_SEMAPHORE_MAXVALUE
 	---help---
 		Enable to support custom max value for semaphores.
 		When this option is enabled, the max value of a semaphore can be set
+
+config HRTIMER
+	bool "High resolution timer support"
+	default n
+	---help---
+		Enable to support high resolution timer
