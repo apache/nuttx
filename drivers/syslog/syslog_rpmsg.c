@@ -59,7 +59,6 @@
 #define SYSLOG_RPMSG_SPACE(p)       ((p)->size - 1 - SYSLOG_RPMSG_COUNT(p))
 #define SYSLOG_RPMSG_HEADOFF(p)     ((p)->head & ((p)->size -1))
 #define SYSLOG_RPMSG_TAILOFF(p)     ((p)->tail & ((p)->size -1))
-#define SYSLOG_RPMSG_FLUSHOFF(p)    ((p)->flush & ((p)->size -1))
 
 /****************************************************************************
  * Private Types
@@ -69,7 +68,6 @@ struct syslog_rpmsg_s
 {
   volatile size_t       head;       /* The head index (where data is added) */
   volatile size_t       tail;       /* The tail index (where data is removed) */
-  volatile size_t       flush;      /* The tail index of flush (where data is removed) */
   size_t                size;       /* Size of the RAM buffer */
   FAR char              *buffer;    /* Circular RAM buffer */
   struct work_s         work;       /* Used for deferred callback work */
@@ -225,7 +223,7 @@ static void syslog_rpmsg_addbuf(FAR struct syslog_rpmsg_s *priv,
     {
       bool ret = false;
 
-      if (!priv->flush && !up_interrupt_context() && !sched_idletask())
+      if (!up_interrupt_context() && !sched_idletask())
         {
           /* Unlock before entering syslog_rpmsg_transfer,
            * it is already locked internally
@@ -261,16 +259,6 @@ static void syslog_rpmsg_addbuf(FAR struct syslog_rpmsg_s *priv,
       priv->tail = priv->head - priv->size;
       priv->buffer[SYSLOG_RPMSG_TAILOFF(priv)] = 0;
       priv->tail++;
-    }
-
-  if (priv->flush)
-    {
-      priv->flush += len;
-      spin_unlock_irqrestore(&priv->lock, flags);
-#if defined(CONFIG_ARCH_LOWPUTC) && !defined(CONFIG_SYSLOG_DEFAULT)
-      up_nputs(buffer, len);
-#endif
-      return;
     }
 
   if (!priv->suspend && is_rpmsg_ept_ready(&priv->ept))
@@ -400,44 +388,6 @@ int syslog_rpmsg_putc(FAR syslog_channel_t *channel, int ch)
 
   syslog_rpmsg_addbuf(&g_syslog_rpmsg, &tmp, 1);
   return ch;
-}
-
-int syslog_rpmsg_flush(FAR syslog_channel_t *channel)
-{
-  FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
-  irqstate_t flags;
-  size_t remaining;
-  size_t len;
-  size_t off;
-
-  flags = spin_lock_irqsave(&priv->lock);
-
-  if (priv->head > priv->flush &&
-      priv->head - priv->flush > priv->size)
-    {
-      priv->flush = priv->tail;
-    }
-
-  UNUSED(remaining);
-  len = priv->head - priv->flush;
-  off = SYSLOG_RPMSG_FLUSHOFF(priv);
-  remaining = priv->size - off;
-  priv->flush += len;
-  spin_unlock_irqrestore(&priv->lock, flags);
-
-#if defined(CONFIG_ARCH_LOWPUTC) && !defined(CONFIG_SYSLOG_DEFAULT)
-  if (len > 0 && len > remaining)
-    {
-      up_nputs(&priv->buffer[off], remaining);
-      up_nputs(priv->buffer, len - remaining);
-    }
-  else if (len > 0)
-    {
-      up_nputs(&priv->buffer[off], len);
-    }
-#endif
-
-  return OK;
 }
 
 ssize_t syslog_rpmsg_write(FAR syslog_channel_t *channel,

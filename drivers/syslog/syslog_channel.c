@@ -106,7 +106,7 @@ static const struct syslog_channel_ops_s g_rpmsg_channel_ops =
 {
   syslog_rpmsg_putc,
   syslog_rpmsg_putc,
-  syslog_rpmsg_flush,
+  NULL,
   syslog_rpmsg_write,
   syslog_rpmsg_write
 };
