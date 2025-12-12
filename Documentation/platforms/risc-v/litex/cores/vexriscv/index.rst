@@ -4,6 +4,15 @@ Vexriscv Core
 
 The vexriscv core only supports standard "Flat builds", consisting of a single binary.
 
+Configuration
+-------------
+
+For vexriscv, the linux CPU variant is required.  Please consult the appropriate board
+documentation for flashing gateware.
+
+If you use the secure CPU variant, you may encounter a kernel panic on startup - please see
+https://github.com/apache/nuttx/pull/17494 for an example.
+
 Building
 --------
 

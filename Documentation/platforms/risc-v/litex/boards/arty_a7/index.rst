@@ -72,7 +72,7 @@ Flashing
 .. code:: console
 
    $ cd litex-boards/litex_boards/targets
-   $ ./digilent_arty.py --with-ethernet --with-sdcard --uart-baudrate 1000000 --cpu-type=vexriscv --cpu-variant=secure --build --load --flash
+   $ ./digilent_arty.py --with-ethernet --with-sdcard --uart-baudrate 1000000 --cpu-type=vexriscv --cpu-variant=linux --build --load --flash
 
 
 2. Next, set up a TFTP server on your host machine, copy ``nuttx.bin`` to your
