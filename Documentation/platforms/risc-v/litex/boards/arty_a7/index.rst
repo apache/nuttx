@@ -58,11 +58,16 @@ You will need to download the tool-chain for this board:
 
    $ curl https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2019.08.0-x86_64-linux-ubuntu14.tar.gz
 
-Flashing
+vexriscv
 ========
 
+This section is for the vexriscv softcore fpga gateware.
+
+Flashing
+--------
+
 1. Follow the instructions on https://github.com/enjoy-digital/litex to build
-   the vexriscv softcore fpga gateware and flash to Arty A7 board:
+   the vexriscv and flash to Arty A7 board:
 
 .. code:: console
 
@@ -86,7 +91,7 @@ Flashing
    You should then see the NSH prompt.
 
 Configurations
-==============
+--------------
 
 You can configure NuttX for this board using:
 
@@ -97,6 +102,23 @@ You can configure NuttX for this board using:
 Where ``<config>`` is the name of one of the configurations listed below.
 
 nsh
----
+^^^
 
 A simple configuration with the NSH shell.
+
+
+VexRISCV_SMP
+============
+
+This section is for the VexRISCV_SMP softcore fpga gateware.
+
+1. For VexRISCV_SMP cores on an Arty A7, you can follow the instructions on
+   https://github.com/enjoy-digital/litex to build the vexriscv_smp softcore fpga gateware:
+
+.. code:: console
+
+   $ cd litex-boards/litex_boards/targets
+   $ ./digilent_arty.py --with-ethernet --with-sdcard --uart-baudrate 1000000 --cpu-type=vexriscv_smp --cpu-variant=linux --with-rvc --cpu-count 8 --build --load --flash
+
+
+Please consult the VexRISCV_SMP core documentation for more information about setting up a two-pass build.
