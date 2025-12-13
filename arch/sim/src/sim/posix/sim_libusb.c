@@ -292,7 +292,7 @@ static void host_libusb_isotransfer_cb(struct libusb_transfer *transfer)
   size_t length;
   int i;
 
-  if (!transfer)
+  if (transfer == NULL)
     {
       ERROR("host_libusb_isotransfer_cb() fail: %s\n",
             host_uninterruptible(libusb_strerror,
@@ -498,7 +498,7 @@ host_libusb_isotransfer(struct host_libusb_hostdev_s *dev, uint8_t addr,
   max_packet_size = datareq->maxpacketsize;
   num_iso_pack = (datareq->len + max_packet_size - 1) / max_packet_size;
   transfer = host_uninterruptible(libusb_alloc_transfer, num_iso_pack);
-  if (!transfer)
+  if (transfer == NULL)
     {
       ERROR("libusb_alloc_transfer() fail: %s\n",
             host_uninterruptible(libusb_strerror,
