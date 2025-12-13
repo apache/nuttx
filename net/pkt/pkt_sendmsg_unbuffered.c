@@ -37,6 +37,7 @@
 #include <debug.h>
 
 #include <arch/irq.h>
+#include <netpacket/packet.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/net/netdev.h>
@@ -65,6 +66,7 @@ struct send_s
   FAR const uint8_t      *snd_buffer;  /* Points to the buffer of data to send */
   size_t                  snd_buflen;  /* Number of bytes in the buffer to send */
   ssize_t                 snd_sent;    /* The number of bytes sent */
+  FAR struct sockaddr_ll *addr;        /* The address of the destination */
 };
 
 /****************************************************************************
@@ -108,8 +110,16 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
         {
           /* Copy the packet data into the device packet buffer and send it */
 
-          int ret = devif_send(dev, pstate->snd_buffer,
-                               pstate->snd_buflen, -NET_LL_HDRLEN(dev));
+          int ret;
+          int offset = -NET_LL_HDRLEN(dev);
+
+          if (pstate->snd_sock->s_type == SOCK_DGRAM)
+            {
+              offset = 0;
+            }
+
+          ret = devif_send(dev, pstate->snd_buffer,
+                           pstate->snd_buflen, offset);
           if (ret <= 0)
             {
               pstate->snd_sent = ret;
@@ -119,6 +129,15 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           dev->d_len                = dev->d_sndlen;
           pstate->snd_sent          = pstate->snd_buflen;
           pstate->snd_conn->pendiob = dev->d_iob;
+
+          if (pstate->snd_sock->s_type == SOCK_DGRAM)
+            {
+              FAR struct eth_hdr_s *ethhdr = NETLLBUF;
+              memcpy(ethhdr->dest, pstate->addr->sll_addr, ETHER_ADDR_LEN);
+              memcpy(ethhdr->src, &dev->d_mac.ether, ETHER_ADDR_LEN);
+              ethhdr->type = pstate->addr->sll_protocol;
+              dev->d_len += NET_LL_HDRLEN(dev);
+            }
 
           /* Make sure no ARP request overwrites this ARP request.  This
            * flag will be cleared in arp_out().
@@ -171,49 +190,27 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 {
   FAR const void *buf = msg->msg_iov->iov_base;
   size_t len = msg->msg_iov->iov_len;
+  FAR struct sockaddr_ll *addr = msg->msg_name;
   FAR struct net_driver_s *dev;
+  FAR struct pkt_conn_s *conn;
   struct send_s state;
   int ret = OK;
 
-  /* Validity check, only single iov supported */
+  /* Validity check */
 
-  if (msg->msg_iovlen != 1)
+  ret = pkt_sendmsg_is_valid(psock, msg, &dev);
+  if (ret != OK)
     {
-      return -ENOTSUP;
+      return ret;
     }
 
-  if (msg->msg_name != NULL)
+  conn = psock->s_conn;
+
+  if (psock->s_type == SOCK_DGRAM)
     {
-      /* pkt_sendto */
+      /* Set the interface index for devif_poll can match the conn */
 
-      nerr("ERROR: sendto() not supported for raw packet sockets\n");
-      return -EAFNOSUPPORT;
-    }
-
-  /* Verify that the sockfd corresponds to valid, allocated socket */
-
-  if (psock == NULL || psock->s_conn == NULL)
-    {
-      return -EBADF;
-    }
-
-  /* Only SOCK_RAW is supported */
-
-  if (psock->s_type != SOCK_RAW)
-    {
-      /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and
-       * no peer address is set.
-       */
-
-      return -EDESTADDRREQ;
-    }
-
-  /* Get the device driver that will service this transfer */
-
-  dev = pkt_find_device(psock->s_conn);
-  if (dev == NULL)
-    {
-      return -ENODEV;
+      conn->ifindex = addr->sll_ifindex;
     }
 
   /* Perform the send operation */
@@ -229,12 +226,11 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   state.snd_sock   = psock;          /* Socket descriptor to use */
   state.snd_buflen = len;            /* Number of bytes to send */
   state.snd_buffer = buf;            /* Buffer to send from */
-  state.snd_conn   = psock->s_conn;  /* Connection info */
+  state.snd_conn   = conn;           /* Connection info */
+  state.addr       = addr;           /* Destination address */
 
   if (len > 0)
     {
-      FAR struct pkt_conn_s *conn = psock->s_conn;
-
       /* Allocate resource to receive a callback */
 
       state.snd_cb = pkt_callback_alloc(dev, conn);

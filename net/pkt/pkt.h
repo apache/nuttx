@@ -197,6 +197,26 @@ FAR struct pkt_conn_s *pkt_active(FAR struct net_driver_s *dev);
 FAR struct pkt_conn_s *pkt_nextconn(FAR struct pkt_conn_s *conn);
 
 /****************************************************************************
+ * Name: pkt_sendmsg_is_valid
+ *
+ * Description:
+ *   Validate the sendmsg() parameters for a packet socket.
+ *
+ * Input Parameters:
+ *   psock - The socket structure to validate
+ *   msg   - The message header containing the data to be sent
+ *   dev   - The network device to be used to send the packet
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int pkt_sendmsg_is_valid(FAR struct socket *psock,
+                         FAR const struct msghdr *msg,
+                         FAR struct net_driver_s **dev);
+
+/****************************************************************************
  * Name: pkt_callback
  *
  * Description:

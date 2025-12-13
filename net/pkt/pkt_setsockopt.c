@@ -82,9 +82,9 @@ int pkt_setsockopt(FAR struct socket *psock, int level, int option,
       return -ENOPROTOOPT;
     }
 
-  if (psock->s_type != SOCK_RAW)
+  if (psock->s_type != SOCK_DGRAM && psock->s_type != SOCK_RAW)
     {
-      nerr("ERROR:  Not a RAW PKT socket\n");
+      nerr("ERROR:  Not a valid PKT socket\n");
       return -ENOTCONN;
     }
 

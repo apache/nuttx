@@ -61,6 +61,7 @@ struct pkt_recvfrom_s
   sem_t                        pr_sem;     /* Semaphore signals recv completion */
   ssize_t                      pr_recvlen; /* The received length */
   int                          pr_result;  /* Success:OK, failure:negated errno */
+  uint8_t                      pr_type;    /* Protocol type */
 };
 
 /****************************************************************************
@@ -152,7 +153,7 @@ static inline void pkt_add_recvlen(FAR struct pkt_recvfrom_s *pstate,
 static void pkt_recvfrom_newdata(FAR struct net_driver_s *dev,
                                  FAR struct pkt_recvfrom_s *pstate)
 {
-  unsigned int offset;
+  unsigned int offset = 0;
   size_t recvlen;
 
 #ifdef CONFIG_NET_TIMESTAMP
@@ -169,7 +170,10 @@ static void pkt_recvfrom_newdata(FAR struct net_driver_s *dev,
 
   /* Copy the new packet data into the user buffer */
 
-  offset = (dev->d_appdata - dev->d_iob->io_data) - dev->d_iob->io_offset;
+  if (pstate->pr_type == SOCK_RAW)
+    {
+      offset = -NET_LL_HDRLEN(dev);
+    }
 
   recvlen = iob_copyout(pstate->pr_msg->msg_iov->iov_base,
                         dev->d_iob, recvlen, offset);
@@ -270,6 +274,7 @@ static uint16_t pkt_recvfrom_eventhandler(FAR struct net_driver_s *dev,
  *   conn     The PKT connection of interest
  *   msg      Receive info and buffer for receive data
  *   pstate   A pointer to the state structure to be initialized
+ *   type     Protocol type
  *
  * Returned Value:
  *   None
@@ -280,7 +285,8 @@ static uint16_t pkt_recvfrom_eventhandler(FAR struct net_driver_s *dev,
 
 static void pkt_recvfrom_initialize(FAR struct pkt_conn_s *conn,
                                     FAR struct msghdr *msg,
-                                    FAR struct pkt_recvfrom_s *pstate)
+                                    FAR struct pkt_recvfrom_s *pstate,
+                                    uint8_t type)
 {
   /* Initialize the state structure. */
 
@@ -289,6 +295,7 @@ static void pkt_recvfrom_initialize(FAR struct pkt_conn_s *conn,
 
   pstate->pr_conn = conn;
   pstate->pr_msg  = msg;
+  pstate->pr_type = type;
 }
 
 /* The only un-initialization that has to be performed is destroying the
@@ -365,6 +372,7 @@ static inline void pkt_readahead(FAR struct pkt_recvfrom_s *pstate)
   FAR struct pkt_conn_s *conn = pstate->pr_conn;
   FAR struct iob_s *iob;
   int recvlen;
+  int offset = 0;
 
   /* Check there is any packets already buffered in a read-ahead buffer. */
 
@@ -394,8 +402,23 @@ static inline void pkt_readahead(FAR struct pkt_recvfrom_s *pstate)
 
       /* Copy to user */
 
+      if (pstate->pr_type == SOCK_DGRAM)
+        {
+          FAR struct net_driver_s *dev = pkt_find_device(conn);
+          if (dev != NULL)
+            {
+              /* For SOCK_DGRAM, we need skip the l2 header */
+
+              offset = NET_LL_HDRLEN(dev);
+            }
+          else
+            {
+              offset = sizeof(struct eth_hdr_s);
+            }
+        }
+
       recvlen = iob_copyout(pstate->pr_msg->msg_iov->iov_base, iob,
-                            pstate->pr_msg->msg_iov->iov_len, 0);
+                            pstate->pr_msg->msg_iov->iov_len, offset);
 
       /* Update the accumulated size of the data read */
 
@@ -471,7 +494,7 @@ ssize_t pkt_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       return -ENOTSUP;
     }
 
-  if (psock->s_type != SOCK_RAW)
+  if (psock->s_type != SOCK_DGRAM && psock->s_type != SOCK_RAW)
     {
       nerr("ERROR: Unsupported socket type: %d\n", psock->s_type);
       ret = -ENOSYS;
@@ -483,7 +506,7 @@ ssize_t pkt_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
    * locked because we don't want anything to happen until we are ready.
    */
 
-  pkt_recvfrom_initialize(conn, msg, &state);
+  pkt_recvfrom_initialize(conn, msg, &state, psock->s_type);
 
   net_lock();
 
