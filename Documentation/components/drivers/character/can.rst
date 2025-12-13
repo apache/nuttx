@@ -2,8 +2,9 @@
 CAN Drivers
 ===========
 
-NuttX supports only a very low-level CAN driver. This driver
-supports only the data exchange and does not include any
+NuttX supports character device CAN a very low-level CAN driver and
+SocketCAN as a more high level (and more overhead) option.
+This driver supports only the data exchange and does not include any
 high-level CAN protocol. The NuttX CAN driver is split into two
 parts:
 

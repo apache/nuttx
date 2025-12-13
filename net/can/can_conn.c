@@ -152,6 +152,27 @@ void can_free(FAR struct can_conn_s *conn)
 
   dq_rem(&conn->sconn.node, &g_active_can_connections);
 
+#ifdef CONFIG_NET_CAN_WRITE_BUFFERS
+  /* Free the write queue */
+
+  iob_free_queue(&conn->write_q);
+
+#   if CONFIG_NET_SEND_BUFSIZE > 0
+  /* Notify the send buffer available */
+
+  can_sendbuffer_notify(conn);
+#   endif /* CONFIG_NET_SEND_BUFSIZE */
+
+#endif
+
+#if CONFIG_NET_SEND_BUFSIZE > 0
+  nxsem_destroy(&conn->sndsem);
+#endif
+
+  /* Free the readahead queue */
+
+  iob_free_queue(&conn->readahead);
+
   /* Free the connection. */
 
   NET_BUFPOOL_FREE(g_can_connections, conn);
@@ -203,7 +224,8 @@ FAR struct can_conn_s *can_active(FAR struct net_driver_s *dev,
 {
   while ((conn = can_nextconn(conn)) != NULL)
     {
-      if (conn->dev == NULL || conn->dev == dev)
+      if ((conn->dev == NULL && _SS_ISBOUND(conn->sconn.s_flags)) ||
+          conn->dev == dev)
         {
           break;
         }

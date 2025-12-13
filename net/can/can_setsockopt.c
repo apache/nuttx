@@ -207,6 +207,35 @@ int can_setsockopt(FAR struct socket *psock, int level, int option,
         }
 #endif
 
+#if CONFIG_NET_SEND_BUFSIZE > 0
+      case SO_SNDBUF:
+        {
+          int buffersize;
+
+          /* Verify options */
+
+          if (value_len != sizeof(int))
+            {
+              return -EINVAL;
+            }
+
+          buffersize = *(FAR int *)value;
+          if (buffersize < 0)
+            {
+              return -EINVAL;
+            }
+
+#   if CONFIG_NET_MAX_SEND_BUFSIZE > 0
+          /* Limit the size of the send buffer */
+
+          buffersize = MIN(buffersize, CONFIG_NET_MAX_SEND_BUFSIZE);
+#   endif
+
+          conn->sndbufs = buffersize;
+          break;
+        }
+#endif
+
       default:
         nerr("ERROR: Unrecognized CAN option: %d\n", option);
         ret = -ENOPROTOOPT;
