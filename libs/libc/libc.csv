@@ -274,7 +274,7 @@
 "sigemptyset","signal.h","","int","FAR sigset_t *"
 "sigfillset","signal.h","","int","FAR sigset_t *"
 "sigismember","signal.h","","int","FAR const sigset_t *","int"
-"signal","signal.h","","_sa_handler_t","int","_sa_handler_t"
+"signal","signal.h","!defined(CONFIG_DISABLE_SIGNALS)","_sa_handler_t","int","_sa_handler_t"
 "sleep","unistd.h","","unsigned int","unsigned int"
 "snprintf","stdio.h","","int","FAR char *","size_t","FAR const IPTR char *","..."
 "sprintf","stdio.h","","int","FAR char *","FAR const IPTR char *","..."

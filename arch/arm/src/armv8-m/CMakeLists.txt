@@ -34,16 +34,18 @@ set(SRCS
     arm_memfault.c
     arm_perf.c
     arm_sau.c
-    arm_schedulesigaction.c
     arm_securefault.c
     arm_secure_irq.c
-    arm_sigdeliver.c
     arm_svcall.c
     arm_systemreset.c
     arm_tcbinfo.c
     arm_trigger_irq.c
     arm_usagefault.c
     arm_vectors.c)
+
+if(NOT CONFIG_DISABLE_SIGNALS)
+  list(APPEND SRCS arm_sigdeliver.c arm_schedulesigaction.c)
+endif()
 
 if(CONFIG_ARMV8M_SYSTICK)
   list(APPEND SRCS arm_systick.c)

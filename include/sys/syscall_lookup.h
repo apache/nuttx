@@ -154,8 +154,10 @@ SYSCALL_LOOKUP(nxsem_wait_slow,            1)
 
 SYSCALL_LOOKUP(kill,                       2)
 SYSCALL_LOOKUP(tgkill,                     3)
+#ifndef CONFIG_DISABLE_SIGNALS
 SYSCALL_LOOKUP(sigaction,                  3)
 SYSCALL_LOOKUP(sigpending,                 1)
+#endif
 SYSCALL_LOOKUP(sigprocmask,                3)
 SYSCALL_LOOKUP(sigqueue,                   3)
 SYSCALL_LOOKUP(sigsuspend,                 1)
