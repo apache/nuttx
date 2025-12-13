@@ -87,6 +87,8 @@
 	ret
 
 def_fn ARCH_LIBCFUN(strnlen)
+	.cfi_sections .debug_frame
+	.cfi_startproc
 	cbz	limit, .Lhit_limit
 	mov	zeroones, #REP8_01
 	bic	src, srcin, #15
@@ -189,6 +191,7 @@ def_fn ARCH_LIBCFUN(strnlen)
 	csinv	data1, data1, xzr, le
 	csel	data2, data2, data2a, le
 	b	.Lrealigned
+	.cfi_endproc
 	.size	ARCH_LIBCFUN(strnlen), . - .Lstart	/* Include pre-padding in size.  */
 
 #endif

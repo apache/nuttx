@@ -22,7 +22,7 @@
 
 set(SRCS)
 
-if(CONFIG_LIBC_ARCH_ELF_64BIT)
+if(CONFIG_LIBC_ARCH_ELF)
   list(APPEND SRCS arch_elf.c)
 endif()
 

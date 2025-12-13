@@ -26,6 +26,7 @@ config ARCH_ARM
 config ARCH_ARM64
 	bool "ARM64"
 	select ALARM_ARCH
+	select ARCH_64BIT
 	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_FORK if !BUILD_KERNEL
@@ -39,7 +40,6 @@ config ARCH_ARM64
 	select ARCH_HAVE_THREAD_LOCAL
 	select ARCH_HAVE_PERF_EVENTS
 	select ONESHOT
-	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	select ONESHOT_COUNT
 	---help---
 		The ARM64 architectures
@@ -135,6 +135,7 @@ config ARCH_X86
 
 config ARCH_X86_64
 	bool "x86_64"
+	select ARCH_64BIT
 	select ARCH_HAVE_TCBINFO
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
@@ -144,7 +145,6 @@ config ARCH_X86_64
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_THREAD_LOCAL
 	select PCI_LATE_DRIVERS_REGISTER if PCI
-	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	select ARCH_TOOLCHAIN_GNU
 	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_FORK if !BUILD_KERNEL
@@ -370,6 +370,12 @@ config ARCH_INSTRUMENT_ALL
 		to register the instrument function.
 
 comment "Architecture Options"
+
+config ARCH_64BIT
+	bool
+	default n
+	---help---
+		Indicates that the current architecture is 64-bit.
 
 config ARCH_NOINTC
 	bool

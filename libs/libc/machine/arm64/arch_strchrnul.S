@@ -81,6 +81,8 @@
 	.endm
 
 def_fn ARCH_LIBCFUN(strchrnul)
+	.cfi_sections .debug_frame
+	.cfi_startproc
 	/* Magic constant 0x40100401 to allow us to identify which lane
 	   matches the termination condition.  */
 	mov	wtmp2, #0x0401
@@ -147,6 +149,7 @@ def_fn ARCH_LIBCFUN(strchrnul)
 	add	result, src, tmp1, lsr #1
 	ret
 
+	.cfi_endproc
 	.size	ARCH_LIBCFUN(strchrnul), . - ARCH_LIBCFUN(strchrnul)
 
 #endif

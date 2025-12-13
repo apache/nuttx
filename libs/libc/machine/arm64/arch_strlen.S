@@ -114,6 +114,8 @@
 	   boundary.  */
 
 def_fn ARCH_LIBCFUN(strlen) p2align=6
+	.cfi_sections .debug_frame
+	.cfi_startproc
 	and	tmp1, srcin, MIN_PAGE_SIZE - 1
 	mov	zeroones, REP8_01
 	cmp	tmp1, MIN_PAGE_SIZE - 16
@@ -243,6 +245,7 @@ L(page_cross):
 	csel	data2, data2, tmp2, eq
 	b	L(page_cross_entry)
 
+	.cfi_endproc
 	.size	ARCH_LIBCFUN(strlen), . - ARCH_LIBCFUN(strlen)
 
 #endif

@@ -38,6 +38,8 @@
 	.global ARCH_LIBCFUN(memmove)
 	.type	ARCH_LIBCFUN(memmove), %function
 ARCH_LIBCFUN(memmove):
+	.cfi_sections .debug_frame
+	.cfi_startproc
 	cmp	r0, r1
 	push	{r4}
 	bls	3f
@@ -67,6 +69,7 @@ ARCH_LIBCFUN(memmove):
 	bne	4b
 	pop	{r4}
 	bx	lr
+	.cfi_endproc
 	.size ARCH_LIBCFUN(memmove), . - ARCH_LIBCFUN(memmove)
 
 #endif

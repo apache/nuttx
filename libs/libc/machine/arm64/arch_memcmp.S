@@ -95,6 +95,8 @@
         .endm
 
 def_fn ARCH_LIBCFUN(memcmp) p2align=6
+	.cfi_sections .debug_frame
+	.cfi_startproc
 	subs	limit, limit, 8
 	b.lo	L(less8)
 
@@ -197,6 +199,7 @@ L(byte_loop):
 	sub	result, data1w, data2w
 	ret
 
+	.cfi_endproc
 	.size	ARCH_LIBCFUN(memcmp), . - ARCH_LIBCFUN(memcmp)
 
 #endif

@@ -94,6 +94,8 @@
 
 def_fn ARCH_LIBCFUN(memset) p2align=6
 
+	.cfi_sections .debug_frame
+	.cfi_startproc
 	dup	v0.16B, valw
 	add	dstend, dstin, count
 
@@ -243,6 +245,7 @@ L(zva_other):
 	sub	dst, dst, 32		/* Bias dst for tail loop.  */
 	b	L(tail64)
 
+	.cfi_endproc
 	.size	ARCH_LIBCFUN(memset), . - ARCH_LIBCFUN(memset)
 
 #endif

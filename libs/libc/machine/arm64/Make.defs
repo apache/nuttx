@@ -20,7 +20,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_LIBC_ARCH_ELF_64BIT),y)
+ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
 CSRCS += arch_elf.c
 endif
 

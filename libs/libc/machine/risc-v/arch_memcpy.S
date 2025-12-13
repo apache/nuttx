@@ -32,8 +32,9 @@
  * Public Symbols
  ************************************************************************************/
 
-	.globl		memcpy
-	.file		"arch_memcpy.S"
+.global ARCH_LIBCFUN(memcpy)
+.type	ARCH_LIBCFUN(memcpy), @function
+.file	"arch_memcpy.S"
 
 /************************************************************************************
  * Name: memcpy
@@ -42,6 +43,8 @@
 	.text
 
 ARCH_LIBCFUN(memcpy):
+	.cfi_sections .debug_frame
+	.cfi_startproc
 	move		t6, a0  /* Preserve return value */
 
 	/* Defer to byte-oriented copy for small sizes */
@@ -139,4 +142,5 @@ ARCH_LIBCFUN(memcpy):
 6:
 	ret
 
+	.cfi_endproc
 #endif

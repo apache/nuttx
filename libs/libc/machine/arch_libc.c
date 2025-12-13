@@ -73,7 +73,7 @@ FAR char *ARCH_LIBCFUN(strncpy)(FAR char *dest,
 FAR char *ARCH_LIBCFUN(strchr)(FAR const char *s, int c);
 #endif
 
-#ifdef CONFIG_LIBC_ARCH_STRCHNUL
+#ifdef CONFIG_LIBC_ARCH_STRCHRNUL
 FAR char *ARCH_LIBCFUN(strchrnul)(FAR const char *s, int c);
 #endif
 
@@ -240,8 +240,8 @@ FAR char *strchr(FAR const char *s, int c)
 }
 #endif
 
-#ifdef CONFIG_LIBC_ARCH_STRCHNUL
-FAR char *strchrnul(FAR const char *s, int c);
+#ifdef CONFIG_LIBC_ARCH_STRCHRNUL
+FAR char *strchrnul(FAR const char *s, int c)
 {
 #  ifdef CONFIG_MM_KASAN_INSTRUMENT
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
