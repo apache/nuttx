@@ -283,6 +283,46 @@ static void host_libusb_inttransfer_cb(struct libusb_transfer *transfer)
   host_uninterruptible_no_return(libusb_free_transfer, transfer);
 }
 
+#ifndef CONFIG_USBHOST_ISOC_DISABLE
+static void host_libusb_isotransfer_cb(struct libusb_transfer *transfer)
+{
+  struct libusb_iso_packet_descriptor *packet;
+  struct host_usb_datareq_s *datareq;
+  usbhost_asynch_t callback;
+  size_t length;
+  int i;
+
+  if (transfer == NULL)
+    {
+      ERROR("host_libusb_isotransfer_cb() fail: %s\n",
+            host_uninterruptible(libusb_strerror,
+            LIBUSB_ERROR_INVALID_PARAM));
+      return;
+    }
+
+  datareq = (struct host_usb_datareq_s *)transfer->user_data;
+  callback = datareq->callback;
+
+  for (i = 0; i < transfer->num_iso_packets; i++)
+    {
+      packet = &transfer->iso_packet_desc[i];
+      length = packet->status == LIBUSB_TRANSFER_COMPLETED ?
+                                      packet->actual_length : 0;
+
+      /* If there are multiple isoc packages, only the actual length
+       * of the data in each package is returned here. Because each
+       * package has the same size, the number of packages returned
+       * needs to be recorded in class driver.
+       */
+
+      callback(datareq->priv, length);
+    }
+
+  free(datareq);
+  host_uninterruptible_no_return(libusb_free_transfer, transfer);
+}
+#endif
+
 static int host_libusb_ep0inhandle(struct host_libusb_hostdev_s *dev,
                                    struct usb_ctrlrequest *ctrlreq,
                                    struct host_usb_datareq_s *datareq,
@@ -373,6 +413,10 @@ static int host_libusb_ep0outhandle(struct host_libusb_hostdev_s *dev,
             ret |= host_uninterruptible(libusb_claim_interface,
                                         dev->handle, 0);
           }
+        else if (ret == LIBUSB_ERROR_NOT_FOUND)
+          {
+            return LIBUSB_SUCCESS;
+          }
         break;
       case USB_REQ_SET_INTERFACE: /* TODO */
         break;
@@ -385,7 +429,7 @@ static int host_libusb_ep0outhandle(struct host_libusb_hostdev_s *dev,
 
 static int
 host_libusb_bulktransfer(struct host_libusb_hostdev_s *dev, uint8_t addr,
-                     struct host_usb_datareq_s *datareq)
+                         struct host_usb_datareq_s *datareq)
 {
   struct libusb_transfer *transfer;
   int ret = LIBUSB_SUCCESS;
@@ -414,7 +458,7 @@ host_libusb_bulktransfer(struct host_libusb_hostdev_s *dev, uint8_t addr,
 
 static int
 host_libusb_inttransfer(struct host_libusb_hostdev_s *dev, uint8_t addr,
-                    struct host_usb_datareq_s *datareq)
+                        struct host_usb_datareq_s *datareq)
 {
   struct libusb_transfer *transfer;
   int ret = LIBUSB_SUCCESS;
@@ -440,6 +484,45 @@ host_libusb_inttransfer(struct host_libusb_hostdev_s *dev, uint8_t addr,
 
   return ret;
 }
+
+#ifndef CONFIG_USBHOST_ISOC_DISABLE
+static int
+host_libusb_isotransfer(struct host_libusb_hostdev_s *dev, uint8_t addr,
+                        struct host_usb_datareq_s *datareq)
+{
+  struct libusb_transfer *transfer;
+  int max_packet_size;
+  int num_iso_pack;
+  int ret;
+
+  max_packet_size = datareq->maxpacketsize;
+  num_iso_pack = (datareq->len + max_packet_size - 1) / max_packet_size;
+  transfer = host_uninterruptible(libusb_alloc_transfer, num_iso_pack);
+  if (transfer == NULL)
+    {
+      ERROR("libusb_alloc_transfer() fail: %s\n",
+            host_uninterruptible(libusb_strerror,
+            LIBUSB_ERROR_NO_MEM));
+      return LIBUSB_ERROR_NO_MEM;
+    }
+
+  host_uninterruptible_no_return(libusb_fill_iso_transfer,
+                                 transfer, dev->handle, addr,
+                                 datareq->data, datareq->len,
+                                 num_iso_pack, host_libusb_isotransfer_cb,
+                                 datareq, 0);
+  host_uninterruptible_no_return(libusb_set_iso_packet_lengths,
+                                 transfer, max_packet_size);
+
+  ret = host_uninterruptible(libusb_submit_transfer, transfer);
+  if (ret != LIBUSB_SUCCESS)
+    {
+      host_uninterruptible_no_return(libusb_free_transfer, transfer);
+    }
+
+  return ret;
+}
+#endif
 
 static void *host_libusb_event_handle(void *arg)
 {
@@ -568,6 +651,11 @@ int host_usbhost_eptrans(struct host_usb_datareq_s *datareq)
       case USB_ENDPOINT_XFER_INT:
         ret = host_libusb_inttransfer(dev, datareq->addr, datareq);
         break;
+#ifndef CONFIG_USBHOST_ISOC_DISABLE
+      case USB_ENDPOINT_XFER_ISOC:
+        ret = host_libusb_isotransfer(dev, datareq->addr, datareq);
+        break;
+#endif
       default:
         ERROR("Unsupported transfer type");
         ret = LIBUSB_ERROR_NOT_SUPPORTED;
