@@ -1859,6 +1859,43 @@ This is a configuration with sim usbhost support.
    Run sim usbhost with root mode, run sim usbdev or plug-in cdcacm usb device.
    Then you can use ``/dev/ttyACM`` to transfer data.
 
+   Here we will demonstrate an example of interaction between sim usbhost and
+   sim usbdev. Build two executable files using the configurations ``sim:usbdev``
+   and ``sim:usbhost`` respectively.
+
+   Run each executable files as root in different terminals.
+   Terminal 1 (run nuttx binary from sim:usbhost):
+
+   .. code:: console
+
+      $ sudo ./nuttx
+
+   Terminal 2  (run nuttx binary from sim:usbdev):
+
+   .. code:: console
+
+      $ sudo ./nuttx
+
+   Then, run CDCACM in usbdev.
+
+   .. code:: console
+
+      nsh> conn 1
+
+   Enter commands to read CDCACM on the usbhost:
+
+   .. code:: console
+
+      nsh> cat /dev/ttyACM0 &
+
+   Enter commands to write CDCACM on the usbdev:
+
+   .. code:: console
+
+      nsh> echo hello > /dev/ttyACM0
+
+   You can see the data on the usbhost: ``hello``.
+
 login
 -----
 
