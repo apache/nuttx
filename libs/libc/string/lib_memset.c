@@ -53,6 +53,7 @@
 #if !defined(CONFIG_LIBC_ARCH_MEMSET) && defined(LIBC_BUILD_MEMSET)
 #undef memset
 no_builtin("memset")
+used_code
 FAR void *memset(FAR void *s, int c, size_t n)
 {
 #ifdef CONFIG_LIBC_MEMSET_OPTSPEED
