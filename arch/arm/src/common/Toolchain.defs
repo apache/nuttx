@@ -559,9 +559,12 @@ ifeq ($(CONFIG_PIC),y)
 
   # Generate an executable elf, need to ignore undefined symbols
   LDELFFLAGS += --unresolved-symbols=ignore-in-object-files --emit-relocs
+  LDELFGLAGS += -e _start
 else
   ifneq ($(CONFIG_BINFMT_ELF_EXECUTABLE),y)
     LDELFFLAGS += -r
+  else
+    LDELFFLAGS += -e _start
   endif
 endif
 
@@ -572,7 +575,7 @@ ifneq ($(CONFIG_BUILD_KERNEL),y)
   LDELFFLAGS += $(TOPDIR)$(DELIM)arch$(DELIM)arm$(DELIM)src$(DELIM)crt0.o
 endif
 
-LDELFFLAGS += -e _start -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)elf$(DELIM)gnu-elf.ld)
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)elf$(DELIM)gnu-elf.ld)
 
 # Zig toolchain
 
