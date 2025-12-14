@@ -48,7 +48,6 @@ set(SRCS
     lib_strtoll.c
     lib_strtoul.c
     lib_strtoull.c
-    lib_strtold.c
     lib_checkbase.c
     lib_mktemp.c
     lib_mkstemp.c
@@ -63,6 +62,10 @@ set(SRCS
     lib_wcstombs.c
     lib_arc4random.c
     lib_atexit.c)
+
+if(NOT CONFIG_LIBM_NONE)
+  list(APPEND SRCS lib_strtold.c)
+endif()
 
 if(CONFIG_PSEUDOTERM)
   list(APPEND SRCS lib_ptsname.c lib_ptsnamer.c lib_unlockpt.c lib_openpty.c)
