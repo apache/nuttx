@@ -1999,10 +1999,10 @@ int up_alarm_tick_cancel(FAR clock_t *ticks);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM)
-#  ifndef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
 int up_alarm_start(FAR const struct timespec *ts);
-#  else
+
+#if defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM)
+#  ifdef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
 int up_alarm_tick_start(clock_t ticks);
 #  endif
 #endif
@@ -2076,10 +2076,10 @@ int up_timer_tick_cancel(FAR clock_t *ticks);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_TICKLESS_ALARM)
-#  ifndef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
 int up_timer_start(FAR const struct timespec *ts);
-#  else
+
+#if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_TICKLESS_ALARM)
+#  ifdef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
 int up_timer_tick_start(clock_t ticks);
 #  endif
 #endif
@@ -2442,6 +2442,10 @@ void up_ndelay(unsigned long nanoseconds);
 void nxsched_process_timer(void);
 #endif
 
+#ifdef CONFIG_HRTIMER
+void nxsched_process_hrtimer(void);
+#endif
+
 /****************************************************************************
  * Name:  nxsched_timer_expiration
  *
@@ -2489,7 +2493,7 @@ void nxsched_timer_expiration(void);
 #if defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM)
 void nxsched_alarm_expiration(FAR const struct timespec *ts);
 #endif
-void nxsched_tick_expiration(clock_t ticks);
+clock_t nxsched_tick_expiration(clock_t ticks);
 
 /****************************************************************************
  * Name:  nxsched_get_next_expired

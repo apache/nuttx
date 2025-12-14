@@ -323,3 +323,35 @@ tricore_systimer_initialize(volatile void *tbase, int irq, uint64_t freq)
 
   return (struct oneshot_lowerhalf_s *)priv;
 }
+
+int up_alarm_start(FAR const struct timespec *ts)
+{
+  FAR struct tricore_systimer_lowerhalf_s *priv =
+    (FAR struct tricore_systimer_lowerhalf_s *)&g_tricore_oneshot_lowerhalf;
+
+  uint64_t freq = IFX_CFG_CPU_CLOCK_FREQUENCY;
+
+  uint64_t expected =
+  (uint64_t)ts->tv_sec * freq + (uint64_t)ts->tv_nsec * freq / NSEC_PER_SEC;
+
+  /* Disable interrupts while programming the timer */
+
+  irqstate_t flags = up_irq_save();
+
+  /* Ensure the timer expiration is at least the minimum delay */
+
+  uint64_t min_expected = tricore_systimer_get_time(priv) +
+                          TRICORE_SYSTIMER_MIN_DELAY;
+  if (expected < min_expected)
+    {
+      expected = min_expected;
+    }
+
+  tricore_systimer_set_timecmp(priv, expected);
+
+  /* Restore interrupts */
+
+  up_irq_restore(flags);
+
+  return OK;
+}

@@ -482,12 +482,12 @@ Watchdog Timer Interfaces
 
 NuttX provides a general watchdog timer facility. This facility
 allows the NuttX user to specify a watchdog timer function that
-will run after a specified delay. The watchdog timer function will
-run in the context of the timer interrupt handler. Because of
-this, a limited number of NuttX interfaces are available to he
-watchdog timer function. However, the watchdog timer function may
-use ``mq_send()``, ``sigqueue()``, or ``kill()`` to communicate
-with NuttX tasks.
+will run after a specified delay in tick level resolution. The
+watchdog timer function will run in the context of the timer
+interrupt handler. Because of this, a limited number of NuttX
+interfaces are available to he watchdog timer function. However,
+the watchdog timer function may use ``mq_send()``, ``sigqueue()``,
+or ``kill()`` to communicate with NuttX tasks.
 
 - :c:func:`wd_start`
 - :c:func:`wd_start_next`
@@ -657,3 +657,65 @@ with NuttX tasks.
     #else
     typedef uint32_t  wdparm_t;
     #endif
+
+High-resolution Timer Interfaces
+================================
+
+NuttX provides a high-resolution timer facility. This facility
+allows the NuttX user to specify a hrtimer function that
+will run after a specified delay in nanosec resolution. The hrtimer
+function will run in the context of the timer interrupt handler.
+Because of this, a limited number of NuttX interfaces are available to he
+hrtimer function. However, the hrtimer function may
+use ``mq_send()``, ``sigqueue()``, ``nxevent_post()``, or ``kill()``
+to communicate with NuttX tasks.
+
+- :c:func:`hrtimer_init`
+- :c:func:`hrtimer_cancel`
+- :c:func:`hrtimer_start`
+- High-resolution Timer Callback
+
+.. c:function:: void hrtimer_init(FAR hrtimer_t *hrtimer, hrtentry_t func, \
+                                  FAR void *arg)
+
+  This function initializes a high-resolution timer instance.
+  Sets the expiration callback and its argument. The timer is
+  not started by this function.
+
+  :param hrtimer: Pointer to hrtimer instance
+  :param func: Expiration callback function
+  :param arg: Callback argument
+
+  :return: None.
+
+  **POSIX Compatibility:** This is a NON-POSIX interface.
+
+.. c:function:: int hrtimer_cancel(FAR hrtimer_t *hrtimer)
+
+  This function cancels a high-resolution timer if it is pending.
+  The timer callback will not be called if the timer was successfully
+  canceled.
+
+  :param hrtimer: Timer instance to cancel
+
+  :return: ``OK`` on success; negated errno on failure.
+
+  **POSIX Compatibility:** This is a NON-POSIX interface.
+
+.. c:function:: int hrtimer_start(FAR hrtimer_t *hrtimer, uint64_t ns, \
+                                  enum hrtimer_mode_e mode)
+
+  This function starts a high-resolution timer in absolute or relative mode.
+
+  :param hrtimer: Timer instance to cancel
+  :param ns: Timer expiration in nanoseconds (absolute or relative)
+  :param mode: HRTIMER_MODE_ABS or HRTIMER_MODE_REL
+
+  :return: ``OK`` on success; negated errno on failure.
+
+  **POSIX Compatibility:** This is a NON-POSIX interface.
+
+.. c:type:: void (*hrtentry_t)(FAR struct hrtimer_s *)
+
+  **High-resolution Timer Callback**: when a hrtimer expires,
+  the callback function with this type is called.

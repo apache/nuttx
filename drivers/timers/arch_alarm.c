@@ -118,6 +118,9 @@ static void ndelay_accurate(unsigned long nanoseconds)
 static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
                              FAR void *arg)
 {
+#ifdef CONFIG_HRTIMER
+  nxsched_process_hrtimer();
+#else
   clock_t now;
 
   ONESHOT_TICK_CURRENT(g_oneshot_lower, &now);
@@ -138,6 +141,7 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
     }
 
   ONESHOT_TICK_ABSOLUTE(g_oneshot_lower, now + 1);
+#  endif
 #endif
 }
 
