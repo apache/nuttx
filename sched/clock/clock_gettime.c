@@ -151,6 +151,11 @@ void nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp)
               up_perf_convert(tcb->run_time, tp);
             }
         }
+
+      if (pid != 0)
+        {
+          nxsched_put_tcb(tcb);
+        }
 #endif
     }
 }

@@ -102,6 +102,7 @@
            { \
              tmp->backtrace[0] = NULL; \
            } \
+         nxsched_put_tcb(tcb); \
          tmp->seqno = g_mm_seqno++; \
        } \
      while (0)

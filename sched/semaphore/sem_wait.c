@@ -111,6 +111,10 @@ int nxsem_wait_slow(FAR sem_t *sem)
         }
 
       unlocked = htcb == NULL;
+      if (htcb)
+        {
+          nxsched_put_tcb(htcb);
+        }
     }
   else
     {

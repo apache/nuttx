@@ -36,6 +36,7 @@
 #include <nuttx/sched.h>
 
 #include "pthread/pthread.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Public Functions
@@ -142,20 +143,20 @@ int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
       if (pid > 0 &&
           ((mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 ||
            mutex->type != PTHREAD_MUTEX_NORMAL) &&
-          nxsched_get_tcb(pid) == NULL)
+          !nxsched_verify_pid(pid))
 
 #else /* CONFIG_PTHREAD_MUTEX_TYPES */
       /* This can only be a NORMAL mutex.  Include check if it is robust */
 
       if (pid > 0 &&
           (mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 &&
-          nxsched_get_tcb(pid) == NULL)
+          !nxsched_verify_pid(pid))
 
 #endif /* CONFIG_PTHREAD_MUTEX_TYPES */
 #else /* CONFIG_PTHREAD_MUTEX_ROBUST */
       /* This mutex is always robust, whatever type it is. */
 
-      if (pid > 0 && nxsched_get_tcb(pid) == NULL)
+      if (pid > 0 && !nxsched_verify_pid(pid))
 #endif
         {
           DEBUGASSERT(pid != 0); /* < 0: available, >0 owned, ==0 error */

@@ -34,6 +34,7 @@
 #include <debug.h>
 
 #include "pthread/pthread.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Public Functions
@@ -110,20 +111,20 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
           if (pid > 0 &&
               ((mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 ||
                mutex->type != PTHREAD_MUTEX_NORMAL) &&
-              nxsched_get_tcb(pid) == NULL)
+              !nxsched_verify_pid(pid))
 
 #else /* CONFIG_PTHREAD_MUTEX_TYPES */
           /* Check if this NORMAL mutex is robust */
 
           if (pid > 0 &&
               (mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 &&
-              nxsched_get_tcb(pid) == NULL)
+              !nxsched_verify_pid(pid))
 
 #endif /* CONFIG_PTHREAD_MUTEX_TYPES */
 #else /* CONFIG_PTHREAD_MUTEX_ROBUST */
           /* This mutex is always robust, whatever type it is. */
 
-          if (pid > 0 && nxsched_get_tcb(pid) == NULL)
+          if (pid > 0 && !nxsched_verify_pid(pid))
 #endif
             {
               /* < 0: available, >0 owned, ==0 error */

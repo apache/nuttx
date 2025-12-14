@@ -324,6 +324,17 @@ bool nxsched_merge_pending(void);
 bool nxsched_reprioritize_rtr(FAR struct tcb_s *tcb, int priority);
 #endif
 
+/****************************************************************************
+ * Name:  nxsched_release_pid
+ *
+ * Description:
+ *   When a task is destroyed, this function must be called to make its
+ *   process ID available for reuse.
+ *
+ ****************************************************************************/
+
+void nxsched_release_pid(pid_t pid);
+
 /* Priority inheritance support */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
@@ -439,9 +450,16 @@ void nxsched_critmon_csection(FAR struct tcb_s *tcb, bool state,
                               FAR void *caller);
 #endif
 
-/* TCB operations */
+/****************************************************************************
+ * Name: nxsched_verify_pid
+ *
+ * Description:
+ *   Given a task ID, this function will check whether the
+ *   TCB corresponding to the PID exists.
+ *
+ ****************************************************************************/
 
-bool nxsched_verify_tcb(FAR struct tcb_s *tcb);
+bool nxsched_verify_pid(pid_t pid);
 
 /* Obtain TLS from kernel */
 

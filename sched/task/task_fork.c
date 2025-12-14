@@ -96,7 +96,7 @@
 FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
 {
   FAR struct tcb_s *ptcb = this_task();
-  FAR struct tcb_s *parent;
+  FAR struct tcb_s *parent = NULL;
   FAR struct task_tcb_s *child;
   FAR char **argv;
   size_t stack_size;
@@ -167,6 +167,8 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
 #if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
   spin_lock_init(&child->cmn.mhead_lock);
 #endif
+
+  nxsem_init(&ptcb->exit_sem, 0, 0);
 
   /* Allocate a new task group with the same privileges as the parent */
 
@@ -259,11 +261,21 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
 
   group_postinitialize(child);
   sinfo("parent=%p, returning child=%p\n", parent, child);
+  if (parent != ptcb)
+    {
+      nxsched_put_tcb(parent);
+    }
+
   return child;
 
 errout_with_tcb:
   nxsched_release_tcb((FAR struct tcb_s *)child, ttype);
 errout:
+  if (parent != ptcb)
+    {
+      nxsched_put_tcb(parent);
+    }
+
   set_errno(-ret);
   return NULL;
 }

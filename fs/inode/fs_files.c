@@ -255,6 +255,7 @@ static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
           ctcb = nxsched_get_tcb(pid);
           if (ctcb == NULL || ctcb->group == NULL || ctcb != tcb)
             {
+              nxsched_put_tcb(ctcb);
               return;
             }
 
@@ -264,6 +265,8 @@ static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
               file_fsync(filep);
               file_put(filep);
             }
+
+          nxsched_put_tcb(ctcb);
         }
     }
 }
