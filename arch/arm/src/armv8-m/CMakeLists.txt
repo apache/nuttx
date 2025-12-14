@@ -59,10 +59,6 @@ if(CONFIG_ARM_PACBTI)
   list(APPEND SRCS arm_pacbticonfig.c)
 endif()
 
-if(CONFIG_ARCH_RAMVECTORS)
-  list(APPEND SRCS arm_ramvec_initialize.c arm_ramvec_attach.c)
-endif()
-
 if(CONFIG_ARM_MPU OR CONFIG_ARM_MPU_EARLY_RESET)
   list(APPEND SRCS arm_mpu.c)
 endif()

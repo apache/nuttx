@@ -32,4 +32,8 @@ if(NOT CONFIG_ARCH_HAVE_CUSTOM_VECTORS)
   list(APPEND SRCS arm_vectors.c)
 endif()
 
+if(CONFIG_ARCH_RAMVECTORS)
+  list(APPEND SRCS arm_ramvec_initialize.c arm_ramvec_attach.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})
