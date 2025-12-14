@@ -35,3 +35,7 @@ endif
 ifneq ($(CONFIG_ARCH_HAVE_CUSTOM_VECTORS),y)
   CMN_CSRCS += arm_vectors.c
 endif
+
+ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
+  CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
+endif

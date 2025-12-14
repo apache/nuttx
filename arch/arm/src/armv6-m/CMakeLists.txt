@@ -34,8 +34,4 @@ if((DEFINED CONFIG_DEBUG_FEATURES AND CONFIG_DEBUG_FEATURES)
   list(APPEND SRCS arm_dumpnvic.c)
 endif()
 
-if(CONFIG_ARCH_RAMVECTORS)
-  list(APPEND SRCS arm_ramvec_initialize.c arm_ramvec_attach.c)
-endif()
-
 target_sources(arch PRIVATE ${SRCS})

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/ram_vectors.h
+ * arch/arm/src/arm_m/ram_vectors.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV8_M_RAM_VECTORS_H
-#define __ARCH_ARM_SRC_ARMV8_M_RAM_VECTORS_H
+#ifndef __ARCH_ARM_SRC_ARM_M_RAM_VECTORS_H
+#define __ARCH_ARM_SRC_ARM_M_RAM_VECTORS_H
 
 /****************************************************************************
  * Included Files
@@ -32,12 +32,19 @@
 
 #include "arm_internal.h"
 #include "chip.h"
+#include "nvic.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ARMV8M_VECTAB_SIZE (ARMV8M_PERIPHERAL_INTERRUPTS + 16)
+#ifdef CONFIG_ARCH_ARMV6M
+#  define ARM_VECTAB_SIZE (ARMV6M_PERIPHERAL_INTERRUPTS + NVIC_IRQ_FIRST)
+#elif defined(CONFIG_ARCH_ARMV7M)
+#  define ARM_VECTAB_SIZE (ARMV7M_PERIPHERAL_INTERRUPTS + NVIC_IRQ_FIRST)
+#elif defined(CONFIG_ARCH_ARMV8M)
+#  define ARM_VECTAB_SIZE (ARMV8M_PERIPHERAL_INTERRUPTS + NVIC_IRQ_FIRST)
+#endif
 
 /* Vector Table Offset Register (VECTAB).  This mask seems to vary among
  * ARMv8-M implementations.  It may need to be redefined in some
@@ -47,15 +54,15 @@
  */
 
 #ifndef NVIC_VECTAB_TBLOFF_MASK
-#  if ARMV8M_VECTAB_SIZE > 512
+#  if ARM_VECTAB_SIZE > 512
 #    define NVIC_VECTAB_TBLOFF_MASK     (0xfffff000)
-#  elif ARMV8M_VECTAB_SIZE > 256
+#  elif ARM_VECTAB_SIZE > 256
 #    define NVIC_VECTAB_TBLOFF_MASK     (0xfffff800)
-#  elif ARMV8M_VECTAB_SIZE > 128
+#  elif ARM_VECTAB_SIZE > 128
 #    define NVIC_VECTAB_TBLOFF_MASK     (0xfffffc00)
-#  elif ARMV8M_VECTAB_SIZE > 64
+#  elif ARM_VECTAB_SIZE > 64
 #    define NVIC_VECTAB_TBLOFF_MASK     (0xfffffe00)
-#  elif ARMV8M_VECTAB_SIZE > 32
+#  elif ARM_VECTAB_SIZE > 32
 #    define NVIC_VECTAB_TBLOFF_MASK     (0xffffff00)
 #  else
 #    define NVIC_VECTAB_TBLOFF_MASK     (0xffffff80)
@@ -80,14 +87,6 @@
 
 #ifdef CONFIG_ARCH_RAMVECTORS
 
-/* This is the size of the vector table (in 4-byte entries).  This size
- * includes the (1) the peripheral interrupts, (2) space for 15 Cortex-M
- * exceptions, and (3) IDLE stack pointer which lies at the beginning of the
- * table.
- */
-
-#define ARMV8M_VECTAB_SIZE (ARMV8M_PERIPHERAL_INTERRUPTS + 16)
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -104,7 +103,7 @@
  * the highest alignment possible.
  */
 
-extern up_vector_t g_ram_vectors[ARMV8M_VECTAB_SIZE]
+extern up_vector_t g_ram_vectors[ARM_VECTAB_SIZE]
   locate_data(".ram_vectors") aligned_data(VECTAB_ALIGN);
 
 /****************************************************************************
@@ -143,4 +142,4 @@ void exception_common(void);
 int arm_ramvec_attach(int irq, up_vector_t vector);
 
 #endif /* CONFIG_ARCH_RAMVECTORS */
-#endif /* __ARCH_ARM_SRC_ARMV8_M_RAM_VECTORS_H */
+#endif /* __ARCH_ARM_SRC_ARM_M_RAM_VECTORS_H */

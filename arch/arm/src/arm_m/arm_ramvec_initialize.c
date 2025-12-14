@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv6-m/ram_vectors.h
+ * arch/arm/src/arm_m/arm_ramvec_initialize.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,64 +20,52 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV6_M_RAM_VECTORS_H
-#define __ARCH_ARM_SRC_ARMV6_M_RAM_VECTORS_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/irq.h>
 
+#include <assert.h>
+#include <nuttx/debug.h>
+#include <inttypes.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
+
+#include "nvic.h"
+#include "ram_vectors.h"
+
+#include "chip.h"             /* May redefine VECTAB fields */
 #include "arm_internal.h"
-#include "chip.h"
+
+#ifdef CONFIG_ARCH_RAMVECTORS
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Vector Table Offset Register (VECTAB).  This mask seems to vary among
- * ARMv6-M implementations.  It may need to be redefined in some
- * architecture-specific header file. By default, the base address of the
- * new vector table must be aligned to the size of the vector table extended
- * to the next larger power of 2.
- */
-
-#ifndef NVIC_VECTAB_TBLOFF_MASK
-#  define NVIC_VECTAB_TBLOFF_MASK     (0xffffff00)
-#endif
-
-/* Alignment ****************************************************************/
-
-#define VECTAB_ALIGN ((~NVIC_VECTAB_TBLOFF_MASK & 0xffff) + 1)
-
-#ifdef CONFIG_ARCH_RAMVECTORS
-
-/* This is the size of the vector table (in 4-byte entries).  This size
- * includes the (1) the peripheral interrupts, (2) space for 15 Cortex-M
- * exceptions, and (3) IDLE stack pointer which lies at the beginning of the
- * table.
- */
-
-#define ARMV6M_VECTAB_SIZE (32 + 16)
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
 /* If CONFIG_ARCH_RAMVECTORS is defined, then the ARM logic must provide
- * ARM-specific implementations of irq_initialize(), irq_attach(), and
+ * ARM-specific implementations of arm_ramvec_initialize(), irq_attach(), and
  * irq_dispatch.  In this case, it is also assumed that the ARM vector
  * table resides in RAM, has the name g_ram_vectors, and has been
  * properly positioned and aligned in memory by the linker script.
+ *
+ * REVISIT: Can this alignment requirement vary from core-to-core?  Yes, it
+ * depends on the number of vectors supported by the MCU. The safest thing
+ * to do is to put the vector table at the beginning of RAM in order to force
+ * the highest alignment possible.
  */
 
-extern up_vector_t g_ram_vectors[ARMV6M_VECTAB_SIZE]
+up_vector_t g_ram_vectors[ARM_VECTAB_SIZE]
   locate_data(".ram_vectors") aligned_data(VECTAB_ALIGN);
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -88,28 +76,43 @@ extern up_vector_t g_ram_vectors[ARMV6M_VECTAB_SIZE]
  *
  ****************************************************************************/
 
-void arm_ramvec_initialize(void);
+void arm_ramvec_initialize(void)
+{
+  const up_vector_t *src;
+  up_vector_t *dest;
+  int i;
 
-/****************************************************************************
- * Name: exception_common
- *
- * Description:
- *   This is the default, common vector handling entrypoint.
- *
- ****************************************************************************/
+  /* The vector table must be aligned */
 
-void exception_common(void);
+  DEBUGASSERT(((uint32_t)g_ram_vectors & ~NVIC_VECTAB_TBLOFF_MASK) == 0);
 
-/****************************************************************************
- * Name: arm_ramvec_attach
- *
- * Description:
- *   Configure the ram vector table so that IRQ number 'irq' will be
- *   dipatched by hardware to 'vector'
- *
- ****************************************************************************/
+  /* Copy the ROM vector table at address zero to RAM vector table.
+   *
+   * This must be done BEFORE the MPU is enable if the MPU is being used to
+   * protect against NULL pointer references.
+   */
 
-int arm_ramvec_attach(int irq, up_vector_t vector);
+  src  = (const up_vector_t *)getreg32(NVIC_VECTAB);
+  dest = g_ram_vectors;
 
-#endif /* CONFIG_ARCH_RAMVECTORS */
-#endif /* __ARCH_ARM_SRC_ARMV6_M_RAM_VECTORS_H */
+  irqinfo("src=%p dest=%p\n", src, dest);
+
+  for (i = 0; i < ARM_VECTAB_SIZE; i++)
+    {
+      *dest++ = *src++;
+    }
+
+  /* Now configure the NVIC to use the new vector table. */
+
+  putreg32((uint32_t)g_ram_vectors, NVIC_VECTAB);
+
+  /* The number bits required to align the RAM vector table seem to vary
+   * from part-to-part.  The following assertion will catch the case where
+   * the table alignment is insufficient.
+   */
+
+  irqinfo("NVIC_VECTAB=%08" PRIx32 "\n", getreg32(NVIC_VECTAB));
+  DEBUGASSERT(getreg32(NVIC_VECTAB) == (uint32_t)g_ram_vectors);
+}
+
+#endif /* !CONFIG_ARCH_RAMVECTORS */

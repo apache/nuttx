@@ -374,6 +374,8 @@
 #define SYSTICK_CALIB_SKEW             (1 << 30) /* Bit 30: TENMS value is exact */
 #define SYSTICK_CALIB_NOREF            (1 << 31) /* Bit 31: Device provides a reference clock */
 
+#define NVIC_VECTAB                    ARMV6M_SYSCON_VECTAB
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

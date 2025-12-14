@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/arm_ramvec_attach.c
+ * arch/arm/src/arm_m/arm_ramvec_attach.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -66,7 +66,7 @@ int arm_ramvec_attach(int irq, up_vector_t vector)
 
   irqinfo("%s IRQ%d\n", vector ? "Attaching" : "Detaching", irq);
 
-  if ((unsigned)irq < ARMV8M_VECTAB_SIZE)
+  if ((unsigned)irq < ARM_VECTAB_SIZE)
     {
       irqstate_t flags;
 
