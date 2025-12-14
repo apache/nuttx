@@ -309,7 +309,7 @@ extern volatile spinlock_t g_cpu_tasklistlock;
  ****************************************************************************/
 
 #if defined(CONFIG_HRTIMER) && defined(CONFIG_SCHED_TICKLESS)
-void nxsched_hrtimer_start(clock_t ticks);
+int nxsched_hrtimer_start(clock_t ticks);
 #endif
 
 int nxthread_create(FAR const char *name, uint8_t ttype, int priority,

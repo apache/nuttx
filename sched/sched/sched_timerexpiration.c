@@ -424,18 +424,21 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
       interval = interval <= (CONFIG_TIMER_ADJUST_USEC / USEC_PER_TICK) ? 0 :
                  interval - (CONFIG_TIMER_ADJUST_USEC / USEC_PER_TICK);
 
-#ifdef CONFIG_SCHED_TICKLESS_ALARM
+#ifdef CONFIG_HRTIMER
+      ret = nxsched_hrtimer_start(interval);
+#else
+#  ifdef CONFIG_SCHED_TICKLESS_ALARM
       /* Convert the delay to a time in the future (with respect
        * to the time when last stopped the timer).
        */
 
       ret = up_alarm_tick_start(ticks + interval);
-#else
+#  else
       /* [Re-]start the interval timer */
 
       ret = up_timer_tick_start(interval);
+#  endif
 #endif
-
       if (ret < 0)
         {
           serr("ERROR: up_timer_start/up_alarm_start failed: %d\n", ret);
@@ -490,7 +493,6 @@ void nxsched_tick_expiration(clock_t ticks)
   /* Process the timer ticks and set up the next interval (or not) */
 
   nexttime = nxsched_timer_process(ticks, elapsed, false);
-
   elapsed = nxsched_timer_start(ticks, nexttime);
   atomic_set(&g_timer_interval, elapsed);
 }
@@ -596,7 +598,6 @@ void nxsched_reassess_timer(void)
   /* Process the timer ticks and start next timer */
 
   nexttime = nxsched_timer_process(ticks, elapsed, true);
-
   elapsed = nxsched_timer_start(ticks, nexttime);
   atomic_set(&g_timer_interval, elapsed);
 }

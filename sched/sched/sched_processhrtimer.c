@@ -93,11 +93,11 @@ static uint32_t nxsched_hrtimer_callback(FAR hrtimer_t *hrtimer)
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_TICKLESS
-void nxsched_hrtimer_start(clock_t ticks)
+int nxsched_hrtimer_start(clock_t ticks)
 {
-  hrtimer_start(&g_nxsched_hrtimer,
-                hrtimer->expired + ticks * NSEC_PER_TICK,
-                HRTIMER_MODE_ABS);
+  return hrtimer_start(&g_nxsched_hrtimer,
+                       hrtimer->expired + ticks * NSEC_PER_TICK,
+                       HRTIMER_MODE_ABS);
 }
 #endif
 
