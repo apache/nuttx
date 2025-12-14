@@ -355,364 +355,670 @@
 #  endif
 #else
 #  undef CONSOLE_DEV                      /* No console */
-#  if defined(CONFIG_IMXRT_LPUART1)
-#    define TTYS0_DEV         g_lpuart1priv /* LPUART1 is ttyS0 */
-#    define UART1_ASSIGNED    1
-#  elif defined(CONFIG_IMXRT_LPUART2)
-#    define TTYS0_DEV         g_lpuart2priv /* LPUART2 is ttyS0 */
-#    define UART2_ASSIGNED    1
-#  elif defined(CONFIG_IMXRT_LPUART3)
-#    define TTYS0_DEV         g_lpuart3priv /* LPUART3 is ttyS0 */
-#    define UART3_ASSIGNED    1
-#  elif defined(CONFIG_IMXRT_LPUART4)
-#    define TTYS0_DEV         g_lpuart4priv /* LPUART4 is ttyS0 */
-#    define UART4_ASSIGNED    1
-#  elif defined(CONFIG_IMXRT_LPUART5)
-#    define TTYS0_DEV         g_lpuart5priv /* LPUART5 is ttyS0 */
-#    define UART5_ASSIGNED    1
-#  elif defined(CONFIG_IMXRT_LPUART6)
-#    define TTYS0_DEV         g_lpuart6priv /* LPUART6 is ttyS0 */
-#    define UART6_ASSIGNED    1
-#  elif defined(CONFIG_IMXRT_LPUART7)
-#    define TTYS0_DEV         g_lpuart7priv /* LPUART7 is ttyS0 */
-#    define UART7_ASSIGNED    1
-#  elif defined(CONFIG_IMXRT_LPUART8)
-#    define TTYS0_DEV         g_lpuart8priv /* LPUART8 is ttyS0 */
-#    define UART8_ASSIGNED    1
-#  elif defined(CONFIG_IMXRT_LPUART9)
-#    define TTYS0_DEV         g_lpuart9priv /* LPUART9 is ttyS0 */
-#    define LPUART9_ASSIGNED  1
-#  elif defined(CONFIG_IMXRT_LPUART10)
-#    define TTYS0_DEV         g_lpuart10priv /* LPUART10 is ttyS0 */
-#    define LPUART10_ASSIGNED 1
-#  elif defined(CONFIG_IMXRT_LPUART11)
-#    define TTYS0_DEV         g_lpuart11priv /* LPUART11 is ttyS0 */
-#    define LPUART11_ASSIGNED 1
-#  elif defined(CONFIG_IMXRT_LPUART12)
-#    define TTYS0_DEV         g_lpuart12priv /* LPUART12 is ttyS0 */
-#    define LPUART12_ASSIGNED 1
-#  endif
 #endif
 
 #if defined(SERIAL_HAVE_CONSOLE_RXDMA) || defined(SERIAL_HAVE_CONSOLE_TXDMA)
 #  define SERIAL_HAVE_CONSOLE_DMA
 #endif
 
-/* Pick ttys1.  This could be any of UART1-12 excluding the console UART.
- * One of UART1-12 could be the console; one of UART1-12 has already been
- * assigned to ttys0.
- */
+/* Pick ttys0 or ttys1.  This could be any of UART1-12. */
 
 #if defined(CONFIG_IMXRT_LPUART1) && !defined(LPUART1_ASSIGNED)
-#  define TTYS1_DEV           g_lpuart1priv /* LPUART1 is ttyS1 */
-#  define LPUART1_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart1priv /* LPUART1 is ttyS1 */
+#    define LPUART1_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS0_DEV           g_lpuart1priv
+#    define LPUART1_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART2) && !defined(LPUART2_ASSIGNED)
-#  define TTYS1_DEV           g_lpuart2priv /* LPUART2 is ttyS1 */
-#  define LPUART2_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart2priv /* LPUART2 is ttyS1 */
+#    define LPUART2_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS0_DEV           g_lpuart2priv
+#    define LPUART2_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART3) && !defined(LPUART3_ASSIGNED)
-#  define TTYS1_DEV           g_lpuart3priv /* LPUART3 is ttyS1 */
-#  define LPUART3_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart3priv /* LPUART3 is ttyS1 */
+#    define LPUART3_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS0_DEV           g_lpuart3priv
+#    define LPUART3_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART4) && !defined(LPUART4_ASSIGNED)
-#  define TTYS1_DEV           g_lpuart4priv /* LPUART4 is ttyS1 */
-#  define LPUART4_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart4priv /* LPUART4 is ttyS1 */
+#    define LPUART4_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS0_DEV           g_lpuart4priv
+#    define LPUART4_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART5) && !defined(LPUART5_ASSIGNED)
-#  define TTYS1_DEV           g_lpuart5priv /* LPUART5 is ttyS1 */
-#  define LPUART5_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart5priv /* LPUART5 is ttyS1 */
+#    define LPUART5_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS0_DEV           g_lpuart5priv
+#    define LPUART5_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART6) && !defined(LPUART6_ASSIGNED)
-#  define TTYS1_DEV           g_lpuart6priv /* LPUART6 is ttyS1 */
-#  define LPUART6_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart6priv /* LPUART6 is ttyS1 */
+#    define LPUART6_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS0_DEV           g_lpuart6priv
+#    define LPUART6_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART7) && !defined(LPUART7_ASSIGNED)
-#  define TTYS1_DEV           g_lpuart7priv /* LPUART7 is ttyS1 */
-#  define LPUART7_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart7priv /* LPUART7 is ttyS1 */
+#    define LPUART7_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS0_DEV           g_lpuart7priv
+#    define LPUART7_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART8) && !defined(LPUART8_ASSIGNED)
-#  define TTYS1_DEV           g_lpuart8priv /* LPUART8 is ttyS1 */
-#  define LPUART8_ASSIGNED    11
+#  if defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart8priv /* LPUART8 is ttyS1 */
+#    define LPUART8_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS0_DEV           g_lpuart8priv
+#    define LPUART8_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART9) && !defined(LPUART9_ASSIGNED)
-#  define TTYS1_DEV           g_lpuart9priv /* LPUART9 is ttyS1 */
-#  define LPUART9_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart9priv /* LPUART9 is ttyS1 */
+#    define LPUART9_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS0_DEV           g_lpuart9priv
+#    define LPUART9_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART10) && !defined(LPUART10_ASSIGNED)
-#  define TTYS1_DEV           g_lpuart10priv /* LPUART10 is ttyS1 */
-#  define LPUART10_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart10priv /* LPUART10 is ttyS1 */
+#    define LPUART10_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS0_DEV           g_lpuart10priv
+#    define LPUART10_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART11) && !defined(LPUART11_ASSIGNED)
-#  define TTYS1_DEV           g_lpuart11priv /* LPUART11 is ttyS1 */
-#  define LPUART11_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart11priv /* LPUART11 is ttyS1 */
+#    define LPUART11_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS0_DEV           g_lpuart11priv
+#    define LPUART11_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART12) && !defined(LPUART12_ASSIGNED)
-#  define TTYS1_DEV           g_lpuart12priv /* LPUART12 is ttyS1 */
-#  define LPUART12_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart12priv /* LPUART12 is ttyS1 */
+#    define LPUART12_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS0_DEV           g_lpuart12priv
+#    define LPUART12_ASSIGNED    1
+#  endif
 #endif
 
-/* Pick ttys2.  This could be one of UART2-12. It can't be UART1 because that
- * was either assigned as ttyS0 or ttys1.  One of UART 1-12 could be the
- * console.  One of UART2-12 has already been assigned to ttys0 or ttyS1.
- */
+/* Pick ttys1/ttys2.  This could be one of UART2-12. */
 
 #if defined(CONFIG_IMXRT_LPUART2) && !defined(LPUART2_ASSIGNED)
-#  define TTYS2_DEV           g_lpuart2priv /* LPUART2 is ttyS2 */
-#  define LPUART2_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart2priv /* LPUART2 is ttyS2 */
+#    define LPUART2_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart2priv
+#    define LPUART2_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART3) && !defined(LPUART3_ASSIGNED)
-#  define TTYS2_DEV           g_lpuart3priv /* LPUART3 is ttyS2 */
-#  define LPUART3_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart3priv /* LPUART3 is ttyS2 */
+#    define LPUART3_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart3priv
+#    define LPUART3_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART4) && !defined(LPUART4_ASSIGNED)
-#  define TTYS2_DEV           g_lpuart4priv /* LPUART4 is ttyS2 */
-#  define LPUART4_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart4priv /* LPUART4 is ttyS2 */
+#    define LPUART4_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart4priv
+#    define LPUART4_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART5) && !defined(LPUART5_ASSIGNED)
-#  define TTYS2_DEV           g_lpuart5priv /* LPUART5 is ttyS2 */
-#  define LPUART5_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart5priv /* LPUART5 is ttyS2 */
+#    define LPUART5_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart5priv
+#    define LPUART5_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART6) && !defined(LPUART6_ASSIGNED)
-#  define TTYS2_DEV           g_lpuart6priv /* LPUART6 is ttyS2 */
-#  define LPUART6_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart6priv /* LPUART6 is ttyS2 */
+#    define LPUART6_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart6priv
+#    define LPUART6_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART7) && !defined(LPUART7_ASSIGNED)
-#  define TTYS2_DEV           g_lpuart7priv /* LPUART7 is ttyS2 */
-#  define LPUART7_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart7priv /* LPUART7 is ttyS2 */
+#    define LPUART7_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart7priv
+#    define LPUART7_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART8) && !defined(LPUART8_ASSIGNED)
-#  define TTYS2_DEV           g_lpuart8priv /* LPUART8 is ttyS2 */
-#  define LPUART8_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart8priv /* LPUART8 is ttyS2 */
+#    define LPUART8_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart8priv
+#    define LPUART8_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART9) && !defined(LPUART9_ASSIGNED)
-#  define TTYS2_DEV           g_lpuart9priv /* LPUART9 is ttyS2 */
-#  define LPUART9_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart9priv /* LPUART9 is ttyS2 */
+#    define LPUART9_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart9priv
+#    define LPUART9_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART10) && !defined(LPUART10_ASSIGNED)
-#  define TTYS2_DEV           g_lpuart10priv /* LPUART10 is ttyS2 */
-#  define LPUART10_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart10priv /* LPUART10 is ttyS2 */
+#    define LPUART10_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart10priv
+#    define LPUART10_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART11) && !defined(LPUART11_ASSIGNED)
-#  define TTYS2_DEV           g_lpuart11priv /* LPUART11 is ttyS2 */
-#  define LPUART11_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart11priv /* LPUART11 is ttyS2 */
+#    define LPUART11_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart11priv
+#    define LPUART11_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART12) && !defined(LPUART12_ASSIGNED)
-#  define TTYS2_DEV           g_lpuart12priv /* LPUART12 is ttyS2 */
-#  define LPUART12_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart12priv /* LPUART12 is ttyS2 */
+#    define LPUART12_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS1_DEV           g_lpuart12priv
+#    define LPUART12_ASSIGNED    1
+#  endif
 #endif
 
-/* Pick ttys3. This could be one of UART3-12. It can't be UART1-2 because
- * those have already been assigned to ttsyS0, 1, or 2.  One of
- * UART3-12 could also be the console.  One of UART3-12 has already
- * been assigned to ttys0, 1, or 3.
- */
+/* Pick ttys2/ttys3. This could be one of UART3-12. */
 
 #if defined(CONFIG_IMXRT_LPUART3) && !defined(LPUART3_ASSIGNED)
-#  define TTYS3_DEV           g_lpuart3priv /* LPUART3 is ttyS3 */
-#  define LPUART3_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS3_DEV           g_lpuart3priv /* LPUART3 is ttyS3 */
+#    define LPUART3_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart3priv
+#    define LPUART3_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART4) && !defined(LPUART4_ASSIGNED)
-#  define TTYS3_DEV           g_lpuart4priv /* LPUART4 is ttyS3 */
-#  define LPUART4_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS3_DEV           g_lpuart4priv /* LPUART4 is ttyS3 */
+#    define LPUART4_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart4priv
+#    define LPUART4_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART5) && !defined(LPUART5_ASSIGNED)
-#  define TTYS3_DEV           g_lpuart5priv /* LPUART5 is ttyS3 */
-#  define LPUART5_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS3_DEV           g_lpuart5priv /* LPUART5 is ttyS3 */
+#    define LPUART5_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart5priv
+#    define LPUART5_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART6) && !defined(LPUART6_ASSIGNED)
-#  define TTYS3_DEV           g_lpuart6priv /* LPUART6 is ttyS3 */
-#  define LPUART6_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS3_DEV           g_lpuart6priv /* LPUART6 is ttyS3 */
+#    define LPUART6_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart6priv
+#    define LPUART6_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART7) && !defined(LPUART7_ASSIGNED)
-#  define TTYS3_DEV           g_lpuart7priv /* LPUART7 is ttyS3 */
-#  define LPUART7_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS3_DEV           g_lpuart7priv /* LPUART7 is ttyS3 */
+#    define LPUART7_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart7priv
+#    define LPUART7_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART8) && !defined(LPUART8_ASSIGNED)
-#  define TTYS3_DEV           g_lpuart8priv /* LPUART8 is ttyS3 */
-#  define LPUART8_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS3_DEV           g_lpuart8priv /* LPUART8 is ttyS3 */
+#    define LPUART8_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart8priv
+#    define LPUART8_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART9) && !defined(LPUART9_ASSIGNED)
-#  define TTYS3_DEV           g_lpuart9priv /* LPUART9 is ttyS3 */
-#  define LPUART9_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS3_DEV           g_lpuart9priv /* LPUART9 is ttyS3 */
+#    define LPUART9_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart9priv
+#    define LPUART9_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART10) && !defined(LPUART10_ASSIGNED)
-#  define TTYS3_DEV           g_lpuart10priv /* LPUART10 is ttyS3 */
-#  define LPUART10_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS3_DEV           g_lpuart10priv /* LPUART10 is ttyS3 */
+#    define LPUART10_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart10priv
+#    define LPUART10_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART11) && !defined(LPUART11_ASSIGNED)
-#  define TTYS3_DEV           g_lpuart11priv /* LPUART11 is ttyS3 */
-#  define LPUART11_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS3_DEV           g_lpuart11priv /* LPUART11 is ttyS3 */
+#    define LPUART11_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart11priv
+#    define LPUART11_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART12) && !defined(LPUART12_ASSIGNED)
-#  define TTYS3_DEV           g_lpuart12priv /* LPUART12 is ttyS3 */
-#  define LPUART12_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS3_DEV           g_lpuart12priv /* LPUART12 is ttyS3 */
+#    define LPUART12_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS2_DEV           g_lpuart12priv
+#    define LPUART12_ASSIGNED    1
+#  endif
 #endif
 
-/* Pick ttys4. This could be one of UART4-8. It can't be UART1-3 because
- * those have already been assigned to ttsyS0, 1, 2 or 3.  One of
- * UART 4-12 could be the console.  One of UART4-12 has already been
- * assigned to ttys0, 1, 3, or 4.
- */
+/* Pick ttys3/ttys4. This could be one of UART4-8. */
 
 #if defined(CONFIG_IMXRT_LPUART4) && !defined(LPUART4_ASSIGNED)
-#  define TTYS4_DEV           g_lpuart4priv /* LPUART4 is ttyS4 */
-#  define LPUART4_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS4_DEV           g_lpuart4priv /* LPUART4 is ttyS4 */
+#    define LPUART4_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS3_DEV           g_lpuart4priv
+#    define LPUART4_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART5) && !defined(LPUART5_ASSIGNED)
-#  define TTYS4_DEV           g_lpuart5priv /* LPUART5 is ttyS4 */
-#  define LPUART5_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS4_DEV           g_lpuart5priv /* LPUART5 is ttyS4 */
+#    define LPUART5_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS3_DEV           g_lpuart5priv
+#    define LPUART5_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART6) && !defined(LPUART6_ASSIGNED)
-#  define TTYS4_DEV           g_lpuart6priv /* LPUART6 is ttyS4 */
-#  define LPUART6_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS4_DEV           g_lpuart6priv /* LPUART6 is ttyS4 */
+#    define LPUART6_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS3_DEV           g_lpuart6priv
+#    define LPUART6_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART7) && !defined(LPUART7_ASSIGNED)
-#  define TTYS4_DEV           g_lpuart7priv /* LPUART7 is ttyS4 */
-#  define LPUART7_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS4_DEV           g_lpuart7priv /* LPUART7 is ttyS4 */
+#    define LPUART7_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS3_DEV           g_lpuart7priv
+#    define LPUART7_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART8) && !defined(LPUART8_ASSIGNED)
-#  define TTYS4_DEV           g_lpuart8priv /* LPUART8 is ttyS4 */
-#  define LPUART8_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS4_DEV           g_lpuart8priv /* LPUART8 is ttyS4 */
+#    define LPUART8_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS3_DEV           g_lpuart8priv
+#    define LPUART8_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART9) && !defined(LPUART9_ASSIGNED)
-#  define TTYS4_DEV           g_lpuart9priv /* LPUART9 is ttyS4 */
-#  define LPUART9_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS4_DEV           g_lpuart9priv /* LPUART9 is ttyS4 */
+#    define LPUART9_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS3_DEV           g_lpuart9priv
+#    define LPUART9_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART10) && !defined(LPUART10_ASSIGNED)
-#  define TTYS4_DEV           g_lpuart10priv /* LPUART10 is ttyS4 */
-#  define LPUART10_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS4_DEV           g_lpuart10priv /* LPUART10 is ttyS4 */
+#    define LPUART10_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS3_DEV           g_lpuart10priv
+#    define LPUART10_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART11) && !defined(LPUART11_ASSIGNED)
-#  define TTYS4_DEV           g_lpuart11priv /* LPUART11 is ttyS4 */
-#  define LPUART11_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS4_DEV           g_lpuart11priv /* LPUART11 is ttyS4 */
+#    define LPUART11_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS3_DEV           g_lpuart11priv
+#    define LPUART11_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART12) && !defined(LPUART12_ASSIGNED)
-#  define TTYS4_DEV           g_lpuart12priv /* LPUART12 is ttyS4 */
-#  define LPUART12_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS4_DEV           g_lpuart12priv /* LPUART12 is ttyS4 */
+#    define LPUART12_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS3_DEV           g_lpuart12priv
+#    define LPUART12_ASSIGNED    1
+#  endif
 #endif
 
-/* Pick ttys5. This could be one of UART5-12. It can't be UART1-4 because
- * those have already been assigned to ttsyS0, 1, 2, 3 or 4.  One of
- * UART 5-12 could be the console.  One of UART5-12 has already been
- * assigned to ttys0, 1, 2, 3, or 4.
- */
+/* Pick ttys4/ttys5. This could be one of UART5-12. */
 
 #if defined(CONFIG_IMXRT_LPUART5) && !defined(LPUART5_ASSIGNED)
-#  define TTYS5_DEV           g_lpuart5priv /* LPUART5 is ttyS5 */
-#  define LPUART5_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS5_DEV           g_lpuart5priv /* LPUART5 is ttyS5 */
+#    define LPUART5_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS4_DEV           g_lpuart5priv
+#    define LPUART5_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART6) && !defined(LPUART6_ASSIGNED)
-#  define TTYS5_DEV           g_lpuart6priv /* LPUART6 is ttyS5 */
-#  define LPUART6_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS5_DEV           g_lpuart6priv /* LPUART6 is ttyS5 */
+#    define LPUART6_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS4_DEV           g_lpuart6priv
+#    define LPUART6_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART7) && !defined(LPUART7_ASSIGNED)
-#  define TTYS5_DEV           g_lpuart7priv /* LPUART7 is ttyS5 */
-#  define LPUART7_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS5_DEV           g_lpuart7priv /* LPUART7 is ttyS5 */
+#    define LPUART7_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS4_DEV           g_lpuart7priv
+#    define LPUART7_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART8) && !defined(LPUART8_ASSIGNED)
-#  define TTYS5_DEV           g_lpuart8priv /* LPUART8 is ttyS5 */
-#  define LPUART8_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS5_DEV           g_lpuart8priv /* LPUART8 is ttyS5 */
+#    define LPUART8_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS4_DEV           g_lpuart8priv
+#    define LPUART8_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART9) && !defined(LPUART9_ASSIGNED)
-#  define TTYS5_DEV           g_lpuart9priv /* LPUART9 is ttyS5 */
-#  define LPUART9_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS5_DEV           g_lpuart9priv /* LPUART9 is ttyS5 */
+#    define LPUART9_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS4_DEV           g_lpuart9priv
+#    define LPUART9_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART10) && !defined(LPUART10_ASSIGNED)
-#  define TTYS5_DEV           g_lpuart10priv /* LPUART10 is ttyS5 */
-#  define LPUART10_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS5_DEV           g_lpuart10priv /* LPUART10 is ttyS5 */
+#    define LPUART10_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS4_DEV           g_lpuart10priv
+#    define LPUART10_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART11) && !defined(LPUART11_ASSIGNED)
-#  define TTYS5_DEV           g_lpuart11priv /* LPUART11 is ttyS5 */
-#  define LPUART11_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS5_DEV           g_lpuart11priv /* LPUART11 is ttyS5 */
+#    define LPUART11_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS4_DEV           g_lpuart11priv
+#    define LPUART11_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART12) && !defined(LPUART12_ASSIGNED)
-#  define TTYS5_DEV           g_lpuart12priv /* LPUART12 is ttyS5 */
-#  define LPUART12_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS5_DEV           g_lpuart12priv /* LPUART12 is ttyS5 */
+#    define LPUART12_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS4_DEV           g_lpuart12priv
+#    define LPUART12_ASSIGNED    1
+#  endif
 #endif
 
-/* Pick ttys6. This could be one of UART6-12. It can't be UART1-5 because
- * those have already been assigned to ttsyS0, 1, 2, 3, 4 or 5.  One of
- * UART 6-12 could be the console.  One of UART6-12 has already been
- * assigned to ttys0, 1, 2, 3, 4 or 5.
- */
+/* Pick ttys5/ttys6. This could be one of UART6-12. */
 
 #if defined(CONFIG_IMXRT_LPUART6) && !defined(LPUART6_ASSIGNED)
-#  define TTYS6_DEV           g_lpuart6priv /* LPUART6 is ttyS6 */
-#  define LPUART6_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS6_DEV           g_lpuart6priv /* LPUART6 is ttyS6 */
+#    define LPUART6_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS5_DEV           g_lpuart6priv
+#    define LPUART6_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART7) && !defined(LPUART7_ASSIGNED)
-#  define TTYS6_DEV           g_lpuart7priv /* LPUART7 is ttyS6 */
-#  define LPUART7_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS6_DEV           g_lpuart7priv /* LPUART7 is ttyS6 */
+#    define LPUART7_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS5_DEV           g_lpuart7priv
+#    define LPUART7_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART8) && !defined(LPUART8_ASSIGNED)
-#  define TTYS6_DEV           g_lpuart8priv /* LPUART8 is ttyS6 */
-#  define LPUART8_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS6_DEV           g_lpuart8priv /* LPUART8 is ttyS6 */
+#    define LPUART8_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS5_DEV           g_lpuart8priv
+#    define LPUART8_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART9) && !defined(LPUART9_ASSIGNED)
-#  define TTYS6_DEV           g_lpuart9priv /* LPUART9 is ttyS6 */
-#  define LPUART9_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS6_DEV           g_lpuart9priv /* LPUART9 is ttyS6 */
+#    define LPUART9_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS5_DEV           g_lpuart9priv
+#    define LPUART9_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART10) && !defined(LPUART10_ASSIGNED)
-#  define TTYS6_DEV           g_lpuart10priv /* LPUART10 is ttyS6 */
-#  define LPUART10_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS6_DEV           g_lpuart10priv /* LPUART10 is ttyS6 */
+#    define LPUART10_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS5_DEV           g_lpuart10priv
+#    define LPUART10_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART11) && !defined(LPUART11_ASSIGNED)
-#  define TTYS6_DEV           g_lpuart11priv /* LPUART11 is ttyS6 */
-#  define LPUART11_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS6_DEV           g_lpuart11priv /* LPUART11 is ttyS6 */
+#    define LPUART11_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS5_DEV           g_lpuart11priv
+#    define LPUART11_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART12) && !defined(LPUART12_ASSIGNED)
-#  define TTYS6_DEV           g_lpuart12priv /* LPUART12 is ttyS6 */
-#  define LPUART12_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS6_DEV           g_lpuart12priv /* LPUART12 is ttyS6 */
+#    define LPUART12_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS5_DEV           g_lpuart12priv
+#    define LPUART12_ASSIGNED    1
+#  endif
 #endif
 
-/* Pick ttys7. This could be one of UART7-12. It can't be UART1-6 because
- * those have already been assigned to ttsyS0, 1, 2, 3, 4, 5 or 6.  One of
- * UART 7-12 could be the console.  One of UART7-12 has already been
- * assigned to ttys0, 1, 2, 3, 4, 5 or 6.
- */
+/* Pick ttys6/ttys7. This could be one of UART7-12. */
 
 #if defined(CONFIG_IMXRT_LPUART7) && !defined(LPUART7_ASSIGNED)
-#  define TTYS7_DEV           g_lpuart7priv /* LPUART7 is ttyS7 */
-#  define LPUART7_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS7_DEV           g_lpuart7priv /* LPUART7 is ttyS7 */
+#    define LPUART7_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS6_DEV           g_lpuart7priv
+#    define LPUART7_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART8) && !defined(LPUART8_ASSIGNED)
-#  define TTYS7_DEV           g_lpuart8port /* LPUART8 is ttyS7 */
-#  define LPUART8_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS7_DEV           g_lpuart8priv /* LPUART8 is ttyS7 */
+#    define LPUART8_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS6_DEV           g_lpuart8priv
+#    define LPUART8_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART9) && !defined(LPUART9_ASSIGNED)
-#  define TTYS7_DEV           g_lpuart9priv /* LPUART9 is ttyS7 */
-#  define LPUART9_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS7_DEV           g_lpuart9priv /* LPUART9 is ttyS7 */
+#    define LPUART9_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS6_DEV           g_lpuart9priv
+#    define LPUART9_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART10) && !defined(LPUART10_ASSIGNED)
-#  define TTYS7_DEV           g_lpuart10priv /* LPUART10 is ttyS7 */
-#  define LPUART10_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS7_DEV           g_lpuart10priv /* LPUART10 is ttyS7 */
+#    define LPUART10_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS6_DEV           g_lpuart10priv
+#    define LPUART10_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART11) && !defined(LPUART11_ASSIGNED)
-#  define TTYS7_DEV           g_lpuart11priv /* LPUART11 is ttyS7 */
-#  define LPUART11_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS7_DEV           g_lpuart11priv /* LPUART11 is ttyS7 */
+#    define LPUART11_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS6_DEV           g_lpuart11priv
+#    define LPUART11_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART12) && !defined(LPUART12_ASSIGNED)
-#  define TTYS7_DEV           g_lpuart12priv /* LPUART12 is ttyS7 */
-#  define LPUART12_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS7_DEV           g_lpuart12priv /* LPUART12 is ttyS7 */
+#    define LPUART12_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS6_DEV           g_lpuart12priv
+#    define LPUART12_ASSIGNED    1
+#  endif
 #endif
 
-/* Pick ttys8. This could be one of UART8-12. It can't be UART1-9 because
- * those have already been assigned to ttsyS0, 1, 2, 3, 4, 5 or 6.  One of
- * UART 8-12 could be the console.  One of UART8-12 has already been
- * assigned to ttys0, 1, 2, 3, 4, 5, 6 or 7.
- */
+/* Pick ttys7/ttys8. This could be one of UART8-12. */
 
 #if defined(CONFIG_IMXRT_LPUART8) && !defined(LPUART8_ASSIGNED)
-#  define TTYS8_DEV           g_lpuart8port /* LPUART8 is ttyS8 */
-#  define LPUART8_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS8_DEV           g_lpuart8priv /* LPUART8 is ttyS8 */
+#    define LPUART8_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS7_DEV           g_lpuart8priv
+#    define LPUART8_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART9) && !defined(LPUART9_ASSIGNED)
-#  define TTYS8_DEV           g_lpuart9priv /* LPUART9 is ttyS8 */
-#  define LPUART9_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS8_DEV           g_lpuart9priv /* LPUART9 is ttyS8 */
+#    define LPUART9_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS7_DEV           g_lpuart9priv
+#    define LPUART9_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART10) && !defined(LPUART10_ASSIGNED)
-#  define TTYS8_DEV           g_lpuart10priv /* LPUART10 is ttyS8 */
-#  define LPUART10_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS8_DEV           g_lpuart10priv /* LPUART10 is ttyS8 */
+#    define LPUART10_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS7_DEV           g_lpuart10priv
+#    define LPUART10_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART11) && !defined(LPUART11_ASSIGNED)
-#  define TTYS8_DEV           g_lpuart11priv /* LPUART11 is ttyS8 */
-#  define LPUART11_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS8_DEV           g_lpuart11priv /* LPUART11 is ttyS8 */
+#    define LPUART11_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS7_DEV           g_lpuart11priv
+#    define LPUART11_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART12) && !defined(LPUART12_ASSIGNED)
-#  define TTYS8_DEV           g_lpuart12priv /* LPUART12 is ttyS8 */
-#  define LPUART12_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS8_DEV           g_lpuart12priv /* LPUART12 is ttyS8 */
+#    define LPUART12_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS7_DEV           g_lpuart12priv
+#    define LPUART12_ASSIGNED    1
+#  endif
 #endif
 
-/* Pick ttys9. This could be one of UART9-12. It can't be UART1-10 because
- * those have already been assigned to ttsyS0, 1, 2, 3, 4, 5, 6 or 7.  One of
- * UART 9-12 could be the console.  One of UART9-12 has already been
- * assigned to ttys0, 1, 2, 3, 4, 5, 6, 7 or 8.
- */
+/* Pick ttys8/ttys9. This could be one of UART9-12. */
 
 #if defined(CONFIG_IMXRT_LPUART9) && !defined(LPUART9_ASSIGNED)
-#  define TTYS9_DEV           g_lpuart9priv /* LPUART9 is ttyS9 */
-#  define LPUART9_ASSIGNED    1
+#  if defined(CONSOLE_DEV)
+#    define TTYS9_DEV           g_lpuart9priv /* LPUART9 is ttyS9 */
+#    define LPUART9_ASSIGNED    1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS8_DEV           g_lpuart9priv
+#    define LPUART9_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART10) && !defined(LPUART10_ASSIGNED)
-#  define TTYS9_DEV           g_lpuart10priv /* LPUART10 is ttyS9 */
-#  define LPUART10_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS9_DEV           g_lpuart10priv /* LPUART10 is ttyS9 */
+#    define LPUART10_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS8_DEV           g_lpuart10priv
+#    define LPUART10_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART11) && !defined(LPUART11_ASSIGNED)
-#  define TTYS9_DEV           g_lpuart11priv /* LPUART11 is ttyS9 */
-#  define LPUART11_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS9_DEV           g_lpuart11priv /* LPUART11 is ttyS9 */
+#    define LPUART11_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS8_DEV           g_lpuart11priv
+#    define LPUART11_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART12) && !defined(LPUART12_ASSIGNED)
-#  define TTYS9_DEV           g_lpuart12priv /* LPUART12 is ttyS9 */
-#  define LPUART12_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS9_DEV           g_lpuart12priv /* LPUART12 is ttyS9 */
+#    define LPUART12_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS8_DEV           g_lpuart12priv
+#    define LPUART12_ASSIGNED    1
+#  endif
 #endif
 
-/* Pick ttys10. This could be one of UART10-12. It can't be UART1-10 because
- * those have already been assigned to ttsyS0, 1, 2, 3, 4, 5, 6, 7 or 8.
- * One of UART 10-12 could be the console. One of UART10-12 has already been
- * assigned to ttys0, 1, 2, 3, 4, 5, 6, 7, 8 or 9.
- */
+/* Pick ttys9/ttys10. This could be one of UART10-12. */
 
 #if defined(CONFIG_IMXRT_LPUART10) && !defined(LPUART10_ASSIGNED)
-#  define TTYS10_DEV          g_lpuart10priv /* LPUART10 is ttyS10 */
-#  define LPUART10_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS10_DEV          g_lpuart10priv /* LPUART10 is ttyS10 */
+#    define LPUART10_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS9_DEV           g_lpuart10priv
+#    define LPUART10_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART11) && !defined(LPUART11_ASSIGNED)
-#  define TTYS10_DEV          g_lpuart11priv /* LPUART11 is ttyS10 */
-#  define LPUART11_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS10_DEV          g_lpuart11priv /* LPUART11 is ttyS10 */
+#    define LPUART11_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS9_DEV           g_lpuart11priv
+#    define LPUART11_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART12) && !defined(LPUART12_ASSIGNED)
-#  define TTYS10_DEV          g_lpuart12priv /* LPUART12 is ttyS10 */
-#  define LPUART12_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS10_DEV          g_lpuart12priv /* LPUART12 is ttyS10 */
+#    define LPUART12_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS9_DEV           g_lpuart12priv
+#    define LPUART12_ASSIGNED    1
+#  endif
 #endif
 
-/* Pick ttys11. This could be one of UART11-12. It can't be UART1-11 because
- * those have already been assigned to ttsyS0, 1, 2, 3, 4, 5, 6, 7, 8 or 9.
- * One of UART 11-12 could be the console. One of UART11-12 has already been
- * assigned to ttys0, 1, 2, 3, 4, 5, 6, 7, 8, 9 or 10.
- */
+/* Pick ttys10/ttys11. This could be one of UART11-12. */
 
 #if defined(CONFIG_IMXRT_LPUART11) && !defined(LPUART11_ASSIGNED)
-#  define TTYS11_DEV          g_lpuart11priv /* LPUART11 is ttyS11 */
-#  define LPUART11_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS11_DEV          g_lpuart11priv /* LPUART11 is ttyS11 */
+#    define LPUART11_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS10_DEV           g_lpuart11priv
+#    define LPUART11_ASSIGNED    1
+#  endif
 #elif defined(CONFIG_IMXRT_LPUART12) && !defined(LPUART12_ASSIGNED)
-#  define TTYS11_DEV          g_lpuart12priv /* LPUART12 is ttyS11 */
-#  define LPUART12_ASSIGNED   1
+#  if defined(CONSOLE_DEV)
+#    define TTYS11_DEV          g_lpuart12priv /* LPUART12 is ttyS11 */
+#    define LPUART12_ASSIGNED   1
+#  elif !defined(CONSOLE_DEV)
+#    define TTYS10_DEV           g_lpuart12priv
+#    define LPUART12_ASSIGNED    1
+#  endif
 #endif
 
 /* UART, if available, should have been assigned to ttyS0-7. */
@@ -3687,7 +3993,9 @@ void arm_serialinit(void)
 
   /* Register all UARTs */
 
+#ifdef TTYS0_DEV
   uart_register("/dev/ttyS0", &TTYS0_DEV.dev);
+#endif
 #ifdef TTYS1_DEV
   uart_register("/dev/ttyS1", &TTYS1_DEV.dev);
 #endif
