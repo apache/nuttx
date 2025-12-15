@@ -367,6 +367,18 @@ int weak_function up_alarm_tick_cancel(FAR clock_t *ticks)
  *
  ****************************************************************************/
 
+int weak_function up_alarm_start(const struct timespec *ts)
+{
+  int ret = -EAGAIN;
+
+  if (g_oneshot_lower != NULL)
+    {
+      ret = ONESHOT_ABSOLUTE(g_oneshot_lower, ts);
+    }
+
+  return ret;
+}
+
 #ifdef CONFIG_SCHED_TICKLESS
 int weak_function up_alarm_tick_start(clock_t ticks)
 {
