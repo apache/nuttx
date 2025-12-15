@@ -52,10 +52,10 @@
 #  define SYSLOG_RPMSG_WORK_DELAY MSEC2TICK(100)
 #endif
 
-#define SYSLOG_RPMSG_COUNT(p)       ((p)->head - (p)->tail)
+#define SYSLOG_RPMSG_COUNT(p)       ((p)->head >= (p)->tail ? \
+                                     (p)->head - (p)->tail : \
+                                     (p)->head + (p)->size - (p)->tail)
 #define SYSLOG_RPMSG_SPACE(p)       ((p)->size - 1 - SYSLOG_RPMSG_COUNT(p))
-#define SYSLOG_RPMSG_HEADOFF(p)     ((p)->head % ((p)->size))
-#define SYSLOG_RPMSG_TAILOFF(p)     ((p)->tail % ((p)->size))
 
 /****************************************************************************
  * Private Function Prototypes
@@ -144,7 +144,6 @@ static bool syslog_rpmsg_transfer(FAR struct syslog_rpmsg_s *priv, bool wait)
   uint32_t len_send;
   uint32_t len_end;
   uint32_t len;
-  uint32_t off;
 
   if (!is_rpmsg_ept_ready(&priv->ept))
     {
@@ -165,8 +164,7 @@ static bool syslog_rpmsg_transfer(FAR struct syslog_rpmsg_s *priv, bool wait)
 
       space  -= sizeof(*msg);
       len     = SYSLOG_RPMSG_COUNT(header);
-      off     = SYSLOG_RPMSG_TAILOFF(header);
-      len_end = header->size - off;
+      len_end = header->size - header->tail;
 
       if (len > space)
         {
@@ -175,19 +173,19 @@ static bool syslog_rpmsg_transfer(FAR struct syslog_rpmsg_s *priv, bool wait)
 
       if (len > len_end)
         {
-          memcpy(msg->data, &header->buffer[off], len_end);
+          memcpy(msg->data, &header->buffer[header->tail], len_end);
           memcpy(msg->data + len_end, header->buffer, len - len_end);
-          memset(&header->buffer[off], 0, len_end);
+          memset(&header->buffer[header->tail], 0, len_end);
           memset(header->buffer, 0, len - len_end);
         }
       else
         {
-          memcpy(msg->data, &header->buffer[off], len);
-          memset(&header->buffer[off], 0, len);
+          memcpy(msg->data, &header->buffer[header->tail], len);
+          memset(&header->buffer[header->tail], 0, len);
         }
 
       msg->count          = len;
-      header->tail       += len;
+      header->tail        = (header->tail + len) % header->size;
       msg->header.command = SYSLOG_RPMSG_TRANSFER;
       len_send            = len;
       len = SYSLOG_RPMSG_COUNT(header);
@@ -220,7 +218,6 @@ static void syslog_rpmsg_addbuf(FAR struct syslog_rpmsg_s *priv,
   FAR struct syslog_rpmsg_buffer_header_s *header;
   bool overwritten = false;
   irqstate_t flags;
-  uint32_t offset;
   uint32_t tail;
 
   if (len <= 0)
@@ -241,7 +238,7 @@ static void syslog_rpmsg_addbuf(FAR struct syslog_rpmsg_s *priv,
       len = header->size;
     }
 
-  if (header->head + len - header->tail >= header->size)
+  if (SYSLOG_RPMSG_SPACE(header) < len)
     {
       bool ret = false;
 
@@ -262,25 +259,22 @@ static void syslog_rpmsg_addbuf(FAR struct syslog_rpmsg_s *priv,
         }
     }
 
-  offset = SYSLOG_RPMSG_HEADOFF(header);
-  tail = header->size - offset;
+  tail = header->size - header->head;
 
   if (len > tail)
     {
-      memcpy(&header->buffer[offset], buffer, tail);
+      memcpy(&header->buffer[header->head], buffer, tail);
       memcpy(header->buffer, buffer + tail, len - tail);
     }
   else
     {
-      memcpy(&header->buffer[offset], buffer, len);
+      memcpy(&header->buffer[header->head], buffer, len);
     }
 
-  header->head += len;
+  header->head = (header->head + len) % header->size;
   if (overwritten)
     {
-      header->tail = header->head - header->size;
-      header->buffer[SYSLOG_RPMSG_TAILOFF(header)] = 0;
-      header->tail++;
+      header->tail = header->head;
     }
 
   if (!priv->suspend && is_rpmsg_ept_ready(&priv->ept))
