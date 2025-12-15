@@ -144,7 +144,16 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
       sinfo("Re-locking...\n");
 
       status = pthread_mutex_restorelock(mutex, nlocks);
-      if (ret == 0)
+
+      /* When the wait times out (ETIMEDOUT), we must decrement
+       * wait_count to maintain proper accounting.
+       */
+
+      if (ret == ETIMEDOUT)
+        {
+          atomic_sub(COND_WAIT_COUNT(cond), 1);
+        }
+      else if (ret == 0)
         {
           ret = status;
         }
