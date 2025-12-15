@@ -133,7 +133,7 @@ static void hw_claim_clear(uint8_t *bits, uint32_t bit_index)
 static int _pio_find_offset_for_program(uint32_t pio,
                                         const rp2040_pio_program_t *program)
 {
-  ASSERT(program->length < PIO_INSTRUCTION_COUNT);
+  ASSERT(program->length <= PIO_INSTRUCTION_COUNT);
   uint32_t used_mask = _used_instruction_space[rp2040_pio_get_index(pio)];
   uint32_t program_mask = (1u << program->length) - 1;
 
