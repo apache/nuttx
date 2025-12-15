@@ -52,6 +52,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Only float data type supported now */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  error fixed-point data type not supported yet
+#endif
+
 #define MS56XX_CMD_RESET              0x1e
 #define MS56XX_CMD_START_ADC_READ     0x00
 #define MS56XX_CMD_CONV_D1_OSR_256    0x40 /* D1 = uncompensated pressure */

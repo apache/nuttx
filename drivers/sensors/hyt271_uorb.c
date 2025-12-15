@@ -61,9 +61,6 @@
 #define HYT271_HUMIRAWEQUAL(x, y) \
   (HYT271_HUMIRAWDATA(x) == HYT271_HUMIRAWDATA(y))
 
-#define HYT271_TEMPDATA(x) (HYT271_TEMPRAWDATA(x) * 165.0 / 16383.0 - 40.0)
-#define HYT271_HUMIDATA(x) (HYT271_HUMIRAWDATA(x) * 100.0 / 16383.0)
-
 #define HYT271_SENSOR_HUMI    0
 #define HYT271_SENSOR_TEMP    1
 #define HYT271_SENSOR_MAX     2
@@ -159,8 +156,12 @@ static const struct sensor_ops_s g_hyt271_ops =
 static void hyt271_humi_from_rawdata(FAR struct hyt271_sensor_data_s *data,
                                      FAR struct sensor_humi *humi)
 {
-  humi->timestamp   = data->timestamp;
-  humi->humidity    = HYT271_HUMIDATA(data->data);
+  /* hum = (HUM_RAW * 100) / 16383 */
+
+  humi->timestamp = data->timestamp;
+  humi->humidity  = sensor_data_divi(
+    sensor_data_muli(HYT271_HUMIRAWDATA(data->data), 100),
+    16383);
 }
 
 /****************************************************************************
@@ -177,8 +178,13 @@ static void hyt271_humi_from_rawdata(FAR struct hyt271_sensor_data_s *data,
 static void hyt271_temp_from_rawdata(FAR struct hyt271_sensor_data_s *data,
                                      FAR struct sensor_temp *temp)
 {
+  /* temp = ((TEMP_RAW * 165) / 16383) - 40 */
+
   temp->timestamp   = data->timestamp;
-  temp->temperature = HYT271_TEMPDATA(data->data);
+  temp->temperature = sensor_data_subi(sensor_data_divi(
+      sensor_data_muli(HYT271_TEMPRAWDATA(data->data), 165),
+      16383),
+    40);
 }
 
 /****************************************************************************

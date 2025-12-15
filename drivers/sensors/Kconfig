@@ -17,6 +17,24 @@ config USENSOR
 	---help---
 		Allow application to register user sensor by /dev/usensor.
 
+choice
+	prompt "Sensor framework data type"
+	default SENSORS_USE_FLOAT
+
+config SENSORS_USE_FLOAT
+	bool "Use float as data type for sensors"
+	---help---
+		Use float as data type for sensors.
+		This option is recommended if for targets with FPU support.
+
+config SENSORS_USE_B16
+	bool "Use b16_t as data type for sensors"
+	---help---
+		Use b16_t (fixed-point type) as data type for sensors.
+		This option is recommended if for targets without FPU support.
+
+endchoice # Sensor framework data type
+
 config SENSORS_RPMSG
 	bool "Sensor RPMSG Support"
 	default n

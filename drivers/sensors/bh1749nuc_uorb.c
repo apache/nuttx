@@ -64,10 +64,10 @@ struct bh1749nuc_sensor_dev_s
 {
   struct bh1749nuc_sensor_s priv[BH1749NUC_MAX_IDX];
   struct bh1749nuc_dev_s    dev;
-  float                     scale_r;
-  float                     scale_g;
-  float                     scale_b;
-  float                     scale_ir;
+  sensor_data_t             scale_r;
+  sensor_data_t             scale_g;
+  sensor_data_t             scale_b;
+  sensor_data_t             scale_ir;
   mutex_t                   lock;
 #ifdef CONFIG_SENSORS_BH1749NUC_POLL
   sem_t                     run;
@@ -231,11 +231,11 @@ static int bh1749nuc_fetch(FAR struct sensor_lowerhalf_s *lower,
 
       rgb_data.timestamp = now;
       tmp = bh1749nuc_read16(dev, BH1749NUC_RED_DATA_LSB);
-      rgb_data.r = (tmp * priv->dev->scale_r);
+      rgb_data.r = sensor_data_muli(priv->dev->scale_r, tmp);
       tmp = bh1749nuc_read16(dev, BH1749NUC_GREEN_DATA_LSB);
-      rgb_data.g = (tmp * priv->dev->scale_g);
+      rgb_data.g = sensor_data_muli(priv->dev->scale_g, tmp);
       tmp = bh1749nuc_read16(dev, BH1749NUC_BLUE_DATA_LSB);
-      rgb_data.b = (tmp * priv->dev->scale_b);
+      rgb_data.b = sensor_data_muli(priv->dev->scale_b, tmp);
 
       memcpy(buffer, &rgb_data, sizeof(rgb_data));
       ret = sizeof(rgb_data);
@@ -250,7 +250,7 @@ static int bh1749nuc_fetch(FAR struct sensor_lowerhalf_s *lower,
 
       ir_data.timestamp = now;
       tmp = bh1749nuc_read16(dev, BH1749NUC_IR_DATA_LSB);
-      ir_data.ir = (tmp * priv->dev->scale_ir);
+      ir_data.ir = sensor_data_muli(priv->dev->scale_ir, tmp);
 
       memcpy(buffer, &ir_data, sizeof(ir_data));
       ret = sizeof(ir_data);
@@ -361,11 +361,11 @@ static int bh1749nuc_thread(int argc, FAR char **argv)
         {
           rgb_data.timestamp = now;
           tmp = bh1749nuc_read16(&dev->dev, BH1749NUC_RED_DATA_LSB);
-          rgb_data.r = (tmp * dev->scale_r);
+          rgb_data.r = sensor_data_muli(dev->scale_r, tmp);
           tmp = bh1749nuc_read16(&dev->dev, BH1749NUC_GREEN_DATA_LSB);
-          rgb_data.g = (tmp * dev->scale_g);
+          rgb_data.g = sensor_data_muli(dev->scale_g, tmp);
           tmp = bh1749nuc_read16(&dev->dev, BH1749NUC_BLUE_DATA_LSB);
-          rgb_data.b = (tmp * dev->scale_b);
+          rgb_data.b = sensor_data_muli(dev->scale_b, tmp);
 
           rgb->lower.push_event(rgb->lower.priv,
                                 &rgb_data, sizeof(rgb_data));
@@ -375,7 +375,7 @@ static int bh1749nuc_thread(int argc, FAR char **argv)
         {
           ir_data.timestamp = now;
           tmp = bh1749nuc_read16(&dev->dev, BH1749NUC_IR_DATA_LSB);
-          ir_data.ir = (tmp * dev->scale_ir);
+          ir_data.ir = sensor_data_muli(dev->scale_ir, tmp);
 
           ir->lower.push_event(ir->lower.priv,
                                &ir_data, sizeof(ir_data));
@@ -459,10 +459,10 @@ int bh1749nuc_register_uorb(int devno, FAR struct bh1749nuc_config_s *config)
 
   /* Return data in lux unit for RGB and IR */
 
-  dev->scale_r  = (20.0f / 71.0f) * (1e-6 / 1.46e-7);
-  dev->scale_g  = (20.0f / 99.0f) * (1e-6 / 1.46e-7);
-  dev->scale_b  = (20.0f / 70.0f) * (1e-6 / 1.46e-7);
-  dev->scale_ir = (20.0f / 25.0f) * (1e-6 / 1.46e-7);
+  dev->scale_r  = sensor_data_ftof((20.0f / 71.0f) * (1e-6 / 1.46e-7));
+  dev->scale_g  = sensor_data_ftof((20.0f / 99.0f) * (1e-6 / 1.46e-7));
+  dev->scale_b  = sensor_data_ftof((20.0f / 70.0f) * (1e-6 / 1.46e-7));
+  dev->scale_ir = sensor_data_ftof((20.0f / 25.0f) * (1e-6 / 1.46e-7));
 
   /*  Register sensor */
 

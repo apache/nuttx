@@ -37,6 +37,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Only float data type supported now */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  error fixed-point data type not supported yet
+#endif
+
 #define BMP180_MIN_INTERVAL 30000
 
 /****************************************************************************
@@ -191,6 +197,8 @@ static void bmp180_worker(FAR void *arg)
 {
   FAR struct bmp180_dev_uorb_s *priv = arg;
   struct sensor_baro baro;
+  int press;
+  int templ
 
   DEBUGASSERT(priv != NULL);
 
@@ -198,7 +206,9 @@ static void bmp180_worker(FAR void *arg)
              bmp180_worker, priv,
              priv->interval / USEC_PER_TICK);
 
-  baro.pressure = bmp180_getpressure(&priv->dev, &baro.temperature) / 100.0f;
+  press = bmp180_getpressure(&priv->dev, &temp);
+  baro.temperature = sensor_data_itof(temp);
+  baro.pressure = sensor_data_divi(press, 100);
   baro.timestamp = sensor_get_timestamp();
 
   priv->lower.push_event(priv->lower.priv, &baro, sizeof(baro));

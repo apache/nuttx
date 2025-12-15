@@ -132,6 +132,6 @@ int bmp180_checkid(FAR struct bmp180_dev_s *priv);
 void bmp180_updatecaldata(FAR struct bmp180_dev_s *priv);
 void bmp180_read_press_temp(FAR struct bmp180_dev_s *priv);
 int bmp180_getpressure(FAR struct bmp180_dev_s *priv,
-                       FAR float *temperature);
+                       FAR int *temperature);
 
 #endif /* CONFIG_I2C && CONFIG_SENSORS_BMP180 */

@@ -45,6 +45,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Only float data type supported now */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  error fixed-point data type not supported yet
+#endif
+
 #define LTR308_ADDR           0x53
 #define DEVID                 0xB1
 

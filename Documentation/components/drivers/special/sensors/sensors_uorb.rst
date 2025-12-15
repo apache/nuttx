@@ -48,11 +48,60 @@ sensor events are sent to the ring buffer in the upper layer.
    :width: 800px
    :align: center
 
-Problems to solve
-=================
+Sensor data type
+================
 
-The current implementation uses the ``float`` type which may make it difficult
-to use on platforms without FPU support.
+The framework supports two types of sensor data:
+
+#. ``float`` if ``CONFIG_SENSORS_USE_FLOAT=y``, not recommended for
+   targets without FPU.
+
+#. ``b16_t`` if ``CONFIG_SENSORS_USE_B16=y``, recommended for targets without
+   FPU.
+
+Currently all sensors support ``float``, support for ``b16_t`` is work-in-progress.
+
+To create generic drivers that support both data types, you should use the dedicated
+sensor data type:
+
+.. code:: C
+
+   /* Data type for sensors */
+
+   #ifdef CONFIG_SENSORS_USE_B16
+   typedef b16_t sensor_data_t;
+   #else
+   typedef float sensor_data_t;
+   #endif
+
+Mathematical operations on this type should only be performed using dedicated
+macros:
+
+- ``sensor_data_ftof(f1)`` - convert float to sensor data number.
+  Should be used only for compile-time constants.
+
+- ``sensor_data_itof(i)`` - convert int to sensor data number.
+
+- ``sensor_data_inv(i)`` - invert int and convert to sensor data number
+
+- ``sensor_data_add(f1, f2)`` - add two sensor data numbers
+
+- ``sensor_data_sub(f1, f2)`` - subtract two sensor data numbers
+
+- ``sensor_data_subi(f1, i)`` - subtract int from sensor data number
+
+- ``sensor_data_mul(f1, f2)`` - multiplicate two sensor data numbers
+
+- ``sensor_data_muli(f1, i)`` - multiplicate sensor data with int
+
+- ``sensor_data_div(f1, f2)`` - divide two sensor data numbers
+
+- ``sensor_data_divi(f1, i)`` - divide sensor data with int
+
+- ``sensor_data_abs(f1)`` - get absolute value for sensor data number
+
+- ``sensor_data_sqrt(f1)`` - get sqrt for sensro data number
+
 
 **Code**
 ========
@@ -313,9 +362,9 @@ being ``sensor_device_info_s``.
   struct sensor_device_info_s
   {
     uint32_t      version;
-    float         power;
-    float         max_range;
-    float         resolution;
+    sensor_data_t power;
+    sensor_data_t max_range;
+    sensor_data_t resolution;
     int32_t       min_delay;
     int32_t       max_delay;
     uint32_t      fifo_reserved_event_count;
