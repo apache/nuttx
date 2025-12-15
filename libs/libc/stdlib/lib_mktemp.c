@@ -237,12 +237,17 @@ FAR char *mktemp(FAR char *path_template)
       /* Attempt to stat the candidate file */
 
       ret = stat(path_template, &buf);
-      if (ret < 0 && get_errno() == ENOENT)
+      if (ret < 0)
         {
           /* We have it... Clear the errno and return the template */
 
-          set_errno(0);
-          return path_template;
+          if (get_errno() == ENOENT)
+            {
+              set_errno(0);
+              return path_template;
+            }
+
+          return NULL;
         }
 
       retries--;
