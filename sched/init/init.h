@@ -119,6 +119,6 @@ void nx_idle_trampoline(void);
  *
  ****************************************************************************/
 
-int nx_bringup(void);
+void nx_bringup(void);
 
 #endif /* __SCHED_INIT_INIT_H */
