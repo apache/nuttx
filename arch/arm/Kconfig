@@ -1444,11 +1444,6 @@ config ARCH_FAMILY_COMMON
 	string
 	default "arm_a_r"	if ARCH_ARM_A_R
 	default "arm_m"		if ARCH_ARM_M
-	default "arm_a_r"	if ARCH_ARM_A_R
-	default "arm_m"		if ARCH_ARM_M
-	default "arm_a_r"	if ARCH_ARM_A_R
-	default "arm_m"		if ARCH_ARM_M
-	default "arm_a_r"	if ARCH_ARM_A_R
 
 config ARCH_CHIP
 	string
