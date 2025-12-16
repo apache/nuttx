@@ -39,6 +39,7 @@
 
 #include "sched/sched.h"
 #include "wdog/wdog.h"
+#include "hrtimer/hrtimer.h"
 #include "clock/clock.h"
 
 #ifdef CONFIG_CLOCK_TIMEKEEPING
@@ -80,7 +81,8 @@ static clock_t nxsched_process_scheduler(clock_t ticks, clock_t elapsed,
                                          bool noswitches);
 static clock_t nxsched_timer_process(clock_t ticks, clock_t elapsed,
                                      bool noswitches);
-static clock_t nxsched_timer_start(clock_t ticks, clock_t interval);
+static inline_function
+clock_t nxsched_timer_update(clock_t ticks, bool noswitches);
 
 /****************************************************************************
  * Private Data
@@ -102,6 +104,10 @@ static atomic_t g_timer_interval;
 
 #ifdef CONFIG_SCHED_TICKLESS
 static unsigned int g_timernested;
+#endif
+
+#ifdef CONFIG_HRTIMER
+static hrtimer_t g_hrtimer_sched;
 #endif
 
 /****************************************************************************
@@ -164,7 +170,51 @@ int up_timer_gettick(FAR clock_t *ticks)
 }
 #endif
 
-#ifdef CONFIG_SCHED_TICKLESS_ALARM
+#ifdef CONFIG_HRTIMER
+static uint64_t nxsched_hrtimer_expiration(FAR const struct hrtimer_s *timer,
+                                           uint64_t expired)
+{
+  uint64_t   next_delay = 0u;
+  clock_t    ticks      = div_const(expired, NSEC_PER_TICK);
+  irqstate_t flags;
+  clock_t    interval;
+
+  /* Process the wdog and scheduler. */
+
+  flags = enter_critical_section();
+  g_timernested++;
+
+  interval = nxsched_timer_update(ticks, false);
+
+  g_timernested--;
+  leave_critical_section(flags);
+
+  /* Calculate the next delay. */
+
+  interval = adjust_next_interval(interval + 1);
+
+  DEBUGASSERT(interval <= UINT64_MAX / NSEC_PER_TICK);
+
+  next_delay = interval == 0u ? 0u :
+               (interval - 1u) * NSEC_PER_TICK + 1u;
+
+  return next_delay;
+}
+
+static inline_function
+int nxsched_timer_tick_start(clock_t ticks, clock_t delay)
+{
+  return hrtimer_restart(&g_hrtimer_sched, nxsched_hrtimer_expiration,
+                         (ticks + delay) * NSEC_PER_TICK, HRTIMER_MODE_ABS);
+}
+
+static inline_function
+int nxsched_timer_tick_cancel(clock_t *ticks)
+{
+  hrtimer_cancel(&g_hrtimer_sched);
+  return up_timer_gettick(ticks);
+}
+#elif defined(CONFIG_SCHED_TICKLESS_ALARM)
 static inline_function
 int nxsched_timer_tick_start(clock_t ticks, clock_t delay)
 {
@@ -190,7 +240,6 @@ int nxsched_timer_tick_cancel(clock_t *ticks)
 #  endif
   return ret;
 }
-
 #else
 static inline_function
 int nxsched_timer_tick_start(clock_t ticks, clock_t delay)
@@ -474,6 +523,7 @@ clock_t nxsched_timer_update(clock_t ticks, bool noswitches)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_HRTIMER
 void nxsched_timer_expiration(void)
 {
   irqstate_t flags;
@@ -495,6 +545,12 @@ void nxsched_timer_expiration(void)
 
   leave_critical_section(flags);
 }
+#else
+void nxsched_timer_expiration(void)
+{
+  hrtimer_expiry(clock_systime_nsec(), false);
+}
+#endif
 
 /****************************************************************************
  * Name:  nxsched_reassess_timer
