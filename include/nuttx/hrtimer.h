@@ -169,6 +169,29 @@ void hrtimer_init(FAR hrtimer_t *hrtimer,
 int hrtimer_cancel(FAR hrtimer_t *hrtimer);
 
 /****************************************************************************
+ * Name: hrtimer_cancel_sync
+ *
+ * Description:
+ *   Cancel a high-resolution timer and wait until it becomes inactive.
+ *
+ *   - Calls hrtimer_cancel() to request timer cancellation.
+ *   - If the timer callback is running, waits until it completes and
+ *     the timer state transitions to HRTIMER_STATE_INACTIVE.
+ *   - If sleeping is allowed (normal task context), yields CPU briefly
+ *     to avoid busy-waiting.
+ *   - Otherwise (interrupt or idle task context), spins until completion.
+ *
+ * Input Parameters:
+ *   hrtimer - Pointer to the high-resolution timer instance to cancel.
+ *
+ * Returned Value:
+ *   OK (0) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer);
+
+/****************************************************************************
  * Name: hrtimer_start
  *
  * Description:
