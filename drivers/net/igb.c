@@ -1252,6 +1252,9 @@ static void igb_enable(FAR struct igb_driver_s *priv)
 
   regval = (IGB_RCTL_EN | IGB_RCTL_MPE |
             (IGB_RCTL_BSIZE << IGB_RCTL_BSIZE_SHIFT));
+#ifdef CONFIG_NET_BROADCAST
+  regval |= IGB_RCTL_BAM;
+#endif
 #ifdef CONFIG_NET_PROMISCUOUS
   regval |= IGB_RCTL_UPE | IGB_RCTL_MPE;
 #endif
