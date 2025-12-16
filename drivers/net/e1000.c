@@ -1351,6 +1351,9 @@ static void e1000_enable(FAR struct e1000_driver_s *priv)
   regval = E1000_RCTL_EN | E1000_RCTL_MPE |
            (E1000_RCTL_BSIZE << E1000_RCTL_BSIZE_SHIFT) |
            (E1000_RCTL_MO_4736 << E1000_RCTL_MO_SHIFT);
+#ifdef CONFIG_NET_BROADCAST
+  regval |= E1000_RCTL_BAM;
+#endif
 #ifdef CONFIG_NET_PROMISCUOUS
   regval |= E1000_RCTL_UPE | E1000_RCTL_MPE;
 #endif
