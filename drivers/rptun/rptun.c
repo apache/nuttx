@@ -948,6 +948,9 @@ static void rptun_check_peer_status(FAR struct rptun_priv_s *priv)
 #ifdef CONFIG_BOARDCTL_POWEROFF
           work_queue(HPWORK, &priv->work, rptun_boardctl_work,
             (FAR void *)(uintptr_t)BOARDIOC_SOFTRESETCAUSE_POWEROFF, 0);
+#else
+          rptun_set_status(priv,
+                           (unsigned long)BOARDIOC_SOFTRESETCAUSE_POWEROFF);
 #endif
         }
       else
@@ -955,6 +958,8 @@ static void rptun_check_peer_status(FAR struct rptun_priv_s *priv)
 #ifdef CONFIG_BOARDCTL_RESET
           work_queue(HPWORK, &priv->work, rptun_boardctl_work,
                      (FAR void *)(uintptr_t)RPTUN_REASON_GET(status), 0);
+#else
+          rptun_set_status(priv, (unsigned long)RPTUN_REASON_GET(status));
 #endif
         }
     }
