@@ -678,6 +678,7 @@ to communicate with tasks.
 
 - :c:func:`hrtimer_init`
 - :c:func:`hrtimer_cancel`
+- :c:func:`hrtimer_cancel_sync`
 - :c:func:`hrtimer_start`
 - High-resolution Timer Callback
 
@@ -698,9 +699,33 @@ to communicate with tasks.
 
 .. c:function:: int hrtimer_cancel(FAR hrtimer_t *hrtimer)
 
-  This function cancels a high-resolution timer if it is pending.
-  The timer callback will not be called if the timer was successfully
-  canceled.
+  If the timer is armed but has not yet expired, it will be removed from
+  the timer queue and the callback will not be invoked.
+
+  If the timer callback is currently executing, this function will mark
+  the timer as canceled and return immediately. The running callback is
+  allowed to complete, but it will not be invoked again.
+
+  This function is non-blocking and does not wait for a running callback
+  to finish.
+
+  :param hrtimer: Timer instance to cancel
+
+  :return: ``OK`` on success; negated errno on failure.
+
+  **POSIX Compatibility:** This is a NON-POSIX interface.
+
+.. c:function:: int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer)
+
+  Cancel a high-resolution timer and wait synchronously until the timer
+  becomes inactive.
+
+  This function first calls hrtimer_cancel() to request cancellation of
+  the timer.  If the timer callback is currently executing, this function
+  will wait until the callback has completed and the timer state has
+  transitioned to HRTIMER_STATE_INACTIVE.
+
+  This function may sleep and must not be called from interrupt context.
 
   :param hrtimer: Timer instance to cancel
 
