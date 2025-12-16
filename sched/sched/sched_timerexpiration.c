@@ -39,6 +39,7 @@
 
 #include "sched/sched.h"
 #include "wdog/wdog.h"
+#include "hrtimer/hrtimer.h"
 #include "clock/clock.h"
 
 #ifdef CONFIG_CLOCK_TIMEKEEPING
@@ -80,7 +81,8 @@ static clock_t nxsched_process_scheduler(clock_t ticks, clock_t elapsed,
                                          bool noswitches);
 static clock_t nxsched_timer_process(clock_t ticks, clock_t elapsed,
                                      bool noswitches);
-static clock_t nxsched_timer_start(clock_t ticks, clock_t interval);
+static inline_function
+clock_t nxsched_timer_update(clock_t ticks, bool noswitches);
 
 /****************************************************************************
  * Private Data
@@ -104,9 +106,39 @@ static atomic_t g_timer_interval;
 static unsigned int g_timernested;
 #endif
 
+#ifdef CONFIG_HRTIMER
+static hrtimer_t g_hrtimer_sched;
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static inline_function clock_t adjust_next_interval(clock_t interval)
+{
+  clock_t ret = interval;
+
+#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
+  ret = MIN(ret, g_oneshot_maxticks);
+#endif
+
+  /* Normally, timer event cannot triggered on exact time due to the
+   * existence of interrupt latency.
+   * Assuming that the interrupt latency is distributed within
+   * [Best-Case Execution Time, Worst-Case Execution Time],
+   * we can set the timer adjustment value to the BCET to reduce the latency.
+   * After the adjustment, the timer interrupt latency will be
+   * [0, WCET - BCET].
+   * Please use this carefully, if the timer adjustment value is not the
+   * best-case interrupt latency, it will immediately fired another timer
+   * interrupt, which may result in a much larger timer interrupt latency.
+   */
+
+  ret = ret <= (CONFIG_TIMER_ADJUST_USEC / USEC_PER_TICK) ? 0 :
+        ret - (CONFIG_TIMER_ADJUST_USEC / USEC_PER_TICK);
+
+  return ret;
+}
 
 static inline_function clock_t  get_time_tick(void)
 {
@@ -370,6 +402,52 @@ static clock_t nxsched_timer_process(clock_t ticks, clock_t elapsed,
 }
 
 /****************************************************************************
+ * Name: nxsched_hrtimer_expiration
+ *
+ * Description:
+ *   This function is called by the hrtimer expipration handler to process
+ *   the scheduler and watchdogs.
+ *
+ * Input Parameters:
+ *   args - Unused
+ *   expired - The expired absolute time in nanoseconds.
+ *
+ * Returned Value:
+ *   Next delay in nanoseconds.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_HRTIMER
+static uint64_t nxsched_hrtimer_expiration(void *args, uint64_t expired)
+{
+  uint64_t   next_delay = 0u;
+  clock_t    ticks      = div_const(expired, NSEC_PER_TICK);
+  irqstate_t flags;
+  clock_t    interval;
+
+  /* Process the wdog and scheduler. */
+
+  flags = enter_critical_section();
+  g_timernested++;
+
+  interval = nxsched_timer_update(ticks, false);
+
+  g_timernested--;
+  leave_critical_section(flags);
+
+  /* Calculate the next delay. */
+
+  if (interval != CLOCK_MAX)
+    {
+      interval   = adjust_next_interval(interval);
+      next_delay = interval * NSEC_PER_TICK;
+    }
+
+  return next_delay;
+}
+#endif
+
+/****************************************************************************
  * Name:  nxsched_timer_start
  *
  * Description:
@@ -384,34 +462,21 @@ static clock_t nxsched_timer_process(clock_t ticks, clock_t elapsed,
  *
  ****************************************************************************/
 
-static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
+static inline_function
+clock_t nxsched_timer_start(clock_t ticks, clock_t interval, bool noswitches)
 {
   int ret;
 
   if (interval != CLOCK_MAX)
     {
-#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
-      interval = MIN(interval, g_oneshot_maxticks);
-#endif
+      interval = adjust_next_interval(interval);
 
-      /* Normally, timer event cannot triggered on exact time
-       * due to the existence of interrupt latency.
-       * Assuming that the interrupt latency is distributed within
-       * [Best-Case Execution Time, Worst-Case Execution Time],
-       * we can set the timer adjustment value to the BCET to
-       * reduce the latency.
-       * After the adjustment, the timer interrupt latency will be
-       * [0, WCET - BCET].
-       * Please use this carefully, if the timer adjustment value is not
-       * the best-case interrupt latency, it will immediately fired
-       * another timer interrupt, which may result in a much larger timer
-       * interrupt latency.
-       */
-
-      interval = interval <= (CONFIG_TIMER_ADJUST_USEC / USEC_PER_TICK) ? 0 :
-                 interval - (CONFIG_TIMER_ADJUST_USEC / USEC_PER_TICK);
-
-#ifdef CONFIG_SCHED_TICKLESS_ALARM
+#ifdef CONFIG_HRTIMER
+      hrtimer_async_cancel(&g_hrtimer_sched);
+      ret = hrtimer_restart_absolute(&g_hrtimer_sched,
+                                     nxsched_hrtimer_expiration, NULL,
+                                     (interval + ticks) * NSEC_PER_TICK);
+#elif defined(CONFIG_SCHED_TICKLESS_ALARM)
       /* Convert the delay to a time in the future (with respect
        * to the time when last stopped the timer).
        */
@@ -423,12 +488,14 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
       ret = up_timer_tick_start(interval);
 #endif
 
-      if (ret < 0)
-        {
-          serr("ERROR: up_timer_start/up_alarm_start failed: %d\n", ret);
-          UNUSED(ret);
-        }
+      DEBUGASSERT(ret == OK);
     }
+#ifdef CONFIG_HRTIMER
+  else if (noswitches)
+    {
+      hrtimer_async_cancel(&g_hrtimer_sched);
+    }
+#endif
 
   atomic_set(&g_timer_interval, interval);
   return interval;
@@ -437,7 +504,6 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
 static inline_function
 clock_t nxsched_timer_update(clock_t ticks, bool noswitches)
 {
-  clock_t nexttime;
   clock_t elapsed;
 
   /* Calculate the elapsed time and update clock tickbase. */
@@ -446,9 +512,7 @@ clock_t nxsched_timer_update(clock_t ticks, bool noswitches)
 
   /* Process the timer ticks and set up the next interval (or not) */
 
-  nexttime = nxsched_timer_process(ticks, elapsed, noswitches);
-
-  return nxsched_timer_start(ticks, nexttime);
+  return nxsched_timer_process(ticks, elapsed, noswitches);
 }
 
 /****************************************************************************
@@ -473,7 +537,11 @@ clock_t nxsched_timer_update(clock_t ticks, bool noswitches)
 
 void nxsched_timer_expiration(void)
 {
+#ifdef CONFIG_HRTIMER
+  hrtimer_expiry(clock_systime_nsec(), false);
+#else
   clock_t ticks;
+  clock_t next;
   irqstate_t flags = enter_critical_section();
 
   /* Get the interval associated with last expiration */
@@ -482,11 +550,13 @@ void nxsched_timer_expiration(void)
 
   up_timer_gettick(&ticks);
 
-  nxsched_timer_update(ticks, false);
+  next = nxsched_timer_update(ticks, false);
+  nxsched_timer_start(ticks, next, false);
 
   g_timernested--;
 
   leave_critical_section(flags);
+#endif
 }
 
 /****************************************************************************
@@ -529,20 +599,22 @@ void nxsched_timer_expiration(void)
 void nxsched_reassess_timer(void)
 {
   clock_t ticks;
+  clock_t next;
 
   if (!g_timernested)
     {
       /* Cancel the timer and get the current time */
-
-#ifdef CONFIG_SCHED_TICKLESS_ALARM
+#ifdef CONFIG_HRTIMER
+      up_timer_gettick(&ticks);
+#elif defined(CONFIG_SCHED_TICKLESS_ALARM)
       up_alarm_tick_cancel(&ticks);
 #else
       clock_t elapsed;
       up_timer_gettick(&ticks);
       up_timer_tick_cancel(&elapsed);
 #endif
-
-      nxsched_timer_update(ticks, true);
+      next = nxsched_timer_update(ticks, true);
+      nxsched_timer_start(ticks, next, true);
     }
 }
 
