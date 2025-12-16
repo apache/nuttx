@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/systick.h
+ * arch/arm/src/arm_m/systick.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV7_M_SYSTICK_H
-#define __ARCH_ARM_SRC_ARMV7_M_SYSTICK_H
+#ifndef __ARCH_ARM_SRC_ARM_M_SYSTICK_H
+#define __ARCH_ARM_SRC_ARM_M_SYSTICK_H
 
 /****************************************************************************
  * Included Files
@@ -60,15 +60,15 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV7M_SYSTICK
+#ifdef CONFIG_ARM_SYSTICK
 struct timer_lowerhalf_s *systick_initialize(bool coreclk, unsigned int freq,
                                              int minor);
 #else
 #  define systick_initialize(coreclk, freq, minor) NULL
-#endif /* CONFIG_ARMV7M_SYSTICK */
+#endif /* CONFIG_ARMV8M_SYSTICK */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __ARCH_ARM_SRC_ARMV7_M_SYSTICK_H */
+#endif /* __ARCH_ARM_SRC_ARM_M_SYSTICK_H */

@@ -1871,6 +1871,9 @@ endchoice # Choose ARM unwinder
 
 endif
 
+if ARCH_ARM_M
+source "arch/arm/src/arm_m/Kconfig"
+endif
 if ARCH_ARMV6M
 source "arch/arm/src/armv6-m/Kconfig"
 endif

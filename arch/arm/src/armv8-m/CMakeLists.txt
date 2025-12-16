@@ -39,10 +39,6 @@ set(SRCS
     arm_trigger_irq.c
     arm_usagefault.c)
 
-if(CONFIG_ARMV8M_SYSTICK)
-  list(APPEND SRCS arm_systick.c)
-endif()
-
 if(CONFIG_ARMV8M_ITMSYSLOG)
   list(APPEND SRCS arm_itm_syslog.c)
 endif()

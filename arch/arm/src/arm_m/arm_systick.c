@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/arm_systick.c
+ * arch/arm/src/arm_m/arm_systick.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -36,7 +36,7 @@
 #include "systick.h"
 #include "arm_internal.h"
 
-#ifdef CONFIG_ARMV7M_SYSTICK
+#ifdef CONFIG_ARM_SYSTICK
 
 /****************************************************************************
  * Pre-processor definitions
@@ -160,8 +160,8 @@ static int systick_getstatus(struct timer_lowerhalf_s *lower_,
   status->flags   |= systick_is_running() ? TCFLAGS_ACTIVE : 0;
   status->timeout  = usec_from_count(
     RELOAD2TIMEOUT(getreg32(NVIC_SYSTICK_RELOAD)), lower->freq);
-  status->timeleft = usec_from_count(
-    getreg32(NVIC_SYSTICK_CURRENT), lower->freq);
+  status->timeleft = usec_from_count(getreg32(NVIC_SYSTICK_CURRENT),
+                                     lower->freq);
 
   if (systick_irq_pending(lower))
     {
@@ -286,7 +286,7 @@ static int systick_interrupt(int irq, void *context, void *arg)
   return 0;
 }
 
-#ifdef CONFIG_ARMV7M_SYSTICK_IRQ_WQUEUE
+#ifdef CONFIG_ARM_SYSTICK_IRQ_WQUEUE
 static int systick_isr_handle(int irq, void *regs, void *arg)
 {
   return IRQ_WAKE_THREAD;
@@ -309,6 +309,7 @@ struct timer_lowerhalf_s *systick_initialize(bool coreclk,
     {
       uint32_t calib = getreg32(NVIC_SYSTICK_CALIB);
       uint32_t tenms = calib & NVIC_SYSTICK_CALIB_TENMS_MASK;
+
       lower->freq = 100 * (tenms + 1);
     }
   else
@@ -328,7 +329,7 @@ struct timer_lowerhalf_s *systick_initialize(bool coreclk,
       putreg32(NVIC_SYSTICK_CTRL_TICKINT, NVIC_SYSTICK_CTRL);
     }
 
-#ifdef CONFIG_ARMV7M_SYSTICK_IRQ_WQUEUE
+#ifdef CONFIG_ARM_SYSTICK_IRQ_WQUEUE
   irq_attach_wqueue(NVIC_IRQ_SYSTICK, systick_isr_handle,
                     systick_interrupt, lower,
                     CONFIG_ARMV7M_SYSTICK_IRQ_WQUEUE_PRIORITY);
@@ -350,4 +351,4 @@ struct timer_lowerhalf_s *systick_initialize(bool coreclk,
   return (struct timer_lowerhalf_s *)lower;
 }
 
-#endif /* CONFIG_ARMV7M_SYSTICK */
+#endif /* CONFIG_ARM_SYSTICK */

@@ -33,10 +33,6 @@ CMN_CSRCS += arm_svcall.c
 CMN_CSRCS += arm_systemreset.c
 CMN_CSRCS += arm_trigger_irq.c arm_usagefault.c arm_dbgmonitor.c
 
-ifeq ($(CONFIG_ARMV8M_SYSTICK),y)
-  CMN_CSRCS += arm_systick.c
-endif
-
 ifeq ($(CONFIG_ARMV8M_ITMSYSLOG),y)
   CMN_CSRCS += arm_itm_syslog.c
 endif
