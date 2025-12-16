@@ -716,7 +716,7 @@ void nx_start(void)
 
   /* Create initial tasks and bring-up the system */
 
-  DEBUGVERIFY(nx_bringup());
+  nx_bringup();
 
   /* Enter to idleloop */
 

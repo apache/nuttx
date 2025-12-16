@@ -502,7 +502,7 @@ static inline void nx_create_initthread(void)
  *
  ****************************************************************************/
 
-int nx_bringup(void)
+void nx_bringup(void)
 {
   sched_trace_begin();
 
@@ -557,5 +557,4 @@ int nx_bringup(void)
 #endif
 
   sched_trace_end();
-  return OK;
 }
