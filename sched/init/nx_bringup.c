@@ -194,6 +194,9 @@ static inline void nx_pgworker(void)
 #ifdef CONFIG_SCHED_WORKQUEUE
 static inline void nx_workqueues(void)
 {
+#if defined(CONFIG_SCHED_HPWORK) || defined(CONFIG_SCHED_LPWORK)
+  int ret;
+#endif
 #ifdef CONFIG_LIBC_USRWORK
   pid_t pid;
 #endif
@@ -203,7 +206,8 @@ static inline void nx_workqueues(void)
    * halves.
    */
 
-  work_start_highpri();
+  ret = work_start_highpri();
+  DEBUGASSERT(ret >= 0);
 
 #endif /* CONFIG_SCHED_HPWORK */
 
@@ -212,7 +216,8 @@ static inline void nx_workqueues(void)
    * continuation tasks
    */
 
-  work_start_lowpri();
+  ret = work_start_lowpri();
+  DEBUGASSERT(ret >= 0);
 
 #endif /* CONFIG_SCHED_LPWORK */
 
