@@ -84,7 +84,7 @@ void clkcnt_best_multshift(uint32_t freq, uint32_t scale,
 {
   uint32_t logfreq = log2floor(freq);
 
-  /* Be careful of the round-nearest behavior here.
+  /* Do not use the round-nearest behavior here.
    * It may lead to the converted result is larger than the
    * integer division.
    * In rare cases, this can cause the converted tick to be greater
@@ -103,7 +103,7 @@ void clkcnt_best_multshift(uint32_t freq, uint32_t scale,
    * affecting the accuracy of time compensation.
    */
 
-  *mult  = (((uint64_t)scale << logfreq) + (freq >> 1)) / freq;
+  *mult  = ((uint64_t)scale << logfreq) / freq;
   *shift = logfreq;
 }
 
