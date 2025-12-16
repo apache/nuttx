@@ -20,6 +20,10 @@
 
 list(APPEND SRCS arm_exception.S arm_saveusercontext.S arm_tcbinfo.c)
 
+if(CONFIG_ARM_SYSTICK)
+  list(APPEND SRCS arm_systick.c)
+endif()
+
 if(CONFIG_ENABLE_ALL_SIGNALS)
   list(APPEND SRCS arm_sigdeliver.c arm_schedulesigaction.c)
 endif()

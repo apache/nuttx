@@ -22,6 +22,10 @@
 
 CMN_ASRCS += arm_exception.S arm_saveusercontext.S
 
+ifeq ($(CONFIG_ARM_SYSTICK),y)
+  CMN_CSRCS += arm_systick.c
+endif
+
 ifeq ($(CONFIG_LIB_SYSCALL),y)
   CMN_ASRCS += arm_dispatch_syscall.S
 endif

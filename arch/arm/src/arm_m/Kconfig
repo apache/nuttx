@@ -1,0 +1,32 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "ARM_M Configuration Options"
+
+config ARM_SYSTICK
+	bool "SysTick timer driver"
+	depends on TIMER
+	default n
+	---help---
+		Enable SysTick timer driver.
+
+config ARM_SYSTICK_IRQ_WQUEUE
+	bool "attach irq by irq_attach_wqueue"
+	default n
+	depends on ARM_SYSTICK
+
+if ARM_SYSTICK_IRQ_WQUEUE
+
+config ARM_SYSTICK_IRQ_WQUEUE_PRIORITY
+	int "SYSTICK IRQ WQUEUE PRIORITY"
+	default 255
+	range 0 255
+
+config ARM_SYSTICK_IRQ_THREAD_STACK_SIZE
+	int "SYSTICK IRQ THREAD STACK SIZE"
+	default DEFAULT_TASK_STACKSIZE
+
+endif # ARM_SYSTICK_IRQ_WQUEUE
+

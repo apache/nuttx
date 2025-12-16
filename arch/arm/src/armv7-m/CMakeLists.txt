@@ -38,10 +38,6 @@ set(SRCS
     arm_usagefault.c
     arm_dbgmonitor.c)
 
-if(CONFIG_ARMV7M_SYSTICK)
-  list(APPEND SRCS arm_systick.c)
-endif()
-
 if(CONFIG_ARMV7M_ITMSYSLOG)
   list(APPEND SRCS arm_itm_syslog.c)
 endif()

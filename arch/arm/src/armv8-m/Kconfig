@@ -153,6 +153,7 @@ endif # ARMV8M_ITMSYSLOG
 config ARMV8M_SYSTICK
 	bool "SysTick timer driver"
 	depends on TIMER
+	select ARM_SYSTICK
 	---help---
 		Enable SysTick timer driver.
 
