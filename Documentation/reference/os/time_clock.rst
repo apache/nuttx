@@ -661,14 +661,20 @@ or ``kill()`` to communicate with NuttX tasks.
 High-resolution Timer Interfaces
 ================================
 
-NuttX provides a high-resolution timer facility. This facility
-allows the NuttX user to specify a hrtimer function that
-will run after a specified delay in nanosec resolution. The hrtimer
-function will run in the context of the timer interrupt handler.
-Because of this, a limited number of NuttX interfaces are available to he
-hrtimer function. However, the hrtimer function may
-use ``mq_send()``, ``sigqueue()``, ``nxevent_post()``, or ``kill()``
-to communicate with NuttX tasks.
+Hard real-time applications, such as motor control, often
+require nanosecond-level task timing, which tick-based timers
+like wdog cannot provide. Reducing the tick interval to micro-
+or nanoseconds is impractical, as it would overload the CPU with interrupts.
+
+To address this, NuttX provides a high-resolution timer (hrtimer),
+which delivers true nanosecond-level precision. Unlike wdog’s list-based timers,
+hrtimer uses a red-black tree for efficient management of large numbers of timers,
+an important advantage in hard real-time systems like vehicle control.
+
+A user can register an hrtimer callback to execute after a specified delay.
+The callback runs in the timer interrupt context, so only limited NuttX interfaces
+are available, such as ``mq_send()``, ``sigqueue()``, ``nxevent_post()``, or ``kill()``,
+to communicate with tasks.
 
 - :c:func:`hrtimer_init`
 - :c:func:`hrtimer_cancel`
