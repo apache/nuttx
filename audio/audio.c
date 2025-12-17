@@ -248,8 +248,6 @@ static int audio_close(FAR struct file *filep)
       upper->head = priv->flink;
     }
 
-  spin_unlock_irqrestore(&upper->spinlock, flags);
-
   kmm_free(priv);
 
   /*  If the reference head decrement to NULL,
@@ -269,6 +267,8 @@ static int audio_close(FAR struct file *filep)
       kumm_free(upper->status);
       upper->status = NULL;
     }
+
+  spin_unlock_irqrestore(&upper->spinlock, flags);
 
   ret = OK;
   nxmutex_unlock(&upper->lock);
@@ -664,6 +664,7 @@ static int audio_stop(FAR struct file *filep)
   FAR struct audio_lowerhalf_s *lower = upper->dev;
   FAR struct audio_openpriv_s *priv = filep->f_priv;
   int nstate;
+  int tstate;
   int ret;
 
   DEBUGASSERT(upper != NULL && lower->ops->stop != NULL);
@@ -673,6 +674,8 @@ static int audio_stop(FAR struct file *filep)
        upper->status->state == AUDIO_STATE_PAUSED) &&
       nstate == AUDIO_STATE_OPEN)
     {
+      tstate = upper->status->state;
+      audio_setstate(upper, AUDIO_STATE_DRAINING);
 #ifdef CONFIG_AUDIO_MULTI_SESSION
       ret = lower->ops->stop(lower, session);
 #else
@@ -680,17 +683,11 @@ static int audio_stop(FAR struct file *filep)
 #endif
       if (ret != OK)
         {
+          audio_setstate(upper, tstate);
           return ret;
         }
 
       memset(&upper->info, 0, sizeof(upper->info));
-
-      /* Audio_complete may have set state to AUDIO_STATE_OPEN */
-
-      if (upper->status->state != AUDIO_STATE_OPEN)
-        {
-          audio_setstate(upper, AUDIO_STATE_DRAINING);
-        }
     }
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
   else if (nstate == AUDIO_STATE_PAUSED)
@@ -1491,13 +1488,17 @@ static inline void audio_complete(FAR struct audio_upperhalf_s *upper,
 #endif
 {
   struct audio_msg_s    msg;
+  irqstate_t flags;
 
   audinfo("Entry\n");
 
-  if (upper->status != NULL)
+  flags = spin_lock_irqsave(&upper->spinlock);
+  if (upper->status && (upper->status->state == AUDIO_STATE_DRAINING))
     {
-      audio_setstate(upper, AUDIO_STATE_OPEN);
+      upper->status->state = AUDIO_STATE_OPEN;
     }
+
+  spin_unlock_irqrestore(&upper->spinlock, flags);
 
   /* Send a dequeue message to the user if a message queue is registered */
 
