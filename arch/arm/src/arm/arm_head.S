@@ -352,61 +352,61 @@ __start:
 
 	/* Clear bits (see arm.h)
 	 *
-	 * CR_R - ROM MMU protection
-	 * CR_F - Implementation defined
-	 * CR_Z - Implementation defined
+	 * SCTLR_R - ROM MMU protection
+	 * SCTLR_SW - Implementation defined
+	 * SCTLR_Z - Implementation defined
 	 *
-	 * CR_A - Alignment abort enable
-	 * CR_C - Dcache enable
-	 * CR_W - Write buffer enable
+	 * SCTLR_A - Alignment abort enable
+	 * SCTLR_C - Dcache enable
+	 * SCTLR_W - Write buffer enable
 	 *
-	 * CR_I - Icache enable
+	 * SCTLR_I - Icache enable
 	 */
 
-	bic		r0, r0, #(CR_R|CR_F|CR_Z)
-	bic		r0, r0, #(CR_A|CR_C|CR_W)
-	bic		r0, r0, #(CR_I)
+	bic		r0, r0, #(SCTLR_R|SCTLR_SW|SCTLR_Z)
+	bic		r0, r0, #(SCTLR_A|SCTLR_C|SCTLR_W)
+	bic		r0, r0, #(SCTLR_I)
 
 	/* Set bits (see arm.h)
 	 *
-	 * CR_M - MMU enable
-	 * CR_P - 32-bit exception handler
-	 * CR_D - 32-bit data address range
+	 * SCTLR_M - MMU enable
+	 * SCTLR_P - 32-bit exception handler
+	 * SCTLR_CCP15BEN - 32-bit data address range
 	 */
 
-	orr		r0, r0, #(CR_M|CR_P|CR_D)
+	orr		r0, r0, #(SCTLR_M|SCTLR_P|SCTLR_CCP15BEN)
 
 	/* In most architectures, vectors are relocated to 0xffff0000.
 	 * -- but not all
 	 *
-	 * CR_S - System MMU protection
-	 * CR_V - Vectors relocated to 0xffff0000
+	 * SCTLR_S - System MMU protection
+	 * SCTLR_V - Vectors relocated to 0xffff0000
 	 */
 
 #ifndef CONFIG_ARCH_LOWVECTORS
-	orr		r0, r0, #(CR_S|CR_V)
+	orr		r0, r0, #(SCTLR_S|SCTLR_V)
 #else
-	orr		r0, r0, #(CR_S)
+	orr		r0, r0, #(SCTLR_S)
 #endif
-	/* CR_RR - Round Robin cache replacement */
+	/* SCTLR_RR - Round Robin cache replacement */
 
 #ifdef CONFIG_ARM_CACHE_ROUND_ROBIN
-	orr		r0, r0, #(CR_RR)
+	orr		r0, r0, #(SCTLR_RR)
 #endif
-	/* CR_C - Dcache enable */
+	/* SCTLR_C - Dcache enable */
 
 #ifndef CONFIG_ARM_DCACHE_DISABLE
-	orr		r0, r0, #(CR_C)
+	orr		r0, r0, #(SCTLR_C)
 #endif
-	/* CR_C - Dcache enable */
+	/* SCTLR_C - Dcache enable */
 
 #ifndef CONFIG_ARM_ICACHE_DISABLE
-	orr		r0, r0, #(CR_I)
+	orr		r0, r0, #(SCTLR_I)
 #endif
-	/* CR_A - Alignment abort enable */
+	/* SCTLR_A - Alignment abort enable */
 
 #ifdef CONFIG_ARM_ALIGNMENT_TRAP
-	orr		r0, r0, #(CR_A)
+	orr		r0, r0, #(SCTLR_A)
 #endif
 	mcr		p15, 0, r0, c1, c0, 0		/* write control reg */
 
