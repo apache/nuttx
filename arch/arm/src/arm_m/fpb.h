@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/fpb.h
+ * arch/arm/src/arm_m/fpb.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV8_M_FPB_H
-#define __ARCH_ARM_SRC_ARMV8_M_FPB_H
+#ifndef __ARCH_ARM_SRC_ARM_M_FPB_H
+#define __ARCH_ARM_SRC_ARM_M_FPB_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -116,7 +116,7 @@
 
 #define FPB_CTRL_KEY_SHIFT        1
 #define FPB_CTRL_KEY_MASK         0x00000002
-#  define FPB_CTRL_KEY            0x00000002
+#define FPB_CTRL_KEY              0x00000002
 
 /* ENABLE
  *
@@ -128,7 +128,7 @@
 
 #define FPB_CTRL_ENABLE_SHIFT     0
 #define FPB_CTRL_ENABLE_MASK      0x00000001
-#  define FPB_CTRL_ENABLE         0x00000001
+#define FPB_CTRL_ENABLE           0x00000001
 
 /* FPB_REMAP */
 
@@ -147,7 +147,7 @@
 
 #define FPB_REMAP_RMPSPT_SHIFT    29
 #define FPB_REMAP_RMPSPT_MASK     0x20000000
-#  define FPB_REMAP_RMPSPT        0x20000000
+#define FPB_REMAP_RMPSPT          0x20000000
 
 /* FPB_COMP0 - FPB_COMP7 */
 
@@ -184,6 +184,6 @@
 
 #define FPB_COMP0_ENABLE_MASK     0x00000001
 #define FPB_COMP0_ENABLE_SHIFT    0
-#  define FPB_COMP0_ENABLE        0x00000001
+#define FPB_COMP0_ENABLE          0x00000001
 
-#endif /* __ARCH_ARM_SRC_ARMV8_M_FPB_H */
+#endif /* __ARCH_ARM_SRC_ARM_M_FPB_H */

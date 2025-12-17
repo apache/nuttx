@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/l2cc.h
+ * arch/arm/src/arm_m/l2cc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV8_M_L2CC_H
-#define __ARCH_ARM_SRC_ARMV8_M_L2CC_H
+#ifndef __ARCH_ARM_SRC_ARM_M_L2CC_H
+#define __ARCH_ARM_SRC_ARM_M_L2CC_H
 
 /****************************************************************************
  * Included Files
@@ -40,11 +40,8 @@
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
-#define EXTERN extern "C"
 extern "C"
 {
-#else
-#define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -231,7 +228,6 @@ void l2cc_flush_all(void);
 
 void l2cc_flush(uint32_t startaddr, uint32_t endaddr);
 
-#undef EXTERN
 #ifdef __cplusplus
 }
 #endif
@@ -255,4 +251,4 @@ void l2cc_flush(uint32_t startaddr, uint32_t endaddr);
 #  define l2cc_flush(s,e) UNUSED(s)
 
 #endif /* CONFIG_ARCH_L2CACHE */
-#endif /* __ARCH_ARM_SRC_ARMV8_M_L2CC_H */
+#endif /* __ARCH_ARM_SRC_ARM_M_L2CC_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/pmu.h
+ * arch/arm/src/arm_m/pmu.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV8_M_PMU_H
-#define __ARCH_ARM_SRC_ARMV8_M_PMU_H
+#ifndef __ARCH_ARM_SRC_ARM_M_PMU_H
+#define __ARCH_ARM_SRC_ARM_M_PMU_H
 
 /****************************************************************************
  * Included Files
@@ -732,4 +732,4 @@ inline void pmu_cntr_increment(uint32_t mask)
   putreg32(mask, PMU_SWINC);
 }
 
-#endif
+#endif /* __ARCH_ARM_SRC_ARM_M_PMU_H */

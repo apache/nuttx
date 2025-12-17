@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/dwt.h
+ * arch/arm/src/arm_m/dwt.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2014 Pierre-noel Bouteville. All rights reserved.
@@ -25,9 +25,9 @@
  *  PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS
  *  AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
  *  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- *  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- *  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- *  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ *  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+ *  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ *  OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  *  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
@@ -60,8 +60,14 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV8_M_DWT_H
-#define __ARCH_ARM_SRC_ARMV8_M_DWT_H
+#ifndef __ARCH_ARM_SRC_ARM_M_DWT_H
+#define __ARCH_ARM_SRC_ARM_M_DWT_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include "arm_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -84,50 +90,26 @@
 #define DWT_FOLDCNT                  (DWT_BASE + 0x0018)  /* Folded-instruction Count Register */
 #define DWT_PCSR                     (DWT_BASE + 0x001c)  /* Program Counter Sample Register */
 #define DWT_COMP0                    (DWT_BASE + 0x0020)  /* Comparator Register 0 */
-#define DWT_FUNCTION0                (DWT_BASE + 0x0028)  /* Function Register 0 */
-#define DWT_MASK0                    (DWT_BASE + 0x002c)  /* Mask Register 0 */
 #define DWT_COMP1                    (DWT_BASE + 0x0030)  /* Comparator Register 1 */
-#define DWT_FUNCTION1                (DWT_BASE + 0x0038)  /* Function Register 1 */
-#define DWT_MASK1                    (DWT_BASE + 0x003c)  /* Mask Register 1 */
 #define DWT_COMP2                    (DWT_BASE + 0x0040)  /* Comparator Register 2 */
-#define DWT_FUNCTION2                (DWT_BASE + 0x0048)  /* Function Register 2 */
-#define DWT_MASK2                    (DWT_BASE + 0x004c)  /* Mask Register 2 */
 #define DWT_COMP3                    (DWT_BASE + 0x0050)  /* Comparator Register 3 */
+#define DWT_FUNCTION0                (DWT_BASE + 0x0028)  /* Function Register 0 */
+#define DWT_FUNCTION1                (DWT_BASE + 0x0038)  /* Function Register 1 */
+#define DWT_FUNCTION2                (DWT_BASE + 0x0048)  /* Function Register 2 */
 #define DWT_FUNCTION3                (DWT_BASE + 0x0058)  /* Function Register 3 */
-#define DWT_MASK3                    (DWT_BASE + 0x005c)  /* Mask Register 3 */
-#define DWT_COMP4                    (DWT_BASE + 0x0060)  /* Comparator Register 4 */
-#define DWT_FUNCTION4                (DWT_BASE + 0x0068)  /* Function Register 4 */
-#define DWT_MASK4                    (DWT_BASE + 0x006c)  /* Mask Register 4 */
-#define DWT_COMP5                    (DWT_BASE + 0x0070)  /* Comparator Register 5 */
-#define DWT_FUNCTION5                (DWT_BASE + 0x0078)  /* Function Register 5 */
-#define DWT_MASK5                    (DWT_BASE + 0x007c)  /* Mask Register 5 */
-#define DWT_COMP6                    (DWT_BASE + 0x0080)  /* Comparator Register 6 */
-#define DWT_FUNCTION6                (DWT_BASE + 0x0088)  /* Function Register 6 */
-#define DWT_MASK6                    (DWT_BASE + 0x008c)  /* Mask Register 6 */
-#define DWT_COMP7                    (DWT_BASE + 0x0090)  /* Comparator Register 7 */
-#define DWT_FUNCTION7                (DWT_BASE + 0x0098)  /* Function Register 7 */
-#define DWT_MASK7                    (DWT_BASE + 0x009c)  /* Mask Register 7 */
-#define DWT_COMP8                    (DWT_BASE + 0x00a0)  /* Comparator Register 8 */
-#define DWT_FUNCTION8                (DWT_BASE + 0x00a8)  /* Function Register 8 */
-#define DWT_MASK8                    (DWT_BASE + 0x00ac)  /* Mask Register 8 */
-#define DWT_COMP9                    (DWT_BASE + 0x00b0)  /* Comparator Register 9 */
-#define DWT_FUNCTION9                (DWT_BASE + 0x00b8)  /* Function Register 9 */
-#define DWT_MASK9                    (DWT_BASE + 0x00bc)  /* Mask Register 9 */
-#define DWT_COMP10                   (DWT_BASE + 0x00c0)  /* Comparator Register 10 */
-#define DWT_FUNCTION10               (DWT_BASE + 0x00c8)  /* Function Register 10 */
-#define DWT_MASK10                   (DWT_BASE + 0x00cc)  /* Mask Register 10 */
-#define DWT_COMP11                   (DWT_BASE + 0x00d0)  /* Comparator Register 11 */
-#define DWT_FUNCTION11               (DWT_BASE + 0x00d8)  /* Function Register 11 */
-#define DWT_MASK11                   (DWT_BASE + 0x00dc)  /* Mask Register 11 */
-#define DWT_COMP12                   (DWT_BASE + 0x00e0)  /* Comparator Register 12 */
-#define DWT_FUNCTION12               (DWT_BASE + 0x00e8)  /* Function Register 12 */
-#define DWT_MASK12                   (DWT_BASE + 0x00ec)  /* Mask Register 12 */
-#define DWT_COMP13                   (DWT_BASE + 0x00f0)  /* Comparator Register 13 */
-#define DWT_FUNCTION13               (DWT_BASE + 0x00f8)  /* Function Register 13 */
-#define DWT_MASK13                   (DWT_BASE + 0x00fc)  /* Mask Register 13 */
-#define DWT_COMP14                   (DWT_BASE + 0x0100)  /* Comparator Register 14 */
-#define DWT_FUNCTION14               (DWT_BASE + 0x0108)  /* Function Register 14 */
-#define DWT_MASK14                   (DWT_BASE + 0x010c)  /* Mask Register 14 */
+
+#ifdef CONFIG_ARCH_ARMV7M
+#  define DWT_MASK0                  (DWT_BASE + 0x0024)  /* Mask Register 0 */
+#  define DWT_MASK1                  (DWT_BASE + 0x0034)  /* Mask Register 1 */
+#  define DWT_MASK2                  (DWT_BASE + 0x0044)  /* Mask Register 2 */
+#  define DWT_MASK3                  (DWT_BASE + 0x0054)  /* Mask Register 3 */
+#elif defined(CONFIG_ARCH_ARMV8M)
+#  define DWT_MASK0                  (DWT_BASE + 0x002c)  /* Mask Register 0 */
+#  define DWT_MASK1                  (DWT_BASE + 0x003c)  /* Mask Register 1 */
+#  define DWT_MASK2                  (DWT_BASE + 0x004c)  /* Mask Register 2 */
+#  define DWT_MASK3                  (DWT_BASE + 0x005c)  /* Mask Register 3 */
+#endif
+#define DWT_LAR                      (DWT_BASE + 0x0FB0)  /* Lock Access Register */
 
 /* DWT Register Bit Field Definitions ***************************************/
 
@@ -217,7 +199,7 @@
 #define DWT_FUNCTION_DATAVMATCH_SHIFT 8
 #define DWT_FUNCTION_DATAVMATCH_MASK  (0x1ul << DWT_FUNCTION_DATAVMATCH_SHIFT)
 #define DWT_FUNCTION_CYCMATCH_SHIFT   7
-#define DWT_FUNCTION_CYCMATCH_MASK    0x1ul << DWT_FUNCTION_CYCMATCH_SHIFT)
+#define DWT_FUNCTION_CYCMATCH_MASK    (0x1ul << DWT_FUNCTION_CYCMATCH_SHIFT)
 #define DWT_FUNCTION_EMITRANGE_SHIFT  5
 #define DWT_FUNCTION_EMITRANGE_MASK   (0x1ul << DWT_FUNCTION_EMITRANGE_SHIFT)
 #define DWT_FUNCTION_FUNCTION_SHIFT   0
@@ -225,9 +207,142 @@
 
 /* Two comparator are consecutive flags */
 
-#define DWT_FUNCTION_WATCHPOINT_CO    (0x17ul << DWT_FUNCTION_FUNCTION_SHIFT)
-#define DWT_FUNCTION_WATCHPOINT_RO    (0x16ul << DWT_FUNCTION_FUNCTION_SHIFT)
-#define DWT_FUNCTION_WATCHPOINT_WO    (0x15ul << DWT_FUNCTION_FUNCTION_SHIFT)
-#define DWT_FUNCTION_WATCHPOINT_RW    (0x14ul << DWT_FUNCTION_FUNCTION_SHIFT)
+#ifdef CONFIG_ARCH_ARMV7M
+#  define DWT_FUNCTION_WATCHPOINT_RO  (0x05ul << DWT_FUNCTION_FUNCTION_SHIFT)
+#  define DWT_FUNCTION_WATCHPOINT_WO  (0x06ul << DWT_FUNCTION_FUNCTION_SHIFT)
+#  define DWT_FUNCTION_WATCHPOINT_RW  (0x07ul << DWT_FUNCTION_FUNCTION_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_ARMV8_M_DWT_H */
+#  define DWT_DATAVSIZE_BYTE          (0x00ul << DWT_FUNCTION_DATAVSIZE_SHIFT)
+#  define DWT_DATAVSIZE_HALFWORD      (0x01ul << DWT_FUNCTION_DATAVSIZE_SHIFT)
+#  define DWT_DATAVSIZE_WORD          (0x02ul << DWT_FUNCTION_DATAVSIZE_SHIFT)
+#elif defined(CONFIG_ARCH_ARMV8M)
+#  define DWT_FUNCTION_WATCHPOINT_CO  (0x17ul << DWT_FUNCTION_FUNCTION_SHIFT)
+#  define DWT_FUNCTION_WATCHPOINT_RO  (0x16ul << DWT_FUNCTION_FUNCTION_SHIFT)
+#  define DWT_FUNCTION_WATCHPOINT_WO  (0x15ul << DWT_FUNCTION_FUNCTION_SHIFT)
+#  define DWT_FUNCTION_WATCHPOINT_RW  (0x14ul << DWT_FUNCTION_FUNCTION_SHIFT)
+#endif
+
+#define DWT_LAR_ACCESS                (0xC5ACCE55) /* Lock Access Magic Value */
+
+#define DWT_GRANT_ACCESS()            (putreg32(DWT_LAR_ACCESS, DWT_LAR))
+#define DWT_REVOKE_ACCESS()           (putreg32(~DWT_LAR_ACCESS, DWT_LAR))
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+static inline void dwt_comparator_setup(int compnum, uint32_t comp,
+                                        uint32_t mask, uint32_t func)
+{
+  DWT_GRANT_ACCESS();
+  switch (compnum)
+    {
+        case 0:
+            putreg32(comp, DWT_COMP0);
+            putreg32(mask, DWT_MASK0);
+            putreg32(func, DWT_FUNCTION0);
+            break;
+        case 1:
+            putreg32(comp, DWT_COMP1);
+            putreg32(mask, DWT_MASK1);
+            putreg32(func, DWT_FUNCTION1);
+            break;
+        case 2:
+            putreg32(comp, DWT_COMP2);
+            putreg32(mask, DWT_MASK2);
+            putreg32(func, DWT_FUNCTION2);
+            break;
+        case 3:
+            putreg32(comp, DWT_COMP3);
+            putreg32(mask, DWT_MASK3);
+            putreg32(func, DWT_FUNCTION3);
+            break;
+        default:
+            break;
+    }
+  DWT_REVOKE_ACCESS();
+}
+
+static inline void dwt_comparator_reset(int compnum)
+{
+  DWT_GRANT_ACCESS();
+  switch (compnum)
+    {
+        case 0:
+            putreg32(0, DWT_COMP0);
+            putreg32(0, DWT_MASK0);
+            putreg32(0, DWT_FUNCTION0);
+            break;
+        case 1:
+            putreg32(0, DWT_COMP1);
+            putreg32(0, DWT_MASK1);
+            putreg32(0, DWT_FUNCTION1);
+            break;
+        case 2:
+            putreg32(0, DWT_COMP2);
+            putreg32(0, DWT_MASK2);
+            putreg32(0, DWT_FUNCTION2);
+            break;
+        case 3:
+            putreg32(0, DWT_COMP3);
+            putreg32(0, DWT_MASK3);
+            putreg32(0, DWT_FUNCTION3);
+            break;
+        default:
+            break;
+    }
+  DWT_REVOKE_ACCESS();
+}
+
+static inline uint32_t dwt_comparator_block(int compnum)
+{
+  uint32_t funcval = 0;
+  DWT_GRANT_ACCESS();
+  switch (compnum)
+    {
+        case 0:
+            funcval = getreg32(DWT_FUNCTION0);
+            putreg32(0, DWT_FUNCTION0);
+            break;
+        case 1:
+            funcval = getreg32(DWT_FUNCTION1);
+            putreg32(0, DWT_FUNCTION1);
+            break;
+        case 2:
+            funcval = getreg32(DWT_FUNCTION2);
+            putreg32(0, DWT_FUNCTION2);
+            break;
+        case 3:
+            funcval = getreg32(DWT_FUNCTION3);
+            putreg32(0, DWT_FUNCTION3);
+            break;
+        default:
+            break;
+    }
+  DWT_REVOKE_ACCESS();
+  return funcval;
+}
+
+static inline void dwt_comparator_restore(int compnum, uint32_t func)
+{
+  DWT_GRANT_ACCESS();
+  switch (compnum)
+    {
+        case 0:
+            putreg32(func, DWT_FUNCTION0);
+            break;
+        case 1:
+            putreg32(func, DWT_FUNCTION1);
+            break;
+        case 2:
+            putreg32(func, DWT_FUNCTION2);
+            break;
+        case 3:
+            putreg32(func, DWT_FUNCTION3);
+            break;
+        default:
+            break;
+    }
+  DWT_REVOKE_ACCESS();
+}
+#endif /* __ARCH_ARM_SRC_ARM_M_DWT_H */
