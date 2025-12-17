@@ -143,6 +143,44 @@ To run it with QEMU, use the following command::
       -mon chardev=con,mode=readline \
       -bios none -kernel nuttx
 
+lvgl64_vector
+-------------
+
+This configuration uses the LVGL graphics framework with RISC-V 64-bit support
+and Vector Extension (V-extension) enabled. It allows developers to create
+graphical applications with LVGL on RISC-V QEMU while leveraging the Vector
+extension for potential SIMD optimization.
+
+Features:
+
+- 64-bit RISC-V architecture (RV64)
+- RISC-V Vector Extension (RVV/V-extension) support
+- LVGL graphics framework with 32-bit color depth
+- VirtIO GPU device for framebuffer access
+- NSH shell with built-in applications
+
+To build it::
+
+    $ ./tools/configure.sh rv-virt:lvgl64_vector
+    $ make -j$(nproc)
+
+To run it with QEMU with graphics output::
+
+    $ qemu-system-riscv64 -semihosting -M virt,aclint=on -cpu rv64,v=true -smp 1 \
+      -chardev stdio,id=con,mux=on \
+      -serial chardev:con \
+      -device virtio-gpu-device,xres=640,yres=480,bus=virtio-mmio-bus.0 \
+      -device virtio-mouse-device,bus=virtio-mmio-bus.1 \
+      -mon chardev=con,mode=readline \
+      -bios none -kernel nuttx
+
+After booting into the NSH shell, you can run the LVGL demo with::
+
+    nsh> lvgldemo
+
+This configuration is suitable for developing and testing LVGL applications
+on 64-bit RISC-V targets with Vector extension support.
+
 knetnsh64
 ---------
 
