@@ -39,3 +39,7 @@ endif
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
   CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
 endif
+
+ifeq ($(CONFIG_ARM_COREDUMP_REGION),y)
+  CMN_CSRCS += arm_dumpnvic.c
+endif

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv6-m/nvic.h
+ * arch/arm/src/arm_m/nvic_legacy.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV6_M_NVIC_H
-#define __ARCH_ARM_SRC_ARMV6_M_NVIC_H
+#ifndef __ARCH_ARM_SRC_ARM_M_NVIC_LEGACY_H
+#define __ARCH_ARM_SRC_ARM_M_NVIC_LEGACY_H
 
 /****************************************************************************
  * Included Files
@@ -77,14 +77,14 @@
 #define ARMV6M_NVIC_ISPR_OFFSET        0x0100  /* Interrupt set-pending register */
 #define ARMV6M_NVIC_ICPR_OFFSET        0x0180  /* Interrupt clear-pending register */
 #define ARMV6M_NVIC_IPR_OFFSET(n)      (0x0300 + ((n) << 2))
-#  define ARMV6M_NVIC_IPR0_OFFSET      0x0300  /* Interrupt priority register 0 */
-#  define ARMV6M_NVIC_IPR1_OFFSET      0x0304  /* Interrupt priority register 1 */
-#  define ARMV6M_NVIC_IPR2_OFFSET      0x0308  /* Interrupt priority register 2 */
-#  define ARMV6M_NVIC_IPR3_OFFSET      0x030c  /* Interrupt priority register 3 */
-#  define ARMV6M_NVIC_IPR4_OFFSET      0x0310  /* Interrupt priority register 4 */
-#  define ARMV6M_NVIC_IPR5_OFFSET      0x0314  /* Interrupt priority register 5 */
-#  define ARMV6M_NVIC_IPR6_OFFSET      0x0318  /* Interrupt priority register 6 */
-#  define ARMV6M_NVIC_IPR7_OFFSET      0x031c  /* Interrupt priority register 7 */
+#define ARMV6M_NVIC_IPR0_OFFSET        0x0300  /* Interrupt priority register 0 */
+#define ARMV6M_NVIC_IPR1_OFFSET        0x0304  /* Interrupt priority register 1 */
+#define ARMV6M_NVIC_IPR2_OFFSET        0x0308  /* Interrupt priority register 2 */
+#define ARMV6M_NVIC_IPR3_OFFSET        0x030c  /* Interrupt priority register 3 */
+#define ARMV6M_NVIC_IPR4_OFFSET        0x0310  /* Interrupt priority register 4 */
+#define ARMV6M_NVIC_IPR5_OFFSET        0x0314  /* Interrupt priority register 5 */
+#define ARMV6M_NVIC_IPR6_OFFSET        0x0318  /* Interrupt priority register 6 */
+#define ARMV6M_NVIC_IPR7_OFFSET        0x031c  /* Interrupt priority register 7 */
 
 /* System control register offsets (all relative to ARMV6M_SYSCON2_BASE) */
 
@@ -113,14 +113,14 @@
 #define ARMV6M_NVIC_ISPR               (ARMV6M_NVIC1_BASE+ARMV6M_NVIC_ISPR_OFFSET)
 #define ARMV6M_NVIC_ICPR               (ARMV6M_NVIC1_BASE+ARMV6M_NVIC_ICPR_OFFSET)
 #define ARMV6M_NVIC_IPR(n)             (ARMV6M_NVIC1_BASE+ARMV6M_NVIC_IPR_OFFSET(n))
-#  define ARMV6M_NVIC_IPR0             (ARMV6M_NVIC1_BASE+ARMV6M_NVIC_IPR0_OFFSET)
-#  define ARMV6M_NVIC_IPR1             (ARMV6M_NVIC1_BASE+ARMV6M_NVIC_IPR1_OFFSET)
-#  define ARMV6M_NVIC_IPR2             (ARMV6M_NVIC1_BASE+ARMV6M_NVIC_IPR2_OFFSET)
-#  define ARMV6M_NVIC_IPR3             (ARMV6M_NVIC1_BASE+ARMV6M_NVIC_IPR3_OFFSET)
-#  define ARMV6M_NVIC_IPR4             (ARMV6M_NVIC1_BASE+ARMV6M_NVIC_IPR4_OFFSET)
-#  define ARMV6M_NVIC_IPR5             (ARMV6M_NVIC1_BASE+ARMV6M_NVIC_IPR5_OFFSET)
-#  define ARMV6M_NVIC_IPR6             (ARMV6M_NVIC1_BASE+ARMV6M_NVIC_IPR6_OFFSET)
-#  define ARMV6M_NVIC_IPR7             (ARMV6M_NVIC1_BASE+ARMV6M_NVIC_IPR7_OFFSET)
+#define ARMV6M_NVIC_IPR0               (ARMV6M_NVIC1_BASE+ARMV6M_NVIC_IPR0_OFFSET)
+#define ARMV6M_NVIC_IPR1               (ARMV6M_NVIC1_BASE+ARMV6M_NVIC_IPR1_OFFSET)
+#define ARMV6M_NVIC_IPR2               (ARMV6M_NVIC1_BASE+ARMV6M_NVIC_IPR2_OFFSET)
+#define ARMV6M_NVIC_IPR3               (ARMV6M_NVIC1_BASE+ARMV6M_NVIC_IPR3_OFFSET)
+#define ARMV6M_NVIC_IPR4               (ARMV6M_NVIC1_BASE+ARMV6M_NVIC_IPR4_OFFSET)
+#define ARMV6M_NVIC_IPR5               (ARMV6M_NVIC1_BASE+ARMV6M_NVIC_IPR5_OFFSET)
+#define ARMV6M_NVIC_IPR6               (ARMV6M_NVIC1_BASE+ARMV6M_NVIC_IPR6_OFFSET)
+#define ARMV6M_NVIC_IPR7               (ARMV6M_NVIC1_BASE+ARMV6M_NVIC_IPR7_OFFSET)
 
 /* System control register addresses */
 
@@ -162,120 +162,120 @@
 
 #define NVIC_IPR_0_SHIFT               (0)        /* Bits 0-7:  PRI_(4n) */
 #define NVIC_IPR_0_MASK                (0xff << NVIC_IPR_0_SHIFT)
-#  define NVIC_IPR_0(p)                ((p) << NVIC_IPR_0_SHIFT)
+#define NVIC_IPR_0(p)                  ((p) << NVIC_IPR_0_SHIFT)
 #define NVIC_IPR_1_SHIFT               (8)        /* Bits 8-15:  PRI_(4n+1) */
 #define NVIC_IPR_1_MASK                (0xff << NVIC_IPR_1_SHIFT)
-#  define NVIC_IPR_1(p)                ((p) << NVIC_IPR_1_SHIFT)
+#define NVIC_IPR_1(p)                  ((p) << NVIC_IPR_1_SHIFT)
 #define NVIC_IPR_2_SHIFT               (16)       /* Bits 16-23:  PRI_(4n+2) */
 #define NVIC_IPR_2_MASK                (0xff << NVIC_IPR_2_SHIFT)
-#  define NVIC_IPR_2(p)                ((p) << NVIC_IPR_2_SHIFT)
+#define NVIC_IPR_2(p)                  ((p) << NVIC_IPR_2_SHIFT)
 #define NVIC_IPR_3_SHIFT               (24)       /* Bits 24-31:  PRI_(4n+3) */
 #define NVIC_IPR_3_MASK                (0xff << NVIC_IPR_3_SHIFT)
-#  define NVIC_IPR_3(p)                ((p) << NVIC_IPR_3_SHIFT)
+#define NVIC_IPR_3(p)                  ((p) << NVIC_IPR_3_SHIFT)
 
 #define NVIC_IPR0_0_SHIFT              (0)        /* Bits 0-7:   PRI_0 */
 #define NVIC_IPR0_0_MASK               (0xff << NVIC_IPR0_0_SHIFT)
-#  define NVIC_IPR0_0(p)               ((p) << NVIC_IPR0_0_SHIFT)
+#define NVIC_IPR0_0(p)                 ((p) << NVIC_IPR0_0_SHIFT)
 #define NVIC_IPR0_1_SHIFT              (8)        /* Bits 8-15:  PRI_1 */
 #define NVIC_IPR0_1_MASK               (0xff << NVIC_IPR0_1_SHIFT)
-#  define NVIC_IPR0_1(p)               ((p) << NVIC_IPR0_1_SHIFT)
+#define NVIC_IPR0_1(p)                 ((p) << NVIC_IPR0_1_SHIFT)
 #define NVIC_IPR0_2_SHIFT              (16)       /* Bits 16-23: PRI_2 */
 #define NVIC_IPR0_2_MASK               (0xff << NVIC_IPR0_2_SHIFT)
-#  define NVIC_IPR0_2(p)               ((p) << NVIC_IPR0_2_SHIFT)
+#define NVIC_IPR0_2(p)                 ((p) << NVIC_IPR0_2_SHIFT)
 #define NVIC_IPR0_3_SHIFT              (24)       /* Bits 24-31: PRI_3 */
 #define NVIC_IPR0_3_MASK               (0xff << NVIC_IPR0_3_SHIFT)
-#  define NVIC_IPR0_3(p)               ((p) << NVIC_IPR0_3_SHIFT)
+#define NVIC_IPR0_3(p)                 ((p) << NVIC_IPR0_3_SHIFT)
 
 #define NVIC_IPR1_4_SHIFT              (0)        /* Bits 0-7:   PRI_4 */
 #define NVIC_IPR1_4_MASK               (0xff << NVIC_IPR1_4_SHIFT)
-#  define NVIC_IPR1_4(p)               ((p) << NVIC_IPR1_4_SHIFT)
+#define NVIC_IPR1_4(p)                 ((p) << NVIC_IPR1_4_SHIFT)
 #define NVIC_IPR1_5_SHIFT              (8)        /* Bits 8-15:  PRI_5 */
 #define NVIC_IPR1_5_MASK               (0xff << NVIC_IPR1_5_SHIFT)
-#  define NVIC_IPR1_5(p)               ((p) << NVIC_IPR1_5_SHIFT)
+#define NVIC_IPR1_5(p)                 ((p) << NVIC_IPR1_5_SHIFT)
 #define NVIC_IPR1_6_SHIFT              (16)       /* Bits 16-23: PRI_6 */
 #define NVIC_IPR1_6_MASK               (0xff << NVIC_IPR1_6_SHIFT)
-#  define NVIC_IPR1_6(p)               ((p) << NVIC_IPR1_6_SHIFT)
+#define NVIC_IPR1_6(p)                 ((p) << NVIC_IPR1_6_SHIFT)
 #define NVIC_IPR1_7_SHIFT              (24)       /* Bits 24-31: PRI_7 */
 #define NVIC_IPR1_7_MASK               (0xff << NVIC_IPR1_7_SHIFT)
-#  define NVIC_IPR1_7(p)               ((p) << NVIC_IPR1_7_SHIFT)
+#define NVIC_IPR1_7(p)                 ((p) << NVIC_IPR1_7_SHIFT)
 
 #define NVIC_IPR2_8_SHIFT              (0)        /* Bits 0-7:   PRI_8 */
 #define NVIC_IPR2_8_MASK               (0xff << NVIC_IPR2_8_SHIFT)
-#  define NVIC_IPR2_8(p)               ((p) << NVIC_IPR2_8_SHIFT)
+#define NVIC_IPR2_8(p)                 ((p) << NVIC_IPR2_8_SHIFT)
 #define NVIC_IPR2_9_SHIFT              (8)        /* Bits 8-15:  PRI_9 */
 #define NVIC_IPR2_9_MASK               (0xff << NVIC_IPR2_9_SHIFT)
-#  define NVIC_IPR2_9(p)               ((p) << NVIC_IPR2_9_SHIFT)
+#define NVIC_IPR2_9(p)                 ((p) << NVIC_IPR2_9_SHIFT)
 #define NVIC_IPR2_10_SHIFT             (16)       /* Bits 16-23: PRI_10 */
 #define NVIC_IPR2_10_MASK              (0xff << NVIC_IPR2_10_SHIFT)
-#  define NVIC_IPR2_10(p)              ((p) << NVIC_IPR2_10_SHIFT)
+#define NVIC_IPR2_10(p)                ((p) << NVIC_IPR2_10_SHIFT)
 #define NVIC_IPR2_11_SHIFT             (24)       /* Bits 24-31: PRI_11 */
 #define NVIC_IPR2_11_MASK              (0xff << NVIC_IPR2_11_SHIFT)
-#  define NVIC_IPR2_11(p)              ((p) << NVIC_IPR2_11_SHIFT)
+#define NVIC_IPR2_11(p)                ((p) << NVIC_IPR2_11_SHIFT)
 
 #define NVIC_IPR3_12_SHIFT             (0)        /* Bits 0-7:   PRI_12 */
 #define NVIC_IPR3_12_MASK              (0xff << NVIC_IPR3_12_SHIFT)
-#  define NVIC_IPR3_12(p)              ((p) << NVIC_IPR3_12_SHIFT)
+#define NVIC_IPR3_12(p)                ((p) << NVIC_IPR3_12_SHIFT)
 #define NVIC_IPR3_13_SHIFT             (8)        /* Bits 8-15:  PRI_13 */
 #define NVIC_IPR3_13_MASK              (0xff << NVIC_IPR3_13_SHIFT)
-#  define NVIC_IPR3_13(p)              ((p) << NVIC_IPR3_13_SHIFT)
+#define NVIC_IPR3_13(p)                ((p) << NVIC_IPR3_13_SHIFT)
 #define NVIC_IPR3_14_SHIFT             (16)       /* Bits 16-23: PRI_14 */
 #define NVIC_IPR3_14_MASK              (0xff << NVIC_IPR3_14_SHIFT)
-#  define NVIC_IPR3_14(p)              ((p) << NVIC_IPR3_14_SHIFT)
+#define NVIC_IPR3_14(p)                ((p) << NVIC_IPR3_14_SHIFT)
 #define NVIC_IPR3_15_SHIFT             (24)       /* Bits 24-31: PRI_15 */
 #define NVIC_IPR3_15_MASK              (0xff << NVIC_IPR3_15_SHIFT)
-#  define NVIC_IPR3_15(p)              ((p) << NVIC_IPR3_15_SHIFT)
+#define NVIC_IPR3_15(p)                ((p) << NVIC_IPR3_15_SHIFT)
 
 #define NVIC_IPR4_16_SHIFT             (0)        /* Bits 0-7:   PRI_16 */
 #define NVIC_IPR4_16_MASK              (0xff << NVIC_IPR4_16_SHIFT)
-#  define NVIC_IPR4_16(p)              ((p) << NVIC_IPR4_16_SHIFT)
+#define NVIC_IPR4_16(p)                ((p) << NVIC_IPR4_16_SHIFT)
 #define NVIC_IPR4_17_SHIFT             (8)        /* Bits 8-15:  PRI_17 */
 #define NVIC_IPR4_17_MASK              (0xff << NVIC_IPR4_17_SHIFT)
-#  define NVIC_IPR4_17(p)              ((p) << NVIC_IPR4_17_SHIFT)
+#define NVIC_IPR4_17(p)                ((p) << NVIC_IPR4_17_SHIFT)
 #define NVIC_IPR4_18_SHIFT             (16)       /* Bits 16-23: PRI_18 */
 #define NVIC_IPR4_18_MASK              (0xff << NVIC_IPR4_18_SHIFT)
-#  define NVIC_IPR4_18(p)              ((p) << NVIC_IPR4_18_SHIFT)
+#define NVIC_IPR4_18(p)                ((p) << NVIC_IPR4_18_SHIFT)
 #define NVIC_IPR4_19_SHIFT             (24)       /* Bits 24-31: PRI_19 */
 #define NVIC_IPR4_19_MASK              (0xff << NVIC_IPR4_19_SHIFT)
-#  define NVIC_IPR4_19(p)              ((p) << NVIC_IPR4_19_SHIFT)
+#define NVIC_IPR4_19(p)                ((p) << NVIC_IPR4_19_SHIFT)
 
 #define NVIC_IPR5_20_SHIFT             (0)        /* Bits 0-7:   PRI_20 */
 #define NVIC_IPR5_20_MASK              (0xff << NVIC_IPR5_20_SHIFT)
-#  define NVIC_IPR5_20(p)              ((p) << NVIC_IPR5_20_SHIFT)
+#define NVIC_IPR5_20(p)                ((p) << NVIC_IPR5_20_SHIFT)
 #define NVIC_IPR5_21_SHIFT             (8)        /* Bits 8-15:  PRI_21 */
 #define NVIC_IPR5_21_MASK              (0xff << NVIC_IPR5_21_SHIFT)
-#  define NVIC_IPR5_21(p)              ((p) << NVIC_IPR5_21_SHIFT)
+#define NVIC_IPR5_21(p)                ((p) << NVIC_IPR5_21_SHIFT)
 #define NVIC_IPR5_22_SHIFT             (16)       /* Bits 16-23: PRI_22 */
 #define NVIC_IPR5_22_MASK              (0xff << NVIC_IPR5_22_SHIFT)
-#  define NVIC_IPR5_22(p)              ((p) << NVIC_IPR5_22_SHIFT)
+#define NVIC_IPR5_22(p)                ((p) << NVIC_IPR5_22_SHIFT)
 #define NVIC_IPR5_23_SHIFT             (24)       /* Bits 24-31: PRI_23 */
 #define NVIC_IPR5_23_MASK              (0xff << NVIC_IPR5_23_SHIFT)
-#  define NVIC_IPR5_23(p)              ((p) << NVIC_IPR5_23_SHIFT)
+#define NVIC_IPR5_23(p)                ((p) << NVIC_IPR5_23_SHIFT)
 
 #define NVIC_IPR6_24_SHIFT             (0)        /* Bits 0-7:   PRI_24 */
 #define NVIC_IPR6_24_MASK              (0xff << NVIC_IPR6_24_SHIFT)
-#  define NVIC_IPR6_24(p)              ((p) << NVIC_IPR6_24_SHIFT)
+#define NVIC_IPR6_24(p)                ((p) << NVIC_IPR6_24_SHIFT)
 #define NVIC_IPR6_25_SHIFT             (8)        /* Bits 8-15:  PRI_25 */
 #define NVIC_IPR6_25_MASK              (0xff << NVIC_IPR6_25_SHIFT)
-#  define NVIC_IPR6_25(p)              ((p) << NVIC_IPR6_25_SHIFT)
+#define NVIC_IPR6_25(p)                ((p) << NVIC_IPR6_25_SHIFT)
 #define NVIC_IPR6_26_SHIFT             (16)       /* Bits 16-23: PRI_26 */
 #define NVIC_IPR6_26_MASK              (0xff << NVIC_IPR6_26_SHIFT)
-#  define NVIC_IPR6_26(p)              ((p) << NVIC_IPR6_26_SHIFT)
+#define NVIC_IPR6_26(p)                ((p) << NVIC_IPR6_26_SHIFT)
 #define NVIC_IPR6_27_SHIFT             (24)       /* Bits 24-31: PRI_27 */
 #define NVIC_IPR6_27_MASK              (0xff << NVIC_IPR6_27_SHIFT)
-#  define NVIC_IPR6_27(p)              ((p) << NVIC_IPR6_27_SHIFT)
+#define NVIC_IPR6_27(p)                ((p) << NVIC_IPR6_27_SHIFT)
 
 #define NVIC_IPR7_28_SHIFT             (0)        /* Bits 0-7:   PRI_28 */
 #define NVIC_IPR7_28_MASK              (0xff << NVIC_IPR7_28_SHIFT)
-#  define NVIC_IPR7_28(p)              ((p) << NVIC_IPR7_28_SHIFT)
+#define NVIC_IPR7_28(p)                ((p) << NVIC_IPR7_28_SHIFT)
 #define NVIC_IPR7_29_SHIFT             (8)        /* Bits 8-15:  PRI_29 */
 #define NVIC_IPR7_29_MASK              (0xff << NVIC_IPR7_29_SHIFT)
-#  define NVIC_IPR7_29(p)              ((p) << NVIC_IPR7_29_SHIFT)
+#define NVIC_IPR7_29(p)                ((p) << NVIC_IPR7_29_SHIFT)
 #define NVIC_IPR7_30_SHIFT             (16)       /* Bits 16-23: PRI_30 */
 #define NVIC_IPR7_30_MASK              (0xff << NVIC_IPR7_30_SHIFT)
-#  define NVIC_IPR7_30(p)              ((p) << NVIC_IPR7_30_SHIFT)
+#define NVIC_IPR7_30(p)                ((p) << NVIC_IPR7_30_SHIFT)
 #define NVIC_IPR7_31_SHIFT             (24)       /* Bits 24-31: PRI_31 */
 #define NVIC_IPR7_31_MASK              (0xff << NVIC_IPR7_31_SHIFT)
-#  define NVIC_IPR7_31(p)              ((p) << NVIC_IPR7_31_SHIFT)
+#define NVIC_IPR7_31(p)                ((p) << NVIC_IPR7_31_SHIFT)
 
 /* System control register addresses */
 
@@ -285,17 +285,17 @@
 #define SYSCON_CPUID_REVISION_MASK     (15 << SYSCON_CPUID_REVISION_SHIFT)
 #define SYSCON_CPUID_PARTNO_SHIFT      (4)     /* Bits 4-15: Part number of the processor */
 #define SYSCON_CPUID_PARTNO_MASK       (0x0fff << SYSCON_CPUID_PARTNO_SHIFT)
-#  define SYSCON_CPUID_PARTNO_CORTEXM0 (0x0c20 << SYSCON_CPUID_PARTNO_SHIFT)
+#define SYSCON_CPUID_PARTNO_CORTEXM0   (0x0c20 << SYSCON_CPUID_PARTNO_SHIFT)
 #define SYSCON_CPUID_CONSTANT_SHIFT    (16)    /* Bits 16-19: Constant that defines the architecture
                                                 *             of the processor */
 #define SYSCON_CPUID_CONSTANT_MASK     (15 << SYSCON_CPUID_CONSTANT_SHIFT)
-#  define SYSCON_CPUID_CONSTANT_ARMV6M (12 << SYSCON_CPUID_PARTNO_SHIFT)
+#define SYSCON_CPUID_CONSTANT_ARMV6M   (12 << SYSCON_CPUID_PARTNO_SHIFT)
 #define SYSCON_CPUID_VARIANT_SHIFT     (20)    /* Bits 20-23: Variant number, the r value in the
                                                 *             rnpn product revision identifier */
 #define SYSCON_CPUID_VARIANT_MASK      (15 << SYSCON_CPUID_VARIANT_SHIFT)
 #define SYSCON_CPUID_IMPLEMENTER_SHIFT (24)    /* Bits 24-31: Implementer code */
 #define SYSCON_CPUID_IMPLEMENTER_MASK  (0xff << SYSCON_CPUID_IMPLEMENTER_SHIFT)
-#  define SYSCON_CPUID_IMPLEMENTER_ARM (0x41 << SYSCON_CPUID_IMPLEMENTER_SHIFT)
+#define SYSCON_CPUID_IMPLEMENTER_ARM   (0x41 << SYSCON_CPUID_IMPLEMENTER_SHIFT)
 
 /* Interrupt control and state register  */
 
@@ -320,7 +320,7 @@
 #define SYSCON_AIRCR_ENDIANESS         (1 << 15) /* Bit 15: Data endianness implemented */
 #define SYSCON_AIRCR_VECTKEY_SHIFT     (16)      /* Bits 16-31: Register key */
 #define SYSCON_AIRCR_VECTKEY_MASK      (0xffff << SYSCON_AIRCR_VECTKEY_SHIFT)
-#  define SYSCON_AIRCR_VECTKEY(n)      ((n) << SYSCON_AIRCR_VECTKEY_SHIFT)
+#define SYSCON_AIRCR_VECTKEY(n)        ((n) << SYSCON_AIRCR_VECTKEY_SHIFT)
 
 /* System control register */
 
@@ -374,8 +374,6 @@
 #define SYSTICK_CALIB_SKEW             (1 << 30) /* Bit 30: TENMS value is exact */
 #define SYSTICK_CALIB_NOREF            (1 << 31) /* Bit 31: Device provides a reference clock */
 
-#define NVIC_VECTAB                    ARMV6M_SYSCON_VECTAB
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -384,32 +382,4 @@
  * Public Data
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#if defined(__cplusplus)
-extern "C"
-{
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  arm_dumpnvic
- *
- * Description:
- *   Dump all NVIC and SYSCON registers along with a user message.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_FEATURES
-void arm_dumpnvic(const char *msg);
-#else
-#  define arm_dumpnvic(m)
-#endif
-
-#if defined(__cplusplus)
-}
-#endif
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_ARMV6_M_NVIC_H */
+#endif /* __ARCH_ARM_SRC_ARM_M_NVIC_LEGACY_H */

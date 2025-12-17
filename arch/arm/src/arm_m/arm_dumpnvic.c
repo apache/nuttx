@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/arm_dumpnvic.c
+ * arch/arm/src/arm_m/arm_dumpnvic.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -50,8 +50,8 @@
 
 void arm_coredump_add_region(void)
 {
-  coredump_add_memory_region((uint32_t *)ARMV8M_NVIC_BASE,
-                             NVIC_CID3 + 4 - ARMV8M_NVIC_BASE,
+  coredump_add_memory_region((uint32_t *)ARM_NVIC_BASE,
+                             NVIC_CID3 + 4 - ARM_NVIC_BASE,
                              PF_REGISTER);
 }
 
