@@ -67,8 +67,4 @@ if(CONFIG_ARCH_TRUSTZONE_SECURE)
   list(APPEND SRCS arm_gen_nonsecfault.c)
 endif()
 
-if(CONFIG_ARM_COREDUMP_REGION)
-  list(APPEND SRCS arm_dumpnvic.c)
-endif()
-
 target_sources(arch PRIVATE ${SRCS})

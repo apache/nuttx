@@ -88,7 +88,7 @@ int arm_ramvec_attach(int irq, up_vector_t vector)
            * common exception handler.
            */
 
-           vector = exception_common;
+          vector = exception_common;
         }
 
       /* Save the new vector in the vector table */

@@ -199,7 +199,7 @@ int board_boot_image(const char *path, uint32_t hdr_size)
 
   /* Set non-secure vector table */
 
-  putreg32(VECTOR_TABLE_NS, (NVIC_VECTAB + ARMV8M_NS_OFFSET));
+  putreg32(VECTOR_TABLE_NS, (NVIC_VECTAB + ARM_NS_OFFSET));
 
   /* Set non-secure stack pointers */
 
@@ -220,6 +220,7 @@ int board_boot_image(const char *path, uint32_t hdr_size)
   /* Jump to non-secure entry point */
 
   nsfunc *ns_reset = (nsfunc *)(vt.reset);
+
   ns_reset();
 #endif
 

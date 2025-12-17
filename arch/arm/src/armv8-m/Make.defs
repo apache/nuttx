@@ -62,8 +62,4 @@ ifeq ($(CONFIG_ARCH_TRUSTZONE_SECURE),y)
   CMN_CSRCS += arm_gen_nonsecfault.c
 endif
 
-ifeq ($(CONFIG_ARM_COREDUMP_REGION),y)
-  CMN_CSRCS += arm_dumpnvic.c
-endif
-
 VPATH += arm_m
