@@ -1,10 +1,10 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/etm.h
+ * arch/arm/src/arm_m/etm.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2014 Pierre-noel Bouteville. All rights reserved.
  * SPDX-FileCopyrightText: 2014 Gregory Nutt. All rights reserved.
- * SPDX-FileCopyrightText: 2014 Silicon Laboratories, Inc.
+ * SPDX-FileCopyrightText: 2014 2014 Silicon Laboratories, Inc.
  * SPDX-FileContributor: Pierre-noel Bouteville <pnb990@gmail.com>
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV8_M_ETM_H
-#define __ARCH_ARM_SRC_ARMV8_M_ETM_H
+#ifndef __ARCH_ARM_SRC_ARM_M_ETM_H
+#define __ARCH_ARM_SRC_ARM_M_ETM_H
 
 /****************************************************************************
  * Included Files
@@ -914,4 +914,4 @@
 #define _ETM_ETMCIDR3_PREAMB_DEFAULT                  0x000000B1UL                        /* Mode DEFAULT for ETM_ETMCIDR3 */
 #define ETM_ETMCIDR3_PREAMB_DEFAULT                   (_ETM_ETMCIDR3_PREAMB_DEFAULT << 0) /* Shifted mode DEFAULT for ETM_ETMCIDR3 */
 
-#endif /* __ARCH_ARM_SRC_ARMV8_M_ETM_H */
+#endif /* __ARCH_ARM_SRC_ARM_M_ETM_H */

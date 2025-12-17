@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/itm_syslog.h
+ * arch/arm/src/arm_m/itm_syslog.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,11 +20,11 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV7_M_ITM_SYSLOG_H
-#define __ARCH_ARM_SRC_ARMV7_M_ITM_SYSLOG_H
+#ifndef __ARCH_ARM_SRC_ARM_M_ITM_SYSLOG_H
+#define __ARCH_ARM_SRC_ARM_M_ITM_SYSLOG_H
 
 /****************************************************************************
- * Public Functions Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -42,10 +42,10 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV7M_ITMSYSLOG
+#ifdef CONFIG_ARMV8M_ITMSYSLOG
 void itm_syslog_initialize(void);
 #else
 #  define itm_syslog_initialize()
 #endif
 
-#endif /* __ARCH_ARM_SRC_ARMV7_M_ITM_SYSLOG_H */
+#endif /* __ARCH_ARM_SRC_ARM_M_ITM_SYSLOG_H */
