@@ -96,7 +96,7 @@
 #  undef CONFIG_ARCH_USBDUMP
 #endif
 
-#define DUMP_PTR(p, x) ((uintptr_t)(&(p)[(x)]) < stack_top ? (p)[(x)] : 0)
+#define DUMP_PTR(p, x) ((uintptr_t)(&(p)[(x) + 1]) <= stack_top ? (p)[(x)] : 0)
 #define DUMP_STRIDE    (sizeof(FAR void *) * 8)
 
 #if UINTPTR_MAX <= UINT32_MAX
