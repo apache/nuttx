@@ -20,13 +20,6 @@
 #
 # ##############################################################################
 
-set(SRCS
-    arm_cpuinfo.c
-    arm_doirq.c
-    arm_hardfault.c
-    arm_initialstate.c
-    arm_svcall.c
-    arm_systemreset.c
-    arm_trigger_irq.c)
+set(SRCS arm_cpuinfo.c arm_doirq.c arm_initialstate.c arm_svcall.c)
 
 target_sources(arch PRIVATE ${SRCS})

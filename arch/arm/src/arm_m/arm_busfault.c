@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/arm_usagefault.c
+ * arch/arm/src/arm_m/arm_busfault.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -40,10 +40,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_USAGEFAULT
-#  define ufalert(format, ...) _alert(format, ##__VA_ARGS__)
+#ifdef CONFIG_DEBUG_BUSFAULT
+#  define bfalert(format, ...) _alert(format, ##__VA_ARGS__)
 #else
-#  define ufalert(x...)
+#  define bfalert(x...)
 #endif
 
 /****************************************************************************
@@ -51,66 +51,65 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_usagefault
+ * Name: arm_busfault
  *
  * Description:
- *   This is Usage Fault exception handler.  It also catches SVC call
+ *   This is Bus Fault exception handler.  It also catches SVC call
  *   exceptions that are performed in bad contexts.
  *
  ****************************************************************************/
 
-int arm_usagefault(int irq, void *context, void *arg)
+int arm_busfault(int irq, void *context, void *arg)
 {
   uint32_t cfsr = getreg32(NVIC_CFAULTS);
 
-  /* Dump some usage fault info */
-
-  ufalert("PANIC!!! Usage Fault:\n");
-  ufalert("\tIRQ: %d regs: %p\n", irq, context);
-  ufalert("\tBASEPRI: %08x PRIMASK: %08x IPSR: %08"
+  bfalert("PANIC!!! Bus Fault:\n");
+  bfalert("\tIRQ: %d regs: %p\n", irq, context);
+  bfalert("\tBASEPRI: %08x PRIMASK: %08x IPSR: %08"
           PRIx32 " CONTROL: %08" PRIx32 "\n",
           getbasepri(), getprimask(), getipsr(), getcontrol());
-  ufalert("\tCFSR: %08" PRIx32 " HFSR: %08" PRIx32 " DFSR: %08"
+  bfalert("\tCFSR: %08" PRIx32 " HFSR: %08" PRIx32 " DFSR: %08"
           PRIx32 " BFAR: %08" PRIx32 " AFSR: %08" PRIx32 "\n",
           cfsr, getreg32(NVIC_HFAULTS), getreg32(NVIC_DFAULTS),
           getreg32(NVIC_BFAULT_ADDR), getreg32(NVIC_AFAULTS));
 
-  ufalert("Usage Fault Reason:\n");
-  if (cfsr & NVIC_CFAULTS_UNDEFINSTR)
+  bfalert("Bus Fault Reason:\n");
+  if (cfsr & NVIC_CFAULTS_IBUSERR)
     {
-      ufalert("\tUndefined instruction\n");
+      bfalert("\tInstruction bus error\n");
     }
 
-  if (cfsr & NVIC_CFAULTS_INVSTATE)
+  if (cfsr & NVIC_CFAULTS_PRECISERR)
     {
-      ufalert("\tInvalid state\n");
+      bfalert("\tPrecise data bus error\n");
     }
 
-  if (cfsr & NVIC_CFAULTS_INVPC)
+  if (cfsr & NVIC_CFAULTS_IMPRECISERR)
     {
-      ufalert("\tInvalid PC load, "
-              "caused by an invalid PC load by EXC_RETURN\n");
+      bfalert("\tImprecise data bus error\n");
     }
 
-  if (cfsr & NVIC_CFAULTS_NOCP)
+  if (cfsr & NVIC_CFAULTS_UNSTKERR)
     {
-      ufalert("\tNo Coprocessor\n");
+      bfalert("\tBusFault on unstacking for a return from exception\n");
     }
 
-  if (cfsr & NVIC_CFAULTS_STKOF)
+  if (cfsr & NVIC_CFAULTS_STKERR)
     {
-      ufalert("\tStack Overflow\n");
+      bfalert("\tBusFault on stacking for exception entry\n");
     }
 
-  if (cfsr & NVIC_CFAULTS_UNALIGNED)
+  if (cfsr & NVIC_CFAULTS_LSPERR)
     {
-      ufalert("\tUnaligned access\n");
+      bfalert("\tFloating-point lazy state preservation error\n");
     }
 
-  if (cfsr & NVIC_CFAULTS_DIVBYZERO)
+#ifdef CONFIG_DEBUG_BUSFAULT
+  if (arm_gen_nonsecurefault(irq, context))
     {
-      ufalert("\tDivide by zero\n");
+      return OK;
     }
+#endif
 
   up_irq_save();
   PANIC_WITH_REGS("panic", context);

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv6-m/arm_systemreset.c
+ * arch/arm/src/arm_m/arm_trigger_irq.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -27,42 +27,63 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
+#include <arch/irq.h>
 
 #include "arm_internal.h"
 #include "nvic.h"
+
+#ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_systemreset
+ * Name: up_trigger_irq
  *
  * Description:
- *   Internal, Cortex-M0 reset logic.
+ *   Trigger an IRQ by software.
  *
  ****************************************************************************/
 
-void up_systemreset(void)
+void up_trigger_irq(int irq, cpu_set_t cpuset)
 {
-  uint32_t regval;
+  uint32_t pend_bit = 0;
 
-  /* Set up for the system reset, retaining the priority group from the
-   * the AIRCR register.
-   */
+  DEBUGASSERT(irq >= NVIC_IRQ_NMI && irq < NR_IRQS);
 
-  regval = ((0x5fa << SYSCON_AIRCR_VECTKEY_SHIFT) |
-           SYSCON_AIRCR_SYSRESETREQ);
-  putreg32(regval, ARMV6M_SYSCON_AIRCR);
+  if (irq >= NVIC_IRQ_FIRST)
+    {
+      putreg32(irq - NVIC_IRQ_FIRST, NVIC_STIR);
+    }
+  else
+    {
+      switch (irq)
+        {
+          case NVIC_IRQ_PENDSV:
+            pend_bit = NVIC_INTCTRL_PENDSVSET;
+            break;
 
-  /* Ensure completion of memory accesses */
+          case NVIC_IRQ_NMI:
+            pend_bit = NVIC_INTCTRL_NMIPENDSET;
+            break;
 
-  __asm volatile ("dsb");
+          case NVIC_IRQ_SYSTICK:
+            pend_bit = NVIC_INTCTRL_PENDSTSET;
+            break;
 
-  /* Wait for the reset */
+          default:
+            break;
+        }
 
-  for (; ; );
+      if (pend_bit)
+        {
+          modifyreg32(NVIC_INTCTRL, 0, pend_bit);
+        }
+    }
 }
+
+#endif /* CONFIG_ARCH_HAVE_IRQTRIGGER */

@@ -18,7 +18,24 @@
 #
 # ##############################################################################
 
-list(APPEND SRCS arm_exception.S arm_saveusercontext.S arm_tcbinfo.c)
+list(
+  APPEND
+  SRCS
+  arm_exception.S
+  arm_saveusercontext.S
+  arm_tcbinfo.c
+  arm_busfault.c
+  arm_hardfault.c
+  arm_systemreset.c
+  arm_trigger_irq.c)
+
+if(NOT CONFIG_ARCH_ARMV6M)
+  list(APPEND SRCS arm_usagefault.c arm_memfault.c)
+endif()
+
+if(CONFIG_ARCH_ARMV8M)
+  list(APPEND SRCS arm_securefault.c)
+endif()
 
 if(CONFIG_ARM_SYSTICK)
   list(APPEND SRCS arm_systick.c)
@@ -42,6 +59,10 @@ endif()
 
 if(CONFIG_ARM_COREDUMP_REGION)
   list(APPEND SRCS arm_dumpnvic.c)
+endif()
+
+if(CONFIG_ARCH_TRUSTZONE_SECURE)
+  list(APPEND SRCS arm_gen_nonsecfault.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})

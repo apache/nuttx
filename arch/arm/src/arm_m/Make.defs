@@ -30,7 +30,16 @@ ifeq ($(CONFIG_LIB_SYSCALL),y)
   CMN_ASRCS += arm_dispatch_syscall.S
 endif
 
-CMN_CSRCS += arm_tcbinfo.c
+CMN_CSRCS += arm_tcbinfo.c arm_busfault.c arm_hardfault.c
+CMN_CSRCS += arm_systemreset.c arm_trigger_irq.c
+
+ifneq ($(CONFIG_ARCH_ARMV6M),y)
+  CMN_CSRCS += arm_usagefault.c arm_memfault.c
+endif
+
+ifeq ($(CONFIG_ARCH_ARMV8M),y)
+  CMN_CSRCS += arm_securefault.c
+endif
 
 ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
   CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
@@ -46,4 +55,8 @@ endif
 
 ifeq ($(CONFIG_ARM_COREDUMP_REGION),y)
   CMN_CSRCS += arm_dumpnvic.c
+endif
+
+ifeq ($(CONFIG_ARCH_TRUSTZONE_SECURE),y)
+  CMN_CSRCS += arm_gen_nonsecfault.c
 endif

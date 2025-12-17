@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/arm_gen_nonsecfault.c
+ * arch/arm/src/arm_m/arm_gen_nonsecfault.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *

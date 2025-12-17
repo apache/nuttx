@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/arm_securefault.c
+ * arch/arm/src/arm_m/arm_securefault.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
