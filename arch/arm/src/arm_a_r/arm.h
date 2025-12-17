@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-r/arm.h
+ * arch/arm/src/arm_a_r/arm.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -27,8 +27,8 @@
  *   All rights reserved. ARM DDI 0406C.c (ID051414)
  */
 
-#ifndef __ARCH_ARM_SRC_ARMV8_R_ARM_H
-#define __ARCH_ARM_SRC_ARMV8_R_ARM_H
+#ifndef __ARCH_ARM_SRC_ARM_A_R_ARM_H
+#define __ARCH_ARM_SRC_ARM_A_R_ARM_H
 
 /****************************************************************************
  * Included Files
@@ -61,6 +61,7 @@
 #  define PSR_MODE_FIQ    (17 << PSR_MODE_SHIFT) /* FIQ mode */
 #  define PSR_MODE_IRQ    (18 << PSR_MODE_SHIFT) /* IRQ mode */
 #  define PSR_MODE_SVC    (19 << PSR_MODE_SHIFT) /* Supervisor mode */
+#  define PSR_MODE_MON    (22 << PSR_MODE_SHIFT) /* Monitor mode */
 #  define PSR_MODE_ABT    (23 << PSR_MODE_SHIFT) /* Abort mode */
 #  define PSR_MODE_HYP    (26 << PSR_MODE_SHIFT) /* Hypervisor mode */
 #  define PSR_MODE_UND    (27 << PSR_MODE_SHIFT) /* Undefined mode */
@@ -146,4 +147,4 @@ void arm_data_initialize(void);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* __ARCH_ARM_SRC_ARMV8_R_ARM_H */
+#endif /* __ARCH_ARM_SRC_ARM_A_R_ARM_H */
