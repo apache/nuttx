@@ -1441,6 +1441,28 @@ config GD5F_SPIFREQUENCY
 
 endif # MTD_GD5F
 
+config MTD_W25N
+	bool "SPI-based W25N NAND FLASH"
+	default n
+	select SPI
+	---help---
+		Enable support for Winbond W25N SPI NAND flash.
+		Currently only W25N01GV (1Gbit/128MB) is supported.
+
+if MTD_W25N
+
+config W25N_SPIMODE
+	int "W25N SPI Mode"
+	default 0
+
+config W25N_SPIFREQUENCY
+	int "W25N SPI Frequency"
+	default 20000000
+	---help---
+		W25N01GV supports up to 104 MHz.
+
+endif # MTD_W25N
+
 config MTD_DHARA
 	bool "MTD Nandflash use dhara map"
 	default n

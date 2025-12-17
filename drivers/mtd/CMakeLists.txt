@@ -138,6 +138,10 @@ if(CONFIG_MTD)
     list(APPEND SRCS gd5f.c)
   endif()
 
+  if(CONFIG_MTD_W25N)
+    list(APPEND SRCS w25n.c)
+  endif()
+
   if(CONFIG_MTD_AT25)
     list(APPEND SRCS at25.c)
   endif()

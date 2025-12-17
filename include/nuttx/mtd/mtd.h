@@ -616,7 +616,7 @@ FAR struct mtd_dev_s *sst39vf_initialize(void);
  *
  * Description:
  *   Initializes the driver for SPI-based W25x16, x32, and x64 and W25q16,
- *   q32, q64, and q128 FLASH
+ *   q32, q64, and q128 NOR FLASH
  *
  ****************************************************************************/
 
@@ -653,6 +653,17 @@ FAR struct mtd_dev_s *gd55_initialize(FAR struct qspi_dev_s *dev,
  ****************************************************************************/
 
 FAR struct mtd_dev_s *gd5f_initialize(FAR struct spi_dev_s *dev,
+                                      uint32_t spi_devid);
+
+/****************************************************************************
+ * Name: w25n_initialize
+ *
+ * Description:
+ *   Initializes the driver for SPI-based W25N NAND FLASH
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *w25n_initialize(FAR struct spi_dev_s *dev,
                                       uint32_t spi_devid);
 
 /****************************************************************************
