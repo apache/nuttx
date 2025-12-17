@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include "arm.h"
+#include "sctlr.h"
 
 /********************************************************************
  * Pre-processor Definitions
@@ -91,8 +92,8 @@ up_phyrestart:
 	 */
 
 	mrc	p15, 0, r0, c1, c0		/* Get control register */
-	bic	r0, r0, #(CR_M|CR_C|CR_A|CR_W)
-	bic	r0, r0, #(CR_S|CR_I|CR_V|CR_RR)
+	bic	r0, r0, #(SCTLR_M|SCTLR_C|SCTLR_A|SCTLR_W)
+	bic	r0, r0, #(SCTLR_S|SCTLR_I|SCTLR_V|SCTLR_RR)
 	mcr	p15, 0, r0, c1, c0, 0		/* Write control reg */
 
 	/* We know that the bootloader entry point is at the

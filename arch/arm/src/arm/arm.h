@@ -60,32 +60,6 @@
 #define PSR_Z_BIT       0x40000000 /* Bit 30: Zero */
 #define PSR_N_BIT       0x80000000 /* Bit 31: Negative/Less than */
 
-/* CR1 bits (CP#15 CR1) */
-
-#define CR_M            0x00000001 /* MMU enable                          */
-#define CR_A            0x00000002 /* Alignment abort enable              */
-#define CR_C            0x00000004 /* Dcache enable                       */
-#define CR_W            0x00000008 /* Write buffer enable                 */
-#define CR_P            0x00000010 /* 32-bit exception handler            */
-#define CR_D            0x00000020 /* 32-bit data address range           */
-#define CR_L            0x00000040 /* Implementation defined              */
-#define CR_B            0x00000080 /* Big endian                          */
-#define CR_S            0x00000100 /* System MMU protection               */
-#define CR_R            0x00000200 /* ROM MMU protection                  */
-#define CR_F            0x00000400 /* Implementation defined              */
-#define CR_Z            0x00000800 /* Implementation defined              */
-#define CR_I            0x00001000 /* Icache enable                       */
-#define CR_V            0x00002000 /* Vectors relocated to 0xffff0000     */
-#define CR_RR           0x00004000 /* Round Robin cache replacement       */
-#define CR_L4           0x00008000 /* LDR pc can set T bit                */
-#define CR_DT           0x00010000
-#define CR_IT           0x00040000
-#define CR_ST           0x00080000
-#define CR_FI           0x00200000 /* Fast interrupt (lower latency mode) */
-#define CR_U            0x00400000 /* Unaligned access operation          */
-#define CR_XP           0x00800000 /* Extended page tables                */
-#define CR_VE           0x01000000 /* Vectored interrupts                 */
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/

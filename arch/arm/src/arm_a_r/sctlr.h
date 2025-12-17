@@ -133,10 +133,13 @@
 #define SCTLR_M                       (1 << 0)  /* Bit 0:  Enables the MMU/MPU enable bit */
 #define SCTLR_A                       (1 << 1)  /* Bit 1:  Enables strict alignment of data */
 #define SCTLR_C                       (1 << 2)  /* Bit 2:  Determines if data can be cached */
-                                                /* Bits 3-9: Reserved */
+#define SCTLR_W                       (1 << 3)  /* Bit 3:  Write buffer enable */
+#define SCTLR_P                       (1 << 4)  /* Bit 4:  32-bit exception handler */
 #define SCTLR_CCP15BEN                (1 << 5)  /* Bit 5:  CP15 barrier enable */
                                                 /* Bit 6:  Reserved */
 #define SCTLR_B                       (1 << 7)  /* Bit 7:  Should be zero on ARMv7-R */
+#define SCTLR_S                       (1 << 8)  /* Bit 8:  System MMU protection */
+#define SCTLR_R                       (1 << 9)  /* Bit 9:  ROM MMU protection */
 #define SCTLR_SW                      (1 << 10) /* Bit 10: SWP/SWPB Enable bit */
 #define SCTLR_Z                       (1 << 11) /* Bit 11: Program flow prediction control (1) */
 #define SCTLR_I                       (1 << 12) /* Bit 12: Determines if instructions can be cached */
