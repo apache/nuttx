@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/arm_hardfault.c
+ * arch/arm/src/arm_m/arm_hardfault.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
@@ -80,10 +81,51 @@ int arm_hardfault(int irq, void *context, void *arg)
   UNUSED(cfsr);
   UNUSED(hfsr);
 
+#ifdef CONFIG_ARCH_ARMV6M
+  uint32_t *regs = (uint32_t *)context;
+  uint16_t *pc = (uint16_t *)regs[REG_PC] - 1;
+
+  /* Check if the pc lies in known FLASH memory.
+   * REVISIT:  What if the PC lies in "unknown" external memory?
+   */
+
+#ifdef CONFIG_BUILD_PROTECTED
+  /* In the kernel build, SVCalls are expected in either the base, kernel
+   * FLASH region or in the user FLASH region.
+   */
+
+  if (((uintptr_t)pc >= (uintptr_t)_stext &&
+      (uintptr_t)pc <  (uintptr_t)_etext) ||
+      ((uintptr_t)pc >= (uintptr_t)USERSPACE->us_textstart &&
+      (uintptr_t)pc <  (uintptr_t)USERSPACE->us_textend))
+#else
+  /* SVCalls are expected only from the base, kernel FLASH region */
+
+  if ((uintptr_t)pc >= (uintptr_t)_stext &&
+      (uintptr_t)pc <  (uintptr_t)_etext)
+#endif
+    {
+      /* Fetch the instruction that caused the Hard fault */
+
+      uint16_t insn = *pc;
+
+      hfinfo("  PC: %p INSN: %04x\n", pc, insn);
+
+      /* If this was the instruction 'svc 0', then forward processing
+       * to the SVCall handler
+       */
+
+      if (insn == INSN_SVC0)
+        {
+          hfinfo("Forward SVCall\n");
+          return arm_svcall(irq, context, NULL);
+        }
+    }
+#endif
+
   if (hfsr & NVIC_HFAULTS_FORCED)
     {
       hfalert("Hard Fault escalation:\n");
-
 #ifdef CONFIG_DEBUG_MEMFAULT
       if (cfsr & NVIC_CFAULTS_MEMFAULTSR_MASK)
         {

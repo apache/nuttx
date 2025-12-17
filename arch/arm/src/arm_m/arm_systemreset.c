@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv6-m/arm_trigger_irq.c
+ * arch/arm/src/arm_m/arm_systemreset.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -27,63 +27,42 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <assert.h>
 
 #include <nuttx/arch.h>
-#include <arch/irq.h>
+#include <nuttx/board.h>
 
 #include "arm_internal.h"
 #include "nvic.h"
-
-#ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_trigger_irq
+ * Name: up_systemreset
  *
  * Description:
- *   Trigger an IRQ by software.
+ *   Internal, Cortex-M0 reset logic.
  *
  ****************************************************************************/
 
-void up_trigger_irq(int irq, cpu_set_t cpuset)
+void up_systemreset(void)
 {
-  uint32_t pend_bit = 0;
+  uint32_t regval;
 
-  DEBUGASSERT(irq >= NVIC_IRQ_NMI && irq < NR_IRQS);
+  /* Set up for the system reset, retaining the priority group from the
+   * the AIRCR register.
+   */
 
-  if (irq >= NVIC_IRQ_FIRST)
-    {
-      putreg32(irq - NVIC_IRQ_FIRST, ARMV6M_NVIC2_BASE);
-    }
-  else
-    {
-      switch (irq)
-        {
-          case NVIC_IRQ_PENDSV:
-            pend_bit = SYSCON_ICSR_PENDSVSET;
-            break;
+  regval  = getreg32(NVIC_AIRCR) & NVIC_AIRCR_PRIGROUP_MASK;
+  regval |= (NVIC_AIRCR_VECTKEY | NVIC_AIRCR_SYSRESETREQ);
+  putreg32(regval, NVIC_AIRCR);
 
-          case NVIC_IRQ_NMI:
-            pend_bit = SYSCON_ICSR_NMIPENDSET;
-            break;
+  /* Ensure completion of memory accesses */
 
-          case NVIC_IRQ_SYSTICK:
-            pend_bit = SYSCON_ICSR_PENDSTSET;
-            break;
+  __asm volatile ("dsb");
 
-          default:
-            break;
-        }
+  /* Wait for the reset */
 
-      if (pend_bit)
-        {
-          modifyreg32(ARMV6M_SYSCON_ICSR, 0, pend_bit);
-        }
-    }
+  for (; ; );
 }
-
-#endif /* CONFIG_ARCH_HAVE_IRQTRIGGER */

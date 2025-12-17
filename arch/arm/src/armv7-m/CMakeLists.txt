@@ -23,20 +23,14 @@
 # TODO: do not use config to detect this
 
 set(SRCS
-    arm_busfault.c
+    arm_dbgmonitor.c
     arm_cache.c
     arm_cpuinfo.c
     arm_doirq.c
-    arm_hardfault.c
     arm_initialstate.c
     arm_itm.c
-    arm_memfault.c
     arm_perf.c
-    arm_svcall.c
-    arm_systemreset.c
-    arm_trigger_irq.c
-    arm_usagefault.c
-    arm_dbgmonitor.c)
+    arm_svcall.c)
 
 if(CONFIG_ARMV7M_ITMSYSLOG)
   list(APPEND SRCS arm_itm_syslog.c)
@@ -52,6 +46,10 @@ endif()
 
 if(CONFIG_ARM_MPU OR CONFIG_ARM_MPU_EARLY_RESET)
   list(APPEND SRCS arm_mpu.c)
+endif()
+
+if(CONFIG_ARCH_ADDRENV)
+  list(APPEND SRCS arm_addrenv.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
