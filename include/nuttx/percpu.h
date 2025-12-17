@@ -82,7 +82,7 @@
 #elif defined(CONFIG_PERCPU_SECTION)
 #  define DEFINE_PER_CPU(t, v)         locate_data(".data..percpu") t v
 #  define DEFINE_PER_CPU_BSS(t, v)     locate_data(".bss..percpu") t v
-#  define DECLARE_PER_CPU(t, v)        extern t v;
+#  define DECLARE_PER_CPU(t, v)        extern t v
 
 /* Compile time percpu .data & .bss size */
 
