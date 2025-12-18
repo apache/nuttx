@@ -445,7 +445,7 @@ static void idle_group_initialize(void)
       /* Allocate the IDLE group */
 
       DEBUGVERIFY(
-        group_initialize((FAR struct task_tcb_s *)tcb, tcb->flags));
+        group_allocate((FAR struct task_tcb_s *)tcb, tcb->flags));
 
       /* Initialize the task join */
 
@@ -478,7 +478,7 @@ static void idle_group_initialize(void)
        * of child status in the IDLE group.
        */
 
-      group_postinitialize((FAR struct task_tcb_s *)tcb);
+      group_initialize((FAR struct task_tcb_s *)tcb);
       tcb->group->tg_flags = GROUP_FLAG_NOCLDWAIT | GROUP_FLAG_PRIVILEGED;
     }
 }
