@@ -1,26 +1,26 @@
-From 6d2bf800f07a9584ea2445b4046c2d82cddf0c6f Mon Sep 17 00:00:00 2001
+From 33fca04b5d33b7b501775f2384a6374eef302729 Mon Sep 17 00:00:00 2001
 From: Yongrong Wang <wangyongrong@xiaomi.com>
 Date: Wed, 10 Jul 2024 18:47:33 +0800
-Subject: [PATCH 11/14] virtio: change feature to 64 bit in all virtio_dispatch
+Subject: [PATCH 09/10] virtio: change feature to 64 bit in all virtio_dispatch
 
 The virtio device feature bit has exceeded 32 bits, so change feature
 to 64 bit like linux does to support more features
 
 Signed-off-by: Yongrong Wang <wangyongrong@xiaomi.com>
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
 ---
  lib/include/openamp/rpmsg_virtio.h |  2 +-
- lib/include/openamp/virtio.h       | 20 ++++++-------
- lib/remoteproc/remoteproc_virtio.c | 14 +++++-----
+ lib/include/openamp/virtio.h       | 22 +++++++--------
+ lib/remoteproc/remoteproc_virtio.c | 12 ++++----
  lib/rpmsg/rpmsg_virtio.c           |  2 +-
- lib/virtio/virtio.c                |  2 +-
  lib/virtio_mmio/virtio_mmio_drv.c  | 45 +++++++++++++++---------------
- 6 files changed, 42 insertions(+), 43 deletions(-)
+ 5 files changed, 41 insertions(+), 42 deletions(-)
 
 diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
-index d9cfa9b..866e9eb 100644
+index a757166082..a069bb02b0 100644
 --- a/lib/include/openamp/rpmsg_virtio.h
 +++ open-amp/lib/include/openamp/rpmsg_virtio.h
-@@ -179,7 +179,7 @@ static inline uint8_t rpmsg_virtio_get_status(struct rpmsg_virtio_device *rvdev)
+@@ -176,7 +176,7 @@ static inline uint8_t rpmsg_virtio_get_status(struct rpmsg_virtio_device *rvdev)
   * @return The features supported by both the rpmsg driver and rpmsg device.
   */
  __deprecated
@@ -30,10 +30,10 @@ index d9cfa9b..866e9eb 100644
  {
  	return rvdev->vdev->func->get_features(rvdev->vdev);
 diff --git a/lib/include/openamp/virtio.h open-amp/lib/include/openamp/virtio.h
-index 278d2da..dd285ac 100644
+index 5e244f6a01..0c35c45ccf 100644
 --- a/lib/include/openamp/virtio.h
 +++ open-amp/lib/include/openamp/virtio.h
-@@ -156,7 +156,7 @@ struct virtio_dispatch;
+@@ -163,7 +163,7 @@ struct virtio_memory_ops;
  /** @brief Device features. */
  struct virtio_feature_desc {
  	/** Unique feature ID, defined in the virtio specification. */
@@ -42,16 +42,7 @@ index 278d2da..dd285ac 100644
  
  	/** Name of the feature (for debug). */
  	const char *vfd_str;
-@@ -221,7 +221,7 @@ struct virtio_device {
- const char *virtio_dev_name(uint16_t devid);
- 
- __deprecated void virtio_describe(struct virtio_device *dev, const char *msg,
--				  uint32_t features,
-+				  uint64_t features,
- 				  struct virtio_feature_desc *feature_desc);
- 
- /**
-@@ -249,17 +249,17 @@ struct virtio_dispatch {
+@@ -246,17 +246,17 @@ struct virtio_dispatch {
  	void (*set_status)(struct virtio_device *dev, uint8_t status);
  
  	/** Get the feature exposed by the virtio device. */
@@ -73,7 +64,7 @@ index 278d2da..dd285ac 100644
  
  	/**
  	 * Read a variable amount from the device specific (ie, network)
-@@ -422,7 +422,7 @@ static inline int virtio_write_config(struct virtio_device *vdev,
+@@ -427,7 +427,7 @@ static inline int virtio_write_config(struct virtio_device *vdev,
   * @return 0 on success, otherwise error code.
   */
  static inline int virtio_get_features(struct virtio_device *vdev,
@@ -82,7 +73,7 @@ index 278d2da..dd285ac 100644
  {
  	if (!vdev || !features)
  		return -EINVAL;
-@@ -443,7 +443,7 @@ static inline int virtio_get_features(struct virtio_device *vdev,
+@@ -451,7 +451,7 @@ static inline int virtio_get_features(struct virtio_device *vdev,
   * @return 0 on success, otherwise error code.
   */
  static inline int virtio_set_features(struct virtio_device *vdev,
@@ -91,7 +82,7 @@ index 278d2da..dd285ac 100644
  {
  	if (!vdev)
  		return -EINVAL;
-@@ -465,8 +465,8 @@ static inline int virtio_set_features(struct virtio_device *vdev,
+@@ -473,8 +473,8 @@ static inline int virtio_set_features(struct virtio_device *vdev,
   * @return 0 on success, otherwise error code.
   */
  static inline int virtio_negotiate_features(struct virtio_device *vdev,
@@ -102,8 +93,26 @@ index 278d2da..dd285ac 100644
  {
  	if (!vdev)
  		return -EINVAL;
+@@ -566,7 +566,7 @@ static inline int virtio_free_buf(struct virtio_device *vdev, void *buf)
+ static inline bool virtio_has_feature(struct virtio_device *vdev,
+ 				      unsigned int feature_bit)
+ {
+-	uint32_t features;
++	uint64_t features;
+ 
+ 	if (!vdev && feature_bit >= sizeof(features) * 8)
+ 		return false;
+@@ -574,7 +574,7 @@ static inline bool virtio_has_feature(struct virtio_device *vdev,
+ 	if (!vdev->features)
+ 		virtio_get_features(vdev, &features);
+ 
+-	return (vdev->features & (1UL << feature_bit)) != 0;
++	return (vdev->features & (1ULL << feature_bit)) != 0;
+ }
+ 
+ #if defined __cplusplus
 diff --git a/lib/remoteproc/remoteproc_virtio.c open-amp/lib/remoteproc/remoteproc_virtio.c
-index aae026c..902fc41 100644
+index 4eb40768d6..b07c0b3e45 100644
 --- a/lib/remoteproc/remoteproc_virtio.c
 +++ open-amp/lib/remoteproc/remoteproc_virtio.c
 @@ -165,7 +165,7 @@ static uint32_t rproc_virtio_get_dfeatures(struct virtio_device *vdev)
@@ -130,7 +139,7 @@ index aae026c..902fc41 100644
  {
  	struct remoteproc_virtio *rpvdev;
  	struct fw_rsc_vdev *vdev_rsc;
-@@ -197,17 +197,17 @@ static void rproc_virtio_set_features(struct virtio_device *vdev,
+@@ -197,13 +197,13 @@ static void rproc_virtio_set_features(struct virtio_device *vdev,
  	io = rpvdev->vdev_rsc_io;
  	metal_io_write32(io,
  			 metal_io_virt_to_offset(io, &vdev_rsc->gfeatures),
@@ -145,18 +154,13 @@ index aae026c..902fc41 100644
 +static uint64_t rproc_virtio_negotiate_features(struct virtio_device *vdev,
 +						uint64_t features)
  {
- 	uint32_t dfeatures = rproc_virtio_get_dfeatures(vdev);
- 
--	rproc_virtio_set_features(vdev, dfeatures & features);
-+	rproc_virtio_set_features(vdev, dfeatures & (uint32_t)features);
- 
- 	return 0;
- }
+ 	features = features & rproc_virtio_get_dfeatures(vdev);
+ 	rproc_virtio_set_features(vdev, features);
 diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
-index bdf9046..e54155f 100644
+index 4aba94e973..4bc6fb21cb 100644
 --- a/lib/rpmsg/rpmsg_virtio.c
 +++ open-amp/lib/rpmsg/rpmsg_virtio.c
-@@ -805,7 +805,7 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
+@@ -807,7 +807,7 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
  	const char *vq_names[RPMSG_NUM_VRINGS];
  	vq_callback callback[RPMSG_NUM_VRINGS];
  	struct fw_rsc_config fw_config;
@@ -165,21 +169,8 @@ index bdf9046..e54155f 100644
  	int status;
  	unsigned int i;
  
-diff --git a/lib/virtio/virtio.c open-amp/lib/virtio/virtio.c
-index a442e52..e2ab3d8 100644
---- a/lib/virtio/virtio.c
-+++ open-amp/lib/virtio/virtio.c
-@@ -51,7 +51,7 @@ const char *virtio_dev_name(unsigned short devid)
- }
- 
- __deprecated void virtio_describe(struct virtio_device *dev, const char *msg,
--				  uint32_t features, struct virtio_feature_desc *desc)
-+				  uint64_t features, struct virtio_feature_desc *desc)
- {
- 	(void)dev;
- 	(void)msg;
 diff --git a/lib/virtio_mmio/virtio_mmio_drv.c open-amp/lib/virtio_mmio/virtio_mmio_drv.c
-index 5700471..34f2b67 100644
+index 9f72f0fe04..45dab76c02 100644
 --- a/lib/virtio_mmio/virtio_mmio_drv.c
 +++ open-amp/lib/virtio_mmio/virtio_mmio_drv.c
 @@ -75,44 +75,43 @@ static void virtio_mmio_read_config(struct virtio_device *vdev,

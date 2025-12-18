@@ -1,7 +1,7 @@
-From 9ed3332f08c9877deb4dcabb7447b634abe8845e Mon Sep 17 00:00:00 2001
+From a2c5e7e101392eb8b72acd608b81b525c643cf4a Mon Sep 17 00:00:00 2001
 From: ligd <liguiding@pinecone.net>
 Date: Wed, 20 Feb 2019 11:36:57 +0800
-Subject: [PATCH 06/14] rpmsg: wait ept ready in rpmsg_send
+Subject: [PATCH 04/10] rpmsg: wait ept ready in rpmsg_send
 
 since the destination address need time to return from peer
 
@@ -9,11 +9,11 @@ Signed-off-by: ligd <liguiding@pinecone.net>
 Signed-off-by: wangyongrong <wangyongrong@xiaomi.com>
 ---
  lib/include/openamp/rpmsg.h | 59 ++++++++++++++++++++++++++-----------
- lib/rpmsg/rpmsg_virtio.c    |  7 -----
- 2 files changed, 42 insertions(+), 24 deletions(-)
+ lib/rpmsg/rpmsg_virtio.c    |  6 ----
+ 2 files changed, 42 insertions(+), 23 deletions(-)
 
 diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
-index bb1c160..cb1a648 100644
+index a0e351af68..3f4c6c7fc6 100644
 --- a/lib/include/openamp/rpmsg.h
 +++ open-amp/lib/include/openamp/rpmsg.h
 @@ -15,6 +15,7 @@
@@ -124,18 +124,10 @@ index bb1c160..cb1a648 100644
  }
  #endif
 diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
-index db3392e..e6a4969 100644
+index cc6c2fd52f..0e2885c732 100644
 --- a/lib/rpmsg/rpmsg_virtio.c
 +++ open-amp/lib/rpmsg/rpmsg_virtio.c
-@@ -9,7 +9,6 @@
-  */
- 
- #include <metal/alloc.h>
--#include <metal/sleep.h>
- #include <metal/utilities.h>
- #include <openamp/rpmsg_virtio.h>
- #include <openamp/remoteproc.h>
-@@ -19,12 +18,6 @@
+@@ -20,12 +20,6 @@
  
  #define RPMSG_NUM_VRINGS                        2
  

@@ -1,7 +1,7 @@
-From 5f90973cb572ec8df29ea03550eef29afa48015b Mon Sep 17 00:00:00 2001
+From a4f6ac1cb1545fdadf7f80cf34f1d31b15d543f7 Mon Sep 17 00:00:00 2001
 From: Xiang Xiao <xiaoxiang@xiaomi.com>
 Date: Mon, 7 Jan 2019 02:15:42 +0800
-Subject: [PATCH 01/14] ns: acknowledge the received creation message
+Subject: [PATCH 01/10] ns: acknowledge the received creation message
 
 the two phase handshake make the client could initiate the transfer
 immediately without the server side send any dummy message first.
@@ -17,7 +17,7 @@ Signed-off-by: wangyongrong <wangyongrong@xiaomi.com>
  5 files changed, 21 insertions(+), 4 deletions(-)
 
 diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
-index f994e1d..b2a9b17 100644
+index 8871cfef88..0a4b47bae9 100644
 --- a/lib/include/openamp/rpmsg.h
 +++ open-amp/lib/include/openamp/rpmsg.h
 @@ -155,6 +155,9 @@ struct rpmsg_device {
@@ -31,7 +31,7 @@ index f994e1d..b2a9b17 100644
  
  /**
 diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
-index 44ac4c0..6d6925f 100644
+index dbbbbfd245..b738e618cf 100644
 --- a/lib/include/openamp/rpmsg_virtio.h
 +++ open-amp/lib/include/openamp/rpmsg_virtio.h
 @@ -29,6 +29,7 @@ extern "C" {
@@ -40,13 +40,13 @@ index 44ac4c0..6d6925f 100644
  #define VIRTIO_RPMSG_F_NS	0 /* RP supports name service notifications */
 +#define VIRTIO_RPMSG_F_ACK	1 /* RP supports name service acknowledge */
  
- #ifdef VIRTIO_CACHED_BUFFERS
- #warning "VIRTIO_CACHED_BUFFERS is deprecated, please use VIRTIO_USE_DCACHE"
+ #if defined(VIRTIO_USE_DCACHE)
+ #define BUFFER_FLUSH(x, s)		metal_cache_flush(x, s)
 diff --git a/lib/rpmsg/rpmsg.c open-amp/lib/rpmsg/rpmsg.c
-index 39774bc..8ab59e1 100644
+index b13e25fd23..28a8de61b3 100644
 --- a/lib/rpmsg/rpmsg.c
 +++ open-amp/lib/rpmsg/rpmsg.c
-@@ -357,10 +357,13 @@ int rpmsg_create_ept(struct rpmsg_endpoint *ept, struct rpmsg_device *rdev,
+@@ -362,10 +362,13 @@ int rpmsg_create_ept(struct rpmsg_endpoint *ept, struct rpmsg_device *rdev,
  	rpmsg_register_endpoint(rdev, ept, name, addr, dest, cb, unbind_cb, ept->priv);
  	metal_mutex_release(&rdev->lock);
  
@@ -62,7 +62,7 @@ index 39774bc..8ab59e1 100644
  	if (status)
  		rpmsg_unregister_endpoint(ept);
 diff --git a/lib/rpmsg/rpmsg_internal.h open-amp/lib/rpmsg/rpmsg_internal.h
-index 27b0f0d..1011b42 100644
+index 27b0f0d1b0..3e9ff02cb3 100644
 --- a/lib/rpmsg/rpmsg_internal.h
 +++ open-amp/lib/rpmsg/rpmsg_internal.h
 @@ -44,6 +44,8 @@ enum rpmsg_ns_flags {
@@ -75,10 +75,10 @@ index 27b0f0d..1011b42 100644
  
  /**
 diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
-index 7baaedd..820227e 100644
+index ed3f4920c9..d59bad5d79 100644
 --- a/lib/rpmsg/rpmsg_virtio.c
 +++ open-amp/lib/rpmsg/rpmsg_virtio.c
-@@ -656,7 +656,7 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+@@ -668,7 +668,7 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
  	 */
  	ept_to_release = _ept && _ept->release_cb;
  
@@ -87,7 +87,7 @@ index 7baaedd..820227e 100644
  		if (_ept)
  			_ept->dest_addr = RPMSG_ADDR_ANY;
  		if (ept_to_release)
-@@ -671,7 +671,7 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+@@ -683,7 +683,7 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
  			rpmsg_ept_decref(_ept);
  			metal_mutex_release(&rdev->lock);
  		}
@@ -96,7 +96,7 @@ index 7baaedd..820227e 100644
  		if (!_ept) {
  			/*
  			 * send callback to application, that can
-@@ -685,7 +685,14 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+@@ -697,7 +697,14 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
  		} else {
  			_ept->dest_addr = dest;
  			metal_mutex_release(&rdev->lock);
@@ -111,15 +111,15 @@ index 7baaedd..820227e 100644
  	}
  
  	return RPMSG_SUCCESS;
-@@ -828,6 +835,7 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
+@@ -840,6 +847,7 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
  	if (status)
  		return status;
  	rdev->support_ns = !!(features & (1 << VIRTIO_RPMSG_F_NS));
 +	rdev->support_ack = !!(features & (1 << VIRTIO_RPMSG_F_ACK));
  
- 	if (VIRTIO_ROLE_IS_DRIVER(rvdev->vdev)) {
+ 	if (VIRTIO_ROLE_IS_DRIVER(vdev)) {
  		/*
-@@ -926,7 +934,7 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
+@@ -938,7 +946,7 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
  	 * Create name service announcement endpoint if device supports name
  	 * service announcement feature.
  	 */

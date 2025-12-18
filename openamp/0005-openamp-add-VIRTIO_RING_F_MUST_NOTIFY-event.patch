@@ -1,7 +1,7 @@
-From 9a8e63285c30026a8fabaf0ed8af323eafd07539 Mon Sep 17 00:00:00 2001
+From 7c6597d46da6d1c3c085dda33262c89b633707ae Mon Sep 17 00:00:00 2001
 From: ligd <liguiding1@xiaomi.com>
 Date: Thu, 23 Jun 2022 00:41:13 +0800
-Subject: [PATCH 07/14] openamp: add VIRTIO_RING_F_MUST_NOTIFY event
+Subject: [PATCH 05/10] openamp: add VIRTIO_RING_F_MUST_NOTIFY event
 
 Signed-off-by: ligd <liguiding1@xiaomi.com>
 ---
@@ -10,7 +10,7 @@ Signed-off-by: ligd <liguiding1@xiaomi.com>
  2 files changed, 6 insertions(+)
 
 diff --git a/lib/include/openamp/virtqueue.h open-amp/lib/include/openamp/virtqueue.h
-index 8194398..dd42c3a 100644
+index 7921948c8e..92a4a87f10 100644
 --- a/lib/include/openamp/virtqueue.h
 +++ open-amp/lib/include/openamp/virtqueue.h
 @@ -48,6 +48,9 @@ extern "C" {
@@ -20,14 +20,14 @@ index 8194398..dd42c3a 100644
 +/* Support to can't suppress interrupt. */
 +#define VIRTIO_RING_F_MUST_NOTIFY      (1 << 30)
 +
- /* cache invalidation helpers */
- #define CACHE_FLUSH(x, s)		metal_cache_flush(x, s)
- #define CACHE_INVALIDATE(x, s)		metal_cache_invalidate(x, s)
+ #if defined(VIRTIO_USE_DCACHE)
+ #define VRING_FLUSH(x, s)		metal_cache_flush(x, s)
+ #define VRING_INVALIDATE(x, s)		metal_cache_invalidate(x, s)
 diff --git a/lib/virtio/virtqueue.c open-amp/lib/virtio/virtqueue.c
-index 363fda8..7ffe569 100644
+index ed7af3fccd..d2738faaba 100644
 --- a/lib/virtio/virtqueue.c
 +++ open-amp/lib/virtio/virtqueue.c
-@@ -609,6 +609,9 @@ static int vq_ring_must_notify(struct virtqueue *vq)
+@@ -633,6 +633,9 @@ static int vq_ring_must_notify(struct virtqueue *vq)
  {
  	uint16_t new_idx, prev_idx, event_idx;
  
