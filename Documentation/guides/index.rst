@@ -60,4 +60,5 @@ Guides
   remove_device_drivers_nsh.rst
   rust.rst
   optee.rst
+  qemu_tips.rst
 
