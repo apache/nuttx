@@ -276,8 +276,7 @@ static const struct rptun_ivshmem_rsc_s g_rsc_table =
     {
       .h2r_buf_size   = 0x600,
       .r2h_buf_size   = 0x600,
-      .host_cpuname   = "server",
-      .remote_cpuname = "proxy",
+      .remote_cpuname = CONFIG_RPMSG_LOCAL_CPUNAME,
     },
   .rpmsg0_carveout =
     {
@@ -383,6 +382,13 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
   else
     {
       memcpy(&priv->shmem->rsc_table, priv->rsc_table, priv->rsc_size);
+      if (priv->rsc_table == (FAR const struct resource_table *)&g_rsc_table)
+        {
+          FAR struct rptun_ivshmem_rsc_s *rsc =
+            (FAR struct rptun_ivshmem_rsc_s *)&priv->shmem->rsc_table;
+          strlcpy((FAR char *)rsc->rpmsg0_config.host_cpuname, priv->cpuname,
+                  sizeof(rsc->rpmsg0_config.host_cpuname));
+        }
 
       priv->shmem->rsc_size = priv->rsc_size;
 
