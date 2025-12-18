@@ -145,6 +145,8 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr)
       goto errout;
     }
 
+  child = (FAR void *)((uintptr_t)child + sizeof(struct task_group_s));
+
   child->flags |= TCB_FLAG_FREE_TCB;
 
 #if defined(CONFIG_ARCH_ADDRENV)

@@ -138,7 +138,8 @@ int group_initialize(FAR struct tcb_s *tcb, uint8_t ttype)
     }
   else if (ttype == TCB_FLAG_TTYPE_TASK)
     {
-      tcb->group = (FAR struct task_group_s *)(tcb + 1);
+      tcb->group = (FAR void *)((uintptr_t)tcb -
+                                sizeof(struct task_group_s));
       group = tcb->group;
     }
   else

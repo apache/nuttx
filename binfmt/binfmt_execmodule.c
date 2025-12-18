@@ -185,6 +185,8 @@ int exec_module(FAR struct binary_s *binp,
       return -ENOMEM;
     }
 
+  tcb = (FAR void *)((uintptr_t)tcb + sizeof(struct task_group_s));
+
   ret = binfmt_copyargv(&argv, argv);
   if (ret < 0)
     {

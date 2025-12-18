@@ -99,6 +99,8 @@ static int nxtask_spawn_create(FAR const char *name, int priority,
       return -ENOMEM;
     }
 
+  tcb = (FAR void *)((uintptr_t)tcb + sizeof(struct task_group_s));
+
   /* Setup the task type */
 
   tcb->flags = TCB_FLAG_TTYPE_TASK | TCB_FLAG_FREE_TCB;

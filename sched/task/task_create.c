@@ -93,6 +93,8 @@ int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
       return -ENOMEM;
     }
 
+  tcb = (FAR void *)((uintptr_t)tcb + sizeof(struct task_group_s));
+
   /* Setup the task type */
 
   tcb->flags = ttype | TCB_FLAG_FREE_TCB;

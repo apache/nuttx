@@ -447,15 +447,15 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
 
   sched_unlock();
 
+  /* Deallocate anything left in the TCB's queues */
+
+  nxsig_cleanup(tcb); /* Deallocate Signal lists */
+
   /* Leave the task group.  Perhaps discarding any un-reaped child
    * status (no zombies here!)
    */
 
   group_leave(tcb);
-
-  /* Deallocate anything left in the TCB's queues */
-
-  nxsig_cleanup(tcb); /* Deallocate Signal lists */
 
 #ifdef CONFIG_SCHED_DUMP_LEAK
   if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
