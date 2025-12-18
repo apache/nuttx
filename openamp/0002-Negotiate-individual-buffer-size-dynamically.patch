@@ -1,7 +1,7 @@
-From a12f4359e3d4382e31a0f6f6983184b635fd0611 Mon Sep 17 00:00:00 2001
+From 4f552ae6fa88eec2a42c3933ea201ab71555838c Mon Sep 17 00:00:00 2001
 From: anchao <anchao@pinecone.net>
 Date: Mon, 10 Dec 2018 16:26:39 +0800
-Subject: [PATCH 02/14] Negotiate individual buffer size dynamically
+Subject: [PATCH 02/10] Negotiate individual buffer size dynamically
 
 Change config type from fw_rsc_config to rpmsg_virtio_config
 to avoid rpmsg_vitio.h couple with remoteproc.h.
@@ -19,7 +19,7 @@ Signed-off-by: wangyongrong <wangyongrong@xiaomi.com>
  3 files changed, 23 insertions(+)
 
 diff --git a/lib/include/openamp/remoteproc.h open-amp/lib/include/openamp/remoteproc.h
-index 84bf233..abc5481 100644
+index 29b28ed0ad..aadc7a798f 100644
 --- a/lib/include/openamp/remoteproc.h
 +++ open-amp/lib/include/openamp/remoteproc.h
 @@ -361,6 +361,21 @@ struct fw_rsc_vendor {
@@ -45,7 +45,7 @@ index 84bf233..abc5481 100644
  struct image_store_ops;
  struct remoteproc_ops;
 diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
-index 6d6925f..d9cfa9b 100644
+index b738e618cf..a757166082 100644
 --- a/lib/include/openamp/rpmsg_virtio.h
 +++ open-amp/lib/include/openamp/rpmsg_virtio.h
 @@ -30,6 +30,7 @@ extern "C" {
@@ -54,21 +54,21 @@ index 6d6925f..d9cfa9b 100644
  #define VIRTIO_RPMSG_F_ACK	1 /* RP supports name service acknowledge */
 +#define VIRTIO_RPMSG_F_BUFSZ	2 /* RP supports get buffer size from config space */
  
- #ifdef VIRTIO_CACHED_BUFFERS
- #warning "VIRTIO_CACHED_BUFFERS is deprecated, please use VIRTIO_USE_DCACHE"
+ #if defined(VIRTIO_USE_DCACHE)
+ #define BUFFER_FLUSH(x, s)		metal_cache_flush(x, s)
 diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
-index 820227e..94c4b95 100644
+index d59bad5d79..8654e7d8b8 100644
 --- a/lib/rpmsg/rpmsg_virtio.c
 +++ open-amp/lib/rpmsg/rpmsg_virtio.c
-@@ -12,6 +12,7 @@
- #include <metal/sleep.h>
+@@ -13,6 +13,7 @@
+ #include <metal/sys.h>
  #include <metal/utilities.h>
  #include <openamp/rpmsg_virtio.h>
 +#include <openamp/remoteproc.h>
  #include <openamp/virtqueue.h>
  
  #include "rpmsg_internal.h"
-@@ -790,6 +791,7 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
+@@ -802,6 +803,7 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
  	struct rpmsg_device *rdev;
  	const char *vq_names[RPMSG_NUM_VRINGS];
  	vq_callback callback[RPMSG_NUM_VRINGS];
@@ -76,7 +76,7 @@ index 820227e..94c4b95 100644
  	uint32_t features;
  	int status;
  	unsigned int i;
-@@ -836,6 +838,11 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
+@@ -848,6 +850,11 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
  		return status;
  	rdev->support_ns = !!(features & (1 << VIRTIO_RPMSG_F_NS));
  	rdev->support_ack = !!(features & (1 << VIRTIO_RPMSG_F_ACK));
@@ -86,7 +86,7 @@ index 820227e..94c4b95 100644
 +		rvdev->config.r2h_buf_size = fw_config.r2h_buf_size;
 +	}
  
- 	if (VIRTIO_ROLE_IS_DRIVER(rvdev->vdev)) {
+ 	if (VIRTIO_ROLE_IS_DRIVER(vdev)) {
  		/*
 -- 
 2.34.1

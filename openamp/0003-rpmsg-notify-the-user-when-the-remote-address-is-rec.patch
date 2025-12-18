@@ -1,7 +1,7 @@
-From ccedce5807709d184a9fe89529e611a556f0bf23 Mon Sep 17 00:00:00 2001
+From 0fd409ef494b47464f57667b24fce91a4f1a5753 Mon Sep 17 00:00:00 2001
 From: ligd <liguiding1@xiaomi.com>
 Date: Tue, 19 Oct 2021 19:45:14 +0800
-Subject: [PATCH 03/14] rpmsg: notify the user when the remote address is
+Subject: [PATCH 03/10] rpmsg: notify the user when the remote address is
  received
 
 Signed-off-by: ligd <liguiding1@xiaomi.com>
@@ -12,7 +12,7 @@ Signed-off-by: wangyongrong <wangyongrong@xiaomi.com>
  2 files changed, 18 insertions(+), 3 deletions(-)
 
 diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
-index b2a9b17..bb1c160 100644
+index 0a4b47bae9..a0e351af68 100644
 --- a/lib/include/openamp/rpmsg.h
 +++ open-amp/lib/include/openamp/rpmsg.h
 @@ -52,6 +52,7 @@ struct rpmsg_device;
@@ -34,10 +34,10 @@ index b2a9b17..bb1c160 100644
  	rpmsg_ns_unbind_cb ns_unbind_cb;
  
 diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
-index 94c4b95..ad9a730 100644
+index 8654e7d8b8..cc6c2fd52f 100644
 --- a/lib/rpmsg/rpmsg_virtio.c
 +++ open-amp/lib/rpmsg/rpmsg_virtio.c
-@@ -683,17 +683,28 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+@@ -695,17 +695,28 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
  			metal_mutex_release(&rdev->lock);
  			if (rdev->ns_bind_cb)
  				rdev->ns_bind_cb(rdev, name, dest);

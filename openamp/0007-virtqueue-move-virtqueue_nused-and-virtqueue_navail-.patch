@@ -1,0 +1,149 @@
+From bbaf772058b44a383b4ef81676eccd7a1b503c09 Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Wed, 20 Nov 2024 10:43:16 +0800
+Subject: [PATCH 07/10] virtqueue: move virtqueue_nused and virtqueue_navail to
+ public
+
+Use these two apis to judge whether there is buffers in the virtqueues
+to be processed.
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/include/openamp/virtqueue.h | 18 ++++++++
+ lib/virtio/virtqueue.c          | 80 ++++++++++++++++-----------------
+ 2 files changed, 57 insertions(+), 41 deletions(-)
+
+diff --git a/lib/include/openamp/virtqueue.h open-amp/lib/include/openamp/virtqueue.h
+index 92a4a87f10..2d42219be5 100644
+--- a/lib/include/openamp/virtqueue.h
++++ open-amp/lib/include/openamp/virtqueue.h
+@@ -428,6 +428,24 @@ static inline int virtqueue_full(struct virtqueue *vq)
+ 	return (vq->vq_free_cnt == 0);
+ }
+ 
++/**
++ * @brief Get number of used buffers in virtqueue
++ *
++ * @param vq	Pointer to VirtIO queue control block
++ *
++ * @return Number of used buffers
++ */
++int virtqueue_nused(struct virtqueue *vq);
++
++/**
++ * @brief Get number of available buffers in virtqueue
++ *
++ * @param vq	Pointer to VirtIO queue control block
++ *
++ * @return Number of available buffers
++ */
++int virtqueue_navail(struct virtqueue *vq);
++
+ #if defined __cplusplus
+ }
+ #endif
+diff --git a/lib/virtio/virtqueue.c open-amp/lib/virtio/virtqueue.c
+index d2738faaba..69e3572cd1 100644
+--- a/lib/virtio/virtqueue.c
++++ open-amp/lib/virtio/virtqueue.c
+@@ -21,8 +21,6 @@ static int vq_ring_enable_interrupt(struct virtqueue *, uint16_t);
+ static void vq_ring_free_chain(struct virtqueue *, uint16_t);
+ static int vq_ring_must_notify(struct virtqueue *vq);
+ static void vq_ring_notify(struct virtqueue *vq);
+-static int virtqueue_nused(struct virtqueue *vq);
+-static int virtqueue_navail(struct virtqueue *vq);
+ 
+ /* Default implementation of P2V based on libmetal */
+ static inline void *virtqueue_phys_to_virt(struct virtqueue *vq,
+@@ -397,6 +395,45 @@ uint32_t virtqueue_get_desc_size(struct virtqueue *vq)
+ 	return len;
+ }
+ 
++/*
++ *
++ * virtqueue_nused
++ *
++ */
++int virtqueue_nused(struct virtqueue *vq)
++{
++	uint16_t used_idx, nused;
++
++	/* Used is written by remote */
++	VRING_INVALIDATE(&vq->vq_ring.used->idx, sizeof(vq->vq_ring.used->idx));
++	used_idx = vq->vq_ring.used->idx;
++
++	nused = (uint16_t)(used_idx - vq->vq_used_cons_idx);
++	VQASSERT(vq, nused <= vq->vq_nentries, "used more than available");
++
++	return nused;
++}
++
++/*
++ *
++ * virtqueue_navail
++ *
++ */
++int virtqueue_navail(struct virtqueue *vq)
++{
++	uint16_t avail_idx, navail;
++
++	/* Avail is written by driver */
++	VRING_INVALIDATE(&vq->vq_ring.avail->idx, sizeof(vq->vq_ring.avail->idx));
++
++	avail_idx = vq->vq_ring.avail->idx;
++
++	navail = (uint16_t)(avail_idx - vq->vq_available_idx);
++	VQASSERT(vq, navail <= vq->vq_nentries, "avail more than available");
++
++	return navail;
++}
++
+ /**************************************************************************
+  *                            Helper Functions                            *
+  **************************************************************************/
+@@ -685,42 +722,3 @@ static void vq_ring_notify(struct virtqueue *vq)
+ 	if (vq->notify)
+ 		vq->notify(vq);
+ }
+-
+-/*
+- *
+- * virtqueue_nused
+- *
+- */
+-static int virtqueue_nused(struct virtqueue *vq)
+-{
+-	uint16_t used_idx, nused;
+-
+-	/* Used is written by remote */
+-	VRING_INVALIDATE(&vq->vq_ring.used->idx, sizeof(vq->vq_ring.used->idx));
+-	used_idx = vq->vq_ring.used->idx;
+-
+-	nused = (uint16_t)(used_idx - vq->vq_used_cons_idx);
+-	VQASSERT(vq, nused <= vq->vq_nentries, "used more than available");
+-
+-	return nused;
+-}
+-
+-/*
+- *
+- * virtqueue_navail
+- *
+- */
+-static int virtqueue_navail(struct virtqueue *vq)
+-{
+-	uint16_t avail_idx, navail;
+-
+-	/* Avail is written by driver */
+-	VRING_INVALIDATE(&vq->vq_ring.avail->idx, sizeof(vq->vq_ring.avail->idx));
+-
+-	avail_idx = vq->vq_ring.avail->idx;
+-
+-	navail = (uint16_t)(avail_idx - vq->vq_available_idx);
+-	VQASSERT(vq, navail <= vq->vq_nentries, "avail more than available");
+-
+-	return navail;
+-}
+-- 
+2.34.1
+

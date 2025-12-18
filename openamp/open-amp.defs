@@ -23,7 +23,7 @@
 ifeq ($(CONFIG_OPENAMP),y)
 
 ifeq ($(CONFIG_OPENAMP_CACHE),y)
-  CFLAGS += -DVIRTIO_CACHED_BUFFERS -DVIRTIO_CACHED_VRINGS
+  CFLAGS += -DVIRTIO_USE_DCACHE
 endif
 
 ifeq ($(CONFIG_OPENAMP_DEBUG),y)
@@ -44,41 +44,46 @@ else
   CFLAGS += -DVIRTIO_DRIVER_SUPPORT=0
 endif
 
+CFLAGS += -DVQ_RX_EMPTY_NOTIFY=1
+CFLAGS += -Iopen-amp/lib/include
+
+# avoid multiple definitions in other file
+CFLAGS += -Dsafe_strcpy=openamp_safe_strcpy
+
 CSRCS += open-amp/lib/remoteproc/elf_loader.c
 CSRCS += open-amp/lib/remoteproc/remoteproc.c
 CSRCS += open-amp/lib/remoteproc/remoteproc_virtio.c
 CSRCS += open-amp/lib/remoteproc/rsc_table_parser.c
 CSRCS += open-amp/lib/rpmsg/rpmsg.c
 CSRCS += open-amp/lib/rpmsg/rpmsg_virtio.c
+CSRCS += open-amp/lib/utils/utilities.c
 CSRCS += open-amp/lib/virtio/virtio.c
 CSRCS += open-amp/lib/virtio/virtqueue.c
 
 # Download and unpack tarball if no git repo found
 ifeq ($(wildcard open-amp/.git),)
 open-amp.zip:
-	$(call DOWNLOAD,https://github.com/OpenAMP/open-amp/archive,$(OPENAMP_COMMIT).zip,open-amp.zip)
+	$(call DOWNLOAD,https://github.com/OpenAMP/open-amp/archive,v$(OPENAMP_VERSION).zip,open-amp.zip)
 	$(Q) unzip -o open-amp.zip
-	mv open-amp-$(OPENAMP_COMMIT) open-amp
+	mv open-amp-$(OPENAMP_VERSION) open-amp
 	$(Q) patch -p0 < 0001-ns-acknowledge-the-received-creation-message.patch
 	$(Q) patch -p0 < 0002-Negotiate-individual-buffer-size-dynamically.patch
 	$(Q) patch -p0 < 0003-rpmsg-notify-the-user-when-the-remote-address-is-rec.patch
-	$(Q) patch -p0 < 0004-openamp-virtio.h-negotiate_features-also-can-be-call.patch
-	$(Q) patch -p0 < 0005-remoteproc-rpmsg_virtio-change-sched_yeild-to-usleep.patch
-	$(Q) patch -p0 < 0006-rpmsg-wait-ept-ready-in-rpmsg_send.patch
-	$(Q) patch -p0 < 0007-openamp-add-VIRTIO_RING_F_MUST_NOTIFY-event.patch
-	$(Q) patch -p0 < 0008-rpmsg_virtio-don-t-need-check-status-when-get_tx_pay.patch
-	$(Q) patch -p0 < 0009-openamp-swap-get_rx_buffer-return_rx_buffer-to-resol.patch
-	$(Q) patch -p0 < 0010-rpmsg_virtio.c-virtqueue_kick-after-all-rx-buffer-re.patch
-	$(Q) patch -p0 < 0011-virtio-change-feature-to-64-bit-in-all-virtio_dispat.patch
-	$(Q) patch -p0 < 0012-rpmsg_virtio.c-fix-get_tx_payload_buffer-error.patch
-	$(Q) patch -p0 < 0013-openamp-add-assert-when-get-tx-buffer-failed.patch
-	$(Q) patch -p0 < 0014-virtio.h-add-memory-operation-for-virtio-device.patch
+	$(Q) patch -p0 < 0004-rpmsg-wait-ept-ready-in-rpmsg_send.patch
+	$(Q) patch -p0 < 0005-openamp-add-VIRTIO_RING_F_MUST_NOTIFY-event.patch
+	$(Q) patch -p0 < 0006-rpmsg_virtio-don-t-need-check-status-when-get_tx_pay.patch
+	$(Q) patch -p0 < 0007-virtqueue-move-virtqueue_nused-and-virtqueue_navail-.patch
+	$(Q) patch -p0 < 0008-lib-rpmsg-rpmsg_virtio-add-last-buffer-check-to-fix-.patch
+	$(Q) patch -p0 < 0009-virtio-change-feature-to-64-bit-in-all-virtio_dispat.patch
+	$(Q) patch -p0 < 0010-openamp-add-assert-when-get-tx-buffer-failed.patch
 
 .openamp_headers: open-amp.zip
 else
 .openamp_headers:
 endif
 	$(eval headers := $(wildcard open-amp/lib/include/openamp/*.h))
+	$(eval headers += open-amp/lib/remoteproc/rsc_table_parser.h)
+	$(eval headers += open-amp/lib/rpmsg/rpmsg_internal.h)
 	$(shell mkdir -p $(TOPDIR)$(DELIM)include$(DELIM)openamp$(DELIM))
 	$(foreach header,$(headers),$(shell cp -rf $(header) $(TOPDIR)$(DELIM)include$(DELIM)openamp$(DELIM)))
 	touch $@

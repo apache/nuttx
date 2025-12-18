@@ -79,16 +79,11 @@ LIBMETAL_HDRS_SEDEXP := \
 ifeq ($(wildcard libmetal/.git),)
 libmetal.zip:
 # Download and unpack tarball if no git repo found
-	$(call DOWNLOAD,https://github.com/OpenAMP/libmetal/archive,$(LIBMETAL_COMMIT).zip,libmetal.zip)
+	$(call DOWNLOAD,https://github.com/OpenAMP/libmetal/archive,v$(LIBMETAL_VERSION).zip,libmetal.zip)
 	$(Q) unzip -o libmetal.zip
-	mv libmetal-$(LIBMETAL_COMMIT) libmetal
-	$(Q) patch -p0 < 0001-lib-errno.h-fix-compile-error.patch
+	mv libmetal-$(LIBMETAL_VERSION) libmetal
+	$(Q) patch -p0 < 0001-libmetal-cmake-set-HAVE_STDATOMIC_H-default-true-in-.patch
 	$(Q) patch -p0 < 0002-libmetal-atomic-enable-64-bit-atomic-by-toolchain-bu.patch
-	$(Q) patch -p0 < 0003-atomic.h-fix-compiler-error.patch
-	$(Q) patch -p0 < 0004-lib-system-nuttx-fix-unused-parameter-compile-error.patch
-	$(Q) patch -p0 < 0005-libmetal-cmake-set-HAVE_STDATOMIC_H-default-true-in-.patch
-	$(Q) patch -p0 < 0006-lib-system-nuttx-io.c-include-stddef.h-in-nuttx-io.c.patch
-	$(Q) patch -p0 < 0007-libmetal-nuttx-Update-function-prototype-changes.patch
 
 .libmetal_headers: libmetal.zip
 else
