@@ -92,7 +92,7 @@ static inline void group_inherit_identity(FAR struct task_group_s *group)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: group_initialize
+ * Name: group_allocate
  *
  * Description:
  *   Create and a new task group structure for the specified TCB. This
@@ -100,8 +100,8 @@ static inline void group_inherit_identity(FAR struct task_group_s *group)
  *   allocated and zeroed, but otherwise uninitialized.  The full creation
  *   of the group of a two step process:  (1) First, this function allocates
  *   group structure early in the task creation sequence in order to provide
- *   a group container, then (2) group_postinitialize() is called to set up
- *   the group membership.
+ *   a group container, then (2) group_initialize() is called to set up the
+ *   group membership.
  *
  * Input Parameters:
  *   tcb   - The tcb in need of the task group.
@@ -116,7 +116,7 @@ static inline void group_inherit_identity(FAR struct task_group_s *group)
  *
  ****************************************************************************/
 
-int group_initialize(FAR struct task_tcb_s *tcb, uint8_t ttype)
+int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 {
   FAR struct task_group_s *group;
   int ret;
@@ -138,7 +138,12 @@ int group_initialize(FAR struct task_tcb_s *tcb, uint8_t ttype)
     }
   else
     {
-      group = &tcb->group;
+      group = kmm_zalloc(sizeof(struct task_group_s));
+    }
+
+  if (!group)
+    {
+      return -ENOMEM;
     }
 
 #if defined(CONFIG_MM_KERNEL_HEAP)
@@ -175,7 +180,7 @@ int group_initialize(FAR struct task_tcb_s *tcb, uint8_t ttype)
   ret = task_init_info(group);
   if (ret < 0)
     {
-      return ret;
+      goto errout_with_group;
     }
 
   nxrmutex_init(&group->tg_mutex);
@@ -193,17 +198,20 @@ int group_initialize(FAR struct task_tcb_s *tcb, uint8_t ttype)
 #endif
 
   return OK;
+
+errout_with_group:
+  kmm_free(group);
+  return ret;
 }
 
 /****************************************************************************
- * Name: group_postinitialize
+ * Name: group_initialize
  *
  * Description:
  *   Add the task as the initial member of the group.  The full creation of
  *   the group of a two step process:  (1) First, this group structure is
- *   allocated by group_initialize() early in the task creation sequence,
- *   then (2) this function  is called to set up the initial group
- *   membership.
+ *   allocated by group_allocate() early in the task creation sequence, then
+ *   (2) this function  is called to set up the initial group membership.
  *
  * Input Parameters:
  *   tcb - The tcb in need of the task group.
@@ -217,7 +225,7 @@ int group_initialize(FAR struct task_tcb_s *tcb, uint8_t ttype)
  *
  ****************************************************************************/
 
-void group_postinitialize(FAR struct task_tcb_s *tcb)
+void group_initialize(FAR struct task_tcb_s *tcb)
 {
   FAR struct task_group_s *group;
 
