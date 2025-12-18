@@ -87,11 +87,14 @@
 static void udp_send_loopback(FAR struct net_driver_s *dev)
 {
   FAR struct iob_s *iob = netdev_iob_clone(dev, true);
+
   if (iob == NULL)
     {
       nerr("ERROR: IOB clone failed when looping UDP.\n");
       return;
     }
+
+  devif_out(dev);
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
