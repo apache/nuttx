@@ -746,10 +746,6 @@ struct task_tcb_s
   /* Common TCB fields ******************************************************/
 
   struct tcb_s cmn;                      /* Common TCB fields               */
-
-  /* Task Group *************************************************************/
-
-  struct task_group_s group;             /* Shared task group data          */
 };
 
 /* struct pthread_tcb_s *****************************************************/
