@@ -127,6 +127,7 @@ struct netdev_lowerhalf_s
 
   FAR atomic_t *quota_ptr; /* Shared quota, ignore `quota` if ptr is set */
   atomic_t quota[NETPKT_TYPENUM];
+  bool txdone;
 
   uint8_t rxtype;
   uint8_t priority;
