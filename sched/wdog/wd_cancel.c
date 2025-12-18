@@ -61,32 +61,37 @@
 int wd_cancel(FAR struct wdog_s *wdog)
 {
   irqstate_t flags;
-  bool head;
+  int ret   = -EINVAL;
+  bool head = false;
 
-  flags = spin_lock_irqsave(&g_wdspinlock);
+  if (wdog != NULL)
+    {
+      sched_note_wdog(NOTE_WDOG_CANCEL, (FAR void *)wdog->func,
+                      (FAR void *)(uintptr_t)wdog->expired);
+    }
+
+  flags = enter_critical_section();
 
   /* Make sure that the watchdog is valid and still active. */
 
-  if (wdog == NULL || !WDOG_ISACTIVE(wdog))
+  if (wdog != NULL && WDOG_ISACTIVE(wdog))
     {
-      spin_unlock_irqrestore(&g_wdspinlock, flags);
-      return -EINVAL;
+      /* Prohibit timer interactions with the timer queue until the
+       * cancellation is complete
+       */
+
+      head = list_is_head(&g_wdactivelist, &wdog->node);
+
+      /* Now, remove the watchdog from the timer queue */
+
+      list_delete(&wdog->node);
+
+      /* Mark the watchdog inactive */
+
+      wdog->func = NULL;
+
+      ret = OK;
     }
-
-  sched_note_wdog(NOTE_WDOG_CANCEL, (FAR void *)wdog->func,
-                  (FAR void *)(uintptr_t)wdog->expired);
-
-  /* Prohibit timer interactions with the timer queue until the
-   * cancellation is complete
-   */
-
-  head = list_is_head(&g_wdactivelist, &wdog->node);
-
-  /* Now, remove the watchdog from the timer queue */
-
-  list_delete(&wdog->node);
-
-  spin_unlock_irqrestore(&g_wdspinlock, flags);
 
   if (head)
     {
@@ -98,5 +103,7 @@ int wd_cancel(FAR struct wdog_s *wdog)
       nxsched_reassess_timer();
     }
 
-  return 0;
+  leave_critical_section(flags);
+
+  return ret;
 }
