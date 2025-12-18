@@ -39,6 +39,7 @@
 #include <nuttx/crc32.h>
 #include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/mutex.h>
+#include <nuttx/sched.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/ioctl.h>
 
