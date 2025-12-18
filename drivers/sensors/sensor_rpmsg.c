@@ -35,6 +35,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/rpmsg/rpmsg.h>
+#include <nuttx/wqueue.h>
 
 /****************************************************************************
  * Pre-processor Definitions
