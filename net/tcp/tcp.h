@@ -75,9 +75,9 @@
 #  define TCP_WBIOB(wrb)             ((wrb)->wb_iob)
 #  define TCP_WBCOPYOUT(wrb,dest,n)  (iob_copyout(dest,(wrb)->wb_iob,(n),0))
 #  define TCP_WBCOPYIN(wrb,src,n,off) \
-     (iob_copyin((wrb)->wb_iob,src,(n),(off),true))
+     (iob_copyin((wrb)->wb_iob,src,(n),(off),false))
 #  define TCP_WBTRYCOPYIN(wrb,src,n,off) \
-     (iob_trycopyin((wrb)->wb_iob,src,(n),(off),true))
+     (iob_trycopyin((wrb)->wb_iob,src,(n),(off),false))
 
 #  define TCP_WBTRIM(wrb,n) \
      do { (wrb)->wb_iob = iob_trimhead((wrb)->wb_iob,(n)); } while (0)

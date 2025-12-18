@@ -1695,7 +1695,7 @@ FAR netpkt_t *netpkt_alloc(FAR struct netdev_lowerhalf_s *dev,
       return NULL;
     }
 
-  pkt = iob_tryalloc(false);
+  pkt = iob_tryalloc(type == NETPKT_RX);
   if (pkt == NULL)
     {
       atomic_fetch_add(&dev->quota_ptr[type], 1);
@@ -1746,10 +1746,12 @@ void netpkt_free(FAR struct netdev_lowerhalf_s *dev, FAR netpkt_t *pkt,
  ****************************************************************************/
 
 int netpkt_copyin(FAR struct netdev_lowerhalf_s *dev, FAR netpkt_t *pkt,
-                  FAR const uint8_t *src, unsigned int len, int offset)
+                  FAR const uint8_t *src, unsigned int len, int offset,
+                  enum netpkt_type_e type)
 {
   return iob_trycopyin(pkt, src, len,
-                       offset - NET_LL_HDRLEN(&dev->netdev), false);
+                       offset - NET_LL_HDRLEN(&dev->netdev),
+                       type == NETPKT_RX);
 }
 
 /****************************************************************************

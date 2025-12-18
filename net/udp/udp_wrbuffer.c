@@ -143,7 +143,7 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_timedalloc(unsigned int timeout)
 
   /* Now get the first I/O buffer for the write buffer structure */
 
-  wrb->wb_iob = net_iobtimedalloc(true, timeout);
+  wrb->wb_iob = net_iobtimedalloc(false, timeout);
 
   /* Did we get an IOB?  We should always get one except under some really
    * weird error conditions.
