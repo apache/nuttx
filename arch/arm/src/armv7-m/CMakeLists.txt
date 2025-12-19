@@ -29,8 +29,7 @@ set(SRCS
     arm_doirq.c
     arm_initialstate.c
     arm_itm.c
-    arm_perf.c
-    arm_svcall.c)
+    arm_perf.c)
 
 if(CONFIG_ARMV7M_ITMSYSLOG)
   list(APPEND SRCS arm_itm_syslog.c)

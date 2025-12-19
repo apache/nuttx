@@ -31,7 +31,7 @@ ifeq ($(CONFIG_LIB_SYSCALL),y)
 endif
 
 CMN_CSRCS += arm_tcbinfo.c arm_busfault.c arm_hardfault.c
-CMN_CSRCS += arm_systemreset.c arm_trigger_irq.c
+CMN_CSRCS += arm_systemreset.c arm_trigger_irq.c arm_svcall.c
 
 ifneq ($(CONFIG_ARCH_ARMV6M),y)
   CMN_CSRCS += arm_usagefault.c arm_memfault.c
