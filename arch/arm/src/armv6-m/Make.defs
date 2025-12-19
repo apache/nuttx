@@ -25,6 +25,6 @@
 include common/Make.defs
 include arm_m/Make.defs
 
-CMN_CSRCS += arm_cpuinfo.c arm_doirq.c arm_initialstate.c
+CMN_CSRCS += arm_cpuinfo.c arm_doirq.c
 
 VPATH += arm_m

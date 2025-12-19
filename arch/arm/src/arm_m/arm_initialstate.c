@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/arm_initialstate.c
+ * arch/arm/src/arm_m/arm_initialstate.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -100,7 +100,7 @@ void up_initial_state(struct tcb_s *tcb)
   xcp->regs[REG_SP]      = (uint32_t)tcb->stack_base_ptr +
                                      tcb->adj_stack_size;
 
-#ifdef CONFIG_ARMV8M_STACKCHECK
+#ifdef CONFIG_ARM_STACKCHECK
   /* Set the stack limit value */
 
   xcp->regs[REG_R10]     = (uint32_t)tcb->stack_alloc_ptr + 64;
@@ -174,11 +174,19 @@ void up_initial_state(struct tcb_s *tcb)
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
 
+#  ifdef CONFIG_ARCH_ARMV6M
+  xcp->regs[REG_PRIMASK] = 1;
+#  else
   xcp->regs[REG_BASEPRI] = NVIC_SYSH_DISABLE_PRIORITY;
+#  endif
 
 #else /* CONFIG_SUPPRESS_INTERRUPTS */
 
+#  ifdef CONFIG_ARCH_ARMV6M
+  xcp->regs[REG_PRIMASK] = 0;
+#  else
   xcp->regs[REG_BASEPRI] = 0;
+#  endif
 
 #endif /* CONFIG_SUPPRESS_INTERRUPTS */
 }
@@ -196,31 +204,36 @@ noinline_function void arm_initialize_stack(void)
 {
   uint32_t stacklim = up_get_intstackbase(this_cpu());
   uint32_t stack = stacklim + INTSTACK_SIZE;
-  uint32_t temp = 0;
+  uint32_t tempa = 0;
+  uint32_t tempb = 2;
 
   __asm__ __volatile__
     (
+#ifndef CONFIG_ARCH_ARMV6M
       "mrs %1, CONTROL\n"
       "tst %1, #2\n"
       "bne 1f\n"
+#endif
 
       /* Initialize PSP */
 
       "mrs %1, msp\n"
       "msr psp, %1\n"
-#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
+#ifdef CONFIG_ARCH_ARMV8M
+#  ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
       "mrs %1, msplim\n"
       "msr psplim, %1\n"
-#else
+#  else
       "mov %1, #0\n"
       "msr psplim, %1\n"
+#  endif
 #endif
       "isb sy\n"
 
       /* Select PSP */
 
       "mrs %1, CONTROL\n"
-      "orr %1, #2\n"
+      "orr %1, %2\n"
       "msr CONTROL, %1\n"
       "isb sy\n"
 
@@ -228,18 +241,20 @@ noinline_function void arm_initialize_stack(void)
 
       "1:\n"
       "msr msp, %0\n"
-#ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
-      "msr msplim, %2\n"
-#else
+#ifdef CONFIG_ARCH_ARMV8M
+#  ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
+      "msr msplim, %3\n"
+#  else
       "mov %1, #0\n"
       "msr msplim, %1\n"
+#  endif
 #endif
       "isb sy\n"
       :
 #ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
-      : "r" (stack), "r" (temp), "r" (stacklim)
+      : "r" (stack), "r" (tempa), "r" (tempb), "r" (stacklim)
 #else
-      : "r" (stack), "r" (temp)
+      : "r" (stack), "r" (tempa), "r" (tempb)
 #endif
       : "memory");
 }

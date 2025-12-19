@@ -86,6 +86,7 @@ config ARMV8M_STACKCHECK_NONE
 
 config ARMV8M_STACKCHECK
 	bool "Check for stack overflow on each function call"
+	select ARM_STACKCHECK
 	---help---
 		This check uses R10 to check for a stack overflow within each
 		function call. This has performances and code size impacts, but it

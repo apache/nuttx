@@ -28,6 +28,7 @@ list(
   arm_hardfault.c
   arm_systemreset.c
   arm_svcall.c
+  arm_initialstate.c
   arm_trigger_irq.c)
 
 if(NOT CONFIG_ARCH_ARMV6M)
