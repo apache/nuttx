@@ -458,6 +458,11 @@ config SYSLOG_RPMSG_CHARDEV
 	bool "SYSLOG RPMSG character device"
 	default SYSLOG_RPMSG_WORK_DELAY != 0
 
+config SYSLOG_RPMSG_DEVPATH
+	string "SYSLOG RPMSG character device name"
+	default "/dev/logrpmsg"
+	depends on SYSLOG_RPMSG_CHARDEV
+
 endif # SYSLOG_RPMSG
 
 config SYSLOG_RPMSG_SERVER
