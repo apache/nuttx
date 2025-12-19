@@ -129,6 +129,9 @@ static int pl031_rdtime(FAR struct rtc_lowerhalf_s *lower,
   time = pl031_getreg(priv->base, PL031_RTCDR);
 
   gmtime_r(&time, (FAR struct tm *)rtctime);
+#if defined(CONFIG_RTC_HIRES) || defined(CONFIG_ARCH_HAVE_RTC_SUBSECONDS)
+  rtctime->tm_nsec = 0;
+#endif
 
   return 0;
 }
