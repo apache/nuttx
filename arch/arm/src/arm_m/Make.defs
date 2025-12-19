@@ -30,7 +30,7 @@ ifeq ($(CONFIG_LIB_SYSCALL),y)
   CMN_ASRCS += arm_dispatch_syscall.S
 endif
 
-CMN_CSRCS += arm_tcbinfo.c arm_busfault.c arm_hardfault.c
+CMN_CSRCS += arm_tcbinfo.c arm_busfault.c arm_hardfault.c arm_initialstate.c
 CMN_CSRCS += arm_systemreset.c arm_trigger_irq.c arm_svcall.c
 
 ifneq ($(CONFIG_ARCH_ARMV6M),y)

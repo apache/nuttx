@@ -25,7 +25,6 @@ set(SRCS
     arm_cache.c
     arm_cpuinfo.c
     arm_doirq.c
-    arm_initialstate.c
     arm_itm.c
     arm_perf.c
     arm_sau.c

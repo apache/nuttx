@@ -102,6 +102,7 @@ config ARMV7M_STACKCHECK
 	bool "Check for stack overflow on each function call"
 	default n
 	depends on ARMV7M_HAVE_STACKCHECK
+	select ARM_STACKCHECK
 	---help---
 		This check uses R10 to check for a stack overflow within each
 		function call. This has performances and code size impacts, but it

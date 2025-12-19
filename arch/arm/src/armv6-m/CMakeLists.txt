@@ -20,6 +20,6 @@
 #
 # ##############################################################################
 
-set(SRCS arm_doirq.c arm_initialstate.c arm_cpuinfo.c)
+set(SRCS arm_doirq.c arm_cpuinfo.c)
 
 target_sources(arch PRIVATE ${SRCS})
