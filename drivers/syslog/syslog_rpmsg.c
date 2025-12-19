@@ -472,7 +472,7 @@ int syslog_rpmsg_init(void)
 #ifdef CONFIG_SYSLOG_RPMSG_CHARDEV
   int ret;
 
-  ret = register_driver(CONFIG_SYSLOG_DEVPATH, &g_syslog_rpmsgfops,
+  ret = register_driver(CONFIG_SYSLOG_RPMSG_DEVPATH, &g_syslog_rpmsgfops,
                         0600, &g_syslog_rpmsg);
   if (ret < 0)
     {
