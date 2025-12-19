@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
+#include "sched/sched.h"
 
 #include <errno.h>
 
@@ -39,6 +40,13 @@
 /* Delay used while waiting for a running hrtimer callback to complete */
 
 #define HRTIMER_CANCEL_SYNC_DELAY_MS  5
+
+#ifdef CONFIG_SMP
+#  define hrtimer_is_free(hrtimer) (((hrtimer)->state == HRTIMER_STATE_INACTIVE) && \
+                                    ((hrtimer)->cpus == 0))
+#else
+#  define hrtimer_is_free(hrtimer) ((hrtimer)->state == HRTIMER_STATE_INACTIVE)
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -196,7 +204,7 @@ int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer)
    * and the state becomes inactive.
    */
 
-  while (hrtimer->state != HRTIMER_STATE_INACTIVE)
+  while (!hrtimer_is_free(hrtimer))
     {
       if (cansleep)
         {

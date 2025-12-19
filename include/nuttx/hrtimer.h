@@ -97,11 +97,14 @@ struct hrtimer_node_s
 
 struct hrtimer_s
 {
-  hrtimer_node_t          node;    /* RB-tree node for sorted insertion */
-  enum hrtimer_state_e    state;   /* Current timer state */
-  hrtimer_cb              func;    /* Expiration callback function */
-  FAR void               *arg;     /* Argument passed to callback */
-  uint64_t                expired; /* Absolute expiration time (ns) */
+  hrtimer_node_t  node;        /* RB-tree node for sorted insertion */
+  enum hrtimer_state_e state;  /* Current timer state */
+  hrtimer_cb func;             /* Expiration callback function */
+  FAR void *arg;               /* Argument passed to callback */
+  uint64_t expired;            /* Absolute expiration time (ns) */
+#ifdef CONFIG_SMP
+  uint8_t cpus;                /* Number of cpus that are running the timer */
+#endif
 };
 
 /****************************************************************************
@@ -139,8 +142,9 @@ void hrtimer_init(FAR hrtimer_t *hrtimer,
                   FAR void *arg)
 {
   hrtimer->state = HRTIMER_STATE_INACTIVE;
-  hrtimer->func  = func;
-  hrtimer->arg   = arg;
+  hrtimer->func = func;
+  hrtimer->arg = arg;
+  hrtimer->cpus = 0;
 }
 
 /****************************************************************************
