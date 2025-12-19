@@ -54,7 +54,7 @@
  *       if no timers remain.
  *
  * Input Parameters:
- *   ts - Pointer to the current high-resolution timestamp.
+ *   now - Current high-resolution timestamp.
  *
  * Returned Value:
  *   None.
@@ -69,7 +69,6 @@
 void hrtimer_process(uint64_t now)
 {
   FAR hrtimer_t *hrtimer;
-  uint64_t expired;
   uint32_t period = 0;
   irqstate_t flags;
 
@@ -99,28 +98,66 @@ void hrtimer_process(uint64_t now)
       DEBUGASSERT(hrtimer->func != NULL);
 
       hrtimer->state = HRTIMER_STATE_RUNNING;
+      hrtimer->cpus++;
+
+      /* cpus is a running reference counter and must never wrap */
+
+      DEBUGASSERT(hrtimer->cpus != 0);
+
+      /* Leave critical section before invoking the callback */
 
       spin_unlock_irqrestore(&g_hrtimer_spinlock, flags);
 
-      /* Invoke the timer callback */
+      /* Execute the timer callback */
 
       period = hrtimer->func(hrtimer);
 
+      /* Re-enter critical section to update timer state */
+
       flags = spin_lock_irqsave(&g_hrtimer_spinlock);
 
-      if ((hrtimer->state == HRTIMER_STATE_CANCELED) || (period == 0))
-        {
-          /* Timer is canceled or one-shot; mark it inactive */
+      hrtimer->cpus--;
 
-          hrtimer->state = HRTIMER_STATE_INACTIVE;
-        }
-      else
+      switch (hrtimer->state)
         {
-          /* Restart the periodic timer */
+          case HRTIMER_STATE_RUNNING:
+            {
+              /* Timer callback completed normally */
 
-          hrtimer->expired += period;
-          hrtimer->state = HRTIMER_STATE_ARMED;
-          RB_INSERT(hrtimer_tree_s, &g_hrtimer_tree, &hrtimer->node);
+              if (period > 0)
+                {
+                  /* Periodic timer: re-arm with the next expiration */
+
+                  hrtimer->expired += period;
+                  hrtimer->state = HRTIMER_STATE_ARMED;
+
+                  RB_INSERT(hrtimer_tree_s, &g_hrtimer_tree,
+                            &hrtimer->node);
+                }
+              else
+                {
+                  /* One-shot timer: deactivate when last instance ends */
+
+                  if (hrtimer->cpus == 0)
+                    {
+                      hrtimer->state = HRTIMER_STATE_INACTIVE;
+                    }
+                }
+
+              break;
+            }
+
+          case HRTIMER_STATE_CANCELED:
+            {
+              /* Timer was canceled during callback execution */
+
+              hrtimer->state = HRTIMER_STATE_INACTIVE;
+              break;
+            }
+
+          case HRTIMER_STATE_ARMED:
+          default:
+            break;
         }
 
       /* Fetch the next earliest timer */

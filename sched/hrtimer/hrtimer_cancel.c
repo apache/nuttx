@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
+#include "sched/sched.h"
 
 #include <errno.h>
 
