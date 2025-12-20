@@ -676,6 +676,21 @@ The callback runs in the timer interrupt context, so only limited NuttX interfac
 are available, such as ``mq_send()``, ``sigqueue()``, ``nxevent_post()``, or ``kill()``,
 to communicate with tasks.
 
+High-resolution timers (hrtimers) use a spinlock to protect internal timer data structures,
+allowing them to be safely accessed from interrupt context. This design makes hrtimers
+suitable for high-frequency timer operations.
+
+However, in SMP systems, a potential issue arises when a user cancels a timer that is currently
+executing: the timer instance may be freed prematurely while its callback is still running.
+To address this problem, a state machine is introduced in the hrtimer implementation:
+
+.. image:: hrtimer_state_machine.png
+   :alt: hrtimer state machine
+
+Users may call ``hrtimer_cancel_sync()`` to synchronously cancel a timer and wait until the
+timer becomes fully inactive. In contrast, ``hrtimer_cancel()`` is a non-blocking variant
+that returns immediately without waiting for the timer to stop executing.
+
 - :c:func:`hrtimer_init`
 - :c:func:`hrtimer_cancel`
 - :c:func:`hrtimer_cancel_sync`
