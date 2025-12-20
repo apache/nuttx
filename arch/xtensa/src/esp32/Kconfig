@@ -207,6 +207,19 @@ config ESP32_RUN_IRAM
 		This loads all of NuttX inside IRAM.  Used to test somewhat small
 		images that can fit entirely in IRAM.
 
+config ESP32_IGNORE_CHIP_REVISION_CHECK
+	bool "Ignore CHIP Revision Check"
+	default n
+	---help---
+		Some old ESP32 chips (before ESP32 ECO V3) has some issues
+		related to PSRAM Cache Bug, 32KHz crystal stability and
+		fault injection regarding security boot. So it is always
+		recommended to use an ESP32 ECO V3 or new chip. However some
+		old boards are still available in the market or in some users'
+		hand and in this case it is necessary to enable this bypass to
+		use this boards.
+                WARNING: Use it only for your own board, not in a product.
+
 menu "ESP32 Peripheral Selection"
 
 source "arch/xtensa/src/common/espressif/Kconfig"
