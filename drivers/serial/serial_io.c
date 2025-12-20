@@ -26,10 +26,6 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_SMP
-#  include <nuttx/irq.h>
-#endif
-
 #include <assert.h>
 #include <sys/types.h>
 #include <stdint.h>
@@ -57,10 +53,7 @@
 void uart_xmitchars(FAR uart_dev_t *dev)
 {
   uint16_t nbytes = 0;
-
-#ifdef CONFIG_SMP
-  irqstate_t flags = enter_critical_section();
-#endif
+  irqstate_t flags = uart_spinlock(dev, true);
 
   /* Send while we still have data in the TX buffer & room in the fifo */
 
@@ -127,9 +120,7 @@ void uart_xmitchars(FAR uart_dev_t *dev)
       uart_datasent(dev);
     }
 
-#ifdef CONFIG_SMP
-  leave_critical_section(flags);
-#endif
+  uart_spinunlock(dev, true, flags);
 }
 
 /****************************************************************************

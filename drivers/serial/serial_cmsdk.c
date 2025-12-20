@@ -530,10 +530,10 @@ static int uart_cmsdk_ioctl(struct file *filep, int cmd, unsigned long arg)
             break;
           }
 
-        flags = enter_critical_section();
+        flags = uart_spinlock(dev, false);
         priv->baud = cfgetispeed(termiosp);
         uart_cmsdk_setup(dev);
-        leave_critical_section(flags);
+        uart_spinunlock(dev, false, flags);
       }
       break;
 
@@ -632,7 +632,7 @@ static void uart_cmsdk_txint(struct uart_dev_s *dev, bool enable)
   FAR struct uart_cmsdk_s *priv = dev->priv;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = uart_spinlock(dev, true);
   if (enable)
     {
       uart_cmsdk_serialmodify(priv, UART_CTRL_OFFSET,
@@ -650,7 +650,7 @@ static void uart_cmsdk_txint(struct uart_dev_s *dev, bool enable)
         UART_CTRL_TX_INT_ENABLE | UART_CTRL_TX_OVERRUN_INT_ENABLE, 0);
     }
 
-  leave_critical_section(flags);
+  uart_spinunlock(dev, true, flags);
 }
 
 /****************************************************************************
