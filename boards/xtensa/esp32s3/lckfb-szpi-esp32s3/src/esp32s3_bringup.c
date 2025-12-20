@@ -113,6 +113,10 @@
 #  include "esp32s3_aes.h"
 #endif
 
+#ifdef CONFIG_SENSORS_QMI8658
+#  include <nuttx/sensors/qmi8658.h>
+#endif
+
 #ifdef CONFIG_ESP32S3_ADC
 #include "esp32s3_board_adc.h"
 #endif
@@ -303,6 +307,16 @@ int esp32s3_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize I2C driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_QMI8658
+  /* Register QMI8658 IMU sensor */
+
+  ret = esp32s3_qmi8658_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register QMI8658 IMU: %d\n", ret);
     }
 #endif
 

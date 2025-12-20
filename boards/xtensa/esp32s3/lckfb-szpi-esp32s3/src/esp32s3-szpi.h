@@ -46,6 +46,9 @@
 #define FT5X06_I2C_ADDRESS  (0x38)
 #define FT5X06_FREQUENCY    (400000)
 
+#define QMI8658_I2C_PORT    (0)
+#define QMI8658_I2C_ADDR    (0x6A)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -154,6 +157,10 @@ int esp32s3_pca9557_initialize(void);
 
 #ifdef CONFIG_INPUT_FT5X06
 int esp32s3_ft5x06_initialize(void);
+#endif
+
+#ifdef CONFIG_SENSORS_QMI8658
+int esp32s3_qmi8658_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
