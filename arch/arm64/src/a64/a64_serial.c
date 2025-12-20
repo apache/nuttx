@@ -648,7 +648,8 @@ static int a64_uart_attach(struct uart_dev_s *dev)
 
   /* Set Interrupt Priority in Generic Interrupt Controller v2 */
 
-  arm64_gic_irq_set_priority(port->irq_num, 0, IRQ_TYPE_LEVEL);
+  up_prioritize_irq(port->irq_num, 0);
+  up_set_irq_type(port->irq_num, IRQ_HIGH_LEVEL);
 
   /* Enable UART Interrupt */
 

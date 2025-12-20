@@ -610,7 +610,7 @@ void up_trigger_irq(int irq, cpu_set_t cpuset)
 }
 
 /****************************************************************************
- * Name: arm_gic_irq_trigger
+ * Name: up_set_irq_type
  *
  * Description:
  *   Set the trigger type for the specified IRQ source and the current CPU.
@@ -619,31 +619,36 @@ void up_trigger_irq(int irq, cpu_set_t cpuset)
  *   avoided in common implementations where possible.
  *
  * Input Parameters:
- *   irq - The interrupt request to modify.
- *   edge - False: Active HIGH level sensitive, True: Rising edge sensitive
+ *   irq  - The interrupt request to modify.
+ *   mode - Level sensitive or edge sensitive
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value is returned on any failure.
  *
  ****************************************************************************/
 
-int arm_gic_irq_trigger(int irq, bool edge)
+int up_set_irq_type(int irq, int mode)
 {
   uintptr_t regaddr;
   uint32_t regval;
   uint32_t intcfg;
 
-  if (irq > GIC_IRQ_SGI15 && irq < NR_IRQS)
+  if (!GIC_IS_SGI(irq))
     {
+      if (mode == IRQ_HIGH_LEVEL || mode == IRQ_LOW_LEVEL)
+        {
+          intcfg = INT_ICDICFR_1N;
+        }
+      else
+        {
+          intcfg = INT_ICDICFR_EDGE | INT_ICDICFR_1N;
+        }
+
       /* Get the address of the Interrupt Configuration Register for this
        * irq.
        */
 
       regaddr = GIC_ICDICFR(irq);
-
-      /* Get the new Interrupt configuration bit setting */
-
-      intcfg = (edge ? (INT_ICDICFR_EDGE | INT_ICDICFR_1N) : INT_ICDICFR_1N);
 
       /* Write the correct interrupt trigger to the Interrupt Configuration
        * Register.
