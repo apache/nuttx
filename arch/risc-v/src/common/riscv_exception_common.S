@@ -239,7 +239,9 @@ handle_irq:
   REGSTORE   s0, 0(sp)
   add        s0, sp, (INT_REG_SIZE * 2)
 
+#ifndef CONFIG_DISABLE_SIGNALS
   addi       sp, sp, -XCPTCONTEXT_SIZE
+#endif
 
   /* Call interrupt handler in C */
 
@@ -249,9 +251,11 @@ handle_irq:
   REGLOAD    s0, 0(sp)
   add        sp, sp, (INT_REG_SIZE * 2)
 
+#ifndef CONFIG_DISABLE_SIGNALS
   /* Restore sp */
 
   addi       sp, sp, XCPTCONTEXT_SIZE
+#endif
 #endif
 
 return_from_exception:

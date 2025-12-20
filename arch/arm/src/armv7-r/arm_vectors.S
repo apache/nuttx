@@ -204,6 +204,7 @@ arm_vectorirq:
 #else
 	/* Call arm_decodeirq() on the user stack */
 
+#ifndef CONFIG_DISABLE_SIGNALS
 	/* If the interrupt stack is disabled, reserve xcpcontext to ensure
 	 * that signal processing can have a separate xcpcontext to handle
 	 * signal context (reference: arm_schedulesigaction.c):
@@ -215,6 +216,8 @@ arm_vectorirq:
 	 */
 
 	sub		sp, sp, #XCPTCONTEXT_SIZE	/* Reserve signal context */
+#endif
+
 #endif
 
 	bic		sp, sp, #7			/* Force 8-byte alignment */
@@ -313,7 +316,7 @@ arm_vectorsvc:
 	/* Call arm_syscall() on the interrupt stack */
 
 	setirqstack	r1, r3				/* SP = interrupt stack top */
-#else
+#elif !defined(CONFIG_DISABLE_SIGNALS)
 	/* Call arm_syscall() on the user stack */
 
 	/* If the interrupt stack is disabled, reserve xcpcontext to ensure
