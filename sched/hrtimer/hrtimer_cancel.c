@@ -41,12 +41,8 @@
 
 #define HRTIMER_CANCEL_SYNC_DELAY_MS  5
 
-#ifdef CONFIG_SMP
-#  define hrtimer_is_free(hrtimer) (((hrtimer)->state == HRTIMER_STATE_INACTIVE) && \
-                                    ((hrtimer)->cpus == 0))
-#else
-#  define hrtimer_is_free(hrtimer) ((hrtimer)->state == HRTIMER_STATE_INACTIVE)
-#endif
+#define hrtimer_is_free(hrtimer) (((hrtimer)->state == HRTIMER_STATE_INACTIVE) && \
+                                  ((hrtimer)->cpus == 0))
 
 /****************************************************************************
  * Public Functions
