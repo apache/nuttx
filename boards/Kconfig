@@ -272,6 +272,15 @@ config ARCH_BOARD_ESP32_DEVKITC
 		of two CPUs is symmetric, meaning they use the same addresses to
 		access the same memory.
 
+config ARCH_BOARD_HELTEC_WIFI_LORA32
+	bool "Heltec WiFi LoRa32"
+	depends on ARCH_CHIP_ESP32WROOM32 || ARCH_CHIP_ESP32WROOM32_8MB || ARCH_CHIP_ESP32WROOM32_16MB || ARCH_CHIP_ESP32WROVER || ARCH_CHIP_ESP32SOLO1
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
+	---help---
+		This is a Heltec board with ESP32 and a SX1276 LoRa transceiver.
+
 config ARCH_BOARD_TLSR8278ADK80D
 	bool "Telink tlsr8278adk80d board"
 	depends on ARCH_CHIP_TLSR82
@@ -3535,6 +3544,7 @@ config ARCH_BOARD
 	default "quickfeather"                 if ARCH_BOARD_QUICKFEATHER
 	default "esp32-audio-kit"              if ARCH_BOARD_ESP32_AUDIO_KIT
 	default "esp32-devkitc"                if ARCH_BOARD_ESP32_DEVKITC
+	default "heltec_wifi_lora32"           if ARCH_BOARD_HELTEC_WIFI_LORA32
 	default "ttgo_eink5_v2"                if ARCH_BOARD_TTGO_T5V2_ESP32
 	default "esp32-ethernet-kit"           if ARCH_BOARD_ESP32_ETHERNETKIT
 	default "esp32-lyrat"                  if ARCH_BOARD_ESP32_LYRAT
@@ -4883,6 +4893,9 @@ source "boards/xtensa/esp32/esp32-audio-kit/Kconfig"
 endif
 if ARCH_BOARD_ESP32_DEVKITC
 source "boards/xtensa/esp32/esp32-devkitc/Kconfig"
+endif
+if ARCH_BOARD_HELTEC_WIFI_LORA32
+source "boards/xtensa/esp32/heltec_wifi_lora32/Kconfig"
 endif
 if ARCH_BOARD_TTGO_T5V2_ESP32
 source "boards/xtensa/esp32/ttgo_eink5_v2/Kconfig"

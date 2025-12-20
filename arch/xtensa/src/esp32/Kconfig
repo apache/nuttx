@@ -218,7 +218,7 @@ config ESP32_IGNORE_CHIP_REVISION_CHECK
 		old boards are still available in the market or in some users'
 		hand and in this case it is necessary to enable this bypass to
 		use this boards.
-                WARNING: Use it only for your own board, not in a product.
+		WARNING: Use it only for your own board, not in a product.
 
 menu "ESP32 Peripheral Selection"
 
