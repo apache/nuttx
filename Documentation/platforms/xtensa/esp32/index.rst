@@ -744,7 +744,7 @@ A QEMU-compatible ``nuttx.merged.bin`` binary image will be created. It can be r
 
 QEMU for ESP32 does not correctly define the chip revision as v3.0 so you have two options:
 
-- #define ``ESP32_IGNORE_CHIP_REVISION_CHECK`` in ``arch/xtensa/src/esp32/esp32_start.c``
+- Enable the ``CONFIG_ESP32_IGNORE_CHIP_REVISION_CHECK`` or
 - Emulate the efuse as described `here <https://github.com/espressif/esp-toolchain-docs/blob/main/qemu/esp32/README.md#emulating-esp32-eco3>`__.
 
 QEMU Networking
