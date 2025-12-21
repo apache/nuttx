@@ -87,3 +87,21 @@ nsh
 Basic NuttShell configuration (console enabled in UART0, exposed via
 USB connection by means of CH340 converter, at 115200 bps).
 
+sx1276
+------
+
+This board profile enables the SX1276 transceiver to RX and TX (half-duplex)
+communication using FSK protocol.
+
+In order to test it you need to flash two boards with this same firmware.
+
+Board 1 will be the transmitter, then execute::
+
+    nsh> sx127x -m 1 -t
+
+Board 2 will be the receiver, then execute::
+
+    nsh> sx127x -m 1
+
+Note: The default configuration is to 915MHz, you need to change the
+configuration if your boards are using other frequencies.
