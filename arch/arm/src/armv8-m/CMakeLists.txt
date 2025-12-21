@@ -42,8 +42,11 @@ set(SRCS
     arm_systemreset.c
     arm_tcbinfo.c
     arm_trigger_irq.c
-    arm_usagefault.c
-    arm_vectors.c)
+    arm_usagefault.c)
+
+if(NOT CONFIG_ARCH_HAVE_CUSTOM_VECTORS)
+  list(APPEND SRCS arm_vectors.c)
+endif()
 
 if(CONFIG_ARMV8M_SYSTICK)
   list(APPEND SRCS arm_systick.c)
