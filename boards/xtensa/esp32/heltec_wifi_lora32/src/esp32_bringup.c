@@ -81,6 +81,16 @@ int esp32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_LPWAN_SX127X
+  ret = esp32_lpwaninitialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize wireless driver: %d\n",
+             ret);
+    }
+#endif /* CONFIG_LPWAN_SX127X */
+
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced
    * capabilities.
