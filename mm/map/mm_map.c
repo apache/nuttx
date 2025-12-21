@@ -173,7 +173,7 @@ void mm_map_destroy(FAR struct mm_map_s *mm)
       kmm_free(entry);
     }
 
-  DEBUGASSERT(mm->map_count == 0);
+  DEBUGASSERT(mm->map_count == 0u);
 
   nxrmutex_destroy(&mm->mm_map_mutex);
 
