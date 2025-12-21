@@ -32,8 +32,11 @@ set(SRCS
     arm_svcall.c
     arm_systemreset.c
     arm_tcbinfo.c
-    arm_trigger_irq.c
-    arm_vectors.c)
+    arm_trigger_irq.c)
+
+if(NOT CONFIG_ARCH_HAVE_CUSTOM_VECTORS)
+  list(APPEND SRCS arm_vectors.c)
+endif()
 
 if((DEFINED CONFIG_DEBUG_FEATURES AND CONFIG_DEBUG_FEATURES)
    OR (DEFINED CONFIG_ARM_COREDUMP_REGION AND CONFIG_ARM_COREDUMP_REGION))
