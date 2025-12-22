@@ -138,20 +138,27 @@
     } \
   while (0)
 
-#define list_delete(item) \
+#define list_delete_fast(item) \
   do \
     { \
       FAR struct list_node *__item = (item); \
       __item->next->prev = __item->prev; \
       __item->prev->next = __item->next; \
-      __item->prev = __item->next = NULL; \
+    } \
+  while (0)
+
+#define list_delete(item) \
+  do \
+    { \
+      list_delete_fast(item); \
+      list_clear_node(item); \
     } \
   while (0)
 
 #define list_delete_init(item) \
   do \
     { \
-      list_delete(item); \
+      list_delete_fast(item); \
       list_initialize(item); \
     } \
   while (0)
