@@ -27,7 +27,6 @@ set(SRCS
     sched_addblocked.c
     sched_removeblocked.c
     sched_gettcb.c
-    sched_verifytcb.c
     sched_releasetcb.c
     sched_setparam.c
     sched_setpriority.c

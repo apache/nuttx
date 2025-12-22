@@ -103,6 +103,11 @@ int sched_rr_get_interval(pid_t pid, struct timespec *interval)
   if (interval == NULL)
     {
       set_errno(EFAULT);
+      if (pid > 0)
+        {
+          nxsched_put_tcb(rrtcb);
+        }
+
       return ERROR;
     }
 
@@ -126,6 +131,11 @@ int sched_rr_get_interval(pid_t pid, struct timespec *interval)
 
       interval->tv_sec  = 0;
       interval->tv_nsec = 0;
+    }
+
+  if (pid > 0)
+    {
+      nxsched_put_tcb(rrtcb);
     }
 
   return OK;

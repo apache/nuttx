@@ -140,6 +140,11 @@ int prctl(int option, ...)
               strlcpy(name, tcb->name, sizeof(tcb->name));
               name[CONFIG_TASK_NAME_SIZE - 1] = '\0';
             }
+
+          if (pid != 0)
+            {
+              nxsched_put_tcb(tcb);
+            }
         }
         break;
 #else

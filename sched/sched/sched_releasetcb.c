@@ -39,21 +39,23 @@
 #include "timer/timer.h"
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  nxsched_releasepid
+ * Name:  nxsched_release_pid
  *
  * Description:  When a task is destroyed, this function must
  * be called to make its process ID available for reuse.
  ****************************************************************************/
 
-static void nxsched_releasepid(pid_t pid)
+void nxsched_release_pid(pid_t pid)
 {
   irqstate_t flags = enter_critical_section();
   int hash_ndx = PIDHASH(pid);
+  FAR struct tcb_s *tcb = g_pidhash[hash_ndx];
 
+  DEBUGASSERT(tcb);
 #ifndef CONFIG_SCHED_CPULOAD_NONE
   /* Decrement the total CPU load count held by this thread from the
    * total for all threads.
@@ -68,13 +70,18 @@ static void nxsched_releasepid(pid_t pid)
    */
 
   g_pidhash[hash_ndx] = NULL;
+  DEBUGASSERT(atomic_read(&tcb->refs) > 0);
+  atomic_fetch_sub(&tcb->refs, 1);
 
   leave_critical_section(flags);
-}
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+  /* Wait tcb->refs to be 0 */
+
+  while (atomic_read(&tcb->refs))
+    {
+      nxsem_wait(&tcb->exit_sem);
+    }
+}
 
 /****************************************************************************
  * Name: nxsched_release_tcb
@@ -117,17 +124,6 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
 
       timer_deleteall(tcb->pid);
 #endif
-
-      /* Release the task's process ID if one was assigned.  PID
-       * zero is reserved for the IDLE task.  The TCB of the IDLE
-       * task is never release so a value of zero simply means that
-       * the process ID was never allocated to this TCB.
-       */
-
-      if (tcb->pid)
-        {
-          nxsched_releasepid(tcb->pid);
-        }
 
       /* Delete the thread's stack if one has been allocated */
 
@@ -173,6 +169,8 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
 
       nxtask_joindestroy(tcb);
 #endif
+
+      nxsem_destroy(&tcb->exit_sem);
 
       /* And, finally, release the TCB itself */
 
