@@ -111,7 +111,7 @@ static inline_function void wd_expiration(clock_t ticks)
   wdentry_t          func;
   wdparm_t           arg;
 
-  flags = spin_lock_irqsave(&g_wdspinlock);
+  flags = enter_critical_section();
 
   /* Process the watchdog at the head of the list as well as any
    * other watchdogs that became ready to run at this time
@@ -143,14 +143,10 @@ static inline_function void wd_expiration(clock_t ticks)
       /* Execute the watchdog function */
 
       up_setpicbase(wdog->picbase);
-      spin_unlock_irqrestore(&g_wdspinlock, flags);
-
       CALL_FUNC(func, arg);
-
-      flags = spin_lock_irqsave(&g_wdspinlock);
     }
 
-  spin_unlock_irqrestore(&g_wdspinlock, flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -272,7 +268,7 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
    * the critical section is established.
    */
 
-  flags = spin_lock_irqsave(&g_wdspinlock);
+  flags = enter_critical_section();
 #ifdef CONFIG_SCHED_TICKLESS
   /* We need to reassess timer if the watchdog list head has changed. */
 
@@ -291,12 +287,7 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
        * then this will pick that new delay.
        */
 
-      spin_unlock_irqrestore(&g_wdspinlock, flags);
       nxsched_reassess_timer();
-    }
-  else
-    {
-      spin_unlock_irqrestore(&g_wdspinlock, flags);
     }
 #else
   UNUSED(reassess);
@@ -309,8 +300,8 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
     }
 
   wd_insert(wdog, ticks, wdentry, arg);
-  spin_unlock_irqrestore(&g_wdspinlock, flags);
 #endif
+  leave_critical_section(flags);
 
   sched_note_wdog(NOTE_WDOG_START, wdentry, (FAR void *)(uintptr_t)ticks);
   return OK;
@@ -356,13 +347,13 @@ clock_t wd_timer(clock_t ticks, bool noswitches)
       wd_expiration(ticks);
     }
 
-  flags = spin_lock_irqsave(&g_wdspinlock);
+  flags = enter_critical_section();
 
   /* Return the delay for the next watchdog to expire */
 
   if (list_is_empty(&g_wdactivelist))
     {
-      spin_unlock_irqrestore(&g_wdspinlock, flags);
+      leave_critical_section(flags);
       return CLOCK_MAX;
     }
 
@@ -373,7 +364,7 @@ clock_t wd_timer(clock_t ticks, bool noswitches)
   wdog = list_first_entry(&g_wdactivelist, struct wdog_s, node);
   ret = wdog->expired - ticks;
 
-  spin_unlock_irqrestore(&g_wdspinlock, flags);
+  leave_critical_section(flags);
 
   /* Return the delay for the next watchdog to expire */
 
