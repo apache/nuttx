@@ -39,7 +39,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define WDOG_ISACTIVE(w)   (list_in_list(&((w)->node)))
+#define WDOG_ISACTIVE(w)   ((w)->func != NULL)
 
 /* The maximum delay tick are supposed to be CLOCK_MAX >> 1.
  * However, if there are expired wdog timers in the wdog queue,

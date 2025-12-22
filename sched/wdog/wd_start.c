@@ -140,12 +140,13 @@ static inline_function void wd_expiration(clock_t ticks)
 
       /* Remove the watchdog from the head of the list */
 
-      list_delete(&wdog->node);
+      list_delete_fast(&wdog->node);
 
       /* Indicate that the watchdog is no longer active. */
 
       func = wdog->func;
       arg  = wdog->arg;
+      wdog->func = NULL;
 
       /* Execute the watchdog function */
 
@@ -286,7 +287,7 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
   if (WDOG_ISACTIVE(wdog))
     {
       reassess |= list_is_head(&g_wdactivelist, &wdog->node);
-      list_delete(&wdog->node);
+      list_delete_fast(&wdog->node);
     }
 
   reassess |= wd_insert(wdog, ticks, wdentry, arg);
@@ -312,7 +313,7 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
 
   if (WDOG_ISACTIVE(wdog))
     {
-      list_delete(&wdog->node);
+      list_delete_fast(&wdog->node);
     }
 
   wd_insert(wdog, ticks, wdentry, arg);
