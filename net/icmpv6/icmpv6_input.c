@@ -35,6 +35,7 @@
 #include <nuttx/net/netstats.h>
 #include <nuttx/net/icmpv6.h>
 #include <nuttx/net/dns.h>
+#include <inet/inet.h>
 
 #include "devif/devif.h"
 #include "netlink/netlink.h"
@@ -332,7 +333,7 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
     case ICMPv6_NEIGHBOR_ADVERTISE:
       {
         FAR struct icmpv6_neighbor_advertise_s *adv;
-
+        bool should_process = false;
         /* If the IPv6 destination address matches our address, and if so,
          * add the neighbor address mapping to the list of neighbors.
          *
@@ -344,6 +345,16 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
 
         adv = ICMPv6ADVERTISE;
         if (NETDEV_IS_MY_V6ADDR(dev, ipv6->destipaddr))
+         {
+            should_process = true;
+         }
+        else if (net_ipv6addr_cmp(ipv6->destipaddr, g_ipv6_allnodes))
+         {
+            should_process = true;
+            ninfo("Received NA to all-nodes multicast address\n");
+         }
+
+        if (should_process)
           {
             /* This message is required to support the Target link-layer
              * address option.
