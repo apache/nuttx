@@ -120,7 +120,9 @@ typedef struct sigq_s sigq_t;
  * structures buffers structures.
  */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
 extern  sigactq_t  g_sigactions[CONFIG_SIG_PREALLOC_ACTIONS];
+#endif
 
 /* The g_sigfreeaction data structure is a list of available signal action
  * structures.
@@ -214,8 +216,6 @@ void               nxsig_release_pendingsignal(FAR sigpendq_t *sigpend);
 FAR sigpendq_t    *nxsig_remove_pendingsignal(FAR struct tcb_s *stcb,
                                               int signo);
 
-#ifdef CONFIG_ENABLE_ALL_SIGNALS
 bool               nxsig_unmask_pendingsignal(void);
-#endif
 
 #endif /* __SCHED_SIGNAL_SIGNAL_H */

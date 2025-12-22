@@ -22,6 +22,7 @@
 
 # Add the signal C files to the build
 
+ifneq ($(CONFIG_DISABLE_ALL_SIGNALS),y)
 CSRCS += sig_addset.c sig_delset.c sig_emptyset.c sig_fillset.c
 CSRCS += sig_nandset.c sig_andset.c sig_orset.c sig_xorset.c
 CSRCS += sig_isemptyset.c sig_killpg.c sig_altstack.c
@@ -36,3 +37,4 @@ endif
 
 DEPPATH += --dep-path signal
 VPATH += :signal
+endif
