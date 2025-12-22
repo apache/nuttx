@@ -93,7 +93,7 @@ uint32_t read_seqbegin(FAR const seqcount_t *s)
   uint32_t seq;
 
 #ifdef CONFIG_SMP
-  seq = atomic_read_acquire((FAR atomic_t *)&s->sequence) & ~1;
+  seq = atomic_read_acquire((FAR atomic_t *)&s->sequence) & (~1u);
 #else
   seq = s->sequence;
   SMP_RMB();
