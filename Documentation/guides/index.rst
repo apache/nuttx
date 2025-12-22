@@ -61,4 +61,5 @@ Guides
   rust.rst
   optee.rst
   qemu_tips.rst
+  lwl.rst
 
