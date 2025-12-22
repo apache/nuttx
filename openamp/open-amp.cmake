@@ -24,7 +24,7 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/open-amp)
     open-amp
     DOWNLOAD_NAME "libopen-amp-main.zip"
     DOWNLOAD_DIR ${CMAKE_CURRENT_LIST_DIR}
-    URL "https://github.com/OpenAMP/open-amp/archive/${OPENAMP_COMMIT}.zip"
+    URL "https://github.com/OpenAMP/open-amp/archive/${OPENAMP_VERSION}.zip"
         SOURCE_DIR
         ${CMAKE_CURRENT_LIST_DIR}/open-amp
         BINARY_DIR
@@ -61,11 +61,7 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/open-amp)
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
       ${CMAKE_CURRENT_LIST_DIR}/0011-virtio-change-feature-to-64-bit-in-all-virtio_dispat.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0012-rpmsg_virtio.c-fix-get_tx_payload_buffer-error.patch
-      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
       ${CMAKE_CURRENT_LIST_DIR}/0013-openamp-add-assert-when-get-tx-buffer-failed.patch
-      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0014-virtio.h-add-memory-operation-for-virtio-device.patch
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 
