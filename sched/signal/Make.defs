@@ -19,7 +19,7 @@
 # under the License.
 #
 ############################################################################
-
+ifneq ($(CONFIG_DISABLE_ALL_SIGNALS),y)
 CSRCS += sig_dispatch.c sig_kill.c sig_lowest.c sig_nanosleep.c
 CSRCS += sig_notification.c sig_pause.c sig_ppoll.c sig_procmask.c
 CSRCS += sig_pselect.c sig_queue.c sig_sleep.c sig_suspend.c sig_tgkill.c
@@ -39,3 +39,4 @@ endif
 
 DEPPATH += --dep-path signal
 VPATH += :signal
+endif

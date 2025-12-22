@@ -154,6 +154,7 @@ SYSCALL_LOOKUP(nxsem_wait_slow,            1)
 
 SYSCALL_LOOKUP(kill,                       2)
 SYSCALL_LOOKUP(tgkill,                     3)
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
 #ifdef CONFIG_ENABLE_ALL_SIGNALS
 SYSCALL_LOOKUP(sigaction,                  3)
 SYSCALL_LOOKUP(sigpending,                 1)
@@ -163,6 +164,7 @@ SYSCALL_LOOKUP(sigqueue,                   3)
 SYSCALL_LOOKUP(sigsuspend,                 1)
 SYSCALL_LOOKUP(sigtimedwait,               3)
 SYSCALL_LOOKUP(sigwaitinfo,                2)
+#endif
 SYSCALL_LOOKUP(clock_nanosleep,            4)
 
 /* The following are only defined if the system clock is enabled in the

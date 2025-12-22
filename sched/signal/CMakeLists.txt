@@ -20,43 +20,45 @@
 #
 # ##############################################################################
 
-set(SRCS
-    sig_procmask.c
-    sig_suspend.c
-    sig_kill.c
-    sig_tgkill.c
-    sig_queue.c
-    sig_waitinfo.c
-    sig_timedwait.c
-    sig_lowest.c
-    sig_notification.c
-    sig_dispatch.c
-    sig_pause.c
-    sig_nanosleep.c
-    sig_usleep.c
-    sig_sleep.c
-    sig_ppoll.c
-    sig_pselect.c)
+if(NOT CONFIG_DISABLE_ALL_SIGNALS)
+  set(SRCS
+      sig_procmask.c
+      sig_suspend.c
+      sig_kill.c
+      sig_tgkill.c
+      sig_queue.c
+      sig_waitinfo.c
+      sig_timedwait.c
+      sig_lowest.c
+      sig_notification.c
+      sig_dispatch.c
+      sig_pause.c
+      sig_nanosleep.c
+      sig_usleep.c
+      sig_sleep.c
+      sig_ppoll.c
+      sig_pselect.c)
 
-if(CONFIG_ENABLE_ALL_SIGNALS)
-  list(
-    APPEND
-    SRCS
-    sig_action.c
-    sig_allocpendingsigaction.c
-    sig_cleanup.c
-    sig_deliver.c
-    sig_findaction.c
-    sig_initialize.c
-    sig_pending.c
-    sig_releasependingsigaction.c
-    sig_releasependingsignal.c
-    sig_removependingsignal.c
-    sig_unmaskpendingsignal.c)
+  if(CONFIG_ENABLE_ALL_SIGNALS)
+    list(
+      APPEND
+      SRCS
+      sig_action.c
+      sig_allocpendingsigaction.c
+      sig_cleanup.c
+      sig_deliver.c
+      sig_findaction.c
+      sig_initialize.c
+      sig_pending.c
+      sig_releasependingsigaction.c
+      sig_releasependingsignal.c
+      sig_removependingsignal.c
+      sig_unmaskpendingsignal.c)
+  endif()
+
+  if(CONFIG_SIG_DEFAULT)
+    list(APPEND SRCS sig_default.c)
+  endif()
+
+  target_sources(sched PRIVATE ${SRCS})
 endif()
-
-if(CONFIG_SIG_DEFAULT)
-  list(APPEND SRCS sig_default.c)
-endif()
-
-target_sources(sched PRIVATE ${SRCS})
