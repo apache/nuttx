@@ -98,7 +98,7 @@ typedef union rspinlock_u
 
 #define SEQLOCK_INITIALIZER { 0u }
 
-typedef struct seqclock
+typedef struct seqcount_s
 {
   uint32_t sequence;
 } seqcount_t;
