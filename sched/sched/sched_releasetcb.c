@@ -178,7 +178,10 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
 
       if (tcb->flags & TCB_FLAG_FREE_TCB)
         {
-          kmm_free(tcb);
+          if (ttype != TCB_FLAG_TTYPE_TASK)
+            {
+              kmm_free(tcb);
+            }
         }
     }
 

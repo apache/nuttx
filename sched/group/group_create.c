@@ -92,7 +92,7 @@ static inline void group_inherit_identity(FAR struct task_group_s *group)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: group_allocate
+ * Name: group_initialize
  *
  * Description:
  *   Create and a new task group structure for the specified TCB. This
@@ -100,8 +100,8 @@ static inline void group_inherit_identity(FAR struct task_group_s *group)
  *   allocated and zeroed, but otherwise uninitialized.  The full creation
  *   of the group of a two step process:  (1) First, this function allocates
  *   group structure early in the task creation sequence in order to provide
- *   a group container, then (2) group_initialize() is called to set up the
- *   group membership.
+ *   a group container, then (2) group_postinitialize() is called to set up
+ *   the group membership.
  *
  * Input Parameters:
  *   tcb   - The tcb in need of the task group.
@@ -116,12 +116,12 @@ static inline void group_inherit_identity(FAR struct task_group_s *group)
  *
  ****************************************************************************/
 
-int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
+int group_initialize(FAR struct tcb_s *tcb, uint8_t ttype)
 {
   FAR struct task_group_s *group;
   int ret;
 
-  DEBUGASSERT(tcb && !tcb->cmn.group);
+  DEBUGASSERT(tcb && !tcb->group);
 
   ttype &= TCB_FLAG_TTYPE_MASK;
 
@@ -130,20 +130,21 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
   if (ttype == TCB_FLAG_TTYPE_KERNEL)
     {
       group = &g_kthread_group;
-      tcb->cmn.group = group;
+      tcb->group = group;
       if (group->tg_info)
         {
           return OK;
         }
     }
+  else if (ttype == TCB_FLAG_TTYPE_TASK)
+    {
+      tcb->group = (FAR void *)((uintptr_t)tcb -
+                                sizeof(struct task_group_s));
+      group = tcb->group;
+    }
   else
     {
-      group = kmm_zalloc(sizeof(struct task_group_s));
-    }
-
-  if (!group)
-    {
-      return -ENOMEM;
+      group = tcb->group;
     }
 
 #if defined(CONFIG_MM_KERNEL_HEAP)
@@ -165,7 +166,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 
   /* Attach the group to the TCB */
 
-  tcb->cmn.group = group;
+  tcb->group = group;
 
   /* Inherit the user identity from the parent task group */
 
@@ -180,7 +181,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
   ret = task_init_info(group);
   if (ret < 0)
     {
-      goto errout_with_group;
+      return ret;
     }
 
   nxrmutex_init(&group->tg_mutex);
@@ -198,20 +199,17 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 #endif
 
   return OK;
-
-errout_with_group:
-  kmm_free(group);
-  return ret;
 }
 
 /****************************************************************************
- * Name: group_initialize
+ * Name: group_postinitialize
  *
  * Description:
  *   Add the task as the initial member of the group.  The full creation of
  *   the group of a two step process:  (1) First, this group structure is
- *   allocated by group_allocate() early in the task creation sequence, then
- *   (2) this function  is called to set up the initial group membership.
+ *   allocated by group_initialize() early in the task creation sequence,
+ *   then (2) this function  is called to set up the initial group
+ *   membership.
  *
  * Input Parameters:
  *   tcb - The tcb in need of the task group.
@@ -225,23 +223,23 @@ errout_with_group:
  *
  ****************************************************************************/
 
-void group_initialize(FAR struct task_tcb_s *tcb)
+void group_postinitialize(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group;
 
-  DEBUGASSERT(tcb && tcb->cmn.group);
-  group = tcb->cmn.group;
+  DEBUGASSERT(tcb && tcb->group);
+  group = tcb->group;
   spin_lock_init(&group->tg_lock);
 
   /* Allocate mm_map list if required */
 
   mm_map_initialize(&group->tg_mm_map,
-                    (tcb->cmn.flags & TCB_FLAG_TTYPE_KERNEL) != 0);
+                    (tcb->flags & TCB_FLAG_TTYPE_KERNEL) != 0);
 
 #ifdef HAVE_GROUP_MEMBERS
   /* Assign the PID of this new task as a member of the group. */
 
-  sq_addlast(&tcb->cmn.member, &group->tg_members);
+  sq_addlast(&tcb->member, &group->tg_members);
 #endif
 
   /* Save the ID of the main task within the group of threads.  This needed
@@ -252,6 +250,6 @@ void group_initialize(FAR struct task_tcb_s *tcb)
 
   if (group != &g_kthread_group)
     {
-      group->tg_pid = tcb->cmn.pid;
+      group->tg_pid = tcb->pid;
     }
 }

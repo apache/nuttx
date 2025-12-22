@@ -58,8 +58,8 @@ void task_initialize(void);
 
 /* Task group data structure management */
 
-int  group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype);
-void group_initialize(FAR struct task_tcb_s *tcb);
+int  group_initialize(FAR struct tcb_s *tcb, uint8_t ttype);
+void group_postinitialize(FAR struct tcb_s *tcb);
 #ifndef CONFIG_DISABLE_PTHREAD
 void group_bind(FAR struct pthread_tcb_s *tcb);
 void group_join(FAR struct pthread_tcb_s *tcb);
@@ -112,7 +112,7 @@ void group_remove_children(FAR struct task_group_s *group);
 /* Group data resource configuration */
 
 int  group_setupidlefiles(void);
-int  group_setuptaskfiles(FAR struct task_tcb_s *tcb,
+int  group_setuptaskfiles(FAR struct tcb_s *tcb,
                           FAR const posix_spawn_file_actions_t *actions,
                           bool cloexec);
 

@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/irq.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
@@ -70,7 +71,8 @@
  *
  ****************************************************************************/
 
-static inline void group_release(FAR struct task_group_s *group)
+static inline void
+group_release(FAR struct task_group_s *group)
 {
   /* Destroy the mutex */
 
@@ -171,6 +173,12 @@ void group_leave(FAR struct tcb_s *tcb)
   group = tcb->group;
   if (group)
     {
+      /* In any event, we can detach the group from the TCB so that we won't
+       * do this again.
+       */
+
+      tcb->group = NULL;
+
       /* Remove the member from group. */
 
 #ifdef HAVE_GROUP_MEMBERS
@@ -187,12 +195,6 @@ void group_leave(FAR struct tcb_s *tcb)
 
           group_release(group);
         }
-
-      /* In any event, we can detach the group from the TCB so that we won't
-       * do this again.
-       */
-
-      tcb->group = NULL;
     }
 }
 
@@ -233,7 +235,6 @@ void group_drop(FAR struct task_group_s *group)
     }
   else
 #endif
-
   /* Finally, if no one needs the group and it has been deleted, remove it */
 
   if (group->tg_flags & GROUP_FLAG_DELETED)

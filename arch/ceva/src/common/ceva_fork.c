@@ -87,7 +87,7 @@ pid_t ceva_fork(const uint32_t *regs)
 {
 #ifdef CONFIG_SCHED_WAITPID
   struct tcb_s *parent = this_task();
-  struct task_tcb_s *child;
+  struct tcb_s *child;
   size_t stacksize;
   const void *sp = regs + XCPTCONTEXT_REGS;
   void *newsp;
@@ -114,7 +114,7 @@ pid_t ceva_fork(const uint32_t *regs)
 
   /* Allocate the stack for the TCB */
 
-  ret = up_create_stack((struct tcb_s *)child, stacksize + argsize,
+  ret = up_create_stack(child, stacksize + argsize,
                         parent->flags & TCB_FLAG_TTYPE_MASK);
   if (ret != OK)
     {
@@ -125,7 +125,7 @@ pid_t ceva_fork(const uint32_t *regs)
 
   /* Allocate the memory and copy argument from parent task */
 
-  argv = up_stack_frame((struct tcb_s *)child, argsize);
+  argv = up_stack_frame(child, argsize);
   memcpy(argv, parent->stack_base_ptr, argsize);
 
   /* How much of the parent's stack was utilized?  The CEVA uses
@@ -146,14 +146,14 @@ pid_t ceva_fork(const uint32_t *regs)
    * effort is overkill.
    */
 
-  newsp = child->cmn.stack_base_ptr - stackutil;
+  newsp = child->stack_base_ptr - stackutil;
   memcpy(newsp, sp, stackutil);
 
   /* Allocate the context and copy the parent snapshot */
 
   newsp -= XCPTCONTEXT_SIZE;
   memcpy(newsp, regs, XCPTCONTEXT_SIZE);
-  child->cmn.xcp.regs = newsp;
+  child->xcp.regs = newsp;
 
   /* Was there a frame pointer in place before? */
 
@@ -161,7 +161,7 @@ pid_t ceva_fork(const uint32_t *regs)
       regs[REG_FP] >= (uint32_t)parent->stack_base_ptr - stacksize)
     {
       uint32_t frameutil = (uint32_t)parent->stack_base_ptr - regs[REG_FP];
-      newfp = (uint32_t)child->cmn.stack_base_ptr - frameutil;
+      newfp = (uint32_t)child->stack_base_ptr - frameutil;
     }
   else
     {
@@ -171,17 +171,17 @@ pid_t ceva_fork(const uint32_t *regs)
   sinfo("Parent: stack base:%08x SP:%08x FP:%08x\n",
         parent->stack_base_ptr, sp, regs[REG_FP]);
   sinfo("Child:  stack base:%08x SP:%08x FP:%08x\n",
-        child->cmn.stack_base_ptr, newsp, newfp);
+        child->stack_base_ptr, newsp, newfp);
 
   /* Update the stack pointer, frame pointer, and the return value in A0
    * should be cleared to zero, providing the indication to the newly started
    * child thread.
    */
 
-  child->cmn.xcp.regs[REG_A0] = 0;               /* Return value */
-  child->cmn.xcp.regs[REG_FP] = newfp;           /* Frame pointer */
-  child->cmn.xcp.regs[REG_PC] = regs[REG_LR];    /* Program counter */
-  child->cmn.xcp.regs[REG_SP] = (uint32_t)newsp; /* Stack pointer */
+  child->xcp.regs[REG_A0] = 0;               /* Return value */
+  child->xcp.regs[REG_FP] = newfp;           /* Frame pointer */
+  child->xcp.regs[REG_PC] = regs[REG_LR];    /* Program counter */
+  child->xcp.regs[REG_SP] = (uint32_t)newsp; /* Stack pointer */
 
 #ifdef CONFIG_LIB_SYSCALL
   /* If we got here via a syscall, then we are going to have to setup some
@@ -193,10 +193,10 @@ pid_t ceva_fork(const uint32_t *regs)
       int index;
       for (index = 0; index < parent->xcp.nsyscalls; index++)
         {
-          child->cmn.xcp.syscall[index] = parent->xcp.syscall[index];
+          child->xcp.syscall[index] = parent->xcp.syscall[index];
         }
 
-      child->cmn.xcp.nsyscalls = parent->xcp.nsyscalls;
+      child->xcp.nsyscalls = parent->xcp.nsyscalls;
     }
 #endif
 
