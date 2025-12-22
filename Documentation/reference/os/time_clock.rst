@@ -372,7 +372,6 @@ In addition to these imported interfaces, the RTOS will export the
 following interfaces for use by the platform-specific interval
 timer implementation:
 
-- ``nxsched_alarm_expiration()``: called by the platform-specific logic when the alarm expires.
 - ``nxsched_timer_expiration()``: called by the platform-specific logic when the interval time expires.
 
 .. c:function:: void archname_timer_initialize(void)

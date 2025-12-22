@@ -36,9 +36,13 @@
 #define arm_dsb()  __asm__ __volatile__ ("dsb " : : : "memory")
 #define arm_isb()  __asm__ __volatile__ ("isb " : : : "memory")
 #define arm_dmb()  __asm__ __volatile__ ("dmb " : : : "memory")
+#define arm_rmb()  __asm__ __volatile__ ("dmb ish" : : : "memory")
+#define arm_wmb()  __asm__ __volatile__ ("dmb ish" : : : "memory")
 
 #define UP_DSB()  arm_dsb()
 #define UP_ISB()  arm_isb()
 #define UP_DMB()  arm_dmb()
+#define UP_RMB()  arm_rmb()
+#define UP_WMB()  arm_wmb()
 
 #endif /* __ARCH_ARM_INCLUDE_ARMV7_M_BARRIERS_H */

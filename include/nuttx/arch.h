@@ -99,6 +99,46 @@
 #define DEBUGPOINT_BREAKPOINT    0x04
 #define DEBUGPOINT_STEPPOINT     0x05
 
+/* Memory barriers may be provided in arch/spinlock.h
+ *
+ *   DMB - Data memory barrier.  Assures writes are completed to memory.
+ *   DSB - Data synchronization barrier.
+ */
+
+#if !defined(UP_DMB)
+#  define UP_DMB()
+#endif
+
+#if !defined(UP_RMB)
+#  define UP_RMB()
+#endif
+
+#if !defined(UP_WMB)
+#  define UP_WMB()
+#endif
+
+#if !defined(UP_DSB)
+#  define UP_DSB()
+#endif
+
+#if !defined(UP_WFE)
+#  define UP_WFE()
+#endif
+
+#if !defined(UP_SEV)
+#  define UP_SEV()
+#endif
+
+#ifdef CONFIG_SMP
+#  define SMP_MB()  UP_DMB()
+#  define SMP_RMB() UP_RMB()
+#  define SMP_WMB() UP_WMB()
+#else	/* !CONFIG_SMP */
+#  define SMP_MB()  memory_barrier()
+#  define SMP_RMB() memory_barrier()
+#  define SMP_WMB() memory_barrier()
+#endif
+
 /****************************************************************************
  * Name: up_cpu_index
  *
@@ -1885,13 +1925,8 @@ void up_timer_initialize(void);
  * The RTOS will provide the following interfaces for use by the platform-
  * specific interval timer implementation:
  *
- * #ifdef CONFIG_SCHED_TICKLESS_ALARM
- *   void nxsched_alarm_expiration(FAR const struct timespec *ts):  Called
- *     by the platform-specific logic when the alarm expires.
- * #else
  *   void nxsched_timer_expiration(void):  Called by the platform-specific
  *     logic when the interval timer expires.
- * #endif
  *
  ****************************************************************************/
 
@@ -1938,7 +1973,7 @@ void up_timer_getmask(FAR clock_t *mask);
  * Description:
  *   Cancel the alarm and return the time of cancellation of the alarm.
  *   These two steps need to be as nearly atomic as possible.
- *   nxsched_alarm_expiration() will not be called unless the alarm is
+ *   nxsched_timer_expiration() will not be called unless the alarm is
  *   restarted with up_alarm_start().
  *
  *   If, as a race condition, the alarm has already expired when this
@@ -1978,7 +2013,7 @@ int up_alarm_tick_cancel(FAR clock_t *ticks);
  * Name: up_alarm_start
  *
  * Description:
- *   Start the alarm.  nxsched_alarm_expiration() will be called when the
+ *   Start the alarm.  nxsched_timer_expiration() will be called when the
  *   alarm occurs (unless up_alaram_cancel is called to stop it).
  *
  *   Provided by platform-specific code and called from the RTOS base code.
@@ -1986,7 +2021,7 @@ int up_alarm_tick_cancel(FAR clock_t *ticks);
  * Input Parameters:
  *   ts - The time in the future at the alarm is expected to occur.  When
  *        the alarm occurs the timer logic will call
- *        nxsched_alarm_expiration().
+ *        nxsched_timer_expiration().
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -2462,34 +2497,9 @@ void nxsched_process_timer(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_TICKLESS_ALARM)
+#if defined(CONFIG_SCHED_TICKLESS)
 void nxsched_timer_expiration(void);
 #endif
-
-/****************************************************************************
- * Name:  nxsched_alarm_expiration
- *
- * Description:
- *   if CONFIG_SCHED_TICKLESS is defined, then this function is provided by
- *   the RTOS base code and called from platform-specific code when the
- *   alarm used to implement the tick-less OS expires.
- *
- * Input Parameters:
- *   ts - The time that the alarm expired
- *
- * Returned Value:
- *   None
- *
- * Assumptions/Limitations:
- *   Base code implementation assumes that this function is called from
- *   interrupt handling logic with interrupts disabled.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM)
-void nxsched_alarm_expiration(FAR const struct timespec *ts);
-#endif
-void nxsched_tick_expiration(clock_t ticks);
 
 /****************************************************************************
  * Name:  nxsched_get_next_expired

@@ -1172,7 +1172,7 @@ int nxsched_suspend_sporadic(FAR struct tcb_s *tcb)
  *
  * Returned Value:
  *   The number if ticks remaining until the budget interval expires.
- *   Zero is returned if we are in the low-priority phase of the
+ *   CLOCK_MAX is returned if we are in the low-priority phase of the
  *   replenishment interval.
  *
  * Assumptions:
@@ -1181,8 +1181,8 @@ int nxsched_suspend_sporadic(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-uint32_t nxsched_process_sporadic(FAR struct tcb_s *tcb, uint32_t ticks,
-                                bool noswitches)
+clock_t nxsched_process_sporadic(FAR struct tcb_s *tcb, clock_t ticks,
+                                 bool noswitches)
 {
   FAR struct sporadic_s *sporadic;
 
@@ -1198,7 +1198,7 @@ uint32_t nxsched_process_sporadic(FAR struct tcb_s *tcb, uint32_t ticks,
 
   if (tcb->timeslice == 0)
     {
-      return 0;
+      return CLOCK_MAX;
     }
 
   /* Check if the budget interval has elapse  If 'ticks' is greater
@@ -1230,12 +1230,12 @@ uint32_t nxsched_process_sporadic(FAR struct tcb_s *tcb, uint32_t ticks,
 
           sporadic_timer_cancel(tcb);
           tcb->timeslice    = -1;
-          return 0;
+          return CLOCK_MAX;
         }
 
       /* We will also suppress context switches if we were called via one of
        * the unusual cases handled by nxsched_reassess_timer(). In that case,
-       * we will return a value of one so that the timer will expire as soon
+       * we will return a value of zero so that the timer will expire as soon
        * as possible and we can perform this action in the normal timer
        * expiration context.
        *
@@ -1246,8 +1246,8 @@ uint32_t nxsched_process_sporadic(FAR struct tcb_s *tcb, uint32_t ticks,
 
       if (noswitches)
         {
-          tcb->timeslice = 1;
-          return 1;
+          tcb->timeslice = 0;
+          return 0;
         }
 
       /* Another possibility is the budget interval is equal to the
@@ -1265,7 +1265,7 @@ uint32_t nxsched_process_sporadic(FAR struct tcb_s *tcb, uint32_t ticks,
        * Let the timers handle the priority changes.
        */
 
-      return 0;
+      return CLOCK_MAX;
     }
 
   /* No.. then just decrement the time remaining in the budget interval

@@ -539,13 +539,7 @@ static inline void lpc54_tl_alarm(uint64_t curr)
   lpc54_init_timer_vars();
   lpc54_set_default_compare(curr);
 
-#ifdef CONFIG_SCHED_TICKLESS_ALARM
-  struct timespec ts;
-  up_timer_gettime(&ts);
-  nxsched_alarm_expiration(&ts);
-#else
   nxsched_timer_expiration();
-#endif
 }
 
 /* Interrupt handler */

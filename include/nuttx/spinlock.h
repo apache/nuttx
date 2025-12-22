@@ -51,40 +51,6 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Memory barriers may be provided in arch/spinlock.h
- *
- *   DMB - Data memory barrier.  Assures writes are completed to memory.
- *   DSB - Data synchronization barrier.
- */
-
-#undef __SP_UNLOCK_FUNCTION
-#if !defined(UP_DMB)
-#  define UP_DMB()
-#else
-#  define __SP_UNLOCK_FUNCTION 1
-#endif
-
-#if !defined(UP_DSB)
-#  define UP_DSB()
-#endif
-
-#if !defined(UP_WFE)
-#  define UP_WFE()
-#endif
-
-#if !defined(UP_SEV)
-#  define UP_SEV()
-#endif
-
-#if !defined(__SP_UNLOCK_FUNCTION) && (defined(CONFIG_TICKET_SPINLOCK) || \
-     defined(CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS))
-#  define __SP_UNLOCK_FUNCTION 1
-#endif
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 

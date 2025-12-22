@@ -40,7 +40,11 @@
 #define arm_sev()  __asm__ __volatile__ ("sev\n")
 
 #define UP_DSB()  arm_dsb(15)
+
 #define UP_DMB()  arm_dmb(15)
+#define UP_RMB()  arm_dmb(3)
+#define UP_WMB()  arm_dmb(2)
+
 #define UP_ISB()  arm_isb()
 #define UP_NOP()  arm_nop()
 #define UP_SEV()  arm_sev()

@@ -118,12 +118,13 @@ static void ndelay_accurate(unsigned long nanoseconds)
 static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
                              FAR void *arg)
 {
+#ifdef CONFIG_SCHED_TICKLESS
+  nxsched_timer_expiration();
+#else
   clock_t now;
 
   ONESHOT_TICK_CURRENT(g_oneshot_lower, &now);
-#ifdef CONFIG_SCHED_TICKLESS
-  nxsched_tick_expiration(now);
-#else
+
   /* It is always an error if this progresses more than 1 tick at a time.
    * That would break any timer based on wdog; such timers might timeout
    * early. Add a DEBUGASSERT here to catch those errors. It is not added
@@ -300,7 +301,7 @@ int weak_function up_timer_gettime(struct timespec *ts)
  * Description:
  *   Cancel the alarm and return the time of cancellation of the alarm.
  *   These two steps need to be as nearly atomic as possible.
- *   nxsched_alarm_expiration() will not be called unless the alarm is
+ *   nxsched_timer_expiration() will not be called unless the alarm is
  *   restarted with up_alarm_start().
  *
  *   If, as a race condition, the alarm has already expired when this
@@ -347,14 +348,14 @@ int weak_function up_alarm_tick_cancel(FAR clock_t *ticks)
  * Name: up_alarm_start
  *
  * Description:
- *   Start the alarm.  nxsched_alarm_expiration() will be called when the
+ *   Start the alarm.  nxsched_timer_expiration() will be called when the
  *   alarm occurs (unless up_alaram_cancel is called to stop it).
  *
  *   Provided by platform-specific code and called from the RTOS base code.
  *
  * Input Parameters:
  *   ts - The time in the future at the alarm is expected to occur. When the
- *        alarm occurs the timer logic will call nxsched_alarm_expiration().
+ *        alarm occurs the timer logic will call nxsched_timer_expiration().
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on

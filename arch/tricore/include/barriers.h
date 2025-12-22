@@ -22,7 +22,10 @@
 #define __ARCH_TRICORE_INCLUDE_BARRIERS_H
 
 #define UP_DSB() __dsync()
-#define UP_DMB() __asm("":::"memory")
+#define UP_DMB() asm volatile ("" : : : "memory")
+#define UP_RMB() asm volatile ("" : : : "memory")
+#define UP_WMB() asm volatile ("" : : : "memory")
+#define UP_ISB() __isync()
 
 #endif /* __ARCH_TRICORE_INCLUDE_BARRIERS_H */
 

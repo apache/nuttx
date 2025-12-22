@@ -37,13 +37,14 @@
  * ARM DDI 0487E.a C6.2.81
  */
 
-#define UP_DSB() __asm__ volatile ("dsb sy" : : : "memory");
+#define UP_DSB() asm volatile ("dsb sy" : : : "memory");
+#define UP_DMB() asm volatile ("dmb sy" : : : "memory")
+#define UP_RMB() asm volatile ("dmb ishld" : : : "memory")
+#define UP_WMB() asm volatile ("dmb ishst" : : : "memory")
 
 /* See Arm® Architecture Reference Manual
  * ARM DDI 0487E.a C6.2.79
  */
-
-#define UP_DMB() __asm__ volatile ("dmb sy" : : : "memory");
 
 /* See Arm® Architecture Reference Manual
  * ARM DDI 0487E.a C6.2.96

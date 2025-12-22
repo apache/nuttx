@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/hrtimer.h
+ * sched/hrtimer/hrtimer.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,30 +20,115 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_HRTIMER_H
-#define __INCLUDE_NUTTX_HRTIMER_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <assert.h>
 
-#include <nuttx/hrtimer_queue_type.h>
+#include "sched/sched.h"
+#include "hrtimer.h"
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
+#ifdef CONFIG_HRTIMER_LIST
+#  define HRTIMER_QUEUE_USE_LIST
 #endif
 
+#include <nuttx/hrtimer_queue.h>
+
+#include <debug.h>
+
 /****************************************************************************
- * Public Function Prototypes
+ * Inline Functions
  ****************************************************************************/
 
-/* Wrapped version for NuttX scheduler. */
+/* The reprogramming function can be fully inlined. */
+
+static inline_function void hrtimer_reprogram(FAR hrtimer_queue_t *queue,
+                                              uint64_t next_expired)
+{
+#ifdef CONFIG_SCHED_TICKLESS
+#  ifdef CONFIG_SCHED_TICKLESS_ALARM
+#    ifdef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
+  up_alarm_tick_start(div_const_roundup(next_expired, NSEC_PER_TICK));
+#    else
+  struct timespec ts;
+  clock_nsec2time(&ts, next_expired);
+  up_alarm_start(&ts);
+#    endif
+#  else
+#    ifdef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
+  uint64_t nsec = clock_systime_nsec();
+  next_expired  = HRTIMER_TIME_BEFORE(nsec, next_expired) ?
+                  next_expired - nsec : 0u;
+  up_timer_tick_start(div_const_roundup(next_expired, NSEC_PER_TICK));
+#    else
+  struct timespec ts;
+  struct timespec current;
+  up_timer_gettime(&current);
+  clock_nsec2time(&ts, next_expired);
+  clock_timespec_subtract(&ts, &current, &ts);
+  up_timer_start(&ts);
+#    endif
+#  endif
+#endif
+}
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static hrtimer_queue_t g_hrtimer_queue;
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: hrtimer_initialize
+ *
+ * Description:
+ *   Initialize the high-resolution timer queue for timing subsystem.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void hrtimer_initialize(void)
+{
+#if !defined(CONFIG_SCHED_TICKLESS) || \
+    defined(CONFIG_SCHED_TICKLESS_TICK_ARGUMENT)
+  swarn("WARNING: The system hrtimer is running in \
+         low-resolution (tick) mode.");
+#endif
+  hrtimer_queue_init(&g_hrtimer_queue);
+}
+
+/****************************************************************************
+ * Name: hrtimer_expiry
+ *
+ * Description:
+ *   This function is called by the timer interrupt handler to handle
+ *   if a hrtimer has expired.
+ *
+ * Input Parameters:
+ *   nsec - The expiration time in nanoseconds.
+ *   noswitches - True: Disable context switches.
+ *
+ * Returned Value:
+ *   The next expiration time in nanoseconds.
+ *
+ ****************************************************************************/
+
+uint64_t hrtimer_expiry(uint64_t nsec, bool noswitches)
+{
+  FAR hrtimer_queue_t *queue = &g_hrtimer_queue;
+  return noswitches ? hrtimer_queue_read(queue, &queue->next_expired) :
+                      hrtimer_queue_expiry(queue, nsec);
+}
 
 /****************************************************************************
  * Name: hrtimer_restart
@@ -73,7 +158,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: hrtimer_start/start_absolute
+ * Name: hrtimer_start
  *
  * Description:
  *   Start the hrtimer with relative or absolute time in nanoseconds.
@@ -155,17 +240,4 @@ extern "C"
  *
  ****************************************************************************/
 
-/* Declare all function proto-types above. */
-
-#ifdef CONFIG_HRTIMER_LIST
-HRTIMER_QUEUE_PROTOTYPE_LIST(hrtimer, clock_systime_nsec)
-#else
-HRTIMER_QUEUE_PROTOTYPE_RB(hrtimer, clock_systime_nsec)
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __INCLUDE_NUTTX_HRTIMER_H */
+HRTIMER_QUEUE_GENERATE(hrtimer, &g_hrtimer_queue, clock_systime_nsec)
