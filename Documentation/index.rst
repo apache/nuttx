@@ -39,6 +39,7 @@ Last Updated: |today|
    debugging/index.rst
    guides/index.rst
    standards/index.rst
+   security.rst
    glossary.rst
    logos/index.rst
    _tags/tagsindex.rst
