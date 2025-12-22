@@ -635,7 +635,7 @@ define CLONE
 		if [ ! -d $3 ]; then \
 			git clone --quiet $1 $3; \
 		fi; \
-		cp -fr $3 $2; \
+		$(DIRLINK) $3 $2; \
 	fi
 	$(ECHO_END)
 endef
