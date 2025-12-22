@@ -67,7 +67,8 @@ pid_t nxsched_getpid(void)
    */
 
   rtcb = this_task();
-  if (rtcb != NULL)
+  DEBUGASSERT(rtcb);
+  if (rtcb->group != NULL)
     {
       /* Yes.. Return the Process ID */
 
