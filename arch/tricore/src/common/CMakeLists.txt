@@ -36,14 +36,16 @@ set(SRCS
     tricore_registerdump.c
     tricore_releasestack.c
     tricore_saveusercontext.c
-    tricore_schedulesigaction.c
-    tricore_sigdeliver.c
     tricore_stackframe.c
     tricore_svcall.c
     tricore_tcbinfo.c
     tricore_trapcall.c
     tricore_systimer.c
     tricore_usestack.c)
+
+if(CONFIG_ENABLE_ALL_SIGNALS)
+  list(APPEND SRCS tricore_schedulesigaction.c tricore_sigdeliver.c)
+endif()
 
 if(CONFIG_SPINLOCK)
   list(APPEND SRCS tricore_testset.c)

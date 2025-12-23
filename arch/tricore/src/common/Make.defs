@@ -37,14 +37,16 @@ CMN_CSRCS += tricore_nputs.c
 CMN_CSRCS += tricore_registerdump.c
 CMN_CSRCS += tricore_releasestack.c
 CMN_CSRCS += tricore_saveusercontext.c
-CMN_CSRCS += tricore_schedulesigaction.c
-CMN_CSRCS += tricore_sigdeliver.c
 CMN_CSRCS += tricore_stackframe.c
 CMN_CSRCS += tricore_svcall.c
 CMN_CSRCS += tricore_tcbinfo.c
 CMN_CSRCS += tricore_trapcall.c
 CMN_CSRCS += tricore_systimer.c
 CMN_CSRCS += tricore_usestack.c
+
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+CMN_CSRCS += tricore_schedulesigaction.c tricore_sigdeliver.c
+endif
 
 ifeq ($(CONFIG_SPINLOCK),y)
   CMN_CSRCS += tricore_testset.c
