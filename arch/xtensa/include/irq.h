@@ -189,6 +189,7 @@ struct xcpt_syscall_s
 
 struct xcptcontext
 {
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   /* These are saved copies of registers used during signal processing.
    *
    * REVISIT:  Because there is only one copy of these save areas,
@@ -199,10 +200,6 @@ struct xcptcontext
 
   uint32_t *saved_regs;
 
-  /* Register save area */
-
-  uint32_t *regs;
-
 #ifndef CONFIG_BUILD_FLAT
   /* This is the saved address to use when returning from a user-space
    * signal handler.
@@ -210,6 +207,10 @@ struct xcptcontext
 
   uintptr_t sigreturn;
 #endif
+#endif /* CONFIG_ENABLE_ALL_SIGNALS */
+  /* Register save area */
+
+  uint32_t *regs;
 
 #ifdef CONFIG_LIB_SYSCALL
   /* The following array holds the return address and the exc_return value

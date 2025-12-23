@@ -179,7 +179,7 @@ g_intstacktop:
 	 * signal context (ref: xtensa_schedulesigaction.c):
 	 */
 
-#if CONFIG_ARCH_INTERRUPTSTACK < 15
+#if (CONFIG_ARCH_INTERRUPTSTACK < 15) && defined(CONFIG_ENABLE_ALL_SIGNALS)
 	addi	sp, sp, -XCPTCONTEXT_SIZE
 #endif
 
@@ -266,7 +266,7 @@ g_intstacktop:
 
 	addi	sp, sp, XCHAL_NUM_INTERRUPTS / 8
 
-#if CONFIG_ARCH_INTERRUPTSTACK < 15
+#if (CONFIG_ARCH_INTERRUPTSTACK < 15) && defined(CONFIG_ENABLE_ALL_SIGNALS)
 	addi	sp, sp, XCPTCONTEXT_SIZE
 #endif
 	.endm
