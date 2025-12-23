@@ -348,7 +348,7 @@ clock_t wd_timer(clock_t ticks, bool noswitches)
 {
   FAR struct wdog_s *wdog;
   irqstate_t flags;
-  clock_t    ret = CLOCK_MAX;
+  clock_t    ret;
 
   /* Check if the watchdog at the head of the list is ready to run */
 
@@ -358,6 +358,7 @@ clock_t wd_timer(clock_t ticks, bool noswitches)
     }
   else
     {
+      ret   = CLOCK_MAX;
       flags = enter_critical_section();
 
       /* Return the delay for the next watchdog to expire */

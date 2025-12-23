@@ -60,47 +60,46 @@
 
 int wd_cancel(FAR struct wdog_s *wdog)
 {
-  irqstate_t flags;
-  bool       reassess = false;
-  int        ret      = -EINVAL;
+  FAR struct wdog_s *first;
+  irqstate_t         flags;
+  int                  ret = -EINVAL;
 
-  flags = enter_critical_section();
-
-  /* Make sure that the watchdog is valid and still active. */
-
-  if (wdog != NULL && WDOG_ISACTIVE(wdog))
+  if (wdog != NULL)
     {
       /* Prohibit timer interactions with the timer queue until the
        * cancellation is complete
        */
 
-      reassess = list_is_head(&g_wdactivelist, &wdog->node);
+      flags = enter_critical_section();
 
-      /* Now, remove the watchdog from the timer queue */
+      /* Make sure that the watchdog is valid and still active. */
 
-      list_delete_fast(&wdog->node);
+      if (WDOG_ISACTIVE(wdog))
+        {
+          first = list_first_entry(&g_wdactivelist, struct wdog_s, node);
 
-      /* Mark the watchdog inactive */
+          /* Now, remove the watchdog from the timer queue */
 
-      wdog->func = NULL;
+          list_delete_fast(&wdog->node);
 
-      ret = OK;
-    }
+          /* Mark the watchdog inactive */
 
-  if (reassess)
-    {
-      /* If the watchdog is at the head of the timer queue, then
-       * we will need to re-adjust the interval timer that will
-       * generate the next interval event.
-       */
+          wdog->func = NULL;
 
-      nxsched_reassess_timer();
-    }
+          if (first == wdog)
+            {
+              /* If the watchdog is at the head of the timer queue, then
+               * we will need to re-adjust the interval timer that will
+               * generate the next interval event.
+               */
 
-  leave_critical_section(flags);
+              nxsched_reassess_timer();
+            }
 
-  if (wdog != NULL)
-    {
+          ret = OK;
+        }
+
+      leave_critical_section(flags);
       sched_note_wdog(NOTE_WDOG_CANCEL, (FAR void *)wdog->func,
                       (FAR void *)(uintptr_t)wdog->expired);
     }
