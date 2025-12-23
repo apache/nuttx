@@ -29,8 +29,6 @@ list(
   arm_doirq.c
   arm_initialstate.c
   arm_prefetchabort.c
-  arm_schedulesigaction.c
-  arm_sigdeliver.c
   arm_syscall.c
   arm_tcbinfo.c
   arm_undefinedinsn.c
@@ -38,6 +36,10 @@ list(
   arm_vectors.S
   arm_vectortab.S
   arm_saveusercontext.S)
+
+if(CONFIG_ENABLE_ALL_SIGNALS)
+  list(APPEND SRCS arm_schedulesigaction.c arm_sigdeliver.c)
+endif()
 
 if(CONFIG_PAGING)
   list(APPEND SRCS arm_pginitialize.c arm_checkmapping.c arm_allocpage.c

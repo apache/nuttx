@@ -151,7 +151,7 @@ arm_vectorirq:
 	str	r1, [sp, #-4]!		/* Save the xcp address at SP-4 then update SP */
 	bl	arm_doirq		/* Call the handler */
 	ldr	sp, [sp]		/* Restore the user stack pointer */
-#else
+#elif defined(CONFIG_ENABLE_ALL_SIGNALS)
 	/* If the interrupt stack is disabled, reserve xcpcontext to ensure
 	 * that signal processing can have a separate xcpcontext to handle
 	 * signal context (reference: arm_schedulesigaction.c):
@@ -163,9 +163,11 @@ arm_vectorirq:
 	 */
 
 	sub	sp, sp, #XCPTCONTEXT_SIZE	/* Reserve signal context */
+#endif
 
 	bl	arm_doirq			/* Call the handler */
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
 	add	sp, sp, #XCPTCONTEXT_SIZE	/* Restore signal context */
 #endif
 

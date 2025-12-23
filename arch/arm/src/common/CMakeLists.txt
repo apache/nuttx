@@ -52,11 +52,14 @@ if(NOT CONFIG_ARCH_IDLE_CUSTOM)
 endif()
 
 if(CONFIG_BUILD_PROTECTED OR CONFIG_BUILD_KERNEL)
-  list(APPEND SRCS arm_task_start.c arm_pthread_start.c arm_signal_dispatch.c)
+  list(APPEND SRCS arm_task_start.c arm_pthread_start.c)
 
-  if(CONFIG_BUILD_PROTECTED)
-    target_sources(arch_interface
-                   PRIVATE ${ARCH_TOOLCHAIN_PATH}/arm_signal_handler.S)
+  if(CONFIG_ENABLE_ALL_SIGNALS)
+    list(APPEND SRCS arm_signal_dispatch.c)
+    if(CONFIG_BUILD_PROTECTED)
+      target_sources(arch_interface
+                     PRIVATE ${ARCH_TOOLCHAIN_PATH}/arm_signal_handler.S)
+    endif()
   endif()
 endif()
 
