@@ -34,10 +34,6 @@ if(CONFIG_ARMV8M_ITMSYSLOG)
   list(APPEND SRCS arm_itm_syslog.c)
 endif()
 
-if(CONFIG_ARMV8M_STACKCHECK)
-  list(APPEND SRCS arm_stackcheck.c)
-endif()
-
 if(CONFIG_ARCH_FPU)
   list(APPEND SRCS arm_fpuconfig.c arm_fpucmp.c)
 endif()
@@ -48,10 +44,6 @@ endif()
 
 if(CONFIG_ARM_MPU OR CONFIG_ARM_MPU_EARLY_RESET)
   list(APPEND SRCS arm_mpu.c)
-endif()
-
-if(CONFIG_ARCH_TRUSTZONE_SECURE)
-  list(APPEND SRCS arm_gen_nonsecfault.c)
 endif()
 
 if(CONFIG_ARCH_ADDRENV)

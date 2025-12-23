@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/arm_stackcheck.c
+ * arch/arm/src/arm_m/arm_stackcheck.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2013, 2014 PX4 Development Team. All rights reserved.
+ * SPDX-FileCopyrightText: 2013, 2014 PX4 Development Team
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_ARMV8M_STACKCHECK
+#ifdef CONFIG_ARM_STACKCHECK
 
 /* Support per function call stack checking.
  * This code uses R10 to check for a stack overflow within function calls.
@@ -80,7 +80,7 @@ void __stack_overflow_trap(void)
 
   uint32_t regval;
 
-#ifdef CONFIG_ARMV8M_STACKCHECK_BREAKPOINT
+#ifdef CONFIG_ARM_STACKCHECK_BREAKPOINT
   regval = getreg32(NVIC_DHCSR);
   if (regval & NVIC_DHCSR_C_DEBUGEN)
     {

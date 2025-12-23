@@ -525,7 +525,7 @@ int arm_gen_nonsecurefault(int irq, uint32_t *regs);
 # define arm_gen_nonsecurefault(i, r)  (0)
 #endif
 
-#if defined(CONFIG_ARMV7M_STACKCHECK) || defined(CONFIG_ARMV8M_STACKCHECK)
+#ifdef CONFIG_ARM_STACKCHECK
 void arm_stack_check_init(void) noinstrument_function;
 #endif
 

@@ -32,10 +32,6 @@ ifeq ($(CONFIG_ARMV7M_ITMSYSLOG),y)
   CMN_CSRCS += arm_itm_syslog.c
 endif
 
-ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
-  CMN_CSRCS += arm_stackcheck.c
-endif
-
 ifeq ($(CONFIG_ARCH_FPU),y)
   CMN_CSRCS += arm_fpuconfig.c
   CMN_CSRCS += arm_fpucmp.c

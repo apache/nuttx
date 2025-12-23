@@ -33,6 +33,10 @@ endif
 CMN_CSRCS += arm_tcbinfo.c arm_busfault.c arm_hardfault.c arm_initialstate.c
 CMN_CSRCS += arm_systemreset.c arm_trigger_irq.c arm_svcall.c
 
+ifeq ($(CONFIG_ARM_STACKCHECK),y)
+  CMN_CSRCS += arm_stackcheck.c
+endif
+
 ifneq ($(CONFIG_ARCH_ARMV6M),y)
   CMN_CSRCS += arm_usagefault.c arm_memfault.c
 endif
