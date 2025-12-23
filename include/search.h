@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/search.h
  *
- * SPDX-License-Identifier: NuttX-PublicDomain
+ * SPDX-License-Identifier: LicenseRef-NuttX-PublicDomain
  *
  * Written by J.T. Conklin <jtc@netbsd.org>
  * Public domain.

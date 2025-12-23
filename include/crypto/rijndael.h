@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/crypto/rijndael.h
  *
- * SPDX-License-Identifier: NuttX-PublicDomain
+ * SPDX-License-Identifier: LicenseRef-NuttX-PublicDomain
  *
  * SPDX-FileContributor: Vincent Rijmen <vincent.rijmen@esat.kuleuven.ac.be>
  * SPDX-FileContributor: Antoon Bosselaers <antoon.bosselaers@esat.kuleuven.ac.be>

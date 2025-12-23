@@ -1,7 +1,7 @@
 /****************************************************************************
  * crypto/md5.c
  *
- * SPDX-License-Identifier: NuttX-PublicDomain
+ * SPDX-License-Identifier: LicenseRef-NuttX-PublicDomain
  *
  * This code implements the MD5 message-digest algorithm.
  * The algorithm is due to Ron Rivest. This code was
