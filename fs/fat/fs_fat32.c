@@ -1324,6 +1324,400 @@ errout_with_lock:
 }
 
 /****************************************************************************
+ * Name: fat_findlfnstart
+ *
+ * Description:
+ *   Given a short filename directory entry position, find the start of
+ *   the LFN sequence (if any). Returns the index of the first LFN entry
+ *   or the original index if no LFN exists.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FAT_LFN
+static int fat_findlfnstart(FAR struct fat_mountpt_s *fs,
+                            off_t sector, uint16_t index,
+                            FAR off_t *lfnsector, FAR uint16_t *lfnindex)
+{
+  FAR uint8_t *direntry;
+  uint8_t seqno;
+  int ret;
+
+  *lfnsector = sector;
+  *lfnindex = index;
+  seqno = 1;
+
+  while (index > 0 || sector > fs->fs_database)
+    {
+      uint16_t previndex;
+      off_t prevsector;
+
+      /* Move to previous entry */
+
+      if (index > 0)
+        {
+          previndex = index - 1;
+          prevsector = sector;
+        }
+      else
+        {
+          /* Need to go to previous sector */
+
+          prevsector = sector - 1;
+          if (prevsector < fs->fs_database)
+            {
+              break;
+            }
+
+          previndex = DIRSEC_NDIRS(fs) - 1;
+        }
+
+      /* Read the previous sector */
+
+      ret = fat_fscacheread(fs, prevsector);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      direntry = &fs->fs_buffer[DIRSEC_BYTENDX(fs, previndex)];
+
+      /* Check if this is an LFN entry */
+
+      if (DIR_GETATTRIBUTES(direntry) != LDDIR_LFNATTR)
+        {
+          break;
+        }
+
+      /* Verify sequence number */
+
+      if ((LDIR_GETSEQ(direntry) & LDIR0_SEQ_MASK) != seqno)
+        {
+          break;
+        }
+
+      /* Update position to this LFN entry */
+
+      *lfnsector = prevsector;
+      *lfnindex = previndex;
+      sector = prevsector;
+      index = previndex;
+
+      /* Check if this is the last (first appearing) LFN entry */
+
+      if ((LDIR_GETSEQ(direntry) & LDIR0_LAST) != 0)
+        {
+          break;
+        }
+
+      seqno++;
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: fat_getfilepath
+ *
+ * Description:
+ *   Build the relative file path by traversing parent directories.
+ *   Uses ".." directory entries to walk up the directory tree.
+ *
+ ****************************************************************************/
+
+static int fat_getfilepath(FAR struct fat_mountpt_s *fs,
+                           FAR struct fat_file_s *ff,
+                           FAR char *path, size_t pathlen)
+{
+  struct fat_dirent_s fdir;
+  FAR uint8_t *direntry;
+  char names[PATH_MAX];
+  struct dirent entry;
+  size_t totallen = 0;
+  off_t currdircluster;
+  off_t parentcluster;
+  size_t pathbaselen;
+  uint16_t dirindex;
+  size_t namelen;
+  off_t dirsector;
+  int ret;
+
+  names[0] = '\0';
+  dirsector = ff->ff_dirsector;
+  dirindex = ff->ff_dirindex;
+
+  /* Remove trailing slash from path if present */
+
+  pathbaselen = strlen(path);
+  if (pathbaselen > 0 && path[pathbaselen - 1] == '/')
+    {
+      path[pathbaselen - 1] = '\0';
+      pathbaselen--;
+    }
+
+  /* Loop to traverse parent directories */
+
+  while (dirsector != 0)
+    {
+      off_t readsector = dirsector;
+      uint16_t readindex = dirindex;
+      off_t currsector;
+      off_t searchcluster;
+      unsigned int idx = 0;
+      bool found = false;
+      bool fat1x_root = false;
+
+#ifdef CONFIG_FAT_LFN
+      /* Find the start of LFN sequence for this entry */
+
+      ret = fat_findlfnstart(fs, dirsector, dirindex,
+                             &readsector, &readindex);
+      if (ret < 0)
+        {
+          return ret;
+        }
+#endif
+
+      /* Read the directory sector containing this entry */
+
+      ret = fat_fscacheread(fs, readsector);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Get the directory entry and extract the filename */
+
+      memset(&fdir, 0, sizeof(fdir));
+      fdir.dir.fd_currsector = readsector;
+      fdir.dir.fd_index = readindex;
+
+      ret = fat_dirname2path(fs, (FAR struct fs_dirent_s *)&fdir, &entry);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Skip "." and ".." entries - these are special directory entries */
+
+      if (entry.d_name[0] == '.' &&
+          (entry.d_name[1] == '\0' ||
+           (entry.d_name[1] == '.' && entry.d_name[2] == '\0')))
+        {
+          /* This is "." or "..", skip to root check */
+
+          break;
+        }
+
+      /* Prepend this name to the accumulated path */
+
+      namelen = strlen(entry.d_name);
+      if (totallen + namelen + 2 > sizeof(names))
+        {
+          return -ENAMETOOLONG;
+        }
+
+      if (totallen > 0)
+        {
+          memmove(names + namelen + 1, names, totallen + 1);
+          names[namelen] = '/';
+          memcpy(names, entry.d_name, namelen);
+          totallen += namelen + 1;
+        }
+      else
+        {
+          memcpy(names, entry.d_name, namelen + 1);
+          totallen = namelen;
+        }
+
+      /* Determine the cluster of the directory containing this entry */
+
+      if (dirsector < fs->fs_database)
+        {
+          /* Already in root directory (FAT12/16), done */
+
+          break;
+        }
+
+      currdircluster = ((dirsector - fs->fs_database) /
+                        fs->fs_fatsecperclus) + 2;
+
+      /* Check if we're already at root directory (FAT32), done */
+
+      if (fs->fs_type == FSTYPE_FAT32 && currdircluster == fs->fs_rootbase)
+        {
+          break;
+        }
+
+      /* Read the first sector of current directory to get ".." entry */
+
+      ret = fat_fscacheread(fs, fat_cluster2sector(fs, currdircluster));
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* ".." entry is at index 1, get parent cluster */
+
+      direntry = &fs->fs_buffer[DIR_SIZE];
+      parentcluster = ((off_t)DIR_GETFSTCLUSTHI(direntry) << 16) |
+                      DIR_GETFSTCLUSTLO(direntry);
+
+      /* If parent cluster is 0 or root, search in root directory */
+
+      if (parentcluster == 0 ||
+          (fs->fs_type == FSTYPE_FAT32 && parentcluster == fs->fs_rootbase))
+        {
+          /* Root directory */
+
+          if (fs->fs_type == FSTYPE_FAT32)
+            {
+              /* FAT32: root directory starts at fs_rootbase cluster */
+
+              searchcluster = fs->fs_rootbase;
+              currsector = fat_cluster2sector(fs, fs->fs_rootbase);
+              if (currsector < 0)
+                {
+                  return (int)currsector;
+                }
+            }
+          else
+            {
+              /* FAT12/16: root directory is before data area */
+
+              fat1x_root = true;
+              searchcluster = 0;
+              currsector = fs->fs_rootbase;
+            }
+        }
+      else
+        {
+          /* Regular parent directory */
+
+          searchcluster = parentcluster;
+          currsector = fat_cluster2sector(fs, parentcluster);
+          if (currsector < 0)
+            {
+              return (int)currsector;
+            }
+        }
+
+      /* Search in parent directory for entry pointing to current dir */
+
+      while (!found)
+        {
+          ret = fat_fscacheread(fs, currsector);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          for (; idx < DIRSEC_NDIRS(fs); idx++)
+            {
+              off_t cluster;
+#ifdef CONFIG_FAT_LFN
+              uint8_t attr;
+#endif
+
+              direntry = &fs->fs_buffer[idx * DIR_SIZE];
+
+              if (direntry[0] == DIR0_ALLEMPTY)
+                {
+                  return -ENOENT;
+                }
+
+              if (direntry[0] == DIR0_EMPTY)
+                {
+                  continue;
+                }
+
+#ifdef CONFIG_FAT_LFN
+              /* Skip LFN entries */
+
+              attr = DIR_GETATTRIBUTES(direntry);
+              if (attr == LDDIR_LFNATTR)
+                {
+                  continue;
+                }
+
+              if ((attr & FATATTR_DIRECTORY) == 0)
+#else
+              if ((DIR_GETATTRIBUTES(direntry) & FATATTR_DIRECTORY) == 0)
+#endif
+                {
+                  continue;
+                }
+
+              /* Skip "." and ".." */
+
+              if (direntry[0] == '.')
+                {
+                  continue;
+                }
+
+              cluster = ((off_t)DIR_GETFSTCLUSTHI(direntry) << 16) |
+                        DIR_GETFSTCLUSTLO(direntry);
+
+              if (cluster == currdircluster)
+                {
+                  dirsector = currsector;
+                  dirindex = idx;
+                  found = true;
+                  break;
+                }
+            }
+
+          if (!found)
+            {
+              idx = 0;
+              currsector++;
+
+              /* Check if we need to move to next cluster/sector */
+
+              if (fat1x_root)
+                {
+                  /* FAT12/16 root directory: check sector limit */
+
+                  if (currsector >= fs->fs_database)
+                    {
+                      return -ENOENT;
+                    }
+                }
+              else if ((currsector - fat_cluster2sector(fs, searchcluster))
+                        >= fs->fs_fatsecperclus)
+                {
+                  /* Move to next cluster */
+
+                  searchcluster = fat_getcluster(fs, searchcluster);
+                  if (searchcluster < 2 ||
+                      searchcluster >= fs->fs_nclusters + 2)
+                    {
+                      return -ENOENT;
+                    }
+
+                  currsector = fat_cluster2sector(fs, searchcluster);
+                }
+            }
+        }
+    }
+
+  /* Copy the constructed path to output */
+
+  if (pathbaselen + totallen + 2 > pathlen)
+    {
+      return -ENAMETOOLONG;
+    }
+
+  if (totallen > 0)
+    {
+      path[pathbaselen] = '/';
+      memcpy(path + pathbaselen + 1, names, totallen + 1);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: fat_ioctl
  ****************************************************************************/
 
@@ -1366,6 +1760,25 @@ static int fat_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       nxmutex_unlock(&fs->fs_lock);
       return ret;
+    }
+
+  switch (cmd)
+    {
+      case FIOC_FILEPATH:
+        {
+          FAR char *path = (FAR char *)(uintptr_t)arg;
+          ret = inode_getpath(filep->f_inode, path, PATH_MAX);
+          if (ret >= 0)
+            {
+              ret = fat_getfilepath(fs, ff, path, PATH_MAX);
+            }
+
+          nxmutex_unlock(&fs->fs_lock);
+          return ret;
+        }
+
+      default:
+        break;
     }
 
   /* ioctl calls are just passed through to the contained block driver */
