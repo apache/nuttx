@@ -520,6 +520,7 @@ struct xcpt_syscall_s
 
 struct xcptcontext
 {
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
 #ifdef CONFIG_BUILD_KERNEL
   /* This is the saved address to use when returning from a user-space
    * signal handler.
@@ -544,6 +545,7 @@ struct xcptcontext
 
   uint64_t saved_ursp;
 #endif
+#endif /* CONFIG_ENABLE_ALL_SIGNALS */
 
   /* Register save area - allocated from stack in up_initial_state() */
 
