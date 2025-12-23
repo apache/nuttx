@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/crypto/sha1.h
  *
- * SPDX-License-Identifier: NuttX-PublicDomain
+ * SPDX-License-Identifier: LicenseRef-NuttX-PublicDomain
  *
  * By Steve Reid <steve@edmweb.com>
  * 100% Public Domain

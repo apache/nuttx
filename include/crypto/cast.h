@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/crypto/cast.h
  *
- * SPDX-License-Identifier: NuttX-PublicDomain
+ * SPDX-License-Identifier: LicenseRef-NuttX-PublicDomain
  *
  * Written by Steve Reid <sreid@sea-to-sky.net>
  * 100% Public Domain - no warranty
