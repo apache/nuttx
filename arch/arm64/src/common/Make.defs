@@ -39,7 +39,6 @@ CMN_CSRCS =  arm64_initialize.c arm64_initialstate.c arm64_boot.c
 CMN_CSRCS += arm64_nputs.c arm64_createstack.c
 CMN_CSRCS += arm64_releasestack.c arm64_stackframe.c arm64_usestack.c
 CMN_CSRCS += arm64_exit.c arm64_fork.c
-CMN_CSRCS += arm64_schedulesigaction.c arm64_sigdeliver.c
 CMN_CSRCS += arm64_getintstack.c arm64_registerdump.c
 CMN_CSRCS += arm64_perf.c arm64_tcbinfo.c
 
@@ -49,6 +48,10 @@ CMN_CSRCS += arm64_doirq.c arm64_fatal.c
 CMN_CSRCS += arm64_syscall.c
 CMN_CSRCS += arm64_modifyreg8.c arm64_modifyreg16.c arm64_modifyreg32.c
 CMN_CSRCS += arm64_hwdebug.c
+
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+CMN_CSRCS += arm64_schedulesigaction.c arm64_sigdeliver.c
+endif
 
 # Use common heap allocation for now (may need to be customized later)
 CMN_CSRCS += arm64_allocateheap.c
@@ -99,7 +102,10 @@ CMN_CSRCS += arm64_smpcall.c
 endif
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)
-CMN_CSRCS += arm64_task_start.c arm64_pthread_start.c arm64_signal_dispatch.c
+CMN_CSRCS += arm64_task_start.c arm64_pthread_start.c
+  ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+    CMN_CSRCS += arm64_signal_dispatch.c
+  endif
 endif
 
 ifeq ($(CONFIG_ARCH_KERNEL_STACK),y)

@@ -210,7 +210,7 @@ uint64_t *arm64_syscall(uint64_t *regs)
 #endif
         break;
 
-#ifdef CONFIG_BUILD_KERNEL
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_ENABLE_ALL_SIGNALS)
       /* R0=SYS_signal_handler:  This a user signal handler callback
        *
        * void signal_handler(_sa_sigaction_t sighand, int signo,
@@ -277,9 +277,7 @@ uint64_t *arm64_syscall(uint64_t *regs)
 #endif
         }
         break;
-#endif
 
-#ifdef CONFIG_BUILD_KERNEL
       /* R0=SYS_signal_handler_return:  This a user signal handler callback
        *
        *   void signal_handler_return(void);
@@ -309,7 +307,7 @@ uint64_t *arm64_syscall(uint64_t *regs)
 #endif
         }
         break;
-#endif
+#endif /* CONFIG_BUILD_KERNEL && CONFIG_ENABLE_ALL_SIGNALS */
 
       default:
         {
