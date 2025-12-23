@@ -184,6 +184,7 @@ uint64_t *x86_64_syscall(uint64_t *regs)
           break;
         }
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
       /* cmd=SYS_signal_handler:  This a user signal handler callback
        *
        * void signal_handler(_sa_sigaction_t sighand, int signo,
@@ -286,6 +287,7 @@ uint64_t *x86_64_syscall(uint64_t *regs)
 
           break;
         }
+#endif  /* CONFIG_ENABLE_ALL_SIGNALS*/
 #endif  /* CONFIG_BUILD_KERNEL */
 
       /* This is not an architecture-specific system call.  If NuttX is

@@ -63,17 +63,14 @@ if(CONFIG_ARCH_ADDRENV)
 endif()
 
 if(NOT CONFIG_BUILD_FLAT)
-  list(APPEND SRCS x86_64_task_start.c x86_64_pthread_start.c
-       x86_64_signal_dispatch.c)
+  list(APPEND SRCS x86_64_task_start.c x86_64_pthread_start.c)
+  if(CONFIG_ENABLE_ALL_SIGNALS)
+    list(APPEND SRCS x86_64_signal_dispatch.c)
+  endif()
 endif()
 
 if(CONFIG_ARCH_KERNEL_STACK)
   list(APPEND SRCS x86_64_addrenv_kstack.c)
-endif()
-
-if(NOT CONFIG_BUILD_FLAT)
-  list(APPEND SRCS x86_64_task_start.c x86_64_pthread_start.c
-       x86_64_signal_dispatch.c)
 endif()
 
 if(CONFIG_ARCH_HAVE_DEBUG)
