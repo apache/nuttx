@@ -158,7 +158,9 @@ exception_common:
 	lsls		r2, #(31 - EXC_RETURN_THREAD_BITNO)	/* Move to bit 31 */
 	bpl		3f					/* Test bit 31 */
 	mov		r2, r1					/* Reserve signal context */
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
 	subs		r2, r2, #XCPTCONTEXT_SIZE
+#endif
 	msr		msp, r2					/* We are using the main stack pointer */
 	isb		sy
 3:

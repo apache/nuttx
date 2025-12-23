@@ -34,9 +34,12 @@ HEAD_ASRC += arm_vectortab.S
 CMN_CSRCS += arm_timer.c arm_cache.c arm_cpuinfo.c arm_dataabort.c
 CMN_CSRCS += arm_doirq.c arm_gicv3.c
 CMN_CSRCS += arm_initialstate.c arm_prefetchabort.c
-CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
 CMN_CSRCS += arm_syscall.c arm_tcbinfo.c arm_undefinedinsn.c
 CMN_CSRCS += arm_perf.c cp15_cacheops.c
+
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
+endif
 
 # Common C source files
 

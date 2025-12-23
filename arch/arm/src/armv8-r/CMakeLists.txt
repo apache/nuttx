@@ -41,13 +41,15 @@ list(
   arm_gicv3.c
   arm_initialstate.c
   arm_prefetchabort.c
-  arm_schedulesigaction.c
-  arm_sigdeliver.c
   arm_syscall.c
   arm_tcbinfo.c
   arm_undefinedinsn.c
   arm_perf.c
   cp15_cacheops.c)
+
+if(CONFIG_ENABLE_ALL_SIGNALS)
+  list(APPEND SRCS arm_schedulesigaction.c arm_sigdeliver.c)
+endif()
 
 if(CONFIG_ARCH_FPU)
   list(APPEND SRCS arm_fpucmp.c arm_fpuconfig.S)
