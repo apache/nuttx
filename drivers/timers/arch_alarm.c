@@ -330,6 +330,18 @@ int weak_function up_timer_gettime(struct timespec *ts)
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_TICKLESS
+int weak_function up_alarm_cancel(FAR struct timespec *ts)
+{
+  int ret = -EAGAIN;
+
+  if (g_oneshot_lower != NULL)
+    {
+      ret = ONESHOT_CANCEL(g_oneshot_lower, ts);
+    }
+
+  return ret;
+}
+
 int weak_function up_alarm_tick_cancel(FAR clock_t *ticks)
 {
   int ret = -EAGAIN;
@@ -368,7 +380,8 @@ int weak_function up_alarm_tick_cancel(FAR clock_t *ticks)
  *
  ****************************************************************************/
 
-int weak_function up_alarm_start(const struct timespec *ts)
+#ifdef CONFIG_SCHED_TICKLESS
+int weak_function up_alarm_start(FAR const struct timespec *ts)
 {
   int ret = -EAGAIN;
 
@@ -380,7 +393,6 @@ int weak_function up_alarm_start(const struct timespec *ts)
   return ret;
 }
 
-#ifdef CONFIG_SCHED_TICKLESS
 int weak_function up_alarm_tick_start(clock_t ticks)
 {
   int ret = -EAGAIN;

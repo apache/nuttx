@@ -107,7 +107,6 @@ config TIMER_ARCH
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_TIMEKEEPING
 	select SCHED_TICKLESS_LIMIT_MAX_SLEEP if SCHED_TICKLESS
-	select SCHED_TICKLESS_TICK_ARGUMENT if SCHED_TICKLESS
 	---help---
 		Implement timer arch API on top of timer driver interface.
 
@@ -147,7 +146,6 @@ config ALARM_ARCH
 	select ARCH_HAVE_TIMEKEEPING
 	select SCHED_TICKLESS_ALARM if SCHED_TICKLESS
 	select SCHED_TICKLESS_LIMIT_MAX_SLEEP if SCHED_TICKLESS
-	select SCHED_TICKLESS_TICK_ARGUMENT if SCHED_TICKLESS
 	---help---
 		Implement alarm arch API on top of oneshot driver interface.
 

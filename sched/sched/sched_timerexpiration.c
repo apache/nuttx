@@ -152,7 +152,8 @@ static inline_function clock_t update_time_tick(clock_t tick)
 #endif
 }
 
-#if !defined(CONFIG_SCHED_TICKLESS_TICK_ARGUMENT) && !defined(CONFIG_CLOCK_TIMEKEEPING)
+#if !defined(CONFIG_CLOCK_TIMEKEEPING) && !defined(CONFIG_ALARM_ARCH) && \
+    !defined(CONFIG_TIMER_ARCH)
 int up_timer_gettick(FAR clock_t *ticks)
 {
   struct timespec ts;
@@ -163,40 +164,57 @@ int up_timer_gettick(FAR clock_t *ticks)
 }
 #endif
 
-#ifndef CONFIG_SCHED_TICKLESS_TICK_ARGUMENT
-#  ifdef CONFIG_SCHED_TICKLESS_ALARM
-int up_alarm_tick_start(clock_t ticks)
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
+static inline_function
+int nxsched_timer_tick_start(clock_t ticks, clock_t delay)
 {
+#  ifndef CONFIG_ALARM_ARCH
   struct timespec ts;
-  clock_ticks2time(&ts, ticks);
+  clock_ticks2time(&ts, ticks + delay);
   return up_alarm_start(&ts);
-}
-
-int up_alarm_tick_cancel(FAR clock_t *ticks)
-{
-  struct timespec ts;
-  int ret;
-  ret = up_alarm_cancel(&ts);
-  *ticks = clock_time2ticks_floor(&ts);
-  return ret;
-}
 #  else
-int up_timer_tick_start(clock_t ticks)
-{
-  struct timespec ts;
-  clock_ticks2time(&ts, ticks);
-  return up_timer_start(&ts);
+  return up_alarm_tick_start(ticks + delay);
+#  endif
 }
 
-int up_timer_tick_cancel(FAR clock_t *ticks)
+static inline_function
+int nxsched_timer_tick_cancel(clock_t *ticks)
 {
+  int    ret;
+#  ifndef CONFIG_ALARM_ARCH
   struct timespec ts;
-  int ret;
-  ret = up_timer_cancel(&ts);
+  ret    = up_alarm_cancel(&ts);
   *ticks = clock_time2ticks_floor(&ts);
+#  else
+  ret    = up_alarm_tick_cancel(ticks);
+#  endif
   return ret;
 }
+
+#else
+static inline_function
+int nxsched_timer_tick_start(clock_t ticks, clock_t delay)
+{
+#  ifndef CONFIG_TIMER_ARCH
+  struct timespec ts;
+  clock_ticks2time(&ts, delay);
+  return up_timer_start(&ts);
+#  else
+  return up_timer_tick_start(delay);
 #  endif
+}
+
+static inline_function
+int nxsched_timer_tick_cancel(clock_t *ticks)
+{
+#  ifndef CONFIG_TIMER_ARCH
+  struct timespec ts;
+  up_timer_cancel(&ts);
+#  else
+  up_timer_cancel(ticks);
+#  endif
+  return up_timer_gettick(ticks);
+}
 #endif
 
 /****************************************************************************
@@ -412,29 +430,10 @@ static clock_t nxsched_timer_process(clock_t ticks, clock_t elapsed,
 
 static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
 {
-  int ret;
-
   if (interval != CLOCK_MAX)
     {
       interval = adjust_next_interval(interval);
-
-#ifdef CONFIG_SCHED_TICKLESS_ALARM
-      /* Convert the delay to a time in the future (with respect
-       * to the time when last stopped the timer).
-       */
-
-      ret = up_alarm_tick_start(ticks + interval);
-#else
-      /* [Re-]start the interval timer */
-
-      ret = up_timer_tick_start(interval);
-#endif
-
-      if (ret < 0)
-        {
-          serr("ERROR: up_timer_start/up_alarm_start failed: %d\n", ret);
-          UNUSED(ret);
-        }
+      nxsched_timer_tick_start(ticks, interval);
     }
 
   atomic_set(&g_timer_interval, interval);
@@ -444,7 +443,6 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
 static inline_function
 clock_t nxsched_timer_update(clock_t ticks, bool noswitches)
 {
-  clock_t nexttime;
   clock_t elapsed;
 
   /* Calculate the elapsed time and update clock tickbase. */
@@ -453,9 +451,7 @@ clock_t nxsched_timer_update(clock_t ticks, bool noswitches)
 
   /* Process the timer ticks and set up the next interval (or not) */
 
-  nexttime = nxsched_timer_process(ticks, elapsed, noswitches);
-
-  return nxsched_timer_start(ticks, nexttime);
+  return nxsched_timer_process(ticks, elapsed, noswitches);
 }
 
 /****************************************************************************
@@ -480,16 +476,20 @@ clock_t nxsched_timer_update(clock_t ticks, bool noswitches)
 
 void nxsched_timer_expiration(void)
 {
+  irqstate_t flags;
   clock_t ticks;
-  irqstate_t flags = enter_critical_section();
+  clock_t next;
+
+  up_timer_gettick(&ticks);
+
+  flags = enter_critical_section();
 
   /* Get the interval associated with last expiration */
 
   g_timernested++;
 
-  up_timer_gettick(&ticks);
-
-  nxsched_timer_update(ticks, false);
+  next = nxsched_timer_update(ticks, false);
+  nxsched_timer_start(ticks, next);
 
   g_timernested--;
 
@@ -536,20 +536,15 @@ void nxsched_timer_expiration(void)
 void nxsched_reassess_timer(void)
 {
   clock_t ticks;
+  clock_t next;
 
   if (!g_timernested)
     {
       /* Cancel the timer and get the current time */
 
-#ifdef CONFIG_SCHED_TICKLESS_ALARM
-      up_alarm_tick_cancel(&ticks);
-#else
-      clock_t elapsed;
-      up_timer_gettick(&ticks);
-      up_timer_tick_cancel(&elapsed);
-#endif
-
-      nxsched_timer_update(ticks, true);
+      nxsched_timer_tick_cancel(&ticks);
+      next = nxsched_timer_update(ticks, true);
+      nxsched_timer_start(ticks, next);
     }
 }
 
