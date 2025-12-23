@@ -1,7 +1,7 @@
 /****************************************************************************
  * crypto/chacha_private.h
  *
- * SPDX-License-Identifier: NuttX-PublicDomain
+ * SPDX-License-Identifier: LicenseRef-NuttX-PublicDomain
  *
  * D. J. Bernstein
  * Public domain.

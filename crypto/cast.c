@@ -1,7 +1,7 @@
 /****************************************************************************
  * crypto/cast.c
  *
- * SPDX-License-Identifier: NuttX-PublicDomain
+ * SPDX-License-Identifier: LicenseRef-NuttX-PublicDomain
  *
  * CAST-128 in C
  * Written by Steve Reid <sreid@sea-to-sky.net>
