@@ -102,7 +102,9 @@ struct hrtimer_s
   hrtimer_cb func;             /* Expiration callback function */
   FAR void *arg;               /* Argument passed to callback */
   uint64_t expired;            /* Absolute expiration time (ns) */
+#ifdef CONFIG_SMP
   uint8_t cpus;                /* Number of cpus that are running the timer */
+#endif
 };
 
 /****************************************************************************
@@ -142,7 +144,9 @@ void hrtimer_init(FAR hrtimer_t *hrtimer,
   hrtimer->state = HRTIMER_STATE_INACTIVE;
   hrtimer->func = func;
   hrtimer->arg = arg;
+#ifdef CONFIG_SMP
   hrtimer->cpus = 0;
+#endif
 }
 
 /****************************************************************************

@@ -98,11 +98,14 @@ void hrtimer_process(uint64_t now)
       DEBUGASSERT(hrtimer->func != NULL);
 
       hrtimer->state = HRTIMER_STATE_RUNNING;
+
+#ifdef CONFIG_SMP
       hrtimer->cpus++;
 
       /* cpus is a running reference counter and must never wrap */
 
       DEBUGASSERT(hrtimer->cpus != 0);
+#endif
 
       /* Leave critical section before invoking the callback */
 
@@ -116,7 +119,9 @@ void hrtimer_process(uint64_t now)
 
       flags = spin_lock_irqsave(&g_hrtimer_spinlock);
 
+#ifdef CONFIG_SMP
       hrtimer->cpus--;
+#endif
 
       switch (hrtimer->state)
         {
@@ -138,7 +143,9 @@ void hrtimer_process(uint64_t now)
                 {
                   /* One-shot timer: deactivate when last instance ends */
 
+#ifdef CONFIG_SMP
                   if (hrtimer->cpus == 0)
+#endif
                     {
                       hrtimer->state = HRTIMER_STATE_INACTIVE;
                     }
@@ -151,7 +158,9 @@ void hrtimer_process(uint64_t now)
             {
               /* Timer was canceled during callback execution */
 
+#ifdef CONFIG_SMP
               if (hrtimer->cpus == 0)
+#endif
                 {
                   hrtimer->state = HRTIMER_STATE_INACTIVE;
                 }
