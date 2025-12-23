@@ -1,7 +1,7 @@
 /****************************************************************************
  * crypto/poly1305.c
  *
- * SPDX-License-Identifier: NuttX-PublicDomain
+ * SPDX-License-Identifier: LicenseRef-NuttX-PublicDomain
  *
  * Public Domain poly1305 from Andrew Moon
  *
