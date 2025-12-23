@@ -37,9 +37,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define VIRTIO_GPU_BPP          32
-#define VIRTIO_GPU_FB_FMT       FB_FMT_RGB32
-#define VIRTIO_GPU_FMT          VIRTIO_GPU_FORMAT_B8G8R8X8_UNORM
+#ifdef CONFIG_DRIVERS_VIRTIO_GPU_RGB565
+#  define VIRTIO_GPU_BPP        16
+#  define VIRTIO_GPU_FB_FMT     FB_FMT_RGB16_565
+#  define VIRTIO_GPU_FMT        VIRTIO_GPU_FORMAT_B5G6R5_UNORM
+#else
+#  define VIRTIO_GPU_BPP        32
+#  define VIRTIO_GPU_FB_FMT     FB_FMT_RGB32
+#  define VIRTIO_GPU_FMT        VIRTIO_GPU_FORMAT_B8G8R8X8_UNORM
+#endif
 
 #define VIRTIO_GPU_CTL          0
 #define VIRTIO_GPU_NUM          1
