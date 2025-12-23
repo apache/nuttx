@@ -121,6 +121,7 @@ config ARMV7M_STACKCHECK_BREAKPOINT
 	bool "Breakpoint on stack overflow"
 	default n
 	depends on ARMV7M_STACKCHECK
+	select ARM_STACKCHECK_BREAKPOINT
 	---help---
 		If enabled, a hard-coded breakpoint will be inserted to the stack
 		overflow trap. This is useful to stop the execution of the program

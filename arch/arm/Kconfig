@@ -1869,6 +1869,8 @@ config UNWINDER_ARM
 
 endchoice # Choose ARM unwinder
 
+endif # SCHED_BACKTRACE
+
 config ARM_STACKCHECK
 	bool
 	default n
@@ -1886,7 +1888,15 @@ config ARM_STACKCHECK
 		compile.  This addition to your CFLAGS should probably be added
 		to the definition of the CFFLAGS in your board Make.defs file.
 
-endif
+config ARM_STACKCHECK_BREAKPOINT
+	bool
+	default n
+	depends on ARM_STACKCHECK
+	---help---
+		If enabled, a hard-coded breakpoint will be inserted to the stack
+		overflow trap. This is useful to stop the execution of the program
+		and diagnose the issue before the hardfault handler is called (and
+		context information is lost).
 
 if ARCH_ARM_M
 source "arch/arm/src/arm_m/Kconfig"

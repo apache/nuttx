@@ -39,6 +39,10 @@ if(CONFIG_ARCH_ARMV8M)
   list(APPEND SRCS arm_securefault.c)
 endif()
 
+if(CONFIG_ARM_STACKCHECK)
+  list(APPEND SRCS arm_stackcheck.c)
+endif()
+
 if(CONFIG_ARM_SYSTICK)
   list(APPEND SRCS arm_systick.c)
 endif()

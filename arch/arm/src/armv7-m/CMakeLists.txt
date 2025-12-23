@@ -22,20 +22,11 @@
 
 # TODO: do not use config to detect this
 
-set(SRCS
-    arm_dbgmonitor.c
-    arm_cache.c
-    arm_cpuinfo.c
-    arm_doirq.c
-    arm_itm.c
-    arm_perf.c)
+set(SRCS arm_dbgmonitor.c arm_cache.c arm_cpuinfo.c arm_doirq.c arm_itm.c
+         arm_perf.c)
 
 if(CONFIG_ARMV7M_ITMSYSLOG)
   list(APPEND SRCS arm_itm_syslog.c)
-endif()
-
-if(CONFIG_ARMV7M_STACKCHECK)
-  list(APPEND SRCS arm_stackcheck.c)
 endif()
 
 if(CONFIG_ARCH_FPU)
