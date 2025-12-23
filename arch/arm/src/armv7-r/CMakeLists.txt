@@ -39,13 +39,15 @@ list(
   arm_doirq.c
   arm_initialstate.c
   arm_prefetchabort.c
-  arm_schedulesigaction.c
-  arm_sigdeliver.c
   arm_syscall.c
   arm_tcbinfo.c
   arm_undefinedinsn.c
   arm_perf.c
   cp15_cacheops.c)
+
+if(CONFIG_ENABLE_ALL_SIGNALS)
+  list(APPEND SRCS arm_schedulesigaction.c arm_sigdeliver.c)
+endif()
 
 if(NOT CONFIG_ARCH_CHIP STREQUAL tms570)
   list(APPEND SRCS arm_gicv2.c arm_gicv2_dump.c)
