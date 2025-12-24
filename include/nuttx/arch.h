@@ -2462,10 +2462,7 @@ void up_ndelay(unsigned long nanoseconds);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SCHED_TICKLESS
 void nxsched_process_timer(void);
-#endif
-
 /****************************************************************************
  * Name:  nxsched_timer_expiration
  *
