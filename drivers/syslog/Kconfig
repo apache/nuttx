@@ -444,6 +444,18 @@ config RAMLOG_BUFSIZE
 
 endif # RAMLOG_SYSLOG
 
+if SYSLOG_DEFAULT
+
+config SYSLOG_DEFAULT_PANIC_ONLY
+	bool "Use syslog default channel for panic only"
+	default n
+	depends on SYSLOG_IOCTL
+	---help---
+		If enabled, the default SYSLOG device will be used only
+		when panic() is called. It is disabled by default.
+
+endif # SYSLOG_DEFAULT
+
 if SYSLOG_RPMSG
 
 config SYSLOG_RPMSG_SERVER_NAME
