@@ -259,6 +259,7 @@ Network Interface Management
   - :c:func:`netlib_ifup`
   - :c:func:`netlib_ifdown`
   - :c:func:`netlib_set_mtu`
+  - :c:func:`netlib_check_ifconflict`
 
 .. c:function:: int netlib_getifstatus(const char *ifname, uint8_t *flags)
 
@@ -293,6 +294,17 @@ Network Interface Management
   :param mtu: MTU value in bytes.
 
   :return: 0 on success; -1 on error with ``errno`` set appropriately.
+
+.. c:function:: int netlib_check_ifconflict(const char *ifname)
+
+  Check the IP address conflict status for a network interface. This function
+  reads the conflict status from the procfs file system (``/proc/net/<ifname>``)
+  which is populated by the ARP Address Conflict Detection (ACD) module.
+
+  :param ifname: Network interface name (e.g., ``"eth0"``).
+
+  :return: 0 if no conflict is detected; 1 if a conflict is detected; a negative
+           value on error with ``errno`` set appropriately.
 
 ARP Table Support
 ==================
