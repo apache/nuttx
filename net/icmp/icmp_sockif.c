@@ -383,6 +383,15 @@ static int icmp_getsockopt(FAR struct socket *psock, int level, int option,
 {
   switch (level)
   {
+    case SOL_SOCKET:
+
+      /* Socket-level options are handled by psock_getsockopt()/inet layer.
+       * Return -ENOPROTOOPT so upper layer will fallback to socket-level
+       * handler without emitting misleading ICMP error logs.
+       */
+
+      return -ENOPROTOOPT;
+
     case SOL_IP:
       return ipv4_getsockopt(psock, option, value, value_len);
 
@@ -486,6 +495,15 @@ static int icmp_setsockopt(FAR struct socket *psock, int level, int option,
 {
   switch (level)
   {
+    case SOL_SOCKET:
+
+      /* Socket-level options are handled by psock_setsockopt()/inet layer.
+       * Return -ENOPROTOOPT so upper layer will fallback to socket-level
+       * handler without emitting misleading ICMP error logs.
+       */
+
+      return -ENOPROTOOPT;
+
     case SOL_IP:
       return ipv4_setsockopt(psock, option, value, value_len);
 
