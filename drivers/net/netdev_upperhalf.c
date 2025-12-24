@@ -517,6 +517,64 @@ netdev_upper_vlan_foreach(FAR struct netdev_upperhalf_s *upper,
 
   netdev_unlock(&upper->lower->netdev);
 }
+
+/****************************************************************************
+ * Name: netdev_upper_vlan_dispatch
+ *
+ * Description:
+ *   Dispatch the received packet to corresponding VLAN device if this is a
+ *   VLAN tagged packet.
+ *
+ * Input Parameters:
+ *   upper - Reference to the upper half driver structure
+ *   pkt   - The received packet
+ *
+ * Returned Value:
+ *   0:Success; negated errno on failure
+ *
+ ****************************************************************************/
+
+static int netdev_upper_vlan_dispatch(FAR struct netdev_upperhalf_s *upper,
+                                      FAR netpkt_t *pkt)
+{
+  FAR struct netdev_lowerhalf_s *vlan;
+  FAR struct netdev_lowerhalf_s *lower = upper->lower;
+  FAR struct eth_8021qhdr_s *vlan_hdr;
+  FAR struct eth_hdr_s *eth_hdr;
+  uint16_t vid;
+
+  if (lower->netdev.d_lltype != NET_LL_ETHERNET)
+    {
+      return -ENOENT;
+    }
+
+  /* Check if this is an 802.1Q VLAN tagged packet */
+
+  eth_hdr = (FAR struct eth_hdr_s *)netpkt_getdata(lower, pkt);
+  if (eth_hdr->type != HTONS(ETHERTYPE_VLAN))
+    {
+      return -ENOENT;
+    }
+
+  vlan_hdr = (FAR struct eth_8021qhdr_s *)netpkt_getdata(lower, pkt);
+  vid = NTOHS(vlan_hdr->tci) & VLAN_VID_MASK;
+  vlan = netdev_upper_vlan_dev(upper, vid);
+  if (vlan)
+    {
+      if (vlan_dispatch(vlan, pkt) == 0)
+        {
+          netdev_lower_rxready(vlan);
+        }
+    }
+  else
+    {
+      nerr("ERROR: Dropped, unknown vlan id: %d\n", vid);
+      netpkt_free(lower, pkt, NETPKT_RX);
+      NETDEV_RXDROPPED(&lower->netdev);
+    }
+
+  return 0;
+}
 #endif
 
 /****************************************************************************
@@ -538,50 +596,6 @@ netdev_upper_vlan_foreach(FAR struct netdev_upperhalf_s *upper,
 static void eth_input(FAR struct net_driver_s *dev)
 {
   FAR struct eth_hdr_s *eth_hdr = (FAR struct eth_hdr_s *)NETLLBUF;
-
-  /* Check if this is an 802.1Q VLAN tagged packet */
-
-#ifdef CONFIG_NET_VLAN
-  if (eth_hdr->type == HTONS(ETHERTYPE_VLAN))
-    {
-      FAR struct netdev_upperhalf_s *upper = dev->d_private;
-      FAR struct netdev_lowerhalf_s *vlan;
-      FAR struct eth_8021qhdr_s *vlan_hdr = NETLLBUF;
-      uint16_t vid = NTOHS(vlan_hdr->tci) & VLAN_VID_MASK;
-
-      vlan = netdev_upper_vlan_dev(upper, vid);
-      if (vlan)
-        {
-          /* Need to remove the 4 octet VLAN Tag, by moving src and dest
-           * addresses 4 octets to the right, and then read the actual
-           * ethertype.
-           */
-
-          netdev_lock(&vlan->netdev);
-          memmove((FAR uint8_t *)eth_hdr + 4, eth_hdr,
-                  offsetof(struct eth_hdr_s, type));
-          netdev_iob_release(&vlan->netdev);
-          vlan->netdev.d_iob = iob_trimhead(dev->d_iob, 4);
-          vlan->netdev.d_len = dev->d_len - 4;
-          netdev_iob_clear(dev);
-
-          /* Then call eth_input again with the new dev */
-
-#ifdef CONFIG_NET_PKT
-          pkt_input(&vlan->netdev);
-#endif
-          eth_input(&vlan->netdev);
-          netdev_unlock(&vlan->netdev);
-        }
-      else
-        {
-          ninfo("INFO: Dropped, unknown vlan id: %d\n", vid);
-          NETDEV_RXDROPPED(dev);
-          dev->d_len = 0;
-        }
-    }
-  else
-#endif
 
   /* We only accept IP packets of the configured type and ARP packets */
 
@@ -819,14 +833,24 @@ static void netdev_upper_rxpoll_work(FAR struct netdev_upperhalf_s *upper)
 
   /* Loop while receive() successfully retrieves valid Ethernet frames. */
 
-  netdev_lock(dev);
   while ((pkt = lower->ops->receive(lower)) != NULL)
     {
+#if defined(CONFIG_NET_VLAN) && defined(CONFIG_NET_ETHERNET)
+      /* If this is a VLAN tagged frame, dispatch it to the VLAN device's
+       * own RX queue without taking the real device lock, then let the
+       * VLAN device run its own RX poll.  This keeps VLAN RX off the real
+       * device lock for better real-time behavior.
+       */
+
+      if (netdev_upper_vlan_dispatch(upper, pkt) == 0)
+        {
+          continue;
+        }
+#endif
+
       netpkt_put(dev, pkt, NETPKT_RX);
       netdev_upper_input(dev);
     }
-
-  netdev_unlock(dev);
 }
 
 /****************************************************************************
