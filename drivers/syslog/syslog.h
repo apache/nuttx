@@ -324,6 +324,15 @@ void syslog_flush_intbuffer(bool force);
 
 ssize_t syslog_write_foreach(int priority, FAR const char *buffer,
                              size_t buflen, bool force);
+
+#ifdef CONFIG_SYSLOG_DEFAULT_PANIC_ONLY
+/****************************************************************************
+ * Name: syslog_panic_notifier_register
+ ****************************************************************************/
+
+void syslog_panic_notifier_register(void);
+#endif
+
 #endif /* CONFIG_SYSLOG */
 
 #ifdef __cplusplus

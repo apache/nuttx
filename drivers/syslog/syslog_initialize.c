@@ -71,6 +71,10 @@ int syslog_initialize(void)
 {
   int ret = OK;
 
+#ifdef CONFIG_SYSLOG_DEFAULT_PANIC_ONLY
+  syslog_panic_notifier_register();
+#endif
+
 #if defined(CONFIG_SYSLOG_CHAR)
   /* Enable use of a character device as the SYSLOG device */
 
