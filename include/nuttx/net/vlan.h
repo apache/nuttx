@@ -131,6 +131,23 @@ int vlan_register(FAR struct netdev_lowerhalf_s *real, uint16_t vid,
 
 void vlan_unregister(FAR struct netdev_lowerhalf_s *dev);
 
+/****************************************************************************
+ * Name: vlan_dispatch
+ *
+ * Description:
+ *   Dispatch the received packet to the VLAN device's RX queue.
+ *
+ * Input Parameters:
+ *   dev - The VLAN device
+ *   pkt - The received packet
+ *
+ * Returned Value:
+ *   0:Success; negated errno on failure
+ *
+ ****************************************************************************/
+
+int vlan_dispatch(FAR struct netdev_lowerhalf_s *vlan, FAR netpkt_t *pkt);
+
 #ifdef __cplusplus
 }
 #endif
