@@ -386,8 +386,13 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
         {
           FAR struct rptun_ivshmem_rsc_s *rsc =
             (FAR struct rptun_ivshmem_rsc_s *)&priv->shmem->rsc_table;
+
           strlcpy((FAR char *)rsc->rpmsg0_config.host_cpuname, priv->cpuname,
                   sizeof(rsc->rpmsg0_config.host_cpuname));
+          strlcpy((FAR char *)&rsc->vsock_config.guest_cid,
+                   priv->cpuname, 5);
+          strlcpy((FAR char *)&rsc->vsock_config.host_cid,
+                   CONFIG_RPMSG_LOCAL_CPUNAME, 5);
         }
 
       priv->shmem->rsc_size = priv->rsc_size;
