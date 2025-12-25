@@ -37,6 +37,8 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/timers/ptp_clock.h>
 
 #include "clock/clock.h"
 
@@ -213,6 +215,98 @@ int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta)
     {
       return OK;
     }
+}
+
+/****************************************************************************
+ * Name: nxclock_adjtime
+ *
+ * Description:
+ *   Adjust the frequency and/or phase of a clock.
+ *   This function allows the adjustment of the frequency and/or phase of a
+ *   specified clock. It can be used to synchronize the clock with an
+ *   external time source or to apply a frequency offset.
+ *
+ * Input Parameters:
+ *   clk_id - The identifier of the clock to be adjusted. This is typically
+ *            one of the predefined clock IDs such as CLOCK_REALTIME,
+ *            CLOCK_MONOTONIC, or CLOCK_BOOTTIME.
+ *
+ *   buf    - A pointer to a `timex` structure that specifies the adjustment
+ *            parameters. This structure includes fields for the frequency
+ *            adjustment (`freq`), the maximum frequency error (`maxerror`),
+ *            the estimated error (`esterror`), the phase offset (`offset`),
+ *            and flags to indicate the type of adjustment (`status`).
+ *
+ * Returned Value:
+ *            Return On success, the function returns 0. On error, it returns
+ *            -1 and sets 'errno` to indicate the specific error that
+ *            occurred.
+ *
+ ****************************************************************************/
+
+int nxclock_adjtime(clockid_t clock_id, FAR struct timex *buf)
+{
+  int ret = -EINVAL;
+
+#ifdef CONFIG_PTP_CLOCK
+  if ((clock_id & CLOCK_MASK) == CLOCK_FD)
+    {
+      FAR struct file *filep;
+
+      ret = ptp_clockid_to_filep(clock_id, &filep);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      ret = file_ioctl(filep, PTP_CLOCK_ADJTIME,
+                       (unsigned long)(uintptr_t)buf);
+      fs_putfilep(filep);
+    }
+#endif
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: clock_adjtime
+ *
+ * Description:
+ *   Adjust the frequency and/or phase of a clock.
+ *   This function allows the adjustment of the frequency and/or phase of a
+ *   specified clock. It can be used to synchronize the clock with an
+ *   external time source or to apply a frequency offset.
+ *
+ * Input Parameters:
+ *   clk_id - The identifier of the clock to be adjusted. This is typically
+ *            one of the predefined clock IDs such as CLOCK_REALTIME,
+ *            CLOCK_MONOTONIC, or CLOCK_BOOTTIME.
+ *
+ *   buf    - A pointer to a `timex` structure that specifies the adjustment
+ *            parameters. This structure includes fields for the frequency
+ *            adjustment (`freq`), the maximum frequency error (`maxerror`),
+ *            the estimated error (`esterror`), the phase offset (`offset`),
+ *            and flags to indicate the type of adjustment (`status`).
+ *
+ * Returned Value:
+ *            Return On success, the function returns 0. On error, it returns
+ *            -1 and sets 'errno` to indicate the specific error that
+ *            occurred.
+ *
+ ****************************************************************************/
+
+int clock_adjtime(clockid_t clk_id, FAR struct timex *buf)
+{
+  int ret;
+
+  ret = nxclock_adjtime(clk_id, buf);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      return ERROR;
+    }
+
+  return ret;
 }
 
 #endif /* CONFIG_CLOCK_ADJTIME */

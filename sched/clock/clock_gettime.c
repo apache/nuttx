@@ -32,10 +32,12 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/timers/ptp_clock.h>
 
 #include "clock/clock.h"
 #include "sched/sched.h"
@@ -86,9 +88,16 @@ static clock_t clock_process_runtime(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-void nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp)
+int nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp)
 {
-  if (clock_id == CLOCK_MONOTONIC)
+  int ret = 0;
+
+  if (tp == NULL)
+    {
+      return -EINVAL;
+    }
+
+  if (clock_id == CLOCK_MONOTONIC || clock_id == CLOCK_BOOTTIME)
     {
       /* The the time elapsed since the timer was initialized at power on
        * reset, excluding the time that the system is suspended.
@@ -124,6 +133,21 @@ void nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp)
       clock_timekeeping_get_wall_time(tp);
 #endif
     }
+#ifdef CONFIG_PTP_CLOCK
+  else if ((clock_id & CLOCK_MASK) == CLOCK_FD)
+    {
+      FAR struct file *filep;
+
+      ret = ptp_clockid_to_filep(clock_id, &filep);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      ret = file_ioctl(filep, PTP_CLOCK_GETTIME, tp);
+      fs_putfilep(filep);
+    }
+#endif
   else
     {
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
@@ -150,9 +174,19 @@ void nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp)
             {
               up_perf_convert(tcb->run_time, tp);
             }
+          else
+            {
+              ret = -EINVAL;
+            }
+        }
+      else
+        {
+          return -EINVAL;
         }
 #endif
     }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -181,12 +215,14 @@ void nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp)
 
 int clock_gettime(clockid_t clock_id, FAR struct timespec *tp)
 {
-  if (tp == NULL || clock_id < 0 || clock_id > CLOCK_BOOTTIME)
+  int ret;
+
+  ret = nxclock_gettime(clock_id, tp);
+  if (ret < 0)
     {
-      set_errno(EINVAL);
+      set_errno(-ret);
       return ERROR;
     }
 
-  nxclock_gettime(clock_id, tp);
   return OK;
 }

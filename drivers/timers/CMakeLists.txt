@@ -90,4 +90,12 @@ if(CONFIG_GOLDFISH_TIMER)
   list(APPEND SRCS goldfish_timer.c)
 endif()
 
+if(CONFIG_PTP_CLOCK)
+  list(APPEND SRCS ptp_clock.c)
+endif()
+
+if(CONFIG_PTP_CLOCK_DUMMY)
+  list(APPEND SRCS ptp_clock_dummy.c)
+endif()
+
 target_sources(drivers PRIVATE ${SRCS})

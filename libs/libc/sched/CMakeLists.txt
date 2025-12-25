@@ -24,7 +24,6 @@ set(SRCS
     sched_getprioritymax.c
     sched_getprioritymin.c
     clock_getcpuclockid.c
-    clock_getres.c
     task_cancelpt.c
     task_setcancelstate.c
     task_setcanceltype.c

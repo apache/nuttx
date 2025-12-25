@@ -124,6 +124,14 @@ ifeq ($(CONFIG_GOLDFISH_TIMER),y)
   TMRVPATH = :timers
 endif
 
+ifeq ($(CONFIG_PTP_CLOCK),y)
+  CSRCS += ptp_clock.c
+endif
+
+ifeq ($(CONFIG_PTP_CLOCK_DUMMY),y)
+  CSRCS += ptp_clock_dummy.c
+endif
+
 # Include timer build support (if any were selected)
 
 DEPPATH += $(TMRDEPPATH)

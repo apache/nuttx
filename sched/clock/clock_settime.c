@@ -30,11 +30,13 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <sys/time.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/spinlock.h>
-#include <sys/time.h>
+#include <nuttx/timers/ptp_clock.h>
 
 #include "clock/clock.h"
 #ifdef CONFIG_CLOCK_TIMEKEEPING
@@ -42,21 +44,10 @@
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: nxclock_settime
- *
- * Description:
- *   Clock Functions based on POSIX APIs
- *
- *   CLOCK_REALTIME - POSIX demands this to be present. This is the wall
- *   time clock.
- *
- ****************************************************************************/
-
-void nxclock_settime(clockid_t clock_id, FAR const struct timespec *tp)
+static void nxclock_set_realtime(FAR const struct timespec *tp)
 {
 #ifndef CONFIG_CLOCK_TIMEKEEPING
   struct timespec bias;
@@ -104,6 +95,54 @@ void nxclock_settime(clockid_t clock_id, FAR const struct timespec *tp)
 }
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxclock_settime
+ *
+ * Description:
+ *   Clock Functions based on POSIX APIs
+ *
+ *   CLOCK_REALTIME - POSIX demands this to be present. This is the wall
+ *   time clock.
+ *
+ ****************************************************************************/
+
+int nxclock_settime(clockid_t clock_id, FAR const struct timespec *tp)
+{
+  int ret = -EINVAL;
+
+  if (tp == NULL || tp->tv_nsec < 0 || tp->tv_nsec >= 1000000000)
+    {
+      return ret;
+    }
+
+  if (clock_id == CLOCK_REALTIME)
+    {
+      nxclock_set_realtime(tp);
+      return 0;
+    }
+#ifdef CONFIG_PTP_CLOCK
+  else if ((clock_id & CLOCK_MASK) == CLOCK_FD)
+    {
+      FAR struct file *filep;
+
+      ret = ptp_clockid_to_filep(clock_id, &filep);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      ret = file_ioctl(filep, PTP_CLOCK_SETTIME, tp);
+      fs_putfilep(filep);
+    }
+#endif
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: clock_settime
  *
  * Description:
@@ -116,13 +155,14 @@ void nxclock_settime(clockid_t clock_id, FAR const struct timespec *tp)
 
 int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
 {
-  if (clock_id != CLOCK_REALTIME || tp == NULL ||
-      tp->tv_nsec < 0 || tp->tv_nsec >= 1000000000)
+  int ret;
+
+  ret = nxclock_settime(clock_id, tp);
+  if (ret < 0)
     {
-      set_errno(EINVAL);
+      set_errno(-ret);
       return ERROR;
     }
 
-  nxclock_settime(clock_id, tp);
   return OK;
 }

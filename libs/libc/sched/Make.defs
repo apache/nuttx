@@ -23,9 +23,9 @@
 # Add the sched C files to the build
 
 CSRCS += sched_getprioritymax.c sched_getprioritymin.c
-CSRCS += clock_getcpuclockid.c clock_getres.c
 CSRCS += task_cancelpt.c task_setcancelstate.c task_setcanceltype.c
 CSRCS += task_testcancel.c task_gettid.c
+CSRCS += clock_getcpuclockid.c
 
 ifeq ($(CONFIG_SMP),y)
 CSRCS += sched_cpucount.c

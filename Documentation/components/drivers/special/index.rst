@@ -53,6 +53,7 @@ following section.
   pinctrl.rst
   pipes.rst
   power/index.rst
+  ptp.rst
   virtio.rst
   video.rst
   wireless.rst

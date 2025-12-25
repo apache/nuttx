@@ -1,7 +1,5 @@
 /****************************************************************************
- * libs/libc/sched/clock_getres.c
- *
- * SPDX-License-Identifier: Apache-2.0
+ * include/nuttx/timers/ptp_clock_dummy.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -20,61 +18,57 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_TIMERS_PTP_CLOCK_DUMMY_H
+#define __INCLUDE_NUTTX_TIMERS_PTP_CLOCK_DUMMY_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdint.h>
-#include <time.h>
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/clock.h>
-
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: clock_getres
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Name: ptp_clock_dummy_initialize
  *
  * Description:
- *   Clock Functions based on POSIX APIs
+ *   This function will initialize dummy ptp device driver for test.
+ *
+ * Input Parameters:
+ *   devno - The user specifies number of device. ex: /dev/ptpX.
+ *
+ * Returned Value:
+ *   OK if the driver was successfully initialize; A negated errno value is
+ *   returned on any failure.
  *
  ****************************************************************************/
 
-int clock_getres(clockid_t clock_id, struct timespec *res)
-{
-  clockid_t clock_type = clock_id & CLOCK_MASK;
-  int       ret = OK;
+int ptp_clock_dummy_initialize(int devno);
 
-  sinfo("clock_id=%d, clock_type=%d\n", clock_id, clock_type);
-
-  switch (clock_type)
-    {
-      default:
-        serr("Returning ERROR\n");
-        set_errno(EINVAL);
-        ret = ERROR;
-        break;
-
-      case CLOCK_MONOTONIC:
-      case CLOCK_BOOTTIME:
-      case CLOCK_REALTIME:
-      case CLOCK_PROCESS_CPUTIME_ID:
-      case CLOCK_THREAD_CPUTIME_ID:
-
-        /* Form the timspec using clock resolution in nanoseconds */
-
-        res->tv_sec  = 0;
-        res->tv_nsec = NSEC_PER_TICK;
-
-        sinfo("Returning res=(%d,%d)\n", (int)res->tv_sec,
-                                         (int)res->tv_nsec);
-        break;
-    }
-
-  return ret;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+#endif /* __INCLUDE_NUTTX_TIMERS_PTP_CLOCK_DUMMY_H */

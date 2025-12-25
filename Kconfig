@@ -2366,6 +2366,41 @@ config DEBUG_PCI_INFO
 
 endif # DEBUG_PCI
 
+config DEBUG_PTP
+	bool "PTP Debug Features"
+	default n
+	depends on PTP_CLOCK
+	---help---
+		Enable PTP driver debug features.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+if DEBUG_PTP
+
+config DEBUG_PTP_ERROR
+	bool "PTP Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable PTP driver error output to SYSLOG.
+
+config DEBUG_PTP_WARN
+	bool "PTP Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable PTP driver warning output to SYSLOG.
+
+config DEBUG_PTP_INFO
+	bool "PTP Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable PTP driver informational output to SYSLOG.
+
+endif # DEBUG_PTP
+
 config DEBUG_RPMSG
 	bool "RPMSG Debug Features"
 	default n
