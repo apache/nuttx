@@ -303,6 +303,17 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
       tcp_send_txnotify(psock, conn);
       conn_dev_unlock(&conn->sconn, conn->dev);
     }
+  else if (conn->tcpstateflags == TCP_SYN_SENT ||
+           conn->tcpstateflags == TCP_SYN_RCVD)
+    {
+      /* Free network resources */
+
+      conn->flags |= TCP_CLOSE_ARRANGED;
+      conn->tcpstateflags = TCP_CLOSED;
+      work_queue(LPWORK, &conn->clswork, tcp_close_work, conn,
+                 HSEC2TICK(conn->timer));
+      conn_dev_unlock(&conn->sconn, conn->dev);
+    }
   else
     {
       /* Stop the network monitor for all sockets */
