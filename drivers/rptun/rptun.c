@@ -932,7 +932,9 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
     {
       priv->stop = true;
       nxsig_kill(priv->pid, SIGKILL);
+#ifdef CONFIG_SCHED_WAITPID
       nxsched_waitpid(priv->pid, NULL, WEXITED);
+#endif
       priv->stop = false;
       priv->pid = -EINVAL;
     }
