@@ -411,16 +411,20 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
       interval = interval <= (CONFIG_TIMER_ADJUST_USEC / USEC_PER_TICK) ? 0 :
                  interval - (CONFIG_TIMER_ADJUST_USEC / USEC_PER_TICK);
 
-#ifdef CONFIG_SCHED_TICKLESS_ALARM
+#ifdef CONFIG_HRTIMER
+  nxsched_hrtimer_start(ticks + interval);
+#else
+#  ifdef CONFIG_SCHED_TICKLESS_ALARM
       /* Convert the delay to a time in the future (with respect
        * to the time when last stopped the timer).
        */
 
       ret = up_alarm_tick_start(ticks + interval);
-#else
+#  else
       /* [Re-]start the interval timer */
 
       ret = up_timer_tick_start(interval);
+#  endif
 #endif
 
       if (ret < 0)
