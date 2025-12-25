@@ -306,6 +306,39 @@ Network Interface Management
   :return: 0 if no conflict is detected; 1 if a conflict is detected; a negative
            value on error with ``errno`` set appropriately.
 
+Network Buffer Statistics
+==========================
+
+  - :c:func:`netlib_get_iobinfo`
+
+.. c:function:: int netlib_get_iobinfo(struct iob_stats_s *iob)
+
+  Get the network IOB (I/O Buffer) statistics. This function reads IOB usage
+  information from the procfs file system (``/proc/iobinfo``) which provides
+  details about the network packet buffer pool.
+
+  IOB buffers are used by the NuttX network stack to buffer network packets
+  during transmission and reception. This function allows monitoring the IOB
+  buffer pool to detect potential buffer exhaustion or throttling conditions.
+
+  :param iob: Pointer to an ``iob_stats_s`` structure to receive the IOB
+              statistics. The structure contains the following fields:
+
+              - ``ntotal``: Total number of IOB buffers configured
+                (``CONFIG_IOB_NBUFFERS``)
+              - ``nfree``: Current number of free IOB buffers available
+              - ``nwait``: Number of tasks waiting for IOB buffers (when
+                ``nfree < 0``)
+              - ``nthrottle``: Number of IOB buffers that are throttled (when
+                below ``CONFIG_IOB_THROTTLE`` threshold)
+
+  :return: 0 on success; a negative value on failure with ``errno`` set
+           appropriately.
+
+  **Note:** This function requires ``CONFIG_MM_IOB`` to be enabled. The IOB
+  statistics are provided by the kernel's IOB buffer management system and
+  reflect the current state of the network packet buffer pool.
+
 ARP Table Support
 ==================
 
