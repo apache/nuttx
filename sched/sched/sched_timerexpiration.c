@@ -108,6 +108,32 @@ static unsigned int g_timernested;
  * Private Functions
  ****************************************************************************/
 
+static inline_function clock_t adjust_next_interval(clock_t interval)
+{
+  clock_t ret = interval;
+
+#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
+  ret = MIN(ret, g_oneshot_maxticks);
+#endif
+
+  /* Normally, timer event cannot triggered on exact time due to the
+   * existence of interrupt latency.
+   * Assuming that the interrupt latency is distributed within
+   * [Best-Case Execution Time, Worst-Case Execution Time],
+   * we can set the timer adjustment value to the BCET to reduce the latency.
+   * After the adjustment, the timer interrupt latency will be
+   * [0, WCET - BCET].
+   * Please use this carefully, if the timer adjustment value is not the
+   * best-case interrupt latency, it will immediately fired another timer
+   * interrupt, which may result in a much larger timer interrupt latency.
+   */
+
+  ret = ret <= (CONFIG_TIMER_ADJUST_USEC / USEC_PER_TICK) ? 0 :
+        ret - (CONFIG_TIMER_ADJUST_USEC / USEC_PER_TICK);
+
+  return ret;
+}
+
 static inline_function clock_t  get_time_tick(void)
 {
 #ifdef CONFIG_SYSTEM_TIME64
@@ -390,26 +416,7 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
 
   if (interval != CLOCK_MAX)
     {
-#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
-      interval = MIN(interval, g_oneshot_maxticks);
-#endif
-
-      /* Normally, timer event cannot triggered on exact time
-       * due to the existence of interrupt latency.
-       * Assuming that the interrupt latency is distributed within
-       * [Best-Case Execution Time, Worst-Case Execution Time],
-       * we can set the timer adjustment value to the BCET to
-       * reduce the latency.
-       * After the adjustment, the timer interrupt latency will be
-       * [0, WCET - BCET].
-       * Please use this carefully, if the timer adjustment value is not
-       * the best-case interrupt latency, it will immediately fired
-       * another timer interrupt, which may result in a much larger timer
-       * interrupt latency.
-       */
-
-      interval = interval <= (CONFIG_TIMER_ADJUST_USEC / USEC_PER_TICK) ? 0 :
-                 interval - (CONFIG_TIMER_ADJUST_USEC / USEC_PER_TICK);
+      interval = adjust_next_interval(interval);
 
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
       /* Convert the delay to a time in the future (with respect
