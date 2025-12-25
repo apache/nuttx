@@ -277,6 +277,15 @@ int pkt_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
       eventset |= POLLWRNORM;
     }
 
+  /* Check for timestamping data */
+
+#ifdef CONFIG_NET_TIMESTAMPING
+  if (!IOB_QEMPTY(&conn->errahead))
+    {
+      eventset |= POLLPRI | POLLERR;
+    }
+#endif
+
   /* Check if any requested events are already in effect */
 
   poll_notify(&fds, 1, eventset);
