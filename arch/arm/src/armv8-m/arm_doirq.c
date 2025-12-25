@@ -55,6 +55,7 @@ void exception_direct(void)
       "vmsr fpscr, r0\n"
       :
       : "i" (ARMV8M_FPSCR_LTPSIZE_NONE)
+      : "r0"
     );
 #endif
 
