@@ -369,9 +369,12 @@ typedef struct sigevent
     } _sigev_un;
 } sigevent_t;
 
-#define sigev_notify_function   _sigev_un._sigev_thread._function
-#define sigev_notify_attributes _sigev_un._sigev_thread._attribute
-#define sigev_notify_thread_id  _sigev_un._tid
+#ifdef CONFIG_SIG_EVTHREAD
+#  define sigev_notify_function   _sigev_un._sigev_thread._function
+#  define sigev_notify_attributes _sigev_un._sigev_thread._attribute
+#endif
+
+#define sigev_notify_thread_id    _sigev_un._tid
 
 /* The following types is used to pass parameters to/from signal handlers */
 
