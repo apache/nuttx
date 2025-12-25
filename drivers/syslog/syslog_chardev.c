@@ -124,6 +124,11 @@ static int syslog_chardev_ioctl(FAR struct file *filep,
 
       for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
         {
+          if (g_syslog_channel[i] == NULL)
+            {
+              continue;
+            }
+
           if (strncmp(g_syslog_channel[i]->sc_name, info->sc_name,
                       sizeof(info->sc_name)) == 0)
             {
