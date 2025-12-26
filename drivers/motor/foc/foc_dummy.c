@@ -33,6 +33,8 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/atomic.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/motor/foc/foc_dummy.h>
 #include <nuttx/motor/foc/foc_lower.h>
 
@@ -92,7 +94,7 @@ struct foc_dummy_data_s
 
   /* FOC worker loop helpers */
 
-  bool     state;
+  atomic_t state;
   uint32_t notifier_cntr;
   uint32_t pwm_freq;
   uint32_t notifier_freq;
@@ -172,6 +174,8 @@ static struct foc_lower_s g_foc_dummy_lower[CONFIG_MOTOR_FOC_INST];
 
 static struct foc_dev_s g_foc_dev[CONFIG_MOTOR_FOC_INST];
 
+static spinlock_t g_foc_lock = SP_UNLOCKED;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -213,7 +217,6 @@ static int foc_dummy_pwm_setup(FAR struct foc_dev_s *dev, uint32_t freq)
 static int foc_dummy_start(FAR struct foc_dev_s *dev, bool state)
 {
   FAR struct foc_dummy_data_s *sim = FOC_DUMMY_DATA_FROM_DEV_GET(dev);
-  irqstate_t                   flags;
   int                          ret = OK;
 
   mtrinfo("[FOC_START] state=%d\n", state);
@@ -238,9 +241,7 @@ static int foc_dummy_start(FAR struct foc_dev_s *dev, bool state)
 
   /* Store FOC worker state */
 
-  flags = enter_critical_section();
-  sim->state = state;
-  leave_critical_section(flags);
+  atomic_set(&sim->state, state);
 
 errout:
   return ret;
@@ -686,7 +687,7 @@ void foc_dummy_update(void)
   int                          i    = 0;
   irqstate_t                   flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&g_foc_lock);
 
   /* Update all FOC instances */
 
@@ -704,12 +705,12 @@ void foc_dummy_update(void)
 
           sim = FOC_DUMMY_DATA_FROM_DEV_GET(dev);
 
-          if (sim->state == true)
+          if (atomic_read(&sim->state))
             {
               foc_dummy_notifier_handler(dev);
             }
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&g_foc_lock, flags);
 }

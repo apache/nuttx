@@ -117,13 +117,12 @@ static int math_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct inode              *inode =  filep->f_inode;
   FAR math_upperhalf_s          *upper =  inode->i_private;
   int                            ret   = -ENOTTY;
-  irqstate_t                     flags;
 
   DEBUGASSERT(upper != NULL);
 
   _info("cmd: %d arg: %lu\n", cmd, arg);
 
-  flags = enter_critical_section();
+  nxmutex_lock(&upper->lock);
 
   switch (cmd)
     {
@@ -175,7 +174,7 @@ static int math_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #endif
     }
 
-  leave_critical_section(flags);
+  nxmutex_unlock(&upper->lock);
 
   return ret;
 }
@@ -215,12 +214,17 @@ int math_register(FAR const char *path,
 
   memcpy(upper, config, sizeof(math_upperhalf_s));
 
+  /* Initialize the mutex lock */
+
+  nxmutex_init(&upper->lock);
+
   /* Register the math timer device */
 
   ret = register_driver(path, &g_math_ops, 0666, upper);
   if (ret < 0)
     {
       _err("register math driver failed: %d\n", ret);
+      nxmutex_destroy(&upper->lock);
       kmm_free(upper);
     }
 
