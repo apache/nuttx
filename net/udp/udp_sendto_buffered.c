@@ -138,11 +138,14 @@ static void sendto_writebuffer_release(FAR struct udp_conn_s *conn)
           conn->sndcb->event = NULL;
           wrb = NULL;
 
-#ifdef CONFIG_NET_UDP_NOTIFIER
-          /* Notify any waiters that the write buffers have been drained. */
+          if (conn->txdrain_sem != NULL)
+            {
+              /* Notify the txdrain semaphore that the write buffer queue
+               * has been drained.
+               */
 
-          udp_writebuffer_signal(conn);
-#endif
+              nxsem_post(conn->txdrain_sem);
+            }
         }
       else
         {
