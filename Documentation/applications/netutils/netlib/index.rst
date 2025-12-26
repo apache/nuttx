@@ -339,6 +339,32 @@ Network Buffer Statistics
   statistics are provided by the kernel's IOB buffer management system and
   reflect the current state of the network packet buffer pool.
 
+Network Connectivity
+=====================
+
+  - :c:func:`netlib_check_ipconnectivity`
+
+.. c:function:: int netlib_check_ipconnectivity(FAR const char *ip, int timeout, int retry)
+
+  Check network connectivity to a specified IPv4 address using ICMP ping. This
+  function sends ICMP echo requests to the target address and counts the number
+  of replies received.
+
+  :param ip: IPv4 address string to check (e.g., ``"192.168.1.1"``). If ``NULL``,
+             the function will use the default DNS server address configured via
+             ``CONFIG_NETDB_DNSSERVER_IPv4ADDR`` (if available).
+  :param timeout: Maximum timeout for each ping attempt in milliseconds.
+  :param retry: Number of ping attempts to send.
+
+  :return: Number of replies received (0 or positive) on success. A value of 0
+           indicates that no replies were received (network unreachable or timeout).
+           A negative value indicates an error occurred (e.g., ``-EINVAL`` if ``ip``
+           is ``NULL`` and no DNS server is configured).
+
+  **Note:** This function requires ``CONFIG_NETUTILS_PING`` to be enabled. The
+  function is blocking and will wait for all ping attempts to complete before
+  returning.
+
 ARP Table Support
 ==================
 
