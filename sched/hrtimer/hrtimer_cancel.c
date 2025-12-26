@@ -39,13 +39,10 @@
 
 /* Delay used while waiting for a running hrtimer callback to complete */
 
-#define HRTIMER_CANCEL_SYNC_DELAY_MS  5
-
 #ifdef CONFIG_SMP
+#  define HRTIMER_CANCEL_SYNC_DELAY_MS  5
 #  define hrtimer_is_free(hrtimer) (((hrtimer)->state == HRTIMER_STATE_INACTIVE) && \
                                     ((hrtimer)->cpus == 0))
-#else
-#  define hrtimer_is_free(hrtimer) (((hrtimer)->state == HRTIMER_STATE_INACTIVE))
 #endif
 
 /****************************************************************************
@@ -104,6 +101,16 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer)
 
   first = (FAR hrtimer_t *)RB_MIN(hrtimer_tree_s, &g_hrtimer_tree);
 
+#ifndef CONFIG_SMP
+  if (RB_FIND(hrtimer_tree_s, &g_hrtimer_tree, &hrtimer->node) != NULL)
+    {
+      RB_REMOVE(hrtimer_tree_s, &g_hrtimer_tree, &hrtimer->node);
+    }
+  else
+    {
+      ret = -EINVAL;
+    }
+#else
   switch (hrtimer->state)
     {
       case HRTIMER_STATE_ARMED:
@@ -138,6 +145,7 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer)
           break;
         }
     }
+#endif
 
   /* If the canceled timer was the earliest one, update the hardware timer */
 
@@ -180,15 +188,15 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer)
 int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer)
 {
   int  ret;
-  bool cansleep;
 
   DEBUGASSERT(hrtimer != NULL);
 
   /* Determine whether sleeping is permitted in the current context */
 
-  cansleep = !up_interrupt_context() &&
-             !is_idle_task(this_task());
-
+#ifdef CONFIG_SMP
+  bool cansleep = !up_interrupt_context() &&
+                  !is_idle_task(this_task());
+#endif
   /* Request cancellation of the timer */
 
   ret = hrtimer_cancel(hrtimer);
@@ -204,6 +212,7 @@ int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer)
    * and the state becomes inactive.
    */
 
+#ifdef CONFIG_SMP
   while (!hrtimer_is_free(hrtimer))
     {
       if (cansleep)
@@ -212,5 +221,6 @@ int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer)
         }
     }
 
+#endif
   return OK;
 }

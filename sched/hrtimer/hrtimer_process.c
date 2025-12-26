@@ -97,9 +97,8 @@ void hrtimer_process(uint64_t now)
 
       DEBUGASSERT(hrtimer->func != NULL);
 
-      hrtimer->state = HRTIMER_STATE_RUNNING;
-
 #ifdef CONFIG_SMP
+      hrtimer->state = HRTIMER_STATE_RUNNING;
       hrtimer->cpus++;
 
       /* cpus is a running reference counter and must never wrap */
@@ -119,9 +118,18 @@ void hrtimer_process(uint64_t now)
 
       flags = write_seqlock_irqsave(&g_hrtimer_spinlock);
 
-#ifdef CONFIG_SMP
+#ifndef CONFIG_SMP
+      if (period > 0)
+        {
+          /* Periodic timer: re-arm with the next expiration */
+
+          hrtimer->expired += period;
+
+          RB_INSERT(hrtimer_tree_s, &g_hrtimer_tree,
+                    &hrtimer->node);
+        }
+#else
       hrtimer->cpus--;
-#endif
 
       switch (hrtimer->state)
         {
@@ -143,9 +151,7 @@ void hrtimer_process(uint64_t now)
                 {
                   /* One-shot timer: deactivate when last instance ends */
 
-#ifdef CONFIG_SMP
                   if (hrtimer->cpus == 0)
-#endif
                     {
                       hrtimer->state = HRTIMER_STATE_INACTIVE;
                     }
@@ -158,9 +164,7 @@ void hrtimer_process(uint64_t now)
             {
               /* Timer was canceled during callback execution */
 
-#ifdef CONFIG_SMP
               if (hrtimer->cpus == 0)
-#endif
                 {
                   hrtimer->state = HRTIMER_STATE_INACTIVE;
                 }
@@ -173,6 +177,7 @@ void hrtimer_process(uint64_t now)
             break;
         }
 
+#endif
       /* Fetch the next earliest timer */
 
       hrtimer = (FAR hrtimer_t *)RB_MIN(hrtimer_tree_s, &g_hrtimer_tree);

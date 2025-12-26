@@ -57,6 +57,7 @@ enum hrtimer_mode_e
  * Callers must not modify the state directly.
  */
 
+#ifdef CONFIG_SMP
 enum hrtimer_state_e
 {
   HRTIMER_STATE_INACTIVE = 0, /* Timer is inactive and not queued */
@@ -64,6 +65,7 @@ enum hrtimer_state_e
   HRTIMER_STATE_RUNNING,      /* Timer callback is currently executing */
   HRTIMER_STATE_CANCELED      /* Timer canceled (callback may be running) */
 };
+#endif
 
 /* Forward declarations */
 
@@ -98,11 +100,11 @@ struct hrtimer_node_s
 struct hrtimer_s
 {
   hrtimer_node_t  node;        /* RB-tree node for sorted insertion */
-  enum hrtimer_state_e state;  /* Current timer state */
   hrtimer_cb func;             /* Expiration callback function */
   FAR void *arg;               /* Argument passed to callback */
   uint64_t expired;            /* Absolute expiration time (ns) */
 #ifdef CONFIG_SMP
+  enum hrtimer_state_e state;  /* Current timer state */
   uint8_t cpus;                /* Number of cpus that are running the timer */
 #endif
 };
@@ -141,10 +143,10 @@ void hrtimer_init(FAR hrtimer_t *hrtimer,
                   hrtimer_cb func,
                   FAR void *arg)
 {
-  hrtimer->state = HRTIMER_STATE_INACTIVE;
   hrtimer->func = func;
   hrtimer->arg = arg;
 #ifdef CONFIG_SMP
+  hrtimer->state = HRTIMER_STATE_INACTIVE;
   hrtimer->cpus = 0;
 #endif
 }

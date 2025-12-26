@@ -61,7 +61,11 @@ int hrtimer_insert(FAR hrtimer_t *hrtimer)
 {
   /* Restart if the timer is already armed */
 
+#ifdef CONFIG_SMP
   if (hrtimer->state == HRTIMER_STATE_ARMED)
+#else
+  if (RB_FIND(hrtimer_tree_s, &g_hrtimer_tree, &hrtimer->node) != NULL)
+#endif
     {
       RB_REMOVE(hrtimer_tree_s, &g_hrtimer_tree, &hrtimer->node);
     }
@@ -72,7 +76,9 @@ int hrtimer_insert(FAR hrtimer_t *hrtimer)
 
   /* Mark the timer as armed */
 
+#ifdef CONFIG_SMP
   hrtimer->state = HRTIMER_STATE_ARMED;
+#endif
 
   /* If the inserted timer is now the earliest, start hardware timer */
 
