@@ -57,6 +57,28 @@ up_invalidate_dcache_all:
 #endif
 
 /****************************************************************************
+ * Name: up_flush_dcache_all
+ *
+ * Description:
+ *   Flush the entire contents of D cache.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_DCACHE
+  .globl  up_flush_dcache_all
+  .type   up_flush_dcache_all, function
+
+up_flush_dcache_all:
+  .word 0x500F
+#endif
+
+/****************************************************************************
  * Name: up_invalidate_icache_all
  *
  * Description:
