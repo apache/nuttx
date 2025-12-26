@@ -123,7 +123,7 @@ int hrtimer_start(FAR hrtimer_t *hrtimer,
 
   /* Protect RB-tree manipulation with spinlock and disable interrupts */
 
-  flags = spin_lock_irqsave(&g_hrtimer_spinlock);
+  flags = write_seqlock_irqsave(&g_hrtimer_spinlock);
 
   /* Compute absolute expiration time */
 
@@ -146,7 +146,7 @@ int hrtimer_start(FAR hrtimer_t *hrtimer,
 
   /* Release spinlock and restore interrupts */
 
-  spin_unlock_irqrestore(&g_hrtimer_spinlock, flags);
+  write_sequnlock_irqrestore(&g_hrtimer_spinlock, flags);
 
   return ret;
 }

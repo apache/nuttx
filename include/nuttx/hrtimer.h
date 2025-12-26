@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 #include <nuttx/clock.h>
 #include <nuttx/compiler.h>
-#include <nuttx/spinlock.h>
+#include <nuttx/seqlock.h>
 
 #include <stdint.h>
 #include <sys/tree.h>
