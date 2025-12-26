@@ -529,14 +529,11 @@ static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   DEBUGASSERT(upper != NULL);
   lower = upper->lower;
   DEBUGASSERT(lower != NULL);
+  ret = OK;
 
   /* Get exclusive access to the device structures */
 
-  ret = nxmutex_lock(&upper->lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  nxmutex_lock(&upper->lock);
 
   /* Handle built-in ioctl commands */
 

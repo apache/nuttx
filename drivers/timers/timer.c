@@ -150,11 +150,7 @@ static int timer_open(FAR struct file *filep)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxmutex_lock(&upper->lock);
-  if (ret < 0)
-    {
-      goto errout;
-    }
+  nxmutex_lock(&upper->lock);
 
   /* Increment the count of references to the device.  If this the first
    * time that the driver has been opened for this device, then initialize
@@ -177,8 +173,6 @@ static int timer_open(FAR struct file *filep)
 
 errout_with_lock:
   nxmutex_unlock(&upper->lock);
-
-errout:
   return ret;
 }
 
@@ -194,27 +188,13 @@ static int timer_close(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct timer_upperhalf_s *upper = inode->i_private;
-  int ret;
 
   tmrinfo("crefs: %d\n", upper->crefs);
 
   /* Get exclusive access to the device structures */
 
-  ret = nxmutex_lock(&upper->lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Decrement the references to the driver.  If the reference count will
-   * decrement to 0, then uninitialize the driver.
-   */
-
-  if (upper->crefs > 0)
-    {
-      upper->crefs--;
-    }
-
+  nxmutex_lock(&upper->lock);
+  upper->crefs--;
   nxmutex_unlock(&upper->lock);
   return OK;
 }
@@ -273,11 +253,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the device structures */
 
-  ret = nxmutex_lock(&upper->lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  nxmutex_lock(&upper->lock);
 
   /* Handle built-in ioctl commands */
 
@@ -419,10 +395,7 @@ static int timer_poll(FAR struct file *filep,
   irqstate_t flags;
   int ret = OK;
 
-  if (upper == NULL || fds == NULL)
-    {
-      return -EINVAL;
-    }
+  DEBUGASSERT(upper != NULL && fds != NULL);
 
   flags = enter_critical_section();
 
