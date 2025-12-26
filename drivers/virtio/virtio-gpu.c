@@ -54,6 +54,16 @@
 #define VIRTIO_GPU_MAP_ERR(e)   ((e) == VIRTIO_GPU_RESP_ERR_OUT_OF_MEMORY ? \
                                 -ENOMEM : -EINVAL)
 
+/* We use the last bit of address to indicate whether a cmd is blocking */
+
+#define VIRTIO_GPU_CMD_BLOCKING ((uintptr_t)0x01)
+#define VIRTIO_GPU_CMD_SET_BLOCKING(p) \
+  ((FAR void *)((uintptr_t)(p) | VIRTIO_GPU_CMD_BLOCKING))
+#define VIRTIO_GPU_CMD_IS_BLOCKING(p) \
+  ((uintptr_t)(p) & VIRTIO_GPU_CMD_BLOCKING)
+#define VIRTIO_GPU_CMD_GET_POINTER(p) \
+  ((FAR void *)((uintptr_t)(p) & ~VIRTIO_GPU_CMD_BLOCKING))
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -213,7 +223,7 @@ static int virtio_gpu_send_cmd(FAR struct virtqueue *vq,
       nxsem_init(&sem, 0, 0);
       flags = spin_lock_irqsave(&priv->lock);
       ret = virtqueue_add_buffer(vq, buf_list, readable, writable,
-                                 (FAR void *)((uintptr_t)&sem | 0x01));
+                                 VIRTIO_GPU_CMD_SET_BLOCKING(&sem));
       if (ret >= 0)
         {
           virtqueue_kick(vq);
@@ -259,9 +269,9 @@ static void virtio_gpu_done(FAR struct virtqueue *vq)
   while ((cookie =
           virtqueue_get_buffer_lock(vq, NULL, NULL, &priv->lock)) != NULL)
     {
-      if ((uintptr_t)cookie & 0x01)
+      if (VIRTIO_GPU_CMD_IS_BLOCKING(cookie))
         {
-          nxsem_post((FAR sem_t *)((uintptr_t)cookie ^ 0x01));
+          nxsem_post(VIRTIO_GPU_CMD_GET_POINTER(cookie));
         }
       else
         {
