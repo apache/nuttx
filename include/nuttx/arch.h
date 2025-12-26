@@ -2462,6 +2462,25 @@ void up_ndelay(unsigned long nanoseconds);
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxsched_hrtimer_start
+ *
+ * Description:
+ *   (Re)start the scheduler high-resolution timer with a new expiration
+ *   based on the specified tick interval.
+ *
+ * Input Parameters:
+ *   ticks - Number of scheduler ticks until expiration.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_HRTIMER
+int nxsched_hrtimer_start(clock_t ticks);
+#endif
+
+/****************************************************************************
  * Name: nxsched_process_timer
  *
  * Description:
@@ -2473,10 +2492,7 @@ void up_ndelay(unsigned long nanoseconds);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SCHED_TICKLESS
 void nxsched_process_timer(void);
-#endif
-
 /****************************************************************************
  * Name:  nxsched_timer_expiration
  *

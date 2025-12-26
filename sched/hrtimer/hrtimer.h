@@ -120,7 +120,7 @@ static inline_function
 int hrtimer_starttimer(uint64_t ns)
 {
   struct timespec ts;
-  int ret;
+  int ret = OK;
 
   /* Convert nanoseconds to timespec */
 
