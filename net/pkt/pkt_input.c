@@ -36,6 +36,7 @@
 
 #include "devif/devif.h"
 #include "pkt/pkt.h"
+#include "utils/utils.h"
 #include "socket/socket.h"
 
 /****************************************************************************
@@ -102,7 +103,11 @@ static uint16_t pkt_datahandler(FAR struct net_driver_s *dev,
    * without waiting).
    */
 
-  if ((ret = iob_tryadd_queue(iob, &conn->readahead)) < 0)
+  conn_lock(&conn->sconn);
+  ret = iob_tryadd_queue(iob, &conn->readahead);
+  conn_unlock(&conn->sconn);
+
+  if (ret < 0)
     {
       nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
       goto errout;
@@ -151,6 +156,7 @@ static int pkt_in(FAR struct net_driver_s *dev)
   FAR struct pkt_conn_s *conn;
   int ret = OK;
 
+  pkt_conn_list_lock();
   conn = pkt_active(dev);
   if (conn)
     {
@@ -161,6 +167,7 @@ static int pkt_in(FAR struct net_driver_s *dev)
           /* Do not read back the packet sent by oneself */
 
           conn->pendiob = NULL;
+          pkt_conn_list_unlock();
           return OK;
         }
 
@@ -207,6 +214,7 @@ static int pkt_in(FAR struct net_driver_s *dev)
       ninfo("No PKT listener\n");
     }
 
+  pkt_conn_list_unlock();
   return ret;
 }
 
@@ -239,6 +247,8 @@ int pkt_input(FAR struct net_driver_s *dev)
   FAR uint8_t *buf;
   int ret;
 
+  netdev_lock(dev);
+
   if (dev->d_iob != NULL)
     {
       buf = dev->d_buf;
@@ -250,10 +260,13 @@ int pkt_input(FAR struct net_driver_s *dev)
 
       dev->d_buf = buf;
 
+      netdev_unlock(dev);
       return ret;
     }
 
-  return netdev_input(dev, pkt_in, false);
+  ret = netdev_input(dev, pkt_in, false);
+  netdev_unlock(dev);
+  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_PKT */

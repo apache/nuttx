@@ -465,3 +465,43 @@ FAR struct iob_s *net_ioballoc(bool throttled)
   return net_iobtimedalloc(throttled, UINT_MAX);
 }
 #endif
+
+/****************************************************************************
+ * Name: conn_lock, conn_unlock, conn_dev_lock, conn_dev_unlock
+ *
+ * Description:
+ *   Lock and unlock the connection and device.
+ *
+ ****************************************************************************/
+
+void conn_lock(FAR struct socket_conn_s *sconn)
+{
+  nxrmutex_lock(&sconn->s_lock);
+}
+
+void conn_unlock(FAR struct socket_conn_s *sconn)
+{
+  nxrmutex_unlock(&sconn->s_lock);
+}
+
+void conn_dev_lock(FAR struct socket_conn_s *sconn,
+                   FAR struct net_driver_s *dev)
+{
+  if (dev != NULL)
+    {
+      netdev_lock(dev);
+    }
+
+  nxrmutex_lock(&sconn->s_lock);
+}
+
+void conn_dev_unlock(FAR struct socket_conn_s *sconn,
+                     FAR struct net_driver_s *dev)
+{
+  nxrmutex_unlock(&sconn->s_lock);
+
+  if (dev != NULL)
+    {
+      netdev_unlock(dev);
+    }
+}

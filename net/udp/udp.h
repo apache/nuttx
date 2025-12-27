@@ -162,6 +162,7 @@ struct udp_conn_s
 #ifdef CONFIG_NET_TIMESTAMP
   int timestamp; /* Nonzero when SO_TIMESTAMP is enabled */
 #endif
+  FAR sem_t *txdrain_sem;
 };
 
 /* This structure supports UDP write buffering.  It is simply a container
@@ -251,6 +252,32 @@ FAR struct udp_conn_s *udp_active(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 FAR struct udp_conn_s *udp_nextconn(FAR struct udp_conn_s *conn);
+
+/****************************************************************************
+ * Name: udp_conn_list_lock
+ *
+ * Description:
+ *   Lock the UDP connection list
+ *
+ * Assumptions:
+ *   This function must be called by driver thread.
+ *
+ ****************************************************************************/
+
+void udp_conn_list_lock(void);
+
+/****************************************************************************
+ * Name: udp_conn_list_unlock
+ *
+ * Description:
+ *   Unlock the UDP connection list
+ *
+ * Assumptions:
+ *   This function must be called by driver thread.
+ *
+ ****************************************************************************/
+
+void udp_conn_list_unlock(void);
 
 /****************************************************************************
  * Name: udp_select_port
@@ -838,38 +865,6 @@ int udp_readahead_notifier_setup(worker_t worker,
 #endif
 
 /****************************************************************************
- * Name: udp_writebuffer_notifier_setup
- *
- * Description:
- *   Set up to perform a callback to the worker function when an UDP write
- *   buffer is emptied.  The worker function will execute on the high
- *   priority worker thread.
- *
- * Input Parameters:
- *   worker - The worker function to execute on the low priority work
- *            queue when data is available in the UDP read-ahead buffer.
- *   conn   - The UDP connection where read-ahead data is needed.
- *   arg    - A user-defined argument that will be available to the worker
- *            function when it runs.
- *
- * Returned Value:
- *   > 0   - The notification is in place.  The returned value is a key that
- *           may be used later in a call to udp_notifier_teardown().
- *   == 0  - There is already buffered read-ahead data.  No notification
- *           will be provided.
- *   < 0   - An unexpected error occurred and no notification will occur.
- *           The returned value is a negated errno value that indicates the
- *           nature of the failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_UDP_NOTIFIER
-int udp_writebuffer_notifier_setup(worker_t worker,
-                                   FAR struct udp_conn_s *conn,
-                                   FAR void *arg);
-#endif
-
-/****************************************************************************
  * Name: udp_notifier_teardown
  *
  * Description:
@@ -913,31 +908,6 @@ void udp_notifier_teardown(FAR void *key);
 
 #ifdef CONFIG_NET_UDP_NOTIFIER
 void udp_readahead_signal(FAR struct udp_conn_s *conn);
-#endif
-
-/****************************************************************************
- * Name: udp_writebuffer_signal
- *
- * Description:
- *   All buffer Tx data has been sent.  Signal all threads waiting for the
- *   write buffers to become empty.
- *
- *   When write buffer becomes empty, *all* of the workers waiting
- *   for that event data will be executed.  If there are multiple workers
- *   waiting for read-ahead data then only the first to execute will get the
- *   data.  Others will need to call udp_writebuffer_notifier_setup() once
- *   again.
- *
- * Input Parameters:
- *   conn  - The UDP connection where read-ahead data was just buffered.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_NET_UDP_NOTIFIER)
-void udp_writebuffer_signal(FAR struct udp_conn_s *conn);
 #endif
 
 /****************************************************************************

@@ -335,6 +335,8 @@ struct net_driver_s
   char d_ifname[IFNAMSIZ];
 #endif
 
+  rmutex_t d_lock;
+
   /* Drivers interface flags.  See IFF_* definitions in include/net/if.h */
 
   uint32_t d_flags;

@@ -138,6 +138,7 @@ void can_free(FAR struct can_conn_s *conn)
   /* Remove the connection from the active list */
 
   dq_rem(&conn->sconn.node, &g_active_can_connections);
+  nxrmutex_destroy(&conn->sconn.s_lock);
 
 #ifdef CONFIG_NET_CAN_WRITE_BUFFERS
   /* Free the write queue */
@@ -168,6 +169,59 @@ void can_free(FAR struct can_conn_s *conn)
 }
 
 /****************************************************************************
+ * Name: can_recv_filter
+ *
+ * Description:
+ *   filter incoming packet
+ *
+ * Input Parameters:
+ *   conn - A pointer to the CAN connection structure
+ *   id   - The CAN identifier
+ *
+ * Returned Value: 0 - Filter not passed, 1 - Filter passed
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+static int can_recv_filter(FAR struct can_conn_s *conn, canid_t id)
+{
+  uint32_t i;
+
+#ifdef CONFIG_NET_CAN_ERRORS
+  /* error message frame */
+
+  if ((id & CAN_ERR_FLAG) != 0)
+    {
+      return id & conn->err_mask ? 1 : 0;
+    }
+#endif
+
+  for (i = 0; i < conn->filter_count; i++)
+    {
+      if (conn->filters[i].can_id & CAN_INV_FILTER)
+        {
+          if ((id & conn->filters[i].can_mask) !=
+                ((conn->filters[i].can_id & ~CAN_INV_FILTER) &
+                 conn->filters[i].can_mask))
+            {
+              return 1;
+            }
+        }
+      else
+        {
+          if ((id & conn->filters[i].can_mask) ==
+                (conn->filters[i].can_id & conn->filters[i].can_mask))
+            {
+              return 1;
+            }
+        }
+    }
+
+  return 0;
+}
+#endif
+
+/****************************************************************************
  * Name: can_nextconn()
  *
  * Description:
@@ -191,6 +245,29 @@ FAR struct can_conn_s *can_nextconn(FAR struct can_conn_s *conn)
 }
 
 /****************************************************************************
+ * Name: can_conn_list_lock
+ *       can_conn_list_unlock
+ *
+ * Description:
+ *   Lock and unlock the CAN connection list. This is used to protect
+ *   the list of active connections.
+ *
+ * Assumptions:
+ *   This function is called from driver.
+ *
+ ****************************************************************************/
+
+void can_conn_list_lock(void)
+{
+  NET_BUFPOOL_LOCK(g_can_connections);
+}
+
+void can_conn_list_unlock(void)
+{
+  NET_BUFPOOL_UNLOCK(g_can_connections);
+}
+
+/****************************************************************************
  * Name: can_active()
  *
  * Description:
@@ -209,15 +286,28 @@ FAR struct can_conn_s *can_nextconn(FAR struct can_conn_s *conn)
 FAR struct can_conn_s *can_active(FAR struct net_driver_s *dev,
                                   FAR struct can_conn_s *conn)
 {
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+  canid_t can_id;
+  memcpy(&can_id, NETLLBUF, sizeof(canid_t));
+#endif
+
+  can_conn_list_lock();
   while ((conn = can_nextconn(conn)) != NULL)
     {
       if ((conn->dev == NULL && _SS_ISBOUND(conn->sconn.s_flags)) ||
           conn->dev == dev)
         {
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+          if (can_recv_filter(conn, can_id) == 0)
+            {
+              continue;
+            }
+#endif
           break;
         }
     }
 
+  can_conn_list_unlock();
   return conn;
 }
 

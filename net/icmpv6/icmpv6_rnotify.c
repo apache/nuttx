@@ -98,7 +98,7 @@ void icmpv6_setaddresses(FAR struct net_driver_s *dev,
    *      using only the MAC address which is not being changed here.
    */
 
-  net_lock();
+  netdev_lock(dev);
 
   /* Create an address mask from the prefix */
 
@@ -152,7 +152,7 @@ void icmpv6_setaddresses(FAR struct net_driver_s *dev,
         NTOHS(dev->d_ipv6draddr[4]), NTOHS(dev->d_ipv6draddr[5]),
         NTOHS(dev->d_ipv6draddr[6]), NTOHS(dev->d_ipv6draddr[7]));
 
-  net_unlock();
+  netdev_unlock(dev);
 }
 
 /****************************************************************************

@@ -47,6 +47,7 @@
 #include "devif/devif.h"
 #include "pkt/pkt.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
 #include <netpacket/packet.h>
 
 /****************************************************************************
@@ -500,6 +501,14 @@ ssize_t pkt_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       ret = -ENOSYS;
     }
 
+  /* Get the device driver that will service this transfer */
+
+  dev  = pkt_find_device(conn);
+  if (dev == NULL)
+    {
+      return -ENODEV;
+    }
+
   /* Perform the packet recvfrom() operation */
 
   /* Initialize the state structure.  This is done with the network
@@ -508,7 +517,7 @@ ssize_t pkt_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   pkt_recvfrom_initialize(conn, msg, &state, psock->s_type);
 
-  net_lock();
+  conn_dev_lock(&conn->sconn, dev);
 
   /* Check if there is buffered read-ahead data for this socket.  We may have
    * already received the response to previous command.
@@ -528,15 +537,6 @@ ssize_t pkt_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
     }
   else
     {
-      /* Get the device driver that will service this transfer */
-
-      dev  = pkt_find_device(conn);
-      if (dev == NULL)
-        {
-          ret = -ENODEV;
-          goto errout_with_state;
-        }
-
       /* TODO pkt_recvfrom_initialize() expects from to be of type
        * sockaddr_in, but in our case is sockaddr_ll
        */
@@ -565,7 +565,9 @@ ssize_t pkt_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
            * the task restarts.
            */
 
+          conn_dev_unlock(&conn->sconn, dev);
           ret = net_sem_wait(&state.pr_sem);
+          conn_dev_lock(&conn->sconn, dev);
 
           /* Make sure that no further events are processed */
 
@@ -578,9 +580,8 @@ ssize_t pkt_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
         }
     }
 
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, dev);
 
-errout_with_state:
   pkt_recvfrom_uninitialize(&state);
 
   return ret;

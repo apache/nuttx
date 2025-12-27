@@ -236,6 +236,7 @@ static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
    * action.
    */
 
+  pkt_conn_list_lock();
   while (!bstop && (pkt_conn = pkt_nextconn(pkt_conn)))
     {
       /* Skip packet connections that are bound to other polling devices */
@@ -259,6 +260,7 @@ static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
         }
     }
 
+  pkt_conn_list_unlock();
   return bstop;
 }
 #endif /* CONFIG_NET_PKT */
@@ -286,6 +288,7 @@ static int devif_poll_can_connections(FAR struct net_driver_s *dev,
    * perform the poll action
    */
 
+  can_conn_list_lock();
   while (!bstop && (can_conn = can_nextconn(can_conn)))
     {
       /* Skip connections that are bound to other polling devices */
@@ -305,6 +308,7 @@ static int devif_poll_can_connections(FAR struct net_driver_s *dev,
         }
     }
 
+  can_conn_list_unlock();
   return bstop;
 }
 #endif /* CONFIG_NET_PKT */
@@ -410,6 +414,7 @@ static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
    * action.
    */
 
+  icmp_conn_list_lock();
   while (!bstop && (conn = icmp_nextconn(conn)) != NULL)
     {
       /* Skip ICMP connections that are bound to other polling devices */
@@ -430,6 +435,7 @@ static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
         }
     }
 
+  icmp_conn_list_unlock();
   return bstop;
 }
 #endif /* CONFIG_NET_ICMP && CONFIG_NET_ICMP_SOCKET */
@@ -592,6 +598,7 @@ static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
    * action.
    */
 
+  udp_conn_list_lock();
   while (!bstop && (conn = udp_nextconn(conn)))
     {
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
@@ -614,6 +621,7 @@ static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
         }
     }
 
+  udp_conn_list_unlock();
   return bstop;
 }
 #endif /* NET_UDP_HAVE_STACK */
@@ -1037,9 +1045,12 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
   FAR uint8_t *buf;
   int bstop;
 
+  netdev_lock(dev);
   if (dev->d_buf == NULL)
     {
-      return devif_iob_poll(dev, callback);
+      bstop = devif_iob_poll(dev, callback);
+      netdev_unlock(dev);
+      return bstop;
     }
 
   buf = dev->d_buf;
@@ -1094,6 +1105,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
   /* Restore the flat buffer */
 
   dev->d_buf = buf;
+  netdev_unlock(dev);
 
   return bstop;
 }

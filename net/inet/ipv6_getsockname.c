@@ -39,6 +39,7 @@
 #include "netdev/netdev.h"
 #include "udp/udp.h"
 #include "tcp/tcp.h"
+#include "utils/utils.h"
 #include "inet/inet.h"
 
 #ifdef CONFIG_NET_IPv6
@@ -130,7 +131,7 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
       return OK;
     }
 
-  net_lock();
+  conn_lock(psock->s_conn);
 
   /* Find the device matching the IPv6 address in the connection structure.
    * NOTE:  listening sockets have no ripaddr.  Work around is to use the
@@ -145,7 +146,7 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
   dev = netdev_findby_ripv6addr(*lipaddr, *ripaddr);
   if (!dev)
     {
-      net_unlock();
+      conn_unlock(psock->s_conn);
       return -EINVAL;
     }
 
@@ -156,7 +157,7 @@ int ipv6_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
                     netdev_ipv6_srcaddr(dev, *lipaddr));
   *addrlen = sizeof(struct sockaddr_in6);
 
-  net_unlock();
+  conn_unlock(psock->s_conn);
 
   /* Return success */
 

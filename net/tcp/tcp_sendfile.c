@@ -55,6 +55,7 @@
 #include "icmpv6/icmpv6.h"
 #include "neighbor/neighbor.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
 #include "tcp/tcp.h"
 
 #if defined(CONFIG_NET_SENDFILE) && defined(CONFIG_NET_TCP) && \
@@ -475,7 +476,7 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
    * ready.
    */
 
-  net_lock();
+  conn_dev_lock(&conn->sconn, conn->dev);
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   conn->sendfile = true;
 #endif
@@ -514,6 +515,7 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
                             TCP_DISCONN_EVENTS);
   state.snd_cb->priv     = (FAR void *)&state;
   state.snd_cb->event    = sendfile_eventhandler;
+  conn_dev_unlock(&conn->sconn, conn->dev);
 
   /* Notify the device driver of the availability of TX data */
 
@@ -536,6 +538,7 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
         }
     }
 
+  conn_dev_lock(&conn->sconn, conn->dev);
   tcp_callback_free(conn, state.snd_cb);
 
 errout_locked:
@@ -543,7 +546,7 @@ errout_locked:
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   conn->sendfile = false;
 #endif
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, conn->dev);
 
   /* Return the current file position */
 

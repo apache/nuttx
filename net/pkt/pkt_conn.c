@@ -127,6 +127,7 @@ void pkt_free(FAR struct pkt_conn_s *conn)
   /* Remove the connection from the active list */
 
   dq_rem(&conn->sconn.node, &g_active_pkt_connections);
+  nxrmutex_destroy(&conn->sconn.s_lock);
 
 #ifdef CONFIG_NET_PKT_WRITE_BUFFERS
   /* Free the write queue */
@@ -277,6 +278,38 @@ int pkt_sendmsg_is_valid(FAR struct socket *psock,
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: pkt_conn_list_lock()
+ *
+ * Description:
+ *   Lock the packet connection list
+ *
+ * Assumptions:
+ *   This function must be called by driver thread.
+ *
+ ****************************************************************************/
+
+void pkt_conn_list_lock(void)
+{
+  NET_BUFPOOL_LOCK(g_pkt_connections);
+}
+
+/****************************************************************************
+ * Name: pkt_conn_list_unlock()
+ *
+ * Description:
+ *   Unlock the packet connection list
+ *
+ * Assumptions:
+ *   This function must be called by driver thread.
+ *
+ ****************************************************************************/
+
+void pkt_conn_list_unlock(void)
+{
+  NET_BUFPOOL_UNLOCK(g_pkt_connections);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_PKT */

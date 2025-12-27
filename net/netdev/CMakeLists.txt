@@ -34,7 +34,8 @@ set(SRCS
     netdev_carrier.c
     netdev_default.c
     netdev_verify.c
-    netdev_lladdrsize.c)
+    netdev_lladdrsize.c
+    netdev_lock.c)
 
 if(CONFIG_MM_IOB)
   list(APPEND SRCS netdev_input.c netdev_iob.c)

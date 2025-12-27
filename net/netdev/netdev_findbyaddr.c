@@ -80,7 +80,7 @@ netdev_prefixlen_findby_lipv4addr(in_addr_t lipaddr, FAR int8_t *prefixlen)
 
   /* Examine each registered network device */
 
-  net_lock();
+  netdev_list_lock();
   for (dev = g_netdevices; dev; dev = dev->flink)
     {
       /* Is the interface in the "up" state? */
@@ -141,7 +141,7 @@ netdev_prefixlen_findby_lipv4addr(in_addr_t lipaddr, FAR int8_t *prefixlen)
         }
     }
 
-  net_unlock();
+  netdev_list_unlock();
   *prefixlen = bestpref;
   return bestdev;
 }
@@ -180,7 +180,7 @@ netdev_prefixlen_findby_lipv6addr(const net_ipv6addr_t lipaddr,
   int16_t len;
 #endif
 
-  net_lock();
+  netdev_list_lock();
 
 #ifdef CONFIG_ROUTE_LONGEST_MATCH
   /* Find a hint from neighbor table in case same prefix length exists on
@@ -245,7 +245,7 @@ netdev_prefixlen_findby_lipv6addr(const net_ipv6addr_t lipaddr,
         }
     }
 
-  net_unlock();
+  netdev_list_unlock();
   *prefixlen = bestpref;
   return bestdev;
 }

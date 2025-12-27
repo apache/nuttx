@@ -118,7 +118,7 @@ int netdev_unregister(FAR struct net_driver_s *dev)
 
   if (dev)
     {
-      net_lock();
+      netdev_list_lock();
 
       /* Find the device in the list of known network devices */
 
@@ -161,7 +161,9 @@ int netdev_unregister(FAR struct net_driver_s *dev)
         }
 #endif
 
-      net_unlock();
+      netdev_list_unlock();
+
+      nxrmutex_destroy(&dev->d_lock);
 
 #if CONFIG_NETDEV_STATISTICS_LOG_PERIOD > 0
       work_cancel_sync(NETDEV_STATISTICS_WORK, &dev->d_statistics.logwork);

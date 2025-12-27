@@ -248,7 +248,7 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
    * because we don't want anything to happen until we are ready.
    */
 
-  net_lock();
+  conn_dev_lock(&conn->sconn, dev);
 
 #if CONFIG_NET_SEND_BUFSIZE > 0
   if ((iob_get_queue_size(&conn->write_q) + msg->msg_iov->iov_len) >
@@ -313,21 +313,15 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
     }
   else
     {
-      unsigned int count;
-      int blresult;
-
       /* iob_copyin might wait for buffers to be freed, but if
        * network is locked this might never happen, since network
        * driver is also locked, therefore we need to break the lock
        */
 
-      blresult = net_breaklock(&count);
+      conn_dev_unlock(&conn->sconn, dev);
       ret = iob_copyin(wb_iob, (FAR uint8_t *)msg->msg_iov->iov_base,
                        msg->msg_iov->iov_len, 0, false);
-      if (blresult >= 0)
-        {
-          net_restorelock(count);
-        }
+      conn_dev_lock(&conn->sconn, dev);
     }
 
   if (ret < 0)
@@ -377,7 +371,8 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
           /* A buffer allocation error occurred */
 
           nerr("ERROR: Failed to allocate callback\n");
-          return -ENOMEM;
+          ret = -ENOMEM;
+          goto errout_with_wq;
         }
 
       /* Set up the callback in the connection */
@@ -386,20 +381,31 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       conn->sndcb->priv = (FAR void *)conn;
       conn->sndcb->event = psock_send_eventhandler;
 
+      /* unlock */
+
+      conn_dev_unlock(&conn->sconn, dev);
+
       /* Notify the device driver that new TX data is available. */
 
       netdev_txnotify_dev(dev);
     }
+    else
+    {
+      /* unlock */
 
-  net_unlock();
+      conn_dev_unlock(&conn->sconn, dev);
+    }
 
   return msg->msg_iov->iov_len;
 
 errout_with_wrb:
   iob_free_chain(wb_iob);
 
+errout_with_wq:
+  iob_free_queue(&conn->write_q);
+
 errout_with_lock:
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, dev);
   return ret;
 }
 

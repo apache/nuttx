@@ -47,6 +47,7 @@
 #include "devif/devif.h"
 #include "can/can.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
 #include <netpacket/packet.h>
 
 #ifdef CONFIG_NET_TIMESTAMP
@@ -74,10 +75,6 @@ struct can_recvfrom_s
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-#ifdef CONFIG_NET_CANPROTO_OPTIONS
-static int can_recv_filter(FAR struct can_conn_s *conn, canid_t id);
-#endif
 
 /****************************************************************************
  * Name: can_add_recvlen
@@ -248,21 +245,6 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
     {
       DEBUGASSERT(iob->io_pktlen > 0);
 
-#ifdef CONFIG_NET_CANPROTO_OPTIONS
-      /* Check receive filters */
-
-      canid_t can_id;
-      iob_copyout((uint8_t *)&can_id, iob, sizeof(canid_t), 0);
-
-      if (can_recv_filter(conn, can_id) == 0)
-        {
-          /* Free the I/O buffer chain */
-
-          iob_free_chain(iob);
-          return 0;
-        }
-#endif
-
 #ifdef CONFIG_NET_TIMESTAMP
       if (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP) &&
           pstate->pr_msglen == sizeof(struct timeval))
@@ -306,45 +288,6 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
   return 0;
 }
 
-#ifdef CONFIG_NET_CANPROTO_OPTIONS
-static int can_recv_filter(FAR struct can_conn_s *conn, canid_t id)
-{
-  uint32_t i;
-
-#ifdef CONFIG_NET_CAN_ERRORS
-  /* error message frame */
-
-  if ((id & CAN_ERR_FLAG) != 0)
-    {
-      return id & conn->err_mask ? 1 : 0;
-    }
-#endif
-
-  for (i = 0; i < conn->filter_count; i++)
-    {
-      if (conn->filters[i].can_id & CAN_INV_FILTER)
-        {
-          if ((id & conn->filters[i].can_mask) !=
-                ((conn->filters[i].can_id & ~CAN_INV_FILTER) &
-                 conn->filters[i].can_mask))
-            {
-              return 1;
-            }
-        }
-      else
-        {
-          if ((id & conn->filters[i].can_mask) ==
-                (conn->filters[i].can_id & conn->filters[i].can_mask))
-            {
-              return 1;
-            }
-        }
-    }
-
-  return 0;
-}
-#endif
-
 static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
                                           FAR void *pvpriv, uint16_t flags)
 {
@@ -354,26 +297,13 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
 
   if (pstate)
     {
-#if defined(CONFIG_NET_CANPROTO_OPTIONS) || defined(CONFIG_NET_TIMESTAMP)
+#if (defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)) \
+     || defined(CONFIG_NET_TIMESTAMP)
       struct can_conn_s *conn = pstate->pr_conn;
 #endif
 
       if ((flags & CAN_NEWDATA) != 0)
         {
-          /* If a new packet is available, check receive filters
-           * when is valid then complete the read action.
-           */
-#ifdef CONFIG_NET_CANPROTO_OPTIONS
-          canid_t can_id;
-          memcpy(&can_id, dev->d_appdata, sizeof(canid_t));
-
-          if (can_recv_filter(conn, can_id) == 0)
-            {
-              flags &= ~CAN_NEWDATA;
-              return flags;
-            }
-#endif
-
           /* do not pass frames with DLC > 8 to a legacy socket */
 #if defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)
           if (!_SO_GETOPT(conn->sconn.s_options, CAN_RAW_FD_FRAMES))
@@ -490,7 +420,7 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                     int flags)
 {
   FAR struct can_conn_s *conn;
-  FAR struct net_driver_s *dev;
+  FAR struct net_driver_s *dev = NULL;
   struct can_recvfrom_s state;
   int ret;
 
@@ -507,7 +437,7 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       return -ENOTSUP;
     }
 
-  net_lock();
+  conn_lock(&conn->sconn);
 
   /* Initialize the state structure. */
 
@@ -575,6 +505,9 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       goto errout_with_state;
     }
 
+  conn_unlock(&conn->sconn);
+  conn_dev_lock(&conn->sconn, dev);
+
   /* Set up the callback in the connection */
 
   state.pr_cb = can_callback_alloc(dev, conn);
@@ -590,7 +523,9 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
        * the task sleeps and automatically re-locked when the task restarts.
        */
 
+      conn_dev_unlock(&conn->sconn, dev);
       ret = net_sem_wait(&state.pr_sem);
+      conn_dev_lock(&conn->sconn, dev);
 
       /* Make sure that no further events are processed */
 
@@ -603,7 +538,7 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
     }
 
 errout_with_state:
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, dev);
   nxsem_destroy(&state.pr_sem);
   return ret;
 }

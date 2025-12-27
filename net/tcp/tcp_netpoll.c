@@ -39,6 +39,7 @@
 #include "netdev/netdev.h"
 #include "socket/socket.h"
 #include "inet/inet.h"
+#include "utils/utils.h"
 #include "tcp/tcp.h"
 
 /****************************************************************************
@@ -207,17 +208,16 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Some of the following must be atomic */
 
-  net_lock();
-
   conn = psock->s_conn;
 
   /* Sanity check */
 
   if (!conn || !fds)
     {
-      ret = -EINVAL;
-      goto errout_with_lock;
+      return -EINVAL;
     }
+
+  conn_dev_lock(&conn->sconn, conn->dev);
 
   /* Non-blocking connection ? */
 
@@ -388,7 +388,7 @@ notify:
   poll_notify(&fds, 1, eventset);
 
 errout_with_lock:
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, conn->dev);
   return ret;
 }
 
@@ -415,17 +415,16 @@ int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Some of the following must be atomic */
 
-  net_lock();
-
   conn = psock->s_conn;
 
   /* Sanity check */
 
   if (!conn || !fds->priv)
     {
-      net_unlock();
       return -EINVAL;
     }
+
+  conn_dev_lock(&conn->sconn, conn->dev);
 
   /* Recover the socket descriptor poll state info from the poll structure */
 
@@ -446,7 +445,7 @@ int tcp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
       info->conn = NULL;
     }
 
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, conn->dev);
 
   return OK;
 }

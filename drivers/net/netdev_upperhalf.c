@@ -382,7 +382,7 @@ static void netdev_upper_txavail_work(FAR struct netdev_upperhalf_s *upper)
 
   /* Ignore the notification if the interface is not yet up */
 
-  net_lock();
+  netdev_lock(dev);
   if (IFF_IS_UP(dev->d_flags) && !upper->txing)
     {
       DEBUGASSERT(dev->d_buf == NULL); /* Make sure: IOB only. */
@@ -392,7 +392,7 @@ static void netdev_upper_txavail_work(FAR struct netdev_upperhalf_s *upper)
       upper->txing = false;
     }
 
-  net_unlock();
+  netdev_unlock(dev);
 }
 
 /****************************************************************************
@@ -535,6 +535,7 @@ static void eth_input(FAR struct net_driver_s *dev)
            * ethertype.
            */
 
+          netdev_lock(&vlan->netdev);
           memmove((FAR uint8_t *)eth_hdr + 4, eth_hdr,
                   offsetof(struct eth_hdr_s, type));
           netdev_iob_release(&vlan->netdev);
@@ -548,6 +549,7 @@ static void eth_input(FAR struct net_driver_s *dev)
           pkt_input(&vlan->netdev);
 #endif
           eth_input(&vlan->netdev);
+          netdev_unlock(&vlan->netdev);
         }
       else
         {
@@ -708,7 +710,7 @@ static void netdev_upper_rxpoll_work(FAR struct netdev_upperhalf_s *upper)
 
   /* Loop while receive() successfully retrieves valid Ethernet frames. */
 
-  net_lock();
+  netdev_lock(dev);
   while ((pkt = lower->ops->receive(lower)) != NULL)
     {
       if (!IFF_IS_UP(dev->d_flags))
@@ -763,7 +765,7 @@ static void netdev_upper_rxpoll_work(FAR struct netdev_upperhalf_s *upper)
         }
     }
 
-  net_unlock();
+  netdev_unlock(dev);
 }
 
 /****************************************************************************
@@ -1532,7 +1534,9 @@ void netdev_lower_carrier_on(FAR struct netdev_lowerhalf_s *dev)
   netdev_upper_vlan_foreach(upper, netdev_lower_carrier_on);
 #endif
 
+  netdev_lock(&dev->netdev);
   netdev_carrier_on(&dev->netdev);
+  netdev_unlock(&dev->netdev);
 }
 
 /****************************************************************************
@@ -1554,7 +1558,9 @@ void netdev_lower_carrier_off(FAR struct netdev_lowerhalf_s *dev)
   netdev_upper_vlan_foreach(upper, netdev_lower_carrier_off);
 #endif
 
+  netdev_lock(&dev->netdev);
   netdev_carrier_off(&dev->netdev);
+  netdev_unlock(&dev->netdev);
 }
 
 /****************************************************************************

@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/netdev/netdev_count.c
+ * net/netdev/netdev_lock.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,39 +26,34 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
-#include <errno.h>
-
 #include <nuttx/net/netdev.h>
-
-#include "utils/utils.h"
-#include "netdev/netdev.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: netdev_count
+ * Name: netdev_lock
  *
  * Description:
- *   Return the number of network devices
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   The number of network devices
+ *   Lock the network device.
  *
  ****************************************************************************/
 
-int netdev_count(void)
+void netdev_lock(FAR struct net_driver_s *dev)
 {
-  struct net_driver_s *dev;
-  int ndev;
+  nxrmutex_lock(&dev->d_lock);
+}
 
-  netdev_list_lock();
-  for (dev = g_netdevices, ndev = 0; dev; dev = dev->flink, ndev++);
-  netdev_list_unlock();
-  return ndev;
+/****************************************************************************
+ * Name: netdev_unlock
+ *
+ * Description:
+ *   Unlock the network device.
+ *
+ ****************************************************************************/
+
+void netdev_unlock(FAR struct net_driver_s *dev)
+{
+  nxrmutex_unlock(&dev->d_lock);
 }
