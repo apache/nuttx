@@ -134,6 +134,15 @@ config CAN_TXPRIORITY
 	---help---
 		Prioritize sending based on canid.
 
+config CAN_TXCANCEL
+	bool "Implement tx cancel ability"
+	default n
+        depends on CAN_TXPRIORITY
+	---help---
+		Enabling this feature adds support for the can cancel ability.
+                this ability can cancel the msg with the largest msgID in the
+                mailbox and return true if success.
+
 choice
 	prompt "TX Ready Work Queue"
 	default CAN_TXREADY_HIPRI

@@ -235,5 +235,33 @@ void can_revert_msg(FAR struct can_txcache_s *cd_sender,
 
 void can_send_done(FAR struct can_txcache_s *cd_sender);
 
+/****************************************************************************
+ * Name: can_txneed_cancel
+ *
+ * Description:
+ *   Compare the msgID between tx_sending and tx_pending's head when
+ *   dev_txready return false and tx_pending is not empty, preserve the node
+ *   with largest msgID in tx_sending into *callbackmsg_node. return true if
+ *   the msgID in tx_pending's head < the smallest msgID in tx_sending.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN_TXCANCEL
+bool can_txneed_cancel(FAR struct can_txcache_s *cd_sender);
+#endif
+
+/****************************************************************************
+ * Name: can_cancel_mbmsg
+ *
+ * Description:
+ *   cancel the msg with the largest msgID in the mailbox and
+ *   return true if success.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN_TXCANCEL
+bool can_cancel_mbmsg(FAR struct can_dev_s *dev);
+#endif
+
 #endif /* CONFIG_CAN */
 #endif /* __INCLUDE_NUTTX_CAN_SENDER_H */
