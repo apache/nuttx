@@ -309,6 +309,21 @@ void icmp_input(FAR struct net_driver_s *dev)
 
   if (icmp->type == ICMP_ECHO_REQUEST)
     {
+      in_addr_t src_ipaddr;
+
+      /* According to RFC1122 section 3.2.2.6， an ICMP Echo Request
+       * which has a broadcast/multicast ip address should be discarded
+       */
+
+      src_ipaddr = net_ip4addr_conv32(ipv4->srcipaddr);
+
+      if (net_ipv4addr_cmp(src_ipaddr, INADDR_BROADCAST) ||
+          IN_MULTICAST(NTOHL(src_ipaddr)))
+        {
+          ninfo("ICMP ECHO request from broadcast/multicast address\n");
+          goto typeerr;
+        }
+
       /* Change the ICMP type */
 
       icmp->type = ICMP_ECHO_REPLY;
