@@ -37,5 +37,8 @@ CMN_CSRCS += z80_usestack.c
 CHIP_ASRCS  = z80_saveusercontext.asm z80_restoreusercontext.asm
 
 CHIP_CSRCS  = z80_initialstate.c z80_io.c z80_irq.c z80_copystate.c
-CHIP_CSRCS += z80_schedulesigaction.c z80_sigdeliver.c
 CHIP_CSRCS += z80_registerdump.c
+
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+CHIP_CSRCS += z80_schedulesigaction.c z80_sigdeliver.c
+endif

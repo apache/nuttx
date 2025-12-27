@@ -55,8 +55,11 @@ CHIP_ASRCS += ez80_getsp.asm
 endif
 
 CHIP_CSRCS  = ez80_clock.c ez80_initialstate.c ez80_irq.c ez80_copystate.c
-CHIP_CSRCS += ez80_schedulesigaction.c ez80_sigdeliver.c
 CHIP_CSRCS += ez80_timerisr.c ez80_serial.c
+
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+CHIP_CSRCS += ez80_schedulesigaction.c ez80_sigdeliver.c
+endif
 
 ifeq ($(CONFIG_ARCH_STACKDUMP),y)
 CHIP_CSRCS += ez80_registerdump.c

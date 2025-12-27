@@ -644,7 +644,9 @@ void nx_start(void)
 
   /* Initialize the signal facility (if in link) */
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   nxsig_initialize();
+#endif
 
 #if !defined(CONFIG_DISABLE_MQUEUE) || !defined(CONFIG_DISABLE_MQUEUE_SYSV)
   /* Initialize the named message queue facility (if in link) */

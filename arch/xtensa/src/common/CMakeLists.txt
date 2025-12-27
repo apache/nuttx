@@ -69,13 +69,15 @@ list(
   xtensa_perf.c
   xtensa_releasestack.c
   xtensa_registerdump.c
-  xtensa_sigdeliver.c
   xtensa_swint.c
   xtensa_stackframe.c
   xtensa_saveusercontext.c
-  xtensa_schedsigaction.c
   xtensa_usestack.c
   xtensa_tcbinfo.c)
+
+if(CONFIG_ENABLE_ALL_SIGNALS)
+  list(APPEND SRCS xtensa_schedsigaction.c xtensa_sigdeliver.c)
+endif()
 
 # Configuration-dependent common Xtensa files
 
