@@ -9,6 +9,7 @@ config NET_PKT
 	bool "Socket packet socket support"
 	default n
 	select NETDEV_IFINDEX
+	select NET_READAHEAD
 	---help---
 		Enable or disable support for packet sockets.
 
