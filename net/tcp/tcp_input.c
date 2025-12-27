@@ -744,10 +744,111 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
   conn = tcp_active(dev, tcp);
   if (conn)
     {
-      /* We found an active connection.. Check for the subsequent SYN
+      uint32_t seq;
+      uint32_t rcvseq;
+
+      seq = tcp_getsequence(tcp->seqno);
+      rcvseq = tcp_getsequence(conn->rcvseq);
+
+      /* rfc793 p66:
+       * "If the state is SYN-SENT then
+       *    first check the ACK bit
+       *      If the ACK bit is set
+       *    If SEG.ACK =< ISS, or SEG.ACK > SND.NXT, send
+       *        a reset (unless the RST bit is set, if so drop
+       *        the segment and return)"
+       */
+
+      if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_SENT)
+        {
+          uint32_t ackseq;
+          if ((tcp->flags & TCP_ACK) != 0)
+            {
+              ackseq = tcp_getsequence(tcp->ackno);
+              if (ackseq != tcp_getsequence(conn->sndseq))
+                {
+                  if ((tcp->flags & TCP_RST) != 0)
+                    {
+                      goto drop;
+                    }
+
+                  goto reset;
+                }
+
+              /* rfc793 p67: Now ACK is acceptable.
+               * "If the RST bit is set
+               *    If the ACK was acceptable then signal the user "error:
+               *    connection reset", drop the segment, enter CLOSED state,
+               *    delete TCB, and return."
+               */
+
+              if ((tcp->flags & TCP_RST) != 0)
+                {
+                  /* fallback to label found rst handle */
+
+                  goto found;
+                }
+
+              /* rfc793 p68: "fifth, if neither of the SYN or RST bits is set
+               * then drop the segment and return."
+               */
+
+              if ((tcp->flags & TCP_SYN) == 0)
+                {
+                  goto drop;
+                }
+            }
+          else if ((tcp->flags & TCP_RST) != 0 ||
+                   (tcp->flags & TCP_SYN) == 0)
+            {
+              /* rfc793 p67: 1) "If a reset was sent, discard the segment
+               * and return" p68 2) "fifth, if neither of the SYN or RST
+               * bits is set then drop the segment and return."
+               */
+
+              goto drop;
+            }
+        }
+
+      /* RFC793, 1) page 37 Reset Processing: "In all states except
+       * SYN-SENT, all reset (RST) segments are validated by checking
+       * their SEQ-fields."
+       * 2) page 69 In all states except SYN-SENT: "If an incoming
+       * segment is not acceptable, an acknowledgment should be sent
+       * in reply (unless the RST bit is set, if so drop the segment
+       * and return)".
+       */
+
+      if ((conn->tcpstateflags & TCP_STATE_MASK) != TCP_SYN_SENT &&
+          ((conn->tcpstateflags & TCP_STATE_MASK) >= TCP_SYN_RCVD &&
+          (conn->tcpstateflags & TCP_STATE_MASK) <= TCP_LAST_ACK))
+        {
+          uint32_t endseq;
+
+          endseq = seq + dev->d_len - iplen - ((tcp->tcpoffset >> 4) << 2);
+          if ((tcp->flags & (TCP_SYN | TCP_FIN)) != 0)
+            {
+              endseq += 1;
+            }
+
+          if (TCP_SEQ_LT(endseq, rcvseq) || TCP_SEQ_GT(seq, conn->rcv_adv))
+            {
+              if ((tcp->flags & TCP_RST) == 0)
+                {
+                  tcp_send(dev, conn, TCP_ACK, tcpiplen);
+                  return;
+                }
+              else
+                {
+                  goto drop;
+                }
+            }
+        }
+
+      /* RFC793,p71 In all states except SYN-SENT: "If the SYN is in the
+       * window it is an error, send a reset", except the subsequent SYN
        * arriving in TCP_SYN_RCVD state after the SYNACK packet was
-       * lost.  To avoid other issues,  reset any active connection
-       * where a SYN arrives in a state != TCP_SYN_RCVD.
+       * lost.
        */
 
       if ((conn->tcpstateflags & TCP_STATE_MASK) != TCP_SYN_RCVD &&
@@ -756,10 +857,32 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
           nwarn("WARNING: SYN in TCP_SYN_RCVD\n");
           goto reset;
         }
-      else
+      else if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_RCVD &&
+               (tcp->flags & TCP_SYN) != 0 && (tcp->flags & TCP_RST) == 0)
         {
-          goto found;
+          if (seq != rcvseq - 1)
+            {
+#ifdef CONFIG_NET_STATISTICS
+              g_netstats.tcp.synrst++;
+#endif
+              tcp_reset(dev, conn);
+              conn->tcpstateflags = TCP_CLOSED;
+              nwarn("WARNING: RESET in TCP_SYN_RCVD\n");
+
+              /* We must free this TCP connection structure; this connection
+               * will never be established.  There should only be one
+               * reference on this connection when we allocated for the
+               * connection.
+               */
+
+              DEBUGASSERT(conn->crefs == 1);
+              conn->crefs = 0;
+              tcp_free(conn);
+              goto drop;
+            }
         }
+
+      goto found;
     }
 
   /* If we didn't find an active connection that expected the packet,
@@ -1298,11 +1421,7 @@ found:
 
         if ((tcp->flags & TCP_CTL) == TCP_SYN)
           {
-#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS)
             tcp_setsequence(conn->sndseq, conn->rexmit_seq);
-#else
-            /* REVISIT for the buffered mode */
-#endif
             tcp_synack(dev, conn, TCP_ACK | TCP_SYN);
             return;
           }
