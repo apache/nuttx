@@ -38,7 +38,7 @@
 
 /* Spinlock protecting access to the hrtimer RB-tree and timer state */
 
-extern spinlock_t g_hrtimer_spinlock;
+extern seqcount_t g_hrtimer_spinlock;
 
 /* Red-Black tree containing all active high-resolution timers */
 

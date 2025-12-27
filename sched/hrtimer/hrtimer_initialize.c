@@ -39,7 +39,7 @@
  * timer tree or hrtimer state is modified.
  */
 
-spinlock_t g_hrtimer_spinlock = SP_UNLOCKED;
+seqcount_t g_hrtimer_spinlock = RSPINLOCK_INITIALIZER;
 
 /* Red-black tree containing all active high-resolution timers.
  *
