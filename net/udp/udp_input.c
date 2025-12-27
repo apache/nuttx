@@ -215,6 +215,7 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
   FAR struct iob_s *iob;
 #endif
   unsigned int udpiplen;
+  unsigned int udpdatalen = dev->d_len - iplen;
 #ifdef CONFIG_NET_UDP_CHECKSUMS
   uint16_t chksum;
 #endif
@@ -231,6 +232,16 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
    */
 
   udp = IPBUF(iplen);
+
+  /* Check the UDP packet length */
+
+  if (udpdatalen < UDP_HDRLEN || ntohs(udp->udplen) != udpdatalen)
+    {
+      nwarn("WARNING: UDP length invalid: hdr=%u actual=%u\n",
+            ntohs(udp->udplen), udpdatalen);
+      dev->d_len = 0;
+      return ret;
+    }
 
   /* Get the size of the IP header and the UDP header */
 
