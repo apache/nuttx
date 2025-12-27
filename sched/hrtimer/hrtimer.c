@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/hrtimer.h
+ * sched/hrtimer/hrtimer.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,42 +20,115 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_HRTIMER_H
-#define __INCLUDE_NUTTX_HRTIMER_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <assert.h>
 
-#include <nuttx/hrtimer_queue_type.h>
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#include "sched/sched.h"
+#include "hrtimer.h"
 
 #ifdef CONFIG_HRTIMER_LIST
-typedef struct hrtimer_list_s hrtimer_t;
-typedef struct hrtimer_list_queue_s hrtimer_queue_t;
+#  include <nuttx/hrtimer/hrtimer_type_list.h>
 #else
-typedef struct hrtimer_rb_s hrtimer_t;
-typedef struct hrtimer_rb_queue_s hrtimer_queue_t;
+#  include <nuttx/hrtimer/hrtimer_type_rb.h>
 #endif
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+#include <nuttx/hrtimer/hrtimer_queue.h>
+
+#include <debug.h>
 
 /****************************************************************************
- * Public Function Prototypes
+ * Inline Functions
  ****************************************************************************/
 
-/* Wrapped version for NuttX scheduler. */
+/* The reprogramming function can be fully inlined. */
+
+static inline_function void hrtimer_reprogram(FAR hrtimer_queue_t *queue,
+                                              uint64_t next_expired)
+{
+#ifdef CONFIG_SCHED_TICKLESS
+  struct timespec ts;
+#  ifdef CONFIG_SCHED_TICKLESS_ALARM
+  clock_nsec2time(&ts, next_expired);
+  up_alarm_start(&ts);
+#  else
+  struct timespec current;
+  up_timer_gettime(&current);
+  clock_nsec2time(&ts, next_expired);
+  clock_timespec_subtract(&ts, &current, &ts);
+  up_timer_start(&ts);
+#  endif
+#else
+  UNUSED(next_expired);
+#endif
+  UNUSED(queue);
+}
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static hrtimer_queue_t g_hrtimer_queue;
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: hrtimer_initialize
+ *
+ * Description:
+ *   Initialize the high-resolution timer queue for timing subsystem.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void hrtimer_initialize(void)
+{
+#if !defined(CONFIG_SCHED_TICKLESS)
+  swarn("WARNING: The system hrtimer is running in \
+         low-resolution (tick) mode.");
+#endif
+
+  /* We must ensure the clock_t is 64-bit. */
+
+  DEBUGASSERT(sizeof(clock_t) >= sizeof(uint64_t));
+
+  ASSERT(hrtimer_queue_init(&g_hrtimer_queue) == OK);
+}
+
+/****************************************************************************
+ * Name: hrtimer_expiry
+ *
+ * Description:
+ *   This function is called by the timer interrupt handler to handle
+ *   if a hrtimer has expired.
+ *
+ * Input Parameters:
+ *   nsec - The expiration time in nanoseconds.
+ *   noswitches - True: Disable context switches.
+ *
+ * Returned Value:
+ *   The next expiration time in nanoseconds.
+ *
+ * Assumption:
+ *   The caller should be in the interrupt context.
+ *
+ ****************************************************************************/
+
+uint64_t hrtimer_expiry(uint64_t nsec, bool noswitches)
+{
+  FAR hrtimer_queue_t *queue = &g_hrtimer_queue;
+  return noswitches ? hrtimer_queue_read(queue, &queue->next_expired) :
+                      hrtimer_queue_expiry(queue, nsec);
+}
 
 /****************************************************************************
  * Name: hrtimer_async_restart
@@ -69,6 +142,10 @@ extern "C"
  *
  * Input Parameters:
  *   timer - The hrtimer to be started.
+ *   func  - The callback function to be called when the timer expires.
+ *   arg   - The argument to be passed to the callback function.
+ *   time  - The relative or absolute expiration time in nanoseconds.
+ *   mode  - The timer mode, relative or absolute.
  *
  * Returned Value:
  *   Zero on success.
@@ -80,86 +157,11 @@ extern "C"
  *
  ****************************************************************************/
 
-int hrtimer_async_restart(FAR hrtimer_t *timer);
-
-/****************************************************************************
- * Name: hrtimer_restart/start_absolute
- *
- * Description:
- *   Start the hrtimer with absolute time in nanoseconds.
- *   These functions can only be called when the caller has the ownership of
- *   the timer.
- *
- * Input Parameters:
- *   timer - The hrtimer to be started.
- *   func  - The callback function to be called when the hrtimer expires.
- *   arg   - The argument to be passed to the callback function.
- *   expired - The absolute expiration time in nanoseconds.
- *
- * Returned Value:
- *   Zero on success.
- *   -EINVAL on if one of the parameter is invalid or the timer is in pending
- *   state.
- *
- ****************************************************************************/
-
-static inline_function
-int hrtimer_restart_absolute(hrtimer_t *timer, hrtimer_callback_t func,
-                             FAR void *arg, uint64_t expired)
+int hrtimer_async_restart(FAR hrtimer_internal_t *timer)
 {
-  DEBUGASSERT(timer && func);
-  hrtimer_fill(timer, func, arg, expired);
-  return hrtimer_async_restart(timer);
+  hrtimer_queue_start(&g_hrtimer_queue, timer);
+  return OK;
 }
-
-static inline_function
-int hrtimer_start_absolute(FAR hrtimer_t *timer, hrtimer_callback_t func,
-                           FAR void *arg, uint64_t expired)
-{
-  int ret = -EINVAL;
-
-  /* Some of the run-time check can be optimized. */
-
-  if (timer && func && !HRTIMER_ISPENDING(timer))
-    {
-      ret = hrtimer_restart_absolute(timer, func, arg, expired);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: hrtimer_restart/start
- *
- * Description:
- *   Start the hrtimer with relative time in nanoseconds.
- *   These functions can only be called when the caller has the ownership of
- *   the timer.
- *
- * Input Parameters:
- *   timer - The hrtimer to be started.
- *   func  - The callback function to be called when the hrtimer expires.
- *   arg   - The argument to be passed to the callback function.
- *   delay - The relative expiration time in nanoseconds.
- *
- * Returned Value:
- *   Zero on success.
- *   -EINVAL on if one of the parameter is invalid or the timer is in pending
- *   state.
- *
- ****************************************************************************/
-
-static inline_function uint64_t hrtimer_delay2absolute(uint64_t delay)
-{
-  uint64_t expired = delay <= HRTIMER_MAX_DELAY ? delay : HRTIMER_MAX_DELAY;
-  return expired + clock_systime_nsec();
-}
-
-#define hrtimer_restart(timer, func, arg, delay) \
-  hrtimer_restart_absolute(timer, func, arg, hrtimer_delay2absolute(delay))
-
-#define hrtimer_start(timer, func, arg, delay) \
-  hrtimer_start_absolute(timer, func, arg, hrtimer_delay2absolute(delay))
 
 /****************************************************************************
  * Name: hrtimer_cancel
@@ -184,7 +186,10 @@ static inline_function uint64_t hrtimer_delay2absolute(uint64_t delay)
  *
  ****************************************************************************/
 
-int hrtimer_cancel(FAR hrtimer_t *timer);
+int hrtimer_cancel(FAR hrtimer_internal_t *timer)
+{
+  return hrtimer_queue_async_cancel(&g_hrtimer_queue, timer);
+}
 
 /****************************************************************************
  * Name: hrtimer_cancel_sync
@@ -207,7 +212,26 @@ int hrtimer_cancel(FAR hrtimer_t *timer);
  *
  ****************************************************************************/
 
-int hrtimer_cancel_sync(FAR hrtimer_t *timer);
+int hrtimer_cancel_sync(FAR hrtimer_internal_t *timer)
+{
+  int ret = hrtimer_cancel(timer);
+
+  if (ret == 0)
+    {
+      /* Nothing to wait, reclaim the ownership directly. */
+
+      timer->func = NULL;
+    }
+  else if (ret > 0)
+    {
+      /* Wait the timer to finish and reclaim the ownership. */
+
+      hrtimer_queue_wait(&g_hrtimer_queue, timer);
+      ret = OK;
+    }
+
+  return ret;
+}
 
 /****************************************************************************
  * Name: hrtimer_gettime
@@ -226,11 +250,8 @@ int hrtimer_cancel_sync(FAR hrtimer_t *timer);
  *
  ****************************************************************************/
 
-uint64_t hrtimer_gettime(FAR hrtimer_t *timer);
-
-#undef EXTERN
-#ifdef __cplusplus
+uint64_t hrtimer_gettime(FAR hrtimer_internal_t *timer)
+{
+  return hrtimer_queue_gettime(&g_hrtimer_queue, timer,
+                               clock_systime_nsec());
 }
-#endif
-
-#endif /* __INCLUDE_NUTTX_HRTIMER_H */
