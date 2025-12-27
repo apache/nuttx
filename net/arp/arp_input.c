@@ -89,6 +89,9 @@ static int arp_in(FAR struct net_driver_s *dev)
 {
   FAR struct arp_hdr_s *arp = ARPBUF;
   in_addr_t ipaddr;
+#ifdef CONFIG_NET_ARP_GRATUITOUS
+  in_addr_t sipaddr;
+#endif /* CONFIG_NET_ARP_GRATUITOUS */
 
   if (dev->d_len < (sizeof(struct arp_hdr_s) + ETH_HDRLEN))
     {
@@ -100,6 +103,9 @@ static int arp_in(FAR struct net_driver_s *dev)
   dev->d_len = 0;
 
   ipaddr = net_ip4addr_conv32(arp->ah_dipaddr);
+#ifdef CONFIG_NET_ARP_GRATUITOUS
+  sipaddr = net_ip4addr_conv32(arp->ah_sipaddr);
+#endif /* CONFIG_NET_ARP_GRATUITOUS */
 
 #ifdef CONFIG_NET_ARP_ACD
   arp_acd_update(dev);
@@ -139,6 +145,23 @@ static int arp_in(FAR struct net_driver_s *dev)
             eth->type  = HTONS(ETHTYPE_ARP);
             dev->d_len = sizeof(struct arp_hdr_s) + ETH_HDRLEN;
           }
+#ifdef CONFIG_NET_ARP_GRATUITOUS
+        else if (net_ipv4addr_cmp(sipaddr, ipaddr) &&
+                 !net_ipv4addr_cmp(sipaddr, INADDR_ANY))
+          {
+            /* Gratuitous arp sender ip should same with target ip,
+             * and ignore IPv4 duplicate address detection packet (RFC2131)
+             */
+
+            /* Gratuitous request arp the sender ip should be a unicast ip */
+
+            if (net_ipv4addr_cmp(sipaddr, dev->d_draddr) ||
+                net_ipv4addr_maskcmp(sipaddr, dev->d_ipaddr, dev->d_netmask))
+              {
+                arp_hdr_update(dev, arp->ah_sipaddr, arp->ah_shwaddr);
+              }
+          }
+#endif /* CONFIG_NET_ARP_GRATUITOUS */
         break;
 
       case HTONS(ARP_REPLY):
@@ -158,6 +181,23 @@ static int arp_in(FAR struct net_driver_s *dev)
 
             arp_notify(net_ip4addr_conv32(arp->ah_sipaddr));
           }
+#ifdef CONFIG_NET_ARP_GRATUITOUS
+        else if (net_ipv4addr_cmp(sipaddr, ipaddr) &&
+                 !net_ipv4addr_cmp(sipaddr, INADDR_ANY))
+          {
+            /* Gratuitous arp sender ip should same with target ip,
+             * and ignore IPv4 duplicate address detection packet (RFC2131)
+             */
+
+            /* Gratuitous request arp the sender ip should be a unicast ip */
+
+            if (net_ipv4addr_cmp(sipaddr, dev->d_draddr) ||
+                net_ipv4addr_maskcmp(sipaddr, dev->d_ipaddr, dev->d_netmask))
+              {
+                arp_hdr_update(dev, arp->ah_sipaddr, arp->ah_shwaddr);
+              }
+          }
+#endif /* CONFIG_NET_ARP_GRATUITOUS */
         break;
     }
 
