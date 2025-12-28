@@ -2238,7 +2238,7 @@ braces <#braces>`__, `indentation <#indentation>`__, and
 
     do ptr++; while (*ptr != '\0');
 
-.. error:: This is incorrect
+.. tip:: This is correct
 
   .. code-block:: c
 
