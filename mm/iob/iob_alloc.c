@@ -96,9 +96,7 @@ static FAR struct iob_s *iob_alloc_committed(void)
       iob->io_len    = 0;    /* Length of the data in the entry */
       iob->io_offset = 0;    /* Offset to the beginning of data */
       iob->io_pktlen = 0;    /* Total length of the packet */
-#ifdef CONFIG_NET_TIMESTAMP
       iob->io_conn   = NULL;
-#endif
     }
 
   spin_unlock_irqrestore(&g_iob_lock, flags);
@@ -138,9 +136,8 @@ static FAR struct iob_s *iob_tryalloc_internal(bool throttled)
           iob->io_len    = 0;    /* Length of the data in the entry */
           iob->io_offset = 0;    /* Offset to the beginning of data */
           iob->io_pktlen = 0;    /* Total length of the packet */
-#ifdef CONFIG_NET_TIMESTAMP
           iob->io_conn   = NULL;
-#endif
+
           return iob;
         }
     }

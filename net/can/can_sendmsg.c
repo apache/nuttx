@@ -63,6 +63,7 @@
 struct send_s
 {
   FAR struct devif_callback_s *snd_cb; /* Reference to callback instance */
+  FAR struct can_conn_s  *snd_conn;    /* Reference to the CAN connection */
   sem_t                   snd_sem;     /* Used to wake up the waiting thread */
   FAR const uint8_t      *snd_buffer;  /* Points to the buffer of data to send */
   size_t                  snd_buflen;  /* Number of bytes in the buffer to send */
@@ -119,6 +120,8 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
               pstate->snd_sent = ret;
               goto end_wait;
             }
+
+          dev->d_iob->io_conn = &pstate->snd_conn->sconn;
 
           pstate->snd_sent = pstate->snd_buflen;
           if (pstate->pr_msglen > 0) /* concat cmsg data after packet */
@@ -233,6 +236,7 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
 
   state.snd_buflen = msg->msg_iov->iov_len;  /* bytes to send */
   state.snd_buffer = msg->msg_iov->iov_base; /* Buffer to send from */
+  state.snd_conn   = conn;
 
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
   if (msg->msg_controllen > sizeof(struct cmsghdr))

@@ -30,6 +30,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/net/can.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/net.h>
@@ -278,6 +279,46 @@ devif_poll_pkt_connections(FAR struct net_driver_s *dev,
 #endif /* CONFIG_NET_PKT */
 
 /****************************************************************************
+ * Name: can_loopback
+ *
+ * Description:
+ *   Deliver a copy of a sent CAN frame to the local CAN sockets.  The
+ *   device buffer state is saved and restored, so the driver and
+ *   devif_poll() continue with the frame exactly as if there were no
+ *   loopback.
+ *
+ * Input Parameters:
+ *   dev - The CAN device that sent the frame
+ *   iob - A copy of the sent frame, freed by this function
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_CAN
+static void can_loopback(FAR struct net_driver_s *dev, FAR struct iob_s *iob)
+{
+  FAR struct iob_s *d_iob = dev->d_iob;
+  FAR uint8_t *d_buf = dev->d_buf;
+  uint16_t d_len = dev->d_len;
+  uint16_t d_sndlen = dev->d_sndlen;
+
+  dev->d_iob = iob;
+  dev->d_buf = NETLLBUF;
+  dev->d_len = iob->io_pktlen;
+
+  can_input(dev);
+
+  /* Free the copy unless a socket kept it */
+
+  netdev_iob_release(dev);
+
+  dev->d_iob    = d_iob;
+  dev->d_buf    = d_buf;
+  dev->d_len    = d_len;
+  dev->d_sndlen = d_sndlen;
+}
+#endif /* CONFIG_NET_CAN */
+
+/****************************************************************************
  * Name: devif_poll_can_connections
  *
  * Description:
@@ -316,7 +357,31 @@ devif_poll_can_connections(FAR struct net_driver_s *dev,
 
           if (dev->d_len > 0)
             {
-              bstop = callback(dev);
+              if (!IFF_IS_LOOPBACK(dev->d_flags)
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+                  && _SO_GETOPT(can_conn->sconn.s_options, CAN_RAW_LOOPBACK)
+#endif
+                 )
+                {
+                  FAR struct iob_s *iob = can_iob_clone(dev);
+
+                  /* The frame is always sent: the callback either sends it
+                   * or, for drivers with a flat buffer, leaves it in d_iob
+                   * for devif_poll() to send.  Its return value only tells
+                   * whether to stop the poll.
+                   */
+
+                  bstop = callback(dev);
+
+                  if (iob != NULL)
+                    {
+                      can_loopback(dev, iob);
+                    }
+                }
+              else
+                {
+                  bstop = callback(dev);
+                }
             }
         }
     }
