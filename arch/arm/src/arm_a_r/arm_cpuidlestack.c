@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-r/arm_cpuidlestack.c
+ * arch/arm/src/arm_a_r/arm_cpuidlestack.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
