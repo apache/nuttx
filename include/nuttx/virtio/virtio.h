@@ -47,9 +47,6 @@
 
 /* Virtio helper functions */
 
-#define virtio_has_feature(vdev, fbit) \
-      (((vdev)->features & (1ULL << (fbit))) != 0)
-
 #define virtio_read_config_member(vdev, structname, member, ptr) \
       virtio_read_config((vdev), offsetof(structname, member), \
                          (ptr), sizeof(*(ptr)));
