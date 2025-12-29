@@ -298,6 +298,15 @@ FAR struct can_conn_s *can_active(FAR struct net_driver_s *dev,
       if ((conn->dev == NULL && _SS_ISBOUND(conn->sconn.s_flags)) ||
           conn->dev == dev)
         {
+          if (dev->d_iob->io_conn == &conn->sconn
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+              && !_SO_GETOPT(conn->sconn.s_options, CAN_RAW_RECV_OWN_MSGS)
+#endif
+             )
+            {
+              continue; /* Skip own messages */
+            }
+
 #ifdef CONFIG_NET_CANPROTO_OPTIONS
           if (can_recv_filter(conn, can_id) == 0)
             {
