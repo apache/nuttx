@@ -89,7 +89,6 @@ config NET_ARP_SEND
 config NET_ARP_SEND_QUEUE
 	bool "Iob queue in arp entry support"
 	default n
-	depends on IOB_NCHAINS > 0
 	---help---
 		Enable queue iob to arp entry when arp_out failed to wait for arp
 		finished, then resend queue iobs.

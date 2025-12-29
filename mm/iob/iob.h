@@ -63,16 +63,6 @@ extern FAR struct iob_s *g_iob_freelist;
 
 extern FAR struct iob_s *g_iob_committed;
 
-#if CONFIG_IOB_NCHAINS > 0
-/* A list of all free, unallocated I/O buffer queue containers */
-
-extern FAR struct iob_qentry_s *g_iob_freeqlist;
-
-/* A list of I/O buffer queue containers that are committed for allocation */
-
-extern FAR struct iob_qentry_s *g_iob_qcommitted;
-#endif
-
 /* semaphores that IOBs need wait */
 
 extern sem_t g_iob_sem;
@@ -88,54 +78,12 @@ extern sem_t g_throttle_sem;
 
 extern int16_t g_throttle_wait;
 #endif
-#if CONFIG_IOB_NCHAINS > 0
-extern sem_t g_qentry_sem;
-
-/* Wait Counts for qentry */
-
-extern int16_t g_qentry_wait;
-#endif
 
 extern volatile spinlock_t g_iob_lock;
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: iob_alloc_qentry
- *
- * Description:
- *   Allocate an I/O buffer chain container by taking the buffer at the head
- *   of the free list. This function is intended only for internal use by
- *   the IOB module.
- *
- ****************************************************************************/
-
-FAR struct iob_qentry_s *iob_alloc_qentry(void);
-
-/****************************************************************************
- * Name: iob_tryalloc_qentry
- *
- * Description:
- *   Try to allocate an I/O buffer chain container by taking the buffer at
- *   the head of the free list without waiting for the container to become
- *   free. This function is intended only for internal use by the IOB module.
- *
- ****************************************************************************/
-
-FAR struct iob_qentry_s *iob_tryalloc_qentry(void);
-
-/****************************************************************************
- * Name: iob_free_qentry
- *
- * Description:
- *   Free the I/O buffer chain container by returning it to the  free list.
- *   The link to  the next I/O buffer in the chain is return.
- *
- ****************************************************************************/
-
-FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq);
 
 /****************************************************************************
  * Name: iob_notifier_signal

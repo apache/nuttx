@@ -24,11 +24,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
 #include <nuttx/mm/iob.h>
-#include "iob.h"
 
-#if CONFIG_IOB_NCHAINS > 0
+#include "iob.h"
 
 /****************************************************************************
  * Public Functions
@@ -44,14 +42,28 @@
 
 unsigned int iob_get_queue_size(FAR struct iob_queue_s *queue)
 {
-  FAR struct iob_qentry_s *iobq;
-  unsigned int total = 0;
   FAR struct iob_s *iob;
+  unsigned int total = 0;
 
-  for (iobq = queue->qh_head; iobq != NULL; iobq = iobq->qe_flink)
+  /* Iterate through all chains in the queue */
+
+  iob = queue->qh_head;
+  while (iob != NULL)
     {
-      iob = iobq->qe_head;
+      /* Add this chain's packet length */
+
       total += iob->io_pktlen;
+
+      /* Move to next chain (skip to chain boundary) */
+
+      while (!IOB_FLAG_TEST(iob, IOB_CHAIN_END))
+        {
+          iob = IOB_LINK_GET(iob);
+        }
+
+      /* Move to next chain head */
+
+      iob = IOB_LINK_GET(iob);
     }
 
   return total;
@@ -67,13 +79,29 @@ unsigned int iob_get_queue_size(FAR struct iob_queue_s *queue)
 
 unsigned int iob_get_queue_entry_count(FAR struct iob_queue_s *queue)
 {
-  FAR struct iob_qentry_s *iobq;
-  unsigned int count;
+  FAR struct iob_s *iob;
+  unsigned int count = 0;
 
-  for (iobq = queue->qh_head, count = 0; iobq != NULL;
-       iobq = iobq->qe_flink, count++);
+  /* Iterate through all chains in the queue */
+
+  iob = queue->qh_head;
+  while (iob != NULL)
+    {
+      /* Count this chain */
+
+      count++;
+
+      /* Skip to chain boundary */
+
+      while (!IOB_FLAG_TEST(iob, IOB_CHAIN_END))
+        {
+          iob = IOB_LINK_GET(iob);
+        }
+
+      /* Move to next chain head */
+
+      iob = IOB_LINK_GET(iob);
+    }
 
   return count;
 }
-
-#endif /* CONFIG_IOB_NCHAINS > 0 */

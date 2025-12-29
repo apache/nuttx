@@ -87,9 +87,7 @@ struct netdev_upperhalf_s
 
   /* TX queue for re-queueing replies */
 
-#if CONFIG_IOB_NCHAINS > 0
   struct iob_queue_s txq;
-#endif
 
 #ifdef CONFIG_NET_VLAN
   struct netdev_vlan_entry_s vlan[CONFIG_NET_VLAN_COUNT];
@@ -367,7 +365,6 @@ static int netdev_upper_txpoll(FAR struct net_driver_s *dev)
 
 static int netdev_upper_tx(FAR struct net_driver_s *dev)
 {
-#if CONFIG_IOB_NCHAINS > 0
   FAR struct netdev_upperhalf_s *upper = dev->d_private;
 
   if (!IOB_QEMPTY(&upper->txq))
@@ -377,7 +374,6 @@ static int netdev_upper_tx(FAR struct net_driver_s *dev)
       netdev_iob_replace_l2(dev, iob_remove_queue(&upper->txq));
       return netdev_upper_txpoll(dev);
     }
-#endif
 
   /* No more TX packets in queue, poll the net stack to get more packets */
 
@@ -435,7 +431,6 @@ static void netdev_upper_txavail_work(FAR struct netdev_upperhalf_s *upper)
     defined(CONFIG_DRIVERS_IEEE80211) || defined(CONFIG_NET_MBIM)
 static void netdev_upper_queue_tx(FAR struct net_driver_s *dev)
 {
-#if CONFIG_IOB_NCHAINS > 0
   FAR struct netdev_upperhalf_s *upper = dev->d_private;
   int ret;
 
@@ -448,11 +443,6 @@ static void netdev_upper_queue_tx(FAR struct net_driver_s *dev)
     {
       nwarn("WARNING: Failed to queue TX packet, dropping: %d\n", ret);
     }
-#else
-  /* Fall back to send the packet directly if we don't have IOB queue. */
-
-  netdev_upper_txpoll(dev);
-#endif
 }
 #endif
 
@@ -1746,9 +1736,7 @@ int netdev_lower_unregister(FAR struct netdev_lowerhalf_s *dev)
         break;
     }
 
-#if CONFIG_IOB_NCHAINS > 0
   iob_free_queue(&upper->txq);
-#endif
 
   kmm_free(upper);
   dev->netdev.d_private = NULL;

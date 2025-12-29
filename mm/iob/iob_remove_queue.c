@@ -24,17 +24,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <nuttx/debug.h>
-
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
 #include <nuttx/mm/iob.h>
 
 #include "iob.h"
-
-#if CONFIG_IOB_NCHAINS > 0
 
 /****************************************************************************
  * Public Functions
@@ -53,29 +45,34 @@
 
 FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq)
 {
-  FAR struct iob_qentry_s *qentry;
-  FAR struct iob_s *iob = NULL;
+  FAR struct iob_s *iob;
+  FAR struct iob_s *last;
 
-  /* Remove the I/O buffer chain from the head of the queue */
+  /* Get the I/O buffer chain from the head of the queue */
 
-  qentry = iobq->qh_head;
-  if (qentry)
+  iob = iobq->qh_head;
+  if (iob != NULL)
     {
-      iobq->qh_head = qentry->qe_flink;
-      if (!iobq->qh_head)
+      /* Find the last IOB in this chain (marked with IOB_CHAIN_END) */
+
+      last = iob;
+      while (!IOB_FLAG_TEST(last, IOB_CHAIN_END))
+        {
+          last = IOB_LINK_GET(last);
+        }
+
+      /* Update queue head to next chain (or NULL) */
+
+      iobq->qh_head = IOB_LINK_GET(last);
+      if (iobq->qh_head == NULL)
         {
           iobq->qh_tail = NULL;
         }
 
-      /* Extract the I/O buffer chain from the container and free the
-       * container.
-       */
+      /* Detach this chain - clear io_flink (flags are in low bits) */
 
-      iob = qentry->qe_head;
-      iob_free_qentry(qentry);
+      last->io_flink = NULL;
     }
 
   return iob;
 }
-
-#endif /* CONFIG_IOB_NCHAINS > 0 */
