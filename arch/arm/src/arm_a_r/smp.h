@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-r/smp.h
+ * arch/arm/src/arm_a_r/smp.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV8_R_SMP_H
-#define __ARCH_ARM_SRC_ARMV8_R_SMP_H
+#ifndef __ARCH_ARM_SRC_ARM_A_R_SMP_H
+#define __ARCH_ARM_SRC_ARM_A_R_SMP_H
 
 /****************************************************************************
  * Included Files
@@ -129,4 +129,4 @@ void arm_cpu_boot(int cpu);
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_SMP */
-#endif /* __ARCH_ARM_SRC_ARMV8_R_SMP_H */
+#endif /* __ARCH_ARM_SRC_ARM_A_R_SMP_H */
