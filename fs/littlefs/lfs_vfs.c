@@ -1544,8 +1544,20 @@ static int littlefs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   ret = littlefs_convert_result(lfs_fs_size(&fs->lfs));
   if (ret > 0)
     {
-      buf->f_bfree -= ret;
-      buf->f_bavail -= ret;
+      /* Clamp to prevent underflow - lfs_fs_size can return more than
+       * block_count during active writes due to COW blocks
+       */
+
+      if ((fsblkcnt_t)ret < buf->f_bfree)
+        {
+          buf->f_bfree -= ret;
+          buf->f_bavail -= ret;
+        }
+      else
+        {
+          buf->f_bfree = 0;
+          buf->f_bavail = 0;
+        }
 
       ret = 0;
     }
