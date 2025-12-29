@@ -24,6 +24,7 @@
 
 CMN_CSRCS += arm_tcbinfo.c arm_doirq.c arm_dataabort.c arm_syscall.c
 CMN_CSRCS += arm_prefetchabort.c arm_userfault.c arm_cpuidlestack.c
+CMN_CSRCS += arm_initialstate.c
 
 ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
   CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c

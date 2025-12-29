@@ -41,6 +41,7 @@ list(
   arm_syscall.c
   arm_prefetchabort.c
   arm_cpuidlestack.c
-  arm_userfault.c)
+  arm_userfault.c
+  arm_initialstate.c)
 
 target_sources(arch PRIVATE ${CSRCS})
