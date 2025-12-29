@@ -44,7 +44,6 @@ config ARCH_CHIP_K210
 
 config ARCH_CHIP_LITEX
 	bool "Enjoy Digital LITEX VEXRISCV"
-	select ARCH_RV32
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_A
 	select ARCH_DCACHE
@@ -53,7 +52,7 @@ config ARCH_CHIP_LITEX
 	select LIBC_FDT
 	select DEVICE_TREE
 	---help---
-		Enjoy Digital LITEX VEXRISCV softcore processor (RV32IMA).
+		Enjoy Digital LITEX VEXRISCV softcore processor (RV32IMA or RV64GC).
 
 config ARCH_CHIP_BL602
 	bool "BouffaloLab BL602"
@@ -783,12 +782,30 @@ choice
 
 config LITEX_CORE_VEXRISCV
 	bool "vexriscv core"
+	select ARCH_RV32
 
 config LITEX_CORE_VEXRISCV_SMP
 	bool "vexriscv_smp core"
+	select ARCH_RV32
 	select ARCH_HAVE_MPU
 	select ARCH_RV_ISA_C
 	select ARCH_MMU_TYPE_SV32
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_S_MODE
+	select ARCH_HAVE_ELF_EXECUTABLE
+	select ARCH_HAVE_PERF_EVENTS
+
+config LITEX_CORE_VEXIIRISCV
+	bool "vexiiriscv core"
+	select ARCH_RV64
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_MPU
+	select ARCH_MMU_TYPE_SV39
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_S_MODE
