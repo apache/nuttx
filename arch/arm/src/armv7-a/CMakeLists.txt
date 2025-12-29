@@ -38,7 +38,6 @@ list(
   arm_cpuinfo.c
   arm_gicv2.c
   arm_gicv2_dump.c
-  arm_initialstate.c
   arm_mmu.c
   arm_undefinedinsn.c
   arm_perf.c
