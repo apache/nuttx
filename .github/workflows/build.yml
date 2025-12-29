@@ -186,6 +186,31 @@ jobs:
       - name: Export NuttX Repo SHA
         run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
 
+      - name: Install NTFC
+        uses: ./sources/nuttx/.github/actions/ci-container
+        env:
+          BLOBDIR: /tools/blobs
+        with:
+          run: |
+            # install venv
+            apt-get update
+            apt install -y python3-dev
+            apt install -y python3-venv
+
+            # get NTFC sources
+            git clone -b release-0.0.1 https://github.com/szafonimateusz-mi/nuttx-ntfc
+            cd /github/workspace/nuttx-ntfc
+
+            # install NTFC with venv
+            python3 -m venv /github/workspace/nuttx-ntfc/venv
+            source /github/workspace/nuttx-ntfc/venv/bin/activate
+            pip3 install .
+            deactivate
+
+            # get NTFC test cases
+            cd external
+            git clone -b release-0.0.1 https://github.com/szafonimateusz-mi/nuttx-testing
+
       - name: Run builds
         uses: ./sources/nuttx/.github/actions/ci-container
         env:
@@ -194,6 +219,7 @@ jobs:
           run: |
             echo "::add-matcher::sources/nuttx/.github/gcc.json"
             export ARTIFACTDIR=`pwd`/buildartifacts
+            export NTFCDIR=/github/workspace/nuttx-ntfc
             git config --global --add safe.directory /github/workspace/sources/nuttx
             git config --global --add safe.directory /github/workspace/sources/apps
             cd sources/nuttx/tools/ci
