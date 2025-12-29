@@ -62,7 +62,7 @@ endif
 ifeq ($(CONFIG_SMP),y)
   CMN_ASRCS += arm_cpuhead.S
   CMN_CSRCS += arm_cpustart.c arm_smpcall.c
-  CMN_CSRCS += arm_cpuidlestack.c arm_scu.c
+  CMN_CSRCS += arm_scu.c
 endif
 
 VPATH += arm_a_r
