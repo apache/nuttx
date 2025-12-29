@@ -24,15 +24,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <assert.h>
-
 #include <nuttx/mm/iob.h>
 
 #include "iob.h"
-
-#if CONFIG_IOB_NCHAINS > 0
 
 /****************************************************************************
  * Public Functions
@@ -48,38 +42,43 @@
 
 void iob_free_queue(FAR struct iob_queue_s *qhead)
 {
-  FAR struct iob_qentry_s *iobq;
-  FAR struct iob_qentry_s *nextq;
   FAR struct iob_s *iob;
+  FAR struct iob_s *next_chain;
+  FAR struct iob_s *last;
 
-  /* Detach the list from the queue head so first for safety (should be safe
-   * anyway).
-   */
+  /* Detach the list from the queue head */
 
-  iobq           = qhead->qh_head;
+  iob = qhead->qh_head;
   qhead->qh_head = NULL;
+  qhead->qh_tail = NULL;
 
-  /* Remove each I/O buffer chain from the queue */
+  /* Free each I/O buffer chain */
 
-  while (iobq)
+  while (iob != NULL)
     {
-      /* Remove the I/O buffer chain from the head of the queue and
-       * discard the queue container.
-       */
+      /* Find the last IOB in this chain */
 
-      iob = iobq->qe_head;
-      DEBUGASSERT(iob);
+      last = iob;
+      while (!IOB_FLAG_TEST(last, IOB_CHAIN_END))
+        {
+          last = IOB_LINK_GET(last);
+        }
 
-      /* Remove the queue container from the list and discard it */
+      /* Save next chain head before freeing */
 
-      nextq = iobq->qe_flink;
-      iob_free_qentry(iobq);
-      iobq = nextq;
+      next_chain = IOB_LINK_GET(last);
 
-      /* Free the I/O chain */
+      /* Detach this chain */
+
+      last->io_flink = NULL;
+
+      /* Free this chain */
 
       iob_free_chain(iob);
+
+      /* Move to next chain */
+
+      iob = next_chain;
     }
 }
 
-#endif /* CONFIG_IOB_NCHAINS > 0 */

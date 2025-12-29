@@ -24,15 +24,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <nuttx/debug.h>
-
 #include <nuttx/mm/iob.h>
 
 #include "iob.h"
-
-#if CONFIG_IOB_NCHAINS > 0
 
 /****************************************************************************
  * Public Functions
@@ -55,20 +49,8 @@
 
 FAR struct iob_s *iob_peek_queue(FAR struct iob_queue_s *iobq)
 {
-  FAR struct iob_qentry_s *qentry;
-  FAR struct iob_s *iob = NULL;
+  /* Return the I/O buffer chain at the head of the queue */
 
-  /* Peek at the I/O buffer chain container at the head of the queue */
-
-  qentry = iobq->qh_head;
-  if (qentry)
-    {
-      /* Return the I/O buffer chain from the container */
-
-      iob = qentry->qe_head;
-    }
-
-  return iob;
+  return iobq->qh_head;
 }
 
-#endif /* CONFIG_IOB_NCHAINS > 0 */

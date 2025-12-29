@@ -68,24 +68,6 @@ config IOB_SECTION
 		The section where iob buffer is located.
 		The section must be zero-initialized on system boot.
 
-config IOB_NCHAINS
-	int "Number of pre-allocated I/O buffer chain heads"
-	default 0 if !NET_READAHEAD
-	default IOB_NBUFFERS if NET_READAHEAD
-	---help---
-		These tiny nodes are used as "containers" to support queueing of
-		I/O buffer chains.  This will limit the number of I/O transactions
-		that can be "in-flight" at any give time.  The default value of
-		zero disables this features.
-
-		These generic I/O buffer chain containers are not currently used
-		by any logic in NuttX.  That is because their other specialized
-		I/O buffer chain containers that also carry a payload of usage
-		specific information.
-
-		Note: TCP and UDP don't use this.
-		Note: ICMP/ICMPv6 and CAN use this.
-
 config IOB_THROTTLE
 	int "I/O buffer throttle value"
 	default 0 if !NET_WRITE_BUFFERS || !NET_READAHEAD

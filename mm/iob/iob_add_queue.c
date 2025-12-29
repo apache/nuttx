@@ -24,59 +24,11 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <assert.h>
-#include <errno.h>
 
-#include <nuttx/debug.h>
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
 #include <nuttx/mm/iob.h>
 
 #include "iob.h"
-
-#if CONFIG_IOB_NCHAINS > 0
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: iob_add_queue_internal
- *
- * Description:
- *   Add one I/O buffer chain to the end of a queue.  May fail due to lack
- *   of resources.
- *
- ****************************************************************************/
-
-static int iob_add_queue_internal(FAR struct iob_s *iob,
-                                  FAR struct iob_queue_s *iobq,
-                                  FAR struct iob_qentry_s *qentry)
-{
-  /* Add the I/O buffer chain to the container */
-
-  qentry->qe_head = iob;
-
-  /* Add the container to the end of the queue */
-
-  qentry->qe_flink = NULL;
-
-  if (!iobq->qh_head)
-    {
-      iobq->qh_head = qentry;
-      iobq->qh_tail = qentry;
-    }
-  else
-    {
-      DEBUGASSERT(iobq->qh_tail);
-      iobq->qh_tail->qe_flink = qentry;
-      iobq->qh_tail = qentry;
-    }
-
-  return 0;
-}
 
 /****************************************************************************
  * Public Functions
@@ -86,25 +38,49 @@ static int iob_add_queue_internal(FAR struct iob_s *iob,
  * Name: iob_add_queue
  *
  * Description:
- *   Add one I/O buffer chain to the end of a queue.  May fail due to lack
- *   of resources.
+ *   Add one I/O buffer chain to the end of a queue.
  *
  ****************************************************************************/
 
 int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
 {
-  FAR struct iob_qentry_s *qentry;
+  FAR struct iob_s *last;
 
-  /* Allocate a container to hold the I/O buffer chain */
+  DEBUGASSERT(iob != NULL && iobq != NULL);
 
-  qentry = iob_alloc_qentry();
-  if (!qentry)
+  /* Find the last IOB in this chain */
+
+  last = iob;
+  while (IOB_LINK_GET(last) != NULL)
     {
-      ioberr("ERROR: Failed to allocate a container\n");
-      return -ENOMEM;
+      last = IOB_LINK_GET(last);
     }
 
-  return iob_add_queue_internal(iob, iobq, qentry);
+  /* Mark this IOB as the end of a chain in the queue using
+   * io_flink low bits
+   */
+
+  IOB_FLAG_SET(last, NULL, IOB_CHAIN_END);
+
+  /* Add to the end of the queue */
+
+  if (iobq->qh_head == NULL)
+    {
+      /* Empty queue */
+
+      iobq->qh_head = iob;
+      iobq->qh_tail = last;
+    }
+  else
+    {
+      /* Link after current tail, setting the chain end flag */
+
+      DEBUGASSERT(iobq->qh_tail != NULL);
+      IOB_FLAG_SET(iobq->qh_tail, iob, IOB_CHAIN_END);
+      iobq->qh_tail = last;
+    }
+
+  return 0;
 }
 
 /****************************************************************************
@@ -118,18 +94,9 @@ int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
 
 int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
 {
-  FAR struct iob_qentry_s *qentry;
+  /* No resource allocation needed, just call iob_add_queue */
 
-  /* Allocate a container to hold the I/O buffer chain */
-
-  qentry = iob_tryalloc_qentry();
-  if (!qentry)
-    {
-      ioberr("ERROR: Failed to allocate a container\n");
-      return -ENOMEM;
-    }
-
-  return iob_add_queue_internal(iob, iobq, qentry);
+  return iob_add_queue(iob, iobq);
 }
 
 /****************************************************************************
@@ -143,33 +110,34 @@ int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
 int iob_concat_queue(FAR struct iob_queue_s *dest,
                      FAR struct iob_queue_s *src)
 {
-  FAR struct iob_qentry_s *qentry;
-  FAR struct iob_qentry_s *tailq;
+  FAR struct iob_s *iob;
+  FAR struct iob_s *tail;
 
-  /* Detach the list from the queue head so first for safety (should be safe
-   * anyway).
-   */
+  /* Detach the list from the source queue */
 
-  qentry = src->qh_head;
-  tailq = src->qh_tail;
+  iob = src->qh_head;
+  tail = src->qh_tail;
   src->qh_head = NULL;
   src->qh_tail = NULL;
 
-  if (qentry)
+  if (iob != NULL)
     {
-      if (!dest->qh_head)
+      if (dest->qh_head == NULL)
         {
-          dest->qh_head = qentry;
-          dest->qh_tail = tailq;
+          /* Destination queue is empty */
+
+          dest->qh_head = iob;
+          dest->qh_tail = tail;
         }
       else
         {
-          DEBUGASSERT(dest->qh_tail);
-          dest->qh_tail->qe_flink = qentry;
-          dest->qh_tail = tailq;
+          /* Link source to destination tail, preserving CHAIN_END flag */
+
+          DEBUGASSERT(dest->qh_tail != NULL);
+          IOB_FLAG_SET(dest->qh_tail, iob, IOB_CHAIN_END);
+          dest->qh_tail = tail;
         }
     }
 
   return 0;
 }
-#endif /* CONFIG_IOB_NCHAINS > 0 */

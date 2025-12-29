@@ -25,7 +25,6 @@ if(CONFIG_MM_IOB)
   set(SRCS
       iob_add_queue.c
       iob_alloc.c
-      iob_alloc_qentry.c
       iob_clone.c
       iob_concat.c
       iob_copyin.c
@@ -33,7 +32,6 @@ if(CONFIG_MM_IOB)
       iob_contig.c
       iob_free.c
       iob_free_chain.c
-      iob_free_qentry.c
       iob_free_queue.c
       iob_initialize.c
       iob_pack.c

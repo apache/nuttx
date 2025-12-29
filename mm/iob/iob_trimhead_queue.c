@@ -24,16 +24,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <assert.h>
-#include <nuttx/debug.h>
-
 #include <nuttx/mm/iob.h>
 
 #include "iob.h"
-
-#if CONFIG_IOB_NCHAINS > 0
 
 /****************************************************************************
  * Public Functions
@@ -59,29 +52,20 @@
 FAR struct iob_s *iob_trimhead_queue(FAR struct iob_queue_s *qhead,
                                      unsigned int trimlen)
 {
-  FAR struct iob_qentry_s *qentry;
-  FAR struct iob_s *iob = NULL;
+  FAR struct iob_s *iob;
 
-  /* Peek at the I/O buffer chain container at the head of the queue */
+  /* Get the I/O buffer chain at the head of the queue */
 
-  qentry = qhead->qh_head;
-  if (qentry)
+  iob = qhead->qh_head;
+  if (iob)
     {
-      /* Verify that the queue entry contains an I/O buffer chain */
+      /* Trim the I/O buffer chain and update the queue head */
 
-      iob = qentry->qe_head;
-      if (iob)
-        {
-          /* Trim the I/Buffer chain and update the queue head */
-
-          iob = iob_trimhead(iob, trimlen);
-          qentry->qe_head = iob;
-        }
+      iob = iob_trimhead(iob, trimlen);
+      qhead->qh_head = iob;
     }
 
   /* Return the new I/O buffer chain at the head of the queue */
 
   return iob;
 }
-
-#endif /* CONFIG_IOB_NCHAINS > 0 */

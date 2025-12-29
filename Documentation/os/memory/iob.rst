@@ -46,19 +46,6 @@ Configuration Options
    series of small I/O buffers in a chain. This setting determines
    the data payload each preallocated I/O buffer. The default
    value is 196 bytes.
-``CONFIG_IOB_NCHAINS``
-   Number of pre-allocated I/O buffer chain heads. These tiny
-   nodes are used as *containers* to support queueing of I/O
-   buffer chains. This will limit the number of I/O transactions
-   that can be *in-flight* at any give time. The default value of
-   zero disables this features.
-   These generic I/O buffer chain containers are not currently
-   used by any logic in NuttX. That is because their other other
-   specialized I/O buffer chain containers that also carry a
-   payload of usage specific information. The default value is
-   zero if nether TCP nor UDP is enabled (i.e., neither
-   ``CONFIG_NET_TCP`` && !\ ``CONFIG_NET_UDP`` or eight if either
-   is enabled.
 ``CONFIG_IOB_THROTTLE``
    I/O buffer throttle value. TCP write buffering and read-ahead
    buffer use the same pool of free I/O buffers. In order to
@@ -117,39 +104,6 @@ valid for the I/O buffer at the head of the chain.
 
      uint8_t  io_data[CONFIG_IOB_BUFSIZE];
    };
-
-This container structure supports queuing of I/O buffer chains.
-This structure is intended only for internal use by the IOB
-module.
-
-.. code-block:: c
-
-   #if CONFIG_IOB_NCHAINS > 0
-   struct iob_qentry_s
-   {
-     /* Singly-link list support */
-
-     FAR struct iob_qentry_s *qe_flink;
-
-     /* Payload -- Head of the I/O buffer chain */
-
-     FAR struct iob_s *qe_head;
-   };
-   #endif /* CONFIG_IOB_NCHAINS > 0 */
-
-The I/O buffer queue head structure.
-
-.. code-block:: c
-
-   #if CONFIG_IOB_NCHAINS > 0
-   struct iob_queue_s
-   {
-     /* Head of the I/O buffer chain list */
-
-     FAR struct iob_qentry_s *qh_head;
-     FAR struct iob_qentry_s *qh_tail;
-   };
-   #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 Public Function Prototypes
 ==========================

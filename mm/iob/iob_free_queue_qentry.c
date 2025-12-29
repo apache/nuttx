@@ -24,16 +24,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <assert.h>
-
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
 #include <nuttx/mm/iob.h>
 
 #include "iob.h"
-
-#if CONFIG_IOB_NCHAINS > 0
 
 /****************************************************************************
  * Public Functions
@@ -43,48 +36,80 @@
  * Name: iob_free_queue_qentry
  *
  * Description:
- *   Free an iob entire queue of I/O buffer chains.
+ *   Free an IOB chain and remove it from the queue.
  *
  ****************************************************************************/
 
 void iob_free_queue_qentry(FAR struct iob_s *iob,
                            FAR struct iob_queue_s *iobq)
 {
-  FAR struct iob_qentry_s *prev = NULL;
-  FAR struct iob_qentry_s *qentry;
+  FAR struct iob_s *prev = NULL;
+  FAR struct iob_s *cur;
+  FAR struct iob_s *last;
 
-  for (qentry = iobq->qh_head; qentry != NULL;
-       prev = qentry, qentry = qentry->qe_flink)
+  /* Iterate through all chains in the queue */
+
+  cur = iobq->qh_head;
+  while (cur != NULL)
     {
-      /* Find head of the I/O buffer chain */
+      /* Check if this is the target chain */
 
-      if (qentry->qe_head == iob)
+      if (cur == iob)
         {
+          /* Find the last IOB in this chain */
+
+          last = cur;
+          while (!IOB_FLAG_TEST(last, IOB_CHAIN_END))
+            {
+              last = IOB_LINK_GET(last);
+            }
+
+          /* Unlink this chain from the queue */
+
           if (prev == NULL)
             {
-              iobq->qh_head = qentry->qe_flink;
+              /* Removing from head */
+
+              iobq->qh_head = IOB_LINK_GET(last);
             }
           else
             {
-              prev->qe_flink = qentry->qe_flink;
+              /* Link previous chain to next chain */
+
+              IOB_FLAG_SET(prev, IOB_LINK_GET(last), IOB_CHAIN_END);
             }
 
-          if (iobq->qh_tail == qentry)
+          /* Update tail if necessary */
+
+          if (iobq->qh_tail == last)
             {
               iobq->qh_tail = prev;
             }
 
-          /* Remove the queue container */
+          /* Detach this chain */
 
-          iob_free_qentry(qentry);
+          last->io_flink = NULL;
 
-          /* Free the I/O chain */
+          /* Free the I/O buffer chain */
 
           iob_free_chain(iob);
 
-          break;
+          return;
         }
+
+      /* Skip to the end of this chain */
+
+      while (!IOB_FLAG_TEST(cur, IOB_CHAIN_END))
+        {
+          cur = IOB_LINK_GET(cur);
+        }
+
+      /* Save as prev for next iteration */
+
+      prev = cur;
+
+      /* Move to next chain */
+
+      cur = IOB_LINK_GET(cur);
     }
 }
-
-#endif /* CONFIG_IOB_NCHAINS > 0 */

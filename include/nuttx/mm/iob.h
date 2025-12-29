@@ -88,12 +88,34 @@ struct iovec; /* Forward declaration for scatter-gather I/O */
 #define IOB_DATA(p)      (&(p)->io_data[(p)->io_offset])
 #define IOB_FREESPACE(p) (CONFIG_IOB_BUFSIZE - (p)->io_len - (p)->io_offset)
 
-#if CONFIG_IOB_NCHAINS > 0
 /* Queue helpers */
 
-#  define IOB_QINIT(q)   do { (q)->qh_head = 0; (q)->qh_tail = 0; } while (0)
-#  define IOB_QEMPTY(q)  ((q)->qh_head == NULL)
-#endif
+#define IOB_QINIT(q)   do { (q)->qh_head = 0; (q)->qh_tail = 0; } while (0)
+#define IOB_QEMPTY(q)  ((q)->qh_head == NULL)
+
+/* IOB queue flags: Stored in the low bits of io_flink pointer.
+ * Since IOB structures are aligned to at least sizeof(uintptr_t),
+ * the low 2 bits (32-bit) or 3 bits (64-bit) are always zero and
+ * can be used to store flags.
+ *
+ * IOB_CHAIN_END: Marks the last IOB in a chain within a queue.
+ * When this flag is set, io_flink (after masking) points to the next
+ * chain head in the queue.
+ */
+
+#define IOB_CHAIN_END     (1 << 0)
+#define IOB_FLAGS_MASK    ((uintptr_t)0x3)  /* Mask for flag bits */
+#define IOB_POINTER_MASK  (~IOB_FLAGS_MASK) /* Mask for pointer */
+
+/* Helper macros to manipulate io_flink with embedded flags */
+
+#define IOB_LINK_GET(iob)       ((FAR struct iob_s *)((uintptr_t)(iob)->io_flink & IOB_POINTER_MASK))
+#define IOB_FLAG_GET(iob)       ((uintptr_t)(iob)->io_flink & IOB_FLAGS_MASK)
+#define IOB_FLAG_SET(iob, ptr, flags) \
+   do { \
+     (iob)->io_flink = (FAR struct iob_s *)((uintptr_t)(ptr) | ((flags) & IOB_FLAGS_MASK)); \
+   } while (0)
+#define IOB_FLAG_TEST(iob, flag) (IOB_FLAG_GET(iob) & (flag))
 
 #ifdef CONFIG_IOB_ALLOC
 #  define IOB_BUFSIZE(p) ((p)->io_bufsize)
@@ -152,32 +174,17 @@ struct iob_s
 #endif
 };
 
-#if CONFIG_IOB_NCHAINS > 0
-/* This container structure supports queuing of I/O buffer chains.  This
- * structure is intended only for internal use by the IOB module.
+/* The I/O buffer queue head structure.
+ * Now directly links IOB chains without separate qentry allocation.
  */
-
-struct iob_qentry_s
-{
-  /* Singly-link list support */
-
-  FAR struct iob_qentry_s *qe_flink;
-
-  /* Payload -- Head of the I/O buffer chain */
-
-  FAR struct iob_s *qe_head;
-};
-
-/* The I/O buffer queue head structure */
 
 struct iob_queue_s
 {
   /* Head of the I/O buffer chain list */
 
-  FAR struct iob_qentry_s *qh_head;
-  FAR struct iob_qentry_s *qh_tail;
+  FAR struct iob_s *qh_head;
+  FAR struct iob_s *qh_tail;
 };
-#endif /* CONFIG_IOB_NCHAINS > 0 */
 
 struct iob_stats_s
 {
@@ -406,9 +413,7 @@ void iob_free_chain(FAR struct iob_s *iob);
  *
  ****************************************************************************/
 
-#if CONFIG_IOB_NCHAINS > 0
 int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
-#endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
  * Name: iob_tryadd_queue
@@ -419,9 +424,7 @@ int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
  *
  ****************************************************************************/
 
-#if CONFIG_IOB_NCHAINS > 0
 int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
-#endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
  * Name: iob_concat_queue
@@ -431,10 +434,8 @@ int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
  *
  ****************************************************************************/
 
-#if CONFIG_IOB_NCHAINS > 0
 int iob_concat_queue(FAR struct iob_queue_s *dest,
                      FAR struct iob_queue_s *src);
-#endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
  * Name: iob_remove_queue
@@ -447,9 +448,7 @@ int iob_concat_queue(FAR struct iob_queue_s *dest,
  *
  ****************************************************************************/
 
-#if CONFIG_IOB_NCHAINS > 0
 FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq);
-#endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
  * Name: iob_peek_queue
@@ -466,9 +465,7 @@ FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq);
  *
  ****************************************************************************/
 
-#if CONFIG_IOB_NCHAINS > 0
 FAR struct iob_s *iob_peek_queue(FAR struct iob_queue_s *iobq);
-#endif
 
 /****************************************************************************
  * Name: iob_free_queue
@@ -478,9 +475,7 @@ FAR struct iob_s *iob_peek_queue(FAR struct iob_queue_s *iobq);
  *
  ****************************************************************************/
 
-#if CONFIG_IOB_NCHAINS > 0
 void iob_free_queue(FAR struct iob_queue_s *qhead);
-#endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
  * Name: iob_free_queue_qentry
@@ -490,10 +485,8 @@ void iob_free_queue(FAR struct iob_queue_s *qhead);
  *
  ****************************************************************************/
 
-#if CONFIG_IOB_NCHAINS > 0
 void iob_free_queue_qentry(FAR struct iob_s *iob,
                            FAR struct iob_queue_s *iobq);
-#endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
  * Name: iob_get_queue_size
@@ -503,10 +496,8 @@ void iob_free_queue_qentry(FAR struct iob_s *iob,
  *
  ****************************************************************************/
 
-#if CONFIG_IOB_NCHAINS > 0
 unsigned int iob_get_queue_size(FAR struct iob_queue_s *queue);
 unsigned int iob_get_queue_entry_count(FAR struct iob_queue_s *queue);
-#endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
  * Name: iob_copyin
@@ -669,10 +660,8 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen);
  *
  ****************************************************************************/
 
-#if CONFIG_IOB_NCHAINS > 0
 FAR struct iob_s *iob_trimhead_queue(FAR struct iob_queue_s *qhead,
                                      unsigned int trimlen);
-#endif
 
 /****************************************************************************
  * Name: iob_trimtail
