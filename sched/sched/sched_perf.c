@@ -1061,13 +1061,14 @@ static int perf_event_sched_in(FAR struct perf_event_s *event)
   ret = pmu->ops->event_add(event, 0);
   if (ret < 0)
     {
-      serr("pmu event add fail\n");
+      event->state = PERF_EVENT_STATE_INACTIVE;
       goto out;
     }
 
   ret = pmu->ops->event_start(event, 0);
   if (ret < 0)
     {
+      event->state = PERF_EVENT_STATE_INACTIVE;
       pmu->ops->event_del(event, 0);
       goto out;
     }
