@@ -495,6 +495,8 @@ function run {
     run_script="$path/run"
     if [ -x $run_script ]; then
       echo "  Running NuttX..."
+      export ARTIFACTCONFDIR=$ARTIFACTDIR/$(echo $config | sed "s/:/\//")/
+      export CURRENTCONFDIR=$(realpath $path)
       if ! $run_script; then
         fail=1
       fi
