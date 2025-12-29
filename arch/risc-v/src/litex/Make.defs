@@ -26,6 +26,8 @@ include common/Make.defs
 # the first object file, so it will appear at address 0
 ifeq ($(CONFIG_LITEX_CORE_VEXRISCV_SMP),y)
 HEAD_ASRC = litex_shead.S
+else ifeq ($(CONFIG_LITEX_CORE_VEXIIRISCV),y)
+HEAD_ASRC = litex_shead.S
 else
 HEAD_ASRC = litex_head.S
 endif

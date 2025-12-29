@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/litex/hardware/litex_plic.h
+ * boards/risc-v/litex/arty_a7/include/vexii_irq.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -18,37 +18,50 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
+ * Auto-generated: 2025-12-28 11:16:55
+ * Source: LiteX soc.h
+ *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_LITEX_HARDWARE_LITEX_PLIC_H
-#define __ARCH_RISCV_SRC_LITEX_HARDWARE_LITEX_PLIC_H
+#ifndef __BOARDS_RISCV_LITEX_ARTY_A7_INCLUDE_VEXII_IRQ_H
+#define __BOARDS_RISCV_LITEX_ARTY_A7_INCLUDE_VEXII_IRQ_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include "litex_memorymap.h"
+#include <arch/mode.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_LITEX_CORE_VEXRISCV_SMP) || defined(CONFIG_LITEX_CORE_VEXIIRISCV)
-#  define LITEX_PLIC_PRIORITY    (LITEX_PLIC_BASE + 0x000000)
-#  define LITEX_PLIC_PENDING1    (LITEX_PLIC_BASE + 0x001000)
+/* Custom IRQ definitions for LiteX VexiiRISCV core */
 
-#  define LITEX_PLIC_ENABLE1     (LITEX_PLIC_BASE + 0x002080)
-#  define LITEX_PLIC_ENABLE2     (LITEX_PLIC_BASE + 0x002084)
-#  define LITEX_PLIC_THRESHOLD   (LITEX_PLIC_BASE + 0x201000)
-#  define LITEX_PLIC_CLAIM       (LITEX_PLIC_BASE + 0x201004)
+/* Map RISC-V external IRQs to NuttX IRQ numbers */
+
+#define LITEX_IRQ_UART0                (RISCV_IRQ_EXT + 1)
+#define LITEX_IRQ_TIMER0               (RISCV_IRQ_EXT + 2)
+#define LITEX_IRQ_ETHMAC               (RISCV_IRQ_EXT + 3)
+#define LITEX_IRQ_GPIO_BASE            (RISCV_IRQ_EXT + 4)
+#define LITEX_IRQ_GPIO_LENGTH          8
+
+/* The last hardware IRQ number */
+
+#define LITEX_IRQ_LAST        (LITEX_IRQ_GPIO_BASE + LITEX_IRQ_GPIO_LENGTH)
+
+/* Second level GPIO interrupts if enabled */
+
+#ifdef CONFIG_LITEX_GPIO_IRQ
+#  define LITEX_NIRQ_GPIO           (LITEX_IRQ_GPIO_LENGTH * 32)
+#  define LITEX_FIRST_GPIOIRQ       (LITEX_IRQ_LAST + 1)
+#  define LITEX_LAST_GPIOIRQ        (LITEX_FIRST_GPIOIRQ + LITEX_NIRQ_GPIO)
 #else
-
-/* litex vexRiscv does not follow RISC-V privileged specification and
- * uses two additional CSRs: mask and pending.
- */
-#define LITEX_MMASK_CSR     0xBC0
-#define LITEX_MPENDING_CSR     0xFC0
-
+#  define LITEX_NIRQ_GPIO           0
 #endif
 
-#endif /* __ARCH_RISCV_SRC_LITEX_HARDWARE_LITEX_PLIC_H */
+/* Total number of IRQs */
+
+#define NR_IRQS            (LITEX_IRQ_LAST + LITEX_NIRQ_GPIO + 1)
+
+#endif /* __BOARDS_RISCV_LITEX_ARTY_A7_INCLUDE_VEXII_IRQ_H */
