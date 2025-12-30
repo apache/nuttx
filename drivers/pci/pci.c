@@ -712,7 +712,7 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar,
       unsigned int flags;
 
       pci_read_config_dword(dev, base_address_0, &orig);
-      pci_write_config_dword(dev, base_address_0, 0xfffffffe);
+      pci_write_config_dword(dev, base_address_0, 0xffffffff);
       pci_read_config_dword(dev, base_address_0, &mask);
       pci_write_config_dword(dev, base_address_0, orig);
 
