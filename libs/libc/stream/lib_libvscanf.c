@@ -571,6 +571,32 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
             {
               bool sign;
 
+              /* A pointer is converted as an unsigned integer of its own
+               * size.  Select the length before the argument is fetched.
+               */
+
+              if (fmt_char(fmt) == 'p')
+                {
+                  if (sizeof(void *) == sizeof(unsigned short))
+                    {
+                      modifier = H_MOD;
+                    }
+                  else if (sizeof(void *) == sizeof(unsigned long))
+                    {
+                      modifier = L_MOD;
+                    }
+#if defined(CONFIG_HAVE_LONG_LONG) && ULLONG_MAX != ULONG_MAX
+                  else if (sizeof(void *) == sizeof(unsigned long long))
+                    {
+                      modifier = LL_MOD;
+                    }
+#endif
+                  else
+                    {
+                      modifier = NO_MOD;
+                    }
+                }
+
               /* Get a pointer to the integer value.  We need to do this even
                * if we have reached the end of the input data in order to
                * update the 'ap' variable.
