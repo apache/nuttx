@@ -320,6 +320,14 @@ int goldfish_battery_register(FAR void *regs, int irq)
   up_enable_irq(data->irq);
   GOLDFISH_BATTERY_WRITE(data, BATTERY_INT_ENABLE, BATTERY_INT_MASK);
 
+  /* Trigger initial battery state update */
+
+  ret = work_queue(HPWORK, &data->work, goldfish_battery_work, data, 0);
+  if (ret < 0)
+    {
+      batwarn("initial battery work queue failed: %d\n", ret);
+    }
+
   batinfo("goldfish_battery_register over");
   return 0;
 fail:
