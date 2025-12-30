@@ -123,7 +123,7 @@ SECTIONS
         _ebss = ABSOLUTE(.);
     } > sram
 
-    .shmem :
+    .shmem (NOLOAD):
     {
         . = ALIGN(4);
         *(.shmem);
