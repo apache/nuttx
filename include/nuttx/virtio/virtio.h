@@ -105,7 +105,7 @@ virtqueue_get_available_buffer_lock(FAR struct virtqueue *vq,
   FAR void *ret;
 
   flags = spin_lock_irqsave(lock);
-  ret = virtqueue_get_available_buffer(vq, avail_idx, len);
+  ret = virtqueue_get_first_avail_buffer(vq, avail_idx, len);
   spin_unlock_irqrestore(lock, flags);
 
   return ret;
