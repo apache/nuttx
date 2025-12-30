@@ -133,7 +133,7 @@ EEPROMs using the same commands as the Microchip 24xxxx family can be
 interfaced using the `drivers/mtd/at25ee.c` and `drivers/mtd/at24xx.c` driver
 respectively.
 
-Refer to the :doc:`EEPROM character driver reference <../character/eeprom>`
+Refer to the :doc:`EEPROM character driver reference <../../character/eeprom>`
 for
 
 -  the differences between EEPROM and FLASH memory;
@@ -301,3 +301,14 @@ on top of the NAND.
 Another, less general, option would be support bad blocks within FAT.
 Such a solution might be possible for SLC NAND, but would not be
 sufficiently general for all NAND types.
+
+Supported Devices
+=================
+
+NuttX provides support for the following MTD devices.
+
+.. toctree::
+  :maxdepth: 1
+  :glob:
+
+  devices/*

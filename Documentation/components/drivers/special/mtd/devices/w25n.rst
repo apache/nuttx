@@ -1,0 +1,29 @@
+===============
+W25N NAND Flash
+===============
+
+NuttX provides support for NAND flashes from W25N family.
+The only supported variant is currently 1 Gbit (128 MB) large flash.
+
+The implementation doesn't support following functionalities at the moment.
+
+- No bad block management (BBM). Factory bad blocks and runtime bad
+  blocks are not tracked.
+- No bad block table (BBT) scanning at initialization.
+- No Quad SPI support (standard SPI only).
+- No access to spare area (64 bytes/page) or OTP region.
+
+The flash is enabled by option ``CONFIG_MTD_W25N``. It is possible
+to select the SPI mode with ``CONFIG_W25N_SPIMODE`` option and
+communication frequency with ``CONFIG_W25N_SPIFREQUENCY`` option.
+
+The flash memory has to be initialized before used. This is typically done
+from board support package layer during the board's bringup phase. This
+operation is performed by following function.
+
+.. code-block:: C
+
+   #include <nuttx/mtd/mtd.h>
+
+   FAR struct mtd_dev_s *w25n_initialize(FAR struct spi_dev_s *spi,
+                                         uint32_t spi_devid)

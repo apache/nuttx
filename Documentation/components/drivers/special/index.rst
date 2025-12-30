@@ -32,7 +32,7 @@ following section.
   i3c.rst
   ioexpander.rst
   lcd.rst
-  mtd.rst
+  mtd/index.rst
   regmap.rst
   reset.rst
   rptun.rst

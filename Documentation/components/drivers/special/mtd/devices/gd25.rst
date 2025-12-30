@@ -1,0 +1,28 @@
+==============
+GD25 NOR Flash
+==============
+
+NuttX provides support for SPI based NOR flashes from GD25
+family. The supported capacity is up to 256 Mbit (32 MB).
+
+The driver is enabled by option ``CONFIG_MTD_GD25``. It is possible
+to select the SPI mode with ``CONFIG_GD25_SPIMODE`` option and
+communication frequency with ``CONFIG_GD25_SPIFREQUENCY`` option. Another
+important configuration is the setting of SPI delays. Unlike QSPI in memory
+mode, where all delays are set to 0, SPI peripherals may have different
+default delays. Delays for GD25 flash can be set by ``CONFIG_GD25_START_DELAY``,
+``CONFIG_GD25_STOP_DELAY``, ``CONFIG_GD25_CS_DELAY`` and ``CONFIG_GD25_IFDELAY``
+options. Default values are set to 5 us.
+
+The size of the flash is set automatically during the device initialization.
+
+The flash memory has to be initialized before used. This is typically done
+from board support package layer during the board's bringup phase. This
+operation is performed by following function.
+
+.. code-block:: C
+
+   #include <nuttx/mtd/mtd.h>
+
+   FAR struct mtd_dev_s *gd25_initialize(FAR struct spi_dev_s *spi,
+                                         uint32_t spi_devid)
