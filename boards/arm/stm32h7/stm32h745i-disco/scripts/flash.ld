@@ -193,7 +193,7 @@ SECTIONS
     } > sram
 
 #ifdef CONFIG_STM32H7_CORTEXM4_ENABLED
-    .shmem :
+    .shmem (NOLOAD):
     {
         . = ALIGN(4);
         *(.shmem);

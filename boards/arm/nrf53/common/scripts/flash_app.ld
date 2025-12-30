@@ -126,7 +126,7 @@ SECTIONS
 
     /* Shmem */
 
-    .shmem :
+    .shmem (NOLOAD):
     {
         . = ALIGN(4);
         *(.shmem);
