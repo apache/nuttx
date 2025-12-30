@@ -613,6 +613,12 @@ To test it, just run the ``oneshot`` example::
     Waiting...
     Finished
 
+ostest
+------
+
+This is the NuttX test at apps/testing/ostest that is run against all new
+architecture ports to assure a correct implementation of the OS.
+
 qencoder
 ---
 
