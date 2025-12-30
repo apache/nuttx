@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/lib/builtin.h>
+#include <nuttx/userspace.h>
 
 /****************************************************************************
  * Public Functions
