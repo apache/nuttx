@@ -903,6 +903,7 @@ int v9fs_client_chstat(FAR struct v9fs_client_s *client, uint32_t fid,
 ssize_t v9fs_client_read(FAR struct v9fs_client_s *client, uint32_t fid,
                          FAR void *buffer, off_t offset, size_t buflen)
 {
+  FAR char *bufptr = (FAR char *)buffer;
   FAR struct v9fs_fid_s *fidp;
   struct v9fs_read_s request;
   struct v9fs_rread_s response;
@@ -923,6 +924,11 @@ ssize_t v9fs_client_read(FAR struct v9fs_client_s *client, uint32_t fid,
 
   while (buflen > 0)
     {
+#ifdef CONFIG_BUILD_KERNEL
+      size_t remain;
+      size_t off;
+#endif
+
       request.header.size = V9FS_HDRSZ + V9FS_BIT32SZ + V9FS_BIT64SZ +
                             V9FS_BIT32SZ;
       request.header.type = V9FS_TREAD;
@@ -931,12 +937,23 @@ ssize_t v9fs_client_read(FAR struct v9fs_client_s *client, uint32_t fid,
       request.offset = offset;
       request.count = buflen > fidp->iounit ? fidp->iounit : buflen;
 
+      /* Limit to page boundary to handle non-contiguous physical memory */
+
+#ifdef CONFIG_BUILD_KERNEL
+      off = (uintptr_t)bufptr & (CONFIG_MM_PGSIZE - 1);
+      remain = CONFIG_MM_PGSIZE - off;
+      if (request.count > remain)
+        {
+          request.count = remain;
+        }
+#endif
+
       wiov[0].iov_base = &request;
       wiov[0].iov_len = V9FS_HDRSZ + V9FS_BIT32SZ + V9FS_BIT64SZ +
                         V9FS_BIT32SZ;
       riov[0].iov_base = &response;
       riov[0].iov_len = V9FS_HDRSZ + V9FS_BIT32SZ;
-      riov[1].iov_base = (FAR void *)up_addrenv_va_to_pa(buffer);
+      riov[1].iov_base = (FAR void *)up_addrenv_va_to_pa(bufptr);
       riov[1].iov_len = request.count;
 
       ret = v9fs_client_rpc(client->transport, wiov, 1, riov, 2,
@@ -953,7 +970,7 @@ ssize_t v9fs_client_read(FAR struct v9fs_client_s *client, uint32_t fid,
 
       nread += response.count;
       offset += response.count;
-      buffer += response.count;
+      bufptr += response.count;
       buflen -= response.count;
     }
 
@@ -1079,6 +1096,7 @@ ssize_t v9fs_client_write(FAR struct v9fs_client_s *client, uint32_t fid,
                           FAR const void *buffer, off_t offset,
                           size_t buflen)
 {
+  FAR char *bufptr = (FAR char *)buffer;
   FAR struct v9fs_fid_s *fidp;
   struct v9fs_write_s request;
   struct v9fs_rwrite_s response;
@@ -1099,7 +1117,23 @@ ssize_t v9fs_client_write(FAR struct v9fs_client_s *client, uint32_t fid,
 
   while (buflen > 0)
     {
+#ifdef CONFIG_BUILD_KERNEL
+      size_t remain;
+      size_t off;
+#endif
       request.count = buflen > fidp->iounit ? fidp->iounit : buflen;
+
+      /* Limit to page boundary to handle non-contiguous physical memory */
+
+#ifdef CONFIG_BUILD_KERNEL
+      off = (uintptr_t)bufptr & (CONFIG_MM_PGSIZE - 1);
+      remain = CONFIG_MM_PGSIZE - off;
+      if (request.count > remain)
+        {
+          request.count = remain;
+        }
+#endif
+
       request.header.size = V9FS_HDRSZ + V9FS_BIT32SZ + V9FS_BIT64SZ +
                             V9FS_BIT32SZ + request.count;
       request.header.type = V9FS_TWRITE;
@@ -1110,7 +1144,7 @@ ssize_t v9fs_client_write(FAR struct v9fs_client_s *client, uint32_t fid,
       wiov[0].iov_base = &request;
       wiov[0].iov_len = V9FS_HDRSZ + V9FS_BIT32SZ + V9FS_BIT64SZ +
                         V9FS_BIT32SZ;
-      wiov[1].iov_base = (FAR void *)up_addrenv_va_to_pa((FAR void *)buffer);
+      wiov[1].iov_base = (FAR void *)up_addrenv_va_to_pa((FAR void *)bufptr);
       wiov[1].iov_len = request.count;
       riov[0].iov_base = &response;
       riov[0].iov_len = V9FS_HDRSZ + V9FS_BIT32SZ;
@@ -1124,7 +1158,7 @@ ssize_t v9fs_client_write(FAR struct v9fs_client_s *client, uint32_t fid,
 
       nwrite += response.count;
       offset += response.count;
-      buffer += response.count;
+      bufptr += response.count;
       buflen -= response.count;
     }
 
