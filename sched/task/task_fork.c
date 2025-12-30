@@ -137,7 +137,7 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr)
 
   /* Allocate a TCB for the child task. */
 
-  child = kmm_zalloc(sizeof(struct tcb_s) + sizeof(struct task_group_s));
+  child = kmm_zalloc(sizeof(struct tcb_s));
   if (!child)
     {
       serr("ERROR: Failed to allocate TCB\n");

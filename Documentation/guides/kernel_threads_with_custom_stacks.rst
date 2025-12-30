@@ -31,7 +31,7 @@ Here is the body of some function.  It expects to have the following inputs:
     * used to that all fields of the new TCB will be zeroed.
     */
 
-    tcb = kmm_zalloc(sizeof(struct tcb_s) + sizeof(struct task_group_s));
+    tcb = kmm_zalloc(sizeof(struct tcb_s));
     if (tcb == NULL)
     {
         return -ENOMEM;
