@@ -29,7 +29,6 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
-#include <nuttx/userspace.h>
 
 #ifdef CONFIG_APP_REGISTRY
 
