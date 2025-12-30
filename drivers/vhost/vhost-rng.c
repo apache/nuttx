@@ -95,7 +95,7 @@ static void vhost_rng_work(FAR void *arg)
   flags = spin_lock_irqsave(&priv->lock);
   for (; ; )
     {
-      buf = virtqueue_get_available_buffer(vq, &idx, &len);
+      buf = virtqueue_get_first_avail_buffer(vq, &idx, &len);
       if (buf == NULL)
         {
           break;
