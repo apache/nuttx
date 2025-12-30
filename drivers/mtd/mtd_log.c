@@ -50,7 +50,7 @@
 
 /* The magic number for the mtdlog storage format. */
 
-#define MTDLOG_MAGIC (0xa5a5)
+#define MTDLOG_MAGIC (0xa5a6)
 
 /* The minimum allowed block size. A size smaller than this
  * will affect storage performance.
@@ -322,13 +322,47 @@ static int mtdlog_write_block(FAR struct mtdlog_s *mtdlog,
    * and thus do not have an erase interface.
    */
 
-  ret = MTD_ERASE(mtdlog->mtd,
-                  blkidx * (mtdlog->blocksize / mtdlog->erasesize),
-                  (mtdlog->blocksize / mtdlog->erasesize));
-  if (ret < 0 && ret != -ENOSYS)
+  if (mtdlog->mtd->erase)
     {
-      ferr("ERROR: MTD_ERASE failed: %d, %d\n", blkidx, ret);
-      return ret;
+      ret = MTD_ERASE(mtdlog->mtd,
+                      blkidx * (mtdlog->blocksize / mtdlog->erasesize),
+                      (mtdlog->blocksize / mtdlog->erasesize));
+      if (ret < 0)
+        {
+          ferr("ERROR: MTD_ERASE failed: %" PRIu16 ", %d\n", blkidx, ret);
+          return ret;
+        }
+    }
+  else
+    {
+      uint32_t erase_size;
+      uint32_t erase_offset = blkidx * mtdlog->blocksize;
+      uint32_t erase_total = 0;
+
+      /* Use the MTD_BWRITE interface instead of the
+       * MTD_ERASE interface for erasing.
+       */
+
+      memset(tmp_buf, mtdlog->erasestate, tmp_buf_size);
+
+      while (erase_total < mtdlog->blocksize)
+        {
+          erase_size = (mtdlog->blocksize - erase_total) > tmp_buf_size ?
+                       tmp_buf_size : (mtdlog->blocksize - erase_total);
+
+          ret = MTD_BWRITE(mtdlog->mtd,
+                           (erase_offset / mtdlog->progsize),
+                           (erase_size / mtdlog->progsize), tmp_buf);
+          if (ret < 0)
+            {
+              ferr("ERROR: MTD_BWRITE failed: %" PRIu32 ", %d\n",
+                   erase_offset, ret);
+              return ret;
+            }
+
+          erase_offset += erase_size;
+          erase_total += erase_size;
+        }
     }
 
   memset(tmp_buf, 0, tmp_buf_size);
@@ -622,7 +656,6 @@ static int mtdlog_detect(FAR struct mtdlog_s *mtdlog)
 {
   int ret;
   uint32_t i;
-  uint32_t around = 0;
   uint16_t min_blkseq = 0;
   uint16_t max_blkseq = 0;
   uint16_t min_blkseq_idx = 0;
@@ -630,7 +663,8 @@ static int mtdlog_detect(FAR struct mtdlog_s *mtdlog)
   uint16_t min_blkseq_grp = 0;
   uint16_t max_blkseq_grp = 0;
   uint16_t valid_block_cnt = 0;
-  uint16_t valid_blkseq_info = 0;
+  uint16_t last_blkseq = 0;
+  uint16_t found_break = 0;
   struct mtdlog_block_s block_info;
 
   /* Traverse all blocks to find the head and tail block. */
@@ -653,11 +687,7 @@ static int mtdlog_detect(FAR struct mtdlog_s *mtdlog)
 
       if (valid_block_cnt == 1)
         {
-          /* The first valid block was found, initialize the information
-           * of min_blkseq and max_blkseq using block_info. Meanwhile, the
-           * corresponding blkidx and blkgrp were recorded.
-           */
-
+          last_blkseq = block_info.blkseq;
           min_blkseq = block_info.blkseq;
           min_blkseq_idx = i;
           min_blkseq_grp = block_info.blkgrp;
@@ -665,22 +695,16 @@ static int mtdlog_detect(FAR struct mtdlog_s *mtdlog)
           max_blkseq_idx = i;
           max_blkseq_grp = block_info.blkgrp;
         }
-
-      if ((max_blkseq == MTDLOG_MAX_BLKSEQ) && (block_info.blkseq == 0))
+      else if ((last_blkseq + 1) != block_info.blkseq)
         {
-          /* The blkseq wraparound occurs when the blkseq reaches
-           * its maximum value and rolls back to zero.
-           * In this case, stop updating the minimum blkseq and
-           * reset the maximum blkseq with current block.
-           */
-
-          around = 1;
-          max_blkseq = block_info.blkseq;
-          max_blkseq_idx = i;
-          max_blkseq_grp = block_info.blkgrp;
+          found_break = 1;
+          min_blkseq = block_info.blkseq;
+          min_blkseq_idx = i;
+          min_blkseq_grp = block_info.blkgrp;
+          break;
         }
 
-      if ((around == 0) && (block_info.blkseq < min_blkseq))
+      if (block_info.blkseq < min_blkseq)
         {
           min_blkseq = block_info.blkseq;
           min_blkseq_idx = i;
@@ -703,41 +727,12 @@ static int mtdlog_detect(FAR struct mtdlog_s *mtdlog)
       return -ENOENT;
     }
 
-  finfo("valid_block_cnt: %d\n", valid_block_cnt);
-
-  /* Check whether blkseq information is invalid. */
-
-  if (around == 0)
-    {
-      uint16_t block_cnt;
-
-      block_cnt = (max_blkseq - min_blkseq + 1);
-
-      if ((max_blkseq >= min_blkseq) && (block_cnt == valid_block_cnt))
-        {
-          valid_blkseq_info = 1;
-        }
-    }
-  else
-    {
-      uint16_t block_cnt;
-
-      block_cnt = (MTDLOG_MAX_BLKSEQ - min_blkseq + 1);
-      block_cnt += (max_blkseq + 1);
-
-      if ((max_blkseq < min_blkseq) && (block_cnt == valid_block_cnt))
-        {
-          valid_blkseq_info = 1;
-        }
-    }
-
-  /* The blkseq information is invalid. */
-
-  if (valid_blkseq_info == 0)
-    {
-      finfo("The blkseq information is invalid\n");
-      return -EINVAL;
-    }
+  finfo("head_blkseq=%"PRIu16", tail_blkseq=%"PRIu16", around=%"PRIu16"\n",
+        min_blkseq, max_blkseq, found_break);
+  finfo("head_blkseq_idx=%"PRIu16", tail_blkseq_idx=%"PRIu16"\n",
+        min_blkseq_idx, max_blkseq_idx);
+  finfo("head_blkseq_grp=%"PRIu16", tail_blkseq_grp=%"PRIu16"\n",
+        min_blkseq_grp, max_blkseq_grp);
 
   /* The max_blkseq corresponds to the last block, and
    * the min_blkseq corresponds to the first block.
