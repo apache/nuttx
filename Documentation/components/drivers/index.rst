@@ -159,7 +159,7 @@ Subdirectories of ``nuttx/drivers``
 
   Motor control drivers.
 
-* ``mtd/`` :doc:`special/mtd`
+* ``mtd/`` :doc:`special/mtd/index`
 
   Memory Technology Device (MTD) drivers.  Some simple drivers for
   memory technologies like FLASH, EEPROM, NVRAM, etc.

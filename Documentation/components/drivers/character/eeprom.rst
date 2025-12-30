@@ -6,7 +6,7 @@ EEPROM
 
    This page describes EEPROM interfacing using a character driver. For the
    more standard MTD interface, refer to the
-   :doc:`MTD documentation <../special/mtd>`.
+   :doc:`MTD documentation <../special/mtd/index>`.
    See `MTD vs character driver <mtd_vs_char_>`_ for when to use each interface.
 
 EEPROMs are a form of Memory Technology Device (MTD).
@@ -204,4 +204,4 @@ because you can open and access the EEPROM part as if it were a single,
 fixed size file.
 
 To use them with a file system, it is preferable to use the
-:doc:`MTD driver <../special/mtd>`.
+:doc:`MTD driver <../special/mtd/index>`.

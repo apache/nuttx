@@ -1,0 +1,20 @@
+===========
+AT25 EEPROM
+===========
+
+NuttX provides support for SPI based EEPROM AT25. The supported
+capacity is 4 MB.
+
+The driver is enabled by option ``CONFIG_MTD_AT25``. It is possible
+to select the SPI mode with ``CONFIG_AT25_SPIMODE`` option and
+communication frequency with ``CONFIG_AT25_SPIFREQUENCY`` option.
+
+The memory has to be initialized before used. This is typically done
+from board support package layer during the board's bringup phase. This
+operation is performed by following function.
+
+.. code-block:: C
+
+   #include <nuttx/mtd/mtd.h>
+
+   FAR struct mtd_dev_s *at25_initialize(FAR struct spi_dev_s *dev)
