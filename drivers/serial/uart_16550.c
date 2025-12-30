@@ -1081,18 +1081,17 @@ static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
-        irqstate_t flags = enter_critical_section();
+        irqstate_t flags = uart_spinlock(dev, false);
         u16550_enablebreaks(priv, true);
-        leave_critical_section(flags);
+        uart_spinunlock(dev, false, flags);
       }
       break;
 
     case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
       {
-        irqstate_t flags;
-        flags = enter_critical_section();
+        irqstate_t flags = uart_spinlock(dev, false);
         u16550_enablebreaks(priv, false);
-        leave_critical_section(flags);
+        uart_spinunlock(dev, false, flags);
       }
       break;
 
@@ -1108,7 +1107,7 @@ static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
             break;
           }
 
-        flags = enter_critical_section();
+        flags = uart_spinlock(dev, false);
 
         cfsetispeed(termiosp, priv->baud);
         termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
@@ -1138,7 +1137,7 @@ static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
             break;
           }
 
-        leave_critical_section(flags);
+        uart_spinunlock(dev, false, flags);
       }
       break;
 
@@ -1153,7 +1152,7 @@ static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
             break;
           }
 
-        flags = enter_critical_section();
+        flags = uart_spinlock(dev, false);
 
         switch (termiosp->c_cflag & CSIZE)
           {
@@ -1191,7 +1190,7 @@ static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
 #endif
 
         u16550_setup(dev);
-        leave_critical_section(flags);
+        uart_spinunlock(dev, false, flags);
 
 #ifdef CONFIG_CLK
         /* Clk enable */
@@ -1588,7 +1587,7 @@ static void u16550_txint(struct uart_dev_s *dev, bool enable)
     }
 #endif
 
-  flags = enter_critical_section();
+  flags = uart_spinlock(dev, false);
   if (enable)
     {
       priv->ier |= UART_IER_ETBEI;
@@ -1606,7 +1605,7 @@ static void u16550_txint(struct uart_dev_s *dev, bool enable)
       u16550_serialout(priv, UART_IER_OFFSET, priv->ier);
     }
 
-  leave_critical_section(flags);
+  uart_spinunlock(dev, false, flags);
 }
 
 /****************************************************************************
