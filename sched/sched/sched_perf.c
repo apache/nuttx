@@ -497,18 +497,15 @@ static FAR struct pmu_s *perf_get_pmu(FAR struct perf_event_s *event)
 
   list_for_every_entry(&g_perf_pmus, pmu, struct pmu_s, node)
     {
-      if (event->attr.type == pmu->type)
+      if (pmu->ops->event_match && pmu->ops->event_match(event) != 0)
         {
-          if (pmu->ops->event_match && pmu->ops->event_match(event) != 0)
-            {
-              continue;
-            }
+          continue;
+        }
 
-          event->pmu = pmu;
-          if (pmu->ops->event_init(event) == 0)
-            {
-              return pmu;
-            }
+      event->pmu = pmu;
+      if (pmu->ops->event_init(event) == 0)
+        {
+          return pmu;
         }
     }
 
@@ -2495,7 +2492,8 @@ static int perf_cpuclock_event_read(FAR struct perf_event_s *event)
 
 static int perf_cpuclock_event_match(FAR struct perf_event_s *event)
 {
-  if (event->attr.config == PERF_COUNT_SW_CPU_CLOCK)
+  if (event->attr.type == PERF_TYPE_SOFTWARE &&
+      event->attr.config == PERF_COUNT_SW_CPU_CLOCK)
     {
       return 0;
     }
@@ -2555,7 +2553,8 @@ static int perf_swevent_read(FAR struct perf_event_s *event)
 
 static int perf_swevent_match(FAR struct perf_event_s *event)
 {
-  if (event->attr.config == PERF_COUNT_SW_CONTEXT_SWITCHES)
+  if (event->attr.type == PERF_TYPE_SOFTWARE &&
+      event->attr.config == PERF_COUNT_SW_CONTEXT_SWITCHES)
     {
       return 0;
     }
@@ -2624,8 +2623,8 @@ int perf_event_init(void)
 
   /* Register clock event */
 
-  perf_pmu_register(&g_perf_swevent, "software", PERF_TYPE_SOFTWARE);
-  perf_pmu_register(&g_perf_cpu_clock, "cpu_clock", PERF_TYPE_SOFTWARE);
+  perf_pmu_register(&g_perf_swevent, "software");
+  perf_pmu_register(&g_perf_cpu_clock, "cpu_clock");
 
   return OK;
 }
@@ -2791,19 +2790,17 @@ exit:
  * Input Parameters:
  *   pmu  - Pmu entry.
  *   name - Pmu name.
- *   type - Perf type id.
  *
  * Returned Value:
  *   Register result
  *
  ****************************************************************************/
 
-int perf_pmu_register(FAR struct pmu_s *pmu, FAR const char *name, int type)
+int perf_pmu_register(FAR struct pmu_s *pmu, FAR const char *name)
 {
   int i;
 
   pmu->name = name;
-  pmu->type = type;
 
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {

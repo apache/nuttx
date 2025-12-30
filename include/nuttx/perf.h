@@ -309,7 +309,6 @@ struct pmu_s
 {
   struct list_node node;
   FAR const char *name;
-  int type;
   FAR struct pmu_ops_s *ops;
   struct pmu_cpu_context_s cpu_pmu_ctx[CONFIG_SMP_NCPUS];
 };
@@ -794,14 +793,13 @@ int perf_event_overflow(FAR struct perf_event_s *event);
  * Input Parameters:
  *   pmu  - Pmu entry.
  *   name - Pmu name.
- *   type - Perf type id.
  *
  * Returned Value:
  *   Register result
  *
  ****************************************************************************/
 
-int perf_pmu_register(FAR struct pmu_s *pmu, FAR const char *name, int type);
+int perf_pmu_register(FAR struct pmu_s *pmu, FAR const char *name);
 
 /****************************************************************************
  * Name: perf_pmu_unregister

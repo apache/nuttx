@@ -552,8 +552,7 @@ static void arm64pmu_free(FAR struct arm64_pmu_s *arm64pmu)
 
 static int arm64pmu_register(FAR struct arm64_pmu_s *arm64pmu)
 {
-  return perf_pmu_register(&arm64pmu->pmu, arm64pmu->name,
-                           PERF_TYPE_HARDWARE);
+  return perf_pmu_register(&arm64pmu->pmu, arm64pmu->name);
 }
 
 static int arm64pmu_map_event(FAR struct perf_event_s *event,
