@@ -371,9 +371,10 @@ static int ipv4_forward_callback(FAR struct net_driver_s *fwddev,
 
   DEBUGASSERT(fwddev != NULL);
 
-  /* Only IFF_UP device and non-loopback device need forward packet */
+  /* Only IFF_RUNNING device and non-loopback device need forward packet */
 
-  if (!IFF_IS_UP(fwddev->d_flags) || fwddev->d_lltype == NET_LL_LOOPBACK)
+  if (!IFF_IS_RUNNING(fwddev->d_flags) ||
+      fwddev->d_lltype == NET_LL_LOOPBACK)
     {
       return OK;
     }
