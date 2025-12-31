@@ -76,6 +76,9 @@ struct pkt_conn_s
   uint8_t    crefs;    /* Reference counts on this instance */
   uint16_t   type;     /* The Ethernet type of the packet */
 
+#if CONFIG_NET_RECV_BUFSIZE > 0
+  int32_t    rcvbufs;  /* Maximum amount of bytes queued in recv */
+#endif
 #ifdef CONFIG_NET_PKT_WRITE_BUFFERS
   /* Write buffering
    *
