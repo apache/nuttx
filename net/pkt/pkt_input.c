@@ -215,6 +215,15 @@ static int pkt_in(FAR struct net_driver_s *dev)
         {
           /* Add the PKT to the socket read-ahead buffer. */
 
+#if CONFIG_NET_RECV_BUFSIZE > 0
+          if ((iob_get_queue_size(&conn->readahead) + dev->d_len) >
+              conn->rcvbufs)
+            {
+              nwarn("WARNING: Full read-ahead buffer, dropping packet\n");
+              continue;
+            }
+#endif
+
           if (pkt_datahandler(dev, conn, &conn->readahead) == 0)
             {
               /* No.. the packet was not processed now.  Return -EAGAIN so
