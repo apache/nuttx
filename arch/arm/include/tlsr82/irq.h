@@ -160,12 +160,13 @@
 #ifndef __ASSEMBLY__
 struct xcptcontext
 {
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   /* These are saved register array pointer used during
    * signal processing.
    */
 
   uint32_t *saved_regs;
-
+#endif /* CONFIG_ENABLE_ALL_SIGNALS */
   /* Register save area */
 
   uint32_t *regs;
