@@ -1163,7 +1163,14 @@ static int rptun_dev_reset(FAR struct rptun_priv_s *priv, unsigned long val)
               break;
             }
 
-          up_udelay(1000);
+          if (up_interrupt_context())
+            {
+              up_udelay(1000);
+            }
+          else
+            {
+              nxsig_usleep(1000);
+            }
         }
     }
 
