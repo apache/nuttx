@@ -353,7 +353,7 @@ void up_invalidate_dcache(uintptr_t start, uintptr_t end)
 {
   uint32_t items = (end - start) / up_get_dcache_linesize();
 
-  cache_invalidate_dcache_items((uint32_t)start, end);
+  cache_invalidate_dcache_items((uint32_t)start, items);
 }
 #endif
 
@@ -466,7 +466,7 @@ void up_flush_dcache(uintptr_t start, uintptr_t end)
 
   cache_writeback_addr((uint32_t)start, (uint32_t)(end - start));
 
-  cache_invalidate_dcache_items((uint32_t)start, end);
+  cache_invalidate_dcache_items((uint32_t)start, items);
 }
 #endif
 
