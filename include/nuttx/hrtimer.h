@@ -201,6 +201,42 @@ int hrtimer_start(FAR hrtimer_t *hrtimer,
                   uint64_t ns,
                   enum hrtimer_mode_e mode);
 
+/****************************************************************************
+ * Name: hrtimer_set
+ *
+ * Description:
+ *   Set or update the callback function and argument for a high-resolution
+ *   timer.
+ *
+ *   This function only updates the callback context associated with the
+ *   timer.  It does not arm, disarm, or otherwise modify the timer's
+ *   expiration state.
+ *
+ *   If the timer callback is currently executing, the updated callback
+ *   function will not affect the running invocation, but will be observed
+ *   by any subsequent expiration.
+ *
+ * Input Parameters:
+ *   hrtimer - Pointer to the high-resolution timer instance.
+ *   func    - Callback function to be invoked on timer expiration.
+ *   arg     - Argument passed to the callback function.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Notes:
+ *   - The global hrtimer spinlock protects access to the timer state.
+ *   - The caller must ensure that the timer structure remains valid while
+ *     the callback may still be executing.
+ *   - This function is safe to call regardless of whether the timer is
+ *     currently armed or inactive.
+ *
+ ****************************************************************************/
+
+int hrtimer_set(FAR hrtimer_t *hrtimer,
+                hrtimer_cb func,
+                FAR void *arg);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
