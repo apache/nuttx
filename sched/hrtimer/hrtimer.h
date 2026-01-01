@@ -32,13 +32,22 @@
 #include <nuttx/clock.h>
 #include <nuttx/hrtimer.h>
 
+#ifdef CONFIG_HRTIMER
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define HRTIMER_ISARMED(hrtimer) ((RB_PARENT(&((hrtimer)->node), entry) != NULL) || \
+                                  (RB_ROOT(&g_hrtimer_tree) == &((hrtimer)->node)))
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
 /* Spinlock protecting access to the hrtimer RB-tree and timer state */
 
-extern spinlock_t g_hrtimer_spinlock;
+extern seqcount_t g_hrtimer_spinlock;
 
 /* Red-Black tree containing all active high-resolution timers */
 
@@ -154,7 +163,7 @@ int hrtimer_starttimer(uint64_t ns)
 
 static inline_function
 int hrtimer_compare(FAR const hrtimer_node_t *a,
-                FAR const hrtimer_node_t *b)
+                    FAR const hrtimer_node_t *b)
 {
   FAR const hrtimer_t *atimer = (FAR const hrtimer_t *)a;
   FAR const hrtimer_t *btimer = (FAR const hrtimer_t *)b;
@@ -172,5 +181,7 @@ int hrtimer_compare(FAR const hrtimer_node_t *a,
  ****************************************************************************/
 
 RB_PROTOTYPE(hrtimer_tree_s, hrtimer_node_s, entry, hrtimer_compare);
+
+#endif /* CONFIG_HRTIMER */
 
 #endif /* __SCHED_HRTIMER_HRTIMER_H */

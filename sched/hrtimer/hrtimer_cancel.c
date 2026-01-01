@@ -28,8 +28,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 
-#include <errno.h>
-
+#include "sched/sched.h"
 #include "hrtimer/hrtimer.h"
 
 /****************************************************************************
@@ -83,57 +82,31 @@
 int hrtimer_cancel(FAR hrtimer_t *hrtimer)
 {
   FAR hrtimer_t *first;
-  irqstate_t     flags;
-  int            ret = OK;
+  irqstate_t flags;
+  int ret = OK;
 
   DEBUGASSERT(hrtimer != NULL);
 
   /* Enter critical section to protect the hrtimer tree and state */
 
-  flags = spin_lock_irqsave(&g_hrtimer_spinlock);
+  flags = write_seqlock_irqsave(&g_hrtimer_spinlock);
 
   /* Capture the current earliest timer before any modification */
 
   first = (FAR hrtimer_t *)RB_MIN(hrtimer_tree_s, &g_hrtimer_tree);
 
-  switch (hrtimer->state)
+  if (HRTIMER_ISARMED(hrtimer))
     {
-      case HRTIMER_STATE_ARMED:
-        {
-          /* Remove the timer from the active tree */
-
-          RB_REMOVE(hrtimer_tree_s, &g_hrtimer_tree, &hrtimer->node);
-          hrtimer->state = HRTIMER_STATE_INACTIVE;
-          break;
-        }
-
-      case HRTIMER_STATE_RUNNING:
-        {
-          /* The callback is currently executing.
-           *
-           * Mark the timer as canceled so it will not be re-armed or
-           * executed again.  The running callback is allowed to complete.
-           *
-           * NOTE: The timer node is expected to have already been removed
-           *       from the tree when the callback started executing.
-           */
-
-          hrtimer->state = HRTIMER_STATE_CANCELED;
-          break;
-        }
-
-      case HRTIMER_STATE_INACTIVE:
-      case HRTIMER_STATE_CANCELED:
-      default:
-        {
-          ret = -EINVAL;
-          break;
-        }
+      RB_REMOVE(hrtimer_tree_s, &g_hrtimer_tree, &hrtimer->node);
     }
+
+  /* Mark the timer as cancelled */
+
+  hrtimer->expired = UINT64_MAX;
 
   /* If the canceled timer was the earliest one, update the hardware timer */
 
-  if ((ret == OK) && (first == hrtimer))
+  if (first == hrtimer)
     {
       first = (FAR hrtimer_t *)RB_MIN(hrtimer_tree_s, &g_hrtimer_tree);
       if (first != NULL)
@@ -144,7 +117,7 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer)
 
   /* Leave critical section */
 
-  spin_unlock_irqrestore(&g_hrtimer_spinlock, flags);
+  write_sequnlock_irqrestore(&g_hrtimer_spinlock, flags);
   return ret;
 }
 
@@ -196,7 +169,7 @@ int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer)
    * and the state becomes inactive.
    */
 
-  while (hrtimer->state != HRTIMER_STATE_INACTIVE)
+  while (hrtimer->cpus != 0)
     {
       if (cansleep)
         {

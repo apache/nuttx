@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
+
 #include "hrtimer/hrtimer.h"
 
 /****************************************************************************
@@ -54,7 +55,7 @@
  *       if no timers remain.
  *
  * Input Parameters:
- *   ts - Pointer to the current high-resolution timestamp.
+ *   now - Current high-resolution timestamp.
  *
  * Returned Value:
  *   None.
@@ -69,13 +70,15 @@
 void hrtimer_process(uint64_t now)
 {
   FAR hrtimer_t *hrtimer;
-  uint64_t expired;
-  uint32_t period = 0;
   irqstate_t flags;
+  uint32_t period = 0;
+  hrtimer_cb func;
+  FAR void *arg;
+  uint64_t expired;
 
   /* Lock the hrtimer RB-tree to protect access */
 
-  flags = spin_lock_irqsave(&g_hrtimer_spinlock);
+  flags = write_seqlock_irqsave(&g_hrtimer_spinlock);
 
   /* Fetch the earliest active timer */
 
@@ -83,9 +86,18 @@ void hrtimer_process(uint64_t now)
 
   while (hrtimer != NULL)
     {
+      func = hrtimer->func;
+
+      /* Ensure the timer callback is valid */
+
+      DEBUGASSERT(func != NULL);
+
+      expired = hrtimer->expired;
+      arg = hrtimer->arg;
+
       /* Check if the timer has expired */
 
-      if (!clock_compare(hrtimer->expired, now))
+      if (!clock_compare(expired, now))
         {
           break;
         }
@@ -94,32 +106,36 @@ void hrtimer_process(uint64_t now)
 
       RB_REMOVE(hrtimer_tree_s, &g_hrtimer_tree, &hrtimer->node);
 
-      /* Ensure the timer callback is valid */
+      /* Increment running reference counter */
 
-      DEBUGASSERT(hrtimer->func != NULL);
+      hrtimer->cpus++;
 
-      hrtimer->state = HRTIMER_STATE_RUNNING;
+      /* cpus is a running reference counter and must never wrap */
 
-      spin_unlock_irqrestore(&g_hrtimer_spinlock, flags);
+      DEBUGASSERT(hrtimer->cpus != 0);
+
+      /* Leave critical section before invoking the callback */
+
+      write_sequnlock_irqrestore(&g_hrtimer_spinlock, flags);
 
       /* Invoke the timer callback */
 
-      period = hrtimer->func(hrtimer);
+      period = func(arg);
 
-      flags = spin_lock_irqsave(&g_hrtimer_spinlock);
+      /* Re-enter critical section to update timer state */
 
-      if ((hrtimer->state == HRTIMER_STATE_CANCELED) || (period == 0))
+      flags = write_seqlock_irqsave(&g_hrtimer_spinlock);
+
+      hrtimer->cpus--;
+
+      /* Re-arm periodic timer if not canceled or re-armed concurrently */
+
+      if (period > 0 && hrtimer->expired == expired)
         {
-          /* Timer is canceled or one-shot; mark it inactive */
+          hrtimer->expired = expired + period;
 
-          hrtimer->state = HRTIMER_STATE_INACTIVE;
-        }
-      else
-        {
-          /* Restart the periodic timer */
+          /* Re-insert into the RB-tree */
 
-          hrtimer->expired += period;
-          hrtimer->state = HRTIMER_STATE_ARMED;
           RB_INSERT(hrtimer_tree_s, &g_hrtimer_tree, &hrtimer->node);
         }
 
@@ -139,5 +155,5 @@ void hrtimer_process(uint64_t now)
 
   /* Leave critical section */
 
-  spin_unlock_irqrestore(&g_hrtimer_spinlock, flags);
+  write_sequnlock_irqrestore(&g_hrtimer_spinlock, flags);
 }
