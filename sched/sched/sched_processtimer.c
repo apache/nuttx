@@ -111,11 +111,9 @@ static uint32_t nxsched_hrtimer_callback(FAR void *arg)
   UNUSED(arg);
 
 #ifdef CONFIG_SCHED_TICKLESS
-  uint64_t now = hrtimer_gettime();
-
   /* Notify scheduler of the current time (converted to ticks) */
 
-  nxsched_tick_expiration(NSEC2TICK(now));
+  nxsched_timer_expiration();
 
 #else
 
@@ -342,7 +340,7 @@ void nxsched_process_timer(void)
   nxsched_process_hrtimer();
 
 #elif defined(CONFIG_SCHED_TICKLESS)
- /* Legacy tickless scheduling */
+  /* Legacy tickless scheduling */
 
   nxsched_timer_expiration();
 
