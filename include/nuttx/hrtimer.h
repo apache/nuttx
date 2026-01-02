@@ -30,10 +30,11 @@
 #include <nuttx/config.h>
 #include <nuttx/clock.h>
 #include <nuttx/compiler.h>
-#include <nuttx/spinlock.h>
+#include <nuttx/seqlock.h>
 
 #include <stdint.h>
 #include <sys/tree.h>
+#include <errno.h>
 
 /****************************************************************************
  * Public Types
@@ -51,20 +52,6 @@ enum hrtimer_mode_e
   HRTIMER_MODE_REL       /* Relative delay from now */
 };
 
-/* High-resolution timer states
- *
- * State transitions are managed internally by the hrtimer framework.
- * Callers must not modify the state directly.
- */
-
-enum hrtimer_state_e
-{
-  HRTIMER_STATE_INACTIVE = 0, /* Timer is inactive and not queued */
-  HRTIMER_STATE_ARMED,        /* Timer is armed and waiting for expiry */
-  HRTIMER_STATE_RUNNING,      /* Timer callback is currently executing */
-  HRTIMER_STATE_CANCELED      /* Timer canceled (callback may be running) */
-};
-
 /* Forward declarations */
 
 struct hrtimer_s;
@@ -79,7 +66,7 @@ typedef struct hrtimer_node_s hrtimer_node_t;
  * timer context and must not block.
  */
 
-typedef uint32_t (*hrtimer_cb)(FAR struct hrtimer_s *hrtimer);
+typedef uint32_t (*hrtimer_cb)(FAR void *arg);
 
 /* Red-black tree node used to order hrtimers by expiration time */
 
@@ -97,11 +84,11 @@ struct hrtimer_node_s
 
 struct hrtimer_s
 {
-  hrtimer_node_t          node;    /* RB-tree node for sorted insertion */
-  enum hrtimer_state_e    state;   /* Current timer state */
-  hrtimer_cb              func;    /* Expiration callback function */
-  FAR void               *arg;     /* Argument passed to callback */
-  uint64_t                expired; /* Absolute expiration time (ns) */
+  hrtimer_node_t node;   /* RB-tree node for sorted insertion */
+  hrtimer_cb func;       /* Expiration callback function */
+  FAR void *arg;         /* Argument passed to callback */
+  uint64_t expired;      /* Absolute expiration time (ns) */
+  uint8_t cpus;          /* Number of cpus that are running the timer */
 };
 
 /****************************************************************************
@@ -138,9 +125,10 @@ void hrtimer_init(FAR hrtimer_t *hrtimer,
                   hrtimer_cb func,
                   FAR void *arg)
 {
-  hrtimer->state = HRTIMER_STATE_INACTIVE;
-  hrtimer->func  = func;
-  hrtimer->arg   = arg;
+  memset(hrtimer, 0, sizeof(hrtimer_t));
+  hrtimer->func = func;
+  hrtimer->arg = arg;
+  hrtimer->cpus = 0;
 }
 
 /****************************************************************************
@@ -212,6 +200,42 @@ int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer);
 int hrtimer_start(FAR hrtimer_t *hrtimer,
                   uint64_t ns,
                   enum hrtimer_mode_e mode);
+
+/****************************************************************************
+ * Name: hrtimer_set
+ *
+ * Description:
+ *   Set or update the callback function and argument for a high-resolution
+ *   timer.
+ *
+ *   This function only updates the callback context associated with the
+ *   timer.  It does not arm, disarm, or otherwise modify the timer's
+ *   expiration state.
+ *
+ *   If the timer callback is currently executing, the updated callback
+ *   function will not affect the running invocation, but will be observed
+ *   by any subsequent expiration.
+ *
+ * Input Parameters:
+ *   hrtimer - Pointer to the high-resolution timer instance.
+ *   func    - Callback function to be invoked on timer expiration.
+ *   arg     - Argument passed to the callback function.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Notes:
+ *   - The global hrtimer spinlock protects access to the timer state.
+ *   - The caller must ensure that the timer structure remains valid while
+ *     the callback may still be executing.
+ *   - This function is safe to call regardless of whether the timer is
+ *     currently armed or inactive.
+ *
+ ****************************************************************************/
+
+int hrtimer_set(FAR hrtimer_t *hrtimer,
+                hrtimer_cb func,
+                FAR void *arg);
 
 #undef EXTERN
 #ifdef __cplusplus
