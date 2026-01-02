@@ -33,6 +33,16 @@
 #  include <stdint.h>
 #endif
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#warning "CONFIG_BOARD_LOOPSPERMSEC is set to 0 to prevent CI build errors." \
+"up_udelay() and similar delay functions will not work correctly." \
+"If you use this board, please determine an appropriate value using the" \
+"calib_udelay application in nuttx-apps. It would be appreciated if you" \
+"submit a patch with the new value to apache/nuttx and remove this warning."
+
 #define HCLK_FREQUENCY    32000000ul       /* HSI48 for USB, only some STM32F0xx */
 
 #endif /* __BOARDS_ARM_PHY62XX_PHY6222_INCLUDE_BOARD_H */
