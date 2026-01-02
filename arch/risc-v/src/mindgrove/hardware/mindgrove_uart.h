@@ -29,4 +29,5 @@
 #define UART_STATUS_OFFSET      0x0c
 #define UART_EV_ENABLE_OFFSET   0x18
 #define UART_BAUD_OFFSET        0x00
+#define UART_CTRL_OFFSET        0x14
 #endif

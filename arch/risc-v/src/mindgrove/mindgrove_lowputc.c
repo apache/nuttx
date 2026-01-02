@@ -93,7 +93,7 @@ void mindgrove_lowsetup(void)
 #if defined(HAVE_SERIAL_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
 
   /* default baudrate set by fpga fabric is 1e6 */
-  unsigned int baud_count = (30000000 / (16 * 115200));
+  unsigned int baud_count = 16;
   putreg16(baud_count,MINDGROVE_CONSOLE_BASE);
   UART_REG(0)->CTRL = (STOP_BITS(0) | PARITY(0) | UART_TX_RX_LEN(8));
   // printf("hiiii");

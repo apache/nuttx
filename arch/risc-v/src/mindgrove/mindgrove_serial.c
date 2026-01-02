@@ -66,26 +66,51 @@
  * be ttyS0.  If there is no console then will use the lowest numbered UART.
  */
 
+// #ifdef HAVE_SERIAL_CONSOLE
+// #  if defined(CONFIG_UART0_SERIAL_CONSOLE)
+// #    define CONSOLE_DEV     g_uart0port     /* UART0 is console */
+// #    define TTYS0_DEV       g_uart0port     /* UART0 is ttyS0 */
+// #    undef  TTYS1_DEV                       /* No ttyS1 */
+// #    define SERIAL_CONSOLE  1
+// #  else
+// #    error "I'm confused... Do we have a serial console or not?"
+// #  endif
+// #else
+// #  undef  CONSOLE_DEV                        /* No console */
+// #  undef  CONFIG_UART0_SERIAL_CONSOLE
+// #  if defined(CONFIG_MINDGROVE_UART0)
+// #    define TTYS0_DEV       g_uart0port     /* UART0 is ttyS0 */
+// #    undef  TTYS1_DEV                       /* No ttyS1 */
+// #    define SERIAL_CONSOLE  1
+// #  else
+// #    undef  TTYS0_DEV
+// #    undef  TTYS1_DEV
+// #  endif
+// #endif
+
+
 #ifdef HAVE_SERIAL_CONSOLE
 #  if defined(CONFIG_UART0_SERIAL_CONSOLE)
-#    define CONSOLE_DEV     g_uart0port     /* UART0 is console */
-#    define TTYS0_DEV       g_uart0port     /* UART0 is ttyS0 */
-#    undef  TTYS1_DEV                       /* No ttyS1 */
+     /* UART0 is console, also ttyS0 */
+#    define CONSOLE_DEV     g_uart0port
+#    define TTYS0_DEV       g_uart0port
 #    define SERIAL_CONSOLE  1
 #  else
-#    error "I'm confused... Do we have a serial console or not?"
+#    error "Only UART0 can be console on this board"
 #  endif
 #else
-#  undef  CONSOLE_DEV                        /* No console */
-#  undef  CONFIG_UART0_SERIAL_CONSOLE
-#  if defined(CONFIG_MINDGROVE_UART0)
-#    define TTYS0_DEV       g_uart0port     /* UART0 is ttyS0 */
-#    undef  TTYS1_DEV                       /* No ttyS1 */
-#    define SERIAL_CONSOLE  1
-#  else
-#    undef  TTYS0_DEV
-#    undef  TTYS1_DEV
-#  endif
+#  undef CONSOLE_DEV
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#endif
+
+/* Register UART1 if enabled */
+#ifdef CONFIG_MINDGROVE_UART1
+#  define TTYS1_DEV         g_uart1port
+#endif
+
+/* Register UART2 if enabled */
+#ifdef CONFIG_MINDGROVE_UART2
+#  define TTYS2_DEV         g_uart2port
 #endif
 
 /* Common initialization logic will not not know that the all of the UARTs
@@ -199,7 +224,7 @@ static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 #endif
 
 #ifdef CONFIG_MINDGROVE_UART1
-static struct up_dev_s g_uart0priv =
+static struct up_dev_s g_uart1priv =
 {
   .uartbase  = 0x11400,
   .baud      = CONFIG_UART1_BAUD,
@@ -208,9 +233,7 @@ static struct up_dev_s g_uart0priv =
 
 static uart_dev_t g_uart1port =
 {
-#if SERIAL_CONSOLE == 1
-  .isconsole = 1,
-#endif
+
   .recv      =
   {
     .size    = CONFIG_UART1_RXBUFSIZE,
@@ -219,7 +242,7 @@ static uart_dev_t g_uart1port =
   .xmit      =
   {
     .size    = CONFIG_UART1_TXBUFSIZE,
-    .buffer  = g_uart0txbuffer,
+    .buffer  = g_uart1txbuffer,
   },
   .ops       = &g_uart_ops,
   .priv      = &g_uart1priv,
@@ -227,8 +250,8 @@ static uart_dev_t g_uart1port =
 #endif
 
 #ifdef CONFIG_MINDGROVE_UART2
-static char g_uart0rxbuffer[CONFIG_UART2_RXBUFSIZE];
-static char g_uart0txbuffer[CONFIG_UART2_TXBUFSIZE];
+static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
+static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
 #endif
 
 #ifdef CONFIG_MINDGROVE_UART2
@@ -241,9 +264,7 @@ static struct up_dev_s g_uart2priv =
 
 static uart_dev_t g_uart2port =
 {
-#if SERIAL_CONSOLE == 1
-  .isconsole = 1,
-#endif
+
   .recv      =
   {
     .size    = CONFIG_UART2_RXBUFSIZE,
@@ -346,6 +367,9 @@ static uint32_t up_serialin(struct up_dev_s *priv, int offset)
 
 static void up_serialout(struct up_dev_s *priv, int offset, uint32_t value)
 {
+    if (priv->uartbase==0x11400){
+    printf("setup\n\r");
+  }
   putreg8(value, priv->uartbase + offset);
 }
 
@@ -386,6 +410,7 @@ static void up_disableuartint(struct up_dev_s *priv, uint8_t *im)
   priv->im = 0;
 
   putreg16(0, priv->uartbase + UART_EV_ENABLE_OFFSET);
+  
 
   leave_critical_section(flags);
 }
@@ -401,9 +426,14 @@ static void up_disableuartint(struct up_dev_s *priv, uint8_t *im)
 
 static int up_setup(struct uart_dev_s *dev)
 {
+
+
   // unsigned int baud_count = 50000000 / (16 * CONFIG_UART0_BAUD);
-  // struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-  // up_serialout(priv,UART_BAUD_OFFSET,baud_count);
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+   
+   uint32_t baud_count = 19;//(SYSTEM_CLK / (16 * priv->baud));
+  up_serialout(priv,UART_BAUD_OFFSET,baud_count);
+    up_serialout(priv,UART_CTRL_OFFSET,0x0000);
 
   return OK;
 }
@@ -445,14 +475,18 @@ static int up_attach(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   int ret;
+if (priv->uartbase==0x11400){
 
+    printf("attach\n\r");
+  }
   /* Initialize interrupt generation on the peripheral */
 
-  putreg16((ENABLE_RX_NOT_EMPTY | ENABLE_RX_FULL | ENABLE_TX_EMPTY), priv->uartbase + UART_EV_ENABLE_OFFSET);
+  // putreg16((ENABLE_RX_NOT_EMPTY | ENABLE_RX_FULL | ENABLE_TX_EMPTY), priv->uartbase + UART_EV_ENABLE_OFFSET);
   
-  // up_serialout(priv, UART_EV_ENABLE_OFFSET,ENABLE_RX_NOT_EMPTY | ENABLE_RX_FULL | ENABLE_TX_EMPTY);
+  up_serialout(priv, UART_EV_ENABLE_OFFSET,ENABLE_RX_NOT_EMPTY | ENABLE_RX_FULL | ENABLE_TX_EMPTY);
 
   ret = irq_attach(priv->irq, up_interrupt, dev);
+    printf("irq_num%d\n\r",priv->irq);
 
   if (ret == OK)
     {
@@ -479,6 +513,9 @@ static int up_attach(struct uart_dev_s *dev)
 static void up_detach(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  if (priv->uartbase==0x11400){
+    printf("detach\n\r");
+  }
 
   /* Disable interrupts */
 
@@ -503,6 +540,7 @@ static void up_detach(struct uart_dev_s *dev)
 
 static int up_interrupt(int irq, void *context, void *arg)
 {
+  
   // _alert("here\n");
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct up_dev_s   *priv;
@@ -511,6 +549,10 @@ static int up_interrupt(int irq, void *context, void *arg)
 
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
   priv = (struct up_dev_s *)dev->priv;
+  //  printf("up_interrupt%d\n\r",priv->uartbase);
+if (priv->uartbase==0x11400){
+    printf("up_interrupt\n\r");
+  }
 
   /* Loop until there are no characters to be t(ransferred or,
    * until we have been looping for a long time.
@@ -520,8 +562,9 @@ static int up_interrupt(int irq, void *context, void *arg)
       /* Retrieve interrupt pending status */
 
       status =  getreg16(priv->uartbase+UART_STATUS_OFFSET);
+     
     
-      if (status & STS_RX_FULL==0 && status & STS_RX_NOT_EMPTY==0 && status&STS_TX_EMPTY==0)
+      if ((status & STS_RX_FULL==0) && (status & STS_RX_NOT_EMPTY==0) &&( status&STS_TX_EMPTY==0))
         {
           break;
         }
@@ -574,18 +617,44 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 {
+  
+
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   int rxdata;
 
   /* Return status information */
-  uint8_t status1 =  getreg16(priv->uartbase+UART_STATUS_OFFSET);
+  uint16_t status1 =  getreg16(priv->uartbase+UART_STATUS_OFFSET);
+
   while((status1 & STS_RX_NOT_EMPTY) == 0){
     status1 =  getreg16(priv->uartbase+UART_STATUS_OFFSET);
+   printf("status_rec%d\n\r,",status1);
   }
   rxdata = getreg8(priv->uartbase+UART_RX_OFFSET);
+  // printf("%d",priv->uartbase);
+  
+  if (priv->uartbase==0x11400){
+    printf("rxdata%d\n\r",rxdata);
+  }
 
   return rxdata;
 }
+
+// static int up_receive(struct uart_dev_s *dev, unsigned int *status)
+// {
+//     struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+
+//     /* Read status first */
+//     uint16_t stat = getreg16(priv->uartbase + UART_STATUS_OFFSET);
+//     if (status) {
+//         *status = stat;
+//         printf("status_rec%d\n\r,",stat);
+//     }
+
+//     /* Read the byte */
+//     int ch = getreg8(priv->uartbase+ UART_RX_OFFSET);
+ 
+//     return ch;
+// }
 
 /****************************************************************************
  * Name: up_rxint
@@ -597,15 +666,19 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 
 static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
+  
+
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   irqstate_t flags = enter_critical_section();
 
   if (enable)
     {
+      if (priv->uartbase==0x11400){
+      printf("enable%d\n\r",enable );}
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
     // priv->im |= ENABLE_RX_FULL;
     // priv->im |= ENABLE_RX_NOT_EMPTY;
-    priv->im = ENABLE_RX_NOT_EMPTY;
+    priv->im |= ENABLE_RX_NOT_EMPTY;
 
 #endif
     }
@@ -613,15 +686,19 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     {
       // priv->im &= ~ENABLE_RX_FULL;
       // priv->im &= ~ENABLE_RX_NOT_EMPTY;
-      priv->im = ~ENABLE_RX_NOT_EMPTY;
+      priv->im &= ~ENABLE_RX_NOT_EMPTY;
 
     }
 
     putreg16(priv->im , priv->uartbase + UART_EV_ENABLE_OFFSET);
+    if (priv->uartbase==0x11400){
+  printf("rx_int_hello %d\n\r",priv->im);
+   
+  }
     // unsigned short *int_reg = (unsigned short*)0x11318;
     // printf("int reg=%x!\n\r",*int_reg);
   // up_serialout(priv, UART_EV_ENABLE_OFFSET, priv->im);
-
+// printf("hello\n\r");
   leave_critical_section(flags);
 }
 
@@ -635,8 +712,14 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool up_rxavailable(struct uart_dev_s *dev)
 {
+ 
+
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint8_t status = getreg16(priv->uartbase+UART_STATUS_OFFSET);
+  
+  if (priv->uartbase==0x11400){
+    printf("status_rx_avail%d\n\r",status);
+  }
   /* Return true is data is available in the receive data buffer */
   return status & STS_RX_NOT_EMPTY;
 }
@@ -775,6 +858,10 @@ void riscv_earlyserialinit(void)
   CONSOLE_DEV.isconsole = true;
   up_setup(&CONSOLE_DEV);
 #endif
+
+// #ifdef TTYS1_DEV
+//   up_setup(&TTYS1_DEV);
+// #endif
 }
 #endif
 
@@ -787,6 +874,22 @@ void riscv_earlyserialinit(void)
  *
  ****************************************************************************/
 
+// void riscv_serialinit(void)
+// {
+//   /* Register the console */
+
+// #ifdef HAVE_SERIAL_CONSOLE
+//   uart_register("/dev/console", &CONSOLE_DEV);
+// #endif
+
+//   /* Register all UARTs */
+
+//   uart_register("/dev/ttyS0", &TTYS0_DEV);
+  
+// #ifdef TTYS1_DEV
+//   uart_register("/dev/ttyS1", &TTYS1_DEV);
+// #endif
+// }
 void riscv_serialinit(void)
 {
   /* Register the console */
@@ -797,11 +900,19 @@ void riscv_serialinit(void)
 
   /* Register all UARTs */
 
+#ifdef CONFIG_MINDGROVE_UART0
   uart_register("/dev/ttyS0", &TTYS0_DEV);
-#ifdef TTYS1_DEV
+#endif
+
+#ifdef CONFIG_MINDGROVE_UART1
   uart_register("/dev/ttyS1", &TTYS1_DEV);
 #endif
+
+#ifdef CONFIG_MINDGROVE_UART2
+  uart_register("/dev/ttyS2", &TTYS2_DEV);
+#endif
 }
+
 
 /****************************************************************************
  * Name: up_putc

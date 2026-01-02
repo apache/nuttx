@@ -23,4 +23,74 @@ config MINDGROVE_UART0
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select MINDGROVE_UART
 
+config MINDGROVE_HAVE_UART1
+    bool
+    default y
+    select UART1_SERIALDRIVER
+    select ARCH_HAVE_SERIAL_TERMIOS
+
+config MINDGROVE_UART1
+    bool "UART1"
+    default y
+    select ARCH_HAVE_UART1
+    select ARCH_HAVE_SERIAL_TERMIOS
+    select MINDGROVE_UART
+
+config MINDGROVE_HAVE_UART2
+    bool
+    default y
+    select UART2_SERIALDRIVER
+    select ARCH_HAVE_SERIAL_TERMIOS
+
+config MINDGROVE_UART2
+    bool "UART2"
+    default y
+    select ARCH_HAVE_UART2
+    select ARCH_HAVE_SERIAL_TERMIOS
+    select MINDGROVE_UART
+
+config MINDGROVE_HAVE_SPI0
+    bool
+    default y
+    select ARCH_HAVE_SPI
+
+config MINDGROVE_SPI0
+    bool "SPI0"
+    default y
+    select MINDGROVE_SPI
+    select SPI_DRIVER
+
+config MINDGROVE_HAVE_SPI1
+    bool
+    default y
+    select ARCH_HAVE_SPI
+
+config MINDGROVE_SPI1
+    bool "SPI1"
+    default y
+    select MINDGROVE_SPI
+    select SPI_DRIVER
+
+config MINDGROVE_HAVE_SPI2
+    bool
+    default y
+    select ARCH_HAVE_SPI
+
+config MINDGROVE_SPI2
+    bool "SPI2"
+    default y
+    select MINDGROVE_SPI
+    select SPI_DRIVER
+
+config MINDGROVE_HAVE_SPI3
+    bool
+    default y
+    select ARCH_HAVE_SPI
+
+config MINDGROVE_SPI3
+    bool "SPI3"
+    default y
+    select MINDGROVE_SPI
+    select SPI_DRIVER
+
 # endmenu

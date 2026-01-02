@@ -18,12 +18,8 @@
   * Pre-processor Definitions
   ****************************************************************************/
  
-  #ifdef CONFIG_DEBUG_FEATURES
-  #  define showprogress(c) riscv_lowputc(c)
-  #else
-  #  define showprogress(c)
-  #endif
- 
+  
+  
   void mindgrove_lowsetup(void);
   void mindgrove_boardinitialize(void);
 

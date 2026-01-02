@@ -128,9 +128,13 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
   int irq = (vector >> (27+32)) | (vector & 0xf);
 
   /* Firstly, check if the irq is machine external interrupt */
+  // printf("PLIC claimed irq=%d\n", irq);
+
 
   if (RISCV_IRQ_MEXT == irq)
     {
+      
+      // printf("INTERRUPT_Claim_Request%d\n\r",intr);
       irq = INTERRUPT_Claim_Request()+MINDGROVE_PLIC_START;
     }
 
