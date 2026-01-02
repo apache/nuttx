@@ -37,6 +37,7 @@ Last Updated: |today|
    reference/index.rst
    faq/index.rst
    debugging/index.rst
+   testing/index.rst
    guides/index.rst
    standards/index.rst
    glossary.rst
