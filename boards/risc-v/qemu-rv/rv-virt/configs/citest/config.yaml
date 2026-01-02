@@ -1,0 +1,15 @@
+config:
+  cwd: './'
+
+product:
+  name: "rv-virt"
+  cores:
+    core0:
+      name: 'main'
+      device: 'qemu'
+      exec_path: 'qemu-system-riscv32'
+      exec_args: '-semihosting -M virt,aclint=on -smp 1 -bios none -nographic
+                  -drive index=0,id=userdata,if=none,format=raw,file=./fatfs.img
+                  -device virtio-blk-device,bus=virtio-mmio-bus.0,drive=userdata'
+      conf_path: './.config'
+      elf_path: './nuttx'
