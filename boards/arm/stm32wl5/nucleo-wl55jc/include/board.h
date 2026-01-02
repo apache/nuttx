@@ -32,6 +32,16 @@
 #  include <stdint.h>
 #endif
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#warning "CONFIG_BOARD_LOOPSPERMSEC is set to 0 to prevent CI build errors." \
+"up_udelay() and similar delay functions will not work correctly." \
+"If you use this board, please determine an appropriate value using the" \
+"calib_udelay application in nuttx-apps. It would be appreciated if you" \
+"submit a patch with the new value to apache/nuttx and remove this warning."
+
 /* Clocking *****************************************************************/
 
 /* nucleo-wl55jc has installed 32Mhz HSE oscillator */
@@ -116,10 +126,6 @@
 #define BOARD_LPTIM1_FREQUENCY       STM32WL5_HCLK_FREQUENCY
 #define BOARD_LPTIM2_FREQUENCY       STM32WL5_HCLK_FREQUENCY
 #define BOARD_LPTIM3_FREQUENCY       STM32WL5_HCLK_FREQUENCY
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /* Alternate function pin selections ****************************************/
 
