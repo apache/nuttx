@@ -552,6 +552,11 @@ LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 CELFFLAGS = $(CFLAGS) -fvisibility=hidden -mlong-calls # --target1-abs
 CXXELFFLAGS = $(CXXFLAGS)-fvisibility=hidden -mlong-calls
 
+ifeq ($(CONFIG_UNWINDER_ARM),y)
+  CELFFLAGS += -fno-unwind-tables -fno-asynchronous-unwind-tables
+  CXXELFFLAGS += -fno-unwind-tables -fno-asynchronous-unwind-tables
+endif
+
 ifeq ($(CONFIG_PIC),y)
   CFLAGS += --fixed-r10
   CELFFLAGS += $(PICFLAGS) -mpic-register=r10
