@@ -1,0 +1,13 @@
+config:
+  cwd: './'
+
+product:
+  name: "sabre-6quad"
+  cores:
+    core0:
+      name: 'main'
+      device: 'qemu'
+      exec_path: 'qemu-system-arm'
+      exec_args: '-semihosting -M sabrelite -m 1024 -smp 4 -nographic'
+      conf_path: './.config'
+      elf_path: './nuttx'
