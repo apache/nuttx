@@ -16,7 +16,6 @@ Guides
   pysimcoder.rst
   customboards.rst
   customapps.rst
-  citests.rst
   zerolatencyinterrupts.rst
   fortify.rst
   nestedinterrupts.rst
