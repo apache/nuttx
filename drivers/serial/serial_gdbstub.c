@@ -80,10 +80,17 @@ static void uart_gdbstub_poll(FAR struct pollfd_s *fds)
 
 static void uart_gdbstub_attach(FAR struct uart_gdbstub_s *uart_gdbstub)
 {
-  uart_gdbstub->fds.arg = uart_gdbstub;
-  uart_gdbstub->fds.events = POLLIN;
-  uart_gdbstub->fds.cb = uart_gdbstub_poll;
-  file_poll(&uart_gdbstub->file, &uart_gdbstub->fds, true);
+  int ret;
+
+  ret = file_open(&uart_gdbstub->file, CONFIG_SERIAL_GDBSTUB_PATH,
+                  O_RDWR | O_NONBLOCK);
+  if (ret >= 0)
+    {
+      uart_gdbstub->fds.arg = uart_gdbstub;
+      uart_gdbstub->fds.events = POLLIN;
+      uart_gdbstub->fds.cb = uart_gdbstub_poll;
+      file_poll(&uart_gdbstub->file, &uart_gdbstub->fds, true);
+    }
 }
 
 /****************************************************************************
@@ -293,7 +300,6 @@ static ssize_t uart_gdbstub_send(FAR void *priv, FAR const char *buf,
 int uart_gdbstub_register(FAR uart_dev_t *dev, FAR const char *path)
 {
   FAR struct uart_gdbstub_s *uart_gdbstub;
-  int ret;
 
   if (g_uart_gdbstub == NULL)
     {
@@ -318,12 +324,6 @@ int uart_gdbstub_register(FAR uart_dev_t *dev, FAR const char *path)
   if (strcmp(path, CONFIG_SERIAL_GDBSTUB_PATH) != 0)
     {
       return 0;
-    }
-
-  ret = file_open(&uart_gdbstub->file, path, O_RDWR | O_NONBLOCK);
-  if (ret < 0)
-    {
-      return ret;
     }
 
   uart_gdbstub->state = gdb_state_init(uart_gdbstub_send,
