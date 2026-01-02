@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM64_IMX8_IMX8QM-MEK_INCLUDE_BOARD_H
-#define __BOARDS_ARM64_IMX8_IMX8QM-MEK_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM64_IMX8_IMX8QM_MEK_INCLUDE_BOARD_H
+#define __BOARDS_ARM64_IMX8_IMX8QM_MEK_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -32,6 +32,12 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#warning "CONFIG_BOARD_LOOPSPERMSEC is set to 0 to prevent CI build errors." \
+"up_udelay() and similar delay functions will not work correctly." \
+"If you use this board, please determine an appropriate value using the" \
+"calib_udelay application in nuttx-apps. It would be appreciated if you" \
+"submit a patch with the new value to apache/nuttx and remove this warning."
 
 /****************************************************************************
  * Public Data
@@ -58,4 +64,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM64_IMX8_IMX8QM-MEK_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM64_IMX8_IMX8QM_MEK_INCLUDE_BOARD_H */
