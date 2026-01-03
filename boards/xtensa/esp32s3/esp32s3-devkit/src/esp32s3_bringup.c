@@ -68,10 +68,6 @@
 #  include "espressif/esp_i2s.h"
 #endif
 
-#ifdef CONFIG_ESPRESSIF_I2S
-#  include "espressif/esp_i2s.h"
-#endif
-
 #ifdef CONFIG_WATCHDOG
 #  include "esp32s3_board_wdt.h"
 #endif
