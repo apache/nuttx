@@ -2031,7 +2031,8 @@ int up_alarm_tick_cancel(FAR clock_t *ticks);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM)
+#if (defined(CONFIG_HRTIMER) && defined(CONFIG_ALARM_ARCH)) || \
+    (defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM))
 int up_alarm_start(FAR const struct timespec *ts);
 int up_alarm_tick_start(clock_t ticks);
 #endif
@@ -2101,8 +2102,8 @@ int up_timer_tick_cancel(FAR clock_t *ticks);
  *   non-reentrancy.
  *
  ****************************************************************************/
-
-#if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_TICKLESS_ALARM)
+#if (defined(CONFIG_HRTIMER) && defined(CONFIG_TIMER_ARCH)) || \
+    (defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_TICKLESS_ALARM))
 int up_timer_start(FAR const struct timespec *ts);
 int up_timer_tick_start(clock_t ticks);
 #endif
@@ -2450,6 +2451,25 @@ void up_ndelay(unsigned long nanoseconds);
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxsched_hrtimer_start
+ *
+ * Description:
+ *   (Re)start the scheduler high-resolution timer with a new expiration
+ *   based on the specified tick interval.
+ *
+ * Input Parameters:
+ *   ticks - Number of scheduler ticks until expiration.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_HRTIMER
+int nxsched_hrtimer_start(clock_t ticks);
+#endif
+
+/****************************************************************************
  * Name: nxsched_process_timer
  *
  * Description:
@@ -2461,10 +2481,7 @@ void up_ndelay(unsigned long nanoseconds);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SCHED_TICKLESS
 void nxsched_process_timer(void);
-#endif
-
 /****************************************************************************
  * Name:  nxsched_timer_expiration
  *
