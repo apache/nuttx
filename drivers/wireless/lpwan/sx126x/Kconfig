@@ -25,4 +25,4 @@ config LPWAN_SX126X_MAX_DEVICES
 	int "SX126X maximum devices"
 	default 1
 
-endif # DRIVERS_LPWAN
+endif # LPWAN_SX126X
