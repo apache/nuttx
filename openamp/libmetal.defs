@@ -84,6 +84,7 @@ libmetal.zip:
 	mv libmetal-$(LIBMETAL_VERSION) libmetal
 	$(Q) patch -p0 < 0001-libmetal-cmake-set-HAVE_STDATOMIC_H-default-true-in-.patch
 	$(Q) patch -p0 < 0002-libmetal-atomic-enable-64-bit-atomic-by-toolchain-bu.patch
+	$(Q) patch -p0 < 0003-mutex-change-the-libmetal-nuttx-mutex-to-recursive-m.patch
 
 .libmetal_headers: libmetal.zip
 else

@@ -40,6 +40,8 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libmetal)
       ${CMAKE_CURRENT_LIST_DIR}/0001-libmetal-cmake-set-HAVE_STDATOMIC_H-default-true-in-.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
       ${CMAKE_CURRENT_LIST_DIR}/0002-libmetal-atomic-enable-64-bit-atomic-by-toolchain-bu.patch
+      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0003-mutex-change-the-libmetal-nuttx-mutex-to-recursive-m.patch
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 
