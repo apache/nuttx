@@ -161,14 +161,11 @@ void mm_map_destroy(FAR struct mm_map_s *mm)
 
       if (entry->munmap)
         {
-          if (entry->munmap(group, entry, entry->vaddr, entry->length) < 0)
-            {
-              /* This would be an error in the driver. It has defined munmap,
-               * but is not able to munmap the full area which it has mapped
-               */
+          /* There would be an error in the driver. It has defined munmap,
+           * but is not able to munmap the full area which it has mapped
+           */
 
-              merr("Driver munmap failed\n");
-            }
+          entry->munmap(group, entry, entry->vaddr, entry->length);
         }
 
       mm->map_count--;
