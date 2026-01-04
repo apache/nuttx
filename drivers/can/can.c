@@ -595,6 +595,25 @@ static int can_xmit(FAR struct can_dev_s *dev)
         }
     }
 
+#ifdef CONFIG_CAN_TXCANCEL
+  if (TX_PENDING(&dev->cd_sender) && can_txneed_cancel(&dev->cd_sender))
+    {
+      if (can_cancel_mbmsg(dev))
+        {
+          msg = can_get_msg(&dev->cd_sender);
+
+          /* Send the next message at the sender */
+
+          ret = dev_send(dev, msg);
+          if (ret < 0)
+            {
+              canerr("dev_send failed: %d\n", ret);
+              can_revert_msg(&dev->cd_sender, msg);
+            }
+        }
+    }
+#endif
+
   /* Make sure that TX interrupts are enabled */
 
   dev_txint(dev, true);
@@ -627,13 +646,18 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
 
   flags = enter_critical_section();
 
-  /* Check if the H/W TX is inactive when we started. In certain race
+  /* if CONFIG_CAN_TXCANCEL is enable, inactive will be always true, else
+   * Check if the H/W TX is inactive when we started. In certain race
    * conditions, there may be a pending interrupt to kick things back off,
    * but we will be sure here that there is not.  That the hardware is IDLE
    * and will need to be kick-started.
    */
 
-  inactive = dev_txempty(dev);
+#ifdef CONFIG_CAN_TXCANCEL
+  inactive = true;
+#else
+  inactive = dev_txready(dev);
+#endif
 
   /* Add the messages to the sender.  Ignore any trailing messages that are
    * shorter than the minimum.
@@ -701,7 +725,11 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
 
           /* Re-check the H/W sender state */
 
-          inactive = dev_txempty(dev);
+#ifdef CONFIG_CAN_TXCANCEL
+          inactive = true;
+#else
+          inactive = dev_txready(dev);
+#endif
         }
 
       /* We get here if there is space in sender.  Add the new
