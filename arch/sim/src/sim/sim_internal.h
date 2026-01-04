@@ -516,5 +516,10 @@ size_t sim_stack_check(void *alloc, size_t size);
 void sim_stack_color(void *stackbase, size_t nbytes);
 #endif
 
+#ifdef CONFIG_SIM_GPIOCHIP
+int sim_gpiochip_initialize(const char *filename);
+struct ioexpander_dev_s *sim_gpiochip_get_ioe(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_SIM_SRC_SIM_INTERNAL_H */

@@ -249,6 +249,11 @@ if(CONFIG_SIM_SPI_LINUX)
   list(APPEND HOSTSRCS sim_linuxspi.c)
 endif()
 
+if(CONFIG_SIM_GPIOCHIP_LINUX)
+  list(APPEND SRCS sim_gpiochip.c)
+  list(APPEND HOSTSRCS sim_linux_gpiochip.c)
+endif()
+
 if(CONFIG_SIM_USB_DEV)
   list(APPEND SRCS sim_usbdev.c)
   if(CONFIG_SIM_USB_RAW_GADGET)
