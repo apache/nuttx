@@ -243,12 +243,12 @@ static inline uintreg_t *riscv_fpuregs(struct tcb_s *tcb)
 
 #ifdef CONFIG_ARCH_RV_ISA_V
 void riscv_vpuconfig(void);
-void riscv_savevpu(uintptr_t *regs, uintptr_t *vregs);
-void riscv_restorevpu(uintptr_t *regs, uintptr_t *vregs);
+void riscv_savevpu(uintreg_t *regs, uintreg_t *vregs);
+void riscv_restorevpu(uintreg_t *regs, uintreg_t *vregs);
 
 /* Get VPU register save area */
 
-static inline uintptr_t *riscv_vpuregs(struct tcb_s *tcb)
+static inline uintreg_t *riscv_vpuregs(struct tcb_s *tcb)
 {
   return tcb->xcp.vregs;
 }
