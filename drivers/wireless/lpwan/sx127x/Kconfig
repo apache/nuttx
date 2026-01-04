@@ -50,6 +50,18 @@ config LPWAN_SX127X_RXFIFO_DATA_LEN
 	int "SX127X RX FIFO data length"
 	default 64
 
+config LPWAN_SX127X_RX_TIMEOUT
+	int "SX127X RX Timeout in Milliseconds"
+	default 10000
+	---help---
+		If device stopped receiving data for more than
+		LPWAN_SX127X_RX_TIMEOUT milliseconds it means the
+		frequency drift is too high that AFC failed to fix
+		the reception frequency. So if we leave the RX mode,
+		entering in standby and returning will clear the
+		AFC and fix the communication again.
+		If you don't want to use RX timeout set it to -1.
+
 endif #LPWAN_SX127X_RXSUPPORT
 
 config LPWAN_SX127X_TXSUPPORT
