@@ -56,7 +56,9 @@ static int local_waitlisten(FAR struct local_conn_s *server)
     {
       /* No.. wait for a connection or a signal */
 
-      ret = net_sem_wait(&server->lc_waitsem);
+      local_unlock();
+      ret = nxsem_wait(&server->lc_waitsem);
+      local_lock();
       if (ret < 0)
         {
           return ret;
@@ -125,6 +127,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   /* Loop as necessary if we have to wait for a connection */
 
+  local_lock();
   for (; ; )
     {
       /* Are there pending connections.  Remove the accept from the
@@ -161,6 +164,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
               ret = local_set_nonblocking(conn);
             }
 
+          local_unlock();
           return ret;
         }
 
@@ -174,6 +178,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
         {
           /* Yes.. return EAGAIN */
 
+          local_unlock();
           return -EAGAIN;
         }
 
@@ -182,6 +187,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       ret = local_waitlisten(server);
       if (ret < 0)
         {
+          local_unlock();
           return ret;
         }
     }

@@ -81,7 +81,7 @@ static int local_sendctl(FAR struct local_conn_s *conn,
   int ret;
   int i = 0;
 
-  net_lock();
+  local_lock();
   peer = conn->lc_peer;
   if (peer == NULL)
     {
@@ -119,12 +119,12 @@ static int local_sendctl(FAR struct local_conn_s *conn,
         }
     }
 
-  net_unlock();
+  local_unlock();
   return count;
 
 fail:
   local_freectl(conn, i);
-  net_unlock();
+  local_unlock();
   return ret;
 }
 #endif /* CONFIG_NET_LOCAL_SCM */
@@ -293,17 +293,17 @@ static ssize_t local_sendto(FAR struct socket *psock,
       return -EISCONN;
     }
 
-  net_lock();
+  local_lock();
 
   server = local_findconn(conn, unaddr);
   if (server == NULL)
     {
-      net_unlock();
+      local_unlock();
       nerr("ERROR: No such file or directory\n");
       return -ENOENT;
     }
 
-  net_unlock();
+  local_unlock();
 
   /* Make sure that dgram is sent safely */
 
@@ -437,9 +437,9 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   if (len < 0 && count > 0)
     {
-      net_lock();
+      local_lock();
       local_freectl(conn, count);
-      net_unlock();
+      local_unlock();
     }
 #else
   len = to ? local_sendto(psock, buf, len, flags, to, tolen) :

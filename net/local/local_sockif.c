@@ -132,9 +132,9 @@ static int local_sockif_alloc(FAR struct socket *psock)
   /* Allocate the local connection structure */
 
   FAR struct local_conn_s *conn;
-  net_lock();
+  local_lock();
   conn = local_alloc();
-  net_unlock();
+  local_unlock();
   if (conn == NULL)
     {
       /* Failed to reserve a connection structure */
@@ -655,7 +655,7 @@ static int local_setsockopt(FAR struct socket *psock, int level, int option,
                   return -EINVAL;
                 }
 
-              net_lock();
+              local_lock();
 
               /* Only SOCK_STREAM sockets need set the send buffer size */
 
@@ -681,7 +681,7 @@ static int local_setsockopt(FAR struct socket *psock, int level, int option,
                 }
 #endif
 
-              net_unlock();
+              local_unlock();
 
               return ret;
             }
@@ -696,7 +696,7 @@ static int local_setsockopt(FAR struct socket *psock, int level, int option,
                   return -EINVAL;
                 }
 
-              net_lock();
+              local_lock();
 
               rcvsize = *(FAR const int *)value;
 #ifdef CONFIG_NET_LOCAL_DGRAM
@@ -740,7 +740,7 @@ static int local_setsockopt(FAR struct socket *psock, int level, int option,
                   conn->lc_rcvsize = rcvsize;
                 }
 
-              net_unlock();
+              local_unlock();
 
               return ret;
             }

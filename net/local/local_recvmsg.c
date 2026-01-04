@@ -145,7 +145,7 @@ static void local_recvctl(FAR struct local_conn_s *conn,
   int *fds;
   int i;
 
-  net_lock();
+  local_lock();
 
   if (conn->lc_peer == NULL)
     {
@@ -197,7 +197,7 @@ static void local_recvctl(FAR struct local_conn_s *conn,
     }
 
 out:
-  net_unlock();
+  local_unlock();
 }
 #endif /* CONFIG_NET_LOCAL_SCM */
 
