@@ -34,6 +34,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/irq.h>
 #include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 
 #include "rpmsg_port.h"
 
@@ -48,6 +49,10 @@
 #  define rpmsg_port_spi_crc16(hdr) 0
 #endif
 
+#define RPMSG_PORT_SPI_DROP_TXQ     0x01
+#define RPMSG_PORT_SPI_DROP_RXQ     0x02
+#define RPMSG_PORT_SPI_DROP_ALL     0x03
+
 #define BYTES2WORDS(s,b)            ((b) / ((s)->nbits >> 3))
 
 /****************************************************************************
@@ -59,6 +64,18 @@ enum rpmsg_port_spi_cmd_e
   RPMSG_PORT_SPI_CMD_CONNECT = 0x01,
   RPMSG_PORT_SPI_CMD_AVAIL,
   RPMSG_PORT_SPI_CMD_DATA,
+  RPMSG_PORT_SPI_CMD_SUSPEND,
+  RPMSG_PORT_SPI_CMD_RESUME,
+  RPMSG_PORT_SPI_CMD_SHUTDOWN,
+};
+
+enum rpmsg_port_spi_state_e
+{
+  RPMSG_PORT_SPI_STATE_UNCONNECTED  = 0x01,
+  RPMSG_PORT_SPI_STATE_CONNECTING,
+  RPMSG_PORT_SPI_STATE_RECONNECTING,
+  RPMSG_PORT_SPI_STATE_DISCONNECTING,
+  RPMSG_PORT_SPI_STATE_CONNECTED,
 };
 
 struct rpmsg_port_spi_s
@@ -74,6 +91,7 @@ struct rpmsg_port_spi_s
 
   /* SPI devices' configuration */
 
+  uint32_t                       freq;
   uint32_t                       devid;
   int                            nbits;
 
@@ -87,7 +105,8 @@ struct rpmsg_port_spi_s
   FAR struct rpmsg_port_header_s *rxhdr;
 
   rpmsg_port_rx_cb_t             rxcb;
-  bool                           connected;
+  volatile uint8_t               state;
+  spinlock_t                     lock;
 
   /* Used for flow control */
 
@@ -126,18 +145,25 @@ static const struct rpmsg_port_ops_s g_rpmsg_port_spi_ops =
  * Name: rpmsg_port_spi_drop_packets
  ****************************************************************************/
 
-static void rpmsg_port_spi_drop_packets(FAR struct rpmsg_port_spi_s *rpspi)
+static void
+rpmsg_port_spi_drop_packets(FAR struct rpmsg_port_spi_s *rpspi, uint8_t type)
 {
   FAR struct rpmsg_port_header_s *hdr;
 
-  while (!!(hdr = rpmsg_port_queue_get_buffer(&rpspi->port.txq, false)))
+  if (type & RPMSG_PORT_SPI_DROP_TXQ)
     {
-      rpmsg_port_queue_return_buffer(&rpspi->port.txq, hdr);
+      while (!!(hdr = rpmsg_port_queue_get_buffer(&rpspi->port.txq, false)))
+        {
+          rpmsg_port_queue_return_buffer(&rpspi->port.txq, hdr);
+        }
     }
 
-  while (!!(hdr = rpmsg_port_queue_get_buffer(&rpspi->port.rxq, false)))
+  if (type & RPMSG_PORT_SPI_DROP_RXQ)
     {
-      rpmsg_port_queue_return_buffer(&rpspi->port.rxq, hdr);
+      while (!!(hdr = rpmsg_port_queue_get_buffer(&rpspi->port.rxq, false)))
+        {
+          rpmsg_port_queue_return_buffer(&rpspi->port.rxq, hdr);
+        }
     }
 }
 
@@ -150,13 +176,17 @@ static void rpmsg_port_spi_notify_tx_ready(FAR struct rpmsg_port_s *port)
   FAR struct rpmsg_port_spi_s *rpspi =
     container_of(port, struct rpmsg_port_spi_s, port);
 
-  if (rpspi->connected)
+  if (rpspi->state == RPMSG_PORT_SPI_STATE_CONNECTED)
     {
       IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 1);
     }
   else
     {
-      rpmsg_port_spi_drop_packets(rpspi);
+      /* Drop txq buffers when a reconnection happens to make connected
+       * status false.
+       */
+
+      rpmsg_port_spi_drop_packets(rpspi, RPMSG_PORT_SPI_DROP_TXQ);
     }
 }
 
@@ -195,14 +225,21 @@ static void rpmsg_port_spi_register_cb(FAR struct rpmsg_port_s *port,
 static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
 {
   FAR struct rpmsg_port_header_s *txhdr;
+  int pending;
 
   IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 0);
-  if (atomic_fetch_add(&rpspi->transferring, 1))
+  pending = atomic_fetch_add(&rpspi->transferring, 1);
+  if (pending > 0)
     {
+      if (pending > 1)
+        {
+          rpmsgerr("pending too many requests: %d\n", pending);
+        }
+
       return;
     }
 
-  if (!rpspi->connected)
+  if (rpspi->state == RPMSG_PORT_SPI_STATE_UNCONNECTED)
     {
       txhdr = rpspi->cmdhdr;
       txhdr->cmd = RPMSG_PORT_SPI_CMD_CONNECT;
@@ -243,6 +280,7 @@ static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
 static void rpmsg_port_spi_complete_handler(FAR void *arg)
 {
   FAR struct rpmsg_port_spi_s *rpspi = arg;
+  irqstate_t flags;
 
   SPI_SELECT(rpspi->spi, rpspi->devid, false);
 
@@ -271,40 +309,76 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
    * connect req data packet has been received.
    */
 
-  if (!rpspi->connected)
+  flags = spin_lock_irqsave(&rpspi->lock);
+  if (rpspi->state == RPMSG_PORT_SPI_STATE_UNCONNECTED)
     {
       if (rpspi->rxhdr->cmd != RPMSG_PORT_SPI_CMD_CONNECT)
         {
-          goto out;
+          goto unlock;
         }
 
       rpspi->txavail = rpspi->rxhdr->avail;
-      rpspi->connected = true;
+      rpspi->state = RPMSG_PORT_SPI_STATE_CONNECTING;
     }
-  else
+  else if (rpspi->state == RPMSG_PORT_SPI_STATE_CONNECTED)
     {
       rpspi->txavail = rpspi->rxhdr->avail;
       if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_CONNECT)
         {
-          rpspi->connected = false;
-          rpmsg_port_spi_drop_packets(rpspi);
+          rpspi->state = RPMSG_PORT_SPI_STATE_RECONNECTING;
+
+          /* Drop all the unprocessed rxq buffer and pre-send txq buffer
+           * when a reconnect request to be received.
+           */
+
+          rpmsg_port_spi_drop_packets(rpspi, RPMSG_PORT_SPI_DROP_ALL);
         }
     }
-
-  if (rpspi->rxhdr->cmd != RPMSG_PORT_SPI_CMD_AVAIL)
+  else if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_CONNECT)
     {
+      /* Drop connect packets recived during connecting status change
+       * and change to RPMSG_PORT_SPI_STATE_CONNECTING to indicate there
+       * is a reconnection happened during the shutting down process.
+       */
+
+      if (rpspi->state == RPMSG_PORT_SPI_STATE_DISCONNECTING)
+        {
+          rpspi->state = RPMSG_PORT_SPI_STATE_CONNECTING;
+        }
+
+      goto unlock;
+    }
+
+  if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_SUSPEND)
+    {
+      atomic_fetch_and(&rpspi->port.signals, ~RPMSG_SIGNAL_RUNNING);
+    }
+  else if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_RESUME)
+    {
+      atomic_fetch_or(&rpspi->port.signals, RPMSG_SIGNAL_RUNNING);
+    }
+  else if (rpspi->rxhdr->cmd != RPMSG_PORT_SPI_CMD_AVAIL)
+    {
+      if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_SHUTDOWN)
+        {
+          rpspi->state = RPMSG_PORT_SPI_STATE_DISCONNECTING;
+          rpmsg_port_spi_drop_packets(rpspi, RPMSG_PORT_SPI_DROP_ALL);
+        }
+
       rpmsg_port_queue_add_buffer(&rpspi->port.rxq, rpspi->rxhdr);
       rpspi->rxhdr = rpmsg_port_queue_get_available_buffer(
         &rpspi->port.rxq, false);
       DEBUGASSERT(rpspi->rxhdr != NULL);
     }
 
+unlock:
+  spin_unlock_irqrestore(&rpspi->lock, flags);
 out:
   if (atomic_xchg(&rpspi->transferring, 0) > 1)
     {
       rpmsg_port_spi_exchange(rpspi);
     }
-  else if (rpspi->connected &&
+  else if (rpspi->state == RPMSG_PORT_SPI_STATE_CONNECTED &&
       rpspi->txavail > 0 && rpmsg_port_queue_nused(&rpspi->port.txq) > 0)
     {
       IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 1);
@@ -321,6 +395,11 @@ static int rpmsg_port_spi_sreq_handler(FAR struct ioexpander_dev_s *dev,
   FAR struct rpmsg_port_spi_s *rpspi = arg;
 
   rpmsginfo("sreq enter\n");
+
+  if (rpspi->state == RPMSG_PORT_SPI_STATE_UNCONNECTED)
+    {
+      SPI_SETFREQUENCY(rpspi->spi, rpspi->freq);
+    }
 
   rpmsg_port_spi_exchange(rpspi);
   return 0;
@@ -360,21 +439,40 @@ static void
 rpmsg_port_spi_process_packet(FAR struct rpmsg_port_spi_s *rpspi,
                               FAR struct rpmsg_port_header_s *rxhdr)
 {
-  rpmsginfo("received cmd: %u avail: %u", rxhdr->cmd, rxhdr->avail);
+  irqstate_t flags;
 
+  rpmsginfo("received cmd: %u avail: %u", rxhdr->cmd, rxhdr->avail);
   switch (rxhdr->cmd)
     {
       case RPMSG_PORT_SPI_CMD_CONNECT:
-        if (!rpspi->connected)
+        flags = spin_lock_irqsave(&rpspi->lock);
+        if (rpspi->state == RPMSG_PORT_SPI_STATE_RECONNECTING)
           {
+            spin_unlock_irqrestore(&rpspi->lock, flags);
             rpmsg_port_unregister(&rpspi->port);
 
-            /* Trigger a transmission for reconnection */
+            /* Do not trigger the reconnect if a shut down cmd has been
+             * received during the unregister process
+             */
 
-            IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 1);
+            flags = spin_lock_irqsave(&rpspi->lock);
+            if (rpspi->state == RPMSG_PORT_SPI_STATE_RECONNECTING)
+              {
+                rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
+                spin_unlock_irqrestore(&rpspi->lock, flags);
+                IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 1);
+              }
+            else
+              {
+                rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
+                spin_unlock_irqrestore(&rpspi->lock, flags);
+                IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 0);
+              }
           }
-        else
+        else if (rpspi->state == RPMSG_PORT_SPI_STATE_CONNECTING)
           {
+            rpspi->state = RPMSG_PORT_SPI_STATE_CONNECTED;
+            spin_unlock_irqrestore(&rpspi->lock, flags);
             rpmsg_port_register(&rpspi->port, (FAR const char *)(rxhdr + 1));
           }
 
@@ -385,8 +483,29 @@ rpmsg_port_spi_process_packet(FAR struct rpmsg_port_spi_s *rpspi,
         rpspi->rxcb(&rpspi->port, rxhdr);
         break;
 
+      case RPMSG_PORT_SPI_CMD_SHUTDOWN:
+        rpmsg_port_unregister(&rpspi->port);
+        flags = spin_lock_irqsave(&rpspi->lock);
+        if (rpspi->state == RPMSG_PORT_SPI_STATE_DISCONNECTING)
+          {
+            rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
+            SPI_SETFREQUENCY(rpspi->spi, 0);
+            spin_unlock_irqrestore(&rpspi->lock, flags);
+            IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 0);
+          }
+        else if (rpspi->state == RPMSG_PORT_SPI_STATE_CONNECTING)
+          {
+            rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
+            spin_unlock_irqrestore(&rpspi->lock, flags);
+            IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 1);
+          }
+
+        rpmsg_port_queue_return_buffer(&rpspi->port.rxq, rxhdr);
+        break;
+
       default:
-        rpmsgerr("received a unexpected frame, dropped\n");
+        rpmsgerr("dropped an unexpected frame cmd: %u avail: %u\n",
+                 rxhdr->cmd, rxhdr->avail);
         rpmsg_port_queue_return_buffer(&rpspi->port.rxq, rxhdr);
         break;
     }
@@ -503,12 +622,12 @@ rpmsg_port_spi_init_hardware(FAR struct rpmsg_port_spi_s *rpspi,
 
   SPI_SETBITS(spi, spicfg->nbits);
   SPI_SETMODE(spi, spicfg->mode);
-  SPI_SETFREQUENCY(spi, spicfg->freq);
   SPI_REGISTERCALLBACK(spi, rpmsg_port_spi_complete_handler, rpspi);
   SPI_SELECT(spi, spicfg->devid, false);
 
   rpspi->spi = spi;
   rpspi->ioe = ioe;
+  rpspi->freq = spicfg->freq;
   rpspi->devid = spicfg->devid;
   rpspi->nbits = spicfg->nbits;
 
@@ -565,6 +684,8 @@ rpmsg_port_spi_initialize(FAR const struct rpmsg_port_config_s *cfg,
 
   rpspi->rxthres = rpmsg_port_queue_navail(&rpspi->port.rxq) *
                    CONFIG_RPMSG_PORT_SPI_RX_THRESHOLD / 100;
+  rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
+  spin_lock_init(&rpspi->lock);
 
   ret = rpmsg_port_spi_init_hardware(rpspi, spicfg, spi, ioe);
   if (ret < 0)
