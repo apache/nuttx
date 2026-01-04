@@ -256,6 +256,14 @@
 #  define USB_EP_ATTR_USAGE_IMPLICIT            (2 << USB_EP_ATTR_USAGE_SHIFT)
 #define USB_EP_ATTR_MAX_ADJUSTABLE              (1 << 7)
 
+/* Endpoint descriptor max packet size */
+
+#define USB_EP_MAX_PACKET_MASK                  (0x07ff)
+#define USB_EP_MAX_PACKET_MULT_SHIFT            (11)
+#define USB_EP_MAX_PACKET_MULT_MASK             (3 << USB_EP_MAX_PACKET_MULT_SHIFT)
+#define USB_EP_MAX_PACKET_MULT(m)               (((m) & USB_EP_MAX_PACKET_MULT_MASK) >> \
+                                                 USB_EP_MAX_PACKET_MULT_SHIFT)
+
 /* OTG Definitions */
 
 /* OTG SET FEATURE Constants */

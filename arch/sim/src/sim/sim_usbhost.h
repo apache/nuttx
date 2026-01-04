@@ -42,6 +42,14 @@
  * Public Types
  ****************************************************************************/
 
+/* usbhost_asynch_t used with all transfers.  The result of the
+ * transfer is provided by the 'result' parameters.  If >= 0, then 'result'
+ * is the number of bytes transfers. If < 0 then the transfer failed and
+ * result is a negated errno value that indicates the nature of the failure.
+ */
+
+typedef void (*usbhost_asynch_t)(void *arg, ssize_t result);
+
 /* NuttX Endpoint descriptor */
 
 struct host_usb_epdesc_s
@@ -70,11 +78,13 @@ struct host_usb_datareq_s
   struct host_usb_datareq_s  *flink;
   uint8_t                     addr;
   uint8_t                     xfrtype;
+  uint16_t                    maxpacketsize;
   uint8_t                    *data;
   uint16_t                    len;
   uint16_t                    xfer;
   bool                        success;
   void                       *priv;
+  usbhost_asynch_t            callback;
 };
 
 /****************************************************************************
