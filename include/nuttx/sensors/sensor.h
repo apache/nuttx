@@ -795,6 +795,36 @@ void sensor_rpmsg_unregister(FAR struct sensor_lowerhalf_s *lower);
 int sensor_rpmsg_initialize(void);
 #endif
 
+/****************************************************************************
+ *Name: sensor_monitor_initialize
+ *
+ * Description:
+ *   Initialize sensor procfs.
+ *
+ * Return Value:
+ *   0 on success, or negative error code on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_MONITOR
+int sensor_monitor_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: sensor_monitor_level
+ *
+ * Description:
+ *   get sensor monitor log level
+ *
+ * Return Value:
+ *   syslog level
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_MONITOR
+int sensor_monitor_level(FAR const char *name);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

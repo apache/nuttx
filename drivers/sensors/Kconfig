@@ -31,12 +31,36 @@ config SENSORS_GNSS
 	---help---
 		Allow application to use GNSS by /dev/uorb/gnss or /dev/ttyGNSS
 
+config SENSORS_MONITOR
+	bool "Sensors Monitor Support"
+	depends on DEBUG_SENSORS_INFO && FS_PROCFS_REGISTER
+	default n
+	---help---
+		Allow application to dynamic monitor topic of sensor by /proc/sensor_monitor.
+
+if SENSORS_MONITOR
+
+config SENSORS_MONITOR_BUCKET
+	int "The count of sensor monitor hash table bucket."
+	default 16
+	---help---
+		The number of sensors that can be monitored.
+
+config SENSORS_MONITOR_LIST
+	string "The list of sensors that starts monitoring at initialization"
+	default ""
+	---help---
+		The topics that needs to be debugged. Multiple topics are separated by ",".
+		e.g.:"sensor_gps sensor_accel".
+
+endif
+
 config SENSORS_GNSS_RECV_BUFFERSIZE
-	int "The size of recvive buffer for nmea message in GNSS driver"
+	int "The size of receive buffer for nmea message in GNSS driver"
 	default 2048
 	depends on SENSORS_GNSS
 	---help---
-		The size of recvive buffer for nmea message in GNSS driver, if
+		The size of receive buffer for nmea message in GNSS driver, if
 		the nmea message happen overwrite when driver push, you can increase
 		the size.
 

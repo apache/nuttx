@@ -29,6 +29,10 @@ if(CONFIG_SENSORS)
     list(APPEND SRCS usensor.c)
   endif()
 
+  if(CONFIG_SENSORS_MONITOR)
+    list(APPEND SRCS sensor_monitor.c)
+  endif()
+
   if(CONFIG_SENSORS_RPMSG)
     list(APPEND SRCS sensor_rpmsg.c)
   endif()

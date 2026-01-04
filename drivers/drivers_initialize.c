@@ -245,6 +245,10 @@ void drivers_initialize(void)
   sensor_rpmsg_initialize();
 #endif
 
+#ifdef CONFIG_SENSORS_MONITOR
+  sensor_monitor_initialize();
+#endif
+
 #ifdef CONFIG_DEV_RPMSG_SERVER
   rpmsgdev_server_init();
 #endif
