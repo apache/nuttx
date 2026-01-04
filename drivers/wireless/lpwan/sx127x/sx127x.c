@@ -316,10 +316,12 @@ struct sx127x_dev_s
   bool     pa_force;              /* Force PA BOOST pin select */
 #endif
 #ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
-  uint32_t rx_timeout;            /* RX timeout (not supported) */
+  uint32_t rx_timeout;            /* RX timeout in milliseconds */
   uint16_t rx_fifo_len;           /* Number of bytes stored in fifo */
   uint16_t nxt_read;              /* Next read index */
   uint16_t nxt_write;             /* Next write index */
+  clock_t  last_rx_tick;          /* Ticks since last RX event to detect timeout */
+  struct work_s rx_watchdog;      /* Watchdog to detect timeout */
 
   /* Circular RX packet buffer */
 
@@ -1277,6 +1279,50 @@ errout:
 }
 
 /****************************************************************************
+ * Name: sx127x_rx_watchdog
+ *
+ * Description:
+ *   Watchdog to detect SX127x RX communication stall
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
+static void sx127x_rx_watchdog(FAR void *arg)
+{
+  FAR struct sx127x_dev_s *dev = (FAR struct sx127x_dev_s *)arg;
+  clock_t now = clock_systime_ticks();
+
+  if (dev->opmode == SX127X_OPMODE_RX &&
+      (now - dev->last_rx_tick) > MSEC2TICK(dev->rx_timeout))
+    {
+      wlerr("RX stall detected, restarting RX\n");
+
+      /* Leave RX mode to clear AFC + bit sync */
+
+      sx127x_opmode_set(dev, SX127X_OPMODE_STANDBY);
+
+      /* datasheet-safe delay */
+
+      nxsched_usleep(100);
+
+      /* Re-enter RX */
+
+      sx127x_opmode_set(dev, SX127X_OPMODE_RX);
+
+      /* Avoid using old RX tick, otherwise it always will fail */
+
+      dev->last_rx_tick = now;
+    }
+
+  /* Reschedule watchdog */
+
+  work_queue(LPWORK, &dev->rx_watchdog,
+             sx127x_rx_watchdog, dev,
+             MSEC2TICK(dev->rx_timeout));
+}
+#endif
+
+/****************************************************************************
  * Name: sx127x_lora_isr0_process
  *
  * Description:
@@ -1471,6 +1517,21 @@ static int sx127x_fskook_isr0_process(FAR struct sx127x_dev_s *dev)
               ret = sx127x_fskook_rxhandle(dev);
               if (ret > 0)
                 {
+                  /* Should we take care of RX timeout? */
+
+                  if (dev->rx_timeout > 0)
+                    {
+                      /* Keep a track of last RX time to detect timeout */
+
+                      dev->last_rx_tick = clock_systime_ticks();
+
+                      /* Prepare the work queue to take care of RX timeout */
+
+                      work_queue(LPWORK, &dev->rx_watchdog,
+                                 sx127x_rx_watchdog, dev,
+                                 MSEC2TICK(dev->rx_timeout));
+                    }
+
                   if (dev->pfd)
                     {
                       /* Data available for input */
@@ -4204,6 +4265,12 @@ static int sx127x_deinit(FAR struct sx127x_dev_s *dev)
 {
   wlinfo("Deinit sx127x dev\n");
 
+#ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
+  /* Cancel any running watchdog */
+
+  work_cancel(LPWORK, &dev->rx_watchdog);
+#endif
+
   /* Enter SLEEP mode */
 
   sx127x_opmode_set(dev, SX127X_OPMODE_SLEEP);
@@ -4559,6 +4626,7 @@ static int sx127x_unregister(FAR struct sx127x_dev_s *dev)
   nxsem_destroy(&dev->tx_sem);
 #endif
 #ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
+  work_cancel(LPWORK, &dev->rx_watchdog);
   nxsem_destroy(&dev->rx_sem);
   nxmutex_destroy(&dev->rx_buffer_lock);
 #endif
@@ -4614,6 +4682,9 @@ int sx127x_register(FAR struct spi_dev_s *spi,
   dev->crcon          = CONFIG_LPWAN_SX127X_CRCON;
 #ifdef CONFIG_LPWAN_SX127X_FSKOOK
   dev->fskook.fixlen  = false;
+#  ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
+  dev->rx_timeout     = CONFIG_LPWAN_SX127X_RX_TIMEOUT;
+#  endif
 #endif
 #ifdef CONFIG_LPWAN_SX127X_LORA
   dev->lora.invert_iq = false;
