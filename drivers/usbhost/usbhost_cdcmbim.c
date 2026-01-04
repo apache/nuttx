@@ -2209,7 +2209,7 @@ static void cdcmbim_receive(FAR struct usbhost_cdcmbim_s *priv,
 {
   uinfo("received packet: %d len\n", len);
 
-  net_lock();
+  netdev_lock(&priv->netdev);
 
   NETDEV_RXPACKETS(&priv->netdev);
 
@@ -2249,7 +2249,7 @@ static void cdcmbim_receive(FAR struct usbhost_cdcmbim_s *priv,
       NETDEV_RXERRORS(dev);
     }
 
-  net_unlock();
+  netdev_unlock(&priv->netdev);
 }
 
 /****************************************************************************
@@ -2405,7 +2405,7 @@ static void cdcmbim_txavail_work(FAR void *arg)
 {
   FAR struct usbhost_cdcmbim_s *priv = (FAR struct usbhost_cdcmbim_s *)arg;
 
-  net_lock();
+  netdev_lock(&priv->netdev);
 
   priv->netdev.d_buf = (FAR uint8_t *)priv->txpktbuf;
 
@@ -2414,7 +2414,7 @@ static void cdcmbim_txavail_work(FAR void *arg)
       devif_poll(&priv->netdev, cdcmbim_txpoll);
     }
 
-  net_unlock();
+  netdev_unlock(&priv->netdev);
 }
 
 /****************************************************************************

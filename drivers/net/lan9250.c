@@ -1525,7 +1525,7 @@ static void lan9250_txavail_work(FAR void *arg)
    * thread has been configured.
    */
 
-  net_lock();
+  netdev_lock(dev);
   lan9250_lock_spi(priv);
 
   /* Ignore the notification if the interface is not yet up */
@@ -1544,7 +1544,7 @@ static void lan9250_txavail_work(FAR void *arg)
   /* Release lock on the SPI bus and the network */
 
   lan9250_unlock_spi(priv);
-  net_unlock();
+  netdev_unlock(dev);
 }
 
 /****************************************************************************
@@ -1798,7 +1798,7 @@ static void lan9250_int_worker(FAR void *arg)
 
   /* Get exclusive access to both the network and the SPI bus. */
 
-  net_lock();
+  netdev_lock(&priv->dev);
   lan9250_lock_spi(priv);
 
   /* There is no infinite loop check... if there are always pending
@@ -1985,7 +1985,7 @@ static void lan9250_int_worker(FAR void *arg)
   /* Release lock on the SPI bus and the network */
 
   lan9250_unlock_spi(priv);
-  net_unlock();
+  netdev_unlock(&priv->dev);
 
   /* Enable ISR_GPIO interrupts after unlocking net so that application
    * could have chance to process Ethernet packet and free iob.
@@ -2061,7 +2061,7 @@ static void lan9250_txtout_worker(FAR void *arg)
 
   /* Get exclusive access to the network */
 
-  net_lock();
+  netdev_lock(&priv->dev);
 
   /* Increment statistics and dump debug info */
 
@@ -2083,7 +2083,7 @@ static void lan9250_txtout_worker(FAR void *arg)
 
   /* Release lock on the network */
 
-  net_unlock();
+  netdev_unlock(&priv->dev);
 }
 
 /****************************************************************************

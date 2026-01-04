@@ -1022,7 +1022,7 @@ static void rndis_rxdispatch(FAR void *arg)
   FAR struct eth_hdr_s *hdr;
   irqstate_t flags;
 
-  net_lock();
+  netdev_lock(&priv->netdev);
   flags = enter_critical_section();
   rndis_giverxreq(priv);
   priv->netdev.d_len = priv->current_rx_datagram_size;
@@ -1099,7 +1099,7 @@ static void rndis_rxdispatch(FAR void *arg)
       rndis_freenetreq(priv);
     }
 
-  net_unlock();
+  netdev_unlock(&priv->netdev);
 }
 
 /****************************************************************************
@@ -1192,7 +1192,7 @@ static void rndis_txavail_work(FAR void *arg)
 {
   FAR struct rndis_dev_s *priv = (FAR struct rndis_dev_s *)arg;
 
-  net_lock();
+  netdev_lock(&priv->netdev);
 
   if (rndis_allocnetreq(priv))
     {
@@ -1203,7 +1203,7 @@ static void rndis_txavail_work(FAR void *arg)
         }
     }
 
-  net_unlock();
+  netdev_unlock(&priv->netdev);
 }
 
 /****************************************************************************
