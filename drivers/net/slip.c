@@ -750,7 +750,7 @@ static void slip_interrupt_work(FAR void *arg)
    * thread has been configured.
    */
 
-  net_lock();
+  netdev_lock(&self->dev);
 
   /* Process pending Ethernet interrupts */
 
@@ -798,7 +798,7 @@ static void slip_interrupt_work(FAR void *arg)
       slip_txdone(self);
     }
 
-  net_unlock();
+  netdev_unlock(&self->dev);
 }
 
 /****************************************************************************
@@ -899,7 +899,7 @@ static void slip_txavail_work(FAR void *arg)
    * thread has been configured.
    */
 
-  net_lock();
+  netdev_lock(&self->dev);
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -917,7 +917,7 @@ static void slip_txavail_work(FAR void *arg)
         }
     }
 
-  net_unlock();
+  netdev_unlock(&self->dev);
 }
 
 /****************************************************************************

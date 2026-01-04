@@ -134,13 +134,13 @@ static int sim_can_txavail(struct net_driver_s *dev)
 
   /* Ignore the notification if the interface is not yet up */
 
-  net_lock();
+  netdev_lock(dev);
   if (IFF_IS_UP(priv->dev.d_flags))
     {
       devif_poll(&priv->dev, sim_can_txpoll);
     }
 
-  net_unlock();
+  netdev_unlock(dev);
 
   return OK;
 }
@@ -189,7 +189,7 @@ static void sim_can_work(void *arg)
        * in priv->dev.d_len
        */
 
-      net_lock();
+      netdev_lock(&priv->dev);
       priv->dev.d_len = ret;
       priv->dev.d_buf = (FAR uint8_t *)&hframe;
 
@@ -198,7 +198,7 @@ static void sim_can_work(void *arg)
       NETDEV_RXPACKETS(&priv->dev);
 
       can_input(&priv->dev);
-      net_unlock();
+      netdev_unlock(&priv->dev);
     }
 
 nodata:

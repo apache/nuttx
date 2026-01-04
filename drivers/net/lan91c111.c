@@ -812,7 +812,7 @@ static void lan91c111_interrupt_work(FAR void *arg)
    * thread has been configured.
    */
 
-  net_lock();
+  netdev_lock(dev);
 
   /* Process pending Ethernet interrupts */
 
@@ -873,7 +873,7 @@ static void lan91c111_interrupt_work(FAR void *arg)
         }
     }
 
-  net_unlock();
+  netdev_unlock(dev);
 
   /* Re-enable Ethernet interrupts */
 
@@ -949,7 +949,7 @@ static int lan91c111_ifup(FAR struct net_driver_s *dev)
         dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
 
-  net_lock();
+  netdev_lock(dev);
 
   /* Initialize PHYs, Ethernet interface, and setup up Ethernet interrupts */
 
@@ -974,7 +974,7 @@ static int lan91c111_ifup(FAR struct net_driver_s *dev)
 
   copyto16(priv, ADDR0_REG, &dev->d_mac.ether, sizeof(dev->d_mac.ether));
 
-  net_unlock();
+  netdev_unlock(dev);
 
   /* Enable the Ethernet interrupt */
 
@@ -1056,7 +1056,7 @@ static void lan91c111_txavail_work(FAR void *arg)
    * thread has been configured.
    */
 
-  net_lock();
+  netdev_lock(dev);
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -1074,7 +1074,7 @@ static void lan91c111_txavail_work(FAR void *arg)
         }
     }
 
-  net_unlock();
+  netdev_unlock(dev);
 }
 
 /****************************************************************************
@@ -1187,9 +1187,9 @@ static int lan91c111_addmac(FAR struct net_driver_s *dev,
 
   /* Add the MAC address to the hardware multicast routing table */
 
-  net_lock();
+  netdev_lock(dev);
   modifyreg16(priv, MCAST_REG1 + off, 0, 1 << bit);
-  net_unlock();
+  netdev_unlock(dev);
 
   return OK;
 }
@@ -1234,9 +1234,9 @@ static int lan91c111_rmmac(FAR struct net_driver_s *dev,
 
   /* Remove the MAC address from the hardware multicast routing table */
 
-  net_lock();
+  netdev_lock(dev);
   modifyreg16(priv, MCAST_REG1 + off, 1 << bit, 0);
-  net_unlock();
+  netdev_unlock(dev);
 
   return OK;
 }
@@ -1269,7 +1269,7 @@ static int lan91c111_ioctl(FAR struct net_driver_s *dev, int cmd,
   FAR struct mii_ioctl_data_s *req = (FAR void *)arg;
   int ret = OK;
 
-  net_lock();
+  netdev_lock(dev);
 
   /* Decode and dispatch the driver-specific IOCTL command */
 
@@ -1292,7 +1292,7 @@ static int lan91c111_ioctl(FAR struct net_driver_s *dev, int cmd,
       ret = -ENOTTY; /* Special return value for this case */
     }
 
-  net_unlock();
+  netdev_unlock(dev);
   return ret;
 }
 #endif

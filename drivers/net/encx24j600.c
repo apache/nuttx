@@ -1735,7 +1735,7 @@ static void enc_irqworker(FAR void *arg)
 
   /* Get exclusive access to both the network and the SPI bus. */
 
-  net_lock();
+  netdev_lock(&priv->dev);
   enc_lock(priv);
 
   /* A good practice is for the host controller to clear the Global Interrupt
@@ -1884,7 +1884,7 @@ static void enc_irqworker(FAR void *arg)
   /* Release lock on the SPI bus and the network */
 
   enc_unlock(priv);
-  net_unlock();
+  netdev_unlock(&priv->dev);
 }
 
 /****************************************************************************
@@ -1957,7 +1957,7 @@ static void enc_toworker(FAR void *arg)
 
   /* Get exclusive access to the network. */
 
-  net_lock();
+  netdev_lock(&priv->dev);
 
   /* Increment statistics and dump debug info */
 
@@ -1979,7 +1979,7 @@ static void enc_toworker(FAR void *arg)
 
   /* Release the network */
 
-  net_unlock();
+  netdev_unlock(&priv->dev);
 }
 
 /****************************************************************************
