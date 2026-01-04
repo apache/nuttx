@@ -450,7 +450,10 @@ Steps for Using NuttX as IVSHMEM host and guest
 
          $ qemu-system-aarch64 -cpu cortex-a53 -nographic -machine virt,virtualization=on,gic-version=3 -kernel server/nuttx \
            -device ivshmem-plain,id=shmem0,memdev=shmmem-shmem0,addr=0xb \
-           -object memory-backend-file,id=shmmem-shmem0,mem-path=/dev/shm/ivshmem0,size=4194304,share=yes
+           -object memory-backend-file,id=shmmem-shmem0,mem-path=/dev/shm/ivshmem0,size=4194304,share=yes \
+           -device virtio-serial-device,bus=virtio-mmio-bus.0 \
+           -chardev socket,path=/tmp/rpmsg_port_uart_socket,server=on,wait=off,id=foo \
+           -device virtconsole,chardev=foo
 
    b. Start ``rpproxy_ivshmem``
 
@@ -458,7 +461,10 @@ Steps for Using NuttX as IVSHMEM host and guest
 
          $ qemu-system-aarch64 -cpu cortex-a53 -nographic -machine virt,virtualization=on,gic-version=3 -kernel proxy/nuttx \
            -device ivshmem-plain,id=shmem0,memdev=shmmem-shmem0,addr=0xb \
-           -object memory-backend-file,discard-data=on,id=shmmem-shmem0,mem-path=/dev/shm/ivshmem0,size=4194304,share=yes
+           -object memory-backend-file,discard-data=on,id=shmmem-shmem0,mem-path=/dev/shm/ivshmem0,size=4194304,share=yes \
+           -device virtio-serial-device,bus=virtio-mmio-bus.0 \
+           -chardev socket,path=/tmp/rpmsg_port_uart_socket,server=off,id=foo \
+           -device virtconsole,chardev=foo
 
    c. Check the RPMSG Syslog in rpserver shell:
 
