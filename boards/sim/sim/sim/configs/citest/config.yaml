@@ -1,0 +1,12 @@
+config:
+  cwd: './'
+  timeout_session: 6000
+
+product:
+  name: "ntfc-sim"
+  cores:
+    core0:
+      name: 'main'
+      device: 'sim'
+      conf_path: './.config'
+      elf_path: './nuttx'

@@ -492,9 +492,11 @@ function refresh {
 
 function run {
   if [ ${RUN} -ne 0 ] && [ -z ${cmake} ]; then
-    run_script="$path/run"
+    run_script="$path/run.sh"
     if [ -x $run_script ]; then
       echo "  Running NuttX..."
+      export ARTIFACTCONFDIR=$ARTIFACTDIR/$(echo $config | sed "s/:/\//")/
+      export CURRENTCONFDIR=$(realpath $path)
       if ! $run_script; then
         fail=1
       fi
