@@ -762,13 +762,15 @@ static int sensor_open(FAR struct file *filep)
   FAR struct sensor_user_s *user;
   int ret = 0;
 
-  nxrmutex_lock(&upper->lock);
   user = kmm_zalloc(sizeof(struct sensor_user_s));
   if (user == NULL)
     {
-      ret = -ENOMEM;
-      goto errout_with_lock;
+      return -ENOMEM;
     }
+
+  /* The lower ops have upper lock protection, so no additional locking
+   * protection is needed.
+   */
 
   if ((filep->f_oflags & O_DIRECT) == 0 && lower->ops->open)
     {
@@ -778,6 +780,8 @@ static int sensor_open(FAR struct file *filep)
           goto errout_with_user;
         }
     }
+
+  nxrmutex_lock(&upper->lock);
 
   /* Using the O_DIRECT flag will prevent cross-core operations,
    * allowing for direct I/O operations.
@@ -836,9 +840,12 @@ static int sensor_open(FAR struct file *filep)
   sensor_pollnotify(upper, POLLPRI, SENSOR_ROLE_WR);
 
   filep->f_priv = user;
-  goto errout_with_lock;
+
+  nxrmutex_unlock(&upper->lock);
+  return OK;
 
 errout_with_open:
+  nxrmutex_unlock(&upper->lock);
   if (lower->ops->close)
     {
       lower->ops->close(lower, filep);
@@ -846,8 +853,6 @@ errout_with_open:
 
 errout_with_user:
   kmm_free(user);
-errout_with_lock:
-  nxrmutex_unlock(&upper->lock);
   return ret;
 }
 
@@ -863,12 +868,16 @@ static int sensor_close(FAR struct file *filep)
   sensor_update_latency(filep, upper, user, UINT32_MAX);
   sensor_update_wakeup(filep, upper, user, false);
 
-  nxrmutex_lock(&upper->lock);
+  /* The lower ops have upper lock protection, so no additional locking
+   * protection is needed.
+   */
 
   if ((filep->f_oflags & O_DIRECT) == 0 && lower->ops->close)
     {
       lower->ops->close(lower, filep);
     }
+
+  nxrmutex_lock(&upper->lock);
 
   /* Using the O_DIRECT flag will prevent cross-core operations,
    * allowing for direct I/O operations.
