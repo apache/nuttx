@@ -180,6 +180,20 @@ struct netdev_ops_s
   /* reclaim - try to reclaim packets sent by netdev. */
 
   CODE void (*reclaim)(FAR struct netdev_lowerhalf_s *dev);
+
+#ifdef CONFIG_NET_NETPOLL
+  /* txpoll - Complete pending transmissions and free the finished TX
+   *          packets, so their TX quota can be reused.
+   *
+   *   Used only by netpoll, which may run with interrupts disabled and
+   *   without the network stack (e.g. on the panic path), where the
+   *   driver's TX-done interrupt cannot run.  It must not depend on
+   *   interrupts or on the upper half.  It is separate from reclaim,
+   *   which is called by the upper half in normal context.
+   */
+
+  CODE void (*txpoll)(FAR struct netdev_lowerhalf_s *dev);
+#endif
 };
 
 /* This structure is a set of wireless handlers, leave unsupported operations
