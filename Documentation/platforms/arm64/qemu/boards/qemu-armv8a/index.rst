@@ -413,38 +413,41 @@ hypervisor but won't work with Jailhouse hypervisor which uses ``ivshmem-v2``.
 Please refer to the official `Qemu ivshmem documentation
 <https://www.qemu.org/docs/master/system/devices/ivshmem.html>`_ for more information.
 
-This is an example implementation for OpenAMP based on the Inter-VM share
-memory(ivshmem)::
+This is an example implementation for OpenAMP that supports multiple transport
+mechanisms including Inter-VM shared memory (ivshmem) and RPMSG port UART::
 
-  rpproxy_ivshmem:  Remote slave(client) proxy process.
-  rpserver_ivshmem: Remote master(host) server process.
+  rpproxy:  Remote slave(client) proxy process.
+  rpserver: Remote master(host) server process.
 
-Steps for Using NuttX as IVSHMEM host and guest
+Steps for Using NuttX as OpenAMP host and guest
 
 1. Build images
 
-   a. Build ``rpserver_ivshmem``
+   a. Build ``rpserver``
 
       .. code:: console
 
-         $ cmake -B server -DBOARD_CONFIG=qemu-armv8a:rpserver_ivshmem -GNinja
+         $ cmake -B server -DBOARD_CONFIG=qemu-armv8a:rpserver -GNinja
          $ cmake --build server
 
-   b. Build ``rpproxy_ivshmem``
+   b. Build ``rpproxy``
 
       .. code:: console
 
-         $ cmake -B proxy -DBOARD_CONFIG=qemu-armv8a:rpproxy_ivshmem -GNinja
+         $ cmake -B proxy -DBOARD_CONFIG=qemu-armv8a:rpproxy -GNinja
          $ cmake --build proxy
 
 2. Bringup firmware via Qemu:
 
-   The Inter-VM Shared Memory device basic syntax is::
+   The configuration supports both ivshmem and RPMSG port UART transports.
+   For ivshmem, use the following device syntax::
 
       -device ivshmem-plain,id=shmem0,memdev=shmmem-shmem0,addr=0xb \
       -object memory-backend-file,id=shmmem-shmem0,mem-path=/dev/shm/ivshmem0,size=4194304,share=yes
 
-   a. Start ``rpserver_ivshmem``
+   For RPMSG port UART, the virtconsole device is used as shown in the examples below.
+
+   a. Start ``rpserver``
 
       .. code:: console
 
@@ -455,7 +458,7 @@ Steps for Using NuttX as IVSHMEM host and guest
            -chardev socket,path=/tmp/rpmsg_port_uart_socket,server=on,wait=off,id=foo \
            -device virtconsole,chardev=foo
 
-   b. Start ``rpproxy_ivshmem``
+   b. Start ``rpproxy``
 
       .. code:: console
 
