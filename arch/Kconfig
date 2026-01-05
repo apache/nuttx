@@ -1316,6 +1316,7 @@ comment "Board Settings"
 
 config BOARD_LOOPSPERMSEC
 	int "Delay loops per millisecond"
+	default 0 if ARCH_SIM && ALARM_ARCH
 	---help---
 		Simple delay loops are used by some logic, especially during boot-up,
 		driver initialization. These delay loops must be calibrated for each
