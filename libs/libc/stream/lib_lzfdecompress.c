@@ -59,6 +59,7 @@ static int lzf_header_foreach(FAR struct lib_lzfsistream_s *lzfstream,
 {
   FAR struct lib_sistream_s *stream = lzfstream->backend;
   struct lzf_type1_header_s hdr;
+  size_t hdrsize;
   size_t blkclen;
   size_t blklen;
   int ret;
@@ -82,15 +83,32 @@ static int lzf_header_foreach(FAR struct lib_lzfsistream_s *lzfstream,
           return -EINVAL;
         }
 
-      blkclen = be16toh(*(uint16_t *)hdr.lzf_clen);
-      blklen = be16toh(*(uint16_t *)hdr.lzf_ulen);
+      if (LZF_TYPE0_HDR == hdr.lzf_type)
+        {
+          struct lzf_type0_header_s *hdr0 =
+                           (struct lzf_type0_header_s *)&hdr;
+          hdrsize = LZF_TYPE0_HDR_SIZE;
+          blklen = be16toh(*(uint16_t *)hdr0->lzf_len);
+          blkclen = blklen;
+        }
+      else if (LZF_TYPE1_HDR == hdr.lzf_type)
+        {
+          hdrsize = LZF_TYPE1_HDR_SIZE;
+          blkclen = be16toh(*(uint16_t *)hdr.lzf_clen);
+          blklen = be16toh(*(uint16_t *)hdr.lzf_ulen);
+        }
+      else
+        {
+          return -EINVAL;
+        }
+
       ret = cb(lzfstream, blklen, blkclen, lzfstream->blkoff, arg);
       if (ret <= 0)
         {
           break;
         }
 
-      lzfstream->blkcoff += blkclen + LZF_MAX_HDR_SIZE;
+      lzfstream->blkcoff += blkclen + hdrsize;
       lzfstream->blkoff += blklen;
     }
 
