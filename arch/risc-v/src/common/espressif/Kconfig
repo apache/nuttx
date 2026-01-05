@@ -248,7 +248,7 @@ config ESPRESSIF_SECURE_FLASH_UART_BOOTLOADER_ALLOW_ENC
 	bool "Leave UART bootloader encryption enabled"
 	depends on ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
 	default n
-	help
+	---help---
 		If not set (default), the bootloader will permanently disable UART bootloader encryption access on
 		first boot. If set, the UART bootloader will still be able to access hardware encryption.
 
@@ -290,12 +290,12 @@ choice ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE
 		Refer to the Flash Encryption section of the ESP-IDF Programmer's Guide for details:
 		https://docs.espressif.com/projects/esp-idf/en/latest/esp32/security/flash-encryption.html#flash-encryption-configuration
 
-	config ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
-		bool "Development (NOT SECURE)"
-		select ESPRESSIF_SECURE_FLASH_UART_BOOTLOADER_ALLOW_ENC
+config ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+	bool "Development (NOT SECURE)"
+	select ESPRESSIF_SECURE_FLASH_UART_BOOTLOADER_ALLOW_ENC
 
-	config ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE_RELEASE
-		bool "Release"
+config ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE_RELEASE
+	bool "Release"
 
 endchoice
 
@@ -1721,11 +1721,13 @@ choice ESPRESSIF_WIFI_MGMT_RX_BUFFER
 		If "Dynamic" is selected, each WiFi RX MGMT buffer is allocated as needed when a MGMT data frame is
 		received. The MGMT buffer is freed after the MGMT data frame has been processed by the WiFi driver.
 
-	config ESPRESSIF_WIFI_STATIC_RX_MGMT_BUFFER
-		bool "Static"
-	config ESPRESSIF_WIFI_DYNAMIC_RX_MGMT_BUFFER
-		bool "Dynamic"
-endchoice
+config ESPRESSIF_WIFI_STATIC_RX_MGMT_BUFFER
+	bool "Static"
+
+config ESPRESSIF_WIFI_DYNAMIC_RX_MGMT_BUFFER
+	bool "Dynamic"
+
+endchoice # ESPRESSIF_WIFI_MGMT_RX_BUFFER
 
 config ESPRESSIF_WIFI_DYNAMIC_RX_MGMT_BUFFER_TYPE
 	int
@@ -1783,11 +1785,13 @@ choice ESPRESSIF_WIFI_TX_BUFFER
 
 		TODO: There is a special dependency for Dynamic if SPIRAM is enabled.
 
-	config ESPRESSIF_WIFI_STATIC_TX_BUFFER
-		bool "Static"
-	config ESPRESSIF_WIFI_DYNAMIC_TX_BUFFER
-		bool "Dynamic"
-endchoice
+config ESPRESSIF_WIFI_STATIC_TX_BUFFER
+	bool "Static"
+
+config ESPRESSIF_WIFI_DYNAMIC_TX_BUFFER
+	bool "Dynamic"
+
+endchoice # ESPRESSIF_WIFI_TX_BUFFER
 
 config ESPRESSIF_WIFI_TX_BUFFER_TYPE
 	int
