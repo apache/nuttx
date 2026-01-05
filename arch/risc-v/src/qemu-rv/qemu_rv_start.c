@@ -166,9 +166,11 @@ void qemu_rv_start(int mhartid, const char *dtb)
     }
 #endif
 
-  /* Configure FPU */
+  /* Configure FPU and VPU */
 
   riscv_fpuconfig();
+
+  riscv_vpuconfig();
 
   if (mhartid > 0)
     {
