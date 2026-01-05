@@ -35,13 +35,14 @@ endif()
 list(
   APPEND
   CSRCS
+  arm_userfault.c
   arm_tcbinfo.c
   arm_doirq.c
   arm_dataabort.c
   arm_syscall.c
-  arm_prefetchabort.c
   arm_cpuidlestack.c
-  arm_userfault.c
-  arm_initialstate.c)
+  arm_initialstate.c
+  arm_undefinedinsn.c
+  arm_prefetchabort.c)
 
 target_sources(arch PRIVATE ${CSRCS})

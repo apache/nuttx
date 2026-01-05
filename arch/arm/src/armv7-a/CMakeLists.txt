@@ -39,7 +39,6 @@ list(
   arm_gicv2.c
   arm_gicv2_dump.c
   arm_mmu.c
-  arm_undefinedinsn.c
   arm_perf.c
   cp15_cacheops.c)
 
