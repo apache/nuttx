@@ -282,6 +282,13 @@ define MKIMAGE
 endef
 endif
 
+# MAKEUF2 -- Merge raw binary files into uf2 format
+
+define MAKEUF2
+	esptool.py -c $(CHIP_SERIES) merge_bin --format uf2 -o nuttx.merged.uf2 -fs $(FLASH_SIZE) -fm $(FLASH_MODE) $(ESPTOOL_BINS)
+	$(Q) echo "Generated: nuttx.merged.uf2"
+endef
+
 # PREBUILD -- Perform pre build operations
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
@@ -299,6 +306,7 @@ define POSTBUILD
 	$(if $(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),$(call MAKE_VIRTUAL_EFUSE_BIN))
 	$(if $(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_ENABLED),$(call FLASH_ENC))
 	$(if $(CONFIG_ESP32S3_MERGE_BINS),$(call MERGEBIN))
+	$(if $(UF2),$(call MAKEUF2))
 endef
 
 # ESPTOOL_BAUD -- Serial port baud rate used when flashing/reading via esptool.py
@@ -315,5 +323,12 @@ define FLASH
 	fi
 	$(if $(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_ENABLED),$(call BURN_EFUSES))
 	$(eval ESPTOOL_OPTS := -c esp32s3 -p $(ESPTOOL_PORT) -b $(ESPTOOL_BAUD) $(if $(CONFIG_ESP32S3_ESPTOOLPY_NO_STUB),--no-stub))
-	esptool.py $(ESPTOOL_OPTS) write_flash $(ESPTOOL_WRITEFLASH_OPTS) $(ESPTOOL_BINS)
+
+	$(Q) if [ -z $(UF2) ]; then \
+		esptool.py $(ESPTOOL_OPTS) write_flash $(ESPTOOL_WRITEFLASH_OPTS) $(ESPTOOL_BINS); \
+	else \
+		echo "Flashing using UF2 file."; \
+		cp nuttx.merged.uf2 $(ESPTOOL_PORT); \
+		sync; \
+	fi
 endef
