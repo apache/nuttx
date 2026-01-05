@@ -300,7 +300,7 @@ config RP2040_PWM0A_INVERT
 
 if RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
-	config RP2040_PWM0B_INVERT
+config RP2040_PWM0B_INVERT
 	bool "PWM0 channel 2 invert"
 	default n
 	---help---
@@ -309,7 +309,7 @@ if RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
 endif # RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
-	config RP2040_PWM0_PHASE_CORRECT
+config RP2040_PWM0_PHASE_CORRECT
 	bool "PWM0 phase correct"
 	default n
 
