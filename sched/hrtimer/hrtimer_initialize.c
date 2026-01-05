@@ -32,6 +32,12 @@
  * Public Data
  ****************************************************************************/
 
+/* Array of pointers to currently running high-resolution timers
+ * for each CPU in SMP configurations. Index corresponds to CPU ID.
+ */
+
+FAR hrtimer_t *g_hrtimer_running[CONFIG_SMP_NCPUS];
+
 /* Global spinlock protecting the high-resolution timer subsystem.
  *
  * This spinlock serializes access to the hrtimer red-black tree and
@@ -49,8 +55,7 @@ spinlock_t g_hrtimer_spinlock = SP_UNLOCKED;
  * The tree is ordered by absolute expiration time.
  */
 
-struct hrtimer_tree_s g_hrtimer_tree =
-  RB_INITIALIZER(g_hrtimer_tree);
+struct hrtimer_tree_s g_hrtimer_tree = RB_INITIALIZER(g_hrtimer_tree);
 
 /****************************************************************************
  * Public Functions

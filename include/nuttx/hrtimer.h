@@ -51,20 +51,6 @@ enum hrtimer_mode_e
   HRTIMER_MODE_REL       /* Relative delay from now */
 };
 
-/* High-resolution timer states
- *
- * State transitions are managed internally by the hrtimer framework.
- * Callers must not modify the state directly.
- */
-
-enum hrtimer_state_e
-{
-  HRTIMER_STATE_INACTIVE = 0, /* Timer is inactive and not queued */
-  HRTIMER_STATE_ARMED,        /* Timer is armed and waiting for expiry */
-  HRTIMER_STATE_RUNNING,      /* Timer callback is currently executing */
-  HRTIMER_STATE_CANCELED      /* Timer canceled (callback may be running) */
-};
-
 /* Forward declarations */
 
 struct hrtimer_s;
@@ -79,7 +65,8 @@ typedef struct hrtimer_node_s hrtimer_node_t;
  * timer context and must not block.
  */
 
-typedef uint32_t (*hrtimer_cb)(FAR struct hrtimer_s *hrtimer);
+typedef CODE uint64_t
+(*hrtimer_cb)(FAR hrtimer_t *hrtimer, uint64_t expired);
 
 /* Red-black tree node used to order hrtimers by expiration time */
 
@@ -97,11 +84,9 @@ struct hrtimer_node_s
 
 struct hrtimer_s
 {
-  hrtimer_node_t          node;    /* RB-tree node for sorted insertion */
-  enum hrtimer_state_e    state;   /* Current timer state */
-  hrtimer_cb              func;    /* Expiration callback function */
-  FAR void               *arg;     /* Argument passed to callback */
-  uint64_t                expired; /* Absolute expiration time (ns) */
+  hrtimer_node_t node;   /* RB-tree node for sorted insertion */
+  hrtimer_cb func;       /* Expiration callback function */
+  uint64_t expired;      /* Absolute expiration time (ns) */
 };
 
 /****************************************************************************
@@ -134,13 +119,10 @@ extern "C"
  ****************************************************************************/
 
 static inline_function
-void hrtimer_init(FAR hrtimer_t *hrtimer,
-                  hrtimer_cb func,
-                  FAR void *arg)
+void hrtimer_init(FAR hrtimer_t *hrtimer, hrtimer_cb func)
 {
-  hrtimer->state = HRTIMER_STATE_INACTIVE;
-  hrtimer->func  = func;
-  hrtimer->arg   = arg;
+  memset(hrtimer, 0, sizeof(hrtimer_t));
+  hrtimer->func = func;
 }
 
 /****************************************************************************
@@ -202,7 +184,7 @@ int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer);
  *
  * Input Parameters:
  *   hrtimer - Timer instance to start
- *   ns      - Expiration time in nanoseconds
+ *   expired - Expiration time in nanoseconds
  *   mode    - HRTIMER_MODE_ABS or HRTIMER_MODE_REL
  *
  * Returned Value:
@@ -210,7 +192,7 @@ int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer);
  ****************************************************************************/
 
 int hrtimer_start(FAR hrtimer_t *hrtimer,
-                  uint64_t ns,
+                  uint64_t expired,
                   enum hrtimer_mode_e mode);
 
 #undef EXTERN
