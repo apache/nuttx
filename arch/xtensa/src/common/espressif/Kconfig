@@ -407,7 +407,7 @@ config ESPRESSIF_SECURE_FLASH_UART_BOOTLOADER_ALLOW_ENC
 	bool "Leave UART bootloader encryption enabled"
 	depends on ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
 	default n
-	help
+	---help---
 		If not set (default), the bootloader will permanently disable UART bootloader encryption access on
 		first boot. If set, the UART bootloader will still be able to access hardware encryption.
 
@@ -449,14 +449,14 @@ choice ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE
 		Refer to the Flash Encryption section of the ESP-IDF Programmer's Guide for details:
 		https://docs.espressif.com/projects/esp-idf/en/latest/esp32/security/flash-encryption.html#flash-encryption-configuration
 
-	config ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
-		bool "Development (NOT SECURE)"
-		select ESPRESSIF_SECURE_FLASH_UART_BOOTLOADER_ALLOW_ENC
+config ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+	bool "Development (NOT SECURE)"
+	select ESPRESSIF_SECURE_FLASH_UART_BOOTLOADER_ALLOW_ENC
 
-	config ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE_RELEASE
-		bool "Release"
+config ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE_RELEASE
+	bool "Release"
 
-endchoice
+endchoice # ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE
 
 config ESPRESSIF_SECURE_FLASH_ENC_USE_HOST_KEY
 	bool "Require user provided encryption key for flash encryption"
