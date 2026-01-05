@@ -750,7 +750,7 @@ config ESP32_I2C1
 	default n
 	select ESP32_I2C
 
-	config ESP32_I2C_PERIPH_MASTER_MODE
+config ESP32_I2C_PERIPH_MASTER_MODE
 	bool
 	depends on (ESP32_I2C0_MASTER_MODE || ESP32_I2C1_MASTER_MODE)
 	default n
