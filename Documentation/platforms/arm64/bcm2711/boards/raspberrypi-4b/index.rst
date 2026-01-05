@@ -198,6 +198,20 @@ nsh
 A simple configuration with NSH on the Mini-UART console, accessible using a TTL
 cable connected to GPIO 14 & 15.
 
+coremark
+--------
+
+This configuration boots directly into the :doc:`coremark
+</applications/benchmarks/coremark/index>` benchmark and displays the results of
+the test over the serial console.
+
+ostest
+------
+
+This configuration boots directly into :doc:`ostest
+</applications/testing/ostest/index>` and displays the results of the test over
+the serial console. The test runs 5 times.
+
 sd
 --
 
