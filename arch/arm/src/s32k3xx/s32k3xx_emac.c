@@ -36,6 +36,7 @@
 #include <errno.h>
 
 #include <sys/param.h>
+#include <arch/barriers.h>
 
 #include <arpa/inet.h>
 
