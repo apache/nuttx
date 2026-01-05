@@ -68,6 +68,7 @@ Network Support
   bridge.rst
   netdev.rst
   netdriver.rst
+  netpoll.rst
   mdio.rst
   netguardsize.rst
   netlink.rst
