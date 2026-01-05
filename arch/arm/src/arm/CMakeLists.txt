@@ -22,14 +22,8 @@
 
 target_sources(nuttx PRIVATE arm_head.S)
 
-list(
-  APPEND
-  SRCS
-  arm_undefinedinsn.c
-  arm_cache.S
-  arm_vectors.S
-  arm_vectortab.S
-  arm_saveusercontext.S)
+list(APPEND SRCS arm_cache.S arm_vectors.S arm_vectortab.S
+     arm_saveusercontext.S)
 
 if(CONFIG_PAGING)
   list(APPEND SRCS arm_pginitialize.c arm_checkmapping.c arm_allocpage.c

@@ -30,14 +30,7 @@ list(APPEND SRCS arm_head.S arm_vectors.S arm_saveusercontext.S)
 
 # Common C source files
 
-list(
-  APPEND
-  SRCS
-  arm_cache.c
-  arm_cpuinfo.c
-  arm_undefinedinsn.c
-  arm_perf.c
-  cp15_cacheops.c)
+list(APPEND SRCS arm_cache.c arm_cpuinfo.c arm_perf.c cp15_cacheops.c)
 
 if(NOT CONFIG_ARCH_CHIP STREQUAL tms570)
   list(APPEND SRCS arm_gicv2.c arm_gicv2_dump.c)

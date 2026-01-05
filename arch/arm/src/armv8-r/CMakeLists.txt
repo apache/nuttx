@@ -33,7 +33,6 @@ list(
   arm_cache.c
   arm_cpuinfo.c
   arm_gicv3.c
-  arm_undefinedinsn.c
   arm_perf.c
   cp15_cacheops.c)
 
