@@ -27,6 +27,10 @@
 # (contains .config and nuttx ELF) SOURCE_DIR       - CMake source directory
 # (NuttX root)
 #
+# Optional (matches make UF2=1): UF2              - If set to 1/on/yes/true, run
+# MAKEUF2 (esptool merge_bin --format uf2). May also be set via the UF2
+# environment variable when invoking cmake -P.
+#
 # All CONFIG_* variables are automatically loaded from .config file.
 
 # ##############################################################################
@@ -57,6 +61,22 @@ endif()
 nuttx_export_kconfig(${DOTCONFIG})
 
 include(${SOURCE_DIR}/tools/espressif/espressif_esptool_common.cmake)
+
+# ##############################################################################
+# UF2 output (tools/espressif/Config.mk MAKEUF2; make UF2=1)
+# ##############################################################################
+
+if(NOT DEFINED UF2)
+  set(UF2 "$ENV{UF2}")
+endif()
+
+set(UF2_ENABLED FALSE)
+if(NOT "${UF2}" STREQUAL "")
+  string(TOLOWER "${UF2}" _uf2_lower)
+  if(_uf2_lower MATCHES "^(1|on|yes|true|y)$")
+    set(UF2_ENABLED TRUE)
+  endif()
+endif()
 
 # ##############################################################################
 # Find required tools for the post build process
@@ -272,6 +292,53 @@ if(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_ENABLED)
 endif()
 
 # ##############################################################################
+# Set address/bin variable for esptool
+# ##############################################################################
+
+set(ESPTOOL_BINS "")
+
+if(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT)
+  # MCUboot configuration
+
+  if(EXISTS "${SOURCE_DIR}/mcuboot-${CHIP_SERIES}.bin")
+    message(
+      STATUS
+        "Merge bin: ${BL_OFFSET} -> ${SOURCE_DIR}/mcuboot-${CHIP_SERIES}.bin")
+    list(APPEND ESPTOOL_BINS ${BL_OFFSET}
+         "${SOURCE_DIR}/mcuboot-${CHIP_SERIES}.bin")
+  else()
+    message(FATAL_ERROR "mcuboot-${CHIP_SERIES}.bin not found in ${SOURCE_DIR}")
+  endif()
+
+  # Create empty vefuse.bin if it doesn't exist
+  if(NOT EXISTS "${BINARY_DIR}/vefuse.bin")
+    file(WRITE "${BINARY_DIR}/vefuse.bin" "")
+  endif()
+  list(APPEND ESPTOOL_BINS ${EFUSE_OFFSET} "${BINARY_DIR}/vefuse.bin")
+  message(STATUS "Merge bin: ${EFUSE_OFFSET} -> ${BINARY_DIR}/vefuse.bin")
+
+  list(APPEND ESPTOOL_BINS ${MCUBOOT_APP_OFFSET} "${BINARY_DIR}/nuttx.bin")
+  message(STATUS "Merge bin: ${MCUBOOT_APP_OFFSET} -> ${BINARY_DIR}/nuttx.bin")
+
+  if(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_ENABLED AND CONFIG_ESPRESSIF_SPIFLASH)
+    list(APPEND ESPTOOL_BINS ${CONFIG_ESPRESSIF_STORAGE_MTD_OFFSET}
+         "${BINARY_DIR}/enc_mtd.bin")
+    message(
+      STATUS
+        "Merge bin: ${CONFIG_ESPRESSIF_STORAGE_MTD_OFFSET} -> ${BINARY_DIR}/enc_mtd.bin"
+    )
+  endif()
+
+elseif(CONFIG_ESPRESSIF_SIMPLE_BOOT)
+  # Simple boot: same base offset as BL_OFFSET (0x2000 on ESP32-P4, else 0x0)
+  list(APPEND ESPTOOL_BINS ${BL_OFFSET} "${BINARY_DIR}/nuttx.bin")
+
+else()
+  # Legacy boot: application at offset 0
+  list(APPEND ESPTOOL_BINS 0x0000 "${BINARY_DIR}/nuttx.bin")
+endif()
+
+# ##############################################################################
 # Merge binaries (optional)
 # ##############################################################################
 
@@ -283,50 +350,6 @@ if(CONFIG_ESPRESSIF_MERGE_BINS)
   endif()
 
   # Build the list of binaries to merge Format: offset1 file1 offset2 file2 ...
-  set(ESPTOOL_BINS "")
-
-  if(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT)
-    # MCUboot configuration
-
-    if(EXISTS "${SOURCE_DIR}/mcuboot-${CHIP_SERIES}.bin")
-      message(
-        STATUS
-          "Merge bin: ${BL_OFFSET} -> ${SOURCE_DIR}/mcuboot-${CHIP_SERIES}.bin")
-      list(APPEND ESPTOOL_BINS ${BL_OFFSET}
-           "${SOURCE_DIR}/mcuboot-${CHIP_SERIES}.bin")
-    else()
-      message(
-        FATAL_ERROR "mcuboot-${CHIP_SERIES}.bin not found in ${SOURCE_DIR}")
-    endif()
-
-    # Create empty vefuse.bin if it doesn't exist
-    if(NOT EXISTS "${BINARY_DIR}/vefuse.bin")
-      file(WRITE "${BINARY_DIR}/vefuse.bin" "")
-    endif()
-    list(APPEND ESPTOOL_BINS ${EFUSE_OFFSET} "${BINARY_DIR}/vefuse.bin")
-    message(STATUS "Merge bin: ${EFUSE_OFFSET} -> ${BINARY_DIR}/vefuse.bin")
-
-    list(APPEND ESPTOOL_BINS ${MCUBOOT_APP_OFFSET} "${BINARY_DIR}/nuttx.bin")
-    message(
-      STATUS "Merge bin: ${MCUBOOT_APP_OFFSET} -> ${BINARY_DIR}/nuttx.bin")
-
-    if(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_ENABLED AND CONFIG_ESPRESSIF_SPIFLASH)
-      list(APPEND ESPTOOL_BINS ${CONFIG_ESPRESSIF_STORAGE_MTD_OFFSET}
-           "${BINARY_DIR}/enc_mtd.bin")
-      message(
-        STATUS
-          "Merge bin: ${CONFIG_ESPRESSIF_STORAGE_MTD_OFFSET} -> ${BINARY_DIR}/enc_mtd.bin"
-      )
-    endif()
-
-  elseif(CONFIG_ESPRESSIF_SIMPLE_BOOT)
-    # Simple boot: same base offset as BL_OFFSET (0x2000 on ESP32-P4, else 0x0)
-    list(APPEND ESPTOOL_BINS ${BL_OFFSET} "${BINARY_DIR}/nuttx.bin")
-
-  else()
-    # Legacy boot: application at offset 0
-    list(APPEND ESPTOOL_BINS 0x0000 "${BINARY_DIR}/nuttx.bin")
-  endif()
 
   # Execute merge_bin
   execute_process(
@@ -341,4 +364,26 @@ if(CONFIG_ESPRESSIF_MERGE_BINS)
 
   message(STATUS "Generated: nuttx.merged.bin")
   file(APPEND "${BINARY_DIR}/nuttx.manifest" "nuttx.merged.bin\n")
+endif()
+
+# ##############################################################################
+# UF2 image (optional; Config.mk MAKEUF2)
+# ##############################################################################
+
+if(UF2_ENABLED)
+  message(STATUS "MAKEUF2: Creating UF2 flash image")
+
+  execute_process(
+    COMMAND
+      ${ESPTOOL} -c ${CHIP_SERIES} merge-bin --format uf2 -o
+      ${BINARY_DIR}/nuttx.merged.uf2 -fs ${FLASH_SIZE} -fm ${FLASH_MODE}
+      ${ESPTOOL_BINS}
+    RESULT_VARIABLE MAKEUF2_RESULT
+    WORKING_DIRECTORY ${BINARY_DIR})
+
+  if(NOT MAKEUF2_RESULT EQUAL 0)
+    message(FATAL_ERROR "esptool merge-bin --format uf2 failed")
+  endif()
+
+  message(STATUS "Generated: nuttx.merged.uf2")
 endif()
