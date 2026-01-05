@@ -32,6 +32,20 @@
 #include <nuttx/clock.h>
 #include <nuttx/hrtimer.h>
 
+#ifdef CONFIG_HRTIMER
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* Red-black tree head for managing active high-resolution timers.
+ *
+ * Timers are ordered by expiration time, the earliest expiring timer
+ * being the left-most (minimum) node in the tree.
+ */
+
+RB_HEAD(hrtimer_tree_s, hrtimer_node_s);
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -44,13 +58,11 @@ extern spinlock_t g_hrtimer_spinlock;
 
 extern struct hrtimer_tree_s g_hrtimer_tree;
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+/* Array of pointers to currently running high-resolution timers
+ * for each CPU in SMP configurations. Index corresponds to CPU ID.
+ */
 
-/* Red-black tree head for managing active hrtimers */
-
-RB_HEAD(hrtimer_tree_s, hrtimer_node_s);
+extern FAR hrtimer_t *g_hrtimer_running[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -147,14 +159,13 @@ int hrtimer_starttimer(uint64_t ns)
  *   b - Pointer to the second hrtimer node.
  *
  * Returned Value:
- *   >0 if b expires before a
- *    0 if a and b expire at the same time
- *   <0 if b expires after a
+ *   <0 if a expires before b
+ *   >=0 if a expires after b
  ****************************************************************************/
 
 static inline_function
 int hrtimer_compare(FAR const hrtimer_node_t *a,
-                FAR const hrtimer_node_t *b)
+                    FAR const hrtimer_node_t *b)
 {
   FAR const hrtimer_t *atimer = (FAR const hrtimer_t *)a;
   FAR const hrtimer_t *btimer = (FAR const hrtimer_t *)b;
@@ -173,4 +184,90 @@ int hrtimer_compare(FAR const hrtimer_node_t *a,
 
 RB_PROTOTYPE(hrtimer_tree_s, hrtimer_node_s, entry, hrtimer_compare);
 
+/****************************************************************************
+ * Name: hrtimer_is_armed
+ *
+ * Description:
+ *   Test whether a timer is currently armed (inserted into the RB-tree).
+ *
+ * Returned Value:
+ *   true if armed, false otherwise.
+ ****************************************************************************/
+
+static inline_function bool hrtimer_is_armed(FAR hrtimer_t *hrtimer)
+{
+  /* RB-tree root has NULL parent, so root must be checked explicitly */
+
+  return RB_PARENT(&hrtimer->node, entry) != NULL ||
+         RB_ROOT(&g_hrtimer_tree) == &hrtimer->node;
+}
+
+/****************************************************************************
+ * Name: hrtimer_remove
+ *
+ * Description:
+ *   Remove a timer from the RB-tree and mark it as unarmed.
+ ****************************************************************************/
+
+static inline_function void hrtimer_remove(FAR hrtimer_t *hrtimer)
+{
+  RB_REMOVE(hrtimer_tree_s, &g_hrtimer_tree, &hrtimer->node);
+
+  /* Explicitly clear parent to mark the timer as unarmed */
+
+  RB_PARENT(&hrtimer->node, entry) = NULL;
+}
+
+/****************************************************************************
+ * Name: hrtimer_insert
+ *
+ * Description:
+ *   Insert a timer into the RB-tree according to its expiration time.
+ ****************************************************************************/
+
+static inline_function void hrtimer_insert(FAR hrtimer_t *hrtimer)
+{
+  RB_INSERT(hrtimer_tree_s, &g_hrtimer_tree, &hrtimer->node);
+}
+
+/****************************************************************************
+ * Name: hrtimer_get_first
+ *
+ * Description:
+ *   Return the earliest expiring armed timer.
+ *
+ * Returned Value:
+ *   Pointer to the earliest timer, or NULL if none are armed.
+ ****************************************************************************/
+
+static inline_function FAR hrtimer_t *hrtimer_get_first(void)
+{
+  return (FAR hrtimer_t *)RB_MIN(hrtimer_tree_s, &g_hrtimer_tree);
+}
+
+/****************************************************************************
+ * Name: hrtimer_is_first
+ *
+ * Description:
+ *   Test whether the given high-resolution timer is the earliest
+ *   expiring timer in the RB-tree.
+ *
+ *   In a red-black tree ordered by expiration time, the earliest timer
+ *   is represented by the left-most node. Therefore, a timer is the
+ *   earliest one if it has no left child.
+ *
+ * Input Parameters:
+ *   hrtimer - Pointer to the high-resolution timer to be tested.
+ *
+ * Returned Value:
+ *   true  - The timer is the earliest expiring armed timer.
+ *   false - The timer is not the earliest timer.
+ ****************************************************************************/
+
+static inline_function bool hrtimer_is_first(FAR hrtimer_t *hrtimer)
+{
+  return RB_LEFT(&hrtimer->node, entry) == NULL;
+}
+
+#endif /* CONFIG_HRTIMER */
 #endif /* __SCHED_HRTIMER_HRTIMER_H */

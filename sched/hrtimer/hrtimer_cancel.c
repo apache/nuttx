@@ -27,9 +27,9 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
-
 #include <errno.h>
 
+#include "sched/sched.h"
 #include "hrtimer/hrtimer.h"
 
 /****************************************************************************
@@ -39,6 +39,40 @@
 /* Delay used while waiting for a running hrtimer callback to complete */
 
 #define HRTIMER_CANCEL_SYNC_DELAY_MS  5
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: hrtimer_is_active
+ *
+ * Description:
+ *   Check whether a high-resolution timer is currently running on any CPU.
+ *
+ * Input Parameters:
+ *   hrtimer - Pointer to the high-resolution timer to check.
+ *
+ * Returned Value:
+ *   true  - The timer is active on at least one CPU.
+ *   false - The timer is not active.
+ ****************************************************************************/
+
+static inline_function bool hrtimer_is_active(FAR hrtimer_t *hrtimer)
+{
+  bool is_active = false;
+
+  for (int i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      if (g_hrtimer_running[i] == hrtimer)
+        {
+          is_active = true;
+          break;
+        }
+    }
+
+  return is_active;
+}
 
 /****************************************************************************
  * Public Functions
@@ -83,8 +117,8 @@
 int hrtimer_cancel(FAR hrtimer_t *hrtimer)
 {
   FAR hrtimer_t *first;
-  irqstate_t     flags;
-  int            ret = OK;
+  irqstate_t flags;
+  int ret = OK;
 
   DEBUGASSERT(hrtimer != NULL);
 
@@ -92,50 +126,20 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer)
 
   flags = spin_lock_irqsave(&g_hrtimer_spinlock);
 
-  /* Capture the current earliest timer before any modification */
-
-  first = (FAR hrtimer_t *)RB_MIN(hrtimer_tree_s, &g_hrtimer_tree);
-
-  switch (hrtimer->state)
+  if (hrtimer_is_armed(hrtimer))
     {
-      case HRTIMER_STATE_ARMED:
-        {
-          /* Remove the timer from the active tree */
-
-          RB_REMOVE(hrtimer_tree_s, &g_hrtimer_tree, &hrtimer->node);
-          hrtimer->state = HRTIMER_STATE_INACTIVE;
-          break;
-        }
-
-      case HRTIMER_STATE_RUNNING:
-        {
-          /* The callback is currently executing.
-           *
-           * Mark the timer as canceled so it will not be re-armed or
-           * executed again.  The running callback is allowed to complete.
-           *
-           * NOTE: The timer node is expected to have already been removed
-           *       from the tree when the callback started executing.
-           */
-
-          hrtimer->state = HRTIMER_STATE_CANCELED;
-          break;
-        }
-
-      case HRTIMER_STATE_INACTIVE:
-      case HRTIMER_STATE_CANCELED:
-      default:
-        {
-          ret = -EINVAL;
-          break;
-        }
+      hrtimer_remove(hrtimer);
     }
+
+  /* Mark timer as cancelled */
+
+  hrtimer->expired = UINT64_MAX;
 
   /* If the canceled timer was the earliest one, update the hardware timer */
 
-  if ((ret == OK) && (first == hrtimer))
+  if (hrtimer_is_first(hrtimer))
     {
-      first = (FAR hrtimer_t *)RB_MIN(hrtimer_tree_s, &g_hrtimer_tree);
+      first = hrtimer_get_first();
       if (first != NULL)
         {
           ret = hrtimer_starttimer(first->expired);
@@ -196,7 +200,7 @@ int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer)
    * and the state becomes inactive.
    */
 
-  while (hrtimer->state != HRTIMER_STATE_INACTIVE)
+  while (hrtimer_is_active(hrtimer))
     {
       if (cansleep)
         {
