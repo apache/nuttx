@@ -126,10 +126,10 @@ static void udp_recvpktinfo(FAR struct udp_recvfrom_s *pstate,
  *
  ****************************************************************************/
 
-static inline size_t udp_recvfrom_newdata(FAR struct net_driver_s *dev,
-                                          FAR struct udp_recvfrom_s *pstate)
+static inline void udp_recvfrom_newdata(FAR struct net_driver_s *dev,
+                                        FAR struct udp_recvfrom_s *pstate)
 {
-  size_t recvlen;
+  ssize_t recvlen;
   int offset;
 
   /* Copy the new appdata into the user buffer */
@@ -145,8 +145,6 @@ static inline size_t udp_recvfrom_newdata(FAR struct net_driver_s *dev,
   pstate->ir_recvlen = recvlen;
 
   dev->d_len = 0;
-
-  return recvlen;
 }
 
 static inline void udp_readahead(struct udp_recvfrom_s *pstate)
