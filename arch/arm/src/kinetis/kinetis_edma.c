@@ -144,6 +144,7 @@ struct kinetis_edma_s
   /* This array describes each DMA channel */
 
   struct kinetis_dmach_s dmach[KINETIS_EDMA_NCHANNELS];
+  spinlock_t lock;
 };
 
 /****************************************************************************
@@ -223,8 +224,6 @@ static struct kinetis_edmatcd_s *kinetis_tcd_alloc(void)
 #if CONFIG_KINETIS_EDMA_NTCD > 0
 static void kinetis_tcd_free_nolock(struct kinetis_edmatcd_s *tcd)
 {
-  irqstate_t flags;
-
   /* Add the the TCD to the end of the free list and post the 'dsem',
    * possibly waking up another thread that might be waiting for
    * a TCD.
