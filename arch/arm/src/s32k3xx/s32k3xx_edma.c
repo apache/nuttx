@@ -156,6 +156,7 @@ struct s32k3xx_edma_s
   /* This array describes each DMA channel */
 
   struct s32k3xx_dmach_s dmach[S32K3XX_EDMA_NCHANNELS];
+  spinlock_t lock;
 };
 
 /****************************************************************************
