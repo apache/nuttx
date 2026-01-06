@@ -146,8 +146,6 @@ static int icmpv6_setup(FAR struct socket *psock)
           memset(&conn->filter, 0xff, sizeof(conn->filter));
         }
 
-      nxrmutex_init(&conn->sconn.s_lock);
-
       /* Save the pre-allocated connection in the socket structure */
 
       psock->s_conn = conn;
