@@ -738,7 +738,9 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 
       nxsem_init(&conn->snd_sem, 0, 0);
 #endif
-      nxrmutex_init(&conn->sconn.s_lock);
+      /* Use conn_init to initialize the connection structure */
+
+      conn_init(&conn->sconn);
 
       /* Set the default value of mss to max, this field will changed when
        * receive SYN.
@@ -861,7 +863,6 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 
   tcp_stop_timer(conn);
 
-  nxrmutex_destroy(&conn->sconn.s_lock);
   tcp_free_rx_buffers(conn);
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
@@ -890,6 +891,10 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 #if CONFIG_NET_SEND_BUFSIZE > 0
   nxsem_destroy(&conn->snd_sem);
 #endif
+
+  /* Use conn_uninit to release all connection resources */
+
+  conn_uninit(&conn->sconn);
 
 #ifdef CONFIG_NET_TCPBACKLOG
   /* Remove any backlog attached to this connection */
