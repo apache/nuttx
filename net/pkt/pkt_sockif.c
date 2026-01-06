@@ -135,8 +135,6 @@ static int pkt_sockif_alloc(FAR struct socket *psock)
   nxsem_init(&conn->sndsem, 0, 0);
 #endif
 
-  nxrmutex_init(&conn->sconn.s_lock);
-
   /* Save the pre-allocated connection in the socket structure */
 
   psock->s_conn = conn;

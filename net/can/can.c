@@ -758,7 +758,10 @@ void can_conn_init(FAR struct can_conn_s *conn)
   conn->sndbufs = CONFIG_NET_SEND_BUFSIZE;
   nxsem_init(&conn->sndsem, 0, 0);
 #endif
-  nxrmutex_init(&conn->sconn.s_lock);
+
+  /* Use conn_init to initialize the connection structure */
+
+  conn_init(&conn->sconn);
 
   /* Enqueue the connection into the active list */
 
@@ -789,7 +792,6 @@ void can_conn_uninit(FAR struct can_conn_s *conn)
   /* Remove the connection from the active list */
 
   dq_rem(&conn->sconn.s_node, &g_active_can_connections);
-  nxrmutex_destroy(&conn->sconn.s_lock);
 
 #ifdef CONFIG_NET_CAN_WRITE_BUFFERS
   /* Free the write queue */
@@ -807,6 +809,10 @@ void can_conn_uninit(FAR struct can_conn_s *conn)
 #if CONFIG_NET_SEND_BUFSIZE > 0
   nxsem_destroy(&conn->sndsem);
 #endif
+
+  /* Use conn_uninit to release all connection resources */
+
+  conn_uninit(&conn->sconn);
 
   /* Free the readahead queue */
 

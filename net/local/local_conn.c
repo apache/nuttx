@@ -37,6 +37,7 @@
 #include <nuttx/queue.h>
 
 #include "local/local.h"
+#include "utils/utils.h"
 
 /****************************************************************************
  * Public Data
@@ -158,7 +159,7 @@ FAR struct local_conn_s *local_alloc(void)
 
   if (conn != NULL)
     {
-      /* Initialize non-zero elements the new connection structure.  Since
+      /* Initialize non-zero elements the new connection structure.
        * Since the memory was allocated with kmm_zalloc(), it is not
        * necessary to zerio-ize any structure elements.
        */
@@ -177,8 +178,10 @@ FAR struct local_conn_s *local_alloc(void)
       nxmutex_init(&conn->lc_sendlock);
       nxmutex_init(&conn->lc_recvlock);
       nxmutex_init(&conn->lc_polllock);
-      nxrmutex_init(&conn->lc_conn.s_lock);
 
+      /* Use conn_init to initialize the connection structure */
+
+      conn_init(&conn->lc_conn);
 #ifdef CONFIG_NET_LOCAL_SCM
       conn->lc_cred.pid = nxsched_getpid();
       conn->lc_cred.uid = getuid();
@@ -357,7 +360,10 @@ void local_free(FAR struct local_conn_s *conn)
   nxmutex_destroy(&conn->lc_sendlock);
   nxmutex_destroy(&conn->lc_recvlock);
   nxmutex_destroy(&conn->lc_polllock);
-  nxrmutex_destroy(&conn->lc_conn.s_lock);
+
+  /* Use conn_uninit to release all connection resources */
+
+  conn_uninit(&conn->lc_conn);
 
   /* And free the connection structure */
 
