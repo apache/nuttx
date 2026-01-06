@@ -28,85 +28,84 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/clock.h>
 #include <nuttx/compiler.h>
-#include <nuttx/spinlock.h>
 
+#include <assert.h>
 #include <stdint.h>
+
+#include <nuttx/list.h>
 #include <sys/tree.h>
+
+#include <nuttx/seqlock.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* The pending state indicates the timer belongs to the shared hrtimer queue
+ * and is waiting for the next hrtimer expiry.
+ */
+
+#define HRTIMER_ISPENDING(timer)       ((timer)->func != NULL)
+
+/* The maximum delay tick should be INT64_MAX. However, if there are expired
+ * hrtimer in the queue, HRTIMER_TIME_BEFORE/AFTER might be incorrect, so we
+ * limited the delay to INT64_MAX >> 1, assuming all expired hrtimer can be
+ * processed within HRTIMER_MAX_DELAY.
+ */
+
+#define HRTIMER_MAX_DELAY              (INT64_MAX >> 1)
+
+#define HRTIMER_TIME_BEFORE(t1, t2)    ((int64_t)((t2) - (t1)) > 0)
+#define HRTIMER_TIME_BEFORE_EQ(t1, t2) ((int64_t)((t2) - (t1)) >= 0)
+#define HRTIMER_TIME_AFTER(t1, t2)     ((int64_t)((t2) - (t1)) < 0)
+#define HRTIMER_TIME_AFTER_EQ(t1, t2)  ((int64_t)((t2) - (t1)) <= 0)
+
+#define HRTIMER_MODE_ABS               (0)
+#define HRTIMER_MODE_REL               (1)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/* High-resolution timer modes
- *
- * HRTIMER_MODE_ABS - Absolute expiration time
- * HRTIMER_MODE_REL - Relative timeout from the current time
- */
-
-enum hrtimer_mode_e
-{
-  HRTIMER_MODE_ABS = 0,  /* Absolute expiration time */
-  HRTIMER_MODE_REL       /* Relative delay from now */
-};
-
-/* High-resolution timer states
- *
- * State transitions are managed internally by the hrtimer framework.
- * Callers must not modify the state directly.
- */
-
-enum hrtimer_state_e
-{
-  HRTIMER_STATE_INACTIVE = 0, /* Timer is inactive and not queued */
-  HRTIMER_STATE_ARMED,        /* Timer is armed and waiting for expiry */
-  HRTIMER_STATE_RUNNING,      /* Timer callback is currently executing */
-  HRTIMER_STATE_CANCELED      /* Timer canceled (callback may be running) */
-};
-
-/* Forward declarations */
-
 struct hrtimer_s;
-struct hrtimer_node_s;
 
-typedef struct hrtimer_s      hrtimer_t;
-typedef struct hrtimer_node_s hrtimer_node_t;
-
-/* Callback type for high-resolution timer expiration
- *
- * The callback is invoked when the timer expires. It is executed in
- * timer context and must not block.
+/* This is the form of the callback function that is called when the
+ * hrtimer function expires. The return value is next delay time.
+ * If the return value is not equal 0 indicates it is periodic timer.
+ * Notice that the timer is only use for offset calculation, the
+ * hrtimer itself can not be written by the callback function.
  */
 
-typedef uint32_t (*hrtimer_cb)(FAR struct hrtimer_s *hrtimer);
+typedef CODE uint64_t (*hrtimer_callback_t)(
+        FAR const struct hrtimer_s *timer, uint64_t expired);
 
-/* Red-black tree node used to order hrtimers by expiration time */
+RB_HEAD(hrtimer_tree_s, hrtimer_s);
 
-struct hrtimer_node_s
+typedef struct hrtimer_s
 {
-  RB_ENTRY(hrtimer_node_s) entry;  /* RB-tree linkage */
-};
+#ifdef CONFIG_HRTIMER_LIST
+  struct list_node    node;    /* Supports a doubly linked list, 16-bytes for 64-bit architectures */
+#else
+  RB_ENTRY(hrtimer_s) node;    /* Supports a RB-tree node, 32-bytes for 64-bit architectures */
+#endif
+  uint64_t            expired; /* Expired time */
+  hrtimer_callback_t  func;    /* Callback function */
+} hrtimer_t;
 
-/* High-resolution timer object
- *
- * The timer is ordered by absolute expiration time and managed by the
- * hrtimer core. The content of this structure should not be accessed
- * directly by users except through the provided APIs.
- */
-
-struct hrtimer_s
+typedef struct hrtimer_queue_s
 {
-  hrtimer_node_t          node;    /* RB-tree node for sorted insertion */
-  enum hrtimer_state_e    state;   /* Current timer state */
-  hrtimer_cb              func;    /* Expiration callback function */
-  FAR void               *arg;     /* Argument passed to callback */
-  uint64_t                expired; /* Absolute expiration time (ns) */
-};
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+  seqcount_t            lock;                      /* The RW-lock */
+#ifdef CONFIG_HRTIMER_LIST
+  struct list_node      queue;                     /* HRTimer doubly linked-list queue */
+#else
+  FAR struct hrtimer_s *first;                     /* Cached left-most timer in the queue */
+  struct hrtimer_tree_s root;                      /* HRTimer red-black-tree-based queue */
+#endif
+  uint64_t              next_expired;              /* Next expired time */
+  hrtimer_t             guard_timer;               /* Guard timer for functional-safety. */
+  uintptr_t             running[CONFIG_SMP_NCPUS]; /* Hazard pointers for memory reclamation. */
+} hrtimer_queue_t;
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -117,101 +116,170 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: hrtimer_init
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#define hrtimer_init(timer) memset(timer, 0, sizeof(timer))
+
+/* Wrapped version for NuttX scheduler. */
+
+/****************************************************************************
+ * Name: hrtimer_async_restart/start
  *
  * Description:
- *   Initialize a high-resolution timer instance. This function sets the
- *   expiration callback and its argument. The timer is initialized in the
- *   inactive state and is not armed until hrtimer_start() is called.
+ *   Restart the hrtimer with relative or absolute time in nanoseconds.
+ *   These functions allow restarting the hrtimer that has been set to
+ *   cancelled state via `hrtimer_cancel`.
+ *   Please be aware of concurrency issues. Concurrency errors are prone to
+ *   occur in this use case.
  *
  * Input Parameters:
- *   hrtimer - Pointer to the hrtimer instance to be initialized
- *   func    - Expiration callback function
- *   arg     - Argument passed to the callback
+ *   timer - The hrtimer to be started.
  *
  * Returned Value:
- *   None
+ *   Zero on success.
+ *   -EINVAL on if one of the parameter is invalid.
+ *
+ * Assumption:
+ *   The timer and func should be not NULL.
+ *   The timer should be cancelled or completed.
+ *
+ ****************************************************************************/
+
+int hrtimer_async_restart(FAR hrtimer_t *timer);
+int hrtimer_async_start(FAR hrtimer_t *timer);
+
+/****************************************************************************
+ * Name: hrtimer_restart/start
+ *
+ * Description:
+ *   Start the hrtimer with absolute or relative time in nanoseconds.
+ *   These functions can only be called when the caller has the ownership of
+ *   the timer.
+ *
+ * Input Parameters:
+ *   timer - The hrtimer to be started.
+ *   func  - The callback function to be called when the hrtimer expires.
+ *   time  - The absolute or relative expiration time in nanoseconds.
+ *   mode  - The mode of the hrtimer, either HRTIMER_MODE_ABS or
+ *           !HRTIMER_MODE_ABS.
+ *
+ * Returned Value:
+ *   Zero on success.
+ *   -EINVAL on if one of the parameter is invalid or the timer is in pending
+ *   state.
+ *
  ****************************************************************************/
 
 static inline_function
-void hrtimer_init(FAR hrtimer_t *hrtimer,
-                  hrtimer_cb func,
-                  FAR void *arg)
+void hrtimer_set_timer(FAR hrtimer_t *timer, hrtimer_callback_t func,
+                           uint64_t time, uint32_t mode)
 {
-  hrtimer->state = HRTIMER_STATE_INACTIVE;
-  hrtimer->func  = func;
-  hrtimer->arg   = arg;
+  uint64_t expired = mode == HRTIMER_MODE_REL ? clock_systime_nsec() +
+                     (time <= HRTIMER_MAX_DELAY ? time : HRTIMER_MAX_DELAY) :
+                     time;
+
+  DEBUGASSERT(timer && func && !HRTIMER_ISPENDING(timer));
+
+  timer->func    = func;
+  timer->expired = expired;
+}
+
+static inline_function
+int hrtimer_restart(FAR hrtimer_t *timer, hrtimer_callback_t func,
+                    uint64_t time, uint32_t mode)
+{
+  int ret = -EINVAL;
+
+  DEBUGASSERT(timer && func);
+
+  hrtimer_set_timer(timer, func, time, mode);
+  ret = hrtimer_async_restart(timer);
+
+  return ret;
+}
+
+static inline_function
+int hrtimer_start(FAR hrtimer_t *timer, hrtimer_callback_t func,
+                  uint64_t time, uint32_t mode)
+{
+  int ret = -EINVAL;
+
+  if (timer && func)
+    {
+      hrtimer_set_timer(timer, func, time, mode);
+      ret = hrtimer_async_start(timer);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
  * Name: hrtimer_cancel
  *
  * Description:
- *   Cancel a high-resolution timer.
- *
- *   If the timer is armed but has not yet expired, it will be removed from
- *   the timer queue and the callback will not be invoked.
- *
- *   If the timer callback is currently executing, this function will mark
- *   the timer as canceled and return immediately. The running callback is
- *   allowed to complete, but it will not be invoked again.
- *
- *   This function is non-blocking and does not wait for a running callback
- *   to finish.
+ *   Cancel the hrtimer asynchronously. This function set the timer to the
+ *   cancelled state. The caller will acquire the limited ownership of the
+ *   hrtimer, which allow the caller restart the hrtimer, but the callback
+ *   function may still be executing on another CPU, which prevent the caller
+ *   from freeing the hrtimer. The caller must call `hrtimer_cancel` to wait
+ *   for the callback to be finished. Please use the function with care.
+ *   Concurrency errors are prone to occur in this use case.
  *
  * Input Parameters:
- *   hrtimer - Timer instance to cancel
+ *   timer - The hrtimer to be cancelled.
  *
- * Returned Value:
- *   OK on success; a negated errno value on failure.
+ * Returned Value
+ *   OK on success. > 0 on if the timer callback is running.
+ *
+ * Assumption:
+ *   The timer should not be NULL.
+ *
  ****************************************************************************/
 
-int hrtimer_cancel(FAR hrtimer_t *hrtimer);
+int hrtimer_cancel(FAR hrtimer_t *timer);
 
 /****************************************************************************
  * Name: hrtimer_cancel_sync
  *
  * Description:
- *   Cancel a high-resolution timer and wait until it becomes inactive.
- *
- *   - Calls hrtimer_cancel() to request timer cancellation.
- *   - If the timer callback is running, waits until it completes and
- *     the timer state transitions to HRTIMER_STATE_INACTIVE.
- *   - If sleeping is allowed (normal task context), yields CPU briefly
- *     to avoid busy-waiting.
- *   - Otherwise (interrupt or idle task context), spins until completion.
+ *   Cancel the hrtimer and synchronously wait the callback to be finished.
+ *   This function set the timer to the cancelled state and wait for all
+ *   references to be released. The caller will then acquire full ownership
+ *   of the hrtimer. After the function returns, the caller can safely
+ *   deallocate the hrtimer.
  *
  * Input Parameters:
- *   hrtimer - Pointer to the high-resolution timer instance to cancel.
+ *   timer - The hrtimer to be cancelled.
  *
- * Returned Value:
- *   OK (0) on success; a negated errno value on failure.
+ * Returned Value
+ *   OK on success.
+ *
+ * Assumption:
+ *   The timer should not be NULL.
  *
  ****************************************************************************/
 
-int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer);
+int hrtimer_cancel_sync(FAR hrtimer_t *timer);
 
 /****************************************************************************
- * Name: hrtimer_start
+ * Name: hrtimer_gettime
  *
  * Description:
- *   Start a high-resolution timer with the specified expiration time.
- *
- *   The expiration time may be specified as either an absolute time or
- *   a relative timeout, depending on the selected mode.
+ *   Get the rest of the delay time of the hrtimer in nanoseconds.
  *
  * Input Parameters:
- *   hrtimer - Timer instance to start
- *   ns      - Expiration time in nanoseconds
- *   mode    - HRTIMER_MODE_ABS or HRTIMER_MODE_REL
+ *   timer - The hrtimer to be queried.
  *
- * Returned Value:
- *   OK on success; a negated errno value on failure.
+ * Returned Value
+ *   The time until next expiration in nanoseconds.
+ *
+ * Assumption:
+ *   The timer should not be NULL.
+ *
  ****************************************************************************/
 
-int hrtimer_start(FAR hrtimer_t *hrtimer,
-                  uint64_t ns,
-                  enum hrtimer_mode_e mode);
+uint64_t hrtimer_gettime(FAR hrtimer_t *timer);
 
 #undef EXTERN
 #ifdef __cplusplus

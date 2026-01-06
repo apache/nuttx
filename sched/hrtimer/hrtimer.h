@@ -20,157 +20,59 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_HRTIMER_HRTIMER_H
-#define __SCHED_HRTIMER_HRTIMER_H
+#ifndef __INCLUDE_SCHED_HRTIMER_HRTIMER_H
+#define __INCLUDE_SCHED_HRTIMER_HRTIMER_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <nuttx/arch.h>
-#include <nuttx/clock.h>
 #include <nuttx/hrtimer.h>
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* Spinlock protecting access to the hrtimer RB-tree and timer state */
-
-extern spinlock_t g_hrtimer_spinlock;
-
-/* Red-Black tree containing all active high-resolution timers */
-
-extern struct hrtimer_tree_s g_hrtimer_tree;
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* Red-black tree head for managing active hrtimers */
-
-RB_HEAD(hrtimer_tree_s, hrtimer_node_s);
-
-/****************************************************************************
- * Public Function Prototypes
+ * Pubic Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: hrtimer_process
+ * Name: hrtimer_initialize
  *
  * Description:
- *   Called from the timer interrupt handler to process expired
- *   high-resolution timers. If a timer has expired, its callback
- *   function will be executed in the context of the timer interrupt.
+ *   Initialize the high-resolution timer queue for timing subsystem.
  *
  * Input Parameters:
- *   now - The current time (nsecs).
- *
- * Returned Value:
  *   None
- ****************************************************************************/
-
-void hrtimer_process(uint64_t now);
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: hrtimer_gettime
- *
- * Description:
- *   Get the current high-resolution time in nanoseconds.
  *
  * Returned Value:
- *   Current time in nanoseconds.
+ *   None.
+ *
  ****************************************************************************/
 
-static inline_function
-uint64_t hrtimer_gettime(void)
-{
-  struct timespec ts;
-
-  /* Get current time from platform-specific timer */
-
-  clock_systime_timespec(&ts);
-
-  /* Convert timespec to nanoseconds */
-
-  return clock_time2nsec(&ts);
-}
+void hrtimer_initialize(void);
 
 /****************************************************************************
- * Name: hrtimer_starttimer
+ * Name: hrtimer_expiry/hrtimer_expiry_tick
  *
  * Description:
- *   Start the hardware timer to expire at a specified nanosecond time.
- *   Converts the nanosecond time to timespec and calls the platform-specific
- *   timer start function.
+ *   This function is called by the timer interrupt handler to handle
+ *   if a hrtimer has expired.
  *
  * Input Parameters:
- *   ns - Expiration time in nanoseconds.
+ *   nsec/tick - The expiration time in nanoseconds or ticks.
+ *   noswitches - True: Disable context switches.
  *
  * Returned Value:
- *   OK (0) on success, negated errno on failure.
+ *   The next expiration time in nanoseconds or ticks.
+ *
  ****************************************************************************/
+
+uint64_t hrtimer_expiry(uint64_t nsec, bool noswitches);
 
 static inline_function
-int hrtimer_starttimer(uint64_t ns)
+clock_t hrtimer_expiry_tick(clock_t tick, bool noswitches)
 {
-  struct timespec ts;
-  int ret;
-
-  /* Convert nanoseconds to timespec */
-
-  clock_nsec2time(&ts, ns);
-
-#ifdef CONFIG_ALARM_ARCH
-  ret = up_alarm_start(&ts);
-#elif defined(CONFIG_TIMER_ARCH)
-  ret = up_timer_start(&ts);
-#endif
-
-  return ret;
+  uint64_t ns   = hrtimer_expiry(tick * NSEC_PER_TICK, noswitches);
+  clock_t  next = div_const_roundup(ns, NSEC_PER_TICK);
+  return clock_compare(tick, next) ? next - tick : 0u;
 }
 
-/****************************************************************************
- * Name: hrtimer_compare
- *
- * Description:
- *   Compare two high-resolution timer nodes to determine their ordering
- *   in the red-black tree. Used internally by the RB-tree macros.
- *
- * Input Parameters:
- *   a - Pointer to the first hrtimer node.
- *   b - Pointer to the second hrtimer node.
- *
- * Returned Value:
- *   >0 if b expires before a
- *    0 if a and b expire at the same time
- *   <0 if b expires after a
- ****************************************************************************/
-
-static inline_function
-int hrtimer_compare(FAR const hrtimer_node_t *a,
-                FAR const hrtimer_node_t *b)
-{
-  FAR const hrtimer_t *atimer = (FAR const hrtimer_t *)a;
-  FAR const hrtimer_t *btimer = (FAR const hrtimer_t *)b;
-
-  return clock_compare(atimer->expired, btimer->expired) ? -1 : 1;
-}
-
-/****************************************************************************
- * Red-Black Tree Prototype for high-resolution timers
- *
- * Description:
- *   Declare the RB-tree prototype that manages all active high-resolution
- *   timers. This tree provides efficient insertion, removal, and lookup
- *   operations based on timer expiration time.
- ****************************************************************************/
-
-RB_PROTOTYPE(hrtimer_tree_s, hrtimer_node_s, entry, hrtimer_compare);
-
-#endif /* __SCHED_HRTIMER_HRTIMER_H */
+#endif  /* __INCLUDE_SCHED_HRTIMER_HRTIMER_H */
