@@ -739,6 +739,8 @@ static void ctucanfd_chardev_receive(FAR struct ctucanfd_can_s *priv)
   uint16_t                     frc    = 0;
   uint32_t                     regval = 0;
 
+  memset(&hdr, 0, sizeof(hdr));
+
   /* Get frame count */
 
   regval = ctucanfd_getreg(priv, CTUCANFD_RXSETSTAT);
