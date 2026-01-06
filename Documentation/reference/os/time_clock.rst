@@ -675,14 +675,28 @@ The callback runs in the timer interrupt context, so only limited NuttX interfac
 are available, such as ``mq_send()``, ``sigqueue()``, ``nxevent_post()``, or ``kill()``,
 to communicate with tasks.
 
+High-resolution timers (hrtimers) use a spinlock to protect internal timer data structures,
+allowing them to be safely accessed from interrupt context. This design makes hrtimers
+suitable for high-frequency timer operations.
+
+However, in SMP systems, a potential issue arises when a user cancels a timer that is currently
+executing: the timer instance may be freed prematurely while its callback is still running.
+To address this problem, a state machine is introduced in the hrtimer implementation:
+
+.. image:: hrtimer_state_machine.png
+   :alt: hrtimer state machine
+
+Users may call ``hrtimer_cancel_sync()`` to synchronously cancel a timer and wait until the
+timer becomes fully inactive. In contrast, ``hrtimer_cancel()`` is a non-blocking variant
+that returns immediately without waiting for the timer to stop executing.
+
 - :c:func:`hrtimer_init`
 - :c:func:`hrtimer_cancel`
 - :c:func:`hrtimer_cancel_sync`
 - :c:func:`hrtimer_start`
 - High-resolution Timer Callback
 
-.. c:function:: void hrtimer_init(FAR hrtimer_t *hrtimer, hrtentry_t func, \
-                                  FAR void *arg)
+.. c:function:: void hrtimer_init(FAR hrtimer_t *hrtimer, hrtentry_t func)
 
   This function initializes a high-resolution timer instance.
   Sets the expiration callback and its argument. The timer is
@@ -690,7 +704,6 @@ to communicate with tasks.
 
   :param hrtimer: Pointer to hrtimer instance
   :param func: Expiration callback function
-  :param arg: Callback argument
 
   :return: None.
 
@@ -745,7 +758,7 @@ to communicate with tasks.
 
   **POSIX Compatibility:** This is a NON-POSIX interface.
 
-.. c:type:: void (*hrtentry_t)(FAR struct hrtimer_s *)
+.. c:type:: uint64_t (*hrtimer_cb)(FAR hrtimer_t *hrtimer, uint64_t expired)
 
   **High-resolution Timer Callback**: when a hrtimer expires,
   the callback function with this type is called.
