@@ -36,10 +36,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define DUMP_DEPTH  16
-#define DUMP_NITEM  8
-#define DUMP_WIDTH  (int)(2 * sizeof(FAR void *) + 2)
-#define DUMP_LINESZ (DUMP_NITEM * (DUMP_WIDTH + 1))
+#define DUMP_DEPTH     16
+#define DUMP_NITEM     8
+#define DUMP_WIDTH     (int)(2 * sizeof(FAR void *) + 2)
+#define DUMP_LINESZ    (DUMP_NITEM * (DUMP_WIDTH + 1))
+#define DUMP_MAX_LOOPS 32  /* Max iterations to prevent infinite loop */
 
 /****************************************************************************
  * Public Functions
@@ -57,8 +58,10 @@ void sched_dumpstack(pid_t tid)
 {
   int size = DUMP_DEPTH;
   int skip;
+  int loops = 0;
 
-  for (skip = 0; size == DUMP_DEPTH; skip += size)
+  for (skip = 0; size == DUMP_DEPTH && loops++ < DUMP_MAX_LOOPS;
+       skip += size)
     {
       FAR void *address[DUMP_DEPTH];
 #ifndef CONFIG_ALLSYMS
