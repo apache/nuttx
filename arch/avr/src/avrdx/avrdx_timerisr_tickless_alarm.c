@@ -233,7 +233,6 @@ static void avrdx_deactivate_alarm(void)
 
 static void avrdx_check_alarm_expired(uint8_t context)
 {
-  struct timespec tv;
   int32_t sec_diff;
   uint32_t nsec_diff;
   int16_t interval;
@@ -270,10 +269,17 @@ static void avrdx_check_alarm_expired(uint8_t context)
        * context. Remove non-interrupt flags from the context before
        * using it.
        *
-       * This possibly incurs small error (delay between alarm expiration
-       * and time read) but alarm must be deactivated first. up_timer_gettime
-       * will attempt to update time and that method in turn calls this one
-       * and the program will run into recursion loop
+       * Deactivate alarm first. Call to nxsched_timer_expiration()
+       * in turns calls up_timer_gettick(), that one calls
+       * up_timer_gettime() which calls this method through
+       * avrdx_increment_uptime(), causing a recursion loop.
+       *
+       * (Note that previous version of this code called
+       * nxsched_alarm_expiration() which does not exist now.
+       * That function needed struct timespec as a parameter which
+       * we obtained using up_timer_gettime (here), causing the same loop.
+       * Therefore, we always deactivate the alarm first before calling
+       * common code, even if it incurs a small timing error.)
        */
 
       avrdx_deactivate_alarm();
