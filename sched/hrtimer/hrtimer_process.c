@@ -71,7 +71,7 @@ void hrtimer_process(uint64_t now)
 {
   FAR hrtimer_t *hrtimer;
   irqstate_t flags;
-  hrtimer_cb func;
+  hrtimer_entry_t func;
   uint64_t expired;
   uint64_t period;
   int cpu = this_cpu();

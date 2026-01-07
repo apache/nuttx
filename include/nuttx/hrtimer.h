@@ -65,8 +65,8 @@ typedef struct hrtimer_node_s hrtimer_node_t;
  * timer context and must not block.
  */
 
-typedef CODE uint64_t
-(*hrtimer_cb)(FAR const hrtimer_t *hrtimer, uint64_t expired);
+typedef CODE uint64_t (*hrtimer_entry_t)(FAR const hrtimer_t *hrtimer,
+                                         uint64_t expired);
 
 /* Red-black tree node used to order hrtimers by expiration time */
 
@@ -85,7 +85,7 @@ struct hrtimer_node_s
 struct hrtimer_s
 {
   hrtimer_node_t node;   /* RB-tree node for sorted insertion */
-  hrtimer_cb func;       /* Expiration callback function */
+  hrtimer_entry_t func;  /* Expiration callback function */
   uint64_t expired;      /* Absolute expiration time (ns) */
 };
 
