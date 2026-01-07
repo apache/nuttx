@@ -92,7 +92,7 @@ int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
     }
   else
     {
-      hrtimer->expired = hrtimer_gettime() + expired;
+      hrtimer->expired = clock_systime_nsec() + expired;
     }
 
   /* Ensure expiration time does not overflow */

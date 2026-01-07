@@ -111,30 +111,6 @@ void hrtimer_process(uint64_t now);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: hrtimer_gettime
- *
- * Description:
- *   Get the current high-resolution time in nanoseconds.
- *
- * Returned Value:
- *   Current time in nanoseconds.
- ****************************************************************************/
-
-static inline_function
-uint64_t hrtimer_gettime(void)
-{
-  struct timespec ts;
-
-  /* Get current time from platform-specific timer */
-
-  clock_systime_timespec(&ts);
-
-  /* Convert timespec to nanoseconds */
-
-  return clock_time2nsec(&ts);
-}
-
-/****************************************************************************
  * Name: hrtimer_reprogram
  *
  * Description:
