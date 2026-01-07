@@ -118,12 +118,7 @@ extern "C"
  *   None
  ****************************************************************************/
 
-static inline_function
-void hrtimer_init(FAR hrtimer_t *hrtimer, hrtimer_cb func)
-{
-  memset(hrtimer, 0, sizeof(hrtimer_t));
-  hrtimer->func = func;
-}
+#define hrtimer_init(hrtimer) memset(hrtimer, 0, sizeof(hrtimer_t))
 
 /****************************************************************************
  * Name: hrtimer_cancel
@@ -184,6 +179,7 @@ int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer);
  *
  * Input Parameters:
  *   hrtimer - Timer instance to start
+ *   func    - Expiration callback function
  *   expired - Expiration time in nanoseconds
  *   mode    - HRTIMER_MODE_ABS or HRTIMER_MODE_REL
  *
@@ -191,7 +187,7 @@ int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer);
  *   OK on success; a negated errno value on failure.
  ****************************************************************************/
 
-int hrtimer_start(FAR hrtimer_t *hrtimer,
+int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
                   uint64_t expired,
                   enum hrtimer_mode_e mode);
 
