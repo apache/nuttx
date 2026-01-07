@@ -357,10 +357,12 @@ config SYSLOG_RPMSG
 
 config SYSLOG_RPMSG_BUFSIZE
 	int "RPMSG SYSLOG buffer size"
-	default 0
 	depends on SYSLOG_RPMSG
 	---help---
-		Size of the console RPMSG syslog.  Default: 0
+		Size of the RPMSG syslog buffer defined by the driver, header
+		included.  With 0, the platform must point g_syslog_rpmsg.header
+		at its own buffer, with the size filled in, before the first
+		message is logged.
 
 config SYSLOG_RPMSG_BUFFER_SECTION
 	string "The section where rpmsg syslog buffer is located"

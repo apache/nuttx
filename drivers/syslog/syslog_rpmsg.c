@@ -82,8 +82,6 @@ static ssize_t syslog_rpmsg_file_write(FAR struct file *filep,
  * Private Data
  ****************************************************************************/
 
-struct syslog_rpmsg_s g_syslog_rpmsg;
-
 #if CONFIG_SYSLOG_RPMSG_BUFSIZE > 0
 #  ifdef SYSLOG_RPMSG_BUFFER_SECTION
 static char g_sysbuffer[CONFIG_SYSLOG_RPMSG_BUFSIZE]
@@ -91,6 +89,17 @@ static char g_sysbuffer[CONFIG_SYSLOG_RPMSG_BUFSIZE]
 #  else
 static char g_sysbuffer[CONFIG_SYSLOG_RPMSG_BUFSIZE];
 #  endif
+
+struct syslog_rpmsg_s g_syslog_rpmsg =
+{
+  .header = (FAR struct syslog_rpmsg_buffer_header_s *)g_sysbuffer,
+  .lock = SP_UNLOCKED,
+};
+#else
+struct syslog_rpmsg_s g_syslog_rpmsg =
+{
+  .lock = SP_UNLOCKED,
+};
 #endif
 
 #ifdef CONFIG_SYSLOG_RPMSG_CHARDEV
@@ -107,33 +116,29 @@ static const struct file_operations g_syslog_rpmsgfops =
  * Private Functions
  ****************************************************************************/
 
-#if CONFIG_SYSLOG_RPMSG_BUFSIZE > 0
 static void syslog_rpmsg_init_buffer(FAR struct syslog_rpmsg_s *priv)
 {
-  FAR struct syslog_rpmsg_buffer_header_s *header =
-    (FAR struct syslog_rpmsg_buffer_header_s *)g_sysbuffer;
+  FAR struct syslog_rpmsg_buffer_header_s *header = priv->header;
   irqstate_t flags;
 
-  if (!priv->header)
-    {
-      priv->header = header;
-      spin_lock_init(&priv->lock);
-    }
+  DEBUGASSERT(priv->header != NULL);
 
   flags = spin_lock_irqsave(&priv->lock);
   if (header->magic != SYSLOG_RPMSG_MAGIC_NUMBER)
     {
       header->head = 0;
       header->tail = 0;
+
+#if CONFIG_SYSLOG_RPMSG_BUFSIZE > 0
       header->size = CONFIG_SYSLOG_RPMSG_BUFSIZE -
-                      sizeof(struct syslog_rpmsg_buffer_header_s);
+                     sizeof(struct syslog_rpmsg_buffer_header_s);
+#endif
 
       header->magic = SYSLOG_RPMSG_MAGIC_NUMBER;
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
 }
-#endif
 
 static bool syslog_rpmsg_transfer(FAR struct syslog_rpmsg_s *priv, bool wait)
 {
@@ -225,9 +230,7 @@ static void syslog_rpmsg_addbuf(FAR struct syslog_rpmsg_s *priv,
       return;
     }
 
-#if CONFIG_SYSLOG_RPMSG_BUFSIZE > 0
   syslog_rpmsg_init_buffer(priv);
-#endif
 
   header = priv->header;
   flags = spin_lock_irqsave(&priv->lock);
@@ -428,10 +431,7 @@ int syslog_rpmsg_init(void)
     }
 #endif
 
-#if CONFIG_SYSLOG_RPMSG_BUFSIZE > 0
   syslog_rpmsg_init_buffer(&g_syslog_rpmsg);
-#endif
-
   return rpmsg_register_callback(&g_syslog_rpmsg,
                                  syslog_rpmsg_device_created,
                                  syslog_rpmsg_device_destroy,
