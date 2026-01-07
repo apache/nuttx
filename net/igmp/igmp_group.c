@@ -224,11 +224,11 @@ void igmp_grpfree(FAR struct net_driver_s *dev,
 
   /* Cancel the workqueue */
 
-  blresult = net_breaklock(&count);
+  blresult = netdev_breaklock(dev, &count);
   work_cancel_sync(LPWORK, &group->work);
   if (blresult >= 0)
     {
-      net_restorelock(count);
+      netdev_restorelock(dev, count);
     }
 
   /* Remove the group structure from the group list in the device structure */

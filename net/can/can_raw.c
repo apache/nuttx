@@ -1409,11 +1409,13 @@ static ssize_t can_raw_sendmsg(FAR struct socket *psock,
 
   if (nonblock)
     {
-      wb_iob = can_iob_timedalloc(0);
+      wb_iob = can_iob_timedalloc(false, 0, NULL, NULL);
     }
   else
     {
-      wb_iob = can_iob_timedalloc(_SO_TIMEOUT(conn->sconn.s_sndtimeo));
+      wb_iob = can_iob_timedalloc(false,
+                                  _SO_TIMEOUT(conn->sconn.s_sndtimeo),
+                                  &conn->sconn, NULL);
     }
 
   if (wb_iob == NULL)

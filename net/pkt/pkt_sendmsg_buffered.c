@@ -271,9 +271,8 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
   iob = iob_tryalloc(true);
   if (iob == NULL && !nonblock)
     {
-      conn_dev_unlock(&conn->sconn, dev);
-      iob = net_iobtimedalloc(true, _SO_TIMEOUT(conn->sconn.s_sndtimeo));
-      conn_dev_lock(&conn->sconn, dev);
+      iob = conn_dev_iobtimedalloc(true, _SO_TIMEOUT(conn->sconn.s_sndtimeo),
+                                   &conn->sconn, dev);
     }
 
   if (iob == NULL)

@@ -1855,10 +1855,11 @@ struct tcp_wrbuffer_s;
  *   Allocate a TCP write buffer by taking a pre-allocated buffer from
  *   the free list.  This function is called from TCP logic when a buffer
  *   of TCP data is about to sent
- *   This function is wrapped version of tcp_wrbuffer_alloc(),
  *   this wait will be terminated when the specified timeout expires.
  *
  * Input Parameters:
+ *   sconn     - The socket connection structure.
+ *   dev       - The network device structure.
  *   timeout   - The relative time to wait until a timeout is declared.
  *
  * Assumptions:
@@ -1866,25 +1867,9 @@ struct tcp_wrbuffer_s;
  *
  ****************************************************************************/
 
-FAR struct tcp_wrbuffer_s *tcp_wrbuffer_timedalloc(unsigned int timeout);
-
-/****************************************************************************
- * Name: tcp_wrbuffer_alloc
- *
- * Description:
- *   Allocate a TCP write buffer by taking a pre-allocated buffer from
- *   the free list.  This function is called from TCP logic when a buffer
- *   of TCP data is about to sent
- *
- * Input Parameters:
- *   None
- *
- * Assumptions:
- *   Called from user logic with the network locked.
- *
- ****************************************************************************/
-
-FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void);
+FAR struct tcp_wrbuffer_s *
+tcp_wrbuffer_timedalloc(FAR struct socket_conn_s *sconn,
+                        FAR struct net_driver_s *dev, unsigned int timeout);
 
 /****************************************************************************
  * Name: tcp_wrbuffer_tryalloc

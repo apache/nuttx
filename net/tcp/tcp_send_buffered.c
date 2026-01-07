@@ -1519,10 +1519,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
             }
           else
             {
-              conn_dev_unlock(&conn->sconn, conn->dev);
-              wrb = tcp_wrbuffer_timedalloc(tcp_send_gettimeout(start,
-                                                                timeout));
-              conn_dev_lock(&conn->sconn, conn->dev);
+              wrb = tcp_wrbuffer_timedalloc(&conn->sconn, conn->dev,
+                                        tcp_send_gettimeout(start, timeout));
               ninfo("new wrb %p\n", wrb);
             }
 
@@ -1623,14 +1621,15 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
           /* Wait for at least one IOB getting available.
            *
-           * Note: net_ioballoc releases the network lock when blocking.
-           * It allows our write_q being drained in the meantime. Otherwise,
-           * we risk a deadlock with other threads competing on IOBs.
+           * Note: conn_dev_iobtimedalloc releases the network lock when
+           * blocking. It allows our write_q being drained in the meantime.
+           * Otherwise, we risk a deadlock with other threads competing on
+           * IOBs.
            */
 
-          conn_dev_unlock(&conn->sconn, conn->dev);
-          iob = net_iobtimedalloc(true, tcp_send_gettimeout(start, timeout));
-          conn_dev_lock(&conn->sconn, conn->dev);
+          iob = conn_dev_iobtimedalloc(true,
+                                       tcp_send_gettimeout(start, timeout),
+                                       &conn->sconn, conn->dev);
           if (iob != NULL)
             {
               iob_free_chain(iob);

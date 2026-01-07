@@ -414,7 +414,7 @@ int sixlowpan_queue_frames(FAR struct radio_driver_s *radio,
    * necessary.
    */
 
-  iob = net_ioballoc(false);
+  iob = conn_dev_ioballoc(false, NULL, &radio->r_dev);
   DEBUGASSERT(iob != NULL);
 
   fptr = iob->io_data;
@@ -628,7 +628,7 @@ int sixlowpan_queue_frames(FAR struct radio_driver_s *radio,
            * necessary.
            */
 
-          iob = net_ioballoc(false);
+          iob = conn_dev_ioballoc(false, NULL, &radio->r_dev);
           DEBUGASSERT(iob != NULL);
 
           /* Initialize the IOB */

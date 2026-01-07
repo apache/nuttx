@@ -504,34 +504,12 @@ int udp_setsockopt(FAR struct socket *psock, int option,
 #endif
 
 /****************************************************************************
- * Name: udp_wrbuffer_alloc
- *
- * Description:
- *   Allocate a UDP write buffer by taking a pre-allocated buffer from
- *   the free list.  This function is called from UDP logic when a buffer
- *   of UDP data is about to sent
- *
- * Input Parameters:
- *   None
- *
- * Assumptions:
- *   Called from user logic with the network locked.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
-struct udp_wrbuffer_s;
-FAR struct udp_wrbuffer_s *udp_wrbuffer_alloc(void);
-#endif /* CONFIG_NET_UDP_WRITE_BUFFERS */
-
-/****************************************************************************
  * Name: udp_wrbuffer_timedalloc
  *
  * Description:
  *   Allocate a UDP write buffer by taking a pre-allocated buffer from
  *   the free list.  This function is called from udp logic when a buffer
  *   of udp data is about to sent
- *   This function is wrapped version of udp_wrbuffer_alloc(),
  *   this wait will be terminated when the specified timeout expires.
  *
  * Input Parameters:
@@ -543,6 +521,7 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_alloc(void);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
+struct udp_wrbuffer_s;
 FAR struct udp_wrbuffer_s *udp_wrbuffer_timedalloc(unsigned int timeout);
 #endif /* CONFIG_NET_UDP_WRITE_BUFFERS */
 

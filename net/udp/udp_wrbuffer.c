@@ -62,57 +62,12 @@ NET_BUFPOOL_DECLARE(g_wrbuffer, sizeof(struct udp_wrbuffer_s),
  ****************************************************************************/
 
 /****************************************************************************
- * Name: udp_wrbuffer_alloc
- *
- * Description:
- *   Allocate a UDP write buffer by taking a pre-allocated buffer from
- *   the free list.  This function is called from UDP logic when a buffer
- *   of UDP data is about to sent
- *
- * Input Parameters:
- *   None
- *
- * Assumptions:
- *   Called from user logic with the network locked.
- *
- ****************************************************************************/
-
-FAR struct udp_wrbuffer_s *udp_wrbuffer_alloc(void)
-{
-  FAR struct udp_wrbuffer_s *wrb;
-
-  /* We need to allocate two things:  (1) A write buffer structure and (2)
-   * at least one I/O buffer to start the chain.
-   *
-   * Allocate the write buffer structure first then the IOBG.  In order to
-   * avoid deadlocks, we will need to free the IOB first, then the write
-   * buffer
-   */
-
-  wrb = NET_BUFPOOL_ALLOC(g_wrbuffer);
-  DEBUGASSERT(wrb);
-
-  /* Now get the first I/O buffer for the write buffer structure */
-
-  wrb->wb_iob = net_ioballoc(false);
-  if (!wrb->wb_iob)
-    {
-      nerr("ERROR: Failed to allocate I/O buffer\n");
-      udp_wrbuffer_release(wrb);
-      return NULL;
-    }
-
-  return wrb;
-}
-
-/****************************************************************************
  * Name: udp_wrbuffer_timedalloc
  *
  * Description:
  *   Allocate a UDP write buffer by taking a pre-allocated buffer from
  *   the free list.  This function is called from udp logic when a buffer
  *   of udp data is about to sent
- *   This function is wrapped version of udp_wrbuffer_alloc(),
  *   this wait will be terminated when the specified timeout expires.
  *
  * Input Parameters:
@@ -143,7 +98,7 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_timedalloc(unsigned int timeout)
 
   /* Now get the first I/O buffer for the write buffer structure */
 
-  wrb->wb_iob = net_iobtimedalloc(true, timeout);
+  wrb->wb_iob = iob_timedalloc(true, timeout);
 
   /* Did we get an IOB?  We should always get one except under some really
    * weird error conditions.
@@ -201,11 +156,10 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_tryalloc(void)
 
   /* Now get the first I/O buffer for the write buffer structure */
 
-  wrb->wb_iob =
 #ifdef CONFIG_NET_JUMBO_FRAME
-    iob_alloc_dynamic(len);
+  wrb->wb_iob = iob_alloc_dynamic(len);
 #else
-    iob_tryalloc(false);
+  wrb->wb_iob = iob_tryalloc(false);
 #endif
   if (!wrb->wb_iob)
     {

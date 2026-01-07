@@ -81,17 +81,48 @@ static void can_buf_free(FAR void *buf)
  *
  ****************************************************************************/
 
-FAR struct iob_s *can_iob_timedalloc(unsigned int timeout)
+FAR struct iob_s *can_iob_timedalloc(bool throttled, unsigned int timeout,
+                                     FAR struct socket_conn_s *sconn,
+                                     FAR struct net_driver_s *dev)
 {
-  FAR void *buf = NET_BUFPOOL_TIMEDALLOC(g_can_buffer, timeout);
+  unsigned int count1 = 0;
+  unsigned int count2 = 0;
+  int          blresult1 = -ENOENT;
+  int          blresult2 = -ENOENT;
 
-  if (buf == NULL)
+  if (sconn != NULL)
     {
-      nwarn("Failed to allocate CAN buffer\n");
-      return NULL;
+      blresult1 = nxrmutex_breaklock(&sconn->s_lock, &count1);
     }
 
-  return iob_init_with_data(buf, CAN_BUFFER_SIZE, can_buf_free);
+  if (dev != NULL)
+    {
+      blresult2 = nxrmutex_breaklock(&dev->d_lock, &count2);
+    }
+
+  FAR void *buf = mempool_zallocate_throttled(&g_can_buffer, timeout,
+                                              throttled);
+
+  if (buf != NULL)
+    {
+      buf = iob_init_with_data(buf, CAN_BUFFER_SIZE, can_buf_free);
+    }
+  else
+    {
+      nwarn("Failed to allocate CAN buffer\n");
+    }
+
+  if (blresult2 >= 0)
+    {
+      nxrmutex_restorelock(&dev->d_lock, count2);
+    }
+
+  if (blresult1 >= 0)
+    {
+      nxrmutex_restorelock(&sconn->s_lock, count1);
+    }
+
+  return buf;
 }
 
 /****************************************************************************
@@ -106,7 +137,7 @@ FAR struct iob_s *can_iob_clone(FAR struct net_driver_s *dev)
 {
   FAR struct iob_s *iob;
 
-  iob = can_iob_timedalloc(0);
+  iob = can_iob_timedalloc(throttled, 0, NULL, NULL);
   if (iob == NULL)
     {
       return NULL;

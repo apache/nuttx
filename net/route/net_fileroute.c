@@ -42,16 +42,6 @@
 #if defined(CONFIG_ROUTE_IPv4_FILEROUTE) || defined(CONFIG_ROUTE_IPv6_FILEROUTE)
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Special "impossible" PID value used to indicate that there is no holder
- * of the lock.
- */
-
-#define NO_HOLDER (INVALID_PROCESS_ID)
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -596,6 +586,7 @@ int net_routesize_ipv6(void)
 int net_lockroute_ipv4(void)
 {
   int ret = nxrmutex_lock(&g_ipv4_lock);
+
   if (ret < 0)
     {
       nerr("ERROR: nxrmutex_lock() failed: %d\n", ret);
@@ -609,6 +600,7 @@ int net_lockroute_ipv4(void)
 int net_lockroute_ipv6(void)
 {
   int ret = nxrmutex_lock(&g_ipv6_lock);
+
   if (ret < 0)
     {
       nerr("ERROR: nxrmutex_lock() failed: %d\n", ret);
@@ -637,6 +629,7 @@ int net_lockroute_ipv6(void)
 int net_unlockroute_ipv4(void)
 {
   int ret = nxrmutex_unlock(&g_ipv4_lock);
+
   if (ret < 0)
     {
       nerr("ERROR: nxrmutex_unlock() failed: %d\n", ret);
@@ -650,6 +643,7 @@ int net_unlockroute_ipv4(void)
 int net_unlockroute_ipv6(void)
 {
   int ret = nxrmutex_unlock(&g_ipv6_lock);
+
   if (ret < 0)
     {
       nerr("ERROR: nxrmutex_unlock() failed: %d\n", ret);
