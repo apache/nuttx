@@ -106,6 +106,12 @@ config NETLINK_DISABLE_GETNEIGH
 	---help---
 		RTM_GETNEIGH is used to retrieve Neighbor/ARP tables.
 
+config NETLINK_DISABLE_NEWROUTE
+	bool "Disable RTM_NEWROUTE support"
+	default n
+	---help---
+		RTM_NEWROUTE is used to add a route.
+
 config NETLINK_DISABLE_GETROUTE
 	bool "Disable RTM_GETROUTE support"
 	default n
