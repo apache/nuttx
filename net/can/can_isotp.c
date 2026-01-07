@@ -562,7 +562,7 @@ isotp_rx_input_cf(FAR struct isotp_conn_s *isotp,
 static inline_function FAR struct iob_s *
 isotp_build_fc_frame(FAR struct isotp_conn_s *conn)
 {
-  FAR struct iob_s *iob = can_iob_timedalloc(0);
+  FAR struct iob_s *iob = can_iob_timedalloc(false, 0, NULL, NULL);
 
   if (iob == NULL)
     {
@@ -931,7 +931,7 @@ static int isotp_tx_enqueue(FAR struct isotp_conn_s *isotp,
       unsigned int          frame_size;
       uint8_t               dlen = isotp->ll.tx_dl;
 
-      iob = can_iob_timedalloc(0);
+      iob = can_iob_timedalloc(false, 0, NULL, NULL);
       if (iob == NULL)
         {
           ret = -EAGAIN;

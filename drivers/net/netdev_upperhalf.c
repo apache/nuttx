@@ -1943,7 +1943,7 @@ FAR netpkt_t *netpkt_alloc(FAR struct netdev_lowerhalf_s *dev,
 #ifdef CONFIG_NET_CAN
   if (dev->netdev.d_lltype == NET_LL_CAN)
     {
-      pkt = can_iob_timedalloc(0);
+      pkt = can_iob_timedalloc(false, 0, NULL, NULL);
     }
   else
 #endif

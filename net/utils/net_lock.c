@@ -43,12 +43,6 @@
 #include "utils/utils.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define NO_HOLDER (INVALID_PROCESS_ID)
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -72,8 +66,8 @@ int net_sem_timedwait2(FAR sem_t *sem, bool interruptible,
   int          blresult2 = -ENOENT;
   int          ret;
 
-  /* Release the network lock, remembering my count.  net_breaklock will
-   * return a negated value if the caller does not hold the network lock.
+  /* Release the network lock, remembering my count.  breaklock will return
+   * a negated value if the caller does not hold the network lock.
    */
 
   if (mutex1 != NULL)
@@ -148,28 +142,6 @@ int net_sem_timedwait2(FAR sem_t *sem, bool interruptible,
 int net_lock(void)
 {
   return nxrmutex_lock(&g_netlock);
-}
-
-/****************************************************************************
- * Name: net_trylock
- *
- * Description:
- *   Try to take the network lock only when it is currently not locked.
- *   Otherwise, it locks the semaphore.  In either
- *   case, the call returns without blocking.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   failure (probably -EAGAIN).
- *
- ****************************************************************************/
-
-int net_trylock(void)
-{
-  return nxrmutex_trylock(&g_netlock);
 }
 
 /****************************************************************************
@@ -321,12 +293,12 @@ int net_sem_wait_uninterruptible(FAR sem_t *sem)
 #ifdef CONFIG_MM_IOB
 
 /****************************************************************************
- * Name: net_timedalloc
+ * Name: conn_dev_iobtimedalloc
  *
  * Description:
  *   Allocate an IOB.  If no IOBs are available, then atomically wait for
  *   for the IOB while temporarily releasing the lock on the network.
- *   This function is wrapped version of nxsem_tickwait(), this wait will
+ *   This function is wrapped version of conn_dev_ioballoc(), this wait will
  *   be terminated when the specified timeout expires.
  *
  *   Caution should be utilized.  Because the network lock is relinquished
@@ -337,6 +309,8 @@ int net_sem_wait_uninterruptible(FAR sem_t *sem)
  * Input Parameters:
  *   throttled  - An indication of the IOB allocation is "throttled"
  *   timeout    - The relative time to wait until a timeout is declared.
+ *   sconn      - The socket connection structure.
+ *   dev        - The network device structure.
  *
  * Returned Value:
  *   A pointer to the newly allocated IOB is returned on success.  NULL is
@@ -344,33 +318,58 @@ int net_sem_wait_uninterruptible(FAR sem_t *sem)
  *
  ****************************************************************************/
 
-FAR struct iob_s *net_iobtimedalloc(bool throttled, unsigned int timeout)
+FAR struct iob_s *
+conn_dev_iobtimedalloc(bool throttled, unsigned int timeout,
+                       FAR struct socket_conn_s *sconn,
+                       FAR struct net_driver_s *dev)
 {
   FAR struct iob_s *iob;
+  unsigned int count1 = 0;
+  unsigned int count2 = 0;
+  int          blresult1 = -ENOENT;
+  int          blresult2 = -ENOENT;
 
   iob = iob_tryalloc(throttled);
-  if (iob == NULL && timeout != 0)
+  if (iob != NULL || timeout == 0)
     {
-      unsigned int count;
-      int blresult;
+      return iob;
+    }
 
-      /* There are no buffers available now.  We will have to wait for one to
-       * become available. But let's not do that with the network locked.
-       */
+  /* Release the network lock, remembering my count.  breaklock will return
+   * a negated value if the caller does not hold the network lock.
+   */
 
-      blresult = net_breaklock(&count);
-      iob      = iob_timedalloc(throttled, timeout);
-      if (blresult >= 0)
-        {
-          net_restorelock(count);
-        }
+  if (sconn != NULL)
+    {
+      blresult1 = nxrmutex_breaklock(&sconn->s_lock, &count1);
+    }
+
+  if (dev != NULL)
+    {
+      blresult2 = nxrmutex_breaklock(&dev->d_lock, &count2);
+    }
+
+  /* Now take the semaphore, waiting if so requested. */
+
+  iob = iob_timedalloc(throttled, timeout);
+
+  /* Recover the network lock at the proper count (if we held it before) */
+
+  if (blresult2 >= 0)
+    {
+      nxrmutex_restorelock(&dev->d_lock, count2);
+    }
+
+  if (blresult1 >= 0)
+    {
+      nxrmutex_restorelock(&sconn->s_lock, count1);
     }
 
   return iob;
 }
 
 /****************************************************************************
- * Name: net_ioballoc
+ * Name: conn_dev_ioballoc
  *
  * Description:
  *   Allocate an IOB.  If no IOBs are available, then atomically wait for
@@ -383,6 +382,8 @@ FAR struct iob_s *net_iobtimedalloc(bool throttled, unsigned int timeout)
  *
  * Input Parameters:
  *   throttled  - An indication of the IOB allocation is "throttled"
+ *   sconn      - The socket connection structure.
+ *   dev        - The network device structure.
  *
  * Returned Value:
  *   A pointer to the newly allocated IOB is returned on success.  NULL is
@@ -390,8 +391,11 @@ FAR struct iob_s *net_iobtimedalloc(bool throttled, unsigned int timeout)
  *
  ****************************************************************************/
 
-FAR struct iob_s *net_ioballoc(bool throttled)
+FAR struct iob_s *conn_dev_ioballoc(bool throttled,
+                                    FAR struct socket_conn_s *sconn,
+                                    FAR struct net_driver_s *dev)
 {
-  return net_iobtimedalloc(throttled, UINT_MAX);
+  return conn_dev_iobtimedalloc(throttled, UINT_MAX, sconn, dev);
 }
+
 #endif
