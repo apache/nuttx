@@ -46,6 +46,7 @@
 
 #include "netdev/netdev.h"
 #include "arp/arp.h"
+#include "inet/inet.h"
 #include "net/if_arp.h"
 #include "neighbor/neighbor.h"
 #include "route/route.h"
@@ -1325,6 +1326,241 @@ netlink_fill_ipv6prefix(FAR struct net_driver_s *dev, int type,
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: netlink_new_ipv4route
+ *
+ * Description:
+ *   Process IPv4 route addition request
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPv4) && !defined(CONFIG_NETLINK_DISABLE_NEWROUTE)
+static int netlink_new_ipv4route(FAR const struct nlmsghdr *nlmsg)
+{
+  FAR struct nlattr *tb[RTA_MAX + 1];
+  FAR const struct rtmsg *rtm;
+  in_addr_t gateway = 0;
+  int oif_index = 0;
+  FAR struct net_driver_s *dev = NULL;
+  int ret;
+
+  memset(tb, 0, sizeof(tb));
+
+  if (nlmsg->nlmsg_len < NLMSG_LENGTH(sizeof(struct rtmsg)))
+    {
+      return -EINVAL;
+    }
+
+  ret = nlmsg_parse((FAR struct nlmsghdr *)nlmsg,
+                    sizeof(struct rtmsg),
+                    tb, RTA_MAX, NULL, NULL);
+  if (ret < 0)
+    {
+      nwarn("nlmsg_parse failed: %d\n", ret);
+      return ret;
+    }
+
+  rtm = NLMSG_DATA(nlmsg);
+
+  if (tb[RTA_GATEWAY])
+    {
+      /* Validate gateway attribute length */
+
+      if (nla_len(tb[RTA_GATEWAY]) >= sizeof(in_addr_t))
+        {
+          gateway = *(FAR in_addr_t *)nla_data(tb[RTA_GATEWAY]);
+        }
+      else
+        {
+          nwarn("netlink_new_ipv4route: Gateway address too short\n");
+          return -EINVAL;
+        }
+    }
+
+  if (tb[RTA_OIF])
+    {
+      /* Validate output interface index length */
+
+      if (nla_len(tb[RTA_OIF]) >= sizeof(uint32_t))
+        {
+          oif_index = *(FAR uint32_t *)nla_data(tb[RTA_OIF]);
+        }
+      else
+        {
+          nwarn("netlink_new_ipv4route: OIF index too short\n");
+          return -EINVAL;
+        }
+    }
+
+  dev = netdev_findbyindex(oif_index);
+  if (dev != NULL)
+    {
+#ifdef CONFIG_NET_ROUTE
+      struct net_route_ipv4_s route;
+      in_addr_t dst = 0;
+
+      /* Parse destination if present */
+
+      if (tb[RTA_DST])
+        {
+          if (nla_len(tb[RTA_DST]) >= sizeof(in_addr_t))
+            {
+              dst = *(FAR in_addr_t *)nla_data(tb[RTA_DST]);
+            }
+          else
+            {
+              nwarn("netlink_new_ipv4route: "
+                    "Destination address too short\n");
+              return -EINVAL;
+            }
+        }
+
+      memset(&route, 0, sizeof(route));
+      route.target  = dst;                         /* Destination network */
+      route.netmask = make_mask(rtm->rtm_dst_len); /* Netmask from prefix */
+      route.router  = gateway;                     /* Gateway */
+
+      /* Broadcast route change notification */
+
+      netlink_route_notify(&route, RTM_NEWROUTE, AF_INET);
+#endif
+
+      /* Update default router only when gateway is specified AND this
+       * route is a default route (prefix length == 0).
+       */
+
+      if (gateway != 0 && rtm->rtm_dst_len == 0)
+        {
+          netdev_lock(dev);
+          dev->d_draddr = gateway;
+          netdev_unlock(dev);
+        }
+
+      return OK;
+    }
+
+  return -ENODEV;
+}
+#endif /* CONFIG_NET_IPv4 && !CONFIG_NETLINK_DISABLE_NEWROUTE */
+
+/****************************************************************************
+ * Name: netlink_new_ipv6route
+ *
+ * Description:
+ *   Process IPv6 route addition request
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPv6) && !defined(CONFIG_NETLINK_DISABLE_NEWROUTE)
+static int netlink_new_ipv6route(FAR const struct nlmsghdr *nlmsg)
+{
+  FAR struct nlattr *tb[RTA_MAX + 1];
+  FAR const struct rtmsg *rtm;
+  net_ipv6addr_t gateway;
+  net_ipv6addr_t dst;
+  int oif_index = 0;
+  FAR struct net_driver_s *dev = NULL;
+  int ret;
+
+  memset(tb, 0, sizeof(tb));
+
+  if (nlmsg->nlmsg_len < NLMSG_LENGTH(sizeof(struct rtmsg)))
+    {
+      return -EINVAL;
+    }
+
+  ret = nlmsg_parse((FAR struct nlmsghdr *)nlmsg,
+                    sizeof(struct rtmsg),
+                    tb, RTA_MAX, NULL, NULL);
+  if (ret < 0)
+    {
+      nwarn("nlmsg_parse failed: %d\n", ret);
+      return ret;
+    }
+
+  rtm = NLMSG_DATA(nlmsg);
+
+  if (tb[RTA_GATEWAY])
+    {
+      if (nla_len(tb[RTA_GATEWAY]) >= sizeof(net_ipv6addr_t))
+        {
+          memcpy(&gateway, nla_data(tb[RTA_GATEWAY]),
+                 sizeof(net_ipv6addr_t));
+        }
+      else
+        {
+          nwarn("netlink_new_ipv6route: Gateway address too short\n");
+          return -EINVAL;
+        }
+    }
+
+  /* Parse destination if present; default to :: (unspecified) */
+
+  memset(&dst, 0, sizeof(dst));
+  if (tb[RTA_DST])
+    {
+      if (nla_len(tb[RTA_DST]) >= sizeof(net_ipv6addr_t))
+        {
+          memcpy(&dst, nla_data(tb[RTA_DST]), sizeof(net_ipv6addr_t));
+        }
+      else
+        {
+          nwarn("netlink_new_ipv6route: Destination address too short\n");
+          return -EINVAL;
+        }
+    }
+
+  if (tb[RTA_OIF])
+    {
+      /* Validate output interface index length */
+
+      if (nla_len(tb[RTA_OIF]) >= sizeof(uint32_t))
+        {
+          oif_index = *(FAR uint32_t *)nla_data(tb[RTA_OIF]);
+        }
+      else
+        {
+          nwarn("netlink_new_ipv6route: OIF index too short\n");
+          return -EINVAL;
+        }
+    }
+
+  if (oif_index > 0)
+    {
+      dev = netdev_findbyindex(oif_index);
+    }
+
+  if (dev)
+    {
+#ifdef CONFIG_NET_ROUTE
+      struct net_route_ipv6_s route;
+
+      memset(&route, 0, sizeof(struct net_route_ipv6_s));
+      net_ipv6addr_copy(route.target, &dst);
+      net_ipv6_pref2mask(route.netmask, rtm->rtm_dst_len);
+      net_ipv6addr_copy(route.router, &gateway);
+      netlink_route_notify(&route, RTM_NEWROUTE, AF_INET6);
+#endif
+
+      /* Update default router only when gateway is specified AND this
+       * route is a default route (prefix length == 0).
+       */
+
+      if (!net_ipv6addr_cmp(&gateway, &g_ipv6_unspecaddr) &&
+          rtm->rtm_dst_len == 0)
+        {
+          netdev_lock(dev);
+          memcpy(&dev->d_ipv6draddr, &gateway, sizeof(net_ipv6addr_t));
+          netdev_unlock(dev);
+        }
+
+      return OK;
+    }
+
+  return -ENODEV;
+}
+#endif /* CONFIG_NET_IPv6 && !CONFIG_NETLINK_DISABLE_NEWROUTE */
+
+/****************************************************************************
  * Name: netlink_route_sendto()
  *
  * Description:
@@ -1340,7 +1576,7 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
 {
   FAR const struct nlroute_sendto_request_s *req =
     (FAR const struct nlroute_sendto_request_s *)nlmsg;
-  int ret;
+  int ret = 0;
 
   DEBUGASSERT(handle != NULL && nlmsg != NULL &&
               nlmsg->nlmsg_len >= sizeof(struct nlmsghdr) &&
@@ -1487,7 +1723,31 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
           }
         break;
 #endif
+#ifndef CONFIG_NETLINK_DISABLE_NEWROUTE
+      /* Add a route */
 
+      case RTM_NEWROUTE:
+#ifdef CONFIG_NET_IPv4
+        if (req->gen.rtgen_family == AF_INET)
+          {
+            ret = netlink_new_ipv4route(nlmsg);
+          }
+        else
+#endif
+#ifdef CONFIG_NET_IPv6
+        if (req->gen.rtgen_family == AF_INET6)
+          {
+            ret = netlink_new_ipv6route(nlmsg);
+          }
+        else
+#endif
+          {
+            ret = -EAFNOSUPPORT;
+            nwarn("Unsupported address family %d\n",
+                  req->gen.rtgen_family);
+          }
+        break;
+#endif
       default:
         ret = -ENOSYS;
         break;
