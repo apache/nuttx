@@ -634,7 +634,7 @@ static int rpmsg_virtio_lite_notify_wait(FAR struct rpmsg_device *rdev,
 
   if (!rpmsg_virtio_lite_is_recursive(priv))
     {
-      return -EAGAIN;
+      return RPMSG_EOPNOTSUPP;
     }
 
   /* Wait to wakeup */

@@ -533,7 +533,7 @@ static int rptun_notify_wait(FAR struct rpmsg_device *rdev, uint32_t id)
 
   if (!rptun_is_recursive(priv))
     {
-      return -EAGAIN;
+      return RPMSG_EOPNOTSUPP;
     }
 
   /* Wait to wakeup */
