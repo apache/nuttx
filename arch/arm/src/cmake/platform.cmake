@@ -88,3 +88,7 @@ endif()
 if(CONFIG_COVERAGE_TOOLCHAIN)
   nuttx_find_toolchain_lib(libgcov.a)
 endif()
+
+if(CONFIG_LIBCXXTOOLCHAIN)
+  nuttx_find_toolchain_lib(libstdc++.a)
+endif()
