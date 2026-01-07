@@ -130,7 +130,7 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer)
 
   /* Enter critical section to protect the hrtimer container */
 
-  flags = spin_lock_irqsave(&g_hrtimer_spinlock);
+  flags = write_seqlock_irqsave(&g_hrtimer_lock);
 
   /* Ensure no core can write the hrtimer. */
 
@@ -154,7 +154,7 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer)
 
   /* Leave critical section */
 
-  spin_unlock_irqrestore(&g_hrtimer_spinlock, flags);
+  write_sequnlock_irqrestore(&g_hrtimer_lock, flags);
   return ret;
 }
 
