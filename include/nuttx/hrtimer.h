@@ -66,7 +66,7 @@ typedef struct hrtimer_node_s hrtimer_node_t;
  */
 
 typedef CODE uint64_t
-(*hrtimer_cb)(FAR hrtimer_t *hrtimer, uint64_t expired);
+(*hrtimer_cb)(FAR const hrtimer_t *hrtimer, uint64_t expired);
 
 /* Red-black tree node used to order hrtimers by expiration time */
 
