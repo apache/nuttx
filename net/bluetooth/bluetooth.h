@@ -46,9 +46,9 @@
 /* Allocate a new Bluetooth socket data callback */
 
 #define bluetooth_callback_alloc(dev,conn) \
-  devif_callback_alloc(dev, &conn->bc_conn.list, &conn->bc_conn.list_tail)
+  devif_callback_alloc(dev, &conn->bc_conn.s_list, &conn->bc_conn.s_listtail)
 #define bluetooth_callback_free(dev,conn,cb) \
-  devif_conn_callback_free(dev, cb, &conn->bc_conn.list, &conn->bc_conn.list_tail)
+  devif_conn_callback_free(dev, cb, &conn->bc_conn.s_list, &conn->bc_conn.s_listtail)
 
 /* Memory Pools */
 

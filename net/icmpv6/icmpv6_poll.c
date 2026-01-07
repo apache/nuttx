@@ -76,7 +76,7 @@ void icmpv6_poll(FAR struct net_driver_s *dev,
   if (conn != NULL)
     {
       DEBUGASSERT(dev == conn->dev);
-      list = conn->sconn.list;
+      list = conn->sconn.s_list;
     }
 #endif
 

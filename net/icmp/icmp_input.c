@@ -211,7 +211,8 @@ static int icmp_delivery_callback(FAR struct icmp_conn_s *conn,
     }
 
   info->delivered = true;
-  if (devif_conn_event(dev, ICMP_NEWDATA, conn->sconn.list) == ICMP_NEWDATA)
+  if (devif_conn_event(dev, ICMP_NEWDATA, conn->sconn.s_list) ==
+      ICMP_NEWDATA)
     {
       icmp_datahandler(dev, conn, info->iphdrlen);
     }

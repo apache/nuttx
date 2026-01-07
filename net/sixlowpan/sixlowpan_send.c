@@ -242,8 +242,8 @@ int sixlowpan_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
        * device related events, no connect-related events.
        */
 
-      sinfo.s_cb = devif_callback_alloc(dev, &conn->sconn.list,
-                                        &conn->sconn.list_tail);
+      sinfo.s_cb = devif_callback_alloc(dev, &conn->sconn.s_list,
+                                        &conn->sconn.s_listtail);
       if (sinfo.s_cb != NULL)
         {
           int ret;
@@ -281,8 +281,8 @@ int sixlowpan_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
 
           /* Make sure that no further events are processed */
 
-          devif_conn_callback_free(dev, sinfo.s_cb, &conn->sconn.list,
-                                   &conn->sconn.list_tail);
+          devif_conn_callback_free(dev, sinfo.s_cb, &conn->sconn.s_list,
+                                   &conn->sconn.s_listtail);
         }
     }
 

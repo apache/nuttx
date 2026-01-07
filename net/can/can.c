@@ -489,7 +489,7 @@ uint32_t can_callback(FAR struct net_driver_s *dev,
   if (conn)
     {
       conn_lock(&conn->sconn);
-      flags = devif_conn_event(dev, flags, conn->sconn.list);
+      flags = devif_conn_event(dev, flags, conn->sconn.s_list);
 
       /* Either we did not get the lock or there is no application listening
        * If we did not get a lock we store the frame in the read-ahead buffer
@@ -763,7 +763,7 @@ void can_conn_init(FAR struct can_conn_s *conn)
   /* Enqueue the connection into the active list */
 
   can_conn_list_lock();
-  dq_addlast(&conn->sconn.node, &g_active_can_connections);
+  dq_addlast(&conn->sconn.s_node, &g_active_can_connections);
   can_conn_list_unlock();
 }
 
@@ -788,7 +788,7 @@ void can_conn_uninit(FAR struct can_conn_s *conn)
 
   /* Remove the connection from the active list */
 
-  dq_rem(&conn->sconn.node, &g_active_can_connections);
+  dq_rem(&conn->sconn.s_node, &g_active_can_connections);
   nxrmutex_destroy(&conn->sconn.s_lock);
 
 #ifdef CONFIG_NET_CAN_WRITE_BUFFERS
@@ -834,7 +834,7 @@ FAR struct can_conn_s *can_conn_next(FAR struct can_conn_s *conn)
     }
   else
     {
-      return (FAR struct can_conn_s *)conn->sconn.node.flink;
+      return (FAR struct can_conn_s *)conn->sconn.s_node.flink;
     }
 }
 

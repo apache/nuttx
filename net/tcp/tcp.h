@@ -58,9 +58,9 @@
  */
 
 #define tcp_callback_alloc(conn) \
-  devif_callback_alloc((conn)->dev, &(conn)->sconn.list, &(conn)->sconn.list_tail)
+  devif_callback_alloc((conn)->dev, &(conn)->sconn.s_list, &(conn)->sconn.s_listtail)
 #define tcp_callback_free(conn,cb) \
-  devif_conn_callback_free((conn)->dev, (cb), &(conn)->sconn.list, &(conn)->sconn.list_tail)
+  devif_conn_callback_free((conn)->dev, (cb), &(conn)->sconn.s_list, &(conn)->sconn.s_listtail)
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 /* TCP write buffer access macros */

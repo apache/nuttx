@@ -201,7 +201,7 @@ static int icmpv6_delivery_callback(FAR struct icmpv6_conn_s *conn,
     }
 
   info->delivered = true;
-  if (devif_conn_event(dev, ICMPv6_NEWDATA, conn->sconn.list) !=
+  if (devif_conn_event(dev, ICMPv6_NEWDATA, conn->sconn.s_list) !=
       ICMPv6_NEWDATA)
     {
       dev->d_len = dev->d_iob->io_pktlen;

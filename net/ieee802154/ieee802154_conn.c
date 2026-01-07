@@ -104,7 +104,7 @@ FAR struct ieee802154_conn_s *ieee802154_conn_alloc(void)
   conn = NET_BUFPOOL_TRYALLOC(g_ieee802154_connections);
   if (conn)
     {
-      dq_addlast(&conn->sconn.node, &g_active_ieee802154_connections);
+      dq_addlast(&conn->sconn.s_node, &g_active_ieee802154_connections);
     }
 
   ieee802154_conn_list_unlock();
@@ -132,7 +132,7 @@ void ieee802154_conn_free(FAR struct ieee802154_conn_s *conn)
   /* Remove the connection from the active list */
 
   ieee802154_conn_list_lock();
-  dq_rem(&conn->sconn.node, &g_active_ieee802154_connections);
+  dq_rem(&conn->sconn.s_node, &g_active_ieee802154_connections);
 
   /* Check if there any any frames attached to the container */
 
@@ -184,7 +184,7 @@ FAR struct ieee802154_conn_s *
   for (conn  = (FAR struct ieee802154_conn_s *)
        g_active_ieee802154_connections.head;
        conn != NULL;
-       conn = (FAR struct ieee802154_conn_s *)conn->sconn.node.flink)
+       conn = (FAR struct ieee802154_conn_s *)conn->sconn.s_node.flink)
     {
       /* Does the destination address match the bound address of the socket.
        *
@@ -232,9 +232,9 @@ FAR struct ieee802154_conn_s *
               }
             break;
 
-           default:
-             nerr("ERROR: Invalid address mode: %u\n", conn->raddr.s_mode);
-             return NULL;
+          default:
+            nerr("ERROR: Invalid address mode: %u\n", conn->raddr.s_mode);
+            return NULL;
         }
     }
 
@@ -262,7 +262,7 @@ FAR struct ieee802154_conn_s *
     }
   else
     {
-      return (FAR struct ieee802154_conn_s *)conn->sconn.node.flink;
+      return (FAR struct ieee802154_conn_s *)conn->sconn.s_node.flink;
     }
 }
 
