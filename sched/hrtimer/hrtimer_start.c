@@ -103,7 +103,7 @@ int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
 
   if (hrtimer_is_first(hrtimer))
     {
-      ret = hrtimer_starttimer(hrtimer->expired);
+      hrtimer_reprogram(hrtimer->expired);
     }
 
   /* Release spinlock and restore interrupts */

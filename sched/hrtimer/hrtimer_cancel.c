@@ -143,7 +143,7 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer)
       first = hrtimer_get_first();
       if (first != NULL)
         {
-          ret = hrtimer_starttimer(first->expired);
+          hrtimer_reprogram(first->expired);
         }
     }
 
