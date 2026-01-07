@@ -155,7 +155,7 @@ void hrtimer_process(uint64_t now)
     {
       /* Start timer for the next earliest expiration */
 
-      (void)hrtimer_starttimer(hrtimer->expired);
+      hrtimer_reprogram(hrtimer->expired);
     }
 
   /* Leave critical section */

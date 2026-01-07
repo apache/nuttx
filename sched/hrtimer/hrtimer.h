@@ -124,10 +124,10 @@ uint64_t hrtimer_gettime(void)
 }
 
 /****************************************************************************
- * Name: hrtimer_starttimer
+ * Name: hrtimer_reprogram
  *
  * Description:
- *   Start the hardware timer to expire at a specified nanosecond time.
+ *   Reprogram the hardware timer to expire at a specified nanosecond time.
  *   Converts the nanosecond time to timespec and calls the platform-specific
  *   timer start function.
  *
@@ -138,23 +138,23 @@ uint64_t hrtimer_gettime(void)
  *   OK (0) on success, negated errno on failure.
  ****************************************************************************/
 
-static inline_function
-int hrtimer_starttimer(uint64_t ns)
+static inline_function void hrtimer_reprogram(uint64_t next_expired)
 {
-  struct timespec ts;
+#ifdef CONFIG_SCHED_TICKLESS
   int ret;
-
-  /* Convert nanoseconds to timespec */
-
-  clock_nsec2time(&ts, ns);
-
-#ifdef CONFIG_ALARM_ARCH
+  struct timespec ts;
+#  ifdef CONFIG_SCHED_TICKLESS_ALARM
+  clock_nsec2time(&ts, next_expired);
   ret = up_alarm_start(&ts);
-#elif defined(CONFIG_TIMER_ARCH)
+#  else
+  struct timespec current;
+  up_timer_gettime(&current);
+  clock_nsec2time(&ts, next_expired);
+  clock_timespec_subtract(&ts, &current, &ts);
   ret = up_timer_start(&ts);
+#  endif
+  DEBUGASSERT(ret == 0);
 #endif
-
-  return ret;
 }
 
 /****************************************************************************
