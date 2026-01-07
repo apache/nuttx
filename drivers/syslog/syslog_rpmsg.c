@@ -84,7 +84,7 @@ static ssize_t syslog_rpmsg_file_write(FAR struct file *filep,
 
 struct syslog_rpmsg_s g_syslog_rpmsg;
 
-#if CONFIG_SYSLOG_RPMSG_BUFSIZE != 0
+#if CONFIG_SYSLOG_RPMSG_BUFSIZE > 0
 #  ifdef SYSLOG_RPMSG_BUFFER_SECTION
 static char g_sysbuffer[CONFIG_SYSLOG_RPMSG_BUFSIZE]
                        locate_data(CONFIG_SYSLOG_RPMSG_BUFFER_SECTION);
@@ -107,7 +107,7 @@ static const struct file_operations g_syslog_rpmsgfops =
  * Private Functions
  ****************************************************************************/
 
-#if CONFIG_SYSLOG_RPMSG_BUFSIZE != 0
+#if CONFIG_SYSLOG_RPMSG_BUFSIZE > 0
 static void syslog_rpmsg_init_buffer(FAR struct syslog_rpmsg_s *priv)
 {
   FAR struct syslog_rpmsg_buffer_header_s *header =
@@ -225,7 +225,7 @@ static void syslog_rpmsg_addbuf(FAR struct syslog_rpmsg_s *priv,
       return;
     }
 
-#if CONFIG_SYSLOG_RPMSG_BUFSIZE != 0
+#if CONFIG_SYSLOG_RPMSG_BUFSIZE > 0
   syslog_rpmsg_init_buffer(priv);
 #endif
 
@@ -428,7 +428,7 @@ int syslog_rpmsg_init(void)
     }
 #endif
 
-#if CONFIG_SYSLOG_RPMSG_BUFSIZE != 0
+#if CONFIG_SYSLOG_RPMSG_BUFSIZE > 0
   syslog_rpmsg_init_buffer(&g_syslog_rpmsg);
 #endif
 
