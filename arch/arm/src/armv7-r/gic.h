@@ -596,6 +596,8 @@
 #define GIC_IRQ_SGI14            14 /* Software Generated Interrupt (SGI) 14 */
 #define GIC_IRQ_SGI15            15 /* Software Generated Interrupt (SGI) 15 */
 
+#define GIC_IRQ_PPI0             16
+
 #define GIC_IRQ_VM               25 /* Virtual Maintenance Interrupt (VM) PPI(6) */
 #define GIC_IRQ_HTM              26 /* Hypervisor Timer (HTM) PPI(5) */
 #define GIC_IRQ_VTM              27 /* Virtual Timer (VTM) PPI(4) */
@@ -603,6 +605,9 @@
 #define GIC_IRQ_STM              29 /* Secure Physical Timer (STM) PPI(1) */
 #define GIC_IRQ_PTM              30 /* Non-secure Physical Timer (PTM) PPI(2) */
 #define GIC_IRQ_IRQ              31 /* Interrupt Request (nIRQ) PPI(3) */
+
+#define GIC_IS_SGI(intid)        ((intid) >= GIC_IRQ_SGI0 && \
+                                  (intid) < GIC_IRQ_PPI0)
 
 /* Shared Peripheral Interrupts (SPI) follow */
 
@@ -747,26 +752,6 @@ void arm_gic0_initialize(void);
  ****************************************************************************/
 
 void arm_gic_initialize(void);
-
-/****************************************************************************
- * Name: arm_gic_irq_trigger
- *
- * Description:
- *   Set the trigger type for the specificd IRQ source and the current CPU.
- *
- *   Since this API is not supported on all architectures, it should be
- *   avoided in common implementations where possible.
- *
- * Input Parameters:
- *   irq - The interrupt request to modify.
- *   edge - False: Active HIGH level sensitive, True: Rising edge sensitive
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value is returned on any failure.
- *
- ****************************************************************************/
-
-int arm_gic_irq_trigger(int irq, bool edge);
 
 /****************************************************************************
  * Name: arm_decodeirq

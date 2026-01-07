@@ -1068,7 +1068,8 @@ static int bcm2711_attach(FAR struct sdio_dev_s *dev)
 
   /* Enable the interrupt handler */
 
-  arm64_gic_irq_set_priority(BCM_IRQ_VC_EMMC, 0, IRQ_TYPE_LEVEL);
+  up_prioritize_irq(BCM_IRQ_VC_EMMC, 0);
+  up_set_irq_type(BCM_IRQ_VC_EMMC, IRQ_HIGH_LEVEL);
   up_enable_irq(BCM_IRQ_VC_EMMC);
   g_emmc_irqinit = true;
   mcinfo("EMMC IRQ enabled.");
