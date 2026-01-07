@@ -31,6 +31,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/hrtimer.h>
+#include <nuttx/seqlock.h>
 
 #ifdef CONFIG_HRTIMER
 
@@ -52,9 +53,9 @@ RB_HEAD(hrtimer_tree_s, hrtimer_node_s);
  * Public Data
  ****************************************************************************/
 
-/* Spinlock protecting access to the hrtimer container and timer state */
+/* Seqcount protecting access to the hrtimer queue and timer state */
 
-extern spinlock_t g_hrtimer_spinlock;
+extern seqcount_t g_hrtimer_lock;
 
 #ifdef CONFIG_HRTIMER_TREE
 /* Red-Black tree containing all active high-resolution timers */
@@ -311,6 +312,72 @@ static inline_function bool hrtimer_is_first(FAR hrtimer_t *hrtimer)
 }
 
 /****************************************************************************
+ * Name: hrtimer_read_64/32
+ *
+ * Description:
+ *   Internal function to read the value in the queue atomically.
+ *   Do not use this function if you are not sure about the thread-safe
+ *   of the value you are reading.
+ *
+ * Input Parameters:
+ *   ptr   - The pointer to be read.
+ *
+ * Returned Value:
+ *   The value in the queue.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_64BIT
+/* On 64-bit architectures, read/write uint64_t is atomic. */
+#  define hrtimer_read_64(ptr) (*(FAR volatile uint64_t *)(ptr))
+#else
+static inline_function
+uint64_t hrtimer_read_64(FAR const uint64_t *ptr)
+{
+  uint64_t val;
+  uint32_t seq;
+
+  do
+    {
+      seq = read_seqbegin(&g_hrtimer_lock);
+      val = *ptr;
+    }
+  while (read_seqretry(&g_hrtimer_lock, seq));
+
+  return val;
+}
+#endif
+
+#if UINT_MAX >= UINT32_MAX
+/* On 32/64-bit architectures, read/write uint32_t is atomic. */
+#  define hrtimer_read_32(ptr) (*(FAR volatile uint32_t *)(ptr))
+#else
+static inline_function
+uint32_t hrtimer_read_32(FAR const uint32_t *ptr)
+{
+  uint32_t val;
+  uint32_t seq;
+
+  do
+    {
+      seq = read_seqbegin(&g_hrtimer_lock);
+      val = *ptr;
+    }
+  while (read_seqretry(&g_hrtimer_lock, seq));
+
+  return val;
+}
+#endif
+
+/* Generic function to read the value in the queue atomically. */
+
+#define hrtimer_read(ptr) \
+  (sizeof(*(ptr)) == 8u ? \
+   hrtimer_read_64((FAR const uint64_t *)(ptr)) : \
+   (sizeof(*(ptr)) == 4u ? \
+    hrtimer_read_32((FAR const uint32_t *)(ptr)) : 0u))
+
+/****************************************************************************
  * Name: hrtimer_mark_running
  *
  * Description:
@@ -349,14 +416,11 @@ static inline_function bool hrtimer_is_first(FAR hrtimer_t *hrtimer)
  * Returned Value:
  *   true if the CPU core is running the timer, false otherwise.
  *
- * Assumption:
- *   The caller must hold the lock.
- *
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
 #  define hrtimer_is_running(timer, cpu) \
-  (g_hrtimer_running[cpu] == (uintptr_t)(timer))
+  (hrtimer_read(&g_hrtimer_running[cpu]) == (uintptr_t)(timer))
 #else
 #  define hrtimer_is_running(timer, cpu) (true)
 #endif

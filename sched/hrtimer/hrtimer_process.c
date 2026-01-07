@@ -79,7 +79,7 @@ void hrtimer_process(uint64_t now)
 
   /* Lock the hrtimer container to protect access */
 
-  flags = spin_lock_irqsave(&g_hrtimer_spinlock);
+  flags = write_seqlock_irqsave(&g_hrtimer_lock);
 
   /* Fetch the earliest active timer */
 
@@ -110,7 +110,7 @@ void hrtimer_process(uint64_t now)
 
       /* Leave critical section before invoking the callback */
 
-      spin_unlock_irqrestore(&g_hrtimer_spinlock, flags);
+      write_sequnlock_irqrestore(&g_hrtimer_lock, flags);
 
       /* Invoke the timer callback */
 
@@ -118,7 +118,9 @@ void hrtimer_process(uint64_t now)
 
       /* Re-enter critical section to update timer state */
 
-      flags = spin_lock_irqsave(&g_hrtimer_spinlock);
+      flags = write_seqlock_irqsave(&g_hrtimer_lock);
+
+      hrtimer_mark_running(NULL, cpu);
 
       /* If the timer is periodic and has not been rearmed or
        * cancelled concurrently,
@@ -155,5 +157,5 @@ void hrtimer_process(uint64_t now)
 
   /* Leave critical section */
 
-  spin_unlock_irqrestore(&g_hrtimer_spinlock, flags);
+  write_sequnlock_irqrestore(&g_hrtimer_lock, flags);
 }

@@ -47,7 +47,7 @@ uintptr_t g_hrtimer_running[CONFIG_SMP_NCPUS];
  * timer container is modified.
  */
 
-spinlock_t g_hrtimer_spinlock = SP_UNLOCKED;
+seqcount_t g_hrtimer_lock = SEQLOCK_INITIALIZER;
 
 /* Container for all active high-resolution timers.
  *
@@ -89,7 +89,7 @@ struct list_node g_hrtimer_list = LIST_INITIAL_VALUE(g_hrtimer_list);
  *   - The tree key is the absolute expiration time stored in
  *     hrtimer_node_s and compared via hrtimer_compare().
  *   - All accesses to the tree must be serialized using
- *     g_hrtimer_spinlock.
+ *     g_hrtimer_lock.
  *   - These generated functions are used internally by the hrtimer
  *     core (e.g., hrtimer_start(), hrtimer_cancel(), and expire paths).
  ****************************************************************************/

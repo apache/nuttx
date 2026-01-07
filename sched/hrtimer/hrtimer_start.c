@@ -71,7 +71,7 @@ int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
 
   /* Protect container manipulation with spinlock and disable interrupts */
 
-  flags = spin_lock_irqsave(&g_hrtimer_spinlock);
+  flags = write_seqlock_irqsave(&g_hrtimer_lock);
 
   /* Ensure no core can write the hrtimer. */
 
@@ -112,7 +112,7 @@ int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
 
   /* Release spinlock and restore interrupts */
 
-  spin_unlock_irqrestore(&g_hrtimer_spinlock, flags);
+  write_sequnlock_irqrestore(&g_hrtimer_lock, flags);
 
   return ret;
 }
