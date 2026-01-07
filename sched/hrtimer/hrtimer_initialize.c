@@ -36,7 +36,9 @@
  * for each CPU in SMP configurations. Index corresponds to CPU ID.
  */
 
+#ifdef CONFIG_SMP
 FAR hrtimer_t *g_hrtimer_running[CONFIG_SMP_NCPUS];
+#endif
 
 /* Global spinlock protecting the high-resolution timer subsystem.
  *

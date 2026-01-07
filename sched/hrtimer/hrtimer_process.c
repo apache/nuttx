@@ -74,7 +74,9 @@ void hrtimer_process(uint64_t now)
   hrtimer_cb func;
   uint64_t expired;
   uint64_t period;
+#ifdef CONFIG_SMP
   int cpu = this_cpu();
+#endif
 
   /* Lock the hrtimer RB-tree to protect access */
 
@@ -105,8 +107,9 @@ void hrtimer_process(uint64_t now)
 
       hrtimer_remove(hrtimer);
 
+#ifdef CONFIG_SMP
       g_hrtimer_running[cpu] = hrtimer;
-
+#endif
       /* Leave critical section before invoking the callback */
 
       spin_unlock_irqrestore(&g_hrtimer_spinlock, flags);
@@ -119,7 +122,9 @@ void hrtimer_process(uint64_t now)
 
       flags = spin_lock_irqsave(&g_hrtimer_spinlock);
 
+#ifdef CONFIG_SMP
       g_hrtimer_running[cpu] = NULL;
+#endif
 
       /* If the timer is periodic and has not been rearmed or
        * cancelled concurrently,
