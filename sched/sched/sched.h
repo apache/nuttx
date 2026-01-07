@@ -607,4 +607,38 @@ static inline_function int nxsched_select_cpu(cpu_set_t affinity)
   return cpu;
 }
 #  endif
+
+#ifdef CONFIG_HRTIMER
+/****************************************************************************
+ * Name: nxsched_hrtimer_start
+ *
+ * Description:
+ *   (Re)start the scheduler high-resolution timer with a new expiration
+ *   based on the specified tick interval.
+ *
+ * Input Parameters:
+ *   ticks - Number of scheduler ticks until expiration.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int nxsched_hrtimer_start(clock_t ticks);
+
+/****************************************************************************
+ * Name: nxsched_hrtimer_init
+ *
+ * Description:
+ *   Initialize the scheduler high-resolution timer (hrtimer) instance
+ *   and arm the first scheduler timer event.
+ *
+ * Returned Value:
+ *   Zero on success, or a negative errno value on failure.
+ *
+ ****************************************************************************/
+
+int nxsched_hrtimer_init(void);
+#endif
+
 #endif /* __SCHED_SCHED_SCHED_H */

@@ -433,7 +433,11 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
   if (interval != CLOCK_MAX)
     {
       interval = adjust_next_interval(interval);
+#ifdef CONFIG_HRTIMER
+      nxsched_hrtimer_start(ticks + interval);
+#else
       nxsched_timer_tick_start(ticks, interval);
+#endif
     }
 
   atomic_set(&g_timer_interval, interval);
