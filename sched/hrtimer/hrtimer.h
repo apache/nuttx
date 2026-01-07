@@ -62,7 +62,9 @@ extern struct hrtimer_tree_s g_hrtimer_tree;
  * for each CPU in SMP configurations. Index corresponds to CPU ID.
  */
 
+#ifdef CONFIG_SMP
 extern FAR hrtimer_t *g_hrtimer_running[CONFIG_SMP_NCPUS];
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
