@@ -135,7 +135,7 @@ void nxsched_process_timer(void)
                     HRTIMER_MODE_REL);
     }
 
-  hrtimer_process(hrtimer_gettime());
+  hrtimer_process(clock_systime_nsec());
 #else
   /* Fallback: process one scheduler tick */
 
