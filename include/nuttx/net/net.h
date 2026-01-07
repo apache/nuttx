@@ -197,14 +197,14 @@ struct socket_conn_s
 {
   /* Common prologue of all connection structures. */
 
-  dq_entry_t node;        /* Supports a doubly linked list */
+  dq_entry_t s_node;      /* Supports a doubly linked list */
 
   /* This is a list of connection callbacks.  Each callback represents a
    * thread that is stalled, waiting for a device-specific event.
    */
 
-  FAR struct devif_callback_s *list;
-  FAR struct devif_callback_s *list_tail;
+  FAR struct devif_callback_s *s_list;
+  FAR struct devif_callback_s *s_listtail;
 
   /* This lock protects the connection structure.  It is used to prevent
    * re-entrance into the connection structure while it is being modified.

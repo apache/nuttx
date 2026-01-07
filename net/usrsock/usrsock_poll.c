@@ -165,7 +165,8 @@ static int usrsock_pollsetup(FAR struct socket *psock,
 
   /* Allocate a usrsock callback structure */
 
-  cb = devif_callback_alloc(NULL, &conn->sconn.list, &conn->sconn.list_tail);
+  cb = devif_callback_alloc(NULL, &conn->sconn.s_list,
+                            &conn->sconn.s_listtail);
   if (cb == NULL)
     {
       ret = -EBUSY;
@@ -303,8 +304,8 @@ static int usrsock_pollteardown(FAR struct socket *psock,
 
       devif_conn_callback_free(NULL,
                                info->cb,
-                               &conn->sconn.list,
-                               &conn->sconn.list_tail);
+                               &conn->sconn.s_list,
+                               &conn->sconn.s_listtail);
 
       /* Release the poll/select data slot */
 

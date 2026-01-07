@@ -100,7 +100,7 @@ FAR struct pkt_conn_s *pkt_alloc(void)
     {
       /* Enqueue the connection into the active list */
 
-      dq_addlast(&conn->sconn.node, &g_active_pkt_connections);
+      dq_addlast(&conn->sconn.s_node, &g_active_pkt_connections);
     }
 
   NET_BUFPOOL_UNLOCK(g_pkt_connections);
@@ -126,7 +126,7 @@ void pkt_free(FAR struct pkt_conn_s *conn)
 
   /* Remove the connection from the active list */
 
-  dq_rem(&conn->sconn.node, &g_active_pkt_connections);
+  dq_rem(&conn->sconn.s_node, &g_active_pkt_connections);
   nxrmutex_destroy(&conn->sconn.s_lock);
 
 #ifdef CONFIG_NET_PKT_WRITE_BUFFERS
@@ -163,6 +163,7 @@ FAR struct pkt_conn_s *pkt_active(FAR struct net_driver_s *dev)
   if (dev->d_lltype == NET_LL_ETHERNET || dev->d_lltype == NET_LL_IEEE80211)
     {
       FAR struct eth_hdr_s *ethhdr = NETLLBUF;
+
       ethertype = ethhdr->type;
     }
 
@@ -178,7 +179,7 @@ FAR struct pkt_conn_s *pkt_active(FAR struct net_driver_s *dev)
 
       /* Look at the next active connection */
 
-      conn = (FAR struct pkt_conn_s *)conn->sconn.node.flink;
+      conn = (FAR struct pkt_conn_s *)conn->sconn.s_node.flink;
     }
 
   return conn;
@@ -203,7 +204,7 @@ FAR struct pkt_conn_s *pkt_nextconn(FAR struct pkt_conn_s *conn)
     }
   else
     {
-      return (FAR struct pkt_conn_s *)conn->sconn.node.flink;
+      return (FAR struct pkt_conn_s *)conn->sconn.s_node.flink;
     }
 }
 

@@ -294,7 +294,7 @@ uint32_t udp_callback(FAR struct net_driver_s *dev,
       /* Perform the callback */
 
       conn_lock(&conn->sconn);
-      flags = devif_conn_event(dev, flags, conn->sconn.list);
+      flags = devif_conn_event(dev, flags, conn->sconn.s_list);
 
       if ((flags & UDP_NEWDATA) != 0)
         {

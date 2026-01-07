@@ -712,7 +712,7 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
 #endif
       /* Enqueue the connection into the active list */
 
-      dq_addlast(&conn->sconn.node, &g_active_udp_connections);
+      dq_addlast(&conn->sconn.s_node, &g_active_udp_connections);
     }
 
   NET_BUFPOOL_UNLOCK(g_udp_connections);
@@ -743,7 +743,7 @@ void udp_free(FAR struct udp_conn_s *conn)
 
   /* Remove the connection from the active list */
 
-  dq_rem(&conn->sconn.node, &g_active_udp_connections);
+  dq_rem(&conn->sconn.s_node, &g_active_udp_connections);
   nxrmutex_destroy(&conn->sconn.s_lock);
 
   /* Release any read-ahead buffers attached to the connection, NULL is ok */
@@ -864,7 +864,7 @@ FAR struct udp_conn_s *udp_nextconn(FAR struct udp_conn_s *conn)
     }
   else
     {
-      return (FAR struct udp_conn_s *)conn->sconn.node.flink;
+      return (FAR struct udp_conn_s *)conn->sconn.s_node.flink;
     }
 }
 

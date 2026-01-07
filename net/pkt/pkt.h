@@ -42,9 +42,9 @@
 /* Allocate a new packet socket data callback */
 
 #define pkt_callback_alloc(dev,conn) \
-  devif_callback_alloc(dev, &conn->sconn.list, &conn->sconn.list_tail)
+  devif_callback_alloc(dev, &conn->sconn.s_list, &conn->sconn.s_listtail)
 #define pkt_callback_free(dev,conn,cb) \
-  devif_conn_callback_free(dev, cb, &conn->sconn.list, &conn->sconn.list_tail)
+  devif_conn_callback_free(dev, cb, &conn->sconn.s_list, &conn->sconn.s_listtail)
 
 /****************************************************************************
  * Public Type Definitions

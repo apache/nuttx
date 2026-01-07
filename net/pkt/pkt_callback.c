@@ -67,7 +67,7 @@ uint32_t pkt_callback(FAR struct net_driver_s *dev,
       /* Perform the callback */
 
       conn_lock(&conn->sconn);
-      flags = devif_conn_event(dev, flags, conn->sconn.list);
+      flags = devif_conn_event(dev, flags, conn->sconn.s_list);
       conn_unlock(&conn->sconn);
     }
 

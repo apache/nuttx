@@ -95,7 +95,7 @@ FAR struct icmpv6_conn_s *icmpv6_alloc(void)
     {
       /* Enqueue the connection into the active list */
 
-      dq_addlast(&conn->sconn.node, &g_active_icmpv6_connections);
+      dq_addlast(&conn->sconn.s_node, &g_active_icmpv6_connections);
     }
 
   NET_BUFPOOL_UNLOCK(g_icmpv6_connections);
@@ -124,7 +124,7 @@ void icmpv6_free(FAR struct icmpv6_conn_s *conn)
 
   /* Remove the connection from the active list */
 
-  dq_rem(&conn->sconn.node, &g_active_icmpv6_connections);
+  dq_rem(&conn->sconn.s_node, &g_active_icmpv6_connections);
   nxrmutex_destroy(&conn->sconn.s_lock);
 
   /* Free the connection. */
@@ -164,7 +164,7 @@ FAR struct icmpv6_conn_s *icmpv6_active(uint16_t id)
 
       /* Look at the next active connection */
 
-      conn = (FAR struct icmpv6_conn_s *)conn->sconn.node.flink;
+      conn = (FAR struct icmpv6_conn_s *)conn->sconn.s_node.flink;
     }
 
   return conn;
@@ -189,7 +189,7 @@ FAR struct icmpv6_conn_s *icmpv6_nextconn(FAR struct icmpv6_conn_s *conn)
     }
   else
     {
-      return (FAR struct icmpv6_conn_s *)conn->sconn.node.flink;
+      return (FAR struct icmpv6_conn_s *)conn->sconn.s_node.flink;
     }
 }
 

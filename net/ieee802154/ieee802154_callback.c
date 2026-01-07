@@ -69,7 +69,7 @@ uint32_t ieee802154_callback(FAR struct radio_driver_s *radio,
       /* Perform the callback */
 
       conn_lock(&conn->sconn);
-      flags = devif_conn_event(&radio->r_dev, flags, conn->sconn.list);
+      flags = devif_conn_event(&radio->r_dev, flags, conn->sconn.s_list);
       conn_unlock(&conn->sconn);
     }
 

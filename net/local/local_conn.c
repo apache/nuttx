@@ -76,7 +76,7 @@ FAR struct local_conn_s *local_nextconn(FAR struct local_conn_s *conn)
       return (FAR struct local_conn_s *)g_local_connections.head;
     }
 
-  return (FAR struct local_conn_s *)conn->lc_conn.node.flink;
+  return (FAR struct local_conn_s *)conn->lc_conn.s_node.flink;
 }
 
 /****************************************************************************
@@ -187,7 +187,7 @@ FAR struct local_conn_s *local_alloc(void)
 
       /* Add the connection structure to the list of listeners */
 
-      dq_addlast(&conn->lc_conn.node, &g_local_connections);
+      dq_addlast(&conn->lc_conn.s_node, &g_local_connections);
     }
 
   return conn;
@@ -308,7 +308,7 @@ void local_free(FAR struct local_conn_s *conn)
 
   /* Remove the server from the list of listeners. */
 
-  dq_rem(&conn->lc_conn.node, &g_local_connections);
+  dq_rem(&conn->lc_conn.s_node, &g_local_connections);
 
   if (conn->lc_peer)
     {
