@@ -82,6 +82,17 @@ void spinlock_mark_locking(FAR spinlock_debug_t *info)
     }
 #endif
 
+  /* Calling `spinlock_mark_locking` does not necessarily disable
+   * interrupts. If interrupts are not disabled, an interrupt might
+   * corrupt the previous `wait_spinlock` information. So, interrupt
+   * context is not considered.
+   */
+
+  if (up_interrupt_context())
+    {
+      return;
+    }
+
   /* Check if the current tcb is not waiting for other spinlock. */
 
   if (rtcb->wait_spinlock != NULL)
@@ -116,6 +127,11 @@ void spinlock_mark_locked(FAR spinlock_debug_t *info)
       return;
     }
 #endif
+
+  if (up_interrupt_context())
+    {
+      return;
+    }
 
   /* Check if the spinlock has been held. */
 
@@ -165,6 +181,11 @@ void spinlock_mark_unlocked(FAR spinlock_debug_t *info)
     }
 #endif
 
+  if (up_interrupt_context())
+    {
+      return;
+    }
+
   /* Check if locking and unlocking are the same task. */
 
   if (info->holder != rtcb)
@@ -196,7 +217,7 @@ void spinlock_mark_unlocked(FAR spinlock_debug_t *info)
 
 void spinlock_switch_context(FAR struct tcb_s *from)
 {
-  if (!sq_empty(&from->hold_spinlock))
+  if (!sq_empty(&from->hold_spinlock) && !up_interrupt_context())
     {
       _alert("Detect thread(%d) switches context while holding spinlock!\n",
              from->pid);
