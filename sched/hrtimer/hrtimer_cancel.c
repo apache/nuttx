@@ -29,52 +29,7 @@
 #include <nuttx/clock.h>
 #include <errno.h>
 
-#include "sched/sched.h"
 #include "hrtimer/hrtimer.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Delay used while waiting for a running hrtimer callback to complete */
-
-#define HRTIMER_CANCEL_SYNC_DELAY_MS  5
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: hrtimer_is_active
- *
- * Description:
- *   Check whether a high-resolution timer is currently running on any CPU.
- *
- * Input Parameters:
- *   hrtimer - Pointer to the high-resolution timer to check.
- *
- * Returned Value:
- *   true  - The timer is active on at least one CPU.
- *   false - The timer is not active.
- ****************************************************************************/
-#ifdef CONFIG_SMP
-static inline_function bool hrtimer_is_active(FAR hrtimer_t *hrtimer)
-{
-  int  cpu;
-  bool is_active = false;
-
-  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
-    {
-      if (hrtimer_is_cancelling(hrtimer, cpu))
-        {
-          is_active = true;
-          break;
-        }
-    }
-
-  return is_active;
-}
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -192,21 +147,9 @@ int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer)
   ret = hrtimer_cancel(hrtimer);
   if (ret > 0)
     {
-      /* Wait until the timer transitions to the inactive state.
-       *
-       * If sleeping is permitted, yield the CPU briefly to avoid
-       * busy-waiting. Otherwise, spin until the callback completes.
-       */
-#ifdef CONFIG_SMP
-      while (hrtimer_is_active(hrtimer))
-        {
-          if (!up_interrupt_context() &&
-              !is_idle_task(this_task()))
-            {
-              nxsched_msleep(HRTIMER_CANCEL_SYNC_DELAY_MS);
-            }
-        }
-#endif
+      /* Wait until all the timer callbacks finish. */
+
+       hrtimer_wait(hrtimer);
     }
 
   return ret;
