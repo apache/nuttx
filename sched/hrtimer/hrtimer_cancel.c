@@ -131,9 +131,11 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer)
       hrtimer_remove(hrtimer);
     }
 
-  /* Mark timer as cancelled */
+  /* If the timer was running, increment its expiration count to prevent
+   * it from being re-armed by the callback.
+   */
 
-  hrtimer->expired = UINT64_MAX;
+  hrtimer->expired++;
 
   /* If the canceled timer was the earliest one, update the hardware timer */
 
