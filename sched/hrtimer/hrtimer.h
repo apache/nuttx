@@ -33,7 +33,17 @@
 #include <nuttx/hrtimer.h>
 #include <nuttx/seqlock.h>
 
+#include "sched/sched.h"
+
 #ifdef CONFIG_HRTIMER
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Delay used while waiting for a running hrtimer callback to complete */
+
+#define HRTIMER_CANCEL_SYNC_DELAY_MS  5
 
 /****************************************************************************
  * Public Types
@@ -483,6 +493,62 @@ int hrtimer_cancel_running(FAR hrtimer_t *timer)
 
   return refs;
 }
+
+/****************************************************************************
+ * Name: hrtimer_wait
+ *
+ * Description:
+ *   Wait for all references to be released before the timer can be freed.
+ *
+ * Input Parameters:
+ *   timer - The hrtimer to be waited.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumption:
+ *   The periodical hrtimer should be cancelled before calling this function.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+static inline_function void hrtimer_wait(FAR hrtimer_t *timer)
+{
+  int cpu;
+
+  DEBUGASSERT(timer && timer->func == NULL);
+
+  /* Wait until all references have been released. */
+
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
+      /* The timer should not be restarted again.
+       * Or there will be ownership invariant violation.
+       */
+
+      DEBUGASSERT(!hrtimer_is_running(timer, cpu));
+
+      /* If sleeping is permitted, yield the CPU briefly to avoid
+       * busy-waiting.  Otherwise, spin until the callback completes
+       * and the state becomes inactive.
+       */
+
+      while (hrtimer_is_cancelling(timer, cpu))
+        {
+          if (!up_interrupt_context() && !is_idle_task(this_task()))
+            {
+              nxsched_msleep(HRTIMER_CANCEL_SYNC_DELAY_MS);
+            }
+
+          /* Otherwise, spin-wait is enough. */
+        }
+    }
+
+  /* Finally, we acquire the ownership of this hrtimer. */
+}
+#else
+#  define hrtimer_wait(timer) /* Nothing to wait in non-SMP. */
+#endif
 
 #endif /* CONFIG_HRTIMER */
 #endif /* __SCHED_HRTIMER_HRTIMER_H */
