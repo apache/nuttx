@@ -52,6 +52,9 @@
   .globl  up_invalidate_dcache_all
   .type   up_invalidate_dcache_all, function
 
+/* Invalidate entire cache via the 0x500F instruction
+ * See https://github.com/SpinalHDL/VexRiscv?tab=readme-ov-file#dbuscachedplugin
+ */
 up_invalidate_dcache_all:
   .word 0x500F
 #endif
@@ -74,8 +77,9 @@ up_invalidate_dcache_all:
   .globl  up_flush_dcache_all
   .type   up_flush_dcache_all, function
 
+/* VexRiscv cache is write-through so there is no need to flush */
 up_flush_dcache_all:
-  .word 0x500F
+  nop
 #endif
 
 /****************************************************************************
