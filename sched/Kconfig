@@ -2006,6 +2006,7 @@ config CUSTOM_SEMAPHORE_MAXVALUE
 
 config HRTIMER
 	bool "High resolution timer support"
+	depends on SYSTEM_TIME64
 	default n
 	depends on SYSTEM_TIME64
 	---help---
