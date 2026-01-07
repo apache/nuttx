@@ -343,6 +343,7 @@ Network Connectivity
 =====================
 
   - :c:func:`netlib_check_ipconnectivity`
+  - :c:func:`netlib_check_ifconnectivity`
 
 .. c:function:: int netlib_check_ipconnectivity(FAR const char *ip, int timeout, int retry)
 
@@ -364,6 +365,28 @@ Network Connectivity
   **Note:** This function requires ``CONFIG_NETUTILS_PING`` to be enabled. The
   function is blocking and will wait for all ping attempts to complete before
   returning.
+
+.. c:function:: int netlib_check_ifconnectivity(FAR const char *ifname, int timeout, int retry)
+
+  Check network interface connectivity by pinging the gateway. This function
+  retrieves the default gateway address for the specified network interface and
+  then sends ICMP echo requests to the gateway to verify connectivity.
+
+  :param ifname: Network interface name (e.g., ``"eth0"``, ``"wlan0"``).
+  :param timeout: Maximum timeout for each ping attempt in milliseconds.
+  :param retry: Number of ping attempts to send.
+
+  :return: Number of gateway ping replies received (0 or positive) on success.
+           A value of 0 indicates that no replies were received (gateway unreachable
+           or timeout). A negative value indicates an error occurred (e.g., if the
+           gateway address cannot be retrieved for the interface, or if the gateway
+           address is invalid).
+
+  **Note:** This function requires ``CONFIG_NETUTILS_PING`` to be enabled. The
+  function is blocking and will wait for all ping attempts to complete before
+  returning. The function internally calls :c:func:`netlib_get_dripv4addr` to
+  retrieve the gateway address and then uses :c:func:`netlib_check_ipconnectivity`
+  to perform the actual ping test.
 
 ARP Table Support
 ==================
