@@ -704,6 +704,54 @@ int work_queue_priority(int qid)
 }
 
 /****************************************************************************
+ * Name: work_queue_setpriority_wq
+ *
+ * Description: Set priority of all worker threads in the work queue.
+ *
+ * Input Parameters:
+ *  wqueue   - The work queue handle
+ *  priority - New priority (SCHED_PRIORITY_MIN ~ SCHED_PRIORITY_MAX)
+ *
+ * Returned Value:
+ *   Zero (OK) on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int work_queue_setpriority_wq(FAR struct kwork_wqueue_s *wqueue,
+                              int priority)
+{
+  FAR struct kworker_s *worker;
+  struct sched_param param;
+  int ret = -EINVAL;
+  uint8_t i;
+
+  if (wqueue != NULL &&
+      priority >= SCHED_PRIORITY_MIN &&
+      priority <= SCHED_PRIORITY_MAX)
+    {
+      worker = wq_get_worker(wqueue);
+      ret = OK;
+
+      for (i = 0; i < wqueue->nthreads; i++)
+        {
+          param.sched_priority = priority;
+          ret = nxsched_set_param(worker[i].pid, &param);
+          if (ret < 0)
+            {
+              break;
+            }
+        }
+    }
+
+  return ret;
+}
+
+int work_queue_setpriority(int qid, int priority)
+{
+  return work_queue_setpriority_wq(work_qid2wq(qid), priority);
+}
+
+/****************************************************************************
  * Name: work_start_highpri
  *
  * Description:
