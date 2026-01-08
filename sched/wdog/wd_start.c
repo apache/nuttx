@@ -104,15 +104,17 @@
  *
  ****************************************************************************/
 
-static inline_function clock_t wd_expiration(clock_t ticks)
+static inline_function void wd_expiration(clock_t ticks)
 {
   FAR struct wdog_s *wdog;
   irqstate_t         flags;
   wdentry_t          func;
   wdparm_t           arg;
-  clock_t            ret = CLOCK_MAX;
+  clock_t     next_ticks = ticks;
 
   flags = enter_critical_section();
+
+  wd_set_nested(true);
 
   /* Process the watchdog at the head of the list as well as any
    * other watchdogs that became ready to run at this time
@@ -128,7 +130,7 @@ static inline_function clock_t wd_expiration(clock_t ticks)
 
       if (!clock_compare(wdog->expired, ticks))
         {
-          ret = wdog->expired - ticks;
+          next_ticks = wdog->expired;
           break;
         }
 
@@ -148,9 +150,14 @@ static inline_function clock_t wd_expiration(clock_t ticks)
       CALL_FUNC(func, arg);
     }
 
-  leave_critical_section(flags);
+  wd_set_nested(false);
 
-  return ret;
+  if (next_ticks != ticks)
+    {
+      wd_timer_start(wd_next_expire());
+    }
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -286,6 +293,7 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
         }
 
       reassess |= wd_insert(wdog, ticks, wdentry, arg);
+      reassess &= !wd_in_callback();
 
       if (reassess)
         {
@@ -294,7 +302,7 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
            * changed, then this will pick that new delay.
            */
 
-          nxsched_reassess_timer();
+          wd_timer_start(wd_next_expire());
         }
 #else
       UNUSED(reassess);
@@ -331,7 +339,6 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
  *     in the interval that just expired is provided.  Otherwise,
  *     this function is called on each timer interrupt and a value of one
  *     is implicit.
- *   noswitches - True: Can't do context switches now.
  *
  * Returned Value:
  *   If CONFIG_SCHED_TICKLESS is defined then the number of ticks for the
@@ -343,48 +350,9 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_TICKLESS
-clock_t wd_timer(clock_t ticks, bool noswitches)
-{
-  FAR struct wdog_s *wdog;
-  irqstate_t flags;
-  clock_t    ret;
-
-  /* Check if the watchdog at the head of the list is ready to run */
-
-  if (!noswitches)
-    {
-      ret = wd_expiration(ticks);
-    }
-  else
-    {
-      ret   = CLOCK_MAX;
-      flags = enter_critical_section();
-
-      /* Return the delay for the next watchdog to expire */
-
-      if (!list_is_empty(&g_wdactivelist))
-        {
-          /* Notice that if noswitches, expired - g_wdtickbase
-           * may get negative value.
-           */
-
-          wdog = list_first_entry(&g_wdactivelist, struct wdog_s, node);
-          ret  = !clock_compare(wdog->expired, ticks) ?
-                 wdog->expired - ticks : 0u;
-        }
-
-      leave_critical_section(flags);
-    }
-
-  return ret;
-}
-
-#else
 void wd_timer(clock_t ticks)
 {
   /* Check if there are any active watchdogs to process */
 
   wd_expiration(ticks);
 }
-#endif /* CONFIG_SCHED_TICKLESS */
