@@ -520,6 +520,28 @@ int work_queue_priority(int qid);
 int work_queue_priority_wq(FAR struct kwork_wqueue_s *wqueue);
 
 /****************************************************************************
+ * Name: work_queue_setpriority/work_queue_setpriority_wq
+ *
+ * Description:
+ *   Set priority of all worker threads in the work queue.
+ *
+ * Input Parameters:
+ *   qid      - The work queue ID (must be HPWORK or LPWORK)
+ *   wqueue   - The work queue handle
+ *   priority - New priority (SCHED_PRIORITY_MIN ~ SCHED_PRIORITY_MAX)
+ *
+ * Returned Value:
+ *   Zero (OK) on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+int work_queue_setpriority(int qid, int priority);
+int work_queue_setpriority_wq(FAR struct kwork_wqueue_s *wqueue,
+                              int priority);
+#endif
+
+/****************************************************************************
  * Name: work_cancel/work_cancel_wq
  *
  * Description:

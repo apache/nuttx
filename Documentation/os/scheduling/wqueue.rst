@@ -353,6 +353,16 @@ Work Queue Interfaces
 
   :return: The worker priority on success or a negated errno on failure.
 
+.. c:function:: int work_queue_setpriority_wq( \
+               FAR struct kwork_wqueue_s *wqueue, int priority)
+
+  Set the scheduling priority of every worker of a custom queue.
+  ``work_queue_setpriority(qid, priority)`` does the same for ``HPWORK``
+  or ``LPWORK``. Kernel only.
+
+  :return: Zero on success or ``-EINVAL`` for an invalid queue or
+    priority.
+
 .. c:function:: int work_signal(int qid)
 
   Signal the worker thread to process the work
