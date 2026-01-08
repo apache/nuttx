@@ -37,6 +37,7 @@
 #include "hardware/imx93/imx93_memorymap.h"
 #include "hardware/imx9_ddr_training.h"
 #include <arch/board/imx9_ddr_training.h>
+#include "imx9_ddr_training.h"
 
 #include "imx9_trdc.h"
 
@@ -98,42 +99,6 @@ static uint32_t g_ccd_rr_max;
 static uint32_t g_ccd_rw_max;
 static uint32_t g_ccd_wr_max;
 static uint32_t g_ccd_ww_max;
-
-static struct dram_fsp_msg ddr_dram_fsp_msg[] =
-{
-  {
-    /* P0 3733 1D */
-
-    .drate = 3733,
-    .fw_type = FW_1D_IMAGE,
-    .fsp_cfg = ddr_fsp0_cfg,
-    .fsp_cfg_num = nitems(ddr_fsp0_cfg),
-  },
-  {
-    /* P0 3733 2D */
-
-    .drate = 3733,
-    .fw_type = FW_2D_IMAGE,
-    .fsp_cfg = ddr_fsp0_2d_cfg,
-    .fsp_cfg_num = nitems(ddr_fsp0_2d_cfg),
-  },
-};
-
-/* DDR timing config params */
-
-struct dram_timing_info dram_timing_default =
-{
-  .ddrc_cfg = ddr_ddrc_cfg,
-  .ddrc_cfg_num = nitems(ddr_ddrc_cfg),
-  .ddrphy_cfg = ddr_ddrphy_cfg,
-  .ddrphy_cfg_num = nitems(ddr_ddrphy_cfg),
-  .fsp_msg = ddr_dram_fsp_msg,
-  .fsp_msg_num = nitems(ddr_dram_fsp_msg),
-  .ddrphy_pie = ddr_phy_pie,
-  .ddrphy_pie_num = nitems(ddr_phy_pie),
-  .fsp_cfg = ddr_dram_fsp_cfg,
-  .fsp_cfg_num = nitems(ddr_dram_fsp_cfg),
-};
 
 /****************************************************************************
  * Private Functions
@@ -1465,7 +1430,7 @@ static int imx9_ddr_init(struct dram_timing_info *dram_timing)
 
 int imx9_dram_init(void)
 {
-  struct dram_timing_info *ptiming = &dram_timing_default;
+  struct dram_timing_info *ptiming = imx9_ddr_config();
 
   return imx9_ddr_init(ptiming);
 }
