@@ -97,7 +97,7 @@ netdev_prefixlen_findby_lipv4addr(in_addr_t lipaddr, FAR int8_t *prefixlen)
               /* Its a match */
 
               bestdev  = dev;
-              bestpref = 32; /* Regard as best (exact) match */
+              bestpref = (int8_t)net_ipv4_mask2pref(dev->d_netmask);
               break;
             }
 #else
