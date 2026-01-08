@@ -190,7 +190,8 @@ static void nxsched_process_event(wdparm_t noswitches)
  *   active task on a single CPU.
  *
  * Input Parameters:
- *   cpu - The CPU that we are performing the scheduler operations on.
+ *   cpu     - The CPU that we are performing the scheduler operations on.
+ *   ticks   - The number of ticks that represent current time.
  *   elapsed - The number of ticks that have elapsed on the interval timer.
  *   noswitches - True: Can't do context switches now.
  *
