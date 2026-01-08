@@ -40,4 +40,21 @@
 
 int imx9_dram_init(void);
 
+/****************************************************************************
+ * Name: imx9_ddr_config
+ *
+ * Description:
+ *   i.MX9 architectures must provide the following entry point
+ *   if CONFIG_IMX9_DDR_TRAINING is defined.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Pointer to dram_timing_info struct
+ *
+ ****************************************************************************/
+
+struct dram_timing_info *imx9_ddr_config(void);
+
 #endif
