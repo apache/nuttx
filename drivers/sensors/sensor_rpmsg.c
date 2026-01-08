@@ -599,13 +599,17 @@ sensor_rpmsg_alloc_proxy(FAR struct sensor_rpmsg_dev_s *dev,
   return proxy;
 }
 
-static
-void sensor_rpmsg_push_event_persist(FAR struct sensor_rpmsg_dev_s *dev,
-                                     FAR struct sensor_rpmsg_stub_s *stub)
+static FAR struct sensor_rpmsg_stub_s *
+sensor_rpmsg_push_event_persist(FAR struct sensor_rpmsg_dev_s *dev,
+                                FAR struct rpmsg_endpoint *ept,
+                                FAR struct sensor_rpmsg_stub_s *stub,
+                                uint64_t cookie)
 {
   FAR struct sensor_rpmsg_cell_s *cell;
+  FAR struct sensor_rpmsg_stub_s *temp;
   FAR struct sensor_rpmsg_data_s *msg;
   FAR struct sensor_rpmsg_ept_s *sre;
+  bool find = false;
   uint32_t space;
   int ret;
 
@@ -615,7 +619,46 @@ void sensor_rpmsg_push_event_persist(FAR struct sensor_rpmsg_dev_s *dev,
     {
       snerr("ERROR: push event persist get buffer failed:%s\n",
             rpmsg_get_cpuname(sre->ept.rdev));
-      return;
+      return NULL;
+    }
+
+  /* Check if the stub still exists.
+   * rpmsg involves recursive calls, which may result in the sub_handler
+   * not completing its execution, the rpmsg recursively switches to
+   * the unsub_handler and releases the stub.
+   */
+
+  list_for_every_entry(&dev->stublist, temp,
+                       struct sensor_rpmsg_stub_s, node)
+    {
+      /* Check if this stub matches the given ept and cookie. */
+
+      if (temp->ept == ept && temp->cookie == cookie)
+        {
+          find = true;
+          break;
+        }
+    }
+
+  /* The current position requires determining whether the stub
+   * node exists. There are three possibilities.
+   * 1.The node exists, and it's still the address originally allocated
+   *   by malloc.
+   * 2.The node exists, but the address has changed due to reallocation.
+   *   the stub address needs to be updated. Return to the new address
+   *   of the stub
+   * 3.The node does not exist anymore，return directly.
+   */
+
+  if (!find)
+    {
+      rpmsg_release_tx_buffer(&sre->ept, msg);
+      return NULL;
+    }
+  else if (stub != temp)
+    {
+      snwarn("WARN: push event persist stub changed:%p -> %p\n", stub, temp);
+      stub = temp;
     }
 
   msg->command = SENSOR_RPMSG_PUBLISH;
@@ -634,6 +677,8 @@ void sensor_rpmsg_push_event_persist(FAR struct sensor_rpmsg_dev_s *dev,
     {
       rpmsg_release_tx_buffer(&sre->ept, msg);
     }
+
+  return stub;
 }
 
 static FAR struct sensor_rpmsg_stub_s *
@@ -680,8 +725,8 @@ sensor_rpmsg_alloc_stub(FAR struct sensor_rpmsg_dev_s *dev,
 
   if (dev->lower.persist)
     {
-      sminfo(dev->name, "push event persist:%p", stub);
-      sensor_rpmsg_push_event_persist(dev, stub);
+      stub = sensor_rpmsg_push_event_persist(dev, ept, stub, cookie);
+      sminfo(dev->name, "push event persist status:%p", stub);
     }
 
   sensor_rpmsg_unlock(dev);
