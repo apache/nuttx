@@ -103,7 +103,6 @@ void arm64_new_task(struct tcb_s * tcb)
 #else
   xcp->regs[REG_SP_EL0]    = (uint64_t)stack_ptr - XCPTCONTEXT_SIZE;
 #endif
-  xcp->regs[REG_EXE_DEPTH] = 0;
 
   /* TPIDR_EL0 points to the TLS info of the thread, see up_tls_info() */
 
