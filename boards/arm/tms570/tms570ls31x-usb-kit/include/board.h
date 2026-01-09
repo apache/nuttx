@@ -38,6 +38,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#warning "CONFIG_BOARD_LOOPSPERMSEC is set to 0 to prevent CI build errors." \
+"up_udelay() and similar delay functions will not work correctly." \
+"If you use this board, please determine an appropriate value using the" \
+"calib_udelay application in nuttx-apps. It would be appreciated if you" \
+"submit a patch with the new value to apache/nuttx and remove this warning."
+
 /* Clocking *****************************************************************/
 
 /* The tms570ls31x-usb-kit has a 16 MHz external crystal. */
