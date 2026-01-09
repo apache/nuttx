@@ -31,6 +31,24 @@
 #include "arm_internal.h"
 
 /****************************************************************************
+ * Private Function
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: arm_read_tp
+ *
+ * Description:
+ *   Helper function for __aeabi_read_tp.
+ *   This allows tls_get_info() macro to expand properly.
+ *
+ ****************************************************************************/
+
+void *arm_read_tp(void)
+{
+  return (void *)(tls_get_info() + 1);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -84,9 +102,22 @@ void up_tls_initialize(struct tls_info_s *info)
  * Description:
  *   Read thread local storage region pointer.
  *
+ *   This function follows the ARM EABI specification for TLS helper
+ *   functions:
+ *   - Only r0 is modified (return value)
+ *   - r1-r3 must be preserved for the caller
+ *
+ *   The naked attribute ensures strict register usage compliance.
+ *
  ****************************************************************************/
 
+__attribute__((naked))
 void *__aeabi_read_tp(void)
 {
-  return (void *)(tls_get_info() + 1);
+  __asm__ __volatile__
+    (
+      "push {r1-r3, lr}\n\t"
+      "bl arm_read_tp\n\t"
+      "pop {r1-r3, pc}\n\t"
+    );
 }
