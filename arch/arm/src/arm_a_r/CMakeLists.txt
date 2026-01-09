@@ -43,6 +43,7 @@ list(
   arm_cpuidlestack.c
   arm_initialstate.c
   arm_undefinedinsn.c
+  arm_allocpage.c
   arm_prefetchabort.c)
 
 target_sources(arch PRIVATE ${CSRCS})

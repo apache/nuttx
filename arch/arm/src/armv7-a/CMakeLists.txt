@@ -55,14 +55,8 @@ if(CONFIG_ARMV7A_L2CC_PL310)
 endif()
 
 if(CONFIG_LEGACY_PAGING)
-  list(
-    APPEND
-    SRCS
-    arm_allocpage.c
-    arm_checkmapping.c
-    arm_pginitialize.c
-    arm_va2pte.c
-    arm_pghead.S)
+  list(APPEND SRCS arm_checkmapping.c arm_pginitialize.c arm_va2pte.c
+       arm_pghead.S)
 else()
   list(APPEND SRCS arm_head.S)
 endif()

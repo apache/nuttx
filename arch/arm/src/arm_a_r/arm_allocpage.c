@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/arm/arm_allocpage.c
+ * arch/arm/src/arm_a_r/arm_allocpage.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -154,6 +154,7 @@ static bool g_pgwrap;
 
 int up_allocpage(struct tcb_s *tcb, void **vpage)
 {
+  uintptr_t oldvaddr;
   uintptr_t vaddr;
   uintptr_t paddr;
   uint32_t *pte;
@@ -189,8 +190,8 @@ int up_allocpage(struct tcb_s *tcb, void **vpage)
        * mapping -- then zero it!
        */
 
-       uintptr_t oldvaddr = PG_POOL_NDX2VA(g_ptemap[pgndx]);
-       pte = arm_va2pte(oldvaddr);
+      oldvaddr = PG_POOL_NDX2VA(g_ptemap[pgndx]);
+      pte = arm_va2pte(oldvaddr);
       *pte = 0;
 
       /* Invalidate instruction TLB corresponding to the virtual address */
