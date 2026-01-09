@@ -69,7 +69,7 @@ int up_tls_size(void)
 
   return sizeof(struct tls_info_s) +
          sizeof(void *) * 2 +
-         sizeof(uint32_t) * (_END_TBSS - _START_TDATA);
+         (_END_TBSS - _START_TDATA);
 }
 
 /****************************************************************************
@@ -85,15 +85,12 @@ int up_tls_size(void)
 
 void up_tls_initialize(struct tls_info_s *info)
 {
-  uint8_t *tls_data = (uint8_t *)(info + 1);
-
-  uint32_t tdata_len = sizeof(uint32_t) * (_END_TDATA - _START_TDATA);
-  uint32_t tbss_len = sizeof(uint32_t) * (_END_TBSS - _START_TBSS);
-
-  tls_data += sizeof(void *) * 2;
+  uint8_t *tls_data = (uint8_t *)(info + 1) + sizeof(void *) * 2;
+  uint32_t tdata_len = _END_TDATA - _START_TDATA;
+  uint32_t tbss_len = _END_TBSS - _START_TBSS;
 
   memcpy(tls_data, _START_TDATA, tdata_len);
-  memset(tls_data + tdata_len, 0, tbss_len);
+  memset(tls_data + tdata_len + (_START_TBSS - _END_TDATA), 0, tbss_len);
 }
 
 /****************************************************************************
