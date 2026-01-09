@@ -344,6 +344,7 @@ Network Connectivity
 
   - :c:func:`netlib_check_ipconnectivity`
   - :c:func:`netlib_check_ifconnectivity`
+  - :c:func:`netlib_check_httpconnectivity`
 
 .. c:function:: int netlib_check_ipconnectivity(FAR const char *ip, int timeout, int retry)
 
@@ -387,6 +388,39 @@ Network Connectivity
   returning. The function internally calls :c:func:`netlib_get_dripv4addr` to
   retrieve the gateway address and then uses :c:func:`netlib_check_ipconnectivity`
   to perform the actual ping test.
+
+.. c:function:: int netlib_check_httpconnectivity(FAR const char *host, FAR const char *getmsg, int port, int expect_code)
+
+  Check HTTP service connectivity by sending an HTTP GET request and verifying
+  the response status code. This function establishes a TCP connection to the
+  specified host and port, sends an HTTP/1.1 GET request for the specified path,
+  and validates that the server returns the expected HTTP status code.
+
+  :param host: Remote hostname or IP address (e.g., ``"www.example.com"`` or
+               ``"192.168.1.1"``). The function supports DNS resolution if
+               ``CONFIG_LIBC_NETDB`` is enabled, otherwise it expects a numeric
+               IPv4 address.
+  :param getmsg: URL path for the HTTP GET request (e.g., ``"index.html"`` or
+                 ``"api/health"``). An empty string (``""``) requests the root path
+                 (``"/"``). The function automatically prepends a forward slash
+                 to the path.
+  :param port: TCP port number of the HTTP server (typically 80 for HTTP, or
+               8080 for alternative HTTP services).
+  :param expect_code: Expected HTTP status code (e.g., ``200`` for success,
+                      ``404`` for not found). The function returns success only
+                      if the server returns this exact status code.
+
+  :return: 0 on success (HTTP status code matches expected value). A negative
+           value on failure, which may be a negative HTTP status code (e.g.,
+           ``-404``) if the server returned a different status code than expected,
+           or a negative error code (e.g., ``-EINVAL``, ``-ENETUNREACH``) if
+           connection, DNS resolution, or other errors occurred.
+
+  **Note:** This function is blocking and will wait for the HTTP request and
+  response to complete. The function only reads the first 256 bytes of the HTTP
+  response to extract the status code. It does not support HTTPS (TLS/SSL) and
+  only works with HTTP/1.1 servers. The function is useful for HTTP service
+  health checks, network diagnostics, and automated service monitoring.
 
 ARP Table Support
 ==================
