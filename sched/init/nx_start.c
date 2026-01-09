@@ -642,6 +642,10 @@ void nx_start(void)
   timer_initialize();
 #endif
 
+#ifdef CONFIG_HRTIMER
+  nxsched_hrtimer_init();
+#endif
+
   /* Initialize the signal facility (if in link) */
 
   nxsig_initialize();
