@@ -24,7 +24,6 @@ set(SRCS
     arm_dbgmonitor.c
     arm_cache.c
     arm_cpuinfo.c
-    arm_doirq.c
     arm_itm.c
     arm_perf.c
     arm_sau.c
