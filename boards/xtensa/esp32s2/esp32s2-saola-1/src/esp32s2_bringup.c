@@ -248,13 +248,22 @@ int esp32s2_bringup(void)
 # endif
 #endif
 
-#if defined(CONFIG_SPI_SLAVE_DRIVER) && defined(CONFIG_ESP32S2_SPI3_SLAVE)
+#ifdef CONFIG_ESP32S2_SPI3
+# ifdef CONFIG_SPI_DRIVER
+  ret = board_spidev_initialize(ESP32S2_SPI3);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI%d driver: %d\n",
+             ESP32S2_SPI3, ret);
+    }
+# elif defined(CONFIG_SPI_SLAVE_DRIVER) && defined(CONFIG_ESP32S2_SPI3_SLAVE)
   ret = board_spislavedev_initialize(ESP32S2_SPI3);
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize SPI%d Slave driver: %d\n",
-              ESP32S2_SPI3, ret);
+             ESP32S2_SPI3, ret);
     }
+# endif
 #endif
 
   /* Register the timer drivers */
