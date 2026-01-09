@@ -24,7 +24,7 @@ Supported ``ioctl`` Commands
 
    **Argument:** ``int8_t *`` (pointer to duty cycle percentage).
 
-.. c:macro:: CAPIOC_FREQUENCE
+.. c:macro:: CAPIOC_FREQUENCY
 
    Get the pulse frequency from the capture unit.
 
@@ -153,7 +153,7 @@ frequency:
           return 1;
         }
 
-      if (ioctl(fd, CAPIOC_FREQUENCE, (unsigned long)&frequency) < 0)
+      if (ioctl(fd, CAPIOC_FREQUENCY, (unsigned long)&frequency) < 0)
         {
           perror("Failed to get frequency");
           close(fd);
@@ -295,7 +295,8 @@ Notes
 * The actual set of supported ``ioctl`` commands may vary depending on
   the hardware and driver implementation.
 * The ``CAPIOC_FREQUENCE`` macro name is preserved for compatibility,
-  even though "frequency" is the correct English spelling.
+  even though "frequency" is the correct English spelling. It will be
+  deprecated in the future.
 * Always check return values from ``ioctl()`` calls for error handling.
 * **Important:** In debug builds of NuttX, calling an unsupported
   ``ioctl`` command will trigger a ``DEBUGASSERT`` in the driver,
