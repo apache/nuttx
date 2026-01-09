@@ -98,6 +98,9 @@ static ssize_t devmem_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen)
 {
   FAR struct memory_region_s *region = filep->f_inode->i_private;
+  size_t accumulated = 0;
+  size_t offset_in_region;
+  size_t region_size;
   uintptr_t start;
   uintptr_t end;
   ssize_t len;
@@ -105,15 +108,30 @@ static ssize_t devmem_read(FAR struct file *filep, FAR char *buffer,
 
   for (i = 0; region[i].start != 0 && region[i].end != 0; i++)
     {
-      start = region[i].start + filep->f_pos;
-      end = MIN(start + buflen, region[i].end);
-      len = end - start;
-      if (len > 0 && (region[i].flags & PROT_READ))
+      region_size = region[i].end - region[i].start;
+
+      /* Check if f_pos falls within this region */
+
+      if (filep->f_pos < accumulated + region_size)
         {
-          memcpy(buffer, (FAR const void *)start, len);
-          filep->f_pos += len;
-          return len;
+          /* Calculate offset within this region */
+
+          offset_in_region = filep->f_pos - accumulated;
+          start = region[i].start + offset_in_region;
+          end = MIN(start + buflen, region[i].end);
+          len = end - start;
+
+          if (len > 0 && (region[i].flags & PROT_READ))
+            {
+              memcpy(buffer, (FAR const void *)start, len);
+              filep->f_pos += len;
+              return len;
+            }
         }
+
+      /* Accumulate this region's size for next iteration */
+
+      accumulated += region_size;
     }
 
   return -EINVAL;
@@ -127,6 +145,9 @@ static ssize_t devmem_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen)
 {
   FAR struct memory_region_s *region = filep->f_inode->i_private;
+  size_t accumulated = 0;
+  size_t offset_in_region;
+  size_t region_size;
   uintptr_t start;
   uintptr_t end;
   ssize_t len;
@@ -134,15 +155,30 @@ static ssize_t devmem_write(FAR struct file *filep, FAR const char *buffer,
 
   for (i = 0; region[i].start != 0 && region[i].end != 0; i++)
     {
-      start = region[i].start + filep->f_pos;
-      end = MIN(start + buflen, region[i].end);
-      len = end - start;
-      if (len > 0 && (region[i].flags & PROT_WRITE))
+      region_size = region[i].end - region[i].start;
+
+      /* Check if f_pos falls within this region */
+
+      if (filep->f_pos < accumulated + region_size)
         {
-          memcpy((FAR void *)start, buffer, len);
-          filep->f_pos += len;
-          return len;
+          /* Calculate offset within this region */
+
+          offset_in_region = filep->f_pos - accumulated;
+          start = region[i].start + offset_in_region;
+          end = MIN(start + buflen, region[i].end);
+          len = end - start;
+
+          if (len > 0 && (region[i].flags & PROT_WRITE))
+            {
+              memcpy((FAR void *)start, buffer, len);
+              filep->f_pos += len;
+              return len;
+            }
         }
+
+      /* Accumulate this region's size for next iteration */
+
+      accumulated += region_size;
     }
 
   return -EINVAL;
