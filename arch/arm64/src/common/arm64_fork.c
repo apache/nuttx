@@ -261,7 +261,6 @@ static pid_t arm64_fork_direct(bool vfork, struct tcb_s *parent,
   child->xcp.regs[REG_SCTLR_EL1] = read_sysreg(sctlr_el1) | SCTLR_TCF1_BIT;
 #endif
 
-  child->xcp.regs[REG_EXE_DEPTH] = 0;
   child->xcp.regs[REG_TPIDR_EL0] = (uint64_t)child->stack_alloc_ptr;
   child->xcp.regs[REG_SP_ELX]    = newsp - XCPTCONTEXT_SIZE;
 #ifdef CONFIG_ARCH_KERNEL_STACK
@@ -377,7 +376,6 @@ static pid_t arm64_fork_syscall(bool vfork, struct tcb_s *parent)
 
   child->xcp.regs[REG_X0]        = 0;
   child->xcp.regs[REG_FP]        = newfp;
-  child->xcp.regs[REG_EXE_DEPTH] = 0;
   child->xcp.regs[REG_TPIDR_EL0] = (uint64_t)child->stack_alloc_ptr;
   child->xcp.regs[REG_SP_ELX]    = regtop - XCPTCONTEXT_SIZE;
 
