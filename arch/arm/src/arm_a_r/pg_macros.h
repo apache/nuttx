@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/arm/pg_macros.h
+ * arch/arm/src/arm_a_r/pg_macros.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,8 +25,8 @@
  * assure that some file inclusion ordering dependencies are enforced.
  */
 
-#ifndef __ARCH_ARM_SRC_ARM_PG_MACROS_H
-#define __ARCH_ARM_SRC_ARM_PG_MACROS_H
+#ifndef __ARCH_ARM_SRC_ARM_A_R_PG_MACROS_H
+#define __ARCH_ARM_SRC_ARM_A_R_PG_MACROS_H
 
 /****************************************************************************
  * Included Files
@@ -511,4 +511,4 @@
 #ifndef __ASSEMBLY__
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_ARM_PG_MACROS_H */
+#endif /* __ARCH_ARM_SRC_ARM_A_R_PG_MACROS_H */
