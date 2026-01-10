@@ -25,8 +25,7 @@ include common/Make.defs
 CMN_CSRCS += intel64_createstack.c intel64_initialstate.c intel64_irq.c
 CMN_CSRCS += intel64_map_region.c intel64_regdump.c intel64_releasestack.c
 CMN_CSRCS += intel64_rtc.c intel64_restore_auxstate.c
-CMN_CSRCS += intel64_stackframe.c intel64_schedulesigaction.c
-CMN_CSRCS += intel64_sigdeliver.c intel64_usestack.c x86_64_tcbinfo.c
+CMN_CSRCS += intel64_stackframe.c intel64_usestack.c x86_64_tcbinfo.c
 CMN_CSRCS += intel64_systemreset.c intel64_freq.c intel64_cache.c
 
 # Required Intel64 files
@@ -35,6 +34,10 @@ CHIP_ASRCS  = intel64_saveusercontext.S intel64_fullcontextrestore.S intel64_vec
 CHIP_CSRCS  = intel64_start.c intel64_handlers.c intel64_idle.c intel64_lowsetup.c
 CHIP_CSRCS += intel64_serial.c intel64_rng.c intel64_check_capability.c
 CHIP_CSRCS += intel64_cpu.c
+
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+CMN_CSRCS += intel64_schedulesigaction.c intel64_sigdeliver.c
+endif
 
 ifeq ($(CONFIG_X86_64_UNWINDER_FRAME_POINTER),y)
   CMN_CSRCS += intel64_backtrace_fp.c

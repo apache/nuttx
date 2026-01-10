@@ -158,6 +158,7 @@ struct xcpt_syscall_s
 
 struct xcptcontext
 {
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   /* These are saved copies of the context used during
    * signal processing.
    */
@@ -170,6 +171,7 @@ struct xcptcontext
    */
 
   uint32_t sigreturn;
+#endif
 #endif
 
 #ifdef CONFIG_LIB_SYSCALL
