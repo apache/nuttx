@@ -1,5 +1,5 @@
 # ##############################################################################
-# arch/arm/src/armv7-r/CMakeLists.txt
+# arch/arm/src/am67/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,62 +20,9 @@
 #
 # ##############################################################################
 
-# The vector table
+set(SRCS am67_boot.c am67_irq.c am67_mpuinit.c am67_pinmux.c am67_serial.c
+         am67_timer.c)
 
-set(SRCS arm_vectortab.S)
-
-# Common assembly language files
-
-list(APPEND SRCS arm_head.S arm_vectors.S arm_saveusercontext.S)
-
-# Common C source files
-
-list(
-  APPEND
-  SRCS
-  arm_cache.c
-  arm_cpuinfo.c
-  arm_dataabort.c
-  arm_doirq.c
-  arm_initialstate.c
-  arm_prefetchabort.c
-  arm_schedulesigaction.c
-  arm_sigdeliver.c
-  arm_syscall.c
-  arm_tcbinfo.c
-  arm_undefinedinsn.c
-  arm_perf.c
-  cp15_cacheops.c)
-
-if(NOT CONFIG_ARCH_CHIP STREQUAL tms570)
-  list(APPEND SRCS arm_gicv2.c arm_gicv2_dump.c)
-endif()
-
-if(CONFIG_ARMV7R_HAVE_PTM)
-  list(APPEND SRCS arm_timer.c)
-endif()
-
-if(CONFIG_ARM_MPU OR CONFIG_BUILD_PROTECTED)
-  list(APPEND SRCS arm_mpu.c)
-endif()
-
-if(CONFIG_ARMV7R_L2CC_PL310)
-  list(APPEND SRCS arm_l2cc_pl310.c)
-endif()
-
-if(CONFIG_ARCH_FPU)
-  list(APPEND SRCS arm_fpucmp.c arm_fpuconfig.S)
-endif()
-
-if(CONFIG_SMP)
-  list(
-    APPEND
-    SRCS
-    arm_cpuhead.S
-    arm_cpustart.c
-    arm_smpcall.c
-    arm_cpuidlestack.c
-    arm_scu.c)
-endif()
+target_link_options(nuttx PRIVATE -Wl,--entry=_vector_start)
 
 target_sources(arch PRIVATE ${SRCS})
