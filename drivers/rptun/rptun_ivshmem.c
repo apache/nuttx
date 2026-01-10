@@ -31,7 +31,6 @@
 #include <stdio.h>
 
 #include <nuttx/nuttx.h>
-#include <nuttx/board.h>
 #include <nuttx/drivers/addrenv.h>
 #include <nuttx/pci/pci_ivshmem.h>
 #include <nuttx/rptun/rptun.h>
@@ -194,7 +193,6 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
       rsc->config.h2r_buf_size      = CONFIG_RPTUN_IVSHMEM_BUFFSIZE;
 
       priv->shmem->rsc_size         = sizeof(struct rptun_rsc_s);
-      cmd->cmd_master               = 0;
       cmd->cmd_slave                = RPTUN_CMD(RPTUN_CMD_READY, 0);
 
       /* Wait until master is ready, slave needs to use master base to
@@ -290,46 +288,12 @@ static int rptun_ivshmem_register_callback(FAR struct rptun_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: rptun_ivshmem_check_cmd
- ****************************************************************************/
-
-static void rptun_ivshmem_check_cmd(FAR struct rptun_ivshmem_dev_s *priv)
-{
-  FAR struct rptun_cmd_s *rptun_cmd = RPTUN_RSC2CMD(&priv->shmem->rsc);
-  uint32_t cmd;
-
-  if (priv->master)
-    {
-      cmd = RPTUN_GET_CMD(rptun_cmd->cmd_slave);
-      rptun_cmd->cmd_slave = RPTUN_CMD(RPTUN_CMD_DEFAULT, 0);
-    }
-  else
-    {
-      cmd = RPTUN_GET_CMD(rptun_cmd->cmd_master);
-      rptun_cmd->cmd_master = RPTUN_CMD(RPTUN_CMD_DEFAULT, 0);
-    }
-
-  switch (cmd)
-    {
-      case RPTUN_CMD_RESTART:
-#ifdef CONFIG_BOARDCTL_RESET
-        board_reset(0);
-#endif
-        break;
-      default:
-        break;
-    }
-}
-
-/****************************************************************************
  * Name: rptun_ivshmem_interrupt
  ****************************************************************************/
 
 static int rptun_ivshmem_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct rptun_ivshmem_dev_s *priv = arg;
-
-  rptun_ivshmem_check_cmd(priv);
 
   if (priv->callback != NULL)
     {
@@ -348,8 +312,6 @@ static void rptun_ivshmem_wdog(wdparm_t arg)
   FAR struct rptun_ivshmem_dev_s *priv =
     (FAR struct rptun_ivshmem_dev_s *)arg;
   bool should_notify = false;
-
-  rptun_ivshmem_check_cmd(priv);
 
   if (priv->master && priv->seq != priv->shmem->seqs)
     {

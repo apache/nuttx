@@ -112,6 +112,26 @@ config RPMSG_PORT_UART_DEBUG
 
 endif # RPMSG_PORT_UART
 
+config RPMSG_VIRTIO
+	bool
+	default n
+	select RPMSG
+	---help---
+		The Rpmsg VirtIO Lite, VirtIO-Rpmsg and VHost-Rpmsg common
+		part.
+
+if RPMSG_VIRTIO
+
+config RPMSG_VIRTIO_PRIORITY
+	int "rpmsg virtio priority"
+	default 224
+
+config RPMSG_VIRTIO_STACKSIZE
+	int "rpmsg virtio stack size"
+	default DEFAULT_TASK_STACKSIZE
+
+endif # RPMSG_VIRTIO
+
 config RPMSG_VIRTIO_LITE
 	bool "rpmsg virtio transport support"
 	default n

@@ -26,6 +26,7 @@
 
 #include "mx8mp_rsctable.h"
 #include <string.h>
+#include <nuttx/nuttx.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -38,7 +39,7 @@
 #define RESOURCE_TABLE_BASE     0x550FF000
 #define VRING_SIZE              0x8000
 
-#define NO_RESOURCE_ENTRIES     (1)
+#define NO_RESOURCE_ENTRIES     (2)
 #define RSC_VDEV_FEATURE_NS     (1) /* Support name service announcement */
 #define MX8MP_RSC_TABLE_VERSION (1)
 
@@ -67,7 +68,8 @@ const struct rptun_rsc_s g_mx8mp_rsc_table =
 
     .offset =
     {
-        offsetof(struct rptun_rsc_s, rpmsg_vdev)
+        offsetof(struct rptun_rsc_s, rpmsg_vdev),
+        offsetof(struct rptun_rsc_s, carveout)
     },
 
     .log_trace =
@@ -111,6 +113,18 @@ const struct rptun_rsc_s g_mx8mp_rsc_table =
     .config =
     {
         0
+    },
+
+    .carveout =
+    {
+        RSC_CARVEOUT,
+        (uintptr_t)&g_mx8mp_rsc_table + ALIGN_UP(sizeof(struct rptun_rsc_s),
+                                                 VRING_ALIGN),
+        FW_RSC_U32_ADDR_ANY,
+        VRING_SIZE * RL_BUFFER_COUNT * NUM_VRINGS + 0x1000,
+        0,
+        0,
+        "rpmsg_shm"
     }
 };
 

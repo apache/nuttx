@@ -117,7 +117,7 @@ struct qemu_rptun_dev_s
  ****************************************************************************/
 
 static const char *rp_get_cpuname(struct rptun_dev_s *dev);
-static struct rptun_rsc_s *rp_get_resource(struct rptun_dev_s *dev);
+static struct resource_table *rp_get_resource(struct rptun_dev_s *dev);
 static bool rp_is_autostart(struct rptun_dev_s *dev);
 static bool rp_is_master(struct rptun_dev_s *dev);
 static int rp_start(struct rptun_dev_s *dev);
@@ -201,14 +201,14 @@ static const char *rp_get_cpuname(struct rptun_dev_s *dev)
   return priv->peername;
 }
 
-static struct rptun_rsc_s *rp_get_resource(struct rptun_dev_s *dev)
+static struct resource_table *rp_get_resource(struct rptun_dev_s *dev)
 {
   struct qemu_rptun_dev_s *priv = as_qemu_rptun_dev(dev);
   struct rptun_rsc_s *rsc;
 
   if (priv->shmem != NULL)
     {
-      return &priv->shmem->rsc;
+      return &priv->shmem->rsc.rsc_tbl_hdr;
     }
 
   priv->shmem = SHMEM + CONFIG_QEMU_RPTUN_SHM_SIZE * priv->ndx;
@@ -220,7 +220,7 @@ static struct rptun_rsc_s *rp_get_resource(struct rptun_dev_s *dev)
       rsc = &priv->shmem->rsc;
 
       rsc->rsc_tbl_hdr.ver          = 1;
-      rsc->rsc_tbl_hdr.num          = 1;
+      rsc->rsc_tbl_hdr.num          = 2;
       rsc->rsc_tbl_hdr.reserved[0]  = 0;
       rsc->rsc_tbl_hdr.reserved[1]  = 0;
       rsc->offset[0]                = offsetof(struct rptun_rsc_s,
@@ -243,6 +243,18 @@ static struct rptun_rsc_s *rp_get_resource(struct rptun_dev_s *dev)
       rsc->config.r2h_buf_size      = VRING_SIZE;
       rsc->config.h2r_buf_size      = VRING_SIZE;
 
+      /* Carveout, reserved 0x1000 for vrings and memory management header */
+
+      rsc->offset[1]                = offsetof(struct rptun_rsc_s,
+                                               carveout);
+      rsc->carveout.type            = RSC_CARVEOUT;
+      rsc->carveout.da              = (uintptr_t)rsc + ALIGN_UP(sizeof
+                                      (struct rptun_rsc_s), VRING_ALIGN);
+      rsc->carveout.pa              = FW_RSC_U32_ADDR_ANY;
+      rsc->carveout.len             = VRING_SIZE * VRING_NR * VRINGS +
+                                      0x1000;
+      memcpy(rsc->carveout.name, "rpmsg_shm", 10);
+
       priv->shmem->base             = (uintptr_t)priv->shmem;
     }
   else
@@ -258,7 +270,7 @@ static struct rptun_rsc_s *rp_get_resource(struct rptun_dev_s *dev)
     }
 
   rpinfo("shmem:%p, dev:%p\n", (void *)priv->shmem->base, dev);
-  return &priv->shmem->rsc;
+  return &priv->shmem->rsc.rsc_tbl_hdr;
 }
 
 static bool rp_is_autostart(struct rptun_dev_s *dev)
