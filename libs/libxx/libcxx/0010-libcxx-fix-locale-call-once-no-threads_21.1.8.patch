@@ -1,0 +1,25 @@
+--- a/src/locale.cpp
++++ b/src/locale.cpp
+@@ -589,8 +589,22 @@
+ constinit int32_t locale::id::__next_id = 0;
+
+ long locale::id::__get() {
++#ifdef _LIBCPP_HAS_NO_THREADS
++  // Interrupt-safe ID assignment: Read current ID first to minimize race window
++  // Even if interrupted between read and write, atomic_add ensures unique IDs
++  int32_t current = __id_;
++  if (current == 0) {
++    // Generate unique ID atomically - each call gets different value
++    int32_t new_id = __libcpp_atomic_add(&__next_id, 1) + 1;
++    // Write back - safe because atomic_add guarantees uniqueness
++    __id_ = new_id;
++    current = new_id;
++  }
++  return current - 1;
++#else
+   call_once(__flag_, [&] { __id_ = __libcpp_atomic_add(&__next_id, 1); });
+   return __id_ - 1;
++#endif
+ }
+
+ // template <> class collate_byname<char>

@@ -1,0 +1,30 @@
+// __assertion_handler for libcxx 21.x
+// This file provides the assertion handler for libcxx when
+// _LIBCPP_ENABLE_ASSERTIONS is enabled.
+
+#ifndef _LIBCPP_ASSERTION_HANDLER_H
+#define _LIBCPP_ASSERTION_HANDLER_H
+
+#include <__config>
+
+_LIBCPP_BEGIN_NAMESPACE_STD
+
+// Forward declare the verbose abort function from libcxx with proper attributes
+[[noreturn]] _LIBCPP_EXPORTED_FROM_ABI void
+__libcpp_verbose_abort(const char *, ...) _NOEXCEPT;
+
+// Default assertion handler that uses verbose abort directly
+[[noreturn]] inline void __libcpp_assertion_handler(char const *format, ...) {
+  // Simply pass format string to verbose abort - no formatting to avoid stdio
+  // dependency
+  __libcpp_verbose_abort(format);
+}
+
+_LIBCPP_END_NAMESPACE_STD
+
+// Define the assertion handler macro
+// Cast to void to make it work with exceptions disabled
+#define _LIBCPP_ASSERTION_HANDLER(...)                                         \
+  (::std::__libcpp_assertion_handler(__VA_ARGS__), static_cast<void>(0))
+
+#endif // _LIBCPP_ASSERTION_HANDLER_H

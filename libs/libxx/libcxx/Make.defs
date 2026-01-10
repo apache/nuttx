@@ -31,18 +31,22 @@ libcxx/libcxx: libcxx-$(LIBCXX_VERSION).src.tar.xz
 	$(Q) tar -xf $< \
 	         --exclude libcxx-$(LIBCXX_VERSION).src/test/std/pstl
 	$(Q) mv libcxx-$(LIBCXX_VERSION).src $@
-	$(Q) patch -p0 < libcxx/0001_fix_stdatomic_h_miss_typedef.patch -d libcxx
-	$(Q) patch -p2 < libcxx/mbstate_t.patch -d libcxx
-	$(Q) patch -p0 < libcxx/0001-libcxx-remove-mach-time-h.patch -d libcxx
-	$(Q) patch -p0 < libcxx/0001-libcxx-fix-ld-errors.patch -d libcxx
-	$(Q) patch -p0 < libcxx/0001-Fix-build-error-about-__GLIBC__.patch -d libcxx
-	$(Q) patch -p0 < libcxx/0001-libc-Fix-failures-with-GCC-14-92663.patch -d libcxx
+	$(Q) patch -p1 < libcxx/0001_fix_stdatomic_h_miss_typedef_21.1.8.patch -d libcxx/libcxx
+	$(Q) patch -p1 < libcxx/mbstate_t_21.1.8.patch -d libcxx/libcxx
+	$(Q) patch -p1 < libcxx/0001-libcxx-remove-mach-time-h_21.1.8.patch -d libcxx/libcxx
+	$(Q) patch -p1 < libcxx/0001-libcxx-fix-exception-no-rtti_21.1.8.patch -d libcxx/libcxx
+	$(Q) patch -p1 < libcxx/0001-Fix-build-error-about-__GLIBC___21.1.8.patch -d libcxx/libcxx
+	$(Q) patch -p1 < libcxx/0001-libcxx-fix-ostream-no-exceptions_21.1.8.patch -d libcxx/libcxx
+	$(Q) patch -p1 < libcxx/0009-libcxx-add-string-template-instantiations_21.1.8.patch -d libcxx/libcxx
+	$(Q) patch -p1 < libcxx/0010-libcxx-fix-locale-call-once-no-threads_21.1.8.patch -d libcxx/libcxx
+	$(Q) patch -p1 < libcxx/0011-libcxx-fix-deprecation-warnings-redefinition_21.1.8.patch -d libcxx/libcxx
 
 endif
 
 $(TOPDIR)/include/libcxx: libcxx/libcxx
 	$(Q) $(DIRLINK) $(CURDIR)/$</include $(TOPDIR)/include/libcxx
 	$(Q) cp $(CURDIR)/__config_site $(TOPDIR)/include/libcxx/__config_site
+	$(Q) cp $(CURDIR)/libcxx/__assertion_handler $(TOPDIR)/include/libcxx/__assertion_handler
 
 context:: $(TOPDIR)/include/libcxx
 
@@ -72,9 +76,25 @@ ifeq ($(shell expr "$(GCCVER)" \>= 12), 1)
 endif
 
 CPPSRCS += $(wildcard libcxx/libcxx/src/*.cpp)
-CPPSRCS += $(wildcard libcxx/libcxx/src/experimental/*.cpp)
 CPPSRCS += $(wildcard libcxx/libcxx/src/filesystem/*.cpp)
 CPPSRCS += $(wildcard libcxx/libcxx/src/ryu/*.cpp)
+
+# Exclude threading-related files when _LIBCPP_HAS_NO_THREADS is defined
+THREAD_CPPSRCS := libcxx/libcxx/src/atomic.cpp
+THREAD_CPPSRCS += libcxx/libcxx/src/barrier.cpp
+THREAD_CPPSRCS += libcxx/libcxx/src/condition_variable.cpp
+THREAD_CPPSRCS += libcxx/libcxx/src/condition_variable_destructor.cpp
+THREAD_CPPSRCS += libcxx/libcxx/src/future.cpp
+THREAD_CPPSRCS += libcxx/libcxx/src/mutex.cpp
+THREAD_CPPSRCS += libcxx/libcxx/src/mutex_destructor.cpp
+THREAD_CPPSRCS += libcxx/libcxx/src/shared_mutex.cpp
+THREAD_CPPSRCS += libcxx/libcxx/src/thread.cpp
+CPPSRCS := $(filter-out $(THREAD_CPPSRCS), $(CPPSRCS))
+
+# Exclude files with embedded-incompatible dependencies
+INCOMPATIBLE_CPPSRCS := libcxx/libcxx/src/charconv.cpp
+INCOMPATIBLE_CPPSRCS += libcxx/libcxx/src/random.cpp
+CPPSRCS := $(filter-out $(INCOMPATIBLE_CPPSRCS), $(CPPSRCS))
 
 ifeq ($(CONFIG_CXX_LOCALIZATION),)
   LOCALE_CPPSRCS := libcxx/libcxx/src/ios.cpp

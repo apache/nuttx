@@ -1,0 +1,10 @@
+--- a/src/exception.cpp
++++ b/src/exception.cpp
+@@ -7,7 +7,6 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #define _LIBCPP_ENABLE_CXX20_REMOVED_UNCAUGHT_EXCEPTION
+-#define _LIBCPP_DISABLE_DEPRECATION_WARNINGS
+ 
+ #include <exception>
+ #include <new>

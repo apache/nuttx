@@ -44,17 +44,23 @@ if(CONFIG_LIBCXX)
           ""
       PATCH_COMMAND
         patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0001_fix_stdatomic_h_miss_typedef.patch &&
-        patch -p3 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/mbstate_t.patch && patch -p1 -d
-        ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-remove-mach-time-h.patch && patch
-        -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-fix-ld-errors.patch && patch -p1
-        -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0001-Fix-build-error-about-__GLIBC__.patch &&
+        ${CMAKE_CURRENT_LIST_DIR}/0001_fix_stdatomic_h_miss_typedef_21.1.8.patch &&
         patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0001-libc-Fix-failures-with-GCC-14-92663.patch
+        ${CMAKE_CURRENT_LIST_DIR}/mbstate_t_21.1.8.patch &&
+        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-remove-mach-time-h_21.1.8.patch &&
+        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-fix-exception-no-rtti_21.1.8.patch &&
+        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0001-Fix-build-error-about-__GLIBC___21.1.8.patch &&
+        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-fix-ostream-no-exceptions_21.1.8.patch &&
+        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0009-libcxx-add-string-template-instantiations_21.1.8.patch &&
+        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0010-libcxx-fix-locale-call-once-no-threads_21.1.8.patch &&
+        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0011-libcxx-fix-deprecation-warnings-redefinition_21.1.8.patch
       DOWNLOAD_NO_PROGRESS true
       TIMEOUT 30)
 
@@ -69,8 +75,15 @@ if(CONFIG_LIBCXX)
   nuttx_create_symlink(${CMAKE_CURRENT_LIST_DIR}/libcxx/include
                        ${CMAKE_BINARY_DIR}/include/libcxx)
 
+  # Copy config files to the libcxx source include directory before symlinking
+  # Remove existing files first to allow reconfiguration
+  file(REMOVE ${CMAKE_CURRENT_LIST_DIR}/libcxx/include/__config_site)
   configure_file(${CMAKE_CURRENT_LIST_DIR}/../__config_site
-                 ${CMAKE_BINARY_DIR}/include/libcxx/__config_site COPYONLY)
+                 ${CMAKE_CURRENT_LIST_DIR}/libcxx/include/__config_site COPYONLY)
+
+  file(REMOVE ${CMAKE_CURRENT_LIST_DIR}/libcxx/include/__assertion_handler)
+  configure_file(${CMAKE_CURRENT_LIST_DIR}/__assertion_handler
+                 ${CMAKE_CURRENT_LIST_DIR}/libcxx/include/__assertion_handler COPYONLY)
 
   set_property(
     TARGET nuttx
@@ -98,6 +111,23 @@ if(CONFIG_LIBCXX)
   file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/ryu/*.cpp)
   list(APPEND SRCS ${SRCSTMP})
 
+  # Exclude threading-related files since _LIBCPP_HAS_NO_THREADS is defined
+  file(
+    GLOB
+    SRCSTMP
+    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/barrier.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/condition_variable.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/condition_variable_destructor.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/mutex.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/mutex_destructor.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/thread.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/future.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/shared_mutex.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/call_once.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/atomic.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/charconv.cpp)
+  list(REMOVE_ITEM SRCS ${SRCSTMP})
+
   if(NOT CONFIG_CXX_LOCALIZATION)
     file(
       GLOB
@@ -110,6 +140,16 @@ if(CONFIG_LIBCXX)
       ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/strstream.cpp)
     list(REMOVE_ITEM SRCS ${SRCSTMP})
   endif()
+
+  # Exclude files with embedded-incompatible dependencies
+  file(
+    GLOB
+    SRCSTMP
+    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/atomic.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/charconv.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/random.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/experimental/*.cpp)
+  list(REMOVE_ITEM SRCS ${SRCSTMP})
 
   set(FLAGS -Wno-attributes -Wno-deprecated-declarations -Wno-shadow
             -Wno-sign-compare -Wno-cpp)

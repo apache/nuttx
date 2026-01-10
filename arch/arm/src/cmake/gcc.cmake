@@ -274,6 +274,11 @@ if(NOT CONFIG_CXX_RTTI)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
 endif()
 
+# Add -mlong-calls for C++ when using libcxx to fix relocation issues
+if(CONFIG_LIBCXX)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-mlong-calls>)
+endif()
+
 set(CMAKE_EXE_LINKER_FLAGS_INIT "--specs=nosys.specs")
 
 set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)

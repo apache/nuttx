@@ -15,8 +15,11 @@
 #define _LIBCPP_ABI_NAMESPACE __1
 /* #undef _LIBCPP_ABI_FORCE_ITANIUM */
 /* #undef _LIBCPP_ABI_FORCE_MICROSOFT */
-/* #undef _LIBCPP_HAS_NO_THREADS */
-/* #undef _LIBCPP_HAS_NO_MONOTONIC_CLOCK */
+#define _LIBCPP_HAS_NO_THREADS
+#define _LIBCPP_HAS_THREADS 0
+#define _LIBCPP_HAS_NO_MONOTONIC_CLOCK
+#define _LIBCPP_HAS_MONOTONIC_CLOCK 0
+#define _LIBCPP_HAS_TIME_ZONE_DATABASE 0
 /* #undef _LIBCPP_HAS_MUSL_LIBC */
 /* #undef _LIBCPP_HAS_THREAD_API_PTHREAD */
 /* #undef _LIBCPP_HAS_THREAD_API_EXTERNAL */
@@ -26,38 +29,50 @@
 /* #undef _LIBCPP_NO_VCRUNTIME */
 /* #undef _LIBCPP_TYPEINFO_COMPARISON_IMPLEMENTATION */
 /* #undef _LIBCPP_HAS_NO_FILESYSTEM */
+#define _LIBCPP_HAS_FILESYSTEM 1
 /* #undef _LIBCPP_HAS_NO_RANDOM_DEVICE */
-#ifndef CONFIG_CXX_LOCALIZATION
-#  define _LIBCPP_HAS_NO_LOCALIZATION
+#define _LIBCPP_HAS_RANDOM_DEVICE 0
+#ifdef CONFIG_CXX_LOCALIZATION
+#define _LIBCPP_HAS_LOCALIZATION 1
+#else
+#define _LIBCPP_HAS_NO_LOCALIZATION
+#define _LIBCPP_HAS_LOCALIZATION 0
 #endif
-#ifndef CONFIG_CXX_WCHAR
-#  define _LIBCPP_HAS_NO_WIDE_CHARACTERS
+#ifdef CONFIG_CXX_WCHAR
+#define _LIBCPP_HAS_WIDE_CHARACTERS 1
+#else
+#define _LIBCPP_HAS_NO_WIDE_CHARACTERS
+#define _LIBCPP_HAS_WIDE_CHARACTERS 0
 #endif
 #define _LIBCPP_ENABLE_ASSERTIONS_DEFAULT 0
 
+// Define assertion macros for libcxx 21.x
+#define _LIBCPP_ASSERT_ARGUMENT_WITHIN_DOMAIN(...) ((void)0)
+
 // PSTL backends
-#define _LIBCPP_PSTL_CPU_BACKEND_SERIAL
-/* #undef _LIBCPP_PSTL_CPU_BACKEND_THREAD */
-/* #undef _LIBCPP_PSTL_CPU_BACKEND_LIBDISPATCH */
+#define _LIBCPP_PSTL_BACKEND_SERIAL
+/* #undef _LIBCPP_PSTL_BACKEND_STD_THREAD */
+/* #undef _LIBCPP_PSTL_BACKEND_LIBDISPATCH */
 
 // Hardening.
-#define _LIBCPP_ENABLE_HARDENED_MODE_DEFAULT 0
-#define _LIBCPP_ENABLE_DEBUG_MODE_DEFAULT 0
+#ifndef NDEBUG
+#define _LIBCPP_HARDENING_MODE_DEFAULT _LIBCPP_HARDENING_MODE_EXTENSIVE
+#else
+#define _LIBCPP_HARDENING_MODE_DEFAULT _LIBCPP_HARDENING_MODE_FAST
+#endif
+#define _LIBCPP_ENABLE_ASSERTIONS_DEFAULT 0
 
 #define _LIBCPP_DISABLE_DEPRECATION_WARNINGS 1
 #define _LIBCPP_AVAILABILITY_HAS_NO_VERBOSE_ABORT 1
 
 // __USE_MINGW_ANSI_STDIO gets redefined on MinGW
 #ifdef __clang__
-#  pragma clang diagnostic push
-#  pragma clang diagnostic ignored "-Wmacro-redefined"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmacro-redefined"
 #endif
 
-
-
-
 #ifdef __clang__
-#  pragma clang diagnostic pop
+#pragma clang diagnostic pop
 #endif
 
 #define _SYS_REENT_H_

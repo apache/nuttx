@@ -30,8 +30,10 @@ libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz:
 libcxxabi/libcxxabi: libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
 	$(Q) tar -xf $<
 	$(Q) mv libcxxabi-$(LIBCXXABI_VERSION).src $@
-	$(Q) patch -p0 < libcxxabi/0001-libcxxabi-Fix-build-warnings-generated-by-CMake-comp.patch -d libcxxabi
-	$(Q) patch -p0 < libcxxabi/0002-libcxxabi-fix-compilation-errors.patch -d libcxxabi
+	$(Q) patch -p1 < libcxxabi/0001-libcxxabi-Fix-build-warnings-generated-by-CMake-comp.patch -d libcxxabi/libcxxabi
+	$(Q) patch -p1 < libcxxabi/0002-libcxxabi-fix-compilation-errors.patch -d libcxxabi/libcxxabi
+	$(Q) patch -p0 < libcxxabi/0003-libcxxabi-fix-exception-handler-init_21.1.8.patch -d libcxxabi/libcxxabi
+	$(Q) patch -p1 < libcxxabi/0004-libcxxabi-disable-threading-in-cxa-guard_21.1.8.patch -d libcxxabi/libcxxabi
 endif
 
 $(TOPDIR)/include/libcxxabi: libcxxabi/libcxxabi
@@ -51,6 +53,9 @@ ifeq ($(CONFIG_LIBCXXABI), y)
 CXXFLAGS += ${DEFINE_PREFIX}LIBCXX_BUILDING_LIBCXXABI
 CXXFLAGS += -I $(TOPDIR)/libs/libxx/libcxxabi/libcxxabi/include
 
+# Define _LIBCPP_HAS_NO_THREADS for no-threading builds
+CXXFLAGS += ${DEFINE_PREFIX}_LIBCPP_HAS_NO_THREADS
+
 # Disable dynamic type checking when enabling libcxxabi
 # It results in a recursive call:
 # cxxabiv1::__dynamic_case -> is_equal -> __ubsan::checkDynamic -> cxxabiv1::__dynamic_case
@@ -61,12 +66,15 @@ endif
 endif
 
 # C++ABI files
-CPPSRCS += cxa_aux_runtime.cpp cxa_default_handlers.cpp cxa_demangle.cpp cxa_exception_storage.cpp
-CPPSRCS += cxa_guard.cpp cxa_handlers.cpp cxa_thread_atexit.cpp cxa_vector.cpp cxa_virtual.cpp
+CPPSRCS += cxa_aux_runtime.cpp cxa_default_handlers.cpp cxa_demangle.cpp
+CPPSRCS += cxa_guard.cpp cxa_handlers.cpp cxa_vector.cpp cxa_virtual.cpp
 # C++ STL files
 CPPSRCS += stdlib_exception.cpp stdlib_new_delete.cpp stdlib_stdexcept.cpp stdlib_typeinfo.cpp
 # Internal files
-CPPSRCS += abort_message.cpp fallback_malloc.cpp private_typeinfo.cpp
+CPPSRCS += abort_message.cpp private_typeinfo.cpp
+
+# Use stub files instead of originals (no threading, no TLS)
+CPPSRCS += cxa_exception_storage_stub.cpp fallback_malloc_stub.cpp
 
 ifeq ($(CONFIG_CXX_EXCEPTION),y)
 CPPSRCS += cxa_exception.cpp cxa_personality.cpp
@@ -85,4 +93,6 @@ CXXFLAGS += -DLIBCXXABI_NON_DEMANGLING_TERMINATE
 CXXFLAGS += -frtti
 
 DEPPATH += --dep-path libcxxabi/libcxxabi/src
+DEPPATH += --dep-path libcxxabi/src
 VPATH += libcxxabi/libcxxabi/src
+VPATH += libcxxabi/src
