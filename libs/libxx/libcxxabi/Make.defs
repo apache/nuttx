@@ -84,6 +84,8 @@ endif
 # libcxxabi/src/cxa_personality.cpp:594:22: error: '_URC_FATAL_PHASE1_ERROR' was not declared in this scope
 #   594 |     results.reason = _URC_FATAL_PHASE1_ERROR;
 ifeq ($(CONFIG_ARCH_ARM),y)
+# Enable bare-metal mode for correct TARGET2 relocation handling
+CXXFLAGS += -DLIBCXXABI_BAREMETAL
 CXXFLAGS += -D_URC_FATAL_PHASE2_ERROR=_URC_FAILURE -D_URC_FATAL_PHASE1_ERROR=_URC_FAILURE
 endif
 

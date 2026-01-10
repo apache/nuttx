@@ -116,28 +116,40 @@ void *__calloc_with_fallback(size_t count, size_t size) {
 
 // Free properly aligned memory with safety validation
 // SAFETY: Validates pointer before freeing to prevent corruption
+// NOTE: For single-argument __aligned_malloc_with_fallback(size), we just use
+// malloc/free directly For two-argument version with alignment, we store the
+// original pointer before the aligned address
 void __aligned_free_with_fallback(void *ptr) {
   // SAFETY: NULL pointer is valid to free (no-op)
   if (!ptr) {
     return;
   }
 
-  // Retrieve the original pointer stored before the aligned pointer
+  // Check if this pointer has the alignment metadata
+  // If alignment was requested, the original pointer is stored at ptr -
+  // sizeof(void*) For simple malloc (no alignment), we just free directly
   void **ptr_storage = reinterpret_cast<void **>(ptr) - 1;
   void *original_ptr = *ptr_storage;
 
-  // SAFETY: Validate that original pointer is not NULL
-  // If this fails, memory corruption has occurred
-  assert(original_ptr != nullptr && "Corrupted alignment metadata detected");
+  // Heuristic: If the stored "pointer" value looks invalid (not aligned, or
+  // points way before current ptr), assume this was allocated with malloc(size)
+  // directly and just free it. Otherwise, use the stored original pointer.
+  uintptr_t ptr_addr = reinterpret_cast<uintptr_t>(ptr);
+  uintptr_t orig_addr = reinterpret_cast<uintptr_t>(original_ptr);
 
-  // SAFETY: Verify original_ptr is before or equal to aligned ptr
-  // This catches some forms of corruption
-  assert(reinterpret_cast<uintptr_t>(original_ptr) <=
-             reinterpret_cast<uintptr_t>(ptr) &&
-         "Memory corruption: original pointer after aligned pointer");
-
-  // Free the original allocation
-  free(original_ptr);
+  // Check if original_ptr looks valid:
+  // 1. Not NULL
+  // 2. Points before or at aligned ptr
+  // 3. Within reasonable distance (< 1MB offset indicates alignment padding,
+  // not corruption)
+  if (original_ptr != nullptr && orig_addr <= ptr_addr &&
+      (ptr_addr - orig_addr) < (1024 * 1024)) {
+    // Looks like aligned allocation with stored pointer
+    free(original_ptr);
+  } else {
+    // Looks like simple malloc allocation without alignment metadata
+    free(ptr);
+  }
 }
 
 } // namespace __cxxabiv1

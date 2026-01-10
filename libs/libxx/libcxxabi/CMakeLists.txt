@@ -141,6 +141,8 @@ if(CONFIG_LIBCXXABI)
   # error: '_URC_FATAL_PHASE1_ERROR' was not declared in this scope 594 |
   # results.reason = _URC_FATAL_PHASE1_ERROR;
   if(CONFIG_ARCH_ARM)
+    # Enable bare-metal mode for correct TARGET2 relocation handling
+    target_compile_definitions(libcxxabi PRIVATE LIBCXXABI_BAREMETAL)
     target_compile_definitions(libcxxabi
                                PRIVATE _URC_FATAL_PHASE2_ERROR=_URC_FAILURE)
     target_compile_definitions(libcxxabi
