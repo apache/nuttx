@@ -56,8 +56,9 @@
 
 static bool syslog_safe_to_block(void)
 {
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   FAR const struct tcb_s *rtcb;
-
+#endif
   /* It's not safe to block in interrupts or when executing the idle loop */
 
   if (up_interrupt_context() || sched_idletask())
@@ -67,11 +68,13 @@ static bool syslog_safe_to_block(void)
 
   /* It's not safe to block if a signal is being delivered */
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   rtcb = nxsched_self();
   if (rtcb->sigdeliver != NULL)
     {
       return false;
     }
+#endif
 
   return true;
 }

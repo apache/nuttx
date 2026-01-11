@@ -1547,6 +1547,39 @@ endmenu # RTOS hooks
 
 menu "Signal Configuration"
 
+choice
+	prompt "Signal support level"
+	default ENABLE_ALL_SIGNALS if !DEFAULT_SMALL
+	default ENABLE_PARTIAL_SIGNALS if DEFAULT_SMALL
+
+config ENABLE_ALL_SIGNALS
+	bool "Enable full signal support"
+	---help---
+		Enable full POSIX signal support, including signal handling,
+		thread cancellation, timers, and process-related notifications.
+
+		This option provides the most complete signal functionality,
+		but increases code size and resource usage.
+
+		Typical use cases:
+		  - Applications relying on POSIX signals or timers
+		  - Systems where memory and CPU resources are sufficient
+
+config ENABLE_PARTIAL_SIGNALS
+	bool "Enable partial signal support"
+	---help---
+		Disable process-related signal functionality while keeping
+		basic signal handling support.
+
+		This option provides a balance between reduced resource usage
+		and limited signal functionality.
+
+		Typical use cases:
+		  - Applications using basic signals without fork/exec
+		  - Resource-constrained real-time systems
+
+endchoice
+
 config SIG_PREALLOC_ACTIONS
 	int "Number of pre-allocated sigactions"
 	default 4
