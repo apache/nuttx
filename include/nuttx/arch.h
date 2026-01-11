@@ -2461,33 +2461,7 @@ void up_ndelay(unsigned long nanoseconds);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SCHED_TICKLESS
 void nxsched_process_timer(void);
-#endif
-
-/****************************************************************************
- * Name:  nxsched_timer_expiration
- *
- * Description:
- *   If CONFIG_SCHED_TICKLESS is defined, then this function is provided by
- *   the RTOS base code and called from platform-specific code when the
- *   interval timer used to implement the tick-less OS expires.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- * Assumptions/Limitations:
- *   Base code implementation assumes that this function is called from
- *   interrupt handling logic with interrupts disabled.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SCHED_TICKLESS)
-void nxsched_timer_expiration(void);
-#endif
 
 /****************************************************************************
  * Name:  nxsched_get_next_expired

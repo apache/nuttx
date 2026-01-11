@@ -119,7 +119,7 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
                              FAR void *arg)
 {
 #ifdef CONFIG_SCHED_TICKLESS
-  nxsched_timer_expiration();
+  nxsched_process_timer();
 #else
   clock_t now;
 
