@@ -120,7 +120,9 @@ typedef struct sigq_s sigq_t;
  * structures buffers structures.
  */
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
 extern  sigactq_t  g_sigactions[CONFIG_SIG_PREALLOC_ACTIONS];
+#endif
 
 /* The g_sigfreeaction data structure is a list of available signal action
  * structures.
@@ -164,7 +166,9 @@ struct task_group_s;
 
 /* sig_initializee.c */
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
 void               nxsig_initialize(void);
+#endif
 
 /* sig_action.c */
 
@@ -190,8 +194,10 @@ int                nxsig_dispatch(pid_t pid, FAR siginfo_t *info,
 
 /* sig_cleanup.c */
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
 void               nxsig_cleanup(FAR struct tcb_s *stcb);
 void               nxsig_release(FAR struct task_group_s *group);
+#endif
 
 /* sig_timedwait.c */
 
