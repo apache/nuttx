@@ -43,12 +43,12 @@ if(CONFIG_LIBCXXABI)
           ""
       PATCH_COMMAND
         patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxxabi <
-        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxxabi-Fix-build-warnings-generated-by-CMake-comp.patch &&
-        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxxabi <
+        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxxabi-Fix-build-warnings-generated-by-CMake-comp.patch
+        && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxxabi <
         ${CMAKE_CURRENT_LIST_DIR}/0002-libcxxabi-fix-compilation-errors.patch &&
         patch -p0 -d ${CMAKE_CURRENT_LIST_DIR}/libcxxabi <
-        ${CMAKE_CURRENT_LIST_DIR}/0003-libcxxabi-fix-exception-handler-init_21.1.8.patch &&
-        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxxabi <
+        ${CMAKE_CURRENT_LIST_DIR}/0003-libcxxabi-fix-exception-handler-init_21.1.8.patch
+        && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxxabi <
         ${CMAKE_CURRENT_LIST_DIR}/0004-libcxxabi-disable-threading-in-cxa-guard_21.1.8.patch
       DOWNLOAD_NO_PROGRESS true
       TIMEOUT 30)
@@ -82,8 +82,8 @@ if(CONFIG_LIBCXXABI)
     cxa_handlers.cpp
     cxa_vector.cpp
     cxa_virtual.cpp)
-  # Excluded: cxa_exception_storage.cpp (uses thread-local storage __aeabi_read_tp)
-  # Excluded threading-dependent files: cxa_thread_atexit.cpp
+  # Excluded: cxa_exception_storage.cpp (uses thread-local storage
+  # __aeabi_read_tp) Excluded threading-dependent files: cxa_thread_atexit.cpp
   add_compile_definitions(_LIBCPP_BUILDING_LIBRARY)
   if(CONFIG_LIBSUPCXX_TOOLCHAIN)
     add_compile_definitions(__GLIBCXX__)
@@ -105,8 +105,9 @@ if(CONFIG_LIBCXXABI)
        ${CMAKE_CURRENT_LIST_DIR}/src/fallback_malloc_stub.cpp)
 
   # Exclude threading-dependent files when _LIBCPP_HAS_NO_THREADS is defined
-  # These files use __libcpp_mutex_t, __libcpp_condvar_t, __libcpp_tls_key which are not available without threading
-  # list(APPEND SRCS cxa_guard.cpp cxa_thread_atexit.cpp)
+  # These files use __libcpp_mutex_t, __libcpp_condvar_t, __libcpp_tls_key which
+  # are not available without threading list(APPEND SRCS cxa_guard.cpp
+  # cxa_thread_atexit.cpp)
 
   if(CONFIG_CXX_EXCEPTION)
     list(APPEND SRCS cxa_exception.cpp cxa_personality.cpp)
@@ -124,13 +125,15 @@ if(CONFIG_LIBCXXABI)
   # RTTI is required for building the libcxxabi library
   target_compile_options(libcxxabi PRIVATE -frtti)
 
-  # Fix ARM unwinder enum type conversion warnings without disabling all type safety
+  # Fix ARM unwinder enum type conversion warnings without disabling all type
+  # safety
   if(CONFIG_ARCH_ARM)
-    target_compile_options(libcxxabi PRIVATE -Wno-error=conversion -Wno-error=enum-conversion)
+    target_compile_options(libcxxabi PRIVATE -Wno-error=conversion
+                                             -Wno-error=enum-conversion)
   endif()
 
-  # Disable threading support to match libcxx configuration
-  # Note: _LIBCPP_HAS_NO_THREADS is already defined in __config_site
+  # Disable threading support to match libcxx configuration Note:
+  # _LIBCPP_HAS_NO_THREADS is already defined in __config_site
   target_compile_definitions(libcxxabi PRIVATE _LIBCXXABI_HAS_NO_THREADS)
 
   if(CONFIG_SIM_UBSAN OR CONFIG_MM_UBSAN)

@@ -401,7 +401,7 @@ SECTIONS
     *(.fini)
     *(.gnu.version)
 
-    . += 16;
+    . = ALIGN(4);
 
     _text_end = ABSOLUTE(.);
     _instruction_reserved_end = ABSOLUTE(.);  /* This is a symbol marking the flash.text end, this can be used for mmu driver to maintain virtual address */

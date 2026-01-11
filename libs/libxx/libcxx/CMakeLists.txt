@@ -44,22 +44,22 @@ if(CONFIG_LIBCXX)
           ""
       PATCH_COMMAND
         patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0001_fix_stdatomic_h_miss_typedef_21.1.8.patch &&
-        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/mbstate_t_21.1.8.patch &&
-        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0001_fix_stdatomic_h_miss_typedef_21.1.8.patch
+        && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/mbstate_t_21.1.8.patch && patch -p1 -d
+        ${CMAKE_CURRENT_LIST_DIR}/libcxx <
         ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-remove-mach-time-h_21.1.8.patch &&
         patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-fix-exception-no-rtti_21.1.8.patch &&
-        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0001-Fix-build-error-about-__GLIBC___21.1.8.patch &&
-        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-fix-ostream-no-exceptions_21.1.8.patch &&
-        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0009-libcxx-add-string-template-instantiations_21.1.8.patch &&
-        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0010-libcxx-fix-locale-call-once-no-threads_21.1.8.patch &&
-        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-fix-exception-no-rtti_21.1.8.patch
+        && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0001-Fix-build-error-about-__GLIBC___21.1.8.patch
+        && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-fix-ostream-no-exceptions_21.1.8.patch
+        && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0009-libcxx-add-string-template-instantiations_21.1.8.patch
+        && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0010-libcxx-fix-locale-call-once-no-threads_21.1.8.patch
+        && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
         ${CMAKE_CURRENT_LIST_DIR}/0011-libcxx-fix-deprecation-warnings-redefinition_21.1.8.patch
       DOWNLOAD_NO_PROGRESS true
       TIMEOUT 30)
@@ -78,12 +78,14 @@ if(CONFIG_LIBCXX)
   # Copy config files to the libcxx source include directory before symlinking
   # Remove existing files first to allow reconfiguration
   file(REMOVE ${CMAKE_CURRENT_LIST_DIR}/libcxx/include/__config_site)
-  configure_file(${CMAKE_CURRENT_LIST_DIR}/../__config_site
-                 ${CMAKE_CURRENT_LIST_DIR}/libcxx/include/__config_site COPYONLY)
+  configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/../__config_site
+    ${CMAKE_CURRENT_LIST_DIR}/libcxx/include/__config_site COPYONLY)
 
   file(REMOVE ${CMAKE_CURRENT_LIST_DIR}/libcxx/include/__assertion_handler)
-  configure_file(${CMAKE_CURRENT_LIST_DIR}/__assertion_handler
-                 ${CMAKE_CURRENT_LIST_DIR}/libcxx/include/__assertion_handler COPYONLY)
+  configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/__assertion_handler
+    ${CMAKE_CURRENT_LIST_DIR}/libcxx/include/__assertion_handler COPYONLY)
 
   set_property(
     TARGET nuttx
