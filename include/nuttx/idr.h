@@ -42,13 +42,13 @@ struct idr_s;
  * Public Function Prototypes
  ****************************************************************************/
 
-FAR void *idr_find(FAR struct idr_s *idr, unsigned int id);
-FAR void *idr_get_next(FAR struct idr_s *idr, FAR int *id);
-FAR struct idr_s *idr_init_base(int base);
+FAR void *idr_find(FAR struct idr_s *idr, unsigned long id);
+FAR void *idr_get_next(FAR struct idr_s *idr, FAR unsigned long *id);
+FAR struct idr_s *idr_init_base(unsigned long base);
 void idr_destroy(FAR struct idr_s *idr);
-int idr_alloc_u32(FAR struct idr_s *idr, FAR void *ptr, FAR uint32_t *result,
-                  uint32_t max);
-int idr_alloc(FAR struct idr_s *idr, FAR void *ptr, int start, int end);
-FAR void *idr_remove(FAR struct idr_s *idr, unsigned int id);
+int idr_alloc(FAR struct idr_s *idr, FAR void *ptr,
+              unsigned long start,
+              unsigned long end, unsigned long *id);
+FAR void *idr_remove(FAR struct idr_s *idr, unsigned long id);
 
 #endif

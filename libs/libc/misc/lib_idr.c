@@ -37,15 +37,15 @@ RB_HEAD(idr_tree_s, idr_node_s);
 struct idr_node_s
 {
   RB_ENTRY(idr_node_s) link;
-  unsigned int id;
+  unsigned long id;
   FAR void *data;
 };
 
 struct idr_s
 {
   mutex_t lock;
-  unsigned int lastid;
-  unsigned int base;
+  unsigned long lastid;
+  unsigned long base;
   struct idr_tree_s alloced;
   struct idr_tree_s removed;
 };
@@ -63,14 +63,24 @@ static int idr_compare(FAR struct idr_node_s *node,
 {
   /* When node < root, it should be placed on the left side of the tree */
 
-  return node->id - root->id;
+  if (node->id == root->id)
+    {
+      return 0;
+    }
+  else if(node->id < root->id)
+    {
+      return -1;
+    }
+
+  return 1;
 }
 
 /****************************************************************************
  * Name: idr_create_node
  ****************************************************************************/
 
-FAR static struct idr_node_s *idr_create_node(FAR void *ptr, unsigned int id)
+FAR static
+struct idr_node_s *idr_create_node(FAR void *ptr, unsigned long id)
 {
   FAR struct idr_node_s *node;
 
@@ -99,7 +109,7 @@ RB_GENERATE_STATIC(idr_tree_s, idr_node_s, link, idr_compare)
  * Name: idr_find
  ****************************************************************************/
 
-FAR void *idr_find(FAR struct idr_s *idr, unsigned int id)
+FAR void *idr_find(FAR struct idr_s *idr, unsigned long id)
 {
   FAR struct idr_node_s *node;
   struct idr_node_s search;
@@ -121,7 +131,7 @@ FAR void *idr_find(FAR struct idr_s *idr, unsigned int id)
  * Name: idr_get_next
  ****************************************************************************/
 
-FAR void *idr_get_next(FAR struct idr_s *idr, FAR int *id)
+FAR void *idr_get_next(FAR struct idr_s *idr, FAR unsigned long *id)
 {
   FAR struct idr_node_s *node;
   struct idr_node_s search;
@@ -146,7 +156,7 @@ FAR void *idr_get_next(FAR struct idr_s *idr, FAR int *id)
  * Name: idr_remove
  ****************************************************************************/
 
-FAR void *idr_remove(FAR struct idr_s *idr, unsigned int id)
+FAR void *idr_remove(FAR struct idr_s *idr, unsigned long id)
 {
   FAR struct idr_node_s *node;
   struct idr_node_s search;
@@ -178,16 +188,26 @@ FAR void *idr_remove(FAR struct idr_s *idr, unsigned int id)
 }
 
 /****************************************************************************
- * Name: idr_alloc_u32
+ * Name: idr_alloc
  ****************************************************************************/
 
-int idr_alloc_u32(FAR struct idr_s *idr, FAR void *ptr, FAR uint32_t *result,
-                  uint32_t max)
+int idr_alloc(FAR struct idr_s *idr, FAR void *ptr,
+              unsigned long start,
+              unsigned long end, unsigned long *result)
 {
   FAR struct idr_node_s *node;
   FAR struct idr_node_s *temp;
   struct idr_node_s search;
+  unsigned long max;
 
+  *result = start;
+
+  if (end < start)
+    {
+      return -EINVAL;
+    }
+
+  max = end > 0 ? end - 1 : ULONG_MAX;
   nxmutex_lock(&idr->lock);
 
   /* Check ID Value */
@@ -272,33 +292,10 @@ out:
 }
 
 /****************************************************************************
- * Name: idr_alloc
- ****************************************************************************/
-
-int idr_alloc(FAR struct idr_s *idr, FAR void *ptr, int start, int end)
-{
-  uint32_t id = start;
-  int ret;
-
-  if (start < 0)
-    {
-      return -EINVAL;
-    }
-
-  ret = idr_alloc_u32(idr, ptr, &id, end > 0 ? end - 1 : INT32_MAX);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  return id;
-}
-
-/****************************************************************************
  * Name: idr_init_base
  ****************************************************************************/
 
-FAR struct idr_s *idr_init_base(int base)
+FAR struct idr_s *idr_init_base(unsigned long base)
 {
   FAR struct idr_s *idr;
 

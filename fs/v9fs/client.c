@@ -558,6 +558,7 @@ static int v9fs_fid_create(FAR struct v9fs_client_s *client,
                            FAR const char *relpath)
 {
   FAR struct v9fs_fid_s *fid;
+  unsigned long id;
   size_t len;
   int ret;
 
@@ -570,12 +571,12 @@ static int v9fs_fid_create(FAR struct v9fs_client_s *client,
 
   fid->refcount = 1;
   nxmutex_lock(&client->lock);
-  ret = idr_alloc(client->fids, fid, 0, 0);
+  ret = idr_alloc(client->fids, fid, 0, INT_MAX, &id);
   nxmutex_unlock(&client->lock);
   if (ret >= 0)
     {
       memcpy(fid->relpath, relpath, len + 1);
-      return ret;
+      return (int)id;
     }
 
   /* Failed to initialize fid */

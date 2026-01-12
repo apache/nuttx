@@ -87,9 +87,10 @@ static struct optee_supplicant g_optee_supp;
  ****************************************************************************/
 
 static FAR struct optee_supplicant_req *pop_entry(uint32_t num_params,
-                                                  FAR int *id)
+                                                  FAR unsigned long *id)
 {
   FAR struct optee_supplicant_req *req;
+  int ret;
 
   if (g_optee_supp.req_id != -1)
     {
@@ -112,8 +113,8 @@ static FAR struct optee_supplicant_req *pop_entry(uint32_t num_params,
       return NULL;
     }
 
-  *id = idr_alloc(g_optee_supp.idr, req, 0, INT32_MAX);
-  if (*id < 0)
+  ret = idr_alloc(g_optee_supp.idr, req, 0, 0, id);
+  if (ret < 0)
     {
       return NULL;
     }
@@ -261,7 +262,7 @@ int optee_supplicant_recv(FAR uint32_t *func, FAR uint32_t *num_params,
                           FAR struct tee_ioctl_param *params)
 {
   FAR struct optee_supplicant_req *req = NULL;
-  int id;
+  unsigned long id;
   int n;
   uint8_t num_meta = (params->attr == TEE_IOCTL_PARAM_ATTR_META);
 
