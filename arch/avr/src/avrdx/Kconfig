@@ -59,15 +59,15 @@ config AVR_HAVE_USART5_ALT1
 		Chip has alternate pin position for USART 5
 
 # Available I/O ports (only those not common for all devices)
-config AVR_HAS_PORTB
+config AVR_HAVE_PORTB
 	bool
 	default n
 
-config AVR_HAS_PORTE
+config AVR_HAVE_PORTE
 	bool
 	default n
 
-config AVR_HAS_PORTG
+config AVR_HAVE_PORTG
 	bool
 	default n
 
@@ -110,9 +110,9 @@ config ARCH_CHIP_AVR128DA64
 	select AVR_HAVE_USART4_ALT1
 	select AVR_HAVE_USART_5
 	select AVR_HAVE_USART5_ALT1
-	select AVR_HAS_PORTB
-	select AVR_HAS_PORTE
-	select AVR_HAS_PORTG
+	select AVR_HAVE_PORTB
+	select AVR_HAVE_PORTE
+	select AVR_HAVE_PORTG
 	select AVR_HAVE_TWI0_ALT1
 	select AVR_HAVE_TWI1
 	select AVR_HAVE_TWI1_ALT1
@@ -130,9 +130,9 @@ config ARCH_CHIP_AVR128DB64
 	select AVR_HAVE_USART4_ALT1
 	select AVR_HAVE_USART_5
 	select AVR_HAVE_USART5_ALT1
-	select AVR_HAS_PORTB
-	select AVR_HAS_PORTE
-	select AVR_HAS_PORTG
+	select AVR_HAVE_PORTB
+	select AVR_HAVE_PORTE
+	select AVR_HAVE_PORTG
 	select AVR_HAVE_TWI0_ALT1
 	select AVR_HAVE_TWI1
 	select AVR_HAVE_TWI1_ALT1
