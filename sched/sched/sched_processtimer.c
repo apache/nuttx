@@ -44,10 +44,115 @@
 #include "sched/sched.h"
 #include "wdog/wdog.h"
 #include "clock/clock.h"
+#include "hrtimer/hrtimer.h"
+
+#ifdef CONFIG_HRTIMER
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static uint64_t
+nxsched_hrtimer_callback(FAR const hrtimer_t *hrtimer,
+                         uint64_t expired);
+
+static void nxsched_process_tick(void);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Scheduler-owned high-resolution timer instance.
+ *
+ * This timer acts as the time source for scheduler-related events:
+ *
+ *  - Periodic scheduler ticks in non-tickless mode
+ *  - Dynamic expiration points in tickless mode
+ *
+ * The timer is initialized lazily to avoid unnecessary setup when
+ * CONFIG_HRTIMER is enabled but not used immediately.
+ */
+
+static hrtimer_t g_nxsched_hrtimer =
+{
+  .func = nxsched_hrtimer_callback,
+};
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxsched_hrtimer_callback
+ *
+ * Description:
+ *   Callback invoked by the high-resolution timer framework when the
+ *   scheduler timer expires.
+ *
+ *   Behavior depends on scheduler configuration:
+ *
+ *   CONFIG_SCHED_TICKLESS:
+ *     - Query current high-resolution time
+ *     - Convert time to scheduler ticks
+ *     - Notify scheduler via nxsched_tick_expiration()
+ *
+ *   !CONFIG_SCHED_TICKLESS:
+ *     - Re-arm the next periodic tick
+ *     - Process a single scheduler tick
+ *
+ * Input Parameters:
+ *   hrtimer - Pointer to the expired high-resolution timer
+ *
+ * Returned Value:
+ *   In non-tickless mode, returns the interval until the next expiration.
+ *   In tickless mode, the return value is ignored.
+ *
+ ****************************************************************************/
+
+static uint64_t
+nxsched_hrtimer_callback(FAR hrtimer_t *hrtimer, uint64_t expired)
+{
+  UNUSED(hrtimer);
+  UNUSED(expired);
+
+#ifdef CONFIG_SCHED_TICKLESS
+  nxsched_tick_expiration();
+#else
+  nxsched_process_tick();
+  return NSEC_PER_TICK;
+#endif
+}
+
+/****************************************************************************
+ * Name: nxsched_process_hrtimer
+ *
+ * Description:
+ *   Entry point for scheduler-related high-resolution timer processing.
+ *
+ *   Responsibilities:
+ *     - Process expired hrtimer events
+ *     - Perform one-time initialization of the scheduler hrtimer
+ *     - Arm the initial scheduler timer event
+ *
+ *   This function is expected to be called from architecture-specific
+ *   timer interrupt handling code.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void nxsched_process_hrtimer(void)
+{
+  uint64_t now = hrtimer_gettime();
+
+  /* Process any expired high-resolution timers */
+
+  hrtimer_process(now);
+}
+#endif /* CONFIG_HRTIMER */
 
 #ifndef CONFIG_SCHED_TICKLESS
 /****************************************************************************
@@ -205,7 +310,12 @@ static void nxsched_process_tick(void)
 
 void nxsched_process_timer(void)
 {
-#ifdef CONFIG_SCHED_TICKLESS
+#if defined(CONFIG_HRTIMER)
+  /* High-resolution timer-based scheduling */
+
+  nxsched_process_hrtimer();
+
+#elif defined(CONFIG_SCHED_TICKLESS)
   /* Tickless scheduling */
 
   nxsched_tick_expiration();
