@@ -522,14 +522,6 @@ add_definitions(-D__NuttX__)
 
 add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-D__ASSEMBLY__>)
 
-if(CONFIG_LIBCXX)
-  if(CONFIG_ARCH_ARM)
-    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-mlong-calls>)
-  elseif(CONFIG_ARCH_RISCV)
-    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-mcmodel=medany>)
-  endif()
-endif()
-
 # Setup main nuttx target ####################################################
 
 add_executable(nuttx)
