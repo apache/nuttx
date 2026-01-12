@@ -114,6 +114,8 @@ static inline_function void wd_expiration(clock_t ticks)
 
   flags = enter_critical_section();
 
+  wd_update_expire(ticks);
+
   wd_set_nested(true);
 
   /* Process the watchdog at the head of the list as well as any
@@ -154,7 +156,7 @@ static inline_function void wd_expiration(clock_t ticks)
 
   if (next_ticks != ticks)
     {
-      wd_timer_start(wd_next_expire());
+      wd_timer_start(next_ticks);
     }
 
   leave_critical_section(flags);

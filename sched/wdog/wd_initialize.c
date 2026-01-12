@@ -43,6 +43,7 @@ struct list_node g_wdactivelist = LIST_INITIAL_VALUE(g_wdactivelist);
 
 #ifdef CONFIG_SCHED_TICKLESS
 bool g_wdtimernested;
+clock_t  g_wdexpired;
 #endif
 
 /****************************************************************************
