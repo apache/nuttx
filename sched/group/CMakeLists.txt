@@ -27,8 +27,11 @@ set(SRCS
     group_setupidlefiles.c
     group_setuptaskfiles.c
     group_foreachchild.c
-    group_killchildren.c
-    group_signal.c)
+    group_killchildren.c)
+
+if(NOT CONFIG_DISABLE_ALL_SIGNALS)
+  list(APPEND SRCS group_signal.c)
+endif()
 
 if(CONFIG_SCHED_HAVE_PARENT)
   if(CONFIG_SCHED_CHILD_STATUS)

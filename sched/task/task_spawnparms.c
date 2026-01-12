@@ -157,6 +157,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
 
   /* Firstly, set the signal mask if requested to do so */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   if ((attr->flags & POSIX_SPAWN_SETSIGMASK) != 0)
     {
       FAR struct tcb_s *tcb = nxsched_get_tcb(pid);
@@ -165,6 +166,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
           tcb->sigprocmask = attr->sigmask;
         }
     }
+#endif
 
   /* If we are only setting the priority, then call sched_setparm()
    * to set the priority of the of the new task.
