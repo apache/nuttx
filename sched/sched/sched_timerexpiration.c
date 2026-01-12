@@ -92,7 +92,7 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval);
 static clock_t g_timer_tick;
 
 /* This is the duration of the currently active timer or, when
- * nxsched_timer_expiration() is called, the duration of interval timer
+ * nxsched_tick_expiration() is called, the duration of interval timer
  * that just expired.  The value zero means that no timer was active.
  */
 
@@ -373,7 +373,7 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsched_timer_expiration
+ * Name: nxsched_tick_expiration
  *
  * Description:
  *   if CONFIG_SCHED_TICKLESS is defined, then this function is provided by
@@ -388,7 +388,7 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
  *
  ****************************************************************************/
 
-void nxsched_timer_expiration(void)
+void nxsched_tick_expiration(void)
 {
   irqstate_t flags;
   clock_t ticks;

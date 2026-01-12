@@ -208,7 +208,7 @@ void nxsched_process_timer(void)
 #ifdef CONFIG_SCHED_TICKLESS
   /* Tickless scheduling */
 
-  nxsched_timer_expiration();
+  nxsched_tick_expiration();
 
 #else
   /* Periodic tick-based scheduling */

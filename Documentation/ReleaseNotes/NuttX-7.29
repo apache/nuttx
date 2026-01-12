@@ -25,7 +25,7 @@ still needed). From Gregory Nutt.
 - Rename all internal OS functions from task_* to nxtask_* to indicate
 that they are NuttX internal functions. From Gregory Nutt.
 - Rename sched_process_timer to nxsched_process_timer. Rename
-sched_timer_expiration to nxsched_timer_expiration. Rename
+sched_timer_expiration to nxsched_tick_expiration. Rename
 sched_alarm_expiration to nxsched_alarm_expiration. Those are the
 appropriate names for an internal sched/ function (still many named
 incorrectly). From Gregory Nutt.

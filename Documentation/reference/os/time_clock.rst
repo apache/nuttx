@@ -372,7 +372,7 @@ In addition to these imported interfaces, the RTOS will export the
 following interfaces for use by the platform-specific interval
 timer implementation:
 
-- ``nxsched_timer_expiration()``: called by the platform-specific logic when the interval time expires.
+- ``nxsched_tick_expiration()``: called by the platform-specific logic when the interval time expires.
 
 .. c:function:: void archname_timer_initialize(void)
 
@@ -410,7 +410,7 @@ timer implementation:
 
   Cancel the alarm and return the time of cancellation of the alarm.
   These two steps need to be as nearly atomic as possible.
-  ``nxsched_timer_expiration()`` will not be called unless the alarm
+  ``nxsched_tick_expiration()`` will not be called unless the alarm
   is restarted with ``up_alarm_start()``. If, as a race condition,
   the alarm has already expired when this function is called, then
   time returned is the current time.
@@ -427,13 +427,13 @@ timer implementation:
 
 .. c:function:: int up_alarm_start(FAR const struct timespec *ts)
 
-  Start the alarm. ``nxsched_timer_expiration()`` will be called
+  Start the alarm. ``nxsched_tick_expiration()`` will be called
   when the alarm occurs (unless ``up_alarm_cancel`` is called to
   stop it).
 
   :param ts: The time in the future at the alarm is expected to
     occur. When the alarm occurs the timer logic will call
-    ``nxsched_timer_expiration()``.
+    ``nxsched_tick_expiration()``.
 
   :return: Zero (OK) on success; a negated errno value on failure.
 
@@ -445,11 +445,11 @@ timer implementation:
 
 Cancel the interval timer and return the time remaining on the
 timer. These two steps need to be as nearly atomic as possible.
-``nxsched_timer_expiration()`` will not be called unless the timer
+``nxsched_tick_expiration()`` will not be called unless the timer
 is restarted with ``up_timer_start()``. If, as a race condition,
 the timer has already expired when this function is called, then
 that pending interrupt must be cleared so that
-``nxsched_timer_expiration()`` is not called spuriously and the
+``nxsched_tick_expiration()`` is not called spuriously and the
 remaining time of zero should be returned.
 
 :param ts: Location to return the remaining time. Zero should be
@@ -463,12 +463,12 @@ disabled internally to assure non-reentrancy.
 
 .. c:function:: int up_timer_start(FAR const struct timespec *ts)
 
-Start the interval timer. ``nxsched_timer_expiration()`` will be
+Start the interval timer. ``nxsched_tick_expiration()`` will be
 called at the completion of the timeout (unless
 ``up_timer_cancel()`` is called to stop the timing).
 
 :param ts: Provides the time interval until
-  ``nxsched_timer_expiration()`` is called.
+  ``nxsched_tick_expiration()`` is called.
 
 :return: Zero (OK) on success; a negated errno value on failure.
 
