@@ -1082,8 +1082,49 @@ found:
         }
       else
         {
-          conn->tcpstateflags = TCP_CLOSED;
           nwarn("WARNING: RESET TCP state: TCP_CLOSED\n");
+#ifdef CONFIG_NET_TCPBACKLOG
+          /* Race condition:
+           * case1) blparent is in close progress
+           * case2) conn is in accept progress
+           */
+
+          tcp_conn_list_lock();
+          if (conn->blparent != NULL)
+            {
+              bool orphaned = false;
+              /* If this connection is, itself, backlogged,
+               * then remove it from the parent connection's
+               * backlog list.
+               */
+
+              conn_lock(&conn->blparent->sconn);
+
+              /* Double check the connection is in accept progress */
+
+              if (conn->blparent != NULL)
+                {
+                  tcp_backlogdelete(conn->blparent, conn);
+                  orphaned = true;
+                }
+
+              conn_unlock(&conn->blparent->sconn);
+
+              if (orphaned)
+                {
+                  tcp_conn_list_unlock();
+                  DEBUGASSERT(conn->crefs == 1);
+                  conn->tcpstateflags = TCP_CLOSED;
+                  conn->crefs = 0;
+                  tcp_free(conn);
+                  goto drop;
+                }
+            }
+
+          tcp_conn_list_unlock();
+#endif
+
+          conn->tcpstateflags = TCP_CLOSED;
 
           /* Notify this connection of the reset event */
 

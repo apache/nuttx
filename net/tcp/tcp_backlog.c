@@ -258,6 +258,7 @@ int tcp_backlogadd(FAR struct tcp_conn_s *conn,
            */
 
           blc->bc_conn = blconn;
+          blconn->blparent = conn;
           sq_addlast(&blc->bc_node, &bls->bl_pending);
           ret = OK;
         }
@@ -341,6 +342,7 @@ FAR struct tcp_conn_s *tcp_backlogremove(FAR struct tcp_conn_s *conn)
 
           blconn       = blc->bc_conn;
           blc->bc_conn = NULL;
+          blconn->blparent = NULL;
           sq_addlast(&blc->bc_node, &bls->bl_free);
         }
     }

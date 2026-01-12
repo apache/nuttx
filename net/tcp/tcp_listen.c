@@ -54,6 +54,7 @@
 #include <nuttx/net/net.h>
 
 #include "devif/devif.h"
+#include "utils/utils.h"
 #include "inet/inet.h"
 #include "tcp/tcp.h"
 
@@ -271,7 +272,9 @@ int tcp_accept_connection(FAR struct net_driver_s *dev,
            * available.
            */
 
+          conn_lock(&listener->sconn);
           ret = tcp_backlogadd(listener, conn);
+          conn_unlock(&listener->sconn);
           if (ret == OK)
             {
               tcp_callback(dev, listener, TCP_BACKLOG);
