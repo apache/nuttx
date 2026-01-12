@@ -54,7 +54,7 @@ RUN curl -s -L https://bitbucket.org/nuttx/tools/get/9ad3e1ee75c7.tar.gz \
   | tar -C nuttx-tools --strip-components=1 -xz
 
 RUN mkdir -p /tools/bloaty \
-  && git clone --depth 1 --branch v1.1 https://github.com/google/bloaty bloaty-src \
+  && git clone --depth 1 https://github.com/google/bloaty bloaty-src \
   && cd bloaty-src \
   && cmake -B build -DCMAKE_INSTALL_PREFIX=/tools/bloaty \
   && cmake --build build \
