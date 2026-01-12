@@ -76,7 +76,7 @@ CPPSRCS += $(wildcard libcxx/libcxx/src/experimental/*.cpp)
 CPPSRCS += $(wildcard libcxx/libcxx/src/filesystem/*.cpp)
 CPPSRCS += $(wildcard libcxx/libcxx/src/ryu/*.cpp)
 
-ifeq ($(CONFIG_CXX_LOCALIZATION),)
+ifeq ($(CONFIG_CXX_NO_LOCALIZATION),y)
   LOCALE_CPPSRCS := libcxx/libcxx/src/ios.cpp
   LOCALE_CPPSRCS += libcxx/libcxx/src/ios.instantiations.cpp
   LOCALE_CPPSRCS += libcxx/libcxx/src/iostream.cpp

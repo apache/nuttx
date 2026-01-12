@@ -98,7 +98,7 @@ if(CONFIG_LIBCXX)
   file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/ryu/*.cpp)
   list(APPEND SRCS ${SRCSTMP})
 
-  if(NOT CONFIG_CXX_LOCALIZATION)
+  if(CONFIG_CXX_NO_LOCALIZATION)
     file(
       GLOB
       SRCSTMP

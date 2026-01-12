@@ -29,7 +29,6 @@ choice
 config LIBCXXTOOLCHAIN
 	bool "Toolchain C++ support"
 	select HAVE_CXXINITIALIZE
-	select LIBC_LOCALE
 	---help---
 		Use Standard C++ library from toolchain.
 
@@ -119,9 +118,21 @@ config CXX_RTTI
 config CXX_WCHAR
 	bool "Enable Wide Character Support"
 
+choice
+	prompt "C++ Locale and Stream select"
+	default CXX_NO_LOCALIZATION
+
+config CXX_NO_LOCALIZATION
+	bool "No Locale and Stream Support"
+
+config CXX_MINI_LOCALIZATION
+	bool "Enable mini Locale and Stream Support"
+
 config CXX_LOCALIZATION
 	bool "Enable Locale and Stream Support"
 	depends on LIBC_LOCALE
+
+endchoice
 
 if UCLIBCXX
 
