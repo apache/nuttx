@@ -86,6 +86,7 @@ ifeq ($(CONFIG_ARCH_ARM),y)
 endif
 
 CXXFLAGS += -DLIBCXXABI_NON_DEMANGLING_TERMINATE
+CXXFLAGS += -DLIBCXXABI_BAREMETAL
 
 DEPPATH += --dep-path libcxxabi/libcxxabi/src
 VPATH += libcxxabi/libcxxabi/src
