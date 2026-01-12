@@ -55,7 +55,9 @@ if(CONFIG_LIBCXX)
         ${CMAKE_CURRENT_LIST_DIR}/0001-Fix-build-error-about-__GLIBC___21.1.8.patch
         && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
         ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-fix-ostream-no-exceptions_21.1.8.patch
-        $<IF:$<OR:$<BOOL:${CONFIG_ARCH_ARM}>,$<BOOL:${CONFIG_ARCH_ARM64}>,$<BOOL:${CONFIG_ARCH_RISCV}>>,&& patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx < ${CMAKE_CURRENT_LIST_DIR}/0009-libcxx-add-string-template-instantiations_21.1.8.patch,>
+        $<IF:$<OR:$<BOOL:${CONFIG_ARCH_ARM}>,$<BOOL:${CONFIG_ARCH_ARM64}>,$<BOOL:${CONFIG_ARCH_RISCV}>>,&&
+        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0009-libcxx-add-string-template-instantiations_21.1.8.patch,>
         && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
         ${CMAKE_CURRENT_LIST_DIR}/0010-libcxx-fix-locale-call-once-no-threads_21.1.8.patch
         && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
