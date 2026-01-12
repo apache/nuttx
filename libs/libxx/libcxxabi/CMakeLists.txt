@@ -77,6 +77,7 @@ if(CONFIG_LIBCXXABI)
     cxa_vector.cpp
     cxa_virtual.cpp)
   add_compile_definitions(_LIBCPP_BUILDING_LIBRARY)
+  add_compile_definitions(LIBCXXABI_BAREMETAL)
 
   # C++ STL files
   list(APPEND SRCS stdlib_exception.cpp stdlib_new_delete.cpp
