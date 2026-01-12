@@ -496,7 +496,7 @@ static inline void lpc43_tl_alarm(uint32_t curr)
   lpc43_tl_init_timer_vars();
   lpc43_tl_set_default_compare(curr);
 
-  nxsched_timer_expiration();
+  nxsched_process_timer();
 }
 
 /* Interrupt handler */

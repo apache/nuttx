@@ -269,7 +269,7 @@ static void avrdx_check_alarm_expired(uint8_t context)
        * context. Remove non-interrupt flags from the context before
        * using it.
        *
-       * Deactivate alarm first. Call to nxsched_timer_expiration()
+       * Deactivate alarm first. Call to nxsched_process_timer()
        * in turns calls up_timer_gettick(), that one calls
        * up_timer_gettime() which calls this method through
        * avrdx_increment_uptime(), causing a recursion loop.
@@ -283,7 +283,7 @@ static void avrdx_check_alarm_expired(uint8_t context)
        */
 
       avrdx_deactivate_alarm();
-      nxsched_timer_expiration();
+      nxsched_process_timer();
     }
   else
     {

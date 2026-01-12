@@ -38,7 +38,7 @@
  * The RTOS will provide the following interfaces for use by the platform-
  * specific interval timer implementation:
  *
- *   void nxsched_timer_expiration(void):  Called by the platform-specific
+ *   void nxsched_process_timer(void):  Called by the platform-specific
  *     logic when the interval timer expires.
  *
  ****************************************************************************/
@@ -272,7 +272,7 @@ static void stm32wb_interval_handler(void)
 
   g_tickless.pending = false;
 
-  nxsched_timer_expiration();
+  nxsched_process_timer();
 }
 
 /****************************************************************************
@@ -612,7 +612,7 @@ void up_timer_getmask(clock_t *mask)
  * Description:
  *   Cancel the interval timer and return the time remaining on the timer.
  *   These two steps need to be as nearly atomic as possible.
- *   nxsched_timer_expiration() will not be called unless the timer is
+ *   nxsched_process_timer() will not be called unless the timer is
  *   restarted with up_timer_start().
  *
  *   If, as a race condition, the timer has already expired when this
@@ -749,14 +749,14 @@ int up_timer_cancel(struct timespec *ts)
  * Name: up_timer_start
  *
  * Description:
- *   Start the interval timer.  nxsched_timer_expiration() will be
+ *   Start the interval timer.  nxsched_process_timer() will be
  *   called at the completion of the timeout (unless up_timer_cancel
  *   is called to stop the timing.
  *
  *   Provided by platform-specific code and called from the RTOS base code.
  *
  * Input Parameters:
- *   ts - Provides the time interval until nxsched_timer_expiration() is
+ *   ts - Provides the time interval until nxsched_process_timer() is
  *        called.
  *
  * Returned Value:

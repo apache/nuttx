@@ -38,7 +38,7 @@
  * The RTOS will provide the following interfaces for use by the platform-
  * specific interval timer implementation:
  *
- *   void nxsched_timer_expiration(void):  Called by the platform-specific
+ *   void nxsched_process_timer(void):  Called by the platform-specific
  *     logic when the interval timer expires.
  *
  * NOTE
@@ -183,7 +183,7 @@ static void imxrt_interval_handler(void)
 
   g_tickless.pending = false;
 
-  nxsched_timer_expiration();
+  nxsched_process_timer();
 }
 
 /****************************************************************************
@@ -477,7 +477,7 @@ int up_timer_gettime(struct timespec *ts)
  * Name: up_alarm_start
  *
  * Description:
- *   Start the alarm.  nxsched_timer_expiration() will be called when the
+ *   Start the alarm.  nxsched_process_timer() will be called when the
  *   alarm occurs (unless up_alaram_cancel is called to stop it).
  *
  *   Provided by platform-specific code and called from the RTOS base code.
@@ -485,7 +485,7 @@ int up_timer_gettime(struct timespec *ts)
  * Input Parameters:
  *   ts - The time in the future at the alarm is expected to occur.  When
  *        the alarm occurs the timer logic will call
- *        nxsched_timer_expiration().
+ *        nxsched_process_timer().
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -553,7 +553,7 @@ int up_alarm_start(const struct timespec *ts)
  * Description:
  *   Cancel the alarm and return the time of cancellation of the alarm.
  *   These two steps need to be as nearly atomic as possible.
- *   nxsched_timer_expiration() will not be called unless the alarm is
+ *   nxsched_process_timer() will not be called unless the alarm is
  *   restarted with up_alarm_start().
  *
  *   If, as a race condition, the alarm has already expired when this
