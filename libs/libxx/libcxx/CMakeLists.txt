@@ -25,6 +25,41 @@ if(CONFIG_LIBCXX)
 
     set(LIBCXX_VERSION ${CONFIG_LIBCXX_VERSION})
 
+    # Build patch command conditionally
+    set(LIBCXX_PATCH_COMMAND
+        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0001_fix_stdatomic_h_miss_typedef_21.1.8.patch
+        && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/mbstate_t_21.1.8.patch && patch -p1 -d
+        ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-remove-mach-time-h_21.1.8.patch
+        && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-fix-exception-no-rtti_21.1.8.patch
+        && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0001-Fix-build-error-about-__GLIBC___21.1.8.patch
+        && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-fix-ostream-no-exceptions_21.1.8.patch
+    )
+
+    # Add architecture-specific patch for ARM, ARM64, and RISC-V
+    if(CONFIG_ARCH_ARM
+       OR CONFIG_ARCH_ARM64
+       OR CONFIG_ARCH_RISCV)
+      set(LIBCXX_PATCH_COMMAND
+          ${LIBCXX_PATCH_COMMAND} && patch -p1 -d
+          ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+          ${CMAKE_CURRENT_LIST_DIR}/0009-libcxx-add-string-template-instantiations_21.1.8.patch
+      )
+    endif()
+
+    set(LIBCXX_PATCH_COMMAND
+        ${LIBCXX_PATCH_COMMAND} && patch -p1 -d
+        ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0010-libcxx-fix-locale-call-once-no-threads_21.1.8.patch
+        && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/0011-libcxx-fix-deprecation-warnings-redefinition_21.1.8.patch
+    )
+
     FetchContent_Declare(
       libcxx
       DOWNLOAD_NAME "libcxx-${LIBCXX_VERSION}.src.tar.xz"
@@ -42,26 +77,7 @@ if(CONFIG_LIBCXX)
           ""
           TEST_COMMAND
           ""
-      PATCH_COMMAND
-        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0001_fix_stdatomic_h_miss_typedef_21.1.8.patch
-        && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/mbstate_t_21.1.8.patch && patch -p1 -d
-        ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-remove-mach-time-h_21.1.8.patch &&
-        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-fix-exception-no-rtti_21.1.8.patch
-        && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0001-Fix-build-error-about-__GLIBC___21.1.8.patch
-        && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-fix-ostream-no-exceptions_21.1.8.patch
-        $<IF:$<OR:$<BOOL:${CONFIG_ARCH_ARM}>,$<BOOL:${CONFIG_ARCH_ARM64}>,$<BOOL:${CONFIG_ARCH_RISCV}>>,&&
-        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0009-libcxx-add-string-template-instantiations_21.1.8.patch,>
-        && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0010-libcxx-fix-locale-call-once-no-threads_21.1.8.patch
-        && patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0011-libcxx-fix-deprecation-warnings-redefinition_21.1.8.patch
+      PATCH_COMMAND ${LIBCXX_PATCH_COMMAND}
       DOWNLOAD_NO_PROGRESS true
       TIMEOUT 30)
 
