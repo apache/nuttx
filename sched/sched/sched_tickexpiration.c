@@ -91,13 +91,6 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval);
 
 static clock_t g_timer_tick;
 
-/* This is the duration of the currently active timer or, when
- * nxsched_process_timer() is called, the duration of interval timer
- * that just expired.  The value zero means that no timer was active.
- */
-
-static atomic_t g_timer_interval;
-
 /* Wdog timer for scheduler event. */
 
 static struct wdog_s g_sched_event;
@@ -105,50 +98,6 @@ static struct wdog_s g_sched_event;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-static inline_function clock_t adjust_next_interval(clock_t interval)
-{
-  clock_t ret = interval;
-
-#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
-  ret = MIN(ret, g_oneshot_maxticks);
-#endif
-
-  /* Normally, timer event cannot triggered on exact time due to the
-   * existence of interrupt latency.
-   * Assuming that the interrupt latency is distributed within
-   * [Best-Case Execution Time, Worst-Case Execution Time],
-   * we can set the timer adjustment value to the BCET to reduce the latency.
-   * After the adjustment, the timer interrupt latency will be
-   * [0, WCET - BCET].
-   * Please use this carefully, if the timer adjustment value is not the
-   * best-case interrupt latency, it will immediately fired another timer
-   * interrupt, which may result in a much larger timer interrupt latency.
-   */
-
-  ret = ret <= (CONFIG_TIMER_ADJUST_USEC / USEC_PER_TICK) ? 0 :
-        ret - (CONFIG_TIMER_ADJUST_USEC / USEC_PER_TICK);
-
-  return ret;
-}
-
-static inline_function clock_t get_time_tick(void)
-{
-#ifdef CONFIG_SYSTEM_TIME64
-  return atomic64_read((FAR atomic64_t *)&g_timer_tick);
-#else
-  return atomic_read((FAR atomic_t *)&g_timer_tick);
-#endif
-}
-
-static inline_function clock_t update_time_tick(clock_t tick)
-{
-#ifdef CONFIG_SYSTEM_TIME64
-  return atomic64_xchg((FAR atomic64_t *)&g_timer_tick, tick);
-#else
-  return atomic_xchg((FAR atomic_t *)&g_timer_tick, tick);
-#endif
-}
 
 #if !defined(CONFIG_CLOCK_TIMEKEEPING) && !defined(CONFIG_ALARM_ARCH) && \
     !defined(CONFIG_TIMER_ARCH)
@@ -174,7 +123,8 @@ static void nxsched_process_event(wdparm_t noswitches)
 
   /* Calculate the elapsed time and update clock tickbase. */
 
-  elapsed = ticks - update_time_tick(ticks);
+  elapsed      = ticks - g_timer_tick;
+  g_timer_tick = ticks;
 
   /* Process the timer ticks and set up the next interval (or not) */
 
@@ -355,7 +305,7 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
 {
   if (interval != CLOCK_MAX)
     {
-      interval = adjust_next_interval(interval);
+      DEBUGASSERT(interval <= UINT32_MAX);
       wd_start_abstick(&g_sched_event, ticks + interval,
                        nxsched_process_event, 0u);
     }
@@ -364,7 +314,6 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
       wd_cancel(&g_sched_event);
     }
 
-  atomic_set(&g_timer_interval, interval);
   return interval;
 }
 
@@ -393,10 +342,13 @@ void nxsched_process_tick(void)
   irqstate_t flags;
   clock_t ticks;
 
-  up_timer_gettick(&ticks);
-
   flags = enter_critical_section();
 
+  /* Do not move the up_timer_gettick out of the critical section,
+   * it will violate the invariant that the g_timer_tick should be monotonic.
+   */
+
+  up_timer_gettick(&ticks);
   wd_timer(ticks);
 
   leave_critical_section(flags);
@@ -460,12 +412,7 @@ void nxsched_reassess_timer(void)
 
 clock_t nxsched_get_next_expired(void)
 {
-  sclock_t ret;
-
-  ret = get_time_tick() + atomic_read(&g_timer_interval) -
-        clock_systime_ticks();
-
-  return ret < 0 ? 0 : ret;
+  return wd_get_next_expire(clock_systime_ticks());
 }
 
 #endif /* CONFIG_SCHED_TICKLESS */
