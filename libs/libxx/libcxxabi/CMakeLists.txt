@@ -80,13 +80,17 @@ if(CONFIG_LIBCXXABI)
 
   # C++ STL files
   list(APPEND SRCS stdlib_exception.cpp stdlib_new_delete.cpp
-       stdlib_stdexcept.cpp stdlib_typeinfo.cpp)
-
+       stdlib_stdexcept.cpp)
   # Internal files
-  list(APPEND SRCS abort_message.cpp fallback_malloc.cpp private_typeinfo.cpp)
+  list(APPEND SRCS abort_message.cpp fallback_malloc.cpp)
 
   if(CONFIG_CXX_EXCEPTION)
-    list(APPEND SRCS cxa_exception.cpp cxa_personality.cpp)
+    list(APPEND SRCS cxa_exception.cpp cxa_exception_storage.cpp
+         cxa_personality.cpp)
+  endif()
+
+  if(CONFIG_CXX_RTTI)
+    list(APPEND SRCS private_typeinfo.cpp stdlib_typeinfo.cpp)
   endif()
 
   if(CONFIG_LIBCXXABI)
@@ -97,9 +101,6 @@ if(CONFIG_LIBCXXABI)
     string(PREPEND src libcxxabi/src/)
     list(APPEND TARGET_SRCS ${src})
   endforeach()
-
-  # RTTI is required for building the libcxxabi library
-  target_compile_options(libcxxabi PRIVATE -frtti)
 
   if(CONFIG_SIM_UBSAN OR CONFIG_MM_UBSAN)
     target_compile_options(libcxxabi PRIVATE -fno-sanitize=vptr)
