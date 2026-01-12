@@ -745,12 +745,15 @@ that returns immediately without waiting for the timer to stop executing.
 
   **POSIX Compatibility:** This is a NON-POSIX interface.
 
-.. c:function:: int hrtimer_start(FAR hrtimer_t *hrtimer, uint64_t ns, \
+.. c:function:: int hrtimer_start(FAR hrtimer_t *hrtimer, \
+                                  hrtimer_entry_t func, \
+                                  uint64_t expired, \
                                   enum hrtimer_mode_e mode)
 
   This function starts a high-resolution timer in absolute or relative mode.
 
   :param hrtimer: Timer instance to cancel
+  :param func: Expiration callback function
   :param ns: Timer expiration in nanoseconds (absolute or relative)
   :param mode: HRTIMER_MODE_ABS or HRTIMER_MODE_REL
 
@@ -758,7 +761,8 @@ that returns immediately without waiting for the timer to stop executing.
 
   **POSIX Compatibility:** This is a NON-POSIX interface.
 
-.. c:type:: uint64_t (*hrtimer_cb)(FAR hrtimer_t *hrtimer, uint64_t expired)
+.. c:type:: uint64_t (*hrtimer_entry_t)(FAR hrtimer_t *hrtimer, \
+                                        uint64_t expired)
 
   **High-resolution Timer Callback**: when a hrtimer expires,
   the callback function with this type is called.
