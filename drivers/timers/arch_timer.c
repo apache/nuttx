@@ -174,7 +174,7 @@ static bool timer_callback(FAR uint32_t *next_interval, FAR void *arg)
   g_timer.timebase     += *next_interval;
   temp_interval         = g_oneshot_maxticks;
   g_timer.next_interval = &temp_interval;
-  nxsched_timer_expiration();
+  nxsched_process_timer();
   g_timer.next_interval = NULL;
 
   TIMER_TICK_GETSTATUS(g_timer.lower, &status);
