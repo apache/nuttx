@@ -1578,6 +1578,21 @@ config ENABLE_PARTIAL_SIGNALS
 		  - Applications using basic signals without fork/exec
 		  - Resource-constrained real-time systems
 
+config DISABLE_ALL_SIGNALS
+	bool "Disable all signal support"
+	select DISABLE_MQUEUE_NOTIFICATION
+	---help---
+		Disable all signal-related functionality, including signal
+		handling, thread cancellation, timers, and process-related
+		notifications.
+
+		This option provides the smallest footprint and maximum
+		resource savings.
+
+		Typical use cases:
+		  - Hard real-time or safety-critical systems
+		  - Applications that do not use POSIX signals or timers
+
 endchoice
 
 config SIG_PREALLOC_ACTIONS

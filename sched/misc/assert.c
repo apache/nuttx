@@ -405,7 +405,9 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 #endif
          " %3d %-8s %-7s %-3c"
          " %-18s"
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
          " " SIGSET_FMT
+#endif
          " %p"
          "   %7zu"
 #ifdef CONFIG_STACK_COLORATION
@@ -427,7 +429,9 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
                         >> TCB_FLAG_TTYPE_SHIFT]
          , tcb->flags & TCB_FLAG_EXIT_PROCESSING ? 'P' : '-'
          , state
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
          , SIGSET_ELEM(&tcb->sigprocmask)
+#endif
          , tcb->stack_base_ptr
          , tcb->adj_stack_size
 #ifdef CONFIG_STACK_COLORATION

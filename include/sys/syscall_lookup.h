@@ -158,11 +158,13 @@ SYSCALL_LOOKUP(tgkill,                     3)
 SYSCALL_LOOKUP(sigaction,                  3)
 SYSCALL_LOOKUP(sigpending,                 1)
 #endif
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
 SYSCALL_LOOKUP(sigprocmask,                3)
 SYSCALL_LOOKUP(sigqueue,                   3)
 SYSCALL_LOOKUP(sigsuspend,                 1)
 SYSCALL_LOOKUP(sigtimedwait,               3)
 SYSCALL_LOOKUP(sigwaitinfo,                2)
+#endif
 SYSCALL_LOOKUP(clock_nanosleep,            4)
 
 /* The following are only defined if the system clock is enabled in the

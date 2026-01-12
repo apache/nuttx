@@ -51,6 +51,7 @@ endif # TIMER_FD
 
 config SIGNAL_FD
 	bool "SignalFD"
+	depends on !DISABLE_ALL_SIGNALS
 	default n
 	---help---
 		Create a file descriptor for accepting signals

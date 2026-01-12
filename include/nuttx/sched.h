@@ -667,9 +667,11 @@ struct tcb_s
   sq_queue_t sigpendactionq;             /* List of pending signal actions  */
   sq_queue_t sigpostedq;                 /* List of posted signals          */
 #endif /* CONFIG_ENABLE_ALL_SIGNALS*/
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   sigset_t   sigprocmask;                /* Signals that are blocked        */
   sigset_t   sigwaitmask;                /* Waiting for pending signals     */
   siginfo_t  *sigunbinfo;                /* Signal info when task unblocked */
+#endif /* !CONFIG_DISABLE_ALL_SIGNALS */
 
   /* Robust mutex support ***************************************************/
 
