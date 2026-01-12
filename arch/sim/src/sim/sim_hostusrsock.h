@@ -140,22 +140,22 @@
 #define NUTTX_SO_OOBINLINE          7
 #define NUTTX_SO_TIMESTAMPS         8
 #define NUTTX_SO_TIMESTAMPING       9
+#define NUTTX_SO_RCVTIMEO           10
+#define NUTTX_SO_SNDTIMEO           11
 #define NUTTX_SO_RCVBUF             64
 #define NUTTX_SO_RCVLOWAT           65
-#define NUTTX_SO_RCVTIMEO           66
-#define NUTTX_SO_SNDBUF             67
-#define NUTTX_SO_SNDLOWAT           68
-#define NUTTX_SO_SNDTIMEO           69
-#define NUTTX_SO_TYPE               70
-#define NUTTX_SO_ERROR              71
-#define NUTTX_SO_BINDTODEVICE       72
-#define NUTTX_SO_PEERCRED           73
-#define NUTTX_SO_PRIORITY           74
-#define NUTTX_SO_ACCEPTCONN         75
+#define NUTTX_SO_SNDBUF             66
+#define NUTTX_SO_SNDLOWAT           67
+#define NUTTX_SO_TYPE               68
+#define NUTTX_SO_ERROR              69
+#define NUTTX_SO_BINDTODEVICE       70
+#define NUTTX_SO_PEERCRED           71
+#define NUTTX_SO_PRIORITY           72
+#define NUTTX_SO_ACCEPTCONN         73
 
-#define NUTTX_SO_SNDBUFFORCE        76
-#define NUTTX_SO_RCVBUFFORCE        77
-#define NUTTX_SO_RXQ_OVFL           78
+#define NUTTX_SO_SNDBUFFORCE        74
+#define NUTTX_SO_RCVBUFFORCE        75
+#define NUTTX_SO_RXQ_OVFL           76
 
 #define NUTTX_SOL_IP                NUTTX_IPPROTO_IP
 #define NUTTX_SOL_IPV6              NUTTX_IPPROTO_IPV6
