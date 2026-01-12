@@ -119,7 +119,7 @@ extern "C"
  ****************************************************************************/
 
 static inline_function
-void hrtimer_init(FAR hrtimer_t *hrtimer, hrtimer_cb func)
+void hrtimer_init(FAR hrtimer_t *hrtimer, hrtimer_entry_t func)
 {
   memset(hrtimer, 0, sizeof(hrtimer_t));
   hrtimer->func = func;
