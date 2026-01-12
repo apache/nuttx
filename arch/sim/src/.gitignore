@@ -2,5 +2,6 @@
 /nuttx.ld
 /config.h
 /hostfs.h
+/errno_lookup.h
 /chip
 /board
