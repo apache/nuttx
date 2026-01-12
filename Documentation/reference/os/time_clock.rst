@@ -564,41 +564,6 @@ or ``kill()`` to communicate with NuttX tasks.
   context of the timer interrupt handler and is subject to all ISR
   restrictions.
 
-.. c:function:: int wd_restart(FAR struct wdog_s *wdog, clock_t delay)
-
-  This function restarts the specified watchdog timer using the same
-  function and argument that were specified in the previous wd_start()
-  call, but with a new delay value. It can be used when the user wants
-  to restart the same watchdog with a different timeout value, or to
-  refresh (feed) an existing watchdog before it expires.
-
-  :param wdog: Pointer to the watchdog timer to restart
-  :param delay: Delay count in clock ticks
-
-  **NOTE**: The parameter must be of type ``wdparm_t``.
-
-  :return: Zero (``OK``) is returned on success; a negated ``errno`` value
-    is return to indicate the nature of any failure.
-
-.. c:function:: int wd_restart_next(FAR struct wdog_s *wdog, clock_t delay)
-
-  This function restarts the specified watchdog timer using a new delay
-  value, but schedules the next expiration based on the previous
-  expiration time (wdog->expired + delay).  This allows the watchdog to
-  maintain a consistent periodic interval even if there is some delay in
-  handling the expiration callback.
-
-  It can be used when the user wants to restart a watchdog for a different
-  purpose or continue periodic timing based on the previous timeout point.
-
-  :param wdog: Pointer to the watchdog timer to restart
-  :param delay: Delay count in clock ticks
-
-  **NOTE**: The parameter must be of type ``wdparm_t``.
-
-  :return: Zero (``OK``) is returned on success; a negated ``errno`` value
-    is return to indicate the nature of any failure.
-
 .. c:function:: int wd_cancel(FAR struct wdog_s *wdog)
 
   This function cancels a currently running
