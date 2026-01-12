@@ -89,7 +89,7 @@ ifeq ($(shell [ $(CPP_STD_VER) -le 14 ] && echo true),true)
   CPPSRCS := $(filter-out $(EXCLUDE_FILES), $(CPPSRCS))
 endif
 
-ifeq ($(CONFIG_CXX_LOCALIZATION),)
+ifeq ($(CONFIG_CXX_NO_LOCALIZATION),y)
   LOCALE_CPPSRCS := libcxx/libcxx/src/ios.cpp
   LOCALE_CPPSRCS += libcxx/libcxx/src/ios.instantiations.cpp
   LOCALE_CPPSRCS += libcxx/libcxx/src/iostream.cpp
