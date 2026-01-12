@@ -539,7 +539,7 @@ static inline void lpc54_tl_alarm(uint64_t curr)
   lpc54_init_timer_vars();
   lpc54_set_default_compare(curr);
 
-  nxsched_timer_expiration();
+  nxsched_process_timer();
 }
 
 /* Interrupt handler */
