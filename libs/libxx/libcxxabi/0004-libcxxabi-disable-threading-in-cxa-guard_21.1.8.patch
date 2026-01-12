@@ -1,24 +1,6 @@
 --- libcxxabi.orig/src/cxa_guard_impl.h	2026-01-10 14:08:51.808835600 +0100
 +++ libcxxabi/src/cxa_guard_impl.h	2026-01-10 14:08:51.819473598 +0100
-@@ -64,7 +64,7 @@
- #include <limits.h>
- #include <stdlib.h>
-
--#ifndef _LIBCXXABI_HAS_NO_THREADS
-+#if !defined(_LIBCXXABI_HAS_NO_THREADS) && !defined(_LIBCPP_HAS_NO_THREADS)
- #  if defined(__ELF__) && defined(_LIBCXXABI_LINK_PTHREAD_LIB)
- #    pragma comment(lib, "pthread")
- #  endif
-@@ -280,7 +280,7 @@
- struct LibcppMutex;
- struct LibcppCondVar;
-
--#ifndef _LIBCXXABI_HAS_NO_THREADS
-+#if !defined(_LIBCXXABI_HAS_NO_THREADS) && !defined(_LIBCPP_HAS_NO_THREADS)
- struct LibcppMutex {
-   LibcppMutex() = default;
-   LibcppMutex(LibcppMutex const&) = delete;
-@@ -663,7 +663,7 @@
+@@ -665,7 +665,7 @@
  // TODO(EricWF): We should prefer the futex implementation when available. But
  // it should be done in a separate step from adding the implementation.
  constexpr Implementation CurrentImplementation =
@@ -27,3 +9,4 @@
      Implementation::NoThreads;
  #elif defined(_LIBCXXABI_USE_FUTEX)
      Implementation::Futex;
+

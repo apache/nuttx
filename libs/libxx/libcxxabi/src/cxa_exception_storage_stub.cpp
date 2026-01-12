@@ -7,76 +7,67 @@
 //===----------------------------------------------------------------------===//
 
 // ============================================================================
-// CRITICAL SAFETY WARNING - READ BEFORE USE
+// THREAD-SAFE EXCEPTION STORAGE FOR NUTTX
 // ============================================================================
 //
-// This implementation uses a SINGLE GLOBAL exception state without any
-// synchronization mechanism. It is ONLY safe under these conditions:
+// This implementation provides per-thread exception storage using pthread
+// thread-local storage (TLS). It is THREAD-SAFE and works correctly with:
 //
-// 1. Single-threaded execution (no RTOS task switching during exception
-// handling)
-// 2. No interrupt-based exception throwing
-// 3. No concurrent exception handling across tasks
-// 4. _LIBCPP_HAS_NO_THREADS must be defined at compile time
+// 1. Multi-threaded execution with NuttX RTOS task switching
+// 2. Concurrent exception handling across different threads
+// 3. Nested exceptions within the same thread
+// 4. Proper cleanup when threads exit
 //
-// UNSAFE SCENARIOS (will cause data corruption):
-// - Multiple RTOS tasks throwing exceptions simultaneously
-// - Exception thrown from ISR while task is handling exception
-// - Nested exceptions across different execution contexts
+// SAFETY FEATURES:
+// - Uses pthread_key_create with destructor for automatic cleanup
+// - Thread-safe initialization using pthread_once
+// - Per-thread exception state isolation
+// - No shared mutable state between threads
 //
-// FOR MULTI-THREADED SYSTEMS:
-// Implement per-task exception storage using NuttX TLS or task-local storage.
-//
-// RECOMMENDED FOR CRITICAL SYSTEMS:
-// Disable C++ exceptions entirely (CONFIG_CXX_EXCEPTION=n) and use
-// error codes instead.
+// NOTE: This implementation requires pthread support to be enabled in NuttX
+// (CONFIG_PTHREAD=y)
 // ============================================================================
 
 #include "../libcxxabi/src/cxa_exception.h"
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
-
-// Use NuttX Task Local Storage for per-task exception state
-#include <nuttx/tls.h>
-
-// Compile-time safety check: ensure threading is disabled for libcxx
-#ifndef _LIBCPP_HAS_NO_THREADS
-#error                                                                         \
-    "cxa_exception_storage_stub.cpp requires _LIBCPP_HAS_NO_THREADS to be defined."
-#endif
+#include <pthread.h>
 
 namespace __cxxabiv1 {
 
-// Per-task exception storage using NuttX TLS
-// This is THREAD-SAFE and works correctly with NuttX RTOS task switching
-static int tls_key = -1;
+// pthread key for per-thread exception storage
+static pthread_key_t exception_storage_key;
+static pthread_once_t key_init_once = PTHREAD_ONCE_INIT;
 
-// Initialize TLS key on first use (lazy initialization)
-static void init_tls_key() {
-  if (tls_key == -1) {
-    // Allocate TLS slot with destructor to free memory on task exit
-    tls_key = task_tls_alloc([](void *ptr) {
-      if (ptr) {
-        free(ptr);
-      }
-    });
-    // Verify allocation succeeded
-    assert(tls_key >= 0 && "Failed to allocate TLS key for exception storage");
+// Destructor called when thread exits - frees the exception storage
+static void exception_storage_destructor(void *ptr) {
+  if (ptr) {
+    free(ptr);
   }
 }
 
-extern __cxa_eh_globals *__cxa_get_globals() {
-  // Ensure TLS key is initialized
-  init_tls_key();
+// Initialize pthread key once (thread-safe)
+static void init_exception_storage_key() {
+  int result =
+      pthread_key_create(&exception_storage_key, exception_storage_destructor);
+  assert(result == 0 && "Failed to create pthread key for exception storage");
+  (void)result; // Suppress unused variable warning in release builds
+}
 
-  // Get per-task exception state from TLS (returns uintptr_t, needs
-  // reinterpret_cast)
-  __cxa_eh_globals *eh =
-      reinterpret_cast<__cxa_eh_globals *>(task_tls_get_value(tls_key));
+extern "C" {
+
+// Get per-thread exception globals, allocating if necessary
+__cxa_eh_globals *__cxa_get_globals() {
+  // Ensure pthread key is initialized (thread-safe, happens only once)
+  pthread_once(&key_init_once, init_exception_storage_key);
+
+  // Get per-thread exception state from pthread TLS
+  __cxa_eh_globals *eh = static_cast<__cxa_eh_globals *>(
+      pthread_getspecific(exception_storage_key));
 
   if (!eh) {
-    // First exception in this task - allocate storage
+    // First exception in this thread - allocate storage
     eh = static_cast<__cxa_eh_globals *>(malloc(sizeof(__cxa_eh_globals)));
     if (!eh) {
       // Out of memory - this is fatal for exception handling
@@ -87,18 +78,25 @@ extern __cxa_eh_globals *__cxa_get_globals() {
     // Initialize to zero
     memset(eh, 0, sizeof(__cxa_eh_globals));
 
-    // Store in TLS for this task (requires uintptr_t cast)
-    task_tls_set_value(tls_key, reinterpret_cast<uintptr_t>(eh));
+    // Store in pthread TLS for this thread
+    int result = pthread_setspecific(exception_storage_key, eh);
+    assert(result == 0 && "Failed to set pthread-specific exception storage");
+    (void)result;
   }
 
   return eh;
 }
 
-extern __cxa_eh_globals *__cxa_get_globals_fast() {
-  // Fast version assumes TLS is already initialized
-  // SAFETY: Only call this after __cxa_get_globals() has been called once
-  init_tls_key();
-  return reinterpret_cast<__cxa_eh_globals *>(task_tls_get_value(tls_key));
+// Fast version - assumes __cxa_get_globals() has been called at least once
+__cxa_eh_globals *__cxa_get_globals_fast() {
+  // Ensure pthread key is initialized
+  pthread_once(&key_init_once, init_exception_storage_key);
+
+  // Get per-thread exception state (may be nullptr if not yet initialized)
+  return static_cast<__cxa_eh_globals *>(
+      pthread_getspecific(exception_storage_key));
 }
+
+} // extern "C"
 
 } // namespace __cxxabiv1

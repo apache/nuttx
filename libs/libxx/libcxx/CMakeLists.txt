@@ -113,21 +113,13 @@ if(CONFIG_LIBCXX)
   file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/ryu/*.cpp)
   list(APPEND SRCS ${SRCSTMP})
 
-  # Exclude threading-related files since _LIBCPP_HAS_NO_THREADS is defined
-  file(
-    GLOB
-    SRCSTMP
-    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/barrier.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/condition_variable.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/condition_variable_destructor.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/mutex.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/mutex_destructor.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/thread.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/future.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/shared_mutex.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/call_once.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/atomic.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/charconv.cpp)
+  # Always exclude C++20 barrier (has additional dependencies not available in
+  # NuttX)
+  file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/barrier.cpp)
+  list(REMOVE_ITEM SRCS ${SRCSTMP})
+
+  # Exclude files with embedded-incompatible dependencies
+  file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/charconv.cpp)
   list(REMOVE_ITEM SRCS ${SRCSTMP})
 
   if(NOT CONFIG_CXX_LOCALIZATION)

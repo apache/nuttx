@@ -79,17 +79,8 @@ CPPSRCS += $(wildcard libcxx/libcxx/src/*.cpp)
 CPPSRCS += $(wildcard libcxx/libcxx/src/filesystem/*.cpp)
 CPPSRCS += $(wildcard libcxx/libcxx/src/ryu/*.cpp)
 
-# Exclude threading-related files when _LIBCPP_HAS_NO_THREADS is defined
-THREAD_CPPSRCS := libcxx/libcxx/src/atomic.cpp
-THREAD_CPPSRCS += libcxx/libcxx/src/barrier.cpp
-THREAD_CPPSRCS += libcxx/libcxx/src/condition_variable.cpp
-THREAD_CPPSRCS += libcxx/libcxx/src/condition_variable_destructor.cpp
-THREAD_CPPSRCS += libcxx/libcxx/src/future.cpp
-THREAD_CPPSRCS += libcxx/libcxx/src/mutex.cpp
-THREAD_CPPSRCS += libcxx/libcxx/src/mutex_destructor.cpp
-THREAD_CPPSRCS += libcxx/libcxx/src/shared_mutex.cpp
-THREAD_CPPSRCS += libcxx/libcxx/src/thread.cpp
-CPPSRCS := $(filter-out $(THREAD_CPPSRCS), $(CPPSRCS))
+# Always exclude C++20 barrier (has additional dependencies not available in NuttX)
+CPPSRCS := $(filter-out libcxx/libcxx/src/barrier.cpp, $(CPPSRCS))
 
 # Exclude files with embedded-incompatible dependencies
 INCOMPATIBLE_CPPSRCS := libcxx/libcxx/src/charconv.cpp

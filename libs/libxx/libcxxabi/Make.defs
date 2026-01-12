@@ -53,9 +53,6 @@ ifeq ($(CONFIG_LIBCXXABI), y)
 CXXFLAGS += ${DEFINE_PREFIX}LIBCXX_BUILDING_LIBCXXABI
 CXXFLAGS += -I $(TOPDIR)/libs/libxx/libcxxabi/libcxxabi/include
 
-# Define _LIBCPP_HAS_NO_THREADS for no-threading builds
-CXXFLAGS += ${DEFINE_PREFIX}_LIBCPP_HAS_NO_THREADS
-
 # Disable dynamic type checking when enabling libcxxabi
 # It results in a recursive call:
 # cxxabiv1::__dynamic_case -> is_equal -> __ubsan::checkDynamic -> cxxabiv1::__dynamic_case
