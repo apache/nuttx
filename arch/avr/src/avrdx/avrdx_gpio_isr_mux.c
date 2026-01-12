@@ -116,21 +116,21 @@ static int avrdx_gpio_isr_mux(int irq, void *context, FAR void *arg)
       port_index = AVRDX_GPIO_PORTF_IDX;
     }
 
-#ifdef CONFIG_AVR_HAS_PORTB
+#ifdef CONFIG_AVR_HAVE_PORTB
   else if (irq8 == AVRDX_IRQ_PORTB_PORT)
     {
       port_index = AVRDX_GPIO_PORTB_IDX;
     }
 #endif
 
-#ifdef CONFIG_AVR_HAS_PORTE
+#ifdef CONFIG_AVR_HAVE_PORTE
   else if (irq8 == AVRDX_IRQ_PORTE_PORT)
     {
       port_index = AVRDX_GPIO_PORTE_IDX;
     }
 #endif
 
-#ifdef CONFIG_AVR_HAS_PORTG
+#ifdef CONFIG_AVR_HAVE_PORTG
   else if (irq8 == AVRDX_IRQ_PORTG_PORT)
     {
       port_index = AVRDX_GPIO_PORTG_IDX;
@@ -213,7 +213,7 @@ int avrdx_irq_attach_gpio_mux(uint8_t port_idx, uint8_t pins,
 
   first_free_slot = GPIO_MUX_MAX_CHANNELS; /* No free slot was found yet */
 
-#ifdef AVR_HAS_PORTG
+#ifdef AVR_HAVE_PORTG
   if (port_idx > AVRDX_GPIO_PORTG_IDX)
     {
       return -EINVAL;
@@ -340,7 +340,7 @@ int avrdx_irq_detach_gpio_mux(uint8_t port_idx, uint8_t pins,
   int ret;
   uint8_t i;
 
-#ifdef AVR_HAS_PORTG
+#ifdef AVR_HAVE_PORTG
   if (port_idx > AVRDX_GPIO_PORTG_IDX)
     {
       return -EINVAL;
@@ -408,7 +408,7 @@ errout_lcs:
 
 void avrdx_gpio_isr_mux_init(void)
 {
-#ifdef AVR_HAS_PORTG
+#ifdef AVR_HAVE_PORTG
   g_gpio_pin_isrs = (struct gpio_pin_isr_s **) kmm_zalloc \
       (sizeof(struct gpio_pin_isr_s *) * (AVRDX_GPIO_PORTG_IDX + 1));
 #else
