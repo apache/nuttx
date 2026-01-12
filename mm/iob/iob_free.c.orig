@@ -121,6 +121,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
 #ifdef CONFIG_IOB_ALLOC
   if (iob->io_free != NULL)
     {
+<<<<<<< HEAD
       FAR uint8_t *io_data = (FAR uint8_t *)ALIGN_UP((uintptr_t)(iob + 1),
                                                      IOB_ALIGNMENT);
       if (iob->io_data == io_data)
@@ -133,6 +134,8 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
           kmm_free(iob);
         }
 
+=======
+      iob->io_free(iob->io_data);
 #ifdef CONFIG_IOB_OWNER_TRACKING
       /* Clear owner metadata when returning to free list */
 
@@ -140,6 +143,8 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
       iob->io_owner_cpu   = 0;
       iob->io_owner_flags = 0;
 #endif
+      kmm_free(iob);
+>>>>>>> b07e949139 (net/iob: Add CONFIG_IOB_OWNER_TRACKING to record IOB owner for debugging)
       return next;
     }
 #endif
