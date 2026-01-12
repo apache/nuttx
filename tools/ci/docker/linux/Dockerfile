@@ -15,7 +15,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-FROM ubuntu:24.04 AS builder-base
+FROM ubuntu:22.04 AS builder-base
 # NOTE WE ARE NOT REMOVING APT CACHE.
 # This should only be used for temp build images that artifacts will be copied from
 RUN apt-get update -qq && apt-get install -y -qq \
@@ -109,9 +109,9 @@ RUN mkdir -p $CARGO_HOME \
 # ENV SWIFT_VERSION=6.0-DEVELOPMENT-SNAPSHOT-2024-08-22-a
 # ENV SWIFT_HOME=/tools/swift
 # RUN mkdir -p ${SWIFT_HOME} \
-#  && curl -s -O -L https://download.swift.org/swift-6.0-branch/ubuntu2204/swift-${SWIFT_VERSION}/swift-${SWIFT_VERSION}-ubuntu24.04.tar.gz \
-#  && tar xzf swift-${SWIFT_VERSION}-ubuntu24.04.tar.gz -C ${SWIFT_HOME} \
-#  && rm swift-${SWIFT_VERSION}-ubuntu24.04.tar.gz
+#  && curl -s -O -L https://download.swift.org/swift-6.0-branch/ubuntu2204/swift-${SWIFT_VERSION}/swift-${SWIFT_VERSION}-ubuntu22.04.tar.gz \
+#  && tar xzf swift-${SWIFT_VERSION}-ubuntu22.04.tar.gz -C ${SWIFT_HOME} \
+#  && rm swift-${SWIFT_VERSION}-ubuntu22.04.tar.gz
 
 # Install Zig latest release
 ENV ZIG_VERSION=0.13.0
@@ -318,14 +318,23 @@ RUN mkdir -p picotool && \
 # Final Docker image used for running CI system.  This includes all toolchains
 # supported by the CI system.
 ###############################################################################
-FROM ubuntu:24.04
+FROM ubuntu:22.04
 LABEL maintainer="dev@nuttx.apache.org"
 
 RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq \
   build-essential \
   curl \
   gcc \
-  libssl-dev
+  libssl-dev \
+  software-properties-common \
+  wget \
+  gnupg \
+  lsb-release
+
+# Add LLVM repository for clang-21
+RUN wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+RUN echo "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-21 main" | tee /etc/apt/sources.list.d/llvm.list
+RUN apt-get update -qq
 
 RUN mkdir -p cmake && \
   curl -s -L https://cmake.org/files/v3.26/cmake-3.26.0.tar.gz \
@@ -339,8 +348,9 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" TZ=Etc/UTC apt-get in
   -o APT::Immediate-Configure=0 \
   avr-libc \
   ccache \
-  clang \
-  clang-tidy \
+  clang-21 \
+  clang++-21 \
+  clang-tidy-21 \
   g++-12-multilib \
   gcc-avr \
   gcc-12-multilib \
@@ -387,6 +397,11 @@ RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 20 && \
   update-alternatives --set cc /usr/bin/gcc && \
   update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 30 && \
   update-alternatives --set c++ /usr/bin/g++
+
+# Set Clang-21 as Default clang compiler
+RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-21 50 && \
+  update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-21 50 && \
+  update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-21 50
 
 # Configure out base setup for adding python packages
 ENV PIP_DISABLE_PIP_VERSION_CHECK=true
