@@ -63,6 +63,7 @@ extern struct list_node g_wdactivelist;
 
 #ifdef CONFIG_SCHED_TICKLESS
 extern bool g_wdtimernested;
+extern clock_t  g_wdexpired;
 #endif
 
 /****************************************************************************
@@ -70,16 +71,49 @@ extern bool g_wdtimernested;
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_TICKLESS
-#  define wd_in_callback() (g_wdtimernested)
-#  define wd_set_nested(f) (g_wdtimernested = (f))
+#  define wd_in_callback()          (g_wdtimernested)
+#  define wd_set_nested(f)          (g_wdtimernested = (f))
+#  define wd_update_expire(expired) (g_wdexpired = (expired))
 #else
 #  define wd_in_callback() (false)
 #  define wd_set_nested(f)
+#  define wd_update_expire(expired)
 #endif
 
 #ifdef CONFIG_SCHED_TICKLESS
-static inline_function void wd_timer_start(clock_t next_tick)
+static inline_function clock_t wd_adjust_next_tick(clock_t tick)
 {
+  clock_t next_tick = tick;
+#ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
+  clock_t interval  = clock_compare(g_wdexpired, tick) ?
+                      tick - g_wdexpired : 0u;
+  interval          = interval <= g_oneshot_maxticks ?
+                      interval : g_oneshot_maxticks;
+  next_tick         = g_wdexpired + interval;
+#endif
+
+#if CONFIG_TIMER_ADJUST_USEC > 0
+  /* Normally, timer event cannot triggered on exact time due to the
+   * existence of interrupt latency.
+   * Assuming that the interrupt latency is distributed within
+   * [Best-Case Execution Time, Worst-Case Execution Time],
+   * we can set the timer adjustment value to the BCET to reduce the latency.
+   * After the adjustment, the timer interrupt latency will be
+   * [0, WCET - BCET].
+   * Please use this carefully, if the timer adjustment value is not the
+   * best-case interrupt latency, it will immediately fired another timer
+   * interrupt, which may result in a much larger timer interrupt latency.
+   */
+
+  next_tick -= CONFIG_TIMER_ADJUST_USEC / USEC_PER_TICK;
+#endif
+
+  return next_tick;
+}
+
+static inline_function void wd_timer_start(clock_t tick)
+{
+  clock_t next_tick = wd_adjust_next_tick(tick);
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
 #  ifndef CONFIG_ALARM_ARCH
   struct timespec ts;
@@ -123,6 +157,20 @@ static inline_function clock_t wd_next_expire(void)
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+static inline_function clock_t wd_get_next_expire(clock_t curr)
+{
+  clock_t     next = curr;
+  irqstate_t flags = enter_critical_section();
+
+  if (!list_is_empty(&g_wdactivelist))
+    {
+      next = wd_next_expire();
+    }
+
+  leave_critical_section(flags);
+  return (sclock_t)(next - curr) <= 0 ? 0u : next;
+}
 
 /****************************************************************************
  * Name: wd_timer
