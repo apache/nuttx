@@ -37,7 +37,15 @@ libcxx/libcxx: libcxx-$(LIBCXX_VERSION).src.tar.xz
 	$(Q) patch -p1 < libcxx/0001-libcxx-fix-exception-no-rtti_21.1.8.patch -d libcxx/libcxx
 	$(Q) patch -p1 < libcxx/0001-Fix-build-error-about-__GLIBC___21.1.8.patch -d libcxx/libcxx
 	$(Q) patch -p1 < libcxx/0001-libcxx-fix-ostream-no-exceptions_21.1.8.patch -d libcxx/libcxx
+ifdef CONFIG_ARCH_ARM
 	$(Q) patch -p1 < libcxx/0009-libcxx-add-string-template-instantiations_21.1.8.patch -d libcxx/libcxx
+endif
+ifdef CONFIG_ARCH_ARM64
+	$(Q) patch -p1 < libcxx/0009-libcxx-add-string-template-instantiations_21.1.8.patch -d libcxx/libcxx
+endif
+ifdef CONFIG_ARCH_RISCV
+	$(Q) patch -p1 < libcxx/0009-libcxx-add-string-template-instantiations_21.1.8.patch -d libcxx/libcxx
+endif
 	$(Q) patch -p1 < libcxx/0010-libcxx-fix-locale-call-once-no-threads_21.1.8.patch -d libcxx/libcxx
 	$(Q) patch -p1 < libcxx/0011-libcxx-fix-deprecation-warnings-redefinition_21.1.8.patch -d libcxx/libcxx
 

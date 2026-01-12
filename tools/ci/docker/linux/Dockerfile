@@ -15,7 +15,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-FROM ubuntu:22.04 AS builder-base
+FROM ubuntu:24.04 AS builder-base
 # NOTE WE ARE NOT REMOVING APT CACHE.
 # This should only be used for temp build images that artifacts will be copied from
 RUN apt-get update -qq && apt-get install -y -qq \
@@ -109,9 +109,9 @@ RUN mkdir -p $CARGO_HOME \
 # ENV SWIFT_VERSION=6.0-DEVELOPMENT-SNAPSHOT-2024-08-22-a
 # ENV SWIFT_HOME=/tools/swift
 # RUN mkdir -p ${SWIFT_HOME} \
-#  && curl -s -O -L https://download.swift.org/swift-6.0-branch/ubuntu2204/swift-${SWIFT_VERSION}/swift-${SWIFT_VERSION}-ubuntu22.04.tar.gz \
-#  && tar xzf swift-${SWIFT_VERSION}-ubuntu22.04.tar.gz -C ${SWIFT_HOME} \
-#  && rm swift-${SWIFT_VERSION}-ubuntu22.04.tar.gz
+#  && curl -s -O -L https://download.swift.org/swift-6.0-branch/ubuntu2204/swift-${SWIFT_VERSION}/swift-${SWIFT_VERSION}-ubuntu24.04.tar.gz \
+#  && tar xzf swift-${SWIFT_VERSION}-ubuntu24.04.tar.gz -C ${SWIFT_HOME} \
+#  && rm swift-${SWIFT_VERSION}-ubuntu24.04.tar.gz
 
 # Install Zig latest release
 ENV ZIG_VERSION=0.13.0
@@ -153,7 +153,7 @@ RUN mkdir -p clang-arm-none-eabi && \
 
 # Download the latest ARM GCC toolchain prebuilt by ARM
 RUN mkdir -p gcc-arm-none-eabi && \
-  curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi.tar.xz" \
+  curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/15.2.Rel1/binrel/arm-gnu-toolchain-15.2.Rel1-x86_64-arm-none-eabi.tar.xz" \
   | tar -C gcc-arm-none-eabi --strip-components 1 -xJ
 
 ###############################################################################
@@ -162,7 +162,7 @@ RUN mkdir -p gcc-arm-none-eabi && \
 FROM nuttx-toolchain-base AS nuttx-toolchain-arm64
 # Download the latest ARM64 GCC toolchain prebuilt by ARM
 RUN mkdir gcc-aarch64-none-elf && \
-  curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf.tar.xz" \
+  curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/15.2.Rel1/binrel/arm-gnu-toolchain-15.2.Rel1-x86_64-aarch64-none-elf.tar.xz" \
   | tar -C gcc-aarch64-none-elf --strip-components 1 -xJ
 
 ###############################################################################
@@ -250,7 +250,7 @@ RUN cd /tools/renesas-tools/build/gcc && \
 FROM nuttx-toolchain-base AS nuttx-toolchain-riscv
 # Download the latest RISCV GCC toolchain prebuilt by xPack
 RUN mkdir -p riscv-none-elf-gcc && \
-  curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v14.2.0-3/xpack-riscv-none-elf-gcc-14.2.0-3-linux-x64.tar.gz" \
+  curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v15.2.0-1/xpack-riscv-none-elf-gcc-15.2.0-1-linux-x64.tar.gz" \
   | tar -C riscv-none-elf-gcc --strip-components 1 -xz
 
 ###############################################################################
@@ -318,7 +318,7 @@ RUN mkdir -p picotool && \
 # Final Docker image used for running CI system.  This includes all toolchains
 # supported by the CI system.
 ###############################################################################
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 LABEL maintainer="dev@nuttx.apache.org"
 
 RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq \
