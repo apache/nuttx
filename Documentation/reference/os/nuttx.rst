@@ -22,7 +22,7 @@ OS List Management APIs
   periodically -- the calling interval must be
   ``CONFIG_USEC_PER_TICK``.
 
-.. c:function:: void nxsched_timer_expiration(void)
+.. c:function:: void nxsched_tick_expiration(void)
 
   Description: if ``CONFIG_SCHED_TICKLESS`` is defined, then this
   function is provided by the RTOS base code and called from

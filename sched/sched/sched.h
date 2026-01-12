@@ -308,7 +308,7 @@ extern volatile spinlock_t g_cpu_tasklistlock;
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  nxsched_timer_expiration
+ * Name:  nxsched_tick_expiration
  *
  * Description:
  *   If CONFIG_SCHED_TICKLESS is defined, then this function is provided by
@@ -328,7 +328,7 @@ extern volatile spinlock_t g_cpu_tasklistlock;
  ****************************************************************************/
 
 #if defined(CONFIG_SCHED_TICKLESS)
-void nxsched_timer_expiration(void);
+void nxsched_tick_expiration(void);
 #endif
 
 int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
