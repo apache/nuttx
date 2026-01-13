@@ -159,7 +159,7 @@ function arm64_gcc_toolchain() {
   }
   catch {
     Write-Error "Failed to download the file: $_"
-  }  
+  }
 }
 
 function cmake_tool {
@@ -345,7 +345,7 @@ function install_build_tools {
   foreach ( $node in $splitArray ) {
     & $node
   }
-  
+
   Set-Location "$oldpath"
 }
 
