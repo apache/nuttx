@@ -1925,7 +1925,7 @@ void up_timer_initialize(void);
  * The RTOS will provide the following interfaces for use by the platform-
  * specific interval timer implementation:
  *
- *   void nxsched_tick_expiration(void):  Called by the platform-specific
+ *   void nxsched_process_timer(void):  Called by the platform-specific
  *     logic when the interval timer expires.
  *
  ****************************************************************************/
@@ -1973,7 +1973,7 @@ void up_timer_getmask(FAR clock_t *mask);
  * Description:
  *   Cancel the alarm and return the time of cancellation of the alarm.
  *   These two steps need to be as nearly atomic as possible.
- *   nxsched_tick_expiration() will not be called unless the alarm is
+ *   nxsched_process_timer() will not be called unless the alarm is
  *   restarted with up_alarm_start().
  *
  *   If, as a race condition, the alarm has already expired when this
@@ -2010,7 +2010,7 @@ int up_alarm_tick_cancel(FAR clock_t *ticks);
  * Name: up_alarm_start
  *
  * Description:
- *   Start the alarm.  nxsched_tick_expiration() will be called when the
+ *   Start the alarm.  nxsched_process_timer() will be called when the
  *   alarm occurs (unless up_alaram_cancel is called to stop it).
  *
  *   Provided by platform-specific code and called from the RTOS base code.
@@ -2018,7 +2018,7 @@ int up_alarm_tick_cancel(FAR clock_t *ticks);
  * Input Parameters:
  *   ts - The time in the future at the alarm is expected to occur.  When
  *        the alarm occurs the timer logic will call
- *        nxsched_tick_expiration().
+ *        nxsched_process_timer().
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -2042,7 +2042,7 @@ int up_alarm_tick_start(clock_t ticks);
  * Description:
  *   Cancel the interval timer and return the time remaining on the timer.
  *   These two steps need to be as nearly atomic as possible.
- *   nxsched_tick_expiration() will not be called unless the timer is
+ *   nxsched_process_timer() will not be called unless the timer is
  *   restarted with up_timer_start().
  *
  *   If, as a race condition, the timer has already expired when this
@@ -2081,14 +2081,14 @@ int up_timer_tick_cancel(FAR clock_t *ticks);
  * Name: up_timer_start
  *
  * Description:
- *   Start the interval timer.  nxsched_tick_expiration() will be called at
+ *   Start the interval timer.  nxsched_process_timer() will be called at
  *   the completion of the timeout (unless up_timer_cancel is called to stop
  *   the timing.
  *
  *   Provided by platform-specific code and called from the RTOS base code.
  *
  * Input Parameters:
- *   ts - Provides the time interval until nxsched_tick_expiration() is
+ *   ts - Provides the time interval until nxsched_process_timer() is
  *        called.
  *
  * Returned Value:
