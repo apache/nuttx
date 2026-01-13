@@ -451,6 +451,7 @@
 #ifndef __ASSEMBLY__
 struct xcptcontext
 {
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   /* These are saved copies of LR and SR used during signal processing.
    *
    * REVISIT:  Because there is only one copy of these save areas,
@@ -461,6 +462,7 @@ struct xcptcontext
 
   uint32_t saved_pc;
   uint32_t saved_sr;
+#endif
 
   /* Register save area */
 
