@@ -222,10 +222,45 @@ static uint16_t perf_prepare_sample(FAR struct perf_sample_data_s *data,
       size += sizeof(event->id);
     }
 
+  if (sample_type & PERF_SAMPLE_IDENTIFIER)
+    {
+      data->id = perf_get_eventid(event);
+      data->sample_flags |= PERF_SAMPLE_IDENTIFIER;
+      size += sizeof(event->id);
+    }
+
   if (sample_type & PERF_SAMPLE_CALLCHAIN)
     {
       data->sample_flags |= PERF_SAMPLE_CALLCHAIN;
       size += sizeof(uint64_t) * (PERF_MAX_BACKTRACE + 1);
+    }
+
+  if (sample_type & PERF_SAMPLE_CPU)
+    {
+      data->cpu_entry.cpu = this_cpu();
+      data->cpu_entry.reserved = 0;
+      data->sample_flags |= PERF_SAMPLE_CPU;
+      size += sizeof(data->cpu_entry);
+    }
+
+  if (sample_type & PERF_SAMPLE_TIME)
+    {
+      data->time = up_perf_gettime();
+      data->sample_flags |= PERF_SAMPLE_TIME;
+      size += sizeof(data->time);
+    }
+
+  if (sample_type & PERF_SAMPLE_STREAM_ID)
+    {
+      data->stream_id = event->id;
+      data->sample_flags |= PERF_SAMPLE_STREAM_ID;
+      size += sizeof(data->stream_id);
+    }
+
+  if (sample_type & PERF_SAMPLE_PERIOD)
+    {
+      size += sizeof(data->period);
+      data->period = event->attr.sample_period;
     }
 
   if (sample_type & PERF_SAMPLE_TID)
@@ -301,6 +336,12 @@ static void perf_output_sample(FAR struct perf_event_header_s *header,
   circbuf_overwrite(&(event->buf->rb), header,
                     sizeof(struct perf_event_header_s));
 
+  if (sample_type & PERF_SAMPLE_IDENTIFIER)
+    {
+      circbuf_overwrite(&(event->buf->rb), &data->id,
+                        sizeof(data->id));
+    }
+
   if (sample_type & PERF_SAMPLE_IP)
     {
       circbuf_overwrite(&(event->buf->rb), &data->ip, sizeof(data->ip));
@@ -312,9 +353,33 @@ static void perf_output_sample(FAR struct perf_event_header_s *header,
                         sizeof(data->tid_entry));
     }
 
+  if (sample_type & PERF_SAMPLE_TIME)
+    {
+      circbuf_overwrite(&(event->buf->rb), &data->time,
+                        sizeof(data->time));
+    }
+
   if (sample_type & PERF_SAMPLE_ID)
     {
       circbuf_overwrite(&(event->buf->rb), &data->id, sizeof(data->id));
+    }
+
+  if (sample_type & PERF_SAMPLE_STREAM_ID)
+    {
+      circbuf_overwrite(&(event->buf->rb), &data->stream_id,
+                        sizeof(data->stream_id));
+    }
+
+  if (sample_type & PERF_SAMPLE_PERIOD)
+    {
+      circbuf_overwrite(&(event->buf->rb), &data->period,
+                        sizeof(data->period));
+    }
+
+  if (sample_type & PERF_SAMPLE_CPU)
+    {
+      circbuf_overwrite(&(event->buf->rb), &data->cpu_entry,
+                        sizeof(data->cpu_entry));
     }
 
   if (sample_type & PERF_SAMPLE_CALLCHAIN)
