@@ -1,0 +1,30 @@
+From 8ae5419aa1e549d2b5d97d62af87bb3ede355ee2 Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Thu, 5 Sep 2024 23:02:20 +0800
+Subject: [PATCH 13/13] virtio.h: add mm_priv to struct virtio_deivce
+
+Support assign private memory data to the virtio device, so the
+virtio memory operation api is more easlier to implement.
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/include/openamp/virtio.h | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/lib/include/openamp/virtio.h open-amp/lib/include/openamp/virtio.h
+index 0c35c45ccf..475aa695bd 100644
+--- a/lib/include/openamp/virtio.h
++++ open-amp/lib/include/openamp/virtio.h
+@@ -207,6 +207,9 @@ struct virtio_device {
+ 	/**< Virtio device memory operations */
+ 	const struct virtio_memory_ops *mmops;
+ 
++	/** The memory operation private data */
++	void *mm_priv;
++
+ 	/** Private data */
+ 	void *priv;
+ 
+-- 
+2.34.1
+
