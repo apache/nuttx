@@ -405,7 +405,6 @@ endif
 ifneq ($(CONFIG_CXX_RTTI),y)
   ARCHCXXFLAGS += -fno-rtti
 endif
-
 ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
 ARCHOPTIMIZATION += --no_commons
 else

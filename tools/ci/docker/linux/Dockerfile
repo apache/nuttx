@@ -54,7 +54,7 @@ RUN curl -s -L https://bitbucket.org/nuttx/tools/get/9ad3e1ee75c7.tar.gz \
   | tar -C nuttx-tools --strip-components=1 -xz
 
 RUN mkdir -p /tools/bloaty \
-  && git clone --depth 1 https://github.com/google/bloaty bloaty-src \
+  && git clone --depth 1 --branch v1.1 https://github.com/google/bloaty bloaty-src \
   && cd bloaty-src \
   && cmake -B build -DCMAKE_INSTALL_PREFIX=/tools/bloaty \
   && cmake --build build \
@@ -153,7 +153,7 @@ RUN mkdir -p clang-arm-none-eabi && \
 
 # Download the latest ARM GCC toolchain prebuilt by ARM
 RUN mkdir -p gcc-arm-none-eabi && \
-  curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/15.2.Rel1/binrel/arm-gnu-toolchain-15.2.Rel1-x86_64-arm-none-eabi.tar.xz" \
+  curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi.tar.xz" \
   | tar -C gcc-arm-none-eabi --strip-components 1 -xJ
 
 ###############################################################################
@@ -162,7 +162,7 @@ RUN mkdir -p gcc-arm-none-eabi && \
 FROM nuttx-toolchain-base AS nuttx-toolchain-arm64
 # Download the latest ARM64 GCC toolchain prebuilt by ARM
 RUN mkdir gcc-aarch64-none-elf && \
-  curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/15.2.Rel1/binrel/arm-gnu-toolchain-15.2.Rel1-x86_64-aarch64-none-elf.tar.xz" \
+  curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf.tar.xz" \
   | tar -C gcc-aarch64-none-elf --strip-components 1 -xJ
 
 ###############################################################################
@@ -250,7 +250,7 @@ RUN cd /tools/renesas-tools/build/gcc && \
 FROM nuttx-toolchain-base AS nuttx-toolchain-riscv
 # Download the latest RISCV GCC toolchain prebuilt by xPack
 RUN mkdir -p riscv-none-elf-gcc && \
-  curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v15.2.0-1/xpack-riscv-none-elf-gcc-15.2.0-1-linux-x64.tar.gz" \
+  curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v14.2.0-3/xpack-riscv-none-elf-gcc-14.2.0-3-linux-x64.tar.gz" \
   | tar -C riscv-none-elf-gcc --strip-components 1 -xz
 
 ###############################################################################
@@ -325,16 +325,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   build-essential \
   curl \
   gcc \
-  libssl-dev \
-  software-properties-common \
-  wget \
-  gnupg \
-  lsb-release
-
-# Add LLVM repository for clang-21
-RUN wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-RUN echo "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-21 main" | tee /etc/apt/sources.list.d/llvm.list
-RUN apt-get update -qq
+  libssl-dev
 
 RUN mkdir -p cmake && \
   curl -s -L https://cmake.org/files/v3.26/cmake-3.26.0.tar.gz \
@@ -348,9 +339,8 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" TZ=Etc/UTC apt-get in
   -o APT::Immediate-Configure=0 \
   avr-libc \
   ccache \
-  clang-21 \
-  clang++-21 \
-  clang-tidy-21 \
+  clang \
+  clang-tidy \
   g++-12-multilib \
   gcc-avr \
   gcc-12-multilib \
@@ -397,11 +387,6 @@ RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 20 && \
   update-alternatives --set cc /usr/bin/gcc && \
   update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 30 && \
   update-alternatives --set c++ /usr/bin/g++
-
-# Set Clang-21 as Default clang compiler
-RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-21 50 && \
-  update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-21 50 && \
-  update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-21 50
 
 # Configure out base setup for adding python packages
 ENV PIP_DISABLE_PIP_VERSION_CHECK=true
