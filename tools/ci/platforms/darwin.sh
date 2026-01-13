@@ -42,10 +42,10 @@ arm_clang_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/clang-arm-none-eabi/bin/clang" ]; then
     local basefile
-    basefile=LLVMEmbeddedToolchainForArm-17.0.1-Darwin
+    basefile=LLVM-ET-Arm-19.1.5-Darwin-universal
     cd "${NUTTXTOOLS}"
     # Download the latest ARM clang toolchain prebuilt by ARM
-    curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-17.0.1/${basefile}.dmg
+    curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-19.1.5/${basefile}.dmg
     sudo hdiutil attach ${basefile}.dmg
     sudo cp -R /Volumes/${basefile}/${basefile} "${NUTTXTOOLS}"/${basefile}
     sudo mv ${basefile} clang-arm-none-eabi
@@ -60,9 +60,9 @@ arm_gcc_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/gcc-arm-none-eabi/bin/arm-none-eabi-gcc" ]; then
     local basefile
-    basefile=arm-gnu-toolchain-13.2.rel1-darwin-x86_64-arm-none-eabi
+    basefile=arm-gnu-toolchain-15.2.rel1-darwin-x86_64-arm-none-eabi
     cd "${NUTTXTOOLS}"
-    curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/${basefile}.tar.xz
+    curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
     tar xf ${basefile}.tar
     mv ${basefile} gcc-arm-none-eabi
@@ -77,10 +77,10 @@ arm64_gcc_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/gcc-aarch64-none-elf/bin/aarch64-none-elf-gcc" ]; then
     local basefile
-    basefile=arm-gnu-toolchain-13.2.Rel1-darwin-x86_64-aarch64-none-elf
+    basefile=arm-gnu-toolchain-15.2.Rel1-darwin-x86_64-aarch64-none-elf
     cd "${NUTTXTOOLS}"
     # Download the latest ARM64 GCC toolchain prebuilt by ARM
-    curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/${basefile}.tar.xz
+    curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/15.2.Rel1/binrel/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
     tar xf ${basefile}.tar
     mv ${basefile} gcc-aarch64-none-elf
@@ -256,11 +256,11 @@ python_tools() {
     echo "export PYTHONUSERBASE=${NUTTXTOOLS}/pylocal" >> "${NUTTXTOOLS}"/env.sh
     add_path "${PYTHONUSERBASE}"/bin
   fi
-  
+
   if [ "X$osarch" == "Xarm64" ]; then
     python3 -m venv --system-site-packages /opt/homebrew
   fi
-  
+
   # workaround for Cython issue
   # https://github.com/yaml/pyyaml/pull/702#issuecomment-1638930830
   pip3 install "Cython<3.0"
@@ -295,12 +295,12 @@ riscv_gcc_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/riscv-none-elf-gcc/bin/riscv-none-elf-gcc" ]; then
     local basefile
-    basefile=xpack-riscv-none-elf-gcc-14.2.0-3-darwin-x64
+    basefile=xpack-riscv-none-elf-gcc-15.2.0-1-darwin-x64
     cd "${NUTTXTOOLS}"
     # Download the latest RISCV GCC toolchain prebuilt by xPack
-    curl -O -L -s https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v14.2.0-3/${basefile}.tar.gz
+    curl -O -L -s https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v15.2.0-1/${basefile}.tar.gz
     tar zxf ${basefile}.tar.gz
-    mv xpack-riscv-none-elf-gcc-14.2.0-3 riscv-none-elf-gcc
+    mv xpack-riscv-none-elf-gcc-15.2.0-1 riscv-none-elf-gcc
     rm ${basefile}.tar.gz
   fi
 

@@ -96,10 +96,10 @@ function arm_clang_toolchain {
       if (-not (Test-Path -Path "$NUTTXTOOLS\clang-arm-none-eabi\bin\clang.exe")) {
         # Download the file
         Write-Host "Download: ARM clang toolchain" -ForegroundColor Green
-        $basefile = "LLVMEmbeddedToolchainForArm-17.0.1-Windows-x86_64"
+        $basefile = "LLVM-ET-Arm-19.1.5-Windows-x86_64"
         Set-Location "$NUTTXTOOLS"
         # Download the latest ARM clang toolchain prebuilt by ARM
-        Invoke-WebRequest -Uri "https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-17.0.1/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
+        Invoke-WebRequest -Uri "https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-19.1.5/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
         Expand-Archive "$NUTTXTOOLS\$basefile.zip"
         Move-Item -Path "$basefile\$basefile" -Destination "clang-arm-none-eabi"
         Remove-Item "$basefile*" -Force
@@ -121,10 +121,10 @@ function arm_gcc_toolchain() {
       if (-not (Test-Path -Path "$NUTTXTOOLS\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe")) {
         # Download the file
         Write-Host "Download: ARM GCC toolchain" -ForegroundColor Green
-        $basefile = "arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-arm-none-eabi"
+        $basefile = "arm-gnu-toolchain-15.2.Rel1-mingw-w64-i686-arm-none-eabi"
         Set-Location "$NUTTXTOOLS"
         # Download the latest ARM GCC toolchain prebuilt by ARM
-        Invoke-WebRequest -Uri "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
+        Invoke-WebRequest -Uri "https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
         Expand-Archive "$NUTTXTOOLS\$basefile.zip"
         Move-Item -Path "$basefile\$basefile" -Destination "gcc-arm-none-eabi"
         Remove-Item "$basefile*" -Force
@@ -146,10 +146,10 @@ function arm64_gcc_toolchain() {
       if (-not (Test-Path -Path "$NUTTXTOOLS\gcc-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe")) {
         # Download the file
         Write-Host "Download: ARM64 GCC toolchain" -ForegroundColor Green
-        $basefile = "arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf"
+        $basefile = "arm-gnu-toolchain-15.2.rel1-mingw-w64-i686-aarch64-none-elf"
         Set-Location "$NUTTXTOOLS"
         # Download the latest ARM64 GCC toolchain prebuilt by ARM
-        Invoke-WebRequest -Uri "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
+        Invoke-WebRequest -Uri "https://developer.arm.com/-/media/Files/downloads/gnu/15.2.Rel1/binrel/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
         Expand-Archive "$NUTTXTOOLS\$basefile.zip"
         Move-Item -Path "$basefile\$basefile" -Destination "gcc-aarch64-none-elf"
         Remove-Item "$basefile*" -Force
@@ -159,7 +159,7 @@ function arm64_gcc_toolchain() {
   }
   catch {
     Write-Error "Failed to download the file: $_"
-  }  
+  }
 }
 
 function cmake_tool {
@@ -345,7 +345,7 @@ function install_build_tools {
   foreach ( $node in $splitArray ) {
     & $node
   }
-  
+
   Set-Location "$oldpath"
 }
 

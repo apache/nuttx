@@ -42,7 +42,7 @@ CMake,sim:smp
 CMake,sim:spiffs
 CMake,sim:tcpblaster
 CMake,sim:tcploop
-CMake,sim:tflm
+CMake,sim:tflm,CONFIG_SIM_TOOLCHAIN_CLANG
 CMake,sim:udgram
 CMake,sim:unionfs
 CMake,sim:usbdev

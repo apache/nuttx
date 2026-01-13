@@ -186,15 +186,9 @@ endif
 
 ARCHPICFLAGS = -fpic
 
-ifeq ($(CONFIG_SIM_TOOLCHAIN_CLANG),y)
-CC = $(CROSSDEV)clang
-CXX = $(CROSSDEV)clang++
-CPP = $(CROSSDEV)clang -E -P -x c
-else
 CC = $(CROSSDEV)cc
 CXX = $(CROSSDEV)c++
 CPP = $(CROSSDEV)cc -E -P -x c
-endif
 LD = $(CROSSDEV)ld
 ifeq ($(CONFIG_HOST_MACOS),y)
 STRIP = $(CROSSDEV)strip

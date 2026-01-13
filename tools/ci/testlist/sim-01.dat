@@ -5,7 +5,7 @@
 -Darwin,sim:alsa
 
 # clang doesn't -fsanitize=kernel-address
--Darwin,sim:citest
+-Darwin,sim:citest,CONFIG_SIM_TOOLCHAIN_CLANG
 
 # macOS can compilation is not currently supported
 -Darwin,sim:can

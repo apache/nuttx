@@ -34,7 +34,7 @@
 -Darwin,sim:wamr
 
 # macOS matter compilation is not currently supported
--Darwin,sim:matter
+-Darwin,sim:matter,CONFIG_SIM_TOOLCHAIN_CLANG
 
 # Boards build by CMake
 CMake,sim:dynconns
@@ -51,4 +51,4 @@ CMake,sim:nettest
 CMake,sim:note
 CMake,sim:nsh
 CMake,sim:nxffs
-CMake,sim:matter
+CMake,sim:matter,CONFIG_SIM_TOOLCHAIN_CLANG

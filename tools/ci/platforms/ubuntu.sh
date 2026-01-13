@@ -35,10 +35,10 @@ arm_clang_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/clang-arm-none-eabi/bin/clang" ]; then
     local basefile
-    basefile=LLVMEmbeddedToolchainForArm-17.0.1-Linux-x86_64
+    basefile=LLVM-ET-Arm-19.1.5-Linux-x86_64
     cd "${NUTTXTOOLS}"
     # Download the latest ARM clang toolchain prebuilt by ARM
-    curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-17.0.1/${basefile}.tar.xz
+    curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-19.1.5/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
     tar xf ${basefile}.tar
     mv ${basefile} clang-arm-none-eabi
@@ -53,10 +53,10 @@ arm_gcc_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/gcc-arm-none-eabi/bin/arm-none-eabi-gcc" ]; then
     local basefile
-    basefile=arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi
+    basefile=arm-gnu-toolchain-15.2.Rel1-x86_64-arm-none-eabi
     cd "${NUTTXTOOLS}"
     # Download the latest ARM GCC toolchain prebuilt by ARM
-    curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/${basefile}.tar.xz
+    curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
     tar xf ${basefile}.tar
     mv ${basefile} gcc-arm-none-eabi
@@ -71,10 +71,10 @@ arm64_gcc_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/gcc-aarch64-none-elf/bin/aarch64-none-elf-gcc" ]; then
     local basefile
-    basefile=arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf
+    basefile=arm-gnu-toolchain-15.2.Rel1-x86_64-aarch64-none-elf
     cd "${NUTTXTOOLS}"
     # Download the latest ARM64 GCC toolchain prebuilt by ARM
-    curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/${basefile}.tar.xz
+    curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/15.2.Rel1/binrel/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
     tar xf ${basefile}.tar
     mv ${basefile} gcc-aarch64-none-elf
@@ -104,7 +104,7 @@ bloaty() {
   add_path "${NUTTXTOOLS}"/bloaty/bin
 
   if [ ! -f "${NUTTXTOOLS}/bloaty/bin/bloaty" ]; then
-    git clone --depth 1 --branch v1.1 https://github.com/google/bloaty "${NUTTXTOOLS}"/bloaty-src
+    git clone --depth 1 https://github.com/google/bloaty "${NUTTXTOOLS}"/bloaty-src
     mkdir -p "${NUTTXTOOLS}"/bloaty
     cd "${NUTTXTOOLS}"/bloaty-src
     cmake -B build -DCMAKE_INSTALL_PREFIX="${NUTTXTOOLS}"/bloaty
@@ -216,12 +216,12 @@ riscv_gcc_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/riscv-none-elf-gcc/bin/riscv-none-elf-gcc" ]; then
     local basefile
-    basefile=xpack-riscv-none-elf-gcc-14.2.0-3-linux-x64
+    basefile=xpack-riscv-none-elf-gcc-15.2.0-1-linux-x64
     cd "${NUTTXTOOLS}"
     # Download the latest RISCV GCC toolchain prebuilt by xPack
-    curl -O -L -s https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v14.2.0-3/${basefile}.tar.gz
+    curl -O -L -s https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v15.2.0-1/${basefile}.tar.gz
     tar zxf ${basefile}.tar.gz
-    mv xpack-riscv-none-elf-gcc-14.2.0-3 riscv-none-elf-gcc
+    mv xpack-riscv-none-elf-gcc-15.2.0-1 riscv-none-elf-gcc
     rm ${basefile}.tar.gz
   fi
 

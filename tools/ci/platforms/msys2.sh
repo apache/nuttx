@@ -35,10 +35,10 @@ arm_clang_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/clang-arm-none-eabi/bin/clang" ]; then
     local basefile
-    basefile=LLVMEmbeddedToolchainForArm-17.0.1-Windows-x86_64
+    basefile=LLVM-ET-Arm-19.1.5-Windows-x86_64
     cd "${NUTTXTOOLS}"
     # Download the latest ARM clang toolchain prebuilt by ARM
-    curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-17.0.1/${basefile}.zip
+    curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-19.1.5/${basefile}.zip
     unzip -qo ${basefile}.zip
     mv ${basefile} clang-arm-none-eabi
     rm ${basefile}.zip
@@ -52,9 +52,9 @@ arm_gcc_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/gcc-arm-none-eabi/bin/arm-none-eabi-gcc" ]; then
     local basefile
-    basefile=arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-arm-none-eabi
+    basefile=arm-gnu-toolchain-15.2.Rel1-mingw-w64-i686-arm-none-eabi
     cd "${NUTTXTOOLS}"
-    curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/${basefile}.zip
+    curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel/${basefile}.zip
     unzip -qo ${basefile}.zip
     mv ${basefile} gcc-arm-none-eabi
     rm ${basefile}.zip
@@ -68,10 +68,10 @@ arm64_gcc_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/gcc-aarch64-none-elf/bin/aarch64-none-elf-gcc" ]; then
     local basefile
-    basefile=arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf
+    basefile=arm-gnu-toolchain-15.2.Rel1-mingw-w64-i686-aarch64-none-elf
     cd "${NUTTXTOOLS}"
     # Download the latest ARM64 GCC toolchain prebuilt by ARM
-    curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/${basefile}.zip
+    curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/15.2.Rel1/binrel/${basefile}.zip
     unzip -qo ${basefile}.zip
     mv ${basefile} gcc-aarch64-none-elf
     rm ${basefile}.zip
@@ -158,12 +158,12 @@ riscv_gcc_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/riscv-none-elf-gcc/bin/riscv-none-elf-gcc" ]; then
     local basefile
-    basefile=xpack-riscv-none-elf-gcc-14.2.0-3-win32-x64
+    basefile=xpack-riscv-none-elf-gcc-15.2.0-1-win32-x64
     cd "${NUTTXTOOLS}"
     # Download the latest RISCV GCC toolchain prebuilt by xPack
-    curl -O -L -s https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v14.2.0-3/${basefile}.zip
+    curl -O -L -s https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v15.2.0-1/${basefile}.zip
     unzip -qo ${basefile}.zip
-    mv xpack-riscv-none-elf-gcc-14.2.0-3 riscv-none-elf-gcc
+    mv xpack-riscv-none-elf-gcc-15.2.0-1 riscv-none-elf-gcc
     rm ${basefile}.zip
   fi
   command riscv-none-elf-gcc --version
