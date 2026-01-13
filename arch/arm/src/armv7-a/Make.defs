@@ -54,7 +54,7 @@ ifeq ($(CONFIG_ARMV7A_L2CC_PL310),y)
 endif
 
 ifeq ($(CONFIG_LEGACY_PAGING),y)
-  CMN_CSRCS += arm_checkmapping.c arm_pginitialize.c
+  CMN_CSRCS += arm_pginitialize.c
   CMN_CSRCS += arm_va2pte.c
   CMN_ASRCS += arm_pghead.S
 else

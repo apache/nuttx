@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/arm/arm_checkmapping.c
+ * arch/arm/src/arm_a_r/arm_checkmapping.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *

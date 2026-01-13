@@ -31,7 +31,7 @@ CMN_ASRCS += arm_cache.S arm_vectors.S arm_vectortab.S
 CMN_ASRCS += arm_saveusercontext.S
 
 ifeq ($(CONFIG_LEGACY_PAGING),y)
-  CMN_CSRCS += arm_pginitialize.c arm_checkmapping.c arm_va2pte.c
+  CMN_CSRCS += arm_pginitialize.c arm_va2pte.c
 endif
 
 VPATH += arm_a_r

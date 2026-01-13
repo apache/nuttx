@@ -32,6 +32,10 @@ if(CONFIG_LIB_SYSCALL)
   list(APPEND CSRCS arm_dispatch_syscall.S)
 endif()
 
+if(CONFIG_PAGING)
+  list(APPEND CSRCS arm_checkmapping.c)
+endif()
+
 list(
   APPEND
   CSRCS

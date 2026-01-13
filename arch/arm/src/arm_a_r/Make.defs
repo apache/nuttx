@@ -38,3 +38,7 @@ endif
 ifeq ($(CONFIG_ARCH_HAVE_DEBUG),y)
   CMN_CSRCS += arm_hwdebug.c
 endif
+
+ifeq ($(CONFIG_LEGACY_PAGING),y)
+  CMN_CSRCS += arm_checkmapping.c
+endif
