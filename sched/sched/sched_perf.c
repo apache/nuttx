@@ -2026,7 +2026,7 @@ static int perf_setup_task_context(FAR struct tcb_s *tcb)
   FAR struct perf_event_context_s *parent_ctx = parent->perf_event_ctx;
   FAR struct perf_event_s *group_leader;
   irqstate_t flags;
-  int ret;
+  int ret = OK;
 
   /* Inherit parent event if it has */
 
