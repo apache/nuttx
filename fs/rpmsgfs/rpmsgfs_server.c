@@ -959,11 +959,29 @@ static int rpmsgfs_readlink_handler(FAR struct rpmsg_endpoint *ept,
 {
   FAR struct rpmsgfs_readlink_s *msg = data;
   ssize_t ret;
-  uint32_t space;
+  ssize_t space;
 
   space = rpmsg_get_tx_buffer_size(ept);
+  if (space < 0)
+    {
+      ret = space;
+      goto out;
+    }
+
+  if (space <= sizeof(*msg))
+    {
+      ret = -EINVAL;
+      goto out;
+    }
+
   ret = readlink(msg->pathname, msg->pathname, space - sizeof(*msg));
-  msg->header.result = ret < 0 ? -get_errno() : ret;
+  if (ret < 0)
+    {
+      ret = -get_errno();
+    }
+
+out:
+  msg->header.result = ret;
   return rpmsg_send(ept, msg, sizeof(*msg) + (ret > 0 ? ret : 0));
 }
 
