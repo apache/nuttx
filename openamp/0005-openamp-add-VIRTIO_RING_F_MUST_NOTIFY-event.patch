@@ -1,7 +1,7 @@
 From 7c6597d46da6d1c3c085dda33262c89b633707ae Mon Sep 17 00:00:00 2001
 From: ligd <liguiding1@xiaomi.com>
 Date: Thu, 23 Jun 2022 00:41:13 +0800
-Subject: [PATCH 05/10] openamp: add VIRTIO_RING_F_MUST_NOTIFY event
+Subject: [PATCH 05/12] openamp: add VIRTIO_RING_F_MUST_NOTIFY event
 
 Signed-off-by: ligd <liguiding1@xiaomi.com>
 ---

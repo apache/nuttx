@@ -1,7 +1,7 @@
 From e201b5ba1fd11bb486a844afb2362d699f915f7f Mon Sep 17 00:00:00 2001
 From: dongjiuzhu1 <dongjiuzhu1@xiaomi.com>
 Date: Mon, 27 May 2024 20:32:46 +0800
-Subject: [PATCH 10/10] openamp: add assert when get tx buffer failed
+Subject: [PATCH 10/12] openamp: add assert when get tx buffer failed
 
 So we can found the error more eaily
 

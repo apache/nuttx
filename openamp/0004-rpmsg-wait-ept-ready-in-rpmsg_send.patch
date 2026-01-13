@@ -1,7 +1,7 @@
 From a2c5e7e101392eb8b72acd608b81b525c643cf4a Mon Sep 17 00:00:00 2001
 From: ligd <liguiding@pinecone.net>
 Date: Wed, 20 Feb 2019 11:36:57 +0800
-Subject: [PATCH 04/10] rpmsg: wait ept ready in rpmsg_send
+Subject: [PATCH 04/12] rpmsg: wait ept ready in rpmsg_send
 
 since the destination address need time to return from peer
 
