@@ -1,0 +1,107 @@
+From a540e0d0c8537e204a437da7ebc57316e663e15c Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Mon, 30 Oct 2023 18:43:19 +0800
+Subject: [PATCH 11/12] remoteproc_virtio: add shm_io for remoteproc virtio and
+ API to set it
+
+Shm_io is a metal io used to access the shared memory just like the
+virtio mmio device.
+Before this patch, only virtio rpmsg device worked with the virtio
+remoteproc transport layer, and we needs pass the shared memory io
+region to the rpmsg_init_vdev() function.
+This patch want to all the virtio devices can work with the virtio
+remoteproc transport layer, so add shm_io in struct remoteproc_virtio.
+
+And later I will remove the shm_io in struct rpmsg_virtio_device instead
+use shm_io in struct remoteproc_virtio.
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/include/openamp/remoteproc_virtio.h | 14 ++++++++++++++
+ lib/remoteproc/remoteproc_virtio.c      | 24 ++++++++++++++++++++++++
+ 2 files changed, 38 insertions(+)
+
+diff --git a/lib/include/openamp/remoteproc_virtio.h open-amp/lib/include/openamp/remoteproc_virtio.h
+index f56026a029..e310f0f9a5 100644
+--- a/lib/include/openamp/remoteproc_virtio.h
++++ open-amp/lib/include/openamp/remoteproc_virtio.h
+@@ -47,6 +47,9 @@ struct remoteproc_virtio {
+ 	/** Metal I/O region of vdev_info, can be NULL */
+ 	struct metal_io_region *vdev_rsc_io;
+ 
++	/** Metal I/O region of virtio device's share memory */
++	struct metal_io_region *shm_io;
++
+ 	/** Notification function */
+ 	rpvdev_notify_func notify;
+ 
+@@ -85,6 +88,17 @@ rproc_virtio_create_vdev(unsigned int role, unsigned int notifyid,
+  */
+ void rproc_virtio_remove_vdev(struct virtio_device *vdev);
+ 
++/**
++ * @brief Set share memory io for remoteproc virtio device
++ *
++ * @param vdev		Pointer to the virtio device
++ * @param shm_io	Metal I/O region to set
++ *
++ * @return 0 for success, negative value for failure.
++ */
++int rproc_virtio_set_shm_io(struct virtio_device *vdev,
++			    struct metal_io_region *shm_io);
++
+ /**
+  * @brief Initialize rproc virtio vring
+  *
+diff --git a/lib/remoteproc/remoteproc_virtio.c open-amp/lib/remoteproc/remoteproc_virtio.c
+index b07c0b3e45..7dee1354e0 100644
+--- a/lib/remoteproc/remoteproc_virtio.c
++++ open-amp/lib/remoteproc/remoteproc_virtio.c
+@@ -40,6 +40,7 @@ static int rproc_virtio_create_virtqueue(struct virtio_device *vdev,
+ {
+ 	struct virtio_vring_info *vring_info;
+ 	struct vring_alloc_info *vring_alloc;
++	struct remoteproc_virtio *rpvdev;
+ 	int ret;
+ 	(void)flags;
+ 
+@@ -68,6 +69,15 @@ static int rproc_virtio_create_virtqueue(struct virtio_device *vdev,
+ 	if (ret)
+ 		return ret;
+ 
++	/*
++	 * If vq->shm_io is uninitialized, init it here. Now only rpmsg device
++	 * init the shm_io specially instead of by transport layer.
++	 */
++	if (!vring_info->vq->shm_io) {
++		rpvdev = metal_container_of(vdev, struct remoteproc_virtio, vdev);
++		virtqueue_set_shmem_io(vring_info->vq, rpvdev->shm_io);
++	}
++
+ 	return 0;
+ }
+ 
+@@ -341,6 +351,20 @@ err:
+ 	return NULL;
+ }
+ 
++int rproc_virtio_set_shm_io(struct virtio_device *vdev,
++			    struct metal_io_region *shm_io)
++{
++	struct remoteproc_virtio *rpvdev;
++
++	if (!vdev || !shm_io)
++		return -RPROC_EINVAL;
++
++	rpvdev = metal_container_of(vdev, struct remoteproc_virtio, vdev);
++	rpvdev->shm_io = shm_io;
++
++	return 0;
++}
++
+ void rproc_virtio_remove_vdev(struct virtio_device *vdev)
+ {
+ 	struct remoteproc_virtio *rpvdev;
+-- 
+2.34.1
+

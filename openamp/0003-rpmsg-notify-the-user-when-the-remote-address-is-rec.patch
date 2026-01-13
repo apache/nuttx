@@ -1,7 +1,7 @@
 From 0fd409ef494b47464f57667b24fce91a4f1a5753 Mon Sep 17 00:00:00 2001
 From: ligd <liguiding1@xiaomi.com>
 Date: Tue, 19 Oct 2021 19:45:14 +0800
-Subject: [PATCH 03/10] rpmsg: notify the user when the remote address is
+Subject: [PATCH 03/12] rpmsg: notify the user when the remote address is
  received
 
 Signed-off-by: ligd <liguiding1@xiaomi.com>

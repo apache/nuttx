@@ -1,7 +1,7 @@
 From 33fca04b5d33b7b501775f2384a6374eef302729 Mon Sep 17 00:00:00 2001
 From: Yongrong Wang <wangyongrong@xiaomi.com>
 Date: Wed, 10 Jul 2024 18:47:33 +0800
-Subject: [PATCH 09/10] virtio: change feature to 64 bit in all virtio_dispatch
+Subject: [PATCH 09/12] virtio: change feature to 64 bit in all virtio_dispatch
 
 The virtio device feature bit has exceeded 32 bits, so change feature
 to 64 bit like linux does to support more features

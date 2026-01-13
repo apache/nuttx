@@ -1,7 +1,7 @@
 From bbaf772058b44a383b4ef81676eccd7a1b503c09 Mon Sep 17 00:00:00 2001
 From: Bowen Wang <wangbowen6@xiaomi.com>
 Date: Wed, 20 Nov 2024 10:43:16 +0800
-Subject: [PATCH 07/10] virtqueue: move virtqueue_nused and virtqueue_navail to
+Subject: [PATCH 07/12] virtqueue: move virtqueue_nused and virtqueue_navail to
  public
 
 Use these two apis to judge whether there is buffers in the virtqueues

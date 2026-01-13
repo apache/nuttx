@@ -1,7 +1,7 @@
 From 4f552ae6fa88eec2a42c3933ea201ab71555838c Mon Sep 17 00:00:00 2001
 From: anchao <anchao@pinecone.net>
 Date: Mon, 10 Dec 2018 16:26:39 +0800
-Subject: [PATCH 02/10] Negotiate individual buffer size dynamically
+Subject: [PATCH 02/12] Negotiate individual buffer size dynamically
 
 Change config type from fw_rsc_config to rpmsg_virtio_config
 to avoid rpmsg_vitio.h couple with remoteproc.h.

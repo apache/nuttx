@@ -58,6 +58,10 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/open-amp)
       ${CMAKE_CURRENT_LIST_DIR}/0009-virtio-change-feature-to-64-bit-in-all-virtio_dispat.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
       ${CMAKE_CURRENT_LIST_DIR}/0010-openamp-add-assert-when-get-tx-buffer-failed.patch
+      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0011-remoteproc_virtio-add-shm_io-for-remoteproc-virtio-a.patch
+      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0012-remoteproc-sync-the-virtio-rpmsg-config-with-linux-s.patch
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 
