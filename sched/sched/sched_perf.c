@@ -105,7 +105,6 @@ static int perf_swevent_match(FAR struct perf_event_s *event);
 static struct perf_event_context_s g_perf_cpu_ctx[CONFIG_SMP_NCPUS];
 static struct list_node g_perf_pmus = LIST_INITIAL_VALUE(g_perf_pmus);
 static mutex_t g_perf_pmus_lock = NXMUTEX_INITIALIZER;
-volatile static atomic_t g_perf_eventid;
 
 static const struct file_operations g_perf_fops =
 {
@@ -170,6 +169,32 @@ static struct smp_call_data_s g_perf_call_data;
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: perf_get_eventid
+ *
+ * Description:
+ *   Get the perf event id
+ *
+ * Input Parameters:
+ *   event - Perf event
+ *
+ * Returned Value:
+ *   Event id
+ *
+ ****************************************************************************/
+
+static uint64_t perf_get_eventid(FAR struct perf_event_s *event)
+{
+  if (event->parent_event != NULL)
+    {
+      return event->parent_event->id;
+    }
+  else
+    {
+      return event->id;
+    }
+}
+
 static void perf_sample_data_init(FAR struct perf_sample_data_s *data,
                                   uint64_t period)
 {
@@ -192,7 +217,7 @@ static uint16_t perf_prepare_sample(FAR struct perf_sample_data_s *data,
 
   if (sample_type & PERF_SAMPLE_ID)
     {
-      data->id = event->id;
+      data->id = perf_get_eventid(event);
       data->sample_flags |= PERF_SAMPLE_ID;
       size += sizeof(event->id);
     }
@@ -384,48 +409,6 @@ static void perf_buffer_release(FAR struct perf_event_s *event)
           kumm_free(event->buf);
           event->buf = NULL;
         }
-    }
-}
-
-/****************************************************************************
- * Name: perf_assign_eventid
- *
- * Description:
- *   Assign the perf event id
- *
- * Returned Value:
- *   Event id
- *
- ****************************************************************************/
-
-static uint64_t perf_assign_eventid(void)
-{
-  return atomic_fetch_add(&g_perf_eventid, 1);
-}
-
-/****************************************************************************
- * Name: perf_get_eventid
- *
- * Description:
- *   Get the perf event id
- *
- * Input Parameters:
- *   event - Perf event
- *
- * Returned Value:
- *   Event id
- *
- ****************************************************************************/
-
-static uint64_t perf_get_eventid(FAR struct perf_event_s *event)
-{
-  if (event->parent_event != NULL)
-    {
-      return event->parent_event->id;
-    }
-  else
-    {
-      return event->id;
     }
 }
 
@@ -828,7 +811,6 @@ perf_event_alloc(FAR struct perf_event_attr_s *attr,
       goto nxmutex_destroy;
     }
 
-  event->id = perf_assign_eventid();
   return event;
 
 nxmutex_destroy:
@@ -2204,7 +2186,7 @@ static int perf_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               return -EINVAL;
             }
 
-          *(uint64_t *)arg = event->id;
+          *(uint64_t *)arg = perf_get_eventid(event);
         }
 
         return OK;
@@ -2750,6 +2732,8 @@ int perf_event_open(FAR struct perf_event_attr_s *attr, pid_t pid,
       ret = -EINVAL;
       goto err_with_event;
     }
+
+  event->id = event_fd;
 
   if (pid > 0)
     {
