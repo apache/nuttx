@@ -232,9 +232,11 @@ python_tools() {
   echo "export PIP_USER=yes" >> "${NUTTXTOOLS}"/env.sh
   echo "export PYTHONUSERBASE=${NUTTXTOOLS}/pylocal" >> "${NUTTXTOOLS}"/env.sh
   add_path "${PYTHONUSERBASE}"/bin
+  
   if [ "X$osarch" == "Xarm64" ]; then
     python3 -m venv --system-site-packages /opt/homebrew
   fi
+  
   # workaround for Cython issue
   # https://github.com/yaml/pyyaml/pull/702#issuecomment-1638930830
   pip3 install "Cython<3.0"
