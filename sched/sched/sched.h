@@ -307,30 +307,6 @@ extern volatile spinlock_t g_cpu_tasklistlock;
  * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Name:  nxsched_tick_expiration
- *
- * Description:
- *   If CONFIG_SCHED_TICKLESS is defined, then this function is provided by
- *   the RTOS base code and called from platform-specific code when the
- *   interval timer used to implement the tick-less OS expires.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- * Assumptions/Limitations:
- *   Base code implementation assumes that this function is called from
- *   interrupt handling logic with interrupts disabled.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SCHED_TICKLESS)
-void nxsched_tick_expiration(void);
-#endif
-
 int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
                     FAR void *stack_addr, int stack_size, main_t entry,
                     FAR char * const argv[], FAR char * const envp[]);
