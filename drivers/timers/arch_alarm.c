@@ -301,7 +301,7 @@ int weak_function up_timer_gettime(struct timespec *ts)
  * Description:
  *   Cancel the alarm and return the time of cancellation of the alarm.
  *   These two steps need to be as nearly atomic as possible.
- *   nxsched_tick_expiration() will not be called unless the alarm is
+ *   nxsched_process_timer() will not be called unless the alarm is
  *   restarted with up_alarm_start().
  *
  *   If, as a race condition, the alarm has already expired when this
@@ -360,14 +360,14 @@ int weak_function up_alarm_tick_cancel(FAR clock_t *ticks)
  * Name: up_alarm_start
  *
  * Description:
- *   Start the alarm.  nxsched_tick_expiration() will be called when the
+ *   Start the alarm.  nxsched_process_timer() will be called when the
  *   alarm occurs (unless up_alaram_cancel is called to stop it).
  *
  *   Provided by platform-specific code and called from the RTOS base code.
  *
  * Input Parameters:
  *   ts - The time in the future at the alarm is expected to occur. When the
- *        alarm occurs the timer logic will call nxsched_tick_expiration().
+ *        alarm occurs the timer logic will call nxsched_process_timer().
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
