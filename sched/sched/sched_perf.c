@@ -1245,56 +1245,6 @@ static void perf_group_sched_out(FAR struct perf_event_s *group_leader,
 }
 
 /****************************************************************************
- * Name: perf_context_enable
- *
- * Description:
- *   Perf context enable
- *
- * Input Parameters:
- *   ctx  - Perf event context
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void perf_context_enable(FAR struct perf_event_context_s *ctx)
-{
-  FAR struct pmu_event_context_s *pmu_ctx;
-
-  list_for_every_entry(&ctx->pmu_ctx_list, pmu_ctx,
-                       struct pmu_event_context_s, pmu_ctx_node)
-    {
-      perf_pmu_enable(pmu_ctx->pmu);
-    }
-}
-
-/****************************************************************************
- * Name: perf_context_disable
- *
- * Description:
- *   Perf context disable
- *
- * Input Parameters:
- *   ctx  - Perf event context
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void perf_context_disable(FAR struct perf_event_context_s *ctx)
-{
-  FAR struct pmu_event_context_s *pmu_ctx;
-
-  list_for_every_entry(&ctx->pmu_ctx_list, pmu_ctx,
-                       struct pmu_event_context_s, pmu_ctx_node)
-    {
-      perf_pmu_disable(pmu_ctx->pmu);
-    }
-}
-
-/****************************************************************************
  * Name: perf_context_sched_in
  *
  * Description:
@@ -1377,15 +1327,11 @@ static int perf_event_do_enable(FAR void *arg)
       return OK;
     }
 
-  perf_context_disable(ctx);
-
   perf_context_sched_out(ctx);
 
   event->state = PERF_EVENT_STATE_INACTIVE;
 
   perf_context_sched_in(ctx);
-
-  perf_context_enable(ctx);
 
   return OK;
 }
@@ -2986,11 +2932,7 @@ void perf_event_task_sched_in(FAR struct tcb_s *tcb)
     {
       irqstate_t flags = spin_lock_irqsave(&ctx->lock);
 
-      perf_context_disable(ctx);
-
       perf_context_sched_in(ctx);
-
-      perf_context_enable(ctx);
 
       spin_unlock_irqrestore(&ctx->lock, flags);
     }
@@ -3020,11 +2962,7 @@ void perf_event_task_sched_out(FAR struct tcb_s *tcb)
     {
       irqstate_t flags = spin_lock_irqsave(&ctx->lock);
 
-      perf_context_disable(ctx);
-
       perf_context_sched_out(ctx);
-
-      perf_context_enable(ctx);
 
       spin_unlock_irqrestore(&ctx->lock, flags);
     }
