@@ -377,7 +377,7 @@ static void usb_msc_disconnect(void *arg)
 
       else
         {
-          ferr("ERROR: Unmount failed: %d\n", errcode);
+          ferr("ERROR: Unmount failed: %d\n", ret);
         }
     }
 }
