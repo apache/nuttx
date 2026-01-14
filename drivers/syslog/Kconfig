@@ -478,6 +478,15 @@ config SYSLOG_RPMSG_SERVER_CHARDEV
 	bool "SYSLOG RPMSG server character device"
 	default n
 
+config SYSLOG_RPMSG_SERVER_PRIORITY
+	int "SYSLOG RPMSG server priority"
+	default 126
+	depends on SYSLOG_RPMSG_SERVER
+	---help---
+		The rpmsg priority of the SYSLOG RPMSG server endpoint.
+		The default is one below RPMSG_PRIO_DEFAULT, so that log
+		traffic does not delay the other endpoints.
+
 menuconfig SYSLOG_FILE
 	bool "Syslog file output"
 	default n
