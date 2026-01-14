@@ -212,6 +212,7 @@ static void syslog_rpmsg_ns_bind(FAR struct rpmsg_device *rdev,
   nxmutex_unlock(&g_lock);
 #endif
 
+  rpmsg_set_priority(&priv->ept, CONFIG_SYSLOG_RPMSG_SERVER_PRIORITY);
   ret = rpmsg_create_ept(&priv->ept, rdev, SYSLOG_RPMSG_EPT_NAME,
                          RPMSG_ADDR_ANY, dest,
                          syslog_rpmsg_ept_cb, rpmsg_destroy_ept);
