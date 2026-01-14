@@ -180,33 +180,45 @@ clock_t nxsched_process_roundrobin(FAR struct tcb_s *tcb, clock_t ticks,
            * give that task a shot.
            */
 
+          FAR struct tcb_s *rtcb = this_task();
+
+#ifdef CONFIG_SMP
+          /* In SMP mode, the running task is in g_assignedtasks[cpu], not
+           * in the ready-to-run list.  Therefore, tcb->flink is NULL and
+           * we cannot check it to find the next task.  If the task is
+           * running on a different CPU, send an SMP call to that CPU.
+           * Otherwise, directly call nxsched_switch_running() to find the
+           * directly call nxsched_switch_running() to find the next eligible
+           * task from the ready-to-run list and switch to it.
+           */
+
+          DEBUGASSERT(tcb->task_state == TSTATE_TASK_RUNNING);
+          if (tcb->cpu != this_cpu())
+            {
+              nxsched_smp_call_init(&g_call_data,
+                                    nxsched_roundrobin_handler,
+                                    (FAR void *)(uintptr_t)tcb->pid);
+              nxsched_smp_call_single_async(tcb->cpu, &g_call_data);
+            }
+          else if (nxsched_switch_running(tcb->cpu, true))
+            {
+              up_switch_context(this_task(), rtcb);
+            }
+#else
+          /* Just resetting the task priority to its current value.
+           * This will cause the task to be rescheduled behind any
+           * other tasks at the same priority.
+           */
+
           if (tcb->flink &&
               tcb->flink->sched_priority >= tcb->sched_priority)
             {
-              FAR struct tcb_s *rtcb = this_task();
-
-              /* Just resetting the task priority to its current value.
-               * This will cause the task to be rescheduled behind any
-               * other tasks at the same priority.
-               */
-
-#ifdef CONFIG_SMP
-              DEBUGASSERT(tcb->task_state == TSTATE_TASK_RUNNING);
-              if (tcb->cpu != this_cpu())
-                {
-                  nxsched_smp_call_init(&g_call_data,
-                                        nxsched_roundrobin_handler,
-                                        (FAR void *)(uintptr_t)tcb->pid);
-                  nxsched_smp_call_single_async(tcb->cpu, &g_call_data);
-                }
-              else if (nxsched_switch_running(tcb->cpu, true))
-#else
               if (nxsched_reprioritize_rtr(tcb, tcb->sched_priority))
-#endif
                 {
                   up_switch_context(this_task(), rtcb);
                 }
             }
+#endif
         }
     }
   else if (tcb->timeslice == 0)
