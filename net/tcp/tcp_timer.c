@@ -152,11 +152,12 @@ static void tcp_timer_expiry(FAR void *arg)
     {
       if (conn == arg)
         {
-          tcp_conn_list_unlock();
+          FAR struct net_driver_s *dev = conn->dev;
           conn->timeout = true;
-          netdev_lock(conn->dev);
-          netdev_txnotify_dev(conn->dev, TCP_POLL);
-          netdev_unlock(conn->dev);
+          tcp_conn_list_unlock();
+          netdev_lock(dev);
+          netdev_txnotify_dev(dev, TCP_POLL);
+          netdev_unlock(dev);
           return;
         }
     }
