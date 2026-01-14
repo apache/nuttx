@@ -359,7 +359,7 @@ config MM_HEAP_MEMPOOL_BACKTRACE_SKIP
 config FS_PROCFS_EXCLUDE_MEMPOOL
 	bool "Exclude mempool from procfs"
 	default DEFAULT_SMALL
-	depends on FS_PROCFS && MM_HEAP_MEMPOOL_THRESHOLD > 0
+	depends on FS_PROCFS
 
 source "mm/kasan/Kconfig"
 
