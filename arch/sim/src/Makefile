@@ -209,8 +209,9 @@ ifeq ($(CONFIG_FS_FAT),y)
   STDLIBS += -lz
 endif
 
-ifneq ($(CONFIG_SIM_WIFIDEV_NUMBER),0)
+ifeq ($(CONFIG_SIM_WIFIDEV_HOST),y)
   CFLAGS += -DTOPDIR=\"$(TOPDIR)\"
+  CSRCS += sim_wifihost.c
 endif
 
 ifeq ($(CONFIG_SIM_NETDEV_TAP),y)

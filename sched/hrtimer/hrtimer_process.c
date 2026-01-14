@@ -139,6 +139,7 @@ void hrtimer_process(uint64_t now)
 
           DEBUGASSERT(hrtimer->expired > period);
 
+          hrtimer->func = func;
           hrtimer_insert(hrtimer);
         }
 

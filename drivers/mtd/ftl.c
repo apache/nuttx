@@ -392,13 +392,14 @@ static ssize_t ftl_mtd_erase(FAR struct ftl_struct_s *dev, off_t startblock)
   if (dev->lptable == NULL)
     {
       ret = MTD_ERASE(dev->mtd, startblock, 1);
-      if (ret < 0)
+      if (ret < 0 && ret != -ENOSYS)
         {
           ferr("ERROR: Erase block %" PRIdOFF " failed: %zd\n",
                startblock, ret);
+          return ret;
         }
 
-      return ret;
+      return OK;
     }
 
   while (1)
@@ -409,9 +410,9 @@ static ssize_t ftl_mtd_erase(FAR struct ftl_struct_s *dev, off_t startblock)
         }
 
       ret = MTD_ERASE(dev->mtd, dev->lptable[startblock], 1);
-      if (ret == 1)
+      if (ret >= 0 || ret == -ENOSYS)
         {
-          return ret;
+          return OK;
         }
 
       MTD_MARKBAD(dev->mtd, dev->lptable[startblock]);
@@ -560,6 +561,18 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
   size_t nxfrd;
   int    nbytes;
   int    ret;
+
+  if (dev->mtd->erase == NULL && dev->lptable == NULL)
+    {
+      ret = MTD_BWRITE(dev->mtd, startblock, nblocks, buffer);
+      if (ret != nblocks)
+        {
+          ferr("ERROR: Direct write block %" PRIdOFF " failed: %d\n",
+               startblock, ret);
+        }
+
+      return ret;
+    }
 
   if (dev->oflags & O_DIRECT)
     {

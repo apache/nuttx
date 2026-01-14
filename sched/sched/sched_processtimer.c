@@ -146,7 +146,7 @@ static inline void nxsched_process_scheduler(void)
 #endif
 
 /****************************************************************************
- * Name:  nxsched_process_tick
+ * Name:  nxsched_process_timer
  *
  * Description:
  *   This function handles system timer events.
@@ -154,6 +154,8 @@ static inline void nxsched_process_scheduler(void)
  *   architecture specific code, but must call the following OS
  *   function periodically -- the calling interval must be
  *   USEC_PER_TICK
+ *   These are standard interfaces that are exported by the OS
+ *   for use by the architecture specific logic
  *
  * Input Parameters:
  *   None
@@ -163,7 +165,7 @@ static inline void nxsched_process_scheduler(void)
  *
  ****************************************************************************/
 
-static void nxsched_process_tick(void)
+void nxsched_process_timer(void)
 {
 #ifdef CONFIG_CLOCK_TIMEKEEPING
   /* Process wall time */
@@ -194,26 +196,3 @@ static void nxsched_process_tick(void)
 #endif
 }
 #endif
-
-/****************************************************************************
- * System Timer Hooks
- *
- * These are standard interfaces that are exported by the OS
- * for use by the architecture specific logic
- *
- ****************************************************************************/
-
-void nxsched_process_timer(void)
-{
-#ifdef CONFIG_SCHED_TICKLESS
-  /* Tickless scheduling */
-
-  nxsched_tick_expiration();
-
-#else
-  /* Periodic tick-based scheduling */
-
-  nxsched_process_tick();
-
-#endif
-}

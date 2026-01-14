@@ -149,6 +149,9 @@ static const struct nxsig_defaction_s g_defactions[] =
 #ifdef CONFIG_SIG_SIGPOLL_ACTION
   { SIGPOLL,   0,                nxsig_abnormal_termination },
 #endif
+#ifdef CONFIG_SIG_SIGURG_ACTION
+  { SIGURG,    0,                nxsig_null_action },
+#endif
 };
 
 #define NACTIONS (sizeof(g_defactions) / sizeof(struct nxsig_defaction_s))

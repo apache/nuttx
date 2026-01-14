@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/net/wifi_sim.h
+ * arch/sim/src/sim/sim_wifihost.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,17 +20,16 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NET_WIFI_SIM_H
-#define __INCLUDE_NUTTX_NET_WIFI_SIM_H
+#ifndef __ARCH_SIM_SRC_SIM_WIFIHOST_H
+#define __ARCH_SIM_SRC_SIM_WIFIHOST_H
+
+#if CONFIG_SIM_WIFIDEV_NUMBER != 0
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#ifdef CONFIG_DRIVERS_WIFI_SIM
-
 #include <nuttx/net/netdev_lowerhalf.h>
 
 /****************************************************************************
@@ -49,22 +48,21 @@ extern "C"
  * Public Type Definitions
  ****************************************************************************/
 
-struct wifi_sim_lowerhalf_s
+struct sim_wifihost_lowerhalf_s
 {
   /* This holds the information visible to the NuttX network */
 
   struct netdev_lowerhalf_s lower;     /* The netdev lowerhalf */
 
-  FAR void *wifi;
+  void *wifi;
 };
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-int  wifi_sim_init(FAR struct wifi_sim_lowerhalf_s *netdev);
-void wifi_sim_remove(FAR struct wifi_sim_lowerhalf_s *netdev);
-bool wifi_sim_connected(FAR struct wifi_sim_lowerhalf_s *dev);
+int sim_wifihost_init(struct sim_wifihost_lowerhalf_s *dev, int devidx);
+bool sim_wifihost_connected(struct sim_wifihost_lowerhalf_s *dev);
 
 #undef EXTERN
 #ifdef __cplusplus
@@ -72,4 +70,4 @@ bool wifi_sim_connected(FAR struct wifi_sim_lowerhalf_s *dev);
 #endif
 
 #endif /* CONFIG_DRIVERS_WIFI_SIM */
-#endif /* __INCLUDE_NUTTX_NET_WIFI_SIM_H */
+#endif /* __ARCH_SIM_SRC_SIM_WIFIHOST_H */

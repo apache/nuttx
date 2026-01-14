@@ -60,7 +60,7 @@ endif()
 # Architecture flags
 
 add_link_options(-entry=__start)
-add_compile_options(--no_commons -Wall -Wshadow -Wundef -nostdlib)
+add_compile_options(--no_commons --ghstd=last -Wshadow -Wundef -nostdlib)
 add_compile_options(--option=305)
 
 if(CONFIG_DEBUG_CUSTOMOPT)
@@ -147,6 +147,12 @@ if(CONFIG_ARM_THUMB)
   add_compile_options(-thumb)
 endif()
 
+# Optimization of unused sections
+
+if(CONFIG_DEBUG_OPT_UNUSED_SECTIONS)
+  add_compile_options(-ffunction-sections -fdata-sections)
+endif()
+
 # Debug --whole-archive
 
 if(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE)
@@ -219,11 +225,30 @@ function(nuttx_generate_preprocess_target)
     ARGN
     ${ARGN})
 
+  # in greenhills, for file to pre-process, if the file name is ends with
+  # "*.ld", will report error, and we need to change the target file name to
+  # "*.ld.i" or "*.ld.tmp", this is a special corner case, and the official
+  # greenhills reference manual do not have explanation about why the only
+  # "*.ld" should handle
+  set(EXPECT_TARGET_FILE_NAME ${TARGET_FILE})
+  string(REGEX MATCH ".*\.ld$" ends_with_ld ${TARGET_FILE})
+
+  if(ends_with_ld STREQUAL ${TARGET_FILE})
+    set(EXPECT_TARGET_FILE_NAME "${TARGET_FILE}.i")
+  endif()
+
   add_custom_command(
-    OUTPUT ${TARGET_FILE}
+    OUTPUT ${EXPECT_TARGET_FILE_NAME}
     COMMAND ${PREPROCESS} -I${CMAKE_BINARY_DIR}/include -filetype.cpp
-            ${SOURCE_FILE} -o ${TARGET_FILE}
+            ${SOURCE_FILE} -o ${EXPECT_TARGET_FILE_NAME}
     DEPENDS ${SOURCE_FILE} ${DEPENDS})
+
+  if(NOT ${EXPECT_TARGET_FILE_NAME} STREQUAL ${TARGET_FILE})
+    add_custom_command(
+      OUTPUT ${TARGET_FILE}
+      COMMAND ${CMAKE_COMMAND} -E copy ${EXPECT_TARGET_FILE_NAME} ${TARGET_FILE}
+      DEPENDS ${EXPECT_TARGET_FILE_NAME})
+  endif()
 
 endfunction()
 

@@ -372,7 +372,7 @@ In addition to these imported interfaces, the RTOS will export the
 following interfaces for use by the platform-specific interval
 timer implementation:
 
-- ``nxsched_tick_expiration()``: called by the platform-specific logic when the interval time expires.
+- ``nxsched_process_timer()``: called by the platform-specific logic when the interval time expires.
 
 .. c:function:: void archname_timer_initialize(void)
 
@@ -410,7 +410,7 @@ timer implementation:
 
   Cancel the alarm and return the time of cancellation of the alarm.
   These two steps need to be as nearly atomic as possible.
-  ``nxsched_tick_expiration()`` will not be called unless the alarm
+  ``nxsched_process_timer()`` will not be called unless the alarm
   is restarted with ``up_alarm_start()``. If, as a race condition,
   the alarm has already expired when this function is called, then
   time returned is the current time.
@@ -427,13 +427,13 @@ timer implementation:
 
 .. c:function:: int up_alarm_start(FAR const struct timespec *ts)
 
-  Start the alarm. ``nxsched_tick_expiration()`` will be called
+  Start the alarm. ``nxsched_process_timer()`` will be called
   when the alarm occurs (unless ``up_alarm_cancel`` is called to
   stop it).
 
   :param ts: The time in the future at the alarm is expected to
     occur. When the alarm occurs the timer logic will call
-    ``nxsched_tick_expiration()``.
+    ``nxsched_process_timer()``.
 
   :return: Zero (OK) on success; a negated errno value on failure.
 
@@ -445,11 +445,11 @@ timer implementation:
 
 Cancel the interval timer and return the time remaining on the
 timer. These two steps need to be as nearly atomic as possible.
-``nxsched_tick_expiration()`` will not be called unless the timer
+``nxsched_process_timer()`` will not be called unless the timer
 is restarted with ``up_timer_start()``. If, as a race condition,
 the timer has already expired when this function is called, then
 that pending interrupt must be cleared so that
-``nxsched_tick_expiration()`` is not called spuriously and the
+``nxsched_process_timer()`` is not called spuriously and the
 remaining time of zero should be returned.
 
 :param ts: Location to return the remaining time. Zero should be
@@ -463,12 +463,12 @@ disabled internally to assure non-reentrancy.
 
 .. c:function:: int up_timer_start(FAR const struct timespec *ts)
 
-Start the interval timer. ``nxsched_tick_expiration()`` will be
+Start the interval timer. ``nxsched_process_timer()`` will be
 called at the completion of the timeout (unless
 ``up_timer_cancel()`` is called to stop the timing).
 
 :param ts: Provides the time interval until
-  ``nxsched_tick_expiration()`` is called.
+  ``nxsched_process_timer()`` is called.
 
 :return: Zero (OK) on success; a negated errno value on failure.
 
@@ -563,41 +563,6 @@ or ``kill()`` to communicate with NuttX tasks.
   **Assumptions/Limitations:** The watchdog routine runs in the
   context of the timer interrupt handler and is subject to all ISR
   restrictions.
-
-.. c:function:: int wd_restart(FAR struct wdog_s *wdog, clock_t delay)
-
-  This function restarts the specified watchdog timer using the same
-  function and argument that were specified in the previous wd_start()
-  call, but with a new delay value. It can be used when the user wants
-  to restart the same watchdog with a different timeout value, or to
-  refresh (feed) an existing watchdog before it expires.
-
-  :param wdog: Pointer to the watchdog timer to restart
-  :param delay: Delay count in clock ticks
-
-  **NOTE**: The parameter must be of type ``wdparm_t``.
-
-  :return: Zero (``OK``) is returned on success; a negated ``errno`` value
-    is return to indicate the nature of any failure.
-
-.. c:function:: int wd_restart_next(FAR struct wdog_s *wdog, clock_t delay)
-
-  This function restarts the specified watchdog timer using a new delay
-  value, but schedules the next expiration based on the previous
-  expiration time (wdog->expired + delay).  This allows the watchdog to
-  maintain a consistent periodic interval even if there is some delay in
-  handling the expiration callback.
-
-  It can be used when the user wants to restart a watchdog for a different
-  purpose or continue periodic timing based on the previous timeout point.
-
-  :param wdog: Pointer to the watchdog timer to restart
-  :param delay: Delay count in clock ticks
-
-  **NOTE**: The parameter must be of type ``wdparm_t``.
-
-  :return: Zero (``OK``) is returned on success; a negated ``errno`` value
-    is return to indicate the nature of any failure.
 
 .. c:function:: int wd_cancel(FAR struct wdog_s *wdog)
 
@@ -745,12 +710,15 @@ that returns immediately without waiting for the timer to stop executing.
 
   **POSIX Compatibility:** This is a NON-POSIX interface.
 
-.. c:function:: int hrtimer_start(FAR hrtimer_t *hrtimer, uint64_t ns, \
+.. c:function:: int hrtimer_start(FAR hrtimer_t *hrtimer, \
+                                  hrtimer_entry_t func, \
+                                  uint64_t expired, \
                                   enum hrtimer_mode_e mode)
 
   This function starts a high-resolution timer in absolute or relative mode.
 
   :param hrtimer: Timer instance to cancel
+  :param func: Expiration callback function
   :param ns: Timer expiration in nanoseconds (absolute or relative)
   :param mode: HRTIMER_MODE_ABS or HRTIMER_MODE_REL
 
@@ -758,7 +726,8 @@ that returns immediately without waiting for the timer to stop executing.
 
   **POSIX Compatibility:** This is a NON-POSIX interface.
 
-.. c:type:: uint64_t (*hrtimer_cb)(FAR hrtimer_t *hrtimer, uint64_t expired)
+.. c:type:: uint64_t (*hrtimer_entry_t)(FAR hrtimer_t *hrtimer, \
+                                        uint64_t expired)
 
   **High-resolution Timer Callback**: when a hrtimer expires,
   the callback function with this type is called.
