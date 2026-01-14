@@ -475,6 +475,7 @@
 /* GNSS Geofence */
 
 #define SENSOR_TYPE_GNSS_GEOFENCE                   52
+
 /* Velocity Sensor
  * A sensor of this type measures the velocity as it is moving.
  * The default unit velocity is meter by seconds m/s (SI).
