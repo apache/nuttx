@@ -28,6 +28,10 @@ include(nuttx_parse_function_args)
 # compiler options and include path needed by all apps libraries.
 add_custom_target(nuttx_apps_interface)
 
+# "nuttx_target_interface" is a source-less target that hold target information
+# for target debug and dump
+add_custom_target(nuttx_target_interface)
+
 # Macro: nuttx_library
 #
 # Creates a library target with the given name and mode. If MODE is "KERNEL", it
@@ -153,7 +157,7 @@ endfunction()
 # Usage: nuttx_include_directories("include/path1" "include/path2")
 function(nuttx_include_directories)
   if(TARGET ${NX_CURRENT_LIBRARY})
-    target_include_directories(${NX_CURRENT_LIBRARY} PRIVATE ${ARGN})
+    target_include_directories(${NX_CURRENT_LIBRARY} PUBLIC ${ARGN})
   endif()
 endfunction()
 
@@ -298,3 +302,14 @@ function(nuttx_link_libraries)
     endforeach()
   endif()
 endfunction()
+
+# dump targets information
+add_custom_target(
+  dump_targets
+  COMMAND ${CMAKE_COMMAND} -E remove target_dump
+  COMMAND ${CMAKE_COMMAND} -E echo
+          "'$<TARGET_PROPERTY:nuttx_target_interface,ALL_TARGETS>'"
+  COMMAND
+    ${CMAKE_COMMAND} -E echo
+    "'$<TARGET_PROPERTY:nuttx_target_interface,ALL_TARGETS>'" >> target_dump
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR})

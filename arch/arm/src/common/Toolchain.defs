@@ -410,7 +410,14 @@ ARCHOPTIMIZATION += --no_commons
 else
 ARCHOPTIMIZATION += -fno-common
 endif
-ARCHOPTIMIZATION += -Wall -Wshadow -Wundef
+
+ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+  ARCHOPTIMIZATION += --ghstd=last
+else
+  ARCHOPTIMIZATION += -Wall
+endif
+
+ARCHOPTIMIZATION += -Wshadow -Wundef
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
   ARCHOPTIMIZATION += -nostdlib
@@ -438,8 +445,8 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
   ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
     ifeq ($(CONFIG_ARCH_TOOLCHAIN_GHS),)
       LDFLAGS          += --gc-sections
-      ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
     endif
+    ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
   endif
 endif
 

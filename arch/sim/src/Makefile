@@ -118,7 +118,7 @@ ifeq ($(CONFIG_FS_LARGEFILE),y)
 endif
 
 HOSTSRCS  = sim_hostirq.c sim_hostmemory.c sim_hostmisc.c sim_hosttime.c sim_hostuart.c
-HOSTSRCS += sim_hostfs.c
+HOSTSRCS += sim_hostfs.c sim_errno.c
 
 hostfs.h: $(TOPDIR)/include/nuttx/fs/hostfs.h
 	@echo "CP:  $<"
@@ -209,8 +209,9 @@ ifeq ($(CONFIG_FS_FAT),y)
   STDLIBS += -lz
 endif
 
-ifneq ($(CONFIG_SIM_WIFIDEV_NUMBER),0)
+ifeq ($(CONFIG_SIM_WIFIDEV_HOST),y)
   CFLAGS += -DTOPDIR=\"$(TOPDIR)\"
+  CSRCS += sim_wifihost.c
 endif
 
 ifeq ($(CONFIG_SIM_NETDEV_TAP),y)

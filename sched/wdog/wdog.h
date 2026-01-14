@@ -36,6 +36,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/queue.h>
 #include <nuttx/wdog.h>
+#include <nuttx/arch.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -59,6 +60,65 @@ extern "C"
  */
 
 extern struct list_node g_wdactivelist;
+
+#ifdef CONFIG_SCHED_TICKLESS
+extern bool g_wdtimernested;
+#endif
+
+/****************************************************************************
+ * Inline functions
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_TICKLESS
+#  define wd_in_callback() (g_wdtimernested)
+#  define wd_set_nested(f) (g_wdtimernested = (f))
+#else
+#  define wd_in_callback() (false)
+#  define wd_set_nested(f)
+#endif
+
+#ifdef CONFIG_SCHED_TICKLESS
+static inline_function void wd_timer_start(clock_t next_tick)
+{
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
+#  ifndef CONFIG_ALARM_ARCH
+  struct timespec ts;
+  clock_ticks2time(&ts, next_tick);
+  up_alarm_start(&ts);
+#  else
+  up_alarm_tick_start(next_tick);
+#  endif
+#else
+#  ifndef CONFIG_TIMER_ARCH
+  struct timespec ts1;
+  struct timespec ts2;
+  clock_ticks2time(&ts1, next_tick);
+  clock_systime_timespec(&ts2);
+  clock_timespec_subtract(&ts1, &ts2, &ts1);
+  up_timer_start(&ts1);
+#  else
+  up_timer_tick_start(next_tick - clock_systime_ticks());
+#  endif
+#endif
+}
+static inline_function void wd_timer_cancel(void)
+{
+  struct timespec ts;
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
+  up_alarm_cancel(&ts);
+#else
+  up_timer_cancel(&ts);
+#endif
+}
+#else
+#  define wd_timer_start(next_tick)
+#  define wd_timer_cancel()
+#endif
+
+static inline_function clock_t wd_next_expire(void)
+{
+  return list_first_entry(&g_wdactivelist, struct wdog_s, node)->expired;
+}
 
 /****************************************************************************
  * Public Function Prototypes
@@ -90,11 +150,7 @@ extern struct list_node g_wdactivelist;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_TICKLESS
-clock_t wd_timer(clock_t ticks, bool noswitches);
-#else
 void wd_timer(clock_t ticks);
-#endif
 
 #undef EXTERN
 #ifdef __cplusplus

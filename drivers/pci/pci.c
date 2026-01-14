@@ -687,7 +687,8 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar,
                              FAR struct pci_resource_s *mem_pref)
 {
   int bar;
-  uint32_t orig;
+  uint32_t orig0;
+  uint32_t orig1;
   uint32_t mask;
   uint64_t orig64;
   uint64_t size64;
@@ -711,10 +712,9 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar,
       FAR struct pci_resource_s *res;
       unsigned int flags;
 
-      pci_read_config_dword(dev, base_address_0, &orig);
+      pci_read_config_dword(dev, base_address_0, &orig0);
       pci_write_config_dword(dev, base_address_0, 0xfffffffe);
       pci_read_config_dword(dev, base_address_0, &mask);
-      pci_write_config_dword(dev, base_address_0, orig);
 
       if (mask == 0 || mask == 0xffffffff)
         {
@@ -770,21 +770,22 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar,
           res    = mem;
         }
 
-      orig64 = orig;
+      orig64 = orig0;
       maxbase = mask;
       if (mask & PCI_BASE_ADDRESS_MEM_TYPE_64)
         {
           uint32_t masktmp;
 
-          pci_read_config_dword(dev, base_address_1, &orig);
+          pci_read_config_dword(dev, base_address_1, &orig1);
           pci_write_config_dword(dev, base_address_1, 0xffffffff);
           pci_read_config_dword(dev, base_address_1, &masktmp);
-          pci_write_config_dword(dev, base_address_1, orig);
+          pci_write_config_dword(dev, base_address_1, orig1);
           mask64 |= (uint64_t)masktmp << 32;
-          orig64 |= (uint64_t)orig << 32;
+          orig64 |= (uint64_t)orig1 << 32;
           maxbase |= (uint64_t)masktmp << 32;
         }
 
+      pci_write_config_dword(dev, base_address_0, orig0);
       size64 = pci_size(orig64, maxbase, mask64);
       if (size64 == 0)
         {
@@ -840,12 +841,12 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar,
         }
     }
 
-  pci_read_config_dword(dev, rom_addr, &orig);
+  pci_read_config_dword(dev, rom_addr, &orig0);
   pci_write_config_dword(dev, rom_addr,
                          ~PCI_ROM_ADDRESS_ENABLE);
   pci_read_config_dword(dev, rom_addr, &mask);
-  pci_write_config_dword(dev, rom_addr, orig);
-  start = PCI_ROM_ADDR(orig);
+  pci_write_config_dword(dev, rom_addr, orig0);
+  start = PCI_ROM_ADDR(orig0);
   size64 = PCI_ROM_SIZE(mask);
   if (start != 0 && size64 != 0)
     {

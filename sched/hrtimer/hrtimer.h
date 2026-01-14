@@ -198,10 +198,7 @@ RB_PROTOTYPE(hrtimer_tree_s, hrtimer_node_s, entry, hrtimer_compare);
 
 static inline_function bool hrtimer_is_armed(FAR hrtimer_t *hrtimer)
 {
-  /* RB-tree root has NULL parent, so root must be checked explicitly */
-
-  return RB_PARENT(&hrtimer->node, entry) != NULL ||
-         RB_ROOT(&g_hrtimer_tree) == &hrtimer->node;
+  return hrtimer->func != NULL;
 }
 
 /****************************************************************************
@@ -217,7 +214,7 @@ static inline_function void hrtimer_remove(FAR hrtimer_t *hrtimer)
 
   /* Explicitly clear parent to mark the timer as unarmed */
 
-  RB_PARENT(&hrtimer->node, entry) = NULL;
+  hrtimer->func = NULL;
 }
 
 /****************************************************************************

@@ -901,7 +901,7 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd,
    * nullified by kmm_zalloc).
    */
 
-  part->child.erase   = part_erase;
+  part->child.erase   = mtd->erase ? part_erase : NULL;
   part->child.bread   = part_bread;
   part->child.bwrite  = part_bwrite;
   part->child.read    = mtd->read ? part_read : NULL;

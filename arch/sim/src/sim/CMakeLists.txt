@@ -213,6 +213,11 @@ if(CONFIG_SIM_X11FB)
   endif()
 endif()
 
+if(NOT ${CONFIG_SIM_WIFIDEV_NUMBER} EQUAL 0)
+  add_compile_options(-DTOPDIR=$(TOPDIR))
+  list(APPEND SRCS sim_wifihost.c)
+endif()
+
 if(CONFIG_SIM_NETDEV_TAP)
   list(APPEND SRCS sim_netdriver.c)
 
@@ -283,6 +288,8 @@ endif()
 
 list(APPEND HOSTSRCS sim_hostfs.c)
 list(APPEND HOST_DEFINITIONS CONFIG_NAME_MAX=${CONFIG_NAME_MAX})
+
+list(APPEND HOSTSRCS sim_errno.c)
 
 configure_file(${NUTTX_DIR}/include/nuttx/fs/hostfs.h
                ${CMAKE_CURRENT_BINARY_DIR}/hostfs.h COPYONLY)

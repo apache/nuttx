@@ -61,28 +61,32 @@ endif
 endif
 
 # C++ABI files
-CPPSRCS += cxa_aux_runtime.cpp cxa_default_handlers.cpp cxa_demangle.cpp cxa_exception_storage.cpp
+CPPSRCS += cxa_aux_runtime.cpp cxa_default_handlers.cpp cxa_demangle.cpp
 CPPSRCS += cxa_guard.cpp cxa_handlers.cpp cxa_thread_atexit.cpp cxa_vector.cpp cxa_virtual.cpp
 # C++ STL files
-CPPSRCS += stdlib_exception.cpp stdlib_new_delete.cpp stdlib_stdexcept.cpp stdlib_typeinfo.cpp
+CPPSRCS += stdlib_exception.cpp stdlib_new_delete.cpp stdlib_stdexcept.cpp
 # Internal files
-CPPSRCS += abort_message.cpp fallback_malloc.cpp private_typeinfo.cpp
+CPPSRCS += abort_message.cpp fallback_malloc.cpp
 
 ifeq ($(CONFIG_CXX_EXCEPTION),y)
-CPPSRCS += cxa_exception.cpp cxa_personality.cpp
+CPPSRCS += cxa_exception.cpp cxa_personality.cpp cxa_exception_storage.cpp
+endif
+
+ifeq ($(CONFIG_CXX_RTTI),y)
+CPPSRCS += private_typeinfo.cpp stdlib_typeinfo.cpp
 endif
 
 # Fix compilation error on ARM32:
 # libcxxabi/src/cxa_personality.cpp:594:22: error: '_URC_FATAL_PHASE1_ERROR' was not declared in this scope
 #   594 |     results.reason = _URC_FATAL_PHASE1_ERROR;
 ifeq ($(CONFIG_ARCH_ARM),y)
-CXXFLAGS += -D_URC_FATAL_PHASE2_ERROR=_URC_FAILURE -D_URC_FATAL_PHASE1_ERROR=_URC_FAILURE
+	ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),)
+		CXXFLAGS += -D_URC_FATAL_PHASE2_ERROR=_URC_FAILURE -D_URC_FATAL_PHASE1_ERROR=_URC_FAILURE
+	endif
 endif
 
 CXXFLAGS += -DLIBCXXABI_NON_DEMANGLING_TERMINATE
-
-# RTTI is required for building the libcxxabi library
-CXXFLAGS += -frtti
+CXXFLAGS += -DLIBCXXABI_BAREMETAL
 
 DEPPATH += --dep-path libcxxabi/libcxxabi/src
 VPATH += libcxxabi/libcxxabi/src

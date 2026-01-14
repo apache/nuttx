@@ -86,7 +86,7 @@ static int lpc43_rit_isr(int irq, void *context, void *arg)
     {
       /* handle expired alarm */
 
-      nxsched_timer_expiration();
+      nxsched_process_timer();
     }
 
   leave_critical_section(flags);

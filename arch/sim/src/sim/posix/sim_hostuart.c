@@ -96,15 +96,15 @@ void host_uart_start(void)
 {
   /* Get the current stdin terminal mode */
 
-  host_uninterruptible_no_return(tcgetattr, 0, &g_cooked);
+  tcgetattr(0, &g_cooked);
 
   /* Put stdin into raw mode */
 
-  host_uninterruptible_no_return(setrawmode, 0);
+  setrawmode(0);
 
   /* Restore the original terminal mode before exit */
 
-  host_uninterruptible_no_return(atexit, restoremode);
+  atexit(restoremode);
 }
 
 /****************************************************************************
@@ -115,12 +115,16 @@ int host_uart_open(const char *pathname)
 {
   int fd;
 
-  fd = host_uninterruptible_errno(open, pathname, O_RDWR | O_NONBLOCK);
+  fd = open(pathname, O_RDWR | O_NONBLOCK);
   if (fd >= 0)
     {
       /* keep raw mode */
 
-      host_uninterruptible_no_return(setrawmode, fd);
+      setrawmode(fd);
+    }
+  else
+    {
+      fd = -errno;
     }
 
   return fd;
@@ -132,7 +136,7 @@ int host_uart_open(const char *pathname)
 
 void host_uart_close(int fd)
 {
-  host_uninterruptible(close, fd);
+  close(fd);
 }
 
 /****************************************************************************
@@ -145,11 +149,11 @@ int host_uart_puts(int fd, const char *buf, size_t size)
 
   do
     {
-      ret = host_uninterruptible_errno(write, fd, buf, size);
+      ret = write(fd, buf, size);
     }
-  while (ret < 0 && ret == -EINTR);
+  while (ret < 0 && errno == EINTR);
 
-  return ret;
+  return ret < 0 ? -errno : ret;
 }
 
 /****************************************************************************
@@ -162,11 +166,11 @@ int host_uart_gets(int fd, char *buf, size_t size)
 
   do
     {
-      ret = host_uninterruptible_errno(read, fd, buf, size);
+      ret = read(fd, buf, size);
     }
-  while (ret < 0 && ret == -EINTR);
+  while (ret < 0 && errno == EINTR);
 
-  return ret;
+  return ret < 0 ? -errno : ret;
 }
 
 /****************************************************************************
@@ -178,8 +182,12 @@ int host_uart_getcflag(int fd, unsigned int *cflag)
   struct termios t;
   int ret;
 
-  ret = host_uninterruptible_errno(tcgetattr, fd, &t);
-  if (ret >= 0)
+  ret = tcgetattr(fd, &t);
+  if (ret < 0)
+    {
+      ret = -errno;
+    }
+  else
     {
       *cflag = t.c_cflag;
     }
@@ -196,11 +204,16 @@ int host_uart_setcflag(int fd, unsigned int cflag)
   struct termios t;
   int ret;
 
-  ret = host_uninterruptible_errno(tcgetattr, fd, &t);
+  ret = tcgetattr(fd, &t);
   if (!ret)
     {
       t.c_cflag = cflag;
-      ret = host_uninterruptible_errno(tcsetattr, fd, TCSANOW, &t);
+      ret = tcsetattr(fd, TCSANOW, &t);
+    }
+
+  if (ret < 0)
+    {
+      ret = -errno;
     }
 
   return ret;
@@ -216,7 +229,7 @@ bool host_uart_checkin(int fd)
 
   pfd.fd     = fd;
   pfd.events = POLLIN;
-  return host_uninterruptible(poll, &pfd, 1, 0) == 1;
+  return poll(&pfd, 1, 0) == 1;
 }
 
 /****************************************************************************
@@ -229,7 +242,7 @@ bool host_uart_checkout(int fd)
 
   pfd.fd     = fd;
   pfd.events = POLLOUT;
-  return host_uninterruptible(poll, &pfd, 1, 0) == 1;
+  return poll(&pfd, 1, 0) == 1;
 }
 
 /****************************************************************************

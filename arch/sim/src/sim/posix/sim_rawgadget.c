@@ -325,7 +325,7 @@ static void host_raw_init(int fd, enum usb_device_speed speed,
 
 static int host_raw_run(int fd)
 {
-  int rv = host_uninterruptible_errno(ioctl, fd, USB_RAW_IOCTL_RUN, 0);
+  int rv = host_uninterruptible(ioctl, fd, USB_RAW_IOCTL_RUN, 0);
   if (rv < 0)
     {
       ERROR("ioctl(USB_RAW_IOCTL_RUN) fail");

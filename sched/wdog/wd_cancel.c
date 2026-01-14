@@ -86,14 +86,21 @@ int wd_cancel(FAR struct wdog_s *wdog)
 
           wdog->func = NULL;
 
-          if (first == wdog)
+          if (first == wdog && !wd_in_callback())
             {
               /* If the watchdog is at the head of the timer queue, then
                * we will need to re-adjust the interval timer that will
                * generate the next interval event.
                */
 
-              nxsched_reassess_timer();
+              if (!list_is_empty(&g_wdactivelist))
+                {
+                  wd_timer_start(wd_next_expire());
+                }
+              else
+                {
+                  wd_timer_cancel();
+                }
             }
 
           ret = OK;

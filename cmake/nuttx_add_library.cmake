@@ -62,6 +62,12 @@ function(nuttx_add_library_internal target)
 
   # Set install config for all library
   install(TARGETS ${target})
+  # Set target information for debug and dump
+  set_property(
+    TARGET nuttx_target_interface
+    APPEND
+    PROPERTY ALL_TARGETS ${target})
+  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/targets "${target}\n")
 endfunction()
 
 # Auxiliary libraries

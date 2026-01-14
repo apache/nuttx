@@ -146,6 +146,7 @@ enum WLAN_STA_STATE_E
   WLAN_STA_STATE_INIT,
   WLAN_STA_STATE_CONNECTING,
   WLAN_STA_STATE_CONNECTED,
+  WLAN_STA_STATE_DISCONNECTED,
 };
 
 enum WLAN_STA_CONNERR_E
@@ -915,6 +916,8 @@ static int wifidriver_start_disconnect(FAR struct wifi_sim_s *wifidev)
         {
           if (wifidev->state == WLAN_STA_STATE_CONNECTED)
             {
+              wifidev->state = WLAN_STA_STATE_DISCONNECTED;
+
               /* free the connected_ap */
 
               free(wifidev->connected_ap);
@@ -1974,6 +1977,8 @@ int wifi_sim_init(FAR struct wifi_sim_lowerhalf_s *netdev)
   priv->lower          = &netdev->lower;
   netdev->wifi         = priv;
 
+  priv->mode           = IW_MODE_AUTO;
+
   return OK;
 }
 
@@ -1991,5 +1996,25 @@ void wifi_sim_remove(FAR struct wifi_sim_lowerhalf_s *netdev)
     }
 
   kmm_free(netdev->wifi);
+}
+
+/****************************************************************************
+ * Name: wifi_sim_connected
+ ****************************************************************************/
+
+bool wifi_sim_connected(FAR struct wifi_sim_lowerhalf_s *dev)
+{
+  FAR struct wifi_sim_s *wifidev = (FAR struct wifi_sim_s *)dev->wifi;
+
+  if (wifidev->mode == IW_MODE_MASTER)
+    {
+      return true;
+    }
+  else if (wifidev->mode == IW_MODE_INFRA)
+    {
+      return wifidev->state == WLAN_STA_STATE_CONNECTED;
+    }
+
+  return false;
 }
 

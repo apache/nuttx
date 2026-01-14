@@ -68,6 +68,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* The compatibility IOCTL definitions */
+
+#define _IO(type,nr)        _IOC((type),(nr))
+
+#define FS_IOC_GETFLAGS     FIOC_GETFLAGS
+#define FS_IOC_SETFLAGS     FIOC_SETFLAGS
+
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
