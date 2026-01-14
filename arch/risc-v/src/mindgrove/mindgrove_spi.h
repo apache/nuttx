@@ -1,4 +1,6 @@
 #define MG_SPI_MODE                0
+#define MG_SPI_MASTER_MODE         0
+#define MG_SPI_SLAVE_MODE          1
 
 #define MG_SPI_ENABLE_SHIFT        1
 #define MG_SPI_ENABLE_MASK         (1U << MG_SPI_ENABLE_SHIFT)
@@ -54,6 +56,7 @@
 #define MG_SPI_INTR_EN_OFFSET       0x10
 #define MG_SPI_FIFO_STAT_OFFSET     0x14
 #define MG_SPI_COMM_STAT_OFFSET     0x18
+#define MG_SPI_NCS_CTRL_OFFSET      0x1c
 
 #define MG_SPI_CONTROL      (priv->hw_base + MG_SPI_CONTROL_OFFSET)
 #define MG_SPI_CLK_CTRL     (priv->hw_base + MG_SPI_CLK_CTRL_OFFSET)
@@ -62,6 +65,7 @@
 #define MG_SPI_INTR_EN      (priv->hw_base + MG_SPI_INTR_EN_OFFSET)
 #define MG_SPI_FIFO_STAT    (priv->hw_base + MG_SPI_FIFO_STAT_OFFSET)
 #define MG_SPI_COMM_STAT    (priv->hw_base + MG_SPI_COMM_STAT_OFFSET)
+#define MG_SPI_NCS_CTRL     (priv->hw_base + MG_SPI_NCS_CTRL_OFFSET)
 
 /* TX FIFO status bits */
 

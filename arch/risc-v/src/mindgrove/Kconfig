@@ -48,6 +48,15 @@ config MINDGROVE_UART2
     select ARCH_HAVE_UART2
     select ARCH_HAVE_SERIAL_TERMIOS
     select MINDGROVE_UART
+    
+config MINDGROVE_SPI
+    bool
+    default n
+    select SPI
+    select SPI_CS_CONTROL
+    select SPI_EXCHANGE
+    select SPI_HWFEATURES     # This "unlocks" the feature you need
+    select SPI_CHARACTER    # Ensures the /dev/spiX driver is built
 
 config MINDGROVE_HAVE_SPI0
     bool
