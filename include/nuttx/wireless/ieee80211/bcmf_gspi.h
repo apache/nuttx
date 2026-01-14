@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/wireless/ieee80211/bcmf_gspi.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,13 +44,13 @@
  ****************************************************************************/
 
 enum gspi_cmd_func_e
-  {
-    gspi_f0_bus       = 0x0,
-    gspi_f1_backplane = 0x1,
-    gspi_f2_dma       = 0x2,
-    gspi_f3_dma       = 0x3,
-    gspi_f0_bus_rev16 = 0x4  /* variant of gspi_f0_bus that does REV16 */
-  };
+{
+  gspi_f0_bus       = 0x0,
+  gspi_f1_backplane = 0x1,
+  gspi_f2_dma       = 0x2,
+  gspi_f3_dma       = 0x3,
+  gspi_f0_bus_rev16 = 0x4  /* variant of gspi_f0_bus that does REV16 */
+};
 
 struct bcmf_dev_s;
 
@@ -61,25 +63,25 @@ typedef struct gspi_dev_s
    * following fields before calling gspi_register.
    */
 
-  FAR int  (*init)            (FAR struct gspi_dev_s   *gspi);
+  CODE int (*init)            (FAR struct gspi_dev_s   *gspi);
 
-  FAR int  (*deinit)          (FAR struct gspi_dev_s   *gspi);
+  CODE int (*deinit)          (FAR struct gspi_dev_s   *gspi);
 
-  FAR int  (*set_isr)         (FAR struct gspi_dev_s   *gspi,
+  CODE int (*set_isr)         (FAR struct gspi_dev_s   *gspi,
                                xcpt_t                   thread_isr,
                                FAR void                *thread_isr_arg);
 
-  FAR int  (*interrupt_enable)(FAR struct gspi_dev_s   *gspi,
-                              bool                     enable);
+  CODE int (*interrupt_enable)(FAR struct gspi_dev_s   *gspi,
+                               bool                     enable);
 
-  FAR int  (*write)           (FAR struct gspi_dev_s  *gspi,
+  CODE int (*write)           (FAR struct gspi_dev_s  *gspi,
                                bool                    increment,
                                enum gspi_cmd_func_e    function,
                                uint32_t                address,
                                uint16_t                length,
                                FAR const uint32_t     *data);
 
-  FAR int  (*read)            (FAR struct gspi_dev_s  *gspi,
+  CODE int (*read)            (FAR struct gspi_dev_s  *gspi,
                                bool                    increment,
                                enum gspi_cmd_func_e    function,
                                uint32_t                address,
@@ -92,7 +94,7 @@ typedef struct gspi_dev_s
    * Other fields must be set to zero.
    */
 
-  void                  *io_dev;  /* Private data for opened io device. */
+  FAR void              *io_dev;  /* Private data for opened io device. */
   FAR struct bcmf_dev_s *priv;    /* Back pointer to bus.               */
 } gspi_dev_t;
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/s32k1xx/s32k1xx_lowputc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -394,7 +396,7 @@ void s32k1xx_lowputc(int ch)
     }
 
   /* If the character to output is a newline,
-   * then pre-pend a carriage return
+   * then prepend a carriage return.
    */
 
   if (ch == '\n')

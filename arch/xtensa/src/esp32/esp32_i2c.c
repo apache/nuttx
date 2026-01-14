@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_ESP32_I2C
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -620,7 +620,7 @@ static void esp32_i2c_init_clock(struct esp32_i2c_priv_s *priv,
 
   if (clk_freq == priv->clk_freq)
     {
-      return ;
+      return;
     }
 
   esp32_i2c_set_reg(priv, I2C_SCL_LOW_PERIOD_OFFSET, half_cycles);
@@ -750,7 +750,7 @@ static int esp32_i2c_sem_waitdone(struct esp32_i2c_priv_s *priv)
  *   priv          - Pointer to the internal driver state structure.
  *
  * Returned Values:
- *   Zero (OK) is returned on successfull transfer. -ETIMEDOUT is returned
+ *   Zero (OK) is returned on successful transfer. -ETIMEDOUT is returned
  *   in case a transfer didn't finish within the timeout interval. And ERROR
  *   is returned in case of any I2C error during the transfer has happened.
  *
@@ -1248,8 +1248,8 @@ static void esp32_i2c_traceevent(struct esp32_i2c_priv_s *priv,
 
       /* Initialize the new trace entry */
 
-      trace->event  = event;
-      trace->parm   = parm;
+      trace->event = event;
+      trace->parm  = parm;
 
       /* Bump up the trace index (unless we are out of trace entries) */
 
@@ -1500,7 +1500,7 @@ struct i2c_master_s *esp32_i2cbus_initialize(int port)
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
   priv->cpuint = esp32_setup_irq(priv->cpu, config->periph,
                                  1, ESP32_CPUINT_LEVEL);
   if (priv->cpuint < 0)
@@ -1569,4 +1569,4 @@ int esp32_i2cbus_uninitialize(struct i2c_master_s *dev)
   return OK;
 }
 
-#endif /* CONFIG_ESP32_I2C */
+#endif /* CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE */

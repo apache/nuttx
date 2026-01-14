@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/video/mipi_dsi.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -122,7 +124,7 @@ struct mipi_dsi_msg
   size_t tx_len;            /* Length of tx_buf */
   FAR const void *tx_buf;   /* Data to be written */
 
-  size_t rx_len;            /* Lenght of rx_buf */
+  size_t rx_len;            /* Length of rx_buf */
   FAR void *rx_buf;         /* Data to be read, or NULL */
 };
 
@@ -150,7 +152,7 @@ struct mipi_dsi_packet
  * packets.
  *
  * Note that typically DSI packet transmission is atomic, so the .transfer()
- * function will seldomly return anything other than the number of bytes
+ * function will seldom return anything other than the number of bytes
  * contained in the transmit buffer on success.
  *
  * Also note that those callbacks can be called no matter the state the
@@ -197,10 +199,10 @@ struct mipi_dsi_device
   uint8_t  format;                    /* Pixel formal */
   uint32_t mode_flags;                /* Dsi operate mode flag */
   uint32_t hs_rate;                   /* Maximum lane frequency for high speed
-                                       * mode in hertz, this shoud be set
+                                       * mode in hertz, this should be set
                                        * to the real limits of the hardware. */
   uint32_t lp_rate;                   /* Maximum lane frequency for low power
-                                       * mode in hertz,  this shoud be set
+                                       * mode in hertz,  this should be set
                                        * to the real limits of the hardware. */
 };
 
@@ -386,7 +388,7 @@ int mipi_dsi_detach(FAR struct mipi_dsi_device *device);
  *   msg - Message to transfer
  *
  * Returned Value:
- *   The number of bytes successfully transfered or a negative error code on
+ *   The number of bytes successfully transferred or a negative error code on
  *   failure.
  *
  ****************************************************************************/

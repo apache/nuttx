@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_advertise.c
- * Send an ICMPv6 Neighbor Advertisement
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -111,8 +112,9 @@ void icmpv6_advertise(FAR struct net_driver_s *dev,
   /* Calculate the checksum over both the ICMP header and payload */
 
   adv->chksum    = 0;
+#ifdef CONFIG_NET_ICMPv6_CHECKSUMS
   adv->chksum    = ~icmpv6_chksum(dev, IPv6_HDRLEN);
-
+#endif
   /* Set the size to the size of the IPv6 header and the payload size */
 
   dev->d_len     = IPv6_HDRLEN + l3size;

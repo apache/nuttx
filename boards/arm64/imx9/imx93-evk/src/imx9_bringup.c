@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm64/imx9/imx93-evk/src/imx9_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,6 +35,18 @@
 
 #include "imx93-evk.h"
 
+#ifdef CONFIG_IMX9_BIN_ROMFS
+#include <nuttx/drivers/ramdisk.h>
+#include <arch/board/bin_romfsimg.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define SECTORSIZE    512
+#define NSECTORS(b)   (((b) + SECTORSIZE - 1) / SECTORSIZE)
+#endif /* CONFIG_IMX9_BIN_ROMFS */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -56,6 +70,17 @@ int imx9_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_IMX9_BIN_ROMFS
+  /* Create a ROM disk for the /bin filesystem */
+
+  ret = romdisk_register(0, romfs_img, NSECTORS(romfs_img_len), SECTORSIZE);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to register ROMFS at /dev/ram0: %d\n", ret);
     }
 #endif
 

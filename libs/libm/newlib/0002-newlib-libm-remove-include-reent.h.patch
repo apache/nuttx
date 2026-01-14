@@ -3,12 +3,9 @@ From: yanghuatao <yanghuatao@xiaomi.com>
 Date: Sun, 26 Mar 2023 09:31:15 +0800
 Subject: [PATCH 2/2] newlib libm remove include reent.h
 
-VELAPLATFO-6159
-
 remove include reent.h
 
 Signed-off-by: yanghuatao <yanghuatao@xiaomi.com>
-Change-Id: I8265baa3bfc9df9035fb45f02676047ea8adacbd
 ---
  newlib/libm/math/w_gamma.c   | 1 -
  newlib/libm/math/w_lgamma.c  | 1 -

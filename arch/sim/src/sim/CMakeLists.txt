@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/sim/src/sim/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -27,7 +29,7 @@ set(HOSTSRCS)
 set(HOST_INCLUDE_DIRS)
 set(STDLIBS pthread)
 
-if(CONFIG_ARCH_COVERAGE)
+if(CONFIG_COVERAGE_TOOLCHAIN)
   list(APPEND STDLIBS gcov)
 endif()
 
@@ -57,7 +59,7 @@ list(
   sim_registerdump.c
   sim_saveusercontext.c
   sim_tcbinfo.c
-  sim_textheap.c
+  sim_sectionheap.c
   sim_checkhostfstypes.c)
 
 if(CONFIG_HOST_X86_64)
@@ -117,16 +119,23 @@ if(CONFIG_LIBM_TOOLCHAIN)
   list(APPEND STDLIBS m)
 endif()
 
+if(CONFIG_RPMSG_VIRTIO_LITE)
+  list(APPEND SRCS sim_rpmsg_virtio.c)
+endif()
+
+if(CONFIG_RPMSG_PORT_UART)
+  list(APPEND SRCS sim_rpmsg_port_uart.c)
+endif()
+
 if(CONFIG_RPTUN)
   list(APPEND SRCS sim_rptun.c)
 endif()
 
 if(CONFIG_SIM_SOUND_ALSA)
   list(APPEND SRCS posix/sim_alsa.c)
-  list(APPEND SRCS posix/sim_offload.c)
+  list(APPEND SRCS sim_offload.c)
   list(APPEND STDLIBS asound)
   list(APPEND STDLIBS mad)
-  list(APPEND STDLIBS mp3lame)
 endif()
 
 # host sources ###############################################################
@@ -171,16 +180,22 @@ endif()
 
 if(CONFIG_SMP)
   list(APPEND SRCS sim_smpsignal.c sim_cpuidlestack.c)
+endif()
+
+if(CONFIG_ARCH_HAVE_MULTICPU AND NOT WIN32)
   list(APPEND HOSTSRCS sim_hostsmp.c)
 endif()
 
 if(CONFIG_SIM_X11FB)
   list(APPEND HOSTSRCS sim_x11framebuffer.c)
-
-  find_package(X11 REQUIRED)
-  if(X11_FOUND)
-    target_include_directories(nuttx PRIVATE ${X11_INCLUDE_DIR})
-    target_link_libraries(nuttx PRIVATE ${X11_LIBRARIES})
+  if(APPLE)
+    find_package(X11 REQUIRED)
+    if(X11_FOUND)
+      target_include_directories(nuttx PRIVATE ${X11_INCLUDE_DIR})
+      target_link_libraries(nuttx PRIVATE ${X11_LIBRARIES})
+    endif()
+  else()
+    list(APPEND STDLIBS X11 Xext)
   endif()
 
   if(CONFIG_SIM_TOUCHSCREEN)
@@ -196,6 +211,11 @@ if(CONFIG_SIM_X11FB)
   if(CONFIG_SIM_KEYBOARD)
     list(APPEND SRCS sim_keyboard.c)
   endif()
+endif()
+
+if(NOT ${CONFIG_SIM_WIFIDEV_NUMBER} EQUAL 0)
+  add_compile_options(-DTOPDIR=$(TOPDIR))
+  list(APPEND SRCS sim_wifihost.c)
 endif()
 
 if(CONFIG_SIM_NETDEV_TAP)
@@ -234,6 +254,11 @@ if(CONFIG_SIM_SPI_LINUX)
   list(APPEND HOSTSRCS sim_linuxspi.c)
 endif()
 
+if(CONFIG_SIM_GPIOCHIP_LINUX)
+  list(APPEND SRCS sim_gpiochip.c)
+  list(APPEND HOSTSRCS sim_linux_gpiochip.c)
+endif()
+
 if(CONFIG_SIM_USB_DEV)
   list(APPEND SRCS sim_usbdev.c)
   if(CONFIG_SIM_USB_RAW_GADGET)
@@ -249,8 +274,22 @@ if(CONFIG_SIM_USB_HOST)
   endif()
 endif()
 
+if(CONFIG_SIM_CANDEV)
+  list(APPEND HOSTSRCS sim_hostcan.c)
+endif()
+
+if(CONFIG_SIM_CANDEV_CHAR)
+  list(APPEND SRCS sim_canchar.c)
+endif()
+
+if(CONFIG_SIM_CANDEV_SOCK)
+  list(APPEND SRCS sim_cansock.c)
+endif()
+
 list(APPEND HOSTSRCS sim_hostfs.c)
 list(APPEND HOST_DEFINITIONS CONFIG_NAME_MAX=${CONFIG_NAME_MAX})
+
+list(APPEND HOSTSRCS sim_errno.c)
 
 configure_file(${NUTTX_DIR}/include/nuttx/fs/hostfs.h
                ${CMAKE_CURRENT_BINARY_DIR}/hostfs.h COPYONLY)
@@ -282,4 +321,14 @@ endforeach()
 set(HOSTSRCS ${WINHOSTSRCS})
 
 target_sources(nuttx PRIVATE ${HOSTSRCS})
+
+get_target_property(HOST_COMPILE_OPTIONS nuttx COMPILE_OPTIONS)
+if(HOST_COMPILE_OPTIONS)
+  foreach(remove_item IN LISTS SIM_NO_HOST_OPTIONS)
+    list(REMOVE_ITEM HOST_COMPILE_OPTIONS ${remove_item})
+  endforeach()
+  set_target_properties(nuttx PROPERTIES COMPILE_OPTIONS
+                                         "${HOST_COMPILE_OPTIONS}")
+endif()
+
 target_compile_definitions(nuttx PRIVATE ${HOST_DEFINITIONS})

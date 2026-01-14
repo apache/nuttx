@@ -1,0 +1,111 @@
+##############################################################################
+# arch/arm/src/stm32h5/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+##############################################################################
+
+# The start-up, "head", file.  Only common vectors are support so there
+# isn't one.
+
+HEAD_ASRC =
+
+# Common ARM and Cortex-M33 files
+
+include armv8-m/Make.defs
+
+ifeq ($(CONFIG_STM32H5_PROGMEM),y)
+CHIP_CSRCS += stm32_flash.c
+endif
+
+# Required STM32H5 files
+
+CHIP_CSRCS += stm32_gpio.c stm32_irq.c stm32_lowputc.c stm32_rcc.c
+CHIP_CSRCS += stm32_start.c stm32_pwr.c stm32_timerisr.c
+CHIP_CSRCS += stm32_lse.c stm32_lsi.c
+CHIP_CSRCS += stm32_uid.c
+
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+CHIP_CSRCS += stm32_idle.c
+endif
+
+ifeq ($(CONFIG_STM32H5_USART),y)
+CHIP_CSRCS += stm32_serial.c
+endif
+
+ifeq ($(CONFIG_TIMER),y)
+CHIP_CSRCS += stm32_tim_lowerhalf.c
+endif
+
+ifeq ($(CONFIG_STM32H5_I2C),y)
+CHIP_CSRCS += stm32_i2c.c
+endif
+
+ifeq ($(CONFIG_ADC),y)
+CHIP_CSRCS += stm32_adc.c
+endif
+
+ifeq ($(CONFIG_STM32H5_FDCAN_CHARDRIVER),y)
+CHIP_CSRCS += stm32_fdcan.c
+endif
+
+ifeq ($(CONFIG_STM32H5_ICACHE),y)
+CHIP_CSRCS += stm32_icache.c
+endif
+
+ifeq ($(CONFIG_STM32H5_SPI),y)
+CHIP_CSRCS += stm32_spi.c
+endif
+
+ifeq ($(CONFIG_STM32H5_QSPI1),y)
+CHIP_CSRCS += stm32_qspi.c
+endif
+
+ifeq ($(CONFIG_STM32H5_TIM),y)
+CHIP_CSRCS += stm32_tim.c
+endif
+
+ifeq ($(CONFIG_STM32H5_HAVE_HSI48),y)
+CHIP_CSRCS += stm32_hsi48.c
+endif
+
+ifeq ($(CONFIG_STM32H5_USBFS),y)
+CHIP_CSRCS += stm32_usbfs.c
+endif
+
+ifeq ($(CONFIG_STM32H5_ETHMAC),y)
+CHIP_CSRCS += stm32_ethernet.c
+endif
+
+ifeq ($(CONFIG_STM32H5_DMA),y)
+CHIP_CSRCS += stm32_dma.c
+endif
+
+ifeq ($(CONFIG_STM32H5_DTS),y)
+CHIP_CSRCS += stm32_dts.c
+endif
+
+ifeq ($(CONFIG_STM32H5_PWM),y)
+CHIP_CSRCS += stm32_pwm.c
+endif
+
+# Required chip type specific files
+
+ifeq ($(CONFIG_STM32H5_STM32H5XXXX),y)
+CHIP_CSRCS += stm32h5xx_rcc.c
+endif

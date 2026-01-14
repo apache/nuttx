@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32f0l0g0/b-l072z-lrwan1/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -51,7 +53,7 @@
 #define STM32_HSE_FREQUENCY     STM32_BOARD_XTAL
 #define STM32_LSE_FREQUENCY     32768            /* X2 on board */
 
-/* PLL source is HSI/1, PLL multipler is 4:
+/* PLL source is HSI/1, PLL multiplier is 4:
  *   PLL frequency is 16MHz (XTAL) x 4 = 64MHz
  */
 

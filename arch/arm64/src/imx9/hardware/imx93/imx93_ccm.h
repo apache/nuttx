@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/imx9/hardware/imx93/imx93_ccm.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -730,6 +732,8 @@ static const int g_ccm_root_mux[][ROOT_MUX_MAX] =
 #define CCM_NIC_APB_CLK_ROOT         66
 #define CCM_DRAM_ALT_CLK_ROOT        76
 #define CCM_DRAM_APB_CLK_ROOT        77
+#define CCM_ENET_TIMER_CLK_ROOT      87
+#define CCM_ENET_REF_CLK_ROOT        89
 #define CCM_CLK_ROOT_NUM             95
 
 #define CCM_OSCPLL_END               19

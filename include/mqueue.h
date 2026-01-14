@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/mqueue.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,8 +27,10 @@
  * Included Files
  ****************************************************************************/
 
+#include <fcntl.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <time.h>
 
 /****************************************************************************
  * Pre-processor Definitions

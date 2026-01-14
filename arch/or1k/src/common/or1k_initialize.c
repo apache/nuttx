@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/or1k/src/common/or1k_initialize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,8 +38,8 @@
 
 /* g_current_regs[] holds a references to the current interrupt level
  * register storage structure.  It is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the macro
- * CURRENT_REGS for portability.
+ * processing.  Access to g_current_regs[] must be through the
+ * [get/set]_current_regs for portability.
  */
 
 volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
@@ -105,32 +107,6 @@ void up_enable_dcache(void)
 #endif
 
 /****************************************************************************
- * Name: up_color_intstack
- *
- * Description:
- *   Set the interrupt stack to a value so that later we can determine how
- *   much stack space was used by interrupt handling logic
- *
- ****************************************************************************/
-
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
-static inline void up_color_intstack(void)
-{
-  uint32_t *ptr = (uint32_t *)g_intstackalloc;
-  ssize_t size;
-
-  for (size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
-       size > 0;
-       size -= sizeof(uint32_t))
-    {
-      *ptr++ = INTSTACK_COLOR;
-    }
-}
-#else
-#  define up_color_intstack()
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -153,10 +129,6 @@ static inline void up_color_intstack(void)
 
 void up_initialize(void)
 {
-  /* Colorize the interrupt stack */
-
-  up_color_intstack();
-
   /* Add any extra memory fragments to the memory manager */
 
   or1k_addregion();

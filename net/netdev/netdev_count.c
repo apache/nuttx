@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/netdev/netdev_count.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -55,8 +57,8 @@ int netdev_count(void)
   struct net_driver_s *dev;
   int ndev;
 
-  net_lock();
+  netdev_list_lock();
   for (dev = g_netdevices, ndev = 0; dev; dev = dev->flink, ndev++);
-  net_unlock();
+  netdev_list_unlock();
   return ndev;
 }

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/esp32c3-legacy/common/src/esp32c3_board_spiflash.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -136,9 +138,6 @@ static const struct ota_partition_s g_ota_partition_table[] =
 static int init_ota_partitions(void)
 {
   struct mtd_dev_s *mtd;
-#ifdef CONFIG_BCH
-  char blockdev[18];
-#endif
   int ret = OK;
 
   for (int i = 0; i < nitems(g_ota_partition_table); ++i)
@@ -147,23 +146,13 @@ static int init_ota_partitions(void)
       mtd = esp32c3_spiflash_alloc_mtdpart(part->offset, part->size,
                                            OTA_ENCRYPT);
 
-      ret = ftl_initialize(i, mtd);
+      ret = register_mtddriver(part->devpath, mtd, 0755, NULL);
       if (ret < 0)
         {
-          ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          ferr("ERROR: register_mtddriver %s failed: %d\n",
+               part->devpath, ret);
           return ret;
         }
-
-#ifdef CONFIG_BCH
-      snprintf(blockdev, sizeof(blockdev), "/dev/mtdblock%d", i);
-
-      ret = bchdev_register(blockdev, part->devpath, false);
-      if (ret < 0)
-        {
-          ferr("ERROR: bchdev_register %s failed: %d\n", part->devpath, ret);
-          return ret;
-        }
-#endif
     }
 
   return ret;
@@ -394,7 +383,7 @@ static int init_storage_partition(void)
 
 #if defined (CONFIG_ESP32C3_SPIFLASH_SMARTFS)
 
-  ret = setup_smartfs(0, mtd, "/data");
+  ret = setup_smartfs(0, mtd, CONFIG_ESP32C3_SPIFLASH_FS_MOUNT_PT);
   if (ret < 0)
     {
       ferr("ERROR: Failed to setup smartfs\n");
@@ -403,7 +392,7 @@ static int init_storage_partition(void)
 
 #elif defined (CONFIG_ESP32C3_SPIFLASH_NXFFS)
 
-  ret = setup_nxffs(mtd, "/data");
+  ret = setup_nxffs(mtd, CONFIG_ESP32C3_SPIFLASH_FS_MOUNT_PT);
   if (ret < 0)
     {
       ferr("ERROR: Failed to setup nxffs\n");
@@ -413,7 +402,7 @@ static int init_storage_partition(void)
 #elif defined (CONFIG_ESP32C3_SPIFLASH_LITTLEFS)
 
   const char *path = "/dev/esp32c3flash";
-  ret = setup_littlefs(path, mtd, "/data", 0755);
+  ret = setup_littlefs(path, mtd, CONFIG_ESP32C3_SPIFLASH_FS_MOUNT_PT, 0755);
   if (ret < 0)
     {
       ferr("ERROR: Failed to setup littlefs\n");
@@ -423,7 +412,7 @@ static int init_storage_partition(void)
 #elif defined (CONFIG_ESP32C3_SPIFLASH_SPIFFS)
 
   const char *path = "/dev/esp32c3flash";
-  ret = setup_spiffs(path, mtd, "/data", 0755);
+  ret = setup_spiffs(path, mtd, CONFIG_ESP32C3_SPIFLASH_FS_MOUNT_PT, 0755);
   if (ret < 0)
     {
       ferr("ERROR: Failed to setup spiffs\n");

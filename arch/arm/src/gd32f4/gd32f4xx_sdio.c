@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/gd32f4/gd32f4xx_sdio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -2153,7 +2155,7 @@ static int gd32_wait_response(struct sdio_dev_s *dev, uint32_t cmd)
  *
  * Returned Value:
  *   Number of bytes sent on success; a negated errno on failure.  Here a
- *   failure means only a faiure to obtain the requested response (due to
+ *   failure means only a failure to obtain the requested response (due to
  *   transport problem -- timeout, CRC, etc.).  The implementation only
  *   assures that the response is returned intacta and does not check errors
  *   within the response itself.

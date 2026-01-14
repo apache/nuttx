@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/xtensa/arch_elf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/elf.h>
 
 /****************************************************************************
@@ -191,7 +194,7 @@ int up_relocateadd(const Elf32_Rela *rel, const Elf32_Sym *sym,
       break;
 
     case R_XTENSA_32:
-      (*(uint32_t *)addr) += value;
+      (*(uint32_t *)(up_textheap_data_address((void *)addr))) += value;
       break;
 
     case R_XTENSA_ASM_EXPAND:
@@ -200,7 +203,7 @@ int up_relocateadd(const Elf32_Rela *rel, const Elf32_Sym *sym,
       break;
 
     case R_XTENSA_SLOT0_OP:
-      p = (unsigned char *)addr;
+      p = (unsigned char *)up_textheap_data_address((void *)addr);
       if (is_l32r(p))
         {
           /* Xtensa ISA:

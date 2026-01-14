@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/rp2040/rp2040_config.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,8 +42,8 @@
 #  define HAVE_UART 1
 #endif
 
-/* Make sure all features are disabled for diabled U[S]ARTs.  This simplifies
- * checking later.
+/* Make sure all features are disabled for disabled U[S]ARTs.
+ * This simplifies checking later.
  */
 
 #ifndef CONFIG_RP2040_UART0

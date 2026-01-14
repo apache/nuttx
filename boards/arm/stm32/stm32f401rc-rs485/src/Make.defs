@@ -1,6 +1,8 @@
 ############################################################################
 # boards/arm/stm32/stm32f401rc-rs485/src/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -23,9 +25,12 @@ include $(TOPDIR)/Make.defs
 CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c
 
 ifeq ($(CONFIG_VIDEO_FB),y)
-ifeq ($(CONFIG_LCD_SSD1306),y)
-  CSRCS += stm32_lcd_ssd1306.c
-endif
+  ifeq ($(CONFIG_LCD_SSD1306),y)
+    CSRCS += stm32_lcd_ssd1306.c
+  endif
+  ifeq ($(CONFIG_LCD_ST7735),y)
+    CSRCS += stm32_lcd_st7735.c
+  endif
 endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
@@ -69,6 +74,14 @@ endif
 
 ifeq ($(CONFIG_USBMSC),y)
 CSRCS += stm32_usbmsc.c
+endif
+
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += stm32_gpio.c
+endif
+
+ifeq ($(CONFIG_ADC_HX711),y)
+CSRCS += stm32_hx711.c
 endif
 
 DEPPATH += --dep-path board

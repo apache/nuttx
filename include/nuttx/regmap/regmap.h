@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/regmap/regmap.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -57,6 +59,10 @@ typedef CODE int (*write_t)(FAR struct regmap_bus_s *bus,
                             FAR const void *data,
                             unsigned int count);
 
+/* Resources destroyed. */
+
+typedef CODE void (*exit_t)(FAR struct regmap_bus_s *bus);
+
 /* Description of a hardware bus for the register map infrastructure. */
 
 struct regmap_bus_s
@@ -65,6 +71,7 @@ struct regmap_bus_s
   reg_write_t reg_write;
   read_t  read;
   write_t write;
+  exit_t  exit;
 };
 
 /* Configuration for the register map of a device.

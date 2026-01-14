@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lpc214x/lpc214x_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -241,7 +243,7 @@ static inline void up_waittxready(struct up_dev_s *priv)
 
   for (tmp = 1000 ; tmp > 0 ; tmp--)
     {
-      /* Check if the tranmitter holding register (THR) is empty */
+      /* Check if the transmitter holding register (THR) is empty */
 
       if ((up_serialin(priv, LPC214X_UART_LSR_OFFSET) &
            LPC214X_LSR_THRE) != 0)
@@ -734,7 +736,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  * Description:
  *   Performs the low level UART initialization early in
  *   debug so that the serial console will be available
- *   during bootup.  This must be called before arm_serialinit.
+ *   during boot up.  This must be called before arm_serialinit.
  *
  ****************************************************************************/
 
@@ -783,7 +785,7 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   uint8_t ier;
@@ -792,19 +794,8 @@ int up_putc(int ch)
   up_waittxready(priv);
   up_serialout(priv, LPC214X_UART_THR_OFFSET, (uint8_t)ch);
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      up_waittxready(priv);
-      up_serialout(priv, LPC214X_UART_THR_OFFSET, '\r');
-    }
-
   up_waittxready(priv);
   up_restoreuartint(priv, ier);
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -817,19 +808,9 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

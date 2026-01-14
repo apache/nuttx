@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/s32k1xx/s32k1xx_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -182,6 +184,7 @@ static inline void s32k1xx_mpu_config(void)
  *
  ****************************************************************************/
 
+osentry_function
 void __start(void)
 {
 #ifdef CONFIG_BOOT_RUNFROMFLASH

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32_pwr.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,6 +36,8 @@
 #  include "hardware/stm32l0_pwr.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32G0)
 #  include "hardware/stm32g0_pwr.h"
+#elif defined(CONFIG_ARCH_CHIP_STM32C0)
+#  include "hardware/stm32c0_pwr.h"
 #else
 #  error "Unsupported STM32 M0 PWR"
 #endif

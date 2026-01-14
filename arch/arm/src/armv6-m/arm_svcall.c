@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv6-m/arm_svcall.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,8 +34,10 @@
 #include <syscall.h>
 
 #include <arch/irq.h>
+#include <nuttx/macro.h>
 #include <nuttx/sched.h>
 
+#include "sched/sched.h"
 #include "signal/signal.h"
 #include "exc_return.h"
 #include "arm_internal.h"
@@ -41,66 +45,6 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: dispatch_syscall
- *
- * Description:
- *   Call the stub function corresponding to the system call.  NOTE the non-
- *   standard parameter passing:
- *
- *     R0 = SYS_ call number
- *     R1 = parm0
- *     R2 = parm1
- *     R3 = parm2
- *     R4 = parm3
- *     R5 = parm4
- *     R6 = parm5
- *
- *   The values of R4-R5 may be preserved in the proxy called by the user
- *   code if they are used (but otherwise will not be).
- *
- *   Register usage:
- *
- *     R0 - Need not be preserved.
- *     R1-R3 - Need to be preserved until the stub is called.  The values of
- *       R0 and R1 returned by the stub must be preserved.
- *     R4-R11 must be preserved to support the expectations of the user-space
- *       callee.  R4-R6 may have been preserved by the proxy, but don't know
- *       for sure.
- *     R12 - Need not be preserved
- *     R13 - (stack pointer)
- *     R14 - Need not be preserved
- *     R15 - (PC)
- *
- ****************************************************************************/
-
-#ifdef CONFIG_LIB_SYSCALL
-static void dispatch_syscall(void) naked_function;
-static void dispatch_syscall(void)
-{
-  __asm__ __volatile__
-  (
-    " push {r4, r5}\n"            /* Save R4 and R5 */
-    " sub sp, sp, #12\n"          /* Create a stack frame to hold 3 parms */
-    " str r4, [sp, #0]\n"         /* Move parameter 4 (if any) into position */
-    " str r5, [sp, #4]\n"         /* Move parameter 5 (if any) into position */
-    " str r6, [sp, #8]\n"         /* Move parameter 6 (if any) into position */
-    " mov r5, lr\n"               /* Save lr in R5 */
-    " ldr r4, =g_stublookup\n"    /* R4=The base of the stub lookup table */
-    " lsl r0, r0, #2\n"           /* R0=Offset of the stub for this syscall */
-    " ldr r4, [r4, r0]\n"         /* R4=Address of the stub for this syscall */
-    " blx r5\n"                   /* Call the stub (modifies lr) */
-    " mov lr, r5\n"               /* Restore lr */
-    " add sp, sp, #12\n"          /* Destroy the stack frame */
-    " pop {r4, r5}\n"             /* Recover R4 and R5 */
-    " mov r2, r0\n"               /* R2=Save return value in R2 */
-    " mov r0, %0\n"               /* R0=SYS_syscall_return */
-    " svc %1\n"::"i"(SYS_syscall_return),
-                 "i"(SYS_syscall) /* Return from the SYSCALL */
-  );
-}
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -117,9 +61,9 @@ static void dispatch_syscall(void)
 int arm_svcall(int irq, void *context, void *arg)
 {
   uint32_t *regs = (uint32_t *)context;
+  struct tcb_s *tcb;
   uint32_t cmd;
 
-  DEBUGASSERT(regs && regs == CURRENT_REGS);
   cmd = regs[REG_R0];
 
   /* The SVCall software interrupt is called with R0 = system call command
@@ -147,51 +91,15 @@ int arm_svcall(int irq, void *context, void *arg)
 
   switch (cmd)
     {
-      /* R0=SYS_restore_context:  This a restore context command:
-       *
-       *   void arm_fullcontextrestore(uint32_t *restoreregs)
-       *     noreturn_function;
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   R0 = SYS_restore_context
-       *   R1 = restoreregs
-       *
-       * In this case, we simply need to set CURRENT_REGS to restore register
-       * area referenced in the saved R1. context == CURRENT_REGS is the
-       * normal exception return.  By setting CURRENT_REGS = context[R1], we
-       * force the return to the saved context referenced in R1.
-       */
-
       case SYS_restore_context:
-        {
-          DEBUGASSERT(regs[REG_R1] != 0);
-          CURRENT_REGS = (uint32_t *)regs[REG_R1];
-        }
-        break;
-
-      /* R0=SYS_switch_context:  This a switch context command:
-       *
-       *   void arm_switchcontext(uint32_t **saveregs,
-       *                          uint32_t *restoreregs);
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   R0 = SYS_switch_context
-       *   R1 = saveregs
-       *   R2 = restoreregs
-       *
-       * In this case, we do both: We save the context registers to the save
-       * register area reference by the saved contents of R1 and then set
-       * CURRENT_REGS to the save register area referenced by the saved
-       * contents of R2.
-       */
-
       case SYS_switch_context:
         {
-          DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
-          *(uint32_t **)regs[REG_R1] = regs;
-          CURRENT_REGS = (uint32_t *)regs[REG_R2];
+          tcb = this_task();
+          restore_critical_section(tcb, this_cpu());
+
+#ifdef CONFIG_DEBUG_SYSCALL_INFO
+          regs = tcb->xcp.regs;
+#endif
         }
         break;
 
@@ -210,7 +118,7 @@ int arm_svcall(int irq, void *context, void *arg)
 #ifdef CONFIG_LIB_SYSCALL
       case SYS_syscall_return:
         {
-          struct tcb_s *rtcb = nxsched_self();
+          struct tcb_s *rtcb = this_task();
           int index = (int)rtcb->xcp.nsyscalls - 1;
 
           /* Make sure that there is a saved syscall return address. */
@@ -223,9 +131,10 @@ int arm_svcall(int irq, void *context, void *arg)
 
           regs[REG_PC]         = rtcb->xcp.syscall[index].sysreturn;
           regs[REG_EXC_RETURN] = rtcb->xcp.syscall[index].excreturn;
+          regs[REG_CONTROL]    = rtcb->xcp.syscall[index].ctrlreturn;
           rtcb->xcp.nsyscalls  = index;
 
-          /* The return value must be in R0-R1.  dispatch_syscall()
+          /* The return value must be in R0-R1.  arm_dispatch_syscall()
            * temporarily moved the value for R0 into R2.
            */
 
@@ -332,7 +241,7 @@ int arm_svcall(int irq, void *context, void *arg)
 #ifdef CONFIG_BUILD_PROTECTED
       case SYS_signal_handler:
         {
-          struct tcb_s *rtcb   = nxsched_self();
+          struct tcb_s *rtcb   = this_task();
 
           /* Remember the caller's return address */
 
@@ -374,7 +283,7 @@ int arm_svcall(int irq, void *context, void *arg)
 #ifdef CONFIG_BUILD_PROTECTED
       case SYS_signal_handler_return:
         {
-          struct tcb_s *rtcb   = nxsched_self();
+          struct tcb_s *rtcb   = this_task();
 
           /* Set up to return to the kernel-mode signal dispatching logic. */
 
@@ -399,7 +308,7 @@ int arm_svcall(int irq, void *context, void *arg)
       default:
         {
 #ifdef CONFIG_LIB_SYSCALL
-          struct tcb_s *rtcb = nxsched_self();
+          struct tcb_s *rtcb = this_task();
           int index = rtcb->xcp.nsyscalls;
 
           /* Verify that the SYS call number is within range */
@@ -412,13 +321,20 @@ int arm_svcall(int irq, void *context, void *arg)
 
           DEBUGASSERT(index < CONFIG_SYS_NNEST);
 
-          /* Setup to return to dispatch_syscall in privileged mode. */
+          /* Use ip to create a debug frame.
+           * we can use gdb backtrace from syscall to user space.
+           */
+
+          regs[REG_IP] = regs[REG_PC];
+
+          /* Setup to return to arm_dispatch_syscall in privileged mode. */
 
           rtcb->xcp.syscall[index].sysreturn  = regs[REG_PC];
           rtcb->xcp.syscall[index].excreturn  = regs[REG_EXC_RETURN];
+          rtcb->xcp.syscall[index].ctrlreturn = regs[REG_CONTROL];
           rtcb->xcp.nsyscalls  = index + 1;
 
-          regs[REG_PC]         = (uint32_t)dispatch_syscall;
+          regs[REG_PC]         = (uint32_t)arm_dispatch_syscall;
           regs[REG_EXC_RETURN] = EXC_RETURN_THREAD;
 
           /* Return privileged mode */
@@ -446,32 +362,20 @@ int arm_svcall(int irq, void *context, void *arg)
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
 #  ifndef CONFIG_DEBUG_SVCALL
   if (cmd > SYS_switch_context)
-#  else
-  if (regs != CURRENT_REGS)
 #  endif
     {
       svcinfo("SVCall Return:\n");
       svcinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-              CURRENT_REGS[REG_R0],  CURRENT_REGS[REG_R1],
-              CURRENT_REGS[REG_R2],  CURRENT_REGS[REG_R3],
-              CURRENT_REGS[REG_R4],  CURRENT_REGS[REG_R5],
-              CURRENT_REGS[REG_R6],  CURRENT_REGS[REG_R7]);
+              regs[REG_R0],  regs[REG_R1], regs[REG_R2],  regs[REG_R3],
+              regs[REG_R4],  regs[REG_R5], regs[REG_R6],  regs[REG_R7]);
       svcinfo("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-              CURRENT_REGS[REG_R8],  CURRENT_REGS[REG_R9],
-              CURRENT_REGS[REG_R10], CURRENT_REGS[REG_R11],
-              CURRENT_REGS[REG_R12], CURRENT_REGS[REG_R13],
-              CURRENT_REGS[REG_R14], CURRENT_REGS[REG_R15]);
-      svcinfo(" PSR: %08x PRIMASK: %08x EXC_RETURN: %08x\n",
-              CURRENT_REGS[REG_XPSR], CURRENT_REGS[REG_PRIMASK],
-              CURRENT_REGS[REG_EXC_RETURN]);
+              regs[REG_R8],  regs[REG_R9], regs[REG_R10], regs[REG_R11],
+              regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+      svcinfo(" PSR: %08x EXC_RETURN: %08x CONTROL: %08x\n",
+              regs[REG_XPSR], regs[REG_EXC_RETURN], regs[REG_CONTROL]);
     }
-#  ifdef CONFIG_DEBUG_SVCALL
-  else
-    {
-      svcinfo("SVCall Return: %d\n", regs[REG_R0]);
-    }
-#  endif
 #endif
 
+  UNUSED(tcb);
   return OK;
 }

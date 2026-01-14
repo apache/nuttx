@@ -1,8 +1,9 @@
 /****************************************************************************
  * include/crypto/siphash.h
- * $OpenBSD: siphash.h,v 1.5 2015/02/20 11:51:03 tedu Exp $
  *
- * Copyright (c) 2013 Andre Oppermann <andre@FreeBSD.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2013 Andre Oppermann <andre@FreeBSD.org>
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,8 +30,6 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $FreeBSD$
- *
  ****************************************************************************/
 
 /* SipHash is a family of pseudorandom functions
@@ -38,7 +37,7 @@
  * optimized for speed on short messages returning a 64bit hash/digest value.
  *
  * The number of rounds is defined during the initialization:
- *  siphash24_init() for the fast and resonable strong version
+ *  siphash24_init() for the fast and reasonable strong version
  *  siphash48_init() for the strong version (half as fast)
  *
  * struct SIPHASH_CTX ctx;

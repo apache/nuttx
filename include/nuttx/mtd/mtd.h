@@ -1,6 +1,7 @@
 /****************************************************************************
  * include/nuttx/mtd/mtd.h
- * Memory Technology Device (MTD) interface
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -33,6 +34,10 @@
 #include <stdbool.h>
 
 #include <nuttx/fs/ioctl.h>
+
+#ifdef CONFIG_EEPROM
+#include <nuttx/eeprom/eeprom.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -76,6 +81,13 @@
                                              *      erased state of the MTD cell */
 #define MTDIOC_ERASESECTORS _MTDIOC(0x000c) /* IN: Pointer to mtd_erase_s structure
                                              * OUT: None */
+#define MTDIOC_RESET        _MTDIOC(0x000d) /* IN: None
+                                             * OUT: None
+                                             *      Resets the device to the power-on
+                                             *      default condition */
+#define MTDIOC_ISBAD        _MTDIOC(0x000e) /* IN: Erase block number
+                                             * OUT: 0=A good block
+                                             *      1=A bad block */
 
 /* Macros to hide implementation */
 
@@ -136,9 +148,9 @@ struct mtd_protect_s
 
 struct mtd_byte_write_s
 {
-  uint32_t offset;        /* Offset within the device to write to */
-  uint16_t count;         /* Number of bytes to write */
-  const uint8_t *buffer;  /* Pointer to the data to write */
+  uint32_t offset;           /* Offset within the device to write to */
+  uint16_t count;            /* Number of bytes to write */
+  FAR const uint8_t *buffer; /* Pointer to the data to write */
 };
 
 /* This structure describes a range of erase sectors to be erased. */
@@ -147,6 +159,14 @@ struct mtd_erase_s
 {
   uint32_t startblock;  /* First block to be erased */
   uint32_t nblocks;     /* Number of blocks to be erased */
+};
+
+/* This structure store the bad block information of a block */
+
+struct mtd_bad_block_s
+{
+  off_t block_num;
+  int bad_flag;
 };
 
 /* This structure defines the interface to a simple memory technology device.
@@ -165,14 +185,15 @@ struct mtd_dev_s
    * or subsector.
    */
 
-  int (*erase)(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);
+  CODE int (*erase)(FAR struct mtd_dev_s *dev, off_t startblock,
+                    size_t nblocks);
 
   /* Read/write from the specified read/write blocks */
 
-  ssize_t (*bread)(FAR struct mtd_dev_s *dev, off_t startblock,
-                   size_t nblocks, FAR uint8_t *buffer);
-  ssize_t (*bwrite)(FAR struct mtd_dev_s *dev, off_t startblock,
-                    size_t nblocks, FAR const uint8_t *buffer);
+  CODE ssize_t (*bread)(FAR struct mtd_dev_s *dev, off_t startblock,
+                        size_t nblocks, FAR uint8_t *buffer);
+  CODE ssize_t (*bwrite)(FAR struct mtd_dev_s *dev, off_t startblock,
+                         size_t nblocks, FAR const uint8_t *buffer);
 
   /* Some devices may support byte oriented reads (optional).  Most MTD
    * devices are inherently block oriented so byte-oriented writing is not
@@ -180,11 +201,11 @@ struct mtd_dev_s
    * if it requires buffering.
    */
 
-  ssize_t (*read)(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                  FAR uint8_t *buffer);
+  CODE ssize_t (*read)(FAR struct mtd_dev_s *dev, off_t offset,
+                       size_t nbytes, FAR uint8_t *buffer);
 #ifdef CONFIG_MTD_BYTE_WRITE
-  ssize_t (*write)(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                   FAR const uint8_t *buffer);
+  CODE ssize_t (*write)(FAR struct mtd_dev_s *dev, off_t offset,
+                        size_t nbytes, FAR const uint8_t *buffer);
 #endif
 
   /* Support other, less frequently used commands:
@@ -195,12 +216,12 @@ struct mtd_dev_s
    * (see include/nuttx/fs/ioctl.h)
    */
 
-  int (*ioctl)(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
+  CODE int (*ioctl)(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
   /* Check/Mark bad block for the specified block number */
 
-  int (*isbad)(FAR struct mtd_dev_s *dev, off_t block);
-  int (*markbad)(FAR struct mtd_dev_s *dev, off_t block);
+  CODE int (*isbad)(FAR struct mtd_dev_s *dev, off_t block);
+  CODE int (*markbad)(FAR struct mtd_dev_s *dev, off_t block);
 
   /* Name of this MTD device */
 
@@ -296,10 +317,25 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd);
  * Input Parameters:
  *   path - The block device path.
  *   mtd  - The MTD device that supports the FLASH interface.
+ *   oflags - oflags passed to the ftl layer. Currently, the ftl is affected
+ *            by two oflags:
+ *           1. O_DIRECT when this flag is passed in, ftl internally uses
+ *              the direct write strategy and no read cache is used in ftl;
+ *              otherwise, each write will be executed with the minimum
+ *              granularity of flash erase sector size which means a
+ *              "sector read back - erase sector - write sector" operation
+ *              is performed by using a read cache buffer in heap.
+ *
+ *           2. O_SYNC, when this flag is passed in, we assume that the
+ *              flash has been erased in advance and no erase operation
+ *              will be performed internally within ftl. O_SYNC will take
+ *              effect only when both O_DIRECT and O_SYNC are passed in
+ *              simultaneously
  *
  ****************************************************************************/
 
-int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd);
+int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd,
+                           int oflags);
 
 /****************************************************************************
  * Name: ftl_initialize
@@ -311,7 +347,6 @@ int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd);
  *   minor - The minor device number.  The MTD block device will be
  *      registered as as /dev/mtdblockN where N is the minor number.
  *   mtd - The MTD device that supports the FLASH interface.
- *
  ****************************************************************************/
 
 int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd);
@@ -398,7 +433,7 @@ FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_master_s *dev);
 #endif
 
 /****************************************************************************
- * Name: at25xx_initialize
+ * Name: at25ee_initialize
  *
  * Description:
  *   Create an initialized MTD device instance for an AT25 SPI EEPROM
@@ -408,16 +443,36 @@ FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_master_s *dev);
  *
  * Input Parameters:
  *   dev        - a reference to the spi device structure
- *   devtype    - device type, from include/nuttx/eeprom/spi_xx25xx.h
+ *   spi_devid  - SPI device ID to manage CS lines in board
+ *   devtype    - device type, see eeprom/eeprom.h
  *   readonly   - sets block driver to be readonly
  *
  * Returned Value:
- *   Initialised device structure (success) of NULL (fail)
+ *   Initialized device structure (success) or NULL (fail)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MTD_AT25EE
 FAR struct mtd_dev_s *at25ee_initialize(FAR struct spi_dev_s *dev,
-                                        int devtype, int readonly);
+                                        uint16_t spi_devid,
+                                        enum eeprom_25xx_e devtype,
+                                        int readonly);
+#endif
+
+/****************************************************************************
+ * Name: at25ee_teardown
+ *
+ * Description:
+ *   Teardown a previously created at25ee device.
+ *
+ * Input Parameters:
+ *   dev - Pointer to the mtd driver instance.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_AT25EE
+void at25ee_teardown(FAR struct mtd_dev_s *mtd);
+#endif
 
 /****************************************************************************
  * Name: at24c_uninitialize
@@ -489,18 +544,32 @@ FAR struct mtd_dev_s *mx35_initialize(FAR struct spi_dev_s *dev);
 FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size);
 
 /****************************************************************************
+ * Name: rammtd_uninitialize
+ *
+ * Description:
+ *   Free the resources associated with a RAM MTD device instance.
+ *
+ * Input Parameters:
+ *   dev - Pointer to the MTD device instance to be uninitialized.
+ *
+ ****************************************************************************/
+
+void rammtd_uninitialize(FAR struct mtd_dev_s *dev);
+
+/****************************************************************************
  * Name: ramtron_initialize
  *
  * Description:
  *   Create and initialize a Ramtron MTD device instance.
  *
  * Input Parameters:
- *   start - Address of the beginning of the allocated RAM regions.
- *   size  - The size in bytes of the allocated RAM region.
+ *   dev  - Pointer to the SPI device instance.
+ *   spi_devid - SPI device ID to manage CS lines in board
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *ramtron_initialize(FAR struct spi_dev_s *dev);
+FAR struct mtd_dev_s *ramtron_initialize(FAR struct spi_dev_s *dev,
+                                         uint16_t spi_devid);
 
 /****************************************************************************
  * Name: sst25_initialize
@@ -558,7 +627,7 @@ FAR struct mtd_dev_s *sst39vf_initialize(void);
  *
  * Description:
  *   Initializes the driver for SPI-based W25x16, x32, and x64 and W25q16,
- *   q32, q64, and q128 FLASH
+ *   q32, q64, and q128 NOR FLASH
  *
  ****************************************************************************/
 
@@ -576,6 +645,17 @@ FAR struct mtd_dev_s *gd25_initialize(FAR struct spi_dev_s *dev,
                                       uint32_t spi_devid);
 
 /****************************************************************************
+ * Name: gd55_initialize
+ *
+ * Description:
+ *   Initializes the driver for QSPI-based GD55 FLASH
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *gd55_initialize(FAR struct qspi_dev_s *dev,
+                                      bool unprotect);
+
+/****************************************************************************
  * Name: gd5f_initialize
  *
  * Description:
@@ -584,6 +664,17 @@ FAR struct mtd_dev_s *gd25_initialize(FAR struct spi_dev_s *dev,
  ****************************************************************************/
 
 FAR struct mtd_dev_s *gd5f_initialize(FAR struct spi_dev_s *dev,
+                                      uint32_t spi_devid);
+
+/****************************************************************************
+ * Name: w25n_initialize
+ *
+ * Description:
+ *   Initializes the driver for SPI-based W25N NAND FLASH
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *w25n_initialize(FAR struct spi_dev_s *dev,
                                       uint32_t spi_devid);
 
 /****************************************************************************
@@ -656,7 +747,7 @@ FAR struct mtd_dev_s *w25qxxxjv_initialize(FAR struct qspi_dev_s *qspi,
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, size_t offset,
+FAR struct mtd_dev_s *filemtd_initialize(FAR const char *path, off_t offset,
                                          int16_t sectsize,
                                          int32_t erasesize);
 
@@ -713,7 +804,7 @@ FAR struct mtd_dev_s *nullmtd_initialize(size_t mtdlen, int16_t sectsize,
  *   remotecpu  - the server cpu name
  *   remotepath - the device you want to access in the remote cpu
  *   localpath  - the device path in local cpu, if NULL, the localpath is
- *                same as the remotepath, provide this argument to supoort
+ *                same as the remotepath, provide this argument to support
  *                custom device path
  *
  * Returned Values:
@@ -777,6 +868,49 @@ int dhara_initialize(int minor, FAR struct mtd_dev_s *mtd);
 #ifdef CONFIG_MTD_DHARA
 int dhara_initialize_by_path(FAR const char *path,
                              FAR struct mtd_dev_s *mtd);
+#endif
+
+/****************************************************************************
+ * Name: nvblk_initialize
+ *
+ * Description:
+ *   Initialize to provide a block driver wrapper around an MTD interface
+ *
+ * Input Parameters:
+ *   path - The block device path.
+ *   mtd  - The MTD device that supports the FLASH interface.
+ *   lbs  - The logical blocksize (size of the nvblk blocks).
+ *   iobs - The input output blocksize (multiple of lbs).
+ *   speb - The number of spare erase blocks.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_NVBLK
+int nvblk_initialize(FAR const char *path,
+                     FAR struct mtd_dev_s *mtd,
+                     uint32_t lbs,
+                     uint32_t iobs,
+                     uint32_t speb);
+#endif
+
+/****************************************************************************
+ * Name: register_cfi_driver
+ *
+ * Description:
+ *   Initialize and register a cfi nor flash.
+ *
+ * Input Parameters:
+ *   addr_base - The base(start) address of the device.
+ *   addr_end  - The end address of the device.
+ *   bankwidth - The bankwidth(port width) of the device.
+ *   id        - The device id used for register name.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_CFI
+int register_cfi_driver(volatile uintptr_t addr_base,
+                        volatile uintptr_t addr_end, uint32_t bankwidth,
+                        int id);
 #endif
 
 #undef EXTERN

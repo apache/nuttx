@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/rtl8720c/amebaz_coex.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -98,7 +100,7 @@ void bt_coex_handle_cmd_complete_evt(uint16_t opcode, uint16_t cause,
       if (total_len <= 1)
         {
           printf("bt_coex_handle_cmd_complete_evt: not report to wifi");
-          return ;
+          return;
         }
 
       rltk_coex_mailbox_to_wifi(p, total_len);

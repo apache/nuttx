@@ -54,7 +54,7 @@ NuttX-10.2.0
 * [#4450](https://github.com/apache/nuttx/pull/4450) libxx:uClibc++: disable new_handler.cpp when use libsupc++
 * [#4456](https://github.com/apache/nuttx/pull/4456) libc/gettext: Initialize path field when creating mofile struct.
 * [#4466](https://github.com/apache/nuttx/pull/4466) sched/wdog/wd_start.c: prevent accessing watch-dog lag if head is NULL
-* [#4499](https://github.com/apache/nuttx/pull/4499) uClibc++:remove typeinfo.cpp that confict with libsupc++
+* [#4499](https://github.com/apache/nuttx/pull/4499) uClibc++:remove typeinfo.cpp that conflict with libsupc++
 * [#3698](https://github.com/apache/nuttx/pull/3698) sched/task: Simplify the syscall handling of task_spawn
 * [#3813](https://github.com/apache/nuttx/pull/3813) syscall/syscall.csv: Correct ordering of entries
 * [#4020](https://github.com/apache/nuttx/pull/4020) SMP should depends on ARCH_INTERRUPTSTACK
@@ -62,7 +62,7 @@ NuttX-10.2.0
 * [#3967](https://github.com/apache/nuttx/pull/3967) libc/dirname: Handle the consecutive '/' correctly
 * [#4018](https://github.com/apache/nuttx/pull/4018) libs/libc/spawn: fix posix_spawn_file_actions_adddup2 alloc size error
 * [#4009](https://github.com/apache/nuttx/pull/4009) Move aligned_alloc, posix_memalign and valloc from mm/umm to libs/libc/stdlib
-* [#4021](https://github.com/apache/nuttx/pull/4021) sched/waitpid: handle waitpid waitting tcb->group is NULL
+* [#4021](https://github.com/apache/nuttx/pull/4021) sched/waitpid: handle waitpid waiting tcb->group is NULL
 * [#4026](https://github.com/apache/nuttx/pull/4026) sched/idle: disable sched when idle call nx_bringup
 * [#4035](https://github.com/apache/nuttx/pull/4035) work_queue: schedule the work queue using the timer mechanism
 * [#4048](https://github.com/apache/nuttx/pull/4048) libc: Move pthread_key_destructor to task_info_s
@@ -74,7 +74,7 @@ NuttX-10.2.0
 * [#4127](https://github.com/apache/nuttx/pull/4127) libc: Increase the function of crc8 to use custom polynomials
 * [#4160](https://github.com/apache/nuttx/pull/4160) group/child_status: Dynamically expand group child_status
 * [#4183](https://github.com/apache/nuttx/pull/4183) sched/task: Fix wrong return value from nxspawn_open()
-* [#4226](https://github.com/apache/nuttx/pull/4226) syslog: reslove crash because vmov.i32 instruction is not ready
+* [#4226](https://github.com/apache/nuttx/pull/4226) syslog: resolve crash because vmov.i32 instruction is not ready
 * [#4246](https://github.com/apache/nuttx/pull/4246) libc/pthread_barrierattr_destory.c: Destroy shouldn't reinitialize the attributes
 * [#4270](https://github.com/apache/nuttx/pull/4270) tzset: avoid taking semaphore in interrupt for non-kernel mode
 * [#4413](https://github.com/apache/nuttx/pull/4413) sched/wdog: fix switch_context caused error in wd_start()
@@ -87,7 +87,7 @@ NuttX-10.2.0
 * [#4377](https://github.com/apache/nuttx/pull/4377) task_spawn: release g_spawn_parmsem and sched_unlock at the ending
 * [#4068](https://github.com/apache/nuttx/pull/4068) mm: Remove mm_heap_impl_s struct
 * [#4247](https://github.com/apache/nuttx/pull/4247) Redirect _l function to non-locale version
-* [#4380](https://github.com/apache/nuttx/pull/4380) som byteorder modification
+* [#4380](https://github.com/apache/nuttx/pull/4380) some byteorder modification
 * [#4283](https://github.com/apache/nuttx/pull/4283) libc/gettext: Change g_domain to array
 * [#4512](https://github.com/apache/nuttx/pull/4512) lib_vsprintf: Add %pV format support
 * [#4513](https://github.com/apache/nuttx/pull/4513) libc/rexec/rexec_af: support remote command execution
@@ -316,7 +316,7 @@ NuttX-10.2.0
 * [#3782](https://github.com/apache/nuttx/pull/3782) spi: Improve SPI Slave interface documentation
 * [#4390](https://github.com/apache/nuttx/pull/4390) Documentation: Update ESP32-C3 supported peripheral list.
 * [#3702](https://github.com/apache/nuttx/pull/3702) Documentation/esp32c3: Fix a couple of issues from #3700
-* [#4242](https://github.com/apache/nuttx/pull/4242) Documentation/bl602: Update some imformation
+* [#4242](https://github.com/apache/nuttx/pull/4242) Documentation/bl602: Update some information
 * [#3662](https://github.com/apache/nuttx/pull/3662) Fix some issues on SPI documentation
 * [#4375](https://github.com/apache/nuttx/pull/4375) Documentation/esp32-wrover-kit: update the name of the GPIO interrupt device.
 * [#4298](https://github.com/apache/nuttx/pull/4298) Doc/FAQ: Add more entries about board initialization
@@ -387,7 +387,7 @@ NuttX-10.2.0
 * [#4415](https://github.com/apache/nuttx/pull/4415) Adds driver for msa301 sensore module
 * [#4420](https://github.com/apache/nuttx/pull/4420) sensor: fix the bug that lsm6dsl selftest is invalid in nuttx.
 * [#3787](https://github.com/apache/nuttx/pull/3787) drivers/spi: Add SPI Slave character device driver
-* [#4566](https://github.com/apache/nuttx/pull/4566) drivers/syslog: Call up_puts in syslog_default_write instad up_putc
+* [#4566](https://github.com/apache/nuttx/pull/4566) drivers/syslog: Call up_puts in syslog_default_write instead up_putc
 * [#4580](https://github.com/apache/nuttx/pull/4580) drivers/syslog: Ensure the buffer zero terminate
 * [#4302](https://github.com/apache/nuttx/pull/4302) Compile fixes in MCP23X17 driver.
 * [#4299](https://github.com/apache/nuttx/pull/4299) bchlib: Improve error handling
@@ -650,7 +650,7 @@ NuttX-10.2.0
 * [#4061](https://github.com/apache/nuttx/pull/4061) FAT32 kconfig entry to enforce computation of free clusters at mount
 * [#4079](https://github.com/apache/nuttx/pull/4079) fs/procfs: layout the output of meminfo correctly
 * [#4093](https://github.com/apache/nuttx/pull/4093) fs: Move the default ioctl handle from nx_vioctl to file_vioctl
-* [#4097](https://github.com/apache/nuttx/pull/4097) fs: Remove the inernal st_count field from struct stat
+* [#4097](https://github.com/apache/nuttx/pull/4097) fs: Remove the internal st_count field from struct stat
 * [#4101](https://github.com/apache/nuttx/pull/4101) fs: pseudorename should call inode_release in the error path
 * [#4118](https://github.com/apache/nuttx/pull/4118) fs: Support the root file system attributes(mode, uid, gid and time)
 * [#4119](https://github.com/apache/nuttx/pull/4119) fs: fstat shouldn't follow the symbol link

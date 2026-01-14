@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32_gpio.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,6 +32,8 @@
 #elif defined(CONFIG_ARCH_CHIP_STM32L0)
 #  define STM32_GPIO_VERY_LOW_SPEED  1      /* Have very low speed operation (400KHz) */
 #elif defined(CONFIG_ARCH_CHIP_STM32G0)
+#  define STM32_GPIO_VERY_LOW_SPEED  1      /* Have very low speed operation */
+#elif defined(CONFIG_ARCH_CHIP_STM32C0)
 #  define STM32_GPIO_VERY_LOW_SPEED  1      /* Have very low speed operation */
 #else
 #  error "Unsupported STM32 M0 family"

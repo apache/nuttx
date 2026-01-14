@@ -659,7 +659,8 @@ static uint32_t esp32_spi_setfrequency(struct spi_dev_s *dev,
 
   putreg32(reg_val, SPI_CLOCK_REG(priv->config->id));
 
-  spiinfo("frequency=%d, actual=%d\n", priv->frequency, priv->actual);
+  spiinfo("frequency=%" PRIu32 ", actual=%" PRIu32 "\n",
+          priv->frequency, priv->actual);
 
   return priv->actual;
 }
@@ -849,6 +850,7 @@ static void esp32_spi_dma_exchange(struct esp32_spi_priv_s *priv,
   const uintptr_t spi_miso_dlen_reg = SPI_MISO_DLEN_REG(id);
   const uintptr_t spi_user_reg = SPI_USER_REG(id);
   const uintptr_t spi_cmd_reg = SPI_CMD_REG(id);
+  const uintptr_t spi_dma_rstatus = SPI_DMA_RSTATUS_REG(id);
 
   DEBUGASSERT((txbuffer != NULL) || (rxbuffer != NULL));
 
@@ -938,6 +940,16 @@ static void esp32_spi_dma_exchange(struct esp32_spi_priv_s *priv,
       else
         {
           esp32_spi_reset_regbits(spi_user_reg, SPI_USR_MISO_M);
+        }
+
+      if (priv->config->flags & ESP32_SPI_IO_W)
+        {
+          /* Wait until SPI TX FIFO is not empty */
+
+          while ((getreg32(spi_dma_rstatus) & SPI_DMA_TX_FIFO_EMPTY) != 0)
+            {
+              ;
+            }
         }
 
       esp32_spi_set_regbits(spi_cmd_reg, SPI_USR_M);
@@ -1102,7 +1114,7 @@ static void esp32_spi_poll_exchange(struct esp32_spi_priv_s *priv,
 
           putreg32(w_wd, data_buf_reg);
 
-          spiinfo("send=0x%" PRIx32 " data_reg=0x%" PRIx32 "\n",
+          spiinfo("send=0x%" PRIx32 " data_reg=0x%" PRIxPTR "\n",
                   w_wd, data_buf_reg);
 
           /* Update data_buf_reg to point to the next data buffer register. */
@@ -1149,7 +1161,7 @@ static void esp32_spi_poll_exchange(struct esp32_spi_priv_s *priv,
             {
               uint32_t r_wd = getreg32(data_buf_reg);
 
-              spiinfo("recv=0x%" PRIx32 " data_reg=0x%" PRIx32 "\n",
+              spiinfo("recv=0x%" PRIx32 " data_reg=0x%" PRIxPTR "\n",
                       r_wd, data_buf_reg);
 
               memcpy(rp, &r_wd, sizeof(uint32_t));
@@ -1523,7 +1535,7 @@ struct spi_dev_s *esp32_spibus_initialize(int port)
     {
       /* Set up to receive peripheral interrupts on the current CPU */
 
-      priv->cpu = up_cpu_index();
+      priv->cpu = this_cpu();
       priv->cpuint = esp32_setup_irq(priv->cpu, priv->config->periph,
                                      1, ESP32_CPUINT_LEVEL);
       if (priv->cpuint < 0)

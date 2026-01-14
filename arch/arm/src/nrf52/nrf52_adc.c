@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nrf52/nrf52_adc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -934,7 +936,7 @@ struct adc_dev_s *nrf52_adcinitialize(
 #ifdef CONFIG_NRF52_SAADC_TIMER
   if (channels > 1)
     {
-      aerr("ERORR: timer trigger works only for 1 channel!\n");
+      aerr("ERROR: timer trigger works only for 1 channel!\n");
       goto errout;
     }
 #endif

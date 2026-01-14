@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_signalfd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,6 +39,7 @@
 #include <sys/signalfd.h>
 
 #include "inode/inode.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -146,7 +149,7 @@ static int signalfd_file_close(FAR struct file *filep)
 
   for (signo = MIN_SIGNO; signo <= MAX_SIGNO; signo++)
     {
-      if (nxsig_ismember(&dev->sigmask, signo))
+      if (nxsig_ismember(&dev->sigmask, signo) == 1)
         {
           signal(signo, SIG_DFL);
         }
@@ -154,7 +157,7 @@ static int signalfd_file_close(FAR struct file *filep)
 
   nxmutex_unlock(&dev->mutex);
   nxmutex_destroy(&dev->mutex);
-  kmm_free(dev);
+  fs_heap_free(dev);
 
   return OK;
 }
@@ -192,7 +195,7 @@ static ssize_t signalfd_file_read(FAR struct file *filep,
   siginfo = (FAR struct signalfd_siginfo *)buffer;
   do
     {
-      ret = nxsig_waitinfo(&pendmask, &info);
+      ret = nxsig_timedwait(&pendmask, &info, NULL);
       if (ret < 0)
         {
           goto errout;
@@ -328,6 +331,7 @@ out:
 int signalfd(int fd, FAR const sigset_t *mask, int flags)
 {
   FAR struct signalfd_priv_s *dev;
+  FAR struct file *filep = NULL;
   struct sigaction act;
   int ret = EINVAL;
   int signo;
@@ -339,7 +343,7 @@ int signalfd(int fd, FAR const sigset_t *mask, int flags)
 
   if (fd == -1)
     {
-      dev = kmm_zalloc(sizeof(*dev));
+      dev = fs_heap_zalloc(sizeof(*dev));
       if (dev == NULL)
         {
           ret = ENOMEM;
@@ -348,8 +352,8 @@ int signalfd(int fd, FAR const sigset_t *mask, int flags)
 
       nxmutex_init(&dev->mutex);
 
-      fd = file_allocate(&g_signalfd_inode, O_RDOK | flags,
-                         0, dev, 0, true);
+      fd = file_allocate_from_inode(&g_signalfd_inode, O_RDOK | flags,
+                                    0, dev, 0);
       if (fd < 0)
         {
           ret = -fd;
@@ -360,9 +364,7 @@ int signalfd(int fd, FAR const sigset_t *mask, int flags)
     }
   else
     {
-      FAR struct file *filep;
-
-      if (fs_getfilep(fd, &filep) < 0)
+      if (file_get(fd, &filep) < 0)
         {
           ret = EBADF;
           goto errout;
@@ -370,13 +372,14 @@ int signalfd(int fd, FAR const sigset_t *mask, int flags)
 
       if (filep->f_inode->u.i_ops != &g_signalfd_fileops)
         {
+          file_put(filep);
           goto errout;
         }
 
       dev = filep->f_priv;
       for (signo = MIN_SIGNO; signo <= MAX_SIGNO; signo++)
         {
-          if (nxsig_ismember(&dev->sigmask, signo))
+          if (nxsig_ismember(&dev->sigmask, signo) == 1)
             {
               signal(signo, SIG_DFL);
             }
@@ -391,17 +394,22 @@ int signalfd(int fd, FAR const sigset_t *mask, int flags)
   act.sa_user = dev;
   for (signo = MIN_SIGNO; signo <= MAX_SIGNO; signo++)
     {
-      if (nxsig_ismember(&dev->sigmask, signo))
+      if (nxsig_ismember(&dev->sigmask, signo) == 1)
         {
           nxsig_action(signo, &act, NULL, false);
         }
+    }
+
+  if (filep != NULL)
+    {
+      file_put(filep);
     }
 
   return fd;
 
 errout_with_dev:
   nxmutex_destroy(&dev->mutex);
-  kmm_free(dev);
+  fs_heap_free(dev);
 
 errout:
   set_errno(ret);

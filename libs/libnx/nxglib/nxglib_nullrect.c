@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libnx/nxglib/nxglib_nullrect.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,7 +38,7 @@
  * Name: nxgl_nullrect
  *
  * Description:
- *   Return true if the area of the retangle is <= 0.
+ *   Return true if the area of the rectangle is <= 0.
  *
  ****************************************************************************/
 

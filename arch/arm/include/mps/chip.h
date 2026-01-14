@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/mps/chip.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,7 +33,10 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
-#define NVIC_SYSH_PRIORITY_MIN     0xe0 /* Bits [7:5] set in minimum priority */
+#define NVIC_SYSH_PRIORITY_MIN     0xf0 /* Bits [7:5] set in minimum priority */
+#define NVIC_SYSH_PRIORITY_DEFAULT 0x80 /* Midpoint is the default */
+#define NVIC_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
+#define NVIC_SYSH_PRIORITY_STEP    0x10 /* Four bits of interrupt priority used */
 
 /****************************************************************************
  * Public Types

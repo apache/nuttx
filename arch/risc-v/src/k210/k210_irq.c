@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/k210/k210_irq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -97,6 +99,7 @@ void up_irqinitialize(void)
 
   /* And finally, enable interrupts */
 
+  riscv_color_intstack();
   up_irq_enable();
 #endif
 }

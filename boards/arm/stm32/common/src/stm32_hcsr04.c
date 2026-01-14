@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/common/src/stm32_hcsr04.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -241,6 +243,6 @@ int board_hcsr04_initialize(int devno)
       return -ENODEV;
     }
 
-  snprintf(devpath, 12, "/dev/dist%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/dist%d", devno);
   return hcsr04_register(devpath, &g_hcsr04config.config);
 }

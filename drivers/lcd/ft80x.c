@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/lcd/ft80x.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -136,7 +138,9 @@ static const struct file_operations g_ft80x_fops =
   ft80x_ioctl,   /* ioctl */
   NULL,          /* mmap */
   NULL,          /* truncate */
-  NULL           /* poll */
+  NULL,          /* poll */
+  NULL,          /* readv */
+  NULL           /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , ft80x_unlink /* unlink */
 #endif
@@ -201,7 +205,7 @@ static int ft80x_fade(FAR struct ft80x_dev_s *priv,
     {
       /* Wait for FADE_STEP_MSEC msec (or whatever we get) */
 
-      nxsig_usleep(FADE_STEP_MSEC * 1000);
+      nxsched_usleep(FADE_STEP_MSEC * 1000);
 
       /* Get the elapsed time */
 

@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_ARCH_FPU is not set
 # CONFIG_STANDARD_SERIAL is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="nrf9160-dk"
@@ -28,6 +29,7 @@ CONFIG_DEBUG_USAGEFAULT=y
 CONFIG_EXPERIMENTAL=y
 CONFIG_INIT_ENTRYPOINT="miniboot_main"
 CONFIG_INTELHEX_BINARY=y
+CONFIG_LIBC_FLOATINGPOINT=y
 CONFIG_MM_REGIONS=2
 CONFIG_NRF91_APP_FORMAT_MCUBOOT=y
 CONFIG_NRF91_FLASH_NS_START=2

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/fvp-v8r/fvp_boot.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,6 +30,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <arch/barriers.h>
 #include <arch/chip/chip.h>
 
 #ifdef CONFIG_SMP
@@ -111,7 +114,7 @@ void arm64_el_init(void)
 {
   write_sysreg(CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC, cntfrq_el0);
 
-  ARM64_ISB();
+  UP_ISB();
 }
 
 #ifdef CONFIG_SMP
@@ -181,5 +184,9 @@ void arm64_chip_boot(void)
    */
 
   arm64_earlyserialinit();
+#endif
+
+#ifdef CONFIG_ARCH_PERF_EVENTS
+  up_perf_init((void *)CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC);
 #endif
 }

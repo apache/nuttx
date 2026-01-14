@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/pthread/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -47,12 +49,17 @@ if(NOT CONFIG_DISABLE_PTHREAD)
     pthread_attr_getstack.c
     pthread_attr_setschedparam.c
     pthread_attr_getschedparam.c
+    pthread_attr_setscope.c
+    pthread_attr_getscope.c
+    pthread_attr_setguardsize.c
+    pthread_attr_getguardsize.c
     pthread_barrierattr_init.c
     pthread_barrierattr_destroy.c
     pthread_barrierattr_getpshared.c
     pthread_barrierattr_setpshared.c
     pthread_barrierinit.c
     pthread_barrierdestroy.c
+    pthread_barrierwait.c
     pthread_condattr_init.c
     pthread_condattr_destroy.c
     pthread_condattr_getpshared.c
@@ -79,7 +86,11 @@ if(NOT CONFIG_DISABLE_PTHREAD)
     pthread_mutexattr_gettype.c
     pthread_mutexattr_setrobust.c
     pthread_mutexattr_getrobust.c
+    pthread_mutexattr_setprioceiling.c
+    pthread_mutexattr_getprioceiling.c
     pthread_mutex_lock.c
+    pthread_mutex_setprioceiling.c
+    pthread_mutex_getprioceiling.c
     pthread_once.c
     pthread_yield.c
     pthread_atfork.c
@@ -95,7 +106,8 @@ if(NOT CONFIG_DISABLE_PTHREAD)
     pthread_testcancel.c
     pthread_getcpuclockid.c
     pthread_self.c
-    pthread_gettid_np.c)
+    pthread_gettid_np.c
+    pthread_concurrency.c)
 
   if(CONFIG_SMP)
     list(APPEND SRCS pthread_attr_getaffinity.c pthread_attr_setaffinity.c)
@@ -105,7 +117,7 @@ if(NOT CONFIG_DISABLE_PTHREAD)
     list(APPEND SRCS pthread_spinlock.c)
   endif()
 
-  if(NOT CONFIG_PTHREAD_CLEANUP_STACKSIZE EQUAL 0)
+  if(NOT CONFIG_TLS_NCLEANUP EQUAL 0)
     list(APPEND SRCS pthread_cleanup.c)
   endif()
 endif()

@@ -141,7 +141,7 @@ void esp32s3_rtcheap_free(void *mem);
  *   size      - Size (in bytes) of the memory region to be allocated.
  *
  * Return Value:
- *   Address of the allocated adddress. NULL, if allocation fails.
+ *   Address of the allocated address. NULL, if allocation fails.
  *
  ****************************************************************************/
 

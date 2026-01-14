@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/intel64/intel64_usestack.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -91,37 +93,20 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
   /* Save the new stack allocation */
 
   tcb->stack_alloc_ptr = stack;
+  tcb->stack_base_ptr  = (void *)STACK_ALIGN_UP((uintptr_t)stack);
 
-  /* If stack debug is enabled, then fill the stack with a recognizable value
-   * that we can use later to test for high water marks.
-   */
+  top_of_stack = STACK_ALIGN_DOWN((uintptr_t)stack + stack_size);
+  size_of_stack = top_of_stack - (uintptr_t)tcb->stack_base_ptr;
+  tcb->adj_stack_size  = size_of_stack;
 
 #ifdef CONFIG_STACK_COLORATION
-  memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
-#endif
-
-  /* The intel64 uses a push-down stack:  the stack grows toward lower
-   * addresses in memory.  The stack pointer register, points to the lowest,
-   * valid work address (the "top" of the stack).  Items on the stack are
-   * referenced as positive word offsets from sp.
+  /* If stack debug is enabled, then fill the stack with a
+   * recognizable value that we can use later to test for high
+   * water marks.
    */
 
-  top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size;
-
-  /* The intel64 stack must be aligned at word (16 byte) boundaries. If
-   * necessary top_of_stack must be rounded down to the next boundary.
-   * We intentionally align at 8 byte boundary (look at up_stack_frame()),
-   * because at task_start, only frame pointer will be pushed, not
-   * instruction pointer.
-   */
-
-  top_of_stack &= ~0x0f;
-  size_of_stack = top_of_stack - (uintptr_t)tcb->stack_alloc_ptr;
-
-  /* Save the adjusted stack values in the struct tcb_s */
-
-  tcb->stack_base_ptr = tcb->stack_alloc_ptr;
-  tcb->adj_stack_size = size_of_stack;
+  x86_64_stack_color(tcb->stack_base_ptr, tcb->adj_stack_size);
+#endif /* CONFIG_STACK_COLORATION */
 
   return OK;
 }

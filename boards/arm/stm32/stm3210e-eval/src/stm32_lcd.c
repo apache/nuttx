@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm3210e-eval/src/stm32_lcd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -286,7 +288,7 @@
 #define R61580_ID             0x1580
 
 /****************************************************************************
- * Private Type Definition
+ * Private Types
  ****************************************************************************/
 
 /* LCD type */
@@ -668,39 +670,6 @@ static void stm3210e_setcursor(uint16_t col, uint16_t row)
 }
 
 /****************************************************************************
- * Name:  stm3210e_dumprun
- *
- * Description:
- *   Dump the contexts of the run buffer:
- *
- *  run     - The buffer in containing the run read to be dumped
- *  npixels - The number of pixels to dump
- *
- ****************************************************************************/
-
-#if 0 /* Sometimes useful */
-static void stm3210e_dumprun(const char *msg, uint16_t *run,
-                             size_t npixels)
-{
-  int i;
-  int j;
-
-  syslog(LOG_DEBUG, "\n%s:\n", msg);
-  for (i = 0; i < npixels; i += 16)
-    {
-      up_putc(' ');
-      syslog(LOG_DEBUG, " ");
-      for (j = 0; j < 16; j++)
-        {
-          syslog(LOG_DEBUG, " %04x", *run++);
-        }
-
-      up_putc('\n');
-    }
-}
-#endif
-
-/****************************************************************************
  * Name:  stm3210e_putrun
  *
  * Description:
@@ -1062,7 +1031,7 @@ static int stm3210e_setpower(struct lcd_dev_s *dev, int power)
           power = CONFIG_LCD_MAXPOWER;
         }
 
-      /* Caclulate the new backlight duty.  It is a faction of the timer1
+      /* Calculate the new backlight duty.  It is a faction of the timer1
        * period based on the ration of the current power setting to the
        * maximum power setting.
        */
@@ -1143,7 +1112,7 @@ static int stm3210e_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  * Input Parameters:
  *
  *    cb - Returned to the driver. The driver version of the callback
- *         strucure may include additional, driver-specific state data at
+ *         structure may include additional, driver-specific state data at
  *         the end of the structure.
  *
  *    pmstate - Identifies the new PM state
@@ -1166,7 +1135,7 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb, int domain,
 
   switch (pmstate)
     {
-      case(PM_NORMAL):
+      case PM_NORMAL:
         {
           /* Restore normal LCD operation */
 
@@ -1183,7 +1152,7 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb, int domain,
         }
         break;
 
-      case(PM_IDLE):
+      case PM_IDLE:
         {
           /* Entering IDLE mode - Reduce LCD light */
 
@@ -1203,7 +1172,7 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb, int domain,
         }
         break;
 
-      case(PM_STANDBY):
+      case PM_STANDBY:
         {
           /* Entering STANDBY mode - Turn display backlight off */
 
@@ -1213,7 +1182,7 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb, int domain,
         }
         break;
 
-      case(PM_SLEEP):
+      case PM_SLEEP:
         {
           /* Entering SLEEP mode - Turn off LCD */
 
@@ -1271,7 +1240,7 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb, int domain,
  * Input Parameters:
  *
  *    cb - Returned to the driver. The driver version of the callback
- *         strucure may include additional, driver-specific state data at
+ *         structure may include additional, driver-specific state data at
  *         the end of the structure.
  *
  *    pmstate - Identifies the new PM state

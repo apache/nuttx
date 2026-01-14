@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/goldfish/goldfish_timer.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -23,8 +25,11 @@
  ****************************************************************************/
 
 #include <nuttx/timers/arch_alarm.h>
+#include <nuttx/timers/goldfish_timer.h>
+#include <nuttx/fdt.h>
 
 #include "arm_timer.h"
+#include "chip.h"
 
 /****************************************************************************
  * Public Functions
@@ -32,5 +37,20 @@
 
 void up_timer_initialize(void)
 {
+#if defined(CONFIG_GOLDFISH_TIMER) && defined(CONFIG_LIBC_FDT)
+  struct oneshot_lowerhalf_s *lower;
+  const void *fdt = fdt_get();
+
+  DEBUGASSERT(fdt != NULL);
+
+  lower = goldfish_timer_initialize(
+            fdt_get_reg_base_by_path(fdt, "/goldfish_rtc"),
+            fdt_get_irq_by_path(fdt, 1, "/goldfish_rtc", QEMU_SPI_IRQ_BASE));
+
+  DEBUGASSERT(lower != NULL);
+
+  up_alarm_set_lowerhalf(lower);
+#else
   up_alarm_set_lowerhalf(arm_timer_initialize(0));
+#endif
 }

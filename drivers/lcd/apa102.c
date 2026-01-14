@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/lcd/apa102.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -123,7 +125,7 @@
 #endif
 
 /****************************************************************************
- * Private Type Definition
+ * Private Types
  ****************************************************************************/
 
 /* This structure describes the state of this driver */
@@ -372,11 +374,11 @@ static inline void apa102_refresh(FAR struct apa102_dev_s *priv)
 
   for (i = 0; i < (APA102_XRES * APA102_YRES); i++)
     {
-      uint32_t *led = (uint32_t *) &priv->fb[i];
+      uint32_t *led = (FAR uint32_t *)&priv->fb[i];
 
       /* Then transfer 4 bytes per LED */
 
-      apa102_write32(priv, (uint32_t) (*led | APA102_HEADER_FRAME));
+      apa102_write32(priv, (uint32_t)(*led | APA102_HEADER_FRAME));
     }
 
   /* Send an end of frame */
@@ -438,7 +440,7 @@ static int apa102_putrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
 
   for (i = 0; i < pixlen; i++)
     {
-      uint16_t *ptr = (uint16_t *)buffer;
+      FAR uint16_t *ptr = (FAR uint16_t *)buffer;
 
       if (row % 2 == 0)
         {
@@ -473,7 +475,7 @@ static int apa102_putrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
  *   buffer    - The buffer containing the area to be written to the LCD
  *   stride    - Length of a line in bytes. This parameter may be necessary
  *               to allow the LCD driver to calculate the offset for partial
- *               writes when the buffer needs to be splited for row-by-row
+ *               writes when the buffer needs to be split for row-by-row
  *               writing.
  *
  ****************************************************************************/
@@ -568,7 +570,7 @@ static int apa102_getrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
 
   for (i = 0; i < pixlen; i++)
     {
-      uint16_t *ptr = (uint16_t *) buffer;
+      FAR uint16_t *ptr = (FAR uint16_t *)buffer;
 
       *ptr++ = apa102_rgb565(priv->fb[(row * APA102_XRES) + col + i]);
     }

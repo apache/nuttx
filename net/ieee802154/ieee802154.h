@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/ieee802154/ieee802154.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,6 +32,7 @@
 #include <sys/types.h>
 #include <netpacket/ieee802154.h>
 
+#include <nuttx/mutex.h>
 #include <nuttx/net/net.h>
 
 #ifdef CONFIG_NET_IEEE802154
@@ -131,6 +134,40 @@ extern "C"
 
 EXTERN const struct sock_intf_s g_ieee802154_sockif;
 
+/* The IEEE 802.15.4 connections rmutex */
+
+extern rmutex_t g_ieee802154_connections_lock;
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: ieee802154_conn_list_lock
+ *
+ * Description:
+ *   Lock the IEEE 802.15.4 connection list.
+ *
+ ****************************************************************************/
+
+static inline_function void ieee802154_conn_list_lock(void)
+{
+  nxrmutex_lock(&g_ieee802154_connections_lock);
+}
+
+/****************************************************************************
+ * Name: ieee802154_conn_list_unlock
+ *
+ * Description:
+ *   Unlock the IEEE 802.15.4 connection list.
+ *
+ ****************************************************************************/
+
+static inline_function void ieee802154_conn_list_unlock(void)
+{
+  nxrmutex_unlock(&g_ieee802154_connections_lock);
+}
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -154,20 +191,6 @@ struct sockaddr;              /* Forward reference */
  ****************************************************************************/
 
 void ieee802154_initialize(void);
-
-/****************************************************************************
- * Name: ieee802154_conn_initialize
- *
- * Description:
- *   Initialize the IEEE 802.15.4 connection structure allocator.  Called
- *   once and only from ieee802154_initialize().
- *
- * Assumptions:
- *   Called early in the initialization sequence
- *
- ****************************************************************************/
-
-void ieee802154_conn_initialize(void);
 
 /****************************************************************************
  * Name: ieee802154_conn_alloc()
@@ -249,7 +272,7 @@ FAR struct ieee802154_conn_s *
  *               appropriate, however.
  *   meta      - Meta data characterizing the received frame.
  *
- *               If there are multilple frames in the list, this metadata
+ *               If there are multiple frames in the list, this metadata
  *               must apply to all of the frames in the list.
  *
  * Returned Value:
@@ -280,9 +303,9 @@ FAR struct ieee802154_conn_s *
  *
  ****************************************************************************/
 
-uint16_t ieee802154_callback(FAR struct radio_driver_s *radio,
+uint32_t ieee802154_callback(FAR struct radio_driver_s *radio,
                              FAR struct ieee802154_conn_s *conn,
-                             uint16_t flags);
+                             uint32_t flags);
 
 /****************************************************************************
  * Name: ieee802154_recvmsg

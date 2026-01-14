@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/hostfs/hostfs.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,10 +49,11 @@
 
 struct hostfs_ofile_s
 {
-  struct hostfs_ofile_s    *fnext;      /* Supports a singly linked list */
-  int16_t                   crefs;      /* Reference count */
-  mode_t                    oflags;     /* Open mode */
+  struct hostfs_ofile_s    *fnext;   /* Supports a singly linked list */
+  int16_t                   crefs;   /* Reference count */
+  mode_t                    oflags;  /* Open mode */
   int                       fd;
+  char                      relpath[1];
 };
 
 /* This structure represents the overall mountpoint state.  An instance of

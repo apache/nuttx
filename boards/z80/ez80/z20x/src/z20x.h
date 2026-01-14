@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/z80/ez80/z20x/src/z20x.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -152,8 +154,7 @@ extern uint8_t _progend[];
 #define __STR(s) #s
 #define __XSTR(s) __STR(s)
 
-#define W25_CHARDEV  "/dev/mtd" __XSTR(CONFIG_Z20X_W25_MINOR)
-#define W25_BLOCKDEV "/dev/mtdblock" __XSTR(CONFIG_Z20X_W25_MINOR)
+#define W25_DEV "/dev/mtd" __XSTR(CONFIG_Z20X_W25_MINOR)
 
 /****************************************************************************
  * Public Function Prototypes

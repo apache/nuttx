@@ -8,8 +8,28 @@ C Coding Standard
 NuttX follows a specific coding style which needs to be followed at all times
 a contribution to be accepted. Please read this document before working on
 new code so that you can follow the style from the start. To check your code
-for conformance to the coding style, you should use the `nxstyle <#nxstyle>`_
-tool included under ``tools/`` in the main NuttX repository.
+for conformance to the coding style, you should use the checkpatch.sh script
+(that calls the `nxstyle <#nxstyle>`_ tool) included under ``tools/`` in the
+main NuttX repository, or enable the pre-commit functionality described in
+`pre-commit <#precommit>`__.
+
+**************************
+Quick Check for Compliance
+**************************
+
+You should check for coding style issues before submitting your Pull Request.
+There is a script that you can run to check for coding styles issue:
+
+  .. code-block:: bash
+
+    ./tools/checkpatch.sh -g HEAD~...HEAD
+
+Alternatevily you can run this script passing the .c file or .h header you
+want to check:
+
+  .. code-block:: bash
+
+    ./tools/checkpatch.sh -f path/to/your/file.c
 
 *******************
 General Conventions
@@ -89,7 +109,7 @@ following order:
 **Large vs. Small Files**. In larger files, block comments should
 be included for all groupings, even if they are empty; the empty
 grouping provides important information in itself. Smaller files
-may omit some of the block comments; it is awkard if the block
+may omit some of the block comments; it is awkward if the block
 comments are larger than the file content!
 
 **Header File Idempotence**. C header file must protect against
@@ -1013,7 +1033,7 @@ meant any variable defined outside of a function. The distinction is
 between this kind of *global* and function *local* definition and refers
 to the scope a symbol *within a file*. A related concept for all
 *global* names defined within a file is the scope of the name across
-different files. If the global symbol is pre-pended with the ``static``
+different files. If the global symbol is prepended with the ``static``
 storage class then the scope of the global symbol is within the file
 only. This is a somewhat different concept and within NuttX you will
 find these distinguished as *private* vs. *public* global symbols.
@@ -1038,7 +1058,7 @@ any variable that has more than local scope.
    delimitation using ``_``. Long variable names, however, are
    discouraged.
 -  **Use structures**. If possible, wrap all global variables within a
-   structure to minimize the liklihood of name collisions.
+   structure to minimize the likelihood of name collisions.
 -  **Avoid global variables when possible**. Use of global variables, in
    general, is discourage unless there is no other reasonable solution.
 
@@ -1208,8 +1228,8 @@ Structures
    defining a structure within a type definition is discouraged. It is
    preferred that the structure definition and the type definition be
    separate definitions. In general, the NuttX coding style discourages
-   any ``typdef``-ing of structures; normally the full structure name is
-   used as types throughout the code. The reason for this is that is
+   any ``typedef``-ing of structures; normally the full structure name
+   is used as types throughout the code. The reason for this is that is
    structure pointers may be forward referenced in header files without
    having to include the file the provides the type definition. This
    greatly reduces header file coupling.
@@ -1256,7 +1276,7 @@ formatting <#lines>`__, `use of braces <#braces>`__,
 **Size Optimizations**. When declaring fields in structures, order the
 declarations in such a way as to minimize memory waste due of data
 alignment. This essentially means that that fields should be organized
-by data size, not by functionality: Put all pointers togeter, all
+by data size, not by functionality: Put all pointers together, all
 ``uint8_t``'s together, all ``uint32_t``'s together. Data types withi
 well known like ``uint8_t`` and ``uint32_t`` should also be place in
 either ascending or descending size order.
@@ -1461,7 +1481,7 @@ the naming of `enumeration values <#enumerations>`__.
 -  **Uppercase**. Macro names are always in upper case.
 -  **Lowercase Exceptions**. There are a few lower case values in NuttX
    macro names. Such as a lower-case ``p`` for a period or decimal point
-   (such as ``VOLTAGE_3p3V``). I have also used lower-case ``v`` for a
+   (such as ``VOLTAGE_3p3V``). The lower-case ``v`` is also used for a
    version number (such as ``CONFIG_NET_IPv6``). However, these are
    exceptions to the rule rather than illustrating a rule.
 -  **Macros that could be functions**. Lower-case macro names are also
@@ -1723,7 +1743,7 @@ Function Body
 -  **Braces in column 1** The opening and close braces of the compound
    statement must be placed in column one.
 -  **First definition or statement in column 3**. The first data
-   definitions or statements in the function body are idented by two
+   definitions or statements in the function body are indented by two
    spaces. Standards for statements are covered in the `following
    paragraph <#statements>`__
 -  **Local variables first**. Because NuttX conforms to the older C89
@@ -1947,7 +1967,7 @@ between the operator and the variable or number they are operating on.
 character in combination with ``=`` such as ``+=``, ``>=``, ``>>=``,
 etc. Some compilers will accept the ``=`` at the beginning or the end of
 the sequence. This standard, however, requires that the ``=`` always
-appear last in order to avoid amiguities that may arise if the ``=``
+appear last in order to avoid ambiguities that may arise if the ``=``
 were to appear first. For example, ``a =++ b;`` could also be
 interpreted as ``a =+ +b;`` or ``a = ++b`` all of which are very
 different.
@@ -2218,7 +2238,7 @@ braces <#braces>`__, `indentation <#indentation>`__, and
 
     do ptr++; while (*ptr != '\0');
 
-.. error:: This is incorrect
+.. tip:: This is correct
 
   .. code-block:: c
 
@@ -2370,6 +2390,58 @@ names begin with a capital letter identifying what is being named:
  *Enumerations Names*
    Enumerations begin with an upper case '**E**'. For example,
    ``EMyEnumeration``. The suffix ``_e`` is never used.
+
+.. _precommit:
+
+******************
+Using Pre-Commit
+******************
+You can use the `pre-commit <https://pre-commit.com/>`_ tool to check
+for style issues automatically. This is a 3rd party, Python based
+tool that simplifies linter checks and runs automatically when you
+commit modifications.
+
+The tool uses the `.pre-commit-config.yaml` file on the root NuttX
+directory as reference.
+
+Installing
+=============
+Follow the installation guide on `pre-commit <https://pre-commit.com/>`_
+website. If you can't install directly with pip, consider using
+`snap <https://snapcraft.io/install/pre-commit/ubuntu>`_ or `apt`.
+Then, enter the NuttX repository and run: ``pre-commit install``.
+
+Using
+========
+When committing changes, the tool should run automatically.
+Each check should show "Passed", otherwise the commit will not happen.
+If any test fails, you should: fix the errors, then ``git add`` and ``git commit``
+again.
+
+Example terminal output:
+
+.. code-block:: console
+
+ user@machine:~/nuttxspace/nuttx$ git commit -m "Testing pre-commit"
+ fix end of files.........................................................Passed
+ trim trailing whitespace.................................................Passed
+ check for added large files..............................................Passed
+ nxstyle..................................................................Passed
+ [feature/example_wifi 8394e9f3cf] Testing pre-commit
+ 1 file changed, 1 insertion(+)
+
+It is possible to manually run the tool without a commit, just checking all
+files in a directory. Simply run: ``pre-commit run --files drivers/i2c/*``
+
+Hooks
+========
+The following hooks are enabled in `.pre-commit-config.yaml`:
+
+-  **end-of-file-fixer:** adds an empty line at the end of the file.
+-  **trailing-whitespace:** finds and removes white spaces at the end of lines.
+-  **check-added-large-files:** verifies if large files were added to the commit.
+-  **cmake-format:** check the style of CMakeLists files.
+-  **nxstyle:** check for the NuttX style (nxstyle). Currently runs the entire ``checkpatch.sh`` script.
 
 .. _appndxa:
 

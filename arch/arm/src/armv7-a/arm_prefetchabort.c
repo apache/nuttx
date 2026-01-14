@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/arm_prefetchabort.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,6 +35,7 @@
 #  include <nuttx/page.h>
 #endif
 
+#include "mmu.h"
 #include "sched/sched.h"
 #include "arm_internal.h"
 
@@ -54,14 +57,14 @@
 
 uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 {
-  uint32_t *savestate;
+  struct tcb_s *tcb = this_task();
+  uint32_t *saveregs;
+  bool savestate;
 
-  /* Save the saved processor context in CURRENT_REGS where it can be
-   * accessed for register dumps and possibly context switching.
-   */
-
-  savestate    = (uint32_t *)CURRENT_REGS;
-  CURRENT_REGS = regs;
+  savestate = up_interrupt_context();
+  saveregs = tcb->xcp.regs;
+  tcb->xcp.regs = regs;
+  up_set_interrupt_context(true);
 
   /* Get the (virtual) address of instruction that caused the prefetch
    * abort. When the exception occurred, this address was provided in the
@@ -75,7 +78,11 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
   pginfo("VADDR: %08x VBASE: %08x VEND: %08x\n",
          regs[REG_PC], PG_PAGED_VBASE, PG_PAGED_VEND);
 
-  if (regs[REG_R15] >= PG_PAGED_VBASE && regs[REG_R15] < PG_PAGED_VEND)
+  if (FSR_FAULT(ifsr) == FSR_FAULT_DEBUG)
+    {
+      arm_dbgmonitor(0, (void *)regs[REG_PC], regs);
+    }
+  else if (regs[REG_R15] >= PG_PAGED_VBASE && regs[REG_R15] < PG_PAGED_VEND)
     {
       /* Save the offending PC as the fault address in the TCB of the
        * currently executing task.  This value is, of course, already known
@@ -99,13 +106,6 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
        */
 
       pg_miss();
-
-      /* Restore the previous value of CURRENT_REGS.
-       * NULL would indicate thatwe are no longer in an interrupt handler.
-       *  It will be non-NULL if we are returning from a nested interrupt.
-       */
-
-      CURRENT_REGS = savestate;
     }
   else
     {
@@ -114,6 +114,11 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
       PANIC_WITH_REGS("panic", regs);
     }
 
+  /* Restore the previous value of saveregs. */
+
+  up_set_interrupt_context(savestate);
+  tcb->xcp.regs = saveregs;
+
   return regs;
 }
 
@@ -121,17 +126,26 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 
 uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 {
-  /* Save the saved processor context in CURRENT_REGS where it can be
-   * accessed for register dumps and possibly context switching.
-   */
+  struct tcb_s *tcb = this_task();
 
-  CURRENT_REGS = regs;
+  tcb->xcp.regs = regs;
+  up_set_interrupt_context(true);
 
   /* Crash -- possibly showing diagnostic debug information. */
 
   _alert("Prefetch abort. PC: %08" PRIx32 " IFAR: %08" PRIx32 " IFSR: %08"
          PRIx32 "\n", regs[REG_PC], ifar, ifsr);
-  PANIC_WITH_REGS("panic", regs);
+
+  if (FSR_FAULT(ifsr) == FSR_FAULT_DEBUG)
+    {
+      arm_dbgmonitor(0, (void *)regs[REG_PC], regs);
+    }
+  else
+    {
+      PANIC_WITH_REGS("panic", regs);
+    }
+
+  up_set_interrupt_context(false);
   return regs; /* To keep the compiler happy */
 }
 

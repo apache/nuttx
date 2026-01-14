@@ -2,6 +2,8 @@
 ############################################################################
 # tools/stm32_pinmap_tool.py
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -444,7 +446,7 @@ def parse_conditional(lines, conditions):
     return defines
 
 
-def formmatter(args):
+def formatter(args):
     # if pinmap passed is a legacy pinmap. Just generate a report
     report_only = args.report is not False
 
@@ -564,7 +566,7 @@ def main():
             "Python 2 is not supported. Please try again using Python 3."
         )
     args = parse_args()
-    formmatter(args)
+    formatter(args)
 
 
 if __name__ == "__main__":

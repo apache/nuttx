@@ -1,5 +1,8 @@
 /****************************************************************************
  * include/crypto/bn.h
+ *
+ * SPDX-License-Identifier: Unlicense
+ *
  * This is free and unencumbered software released into the public domain.
  * Anyone is free to copy, modify, publish, use, compile, sell, or
  * distribute this software, either in source code form or as a compiled
@@ -60,15 +63,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* This macro defines the word size in bytes of the array that constitues the
- * big-number data structure.
+/* This macro defines the word size in bytes of the array that constitutes
+ * the big-number data structure.
  */
 
 #define WORD_SIZE             1
 
 /* Size of big-numbers in bytes */
 
-#define BN_ARRAY_SIZE         (256 / WORD_SIZE)
+#define BN_ARRAY_SIZE         (512 / WORD_SIZE)
 
 /* Data type of array in structure */
 
@@ -101,6 +104,9 @@
 
 struct bn
 {
+  /* Sign: -1 if the bignum is negative, 1 otherwise. */
+
+  int s;
   DTYPE array[BN_ARRAY_SIZE];
 };
 
@@ -131,9 +137,17 @@ void bignum_to_string(FAR struct bn *n, FAR char *str, int maxsize);
 
 void bignum_add(FAR struct bn *a, FAR struct bn *b, FAR struct bn *c);
 
+/* c = |a| + |b| */
+
+void bignum_add_abs(FAR struct bn *a, FAR struct bn *b, FAR struct bn *c);
+
 /* c = a - b */
 
 void bignum_sub(FAR struct bn *a, FAR struct bn *b, FAR struct bn *c);
+
+/* c = |a| - |b| */
+
+void bignum_sub_abs(FAR struct bn *a, FAR struct bn *b, FAR struct bn *c);
 
 /* c = a * b */
 
@@ -180,6 +194,10 @@ void bignum_rshift(FAR struct bn *a, FAR struct bn *b, int nbits);
 
 int  bignum_cmp(FAR struct bn *a, FAR struct bn *b);
 
+/* Compare |A| and |B| */
+
+int  bignum_cmp_abs(FAR struct bn *a, FAR struct bn *b);
+
 /* For comparison with zero */
 
 int  bignum_is_zero(FAR struct bn *n);
@@ -208,5 +226,17 @@ void bignum_assign(FAR struct bn *dst, FAR struct bn *src);
 
 void pow_mod_faster(FAR struct bn *a, FAR struct bn *b,
                     FAR struct bn *n, FAR struct bn *res);
+
+/* Return the number of less significant zero-bits */
+
+int bignum_lsb(FAR struct bn *a);
+
+/* g = gcd(a, b) */
+
+void bignum_gcd(FAR struct bn *a, FAR struct bn *b, FAR struct bn *g);
+
+/* Modular inverse: c = a^-1 mod n */
+
+int bignum_inv_mod(FAR struct bn *a, FAR struct bn *n, FAR struct bn *c);
 
 #endif /* __INCLUDE_CRYPTO_BIGNUM_H */

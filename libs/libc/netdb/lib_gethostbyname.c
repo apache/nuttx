@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/netdb/lib_gethostbyname.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,8 +27,6 @@
 #include <nuttx/config.h>
 
 #include <netdb.h>
-
-#ifdef CONFIG_LIBC_NETDB
 
 /****************************************************************************
  * Public Functions
@@ -65,4 +65,3 @@ FAR struct hostent *gethostbyname(FAR const char *name)
   return gethostbyname2(name, AF_UNSPEC);
 }
 
-#endif /* CONFIG_LIBC_NETDB */

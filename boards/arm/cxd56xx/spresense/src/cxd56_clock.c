@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/cxd56xx/spresense/src/cxd56_clock.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,7 +39,8 @@
  ****************************************************************************/
 
 static struct pm_cpu_freqlock_s g_hv_lock =
-  PM_CPUFREQLOCK_INIT(PM_CPUFREQLOCK_TAG('C','P',0), PM_CPUFREQLOCK_FLAG_HV);
+  PM_CPUFREQLOCK_INIT(PM_CPUFREQLOCK_TAG('C', 'P', 0),
+                      PM_CPUFREQLOCK_FLAG_HV);
 
 /****************************************************************************
  * Public Functions

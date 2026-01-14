@@ -1,13 +1,11 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_tc.c
  *
- *   Copyright (C) 2013-2014, 2016-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * The Atmel sample code has a BSD compatible license that requires this
- * copyright notice:
- *
- *   Copyright (c) 2011, Atmel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2016-2017 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2013-2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2011 Atmel Corporation
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.orgr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -521,7 +519,7 @@ static void sam_regdump(struct sam_chan_s *chan, const char *msg)
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/usbdev/usbmsc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,6 +39,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/queue.h>
 #include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/usb/storage.h>
 #include <nuttx/usb/usbdev.h>
@@ -197,12 +200,6 @@
 #  define CONFIG_USBMSC_SCSI_STACKSIZE 2048
 #endif
 
-/* Packet and request buffer sizes */
-
-#ifndef CONFIG_USBMSC_EP0MAXPACKET
-#  define CONFIG_USBMSC_EP0MAXPACKET 64
-#endif
-
 /* USB Controller */
 
 #ifdef CONFIG_USBDEV_SELFPOWERED
@@ -231,7 +228,7 @@
 #define USBMSC_STATE_CMDWRITE         (5)  /* Processing a SCSI write command */
 #define USBMSC_STATE_CMDFINISH        (6)  /* Finish command processing */
 #define USBMSC_STATE_CMDSTATUS        (7)  /* Processing the final status of the command */
-#define USBMSC_STATE_TERMINATED       (8)  /* Thread has exitted */
+#define USBMSC_STATE_TERMINATED       (8)  /* Thread has exited */
 
 /* Event communicated to worker thread */
 
@@ -301,6 +298,11 @@
 #define USBMSC_MKEPBULKIN(devDesc)    (USB_DIR_IN | (devDesc)->epno[USBMSC_EP_BULKIN_IDX])
 #define USBMSC_EPINBULK_ATTR          (USB_EP_ATTR_XFER_BULK)
 
+#define USBMSC_SSBULKMAXSTREAM        (0)
+#define USBMSC_SSBULKMAXBURST         (0)
+#define USBMSC_SSBULKMAXPACKET        (1024)
+#define USBMSC_SSBULKMXPKTSHIFT       (10)
+#define USBMSC_SSBULKMXPKTMASK        (0x000003ff)
 #define USBMSC_HSBULKMAXPACKET        (512)
 #define USBMSC_HSBULKMXPKTSHIFT       (9)
 #define USBMSC_HSBULKMXPKTMASK        (0x000001ff)
@@ -310,15 +312,14 @@
 
 /* Configuration descriptor size */
 
-#ifndef CONFIG_USBMSC_COMPOSITE
-
-/* The size of the config descriptor: (9 + 9 + 2*7) = 32 */
+#if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
+/* The size of the config descriptor: (9 + 2*7 + 2*6) = 35 */
 
 #  define SIZEOF_USBMSC_CFGDESC \
-     (USB_SIZEOF_CFGDESC + USB_SIZEOF_IFDESC + USBMSC_NENDPOINTS * USB_SIZEOF_EPDESC)
+     (USB_SIZEOF_IFDESC + USBMSC_NENDPOINTS * USB_SIZEOF_EPDESC + \
+      USBMSC_NENDPOINTS * USB_SIZEOF_SS_EPCOMPDESC)
 
 #else
-
 /* The size of the config descriptor: (9 + 2*7) = 23 */
 
 #  define SIZEOF_USBMSC_CFGDESC \
@@ -380,6 +381,7 @@ struct usbmsc_dev_s
 
   pid_t             thpid;            /* The worker thread task ID */
   sem_t             thsynch;          /* Used to synchronizer terminal events */
+  spinlock_t        spinlock;         /* Used to protect the critical section */
   mutex_t           thlock;           /* Used to get exclusive access to the state data */
   sem_t             thwaitsem;        /* Used to signal worker thread */
   volatile bool     thwaiting;        /* True: worker thread is waiting for an event */
@@ -545,7 +547,7 @@ FAR const struct usb_devdesc_s *usbmsc_getdevdesc(void);
 int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
                        FAR struct usb_epdesc_s *epdesc,
                        FAR struct usbdev_devinfo_s *devinfo,
-                       bool hispeed);
+                       uint8_t speed);
 
 /****************************************************************************
  * Name: usbmsc_mkcfgdesc
@@ -555,14 +557,9 @@ int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_USBDEV_DUALSPEED
 int16_t usbmsc_mkcfgdesc(FAR uint8_t *buf,
                          FAR struct usbdev_devinfo_s *devinfo,
                          uint8_t speed, uint8_t type);
-#else
-int16_t usbmsc_mkcfgdesc(FAR uint8_t *buf,
-                         FAR struct usbdev_devinfo_s *devinfo);
-#endif
 
 /****************************************************************************
  * Name: usbmsc_getqualdesc
@@ -585,7 +582,7 @@ FAR const struct usb_qualdesc_s *usbmsc_getqualdesc(void);
  *
  ****************************************************************************/
 
-int usbmsc_scsi_main(int argc, char *argv[]);
+int usbmsc_scsi_main(int argc, FAR char *argv[]);
 
 /****************************************************************************
  * Name: usbmsc_setconfig

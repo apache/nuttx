@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/imx9/hardware/imx93/imx93_memorymap.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -105,6 +107,7 @@
 #define IMX9_MU1__MUB_BASE                 (0x44230000UL)
 #define IMX9_MU2__MUB_BASE                 (0x42440000UL)
 #define IMX9_S3MUA_BASE                    (0x47520000UL)
+#define IMX9_TRDC_BASE                     (0x49010000UL)
 #define IMX9_NPU_BASE                      (0x4A900000UL)
 #define IMX9_OCOTP_BASE                    (0x47518000UL)
 #define IMX9_OCRAM_MECC1_BASE              (0x490A0000UL)
@@ -127,6 +130,7 @@
 #define IMX9_SEMA42_2_BASE                 (0x42450000UL)
 #define IMX9_SFA_BASE                      (0x44483000UL)
 #define IMX9_SPDIF_BASE                    (0x42680000UL)
+#define IMX9_SRC_GENERAL_REG_BASE          (0x44460000UL)
 #define IMX9_SRC_SENTINEL_SLICE_BASE       (0x44460400UL)
 #define IMX9_SRC_AON_SLICE_BASE            (0x44460800UL)
 #define IMX9_SRC_WKUP_SLICE_BASE           (0x44460C00UL)
@@ -140,6 +144,8 @@
 #define IMX9_SRC_A55C0_SLICE_BASE          (0x44462C00UL)
 #define IMX9_SRC_A55C1_SLICE_BASE          (0x44463000UL)
 #define IMX9_SRC_A55P_SLICE_BASE           (0x44463400UL)
+#define IMX9_SRC_MEDIA_MEM_BASE            (0x44465800UL)
+#define IMX9_SRC_ML_MEM_BASE               (0x44464800UL)
 #define IMX9_M33_PCF1_BASE                 (0x443E0000UL)
 #define IMX9_M33_PSF1_BASE                 (0x443F0000UL)
 #define IMX9_SYS_CTR_COMPARE_BASE          (0x442A0000UL)

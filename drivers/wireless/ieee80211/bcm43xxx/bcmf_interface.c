@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/wireless/ieee80211/bcm43xxx/bcmf_interface.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -121,7 +123,7 @@ bcmf_interface_frame_t
 
       nxmutex_unlock(&ibus->queue_lock);
 
-      nxsig_usleep(10 * 1000);
+      nxsched_usleep(10 * 1000);
 
       if (!block)
         {

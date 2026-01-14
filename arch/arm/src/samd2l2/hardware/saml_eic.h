@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samd2l2/hardware/saml_eic.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -103,8 +105,8 @@
 
 /* Synchronization busy register */
 
-#define EIC_SYNCBUSY_SWRST           (1 << 0)  /* Bit 0:  Software reset syncrhonization busy */
-#define EIC_SYNCBUSY_ENABLE          (1 << 1)  /* Bit 1:  Enable syncrhonization busy */
+#define EIC_SYNCBUSY_SWRST           (1 << 0)  /* Bit 0:  Software reset synchronization busy */
+#define EIC_SYNCBUSY_ENABLE          (1 << 1)  /* Bit 1:  Enable synchronization busy */
 
 /* Event control, Interrupt enable clear, interrupt enable set register,
  * interrupt flag status and clear, and External interrupt asynchronous

@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/procfs/fs_procfscpuinfo.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,8 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
+
+#include "fs_heap.h"
 
 #if defined(CONFIG_ARCH_HAVE_CPUINFO) && !defined(CONFIG_FS_PROCFS_EXCLUDE_CPUINFO)
 
@@ -105,7 +109,7 @@ static int cpuinfo_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Allocate a container to hold the file attributes */
 
-  procfile = kmm_zalloc(sizeof(struct cpuinfo_file_s));
+  procfile = fs_heap_zalloc(sizeof(struct cpuinfo_file_s));
   if (procfile == NULL)
     {
       ferr("ERROR: Failed to allocate file attributes\n");
@@ -133,7 +137,7 @@ static int cpuinfo_close(FAR struct file *filep)
 
   /* Release the file attributes structure */
 
-  kmm_free(procfile);
+  fs_heap_free(procfile);
   filep->f_priv = NULL;
   return OK;
 }
@@ -188,7 +192,7 @@ static int cpuinfo_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and attribute selection */
 
-  newattr = kmm_malloc(sizeof(struct cpuinfo_file_s));
+  newattr = fs_heap_malloc(sizeof(struct cpuinfo_file_s));
   if (newattr == NULL)
     {
       ferr("ERROR: Failed to allocate file attributes\n");

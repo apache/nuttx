@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/lpc54xx/lpcxpresso-lpc54628/src/lpc54_sdram.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -139,7 +141,7 @@ void lpc54_sdram_initialize(void)
       lpc54_gpio_config(g_emc_pinset[i]);
     }
 
-  /* EMC Dynamc memory configuration. */
+  /* EMC Dynamic memory configuration. */
 
   lpc54_emc_sdram_initialize(&g_emc_dynconfig, &g_emc_dynchipconfig, 1);
 }

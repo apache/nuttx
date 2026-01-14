@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/qemu-rv/rv-virt/src/qemu_rv_appinit.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,12 +38,16 @@
 
 #include <sys/mount.h>
 
-#ifndef CONFIG_BUILD_KERNEL
 #include "hardware/qemu_rv_memorymap.h"
 #include "qemu_rv_memorymap.h"
-#endif
-#include "riscv_internal.h"
+#include "qemu_rv_rptun.h"
+
+#include "riscv_sbi.h"
 #include "romfs.h"
+
+#ifdef CONFIG_USERLED
+#include <nuttx/leds/userled.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -125,13 +131,29 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef CONFIG_FS_TMPFS
-  mount(NULL, "/tmp", "tmpfs", 0, NULL);
+  mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
 #endif
 
 #endif
 
 #ifdef CONFIG_DRIVERS_VIRTIO_MMIO
+#ifndef CONFIG_BOARD_EARLY_INITIALIZE
   qemu_virtio_register_mmio_devices();
+#endif
+#endif
+
+#ifdef CONFIG_RPTUN
+  qemu_rptun_init();
+#endif
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  int ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
 #endif
 
   return OK;
@@ -181,15 +203,32 @@ void board_late_initialize(void)
   mount(NULL, "/proc", "procfs", 0, NULL);
 
 #endif
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  int ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+}
+
+void board_early_initialize(void)
+{
+#ifdef CONFIG_DRIVERS_VIRTIO_MMIO
+  qemu_virtio_register_mmio_devices();
+#endif
 }
 
 #ifdef CONFIG_BOARDCTL_POWEROFF
 int board_power_off(int status)
 {
-#ifdef CONFIG_BUILD_KERNEL
+#if defined(CONFIG_BUILD_KERNEL) && ! defined(CONFIG_NUTTSBI)
   riscv_sbi_system_reset(SBI_SRST_TYPE_SHUTDOWN, SBI_SRST_REASON_NONE);
 #else
-  *(FAR volatile uint32_t *)QEMU_RV_RESET_BASE = QEMU_RV_RESET_DONE;
+  *(volatile uint32_t *)QEMU_RV_RESET_BASE = QEMU_RV_RESET_DONE;
 #endif
 
   UNUSED(status);

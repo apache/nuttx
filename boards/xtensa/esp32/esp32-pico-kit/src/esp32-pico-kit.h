@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32/esp32-pico-kit/src/esp32-pico-kit.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -166,7 +168,7 @@ int esp32_twai_setup(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ESP32_I2S0) || defined(CONFIG_ESP32_I2S1)
+#if defined(CONFIG_ESPRESSIF_I2S0) || defined(CONFIG_ESPRESSIF_I2S1)
 int board_i2sdev_initialize(int port, bool enable_tx, bool enable_rx);
 #endif
 

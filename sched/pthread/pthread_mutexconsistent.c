@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/pthread/pthread_mutexconsistent.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -74,21 +76,20 @@
 int pthread_mutex_consistent(FAR pthread_mutex_t *mutex)
 {
   int ret = EINVAL;
-  int status;
 
   sinfo("mutex=%p\n", mutex);
   DEBUGASSERT(mutex != NULL);
 
   if (mutex != NULL)
     {
-      /* Make sure the mutex is stable while we make the following checks. */
+      pid_t pid;
 
-      sched_lock();
+      pid = mutex_get_holder(&mutex->mutex);
 
       /* Is the mutex available? */
 
-      DEBUGASSERT(mutex->pid != 0); /* < 0: available, >0 owned, ==0 error */
-      if (mutex->pid >= 0)
+      DEBUGASSERT(pid != 0); /* < 0: available, >0 owned, ==0 error */
+      if (pid >= 0)
         {
           /* No.. Verify that the thread associated with the PID still
            * exists.  We may be destroying the mutex after cancelling a
@@ -101,28 +102,18 @@ int pthread_mutex_consistent(FAR pthread_mutex_t *mutex)
            * nxsched_get_tcb() does.
            */
 
-          if (nxsched_get_tcb(mutex->pid) == NULL)
+          if (nxsched_get_tcb(pid) == NULL)
             {
-              /* The thread associated with the PID no longer exists */
-
-              mutex->pid    = INVALID_PROCESS_ID;
-              mutex->flags &= _PTHREAD_MFLAGS_ROBUST;
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
-              mutex->nlocks = 0;
-#endif
               /* Reset the semaphore.  This has the same affect as if the
                * dead task had called pthread_mutex_unlock().
                */
 
-              status = nxsem_reset(&mutex->sem, 1);
-              if (status < 0)
-                {
-                  ret = -status;
-                }
-              else
-                {
-                  ret = OK;
-                }
+              mutex_reset(&mutex->mutex);
+
+              /* The thread associated with the PID no longer exists */
+
+              mutex->flags &= _PTHREAD_MFLAGS_ROBUST;
+              ret = OK;
             }
 
           /* Otherwise the mutex is held by some active thread.  Let's not
@@ -136,13 +127,8 @@ int pthread_mutex_consistent(FAR pthread_mutex_t *mutex)
            */
 
           mutex->flags &= _PTHREAD_MFLAGS_ROBUST;
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
-          mutex->nlocks = 0;
-#endif
           ret = OK;
         }
-
-      sched_unlock();
     }
 
   sinfo("Returning %d\n", ret);

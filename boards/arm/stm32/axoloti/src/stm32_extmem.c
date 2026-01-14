@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/axoloti/src/stm32_extmem.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -235,7 +237,7 @@ int stm32_sdram_initialize(void)
    * power-up).
    */
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* Step 5:
    * Set MODE bits to ‘010’ and configure the Target Bank bits (CTB1

@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/arm/src/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -27,7 +29,7 @@ add_subdirectory(common)
 target_include_directories(arch BEFORE PUBLIC ${NUTTX_CHIP_ABS_DIR} common
                                               ${ARCH_SUBDIR})
 
-if(NOT CONFIG_BUILD_FLAT)
+if(CONFIG_BUILD_PROTECTED)
   target_include_directories(arch_interface BEFORE PUBLIC ${NUTTX_CHIP_ABS_DIR}
                                                           common ${ARCH_SUBDIR})
 endif()

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/audio/es8388.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -528,7 +530,7 @@ static void es8388_setmclkfrequency(FAR struct es8388_dev_s *priv)
 
   if (priv->mclk)
     {
-      audinfo("MCLK Freq: %u\n", priv->mclk);
+      audinfo("MCLK Freq: %" PRIu32"\n", priv->mclk);
 
       int ret = I2S_SETMCLKFREQUENCY(priv->i2s, priv->mclk);
 
@@ -746,7 +748,7 @@ static void es8388_setsamplerate(FAR struct es8388_dev_s *priv)
       es8388_writereg(priv, ES8388_DACCONTROL2, ES8388_DACFSRATIO(regval));
     }
 
-  audinfo("Sample rate set to %d\n", priv->samprate);
+  audinfo("Sample rate set to %" PRIu32 "\n", priv->samprate);
 }
 
 /****************************************************************************
@@ -828,11 +830,10 @@ static int es8388_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* 8kHz is hardware dependent */
 
-              caps->ac_controls.b[0] =
+              caps->ac_controls.hw[0] =
                 AUDIO_SAMP_RATE_11K | AUDIO_SAMP_RATE_16K |
                 AUDIO_SAMP_RATE_22K | AUDIO_SAMP_RATE_32K |
                 AUDIO_SAMP_RATE_44K | AUDIO_SAMP_RATE_48K;
-              caps->ac_controls.b[1] = 0;
               break;
 
             default:
@@ -851,11 +852,10 @@ static int es8388_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* Report supported input sample rates */
 
-              caps->ac_controls.b[0] =
+              caps->ac_controls.hw[0] =
                 AUDIO_SAMP_RATE_11K | AUDIO_SAMP_RATE_16K |
                 AUDIO_SAMP_RATE_22K | AUDIO_SAMP_RATE_32K |
                 AUDIO_SAMP_RATE_44K | AUDIO_SAMP_RATE_48K;
-              caps->ac_controls.b[1] = 0;
               break;
 
             default:

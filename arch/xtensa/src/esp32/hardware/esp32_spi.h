@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/esp32/hardware/esp32_spi.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -2779,6 +2781,8 @@
 
 #define SPI_DMA_RSTATUS_OFFSET  (0x148)
 #define SPI_DMA_RSTATUS_REG(i)  (REG_SPI_BASE(i) + SPI_DMA_RSTATUS_OFFSET)
+
+#define SPI_DMA_TX_FIFO_EMPTY   (BIT(31))
 
 /* SPI_DMA_OUT_STATUS : RO ;bitpos:[31:0] ;default: 32'b0 ; */
 

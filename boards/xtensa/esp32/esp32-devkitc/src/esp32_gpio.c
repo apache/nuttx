@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32/esp32-devkitc/src/esp32_gpio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -212,7 +214,7 @@ static int gpin_read(struct gpio_dev_s *dev, bool *value)
 
   DEBUGASSERT(esp32gpio != NULL && value != NULL);
   DEBUGASSERT(esp32gpio->id < BOARD_NGPIOIN);
-  gpioinfo("Reading... pin %d\n", g_gpioinputs[esp32gpio->id]);
+  gpioinfo("Reading... pin %" PRIu32 "\n", g_gpioinputs[esp32gpio->id]);
 
   *value = esp32_gpioread(g_gpioinputs[esp32gpio->id]);
   return OK;

@@ -1,6 +1,8 @@
 /***************************************************************************
  * drivers/serial/uart_pl011.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -226,6 +228,7 @@ struct pl011_uart_port_s
   struct pl011_data data;
   struct pl011_config config;
   unsigned int irq_num;
+  spinlock_t lock;
 };
 
 static int pl011_setup(FAR struct uart_dev_s *dev);
@@ -305,6 +308,7 @@ static struct pl011_uart_port_s g_uart0priv =
     },
 
     .irq_num    = CONFIG_UART0_IRQ,
+    .lock       = SP_UNLOCKED,
 };
 
 /* I/O buffers */
@@ -348,6 +352,7 @@ static struct pl011_uart_port_s g_uart1priv =
     },
 
     .irq_num    = CONFIG_UART1_IRQ,
+    .lock       = SP_UNLOCKED,
 };
 
 /* I/O buffers */
@@ -391,6 +396,7 @@ static struct pl011_uart_port_s g_uart2priv =
     },
 
     .irq_num    = CONFIG_UART2_IRQ,
+    .lock       = SP_UNLOCKED,
 };
 
 /* I/O buffers */
@@ -434,6 +440,7 @@ static struct pl011_uart_port_s g_uart3priv =
     },
 
     .irq_num    = CONFIG_UART3_IRQ,
+    .lock       = SP_UNLOCKED,
 };
 
 /* I/O buffers */
@@ -587,13 +594,18 @@ static int pl011_irq_tx_complete(FAR const struct pl011_uart_port_s *sport)
   return config->uart->fr & PL011_FR_TXFE;
 }
 
-static int pl011_irq_tx_ready(const struct pl011_uart_port_s *sport)
+static int pl011_irq_tx_ready(FAR const struct pl011_uart_port_s *sport)
 {
-  const struct pl011_config *config = &sport->config;
+  FAR const struct pl011_config *config = &sport->config;
+  FAR const struct pl011_data   *data   = &sport->data;
 
-  /* check for TX FIFO not full */
+  if (!data->sbsa && !(config->uart->cr & PL011_CR_TXE))
+    {
+      return false;
+    }
 
-  return ((config->uart->fr & PL011_FR_TXFF) == 0);
+  return (config->uart->imsc & PL011_IMSC_TXIM) &&
+         (!(config->uart->fr & PL011_FR_TXFF));
 }
 
 static int pl011_irq_rx_ready(FAR const struct pl011_uart_port_s *sport)
@@ -622,15 +634,10 @@ static bool pl011_txready(FAR struct uart_dev_s *dev)
 {
   FAR struct pl011_uart_port_s  *sport  = dev->priv;
   FAR const struct pl011_config *config = &sport->config;
-  FAR struct pl011_data         *data   = &sport->data;
 
-  if (!data->sbsa && !(config->uart->cr & PL011_CR_TXE))
-    {
-      return false;
-    }
+  /* check for TX FIFO not full */
 
-  return (config->uart->imsc & PL011_IMSC_TXIM) &&
-         pl011_irq_tx_ready(sport);
+  return ((config->uart->fr & PL011_FR_TXFF) == 0);
 }
 
 /***************************************************************************
@@ -661,7 +668,20 @@ static void pl011_send(FAR struct uart_dev_s *dev, int ch)
   FAR struct pl011_uart_port_s  *sport  = dev->priv;
   FAR const struct pl011_config *config = &sport->config;
 
+  while (!pl011_txready(dev));
+
   config->uart->dr = ch;
+}
+
+static void pl011_putc(struct uart_dev_s *dev, int ch)
+{
+  FAR struct pl011_uart_port_s *sport = dev->priv;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&sport->lock);
+  while (!pl011_txempty(dev));
+  pl011_send(dev, ch);
+  spin_unlock_irqrestore(&sport->lock, flags);
 }
 
 /***************************************************************************
@@ -723,24 +743,20 @@ static void pl011_txint(FAR struct uart_dev_s *dev, bool enable)
   FAR struct pl011_uart_port_s *sport = dev->priv;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&sport->lock);
 
   if (enable)
     {
       pl011_irq_tx_enable(sport);
-
-      /* Fake a TX interrupt here by just calling uart_xmitchars() with
-       * interrupts disabled (note this may recurse).
-       */
+      spin_unlock_irqrestore(&sport->lock, flags);
 
       uart_xmitchars(dev);
     }
   else
     {
       pl011_irq_tx_disable(sport);
+      spin_unlock_irqrestore(&sport->lock, flags);
     }
-
-  leave_critical_section(flags);
 }
 
 /***************************************************************************
@@ -821,7 +837,7 @@ static int pl011_irq_handler(int irq, FAR void *context, FAR void *arg)
       uart_recvchars(dev);
     }
 
-  if (pl011_txready(dev))
+  if (pl011_irq_tx_ready(sport))
     {
       uart_xmitchars(dev);
     }
@@ -984,6 +1000,7 @@ static int pl011_setup(FAR struct uart_dev_s *dev)
     }
 
   up_irq_restore(i_flags);
+  pl011_enable(sport);
 
   return 0;
 }
@@ -1048,22 +1065,11 @@ void pl011_serialinit(void)
  ***************************************************************************/
 
 #ifdef HAVE_PL011_CONSOLE
-int up_putc(int ch)
+void up_putc(int ch)
 {
   FAR struct uart_dev_s *dev = &CONSOLE_DEV;
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      pl011_send(dev, '\r');
-    }
-
-  pl011_send(dev, ch);
-
-  return ch;
+  pl011_putc(dev, ch);
 }
 #endif
 

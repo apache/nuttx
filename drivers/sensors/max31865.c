@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/max31865.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -52,10 +54,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private
- ****************************************************************************/
-
 #define MAX31865_CONFIG_REG             0x00
 # define MAX31865_BIAS_ON               (1 << 7)
 # define MAX31865_AUTO_CONVERSION       (1 << 6)
@@ -84,6 +82,10 @@
 
 #define RTD_A                           (3.9083e-3)
 #define RTD_B                           (-5.775e-7)
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
 
 struct max31865_dev_s
 {
@@ -255,7 +257,7 @@ static ssize_t max31865_read(FAR struct file *filep, FAR char *buffer,
   temp = (-RTD_A + sqrt(RTD_A * RTD_A - 4 * RTD_B * (1 - rt / 100.0))) \
           / (2 * RTD_B);
 
-  *(float *)buffer = temp;
+  *(FAR float *)buffer = temp;
 
   sninfo("MAX31865 ADC: %d, RTD: %.2f, temperature: %.1f\n", \
         regmsb, rt, temp);

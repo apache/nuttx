@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_clockconfig_ver2.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -128,8 +130,16 @@ static void imxrt_oscsetup(void)
 
   /* FlexRAM AXI CLK ROOT */
 
-  putreg32(CCM_CG_CTRL_RSTDIV(1) | CCM_CG_CTRL_DIV0(1),
+  putreg32(CCM_CG_CTRL_RSTDIV(3) | CCM_CG_CTRL_DIV0(3),
   IMXRT_CCM_CG_CTRL(0));
+
+  /* Keep TCM clock running during M7 sleep
+   * needed for DMA to read/write from TCM or OCRAM-M7 FlexRAM ECC
+   */
+
+  reg = getreg32(IMXRT_IOMUXC_GPR_GPR16);
+  putreg32(reg | GPR_GPR16_CM7_FORCE_HCLK_ENABLED,
+  IMXRT_IOMUXC_GPR_GPR16);
 }
 
 /****************************************************************************
@@ -432,7 +442,7 @@ static void imxrt_pll2_pfd(void)
 
   putreg32(reg, IMXRT_ANADIG_PLL_SYS_PLL2_UPDATE);
 
-  /* Wait for stablizing */
+  /* Wait for stabilizing */
 
   reg = 0;
 
@@ -602,7 +612,7 @@ static void imxrt_pll3_pfd(void)
 
   putreg32(reg, IMXRT_ANADIG_PLL_SYS_PLL3_UPDATE);
 
-  /* Wait for stablizing */
+  /* Wait for stabilizing */
 
   reg = 0;
 

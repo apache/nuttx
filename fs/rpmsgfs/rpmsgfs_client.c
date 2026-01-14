@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/rpmsgfs/rpmsgfs_client.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,13 +29,16 @@
 #include <string.h>
 #include <stdio.h>
 #include <sys/uio.h>
+#include <termios.h>
+#include <fcntl.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/semaphore.h>
 
 #include "rpmsgfs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Types
@@ -174,6 +179,7 @@ static int rpmsgfs_ioctl_handler(FAR struct rpmsg_endpoint *ept,
       (FAR struct rpmsgfs_cookie_s *)(uintptr_t)header->cookie;
   FAR struct rpmsgfs_ioctl_s *rsp = data;
 
+  cookie->result = header->result;
   if (cookie->result >= 0 && rsp->arglen > 0)
     {
       memcpy(cookie->data, (FAR void *)(uintptr_t)rsp->buf, rsp->arglen);
@@ -369,6 +375,11 @@ static int rpmsgfs_send_recv(FAR struct rpmsgfs_s *priv,
 
   if (ret < 0)
     {
+      if (copy == false)
+        {
+          rpmsg_release_tx_buffer(&priv->ept, msg);
+        }
+
       goto fail;
     }
 
@@ -391,6 +402,18 @@ static ssize_t rpmsgfs_ioctl_arglen(int cmd)
       case FIONWRITE:
       case FIONREAD:
         return sizeof(int);
+      case FIOC_FILEPATH:
+        return PATH_MAX;
+      case TCDRN:
+      case TCFLSH:
+        return 0;
+      case TCGETS:
+      case TCSETS:
+        return sizeof(struct termios);
+      case FIOC_SETLK:
+      case FIOC_GETLK:
+      case FIOC_SETLKW:
+        return sizeof(struct flock);
       default:
         return -ENOTTY;
     }
@@ -534,6 +557,7 @@ ssize_t rpmsgfs_client_write(FAR void *handle, int fd,
       ret = rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + space);
       if (ret < 0)
         {
+          rpmsg_release_tx_buffer(&priv->ept, msg);
           goto out;
         }
 
@@ -575,6 +599,7 @@ int rpmsgfs_client_ioctl(FAR void *handle, int fd,
   FAR struct rpmsgfs_ioctl_s *msg;
   uint32_t space;
   size_t len;
+  int ret;
 
   if (arglen < 0)
     {
@@ -582,27 +607,39 @@ int rpmsgfs_client_ioctl(FAR void *handle, int fd,
     }
 
   len = sizeof(*msg) + arglen;
-  msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
-  if (msg == NULL)
+
+  while (1)
     {
-      return -ENOMEM;
+      msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
+      if (msg == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      DEBUGASSERT(len <= space);
+
+      msg->fd      = fd;
+      msg->request = request == FIOC_SETLKW ? FIOC_SETLK : request;
+      msg->arg     = arg;
+      msg->arglen  = arglen;
+
+      if (arglen > 0)
+        {
+          memcpy(msg->buf, (FAR void *)(uintptr_t)arg, arglen);
+        }
+
+      ret = rpmsgfs_send_recv(handle, RPMSGFS_IOCTL, false,
+                              (FAR struct rpmsgfs_header_s *)msg, len,
+                              arglen > 0 ? (FAR void *)arg : NULL);
+      if (request != FIOC_SETLKW || ret != -EAGAIN)
+        {
+          break;
+        }
+
+      usleep(20000);
     }
 
-  DEBUGASSERT(len <= space);
-
-  msg->fd      = fd;
-  msg->request = request;
-  msg->arg     = arg;
-  msg->arglen  = arglen;
-
-  if (arglen > 0)
-    {
-      memcpy(msg->buf, (FAR void *)(uintptr_t)arg, arglen);
-    }
-
-  return rpmsgfs_send_recv(handle, RPMSGFS_IOCTL, false,
-                           (FAR struct rpmsgfs_header_s *)msg, len,
-                           arglen > 0 ? (FAR void *)arg : NULL);
+  return ret;
 }
 
 void rpmsgfs_client_sync(FAR void *handle, int fd)
@@ -709,12 +746,13 @@ int rpmsgfs_client_bind(FAR void **handle, FAR const char *cpuname)
       return -EINVAL;
     }
 
-  priv = kmm_zalloc(sizeof(struct rpmsgfs_s));
+  priv = fs_heap_zalloc(sizeof(struct rpmsgfs_s));
   if (!priv)
     {
       return -ENOMEM;
     }
 
+  nxsem_init(&priv->wait, 0, 0);
   strlcpy(priv->cpuname, cpuname, sizeof(priv->cpuname));
   ret = rpmsg_register_callback(priv,
                                 rpmsgfs_device_created,
@@ -723,11 +761,11 @@ int rpmsgfs_client_bind(FAR void **handle, FAR const char *cpuname)
                                 NULL);
   if (ret < 0)
     {
-      kmm_free(priv);
+      nxsem_destroy(&priv->wait);
+      fs_heap_free(priv);
       return ret;
     }
 
-  nxsem_init(&priv->wait, 0, 0);
   *handle = priv;
 
   return 0;
@@ -744,7 +782,7 @@ int rpmsgfs_client_unbind(FAR void *handle)
                             NULL);
 
   nxsem_destroy(&priv->wait);
-  kmm_free(priv);
+  fs_heap_free(priv);
   return 0;
 }
 
@@ -954,8 +992,24 @@ int rpmsgfs_client_chstat(FAR void *handle, FAR const char *path,
 
   DEBUGASSERT(len <= space);
 
-  msg->flags = flags;
-  memcpy(&msg->buf, buf, sizeof(*buf));
+  msg->flags         = flags;
+  msg->buf.dev       = buf->st_dev;
+  msg->buf.ino       = buf->st_ino;
+  msg->buf.mode      = buf->st_mode;
+  msg->buf.nlink     = buf->st_nlink;
+  msg->buf.uid       = buf->st_uid;
+  msg->buf.gid       = buf->st_gid;
+  msg->buf.rdev      = buf->st_rdev;
+  msg->buf.size      = buf->st_size;
+  msg->buf.atim_sec  = buf->st_atim.tv_sec;
+  msg->buf.atim_nsec = buf->st_atim.tv_nsec;
+  msg->buf.mtim_sec  = buf->st_mtim.tv_sec;
+  msg->buf.mtim_nsec = buf->st_mtim.tv_nsec;
+  msg->buf.ctim_sec  = buf->st_ctim.tv_sec;
+  msg->buf.ctim_nsec = buf->st_ctim.tv_nsec;
+  msg->buf.blksize   = buf->st_blksize;
+  msg->buf.blocks    = buf->st_blocks;
+
   strlcpy(msg->pathname, path, space - sizeof(*msg));
 
   return rpmsgfs_send_recv(priv, RPMSGFS_CHSTAT, false,

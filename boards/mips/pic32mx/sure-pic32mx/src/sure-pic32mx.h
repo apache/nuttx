@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/mips/pic32mx/sure-pic32mx/src/sure-pic32mx.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,7 +37,7 @@
 
 /* GPIO Pin Configurations **************************************************/
 
-/* The Sure PIC32MX board has five LEDs.  One (D4, lablel "Power") is not
+/* The Sure PIC32MX board has five LEDs.  One (D4, labeled "Power") is not
  * controllable by software.  Four are controllable by software:
  *
  * D7  "USB"    Yellow  RD7 Low illuminates
@@ -50,7 +52,7 @@
 #define GPIO_FLASH_LED (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTF | GPIO_PIN0)
 #define GPIO_ERROR_LED (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTF | GPIO_PIN1)
 
-/* LCD pin mapping (see boards/sure-pic32mx/README.txt)
+/* LCD pin mapping
  *
  *  --------------------- ---------- ----------------------------------
  *  PIC32                  Sure JP1   Sure Signal Description

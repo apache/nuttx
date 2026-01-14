@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/mpfs_entrypoints.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -85,6 +87,38 @@ int mpfs_set_entrypt(uint64_t hartid, uintptr_t entry);
  ****************************************************************************/
 
 int mpfs_set_use_sbi(uint64_t hartid, bool use_sbi);
+
+/****************************************************************************
+ * Name: mpfs_get_use_sbi
+ *
+ * Description:
+ *   Get if hart boots via SBI.
+ *
+ * Input Parameters:
+ *   hartid - hart id to check
+ *
+ * Returned value:
+ *   true if SBI is used, false otherwise
+ *
+ ****************************************************************************/
+
+bool mpfs_get_use_sbi(uint64_t hartid);
+
+/****************************************************************************
+ * Name: mpfs_cpus_booted
+ *
+ * Description:
+ *   Get amount of CPUs that have completed boot.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned value:
+ *   Amount of CPUs that have booted.
+ *
+ ****************************************************************************/
+
+int mpfs_cpus_booted(void);
 
 #if defined(__cplusplus)
 }

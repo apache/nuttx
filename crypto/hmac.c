@@ -1,8 +1,8 @@
 /****************************************************************************
  * crypto/hmac.c
- * $OpenBSD: hmac.c,v 1.4 2016/09/19 18:09:40 tedu Exp $
  *
- * Copyright (c) 2008 Damien Bergamini <damien.bergamini@free.fr>
+ * SPDX-License-Identifier: ISC
+ * SPDX-FileCopyrightText: 2008 Damien Bergamini <damien.bergamini@free.fr>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -39,7 +39,7 @@
  * Public Functions
  ****************************************************************************/
 
-void hmca_md5_init(FAR HMAC_MD5_CTX *ctx,
+void hmac_md5_init(FAR HMAC_MD5_CTX *ctx,
                    FAR const uint8_t *key,
                    u_int key_len)
 {
@@ -141,7 +141,7 @@ void hmac_sha1_update(FAR HMAC_SHA1_CTX *ctx,
   sha1update(&ctx->ctx, data, len);
 }
 
-void hmca_sha1_final(FAR uint8_t *digest, FAR HMAC_SHA1_CTX *ctx)
+void hmac_sha1_final(FAR uint8_t *digest, FAR HMAC_SHA1_CTX *ctx)
 {
   uint8_t k_opad[SHA1_BLOCK_LENGTH];
   int i;

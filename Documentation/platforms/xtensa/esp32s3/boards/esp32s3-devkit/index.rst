@@ -2,6 +2,8 @@
 ESP32S3-DevKit
 ==============
 
+.. tags:: chip:esp32, chip:esp32s3
+
 The `ESP32S3 DevKit <https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html>`_ is a development board for the ESP32-S3 SoC from Espressif, based on a ESP32-S3-WROOM-1 module.
 
 .. list-table::
@@ -81,6 +83,27 @@ All of the configurations presented below can be tested by running the following
 Where <config_name> is the name of board configuration you want to use, i.e.: nsh, buttons, wifi...
 Then use a serial console terminal like ``picocom`` configured to 115200 8N1.
 
+adc
+---
+
+The ``adc`` configuration enables the ADC driver and the ADC example application.
+ADC Unit 1 is registered to ``/dev/adc0`` with channels 0, 1, 2 and 3 enabled by default.
+Currently, the ADC operates in oneshot mode.
+
+More ADC channels can be enabled or disabled in ``ADC Configuration`` menu.
+
+This example shows channels 0 and 1 connected to 3.3 V and channels 2 and 3 to GND (all readings
+show in units of mV)::
+
+    nsh> adc -n 1
+    adc_main: g_adcstate.count: 1
+    adc_main: Hardware initialized. Opening the ADC device: /dev/adc0
+    Sample:
+    1: channel: 0 value: 3061
+    2: channel: 1 value: 3061
+    3: channel: 2 value: 106
+    4: channel: 3 value: 99
+
 audio
 -----
 
@@ -152,15 +175,15 @@ capture
 The capture configuration enables the capture driver and the capture example, allowing
 the user to measure duty cycle and frequency of a signal. Default pin is GPIO 12 with
 an internal pull-up resistor enabled. When connecting a 50 Hz pulse with 50% duty cycle,
-the following output is expected:
+the following output is expected::
 
-nsh> cap
-cap_main: Hardware initialized. Opening the capture device: /dev/capture0
-cap_main: Number of samples: 0
-pwm duty cycle: 50 % 
-pwm frequence: 50 Hz 
-pwm duty cycle: 50 % 
-pwm frequence: 50 Hz 
+    nsh> cap
+    cap_main: Hardware initialized. Opening the capture device: /dev/capture0
+    cap_main: Number of samples: 0
+    pwm duty cycle: 50 %
+    pwm frequency: 50 Hz
+    pwm duty cycle: 50 %
+    pwm frequency: 50 Hz
 
 coremark
 --------
@@ -172,9 +195,26 @@ disables the NuttShell to get the best possible score.
 .. note:: As the NSH is disabled, the application will start as soon as the
   system is turned on.
 
+crypto
+------
+
+This configuration enables support for the cryptographic hardware and
+the ``/dev/crypto`` device file. Currently, we are supporting SHA-1,
+SHA-224 and SHA-256 algorithms using hardware.
+To test hardware acceleration, you can use `hmac` example and following output
+should look like this::
+
+    nsh> hmac
+    ...
+    hmac sha1 success
+    hmac sha1 success
+    hmac sha1 success
+    hmac sha256 success
+    hmac sha256 success
+    hmac sha256 success
+
 cxx
 ---
-
 Development environment ready for C++ applications. You can check if the setup
 was successful by running ``cxxtest``::
 
@@ -196,6 +236,12 @@ was successful by running ``cxxtest``::
     File /proc/meminfo exists!
     Invalid file! /invalid
     File /proc/version exists!
+
+elf
+---
+
+This configuration uses apps/examples/elf in order to test the ELF loader.
+It can be tested by executing the ``elf`` application.
 
 gpio
 ----
@@ -229,6 +275,41 @@ interrupt fires::
 The pin is configured to trigger an interrupt on the rising edge, so after
 issuing the above command, connect it to 3.3V.
 
+To use dedicated gpio for controlling multiple gpio pin at the same time
+or having better response time, you need to enable
+`CONFIG_ESPRESSIF_DEDICATED_GPIO` option. Dedicated GPIO is suitable
+for faster response times required applications like simulate serial/parallel
+interfaces in a bit-banging way.
+After this option enabled GPIO4 and GPIO5 pins are ready to used as dedicated GPIO pins
+as input/output mode. These pins are for example, you can use any pin up to 8 pins for
+input and 8 pins for output for dedicated gpio.
+To write and read data from dedicated gpio, you need to use
+`write` and `read` calls.
+
+The following snippet demonstrates how to read/write to dedicated GPIO pins:
+
+.. code-block:: C
+
+    int fd; = open("/dev/dedic_gpio0", O_RDWR);
+    int rd_val = 0;
+    int wr_mask = 0xffff;
+    int wr_val = 3;
+
+    while(1)
+      {
+        write(fd, &wr_val, wr_mask);
+        if (wr_val == 0)
+          {
+            wr_val = 3;
+          }
+        else
+          {
+            wr_val = 0;
+          }
+        read(fd, &rd_val, sizeof(uint32_t));
+        printf("rd_val: %d", rd_val);
+      }
+
 i2c
 ---
 
@@ -236,6 +317,60 @@ This configuration can be used to scan and manipulate I2C devices.
 You can scan for all I2C devices using the following command::
 
     nsh> i2c dev 0x00 0x7f
+
+To use slave mode, you can enable `ESP32S3_I2S0_ROLE_SLAVE` or
+`ESP32S3_I2S1_ROLE_SLAVE` option.
+To use slave mode driver following snippet demonstrates how write to i2c bus
+using slave driver:
+
+.. code-block:: C
+
+   #define ESP_I2C_SLAVE_PATH  "/dev/i2cslv0"
+   int main(int argc, char *argv[])
+     {
+       int i2c_slave_fd;
+       int ret;
+       uint8_t buffer[5] = {0xAA};
+       i2c_slave_fd = open(ESP_I2C_SLAVE_PATH, O_RDWR);
+       ret = write(i2c_slave_fd, buffer, 5);
+       close(i2c_slave_fd);
+    }
+
+i2schar
+-------
+
+This configuration enables the I2S character device and the i2schar example
+app, which provides an easy-to-use way of testing the I2S peripherals (I2S0
+and I2S1), enabling both the TX and the RX for those peripherals.
+
+**I2S0 pinout**
+
+============= ========== =========================================
+ESP32-S3 Pin  Signal Pin Description
+============= ========== =========================================
+0             MCLK       Master Clock
+4             BCLK       Bit Clock (SCLK)
+5             WS         Word Select (LRCLK)
+18            DOUT       Data Out
+19            DIN        Data IN
+============= ========== =========================================
+
+**I2S1 pinout**
+
+============= ========== =========================================
+ESP32-S3 Pin  Signal Pin Description
+============= ========== =========================================
+22            BCLK       Bit Clock (SCLK)
+23            WS         Word Select (LRCLK)
+25            DOUT       Data Out
+26            DIN        Data IN
+============= ========== =========================================
+
+After successfully built and flashed, run on the boards's terminal::
+
+    i2schar -p /dev/i2schar[0-1]
+
+The corresponding output should show related debug information.
 
 knsh
 ----
@@ -257,12 +392,149 @@ Flash and PSRAM).
 .. warning:: The World Controller and Permission Control **do not** prevent
   the application from accessing CPU System Registers.
 
+mbedtls
+-------
+
+This configuration is to test mbedtls.
+
+A benchmark result::
+
+  MD5                      :      13300 KiB/s,          0 cycles/byte
+  RIPEMD160                :       5658 KiB/s,          0 cycles/byte
+  SHA-1                    :       6460 KiB/s,          0 cycles/byte
+  SHA-256                  :       3358 KiB/s,          0 cycles/byte
+  SHA-512                  :       1519 KiB/s,          0 cycles/byte
+  SHA3-224                 :        473 KiB/s,          2 cycles/byte
+  SHA3-256                 :        472 KiB/s,          2 cycles/byte
+  SHA3-384                 :        382 KiB/s,          2 cycles/byte
+  SHA3-512                 :        256 KiB/s,          3 cycles/byte
+  3DES                     :        712 KiB/s,          1 cycles/byte
+  DES                      :       1743 KiB/s,          0 cycles/byte
+  3DES-CMAC                :        665 KiB/s,          1 cycles/byte
+  AES-CBC-128              :       3002 KiB/s,          0 cycles/byte
+  AES-CBC-192              :       2656 KiB/s,          0 cycles/byte
+  AES-CBC-256              :       2365 KiB/s,          0 cycles/byte
+  AES-CFB128-128           :       2815 KiB/s,          0 cycles/byte
+  AES-CFB128-192           :       2499 KiB/s,          0 cycles/byte
+  AES-CFB128-256           :       2262 KiB/s,          0 cycles/byte
+  AES-CFB8-128             :        207 KiB/s,          4 cycles/byte
+  AES-CFB8-192             :        181 KiB/s,          5 cycles/byte
+  AES-CFB8-256             :        161 KiB/s,          6 cycles/byte
+  AES-CTR-128              :       2894 KiB/s,          0 cycles/byte
+  AES-CTR-192              :       2567 KiB/s,          0 cycles/byte
+  AES-CTR-256              :       2317 KiB/s,          0 cycles/byte
+  AES-XTS-128              :       2827 KiB/s,          0 cycles/byte
+  AES-XTS-256              :       2261 KiB/s,          0 cycles/byte
+  AES-GCM-128              :        643 KiB/s,          1 cycles/byte
+  AES-GCM-192              :        627 KiB/s,          1 cycles/byte
+  AES-GCM-256              :        612 KiB/s,          1 cycles/byte
+  AES-CCM-128              :       1350 KiB/s,          0 cycles/byte
+  AES-CCM-192              :       1207 KiB/s,          0 cycles/byte
+  AES-CCM-256              :       1087 KiB/s,          0 cycles/byte
+  ChaCha20-Poly1305        :       2093 KiB/s,          0 cycles/byte
+  AES-CMAC-128             :       2654 KiB/s,          0 cycles/byte
+  AES-CMAC-192             :       2376 KiB/s,          0 cycles/byte
+  AES-CMAC-256             :       2134 KiB/s,          0 cycles/byte
+  AES-CMAC-PRF-128         :       2644 KiB/s,          0 cycles/byte
+  ARIA-CBC-128             :       1329 KiB/s,          0 cycles/byte
+  ARIA-CBC-192             :       1140 KiB/s,          0 cycles/byte
+  ARIA-CBC-256             :       1015 KiB/s,          0 cycles/byte
+  CAMELLIA-CBC-128         :       1904 KiB/s,          0 cycles/byte
+  CAMELLIA-CBC-192         :       1515 KiB/s,          0 cycles/byte
+  CAMELLIA-CBC-256         :       1518 KiB/s,          0 cycles/byte
+  ChaCha20                 :       2732 KiB/s,          0 cycles/byte
+  Poly1305                 :      11615 KiB/s,          0 cycles/byte
+  CTR_DRBG (NOPR)          :       2336 KiB/s,          0 cycles/byte
+  CTR_DRBG (PR)            :       1607 KiB/s,          0 cycles/byte
+  HMAC_DRBG SHA-1 (NOPR)   :        441 KiB/s,          2 cycles/byte
+  HMAC_DRBG SHA-1 (PR)     :        408 KiB/s,          2 cycles/byte
+  HMAC_DRBG SHA-256 (NOPR) :        339 KiB/s,          2 cycles/byte
+  HMAC_DRBG SHA-256 (PR)   :        342 KiB/s,          2 cycles/byte
+  RSA-2048                 :      42  public/s
+  RSA-2048                 :       2 private/s
+  RSA-3072                 :      20  public/s
+  RSA-3072                 :       1 private/s
+  RSA-4096                 :      11  public/s
+  RSA-4096                 :       0 private/s
+  DHE-2048                 :       0 handshake/s
+  DH-2048                  :       0 handshake/s
+  DHE-3072                 :       0 handshake/s
+  DH-3072                  :       0 handshake/s
+  ECDSA-secp521r1          :       4 sign/s
+  ECDSA-brainpoolP512r1    :       1 sign/s
+  ECDSA-secp384r1          :       5 sign/s
+  ECDSA-brainpoolP384r1    :       1 sign/s
+  ECDSA-secp256r1          :      11 sign/s
+  ECDSA-secp256k1          :       9 sign/s
+  ECDSA-brainpoolP256r1    :       2 sign/s
+  ECDSA-secp224r1          :      16 sign/s
+  ECDSA-secp224k1          :      11 sign/s
+  ECDSA-secp192r1          :      21 sign/s
+  ECDSA-secp192k1          :      13 sign/s
+  ECDSA-secp521r1          :       2 verify/s
+  ECDSA-brainpoolP512r1    :       0 verify/s
+  ECDSA-secp384r1          :       3 verify/s
+  ECDSA-brainpoolP384r1    :       1 verify/s
+  ECDSA-secp256r1          :       6 verify/s
+  ECDSA-secp256k1          :       5 verify/s
+  ECDSA-brainpoolP256r1    :       1 verify/s
+  ECDSA-secp224r1          :       8 verify/s
+  ECDSA-secp224k1          :       6 verify/s
+  ECDSA-secp192r1          :      11 verify/s
+  ECDSA-secp192k1          :       7 verify/s
+  ECDHE-secp521r1          :       2 ephemeral handshake/s
+  ECDHE-brainpoolP512r1    :       0 ephemeral handshake/s
+  ECDHE-secp384r1          :       3 ephemeral handshake/s
+  ECDHE-brainpoolP384r1    :       1 ephemeral handshake/s
+  ECDHE-secp256r1          :       6 ephemeral handshake/s
+  ECDHE-secp256k1          :       5 ephemeral handshake/s
+  ECDHE-brainpoolP256r1    :       1 ephemeral handshake/s
+  ECDHE-secp224r1          :       8 ephemeral handshake/s
+  ECDHE-secp224k1          :       6 ephemeral handshake/s
+  ECDHE-secp192r1          :      12 ephemeral handshake/s
+  ECDHE-secp192k1          :       7 ephemeral handshake/s
+  ECDHE-x25519             :       6 ephemeral handshake/s
+  ECDHE-x448               :       2 ephemeral handshake/s
+  ECDH-secp521r1           :       4 static handshake/s
+  ECDH-brainpoolP512r1     :       1 static handshake/s
+  ECDH-secp384r1           :       6 static handshake/s
+  ECDH-brainpoolP384r1     :       1 static handshake/s
+  ECDH-secp256r1           :      11 static handshake/s
+  ECDH-secp256k1           :      10 static handshake/s
+  ECDH-brainpoolP256r1     :       2 static handshake/s
+  ECDH-secp224r1           :      17 static handshake/s
+  ECDH-secp224k1           :      11 static handshake/s
+  ECDH-secp192r1           :      23 static handshake/s
+  ECDH-secp192k1           :      14 static handshake/s
+  ECDH-x25519              :      12 static handshake/s
+  ECDH-x448                :       5 static handshake/s
+
+motor
+-------
+
+The motor configuration enables the MCPWM peripheral with support to brushed DC motor
+control.
+
+It creates a ``/dev/motor0`` device with speed and direction control capabilities
+by using two GPIOs (GPIO15 and GPIO16) for PWM output. PWM frequency is configurable
+from 25 Hz to 3 kHz, however it defaults to 1 kHz.
+There is also support for an optional fault GPIO (defaults to GPIO10), which can be used
+for quick motor braking. All GPIOs are configurable in ``menuconfig``.
+
 mcuboot_nsh
 -----------
 
 This configuration is the same as the ``nsh`` configuration, but it generates the application
 image in a format that can be used by MCUboot. It also makes the ``make bootloader`` command to
 build the MCUboot bootloader image using the Espressif HAL.
+
+mcuboot_update_agent
+--------------------
+
+This configuration is used to represent an MCUboot image that contains an update agent
+to perform over-the-air (OTA) updates. Wi-Fi settings are already enabled and image confirmation program is included.
+
+Follow the instructions in the :ref:`MCUBoot and OTA Update <MCUBoot and OTA Update S3>` section to execute OTA update.
 
 nsh
 ---
@@ -341,6 +613,22 @@ To test it, just run the ``oneshot`` example::
     Waiting...
     Finished
 
+ostest
+------
+
+This is the NuttX test at apps/testing/ostest that is run against all new
+architecture ports to assure a correct implementation of the OS.
+
+qencoder
+---
+
+This configuration demonstrates the use of Quadrature Encoder connected to pins
+GPIO10 and GPIO11. You can start measurement of pulses using the following
+command (by default, it will open ``\dev\qe0`` device and print 20 samples
+using 1 second delay)::
+
+    nsh> qe
+
 pm
 -------
 
@@ -354,6 +642,20 @@ Enables PM support. You can define standby mode and sleep mode delay time::
            (0)  PM_STANDBY delay (nanoseconds)
            (20) PM_SLEEP delay (seconds)
            (0)  PM_SLEEP delay (nanoseconds)
+
+You can also define an EXT1 wakeup for both sleep modes by selecting which RTC
+GPIO will be used and the logic level that will trigger it::
+
+    $ make menuconfig
+    -> Board Selection
+        -> [*] PM EXT1 Wakeup
+                  PM EXT1 Wakeup Sources  --->
+                    [ ] RTC_GPIO<N>
+              (0) PM EXT1 Wakeup Trigger Mode
+
+To enable ULP coprocessor wakeup ``CONFIG_PM_ULP_WAKEUP`` option needs to be enabled.
+After that, ULP core can wake up HP core using ``ulp_riscv_wakeup_main_processor`` function
+which needs to be called in the ULP app.
 
 Before switching PM status, you need to query the current PM status::
 
@@ -426,6 +728,40 @@ psram_octal
 Similar to the ```psram_quad``` configuration but using the SPIRAM
 interface in octal mode.
 
+psram_usrheap
+-------------
+
+This configuration enables allocating the userspace heap into SPI RAM and reserves the
+internal RAM for kernel heap.
+
+Important: this config defaults to flash QUAD mode, and should be changed if the board
+runs on OCTAL mode by setting ``CONFIG_ESP32S3_SPIRAM_MODE_OCT``. If wrong, a SPIRAM error
+will appear during boot.
+
+To check the flash type, run the following command::
+
+    $ esptool.py flash_id
+    esptool.py v4.8.1
+    Found 33 serial ports
+    Serial port /dev/ttyUSB0
+    Connecting....
+    Detecting chip type... ESP32-S3
+    Chip is ESP32-S3 (QFN56) (revision v0.1)
+    Features: WiFi, BLE, Embedded PSRAM 2MB (AP_3v3)
+    Crystal is 40MHz
+    MAC: 7c:df:a1:e5:d8:5c
+    Uploading stub...
+    Running stub...
+    Stub running...
+    Manufacturer: 20
+    Device: 4017
+    Detected flash size: 8MB
+    Flash type set in eFuse: quad (4 data lines)
+    Flash voltage set by eFuse to 3.3V
+    Hard resetting via RTS pin...
+
+The flash type can be seen on the "Flash type set in eFuse: quad" line.
+
 pwm
 ---
 
@@ -436,12 +772,28 @@ To test it, just execute the ``pwm`` application::
     pwm_main: starting output with frequency: 10000 duty: 00008000
     pwm_main: stopping output
 
+python
+------
+
+This configuration enables the Python for ESP32-S3.
+Please refer to the :doc:`Python Interpreter </applications/interpreters/python/index>` page.
+
+.. warning:: Note that this defconfig uses a board with the ESP32-S3-WROOM-2 module with 32MiB
+  of flash and 8MiB of PSRAM. Running Python on ESP32-S3 requires at least 16MiB of flash and
+  8MiB of PSRAM.
+
 qemu_debug
 ----------
 
 A configuration tailored for the `Espressif fork of QEMU`_.
 
 .. _Espressif fork of QEMU: https://github.com/espressif/qemu
+
+qemu_toywasm
+------------
+
+Based on ``qemu_debug`` defconfig, with the addition of WebAssembly support.
+See :ref:`toywasm` for more further details.
 
 random
 ------
@@ -487,6 +839,59 @@ Please note that this board contains an on-board WS2812 LED connected to GPIO48
 (or GPIO38, depending on the board version) and, by default, this config
 configures the RMT transmitter in the same pin.
 
+romfs
+-----
+
+This configuration demonstrates the use of ROMFS (Read-Only Memory File System) to provide
+automated system initialization and startup scripts. ROMFS allows embedding a read-only
+filesystem directly into the NuttX binary, which is mounted at ``/etc`` during system startup.
+
+**What ROMFS provides:**
+
+* **System initialization script** (``/etc/init.d/rc.sysinit``): Executed after board bring-up
+* **Startup script** (``/etc/init.d/rcS``): Executed after system init, typically used to start applications
+
+**Default behavior:**
+
+When this configuration is used, NuttX will:
+
+1. Create a read-only RAM disk containing the ROMFS filesystem
+2. Mount the ROMFS at ``/etc``
+3. Execute ``/etc/init.d/rc.sysinit`` during system initialization
+4. Execute ``/etc/init.d/rcS`` for application startup
+
+**Customizing startup scripts:**
+
+The startup scripts are located in:
+``boards/xtensa/esp32s3/common/src/etc/init.d/``
+
+* ``rc.sysinit`` - System initialization script
+* ``rcS`` - Application startup script
+
+To customize these scripts:
+
+1. **Edit the script files** in ``boards/xtensa/esp32s3/common/src/etc/init.d/``
+2. **Add your initialization commands** using any NSH-compatible commands
+
+**Example customizations:**
+
+* **rc.sysinit** - Set up system services, mount additional filesystems, configure network.
+* **rcS** - Start your application, launch daemons, configure peripherals. This is executed after the rc.sysinit script.
+
+Example output::
+
+    *** Booting NuttX ***
+    [...]
+    rc.sysinit is called!
+    rcS file is called!
+    NuttShell (NSH) NuttX-12.8.0
+    nsh> ls /etc/init.d
+    /etc/init.d:
+    .
+    ..
+    rc.sysinit
+    rcS
+
 rtc
 ---
 
@@ -502,6 +907,100 @@ You can set an alarm, check its progress and receive a notification after it exp
     Opening /dev/rtc0
     Alarm 0 is active with 10 seconds to expiration
     nsh> alarm_daemon: alarm 0 received
+
+sdm
+---
+
+This configuration enables the support for the Sigma-Delta Modulation (SDM) driver
+which can be used for LED dimming, simple dac with help of an low pass filter either
+active or passive and so on. ESP32-S3 supports 1 group of SDM up to 8 channels with
+any GPIO up to user. This configuration enables 1 channel of SDM on GPIO5. You can test
+DAC feature with following command with connecting simple LED on GPIO5
+
+    nsh> dac -d 100 -s 10 test
+
+After this command you will see LED will light up in different brightness.
+
+sdmmc
+-----
+
+Based on nsh. Support for sdmmc driver is enabled with following settings:
+
+Enable sdmmc driver::
+
+    CONFIG_ESP32S3_SDMMC=y
+
+Default GPIO definitions::
+
+    CONFIG_ESP32S3_SDMMC_CMD=41
+    CONFIG_ESP32S3_SDMMC_CLK=39
+    CONFIG_ESP32S3_SDMMC_D0=40
+    CONFIG_ESP32S3_SDMMC_D1=16
+    CONFIG_ESP32S3_SDMMC_D2=8
+    CONFIG_ESP32S3_SDMMC_D3=42
+
+Multiblock limitation due to hardware::
+
+    CONFIG_MMCSD_MULTIBLOCK_LIMIT=128
+
+Use sched_yield instead of usleep due to long tick time::
+
+    CONFIG_MMCSD_CHECK_READY_STATUS_WITHOUT_SLEEP=y
+
+This configuration has been verified with an adapter (1.27 to 2.54mm T-type
+adapter, CN10P2) and an `external emmc module <https://semiconductor.samsung.com/jp/estorage/emmc/emmc-5-1/klm8g1getf-b041/>`_.
+
+Besides the connections to 3v3 and GND of ESP32S3 DevKit, pins of the adapter
+used in the verification are connected to ESP32S3 DevKit as following::
+
+    adapter pin           ESP32S3 GPIO
+        11      ===CMD==>       41
+        12      ===CLK==>       39
+        1       ===D0===>       40
+        2       ===D1===>       16
+        3       ===D2===>       8
+        4       ===D3===>       42
+
+Format and mount the SD/MMC device with following commands::
+
+    mkfatfs -F 32 -r /mnt /dev/mmcsd1
+    mount -t vfat /dev/mmcsd1 /mnt
+
+FAT filesystem is enabled in the default configuration. Other filesystems may
+also work.
+
+sdmmc_spi
+---------
+
+This configuration is used to mount a FAT/FAT32 SD Card into the OS' filesystem.
+It uses SPI to communicate with the SD Card, defaulting to SPI2.
+
+The SD slot number, SPI port number and minor number can be modified in ``Application Configuration → NSH Library``.
+
+To access the card's files, make sure ``/dev/mmcsd0`` exists and then execute the following commands::
+
+    nsh> ls /dev
+    /dev:
+    console
+    mmcsd0
+    null
+    ttyS0
+    zero
+    nsh> mount -t vfat /dev/mmcsd0 /mnt
+
+This will mount the SD Card to ``/mnt``. Now, you can use the SD Card as a normal filesystem.
+For example, you can read a file and write to it::
+
+    nsh> ls /mnt
+    /mnt:
+    hello.txt
+    nsh> cat /mnt/hello.txt
+    Hello World
+    nsh> echo 'NuttX RTOS' >> /mnt/hello.txt
+    nsh> cat /mnt/hello.txt
+    Hello World!
+    NuttX RTOS
+    nsh>
 
 smp
 ---
@@ -536,6 +1035,26 @@ Once booted you can use the following commands to mount the file system::
     nsh> mount -t smartfs /dev/smart0 /mnt
 
 Note that mksmartfs is only needed the first time.
+
+spislv
+------
+
+This configuration enables the SPI2 peripheral in **slave mode** and
+provides the ``spislv`` example application to test data exchange with an
+external SPI master.
+
+After building and flashing the firmware, run the following command on the
+board terminal::
+
+    nsh> spislv -x 5 1a2b3c4d5e
+
+This command enqueues the data sequence ``1a2b3c4d5e`` in the slave buffer.
+On the next transfer, the external SPI master should receive this data back
+from the slave.
+
+By default, SPI2 pins are used for the slave interface. The exact pin mapping
+depends on the ESP32-S3 DevKit version and can be adjusted through
+``menuconfig`` under *System type → SPI configuration*.
 
 sta_softap
 ----------
@@ -575,6 +1094,8 @@ To test it, just run the following::
 
 Where x in the timer instance.
 
+.. _toywasm:
+
 toywasm
 -------
 
@@ -603,9 +1124,9 @@ https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/bootloade
         --disk-version 2.0 \
         ..../wasm_module_dir
 
-2. Build a NuttX binary as usual with this config.
+2. Build a NuttX binary and write it to the board as usual with this config.
 
-3. Write the NuttX binary and the filesystem image to the board::
+3. Write the filesystem image to the board::
 
       % esptool.py \
         -c esp32s3 \
@@ -615,7 +1136,6 @@ https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/bootloade
         -fs detect \
         -fm dio \
         -ff 40m \
-        0x10000 nuttx.bin \
         0x180000 ..../littlefs.bin
 
 4. Mount the filesystem and run a wasm module on it::
@@ -640,6 +1160,47 @@ the ``Device Drivers -> CAN Driver Support -> CAN loopback mode`` option and run
       TSEG2: 4
         SJW: 3
       ID:    1 DLC: 1
+
+ulp
+---
+
+This configuration enables the support for the ULP RISC-V core coprocessor.
+To get more information about LP Core please check :ref:`ULP LP Core Coprocessor docs. <esp32s3_ulp>`
+
+Configuration uses a pre-built binary in ``Documentation/platforms/xtensa/esp32s3/boards/esp32s3-devkit/ulp_riscv_blink.bin``
+which is a blink example for GPIO0. After flashing operation, GPIO0 pin will blink.
+
+Prebuild binary runs this code:
+
+.. code-block:: C
+
+   #include <stdio.h>
+   #include <stdint.h>
+   #include <stdbool.h>
+   #include "ulp_riscv.h"
+   #include "ulp_riscv_utils.h"
+   #include "ulp_riscv_gpio.h"
+
+   #define GPIO_PIN 0
+
+   #define nop() __asm__ __volatile__ ("nop")
+
+   bool gpio_level_previous = true;
+
+   int main (void)
+    {
+       while (1)
+           {
+           ulp_riscv_gpio_output_level(GPIO_PIN, gpio_level_previous);
+           gpio_level_previous = !gpio_level_previous;
+           for (int i = 0; i < 10000; i++)
+             {
+               nop();
+             }
+           }
+
+       return 0;
+    }
 
 usbnsh
 ------
@@ -718,3 +1279,215 @@ To test the XTWDT(/dev/watchdog3) an interrupt handler needs to be
 implemented because XTWDT does not have system reset feature. To implement
 an interrupt handler `WDIOC_CAPTURE` command can be used. When interrupt
 rises, XTAL32K clock can be restored with `WDIOC_RSTCLK` command.
+
+adb
+---
+
+Basic NuttShell configuration console enabled over USB Device (USB ADB).
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh esp32s3-devkit:adb
+  $ make -j16
+  $ make flash ESPTOOL_PORT=/dev/ttyACMx
+
+Then run the adb command::
+
+  $ adb -s 1234 shell
+  nsh> uname -a
+  NuttX 0.0.0  Nov 22 2024 11:41:43 xtensa esp32s3-devkit
+
+txtable
+-------
+
+Basic TXTABLE(Text based Partition Table) configuration console enabled over USB ADB.
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh -l esp32s3-devkit:txtable
+  $ make -j16
+  $ make flash ESPTOOL_PORT=/dev/ttyACMx
+
+Then check the partition::
+
+  nsh> ls -l /dev/
+  /dev:
+   dr--r--r--           0 adb0/
+   crw-rw-rw-           0 console
+   frw-rw-rw-     1044480 data
+   frw-rw-rw-     1048576 esp32s3flash
+   c-w--w--w-           0 log
+   crw-rw-rw-           0 null
+   crw-rw-rw-           0 ptmx
+   dr--r--r--           0 pts/
+   brw-rw-rw-        1024 ram0
+   crw-rw-rw-           0 ttyS0
+   frw-rw-rw-        4096 txtable
+   crw-rw-rw-           0 zero
+
+usbmsc
+------
+
+Basic USBMSC(USB Mass Storage Class) configuration based on esp32s3-devkit:usb_device
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh -l esp32s3-devkit:usbmsc
+  $ make flash ESPTOOL_PORT=/dev/ttyACMx -j16
+
+To test it, just run the following::
+
+  # Device
+  nsh> mkrd -m 10 -s 512 640
+  nsh> msconn
+
+  # Host
+  $ sudo mkfs.ext4 /dev/sdx
+  $ sudo mount /dev/sdx ./mnt/
+
+fastboot
+--------
+
+| The Fastboot configuration is based on esp32s3-devkit:usb_device and esp32s3-devkit:wifi, and support both **USB** and **TCP** network transport.
+| More details about usage of fastboot, please refer to `fastbootd — NuttX latest documentation <https://nuttx.apache.org/docs/latest/applications/system/fastboot/index.html>`_.
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh -l esp32s3-devkit:fastboot
+  $ make flash ESPTOOL_PORT=/dev/ttyACMx -j
+
+To test it, just run the following (**Default is host side**):
+
+1. Install fastboot tool::
+
+    sudo apt install fastboot
+
+2. Specify a device / List devices:
+
+  List devices only supported for USB transport::
+
+    fastboot devices
+
+    # Examples
+
+    $ fastboot devices
+    1234    fastboot
+
+  To specific a device, use "-s" option::
+
+    # Usage
+    #
+    #   -s tcp:HOST[:PORT]         Specify a TCP network device.
+    #   -s SERIAL                  Specify a USB device.
+
+    fastboot -s SERIAL COMMAND
+    fastboot -s tcp:HOST[:PORT] COMMAND
+
+    # Examples
+
+    $ fastboot -s 1234 oem shell ifconfig
+    wlan0   Link encap:Ethernet HWaddr a0:85:e3:f4:43:30 at RUNNING mtu 1500
+            inet addr:192.168.211.111 DRaddr:192.168.211.107 Mask:255.255.255.0
+
+    PS C:\workspace> fastboot.exe -s tcp:192.168.211.111 oem shell ifconfig
+    wlan0   Link encap:Ethernet HWaddr a0:85:e3:f4:43:30 at RUNNING mtu 1500
+            inet addr:192.168.211.111 DRaddr:192.168.211.107 Mask:255.255.255.0
+
+3. Display given variable::
+
+    fastboot getvar <NAME>
+
+  Example::
+
+    # Display the "kernel" variable::
+    $ fastboot -s 1234 getvar kernel
+    Kernel: NuttX
+    Finished. Total time: 0.000s
+
+4. Flash given partition::
+
+    fastboot flash PARTITION FILENAME
+
+  Example (Flash test.img to partition ram10)::
+
+    # 1. Generate a test image
+    $ dd if=/dev/random of=test.img bs=1 count=128
+
+    # 2. Create a RAM disk (Device side)
+    nsh> mkrd -m 10 -s 512 640
+    nsh> ls -l /dev/ram10
+     brw-rw-rw-      327680 /dev/ram10
+
+    # 3. Flash test.img to partition ram10
+    $ fastboot flash ram10 ./test.img
+    Sending 'ram10' (0 KB)                             OKAY [  0.001s]
+    Writing 'ram10'                                    OKAY [  0.001s]
+    Finished. Total time: 0.003s
+
+    # 4. Hexdump the test.img and partition ram10, and compare
+
+    ## Host side
+    $ hexdump test.img
+    0000000 b1e8 b297 4ac5 9dfa d170 244e 4f83 0f93
+    0000010 1bf7 0b19 7bde 5543 0520 9719 746d 54fc
+    0000020 369d 72b3 f2e6 f463 c8e9 24c8 c876 e820
+    0000030 384d 07ab 52ca 2b24 dee7 0404 2663 91e4
+    0000040 6752 3611 aece b543 5194 2224 d1d5 8144
+    0000050 ff44 3bc9 5155 b393 1efb 9e88 2de9 3669
+    0000060 d010 2770 9192 2532 ccf5 591f 39ea 2431
+    0000070 2e3f feb0 87ef 9bdf 7dd4 2e79 64de edf6
+    0000080
+
+    ## Device side
+    nsh> hexdump /dev/ram10 count=128
+    /dev/ram10 at 00000000:
+    0000: e8 b1 97 b2 c5 4a fa 9d 70 d1 4e 24 83 4f 93 0f .....J..p.N$.O..
+    0010: f7 1b 19 0b de 7b 43 55 20 05 19 97 6d 74 fc 54 .....{CU ...mt.T
+    0020: 9d 36 b3 72 e6 f2 63 f4 e9 c8 c8 24 76 c8 20 e8 .6.r..c....$v. .
+    0030: 4d 38 ab 07 ca 52 24 2b e7 de 04 04 63 26 e4 91 M8...R$+....c&..
+    0040: 52 67 11 36 ce ae 43 b5 94 51 24 22 d5 d1 44 81 Rg.6..C..Q$"..D.
+    0050: 44 ff c9 3b 55 51 93 b3 fb 1e 88 9e e9 2d 69 36 D..;UQ.......-i6
+    0060: 10 d0 70 27 92 91 32 25 f5 cc 1f 59 ea 39 31 24 ..p'..2%...Y.91$
+    0070: 3f 2e b0 fe ef 87 df 9b d4 7d 79 2e de 64 f6 ed ?........}y..d..
+
+fastboot_usb
+------------
+
+| The basic Fastboot configuration is based on esp32s3-devkit:usb_device and support **USB** transport only.
+| More details about usage of fastboot, please refer to `fastbootd — NuttX latest documentation <https://nuttx.apache.org/docs/latest/applications/system/fastboot/index.html>`_.
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh -l lckfb-szpi-esp32s3:fastboot_usb
+  $ make flash ESPTOOL_PORT=/dev/ttyACMx -j
+
+fastboot_tcp
+------------
+
+| The basic Fastboot configuration is based on esp32s3-devkit:wifi and support **TCP** transport only.
+| More details about usage of fastboot, please refer to `fastbootd — NuttX latest documentation <https://nuttx.apache.org/docs/latest/applications/system/fastboot/index.html>`_.
+
+You can run the configuration and compilation procedure::
+
+    $ ./tools/configure.sh -l esp32s3-devkit:fastboot_tcp
+    $ make flash ESPTOOL_PORT=/dev/ttyACMx -j
+
+To test it, just run the following::
+
+    # Device side
+
+    nsh> wapi psk wlan0 mypasswd 3
+    nsh> wapi essid wlan0 myssid 1
+    nsh> renew wlan0
+
+    # Host side
+
+    PS C:\workspace> fastboot.exe -s tcp:HOST[:PORT] oem shell ls
+    /:
+     data/
+     dev/
+     etc/
+     proc/
+     var/
+    OKAY [  0.063s]
+    Finished. Total time: 0.064s

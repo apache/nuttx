@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/gd32f4/gd32f4xx_i2c.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -943,8 +945,8 @@ static void gd32_i2c_traceevent(struct gd32_i2c_priv_s *priv,
 
       /* Initialize the new trace entry */
 
-      trace->event  = event;
-      trace->parm   = parm;
+      trace->event = event;
+      trace->parm  = parm;
 
       /* Bump up the trace index (unless we are out of trace entries) */
 
@@ -2553,7 +2555,7 @@ static int gd32_i2c_reset(struct i2c_master_s *dev)
 
 out:
 
-  /* Release the port for re-use by other clients */
+  /* Release the port for reuse by other clients */
 
   nxmutex_unlock(&priv->lock);
   return ret;

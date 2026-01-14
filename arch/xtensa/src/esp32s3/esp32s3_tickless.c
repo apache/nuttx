@@ -194,6 +194,10 @@ static void IRAM_ATTR tickless_setcounter(uint64_t ticks)
 {
   uint64_t alarm_ticks = tickless_getcounter() + ticks;
 
+  /* Select unit0 to comp0 */
+
+  modifyreg32(SYSTIMER_TARGET0_CONF_REG, SYSTIMER_TARGET0_TIMER_UNIT_SEL, 0);
+
   /* Select alarm mode */
 
   modifyreg32(SYSTIMER_TARGET0_CONF_REG, SYSTIMER_TARGET0_PERIOD_MODE, 0);
@@ -240,7 +244,18 @@ static int IRAM_ATTR tickless_isr(int irq, void *context, void *arg)
 
   modifyreg32(SYSTIMER_INT_CLR_REG, 0, SYSTIMER_TARGET0_INT_CLR);
 
-  nxsched_timer_expiration();
+  uint64_t unit_ticks = tickless_getcounter();
+  uint64_t alarm_ticks = tickless_getalarmvalue();
+  if (unit_ticks < alarm_ticks)
+    {
+      modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_TARGET0_WORK_EN);
+      modifyreg32(SYSTIMER_INT_ENA_REG, 0, SYSTIMER_TARGET0_INT_ENA);
+      g_timer_started = true;
+
+      return OK;
+    }
+
+  nxsched_process_timer();
 
   return OK;
 }
@@ -304,7 +319,7 @@ int IRAM_ATTR up_timer_gettime(struct timespec *ts)
  * Description:
  *   Cancel the interval timer and return the time remaining on the timer.
  *   These two steps need to be as nearly atomic as possible.
- *   nxsched_timer_expiration() will not be called unless the timer is
+ *   nxsched_process_timer() will not be called unless the timer is
  *   restarted with up_timer_start().
  *
  *   If, as a race condition, the timer has already expired when this
@@ -371,7 +386,7 @@ int IRAM_ATTR up_timer_cancel(struct timespec *ts)
 
   modifyreg32(SYSTIMER_CONF_REG, SYSTIMER_TARGET0_WORK_EN, 0);
   modifyreg32(SYSTIMER_INT_ENA_REG, SYSTIMER_TARGET0_INT_ENA, 0);
-  modifyreg32(SYSTIMER_INT_CLR_REG, SYSTIMER_TARGET0_INT_CLR, 0);
+  modifyreg32(SYSTIMER_INT_CLR_REG, 0, SYSTIMER_TARGET0_INT_CLR);
 
   leave_critical_section(flags);
 
@@ -382,14 +397,14 @@ int IRAM_ATTR up_timer_cancel(struct timespec *ts)
  * Name: up_timer_start
  *
  * Description:
- *   Start the interval timer.  nxsched_timer_expiration() will be
+ *   Start the interval timer.  nxsched_process_timer() will be
  *   called at the completion of the timeout (unless up_timer_cancel
  *   is called to stop the timing.
  *
  *   Provided by platform-specific code and called from the RTOS base code.
  *
  * Input Parameters:
- *   ts - Provides the time interval until nxsched_timer_expiration() is
+ *   ts - Provides the time interval until nxsched_process_timer() is
  *        called.
  *
  * Returned Value:
@@ -474,6 +489,8 @@ void up_timer_initialize(void)
 
   modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, 0, SYSTEM_SYSTIMER_CLK_EN);
   modifyreg32(SYSTEM_PERIP_RST_EN0_REG, SYSTEM_SYSTIMER_RST, 0);
+  modifyreg32(SYSTIMER_UNIT0_LOAD_REG, 0, SYSTIMER_TIMER_UNIT0_LOAD);
+  modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_TIMER_UNIT0_WORK_EN);
   modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_CLK_EN);
 
   /* Stall systimer 0 when CPU stalls, e.g., when using JTAG to debug */

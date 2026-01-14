@@ -18,7 +18,7 @@
 #
 ############################################################################
 
-include $(TOPDIR)/tools/apps-or-nuttx-Make.defs
+include $(TOPDIR)/tools/Make.defs
 include chip/Make.defs
 
 ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
@@ -142,11 +142,14 @@ $(AOBJS) $(UAOBJS) $(HEAD_OBJ): %$(OBJEXT): %.S
 $(COBJS) $(UCOBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
+$(STARTUP_OBJS): %$(OBJEXT): %.c
+	$(Q) $(CC) $(CELFFLAGS) -c common$(DELIM)crt0.c -o crt0$(OBJEXT)
+
 ifeq ($(CONFIG_BUILD_FLAT),y)
-$(BIN): $(OBJS)
+$(BIN): $(OBJS) $(STARTUP_OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 else
-$(BIN): $(UOBJS)
+$(BIN): $(UOBJS) $(STARTUP_OBJS)
 	$(call ARCHIVE, $@, $(UOBJS))
 endif
 
@@ -171,7 +174,7 @@ define LINK_ALLSYMS_KASAN
 	$(Q) $(call COMPILE, allsyms.tmp, allsyms$(OBJEXT), -x c)
 	$(Q) $(call DELFILE, allsyms.tmp))
 	$(if $(CONFIG_MM_KASAN_GLOBAL),
-	$(Q) $(TOPDIR)/tools/kasan_global.py -e $(NUTTX) -o kasan_globals.tmp
+	$(Q) $(TOPDIR)/tools/kasan_global.py -e $(NUTTX) -o kasan_globals.tmp -a $(CONFIG_MM_KASAN_GLOBAL_ALIGN)
 	$(Q) $(call COMPILE, kasan_globals.tmp, kasan_globals$(OBJEXT) -fno-sanitize=kernel-address, -x c)
 	$(Q) $(call DELFILE, kasan_globals.tmp))
 	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \

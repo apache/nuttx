@@ -1,13 +1,11 @@
 /****************************************************************************
  * arch/arm/src/lpc2378/chip.h
  *
- *   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
- *   Author: Rommel Marcelo
- *
- * This file is part of the NuttX RTOS and based on the lpc2148 port:
- *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2010 Rommel Marcelo. All rights reserved.
+ * SPDX-FileCopyrightText: 2010 Gregory Nutt. All rights reserved.
+ * SPDX-FileContributor: Rommel Marcelo
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -424,7 +422,7 @@
 #define CAN2TDA3_OFFSET             0x58
 #define CAN2TDB3_OFFSET             0x5C
 
-/* MultiMedia Card Interface(MCI) ontroller */
+/* MultiMedia Card Interface(MCI) controller */
 
 /* MCI_BASE_ADDR                   0xE008C000 */
 #define MCI_POWER_OFFSET            0x00

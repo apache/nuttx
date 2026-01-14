@@ -8,7 +8,7 @@ config FS_AIO
 	default n
 	depends on SCHED_WORKQUEUE
 	---help---
-		Enable support for aynchronous I/O.  This selection enables the
+		Enable support for asynchronous I/O.  This selection enables the
 		interfaces declared in include/aio.h.
 
 if FS_AIO

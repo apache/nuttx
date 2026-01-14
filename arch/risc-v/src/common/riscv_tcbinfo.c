@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_tcbinfo.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,7 +36,7 @@
 
 static const uint16_t g_reg_offs[] =
 {
-  TCB_REG_OFF(REG_EPC_NDX), /* X0, but it will be ommited by gdb client */
+  TCB_REG_OFF(REG_EPC_NDX), /* X0, but it will be omitted by gdb client */
   TCB_REG_OFF(REG_X1_NDX),
   TCB_REG_OFF(REG_X2_NDX),
   TCB_REG_OFF(REG_X3_NDX),

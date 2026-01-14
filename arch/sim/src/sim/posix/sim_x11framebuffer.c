@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/posix/sim_x11framebuffer.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -83,11 +85,11 @@ static unsigned short g_fbpixelwidth;
 static unsigned short g_fbpixelheight;
 static int g_fbbpp;
 static int g_fblen;
-static int g_fbcount;
 static int g_shmcheckpoint = 0;
 static int b_useshm;
 
 static unsigned char *g_trans_framebuffer;
+static unsigned int g_offset;
 
 /****************************************************************************
  * Private Functions
@@ -279,11 +281,12 @@ static void sim_x11uninitialize(void)
 
 static inline int sim_x11mapsharedmem(Display *display,
                                       int depth, unsigned int fblen,
-                                      int fbcount)
+                                      int fbcount, int interval)
 {
 #ifndef CONFIG_SIM_X11NOSHM
   Status result;
 #endif
+  int fbinterval = 0;
 
   atexit(sim_x11uninit);
   g_shmcheckpoint = 1;
@@ -315,7 +318,8 @@ static inline int sim_x11mapsharedmem(Display *display,
 
       g_xshminfo.shmid = shmget(IPC_PRIVATE,
                                 g_image->bytes_per_line *
-                                g_image->height * fbcount,
+                                (g_image->height * fbcount +
+                                interval * (fbcount - 1)),
                                 IPC_CREAT | 0777);
       if (g_xshminfo.shmid < 0)
         {
@@ -357,7 +361,8 @@ shmerror:
 #endif
       b_useshm = 0;
 
-      g_framebuffer = malloc(fblen * fbcount);
+      fbinterval = (depth * g_fbpixelwidth / 8) * interval;
+      g_framebuffer = malloc(fblen * fbcount + fbinterval * (fbcount - 1));
 
       g_image = XCreateImage(display, DefaultVisual(display, g_screen),
                              depth, ZPixmap, 0, g_framebuffer,
@@ -411,10 +416,11 @@ static inline void sim_x11depth16to32(void *d_mem, size_t size,
 
 int sim_x11initialize(unsigned short width, unsigned short height,
                      void **fbmem, size_t *fblen, unsigned char *bpp,
-                     unsigned short *stride, int fbcount)
+                     unsigned short *stride, int fbcount, int interval)
 {
   XWindowAttributes windowattributes;
   Display *display;
+  int fbinterval;
   int depth;
 
   /* Save inputs */
@@ -461,11 +467,11 @@ int sim_x11initialize(unsigned short width, unsigned short height,
 
   /* Map the window to shared memory */
 
-  sim_x11mapsharedmem(display, windowattributes.depth, *fblen, fbcount);
+  sim_x11mapsharedmem(display, windowattributes.depth,
+                      *fblen, fbcount, interval);
 
   g_fbbpp = depth;
   g_fblen = *fblen;
-  g_fbcount = fbcount;
 
   /* Create conversion framebuffer */
 
@@ -474,8 +480,10 @@ int sim_x11initialize(unsigned short width, unsigned short height,
       *bpp = CONFIG_SIM_FBBPP;
       *stride = (CONFIG_SIM_FBBPP * width / 8);
       *fblen = (*stride * height);
+      fbinterval = *stride * interval;
 
-      g_trans_framebuffer = malloc((*fblen) * fbcount);
+      g_trans_framebuffer = malloc(*fblen * fbcount +
+                                   fbinterval * (fbcount - 1));
       if (g_trans_framebuffer == NULL)
         {
           syslog(LOG_ERR, "Failed to allocate g_trans_framebuffer\n");
@@ -487,6 +495,11 @@ int sim_x11initialize(unsigned short width, unsigned short height,
   else
     {
       *fbmem = g_framebuffer;
+    }
+
+  if (interval == 0)
+    {
+      *fblen *= fbcount;
     }
 
   g_display = display;
@@ -541,6 +554,7 @@ int sim_x11setoffset(unsigned int offset)
   if (g_fbbpp == 32 && CONFIG_SIM_FBBPP == 16)
     {
       g_image->data = g_framebuffer + (offset << 1);
+      g_offset = offset;
     }
   else
     {
@@ -620,9 +634,9 @@ int sim_x11update(void)
 
   if (g_fbbpp == 32 && CONFIG_SIM_FBBPP == 16)
     {
-      sim_x11depth16to32(g_framebuffer,
-                         g_fblen * g_fbcount,
-                         g_trans_framebuffer);
+      sim_x11depth16to32(g_image->data,
+                         g_fblen,
+                         g_trans_framebuffer + g_offset);
     }
 
   XSync(g_display, 0);

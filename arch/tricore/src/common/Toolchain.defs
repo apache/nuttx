@@ -1,6 +1,8 @@
 ############################################################################
 # arch/tricore/src/common/Toolchain.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -22,4 +24,13 @@ ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
   include $(TOPDIR)/arch/tricore/src/common/ToolchainTasking.defs
 else
   include $(TOPDIR)/arch/tricore/src/common/ToolchainGnuc.defs
+endif
+
+ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
+  undefine PREPROCESS
+  define PREPROCESS
+    $(ECHO_BEGIN)"CPP: $1->$2 "
+    $(CPP) $(CPPFLAGS) $1 > $2
+    $(ECHO_END)
+  endef
 endif

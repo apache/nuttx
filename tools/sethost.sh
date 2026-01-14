@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # tools/sethost.sh
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -226,4 +228,8 @@ fi
 
 echo "  Refreshing..."
 
+if [ "X$wenv" == "Xmsys" ]; then
+${MAKECMD} olddefconfig || { echo "ERROR: failed to refresh"; exit 1; }
+else
 ${MAKECMD} olddefconfig $* || { echo "ERROR: failed to refresh"; exit 1; }
+fi

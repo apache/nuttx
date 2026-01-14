@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stream/lib_stdinstream.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -50,6 +52,10 @@ static int stdinstream_getc(FAR struct lib_instream_s *self)
     {
       self->nget++;
     }
+  else
+    {
+      ret = _NX_GETERRVAL(ret);
+    }
 
   return ret;
 }
@@ -58,12 +64,12 @@ static int stdinstream_getc(FAR struct lib_instream_s *self)
  * Name: stdinstream_gets
  ****************************************************************************/
 
-static int stdinstream_gets(FAR struct lib_instream_s *self,
-                            FAR void *buffer, int len)
+static ssize_t stdinstream_gets(FAR struct lib_instream_s *self,
+                                FAR void *buffer, size_t len)
 {
   FAR struct lib_stdinstream_s *stream =
                                        (FAR struct lib_stdinstream_s *)self;
-  int nread = 0;
+  ssize_t nread = 0;
 
   DEBUGASSERT(self);
 

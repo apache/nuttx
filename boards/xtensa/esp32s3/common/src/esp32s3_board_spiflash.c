@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s3/common/src/esp32s3_board_spiflash.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <sys/mount.h>
+#include <sys/param.h>
 
 #include "inttypes.h"
 #include <stdbool.h>
@@ -38,20 +41,112 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/nxffs.h>
-#ifdef CONFIG_BCH
-#include <nuttx/drivers/drivers.h>
-#endif
+#include <nuttx/fs/partition.h>
 
-#include "esp32s3_spiflash.h"
-#include "esp32s3_spiflash_mtd.h"
+#if defined(CONFIG_ESP32S3_SPIRAM) || defined(CONFIG_ESP32S3_PARTITION_TABLE)
+#  include "esp32s3_spiflash.h"
+#  include "esp32s3_spiflash_mtd.h"
+#else
+#  include "espressif/esp_spiflash.h"
+#  include "espressif/esp_spiflash_mtd.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_ESP32S3_OTA_PARTITION_ENCRYPT
+#  define OTA_ENCRYPT true
+#else
+#  define OTA_ENCRYPT false
+#endif
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_HAVE_OTA_PARTITION
+static int init_ota_partitions(void);
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_HAVE_OTA_PARTITION
+static const struct partition_s g_ota_partition_table[] =
+{
+  {
+    .name       = CONFIG_ESP32S3_OTA_PRIMARY_SLOT_DEVPATH,
+    .index      = 0,
+    .firstblock = CONFIG_ESP32S3_OTA_PRIMARY_SLOT_OFFSET,
+    .blocksize  = CONFIG_ESP32S3_OTA_SLOT_SIZE,
+  },
+  {
+    .name       = CONFIG_ESP32S3_OTA_SECONDARY_SLOT_DEVPATH,
+    .index      = 1,
+    .firstblock = CONFIG_ESP32S3_OTA_SECONDARY_SLOT_OFFSET,
+    .blocksize  = CONFIG_ESP32S3_OTA_SLOT_SIZE,
+  },
+  {
+    .name       = CONFIG_ESP32S3_OTA_SCRATCH_DEVPATH,
+    .index      = 2,
+    .firstblock = CONFIG_ESP32S3_OTA_SCRATCH_OFFSET,
+    .blocksize  = CONFIG_ESP32S3_OTA_SCRATCH_SIZE,
+  }
+};
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: init_ota_partitions
+ *
+ * Description:
+ *   Initialize partitions that are dedicated to firmware OTA update.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+ #ifdef CONFIG_ESP32S3_HAVE_OTA_PARTITION
+static int init_ota_partitions(void)
+{
+  struct mtd_dev_s *mtd;
+  int ret = OK;
+
+  for (int i = 0; i < nitems(g_ota_partition_table); ++i)
+    {
+      const struct partition_s *part = &g_ota_partition_table[i];
+#if defined(CONFIG_ESP32S3_SPIRAM) || defined(CONFIG_ESP32S3_PARTITION_TABLE)
+      mtd = esp32s3_spiflash_alloc_mtdpart(part->firstblock, part->blocksize,
+                                           OTA_ENCRYPT);
+#else
+      mtd = esp_spiflash_alloc_mtdpart(part->firstblock, part->blocksize);
+#endif
+
+      ret = register_mtddriver(part->name, mtd, 0755, NULL);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: register_mtddriver %s failed: %d\n",
+                 part->name, ret);
+          return ret;
+        }
+    }
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: setup_smartfs
@@ -272,9 +367,14 @@ static int init_storage_partition(void)
   int ret = OK;
   struct mtd_dev_s *mtd;
 
+#if defined(CONFIG_ESP32S3_SPIRAM) || defined(CONFIG_ESP32S3_PARTITION_TABLE)
   mtd = esp32s3_spiflash_alloc_mtdpart(CONFIG_ESP32S3_STORAGE_MTD_OFFSET,
                                        CONFIG_ESP32S3_STORAGE_MTD_SIZE,
-                                       false);
+                                       OTA_ENCRYPT);
+#else
+  mtd = esp_spiflash_alloc_mtdpart(CONFIG_ESP32S3_STORAGE_MTD_OFFSET,
+                                   CONFIG_ESP32S3_STORAGE_MTD_SIZE);
+#endif
   if (!mtd)
     {
       syslog(LOG_ERR, "ERROR: Failed to alloc MTD partition of SPI Flash\n");
@@ -321,10 +421,10 @@ static int init_storage_partition(void)
 
 #else
 
-  ret = register_mtddriver("/dev/esp32s3flash", mtd, 0755, NULL);
+  ret = register_mtddriver("/dev/mtdblock0", mtd, 0755, NULL);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register MTD: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to register MTD mtdblock0: %d\n", ret);
       return ret;
     }
 
@@ -349,11 +449,23 @@ int board_spiflash_init(void)
 {
   int ret = OK;
 
+#if defined(CONFIG_ESP32S3_SPIRAM) || defined(CONFIG_ESP32S3_PARTITION_TABLE)
   ret = esp32s3_spiflash_init();
+#else
+  ret = esp_spiflash_init();
+#endif
   if (ret < 0)
     {
       return ret;
     }
+
+#ifdef CONFIG_ESP32S3_HAVE_OTA_PARTITION
+  ret = init_ota_partitions();
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
 
   ret = init_storage_partition();
   if (ret < 0)
@@ -363,4 +475,3 @@ int board_spiflash_init(void)
 
   return ret;
 }
-

@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/socket/setsockopt.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,6 +35,7 @@
 #include <assert.h>
 #include <arch/irq.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <netdev/netdev.h>
@@ -127,13 +130,17 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
           return OK;
         }
 
-      case SO_BROADCAST:  /* Permits sending of broadcast messages */
-      case SO_DEBUG:      /* Enables recording of debugging information */
-      case SO_DONTROUTE:  /* Requests outgoing messages bypass standard routing */
-      case SO_KEEPALIVE:  /* Verifies TCP connections active by enabling the
-                           * periodic transmission of probes */
-      case SO_OOBINLINE:  /* Leaves received out-of-band data inline */
-      case SO_REUSEADDR:  /* Allow reuse of local addresses */
+      case SO_BROADCAST:   /* Permits sending of broadcast messages */
+      case SO_DEBUG:       /* Enables recording of debugging information */
+      case SO_DONTROUTE:   /* Requests outgoing messages bypass standard routing */
+      case SO_KEEPALIVE:   /* Verifies TCP connections active by enabling the
+                            * periodic transmission of probes */
+      case SO_OOBINLINE:   /* Leaves received out-of-band data inline */
+      case SO_REUSEADDR:   /* Allow reuse of local addresses */
+#ifdef CONFIG_NET_TIMESTAMP
+      case SO_TIMESTAMP:   /* Generates a timestamp in us for each incoming packet */
+      case SO_TIMESTAMPNS: /* Generates a timestamp in ns for each incoming packet */
+#endif
         {
           int setting;
 
@@ -154,7 +161,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
            * options.
            */
 
-           net_lock();
+          conn_lock(conn);
 
           /* Set or clear the option bit */
 
@@ -167,7 +174,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
               _SO_CLROPT(conn->s_options, option);
             }
 
-          net_unlock();
+          conn_unlock(conn);
         }
         break;
 
@@ -196,11 +203,27 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
               break;
             }
 
-          /* No, we are binding a socket to the interface
-           * Find the interface device with this name.
-           */
+          /* Check if the value is already null-terminated */
 
-          dev = netdev_findbyname(value);
+          if (((FAR char *)value)[value_len - 1] != '\0')
+            {
+              char ifname[IFNAMSIZ];
+              socklen_t len = MIN(IFNAMSIZ - 1, value_len);
+
+              /* Copy the data and add null terminator */
+
+              memcpy(ifname, value, len);
+              ifname[len] = '\0';
+
+              dev = netdev_findbyname(ifname);
+            }
+          else
+            {
+              /* Value is already null-terminated, use it directly */
+
+              dev = netdev_findbyname(value);
+            }
+
           if (dev == NULL)
             {
               return -ENODEV;
@@ -383,17 +406,19 @@ int setsockopt(int sockfd, int level, int option, const void *value,
                socklen_t value_len)
 {
   FAR struct socket *psock;
+  FAR struct file *filep;
   int ret;
 
   /* Get the underlying socket structure */
 
-  ret = sockfd_socket(sockfd, &psock);
+  ret = sockfd_socket(sockfd, &filep, &psock);
 
   /* Then let psock_setockopt() do all of the work */
 
   if (ret == OK)
     {
       ret = psock_setsockopt(psock, level, option, value, value_len);
+      file_put(filep);
     }
 
   if (ret < 0)

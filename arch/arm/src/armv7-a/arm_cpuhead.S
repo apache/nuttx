@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/arm_cpuhead.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,7 +29,6 @@
 #include <arch/irq.h>
 
 #include "arm.h"
-#include "cp15.h"
 #include "sctlr.h"
 #include "mmu.h"
 #include "smp.h"
@@ -194,6 +195,7 @@ __cpu3_start:
 	 */
 
 	mov		r0, #0
+	mcr		CP15_TPIDRPRW(r0)	/* Initialize percpu reg TPIDRPRW */
 #ifdef CONFIG_ARM_HAVE_MPCORE
 	mcr		CP15_TLBIALLIS(r0)	/* Invalidate the entire unified TLB */
 	mcr		CP15_BPIALLIS(r0)	/* Invalidate entire branch prediction array */

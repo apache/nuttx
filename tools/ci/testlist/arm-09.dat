@@ -1,14 +1,63 @@
-/arm/stm32/olimexino-stm32,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32/nucleo-f33*,CONFIG_ARM_TOOLCHAIN_CLANG
 
-/arm/stm32/omnibusf4,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32/nucleo-f4*,CONFIG_ARM_TOOLCHAIN_CLANG
 
-/arm/stm32/photon,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/stm32/nucleo-g*,CONFIG_ARM_TOOLCHAIN_CLANG
 
-/arm/stm32/shenzhou,CONFIG_ARM_TOOLCHAIN_CLANG
--shenzhou:thttpd
+/arm/stm32/nucleo-l*,CONFIG_ARM_TOOLCHAIN_CLANG
 
-/arm/stm32/stm3210e-eval,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32/olimex-*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
-/arm/stm32/stm3220g-eval,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+# Boards build by CMake
 
-/arm/stm32/stm3240g-eval,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+CMake,nucleo-f334r8:adc
+CMake,nucleo-f334r8:highpri
+CMake,nucleo-f334r8:nsh
+CMake,nucleo-f334r8:spwm1
+CMake,nucleo-f334r8:spwm2
+
+CMake,nucleo-f410rb:nsh
+
+CMake,nucleo-f412zg:nsh
+
+CMake,nucleo-f429zi:netnsh
+CMake,nucleo-f429zi:nsh
+
+CMake,nucleo-f446re:adc
+# CMake,nucleo-f446re:can
+CMake,nucleo-f446re:cansock
+CMake,nucleo-f446re:dac
+CMake,nucleo-f446re:gpio
+CMake,nucleo-f446re:ihm08m1_b16
+CMake,nucleo-f446re:ihm08m1_f32
+# CMake,nucleo-f446re:lcd
+CMake,nucleo-f446re:nsh
+CMake,nucleo-f446re:pwm
+CMake,nucleo-f446re:qenco
+CMake,nucleo-f446re:systemview
+
+CMake,nucleo-f401re:fb
+CMake,nucleo-f401re:nsh
+
+CMake,nucleo-f411re:mcp2515-extid
+CMake,nucleo-f411re:nsh
+
+CMake,nucleo-g431kb:comp
+CMake,nucleo-g431kb:nsh
+CMake,nucleo-g431kb:pwm
+
+CMake,nucleo-g431rb:adc
+# CMake,nucleo-g431rb:can
+CMake,nucleo-g431rb:cansock
+CMake,nucleo-g431rb:cordic
+CMake,nucleo-g431rb:ihm16m1_b16
+CMake,nucleo-g431rb:ihm16m1_f32
+CMake,nucleo-g431rb:nsh
+CMake,nucleo-g431rb:pwm
+CMake,nucleo-g431rb:qenco
+
+CMake,nucleo-g474re:nsh
+# CMake,nucleo-g474re:usbserial
+
+# CMake,nucleo-l152re:lcd
+CMake,nucleo-l152re:nsh

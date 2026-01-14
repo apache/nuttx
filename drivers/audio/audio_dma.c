@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/audio/audio_dma.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -23,6 +25,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
 #include <nuttx/audio/audio_dma.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>
@@ -585,9 +589,9 @@ struct audio_lowerhalf_s *audio_dma_initialize(struct dma_dev_s *dma_dev,
   audio_dma->fifo_width = fifo_width;
 
   if (audio_dma->playback)
-    audio_dma->dst_addr = up_addrenv_va_to_pa((void *)fifo_addr);
+    audio_dma->dst_addr = up_addrenv_va_to_pa((FAR void *)fifo_addr);
   else
-    audio_dma->src_addr = up_addrenv_va_to_pa((void *)fifo_addr);
+    audio_dma->src_addr = up_addrenv_va_to_pa((FAR void *)fifo_addr);
 
   audio_dma->buffer_size = CONFIG_AUDIO_BUFFER_NUMBYTES;
   audio_dma->buffer_num  = CONFIG_AUDIO_NUM_BUFFERS;

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/mtd/w25.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -48,6 +50,18 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* You can enable just the W25 traces; else its convoluted potentially with
+ * high number of other traces from fs.
+ */
+
+#ifdef CONFIG_W25_DEBUG
+#  define w25_finfo  _info
+#  define w25_ferr   _err
+#else
+#  define w25_finfo  finfo
+#  define w25_ferr   ferr
+#endif
 
 /* Configuration ************************************************************/
 
@@ -340,6 +354,11 @@ static void w25_lock(FAR struct spi_dev_s *spi)
   SPI_SETBITS(spi, 8);
   SPI_HWFEATURES(spi, 0);
   SPI_SETFREQUENCY(spi, CONFIG_W25_SPIFREQUENCY);
+#ifdef CONFIG_SPI_DELAY_CONTROL
+  SPI_SETDELAY(spi, CONFIG_W25_START_DELAY,
+               CONFIG_W25_STOP_DELAY, CONFIG_W25_CS_DELAY,
+               CONFIG_W25_IFDELAY);
+#endif
 }
 
 /****************************************************************************
@@ -361,7 +380,7 @@ static inline int w25_readid(struct w25_dev_s *priv)
   uint16_t memory;
   uint16_t capacity;
 
-  finfo("priv: %p\n", priv);
+  w25_finfo("priv: %p\n", priv);
 
   /* Lock and configure the SPI bus */
 
@@ -387,7 +406,7 @@ static inline int w25_readid(struct w25_dev_s *priv)
   SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
   w25_unlock(priv->spi);
 
-  finfo("manufacturer: %02x memory: %02x capacity: %02x\n",
+  w25_finfo("manufacturer: %02x memory: %02x capacity: %02x\n",
         manufacturer, memory, capacity);
 
   /* Check for a valid manufacturer and memory type */
@@ -467,7 +486,7 @@ static inline int w25_readid(struct w25_dev_s *priv)
         {
           /* Nope.. we don't understand this capacity. */
 
-          ferr("ERROR: Unsupported capacity: %02x\n", capacity);
+          w25_ferr("ERROR: Unsupported capacity: %02x\n", capacity);
           return -ENODEV;
         }
 
@@ -476,7 +495,7 @@ static inline int w25_readid(struct w25_dev_s *priv)
 
   /* We don't understand the manufacturer or the memory type */
 
-  ferr("ERROR: Unrecognized manufacturer/memory type: %02x/%02x\n",
+  w25_ferr("ERROR: Unrecognized manufacturer/memory type: %02x/%02x\n",
        manufacturer, memory);
   return -ENODEV;
 }
@@ -529,7 +548,7 @@ static uint8_t w25_waitwritecomplete(struct w25_dev_s *priv)
   uint8_t status;
 
   /* Loop as long as the memory is busy with a write cycle. Device sets BUSY
-   * flag to a 1 state whhen previous write or erase command is still
+   * flag to a 1 state when previous write or erase command is still
    * executing and during this time, device will ignore further instructions
    * except for "Read Status Register" and "Erase/Program Suspend"
    * instructions.
@@ -565,7 +584,7 @@ static uint8_t w25_waitwritecomplete(struct w25_dev_s *priv)
       if (priv->prev_instr != W25_PP && (status & W25_SR_BUSY) != 0)
         {
           w25_unlock(priv->spi);
-          nxsig_usleep(1000);
+          nxsched_usleep(1000);
           w25_lock(priv->spi);
         }
     }
@@ -640,7 +659,7 @@ static bool w25_is_erased(struct w25_dev_s *priv, off_t address, off_t size)
     {
       /* Check if all bytes of page is in erased state. */
 
-      w25_byteread(priv, (unsigned char *)buf, address, W25_PAGE_SIZE);
+      w25_byteread(priv, (FAR unsigned char *)buf, address, W25_PAGE_SIZE);
 
       for (i = 0; i < W25_PAGE_SIZE / sizeof(uint32_t); i++)
         {
@@ -669,7 +688,7 @@ static void w25_sectorerase(struct w25_dev_s *priv, off_t sector)
 {
   off_t address = sector << W25_SECTOR_SHIFT;
 
-  finfo("sector: %08lx\n", (long)sector);
+  w25_finfo("sector: %08lx\n", (long)sector);
 
   /* Check if sector is already erased. */
 
@@ -716,7 +735,7 @@ static void w25_sectorerase(struct w25_dev_s *priv, off_t sector)
 
 static inline int w25_chiperase(struct w25_dev_s *priv)
 {
-  finfo("priv: %p\n", priv);
+  w25_finfo("priv: %p\n", priv);
 
   /* Wait for any preceding write or erase operation to complete. */
 
@@ -738,7 +757,7 @@ static inline int w25_chiperase(struct w25_dev_s *priv)
   /* Deselect the FLASH */
 
   SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
-  finfo("Return: OK\n");
+  w25_finfo("Return: OK\n");
   return OK;
 }
 
@@ -751,7 +770,7 @@ static void w25_byteread(FAR struct w25_dev_s *priv, FAR uint8_t *buffer,
 {
   uint8_t status;
 
-  finfo("address: %08lx nbytes: %d\n", (long)address, (int)nbytes);
+  w25_finfo("address: %08lx nbytes: %d\n", (long)address, (int)nbytes);
 
   /* Wait for any preceding write or erase operation to complete. */
 
@@ -807,7 +826,7 @@ static void w25_pagewrite(struct w25_dev_s *priv, FAR const uint8_t *buffer,
 {
   uint8_t status;
 
-  finfo("address: %08lx nwords: %d\n", (long)address, (int)nbytes);
+  w25_finfo("address: %08lx nwords: %d\n", (long)address, (int)nbytes);
   DEBUGASSERT(priv && buffer && (address & 0xff) == 0 &&
              (nbytes & 0xff) == 0);
 
@@ -867,7 +886,7 @@ static inline void w25_bytewrite(struct w25_dev_s *priv,
                                  off_t offset,
                                  uint16_t count)
 {
-  finfo("offset: %08lx  count:%d\n", (long)offset, count);
+  w25_finfo("offset: %08lx  count:%d\n", (long)offset, count);
 
   /* Wait for any preceding write to complete.  We could simplify things by
    * perform this wait at the end of each write operation (rather than at
@@ -903,7 +922,7 @@ static inline void w25_bytewrite(struct w25_dev_s *priv,
   /* Deselect the FLASH: Chip Select high */
 
   SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
-  finfo("Written\n");
+  w25_finfo("Written\n");
 }
 #endif /* defined(CONFIG_MTD_BYTE_WRITE) && !defined(CONFIG_W25_READONLY) */
 
@@ -954,7 +973,7 @@ static FAR uint8_t *w25_cacheread(struct w25_dev_s *priv, off_t sector)
 
   shift   = W25_SECTOR_SHIFT - W25_SECTOR512_SHIFT;
   esectno = sector >> shift;
-  finfo("sector: %ld esectno: %d shift=%d\n", sector, esectno, shift);
+  w25_finfo("sector: %ld esectno: %d shift=%d\n", sector, esectno, shift);
 
   /* Check if the requested erase block is already in the cache */
 
@@ -1013,7 +1032,7 @@ static void w25_cacheerase(struct w25_dev_s *priv, off_t sector)
   if (!IS_ERASED(priv))
     {
       off_t esectno  = sector >> (W25_SECTOR_SHIFT - W25_SECTOR512_SHIFT);
-      finfo("sector: %ld esectno: %d\n", sector, esectno);
+      w25_finfo("sector: %ld esectno: %d\n", sector, esectno);
 
       w25_sectorerase(priv, esectno);
       SET_ERASED(priv);
@@ -1058,7 +1077,7 @@ static void w25_cachewrite(FAR struct w25_dev_s *priv,
         {
           off_t esectno  = sector >>
                            (W25_SECTOR_SHIFT - W25_SECTOR512_SHIFT);
-          finfo("sector: %ld esectno: %d\n", sector, esectno);
+          w25_finfo("sector: %ld esectno: %d\n", sector, esectno);
 
           w25_sectorerase(priv, esectno);
           SET_ERASED(priv);
@@ -1095,7 +1114,8 @@ static int w25_erase(FAR struct mtd_dev_s *dev,
   FAR struct w25_dev_s *priv = (FAR struct w25_dev_s *)dev;
   size_t blocksleft = nblocks;
 
-  finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+  w25_finfo("startblock: %08lx nblocks: %d\n", (long)startblock,
+                                          (int)nblocks);
 
   /* Lock access to the SPI bus until we complete the erase */
 
@@ -1135,7 +1155,7 @@ static ssize_t w25_bread(FAR struct mtd_dev_s *dev,
 {
   ssize_t nbytes;
 
-  finfo("startblock: %08lx nblocks: %d\n",
+  w25_finfo("startblock: %08lx nblocks: %d\n",
        (long)startblock, (int)nblocks);
 
   /* On this device, we can handle the block read just like the byte-oriented
@@ -1174,7 +1194,8 @@ static ssize_t w25_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 #else
   FAR struct w25_dev_s *priv = (FAR struct w25_dev_s *)dev;
 
-  finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
+  w25_finfo("startblock: %08lx nblocks: %d\n", (long)startblock,
+                                                  (int)nblocks);
 
   /* Lock the SPI bus and write all of the pages to FLASH */
 
@@ -1203,7 +1224,7 @@ static ssize_t w25_read(FAR struct mtd_dev_s *dev,
 {
   FAR struct w25_dev_s *priv = (FAR struct w25_dev_s *)dev;
 
-  finfo("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
+  w25_finfo("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
 
   /* Lock the SPI bus and select this FLASH part */
 
@@ -1211,7 +1232,7 @@ static ssize_t w25_read(FAR struct mtd_dev_s *dev,
   w25_byteread(priv, buffer, offset, nbytes);
   w25_unlock(priv->spi);
 
-  finfo("return nbytes: %d\n", (int)nbytes);
+  w25_finfo("return nbytes: %d\n", (int)nbytes);
   return nbytes;
 }
 
@@ -1232,7 +1253,7 @@ static ssize_t w25_write(FAR struct mtd_dev_s *dev,
   int    index;
   int    bytestowrite;
 
-  finfo("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
+  w25_finfo("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
 
   /* We must test if the offset + count crosses one or more pages
    * and perform individual writes.  The devices can only write in
@@ -1298,7 +1319,7 @@ static int w25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   FAR struct w25_dev_s *priv = (FAR struct w25_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
-  finfo("cmd: %d\n", cmd);
+  w25_finfo("cmd: %d\n", cmd);
 
   switch (cmd)
     {
@@ -1332,7 +1353,7 @@ static int w25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 #endif
               ret               = OK;
 
-              finfo("blocksize: %" PRIu32 " erasesize: %" PRIu32
+              w25_finfo("blocksize: %" PRIu32 " erasesize: %" PRIu32
                     " neraseblocks: %" PRIu32 "\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
@@ -1385,7 +1406,7 @@ static int w25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         break;
     }
 
-  finfo("return %d\n", ret);
+  w25_finfo("return %d\n", ret);
   return ret;
 }
 
@@ -1408,7 +1429,7 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
   FAR struct w25_dev_s *priv;
   int ret;
 
-  finfo("spi: %p\n", spi);
+  w25_finfo("spi: %p\n", spi);
 
   /* Allocate a state structure (we allocate the structure instead of using
    * a fixed, static allocation so that we can handle multiple FLASH devices.
@@ -1448,7 +1469,7 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
            * return NULL
            */
 
-          ferr("ERROR: Unrecognized\n");
+          w25_ferr("ERROR: Unrecognized\n");
           kmm_free(priv);
           return NULL;
         }
@@ -1470,7 +1491,7 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
             {
               /* Discard all of that work we just did and return NULL */
 
-              ferr("ERROR: Allocation failed\n");
+              w25_ferr("ERROR: Allocation failed\n");
               kmm_free(priv);
               return NULL;
             }
@@ -1480,6 +1501,6 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
 
   /* Return the implementation-specific state structure as the MTD device */
 
-  finfo("Return %p\n", priv);
+  w25_finfo("Return %p\n", priv);
   return (FAR struct mtd_dev_s *)priv;
 }

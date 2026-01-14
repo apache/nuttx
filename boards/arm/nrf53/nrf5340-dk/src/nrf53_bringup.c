@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/nrf53/nrf5340-dk/src/nrf53_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -55,10 +57,7 @@
 
 #ifdef CONFIG_RPTUN
 #  include <nuttx/wireless/bluetooth/bt_rpmsghci.h>
-#  ifdef CONFIG_UART_BTH4
-#    include <nuttx/serial/uart_bth4.h>
-#  endif
-#  ifdef CONFIG_NET_BLUETOOTH
+#  ifdef CONFIG_DRIVERS_BLUETOOTH
 #    include <nuttx/wireless/bluetooth/bt_driver.h>
 #  endif
 #  include "nrf53_rptun.h"
@@ -104,21 +103,11 @@ static int nrf53_appcore_bleinit(void)
       return -ENOMEM;
     }
 
-#  ifdef CONFIG_UART_BTH4
-  /* Register UART BT H4 device */
-
-  ret = uart_bth4_register("/dev/ttyHCI", bt_dev);
+#  ifdef CONFIG_DRIVERS_BLUETOOTH
+  ret = bt_driver_register(bt_dev);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "bt_bth4_register error: %d\n", ret);
-    }
-#  elif defined(CONFIG_NET_BLUETOOTH)
-  /* Register network device */
-
-  ret = bt_netdev_register(bt_dev);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "bt_netdev_register error: %d\n", ret);
+      syslog(LOG_ERR, "bt_driver_register error: %d\n", ret);
     }
 #  else
 #    error
@@ -207,12 +196,22 @@ int nrf53_bringup(void)
 #ifdef CONFIG_USERLED
   /* Register the LED driver */
 
-  ret = userled_lower_initialize(CONFIG_EXAMPLES_LEDS_DEVPATH);
+  ret = userled_lower_initialize("/dev/userleds");
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
     }
 #endif
+
+#ifdef CONFIG_DEV_GPIO
+
+  ret = nrf53_gpio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+      return ret;
+    }
+#endif /* CONFIG_DEV_GPIO */
 
 #ifdef CONFIG_INPUT_BUTTONS
   /* Register the BUTTON driver */

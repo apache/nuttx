@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/udp/udp_txdrain.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,42 +31,15 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/cancelpt.h>
 #include <nuttx/net/net.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/tls.h>
 
 #include "utils/utils.h"
 #include "udp/udp.h"
 
 #if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_NET_UDP_NOTIFIER)
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: txdrain_worker
- *
- * Description:
- *   Called with the write buffers have all been sent.
- *
- * Input Parameters:
- *   arg     - The notifier entry.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-static void txdrain_worker(FAR void *arg)
-{
-  FAR sem_t *waitsem = (FAR sem_t *)arg;
-
-  DEBUGASSERT(waitsem != NULL);
-
-  /* Then just post the semaphore, waking up tcp_txdrain() */
-
-  nxsem_post(waitsem);
-}
 
 /****************************************************************************
  * Public Functions
@@ -90,9 +65,13 @@ int udp_txdrain(FAR struct socket *psock, unsigned int timeout)
 {
   FAR struct udp_conn_s *conn;
   sem_t waitsem;
-  int ret;
+  int ret = OK;
 
   DEBUGASSERT(psock->s_type == SOCK_DGRAM);
+
+  /* udp_txdrain() is a cancellation point */
+
+  enter_cancellation_point();
 
   conn = psock->s_conn;
 
@@ -102,26 +81,18 @@ int udp_txdrain(FAR struct socket *psock, unsigned int timeout)
 
   /* The following needs to be done with the network stable */
 
-  net_lock();
-  ret = udp_writebuffer_notifier_setup(txdrain_worker, conn, &waitsem);
-  if (ret > 0)
+  conn_lock(&conn->sconn);
+  if (!sq_empty(&conn->write_q))
     {
-      int key = ret;
-
-      /* There is pending write data.. wait for it to drain. */
-
-      ret = net_sem_timedwait_uninterruptible(&waitsem, timeout);
-
-      /* Tear down the notifier (in case we timed out or were canceled) */
-
-      if (ret < 0)
-        {
-          udp_notifier_teardown(key);
-        }
+      conn->txdrain_sem = &waitsem;
+      ret = conn_dev_sem_timedwait(&waitsem, false, timeout,
+                                   &conn->sconn, NULL);
+      conn->txdrain_sem = NULL;
     }
 
-  net_unlock();
+  conn_unlock(&conn->sconn);
   nxsem_destroy(&waitsem);
+  leave_cancellation_point();
   return ret;
 }
 

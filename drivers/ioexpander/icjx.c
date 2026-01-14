@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/ioexpander/icjx.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -931,6 +933,74 @@ static int icjx_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle)
 }
 
 /****************************************************************************
+ * Name: icjx_reconfigure
+ *
+ * Description:
+ *   Reconfigure icjx chip. This might be required if VCC or VDD drops
+ *   below a limit or if VDD burst occurs as registers are reset to a
+ *   default state.
+ *
+ * Input Parameters:
+ *   priv     - Private icjx data structure.
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
+ *
+ ****************************************************************************/
+
+static int icjx_reconfigure(FAR struct icjx_dev_s *priv)
+{
+  FAR struct icjx_config_s *config = priv->config;
+  uint8_t regval;
+  uint16_t direction;
+  int ret;
+
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Re-enable pull ups */
+
+  regval = (config->current_src << 4) | config->current_src;
+  icjx_write(priv, ICJX_CTRL_WORD_2_A, regval, ICJX_NOB1);
+  icjx_write(priv, ICJX_CTRL_WORD_2_B, regval, ICJX_NOB1);
+
+  /* Re-enable filters */
+
+  if (config->filters != ICJX_CTRL_WORD_FILTER_DISABLED)
+    {
+      regval = ICJX_CTRL_WORD_3_ICLK;
+    }
+  else
+    {
+      regval = ICJX_CTRL_WORD_3_DIS;
+    }
+
+  icjx_write(priv, ICJX_CTRL_WORD_3_B, regval, ICJX_NOB1);
+  regval = (config->filters << 4) | config->filters;
+  icjx_write(priv, ICJX_CTRL_WORD_1_A, regval, ICJX_NOB1);
+  icjx_write(priv, ICJX_CTRL_WORD_1_B, regval, ICJX_NOB1);
+
+  /* Re-enable outputs */
+
+  icjx_read(priv, ICJX_CTRL_WORD_2_A, &direction, ICJX_NOB2);
+  direction |= priv->outpins & 0xf ? ICJX_CTRL_WORD_2_NIOL : 0;
+  direction |= priv->outpins & 0xf0 ? ICJX_CTRL_WORD_2_NIOH : 0;
+  direction |= priv->outpins & 0xf00 ? ICJX_CTRL_WORD_2_NIOL << 8 : 0;
+  direction |= priv->outpins & 0xf000 ? ICJX_CTRL_WORD_2_NIOH << 8 : 0;
+  icjx_write(priv, ICJX_CTRL_WORD_2_A, direction, ICJX_NOB2);
+
+  /* Re-enable interrupts */
+
+  icjx_write(priv, ICJX_CHNG_INT_EN_A, priv->irqpins, ICJX_NOB2);
+
+  nxmutex_unlock(&priv->lock);
+  return 0;
+}
+
+/****************************************************************************
  * Name: icjx_interrupt_worker
  *
  * Description:
@@ -947,6 +1017,12 @@ static void icjx_interrupt_worker(void *arg)
   uint16_t isr;
   ioe_pinset_t irq_match;
   int ret;
+
+  /* Disable interrupts. All newly incoming interrupts are handled in
+   * a while loop if there is something to handle.
+   */
+
+  priv->config->enable(priv->config, false);
 
   /* Read interrupt status register */
 
@@ -970,11 +1046,27 @@ static void icjx_interrupt_worker(void *arg)
             }
         }
 
+      if (((isr >> 8) & (ICJX_ISR_B_IUSA | ICJX_ISR_B_IUSD |
+           ICJX_ISR_B_ISD)) != 0)
+        {
+          /* According to a reference manual, VCC and VDD undervoltage
+           * and VDD burst leads to the reset of all registers.
+           * Therefore we have to reconfigure the expander to make
+           * it functional again.
+           */
+
+          icjx_reconfigure(priv);
+        }
+
       /* Clear interrupt and check ISR again */
 
       icjx_write(priv, ICJX_CTRL_WORD_4, ICJX_CTRL_WORD_4_EOI, ICJX_NOB1);
       icjx_read(priv, ICJX_INT_STATUS_A, &isr, ICJX_NOB2);
     }
+
+  /* And enable interrupts again. */
+
+  priv->config->enable(priv->config, true);
 }
 
 /****************************************************************************
@@ -996,7 +1088,7 @@ static int icjx_interrupt(int irq, FAR void *context, FAR void *arg)
 
   DEBUGASSERT(work_available(&priv->work));
   DEBUGVERIFY(work_queue(HPWORK, &priv->work, icjx_interrupt_worker,
-                        (void *)priv, 0));
+                         (FAR void *)priv, 0));
 
   return OK;
 }
@@ -1072,31 +1164,47 @@ FAR struct ioexpander_dev_s *icjx_initialize(FAR struct spi_dev_s *spi,
   ret = icjx_write(priv, ICJX_CTRL_WORD_2_A, regval, ICJX_NOB1);
   if (ret < 0)
     {
-      gpioerr("ERROR: Could write to ICJX_CTRL_WORD_2_A: %d!\n", ret);
+      gpioerr("ERROR: Couldn't write to ICJX_CTRL_WORD_2_A: %d!\n", ret);
       goto err;
     }
 
   ret = icjx_write(priv, ICJX_CTRL_WORD_2_B, regval, ICJX_NOB1);
   if (ret < 0)
     {
-      gpioerr("ERROR: Could write to ICJX_CTRL_WORD_2_B: %d!\n", ret);
+      gpioerr("ERROR: Couldn't write to ICJX_CTRL_WORD_2_B: %d!\n", ret);
       goto err;
     }
 
   /* Bypass filters as those are not yet supported. */
 
-  regval = ICJX_CTRL_WORD_1_BYP0 | ICJX_CTRL_WORD_1_BYP1;
+  if (config->filters != ICJX_CTRL_WORD_FILTER_DISABLED)
+    {
+      regval = ICJX_CTRL_WORD_3_ICLK;
+    }
+  else
+    {
+      regval = ICJX_CTRL_WORD_3_DIS;
+    }
+
+  ret = icjx_write(priv, ICJX_CTRL_WORD_3_B, regval, ICJX_NOB1);
+  if (ret < 0)
+    {
+      gpioerr("ERROR: Couldn't write to ICJX_CTRL_WORD_3_B: %d!\n", ret);
+      goto err;
+    }
+
+  regval = (config->filters << 4) | config->filters;
   ret = icjx_write(priv, ICJX_CTRL_WORD_1_A, regval, ICJX_NOB1);
   if (ret < 0)
     {
-      gpioerr("ERROR: Could write to ICJX_CTRL_WORD_1_A: %d!\n", ret);
+      gpioerr("ERROR: Couldn't write to ICJX_CTRL_WORD_1_A: %d!\n", ret);
       goto err;
     }
 
   ret = icjx_write(priv, ICJX_CTRL_WORD_1_B, regval, ICJX_NOB1);
   if (ret < 0)
     {
-      gpioerr("ERROR: Could write to ICJX_CTRL_WORD_1_B: %d!\n", ret);
+      gpioerr("ERROR: Couldn't write to ICJX_CTRL_WORD_1_B: %d!\n", ret);
       goto err;
     }
 

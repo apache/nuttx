@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/sensors/lsm330.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -67,10 +69,8 @@
  * Use the Cluster Driver Interface to perform DMA block transfers.
  *
  * This driver supports the Common Sensor Register Interface.
- * See drivers/sensors/README.txt for details.
- *
- * This driver supports the Sensor Cluster Driver Interface.
- * See drivers/sensors/README.txt for details.
+ * See Documentation/components/drivers/special/sensors/sensors_cluster.rst
+ * for details.
  *
  * It also extends the interface by permitting cluster driver calls to
  * a function that is intended to perform high performance DMA SPI exchange

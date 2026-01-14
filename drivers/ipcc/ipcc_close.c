@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/ipcc/ipcc_close.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -50,7 +52,7 @@
  *   filep - pointer to a file structure to close.
  *
  * Returned Value:
- *   OK on successfull close, or negated errno on failure.
+ *   OK on successful close, or negated errno on failure.
  *
  * Assumptions/Limitations:
  *

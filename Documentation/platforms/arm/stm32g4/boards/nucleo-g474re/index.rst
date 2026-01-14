@@ -2,6 +2,8 @@
 ST Nucleo G474RE
 ================
 
+.. tags:: chip:stm32, chip:stm32g4, chip:stm32g474
+
 This is the page for a port of NuttX to the ST Micro Nucleo G474RE
 board with STM32G474RE MCU. For more information about this board, see:
 

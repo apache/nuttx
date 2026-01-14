@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_serial.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -66,7 +68,7 @@ extern "C"
  *
  * Description:
  *   Performs the low level USART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before arm_serialinit.
  *
  ****************************************************************************/
@@ -80,7 +82,7 @@ void sam_earlyserialinit(void);
  *
  * Description:
  *   Performs the low level USART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before arm_serialinit.
  *
  ****************************************************************************/
@@ -94,7 +96,7 @@ void uart_earlyserialinit(void);
  *
  * Description:
  *   Performs the low level Flexcom USART initialization early so that the
- *   Flexcom serial console will be available during bootup.  This must be
+ *   Flexcom serial console will be available during boot up.  This must be
  *   called before flexus_serialinit.
  *
  ****************************************************************************/

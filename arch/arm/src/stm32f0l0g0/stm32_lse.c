@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/stm32_lse.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -45,12 +47,14 @@
 
 void stm32_rcc_enablelse(void)
 {
+#ifdef HAVE_PWR_DBP
   /* The LSE is in the RTC domain and write access is denied to this domain
    * after reset, you have to enable write access using DBP bit in the PWR CR
    * register before to configuring the LSE.
    */
 
   stm32_pwr_enablebkp(true);
+#endif
 
 #if defined(CONFIG_ARCH_CHIP_STM32L0)
   /* Enable the External Low-Speed (LSE) oscillator by setting the LSEON bit
@@ -78,9 +82,23 @@ void stm32_rcc_enablelse(void)
     {
     }
 
+#elif defined(CONFIG_ARCH_CHIP_STM32C0)
+  /* Enable the External Low-Speed (LSE) oscillator by setting the LSEON bit
+   * the RCC CSR1 register.
+   */
+
+  modifyreg32(STM32_RCC_CSR1, 0, RCC_CSR1_LSEON);
+
+  /* Wait for the LSE clock to be ready */
+
+  while ((getreg32(STM32_RCC_CSR1) & RCC_CSR1_LSERDY) == 0)
+    {
+    }
 #endif
 
+#ifdef HAVE_PWR_DBP
   /* Disable backup domain access if it was disabled on entry */
 
   stm32_pwr_enablebkp(false);
+#endif
 }

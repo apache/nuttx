@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/pthread/pthread_mutexattr_getprotocol.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -53,13 +55,13 @@ int pthread_mutexattr_getprotocol(FAR const pthread_mutexattr_t *attr,
 {
   DEBUGASSERT(attr != NULL && protocol != NULL);
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
+#if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
   linfo("Returning %d\n", attr->proto);
   *protocol = attr->proto;
 #else
   linfo("Returning %d\n", PTHREAD_PRIO_NONE);
   *protocol = PTHREAD_PRIO_NONE;
-#endif /* CONFIG_PRIORITY_INHERITANCE */
+#endif /* CONFIG_PRIORITY_INHERITANCE || CONFIG_PRIORITY_PROTECT */
 
   return 0;
 }

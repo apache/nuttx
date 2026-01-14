@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/syslog.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,6 +29,10 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+
+#ifdef CONFIG_SYSLOG_TO_SCHED_NOTE
+#include <nuttx/sched_note.h>
+#endif
 
 #include <stdint.h>
 #include <stdarg.h>
@@ -81,26 +87,26 @@
  *   LOG_UUCP     - UUCP subsystem
  */
 
-#define LOG_AUTH      0
-#define LOG_AUTHPRIV  0
-#define LOG_CRON      0
-#define LOG_DAEMON    0
-#define LOG_FTP       0
-#define LOG_KERN      0
-#define LOG_LOCAL0    0
-#define LOG_LOCAL1    0
-#define LOG_LOCAL2    0
-#define LOG_LOCAL3    0
-#define LOG_LOCAL4    0
-#define LOG_LOCAL5    0
-#define LOG_LOCAL6    0
-#define LOG_LOCAL7    0
-#define LOG_LPR       0
-#define LOG_MAIL      0
-#define LOG_NEWS      0
-#define LOG_SYSLOG    0
-#define LOG_USER      0
-#define LOG_UUCP      0
+#define LOG_KERN      (0 << 3)
+#define LOG_USER      (1 << 3)
+#define LOG_MAIL      (2 << 3)
+#define LOG_DAEMON    (3 << 3)
+#define LOG_AUTH      (4 << 3)
+#define LOG_SYSLOG    (5 << 3)
+#define LOG_LPR       (6 << 3)
+#define LOG_NEWS      (7 << 3)
+#define LOG_UUCP      (8 << 3)
+#define LOG_CRON      (9 << 3)
+#define LOG_AUTHPRIV  (10 << 3)
+#define LOG_FTP       (11 << 3)
+#define LOG_LOCAL0    (16 << 3)
+#define LOG_LOCAL1    (17 << 3)
+#define LOG_LOCAL2    (18 << 3)
+#define LOG_LOCAL3    (19 << 3)
+#define LOG_LOCAL4    (20 << 3)
+#define LOG_LOCAL5    (21 << 3)
+#define LOG_LOCAL6    (22 << 3)
+#define LOG_LOCAL7    (23 << 3)
 
 /* This determines the importance of the message. The levels are, in order
  * of decreasing importance:
@@ -120,6 +126,10 @@
 #define LOG_MASK(p)   (1 << (p))
 #define LOG_UPTO(p)   ((1 << ((p)+1)) - 1)
 #define LOG_ALL       0xff
+
+#define LOG_PRIMASK            0x07               /* mask to extract priority part (internal) */
+#define LOG_PRI(p)            ((p) & LOG_PRIMASK) /* extract priority */
+#define LOG_MAKEPRI(fac, pri) ((fac) | (pri))
 
 /****************************************************************************
  * Public Function Prototypes
@@ -203,9 +213,16 @@ extern "C"
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SYSLOG_TO_SCHED_NOTE
 void syslog(int priority, FAR const IPTR char *fmt, ...) syslog_like(2, 3);
 void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
      syslog_like(2, 0);
+#else
+#  define syslog(priority, fmt, ...) \
+          sched_note_printf(NOTE_TAG_LOG + priority, fmt, ##__VA_ARGS__)
+#  define vsyslog(priority, fmt, ap) \
+          sched_note_vprintf(NOTE_TAG_LOG + priority, fmt, ap)
+#endif
 
 /****************************************************************************
  * Name: setlogmask
@@ -218,10 +235,6 @@ void vsyslog(int priority, FAR const IPTR char *fmt, va_list ap)
  *   LOG_WARNING, LOG_NOTICE, LOG_INFO, and LOG_DEBUG.  The bit corresponding
  *   to a priority p is LOG_MASK(p); LOG_UPTO(p) provides the mask of all
  *   priorities in the above list up to and including p.
- *
- *   Per OpenGroup.org "If the maskpri argument is 0, the current log mask
- *   is not modified."  In this implementation, the value zero is permitted
- *   in order to disable all syslog levels.
  *
  *   NOTE:  setlogmask is not a thread-safe, re-entrant function.  Concurrent
  *   use of setlogmask() will have undefined behavior.

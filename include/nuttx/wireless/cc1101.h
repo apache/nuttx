@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/wireless/cc1101.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -426,7 +428,7 @@ EXTERN const struct c1101_rfsettings_s
  * Public Function Prototypes
  ****************************************************************************/
 
-FAR int cc1101_init2(FAR struct cc1101_dev_s *dev);
+int cc1101_init2(FAR struct cc1101_dev_s *dev);
 
 /****************************************************************************
  * Initialize Chipcon CC1101 Chip.

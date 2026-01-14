@@ -1,8 +1,9 @@
 /****************************************************************************
  * libs/libc/misc/lib_utsname.c
  *
- *   Copyright (C) 2015 Stavros Polymenis. All rights reserved.
- *   Author: Stavros Polymenis <sp@orbitalfox.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2015 Stavros Polymenis. All rights reserved.
+ * SPDX-FileContributor: Stavros Polymenis <sp@orbitalfox.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -45,6 +46,17 @@
 
 #include <nuttx/version.h>
 #include <unistd.h>
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#if defined(__DATE__) && defined(__TIME__) && \
+    !defined(CONFIG_LIBC_UNAME_DISABLE_TIMESTAMP)
+static char g_version[] = CONFIG_VERSION_BUILD " " __DATE__ " " __TIME__;
+#else
+static char g_version[] = CONFIG_VERSION_BUILD;
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -93,13 +105,7 @@ int uname(FAR struct utsname *name)
 
   strlcpy(name->release,  CONFIG_VERSION_STRING, sizeof(name->release));
 
-#if defined(__DATE__) && defined(__TIME__) && \
-    !defined(CONFIG_LIBC_UNAME_DISABLE_TIMESTAMP)
-  snprintf(name->version, VERSION_NAMELEN, "%s %s %s",
-           CONFIG_VERSION_BUILD, __DATE__, __TIME__);
-#else
-  strlcpy(name->version,  CONFIG_VERSION_BUILD, sizeof(name->version));
-#endif
+  strlcpy(name->version,  g_version, sizeof(name->version));
 
   strlcpy(name->machine,  CONFIG_ARCH, sizeof(name->machine));
 

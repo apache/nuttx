@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f401rc-rs485/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,7 +38,7 @@
 
 /* Clocking *****************************************************************/
 
-/* The STM32F401RC-RS485 uses an external 32kHz cristal (X2) to enable HSE
+/* The STM32F401RC-RS485 uses an external 32kHz crystal (X2) to enable HSE
  * clock.
  *
  *   System Clock source           : PLL (HSI)
@@ -335,6 +337,25 @@ extern "C"
 #define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1
 #define GPIO_SPI2_SCK    GPIO_SPI2_SCK_2
 
+/* MAX7219 */
+
+#define STM32_LCD_CS (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN4)
+
+/* MFRC522 */
+
+#define GPIO_RFID_CS      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN5)
+
+/* MAX31855 */
+
+#define GPIO_MAX31855_CS   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN4)
+
+/* MAX6675 */
+
+#define GPIO_MAX6675_CS    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN5)
 /* LEDs
  *
  * The STM32F401RC-RS485 boards provide 4 blue user LEDs. LD1, LD2, LD3

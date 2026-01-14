@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/mqueue.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,7 +39,7 @@
 #include <mqueue.h>
 #include <poll.h>
 
-#if CONFIG_MQ_MAXMSGSIZE > 0
+#if defined(CONFIG_MQ_MAXMSGSIZE) && (CONFIG_MQ_MAXMSGSIZE > 0)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -290,7 +292,7 @@ int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
  *   msg     - Message to send
  *   msglen  - The length of the message in bytes
  *   prio    - The priority of the message
- *   abstime - the absolute time to wait until a timeout is decleared
+ *   abstime - the absolute time to wait until a timeout is declared
  *
  * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
@@ -566,7 +568,7 @@ int file_mq_send(FAR struct file *mq, FAR const char *msg, size_t msglen,
  *   msg     - Message to send
  *   msglen  - The length of the message in bytes
  *   prio    - The priority of the message
- *   abstime - the absolute time to wait until a timeout is decleared
+ *   abstime - the absolute time to wait until a timeout is declared
  *
  * Returned Value:
  *   This is an internal OS interface and should not be used by applications.

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/stm32h7/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -67,7 +69,9 @@
  * Included Files
  ****************************************************************************/
 
-#if defined(CONFIG_STM32H7_STM32H7X3XX)
+#if defined(CONFIG_STM32H7_STM32H7X0XX)
+#  include <arch/stm32h7/stm32h7x3xx_irq.h>
+#elif defined(CONFIG_STM32H7_STM32H7X3XX)
 #  include <arch/stm32h7/stm32h7x3xx_irq.h>
 #elif defined(CONFIG_STM32H7_STM32H7B3XX)
 #  include <arch/stm32h7/stm32h7x3xx_irq.h>

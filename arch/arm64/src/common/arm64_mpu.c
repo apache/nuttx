@@ -1,5 +1,7 @@
-/***************************************************************************
+/****************************************************************************
  * arch/arm64/src/common/arm64_mpu.c
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,11 +18,11 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ***************************************************************************/
+ ****************************************************************************/
 
-/***************************************************************************
+/****************************************************************************
  * Included Files
- ***************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <stdint.h>
@@ -28,6 +30,7 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
+#include <arch/barriers.h>
 #include <arch/irq.h>
 #include <arch/chip/chip.h>
 
@@ -36,9 +39,9 @@
 #include "arm64_fatal.h"
 #include "arm64_mpu.h"
 
-/***************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ***************************************************************************/
+ ****************************************************************************/
 
 #define __MPU_ASSERT(__cond, fmt, ...) \
   do                                   \
@@ -70,65 +73,50 @@
  * regions.
  */
 
-static uint8_t static_regions_num;
+static unsigned int g_mpu_region;
 
-/***************************************************************************
+/****************************************************************************
  * Private Functions
- ***************************************************************************/
+ ****************************************************************************/
 
-/* Get the number of supported MPU regions. */
+/****************************************************************************
+ * Name: get_num_regions
+ *
+ * Description:
+ *   Get the number of supported MPU regions.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Numbers of the region.
+ *
+ ****************************************************************************/
 
-static inline uint8_t get_num_regions(void)
+static inline unsigned int get_num_regions(void)
 {
   uint64_t type;
 
   type = read_sysreg(mpuir_el1);
   type = type & MPU_IR_REGION_MSK;
 
-  return (uint8_t)type;
+  return (unsigned int)type;
 }
 
-/* ARM Core MPU Driver API Implementation for ARM MPU */
-
-/* Enable the MPU */
-
-void arm64_core_mpu_enable(void)
-{
-  uint64_t val;
-
-  val = read_sysreg(sctlr_el1);
-  val |= (SCTLR_M_BIT
-#ifndef CONFIG_ARM64_DCACHE_DISABLE
-          | SCTLR_C_BIT
-#endif
-         );
-  write_sysreg(val, sctlr_el1);
-  ARM64_DSB();
-  ARM64_ISB();
-}
-
-/* Disable the MPU */
-
-void arm64_core_mpu_disable(void)
-{
-  uint64_t val;
-
-  /* Force any outstanding transfers to complete before disabling MPU */
-
-  ARM64_DMB();
-
-  val = read_sysreg(sctlr_el1);
-  val &= ~(SCTLR_M_BIT | SCTLR_C_BIT);
-  write_sysreg(val, sctlr_el1);
-  ARM64_DSB();
-  ARM64_ISB();
-}
-
-/* ARM MPU Driver Initial Setup
+/****************************************************************************
+ * Name: mpu_init
  *
- * Configure the cache-ability attributes for all the
- * different types of memory regions.
- */
+ * Description:
+ *   Configure the cache-ability attributes for all the different types
+ *   of memory regions.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
 static void mpu_init(void)
 {
@@ -141,53 +129,267 @@ static void mpu_init(void)
   uint64_t mair = MPU_MAIR_ATTRS;
 
   write_sysreg(mair, mair_el1);
-  ARM64_DSB();
-  ARM64_ISB();
+  UP_MB();
 }
 
-static inline void mpu_set_region(uint32_t rnr, uint64_t rbar,
-                                  uint64_t rlar)
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: mpu_allocregion
+ *
+ * Description:
+ *   Allocate the next region
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The index of the allocated region.
+ *
+ ****************************************************************************/
+
+unsigned int mpu_allocregion(void)
 {
-  write_sysreg(rnr, prselr_el1);
-  ARM64_DSB();
-  write_sysreg(rbar, prbar_el1);
-  write_sysreg(rlar, prlar_el1);
-  ARM64_DSB();
-  ARM64_ISB();
+  unsigned int num_regions = get_num_regions();
+  unsigned int i = ffs(~g_mpu_region) - 1;
+
+  /* There are not enough regions to apply */
+
+  DEBUGASSERT(i < num_regions);
+  g_mpu_region |= 1 << i;
+  return i;
 }
 
-/* This internal functions performs MPU region initialization. */
+/****************************************************************************
+ * Name: mpu_freeregion
+ *
+ * Description:
+ *   Free target region.
+ *
+ * Input Parameters:
+ *  region - The index of the region to be freed.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
-static void region_init(const uint32_t index,
-                        const struct arm64_mpu_region *region_conf)
+void mpu_freeregion(unsigned int region)
 {
-  uint64_t rbar = region_conf->base & MPU_RBAR_BASE_MSK;
-  uint64_t rlar = (region_conf->limit - 1) & MPU_RLAR_LIMIT_MSK;
+  unsigned int num_regions = get_num_regions();
 
-  rbar |= region_conf->attr.rbar &
+  /* Check region valid */
+
+  DEBUGASSERT(region < num_regions);
+
+  write_sysreg(region, prselr_el1);
+  UP_DSB();
+
+  /* Set the region base, limit and attribute */
+
+  write_sysreg(0, prbar_el1);
+  write_sysreg(0, prlar_el1);
+  g_mpu_region &= ~(1 << region);
+  UP_MB();
+}
+
+/****************************************************************************
+ * Name: arm64_mpu_enable
+ *
+ * Description:
+ *   Enable the MPU
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Return Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void arm64_mpu_enable(void)
+{
+  uint64_t val;
+
+  val = read_sysreg(sctlr_el1);
+  val |= (SCTLR_M_BIT
+#ifndef CONFIG_ARM64_DCACHE_DISABLE
+          | SCTLR_C_BIT
+#endif
+         );
+  write_sysreg(val, sctlr_el1);
+  UP_MB();
+}
+
+/****************************************************************************
+ * Name: arm64_mpu_disable
+ *
+ * Description:
+ *   Disable the MPU
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Return Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void arm64_mpu_disable(void)
+{
+  uint64_t val;
+
+  /* Force any outstanding transfers to complete before disabling MPU */
+
+  UP_DMB();
+
+  val = read_sysreg(sctlr_el1);
+  val &= ~(SCTLR_M_BIT | SCTLR_C_BIT);
+  write_sysreg(val, sctlr_el1);
+  UP_MB();
+}
+
+/****************************************************************************
+ * Name: mpu_modify_region
+ *
+ * Description:
+ *   Modify a region for privileged, strongly ordered memory
+ *
+ * Input Parameters:
+ *   region - The index of the MPU region to modify.
+ *   table  - Pointer to a struct containing the configuration
+ *            parameters for the region.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void mpu_modify_region(unsigned int region,
+                       const struct arm64_mpu_region *table)
+{
+  uint64_t rbar = table->base & MPU_RBAR_BASE_MSK;
+  uint64_t rlar = (table->limit - 1) & MPU_RLAR_LIMIT_MSK;
+
+  /* Check that the region is valid */
+
+  DEBUGASSERT(g_mpu_region & (1 << region));
+
+  rbar |= table->attr.rbar &
           (MPU_RBAR_XN_MSK | MPU_RBAR_AP_MSK | MPU_RBAR_SH_MSK);
   rlar |=
-    (region_conf->attr.mair_idx <<
+     (table->attr.mair_idx <<
       MPU_RLAR_ATTRINDX_POS) & MPU_RLAR_ATTRINDX_MSK;
   rlar |= MPU_RLAR_EN_MSK;
 
-  mpu_set_region(index, rbar, rlar);
+  /* Select the region */
+
+  write_sysreg(region, prselr_el1);
+  UP_DSB();
+
+  /* Set the region base, limit and attribute */
+
+  write_sysreg(rbar, prbar_el1);
+  write_sysreg(rlar, prlar_el1);
+  UP_MB();
 }
 
-/***************************************************************************
- * Public Functions
- ***************************************************************************/
-
-/* @brief MPU default configuration
+/****************************************************************************
+ * Name: mpu_configure_region
  *
- * This function here provides the default configuration mechanism
- * for the Memory Protection Unit (MPU).
- */
+ * Description:
+ *   Configure a region for privileged, strongly ordered memory
+ *
+ * Input Parameters:
+ *   table - Pointer to a struct containing the configuration
+ *           parameters for the region.
+ *
+ * Returned Value:
+ *   The region number allocated for the configured region.
+ *
+ ****************************************************************************/
+
+unsigned int mpu_configure_region(const struct arm64_mpu_region *
+                                  table)
+{
+  unsigned int region = mpu_allocregion();
+  mpu_modify_region(region, table);
+  return region;
+}
+
+/****************************************************************************
+ * Name: mpu_dump_region
+ *
+ * Description:
+ *   Dump the region that has been used.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ ****************************************************************************/
+
+void mpu_dump_region(void)
+{
+  uint64_t sctlr_el1;
+  uint64_t prlar;
+  uint64_t prbar;
+  unsigned int num_regions;
+  int i;
+  int count = 0;
+
+  num_regions = get_num_regions();
+  sctlr_el1 = read_sysreg(sctlr_el1);
+  _info("MPU-SCTLR_EL1 Enable:%" PRIu64 ", Cacheable: %" PRIu64 "\n",
+        sctlr_el1 & SCTLR_M_BIT, sctlr_el1 & SCTLR_C_BIT);
+  for (i = 0; i < num_regions; i++)
+    {
+      write_sysreg(i, prselr_el1);
+      prlar = read_sysreg(prlar_el1);
+      prbar = read_sysreg(prbar_el1);
+      _info("MPU-%d, 0x%08llX-0x%08llX SH=%llX AP=%llX XN=%llX\n", i,
+            prbar & MPU_RBAR_BASE_MSK, prlar & MPU_RLAR_LIMIT_MSK,
+            prbar & MPU_RBAR_SH_MSK, prbar & MPU_RBAR_AP_MSK,
+            prbar & MPU_RBAR_XN_MSK);
+      if (prlar & MPU_RLAR_EN_MSK)
+        {
+          count++;
+        }
+    }
+
+  _info("Total Use Region:%d, Remaining Available:%d\n", count,
+        num_regions - count);
+}
+
+/****************************************************************************
+ * Name: arm64_mpu_init
+ *
+ * Description:
+ *   This function here provides the default configuration mechanism
+ *   for the Memory Protection Unit (MPU).
+ *
+ * Input Parameters:
+ *   is_primary_core: A boolean indicating whether the current core is the
+ *   primary core.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
 void arm64_mpu_init(bool is_primary_core)
 {
   uint64_t  val;
   uint32_t  r_index;
+
+#ifdef CONFIG_MM_KASAN_SW_TAGS
+  val  = read_sysreg(tcr_el1);
+  val |= (TCR_TBI0 | TCR_TBI1 | TCR_ASID_8);
+  write_sysreg(val, tcr_el1);
+#endif
 
   /* Current MPU code supports only EL1 */
 
@@ -206,21 +408,7 @@ void arm64_mpu_init(bool is_primary_core)
       return;
     }
 
-  if (g_mpu_config.num_regions > get_num_regions())
-    {
-      /* Attempt to configure more MPU regions than
-       * what is supported by hardware. As this operation
-       * is executed during system (pre-kernel) initialization,
-       * we want to ensure we can detect an attempt to
-       * perform invalid configuration.
-       */
-
-      __MPU_ASSERT(0, "Request to configure: %u regions (supported: %u)\n",
-                   g_mpu_config.num_regions, get_num_regions());
-      return;
-    }
-
-  arm64_core_mpu_disable();
+  arm64_mpu_disable();
 
   /* Architecture-specific configuration */
 
@@ -230,12 +418,8 @@ void arm64_mpu_init(bool is_primary_core)
 
   for (r_index = 0U; r_index < g_mpu_config.num_regions; r_index++)
     {
-      region_init(r_index, &g_mpu_config.mpu_regions[r_index]);
+      mpu_configure_region(&g_mpu_config.mpu_regions[r_index]);
     }
 
-  /* Update the number of programmed MPU regions. */
-
-  static_regions_num = g_mpu_config.num_regions;
-
-  arm64_core_mpu_enable();
+  arm64_mpu_enable();
 }

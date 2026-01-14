@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/dm320/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -73,7 +75,7 @@
 #define DM320_IRQ_EXT14    35 /* IRQ35: External Interrupt #14 (GIO14) */
 #define DM320_IRQ_EXT15    36 /* IRQ36: External Interrupt #15 (GIO15) */
 #define DM320_IRQ_PREV0    37 /* IRQ37: Preview Engine 0 (Preview Over) */
-#define DM320_IRQ_PREV1    38 /* IRQ38: Preview Engine 1 (Preview Historgram Over) */
+#define DM320_IRQ_PREV1    38 /* IRQ38: Preview Engine 1 (Preview Histogram Over) */
 #define DM320_IRQ_WDT      39 /* IRQ39: Watchdog Timer Interrupt */
 #define DM320_IRQ_I2C      40 /* IRQ40: I2C Interrupt */
 #define DM320_IRQ_CLKC     41 /* IRQ41: Clock controller Interrupt (wake up) */

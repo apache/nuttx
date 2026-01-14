@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/sixlowpan/sixlowpan_input.c
- * 6LoWPAN implementation (RFC 4944 and RFC 6282)
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *
  *   Copyright (C) 2017, Gregory Nutt, all rights reserved
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -717,7 +718,7 @@ static int sixlowpan_dispatch(FAR struct radio_driver_s *radio)
  *               radio, or (2) struct pktradio_metadata_s for a non-standard
  *               packet radio.
  *
- *               If there are multilple frames in the list, this metadata
+ *               If there are multiple frames in the list, this metadata
  *               must apply to all of the frames in the list.
  *
  * Returned Value:

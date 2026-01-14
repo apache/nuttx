@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_fpucmp.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,8 +36,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_FPU
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -63,4 +63,3 @@ bool up_fpucmp(const void *saveregs1, const void *saveregs2)
   return memcmp(&regs1[INT_XCPT_REGS], &regs2[INT_XCPT_REGS],
                 INT_REG_SIZE * FPU_XCPT_REGS) == 0;
 }
-#endif /* CONFIG_ARCH_FPU */

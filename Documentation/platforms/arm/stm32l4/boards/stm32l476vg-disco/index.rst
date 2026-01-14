@@ -2,6 +2,8 @@
 ST STM32L476VG-DISCO
 ====================
 
+.. tags:: chip:stm32, chip:stm32l4, chip:stm32l476
+
 XXX all this needs review and update
 
 This page discusses issues unique to NuttX configurations for the ST
@@ -386,7 +388,7 @@ NOTES:
          nuttx.hex         - The pass2 Intel HEX file (selected in defconfig)
          System.map        - Symbols in the kernel-space ELF file
 
-       The J-Link programmer will except files in .hex, .mot, .srec, and .bin
+       The J-Link programmer will accept files in .hex, .mot, .srec, and .bin
        formats.
 
 2. Combining .hex files.  If you plan to use the .hex files with your

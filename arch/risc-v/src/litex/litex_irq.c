@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/litex/litex_irq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -66,8 +68,8 @@ void up_irqinitialize(void)
 
   /* litex vexriscv dont have priority and threshold control */
 
-#ifdef CONFIG_LITEX_CORE_VEXRISCV_SMP
-  /* litex vexriscv_smp does. */
+#if defined(CONFIG_LITEX_CORE_VEXRISCV_SMP) || defined(CONFIG_LITEX_CORE_VEXIIRISCV)
+  /* litex vexriscv_smp and vexiiriscv do. */
 
   /* Set priority for all global interrupts to 1 (lowest) */
 
@@ -91,6 +93,7 @@ void up_irqinitialize(void)
 
   /* And finally, enable interrupts */
 
+  riscv_color_intstack();
   up_irq_enable();
 #endif
 }
@@ -103,7 +106,7 @@ void up_irqinitialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LITEX_CORE_VEXRISCV_SMP
+#if defined(CONFIG_LITEX_CORE_VEXRISCV_SMP) || defined(CONFIG_LITEX_CORE_VEXIIRISCV)
 void up_disable_irq(int irq)
 {
   int extirq;
@@ -184,7 +187,7 @@ void up_disable_irq(int irq)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LITEX_CORE_VEXRISCV_SMP
+#if defined(CONFIG_LITEX_CORE_VEXRISCV_SMP) || defined(CONFIG_LITEX_CORE_VEXIIRISCV)
 void up_enable_irq(int irq)
 {
   int extirq;

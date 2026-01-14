@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/ipforward/ipfwd_poll.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -158,7 +160,7 @@ static void ipfwd_packet_conversion(FAR struct net_driver_s *dev, int proto)
 
 void ipfwd_poll(FAR struct net_driver_s *dev)
 {
-  uint16_t flags;
+  uint32_t flags;
 
   /* Setup for the callback (most of these do not apply) */
 
@@ -173,7 +175,7 @@ void ipfwd_poll(FAR struct net_driver_s *dev)
   flags = devif_conn_event(dev, IPFWD_POLL, dev->d_conncb);
 
 #ifdef CONFIG_NET_6LOWPAN
-  if ((flags & DEVPOLL_MASK) == 0)
+  if ((flags & IPFWD_POLL) == 0)
     {
       /* Get the L2 protocol of packet in the device's d_buf */
 

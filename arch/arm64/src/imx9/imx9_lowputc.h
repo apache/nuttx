@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/imx9/imx9_lowputc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -56,6 +58,11 @@ struct uart_config_s
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /****************************************************************************
  * Name: imx9_lowsetup
  *
@@ -80,5 +87,9 @@ void imx9_lowsetup(void);
 int imx9_lpuart_configure(uint32_t base,
                           int uartnum,
                           const struct uart_config_s *config);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __ARCH_ARM_SRC_IMX9_IMX9_LOWPUTC_H */

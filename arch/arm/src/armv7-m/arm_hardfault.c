@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/arm_hardfault.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,10 +42,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* If CONFIG_ARMV7M_USEBASEPRI=n, then debug output from this file may
- * interfere with context switching!
- */
-
 #ifdef CONFIG_DEBUG_HARDFAULT_ALERT
 #  define hfalert(format, ...) _alert(format, ##__VA_ARGS__)
 #else
@@ -77,50 +75,7 @@ int arm_hardfault(int irq, void *context, void *arg)
   uint32_t cfsr = getreg32(NVIC_CFAULTS);
 
   UNUSED(cfsr);
-
-  /* Get the value of the program counter where the fault occurred */
-
-#ifndef CONFIG_ARMV7M_USEBASEPRI
-  uint32_t *regs = (uint32_t *)context;
-  uint16_t *pc = (uint16_t *)regs[REG_PC] - 1;
-
-  /* Check if the pc lies in known FLASH memory.
-   * REVISIT:  What if the PC lies in "unknown" external memory?  Best
-   * use the BASEPRI register if you have external memory.
-   */
-
-#ifdef CONFIG_BUILD_PROTECTED
-  /* In the kernel build, SVCalls are expected in either the base, kernel
-   * FLASH region or in the user FLASH region.
-   */
-
-  if (((uintptr_t)pc >= (uintptr_t)_START_TEXT &&
-       (uintptr_t)pc <  (uintptr_t)_END_TEXT) ||
-      ((uintptr_t)pc >= (uintptr_t)USERSPACE->us_textstart &&
-       (uintptr_t)pc <  (uintptr_t)USERSPACE->us_textend))
-#else
-  /* SVCalls are expected only from the base, kernel FLASH region */
-
-  if ((uintptr_t)pc >= (uintptr_t)_START_TEXT &&
-      (uintptr_t)pc <  (uintptr_t)_END_TEXT)
-#endif
-    {
-      /* Fetch the instruction that caused the Hard fault */
-
-      uint16_t insn = *pc;
-      hfinfo("  PC: %p INSN: %04x\n", pc, insn);
-
-      /* If this was the instruction 'svc 0', then forward processing
-       * to the SVCall handler
-       */
-
-      if (insn == INSN_SVC0)
-        {
-          hfinfo("Forward SVCall\n");
-          return arm_svcall(irq, context, arg);
-        }
-    }
-#endif
+  UNUSED(hfsr);
 
   if (hfsr & NVIC_HFAULTS_FORCED)
     {

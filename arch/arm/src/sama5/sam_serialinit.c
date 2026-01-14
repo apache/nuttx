@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_serialinit.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -41,7 +43,7 @@
  *
  * Description:
  *   Performs the low level serial initialization early so that the serial
- *   console will be available during bootup.  This must be called
+ *   console will be available during boot up.  This must be called
  *   before arm_serialinit.
  *
  ****************************************************************************/

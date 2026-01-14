@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_DEBUG_OPT_UNUSED_SECTIONS is not set
 CONFIG_ARCH="avr"
 CONFIG_ARCH_AVR=y
 CONFIG_ARCH_BOARD="teensy-2.0"

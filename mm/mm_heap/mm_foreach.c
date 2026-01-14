@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/mm_heap/mm_foreach.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -79,6 +81,7 @@ void mm_foreach(FAR struct mm_heap_s *heap, mm_node_handler_t handler,
            node = (FAR struct mm_allocnode_s *)((FAR char *)node + nodesize))
         {
           nodesize = MM_SIZEOF_NODE(node);
+          DEBUGASSERT(nodesize >= MM_SIZEOF_ALLOCNODE);
           minfo("region=%d node=%p size=%zu preceding=%u (%c %c)\n",
                 region, node, nodesize, (unsigned int)node->preceding,
                 MM_PREVNODE_IS_FREE(node) ? 'F' : 'A',

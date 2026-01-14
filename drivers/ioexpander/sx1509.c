@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/ioexpander/sx1509.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -875,7 +877,7 @@ static int sx1509_interrupt(int irq, FAR void *context, FAR void *arg)
  * Name: sx1509_osc_config
  *
  * Description:
- *   Configure oscilator required for LED driver and keypad engine.
+ *   Configure oscillator required for LED driver and keypad engine.
  *
  ****************************************************************************/
 
@@ -891,7 +893,7 @@ static int sx1509_osc_config(FAR struct sx1509_dev_s *priv)
       return ret;
     }
 
-  /* Configure oscilator source */
+  /* Configure oscillator source */
 
   buf[0] = SX1509_REGCLOCK;
   buf[1] = SX1509_OSC_INT;
@@ -1330,7 +1332,7 @@ int sx1509_leds_initialize(FAR struct ioexpander_dev_s *ioe,
   FAR struct sx1509_dev_s *priv = (FAR struct sx1509_dev_s *)ioe;
   int ret;
 
-  /* Configure oscilator */
+  /* Configure oscillator */
 
   ret = sx1509_osc_config(priv);
   if (ret < 0)

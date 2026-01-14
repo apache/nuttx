@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/inet/inet.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,28 +33,6 @@
 
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Configuration */
-
-#undef HAVE_INET_SOCKETS
-#undef HAVE_PFINET_SOCKETS
-#undef HAVE_PFINET6_SOCKETS
-
-#if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
-#  define HAVE_INET_SOCKETS
-
-#  if defined(CONFIG_NET_IPv4)
-#    define HAVE_PFINET_SOCKETS
-#  endif
-
-#  if defined(CONFIG_NET_IPv6)
-#    define HAVE_PFINET6_SOCKETS
-#  endif
-#endif
 
 /****************************************************************************
  * Public Data

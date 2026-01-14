@@ -1,6 +1,8 @@
 //***************************************************************************
 // libs/libxx/libcxxmini/libxx_cxa_guard.cxx
 //
+// SPDX-License-Identifier: Apache-2.0
+//
 // Licensed to the Apache Software Foundation (ASF) under one or more
 // contributor license agreements.  See the NOTICE file distributed with
 // this work for additional information regarding copyright ownership.  The
@@ -66,7 +68,7 @@ extern "C"
 #ifdef __ARM_EABI__
     return !(*g & 1);
 #else
-    return !*(char *)g;
+    return !*(FAR char *)g;
 #endif
   }
 
@@ -79,7 +81,7 @@ extern "C"
 #ifdef __ARM_EABI__
     *g = 1;
 #else
-    *(char *)g = 1;
+    *(FAR char *)g = 1;
 #endif
   }
 

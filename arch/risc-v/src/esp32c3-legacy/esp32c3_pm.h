@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/esp32c3_pm.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -193,7 +195,7 @@ void esp32c3_sleep_enable_wifi_wakeup(void);
  * Name:  esp32c3_should_skip_light_sleep
  *
  * Description:
- *   Indicates if light sleep shoule be skipped.
+ *   Indicates if light sleep should be skipped.
  *
  * Input Parameters:
  *   None

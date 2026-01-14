@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/igmp/igmp_msg.c
  *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  *   Copyright (C) 2010-2011, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -75,8 +77,14 @@ int igmp_schedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
 {
   FAR struct net_driver_s *dev;
 
-  DEBUGASSERT(group != NULL && !IS_SCHEDMSG(group->flags));
+  DEBUGASSERT(group != NULL);
   DEBUGASSERT(group->ifindex > 0);
+
+  if (IS_SCHEDMSG(group->flags))
+    {
+      nerr("ERROR: The group %u is busy\n", group->ifindex);
+      return -EBUSY;
+    }
 
   /* Get the device instance associated with the interface index of the
    * group
@@ -97,7 +105,9 @@ int igmp_schedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
 
   /* Notify the device that we have a packet to send */
 
-  netdev_txnotify_dev(dev);
+  netdev_lock(dev);
+  netdev_txnotify_dev(dev, IGMP_POLL);
+  netdev_unlock(dev);
   return OK;
 }
 
@@ -135,7 +145,7 @@ int igmp_waitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
     {
       /* Wait for the semaphore to be posted */
 
-      ret = net_sem_wait_uninterruptible(&group->sem);
+      ret = nxsem_wait_uninterruptible(&group->sem);
       if (ret < 0)
         {
           break;

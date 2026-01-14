@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32wl5/hardware/stm32wl5_exti.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -106,7 +108,7 @@
 #define EXTI2_HSE32CSS     (1 << 12)  /* EXTI line 43: RCC HSE32 CSS interrupt */
 #define EXTI2_RADIOIRQ     (1 << 13)  /* EXTI line 44: Radio interrupt */
 #define EXTI2_RADIOBSY     (1 << 14)  /* EXTI line 45: Radio busy wakeup */
-#define EXTI2_CDBGPWRUPREQ (1 << 15)  /* EXTI line 46: Debug power-up request wakup */
+#define EXTI2_CDBGPWRUPREQ (1 << 15)  /* EXTI line 46: Debug power-up request wakeup */
 
 /* Rising Trigger selection register */
 

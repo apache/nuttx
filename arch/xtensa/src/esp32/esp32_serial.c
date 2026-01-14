@@ -195,7 +195,7 @@
 #endif
 
 /* Semaphores to control access to each DMA.
- * Theses semaphores ensure a new transfer is
+ * These semaphores ensure a new transfer is
  * triggered only after the previous one is completed,
  * and it also avoids competing issues with multiple UART
  * instances requesting to the same DMA.
@@ -1056,7 +1056,7 @@ static int esp32_attach(struct uart_dev_s *dev)
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
   priv->cpuint = esp32_setup_irq(priv->cpu, priv->config->periph,
                                  1, ESP32_CPUINT_LEVEL);
   if (priv->cpuint < 0)
@@ -1186,7 +1186,7 @@ static void dma_attach(uint8_t dma_chan)
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-  cpu = up_cpu_index();
+  cpu = this_cpu();
   dma_cpuint = esp32_setup_irq(cpu, periph, 1, ESP32_CPUINT_LEVEL);
   if (dma_cpuint < 0)
     {
@@ -1210,7 +1210,7 @@ static void dma_attach(uint8_t dma_chan)
 }
 
 /****************************************************************************
- * Name: esp32_interrupt
+ * Name: esp32_interrupt_dma
  *
  * Description:
  *   DMA interrupt.
@@ -1936,7 +1936,7 @@ static void esp32_config_pins(struct esp32_dev_s *priv)
  *   line and to stop receiving data. This is very similar to the concept
  *   behind upper watermark level. The hardware threshold is used here
  *   to control the RTS line. When setting the threshold to zero, RTS will
- *   imediately be asserted. If nbuffered = 0 or the lower watermark is
+ *   immediately be asserted. If nbuffered = 0 or the lower watermark is
  *   crossed and the serial driver decides to disable RX flow control, the
  *   threshold will be changed to UART_RX_FLOW_THRHD_VALUE, which is almost
  *   half the HW RX FIFO capacity. It keeps some space to keep the data
@@ -1983,7 +1983,7 @@ static bool esp32_rxflowcontrol(struct uart_dev_s *dev,
         {
           /* If the RX buffer is not zero and watermarks are not enabled,
            * then this function is called to announce RX buffer is full.
-           * The first thing it should do is to imediately assert RTS.
+           * The first thing it should do is to immediately assert RTS.
            */
 
           modifyreg32(UART_CONF1_REG(priv->config->id), UART_RX_FLOW_THRHD_M,
@@ -2034,7 +2034,7 @@ void esp32_lowsetup(void)
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before xtensa_serialinit.
  *
  ****************************************************************************/
@@ -2114,29 +2114,17 @@ void xtensa_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   uint32_t intena;
 
   esp32_disableallints(CONSOLE_DEV.priv, &intena);
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      while (!esp32_txready(&CONSOLE_DEV));
-      esp32_send(&CONSOLE_DEV, '\r');
-    }
-
   while (!esp32_txready(&CONSOLE_DEV));
   esp32_send(&CONSOLE_DEV, ch);
 
   esp32_restoreuartint(CONSOLE_DEV.priv, intena);
 #endif
-
-  return ch;
 }
 #endif /* USE_SERIALDRIVER */

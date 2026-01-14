@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/bh1750fvi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,14 +40,6 @@
 #include <nuttx/random.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_BH1750FVI)
-
-/****************************************************************************
- * Pre-process Definitions
- ****************************************************************************/
-
-#ifndef CONFIG_BH1750FVI_I2C_FREQUENCY
-#  define CONFIG_BH1750FVI_I2C_FREQUENCY 400000
-#endif
 
 /****************************************************************************
  * Private Types

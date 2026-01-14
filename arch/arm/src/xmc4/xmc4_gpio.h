@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/xmc4/xmc4_gpio.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -123,7 +125,7 @@
  *   .... .... ..CC .....  .... .... .... ....
  */
 
-#define GPIO_PINCTRL_SHIFT         (20)       /* Bits 20-21: Pad driver strength */
+#define GPIO_PINCTRL_SHIFT         (20)       /* Bits 20-21: Pin Control */
 #define GPIO_PINCTRL_MASK          (3                      << GPIO_PINCTRL_SHIFT)
 
 /* See chip/xmc4_ports.h for the PDR definitions */

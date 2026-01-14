@@ -1,8 +1,8 @@
 /****************************************************************************
  * include/crypto/hmac.h
- * $OpenBSD: hmac.h,v 1.3 2012/12/05 23:20:15 deraadt Exp $
  *
- * Copyright (c) 2008 Damien Bergamini <damien.bergamini@free.fr>
+ * SPDX-License-Identifier: ISC
+ * SPDX-FileCopyrightText: 2008 Damien Bergamini <damien.bergamini@free.fr>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -26,6 +26,9 @@
  ****************************************************************************/
 
 #include <sys/types.h>
+#include <crypto/md5.h>
+#include <crypto/sha1.h>
+#include <crypto/sha2.h>
 
 typedef struct _HMAC_MD5_CTX
 {

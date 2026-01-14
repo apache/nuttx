@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/cxd56xx/scu.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -443,7 +445,7 @@ int seq_setinstruction(struct seq_s *seq, const uint16_t *inst,
  * param [in] seq      : Sequencer instance
  * param [in] sample   : Bytes per sample
  * param [in] offset   : Start offset of sampling data
- * param [in] elemsize : Bytes of 1 element in sample
+ * param [in] elemsize : Number of vector elements - 1 (e.g. 3 axis = 2)
  * param [in] swapbyte : Enable/Disable byte swapping
  *
  * return  OK(0) is success. negative value is failure.

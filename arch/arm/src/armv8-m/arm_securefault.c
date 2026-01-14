@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv8-m/arm_securefault.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -66,12 +68,13 @@ int arm_securefault(int irq, void *context, void *arg)
 
   sfalert("PANIC!!! Secure Fault:\n");
   sfalert("\tIRQ: %d regs: %p\n", irq, context);
-  sfalert("\tBASEPRI: %08x PRIMASK: %08x IPSR: %08"
+  sfalert("\tBASEPRI: %08" PRIx8 " PRIMASK: %08" PRIx8 " IPSR: %08"
           PRIx32 " CONTROL: %08" PRIx32 "\n",
           getbasepri(), getprimask(), getipsr(), getcontrol());
-  sfalert("\tCFSR: %08x HFSR: %08x DFSR: %08x\n", getreg32(NVIC_CFAULTS),
-          getreg32(NVIC_HFAULTS), getreg32(NVIC_DFAULTS));
-  sfalert("\tBFAR: %08x AFSR: %08x SFAR: %08x\n",
+  sfalert("\tCFSR: %08" PRIx32 " HFSR: %08" PRIx32 " DFSR: %08" PRIx32 "\n",
+          getreg32(NVIC_CFAULTS), getreg32(NVIC_HFAULTS),
+          getreg32(NVIC_DFAULTS));
+  sfalert("\tBFAR: %08" PRIx32 " AFSR: %08" PRIx32 " SFAR: %08" PRIx32 "\n",
           getreg32(NVIC_BFAULT_ADDR), getreg32(NVIC_AFAULTS),
           getreg32(SAU_SFAR));
 
@@ -111,16 +114,15 @@ int arm_securefault(int irq, void *context, void *arg)
       sfalert("\tLazy state error\n");
     }
 
-  /* clear SFSR sticky bits */
-
-  putreg32(0xff, SAU_SFSR);
-
 #ifdef CONFIG_DEBUG_SECUREFAULT
   if (arm_gen_nonsecurefault(irq, context))
     {
+      putreg32(0xff, SAU_SFSR);
       return OK;
     }
 #endif
+
+  putreg32(0xff, SAU_SFSR);
 
   up_irq_save();
   PANIC_WITH_REGS("panic", context);

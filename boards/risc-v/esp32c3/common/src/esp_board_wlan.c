@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/esp32c3/common/src/esp_board_wlan.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,7 +35,7 @@
 
 #include <nuttx/wireless/wireless.h>
 
-#include "espressif/esp_wlan.h"
+#include "espressif/esp_wlan_netdev.h"
 
 /****************************************************************************
  * Public Functions
@@ -78,4 +80,3 @@ int board_wlan_init(void)
 
   return ret;
 }
-

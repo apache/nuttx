@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/misoc/src/lm32/lm32_exit.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -56,12 +58,6 @@ void up_exit(int status)
 {
   struct tcb_s *tcb = this_task();
 
-  /* Make sure that we are in a critical section with local interrupts.
-   * The IRQ state will be restored when the next task is started.
-   */
-
-  enter_critical_section();
-
   /* Destroy the task at the head of the ready to run list. */
 
   nxtask_exit();
@@ -74,7 +70,7 @@ void up_exit(int status)
 
   /* Adjusts time slice for RR & SPORADIC cases */
 
-  nxsched_resume_scheduler(tcb);
+  g_running_tasks[this_cpu()] = NULL;
 
   /* Then switch contexts */
 

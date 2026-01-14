@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/shm/shm.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,8 +36,6 @@
 #include <nuttx/addrenv.h>
 #include <nuttx/mutex.h>
 
-#ifdef CONFIG_MM_SHM
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -44,7 +44,7 @@
 
 #define SRFLAG_AVAILABLE 0        /* Available if no flag bits set */
 #define SRFLAG_INUSE     (1 << 0) /* Bit 0: Region is in use */
-#define SRFLAG_UNLINKED  (1 << 1) /* Bit 1: Region perists while references */
+#define SRFLAG_UNLINKED  (1 << 1) /* Bit 1: Region persists while references */
 
 #ifndef CONFIG_ARCH_ADDRENV
 #  error CONFIG_ARCH_ADDRENV must be selected with CONFIG_MM_SHM
@@ -141,5 +141,4 @@ extern struct shm_info_s g_shminfo;
 
 void shm_destroy(int shmid);
 
-#endif /* CONFIG_MM_SHM */
 #endif /* __MM_SHM_SHM_H */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/usbmisc/fusb303.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -774,7 +776,7 @@ static int fusb303_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   {
   case USBCIOC_READ_DEVID:
     {
-      ret = fusb303_read_device_id(priv, (uint8_t *)arg, NULL);
+      ret = fusb303_read_device_id(priv, (FAR uint8_t *)arg, NULL);
     }
     break;
 
@@ -798,13 +800,13 @@ static int fusb303_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   case USBCIOC_READ_STATUS:
     {
-      ret = fusb303_read_status(priv, (uint8_t *)arg);
+      ret = fusb303_read_status(priv, (FAR uint8_t *)arg);
     }
     break;
 
   case USBCIOC_READ_DEVTYPE:
     {
-      ret = fusb303_read_devtype(priv, (uint8_t *)arg);
+      ret = fusb303_read_devtype(priv, (FAR uint8_t *)arg);
     }
     break;
 
@@ -902,7 +904,7 @@ static int fusb303_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */

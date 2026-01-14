@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/esp32c3_bignum.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1032,7 +1034,7 @@ static void mpi_bigendian_to_host(uint32_t * const p, size_t limbs)
   uint32_t *cur_limb_right;
   if (limbs == 0)
     {
-      return ;
+      return;
     }
 
   /* Traverse limbs and
@@ -1255,7 +1257,7 @@ void esp32c3_mpi_free(struct esp32c3_mpi_s *X)
 {
   if (X == NULL)
     {
-      return ;
+      return;
     }
 
   if (X->p != NULL)

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/timers/rtc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -131,7 +133,9 @@ static const struct file_operations g_rtc_fops =
   rtc_ioctl,     /* ioctl */
   NULL,          /* mmap */
   NULL,          /* truncate */
-  NULL           /* poll */
+  NULL,          /* poll */
+  NULL,          /* readv */
+  NULL           /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , rtc_unlink   /* unlink */
 #endif
@@ -185,15 +189,15 @@ static void rtc_alarm_callback(FAR void *priv, int alarmid)
 
   if (alarminfo->active)
     {
+      /* The alarm is no longer active */
+
+      alarminfo->active = false;
+
       /* Yes.. signal the alarm expiration */
 
       nxsig_notification(alarminfo->pid, &alarminfo->event,
                          SI_QUEUE, &alarminfo->work);
     }
-
-  /* The alarm is no longer active */
-
-  alarminfo->active = false;
 }
 #endif
 

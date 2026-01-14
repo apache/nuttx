@@ -2,6 +2,8 @@
 ST STM32VLDiscovery
 ===================
 
+.. tags:: chip:stm32, chip:stm32f1, chip:stm32f100
+
 This page discusses issues unique to NuttX configurations for the STMicro
 STM32VLDiscovery (Value Line Discovery) board.
 

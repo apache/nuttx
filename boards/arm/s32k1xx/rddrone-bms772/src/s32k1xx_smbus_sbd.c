@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/s32k1xx/rddrone-bms772/src/s32k1xx_smbus_sbd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -51,7 +53,7 @@
 #define HIBYTE(n) ((uint8_t)(((n) & 0xff00) >> 8))
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* Private data of the SMBus Smart Battery Data slave device */
@@ -384,10 +386,12 @@ static ssize_t smbus_sbd_write(struct file *filep, const char *buffer,
  *
  ****************************************************************************/
 
-static int smbus_sbd_callback(void *arg, size_t rx_len)
+static int smbus_sbd_callback(void *arg, i2c_slave_complete_t state,
+                              size_t rx_len)
 {
   struct smbus_sbd_dev_s *dev;
   int buffer_length;
+  int ret = OK;
   int i;
 
   /* Retrieve the pointer to the SMBus SBD slave device struct */
@@ -719,15 +723,22 @@ static int smbus_sbd_callback(void *arg, size_t rx_len)
     }
 
   /* Install the (re)filled write buffer.  Technically this buffer needs to
-   * be constant, but we want to be able to re-use the same buffer for the
+   * be constant, but we want to be able to reuse the same buffer for the
    * next request, so we just cast the buffer to const.  This should not
    * cause any problems, because the write buffer is only changed when the
    * I2C slave driver invokes this callback, which only happens when a new
    * request has been received.
    */
 
-  return I2CS_WRITE(dev->i2c_slave_dev, (const uint8_t *)dev->write_buffer,
-                    buffer_length);
+  ret = I2CS_WRITE(dev->i2c_slave_dev, (const uint8_t *)dev->write_buffer,
+                   buffer_length);
+  if (ret >= 0)
+    {
+      dev->i2c_slave_dev->callback(dev->i2c_slave_dev->callback_arg,
+                                   I2CS_TX_COMPLETE, buffer_length);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -761,7 +772,7 @@ int smbus_sbd_initialize(int minor, struct i2c_slave_s *i2c_slave_dev)
 {
   irqstate_t flags;
   struct smbus_sbd_dev_s *smbus_sbd_dev;
-  char dev_name[24];
+  char devname[24];
   int ret;
 
   /* Make sure the initialization is not interrupted */
@@ -780,13 +791,13 @@ int smbus_sbd_initialize(int minor, struct i2c_slave_s *i2c_slave_dev)
     {
       /* Create the device name string */
 
-      snprintf(dev_name, 24, "/dev/smbus-sbd%d", minor);
+      snprintf(devname, sizeof(devname), "/dev/smbus-sbd%d", minor);
 
       /* Register the driver.  The associated private data is a reference to
        * the SMBus Smart Battery Data slave device structure.
        */
 
-      ret = register_driver(dev_name, &g_smbus_sbd_fops, 0, smbus_sbd_dev);
+      ret = register_driver(devname, &g_smbus_sbd_fops, 0, smbus_sbd_dev);
       if (ret < 0)
         {
           ferr("register_driver failed: %d\n", -ret);

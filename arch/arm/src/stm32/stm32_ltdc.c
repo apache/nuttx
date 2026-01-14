@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_ltdc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -204,7 +206,7 @@
 #  error Undefined or unrecognized base resolution
 #endif
 
-/* LTDC only supports 8 bit per pixel overal */
+/* LTDC only supports 8 bit per pixel overall */
 
 #define STM32_LTDC_LX_BYPP(n)       ((n) / 8)
 
@@ -662,7 +664,7 @@ struct stm32_interrupt_s
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Overal LTDC helper */
+/* Overall LTDC helper */
 
 static void stm32_ltdc_enable(bool enable);
 static void stm32_ltdc_gpioconfig(void);

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/power/pm/stability_governor.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,7 +36,7 @@
 #include "pm.h"
 
 /****************************************************************************
- * Private Type Declarations
+ * Private Types
  ****************************************************************************/
 
 struct pm_stability_governor_domain_s

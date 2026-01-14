@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/gd32f4/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -72,7 +74,7 @@
 #if defined(CONFIG_GD32F4_GD32F4XX)
 #  include <arch/gd32f4/gd32f4xx_irq.h>
 #else
-#  error "Uknown GD32 chip"
+#  error "Unknown GD32 chip"
 #endif
 
 /****************************************************************************

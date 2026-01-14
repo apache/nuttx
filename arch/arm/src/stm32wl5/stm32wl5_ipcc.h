@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32wl5/stm32wl5_ipcc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -128,7 +130,7 @@
  *  +----------+
  */
 
-/* IPCC needs continous memory of known address that is shared
+/* IPCC needs continuous memory of known address that is shared
  * between CPUs. Because of that we reserve memory at beginning
  * of SRAM2. SRAM2 region will be right after IPCC reserved memory
  */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_pthread_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,6 +32,8 @@
 #include <arch/syscall.h>
 
 #include "riscv_internal.h"
+
+#include "sched/sched.h"
 
 #if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__) && \
     !defined(CONFIG_DISABLE_PTHREAD)
@@ -66,12 +70,26 @@
 void up_pthread_start(pthread_trampoline_t startup,
                       pthread_startroutine_t entrypt, pthread_addr_t arg)
 {
-  /* Let sys_call3() do all of the work */
+  struct tcb_s *rtcb = this_task();
+  uintptr_t sp;
 
-  sys_call3(SYS_pthread_start, (uintptr_t)startup, (uintptr_t)entrypt,
-            (uintptr_t)arg);
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  sp = (uintreg_t)rtcb->xcp.ustkptr;
+#else
+  sp = (uintptr_t)rtcb->stack_base_ptr + rtcb->adj_stack_size;
+#endif
 
-  PANIC();
+  /* Set up to return to the user-space _start function in
+   * unprivileged mode.  We need:
+   *
+   *   A0    = entrypt
+   *   A1    = arg
+   *   EPC   = startup
+   *   M/SPP = user mode
+   */
+
+  riscv_jump_to_user((uintptr_t)startup, (uintreg_t)entrypt, (uintreg_t)arg,
+                     0, sp, rtcb->xcp.initregs);
 }
 
 #endif /* !CONFIG_BUILD_FLAT && __KERNEL__ && !CONFIG_DISABLE_PTHREAD */

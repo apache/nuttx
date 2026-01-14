@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tlsr82/hardware/tlsr82_adc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -116,7 +118,7 @@
 #define ADC_MODE_INPUT_RSVD                (0x0 << ADC_MODE_INPUT_SHIFT)
 #define ADC_MODE_INPUT_DIFF                (0x1 << ADC_MODE_INPUT_SHIFT)
 
-/* ADC Sample 0 defnition
+/* ADC Sample 0 definition
  * - Sample cycle
  */
 
@@ -134,7 +136,7 @@
  * - Sample length
  */
 
-/* ADC Channel enabel definition */
+/* ADC Channel enable definition */
 
 #define ADC_CTRL0_CHANEN_SHIFT             2
 #define ADC_CTRL0_CHANEN_MASK              (0x1 << ADC_CTRL0_CHANEN_SHIFT)

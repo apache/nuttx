@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -107,6 +109,7 @@ void __start(void) noinstrument_function;
  *
  ****************************************************************************/
 
+osentry_function
 void __start(void)
 {
   const uint32_t *src;

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_farapi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -185,7 +187,7 @@ void farapi_main(int id, void *arg, struct modulelist_s *mlist)
   int ret;
 
 #ifdef CONFIG_SMP
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
   static cpu_set_t cpuset0;
 
   if (0 != cpu)
@@ -203,7 +205,7 @@ void farapi_main(int id, void *arg, struct modulelist_s *mlist)
 
       /* NOTE: a workaround to finish rescheduling */
 
-      nxsig_usleep(10 * 1000);
+      nxsched_usleep(10 * 1000);
     }
 #endif
 
@@ -271,7 +273,7 @@ err:
 
       /* NOTE: a workaround to finish rescheduling */
 
-      nxsig_usleep(10 * 1000);
+      nxsched_usleep(10 * 1000);
     }
 #endif
 }

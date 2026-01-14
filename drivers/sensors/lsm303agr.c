@@ -1,17 +1,13 @@
 /****************************************************************************
  * drivers/sensors/lsm303agr.c
  *
- *   Copyright (C) 2018 Inc. All rights reserved.
- *   Author: Ben vd Veen <disruptivesolutionsnl@gmail.com>
- *   Alias: DisruptiveNL
- *
- * Based on:
- *
- *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
- *   Author: Paul Alexander Patience <paul-a.patience@polymtl.ca>
- *
- *   Copyright (C) 2016, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2018 Inc. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Omni Hoverboards Inc. All rights reserved.
+ * SPDX-FileCopyrightText: 2016, 2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileContributor: Ben vd Veen <disruptivesolutionsnl@gmail.com>
+ * SPDX-FileContributor: Paul Alexander Patience <paul-a.patience@polymtl.ca>
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -61,14 +57,6 @@
 #include <nuttx/sensors/lsm303agr.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_LSM303AGR)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef CONFIG_LSM303AGR_I2C_FREQUENCY
-#  define CONFIG_LSM303AGR_I2C_FREQUENCY 400000
-#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -522,7 +510,7 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv,
       g_magnetofactor = 1;
     }
 
-  nxsig_usleep(100000);         /* 100ms */
+  nxsched_usleep(100000);         /* 100ms */
 
   /* Read the output registers after checking XLDA bit 5 times */
 
@@ -544,7 +532,7 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv,
         }
     }
 
-  nxsig_usleep(100000);         /* 100ms */
+  nxsched_usleep(100000);         /* 100ms */
 
   /* Read OUT registers Gyro is starting at 22h and Accelero at 28h */
 
@@ -630,7 +618,7 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv,
       lsm303agr_writereg8(priv, LSM303AGR_CFG_REG_C_M, 0x12);
     }
 
-  nxsig_usleep(100000);         /* 100ms */
+  nxsched_usleep(100000);         /* 100ms */
 
   checkbit = false;
   while (checkbit)
@@ -647,7 +635,7 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv,
         }
     }
 
-  nxsig_usleep(100000);    /* 100ms */
+  nxsched_usleep(100000);    /* 100ms */
 
   /* Now do all the ST values */
 
@@ -685,7 +673,7 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv,
           checkbit = lsm303agr_isbitset(value, LSM303AGR_STATUS_REG_M_ZYXDA);
         }
 
-      nxsig_usleep(100000);    /* 100ms */
+      nxsched_usleep(100000);    /* 100ms */
 
       lsm303agr_readreg8(priv,
                          LSM303AGR_OUT_X_L_A + registershift,
@@ -824,7 +812,7 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv,
       sninfo("\n");
     }
 
-  nxsig_sleep(2);
+  nxsched_sleep(2);
 
   /* Disable test */
 

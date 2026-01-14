@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/rtl8720c/amebaz_hci_board.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -169,9 +171,9 @@ static uint8_t rtl_vendor_init_config[] =
 
   0x94, 0x01, 0x06, 0x0a, 0x08, 0x00, 0x00, 0x2e, 0x07,   /* phy flatk */
 
-  0x9f, 0x01, 0x05, 0x2a, 0x2a, 0x2a, 0x2a, 0x1c,         /* unknow 1 */
+  0x9f, 0x01, 0x05, 0x2a, 0x2a, 0x2a, 0x2a, 0x1c,         /* unknown 1 */
 
-  0xa4, 0x01, 0x04, 0xfe, 0xfe, 0xfe, 0xfe,               /* unknow 2 */
+  0xa4, 0x01, 0x04, 0xfe, 0xfe, 0xfe, 0xfe,               /* unknown 2 */
 };
 
 /****************************************************************************
@@ -416,7 +418,7 @@ int hci_find_fw_patch(uint8_t chipid)
 
   phal_spic_adaptor_t flash;
 
-  /* FIXME: Distiguish Normal and MP Ptach (rltk_bt_get_patch_code) */
+  /* FIXME: Distinguish Normal and MP Ptach (rltk_bt_get_patch_code) */
 
   const uint8_t *fw_patch        = rtl_vendor_command;
   uint32_t fw_patch_len    = rtl_vendor_command_size;
@@ -679,7 +681,7 @@ static int hci_parse_config(void)
 
   if (payload_len != sizeof(rtl_vendor_init_config) - BT_CONFIG_HEADER_LEN)
     {
-      /* Fix the len, just avoid the length is not corect */
+      /* Fix the len, just avoid the length is not correct */
 
       LE_UINT16_TO_STREAM(p_len,
                     sizeof(rtl_vendor_init_config) - BT_CONFIG_HEADER_LEN);

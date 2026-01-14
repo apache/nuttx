@@ -1,6 +1,8 @@
 # ##############################################################################
 # sched/clock/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -20,13 +22,23 @@
 
 set(SRCS
     clock.c
-    clock_perf.c
     clock_initialize.c
+    clock_getres.c
     clock_settime.c
     clock_gettime.c
-    clock_abstime2ticks.c
+    clock_realtime2absticks.c
     clock_systime_ticks.c
-    clock_systime_timespec.c)
+    clock_systime_timespec.c
+    clock_sched_ticks.c
+    clock_perf.c)
+
+# Unless a driver with a more accurate version of up_*delay is enabled, always
+# include the base delay definition (busy-loop) as a minimum-viable product. We
+# don't want the weak references to conflict.
+
+if(NOT CONFIG_TIMER_ARCH AND NOT CONFIG_ALARM_ARCH)
+  list(APPEND SRCS delay.c)
+endif()
 
 if(CONFIG_CLOCK_TIMEKEEPING)
   list(APPEND SRCS clock_timekeeping.c)

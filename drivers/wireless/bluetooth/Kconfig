@@ -5,6 +5,12 @@
 
 if DRIVERS_BLUETOOTH
 
+config BLUETOOTH_DEVICE_ID
+	int "Bluetooth Device ID, eg: /dev/ttyBT0"
+	default 0
+	---help---
+		Bluetooth Device ID.
+
 config BLUETOOTH_UART
 	bool "Bluetooth UART driver"
 	default n
@@ -18,7 +24,7 @@ config BLUETOOTH_UART_GENERIC
 	default n
 
 config BLUETOOTH_UART_SHIM
-	bool
+	bool "Bluetooth UART SHIM driver"
 	default n
 
 if BLUETOOTH_UART
@@ -50,6 +56,12 @@ config BLUETOOTH_UART_DUMP
 	depends on DEBUG_WIRELESS_INFO
 	---help---
 		Dump the full content of all outgoing and incoming messages.
+
+config BLUETOOTH_UART_RXBUFSIZE
+	int "Bluetooth UART RX Buffer size"
+	default 2048
+	---help---
+		Bluetooth UART RX Buffer size.  Default: 2048
 
 endif # BLUETOOTH_UART
 
@@ -84,5 +96,25 @@ config BLUETOOTH_RPMSG
 	bool "RPMSG Bluetooth HCI client support"
 	depends on EXPERIMENTAL && RPTUN
 	default n
+
+config BLUETOOTH_SLIP
+	bool "Bluetooth SLIP support"
+	default n
+
+if BLUETOOTH_SLIP
+
+config BLUETOOTH_SLIP_TXBUFSIZE
+	int "BT H5 UART TX Buffer Size"
+	default 2048
+	---help---
+		H5 UART TX Buffer Size.  Default: 2048
+
+config BLUETOOTH_SLIP_TXWIN
+	int "BT H5 Uart TX Window Size"
+	default 4
+	---help---
+		H5 UART TX Window Size.  Default: 4
+
+endif # BLUETOOTH_SLIP
 
 endif # DRIVERS_BLUETOOTH

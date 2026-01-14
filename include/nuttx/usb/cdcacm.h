@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/usb/cdcacm.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -57,6 +59,9 @@
  * CONFIG_CDCACM_EPBULKOUT_HSSIZE
  *   Max package size for the bulk OUT endpoint if high speed mode.
  *   Default 512.
+  * CONFIG_CDCACM_EPBULKOUT_SSSIZE
+ *   Max package size for the bulk OUT endpoint if super speed mode.
+ *   Default 1024.
  * CONFIG_CDCACM_EPBULKIN
  *   The logical 7-bit address of a hardware endpoint that supports
  *   bulk IN operation.  Default: 2
@@ -66,6 +71,9 @@
  * CONFIG_CDCACM_EPBULKIN_HSSIZE
  *   Max package size for the bulk IN endpoint if high speed mode.
  *   Default 512.
+ * CONFIG_CDCACM_EPBULKIN_SSSIZE
+ *   Max package size for the bulk IN endpoint if super speed mode.
+ *   Default 1024.
  * CONFIG_CDCACM_NWRREQS and CONFIG_CDCACM_NRDREQS
  *   The number of write/read requests that can be in flight.
  *   CONFIG_CDCACM_NWRREQS includes write requests used for both the
@@ -79,8 +87,6 @@
  *   The product ID code/string. Default 0xa4a7 and "CDC/ACM Serial"
  *   0xa4a7 was selected for compatibility with the Linux CDC ACM
  *   default PID.
- * CONFIG_CDCACM_RXBUFSIZE and CONFIG_CDCACM_TXBUFSIZE
- *   Size of the serial receive/transmit buffers. Default 256.
  */
 
 /* Information needed in usbdev_devinfo_s */
@@ -146,6 +152,10 @@
 #  define CONFIG_CDCACM_EPBULKIN_HSSIZE 512
 #endif
 
+#ifndef CONFIG_CDCACM_EPBULKIN_SSSIZE
+#  define CONFIG_CDCACM_EPBULKIN_SSSIZE 1024
+#endif
+
 #ifndef CONFIG_CDCACM_BULKIN_REQLEN
 #  ifdef CONFIG_USBDEV_DUALSPEED
 #    define CONFIG_CDCACM_BULKIN_REQLEN (3 * CONFIG_CDCACM_EPBULKIN_FSSIZE / 2)
@@ -176,6 +186,10 @@
 #  define CONFIG_CDCACM_EPBULKOUT_HSSIZE 512
 #endif
 
+#ifndef CONFIG_CDCACM_EPBULKOUT_SSSIZE
+#  define CONFIG_CDCACM_EPBULKOUT_SSSIZE 1024
+#endif
+
 /* Number of requests in the write queue.  This includes write requests used
  * for both the interrupt and bulk IN endpoints.
  */
@@ -188,16 +202,6 @@
 
 #ifndef CONFIG_CDCACM_NRDREQS
 #  define CONFIG_CDCACM_NRDREQS 4
-#endif
-
-/* TX/RX buffer sizes */
-
-#ifndef CONFIG_CDCACM_RXBUFSIZE
-#  define CONFIG_CDCACM_RXBUFSIZE 256
-#endif
-
-#ifndef CONFIG_CDCACM_TXBUFSIZE
-#  define CONFIG_CDCACM_TXBUFSIZE 256
 #endif
 
 /* Vendor and product IDs and strings.  The default is the Linux Netchip
@@ -388,6 +392,25 @@ int cdcacm_initialize(int minor, FAR void **handle);
 void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev);
 
 /****************************************************************************
+ * Name: cdcacm_uninitialize_instance
+ *
+ * Description:
+ *   Function to uninitialize specific cdcacm instance
+ *
+ * Input Parameters:
+ *   minor     - CDCACM node minor number
+ *   classdev  - The class object returned by cdcacm_classobject().
+ *               if NULL, the driver is searched from the filesystem.
+ *
+ * Returned Value:
+ *   OK when successful, -ENODEV if cdcacm is not initialized
+ *
+ ****************************************************************************/
+
+int cdcacm_uninitialize_instance(int minor,
+                                 FAR struct usbdevclass_driver_s *classdev);
+
+/****************************************************************************
  * Name: cdcacm_get_composite_devdesc
  *
  * Description:
@@ -405,6 +428,40 @@ void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev);
 #if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_CDCACM_COMPOSITE)
 struct composite_devdesc_s;
 void cdcacm_get_composite_devdesc(struct composite_devdesc_s *dev);
+#endif
+
+/****************************************************************************
+ * Name: cdcacm_write
+ *
+ * Description:
+ *   This provides a cdcacm write method for syslog devices that support
+ *   multiple byte writes.
+ *
+ * Input Parameters:
+ *   buffer - The buffer containing the data to be output
+ *   buflen - The number of bytes in the buffer
+ *
+ * Returned Value:
+ *   On success, the number of characters written is returned.  A negated
+ *   errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSLOG_CDCACM
+ssize_t cdcacm_write(FAR const char *buffer, size_t buflen);
+#endif
+
+/****************************************************************************
+ * Name: cdcacm_disable_syslog
+ *
+ * Description:
+ *   Disable CDCACM syslog channel by clearing the globle pointer.
+ *   This function is used in specific situation, such as must disable
+ *   cdcacm log printing when usb re-enumeration.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_SYSLOG_CDCACM
+void cdcacm_disable_syslog(void);
 #endif
 
 #undef EXTERN

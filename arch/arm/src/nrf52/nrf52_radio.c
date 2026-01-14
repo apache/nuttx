@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nrf52/nrf52_radio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -336,7 +338,7 @@ static int nrf52_radio_rssi_get(struct nrf52_radio_dev_s *dev,
 {
   uint32_t regval = 0;
 
-  /* Start the RSSI meassurement */
+  /* Start the RSSI measurement */
 
   nrf52_radio_putreg(dev, NRF52_RADIO_TASKS_RSSISTART_OFFSET, 1);
 
@@ -923,7 +925,7 @@ static void nrf52_radio_cca_cfg(struct nrf52_radio_dev_s *dev,
   regval |= ((cca->corrthres << RADIO_CCACTRL_CCACORRTHRES_SHIFT)
              & RADIO_CCACTRL_CCACORRTHRES_MASK);
 
-  /* Limit for occurances above CCACORRTHRES */
+  /* Limit for occurrences above CCACORRTHRES */
 
   regval |= ((cca->corrcnt << RADIO_CCACTRL_CCACORRCNT_SHIFT)
              & RADIO_CCACTRL_CCACORRCNT_MASK);

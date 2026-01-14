@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/dhtxx.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -69,7 +71,7 @@
 #define DHT22_MAX_TEMP                    80.0F
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Type
  ****************************************************************************/
 
 struct dhtxx_dev_s
@@ -417,7 +419,7 @@ static int dhtxx_open(FAR struct file *filep)
 
   dht_standby_mode(priv);
 
-  nxsig_sleep(DHTXX_SAMPLING_PERIOD_S);
+  nxsched_sleep(DHTXX_SAMPLING_PERIOD_S);
 
   /* Sensor ready. */
 
@@ -501,7 +503,7 @@ out:
    * consecutive readings.
    */
 
-  nxsig_sleep(DHTXX_SAMPLING_PERIOD_S);
+  nxsched_sleep(DHTXX_SAMPLING_PERIOD_S);
 
   /* Sensor ready for new reading */
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libdsp/lib_motor_b16.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -363,7 +365,7 @@ void pmsm_phy_params_init_b16(FAR struct pmsm_phy_params_b16_s *phy,
 
   motor_phy_params_init_b16(&phy->motor, poles, res, ind, flux);
 
-  /* Iniitalize PMSM specific data */
+  /* Initialize PMSM specific data */
 
   phy->iner        = iner;
   phy->ind_d       = ind_d;

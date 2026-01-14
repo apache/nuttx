@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/wireless/spirit/drivers/spirit_netdev.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -953,7 +955,7 @@ static void spirit_receive_work(FAR void *arg)
       wlinfo("Send frame %p to the network:  Offset=%u Length=%u\n",
              iob, iob->io_offset, iob->io_len);
 
-      net_lock();
+      netdev_lock(&priv->radio.r_dev);
       ret = sixlowpan_input(&priv->radio, iob, (FAR void *)pktmeta);
       if (ret < 0)
         {
@@ -962,7 +964,7 @@ static void spirit_receive_work(FAR void *arg)
           NETDEV_ERRORS(&priv->radio.r_dev);
         }
 
-      net_unlock();
+      netdev_unlock(&priv->radio.r_dev);
 
       /* sixlowpan_input() will free the IOB, but we must free the struct
        * pktradio_metadata_s container here.
@@ -1565,7 +1567,7 @@ static void spirit_txtimeout_work(FAR void *arg)
        * worker thread has been configured.
        */
 
-      net_lock();
+      netdev_lock(&priv->radio.r_dev);
 
       /* Increment statistics and dump debug info */
 
@@ -1581,7 +1583,7 @@ static void spirit_txtimeout_work(FAR void *arg)
        */
 
       work_queue(LPWORK, &priv->pollwork, spirit_txpoll_work, priv, 0);
-      net_unlock();
+      netdev_unlock(&priv->radio.r_dev);
     }
 }
 
@@ -1651,7 +1653,7 @@ static void spirit_txpoll_work(FAR void *arg)
    * thread has been configured.
    */
 
-  net_lock();
+  netdev_lock(&priv->radio.r_dev);
 
 #ifdef CONFIG_NET_6LOWPAN
   /* Make sure the our single packet buffer is attached */
@@ -1668,7 +1670,7 @@ static void spirit_txpoll_work(FAR void *arg)
       devif_poll(&priv->radio.r_dev, spirit_txpoll_callback);
     }
 
-  net_unlock();
+  netdev_unlock(&priv->radio.r_dev);
 }
 
 /****************************************************************************

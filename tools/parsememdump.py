@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # tools/parsememdump.py
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -19,41 +21,43 @@
 import argparse
 import os
 import re
+from concurrent.futures import ThreadPoolExecutor
 
 program_description = """
 This program will help you analyze memdump log files,
 analyze the number of occurrences of backtrace,
 and output stack information
 memdump log files need this format:
-pid   size  seq  addr   mem
+pid   size  overhead seq  addr   mem
 """
 
 
 class dump_line:
     def __init__(self, line_str):
         self.mem = []
-        self.err = 0
+        self.err = False
         self.cnt = 1
-        tmp = re.search("( \d+ )", line_str)
-        if tmp is None:
-            self.err = 1
-            return
-        self.pid = int(tmp.group(0)[1:])
-        tmp = re.search("( \d+ )", line_str[tmp.span()[1] :])
-        if tmp is None:
-            self.err = 1
-            return
-        self.size = int(tmp.group(0)[1:])
-        tmp = re.search("( \d+ )", line_str[tmp.span()[1] :])
-        if tmp is None:
-            self.err = 1
-            return
-        self.seq = int(tmp.group(0)[1:])
+        self.pid = None
+        self.size = None
+        self.overhead = None
+        self.seq = None
+        self.addr = None
+        self.parse_line(line_str)
 
-        tmp = re.findall("0x([0-9a-fA-F]+)", line_str[tmp.span()[1] :])
-        self.addr = tmp[0]
-        for str in tmp[1:]:
-            self.mem.append(str)
+    def parse_line(self, line_str):
+        match = re.search(
+            r"\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+((?:\s+0x[0-9a-fA-F]+)+)", line_str
+        )
+        if match:
+            self.pid = int(match.group(1))
+            self.size = int(match.group(2))
+            self.overhead = int(match.group(3))
+            self.seq = int(match.group(4))
+            addresses = match.group(5).split()
+            self.addr = addresses[0]
+            self.mem = addresses[1:]
+        else:
+            self.err = True
 
 
 class log_output:
@@ -82,14 +86,70 @@ def compare_dump_line(dump_line_list, str):
         return
 
     find = 0
-    for tmp in dump_line_list:
-        if tmp.mem is t.mem:
+    for line in dump_line_list:
+        if line.mem == t.mem and line.size == t.size and t.mem != []:
             find = 1
-            tmp.cnt += 1
+            line.cnt += 1
             break
 
     if find == 0:
         dump_line_list.append(t)
+
+
+def multi_thread_executer(cmd):
+    result = ""
+    p = os.popen(cmd, "r")
+    while True:
+        line = p.readline()
+        if line == "":
+            break
+        result += f"    {line}"
+    return result
+
+
+class addr2line_db:
+    def __init__(self, mem=[], ncpu=1, prefix="", file="nuttx.elf", batch_max=1):
+        self.mem = mem
+        self.ncpu = ncpu
+        self.db = {}
+        self.prefix = prefix
+        self.file = file
+        self.batch_max = batch_max
+        self.parse_all()
+
+    def split_array(self, arr, num_splits):
+        k, m = divmod(len(arr), num_splits)
+        return [
+            arr[i * k + min(i, m) : (i + 1) * k + min(i + 1, m)]
+            for i in range(num_splits)
+        ]
+
+    def parse_all(self):
+        cmds = []
+        batch_cnt = len(self.mem) // self.ncpu
+        if batch_cnt > self.batch_max:
+            batch_cnt = self.batch_max
+        segments = self.split_array(self.mem, batch_cnt)
+
+        for seg in segments:
+            addrs = " ".join(seg)
+            cmds.append(f"{self.prefix}addr2line -Cfe {self.file} {addrs}")
+
+        with ThreadPoolExecutor(max_workers=self.ncpu) as executor:
+            for keys, v in zip(segments, executor.map(multi_thread_executer, cmds)):
+                lines = v.split("\n")
+                values = [
+                    lines[i] + "\n" + lines[i + 1] + "\n"
+                    for i in range(0, len(lines) - 1, 2)
+                ]
+                for i in range(len(keys)):
+                    self.db[keys[i]] = values[i]
+
+    def parse(self, mem):
+        if mem in self.db.keys():
+            return self.db[mem]
+        else:
+            return ""
 
 
 if __name__ == "__main__":
@@ -100,7 +160,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "-p", "--prefix", help="addr2line program prefix", nargs=1, default=""
     )
-
+    parser.add_argument(
+        "-j",
+        "--ncpu",
+        help="multi thread count, default all",
+        type=int,
+        default=0,
+        required=False,
+    )
     parser.add_argument(
         "-e",
         "--elffile",
@@ -109,26 +176,26 @@ if __name__ == "__main__":
         nargs=1,
     )
 
-    parser.add_argument("-o", "--output", help="output file,default output shell")
+    parser.add_argument("-o", "--output", help="output file, default output shell")
 
     args = parser.parse_args()
     dump_file = open("%s" % args.file[0], "r")
-    list = []
+    lines = []
     while 1:
-        str = dump_file.readline()
-        if str == "":
+        line = dump_file.readline()
+        if line == "":
             break
-        compare_dump_line(list, str)
+        compare_dump_line(lines, line)
     dump_file.close()
-    list.sort(key=lambda x: x.cnt, reverse=True)
+    lines.sort(key=lambda x: x.cnt, reverse=True)
 
     log = log_output(args)
     total_dir = {}
-    for t in list:
+    for t in lines:
         if t.pid in total_dir:
-            total_dir[t.pid] += t.size
+            total_dir[t.pid] += t.size * t.cnt
         else:
-            total_dir.setdefault(t.pid, t.size)
+            total_dir.setdefault(t.pid, t.size * t.cnt)
 
     log.output("total memory used for ervey pid\n")
     log.output("pid       total size\n")
@@ -138,24 +205,34 @@ if __name__ == "__main__":
         total_size += size
     log.output("all used memory %-6d\n" % (total_size))
 
-    log.output("cnt   size   pid   addr         mem\n")
-    for t in list:
-        memstr = ""
-        log.output("%-4d  %-6d %-3d   %s   " % (t.cnt, t.size, t.pid, t.addr))
+    log.output("cnt   size   pid  overhead   addr         mem\n")
+
+    mems = []
+    for line in lines:
+        if line.mem == []:
+            continue
+        for mem in line.mem:
+            if mem not in mems:
+                mems.append(mem)
+
+    ncpu = args.ncpu
+    if ncpu == 0:
+        ncpu = os.cpu_count()
+
+    db = addr2line_db(mem=mems, ncpu=ncpu, prefix=args.prefix[0], file=args.elffile[0])
+    for t in lines:
+        addr2line_str = ""
+        log.output(
+            "%-4d  %-6d %-6d %-3d   %s   " % (t.cnt, t.size, t.overhead, t.pid, t.addr)
+        )
         if t.mem == []:
+            log.output("\n")
             continue
         for mem in t.mem:
             log.output("%s " % mem)
-            memstr += mem + " "
+            addr2line_str += db.parse(mem)
         log.output("\n")
-        if args.elffile != "":
-            addr2line_file = os.popen(
-                "%saddr2line -Cfe %s %s" % (args.prefix, args.elffile[0], memstr), "r"
-            )
-            while 1:
-                add2line_str = addr2line_file.readline()
-                if add2line_str == "":
-                    break
-                log.output("    " + add2line_str)
-            log.output("\n" + add2line_str)
+        if addr2line_str != "":
+            log.output(addr2line_str)
+        log.output("\n")
     log.__del__()

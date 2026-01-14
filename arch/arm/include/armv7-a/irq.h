@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/armv7-a/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,9 +38,15 @@
 #  include <stdint.h>
 #endif
 
+#include <arch/armv7-a/cp15.h>
+
 /****************************************************************************
  * Pre-processor Prototypes
  ****************************************************************************/
+
+#ifdef __ghs__
+#  define __ARM_ARCH 7
+#endif
 
 /* IRQ Stack Frame Format:
  *
@@ -198,6 +206,20 @@
 
 #define REG_PIC             REG_R10
 
+/* Multiprocessor Affinity Register (MPIDR): CRn=c0, opc1=0, CRm=c0, opc2=5 */
+
+#define MPIDR_CPUID_SHIFT   (0)       /* Bits 0-1: CPU ID */
+#define MPIDR_CPUID_MASK    (3 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU0  (0 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU1  (1 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU2  (2 << MPIDR_CPUID_SHIFT)
+#  define MPIDR_CPUID_CPU3  (3 << MPIDR_CPUID_SHIFT)
+                                      /* Bits 2-7: Reserved */
+#define MPIDR_CLUSTID_SHIFT (8)       /* Bits 8-11: Cluster ID value */
+#define MPIDR_CLUSTID_MASK  (15 << MPIDR_CLUSTID_SHIFT)
+                                      /* Bits 12-29: Reserved */
+#define MPIDR_U             (1 << 30) /* Bit 30: Multiprocessing Extensions. */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -235,15 +257,8 @@ struct xcpt_syscall_s
  * For a total of 17 (XCPTCONTEXT_REGS)
  */
 
-#ifndef __ASSEMBLY__
 struct xcptcontext
 {
-  /* The following function pointer is non-zero if there are pending signals
-   * to be processed.
-   */
-
-  void *sigdeliver; /* Actual type is sig_deliver_t */
-
   /* These are saved copies of the context used during
    * signal processing.
    */
@@ -288,13 +303,15 @@ struct xcptcontext
 
 #ifdef CONFIG_ARCH_ADDRENV
 #ifdef CONFIG_ARCH_STACK_DYNAMIC
-  /* This array holds the physical address of the level 2 page table used
-   * to map the thread's stack memory.  This array will be initially of
-   * zeroed and would be back-up up with pages during page fault exception
-   * handling to support dynamically sized stacks for each thread.
+  /* Experimental support for dynamically sized stacks.  We using per-task
+   * l1entry, so only record the ustack virtual address base.
+   *
+   * REVISIT: ARCH_STACK_DYNAMIC not fully implemented.  Have to check
+   *          if want to use this feature.  L1 page table per-task stored,
+   *          we only record the ustackbase in the context.
    */
 
-  uintptr_t *ustack[ARCH_STACK_NSECTS];
+  uintptr_t ustackbase;
 #endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
@@ -312,15 +329,10 @@ struct xcptcontext
 #endif
 #endif
 };
-#endif
-
-#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
 
 /* Name: up_irq_save, up_irq_restore, and friends.
  *
@@ -333,7 +345,7 @@ struct xcptcontext
 
 /* Return the current IRQ state */
 
-static inline irqstate_t irqstate(void)
+static inline_function irqstate_t irqstate(void)
 {
   unsigned int cpsr;
 
@@ -350,7 +362,7 @@ static inline irqstate_t irqstate(void)
 
 /* Disable IRQs and return the previous IRQ state */
 
-noinstrument_function static inline irqstate_t up_irq_save(void)
+noinstrument_function static inline_function irqstate_t up_irq_save(void)
 {
   unsigned int cpsr;
 
@@ -372,17 +384,18 @@ noinstrument_function static inline irqstate_t up_irq_save(void)
 
 /* Enable IRQs and return the previous IRQ state */
 
-static inline irqstate_t up_irq_enable(void)
+static inline_function irqstate_t up_irq_enable(void)
 {
   unsigned int cpsr;
 
   __asm__ __volatile__
     (
       "\tmrs    %0, cpsr\n"
-#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_HIPRI_INTERRUPT)
+#if defined(CONFIG_ARCH_HIPRI_INTERRUPT)
+      "\tcpsie  if\n"
+#elif defined(CONFIG_ARCH_TRUSTZONE_SECURE)
       "\tcpsie  f\n"
-#endif
-#ifndef CONFIG_ARCH_TRUSTZONE_SECURE
+#else
       "\tcpsie  i\n"
 #endif
       : "=r" (cpsr)
@@ -393,9 +406,28 @@ static inline irqstate_t up_irq_enable(void)
   return cpsr;
 }
 
+/* Disable IRQs and return the previous IRQ state */
+
+static inline_function irqstate_t up_irq_disable(void)
+{
+  unsigned int cpsr;
+
+  __asm__ __volatile__
+    (
+      "\tmrs    %0, cpsr\n"
+      "\tcpsid  i\n"
+      : "=r" (cpsr)
+      :
+      : "memory"
+    );
+
+  return cpsr;
+}
+
 /* Restore saved IRQ & FIQ state */
 
-noinstrument_function static inline void up_irq_restore(irqstate_t flags)
+noinstrument_function static inline_function
+void up_irq_restore(irqstate_t flags)
 {
   __asm__ __volatile__
     (
@@ -406,13 +438,63 @@ noinstrument_function static inline void up_irq_restore(irqstate_t flags)
     );
 }
 
-#endif /* __ASSEMBLY__ */
+/****************************************************************************
+ * Name: up_cpu_index
+ *
+ * Description:
+ *   Return the real core number regardless CONFIG_SMP setting
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_MULTICPU
+noinstrument_function
+static inline_function int up_cpu_index(void)
+{
+  unsigned int mpidr;
+
+  /* Read the Multiprocessor Affinity Register (MPIDR) */
+
+  mpidr = CP15_GET(MPIDR);
+
+  /* And return the CPU ID field */
+
+  return (mpidr & MPIDR_CPUID_MASK) >> MPIDR_CPUID_SHIFT;
+}
+#endif /* CONFIG_ARCH_HAVE_MULTICPU */
+
+static inline_function uint32_t up_getsp(void)
+{
+  register uint32_t sp;
+
+  __asm__ __volatile__
+  (
+    "mov %0, sp\n"
+    : "=r" (sp)
+  );
+
+  return sp;
+}
+
+static inline_function uintptr_t up_getusrsp(void *regs)
+{
+  uint32_t *ptr = (uint32_t *)regs;
+  return ptr[REG_SP];
+}
+
+noinstrument_function
+static inline_function void up_set_interrupt_context(bool flag)
+{
+  CP15_MODIFY(flag, 1ul, TPIDRPRW);
+}
+
+#define up_this_task()         ((struct tcb_s *)(CP15_GET(TPIDRPRW) & ~1ul))
+#define up_update_task(t)      CP15_MODIFY(t, ~1ul, TPIDRPRW)
+#define up_interrupt_context() (CP15_GET(TPIDRPRW) & 1)
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"
@@ -429,6 +511,6 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_ARM_INCLUDE_ARMV7_A_IRQ_H */

@@ -1,5 +1,7 @@
 /****************************************************************************
- * boards/arm/rp2040/raspberrypi-pico/scripts/raspberrypi-pico-sram.ld
+ * boards/arm/rp2040/waveshare-rp2040-lcd-1.28/scripts/waveshare-rp2040-lcd-1-28-sram.ld
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -51,7 +53,7 @@ SECTIONS
     .init_section : {
         _sinit = ABSOLUTE(.);
         KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
-        KEEP(*(.init_array .ctors))
+        KEEP(*(.init_array EXCLUDE_FILE(*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o) .ctors))
         _einit = ABSOLUTE(.);
     } > sram
 

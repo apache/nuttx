@@ -2,6 +2,8 @@
 Waveshare RP2040 LCD 1.28
 ===============================
 
+.. tags:: chip:rp2040
+
 The `Waveshare RP2040 LCD 1.28 <https://www.waveshare.com/wiki/RP2040-LCD-1.28>`_
 is a low-cost, high-performance MCU board designed by Waveshare based on RP2040
 with onboard 1.28 inch LCD.
@@ -29,14 +31,6 @@ Features
 * Temperature sensor
 * Accelerated floating-point libraries on-chip
 * 8 x Programmable I/O (PIO) state machines for custom peripheral support
-
-Serial Console
-==============
-
-By default a serial console appears on pins 1 (TX GPIO0) and pin 2
-(RX GPIO1).  This console runs a 115200-8N1.
-
-The board can be configured to use the USB connection as the serial console.
 
 Buttons and LEDs
 ================
@@ -66,16 +60,33 @@ The Raspberry Pi Pico can be powered via the USB connector, connecting
 a lithium battery through connector, or by supplying +5V to pin 18(VSYS).
 The board had a diode that prevents power from pin 18 from flowing back
 to the USB socket. Power through USB or VSYS will be charging the battery
-if connected. The schematic is available at `RP2040-LCD-1.28-sch.pdf <https://www.waveshare.net/w/upload/6/60/RP2040-LCD-1.28-sch.pdf>`_
+if connected. The schematic is available at `RP2040-LCD-1.28-sch.pdf
+<https://www.waveshare.net/w/upload/6/60/RP2040-LCD-1.28-sch.pdf>`_
+
+Installation & Build
+====================
+
+For instructions on how to to install the build dependencies and create a NuttX
+image for this board, consult the main :doc:`RP2040 documentation
+<../../index>`.
 
 Configurations
 ==============
+
+All configurations listed below can be configured using the following command in
+the ``nuttx`` directory (again, consult the main :doc:`RP2040 documentation
+<../../index>`):
+
+.. code:: console
+
+   $ ./tools/configure.sh waveshare-rp2040-lcd-1.28:<configname>
 
 composite
 ---------
 
 NuttShell configuration (console enabled in UART0, at 115200 bps) with support for
-CDC/ACM with MSC USB composite driver.
+CDC/ACM with MSC USB composite driver. ``conn`` command enables the composite
+device.
 
 nsh
 ---
@@ -103,18 +114,49 @@ both ARM cores enabled.
 spisd
 -----
 
-NuttShell configuration (console enabled in UART0, at 115200 bps) with SPI configured.
+NuttShell configuration (console enabled in UART0, at 115200 bps) with SPI SD
+card support enabled.
+
+.. list-table:: spisd connections
+   :widths: auto
+   :header-rows: 1
+
+   * - SD card slot
+     - Waveshare RP2040
+   * - DAT2          
+     - Not connected
+   * - DAT3/CS
+     - GP17 (SPI0 CSn) (Pin 22)
+   * - CMD /DI
+     - GP19 (SPI0 TX)  (Pin 25)
+   * - VDD
+     - 3V3 OUT (Pin 36)
+   * - CLK/SCK
+     - GP18 (SPI0 SCK) (Pin 24)
+   * - VSS
+     - GND (Pin 3 or 38 or ...)
+   * - DAT0/DO
+     - GP16 (SPI0 RX)  (Pin 21)
+   * - DAT1          
+     - Not connected
+
+Card hot swapping is not supported.
 
 usbmsc
 ------
 
 NuttShell configuration (console enabled in UART0, at 115200 bps) with support for
-usbmsc.
+USB MSC and CDC/ACM.
+
+``msconn`` and ``sercon`` commands enable the MSC and CDC/ACM devices. The MSC
+support provides the interface to the SD card with SPI, so the SD card slot
+connection like spisd configuration is required.
 
 usbnsh
 ------
 
-Basic NuttShell configuration (console enabled in USB Port, at 115200 bps).
+Basic NuttShell configuration using CDC/ACM serial (console enabled in USB Port,
+at 115200 bps).
 
 fb
 ------------------
@@ -127,10 +169,3 @@ lvgl
 
 NuttShell configuration (console enabled in USB Port, at 115200 bps) with support for
 gc9a01 and LVGL demo (using lcd_dev).
-
-
-README.txt
-==========
-
-.. include:: README.txt
-   :literal:

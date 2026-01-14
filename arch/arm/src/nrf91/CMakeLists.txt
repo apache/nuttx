@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/arm/src/nrf91/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -144,14 +146,10 @@ if(CONFIG_NRF91_MODEM)
     set(MODEM_LIB_VARIANT libmodem.a)
   endif()
 
-  nuttx_library_import(
-    modem
+  nuttx_add_extra_library(
     ${NRFXLIB_DIR}/nrf_modem/lib/cortex-m33/${NRFXLIB_LIB_VARIANT}/${MODEM_LIB_VARIANT}
   )
   target_include_directories(arch PRIVATE ${NRFXLIB_DIR}/nrf_modem/include)
-
-  target_link_libraries(arch PRIVATE modem)
-  target_link_libraries(modem INTERFACE arch c net)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})

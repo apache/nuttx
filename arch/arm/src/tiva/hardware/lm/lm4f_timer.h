@@ -1,21 +1,13 @@
 /****************************************************************************
  * arch/arm/src/tiva/hardware/lm/lm4f_timer.h
  *
- * Originally:
- *
- *   Copyright (C) 2012, 2014 Max Nekludov. All rights reserved.
- *   Author: Max Nekludov <macscomp@gmail.com>
- *
- * Ongoing support and major revision to support the TM4C129 family
- * (essentially a full file replacement):
- *
- *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Some bitfield definitions taken from a header file provided by:
- *
- *   Copyright (C) 2014 TRD2 Inc. All rights reserved.
- *   Author: Calvin Maguranis <calvin.maguranis@trd2inc.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2015, 2018 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2014 TRD2 Inc. All rights reserved.
+ * SPDX-FileCopyrightText: 2012, 2014 Max Nekludov. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Max Nekludov <macscomp@gmail.com>
+ * SPDX-FileContributor: Calvin Maguranis <calvin.maguranis@trd2inc.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

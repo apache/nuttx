@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32_crc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -64,7 +66,7 @@
 #  define CRC_CR_POLYSIZE_8     (2 << CRC_CR_POLYSIZE_SHIFT) /* 10: 8 bit polynomial */
 #  define CRC_CR_POLYSIZE_7     (3 << CRC_CR_POLYSIZE_SHIFT) /* 10: 8 bit polynomial */
 
-#define CRC_CR_REVIN_SHIFT      5         /* Bits 5-6: These bits ontrol the reversal of the bit order of the input data */
+#define CRC_CR_REVIN_SHIFT      5         /* Bits 5-6: These bits control the reversal of the bit order of the input data */
 #define CRC_CR_REVIN_MASK       (3 << CRC_CR_REVIN_SHIFT)
 #  define CRC_CR_REVIN_NONE     (0 << CRC_CR_REVIN_SHIFT) /* 00: bit order is not affected */
 #  define CRC_CR_REVIN_BYTE     (1 << CRC_CR_REVIN_SHIFT) /* 01: reversal done by byte */

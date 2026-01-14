@@ -317,7 +317,7 @@ static int rt_timer_setisr(xcpt_t handler, void *arg)
 
       /* Set up to receive peripheral interrupts on the current CPU */
 
-      priv->core = up_cpu_index();
+      priv->core = this_cpu();
       priv->cpuint = esp32s3_setup_irq(priv->core,
                                        ESP32S3_PERIPH_SYSTIMER_TARGET2,
                                        1, ESP32S3_CPUINT_LEVEL);
@@ -611,7 +611,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
 
   modifyreg32(SYSTIMER_INT_CLR_REG, 0, SYSTIMER_TARGET2_INT_CLR);
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
 
   /* Check if there is a timer running */
 
@@ -672,7 +672,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
         }
     }
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
 
   return OK;
 }
@@ -805,7 +805,7 @@ void esp32s3_rt_timer_delete(struct rt_timer_s *timer)
   irqstate_t flags;
   struct esp32s3_rt_priv_s *priv = &g_rt_priv;
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
 
   if (timer->state == RT_TIMER_READY)
     {
@@ -832,7 +832,7 @@ void esp32s3_rt_timer_delete(struct rt_timer_s *timer)
     }
 
 exit:
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -965,7 +965,7 @@ int esp32s3_rt_timer_init(void)
 
   priv->pid = (pid_t)pid;
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
 
   /* ESP32-S3 hardware timer configuration:
    * 1 count = 1/16 us
@@ -1007,7 +1007,7 @@ int esp32s3_rt_timer_init(void)
 
   modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_TIMER_UNIT1_WORK_EN);
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
 
   return OK;
 }

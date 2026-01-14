@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/stm32/stm32f10xxx_irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The

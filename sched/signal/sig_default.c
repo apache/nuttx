@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/signal/sig_default.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,10 +30,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <pthread.h>
 #include <signal.h>
 #include <assert.h>
 
+#include <nuttx/pthread.h>
 #include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/signal.h>
@@ -147,6 +149,9 @@ static const struct nxsig_defaction_s g_defactions[] =
 #ifdef CONFIG_SIG_SIGPOLL_ACTION
   { SIGPOLL,   0,                nxsig_abnormal_termination },
 #endif
+#ifdef CONFIG_SIG_SIGURG_ACTION
+  { SIGURG,    0,                nxsig_null_action },
+#endif
 };
 
 #define NACTIONS (sizeof(g_defactions) / sizeof(struct nxsig_defaction_s))
@@ -223,6 +228,8 @@ static void nxsig_abnormal_termination(int signo)
   group_kill_children(rtcb);
 #endif
 
+  tls_cleanup_popall(tls_get_info());
+
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Check if the currently running task is actually a pthread */
 
@@ -233,7 +240,7 @@ static void nxsig_abnormal_termination(int signo)
        * REVISIT:  This will not work if HAVE_GROUP_MEMBERS is not set.
        */
 
-      pthread_exit(NULL);
+      nx_pthread_exit(NULL);
     }
   else
 #endif
@@ -285,7 +292,7 @@ static void nxsig_stop_task(int signo)
   group_suspend_children(rtcb);
 #endif
 
-  /* Lock the scheduler so this thread is not pre-empted until after we
+  /* Lock the scheduler so this thread is not preempted until after we
    * call nxsched_suspend().
    */
 
@@ -299,6 +306,8 @@ static void nxsig_stop_task(int signo)
 
   if ((group->tg_waitflags & WUNTRACED) != 0)
     {
+      int semvalue;
+
       /* Return zero for exit status (we are not exiting, however) */
 
       if (group->tg_statloc != NULL)
@@ -315,11 +324,13 @@ static void nxsig_stop_task(int signo)
 
       /* Wakeup any tasks waiting for this task to exit or stop. */
 
-      while (group->tg_exitsem.semcount < 0)
+      nxsem_get_value(&group->tg_exitsem, &semvalue);
+      while (semvalue < 0)
         {
           /* Wake up the thread */
 
           nxsem_post(&group->tg_exitsem);
+          nxsem_get_value(&group->tg_exitsem, &semvalue);
         }
     }
 #endif
@@ -503,7 +514,7 @@ bool nxsig_iscatchable(int signo)
  *   defaction - True: the default action is in place
  *
  * Returned Value:
- *   The address of the default signal action handler is returne on success.
+ *   The address of the default signal action handler is returned on success.
  *   SIG_IGN is returned if there is no default action.
  *
  ****************************************************************************/
@@ -530,9 +541,9 @@ _sa_handler_t nxsig_default(FAR struct tcb_s *tcb, int signo, bool defaction)
         {
           /* nxsig_addset() is not atomic (but neither is sigaction()) */
 
-          flags = spin_lock_irqsave(NULL);
+          flags = spin_lock_irqsave(&group->tg_lock);
           nxsig_addset(&group->tg_sigdefault, signo);
-          spin_unlock_irqrestore(NULL, flags);
+          spin_unlock_irqrestore(&group->tg_lock, flags);
         }
     }
 
@@ -542,9 +553,9 @@ _sa_handler_t nxsig_default(FAR struct tcb_s *tcb, int signo, bool defaction)
        * atomic (but neither is sigaction()).
        */
 
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&group->tg_lock);
       nxsig_delset(&group->tg_sigdefault, signo);
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&group->tg_lock, flags);
     }
 
   return handler;

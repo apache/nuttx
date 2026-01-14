@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/common/src/stm32_lcd_backpack.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -84,7 +86,7 @@ int board_lcd_backpack_init(int devno, int busno, int rows, int cols)
 
   /* Register the Segment LCD */
 
-  snprintf(devpath, 12, "/dev/slcd%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/slcd%d", devno);
   ret = pcf8574_lcd_backpack_register(devpath, i2c, &cfg);
   if (ret < 0)
     {

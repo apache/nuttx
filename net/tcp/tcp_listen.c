@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp_listen.c
  *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -91,6 +93,7 @@ FAR struct tcp_conn_s *tcp_findlistener(FAR union ip_binding_u *uaddr,
 
   /* Examine each connection structure in each slot of the listener list */
 
+  tcp_conn_list_lock();
   for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
     {
       /* Is this slot assigned?  If so, does the connection have the same
@@ -99,45 +102,20 @@ FAR struct tcp_conn_s *tcp_findlistener(FAR union ip_binding_u *uaddr,
 
       FAR struct tcp_conn_s *conn = tcp_listenports[ndx];
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-      if (conn && conn->lport == portno && conn->domain == domain)
+      if (tcp_conn_cmp(domain, (FAR const union ip_addr_u *)uaddr, portno,
+                       conn))
 #else
-      if (conn && conn->lport == portno)
+      if (tcp_conn_cmp((FAR const union ip_addr_u *)uaddr, portno, conn))
 #endif
         {
-#ifdef CONFIG_NET_IPv6
-#  ifdef CONFIG_NET_IPv4
-          if (domain == PF_INET6)
-#  endif
-            {
-              if (net_ipv6addr_cmp(conn->u.ipv6.laddr, uaddr->ipv6.laddr) ||
-                  net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
-                {
-                  /* Yes.. we found a listener on this port */
-
-                  return conn;
-                }
-            }
-#endif
-
-#ifdef CONFIG_NET_IPv4
-#  ifdef CONFIG_NET_IPv6
-          if (domain == PF_INET)
-#  endif
-            {
-              if (net_ipv4addr_cmp(conn->u.ipv4.laddr, uaddr->ipv4.laddr) ||
-                  net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY))
-                {
-                  /* Yes.. we found a listener on this port */
-
-                  return conn;
-                }
-            }
-#endif
+          tcp_conn_list_unlock();
+          return conn;
         }
     }
 
   /* No listener for this port */
 
+  tcp_conn_list_unlock();
   return NULL;
 }
 
@@ -161,18 +139,19 @@ int tcp_unlisten(FAR struct tcp_conn_s *conn)
   int ndx;
   int ret = -EINVAL;
 
-  net_lock();
+  tcp_conn_list_lock();
   for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
     {
       if (tcp_listenports[ndx] == conn)
         {
           tcp_listenports[ndx] = NULL;
+          tcp_remove_syn_backlog(conn);
           ret = OK;
           break;
         }
     }
 
-  net_unlock();
+  tcp_conn_list_unlock();
   return ret;
 }
 
@@ -196,7 +175,7 @@ int tcp_listen(FAR struct tcp_conn_s *conn)
    * is accessed from event processing logic as well.
    */
 
-  net_lock();
+  tcp_conn_list_lock();
 
   /* First, check if there is already a socket listening on this port */
 
@@ -235,7 +214,7 @@ int tcp_listen(FAR struct tcp_conn_s *conn)
         }
     }
 
-  net_unlock();
+  tcp_conn_list_unlock();
   return ret;
 }
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/esp32h2/common/scripts/esp32h2_legacy_sections.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -48,6 +50,7 @@ SECTIONS
     *libarch.a:uart_hal_iram.*(.text .text.* .literal .literal.*)
     *libarch.a:wdt_hal_iram.*(.text .text.* .literal .literal.*)
     *libsched.a:irq_dispatch.*(.text .text.* .literal .literal.*)
+    *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
   } >iram0_0_seg
 
   /* Marks the end of IRAM code segment */
@@ -261,7 +264,9 @@ SECTIONS
   .rtc.data :
   {
     *(.rtc.data)
+    *(.rtc.data.*)
     *(.rtc.rodata)
+    *(.rtc.rodata.*)
   } >lp_ram_seg
 
   /* This section holds RTC data that should have fixed addresses.

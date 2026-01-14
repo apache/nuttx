@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/utils/net_mask2pref.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -130,7 +132,7 @@ static inline uint8_t net_msbits16(uint16_t hword)
  *   This, of course, assumes that all MS bits are '1' and all LS bits are
  *   '0' with no intermixed 1's and 0's.  This function searches from the MS
  *   bit until the first '0' is found (this does not necessary mean that
- *   there might not be additional '1' bits following the firs '0', but that
+ *   there might not be additional '1' bits following the first '0', but that
  *   will be a malformed netmask.
  *
  * Input Parameters:
@@ -170,7 +172,7 @@ uint8_t net_ipv4_mask2pref(in_addr_t mask)
  *   This, of course, assumes that all MS bits are '1' and all LS bits are
  *   '0' with no intermixed 1's and 0's.  This function searches from the MS
  *   bit until the first '0' is found (this does not necessary mean that
- *   there might not be additional '1' bits following the firs '0', but that
+ *   there might not be additional '1' bits following the first '0', but that
  *   will be a malformed netmask.
  *
  * Input Parameters:

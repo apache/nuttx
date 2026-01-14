@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/rp2040/rp2040_cyw43439.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,8 +33,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/wireless/ieee80211/bcmf_gspi.h>
-
-#include "barriers.h"
+#include <arch/barriers.h>
 
 #include "rp2040_cyw43439.h"
 #include "rp2040_pio.h"
@@ -58,7 +59,7 @@ bool  g_print_gspi = false;
 #define TX_FIFO_SIZE    4
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 typedef struct dma_info_s
@@ -77,7 +78,7 @@ typedef struct dma_info_s
  * to one less than the total number of BITS to be transmitted.
  *
  * The Y register is the input bit count register.  It too must be set
- * to one less thant the total number of bits to be read.
+ * to one less than the total number of bits to be read.
  *
  * The PIO's state machine is set up to auto-pull data from the input
  * fifo whenever the output shift register is empty.  This happens at
@@ -165,11 +166,11 @@ static int my_init(gspi_dev_t  *gspi)
   rp2040_gpio_setdir(rp_io->gpio_data, true);
   rp2040_gpio_put(rp_io->gpio_data, false);
 
-  nxsig_usleep(50000); /* Leave off for at least 50ms. */
+  nxsched_usleep(50000); /* Leave off for at least 50ms. */
 
   rp2040_gpio_put(rp_io->gpio_on, true);     /* power on */
 
-  nxsig_usleep(50000); /* Wait a bit to let the power come up. */
+  nxsched_usleep(50000); /* Wait a bit to let the power come up. */
 
   /* Don't let anyone else grab a PIO while we are doing so. */
 
@@ -497,7 +498,7 @@ static int my_write(struct gspi_dev_s   *gspi,
   /* Assert gpio_select by pulling line low */
 
   rp2040_gpio_put(rp_io->gpio_select, false);
-  ARM_DMB();
+  UP_DMB();
 
   /* Enable the state machine.  This starts the pio program running */
 
@@ -522,7 +523,7 @@ static int my_write(struct gspi_dev_s   *gspi,
 
   /* Un-assert select by pulling line high. */
 
-  ARM_DMB();
+  UP_DMB();
   rp2040_gpio_put(rp_io->gpio_select, true);
 
   /* Free the DMA controller */
@@ -639,7 +640,7 @@ static int my_read(struct gspi_dev_s   *gspi,
    * word we set X to 31.
    *
    * We load Y with the number of bits to read.  This is based on the
-   * byte count in "length" which we round up to a 32-bit boundry so the
+   * byte count in "length" which we round up to a 32-bit boundary so the
    * pio program will be sure to autopush the final data to the output fifo.
    *
    * This is slightly magical.  The way we load the X is to first
@@ -723,7 +724,7 @@ static int my_read(struct gspi_dev_s   *gspi,
   /* Assert gpio_select by pulling line low */
 
   rp2040_gpio_put(rp_io->gpio_select, false);
-  ARM_DMB();
+  UP_DMB();
 
   /* Enable the state machine.  This starts the pio program running */
 
@@ -739,7 +740,7 @@ static int my_read(struct gspi_dev_s   *gspi,
 
   /* Un-assert select by pulling line high. */
 
-  ARM_DMB();
+  UP_DMB();
   rp2040_gpio_put(rp_io->gpio_select, true);
 
   /* Free the DMA controllers */
@@ -774,6 +775,7 @@ static int my_read(struct gspi_dev_s   *gspi,
  *
  * Description:
  *   Initialize the cyw43439 private data and PIO communication.
+ *
  ****************************************************************************/
 
 gspi_dev_t *rp2040_cyw_setup(uint8_t gpio_on,
@@ -852,6 +854,7 @@ gspi_dev_t *rp2040_cyw_setup(uint8_t gpio_on,
  *
  * Description:
  *   Deinitialize the cyw43439 PIO communication.
+ *
  ****************************************************************************/
 
 void rp2040_cyw_remove(gspi_dev_t *gspi)

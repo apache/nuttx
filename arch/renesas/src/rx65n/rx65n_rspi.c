@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/renesas/src/rx65n/rx65n_rspi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -2265,7 +2267,7 @@ static void rspi_bus_initialize(struct rx65n_rspidev_s *priv)
                 | RSPI_SSLP_SSL3P)); /* RSPCK is low when idle */
   rspi_putreg8(priv, RX65N_RSPI_SSLP_OFFSET, regval8);
 
-  /* Inititalize frequency, frame size and SPI mode */
+  /* Initialize frequency, frame size and SPI mode */
 
   priv->frequency = 0;
   priv->mode      = SPIDEV_MODE0;

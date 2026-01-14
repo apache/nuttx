@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stdlib/lib_srand.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -218,6 +220,7 @@ static float_t frand3(void)
 static unsigned long nrand_r(unsigned long limit,
                              FAR unsigned long *seed)
 {
+#if CONFIG_LIBC_RAND_ORDER > 0
   unsigned long result;
   float_t ratio;
 
@@ -227,11 +230,11 @@ static unsigned long nrand_r(unsigned long limit,
     {
       /* Get a random integer in the range 0.0 - 1.0 */
 
-#if (CONFIG_LIBC_RAND_ORDER == 1)
+#  if (CONFIG_LIBC_RAND_ORDER == 1)
       ratio = frand1(seed);
-#elif (CONFIG_LIBC_RAND_ORDER == 2)
+#  elif (CONFIG_LIBC_RAND_ORDER == 2)
       ratio = frand2();
-#else /* if (CONFIG_LIBC_RAND_ORDER > 2) */
+#  elif (CONFIG_LIBC_RAND_ORDER > 2)
       ratio = frand3();
 #endif
 
@@ -246,6 +249,9 @@ static unsigned long nrand_r(unsigned long limit,
   while (result >= limit);
 
   return result;
+#else
+  return fgenerate1(seed) % limit;
+#endif
 }
 
 /****************************************************************************

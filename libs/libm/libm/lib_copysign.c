@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libm/libm/lib_copysign.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,7 +36,7 @@
 #ifdef CONFIG_HAVE_DOUBLE
 double copysign(double x, double y)
 {
-  if (y < 0)
+  if (signbit(y))
     {
       return -fabs(x);
     }

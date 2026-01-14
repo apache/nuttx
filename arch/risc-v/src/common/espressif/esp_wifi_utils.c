@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/espressif/esp_wifi_utils.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,19 +35,13 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/wireless/wireless.h>
 
-#include "esp_wifi_adapter.h"
-
-#include "esp_log.h"
-#include "esp_mac.h"
-#include "esp_private/phy.h"
-#include "esp_private/wifi.h"
-#include "esp_random.h"
 #include "esp_timer.h"
-#include "esp_wpa.h"
-#include "rom/ets_sys.h"
-#include "soc/soc_caps.h"
-
 #include "esp_wifi_utils.h"
+#include "esp_wlan_netdev.h"
+
+#include "esp_wifi.h"
+#include "esp_err.h"
+#include "esp_wifi_types_generic.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -90,6 +86,10 @@ struct wifi_scan_result
 };
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -100,9 +100,106 @@ static struct wifi_scan_result g_scan_priv =
 static uint8_t g_channel_num;
 static uint8_t g_channel_list[CHANNEL_MAX_NUM];
 
+static mutex_t g_wifiexcl_lock = NXMUTEX_INITIALIZER;
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_WIFI
+
+/****************************************************************************
+ * Name: esp_wifi_mode_translate
+ *
+ * Description:
+ *   Translate wireless mode constants to ESP Wi-Fi mode constants.
+ *
+ * Input Parameters:
+ *   wireless_mode - Wireless mode from wireless.h (IW_MODE_*)
+ *
+ * Returned Value:
+ *   ESP Wi-Fi mode (WIFI_MODE_*) on success
+ *   -EINVAL on failure
+ *
+ ****************************************************************************/
+
+wifi_mode_t esp_wifi_mode_translate(uint32_t wireless_mode)
+{
+  switch (wireless_mode)
+    {
+      case IW_MODE_INFRA:
+        return WIFI_MODE_STA;
+
+      case IW_MODE_MASTER:
+        return WIFI_MODE_AP;
+
+      default:
+        wlerr("Invalid wireless mode=%ld\n", wireless_mode);
+        return -EINVAL;
+    }
+}
+
+/****************************************************************************
+ * Name: esp_freq_to_channel
+ *
+ * Description:
+ *   Converts Wi-Fi frequency to channel.
+ *
+ * Input Parameters:
+ *   freq - Wi-Fi frequency
+ *
+ * Returned Value:
+ *   Wi-Fi channel
+ *
+ ****************************************************************************/
+
+int esp_freq_to_channel(uint16_t freq)
+{
+  int channel = 0;
+  if (freq >= 2412 && freq <= 2484)
+    {
+      if (freq == 2484)
+        {
+          channel = 14;
+        }
+      else
+        {
+          channel = freq - 2407;
+          if (channel % 5)
+            {
+              return 0;
+            }
+
+          channel /= 5;
+        }
+
+      return channel;
+    }
+
+  if (freq >= 5005 && freq < 5900)
+    {
+      if (freq % 5)
+        {
+          return 0;
+        }
+
+      channel = (freq - 5000) / 5;
+      return channel;
+    }
+
+  if (freq >= 4905 && freq < 5000)
+    {
+      if (freq % 5)
+        {
+          return 0;
+        }
+
+      channel = (freq - 4000) / 5;
+      return channel;
+    }
+
+  return 0;
+}
 
 /****************************************************************************
  * Name: esp_wifi_start_scan
@@ -127,8 +224,8 @@ int esp_wifi_start_scan(struct iwreq *iwr)
   int ret = 0;
   int i;
   uint8_t target_mac[MAC_LEN];
-  uint8_t target_ssid[SSID_MAX_LEN + 1];
-  memset(target_ssid, 0x0, sizeof(SSID_MAX_LEN + 1));
+  uint8_t target_ssid[IW_ESSID_MAX_SIZE + 1];
+  memset(target_ssid, 0x0, sizeof(IW_ESSID_MAX_SIZE + 1));
 
   if (iwr == NULL)
     {
@@ -206,7 +303,6 @@ int esp_wifi_start_scan(struct iwreq *iwr)
       config->scan_type = WIFI_SCAN_TYPE_ACTIVE; /* Active scan */
     }
 
-  esp_wifi_start();
   ret = esp_wifi_scan_start(config, false);
   if (ret != OK)
     {
@@ -251,10 +347,10 @@ int esp_wifi_start_scan(struct iwreq *iwr)
  * Name: esp_wifi_get_scan_results
  *
  * Description:
- *   Get scan result
+ *   Get Wi-Fi scan results.
  *
  * Input Parameters:
- *   iwr - The argument of the ioctl cmd
+ *   iwr - The argument of the ioctl cmd.
  *
  * Returned Value:
  *   OK on success (positive non-zero values are cmd-specific)
@@ -355,13 +451,13 @@ exit_failed:
  * Name: esp_wifi_scan_event_parse
  *
  * Description:
- *   Parse scan information
+ *   Parse scan information Wi-Fi AP scan results.
  *
  * Input Parameters:
- *   None
+ *   None.
  *
  * Returned Value:
- *   None
+ *   None.
  *
  ****************************************************************************/
 
@@ -450,7 +546,8 @@ void esp_wifi_scan_event_parse(void)
               /* Copy ESSID */
 
               essid_len = MIN(strlen((const char *)
-                              ap_list_buffer[bss_count].ssid), SSID_MAX_LEN);
+                              ap_list_buffer[bss_count].ssid),
+                              IW_ESSID_MAX_SIZE);
               essid_len_aligned = (essid_len + 3) & -4;
               if (result_size < ESP_IW_EVENT_SIZE(essid) + essid_len_aligned)
                 {
@@ -573,15 +670,16 @@ scan_result_full:
   priv->scan_status = ESP_SCAN_DONE;
   nxsem_post(&priv->scan_signal);
 }
+#endif /* CONFIG_ESPRESSIF_WIFI */
 
 /****************************************************************************
  * Name: esp_wifi_to_errno
  *
  * Description:
- *   Transform from ESP Wi-Fi error code to NuttX error code
+ *   Transform from ESP Wi-Fi error code to NuttX error code.
  *
  * Input Parameters:
- *   err - ESP Wi-Fi error code
+ *   err - ESP Wi-Fi error code.
  *
  * Returned Value:
  *   NuttX error code defined in errno.h
@@ -648,6 +746,44 @@ int32_t esp_wifi_to_errno(int err)
   if (ret != OK)
     {
       wlerr("ERROR: %s\n", esp_err_to_name(err));
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: esp_wifi_lock
+ *
+ * Description:
+ *   Lock or unlock the event process
+ *
+ * Input Parameters:
+ *   lock - true: Lock event process, false: unlock event process
+ *
+ * Returned Value:
+ *   The result of lock or unlock the event process
+ *
+ ****************************************************************************/
+
+int esp_wifi_lock(bool lock)
+{
+  int ret;
+
+  if (lock)
+    {
+      ret = nxmutex_lock(&g_wifiexcl_lock);
+      if (ret < 0)
+        {
+          wlinfo("Failed to lock Wi-Fi ret=%d\n", ret);
+        }
+    }
+  else
+    {
+      ret = nxmutex_unlock(&g_wifiexcl_lock);
+      if (ret < 0)
+        {
+          wlinfo("Failed to unlock Wi-Fi ret=%d\n", ret);
+        }
     }
 
   return ret;

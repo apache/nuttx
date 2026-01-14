@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/esp32c3-legacy/common/include/esp32c3_board_adc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -18,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_ADC_H
-#define __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_ADC_H
+#ifndef __BOARDS_RISCV_ESP32C3_LEGACY_COMMON_INCLUDE_ESP32C3_BOARD_ADC_H
+#define __BOARDS_RISCV_ESP32C3_LEGACY_COMMON_INCLUDE_ESP32C3_BOARD_ADC_H
 
 /****************************************************************************
  * Included Files
@@ -71,4 +73,4 @@ int board_adc_init(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_ADC_H */
+#endif /* __BOARDS_RISCV_ESP32C3_LEGACY_COMMON_INCLUDE_ESP32C3_BOARD_ADC_H */

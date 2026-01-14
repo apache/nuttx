@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/jh7110/jh7110_timerisr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -62,7 +64,7 @@ static uint32_t g_stimer_pending = false;
 
 static int jh7110_ssoft_interrupt(int irq, void *context, void *arg)
 {
-  /* Cleaer Supervisor Software Interrupt */
+  /* Clear Supervisor Software Interrupt */
 
   CLEAR_CSR(CSR_SIP, SIP_SSIP);
 
@@ -79,7 +81,7 @@ static int jh7110_ssoft_interrupt(int irq, void *context, void *arg)
     {
       /* We assume IPI has been issued */
 
-      riscv_pause_handler(irq, context, arg);
+      riscv_smp_call_handler(irq, context, arg);
     }
 #endif
 

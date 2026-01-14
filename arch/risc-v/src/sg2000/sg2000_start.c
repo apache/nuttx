@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/sg2000/sg2000_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -221,7 +223,7 @@ void sg2000_start_s(int mhartid)
 
   showprogress('B');
 
-  /* Do board initialization */
+  /* TODO: Additional initialization */
 
   showprogress('C');
 
@@ -293,7 +295,7 @@ void sg2000_start(int mhartid)
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before riscv_serialinit.  NOTE:  This function depends on GPIO pin
  *   configuration performed in up_consoleinit() and main clock
  *   initialization performed in up_clkinitialize().

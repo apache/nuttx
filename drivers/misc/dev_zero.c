@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/misc/dev_zero.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -59,7 +61,9 @@ static const struct file_operations g_devzero_fops =
   NULL,          /* ioctl */
   NULL,          /* mmap */
   NULL,          /* truncate */
-  devzero_poll   /* poll */
+  devzero_poll,  /* poll */
+  NULL,          /* readv */
+  NULL           /* writev */
 };
 
 /****************************************************************************

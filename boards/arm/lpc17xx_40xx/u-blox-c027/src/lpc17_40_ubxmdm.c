@@ -1,8 +1,9 @@
 /****************************************************************************
  * boards/arm/lpc17xx_40xx/u-blox-c027/src/lpc17_40_ubxmdm.c
  *
- *   Copyright (C) 2016 Vladimir Komendantskiy. All rights reserved.
- *   Author: Vladimir Komendantskiy <vladimir@moixaenergy.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2016 Vladimir Komendantskiy. All rights reserved.
+ * SPDX-FileContributor: Vladimir Komendantskiy <vladimir@moixaenergy.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -267,7 +268,7 @@ static int lpc17_40_poweron(struct ubxmdm_lower * lower)
 
   /* Min. time for power_on_n being low is 5 ms */
 
-  nxsig_usleep(10 * 1000);
+  nxsched_usleep(10 * 1000);
 
   if (priv->usb_used)
     {
@@ -286,7 +287,7 @@ static int lpc17_40_poweron(struct ubxmdm_lower * lower)
 
   /* Delay to obtain correct voltage on shifters */
 
-  nxsig_usleep(1 * 1000);
+  nxsched_usleep(1 * 1000);
 
   /* UART shifter enabled */
 
@@ -338,7 +339,7 @@ static int lpc17_40_reset(struct ubxmdm_lower * lower)
 
   /* The minimum reset_n low time is 50 ms */
 
-  nxsig_usleep(75 * 1000);
+  nxsched_usleep(75 * 1000);
 
   /* Modem not in reset */
 

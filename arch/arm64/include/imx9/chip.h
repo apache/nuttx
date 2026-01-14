@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/include/imx9/chip.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,12 +44,14 @@
 #define MB(x)   (KB(x) << 10)
 #define GB(x)   (MB(UINT64_C(x)) << 10)
 
-#if defined(CONFIG_ARCH_CHIP_IMX93)
-
 #if CONFIG_ARM64_GIC_VERSION == 3 || CONFIG_ARM64_GIC_VERSION == 4
 
 #define CONFIG_GICD_BASE          0x48000000
+#if defined(CONFIG_ARCH_CHIP_IMX93)
 #define CONFIG_GICR_BASE          0x48040000
+#elif defined(CONFIG_ARCH_CHIP_IMX95)
+#define CONFIG_GICR_BASE          0x48060000
+#endif
 #define CONFIG_GICR_OFFSET        0x20000
 
 #else
@@ -56,8 +60,20 @@
 
 #endif /* CONFIG_ARM64_GIC_VERSION */
 
+#if defined(CONFIG_ARCH_CHIP_IMX93)
 #define CONFIG_RAMBANK1_ADDR      0x80000000
+#elif defined(CONFIG_ARCH_CHIP_IMX95)
+#define CONFIG_RAMBANK1_ADDR      0xa0100000
+#endif
 #define CONFIG_RAMBANK1_SIZE      MB(128)
+
+#if defined(CONFIG_ARCH_CHIP_IMX95)
+#define CONFIG_PCI_DMA_ADDR       0xa8100000
+#define CONFIG_PCI_DMA_SIZE       MB(32)
+
+#define CONFIG_PCI_OB_ADDR        0xa00000000
+#define CONFIG_PCI_OB_SIZE        GB(1)
+#endif
 
 #define CONFIG_DEVICEIO_BASEADDR  0x40000000
 #define CONFIG_DEVICEIO_SIZE      MB(512)
@@ -72,8 +88,6 @@
 
 #define IMX9_GPIO_NPORTS          4
 
-#endif
-
 /****************************************************************************
  * Assembly Macros
  ****************************************************************************/
@@ -82,6 +96,7 @@
 
 .macro  get_cpu_id xreg0
   mrs    \xreg0, mpidr_el1
+  lsr    \xreg0, \xreg0, 8
   ubfx   \xreg0, \xreg0, #0, #8
 .endm
 

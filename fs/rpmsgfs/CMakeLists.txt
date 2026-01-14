@@ -1,6 +1,8 @@
 # ##############################################################################
 # fs/rpmsgfs/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -17,11 +19,18 @@
 # the License.
 #
 # ##############################################################################
+if(NOT CONFIG_DISABLE_MOUNTPOINT)
+  if(CONFIG_FS_RPMSGFS)
+    target_sources(fs PRIVATE rpmsgfs.c rpmsgfs_client.c)
+  endif()
 
-if(CONFIG_FS_RPMSGFS)
-  target_sources(fs PRIVATE rpmsgfs.c rpmsgfs_client.c)
-endif()
+  if(CONFIG_FS_RPMSGFS_SERVER)
+    target_sources(fs PRIVATE rpmsgfs_server.c)
+  endif()
 
-if(CONFIG_FS_RPMSGFS_SERVER)
-  target_sources(fs PRIVATE rpmsgfs_server.c)
+  if(CONFIG_TRACE_RPMSGFS_FS)
+    set_source_files_properties(rpmsgfs.c PROPERTIES COMPILE_FLAGS
+                                                     -finstrument-functions)
+  endif()
+
 endif()

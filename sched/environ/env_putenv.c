@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/environ/env_putenv.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -91,7 +93,7 @@ int putenv(FAR const char *string)
       ret = setenv(pname, pequal + 1, TRUE);
     }
 
-  lib_free(pname);
+  kmm_free(pname);
   return ret;
 
 errout:

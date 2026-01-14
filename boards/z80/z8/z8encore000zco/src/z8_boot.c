@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/z80/z8/z8encore000zco/src/z8_boot.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The

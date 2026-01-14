@@ -686,6 +686,10 @@ config LCD_ST7735_BGR
 	bool "Swap R & B channel"
 	default n
 
+config LCD_ST7735_INVCOLOR
+	bool "Invert display color"
+	default n
+
 config LCD_ST7735_BPP
 	int "Bit Per Pixel (12, 16 or 18)"
 	default 16
@@ -745,12 +749,25 @@ config LCD_ST7789_MIRRORY
 	bool "ST7789 Mirror Y"
 	default n
 
+config LCD_ST7789_MIRRORV
+	bool "ST7789 Mirror V"
+	default n
+
 config LCD_ST7789_INVCOLOR
 	bool "ST7789 Invert Color"
 	default y
 	---help---
 		Invert colors of the LCD display. This is useful for implementations
 		that assume that that colors are inverted by default.
+
+config LCD_ST7789_DEFAULT_COLOR
+	hex "ST7789 Default Background Color"
+	default 0xffff
+	range 0 0xffff
+	---help---
+		This sets the default color of ST7789 display during its initialization.
+		It is the color that is filled to the display and remains there unless
+		higher layer (framebuffer/lcd) overwrites it.
 
 config LCD_ST7789_BGR
 	bool "ST7789 Use BGR Instead Of RGB"
@@ -769,6 +786,44 @@ config LCD_ST7789_SPIMODE
 config LCD_ST7789_FREQUENCY
 	int "SPI Frequency"
 	default 1000000
+
+config LCD_ST7789_START_DELAY
+	int "ST7789 SPI start delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 60
+	---help---
+		The delay between CS active and first CLK. In ns.
+
+config LCD_ST7789_STOP_DELAY
+	int "ST7789 SPI stop delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 65
+	---help---
+		The delay between last CLK and CS inactive. In ns.
+
+config LCD_ST7789_CS_DELAY
+	int "ST7789 SPI chip select delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 40
+	---help---
+		The delay between CS inactive and CS active again. In ns.
+
+config LCD_ST7789_IFDELAY
+	int "ST7789 SPI frames delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 50
+	---help---
+		The delay between consecutive frames. In ns.
+
+config LCD_ST7789_DATA_ENDIAN_LITTLE
+	bool "ST7789 RGB data endian little"
+	default n
+	---help---
+		The RGB data endian, MSB first by default(n).
 
 endif # LCD_ST7789
 
@@ -1379,6 +1434,13 @@ config LCD_ILI9341
 		LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
 		LCD_MAXPOWER should be 1:  0=off, 1=on
 
+config LCD_ILI9341_BGR
+	bool "Use BGR order for RGB colors."
+	default n
+	depends on LCD_ILI9341
+	---help---
+		Use BGR color order instead of RGB (Memory Access Control).
+
 config LCD_ILI9341_NINTERFACES
 	int "Number of supported display driver"
 	range 1 2
@@ -1395,6 +1457,18 @@ config LCD_ILI9341_IFACE0
 		Configure first LCD Display.
 
 if LCD_ILI9341_IFACE0
+config LCD_ILI9341_IFACE0_WIDTH
+	int "Width of the display"
+	default 240
+	---help---
+		Define the width of the display.
+
+config LCD_ILI9341_IFACE0_HEIGHT
+	int "Height of the display"
+	default 320
+	---help---
+		Define the the height of the display.
+
 choice
 	prompt "LCD Orientation"
 	default LCD_ILI9341_IFACE0_LANDSCAPE
@@ -1444,6 +1518,18 @@ config LCD_ILI9341_IFACE1
 		Configure second LCD Display.
 
 if LCD_ILI9341_IFACE1
+config LCD_ILI9341_IFACE1_WIDTH
+	int "Width of the display"
+	default 240
+	---help---
+		Define the width of the display.
+
+config LCD_ILI9341_IFACE1_HEIGHT
+	int "Height of the display"
+	default 320
+	---help---
+		Define the the height of the display.
+
 choice
 	prompt "LCD Orientation"
 	default LCD_ILI9341_IFACE1_LANDSCAPE
@@ -1502,6 +1588,17 @@ config LCD_LCDDRV_SPEED
 		SPI Interface speed. According to the specification this is generally
 		quite limited, but people have had success with much faster
 		speeds than the spec sheets say. YMMV.
+
+config LCD_LCDDRV_3WIRE
+	bool "Use 3-wire 9-bit SPI."
+	default n
+	depends on LCD_LCDDRV_SPIIF
+	---help---
+		Specifies whether 3-wire or 4-wire (default) SPI is used.
+
+		3-wire 9-bit SPI uses MSB to distinguish between CMD (0) or
+		DATA (1). 4-wire 8-bit SPI uses dedicated CMD/DATA pin to
+		distinguish between CMD and DATA.
 
 config LCD_RA8875
 	bool "RA8875 LCD Display Controller"
@@ -1645,11 +1742,11 @@ config LCD_FT80X_AUDIO_GPIO
 endif # LCD_FT80X
 
 config LCD_SSD1680
-	bool "SSD1680 E-PAPER Single Chip Driver"
+	bool "SSD1680/SSD1681 E-PAPER Single Chip Driver"
 	default n
 	select SPI_CMDDATA
 	---help---
-		e-paper Display Module based on SSD1680 controller.
+		e-paper Display Module based on SSD1680/SSD1681 controller.
 
 		Required SPI driver settings:
 		SPI_CMDDATA - Include support for cmd/data selection.
@@ -1671,6 +1768,11 @@ config LCD_SSD1680_2_90
 
 config LCD_SSD1680_2_90_RED
 	bool "2.9 inch 128/296 tri color (red)"
+
+config LCD_SSD1681_1_54
+	bool "1.54 inch 200/200 mono"
+	---help---
+		1.54 inch 200x200 e-paper display module based on SSD1681 controller.
 
 endchoice # Display size
 

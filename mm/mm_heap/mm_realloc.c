@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/mm_heap/mm_realloc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,9 +33,10 @@
 #include <assert.h>
 
 #include <nuttx/mm/mm.h>
+#include <nuttx/mm/kasan.h>
+#include <nuttx/sched_note.h>
 
 #include "mm_heap/mm.h"
-#include "kasan/kasan.h"
 
 /****************************************************************************
  * Public Functions
@@ -129,7 +132,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
   /* Map the memory chunk into an allocated node structure */
 
   oldnode = (FAR struct mm_allocnode_s *)
-    ((FAR char *)oldmem - MM_SIZEOF_ALLOCNODE);
+    ((FAR char *)kasan_clear_tag(oldmem) - MM_SIZEOF_ALLOCNODE);
 
   /* We need to hold the MM mutex while we muck with the nodelist. */
 
@@ -150,7 +153,8 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
           heap->mm_curused += newsize - oldsize;
           mm_shrinkchunk(heap, oldnode, newsize);
           kasan_poison((FAR char *)oldnode + MM_SIZEOF_NODE(oldnode) +
-                       sizeof(mmsize_t), oldsize - MM_SIZEOF_NODE(oldnode));
+                       sizeof(mmsize_t) - CONFIG_MM_NODE_GUARDSIZE,
+                       oldsize - MM_SIZEOF_NODE(oldnode));
         }
 
       /* Then return the original address */
@@ -380,10 +384,18 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
           heap->mm_maxused = heap->mm_curused;
         }
 
+      sched_note_heap(NOTE_HEAP_FREE, heap, oldmem, oldsize,
+                      heap->mm_curused - newsize);
+      sched_note_heap(NOTE_HEAP_ALLOC, heap, newmem, newsize,
+                      heap->mm_curused);
+
+      size = MM_SIZEOF_NODE(oldnode);
       mm_unlock(heap);
       MM_ADD_BACKTRACE(heap, (FAR char *)newmem - MM_SIZEOF_ALLOCNODE);
 
-      kasan_unpoison(newmem, mm_malloc_size(heap, newmem));
+      newmem = kasan_unpoison(newmem, size - MM_ALLOCNODE_OVERHEAD);
+
+      oldmem = kasan_set_tag(oldmem, kasan_get_tag(newmem));
       if (newmem != oldmem)
         {
           /* Now we have to move the user contents 'down' in memory.  memcpy

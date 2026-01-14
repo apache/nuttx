@@ -1,6 +1,8 @@
 # ##############################################################################
 # fs/zipfs/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -17,12 +19,13 @@
 # the License.
 #
 # ##############################################################################
+if(NOT CONFIG_DISABLE_MOUNTPOINT)
+  if(CONFIG_FS_ZIPFS)
 
-if(CONFIG_FS_ZIPFS)
+    target_sources(fs PRIVATE zip_vfs.c)
 
-  target_sources(fs PRIVATE zip_vfs.c)
-
-  target_include_directories(
-    fs PRIVATE ${CMAKE_CURRENT_LIST_DIR}/zlib/zlib/contrib/minizip
-               ${CMAKE_CURRENT_LIST_DIR}/zlib/zlib)
+    target_include_directories(
+      fs PRIVATE ${CMAKE_CURRENT_LIST_DIR}/zlib/zlib/contrib/minizip
+                 ${CMAKE_CURRENT_LIST_DIR}/zlib/zlib)
+  endif()
 endif()

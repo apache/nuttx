@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/misc/lib_instrument.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -105,7 +107,7 @@ __cyg_profile_func_exit(FAR void *this_fn, FAR void *call_site)
  *   entry - instrument entry structure.
  * Notice:
  *  use CONFIG_ARCH_INSTRUMENT_ALL must mark _start or entry
- *  noinstrument_function, becuase bss not set.
+ *  noinstrument_function, because bss not set.
  *  Make sure your callbacks are not instrumented recursively.
  *
  ****************************************************************************/

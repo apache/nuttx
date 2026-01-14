@@ -1,6 +1,8 @@
 /****************************************************************************
  * graphics/nxterm/nxterm_unregister.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -75,7 +77,7 @@ void nxterm_unregister(FAR struct nxterm_state_s *priv)
 
   /* Unregister the driver */
 
-  snprintf(devname, NX_DEVNAME_SIZE, NX_DEVNAME_FORMAT, priv->minor);
+  snprintf(devname, sizeof(devname), NX_DEVNAME_FORMAT, priv->minor);
   unregister_driver(devname);
 
   /* Free the private data structure */

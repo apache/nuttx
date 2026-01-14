@@ -1,6 +1,7 @@
 /****************************************************************************
  * drivers/sensors/ds18b20_uorb.c
- * Character driver for DS18B20 Digital Humidity and Temperature Module.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -80,7 +81,7 @@
 #define DS18B20_RES_VAL(x)             (((x) >> 5) & 0x3)
 #define DS18B20_RES_CONV(x)            (((x) & 0x3) << 5)
 
-/* Measurement timneout offset */
+/* Measurement timeout offset */
 
 #define DS18B20_TIMEOUT_OFFSET(x)      (DS18B20_RESMAX - (x))
 
@@ -146,7 +147,7 @@ struct ds18b20_dev_s
   struct onewire_config_s     config;         /* 1wire device configuration */
   struct ds18b20_config_s     reg;            /* Sensor resolution */
 #ifdef CONFIG_SENSORS_DS18B20_POLL
-  unsigned long               interval;       /* Polling interval */
+  uint32_t                    interval;       /* Polling interval */
   sem_t                       run;            /* Locks sensor thread */
 #endif
 };
@@ -172,7 +173,7 @@ static int ds18b20_control(FAR struct sensor_lowerhalf_s *lower,
 #ifdef CONFIG_SENSORS_DS18B20_POLL
 static int ds18b20_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                 FAR struct file *filep,
-                                FAR unsigned long *period_us);
+                                FAR uint32_t *period_us);
 #endif
 
 /****************************************************************************
@@ -323,6 +324,7 @@ static int ds18b20_isalarm(FAR struct onewire_master_s *master,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ds18b20_measure(FAR struct ds18b20_dev_s *dev)
@@ -353,6 +355,7 @@ static int ds18b20_measure(FAR struct ds18b20_dev_s *dev)
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ds18b20_write_spad(FAR struct ds18b20_dev_s *dev, int8_t th,
@@ -386,6 +389,7 @@ static int ds18b20_write_spad(FAR struct ds18b20_dev_s *dev, int8_t th,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ds18b20_read_spad(FAR struct ds18b20_dev_s *dev,
@@ -443,6 +447,7 @@ static int ds18b20_read_spad(FAR struct ds18b20_dev_s *dev,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ds18b20_set_res(FAR struct ds18b20_dev_s *dev, uint8_t res)
@@ -494,6 +499,7 @@ static int ds18b20_set_res(FAR struct ds18b20_dev_s *dev, uint8_t res)
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ds18b20_set_alarm(FAR struct ds18b20_dev_s *dev,
@@ -548,6 +554,7 @@ static int ds18b20_set_alarm(FAR struct ds18b20_dev_s *dev,
  *
  * Return:
  *   Timestamp in nsec
+ *
  ****************************************************************************/
 
 static unsigned long ds18b20_curtime(void)
@@ -595,6 +602,7 @@ static void ds18b20_notify(FAR struct ds18b20_dev_s *dev,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ds18b20_measure_read(FAR struct ds18b20_dev_s *dev,
@@ -608,7 +616,7 @@ static int ds18b20_measure_read(FAR struct ds18b20_dev_s *dev,
       return ret;
     }
 
-  nxsig_usleep(g_res_timeout[DS18B20_RES_VAL(dev->reg.res)]);
+  nxsched_usleep(g_res_timeout[DS18B20_RES_VAL(dev->reg.res)]);
 
   ret = ds18b20_read_spad(dev, data->spad);
   if (ret < 0)
@@ -623,7 +631,7 @@ static int ds18b20_measure_read(FAR struct ds18b20_dev_s *dev,
 /****************************************************************************
  * Name: ds18b20_fetch
  *
- * Description: Performs a measuremnt cylce and data read with data
+ * Description: Performs a measuremnt cycle and data read with data
  *              conversion.
  *
  * Parameter:
@@ -634,6 +642,7 @@ static int ds18b20_measure_read(FAR struct ds18b20_dev_s *dev,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ds18b20_fetch(FAR struct sensor_lowerhalf_s *lower,
@@ -676,6 +685,7 @@ static int ds18b20_fetch(FAR struct sensor_lowerhalf_s *lower,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ds18b20_control(FAR struct sensor_lowerhalf_s *lower,
@@ -744,6 +754,7 @@ static int ds18b20_control(FAR struct sensor_lowerhalf_s *lower,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ds18b20_active(FAR struct sensor_lowerhalf_s *lower,
@@ -782,12 +793,13 @@ static int ds18b20_active(FAR struct sensor_lowerhalf_s *lower,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_DS18B20_POLL
 static int ds18b20_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                 FAR struct file *filep,
-                                FAR unsigned long *period_us)
+                                FAR uint32_t *period_us)
 {
   FAR struct ds18b20_dev_s *priv = (FAR struct ds18b20_dev_s *)lower;
   priv->interval = *period_us;
@@ -804,6 +816,7 @@ static int ds18b20_set_interval(FAR struct sensor_lowerhalf_s *lower,
  * Parameter:
  *   argc - Number of arguments
  *   argv - Pointer to argument list
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_DS18B20_POLL
@@ -844,7 +857,7 @@ static int ds18b20_thread(int argc, char** argv)
                * is up to date.
                */
 
-              nxsig_usleep(g_res_timeout[DS18B20_RES_VAL(priv->reg.res)]);
+              nxsched_usleep(g_res_timeout[DS18B20_RES_VAL(priv->reg.res)]);
 
               /* Check for existing temperature alarm */
 
@@ -863,7 +876,7 @@ static int ds18b20_thread(int argc, char** argv)
         }
       else
         {
-          /* Default nofitication when temperature has been changed */
+          /* Default notification when temperature has been changed */
 
           ret = ds18b20_measure_read(priv, &data);
           if (!ret)
@@ -883,7 +896,7 @@ static int ds18b20_thread(int argc, char** argv)
 
       /* Sleeping thread before fetching the next sensor data */
 
-      nxsig_usleep(priv->interval);
+      nxsched_usleep(priv->interval);
     }
 
   return OK;
@@ -908,6 +921,7 @@ static int ds18b20_thread(int argc, char** argv)
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
+ *
  ****************************************************************************/
 
 int ds18b20_register(int devno, FAR struct onewire_master_s *onewire,
@@ -959,7 +973,6 @@ int ds18b20_register(int devno, FAR struct onewire_master_s *onewire,
 #endif
   tmp->lower.ops = &g_ds18b20_ops;
   tmp->lower.type = SENSOR_TYPE_AMBIENT_TEMPERATURE;
-  tmp->lower.uncalibrated = false;
   tmp->lower.nbuffer = 1;
   ret = sensor_register(&tmp->lower, devno);
   if (ret < 0)

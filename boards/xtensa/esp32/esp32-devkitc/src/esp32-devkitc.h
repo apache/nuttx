@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32/esp32-devkitc/src/esp32-devkitc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -110,15 +112,6 @@
 int esp32_bringup(void);
 
 /****************************************************************************
- * Name: esp32_mmcsd_initialize
- *
- * Description:
- *   Initialize SPI-based SD card and card detect thread.
- ****************************************************************************/
-
-int esp32_mmcsd_initialize(int minor);
-
-/****************************************************************************
  * Name: esp32_gpio_init
  ****************************************************************************/
 
@@ -188,8 +181,8 @@ int esp32_twai_setup(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ESP32_I2S0) && !defined(CONFIG_AUDIO_CS4344) || \
-    defined(CONFIG_ESP32_I2S1)
+#if defined(CONFIG_ESPRESSIF_I2S0) && !defined(CONFIG_AUDIO_CS4344) || \
+    defined(CONFIG_ESPRESSIF_I2S1)
 int board_i2sdev_initialize(int port, bool enable_tx, bool enable_rx);
 #endif
 
@@ -245,7 +238,7 @@ int board_ws2812_initialize(
  *
  ****************************************************************************/
 #ifdef CONFIG_ESP32_OPENETH
-int esp32_openeth_initialize(void);
+int esp_openeth_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

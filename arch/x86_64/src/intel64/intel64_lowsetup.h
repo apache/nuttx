@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/intel64/intel64_lowsetup.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -54,6 +56,16 @@ extern "C"
  ****************************************************************************/
 
 void intel64_lowsetup(void);
+
+/****************************************************************************
+ * Name: intel64_timer_secondary_init
+ *
+ * Description:
+ *   Called for the secondary CPUs to initialize the timer subsystem.
+ *
+ ****************************************************************************/
+
+void intel64_timer_secondary_init(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

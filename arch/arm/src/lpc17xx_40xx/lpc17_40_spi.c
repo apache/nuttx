@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc17_40_spi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -215,7 +217,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev,
 
   DEBUGASSERT(priv && frequency <= SPI_CLOCK / 2);
 
-  /* Check if the requested frequence is the same as the frequency
+  /* Check if the requested frequency is the same as the frequency
    * selection.
    */
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/kinetis/freedom-k66f/src/k66_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,8 +34,15 @@
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
 
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
+
 #include <nuttx/spi/spi.h>
-#include <nuttx/input/buttons.h>
+
+#ifdef CONFIG_INPUT_BUTTONS
+#  include <nuttx/input/buttons.h>
+#endif
 
 #include "kinetis_spi.h"
 #include "freedom-k66f.h"
@@ -58,6 +67,17 @@ int k66_bringup(void)
   struct spi_dev_s *spi1;
 #endif
   int ret;
+
+#ifdef HAVE_LEDS
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+      return ret;
+    }
+#endif
 
 #ifdef HAVE_PROC
   /* Mount the proc filesystem */

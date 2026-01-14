@@ -63,7 +63,7 @@
  *   size      - Size (in bytes) of the memory region to be allocated.
  *
  * Return Value:
- *   Adress of the allocated adress. NULL, if allocation fails.
+ *   Address of the allocated address. NULL, if allocation fails.
  *
  ****************************************************************************/
 
@@ -102,7 +102,7 @@ void *up_textheap_memalign(size_t align, size_t size)
  *   Free memory from the text heap.
  *
  * Parameters:
- *   mem - Adress to be freed.
+ *   mem - Address to be freed.
  *
  ****************************************************************************/
 

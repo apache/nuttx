@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_gpioirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,7 +39,6 @@
 
 #include "arm_internal.h"
 #include "sam_gpio.h"
-#include "sam_periphclks.h"
 #include "hardware/sam_pmc.h"
 #include "hardware/sam_pio.h"
 
@@ -233,10 +234,6 @@ void sam_gpioirqinitialize(void)
   /* Configure GPIOA interrupts */
 
 #ifdef CONFIG_SAMV7_GPIOA_IRQ
-  /* Enable GPIOA clocking */
-
-  sam_pioa_enableclk();
-
   /* Clear and disable all GPIOA interrupts */
 
   getreg32(SAM_PIOA_ISR);
@@ -251,10 +248,6 @@ void sam_gpioirqinitialize(void)
   /* Configure GPIOB interrupts */
 
 #ifdef CONFIG_SAMV7_GPIOB_IRQ
-  /* Enable GPIOB clocking */
-
-  sam_piob_enableclk();
-
   /* Clear and disable all GPIOB interrupts */
 
   getreg32(SAM_PIOB_ISR);
@@ -269,10 +262,6 @@ void sam_gpioirqinitialize(void)
   /* Configure GPIOC interrupts */
 
 #ifdef CONFIG_SAMV7_GPIOC_IRQ
-  /* Enable GPIOC clocking */
-
-  sam_pioc_enableclk();
-
   /* Clear and disable all GPIOC interrupts */
 
   getreg32(SAM_PIOC_ISR);
@@ -287,10 +276,6 @@ void sam_gpioirqinitialize(void)
   /* Configure GPIOD interrupts */
 
 #ifdef CONFIG_SAMV7_GPIOD_IRQ
-  /* Enable GPIOD clocking */
-
-  sam_piod_enableclk();
-
   /* Clear and disable all GPIOD interrupts */
 
   getreg32(SAM_PIOD_ISR);
@@ -305,10 +290,6 @@ void sam_gpioirqinitialize(void)
   /* Configure GPIOE interrupts */
 
 #ifdef CONFIG_SAMV7_GPIOE_IRQ
-  /* Enable GPIOE clocking */
-
-  sam_pioe_enableclk();
-
   /* Clear and disable all GPIOE interrupts */
 
   getreg32(SAM_PIOE_ISR);

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/lpc31xx/ea3152/tools/lpchdr.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -76,7 +78,7 @@ struct lpc31_header_s
                                *    not used by boot ROM but is provided to
                                *    track the image versions.
                                */
-  uint32_t sbzbootparameter;  /* 0x2c    hould be zero. */
+  uint32_t sbzbootparameter;  /* 0x2c    Should be zero. */
   uint32_t cust_reserved[15]; /* 0x30-0x68: Reserved for customer use
                                *                   (60 bytes)
                                */

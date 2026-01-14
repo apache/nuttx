@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/avr/src/avr/avr_switchcontext.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -54,23 +56,15 @@
 
 void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
-  /* Update scheduler parameters */
-
-  nxsched_suspend_scheduler(rtcb);
-
   /* Are we in an interrupt handler? */
 
-  if (g_current_regs)
+  if (up_current_regs())
     {
       /* Yes, then we have to do things differently.
        * Just copy the g_current_regs into the OLD rtcb.
        */
 
       avr_savestate(rtcb->xcp.regs);
-
-      /* Update scheduler parameters */
-
-      nxsched_resume_scheduler(tcb);
 
       /* Then switch contexts */
 
@@ -83,7 +77,11 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
     {
       /* Update scheduler parameters */
 
-      nxsched_resume_scheduler(tcb);
+      nxsched_switch_context(rtcb, tcb);
+
+      /* Record the new "running" task */
+
+      g_running_tasks[this_cpu()] = tcb;
 
       /* Switch context to the context of the task at the head of the
        * ready to run list.

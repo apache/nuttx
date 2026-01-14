@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/z80/ez80/z20x/src/w25_main.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -101,11 +103,11 @@ static int w25_read_hex(FAR uint24_t *len)
 
   /* Open the W25 device for writing */
 
-  fd = open(W25_CHARDEV, O_WRONLY);
+  fd = open(W25_DEV, O_WRONLY);
   if (fd < 0)
     {
       ret = -errno;
-      fprintf(stderr, "ERROR: Failed to open %s: %d\n", W25_CHARDEV, ret);
+      fprintf(stderr, "ERROR: Failed to open %s: %d\n", W25_DEV, ret);
       return ret;
     }
 
@@ -204,11 +206,11 @@ static int w25_write_binary(FAR const struct prog_header_s *hdr)
 
   /* Open the W25 device for writing */
 
-  fd = open(W25_CHARDEV, O_WRONLY);
+  fd = open(W25_DEV, O_WRONLY);
   if (fd < 0)
     {
       ret = -errno;
-      fprintf(stderr, "ERROR: Failed to open %s: %d\n", W25_CHARDEV, ret);
+      fprintf(stderr, "ERROR: Failed to open %s: %d\n", W25_DEV, ret);
       return ret;
     }
 
@@ -288,7 +290,7 @@ static int w25_read_binary(FAR struct prog_header_s *hdr)
 
   /* Open the W25 device for reading */
 
-  fd = open(W25_CHARDEV, O_RDONLY);
+  fd = open(W25_DEV, O_RDONLY);
   if (fd < 0)
     {
       ret = -errno;
@@ -688,7 +690,7 @@ static int w25_wait_keypress(FAR char *keyset, int nseconds)
 
           /* Delay 50 Milliseconds  */
 
-          nxsig_usleep(50 * 1000);
+          nxsched_usleep(50 * 1000);
 
           /* Output a dot to stdout every 10 * 50 = 500 milliseconds */
 

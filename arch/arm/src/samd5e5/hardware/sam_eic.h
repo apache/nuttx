@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samd5e5/hardware/sam_eic.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -96,7 +98,7 @@
 
 /* Synchronization busy register */
 
-#define EIC_SYNCBUSY_SWRST           (1 << 0)  /* Bit 0:  Software reset syncrhonization busy */
+#define EIC_SYNCBUSY_SWRST           (1 << 0)  /* Bit 0:  Software reset synchronization busy */
 #define EIC_SYNCBUSY_ENABLE          (1 << 1)  /* Bit 1:  Enable synchronization busy */
 
 /* Event control, Interrupt enable clear, interrupt enable set register,

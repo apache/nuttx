@@ -1,6 +1,8 @@
 ############################################################################
 # drivers/1wire/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -24,6 +26,10 @@ CSRCS += 1wire.c 1wire_crc.c 1wire_read.c 1wire_write.c 1wire_writeread.c
 
 ifeq ($(CONFIG_1WIRE_DS28E17),y)
 CSRCS += ds28e17.c
+endif
+
+ifeq ($(CONFIG_1WIRE_EE_DS2XXX),y)
+CSRCS += 1wire_ds2xxx.c
 endif
 
 # Include 1wire device driver build support

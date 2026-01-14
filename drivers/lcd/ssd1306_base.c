@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/lcd/ssd1306_base.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -912,7 +914,7 @@ static int ssd1306_configuredisplay(struct ssd1306_dev_s *priv)
 
   /* Configure OLED SPI or I/O, must be delayed 1-10ms */
 
-  nxsig_usleep(5000);
+  nxsched_usleep(5000);
 
   /* Configure the device */
 
@@ -1308,7 +1310,7 @@ static int ssd1306_configuredisplay(struct ssd1306_dev_s *priv)
 
   ssd1306_select(priv, false);
 
-  nxsig_usleep(100000);
+  nxsched_usleep(100000);
 
   priv->is_conf = true;
   return OK;

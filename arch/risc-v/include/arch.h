@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/include/arch.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,42 @@
 #  include <stdint.h>
 #  include <stddef.h>
 #endif
+
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_PIC
+
+#define PIC_REG         x29
+#define PIC_REG_STRING "x29"
+
+#define up_getpicbase(ppicbase) \
+do { \
+  uintptr_t picbase; \
+  __asm__ volatile \
+  ( \
+    "mv %0, " PIC_REG_STRING \
+    : "=r"(picbase) \
+    : \
+    : \
+  ); \
+  *(uintptr_t *)ppicbase = picbase; \
+} while (0)
+
+#define up_setpicbase(picbase) \
+do { \
+  uintptr_t _picbase = (uintptr_t)picbase; \
+  __asm__ volatile \
+  ( \
+    "mv " PIC_REG_STRING ", %0" \
+    : \
+    : "r"(_picbase) \
+    : PIC_REG_STRING \
+  ); \
+} while (0)
+
+#endif /* CONFIG_PIC */
 
 /****************************************************************************
  * Pre-processor Definitions

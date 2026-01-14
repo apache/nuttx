@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_cpuload_oneshot.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -191,14 +193,13 @@ static void nxsched_oneshot_start(void)
 
   /* Then re-start the oneshot timer */
 
-  secs       = usecs / 1000000;
+  secs       = USEC2SEC(usecs);
   usecs     -= 100000 * secs;
 
   ts.tv_sec  = secs;
   ts.tv_nsec = 1000 * usecs;
 
-  DEBUGVERIFY(ONESHOT_START(g_sched_oneshot.oneshot,
-                            nxsched_oneshot_callback, NULL, &ts));
+  DEBUGVERIFY(ONESHOT_START(g_sched_oneshot.oneshot, &ts));
 }
 
 /****************************************************************************
@@ -302,7 +303,7 @@ void nxsched_oneshot_extclk(FAR struct oneshot_lowerhalf_s *lower)
     }
   else
     {
-      g_sched_oneshot.maxdelay = ts.tv_nsec / 1000;
+      g_sched_oneshot.maxdelay = NSEC2USEC(ts.tv_nsec);
     }
 
   tmrinfo("madelay = %ld usec\n", (long)g_sched_oneshot.maxdelay);
@@ -326,6 +327,8 @@ void nxsched_oneshot_extclk(FAR struct oneshot_lowerhalf_s *lower)
   /* Then start the oneshot */
 
   g_sched_oneshot.oneshot = lower;
+  lower->callback = nxsched_oneshot_callback;
+  lower->arg      = NULL;
   nxsched_oneshot_start();
 }
 #endif

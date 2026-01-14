@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/wqueue/kwork_cancel.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,7 +31,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/queue.h>
+#include <nuttx/list.h>
 #include <nuttx/wqueue.h>
 
 #include "wqueue/wqueue.h"
@@ -40,80 +42,67 @@
  * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: work_qcancel
- *
- * Description:
- *   Cancel previously queued work.  This removes work from the work queue.
- *   After work has been cancelled, it may be requeued by calling
- *   work_queue() again.
- *
- * Input Parameters:
- *   wqueue  - The work queue to use.  Must be HPWORK or LPWORK
- *   nthread - The number of threads in the work queue
- *             > 0 unsynchronous cancel
- *             < 0 synchronous cancel
- *   work    - The previously queued work structure to cancel
- *
- * Returned Value:
- *   Zero (OK) on success, a negated errno on failure.  This error may be
- *   reported:
- *
- *   -ENOENT - There is no such work queued.
- *   -EINVAL - An invalid work queue was specified
- *
- ****************************************************************************/
-
-static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, int nthread,
+static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
                         FAR struct work_s *work)
 {
   irqstate_t flags;
-  int ret = -ENOENT;
+  FAR sem_t *sync_wait = NULL;
 
-  DEBUGASSERT(work != NULL);
+  if (wqueue == NULL || work == NULL)
+    {
+      return -EINVAL;
+    }
 
   /* Cancelling the work is simply a matter of removing the work structure
    * from the work queue.  This must be done with interrupts disabled because
    * new work is typically added to the work queue from interrupt handlers.
    */
 
-  flags = enter_critical_section();
-  if (work->worker != NULL)
+  flags = spin_lock_irqsave(&wqueue->lock);
+
+  if (!work_available(work))
     {
-      /* Remove the entry from the work queue and make sure that it is
-       * marked as available (i.e., the worker field is nullified).
+      /* If the head of the pending queue has changed, we should reset
+       * the wqueue timer.
        */
 
-      if (WDOG_ISACTIVE(&work->u.timer))
+      if (work_remove(wqueue, work))
         {
-          wd_cancel(&work->u.timer);
+          work_timer_reset(wqueue);
         }
-      else
-        {
-          dq_rem((FAR dq_entry_t *)work, &wqueue->q);
-        }
-
-      work->worker = NULL;
-      ret = OK;
     }
-  else if (nthread > 0)
+
+  /* Note that cancel_sync can not be called in the interrupt
+   * context and the idletask context.
+   */
+
+  if (sync)
     {
       int wndx;
+      pid_t pid = nxsched_gettid();
+      FAR struct kworker_s *worker = wq_get_worker(wqueue);
 
-      for (wndx = 0; wndx < nthread; wndx++)
+      /* Wait until the worker thread finished the work. */
+
+      for (wndx = 0; wndx < wqueue->nthreads; wndx++)
         {
-          if (wqueue->worker[wndx].work == work &&
-              wqueue->worker[wndx].pid != nxsched_gettid())
+          if (worker[wndx].work == work && worker[wndx].pid != pid)
             {
-              nxsem_wait_uninterruptible(&wqueue->worker[wndx].wait);
-              ret = OK;
+              worker[wndx].wait_count++;
+              sync_wait = &worker[wndx].wait;
               break;
             }
         }
     }
 
-  leave_critical_section(flags);
-  return ret;
+  spin_unlock_irqrestore(&wqueue->lock, flags);
+
+  if (sync_wait)
+    {
+      nxsem_wait_uninterruptible(sync_wait);
+    }
+
+  return 0;
 }
 
 /****************************************************************************
@@ -121,20 +110,20 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, int nthread,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: work_cancel
+ * Name: work_cancel/work_cancel_wq
  *
  * Description:
- *   Cancel previously queued user-mode work.  This removes work from the
- *   user mode work queue.  After work has been cancelled, it may be
- *   requeued by calling work_queue() again.
+ *   Cancel previously queued work.  This removes work from the work queue.
+ *   After work has been cancelled, it may be requeued by calling
+ *   work_queue() again.
  *
  * Input Parameters:
  *   qid    - The work queue ID (must be HPWORK or LPWORK)
+ *   wqueue - The work queue handle
  *   work   - The previously queued work structure to cancel
  *
  * Returned Value:
- *   Zero (OK) on success, a negated errno on failure.  This error may be
- *   reported:
+ *   Zero on success, a negated errno on failure
  *
  *   -ENOENT - There is no such work queued.
  *   -EINVAL - An invalid work queue was specified
@@ -143,33 +132,17 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, int nthread,
 
 int work_cancel(int qid, FAR struct work_s *work)
 {
-#ifdef CONFIG_SCHED_HPWORK
-  if (qid == HPWORK)
-    {
-      /* Cancel high priority work */
+  return work_qcancel(work_qid2wq(qid), false, work);
+}
 
-      return work_qcancel((FAR struct kwork_wqueue_s *)&g_hpwork,
-                          -1, work);
-    }
-  else
-#endif
-#ifdef CONFIG_SCHED_LPWORK
-  if (qid == LPWORK)
-    {
-      /* Cancel low priority work */
-
-      return work_qcancel((FAR struct kwork_wqueue_s *)&g_lpwork,
-                          -1, work);
-    }
-  else
-#endif
-    {
-      return -EINVAL;
-    }
+int work_cancel_wq(FAR struct kwork_wqueue_s *wqueue,
+                   FAR struct work_s *work)
+{
+  return work_qcancel(wqueue, false, work);
 }
 
 /****************************************************************************
- * Name: work_cancel_sync
+ * Name: work_cancel_sync/work_cancel_sync_wq
  *
  * Description:
  *   Blocked cancel previously queued user-mode work.  This removes work
@@ -178,11 +151,12 @@ int work_cancel(int qid, FAR struct work_s *work)
  *
  * Input Parameters:
  *   qid    - The work queue ID (must be HPWORK or LPWORK)
+ *   wqueue - The work queue handle
  *   work   - The previously queued work structure to cancel
  *
  * Returned Value:
- *   Zero (OK) on success, a negated errno on failure.  This error may be
- *   reported:
+ *   Zero means the work was successfully cancelled.
+ *   A negated errno value is returned on any failure:
  *
  *   -ENOENT - There is no such work queued.
  *   -EINVAL - An invalid work queue was specified
@@ -191,29 +165,13 @@ int work_cancel(int qid, FAR struct work_s *work)
 
 int work_cancel_sync(int qid, FAR struct work_s *work)
 {
-#ifdef CONFIG_SCHED_HPWORK
-  if (qid == HPWORK)
-    {
-      /* Cancel high priority work */
+  return work_qcancel(work_qid2wq(qid), true, work);
+}
 
-      return work_qcancel((FAR struct kwork_wqueue_s *)&g_hpwork,
-                          CONFIG_SCHED_HPNTHREADS, work);
-    }
-  else
-#endif
-#ifdef CONFIG_SCHED_LPWORK
-  if (qid == LPWORK)
-    {
-      /* Cancel low priority work */
-
-      return work_qcancel((FAR struct kwork_wqueue_s *)&g_lpwork,
-                          CONFIG_SCHED_LPNTHREADS, work);
-    }
-  else
-#endif
-    {
-      return -EINVAL;
-    }
+int work_cancel_sync_wq(FAR struct kwork_wqueue_s *wqueue,
+                        FAR struct work_s *work)
+{
+  return work_qcancel(wqueue, true, work);
 }
 
 #endif /* CONFIG_SCHED_WORKQUEUE */

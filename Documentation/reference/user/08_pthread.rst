@@ -34,6 +34,8 @@ manage pthreads.
  - :c:func:`pthread_attr_getinheritsched`
  - :c:func:`pthread_attr_setstacksize`
  - :c:func:`pthread_attr_getstacksize`
+ - :c:func:`pthread_attr_setguardsize`
+ - :c:func:`pthread_attr_getguardsize`
  - :c:func:`pthread_create`
  - :c:func:`pthread_detach`
  - :c:func:`pthread_exit`
@@ -109,13 +111,8 @@ The main task thread does not have thread-specific data.
 
 No support for the following pthread interfaces is provided by NuttX:
 
-  -  ``pthread_attr_getguardsize``. get and set the thread guardsize
-     attribute.
   -  ``pthread_attr_getscope``. get and set the contentionscope attribute.
-  -  ``pthread_attr_setguardsize``. get and set the thread guardsize
-     attribute.
   -  ``pthread_attr_setscope``. get and set the contentionscope attribute.
-  -  ``pthread_getconcurrency``. get and set the level of concurrency.
   -  ``pthread_getcpuclockid``. access a thread CPU-time clock.
   -  ``pthread_mutex_getprioceiling``. get and set the priority ceiling of
      a mutex.
@@ -125,7 +122,6 @@ No support for the following pthread interfaces is provided by NuttX:
      attribute of the mutex attributes object.
   -  ``pthread_mutexattr_setprioceiling``. get and set the prioceiling
      attribute of the mutex attributes object.
-  -  ``pthread_setconcurrency``. get and set the level of concurrency.
 
 .. c:function:: int pthread_attr_init(pthread_attr_t *attr);
 
@@ -318,6 +314,51 @@ No support for the following pthread interfaces is provided by NuttX:
   **Returned Value:**
 
   If successful, the ``pthread_attr_getstacksize()`` function will return
+  zero (``OK``). Otherwise, an error number will be returned to indicate
+  the error:
+
+  -  ``To be provided``.
+
+  **Assumptions/Limitations:**
+
+  **POSIX Compatibility:** Comparable to the POSIX interface of the same
+  name.
+
+.. c:function:: int pthread_attr_setguardsize(pthread_attr_t *attr, long guardsize);
+
+   Sets the thread guardsize attribute in the attr object. At this moment this
+   option simply increases the size of thread stacks.
+
+  **Input Parameters:**
+
+  -  attr - thread attributes to be modified
+  -  guardsize - guard size
+
+  **Returned Value:**
+
+  If successful, the ``pthread_attr_setguardsize()`` function will return
+  zero (``OK``). Otherwise, an error number will be returned to indicate
+  the error:
+
+  -  ``To be provided``.
+
+  **Assumptions/Limitations:**
+
+  **POSIX Compatibility:** Comparable to the POSIX interface of the same
+  name.
+
+.. c:function:: int pthread_attr_getguardsize(FAR const pthread_attr_t *attr, FAR size_t *stackaddr);
+
+ Gets the thread guardsize attributes from the attr object.
+
+  **Input Parameters:**
+
+  -  attr - thread attributes to be queried
+  -  guardsize - guard size pointer
+
+  **Returned Value:**
+
+  If successful, the ``pthread_attr_getguardsize()`` function will return
   zero (``OK``). Otherwise, an error number will be returned to indicate
   the error:
 

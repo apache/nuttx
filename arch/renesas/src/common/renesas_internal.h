@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/renesas/src/common/renesas_internal.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -87,7 +89,7 @@
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
-#define renesas_savestate(regs)  renesas_copystate(regs, (uint32_t *)g_current_regs)
+#define renesas_savestate(regs)  renesas_copystate(regs, up_current_regs())
 
 #define getreg8(a)          (*(volatile uint8_t *)(a))
 #define putreg8(v,a)        (*(volatile uint8_t *)(a) = (v))

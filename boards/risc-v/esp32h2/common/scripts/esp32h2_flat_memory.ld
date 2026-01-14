@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/esp32h2/common/scripts/esp32h2_flat_memory.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -72,7 +74,7 @@ MEMORY
    * signing of firmware image.
    */
 
-  metadata (RX) :        org = CONFIG_ESPRESSIF_APP_MCUBOOT_HEADER_SIZE, len = 0x20
+  metadata (RX) :        org = CONFIG_ESPRESSIF_APP_MCUBOOT_HEADER_SIZE, len = 0x60
   ROM (RX) :             org = ORIGIN(metadata) + LENGTH(metadata),
                          len = FLASH_SIZE - ORIGIN(ROM)
 #elif defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)

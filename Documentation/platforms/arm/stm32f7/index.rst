@@ -189,7 +189,13 @@ CAN
 
 - CONFIG_CAN_EXTID - Enables support for the 29-bit extended ID.  Default Standard 11-bit IDs.
 
-- CONFIG_CAN_FIFOSIZE - The size of the circular buffer of CAN messages.  Default: 8
+- CONFIG_CAN_TXFIFOSIZE - The size of the circular tx buffer
+  of CAN messages.
+  Default: 8
+   
+- CONFIG_CAN_RXFIFOSIZE - The size of the circular rx buffer
+  of CAN messages.
+  Default: 8
 
 - CONFIG_CAN_NPENDINGRTR - The size of the list of pending RTR requests.  Default: 4
 
@@ -428,6 +434,33 @@ different from the default in your PATH variable).
 - Builds NuttX with the features you selected.::
 
      $ make
+
+Flashing and Debugging
+======================
+
+NuttX firmware Flashing with STLink probe and OpenOCD::
+
+   openocd -f  interface/stlink.cfg -f target/stm32f7x.cfg -c 'program nuttx.bin 0x08000000; reset run; exit'
+
+Remote target Reset with STLink probe and OpenOCD::
+
+   openocd -f interface/stlink.cfg -f target/stm32f7x.cfg -c 'init; reset run; exit'
+
+Remote target Debug with STLink probe and OpenOCD:
+
+ 1. You need to have NuttX built with debug symbols, see :ref:`debugging`.
+
+ 2. Launch the OpenOCD GDB server::
+
+     openocd -f interface/stlink.cfg -f target/stm32f7x.cfg -c 'init; reset halt'
+
+ 3. You can now attach to remote OpenOCD GDB server with your favorite debugger,
+    for instance gdb::
+
+     arm-none-eabi-gdb --tui nuttx -ex 'target extended-remote localhost:3333'
+     (gdb) monitor reset halt
+     (gdb) breakpoint nsh_main
+     (gdb) continue
 
 Supported Boards
 ================

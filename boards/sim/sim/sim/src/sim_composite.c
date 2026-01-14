@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/sim/sim/sim/src/sim_composite.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,6 +36,7 @@
 #include <nuttx/usb/rndis.h>
 #include <nuttx/usb/cdcacm.h>
 #include <nuttx/usb/cdcecm.h>
+#include <nuttx/usb/cdcncm.h>
 #include <nuttx/usb/composite.h>
 
 #if defined(CONFIG_BOARDCTL_USBDEVCTRL) && defined(CONFIG_USBDEV_COMPOSITE)
@@ -211,6 +214,100 @@ static void *board_composite1_connect(int port)
 }
 
 /****************************************************************************
+ * Name:  board_composite2_connect
+ *
+ * Description:
+ *   Connect the USB composite device on the specified USB device port for
+ *   configuration 2.
+ *
+ * Input Parameters:
+ *   port     - The USB device port.
+ *
+ * Returned Value:
+ *   A non-NULL handle value is returned on success.  NULL is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+static void *board_composite2_connect(int port)
+{
+  struct composite_devdesc_s dev[1];
+  int dev_idx = 0;
+
+#ifdef CONFIG_NET_CDCNCM
+  /* Configure the CDC/NCM device */
+
+  cdcncm_get_composite_devdesc(&dev[dev_idx]);
+
+  /* Interfaces */
+
+  dev[dev_idx].devinfo.ifnobase = 0;
+  dev[dev_idx].minor = 0;
+
+  /* Strings */
+
+  dev[dev_idx].devinfo.strbase = COMPOSITE_NSTRIDS - 1;
+
+  /* Endpoints */
+
+  dev[dev_idx].devinfo.epno[CDCNCM_EP_INTIN_IDX] = 5;
+  dev[dev_idx].devinfo.epno[CDCNCM_EP_BULKIN_IDX] = 6;
+  dev[dev_idx].devinfo.epno[CDCNCM_EP_BULKOUT_IDX] = 7;
+
+  dev_idx += 1;
+#endif
+
+  return composite_initialize(composite_getdevdescs(), dev, dev_idx);
+}
+
+/****************************************************************************
+ * Name:  board_composite3_connect
+ *
+ * Description:
+ *   Connect the USB composite device on the specified USB device port for
+ *   configuration 3.
+ *
+ * Input Parameters:
+ *   port     - The USB device port.
+ *
+ * Returned Value:
+ *   A non-NULL handle value is returned on success.  NULL is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+static void *board_composite3_connect(int port)
+{
+  struct composite_devdesc_s dev[1];
+  int dev_idx = 0;
+
+#ifdef CONFIG_NET_CDCMBIM
+  /* Configure the CDC/NCM device */
+
+  cdcmbim_get_composite_devdesc(&dev[dev_idx]);
+
+  /* Interfaces */
+
+  dev[dev_idx].devinfo.ifnobase = 0;
+  dev[dev_idx].minor = 0;
+
+  /* Strings */
+
+  dev[dev_idx].devinfo.strbase = COMPOSITE_NSTRIDS - 1;
+
+  /* Endpoints */
+
+  dev[dev_idx].devinfo.epno[CDCNCM_EP_INTIN_IDX] = 5;
+  dev[dev_idx].devinfo.epno[CDCNCM_EP_BULKIN_IDX] = 6;
+  dev[dev_idx].devinfo.epno[CDCNCM_EP_BULKOUT_IDX] = 7;
+
+  dev_idx += 1;
+#endif
+
+  return composite_initialize(composite_getdevdescs(), dev, dev_idx);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -251,9 +348,17 @@ void *board_composite_connect(int port, int configid)
     {
       return board_composite0_connect(port);
     }
-  else
+  else if (configid == 1)
     {
       return board_composite1_connect(port);
+    }
+  else if (configid == 2)
+    {
+      return board_composite2_connect(port);
+    }
+  else
+    {
+      return board_composite3_connect(port);
     }
 }
 

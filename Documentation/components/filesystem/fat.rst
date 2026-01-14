@@ -100,7 +100,7 @@ are set (``0xFFF`` for FAT12, ``0xFFFF`` for FAT16, ``0xFFFFFFFF`` for FAT32).
 The starting cluster (head of the file chain) is pointed to by the directory
 entry of that file.
 
-Directory Entires
+Directory Entries
 =================
 
 A directory is basically a file which has a table that contains directory

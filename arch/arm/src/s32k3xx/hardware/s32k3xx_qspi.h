@@ -153,7 +153,7 @@
 /* Module Configuration Register (MCR) */
 
 #define QSPI_MCR_SWRSTSD                  (1 << 0)  /* Bit 0: Software reset for serial flash memory domain (SWRSTSD) */
-#define QSPI_MCR_SWRSTHD                  (1 << 1)  /* Bit 1: Software reset fo AHB domain (SWRSTHD) */
+#define QSPI_MCR_SWRSTHD                  (1 << 1)  /* Bit 1: Software reset for AHB domain (SWRSTHD) */
                                                     /* Bits 2-9: Reserved */
 #define QSPI_MCR_CLR_RXF                  (1 << 10) /* Bit 10: Clear RX FIFO (CLR_RXF) */
 #define QSPI_MCR_CLR_TXF                  (1 << 11) /* Bit 11: Clear TX FIFO/buffer (CLR_TXF) */

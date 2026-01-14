@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm64/src/imx9/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -20,16 +22,32 @@
 
 include common/Make.defs
 
+ifeq ($(CONFIG_IMX9_DDR_TRAINING),y)
+  include imx9/ddr/Make.defs
+endif
+
 # i.MX9-specific C source files
 
-CHIP_CSRCS = imx9_boot.c imx9_ccm.c imx9_clockconfig.c imx9_gpio.c imx9_iomuxc.c
+CHIP_CSRCS  = imx9_boot.c
 
 ifeq ($(CONFIG_ARCH_CHIP_IMX93),y)
-  CHIP_CSRCS += imx9_lpuart.c imx9_lowputc.c
+CHIP_CSRCS  += imx9_ccm.c imx9_gpio.c
 endif
+
+CHIP_CSRCS += imx9_lpuart.c imx9_lowputc.c imx9_clockconfig.c
+CHIP_CSRCS += imx9_iomuxc.c
 
 ifeq ($(CONFIG_IMX9_GPIO_IRQ),y)
   CHIP_CSRCS += imx9_gpioirq.c
+endif
+
+ifeq ($(CONFIG_IMX9_MU),y)
+  CHIP_CSRCS += imx9_mu.c
+endif
+
+ifeq ($(CONFIG_IMX9_SCMI),y)
+  CHIP_CSRCS += imx9_scmi.c
+  # NXP SDK SCMI interface for pinctrl and clocking
 endif
 
 ifeq ($(CONFIG_IMX9_FLEXIO_PWM),y)
@@ -74,4 +92,26 @@ endif
 
 ifeq ($(CONFIG_IMX9_FLEXSPI_NOR), y)
   CHIP_CSRCS += imx9_flexspi_nor.c
+endif
+
+ifeq ($(CONFIG_IMX9_BOOTLOADER), y)
+  CHIP_CSRCS += imx9_system_ctl.c
+  CHIP_CSRCS += imx9_trdc.c
+  CHIP_CSRCS += imx9_ele.c
+endif
+
+ifeq ($(CONFIG_IMX9_ROMAPI), y)
+  CHIP_CSRCS += imx9_romapi.c
+endif
+
+ifeq ($(CONFIG_IMX9_AHAB_BOOT), y)
+  CHIP_CSRCS += imx9_ahab.c
+endif
+
+ifeq ($(CONFIG_IMX9_DDR_TRAINING),y)
+  CHIP_CSRCS += $(DDR_CSRCS)
+endif
+
+ifeq ($(CONFIG_IMX9_FLEXCAN), y)
+  CHIP_CSRCS += imx9_flexcan.c
 endif

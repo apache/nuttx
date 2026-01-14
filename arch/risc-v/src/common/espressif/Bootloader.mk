@@ -1,6 +1,8 @@
 ############################################################################
 # arch/risc-v/src/common/espressif/Bootloader.mk
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -24,7 +26,6 @@ CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
 
 TOOLSDIR             = $(TOPDIR)/tools/espressif
 CHIPDIR              = $(TOPDIR)/arch/risc-v/src/chip
-HALDIR               = $(CHIPDIR)/esp-hal-3rdparty
 BOOTLOADER_SRCDIR    = $(CHIPDIR)/bootloader
 BOOTLOADER_OUTDIR    = $(BOOTLOADER_SRCDIR)/out
 BOOTLOADER_CONFIG    = $(BOOTLOADER_SRCDIR)/bootloader.conf
@@ -33,8 +34,20 @@ BOOTLOADER_CONFIG    = $(BOOTLOADER_SRCDIR)/bootloader.conf
 
 MCUBOOT_SRCDIR     = $(BOOTLOADER_SRCDIR)/mcuboot
 MCUBOOT_ESPDIR     = $(MCUBOOT_SRCDIR)/boot/espressif
-MCUBOOT_URL        = https://github.com/mcu-tools/mcuboot
 MCUBOOT_TOOLCHAIN  = $(TOOLSDIR)/mcuboot_toolchain_espressif.cmake
+HALDIR             = $(BOOTLOADER_SRCDIR)/esp-hal-3rdparty-mcuboot
+
+ifndef MCUBOOT_VERSION
+	MCUBOOT_VERSION = $(CONFIG_ESPRESSIF_MCUBOOT_VERSION)
+endif
+
+ifndef MCUBOOT_URL
+	MCUBOOT_URL = https://github.com/mcu-tools/mcuboot
+endif
+
+ifndef ESP_HAL_3RDPARTY_VERSION_FOR_MCUBOOT
+	ESP_HAL_3RDPARTY_VERSION_FOR_MCUBOOT = 911dbec8e4a92e70056b58a3d2b0d965b8b7bcc9
+endif
 
 # Helpers for creating the configuration file
 
@@ -48,6 +61,7 @@ $(BOOTLOADER_SRCDIR):
 $(BOOTLOADER_CONFIG): $(TOPDIR)/.config $(BOOTLOADER_SRCDIR)
 	$(Q) echo "Creating Bootloader configuration"
 	$(Q) { \
+		$(call cfg_en,NON_OS_BUILD) \
 		$(if $(CONFIG_ESPRESSIF_FLASH_2M),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHSIZE_2MB)) \
 		$(if $(CONFIG_ESPRESSIF_FLASH_4M),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHSIZE_4MB)) \
 		$(if $(CONFIG_ESPRESSIF_FLASH_MODE_DIO),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHMODE_DIO)) \
@@ -55,25 +69,46 @@ $(BOOTLOADER_CONFIG): $(TOPDIR)/.config $(BOOTLOADER_SRCDIR)
 		$(if $(CONFIG_ESPRESSIF_FLASH_MODE_QIO),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHMODE_QIO)) \
 		$(if $(CONFIG_ESPRESSIF_FLASH_MODE_QOUT),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHMODE_QOUT)) \
 		$(if $(CONFIG_ESPRESSIF_FLASH_FREQ_80M),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHFREQ_80M)) \
+		$(if $(CONFIG_ESPRESSIF_FLASH_FREQ_64M),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHFREQ_64M)) \
 		$(if $(CONFIG_ESPRESSIF_FLASH_FREQ_48M),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHFREQ_48M)) \
 		$(if $(CONFIG_ESPRESSIF_FLASH_FREQ_40M),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHFREQ_40M)) \
 		$(if $(CONFIG_ESPRESSIF_FLASH_FREQ_26M),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHFREQ_26M)) \
 		$(if $(CONFIG_ESPRESSIF_FLASH_FREQ_20M),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHFREQ_20M)) \
+		$(call cfg_val,CONFIG_ESPTOOLPY_FLASHFREQ,$(CONFIG_ESPRESSIF_FLASH_FREQ)) \
 	} > $(BOOTLOADER_CONFIG)
 ifeq ($(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),y)
 	$(Q) { \
+		$(call cfg_en,CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT) \
 		$(call cfg_val,CONFIG_ESP_BOOTLOADER_OFFSET,0x0000) \
 		$(call cfg_val,CONFIG_ESP_BOOTLOADER_SIZE,0xF000) \
 		$(call cfg_val,CONFIG_ESP_IMAGE0_PRIMARY_START_ADDRESS,$(CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET)) \
 		$(call cfg_val,CONFIG_ESP_APPLICATION_SIZE,$(CONFIG_ESPRESSIF_OTA_SLOT_SIZE)) \
 		$(call cfg_val,CONFIG_ESP_IMAGE0_SECONDARY_START_ADDRESS,$(CONFIG_ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET)) \
 		$(call cfg_en,CONFIG_ESP_MCUBOOT_WDT_ENABLE) \
+		$(call cfg_en,CONFIG_LIBC_NEWLIB) \
 		$(call cfg_val,CONFIG_ESP_SCRATCH_OFFSET,$(CONFIG_ESPRESSIF_OTA_SCRATCH_OFFSET)) \
 		$(call cfg_val,CONFIG_ESP_SCRATCH_SIZE,$(CONFIG_ESPRESSIF_OTA_SCRATCH_SIZE)) \
 		$(call cfg_en,CONFIG_ESP_CONSOLE_UART) \
 		$(if $(CONFIG_UART0_SERIAL_CONSOLE),$(call cfg_val,CONFIG_ESP_CONSOLE_UART_NUM,0)) \
 		$(if $(CONFIG_UART1_SERIAL_CONSOLE),$(call cfg_val,CONFIG_ESP_CONSOLE_UART_NUM,1)) \
+		$(if $(CONFIG_UART0_SERIAL_CONSOLE),$(call cfg_val,CONFIG_ESP_CONSOLE_ROM_SERIAL_PORT_NUM,0)) \
+		$(if $(CONFIG_UART1_SERIAL_CONSOLE),$(call cfg_val,CONFIG_ESP_CONSOLE_ROM_SERIAL_PORT_NUM,1)) \
+		$(if $(CONFIG_ESPRESSIF_USBSERIAL),$(call cfg_val,CONFIG_ESP_CONSOLE_UART_NUM,0)) \
+		$(if $(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_ENABLED),$(call cfg_en,CONFIG_SECURE_FLASH_ENC_ENABLED)) \
+		$(if $(CONFIG_ESPRESSIF_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT),$(call cfg_en,CONFIG_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT)) \
+		$(if $(CONFIG_ESPRESSIF_SECURE_FLASH_UART_BOOTLOADER_ALLOW_ENC),$(call cfg_en,CONFIG_SECURE_FLASH_UART_BOOTLOADER_ALLOW_ENC)) \
+		$(if $(CONFIG_ESPRESSIF_SECURE_FLASH_UART_BOOTLOADER_ALLOW_DEC),$(call cfg_en,CONFIG_SECURE_FLASH_UART_BOOTLOADER_ALLOW_DEC)) \
+		$(if $(CONFIG_ESPRESSIF_SECURE_FLASH_UART_BOOTLOADER_ALLOW_CACHE),$(call cfg_en,CONFIG_SECURE_FLASH_UART_BOOTLOADER_ALLOW_CACHE)) \
+		$(call cfg_val,CONFIG_BOOTLOADER_LOG_LEVEL,3) \
 	} >> $(BOOTLOADER_CONFIG)
+ifeq ($(CONFIG_ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH),y)
+	$(Q) { \
+		$(call cfg_en,CONFIG_EFUSE_VIRTUAL) \
+		$(call cfg_en,CONFIG_EFUSE_VIRTUAL_KEEP_IN_FLASH) \
+		$(call cfg_val,CONFIG_EFUSE_VIRTUAL_OFFSET,$(CONFIG_ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH_OFFSET)) \
+		$(call cfg_val,CONFIG_EFUSE_VIRTUAL_SIZE,$(CONFIG_ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH_SIZE)) \
+	} >> $(BOOTLOADER_CONFIG)
+endif
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
@@ -84,13 +119,23 @@ ifeq ($(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),y)
 
 BOOTLOADER_BIN = $(TOPDIR)/mcuboot-$(CHIP_SERIES).bin
 
+define CLONE_ESP_HAL_3RDPARTY_REPO_MCUBOOT
+	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),$(HALDIR))
+endef
+
 $(MCUBOOT_SRCDIR): $(BOOTLOADER_SRCDIR)
 	$(Q) echo "Cloning MCUboot"
 	$(Q) git clone --quiet $(MCUBOOT_URL) $(MCUBOOT_SRCDIR)
-	$(Q) git -C "$(MCUBOOT_SRCDIR)" checkout --quiet $(CONFIG_ESPRESSIF_MCUBOOT_VERSION)
+	$(Q) git -C "$(MCUBOOT_SRCDIR)" checkout --quiet $(MCUBOOT_VERSION)
 	$(Q) git -C "$(MCUBOOT_SRCDIR)" submodule --quiet update --init --recursive ext/mbedtls
 
-$(BOOTLOADER_BIN): chip/$(ESP_HAL_3RDPARTY_REPO) $(MCUBOOT_SRCDIR) $(BOOTLOADER_CONFIG)
+$(HALDIR):
+	$(Q) echo "Cloning Espressif HAL for 3rd Party Platforms (MCUBoot build)"
+	$(Q) $(call CLONE_ESP_HAL_3RDPARTY_REPO_MCUBOOT)
+	$(Q) echo "Espressif HAL for 3rd Party Platforms (MCUBoot build): ${ESP_HAL_3RDPARTY_VERSION_FOR_MCUBOOT}"
+	$(Q) git -C $(HALDIR) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION_FOR_MCUBOOT)
+
+$(BOOTLOADER_BIN): $(HALDIR) $(MCUBOOT_SRCDIR) $(BOOTLOADER_CONFIG)
 	$(Q) echo "Building MCUboot"
 	$(Q) $(TOOLSDIR)/build_mcuboot.sh \
 		-c $(CHIP_SERIES) \
@@ -103,6 +148,7 @@ $(BOOTLOADER_BIN): chip/$(ESP_HAL_3RDPARTY_REPO) $(MCUBOOT_SRCDIR) $(BOOTLOADER_
 bootloader: $(BOOTLOADER_CONFIG) $(BOOTLOADER_BIN)
 
 clean_bootloader:
+	$(call DELDIR,$(HALDIR))
 	$(call DELDIR,$(BOOTLOADER_SRCDIR))
 	$(call DELFILE,$(BOOTLOADER_BIN))
 endif

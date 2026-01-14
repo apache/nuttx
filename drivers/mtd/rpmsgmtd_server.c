@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/mtd/rpmsgmtd_server.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,7 +32,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/mtd/mtd.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 
 #include "rpmsgmtd.h"
 
@@ -85,7 +87,6 @@ static bool rpmsgmtd_ns_match(FAR struct rpmsg_device *rdev,
 static void rpmsgmtd_ns_bind(FAR struct rpmsg_device *rdev,
                              FAR void *priv, FAR const char *name,
                              uint32_t dest);
-static void rpmsgmtd_ns_unbind(FAR struct rpmsg_endpoint *ept);
 static int  rpmsgmtd_ept_cb(FAR struct rpmsg_endpoint *ept,
                             FAR void *data, size_t len, uint32_t src,
                             FAR void *priv);
@@ -166,8 +167,9 @@ static int rpmsgmtd_bread_handler(FAR struct rpmsg_endpoint *ept,
       rsp->header.result = ret;
       rpmsg_send_nocopy(ept, rsp, (ret < 0 ? 0 : ret * msg->blocksize) +
                         sizeof(*rsp) - 1);
-      if (ret <= 0)
+      if (ret < 0)
         {
+          rpmsg_release_tx_buffer(ept, rsp);
           ferr("mtd block read failed\n");
           break;
         }
@@ -246,8 +248,9 @@ static int rpmsgmtd_read_handler(FAR struct rpmsg_endpoint *ept,
 
       rsp->header.result = ret;
       rpmsg_send_nocopy(ept, rsp, (ret < 0 ? 0 : ret) + sizeof(*rsp) - 1);
-      if (ret <= 0)
+      if (ret < 0)
         {
+          rpmsg_release_tx_buffer(ept, rsp);
           break;
         }
 
@@ -351,6 +354,18 @@ static bool rpmsgmtd_ns_match(FAR struct rpmsg_device *rdev,
 }
 
 /****************************************************************************
+ * Name: rpmsgmtd_ept_release
+ ****************************************************************************/
+
+static void rpmsgmtd_ept_release(FAR struct rpmsg_endpoint *ept)
+{
+  FAR struct rpmsgmtd_server_s *server = ept->priv;
+
+  close_mtddriver(server->mtdnode);
+  kmm_free(server);
+}
+
+/****************************************************************************
  * Name: rpmsgmtd_ns_bind
  ****************************************************************************/
 
@@ -377,12 +392,13 @@ static void rpmsgmtd_ns_bind(FAR struct rpmsg_device *rdev,
     }
 
   server->ept.priv = server;
+  server->ept.release_cb = rpmsgmtd_ept_release;
   server->mtdnode  = mtdnode;
   server->dev      = mtdnode->u.i_mtd;
 
   ret = rpmsg_create_ept(&server->ept, rdev, name,
                          RPMSG_ADDR_ANY, dest,
-                         rpmsgmtd_ept_cb, rpmsgmtd_ns_unbind);
+                         rpmsgmtd_ept_cb, rpmsg_destroy_ept);
   if (ret < 0)
     {
       ferr("endpoint create failed, ret=%d\n", ret);
@@ -393,19 +409,6 @@ static void rpmsgmtd_ns_bind(FAR struct rpmsg_device *rdev,
   return;
 
 errout:
-  kmm_free(server);
-}
-
-/****************************************************************************
- * Name: rpmsgmtd_ns_unbind
- ****************************************************************************/
-
-static void rpmsgmtd_ns_unbind(FAR struct rpmsg_endpoint *ept)
-{
-  FAR struct rpmsgmtd_server_s *server = ept->priv;
-
-  rpmsg_destroy_ept(&server->ept);
-  close_mtddriver(server->mtdnode);
   kmm_free(server);
 }
 

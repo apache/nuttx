@@ -1,6 +1,8 @@
 ############################################################################
 # libs/libc/fdt/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -28,6 +30,7 @@ dtc:
 	$(call DOWNLOAD,https://github.com/dgibson/dtc/archive,v$(VERSION).zip,dtc.zip)
 	$(Q) mv dtc.zip fdt/dtc.zip
 	$(Q) unzip -o fdt/dtc.zip -d fdt
+	$(call DELDIR, fdt/dtc)
 	$(Q) mv fdt/dtc-$(VERSION) fdt/dtc
 else
 dtc:

@@ -121,7 +121,7 @@ int esp32s3_bt_controller_disable(void);
  *
  ****************************************************************************/
 
-esp_bt_controller_status_t esp32s3_bt_controller_get_status(void);
+esp_bt_controller_status_t esp_bt_controller_get_status(void);
 
 /****************************************************************************
  * Name: esp32s3_vhci_host_check_send_available

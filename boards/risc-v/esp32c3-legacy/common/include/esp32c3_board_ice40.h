@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/esp32c3-legacy/common/include/esp32c3_board_ice40.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -67,4 +69,4 @@ int esp32c3_ice40_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32C3_COMMON_INCLUDE_ESP32C3_BOARD_BMP180_H */
+#endif /* __BOARDS_RISCV_ESP32C3_LEGACY_COMMON_INCLUDE_ESP32C3_BOARD_ICE40_H */

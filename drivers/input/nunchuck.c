@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/input/nunchuck.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -196,7 +198,7 @@ static int nunchuck_sample(FAR struct nunchuck_dev_s *priv,
 
       /* Delay 20ms */
 
-      nxsig_usleep(20 * 1000);
+      nxsched_usleep(20 * 1000);
 
       initialized = true;
     }
@@ -208,7 +210,7 @@ static int nunchuck_sample(FAR struct nunchuck_dev_s *priv,
 
   /* Wait */
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* Read data */
 
@@ -216,35 +218,35 @@ static int nunchuck_sample(FAR struct nunchuck_dev_s *priv,
 
   /* Wait */
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* Wait */
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   nunchuck_i2c_read(priv, &data[1], 1);
 
   /* Wait */
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   nunchuck_i2c_read(priv, &data[2], 1);
 
   /* Wait */
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   nunchuck_i2c_read(priv, &data[3], 1);
 
   /* Wait */
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   nunchuck_i2c_read(priv, &data[4], 1);
 
   /* Wait */
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   nunchuck_i2c_read(priv, &data[5], 1);
 

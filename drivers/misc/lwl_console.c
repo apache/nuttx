@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/misc/lwl_console.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -291,6 +293,22 @@ static ssize_t lwlconsole_write(FAR struct file *filep,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_putc
+ ****************************************************************************/
+
+void up_putc(int ch)
+{
+  /* If link not initialize just return */
+
+  if (!linkactive())
+    {
+      return;
+    }
+
+  write8bits(LWL_PORT_CONSOLE, (uint8_t)ch);
+}
 
 /****************************************************************************
  * Name: lwlconsole_init

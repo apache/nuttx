@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32wl5/stm32wl5_tim.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,7 +39,6 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_internal.h"
 #include "arm_internal.h"
 
 #include "stm32wl5.h"
@@ -283,6 +284,8 @@ static int stm32wl5_tim_checkint(struct stm32wl5_tim_dev_s *dev,
 
 static const struct stm32wl5_tim_ops_s stm32wl5_tim_ops =
 {
+  .enable     = stm32wl5_tim_enable,
+  .disable    = stm32wl5_tim_disable,
   .setmode    = stm32wl5_tim_setmode,
   .setclock   = stm32wl5_tim_setclock,
   .getclock   = stm32wl5_tim_getclock,

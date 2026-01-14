@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/esp32h2/common/src/esp_board_spislavedev.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #include <nuttx/spi/slave.h>
@@ -55,28 +57,29 @@
 
 int board_spislavedev_initialize(int bus)
 {
-  int ret;
-
   struct spi_slave_ctrlr_s *ctrlr;
-
-  spiinfo("Initializing /dev/spislv%d...\n", bus);
+  int ret = OK;
 
   /* Initialize SPI Slave controller device */
 
   ctrlr = esp_spislave_ctrlr_initialize(bus);
   if (ctrlr == NULL)
     {
-      spierr("Failed to initialize SPI%d as slave.\n", bus);
+      syslog(LOG_ERR, "Failed to initialize SPI%d as slave.\n", bus);
       return -ENODEV;
     }
+
+#ifdef CONFIG_SPI_SLAVE_DRIVER
+  syslog(LOG_INFO, "Initializing /dev/spislv%d...\n", bus);
 
   ret = spi_slave_register(ctrlr, bus);
   if (ret < 0)
     {
-      spierr("Failed to register /dev/spislv%d: %d\n", bus, ret);
+      syslog(LOG_ERR, "Failed to register /dev/spislv%d: %d\n", bus, ret);
 
       esp_spislave_ctrlr_uninitialize(ctrlr);
     }
+#endif
 
   return ret;
 }

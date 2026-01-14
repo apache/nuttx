@@ -1,6 +1,7 @@
 /****************************************************************************
  * tools/pic32/mkpichex.c
- * Convert virtual addresses in nuttx.hex to physical addresses
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

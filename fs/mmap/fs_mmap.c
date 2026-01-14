@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/mmap/fs_mmap.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,10 +35,10 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
 #include "fs_rammap.h"
-#include "fs_anonmap.h"
 
 /****************************************************************************
  * Private Functions
@@ -47,8 +49,8 @@
  ****************************************************************************/
 
 static int file_mmap_(FAR struct file *filep, FAR void *start,
-                      size_t length, int prot, int flags,
-                      off_t offset, bool kernel, FAR void **mapped)
+                      size_t length, int prot, int flags, off_t offset,
+                      enum mm_map_type_e type, FAR void **mapped)
 {
   int ret = -ENOTTY;
 
@@ -66,6 +68,7 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
      prot,
      flags,
      { NULL }, /* priv.p */
+     NULL,     /* msync */
      NULL      /* munmap */
     };
 
@@ -76,6 +79,13 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
   /* A flags with MAP_PRIVATE and MAP_SHARED is invalid. */
 
   if ((flags & MAP_PRIVATE) && (flags & MAP_SHARED))
+    {
+      return -EINVAL;
+    }
+
+  /* MAP_PRIVATE or MAP_SHARED must be specified */
+
+  if (((flags & MAP_PRIVATE) == 0) && ((flags & MAP_SHARED) == 0))
     {
       return -EINVAL;
     }
@@ -107,7 +117,18 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
 
   if ((flags & MAP_ANONYMOUS) != 0)
     {
-      ret = map_anonymous(&entry, kernel);
+      ret = map_anonymous(&entry, type);
+
+      /* According to the mmap(2) specification, anonymous pages should be
+       * initialized to zero unless the MAP_UNINITIALIZED is specified.
+       */
+
+      if ((ret == OK) && (flags & MAP_UNINITIALIZED) == 0)
+        {
+          DEBUGASSERT(entry.vaddr != NULL);
+          memset(entry.vaddr, 0, entry.length);
+        }
+
       goto out;
     }
 
@@ -150,7 +171,7 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
        * do much better in the KERNEL build using the MMU.
        */
 
-      ret = rammap(filep, &entry, kernel);
+      ret = rammap(filep, &entry, type);
     }
 
   /* Return */
@@ -182,7 +203,7 @@ int file_mmap(FAR struct file *filep, FAR void *start, size_t length,
               int prot, int flags, off_t offset, FAR void **mapped)
 {
   return file_mmap_(filep, start, length,
-                    prot, flags, offset, true, mapped);
+                    prot, flags, offset, MAP_KERNEL, mapped);
 }
 
 /****************************************************************************
@@ -202,7 +223,7 @@ int file_mmap(FAR struct file *filep, FAR void *start, size_t length,
  *        only file system that meets this requirement.
  *     b. The underlying block driver supports the BIOC_XIPBASE ioctl
  *        command that maps the underlying media to a randomly accessible
- *        address. At  present, only the RAM/ROM disk driver does this.
+ *        address. At present, only the RAM/ROM disk driver does this.
  *
  *   2. If CONFIG_FS_RAMMAP is defined in the configuration, then mmap() will
  *      support simulation of memory mapped files by copying files whole
@@ -266,15 +287,19 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
   FAR void *mapped = NULL;
   int ret;
 
-  if (fd != -1 && fs_getfilep(fd, &filep) < 0)
+  if (fd != -1 && (ret = file_get(fd, &filep)) < 0)
     {
-      ferr("ERROR: fd:%d referred file whose type is not supported\n", fd);
-      ret = -ENODEV;
+      ferr("ERROR: fd:%d referred file is not valid\n", fd);
       goto errout;
     }
 
   ret = file_mmap_(filep, start, length,
-                   prot, flags, offset, false, &mapped);
+                   prot, flags, offset, MAP_USER, &mapped);
+  if (filep)
+    {
+      file_put(filep);
+    }
+
   if (ret < 0)
     {
       goto errout;

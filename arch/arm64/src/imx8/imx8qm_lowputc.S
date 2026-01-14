@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/imx8/imx8_lowputs.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -16,15 +18,13 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************
- *
- *    DESCRIPTION
- *       Wrapper for early printk
- *
- ***************************************************************************/
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include "arm64_macro.inc"
 
 /****************************************************************************
@@ -84,6 +84,6 @@ SECTION_FUNC(text, arm64_earlyprintinit)
 GTEXT(arm64_lowputc)
 SECTION_FUNC(text, arm64_lowputc)
     ldr   x15, =UART1_BASE_ADDRESS
-    early_uart_ready x15, 1
+    early_uart_ready x15, 2
     early_uart_transmit x15, w0
     ret

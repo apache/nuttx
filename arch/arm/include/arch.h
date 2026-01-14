@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/arch.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -62,7 +64,7 @@ do { \
     "\tmov %0, " PIC_REG_STRING "\n\t" \
     : "=r"(picbase) \
   ); \
-  *ppicbase = (void *)picbase; \
+  *(uint32_t *)ppicbase = picbase; \
 } while (0)
 
 #define up_setpicbase(picbase) \
@@ -95,7 +97,7 @@ do { \
 #  define ARCH_HEAP_NSECTS    ARCH_PG2SECT(CONFIG_ARCH_HEAP_NPAGES)
 
 #  ifdef CONFIG_ARCH_VMA_MAPPING
-#    define ARCH_SHM_NSECTS   ARCH_PG2SECT(ARCH_SHM_MAXPAGES)
+#    define ARCH_SHM_NSECTS   ARCH_PG2SECT((CONFIG_ARCH_SHM_NPAGES * CONFIG_ARCH_SHM_MAXREGIONS))
 #  endif
 
 #  ifdef CONFIG_ARCH_STACK_DYNAMIC
@@ -131,15 +133,15 @@ do { \
 
 struct arch_addrenv_s
 {
-  /* Level 1 page table entries for each group section */
+  /* Alloc whole l1table to make better context switch performance */
 
-  uintptr_t *text[ARCH_TEXT_NSECTS];
-  uintptr_t *data[ARCH_DATA_NSECTS];
-#ifdef CONFIG_BUILD_KERNEL
-  uintptr_t *heap[ARCH_HEAP_NSECTS];
-#ifdef CONFIG_ARCH_VMA_MAPPING
-  uintptr_t *shm[ARCH_SHM_NSECTS];
-#endif
+  uintptr_t *l1table;
+
+  /* The text, data, heap bases and heap size here */
+
+  uintptr_t textvbase;
+  uintptr_t datavbase;
+  uintptr_t heapvbase;
 
   /* Initial heap allocation (in bytes).  This exists only provide an
    * indirect path for passing the size of the initial heap to the heap
@@ -148,6 +150,9 @@ struct arch_addrenv_s
    */
 
   size_t heapsize;
+
+#ifdef CONFIG_ARCH_VMA_MAPPING
+  uintptr_t shmvbase;
 #endif
 };
 

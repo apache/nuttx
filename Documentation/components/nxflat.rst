@@ -219,7 +219,7 @@ files. In particular, the CSV files:
   #. ``nuttx/syscall/syscall.csv`` that describes the NuttX RTOS
      interface, and
   #. ``nuttx/libc/libc.csv`` that describes the NuttX C library interface.
-  #. ``nuttx/libc/math.cvs`` that descirbes any math library.
+  #. ``nuttx/libc/math.cvs`` that describes any math library.
 
 ::
 

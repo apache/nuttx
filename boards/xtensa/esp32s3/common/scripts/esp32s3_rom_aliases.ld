@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s3/common/scripts/esp32s3_aliases.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -22,11 +24,20 @@
 
 /* Lower-case aliases for symbols not compliant to nxstyle */
 
+PROVIDE( cache_get_dcache_line_size = Cache_Get_DCache_Line_Size );
+PROVIDE( cache_get_icache_line_size = Cache_Get_ICache_Line_Size );
 PROVIDE( cache_dbus_mmu_set = Cache_Dbus_MMU_Set );
 PROVIDE( cache_ibus_mmu_set = Cache_Ibus_MMU_Set );
+PROVIDE( cache_clean_addr = Cache_Clean_Addr );
 PROVIDE( cache_invalidate_addr = Cache_Invalidate_Addr );
 PROVIDE( cache_invalidate_dcache_all = Cache_Invalidate_DCache_All );
 PROVIDE( cache_invalidate_icache_all = Cache_Invalidate_ICache_All );
+PROVIDE( cache_invalidate_icache_items = Cache_Invalidate_ICache_Items );
+PROVIDE( cache_invalidate_dcache_items = Cache_Invalidate_DCache_Items );
+PROVIDE( cache_lock_icache_items = Cache_Lock_ICache_Items );
+PROVIDE( cache_lock_dcache_items = Cache_Lock_DCache_Items );
+PROVIDE( cache_unlock_icache_items = Cache_Unlock_ICache_Items );
+PROVIDE( cache_unlock_dcache_items = Cache_Unlock_DCache_Items );
 PROVIDE( cache_occupy_addr = Cache_Occupy_Addr );
 PROVIDE( cache_resume_dcache = Cache_Resume_DCache );
 PROVIDE( cache_resume_icache = Cache_Resume_ICache );
@@ -35,3 +46,10 @@ PROVIDE( cache_set_idrom_mmu_size = Cache_Set_IDROM_MMU_Size );
 PROVIDE( cache_suspend_dcache = Cache_Suspend_DCache );
 PROVIDE( cache_suspend_icache = Cache_Suspend_ICache );
 PROVIDE( cache_writeback_all = Cache_WriteBack_All );
+PROVIDE( cache_writeback_items = Cache_WriteBack_Items );
+PROVIDE( cache_writeback_addr = Cache_WriteBack_Addr );
+
+#ifndef CONFIG_ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE
+spi_flash_guard_set = 0x40000b04;
+spi_flash_guard_get = 0x40000b10;
+#endif

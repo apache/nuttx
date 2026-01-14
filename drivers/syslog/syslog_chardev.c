@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/syslog/syslog_chardev.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -85,7 +87,7 @@ static int syslog_chardev_ioctl(FAR struct file *filep,
                                 int cmd, unsigned long arg)
 {
   FAR struct syslog_channel_info_s *info;
-  FAR struct syslog_channel_s *channel = NULL;
+  FAR syslog_channel_t *channel = NULL;
   int i;
 
   if (arg == 0)
@@ -107,7 +109,8 @@ static int syslog_chardev_ioctl(FAR struct file *filep,
 
           strlcpy(info[i].sc_name, channel->sc_name,
                   sizeof(info[i].sc_name));
-          info[i].sc_disable = channel->sc_disable;
+          info[i].sc_disable =
+                  channel->sc_state & SYSLOG_CHANNEL_DISABLE;
         }
     }
   else if (cmd == SYSLOGIOC_SETFILTER)
@@ -129,7 +132,9 @@ static int syslog_chardev_ioctl(FAR struct file *filep,
           return -ENOENT;
         }
 
-      channel->sc_disable = info->sc_disable;
+      channel->sc_state = info->sc_disable ?
+                          channel->sc_state | SYSLOG_CHANNEL_DISABLE :
+                          channel->sc_state & ~SYSLOG_CHANNEL_DISABLE;
     }
 
   return OK;

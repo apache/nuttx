@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/at32/hardware/at32f43xxx_rcc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -53,29 +55,29 @@
 
 /* Register Addresses *******************************************************/
 
-#define AT32_CRM_CTRL                   (AT32_CRM_BASE+AT32_CRM_CTRL_OFFSET)       
-#define AT32_CRM_PLL_CFG                (AT32_CRM_BASE+AT32_CRM_PLL_CFG_OFFSET)   
-#define AT32_CRM_CFG                    (AT32_CRM_BASE+AT32_CRM_CFG_OFFSET)   
-#define AT32_CRM_CLKINT                 (AT32_CRM_BASE+AT32_CRM_CLKINT_OFFSET)   
-#define AT32_CRM_AHBRST1                (AT32_CRM_BASE+AT32_CRM_AHBRST1_OFFSET)   
-#define AT32_CRM_AHBRST2                (AT32_CRM_BASE+AT32_CRM_AHBRST2_OFFSET)   
-#define AT32_CRM_AHBRST3                (AT32_CRM_BASE+AT32_CRM_AHBRST3_OFFSET)   
-#define AT32_CRM_APB1RST                (AT32_CRM_BASE+AT32_CRM_APB1RST_OFFSET)   
-#define AT32_CRM_APB2RST                (AT32_CRM_BASE+AT32_CRM_APB2RST_OFFSET)   
-#define AT32_CRM_AHBEN1                 (AT32_CRM_BASE+AT32_CRM_AHBEN1_OFFSET)   
-#define AT32_CRM_AHBEN2                 (AT32_CRM_BASE+AT32_CRM_AHBEN2_OFFSET)   
-#define AT32_CRM_AHBEN3                 (AT32_CRM_BASE+AT32_CRM_AHBEN3_OFFSET)   
-#define AT32_CRM_APB1EN                 (AT32_CRM_BASE+AT32_CRM_APB1EN_OFFSET)   
-#define AT32_CRM_APB2EN                 (AT32_CRM_BASE+AT32_CRM_APB2EN_OFFSET)   
-#define AT32_CRM_AHBLPEN1               (AT32_CRM_BASE+AT32_CRM_AHBLPEN1_OFFSET)   
-#define AT32_CRM_AHBLPEN2               (AT32_CRM_BASE+AT32_CRM_AHBLPEN2_OFFSET)   
-#define AT32_CRM_AHBLPEN3               (AT32_CRM_BASE+AT32_CRM_AHBLPEN3_OFFSET)   
-#define AT32_CRM_APB1LPEN               (AT32_CRM_BASE+AT32_CRM_APB1LPEN_OFFSET)   
-#define AT32_CRM_APB2LPEN               (AT32_CRM_BASE+AT32_CRM_APB2LPEN_OFFSET)   
-#define AT32_CRM_BPDC                   (AT32_CRM_BASE+AT32_CRM_BPDC_OFFSET)   
-#define AT32_CRM_CTRLSTS                (AT32_CRM_BASE+AT32_CRM_CTRLSTS_OFFSET)   
-#define AT32_CRM_MISC1                  (AT32_CRM_BASE+AT32_CRM_MISC1_OFFSET)   
-#define AT32_CRM_MISC2                  (AT32_CRM_BASE+AT32_CRM_MISC2_OFFSET)   
+#define AT32_CRM_CTRL                   (AT32_CRM_BASE+AT32_CRM_CTRL_OFFSET)
+#define AT32_CRM_PLL_CFG                (AT32_CRM_BASE+AT32_CRM_PLL_CFG_OFFSET)
+#define AT32_CRM_CFG                    (AT32_CRM_BASE+AT32_CRM_CFG_OFFSET)
+#define AT32_CRM_CLKINT                 (AT32_CRM_BASE+AT32_CRM_CLKINT_OFFSET)
+#define AT32_CRM_AHBRST1                (AT32_CRM_BASE+AT32_CRM_AHBRST1_OFFSET)
+#define AT32_CRM_AHBRST2                (AT32_CRM_BASE+AT32_CRM_AHBRST2_OFFSET)
+#define AT32_CRM_AHBRST3                (AT32_CRM_BASE+AT32_CRM_AHBRST3_OFFSET)
+#define AT32_CRM_APB1RST                (AT32_CRM_BASE+AT32_CRM_APB1RST_OFFSET)
+#define AT32_CRM_APB2RST                (AT32_CRM_BASE+AT32_CRM_APB2RST_OFFSET)
+#define AT32_CRM_AHBEN1                 (AT32_CRM_BASE+AT32_CRM_AHBEN1_OFFSET)
+#define AT32_CRM_AHBEN2                 (AT32_CRM_BASE+AT32_CRM_AHBEN2_OFFSET)
+#define AT32_CRM_AHBEN3                 (AT32_CRM_BASE+AT32_CRM_AHBEN3_OFFSET)
+#define AT32_CRM_APB1EN                 (AT32_CRM_BASE+AT32_CRM_APB1EN_OFFSET)
+#define AT32_CRM_APB2EN                 (AT32_CRM_BASE+AT32_CRM_APB2EN_OFFSET)
+#define AT32_CRM_AHBLPEN1               (AT32_CRM_BASE+AT32_CRM_AHBLPEN1_OFFSET)
+#define AT32_CRM_AHBLPEN2               (AT32_CRM_BASE+AT32_CRM_AHBLPEN2_OFFSET)
+#define AT32_CRM_AHBLPEN3               (AT32_CRM_BASE+AT32_CRM_AHBLPEN3_OFFSET)
+#define AT32_CRM_APB1LPEN               (AT32_CRM_BASE+AT32_CRM_APB1LPEN_OFFSET)
+#define AT32_CRM_APB2LPEN               (AT32_CRM_BASE+AT32_CRM_APB2LPEN_OFFSET)
+#define AT32_CRM_BPDC                   (AT32_CRM_BASE+AT32_CRM_BPDC_OFFSET)
+#define AT32_CRM_CTRLSTS                (AT32_CRM_BASE+AT32_CRM_CTRLSTS_OFFSET)
+#define AT32_CRM_MISC1                  (AT32_CRM_BASE+AT32_CRM_MISC1_OFFSET)
+#define AT32_CRM_MISC2                  (AT32_CRM_BASE+AT32_CRM_MISC2_OFFSET)
 
 /* Register Bitfield Definitions ********************************************/
 
@@ -95,11 +97,11 @@
 /* PLL configuration register */
 
 #define CRM_PLL_CFG_PLL_MS_SHIFT        (0) /* PLL pre-division, range: 1~15 */
-#define CRM_PLL_CFG_PLL_MS_MASK         (15 << CRM_PLL_CFG_PLL_MS_SHIFT) 
+#define CRM_PLL_CFG_PLL_MS_MASK         (15 << CRM_PLL_CFG_PLL_MS_SHIFT)
 #  define CRM_PLL_CFG_PLL_MS(n)         ((n) << CRM_PLL_CFG_PLL_MS_SHIFT) /* n = 1..15 */
 
 #define CRM_PLL_CFG_PLL_NS_SHIFT        (6) /* PLL Multiplication Factor,range: 31~500 */
-#define CRM_PLL_CFG_PLL_NS_MASK         (0x1FF << CRM_PLL_CFG_PLL_NS_SHIFT) 
+#define CRM_PLL_CFG_PLL_NS_MASK         (0x1FF << CRM_PLL_CFG_PLL_NS_SHIFT)
 #  define CRM_PLL_CFG_PLL_NS(n)         ((n) << CRM_PLL_CFG_PLL_NS_SHIFT) /* n = 31..500 */
 
 #define CRM_PLL_CFG_PLL_FR_SHIFT        (16) /* PLL post-division */
@@ -213,7 +215,7 @@
 #  define CRM_CFG_CLKOUT2DIV1_1_4           (6 << CRM_CFG_CLKOUT2DIV1_SHIFT) /* CLKOUT2/4 */
 #  define CRM_CFG_CLKOUT2DIV1_1_5           (7 << CRM_CFG_CLKOUT2DIV1_SHIFT) /* CLKOUT2/5 */
 
-#define CRM_CFG_CLKOUT2_SEL1_SHIFT           (30) /* clock output2 selecction 1 */
+#define CRM_CFG_CLKOUT2_SEL1_SHIFT           (30) /* clock output2 selection 1 */
 #define CRM_CFG_CLKOUT2_SEL1_MASK            (3 << CRM_CFG_CLKOUT2_SEL1_SHIFT)
 #  define CRM_CFG_CLKOUT2_SEL1_SCLK          (0 << CRM_CFG_CLKOUT2_SEL1_SHIFT) /* Output from SCLK */
 #  define CRM_CFG_CLKOUT2_SEL1_2             (1 << CRM_CFG_CLKOUT2_SEL1_SHIFT) /* Output determine from CRM_MISC1 */
@@ -508,7 +510,7 @@
 #define CRM_MISC1_HICK_TO_SCLK              (1 << 14) /* HICK as system clock frequency select */
 
 #define CRM_MISC1_CLKOUT2_SEL2_SHIFT        (16) /* Clock output2 sel2 */
-#define CRM_MISC1_CLKOUT2_SEL2_MASK         (15 << CRM_MISC1_CLKOUT2_SEL2_SHIFT) 
+#define CRM_MISC1_CLKOUT2_SEL2_MASK         (15 << CRM_MISC1_CLKOUT2_SEL2_SHIFT)
 #  define CRM_MISC1_CLKOUT2_SEL2_USB        (0 << CRM_MISC1_CLKOUT2_SEL2_SHIFT) /* Select USB output */
 #  define CRM_MISC1_CLKOUT2_SEL2_ADC        (1 << CRM_MISC1_CLKOUT2_SEL2_SHIFT) /* Select ADC output */
 #  define CRM_MISC1_CLKOUT2_SEL2_HICK       (2 << CRM_MISC1_CLKOUT2_SEL2_SHIFT) /* Select HICK output */

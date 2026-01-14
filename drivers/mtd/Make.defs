@@ -1,6 +1,8 @@
 ############################################################################
 # drivers/mtd/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -131,8 +133,16 @@ ifeq ($(CONFIG_MTD_GD25),y)
 CSRCS += gd25.c
 endif
 
+ifeq ($(CONFIG_MTD_GD55),y)
+CSRCS += gd55.c
+endif
+
 ifeq ($(CONFIG_MTD_GD5F),y)
 CSRCS += gd5f.c
+endif
+
+ifeq ($(CONFIG_MTD_W25N),y)
+CSRCS += w25n.c
 endif
 
 ifeq ($(CONFIG_MTD_AT25),y)
@@ -200,6 +210,34 @@ CSRCS += mtd/dhara/dhara/map.c
 CSRCS += mtd/dhara/dhara/error.c
 CSRCS += mtd/dhara/dhara/journal.c
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)mtd$(DELIM)dhara
+endif
+
+ifeq ($(CONFIG_MTD_NVBLK),y)
+
+main.zip:
+	$(call DOWNLOAD,https://github.com/Laczen/nvblk/archive/refs/heads,main.zip,mtd/nvblk-main.zip)
+
+.nvblkunpack: main.zip
+	$(Q) unzip mtd/nvblk-main.zip
+	$(call DELFILE, mtd/nvblk-main.zip)
+	$(Q) mv nvblk-main mtd/nvblk
+	$(Q) touch mtd/nvblk/.nvblkunpack
+
+ifeq ($(wildcard mtd/nvblk/.gitignore),)
+context:: .nvblkunpack
+endif
+
+distclean::
+	$(call DELDIR, mtd/nvblk)
+
+CSRCS += nvblk.c
+CSRCS += mtd/nvblk/src/nvblk.c
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)mtd$(DELIM)nvblk$(DELIM)include
+endif
+
+ifeq ($(CONFIG_MTD_CFI),y)
+CSRCS += mtd_cfi.c
+CSRCS += cfi.c
 endif
 
 # Include MTD driver support

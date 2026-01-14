@@ -1,6 +1,8 @@
 ############################################################################
 # boards/risc-v/qemu-rv/rv-virt/src/Makefile
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -30,9 +32,17 @@ CSRCS += $(if $(wildcard romfs_boot.c), romfs_boot.c, romfs_stub.c)
 endif
 endif
 
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += qemu_rv_autoleds.c
+endif
+
+ifeq ($(CONFIG_USERLED),y)
+CSRCS += qemu_rv_userleds.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
 
-# don't use single-colon targets as they may coflict with those included ones.
+# don't use single-colon targets as they may conflict with those included ones.
 # use double-colon targets to avoid collisions below.
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)

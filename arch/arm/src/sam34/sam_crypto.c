@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_crypto.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -77,7 +79,7 @@ static int sam_newsession(uint32_t *sid, struct cryptoini *cri)
 
         *sid = g_sam_sesnum++;
         break;
-      default :
+      default:
         return -EINVAL;
     }
 

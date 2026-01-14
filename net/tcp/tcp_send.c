@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp_send.c
  *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  *   Copyright (C) 2007-2010, 2012, 2015, 2018-2019 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,6 +57,7 @@
 #include <nuttx/net/netstats.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/tcp.h>
+#include <nuttx/wqueue.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
@@ -146,6 +149,12 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
     }
   else
     {
+      if (work_available(&conn->work) && conn->tx_unacked != 0)
+        {
+          conn->timeout = false;
+          tcp_update_retrantimer(conn, conn->rto);
+        }
+
       /* Update the TCP received window based on I/O buffer availability */
 
       uint32_t rcvseq = tcp_getsequence(conn->rcvseq);
@@ -189,7 +198,11 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
       /* Calculate TCP checksum. */
 
       tcp->tcpchksum = 0;
+
+#ifdef CONFIG_NET_TCP_CHECKSUMS
       tcp->tcpchksum = ~tcp_ipv6_chksum(dev);
+#endif
+
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.ipv6.sent++;
 #endif
@@ -209,7 +222,11 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
       /* Calculate TCP checksum. */
 
       tcp->tcpchksum = 0;
+
+#ifdef CONFIG_NET_TCP_CHECKSUMS
       tcp->tcpchksum = ~tcp_ipv4_chksum(dev);
+#endif
+
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.ipv4.sent++;
 #endif
@@ -221,7 +238,6 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
   g_netstats.tcp.sent++;
 #endif
 
-#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS)
   if ((tcp->flags & (TCP_SYN | TCP_FIN)) != 0)
     {
       /* Remember sndseq that will be used in case of a possible
@@ -236,9 +252,6 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
 
       net_incr32(conn->sndseq, 1);
     }
-#else
-  /* REVISIT for the buffered mode */
-#endif
 }
 
 /****************************************************************************
@@ -365,7 +378,6 @@ void tcp_send(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 void tcp_reset(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 {
   FAR struct tcp_hdr_s *tcp;
-  uint32_t ackno;
   uint16_t tmp16;
   uint16_t acklen = 0;
   uint8_t seqbyte;
@@ -420,7 +432,6 @@ void tcp_reset(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
   acklen        -= (tcp->tcpoffset >> 4) << 2;
 
-  tcp->flags     = TCP_RST | TCP_ACK;
   tcp->tcpoffset = 5 << 4;
 
   /* Flip the seqno and ackno fields in the TCP header. */
@@ -446,9 +457,19 @@ void tcp_reset(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
    * to propagate the carry to the other bytes as well.
    */
 
-  ackno = tcp_addsequence(tcp->ackno, acklen);
-
-  tcp_setsequence(tcp->ackno, ackno);
+  if ((tcp->flags & TCP_ACK) != 0)
+    {
+      tcp->flags = TCP_RST;
+      tcp_setsequence(tcp->ackno, 0);
+    }
+  else
+    {
+      uint32_t ackno;
+      tcp->flags = TCP_RST | TCP_ACK;
+      tcp_setsequence(tcp->seqno, 0);
+      ackno = tcp_addsequence(tcp->ackno, acklen);
+      tcp_setsequence(tcp->ackno, ackno);
+    }
 
   /* Swap port numbers. */
 
@@ -484,7 +505,10 @@ void tcp_reset(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
                         conn ? conn->sconn.s_ttl : IP_TTL_DEFAULT,
                         conn ? conn->sconn.s_tos : 0);
       tcp->tcpchksum = 0;
+
+#ifdef CONFIG_NET_TCP_CHECKSUMS
       tcp->tcpchksum = ~tcp_ipv6_chksum(dev);
+#endif
     }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -501,7 +525,10 @@ void tcp_reset(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
                         conn ? conn->sconn.s_tos : 0, NULL);
 
       tcp->tcpchksum = 0;
+
+#ifdef CONFIG_NET_TCP_CHECKSUMS
       tcp->tcpchksum = ~tcp_ipv4_chksum(dev);
+#endif
     }
 #endif /* CONFIG_NET_IPv4 */
 }
@@ -510,7 +537,7 @@ void tcp_reset(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
  * Name: tcp_rx_mss
  *
  * Description:
- *   Return the MSS to advertize to the peer.
+ *   Return the MSS to advertise to the peer.
  *
  * Input Parameters:
  *   dev  - The device driver structure
@@ -672,7 +699,7 @@ void tcp_send_txnotify(FAR struct socket *psock,
     {
       /* Notify the device driver that send data is available */
 
-      netdev_ipv4_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
+      netdev_ipv4_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr, TCP_POLL);
     }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -684,7 +711,7 @@ void tcp_send_txnotify(FAR struct socket *psock,
       /* Notify the device driver that send data is available */
 
       DEBUGASSERT(psock->s_domain == PF_INET6);
-      netdev_ipv6_txnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
+      netdev_ipv6_txnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr, TCP_POLL);
     }
 #endif /* CONFIG_NET_IPv6 */
 }

@@ -21,7 +21,7 @@ networking subsystem. This objectives of this feature are:
      logic will cause the task to block and wait until a an I/O
      buffer to be freed.
   #. Each I/O buffer should be small, but can be chained together to
-     support buffering of larger thinks such as full size network
+     support buffering of larger things such as full size network
      packets.
   #. Support *throttling* logic to prevent lower priority tasks from
      hogging all available I/O buffering.

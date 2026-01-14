@@ -1,6 +1,8 @@
 /***************************************************************************
  * arch/arm64/src/common/arm64_gicv3.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,6 +29,8 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/compiler.h>
+#include <arch/barriers.h>
 #include <arch/irq.h>
 #include <arch/chip/chip.h>
 #include <sched/sched.h>
@@ -78,13 +82,15 @@
 
 /* Redistributor base addresses for each core */
 
-static unsigned long gic_rdists[CONFIG_SMP_NCPUS];
+static unsigned long g_gic_rdists[CONFIG_SMP_NCPUS];
+static volatile spinlock_t g_gic_lock = SP_UNLOCKED;
 
 /***************************************************************************
  * Private Functions
  ***************************************************************************/
 
-static inline void sys_set_bit(unsigned long addr, unsigned int bit)
+unused_code static inline void sys_set_bit(unsigned long addr,
+                                           unsigned int bit)
 {
   uint32_t temp;
 
@@ -102,7 +108,8 @@ static inline void sys_clear_bit(unsigned long addr, unsigned int bit)
   putreg32(temp, addr);
 }
 
-static inline int sys_test_bit(unsigned long addr, unsigned int bit)
+unused_code static inline int sys_test_bit(unsigned long addr,
+                                           unsigned int bit)
 {
   uint32_t temp;
 
@@ -112,21 +119,7 @@ static inline int sys_test_bit(unsigned long addr, unsigned int bit)
 
 static inline unsigned long gic_get_rdist(void)
 {
-  return gic_rdists[this_cpu()];
-}
-
-static inline uint32_t read_gicd_wait_rwp(void)
-{
-  uint32_t value;
-
-  value = getreg32(GICD_CTLR);
-
-  while (value & BIT(GICD_CTLR_RWP))
-    {
-      value = getreg32(GICD_CTLR);
-    }
-
-  return value;
+  return g_gic_rdists[this_cpu()];
 }
 
 /* Wait for register write pending
@@ -171,6 +164,7 @@ void arm64_gic_irq_set_priority(unsigned int intid, unsigned int prio,
   uint32_t      shift;
   uint32_t      val;
   unsigned long base = GET_DIST_BASE(intid);
+  irqstate_t    irq_flags;
 
   /* Disable the interrupt */
 
@@ -188,6 +182,13 @@ void arm64_gic_irq_set_priority(unsigned int intid, unsigned int prio,
       idx     = intid / GIC_NUM_CFG_PER_REG;
       shift   = (intid & (GIC_NUM_CFG_PER_REG - 1)) * 2;
 
+      /* GICD_ICFGR requires full 32-bit RMW operations.
+       * Each interrupt uses 2 bits; thus updates must be synchronized
+       * to avoid losing configuration in concurrent environments.
+       */
+
+      irq_flags = spin_lock_irqsave(&g_gic_lock);
+
       val = getreg32(ICFGR(base, idx));
       val &= ~(GICD_ICFGR_MASK << shift);
       if (flags & IRQ_TYPE_EDGE)
@@ -196,6 +197,7 @@ void arm64_gic_irq_set_priority(unsigned int intid, unsigned int prio,
         }
 
       putreg32(val, ICFGR(base, idx));
+      spin_unlock_irqrestore(&g_gic_lock, irq_flags);
     }
 }
 
@@ -224,11 +226,19 @@ int arm64_gic_irq_trigger(unsigned int intid, uint32_t flags)
   uint32_t      shift;
   uint32_t      val;
   unsigned long base = GET_DIST_BASE(intid);
+  irqstate_t    irq_flags;
 
   if (!GIC_IS_SGI(intid))
     {
       idx   = intid / GIC_NUM_CFG_PER_REG;
       shift = (intid & (GIC_NUM_CFG_PER_REG - 1)) * 2;
+
+      /* GICD_ICFGR requires full 32-bit RMW operations.
+       * Each interrupt uses 2 bits; thus updates must be synchronized
+       * to avoid losing configuration in concurrent environments.
+       */
+
+      irq_flags = spin_lock_irqsave(&g_gic_lock);
 
       val = getreg32(ICFGR(base, idx));
       val &= ~(GICD_ICFGR_MASK << shift);
@@ -238,6 +248,7 @@ int arm64_gic_irq_trigger(unsigned int intid, uint32_t flags)
         }
 
       putreg32(val, ICFGR(base, idx));
+      spin_unlock_irqrestore(&g_gic_lock, irq_flags);
       return OK;
     }
 
@@ -249,17 +260,19 @@ void arm64_gic_irq_enable(unsigned int intid)
   uint32_t mask = BIT(intid & (GIC_NUM_INTR_PER_REG - 1));
   uint32_t idx  = intid / GIC_NUM_INTR_PER_REG;
 
-  putreg32(mask, ISENABLER(GET_DIST_BASE(intid), idx));
-
   /* Affinity routing is enabled for Non-secure state (GICD_CTLR.ARE_NS
    * is set to '1' when GIC distributor is initialized) ,so need to set
    * SPI's affinity, now set it to be the PE on which it is enabled.
    */
 
+#ifndef CONFIG_ARM64_GICV3_SPI_ROUTING_CPU0
   if (GIC_IS_SPI(intid))
     {
-      arm64_gic_write_irouter((GET_MPIDR() & MPIDR_ID_MASK), intid);
+      arm64_gic_write_irouter(up_cpu_index(), intid);
     }
+#endif
+
+  putreg32(mask, ISENABLER(GET_DIST_BASE(intid), idx));
 }
 
 void arm64_gic_irq_disable(unsigned int intid)
@@ -299,7 +312,7 @@ unsigned int arm64_gic_get_active_irq(void)
    * to be visible until after the execution of a DSB.
    */
 
-  ARM64_DSB();
+  UP_DSB();
   return intid;
 }
 
@@ -318,7 +331,7 @@ unsigned int arm64_gic_get_active_fiq(void)
    * to be visible until after the execution of a DSB.
    */
 
-  ARM64_DSB();
+  UP_DSB();
   return intid;
 }
 #endif
@@ -336,13 +349,13 @@ void aarm64_gic_eoi_irq(unsigned int intid)
    * DEVICE nGnRnE attribute.
    */
 
-  ARM64_DSB();
+  UP_DSB();
 
   /* (AP -> Pending) Or (Active -> Inactive) or (AP to AP) nested case */
 
   write_sysreg(intid, ICC_EOIR1_EL1);
 
-  ARM64_ISB();
+  UP_ISB();
 }
 
 #ifdef CONFIG_ARM64_DECODEFIQ
@@ -359,12 +372,12 @@ void arm64_gic_eoi_fiq(unsigned int intid)
    * DEVICE nGnRnE attribute.
    */
 
-  ARM64_DSB();
+  UP_DSB();
 
   /* (AP -> Pending) Or (Active -> Inactive) or (AP to AP) nested case */
 
   write_sysreg(intid, ICC_EOIR0_EL1);
-  ARM64_ISB();
+  UP_ISB();
 }
 #endif
 
@@ -376,9 +389,7 @@ static int arm64_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
   uint32_t aff1;
   uint64_t sgi_val;
   uint32_t regval;
-  unsigned long base;
 
-  base = gic_get_rdist() + GICR_SGI_BASE_OFF;
   ASSERT(GIC_IS_SGI(sgi_id));
 
   /* Extract affinity fields from target */
@@ -390,9 +401,11 @@ static int arm64_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
   sgi_val = GICV3_SGIR_VALUE(aff3, aff2, aff1, sgi_id, SGIR_IRM_TO_AFF,
                              target_list);
 
-  ARM64_DSB();
+  UP_DSB();
 
-  regval = getreg32(IGROUPR(base, 0));
+  /* Read the IGROUPR0 value we set in `gicv3_cpuif_init` */
+
+  regval = IGROUPR_SGI_VAL;
 
   if (regval & BIT(sgi_id))
     {
@@ -403,12 +416,12 @@ static int arm64_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
       write_sysreg(sgi_val, ICC_SGI0R_EL1); /* Group 0 */
     }
 
-  ARM64_ISB();
+  UP_ISB();
 
   return 0;
 }
 
-int arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list)
+void arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list)
 {
   uint64_t pre_cluster_id = UINT64_MAX;
   uint64_t curr_cluster_id;
@@ -437,8 +450,6 @@ int arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list)
     }
 
   arm64_gic_send_sgi(sgi_id, pre_cluster_id, tlist);
-
-  return 0;
 }
 
 /* Wake up GIC redistributor.
@@ -471,11 +482,13 @@ static void gicv3_rdist_enable(unsigned long rdist)
 
 static void gicv3_cpuif_init(void)
 {
-  uint32_t      icc_sre;
+  uint64_t      icc_sre;
+  uint64_t      icc_ctrl;
   uint32_t      intid;
   unsigned long base = gic_get_rdist() + GICR_SGI_BASE_OFF;
+  bool eoi_mode;
 
-  /* Disable all sgi ppi */
+  /* Disable all SGI and PPI interrupts */
 
   putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG), ICENABLER(base, 0));
 
@@ -483,17 +496,61 @@ static void gicv3_cpuif_init(void)
 
   gic_wait_rwp(0);
 
-  /* Clear pending */
+  /* Clear pending and active SGI and PPI interrupts at GIC */
 
   putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG), ICPENDR(base, 0));
+  putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG), ICACTIVER(base, 0));
 
-  /* Configure all SGIs/PPIs as G1S or G1NS depending on Zephyr
-   * is run in EL1S or EL1NS respectively.
-   * All interrupts will be delivered as irq
+  /* Configure all SGIs/PPIs as G1S or G1NS depending on NuttX is run in
+   * EL1S or EL1NS respectively. All interrupts will be delivered as irq.
    */
 
   putreg32(IGROUPR_SGI_VAL, IGROUPR(base, 0));
-  putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG), IGROUPMODR(base, 0));
+  putreg32(0, IGROUPMODR(base, 0));
+
+  /* Clear any active IRQs in the CPU interface */
+
+  icc_ctrl = read_sysreg(ICC_CTLR_EL1);
+  UP_DSB();
+  eoi_mode = (icc_ctrl & ICC_CTLR_EOIMODE_BIT) != 0;
+
+  /* If the SW has crashed / warm-rebooted right after reading the
+   * ICC_IAR1_EL1, but before acking it in EOIR1, the irq is still
+   * active, but not any longer readable from the IAR1.
+   *
+   * Just ack all IRQs to clear such state. Invalid writes are ignored by
+   * the architecture.
+   */
+
+  for (intid = 0; intid < NR_IRQS; intid++)
+    {
+#ifdef CONFIG_ARM64_DECODEFIQ
+      write_sysreg(intid, ICC_EOIR0_EL1);
+#endif
+      write_sysreg(intid, ICC_EOIR1_EL1);
+
+      if (eoi_mode)
+        {
+          write_sysreg(intid, ICC_DIR_EL1);
+        }
+    }
+
+  /* Now, if the SW has crashed / warm rebooted when interrupts are
+   * activated, but before reading the ICC_IAR1_EL1, disable the
+   * interrupts normally
+   */
+
+  while ((intid = arm64_gic_get_active_irq()) < NR_IRQS)
+    {
+#ifdef CONFIG_ARM64_DECODEFIQ
+      write_sysreg(intid, ICC_EOIR0_EL1);
+#endif
+      write_sysreg(intid, ICC_EOIR1_EL1);
+      if (eoi_mode)
+        {
+          write_sysreg(intid, ICC_DIR_EL1);
+        }
+    }
 
   /* Configure default priorities for SGI 0:15 and PPI 0:15. */
 
@@ -510,7 +567,6 @@ static void gicv3_cpuif_init(void)
   /* Check if system interface can be enabled.
    * 'icc_sre_el3' needs to be configured at 'EL3'
    * to allow access to 'icc_sre_el1' at 'EL1'
-   * eg: z_arch_el3_plat_init can be used by platform.
    */
 
   icc_sre = read_sysreg(ICC_SRE_EL1);
@@ -522,7 +578,7 @@ static void gicv3_cpuif_init(void)
          ICC_SRE_ELX_DFB_BIT);
       write_sysreg(icc_sre, ICC_SRE_EL1);
 
-      ARM64_ISB();
+      UP_ISB();
 
       icc_sre = read_sysreg(ICC_SRE_EL1);
 
@@ -539,7 +595,7 @@ static void gicv3_cpuif_init(void)
   write_sysreg(1, ICC_IGRPEN0_EL1);
 #endif
 
-  ARM64_ISB();
+  UP_ISB();
 }
 
 static void gicv3_dist_init(void)
@@ -583,21 +639,22 @@ static void gicv3_dist_init(void)
 
       /* Disable interrupt */
 
-      putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG),
-               ICENABLER(base, idx));
+      putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG), ICENABLER(base, idx));
 
-      /* Clear pending */
+      /* Wait for rwp on GICD */
 
-      putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG),
-               ICPENDR(base, idx));
+      gic_wait_rwp(intid);
+
+      /* Clear pending and active SPIs */
+
+      putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG), ICPENDR(base, idx));
+      putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG), ICACTIVER(base, idx));
+
+      /* Configure groups to default values */
+
       putreg32(IGROUPR_VAL, IGROUPR(base, idx));
-      putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG),
-               IGROUPMODR(base, idx));
+      putreg32(0, IGROUPMODR(base, idx));
     }
-
-  /* wait for rwp on GICD */
-
-  gic_wait_rwp(GIC_SPI_INT_BASE);
 
   /* Configure default priorities for all SPIs. */
 
@@ -613,8 +670,27 @@ static void gicv3_dist_init(void)
        intid += GIC_NUM_CFG_PER_REG)
     {
       idx = intid / GIC_NUM_CFG_PER_REG;
+#ifdef CONFIG_ARM64_GICV3_SPI_EDGE
+      /* Configure all SPIs as edge-triggered by default */
+
+      putreg32(0xaaaaaaaa, ICFGR(base, idx));
+#else
+      /* Configure all SPIs as level-sensitive by default */
+
       putreg32(0, ICFGR(base, idx));
+#endif
     }
+
+  /* Configure SPI interrupt affinity routing to CPU0 */
+
+#ifdef CONFIG_ARM64_GICV3_SPI_ROUTING_CPU0
+  uint64_t mpid = arm64_get_mpid(0);
+
+  for (intid = GIC_SPI_INT_BASE; intid < num_ints; intid++)
+    {
+      putreg64(mpid, IROUTER(base, intid));
+    }
+#endif
 
   /* TODO: Some arrch64 Cortex-A core maybe without security state
    * it has different GIC configure with standard arrch64 A or R core
@@ -655,12 +731,8 @@ static void gicv3_dist_init(void)
 #ifdef CONFIG_SMP
   /* Attach SGI interrupt handlers. This attaches the handler to all CPUs. */
 
-  DEBUGVERIFY(irq_attach(GIC_SMP_CPUPAUSE, arm64_pause_handler, NULL));
-
-#  ifdef CONFIG_SMP_CALL
-  DEBUGVERIFY(irq_attach(GIC_SMP_CPUCALL,
-                         nxsched_smp_call_handler, NULL));
-#  endif
+  DEBUGVERIFY(irq_attach(GIC_SMP_SCHED, arm64_smp_sched_handler, NULL));
+  DEBUGVERIFY(irq_attach(GIC_SMP_CALL, nxsched_smp_call_handler, NULL));
 #endif
 }
 
@@ -673,6 +745,35 @@ void up_disable_irq(int irq)
 {
   arm64_gic_irq_disable(irq);
 }
+
+/***************************************************************************
+ * Name: up_set_secure_irq
+ *
+ * Description:
+ *   Secure an IRQ
+ *
+ ***************************************************************************/
+
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_HIPRI_INTERRUPT)
+void up_secure_irq(int irq, bool secure)
+{
+  uint32_t mask      = BIT(irq & (GIC_NUM_INTR_PER_REG - 1));
+  uint32_t idx       = irq / GIC_NUM_INTR_PER_REG;
+  unsigned long base = GET_DIST_BASE(irq);
+  unsigned int val   = getreg32(IGROUPR(base, idx));
+
+  if (secure)
+    {
+      val &= (~mask);  /* group 0 fiq */
+    }
+  else
+    {
+      val |= mask;     /* group 1 irq */
+    }
+
+  putreg32(val, IGROUPR(base, idx));
+}
+#endif
 
 /***************************************************************************
  * Name: up_prioritize_irq
@@ -940,9 +1041,9 @@ static void arm64_gic_init(void)
   uint8_t   cpu;
   int       err;
 
-  cpu             = this_cpu();
-  gic_rdists[cpu] = CONFIG_GICR_BASE +
-                    up_cpu_index() * CONFIG_GICR_OFFSET;
+  cpu               = this_cpu();
+  g_gic_rdists[cpu] = CONFIG_GICR_BASE +
+                      up_cpu_index() * CONFIG_GICR_OFFSET;
 
   err = gic_validate_redist_version();
   if (err)
@@ -956,10 +1057,8 @@ static void arm64_gic_init(void)
   gicv3_cpuif_init();
 
 #ifdef CONFIG_SMP
-  up_enable_irq(GIC_SMP_CPUPAUSE);
-#  ifdef CONFIG_SMP_CALL
-  up_enable_irq(GIC_SMP_CPUCALL);
-#  endif
+  up_enable_irq(GIC_SMP_SCHED);
+  up_enable_irq(GIC_SMP_CALL);
 #endif
 }
 
@@ -986,11 +1085,17 @@ void arm64_gic_secondary_init(void)
 {
   arm64_gic_init();
 }
-
-#  ifdef CONFIG_SMP_CALL
-void up_send_smp_call(cpu_set_t cpuset)
-{
-  up_trigger_irq(GIC_SMP_CPUCALL, cpuset);
-}
-#  endif
 #endif
+
+/***************************************************************************
+ * Name: up_get_legacy_irq
+ *
+ * Description:
+ *   Reserve vector for legacy
+ *
+ ***************************************************************************/
+
+int up_get_legacy_irq(uint32_t devfn, uint8_t line, uint8_t pin)
+{
+  return -ENOTSUP;
+}

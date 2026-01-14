@@ -2,6 +2,8 @@
 nRF52832-DK
 ===========
 
+.. tags:: chip:nrf52, chip:nrf52832
+
 The `NRF52832-DK (PCA10040) <https://www.nordicsemi.com/Products/Development-hardware/nrf52-dk>`_
 is a development board for the nRF52832 SoC from Nordic.
 
@@ -71,10 +73,13 @@ follow::
 
 Where <subdir> is one of the following:
 
-buttons
--------
+jumbo
+-----
 
-This configuration shows the use of the buttons subsystem.
+This configuration enables many Apache NuttX features.  This is
+mostly to help provide additional code coverage in CI, but also
+allows for a users to see a wide range of features that are
+supported by the OS.
 
 nsh
 ----
@@ -99,8 +104,3 @@ sdc_nimble
 
 Enables Nordic's SoftDevice controller and uses nimBLE for the host-layer.
 The ``nimble`` test application can be used to enable a simple GATT server.
-
-wdog
-----
-This configuration is a simple NSH-based test of the nRF52 watchdog
-timer driver using the test at ``apps/examples/watchdog``.

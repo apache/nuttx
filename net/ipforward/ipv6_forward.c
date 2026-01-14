@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/ipforward/ipv6_forward.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -359,11 +361,11 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
     }
 #endif
 
-  /* If the interface isn't "up", we can't forward. */
+  /* If the interface isn't "running", we can't forward. */
 
-  if ((fwddev->d_flags & IFF_UP) == 0)
+  if (IFF_IS_RUNNING(fwddev->d_flags) == 0)
     {
-      nwarn("WARNING: device is DOWN\n");
+      nwarn("WARNING: device is not running\n");
       ret = -EHOSTUNREACH;
       goto errout;
     }
@@ -434,7 +436,7 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
       fwd->f_iob = dev->d_iob;
 
       /* Decrement the TTL in the copy of the IPv6 header (retaining the
-       * original TTL in the sourcee to handle the broadcast case).  If the
+       * original TTL in the source to handle the broadcast case).  If the
        * TTL decrements to zero, then do not forward the packet.
        */
 
@@ -508,9 +510,10 @@ static int ipv6_forward_callback(FAR struct net_driver_s *fwddev,
 
   DEBUGASSERT(fwddev != NULL);
 
-  /* Only IFF_UP device and non-loopback device need forward packet */
+  /* Only IFF_RUNNING device and non-loopback device need forward packet */
 
-  if (!IFF_IS_UP(fwddev->d_flags) || fwddev->d_lltype == NET_LL_LOOPBACK)
+  if (!IFF_IS_RUNNING(fwddev->d_flags) ||
+      fwddev->d_lltype == NET_LL_LOOPBACK)
     {
       return OK;
     }

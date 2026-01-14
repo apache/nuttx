@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s2/common/src/esp32s2_board_spi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -50,6 +52,11 @@ uint8_t esp32s2_spi2_status(struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t status = 0;
 
+  if (devid == SPIDEV_MMCSD(0))
+    {
+      return SPI_STATUS_PRESENT;
+    }
+
   return status;
 }
 
@@ -91,6 +98,11 @@ int esp32s2_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 uint8_t esp32s2_spi3_status(struct spi_dev_s *dev, uint32_t devid)
 {
   uint8_t status = 0;
+
+  if (devid == SPIDEV_MMCSD(0))
+    {
+      return SPI_STATUS_PRESENT;
+    }
 
   return status;
 }

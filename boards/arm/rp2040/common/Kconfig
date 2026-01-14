@@ -552,6 +552,12 @@ config RP2040_LCD_SPI_CH
 	range 0 1
 	---help---
 		Select SPI channel number to use LCD display.
+config LCD_ST7789_RST_GPIO
+	int "ST7789 LCD Reset gpio number"
+	default 12
+	range 0 21
+	---help---
+		Select Sitronix ST7789 TFT Controller Reset gpio.
 
 endif # LCD
 

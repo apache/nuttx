@@ -1,10 +1,8 @@
 /****************************************************************************
  * arch/arm/src/rp2040/hardware/rp2040_adc.h
  *
- * Generated from rp2040.svd originally provided by
- *   Raspberry Pi (Trading) Ltd.
- *
- * Copyright 2020 (c) 2020 Raspberry Pi (Trading) Ltd.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2020 Raspberry Pi (Trading) Ltd.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -75,9 +73,9 @@
 /* Register bit definitions *************************************************/
 
 #define RP2040_ADC_CS_RROBIN_SHIFT     (16)
-#define RP2040_ADC_CS_RROBIN_MASK      (0x001fl << RPC2040_ADC_CS_RROBIN_SHIFT)
+#define RP2040_ADC_CS_RROBIN_MASK      (0x001fl << RP2040_ADC_CS_RROBIN_SHIFT)
 #define RP2040_ADC_CS_AINSEL_SHIFT     (12)
-#define RP2040_ADC_CS_AINSEL_MASK      (0x0007l << RPC2040_ADC_CS_AINSEL_SHIFT)
+#define RP2040_ADC_CS_AINSEL_MASK      (0x0007l << RP2040_ADC_CS_AINSEL_SHIFT)
 #define RP2040_ADC_CS_ERR_STICKY       (1 << 10)
 #define RP2040_ADC_CS_ERR              (1 <<  9)
 #define RP2040_ADC_CS_READY            (1 <<  8)

@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/cache.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -340,7 +342,7 @@ void up_disable_dcache(void);
 #ifdef CONFIG_ARCH_DCACHE
 void up_invalidate_dcache(uintptr_t start, uintptr_t end);
 #else
-#  define up_invalidate_dcache(start, end)
+#  define up_invalidate_dcache(start, end) ((void)(start), (void)(end))
 #endif
 
 /****************************************************************************
@@ -382,7 +384,7 @@ void up_invalidate_dcache_all(void);
 #ifdef CONFIG_ARCH_DCACHE
 void up_clean_dcache(uintptr_t start, uintptr_t end);
 #else
-#  define up_clean_dcache(start, end)
+#  define up_clean_dcache(start, end) ((void)(start), (void)(end))
 #endif
 
 /****************************************************************************

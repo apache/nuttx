@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/nrf53/common/src/nrf53_boot_image.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,10 +33,10 @@
 #include <sys/boardctl.h>
 #include <nuttx/irq.h>
 #include <nuttx/cache.h>
+#include <arch/barriers.h>
 
 #include "nvic.h"
 #include "arm_internal.h"
-#include "barriers.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -83,7 +85,7 @@ static void cleanup_arm_nvic(void)
 
   /* Allow any pending interrupts to be recognized */
 
-  ARM_ISB();
+  UP_ISB();
   cpsid();
 
   /* Disable all interrupts */
@@ -161,10 +163,12 @@ int board_boot_image(const char *path, uint32_t hdr_size)
 
   /* Set main and process stack pointers */
 
-  __asm__ __volatile__("\tmsr msp, %0\n" : : "r" (vt.spr));
-  setcontrol(0x00);
-  ARM_ISB();
-  ((void (*)(void))vt.reset)();
+  __asm__ __volatile__("\tmsr msp, %0\n"
+                       "\tmsr control, %1\n"
+                       "\tisb\n"
+                       "\tmov pc, %2\n"
+                       :
+                       : "r" (vt.spr), "r" (0), "r" (vt.reset));
 
   return 0;
 }

@@ -1,0 +1,260 @@
+# Identify the Arch for the PR and select the applicable builds
+name: Arch
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        description: "Operating System hosting the build: Linux, macOS or msys2"
+        required: true
+        type: string
+      boards:
+        description: "List of All Builds: [arm-01, risc-v-01, xtensa-01, ...]"
+        required: true
+        type: string
+    outputs:
+      skip_all_builds:
+        description: "Set to 1 if all builds should be skipped"
+        value: ${{ jobs.Select-Builds.outputs.skip_all_builds }}
+      selected_builds:
+        description: "Selected Builds for the PR: [arm-01, risc-v-01, xtensa-01, ...]"
+        value: ${{ jobs.Select-Builds.outputs.selected_builds }}
+
+jobs:
+  Select-Builds:
+    runs-on: ubuntu-latest
+
+    outputs:
+      skip_all_builds: ${{ steps.select-builds.outputs.skip_all_builds }}
+      selected_builds: ${{ steps.select-builds.outputs.selected_builds }}
+
+    steps:
+
+      # Get the Arch for the PR: arm, arm64, risc-v, xtensa, ...
+      - name: Get arch
+        id: get-arch
+        run: |        
+
+          # If PR is Not Created or Modified: Build all targets
+          pr=${{github.event.pull_request.number}}
+          if [[ "$pr" == "" ]]; then
+            echo "Not a Created or Modified PR, will build all targets"
+            exit
+          fi
+
+          # Ignore the Label "Area: Documentation", because it won't affect the Build Targets
+          query='.labels | map(select(.name != "Area: Documentation")) | '
+          select_name='.[].name'
+          select_length='length'
+
+          # Get the Labels for the PR: "Arch: risc-v \n Board: risc-v \n Size: XS"
+          # If GitHub CLI Fails: Build all targets
+          labels=$(gh pr view $pr --repo $GITHUB_REPOSITORY --json labels --jq "$query$select_name" || echo "")
+          numlabels=$(gh pr view $pr --repo $GITHUB_REPOSITORY --json labels --jq "$query$select_length" || echo "")
+          echo "labels=$labels"
+          echo "numlabels=$numlabels" | tee -a $GITHUB_OUTPUT
+
+          # Identify the Size, Arch and Board Labels
+          if [[ "$labels" == *"Size: "* ]]; then
+            echo 'labels_contain_size=1' | tee -a $GITHUB_OUTPUT
+          fi
+          if [[ "$labels" == *"Arch: "* ]]; then
+            echo 'labels_contain_arch=1' | tee -a $GITHUB_OUTPUT
+          fi
+          if [[ "$labels" == *"Board: "* ]]; then
+            echo 'labels_contain_board=1' | tee -a $GITHUB_OUTPUT
+          fi
+
+          # Get the Arch Label
+          if [[ "$labels" == *"Arch: arm64"* ]]; then
+            echo 'arch_contains_arm64=1' | tee -a $GITHUB_OUTPUT
+          elif [[ "$labels" == *"Arch: arm"* ]]; then
+            echo 'arch_contains_arm=1' | tee -a $GITHUB_OUTPUT
+          elif [[ "$labels" == *"Arch: risc-v"* ]]; then
+            echo 'arch_contains_riscv=1' | tee -a $GITHUB_OUTPUT
+          elif [[ "$labels" == *"Arch: simulator"* ]]; then
+            echo 'arch_contains_sim=1' | tee -a $GITHUB_OUTPUT
+          elif [[ "$labels" == *"Arch: x86_64"* ]]; then
+            echo 'arch_contains_x86_64=1' | tee -a $GITHUB_OUTPUT
+          elif [[ "$labels" == *"Arch: x86"* ]]; then
+            echo 'arch_contains_x86=1' | tee -a $GITHUB_OUTPUT
+          elif [[ "$labels" == *"Arch: xtensa"* ]]; then
+            echo 'arch_contains_xtensa=1' | tee -a $GITHUB_OUTPUT
+          fi
+
+          # Get the Board Label
+          if [[ "$labels" == *"Board: arm64"* ]]; then
+            echo 'board_contains_arm64=1' | tee -a $GITHUB_OUTPUT
+          elif [[ "$labels" == *"Board: arm"* ]]; then
+            echo 'board_contains_arm=1' | tee -a $GITHUB_OUTPUT
+          elif [[ "$labels" == *"Board: risc-v"* ]]; then
+            echo 'board_contains_riscv=1' | tee -a $GITHUB_OUTPUT
+          elif [[ "$labels" == *"Board: simulator"* ]]; then
+            echo 'board_contains_sim=1' | tee -a $GITHUB_OUTPUT
+          elif [[ "$labels" == *"Board: x86_64"* ]]; then
+            echo 'board_contains_x86_64=1' | tee -a $GITHUB_OUTPUT
+          elif [[ "$labels" == *"Board: x86"* ]]; then
+            echo 'board_contains_x86=1' | tee -a $GITHUB_OUTPUT
+          elif [[ "$labels" == *"Board: xtensa"* ]]; then
+            echo 'board_contains_xtensa=1' | tee -a $GITHUB_OUTPUT
+          fi
+
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Select the Builds for the PR: arm-01, risc-v-01, xtensa-01, ...
+      - name: Select builds
+        id: select-builds
+        run: |
+
+          # Skip all macOS Builds
+          if [[ "${{ inputs.os }}" == "macOS" ]]; then
+            echo "Skipping all macOS Builds"
+            echo "skip_all_builds=1" | tee -a $GITHUB_OUTPUT
+            exit
+          fi
+
+          # Fetch the outputs from the previous step
+          numlabels=${{ steps.get-arch.outputs.numlabels }}
+          labels_contain_size=${{ steps.get-arch.outputs.labels_contain_size }}
+          labels_contain_arch=${{ steps.get-arch.outputs.labels_contain_arch }}
+          labels_contain_board=${{ steps.get-arch.outputs.labels_contain_board }}
+          arch_contains_arm=${{ steps.get-arch.outputs.arch_contains_arm }}
+          arch_contains_arm64=${{ steps.get-arch.outputs.arch_contains_arm64 }}
+          arch_contains_riscv=${{ steps.get-arch.outputs.arch_contains_riscv }}
+          arch_contains_sim=${{ steps.get-arch.outputs.arch_contains_sim }}
+          arch_contains_x86=${{ steps.get-arch.outputs.arch_contains_x86 }}
+          arch_contains_x86_64=${{ steps.get-arch.outputs.arch_contains_x86_64 }}
+          arch_contains_xtensa=${{ steps.get-arch.outputs.arch_contains_xtensa }}
+          board_contains_arm=${{ steps.get-arch.outputs.board_contains_arm }}
+          board_contains_arm64=${{ steps.get-arch.outputs.board_contains_arm64 }}
+          board_contains_riscv=${{ steps.get-arch.outputs.board_contains_riscv }}
+          board_contains_sim=${{ steps.get-arch.outputs.board_contains_sim }}
+          board_contains_x86=${{ steps.get-arch.outputs.board_contains_x86 }}
+          board_contains_x86_64=${{ steps.get-arch.outputs.board_contains_x86_64 }}
+          board_contains_xtensa=${{ steps.get-arch.outputs.board_contains_xtensa }}
+
+          # inputs.boards is a JSON Array: ["arm-01", "risc-v-01", "xtensa-01", ...]
+          # We compact and remove the newlines
+          boards=$( echo '${{ inputs.boards }}' | jq --compact-output ".")
+          numboards=$( echo "$boards" | jq "length" )
+
+          # We consider only Simple PRs with:
+          # Arch + Size Labels Only
+          # Board + Size Labels Only
+          # Arch + Board + Size Labels Only
+          if [[ "$labels_contain_size" != "1" ]]; then
+            echo "Size Label Missing, will build all targets"
+            quit=1
+          elif [[ "$numlabels" == "2" && "$labels_contain_arch" == "1" ]]; then
+            echo "Arch + Size Labels Only"
+          elif [[ "$numlabels" == "2" && "$labels_contain_board" == "1" ]]; then
+            echo "Board + Size Labels Only"
+          elif [[ "$numlabels" == "3" && "$labels_contain_arch" == "1"  && "$labels_contain_board" == "1" ]]; then
+            # Arch and Board must be the same
+            if [[
+              "$arch_contains_arm" != "$board_contains_arm" ||
+              "$arch_contains_arm64" != "$board_contains_arm64" ||
+              "$arch_contains_riscv" != "$board_contains_riscv" ||
+              "$arch_contains_sim" != "$board_contains_sim" ||
+              "$arch_contains_x86" != "$board_contains_x86" ||
+              "$arch_contains_x86_64" != "$board_contains_x86_64" ||
+              "$arch_contains_xtensa" != "$board_contains_xtensa"
+            ]]; then
+              echo "Arch and Board are not the same, will build all targets"
+              quit=1
+            else
+              echo "Arch + Board + Size Labels Only"
+            fi
+          else
+            echo "Not a Simple PR, will build all targets"
+            quit=1
+          fi
+
+          # If Not a Simple PR: Build all targets
+          if [[ "$quit" == "1" ]]; then
+            # If PR was Created or Modified: Include all boards
+            pr=${{github.event.pull_request.number}}
+            if [[ "$pr" != "" ]]; then
+              echo "Include all boards"
+              boards=$(
+                echo '${{ inputs.boards }}' |
+                jq --compact-output \
+                '.'
+              )
+            fi
+            echo "selected_builds=$boards" | tee -a $GITHUB_OUTPUT
+            exit
+          fi
+
+          # For every board
+          for (( i=0; i<numboards; i++ ))
+          do
+            # Fetch the board
+            board=$( echo "$boards" | jq ".[$i]" )
+            skip_build=0
+            
+            # For "Arch / Board: arm": Build arm-01, arm-02, ...
+            if [[ "$arch_contains_arm" == "1" || "$board_contains_arm" == "1" ]]; then
+              if [[ "$board" != *"arm-"* ]]; then
+                skip_build=1
+              fi
+
+            # For "Arch / Board: arm64": Build arm64-01
+            elif [[ "$arch_contains_arm64" == "1" || "$board_contains_arm64" == "1" ]]; then
+              if [[ "$board" != *"arm64-"* ]]; then
+                skip_build=1
+              fi
+
+            # For "Arch / Board: risc-v": Build risc-v-01, risc-v-02, ...
+            elif [[ "$arch_contains_riscv" == "1" || "$board_contains_riscv" == "1" ]]; then
+              if [[ "$board" != *"risc-v-"* ]]; then
+                skip_build=1
+              fi
+  
+            # For "Arch / Board: simulator": Build sim-01, sim-02
+            elif [[ "$arch_contains_sim" == "1" || "$board_contains_sim" == "1" ]]; then
+              if [[ "$board" != *"sim-"* ]]; then
+                skip_build=1
+              fi
+
+            # For "Arch / Board: x86": Build other
+            elif [[ "$arch_contains_x86" == "1" || "$board_contains_x86" == "1" ]]; then
+              if [[ "$board" != *"other"* ]]; then
+                skip_build=1
+              fi
+  
+            # For "Arch / Board: x86_64": Build x86_64-01
+            elif [[ "$arch_contains_x86_64" == "1" || "$board_contains_x86_64" == "1" ]]; then
+              if [[ "$board" != *"x86_64-"* ]]; then
+                skip_build=1
+              fi
+  
+            # For "Arch / Board: xtensa": Build xtensa-01, xtensa-02
+            elif [[ "$arch_contains_xtensa" == "1" || "$board_contains_xtensa" == "1" ]]; then
+              if [[ "$board" != *"xtensa-"* ]]; then
+                skip_build=1
+              fi
+  
+            # For Other Arch: Allow the build
+            else
+              echo Build by default: $board
+            fi
+  
+            # Add the board to the selected builds
+            if [[ "$skip_build" == "0" ]]; then
+              echo Add $board to selected_builds
+              if [[ "$selected_builds" == "" ]]; then
+                selected_builds=$board
+              else
+                selected_builds=$selected_builds,$board
+              fi
+            fi
+          done
+
+          # Return the selected builds as JSON Array
+          # If Selected Builds is empty: Skip all builds
+          echo "selected_builds=[$selected_builds]" | tee -a $GITHUB_OUTPUT
+          if [[ "$selected_builds" == "" ]]; then
+            echo "skip_all_builds=1" | tee -a $GITHUB_OUTPUT
+          fi

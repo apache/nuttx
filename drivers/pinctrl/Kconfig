@@ -1,0 +1,15 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "Pinctrl Support"
+
+config PINCTRL
+	bool "PINCTRL Driver Support"
+	default n
+	---help---
+		This selection enables selection of common PINCTRL options.  This option
+		should be enabled by all platforms that support PINCTRL interfaces.
+		See include/nuttx/pinctrl/pinctrl.h for further PINCTRL driver information.
+endmenu

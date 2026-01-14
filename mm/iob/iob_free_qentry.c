@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/iob/iob_free_qentry.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -66,27 +68,20 @@ FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq)
    * iob_tryalloc_qentry()).
    */
 
-  if (g_qentry_sem.semcount < 0)
+  if (g_qentry_wait > 0)
     {
       iobq->qe_flink   = g_iob_qcommitted;
       g_iob_qcommitted = iobq;
+      g_qentry_wait--;
+      spin_unlock_irqrestore(&g_iob_lock, flags);
+      nxsem_post(&g_qentry_sem);
     }
   else
     {
       iobq->qe_flink   = g_iob_freeqlist;
       g_iob_freeqlist  = iobq;
+      spin_unlock_irqrestore(&g_iob_lock, flags);
     }
-
-  spin_unlock_irqrestore(&g_iob_lock, flags);
-
-  /* Signal that an I/O buffer chain container is available.  If there
-   * is a thread waiting for an I/O buffer chain container, this will
-   * wake up exactly one thread.  The semaphore count will correctly
-   * indicated that the awakened task owns an I/O buffer chain container
-   * and should find it in the committed list.
-   */
-
-  nxsem_post(&g_qentry_sem);
 
   /* And return the I/O buffer chain container after the one that was freed */
 

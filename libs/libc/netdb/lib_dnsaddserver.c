@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/netdb/lib_dnsaddserver.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -122,6 +124,11 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
   union dns_addr_u dns_addr;
   FAR uint16_t *pport;
   size_t copylen;
+#if CONFIG_NETDB_DNSSERVER_NAMESERVERS > 1
+  char prev_addr[CONFIG_NETDB_DNSSERVER_NAMESERVERS - 1][DNS_MAX_LINE];
+  int prev_cnt;
+  int i;
+#endif
   int ret;
 
   stream = fopen(CONFIG_NETDB_RESOLVCONF_PATH, "a+");
@@ -223,7 +230,22 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
       goto errout;
     }
 
-  /* Write the new record to the end of the resolv.conf file. */
+#if CONFIG_NETDB_DNSSERVER_NAMESERVERS > 1
+  fseek(stream, 0, SEEK_SET);
+  for (prev_cnt = 0; prev_cnt < CONFIG_NETDB_DNSSERVER_NAMESERVERS - 1;
+       prev_cnt++)
+    {
+      if (fgets(prev_addr[prev_cnt], DNS_MAX_LINE, stream) == NULL)
+        {
+          break;
+        }
+    }
+#endif
+
+  fclose(stream);
+  stream = fopen(CONFIG_NETDB_RESOLVCONF_PATH, "w");
+
+  /* Write the new record to the head of the resolv.conf file. */
 
 #ifdef CONFIG_NETDB_RESOLVCONF_NONSTDPORT
   /* The OpenBSD version supports a [host]:port syntax.  When a non-standard
@@ -237,8 +259,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
   ret = fprintf(stream, "%s [%s]:%u\n",
                 NETDB_DNS_KEYWORD, addrstr, NTOHS(*pport));
 #else
-  ret = fprintf(stream, "%s %s\n",
-                NETDB_DNS_KEYWORD, addrstr);
+  ret = fprintf(stream, "%s %s\n", NETDB_DNS_KEYWORD, addrstr);
 #endif
 
   if (ret < 0)
@@ -248,6 +269,20 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
       DEBUGASSERT(ret < 0);
       goto errout;
     }
+
+#if CONFIG_NETDB_DNSSERVER_NAMESERVERS > 1
+  for (i = 0; i < prev_cnt; i++)
+    {
+      ret = fputs(prev_addr[i], stream);
+      if (ret < 0)
+        {
+          ret = -get_errno();
+          nerr("ERROR: fprintf failed: %d\n", ret);
+          DEBUGASSERT(ret < 0);
+          goto errout;
+        }
+    }
+#endif
 
   ret = OK;
 

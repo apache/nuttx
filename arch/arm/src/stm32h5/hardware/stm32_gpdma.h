@@ -1,0 +1,561 @@
+/****************************************************************************
+ * arch/arm/src/stm32h5/hardware/stm32_gpdma.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#ifndef __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_GPDMA_H
+#define __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_GPDMA_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+#include "chip.h"
+
+#if defined(CONFIG_STM32H5_STM32H56XXX) || defined(CONFIG_STM32H5_STM32H57XXX)
+#  include "stm32h56x_dmasigmap.h"
+#else
+# error "Unsupported STM32 H5 DMA map"
+#endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Register Offsets *********************************************************/
+
+#define STM32_GPDMA_SECCFGR_OFFSET      0x0000
+#define STM32_GPDMA_PRIVCFGR_OFFSET     0x0004
+#define STM32_GPDMA_RCFGLOCKR_OFFSET    0x0008
+#define STM32_GPDMA_MISR_OFFSET         0x000C
+#define STM32_GPDMA_SMISR_OFFSET        0x0010
+#define STM32_GPDMA_CXLBAR_OFFSET(x)    (0x50+0x80*(x))
+#  define STM32_GPDMA_C0LBAR_OFFSET     STM32_GPDMA_CXLBAR_OFFSET(0)
+#  define STM32_GPDMA_C1LBAR_OFFSET     STM32_GPDMA_CXLBAR_OFFSET(1)
+#  define STM32_GPDMA_C2LBAR_OFFSET     STM32_GPDMA_CXLBAR_OFFSET(2)
+#  define STM32_GPDMA_C3LBAR_OFFSET     STM32_GPDMA_CXLBAR_OFFSET(3)
+#  define STM32_GPDMA_C4LBAR_OFFSET     STM32_GPDMA_CXLBAR_OFFSET(4)
+#  define STM32_GPDMA_C5LBAR_OFFSET     STM32_GPDMA_CXLBAR_OFFSET(5)
+#  define STM32_GPDMA_C6LBAR_OFFSET     STM32_GPDMA_CXLBAR_OFFSET(6)
+#  define STM32_GPDMA_C7LBAR_OFFSET     STM32_GPDMA_CXLBAR_OFFSET(7)
+#define STM32_GPDMA_CXFCR_OFFSET(x)     (0x5C+0x80*(x))
+#  define STM32_GPDMA_C0FCR_OFFSET      STM32_GPDMA_CXFCR_OFFSET(0)
+#  define STM32_GPDMA_C1FCR_OFFSET      STM32_GPDMA_CXFCR_OFFSET(1)
+#  define STM32_GPDMA_C2FCR_OFFSET      STM32_GPDMA_CXFCR_OFFSET(2)
+#  define STM32_GPDMA_C3FCR_OFFSET      STM32_GPDMA_CXFCR_OFFSET(3)
+#  define STM32_GPDMA_C4FCR_OFFSET      STM32_GPDMA_CXFCR_OFFSET(4)
+#  define STM32_GPDMA_C5FCR_OFFSET      STM32_GPDMA_CXFCR_OFFSET(5)
+#  define STM32_GPDMA_C6FCR_OFFSET      STM32_GPDMA_CXFCR_OFFSET(6)
+#  define STM32_GPDMA_C7FCR_OFFSET      STM32_GPDMA_CXFCR_OFFSET(7)
+#define STM32_GPDMA_CXSR_OFFSET(x)      (0x60+0x80*(x))
+#  define STM32_GPDMA_C0SR_OFFSET       STM32_GPDMA_CXSR_OFFSET(0)
+#  define STM32_GPDMA_C1SR_OFFSET       STM32_GPDMA_CXSR_OFFSET(1)
+#  define STM32_GPDMA_C2SR_OFFSET       STM32_GPDMA_CXSR_OFFSET(2)
+#  define STM32_GPDMA_C3SR_OFFSET       STM32_GPDMA_CXSR_OFFSET(3)
+#  define STM32_GPDMA_C4SR_OFFSET       STM32_GPDMA_CXSR_OFFSET(4)
+#  define STM32_GPDMA_C5SR_OFFSET       STM32_GPDMA_CXSR_OFFSET(5)
+#  define STM32_GPDMA_C6SR_OFFSET       STM32_GPDMA_CXSR_OFFSET(6)
+#  define STM32_GPDMA_C7SR_OFFSET       STM32_GPDMA_CXSR_OFFSET(7)
+#define STM32_GPDMA_CXCR_OFFSET(x)      (0x64+0x80*(x))
+#  define STM32_GPDMA_C0CR_OFFSET       STM32_GPDMA_CXCR_OFFSET(0)
+#  define STM32_GPDMA_C1CR_OFFSET       STM32_GPDMA_CXCR_OFFSET(1)
+#  define STM32_GPDMA_C2CR_OFFSET       STM32_GPDMA_CXCR_OFFSET(2)
+#  define STM32_GPDMA_C3CR_OFFSET       STM32_GPDMA_CXCR_OFFSET(3)
+#  define STM32_GPDMA_C4CR_OFFSET       STM32_GPDMA_CXCR_OFFSET(4)
+#  define STM32_GPDMA_C5CR_OFFSET       STM32_GPDMA_CXCR_OFFSET(5)
+#  define STM32_GPDMA_C6CR_OFFSET       STM32_GPDMA_CXCR_OFFSET(6)
+#  define STM32_GPDMA_C7CR_OFFSET       STM32_GPDMA_CXCR_OFFSET(7)
+#define STM32_GPDMA_CXTR1_OFFSET(x)     (0x90+0x80*(x))
+#  define STM32_GPDMA_C0TR1_OFFSET      STM32_GPDMA_CXTR1_OFFSET(0)
+#  define STM32_GPDMA_C1TR1_OFFSET      STM32_GPDMA_CXTR1_OFFSET(1)
+#  define STM32_GPDMA_C2TR1_OFFSET      STM32_GPDMA_CXTR1_OFFSET(2)
+#  define STM32_GPDMA_C3TR1_OFFSET      STM32_GPDMA_CXTR1_OFFSET(3)
+#  define STM32_GPDMA_C4TR1_OFFSET      STM32_GPDMA_CXTR1_OFFSET(4)
+#  define STM32_GPDMA_C5TR1_OFFSET      STM32_GPDMA_CXTR1_OFFSET(5)
+#  define STM32_GPDMA_C6TR1_OFFSET      STM32_GPDMA_CXTR1_OFFSET(6)
+#  define STM32_GPDMA_C7TR1_OFFSET      STM32_GPDMA_CXTR1_OFFSET(7)
+#define STM32_GPDMA_CXTR2_OFFSET(x)     (0x94+0x80*(x))
+#  define STM32_GPDMA_C0TR2_OFFSET      STM32_GPDMA_CXTR2_OFFSET(0)
+#  define STM32_GPDMA_C1TR2_OFFSET      STM32_GPDMA_CXTR2_OFFSET(1)
+#  define STM32_GPDMA_C2TR2_OFFSET      STM32_GPDMA_CXTR2_OFFSET(2)
+#  define STM32_GPDMA_C3TR2_OFFSET      STM32_GPDMA_CXTR2_OFFSET(3)
+#  define STM32_GPDMA_C4TR2_OFFSET      STM32_GPDMA_CXTR2_OFFSET(4)
+#  define STM32_GPDMA_C5TR2_OFFSET      STM32_GPDMA_CXTR2_OFFSET(5)
+#  define STM32_GPDMA_C6TR2_OFFSET      STM32_GPDMA_CXTR2_OFFSET(6)
+#  define STM32_GPDMA_C7TR2_OFFSET      STM32_GPDMA_CXTR2_OFFSET(7)
+#define STM32_GPDMA_CXBR1_OFFSET(x)     (0x98+0x80*(x))
+#  define STM32_GPDMA_C0BR1_OFFSET      STM32_GPDMA_CXBR1_OFFSET(0)
+#  define STM32_GPDMA_C1BR1_OFFSET      STM32_GPDMA_CXBR1_OFFSET(1)
+#  define STM32_GPDMA_C2BR1_OFFSET      STM32_GPDMA_CXBR1_OFFSET(2)
+#  define STM32_GPDMA_C3BR1_OFFSET      STM32_GPDMA_CXBR1_OFFSET(3)
+#  define STM32_GPDMA_C4BR1_OFFSET      STM32_GPDMA_CXBR1_OFFSET(4)
+#  define STM32_GPDMA_C5BR1_OFFSET      STM32_GPDMA_CXBR1_OFFSET(5)
+#  define STM32_GPDMA_C6BR1_OFFSET      STM32_GPDMA_CXBR1_OFFSET(6)
+#  define STM32_GPDMA_C7BR1_OFFSET      STM32_GPDMA_CXBR1_OFFSET(7)
+#define STM32_GPDMA_CXSAR_OFFSET(x)     (0x9C+0x80*(x))
+#  define STM32_GPDMA_C0SAR_OFFSET      STM32_GPDMA_CXSAR_OFFSET(0)
+#  define STM32_GPDMA_C1SAR_OFFSET      STM32_GPDMA_CXSAR_OFFSET(1)
+#  define STM32_GPDMA_C2SAR_OFFSET      STM32_GPDMA_CXSAR_OFFSET(2)
+#  define STM32_GPDMA_C3SAR_OFFSET      STM32_GPDMA_CXSAR_OFFSET(3)
+#  define STM32_GPDMA_C4SAR_OFFSET      STM32_GPDMA_CXSAR_OFFSET(4)
+#  define STM32_GPDMA_C5SAR_OFFSET      STM32_GPDMA_CXSAR_OFFSET(5)
+#  define STM32_GPDMA_C6SAR_OFFSET      STM32_GPDMA_CXSAR_OFFSET(6)
+#  define STM32_GPDMA_C7SAR_OFFSET      STM32_GPDMA_CXSAR_OFFSET(7)
+#define STM32_GPDMA_CXDAR_OFFSET(x)     (0xA0+0x80*(x))
+#  define STM32_GPDMA_C0DAR_OFFSET      STM32_GPDMA_CXDAR_OFFSET(0)
+#  define STM32_GPDMA_C1DAR_OFFSET      STM32_GPDMA_CXDAR_OFFSET(1)
+#  define STM32_GPDMA_C2DAR_OFFSET      STM32_GPDMA_CXDAR_OFFSET(2)
+#  define STM32_GPDMA_C3DAR_OFFSET      STM32_GPDMA_CXDAR_OFFSET(3)
+#  define STM32_GPDMA_C4DAR_OFFSET      STM32_GPDMA_CXDAR_OFFSET(4)
+#  define STM32_GPDMA_C5DAR_OFFSET      STM32_GPDMA_CXDAR_OFFSET(5)
+#  define STM32_GPDMA_C6DAR_OFFSET      STM32_GPDMA_CXDAR_OFFSET(6)
+#  define STM32_GPDMA_C7DAR_OFFSET      STM32_GPDMA_CXDAR_OFFSET(7)
+#define STM32_GPDMA_CXTR3_OFFSET(x)     (0xA4+0x80*(x))
+#  define STM32_GPDMA_C6TR3_OFFSET      STM32_GPDMA_CXTR3_OFFSET(6)
+#  define STM32_GPDMA_C7TR3_OFFSET      STM32_GPDMA_CXTR3_OFFSET(7)
+#define STM32_GPDMA_CXBR2_OFFSET(x)     (0xA8+0x80*(x))
+#  define STM32_GPDMA_C6BR2_OFFSET      STM32_GPDMA_CXBR2_OFFSET(6)
+#  define STM32_GPDMA_C7BR2_OFFSET      STM32_GPDMA_CXBR2_OFFSET(7)
+#define STM32_GPDMA_CXLLR_OFFSET(x)     (0xCC+0x80*(x))
+#  define STM32_GPDMA_C0LLR_OFFSET      STM32_GPDMA_CXLLR_OFFSET(0)
+#  define STM32_GPDMA_C1LLR_OFFSET      STM32_GPDMA_CXLLR_OFFSET(1)
+#  define STM32_GPDMA_C2LLR_OFFSET      STM32_GPDMA_CXLLR_OFFSET(2)
+#  define STM32_GPDMA_C3LLR_OFFSET      STM32_GPDMA_CXLLR_OFFSET(3)
+#  define STM32_GPDMA_C4LLR_OFFSET      STM32_GPDMA_CXLLR_OFFSET(4)
+#  define STM32_GPDMA_C5LLR_OFFSET      STM32_GPDMA_CXLLR_OFFSET(5)
+#  define STM32_GPDMA_C6LLR_OFFSET      STM32_GPDMA_CXLLR_OFFSET(6)
+#  define STM32_GPDMA_C7LLR_OFFSET      STM32_GPDMA_CXLLR_OFFSET(7)
+
+/* Register Addresses *******************************************************/
+
+/* GPDMA1 */
+
+#define STM32_GPDMA1_SECCFGR            (STM32_DMA1_BASE+STM32_GPDMA_SECCFGR_OFFSET)
+#define STM32_GPDMA1_PRIVCFGR           (STM32_DMA1_BASE+STM32_GPDMA_PRIVCFGR_OFFSET)
+#define STM32_GPDMA1_RCFGLOCKR          (STM32_DMA1_BASE+STM32_GPDMA_RCFGLOCKR_OFFSET)
+#define STM32_GPDMA1_MISR               (STM32_DMA1_BASE+STM32_GPDMA_MISR_OFFSET)
+#define STM32_GPDMA1_SMISR              (STM32_DMA1_BASE+STM32_GPDMA_SMISR_OFFSET)
+#define STM32_GPDMA1_CXLBAR(x)          (STM32_DMA1_BASE+STM32_GPDMA_CXLBAR_OFFSET(x))
+#  define STM32_GPDMA1_C0LBAR           (STM32_DMA1_BASE+STM32_GPDMA_C0LBAR_OFFSET)
+#  define STM32_GPDMA1_C1LBAR           (STM32_DMA1_BASE+STM32_GPDMA_C1LBAR_OFFSET)
+#  define STM32_GPDMA1_C2LBAR           (STM32_DMA1_BASE+STM32_GPDMA_C2LBAR_OFFSET)
+#  define STM32_GPDMA1_C3LBAR           (STM32_DMA1_BASE+STM32_GPDMA_C3LBAR_OFFSET)
+#  define STM32_GPDMA1_C4LBAR           (STM32_DMA1_BASE+STM32_GPDMA_C4LBAR_OFFSET)
+#  define STM32_GPDMA1_C5LBAR           (STM32_DMA1_BASE+STM32_GPDMA_C5LBAR_OFFSET)
+#  define STM32_GPDMA1_C6LBAR           (STM32_DMA1_BASE+STM32_GPDMA_C6LBAR_OFFSET)
+#  define STM32_GPDMA1_C7LBAR           (STM32_DMA1_BASE+STM32_GPDMA_C7LBAR_OFFSET)
+#define STM32_GPDMA1_CXFCR(x)           (STM32_DMA1_BASE+STM32_GPDMA_CXFCR_OFFSET(x))
+#  define STM32_GPDMA1_C0FCR            (STM32_DMA1_BASE+STM32_GPDMA_C0FCR_OFFSET)
+#  define STM32_GPDMA1_C1FCR            (STM32_DMA1_BASE+STM32_GPDMA_C1FCR_OFFSET)
+#  define STM32_GPDMA1_C2FCR            (STM32_DMA1_BASE+STM32_GPDMA_C2FCR_OFFSET)
+#  define STM32_GPDMA1_C3FCR            (STM32_DMA1_BASE+STM32_GPDMA_C3FCR_OFFSET)
+#  define STM32_GPDMA1_C4FCR            (STM32_DMA1_BASE+STM32_GPDMA_C4FCR_OFFSET)
+#  define STM32_GPDMA1_C5FCR            (STM32_DMA1_BASE+STM32_GPDMA_C5FCR_OFFSET)
+#  define STM32_GPDMA1_C6FCR            (STM32_DMA1_BASE+STM32_GPDMA_C6FCR_OFFSET)
+#  define STM32_GPDMA1_C7FCR            (STM32_DMA1_BASE+STM32_GPDMA_C7FCR_OFFSET)
+#define STM32_GPDMA1_CXSR(x)            (STM32_DMA1_BASE+STM32_GPDMA_CXSR_OFFSET(x))
+#  define STM32_GPDMA1_C0SR             (STM32_DMA1_BASE+STM32_GPDMA_C0SR_OFFSET)
+#  define STM32_GPDMA1_C1SR             (STM32_DMA1_BASE+STM32_GPDMA_C1SR_OFFSET)
+#  define STM32_GPDMA1_C2SR             (STM32_DMA1_BASE+STM32_GPDMA_C2SR_OFFSET)
+#  define STM32_GPDMA1_C3SR             (STM32_DMA1_BASE+STM32_GPDMA_C3SR_OFFSET)
+#  define STM32_GPDMA1_C4SR             (STM32_DMA1_BASE+STM32_GPDMA_C4SR_OFFSET)
+#  define STM32_GPDMA1_C5SR             (STM32_DMA1_BASE+STM32_GPDMA_C5SR_OFFSET)
+#  define STM32_GPDMA1_C6SR             (STM32_DMA1_BASE+STM32_GPDMA_C6SR_OFFSET)
+#  define STM32_GPDMA1_C7SR             (STM32_DMA1_BASE+STM32_GPDMA_C7SR_OFFSET)
+#define STM32_GPDMA1_CXCR(x)            (STM32_DMA1_BASE+STM32_GPDMA_CXCR_OFFSET(x))
+#  define STM32_GPDMA1_C0CR             (STM32_DMA1_BASE+STM32_GPDMA_C0CR_OFFSET)
+#  define STM32_GPDMA1_C1CR             (STM32_DMA1_BASE+STM32_GPDMA_C1CR_OFFSET)
+#  define STM32_GPDMA1_C2CR             (STM32_DMA1_BASE+STM32_GPDMA_C2CR_OFFSET)
+#  define STM32_GPDMA1_C3CR             (STM32_DMA1_BASE+STM32_GPDMA_C3CR_OFFSET)
+#  define STM32_GPDMA1_C4CR             (STM32_DMA1_BASE+STM32_GPDMA_C4CR_OFFSET)
+#  define STM32_GPDMA1_C5CR             (STM32_DMA1_BASE+STM32_GPDMA_C5CR_OFFSET)
+#  define STM32_GPDMA1_C6CR             (STM32_DMA1_BASE+STM32_GPDMA_C6CR_OFFSET)
+#  define STM32_GPDMA1_C7CR             (STM32_DMA1_BASE+STM32_GPDMA_C7CR_OFFSET)
+#define STM32_GPDMA1_CXTR1(x)           (STM32_DMA1_BASE+STM32_GPDMA_CXTR1_OFFSET(x))
+#  define STM32_GPDMA1_C0TR1            (STM32_DMA1_BASE+STM32_GPDMA_C0TR1_OFFSET)
+#  define STM32_GPDMA1_C1TR1            (STM32_DMA1_BASE+STM32_GPDMA_C1TR1_OFFSET)
+#  define STM32_GPDMA1_C2TR1            (STM32_DMA1_BASE+STM32_GPDMA_C2TR1_OFFSET)
+#  define STM32_GPDMA1_C3TR1            (STM32_DMA1_BASE+STM32_GPDMA_C3TR1_OFFSET)
+#  define STM32_GPDMA1_C4TR1            (STM32_DMA1_BASE+STM32_GPDMA_C4TR1_OFFSET)
+#  define STM32_GPDMA1_C5TR1            (STM32_DMA1_BASE+STM32_GPDMA_C5TR1_OFFSET)
+#  define STM32_GPDMA1_C6TR1            (STM32_DMA1_BASE+STM32_GPDMA_C6TR1_OFFSET)
+#  define STM32_GPDMA1_C7TR1            (STM32_DMA1_BASE+STM32_GPDMA_C7TR1_OFFSET)
+#define STM32_GPDMA1_CXTR2(x)           (STM32_DMA1_BASE+STM32_GPDMA_CXTR2_OFFSET(x))
+#  define STM32_GPDMA1_C0TR2            (STM32_DMA1_BASE+STM32_GPDMA_C0TR2_OFFSET)
+#  define STM32_GPDMA1_C1TR2            (STM32_DMA1_BASE+STM32_GPDMA_C1TR2_OFFSET)
+#  define STM32_GPDMA1_C2TR2            (STM32_DMA1_BASE+STM32_GPDMA_C2TR2_OFFSET)
+#  define STM32_GPDMA1_C3TR2            (STM32_DMA1_BASE+STM32_GPDMA_C3TR2_OFFSET)
+#  define STM32_GPDMA1_C4TR2            (STM32_DMA1_BASE+STM32_GPDMA_C4TR2_OFFSET)
+#  define STM32_GPDMA1_C5TR2            (STM32_DMA1_BASE+STM32_GPDMA_C5TR2_OFFSET)
+#  define STM32_GPDMA1_C6TR2            (STM32_DMA1_BASE+STM32_GPDMA_C6TR2_OFFSET)
+#  define STM32_GPDMA1_C7TR2            (STM32_DMA1_BASE+STM32_GPDMA_C7TR2_OFFSET)
+#define STM32_GPDMA1_CXBR1(x)           (STM32_DMA1_BASE+STM32_GPDMA_CXBR1_OFFSET(x))
+#  define STM32_GPDMA1_C0BR1            (STM32_DMA1_BASE+STM32_GPDMA_C0BR1_OFFSET)
+#  define STM32_GPDMA1_C1BR1            (STM32_DMA1_BASE+STM32_GPDMA_C1BR1_OFFSET)
+#  define STM32_GPDMA1_C2BR1            (STM32_DMA1_BASE+STM32_GPDMA_C2BR1_OFFSET)
+#  define STM32_GPDMA1_C3BR1            (STM32_DMA1_BASE+STM32_GPDMA_C3BR1_OFFSET)
+#  define STM32_GPDMA1_C4BR1            (STM32_DMA1_BASE+STM32_GPDMA_C4BR1_OFFSET)
+#  define STM32_GPDMA1_C5BR1            (STM32_DMA1_BASE+STM32_GPDMA_C5BR1_OFFSET)
+#  define STM32_GPDMA1_C6BR1            (STM32_DMA1_BASE+STM32_GPDMA_C6BR1_OFFSET)
+#  define STM32_GPDMA1_C7BR1            (STM32_DMA1_BASE+STM32_GPDMA_C7BR1_OFFSET)
+#define STM32_GPDMA1_CXSAR(x)           (STM32_DMA1_BASE+STM32_GPDMA_CXSAR_OFFSET(x))
+#  define STM32_GPDMA1_C0SAR            (STM32_DMA1_BASE+STM32_GPDMA_C0SAR_OFFSET)
+#  define STM32_GPDMA1_C1SAR            (STM32_DMA1_BASE+STM32_GPDMA_C1SAR_OFFSET)
+#  define STM32_GPDMA1_C2SAR            (STM32_DMA1_BASE+STM32_GPDMA_C2SAR_OFFSET)
+#  define STM32_GPDMA1_C3SAR            (STM32_DMA1_BASE+STM32_GPDMA_C3SAR_OFFSET)
+#  define STM32_GPDMA1_C4SAR            (STM32_DMA1_BASE+STM32_GPDMA_C4SAR_OFFSET)
+#  define STM32_GPDMA1_C5SAR            (STM32_DMA1_BASE+STM32_GPDMA_C5SAR_OFFSET)
+#  define STM32_GPDMA1_C6SAR            (STM32_DMA1_BASE+STM32_GPDMA_C6SAR_OFFSET)
+#  define STM32_GPDMA1_C7SAR            (STM32_DMA1_BASE+STM32_GPDMA_C7SAR_OFFSET)
+#define STM32_GPDMA1_CXDAR(x)           (STM32_DMA1_BASE+STM32_GPDMA_CXDAR_OFFSET(x))
+#  define STM32_GPDMA1_C0DAR            (STM32_DMA1_BASE+STM32_GPDMA_C0DAR_OFFSET)
+#  define STM32_GPDMA1_C1DAR            (STM32_DMA1_BASE+STM32_GPDMA_C1DAR_OFFSET)
+#  define STM32_GPDMA1_C2DAR            (STM32_DMA1_BASE+STM32_GPDMA_C2DAR_OFFSET)
+#  define STM32_GPDMA1_C3DAR            (STM32_DMA1_BASE+STM32_GPDMA_C3DAR_OFFSET)
+#  define STM32_GPDMA1_C4DAR            (STM32_DMA1_BASE+STM32_GPDMA_C4DAR_OFFSET)
+#  define STM32_GPDMA1_C5DAR            (STM32_DMA1_BASE+STM32_GPDMA_C5DAR_OFFSET)
+#  define STM32_GPDMA1_C6DAR            (STM32_DMA1_BASE+STM32_GPDMA_C6DAR_OFFSET)
+#  define STM32_GPDMA1_C7DAR            (STM32_DMA1_BASE+STM32_GPDMA_C7DAR_OFFSET)
+#define STM32_GPDMA1_CXTR3(x)           (STM32_DMA1_BASE+STM32_GPDMA_CXTR3_OFFSET(x))
+#  define STM32_GPDMA1_C6TR3            (STM32_DMA1_BASE+STM32_GPDMA_C6TR3_OFFSET)
+#  define STM32_GPDMA1_C7TR3            (STM32_DMA1_BASE+STM32_GPDMA_C7TR3_OFFSET)
+#define STM32_GPDMA1_CXBR2(x)           (STM32_DMA1_BASE+STM32_GPDMA_CXBR2_OFFSET(x))
+#  define STM32_GPDMA1_C6BR2            (STM32_DMA1_BASE+STM32_GPDMA_C6BR2_OFFSET)
+#  define STM32_GPDMA1_C7BR2            (STM32_DMA1_BASE+STM32_GPDMA_C7BR2_OFFSET)
+#define STM32_GPDMA1_CXLLR(x)           (STM32_DMA1_BASE+STM32_GPDMA_CXLLR_OFFSET(x))
+#  define STM32_GPDMA1_C0LLR            (STM32_DMA1_BASE+STM32_GPDMA_C0LLR_OFFSET)
+#  define STM32_GPDMA1_C1LLR            (STM32_DMA1_BASE+STM32_GPDMA_C1LLR_OFFSET)
+#  define STM32_GPDMA1_C2LLR            (STM32_DMA1_BASE+STM32_GPDMA_C2LLR_OFFSET)
+#  define STM32_GPDMA1_C3LLR            (STM32_DMA1_BASE+STM32_GPDMA_C3LLR_OFFSET)
+#  define STM32_GPDMA1_C4LLR            (STM32_DMA1_BASE+STM32_GPDMA_C4LLR_OFFSET)
+#  define STM32_GPDMA1_C5LLR            (STM32_DMA1_BASE+STM32_GPDMA_C5LLR_OFFSET)
+#  define STM32_GPDMA1_C6LLR            (STM32_DMA1_BASE+STM32_GPDMA_C6LLR_OFFSET)
+#  define STM32_GPDMA1_C7LLR            (STM32_DMA1_BASE+STM32_GPDMA_C7LLR_OFFSET)
+
+/* GPDMA2 */
+
+#define STM32_GPDMA2_SECCFGR            (STM32_DMA2_BASE+STM32_GPDMA_SECCFGR_OFFSET)
+#define STM32_GPDMA2_PRIVCFGR           (STM32_DMA2_BASE+STM32_GPDMA_PRIVCFGR_OFFSET)
+#define STM32_GPDMA2_RCFGLOCKR          (STM32_DMA2_BASE+STM32_GPDMA_RCFGLOCKR_OFFSET)
+#define STM32_GPDMA2_MISR               (STM32_DMA2_BASE+STM32_GPDMA_MISR_OFFSET)
+#define STM32_GPDMA2_SMISR              (STM32_DMA2_BASE+STM32_GPDMA_SMISR_OFFSET)
+#define STM32_GPDMA2_CXLBAR(x)          (STM32_DMA2_BASE+STM32_GPDMA_CXLBAR_OFFSET(x))
+#  define STM32_GPDMA2_C0LBAR           (STM32_DMA2_BASE+STM32_GPDMA_C0LBAR_OFFSET)
+#  define STM32_GPDMA2_C1LBAR           (STM32_DMA2_BASE+STM32_GPDMA_C1LBAR_OFFSET)
+#  define STM32_GPDMA2_C2LBAR           (STM32_DMA2_BASE+STM32_GPDMA_C2LBAR_OFFSET)
+#  define STM32_GPDMA2_C3LBAR           (STM32_DMA2_BASE+STM32_GPDMA_C3LBAR_OFFSET)
+#  define STM32_GPDMA2_C4LBAR           (STM32_DMA2_BASE+STM32_GPDMA_C4LBAR_OFFSET)
+#  define STM32_GPDMA2_C5LBAR           (STM32_DMA2_BASE+STM32_GPDMA_C5LBAR_OFFSET)
+#  define STM32_GPDMA2_C6LBAR           (STM32_DMA2_BASE+STM32_GPDMA_C6LBAR_OFFSET)
+#  define STM32_GPDMA2_C7LBAR           (STM32_DMA2_BASE+STM32_GPDMA_C7LBAR_OFFSET)
+#define STM32_GPDMA2_CXFCR(x)           (STM32_DMA2_BASE+STM32_GPDMA_CXFCR_OFFSET(x))
+#  define STM32_GPDMA2_C0FCR            (STM32_DMA2_BASE+STM32_GPDMA_C0FCR_OFFSET)
+#  define STM32_GPDMA2_C1FCR            (STM32_DMA2_BASE+STM32_GPDMA_C1FCR_OFFSET)
+#  define STM32_GPDMA2_C2FCR            (STM32_DMA2_BASE+STM32_GPDMA_C2FCR_OFFSET)
+#  define STM32_GPDMA2_C3FCR            (STM32_DMA2_BASE+STM32_GPDMA_C3FCR_OFFSET)
+#  define STM32_GPDMA2_C4FCR            (STM32_DMA2_BASE+STM32_GPDMA_C4FCR_OFFSET)
+#  define STM32_GPDMA2_C5FCR            (STM32_DMA2_BASE+STM32_GPDMA_C5FCR_OFFSET)
+#  define STM32_GPDMA2_C6FCR            (STM32_DMA2_BASE+STM32_GPDMA_C6FCR_OFFSET)
+#  define STM32_GPDMA2_C7FCR            (STM32_DMA2_BASE+STM32_GPDMA_C7FCR_OFFSET)
+#define STM32_GPDMA2_CXSR(x)            (STM32_DMA2_BASE+STM32_GPDMA_CXSR_OFFSET(x))
+#  define STM32_GPDMA2_C0SR             (STM32_DMA2_BASE+STM32_GPDMA_C0SR_OFFSET)
+#  define STM32_GPDMA2_C1SR             (STM32_DMA2_BASE+STM32_GPDMA_C1SR_OFFSET)
+#  define STM32_GPDMA2_C2SR             (STM32_DMA2_BASE+STM32_GPDMA_C2SR_OFFSET)
+#  define STM32_GPDMA2_C3SR             (STM32_DMA2_BASE+STM32_GPDMA_C3SR_OFFSET)
+#  define STM32_GPDMA2_C4SR             (STM32_DMA2_BASE+STM32_GPDMA_C4SR_OFFSET)
+#  define STM32_GPDMA2_C5SR             (STM32_DMA2_BASE+STM32_GPDMA_C5SR_OFFSET)
+#  define STM32_GPDMA2_C6SR             (STM32_DMA2_BASE+STM32_GPDMA_C6SR_OFFSET)
+#  define STM32_GPDMA2_C7SR             (STM32_DMA2_BASE+STM32_GPDMA_C7SR_OFFSET)
+#define STM32_GPDMA2_CXCR(x)            (STM32_DMA2_BASE+STM32_GPDMA_CXCR_OFFSET(x))
+#  define STM32_GPDMA2_C0CR             (STM32_DMA2_BASE+STM32_GPDMA_C0CR_OFFSET)
+#  define STM32_GPDMA2_C1CR             (STM32_DMA2_BASE+STM32_GPDMA_C1CR_OFFSET)
+#  define STM32_GPDMA2_C2CR             (STM32_DMA2_BASE+STM32_GPDMA_C2CR_OFFSET)
+#  define STM32_GPDMA2_C3CR             (STM32_DMA2_BASE+STM32_GPDMA_C3CR_OFFSET)
+#  define STM32_GPDMA2_C4CR             (STM32_DMA2_BASE+STM32_GPDMA_C4CR_OFFSET)
+#  define STM32_GPDMA2_C5CR             (STM32_DMA2_BASE+STM32_GPDMA_C5CR_OFFSET)
+#  define STM32_GPDMA2_C6CR             (STM32_DMA2_BASE+STM32_GPDMA_C6CR_OFFSET)
+#  define STM32_GPDMA2_C7CR             (STM32_DMA2_BASE+STM32_GPDMA_C7CR_OFFSET)
+#define STM32_GPDMA2_CXTR1(x)           (STM32_DMA2_BASE+STM32_GPDMA_CXTR1_OFFSET(x))
+#  define STM32_GPDMA2_C0TR1            (STM32_DMA2_BASE+STM32_GPDMA_C0TR1_OFFSET)
+#  define STM32_GPDMA2_C1TR1            (STM32_DMA2_BASE+STM32_GPDMA_C1TR1_OFFSET)
+#  define STM32_GPDMA2_C2TR1            (STM32_DMA2_BASE+STM32_GPDMA_C2TR1_OFFSET)
+#  define STM32_GPDMA2_C3TR1            (STM32_DMA2_BASE+STM32_GPDMA_C3TR1_OFFSET)
+#  define STM32_GPDMA2_C4TR1            (STM32_DMA2_BASE+STM32_GPDMA_C4TR1_OFFSET)
+#  define STM32_GPDMA2_C5TR1            (STM32_DMA2_BASE+STM32_GPDMA_C5TR1_OFFSET)
+#  define STM32_GPDMA2_C6TR1            (STM32_DMA2_BASE+STM32_GPDMA_C6TR1_OFFSET)
+#  define STM32_GPDMA2_C7TR1            (STM32_DMA2_BASE+STM32_GPDMA_C7TR1_OFFSET)
+#define STM32_GPDMA2_CXTR2(x)           (STM32_DMA2_BASE+STM32_GPDMA_CXTR2_OFFSET(x))
+#  define STM32_GPDMA2_C0TR2            (STM32_DMA2_BASE+STM32_GPDMA_C0TR2_OFFSET)
+#  define STM32_GPDMA2_C1TR2            (STM32_DMA2_BASE+STM32_GPDMA_C1TR2_OFFSET)
+#  define STM32_GPDMA2_C2TR2            (STM32_DMA2_BASE+STM32_GPDMA_C2TR2_OFFSET)
+#  define STM32_GPDMA2_C3TR2            (STM32_DMA2_BASE+STM32_GPDMA_C3TR2_OFFSET)
+#  define STM32_GPDMA2_C4TR2            (STM32_DMA2_BASE+STM32_GPDMA_C4TR2_OFFSET)
+#  define STM32_GPDMA2_C5TR2            (STM32_DMA2_BASE+STM32_GPDMA_C5TR2_OFFSET)
+#  define STM32_GPDMA2_C6TR2            (STM32_DMA2_BASE+STM32_GPDMA_C6TR2_OFFSET)
+#  define STM32_GPDMA2_C7TR2            (STM32_DMA2_BASE+STM32_GPDMA_C7TR2_OFFSET)
+#define STM32_GPDMA2_CXBR1(x)           (STM32_DMA2_BASE+STM32_GPDMA_CXBR1_OFFSET(x))
+#  define STM32_GPDMA2_C0BR1            (STM32_DMA2_BASE+STM32_GPDMA_C0BR1_OFFSET)
+#  define STM32_GPDMA2_C1BR1            (STM32_DMA2_BASE+STM32_GPDMA_C1BR1_OFFSET)
+#  define STM32_GPDMA2_C2BR1            (STM32_DMA2_BASE+STM32_GPDMA_C2BR1_OFFSET)
+#  define STM32_GPDMA2_C3BR1            (STM32_DMA2_BASE+STM32_GPDMA_C3BR1_OFFSET)
+#  define STM32_GPDMA2_C4BR1            (STM32_DMA2_BASE+STM32_GPDMA_C4BR1_OFFSET)
+#  define STM32_GPDMA2_C5BR1            (STM32_DMA2_BASE+STM32_GPDMA_C5BR1_OFFSET)
+#  define STM32_GPDMA2_C6BR1            (STM32_DMA2_BASE+STM32_GPDMA_C6BR1_OFFSET)
+#  define STM32_GPDMA2_C7BR1            (STM32_DMA2_BASE+STM32_GPDMA_C7BR1_OFFSET)
+#define STM32_GPDMA2_CXSAR(x)           (STM32_DMA2_BASE+STM32_GPDMA_CXSAR_OFFSET(x))
+#  define STM32_GPDMA2_C0SAR            (STM32_DMA2_BASE+STM32_GPDMA_C0SAR_OFFSET)
+#  define STM32_GPDMA2_C1SAR            (STM32_DMA2_BASE+STM32_GPDMA_C1SAR_OFFSET)
+#  define STM32_GPDMA2_C2SAR            (STM32_DMA2_BASE+STM32_GPDMA_C2SAR_OFFSET)
+#  define STM32_GPDMA2_C3SAR            (STM32_DMA2_BASE+STM32_GPDMA_C3SAR_OFFSET)
+#  define STM32_GPDMA2_C4SAR            (STM32_DMA2_BASE+STM32_GPDMA_C4SAR_OFFSET)
+#  define STM32_GPDMA2_C5SAR            (STM32_DMA2_BASE+STM32_GPDMA_C5SAR_OFFSET)
+#  define STM32_GPDMA2_C6SAR            (STM32_DMA2_BASE+STM32_GPDMA_C6SAR_OFFSET)
+#  define STM32_GPDMA2_C7SAR            (STM32_DMA2_BASE+STM32_GPDMA_C7SAR_OFFSET)
+#define STM32_GPDMA2_CXDAR(x)           (STM32_DMA2_BASE+STM32_GPDMA_CXDAR_OFFSET(x))
+#  define STM32_GPDMA2_C0DAR            (STM32_DMA2_BASE+STM32_GPDMA_C0DAR_OFFSET)
+#  define STM32_GPDMA2_C1DAR            (STM32_DMA2_BASE+STM32_GPDMA_C1DAR_OFFSET)
+#  define STM32_GPDMA2_C2DAR            (STM32_DMA2_BASE+STM32_GPDMA_C2DAR_OFFSET)
+#  define STM32_GPDMA2_C3DAR            (STM32_DMA2_BASE+STM32_GPDMA_C3DAR_OFFSET)
+#  define STM32_GPDMA2_C4DAR            (STM32_DMA2_BASE+STM32_GPDMA_C4DAR_OFFSET)
+#  define STM32_GPDMA2_C5DAR            (STM32_DMA2_BASE+STM32_GPDMA_C5DAR_OFFSET)
+#  define STM32_GPDMA2_C6DAR            (STM32_DMA2_BASE+STM32_GPDMA_C6DAR_OFFSET)
+#  define STM32_GPDMA2_C7DAR            (STM32_DMA2_BASE+STM32_GPDMA_C7DAR_OFFSET)
+#define STM32_GPDMA2_CXTR3(x)           (STM32_DMA2_BASE+STM32_GPDMA_CXTR3_OFFSET(x))
+#  define STM32_GPDMA2_C6TR3            (STM32_DMA2_BASE+STM32_GPDMA_C6TR3_OFFSET)
+#  define STM32_GPDMA2_C7TR3            (STM32_DMA2_BASE+STM32_GPDMA_C7TR3_OFFSET)
+#define STM32_GPDMA2_CXBR2(x)           (STM32_DMA2_BASE+STM32_GPDMA_CXBR2_OFFSET(x))
+#  define STM32_GPDMA2_C6BR2            (STM32_DMA2_BASE+STM32_GPDMA_C6BR2_OFFSET)
+#  define STM32_GPDMA2_C7BR2            (STM32_DMA2_BASE+STM32_GPDMA_C7BR2_OFFSET)
+#define STM32_GPDMA2_CXLLR(x)           (STM32_DMA2_BASE+STM32_GPDMA_CXLLR_OFFSET(x))
+#  define STM32_GPDMA2_C0LLR            (STM32_DMA2_BASE+STM32_GPDMA_C0LLR_OFFSET)
+#  define STM32_GPDMA2_C1LLR            (STM32_DMA2_BASE+STM32_GPDMA_C1LLR_OFFSET)
+#  define STM32_GPDMA2_C2LLR            (STM32_DMA2_BASE+STM32_GPDMA_C2LLR_OFFSET)
+#  define STM32_GPDMA2_C3LLR            (STM32_DMA2_BASE+STM32_GPDMA_C3LLR_OFFSET)
+#  define STM32_GPDMA2_C4LLR            (STM32_DMA2_BASE+STM32_GPDMA_C4LLR_OFFSET)
+#  define STM32_GPDMA2_C5LLR            (STM32_DMA2_BASE+STM32_GPDMA_C5LLR_OFFSET)
+#  define STM32_GPDMA2_C6LLR            (STM32_DMA2_BASE+STM32_GPDMA_C6LLR_OFFSET)
+#  define STM32_GPDMA2_C7LLR            (STM32_DMA2_BASE+STM32_GPDMA_C7LLR_OFFSET)
+
+/* Register Bitfield Definitions ********************************************/
+
+/* Secure configuration register */
+
+#define GPDMA_SECCFGR_SECX(x)       (1 << (x))
+#  define GPDMA_SECCFGR_SEC0        GPDMA_SECCFGR_SECX(0)
+#  define GPDMA_SECCFGR_SEC1        GPDMA_SECCFGR_SECX(1)
+#  define GPDMA_SECCFGR_SEC2        GPDMA_SECCFGR_SECX(2)
+#  define GPDMA_SECCFGR_SEC3        GPDMA_SECCFGR_SECX(3)
+#  define GPDMA_SECCFGR_SEC4        GPDMA_SECCFGR_SECX(4)
+#  define GPDMA_SECCFGR_SEC5        GPDMA_SECCFGR_SECX(5)
+#  define GPDMA_SECCFGR_SEC6        GPDMA_SECCFGR_SECX(6)
+#  define GPDMA_SECCFGR_SEC7        GPDMA_SECCFGR_SECX(7)
+
+/* Privileged configuration register */
+
+#define GPDMA_PRIVCFGR_PRIVX(x)     (1 << (x))
+#  define GPDMA_PRIVCFGR_PRIV0      GPDMA_PRIVCFGR_PRIVX(0)
+#  define GPDMA_PRIVCFGR_PRIV1      GPDMA_PRIVCFGR_PRIVX(1)
+#  define GPDMA_PRIVCFGR_PRIV2      GPDMA_PRIVCFGR_PRIVX(2)
+#  define GPDMA_PRIVCFGR_PRIV3      GPDMA_PRIVCFGR_PRIVX(3)
+#  define GPDMA_PRIVCFGR_PRIV4      GPDMA_PRIVCFGR_PRIVX(4)
+#  define GPDMA_PRIVCFGR_PRIV5      GPDMA_PRIVCFGR_PRIVX(5)
+#  define GPDMA_PRIVCFGR_PRIV6      GPDMA_PRIVCFGR_PRIVX(6)
+#  define GPDMA_PRIVCFGR_PRIV7      GPDMA_PRIVCFGR_PRIVX(7)
+
+/* Configuration lock register */
+
+#define GPDMA_RCFGLOCKR_LOCKX(x)    (1 << (x))
+#  define GPDMA_RCFGLOCKR_LOCK0     GPDMA_RCFGLOCKR_LOCKX(0)
+#  define GPDMA_RCFGLOCKR_LOCK1     GPDMA_RCFGLOCKR_LOCKX(1)
+#  define GPDMA_RCFGLOCKR_LOCK2     GPDMA_RCFGLOCKR_LOCKX(2)
+#  define GPDMA_RCFGLOCKR_LOCK3     GPDMA_RCFGLOCKR_LOCKX(3)
+#  define GPDMA_RCFGLOCKR_LOCK4     GPDMA_RCFGLOCKR_LOCKX(4)
+#  define GPDMA_RCFGLOCKR_LOCK5     GPDMA_RCFGLOCKR_LOCKX(5)
+#  define GPDMA_RCFGLOCKR_LOCK6     GPDMA_RCFGLOCKR_LOCKX(6)
+#  define GPDMA_RCFGLOCKR_LOCK7     GPDMA_RCFGLOCKR_LOCKX(7)
+
+/* Nonsecure masked interrupt status register */
+
+#define GPDMA_MISR_MISX(x)          (1 << (x))
+#  define GPDMA_MISR_MIS0           GPDMA_MISR_MISX(0)
+#  define GPDMA_MISR_MIS1           GPDMA_MISR_MISX(1)
+#  define GPDMA_MISR_MIS2           GPDMA_MISR_MISX(2)
+#  define GPDMA_MISR_MIS3           GPDMA_MISR_MISX(3)
+#  define GPDMA_MISR_MIS4           GPDMA_MISR_MISX(4)
+#  define GPDMA_MISR_MIS5           GPDMA_MISR_MISX(5)
+#  define GPDMA_MISR_MIS6           GPDMA_MISR_MISX(6)
+#  define GPDMA_MISR_MIS7           GPDMA_MISR_MISX(7)
+
+/* Secure masked interrupt status register */
+
+#define GPDMA_SMISR_MISX(x)         (1 << (x))
+#  define GPDMA_SMISR_MIS0          GPDMA_SMISR_MISX(0)
+#  define GPDMA_SMISR_MIS1          GPDMA_SMISR_MISX(1)
+#  define GPDMA_SMISR_MIS2          GPDMA_SMISR_MISX(2)
+#  define GPDMA_SMISR_MIS3          GPDMA_SMISR_MISX(3)
+#  define GPDMA_SMISR_MIS4          GPDMA_SMISR_MISX(4)
+#  define GPDMA_SMISR_MIS5          GPDMA_SMISR_MISX(5)
+#  define GPDMA_SMISR_MIS6          GPDMA_SMISR_MISX(6)
+#  define GPDMA_SMISR_MIS7          GPDMA_SMISR_MISX(7)
+
+/* Channel x linked-list base address register */
+
+#define GPDMA_CXLBAR_LBA_SHIFT        (16)
+#define GPDMA_CXLBAR_LBA_MASK         (0xffff << GPDMA_CXLBAR_LBA_SHIFT)
+
+/* Channel x flag clear register */
+
+#define GPDMA_CXFCR_TCF               (1 << 8)
+#define GPDMA_CXFCR_HTF               (1 << 9)
+#define GPDMA_CXFCR_DTEF              (1 << 10)
+#define GPDMA_CXFCR_ULEF              (1 << 11)
+#define GPDMA_CXFCR_USEF              (1 << 12)
+#define GPDMA_CXFCR_SUSPF             (1 << 13)
+#define GPDMA_CXFCR_TOF               (1 << 14)
+
+/* Channel x status register */
+
+#define GPDMA_CXSR_IDLEF              (1 << 0)  /* Idle flag */
+#define GPDMA_CXSR_TCF                (1 << 8)  /* Transfer complete flag */
+#define GPDMA_CXSR_HTF                (1 << 9)  /* Half transfer flag */
+#define GPDMA_CXSR_DTEF               (1 << 10) /* Data transfer error flag */
+#define GPDMA_CXSR_ULEF               (1 << 11) /* Update link transfer error flag */
+#define GPDMA_CXSR_USEF               (1 << 12) /* User setting error flag */
+#define GPDMA_CXSR_SUSPF              (1 << 13) /* Completed suspension flag */
+#define GPDMA_CXSR_TOF                (1 << 14) /* Trigger overrun flag */
+#define GPDMA_CXSR_FIFOL_SHIFT        (16)
+#define GPDMA_CXSR_FIFOL_MASK         (0xff << GPDMA_CXSR_FIFOL_SHIFT)
+
+/* Channel x control register */
+
+#define GPDMA_CXCR_EN                 (1 << 0)  /* Enable */
+#define GPDMA_CXCR_RESET              (1 << 1)  /* Reset */
+#define GPDMA_CXCR_SUSP               (1 << 2)  /* Suspend */
+#define GPDMA_CXCR_TCIE               (1 << 8)  /* Transfer complete interrupt enable */
+#define GPDMA_CXCR_HTIE               (1 << 9)  /* Half transfer complete interrupt enable */
+#define GPDMA_CXCR_DTEIE              (1 << 10) /* Data transfer error interrupt enable */
+#define GPDMA_CXCR_ULEIE              (1 << 11) /* update link transfer error interrupt enable */
+#define GPDMA_CXCR_USEIE              (1 << 12) /* User setting error interrupt enable */
+#define GPDMA_CXCR_SUSPEI             (1 << 13) /* Completed suspension interrupt enable */
+#define GPDMA_CXCR_TOIE               (1 << 14) /* Trigger overrun interrupt enable */
+#define GPDMA_CXCR_LSM                (1 << 16) /* Link step mode */
+#define GPDMA_CXCR_LAP                (1 << 17) /* Linked-list allocated port */
+#define GPDMA_CXCR_PRIO_SHIFT         (22)      /* Bits 22-23: Priority level of ch x GPDMA transfer */
+#define GPDMA_CXCR_PRIO_MASK          (0b11 << GPDMA_CXCR_PRIO_SHIFT)
+
+#define GPDMA_CXCR_ALLINTS            (GPDMA_CXCR_TOIE|GPDMA_CXCR_SUSPEI|GPDMA_CXCR_USEIE|GPDMA_CXCR_ULEIE|GPDMA_CXCR_DTEIE|GPDMA_CXCR_HTIE|GPDMA_CXCR_TCIE)
+
+/* Channel x transfer register 1 */
+
+#define GPDMA_CXTR1_SDW_LOG2_SHIFT    (0)
+#define GPDMA_CXTR1_SDW_LOG2_MASK     (0b11 << GPDMA_CXTR1_SDW_LOG2_SHIFT)
+#  define GPDMA_CXTR1_SDW_LOG2_BYTE   (0 << GPDMA_CXTR1_SDW_LOG2_SHIFT)  /* Byte */
+#  define GPDMA_CXTR1_SDW_LOG2_HW     (1 << GPDMA_CXTR1_SDW_LOG2_SHIFT)  /* Half-word (2 Bytes) */
+#  define GPDMA_CXTR1_SDW_LOG2_WORD   (2 << GPDMA_CXTR1_SDW_LOG2_SHIFT)  /* Word (4 Bytes) */
+
+#define GPDMA_CXTR1_SINC              (1 << 3)  /* Source incrementing burst */
+#define GPDMA_CXTR1_SBL_1_SHIFT       (4)       /* Bits 4-9: Source burst length minus 1, between 0 and 63 */
+#define GPDMA_CXTR1_SBL_1_MASK        (0x3f << GPDMA_CXTR1_SBL_1_SHIFT)
+#define GPDMA_CXTR1_PAM_SHIFT         (11)      /* Bits 11-12: Padding/alignment mode */
+#define GPDMA_CXTR1_PAM_MASK          (0b11 << GPDMA_CXTR1_PAM_SHIFT)
+#define GPDMA_CXTR1_SBX               (1 << 13) /* Source byte exchange */
+#define GPDMA_CXTR1_SAP               (1 << 14) /* Source allocated port */
+#define GPDMA_CXTR1_SSEC              (1 << 15) /* Security attribute for transfer from the source */
+
+#define GPDMA_CXTR1_DDW_LOG2_SHIFT    (16)      /* Bits 16-17: Binary log of destination data width of burst, in bytes */
+#define GPDMA_CXTR1_DDW_LOG2_MASK     (0b11 << GPDMA_CXTR1_DDW_LOG2_SHIFT)
+#  define GPDMA_CXTR1_DDW_LOG2_BYTE   (0 << GPDMA_CXTR1_DDW_LOG2_SHIFT) /* Byte */
+#  define GPDMA_CXTR1_DDW_LOG2_HW     (1 << GPDMA_CXTR1_DDW_LOG2_SHIFT) /* Half-word (2 bytes) */
+#  define GPDMA_CXTR1_DDW_LOG2_WORD   (2 << GPDMA_CXTR1_DDW_LOG2_SHIFT) /* Word (4 bytes) */
+
+#define GPDMA_CXTR1_DINC              (1 << 19) /* Destination incrementing burst */
+
+#define GPDMA_CXTR1_DBL_1_SHIFT       (20)      /* Bits 20-25: Destination burst length minus 1, between 0 and 63*/
+#define GPDMA_CXTR1_DBL_1_MASK        (0x3f << GPDMA_CXTR1_DBL_1_SHIFT)
+#define GPDMA_CXTR1_DBL_1(l)          ((l) - 1 << GPDMA_CXTR1_DBL_1_SHIFT)
+
+#define GPDMA_CXTR1_DBX               (1 << 26) /* Destination byte exchange */
+#define GPDMA_CXTR1_DHX               (1 << 27) /* Destination half-word exchange */
+#define GPDMA_CXTR1_DAP               (1 << 30) /* Destination allocated port */
+#define GPDMA_CXTR1_DSEC              (1 << 31) /* Security attribute of transfer to the destination */
+
+/* Channel x transfer register 2 */
+
+#define GPDMA_CXTR2_REQSEL_SHIFT      (0)       /* Bits 0-7: GPDMA hardware request selection */
+#define GPDMA_CXTR2_REQSEL_MASK       (0xff << GPDMA_CXTR2_REQSEL_SHIFT)
+#define GPDMA_CXTR2_REQSEL(r)         ((r) << GPDMA_CXTR2_REQSEL_SHIFT)
+
+#define GPDMA_CXTR2_SWREQ             (1 << 9)  /* Software request */
+#define GPDMA_CXTR2_DREQ              (1 << 10) /* Destination hardware request */
+#define GPDMA_CXTR2_BREQ              (1 << 11) /* Block hardware request */
+#define GPDMA_CXTR2_PFREQ             (1 << 12) /* Hardware request in peripheral flow control mode */
+
+#define GPDMA_CXTR2_TRIGM_SHIFT       (14)      /* Bits 14-15: Trigger mode */
+#define GPDMA_CXTR2_TRIGM_MASK        (0b11 << GPDMA_CXTR2_TRIGM_SHIFT)
+#define GPDMA_CXTR2_TRIGSEL_SHIFT     (16)      /* Bits 16-21: Trigger event input selection */
+#define GPDMA_CXTR2_TRIGSEL_MASK      (0x3f << GPDMA_CXTR2_TRIGSEL_SHIFT)
+
+#define GPDMA_CXTR2_TRIGPOL_SHIFT     (24)      /* Bits 23-25: Trigger event polarity */
+#define GPDMA_CXTR2_TRIGPOL_MASK      (0b11 << GPDMA_CXTR2_TRIGPOL_SHIFT)
+#  define GPDMA_CXTR2_TRIGPOL_NONE    (0 << GPDMA_CXTR2_TRIGPOL_SHIFT) /* No trigger */
+#  define GPDMA_CXTR2_TRIGPOL_RISING  (1 << GPDMA_CXTR2_TRIGPOL_SHIFT) /* Trigger on rising edge */
+#  define GPDMA_CXTR2_TRIGPOL_FALLING (2 << GPDMA_CXTR2_TRIGPOL_SHIFT) /* Trigger on falling edge */
+
+#define GPDMA_CXTR2_TCEM_SHIFT        (30)      /* Bits 30-31: Transfer complete event mode */
+#define GPDMA_CXTR2_TCEM_MASK         (0b11 << GPDMA_CXTR2_TCEM_SHIFT)
+
+/* Channel x block register 1 */
+
+#define GPDMA_CXBR1_BNDT_SHIFT        (0)       /* Bits 0-15: Block number of data bytes to transfer from source */
+#define GPDMA_CXBR1_BNDT_MASK         (0xffff << GPDMA_CXBR1_BNDT_SHIFT)
+#define GPDMA_CXBR1_BRC_SHIFT         (16)      /* Bits 16-26: Block repeat counter */
+#define GPDMA_CXBR1_BRC_MASK          (0x7ff << GPDMA_CXBR1_BRC_SHIFT)
+#define GPDMA_CXBR1_SDEC              (1 << 28) /* Source address decrement */
+#define GPDMA_CXBR1_DDEC              (1 << 29) /* Destination address decrement */
+#define GPDMA_CXBR1_BRSDEC            (1 << 30) /* Block repeat source address decrement */
+#define GPDMA_CXBR1_BRDDEC            (1 << 31) /* Block repeat destination address decrement */
+
+/* Channel x stransfer register 3 */
+
+#define GPDMA_CXTR3_SAO_SHIFT         (0)       /* Bits 0-12: Source address offset increment */
+#define GPDMA_CXTR3_MASK              (0x1fff << GPDMA_CXTR3_SAO_SHIFT)
+#define GPDMA_CXTR3_DAO_SHIFT         (16)      /* Bits 16-28: Destination address offset increment */
+#define GPDMA_CXTR3_DAO_MASK          (0x1fff << GPDMA_CXTR3_DAO_SHIFT)
+
+/* Channel x block register 2 */
+
+#define GPDMA_CXBR2_BRSAO_SHIFT       (0)       /* Bits 0-15: Block repeated source address offset */
+#define GPDMA_CXBR2_BRSAO_MASK        (0xffff << GPDMA_CXBR2_BRSAO_SHIFT)
+#define GPDMA_CXBR2_BRDAO_SHIFT       (16)      /* Bits 16-31: Block repeated destination address offset */
+#define GPDMA_CXBR2_BRDAO_MASK        (0xffff << GPDMA_CXBR2_BRDAO_SHIFT) 
+
+/* Channel x linked-list address register */
+
+#define GPDMA_CXLLR_LA_SHIFT          (2)       /* Bits 2-15: Pointer (16-bit low-significant address) to next linked-list DS */
+#define GPDMA_CXLLR_LA_MASK           (0x3fff << GPDMA_CXLLR_LA_SHIFT)
+#define GPDMA_CXLLR_ULL               (1 << 16) /* Update CxLLR register from memory */
+#define GPDMA_CXLLR_UDA               (1 << 27) /* Update CxDAR register from memory */
+#define GPDMA_CXLLR_USA               (1 << 28) /* Update CxSAR register from memory */
+#define GPDMA_CXLLR_UB1               (1 << 29) /* Update CxBR1 register from memory */
+#define GPDMA_CXLLR_UT2               (1 << 30) /* Update CxTR2 register from memory */
+#define GPDMA_CXLLR_UT1               (1 << 31) /* Update CxTR1 register from memory */
+
+#endif /* __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_GPDMA_H */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libm/newlib/include/machine/ieeefp.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -82,7 +84,7 @@
  *      ISO C99 support (hexfloat literals, standard fenv semantics), the
  *      target has IEEE-754 conforming binary32 float and binary64 double
  *      (not mixed endian) representation, standard SNaN representation,
- *      double and single precision arithmetics has similar latency and it
+ *      double and single precision arithmetic has similar latency and it
  *      has no legacy SVID matherr support, only POSIX errno and fenv
  *      exception based error handling.
  */
@@ -541,7 +543,7 @@
 
 #ifndef __IEEE_BIG_ENDIAN
 #ifndef __IEEE_LITTLE_ENDIAN
-#error Endianess not declared!!
+#error Endianness not declared!!
 #endif /* not __IEEE_LITTLE_ENDIAN */
 #endif /* not __IEEE_BIG_ENDIAN */
 

@@ -1,9 +1,10 @@
 /****************************************************************************
  * arch/arm/src/imxrt/hardware/imxrt_lcd.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2016-2018 NXP. All rights reserved.
- *   Author: Johannes Schock (Port)
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016-2018 NXP. All rights reserved.
+ * SPDX-FileContributor: Johannes Schock (Port)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

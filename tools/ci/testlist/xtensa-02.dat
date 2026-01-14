@@ -1,0 +1,9 @@
+/xtensa/esp32s2
+
+/xtensa/esp32s3
+
+# Building Python takes too long to be tested automatically
+-esp32s3-devkit:python
+
+# We do not set ESPTOOL_BINDIR in this build
+-esp32s3-devkit:qemu_openeth

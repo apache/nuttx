@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tlsr82/tlsr82_pwm.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -458,7 +460,7 @@ static void pwm_enable(struct tlsr82_pwmtimer_s *priv, bool en)
  * Name: pwm_cfg_check
  *
  * Description:
- *   This method is called when the driver intialize. This function will
+ *   This method is called when the driver initialize. This function will
  *   check the pincfg, if pincfg is not valid or current pin can not be used
  *   as PWM, this function will call
  *   PANIC() to assert here.
@@ -697,7 +699,7 @@ static int pwm_stop(struct pwm_lowerhalf_s *dev)
   PWM_INT_CLEAR(priv->id);
 
 #ifdef CONFIG_TLSR82_PWM0_PULSECOUNT
-  /* Diable and clear PWM0 count interrupt flag */
+  /* Disable and clear PWM0 count interrupt flag */
 
   if (priv->count > 0)
     {
@@ -765,7 +767,7 @@ static int pwm_ioctl(struct pwm_lowerhalf_s *dev, int cmd,
  *
  ****************************************************************************/
 
-int tlsr82_pwminitialize(const char *devpath, int miror)
+int tlsr82_pwminitialize(const char *devpath, int minor)
 {
   struct tlsr82_pwmtimer_s *lower;
   int ret = OK;
@@ -796,9 +798,9 @@ int tlsr82_pwminitialize(const char *devpath, int miror)
       up_enable_irq(NR_SW_PWM_IRQ);
     }
 
-  pwminfo("PWM%u\n", miror);
+  pwminfo("PWM%u\n", minor);
 
-  switch (miror)
+  switch (minor)
     {
 #ifdef CONFIG_TLSR82_PWM0
       case 0:

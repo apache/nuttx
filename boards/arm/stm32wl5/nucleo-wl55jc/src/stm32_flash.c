@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32wl5/nucleo-wl55jc/src/stm32_flash.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -180,6 +182,7 @@ int stm32wl5_flash_init(void)
   int mtdblk_minor;
   int smart_minor;
   int nxf_minor;
+  char path[32];
   int ret;
   int i;
 
@@ -252,12 +255,15 @@ int stm32wl5_flash_init(void)
 
       if (strcmp(fs, "rawfs") == 0)
         {
-          /* for raw fs just create mtdblock using ftl */
+          /* Register the MTD driver */
 
-          if ((ret = ftl_initialize(mtdblk_minor, mtd_part)))
+          snprintf(path, sizeof(path), "/dev/mtdblock%d", mtdblk_minor);
+          ret = register_mtddriver(path, mtd, 0755, NULL);
+          if (ret < 0)
             {
-              ferr("[%s]ERROR: ftl_initialize failed %d\n", name, ret);
-              continue;
+              ferr("[%s]ERROR:Failed to register the MTD driver %s ret %d\n",
+                   name, path, ret);
+              return ret;
             }
 
           mtdblk_minor++;

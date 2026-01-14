@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/string/lib_strncpy.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -54,7 +56,7 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_STRNCPY) && defined(LIBC_BUILD_STRNCPY)
-#undef strncpy /* See mm/README.txt */
+#undef strncpy
 FAR char *strncpy(FAR char *dest, FAR const char *src, size_t n)
 {
   FAR char *ret = dest;     /* Value to be returned */

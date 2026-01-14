@@ -23,6 +23,15 @@ config ARCH_CHIP_AT90USB
 	---help---
 		Atmel AT90USB family of 8-bit AVRs.
 
+config ARCH_CHIP_AVRDX
+	bool "AVR 32/64/128 DA/DB core"
+	select ARCH_FAMILY_AVR
+	select MM_SMALL
+	select ARCH_HAVE_TICKLESS
+	select AVR_HAVE_FLMAP
+	---help---
+		Atmel/Microchip AVR 32/64/128 DA/DB core family.
+
 config ARCH_CHIP_AT32UC3
 	bool "AVR32 AT32UC3* family"
 	select ARCH_FAMILY_AVR32
@@ -41,6 +50,7 @@ config ARCH_FAMILY_AVR
 	bool
 	default n
 	select ARCH_HAVE_STACKCHECK
+	select ARCH_LDST_16BIT_NOT_ATOMIC
 
 config ARCH_FAMILY_AVR32
 	bool
@@ -54,6 +64,7 @@ config ARCH_FAMILY
 config ARCH_CHIP
 	string
 	default "atmega"	if ARCH_CHIP_ATMEGA
+	default "avrdx"		if ARCH_CHIP_AVRDX
 	default "at90usb"	if ARCH_CHIP_AT90USB
 	default "at32uc3"	if ARCH_CHIP_AT32UC3
 
@@ -63,6 +74,7 @@ if ARCH_FAMILY_AVR
 source "arch/avr/src/avr/Kconfig"
 source "arch/avr/src/at90usb/Kconfig"
 source "arch/avr/src/atmega/Kconfig"
+source "arch/avr/src/avrdx/Kconfig"
 endif
 
 if ARCH_FAMILY_AVR32

@@ -24,9 +24,9 @@ the display. This only works for ``RGB23`` (``888``), ``RGB16`` (``656``), ``RGB
 
 How was that run-length encoded image produced?
 
-1. I used GIMP output the image as a ``.c`` file.
-2. I added some C logic to palette-ize the RGB image in the GIMP ``.c`` file.
-3. Then I add some simple run-length encoding to palette-ized image.
+1. Use GIMP to output the image as a ``.c`` file.
+2. Add some C logic to palette-ize the RGB image in the GIMP ``.c`` file.
+3. Then add some simple run-length encoding to palette-ized image.
 
 But now there is a tool that can be found in the NxWidgets package at
 ``NxWidgets/tools/bitmap_converter.py`` that can be used to convert any graphics

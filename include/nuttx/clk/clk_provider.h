@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/clk/clk_provider.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -93,6 +95,7 @@ struct clk_s
   FAR const char             *name;
   FAR const struct clk_ops_s *ops;
   FAR struct clk_s           *parent;
+  FAR struct clk_s           **parents;
   uint8_t                     num_parents;
   uint8_t                     new_parent_index;
   uint8_t                     enable_count;

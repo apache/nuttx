@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lpc43xx/hardware/lpc4310203050_pinconfig.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,8 +39,8 @@
  *    not be applicable to any other family members.
  *
  * 2. Settings taken from the data sheet include only function, pin set, and
- *    pin number.  Additional settings must be verfied before using these pin
- *    configurations (like pull-ups, open-drain, drive strength, input
+ *    pin number.  Additional settings must be verified before using these
+ *    pin configurations (like pull-ups, open-drain, drive strength, input
  *    buffering, etc.).
  *
  * 3. Alternative pin selections are provided with a numeric suffix like _1,

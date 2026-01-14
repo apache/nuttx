@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv8-m/arm_itm_syslog.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -62,8 +64,8 @@
 
 /* SYSLOG channel methods */
 
-static int itm_putc(struct syslog_channel_s *channel, int ch);
-static int itm_flush(struct syslog_channel_s *channel);
+static int itm_putc(syslog_channel_t *channel, int ch);
+static int itm_flush(syslog_channel_t *channel);
 
 /****************************************************************************
  * Private Data
@@ -80,7 +82,7 @@ static const struct syslog_channel_ops_s g_itm_channel_ops =
 
 /* This structure describes the ITM SYSLOG channel */
 
-static struct syslog_channel_s g_itm_channel =
+static syslog_channel_t g_itm_channel =
 {
   .sc_ops   = &g_itm_channel_ops
 };
@@ -97,7 +99,7 @@ static struct syslog_channel_s g_itm_channel =
  *
  ****************************************************************************/
 
-static int itm_putc(struct syslog_channel_s *channel, int ch)
+static int itm_putc(syslog_channel_t *channel, int ch)
 {
   UNUSED(channel);
 
@@ -127,7 +129,7 @@ static int itm_putc(struct syslog_channel_s *channel, int ch)
  *
  ****************************************************************************/
 
-static int itm_flush(struct syslog_channel_s *channel)
+static int itm_flush(syslog_channel_t *channel)
 {
   UNUSED(channel);
   return OK;
@@ -180,7 +182,7 @@ void itm_syslog_initialize(void)
 
   /* Setup the SYSLOG channel */
 
-  syslog_channel(&g_itm_channel);
+  syslog_channel_register(&g_itm_channel);
 }
 
 #endif /* CONFIG_ARMV8M_ITMSYSLOG */

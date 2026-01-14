@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/esp32c3_wifi_adapter.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -821,7 +823,7 @@ int esp_wifi_softap_rssi(struct iwreq *iwr, bool set);
  * Name: esp32c3_wifi_bt_coexist_init
  *
  * Description:
- *   Initialize ESP32-C3 Wi-Fi and BT coexistance module.
+ *   Initialize ESP32-C3 Wi-Fi and BT coexistence module.
  *
  * Input Parameters:
  *   None

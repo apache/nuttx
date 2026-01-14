@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm64/imx9/imx93-evk/scripts/ocramboot.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,9 +33,9 @@ EXTERN(__start)
 
 MEMORY
 {
-  ocram (rx) : ORIGIN = 0x2049a000, LENGTH = 0x40000
-  ocram_data (rw) : ORIGIN = 0x204e0000, LENGTH = 0x2000
-  ocram_noload (rw) : ORIGIN = 0x204f0000, LENGTH = 0x30000
+  ocram (rx) : ORIGIN = 0x2049a000, LENGTH = 0x46000
+  ocram_data (rw) : ORIGIN = 0x204e0000, LENGTH = 0x6000
+  ocram_noload (rw) : ORIGIN = 0x204f0000, LENGTH = 0x2c000
 }
 
 PHDRS

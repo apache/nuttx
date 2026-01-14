@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/bl602/bl602_gpio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,9 +26,17 @@
 
 #include <stdint.h>
 
+#include <nuttx/spinlock.h>
+
 #include "riscv_internal.h"
 #include "hardware/bl602_glb.h"
 #include "bl602_gpio.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static spinlock_t g_configgpio_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Public Data
@@ -183,14 +193,14 @@ int bl602_config_uart_sel(gpio_pinset_t pinset, uint8_t sig_sel)
     }
 
   sel_idx = pin % 8;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_configgpio_lock);
 
   reg = getreg32(BL602_UART_SIG_SEL_0);
   reg &= ~(0xf << (sel_idx * 4));
   reg |= sig_sel << (sel_idx * 4);
   putreg32(reg, BL602_UART_SIG_SEL_0);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_configgpio_lock, flags);
   return OK;
 }
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_nxaudio.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -276,7 +278,7 @@ struct cxd56_dev_s
 #ifdef CONFIG_AUDIO_CXD56_SRC
   struct dq_queue_s       down_pendq;       /* Pending SRC buffers to be DMA'd */
   struct dq_queue_s       down_runq;        /* SRC buffers being processed */
-  struct dq_queue_s       down_doneq;       /* Done SRC buffers to be re-used */
+  struct dq_queue_s       down_doneq;       /* Done SRC buffers to be reused */
 #endif
 
   uint32_t                samplerate;       /* Sample rate */

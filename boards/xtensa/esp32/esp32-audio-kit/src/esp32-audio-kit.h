@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32/esp32-audio-kit/src/esp32-audio-kit.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -145,20 +147,10 @@ int esp32_es8388_initialize(int i2c_port, uint8_t i2c_addr, int i2c_freq,
  *
  ****************************************************************************/
 
-#if defined CONFIG_ESP32_I2S0 && !defined CONFIG_AUDIO_ES8388 || \
-    defined CONFIG_ESP32_I2S1
+#if defined CONFIG_ESPRESSIF_I2S0 && !defined CONFIG_AUDIO_ES8388 || \
+    defined CONFIG_ESPRESSIF_I2S1
 int board_i2sdev_initialize(int port);
 #endif
-
-/****************************************************************************
- * Name: esp32_mmcsd_initialize
- *
- * Description:
- *   Initialize SPI-based SD card and card detect thread.
- *
- ****************************************************************************/
-
-int esp32_mmcsd_initialize(int minor);
 
 /****************************************************************************
  * Name: esp32_spiflash_init

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sparc/src/common/sparc_checkstack.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,6 +48,27 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: sparc_color_intstack
+ *
+ * Description:
+ *   Set the interrupt stack to a value so that later we can determine how
+ *   much stack space was used by interrupt handling logic
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 7
+void sparc_color_intstack(void)
+{
+  int cpu;
+
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
+      sparc_stack_color((void *)up_get_intstackbase(cpu), INTSTACK_SIZE);
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: sparc_stack_check
@@ -198,16 +221,20 @@ void sparc_stack_color(void *stackbase, size_t nbytes)
  *
  ****************************************************************************/
 
-size_t up_check_tcbstack(struct tcb_s *tcb)
+size_t up_check_tcbstack(struct tcb_s *tcb, size_t check_size)
 {
-  return sparc_stack_check(tcb->stack_base_ptr, tcb->adj_stack_size);
+  return sparc_stack_check(tcb->stack_base_ptr, check_size);
 }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
-size_t up_check_intstack(int cpu)
+size_t up_check_intstack(int cpu, size_t check_size)
 {
-  return sparc_stack_check((void *)up_get_intstackbase(cpu),
-                           STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
+  if (check_size == 0)
+    {
+      check_size = STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK);
+    }
+
+  return sparc_stack_check((void *)up_get_intstackbase(cpu), check_size);
 }
 #endif
 

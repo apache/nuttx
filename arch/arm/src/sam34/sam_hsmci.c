@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_hsmci.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1790,7 +1792,7 @@ static int sam_sendcmd(struct sdio_dev_s *dev,
    * correct solution.
    */
 
-  nxsig_usleep(10);
+  nxsched_usleep(10);
 
   return OK;
 }

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samd5e5/sam_oneshot.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -69,7 +71,7 @@ struct sam_oneshot_s
                                        * the callback */
 #ifdef CONFIG_SAMD5E5_FREERUN
   volatile uint32_t start_count;      /* Stores the value of the freerun counter,
-                                       * at each start of the onshot timer. Is neccesary
+                                       * at each start of the onshot timer. Is necessary
                                        * to find out if the onshot counter was updated
                                        * correctly at the time of the call to
                                        * sam_oneshot_cancel or not. */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/cxd56xx/common/src/cxd56_isx012.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -89,7 +91,7 @@ int board_isx012_power_on(void)
     {
       /* Need to wait for a while after power-on */
 
-      nxsig_usleep(POWER_CHECK_TIME);
+      nxsched_usleep(POWER_CHECK_TIME);
 
       if (true == board_power_monitor(POWER_IMAGE_SENSOR))
         {
@@ -115,7 +117,7 @@ int board_isx012_power_off(void)
 
   /* Need to wait for power-off to be reflected */
 
-  nxsig_usleep(POWER_OFF_TIME);
+  nxsched_usleep(POWER_OFF_TIME);
 
   ret = -ETIMEDOUT;
   for (i = 0; i < POWER_CHECK_RETRY; i++)
@@ -126,7 +128,7 @@ int board_isx012_power_off(void)
           break;
         }
 
-      nxsig_usleep(POWER_CHECK_TIME);
+      nxsched_usleep(POWER_CHECK_TIME);
     }
 
   return ret;
@@ -149,20 +151,20 @@ void board_isx012_set_sleep(int kind)
     {
       /* PowerON -> sleep */
 
-      nxsig_usleep(DEVICE_STARTUP_TIME);
+      nxsched_usleep(DEVICE_STARTUP_TIME);
     }
   else
     {
       /* active -> sleep */
 
-      nxsig_usleep(STANDBY_TIME);
+      nxsched_usleep(STANDBY_TIME);
     }
 }
 
 void board_isx012_release_sleep(void)
 {
   cxd56_gpio_write(IMAGER_SLEEP, true);
-  nxsig_usleep(SLEEP_CANCEL_TIME);
+  nxsched_usleep(SLEEP_CANCEL_TIME);
 }
 
 int isx012_register(struct i2c_master_s *i2c);

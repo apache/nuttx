@@ -165,7 +165,7 @@ NXGL Types
 
 .. c:function:: bool nxgl_nullrect(FAR const struct nxgl_rect_s *rect);
 
-  Return true if the area of the retangle is <= 0.
+  Return true if the area of the rectangle is <= 0.
 
 .. c:function:: void nxgl_runoffset(FAR struct nxgl_run_s *dest, \
                     FAR const struct nxgl_run_s *src, \

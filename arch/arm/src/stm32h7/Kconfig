@@ -202,6 +202,42 @@ config ARCH_CHIP_STM32H747XI
 		Dual core STM32 H7 Cortex M7+M4, 2048 Kb FLASH, 1024K Kb SRAM
 		TFBGA240
 
+config ARCH_CHIP_STM32H750VB
+	bool "STM32H750VB"
+	select STM32H7_STM32H7X0XX
+	select STM32H7_FLASH_CONFIG_B
+	select STM32H7_IO_CONFIG_V
+	---help---
+		STM32 H7 Cortex M7+M4, 128 Kb FLASH, 1024K Kb SRAM,
+		LQFP100
+
+config ARCH_CHIP_STM32H750ZB
+	bool "STM32H750ZB"
+	select STM32H7_STM32H7X0XX
+	select STM32H7_FLASH_CONFIG_B
+	select STM32H7_IO_CONFIG_Z
+	---help---
+		STM32 H7 Cortex M7+M4, 128 Kb FLASH, 1024K Kb SRAM,
+		LQFP144
+
+config ARCH_CHIP_STM32H750IB
+	bool "STM32H750IB"
+	select STM32H7_STM32H7X0XX
+	select STM32H7_FLASH_CONFIG_B
+	select STM32H7_IO_CONFIG_I
+	---help---
+		STM32 H7 Cortex M7+M4, 128 Kb FLASH, 1024K Kb SRAM,
+		LQFP176 or UFBGA176+25
+
+config ARCH_CHIP_STM32H750XB
+	bool "STM32H750XB"
+	select STM32H7_STM32H7X0XX
+	select STM32H7_FLASH_CONFIG_B
+	select STM32H7_IO_CONFIG_X
+	---help---
+		STM32 H7 Cortex M7+M4, 128 Kb FLASH, 1024K Kb SRAM,
+		TFBGA240+25
+
 config ARCH_CHIP_STM32H753AI
 	bool "STM32H753AI"
 	select STM32H7_STM32H7X3XX
@@ -293,16 +329,22 @@ config STM32H7_PWR_DIRECT_SMPS_SUPPLY
 	depends on STM32H7_HAVE_SMPS
 	default n
 
+config STM32H7_PWR_EXTERNAL_SOURCE_SUPPLY
+	bool "Use external source as power supply"
+	default n
+	---help---
+		Select this option for using an external power supply connected directly to the VCAP pin.
+
 choice
 	prompt "STM32 H7 Power Supply Selection"
 	default STM32H7_PWR_DEFAULT_SUPPLY
 	depends on STM32H7_HAVE_SMPS && !STM32H7_HAVE_PWR_DIRECT_SMPS_SUPPLY
 	---help---
-		The STM32H7x5 and STM32H7x7 support power supply configrations for the VCORE core domain and an external supply,
+		The STM32H7x5 and STM32H7x7 support power supply configurations for the VCORE core domain and an external supply,
 		by configuring the SMPS step-down converter and voltage regulator.
 		Note:The SMPS step-down converter is not available on all packages.
 
-		Currenlty the only supported modes are Direct SMPS supply and LDO supply.
+		Currently the only supported modes are Direct SMPS supply and LDO supply.
 
 config STM32H7_PWR_DEFAULT_SUPPLY
 	bool "Default"
@@ -311,6 +353,13 @@ config STM32H7_PWR_LDO_SUPPLY
 	bool "Use LDO supply mode"
 
 endchoice # "STM32 H7 Power Supply Selection"
+
+config STM32H7_PWR_IGNORE_ACTVOSRDY
+	bool "Ignore PWR_CSR1_ACTVOSRDY bit"
+	default n
+	---help---
+		This option disable busy wait for PWR_CSR1_ACTVOSRDY during boot.
+		This is workaround for Renode simulation that doesn't implement this feature.
 
 config STM32H7_IO_CONFIG_A
 	bool
@@ -365,6 +414,21 @@ config ARCH_CHIP_STM32H7_CORTEXM4
 
 endchoice # STM32 H7 Core selection
 
+config STM32H7_STM32H7X0XX
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select STM32H7_HAVE_LTDC
+	select STM32H7_HAVE_ETHERNET
+	select STM32H7_HAVE_FMC
+	select STM32H7_HAVE_GPIOF if !STM32H7_IO_CONFIG_V
+	select STM32H7_HAVE_GPIOG if !STM32H7_IO_CONFIG_V
+	select STM32H7_HAVE_SPI4
+	select STM32H7_HAVE_SPI5 if !STM32H7_IO_CONFIG_V
+	select STM32H7_HAVE_SPI6
+	select STM32H7_HAVE_RNG
+
 config STM32H7_STM32H7X3XX
 	bool
 	default n
@@ -378,6 +442,7 @@ config STM32H7_STM32H7X3XX
 	select STM32H7_HAVE_SPI4
 	select STM32H7_HAVE_SPI5 if !STM32H7_IO_CONFIG_V
 	select STM32H7_HAVE_SPI6
+	select STM32H7_HAVE_RNG
 
 config STM32H7_STM32H7B3XX
 	bool
@@ -391,6 +456,7 @@ config STM32H7_STM32H7B3XX
 	select STM32H7_HAVE_SPI4
 	select STM32H7_HAVE_SPI5 if !STM32H7_IO_CONFIG_V
 	select STM32H7_HAVE_SPI6
+	select STM32H7_HAVE_RNG
 
 config STM32H7_STM32H7X5XX
 	bool
@@ -407,6 +473,7 @@ config STM32H7_STM32H7X5XX
 	select STM32H7_HAVE_SPI5 if !STM32H7_IO_CONFIG_V
 	select STM32H7_HAVE_SPI6
 	select STM32H7_HAVE_SMPS
+	select STM32H7_HAVE_RNG
 
 config STM32H7_STM32H7X7XX
 	bool
@@ -422,6 +489,7 @@ config STM32H7_STM32H7X7XX
 	select STM32H7_HAVE_SPI4
 	select STM32H7_HAVE_SPI5
 	select STM32H7_HAVE_SPI6
+	select STM32H7_HAVE_RNG
 
 config STM32H7_FLASH_CONFIG_B
 	bool
@@ -519,7 +587,7 @@ config STM32H7_CORTEXM7_BOOTM4
 	default y if STM32H7_CORTEXM4_ENABLED
 	default n
 
-endif
+endif # ARCH_CHIP_STM32H7_CORTEXM7
 
 config STM32H7_CORTEXM7_FLASH_SIZE
 	int "Flash reserved for M7 core"
@@ -537,7 +605,7 @@ config STM32H7_SHMEM_SRAM3
 	depends on STM32H7_CORTEXM7_SHMEM
 	default y
 
-endif
+endif # ARCH_STM32H7_DUALCORE
 
 config STM32_HAVE_OTA_PARTITION
 	bool
@@ -629,6 +697,10 @@ config STM32H7_HAVE_FDCAN1
 	default n
 
 config STM32H7_HAVE_FDCAN2
+	bool
+	default n
+
+config STM32H7_HAVE_RNG
 	bool
 	default n
 
@@ -728,6 +800,12 @@ config STM32H7_ADC3
 	bool "ADC3"
 	default n
 	select STM32H7_ADC
+
+config STM32H7_RNG
+	bool "RNG"
+	default n
+	depends on STM32H7_HAVE_RNG
+	select ARCH_HAVE_RNG
 
 config STM32H7_CRC
 	bool "CRC"
@@ -1048,7 +1126,7 @@ config STM32H7_LPTIM5
 	default n
 	select STM32H7_LPTIM
 
-endmenu # STM32H7 Timer Selection
+endmenu # STM32H7 Low-power Timer Selection
 
 menu "STM32H7 U[S]ART Selection"
 
@@ -1244,7 +1322,7 @@ config STM32H7_OTGHS_USBDEV
 
 endchoice # "STM32H7 OTGHS role"
 
-endmenu
+endmenu # OTG Configuration
 
 menu "SPI Configuration"
 	depends on STM32H7_SPI
@@ -1804,6 +1882,79 @@ config STM32H7_PM_SERIAL_ACTIVITY
 endif # PM
 endmenu # U[S]ART Configuration
 
+menu "ADC Configuration"
+	depends on STM32H7_ADC
+
+config STM32H7_ADC_MAX_SAMPLES
+	int "The maximum number of channels that can be sampled"
+	default 16
+	---help---
+		The maximum number of samples which can be handled without
+		overrun depends on various factors. This is the user's
+		responsibility to correctly select this value.
+		Since the interface to update the sampling time is available
+		for all supported devices, the user can change the default
+		values in the board initialization logic and avoid ADC overrun.
+
+config STM32H7_ADC1_DMA
+	bool "ADC1 DMA (not supported yet)"
+	depends on STM32H7_ADC1 && EXPERIMENTAL
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32H7_ADC1_DMA_BATCH
+	int "ADC1 DMA number of conversions"
+	depends on STM32H7_ADC1 && STM32H7_ADC1_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
+
+config STM32H7_ADC2_DMA
+	bool "ADC2 DMA (not supported yet)"
+	depends on STM32H7_ADC2 && EXPERIMENTAL
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32H7_ADC2_DMA_BATCH
+	int "ADC2 DMA number of conversions"
+	depends on STM32H7_ADC2 && STM32H7_ADC2_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
+
+config STM32H7_ADC3_DMA
+	bool "ADC3 DMA (not supported yet)"
+	depends on STM32H7_ADC3 && EXPERIMENTAL
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32H7_ADC3_DMA_BATCH
+	int "ADC3 DMA number of conversions"
+	depends on STM32H7_ADC3 && STM32H7_ADC3_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
+
+endmenu # ADC Configuration
+
 menu "SD/MMC Configuration"
 	depends on STM32H7_SDMMC
 
@@ -2058,7 +2209,7 @@ config STM32H7_QSPI_DMA
 	---help---
 		Use DMA to improve QSPI transfer performance.
 
-endchoice
+endchoice # Transfer technique
 
 choice
 	prompt "Bank selection"
@@ -2076,7 +2227,7 @@ config STM32H7_QSPI_MODE_BANK2
 config STM32H7_QSPI_MODE_DUAL
 	bool "Dual Bank"
 
-endchoice
+endchoice # Bank selection
 
 choice
 	prompt "DMA Priority"
@@ -2112,7 +2263,7 @@ config STM32H7_QSPI_DMAPRIORITY_LOW
 	---help---
 		'Low' priority.
 
-endchoice
+endchoice # DMA Priority
 
 config STM32H7_QSPI_DMATHRESHOLD
 	int "QSPI DMA threshold"
@@ -2141,7 +2292,7 @@ config STM32H7_QSPI_REGDEBUG
 		Output detailed register-level QSPI device debug information.
 		Requires also CONFIG_DEBUG_SPI_INFO.
 
-endmenu
+endmenu # QuadSPI Configuration
 
 config STM32H7_BYPASS_CLOCKCONFIG
 	bool "Bypass clock configuration"
@@ -4166,7 +4317,7 @@ config STM32H7_TIM1_ADC3
 	---help---
 		Reserve TIM1 to trigger ADC3
 
-endchoice
+endchoice # Select ADC for use with TIM1
 
 config STM32H7_TIM2_ADC
 	bool "TIM2 ADC"
@@ -4208,7 +4359,7 @@ config STM32H7_TIM2_ADC3
 	---help---
 		Reserve TIM2 to trigger ADC3
 
-endchoice
+endchoice # Select ADC for use with TIM2
 
 config STM32H7_TIM3_ADC
 	bool "TIM3 ADC"
@@ -4250,7 +4401,7 @@ config STM32H7_TIM3_ADC3
 	---help---
 		Reserve TIM3 to trigger ADC3
 
-endchoice
+endchoice # Select ADC for use with TIM3
 
 config STM32H7_TIM4_ADC
 	bool "TIM4 ADC"
@@ -4292,7 +4443,7 @@ config STM32H7_TIM4_ADC3
 	---help---
 		Reserve TIM4 to trigger ADC3
 
-endchoice
+endchoice # Select ADC for use with TIM4
 
 config STM32H7_TIM6_ADC
 	bool "TIM6 ADC"
@@ -4334,7 +4485,7 @@ config STM32H7_TIM6_ADC3
 	---help---
 		Reserve TIM6 to trigger ADC3
 
-endchoice
+endchoice # Select ADC for use with TIM6
 
 config STM32H7_TIM8_ADC
 	bool "TIM8 ADC"
@@ -4376,7 +4527,7 @@ config STM32H7_TIM8_ADC3
 	---help---
 		Reserve TIM8 to trigger ADC3
 
-endchoice
+endchoice # Select ADC for use with TIM8
 
 config STM32H7_TIM15_ADC
 	bool "TIM15 ADC"
@@ -4418,7 +4569,7 @@ config STM32H7_TIM15_ADC3
 	---help---
 		Reserve TIM15 to trigger ADC3
 
-endchoice
+endchoice # Select ADC for use with TIM15
 
 config STM32H7_HAVE_ADC1_TIMER
 	bool
@@ -4474,125 +4625,450 @@ config STM32H7_ADC3_TIMTRIG
 	---help---
 		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
 
+config STM32H7_TIMX_CAP
+	default n
+	bool "Helpers for Capture Drivers"
+
 config STM32H7_TIM1_CAP
 	bool "TIM1 Capture"
 	default n
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_TIM1
 	---help---
-		Reserve timer 1 for use by Capture
+		Reserve timer 1 for use by the capture driver.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
+if STM32H7_TIM1_CAP
 
-config STM32H7_TIM2_CAP
-	bool "TIM2 Capture"
-	default n
-	depends on STM32H7_TIM2
+config STM32H7_TIM1_CHANNEL
+	int "TIM1 Capture Input Channel"
+	default 1
+	range 1 6
 	---help---
-		Reserve timer 2 for use by Capture
+		Specifies the timer input channel {1..6} for TIM1.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
-
-config STM32H7_TIM3_CAP
-	bool "TIM3 Capture"
-	default n
-	depends on STM32H7_TIM3
+config STM32H7_TIM1_CLOCK
+	int "TIM1 capture frequency (Hz)"
+	default 100000
 	---help---
-		Reserve timer 3 for use by Capture
+		This clock frequency determines the timer's counting rate.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
-
-config STM32H7_TIM4_CAP
-	bool "TIM4 Capture"
-	default n
-	depends on STM32H7_TIM4
-	---help---
-		Reserve timer 4 for use by Capture
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
-
-config STM32H7_TIM5_CAP
-	bool "TIM5 Capture"
-	default n
-	depends on STM32H7_TIM5
-	---help---
-		Reserve timer 5 for use by Capture
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
+endif # STM32H7_TIM1_CAP
 
 config STM32H7_TIM8_CAP
 	bool "TIM8 Capture"
 	default n
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_TIM8
 	---help---
-		Reserve timer 8 for use by Capture
+		Reserve timer 8 for use by the capture driver.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
+if STM32H7_TIM8_CAP
+
+config STM32H7_TIM8_CHANNEL
+	int "TIM8 Capture Input Channel"
+	default 1
+	range 1 6
+	---help---
+		Specifies the timer input channel {1..6} for TIM8.
+
+config STM32H7_TIM8_CLOCK
+	int "TIM8 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM8_CAP
+
+#
+# General-Purpose Timers (4 Channels)
+#
+
+config STM32H7_TIM2_CAP
+	bool "TIM2 Capture"
+	default n
+	select STM32H7_TIMX_CAP
+	depends on STM32H7_TIM2
+	---help---
+		Reserve timer 2 for use by the capture driver.
+
+if STM32H7_TIM2_CAP
+
+config STM32H7_TIM2_CHANNEL
+	int "TIM2 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		Specifies the timer input channel {1..4} for TIM2.
+
+config STM32H7_TIM2_CLOCK
+	int "TIM2 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM2_CAP
+
+config STM32H7_TIM3_CAP
+	bool "TIM3 Capture"
+	default n
+	select STM32H7_TIMX_CAP
+	depends on STM32H7_TIM3
+	---help---
+		Reserve timer 3 for use by the capture driver.
+
+if STM32H7_TIM3_CAP
+
+config STM32H7_TIM3_CHANNEL
+	int "TIM3 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		Specifies the timer input channel {1..4} for TIM3.
+
+config STM32H7_TIM3_CLOCK
+	int "TIM3 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM3_CAP
+
+config STM32H7_TIM4_CAP
+	bool "TIM4 Capture"
+	default n
+	select STM32H7_TIMX_CAP
+	depends on STM32H7_TIM4
+	---help---
+		Reserve timer 4 for use by the capture driver.
+
+if STM32H7_TIM4_CAP
+
+config STM32H7_TIM4_CHANNEL
+	int "TIM4 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		Specifies the timer input channel {1..4} for TIM4.
+
+config STM32H7_TIM4_CLOCK
+	int "TIM4 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM4_CAP
+
+config STM32H7_TIM5_CAP
+	bool "TIM5 Capture"
+	default n
+	select STM32H7_TIMX_CAP
+	depends on STM32H7_TIM5
+	---help---
+		Reserve timer 5 for use by the capture driver.
+
+if STM32H7_TIM5_CAP
+
+config STM32H7_TIM5_CHANNEL
+	int "TIM5 Capture Input Channel"
+	default 1
+	range 1 4
+	---help---
+		Specifies the timer input channel {1..4} for TIM5.
+
+config STM32H7_TIM5_CLOCK
+	int "TIM5 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM5_CAP
+
+#
+# General-Purpose Timers (2 Channels)
+#
 
 config STM32H7_TIM12_CAP
 	bool "TIM12 Capture"
 	default n
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_TIM12
 	---help---
-		Reserve timer 12 for use by Capture
+		Reserve timer 12 for use by the capture driver.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
+if STM32H7_TIM12_CAP
 
-config STM32H7_TIM13_CAP
-	bool "TIM13 Capture"
-	default n
-	depends on STM32H7_TIM13
+config STM32H7_TIM12_CHANNEL
+	int "TIM12 Capture Input Channel"
+	default 1
+	range 1 2
 	---help---
-		Reserve timer 13 for use by Capture
+		Specifies the timer input channel {1..2} for TIM12.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
-
-config STM32H7_TIM14_CAP
-	bool "TIM14 Capture"
-	default n
-	depends on STM32H7_TIM14
+config STM32H7_TIM12_CLOCK
+	int "TIM12 capture frequency (Hz)"
+	default 100000
 	---help---
-		Reserve timer 14 for use by Capture
+		This clock frequency determines the timer's counting rate.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
+endif # STM32H7_TIM12_CAP
 
 config STM32H7_TIM15_CAP
 	bool "TIM15 Capture"
 	default n
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_TIM15
 	---help---
-		Reserve timer 15 for use by Capture
+		Reserve timer 15 for use by the capture driver.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
+if STM32H7_TIM15_CAP
+
+config STM32H7_TIM15_CHANNEL
+	int "TIM15 Capture Input Channel"
+	default 1
+	range 1 2
+	---help---
+		Specifies the timer input channel {1..2} for TIM15.
+
+config STM32H7_TIM15_CLOCK
+	int "TIM15 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM15_CAP
+
+#
+# General-Purpose Timers (1 Channel)
+#
+
+config STM32H7_TIM13_CAP
+	bool "TIM13 Capture"
+	default n
+	select STM32H7_TIMX_CAP
+	depends on STM32H7_TIM13
+	---help---
+		Reserve timer 13 for use by the capture driver.
+
+if STM32H7_TIM13_CAP
+
+config STM32H7_TIM13_CHANNEL
+	int "TIM13 Capture Input Channel"
+	default 1
+	range 1 1
+	---help---
+		Specifies the timer input channel {1} for TIM13.
+
+config STM32H7_TIM13_CLOCK
+	int "TIM13 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM13_CAP
+
+config STM32H7_TIM14_CAP
+	bool "TIM14 Capture"
+	default n
+	select STM32H7_TIMX_CAP
+	depends on STM32H7_TIM14
+	---help---
+		Reserve timer 14 for use by the capture driver.
+
+if STM32H7_TIM14_CAP
+
+config STM32H7_TIM14_CHANNEL
+	int "TIM14 Capture Input Channel"
+	default 1
+	range 1 1
+	---help---
+		Specifies the timer input channel {1} for TIM14.
+
+config STM32H7_TIM14_CLOCK
+	int "TIM14 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM14_CAP
 
 config STM32H7_TIM16_CAP
 	bool "TIM16 Capture"
 	default n
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_TIM16
 	---help---
-		Reserve timer 16 for use by Capture
+		Reserve timer 16 for use by the capture driver.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
+if STM32H7_TIM16_CAP
+
+config STM32H7_TIM16_CHANNEL
+	int "TIM16 Capture Input Channel"
+	default 1
+	range 1 1
+	---help---
+		Specifies the timer input channel {1} for TIM16.
+
+config STM32H7_TIM16_CLOCK
+	int "TIM16 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM16_CAP
 
 config STM32H7_TIM17_CAP
-	bool "TIM14 Capture"
+	bool "TIM17 Capture"
 	default n
+	select STM32H7_TIMX_CAP
 	depends on STM32H7_TIM17
 	---help---
-		Reserve timer 17 for use by Capture
+		Reserve timer 17 for use by the capture driver.
 
-		Timer devices may be used for different purposes.  One special purpose is
-		to capture input.
+if STM32H7_TIM17_CAP
+
+config STM32H7_TIM17_CHANNEL
+	int "TIM17 Capture Input Channel"
+	default 1
+	range 1 1
+	---help---
+		Specifies the timer input channel {1} for TIM17.
+
+config STM32H7_TIM17_CLOCK
+	int "TIM17 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_TIM17_CAP
+
+#
+# Low-Power Timers
+#
+
+config STM32H7_LPTIM1_CAP
+	bool "LPTIM1 Capture"
+	default n
+	select STM32H7_TIMX_CAP
+	depends on STM32H7_LPTIM1
+	---help---
+		Reserve low-power timer 1 for use by the capture driver.
+
+if STM32H7_LPTIM1_CAP
+
+config STM32H7LPTIM1_CHANNEL
+	int "LPTIM1 Capture Input Channel"
+	default 1
+	range 1 2
+	---help---
+		Specifies the timer input channel {1,2} for LPTIM1.
+
+config STM32H7LPTIM1_CLOCK
+	int "LPTIM1 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_LPTIM1_CAP
+
+config STM32H7_LPTIM2_CAP
+	bool "LPTIM2 Capture"
+	default n
+	select STM32H7_TIMX_CAP
+	depends on STM32H7_LPTIM2
+	---help---
+		Reserve low-power timer 2 for use by the capture driver.
+
+if STM32H7_LPTIM2_CAP
+
+config STM32H7LPTIM2_CHANNEL
+	int "LPTIM2 Capture Input Channel"
+	default 1
+	range 1 2
+	---help---
+		Specifies the timer input channel {1,2} for LPTIM2.
+
+config STM32H7LPTIM2_CLOCK
+	int "LPTIM2 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_LPTIM2_CAP
+
+config STM32H7_LPTIM3_CAP
+	bool "LPTIM3 Capture"
+	default n
+	select STM32H7_TIMX_CAP
+	depends on STM32H7_LPTIM3
+	---help---
+		Reserve low-power timer 3 for use by the capture driver.
+
+if STM32H7_LPTIM3_CAP
+
+config STM32H7LPTIM3_CHANNEL
+	int "LPTIM3 Capture Input Channel"
+	default 1
+	range 1 2
+	---help---
+		Specifies the timer input channel {1,2} for LPTIM3.
+
+config STM32H7LPTIM3_CLOCK
+	int "LPTIM3 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_LPTIM3_CAP
+
+config STM32H7_LPTIM4_CAP
+	bool "LPTIM4 Capture"
+	default n
+	select STM32H7_TIMX_CAP
+	depends on STM32H7_LPTIM4
+	---help---
+		Reserve low-power timer 4 for use by the capture driver.
+
+if STM32H7_LPTIM4_CAP
+
+config STM32H7LPTIM4_CHANNEL
+	int "LPTIM4 Capture Input Channel"
+	default 1
+	range 1 2
+	---help---
+		Specifies the timer input channel {1,2} for LPTIM4.
+
+config STM32H7LPTIM4_CLOCK
+	int "LPTIM4 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_LPTIM4_CAP
+
+config STM32H7_LPTIM5_CAP
+	bool "LPTIM5 Capture"
+	default n
+	select STM32H7_TIMX_CAP
+	depends on STM32H7_LPTIM5
+	---help---
+		Reserve low-power timer 5 for use by the capture driver.
+
+if STM32H7_LPTIM5_CAP
+
+config STM32H7LPTIM5_CHANNEL
+	int "LPTIM5 Capture Input Channel"
+	default 1
+	range 1 2
+	---help---
+		Specifies the timer input channel {1,2} for LPTIM5.
+
+config STM32H7LPTIM5_CLOCK
+	int "LPTIM5 capture frequency (Hz)"
+	default 100000
+	---help---
+		This clock frequency determines the timer's counting rate.
+
+endif # STM32H7_LPTIM5_CAP
 
 menu "STM32 TIMx Outputs Configuration"
 
@@ -5359,7 +5835,7 @@ config STM32H7_MII_EXTCLK
 	---help---
 		Clocking is provided by external logic.
 
-endchoice
+endchoice # MII clock configuration
 
 config STM32H7_AUTONEG
 	bool "Use autonegotiation"
@@ -5596,6 +6072,15 @@ config STM32H7_LTDC_FB_SIZE
 	---help---
 		Must be the whole size of the active LTDC layer.
 
+config STM32H7_LTDC_FB_DOUBLE_BUFFER
+	bool "Enable double buffering"
+	default n
+	---help---
+		Enable double buffering to allow updates to the framebuffer while the display is being refreshed.
+		This configuration requires two framebuffers: one active and one inactive.
+		When the display refreshes, the active and inactive framebuffers are swapped,
+		enabling smooth and flicker-free updates.
+
 config STM32H7_LTDC_L1_CHROMAKEYEN
 	bool "Enable chromakey support for layer 1"
 	default y
@@ -5727,7 +6212,7 @@ config STM32H7_LTDC_REGDEBUG
 		Additionally, you have to select "Low-level LCD Debug Features"
 		to enable the debug messages.
 
-endmenu
+endmenu # LTDC Configuration
 
 endif # STM32H7_LTDC
 
@@ -5751,7 +6236,7 @@ config STM32H7_TIM1_QEPSC
 		This prescaler divides the number of recorded encoder pulses,
 		limiting the count rate at the expense of resolution.
 
-endif
+endif # STM32H7_TIM1_QE
 
 config STM32H7_TIM2_QE
 	bool "TIM2"
@@ -5769,7 +6254,7 @@ config STM32H7_TIM2_QEPSC
 		This prescaler divides the number of recorded encoder pulses,
 		limiting the count rate at the expense of resolution.
 
-endif
+endif # STM32H7_TIM2_QE
 
 config STM32H7_TIM3_QE
 	bool "TIM3"
@@ -5787,7 +6272,7 @@ config STM32H7_TIM3_QEPSC
 		This prescaler divides the number of recorded encoder pulses,
 		limiting the count rate at the expense of resolution.
 
-endif
+endif # STM32H7_TIM3_QE
 
 config STM32H7_TIM4_QE
 	bool "TIM4"
@@ -5805,7 +6290,7 @@ config STM32H7_TIM4_QEPSC
 		This prescaler divides the number of recorded encoder pulses,
 		limiting the count rate at the expense of resolution.
 
-endif
+endif # STM32H7_TIM4_QE
 
 config STM32H7_TIM5_QE
 	bool "TIM5"
@@ -5823,7 +6308,7 @@ config STM32H7_TIM5_QEPSC
 		This prescaler divides the number of recorded encoder pulses,
 		limiting the count rate at the expense of resolution.
 
-endif
+endif # STM32H7_TIM5_QE
 
 config STM32H7_TIM8_QE
 	bool "TIM8"
@@ -5841,7 +6326,7 @@ config STM32H7_TIM8_QEPSC
 		This prescaler divides the number of recorded encoder pulses,
 		limiting the count rate at the expense of resolution.
 
-endif
+endif # STM32H7_TIM8_QE
 
 config STM32H7_QENCODER_FILTER
 	bool "Enable filtering on STM32 QEncoder input"
@@ -5873,7 +6358,7 @@ config STM32H7_QENCODER_SAMPLE_FDTS_16
 config STM32H7_QENCODER_SAMPLE_FDTS_32
 	bool "fDTS/32"
 
-endchoice
+endchoice # Input channel sampling frequency
 
 choice
 	depends on STM32H7_QENCODER_FILTER
@@ -5904,7 +6389,7 @@ config STM32H7_QENCODER_SAMPLE_EVENT_8
 	depends on !STM32H7_QENCODER_SAMPLE_FDTS
 	bool "8"
 
-endchoice
+endchoice # Input channel event count
 
 endmenu # QEncoder Driver
 
@@ -5917,12 +6402,12 @@ menu "FDCAN1 Configuration"
 config FDCAN1_BITRATE
 	int "CAN bitrate"
 	depends on !NET_CAN_CANFD
-	default 1000000
+	default 100000
 
 config FDCAN1_ARBI_BITRATE
 	int "CAN FD Arbitration phase bitrate"
 	depends on NET_CAN_CANFD
-	default 1000000
+	default 100000
 
 config FDCAN1_DATA_BITRATE
 	int "CAN FD Data phase bitrate"
@@ -5937,12 +6422,12 @@ menu "FDCAN2 Configuration"
 config FDCAN2_BITRATE
 	int "CAN bitrate"
 	depends on !NET_CAN_CANFD
-	default 1000000
+	default 100000
 
 config FDCAN2_ARBI_BITRATE
 	int "CAN FD Arbitration phase bitrate"
 	depends on NET_CAN_CANFD
-	default 1000000
+	default 100000
 
 config FDCAN2_DATA_BITRATE
 	int "CAN FD Data phase bitrate"
@@ -5992,7 +6477,7 @@ config STM32H7_FDCAN_LOOPBACK_EXTERNAL
 		All transmitted frames are treated as received frames and processed
 		accordingly.
 
-endchoice # CAN Loopback Mode
+endchoice # FDCAN Loopback Mode
 
 choice
 	prompt "FDCAN WorkQueue Selection"
@@ -6010,7 +6495,7 @@ config STM32H7_FDCAN_HPWORK
 		Use the high-priority (HP) work queue for reception and transmission
 		of new frames and for processing of transmission timeouts.
 
-endchoice
+endchoice # FDCAN WorkQueue Selection
 
 endmenu # FDCAN Driver
 

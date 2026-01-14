@@ -2,6 +2,8 @@
 fire-stm2v2
 ===========
 
+.. tags:: chip:stm32, chip:stm32f1, chip:stm32f103
+
 This page discusses issues unique to NuttX configurations for the M3
 Wildfire development board (STM32F103VET6).  See http://firestm32.taobao.com
 
@@ -149,8 +151,8 @@ Pin Configuration
 DFU and JTAG
 ============
 
-Enbling Support for the DFU Bootloader
---------------------------------------
+Enabling Support for the DFU Bootloader
+---------------------------------------
 
 The linker files in these projects can be configured to indicate that you
 will be loading code using STMicro built-in USB Device Firmware Upgrade (DFU)
@@ -501,7 +503,11 @@ M3 Wildfire-specific Configuration Options
    CONFIG_STM32_CAN2 must also be defined)
    CONFIG_CAN_EXTID - Enables support for the 29-bit extended ID.  Default
    Standard 11-bit IDs.
-   CONFIG_CAN_FIFOSIZE - The size of the circular buffer of CAN messages.
+   CONFIG_CAN_TXFIFOSIZE - The size of the circular tx buffer
+   of CAN messages.
+   Default: 8
+   CONFIG_CAN_RXFIFOSIZE - The size of the circular rx buffer
+   of CAN messages.
    Default: 8
    CONFIG_CAN_NPENDINGRTR - The size of the list of pending RTR requests.
    Default: 4
@@ -534,7 +540,7 @@ M3 Wildfire-specific Configuration Options
    CONFIG_LCD_BACKLIGHT - Define to support a backlight.
    CONFIG_LCD_PWM - If CONFIG_STM32_TIM1 is also defined, then an
    adjustable backlight will be provided using timer 1 to generate
-   various pulse widthes.  The granularity of the settings is
+   various pulse widths.  The granularity of the settings is
    determined by CONFIG_LCD_MAXPOWER.  If CONFIG_LCD_PWM (or
    CONFIG_STM32_TIM1) is not defined, then a simple on/off backlight
    is provided.

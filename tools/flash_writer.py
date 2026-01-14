@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # tools/flash_writer.py
 
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -343,15 +345,15 @@ class TelnetDev:
         pass
 
     def set_file_size(self, filesize):
-        self.bytes_transfered = 0
+        self.bytes_transferred = 0
         self.filesize = filesize
         self.count = 0
 
     def show_progress(self, sendsize):
         if PRINT_RAW_COMMAND:
             if self.count < MAX_DOT_COUNT:
-                self.bytes_transfered = self.bytes_transfered + sendsize
-                cur_count = int(self.bytes_transfered * MAX_DOT_COUNT / self.filesize)
+                self.bytes_transferred = self.bytes_transferred + sendsize
+                cur_count = int(self.bytes_transferred * MAX_DOT_COUNT / self.filesize)
                 if MAX_DOT_COUNT < cur_count:
                     cur_count = MAX_DOT_COUNT
                 for idx in range(cur_count - self.count):
@@ -429,15 +431,15 @@ class SerialDev:
         self.serial.setDTR(False)
 
     def set_file_size(self, filesize):
-        self.bytes_transfered = 0
+        self.bytes_transferred = 0
         self.filesize = filesize
         self.count = 0
 
     def show_progress(self, sendsize):
         if PRINT_RAW_COMMAND:
             if self.count < MAX_DOT_COUNT:
-                self.bytes_transfered = self.bytes_transfered + sendsize
-                cur_count = int(self.bytes_transfered * MAX_DOT_COUNT / self.filesize)
+                self.bytes_transferred = self.bytes_transferred + sendsize
+                cur_count = int(self.bytes_transferred * MAX_DOT_COUNT / self.filesize)
                 if MAX_DOT_COUNT < cur_count:
                     cur_count = MAX_DOT_COUNT
                 for idx in range(cur_count - self.count):

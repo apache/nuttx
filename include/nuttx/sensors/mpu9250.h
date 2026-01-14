@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/sensors/mpu9250.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -156,11 +158,20 @@ struct mpu9250_config_s
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Declares the existence of an mpu9250 chip, wired according to
- * config; creates an interface to it at path.
+/****************************************************************************
+ * Name: mpu9250_register
  *
- * Returns 0 on success, or negative errno.
- */
+ * Description:
+ *   Registers the mpu9250 character device
+ *
+ * Input Parameters:
+ *   devno   - Instance number for driver
+ *   config  - Configuration information
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
 
 int mpu9250_register(int devno, FAR struct mpu9250_config_s *config);
 

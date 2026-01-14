@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/phy62xx/jump_table.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -23,7 +25,7 @@
  *  Revised:
  *  Revision:
  *
- *  Description:    Jump table that holds function pointers and veriables
+ *  Description:    Jump table that holds function pointers and variables
  *  used in ROM code.
  ****************************************************************************/
 

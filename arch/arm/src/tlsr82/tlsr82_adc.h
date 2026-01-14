@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tlsr82/tlsr82_adc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -60,6 +62,6 @@
  * Name: tlsr82_adc_init
  ****************************************************************************/
 
-int tlsr82_adc_init(const char *devpath, int miror);
+int tlsr82_adc_init(const char *devpath, int minor);
 
 #endif /* __ARCH_ARM_SRC_TLSR82_TLSR82_ADC_H */

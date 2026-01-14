@@ -75,7 +75,7 @@
 #define LIGHT_SLEEP_TIME_OVERHEAD_US (250 + 30 * 240 / CONFIG_ESP32_DEFAULT_CPU_FREQ_MHZ)
 #define DEEP_SLEEP_TIME_OVERHEAD_US  (250 + 100 * 240 / CONFIG_ESP32_DEFAULT_CPU_FREQ_MHZ)
 
-#define CONFIG_ESP32_DEEP_SLEEP_WAKEUP_DELAY 2000
+#define ESP32_DEEP_SLEEP_WAKEUP_DELAY 2000
 
 #define RTC_VDDSDIO_TIEH_1_8V       0  /* TIEH field value for 1.8V VDDSDIO */
 #define RTC_VDDSDIO_TIEH_3_3V       1  /* TIEH field value for 3.3V VDDSDIO */
@@ -591,7 +591,7 @@ static int IRAM_ATTR esp32_sleep_start(uint32_t pd_flags)
   if (esp32_configure_cpu_freq(cur_freq) != OK)
     {
       pwrwarn("WARNING: Failed to restore CPU frequency"
-              "Configure cpu frequency %d.\n", cur_freq);
+              "Configure cpu frequency %" PRIu32 ".\n", cur_freq);
     }
 
   /* Re-enable UART output */
@@ -810,7 +810,7 @@ static void RTC_IRAM_ATTR esp32_wake_deep_sleep(void)
   putreg32(getreg32(DPORT_PRO_CACHE_CTRL1_REG) &
                    (~DPORT_PRO_CACHE_MMU_IA_CLR), DPORT_PRO_CACHE_CTRL1_REG);
 
-#if CONFIG_ESP32_DEEP_SLEEP_WAKEUP_DELAY > 0
+#if ESP32_DEEP_SLEEP_WAKEUP_DELAY > 0
   /* ROM code has not started yet, so we need to set delay factor
    * used by ets_delay_us first.
    */
@@ -821,7 +821,7 @@ static void RTC_IRAM_ATTR esp32_wake_deep_sleep(void)
    * the flash chip some time to become ready.
    */
 
-  ets_delay_us(CONFIG_ESP32_DEEP_SLEEP_WAKEUP_DELAY);
+  ets_delay_us(ESP32_DEEP_SLEEP_WAKEUP_DELAY);
 #endif
 }
 
@@ -892,7 +892,7 @@ int esp32_light_sleep_start(uint64_t *sleep_time)
    */
 
   flash_enable_time_us = VDD_SDIO_POWERUP_TO_FLASH_READ_US
-                         + CONFIG_ESP32_DEEP_SLEEP_WAKEUP_DELAY;
+                         + ESP32_DEEP_SLEEP_WAKEUP_DELAY;
 
 #ifndef CONFIG_ESP32_SPIRAM
   vddsdio_pd_sleep_duration = MAX(FLASH_PD_MIN_SLEEP_TIME_US,

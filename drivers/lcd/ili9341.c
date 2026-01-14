@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/lcd/ili9341.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -146,7 +148,7 @@
  * MX:          0
  * MV:          1
  * ML:          0
- * BGR:         0/1 Depending on endian mode of the mcu?
+ * BGR:         0/1
  * MH:          0
  */
 
@@ -154,10 +156,10 @@
 #define ILI9341_MADCTL_LANDSCAPE_MX     0
 #define ILI9341_MADCTL_LANDSCAPE_MV     ILI9341_MEMORY_ACCESS_CONTROL_MV
 #define ILI9341_MADCTL_LANDSCAPE_ML     0
-#ifdef CONFIG_ENDIAN_BIG
-#  define ILI9341_MADCTL_LANDSCAPE_BGR  0
-#else
+#ifdef CONFIG_ILI9341_BGR
 #  define ILI9341_MADCTL_LANDSCAPE_BGR  ILI9341_MEMORY_ACCESS_CONTROL_BGR
+#else
+#  define ILI9341_MADCTL_LANDSCAPE_BGR  0
 #endif
 #define ILI9341_MADCTL_LANDSCAPE_MH     0
 
@@ -174,7 +176,7 @@
  * MX:          0
  * MV:          0
  * ML:          0
- * BGR:         0/1 Depending on endian mode of the mcu?
+ * BGR:         0/1
  * MH:          0
  */
 
@@ -182,10 +184,10 @@
 #define ILI9341_MADCTL_PORTRAIT_MX      ILI9341_MEMORY_ACCESS_CONTROL_MX
 #define ILI9341_MADCTL_PORTRAIT_MV      0
 #define ILI9341_MADCTL_PORTRAIT_ML      ILI9341_MEMORY_ACCESS_CONTROL_ML
-#ifdef CONFIG_ENDIAN_BIG
-#  define ILI9341_MADCTL_PORTRAIT_BGR   0
-#else
+#ifdef CONFIG_ILI9341_BGR
 #  define ILI9341_MADCTL_PORTRAIT_BGR   ILI9341_MEMORY_ACCESS_CONTROL_BGR
+#else
+#  define ILI9341_MADCTL_PORTRAIT_BGR   0
 #endif
 #define ILI9341_MADCTL_PORTRAIT_MH      0
 
@@ -201,7 +203,7 @@
  * MX:          1
  * MV:          1
  * ML:          0
- * BGR:         0/1 Depending on endian mode of the mcu?
+ * BGR:         0/1
  * MH:          0
  */
 
@@ -209,10 +211,10 @@
 #define ILI9341_MADCTL_RLANDSCAPE_MX    ILI9341_MEMORY_ACCESS_CONTROL_MX
 #define ILI9341_MADCTL_RLANDSCAPE_MV    ILI9341_MEMORY_ACCESS_CONTROL_MV
 #define ILI9341_MADCTL_RLANDSCAPE_ML    0
-#ifdef CONFIG_ENDIAN_BIG
-#  define ILI9341_MADCTL_RLANDSCAPE_BGR 0
-#else
+#ifdef CONFIG_ILI9341_BGR
 #  define ILI9341_MADCTL_RLANDSCAPE_BGR ILI9341_MEMORY_ACCESS_CONTROL_BGR
+#else
+#  define ILI9341_MADCTL_RLANDSCAPE_BGR 0
 #endif
 #define ILI9341_MADCTL_RLANDSCAPE_MH    0
 
@@ -230,7 +232,7 @@
  * MX:          1
  * MV:          0
  * ML:          0
- * BGR:         0/1 Depending on endian mode of the mcu?
+ * BGR:         0/1
  * MH:          0
  *
  */
@@ -239,10 +241,10 @@
 #define ILI9341_MADCTL_RPORTRAIT_MX     0
 #define ILI9341_MADCTL_RPORTRAIT_MV     0
 #define ILI9341_MADCTL_RPORTRAIT_ML     ILI9341_MEMORY_ACCESS_CONTROL_ML
-#ifdef CONFIG_ENDIAN_BIG
-#  define ILI9341_MADCTL_RPORTRAIT_BGR  0
-#else
+#ifdef CONFIG_ILI9341_BGR
 #  define ILI9341_MADCTL_RPORTRAIT_BGR  ILI9341_MEMORY_ACCESS_CONTROL_BGR
+#else
+#  define ILI9341_MADCTL_RPORTRAIT_BGR  0
 #endif
 #define ILI9341_MADCTL_RPORTRAIT_MH     0
 
@@ -283,11 +285,6 @@
 #define ILI9341_PIXSET_18BITMCU_PARAM1  (ILI9341_PIXSET_18BITDPI | \
                                         ILI9341_PIXSET_18BITDBI)
 
-/* General fix display resolution */
-
-#define ILI9341_XRES           240
-#define ILI9341_YRES           320
-
 /* Validate configuration */
 
 #if CONFIG_LCD_ILI9341_NINTERFACES < 1
@@ -299,6 +296,8 @@
 /* First LCD display */
 
 #ifdef CONFIG_LCD_ILI9341_IFACE0
+#  define ILI9341_XRES      CONFIG_LCD_ILI9341_IFACE0_WIDTH
+#  define ILI9341_YRES      CONFIG_LCD_ILI9341_IFACE0_HEIGHT
 #  if defined(CONFIG_LCD_ILI9341_IFACE0_LANDSCAPE)
 #    define ILI9341_IFACE0_ORIENT     ILI9341_MADCTL_LANDSCAPE_PARAM1
 #    define ILI9341_IFACE0_STRIDE     ILI9341_YRES
@@ -324,6 +323,8 @@
 /* Second LCD display */
 
 #ifdef CONFIG_LCD_ILI9341_IFACE1
+#  define ILI9341_XRES      CONFIG_LCD_ILI9341_IFACE1_WIDTH
+#  define ILI9341_YRES      CONFIG_LCD_ILI9341_IFACE1_HEIGHT
 #  ifdef CONFIG_LCD_ILI9341_IFACE1_LANDSCAPE
 #    define ILI9341_IFACE1_ORIENT     ILI9341_MADCTL_LANDSCAPE_PARAM1
 #    define ILI9341_IFACE1_STRIDE     ILI9341_YRES
@@ -347,7 +348,7 @@
 #endif
 
 /****************************************************************************
- * Private Type Definition
+ * Private Types
  ****************************************************************************/
 
 /* Each single connected ili9341 LCD driver needs an own driver instance
@@ -727,6 +728,9 @@ static int ili9341_hwinitialize(FAR struct ili9341_dev_s *dev)
   lcd->sendcmd(lcd, ILI9341_SOFTWARE_RESET);
   up_mdelay(5);
 
+  lcd->deselect(lcd);
+  lcd->select(lcd);
+
   lcdinfo("ili9341 LCD driver: set Memory Access Control: %04x\n",
           dev->orient);
   lcd->sendcmd(lcd, ILI9341_MEMORY_ACCESS_CONTROL);
@@ -1039,6 +1043,10 @@ FAR struct lcd_dev_s *
           /* Initialize the LCD driver */
 
           ret = ili9341_hwinitialize(priv);
+
+          /* Clear the display after initialization. */
+
+          ili9341_clear(dev, 0x0000);
 
           if (ret == OK)
             {

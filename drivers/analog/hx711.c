@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/analog/hx711.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -336,7 +338,7 @@ static int hx711_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     case HX711_GET_AVERAGE:
         {
-          unsigned *ptr = (unsigned *)((uintptr_t)arg);
+          FAR unsigned *ptr = (FAR unsigned *)((uintptr_t)arg);
           if (ptr == NULL)
             {
               ret = -EINVAL;
@@ -349,7 +351,7 @@ static int hx711_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     case HX711_GET_CHANNEL:
         {
-          char *ptr = (char *)((uintptr_t)arg);
+          FAR char *ptr = (FAR char *)((uintptr_t)arg);
           if (ptr == NULL)
             {
               ret = -EINVAL;
@@ -362,7 +364,7 @@ static int hx711_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     case HX711_GET_GAIN:
         {
-          unsigned char *ptr = (unsigned char *)((uintptr_t)arg);
+          FAR unsigned char *ptr = (FAR unsigned char *)((uintptr_t)arg);
           if (ptr == NULL)
             {
               ret = -EINVAL;
@@ -375,7 +377,7 @@ static int hx711_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     case HX711_GET_VAL_PER_UNIT:
         {
-          unsigned *ptr = (unsigned *)((uintptr_t)arg);
+          FAR unsigned *ptr = (FAR unsigned *)((uintptr_t)arg);
           if (ptr == NULL)
             {
               ret = -EINVAL;
@@ -388,7 +390,7 @@ static int hx711_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     case HX711_TARE:
         {
-          float *precision = (float *)((uintptr_t)arg);
+          FAR float *precision = (FAR float *)((uintptr_t)arg);
           if (precision == NULL)
             {
               ret = -EINVAL;
@@ -401,7 +403,7 @@ static int hx711_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     case HX711_SET_SIGN:
         {
-          int *sign = (int *)((uintptr_t)arg);
+          FAR int *sign = (FAR int *)((uintptr_t)arg);
           if (sign == NULL || (*sign != 1 && *sign != -1))
             {
               ret = EINVAL;
@@ -864,7 +866,7 @@ static int hx711_close(FAR struct file *filep)
  *
  * Description:
  *   Action to take upon file unlinking. Function will free resources if
- *   noone is using the driver when unlinking occured. If driver is still
+ *   no one is using the driver when unlinking occurred. If driver is still
  *   in use, it will be marked as unlinked and resource freeing will take
  *   place in hx711_close() function instead, once last reference is closed.
  *
@@ -872,7 +874,7 @@ static int hx711_close(FAR struct file *filep)
  *   inode - driver inode that is being unlinked.
  *
  * Returned Value:
- *   OK on successfull close, or negated errno on failure.
+ *   OK on successful close, or negated errno on failure.
  *
  ****************************************************************************/
 
@@ -927,7 +929,7 @@ static int hx711_unlink(FAR struct inode *inode)
  * Input Parameters:
  *   minor - unique number identifying hx711 chip.
  *   lower - provided by platform code to manipulate hx711 with platform
- *           dependant functions>
+ *           dependent functions>
  *
  * Returned Value:
  *   OK on success, or negated errno on failure
@@ -946,7 +948,7 @@ int hx711_register(unsigned char minor, FAR struct hx711_lower_s *lower)
       return -ENOMEM;
     }
 
-  snprintf(devname, DEVNAME_FMTLEN, DEVNAME_FMT, minor);
+  snprintf(devname, sizeof(devname), DEVNAME_FMT, minor);
   ret = register_driver(devname, &g_hx711_fops, 0666, dev);
   if (ret)
     {

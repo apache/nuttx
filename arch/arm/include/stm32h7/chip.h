@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/stm32h7/chip.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -74,6 +76,10 @@
     defined (CONFIG_ARCH_CHIP_STM32H7B3LI) || \
     defined (CONFIG_ARCH_CHIP_STM32H745XI) || \
     defined (CONFIG_ARCH_CHIP_STM32H745ZI) || \
+    defined (CONFIG_ARCH_CHIP_STM32H750VB) || \
+    defined (CONFIG_ARCH_CHIP_STM32H750ZB) || \
+    defined (CONFIG_ARCH_CHIP_STM32H750IB) || \
+    defined (CONFIG_ARCH_CHIP_STM32H750XB) || \
     defined (CONFIG_ARCH_CHIP_STM32H755II)
 #elif defined(CONFIG_ARCH_CHIP_STM32H747XI)
 #else
@@ -82,7 +88,7 @@
 
 /* Size SRAM */
 
-#if defined(CONFIG_STM32H7_STM32H7X3XX) || defined(CONFIG_STM32H7_STM32H7X5XX)
+#if defined(CONFIG_STM32H7_STM32H7X0XX) || defined(CONFIG_STM32H7_STM32H7X3XX) || defined(CONFIG_STM32H7_STM32H7X5XX)
 /* Memory */
 
 #    define STM32H7_SRAM_SIZE             (512*1024)  /* 512Kb SRAM on AXI bus Matrix (D1) */

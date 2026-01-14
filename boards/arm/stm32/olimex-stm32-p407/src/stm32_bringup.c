@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/olimex-stm32-p407/src/stm32_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,7 +41,7 @@
 #endif
 
 #ifdef CONFIG_MODULE
-#  include <nuttx/lib/modlib.h>
+#  include <nuttx/lib/elf.h>
 #endif
 
 #ifdef CONFIG_STM32_OTGFS
@@ -100,7 +102,7 @@ int stm32_bringup(void)
 #ifdef HAVE_MODSYMS
   /* Install the module symbol table */
 
-  modlib_setsymtab(MODSYMS_SYMTAB_ARRAY, MODSYMS_NSYMBOLS_VAR);
+  libelf_setsymtab(MODSYMS_SYMTAB_ARRAY, MODSYMS_NSYMBOLS_VAR);
 #endif
 
 #ifdef HAVE_MMCSD

@@ -22,35 +22,26 @@ if NETDEVICES
 
 comment "Upper-half Network Device Driver Options"
 
-choice
-	prompt "Netdev poll worker"
-
-config NETDEV_LPWORK_THREAD
-	bool "Use low-priority worker thread to do netdev poll"
-	depends on SCHED_LPWORK
-
-config NETDEV_HPWORK_THREAD
-	bool "Use high-priority worker thread to do netdev poll"
-	depends on SCHED_HPWORK
-
-config NETDEV_WORK_THREAD
-	bool "Use a dedicated work thread to do netdev poll"
-
-endchoice # Netdev poll worker
-
-config NETDEV_WORK_THREAD_PRIORITY
-	int "Priority of work poll thread"
-	default 100
-	depends on NETDEV_WORK_THREAD
-	---help---
-		The priority of work poll thread in netdev.
-
 config NETDEV_WIRELESS_HANDLER
 	bool "Support wireless handler in upper-half driver"
 	default y
 	depends on NETDEV_WIRELESS_IOCTL
 	---help---
 		Enable the wireless handler support in upper-half driver.
+
+menuconfig MDIO_BUS
+	bool "Upper-half MDIO Bus Driver Options"
+	default y
+
+if MDIO_BUS
+
+comment "IEEE 802.3 Ethernet MDIO Clauses Support"
+
+config MDIO_CLAUSE_45
+	bool "MDIO bus supports Clause 45"
+	default n
+
+endif
 
 comment "General Ethernet MAC Driver Options"
 
@@ -122,6 +113,14 @@ config NETDEV_STATISTICS
 	---help---
 		Enable to collect statistics from the network drivers (if supported
 		by the network driver).
+
+config NETDEV_STATISTICS_LOG_PERIOD
+	int "Network device statistics log period"
+	default 0
+	depends on NETDEV_STATISTICS && DEBUG_FEATURES
+	---help---
+		Period in seconds to log network device statistics.  Zero means
+		disable logging.
 
 config NET_DUMPPACKET
 	bool "Enable packet dumping"
@@ -736,5 +735,97 @@ config WIFI_SIM_CONFDIR
 		Provides the full path to location in the file system where WiFi-SIM
 		BSS configuration will be accessed.  This is a string and should not
 		include any trailing '/'.
+
+config WIFI_SIM_NUMBER
+	int "Number of Simulated WiFi Device"
+	default 0
+	depends on DRIVERS_WIFI_SIM
+	---help---
+		The number of simulated wifi network devices.
+
+menuconfig NET_E1000
+	bool "Intel E1000 support"
+	default n
+	depends on PCI
+	---help---
+		Enable E1000 PCI Ethernet driver.
+
+if NET_E1000
+
+config NET_E1000_TXDESC
+	int "Intel E1000 TX descriptors"
+	default 256
+
+config NET_E1000_RXDESC
+	int "Intel E1000 RX descriptors"
+	default 256
+
+config NET_E1000_RXSPARE
+	int "Intel E1000 spare RX buffers"
+	default 8
+
+endif # NET_E1000
+
+menuconfig NET_IGB
+	bool "Intel IGB support"
+	default n
+	depends on PCI && PCI_MSIX
+	---help---
+		Enable IGB PCI Ethernet driver.
+
+if NET_IGB
+
+config NET_IGB_TXDESC
+	int "Intel IGB TX descriptors"
+	default 256
+
+config NET_IGB_RXDESC
+	int "Intel IGB RX descriptors"
+	default 256
+
+config NET_IGB_RXSPARE
+	int "Intel IGB spare RX buffers"
+	default 8
+
+config NET_IGB_INT_INTERVAL
+	int "Intel IGB interrupt interval"
+	default 100
+	range 1 8191
+	---help---
+		Minimum Inter-interrupt Interval in 1 us increments.
+
+endif # NET_IGB
+
+menuconfig NET_IGC
+	bool "Intel IGC support"
+	default n
+	depends on PCI && PCI_MSIX
+	---help---
+		Enable IGC PCI Ethernet driver.
+
+if NET_IGC
+
+config NET_IGC_TXDESC
+	int "Intel IGC TX descriptors"
+	default 256
+
+config NET_IGC_RXDESC
+	int "Intel IGC RX descriptors"
+	default 256
+
+config NET_IGC_RXSPARE
+	int "Intel IGC spare RX buffers"
+	default 8
+
+config NET_IGC_INT_INTERVAL
+	int "Intel IGC interrupt interval"
+	default 100
+	range 1 8191
+	---help---
+		Minimum Inter-interrupt Interval in 1 us increments.
+
+endif # NET_IGC
+
+source "drivers/net/oa_tc6/Kconfig"
 
 endif # NETDEVICES

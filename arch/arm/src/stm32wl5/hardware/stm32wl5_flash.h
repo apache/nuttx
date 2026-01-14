@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32wl5/hardware/stm32wl5_flash.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -171,7 +173,7 @@
 
 /* Flash Access Control Register 2 (ACR2) */
 
-#define FLASH_ACR2_PRIVMODE        (1 <<  0) /* Bit  0: Enable flash priviliged access mode */
+#define FLASH_ACR2_PRIVMODE        (1 <<  0) /* Bit  0: Enable flash privileged access mode */
 #define FLASH_ACR2_HDPADIS         (1 <<  1) /* Bit  1: Disable user flash hide protection area access */
 #define FLASH_ACR2_C2SWDBGEN       (1 <<  2) /* Bit  2: Enable cpu2 debug access */
 

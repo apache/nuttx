@@ -24,12 +24,45 @@ config SENSORS_RPMSG
 	---help---
 		Allow application to read or control remote sensor device by RPMSG.
 
-config SENSORS_GPS
-	bool "GPS Support"
+config SENSORS_GNSS
+	bool "GNSS Support"
 	default n
-	depends on GPSUTILS_MINMEA_LIB
+	depends on GNSSUTILS_MINMEA_LIB
 	---help---
-		Allow application to use gps by /dev/uorb/gps or /dev/ttyGPS
+		Allow application to use GNSS by /dev/uorb/gnss or /dev/ttyGNSS
+
+config SENSORS_MONITOR
+	bool "Sensors Monitor Support"
+	depends on DEBUG_SENSORS_INFO && FS_PROCFS_REGISTER
+	default n
+	---help---
+		Allow application to dynamic monitor topic of sensor by /proc/sensor_monitor.
+
+if SENSORS_MONITOR
+
+config SENSORS_MONITOR_BUCKET
+	int "The count of sensor monitor hash table bucket."
+	default 16
+	---help---
+		The number of sensors that can be monitored.
+
+config SENSORS_MONITOR_LIST
+	string "The list of sensors that starts monitoring at initialization"
+	default ""
+	---help---
+		The topics that needs to be debugged. Multiple topics are separated by ",".
+		e.g.:"sensor_gps sensor_accel".
+
+endif
+
+config SENSORS_GNSS_RECV_BUFFERSIZE
+	int "The size of receive buffer for nmea message in GNSS driver"
+	default 2048
+	depends on SENSORS_GNSS
+	---help---
+		The size of receive buffer for nmea message in GNSS driver, if
+		the nmea message happen overwrite when driver push, you can increase
+		the size.
 
 config SENSORS_WTGAHRS2
 	bool "Wtgahrs2 Sensor Support"
@@ -37,11 +70,10 @@ config SENSORS_WTGAHRS2
 	---help---
 		We can read sensor data by serial interface. It need the hardware sensor
 		wtgashrs2(JY901) as data source. This sensor can generate accelerometer,
-		gyroscope, magnetic, barometer and gps data.
+		gyroscope, magnetic, barometer and GNSS data.
 
 config SENSORS_FAKESENSOR
 	bool "Fake Sensor Support"
-	depends on SENSORS_GPS
 	default n
 	---help---
 		Simulate physical sensor by reading data from csv file.
@@ -56,9 +88,9 @@ config SENSORS_FAKESENSOR
 		2.1234,3.23443,2.23456
 		...
 
-config SENSORS_GOLDFISH_GPS
-	bool "Goldfish GPS Support"
-	depends on SENSORS_GPS
+config SENSORS_GOLDFISH_GNSS
+	bool "Goldfish GNSS Support"
+	depends on SENSORS_GNSS
 	default n
 
 config SENSORS_GOLDFISH_SENSOR
@@ -84,24 +116,25 @@ config SENSORS_APDS9922
 	---help---
 		Enable driver support for the Broadcom APDS-9922 proximity and ambient light sensor.
 
+if SENSORS_APDS9922
+
 config APDS9922_I2C_FREQUENCY
 	int "APDS-9922 I2C frequency"
 	default 400000
-	depends on SENSORS_APDS9922
 
 config APDS9922_ALS_NPOLLWAITERS
 	int "APDS-9922 - number of ALS poll waiters"
 	default 2
-	depends on SENSORS_APDS9922
 	---help---
 		Sets the number of poll waiters for the ambient light sensor
 
 config APDS9922_PS_NPOLLWAITERS
 	int "APDS-9922 - number of PS poll waiters"
 	default 2
-	depends on SENSORS_APDS9922
 	---help---
 		Sets the number of poll waiters for the proximity sensor
+
+endif # SENSORS_APDS9922
 
 config SENSORS_AK09912
 	bool "Asahi AK09911/AK09912 Compass Sensor"
@@ -133,6 +166,11 @@ config SENSORS_AS726X
 	depends on ALLOW_BSD_COMPONENTS
 	---help---
 		Enable driver support for the AS726X Spectral Sensor.
+
+config AS726X_I2C_FREQUENCY
+	int "AS726X I2C frequency"
+	default 100000
+	depends on SENSORS_AS726X
 
 config SENSORS_BH1749NUC
 	bool "Rohm BH1749NUC Color Sensor support"
@@ -174,7 +212,7 @@ config SENSORS_BH1749NUC_THREAD_STACKSIZE
 	---help---
 		The stack size for the worker thread.
 
-endif #SENSORS_BH1749NUC_UORB
+endif # SENSORS_BH1749NUC_UORB
 
 endif # SENSORS_BH1749NUC
 
@@ -189,6 +227,27 @@ config BH1750FVI_I2C_FREQUENCY
 	int "BH1750FVI I2C frequency"
 	default 400000
 	depends on SENSORS_BH1750FVI
+
+config SENSORS_NAU7802
+	bool "Adafruit NAU7802 ADC sensor support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Adafruit NAU7802 sensor.
+
+if SENSORS_NAU7802
+
+config SENSORS_NAU7802_I2C_FREQUENCY
+	int "NAU7802 I2C frequency"
+	default 100000
+
+config SENSORS_NAU7802_THREAD_STACKSIZE
+	int "NAU7802 worker thread stack size"
+	default 1024
+	---help---
+		The stack size for the worker threads that perform measurements.
+
+endif # SENSORS_NAU7802
 
 config SENSORS_BMG160
 	bool "Bosch BMG160 Gyroscope Sensor support"
@@ -232,6 +291,8 @@ config SENSORS_BMI160_SPI
 
 endchoice # BMI160 Interface
 
+if SENSORS_BMI160_I2C
+
 choice
 	prompt "I2C Address"
 	default BMI160_I2C_ADDR_68
@@ -249,7 +310,66 @@ config BMI160_I2C_ADDR_69
 
 endchoice # I2C Address
 
+endif # SENSORS_BMI160_I2C
+
 endif # SENSORS_BMI160
+
+config SENSORS_BMI088
+	bool "Bosch BMI088 Gyroscope Sensor support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the Bosch BMG088 gyroscope sensor.
+
+if SENSORS_BMI088
+
+config SENSORS_BMI088_UORB
+	bool "BMI088 UORB Interface"
+	default n
+	---help---
+		Enables Work with the UORB or Character Device interface.
+		If not set, the Character Device is used by default.
+
+choice
+	prompt "BMI088 Interface"
+	default SENSORS_BMI088_SPI
+
+config SENSORS_BMI088_I2C
+	bool "BMI088 I2C Interface"
+	select I2C
+	---help---
+		Enables support for the I2C interface
+
+config SENSORS_BMI088_SPI
+	bool "BMI088 SPI Interface"
+	select SPI
+	---help---
+		Enables support for the SPI interface
+
+endchoice # BMI088 Interface
+
+if SENSORS_BMI088_I2C
+
+choice
+	prompt "I2C Address"
+	default BMI088_I2C_GYRO_ADDR_68
+
+config BMI088_I2C_GYRO_ADDR_68
+	bool "0x68"
+	---help---
+		Default address.
+		If SDO pin is pulled to GND, use 0x68
+
+config BMI088_I2C_GYRO_ADDR_69
+	bool "0x69"
+	---help---
+		If SDO pin is pulled to VDDIO, use 0x69
+
+endchoice # I2C Address
+
+endif # SENSORS_BMI088_I2C
+
+endif # SENSORS_BMI088
 
 config SENSORS_BMI270
 	bool "Bosch BMI270 Inertial Measurement Sensor support"
@@ -287,7 +407,7 @@ config SENSORS_BMI270_THREAD_STACKSIZE
 	---help---
 		The stack size for the worker thread.
 
-endif #SENSORS_BMI270_UORB
+endif # SENSORS_BMI270_UORB
 
 choice
 	prompt "BMI270 Interface"
@@ -353,6 +473,61 @@ config SENSORS_BMM150_THREAD_STACKSIZE
 
 endif # SENSORS_BMM150
 
+config SENSORS_CXD5602PWBIMU
+	bool "SONY CXD5602PWBIMU Inertial Measurement Sensor support"
+	default n
+	select SPI
+	select I2C
+	---help---
+		Enable driver support for the SONY CXD5602PWBIMU Inertial
+		Measurement sensor
+
+if SENSORS_CXD5602PWBIMU
+
+config SENSORS_CXD5602PWBIMU_NR_BUFFERS
+	int "Number of buffers to retrieve sensing data"
+	default 16
+
+config SENSORS_CXD5602PWBIMU_OVERWRITE
+	bool "Overwrite circular buffer"
+	default y
+
+config SENSORS_CXD5602PWBIMU_NPOLLWAITERS
+	int "Number of waiters to poll"
+	default 1
+	---help---
+		Number of waiters to poll
+
+config SENSORS_CXD5602PWBIMU_I2C_ADDRS_AUTO
+	bool "I2C address auto detection"
+	default y
+	---help---
+		Number of waiters to poll
+
+if !SENSORS_CXD5602PWBIMU_I2C_ADDRS_AUTO
+
+choice
+	prompt "I2C address selection"
+	default SENSORS_CXD5602PWBIMU_I2C_ADDRS_PRIMARY
+
+config SENSORS_CXD5602PWBIMU_I2C_ADDRS_PRIMARY
+	bool "Primary address series"
+	---help---
+		DipSW[2] -> off
+		Using address: 0x10, 0x11, 0x12, 0x13
+
+config SENSORS_CXD5602PWBIMU_I2C_ADDRS_SECONDARY
+	bool "Secondary address series"
+	---help---
+		DipSW[2] -> on
+		Using address: 0x30, 0x31, 0x32, 0x33
+
+endchoice
+
+endif # !SENSORS_CXD5602PWBIMU_I2C_ADDRS_AUTO
+
+endif # SENSORS_CXD5602PWBIMU
+
 config SENSORS_BMP180
 	bool "Bosch BMP180 Barometer Sensor support"
 	default n
@@ -368,7 +543,7 @@ config SENSORS_BMP180_UORB
 		Enables work with the UORB or Character Device interface.
 		If not set, the Character Device is used by default.
 
-endif #SENSORS_BMP180
+endif # SENSORS_BMP180
 
 config SENSORS_BMP280
 	bool "Bosch BMP280 Barometric Pressure Sensor"
@@ -378,6 +553,23 @@ config SENSORS_BMP280
 		Enable driver for the Bosch BMP280 barometric pressure sensor.
 
 if SENSORS_BMP280
+
+choice
+	prompt "I2C Address"
+	default BMP280_I2C_ADDR_76
+
+config BMP280_I2C_ADDR_76
+	bool "0x76"
+	---help---
+		Default address.
+		If SDO pin is pulled to GND, use 0x76
+
+config BMP280_I2C_ADDR_77
+	bool "0x77"
+	---help---
+		If SDO pin is pulled to VDDIO, use 0x77
+
+endchoice # I2C Address
 
 config BMP280_I2C_FREQUENCY
 	int "BMP280 I2C frequency"
@@ -437,6 +629,65 @@ config SENSORS_BME680_THREAD_STACKSIZE
 		The stack size for the worker thread.
 
 endif # SENSORS_BME680
+
+config SENSORS_BME688
+	bool "Bosch BME688 Temperature, Gas, Humidity and Pressure Sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver for the Bosch BME688 sensor.
+
+if SENSORS_BME688
+
+config BME688_I2C_FREQUENCY
+	int "BME688 I2C frequency"
+	default 400000
+
+config BME688_DISABLE_TEMP_MEAS
+	bool "Disable Temperature Measurement"
+	default n
+	---help---
+		If enabled, the sensor will not measure temperature.
+
+config BME688_DISABLE_PRESS_MEAS
+	bool "Disable Pressure Measurement"
+	default n
+	---help---
+		If enabled, the sensor will not measure pressure.
+
+config BME688_DISABLE_HUM_MEAS
+	bool "Disable Humidity Measurement"
+	default n
+	---help---
+		If enabled, the sensor will not measure humidity.
+
+config BME688_DISABLE_GAS_MEAS
+	bool "Disable Gas Measurement"
+	default n
+	---help---
+		If enabled, the sensor will not measure gas.
+
+config BME688_ENABLE_IIR_FILTER
+	bool "Enable IIR Filter"
+	default n
+	---help---
+		Enable IIR filtering for temperature and pressure
+		measurements.
+
+config SENSORS_BME688_POLL_INTERVAL
+	int "Polling interval in microseconds, default 3 sec"
+	default 3000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config SENSORS_BME688_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	default 1024
+	---help---
+		The stack size for the worker thread.
+
+endif # SENSORS_BME688
 
 config SENSORS_DHTXX
 	bool "DHTxx humidity/temperature Sensor support"
@@ -602,6 +853,26 @@ config KXTJ9_I2C_BUS_SPEED
 
 endif # SENSORS_KXTJ9
 
+config SENSORS_L86_XXX
+	bool "Quectel L86-XXX GNSS support"
+	default n
+	depends on SERIAL && STANDARD_SERIAL && UORB && SENSORS_GNSS
+	---help---
+		Enable driver support for the L86-XXX series of GNSS modules.
+
+config SENSORS_L86_XXX_THREAD_STACKSIZE
+	int "Stack size for L86XXX module collection thread"
+	default 1024
+	depends on SENSORS_L86_XXX
+
+config L86_XXX_BAUD
+	int "Quectel L86-XXX baud rate"
+	default 9600
+	depends on SENSORS_L86_XXX && SERIAL_TERMIOS
+	range 4800 115200
+	---help---
+		Supported values are: 4800, 9600, 14400, 19200, 38400, 57600 and 115200
+
 config SENSORS_LIS2DH
 	bool "STMicro LIS2DH device support"
 	default n
@@ -697,6 +968,44 @@ config LSM6DSL_I2C_FREQUENCY
 	range 1 400000
 	depends on SENSORS_LSM6DSL
 
+config SENSORS_LSM6DSO32
+	bool "LSM6DSO32 support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the STMicro LSM6DSO32 IMU.
+
+if SENSORS_LSM6DSO32
+
+config SENSORS_LSM6DSO32_I2C_FREQUENCY
+	int "LSM6DSO32 frequency"
+	default 400000
+	range 1 400000
+	---help---
+		The I2C frequency used to communicate with the LSM6DSO32.
+
+config SENSORS_LSM6DSO32_THREAD_STACKSIZE
+	int "LSM6DSO32 worker thread stack size"
+	default 1024
+	---help---
+		The stack size for the worker threads that perform measurements.
+
+config SENSORS_LSM6DSO32_ACCEL_ORB_BUFSIZE
+	int "LSM6DSO32 accelerometer uORB buffer size"
+	default 10
+	range 0 500
+	---help---
+		The circular buffer size for the accelerometer uORB measurements
+
+config SENSORS_LSM6DSO32_GYRO_ORB_BUFSIZE
+	int "LSM6DSO32 gyro uORB buffer size"
+	default 10
+	range 0 500
+	---help---
+		The circular buffer size for the gyroscope uORB measurements
+
+endif # SENSORS_LSM6DSO32
+
 config SENSORS_LSM9DS1
 	bool "STMicro LSM9DS1 support"
 	default n
@@ -732,7 +1041,7 @@ config SENSORS_LSM9DS1_THREAD_STACKSIZE
 	---help---
 		The stack size for the worker thread.
 
-endif #SENSORS_LSM9DS1_UORB
+endif # SENSORS_LSM9DS1_UORB
 
 config SENSORS_MSA301
 	bool "MSA301 support"
@@ -740,6 +1049,11 @@ config SENSORS_MSA301
 	select I2C
 	---help---
 		Enable driver support for the MSA301.
+
+config MSA301_I2C_FREQUENCY
+	int "MSA301 I2C frequency"
+	default 400000
+	depends on SENSORS_MSA301
 
 config LSM9DS1_I2C_FREQUENCY
 	int "LSM9DS1 I2C frequency"
@@ -854,6 +1168,35 @@ config MLX90614_CRC
 
 endif # SENSORS_MLX90614
 
+config SENSORS_MCP9600
+	bool "MCP9600 Thermocouple Amplifier"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the MCP9600 thermocouple amplifier
+
+if SENSORS_MCP9600
+
+config MCP9600_I2C_FREQUENCY
+	int "MCP9600 I2C frequency"
+	default 100000
+	range 10000 100000
+
+config SENSORS_MCP9600_POLL
+	bool "MCP9600 polling"
+	default y
+	---help---
+		Enable the worker thread for polling the MCP9600 and collecting
+		measurements
+
+config MCP9600_THREAD_STACKSIZE
+	int "MCP9600 stack size"
+	default 1024
+	---help---
+		Stack size of the worker thread polling the MCP9600 for measurements
+
+endif # SENSORS_MCP9600
+
 config SENSORS_MCP9844
 	bool "MCP9844 Temperature Sensor"
 	default n
@@ -923,16 +1266,18 @@ config SENSORS_MS58XX
 	---help---
 		Enable driver support for MEAS MS58XX altimeters.
 
+if SENSORS_MS58XX
+
 config MS58XX_I2C_FREQUENCY
 	int "MS58XX I2C frequency"
 	default 400000
 	range 1 400000
-	depends on SENSORS_MS58XX
 
 config MS58XX_VDD
 	int "MEAS MS58XX VDD"
 	default 30
-	depends on SENSORS_MS58XX
+
+endif # SENSORS_MS58XX
 
 config SENSORS_MPL115A
 	bool "Freescale MPL115A Barometer Sensor support"
@@ -1058,7 +1403,7 @@ config SENSORS_ADXL372_THREAD_STACKSIZE
 	---help---
 		The stack size for the worker thread.
 
-endif #SENSORS_ADXL372_UORB
+endif # SENSORS_ADXL372_UORB
 
 endif # SENSORS_ADXL372
 
@@ -1308,6 +1653,41 @@ config SENSORS_MAX6675
 	---help---
 		Enables support for the MAX6675 driver
 
+config SENSORS_LIS2MDL
+	bool "STMicro LIS2MDL 3-Axis magnetometer support"
+	default n
+	select I2C
+	---help---
+		Enable UORB driver support for the STMicro LIS2MDL 3-axis magnetometer.
+
+if SENSORS_LIS2MDL
+
+config SENSORS_LIS2MDL_I2C_FREQUENCY
+	int "LIS2MDL I2C frequency"
+	default 1000000
+	range 1 3400000
+
+config SENSORS_LIS2MDL_THREAD_STACKSIZE
+	int "LIS2MDL worker thread stack size"
+	default 1024
+	---help---
+		The stack size for the worker thread that performs measurements
+
+config SENSORS_LIS2MDL_ORB_BUFSIZE
+	int "LIS2MDL uORB buffer size"
+	default 10
+	range 0 100
+	---help---
+		The size of the uORB circular buffer for storing measurements.
+
+config SENSORS_LIS2MDL_FETCH
+	bool "Enable LIS2MDL fetch capability"
+	default n
+	---help---
+		Enables the `fetch` UORB function for the LIS2MDL
+
+endif # SENSORS_LIS2MDL
+
 config SENSORS_LIS3MDL
 	bool "STMicro LIS3MDL 3-Axis magnetometer support"
 	default n
@@ -1439,13 +1819,11 @@ config SENSORS_AHT10
 	---help---
 		Enable driver support for the ASAIR AHT10 temperature and humidity sensors.
 
-if SENSORS_AHT10
 config AHT10_I2C_FREQUENCY
 	int "AHT10 I2C frequency"
+	depends on SENSORS_AHT10
 	default 400000
 	range 1 400000
-
-endif # SENSORS_AHT10
 
 config SENSORS_SHT21
 	bool "Sensirion SHT21 temperature and humidity sensor"
@@ -1498,6 +1876,55 @@ config SHT3X_DEBUG
 		Enables debug features for the SHT3x
 
 endif # SENSORS_SHT3X
+
+config SENSORS_SHT4X
+	bool "Sensirion SHT4x temperature and humidity sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Sensirion SHT4x temperature
+		and humidity sensors.
+
+if SENSORS_SHT4X
+
+config SHT4X_I2C_FREQUENCY
+	int "SHT4X I2C frequency"
+	default 400000
+	range 1 400000
+
+config SHT4X_THREAD_STACKSIZE
+	int "SHT4X worker thread stack size"
+	default 1024
+	---help---
+		The stack size for the worker thread that performs measurements
+
+config SHT4X_I2C_ADDR
+	hex "SHT4X I2C address"
+	default 0x44
+	range 0x44 0x46
+	---help---
+		Enables debug features for the SHT4X
+
+config SHT4X_LIMIT_HUMIDITY
+	bool "SHT4X limit humidity between 0-100%"
+	default y
+	---help---
+		Limits humidity calculations to be between 0-100 percent. Uncropped boundaries may be beneficial in some cases, see datasheet section 4.6.
+
+config SHT4X_CRC_LOOKUP
+	bool "SHT4X use CRC lookup"
+	default n
+	---help---
+		Configures the SHT4X to do CRC checks with a lookup table. Default uses a bitwise CRC calculation.
+
+config SENSORS_SHT4X_POLL
+	bool "Use polling"
+	default y
+	---help---
+		Configures the SHT4X to be polled at an interval instead of allowing user code to choose when measurements are
+		taken.
+
+endif # SENSORS_SHT4X
 
 config SENSORS_SPS30
 	bool "Sensirion SPS30 particulate matter sensor"
@@ -1591,6 +2018,11 @@ config SENSORS_ADT7320
 	---help---
 		Enables support for the ADT7320 Driver
 
+config ADT7320_SPI_FREQUENCY
+	int "ADT7320 SPI frequency"
+	depends on SENSORS_ADT7320
+	default 1000000
+
 config SENSORS_HDC1008
 	bool "TI HDC1008 temperature and humidity sensor"
 	default n
@@ -1651,5 +2083,127 @@ config SENSORS_LTR308_THREAD_STACKSIZE
 		The stack size for the worker thread.
 
 endif # SENSORS_LTR308
+
+config SENSORS_AMG88XX
+	bool "AMG88xx infrared array sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for AMG88xx infrared array sensor.
+
+if SENSORS_AMG88XX
+
+choice
+	prompt "AMG88xx AD_SELECT value"
+	default SENSOR_AMG88XX_AD_SELECT_0
+	---help---
+		AD SELECT sets the amg88xx i2c address
+		AD_SELECT tied to GND -> sensor address 0x68
+		AD_SELECT tied to VCC -> sensor address 0x69
+
+config SENSOR_AMG88XX_AD_SELECT_0
+	bool "AD_SELECT tied to GND"
+
+config SENSOR_AMG88XX_AD_SELECT_1
+	bool "AD_SELECT tied to VCC"
+
+endchoice
+
+config SENSOR_AMG88XX_ADDR
+	hex
+	default 0x68 if SENSOR_AMG88XX_AD_SELECT_0
+	default 0x69 if SENSOR_AMG88XX_AD_SELECT_1
+
+endif # SENSORS_AMG88XX
+
+config SENSORS_FS3000
+	bool "FS3000 Air Flow Speed Sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the FS3000 Renesas Air Speed sensor.
+
+if SENSORS_FS3000
+
+choice
+	prompt "FS3000 Type:"
+	default SENSOR_FS3000_1005
+	---help---
+		FS3000-1005: 0 to 7m/sec air speed module
+		FS3000-1015: 0 to 15m/sec air speed module
+
+config SENSOR_FS3000_1005
+	bool "FS3000-1005"
+
+config SENSOR_FS3000_1015
+	bool "FS3000-1015"
+
+endchoice
+
+config SENSORS_FS3000_I2C_FREQUENCY
+	int "FS3000 I2C frequency"
+	default 400000
+	range 1 400000
+
+config SENSORS_FS3000_POLL_INTERVAL
+	int "Polling interval in microseconds, default 1 sec"
+	default 1000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config SENSORS_FS3000_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	default 1024
+	---help---
+		The stack size for the worker thread.
+
+endif # SENSORS_FS3000
+
+config SENSORS_TMP112
+	bool "Texas Instruments TMP112x Temperature Sensor support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Texas Instruments TMP112x temperature sensor.
+
+if SENSORS_TMP112
+
+config TMP112_I2C_FREQUENCY
+	int "TMP112 I2C frequency"
+	default 400000
+
+endif #SENSORS_TMP112
+
+config SENSORS_QMI8658
+	bool "QST QMI8658 6-Axis IMU Sensor support"
+	default n
+	depends on I2C && UORB
+	---help---
+		Enable driver support for the QST QMI8658 6-axis IMU sensor.
+
+if SENSORS_QMI8658
+
+config SENSORS_QMI8658_POLL
+	bool "Enables polling sensor data"
+	default n
+	---help---
+		Enables polling of sensor data.
+
+config SENSORS_QMI8658_POLL_INTERVAL
+	int "Polling interval in microseconds, default 1s"
+	depends on SENSORS_QMI8658_POLL
+	default 1000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config QMI8658_I2C_FREQUENCY
+	int "QMI8658 I2C frequency"
+	default 400000
+	---help---
+		I2C frequency used to communicate with QMI8658.
+
+endif # SENSORS_QMI8658
 
 endif # SENSORS

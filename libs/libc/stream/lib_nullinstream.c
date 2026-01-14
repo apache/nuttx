@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stream/lib_nullinstream.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,15 +36,15 @@
 static int nullinstream_getc(FAR struct lib_instream_s *self)
 {
   UNUSED(self);
-  return EOF;
+  return -EINVAL;
 }
 
-static int nullinstream_gets(FAR struct lib_instream_s *self,
-                             FAR void *buffer, int len)
+static ssize_t nullinstream_gets(FAR struct lib_instream_s *self,
+                                 FAR void *buffer, size_t len)
 {
   UNUSED(buffer);
   UNUSED(len);
-  return EOF;
+  return -EINVAL;
 }
 
 /****************************************************************************

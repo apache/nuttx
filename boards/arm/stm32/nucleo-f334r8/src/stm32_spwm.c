@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/nucleo-f334r8/src/stm32_spwm.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -51,8 +53,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Asserions ****************************************************************/
 
 #ifndef CONFIG_ARCH_CHIP_STM32F334R8
 #  warning "This only have been verified with CONFIG_ARCH_CHIP_STM32F334R8"
@@ -633,7 +633,7 @@ static int spwm_hrtim_start(struct spwm_s *spwm)
       outputs |= (1 << (i * 2));
     }
 
-  /* Enable HRTIM outpus */
+  /* Enable HRTIM outputs */
 
   HRTIM_OUTPUTS_ENABLE(hrtim, outputs, true);
 
@@ -673,7 +673,7 @@ static int spwm_hrtim_stop(struct spwm_s *spwm)
       outputs |= (1 << (i * 2));
     }
 
-  /* Disable HRTIM outpus */
+  /* Disable HRTIM outputs */
 
   HRTIM_OUTPUTS_ENABLE(hrtim, outputs, false);
 
@@ -1034,7 +1034,7 @@ int spwm_main(int argc, char *argv[])
 
       /* Sleep */
 
-      nxsig_sleep(1);
+      nxsched_sleep(1);
     }
 
 errout:

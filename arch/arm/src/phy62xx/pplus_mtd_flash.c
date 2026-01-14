@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/phy62xx/pplus_mtd_flash.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -63,7 +65,7 @@ struct pplus_fls_dev_s
 {
   struct mtd_dev_s      mtd;          /* MTD interface */
   uint32_t              offset;       /* offset from flash start address */
-  uint32_t              size;         /* avaliable size for MTD */
+  uint32_t              size;         /* available size for MTD */
   uint16_t              nsectors;     /* Number of erase sectors */
   uint8_t               sectorshift;  /* Log2 of sector size */
   uint8_t               pageshift;    /* Log2 of page size */
@@ -352,7 +354,7 @@ static int pplus_fls_ioctl(struct mtd_dev_s *dev,
  *   character driver front end).
  * Parameter:
  *  offset: offset from 0 of internal flash
- *  size:   avaiable size for NVM
+ *  size:   available size for NVM
  ****************************************************************************/
 
 struct mtd_dev_s *pplus_fls_initialize(uint32_t offset, uint32_t size)

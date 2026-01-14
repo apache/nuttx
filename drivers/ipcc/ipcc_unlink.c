@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/ipcc/ipcc_unlink.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,7 +46,7 @@
  *
  * Description:
  *   Action to take upon file unlinking. Function will free resources if
- *   noone is using the driver when unlinking occured. If driver is still
+ *   no one is using the driver when unlinking occurred. If driver is still
  *   in use, it will be marked as unlinked and resource freeing will take
  *   place in ipcc_close() function instead, once last reference is closed.
  *
@@ -52,7 +54,7 @@
  *   inode - driver inode that is being unlinked
  *
  * Returned Value:
- *   OK on successfull close, or negated errno on failure.
+ *   OK on successful close, or negated errno on failure.
  *
  * Assumptions/Limitations:
  *

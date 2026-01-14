@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/common/src/stm32_ds1307.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -63,7 +65,7 @@ int board_ds1307_initialize(int busno)
   struct i2c_master_s *i2c;
   int ret;
 
-  rtcinfo("Initialize I2C%d\n", DS1307_I2C_BUS);
+  rtcinfo("Initialize I2C%d\n", busno);
 
   /* Initialize I2C */
 
@@ -81,7 +83,7 @@ int board_ds1307_initialize(int busno)
   if (ret < 0)
     {
       rtcerr("ERROR: Failed to bind I2C%d to the DS1307 RTC driver\n",
-             DS1307_I2C_BUS);
+             busno);
       return -ENODEV;
     }
 

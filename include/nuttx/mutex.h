@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/mutex.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,9 +36,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NXMUTEX_NO_HOLDER      ((pid_t)-1)
-#define NXMUTEX_INITIALIZER    {NXSEM_INITIALIZER(1, SEM_TYPE_MUTEX | \
-                                SEM_PRIO_INHERIT), NXMUTEX_NO_HOLDER}
+#define NXMUTEX_INITIALIZER                                             \
+  {NXSEM_INITIALIZER(NXSEM_NO_MHOLDER, SEM_TYPE_MUTEX | SEM_PRIO_INHERIT)}
+
 #define NXRMUTEX_INITIALIZER   {NXMUTEX_INITIALIZER, 0}
 
 /****************************************************************************
@@ -46,7 +48,9 @@
 struct mutex_s
 {
   sem_t sem;
-  pid_t holder;
+#if CONFIG_LIBC_MUTEX_BACKTRACE > 0
+  FAR void *backtrace[CONFIG_LIBC_MUTEX_BACKTRACE];
+#endif
 };
 
 typedef struct mutex_s mutex_t;
@@ -74,6 +78,25 @@ extern "C"
 #endif
 
 /****************************************************************************
+ * Name: nxmutex_add_backtrace
+ *
+ * Description:
+ *   This function add the backtrace of the holder of the mutex.
+ *
+ * Parameters:
+ *   mutex - mutex descriptor.
+ *
+ * Return Value:
+ *
+ ****************************************************************************/
+
+#if CONFIG_LIBC_MUTEX_BACKTRACE > 0
+void nxmutex_add_backtrace(FAR mutex_t *mutex);
+#else
+#  define nxmutex_add_backtrace(mutex)
+#endif
+
+/****************************************************************************
  * Name: nxmutex_init
  *
  * Description:
@@ -95,31 +118,10 @@ extern "C"
 int nxmutex_init(FAR mutex_t *mutex);
 
 /****************************************************************************
- * Name: nxmutex_destroy
- *
- * Description:
- *   This function initializes the UNNAMED mutex. Following a
- *   successful call to nxmutex_init(), the mutex may be used in subsequent
- *   calls to nxmutex_lock(), nxmutex_unlock(), and nxmutex_trylock().  The
- *   mutex remains usable until it is destroyed.
- *
- * Parameters:
- *   mutex - Semaphore to be destroyed
- *
- * Return Value:
- *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure.
- *
- ****************************************************************************/
-
-int nxmutex_destroy(FAR mutex_t *mutex);
-
-/****************************************************************************
  * Name: nxmutex_is_hold
  *
  * Description:
- *   This function check whether the caller hold the mutex
+ *   This function check whether the calling thread hold the mutex
  *   referenced by 'mutex'.
  *
  * Parameters:
@@ -132,64 +134,60 @@ int nxmutex_destroy(FAR mutex_t *mutex);
 bool nxmutex_is_hold(FAR mutex_t *mutex);
 
 /****************************************************************************
- * Name: nxmutex_is_locked
+ * Name: nxmutex_ticklock
  *
  * Description:
- *   This function get the lock state the mutex referenced by 'mutex'.
+ *   This function attempts to lock the mutex referenced by 'mutex'.  If the
+ *   mutex value is (<=) zero, then the calling task will not return until it
+ *   successfully acquires the lock or timed out
  *
- * Parameters:
- *   mutex - mutex descriptor.
+ * Input Parameters:
+ *   mutex   - Mutex object
+ *   delay   - Ticks to wait from the start time until the semaphore is
+ *             posted.  If ticks is zero, then this function is equivalent
+ *             to nxmutex_trylock().
  *
- * Return Value:
+ * Returned Value:
+ *   OK        The mutex successfully acquires
+ *   EINVAL    The mutex argument does not refer to a valid mutex.  Or the
+ *             thread would have blocked, and the abstime parameter specified
+ *             a nanoseconds field value less than zero or greater than or
+ *             equal to 1000 million.
+ *   ETIMEDOUT The mutex could not be locked before the specified timeout
+ *             expired.
+ *   EDEADLK   A deadlock condition was detected.
  *
  ****************************************************************************/
 
-bool nxmutex_is_locked(FAR mutex_t *mutex);
+int nxmutex_ticklock(FAR mutex_t *mutex, uint32_t delay);
 
 /****************************************************************************
- * Name: nxmutex_lock
+ * Name: nxmutex_clocklock
  *
  * Description:
- *   This function attempts to lock the mutex referenced by 'mutex'.  The
- *   mutex is implemented with a semaphore, so if the semaphore value is
- *   (<=) zero, then the calling task will not return until it successfully
- *   acquires the lock.
+ *   This function attempts to lock the mutex referenced by 'mutex'.  If the
+ *   mutex value is (<=) zero, then the calling task will not return until it
+ *   successfully acquires the lock or timed out
  *
- * Parameters:
- *   mutex - mutex descriptor.
+ * Input Parameters:
+ *   mutex   - Mutex object
+ *   clockid - The clock to be used as the time base
+ *   abstime - The absolute time when the mutex lock timed out
  *
- * Return Value:
- *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure.
- *   Possible returned errors:
+ * Returned Value:
+ *   OK        The mutex successfully acquires
+ *   EINVAL    The mutex argument does not refer to a valid mutex.  Or the
+ *             thread would have blocked, and the abstime parameter specified
+ *             a nanoseconds field value less than zero or greater than or
+ *             equal to 1000 million.
+ *   ETIMEDOUT The mutex could not be locked before the specified timeout
+ *             expired.
+ *   EDEADLK   A deadlock condition was detected.
  *
  ****************************************************************************/
 
-int nxmutex_lock(FAR mutex_t *mutex);
-
-/****************************************************************************
- * Name: nxmutex_trylock
- *
- * Description:
- *   This function locks the mutex only if the mutex is currently not locked.
- *   If the mutex has been locked already, the call returns without blocking.
- *
- * Parameters:
- *   mutex - mutex descriptor.
- *
- * Return Value:
- *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure.
- *   Possible returned errors:
- *
- *     -EINVAL - Invalid attempt to lock the mutex
- *     -EAGAIN - The mutex is not available.
- *
- ****************************************************************************/
-
-int nxmutex_trylock(FAR mutex_t *mutex);
+int nxmutex_clocklock(FAR mutex_t *mutex, clockid_t clockid,
+                      FAR const struct timespec *abstime);
 
 /****************************************************************************
  * Name: nxmutex_timedlock
@@ -216,154 +214,6 @@ int nxmutex_trylock(FAR mutex_t *mutex);
  ****************************************************************************/
 
 int nxmutex_timedlock(FAR mutex_t *mutex, unsigned int timeout);
-
-/****************************************************************************
- * Name: nxmutex_unlock
- *
- * Description:
- *   This function attempts to unlock the mutex referenced by 'mutex'.
- *
- * Parameters:
- *   mutex - mutex descriptor.
- *
- * Return Value:
- *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure.
- *   Possible returned errors:
- *
- * Assumptions:
- *   This function may be called from an interrupt handler.
- *
- ****************************************************************************/
-
-int nxmutex_unlock(FAR mutex_t *mutex);
-
-/****************************************************************************
- * Name: nxmutex_reset
- *
- * Description:
- *   This function reset lock state.
- *
- * Parameters:
- *   mutex - mutex descriptor.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-void nxmutex_reset(FAR mutex_t *mutex);
-#endif
-
-/****************************************************************************
- * Name: nxmutex_breaklock
- *
- * Description:
- *   This function attempts to break the mutex
- *
- * Parameters:
- *   mutex   - Mutex descriptor.
- *   locked  - Is the mutex break success
- *
- * Return Value:
- *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure.
- *   Possible returned errors:
- *
- ****************************************************************************/
-
-int nxmutex_breaklock(FAR mutex_t *mutex, FAR bool *locked);
-
-/****************************************************************************
- * Name: nxmutex_restorelock
- *
- * Description:
- *   This function attempts to restore the mutex.
- *
- * Parameters:
- *   mutex   - mutex descriptor.
- *   locked  - true: it's mean that the mutex is broke success
- *
- * Return Value:
- *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure
- *
- ****************************************************************************/
-
-int nxmutex_restorelock(FAR mutex_t *mutex, bool locked);
-
-/****************************************************************************
- * Name: nxrmutex_init
- *
- * Description:
- *   This function initializes the UNNAMED recursive mutex. Following a
- *   successful call to nxrmutex_init(), the recursive mutex may be used in
- *   subsequent calls to nxrmutex_lock(), nxrmutex_unlock(),
- *   and nxrmutex_trylock(). The recursive mutex remains usable
- *   until it is destroyed.
- *
- * Parameters:
- *   rmutex - Recursive mutex to be initialized
- *
- * Return Value:
- *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure.
- *
- ****************************************************************************/
-
-int nxrmutex_init(FAR rmutex_t *rmutex);
-
-/****************************************************************************
- * Name: nxrmutex_destroy
- *
- * Description:
- *   This function destroy the UNNAMED recursive mutex.
- *
- * Parameters:
- *   rmutex - Recursive mutex to be destroyed
- *
- * Return Value:
- *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure.
- *
- ****************************************************************************/
-
-int nxrmutex_destroy(FAR rmutex_t *rmutex);
-
-/****************************************************************************
- * Name: nxrmutex_is_hold
- *
- * Description:
- *   This function check whether the caller hold the recursive mutex
- *   referenced by 'rmutex'.
- *
- * Parameters:
- *   rmutex - Recursive mutex descriptor.
- *
- * Return Value:
- *
- ****************************************************************************/
-
-bool nxrmutex_is_hold(FAR rmutex_t *rmutex);
-
-/****************************************************************************
- * Name: nxrmutex_is_locked
- *
- * Description:
- *   This function get the lock state the recursive mutex
- *   referenced by 'rmutex'.
- *
- * Parameters:
- *   rmutex - Recursive mutex descriptor.
- *
- * Return Value:
- *
- ****************************************************************************/
-
-bool nxrmutex_is_locked(FAR rmutex_t *rmutex);
 
 /****************************************************************************
  * Name: nrxmutex_lock
@@ -410,6 +260,62 @@ int nxrmutex_lock(FAR rmutex_t *rmutex);
  ****************************************************************************/
 
 int nxrmutex_trylock(FAR rmutex_t *rmutex);
+
+/****************************************************************************
+ * Name: nxrmutex_ticklock
+ *
+ * Description:
+ *   This function attempts to lock the mutex referenced by 'mutex'.  If the
+ *   mutex value is (<=) zero, then the calling task will not return until it
+ *   successfully acquires the lock or timed out
+ *
+ * Input Parameters:
+ *   rmutex  - Rmutex object
+ *   delay   - Ticks to wait from the start time until the semaphore is
+ *             posted.  If ticks is zero, then this function is equivalent
+ *             to nxrmutex_trylock().
+ *
+ * Returned Value:
+ *   OK        The mutex successfully acquires
+ *   EINVAL    The mutex argument does not refer to a valid mutex.  Or the
+ *             thread would have blocked, and the abstime parameter specified
+ *             a nanoseconds field value less than zero or greater than or
+ *             equal to 1000 million.
+ *   ETIMEDOUT The mutex could not be locked before the specified timeout
+ *             expired.
+ *   EDEADLK   A deadlock condition was detected.
+ *
+ ****************************************************************************/
+
+int nxrmutex_ticklock(FAR rmutex_t *rmutex, uint32_t delay);
+
+/****************************************************************************
+ * Name: nxrmutex_clocklock
+ *
+ * Description:
+ *   This function attempts to lock the mutex referenced by 'mutex'.  If the
+ *   mutex value is (<=) zero, then the calling task will not return until it
+ *   successfully acquires the lock or timed out
+ *
+ * Input Parameters:
+ *   rmutex  - Rmutex object
+ *   clockid - The clock to be used as the time base
+ *   abstime - The absolute time when the mutex lock timed out
+ *
+ * Returned Value:
+ *   OK        The mutex successfully acquires
+ *   EINVAL    The mutex argument does not refer to a valid mutex.  Or the
+ *             thread would have blocked, and the abstime parameter specified
+ *             a nanoseconds field value less than zero or greater than or
+ *             equal to 1000 million.
+ *   ETIMEDOUT The mutex could not be locked before the specified timeout
+ *             expired.
+ *   EDEADLK   A deadlock condition was detected.
+ *
+ ****************************************************************************/
+
+int nxrmutex_clocklock(FAR rmutex_t *rmutex, clockid_t clockid,
+                       FAR const struct timespec *abstime);
 
 /****************************************************************************
  * Name: nxrmutex_timedlock
@@ -462,20 +368,6 @@ int nxrmutex_timedlock(FAR rmutex_t *rmutex, unsigned int timeout);
 int nxrmutex_unlock(FAR rmutex_t *rmutex);
 
 /****************************************************************************
- * Name: nxrmutex_reset
- *
- * Description:
- *   This function reset lock state.
- *
- * Parameters:
- *   rmutex - rmutex descriptor.
- *
- ****************************************************************************/
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-void nxrmutex_reset(FAR rmutex_t *rmutex);
-#endif
-
-/****************************************************************************
  * Name: nrxmutex_breaklock
  *
  * Description:
@@ -512,6 +404,479 @@ int nxrmutex_breaklock(FAR rmutex_t *rmutex, FAR unsigned int *count);
  ****************************************************************************/
 
 int nxrmutex_restorelock(FAR rmutex_t *rmutex, unsigned int count);
+
+#define nxrmutex_set_protocol(rmutex, protocol) \
+        nxmutex_set_protocol(&(rmutex)->mutex, protocol)
+#define nxrmutex_getprioceiling(rmutex, prioceiling) \
+        nxmutex_getprioceiling(&(rmutex)->mutex, prioceiling)
+#define nxrmutex_setprioceiling(rmutex, prioceiling, old_ceiling) \
+        nxmutex_setprioceiling(&(rmutex)->mutex, prioceiling, old_ceiling)
+
+/****************************************************************************
+ * Inline functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxmutex_get_holder
+ *
+ * Description:
+ *   This function get the holder of the mutex referenced by 'mutex'.
+ *   Note that this is inherently racy unless the calling thread is
+ *   holding the mutex.
+ *
+ * Parameters:
+ *   mutex - mutex descriptor.
+ *
+ * Return Value:
+ *
+ ****************************************************************************/
+
+static inline_function pid_t nxmutex_get_holder(FAR mutex_t *mutex)
+{
+  uint32_t mholder = mutex->sem.val.mholder & ~NXSEM_MBLOCKING_BIT;
+  return NXSEM_MACQUIRED(mholder) ? (pid_t)mholder : -1;
+}
+
+/****************************************************************************
+ * Name: nxmutex_is_locked
+ *
+ * Description:
+ *   This function get the lock state the mutex referenced by 'mutex'.
+ *   Note that this is inherently racy unless the calling thread is
+ *   holding the mutex.
+ *
+ * Parameters:
+ *   mutex - mutex descriptor.
+ *
+ * Return Value:
+ *
+ ****************************************************************************/
+
+static inline_function bool nxmutex_is_locked(FAR mutex_t *mutex)
+{
+  return NXSEM_MACQUIRED(mutex->sem.val.mholder);
+}
+
+/****************************************************************************
+ * Name: nxmutex_destroy
+ *
+ * Description:
+ *   This function initializes the UNNAMED mutex. Following a
+ *   successful call to nxmutex_init(), the mutex may be used in subsequent
+ *   calls to nxmutex_lock(), nxmutex_unlock(), and nxmutex_trylock().  The
+ *   mutex remains usable until it is destroyed.
+ *
+ * Parameters:
+ *   mutex - Semaphore to be destroyed
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+static inline_function int nxmutex_destroy(FAR mutex_t *mutex)
+{
+  return nxsem_destroy(&mutex->sem);
+}
+
+/****************************************************************************
+ * Name: nxmutex_lock
+ *
+ * Description:
+ *   This function attempts to lock the mutex referenced by 'mutex'.  The
+ *   mutex is implemented with a semaphore, so if the semaphore value is
+ *   (<=) zero, then the calling task will not return until it successfully
+ *   acquires the lock.
+ *
+ * Parameters:
+ *   mutex - mutex descriptor.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   Possible returned errors:
+ *
+ ****************************************************************************/
+
+static inline_function int nxmutex_lock(FAR mutex_t *mutex)
+{
+  int ret;
+
+  ret = nxsem_wait(&mutex->sem);
+  if (ret >= 0)
+    {
+      nxmutex_add_backtrace(mutex);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nxmutex_trylock
+ *
+ * Description:
+ *   This function locks the mutex only if the mutex is currently not locked.
+ *   If the mutex has been locked already, the call returns without blocking.
+ *
+ * Parameters:
+ *   mutex - mutex descriptor.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   Possible returned errors:
+ *
+ *     -EINVAL - Invalid attempt to lock the mutex
+ *     -EAGAIN - The mutex is not available.
+ *
+ ****************************************************************************/
+
+static inline_function int nxmutex_trylock(FAR mutex_t *mutex)
+{
+  int ret;
+
+  ret = nxsem_trywait(&mutex->sem);
+  if (ret >= 0)
+    {
+      nxmutex_add_backtrace(mutex);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nxmutex_unlock
+ *
+ * Description:
+ *   This function attempts to unlock the mutex referenced by 'mutex'.
+ *
+ * Parameters:
+ *   mutex - mutex descriptor.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   Possible returned errors:
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+static inline_function int nxmutex_unlock(FAR mutex_t *mutex)
+{
+  return nxsem_post(&mutex->sem);
+}
+
+/****************************************************************************
+ * Name: nxmutex_reset
+ *
+ * Description:
+ *   This function reset lock state.
+ *
+ * Parameters:
+ *   mutex - mutex descriptor.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+static inline_function void nxmutex_reset(FAR mutex_t *mutex)
+{
+  nxsem_reset(&mutex->sem, 1);
+}
+#endif
+
+/****************************************************************************
+ * Name: nxmutex_breaklock
+ *
+ * Description:
+ *   This function attempts to break the mutex
+ *
+ * Parameters:
+ *   mutex   - Mutex descriptor.
+ *   locked  - Is the mutex break success
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   Possible returned errors:
+ *
+ ****************************************************************************/
+
+static inline_function int nxmutex_breaklock(FAR mutex_t *mutex,
+                                             FAR unsigned int *locked)
+{
+  int ret = OK;
+
+  *locked = false;
+  ret = nxmutex_unlock(mutex);
+  if (ret >= 0)
+    {
+      *locked = true;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nxmutex_restorelock
+ *
+ * Description:
+ *   This function attempts to restore the mutex.
+ *
+ * Parameters:
+ *   mutex   - mutex descriptor.
+ *   locked  - true: it's mean that the mutex is broke success
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure
+ *
+ ****************************************************************************/
+
+static inline_function int nxmutex_restorelock(FAR mutex_t *mutex,
+                                               unsigned int locked)
+{
+  return locked ? nxmutex_lock(mutex) : OK;
+}
+
+/****************************************************************************
+ * Name: nxmutex_set_protocol
+ *
+ * Description:
+ *   This function attempts to set the priority protocol of a mutex.
+ *
+ * Parameters:
+ *   mutex        - mutex descriptor.
+ *   protocol     - mutex protocol value to set.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure
+ *
+ ****************************************************************************/
+
+static inline_function int nxmutex_set_protocol(FAR mutex_t *mutex,
+                                                int protocol)
+{
+  return nxsem_set_protocol(&mutex->sem, protocol);
+}
+
+/****************************************************************************
+ * Name: nxmutex_getprioceiling
+ *
+ * Description:
+ *   This function attempts to get the priority ceiling of a mutex.
+ *
+ * Parameters:
+ *   mutex        - mutex descriptor.
+ *   prioceiling  - location to return the mutex priority ceiling.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PRIORITY_PROTECT
+static inline_function int nxmutex_getprioceiling(FAR const mutex_t *mutex,
+                                                  FAR int *prioceiling)
+{
+  return nxsem_getprioceiling(&mutex->sem, prioceiling);
+}
+#endif
+
+/****************************************************************************
+ * Name: nxmutex_setprioceiling
+ *
+ * Description:
+ *   This function attempts to set the priority ceiling of a mutex.
+ *
+ * Parameters:
+ *   mutex        - mutex descriptor.
+ *   prioceiling  - mutex priority ceiling value to set.
+ *   old_ceiling  - location to return the mutex ceiling priority set before.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PRIORITY_PROTECT
+static inline_function int nxmutex_setprioceiling(FAR mutex_t *mutex,
+                                                  int prioceiling,
+                                                  FAR int *old_ceiling)
+{
+  return nxsem_setprioceiling(&mutex->sem, prioceiling, old_ceiling);
+}
+#endif
+
+/****************************************************************************
+ * Name: nxrmutex_init
+ *
+ * Description:
+ *   This function initializes the UNNAMED recursive mutex. Following a
+ *   successful call to nxrmutex_init(), the recursive mutex may be used in
+ *   subsequent calls to nxrmutex_lock(), nxrmutex_unlock(),
+ *   and nxrmutex_trylock(). The recursive mutex remains usable
+ *   until it is destroyed.
+ *
+ * Parameters:
+ *   rmutex - Recursive mutex to be initialized
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+static inline_function int nxrmutex_init(FAR rmutex_t *rmutex)
+{
+  rmutex->count = 0;
+  return nxmutex_init(&rmutex->mutex);
+}
+
+/****************************************************************************
+ * Name: nxrmutex_destroy
+ *
+ * Description:
+ *   This function destroy the UNNAMED recursive mutex.
+ *
+ * Parameters:
+ *   rmutex - Recursive mutex to be destroyed
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+static inline_function int nxrmutex_destroy(FAR rmutex_t *rmutex)
+{
+  int ret = nxmutex_destroy(&rmutex->mutex);
+
+  if (ret >= 0)
+    {
+      rmutex->count = 0;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nxrmutex_is_hold
+ *
+ * Description:
+ *   This function check whether the calling thread hold the recursive mutex
+ *   referenced by 'rmutex'.
+ *
+ * Parameters:
+ *   rmutex - Recursive mutex descriptor.
+ *
+ * Return Value:
+ *
+ ****************************************************************************/
+
+static inline_function bool nxrmutex_is_hold(FAR rmutex_t *rmutex)
+{
+  return nxmutex_is_hold(&rmutex->mutex);
+}
+
+/****************************************************************************
+ * Name: nxrmutex_is_recursive
+ *
+ * Description:
+ *   This function check whether the recursive mutex is currently held
+ *   recursively. That is, whether it's locked more than once by the
+ *   current holder.
+ *   Note that this is inherently racy unless the calling thread is
+ *   holding the mutex.
+ *
+ * Parameters:
+ *   rmutex - Recursive mutex descriptor.
+ *
+ * Return Value:
+ *  If rmutex has returned to True recursively, otherwise returns false.
+ *
+ ****************************************************************************/
+
+static inline_function bool nxrmutex_is_recursive(FAR rmutex_t *rmutex)
+{
+  return rmutex->count > 1;
+}
+
+/****************************************************************************
+ * Name: nxrmutex_get_holder
+ *
+ * Description:
+ *   This function get the holder of the mutex referenced by 'mutex'.
+ *   Note that this is inherently racy unless the calling thread is
+ *   holding the mutex.
+ *
+ * Parameters:
+ *   rmutex - Rmutex descriptor.
+ *
+ * Return Value:
+ *
+ ****************************************************************************/
+
+static inline_function int nxrmutex_get_holder(FAR rmutex_t *rmutex)
+{
+  return nxmutex_get_holder(&rmutex->mutex);
+}
+
+/****************************************************************************
+ * Name: nxrmutex_is_locked
+ *
+ * Description:
+ *   This function get the lock state the recursive mutex
+ *   referenced by 'rmutex'.
+ *   Note that this is inherently racy unless the calling thread is
+ *   holding the mutex.
+ *
+ * Parameters:
+ *   rmutex - Recursive mutex descriptor.
+ *
+ * Return Value:
+ *
+ ****************************************************************************/
+
+static inline_function bool nxrmutex_is_locked(FAR rmutex_t *rmutex)
+{
+  return nxmutex_is_locked(&rmutex->mutex);
+}
+
+/****************************************************************************
+ * Name: nxrmutex_reset
+ *
+ * Description:
+ *   This function reset lock state.
+ *
+ * Parameters:
+ *   rmutex - rmutex descriptor.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+static inline_function void nxrmutex_reset(FAR rmutex_t *rmutex)
+{
+  rmutex->count = 0;
+  nxmutex_reset(&rmutex->mutex);
+}
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

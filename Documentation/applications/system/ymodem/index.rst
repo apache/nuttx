@@ -18,10 +18,10 @@ Advanced Usage
 ~~~~~~~~~~~~~~
 
 In order to achieve a faster transmission speed,
-I added a specific HEADER ``STC`` to the YMODEM protocol to represent the custom length.
+a specific HEADER ``STC`` was added to the YMODEM protocol to represent the custom length.
 Using the ``sb`` and ``rb`` commands on the board, you can use the ``-k`` option to set the length
 of the custom packet, and the unit is KB. Therefore, you need to use ``sbrb.py`` for file transfer,
-and you need ``sbrb.py`` -k to set the same length as the board. According to my test,
+and you need ``sbrb.py`` -k to set the same length as the board. According to tests,
 when using -k 32, it can reach 93% of the baud rate,
 and is fully compatible with the original ymodem protocol.
 First, you need to add a soft link to sbrb.py, for example ``sudo ln -s /home/<name>/.../<nuttxwork>/apps/system/ymodem/sbrb.py /usr/bin``

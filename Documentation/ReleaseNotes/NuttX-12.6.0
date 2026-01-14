@@ -45,12 +45,12 @@ Sched
 mm
 * [#12449](https://github.com/apache/nuttx/pull/12449) mm: check double free before adding to delaylist
 * [#12467](https://github.com/apache/nuttx/pull/12467) mm: fix mm_curused calculate err
-* [#12541](https://github.com/apache/nuttx/pull/12541) mm: seperate mm_pool and mm_pool init
+* [#12541](https://github.com/apache/nuttx/pull/12541) mm: separate mm_pool and mm_pool init
 * [#12041](https://github.com/apache/nuttx/pull/12041) mm/arch: user-space device mapping support
 * [#12445](https://github.com/apache/nuttx/pull/12445) mm/gran: Fix GRAN_ALIGNED() macro
 * [#12095](https://github.com/apache/nuttx/pull/12095) mm/gran: remove size limitation
 * [#12224](https://github.com/apache/nuttx/pull/12224) mm/iob: Support alloc IOB via malloc
-* [#12124](https://github.com/apache/nuttx/pull/12124) mm/map: minor reformating vm_region.c
+* [#12124](https://github.com/apache/nuttx/pull/12124) mm/map: minor reformatting vm_region.c
 * [#12040](https://github.com/apache/nuttx/pull/12040) mm/map.h: polish field defs/comments
 libc
 * [#12230](https://github.com/apache/nuttx/pull/12230) Basic locale support for C++ (libstdc++)
@@ -100,7 +100,7 @@ New Architecture Support
 * [#12350](https://github.com/apache/nuttx/pull/12350) arch/arm/stm32h7: add stm32h755II chip
 * [#12394](https://github.com/apache/nuttx/pull/12394) arch/arm/stm32h7: add stm32h755II chip
 Architecture improvements
-* [#12281](https://github.com/apache/nuttx/pull/12281) arch: smp optmization
+* [#12281](https://github.com/apache/nuttx/pull/12281) arch: smp optimization
 * [#12457](https://github.com/apache/nuttx/pull/12457) arch: add LDC2 (dlang) support
 * [#12378](https://github.com/apache/nuttx/pull/12378) types: on some arch, execution speed can be accelerated
 
@@ -133,7 +133,7 @@ Architecture improvements
 * [#12081](https://github.com/apache/nuttx/pull/12081) arch/arm/samv7/sam_qencoder.c: add support for GETINDEX ioctl call
 * [#12247](https://github.com/apache/nuttx/pull/12247) arch/arm/samv7/sam_pwm.c: option to enable only the L PWM outputs
 * [#12538](https://github.com/apache/nuttx/pull/12538) arch/arm/stm32h7: allow Ethernet MAC without PHY
-* [#11933](https://github.com/apache/nuttx/pull/11933) arch/arm/stm32f7: Add support to I2S Audio inteface using I2S/SPI peripheral
+* [#11933](https://github.com/apache/nuttx/pull/11933) arch/arm/stm32f7: Add support to I2S Audio interface using I2S/SPI peripheral
 * [#11990](https://github.com/apache/nuttx/pull/11990) arch/arm/stm32h7: Serial Fix Logic error in up_dma_txavailable
 * [#12145](https://github.com/apache/nuttx/pull/12145) arch/arm/stm32h7/linum-stm32h753bi: Add support to littlefs and nxffs
 * [#11996](https://github.com/apache/nuttx/pull/11996) arch/arm/stm32h7/linum-stm32h753bi: Add FDCAN support
@@ -233,7 +233,7 @@ Architecture improvements
 * [#12279](https://github.com/apache/nuttx/pull/12279) arch/risc-v/qemu: fix kernel build issue 12275
 * [#12290](https://github.com/apache/nuttx/pull/12290) arch/risc-v/qemu: graceful shutdown via SBI
 * [#12178](https://github.com/apache/nuttx/pull/12178) arch/risc-v/qemu-rv: Add S-mode support
-* [#12433](https://github.com/apache/nuttx/pull/12433) arch/risc-v/riscv_mtimer: Update the mtimecmp value once per interrup…
+* [#12433](https://github.com/apache/nuttx/pull/12433) arch/risc-v/riscv_mtimer: Update the mtimecmp value once per interrupt…
 * [#12535](https://github.com/apache/nuttx/pull/12535) arch/risc-v/rv64ilp32: revise fpucmp
 * [#12435](https://github.com/apache/nuttx/pull/12435) arch/risc-v/syscall: Optimize user service call performance
 * [#12301](https://github.com/apache/nuttx/pull/12301) arch/risc-v/virt: graceful shutdown in M-mode
@@ -284,7 +284,7 @@ Drivers With Improvements
 * [#12139](https://github.com/apache/nuttx/pull/12139) drivers: There is no need to use sched_[un]lock
 * [#12473](https://github.com/apache/nuttx/pull/12473) drivers/1wire: update pm callback use container_of
 * [#12411](https://github.com/apache/nuttx/pull/12411) drivers/analog: add configuration option to set DAC FIFO size
-* [#12143](https://github.com/apache/nuttx/pull/12143) drivers/analog: enable support for multible devices of mcp48xx
+* [#12143](https://github.com/apache/nuttx/pull/12143) drivers/analog: enable support for multiple devices of mcp48xx
 * [#11940](https://github.com/apache/nuttx/pull/11940) drivers/devicetree: Add a set of commonly used FDT utilities.
 * [#12405](https://github.com/apache/nuttx/pull/12405) drivers/devicetree/fdt: add additional fdt parsing utilities
 * [#12519](https://github.com/apache/nuttx/pull/12519) drivers/can/sja1000: fix cmd register write
@@ -314,7 +314,7 @@ Drivers With Improvements
 * [#12341](https://github.com/apache/nuttx/pull/12341) drivers/tun: add tx packets dump
 * [#12413](https://github.com/apache/nuttx/pull/12413) drivers/timers/mcp794xx: store datetime in UTC and add trimming support
 * [#12474](https://github.com/apache/nuttx/pull/12474) drivers/timers/watchdog: fix idle callback maybe not upperhalf
-* [#12198](https://github.com/apache/nuttx/pull/12198) drivers/usbdev: fix complile break about mtp class
+* [#12198](https://github.com/apache/nuttx/pull/12198) drivers/usbdev: fix compile break about mtp class
 * [#12199](https://github.com/apache/nuttx/pull/12199) drivers/usbdev/cdcacm: simply cdcacm uninitialize flow and fix double issue
 * [#12197](https://github.com/apache/nuttx/pull/12197) drivers/usbdev/fs: fix issue between adb/fastboot/mtp and usbdev fs
 * [#12539](https://github.com/apache/nuttx/pull/12539) drivers/video: fix code scan
@@ -323,7 +323,7 @@ Drivers With Improvements
 * [#11999](https://github.com/apache/nuttx/pull/11999) drivers/video/isx019: Fix the default_value of some parameters
 * [#12024](https://github.com/apache/nuttx/pull/12024) drivers/virtio/gpu: minor revision on virtio_gpu_send_cmd()
 * [#12330](https://github.com/apache/nuttx/pull/12330) drivers/vnc:fix vnc kbd assert cause by wrong data conversion
-* [#12390](https://github.com/apache/nuttx/pull/12390) PM: add stability governer
+* [#12390](https://github.com/apache/nuttx/pull/12390) PM: add stability governor
 * [#12351](https://github.com/apache/nuttx/pull/12351) PM: change domain field state after callback done
 * [#12503](https://github.com/apache/nuttx/pull/12503) pm: change pm lock from mutex to spinlock
 * [#12400](https://github.com/apache/nuttx/pull/12400) pm: do struct timespec copy to decrease api call times.

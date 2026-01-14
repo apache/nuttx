@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/trace.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,9 +36,15 @@
 #ifdef CONFIG_TRACE
 #  define trace_begin(tag) sched_note_begin(tag)
 #  define trace_end(tag) sched_note_end(tag)
+
+#  define trace_beginex(tag, name) sched_note_beginex(tag, name)
+#  define trace_endex(tag, name) sched_note_endex(tag, name)
 #else
 #  define trace_begin(tag)
 #  define trace_end(tag)
+
+#  define trace_beginex(tag, name)
+#  define trace_endex(tag, name)
 #endif
 
 #ifdef CONFIG_TRACE_APP
@@ -101,6 +109,14 @@
 #else
 #  define graphics_trace_begin()
 #  define graphics_trace_end()
+#endif
+
+#ifdef CONFIG_TRACE_INPUT
+#  define input_trace_begin() trace_begin(NOTE_TAG_INPUT)
+#  define input_trace_end() trace_end(NOTE_TAG_INPUT)
+#else
+#  define input_trace_begin()
+#  define input_trace_end()
 #endif
 
 #ifdef CONFIG_TRACE_LIBS

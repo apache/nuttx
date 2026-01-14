@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/sama5/sama5d4-ek/src/sam_usbmsc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,8 +46,8 @@
 #  error AT25 Serial FLASH not supported
 #endif
 
-#ifndef CONFIG_SAMA5D4EK_AT25_FTL
-#  error AT25 FTL support required (CONFIG_SAMA5D4EK_AT25_FTL)
+#ifndef CONFIG_SAMA5D4EK_AT25_MTD
+#  error AT25 MTD support required (CONFIG_SAMA5D4EK_AT25_MTD)
 #  undef HAVE_AT25
 #endif
 

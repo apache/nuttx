@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/cxd56xx/drivers/sensors/bh1721fvc_scu.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -59,7 +61,7 @@
 #endif
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* Structure for bh1721fvc device */

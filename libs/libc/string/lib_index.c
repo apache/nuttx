@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/string/lib_index.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,7 +34,7 @@
  * Name: index
  ****************************************************************************/
 
-#undef index /* See mm/README.txt */
+#undef index
 FAR char *index(FAR const char *s, int c)
 {
   return strchr(s, c);

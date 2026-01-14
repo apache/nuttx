@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/nrf52/nrf52840-dk/src/nrf52_userleds.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,7 +36,7 @@
 #include "arm_internal.h"
 #include "nrf52840-dk.h"
 
-#ifndef CONFIG_ARCH_LEDS
+#if !defined(CONFIG_ARCH_LEDS) && !defined(CONFIG_NRF52840DK_LEDS_GPIO)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -145,4 +147,4 @@ void board_userled_all(uint32_t ledset)
     }
 }
 
-#endif /* !CONFIG_ARCH_LEDS */
+#endif /* !defined(CONFIG_ARCH_LEDS) && !defined(CONFIG_NRF52840DK_LEDS_GPIO) */

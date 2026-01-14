@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s2/common/scripts/flat_memory.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -69,7 +71,7 @@ MEMORY
    * signing of firmware image.
    */
 
-  metadata (RX) :        org = CONFIG_ESP32S2_APP_MCUBOOT_HEADER_SIZE, len = 0x20
+  metadata (RX) :        org = CONFIG_ESP32S2_APP_MCUBOOT_HEADER_SIZE, len = 0x60
   ROM (RX) :             org = ORIGIN(metadata) + LENGTH(metadata),
                          len = FLASH_SIZE - ORIGIN(ROM)
 #elif defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
@@ -158,6 +160,7 @@ MEMORY
 
   /* RTC fast memory (same block as above), viewed from data bus */
   rtc_data_seg(RW)  :                 org = 0x3ff9e000, len = 0x2000
+  rtc_reserved_seg(RW) : org = 0x3ff9e000 + 0x2000 - (0 + (24)), len = (0 + (24))
 }
 
 #if CONFIG_ESP32S2_RUN_IRAM

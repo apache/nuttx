@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/mpfs_corepwm.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,7 +44,11 @@
 
 #include <arch/board/board.h>
 
+#include "mpfs_rcc.h"
+
+#include "hardware/mpfs_memorymap.h"
 #include "hardware/mpfs_corepwm.h"
+#include "hardware/mpfs_sysreg.h"
 #include "riscv_internal.h"
 
 /****************************************************************************
@@ -76,7 +82,6 @@ struct mpfs_pwmtimer_s
   struct mpfs_pwmchan_s channels[MPFS_MAX_PWM_CHANNELS];
   uint32_t frequency;          /* Current frequency setting */
   uintptr_t base;              /* The base address of the pwm block */
-  uint32_t pwmclk;             /* The frequency of the pwm clock */
 };
 
 /****************************************************************************
@@ -187,7 +192,6 @@ static struct mpfs_pwmtimer_s g_pwm0dev =
     }
   },
   .base        = CONFIG_MPFS_COREPWM0_BASE,
-  .pwmclk      = CONFIG_MPFS_COREPWM0_PWMCLK,
 };
 #endif
 
@@ -249,7 +253,6 @@ static struct mpfs_pwmtimer_s g_pwm1dev =
     }
   },
   .base        = CONFIG_MPFS_COREPWM1_BASE,
-  .pwmclk      = CONFIG_MPFS_COREPWM1_PWMCLK,
 };
 #endif
 
@@ -404,12 +407,12 @@ static int pwm_timer(struct mpfs_pwmtimer_s *priv,
    *    PERIOD = pwmclk / frequency = 25,000,000 / 50 = 500,000
    */
 
-  pwminfo("PWM%u frequency: %u PWMCLK: %u prescaler: %u\n",
-          priv->pwmid, info->frequency, priv->pwmclk, prescaler);
+  pwminfo("PWM%u frequency: %u PWMCLK: %lu prescaler: %u\n",
+          priv->pwmid, info->frequency, MPFS_FPGA_PERIPHERAL_CLK, prescaler);
 
   /* Set the reload and prescaler values */
 
-  period = priv->pwmclk / info->frequency;
+  period = MPFS_FPGA_PERIPHERAL_CLK / info->frequency;
 
   pwm_putreg(priv, MPFS_COREPWM_PERIOD_OFFSET, period);
   pwm_putreg(priv, MPFS_COREPWM_PRESCALE_OFFSET, prescaler);
@@ -560,6 +563,13 @@ static int pwm_setup(struct pwm_lowerhalf_s *dev)
   struct mpfs_pwmtimer_s *priv = (struct mpfs_pwmtimer_s *)dev;
 
   pwminfo("PWMID%u\n", priv->pwmid);
+
+  /* Make sure that frequency is zero and channels has been disabled */
+
+  priv->frequency = 0;
+  pwm_putreg(priv, MPFS_COREPWM_PWM_ENABLE_0_7_OFFSET,  0x00);
+  pwm_putreg(priv, MPFS_COREPWM_PWM_ENABLE_8_15_OFFSET, 0x00);
+
   pwm_dumpregs(priv, "Initially");
 
   return OK;
@@ -746,6 +756,25 @@ static int pwm_ioctl(struct pwm_lowerhalf_s *dev, int cmd,
   return -ENOTTY;
 }
 
+static int pwm_init(struct mpfs_pwmtimer_s *priv)
+{
+  /* Toggle peripheral reset */
+
+  mpfs_set_reset(MPFS_RCC_I2C, priv->pwmid, 1);
+  mpfs_set_reset(MPFS_RCC_I2C, priv->pwmid, 0);
+
+  /* Release FIC reset and enable clocks */
+
+  modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
+              SYSREG_SOFT_RESET_CR_FIC3 | SYSREG_SOFT_RESET_CR_FPGA,
+              0);
+
+  modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR, 0,
+              SYSREG_SUBBLK_CLOCK_CR_FIC3);
+
+  return OK;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -789,6 +818,7 @@ struct pwm_lowerhalf_s *mpfs_corepwm_init(int pwmid)
       return NULL;
   }
 
+  pwm_init(lower);
+
   return (struct pwm_lowerhalf_s *)lower;
 }
-

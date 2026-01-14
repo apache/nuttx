@@ -1,13 +1,11 @@
 /****************************************************************************
  * boards/arm/lpc2378/olimex-lpc2378/src/lpc2378_appinit.c
  *
- *   Copyright (C) 2010, 2016 Rommel Marcelo. All rights reserved.
- *   Author: Rommel Marcelo
- *
- * This is part of the NuttX RTOS and based on the LPC2148 port:
- *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2010 Rommel Marcelo. All rights reserved.
+ * SPDX-FileCopyrightText: 2010, 2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Rommel Marcelo
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

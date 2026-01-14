@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/max326xx/max32660-evsys/src/max326_button.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,14 +34,20 @@
 #include <nuttx/irq.h>
 #include <nuttx/spinlock.h>
 
-#include <nuttx/irq.h>
-
 #include "max326_gpio.h"
 #include "max32660-evsys.h"
 
 #include <arch/board/board.h>
 
 #ifdef CONFIG_ARCH_BUTTONS
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#if defined(CONFIG_SAMA5_PIOB_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
+static spinlock_t g_max326_lock = SP_UNLOCKED;
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -106,7 +114,7 @@ int board_button_irq(int id, xcpt_t irqhandler, void *arg)
        * following operations are atomic.
        */
 
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_max326_lock);
 
       /* Are we attaching or detaching? */
 
@@ -125,7 +133,7 @@ int board_button_irq(int id, xcpt_t irqhandler, void *arg)
           irq_detach(BUTTON_IRQ);
         }
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_max326_lock, flags);
       ret = OK;
     }
 

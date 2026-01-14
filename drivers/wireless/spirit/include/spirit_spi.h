@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/wireless/spirit/include/spirit_spi.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,7 +30,7 @@
 #include "spirit_types.h"
 
 /****************************************************************************
- * Pre-processor Defintiions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* SPIRIT1 SPI Headers */

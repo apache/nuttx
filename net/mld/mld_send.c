@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/mld/mld_send.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -285,7 +287,10 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
           /* Calculate the ICMPv6 checksum. */
 
           query->chksum = 0;
+
+#ifdef CONFIG_NET_ICMPv6_CHECKSUMS
           query->chksum = ~icmpv6_chksum(dev, MLD_HDRLEN);
+#endif
 
           MLD_STATINCR(g_netstats.mld.query_sent);
 
@@ -326,7 +331,10 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
           /* Calculate the ICMPv6 checksum. */
 
           report->chksum  = 0;
+
+#ifdef CONFIG_NET_ICMPv6_CHECKSUMS
           report->chksum  = ~icmpv6_chksum(dev, MLD_HDRLEN);
+#endif
 
           SET_MLD_LASTREPORT(group->flags); /* Remember we were the last to report */
           MLD_STATINCR(g_netstats.mld.v1report_sent);
@@ -352,7 +360,10 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
           /* Calculate the ICMPv6 checksum. */
 
           report->chksum  = 0;
+
+#ifdef CONFIG_NET_ICMPv6_CHECKSUMS
           report->chksum  = ~icmpv6_chksum(dev, MLD_HDRLEN);
+#endif
 
           SET_MLD_LASTREPORT(group->flags); /* Remember we were the last to report */
           MLD_STATINCR(g_netstats.mld.v2report_sent);
@@ -372,7 +383,10 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
           /* Calculate the ICMPv6 checksum. */
 
           done->chksum    = 0;
+
+#ifdef CONFIG_NET_ICMPv6_CHECKSUMS
           done->chksum    = ~icmpv6_chksum(dev, MLD_HDRLEN);
+#endif
 
           MLD_STATINCR(g_netstats.mld.done_sent);
         }

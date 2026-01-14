@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/lpc17xx_40xx/pnev5180b/src/lpc17_40_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,10 +48,6 @@
 
 #ifdef CONFIG_USBMONITOR
 #  include <nuttx/usb/usbmonitor.h>
-#endif
-
-#ifdef CONFIG_CDCECM_COMPOSITE
-#  include <nuttx/board.h>
 #endif
 
 #ifdef CONFIG_LPC17_40_ROMFS

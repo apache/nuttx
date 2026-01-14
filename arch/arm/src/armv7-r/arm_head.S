@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-r/arm_head.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,8 +26,9 @@
 
 #include <nuttx/config.h>
 
+#include <arch/irq.h>
+
 #include "arm.h"
-#include "cp15.h"
 #include "sctlr.h"
 #include "arm_internal.h"
 
@@ -131,7 +134,17 @@ __start:
 	and		r0, r0, #0x3
 	cmp		r0, #0
 	beq		__cpu0_start
+
+#ifdef CONFIG_ARM_BUSY_WAIT
+	ldr		r2, =CONFIG_ARM_BUSY_WAIT_FLAG_ADDR
+1:
+	ldr		r1, [r2, #0]
+	cmp		r1, #0
+	beq		1b
+#else
 	wfe
+#endif
+
 	cmp		r0, #1
 	beq		__cpu1_start
 #  if CONFIG_SMP_NCPUS > 2
@@ -174,6 +187,7 @@ __cpu0_start:
 	 */
 
 	mov		r0, #0
+	mcr		CP15_TPIDRPRW(r0)	/* Initialize percpu reg TPIDRPRW */
 	mcr		CP15_BPIALL(r0)		/* Invalidate entire branch prediction array */
 	mcr		CP15_ICIALLU(r0)	/* Invalidate I-cache */
 	mcr		CP15_DCIALLU(r0)	/* Invalidate D-cache */
@@ -390,6 +404,15 @@ __cpu0_start:
 	 */
 
 	b		arm_boot
+
+	/* finish busy wait */
+
+#if defined(CONFIG_ARM_BUSY_WAIT) && defined(CONFIG_SMP)
+	ldr		r0, =CONFIG_ARM_BUSY_WAIT_FLAG_ADDR
+	mov		r1, #1
+	str		r1, [r0]
+	dsb		sy
+#endif
 
 	/* .text Data */
 

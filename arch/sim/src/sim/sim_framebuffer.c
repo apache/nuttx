@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/sim_framebuffer.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -243,7 +245,21 @@ static int sim_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
   ginfo("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
   if (vtable && planeno == 0 && pinfo)
     {
+#if CONFIG_SIM_FB_INTERVAL_LINE > 0
+      int display = pinfo->display;
+#endif
       memcpy(pinfo, &g_planeinfo, sizeof(struct fb_planeinfo_s));
+
+#if CONFIG_SIM_FB_INTERVAL_LINE > 0
+      if (display - g_planeinfo.display > 0)
+        {
+          pinfo->display = display;
+          pinfo->fbmem = g_planeinfo.fbmem + g_planeinfo.stride *
+             (CONFIG_SIM_FB_INTERVAL_LINE + CONFIG_SIM_FBHEIGHT) *
+             (display - g_planeinfo.display);
+        }
+#endif
+
       return OK;
     }
 
@@ -416,30 +432,25 @@ static int sim_setpower(struct fb_vtable_s *vtable, int power)
  * Name: sim_x11loop
  ****************************************************************************/
 
+#ifdef CONFIG_SIM_X11FB
 void sim_x11loop(void)
 {
-#ifdef CONFIG_SIM_X11FB
-  static clock_t last;
-  clock_t now = clock_systime_ticks();
   union fb_paninfo_u info;
 
-  if (now - last >= MSEC2TICK(16))
+  fb_notify_vsync(&g_fbobject);
+  if (fb_paninfo_count(&g_fbobject, FB_NO_OVERLAY) > 1)
     {
-      last = now;
-      if (fb_paninfo_count(&g_fbobject, FB_NO_OVERLAY) > 1)
-        {
-          fb_remove_paninfo(&g_fbobject, FB_NO_OVERLAY);
-        }
-
-      if (fb_peek_paninfo(&g_fbobject, &info, FB_NO_OVERLAY) == OK)
-        {
-          sim_x11setoffset(info.planeinfo.yoffset * info.planeinfo.stride);
-        }
-
-      sim_x11update();
+      fb_remove_paninfo(&g_fbobject, FB_NO_OVERLAY);
     }
-#endif
+
+  if (fb_peek_paninfo(&g_fbobject, &info, FB_NO_OVERLAY) == OK)
+    {
+      sim_x11setoffset(info.planeinfo.yoffset * info.planeinfo.stride);
+    }
+
+  sim_x11update();
 }
+#endif
 
 /****************************************************************************
  * Name: up_fbinitialize
@@ -463,11 +474,13 @@ int up_fbinitialize(int display)
 
 #ifdef CONFIG_SIM_X11FB
   g_planeinfo.xres_virtual = CONFIG_SIM_FBWIDTH;
-  g_planeinfo.yres_virtual = CONFIG_SIM_FBHEIGHT * CONFIG_SIM_FRAMEBUFFER_COUNT;
+  g_planeinfo.yres_virtual = CONFIG_SIM_FBHEIGHT *
+                             CONFIG_SIM_FRAMEBUFFER_COUNT;
   ret = sim_x11initialize(CONFIG_SIM_FBWIDTH, CONFIG_SIM_FBHEIGHT,
                           &g_planeinfo.fbmem, &g_planeinfo.fblen,
                           &g_planeinfo.bpp, &g_planeinfo.stride,
-                          CONFIG_SIM_FRAMEBUFFER_COUNT);
+                          CONFIG_SIM_FRAMEBUFFER_COUNT,
+                          CONFIG_SIM_FB_INTERVAL_LINE);
 #endif
 
   return ret;

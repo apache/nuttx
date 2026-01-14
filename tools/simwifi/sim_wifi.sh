@@ -3,6 +3,8 @@
 #****************************************************************************
 # tools/simwifi/sim_wifi.sh
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -491,6 +493,13 @@ show_status()
   echo ""
   ip route show
 
+  #7. show radio state
+  echo "radio status"
+  rfkill list
+
+  #8. show networkmanager wifi status
+  echo "networkmanager wifi status"
+  nmcli radio wifi
 }
 
 # $1 is the default wan interface for start_sta
@@ -516,7 +525,16 @@ init()
   [ -n "$1" -a  -n "$(ifconfig | grep $1)" ] && start_bridge $1
 
   echo "mode:$2" >> $DEFCONF_FILE
-  [ "$2" = "hwsim" ] &&  modprobe  mac80211_hwsim
+  [ "$2" = "hwsim" ] && modprobe  mac80211_hwsim
+
+  # Turn off the wifi of networkmanager.
+  nmcli radio wifi off
+
+  # open the radio by rfkill
+  id_list=$(rfkill list | grep phy | awk -F':' '{print $1}')
+  for id in $id_list; do
+    rfkill unblock $id;
+  done
 
   set_state SW_INIT  "" $NUTTX_BR_IF $1
 }
@@ -540,6 +558,10 @@ clean()
 
   rm -fr $RUN_DIR
   rm -f $UDHCPC_SCRIPT
+
+  # Turn on the wifi of networkmanager.
+  nmcli radio wifi on
+
 }
 
 usage()

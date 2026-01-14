@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32l0_memorymap.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -111,5 +113,9 @@
 #define STM32_GPIOD_BASE     0x50000c00     /* 0x50000c00-0x50000fff GPIO Port D */
 #define STM32_GPIOE_BASE     0x50001000     /* 0x50001000-0x500013ff GPIO Port E */
 #define STM32_GPIOH_BASE     0x50001c00     /* 0x50001c00-0x50001fff GPIO Port H */
+
+/* System Memory Addresses **************************************************/
+
+#define STM32_SYSMEM_UID     0x1ff80050     /* The 96-bit unique device identifier */
 
 #endif /* __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32L0_MEMORYMAP_H */

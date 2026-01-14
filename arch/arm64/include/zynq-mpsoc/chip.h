@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/include/zynq-mpsoc/chip.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,7 +42,7 @@
 /* XilinX ZYNQ_MPSOC Generic Interrupt Controller v2: Distributor & Redist */
 
 #define CONFIG_GICD_BASE          0xf9010000
-#define CONFIG_GICR_BASE          0xf9020000 
+#define CONFIG_GICR_BASE          0xf9020000
 #define CONFIG_GICR_OFFSET        0x20000
 
 /* XilinX ZYNQ_MPSOC Memory Map: RAM and Device I/O */

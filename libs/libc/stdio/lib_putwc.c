@@ -1,7 +1,8 @@
 /****************************************************************************
  * libs/libc/stdio/lib_putwc.c
  *
- * Copyright © 2005-2014 Rich Felker, et al.
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: 2005-2014 Rich Felker, et al.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -76,10 +77,11 @@ wint_t putwc_unlocked(wchar_t c, FAR FILE *f)
 
 wint_t putwc(wchar_t c, FAR FILE *f)
 {
+  wint_t wc;
   flockfile(f);
-  c = putwc_unlocked(c, f);
+  wc = putwc_unlocked(c, f);
   funlockfile(f);
-  return c;
+  return wc;
 }
 
 #endif /* CONFIG_FILE_STREAM */

@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/mmcsd/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -24,7 +26,7 @@ if(CONFIG_MMCSD)
   # Include MMC/SD drivers
 
   if(CONFIG_MMCSD_SDIO)
-    list(APPEND SRCS mmcsd_sdio.c)
+    list(APPEND SRCS mmcsd_sdio.c sdio.c)
   endif()
 
   if(CONFIG_MMCSD_SPI)

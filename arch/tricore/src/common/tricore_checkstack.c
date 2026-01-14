@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/tricore/src/common/tricore_checkstack.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -77,8 +79,8 @@ size_t tricore_stack_check(uintptr_t alloc, size_t size)
 
   /* Get aligned addresses of the top and bottom of the stack */
 
-  start = (alloc + 3) & ~3;
-  end   = (alloc + size) & ~3;
+  start = STACK_ALIGN_UP((uintptr_t)alloc);
+  end   = STACK_ALIGN_DOWN((uintptr_t)alloc + size);
 
   /* Get the adjusted size based on the top and bottom of the stack */
 
@@ -115,7 +117,7 @@ size_t tricore_stack_check(uintptr_t alloc, size_t size)
  *
  ****************************************************************************/
 
-size_t up_check_tcbstack(struct tcb_s *tcb)
+size_t up_check_tcbstack(struct tcb_s *tcb, size_t check_size)
 {
   size_t size;
 
@@ -128,8 +130,7 @@ size_t up_check_tcbstack(struct tcb_s *tcb)
     }
 #endif
 
-  size = tricore_stack_check((uintptr_t)tcb->stack_base_ptr,
-                                      tcb->adj_stack_size);
+  size = tricore_stack_check((uintptr_t)tcb->stack_base_ptr, check_size);
 
 #ifdef CONFIG_ARCH_ADDRENV
   if (tcb->addrenv_own != NULL)
@@ -142,10 +143,14 @@ size_t up_check_tcbstack(struct tcb_s *tcb)
 }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
-size_t up_check_intstack(int cpu)
+size_t up_check_intstack(int cpu, size_t check_size)
 {
-  return tricore_stack_check((uintptr_t)g_intstackalloc,
-                           (CONFIG_ARCH_INTERRUPTSTACK & ~15));
+  if (check_size == 0)
+    {
+      check_size = CONFIG_ARCH_INTERRUPTSTACK & ~15;
+    }
+
+  return tricore_stack_check((uintptr_t)g_intstackalloc, check_size);
 }
 #endif
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/str71x/str71x_head.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -310,7 +312,7 @@ eicloop:
 	mov		\value, \irqno, lsl #16
 	str		\value, [\eicbase, \offset]
 
-	/* Increment the offset to the next SIR register and inrement
+	/* Increment the offset to the next SIR register and increment
 	 * the IRQ number.
 	 */
 

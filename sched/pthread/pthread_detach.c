@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/pthread/pthread_detach.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -68,7 +70,7 @@ int pthread_detach(pthread_t thread)
   FAR struct tcb_s *tcb;
   int ret;
 
-  nxrmutex_lock(&group->tg_joinlock);
+  nxrmutex_lock(&group->tg_mutex);
 
   tcb = nxsched_get_tcb((pid_t)thread);
   if (tcb == NULL || (tcb->flags & TCB_FLAG_JOIN_COMPLETED) != 0)
@@ -100,7 +102,7 @@ int pthread_detach(pthread_t thread)
     }
 
 errout:
-  nxrmutex_unlock(&group->tg_joinlock);
+  nxrmutex_unlock(&group->tg_mutex);
 
   sinfo("Returning %d\n", ret);
   return ret;

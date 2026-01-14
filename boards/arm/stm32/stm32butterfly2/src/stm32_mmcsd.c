@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm32butterfly2/src/stm32_mmcsd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -96,7 +98,7 @@ static void *stm32_cd_thread(void *arg)
            * rest for a millisecond or so.
            */
 
-          nxsig_usleep(1 * 1000);
+          nxsched_usleep(1 * 1000);
           g_chmediaclbk(g_chmediaarg);
         }
     }

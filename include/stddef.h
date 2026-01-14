@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/stddef.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,6 +36,8 @@
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 /* The <stddef.h> header shall define the following types:
  *
@@ -81,5 +85,7 @@ typedef struct
   float max_align_f;
 #endif
 } max_align_t;
+
+#endif /* __ASSEMBLY__ */
 
 #endif /* __INCLUDE_STDDEF_H */

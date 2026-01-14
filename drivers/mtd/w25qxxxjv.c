@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/mtd/w25qxxxjv.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -392,11 +394,11 @@ static int w25qxxxjv_get_die_from_addr(FAR struct w25qxxxjv_dev_s *priv,
                                        off_t addr);
 static int  w25qxxxjv_readid(FAR struct w25qxxxjv_dev_s *priv);
 static int  w25qxxxjv_protect(FAR struct w25qxxxjv_dev_s *priv,
-              off_t startblock, size_t nblocks);
+                              off_t startblock, size_t nblocks);
 static int  w25qxxxjv_unprotect(FAR struct w25qxxxjv_dev_s *priv,
-              off_t startblock, size_t nblocks);
+                                off_t startblock, size_t nblocks);
 static bool w25qxxxjv_isprotected(FAR struct w25qxxxjv_dev_s *priv,
-              uint8_t status, off_t address);
+                                  uint8_t status, off_t address);
 static int  w25qxxxjv_erase_sector(FAR struct w25qxxxjv_dev_s *priv,
                                    off_t offset);
 static int  w25qxxxjv_erase_chip(FAR struct w25qxxxjv_dev_s *priv);
@@ -959,6 +961,7 @@ static int w25qxxxjv_erase_sector(FAR struct w25qxxxjv_dev_s *priv,
 {
   off_t address;
   uint8_t status;
+  uint16_t nloops = priv->nsectors;
 
   finfo("sector: %08" PRIxOFF "\n", sector);
 
@@ -974,10 +977,16 @@ static int w25qxxxjv_erase_sector(FAR struct w25qxxxjv_dev_s *priv,
     }
 
   status = w25qxxxjv_read_status(priv);
-  if ((status & STATUS_BUSY_MASK) != STATUS_READY)
+  while ((status & STATUS_BUSY_MASK) != STATUS_READY)
     {
-      ferr("ERROR: Flash busy: %02x", status);
-      return -EBUSY;
+      if (nloops-- == 0)
+        {
+          ferr("ERROR: Flash busy: %02x", status);
+          return -EBUSY;
+        }
+
+      nxsched_usleep(priv->erasetime * 1000);
+      status = w25qxxxjv_read_status(priv);
     }
 
   if ((status & priv->protectmask) != 0 &&
@@ -999,7 +1008,7 @@ static int w25qxxxjv_erase_sector(FAR struct w25qxxxjv_dev_s *priv,
   status = w25qxxxjv_read_status(priv);
   while ((status & STATUS_BUSY_MASK) != 0)
     {
-      nxsig_usleep(priv->erasetime * 1000);
+      nxsched_usleep(priv->erasetime * 1000);
       status = w25qxxxjv_read_status(priv);
     }
 
@@ -1033,7 +1042,7 @@ static int w25qxxxjv_erase_chip(FAR struct w25qxxxjv_dev_s *priv)
   status = w25qxxxjv_read_status(priv);
   while ((status & STATUS_BUSY_MASK) != 0)
     {
-      nxsig_usleep(200 * 1000);
+      nxsched_usleep(200 * 1000);
       status = w25qxxxjv_read_status(priv);
     }
 
@@ -1098,7 +1107,7 @@ static int w25qxxxjv_write_page(FAR struct w25qxxxjv_dev_s *priv,
       /* Set up varying parts of the transfer description */
 
       meminfo.addr   = address;
-      meminfo.buffer = (void *)buffer;
+      meminfo.buffer = (FAR void *)buffer;
 
       /* Write one page */
 
@@ -1350,9 +1359,7 @@ static int w25qxxxjv_erase(FAR struct mtd_dev_s *dev, off_t startblock,
 {
   FAR struct w25qxxxjv_dev_s *priv = (FAR struct w25qxxxjv_dev_s *)dev;
   size_t blocksleft = nblocks;
-#ifdef CONFIG_W25QXXXJV_SECTOR512
   int ret;
-#endif
 
   finfo("startblock: %08" PRIxOFF " nblocks: %d\n",
         startblock, (int)nblocks);
@@ -1368,7 +1375,13 @@ static int w25qxxxjv_erase(FAR struct mtd_dev_s *dev, off_t startblock,
 #ifdef CONFIG_W25QXXXJV_SECTOR512
       w25qxxxjv_erase_cache(priv, startblock);
 #else
-      w25qxxxjv_erase_sector(priv, startblock);
+      ret = w25qxxxjv_erase_sector(priv, startblock);
+      if (ret < 0)
+        {
+          w25qxxxjv_unlock(priv->qspi);
+          return ret;
+        }
+
 #endif
       startblock++;
     }
@@ -1407,11 +1420,15 @@ static ssize_t w25qxxxjv_bread(FAR struct mtd_dev_s *dev, off_t startblock,
    * read
    */
 
+  w25qxxxjv_lock(priv->qspi);
+
   if (priv->numofdies != 0)
     {
       priv->currentdie = w25qxxxjv_get_die_from_addr(priv, startblock <<
                                                      priv->pageshift);
     }
+
+  w25qxxxjv_unlock(priv->qspi);
 
 #ifdef CONFIG_W25QXXXJV_SECTOR512
   nbytes = w25qxxxjv_read(dev, startblock << W25QXXXJV_SECTOR512_SHIFT,
@@ -1445,6 +1462,8 @@ static ssize_t w25qxxxjv_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
   finfo("startblock: %08" PRIxOFF " nblocks: %d\n",
         startblock, (int)nblocks);
 
+  w25qxxxjv_lock(priv->qspi);
+
   if (priv->numofdies != 0)
     {
       priv->currentdie = w25qxxxjv_get_die_from_addr(priv, startblock <<
@@ -1452,8 +1471,6 @@ static ssize_t w25qxxxjv_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
     }
 
   /* Lock the QuadSPI bus and write all of the pages to FLASH */
-
-  w25qxxxjv_lock(priv->qspi);
 
 #if defined(CONFIG_W25QXXXJV_SECTOR512)
   ret = w25qxxxjv_write_cache(priv, buffer, startblock, nblocks);

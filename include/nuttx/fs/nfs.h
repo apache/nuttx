@@ -1,17 +1,11 @@
 /****************************************************************************
  * include/nuttx/fs/nfs.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2012 Jose Pablo Rojas Vargas. All rights reserved.
- *   Author: Jose Pablo Rojas Vargas <jrojas@nx-engineering.com>
- *
- * Some of the content of this file was leveraged from OpenBSD:
- *
- *   Copyright (c) 1989, 1993, 1995
- *   The Regents of the University of California.  All rights reserved.
- *
- * This code is derived from software contributed to Berkeley by
- * Rick Macklem at The University of Guelph.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2012 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2012 Jose Pablo Rojas Vargas. All rights reserved.
+ * SPDX-FileCopyrightText: 1989, 1993, 1995 The Regents of the University of California.  All rights reserved.
+ * SPDX-FileContributor: Jose Pablo Rojas Vargas <jrojas@nx-engineering.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

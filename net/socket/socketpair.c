@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/socket/socketpair.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,6 +33,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 
@@ -93,100 +96,4 @@ int psock_socketpair(int domain, int type, int protocol,
 errsock:
   psock_close(psocks[0]);
   return ret;
-}
-
-/****************************************************************************
- * Name: socketpair
- *
- * Description:
- * Create an unbound pair of connected sockets in a specified domain, of a
- * specified type, under the protocol optionally specified by the protocol
- * argument. The two sockets shall be identical. The file descriptors used
- * in referencing the created sockets shall be returned in
- * sv[0] and sv[1].
- *
- * Input Parameters:
- *   domain   - (see sys/socket.h)
- *   type     - (see sys/socket.h)
- *   protocol - (see sys/socket.h)
- *   sv[2]    - The user provided array in which to catch the pair
- *              descriptors
- *
- ****************************************************************************/
-
-int socketpair(int domain, int type, int protocol, int sv[2])
-{
-  FAR struct socket *psocks[2];
-  int oflags = O_RDWR;
-  int ret;
-  int i;
-  int j = 0;
-  int k;
-
-  if (sv == NULL)
-    {
-      ret = -EINVAL;
-      goto errout;
-    }
-
-  for (k = 0; k < 2; k++)
-    {
-      psocks[k] = kmm_zalloc(sizeof(*psocks[k]));
-      if (psocks[k] == NULL)
-        {
-          ret = -ENOMEM;
-          goto errout_with_alloc;
-        }
-    }
-
-  ret = psock_socketpair(domain, type, protocol, psocks);
-  if (ret < 0)
-    {
-      goto errout_with_alloc;
-    }
-
-  if (type & SOCK_CLOEXEC)
-    {
-      oflags |= O_CLOEXEC;
-    }
-
-  if (type & SOCK_NONBLOCK)
-    {
-      oflags |= O_NONBLOCK;
-    }
-
-  /* Allocate a socket descriptor */
-
-  for (; j < 2; j++)
-    {
-      sv[j] = sockfd_allocate(psocks[j], oflags);
-      if (sv[j] < 0)
-        {
-          ret = sv[j];
-          goto errout_with_psock;
-        }
-    }
-
-  return OK;
-
-errout_with_psock:
-  for (i = 0; i < j; i++)
-    {
-      nx_close(sv[i]);
-    }
-
-  for (i = j; i < k; i++)
-    {
-      psock_close(psocks[i]);
-    }
-
-errout_with_alloc:
-  for (i = j; i < k; i++)
-    {
-      kmm_free(psocks[i]);
-    }
-
-errout:
-  set_errno(-ret);
-  return ERROR;
 }

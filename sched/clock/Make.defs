@@ -1,6 +1,8 @@
 ############################################################################
 # sched/clock/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -19,8 +21,18 @@
 ############################################################################
 
 CSRCS += clock.c clock_initialize.c clock_settime.c clock_gettime.c
-CSRCS += clock_abstime2ticks.c clock_systime_ticks.c clock_systime_timespec.c
-CSRCS += clock_perf.c
+CSRCS += clock_systime_ticks.c clock_systime_timespec.c clock_sched_ticks.c
+CSRCS += clock_perf.c clock_realtime2absticks.c clock_getres.c
+
+# Unless a driver with a more accurate version of up_*delay is enabled, always
+# include the base delay definition (busy-loop) as a minimum-viable product. We
+# don't want the weak references to conflict.
+
+ifneq ($(CONFIG_TIMER_ARCH),y)
+  ifneq ($(CONFIG_ALARM_ARCH),y)
+    CSRCS += delay.c
+  endif
+endif
 
 ifeq ($(CONFIG_CLOCK_TIMEKEEPING),y)
 CSRCS += clock_timekeeping.c

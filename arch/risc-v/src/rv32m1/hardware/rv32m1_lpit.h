@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/rv32m1/hardware/rv32m1_lpit.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,7 +37,7 @@
 #define RV32M1_LPIT_PARAM_OFFSET        0x0004 /* Parameter */
 #define RV32M1_LPIT_MCR_OFFSET          0x0008 /* Module Control */
 #define RV32M1_LPIT_MSR_OFFSET          0x000c /* Module Status Register */
-#define RV32M1_LPIT_MIER_OFFSET         0x0010 /* Moduel Interrupt Enable */
+#define RV32M1_LPIT_MIER_OFFSET         0x0010 /* Module Interrupt Enable */
 #define RV32M1_LPIT_SETTEN_OFFSET       0x0014 /* Set Timer Enable */
 #define RV32M1_LPIT_CLRTEN_OFFSET       0x0018 /* Clear Timer Enable */
 #define RV32M1_LPIT_TVAL0_OFFSET        0x0020 /* Timer Channel 0 Value */

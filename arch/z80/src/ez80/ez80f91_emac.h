@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80f91_emac.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -155,7 +157,7 @@
 #define EMAC_FFLAGS_RFF       0x08 /* Bit 0: 1=Receive FIFO full */
 #define EMAC_FFLAGS_TFE       0x10 /* Bit 0: 1=Transmit FIFO empty */
 #define EMAC_FFLAGS_TFAE      0x20 /* Bit 0: 1=Transmit FIFO almost empty */
-#define EMAC_FFLAGS_TFF       0x80 /* Bit 0: 1=Trasnmit FIFO full */
+#define EMAC_FFLAGS_TFF       0x80 /* Bit 0: 1=Transmit FIFO full */
 
 /* EMAC Transmit Descriptor Status ******************************************/
 

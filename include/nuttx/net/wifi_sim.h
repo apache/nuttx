@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/net/wifi_sim.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -62,6 +64,7 @@ struct wifi_sim_lowerhalf_s
 
 int  wifi_sim_init(FAR struct wifi_sim_lowerhalf_s *netdev);
 void wifi_sim_remove(FAR struct wifi_sim_lowerhalf_s *netdev);
+bool wifi_sim_connected(FAR struct wifi_sim_lowerhalf_s *dev);
 
 #undef EXTERN
 #ifdef __cplusplus

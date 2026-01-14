@@ -1,10 +1,8 @@
 /****************************************************************************
  * libs/libc/regex/regcomp.c
  *
- * regcomp.c - TRE POSIX compatible regex compilation functions.
- *
- * Copyright (c) 2001-2009 Ville Laurikari <vl@iki.fi>
- * All rights reserved.
+ * SPDX-License-Identifier: BSD-2-Clause
+ * SPDX-FileCopyrightText: 2001-2009 Ville Laurikari <vl@iki.fi>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -696,7 +694,7 @@ struct neg
  * coll_single is a single char collating element but it can be
  * '-' only at the beginning or end of a List and
  * ']' only at the beginning of a List and
- * '^' anywhere except after the openning '['
+ * '^' anywhere except after the opening '['
  */
 
 static reg_errcode_t parse_bracket_terms(tre_parse_ctx_t *ctx, const char *s,

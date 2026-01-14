@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp_seqno.c
  *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -46,6 +48,7 @@
 #include <crypto/md5.h>
 #include <debug.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #include <nuttx/clock.h>
 #include <nuttx/net/netconfig.h>
@@ -53,7 +56,6 @@
 
 #include "devif/devif.h"
 #include "tcp/tcp.h"
-#include "utils/utils.h"
 
 /****************************************************************************
  * Private Data
@@ -95,7 +97,7 @@ static uint32_t tcp_isn_rfc6528(FAR struct tcp_conn_s *conn)
 
   if (g_tcp_isnkey[0] == 0)
     {
-      net_getrandom(g_tcp_isnkey, sizeof(g_tcp_isnkey));
+      arc4random_buf(g_tcp_isnkey, sizeof(g_tcp_isnkey));
     }
 
   /* M is the 4 microsecond timer */
@@ -214,7 +216,7 @@ void tcp_initsequence(FAR struct tcp_conn_s *conn)
     {
       /* Get a random TCP sequence number */
 
-      net_getrandom(&g_tcpsequence, sizeof(uint32_t));
+      arc4random_buf(&g_tcpsequence, sizeof(uint32_t));
 
       /* Use about half of allowed values */
 

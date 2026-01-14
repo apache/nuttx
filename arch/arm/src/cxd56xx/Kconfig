@@ -24,7 +24,7 @@ config CXD56_FCBGA
 config CXD56_WLCSP
 	bool "WLCSP 100 pin package"
 
-endchoice
+endchoice # CXD56xx package selection
 
 choice
 	prompt "CXD56xx core selection"
@@ -36,7 +36,7 @@ config CXD56_MAINCORE
 config CXD56_SUBCORE
 	bool "Sub Core"
 
-endchoice
+endchoice # CXD56xx core selection
 
 config CXD56_CUSTOM_PINCONFIG
 	bool "Board-specific pin configuration"
@@ -115,7 +115,7 @@ config CXD56_FARAPI_VERSION_CHECK
 	default y
 	---help---
 		Enable the Far API version compatibility check. If the version
-		mismatch is detected during system bootup, the target system shows
+		mismatch is detected during system boot up, the target system shows
 		the message to update the loader and gnssfw firmwares.
 
 if CXD56_FARAPI_VERSION_CHECK
@@ -178,7 +178,8 @@ config CXD56_TIMER_DIVIDER_16
 config CXD56_TIMER_DIVIDER_256
 	bool "Divider 256"
 
-endchoice
+endchoice # Timer divider selection
+
 endif # CXD56_TIMER
 
 menuconfig CXD56_WDT
@@ -500,7 +501,6 @@ config CXD56_DMAC_SPI4_RX
 	bool "DMAC support for SPI4 RX"
 	default n
 	select CXD56_DMAC
-
 	---help---
 		Enables DMAC for SPI4 RX
 
@@ -1093,7 +1093,7 @@ config CXD56_SCU_PREDIV
 	default 64
 	range 1 256
 	---help---
-		This configuration ralated to maximum sampling rate based
+		This configuration related to maximum sampling rate based
 		on 32.768KHz.
 		e.g. 32768 / 64 = 512 (samples)
 

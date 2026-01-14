@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/cxd32xx/cxd32_timerisr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -52,7 +54,7 @@
 
 #define TICK_RELOAD ((CXD32_TIMER_BASEFREQ / CLK_TCK) - 1)
 
-/* The size of the reload field is 24 bits.  Verify taht the reload value
+/* The size of the reload field is 24 bits.  Verify that the reload value
  * will fit in the reload register.
  */
 
@@ -138,7 +140,7 @@ static void cxd32_timer1_initialize(void)
 {
   uint32_t ctrl;
 
-  /* Configure the coutner */
+  /* Configure the counter */
 
   putreg32(TIMER4_CH1_INITVALUE, TIMER4_CH1 + CXD32_TIMER_LOAD);
 

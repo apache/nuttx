@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nrf52/nrf52_ieee802154.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -585,7 +587,7 @@ static int nrf52_radioi8_txdelayed(struct ieee802154_radio_s *radio,
       return -EBUSY;
     }
 
-  /* Wait for ACKTX done - we start transmition in
+  /* Wait for ACKTX done - we start transmission in
    * nrf52_radioi8_state_acktx()
    */
 
@@ -757,7 +759,7 @@ nrf52_radioi8_beaconstart(struct ieee802154_radio_s *radio,
       memcpy(&dev->state.sf, (void *)sfspec,
              sizeof(struct ieee802154_superframespec_s));
 
-      /* Setup beacon transmition */
+      /* Setup beacon transmission */
 
       dev->radio->ops->beacon_setup(dev, beacon->bf_data, beacon->bf_len);
 

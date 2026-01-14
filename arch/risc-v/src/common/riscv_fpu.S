@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_fpu.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -98,20 +100,18 @@ riscv_fpuconfig:
 
 riscv_savefpu:
 
+#ifdef CONFIG_ARCH_LAZYFPU
   REGLOAD    t0, REG_INT_CTX(a0)
   li         t1, MSTATUS_FS
   and        t2, t0, t1
   li         t1, MSTATUS_FS_DIRTY
-#ifdef CONFIG_ARCH_LAZYFPU
   bne        t2, t1, 1f
-#else
-  blt        t2, t1, 1f
-#endif
   li         t1, ~MSTATUS_FS
   and        t0, t0, t1
   li         t1, MSTATUS_FS_CLEAN
   or         t0, t0, t1
   REGSTORE   t0, REG_INT_CTX(a0)
+#endif
 
   riscv_savefpu a1
 
@@ -144,11 +144,13 @@ riscv_savefpu:
 
 riscv_restorefpu:
 
+#ifdef CONFIG_ARCH_LAZYFPU
   REGLOAD      t0, REG_INT_CTX(a0)
   li           t1, MSTATUS_FS
   and          t2, t0, t1
   li           t1, MSTATUS_FS_INIT
   ble          t2, t1, 1f
+#endif
 
   riscv_loadfpu a1
 

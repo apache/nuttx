@@ -60,7 +60,9 @@ Character device drivers have these properties:
   can.rst
   contactless.rst
   crypto/index.rst
+  eeprom.rst
   efuse.rst
+  gpio.rst
   i2s.rst
   input/index.rst
   ipcc.rst
@@ -77,3 +79,4 @@ Character device drivers have these properties:
   serial.rst
   timers/index.rst
   touchscreen.rst
+  wireless/index.rst

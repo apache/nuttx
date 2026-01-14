@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/signal/sig_pending.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -96,7 +98,10 @@ sigset_t nxsig_pendingset(FAR struct tcb_s *stcb)
   for (sigpend = (FAR sigpendq_t *)group->tg_sigpendingq.head;
        (sigpend); sigpend = sigpend->flink)
     {
-      nxsig_addset(&sigpendset, sigpend->info.si_signo);
+      if (sigpend->tcb == NULL || stcb == sigpend->tcb)
+        {
+          nxsig_addset(&sigpendset, sigpend->info.si_signo);
+        }
     }
 
   leave_critical_section(flags);

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/imx9/hardware/imx9_enet.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -158,7 +160,7 @@
 #define ENET_RXB2                    (1 << 4)  /* Receive buffer interrupt, class 2 */
 #define ENET_RXF2                    (1 << 5)  /* Receive frame interrupt, class 2 */
 #define ENET_TXB2                    (1 << 6)  /* Transmit buffer interrupt, class 2 */
-#define ENET_TXF2                    (1 << 7)  /* Transmit frame interrupt, class 2 */ 
+#define ENET_TXF2                    (1 << 7)  /* Transmit frame interrupt, class 2 */
 #define ENET_RXFLUSH_0               (1 << 12) /* RX DMA Ring 0 flush indication */
 #define ENET_RXFLUSH_1               (1 << 13) /* RX DMA Ring 1 flush indication */
 #define ENET_RXFLUSH_2               (1 << 14) /* RX DMA Ring 2 flush indication */
@@ -324,7 +326,7 @@
 #define ENET_TXIC_ICFT_SHIFT         (20)      /* Bits 0-15: Interrupt coalescing timer threshold */
 #define ENET_TXIC_ICFT_SHIFT_MASK    (0xff << ENET_TXIC_ICFT_SHIFT)
 #define ENET_TXIC_ICTT_ICCS          (1 << 30) /* Bit 30: Interrupt Coalescing Timer Clock Source Select */
-#define ENET_TXIC_ICTT_ICEN          (1 << 31) /* Bit 31: Eable/disabel Interrupt Coalescing */
+#define ENET_TXIC_ICTT_ICEN          (1 << 31) /* Bit 31: Enable/disable Interrupt Coalescing */
 
 /* Receive Interrupt Coalescing Register */
 
@@ -334,7 +336,7 @@
 #define ENET_RXIC_ICFT_SHIFT         (20)      /* Bits 0-15: Interrupt coalescing timer threshold */
 #define ENET_RXIC_ICFT_SHIFT_MASK    (0xff << ENET_TXIC_ICFT_SHIFT)
 #define ENET_RXIC_ICTT_ICCS          (1 << 30) /* Bit 30: Interrupt Coalescing Timer Clock Source Select */
-#define ENET_RXIC_ICTT_ICEN          (1 << 31) /* Bit 31: Eable/disabel Interrupt Coalescing */
+#define ENET_RXIC_ICTT_ICEN          (1 << 31) /* Bit 31: Enable/disable Interrupt Coalescing */
 
 /* Transmit FIFO Watermark Register */
 

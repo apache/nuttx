@@ -1,6 +1,8 @@
 /****************************************************************************
  * graphics/nxterm/nxterm_kbdin.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -127,7 +129,7 @@ ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len)
           priv->nwaiters++;
           nxmutex_unlock(&priv->lock);
 
-          /* We may now be pre-empted!  But that should be okay because we
+          /* We may now be preempted!  But that should be okay because we
            * have already incremented nwaiters.  Pre-emption is disabled
            * but will be re-enabled while we are waiting.
            */
@@ -289,7 +291,7 @@ int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
 
 #ifdef CONFIG_DEBUG_GRAPHICS
       if (!slot)

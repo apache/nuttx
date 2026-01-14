@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stdlib/lib_posix_memalign.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,7 +33,7 @@
  * Public Functions
  ****************************************************************************/
 
-#undef posix_memalign /* See mm/README.txt */
+#undef posix_memalign
 int posix_memalign(FAR void **mem, size_t align, size_t size)
 {
   *mem = lib_memalign(align, size);

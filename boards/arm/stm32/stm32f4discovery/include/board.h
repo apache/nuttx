@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f4discovery/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -259,7 +261,7 @@
  *
  * The STM32F4 Discovery has no on-board serial devices, but the console is
  * brought out to PA2 (TX) and PA3 (RX) for connection to an external serial
- * device. (See the README.txt file for other options)
+ * device.
  *
  * These pins selections, however, conflict with pin usage on the
  * STM32F4DIS-BB.
@@ -382,7 +384,7 @@
 #define GPIO_I2C1_SCL     GPIO_I2C1_SCL_1
 #define GPIO_I2C1_SDA     GPIO_I2C1_SDA_2
 
-/* Timer Inputs/Outputs (see the README.txt file for options) */
+/* Timer Inputs/Outputs */
 
 #define GPIO_TIM2_CH1IN   GPIO_TIM2_CH1IN_2
 #define GPIO_TIM2_CH2IN   GPIO_TIM2_CH2IN_1
@@ -462,6 +464,9 @@
                            GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
 
 #define BOARD_XEN1210_GPIO_INT  GPIO_XEN1210_INT
+
+#define BOARD_SBUTTON_GPIO_INT (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|\
+                                GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN0)
 
 /* Define what timer to use as XEN1210 CLK (will use channel 1) */
 

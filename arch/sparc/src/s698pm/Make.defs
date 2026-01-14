@@ -1,6 +1,8 @@
 ############################################################################
 # arch/sparc/src/s698pm/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -54,5 +56,9 @@ endif
 # Configuration-dependent files
 
 ifeq ($(CONFIG_SMP),y)
-CHIP_CSRCS += s698pm_cpuindex.c s698pm_cpustart.c s698pm_cpupause.c s698pm_cpuidlestack.c
+CHIP_CSRCS += s698pm_cpustart.c s698pm_smpcall.c s698pm_cpuidlestack.c
+endif
+
+ifeq ($(CONFIG_ARCH_HAVE_MULTICPU),y)
+CHIP_CSRCS += s698pm_cpuindex.c
 endif

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/avr/src/common/avr_modifyreg16.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #include "avr_internal.h"
 
@@ -39,6 +42,8 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static spinlock_t g_modifyreg_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -61,10 +66,10 @@ void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits)
   irqstate_t flags;
   uint16_t   regval;
 
-  flags   = enter_critical_section();
+  flags   = spin_lock_irqsave(&g_modifyreg_lock);
   regval  = getreg16(addr);
   regval &= ~clearbits;
   regval |= setbits;
   putreg16(regval, addr);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_modifyreg_lock, flags);
 }

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_pmp.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -416,7 +418,7 @@ static void pmp_read(uintptr_t region, pmp_entry_t * entry)
  *   and the size must be power-of-two according to the the PMP spec.
  *
  * Returned Value:
- *   0 on succeess; negated error on failure
+ *   0 on success; negated error on failure
  *
  ****************************************************************************/
 

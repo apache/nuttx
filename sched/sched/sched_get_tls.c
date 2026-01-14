@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_get_tls.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -73,5 +75,6 @@ FAR char **nxsched_get_stackargs(FAR struct tcb_s *tcb)
 {
   /* The args data follows the TLS data */
 
-  return (FAR char**)(tcb->stack_alloc_ptr + nxsched_get_tls(tcb)->tl_size);
+  return (FAR char**)((FAR char *)tcb->stack_alloc_ptr +
+                                  nxsched_get_tls(tcb)->tl_size);
 }

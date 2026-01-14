@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/mtd/nand_wrapper.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -41,7 +43,7 @@
 struct nand_wrapper_dev_s
 {
   struct nand_dev_s wrapper; /* Wrapper device */
-  struct nand_dev_s under;   /* Underlying actuall upper half device */
+  struct nand_dev_s under;   /* Underlying the upper half device */
 };
 
 /****************************************************************************
@@ -65,13 +67,13 @@ extern "C"
  ****************************************************************************/
 
 int nand_wrapper_erase(FAR struct mtd_dev_s *dev, off_t startblock,
-                            size_t nblocks);
+                       size_t nblocks);
 ssize_t nand_wrapper_bread(FAR struct mtd_dev_s *dev, off_t startpage,
-                      size_t npages, FAR uint8_t *buffer);
+                           size_t npages, FAR uint8_t *buffer);
 ssize_t nand_wrapper_bwrite(FAR struct mtd_dev_s *dev, off_t startpage,
-                        size_t npages, FAR const uint8_t *buffer);
+                            size_t npages, FAR const uint8_t *buffer);
 int nand_wrapper_ioctl(FAR struct mtd_dev_s *dev, int cmd,
-                            unsigned long arg);
+                       unsigned long arg);
 int nand_wrapper_isbad(FAR struct mtd_dev_s *dev, off_t block);
 int nand_wrapper_markbad(FAR struct mtd_dev_s *dev, off_t block);
 void nand_wrapper_initialize(void);

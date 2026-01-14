@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/arm_addrenv_utils.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -55,15 +57,15 @@
  *
  ****************************************************************************/
 
-int arm_addrenv_create_region(uintptr_t **list, unsigned int listlen,
+int arm_addrenv_create_region(uintptr_t *l1table, unsigned int listlen,
                               uintptr_t vaddr, size_t regionsize,
                               uint32_t mmuflags)
 {
-  irqstate_t flags;
   uintptr_t paddr;
-  uint32_t *l2table;
+  uintptr_t *l2table;
   size_t nmapped;
   unsigned int npages;
+  unsigned int nlist;
   unsigned int i;
   unsigned int j;
 
@@ -90,8 +92,9 @@ int arm_addrenv_create_region(uintptr_t **list, unsigned int listlen,
    * the L1 page table).
    */
 
+  nlist = (npages + ENTRIES_PER_L2TABLE - 1) / ENTRIES_PER_L2TABLE;
   nmapped = 0;
-  for (i = 0; i < npages; i += ENTRIES_PER_L2TABLE)
+  for (i = 0; i < nlist; i++)
     {
       /* Allocate one physical page for the L2 page table */
 
@@ -103,17 +106,17 @@ int arm_addrenv_create_region(uintptr_t **list, unsigned int listlen,
         }
 
       DEBUGASSERT(MM_ISALIGNED(paddr));
-      list[i] = (uintptr_t *)paddr;
 
-      flags = enter_critical_section();
+      mmu_l1table_setentry(l1table, paddr, vaddr + i * SECTION_SIZE,
+                           MMU_L1_PGTABFLAGS);
 
       /* Get the virtual address corresponding to the physical page address */
 
-      l2table = (uint32_t *)arm_pgvaddr(paddr);
+      l2table = (uintptr_t *)arm_pgvaddr(paddr);
 
       /* Initialize the page table */
 
-      memset(l2table, 0, ENTRIES_PER_L2TABLE * sizeof(uint32_t));
+      memset(l2table, 0, ENTRIES_PER_L2TABLE * sizeof(uintptr_t));
 
       /* Back up L2 entries with physical memory */
 
@@ -125,7 +128,6 @@ int arm_addrenv_create_region(uintptr_t **list, unsigned int listlen,
           binfo("a new page (paddr=%x)\n", paddr);
           if (!paddr)
             {
-              leave_critical_section(flags);
               return -ENOMEM;
             }
 
@@ -142,9 +144,7 @@ int arm_addrenv_create_region(uintptr_t **list, unsigned int listlen,
 
       up_flush_dcache((uintptr_t)l2table,
                       (uintptr_t)l2table +
-                      ENTRIES_PER_L2TABLE * sizeof(uint32_t));
-
-      leave_critical_section(flags);
+                      ENTRIES_PER_L2TABLE * sizeof(uintptr_t));
     }
 
   return npages;
@@ -158,12 +158,11 @@ int arm_addrenv_create_region(uintptr_t **list, unsigned int listlen,
  *
  ****************************************************************************/
 
-void arm_addrenv_destroy_region(uintptr_t **list, unsigned int listlen,
+void arm_addrenv_destroy_region(uintptr_t *l1table, unsigned int listlen,
                                 uintptr_t vaddr, bool keep)
 {
-  irqstate_t flags;
-  uintptr_t paddr;
-  uint32_t *l2table;
+  uintptr_t l1entry;
+  uintptr_t *l2table;
   int i;
   int j;
 
@@ -173,16 +172,16 @@ void arm_addrenv_destroy_region(uintptr_t **list, unsigned int listlen,
     {
       /* Has this page table been allocated? */
 
-      paddr = (uintptr_t)list[i];
-      if (paddr != 0)
+      l1entry = mmu_l1table_getentry(l1table, vaddr);
+      if (l1entry != 0)
         {
-          flags = enter_critical_section();
+          l1entry &= PTE_SMALL_PADDR_MASK;
 
           /* Get the virtual address corresponding to the physical page
            * address
            */
 
-          l2table = (uint32_t *)arm_pgvaddr(paddr);
+          l2table = (uintptr_t *)arm_pgvaddr(l1entry);
 
           /* Return the allocated pages to the page allocator unless we were
            * asked to keep the page data.  We keep the page data only for
@@ -195,7 +194,8 @@ void arm_addrenv_destroy_region(uintptr_t **list, unsigned int listlen,
             {
               for (j = 0; j < ENTRIES_PER_L2TABLE; j++)
                 {
-                  paddr = *l2table++;
+                  uintptr_t paddr = *l2table++;
+
                   if (paddr != 0)
                     {
                       paddr &= PTE_SMALL_PADDR_MASK;
@@ -204,11 +204,11 @@ void arm_addrenv_destroy_region(uintptr_t **list, unsigned int listlen,
                 }
             }
 
-          leave_critical_section(flags);
+          /* And free the L2 page table itself.
+           * The l1table will be entire free, so don't need to set 0,
+           */
 
-          /* And free the L2 page table itself */
-
-          mm_pgfree((uintptr_t)list[i], 1);
+          mm_pgfree((uintptr_t)l1entry, 1);
         }
     }
 }

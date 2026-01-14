@@ -1,6 +1,8 @@
 ############################################################################
 # arch/misoc/src/minerva/Toolchain.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -40,7 +42,7 @@ endif
 LDFLAGS += -nostdlib
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION += -g
+  ARCHOPTIMIZATION += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
 endif
 
 ARCHCFLAGS += -fno-common
@@ -57,6 +59,7 @@ CPP = $(CROSSDEV)gcc -E -P -x c
 LD = $(CROSSDEV)ld
 STRIP = $(CROSSDEV)strip --strip-unneeded
 AR = $(CROSSDEV)ar rcs
+UNAR = $(CROSSDEV)ar x
 NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
@@ -73,6 +76,19 @@ ifeq ($(CONFIG_LIBM_TOOLCHAIN),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a))
 endif
 
-ifeq ($(CONFIG_LIBSUPCXX),y)
+ifeq ($(CONFIG_LIBSUPCXX_TOOLCHAIN),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a))
 endif
+
+# Loadable module definitions
+
+CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden
+LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
+
+# ELF module definitions
+
+CELFFLAGS = $(CFLAGS) -fvisibility=hidden
+CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
+
+LDELFFLAGS = -r -e _start
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)elf$(DELIM)gnu-elf.ld)

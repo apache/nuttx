@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libnx/nxmu/nx_synch.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -95,7 +97,7 @@ int nx_synch(NXWINDOW hwnd, FAR void *arg)
     }
 #endif
 
-  /* Send the syncrhonization request message. */
+  /* Send the synchronization request message. */
 
   outmsg.msgid = NX_SVRMSG_SYNCH;
   outmsg.wnd   = (FAR struct nxbe_window_s *)hwnd;

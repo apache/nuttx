@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_gpio.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -263,12 +265,7 @@ static inline int sam_gpio_pinmask(gpio_pinset_t cfgset)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_SAMV7_ERASE_ENABLE) || \
-    !defined(CONFIG_SAMV7_JTAG_FULL_ENABLE)
 void sam_gpioinit(void);
-#else
-#  define sam_gpioinit()
-#endif
 
 /****************************************************************************
  * Name: sam_gpioirqinitialize

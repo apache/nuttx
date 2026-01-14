@@ -1,7 +1,6 @@
-/* http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/tgmath.h.html */
-
-/* Copyright (c) 2004 Stefan Farfeleder.
- * All rights reserved.
+/****************************************************************************
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: Copyright (c) 2004 Stefan Farfeleder.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,7 +24,9 @@
  * SUCH DAMAGE.
  *
  * $FreeBSD$
- */
+ ****************************************************************************/
+
+/* http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/tgmath.h.html */
 
 #ifndef _TGMATH_H_
 #define _TGMATH_H_

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/virtio/virtio-input.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,9 +37,9 @@
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/keyboard.h>
 #include <nuttx/input/kbd_codec.h>
+#include <nuttx/input/virtio-input-event-codes.h>
 
 #include "virtio-input.h"
-#include "virtio-input-event-codes.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -62,6 +64,7 @@ struct virtio_input_priv
   struct virtio_input_event     evt[VIRTIO_INPUT_EVT_NUM];
   size_t                        evtnum;         /* Input event number */
   struct work_s                 work;           /* Supports the interrupt handling "bottom half" */
+  spinlock_t                    lock;           /* Lock */
   virtio_send_event_handler     eventhandler;
 
   union
@@ -107,97 +110,6 @@ static int g_virtio_keyboard_idx = 0;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: virtio_input_translate_keycode
- ****************************************************************************/
-
-static uint32_t virtio_input_translate_keycode(uint16_t keycode)
-{
-  switch (keycode)
-    {
-      case KEY_DELETE:
-        return KEYCODE_FWDDEL;
-      case KEY_BACKSPACE:
-        return KEYCODE_BACKDEL;
-      case KEY_HOME:
-        return KEYCODE_HOME;
-      case KEY_END:
-        return KEYCODE_END;
-      case KEY_LEFT:
-        return KEYCODE_LEFT;
-      case KEY_RIGHT:
-        return KEYCODE_RIGHT;
-      case KEY_UP:
-        return KEYCODE_UP;
-      case KEY_DOWN:
-        return KEYCODE_DOWN;
-      case KEY_PAGEUP:
-        return KEYCODE_PAGEUP;
-      case KEY_PAGEDOWN:
-        return KEYCODE_PAGEDOWN;
-      case KEY_ENTER:
-        return KEYCODE_ENTER;
-      case KEY_CAPSLOCK:
-        return KEYCODE_CAPSLOCK;
-      case KEY_SCROLLLOCK:
-        return KEYCODE_SCROLLLOCK;
-      case KEY_NUMLOCK:
-        return KEYCODE_NUMLOCK;
-      case KEY_SYSRQ:
-        return KEYCODE_PRTSCRN;
-      case KEY_F1:
-        return KEYCODE_F1;
-      case KEY_F2:
-        return KEYCODE_F2;
-      case KEY_F3:
-        return KEYCODE_F3;
-      case KEY_F4:
-        return KEYCODE_F4;
-      case KEY_F5:
-        return KEYCODE_F5;
-      case KEY_F6:
-        return KEYCODE_F6;
-      case KEY_F7:
-        return KEYCODE_F7;
-      case KEY_F8:
-        return KEYCODE_F8;
-      case KEY_F9:
-        return KEYCODE_F9;
-      case KEY_F10:
-        return KEYCODE_F10;
-      case KEY_F11:
-        return KEYCODE_F11;
-      case KEY_F12:
-        return KEYCODE_F12;
-      case KEY_F13:
-        return KEYCODE_F13;
-      case KEY_F14:
-        return KEYCODE_F14;
-      case KEY_F15:
-        return KEYCODE_F15;
-      case KEY_F16:
-        return KEYCODE_F16;
-      case KEY_F17:
-        return KEYCODE_F17;
-      case KEY_F18:
-        return KEYCODE_F18;
-      case KEY_F19:
-        return KEYCODE_F19;
-      case KEY_F20:
-        return KEYCODE_F20;
-      case KEY_F21:
-        return KEYCODE_F21;
-      case KEY_F22:
-        return KEYCODE_F22;
-      case KEY_F23:
-        return KEYCODE_F23;
-      case KEY_F24:
-        return KEYCODE_F24;
-      default:
-        return keycode;
-    }
-}
-
-/****************************************************************************
  * Name: virtio_input_send_keyboard_event
  ****************************************************************************/
 
@@ -208,7 +120,7 @@ virtio_input_send_keyboard_event(FAR struct virtio_input_priv *priv,
   if (event->type == EV_KEY)
     {
       priv->keyboardsample.code =
-        virtio_input_translate_keycode(event->code);
+        keyboard_translate_virtio_code(event->code);
       priv->keyboardsample.type = event->value;
     }
   else if (event->type == EV_SYN && event->code == SYN_REPORT)
@@ -256,12 +168,20 @@ virtio_input_send_mouse_event(FAR struct virtio_input_priv *priv,
               {
                 priv->mousesample.buttons |= MOUSE_BUTTON_1;
               }
+            else
+              {
+                priv->mousesample.buttons &= ~MOUSE_BUTTON_1;
+              }
             break;
 
           case BTN_RIGHT:
             if (event->value)
               {
                 priv->mousesample.buttons |= MOUSE_BUTTON_2;
+              }
+            else
+              {
+                priv->mousesample.buttons &= ~MOUSE_BUTTON_2;
               }
             break;
 
@@ -270,13 +190,18 @@ virtio_input_send_mouse_event(FAR struct virtio_input_priv *priv,
               {
                 priv->mousesample.buttons |= MOUSE_BUTTON_3;
               }
+            else
+              {
+                priv->mousesample.buttons &= ~MOUSE_BUTTON_3;
+              }
             break;
         }
     }
   else if (event->type == EV_SYN && event->code == SYN_REPORT)
     {
       mouse_event(priv->mouselower.priv, &priv->mousesample);
-      memset(&priv->mousesample, 0, sizeof(priv->mousesample));
+      priv->mousesample.x = 0;
+      priv->mousesample.y = 0;
     }
 }
 
@@ -331,19 +256,19 @@ static void virtio_input_worker(FAR void *arg)
   uint32_t len;
 
   while ((evt = (FAR struct virtio_input_event *)
-         virtqueue_get_buffer(vq, &len, NULL)) != NULL)
+         virtqueue_get_buffer_lock(vq, &len, NULL, &priv->lock)) != NULL)
     {
-      vrtinfo("virtio_input_worker (type,code,value) - (%d,%d,%d).\n",
+      vrtinfo("virtio_input_worker (type,code,value)-(%d,%d,%" PRIu32 ").\n",
               evt->type, evt->code, evt->value);
 
       priv->eventhandler(priv, evt);
 
       vb.buf = evt;
       vb.len = len;
-      virtqueue_add_buffer(vq, &vb, 0, 1, vb.buf);
+      virtqueue_add_buffer_lock(vq, &vb, 0, 1, vb.buf, &priv->lock);
     }
 
-  virtqueue_kick(vq);
+  virtqueue_kick_lock(vq, &priv->lock);
 }
 
 /****************************************************************************
@@ -378,10 +303,10 @@ static void virtio_input_fill_event(FAR struct virtio_input_priv *priv)
     {
       vb.buf = &priv->evt[i];
       vb.len = sizeof(struct virtio_input_event);
-      virtqueue_add_buffer(vq, &vb, 0, 1, vb.buf);
+      virtqueue_add_buffer_lock(vq, &vb, 0, 1, vb.buf, &priv->lock);
     }
 
-    virtqueue_kick(vq);
+  virtqueue_kick_lock(vq, &priv->lock);
 }
 
 /****************************************************************************
@@ -410,7 +335,7 @@ static void virtio_input_register(FAR struct virtio_input_priv *priv)
   if (virtio_input_select_cfg(priv, VIRTIO_INPUT_CFG_EV_BITS, EV_ABS))
     {
       priv->touchlower.maxpoint = 1;
-      snprintf(priv->name, NAME_MAX, "/dev/virtinput%d",
+      snprintf(priv->name, NAME_MAX, "/dev/input%d",
                g_virtio_touch_idx++);
       touch_register(&(priv->touchlower),
                      priv->name,
@@ -419,7 +344,7 @@ static void virtio_input_register(FAR struct virtio_input_priv *priv)
     }
   else if (virtio_input_select_cfg(priv, VIRTIO_INPUT_CFG_EV_BITS, EV_REL))
     {
-      snprintf(priv->name, NAME_MAX, "/dev/virtmouse%d",
+      snprintf(priv->name, NAME_MAX, "/dev/mouse%d",
                g_virtio_mouse_idx++);
       mouse_register(&(priv->mouselower),
                      priv->name,
@@ -428,7 +353,7 @@ static void virtio_input_register(FAR struct virtio_input_priv *priv)
     }
   else if (virtio_input_select_cfg(priv, VIRTIO_INPUT_CFG_EV_BITS, EV_KEY))
     {
-      snprintf(priv->name, NAME_MAX, "/dev/virtkbd%d",
+      snprintf(priv->name, NAME_MAX, "/dev/kbd%d",
                g_virtio_keyboard_idx++);
       keyboard_register(&(priv->keyboardlower),
                         priv->name,
@@ -455,6 +380,7 @@ static int virtio_input_probe(FAR struct virtio_device *vdev)
       return -ENOMEM;
     }
 
+  spin_lock_init(&priv->lock);
   priv->vdev = vdev;
   vdev->priv = priv;
 
@@ -467,7 +393,7 @@ static int virtio_input_probe(FAR struct virtio_device *vdev)
   vqnames[VIRTIO_INPUT_EVENT] = "virtio_input_event";
   callbacks[VIRTIO_INPUT_EVENT] = virtio_input_recv_events;
   ret = virtio_create_virtqueues(vdev, 0, VIRTIO_INPUT_NUM, vqnames,
-                                 callbacks);
+                                 callbacks, NULL);
   if (ret < 0)
     {
       vrterr("virtio_device_create_virtqueue failed, ret=%d\n", ret);

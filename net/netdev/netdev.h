@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/netdev/netdev.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -308,8 +310,9 @@ FAR struct net_driver_s *netdev_default(void);
  *   data is available.
  *
  * Input Parameters:
- *   lipaddr - The local address bound to the socket
- *   ripaddr - The remote address to send the data
+ *   lipaddr  - The local address bound to the socket
+ *   ripaddr  - The remote address to send the data
+ *   polltype - The type of poll to be triggered for the device.
  *
  * Returned Value:
  *  None
@@ -317,7 +320,8 @@ FAR struct net_driver_s *netdev_default(void);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr);
+void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr,
+                          uint32_t polltype);
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
@@ -328,8 +332,9 @@ void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr);
  *   data is available.
  *
  * Input Parameters:
- *   lipaddr - The local address bound to the socket
- *   ripaddr - The remote address to send the data
+ *   lipaddr  - The local address bound to the socket
+ *   ripaddr  - The remote address to send the data
+ *   polltype - The type of poll to be triggered for the device.
  *
  * Returned Value:
  *  None
@@ -338,7 +343,8 @@ void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr);
 
 #ifdef CONFIG_NET_IPv6
 void netdev_ipv6_txnotify(FAR const net_ipv6addr_t lipaddr,
-                          FAR const net_ipv6addr_t ripaddr);
+                          FAR const net_ipv6addr_t ripaddr,
+                          uint32_t polltype);
 #endif /* CONFIG_NET_IPv6 */
 
 /****************************************************************************
@@ -350,14 +356,15 @@ void netdev_ipv6_txnotify(FAR const net_ipv6addr_t lipaddr,
  *   packet will be routed.
  *
  * Input Parameters:
- *   dev - The network device driver state structure.
+ *   dev      - The network device driver state structure.
+ *   polltype - The type of poll to be triggered for the device.
  *
  * Returned Value:
  *  None
  *
  ****************************************************************************/
 
-void netdev_txnotify_dev(FAR struct net_driver_s *dev);
+void netdev_txnotify_dev(FAR struct net_driver_s *dev, uint32_t polltype);
 
 /****************************************************************************
  * Name: netdev_count
@@ -523,6 +530,34 @@ void netdev_ipv6_removemcastmac(FAR struct net_driver_s *dev,
 #  define netdev_ipv6_addmcastmac(dev,addr)
 #  define netdev_ipv6_removemcastmac(dev,addr)
 #endif
+
+#ifdef CONFIG_NETDEV_RSS
+void netdev_notify_recvcpu(FAR struct net_driver_s *dev,
+                           int cpu, uint8_t domain,
+                           FAR const void *src_addr, uint16_t src_port,
+                           FAR const void *dst_addr, uint16_t dst_port);
+#endif
+
+/****************************************************************************
+ * Name: netdev_list_lock
+ *
+ * Description:
+ *   Lock the network device list.  This is used to protect the network
+ *   device list from concurrent access.
+ *
+ ****************************************************************************/
+
+void netdev_list_lock(void);
+
+/****************************************************************************
+ * Name: netdev_list_unlock
+ *
+ * Description:
+ *   Unlock the network device list.
+ *
+ ****************************************************************************/
+
+void netdev_list_unlock(void);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -1,6 +1,0 @@
-/risc-v
--,arty_a7:.+
-
-# Boards build by CMake
-CMake,rv-virt:smp
-CMake,rv-virt:smp64

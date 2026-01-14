@@ -20,7 +20,7 @@ config LITEX_COHERENT_DMA
 
 config LITEX_FDT_MEMORY_ADDRESS
 	hex "Location of the FDT in memory"
-	default 0x41ec0000
+	default 0x40EF0000
 
 menu "LITEX Peripheral Support"
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/litex/litex_sdio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -595,7 +597,7 @@ static void litex_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
   switch (rate)
     {
-      /* Return early - SDPHY doesnt support clock disabling */
+      /* Return early - SDPHY does not support clock disabling */
 
       default:
       case CLOCK_SDIO_DISABLED:
@@ -953,7 +955,7 @@ static int litex_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
       if (ev & LITEX_EV_CMDDONE)
         break;
 
-      nxsig_usleep(10);
+      nxsched_usleep(10);
     }
 
   if (ev & LITEX_EV_WRERROR)

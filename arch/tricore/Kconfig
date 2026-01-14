@@ -25,6 +25,7 @@ endchoice # Tricore Toolchain Selection
 config ARCH_TC3XX
 	bool
 	select ARCH_HAVE_TESTSET
+	select ARCH_HAVE_IRQTRIGGER
 	default n
 
 config ARCH_FAMILY
@@ -33,17 +34,21 @@ config ARCH_FAMILY
 
 config ARCH_CHIP
 	string
-	default "tc3xx"		if ARCH_CHIP_TC397
+	default "tc397"		if ARCH_CHIP_TC397
 
 config ARCH_CHIP_TC397
 	bool "AURIX Family TC397"
 	select ARCH_TC3XX
 	select ALARM_ARCH
 	select ONESHOT
+	select ONESHOT_COUNT
 	---help---
 		AURIX TC39x family: TC397
 
 if ARCH_TC3XX
 source "arch/tricore/src/tc3xx/Kconfig"
+endif
+if ARCH_TC397
+source "arch/tricore/src/tc397/Kconfig"
 endif
 endif # ARCH_TRICORE

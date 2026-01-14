@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/ceva/src/xm6/fork.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -71,7 +73,7 @@
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
  *      - Configuration of environment variables
- *      - Setup the intput parameters for the task.
+ *      - Setup the input parameters for the task.
  *      - Initialization of the TCB (including call to up_initial_state()
  *   4) ceva_fork() provides any additional operating context. ceva_fork must:
  *      - Allocate and initialize the stack
@@ -80,7 +82,7 @@
  *   5) ceva_fork() then calls nxtask_forkstart()
  *   6) nxtask_forkstart() then executes the child thread.
  *
- * Input Paremeters:
+ * Input Parameters:
  *   None
  *
  * Return:

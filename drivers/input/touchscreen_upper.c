@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/input/touchscreen_upper.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,7 +40,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/list.h>
-#include <nuttx/mm/circbuf.h>
+#include <nuttx/circbuf.h>
 
 /****************************************************************************
  * Private Types
@@ -61,6 +63,7 @@ struct touch_upperhalf_s
   mutex_t          lock;               /* Manages exclusive access to this structure */
   struct list_node head;               /* Opened file buffer chain header node */
   FAR struct touch_lowerhalf_s *lower; /* A pointer of lower half instance */
+  FAR struct touch_openpriv_s  *grab;  /* A pointer of grab file */
 };
 
 /****************************************************************************
@@ -77,6 +80,10 @@ static int     touch_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
 static int     touch_poll(FAR struct file *filep, FAR struct pollfd *fds,
                           bool setup);
+
+static void    touch_event_notify(FAR struct touch_upperhalf_s *upper,
+                                  FAR struct touch_openpriv_s  *openpriv,
+                                  FAR struct touch_sample_s *sample);
 
 /****************************************************************************
  * Private Data
@@ -143,6 +150,11 @@ static int touch_open(FAR struct file *filep)
 
   filep->f_priv = openpriv;
   nxmutex_unlock(&upper->lock);
+  if (lower->open)
+    {
+      return lower->open(lower);
+    }
+
   return ret;
 }
 
@@ -155,12 +167,18 @@ static int touch_close(FAR struct file *filep)
   FAR struct touch_openpriv_s  *openpriv = filep->f_priv;
   FAR struct inode             *inode    = filep->f_inode;
   FAR struct touch_upperhalf_s *upper    = inode->i_private;
+  FAR struct touch_lowerhalf_s *lower    = upper->lower;
   int ret;
 
   ret = nxmutex_lock(&upper->lock);
   if (ret < 0)
     {
       return ret;
+    }
+
+  if (upper->grab == openpriv)
+    {
+      upper->grab = NULL;
     }
 
   list_delete(&openpriv->node);
@@ -170,6 +188,11 @@ static int touch_close(FAR struct file *filep)
   kmm_free(openpriv);
 
   nxmutex_unlock(&upper->lock);
+  if (lower->close)
+    {
+      return lower->close(lower);
+    }
+
   return ret;
 }
 
@@ -250,9 +273,10 @@ out:
 
 static int touch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode             *inode = filep->f_inode;
-  FAR struct touch_upperhalf_s *upper = inode->i_private;
-  FAR struct touch_lowerhalf_s *lower = upper->lower;
+  FAR struct touch_openpriv_s  *openpriv = filep->f_priv;
+  FAR struct inode             *inode    = filep->f_inode;
+  FAR struct touch_upperhalf_s *upper    = inode->i_private;
+  FAR struct touch_lowerhalf_s *lower    = upper->lower;
   int ret;
 
   ret = nxmutex_lock(&upper->lock);
@@ -261,13 +285,48 @@ static int touch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       return ret;
     }
 
-  if (lower->control)
+  switch (cmd)
     {
-      ret = lower->control(lower, cmd, arg);
-    }
-  else
-    {
-      ret = -ENOTTY;
+      case TSIOC_GRAB:
+        {
+          int enable = (int)arg;
+          ret = OK;
+          if (enable)
+            {
+              if (upper->grab != NULL)
+                {
+                  ret = -EBUSY;
+                }
+              else
+                {
+                  upper->grab = openpriv;
+                }
+            }
+          else
+            {
+              if (upper->grab != openpriv)
+                {
+                  ret = -EINVAL;
+                }
+              else
+                {
+                  upper->grab = NULL;
+                }
+            }
+        }
+        break;
+      default:
+        {
+          if (lower->control)
+            {
+              ret = lower->control(lower, cmd, arg);
+            }
+          else
+            {
+              ret = -ENOTTY;
+            }
+        }
+        break;
     }
 
   nxmutex_unlock(&upper->lock);
@@ -278,7 +337,8 @@ static int touch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: touch_poll
  ****************************************************************************/
 
-static int touch_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
+static int touch_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                      bool setup)
 {
   FAR struct touch_openpriv_s *openpriv = filep->f_priv;
   pollevent_t eventset = 0;
@@ -322,6 +382,52 @@ errout:
 }
 
 /****************************************************************************
+ * Name: touch_event_notify
+ ****************************************************************************/
+
+static void touch_event_notify(FAR struct touch_upperhalf_s *upper,
+                               FAR struct touch_openpriv_s  *openpriv,
+                               FAR struct touch_sample_s *sample)
+{
+  FAR struct touch_lowerhalf_s *lower = upper->lower;
+  FAR struct touch_point_s *point = sample->point;
+  int n;
+
+  for (n = 0; lower->flags && n < sample->npoints; n++)
+    {
+      if (lower->flags & TOUCH_FLAG_SWAPXY)
+        {
+          int16_t p = point[n].x;
+          point[n].x = point[n].y;
+          point[n].y = p;
+        }
+
+      if (lower->flags & TOUCH_FLAG_MIRRORX)
+        {
+          point[n].x = upper->lower->xres - point[n].x;
+        }
+
+      if (lower->flags & TOUCH_FLAG_MIRRORY)
+        {
+          point[n].y = upper->lower->yres - point[n].y;
+        }
+    }
+
+  nxmutex_lock(&openpriv->lock);
+  circbuf_overwrite(&openpriv->circbuf, sample,
+                    SIZEOF_TOUCH_SAMPLE_S(sample->npoints));
+
+  nxsem_get_value(&openpriv->waitsem, &n);
+  if (n < 1)
+    {
+      nxsem_post(&openpriv->waitsem);
+    }
+
+  poll_notify(&openpriv->fds, 1, POLLIN);
+  nxmutex_unlock(&openpriv->lock);
+}
+
+/****************************************************************************
  * Public Function
  ****************************************************************************/
 
@@ -329,29 +435,27 @@ errout:
  * Name: touch_event
  ****************************************************************************/
 
-void touch_event(FAR void *priv, FAR const struct touch_sample_s *sample)
+void touch_event(FAR void *priv, FAR struct touch_sample_s *sample)
 {
   FAR struct touch_upperhalf_s *upper = priv;
   FAR struct touch_openpriv_s  *openpriv;
-  int semcount;
 
   if (nxmutex_lock(&upper->lock) < 0)
     {
       return;
     }
 
-  list_for_every_entry(&upper->head, openpriv, struct touch_openpriv_s, node)
+  if (upper->grab)
     {
-      circbuf_overwrite(&openpriv->circbuf, sample,
-                        SIZEOF_TOUCH_SAMPLE_S(sample->npoints));
-
-      nxsem_get_value(&openpriv->waitsem, &semcount);
-      if (semcount < 1)
+      touch_event_notify(upper, upper->grab, sample);
+    }
+  else
+    {
+      list_for_every_entry(&upper->head, openpriv,
+                           struct touch_openpriv_s, node)
         {
-          nxsem_post(&openpriv->waitsem);
+          touch_event_notify(upper, openpriv, sample);
         }
-
-      poll_notify(&openpriv->fds, 1, POLLIN);
     }
 
   nxmutex_unlock(&upper->lock);

@@ -1,14 +1,10 @@
 /****************************************************************************
  * arch/arm/src/tiva/hardware/cc13x0/cc13x0_ddi0_osc.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *
- * Technical content derives from a TI header file that has a
- * compatible BSD license:
- *
- *   Copyright (c) 2015-2017, Texas Instruments Incorporated
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2018 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2015-2017, Texas Instruments Incorporated
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -135,7 +131,7 @@
 #  define DDI0_OSC_CTL0_ACLK_REF_SRC_RCOSCLF        (2 << DDI0_OSC_CTL0_ACLK_REF_SRC_SEL_SHIFT) /* RCOSC_LF (32kHz) */
 #  define DDI0_OSC_CTL0_ACLK_REF_SRC_XOSCLF         (3 << DDI0_OSC_CTL0_ACLK_REF_SRC_SEL_SHIFT) /*  XOSC_LF (32.768kHz) */
 
-#define DDI0_OSC_CTL0_ACLK_TDC_SRC_SEL_SHIFT        (7)       /* Bits 7-8: ource select for aclk_tdc */
+#define DDI0_OSC_CTL0_ACLK_TDC_SRC_SEL_SHIFT        (7)       /* Bits 7-8:  Source select for aclk_tdc */
 #define DDI0_OSC_CTL0_ACLK_TDC_SRC_SEL_MASK         (3 << DDI0_OSC_CTL0_ACLK_TDC_SRC_SEL_SHIFT)
 #  define DDI0_OSC_CTL0_ACLK_TDC_SRC_RCOSCHF48      (0 << DDI0_OSC_CTL0_ACLK_TDC_SRC_SEL_SHIFT) /* RCOSC_HF (48MHz) */
 #  define DDI0_OSC_CTL0_ACLK_TDC_SRC_RCOSCHF24      (1 << DDI0_OSC_CTL0_ACLK_TDC_SRC_SEL_SHIFT) /* RCOSC_HF (24MHz) */

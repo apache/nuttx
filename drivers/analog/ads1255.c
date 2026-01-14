@@ -1,14 +1,11 @@
 /****************************************************************************
  * drivers/analog/ads1255.c
  *
- *   Copyright (C) 2010, 2016 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
- *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
- *           Gregory Nutt <gnutt@nuttx.org>
- *
- * This file is a part of NuttX:
- *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2010, 2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2011 Li Zhuoyi. All rights reserved.
+ * SPDX-FileContributor: Li Zhuoyi <lzyy.cn@gmail.com>
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -281,7 +278,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   spi = priv->spi;
 
   adc_lock(spi);
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   SPI_SELECT(spi, priv->devno, true);
   SPI_SEND(spi, ADS125X_WREG + 0x03);  /* WRITE SPS REG */
@@ -332,7 +329,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
       SPI_SEND(spi, priv->mux[0]);
       SPI_SEND(spi, priv->pga);            /* REG2 ADCON PGA=2 */
       SPI_SEND(spi, getspsreg(priv->sps));
-      nxsig_usleep(1000);
+      nxsched_usleep(1000);
       SPI_SEND(spi, ADS125X_SELFCAL);
       SPI_SELECT(spi, priv->devno, false);
 
@@ -457,7 +454,7 @@ static void adc_worker(FAR void *arg)
       /* Perform the data received callback */
 
       DEBUGASSERT(priv->cb->au_receive != NULL);
-      priv->cb->au_receive(&g_adcdev, priv->channel, *(int32_t *)buf);
+      priv->cb->au_receive(&g_adcdev, priv->channel, *(FAR int32_t *)buf);
     }
 
   /* Re-enable ADC interrupts */
@@ -473,7 +470,7 @@ static void adc_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-static int adc_interrupt(int irq, void *context, FAR void *arg)
+static int adc_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct ads1255_dev_s *priv =
     (FAR struct ads1255_dev_s *)g_adcdev.ad_priv;
@@ -484,7 +481,7 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
 
   up_disable_irq(priv->irq);
 
-  /* Schedule the ADC work for the worker thread.  Whent he sample has been
+  /* Schedule the ADC work for the worker thread.  When the sample has been
    * processed, the ADC interrupt will be re-enabled.
    */
 
@@ -497,7 +494,7 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ads1255initialize
+ * Name: ads1255_initialize
  *
  * Description:
  *   Initialize the selected adc port
@@ -510,8 +507,8 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *up_ads1255initialize(FAR struct spi_dev_s *spi,
-                                           unsigned int devno)
+FAR struct adc_dev_s *ads1255_initialize(FAR struct spi_dev_s *spi,
+                                         unsigned int devno)
 {
   FAR struct ads1255_dev_s *priv =
     (FAR struct ads1255_dev_s *)g_adcdev.ad_priv;

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/video/max7456.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -72,11 +74,12 @@
 #include <debug.h>
 #include <string.h>
 #include <limits.h>
-#include <nuttx/mutex.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/bits.h>
 #include <nuttx/compiler.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/video/max7456.h>
@@ -1283,7 +1286,7 @@ static ssize_t mx7_write_fb(FAR struct file *filep, FAR const char *buf,
  *   We use the approach you see here so that we don't have to have one
  *   distinct function (and a separate file_operations structure) for each of
  *   the many interfaces we're likely to create for interacting with this
- *   chip in its various useful ways. This schema also lets us re-use the
+ *   chip in its various useful ways. This schema also lets us reuse the
  *   interface code internally (see the test-pattern generator at startup.)
  *
  *   In general, any function we call from here uses the combination of
@@ -1526,7 +1529,7 @@ static ssize_t mx7_debug_write(FAR struct file *filep, FAR const char *buf,
  *   path    - The full path to the interface to register. E.g., "/dev/osd0"
  *   name    - Entry underneath @path (making the latter a directory)
  *   fops    - File operations for the interface
- *   mode    - Access permisisons
+ *   mode    - Access permissions
  *   private - Opaque pointer to forward to the file operation handlers
  *
  * Returned value:

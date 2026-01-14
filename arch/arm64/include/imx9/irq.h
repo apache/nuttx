@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/include/imx9/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,6 +35,8 @@
 
 #if defined(CONFIG_ARCH_CHIP_IMX93)
 #  include <arch/imx9/imx93_irq.h>
+#elif defined(CONFIG_ARCH_CHIP_IMX95)
+#  include <arch/imx9/imx95_irq.h>
 #else
 #  error "Unrecognized i.MX9 architecture"
 #endif

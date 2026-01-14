@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_emac.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -64,6 +66,7 @@
 #include "sam_gpio.h"
 #include "sam_periphclks.h"
 #include "sam_ethernet.h"
+#include "sam_chipid.h"
 
 #include <arch/board/board.h>
 
@@ -910,7 +913,7 @@ static uint8_t g_emac_nqueues = EMAC_NQUEUES_REVA; /* Assume Rev A */
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 
@@ -4753,7 +4756,6 @@ int sam_emac_initialize(int intf)
 {
   struct sam_emac_s *priv;
   const struct sam_emacattr_s *attr;
-  uint32_t regval;
   uint8_t *pktbuf;
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
   uint8_t phytype;
@@ -4768,12 +4770,13 @@ int sam_emac_initialize(int intf)
    * If both emacs are enabled, this code will be run twice, which
    * should not be a problem as the result will be the same each time
    * it is run.
+   *
+   * PIC32CZ CA70 family is always a revision B, therefore it has 6 queues.
    */
 
-  regval = getreg32(SAM_CHIPID_CIDR);
-  if (((regval & CHIPID_CIDR_VERSION_MASK) >> CHIPID_CIDR_VERSION_SHIFT) > 0)
+  if (sam_has_revb_periphs())
     {
-      g_emac_nqueues = EMAC_NQUEUES_REVB;  /* Change to Rev. B with 6 queues */
+      g_emac_nqueues = EMAC_NQUEUES_REVB;
     }
 
 #if defined(CONFIG_SAMV7_EMAC0)

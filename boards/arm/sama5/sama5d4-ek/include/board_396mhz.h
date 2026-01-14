@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/sama5/sama5d4-ek/include/board_396mhz.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -56,7 +58,7 @@
 
 /* PLLA configuration.
  *
- *   Multipler = 66: PLLACK = 66 * 12MHz = 792MHz
+ *   Multiplier = 66: PLLACK = 66 * 12MHz = 792MHz
  */
 
 #define BOARD_CKGR_PLLAR_COUNT     (63 << PMC_CKGR_PLLAR_COUNT_SHIFT)

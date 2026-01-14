@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/olimex-stm32-e407/src/stm32_mrf24j40.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -211,7 +213,7 @@ static int stm32_mrf24j40_devsetup(struct stm32_priv_s *priv)
 
 #ifdef CONFIG_IEEE802154_NETDEV
   /* Use the IEEE802.15.4 MAC interface instance to create a 6LoWPAN
-   * network interface by wrapping the MAC intrface instance in a
+   * network interface by wrapping the MAC interface instance in a
    * network device driver via mac802154dev_register().
    */
 

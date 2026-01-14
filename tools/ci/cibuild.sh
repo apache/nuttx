@@ -2,6 +2,8 @@
 ############################################################################
 # tools/ci/cibuild.sh
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -18,9 +20,9 @@
 # under the License.
 #
 ############################################################################
+
 set -e
 set -o xtrace
-
 
 CID=$(cd "$(dirname "$0")" && pwd)
 CIWORKSPACE=$(cd "${CID}"/../../../ && pwd -P)
@@ -29,6 +31,7 @@ nuttx=${CIWORKSPACE}/nuttx
 apps=${CIWORKSPACE}/apps
 
 os=$(uname -s)
+osarch=$(uname -m)
 if [ -f /etc/os-release ]; then
   osname=$(grep "^ID=" /etc/os-release | cut -d'=' -f2 | tr -d '"')
 else
@@ -67,7 +70,11 @@ function install_tools {
       to_do "freebsd"
       ;;
     Darwin)
-      "${CIPLAT}"/darwin.sh
+      if [ "X$osarch" == "Xx86_64" ]; then
+        "${CIPLAT}"/darwin.sh
+      else
+        "${CIPLAT}"/darwin_arm64.sh
+      fi
       ;;
     Linux)
       "${CIPLAT}"/linux.sh

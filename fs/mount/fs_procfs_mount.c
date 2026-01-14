@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/mount/fs_procfs_mount.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,6 +48,7 @@
 #include <nuttx/fs/procfs.h>
 
 #include "mount/mount.h"
+#include "fs_heap.h"
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
 #if !defined(CONFIG_FS_PROCFS_EXCLUDE_MOUNT) || \
@@ -101,30 +104,30 @@ struct mount_info_s
 /* Helpers */
 
 static void    mount_sprintf(FAR struct mount_info_s *info,
-                 FAR const char *fmt, ...) printf_like(2, 3);
+                             FAR const char *fmt, ...) printf_like(2, 3);
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MOUNT
 static int     mount_entry(FAR const char *mountpoint,
-                 FAR struct statfs *statbuf, FAR void *arg);
+                           FAR struct statfs *statbuf, FAR void *arg);
 #endif
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_BLOCKS
 static int     blocks_entry(FAR const char *mountpoint,
-                 FAR struct statfs *statbuf, FAR void *arg);
+                            FAR struct statfs *statbuf, FAR void *arg);
 #endif
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_USAGE
 static int     usage_entry(FAR const char *mountpoint,
-                 FAR struct statfs *statbuf, FAR void *arg);
+                           FAR struct statfs *statbuf, FAR void *arg);
 #endif
 
 /* File system methods */
 
 static int     mount_open(FAR struct file *filep, FAR const char *relpath,
-                 int oflags, mode_t mode);
+                          int oflags, mode_t mode);
 static int     mount_close(FAR struct file *filep);
 static ssize_t mount_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
+                          size_t buflen);
 
 static int     mount_dup(FAR const struct file *oldp,
-                 FAR struct file *newp);
+                         FAR struct file *newp);
 
 static int     mount_stat(FAR const char *relpath, FAR struct stat *buf);
 
@@ -409,7 +412,7 @@ static int mount_open(FAR struct file *filep, FAR const char *relpath,
   /* Allocate a container to hold the task and node selection */
 
   procfile = (FAR struct mount_file_s *)
-    kmm_zalloc(sizeof(struct mount_file_s));
+    fs_heap_zalloc(sizeof(struct mount_file_s));
   if (!procfile)
     {
       ferr("ERROR: Failed to allocate file container\n");
@@ -441,7 +444,7 @@ static int mount_close(FAR struct file *filep)
 
   /* Release the file container structure */
 
-  kmm_free(procfile);
+  fs_heap_free(procfile);
   filep->f_priv = NULL;
   return OK;
 }
@@ -539,7 +542,7 @@ static int mount_dup(FAR const struct file *oldp, FAR struct file *newp)
   /* Allocate a new container to hold the task and node selection */
 
   newfile = (FAR struct mount_file_s *)
-    kmm_malloc(sizeof(struct mount_file_s));
+    fs_heap_malloc(sizeof(struct mount_file_s));
   if (!newfile)
     {
       ferr("ERROR: Failed to allocate file container\n");
@@ -563,7 +566,7 @@ static int mount_dup(FAR const struct file *oldp, FAR struct file *newp)
  *
  ****************************************************************************/
 
-static int mount_stat(const char *relpath, struct stat *buf)
+static int mount_stat(FAR const char *relpath, FAR struct stat *buf)
 {
   memset(buf, 0, sizeof(struct stat));
   buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;

@@ -1,9 +1,7 @@
 /****************************************************************************
  * drivers/can/sja1000.c
  *
- * SJA1000 CAN driver based on esp32c3_twai.c
- *
- * License header retained from original source.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -42,6 +40,7 @@
 #include <nuttx/can/can.h>
 #include <nuttx/mutex.h>
 #include <nuttx/signal.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/spinlock.h>
 
 #include <nuttx/can/sja1000.h>
@@ -229,11 +228,7 @@ static void sja1000_reset(struct can_dev_s *dev)
 
   caninfo("SJA1000 Device %" PRIu8 "\n", port);
 
-#ifdef CONFIG_ARCH_HAVE_MULTICPU
   flags = spin_lock_irqsave(&priv->lock);
-#else
-  flags = enter_critical_section();
-#endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
   /* Disable the SJA1000 and stop ongoing transmissions */
 
@@ -262,11 +257,6 @@ static void sja1000_reset(struct can_dev_s *dev)
   ret = sja1000_baud_rate(priv, config->bitrate, config->clk_freq,
                           config->sjw, config->samplep, 0);
 
-  if (ret != OK)
-    {
-      canerr("ERROR: Failed to set bit timing: %d\n", ret);
-    }
-
   /* Restart the SJA1000 */
 
   if (config->loopback)
@@ -289,11 +279,12 @@ static void sja1000_reset(struct can_dev_s *dev)
   sja1000_putreg(priv,
       SJA1000_CMD_REG, SJA1000_ABORT_TX_M | SJA1000_CLR_OVERRUN_M);
 
-#ifdef CONFIG_ARCH_HAVE_MULTICPU
   spin_unlock_irqrestore(&priv->lock, flags);
-#else
-  leave_critical_section(flags);
-#endif /* CONFIG_ARCH_HAVE_MULTICPU */
+
+  if (ret != OK)
+    {
+      canerr("ERROR: sja1000_baud_rate Failed to set bit timing: %d\n", ret);
+    }
 }
 
 /****************************************************************************
@@ -322,11 +313,7 @@ static int sja1000_setup(struct can_dev_s *dev)
 
   caninfo("SJA1000 (%" PRIu8 ")\n", port);
 
-#ifdef CONFIG_ARCH_HAVE_MULTICPU
   flags = spin_lock_irqsave(&priv->lock);
-#else
-  flags = enter_critical_section();
-#endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
   sja1000_putreg(priv, SJA1000_INT_ENA_REG, SJA1000_DEFAULT_INTERRUPTS);
 
@@ -338,17 +325,13 @@ static int sja1000_setup(struct can_dev_s *dev)
 
   ret = config->attach(
       config, (sja1000_handler_t)sja1000_interrupt, (FAR void *)dev);
+
+  spin_unlock_irqrestore(&priv->lock, flags);
+
   if (ret < 0)
     {
       canerr("ERROR: Failed to attach to IRQ Handler!\n");
-      return ret;
     }
-
-#ifdef CONFIG_ARCH_HAVE_MULTICPU
-  spin_unlock_irqrestore(&priv->lock, flags);
-#else
-  leave_critical_section(flags);
-#endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
   return ret;
 }
@@ -415,11 +398,7 @@ static void sja1000_rxint(struct can_dev_s *dev, bool enable)
    * so we have to protect this code section.
    */
 
-#ifdef CONFIG_ARCH_HAVE_MULTICPU
   flags = spin_lock_irqsave(&priv->lock);
-#else
-  flags = enter_critical_section();
-#endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
   regval = sja1000_getreg(priv, SJA1000_INT_ENA_REG);
   if (enable)
@@ -432,11 +411,7 @@ static void sja1000_rxint(struct can_dev_s *dev, bool enable)
     }
 
   sja1000_putreg(priv, SJA1000_INT_ENA_REG, regval);
-#ifdef CONFIG_ARCH_HAVE_MULTICPU
   spin_unlock_irqrestore(&priv->lock, flags);
-#else
-  leave_critical_section(flags);
-#endif /* CONFIG_ARCH_HAVE_MULTICPU */
 }
 
 /****************************************************************************
@@ -475,22 +450,14 @@ static void sja1000_txint(struct can_dev_s *dev, bool enable)
        * have to protect this code section.
        */
 
-#ifdef CONFIG_ARCH_HAVE_MULTICPU
       flags = spin_lock_irqsave(&priv->lock);
-#else
-      flags = enter_critical_section();
-#endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
       /* Disable all TX interrupts */
 
       regval = sja1000_getreg(priv, SJA1000_INT_ENA_REG);
       regval &= ~(SJA1000_TX_INT_ENA_M);
       sja1000_putreg(priv, SJA1000_INT_ENA_REG, regval);
-#ifdef CONFIG_ARCH_HAVE_MULTICPU
       spin_unlock_irqrestore(&priv->lock, flags);
-#else
-      leave_critical_section(flags);
-#endif /* CONFIG_ARCH_HAVE_MULTICPU */
     }
 
   cantrace("Exiting.\n");
@@ -641,11 +608,7 @@ static int sja1000_send(struct can_dev_s *dev, struct can_msg_s *msg)
       frame_info |= (1 << 6);
     }
 
-#ifdef CONFIG_ARCH_HAVE_MULTICPU
   flags = spin_lock_irqsave(&priv->lock);
-#else
-  flags = enter_critical_section();
-#endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
   /* Make sure that TX interrupts are enabled BEFORE sending the
    * message.
@@ -714,11 +677,7 @@ static int sja1000_send(struct can_dev_s *dev, struct can_msg_s *msg)
       sja1000_putreg(priv, SJA1000_CMD_REG, SJA1000_TX_REQ_M);
     }
 
-#ifdef CONFIG_ARCH_HAVE_MULTICPU
   spin_unlock_irqrestore(&priv->lock, flags);
-#else
-  leave_critical_section(flags);
-#endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
   return ret;
 }
@@ -917,8 +876,6 @@ static void sja1000_set_acc_filter(struct sja1000_dev_s *priv,
                                    bool single_filter)
 {
   uint32_t regval;
-  uint32_t code_swapped = __builtin_bswap32(code);
-  uint32_t mask_swapped = __builtin_bswap32(mask);
 
   regval = sja1000_getreg(priv, SJA1000_MODE_REG);
   if (single_filter)
@@ -935,9 +892,9 @@ static void sja1000_set_acc_filter(struct sja1000_dev_s *priv,
   for (int i = 0; i < 4; i++)
     {
       sja1000_putreg(priv, (SJA1000_DATA_0_REG + i),
-                   ((code_swapped >> (i * 8)) & 0xff));
+                     ((code >> ((3 - i) * 8)) & 0xff));
       sja1000_putreg(priv, (SJA1000_DATA_4_REG + i),
-                   ((mask_swapped >> (i * 8)) & 0xff));
+                     ((mask >> ((3 - i) * 8)) & 0xff));
     }
 }
 
@@ -1127,7 +1084,6 @@ FAR struct can_dev_s *sja1000_instantiate(FAR struct sja1000_dev_s *priv)
 {
   struct sja1000_config_s *config = priv->config;
   FAR struct can_dev_s *dev;
-  irqstate_t flags;
 
   DEBUGASSERT(dev);
   DEBUGASSERT(priv);
@@ -1144,24 +1100,10 @@ FAR struct can_dev_s *sja1000_instantiate(FAR struct sja1000_dev_s *priv)
       return NULL;
     }
 
-#ifdef CONFIG_ARCH_HAVE_MULTICPU
-  flags = spin_lock_irqsave(&priv->lock);
-#else
-  flags = enter_critical_section();
-#endif /* CONFIG_ARCH_HAVE_MULTICPU */
-
-#ifdef CONFIG_ARCH_HAVE_MULTICPU
-  priv->lock = SP_UNLOCKED;
-#endif /* CONFIG_ARCH_HAVE_MULTICPU */
+  spin_lock_init(&priv->lock);
 
   dev->cd_ops = &g_sja1000ops;
   dev->cd_priv = (FAR void *)priv;
-
-#ifdef CONFIG_ARCH_HAVE_MULTICPU
-  spin_unlock_irqrestore(&priv->lock, flags);
-#else
-  leave_critical_section(flags);
-#endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
   /* Reset chip */
 

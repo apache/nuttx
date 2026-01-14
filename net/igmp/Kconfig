@@ -12,6 +12,12 @@ config NET_IGMP
 	---help---
 		Enable IGMPv2 client support.
 
+config NET_IGMP_CHECKSUMS
+	bool "IGMP checksums"
+	default y
+	---help---
+		Enable/disable IGMP checksum support.
+
 if NET_IGMP
 
 endif # NET_IGMP

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32/common/include/esp32_board_dac.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -63,7 +65,7 @@ extern "C"
  * Name: board_dac_initialize
  *
  * Description:
- *   Initialize and register the Digital to Analog Convertor (DAC) driver.
+ *   Initialize and register the Digital to Analog Converter (DAC) driver.
  *
  * Input Parameters:
  *   path - The device number, used to build the device path as

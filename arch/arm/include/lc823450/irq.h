@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/lc823450/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -59,11 +61,11 @@
 #define LC823450_IRQ_INTERRUPTS    (16) /* Vector number of the first external interrupt */
 
 #define LC823450_IRQ_CTXM3_00       (LC823450_IRQ_INTERRUPTS+0)   /* 16: CortexM3_00 interrupt */
-#define LC823450_IRQ_CTXM3_01       (LC823450_IRQ_INTERRUPTS+1)   /* 17: CortexM3_01 interrupt */
+#define LC823450_IRQ_SMP_CALL_01    (LC823450_IRQ_INTERRUPTS+1)   /* 17: CortexM3_01 interrupt */
 #define LC823450_IRQ_CTXM3_02       (LC823450_IRQ_INTERRUPTS+2)   /* 18: CortexM3_02 interrupt */
 #define LC823450_IRQ_CTXM3_03       (LC823450_IRQ_INTERRUPTS+3)   /* 19: CortexM3_03 interrupt */
 #define LC823450_IRQ_CTXM3_10       (LC823450_IRQ_INTERRUPTS+4)   /* 20: CortexM3_00 interrupt */
-#define LC823450_IRQ_CTXM3_11       (LC823450_IRQ_INTERRUPTS+5)   /* 21: CortexM3_01 interrupt */
+#define LC823450_IRQ_SMP_CALL_11    (LC823450_IRQ_INTERRUPTS+5)   /* 21: CortexM3_01 interrupt */
 #define LC823450_IRQ_CTXM3_12       (LC823450_IRQ_INTERRUPTS+6)   /* 22: CortexM3_02 interrupt */
 #define LC823450_IRQ_CTXM3_13       (LC823450_IRQ_INTERRUPTS+7)   /* 23: CortexM3_03 interrupt */
 #define LC823450_IRQ_LPDSP0         (LC823450_IRQ_INTERRUPTS+8)   /* 24: LPDSP0 interrupt */

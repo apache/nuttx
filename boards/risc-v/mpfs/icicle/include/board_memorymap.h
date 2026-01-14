@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/mpfs/icicle/include/board_memorymap.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -65,6 +67,11 @@
 #define USRAM_START     (uintptr_t)__usram_start
 #define USRAM_SIZE      (uintptr_t)__usram_size
 
+/* User IO */
+
+#define USRIO_START     (uintptr_t)__usrio_start
+#define USRIO_SIZE      (uintptr_t)__usrio_size
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -94,5 +101,10 @@ extern uint8_t          __uflash_size[];
 
 extern uint8_t          __usram_start[];
 extern uint8_t          __usram_size[];
+
+/* User IO (R) */
+
+extern uint8_t          __usrio_start[];
+extern uint8_t          __usrio_size[];
 
 #endif /* __BOARDS_RISC_V_MPFS_ICICLE_INCLUDE_BOARD_MEMORYMAP_H */

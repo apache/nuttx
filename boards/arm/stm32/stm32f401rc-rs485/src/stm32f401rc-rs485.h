@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f401rc-rs485/src/stm32f401rc-rs485.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -92,14 +94,14 @@
 #define GPIO_BTN_SW5 \
   (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTB | GPIO_PIN15)
 
-/* OLED SSD1309 */
+/* LCD SSD1309 or ST7735 */
 
-#if defined(CONFIG_LCD_SSD1306)
-#  define GPIO_OLED_RESET (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+#if defined(CONFIG_LCD_SSD1306) || defined(CONFIG_LCD_ST7735)
+#  define GPIO_LCD_RESET (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN6)
-#  define GPIO_OLED_CS    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+#  define GPIO_LCD_CS    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN7)
-#  define GPIO_OLED_DC    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+#  define GPIO_LCD_DC    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN8)
 #endif
 
@@ -124,6 +126,10 @@
      GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN5)
 #endif
 
+/* WS2812 LEDs SPI */
+
+#define WS2812_SPI 1
+
 /* PWM
  *
  * The STM32F401RC-RS485 has no real on-board PWM devices, but the board can
@@ -139,6 +145,28 @@
  */
 
 #define STM32F401RCRS485_QETIMER 3
+
+/* GPIO pins used by the GPIO Subsystem */
+
+#define BOARD_NGPIOIN     1 /* Amount of GPIO Input pins */
+#define BOARD_NGPIOOUT    1 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
+
+#define GPIO_IN1          (GPIO_INPUT | GPIO_PULLDOWN | GPIO_SPEED_2MHz | \
+                           GPIO_PORTC | GPIO_PIN4)
+#define GPIO_OUT1         (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_2MHz | \
+                           GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN0)
+#define GPIO_INT1         (GPIO_INPUT | GPIO_PULLDOWN | GPIO_SPEED_2MHz | \
+                           GPIO_PORTC | GPIO_PIN4)
+
+/* HX711 PINs */
+#ifdef CONFIG_ADC_HX711
+#  define HX711_CLK_PIN  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_OUTPUT_SET|\
+                          GPIO_SPEED_2MHz|GPIO_PULLUP|\
+                          GPIO_PORTB|GPIO_PIN1)
+#  define HX711_DATA_PIN (GPIO_INPUT|GPIO_SPEED_2MHz|GPIO_PULLUP|GPIO_EXTI|\
+                          GPIO_PORTB|GPIO_PIN2)
+#endif /* CONFIG_ADC_HX711 */
 
 /****************************************************************************
  * Public Data
@@ -260,6 +288,21 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port);
 int stm32_at24_init(char *path);
 
 /****************************************************************************
+ * Name: stm32_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO drivers for use with /apps/examples/gpio
+ *
+ * Return Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_GPIO
+int stm32_gpio_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: stm32_adc_setup
  *
  * Description:
@@ -269,6 +312,18 @@ int stm32_at24_init(char *path);
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_hx711_initialize
+ *
+ * Description:
+ *   Initialize hx711 chip
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ADC_HX711
+int stm32_hx711_initialize(void);
 #endif
 
 #endif /* __BOARDS_ARM_STM32_STM32F401RC_RS485_SRC_STM32F401RC_RS485_H */

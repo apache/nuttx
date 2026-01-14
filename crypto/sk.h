@@ -1,9 +1,9 @@
 /****************************************************************************
  * crypto/sk.h
- * $OpenBSD: sk.h,v 1.2 2002/10/27 13:24:26 miod Exp $
- * lib/des/sk.h
- * Copyright (C) 1995 Eric Young (eay@mincom.oz.au)
- * All rights reserved.
+ *
+ * SPDX-License-Identifier: SSLeay-standalone
+ * SPDX-FileCopyrightText: Copyright (C) 1995 Eric Young (eay@mincom.oz.au)
+ * SPDX-FileCopyrightText: Eric Young (eay@mincom.oz.au).
  *
  * This file is part of an SSL implementation written
  * by Eric Young (eay@mincom.oz.au).

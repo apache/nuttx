@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_clockconfig_ver1.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -240,7 +242,7 @@ static void imxrt_pllsetup(void)
     {
     }
 
-  /* Init USB PLL3 */
+  /* Init USB1 PLL3 */
 
   /* capture it's original value */
 
@@ -264,6 +266,31 @@ static void imxrt_pllsetup(void)
     }
 
   putreg32(pll3reg, IMXRT_CCM_ANALOG_PFD_480);
+
+#ifdef CONFIG_IMXRT_USBOTG2
+  /* Init USB2 PLL */
+
+  /* Enable the USB2 PLL */
+
+  reg = getreg32(IMXRT_CCM_ANALOG_PLL_USB2);
+  reg |= IMXRT_USB2_PLL_DIV_SELECT        |
+         CCM_ANALOG_PLL_USB2_ENABLE       |
+         CCM_ANALOG_PLL_USB2_EN_USB_CLKS  |
+         CCM_ANALOG_PLL_USB2_POWER        |
+         CCM_ANALOG_PLL_USB2_DIV_SELECT_20;
+  putreg32(reg, IMXRT_CCM_ANALOG_PLL_USB2);
+
+  while ((getreg32(IMXRT_CCM_ANALOG_PLL_USB2) &
+          CCM_ANALOG_PLL_USB2_LOCK) == 0)
+    {
+    }
+
+  /* Disable bypass */
+
+  reg  = getreg32(IMXRT_CCM_ANALOG_PLL_USB2);
+  reg &= ~CCM_ANALOG_PLL_USB2_BYPASS;
+  putreg32(reg, IMXRT_CCM_ANALOG_PLL_USB2);
+#endif
 
 #ifdef CONFIG_IMXRT_LCD
   /* Init Video PLL5 */

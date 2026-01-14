@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/wchar.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -97,7 +99,8 @@ struct mbstate_s
   int __fill[6];
 };
 
-typedef struct mbstate_s mbstate_t;
+typedef struct mbstate_s mbstate_s;
+#define mbstate_t mbstate_s
 
 /* FILE
  *   As described in <stdio.h>.
@@ -202,7 +205,9 @@ FAR wchar_t      *wcsstr(FAR const wchar_t *, FAR const wchar_t *);
 #ifdef CONFIG_HAVE_DOUBLE
 double            wcstod(FAR const wchar_t *, FAR wchar_t **);
 #endif
+#ifdef CONFIG_HAVE_FLOAT
 float             wcstof(FAR const wchar_t *, FAR wchar_t **);
+#endif
 FAR wchar_t      *wcstok(FAR wchar_t *, FAR const wchar_t *, FAR wchar_t **);
 long int          wcstol(FAR const wchar_t *, FAR wchar_t **, int);
 #ifdef CONFIG_HAVE_LONG_DOUBLE
@@ -269,10 +274,10 @@ fortify_function(wcscpy) FAR wchar_t *wcscpy(FAR wchar_t *dst,
 
 fortify_function(wcslcpy) size_t wcslcpy(FAR wchar_t *dst,
                                          FAR const wchar_t *src,
-                                         size_t siz)
+                                         size_t size)
 {
-  fortify_assert(siz <= fortify_size(dst, 0) / sizeof(wchar_t));
-  return __real_wcslcpy(dst, src, siz);
+  fortify_assert(size <= fortify_size(dst, 0) / sizeof(wchar_t));
+  return __real_wcslcpy(dst, src, size);
 }
 
 fortify_function(wcscat) FAR wchar_t *wcscat(FAR wchar_t *dst,
@@ -285,26 +290,26 @@ fortify_function(wcscat) FAR wchar_t *wcscat(FAR wchar_t *dst,
 
 fortify_function(wcsncat) FAR wchar_t *wcsncat(FAR wchar_t *dst,
                                                FAR const wchar_t *src,
-                                               size_t siz)
+                                               size_t size)
 {
-  fortify_assert(siz <= fortify_size(dst, 0) / sizeof(wchar_t));
-  return __real_wcsncat(dst, src, siz);
+  fortify_assert(size <= fortify_size(dst, 0) / sizeof(wchar_t));
+  return __real_wcsncat(dst, src, size);
 }
 
 fortify_function(wcslcat) size_t wcslcat(FAR wchar_t *dst,
                                          FAR const wchar_t *src,
-                                         size_t siz)
+                                         size_t size)
 {
-  fortify_assert(siz <= fortify_size(dst, 0) / sizeof(wchar_t));
-  return __real_wcslcat(dst, src, siz);
+  fortify_assert(size <= fortify_size(dst, 0) / sizeof(wchar_t));
+  return __real_wcslcat(dst, src, size);
 }
 
 fortify_function(wcsncpy) FAR wchar_t *wcsncpy(FAR wchar_t *dst,
                                                FAR const wchar_t *src,
-                                               size_t siz)
+                                               size_t size)
 {
-  fortify_assert(siz <= fortify_size(dst, 0) / sizeof(wchar_t));
-  return __real_wcsncpy(dst, src, siz);
+  fortify_assert(size <= fortify_size(dst, 0) / sizeof(wchar_t));
+  return __real_wcsncpy(dst, src, size);
 }
 
 fortify_function(wcsnrtombs) size_t wcsnrtombs(FAR char *dst,

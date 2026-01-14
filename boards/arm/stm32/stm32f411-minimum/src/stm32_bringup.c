@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f411-minimum/src/stm32_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,14 @@
 #include <nuttx/fs/fs.h>
 
 #include "stm32.h"
+
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
+
+#ifdef CONFIG_INPUT_BUTTONS
+#  include <nuttx/input/buttons.h>
+#endif
 
 #ifdef CONFIG_STM32_OTGFS
 #  include "stm32_usbhost.h"
@@ -83,6 +93,46 @@
 int stm32_bringup(void)
 {
   int ret = OK;
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_INPUT_BUTTONS
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RGBLED
+  /* Configure and initialize the RGB LED. */
+
+  ret = stm32_rgbled_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_rgbled_setup() failed: %d\n", ret);
+    }
+#endif
 
 #ifdef CONFIG_STM32F411MINIMUM_GPIO
   ret = stm32_gpio_initialize();

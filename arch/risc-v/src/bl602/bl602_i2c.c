@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/bl602/bl602_i2c.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -720,13 +722,13 @@ static int bl602_i2c_transfer(struct i2c_master_s *dev,
       priv->msgid = i;
       bl602_i2c_start_transfer(priv);
 
-      /* wait for transter finished */
+      /* wait for transfer finished */
 
       ret = nxsem_wait_uninterruptible(&priv->sem_isr);
 
       if (ret < 0)
         {
-          i2cerr("transter error\n");
+          i2cerr("transfer error\n");
           return ret;
         }
 

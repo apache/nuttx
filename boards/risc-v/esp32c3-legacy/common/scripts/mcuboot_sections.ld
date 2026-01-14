@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/esp32c3-legacy/common/scripts/mcuboot_sections.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -294,7 +296,9 @@ SECTIONS
   .rtc.data :
   {
     *(.rtc.data)
+    *(.rtc.data.*)
     *(.rtc.rodata)
+    *(.rtc.rodata.*)
 
    /* Whatever is left from the RTC memory is used as a special heap. */
 

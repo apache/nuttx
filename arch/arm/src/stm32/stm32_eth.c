@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_eth.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,6 +48,7 @@
 #include <nuttx/net/mii.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/spinlock.h>
 
 #if defined(CONFIG_NET_PKT)
 #  include <nuttx/net/pkt.h>
@@ -71,10 +74,6 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
-
-/* See boards/arm/stm32/stm3240g-eval/README.txt for an explanation of the
- * configuration settings.
- */
 
 #if STM32_NETHERNET > 1
 #  error "Logic to support multiple Ethernet interfaces is incomplete"
@@ -649,6 +648,7 @@ static uint8_t g_alloc[STM32_ETH_NFREEBUFFERS *
 static struct stm32_ethmac_s g_stm32ethmac[STM32_NETHERNET];
 
 #ifdef CONFIG_STM32_ETH_PTP_RTC_HIRES
+static spinlock_t g_rtc_lock = SP_UNLOCKED;
 volatile bool g_rtc_enabled;
 static struct timespec g_stm32_eth_ptp_basetime;
 #endif
@@ -1542,7 +1542,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
    *   3) All of the TX descriptors are in flight.
    *
    * This last case is obscure.  It is due to that fact that each packet
-   * that we receive can generate an unstoppable transmisson.  So we have
+   * that we receive can generate an unstoppable transmission.  So we have
    * to stop receiving when we can not longer transmit.  In this case, the
    * transmit logic should also have disabled further RX interrupts.
    */
@@ -1810,7 +1810,7 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
-       * re-used for transmission, the dev->d_buf field will have been
+       * reused for transmission, the dev->d_buf field will have been
        * nullified.
        */
 
@@ -3776,10 +3776,10 @@ static void stm32_eth_ptp_convert_rxtime(struct stm32_ethmac_s *priv)
 
       /* Sample PTP and CLOCK_REALTIME close to each other */
 
-      flags = enter_critical_section();
       clock_gettime(CLOCK_REALTIME, &realtime);
+      flags = spin_lock_irqsave(&g_rtc_lock);
       ptptime = stm32_eth_ptp_gettime();
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_rtc_lock, flags);
 
       /* Compute how much time has elapsed since packet reception
        * and add that to current time.
@@ -4304,9 +4304,12 @@ int up_rtc_initialize(void)
  *
  ****************************************************************************/
 
-int up_rtc_gettime(FAR struct timespec *tp)
+int up_rtc_gettime(struct timespec *tp)
 {
+  irqstate_t flags;
   uint64_t timestamp;
+
+  flags = spin_lock_irqsave(&g_rtc_lock);
   timestamp = stm32_eth_ptp_gettime();
 
   if (timestamp == 0)
@@ -4315,12 +4318,14 @@ int up_rtc_gettime(FAR struct timespec *tp)
        * Normally we shouldn't end up here because g_rtc_enabled is false.
        */
 
+      spin_unlock_irqrestore(&g_rtc_lock, flags);
       DEBUGASSERT(!g_rtc_enabled);
       return -EBUSY;
     }
 
   ptp_to_timespec(timestamp, tp);
   clock_timespec_add(tp, &g_stm32_eth_ptp_basetime, tp);
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
 
   return OK;
 }
@@ -4340,10 +4345,13 @@ int up_rtc_gettime(FAR struct timespec *tp)
  *
  ****************************************************************************/
 
-int up_rtc_settime(FAR const struct timespec *tp)
+int up_rtc_settime(const struct timespec *tp)
 {
   struct timespec ptptime;
   uint64_t timestamp;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&g_rtc_lock);
   timestamp = stm32_eth_ptp_gettime();
 
   if (timestamp == 0)
@@ -4352,6 +4360,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
        * Normally we shouldn't end up here because g_rtc_enabled is false.
        */
 
+      spin_unlock_irqrestore(&g_rtc_lock, flags);
       DEBUGASSERT(!g_rtc_enabled);
       return -EBUSY;
     }
@@ -4363,6 +4372,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   ptp_to_timespec(timestamp, &ptptime);
   clock_timespec_subtract(tp, &ptptime, &g_stm32_eth_ptp_basetime);
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
 
   return OK;
 }
@@ -4384,6 +4394,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
  *
  * Assumptions:
  *   Called from within a critical section.
+ *
  ****************************************************************************/
 
 int up_rtc_adjtime(long ppb)

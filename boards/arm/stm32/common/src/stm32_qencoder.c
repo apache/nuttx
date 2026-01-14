@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/common/src/stm32_qencoder.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -55,7 +57,7 @@ int board_qencoder_initialize(int devno, int timerno)
   /* Initialize a quadrature encoder interface. */
 
   sninfo("Initializing the quadrature encoder using TIM%d\n", timerno);
-  snprintf(devpath, 12, "/dev/qe%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/qe%d", devno);
   ret = stm32_qeinitialize(devpath, timerno);
   if (ret < 0)
     {

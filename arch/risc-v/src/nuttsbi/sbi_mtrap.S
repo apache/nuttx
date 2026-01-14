@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/nuttsbi/sbi_machine_trap.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -145,7 +147,7 @@ machine_trap:
  *  Description:
  *    Allocate separate stack(s) for machine mode interrupts, only if kernel
  *    runs in S-mode. Separate stacks are needed as M-mode interrupts can
- *    pre-empt S-mode interrupts.
+ *    preempt S-mode interrupts.
  *
  ****************************************************************************/
 

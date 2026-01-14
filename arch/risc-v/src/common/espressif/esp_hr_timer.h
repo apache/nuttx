@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/espressif/esp_hr_timer.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -71,6 +73,8 @@ struct esp_hr_timer_args_s
 {
   void (*callback)(void *arg);      /* Callback function */
   void *arg;                        /* Private data */
+  const char *name;                 /* Timer name, used in esp_timer_dump function */
+  bool skip_unhandled_events;       /* Skip unhandled events for periodic timers */
 };
 
 #undef EXTERN
@@ -119,13 +123,48 @@ int esp_hr_timer_create(const struct esp_hr_timer_args_s *args,
  *   repeat        - Repeat mode (true: enabled, false: disabled).
  *
  * Returned Value:
- *   None.
+ *   OK on success; ERROR on failure.
  *
  ****************************************************************************/
 
-void esp_hr_timer_start(struct esp_hr_timer_s *timer,
+int esp_hr_timer_start(struct esp_hr_timer_s *timer,
                         uint64_t timeout,
                         bool repeat);
+
+/****************************************************************************
+ * Name: esp_hr_timer_start_once
+ *
+ * Description:
+ *   Start the High Resolution Timer with one shot mode.
+ *
+ * Input Parameters:
+ *   timer         - HR Timer pointer.
+ *   timeout       - Timeout value.
+ *
+ * Returned Value:
+ *   OK on success; ERROR on failure.
+ *
+ ****************************************************************************/
+
+int esp_hr_timer_start_once(struct esp_hr_timer_s *timer, uint64_t timeout);
+
+/****************************************************************************
+ * Name: esp_hr_timer_start_periodic
+ *
+ * Description:
+ *   Start the High Resolution Timer with periodic mode.
+ *
+ * Input Parameters:
+ *   timer         - HR Timer pointer.
+ *   timeout       - Timeout value.
+ *
+ * Returned Value:
+ *   OK on success; ERROR on failure.
+ *
+ ****************************************************************************/
+
+int esp_hr_timer_start_periodic(struct esp_hr_timer_s *timer,
+                                 uint64_t timeout);
 
 /****************************************************************************
  * Name: esp_hr_timer_stop
@@ -137,11 +176,12 @@ void esp_hr_timer_start(struct esp_hr_timer_s *timer,
  *   timer         - HR Timer pointer.
  *
  * Returned Value:
- *   None.
+ *   OK on success; ERROR on failure.
  *
  ****************************************************************************/
 
-void esp_hr_timer_stop(struct esp_hr_timer_s *timer);
+int esp_hr_timer_stop(struct esp_hr_timer_s *timer);
+int esp_hr_timer_stop_nolock(struct esp_hr_timer_s *timer);
 
 /****************************************************************************
  * Name: esp_hr_timer_delete
@@ -153,11 +193,11 @@ void esp_hr_timer_stop(struct esp_hr_timer_s *timer);
  *   timer         - HR Timer pointer.
  *
  * Returned Value:
- *   None.
+ *   OK on success; ERROR on failure.
  *
  ****************************************************************************/
 
-void esp_hr_timer_delete(struct esp_hr_timer_s *timer);
+int esp_hr_timer_delete(struct esp_hr_timer_s *timer);
 
 /****************************************************************************
  * Name: esp_hr_timer_time_us

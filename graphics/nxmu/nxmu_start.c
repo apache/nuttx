@@ -1,6 +1,8 @@
 /****************************************************************************
  * graphics/nxmu/nxmu_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -232,7 +234,7 @@ int nxmu_start(int display, int plane)
        * this operation cannot be done from the IDLE thread!
        */
 
-      nxsig_usleep(50 * 1000);
+      nxsched_usleep(50 * 1000);
     }
 
   return OK;

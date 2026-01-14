@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/wireless/ieee802154/xbee/xbee.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -417,7 +419,7 @@ void xbee_set_saddr(FAR struct xbee_priv_s *priv, FAR const uint8_t *saddr);
  *
  * Description:
  *   Sends API frame with AT command request in order to set the RF channel
- *   (Operatin Channel) of the device.
+ *   (Operation Channel) of the device.
  *
  ****************************************************************************/
 

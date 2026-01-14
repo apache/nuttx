@@ -1,9 +1,9 @@
 /****************************************************************************
  * crypto/set_key.c
- * $OpenBSD: set_key.c,v 1.5 2021/03/12 10:22:46 jsg Exp $
- * lib/des/set_key.c
- * Copyright (C) 1995 Eric Young (eay@mincom.oz.au)
- * All rights reserved.
+ *
+ * SPDX-License-Identifier: SSLeay-standalone
+ * SPDX-FileCopyrightText: Copyright (C) 1995 Eric Young (eay@mincom.oz.au)
+ * SPDX-FileCopyrightText: Eric Young (eay@mincom.oz.au).
  *
  * This file is part of an SSL implementation written
  * by Eric Young (eay@mincom.oz.au).

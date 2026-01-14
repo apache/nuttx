@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/litex/arty_a7/src/litex_pwm.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -60,10 +62,7 @@ int litex_pwm_setup(void)
   struct pwm_lowerhalf_s *pwm = NULL;
   int ret = OK;
   int channel;
-  char devpath[12] =
-    {
-        0
-    };
+  char devpath[12];
 
   for (channel = 0; channel < LITEX_PWM_MAX; channel++)
     {
@@ -76,7 +75,7 @@ int litex_pwm_setup(void)
 
       /* Register the PWM driver at "/dev/pwmX" */
 
-      snprintf(devpath, 12, "/dev/pwm%d", channel);
+      snprintf(devpath, sizeof(devpath), "/dev/pwm%d", channel);
       ret = pwm_register(devpath, pwm);
       if (ret < 0)
         {

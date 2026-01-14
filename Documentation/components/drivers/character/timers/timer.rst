@@ -110,6 +110,9 @@ systems calls. The available ``ioctl`` commands are:
  * :c:macro:`TCIOC_SETTIMEOUT`
  * :c:macro:`TCIOC_NOTIFICATION`
  * :c:macro:`TCIOC_MAXTIMEOUT`
+ * :c:macro:`TCIOC_TICK_GETSTATUS`
+ * :c:macro:`TCIOC_TICK_SETTIMEOUT`
+ * :c:macro:`TCIOC_TICK_MAXTIMEOUT`
 
 These ``ioctl`` commands internally call lower-half layer operations and the
 parameters are forwarded to these ops through the ``ioctl`` system call. The return
@@ -280,7 +283,7 @@ The ``TCIOC_SETTIMEOUT`` command calls the ``settimeout`` operation, which is de
 
 .. c:function:: int settimeout(uint32_t timeout)
 
-  The getstatus operation sets a timeout interval to trigger the alarm and then
+  The settimeout operation sets a timeout interval to trigger the alarm and then
   trigger an interrupt. It defines the timer interval in which the handler will
   be called.
 
@@ -362,7 +365,7 @@ This command may be used like so:
   ret = ioctl(fd, TCIOC_MAXTIMEOUT, (uint32_t*)(&max_timeout));
   if (ret < 0)
     {
-      fprintf(stderr, "ERROR: Failed to reat the timer's maximum timeout: %d\n", errno);
+      fprintf(stderr, "ERROR: Failed to read the timer's maximum timeout: %d\n", errno);
       close(fd);
       return EXIT_FAILURE;
     }
@@ -370,6 +373,101 @@ This command may be used like so:
   /* Print the maximum supported timeout */
 
   printf("Maximum supported timeout: %" PRIu32 "\n", max_timeout);
+
+The ``TCIOC_TICK_GETSTATUS`` command invokes the ``getstatus`` lower-half
+operation and returns the current timer status expressed in timer ticks.
+The conversion from microseconds to ticks is performed by the timer
+upper-half driver.
+
+  The ``getstatus`` operation gathers the timer's current information.
+  When invoked via ``TCIOC_TICK_GETSTATUS``, the ``timeout`` and
+  ``timeleft`` fields are converted from microseconds to timer ticks
+  before being returned to the caller.
+
+  :param status: A writable pointer to a struct timer_status_s.
+                 This structure contains the same fields as used by
+                 `TCIOC_GETSTATUS`, but the timeout and timeleft
+                 values are expressed in timer ticks instead of
+                 microseconds.
+  :return: A Linux System Error Code for failing or 0 for success.
+
+This command may be used like so:
+
+.. code-block:: c
+
+  /* Get timer status in ticks */
+
+  ret = ioctl(fd, TCIOC_TICK_GETSTATUS, (unsigned long)((uintptr_t)&status));
+  if (ret < 0)
+    {
+      fprintf(stderr, "ERROR: Failed to get timer tick status: %d\n", errno);
+      close(fd);
+      return EXIT_FAILURE;
+    }
+
+  printf("flags: %08lx timeout(ticks): %lu timeleft(ticks): %lu\n",
+          (unsigned long)status.flags, (unsigned long)status.timeout,
+          (unsigned long)status.timeleft);
+
+The ``TCIOC_TICK_SETTIMEOUT`` command calls the ``settimeout`` operation and
+sets a new timeout value expressed in timer ticks.
+
+  The settimeout operation configures the timer to expire after the specified
+  number of timer ticks and resets the timer. The timeout value is converted
+  from ticks to microseconds by the timer upper-half driver before invoking
+  the lower-half settimeout operation.
+
+  :param timeout: An argument of type uint32_t that specifies the timeout
+                  interval in timer ticks.
+  :return: A Linux System Error Code for failing or 0 for success.
+
+This command may be used like so:
+
+.. code-block:: c
+
+  /* Set timer timeout in ticks */
+
+  printf("Set timer timeout to %lu ticks\n",
+  (unsigned long)timeout_ticks);
+
+  ret = ioctl(fd, TCIOC_TICK_SETTIMEOUT, timeout_ticks);
+  if (ret < 0)
+    {
+      fprintf(stderr, "ERROR: Failed to set timer tick timeout: %d\n", errno);
+      close(fd);
+      return EXIT_FAILURE;
+    }
+
+The ``TCIOC_TICK_MAXTIMEOUT`` command calls the ``maxtimeout`` operation and
+returns the maximum supported timeout value expressed in timer ticks.
+
+  The maxtimeout operation gets the maximum timeout value that can be
+  configured for the timer when using tick-based time units.
+
+  :param maxtimeout: A writable pointer to a variable of uint32_t type in
+                     which the maximum supported timeout (in ticks) will be
+                     stored.
+  :return: A Linux System Error Code for failing or 0 for success.
+
+This command may be used like so:
+
+.. code-block:: c
+
+  /* Get the maximum timer timeout in ticks */
+
+  printf("Get the maximum timer timeout in ticks\n");
+
+  ret = ioctl(fd, TCIOC_TICK_MAXTIMEOUT, (uint32_t *)(&max_timeout));
+  if (ret < 0)
+    {
+      fprintf(stderr, "ERROR: Failed to read timer tick maximum timeout: %d\n", errno);
+      close(fd);
+      return EXIT_FAILURE;
+    }
+
+  /* Print the maximum supported timeout (ticks) */
+
+  printf("Maximum supported timeout (ticks): %" PRIu32 "\n", max_timeout);
 
 Those snippets were taken from the Example which provides a great resource to
 demonstrate how to use those ``ioctl`` commands.

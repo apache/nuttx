@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32h7/weact-stm32h743/src/stm32_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,10 @@
 #include "weact-stm32h743.h"
 
 #include "stm32_gpio.h"
+
+#ifdef CONFIG_VIDEO_FB
+#  include <nuttx/video/fb.h>
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -75,6 +81,34 @@ int stm32_bringup(void)
              "ERROR: Failed to mount the PROC filesystem: %d\n",  ret);
     }
 #endif /* CONFIG_FS_PROCFS */
+
+#if defined(CONFIG_FAT_DMAMEMORY)
+  if (stm32_dma_alloc_init() < 0)
+    {
+      syslog(LOG_ERR, "DMA alloc FAILED");
+    }
+#endif
+
+#ifdef HAVE_SDIO
+  /* Initialize the SDIO block driver */
+
+  ret = stm32_sdio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_VIDEO_FB
+  /* Initialize and register the framebuffer driver */
+
+  ret = fb_register(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
+    }
+#endif
 
   return OK;
 }

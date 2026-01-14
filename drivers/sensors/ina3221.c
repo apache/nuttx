@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/ina3221.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -65,10 +67,6 @@
 #define INA3221_REG_DIE_ID              0xFF  /* Always 0x3220 */
 
 #define INA3221_CONFIG_RST (1 << 15)
-
-#ifndef CONFIG_INA3221_I2C_FREQUENCY
-#  define CONFIG_INA3221_I2C_FREQUENCY  400000
-#endif
 
 #define I2C_NOSTARTSTOP_MSGS              2
 #define I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX 0

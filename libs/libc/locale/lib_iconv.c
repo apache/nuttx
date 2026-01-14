@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/locale/lib_iconv.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -860,7 +862,7 @@ size_t iconv(iconv_t cd, FAR char **in, FAR size_t *inb,
                   goto starved;
                 }
 
-              d = *((unsigned char *)*in + 1);
+              d = *((FAR unsigned char *)*in + 1);
               if (d < 0xa1 && type == GB2312)
                 {
                   goto ilseq;

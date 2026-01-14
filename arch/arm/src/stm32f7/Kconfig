@@ -4962,10 +4962,10 @@ config STM32F7_ADC1_SAMPLE_FREQUENCY
 config STM32F7_ADC1_TIMTRIG
 	int "ADC1 Timer Trigger"
 	default 0
-	range 0 4
+	range 0 5
 	depends on STM32F7_HAVE_ADC1_TIMER
 	---help---
-		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO 5:TRGO2
 
 config STM32F7_ADC2_SAMPLE_FREQUENCY
 	int "ADC2 Sampling Frequency"
@@ -4977,10 +4977,10 @@ config STM32F7_ADC2_SAMPLE_FREQUENCY
 config STM32F7_ADC2_TIMTRIG
 	int "ADC2 Timer Trigger"
 	default 0
-	range 0 4
+	range 0 5
 	depends on STM32F7_HAVE_ADC2_TIMER
 	---help---
-		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO 5:TRGO2
 
 config STM32F7_ADC3_SAMPLE_FREQUENCY
 	int "ADC3 Sampling Frequency"
@@ -4992,10 +4992,10 @@ config STM32F7_ADC3_SAMPLE_FREQUENCY
 config STM32F7_ADC3_TIMTRIG
 	int "ADC3 Timer Trigger"
 	default 0
-	range 0 4
+	range 0 5
 	depends on STM32F7_HAVE_ADC3_TIMER
 	---help---
-		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO 5:TRGO2
 
 config STM32F7_TIM1_DAC
 	bool "TIM1 DAC"
@@ -6376,6 +6376,16 @@ config STM32F7_ADC1_DMA_CFG
 	---help---
 		0 - ADC1 DMA in One Shot Mode, 1 - ADC1 DMA in Circular Mode
 
+config STM32F7_ADC1_DMA_BATCH
+	int "ADC1 DMA number of conversions"
+	depends on STM32F7_ADC1 && STM32F7_ADC1_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
+
 config STM32F7_ADC1_ANIOC_TRIGGER
 	int "ADC1 software trigger (ANIOC_TRIGGER) configuration"
 	depends on STM32F7_ADC1
@@ -6408,6 +6418,16 @@ config STM32F7_ADC2_DMA_CFG
 	---help---
 		0 - ADC2 DMA in One Shot Mode, 1 - ADC2 DMA in Circular Mode
 
+config STM32F7_ADC2_DMA_BATCH
+	int "ADC2 DMA number of conversions"
+	depends on STM32F7_ADC2 && STM32F7_ADC2_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
+
 config STM32F7_ADC2_ANIOC_TRIGGER
 	int "ADC2 software trigger (ANIOC_TRIGGER) configuration"
 	depends on STM32F7_ADC2
@@ -6439,6 +6459,16 @@ config STM32F7_ADC3_DMA_CFG
 	default 0
 	---help---
 		0 - ADC3 DMA in One Shot Mode, 1 - ADC3 DMA in Circular Mode
+
+config STM32F7_ADC3_DMA_BATCH
+	int "ADC3 DMA number of conversions"
+	depends on STM32F7_ADC3 && STM32F7_ADC3_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
 
 config STM32F7_ADC3_ANIOC_TRIGGER
 	int "ADC3 software trigger (ANIOC_TRIGGER) configuration"

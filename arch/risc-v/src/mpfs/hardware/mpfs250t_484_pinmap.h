@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/hardware/mpfs250t_484_pinmap.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -79,7 +81,7 @@
 #define MSSIO_MUX_BANK_REG(bank,pin) (MPFS_SYSREG_BASE +                       \
                                       MSSIO_MUX_BANK_REG_OFFSET(bank,pin))
 
-/* Drive strenght configuration in mA
+/* Drive strength configuration in mA
  * The following bit combinations are from the reference design.
  */
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/uuid/lib_uuid_equal.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,7 +42,9 @@
  *
  ****************************************************************************/
 
-int32_t uuid_equal(const uuid_t *a, const uuid_t *b, uint32_t *status)
+int32_t uuid_equal(FAR const uuid_t *a, FAR const uuid_t *b,
+
+                   FAR uint32_t *status)
 {
   if (status != NULL)
     {

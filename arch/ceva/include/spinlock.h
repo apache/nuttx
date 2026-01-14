@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/ceva/include/spinlock.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -61,9 +63,6 @@
  *
  */
 
-#define SP_DSB(n) up_dsb()
-#define SP_DMB(n) up_dmb()
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -84,7 +83,7 @@ typedef uint32_t spinlock_t;
  * Description:
  *   Perform an atomic test and set operation on the provided spinlock.
  *
- *   This function must be provided via the architecture-specific logoic.
+ *   This function must be provided via the architecture-specific logic.
  *
  * Input Parameters:
  *   lock - The address of spinlock object.

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/msa301.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,6 +30,8 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/mutex.h>
@@ -58,14 +62,6 @@ struct msa301_ops_s
   CODE int (*stop)(FAR struct msa301_dev_s *priv);
   CODE int (*sensor_read)(FAR struct msa301_dev_s *priv);
 };
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#  ifndef CONFIG_MSA301_I2C_FREQUENCY
-#    define CONFIG_MSA301_I2C_FREQUENCY 400000
-#  endif
 
 /****************************************************************************
  * Private Function Prototypes

@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/semaphore/sem_holder.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,8 +30,8 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
+#include <nuttx/mm/kmap.h>
 
 #include "sched/sched.h"
 #include "semaphore/semaphore.h"
@@ -40,14 +42,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-#ifndef CONFIG_SEM_PREALLOCHOLDERS
-#  define CONFIG_SEM_PREALLOCHOLDERS 0
-#endif
-
 /****************************************************************************
- * Private Type Declarations
+ * Private Types
  ****************************************************************************/
 
 typedef int (*holderhandler_t)(FAR struct semholder_s *pholder,
@@ -101,6 +97,10 @@ nxsem_allocholder(FAR sem_t *sem, FAR struct tcb_s *htcb)
       serr("ERROR: Insufficient pre-allocated holders\n");
       PANIC();
     }
+
+#ifdef CONFIG_MM_KMAP
+  sem = kmm_map_user(this_task(), sem, sizeof(*sem));
+#endif
 
   pholder->sem    = sem;
   pholder->htcb   = htcb;
@@ -198,6 +198,10 @@ static inline void nxsem_freeholder(FAR sem_t *sem,
         }
     }
 
+#ifdef CONFIG_MM_KMAP
+  kmm_unmap(pholder->sem);
+#endif
+
   /* Release the holder and counts */
 
   pholder->tlink  = NULL;
@@ -236,9 +240,11 @@ static int nxsem_freecount0holder(FAR struct semholder_s *pholder,
 {
   /* When no more counts are held, remove the holder from the list.  The
    * count was decremented in nxsem_release_holder.
+   *
+   * Mutex is held only by one thread, so the holder is always freed.
    */
 
-  if (pholder->counts <= 0)
+  if (pholder->counts <= 0 || NXSEM_IS_MUTEX(sem))
     {
       nxsem_freeholder(sem, pholder);
       return 1;
@@ -317,7 +323,7 @@ static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
    * because the thread is already running at a sufficient priority.
    */
 
-  if (rtcb->sched_priority > htcb->sched_priority)
+  if (rtcb && htcb && rtcb->sched_priority > htcb->sched_priority)
     {
       /* Raise the priority of the holder of the semaphore.  This
        * cannot cause a context switch because we have preemption
@@ -402,15 +408,6 @@ static void nxsem_restore_priority(FAR struct tcb_s *htcb)
     {
       FAR struct semholder_s *pholder;
 
-#ifdef CONFIG_ARCH_ADDRENV
-      FAR struct addrenv_s *oldenv;
-
-      if (htcb->addrenv_own)
-        {
-          addrenv_select(htcb->addrenv_own, &oldenv);
-        }
-#endif
-
       /* Try to find the highest priority across all the threads that are
        * waiting for any semaphore held by htcb.
        */
@@ -427,13 +424,6 @@ static void nxsem_restore_priority(FAR struct tcb_s *htcb)
               hpriority = stcb->sched_priority;
             }
         }
-
-#ifdef CONFIG_ARCH_ADDRENV
-      if (htcb->addrenv_own)
-        {
-          addrenv_restore(oldenv);
-        }
-#endif
 
       /* Apply the selected priority to the thread (hopefully back to the
        * threads base_priority).
@@ -454,9 +444,11 @@ static int nxsem_restoreholderprio(FAR struct semholder_s *pholder,
 
   /* Release the holder if all counts have been given up
    * before reprioritizing causes a context switch.
+   *
+   * Mutex is held only by one thread, so the holder is always freed.
    */
 
-  if (pholder->counts <= 0)
+  if (pholder->counts <= 0 || NXSEM_IS_MUTEX(sem))
     {
       nxsem_freeholder(sem, pholder);
     }
@@ -570,6 +562,8 @@ void nxsem_initialize_holders(void)
 
 void nxsem_destroyholder(FAR sem_t *sem)
 {
+  irqstate_t flags = enter_critical_section();
+
   /* It might be an error if a semaphore is destroyed while there are any
    * holders of the semaphore (except perhaps the thread that release the
    * semaphore itself).  We actually have to assume that the caller knows
@@ -599,11 +593,13 @@ void nxsem_destroyholder(FAR sem_t *sem)
 #else
   /* There may be an issue if there are multiple holders of the semaphore. */
 
-  DEBUGASSERT(sem->holder.htcb == NULL);
+  DEBUGASSERT(sem->holder.htcb == NULL || sem->holder.htcb == this_task());
 
 #endif
 
   nxsem_foreachholder(sem, nxsem_recoverholders, NULL);
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -755,14 +751,13 @@ void nxsem_release_holder(FAR sem_t *sem)
               return;
             }
         }
-
-      /* The current task is not a holder */
-
-      DEBUGPANIC();
 #else
       pholder = &sem->holder;
-      DEBUGASSERT(pholder->htcb == rtcb);
-      nxsem_freeholder(sem, pholder);
+      if (pholder->htcb)
+        {
+          DEBUGASSERT(pholder->htcb == rtcb);
+          nxsem_freeholder(sem, pholder);
+        }
 #endif
     }
 }
@@ -885,7 +880,9 @@ void nxsem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem)
 {
   /* Check our assumptions */
 
-  DEBUGASSERT(sem->semcount <= 0);
+  DEBUGASSERT(NXSEM_IS_MUTEX(sem) || atomic_read(NXSEM_COUNT(sem)) <= 0);
+  DEBUGASSERT(!NXSEM_IS_MUTEX(sem) ||
+              NXSEM_MACQUIRED(atomic_read(NXSEM_MHOLDER(sem))));
 
   /* Adjust the priority of every holder as necessary */
 
@@ -979,11 +976,14 @@ void nxsem_release_all(FAR struct tcb_s *htcb)
 
       nxsem_freeholder(sem, pholder);
 
-      /* Increment the count on the semaphore, to releases the count
-       * that was taken by sem_wait() or sem_post().
-       */
+      if (!NXSEM_IS_MUTEX(sem))
+        {
+          /* Increment the count on the semaphore, to releases the count
+           * that was taken by sem_wait() or sem_post().
+           */
 
-      sem->semcount++;
+          atomic_fetch_add(NXSEM_COUNT(sem), 1);
+        }
     }
 }
 

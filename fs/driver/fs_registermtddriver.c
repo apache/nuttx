@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/driver/fs_registermtddriver.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,6 +33,7 @@
 #include <nuttx/mtd/mtd.h>
 
 #include "inode/inode.h"
+#include "vfs/vfs.h"
 
 #if defined(CONFIG_MTD) && !defined(CONFIG_DISABLE_MOUNTPOINT)
 
@@ -73,12 +76,7 @@ int register_mtddriver(FAR const char *path, FAR struct mtd_dev_s *mtd,
    * valid data.
    */
 
-  ret = inode_lock();
-  if (ret < 0)
-    {
-      return ret;
-    }
-
+  inode_lock();
   ret = inode_reserve(path, mode, &node);
   if (ret >= 0)
     {
@@ -90,7 +88,11 @@ int register_mtddriver(FAR const char *path, FAR struct mtd_dev_s *mtd,
 
       node->u.i_mtd   = mtd;
       node->i_private = priv;
-      ret             = OK;
+      inode_unlock();
+#ifdef CONFIG_FS_NOTIFY
+      notify_create(path);
+#endif
+      return OK;
     }
 
   inode_unlock();

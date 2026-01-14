@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/aht10.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,10 +44,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_AHT10_I2C_FREQUENCY
-#  define CONFIG_AHT10_I2C_FREQUENCY 400000
-#endif
-
 /* I2C command bytes */
 
 #define AHT10_SOFT_INIT              0xe1
@@ -54,7 +52,7 @@
 #define AHT10_NORMAL_CMD             0xa8
 
 /****************************************************************************
- * Private
+ * Private Types
  ****************************************************************************/
 
 struct aht10_dev_s
@@ -118,7 +116,9 @@ static const struct file_operations g_aht10fops =
   aht10_ioctl,    /* ioctl */
   NULL,           /* mmap */
   NULL,           /* truncate */
-  NULL            /* poll */
+  NULL,           /* poll */
+  NULL,           /* readv */
+  NULL            /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , aht10_unlink /* unlink */
 #endif
@@ -208,7 +208,7 @@ static int aht10_initialize(FAR struct aht10_dev_s *priv)
 
   /* wait at least 300ms */
 
-  nxsig_usleep(300000);
+  nxsched_usleep(300000);
 
   buf[0] = 0x08;
   buf[1] = 0x00;
@@ -222,7 +222,7 @@ static int aht10_initialize(FAR struct aht10_dev_s *priv)
 
   /* wait at least 300ms */
 
-  nxsig_usleep(300000);
+  nxsched_usleep(300000);
 
   return ret;
 }

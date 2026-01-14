@@ -1,6 +1,8 @@
 ##############################################################################
 # boards/renesas/rx65n/rx65n/scripts/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -30,13 +32,14 @@ CPP = $(CROSSDEV)gcc -E -P -x c
 LD = $(CROSSDEV)ld
 STRIP = $(CROSSDEV)strip --strip-unneeded
 AR = $(CROSSDEV)ar rcs
+UNAR = $(CROSSDEV)ar x
 AS = $(CROSSDEV)as
 NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -g
+  ARCHOPTIMIZATION = $(CONFIG_DEBUG_SYMBOLS_LEVEL)
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
@@ -50,13 +53,11 @@ ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 
 CFLAGS := $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-   $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+   $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) $(ARCHWARNINGSXX)
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 
-LDMODULEFLAGS = -r -e module_initialize
-LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
-
-CMODULEFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
+LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
+CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden -mlong-calls # --target1-abs
 
 ASMEXT = .asm

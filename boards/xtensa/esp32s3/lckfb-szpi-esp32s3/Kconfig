@@ -1,0 +1,26 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_ESP32S3_LCKFB_SZPI
+
+config ARCH_BOARD_ESP32S3_LCKFB_SZPI_DISPLAY_XRES
+	int
+	default LCD_ST7789_XRES
+	depends on LCD_ST7789
+
+config ARCH_BOARD_ESP32S3_LCKFB_SZPI_DISPLAY_YRES
+	int
+	default LCD_ST7789_YRES
+	depends on LCD_ST7789
+
+config ARCH_BOARD_ESP32S3_LCKFB_SZPI_TOUCHSCREEN_MIRRORY
+	bool "SZPI-ESP32-S3 Touchscreen mirror Y"
+	depends on INPUT_TOUCHSCREEN
+
+config ARCH_BOARD_ESP32S3_LCKFB_SZPI_TOUCHSCREEN_SWAPXY
+	bool "SZPI-ESP32-S3 Touchscreen sway X/Y"
+	depends on INPUT_TOUCHSCREEN
+
+endif # ARCH_BOARD_ESP32S3_LCKFB_SZPI

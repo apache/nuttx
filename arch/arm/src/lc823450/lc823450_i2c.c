@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lc823450/lc823450_i2c.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1018,11 +1020,11 @@ static int lc823450_i2c_transfer(struct i2c_master_s *dev,
           leave_critical_section(irqs);
 
           /* Wait for irq handler completion. 10msec wait is probably enough
-           * to terminate i2c transaction, NACK and STOP contition for read
+           * to terminate i2c transaction, NACK and STOP condition for read
            * transaction, STOP condition for write transaction
            */
 
-          nxsig_usleep(10 * 1000);
+          nxsched_usleep(10 * 1000);
         }
       else
         {

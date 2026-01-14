@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_flash.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -178,17 +180,37 @@
 /* Define the Valid Configuration the G4 */
 
 #  elif defined(CONFIG_STM32_STM32G4XXX)
-#    if defined(CONFIG_STM32_FLASH_CONFIG_B)
-#      define STM32_FLASH_NPAGES      32
-#      define STM32_FLASH_PAGESIZE    4096
+#    if defined(CONFIG_STM32_STM32G43XX)
+#      if defined(CONFIG_STM32_FLASH_CONFIG_6)
+#        define STM32_FLASH_NPAGES      16
+#        define STM32_FLASH_PAGESIZE    2048
 
-#    elif defined(CONFIG_STM32_FLASH_CONFIG_C)
-#      define STM32_FLASH_NPAGES      64
-#      define STM32_FLASH_PAGESIZE    4096
+#      elif defined(CONFIG_STM32_FLASH_CONFIG_8)
+#        define STM32_FLASH_NPAGES      32
+#        define STM32_FLASH_PAGESIZE    2048
 
-#    elif defined(CONFIG_STM32_FLASH_CONFIG_E)
-#      define STM32_FLASH_NPAGES      128
-#      define STM32_FLASH_PAGESIZE    4096
+#      elif defined(CONFIG_STM32_FLASH_CONFIG_B)
+#        define STM32_FLASH_NPAGES      64
+#        define STM32_FLASH_PAGESIZE    2048
+#      endif
+#    elif defined(CONFIG_STM32_STM32G47XX) || defined(CONFIG_STM32_STM32G48XX)
+#      if defined(CONFIG_STM32_FLASH_CONFIG_B)
+#        define STM32_FLASH_SIZE        32 * 4096
+
+#      elif defined(CONFIG_STM32_FLASH_CONFIG_C)
+#        define STM32_FLASH_SIZE        64 * 4096
+
+#      elif defined(CONFIG_STM32_FLASH_CONFIG_E)
+#        define STM32_FLASH_SIZE        128 * 4096
+#      endif
+#    elif defined(CONFIG_STM32_STM32G49XX)
+#      elif defined(CONFIG_STM32_FLASH_CONFIG_C)
+#        define STM32_FLASH_NPAGES      128
+#        define STM32_FLASH_PAGESIZE    2048
+
+#      elif defined(CONFIG_STM32_FLASH_CONFIG_E)
+#        define STM32_FLASH_NPAGES      256
+#        define STM32_FLASH_PAGESIZE    2048
 #    endif
 
 /* Define the Valid Configuration the F1 and F3  */
@@ -261,7 +283,7 @@
 #elif defined(CONFIG_STM32_STM32G4XXX)
 #  define STM32_FLASH_PDKEYR_OFFSET    0x0004
 #  define STM32_FLASH_KEYR_OFFSET      0x0008
-#  define STM32_FLASH_OPT_KEYR_OFFSET  0x000c
+#  define STM32_FLASH_OPTKEYR_OFFSET   0x000c
 #  define STM32_FLASH_SR_OFFSET        0x0010
 #  define STM32_FLASH_CR_OFFSET        0x0014
 #  define STM32_FLASH_ECCR_OFFSET      0x0018
@@ -324,7 +346,7 @@
 #elif defined(CONFIG_STM32_STM32G4XXX)
 #  define STM32_FLASH_PDKEYR         (STM32_FLASHIF_BASE+STM32_FLASH_PDKEYR_OFFSET)
 #  define STM32_FLASH_KEYR           (STM32_FLASHIF_BASE+STM32_FLASH_KEYR_OFFSET)
-#  define STM32_FLASH_OPT_KEYR       (STM32_FLASHIF_BASE+STM32_FLASH_OPT_KEYR_OFFSET)
+#  define STM32_FLASH_OPTKEYR        (STM32_FLASHIF_BASE+STM32_FLASH_OPTKEYR_OFFSET)
 #  define STM32_FLASH_SR             (STM32_FLASHIF_BASE+STM32_FLASH_SR_OFFSET)
 #  define STM32_FLASH_CR             (STM32_FLASHIF_BASE+STM32_FLASH_CR_OFFSET)
 #  define STM32_FLASH_ECCR           (STM32_FLASHIF_BASE+STM32_FLASH_ECCR_OFFSET)
@@ -538,10 +560,18 @@
 #  define FLASH_CR_PER              (1 << 1)
 #  define FLASH_CR_MER1             (1 << 2)
 #  define FLASH_CR_PNB_SHIFT        (3)
-#  define FLASH_CR_PNB_MASK         (0x7f << FLASH_CR_PNB_SHIFT)
+#  if defined(CONFIG_STM32_STM32G43XX)
+#    define FLASH_CR_PNB_MASK         (0x3f << FLASH_CR_PNB_SHIFT)
+#  elif defined(CONFIG_STM32_STM32G47XX) || defined (CONFIG_STM32_STM32G48XX)
+#    define FLASH_CR_PNB_MASK         (0x7f << FLASH_CR_PNB_SHIFT)
+#  elif defined(CONFIG_STM32_STM32G49XX)
+#    define FLASH_CR_PNB_MASK         (0xff << FLASH_CR_PNB_SHIFT)
+#  endif
 #    define FLASH_CR_PNB(n)         (((n) << FLASH_CR_PNB_SHIFT) & FLASH_CR_PNB_MASK)
-#  define FLASH_CR_BKER             (1 << 11)
-#  define FLASH_CR_MER2             (1 << 15)
+#  if defined(CONFIG_STM32_STM32G47XX) || defined (CONFIG_STM32_STM32G48XX)
+#    define FLASH_CR_BKER             (1 << 11)
+#    define FLASH_CR_MER2             (1 << 15)
+#  endif
 #  define FLASH_CR_START            (1 << 16)
 #  define FLASH_CR_OPTSTRT          (1 << 17)
 #  define FLASH_CR_FSTPG            (1 << 18)
@@ -550,7 +580,9 @@
 #  define FLASH_CR_RDERRIE          (1 << 26)
 #  define FLASH_CR_OBL_LAUNCH       (1 << 27)
 #  define FLASH_CR_SEC_PROT1        (1 << 28)
-#  define FLASH_CR_SEC_PROT2        (1 << 29)
+#  if defined(CONFIG_STM32_STM32G47XX) || defined (CONFIG_STM32_STM32G48XX)
+#    define FLASH_CR_SEC_PROT2        (1 << 29)
+#  endif
 #  define FLASH_CR_OPTLOCK          (1 << 30)
 #  define FLASH_CR_LOCK             (1 << 31)
 #endif
@@ -568,8 +600,10 @@
 #  define FLASH_ECCR_BK_ECC            (1 << 21)
 #  define FLASH_ECCR_SYSF_ECC          (1 << 22)
 #  define FLASH_ECCR_ECCIE             (1 << 24)
-#  define FLASH_ECCR_ECCC2             (1 << 28)
-#  define FLASH_ECCR_ECCD2             (1 << 29)
+#  if defined(CONFIG_STM32_STM32G47XX) || defined (CONFIG_STM32_STM32G48XX)
+#    define FLASH_ECCR_ECCC2             (1 << 28)
+#    define FLASH_ECCR_ECCD2             (1 << 29)
+#  endif
 #  define FLASH_ECCR_ECCC              (1 << 30)
 #  define FLASH_ECCR_ECCD              (1 << 31)
 #endif
@@ -633,7 +667,11 @@
 #  define FLASH_OPTR_IWDG_STDBY        (1 << 18)
 #  define FLASH_OPTR_WWDG_SW           (1 << 19)
 #  define FLASH_OPTR_BFB2              (1 << 20)
-#  define FLASH_OPTR_DBANK             (1 << 22)
+#  if defined(CONFIG_STM32_STM32G47XX) || defined (CONFIG_STM32_STM32G48XX)
+#    define FLASH_OPTR_DBANK           (1 << 22)
+#  elif defined (CONFIG_STM32_STM32G49XX)
+#    define FLASH_OPTR_PB4_PUPEN       (1 << 22)
+#  endif
 #  define FLASH_OPTR_NBOOT1            (1 << 23)
 #  define FLASH_OPTR_SRAM_PE           (1 << 24)
 #  define FLASH_OPTR_CCMSRAM_RST       (1 << 25)

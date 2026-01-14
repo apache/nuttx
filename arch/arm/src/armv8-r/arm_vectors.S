@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv8-r/arm_vectors.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,7 +28,6 @@
 #include <nuttx/irq.h>
 
 #include "arm.h"
-#include "cp15.h"
 
 	.file	"arm_vectors.S"
 
@@ -52,9 +53,15 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#ifdef __ghs__
+	.macro	setirqstack tmp1 tmp2
+	ldr		sp, .Lirqstacktop		/* SP = IRQ stack top */
+	.endm
+#else
 	.macro	setirqstack, tmp1, tmp2
 	ldr		sp, .Lirqstacktop		/* SP = IRQ stack top */
 	.endm
+#endif
 #endif
 
 /****************************************************************************
@@ -67,9 +74,15 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#ifdef __ghs__
+	.macro	setfiqstack tmp1 tmp2
+	ldr		sp, .Lfiqstacktop		/* SP = FIQ stack top */
+	.endm
+#else
 	.macro	setfiqstack, tmp1, tmp2
 	ldr		sp, .Lfiqstacktop		/* SP = FIQ stack top */
 	.endm
+#endif
 #endif
 
 /****************************************************************************
@@ -81,6 +94,26 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_FPU
+#ifdef __ghs__
+	.macro	savefpu out tmp
+	/* Store all floating point registers.  Registers are stored in numeric order,
+	 * s0, s1, ... in increasing address order.
+	 */
+
+	/* Store the floating point control and status register. */
+
+	vmrs		tmp, fpscr			/* Fetch the FPSCR */
+	str		tmp, [out, #-4]! 		/* Save the floating point control and status register */
+
+#ifdef CONFIG_ARM_DPFPU32
+	vstmdb.64	out!, {d16-d31}		/* Save the full FP context */
+	vstmdb.64	out!, {d0-d15}
+#else
+	vstmdb		out!, {s0-s31}			/* Save the full FP context */
+#endif
+
+	.endm
+#else /* __ghs__ */
 	.macro	savefpu, out, tmp
 	/* Store all floating point registers.  Registers are stored in numeric order,
 	 * s0, s1, ... in increasing address order.
@@ -99,6 +132,7 @@
 #endif
 
 	.endm
+#endif /* __ghs__ */
 #endif
 
 /****************************************************************************
@@ -110,6 +144,27 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_FPU
+#ifdef __ghs__
+	.macro	restorefpu in tmp
+	/* Load all floating point registers.  Registers are loaded in numeric order,
+	 * s0, s1, ... in increasing address order.
+	 */
+
+#ifdef CONFIG_ARM_DPFPU32
+	vldmia.64	in!, {d0-d15}			/* Restore the full FP context */
+	vldmia.64	in!, {d16-d31}
+#else
+	vldmia		in!, {s0-s31}			/* Restore the full FP context */
+#endif
+
+	/* Load the floating point control and status register.   At the end of the
+	 * vstmia, \in will point to the FPSCR storage location.
+	 */
+
+	ldr		tmp, [in], #4			/* Fetch the floating point control and status register */
+	vmsr		fpscr, tmp			/* Restore the FPSCR */
+	.endm
+#else
 	.macro	restorefpu, in, tmp
 	/* Load all floating point registers.  Registers are loaded in numeric order,
 	 * s0, s1, ... in increasing address order.
@@ -129,6 +184,7 @@
 	ldr		\tmp, [\in], #4			/* Fetch the floating point control and status register */
 	vmsr		fpscr, \tmp			/* Restore the FPSCR */
 	.endm
+#endif /* __ghs__ */
 #endif
 
 /****************************************************************************
@@ -136,7 +192,9 @@
  ****************************************************************************/
 
 	.text
+#ifndef __ghs__
 	.syntax	unified
+#endif
 	.arm
 
 /****************************************************************************
@@ -153,7 +211,11 @@
 
 	.globl	arm_decodeirq
 	.globl	arm_vectorirq
+#ifdef __ghs__
+	.type	arm_vectorirq, $function
+#else
 	.type	arm_vectorirq, %function
+#endif
 
 arm_vectorirq:
 
@@ -164,7 +226,7 @@ arm_vectorirq:
 
 	/* Switch to SYS mode */
 
-#ifdef CONFIG_ARMV8R_DECODEFIQ
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 	cpsid		if, #PSR_MODE_SYS
 #else
 	cpsid		i, #PSR_MODE_SYS
@@ -252,7 +314,11 @@ arm_vectorirq:
 #endif
 	.size	arm_vectorirq, . - arm_vectorirq
 
+#ifdef __ghs__
+	.align	32
+#else
 	.align	5
+#endif
 
 /****************************************************************************
  * Function: arm_vectorsvc
@@ -264,7 +330,11 @@ arm_vectorirq:
 
 	.globl	arm_syscall
 	.globl	arm_vectorsvc
+#ifdef __ghs__
+	.type	arm_vectorsvc, $function
+#else
 	.type	arm_vectorsvc, %function
+#endif
 
 arm_vectorsvc:
 
@@ -274,7 +344,7 @@ arm_vectorsvc:
 
 	/* Switch to SYS mode */
 
-#ifdef CONFIG_ARMV8R_DECODEFIQ
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 	cpsid		if, #PSR_MODE_SYS
 #else
 	cpsid		i, #PSR_MODE_SYS
@@ -359,7 +429,11 @@ arm_vectorsvc:
 	rfeia		r14
 	.size	arm_vectorsvc, . - arm_vectorsvc
 
+#ifdef __ghs__
+	.align	32
+#else
 	.align	5
+#endif
 
 /****************************************************************************
  * Name: arm_vectordata
@@ -374,7 +448,11 @@ arm_vectorsvc:
 
 	.globl	arm_dataabort
 	.globl	arm_vectordata
+#ifdef __ghs__
+	.type	arm_vectordata, $function
+#else
 	.type	arm_vectordata, %function
+#endif
 
 arm_vectordata:
 
@@ -385,7 +463,7 @@ arm_vectordata:
 
 	/* Switch to SYS mode */
 
-#ifdef CONFIG_ARMV8R_DECODEFIQ
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 	cpsid		if, #PSR_MODE_SYS
 #else
 	cpsid		i, #PSR_MODE_SYS
@@ -450,7 +528,11 @@ arm_vectordata:
 	rfeia		r14
 	.size	arm_vectordata, . - arm_vectordata
 
+#ifdef __ghs__
+	.align	32
+#else
 	.align	5
+#endif
 
 /****************************************************************************
  * Name: arm_vectorprefetch
@@ -465,7 +547,11 @@ arm_vectordata:
 
 	.globl	arm_prefetchabort
 	.globl	arm_vectorprefetch
+#ifdef __ghs__
+	.type	arm_vectorprefetch, $function
+#else
 	.type	arm_vectorprefetch, %function
+#endif
 
 arm_vectorprefetch:
 
@@ -535,7 +621,11 @@ arm_vectorprefetch:
 	rfeia		r14
 	.size	arm_vectorprefetch, . - arm_vectorprefetch
 
+#ifdef __ghs__
+	.align	32
+#else
 	.align	5
+#endif
 
 /****************************************************************************
  * Name: arm_vectorundefinsn
@@ -548,7 +638,11 @@ arm_vectorprefetch:
 
 	.globl	arm_undefinedinsn
 	.globl	arm_vectorundefinsn
+#ifdef __ghs__
+	.type	arm_vectorundefinsn, $function
+#else
 	.type	arm_vectorundefinsn, %function
+#endif
 
 arm_vectorundefinsn:
 
@@ -615,7 +709,11 @@ arm_vectorundefinsn:
 	rfeia		r14
 	.size	arm_vectorundefinsn, . - arm_vectorundefinsn
 
+#ifdef __ghs__
+	.align	32
+#else
 	.align	5
+#endif
 
 /****************************************************************************
  * Name: arm_vectorfiq
@@ -626,14 +724,18 @@ arm_vectorundefinsn:
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV8R_DECODEFIQ
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 	.globl	arm_decodefiq
 #endif
 	.globl	arm_vectorfiq
+#ifdef __ghs__
+	.type	arm_vectorfiq, $function
+#else
 	.type	arm_vectorfiq, %function
+#endif
 
 arm_vectorfiq:
-#ifdef CONFIG_ARMV8R_DECODEFIQ
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 
 	/* Save the LR and SPSR onto the SYS mode stack before switch. */
 
@@ -727,7 +829,12 @@ arm_vectorfiq:
  ****************************************************************************/
 
 	.globl	arm_vectoraddrexcptn
+#ifdef __ghs__
+	.type	arm_vectoraddrexcptn, $function
+#else
 	.type	arm_vectoraddrexcptn, %function
+#endif
+
 arm_vectoraddrexcptn:
 	b		arm_vectoraddrexcptn
 	.size	arm_vectoraddrexcptn, . - arm_vectoraddrexcptn
@@ -741,9 +848,17 @@ arm_vectoraddrexcptn:
 	.balign	8
 
 	.globl	g_intstackalloc
+#ifdef __ghs__
+	.type	g_intstackalloc, $object
+#else
 	.type	g_intstackalloc, object
+#endif
 	.globl	g_intstacktop
+#ifdef __ghs__
+	.type	g_intstacktop, $object
+#else
 	.type	g_intstacktop, object
+#endif
 
 g_intstackalloc:
 	.skip	((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)
@@ -755,11 +870,19 @@ g_intstacktop:
  *  Name: g_fiqstackalloc/g_fiqstacktop
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV8R_DECODEFIQ
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 	.globl	g_fiqstackalloc
+#ifdef __ghs__
+	.type	g_fiqstackalloc, $object
+#else
 	.type	g_fiqstackalloc, object
+#endif
 	.globl	g_fiqstacktop
+#ifdef __ghs__
+	.type	g_fiqstacktop, $object
+#else
 	.type	g_fiqstacktop, object
+#endif
 
 g_fiqstackalloc:
 	.skip	((CONFIG_ARCH_INTERRUPTSTACK + 4) & ~7)

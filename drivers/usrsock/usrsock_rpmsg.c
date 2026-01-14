@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/usrsock/usrsock_rpmsg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -23,7 +25,8 @@
  ****************************************************************************/
 
 #include <nuttx/net/dns.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/net/net.h>
+#include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/usrsock/usrsock_rpmsg.h>
 
@@ -97,9 +100,13 @@ static int usrsock_rpmsg_send_dns_request(FAR void *arg,
   dns->addrlen = addrlen;
   memcpy(dns + 1, addr, addrlen);
 
-  net_lock();
+  usrsock_lock();
   ret = rpmsg_send_nocopy(ept, dns, sizeof(*dns) + addrlen);
-  net_unlock();
+  usrsock_unlock();
+  if (ret < 0)
+    {
+      rpmsg_release_tx_buffer(ept, dns);
+    }
 
   return ret;
 }
@@ -198,7 +205,7 @@ int usrsock_request(FAR struct iovec *iov, unsigned int iovcnt)
   nxsem_get_value(&priv->wait, &ret);
   if (ret <= 0)
     {
-      net_sem_wait_uninterruptible(&priv->wait);
+      usrsock_sem_timedwait(&priv->wait, false, UINT_MAX);
       nxsem_post(&priv->wait);
     }
 
@@ -225,6 +232,7 @@ int usrsock_request(FAR struct iovec *iov, unsigned int iovcnt)
       ret = rpmsg_send_nocopy(&priv->ept, buf, ret);
       if (ret < 0)
         {
+          rpmsg_release_tx_buffer(&priv->ept, buf);
           break;
         }
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stdio/lib_sscanf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -23,9 +25,6 @@
  ****************************************************************************/
 
 #include <stdio.h>
-#include <stdarg.h>
-#include <nuttx/streams.h>
-#include "libc.h"
 
 /****************************************************************************
  * Public Functions

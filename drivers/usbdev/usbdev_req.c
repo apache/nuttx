@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/usbdev/usbdev_req.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -68,7 +70,7 @@
  ****************************************************************************/
 
 FAR struct usbdev_req_s *usbdev_allocreq(FAR struct usbdev_ep_s *ep,
-                                         uint16_t len)
+                                         size_t len)
 {
   FAR struct usbdev_req_s *req;
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nrf91/nrf91_modem_at.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -294,7 +296,7 @@ static void nrf91_modem_at_send(struct uart_dev_s *dev, int ch)
   priv->txbuf[priv->tx_i] = (char)ch;
   priv->tx_i += 1;
 
-  /* Special formating Nordic AT interface (escape charactes) */
+  /* Special formatting Nordic AT interface (escape characters) */
 
   if (ch == '%')
     {

@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/string/lib_mempcpy.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -51,7 +53,7 @@
  *
  ****************************************************************************/
 
-#undef mempcpy /* See mm/README.txt */
+#undef mempcpy
 FAR void *mempcpy(FAR void *dest, FAR const void *src, size_t n)
 {
   return (FAR char *)memcpy(dest, src, n) + n;

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/common/x86_64_acpi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -246,7 +248,7 @@ static int acpi_rsdp_parse(struct acpi_rsdp_s *rsdp)
 
       g_acpi.xsdt = xsdt;
 
-      /* Map all talbes */
+      /* Map all tables */
 
       acpi_map_xsdt();
     }
@@ -300,12 +302,12 @@ static bool acpi_rsdp_find_bios(struct acpi_s *acpi)
 
 static bool acpi_rsdp_find(struct acpi_s *acpi)
 {
-  /* For now ony ACPI from BIOS region us supported */
+  /* For now only ACPI from BIOS region is supported */
 
 #ifdef CONFIG_ARCH_X86_64_ACPI_BIOS
   return acpi_rsdp_find_bios(acpi);
 #else
-#  error For now ony ACPI from BIOS region is supported
+#  error For now only ACPI from BIOS region is supported
 #endif
 }
 
@@ -482,7 +484,7 @@ int acpi_init(uintptr_t rsdp)
  * Name: acpi_madt_get
  *
  * Description:
- *   Find the n'th occurence of a MADT entry with a given type.
+ *   Find the n'th occurrence of a MADT entry with a given type.
  *
  ****************************************************************************/
 
@@ -560,7 +562,7 @@ void acpi_dump(void)
   int                  i     = 0;
   int                  ret   = 0;
 
-  /* Dump entires */
+  /* Dump entries */
 
   if (g_acpi.xsdt != 0)
     {

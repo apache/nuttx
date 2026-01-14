@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/wireless/bluetooth/bt_rpmsghci.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,7 +34,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/wireless/bluetooth/bt_rpmsghci.h>
 
 #include "bt_rpmsghci.h"
@@ -47,7 +49,7 @@
 
 struct rpmsghci_s
 {
-  /* This must be te first thung in the structure so we can simply cast from
+  /* This must be the first thing in the structure so we can simply cast from
    * struct rpmsghci_s to struct bt_driver_s.
    */
 
@@ -130,6 +132,7 @@ static int rpmsghci_send(FAR struct rpmsghci_s *priv, uint32_t command,
   ret = rpmsg_send_nocopy(&priv->ept, msg, len);
   if (ret < 0)
     {
+      rpmsg_release_tx_buffer(&priv->ept, msg);
       goto errout;
     }
 
@@ -305,8 +308,8 @@ static int rpmsghci_bt_ioctl(FAR struct bt_driver_s *btdev, int cmd,
  *   ept  - The rpmsg endpoint
  *   data - The return message
  *   len  - The return message length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   Always OK
@@ -339,8 +342,8 @@ static int rpmsghci_default_handler(FAR struct rpmsg_endpoint *ept,
  *   ept  - The rpmsg endpoint
  *   data - The return message
  *   len  - The return message length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   OK on success; A negated errno value is returned on any failure.
@@ -378,8 +381,8 @@ static int rpmsghci_recv_handler(FAR struct rpmsg_endpoint *ept,
  *   ept  - The rpmsg-HCI end point
  *   data - The received data
  *   len  - The received data length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   OK on success; A negated errno value is returned on any failure.

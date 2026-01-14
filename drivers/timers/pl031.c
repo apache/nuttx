@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/timers/pl031.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,9 +26,12 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
 #include <nuttx/timers/rtc.h>
 #include <nuttx/timers/pl031.h>
-#include <stdio.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -137,7 +142,7 @@ static int pl031_settime(FAR struct rtc_lowerhalf_s *lower,
 
   DEBUGASSERT(priv != NULL && rtctime != NULL);
 
-  time = mktime((FAR struct tm *)rtctime);
+  time = timegm((FAR struct tm *)rtctime);
   pl031_putreg(time, priv->base, PL031_RTCLR);
 
   return 0;
@@ -191,7 +196,7 @@ static int pl031_setalarm(FAR struct rtc_lowerhalf_s *lower,
   priv->alarm.cb = alarminfo->cb;
   priv->alarm.priv = alarminfo->priv;
 
-  time = mktime((FAR struct tm *)&alarminfo->time);
+  time = timegm((FAR struct tm *)&alarminfo->time);
 
   pl031_putreg(time, priv->base, PL031_RTCMR);
   pl031_putreg(1, priv->base, PL031_RTCIMSC);

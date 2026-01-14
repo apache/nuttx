@@ -59,7 +59,7 @@ of the allocated memory.
 of the block that provides the same information that was previously
 provided by a kludgy, auto-generated header file (user_map.h).
 - Basic support implemented for the ARMv7-M family with fragments
-also implemetned for the ARMv6-M and MIPS32 families.
+also implemented for the ARMv6-M and MIPS32 families.
 - Kernel build supported added for the LPC17xx Open1788 and for
 the Atmel SAM3U-EK board. All testing is being performed on the
 Open1788 board.

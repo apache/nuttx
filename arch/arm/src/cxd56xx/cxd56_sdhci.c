@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_sdhci.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1358,6 +1360,8 @@ static sdio_capset_t cxd56_sdio_capabilities(struct sdio_dev_s *dev)
 
 #ifdef CONFIG_CXD56_SDIO_WIDTH_D1_ONLY
   caps |= SDIO_CAPS_1BIT_ONLY;
+#else
+  caps |= SDIO_CAPS_4BIT;
 #endif
 #ifdef CONFIG_CXD56_SDIO_DMA
   caps |= SDIO_CAPS_DMASUPPORTED;
@@ -2185,7 +2189,7 @@ static int cxd56_sdio_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
  *
  * Returned Value:
  *   Number of bytes sent on success; a negated errno on failure.  Here a
- *   failure means only a faiure to obtain the requested response (due to
+ *   failure means only a failure to obtain the requested response (due to
  *   transport problem -- timeout, CRC, etc.).  The implementation only
  *   assures that the response is returned intacta and does not check errors
  *   within the response itself.
@@ -3334,7 +3338,7 @@ void cxd56_sdhci_mediachange(struct sdio_dev_s *dev)
               break;
             }
 
-          nxsig_usleep(100000);
+          nxsched_usleep(100000);
           timeout -= 100000;
         }
     }

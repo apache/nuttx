@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/utils/net_cmsg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -79,7 +81,7 @@ FAR void *cmsg_append(FAR struct msghdr *msg, int level, int type,
       memcpy(cmsgdata, value, value_len);
     }
 
-  msg->msg_control     = (char *)msg->msg_control + cmsgspace;
+  msg->msg_control     = (FAR char *)msg->msg_control + cmsgspace;
   msg->msg_controllen -= cmsgspace;
 
   return cmsgdata;

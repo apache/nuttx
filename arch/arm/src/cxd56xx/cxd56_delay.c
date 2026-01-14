@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_delay.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,7 +39,11 @@
 #ifdef CONFIG_CXD56_USE_SYSBUS
 #  define CXD56XX_LOOPSPERMSEC_156MHZ 15533ull
 #else
-#  define CXD56XX_LOOPSPERMSEC_156MHZ 7428ull
+#  ifdef CONFIG_CXD56_SUBCORE
+#    define CXD56XX_LOOPSPERMSEC_156MHZ 10405ull
+#  else
+#    define CXD56XX_LOOPSPERMSEC_156MHZ 7428ull
+#  endif
 #endif
 
 #define CXD56XX_LOOPSPERMSEC_BY_CLOCK(clock) \

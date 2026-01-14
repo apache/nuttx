@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv8-m/nvic.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -205,7 +207,7 @@
 #define NVIC_CPUID_BASE_OFFSET          0x0d00 /* CPUID base register */
 #define NVIC_INTCTRL_OFFSET             0x0d04 /* Interrupt control state register */
 #define NVIC_VECTAB_OFFSET              0x0d08 /* Vector table offset register */
-#define NVIC_AIRCR_OFFSET               0x0d0c /* Application interrupt/reset control registr */
+#define NVIC_AIRCR_OFFSET               0x0d0c /* Application interrupt/reset control register */
 #define NVIC_SYSCON_OFFSET              0x0d10 /* System control register */
 #define NVIC_CFGCON_OFFSET              0x0d14 /* Configuration control register */
 #define NVIC_SYSH_PRIORITY_OFFSET(n)    (0x0d14 + 4*((n) >> 2))

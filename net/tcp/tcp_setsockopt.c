@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp_setsockopt.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -214,6 +216,7 @@ int tcp_setsockopt(FAR struct socket *psock, int option,
 #endif /* CONFIG_NET_TCP_KEEPALIVE */
 
       case TCP_NODELAY: /* Avoid coalescing of small segments. */
+      case TCP_CORK:    /* coalescing of small segments. */
         if (value_len != sizeof(int))
           {
             ret = -EDOM;
@@ -222,9 +225,11 @@ int tcp_setsockopt(FAR struct socket *psock, int option,
           {
             int nodelay = *(FAR int *)value;
 
-            if (!nodelay)
+            if ((!nodelay && option == TCP_NODELAY) ||
+                (nodelay && option == TCP_CORK))
               {
-                nerr("ERROR: TCP_NODELAY not supported\n");
+                nerr("ERROR: %s not supported\n",
+                     option == TCP_NODELAY ? "TCP_NODELAY" : "TCP_CORK");
                 ret = -ENOSYS;
               }
           }

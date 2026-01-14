@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/cxd56xx/spresense/src/cxd56_power.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -234,7 +236,7 @@ int board_power_control(int target, bool en)
 
       if (!g_rtc_enabled && (PMIC_GET_TYPE(target) == PMIC_TYPE_GPO))
         {
-          nxsig_usleep(1);
+          nxsched_usleep(1);
         }
     }
 
@@ -272,7 +274,7 @@ int board_power_control_tristate(int target, int value)
 
       if (!g_rtc_enabled)
         {
-          nxsig_usleep(1);
+          nxsched_usleep(1);
         }
     }
   else if (PMIC_GET_TYPE(target) == CHIP_TYPE_GPIO)
@@ -540,7 +542,7 @@ int board_reset(int status)
 {
   board_power_control(PMIC_TYPE_GPO | g_reset_gpo_targets, false);
 
-  /* Restore the original state for bootup after power cycle  */
+  /* Restore the original state for boot up after power cycle  */
 
   if (!up_interrupt_context())
     {

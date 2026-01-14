@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/semaphore.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,6 +51,10 @@
 
 #define SEM_FAILED                NULL
 
+#ifndef CONFIG_SEM_PREALLOCHOLDERS
+#  define CONFIG_SEM_PREALLOCHOLDERS 0
+#endif
+
 /****************************************************************************
  * Public Type Declarations
  ****************************************************************************/
@@ -65,9 +71,9 @@ struct semholder_s
   FAR struct semholder_s *flink;  /* List of semaphore's holder            */
 #endif
   FAR struct semholder_s *tlink;  /* List of task held semaphores          */
-  FAR struct sem_s *sem;          /* Ths corresponding semaphore           */
-  FAR struct tcb_s *htcb;         /* Ths corresponding TCB                 */
-  int16_t counts;                 /* Number of counts owned by this holder */
+  FAR struct sem_s *sem;          /* The corresponding semaphore           */
+  FAR struct tcb_s *htcb;         /* The corresponding TCB                 */
+  int32_t counts;                 /* Number of counts owned by this holder */
 };
 
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
@@ -98,8 +104,16 @@ struct semholder_s
 
 struct sem_s
 {
-  volatile int16_t semcount;     /* >0 -> Num counts available */
-                                 /* <0 -> Num tasks waiting for semaphore */
+  union
+    {
+      volatile int32_t semcount;     /* >0 -> Num counts available */
+                                     /* <0 -> Num tasks waiting for semaphore */
+      volatile uint32_t mholder;     /* == NXSEM_NO_MHOLDER -> mutex has no holder */
+                                     /* == NXSEM_RESET -> mutex has been reset */
+                                     /* Otherwise: */
+                                     /*   bits[30:0]: TID of the current holder */
+                                     /*   bit [31]: Mutex is blocking some task */
+    } val;
 
   /* If priority inheritance is enabled, then we have to keep track of which
    * tasks hold references to the semaphore.
@@ -109,12 +123,20 @@ struct sem_s
 
   dq_queue_t waitlist;
 
+#ifdef CONFIG_CUSTOM_SEMAPHORE_MAXVALUE
+  int32_t maxvalue;
+#endif
+
 #ifdef CONFIG_PRIORITY_INHERITANCE
 #  if CONFIG_SEM_PREALLOCHOLDERS > 0
   FAR struct semholder_s *hhead; /* List of holders of semaphore counts */
 #  else
   struct semholder_s holder;     /* Slot for old and new holder */
 #  endif
+#endif
+#ifdef CONFIG_PRIORITY_PROTECT
+  uint8_t ceiling;               /* The priority ceiling owned by mutex  */
+  uint8_t saved;                 /* The saved priority of thread before boost */
 #endif
 };
 
@@ -127,18 +149,18 @@ typedef struct sem_s sem_t;
 /* semcount, flags, waitlist, hhead */
 
 #    define SEM_INITIALIZER(c) \
-       {(c), 0, SEM_WAITLIST_INITIALIZER, NULL}
+       {{(c)}, 0, SEM_WAITLIST_INITIALIZER, NULL}
 #  else
 /* semcount, flags, waitlist, holder[2] */
 
 #    define SEM_INITIALIZER(c) \
-       {(c), 0, SEM_WAITLIST_INITIALIZER, SEMHOLDER_INITIALIZER}
+       {{(c)}, 0, SEM_WAITLIST_INITIALIZER, SEMHOLDER_INITIALIZER}
 #  endif
 #else
 /* semcount, flags, waitlist */
 
 #  define SEM_INITIALIZER(c) \
-     {(c), 0, SEM_WAITLIST_INITIALIZER}
+     {{(c)}, 0, SEM_WAITLIST_INITIALIZER}
 #endif
 
 #define SEM_WAITLIST(sem)       (&((sem)->waitlist))

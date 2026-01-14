@@ -11,16 +11,43 @@ choice
 	prompt "ARM MPS Configuration"
 	default ARCH_CHIP_MPS3_AN547
 
-config ARCH_CHIP_MPS3_AN547
-	bool "MPS3 AN547 Processor Cortexm55"
-	select ARCH_CORTEXM55
+config ARCH_CHIP_MPS2_AN386
+	bool "MPS2 AN386 Processor Cortexm4"
+	select ARCH_CORTEXM4
+	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
+	select ARCH_HAVE_FPU
+	select ARMV7M_HAVE_STACKCHECK
+
+config ARCH_CHIP_MPS2_AN500
+	bool "MPS2 AN500 Processor Cortexm7"
+	select ARCH_CORTEXM7
+	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
+	select ARCH_HAVE_FPU
+	select ARMV7M_HAVE_STACKCHECK
+
+config ARCH_CHIP_MPS2_AN521
+	bool "MPS2 AN521 Processor Cortexm33"
+	select ARCH_CORTEXM33
+	select ARCH_HAVE_MPU
+	select ARM_HAVE_MPU_UNIFIED
 
 config ARCH_CHIP_MPS3_AN524
 	bool "MPS3 AN524 Processor Cortexm33"
 	select ARCH_CORTEXM33
 
-endchoice
+config ARCH_CHIP_MPS3_AN547
+	bool "MPS3 AN547 Processor Cortexm55"
+	select ARCH_CORTEXM55
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FPU
+	select ARM_HAVE_MVE
+	select ARCH_HAVE_TEXT_HEAP
+	select ARCH_HAVE_DATA_HEAP
 
-endmenu
+endchoice # ARM MPS Configuration
 
-endif
+endmenu # MPS Chip Selection
+
+endif # ARCH_CHIP_MPS

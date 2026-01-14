@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm/src/armv7-r/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -59,6 +61,6 @@ endif
 
 ifeq ($(CONFIG_SMP),y)
   CMN_ASRCS += arm_cpuhead.S
-  CMN_CSRCS += arm_cpuindex.c arm_cpustart.c arm_cpupause.c
+  CMN_CSRCS += arm_cpustart.c arm_smpcall.c
   CMN_CSRCS += arm_cpuidlestack.c arm_scu.c
 endif

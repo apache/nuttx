@@ -50,11 +50,18 @@
 #include "hal/cache_types.h"
 #include "hal/cache_ll.h"
 #include "hal/cache_hal.h"
+#include "hal/sar_ctrl_ll.h"
 #include "rom/spi_flash.h"
+#include "esp_private/cache_utils.h"
+#include "esp_private/startup_internal.h"
 
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
 #  include "bootloader_init.h"
 #endif
+
+#include "bootloader_random.h"
+#include "bootloader_soc.h"
+#include "esp_clk_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -69,7 +76,7 @@
 #if defined(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT) || \
     defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
 #  ifdef CONFIG_ESP32S2_APP_FORMAT_MCUBOOT
-#    define PRIMARY_SLOT_OFFSET   CONFIG_ESP32S2_OTA_PRIMARY_SLOT_OFFSET
+#    define PRIMARY_SLOT_OFFSET   CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET
 #  else
      /* Force offset to the beginning of the whole image */
 
@@ -94,34 +101,6 @@ extern uint8_t _image_drom_vma[];
 extern uint8_t _image_drom_lma[];
 extern uint8_t _image_drom_size[];
 #endif
-
-typedef enum
-{
-  CACHE_MEMORY_INVALID     = 0,
-  CACHE_MEMORY_ICACHE_LOW  = 1 << 0,
-  CACHE_MEMORY_ICACHE_HIGH = 1 << 1,
-  CACHE_MEMORY_DCACHE_LOW  = 1 << 2,
-  CACHE_MEMORY_DCACHE_HIGH = 1 << 3,
-} cache_layout_t;
-
-typedef enum
-{
-  CACHE_SIZE_HALF = 0,                /* 8KB for icache and dcache */
-  CACHE_SIZE_FULL = 1,                /* 16KB for icache and dcache */
-} cache_size_t;
-
-typedef enum
-{
-  CACHE_4WAYS_ASSOC = 0,              /* 4 way associated cache */
-  CACHE_8WAYS_ASSOC = 1,              /* 8 way associated cache */
-} cache_ways_t;
-
-typedef enum
-{
-  CACHE_LINE_SIZE_16B = 0,            /* 16 Byte cache line size */
-  CACHE_LINE_SIZE_32B = 1,            /* 32 Byte cache line size */
-  CACHE_LINE_SIZE_64B = 2,            /* 64 Byte cache line size */
-} cache_line_size_t;
 
 #define CACHE_SIZE_8KB  CACHE_SIZE_HALF
 #define CACHE_SIZE_16KB CACHE_SIZE_FULL
@@ -180,62 +159,6 @@ uint32_t g_idlestack[IDLETHREAD_STACKWORDS]
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: esp_config_data_cache_mode
- *
- * Description:
- *   Configure the data cache mode to use with PSRAM.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-IRAM_ATTR void esp_config_data_cache_mode(void)
-{
-    cache_size_t cache_size;
-    cache_ways_t cache_ways;
-    cache_line_size_t cache_line_size;
-
-#if defined(CONFIG_ESP32S2_INSTRUCTION_CACHE_8KB)
-#if defined(CONFIG_ESP32S2_DATA_CACHE_8KB)
-    cache_allocate_sram(CACHE_MEMORY_ICACHE_LOW, CACHE_MEMORY_DCACHE_LOW,
-                        CACHE_MEMORY_INVALID, CACHE_MEMORY_INVALID);
-    cache_size = CACHE_SIZE_8KB;
-#else
-    cache_allocate_sram(CACHE_MEMORY_ICACHE_LOW, CACHE_MEMORY_DCACHE_LOW,
-                        CACHE_MEMORY_DCACHE_HIGH, CACHE_MEMORY_INVALID);
-    cache_size = CACHE_SIZE_16KB;
-#endif
-#else
-#if defined(CONFIG_ESP32S2_DATA_CACHE_8KB)
-    cache_allocate_sram(CACHE_MEMORY_ICACHE_LOW, CACHE_MEMORY_ICACHE_HIGH,
-                        CACHE_MEMORY_DCACHE_LOW, CACHE_MEMORY_INVALID);
-    cache_size = CACHE_SIZE_8KB;
-#else
-    cache_allocate_sram(CACHE_MEMORY_ICACHE_LOW, CACHE_MEMORY_ICACHE_HIGH,
-                        CACHE_MEMORY_DCACHE_LOW, CACHE_MEMORY_DCACHE_HIGH);
-    cache_size = CACHE_SIZE_16KB;
-#endif
-#endif
-
-    cache_ways = CACHE_4WAYS_ASSOC;
-#if defined(CONFIG_ESP32S2_DATA_CACHE_LINE_16B)
-    cache_line_size = CACHE_LINE_SIZE_16B;
-#else
-    cache_line_size = CACHE_LINE_SIZE_32B;
-#endif
-    merr("Data cache \t\t: size %dKB, %dWays, cache line size %dByte",
-         cache_size == CACHE_SIZE_8KB ? 8 : 16, 4,
-         cache_line_size == CACHE_LINE_SIZE_16B ? 16 : 32);
-
-    cache_set_dcache_mode(cache_size, cache_ways, cache_line_size);
-    cache_invalidate_dcache_all();
-}
 
 /****************************************************************************
  * Name: configure_cpu_caches
@@ -346,6 +269,17 @@ static void noreturn_function IRAM_ATTR __esp32s2_start(void)
     }
 #endif
 
+  /* Initialize peripherals parameters */
+
+  esp_perip_clk_init();
+
+  /* RNG is enabled during boot and must be disabled otherwise
+   * Wi-Fi gets unstable.
+   */
+
+  bootloader_random_disable();
+  bootloader_ana_clock_glitch_reset_config(false);
+
   /* The 2nd stage bootloader enables RTC WDT to check on startup sequence
    * related issues in application. Hence disable that as we are about to
    * start the NuttX environment.
@@ -388,7 +322,13 @@ static void noreturn_function IRAM_ATTR __esp32s2_start(void)
   else
     {
       esp_spiram_init_cache();
-      esp_spiram_test();
+#  if defined(CONFIG_ESP32S2_SPIRAM_MEMTEST)
+      if (esp_spiram_test() != OK)
+        {
+            ets_printf("SPIRAM test failed\n");
+            PANIC();
+        }
+#  endif // CONFIG_ESP32S2_SPIRAM_MEMTEST
     }
 #endif
 
@@ -401,6 +341,10 @@ static void noreturn_function IRAM_ATTR __esp32s2_start(void)
   esp32s2_board_initialize();
 
   showprogress('B');
+
+  SYS_STARTUP_FN();
+
+  showprogress('C');
 
   /* Bring up NuttX */
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tlsr82/chip/b87/boot/cstartup_flash.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -21,7 +23,7 @@
 #include <nuttx/config.h>
 #include <arch/chip/irq.h>
 
-#define SRAM_SIZE_32K_EN				0 /* defaut sram size=64k */
+#define SRAM_SIZE_32K_EN				0 /* default sram size=64k */
 
 #define FLL_STK_EN					1
 #define ZERO_IC_TAG_EN					1

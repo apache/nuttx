@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/fat/fs_fat32dirent.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -146,7 +148,7 @@ static int fat_putsfdirentry(FAR struct fat_mountpt_s *fs,
                              uint8_t attributes, uint32_t fattime);
 
 #if defined(CONFIG_FAT_LFN) && defined(CONFIG_FAT_LFN_UTF8)
-static int fat_utf8toucs(FAR const char **str, lfnchar *ucs);
+static int fat_utf8toucs(FAR const char **str, FAR lfnchar *ucs);
 static int fat_ucstoutf8(FAR uint8_t *dest, uint8_t offset, lfnchar ucs);
 #endif
 
@@ -162,7 +164,7 @@ static int fat_ucstoutf8(FAR uint8_t *dest, uint8_t offset, lfnchar ucs);
  *
  ****************************************************************************/
 #if defined(CONFIG_FAT_LFN) && defined(CONFIG_FAT_LFN_UTF8)
-static int fat_utf8toucs(FAR const char **str, lfnchar *ucs)
+static int fat_utf8toucs(FAR const char **str, FAR lfnchar *ucs)
 {
   uint8_t chr;
   lfnchar tucs;
@@ -360,6 +362,13 @@ static inline int fat_parsesfname(FAR const char **path,
 #ifdef CONFIG_FAT_LCNAMES
           dirinfo->fd_ntflags = ntlcfound & ntlcenable;
 #endif
+          /* Ignore sequences of //... in the filename */
+
+          while (node && *node == '/')
+            {
+              node++;
+            }
+
           *terminator = ch;
           *path       = node;
           return OK;
@@ -598,6 +607,13 @@ static inline int fat_parselfname(FAR const char **path,
 
           dirinfo->fd_lfname[ndx] = '\0';
 
+          /* Ignore sequences of //... in the filename */
+
+          while (node && *node == '/')
+            {
+              node++;
+            }
+
           /* Return the remaining sub-string and the terminating character. */
 
           *terminator = (char)ch;
@@ -669,14 +685,14 @@ errout:
 #ifdef CONFIG_FAT_LFN
 static inline int fat_createalias(FAR struct fat_dirinfo_s *dirinfo)
 {
-  uint8_t  ch;        /* Current character being processed */
-  lfnchar *ext;       /* Pointer to the extension substring */
-  lfnchar *src;       /* Pointer to the long file name source */
-  int      len;       /* Total length of the long file name */
-  int      namechars; /* Number of characters available in long name */
-  int      extchars;  /* Number of characters available in long name extension */
-  int      endndx;    /* Maximum index into the short name array */
-  int      ndx;       /* Index to store next character */
+  uint8_t      ch;        /* Current character being processed */
+  FAR lfnchar *ext;       /* Pointer to the extension substring */
+  FAR lfnchar *src;       /* Pointer to the long file name source */
+  int          len;       /* Total length of the long file name */
+  int          namechars; /* Number of characters available in long name */
+  int          extchars;  /* Number of characters available in long name extension */
+  int          endndx;    /* Maximum index into the short name array */
+  int          ndx;       /* Index to store next character */
 
   /* First, let's decide what is name and what is extension */
 
@@ -1829,8 +1845,8 @@ static inline int fat_getsfname(FAR uint8_t *direntry, FAR char *buffer,
 
       /* In this version, we never write 0xe5 in the directory filenames
        * (because we do not handle any character sets where 0xe5 is valid
-       * in a filaname), but we could eencounter this in a filesystem
-       * written by some other system
+       * in a filename), but we could eencounter this in a filesystem
+       * written by some other system.
        */
 
       if (ndx == 0 && ch == DIR0_E5)
@@ -3109,7 +3125,7 @@ int fat_remove(FAR struct fat_mountpt_s *fs, FAR const char *relpath,
 {
   struct fat_dirinfo_s dirinfo;
   uint32_t             dircluster;
-  uint8_t             *direntry;
+  FAR uint8_t         *direntry;
   int                  ret;
 
   /* Find the directory entry referring to the entry to be deleted */

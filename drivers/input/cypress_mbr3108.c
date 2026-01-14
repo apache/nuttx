@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/input/cypress_mbr3108.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -184,19 +186,19 @@ struct mbr3108_dev_s
 {
   /* I2C bus and address for device. */
 
-  struct i2c_master_s *i2c;
+  FAR struct i2c_master_s *i2c;
   uint8_t addr;
 
   /* Configuration for device. */
 
-  struct mbr3108_board_s *board;
-  const struct mbr3108_sensor_conf_s *sensor_conf;
+  FAR struct mbr3108_board_s *board;
+  FAR const struct mbr3108_sensor_conf_s *sensor_conf;
   mutex_t devlock;
   uint8_t cref;
   struct mbr3108_debug_conf_s debug_conf;
   bool int_pending;
 
-  struct pollfd *fds[CONFIG_INPUT_CYPRESS_MBR3108_NPOLLWAITERS];
+  FAR struct pollfd *fds[CONFIG_INPUT_CYPRESS_MBR3108_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -234,7 +236,7 @@ static const struct file_operations g_mbr3108_fileops =
  ****************************************************************************/
 
 static int mbr3108_i2c_write(FAR struct mbr3108_dev_s *dev, uint8_t reg,
-                             const uint8_t *buf, size_t buflen)
+                             FAR const uint8_t *buf, size_t buflen)
 {
   struct i2c_msg_s msgv[2] =
   {
@@ -282,7 +284,7 @@ static int mbr3108_i2c_write(FAR struct mbr3108_dev_s *dev, uint8_t reg,
 }
 
 static int mbr3108_i2c_read(FAR struct mbr3108_dev_s *dev, uint8_t reg,
-                            uint8_t *buf, size_t buflen)
+                            FAR uint8_t *buf, size_t buflen)
 {
   struct i2c_msg_s msgv[2] =
   {
@@ -401,7 +403,7 @@ static int mbr3108_save_check_crc(FAR struct mbr3108_dev_s *dev)
       return ret;
     }
 
-  nxsig_usleep(MBR3108_CMD_MSECS_CHECK_CONFIG_CRC * 1000);
+  nxsched_usleep(MBR3108_CMD_MSECS_CHECK_CONFIG_CRC * 1000);
 
   ret = mbr3108_check_cmd_status(dev);
   if (ret != 0)
@@ -425,7 +427,7 @@ static int mbr3108_software_reset(FAR struct mbr3108_dev_s *dev)
       return ret;
     }
 
-  nxsig_usleep(MBR3108_CMD_MSECS_SOFTWARE_RESET * 1000);
+  nxsched_usleep(MBR3108_CMD_MSECS_SOFTWARE_RESET * 1000);
 
   ret = mbr3108_check_cmd_status(dev);
   if (ret != 0)
@@ -470,7 +472,7 @@ static int mbr3108_clear_latched(FAR struct mbr3108_dev_s *dev)
       return ret;
     }
 
-  nxsig_usleep(MBR3108_CMD_MSECS_CLEAR_LATCHED * 1000);
+  nxsched_usleep(MBR3108_CMD_MSECS_CLEAR_LATCHED * 1000);
 
   ret = mbr3108_check_cmd_status(dev);
   if (ret != 0)
@@ -886,7 +888,7 @@ static int mbr3108_open(FAR struct file *filep)
 
       /* Let chip to power up before probing */
 
-      nxsig_usleep(100 * 1000);
+      nxsched_usleep(100 * 1000);
 
       /* Check that device exists on I2C. */
 
@@ -1075,13 +1077,14 @@ static int mbr3108_isr_handler(int irq, FAR void *context, FAR void *arg)
  * Public Functions
  ****************************************************************************/
 
-int cypress_mbr3108_register(FAR const char *devpath,
-                             FAR struct i2c_master_s *i2c_dev,
-                             uint8_t i2c_devaddr,
-                             struct mbr3108_board_s *board_config,
-                             const struct mbr3108_sensor_conf_s *sensor_conf)
+int
+cypress_mbr3108_register(FAR const char *devpath,
+                         FAR struct i2c_master_s *i2c_dev,
+                         uint8_t i2c_devaddr,
+                         FAR struct mbr3108_board_s *board_config,
+                         FAR const struct mbr3108_sensor_conf_s *sensor_conf)
 {
-  struct mbr3108_dev_s *priv;
+  FAR struct mbr3108_dev_s *priv;
   int ret = 0;
 
   /* Allocate device private structure. */

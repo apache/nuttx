@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sparc/src/sparc_v8/sparc_v8_syscall.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The

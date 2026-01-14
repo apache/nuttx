@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/mpfs_ihc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,7 +44,6 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/wqueue.h>
 
-#include <nuttx/rptun/openamp.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/drivers/addrenv.h>
 #include <nuttx/list.h>
@@ -375,7 +376,7 @@ static uint32_t mpfs_ihc_context_to_local_hart_id(ihc_channel_t channel)
   uint32_t hart             = UNDEFINED_HART_ID;
   uint32_t hart_idx         = 0;
   uint32_t harts_in_context = LIBERO_SETTING_CONTEXT_B_HART_EN;
-  uint64_t mhartid          = riscv_mhartid();
+  uint64_t mhartid          = up_cpu_index();
 
   /* If we are sending to a Context, assume we are a Context.
    * i.e. HSS bootloader will not send directly to a context.
@@ -576,7 +577,7 @@ static void mpfs_ihc_rx_message(ihc_channel_t channel, uint32_t mhartid,
  *
  * Description:
  *   This is called from the interrupt handler. This figures out the actions
- *   based on the information retieved from the subsequent functions.
+ *   based on the information retrieved from the subsequent functions.
  *
  * Input Parameters:
  *   None
@@ -588,7 +589,7 @@ static void mpfs_ihc_rx_message(ihc_channel_t channel, uint32_t mhartid,
 
 static void mpfs_ihc_message_present_isr(void)
 {
-  uint64_t mhartid = riscv_mhartid();
+  uint64_t mhartid = up_cpu_index();
   bool is_ack = false;
   bool is_msg = false;
 
@@ -1174,7 +1175,7 @@ static int mpfs_echo_ping_init(struct rpmsg_device *rdev,
  *
  * Description:
  *   Callback that is called when the underlying rpmsg device has been
- *   created. This is used to initialize the ping enpoint at the proper
+ *   created. This is used to initialize the ping endpoint at the proper
  *   time.
  *
  * Input Parameters:
@@ -1307,7 +1308,7 @@ static int mpfs_rptun_thread(int argc, char *argv[])
 
 int mpfs_ihc_init(void)
 {
-  uint32_t  mhartid = (uint32_t)riscv_mhartid();
+  uint32_t  mhartid = (uint32_t)up_cpu_index();
 #ifdef MPFS_RPTUN_USE_THREAD
   char     *argv[3];
   char      arg1[19];

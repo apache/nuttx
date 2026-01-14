@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_spi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -404,7 +406,7 @@ static struct sam_spidev_s g_spi1dev =
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 
@@ -1155,7 +1157,7 @@ static int spi_setdelay(struct spi_dev_s *dev, uint32_t startdelay,
   regval |= (uint32_t) dlybs << SPI_CSR_DLYBS_SHIFT;
   spi_putreg(spi, regval, offset);
 
-  /* stopdelay = DLYBCT: Delay Between Consecutive Transfers.
+  /* ifdelay = DLYBCT: Delay Between Consecutive Transfers.
    * This field defines the delay between two consecutive transfers with the
    * same peripheral without removing the chip select. The delay is always
    * inserted after each transfer and before removing the chip select if
@@ -1169,7 +1171,7 @@ static int spi_setdelay(struct spi_dev_s *dev, uint32_t startdelay,
    */
 
   dlybct  = SAM_SPI_CLOCK;
-  dlybct *= stopdelay;
+  dlybct *= ifdelay;
   dlybct /= 1000000000;
   dlybct /= 32;
   regval  = spi_getreg(spi, offset);

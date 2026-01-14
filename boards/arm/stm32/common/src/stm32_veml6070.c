@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/common/src/stm32_veml6070.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,7 +30,6 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/spi/spi.h>
 #include <nuttx/sensors/veml6070.h>
 
 #include "stm32.h"
@@ -99,7 +100,7 @@ int board_veml6070_initialize(int devno, int busno)
 
   /* Then register the light sensor */
 
-  snprintf(devpath, 14, "/dev/uvlight%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/uvlight%d", devno);
   ret = veml6070_register(devpath, i2c, VEML6070_I2C_DATA_LSB_CMD_ADDR);
   if (ret < 0)
     {

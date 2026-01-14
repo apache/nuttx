@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/litex/hardware/litex_memorymap.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,7 +37,7 @@
 
 /* Register Base Address ****************************************************/
 
-#ifdef CONFIG_LITEX_CORE_VEXRISCV_SMP
+#if defined(CONFIG_LITEX_CORE_VEXRISCV_SMP) || defined(CONFIG_LITEX_CORE_VEXIIRISCV)
     #define LITEX_CLINT_BASE        0xf0010000
     #define LITEX_PLIC_BASE         0xf0c00000
     #define LITEX_ETHMAC_BASE       0xf0002000

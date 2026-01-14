@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/binfmt/ieee695.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -398,7 +400,7 @@ struct ieee695_lheadr_s
   uint8_t name[1];         /* Name string data begins here */
 };
 
-/* 88H COMENT - Comment Record */
+/* 88H COMMENT - Comment Record */
 
 struct ieee695_coment_s
 {

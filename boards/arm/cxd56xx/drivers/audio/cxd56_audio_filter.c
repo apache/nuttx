@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/cxd56xx/drivers/audio/cxd56_audio_filter.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -63,7 +65,7 @@ void cxd56_audio_filter_set_dnc(cxd56_audio_dnc_id_t id,
                                 bool en,
                                 cxd56_audio_dnc_bin_t *bin)
 {
-  /* Desable DNC. */
+  /* Disable DNC. */
 
   cxd56_audio_ac_reg_disable_dnc(id);
 

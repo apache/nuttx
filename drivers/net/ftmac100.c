@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/net/ftmac100.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -135,8 +137,8 @@
 
 #define INT_MASK_ALL_DISABLED 0
 
-#define putreg32(v, x) (*(volatile uint32_t*)(x) = (v))
-#define getreg32(x) (*(uint32_t *)(x))
+#define putreg32(v, x) (*(FAR volatile uint32_t*)(x) = (v))
+#define getreg32(x) (*(FAR volatile uint32_t *)(x))
 
 /****************************************************************************
  * Private Types
@@ -190,7 +192,7 @@ static struct ftmac100_driver_s g_ftmac100[CONFIG_FTMAC100_NINTERFACES]
 /* Common TX logic */
 
 static int  ftmac100_transmit(FAR struct ftmac100_driver_s *priv);
-static int  ftmac100_txpoll(struct net_driver_s *dev);
+static int  ftmac100_txpoll(FAR struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -337,7 +339,7 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
  *
  ****************************************************************************/
 
-static int ftmac100_txpoll(struct net_driver_s *dev)
+static int ftmac100_txpoll(FAR struct net_driver_s *dev)
 {
   FAR struct ftmac100_driver_s *priv =
     (FAR struct ftmac100_driver_s *)dev->d_private;
@@ -620,7 +622,7 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
         }
 
       len = FTMAC100_RXDES0_RFL(rxdes->rxdes0);
-      data = (uint8_t *)rxdes->rxdes2;
+      data = (FAR uint8_t *)rxdes->rxdes2;
 
       ninfo ("RX buffer %d (%08x), %x received (%d)\n",
              priv->rx_pointer, data, len,
@@ -807,7 +809,7 @@ static void ftmac100_interrupt_work(FAR void *arg)
 
   /* Process pending Ethernet interrupts */
 
-  net_lock();
+  netdev_lock(&priv->ft_dev);
   status = priv->status;
 
   ninfo("status=%08x(%08x) BASE=%p ISR=%p PHYCR=%p\n",
@@ -881,7 +883,7 @@ out:
   putreg32 (INT_MASK_ALL_ENABLED, &iobase->imr);
 
   ninfo("ISR-done\n");
-  net_unlock();
+  netdev_unlock(&priv->ft_dev);
 
   /* Re-enable Ethernet interrupts */
 
@@ -970,12 +972,12 @@ static void ftmac100_txtimeout_work(FAR void *arg)
 
   /* Process pending Ethernet interrupts */
 
-  net_lock();
+  netdev_lock(&priv->ft_dev);
 
   /* Then poll the network for new XMIT data */
 
   devif_poll(&priv->ft_dev, ftmac100_txpoll);
-  net_unlock();
+  netdev_unlock(&priv->ft_dev);
 }
 
 /****************************************************************************
@@ -1135,7 +1137,7 @@ static void ftmac100_txavail_work(FAR void *arg)
 
   /* Perform the poll */
 
-  net_lock();
+  netdev_lock(&priv->ft_dev);
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -1150,7 +1152,7 @@ static void ftmac100_txavail_work(FAR void *arg)
       devif_poll(&priv->ft_dev, ftmac100_txpoll);
     }
 
-  net_unlock();
+  netdev_unlock(&priv->ft_dev);
 }
 
 /****************************************************************************

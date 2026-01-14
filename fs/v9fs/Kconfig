@@ -1,0 +1,29 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config FS_V9FS
+	bool "V9FS file system"
+	default n
+	depends on !DISABLE_MOUNTPOINT
+	---help---
+		Enable V9FS filesystem support
+
+if FS_V9FS
+
+config V9FS_DEFAULT_MSIZE
+	int "V9FS Default message max size"
+	default 65536
+
+config V9FS_VIRTIO_9P
+	bool "Virtio 9P support"
+	depends on DRIVERS_VIRTIO
+	default n
+
+config V9FS_SOCKET_9P
+	bool "Socket 9P support"
+	depends on NET_TCP
+	default n
+
+endif

@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm/src/Makefile
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -18,7 +20,7 @@
 #
 ############################################################################
 
-include $(TOPDIR)/tools/apps-or-nuttx-Make.defs
+include $(TOPDIR)/tools/Make.defs
 include chip/Make.defs
 
 ifeq ($(CONFIG_ARCH_ARMV7A),y)          # ARMv7-A
@@ -117,7 +119,7 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
     LDENDGROUP   ?= -Wl,--end-group
     LDFLAGS      := $(addprefix -Xlinker ,$(LDFLAGS))
     LDFLAGS      += $(filter-out $(STRIPCFLAGS),$(CFLAGS))
-  else
+  else ifneq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
     LDSTARTGROUP ?= --start-group
     LDENDGROUP   ?= --end-group
   endif
@@ -154,6 +156,7 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_IAR),y)
   VPATH += common$(DELIM)iar
 else # ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
   VPATH += common$(DELIM)gnu
+  VPATH += common$(DELIM)ghs
 endif
 
 all: $(HEAD_OBJ) $(BIN)
@@ -166,11 +169,14 @@ $(AOBJS) $(UAOBJS) $(HEAD_OBJ): %$(OBJEXT): %.S
 $(COBJS) $(UCOBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
+$(STARTUP_OBJS): %$(OBJEXT): %.c
+	$(Q) $(CC) $(CELFFLAGS) -c common$(DELIM)crt0.c -o crt0$(OBJEXT)
+
 ifeq ($(CONFIG_BUILD_FLAT),y)
-$(BIN): $(OBJS)
+$(BIN): $(STARTUP_OBJS) $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 else
-$(BIN): $(UOBJS)
+$(BIN): $(STARTUP_OBJS) $(UOBJS)
 	$(call ARCHIVE, $@, $(UOBJS))
 endif
 
@@ -195,10 +201,10 @@ define LINK_ALLSYMS_KASAN
 	$(Q) $(call COMPILE, allsyms.tmp, allsyms$(OBJEXT), -x c)
 	$(Q) $(call DELFILE, allsyms.tmp))
 	$(if $(CONFIG_MM_KASAN_GLOBAL),
-	$(Q) $(TOPDIR)/tools/kasan_global.py -e $(NUTTX) -o kasan_globals.tmp
+	$(Q) $(TOPDIR)/tools/kasan_global.py -e $(NUTTX) -o kasan_globals.tmp -a $(CONFIG_MM_KASAN_GLOBAL_ALIGN)
 	$(Q) $(call COMPILE, kasan_globals.tmp, kasan_globals$(OBJEXT) -fno-sanitize=kernel-address, -x c)
 	$(Q) $(call DELFILE, kasan_globals.tmp))
-	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
+	$(Q) $(LD) $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \
 		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 endef
@@ -209,7 +215,7 @@ $(addsuffix .tmp,$(ARCHSCRIPT)): $(ARCHSCRIPT)
 nuttx$(EXEEXT): $(HEAD_OBJ) board$(DELIM)libboard$(LIBEXT) $(addsuffix .tmp,$(ARCHSCRIPT))
 	$(Q) echo "LD: nuttx"
 ifeq ($(CONFIG_ALLSYMS)$(CONFIG_MM_KASAN_GLOBAL),)
-	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
+	$(Q) $(LD) $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \
 		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 else

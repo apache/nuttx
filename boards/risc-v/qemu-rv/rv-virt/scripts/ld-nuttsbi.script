@@ -1,0 +1,204 @@
+/****************************************************************************
+ * boards/risc-v/qemu-rv/rv-virt/scripts/ld-nuttsbi.script
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+/* We use a linear layout of zones: kflash, ksram and pgpool. They are
+ * defined by CONFIG_RAM_xx and CONFIG_ARCH_PGPOOL_xx as below:
+ *
+ * |>--- CONFIG_RAM_SIZE ------------------------------------<|
+ * |                           |>- CONFIG_ARCH_PGPOOL_SIZE --<|
+ * +-------------+-------------+------------------------------+
+ * | kflash/text :  ksram zone | pgpool zone                  |
+ * +-------------+-------------+------------------------------+
+ * ^CONFIG_RAM_START           ^CONFIG_ARCH_PGPOOL_PBASE
+ *
+ * We require that:
+ *
+ *   a) KRAM_TOTAL(= CONFIG_ARCH_PGPOOL_PBASE - CONFIG_RAM_START) > 0
+ *   b) CONFIG_RAM_SIZE == CONFIG_ARCH_PGPOOL_SIZE + KRAM_TOTAL
+ *
+ * The split of kernel memory can be adjusted below via KSRAM_SIZE
+ * The script warns if PGPOOL doesn't end at end of configured RAM.
+ */
+
+#define PGRAM_ADDR   (CONFIG_ARCH_PGPOOL_PBASE)
+#define PGRAM_SIZE   (CONFIG_ARCH_PGPOOL_SIZE)
+#define PGRAM_END    (PGRAM_ADDR + PGRAM_SIZE)
+#define CFRAM_END    (CONFIG_RAM_START + CONFIG_RAM_SIZE)
+
+#if (PGRAM_ADDR < CONFIG_RAM_START) || (PGRAM_END > CFRAM_END)
+#error "invalid RAM or PGPOOL config!"
+#endif
+
+#if (PGRAM_END < CFRAM_END)
+#warning "wasted memory after PGPOOL!"
+#endif
+
+/* Use proper size to match MMU setup logic */
+
+#ifdef CONFIG_ARCH_RV32
+#define KTEXT_SIZE   4194304
+#else
+#define KTEXT_SIZE   2097152
+#endif
+
+#define KRAM_TOTAL   (PGRAM_ADDR - KTEXT_ADDR)
+#define KSRAM_SIZE   (KRAM_TOTAL - KTEXT_SIZE)
+#define KTEXT_ADDR   (CONFIG_RAM_START)
+#define KSRAM_ADDR   (KTEXT_ADDR + KTEXT_SIZE)
+
+/* Do some checks */
+
+#if (KSRAM_SIZE <= 16384)
+#error "Invalid kernel sram size!"
+#endif
+
+MEMORY
+{
+    kflash (rx) : ORIGIN = KTEXT_ADDR, LENGTH = KTEXT_SIZE
+    ksram (rwx) : ORIGIN = KSRAM_ADDR, LENGTH = KSRAM_SIZE
+    pgram (rwx) : ORIGIN = PGRAM_ADDR, LENGTH = PGRAM_SIZE
+}
+
+OUTPUT_ARCH("riscv")
+
+/* Boundaries referred in board memory map header */
+
+__kflash_start = ORIGIN(kflash);
+__kflash_size = LENGTH(kflash);
+__ksram_start = ORIGIN(ksram);
+__ksram_size = LENGTH(ksram);
+__ksram_end = ORIGIN(ksram) + LENGTH(ksram);
+
+/* Page heap */
+
+__pgheap_start = ORIGIN(pgram);
+__pgheap_size = LENGTH(pgram);
+
+SECTIONS
+{
+  . = KTEXT_ADDR;
+
+  .text :
+    {
+      _stext = . ;
+      *(.text)
+      *(.text.*)
+      *(.gnu.warning)
+      *(.stub)
+      *(.glue_7)
+      *(.glue_7t)
+      *(.jcr)
+
+      /* C++ support:  The .init and .fini sections contain specific logic
+       * to manage static constructors and destructors.
+       */
+
+      *(.gnu.linkonce.t.*)
+      *(.init)             /* Old ABI */
+      *(.fini)             /* Old ABI */
+      _etext = . ;
+    }
+
+  .rodata :
+    {
+      _srodata = . ;
+      *(.rodata)
+      *(.rodata1)
+      *(.rodata.*)
+      *(.gnu.linkonce.r*)
+      _erodata = . ;
+    }
+
+  .tdata : {
+      _stdata = ABSOLUTE(.);
+      *(.tdata .tdata.* .gnu.linkonce.td.*);
+      _etdata = ABSOLUTE(.);
+  }
+
+  .tbss : {
+      _stbss = ABSOLUTE(.);
+      *(.tbss .tbss.* .gnu.linkonce.tb.* .tcommon);
+      _etbss = ABSOLUTE(.);
+  }
+
+  _eronly = ABSOLUTE(.);
+
+  .data :
+    {
+      _sdata = . ;
+      *(.data)
+      *(.data1)
+      *(.data.*)
+      *(.gnu.linkonce.d*)
+      . = ALIGN(4);
+      _edata = . ;
+    }
+
+  .noinit (NOLOAD) : ALIGN(4)
+    {
+      *(.noinit)
+      *(.noinit.*)
+    } > ksram
+
+  .bss :
+    {
+      _sbss = . ;
+      *(.bss)
+      *(.bss.*)
+      *(.sbss)
+      *(.sbss.*)
+      *(.gnu.linkonce.b*)
+      *(COMMON)
+      _ebss = . ;
+    } > ksram
+
+    /* Page tables here, align to 4K boundary */
+
+    .pgtables (NOLOAD) : ALIGN(0x1000) {
+        *(.pgtables)
+        . = ALIGN(4);
+    } > ksram
+
+    /* Stack top */
+
+    .stack_top : {
+        . = ALIGN(32);
+        _ebss = ABSOLUTE(.);
+    } > ksram
+
+    /* Stabs debugging sections. */
+
+    .stab 0 : { *(.stab) }
+    .stabstr 0 : { *(.stabstr) }
+    .stab.excl 0 : { *(.stab.excl) }
+    .stab.exclstr 0 : { *(.stab.exclstr) }
+    .stab.index 0 : { *(.stab.index) }
+    .stab.indexstr 0 : { *(.stab.indexstr) }
+    .comment 0 : { *(.comment) }
+    .debug_abbrev 0 : { *(.debug_abbrev) }
+    .debug_info 0 : { *(.debug_info) }
+    .debug_line 0 : { *(.debug_line) }
+    .debug_pubnames 0 : { *(.debug_pubnames) }
+    .debug_aranges 0 : { *(.debug_aranges) }
+}

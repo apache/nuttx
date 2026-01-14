@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/esp32c3_perf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this args for additional information regarding copyright ownership.  The
@@ -33,7 +35,7 @@
 #include "hardware/esp32c3_system.h"
 #include "esp32c3_clockconfig.h"
 
-#ifdef CONFIG_ARCH_PERF_EVENTS
+#ifdef CONFIG_ARCH_HAVE_PERF_EVENTS
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -60,7 +62,7 @@ void up_perf_init(void *arg)
  * Name: up_perf_gettime
  ****************************************************************************/
 
-unsigned long IRAM_ATTR up_perf_gettime(void)
+clock_t IRAM_ATTR up_perf_gettime(void)
 {
   return READ_CSR(CSR_PCCR_MACHINE);
 }
@@ -78,7 +80,7 @@ unsigned long up_perf_getfreq(void)
  * Name: up_perf_convert
  ****************************************************************************/
 
-void up_perf_convert(unsigned long elapsed, struct timespec *ts)
+void up_perf_convert(clock_t elapsed, struct timespec *ts)
 {
   ts->tv_sec  = elapsed / CYCLE_PER_SEC;
   elapsed    -= ts->tv_sec * CYCLE_PER_SEC;

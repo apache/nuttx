@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/video/isx019.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1208,14 +1210,14 @@ static int set_drive_mode(FAR isx019_dev_t *priv)
 #endif
     };
 
-  nxsig_usleep(TRANSITION_TIME_TO_STARTUP);
+  nxsched_usleep(TRANSITION_TIME_TO_STARTUP);
 
   isx019_i2c_write(priv, CAT_CONFIG, MODE_SENSSEL,      &drv[INDEX_SENS], 1);
   isx019_i2c_write(priv, CAT_CONFIG, MODE_POSTSEL,      &drv[INDEX_POST], 1);
   isx019_i2c_write(priv,
     CAT_CONFIG, MODE_SENSPOST_SEL, &drv[INDEX_SENSPOST], 1);
 
-  nxsig_usleep(TRANSITION_TIME_TO_STREAMING);
+  nxsched_usleep(TRANSITION_TIME_TO_STREAMING);
 
   return OK;
 }
@@ -1228,11 +1230,7 @@ static bool try_repeat(int sec, int usec, FAR isx019_dev_t *priv,
   struct timespec now;
   struct timespec delta;
 
-  ret = clock_systime_timespec(&start);
-  if (ret < 0)
-    {
-      return false;
-    }
+  clock_systime_timespec(&start);
 
   while (1)
     {
@@ -1243,12 +1241,7 @@ static bool try_repeat(int sec, int usec, FAR isx019_dev_t *priv,
         }
       else
         {
-          ret = clock_systime_timespec(&now);
-          if (ret < 0)
-            {
-              return false;
-            }
-
+          clock_systime_timespec(&now);
           clock_timespec_subtract(&now, &start, &delta);
           if ((delta.tv_sec > sec) ||
               ((delta.tv_sec == sec) &&
@@ -1733,7 +1726,7 @@ static int isx019_start_capture(FAR struct imgsensor_s *sensor,
             regval |= FPGA_THUMBNAIL_SCALE_1_4;
             break;
 
-          default : /* 1/8 */
+          default: /* 1/8 */
             regval |= FPGA_THUMBNAIL_SCALE_1_8;
             break;
         }
@@ -2437,7 +2430,7 @@ static int set_wbmode(FAR isx019_dev_t *priv,
 static int set_awb(FAR isx019_dev_t *priv,
                    imgsensor_value_t val)
 {
-  /* true  -> false : Update regster to HOLD
+  /* true  -> false : Update register to HOLD
    * false -> true  : Update register
    *                  with IMGSENSOR_ID_AUTO_N_PRESET_WB setting
    * otherwise      : Nothing to do
@@ -2614,7 +2607,7 @@ static int set_spot_position(FAR isx019_dev_t *priv,
   int split;
 
   /* Spot position of ISX019 is divided into 9x7 sections.
-   * - Horizontal direction is devided into 9 sections.
+   * - Horizontal direction is divided into 9 sections.
    * - Vertical  direction is divided into 7 sections.
    * The register value 0 means left top.
    * The register value 62 means right bottom.
@@ -2932,7 +2925,7 @@ static int set_jpg_quality(FAR isx019_dev_t *priv,
 
   /* Wait for swap of non-active side and active side. */
 
-  nxsig_usleep(DELAY_TIME_JPEGDQT_SWAP);
+  nxsched_usleep(DELAY_TIME_JPEGDQT_SWAP);
 
   /* Update non-active side in preparation for other activation trigger. */
 

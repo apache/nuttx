@@ -1,8 +1,9 @@
 /******************************************************************************
  * drivers/wireless/spirit/lib/spirit_timer.c
  *
- *   Copyright(c) 2015 STMicroelectronics
- *   Author: VMA division - AMS
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: Copyright(c) 2015 STMicroelectronics
+ * SPDX-FileContributor: Author: VMA division - AMS
  *   Version 3.2.2 08-July-2015
  *
  * Redistribution and use in source and binary forms, with or without
@@ -356,7 +357,7 @@ int spirit_timer_get_rxtimeout_setup(FAR struct spirit_library_s *spirit,
  *
  *   where Tck = 28.818 us. The minimum vale of the wakeup timeout is 28.818us
  *   (PRESCALER and COUNTER equals to 0) and the maximum value is about 1.89 s
- *   (PRESCALER anc COUNTER equals to 255).
+ *   (PRESCALER and COUNTER equals to 255).
  *
  * Input Parameters:
  *   spirit    - Reference to a Spirit library state structure instance
@@ -391,7 +392,7 @@ int spirit_timer_setup_wakeuptimer(FAR struct spirit_library_s *spirit,
  *   in ms, according to the formula: Twu=(PRESCALER +1)*(COUNTER+1)*Tck,
  *   where Tck = 28.818 us.  The minimum vale of the wakeup timeout is
  *   28.818us (PRESCALER and COUNTER equals to 0) and the maximum value is
- *   about 1.89 s (PRESCALER anc COUNTER equals to 255).
+ *   about 1.89 s (PRESCALER and COUNTER equals to 255).
  *
  * Input Parameters:
  *   spirit  - Reference to a Spirit library state structure instance
@@ -529,7 +530,7 @@ int spirit_timer_get_wakeuptimer_setup(FAR struct spirit_library_s *spirit,
  *
  *   where Tck = 28.818 us. The minimum vale of the wakeup timeout is
  *   28.818us (PRESCALER and COUNTER equals to 0) and the maximum value is
- *   about 1.89 s (PRESCALER anc COUNTER equals to 255).
+ *   about 1.89 s (PRESCALER and COUNTER equals to 255).
  *
  * Input Parameters:
  *   spirit    - Reference to a Spirit library state structure instance
@@ -568,7 +569,7 @@ int spirit_timer_setup_wakeuptimer_reload(FAR struct spirit_library_s *spirit,
  *
  *   where Tck = 28.818 us.  The minimum vale of the wakeup timeout is 28.818us
  *   (PRESCALER and COUNTER equals to 0) and the maximum value is about 1.89 s
- *   (PRESCALER anc COUNTER equals to 255).
+ *   (PRESCALER and COUNTER equals to 255).
  *
  * Input Parameters:
  *   spirit  - Reference to a Spirit library state structure instance

@@ -20,6 +20,8 @@
 
 include common/Make.defs
 
+STORAGETMP = $(if $(wildcard $(NXTMPDIR)/.*),y,)
+
 # The start-up, "head", file.  May be either a .S or a .c file.
 
 HEAD_CSRC  = esp32_start.c esp32_wdt.c
@@ -42,6 +44,9 @@ endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += esp32_userspace.c
+ifeq ($(CONFIG_ESP32_PID),y)
+CHIP_CSRCS += esp32_userspace_pid.c
+endif
 endif
 
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
@@ -70,12 +75,11 @@ CHIP_CSRCS += esp32_ledc.c
 endif
 
 ifeq ($(CONFIG_ESP32_I2C),y)
+ifeq ($(CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE),y)
 CHIP_CSRCS += esp32_i2c.c
 endif
-
-ifeq ($(CONFIG_ESP32_I2S),y)
-CHIP_CSRCS += esp32_i2s.c
 endif
+
 
 ifeq ($(CONFIG_ESP32_TWAI),y)
 CHIP_CSRCS += esp32_twai.c
@@ -92,28 +96,11 @@ CHIP_CSRCS += esp32_spi_slave.c
 endif
 endif
 
-# SPIFLASH and SPIRAM need spicache.c
-
-ifeq ($(CONFIG_ESP32_SPIFLASH),y)
-CHIP_CSRCS += esp32_spicache.c
-else ifeq ($(CONFIG_ESP32_SPIRAM),y)
-CHIP_CSRCS += esp32_spicache.c
-endif
-
-ifeq ($(CONFIG_ESP32_SPIFLASH),y)
-CHIP_CSRCS += esp32_spiflash.c
-endif
-
 ifeq ($(CONFIG_ESP32_SPIRAM),y)
 CHIP_CSRCS += esp32_spiram.c
 CHIP_CSRCS += esp32_psram.c
 CHIP_CSRCS += esp32_himem.c
 CHIP_CSRCS += esp32_himem_chardev.c
-endif
-
-CHIP_CSRCS += esp32_efuse.c
-ifeq ($(CONFIG_ESP32_EFUSE),y)
-CHIP_CSRCS += esp32_efuse_lowerhalf.c
 endif
 
 ifeq ($(CONFIG_ESP32_EMAC),y)
@@ -123,7 +110,6 @@ endif
 # Configuration-dependent ESP32 files
 
 ifeq ($(CONFIG_SMP),y)
-CHIP_ASRCS  = esp32_cpuindex.S
 CHIP_CSRCS += esp32_cpuidlestack.c esp32_cpustart.c esp32_intercpu_interrupt.c
 endif
 
@@ -154,6 +140,7 @@ CHIP_CSRCS += esp32_freerun.c
 endif
 
 ifeq ($(CONFIG_ESP32_PARTITION_TABLE),y)
+CHIP_CSRCS += esp32_spiflash.c
 CHIP_CSRCS += esp32_partition.c
 endif
 
@@ -189,6 +176,14 @@ ifeq ($(CONFIG_ESP32_AES_ACCELERATOR),y)
 CHIP_CSRCS += esp32_aes.c
 endif
 
+ifeq ($(CONFIG_ESP32_SHA_ACCELERATOR),y)
+CHIP_CSRCS += esp32_sha.c
+endif
+
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
+CHIP_CSRCS += esp32_crypto.c
+endif
+
 ifeq ($(CONFIG_ESP32_RTC),y)
 CHIP_CSRCS += esp32_rtc.c
 ifeq ($(CONFIG_RTC_DRIVER),y)
@@ -197,7 +192,16 @@ endif
 endif
 
 ifeq ($(CONFIG_ESP32_OPENETH),y)
-CHIP_CSRCS += esp32_openeth.c
+CHIP_CSRCS += esp_openeth.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
+CHIP_CSRCS += esp32_wifi_adapter.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_BLE),y)
+CHIP_CSRCS += esp32_ble_adapter.c esp32_ble.c
+EXTRA_LIBS += -lbtdm_app
 endif
 
 #############################################################################
@@ -208,7 +212,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 0e6895d4ce431ce95b156027e6e3af50f9b4df37
+	ESP_HAL_3RDPARTY_VERSION = b9472bd56b916cced7447e25c2b2e1390d7e0d90
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -222,15 +226,39 @@ endif
 	GIT_DEPTH_PARAMETER = --depth=$(GIT_DEPTH)
 endif
 
+# When set USE_NXTMPDIR_ESP_REPO_DIRECTLY=y, will directly use esp-hal-3rdparty
+# under nxtmpdir without CHECK_COMMITSHA, reset, checkout and update.
+
+USE_NXTMPDIR_ESP_REPO_DIRECTLY ?= n
+
+ifeq ($(STORAGETMP),y)
+ifeq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
+define CLONE_ESP_HAL_3RDPARTY_REPO
+	$(call COPYDIR, $(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO),chip/$(ESP_HAL_3RDPARTY_REPO))
+endef
+else
+define CLONE_ESP_HAL_3RDPARTY_REPO
+	$(call CHECK_COMMITSHA, $(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO),$(ESP_HAL_3RDPARTY_VERSION))
+	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),chip/$(ESP_HAL_3RDPARTY_REPO),$(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO))
+endef
+endif
+else
+define CLONE_ESP_HAL_3RDPARTY_REPO
+	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),chip/$(ESP_HAL_3RDPARTY_REPO))
+endef
+endif
+
 chip/$(ESP_HAL_3RDPARTY_REPO):
 	$(Q) echo "Cloning Espressif HAL for 3rd Party Platforms"
-	$(Q) git clone --quiet $(ESP_HAL_3RDPARTY_URL) chip/$(ESP_HAL_3RDPARTY_REPO)
+	$(Q) $(call CLONE_ESP_HAL_3RDPARTY_REPO)
+ifneq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: ${ESP_HAL_3RDPARTY_VERSION}"
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
+endif
 
 # Silent preprocessor warnings
 
-CFLAGS += -Wno-undef -Wno-unused-variable
+CFLAGS += -Wno-undef -Wno-unused-variable -fno-jump-tables -fno-tree-switch-conversion
 
 # Enable strict volatile bitfield access
 
@@ -247,19 +275,21 @@ include chip/hal.mk
 include common/espressif/Make.defs
 
 context:: chip/$(ESP_HAL_3RDPARTY_REPO)
-ifeq ($(CONFIG_ESP32_WIRELESS),y)
+ifneq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: initializing submodules..."
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/mbedtls/mbedtls components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32 components/esp_coex/lib
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls reset --quiet --hard
+endif
 	$(Q) echo "Applying patches..."
 	$(Q) cd chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls && git apply ../../../nuttx/patches/components/mbedtls/mbedtls/*.patch
+ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
+ifneq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32 components/esp_coex/lib
 endif
-
-ifeq ($(CONFIG_ESP32_WIRELESS),y)
-include chip/Wireless.mk
 endif
 
 distclean::
 	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
+	$(call DELFILE,../../../vefuse.bin)
 
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif

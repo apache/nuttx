@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_rtc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -110,6 +112,8 @@ struct rtc_backup_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static spinlock_t g_rtc_lock = SP_UNLOCKED;
 
 /* Callback to use when the alarm expires */
 
@@ -321,6 +325,24 @@ static void cxd56_rtc_initialize(wdparm_t arg)
 }
 
 /****************************************************************************
+ * Name: cxd56_update_basetime
+ *
+ * Description:
+ *   Update the g_basetime value from RTC saved offset data.
+ *
+ * Input Parameters:
+ *   tp - Pointer to timespec structure to update the g_basetime.
+ *
+ ****************************************************************************/
+
+static void cxd56_update_basetime(struct timespec *tp)
+{
+  tp->tv_sec  = g_rtc_save->offset / CONFIG_RTC_FREQUENCY;
+  tp->tv_nsec = (g_rtc_save->offset % CONFIG_RTC_FREQUENCY) *
+                (NSEC_PER_SEC / CONFIG_RTC_FREQUENCY);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -395,10 +417,17 @@ time_t up_rtc_time(void)
 #ifdef CONFIG_RTC_HIRES
 int up_rtc_gettime(struct timespec *tp)
 {
+  irqstate_t flags;
   uint64_t count;
 
-  count = cxd56_rtc_count();
+  flags = spin_lock_irqsave(&g_rtc_lock);
+
+  count = cxd56_rtc_count_nolock();
   count += g_rtc_save->offset;
+
+  cxd56_update_basetime(&g_basetime);
+
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
 
   /* Then we can save the time in seconds and fractional seconds. */
 
@@ -432,7 +461,7 @@ int up_rtc_settime(const struct timespec *tp)
   irqstate_t flags;
   uint64_t count;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_rtc_lock);
 
 #ifdef RTC_DIRECT_CONTROL
   /* wait until previous write request is completed */
@@ -455,7 +484,9 @@ int up_rtc_settime(const struct timespec *tp)
   g_rtc_save->offset = (int64_t)count - (int64_t)cxd56_rtc_count();
 #endif
 
-  spin_unlock_irqrestore(NULL, flags);
+  cxd56_update_basetime(&g_basetime);
+
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
 
   rtc_dumptime(tp, "Setting time");
 
@@ -473,22 +504,29 @@ int up_rtc_settime(const struct timespec *tp)
  *
  ****************************************************************************/
 
-uint64_t cxd56_rtc_count(void)
+uint64_t cxd56_rtc_count_nolock(void)
 {
   uint64_t val;
-  irqstate_t flags;
 
   /* The pre register is latched with reading the post rtcounter register,
    * so these registers always have to been read in the below order,
    * 1st post -> 2nd pre, and should be operated in atomic.
    */
 
-  flags = spin_lock_irqsave(NULL);
-
   val = (uint64_t)getreg32(CXD56_RTC0_RTPOSTCNT) << 15;
   val |= getreg32(CXD56_RTC0_RTPRECNT);
 
-  spin_unlock_irqrestore(NULL, flags);
+  return val;
+}
+
+uint64_t cxd56_rtc_count(void)
+{
+  uint64_t val;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&g_rtc_lock);
+  val = cxd56_rtc_count_nolock();
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
 
   return val;
 }
@@ -510,12 +548,12 @@ uint64_t cxd56_rtc_almcount(void)
   uint64_t val;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_rtc_lock);
 
   val = (uint64_t)getreg32(CXD56_RTC0_SETALMPOSTCNT(0)) << 15;
   val |= (getreg32(CXD56_RTC0_SETALMPRECNT(0)) & 0x7fff);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
 
   return val;
 }
@@ -557,7 +595,7 @@ int cxd56_rtc_setalarm(struct alm_setalarm_s *alminfo)
     {
       /* The set the alarm */
 
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_rtc_lock);
 
       cbinfo->ac_cb  = alminfo->as_cb;
       cbinfo->ac_arg = alminfo->as_arg;
@@ -567,7 +605,7 @@ int cxd56_rtc_setalarm(struct alm_setalarm_s *alminfo)
 
       count -= g_rtc_save->offset;
 
-      /* clear previsous setting */
+      /* clear previous setting */
 
       mask = RTCREG_ALM0_ERR_FLAG_MASK | RTCREG_ALM0_FLAG_MASK;
       mask <<= id;
@@ -588,7 +626,7 @@ int cxd56_rtc_setalarm(struct alm_setalarm_s *alminfo)
 
       while (RTCREG_ALM_BUSY_MASK & getreg32(CXD56_RTC0_ALMOUTEN(id)));
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_rtc_lock, flags);
 
       rtc_dumptime(&alminfo->as_time, "New Alarm time");
       ret = OK;
@@ -630,7 +668,7 @@ int cxd56_rtc_cancelalarm(enum alm_id_e alarmid)
     {
       /* Unset the alarm */
 
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_rtc_lock);
 
       cbinfo->ac_cb = NULL;
 
@@ -663,7 +701,7 @@ int cxd56_rtc_cancelalarm(enum alm_id_e alarmid)
           putreg32(mask, CXD56_RTC0_ALMCLR);
         }
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_rtc_lock, flags);
 
       ret = OK;
     }

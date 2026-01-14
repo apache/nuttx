@@ -1,10 +1,9 @@
 /****************************************************************************
  * include/crypto/blf.h
- * $OpenBSD: blf.h,v 1.7 2021/11/29 01:04:45 djm Exp $
  *
- * Blowfish - a fast block cipher designed by Bruce Schneier
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 1997 Niels Provos <provos@physnet.uni-hamburg.de>
  *
- * Copyright 1997 Niels Provos <provos@physnet.uni-hamburg.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

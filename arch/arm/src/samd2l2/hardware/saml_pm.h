@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samd2l2/hardware/saml_pm.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -88,7 +90,7 @@
  * and Interrupt flag status and clear registers
  */
 
-#define PM_INT_PLRDY                       (1 << 0)  /* Bit 0: Performanc level ready */
+#define PM_INT_PLRDY                       (1 << 0)  /* Bit 0: Performance level ready */
 
 /* Standby configuration */
 

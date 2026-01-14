@@ -414,55 +414,71 @@ static void esp32_dumpregs(struct esp32_lowerhalf_s *priv,
                            const char *msg)
 {
   sninfo("%s:\n", msg);
-  sninfo("  PCNT_U0_CONF0_REG: %08x PCNT_U1_CONF0_REG:  %08x\n",
+  sninfo("  PCNT_U0_CONF0_REG: 0x08%" PRIx32 ""
+         " PCNT_U1_CONF0_REG:  0x08%" PRIx32 "\n",
          getreg32(PCNT_CONF0_U(0)),
          getreg32(PCNT_CONF0_U(1)));
-  sninfo("  PCNT_U2_CONF0_REG: %08x PCNT_U3_CONF0_REG:  %08x\n",
+  sninfo("  PCNT_U2_CONF0_REG: 0x08%" PRIx32 ""
+         " PCNT_U3_CONF0_REG:  0x08%" PRIx32 "\n",
          getreg32(PCNT_CONF0_U(2)),
          getreg32(PCNT_CONF0_U(3)));
-  sninfo("  PCNT_U4_CONF0_REG: %08x PCNT_U5_CONF0_REG:  %08x\n",
+  sninfo("  PCNT_U4_CONF0_REG: 0x08%" PRIx32 ""
+         " PCNT_U5_CONF0_REG:  0x08%" PRIx32 "\n",
          getreg32(PCNT_CONF0_U(4)),
          getreg32(PCNT_CONF0_U(5)));
-  sninfo("  PCNT_U6_CONF0_REG: %08x PCNT_U7_CONF0_REG:  %08x\n",
+  sninfo("  PCNT_U6_CONF0_REG: 0x08%" PRIx32 ""
+         " PCNT_U7_CONF0_REG:  0x08%" PRIx32 "\n",
          getreg32(PCNT_CONF0_U(6)),
          getreg32(PCNT_CONF0_U(7)));
-  sninfo("  PCNT_U0_CONF1_REG: %08x PCNT_U1_CONF1_REG:  %08x\n",
+  sninfo("  PCNT_U0_CONF1_REG: 0x08%" PRIx32 ""
+         " PCNT_U1_CONF1_REG:  0x08%" PRIx32 "\n",
          getreg32(PCNT_CONF1_U(0)),
          getreg32(PCNT_CONF1_U(1)));
-  sninfo("  PCNT_U2_CONF1_REG: %08x PCNT_U3_CONF1_REG:  %08x\n",
+  sninfo("  PCNT_U2_CONF1_REG: 0x08%" PRIx32 ""
+         " PCNT_U3_CONF1_REG:  0x08%" PRIx32 "\n",
          getreg32(PCNT_CONF1_U(2)),
          getreg32(PCNT_CONF1_U(3)));
-  sninfo("  PCNT_U4_CONF1_REG: %08x PCNT_U5_CONF1_REG:  %08x\n",
+  sninfo("  PCNT_U4_CONF1_REG: 0x08%" PRIx32 ""
+         " PCNT_U5_CONF1_REG:  0x08%" PRIx32 "\n",
          getreg32(PCNT_CONF1_U(4)),
          getreg32(PCNT_CONF1_U(5)));
-  sninfo("  PCNT_U6_CONF1_REG: %08x PCNT_U7_CONF1_REG:  %08x\n",
+  sninfo("  PCNT_U6_CONF1_REG: 0x08%" PRIx32 ""
+         " PCNT_U7_CONF1_REG:  0x08%" PRIx32 "\n",
          getreg32(PCNT_CONF1_U(6)),
          getreg32(PCNT_CONF1_U(7)));
-  sninfo("  PCNT_U0_CONF2_REG: %08x PCNT_U1_CONF2_REG:  %08x\n",
+  sninfo("  PCNT_U0_CONF2_REG: 0x08%" PRIx32 ""
+         " PCNT_U1_CONF2_REG:  0x08%" PRIx32 "\n",
          getreg32(PCNT_CONF2_U(0)),
          getreg32(PCNT_CONF2_U(1)));
-  sninfo("  PCNT_U2_CONF2_REG: %08x PCNT_U3_CONF2_REG:  %08x\n",
+  sninfo("  PCNT_U2_CONF2_REG: 0x08%" PRIx32 ""
+         " PCNT_U3_CONF2_REG:  0x08%" PRIx32 "\n",
          getreg32(PCNT_CONF2_U(2)),
          getreg32(PCNT_CONF2_U(3)));
-  sninfo("  PCNT_U4_CONF2_REG: %08x PCNT_U5_CONF2_REG:  %08x\n",
+  sninfo("  PCNT_U4_CONF2_REG: 0x08%" PRIx32 ""
+         " PCNT_U5_CONF2_REG:  0x08%" PRIx32 "\n",
          getreg32(PCNT_CONF2_U(4)),
          getreg32(PCNT_CONF2_U(5)));
-  sninfo("  PCNT_U6_CONF2_REG: %08x PCNT_U7_CONF2_REG:  %08x\n",
+  sninfo("  PCNT_U6_CONF2_REG: 0x08%" PRIx32 ""
+         " PCNT_U7_CONF2_REG:  0x08%" PRIx32 "\n",
          getreg32(PCNT_CONF2_U(6)),
          getreg32(PCNT_CONF2_U(7)));
-  sninfo("  PCNT_U0_CNT_REG: %08x PCNT_U1_CNT_REG:  %08x\n",
+  sninfo("  PCNT_U0_CNT_REG: 0x08%" PRIx32 ""
+         " PCNT_U1_CNT_REG:  0x08%" PRIx32 "\n",
          getreg32(PCNT_CNT_U(0)),
          getreg32(PCNT_CNT_U(1)));
-  sninfo("  PCNT_U2_CNT_REG: %08x PCNT_U3_CNT_REG:  %08x\n",
+  sninfo("  PCNT_U2_CNT_REG: 0x08%" PRIx32 ""
+         " PCNT_U3_CNT_REG:  0x08%" PRIx32 "\n",
          getreg32(PCNT_CNT_U(2)),
          getreg32(PCNT_CNT_U(3)));
-  sninfo("  PCNT_U4_CNT_REG: %08x PCNT_U5_CNT_REG:  %08x\n",
+  sninfo("  PCNT_U4_CNT_REG: 0x08%" PRIx32 ""
+         " PCNT_U5_CNT_REG:  0x08%" PRIx32 "\n",
          getreg32(PCNT_CNT_U(4)),
          getreg32(PCNT_CNT_U(5)));
-  sninfo("  PCNT_U6_CNT_REG: %08x PCNT_U7_CNT_REG:  %08x\n",
+  sninfo("  PCNT_U6_CNT_REG: 0x08%" PRIx32 ""
+         " PCNT_U7_CNT_REG:  0x08%" PRIx32 "\n",
          getreg32(PCNT_CNT_U(6)),
          getreg32(PCNT_CNT_U(7)));
-  sninfo("  PCNT_CTRL_REF: %08x\n",
+  sninfo("  PCNT_CTRL_REF: 0x08%" PRIx32 "\n",
          getreg32(PCNT_CTRL_REG));
 }
 #endif

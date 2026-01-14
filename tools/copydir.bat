@@ -2,6 +2,8 @@
 
 rem tools/copydir.bat
 rem
+rem SPDX-License-Identifier: Apache-2.0
+rem
 rem Licensed to the Apache Software Foundation (ASF) under one or more
 rem contributor license agreements.  See the NOTICE file distributed with
 rem this work for additional information regarding copyright ownership.  The
@@ -26,7 +28,7 @@ rem links do not work correctly when accessed from the Windows native toolchain;
 rem rather, just look link files with the extension .lnk
 rem
 rem In this environment, the build system will work around this using this script
-rem as a replacement for the 'ln' command.  This scrpt will simply copy the
+rem as a replacement for the 'ln' command.  This script will simply copy the
 rem directory into the expected positiion.
 rem
 

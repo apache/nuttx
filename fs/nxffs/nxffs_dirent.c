@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/nxffs/nxffs_dirent.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,7 @@
 #include <nuttx/kmalloc.h>
 
 #include "nxffs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Types
@@ -74,7 +77,7 @@ int nxffs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   /* Recover the file system state from the NuttX inode instance */
 
   volume = mountpt->i_private;
-  ndir = kmm_zalloc(sizeof(*ndir));
+  ndir = fs_heap_zalloc(sizeof(*ndir));
   if (ndir == NULL)
     {
       return -ENOMEM;
@@ -105,7 +108,7 @@ errout_with_lock:
   nxmutex_unlock(&volume->lock);
 
 errout_with_ndir:
-  kmm_free(ndir);
+  fs_heap_free(ndir);
   return ret;
 }
 
@@ -121,7 +124,7 @@ int nxffs_closedir(FAR struct inode *mountpt,
                    FAR struct fs_dirent_s *dir)
 {
   DEBUGASSERT(dir);
-  kmm_free(dir);
+  fs_heap_free(dir);
   return 0;
 }
 

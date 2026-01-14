@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/segger/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -21,13 +23,11 @@
 if(CONFIG_SEGGER_RTT OR CONFIG_SEGGER_SYSVIEW)
   if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/SystemView)
 
-    set(SYSVIEW_VERSION 354)
-
     FetchContent_Declare(
       systemview
       DOWNLOAD_NAME "SystemView.zip"
       DOWNLOAD_DIR ${CMAKE_CURRENT_LIST_DIR}
-      URL "https://www.segger.com/downloads/systemview/SystemView_Src_V${SYSVIEW_VERSION}.zip"
+      URL "https://www.segger.com/downloads/systemview/SystemView_Src_V${CONFIG_SEGGER_SYSVIEW_TARGET_SOURCE}.zip"
           SOURCE_DIR
           ${CMAKE_CURRENT_LIST_DIR}/SystemView
           BINARY_DIR
@@ -45,6 +45,8 @@ endif()
 
 if(CONFIG_SEGGER_RTT)
   nuttx_add_kernel_library(RTT)
+
+  target_sources(RTT PRIVATE segger.c)
 
   set(RTT_SRCS SystemView/SEGGER/SEGGER_RTT.c)
 

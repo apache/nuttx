@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/hardware/mpfs_ihc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -63,7 +65,7 @@ struct ihc_sbi_rx_msg_s
 #  error Harts misconfigured. Cannot use the same harts.
 #endif
 
-/* Contex A and B hart ID's used in this system. Context A is the master. */
+/* Context A and B hart ID's used in this system. Context A is the master. */
 
 #if CONFIG_MPFS_IHC_LINUX_ON_HART1 == 1
 #define CONTEXTA_HARTID 0x01

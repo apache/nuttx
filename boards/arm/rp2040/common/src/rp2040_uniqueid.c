@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/rp2040/common/src/rp2040_uniqueid.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,6 +30,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "rp2040_uniqueid.h"
+#include "hardware/rp2040_address_mapped.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -48,11 +51,8 @@
 #define SSI_SR_TFNF_BITS                  0x00000002
 #define SSI_SR_RFNE_BITS                  0x00000008
 #define BOOT2_SIZE_WORDS                  64
-#define REG_ALIAS_XOR_BITS                (0x1u << 12u)
 
 #define ROM_TABLE_CODE(c1, c2)     ((c1) | ((c2) << 8))
-#define hw_alias_check_addr(addr)  ((uintptr_t)(addr))
-#define hw_xor_alias_untyped(addr) ((void *)(REG_ALIAS_XOR_BITS | hw_alias_check_addr(addr)))
 
 /****************************************************************************
  * Private Types
@@ -73,10 +73,6 @@ static inline void __compiler_memory_barrier(void);
 static inline void *rom_hword_as_ptr(uint16_t rom_address);
 static inline uint32_t rom_table_code(uint8_t c1, uint8_t c2);
 static void *rf_lookup(uint32_t code);
-static void hw_xor_bits(io_rw_32 *addr, uint32_t mask);
-static void hw_write_masked(io_rw_32 *addr,
-                            uint32_t values,
-                            uint32_t write_mask);
 static void flash_cs_force (bool high);
 void rp2040_flash_cmd(const uint8_t *txbuf, uint8_t *rxbuf, size_t count);
 
@@ -162,34 +158,6 @@ always_inline_function static void *rf_lookup(uint32_t code)
 }
 
 /****************************************************************************
- * Name: hw_xor_bits
- *
- * Description:
- *   Helper function for flash_cs_force.
- *
- ****************************************************************************/
-
-always_inline_function static void hw_xor_bits(io_rw_32 *addr, uint32_t mask)
-{
-  *(io_rw_32 *) hw_xor_alias_untyped((volatile void *) addr) = mask;
-}
-
-/****************************************************************************
- * Name: hw_write_masked
- *
- * Description:
- *   Helper function for flash_cs_force.
- *
- ****************************************************************************/
-
-always_inline_function static void hw_write_masked(io_rw_32 *addr,
-                                           uint32_t values,
-                                           uint32_t write_mask)
-{
-  hw_xor_bits(addr, (*addr ^ values) & write_mask);
-}
-
-/****************************************************************************
  * Name: flash_cs_force
  *
  * Description:
@@ -206,7 +174,7 @@ static void flash_cs_force (bool high)
   uint32_t field_val = high ?
     QSPI_SS_CTRL_OUTOVER_VALUE_HIGH :
     QSPI_SS_CTRL_OUTOVER_VALUE_LOW;
-  hw_write_masked((io_rw_32 *)QSPI_SS_CTRL,
+  hw_write_masked((volatile uint32_t *)QSPI_SS_CTRL,
     field_val << QSPI_SS_CTRL_OUTOVER_LSB,
     QSPI_SS_CTRL_OUTOVER_BITS
   );
@@ -329,12 +297,12 @@ void rp2040_uniqueid_initialize(void)
  *     length.
  *
  * Returned Value:
- *   Zero (OK) is returned on success.  Otherwize a negated errno value is
+ *   Zero (OK) is returned on success.  Otherwise a negated errno value is
  *   returned indicating the nature of the failure.
  *
  ****************************************************************************/
 
-int board_uniqueid(FAR uint8_t *uniqueid)
+int board_uniqueid(uint8_t *uniqueid)
 {
   memcpy(uniqueid, g_uniqueid, CONFIG_BOARDCTL_UNIQUEID_SIZE);
   return OK;

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32h7/stm32h745i-disco/src/stm32_userleds.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -53,7 +55,7 @@
 static const uint32_t g_ledcfg[BOARD_NLEDS] =
 {
   GPIO_LED_GREEN,
-  GPIO_LED_BLUE,
+  GPIO_LED_ORANGE,
   GPIO_LED_RED,
 };
 

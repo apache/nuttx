@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_farapistub.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -21,6 +23,6 @@
 #ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_FARAPISTUB_H
 #define __ARCH_ARM_SRC_CXD56XX_CXD56_FARAPISTUB_H
 
-#define FARAPISTUB_VERSION 20591
+#define FARAPISTUB_VERSION 20596
 
 #endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_FARAPISTUB_H */

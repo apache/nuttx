@@ -8,7 +8,6 @@ Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
 Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
-Change-Id: Ie8f405c14d6bae5a5d25caa82e7190c4bcb4504f
 ---
  libm/common/tools.h | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)

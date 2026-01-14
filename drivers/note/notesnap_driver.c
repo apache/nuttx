@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/note/notesnap_driver.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -22,8 +24,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdatomic.h>
-
+#include <nuttx/atomic.h>
 #include <nuttx/note/note_driver.h>
 #include <nuttx/note/notesnap_driver.h>
 #include <nuttx/panic_notifier.h>
@@ -49,8 +50,8 @@ struct notesnap_s
 {
   struct note_driver_s driver;
   struct notifier_block nb;
-  size_t index;
-  bool dumping;
+  atomic_t index;
+  atomic_t dumping;
   struct notesnap_chunk_s buffer[CONFIG_DRIVERS_NOTESNAP_NBUFFERS];
 };
 
@@ -85,8 +86,8 @@ static void notesnap_cpu_resumed(FAR struct note_driver_s *drv,
 #  endif
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-static void notesnap_premption(FAR struct note_driver_s *drv,
-                               FAR struct tcb_s *tcb, bool locked);
+static void notesnap_preemption(FAR struct note_driver_s *drv,
+                                FAR struct tcb_s *tcb, bool locked);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
 static void notesnap_csection(FAR struct note_driver_s *drv,
@@ -132,7 +133,7 @@ static const struct note_driver_ops_s g_notesnap_ops =
 #  endif
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-  notesnap_premption,
+  notesnap_preemption,
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
   notesnap_csection,
@@ -151,7 +152,20 @@ static const struct note_driver_ops_s g_notesnap_ops =
 
 static struct notesnap_s g_notesnap =
 {
-  {&g_notesnap_ops}
+  {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+    "snap",
+    {
+      {
+        CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE,
+#  ifdef CONFIG_SMP
+        CONFIG_SCHED_INSTRUMENTATION_CPUSET
+#  endif
+      },
+    },
+#endif
+    &g_notesnap_ops
+  }
 };
 
 static FAR const char *g_notesnap_type[] =
@@ -198,7 +212,7 @@ static inline void notesnap_common(FAR struct note_driver_s *drv,
   FAR struct notesnap_chunk_s *note;
   size_t index;
 
-  if (snap->dumping)
+  if (atomic_read(&snap->dumping))
     {
       return;
     }
@@ -288,8 +302,8 @@ static void notesnap_cpu_resumed(FAR struct note_driver_s *drv,
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-static void notesnap_premption(FAR struct note_driver_s *drv,
-                               FAR struct tcb_s *tcb, bool locked)
+static void notesnap_preemption(FAR struct note_driver_s *drv,
+                                FAR struct tcb_s *tcb, bool locked)
 {
   notesnap_common(drv, tcb, locked ? NOTE_PREEMPT_LOCK :
                   NOTE_PREEMPT_UNLOCK, 0);
@@ -369,46 +383,35 @@ int notesnap_register(void)
 
 void notesnap_dump_with_stream(FAR struct lib_outstream_s *stream)
 {
-  size_t i;
   size_t index = g_notesnap.index % CONFIG_DRIVERS_NOTESNAP_NBUFFERS;
-  clock_t lastcount = g_notesnap.buffer[index].count;
-  struct timespec lasttime =
-  {
-    0
-  };
+  size_t i;
 
   /* Stop recording while dumping */
 
-  atomic_store(&g_notesnap.dumping, true);
+  atomic_set(&g_notesnap.dumping, true);
 
-  for (i = index; i != index - 1;
-       i == CONFIG_DRIVERS_NOTESNAP_NBUFFERS - 1 ? i = 0 : i++)
+  for (i = 0; i < CONFIG_DRIVERS_NOTESNAP_NBUFFERS; i++)
     {
-      FAR struct notesnap_chunk_s *note = &g_notesnap.buffer[i];
-
+      FAR struct notesnap_chunk_s *note = &g_notesnap.buffer
+          [(index + i) % CONFIG_DRIVERS_NOTESNAP_NBUFFERS];
       struct timespec time;
-      clock_t elapsed = note->count < lastcount ?
-                        note->count + CLOCK_MAX - lastcount :
-                        note->count - lastcount;
-      perf_convert(elapsed, &time);
-      clock_timespec_add(&lasttime, &time, &lasttime);
-      lastcount = note->count;
 
+      perf_convert(note->count, &time);
       lib_sprintf(stream,
-                  "snapshoot: [%u.%09u] "
+                  "snapshoot: [%" PRIu64 ".%09u] "
 #ifdef CONFIG_SMP
                   "[CPU%d] "
 #endif
                   "[%d] %-16s %#" PRIxPTR "\n",
-                  (unsigned)lasttime.tv_sec,
-                  (unsigned)lasttime.tv_nsec,
+                  (uint64_t)time.tv_sec,
+                  (unsigned)time.tv_nsec,
 #ifdef CONFIG_SMP
                   note->cpu,
 #endif
                   note->pid, g_notesnap_type[note->type], note->args);
     }
 
-  atomic_store(&g_notesnap.dumping, false);
+  atomic_set(&g_notesnap.dumping, false);
 }
 
 /****************************************************************************

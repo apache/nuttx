@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/rp2040/rp2040_cpustart.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,7 +34,6 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
 
 #include "nvic.h"
@@ -65,9 +66,9 @@
  * Public Data
  ****************************************************************************/
 
-volatile static spinlock_t g_core1_boot;
+static volatile bool g_core1_boot;
 
-extern int arm_pause_handler(int irq, void *c, void *arg);
+extern int rp2040_smp_call_handler(int irq, void *c, void *arg);
 
 /****************************************************************************
  * Private Functions
@@ -151,10 +152,10 @@ static void core1_boot(void)
 
   /* Enable inter-processor FIFO interrupt */
 
-  irq_attach(RP2040_SIO_IRQ_PROC1, arm_pause_handler, NULL);
-  up_enable_irq(RP2040_SIO_IRQ_PROC1);
+  irq_attach(RP2040_SMP_CALL_PROC1, rp2040_smp_call_handler, NULL);
+  up_enable_irq(RP2040_SMP_CALL_PROC1);
 
-  spin_unlock(&g_core1_boot);
+  g_core1_boot = true;
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify that this CPU has started */
@@ -219,8 +220,6 @@ int up_cpu_start(int cpu)
     ;
   clrbits_reg32(RP2040_PSM_PROC1, RP2040_PSM_FRCE_OFF);
 
-  spin_lock(&g_core1_boot);
-
   /* Send initial VTOR, MSP, PC for Core 1 boot */
 
   core1_boot_msg[0] = 0;
@@ -247,14 +246,12 @@ int up_cpu_start(int cpu)
 
   /* Enable inter-processor FIFO interrupt */
 
-  irq_attach(RP2040_SIO_IRQ_PROC0, arm_pause_handler, NULL);
-  up_enable_irq(RP2040_SIO_IRQ_PROC0);
+  irq_attach(RP2040_SMP_CALL_PROC0, rp2040_smp_call_handler, NULL);
+  up_enable_irq(RP2040_SMP_CALL_PROC0);
 
-  spin_lock(&g_core1_boot);
+  while (!g_core1_boot);
 
   /* CPU Core 1 boot done */
-
-  spin_unlock(&g_core1_boot);
 
   return 0;
 }

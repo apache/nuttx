@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/video/vnc/vnc_server.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -76,7 +78,7 @@ FAR struct vnc_session_s *g_vnc_sessions[RFB_MAX_DISPLAYS];
  * Description:
  *  Conclude the current VNC session.  This function re-initializes the
  *  session structure; it does not free either the session structure nor
- *  the framebuffer so that they may be re-used.
+ *  the framebuffer so that they may be reused.
  *
  * Input Parameters:
  *   session - An instance of the session structure.

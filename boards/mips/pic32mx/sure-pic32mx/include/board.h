@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/mips/pic32mx/sure-pic32mx/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -85,7 +87,7 @@
 /* LED definitions **********************************************************/
 
 /* The Sure DB_DP11215 PIC32 Storage Demo Board board has five LEDs.  One
- * (D4, lablel "Power") is not controllable by software.  Four are
+ * (D4, labeled "Power") is not controllable by software.  Four are
  * controllable by software:
  *
  * D7  "USB"    Yellow  RD7 Low illuminates

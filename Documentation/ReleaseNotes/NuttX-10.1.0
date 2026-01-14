@@ -140,7 +140,7 @@ NuttX-10.1.0
 * [#2107](https://github.com/apache/nuttx/pull/2107) build: Makefile should reference CONFIG_HOST_xxx
 * [#2392](https://github.com/apache/nuttx/pull/2392) configure.sh: support custom board build config with absolute path
 * [#2824](https://github.com/apache/nuttx/pull/2824) build/esp32: Create Flash size configuration and a new DOWNLOAD make target
-* [#3317](https://github.com/apache/nuttx/pull/3317) tols: Update python scripts to py3 and lint all of them againt Black
+* [#3317](https://github.com/apache/nuttx/pull/3317) tols: Update python scripts to py3 and lint all of them against Black
 
 ### Bug Fixes
 * [#1890](https://github.com/apache/nuttx/pull/1890) make/expression: improving up asm/C/C++ compile times(make with multi-jobs only)
@@ -319,7 +319,7 @@ NuttX-10.1.0
 
 #### STM32L4
 * [#2068](https://github.com/apache/nuttx/pull/2068) STM32L4: Improvements on ADC driver
-* [#2178](https://github.com/apache/nuttx/pull/2178) STM32L4 ADC driver: extenal event configuration
+* [#2178](https://github.com/apache/nuttx/pull/2178) STM32L4 ADC driver: external event configuration
 * [#2220](https://github.com/apache/nuttx/pull/2220) STM32L4 TIMER: Add some helper functions
 * [#2232](https://github.com/apache/nuttx/pull/2232) STM32L4 ADC: Add injected channel support.
 
@@ -358,7 +358,7 @@ NuttX-10.1.0
 * [#1968](https://github.com/apache/nuttx/pull/1968) arm: kinetis: freedom-k64f: Declare missing NUM_BUTTONS
 * [#1990](https://github.com/apache/nuttx/pull/1990) arm: kinetis: flexcan fixed compile error
 * [#2120](https://github.com/apache/nuttx/pull/2120) arm: stm32h7: Fix missing 'ret' reported by Frank-Christian Kruegel
-* [#2159](https://github.com/apache/nuttx/pull/2159) xtensa: esp32: Fix SPI master DMA RX buffer memcpy size erro
+* [#2159](https://github.com/apache/nuttx/pull/2159) xtensa: esp32: Fix SPI master DMA RX buffer memcpy size error
 * [#2160](https://github.com/apache/nuttx/pull/2160) arm: stm32l4/stm32l4_adc.c: fix copy-paste mistake with CONFI
 * [#2210](https://github.com/apache/nuttx/pull/2210) arm: stm32/stm32_adc.c: do not allow negative ref count
 * [#2214](https://github.com/apache/nuttx/pull/2214) xtensa: esp32: Fix rt-timer issues
@@ -542,7 +542,7 @@ NuttX-10.1.0
 * [#2819](https://github.com/apache/nuttx/pull/2819) Documentation: document nRF52832 Sparkfun board (improve MDK board a bit)
 * [#3022](https://github.com/apache/nuttx/pull/3022) hostfs: Document the backends and restrictions
 * [#3127](https://github.com/apache/nuttx/pull/3127) Documentation: add ESP32 and DevKitC docs
-* [#3138](https://github.com/apache/nuttx/pull/3138) Addind CMake based C++ project example in documentation
+* [#3138](https://github.com/apache/nuttx/pull/3138) Adding CMake based C++ project example in documentation
 * [#3490](https://github.com/apache/nuttx/pull/3490) Documentation/esp32: Add supported peripherals
 
 ### Improvements
@@ -557,7 +557,7 @@ NuttX-10.1.0
 * [#2329](https://github.com/apache/nuttx/pull/2329) Documentation/components/drivers/character/pwm: fix pwm.c location
 * [#2362](https://github.com/apache/nuttx/pull/2362) Documentation improvements
 * [#2390](https://github.com/apache/nuttx/pull/2390) Documentation: improve debugging section
-* [#2485](https://github.com/apache/nuttx/pull/2485) Documentaiton: merge quickstart to getting started
+* [#2485](https://github.com/apache/nuttx/pull/2485) Documentation: merge quickstart to getting started
 * [#2563](https://github.com/apache/nuttx/pull/2563) update Documentation/components/drivers/character/watchdog.rst
 * [#3144](https://github.com/apache/nuttx/pull/3144) CI: remove linkcheck when building docs
 * [#3180](https://github.com/apache/nuttx/pull/3180) documentation: improve boardctl() docs
@@ -614,7 +614,7 @@ NuttX-10.1.0
 * [#2571](https://github.com/apache/nuttx/pull/2571) bluetooth: Fix bt_buff lifecycle
 * [#2607](https://github.com/apache/nuttx/pull/2607) wireless: bluetooth: minor fix to bluetooth stack
 * [#2609](https://github.com/apache/nuttx/pull/2609) wireless: bluetooth: fix minor issue in bt uart driver
-* [#2611](https://github.com/apache/nuttx/pull/2611) wireless/bluetooth: Fix vairous issues found in bt uart shim driver
+* [#2611](https://github.com/apache/nuttx/pull/2611) wireless/bluetooth: Fix various issues found in bt uart shim driver
 * [#2617](https://github.com/apache/nuttx/pull/2617) serial: should include <signal.h> explicitly
 * [#2621](https://github.com/apache/nuttx/pull/2621) syslog: Added formatted timestamps in syslog.
 * [#2636](https://github.com/apache/nuttx/pull/2636) pipes: pty shouldn't call nx_pipe and then file_detach in kernel space
@@ -633,7 +633,7 @@ NuttX-10.1.0
 * [#2775](https://github.com/apache/nuttx/pull/2775) mtd: w25qxxxjv.c : W25Q256's sector count is 8192
 * [#2776](https://github.com/apache/nuttx/pull/2776) net/encx24j600.c: Correct setting of ifstate
 * [#2798](https://github.com/apache/nuttx/pull/2798) wireless: gs2200m: Change retry condition in gs2200m_hal_write()
-* [#2801](https://github.com/apache/nuttx/pull/2801) mtd:w25qxxxjv.c: use different protect bits and address lengts
+* [#2801](https://github.com/apache/nuttx/pull/2801) mtd:w25qxxxjv.c: use different protect bits and address lengths
 * [#2850](https://github.com/apache/nuttx/pull/2850) audio: Introduce a driver-specific spinlock to cxd56.c
 * [#2907](https://github.com/apache/nuttx/pull/2711) sensors: driver model update
 * [#2950](https://github.com/apache/nuttx/pull/2950) audio: pcm_decode: add RAW format support
@@ -693,7 +693,7 @@ NuttX-10.1.0
 * [#2753](https://github.com/apache/nuttx/pull/2753) esp32: Enable renew for "wapi" configs
 * [#2864](https://github.com/apache/nuttx/pull/2864) Add wapi_smp to test Wi-Fi in SMP mode
 * [#2883](https://github.com/apache/nuttx/pull/2883) This commit implements I2C support for ESP32 (wrover kit)
-* [#2888](https://github.com/apache/nuttx/pull/2888) This commit enables BMP180 suport for ESP32
+* [#2888](https://github.com/apache/nuttx/pull/2888) This commit enables BMP180 support for ESP32
 * [#2971](https://github.com/apache/nuttx/pull/2971) esp32: Add board config to support MCP2515
 * [#3071](https://github.com/apache/nuttx/pull/3071) ESP32: Mount TMPFS on board bring up
 * [#3095](https://github.com/apache/nuttx/pull/3095) ESP32: Allow a BSS section to reside in external memory
@@ -842,7 +842,7 @@ NuttX-10.1.0
 * [#3069](https://github.com/apache/nuttx/pull/3069) fs/mmap: Clarify MAP_PRIVATE dependency on CONFIG_FS_RAMMAP
 * [#3070](https://github.com/apache/nuttx/pull/3070) fs/mmap: Return EACCES for incompatible file descriptors
 * [#3105](https://github.com/apache/nuttx/pull/3105) fs/epoll: correct the return value of epoll_ctl(2)
-* [#3137](https://github.com/apache/nuttx/pull/3137) fs/littlefs: Suppport the duplication function
+* [#3137](https://github.com/apache/nuttx/pull/3137) fs/littlefs: Support the duplication function
 * [#3444](https://github.com/apache/nuttx/pull/3444) fs/romfs: fix open zero-byte file fail issue
 * [#3491](https://github.com/apache/nuttx/pull/3491) fs: vfs: adjust the error code of write to be consistent with read
 

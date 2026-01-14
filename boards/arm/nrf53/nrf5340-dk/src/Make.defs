@@ -1,6 +1,8 @@
 ############################################################################
 # boards/arm/nrf53/nrf5340-dk/src/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -34,6 +36,10 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += nrf53_autoleds.c
 else
 CSRCS += nrf53_userleds.c
+endif
+
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += nrf53_gpio.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)

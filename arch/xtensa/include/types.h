@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/include/types.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -54,8 +56,8 @@ typedef unsigned char      _uint8_t;
 typedef signed short       _int16_t;
 typedef unsigned short     _uint16_t;
 
-typedef signed int         _int32_t;
-typedef unsigned int       _uint32_t;
+typedef long int           _int32_t;
+typedef long unsigned int  _uint32_t;
 
 typedef signed long long   _int64_t;
 typedef unsigned long long _uint64_t;
@@ -69,6 +71,9 @@ typedef __WCHAR_TYPE__     _wchar_t;
 #else
 typedef int                _wchar_t;
 #endif
+
+typedef int                _wint_t;
+typedef int                _wctype_t;
 
 /* A size is 4 bytes */
 

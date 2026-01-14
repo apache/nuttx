@@ -1,0 +1,155 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+name: Bug report
+description: Report a bug to improve NuttX stability
+title: "[BUG] <title>"
+labels: [👀 needs triage, "Type: Bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Hello NuttX Community member! Please keep things tidy by putting your post in the proper place:
+
+        Reporting a bug: use this form.
+        Asking a question or getting help: use the [General Help](https://github.com/apache/nuttx/issues/new?assignees=&labels=Community%3A+Question&projects=&template=003_help.yml&title=%5BHELP%5D+%3Ctitle%3E) form or [Mailing list](https://nuttx.apache.org/community/).
+        Requesting a new feature: use the [Feature request](https://github.com/apache/nuttx/issues/new?assignees=&labels=Type%3A+Enhancement&projects=&template=002_feature_request.yml&title=%5BFEATURE%5D+%3Ctitle%3E) form.
+  - type: textarea
+    attributes:
+      label: "Description / Steps to reproduce the issue"
+      description: "A clear and concise description of what the bug is, and why you consider it to be a bug, and steps for how to reproduce it"
+      placeholder: |
+        A description with steps to reproduce the issue.
+        May include logs, images, or videos.
+        1. Step 1
+        2. Step 2
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ### Environment
+        Please specify your environment.
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: On which OS does this issue occur?
+      multiple: true
+      options:
+        - "[OS: BSD]"
+        - "[OS: Linux]"
+        - "[OS: Mac]"
+        - "[OS: Windows]"
+        - "[OS: Other]"
+    validations:
+      required: true
+
+  - type: input
+    id: os_version
+    attributes:
+      label: What is the version of your OS?
+      description: Please fill out the distro or OS version from the previous dropdown
+      placeholder: "MacOS 14, Ubuntu 23.10, Windows 10/MSYS_NT-10.0-19045, ecc"
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: NuttX Version
+      placeholder: "e.g., master, 12.5.1, ecc"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: architecture
+    attributes:
+      label: Issue Architecture
+      description: What architecture(s) are you seeing the problem on?
+      multiple: true
+      options:
+        - "[Arch: all]"
+        - "[Arch: arm]"
+        - "[Arch: arm64]"
+        - "[Arch: avr]"
+        - "[Arch: ceva]"
+        - "[Arch: hc]"
+        - "[Arch: mips]"
+        - "[Arch: misoc]"
+        - "[Arch: openrisc]"
+        - "[Arch: renesas]"
+        - "[Arch: risc-v]"
+        - "[Arch: simulator]"
+        - "[Arch: sparc]"
+        - "[Arch: tricore]"
+        - "[Arch: x86]"
+        - "[Arch: x86_64]"
+        - "[Arch: xtensa]"
+        - "[Arch: z16]"
+        - "[Arch: z80]"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Issue Area
+      description: What area(s) are you seeing the problem on?
+      multiple: true
+      options:
+        - "[Area: Other]"
+        - "[Area: Applications]"
+        - "[Area: Api]"
+        - "[Area: Board support]"
+        - "[Area: Build System]"
+        - "[Area: Configuring]"
+        - "[Area: Debugging]"
+        - "[Area: Drivers]"
+        - "[Area: File System]"
+        - "[Area: Installing]"
+        - "[Area: Kconfig]"
+        - "[Area: Kernel]"
+        - "[Area: Memory Management]"
+        - "[Area: Native port]"
+        - "[Area: Networking]"
+        - "[Area: OS Components]"
+        - "[Area: Posix]"
+        - "[Area: Sensors]"
+        - "[Area: Specific Peripheral]"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Host information"
+      description: "What is the output of `make host_info` command while your buggy configuration selected and if possible device connected to your system?"
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ### Before You Submit
+
+        Please verify that you've followed these steps:
+          - Confirm the problem is reproducible on [**master**](https://github.com/apache/nuttx) or [**latest stable**](https://nuttx.apache.org/download) release.
+          - Run `make distclean` when encountering build issues.
+          - Search [existing issues](https://github.com/apache/nuttx/issues) (including [closed](https://github.com/apache/nuttx/issues?q=is%3Aissue+is%3Aclosed))
+          - Read the [FAQ](https://nuttx.apache.org/docs/latest/faq/index.html).
+
+  - type: checkboxes
+    attributes:
+      label: "Verification"
+      options:
+        - label: "I have verified before submitting the report."
+          required: true

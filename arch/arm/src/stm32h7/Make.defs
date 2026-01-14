@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm/src/stm32h7/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -77,6 +79,10 @@ ifeq ($(CONFIG_STM32H7_FDCAN),y)
 CHIP_CSRCS += stm32_fdcan_sock.c
 endif
 
+ifeq ($(CONFIG_STM32H7_RNG),y)
+CHIP_CSRCS += stm32_rng.c
+endif
+
 ifeq ($(CONFIG_STM32H7_BBSRAM),y)
 CHIP_CSRCS += stm32_bbsram.c
 endif
@@ -138,6 +144,14 @@ ifeq ($(CONFIG_TIMER),y)
 CHIP_CSRCS += stm32_tim_lowerhalf.c
 endif
 
+ifeq ($(CONFIG_STM32H7_TIMX_CAP),y)
+CHIP_CSRCS += stm32_capture.c
+endif
+
+ifeq ($(CONFIG_CAPTURE),y)
+CHIP_CSRCS += stm32_capture_lowerhalf.c
+endif
+
 ifeq ($(CONFIG_STM32H7_LTDC),y)
 CHIP_CSRCS += stm32_ltdc.c
 endif
@@ -172,6 +186,10 @@ endif
 ifeq ($(CONFIG_STM32H7_ETHMAC),y)
 CHIP_CSRCS += stm32_ethernet.c
 endif
+
+ifeq ($(CONFIG_MDIO_BUS),y)
+CHIP_CSRCS += stm32_mdio.c
+endif 
 
 ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CHIP_CSRCS += stm32_qencoder.c

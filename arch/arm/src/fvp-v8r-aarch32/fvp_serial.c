@@ -1,6 +1,8 @@
 /***************************************************************************
  * arch/arm/src/fvp-v8r-aarch32/fvp_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -78,9 +80,8 @@ void arm_serialinit(void)
 
 #else /* USE_SERIALDRIVER */
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
-  return 0;
 }
 
 #endif /* USE_SERIALDRIVER */

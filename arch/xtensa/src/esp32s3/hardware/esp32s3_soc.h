@@ -33,16 +33,16 @@
 #include <nuttx/bits.h>
 
 #include "soc/soc.h"
+#include "soc/hwcrypto_reg.h"
+#include "soc/system_reg.h"
 #include "esp_attr.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define REG_SPI_BASE(i)                         (DR_REG_SPI2_BASE + (((i) > 3) ? ((((i) - 2) * 0x1000) + 0x10000) : (((i) - 2) * 0x1000)))
-
 #define DR_REG_USB_BASE                         0x60080000
-
+#define DR_REG_EMAC_BASE                        0x600CD000
 #define DR_REG_ASSIST_DEBUG_BASE                0x600CE000
 #define DR_REG_WORLD_CNTL_BASE                  0x600D0000
 #define DR_REG_DPORT_END                        0x600D3FFC
@@ -96,6 +96,19 @@
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32s3_sp_dram
+ *
+ * Description:
+ *   Check if the pointer is dma capable.
+ *
+ ****************************************************************************/
+
+static inline bool IRAM_ATTR esp32s3_ptr_dma_capable(const void *p)
+{
+    return (intptr_t)p >= SOC_DMA_LOW && (intptr_t)p < SOC_DMA_HIGH;
+}
 
 /****************************************************************************
  * Name: esp32s3_sp_dram

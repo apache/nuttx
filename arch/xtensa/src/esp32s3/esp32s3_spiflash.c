@@ -37,6 +37,7 @@
 #include <nuttx/init.h>
 #include <nuttx/kthread.h>
 #include <nuttx/signal.h>
+#include <nuttx/kmalloc.h>
 
 #include "sched/sched.h"
 
@@ -48,6 +49,9 @@
 #include "esp32s3_irq.h"
 #include "esp32s3_spiflash.h"
 
+#include "spi_flash_defs.h"
+#include "hal/cache_hal.h"
+#include "hal/cache_ll.h"
 #include "soc/extmem_reg.h"
 #include "soc/spi_mem_reg.h"
 #include "rom/opi_flash.h"
@@ -120,27 +124,90 @@
 #  define FLASH_SR1_BUSY            ESP_ROM_SPIFLASH_BUSY_FLAG
 #  define FLASH_SR1_WREN            ESP_ROM_SPIFLASH_WRENABLE_FLAG
 
+#define SPI_FLASH_DIO_ADDR_BITLEN       24
+#define SPI_FLASH_DIO_DUMMY_BITLEN      4
+#define SPI_FLASH_QIO_ADDR_BITLEN       24
+#define SPI_FLASH_QIO_DUMMY_BITLEN      6
+#define SPI_FLASH_QOUT_ADDR_BITLEN      24
+#define SPI_FLASH_QOUT_DUMMY_BITLEN     8
+#define SPI_FLASH_DOUT_ADDR_BITLEN      24
+#define SPI_FLASH_DOUT_DUMMY_BITLEN     8
+#define SPI_FLASH_FASTRD_ADDR_BITLEN    24
+#define SPI_FLASH_FASTRD_DUMMY_BITLEN   8
+#define SPI_FLASH_SLOWRD_ADDR_BITLEN    24
+#define SPI_FLASH_SLOWRD_DUMMY_BITLEN   0
+#define SPI_FLASH_OPISTR_ADDR_BITLEN    32
+#define SPI_FLASH_OPISTR_DUMMY_BITLEN   20
+#define SPI_FLASH_OPIDTR_ADDR_BITLEN    32
+#define SPI_FLASH_OPIDTR_DUMMY_BITLEN   40
+#define SPI_FLASH_QIO_HPM_DUMMY_BITLEN  10
+#define SPI_FLASH_DIO_HPM_DUMMY_BITLEN  8
+
 /* SPI flash operation */
 
-#  ifdef CONFIG_ESP32S3_SPI_FLASH_USE_32BIT_ADDRESS
-#    define ADDR_BITS(addr)         (((addr) & 0xff000000) ? 32 : 24)
+#ifndef CONFIG_ESP32S3_FLASH_MODE_OCT
+#  define CMD_OPI_FLASH_MXIC(cmd)   (cmd)
+#  define CMD_BITLEN(cmd)           (8)
+#  ifdef CONFIG_ESP32S3_FLASH_MODE_QIO
+#    define READ_DUMMY(addr)        SPI_FLASH_QIO_DUMMY_BITLEN
+#    define READ_CMD(addr)          (ADDR_BITS(addr) == 32 ? CMD_FASTRD_QIO_4B : \
+                                                             CMD_FASTRD_QIO)
+#  elif CONFIG_ESP32S3_FLASH_MODE_QOUT
+#    define READ_DUMMY(addr)        SPI_FLASH_QOUT_DUMMY_BITLEN
+#    define READ_CMD(addr)          (ADDR_BITS(addr) == 32 ? CMD_FASTRD_QUAD_4B : \
+                                                             CMD_FASTRD_QUAD)
+#  elif CONFIG_ESP32S3_FLASH_MODE_DIO
+#    define READ_DUMMY(addr)        SPI_FLASH_DIO_DUMMY_BITLEN
+#    define READ_CMD(addr)          (ADDR_BITS(addr) == 32 ? CMD_FASTRD_DIO_4B : \
+                                                             CMD_FASTRD_DIO)
+#  elif CONFIG_ESP32S3_FLASH_MODE_DOUT
+#    define READ_DUMMY(addr)        SPI_FLASH_DOUT_DUMMY_BITLEN
+#    define READ_CMD(addr)          (ADDR_BITS(addr) == 32 ? CMD_FASTRD_DUAL_4B : \
+                                                             CMD_FASTRD_DUAL)
+#  else /* SPI_FLASH_FASTRD */
+#    define READ_DUMMY(addr)        SPI_FLASH_FASTRD_DUMMY_BITLEN
 #    define READ_CMD(addr)          (ADDR_BITS(addr) == 32 ? FLASH_CMD_FSTRD4B : \
                                                              FLASH_CMD_FSTRD)
+#  endif
+#  ifdef CONFIG_ESP32S3_SPI_FLASH_USE_32BIT_ADDRESS
+#    define ADDR_BITS(addr)         (((addr) & 0xff000000) ? 32 : 24)
 #    define WRITE_CMD(addr)         (ADDR_BITS(addr) == 32 ? FLASH_CMD_PP4B : \
                                                              FLASH_CMD_PP)
 #    define ERASE_CMD(addr)         (ADDR_BITS(addr) == 32 ? FLASH_CMD_SE4B : \
                                                              FLASH_CMD_SE)
-#    define READ_DUMMY(addr)        (8)
 #  else
 #    define ADDR_BITS(addr)         24
-#    define READ_CMD(addr)          FLASH_CMD_FSTRD
 #    define WRITE_CMD(addr)         FLASH_CMD_PP
 #    define ERASE_CMD(addr)         FLASH_CMD_SE
-#    define READ_DUMMY(addr)        (8)
 #  endif
+#  define READ_REG_DUMMY(addr)      (0)
+#else /* CONFIG_ESP32S3_FLASH_MODE_OCT */
+#    define CMD_OPI_FLASH_MXIC(cmd) ((((~(cmd) & 0xff) << 8)) | ((cmd) & 0xff))
+#    define CMD_OPI_FLASH_MXIC_CHIP_ERASE        0x9F60
+#    define CMD_OPI_FLASH_MXIC_READ_STR          0x13EC
+#    define CMD_OPI_FLASH_MXIC_READ_DTR          0x11EE
+#    define CMD_OPI_FLASH_MXIC_RDCR2             0x8E71
+#    define CMD_OPI_FLASH_MXIC_WRCR2             0x8D72
+#    define CMD_BITLEN(cmd)         (cmd >= 0x100 ? 16 : 8)
+#    define ADDR_BITS(addr)         (32)
+#    ifdef CONFIG_ESP32S3_FLASH_SAMPLE_MODE_STR
+#      define READ_CMD(addr)          CMD_OPI_FLASH_MXIC_READ_STR
+#    else
+#      define READ_CMD(addr)          CMD_OPI_FLASH_MXIC_READ_DTR
+#    endif
+#    define WRITE_CMD(addr)         CMD_OPI_FLASH_MXIC(FLASH_CMD_PP4B)
+#    define ERASE_CMD(addr)         CMD_OPI_FLASH_MXIC(FLASH_CMD_SE4B)
+#    ifdef CONFIG_ESP32S3_FLASH_SAMPLE_MODE_STR
+#      define READ_DUMMY(addr)          SPI_FLASH_OPISTR_DUMMY_BITLEN
+#      define READ_REG_DUMMY(addr)      4
+#    else /* CONFIG_ESP32S3_FLASH_SAMPLE_MODE_DTR */
+#      define READ_DUMMY(addr)          CMD_OPI_FLASH_MXIC_READ_DTR
+#      define READ_REG_DUMMY(addr)      8
+#    endif
+#endif /* !CONFIG_ESP32S3_FLASH_MODE_OCT*/
 
 #  define SEND_CMD8_TO_FLASH(cmd)                           \
-    esp32s3_spi_trans((cmd), 8,                             \
+    esp32s3_spi_trans((cmd), CMD_BITLEN(cmd),               \
                       0, 0,                                 \
                       NULL, 0,                              \
                       NULL, 0,                              \
@@ -148,15 +215,16 @@
                       false)
 
 #  define READ_SR1_FROM_FLASH(cmd, status)                  \
-    esp32s3_spi_trans((cmd), 8,                             \
-                      0, 0,                                 \
+    esp32s3_spi_trans((cmd), CMD_BITLEN(cmd),               \
+                      0, ADDR_BITS(0),                      \
                       NULL, 0,                              \
                       (status), 1,                          \
-                      0,                                    \
+                      READ_REG_DUMMY(0),                    \
                       false)
 
 #  define ERASE_FLASH_SECTOR(addr)                          \
-    esp32s3_spi_trans(ERASE_CMD(addr), 8,                   \
+    esp32s3_spi_trans(ERASE_CMD(addr),                      \
+                      CMD_BITLEN(ERASE_CMD(addr)),          \
                       (addr), ADDR_BITS(addr),              \
                       NULL, 0,                              \
                       NULL, 0,                              \
@@ -164,7 +232,8 @@
                       true)
 
 #  define WRITE_DATA_TO_FLASH(addr, buffer, size)           \
-    esp32s3_spi_trans(WRITE_CMD(addr), 8,                   \
+    esp32s3_spi_trans(WRITE_CMD(addr),                      \
+                      CMD_BITLEN(WRITE_CMD(addr)),          \
                       (addr), ADDR_BITS(addr),              \
                       buffer, size,                         \
                       NULL, 0,                              \
@@ -172,7 +241,8 @@
                       true)
 
 #  define READ_DATA_FROM_FLASH(addr, buffer, size)          \
-    esp32s3_spi_trans(READ_CMD(addr), 8,                    \
+    esp32s3_spi_trans(READ_CMD(addr),                       \
+                      CMD_BITLEN(READ_CMD(addr)),           \
                       (addr), ADDR_BITS(addr),              \
                       NULL, 0,                              \
                       buffer, size,                         \
@@ -185,10 +255,10 @@
  * Private Functions Declaration
  ****************************************************************************/
 
-static void spiflash_start(void);
-static void spiflash_end(void);
-static void spi_flash_disable_cache(uint32_t cpuid);
-static void spi_flash_restore_cache(uint32_t cpuid);
+void spiflash_start(void);
+void spiflash_end(void);
+static void spi_flash_disable_cache(void);
+static void spi_flash_restore_cache(void);
 #ifdef CONFIG_SMP
 static int spi_flash_op_block_task(int argc, char *argv[]);
 static int spiflash_init_spi_flash_op_block_task(int cpu);
@@ -205,6 +275,12 @@ extern void cache_resume_dcache(uint32_t val);
 extern int cache_invalidate_addr(uint32_t addr, uint32_t size);
 extern void cache_invalidate_icache_all(void);
 
+#ifndef CONFIG_ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE
+extern void spi_flash_mmap_os_func_set(void *(*func1)(size_t size),
+                                       void (*func2)(void *p));
+extern esp_err_t spi_flash_mmap_page_num_init(uint32_t page_num);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -220,7 +296,9 @@ static uint32_t s_flash_op_cache_state[CONFIG_SMP_NCPUS];
 static rmutex_t g_flash_op_mutex;
 static volatile bool g_flash_op_can_start = false;
 static volatile bool g_flash_op_complete = false;
+static volatile bool g_spi_flash_cache_suspended = false;
 static volatile bool g_sched_suspended[CONFIG_SMP_NCPUS];
+static volatile bool g_flash_chip_busy = false;
 #ifdef CONFIG_SMP
 static sem_t g_disable_non_iram_isr_on_core[CONFIG_SMP_NCPUS];
 #endif
@@ -239,36 +317,14 @@ static sem_t g_disable_non_iram_isr_on_core[CONFIG_SMP_NCPUS];
 
 static void spiflash_suspend_cache(void)
 {
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
 #ifdef CONFIG_SMP
   int other_cpu = cpu ? 0 : 1;
 #endif
 
-  spi_flash_disable_cache(cpu);
-#ifdef CONFIG_SMP
-  spi_flash_disable_cache(other_cpu);
-#endif
-}
+  spi_flash_disable_cache();
 
-/****************************************************************************
- * Name: spiflash_resume_cache
- *
- * Description:
- *   Resume CPU cache.
- *
- ****************************************************************************/
-
-static void spiflash_resume_cache(void)
-{
-  int cpu = up_cpu_index();
-#ifdef CONFIG_SMP
-  int other_cpu = cpu ? 0 : 1;
-#endif
-
-  spi_flash_restore_cache(cpu);
-#ifdef CONFIG_SMP
-  spi_flash_restore_cache(other_cpu);
-#endif
+  g_spi_flash_cache_suspended = true;
 }
 
 /****************************************************************************
@@ -279,7 +335,7 @@ static void spiflash_resume_cache(void)
  *
  ****************************************************************************/
 
-static void spiflash_start(void)
+void spiflash_start(void)
 {
   struct tcb_s *tcb = this_task();
   int saved_priority = tcb->sched_priority;
@@ -294,7 +350,7 @@ static void spiflash_start(void)
 
   nxsched_set_priority(tcb, SCHED_PRIORITY_MAX);
 
-  cpu = up_cpu_index();
+  cpu = this_cpu();
 #ifdef CONFIG_SMP
   other_cpu = cpu == 1 ? 0 : 1;
 #endif
@@ -308,7 +364,7 @@ static void spiflash_start(void)
     {
       g_flash_op_can_start = false;
 
-      cpu = up_cpu_index();
+      cpu = this_cpu();
       other_cpu = cpu ? 0 : 1;
 
       nxsem_post(&g_disable_non_iram_isr_on_core[other_cpu]);
@@ -341,9 +397,9 @@ static void spiflash_start(void)
  *
  ****************************************************************************/
 
-static void spiflash_end(void)
+void spiflash_end(void)
 {
-  const int cpu = up_cpu_index();
+  const int cpu = this_cpu();
 #ifdef CONFIG_SMP
   const int other_cpu = cpu ? 0 : 1;
 #endif
@@ -420,10 +476,10 @@ static void esp32s3_spi_trans(uint32_t command,
   uint32_t user1_reg = getreg32(SPI_MEM_USER1_REG(SPI_PORT));
   uint32_t user_reg = getreg32(SPI_MEM_USER_REG(SPI_PORT));
 
-  /* Initiliaze SPI user register */
+  /* Initialize SPI user register */
 
-  user_reg &= ~(SPI_MEM_USR_ADDR_M | SPI_MEM_USR_DUMMY_M |
-                SPI_MEM_USR_MOSI_M | SPI_MEM_USR_MISO_M);
+  user_reg &= ~(SPI_MEM_USR_DUMMY_M | SPI_MEM_USR_MOSI_M |
+                SPI_MEM_USR_MISO_M | SPI_MEM_USR_ADDR_M);
   user_reg |= SPI_MEM_USR_COMMAND_M;
 
   /* Wait until SPI is idle */
@@ -444,36 +500,40 @@ static void esp32s3_spi_trans(uint32_t command,
 
   /* Set address bits and value */
 
+  user1_reg &= ~SPI_MEM_USR_ADDR_BITLEN_M;
+  user1_reg |= (address_bits - 1) << SPI_MEM_USR_ADDR_BITLEN_S;
+
+  putreg32(address, SPI_MEM_ADDR_REG(SPI_PORT));
+
+  regval  = getreg32(SPI_MEM_CACHE_FCTRL_REG(SPI_PORT));
+  if (address_bits > 24)
+    {
+      regval |= SPI_MEM_CACHE_USR_CMD_4BYTE_M;
+    }
+  else
+    {
+      regval &= ~SPI_MEM_CACHE_USR_CMD_4BYTE_M;
+    }
+
   if (address_bits)
     {
-      user1_reg &= ~SPI_MEM_USR_ADDR_BITLEN_M;
-      user1_reg |= (address_bits - 1) << SPI_MEM_USR_ADDR_BITLEN_S;
-
-      putreg32(address, SPI_MEM_ADDR_REG(SPI_PORT));
-
       user_reg |= SPI_MEM_USR_ADDR_M;
-
-      regval  = getreg32(SPI_MEM_CACHE_FCTRL_REG(SPI_PORT));
-      if (address_bits > 24)
-        {
-          regval |= SPI_MEM_CACHE_USR_CMD_4BYTE_M;
-        }
-      else
-        {
-          regval &= ~SPI_MEM_CACHE_USR_CMD_4BYTE_M;
-        }
-
-      putreg32(regval, SPI_MEM_CACHE_FCTRL_REG(SPI_PORT));
     }
+
+  putreg32(regval, SPI_MEM_CACHE_FCTRL_REG(SPI_PORT));
 
   /* Set dummy */
 
+  user1_reg &= ~SPI_MEM_USR_DUMMY_CYCLELEN_M;
+
   if (dummy_bits)
     {
-      user1_reg &= ~SPI_MEM_USR_DUMMY_CYCLELEN_M;
-      user1_reg |= (dummy_bits - 1) << SPI_MEM_USR_DUMMY_CYCLELEN_S;
-
       user_reg |= SPI_MEM_USR_DUMMY_M;
+      user1_reg |= (dummy_bits - 1) << SPI_MEM_USR_DUMMY_CYCLELEN_S;
+    }
+  else
+    {
+      user1_reg |= SPI_MEM_USR_DUMMY_CYCLELEN_M;
     }
 
   /* Set TX data */
@@ -494,8 +554,11 @@ static void esp32s3_spi_trans(uint32_t command,
   if (rx_bytes)
     {
       putreg32(rx_bytes * 8 - 1, SPI_MEM_MISO_DLEN_REG(SPI_PORT));
-
       user_reg |= SPI_MEM_USR_MISO_M;
+    }
+  else
+    {
+      putreg32(0, SPI_MEM_MISO_DLEN_REG(SPI_PORT));
     }
 
   putreg32(user_reg,  SPI_MEM_USER_REG(SPI_PORT));
@@ -510,15 +573,54 @@ static void esp32s3_spi_trans(uint32_t command,
               SPI_MEM_FCMD_DUAL_M | SPI_MEM_FADDR_OCT_M |
               SPI_MEM_FDIN_OCT_M | SPI_MEM_FDOUT_OCT_M |
               SPI_MEM_FDUMMY_OUT_M | SPI_MEM_RESANDRES_M |
-              SPI_MEM_WP_REG_M | SPI_MEM_WRSR_2B_M);
+              SPI_MEM_WP_REG_M | SPI_MEM_WRSR_2B_M |
+              SPI_MEM_FASTRD_MODE_M);
+  regval |= (SPI_MEM_Q_POL_M | SPI_MEM_D_POL_M);
+#ifdef CONFIG_ESP32S3_FLASH_MODE_QIO
+  if (command == READ_CMD(address))
+    {
+      regval |= SPI_MEM_FREAD_QIO_M;
+      regval |= SPI_MEM_FASTRD_MODE_M;
+      regval |= SPI_MEM_FDUMMY_OUT_M;
+    }
+#elif CONFIG_ESP32S3_FLASH_MODE_QOUT
+  if (command == READ_CMD(address))
+    {
+      regval |= SPI_MEM_FREAD_QUAD_M;
+      regval |= SPI_MEM_FASTRD_MODE_M;
+    }
+#elif CONFIG_ESP32S3_FLASH_MODE_DIO
+  if (command == READ_CMD(address))
+    {
+      regval |= SPI_MEM_FREAD_DIO_M;
+      regval |= SPI_MEM_FASTRD_MODE_M;
+      regval |= SPI_MEM_FDUMMY_OUT_M;
+    }
+#elif CONFIG_ESP32S3_FLASH_MODE_DOUT
+  if (command == READ_CMD(address))
+    {
+      regval |= SPI_MEM_FREAD_DUAL_M;
+      regval |= SPI_MEM_FASTRD_MODE_M;
+    }
+#elif CONFIG_ESP32S3_FLASH_MODE_OCT
   regval |= SPI_MEM_FASTRD_MODE_M;
+#  ifdef CONFIG_ESP32S3_FLASH_SAMPLE_MODE_STR
+  regval |= (SPI_MEM_FADDR_OCT_M | SPI_MEM_FCMD_OCT_M |
+             SPI_MEM_FDIN_OCT_M | SPI_MEM_FDOUT_OCT_M);
+#  elif CONFIG_ESP32S3_FLASH_SAMPLE_MODE_DTR
+#    error "Not yet implemented"
+#  endif
+#else /* SPI_FLASH_FASTRD */
+  if (command == READ_CMD(address))
+    {
+      regval |= SPI_MEM_FASTRD_MODE_M;
+    }
+#endif
+
   putreg32(regval, SPI_MEM_CTRL_REG(SPI_PORT));
 
   /* Set clock and delay */
 
-  regval = SPI_MEM_FLASH_PES_WAIT_EN_M |
-           SPI_MEM_FLASH_PER_WAIT_EN_M;
-  putreg32(regval, SPI_MEM_FLASH_SUS_CMD_REG(SPI_PORT));
   putreg32(0, SPI_MEM_CLOCK_GATE_REG(SPI_PORT));
 
   /* Set if this is program or erase operation */
@@ -528,7 +630,7 @@ static void esp32s3_spi_trans(uint32_t command,
       cmd_reg |= SPI_MEM_FLASH_PE_M;
     }
 
-  /* Start transmision */
+  /* Start transmission */
 
   cmd_reg |= SPI_MEM_USR_M;
   putreg32(cmd_reg, SPI_MEM_CMD_REG(SPI_PORT));
@@ -568,9 +670,21 @@ static void wait_flash_idle(void)
 
   do
     {
-      READ_SR1_FROM_FLASH(FLASH_CMD_RDSR, &status);
+      READ_SR1_FROM_FLASH(CMD_OPI_FLASH_MXIC(FLASH_CMD_RDSR), &status);
       if ((status & FLASH_SR1_BUSY) == 0)
         {
+          if (g_flash_chip_busy == true)
+            {
+              g_flash_chip_busy = 0;
+              if ((status & FLASH_SR1_WREN) != 0)
+                {
+                  /* The previous command is not accepted, leaving the WEL
+                   * bit still set.
+                   */
+
+                  return;
+                }
+            }
           break;
         }
     }
@@ -594,8 +708,8 @@ static void enable_flash_write(void)
 
   do
     {
-      SEND_CMD8_TO_FLASH(FLASH_CMD_WREN);
-      READ_SR1_FROM_FLASH(FLASH_CMD_RDSR, &status);
+      SEND_CMD8_TO_FLASH(CMD_OPI_FLASH_MXIC(FLASH_CMD_WREN));
+      READ_SR1_FROM_FLASH(CMD_OPI_FLASH_MXIC(FLASH_CMD_RDSR), &status);
       if ((status & FLASH_SR1_WREN) != 0)
         {
           break;
@@ -621,8 +735,8 @@ static void disable_flash_write(void)
 
   do
     {
-      SEND_CMD8_TO_FLASH(FLASH_CMD_WRDI);
-      READ_SR1_FROM_FLASH(FLASH_CMD_RDSR, &status);
+      SEND_CMD8_TO_FLASH(CMD_OPI_FLASH_MXIC(FLASH_CMD_WRDI));
+      READ_SR1_FROM_FLASH(CMD_OPI_FLASH_MXIC(FLASH_CMD_RDSR), &status);
       if ((status & FLASH_SR1_WREN) == 0)
         {
           break;
@@ -753,7 +867,7 @@ static inline void IRAM_ATTR spiflash_os_yield(void)
   /* Delay 1 tick */
 
   useconds_t us = TICK2USEC(1);
-  nxsig_usleep(us);
+  nxsched_usleep(us);
 }
 #endif /* CONFIG_ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE */
 
@@ -765,17 +879,16 @@ static inline void IRAM_ATTR spiflash_os_yield(void)
  *   s_flash_op_cache_state.
  *
  * Input Parameters:
- *   cpuid - The CPU core whose cache will be disabled.
+ *   None.
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-static void spi_flash_disable_cache(uint32_t cpuid)
+static void spi_flash_disable_cache(void)
 {
-  s_flash_op_cache_state[cpuid] = cache_suspend_icache() << 16;
-  s_flash_op_cache_state[cpuid] |= cache_suspend_dcache();
+  cache_hal_suspend(CACHE_LL_LEVEL_EXT_MEM, CACHE_TYPE_ALL);
 }
 
 /****************************************************************************
@@ -786,17 +899,16 @@ static void spi_flash_disable_cache(uint32_t cpuid)
  *   s_flash_op_cache_state.
  *
  * Input Parameters:
- *   cpuid - The CPU core whose cache will be restored.
+ *   None.
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-static void spi_flash_restore_cache(uint32_t cpuid)
+static void spi_flash_restore_cache(void)
 {
-  cache_resume_dcache(s_flash_op_cache_state[cpuid] & 0xffff);
-  cache_resume_icache(s_flash_op_cache_state[cpuid] >> 16);
+  cache_hal_resume(CACHE_LL_LEVEL_EXT_MEM, CACHE_TYPE_ALL);
 }
 
 #ifdef CONFIG_SMP
@@ -808,7 +920,7 @@ static void spi_flash_restore_cache(uint32_t cpuid)
  *   Disable the non-IRAM interrupts on the other core (the one that isn't
  *   handling the SPI flash operation) and notify that the SPI flash
  *   operation can start. Wait on a busy loop until it's finished and then
- *   reenable the non-IRAM interrups.
+ *   re-enable the non-IRAM interrupts.
  *
  * Input Parameters:
  *   argc          - Not used.
@@ -823,7 +935,7 @@ static void spi_flash_restore_cache(uint32_t cpuid)
 static int spi_flash_op_block_task(int argc, char *argv[])
 {
   struct tcb_s *tcb = this_task();
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
 
   for (; ; )
     {
@@ -855,7 +967,7 @@ static int spi_flash_op_block_task(int argc, char *argv[])
 
       /* Flash operation is complete, re-enable cache */
 
-      spi_flash_restore_cache(cpu);
+      spi_flash_restore_cache();
 
       /* Restore interrupts that aren't located in IRAM */
 
@@ -887,8 +999,8 @@ static int spi_flash_op_block_task(int argc, char *argv[])
 
 static int spiflash_init_spi_flash_op_block_task(int cpu)
 {
-  int pid;
-  int ret = OK;
+  FAR struct tcb_s *tcb;
+  int ret;
   char *argv[2];
   char arg1[32];
   cpu_set_t cpuset;
@@ -897,28 +1009,40 @@ static int spiflash_init_spi_flash_op_block_task(int cpu)
   argv[0] = arg1;
   argv[1] = NULL;
 
-  pid = kthread_create("spiflash_op",
-                       SCHED_PRIORITY_MAX,
-                       CONFIG_ESP32S3_SPIFLASH_OP_TASK_STACKSIZE,
-                       spi_flash_op_block_task,
-                       argv);
-  if (pid > 0)
+  /* Allocate a TCB for the new task. */
+
+  tcb = kmm_zalloc(sizeof(struct tcb_s));
+  if (!tcb)
     {
-      if (cpu < CONFIG_SMP_NCPUS)
-        {
-          CPU_ZERO(&cpuset);
-          CPU_SET(cpu, &cpuset);
-          ret = nxsched_set_affinity(pid, sizeof(cpuset), &cpuset);
-          if (ret < 0)
-            {
-              return ret;
-            }
-        }
+      serr("ERROR: Failed to allocate TCB\n");
+      return -ENOMEM;
     }
-  else
+
+  /* Setup the task type */
+
+  tcb->flags = TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_FREE_TCB;
+
+  /* Initialize the task */
+
+  ret = nxtask_init(tcb, "spiflash_op",
+                    SCHED_PRIORITY_MAX,
+                    NULL, CONFIG_ESP32S3_SPIFLASH_OP_TASK_STACKSIZE,
+                    spi_flash_op_block_task, argv, environ, NULL);
+  if (ret < OK)
     {
-      return -EPERM;
+      kmm_free(tcb);
+      return ret;
     }
+
+  /* Set the affinity */
+
+  CPU_ZERO(&cpuset);
+  CPU_SET(cpu, &cpuset);
+  tcb->affinity = cpuset;
+
+  /* Activate the task */
+
+  nxtask_activate(tcb);
 
   return ret;
 }
@@ -927,6 +1051,32 @@ static int spiflash_init_spi_flash_op_block_task(int cpu)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: spiflash_resume_cache
+ *
+ * Description:
+ *   Resume CPU cache.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void spiflash_resume_cache(void)
+{
+  int cpu = this_cpu();
+#ifdef CONFIG_SMP
+  int other_cpu = cpu ? 0 : 1;
+#endif
+
+  spi_flash_restore_cache();
+
+  g_spi_flash_cache_suspended = false;
+}
 
 /****************************************************************************
  * Name: esp32s3_mmap
@@ -961,7 +1111,7 @@ int esp32s3_mmap(struct spiflash_map_req_s *req)
        start_page < DROM0_PAGES_END;
        ++start_page)
     {
-      if (MMU_TABLE[start_page] == MMU_INVALID)
+      if (MMU_TABLE[start_page] == SOC_MMU_INVALID)
         {
           break;
         }
@@ -1028,7 +1178,7 @@ void esp32s3_ummap(const struct spiflash_map_req_s *req)
 
   for (i = req->start_page; i < req->start_page + req->page_cnt; ++i)
     {
-      MMU_TABLE[i] = MMU_INVALID;
+      MMU_TABLE[i] = SOC_MMU_INVALID;
     }
 
   spiflash_end();
@@ -1099,6 +1249,7 @@ int spi_flash_erase_sector(uint32_t sector)
   enable_flash_write();
 
   ERASE_FLASH_SECTOR(addr);
+  g_flash_chip_busy = true;
 
   wait_flash_idle();
   disable_flash_write();
@@ -1140,8 +1291,10 @@ int spi_flash_erase_range(uint32_t start_address, uint32_t size)
       spiflash_start();
       wait_flash_idle();
       enable_flash_write();
+      wait_flash_idle();
 
       ERASE_FLASH_SECTOR(addr);
+      g_flash_chip_busy = true;
       addr += FLASH_SECTOR_SIZE;
       wait_flash_idle();
       disable_flash_write();
@@ -1215,6 +1368,7 @@ int spi_flash_write(uint32_t dest_addr, const void *buffer, uint32_t size)
       enable_flash_write();
 
       WRITE_DATA_TO_FLASH(tx_addr, spi_buffer, n);
+      g_flash_chip_busy = true;
 
       tx_bytes -= n;
       tx_buf += n;
@@ -1337,6 +1491,14 @@ int esp32s3_spiflash_init(void)
 
   spi_flash_guard_set(&g_spi_flash_guard_funcs);
 
+#ifndef CONFIG_ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE
+
+  /* These two functions are in ROM only */
+
+  spi_flash_mmap_os_func_set(malloc, free);
+  spi_flash_mmap_page_num_init(128);
+#endif
+
   return ret;
 }
 
@@ -1375,4 +1537,25 @@ bool esp32s3_flash_encryption_enabled(void)
     }
 
   return enabled;
+}
+
+/****************************************************************************
+ * Name: esp32s3_get_flash_address_mapped_as_text
+ *
+ * Description:
+ *   Get flash address which is currently mapped as text
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   flash address which is currently mapped as text
+ *
+ ****************************************************************************/
+
+uint32_t esp32s3_get_flash_address_mapped_as_text(void)
+{
+  uint32_t i = MMU_ADDR2PAGE((uint32_t)_stext) -
+               MMU_ADDR2PAGE(SOC_MMU_IBUS_VADDR_BASE);
+  return (FLASH_MMU_TABLE[i] & MMU_ADDRESS_MASK) * MMU_PAGE_SIZE;
 }

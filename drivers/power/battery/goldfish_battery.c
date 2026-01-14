@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/power/battery/goldfish_battery.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,8 +27,10 @@
 #include <stdint.h>
 #include <errno.h>
 #include <debug.h>
-#include <nuttx/nuttx.h>
+
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/power/battery_gauge.h>
 #include <nuttx/power/battery_ioctl.h>
 
@@ -98,13 +102,13 @@ static int goldfish_charger_online(FAR struct battery_gauge_dev_s *dev,
 static int goldfish_battery_state(FAR struct battery_gauge_dev_s *dev,
                                   FAR int *status);
 static int goldfish_battery_voltage(FAR struct battery_gauge_dev_s *dev,
-                                    FAR b16_t *value);
+                                    FAR int *value);
 static int  goldfish_battery_capacity(FAR struct battery_gauge_dev_s *dev,
-                                      FAR b16_t *value);
+                                      FAR int *value);
 static int goldfish_battery_current(FAR struct battery_gauge_dev_s *dev,
-                                    FAR b16_t *value);
+                                    FAR int *value);
 static int goldfish_battery_temp(FAR struct battery_gauge_dev_s *dev,
-                                 FAR b8_t *value);
+                                 FAR int *value);
 
 /****************************************************************************
  * Private Data
@@ -170,26 +174,24 @@ static int goldfish_battery_state(FAR struct battery_gauge_dev_s *dev,
 }
 
 static int goldfish_battery_voltage(FAR struct battery_gauge_dev_s *dev,
-                                    FAR b16_t *value)
+                                    FAR int *value)
 {
   FAR struct goldfish_battery_data_s *data =
       container_of(dev, struct goldfish_battery_data_s, battery);
   uint32_t regval;
-  float vol;
 
   /* BATTERY_VOLTAGE units is µV */
 
   regval = GOLDFISH_BATTERY_READ(data, BATTERY_VOLTAGE);
 
-  /* convert to unit V and fill b16_t */
+  /* convert to unit mV and fill int */
 
-  vol = regval / 1000000.0f;
-  *value = ftob16(vol);
+  *value = regval / 1000;
   return OK;
 }
 
 static int  goldfish_battery_capacity(FAR struct battery_gauge_dev_s *dev,
-                                      FAR b16_t *value)
+                                      FAR int *value)
 {
   FAR struct goldfish_battery_data_s *data =
       container_of(dev, struct goldfish_battery_data_s, battery);
@@ -198,45 +200,39 @@ static int  goldfish_battery_capacity(FAR struct battery_gauge_dev_s *dev,
   /* BATTERY_CAPACITY units is percentage */
 
   regval = GOLDFISH_BATTERY_READ(data, BATTERY_CAPACITY);
-  *value = uitoub16(regval);
+  *value = regval;
   return OK;
 }
 
 static int goldfish_battery_current(FAR struct battery_gauge_dev_s *dev,
-                                    FAR b16_t *value)
+                                    FAR int *value)
 {
   FAR struct goldfish_battery_data_s *data =
       container_of(dev, struct goldfish_battery_data_s, battery);
   uint32_t regval;
-  float current;
 
   /* BATTERY_CURRENT_NOW units is µA */
 
   regval = GOLDFISH_BATTERY_READ(data, BATTERY_CURRENT_NOW);
 
-  /* convert to unit mA and fill b16_t */
+  /* convert to unit mA and fill int */
 
-  current = regval / 1000.0f;
-  *value = ftob16(current);
+  *value = regval / 1000;
   return OK;
 }
 
 static int goldfish_battery_temp(FAR struct battery_gauge_dev_s *dev,
-                                 FAR b8_t *value)
+                                 FAR int *value)
 {
   FAR struct goldfish_battery_data_s *data =
       container_of(dev, struct goldfish_battery_data_s, battery);
   int32_t regval;
-  float temp;
 
-  /* BATTERY_TEMP units is 0.1 celsuis */
+  /* BATTERY_TEMP units is 0.1 celsius */
 
   regval = GOLDFISH_BATTERY_READ(data, BATTERY_TEMP);
 
-  /* convert to unit celsuis and fill b16_t */
-
-  temp = regval / 10.0f;
-  *value = ftob8(temp);
+  *value = regval;
   return OK;
 }
 
@@ -321,8 +317,9 @@ int goldfish_battery_register(FAR void *regs, int irq)
       goto fail;
     }
 
-  GOLDFISH_BATTERY_WRITE(data, BATTERY_INT_ENABLE, BATTERY_INT_MASK);
   up_enable_irq(data->irq);
+  GOLDFISH_BATTERY_WRITE(data, BATTERY_INT_ENABLE, BATTERY_INT_MASK);
+
   batinfo("goldfish_battery_register over");
   return 0;
 fail:

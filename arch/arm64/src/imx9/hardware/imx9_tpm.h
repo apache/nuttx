@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/imx9/hardware/imx9_tpm.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -158,7 +160,7 @@
 
 /* FILTER */
 
-#define TPM_FILTER_CHXFVAL_MASK(ch)   (0xf << ((ch) * 4))) /* Channel filter value */
+#define TPM_FILTER_CHXFVAL_MASK(ch)   (0xf << ((ch) * 4)) /* Channel filter value */
 
 /* QDCTRL */
 

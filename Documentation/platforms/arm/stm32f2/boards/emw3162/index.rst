@@ -2,6 +2,8 @@
 emw3162
 =======
 
+.. tags:: chip:stm32, chip:stm32f2, chip:stm32f205
+
 EMW3162 board (https://www.waveshare.com/EMW3162.htm) features the
 STM32F205RG MCU and Broadcom BCM43362KUBG Wi-Fi chip.
 The STM32F205RG is a 120 MHz Cortex-M3 operation with 1MB Flash

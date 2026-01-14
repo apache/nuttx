@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/gd32f4/gd32f4xx_dma.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -133,7 +135,7 @@ extern "C"
  *   gd32_dma_channel_free().
  *
  * Input Parameters:
- *   periph_req - Identifies the DMA channle is request by which peripheral
+ *   periph_req - Identifies the DMA channel is request by which peripheral
  *
  * Returned Value:
  *   If periph_req is valid, this function ALWAYS returns a non-NULL

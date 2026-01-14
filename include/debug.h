@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/debug.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,6 +29,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <nuttx/streams.h>
 
 #ifdef CONFIG_ARCH_DEBUG_H
 #  include <arch/debug.h>
@@ -120,7 +123,7 @@
 #  define _alert      _none
 #elif defined(CONFIG_CPP_HAVE_VARARGS)
 #  define _alert(format, ...) \
-   __arch_syslog(LOG_EMERG, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
+   __arch_syslog(LOG_ALERT, EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 #endif
 
 #if !defined(CONFIG_DEBUG_ERROR)
@@ -596,6 +599,24 @@
 #  define i2sinfo     _none
 #endif
 
+#ifdef CONFIG_DEBUG_I3C_ERROR
+#  define i3cerr       _err
+#else
+#  define i3cerr      _none
+#endif
+
+#ifdef CONFIG_DEBUG_I3C_WARN
+#  define i3cwarn     _warn
+#else
+#  define i3cwarn     _none
+#endif
+
+#ifdef CONFIG_DEBUG_I3C_INFO
+#  define i3cinfo     _info
+#else
+#  define i3cinfo     _none
+#endif
+
 #ifdef CONFIG_DEBUG_PWM_ERROR
 #  define pwmerr       _err
 #else
@@ -758,6 +779,24 @@
 #  define spiinfo     _none
 #endif
 
+#ifdef CONFIG_DEBUG_THERMAL_ERROR
+#  define therr         _err
+#else
+#  define therr        _none
+#endif
+
+#ifdef CONFIG_DEBUG_THERMAL_WARN
+#  define thwarn       _warn
+#else
+#  define thwarn       _none
+#endif
+
+#ifdef CONFIG_DEBUG_THERMAL_INFO
+#  define thinfo       _info
+#else
+#  define thinfo       _none
+#endif
+
 #ifdef CONFIG_DEBUG_TIMER_ERROR
 #  define tmrerr       _err
 #else
@@ -884,6 +923,24 @@
 #  define vrtinfo     _none
 #endif
 
+#ifdef CONFIG_DEBUG_VHOST_ERROR
+#  define vhosterr     _err
+#else
+#  define vhosterr     _none
+#endif
+
+#ifdef CONFIG_DEBUG_VHOST_WARN
+#  define vhostwarn    _warn
+#else
+#  define vhostwarn    _none
+#endif
+
+#ifdef CONFIG_DEBUG_VHOST_INFO
+#  define vhostinfo    _info
+#else
+#  define vhostinfo    _none
+#endif
+
 #ifdef CONFIG_DEBUG_RESET_ERROR
 #  define rsterr       _err
 #else
@@ -954,6 +1011,42 @@
 #  define rpmsginfo     _info
 #else
 #  define rpmsginfo     _none
+#endif
+
+#ifdef CONFIG_DEBUG_CORESIGHT_ERROR
+#  define cserr       _err
+#else
+#  define cserr      _none
+#endif
+
+#ifdef CONFIG_DEBUG_CORESIGHT_WARN
+#  define cswarn     _warn
+#else
+#  define cswarn     _none
+#endif
+
+#ifdef CONFIG_DEBUG_CORESIGHT_INFO
+#  define csinfo     _info
+#else
+#  define csinfo     _none
+#endif
+
+#ifdef CONFIG_DEBUG_PTP_ERROR
+#  define ptperr     _err
+#else
+#  define ptperr     _none
+#endif
+
+#ifdef CONFIG_DEBUG_PTP_WARN
+#  define ptpwarn    _warn
+#else
+#  define ptpwarn    _none
+#endif
+
+#ifdef CONFIG_DEBUG_PTP_INFO
+#  define ptpinfo    _info
+#else
+#  define ptpinfo    _none
 #endif
 
 /* Buffer dumping macros do not depend on varargs */
@@ -1156,6 +1249,14 @@
 #  define i2sinfodumpbuffer(m,b,n)
 #endif
 
+#ifdef CONFIG_DEBUG_I3C
+#  define i3cerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define i3cinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define i3cerrdumpbuffer(m,b,n)
+#  define i3cinfodumpbuffer(m,b,n)
+#endif
+
 #ifdef CONFIG_DEBUG_PWM
 #  define pwmerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
 #  define pwminfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
@@ -1235,6 +1336,26 @@
 #  define reseterrdumpbuffer(m,b,n)
 #  define resetinfodumpbuffer(m,b,n)
 #endif
+
+/****************************************************************************
+ * Name: lowsyslog
+ *
+ * Description:
+ *   lowsyslog() is used for output debug information at early boot-stage.
+ *
+ *   The NuttX implementation does not support any special formatting
+ *   characters beyond those supported by printf.
+ *
+ ****************************************************************************/
+
+#define lowsyslog(...) \
+  do \
+    { \
+       struct lib_outstream_s stream; \
+       lib_lowoutstream(&stream); \
+       lib_sprintf(&stream, __VA_ARGS__); \
+    } \
+  while (0)
 
 /****************************************************************************
  * Public Function Prototypes

@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/timers/watchdog.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 #include <nuttx/compiler.h>
 #include <nuttx/irq.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/notifier.h>
 
 #ifdef CONFIG_WATCHDOG
 
@@ -85,6 +88,35 @@
 #define WDFLAGS_RESET    (1 << 1) /* 1=Reset when the watchdog timer expires */
 #define WDFLAGS_CAPTURE  (1 << 2) /* 1=Call the user function when the
                                    *   watchdog timer expires */
+
+/* Keepalive Actions ********************************************************/
+
+/* According to the keepalive action specified by the Auto-monitor, callback
+ * functions registered on the watchdog notifier chain may take corresponding
+ * actions.
+ *
+ * These are detected and handled by the "upper half" watchdog timer driver.
+ *
+ * WATCHDOG_KEEPALIVE_BY_ONESHOT      - The watchdog timer is keepalive by
+ *                                      oneshot timer.
+ * WATCHDOG_KEEPALIVE_BY_TIMER        - The watchdog timer is keepalive by
+ *                                      timer.
+ * WATCHDOG_KEEPALIVE_BY_WDOG         - The watchdog timer is keepalive by
+ *                                      wdog.
+ * WATCHDOG_KEEPALIVE_BY_WORKER       - The watchdog timer is keepalive by
+ *                                      worker queue.
+ * WATCHDOG_KEEPALIVE_BY_CAPTURE      - The watchdog timer is keepalive by
+ *                                      capture.
+ * WATCHDOG_KEEPALIVE_BY_IDLE         - The watchdog timer is keepalive by
+ *                                      idle task.
+ */
+
+#define WATCHDOG_KEEPALIVE_BY_ONESHOT 0
+#define WATCHDOG_KEEPALIVE_BY_TIMER   1
+#define WATCHDOG_KEEPALIVE_BY_WDOG    2
+#define WATCHDOG_KEEPALIVE_BY_WORKER  3
+#define WATCHDOG_KEEPALIVE_BY_CAPTURE 4
+#define WATCHDOG_KEEPALIVE_BY_IDLE    5
 
 /****************************************************************************
  * Public Types
@@ -194,6 +226,47 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+#ifdef CONFIG_WATCHDOG_TIMEOUT_NOTIFIER
+/****************************************************************************
+ * Name:  watchdog_notifier_chain_register
+ *
+ * Description:
+ *   Add notifier to the watchdog notifier chain
+ *
+ * Input Parameters:
+ *    nb - New entry in notifier chain
+ *
+ ****************************************************************************/
+
+void watchdog_notifier_chain_register(FAR struct notifier_block *nb);
+
+/****************************************************************************
+ * Name:  watchdog_notifier_chain_unregister
+ *
+ * Description:
+ *   Remove notifier from the watchdog notifier chain
+ *
+ * Input Parameters:
+ *    nb - Entry to remove from notifier chain
+ *
+ ****************************************************************************/
+
+void watchdog_notifier_chain_unregister(FAR struct notifier_block *nb);
+
+/****************************************************************************
+ * Name: watchdog_automonitor_timeout
+ *
+ * Description:
+ *   This function can be called in the watchdog timeout interrupt handler.
+ *   If so, callbacks on the watchdog timer notify chain are called when the
+ *   watchdog timer times out.
+ *
+ ****************************************************************************/
+
+void watchdog_automonitor_timeout(void);
+
+#endif /* CONFIG_WATCHDOG_TIMEOUT_NOTIFIER */
 
 /****************************************************************************
  * Name: watchdog_register

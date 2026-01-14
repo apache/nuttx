@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nrf91/nrf91_modem.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -53,19 +55,19 @@
 #define NRF91_SHMEM_TRACE_SIZE (CONFIG_NRF91_MODEM_SHMEM_TRACE_SIZE)
 
 #if !(NRF91_SHMEM_CTRL_BASE % 4 == 0)
-#  error SHMEM base addres must be word-aligned (4 bytes)
+#  error SHMEM base address must be word-aligned (4 bytes)
 #endif
 
 #if !(NRF91_SHMEM_TX_BASE % 4 == 0)
-#  error SHMEM base addres must be word-aligned (4 bytes)
+#  error SHMEM base address must be word-aligned (4 bytes)
 #endif
 
 #if !(NRF91_SHMEM_RX_BASE % 4 == 0)
-#  error SHMEM base addres must be word-aligned (4 bytes)
+#  error SHMEM base address must be word-aligned (4 bytes)
 #endif
 
 #if !(NRF91_SHMEM_TRACE_BASE % 4 == 0)
-#  error SHMEM base addres must be word-aligned (4 bytes)
+#  error SHMEM base address must be word-aligned (4 bytes)
 #endif
 
 /****************************************************************************

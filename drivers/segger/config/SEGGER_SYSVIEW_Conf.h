@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/segger/config/SEGGER_SYSVIEW_Conf.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/clock.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -43,6 +46,8 @@
 
 #define SEGGER_SYSVIEW_GET_TIMESTAMP       note_sysview_get_timestamp
 
+#define SEGGER_SYSVIEW_TIMESTAMP_FREQ      note_sysview_timestamp_freq
+
 /* The RTT channel that SystemView will use. */
 
 #define SEGGER_SYSVIEW_RTT_CHANNEL         CONFIG_SEGGER_SYSVIEW_RTT_CHANNEL
@@ -54,6 +59,17 @@
 /* Largest cache line size (in bytes) in the target system. */
 
 #define SEGGER_SYSVIEW_CPU_CACHE_LINE_SIZE CONFIG_SEGGER_RTT_CPU_CACHE_LINE_SIZE
+
+/****************************************************************************
+ * Name: note_sysview_get_timestamp
+ *
+ * Description:
+ *   Retrieve a system timestamp for SYSVIEW events.
+ *
+ ****************************************************************************/
+
+#define note_sysview_get_timestamp() perf_gettime()
+#define note_sysview_timestamp_freq() perf_getfreq()
 
 /****************************************************************************
  * Public Data
@@ -72,8 +88,15 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: note_sysview_get_interrupt_id
+ *
+ * Description:
+ *   Retrieve the Id of the currently active interrupt.
+ *
+ ****************************************************************************/
+
 unsigned int note_sysview_get_interrupt_id(void);
-unsigned long note_sysview_get_timestamp(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

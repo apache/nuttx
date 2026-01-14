@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/power/pm/activity_governor.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -54,7 +56,7 @@
 #define TIME_SLICE_TICKS ((CONFIG_PM_GOVERNOR_SLICEMS * CLOCKS_PER_SEC) /  1000)
 
 /****************************************************************************
- * Private Type Declarations
+ * Private Types
  ****************************************************************************/
 
 struct pm_domain_state_s

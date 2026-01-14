@@ -1,14 +1,10 @@
 /****************************************************************************
  * arch/arm/src/tms570/tms570_selftest.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Most logic in this file was leveraged from TI's Project0 which has a
- * compatible BSD license:
- *
- *   Copyright (c) 2012, Texas Instruments Incorporated
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2015 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2012 Texas Instruments Incorporated
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

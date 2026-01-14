@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/environ/env_dup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -64,6 +66,7 @@
 int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
 {
   FAR char **envp = NULL;
+  irqstate_t flags;
   size_t envc = 0;
   size_t size;
   int ret = OK;
@@ -78,7 +81,7 @@ int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
        * environment may be shared.
        */
 
-      sched_lock();
+      flags = enter_critical_section();
 
       /* Count the strings */
 
@@ -140,7 +143,7 @@ int env_dup(FAR struct task_group_s *group, FAR char * const *envcp)
 
       group->tg_envp = envp;
 
-      sched_unlock();
+      leave_critical_section(flags);
     }
 
   return ret;

@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/binfmt/elf.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -79,6 +81,10 @@ struct elf_loadinfo_s
    * after the ELF module has been loaded.
    */
 
+#ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
+  FAR uintptr_t     *sectalloc;   /* All sections memory allocated when ELF file was loaded */
+#endif
+
   uintptr_t          textalloc;  /* .text memory allocated when ELF file was loaded */
   uintptr_t          dataalloc;  /* .bss/.data memory allocated when ELF file was loaded */
   size_t             textsize;   /* Size of the ELF .text memory allocation */
@@ -122,19 +128,6 @@ struct elf_loadinfo_s
   uint16_t           buflen;     /* size of iobuffer[] */
   struct file        file;       /* Descriptor for the file being loaded */
 };
-
-/* This struct provides a description of the dump information of
- * memory regions.
- */
-
-#ifdef CONFIG_ELF_COREDUMP
-struct elf_dumpinfo_s
-{
-  FAR struct memory_region_s *regions;
-  FAR struct lib_outstream_s *stream;
-  pid_t                       pid;
-};
-#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -226,24 +219,6 @@ int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
  ****************************************************************************/
 
 int elf_unload(FAR struct elf_loadinfo_s *loadinfo);
-
-/****************************************************************************
- * Name: elf_coredump
- *
- * Description:
- *   Generat the core dump stream as ELF structure.
- *
- * Input Parameters:
- *   dumpinfo - elf coredump informations
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ELF_COREDUMP
-int elf_coredump(FAR struct elf_dumpinfo_s *dumpinfo);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

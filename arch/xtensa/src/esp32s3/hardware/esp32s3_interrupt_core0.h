@@ -1700,7 +1700,7 @@
 #define INTERRUPT_CORE0_CLOCK_GATE_REG (DR_REG_INTERRUPT_CORE0_BASE + 0x19c)
 
 /* INTERRUPT_CORE0_REG_CLK_EN : R/W; bitpos: [0]; default: 1;
- * this register uesd to control clock-gating interupt martrix
+ * this register used to control clock-gating interrupt martrix
  */
 
 #define INTERRUPT_CORE0_REG_CLK_EN    (BIT(0))

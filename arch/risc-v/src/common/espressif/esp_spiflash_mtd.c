@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/espressif/esp_spiflash_mtd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -146,31 +148,15 @@ static int esp_erase(struct mtd_dev_s *dev, off_t startblock,
       return -EINVAL;
     }
 
-#ifdef CONFIG_ESPRESSIF_STORAGE_MTD_DEBUG
-  finfo("%s(%p, 0x%x, %d)\n", __func__, dev, startblock, nblocks);
-
-  finfo("spi_flash_erase_range(0x%x, %d)\n", offset, nbytes);
-#endif
-
-  flags = enter_critical_section();
-  ret = spi_flash_erase_range(offset, nbytes);
-  leave_critical_section(flags);
-
+  ret = esp_spiflash_erase(offset, nbytes);
   if (ret == OK)
     {
       ret = nblocks;
     }
   else
     {
-#ifdef CONFIG_ESPRESSIF_STORAGE_MTD_DEBUG
-      finfo("Failed to erase the flash range!\n");
-#endif
-      ret = -1;
+      ret = ERROR;
     }
-
-#ifdef CONFIG_ESPRESSIF_STORAGE_MTD_DEBUG
-  finfo("%s()=%d\n", __func__, ret);
-#endif
 
   return ret;
 }
@@ -196,26 +182,12 @@ static ssize_t esp_read(struct mtd_dev_s *dev, off_t offset,
                         size_t nbytes, uint8_t *buffer)
 {
   ssize_t ret;
-  irqstate_t flags;
 
-#ifdef CONFIG_ESPRESSIF_STORAGE_MTD_DEBUG
-  finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, offset, nbytes, buffer);
-
-  finfo("spi_flash_read(0x%x, %p, %d)\n", offset, buffer, nbytes);
-#endif
-
-  flags = enter_critical_section();
-  ret = spi_flash_read(offset, (uint32_t *)buffer, nbytes);
-  leave_critical_section(flags);
-
+  ret = esp_spiflash_read(offset, (uint32_t *)buffer, nbytes);
   if (ret == OK)
     {
       ret = nbytes;
     }
-
-#ifdef CONFIG_ESPRESSIF_STORAGE_MTD_DEBUG
-  finfo("%s()=%d\n", __func__, ret);
-#endif
 
   return ret;
 }
@@ -243,27 +215,12 @@ static ssize_t esp_bread(struct mtd_dev_s *dev, off_t startblock,
   ssize_t ret;
   uint32_t addr = startblock * MTD_BLK_SIZE;
   uint32_t size = nblocks * MTD_BLK_SIZE;
-  irqstate_t flags;
 
-#ifdef CONFIG_ESPRESSIF_STORAGE_MTD_DEBUG
-  finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, startblock, nblocks,
-        buffer);
-
-  finfo("spi_flash_read(0x%x, %p, %d)\n", addr, buffer, size);
-#endif
-
-  flags = enter_critical_section();
-  ret = spi_flash_read(addr, (uint32_t *)buffer, size);
-  leave_critical_section(flags);
-
+  ret = esp_spiflash_read(addr, (uint32_t *)buffer, size);
   if (ret == OK)
     {
       ret = nblocks;
     }
-
-#ifdef CONFIG_ESPRESSIF_STORAGE_MTD_DEBUG
-  finfo("%s()=%d\n", __func__, ret);
-#endif
 
   return ret;
 }
@@ -281,7 +238,7 @@ static ssize_t esp_bread(struct mtd_dev_s *dev, off_t startblock,
  *   buffer - data buffer pointer
  *
  * Returned Value:
- *   Writen bytes if success or a negative value if fail.
+ *   Written bytes if success or a negative value if fail.
  *
  ****************************************************************************/
 
@@ -290,7 +247,6 @@ static ssize_t esp_write(struct mtd_dev_s *dev, off_t offset,
 {
   ssize_t ret;
   struct esp_mtd_dev_s *priv = (struct esp_mtd_dev_s *)dev;
-  irqstate_t flags;
 
   ASSERT(buffer);
 
@@ -299,24 +255,11 @@ static ssize_t esp_write(struct mtd_dev_s *dev, off_t offset,
       return -EINVAL;
     }
 
-#ifdef CONFIG_ESPRESSIF_STORAGE_MTD_DEBUG
-  finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, offset, nbytes, buffer);
-
-  finfo("spi_flash_write(0x%x, %p, %d)\n", offset, buffer, nbytes);
-#endif
-
-  flags = enter_critical_section();
-  ret = spi_flash_write(offset, (uint32_t *)buffer, nbytes);
-  leave_critical_section(flags);
-
+  ret = esp_spiflash_write(offset, (uint32_t *)buffer, nbytes);
   if (ret == OK)
     {
       ret = nbytes;
     }
-
-#ifdef CONFIG_ESPRESSIF_STORAGE_MTD_DEBUG
-  finfo("%s()=%d\n", __func__, ret);
-#endif
 
   return ret;
 }
@@ -335,7 +278,7 @@ static ssize_t esp_write(struct mtd_dev_s *dev, off_t offset,
  *   buffer     - data buffer pointer
  *
  * Returned Value:
- *   Writen block number if success or a negative value if fail.
+ *   Written block number if success or a negative value if fail.
  *
  ****************************************************************************/
 
@@ -345,27 +288,12 @@ static ssize_t esp_bwrite(struct mtd_dev_s *dev, off_t startblock,
   ssize_t ret;
   uint32_t addr = startblock * MTD_BLK_SIZE;
   uint32_t size = nblocks * MTD_BLK_SIZE;
-  irqstate_t flags;
 
-#ifdef CONFIG_ESPRESSIF_STORAGE_MTD_DEBUG
-  finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, startblock,
-        nblocks, buffer);
-
-  finfo("spi_flash_write(0x%x, %p, %d)\n", addr, buffer, size);
-#endif
-
-  flags = enter_critical_section();
-  ret = spi_flash_write(addr, (uint32_t *)buffer, size);
-  leave_critical_section(flags);
-
+  ret = esp_spiflash_write(addr, (uint32_t *)buffer, size);
   if (ret == OK)
     {
       ret = nblocks;
     }
-
-#ifdef CONFIG_ESPRESSIF_STORAGE_MTD_DEBUG
-  finfo("%s()=%d\n", __func__, ret);
-#endif
 
   return ret;
 }

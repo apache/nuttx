@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/netdb/lib_dnsnotify.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,7 +35,7 @@
 #ifdef CONFIG_NETDB_DNSCLIENT
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 struct dns_notify_s

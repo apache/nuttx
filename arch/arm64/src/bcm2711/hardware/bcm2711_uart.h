@@ -1,0 +1,292 @@
+/****************************************************************************
+ * arch/arm64/src/bcm2711/hardware/bcm2711_uart.h
+ *
+ * Author: Matteo Golin <matteo.golin@gmail.com>
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#ifndef __ARCH_ARM64_SRC_BCM2711_UART_H
+#define __ARCH_ARM64_SRC_BCM2711_UART_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include "bcm2711_memmap.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* UART register offsets */
+
+#define BCM_UART_DR_OFFSET 0x00
+#define BCM_UART_RSRECR_OFFSET 0x04
+#define BCM_UART_FR_OFFSET 0x18
+#define BCM_UART_IBRD_OFFSET 0x24
+#define BCM_UART_FBRD_OFFSET 0x28
+#define BCM_UART_LCRH_OFFSET 0x2c
+#define BCM_UART_CR_OFFSET 0x30
+#define BCM_UART_IFLS_OFFSET 0x34
+#define BCM_UART_IMSC_OFFSET 0x38
+#define BCM_UART_RIS_OFFSET 0x3c
+#define BCM_UART_MIS_OFFSET 0x40
+#define BCM_UART_ICR_OFFSET 0x44
+#define BCM_UART_DMACR_OFFSET 0x48
+#define BCM_UART_ITCR_OFFSET 0x80
+#define BCM_UART_ITIP_OFFSET 0x84
+#define BCM_UART_ITOP_OFFSET 0x88
+#define BCM_UART_TDR_OFFSET 0x8c
+
+/* NOTE: ILPR register deliberately omitted because it is not used on this
+ * chip.
+ */
+
+/* UART register addresses */
+
+#define BCM_UART0_DR (BCM_UART0_BASEADDR + BCM_UART_DR_OFFSET)
+#define BCM_UART0_RSRECR (BCM_UART0_BASEADDR + BCM_UART_RSRECR_OFFSET)
+#define BCM_UART0_FR (BCM_UART0_BASEADDR + BCM_UART_FR_OFFSET)
+#define BCM_UART0_IBRD (BCM_UART0_BASEADDR + BCM_UART_IBRD_OFFSET)
+#define BCM_UART0_FBRD (BCM_UART0_BASEADDR + BCM_UART_FBRD_OFFSET)
+#define BCM_UART0_LCRH (BCM_UART0_BASEADDR + BCM_UART_LCRH_OFFSET)
+#define BCM_UART0_CR (BCM_UART0_BASEADDR + BCM_UART_CR_OFFSET)
+#define BCM_UART0_IFLS (BCM_UART0_BASEADDR + BCM_UART_IFLS_OFFSET)
+#define BCM_UART0_IMSC (BCM_UART0_BASEADDR + BCM_UART_IMSC_OFFSET)
+#define BCM_UART0_RIS (BCM_UART0_BASEADDR + BCM_UART_RIS_OFFSET)
+#define BCM_UART0_MIS (BCM_UART0_BASEADDR + BCM_UART_MIS_OFFSET)
+#define BCM_UART0_ICR (BCM_UART0_BASEADDR + BCM_UART_ICR_OFFSET)
+#define BCM_UART0_DMACR (BCM_UART0_BASEADDR + BCM_UART_DMACR_OFFSET)
+#define BCM_UART0_ITCR (BCM_UART0_BASEADDR + BCM_UART_ITCR_OFFSET)
+#define BCM_UART0_ITIP (BCM_UART0_BASEADDR + BCM_UART_ITIP_OFFSET)
+#define BCM_UART0_ITOP (BCM_UART0_BASEADDR + BCM_UART_ITOP_OFFSET)
+#define BCM_UART0_TDR (BCM_UART0_BASEADDR + BCM_UART_TDR_OFFSET)
+
+#define BCM_UART2_DR (BCM_UART2_BASEADDR + BCM_UART_DR_OFFSET)
+#define BCM_UART2_RSRECR (BCM_UART2_BASEADDR + BCM_UART_RSRECR_OFFSET)
+#define BCM_UART2_FR (BCM_UART2_BASEADDR + BCM_UART_FR_OFFSET)
+#define BCM_UART2_IBRD (BCM_UART2_BASEADDR + BCM_UART_IBRD_OFFSET)
+#define BCM_UART2_FBRD (BCM_UART2_BASEADDR + BCM_UART_FBRD_OFFSET)
+#define BCM_UART2_LCRH (BCM_UART2_BASEADDR + BCM_UART_LCRH_OFFSET)
+#define BCM_UART2_CR (BCM_UART2_BASEADDR + BCM_UART_CR_OFFSET)
+#define BCM_UART2_IFLS (BCM_UART2_BASEADDR + BCM_UART_IFLS_OFFSET)
+#define BCM_UART2_IMSC (BCM_UART2_BASEADDR + BCM_UART_IMSC_OFFSET)
+#define BCM_UART2_RIS (BCM_UART2_BASEADDR + BCM_UART_RIS_OFFSET)
+#define BCM_UART2_MIS (BCM_UART2_BASEADDR + BCM_UART_MIS_OFFSET)
+#define BCM_UART2_ICR (BCM_UART2_BASEADDR + BCM_UART_ICR_OFFSET)
+#define BCM_UART2_DMACR (BCM_UART2_BASEADDR + BCM_UART_DMACR_OFFSET)
+#define BCM_UART2_ITCR (BCM_UART2_BASEADDR + BCM_UART_ITCR_OFFSET)
+#define BCM_UART2_ITIP (BCM_UART2_BASEADDR + BCM_UART_ITIP_OFFSET)
+#define BCM_UART2_ITOP (BCM_UART2_BASEADDR + BCM_UART_ITOP_OFFSET)
+#define BCM_UART2_TDR (BCM_UART2_BASEADDR + BCM_UART_TDR_OFFSET)
+
+#define BCM_UART3_DR (BCM_UART3_BASEADDR + BCM_UART_DR_OFFSET)
+#define BCM_UART3_RSRECR (BCM_UART3_BASEADDR + BCM_UART_RSRECR_OFFSET)
+#define BCM_UART3_FR (BCM_UART3_BASEADDR + BCM_UART_FR_OFFSET)
+#define BCM_UART3_IBRD (BCM_UART3_BASEADDR + BCM_UART_IBRD_OFFSET)
+#define BCM_UART3_FBRD (BCM_UART3_BASEADDR + BCM_UART_FBRD_OFFSET)
+#define BCM_UART3_LCRH (BCM_UART3_BASEADDR + BCM_UART_LCRH_OFFSET)
+#define BCM_UART3_CR (BCM_UART3_BASEADDR + BCM_UART_CR_OFFSET)
+#define BCM_UART3_IFLS (BCM_UART3_BASEADDR + BCM_UART_IFLS_OFFSET)
+#define BCM_UART3_IMSC (BCM_UART3_BASEADDR + BCM_UART_IMSC_OFFSET)
+#define BCM_UART3_RIS (BCM_UART3_BASEADDR + BCM_UART_RIS_OFFSET)
+#define BCM_UART3_MIS (BCM_UART3_BASEADDR + BCM_UART_MIS_OFFSET)
+#define BCM_UART3_ICR (BCM_UART3_BASEADDR + BCM_UART_ICR_OFFSET)
+#define BCM_UART3_DMACR (BCM_UART3_BASEADDR + BCM_UART_DMACR_OFFSET)
+#define BCM_UART3_ITCR (BCM_UART3_BASEADDR + BCM_UART_ITCR_OFFSET)
+#define BCM_UART3_ITIP (BCM_UART3_BASEADDR + BCM_UART_ITIP_OFFSET)
+#define BCM_UART3_ITOP (BCM_UART3_BASEADDR + BCM_UART_ITOP_OFFSET)
+#define BCM_UART3_TDR (BCM_UART3_BASEADDR + BCM_UART_TDR_OFFSET)
+
+#define BCM_UART4_DR (BCM_UART4_BASEADDR + BCM_UART_DR_OFFSET)
+#define BCM_UART4_RSRECR (BCM_UART4_BASEADDR + BCM_UART_RSRECR_OFFSET)
+#define BCM_UART4_FR (BCM_UART4_BASEADDR + BCM_UART_FR_OFFSET)
+#define BCM_UART4_IBRD (BCM_UART4_BASEADDR + BCM_UART_IBRD_OFFSET)
+#define BCM_UART4_FBRD (BCM_UART4_BASEADDR + BCM_UART_FBRD_OFFSET)
+#define BCM_UART4_LCRH (BCM_UART4_BASEADDR + BCM_UART_LCRH_OFFSET)
+#define BCM_UART4_CR (BCM_UART4_BASEADDR + BCM_UART_CR_OFFSET)
+#define BCM_UART4_IFLS (BCM_UART4_BASEADDR + BCM_UART_IFLS_OFFSET)
+#define BCM_UART4_IMSC (BCM_UART4_BASEADDR + BCM_UART_IMSC_OFFSET)
+#define BCM_UART4_RIS (BCM_UART4_BASEADDR + BCM_UART_RIS_OFFSET)
+#define BCM_UART4_MIS (BCM_UART4_BASEADDR + BCM_UART_MIS_OFFSET)
+#define BCM_UART4_ICR (BCM_UART4_BASEADDR + BCM_UART_ICR_OFFSET)
+#define BCM_UART4_DMACR (BCM_UART4_BASEADDR + BCM_UART_DMACR_OFFSET)
+#define BCM_UART4_ITCR (BCM_UART4_BASEADDR + BCM_UART_ITCR_OFFSET)
+#define BCM_UART4_ITIP (BCM_UART4_BASEADDR + BCM_UART_ITIP_OFFSET)
+#define BCM_UART4_ITOP (BCM_UART4_BASEADDR + BCM_UART_ITOP_OFFSET)
+#define BCM_UART4_TDR (BCM_UART4_BASEADDR + BCM_UART_TDR_OFFSET)
+
+#define BCM_UART5_DR (BCM_UART5_BASEADDR + BCM_UART_DR_OFFSET)
+#define BCM_UART5_RSRECR (BCM_UART5_BASEADDR + BCM_UART_RSRECR_OFFSET)
+#define BCM_UART5_FR (BCM_UART5_BASEADDR + BCM_UART_FR_OFFSET)
+#define BCM_UART5_IBRD (BCM_UART5_BASEADDR + BCM_UART_IBRD_OFFSET)
+#define BCM_UART5_FBRD (BCM_UART5_BASEADDR + BCM_UART_FBRD_OFFSET)
+#define BCM_UART5_LCRH (BCM_UART5_BASEADDR + BCM_UART_LCRH_OFFSET)
+#define BCM_UART5_CR (BCM_UART5_BASEADDR + BCM_UART_CR_OFFSET)
+#define BCM_UART5_IFLS (BCM_UART5_BASEADDR + BCM_UART_IFLS_OFFSET)
+#define BCM_UART5_IMSC (BCM_UART5_BASEADDR + BCM_UART_IMSC_OFFSET)
+#define BCM_UART5_RIS (BCM_UART5_BASEADDR + BCM_UART_RIS_OFFSET)
+#define BCM_UART5_MIS (BCM_UART5_BASEADDR + BCM_UART_MIS_OFFSET)
+#define BCM_UART5_ICR (BCM_UART5_BASEADDR + BCM_UART_ICR_OFFSET)
+#define BCM_UART5_DMACR (BCM_UART5_BASEADDR + BCM_UART_DMACR_OFFSET)
+#define BCM_UART5_ITCR (BCM_UART5_BASEADDR + BCM_UART_ITCR_OFFSET)
+#define BCM_UART5_ITIP (BCM_UART5_BASEADDR + BCM_UART_ITIP_OFFSET)
+#define BCM_UART5_ITOP (BCM_UART5_BASEADDR + BCM_UART_ITOP_OFFSET)
+#define BCM_UART5_TDR (BCM_UART5_BASEADDR + BCM_UART_TDR_OFFSET)
+
+/* UART register bit definitions */
+
+#define BCM_UART_DR_OE (1 << 11)
+#define BCM_UART_DR_BE (1 << 10)
+#define BCM_UART_DR_PE (1 << 9)
+#define BCM_UART_DR_FE (1 << 8)
+#define BCM_UART_DR_DATA (0xff << 0)
+
+#define BCM_UART_RSRECR_OE (1 << 3)
+#define BCM_UART_RSRECR_BE (1 << 2)
+#define BCM_UART_RSRECR_PE (1 << 1)
+#define BCM_UART_RSRECR_FE (1 << 0)
+
+#define BCM_UART_FR_RI (1 << 8)
+#define BCM_UART_FR_TXFE (1 << 7)
+#define BCM_UART_FR_RXFF (1 << 6)
+#define BCM_UART_FR_TXFF (1 << 5)
+#define BCM_UART_FR_RXFE (1 << 4)
+#define BCM_UART_FR_BUSY (1 << 3)
+#define BCM_UART_FR_DCD (1 << 2)
+#define BCM_UART_FR_DSR (1 << 1)
+#define BCM_UART_FR_CTS (1 << 0)
+
+#define BCM_UART_IBRD_IBRD (0xffff << 0)
+
+#define BCM_UART_FBRD_FBRD (0x3f << 0)
+
+#define BCM_UART_LCRH_SPS (1 << 7)
+#define BCM_UART_LCRH_WLEN (0x3 << 5)
+#define BCM_UART_LCRH_FEN (1 << 4)
+#define BCM_UART_LCRH_STP2 (1 << 3)
+#define BCM_UART_LCRH_EPS (1 << 2)
+#define BCM_UART_LCRH_PEN (1 << 1)
+#define BCM_UART_LCRH_BRK (1 << 0)
+
+#define BCM_UART_CR_CTSEN (1 << 15)
+#define BCM_UART_CR_RTSEN (1 << 14)
+#define BCM_UART_CR_OUT2 (1 << 13)
+#define BCM_UART_CR_OUT1 (1 << 12)
+#define BCM_UART_CR_RTS (1 << 11)
+#define BCM_UART_CR_DTR (1 << 10)
+#define BCM_UART_CR_RXE (1 << 9)
+#define BCM_UART_CR_TXE (1 << 8)
+#define BCM_UART_CR_LBE (1 << 7)
+#define BCM_UART_CR_SIRLP (1 << 2)
+#define BCM_UART_CR_SIREN (1 << 1)
+#define BCM_UART_CR_UARTEN (1 << 0)
+
+#define BCM_UART_IFLS_RXIFPSEL (0x7 << 9)
+#define BCM_UART_IFLS_TXIFPSEL (0x7 << 6)
+#define BCM_UART_IFLS_RXIFLSEL (0x7 << 3)
+#define BCM_UART_IFLS_RXFIFO18 (0 << 3) /* RX FIFO is 1/8 full */
+#define BCM_UART_IFLS_RXFIFO14 (1 << 3) /* RX FIFO is 1/4 full */
+#define BCM_UART_IFLS_RXFIFO12 (2 << 3) /* RX FIFO is 1/2 full */
+#define BCM_UART_IFLS_RXFIFO34 (3 << 3) /* RX FIFO is 3/4 full */
+#define BCM_UART_IFLS_RXFIFO78 (4 << 3) /* RX FIFO is 7/8 full */
+#define BCM_UART_IFLS_TXIFLSEL (0x7 << 0)
+#define BCM_UART_IFLS_TXFIFO18 (0 << 3) /* TX FIFO is 1/8 full */
+#define BCM_UART_IFLS_TXFIFO14 (1 << 3) /* TX FIFO is 1/4 full */
+#define BCM_UART_IFLS_TXFIFO12 (2 << 3) /* TX FIFO is 1/2 full */
+#define BCM_UART_IFLS_TXFIFO34 (3 << 3) /* TX FIFO is 3/4 full */
+#define BCM_UART_IFLS_TXFIFO78 (4 << 3) /* TX FIFO is 7/8 full */
+
+/* NOTE: DSRMIM and DCDMIM are deliberately omitted because they are
+ * unsupported on this chip.
+ */
+
+#define BCM_UART_IMSC_OEIM (1 << 10)
+#define BCM_UART_IMSC_BEIM (1 << 9)
+#define BCM_UART_IMSC_PEIM (1 << 8)
+#define BCM_UART_IMSC_FEIM (1 << 7)
+#define BCM_UART_IMSC_RTIM (1 << 6)
+#define BCM_UART_IMSC_TXIM (1 << 5)
+#define BCM_UART_IMSC_RXIM (1 << 4)
+#define BCM_UART_IMSC_CTSMIM (1 << 1)
+#define BCM_UART_IMSC_RIMIM (1 << 0)
+
+/* NOTE: DSRRMIS and DCDRMIS are deliberately omitted because they are
+ * unsupported on this chip.
+ */
+
+#define BCM_UART_RIS_OERIS (1 << 10)
+#define BCM_UART_RIS_BERIS (1 << 9)
+#define BCM_UART_RIS_PERIS (1 << 8)
+#define BCM_UART_RIS_FERIS (1 << 7)
+#define BCM_UART_RIS_RTRIS (1 << 6)
+#define BCM_UART_RIS_TXRIS (1 << 5)
+#define BCM_UART_RIS_RXRIS (1 << 4)
+#define BCM_UART_RIS_CTSRMIS (1 << 1)
+#define BCM_UART_RIS_RIRMIS (1 << 0)
+
+/* NOTE: DSRMMIS and DCDMMIS are deliberately omitted because they are
+ * unsupported on this chip.
+ */
+
+#define BCM_UART_MIS_OEMIS (1 << 10)
+#define BCM_UART_MIS_BEMIS (1 << 9)
+#define BCM_UART_MIS_PEMIS (1 << 8)
+#define BCM_UART_MIS_FEMIS (1 << 7)
+#define BCM_UART_MIS_RTMIS (1 << 6)
+#define BCM_UART_MIS_TXMIS (1 << 5)
+#define BCM_UART_MIS_RXMIS (1 << 4)
+#define BCM_UART_MIS_CTSMMIS (1 << 1)
+#define BCM_UART_MIS_RIMMIS (1 << 0)
+
+/* NOTE: DSRMIC and DCDMIC are deliberately omitted because they are
+ * unsupported on this chip.
+ */
+
+#define BCM_UART_ICR_OEIC (1 << 10)
+#define BCM_UART_ICR_BEIC (1 << 9)
+#define BCM_UART_ICR_PEIC (1 << 8)
+#define BCM_UART_ICR_FEIC (1 << 7)
+#define BCM_UART_ICR_RTIC (1 << 6)
+#define BCM_UART_ICR_TXIC (1 << 5)
+#define BCM_UART_ICR_RXIC (1 << 4)
+#define BCM_UART_ICR_CTSMIC (1 << 1)
+#define BCM_UART_ICR_RIMIC (1 << 0)
+
+#define BCM_UART_DMACR_DMAONERR (1 << 2)
+#define BCM_UART_DMACR_TXDMAE (1 << 1)
+#define BCM_UART_DMACR_RXDMAE (1 << 0)
+
+#define BCM_UART_ITCR_ITCR1 (1 << 1)
+#define BCM_UART_ITCR_ITCR0 (1 << 0)
+
+#define BCM_UART_ITIP_ITIP3 (1 << 3)
+#define BCM_UART_ITIP_ITIP0 (1 << 0)
+
+#define BCM_UART_ITOP_ITOP11 (1 << 11)
+#define BCM_UART_ITOP_ITOP10 (1 << 10)
+#define BCM_UART_ITOP_ITOP9 (1 << 9)
+#define BCM_UART_ITOP_ITOP8 (1 << 8)
+#define BCM_UART_ITOP_ITOP7 (1 << 7)
+#define BCM_UART_ITOP_ITOP6 (1 << 6)
+#define BCM_UART_ITOP_ITOP3 (1 << 3)
+#define BCM_UART_ITOP_ITOP0 (1 << 0)
+
+#define BCM_UART_TDR_TDR10_0 (0x7ff << 0)
+
+#endif /* __ARCH_ARM64_SRC_BCM2711_UART_H */

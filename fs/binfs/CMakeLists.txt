@@ -1,6 +1,8 @@
 # ##############################################################################
 # fs/binfs/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -17,9 +19,10 @@
 # the License.
 #
 # ##############################################################################
+if(NOT CONFIG_DISABLE_MOUNTPOINT)
+  if(CONFIG_FS_BINFS)
 
-if(CONFIG_FS_BINFS)
+    target_sources(fs PRIVATE fs_binfs.c)
 
-  target_sources(fs PRIVATE fs_binfs.c)
-
+  endif()
 endif()

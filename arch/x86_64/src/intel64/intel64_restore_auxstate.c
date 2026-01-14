@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/intel64/intel64_restore_auxstate.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -52,5 +54,7 @@ void x86_64_restore_auxstate(struct tcb_s *rtcb)
 {
   /* Set PCID, avoid TLB flush */
 
+#ifdef CONFIG_ARCH_INTEL64_HAVE_PCID
   set_pcid(rtcb->pid);
+#endif
 }

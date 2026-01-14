@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_macros.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -43,7 +45,30 @@
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
 	.macro	setintstack tmp1 tmp2
-	movi		a1, g_intstacktop
+
+	/* Load g_intstacktop (the start of the interrupt stack) */
+
+	movi	\tmp1, g_intstacktop
+
+	/* If a1 < g_intstackalloc (outside the interrupt stack boundary),
+	 * set a1 (sp) to g_intstacktop (switch to the interrupt stack).
+	 */
+
+	movi	\tmp2, g_intstackalloc	/* Load the end (low address) of the interrupt stack */
+	sub		\tmp2, a1, \tmp2
+	movltz	a1, \tmp1, \tmp2
+
+	/* If a1 >= g_intstacktop, sp is outside the interrupt stack boundaries */
+
+	movi	\tmp2, g_intstacktop   /* Load the start (high address) of the interrupt stack */
+	sub		\tmp2, a1, \tmp2
+	movgez	a1, \tmp1, \tmp2
+
+	/* If neither movltz and movgez moved g_intstacktop (on /tmp1) to a1,
+	 * it means that the stack pointer was already pointing to the interrupt
+	 * stack and no action is required.
+	 */
+
 	.endm
 #endif
 

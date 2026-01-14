@@ -47,6 +47,7 @@
 
 #include "hardware/esp32s2_system.h"
 #include "hardware/esp32s2_gpio_sigmap.h"
+#include "hardware/esp32s2_twai.h"
 
 #if defined(CONFIG_ESP32S2_TWAI)
 

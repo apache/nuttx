@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/tricore/src/tc3xx/tc3xx_timerisr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,12 +33,6 @@
 #include "tricore_internal.h"
 
 #include "IfxStm.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define SCU_FREQUENCY 100000000UL
 
 /****************************************************************************
  * Public Functions

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/common/src/stm32_apds9960.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,7 +30,6 @@
 #include <debug.h>
 #include <stdio.h>
 
-#include <nuttx/spi/spi.h>
 #include <nuttx/sensors/apds9960.h>
 #include <arch/board/board.h>
 
@@ -154,7 +155,7 @@ int board_apds9960_initialize(int devno, int busno)
 
   /* Then register the gesture sensor */
 
-  snprintf(devpath, 12, "/dev/gest%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/gest%d", devno);
   ret = apds9960_register(devpath, &g_apds9960config.config);
   if (ret < 0)
     {

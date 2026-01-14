@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/lcd/st7565.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -145,7 +147,7 @@
 #define MS_BIT          (1 << 7)
 
 /****************************************************************************
- * Private Type Definition
+ * Private Types
  ****************************************************************************/
 
 /* This structure describes the state of this driver */
@@ -262,10 +264,10 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  .putrun  = st7565_putrun,           /* Put a run into LCD memory */
-  .getrun  = st7565_getrun,           /* Get a run from LCD memory */
-  .buffer  = (uint8_t *) g_runbuffer, /* Run scratch buffer */
-  .bpp     = ST7565_BPP,              /* Bits-per-pixel */
+  .putrun  = st7565_putrun,              /* Put a run into LCD memory */
+  .getrun  = st7565_getrun,              /* Get a run from LCD memory */
+  .buffer  = (FAR uint8_t *)g_runbuffer, /* Run scratch buffer */
+  .bpp     = ST7565_BPP,                 /* Bits-per-pixel */
 };
 
 /* This is the standard, NuttX LCD driver object */

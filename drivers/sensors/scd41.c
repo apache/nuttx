@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/scd41.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -53,10 +55,6 @@
 #  define scd41_dbg(x, ...)    sninfo(x, ##__VA_ARGS__)
 #endif
 
-#ifndef CONFIG_SCD41_I2C_FREQUENCY
-#  define CONFIG_SCD41_I2C_FREQUENCY 100000
-#endif
-
 #define SCD41_I2C_RETRIES 3
 
 /* SCD41 command words */
@@ -88,7 +86,7 @@
 #define SCD41_DEFAULT_TEMPERATURE_OFFSET    0
 
 /****************************************************************************
- * Private
+ * Private Types
  ****************************************************************************/
 
 struct scd41_dev_s
@@ -192,7 +190,9 @@ static const struct file_operations g_scd41fops =
   scd41_ioctl,    /* ioctl */
   NULL,           /* mmap */
   NULL,           /* truncate */
-  NULL            /* poll */
+  NULL,           /* poll */
+  NULL,           /* readv */
+  NULL            /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , scd41_unlink /* unlink */
 #endif
@@ -476,11 +476,7 @@ static int scd41_read_values(FAR struct scd41_dev_s *priv, FAR float *temp,
                   return ret;
                 }
 
-              ret = nxsig_usleep(500 * 1000);
-              if (ret == -EINTR)
-                {
-                  return ret;
-                }
+              nxsched_usleep(500 * 1000);
             }
           else
             {

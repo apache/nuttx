@@ -62,7 +62,7 @@ static size_t g_ram_offset; /* used by himem map/unmap */
 
 static void *g_himem_ptr;  /* mapped himem pointer */
 
-static struct file *g_mapped_filep; /* for multi device */
+static struct inode *g_mapped_inode; /* for multi device */
 
 /****************************************************************************
  * Priavte Functions
@@ -120,7 +120,8 @@ static int himem_chardev_read_write(int is_write, struct file *filep,
                 length, dev->size);
           goto err;
         }
-      if ((mmap_offset != g_ram_offset) || (g_mapped_filep != filep))
+      if ((mmap_offset != g_ram_offset) || \
+          (g_mapped_inode != filep->f_inode))
         {
           if (g_ram_offset != HIMEM_UNMAPPED)
             {
@@ -134,7 +135,7 @@ static int himem_chardev_read_write(int is_write, struct file *filep,
                   goto err;
                 }
               g_ram_offset = HIMEM_UNMAPPED;
-              g_mapped_filep = NULL;
+              g_mapped_inode = NULL;
             }
           ret = esp_himem_map(dev->mem_handle, g_range_handle,
                               mmap_offset * ESP_HIMEM_BLKSZ,
@@ -145,7 +146,7 @@ static int himem_chardev_read_write(int is_write, struct file *filep,
               goto err;
             }
           g_ram_offset = mmap_offset;
-          g_mapped_filep = filep;
+          g_mapped_inode = filep->f_inode;
         }
       himem_ptr = g_himem_ptr + priv->offset % ESP_HIMEM_BLKSZ;
       copy_range = ESP_HIMEM_BLKSZ - priv->offset % ESP_HIMEM_BLKSZ;
@@ -273,7 +274,7 @@ int himem_chardev_init(void)
     }
 
   g_ram_offset = HIMEM_UNMAPPED;
-  g_mapped_filep = NULL;
+  g_mapped_inode = NULL;
   return ret;
 }
 
@@ -360,7 +361,7 @@ int himem_chardev_register(char *name, size_t size)
 int himem_chardev_unregister(char *name)
 {
   int ret = 0;
-  int successed = 0;
+  int success = 0;
   struct himem_chardev_s *dev;
   struct himem_chardev_s *tmp;
   nxmutex_lock(&lock);
@@ -378,36 +379,36 @@ int himem_chardev_unregister(char *name)
               if (ret != 0)
                 {
                   merr("Failed to unmap himem.\n");
-                  successed = -1;
+                  success = -1;
                 }
 
               g_ram_offset = HIMEM_UNMAPPED;
-              g_mapped_filep = NULL;
+              g_mapped_inode = NULL;
             }
 
           ret = esp_himem_free(dev->mem_handle);
           if (ret != 0)
             {
               merr("Failed to free himem.\n");
-              successed = -1;
+              success = -1;
             }
 
           ret = unregister_driver(dev->name);
           if (ret != 0)
             {
               merr("Failed to unregister driver. dev=%s\n", dev->name);
-              successed = -1;
+              success = -1;
             }
 
           list_delete(&dev->node);
           kmm_free(dev);
           nxmutex_unlock(&lock);
-          return successed;
+          return success;
         }
     }
 
   nxmutex_unlock(&lock);
-  merr("dev=%s is not registerd.\n", name);
+  merr("dev=%s is not registered.\n", name);
 
   return -1;
 }

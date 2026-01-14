@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/sama5/jupiter-nano/include/board_528mhz.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -55,7 +57,7 @@
 
 /* PLLA configuration.
  *
- *   Multipler = 43+1: PLLACK = 44 * 12MHz = 528MHz
+ *   Multiplier = 43+1: PLLACK = 44 * 12MHz = 528MHz
  */
 
 #define BOARD_CKGR_PLLAR_COUNT     (63 << PMC_CKGR_PLLAR_COUNT_SHIFT)

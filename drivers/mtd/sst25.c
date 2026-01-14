@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/mtd/sst25.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -445,7 +447,7 @@ static uint8_t sst25_waitwritecomplete(struct sst25_dev_s *priv)
       if ((status & SST25_SR_BUSY) != 0)
         {
           sst25_unlock(priv->dev);
-          nxsig_usleep(1000);
+          nxsched_usleep(1000);
           sst25_lock(priv->dev);
         }
 #endif

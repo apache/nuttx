@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libm/libm/lib_sincosf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -22,7 +24,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
 #include <math.h>
@@ -40,7 +41,7 @@
  ****************************************************************************/
 
 nooptimiziation_function
-void sincosf(float x, float *s, float *c)
+void sincosf(float x, FAR float *s, FAR float *c)
 {
   *s = sinf(x);
   *c = cosf(x);

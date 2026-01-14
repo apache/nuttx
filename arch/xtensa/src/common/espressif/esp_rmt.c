@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/espressif/esp_rmt.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,7 +41,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/rmt/rmt.h>
 #include <nuttx/spinlock.h>
-#include <nuttx/mm/circbuf.h>
+#include <nuttx/circbuf.h>
 
 #include "xtensa.h"
 #ifdef CONFIG_ARCH_CHIP_ESP32
@@ -270,10 +272,10 @@ struct rmt_dev_lowerhalf_s
 {
   /* The following block is part of the upper-half device struct */
 
-  FAR const struct rmt_ops_s *ops;
-  FAR struct circbuf_s       *circbuf;
-  sem_t                      *recvsem;
-  int                         minor;
+  const struct rmt_ops_s *ops;
+  struct circbuf_s       *circbuf;
+  sem_t                  *recvsem;
+  int                     minor;
 
   /* The following is private to the ESP32 RMT driver */
 
@@ -384,8 +386,8 @@ static int rmt_write_items(rmt_channel_t channel,
                            bool wait_tx_done);
 static ssize_t esp_rmt_read(struct rmt_dev_s *dev, char *buffer,
                               size_t buflen);
-static ssize_t esp_rmt_write(FAR struct rmt_dev_s *dev,
-                             FAR const char *buffer,
+static ssize_t esp_rmt_write(struct rmt_dev_s *dev,
+                             const char *buffer,
                              size_t buflen);
 static struct rmt_dev_s
     *esp_rmtinitialize(struct rmt_channel_config_s config);
@@ -449,12 +451,12 @@ static void rmt_module_enable(void)
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+  flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
 
   if (g_rmtdev_common.rmt_module_enabled == false)
     {
-      periph_module_reset(rmt_periph_signals.groups[0].module);
-      periph_module_enable(rmt_periph_signals.groups[0].module);
+      periph_module_reset(PERIPH_RMT_MODULE);
+      periph_module_enable(PERIPH_RMT_MODULE);
       g_rmtdev_common.rmt_module_enabled = true;
     }
 
@@ -501,7 +503,7 @@ static int rmt_set_rx_thr_intr_en(rmt_channel_t channel, bool en,
           return -EINVAL;
         }
 
-      flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+      flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
       rmt_ll_rx_set_limit(g_rmtdev_common.hal.regs,
                           RMT_DECODE_RX_CHANNEL(channel), evt_thresh);
       mask = RMT_LL_EVENT_RX_THRES(RMT_DECODE_RX_CHANNEL(channel));
@@ -510,7 +512,7 @@ static int rmt_set_rx_thr_intr_en(rmt_channel_t channel, bool en,
     }
   else
     {
-      flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+      flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
       mask = RMT_LL_EVENT_RX_THRES(RMT_DECODE_RX_CHANNEL(channel));
       rmt_ll_enable_interrupt(g_rmtdev_common.hal.regs, mask, false);
       spin_unlock_irqrestore(&g_rmtdev_common.rmt_spinlock, flags);
@@ -551,7 +553,7 @@ static int rmt_rx_start(rmt_channel_t channel, bool rx_idx_rst)
 
   DEBUGASSERT(RMT_IS_RX_CHANNEL(channel));
 
-  flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+  flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
 
   rmt_ll_rx_enable(g_rmtdev_common.hal.regs, ch, false);
   if (rx_idx_rst)
@@ -598,7 +600,7 @@ static int rmt_tx_start(rmt_channel_t channel, bool tx_idx_rst)
 
   DEBUGASSERT(RMT_IS_TX_CHANNEL(channel));
 
-  flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+  flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
   if (tx_idx_rst)
     {
       rmt_ll_tx_reset_pointer(g_rmtdev_common.hal.regs, channel);
@@ -656,7 +658,7 @@ static int rmt_set_tx_loop_mode(rmt_channel_t channel, bool loop_en)
 
   DEBUGASSERT(RMT_IS_TX_CHANNEL(channel));
 
-  flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+  flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
   rmt_ll_tx_enable_loop(g_rmtdev_common.hal.regs, channel, loop_en);
   spin_unlock_irqrestore(&g_rmtdev_common.rmt_spinlock, flags);
 
@@ -698,7 +700,7 @@ static int rmt_set_tx_thr_intr_en(rmt_channel_t channel, bool en,
 
       DEBUGASSERT(evt_thresh <= item_block_len);
 
-      flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+      flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
       rmt_ll_tx_set_limit(g_rmtdev_common.hal.regs, channel, evt_thresh);
       rmt_ll_enable_interrupt(g_rmtdev_common.hal.regs,
                               RMT_LL_EVENT_TX_THRES(channel), true);
@@ -706,7 +708,7 @@ static int rmt_set_tx_thr_intr_en(rmt_channel_t channel, bool en,
     }
   else
     {
-      flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+      flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
       rmt_ll_enable_interrupt(g_rmtdev_common.hal.regs,
                               RMT_LL_EVENT_TX_THRES(channel), false);
       spin_unlock_irqrestore(&g_rmtdev_common.rmt_spinlock, flags);
@@ -848,7 +850,7 @@ static int rmt_internal_config(rmt_dev_t *dev,
       return -EINVAL;
     }
 
-  flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+  flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
 
   rmt_ll_enable_mem_access_nonfifo(dev, true);
 
@@ -913,7 +915,7 @@ static int rmt_internal_config(rmt_dev_t *dev,
       uint8_t carrier_level = rmt_param->tx_config.carrier_level;
       uint8_t idle_level = rmt_param->tx_config.idle_level;
 
-      flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+      flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
       rmt_ll_tx_set_channel_clock_div(dev, channel, clk_div);
       rmt_ll_tx_set_mem_blocks(dev, channel, mem_cnt);
       rmt_ll_tx_reset_pointer(dev, channel);
@@ -965,7 +967,7 @@ static int rmt_internal_config(rmt_dev_t *dev,
       uint8_t filter_cnt = rmt_param->rx_config.filter_ticks_thresh;
       uint16_t threshold = rmt_param->rx_config.idle_threshold;
 
-      flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+      flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
       rmt_ll_rx_set_channel_clock_div(dev, RMT_DECODE_RX_CHANNEL(channel),
                                       clk_div);
       rmt_ll_rx_set_mem_blocks(dev, RMT_DECODE_RX_CHANNEL(channel), mem_cnt);
@@ -1023,7 +1025,7 @@ static int rmt_internal_config(rmt_dev_t *dev,
 
       spin_unlock_irqrestore(&g_rmtdev_common.rmt_spinlock, flags);
 
-      rmtinfo("Rmt Rx Channel %u|Gpio %u|Sclk_Hz %"PRIu32"|Div %u|Thresold "
+      rmtinfo("Rmt Rx Channel %u|Gpio %u|Sclk_Hz %"PRIu32"|Div %u|Threshold "
               "%u|Filter %u", channel, gpio_num, rmt_source_clk_hz, clk_div,
               threshold, filter_cnt);
     }
@@ -1123,7 +1125,7 @@ static int rmt_isr_register(int (*fn)(int, void *, void *), void *arg,
 {
   int cpuint;
   int ret;
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
 
   DEBUGASSERT(fn);
   DEBUGASSERT(g_rmtdev_common.rmt_driver_channels == 0);
@@ -1435,7 +1437,7 @@ static int IRAM_ATTR rmt_driver_isr_default(int irq, void *context,
 
           rmt_ll_rx_reset_pointer(g_rmtdev_common.hal.regs, channel);
           rmtinfo("RMT RX channel %d error", channel);
-          rmtinfo("status: 0x%08x",
+          rmtinfo("status: 0x%08" PRIx32 "",
                   rmt_ll_rx_get_status_word(g_rmtdev_common.hal.regs,
                                             channel));
         }
@@ -1460,7 +1462,7 @@ static int IRAM_ATTR rmt_driver_isr_default(int irq, void *context,
 
           rmt_ll_tx_reset_pointer(g_rmtdev_common.hal.regs, channel);
           rmtinfo("RMT TX channel %d error", channel);
-          rmtinfo("status: 0x%08x",
+          rmtinfo("status: 0x%08" PRIx32 "",
                   rmt_ll_tx_get_status_word(g_rmtdev_common.hal.regs,
                                             channel));
         }

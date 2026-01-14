@@ -67,6 +67,26 @@ The above are all standard interfaces as defined at
 Those interfaces are available for use by application software.
 The remaining interfaces discussed in this section are non-standard, OS-internal interfaces.
 
+Early Syslog Interfaces
+-----------------------
+
+Provides a minimal SYSLOG output facility that can be used during the
+very early boot phase or when the system is in a down state, before the
+full SYSLOG subsystem or scheduler becomes available.
+
+.. c::function:: void early_syslog(FAR const char *fmt, ...);
+
+  See ``include/nuttx/syslog/syslog.h``.
+  This function provides basic formatted output similar to printf(),
+  and writes the resulting characters directly to the low-level output
+  device via up_putc(). It is primarily intended for debugging or
+  diagnostic messages in early system contexts, where interrupts may
+  be disabled and locking mechanisms are not yet available.
+
+  The function automatically appends a newline character ('\n') if
+  the formatted message does not already end with one, ensuring proper
+  alignment of log output in serial consoles or early boot traces.
+
 Debug Interfaces
 ----------------
 
@@ -149,14 +169,14 @@ defined in ``include/nuttx/syslog/syslog.h``:
   };
 
 The channel interface is instantiated by calling
-:c:func:`syslog_channel()`.
+:c:func:`syslog_channel_register()`.
 
-.. c:function:: int syslog_channel(FAR const struct syslog_channel_s *channel);
+.. c:function:: int syslog_channel_register(FAR syslog_channel_t *channel);
 
   Configure the SYSLOG function to use the provided
   channel to generate SYSLOG output.
 
-  ``syslog_channel()`` is a non-standard, internal OS interface and
+  ``syslog_channel_register()`` is a non-standard, internal OS interface and
   is not available to applications. It may be called numerous times
   as necessary to change channel interfaces. By default, all system
   log output goes to console (``/dev/console``).
@@ -263,8 +283,8 @@ There are three conditions under which SYSLOG output generated
 from interrupt level processing can a included the SYSLOG output
 stream:
 
-  #. **Low-Level Serial Output**. If you are using a SYSLOG console
-     channel (``CONFIG_SYSLOG_CONSOLE``) and if the underlying
+  #. **Low-Level Serial Output**. If you are using the "default" SYSLOG
+     channel (``CONFIG_SYSLOG_DEFAULT``) and if the underlying
      architecture supports the low-level ``up_putc()``
      interface(\ ``CONFIG_ARCH_LOWPUTC``), then the SYSLOG logic
      will direct the output to ``up_putc()`` which is capable of
@@ -363,7 +383,7 @@ serial console is used and ``up_putc()`` is supported.
   device is used for a console -- such as a USB console or a Telnet
   console. The SYSLOG channel is not redirected as ``stdout`` is;
   the SYSLOG channel will stayed fixed (unless it is explicitly
-  changed via ``syslog_channel()``).
+  changed via ``syslog_channel_register()``).
 
 References: ``drivers/syslog/syslog_consolechannel.c`` and
 ``drivers/syslog/syslog_device.c``
@@ -408,16 +428,16 @@ mounting of the file systems.
 The interface ``syslog_file_channel()`` is used to configure the
 SYSLOG file channel:
 
-.. c:function:: FAR struct syslog_channel_s * \
+.. c:function:: FAR syslog_channel_t * \
                     syslog_file_channel(FAR const char *devpath);
 
   Configure to use a file in a mounted file system
   at ``devpath`` as the SYSLOG channel.
 
   This tiny function is simply a wrapper around
-  ``syslog_dev_initialize()`` and ``syslog_channel()``. It calls
+  ``syslog_dev_initialize()`` and ``syslog_channel_register()``. It calls
   ``syslog_dev_initialize()`` to configure the character file at
-  ``devpath`` then calls ``syslog_channel()`` to use that device as
+  ``devpath`` then calls ``syslog_channel_register()`` to use that device as
   the SYSLOG output channel.
 
   File SYSLOG channels differ from other SYSLOG channels in that
@@ -507,7 +527,7 @@ RAMLOG Configuration options
 
 Other miscellaneous settings
 
--  ``CONFIG_RAMLOG_CRLF``: Pre-pend a carriage return before every
+-  ``CONFIG_RAMLOG_CRLF``: Prepend a carriage return before every
    linefeed that goes into the RAM log.
 
 -  ``CONFIG_RAMLOG_NONBLOCKING``: Reading from the RAMLOG will
@@ -518,3 +538,36 @@ Other miscellaneous settings
 
 -  ``CONFIG_RAMLOG_NPOLLWAITERS``: The maximum number of threads
    that may be waiting on the poll method.
+
+SYSLOG Protocol (RFC 5424)
+==========================
+
+`RFC 5424 <https://www.rfc-editor.org/rfc/rfc5424>`_ is a protocol defined for
+syslog messages which makes provisions to have logs created by "originators" to
+be saved on "collectors" (log servers).
+
+NuttX is capable of generating RFC 5424 compatible ``syslog`` entries with the
+option ``CONFIG_SYSLOG_RFC5424``. Not all features of RFC 5424 are currently
+implemented, such as the ``HOSTNAME`` field or ``MSGID`` fields. However, the
+majority of the RFC 5424 functionality is in place and allows for a NuttX device
+to become a RFC 5424 originator.
+
+Syslog over the network
+-----------------------
+
+Using RFC 5424, network capable NuttX devices can become originators and
+transmit ``syslog`` entries to a collector (log server). This is currently
+possible using the basic UDP implementation with
+:doc:`/applications/system/syslogd/index`.
+
+If using ``syslogd``, it is recommended to use the ``RAMLOG`` device as the
+syslog sink. This allows very fast recording of logs, which unlocks the
+ability to record logs from interrupt contexts or time-sensitive code. The
+``syslogd`` daemon can then transmit these later from user space. As stated
+in :doc:`the syslogd documentation </applications/system/syslogd/index>`, it is
+recommended to configure ``RAMLOG`` in blocking mode.
+
+Once messages are set up for transmission with ``syslogd``, you can consume them
+on another network capable host device using one of the RFC 5424 compatible log
+servers. You're even able to use `WireShark <https://www.wireshark.org/>`_ to
+view and parse ``syslog`` entries in your packet captures.

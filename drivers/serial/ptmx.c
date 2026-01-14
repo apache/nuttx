@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/serial/ptmx.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -149,7 +151,7 @@ static int ptmx_minor_allocate(void)
        * prevent (unexpected) infinite loops.
        */
 
-      if (startaddr == minor)
+      if (startaddr == g_ptmx.px_next)
         {
           /* We are back where we started... the are no free device address */
 
@@ -180,10 +182,10 @@ static int ptmx_open(FAR struct file *filep)
   /* Allocate a PTY minor */
 
   minor = ptmx_minor_allocate();
+  nxmutex_unlock(&g_ptmx.px_lock);
   if (minor < 0)
     {
-      ret = minor;
-      goto errout_with_lock;
+      return minor;
     }
 
   /* Create the master slave pair.  This should create:
@@ -197,18 +199,17 @@ static int ptmx_open(FAR struct file *filep)
   ret = pty_register2(minor, true);
   if (ret < 0)
     {
-      goto errout_with_minor;
+      ptmx_minor_free(minor);
+      return ret;
     }
 
   /* Open the master device:  /dev/ptyN, where N=minor */
 
   snprintf(devname, sizeof(devname), "/dev/pty%d", minor);
-  memcpy(&temp, filep, sizeof(temp));
-  ret = file_open(filep, devname, O_RDWR | O_CLOEXEC);
+  ret = file_open(&temp, devname, O_RDWR | O_CLOEXEC);
   DEBUGASSERT(ret >= 0);  /* file_open() should never fail */
-
-  /* Close the multiplexor device: /dev/ptmx */
-
+  ret = file_dup2(&temp, filep);
+  DEBUGASSERT(ret >= 0);  /* file_dup2() should never fail) */
   ret = file_close(&temp);
   DEBUGASSERT(ret >= 0);  /* file_close() should never fail */
 
@@ -220,15 +221,7 @@ static int ptmx_open(FAR struct file *filep)
   ret = unregister_driver(devname);
   DEBUGASSERT(ret >= 0 || ret == -EBUSY);  /* unregister_driver() should never fail */
 
-  nxmutex_unlock(&g_ptmx.px_lock);
   return OK;
-
-errout_with_minor:
-  ptmx_minor_free(minor);
-
-errout_with_lock:
-  nxmutex_unlock(&g_ptmx.px_lock);
-  return ret;
 }
 
 /****************************************************************************

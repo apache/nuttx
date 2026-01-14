@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32h7/nucleo-h745zi/src/stm32_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,6 +39,10 @@
 #endif
 #ifdef CONFIG_RPMSG_UART
 #  include <nuttx/serial/uart_rpmsg.h>
+#endif
+
+#ifdef CONFIG_SYSTEMTICK_HOOK
+#include <semaphore.h>
 #endif
 
 #include "nucleo-h745zi.h"
@@ -227,3 +233,13 @@ int stm32_bringup(void)
 
   return OK;
 }
+
+#ifdef CONFIG_SYSTEMTICK_HOOK
+
+sem_t g_waitsem;
+
+void board_timerhook(void)
+{
+  (void)sem_post(&g_waitsem);
+}
+#endif

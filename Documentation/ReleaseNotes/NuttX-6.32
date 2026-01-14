@@ -229,7 +229,7 @@ but still a problem. The correct solution would be configure the
 USB MSC thread to a task, however, this workaround from David
 Sidrane plugs the hole for now.
 - USB CDC/ACM, USB MSC, and Composite Device Classes: Un-initialization
-logic caused re-use of a stale pointer. Changed to a two pass
+logic caused reuse of a stale pointer. Changed to a two pass
 un-initialization for the case of the composite driver: Memory
 resources are not freed until the second un-initialization pass.
 From David Sidrane.

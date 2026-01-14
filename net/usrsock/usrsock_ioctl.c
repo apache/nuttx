@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/usrsock/usrsock_ioctl.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -45,8 +47,8 @@
  * Private Functions
  ****************************************************************************/
 
-static uint16_t ioctl_event(FAR struct net_driver_s *dev,
-                            FAR void *pvpriv, uint16_t flags)
+static uint32_t ioctl_event(FAR struct net_driver_s *dev,
+                            FAR void *pvpriv, uint32_t flags)
 {
   FAR struct usrsock_data_reqstate_s *pstate = pvpriv;
   FAR struct usrsock_conn_s *conn = pstate->reqstate.conn;
@@ -189,7 +191,7 @@ int usrsock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg_)
       return arglen;
     }
 
-  net_lock();
+  usrsock_lock();
 
   if (conn->state == USRSOCK_CONN_STATE_UNINITIALIZED ||
       conn->state == USRSOCK_CONN_STATE_ABORTED)
@@ -236,7 +238,7 @@ int usrsock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg_)
     {
       /* Wait for completion of request. */
 
-      net_sem_wait_uninterruptible(&state.reqstate.recvsem);
+      usrsock_sem_timedwait(&state.reqstate.recvsem, false, UINT_MAX);
       ret = state.reqstate.result;
 
       DEBUGASSERT(state.valuelen <= arglen);
@@ -247,7 +249,7 @@ int usrsock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg_)
   usrsock_teardown_data_request_callback(&state);
 
 errout_unlock:
-  net_unlock();
+  usrsock_unlock();
   return ret;
 }
 

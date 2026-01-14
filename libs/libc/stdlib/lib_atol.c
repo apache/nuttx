@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stdlib/lib_atol.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,7 +30,7 @@
  * Public Functions
  ****************************************************************************/
 
-#undef atol /* See mm/README.txt */
+#undef atol
 long atol(FAR const char *nptr)
 {
   return strtol(nptr, NULL, 10);

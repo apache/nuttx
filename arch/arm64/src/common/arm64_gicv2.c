@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_gicv2.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,6 +42,7 @@
 
 #include <nuttx/arch.h>
 #include <arch/irq.h>
+#include <nuttx/pci/pci.h>
 
 #include "arm64_internal.h"
 #include "arm64_gic.h"
@@ -785,65 +788,24 @@ static int gic_validate_dist_version(void)
   if (reg == (0x2 << GIC_ICCIDR_ARCHNO_SHIFT))
     {
       sinfo("GICv2 detected\n");
+      return 0;
     }
-  else
+
+  /* Read the Peripheral ID2 Register (ICPIDR2) */
+
+  reg = getreg32(GIC_ICDPIDR(GIC_ICPIDR2)) & GICD_PIDR2_ARCH_MASK;
+
+  /* GIC Version should be 2 */
+
+  if (reg == GICD_PIDR2_ARCH_GICV2)
     {
-      sinfo("GICv2 not detected\n");
-      return -ENODEV;
+      sinfo("GICv2 detected\n");
+      return 0;
     }
 
-  return 0;
-}
+  sinfo("GICv2 not detected\n");
 
-/****************************************************************************
- * Name: arm_gic_irq_trigger
- *
- * Description:
- *   Set the trigger type for the specified IRQ source and the current CPU.
- *
- *   Since this API is not supported on all architectures, it should be
- *   avoided in common implementations where possible.
- *
- * Input Parameters:
- *   irq - The interrupt request to modify.
- *   edge - False: Active HIGH level sensitive, True: Rising edge sensitive
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value is returned on any failure.
- *
- ****************************************************************************/
-
-static int arm_gic_irq_trigger(int irq, bool edge)
-{
-  uintptr_t regaddr;
-  uint32_t regval;
-  uint32_t intcfg;
-
-  if (irq > GIC_IRQ_SGI15 && irq < NR_IRQS)
-    {
-      /* Get the address of the Interrupt Configuration Register for this
-       * irq.
-       */
-
-      regaddr = GIC_ICDICFR(irq);
-
-      /* Get the new Interrupt configuration bit setting */
-
-      intcfg = (edge ? (INT_ICDICFR_EDGE | INT_ICDICFR_1N) : INT_ICDICFR_1N);
-
-      /* Write the correct interrupt trigger to the Interrupt Configuration
-       * Register.
-       */
-
-      regval  = getreg32(regaddr);
-      regval &= ~GIC_ICDICFR_ID_MASK(irq);
-      regval |= GIC_ICDICFR_ID(irq, intcfg);
-      putreg32(regval, regaddr);
-
-      return OK;
-    }
-
-  return -EINVAL;
+  return -ENODEV;
 }
 
 /****************************************************************************
@@ -907,15 +869,15 @@ static void arm_gic0_initialize(void)
       putreg32(0x01010101, GIC_ICDIPTR(irq));  /* SPI on CPU0 */
     }
 
+#ifdef CONFIG_ARM64_GICV2M
+  arm64_gic_v2m_initialize();
+#endif
+
 #ifdef CONFIG_SMP
   /* Attach SGI interrupt handlers. This attaches the handler to all CPUs. */
 
-  DEBUGVERIFY(irq_attach(GIC_SMP_CPUPAUSE, arm64_pause_handler, NULL));
-
-#  ifdef CONFIG_SMP_CALL
-  DEBUGVERIFY(irq_attach(GIC_SMP_CPUCALL,
-                         nxsched_smp_call_handler, NULL));
-#  endif
+  DEBUGVERIFY(irq_attach(GIC_SMP_SCHED, arm64_smp_sched_handler, NULL));
+  DEBUGVERIFY(irq_attach(GIC_SMP_CALL, nxsched_smp_call_handler, NULL));
 #endif
 }
 
@@ -1356,6 +1318,57 @@ void up_trigger_irq(int irq, cpu_set_t cpuset)
 }
 
 /****************************************************************************
+ * Name: arm64_gicv_irq_trigger
+ *
+ * Description:
+ *   Set the trigger type for the specified IRQ source and the current CPU.
+ *
+ *   Since this API is not supported on all architectures, it should be
+ *   avoided in common implementations where possible.
+ *
+ * Input Parameters:
+ *   irq - The interrupt request to modify.
+ *   edge - False: Active HIGH level sensitive, True: Rising edge sensitive
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int arm64_gicv_irq_trigger(int irq, bool edge)
+{
+  uintptr_t regaddr;
+  uint32_t regval;
+  uint32_t intcfg;
+
+  if (irq > GIC_IRQ_SGI15 && irq < NR_IRQS)
+    {
+      /* Get the address of the Interrupt Configuration Register for this
+       * irq.
+       */
+
+      regaddr = GIC_ICDICFR(irq);
+
+      /* Get the new Interrupt configuration bit setting */
+
+      intcfg = (edge ? (INT_ICDICFR_EDGE | INT_ICDICFR_1N) : INT_ICDICFR_1N);
+
+      /* Write the correct interrupt trigger to the Interrupt Configuration
+       * Register.
+       */
+
+      regval  = getreg32(regaddr);
+      regval &= ~GIC_ICDICFR_ID_MASK(irq);
+      regval |= GIC_ICDICFR_ID(irq, intcfg);
+      putreg32(regval, regaddr);
+
+      return OK;
+    }
+
+  return -EINVAL;
+}
+
+/****************************************************************************
  * Name: arm64_gic_irq_set_priority
  *
  * Description:
@@ -1394,12 +1407,12 @@ void arm64_gic_irq_set_priority(unsigned int intid, unsigned int prio,
     {
       if (flags & IRQ_TYPE_EDGE)
         {
-          ret = arm_gic_irq_trigger(intid, true);
+          ret = arm64_gicv_irq_trigger(intid, true);
           DEBUGASSERT(ret == OK);
         }
       else
         {
-          ret = arm_gic_irq_trigger(intid, false);
+          ret = arm64_gicv_irq_trigger(intid, false);
           DEBUGASSERT(ret == OK);
         }
     }
@@ -1477,22 +1490,38 @@ void arm64_gic_secondary_init(void)
  *   cpuset - The set of CPUs to receive the SGI
  *
  * Returned Value:
- *   OK is always returned at present.
+ *   None
  *
  ****************************************************************************/
 
-int arm64_gic_raise_sgi(unsigned int sgi, uint16_t cpuset)
+void arm64_gic_raise_sgi(unsigned int sgi, uint16_t cpuset)
 {
   arm_cpu_sgi(sgi, cpuset);
-  return 0;
 }
 
-#  ifdef CONFIG_SMP_CALL
-void up_send_smp_call(cpu_set_t cpuset)
-{
-  up_trigger_irq(GIC_SMP_CPUCALL, cpuset);
-}
-#  endif
 #endif /* CONFIG_SMP */
+
+/****************************************************************************
+ * Name: up_get_legacy_irq
+ *
+ * Description:
+ *   Reserve vector for legacy
+ *
+ ****************************************************************************/
+
+int up_get_legacy_irq(uint32_t devfn, uint8_t line, uint8_t pin)
+{
+#if CONFIG_ARM64_GICV2_LEGACY_IRQ0 >= 0
+  uint8_t slot;
+  uint8_t tmp;
+
+  UNUSED(line);
+  slot = PCI_SLOT(devfn);
+  tmp = (pin - 1 + slot) % 4;
+  return CONFIG_ARM64_GICV2_LEGACY_IRQ0 + tmp;
+#else
+  return -ENOTSUP;
+#endif
+}
 
 #endif /* CONFIG_ARM64_GIC_VERSION == 2 */

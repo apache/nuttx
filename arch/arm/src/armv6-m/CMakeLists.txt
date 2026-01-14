@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/arm/src/armv6-m/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -21,6 +23,7 @@
 set(SRCS
     arm_exception.S
     arm_saveusercontext.S
+    arm_cpuinfo.c
     arm_doirq.c
     arm_hardfault.c
     arm_initialstate.c
@@ -29,14 +32,23 @@ set(SRCS
     arm_svcall.c
     arm_systemreset.c
     arm_tcbinfo.c
-    arm_vectors.c)
+    arm_trigger_irq.c)
 
-if(CONFIG_DEBUG_FEATURES)
+if(NOT CONFIG_ARCH_HAVE_CUSTOM_VECTORS)
+  list(APPEND SRCS arm_vectors.c)
+endif()
+
+if((DEFINED CONFIG_DEBUG_FEATURES AND CONFIG_DEBUG_FEATURES)
+   OR (DEFINED CONFIG_ARM_COREDUMP_REGION AND CONFIG_ARM_COREDUMP_REGION))
   list(APPEND SRCS arm_dumpnvic.c)
 endif()
 
 if(CONFIG_ARCH_RAMVECTORS)
   list(APPEND SRCS arm_ramvec_initialize.c arm_ramvec_attach.c)
+endif()
+
+if(CONFIG_LIB_SYSCALL)
+  list(APPEND SRCS arm_dispatch_syscall.S)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})

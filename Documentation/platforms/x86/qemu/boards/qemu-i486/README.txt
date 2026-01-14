@@ -60,7 +60,7 @@ Cygwin Build Problems
 
     1. Google for "qemu windows download" and download some pre-built QEMU
        binaries.  I found 0.14.0 here: http://dietpc.org/windows/qemu/, or
-    2. Try building QEMU with MingGW (I understand that this is difficult).
+    2. Try building QEMU with MinGW (I understand that this is difficult).
 
   NOTE: As of this writing, I have not been successful getting ANY pre-built
   version of QEMU to work successfully with WinXP.  The same binaries work

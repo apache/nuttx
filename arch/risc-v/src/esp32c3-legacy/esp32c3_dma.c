@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/esp32c3_dma.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,6 +36,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/mutex.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
 #include <arch/irq.h>
 
@@ -55,10 +58,6 @@
 
 #define SET_BITS(_r, _ch, _b)   modifyreg32((_r) + (_ch) * REG_OFF, 0, (_b))
 #define CLR_BITS(_r, _ch, _b)   modifyreg32((_r) + (_ch) * REG_OFF, (_b), 0)
-
-#ifndef ALIGN_UP
-#  define ALIGN_UP(num, align) (((num) + ((align) - 1)) & ~((align) - 1))
-#endif
 
 /****************************************************************************
  * Private Data

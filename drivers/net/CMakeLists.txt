@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/net/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -25,6 +27,10 @@ if(CONFIG_NET)
 
   if(CONFIG_MM_IOB)
     list(APPEND SRCS netdev_upperhalf.c)
+  endif()
+
+  if(CONFIG_MDIO_BUS)
+    list(APPEND SRCS mdio.c)
   endif()
 
   if(CONFIG_NET_LOOPBACK)
@@ -59,6 +65,10 @@ if(CONFIG_NET)
     list(APPEND SRCS tun.c)
   endif()
 
+  if(CONFIG_NET_VLAN)
+    list(APPEND SRCS vlan.c)
+  endif()
+
   if(CONFIG_NET_FTMAC100)
     list(APPEND SRCS ftmac100.c)
   endif()
@@ -79,6 +89,25 @@ if(CONFIG_NET)
     list(APPEND SRCS lan9250.c)
   endif()
 
+  if(CONFIG_NET_KSZ9477)
+    list(APPEND SRCS ksz9477.c)
+    if(CONFIG_NET_KSZ9477_I2C)
+      list(APPEND SRCS ksz9477_i2c.c)
+    endif()
+  endif()
+
+  if(CONFIG_NET_E1000)
+    list(APPEND SRCS e1000.c)
+  endif()
+
+  if(CONFIG_NET_IGB)
+    list(APPEND SRCS igb.c)
+  endif()
+
+  if(CONFIG_NET_IGC)
+    list(APPEND SRCS igc.c)
+  endif()
+
   if(CONFIG_ARCH_PHY_INTERRUPT)
     list(APPEND SRCS phy_notify.c)
   endif()
@@ -88,4 +117,6 @@ if(CONFIG_NET)
   endif()
 
   target_sources(drivers PRIVATE ${SRCS})
+
+  nuttx_add_subdirectory()
 endif()

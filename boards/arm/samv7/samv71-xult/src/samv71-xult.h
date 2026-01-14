@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/samv7/samv71-xult/src/samv71-xult.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -337,14 +339,6 @@
 #if defined(CONFIG_ARCH_LEDS) || !defined(CONFIG_USERLED) || \
     !defined(CONFIG_USERLED_LOWER)
 #  undef HAVE_LED_DRIVER
-#endif
-
-#ifdef HAVE_LED_DRIVER
-#  ifdef CONFIG_EXAMPLES_LEDS_DEVPATH
-#    define LED_DRIVER_PATH CONFIG_EXAMPLES_LEDS_DEVPATH
-#  else
-#    define LED_DRIVER_PATH "/dev/userleds"
-#  endif
 #endif
 
 /* Check if the MRF24J40 is supported in this configuration */

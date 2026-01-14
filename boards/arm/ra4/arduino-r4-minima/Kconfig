@@ -1,0 +1,24 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_ARDUINO_R4_MINIMA
+
+config ARDUINO_R4_MINIMA_PWM_CHANNEL
+	int "PWM channel number"
+	default 0 if RA_GPT0_PWM
+	default 1 if RA_GPT1_PWM
+	default 2 if RA_GPT2_PWM
+	default 3 if RA_GPT3_PWM
+	default 4 if RA_GPT4_PWM
+	default 5 if RA_GPT5_PWM
+	default 6 if RA_GPT6_PWM
+	default 7 if RA_GPT7_PWM
+	range 0 7
+	depends on PWM && RA_PWM
+	---help---
+		Selects the PWM channel number that will be used to perform the PWM
+		test.  See apps/examples/pwm.
+
+endif

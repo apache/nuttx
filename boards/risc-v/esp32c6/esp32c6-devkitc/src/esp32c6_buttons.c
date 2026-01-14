@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/esp32c6/esp32c6-devkitc/src/esp32c6_buttons.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -73,7 +75,7 @@
 
 uint32_t board_button_initialize(void)
 {
-  esp_configgpio(BUTTON_BOOT, INPUT_FUNCTION_3 | PULLUP);
+  esp_configgpio(BUTTON_BOOT, INPUT_FUNCTION_2 | PULLUP);
   return 1;
 }
 

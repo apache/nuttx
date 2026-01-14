@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/netdev/netdev_txnotify.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -55,11 +57,12 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr)
+void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr,
+                          uint32_t polltype)
 {
   /* Find the device driver that serves the subnet of the remote address */
 
-  netdev_txnotify_dev(netdev_findby_ripv4addr(lipaddr, ripaddr));
+  netdev_txnotify_dev(netdev_findby_ripv4addr(lipaddr, ripaddr), polltype);
 }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -81,11 +84,12 @@ void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr)
 
 #ifdef CONFIG_NET_IPv6
 void netdev_ipv6_txnotify(FAR const net_ipv6addr_t lipaddr,
-                          FAR const net_ipv6addr_t ripaddr)
+                          FAR const net_ipv6addr_t ripaddr,
+                          uint32_t polltype)
 {
   /* Find the device driver that serves the subnet of the remote address */
 
-  netdev_txnotify_dev(netdev_findby_ripv6addr(lipaddr, ripaddr));
+  netdev_txnotify_dev(netdev_findby_ripv6addr(lipaddr, ripaddr), polltype);
 }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -105,10 +109,14 @@ void netdev_ipv6_txnotify(FAR const net_ipv6addr_t lipaddr,
  *
  ****************************************************************************/
 
-void netdev_txnotify_dev(FAR struct net_driver_s *dev)
+void netdev_txnotify_dev(FAR struct net_driver_s *dev, uint32_t polltype)
 {
   if (dev != NULL && dev->d_txavail != NULL)
     {
+      /* Set the poll type flags */
+
+      dev->d_polltype |= polltype;
+
       /* Notify the device driver that new TX data is available. */
 
       dev->d_txavail(dev);

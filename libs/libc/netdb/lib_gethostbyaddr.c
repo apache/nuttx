@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/netdb/lib_gethostbyaddr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,8 +29,6 @@
 #include <netdb.h>
 
 #include "netdb/lib_netdb.h"
-
-#ifdef CONFIG_LIBC_NETDB
 
 /****************************************************************************
  * Public Functions
@@ -71,4 +71,3 @@ FAR struct hostent *gethostbyaddr(FAR const void *addr,
   return ret == 0 ? res : NULL;
 }
 
-#endif /* CONFIG_LIBC_NETDB */

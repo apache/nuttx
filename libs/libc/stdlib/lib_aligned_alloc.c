@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stdlib/lib_aligned_alloc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,7 +32,7 @@
  * Public Functions
  ****************************************************************************/
 
-#undef aligned_alloc /* See mm/README.txt */
+#undef aligned_alloc
 FAR void *aligned_alloc(size_t align, size_t size)
 {
   return lib_memalign(align, size);

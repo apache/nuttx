@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/gd32f4/gd32f4xx_rcu.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -79,6 +81,7 @@ void gd32_clockconfig(void);
  * Description:
  *   Configure the CK_OUT0 clock source and divider. CK_OUT0 is connected
  *   to PA8. PA8 should be configured in alternate function mode.
+ *
  ****************************************************************************/
 
 void gd32_rcu_ckout0_config(uint32_t src, uint32_t div);
@@ -89,6 +92,7 @@ void gd32_rcu_ckout0_config(uint32_t src, uint32_t div);
  * Description:
  *   Configure the CK_OUT0 clock source and divider. CK_OUT0 is connected
  *   to PC9. PC9 should be configured in alternate function mode.
+ *
  ****************************************************************************/
 
 void gd32_rcu_ckout1_config(uint32_t src, uint32_t div);

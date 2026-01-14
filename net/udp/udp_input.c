@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/udp/udp_input.c
- * Handling incoming UDP input
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *
  *   Copyright (C) 2007-2009, 2011, 2018-2019 Gregory Nutt. All rights
  *     reserved.
@@ -77,7 +78,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_SOCKOPTS) && defined(CONFIG_NET_BROADCAST)
+#ifdef CONFIG_NET_BROADCAST
 static bool udp_is_broadcast(FAR struct net_driver_s *dev)
 {
   /* Check if the destination address is a broadcast/multicast address */
@@ -137,7 +138,7 @@ static bool udp_is_broadcast(FAR struct net_driver_s *dev)
 static int udp_input_conn(FAR struct net_driver_s *dev,
                           FAR struct udp_conn_s *conn, unsigned int udpiplen)
 {
-  uint16_t flags;
+  uint32_t flags;
 
   /* Set-up for the application callback */
 
@@ -214,6 +215,7 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
   FAR struct iob_s *iob;
 #endif
   unsigned int udpiplen;
+  unsigned int udpdatalen = dev->d_len - iplen;
 #ifdef CONFIG_NET_UDP_CHECKSUMS
   uint16_t chksum;
 #endif
@@ -230,6 +232,16 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
    */
 
   udp = IPBUF(iplen);
+
+  /* Check the UDP packet length */
+
+  if (udpdatalen < UDP_HDRLEN || ntohs(udp->udplen) != udpdatalen)
+    {
+      nwarn("WARNING: UDP length invalid: hdr=%u actual=%u\n",
+            ntohs(udp->udplen), udpdatalen);
+      dev->d_len = 0;
+      return ret;
+    }
 
   /* Get the size of the IP header and the UDP header */
 
@@ -285,6 +297,7 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
        * that, however.
        */
 
+      udp_conn_list_lock();
       conn = udp_active(dev, NULL, udp);
       if (conn)
         {
@@ -329,6 +342,16 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 
           ret = udp_input_conn(dev, conn, udpiplen);
         }
+#ifdef CONFIG_NET_BROADCAST
+      else if (udp_is_broadcast(dev))
+        {
+          /* Due to RFC 1112, Section 7.2, we don't reply ICMP error
+           * message when the destination address is broadcast/multicast.
+           */
+
+          dev->d_len = 0;
+        }
+#endif
       else
         {
           nwarn("WARNING: No listener on UDP port\n");
@@ -337,29 +360,38 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
            * unless destination address was broadcast/multicast.
            */
 
-#if defined(CONFIG_NET_ICMP) || defined(CONFIG_NET_ICMPv6)
-#  ifdef CONFIG_NET_ICMPv6
-#    ifdef CONFIG_NET_ICMP
-          if (IFF_IS_IPv6(dev->d_flags))
+#if !defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMPv6)
+          dev->d_len = 0;
+#else
+#  ifdef CONFIG_NET_IPv4
+#    ifdef CONFIG_NET_IPv6
+          if (IFF_IS_IPv4(dev->d_flags))
 #    endif
             {
+#    ifdef CONFIG_NET_ICMP
+              icmp_reply(dev, ICMP_DEST_UNREACHABLE, ICMP_PORT_UNREACH);
+#    else
+              dev->d_len = 0;
+#    endif /* CONFIG_NET_ICMP */
+            }
+#  endif /* CONFIG_NET_IPv4 */
+#  ifdef CONFIG_NET_IPv6
+#    ifdef CONFIG_NET_IPv4
+           else
+#    endif
+            {
+#    ifdef CONFIG_NET_ICMPv6
               icmpv6_reply(dev, ICMPv6_DEST_UNREACHABLE,
                            ICMPv6_PORT_UNREACH, 0);
+#    else
+              dev->d_len = 0;
+#    endif /* CONFIG_NET_ICMPv6 */
             }
-#  endif /* CONFIG_NET_ICMPv6 */
-
-#  ifdef CONFIG_NET_ICMP
-#    ifdef CONFIG_NET_ICMPv6
-          else
-#    endif
-            {
-              icmp_reply(dev, ICMP_DEST_UNREACHABLE, ICMP_PORT_UNREACH);
-            }
-#  endif /* CONFIG_NET_ICMP */
-#else
-          dev->d_len = 0;
-#endif /* CONFIG_NET_ICMP || CONFIG_NET_ICMPv6 */
+#  endif /* CONFIG_NET_IPv6*/
+#endif
         }
+
+      udp_conn_list_unlock();
     }
 
   return ret;

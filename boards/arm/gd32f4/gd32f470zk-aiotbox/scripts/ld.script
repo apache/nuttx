@@ -1,5 +1,7 @@
 /****************************************************************************
- * boards/arm/gd32f4/gd32f470zk-eval/scripts/ld.script
+ * boards/arm/gd32f4/gd32f470zk-aiotbox/scripts/ld.script
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

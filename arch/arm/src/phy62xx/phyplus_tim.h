@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/phy62xx/phyplus_tim.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -65,7 +67,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* register informations... */
+/* register information... */
 
 #define TIM_COUNT_OFFSET                  0x0000
 #define TIM_CURRENT_OFFSET                0x0004

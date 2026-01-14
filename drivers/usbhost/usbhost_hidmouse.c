@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_hidmouse.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -242,7 +244,7 @@ struct usbhost_state_s
    * bound to this class instance
    */
 
-  struct usbhost_driver_s *drvr;
+  FAR struct usbhost_driver_s *drvr;
 
   /* The remainder of the fields are provide o the mouse class driver */
 
@@ -280,7 +282,7 @@ struct usbhost_state_s
    * retained in the f_priv field of the 'struct file'.
    */
 
-  struct pollfd *fds[CONFIG_HIDMOUSE_NPOLLWAITERS];
+  FAR struct pollfd      *fds[CONFIG_HIDMOUSE_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -310,7 +312,7 @@ static bool usbhost_touchscreen(FAR struct usbhost_state_s *priv,
                                 FAR struct usbhid_mousereport_s *rpt);
 #endif
 static bool usbhost_threshold(FAR struct usbhost_state_s *priv);
-static int usbhost_mouse_poll(int argc, char *argv[]);
+static int usbhost_mouse_poll(int argc, FAR char *argv[]);
 static int usbhost_sample(FAR struct usbhost_state_s *priv,
                           FAR struct mouse_sample_s *sample);
 static int usbhost_waitsample(FAR struct usbhost_state_s *priv,
@@ -939,7 +941,7 @@ static bool usbhost_threshold(FAR struct usbhost_state_s *priv)
  *
  ****************************************************************************/
 
-static int usbhost_mouse_poll(int argc, char *argv[])
+static int usbhost_mouse_poll(int argc, FAR char *argv[])
 {
   FAR struct usbhost_state_s *priv;
   FAR struct usbhost_hubport_s *hport;
@@ -973,7 +975,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
 
   priv->polling = true;
   nxsem_post(&g_syncsem);
-  nxsig_sleep(1);
+  nxsched_sleep(1);
 
   /* Loop here until the device is disconnected */
 
@@ -2384,7 +2386,7 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
       DEBUGASSERT(slot);
 
       /* Remove all memory of the poll setup */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/random.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -128,6 +130,16 @@ void up_rngaddint(enum rnd_source_t kindof, int val);
 
 void up_rngaddentropy(enum rnd_source_t kindof, FAR const uint32_t *buf,
                       size_t n);
+
+/****************************************************************************
+ * Name: up_rngbuf
+ *
+ * Description:
+ *   Fill a buffer of arbitrary length with randomness.
+ *
+ ****************************************************************************/
+
+void up_rngbuf(FAR void *bytes, size_t nbytes);
 
 /****************************************************************************
  * Name: up_rngreseed

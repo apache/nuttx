@@ -1,6 +1,8 @@
 /****************************************************************************
  * wireless/ieee802154/mac802154_netdev.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -707,11 +709,6 @@ static int macnet_ifdown(FAR struct net_driver_s *dev)
 {
   FAR struct macnet_driver_s *priv = (FAR struct macnet_driver_s *)
                                       dev->d_private;
-  irqstate_t flags;
-
-  /* Disable interruption */
-
-  flags = enter_critical_section();
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the macnet_ifup() always
@@ -721,7 +718,7 @@ static int macnet_ifdown(FAR struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->md_bifup = false;
-  leave_critical_section(flags);
+
   return OK;
 }
 

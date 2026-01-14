@@ -1,16 +1,14 @@
 /****************************************************************************
  * arch/arm/src/samd2l2/sam_i2c_master.c
  *
- *   Copyright (C) 2013-2014, 2017 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2015 Filament - www.filament.com
- *   Author: Matt Thompson <mthompson@hexwave.com>
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * The Atmel sample code has a BSD compatible license that requires this
- * copyright notice:
- *
- *    Copyright (c) 2011, Atmel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2017 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2015 Filament - www.filament.com
+ * SPDX-FileCopyrightText: 2013-2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2011 Atmel Corporation
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Matt Thompson <mthompson@hexwave.com>
+ * SPDX-FileContributor: Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32h7/openh743i/src/stm32_sdmmc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -50,7 +52,7 @@
 /* If IDMA is enabled, internal SRAM must be excluded from heap */
 
 #if CONFIG_MM_REGIONS > 1 && defined(CONFIG_STM32H7_SDMMC_IDMA)
-#  error SDMMC1 with IDMA doesnt work CONFIG_MM_REGIONS > 1
+#  error SDMMC1 with IDMA does not work CONFIG_MM_REGIONS > 1
 #endif
 
 /****************************************************************************

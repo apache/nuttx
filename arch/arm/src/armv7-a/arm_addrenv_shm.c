@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/arm_addrenv_shm.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,6 +39,7 @@
 #include "mmu.h"
 #include "addrenv.h"
 #include "pgalloc.h"
+#include "sched/sched.h"
 
 #if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_ARCH_VMA_MAPPING)
 
@@ -65,17 +68,11 @@
 
 int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
 {
-  struct tcb_s *tcb = nxsched_self();
-  struct arch_addrenv_s *addrenv;
-  uintptr_t *l1entry;
-  uint32_t *l2table;
-  irqstate_t flags;
+  struct tcb_s *tcb = this_task();
+  uintptr_t l1entry;
+  uintptr_t *l2table;
   uintptr_t paddr;
   unsigned int nmapped;
-  unsigned int shmndx;
-
-  shminfo("pages=%p npages=%d vaddr=%08lx\n",
-          pages, npages, (unsigned long)vaddr);
 
   /* Sanity checks */
 
@@ -83,22 +80,17 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
   DEBUGASSERT(vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr < ARCH_SHM_VEND);
   DEBUGASSERT(MM_ISALIGNED(vaddr));
 
-  addrenv = &tcb->addrenv_own->addrenv;
-
   /* Loop until all pages have been mapped into the caller's address space. */
 
   for (nmapped = 0; nmapped < npages; )
     {
-      /* Get the shm[] index associated with the virtual address */
-
-      shmndx = (vaddr - CONFIG_ARCH_SHM_VBASE) >> SECTION_SHIFT;
-
       /* Has a level 1 page table entry been created for this virtual
        * address.
        */
 
-      l1entry = addrenv->shm[shmndx];
-      if (l1entry == NULL)
+      l1entry = mmu_l1_getentry(vaddr);
+
+      if (l1entry == 0)
         {
           /* No.. Allocate one physical page for the L2 page table */
 
@@ -110,22 +102,19 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
 
           DEBUGASSERT(MM_ISALIGNED(paddr));
 
-          /* We need to be more careful after we begin modifying
-           * global resources.
-           */
-
-          flags = enter_critical_section();
-          addrenv->shm[shmndx] = (uintptr_t *)paddr;
-
           /* Get the virtual address corresponding to the physical page
            * address.
            */
 
-          l2table = (uint32_t *)arm_pgvaddr(paddr);
+          l2table = (uintptr_t *)arm_pgvaddr(paddr);
 
           /* Initialize the page table */
 
-          memset(l2table, 0, ENTRIES_PER_L2TABLE * sizeof(uint32_t));
+          memset(l2table, 0, ENTRIES_PER_L2TABLE * sizeof(uintptr_t));
+
+          /* In case first time set shm l1 entry */
+
+          mmu_l1_setentry(paddr, vaddr, MMU_L1_PGTABFLAGS);
         }
       else
         {
@@ -133,14 +122,13 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
            * table entry.
            */
 
-          paddr = (uintptr_t)l1entry & ~SECTION_MASK;
-          flags = enter_critical_section();
+          paddr = l1entry & PTE_SMALL_PADDR_MASK;
 
           /* Get the virtual address corresponding to the physical page\
            * address.
            */
 
-          l2table = (uint32_t *)arm_pgvaddr(paddr);
+          l2table = (uintptr_t *)arm_pgvaddr(paddr);
         }
 
       /* Map the virtual address to this physical address */
@@ -148,7 +136,7 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
       DEBUGASSERT(get_l2_entry(l2table, vaddr) == 0);
 
       paddr = *pages++;
-      set_l2_entry(l2table, paddr, vaddr, MMU_MEMFLAGS);
+      set_l2_entry(l2table, paddr, vaddr, MMU_L2_UDATAFLAGS);
       nmapped++;
       vaddr += MM_PGSIZE;
 
@@ -161,9 +149,7 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
 
       up_flush_dcache((uintptr_t)l2table,
                       (uintptr_t)l2table +
-                      ENTRIES_PER_L2TABLE * sizeof(uint32_t));
-
-      leave_critical_section(flags);
+                      ENTRIES_PER_L2TABLE * sizeof(uintptr_t));
     }
 
   return OK;
@@ -188,16 +174,11 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
 
 int up_shmdt(uintptr_t vaddr, unsigned int npages)
 {
-  struct tcb_s *tcb = nxsched_self();
-  struct arch_addrenv_s *addrenv;
-  uintptr_t *l1entry;
-  uint32_t *l2table;
-  irqstate_t flags;
+  struct tcb_s *tcb = this_task();
+  uintptr_t l1entry;
+  uintptr_t *l2table;
   uintptr_t paddr;
   unsigned int nunmapped;
-  unsigned int shmndx;
-
-  shminfo("npages=%d vaddr=%08lx\n", npages, (unsigned long)vaddr);
 
   /* Sanity checks */
 
@@ -205,35 +186,28 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages)
   DEBUGASSERT(vaddr >= CONFIG_ARCH_SHM_VBASE && vaddr < ARCH_SHM_VEND);
   DEBUGASSERT(MM_ISALIGNED(vaddr));
 
-  addrenv = &tcb->addrenv_own->addrenv;
-
   /* Loop until all pages have been unmapped from the caller's address
    * space.
    */
 
   for (nunmapped = 0; nunmapped < npages; )
     {
-      /* Get the shm[] index associated with the virtual address */
-
-      shmndx = (vaddr - CONFIG_ARCH_SHM_VBASE) >> SECTION_SHIFT;
-
       /* Get the level 1 page table entry for this virtual address */
 
-      l1entry = addrenv->shm[shmndx];
-      DEBUGASSERT(l1entry != NULL);
+      l1entry = mmu_l1_getentry(vaddr);
+      DEBUGASSERT(l1entry != 0);
 
       /* Get the physical address of the L2 page table from the L1 page
        * table entry.
        */
 
-       paddr = (uintptr_t)l1entry & ~SECTION_MASK;
-       flags = enter_critical_section();
+      paddr = l1entry & PTE_SMALL_PADDR_MASK;
 
       /* Get the virtual address corresponding to the physical page
        * address.
        */
 
-      l2table = (uint32_t *)arm_pgvaddr(paddr);
+      l2table = (uintptr_t *)arm_pgvaddr(paddr);
 
       /* Unmap this virtual page address.
        *
@@ -262,8 +236,6 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages)
       up_flush_dcache((uintptr_t)l2table,
                       (uintptr_t)l2table +
                       ENTRIES_PER_L2TABLE * sizeof(uint32_t));
-
-      leave_critical_section(flags);
     }
 
   return OK;

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_hsmci.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -103,7 +105,7 @@
 
 #elif defined(ATSAMA5D4)
   /* The SAMA5D3 has two HSMCI blocks: HSMCI0-1.  They can be driven
-   * either by XDMAC0 (secure) or XDMAC1 (unsecure).
+   * either by XDMAC0 (secure) or XDMAC1 (insecure).
    */
 
 #  if !defined(CONFIG_SAMA5_XDMAC0) && !defined(CONFIG_SAMA5_XDMAC1)
@@ -749,7 +751,7 @@ static struct sam_dev_s g_hsmci2 =
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 
@@ -3213,8 +3215,6 @@ static void sam_callback(void *arg)
       ret = work_cancel(LPWORK, &priv->cbwork);
       if (ret < 0)
         {
-          /* NOTE: Currently, work_cancel only returns success */
-
           lcderr("ERROR: Failed to cancel work: %d\n", ret);
         }
 
@@ -3223,8 +3223,6 @@ static void sam_callback(void *arg)
                        priv->cbarg, 0);
       if (ret < 0)
         {
-          /* NOTE: Currently, work_queue only returns success */
-
           lcderr("ERROR: Failed to schedule work: %d\n", ret);
         }
     }

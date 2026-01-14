@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/arp/arp_out.c
  *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  *   Copyright (C) 2007-2011, 2014-2015, 2017-2018 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -87,7 +89,7 @@ static const uint16_t g_broadcast_ipaddr[2] =
  * 33-33-00-00-00-00 0x86DD IPv6 Neighbor Discovery
  * 33-33-xx-xx-xx-xx 0x86DD IPv6 Multicast Address (RFC3307)
  *
- * The following is the first three octects of the IGMP address:
+ * The following is the first three octets of the IGMP address:
  */
 
 #ifdef CONFIG_NET_IGMP
@@ -113,7 +115,7 @@ static const uint8_t g_multicast_ethaddr[3] =
  *   If the destination IP address is in the local network (determined
  *   by logical ANDing of netmask and our IP address), the function
  *   checks the ARP cache to see if an entry for the destination IP
- *   address is found.  If so, an Ethernet header is pre-pended at the
+ *   address is found.  If so, an Ethernet header is prepended at the
  *   beginning of the packet and the function returns.
  *
  *   If no ARP cache entry is found for the destination IP address, the
@@ -147,20 +149,6 @@ void arp_out(FAR struct net_driver_s *dev)
     {
       return;
     }
-
-#if defined(CONFIG_NET_PKT) || defined(CONFIG_NET_ARP_SEND)
-  /* Skip sending ARP requests when the frame to be transmitted was
-   * written into a packet socket.
-   */
-
-  if (IFF_IS_NOARP(dev->d_flags))
-    {
-      /* Clear the indication and let the packet continue on its way. */
-
-      IFF_CLR_NOARP(dev->d_flags);
-      return;
-    }
-#endif
 
   /* Find the destination IP address in the ARP table and construct
    * the Ethernet header. If the destination IP address isn't on the
@@ -236,6 +224,12 @@ void arp_out(FAR struct net_driver_s *dev)
 
       net_ipv4addr_copy(ipaddr, dev->d_draddr);
 #endif
+
+      if (ipaddr == INADDR_ANY)
+        {
+          dev->d_len = 0;
+          return;
+        }
     }
 
   /* The destination address is on the local network.  Check if it is
@@ -263,7 +257,42 @@ void arp_out(FAR struct net_driver_s *dev)
   ret = arp_find(ipaddr, ethaddr.ether_addr_octet, dev);
   if (ret < 0)
     {
+      /* No send ARP if the interface forbidden */
+
+      if (IFF_IS_NOARP(dev->d_flags) || ret == -ENETUNREACH)
+        {
+          ninfo("ARP not supported on %s, no send!\n", dev->d_ifname);
+          dev->d_len = 0;
+          return;
+        }
+
       ninfo("ARP request for IP %08lx\n", (unsigned long)ipaddr);
+
+      if (ret == -EINPROGRESS)
+        {
+          /* The destination address was not in our ARP table, and
+           * the last arp request is in progress, directly drop the packet
+           * to prevent arp flood.
+           */
+
+#ifdef CONFIG_NET_ARP_SEND_QUEUE
+          arp_queue_iob(dev, ipaddr, dev->d_iob);
+          netdev_iob_clear(dev);
+#else
+          dev->d_len = 0;
+#endif
+          return;
+        }
+
+      /* MAC address marked with all zeros to limit concurrent task
+       * send ARP request for same destination.
+       */
+
+      arp_update(dev, ipaddr, NULL, 0);
+#ifdef CONFIG_NET_ARP_SEND_QUEUE
+      arp_queue_iob(dev, ipaddr, dev->d_iob);
+      netdev_iob_clear(dev);
+#endif
 
       /* The destination address was not in our ARP table, so we overwrite
        * the IP packet with an ARP request.

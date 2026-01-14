@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/wireless/gs2200m.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -865,7 +867,7 @@ retry:
   if (RD_RESP_NOK == res[1])
     {
       wlwarn("*** warning: RD_RESP_NOK received.. retrying. (n=%d)\n", n);
-      nxsig_usleep(100 * 1000);
+      nxsched_usleep(100 * 1000);
       n++;
       goto retry;
     }
@@ -929,7 +931,7 @@ retry:
                      (FAR void *)dev, 0);
         }
 
-      nxsig_usleep(100 * 1000);
+      nxsched_usleep(100 * 1000);
       n++;
       goto retry;
     }
@@ -955,7 +957,7 @@ retry:
     {
       wlwarn("*** warning: 0x%x received.. retrying. (n=%d)\n",
              res[1], n);
-      nxsig_usleep(10 * 1000);
+      nxsched_usleep(10 * 1000);
 
       if (WR_MAX_RETRY < n)
         {
@@ -3218,7 +3220,7 @@ repeat:
 
           while (gs2200m_recv_pkt(dev, NULL) != TYPE_TIMEOUT)
             {
-              nxsig_usleep(100 * 1000);
+              nxsched_usleep(100 * 1000);
             }
         }
       while (gs2200m_ioctl_assoc_sta(dev, &dev->reconnect_msg) != OK);

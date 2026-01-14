@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/renesas/src/m16c/m16c_timerisr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -68,8 +70,8 @@
 #define M16C_IDEAL_PRESCALER \
   ((M16C_XIN_FREQ + M16C_DIVISOR - 1) / M16C_DIVISOR)
 
-/* Now, given this idel prescaler value,
- * pick between available choices: 1, 8, and 32
+/* Now, given this ideal prescaler value,
+ * pick between available choices: 1, 8, and 32.
  */
 
 #if M16C_IDEAL_PRESCALER > 8

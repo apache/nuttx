@@ -1,7 +1,8 @@
 /****************************************************************************
  * libs/libc/stdio/lib_ungetwc.c
  *
- * Copyright © 2005-2014 Rich Felker, et al.
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: 2005-2014 Rich Felker, et al.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -70,7 +71,7 @@ wint_t ungetwc_unlocked(wint_t wc, FAR FILE *f)
 
   /* Try conversion early so we can fail without locking if invalid */
 
-  if ((l = wctomb(mbc, wc)) < 0)
+  if ((l = wctomb(mbc, wc)) <= 0)
     {
       return WEOF;
     }

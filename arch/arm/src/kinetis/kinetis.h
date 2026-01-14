@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -348,8 +350,8 @@ void kinetis_clockconfig(void);
  *
  * Description:
  *   Performs the low level UART/LPUART initialization early in debug so that
- *   the serial console will be available during bootup.  This must be called
- *   before arm_serialinit.
+ *   the serial console will be available during boot up.  This must be
+ *   called before arm_serialinit.
  *
  ****************************************************************************/
 
@@ -362,7 +364,7 @@ void kinetis_earlyserialinit(void);
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before arm_serialinit.
  *
  ****************************************************************************/
@@ -376,7 +378,7 @@ void kinetis_uart_earlyserialinit(void);
  *
  * Description:
  *   Performs the low level LPUART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before arm_serialinit.
  *
  ****************************************************************************/
@@ -473,7 +475,7 @@ void kinetis_uartconfigure(uintptr_t uart_base,
                            uint32_t baud, uint32_t clock,
                            unsigned int parity, unsigned int nbits,
                            unsigned int stop2,
-                           bool iflow, bool oflow);
+                           bool iflow, bool oflow, bool rs485control);
 #endif
 
 /****************************************************************************

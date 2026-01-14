@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/hdc1008.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -50,10 +52,6 @@
 #  define hdc1008_dbg(x, ...)    sninfo(x, ##__VA_ARGS__)
 #endif
 
-#ifndef CONFIG_SHT21_I2C_FREQUENCY
-#  define CONFIG_SHT21_I2C_FREQUENCY 400000
-#endif
-
 /* Macros to convert raw temperature and humidity to real values. Temperature
  * is scaled by 100, humidity by 10.
  */
@@ -97,7 +95,7 @@
 #define HDC1008_CONFIGURATION_RST             (1 << 15) /* Bit 15: Software reset bit */
 
 /****************************************************************************
- * Private
+ * Private Types
  ****************************************************************************/
 
 struct hdc1008_dev_s
@@ -163,7 +161,9 @@ static const struct file_operations g_hdc1008fops =
   hdc1008_ioctl,    /* ioctl */
   NULL,             /* mmap */
   NULL,             /* truncate */
-  NULL              /* poll */
+  NULL,             /* poll */
+  NULL,             /* readv */
+  NULL              /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , hdc1008_unlink  /* unlink */
 #endif
@@ -200,7 +200,7 @@ static int hdc1008_measure_trh(FAR struct hdc1008_dev_s *priv, int *t,
    * both temperature and humidity.
    */
 
-  nxsig_usleep(20000);
+  nxsched_usleep(20000);
 
   ret = i2c_read(priv->i2c, &config, buf, 4);
   if (ret < 0)
@@ -250,7 +250,7 @@ static int hdc1008_measure_t_or_rh(FAR struct hdc1008_dev_s *priv,
    * margin for either temperature/humidity at maximum resolution.
    */
 
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
 
   ret = i2c_read(priv->i2c, &config, buf, 2);
   if (ret < 0)
@@ -799,7 +799,7 @@ static int hdc1008_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = hdc1008_getreg(priv, HDC1008_REG_CONFIGURATION, &reg);
           if (ret >= 0)
             {
-              *(uint16_t *)arg = reg;
+              *(FAR uint16_t *)arg = reg;
             }
 
           hdc1008_dbg("read config ret: %d\n", ret);
@@ -902,7 +902,7 @@ static int hdc1008_reset(FAR struct hdc1008_dev_s *priv)
   do
     {
       ret = hdc1008_getreg(priv, HDC1008_REG_CONFIGURATION, &reg);
-      nxsig_usleep(1000);
+      nxsched_usleep(1000);
       --count;
     }
   while ((reg & HDC1008_CONFIGURATION_RST) && (ret == OK) && count);
@@ -974,7 +974,7 @@ int hdc1008_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
    * sure that it is ready.
    */
 
-  nxsig_usleep(15000);
+  nxsched_usleep(15000);
 
   /* Set default configuration */
 

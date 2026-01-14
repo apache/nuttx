@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/rp2040/rp2040_irq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -259,6 +261,7 @@ void up_irqinitialize(void)
   /* And finally, enable interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
+  arm_color_intstack();
   up_irq_enable();
 #endif
 }
@@ -276,8 +279,8 @@ void up_disable_irq(int irq)
   DEBUGASSERT((unsigned)irq < NR_IRQS);
 
 #ifdef CONFIG_SMP
-  if (irq >= RP2040_IRQ_EXTINT && irq != RP2040_SIO_IRQ_PROC1 &&
-      up_cpu_index() != 0)
+  if (irq >= RP2040_IRQ_EXTINT && irq != RP2040_SMP_CALL_PROC1 &&
+      this_cpu() != 0)
     {
       /* Must be handled by Core 0 */
 
@@ -324,8 +327,8 @@ void up_enable_irq(int irq)
   DEBUGASSERT((unsigned)irq < NR_IRQS);
 
 #ifdef CONFIG_SMP
-  if (irq >= RP2040_IRQ_EXTINT && irq != RP2040_SIO_IRQ_PROC1 &&
-      up_cpu_index() != 0)
+  if (irq >= RP2040_IRQ_EXTINT && irq != RP2040_SMP_CALL_PROC1 &&
+      this_cpu() != 0)
     {
       /* Must be handled by Core 0 */
 

@@ -1,0 +1,153 @@
+=======
+MCP9600
+=======
+
+Contributed by Matteo Golin.
+
+The MCP9600 is a thermocouple EMF to temperature converter made by Microchip. It
+is also sold as a `breakout board module by Adafruit
+<https://learn.adafruit.com/adafruit-mcp9600-i2c-thermocouple-amplifier>`_.
+
+Application Programming Interface
+==================================
+
+The header file for the MCP9600 driver interface can be included using:
+
+.. code-block:: c
+
+   #include <nuttx/sensors/mcp9600.h>
+
+The MCP9600 registration function allows the driver to be registered as a
+:doc:`UORB </components/drivers/special/sensors/sensors_uorb>` sensor.
+
+The MCP9600 measures three types of temperature:
+ * Hot junction temperature
+ * Cold junction temperature
+ * Temperature delta
+
+Registering this sensor will create three UORB temperature topics, each with
+their own unique device number. You must specify the unique device numbers for
+each topic in the registration function:
+
+.. code-block:: c
+
+   /* Registers sensor_temp1, sensor_temp2 and sensor_temp 3, where 1 is the
+    * hot junction topic, 2 is the cold junction topic and 3 is the delta
+    */
+
+   int err;
+   err = mcp9600_register(i2c_master, 0x60, 1, 2, 3);
+   if (err < 0) {
+     syslog(LOG_ERR, "Could not register MCP9600: %d\n", err);
+   }
+
+
+This sensor offers some additional control commands for features that are not
+accessible with the standard UORB interface.
+
+ * :c:macro:`SNIOC_SET_THERMO`
+ * :c:macro:`SNIOC_WHO_AM_I`
+ * :c:macro:`SNIOC_READ_RAW_DATA`
+ * :c:macro:`SNIOC_CHECK_STATUS_REG`
+ * :c:macro:`SNIOC_CONFIGURE`
+ * :c:macro:`SNIOC_WRITECONF`
+
+``SNIOC_SET_THERMO``
+--------------------
+
+This command configures the thermocouple type of the MCP9600. The device
+supports the following thermocouple types:
+
+ * K
+ * J
+ * T
+ * N
+ * E
+ * S
+ * B
+ * R
+
+.. code-block:: c
+
+   int err;
+   err = orb_ioctl(sensor, SNIOC_SET_THERMO, SENSOR_THERMO_TYPE_J);
+   if (err < 0) {
+     syslog(LOG_ERR, "Failed to set thermocouple type: %d\n", err);
+   }
+
+``SNIOC_WHO_AM_I``
+------------------
+
+This command reads the device ID register of the MCP9600 sensor. The device ID,
+major and minor revision numbers are returned in the argument, which must be of
+type ``struct mcp9600_devinfo_s *``.
+
+.. code-block:: c
+
+  struct mcp9600_devinfo_s devinfo;
+  err = orb_ioctl(sensor, SNIOC_WHO_AM_I, &devinfo);
+
+  uint8_t revision_minor = MCP9600_REV_MINOR(devinfo.revision);
+  uint8_t revision_major = MCP9600_REV_MAJOR(devinfo.revision);
+
+``SNIOC_READ_RAW_DATA``
+-----------------------
+
+This command allows the caller to read the raw data returned from the sensor's
+ADC.
+
+The argument to this command must be an ``int32_t`` pointer. The raw data will
+be returned here. The process to convert the raw ADC data depends on the
+configured resolution; consult the data sheet.
+
+.. code-block:: c
+
+  int32_t raw;
+  err = orb_ioctl(sensor, SNIOC_READ_RAW_DATA, &raw);
+
+``SNIOC_CHECK_STATUS_REG``
+--------------------------
+
+This command lets you check the status register of the device. The argument to
+this command must be a pointer to type ``struct mcp9600_status_s``.
+
+.. code-block:: c
+
+  struct mcp9600_status_s status;
+  err = orb_ioctl(sensor, SNIOC_CHECK_STATUS_REG, &status);
+
+``SNIOC_CONFIGURE``
+-------------------
+
+This command lets you configure the MCP9600's operation, including thermocouple
+type, operating mode, ADC resolution, etc.
+
+The argument to this command must be a pointer to type ``struct
+mcp9600_devconf_s``.
+
+.. code-block:: c
+
+  struct mcp9600_devconf_s conf = {
+    .thermo_type = MCP9600_THERMO_TYPE_K,
+    .resolution = MCP9600_ADC_RES_18,
+    /* More fields ... */
+  };
+  err = orb_ioctl(sensor, SNIOC_CONFIGURE, &conf);
+
+``SNIOC_WRITECONF``
+-------------------
+
+This command lets you configure the MCP9600's alerts on a per-alert basis.
+   
+The argument to this command must be a pointer to type ``struct
+mcp9600_alertconf_s``.
+
+.. code-block:: c
+
+  struct mcp9600_alertconf_s conf = {
+    .alert = MCP9600_ALERT1,
+    .enable = true,
+    .limit = 40 / 0.25,
+    /* More fields ... */
+  };
+  err = orb_ioctl(sensor, SNIOC_WRITECONF, &conf);

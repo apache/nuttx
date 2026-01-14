@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_irq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -85,6 +87,7 @@ void up_irqinitialize(void)
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And finally, enable interrupts */
 
+  arm_color_intstack();
   up_irq_restore(PSR_MODE_SYS | PSR_F_BIT);
 #endif
 }

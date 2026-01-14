@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/bl602/bl602_netdev.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -140,7 +142,7 @@ struct bl602_net_driver_s
 
   struct wlan_netif *wlan;
 
-  /* there is impossble to concurrency access these fields, so
+  /* there is impossible to concurrency access these fields, so
    * we use bit-field to save some little space :)
    */
 
@@ -594,7 +596,7 @@ static int bl602_launch_pending_rx(void)
 
       if (tx_buf_empty)
         {
-          /* we dont have tx buffer, so we cant go ahead, abort.. */
+          /* we dont have tx buffer, so we can't go ahead, abort.. */
 
           nwarn("tx buf empty!\n");
 
@@ -620,7 +622,7 @@ static int bl602_launch_pending_rx(void)
 
       ninfo("input stack rx data :%p %d\n", item->data, item->len);
 
-      /* now we have avaliable tx buffer and pending rx data, launch it */
+      /* now we have available tx buffer and pending rx data, launch it */
 
       DEBUGASSERT(item->priv != NULL);
       DEBUGASSERT(item->priv->net_dev.d_buf == NULL);
@@ -802,9 +804,9 @@ static int bl602_net_soft_reset(void)
   int idx;
 
   wifi_mgmr_sta_disconnect();
-  nxsig_sleep(1);
+  nxsched_sleep(1);
   wifi_mgmr_api_ap_stop();
-  nxsig_sleep(1);
+  nxsched_sleep(1);
   wifi_mgmr_api_idle();
   wifi_mgmr_reset();
 
@@ -1216,7 +1218,7 @@ static int bl602_ioctl_wifi_start(struct bl602_net_driver_s *priv,
 {
   UNUSED(arg);
 
-  /* preform connect ap */
+  /* perform connect ap */
 
   wifi_mgmr_t *mgmr = bl602_netdev_get_wifi_mgmr(priv);
   if (mgmr == NULL)
@@ -1300,7 +1302,7 @@ static int bl602_ioctl_wifi_stop(struct bl602_net_driver_s *priv,
         }
 
       wifi_mgmr_sta_disconnect();
-      nxsig_sleep(1);
+      nxsched_sleep(1);
       wifi_mgmr_api_idle();
     }
   else if (priv->current_mode == IW_MODE_MASTER)
@@ -1311,7 +1313,7 @@ static int bl602_ioctl_wifi_stop(struct bl602_net_driver_s *priv,
         }
 
       wifi_mgmr_api_ap_stop();
-      nxsig_sleep(1);
+      nxsched_sleep(1);
       wifi_mgmr_api_idle();
     }
 
@@ -1549,7 +1551,7 @@ bl602_net_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
             }
           else
             {
-              wlwarn("WARNING: Unsupport mode:%ld\n", req->u.mode);
+              wlwarn("WARNING: Unsupported mode:%ld\n", req->u.mode);
               return -ENOSYS;
             }
         }
@@ -1633,7 +1635,7 @@ bl602_net_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
             }
           else
             {
-              wlinfo("unknow essid action: %d\n", req->u.essid.flags);
+              wlinfo("unknown essid action: %d\n", req->u.essid.flags);
               return -ENOSYS;
             }
         }

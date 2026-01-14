@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stdio/lib_vfscanf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -22,13 +24,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdio.h>
-
 #include <nuttx/streams.h>
-
-#include "libc.h"
 
 /****************************************************************************
  * Public Functions
@@ -51,7 +47,7 @@ int vfscanf(FAR FILE *stream, FAR const IPTR char *fmt, va_list ap)
       lib_stdinstream(&stdinstream, stream);
 
       /* Hold the stream semaphore throughout the lib_vscanf call so that
-       * this thread can get its entire message out before being pre-empted
+       * this thread can get its entire message out before being preempted
        * by the next thread.
        */
 

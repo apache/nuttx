@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/k230/k230_hart.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -80,6 +82,10 @@
 #define RESET_RQST_ENW     (1 << (0 + 16))
 
 #define RESET_WAIT_USEC    100
+
+/* PMP openall flag */
+
+#define PMP_NAPOT_RWX      (PMPCFG_A_NAPOT | PMPCFG_RWX_MASK)
 
 /****************************************************************************
  * Private Variables
@@ -163,13 +169,14 @@ bool k230_hart_is_big(void)
 
 void k230_hart_big_stop(void)
 {
-  if (k230_hart_is_big()) return;
+  if (!k230_hart_is_big())
+    {
+      /* 0x10001 set RESET */
 
-  /* 0x10001 set RESET */
-
-  putreg32(RESET_RQST_BIT | RESET_RQST_ENW, K230_CPU1_RESET);
-  up_udelay(RESET_WAIT_USEC);
-  sinfo("reg: %" PRIx32 "\n", getreg32(K230_CPU1_RESET));
+      putreg32(RESET_RQST_BIT | RESET_RQST_ENW, K230_CPU1_RESET);
+      up_udelay(RESET_WAIT_USEC);
+      sinfo("reg: %" PRIx32 "\n", getreg32(K230_CPU1_RESET));
+    }
 }
 
 /****************************************************************************
@@ -179,27 +186,28 @@ void k230_hart_big_stop(void)
 
 void k230_hart_big_boot(uintptr_t addr)
 {
-  if (k230_hart_is_big()) return;
+  if (!k230_hart_is_big())
+    {
+      /* learned from U-Boot baremetal and RTT sysctl_reset_cpu */
 
-  /* learned from U-Boot baremetal and RTT sysctl_reset_cpu */
+      putreg32(addr, K230_CPU1_BOOTA);
+      sinfo("addr=%"PRIxPTR"\n", addr);
 
-  if (addr) putreg32(addr, K230_CPU1_BOOTA);
-  sinfo("addr=%"PRIxPTR"\n", addr);
+      /* 0x10001000 clear DONE bit */
 
-  /* 0x10001000 clear DONE bit */
+      putreg32(RESET_DONE_BIT | RESET_DONE_ENW, K230_CPU1_RESET);
+      up_udelay(RESET_WAIT_USEC);
 
-  putreg32(RESET_DONE_BIT | RESET_DONE_ENW, K230_CPU1_RESET);
-  up_udelay(RESET_WAIT_USEC);
+      /* 0x10001 set RQST bit */
 
-  /* 0x10001 set RQST bit */
+      putreg32(RESET_RQST_BIT | RESET_RQST_ENW, K230_CPU1_RESET);
+      up_udelay(RESET_WAIT_USEC);
 
-  putreg32(RESET_RQST_BIT | RESET_RQST_ENW, K230_CPU1_RESET);
-  up_udelay(RESET_WAIT_USEC);
+      /* 0x10000 clear RQST bit */
 
-  /* 0x10000 clear RQST bit */
-
-  putreg32(RESET_RQST_ENW, K230_CPU1_RESET);
-  up_udelay(RESET_WAIT_USEC);
+      putreg32(RESET_RQST_ENW, K230_CPU1_RESET);
+      up_udelay(RESET_WAIT_USEC);
+    }
 }
 
 #endif /* !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NUTTSBI) */
@@ -217,5 +225,9 @@ void sbi_late_initialize(void)
 
   putreg32(1, K230_PLIC_CTRL);
   k230_hart_init();
+
+  /* Open everything for PMP */
+
+  DEBUGASSERT(riscv_append_pmp_region(PMP_NAPOT_RWX, 0, 0) == 0);
 }
 #endif

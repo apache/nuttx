@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32/common/src/esp32_cs4344.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,9 +39,9 @@
 
 #include <arch/board/board.h>
 
-#include "esp32_i2s.h"
+#include "espressif/esp_i2s.h"
 
-#if defined CONFIG_ESP32_I2S && defined CONFIG_AUDIO_CS4344
+#if defined CONFIG_ESPRESSIF_I2S && defined CONFIG_AUDIO_CS4344
 
 /****************************************************************************
  * Public Functions
@@ -85,7 +87,7 @@ int esp32_cs4344_initialize(int port)
     {
       /* Get an instance of the I2S interface for the CS4344 data channel */
 
-      i2s = esp32_i2sbus_initialize(port);
+      i2s = esp_i2sbus_initialize(port);
       if (!i2s)
         {
           auderr("ERROR: Failed to initialize I2S%d\n", port);
@@ -93,7 +95,7 @@ int esp32_cs4344_initialize(int port)
           goto errout;
         }
 
-      /* Check wheter to enable a simple character driver that supports I2S
+      /* Check whether to enable a simple character driver that supports I2S
        * transfers via a read() and write().  The intent of this driver is to
        * support I2S testing.  It is not an audio driver but does conform to
        * some of the buffer management heuristics of an audio driver.  It is
@@ -137,7 +139,7 @@ int esp32_cs4344_initialize(int port)
 
       /* Create a device name */
 
-      snprintf(devname, 12, "pcm%d",  port);
+      snprintf(devname, sizeof(devname), "pcm%d",  port);
 
       /* Finally, we can register the PCM/CS4344/I2S audio device.
        *
@@ -163,4 +165,4 @@ errout:
   return ret;
 }
 
-#endif /* CONFIG_ESP32_I2S && CONFIG_AUDIO_CS4344 */
+#endif /* CONFIG_ESPRESSIF_I2S && CONFIG_AUDIO_CS4344 */

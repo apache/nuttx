@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libdsp/lib_foc_b16.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -203,7 +205,7 @@ void foc_init_b16(FAR struct foc_data_b16_s *foc,
 
   pi_controller_init_b16(&foc->iq_pid, init->iq_kp, init->iq_ki);
 
-  /* Disable PI intergral part reset when saturated */
+  /* Disable PI integral part reset when saturated */
 
   pi_ireset_enable_b16(&foc->iq_pid, false);
   pi_ireset_enable_b16(&foc->id_pid, false);

@@ -2,6 +2,8 @@
 Mikroe Clicker2 STM32
 =====================
 
+.. tags:: chip:stm32, chip:stm32f4, chip:stm32f407
+
 This is the page file for the port of NuttX to the Mikroe Clicker2 STM32
 board based on the STMicro STM32F407VGT6 MCU.
 
@@ -639,7 +641,7 @@ configuration and most of the notes there apply here as well.
        cannot initiate telnet sessions.
 
 4. TCP and UDP Tests:  The same TCP and UDP tests as described for
-       the mrf24j40-6lowpan coniguration are supported on the star
+       the mrf24j40-6lowpan configuration are supported on the star
        endpoints, but NOT on the star hub.  Therefore, all network testing
        is between endpoints with the hub acting, well, only like a hub.
 

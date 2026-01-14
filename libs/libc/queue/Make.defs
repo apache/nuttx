@@ -1,6 +1,8 @@
 ############################################################################
 # libs/libc/queue/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -20,8 +22,7 @@
 
 # Add the queue C files to the build
 
-CSRCS += sq_addafter.c sq_remlast.c sq_remfirst.c sq_remafter.c sq_count.c
-CSRCS += dq_addafter.c dq_remlast.c dq_remfirst.c dq_remafter.c dq_count.c
+CSRCS += queue.c
 
 # Add the queue directory to the build
 

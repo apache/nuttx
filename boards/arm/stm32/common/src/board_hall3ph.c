@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/common/src/board_hall3ph.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -63,7 +65,7 @@ int board_hall3ph_initialize(int devno, int pha, int phb, int phc)
 
   /* Initialize a Hall effect sensor interface. */
 
-  snprintf(devpath, 12, "/dev/hall%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/hall%d", devno);
 
   ret = stm32_hall3ph_initialize(devpath, &cfg);
   if (ret < 0)

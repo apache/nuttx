@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/video/isx012.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -771,7 +773,7 @@ static int isx012_chk_int_state(FAR isx012_dev_t *priv,
   uint8_t data;
   uint32_t time = 0;
 
-  nxsig_usleep(delay_time * 1000);
+  nxsched_usleep(delay_time * 1000);
   while (time < timeout)
     {
       data = isx012_getreg(priv, INTSTS0, sizeof(data));
@@ -782,7 +784,7 @@ static int isx012_chk_int_state(FAR isx012_dev_t *priv,
           return ret;
         }
 
-      nxsig_usleep(wait_time * 1000);
+      nxsched_usleep(wait_time * 1000);
       time += wait_time;
     }
 
@@ -1328,10 +1330,10 @@ int init_isx012(FAR isx012_dev_t *priv)
 #ifdef ISX012_NOT_USE_NSTBY
   board_isx012_release_sleep();
   board_isx012_release_reset();
-  nxsig_usleep(6000);
+  nxsched_usleep(6000);
 #else
   board_isx012_release_reset();
-  nxsig_usleep(6000);
+  nxsched_usleep(6000);
 #endif
 
 #ifdef ISX012_CHECK_IN_DETAIL
@@ -1663,7 +1665,7 @@ static int isx012_replace_frameinterval_to_regval
       case 10 :  /* 5FPS */
         return REGVAL_FPSTYPE_5FPS;
 
-      default :
+      default:
         return -EINVAL;
     }
 }

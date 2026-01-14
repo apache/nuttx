@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/ms58xx.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,10 +44,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifndef CONFIG_MS58XX_I2C_FREQUENCY
-#  define CONFIG_MS58XX_I2C_FREQUENCY 400000
-#endif
 
 /* Register Definitions *****************************************************/
 
@@ -854,7 +852,7 @@ static int ms58xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_OVERSAMPLING:
         ret = ms58xx_setosr(priv, (uint16_t)arg);
-        sninfo("osr: %04x ret: %d\n", *(uint16_t *)arg, ret);
+        sninfo("osr: %04x ret: %d\n", *(FAR uint16_t *)arg, ret);
         break;
 
       /* Unrecognized commands */

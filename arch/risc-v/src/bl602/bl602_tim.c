@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/bl602/bl602_tim.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -249,7 +251,7 @@ void bl602_timer_setcountmode(uint32_t timer_ch, uint8_t count_mode)
  *
  * Input Parameters:
  *   timer_ch - TIMER channel type.
- *   cmp_no   - TIMER macth comparator ID type.
+ *   cmp_no   - TIMER match comparator ID type.
  *
  * Returned Value:
  *   None.

@@ -303,7 +303,7 @@ it. From Alan Carvalho de Assis.
 
 * Applications: apps/system:
 
-- apps/system/sched_note: Extend to include additions to instumentation
+- apps/system/sched_note: Extend to include additions to instrumentation
 for SMP.
 - apps/system/sched_note: Add support for spinlock notes.
 - apps/system/sched_note: Add support for new scheduler instrumentation.
@@ -317,7 +317,7 @@ for SMP.
 
 - graphics/traveler/tcledit and libwld: Add an X11 Tcl/Tk tool that can
 be used to edit Traveler world files.
-- Graphics: Remove all NX server taks. Instead, call boardctl() to the
+- Graphics: Remove all NX server tasks. Instead, call boardctl() to the
 NX server kernel thread.
 
 * Applications: apps/examples:

@@ -1,9 +1,18 @@
-/arm/[m-r]*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/max326xx/*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/moxart/*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/mps/mps2*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+
+/arm/mps/mps3-an547/configs/ap,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/mps/mps3-an547/configs/bl,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/mps/mps3-an547/configs/clang,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/mps/mps3-an547/configs/nsh,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/mps/mps3-an547/configs/picostest,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+
+/arm/mx8mp/*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+
+/arm/[n-q]*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+
 -moxa:nsh
-
-/arm/s32k1xx,CONFIG_ARM_TOOLCHAIN_GNU_EABI
-
-/arm/sam34,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
 # Boards build by CMake
 
@@ -13,7 +22,8 @@ CMake,arduino-nano-33ble:usbnsh
 CMake,arduino-nano-33ble-rev2:nsh
 CMake,arduino-nano-33ble-rev2:usbnsh
 
-CMake,nrf52832-dk:buttons
+CMAKE,mps3-an547:gcov
+
 CMake,nrf52832-dk:mcuboot_app
 CMake,nrf52832-dk:mcuboot_loader
 CMake,nrf52832-dk:mcuboot_loader_minimal
@@ -21,14 +31,11 @@ CMake,nrf52832-dk:nsh
 CMake,nrf52832-dk:ostest_tickless
 CMake,nrf52832-dk:sdc
 CMake,nrf52832-dk:sdc_nimble
-CMake,nrf52832-dk:wdog
 
 CMake,nrf52832-mdk:nsh
 
 CMake,nrf52832-sparkfun:nsh
 
-CMake,nrf52840-dk:adc
-CMake,nrf52840-dk:buttons
 CMake,nrf52840-dk:cdcacm
 CMake,nrf52840-dk:composite
 CMake,nrf52840-dk:highpri
@@ -36,13 +43,10 @@ CMake,nrf52840-dk:mcuboot_app
 CMake,nrf52840-dk:mcuboot_loader
 CMake,nrf52840-dk:nsh
 CMake,nrf52840-dk:ostest_tickless
-CMake,nrf52840-dk:pwm
-CMake,nrf52840-dk:qspi
 CMake,nrf52840-dk:rndis
 CMake,nrf52840-dk:sdc
 CMake,nrf52840-dk:sdc_nimble
 CMake,nrf52840-dk:sx127x
-CMake,nrf52840-dk:timer
 
 CMake,nrf52840-dongle:nsh
 CMake,nrf52840-dongle:usbnsh
@@ -84,3 +88,5 @@ CMake,nrf9160-dk:miniboot_s
 CMake,nrf9160-dk:modem_ns
 CMake,nrf9160-dk:nsh
 CMake,nrf9160-dk:ostest_tickless
+
+CMake,qemu-armv7a:full

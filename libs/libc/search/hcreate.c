@@ -1,10 +1,8 @@
 /****************************************************************************
  * libs/libc/search/hcreate.c
  *
- * $NetBSD: hcreate.c,v 1.2 2001/02/19 21:26:04 ross Exp $
- *
- * Copyright (c) 2001 Christopher G. Demetriou
- * All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2001 Christopher G. Demetriou.All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,9 +25,6 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * <<Id: LICENSE_GC,v 1.1 2001/10/01 23:24:05 cgd Exp>>
- *
  *
  * hcreate() / hsearch() / hdestroy()
  *
@@ -132,9 +127,30 @@ void hdestroy(void)
 
 FAR ENTRY *hsearch(ENTRY item, ACTION action)
 {
-  FAR ENTRY *retval;
+  FAR ENTRY *retval = NULL;
 
   hsearch_r(item, action, &retval, &g_htab);
 
   return retval;
+}
+
+/****************************************************************************
+ * Name: hforeach
+ *
+ * Description:
+ *   The hforeach() function iterates over the entries in the hashing table
+ *   specified by htab. The function is called for each entry in the
+ *   table.  The function fn is called with the entry and the data argument.
+ *   The data argument is passed to the function.
+ *
+ *   The hforeach_r() function is the reentrant version of hforeach().
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void hforeach(hforeach_t handle, FAR void *data)
+{
+  hforeach_r(handle, data, &g_htab);
 }

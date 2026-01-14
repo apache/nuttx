@@ -306,7 +306,7 @@ buttons, LEDS, IWDG, USB OTG HS, and procfs support. Configurations
 available for nsh, usbnsh, and wlan configurations.
 - Clicker2-STM32: Support for the Mikroelektronika Clicker 2 for
 STM32 was added by Anthony Merlino. This board, along with the
-MRF24J40 Click board is the platform used to deveop the IEEE
+MRF24J40 Click board is the platform used to develop the IEEE
 802.15.4 support. The boad configuration includes the MRF24J40
 initialization logic and SPI support. Configurations exist for nsh,
 knsh, usbnsh, and mrf24j40-radio.
@@ -446,7 +446,7 @@ into NSH. From Simon Piriou.
 - apps/system/dhcpc: Add a command to renew or establish a lease on an
 IPv4 address.
 - apps/system/ntpc: Add a command to start or stop the NTPC daemon.
-- apps/system/ramtest: Make stacksize and priority conigurable.
+- apps/system/ramtest: Make stacksize and priority configurable.
 
 * Platform-Specific Support (apps/platform)
 
@@ -493,7 +493,7 @@ sem_restorebaseprio needed to take the tcb from the holder prior to
 the holder being freed. In the failure case where sched_verifytcb
 fails it added the overhead of looking up the holder. There is also
 the additional thunking on the foreach to get from holer to
-holder->tcb. An alternate approach could be to leve the interface
+holder->tcb. An alternate approach could be to leave the interface
 the same and allocate a holder on the stack of sem_restoreholderprioB
 copy the sem's holder to it, free it as is done in this pr and
 then pass that address sem_restoreholderprio as the holder. It could
@@ -613,7 +613,7 @@ Jussi Kivilinna.
 will all other IOCTL methods.
 - net/socket: Fix cloning of local and raw sockets. From Jussi
 Kivilinna.
-- TCP: Wait for 3-Way Handshare before accept() returns. From Simon
+- TCP: Wait for 3-Way Handshake before accept() returns. From Simon
 Piriou.
 - TCP: Send RST if application 'unlistens()' before we complete the
 connection sequence.
@@ -768,7 +768,7 @@ error. From Freddie Chopin.
 similar STM32 I2C drivers. From David Sidrane.
 - STM32: OTG host implementations of stm32_in_transfer() must obey the
 polling interval for the case of isochronous and interrupt endpoints.
-- STM32: Fix erase sector number for microcontrolers with more than 11
+- STM32: Fix erase sector number for microcontrollers with more than 11
 sectors. Erase a sector from the second bank cause the bit 4 of SNB
 being set but never unused, so trying to erase a sector from the first
 bank was actually eraseing a sector from the second bank. From José
@@ -799,7 +799,7 @@ From Alexander Oryshchenko; verified by David Sidrane.
 inherited dma bug from the stm32. see
 https://bitbucket.org/nuttx/nuttx/commits/df9ae3c13fc2fff2c21ebdb098c520b11f43280d
 for details. And (2) Most all CR1-CR3 settings can not be configured
-while UE is true. Threfore we make all operation atomic and disable
+while UE is true. Therefore we make all operation atomic and disable
 UE and restore it's originalstate on exit. From David Sidrane.
 - STM32 L1: Fix IWDG and WWDG debug mode stop for STM32L15XX. From
 Juha Niskanen.

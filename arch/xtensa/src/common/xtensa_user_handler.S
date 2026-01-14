@@ -1,14 +1,10 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_user_handler.S
  *
- * Adapted from use in NuttX by:
- *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Derives from logic originally provided by Cadence Design Systems Inc.
- *
- *   Copyright (c) 2006-2015 Cadence Design Systems Inc.
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: 2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2006-2015 Cadence Design Systems Inc.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -193,6 +189,13 @@ _xtensa_user_handler:
 
 	mov		a2, RETVAL							/* a2 = address of new state save area */
 
+	/* Set PS.EXCM to 1 */
+
+	movi	a3, PS_EXCM_MASK
+	l32i	a4, a2, (4 * REG_PS)
+	or	a4, a3, a4
+	s32i	a4, a2, (4 * REG_PS)
+
 	/* Restore registers in preparation to return from interrupt */
 
 	call0	_xtensa_context_restore			/* (Preserves a2) */
@@ -235,6 +238,13 @@ _xtensa_syscall_handler:
 
 	call0	_xtensa_context_save
 
+	/* Overwrite the PS saved by the exception entry. */
+
+	movi	a2, ~PS_EXCM_MASK
+	l32i	a3, sp, (4 * REG_PS)
+	and	a3, a3, a2
+	s32i	a3, sp, (4 * REG_PS)
+
 	/* Save EPC (note that this will overwrite the PC saved by the exception
 	 * entry with the correct value skipping the syscall instruction.)
 	 */
@@ -265,8 +275,8 @@ _xtensa_syscall_handler:
 #else
 	/* Get the interruptee's PC and skip over the 'syscall' instruction. */
 
-	rsr		a1, EPC_1						/* a2 = PC of 'syscall' */
-	addi	a0, a1, 3						/* ++PC */
+	rsr		a2, EPC_1						/* a2 = PC of 'syscall' */
+	addi	a0, a2, 3						/* ++PC */
 
 	wsr		a0, EPC_1						/* Update PC */
 	s32i	a0, sp, (4 * REG_PC)
@@ -286,6 +296,13 @@ _xtensa_syscall_handler:
 
 	ps_setup	1 a0
 
+	/* Link the pre-exception frame for debugging. At this point, a12 points to the
+	 * allocated and filled exception stack frame (old value of SP in case of
+	 * an interrupt stack).
+	 */
+
+	exception_backtrace a12 1
+
 	movi	ARG1, XTENSA_IRQ_SYSCALL			/* Argument 1: IRQ number */
 	mov		ARG2, a12							/* Argument 2: Top of stack = register save area */
 	CALL	xtensa_irq_dispatch					/* Call xtensa_int_decode */
@@ -296,6 +313,13 @@ _xtensa_syscall_handler:
 	 */
 
 	mov		a2, RETVAL							/* Switch to the new register save area */
+
+	/* Set PS.EXCM to 1 */
+
+	movi	a3, PS_EXCM_MASK
+	l32i	a4, a2, (4 * REG_PS)
+	or	a4, a3, a4
+	s32i	a4, a2, (4 * REG_PS)
 
 	/* Restore registers in preparation to return from interrupt */
 

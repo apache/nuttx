@@ -1,6 +1,8 @@
 ############################################################################
 # drivers/video/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -30,6 +32,18 @@ ifeq ($(CONFIG_VIDEO_STREAM),y)
   CSRCS += v4l2_core.c video_framebuff.c v4l2_cap.c v4l2_m2m.c
 endif
 
+ifeq ($(CONFIG_VIDEO_FB_SPLASHSCREEN),y)
+  ifeq ($(CONFIG_VIDEO_FB_SPLASHSCREEN_NXLOGO),y)
+    ifeq ($(CONFIG_VIDEO_FB_SPLASHSCREEN_NXLOGO_320),y)
+      CSRCS += nxlogo320.c
+    else ifeq ($(CONFIG_VIDEO_FB_SPLASHSCREEN_NXLOGO_160),y)
+      CSRCS += nxlogo160.c
+    else
+      CSRCS += nxlogo80.c
+    endif
+  endif
+endif
+
 # These video drivers depend on I2C support
 
 ifeq ($(CONFIG_I2C),y)
@@ -50,6 +64,10 @@ endif
 
 ifeq ($(CONFIG_GOLDFISH_FB),y)
   CSRCS += goldfish_fb.c
+endif
+
+ifeq ($(CONFIG_GOLDFISH_GPU_FB),y)
+  CSRCS += goldfish_gpu_fb.c
 endif
 
 # These video drivers depend on SPI support

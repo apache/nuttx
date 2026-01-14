@@ -12,9 +12,17 @@
 #
 ---
 name: "Build Documentation"
+
 on:
-  pull_request:
   push:
+    branches:
+      - master
+    paths:
+      - 'Documentation/**'
+
+  pull_request:
+    paths:
+      - 'Documentation/**'
 
 concurrency:
   group: docs-${{ github.event.pull_request.number || github.ref }}
@@ -27,24 +35,17 @@ jobs:
   build-html:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
-          python-version: '3.8'
-      - name: Install LaTeX packages
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y \
-            texlive-latex-recommended texlive-fonts-recommended \
-            texlive-latex-base texlive-latex-extra latexmk texlive-luatex \
-            fonts-freefont-otf xindy
+          python-version: '3.10'
       - name: Generate Documentation
         run: |
           cd Documentation/
           pip3 install pipenv
           pipenv install
-          pipenv run make html latexpdf
-      - uses: actions/upload-artifact@v3
+          pipenv run make html
+      - uses: actions/upload-artifact@v6
         with:
           name: sphinx-docs
           path: |

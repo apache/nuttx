@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_solicit.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -127,8 +129,10 @@ void icmpv6_solicit(FAR struct net_driver_s *dev,
   /* Calculate the checksum over both the ICMP header and payload */
 
   sol->chksum   = 0;
-  sol->chksum   = ~icmpv6_chksum(dev, IPv6_HDRLEN);
 
+#ifdef CONFIG_NET_ICMPv6_CHECKSUMS
+  sol->chksum   = ~icmpv6_chksum(dev, IPv6_HDRLEN);
+#endif
   /* Set the size to the size of the IPv6 header and the payload size */
 
   dev->d_len    = IPv6_HDRLEN + l3size;

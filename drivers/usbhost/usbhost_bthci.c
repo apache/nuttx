@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_bthci.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -23,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/spinlock.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -126,8 +129,6 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass);
 
 static int usbhost_allocdevno(FAR struct usbhost_state_s *priv);
 static void usbhost_freedevno(FAR struct usbhost_state_s *priv);
-static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv,
-                                     FAR char *devname);
 
 /* Worker thread actions */
 
@@ -136,8 +137,8 @@ static void usbhost_destroy(FAR void *arg);
 /* Helpers for usbhci_connect() */
 
 static inline int usbhci_cfgdesc(FAR struct usbhost_state_s *priv,
-                                  FAR const uint8_t *configdesc,
-                                  int desclen);
+                                 FAR const uint8_t *configdesc,
+                                 int desclen);
 static inline int usbhost_devinit(FAR struct usbhost_state_s *priv);
 
 /* (Little Endian) Data helpers */
@@ -152,14 +153,14 @@ static inline void usbhost_tfree(FAR struct usbhost_state_s *priv);
 
 /* struct usbhost_registry_s methods */
 
-static struct usbhost_class_s *
+static FAR struct usbhost_class_s *
   usbhost_create(FAR struct usbhost_hubport_s *hport,
                  FAR const struct usbhost_id_s *id);
 
 /* struct usbhost_class_s methods */
 
 static int usbhci_connect(FAR struct usbhost_class_s *usbclass,
-                           FAR const uint8_t *configdesc, int desclen);
+                          FAR const uint8_t *configdesc, int desclen);
 static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
 
 /* Driver methods --
@@ -174,17 +175,17 @@ static void usbhost_event_callback(FAR void *arg, ssize_t nbytes);
 static void usbhost_acl_callback(FAR void *arg, ssize_t nbytes);
 
 static ssize_t usbhost_cmd_tx(FAR struct usbhost_state_s *priv,
-                      FAR const void *buffer, size_t buflen);
+                              FAR const void *buffer, size_t buflen);
 static ssize_t usbhost_acl_tx(FAR struct usbhost_state_s *priv,
-                      FAR const void *buffer, size_t buflen);
+                              FAR const void *buffer, size_t buflen);
 
 static int usbhost_bthci_send(FAR struct bt_driver_s *dev,
-                enum bt_buf_type_e type,
-                FAR void *data, size_t len);
+                              enum bt_buf_type_e type,
+                              FAR void *data, size_t len);
 static int usbhost_bthci_open(FAR struct bt_driver_s *dev);
 static void usbhost_bthci_close(FAR struct bt_driver_s *dev);
 static int usbhost_bthci_ioctl(FAR struct bt_driver_s *dev,
-                 int cmd, unsigned long arg);
+                               int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -218,6 +219,8 @@ static struct usbhost_registry_s g_bthci =
 /* This is a bitmap that is used to allocate device names /dev/bthcia-z. */
 
 static uint32_t g_devinuse;
+
+static spinlock_t g_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -294,7 +297,7 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
   irqstate_t flags;
   int devno;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
   for (devno = 0; devno < 26; devno++)
     {
       uint32_t bitno = 1 << devno;
@@ -302,12 +305,12 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
         {
           g_devinuse |= bitno;
           priv->devchar = 'a' + devno;
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(&g_lock, flags);
           return OK;
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
   return -EMFILE;
 }
 
@@ -319,17 +322,11 @@ static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
 
       if (devno >= 0 && devno < 26)
         {
-          irqstate_t flags = enter_critical_section();
+          irqstate_t flags = spin_lock_irqsave(&g_lock);
           g_devinuse &= ~(1 << devno);
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(&g_lock, flags);
         }
     }
-}
-
-static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv,
-                                     FAR char *devname)
-{
-  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->devchar);
 }
 
 /****************************************************************************
@@ -434,14 +431,14 @@ static void usbhost_destroy(FAR void *arg)
  ****************************************************************************/
 
 static inline int usbhci_cfgdesc(FAR struct usbhost_state_s *priv,
-                                  FAR const uint8_t *configdesc, int desclen)
+                                 FAR const uint8_t *configdesc, int desclen)
 {
   FAR struct usbhost_hubport_s *hport;
   FAR struct usb_cfgdesc_s *cfgdesc;
   FAR struct usb_desc_s *desc;
-  FAR struct usbhost_epdesc_s bindesc;
-  FAR struct usbhost_epdesc_s boutdesc;
-  FAR struct usbhost_epdesc_s iindesc;
+  struct usbhost_epdesc_s bindesc;
+  struct usbhost_epdesc_s boutdesc;
+  struct usbhost_epdesc_s iindesc;
   int remaining;
   uint8_t found = 0;
   int ret;
@@ -469,7 +466,7 @@ static inline int usbhci_cfgdesc(FAR struct usbhost_state_s *priv,
   configdesc += cfgdesc->len;
   remaining  -= cfgdesc->len;
 
-  /* Loop where there are more dscriptors to examine */
+  /* Loop where there are more descriptors to examine */
 
   while (remaining >= sizeof(struct usb_desc_s))
     {
@@ -689,20 +686,21 @@ static inline int usbhci_cfgdesc(FAR struct usbhost_state_s *priv,
 
 static int usbhost_ctrl_cmd(FAR struct usbhost_state_s *priv,
                             uint8_t type, uint8_t req, uint16_t value,
-                            uint16_t indx, uint8_t *payload, uint16_t len)
+                            uint16_t index, FAR uint8_t *payload,
+                            uint16_t len)
 {
   FAR struct usbhost_hubport_s *hport;
-  struct usb_ctrlreq_s *ctrlreq;
+  FAR struct usb_ctrlreq_s *ctrlreq;
   int ret;
 
   hport = priv->usbclass.hport;
 
-  ctrlreq       = (struct usb_ctrlreq_s *)priv->ctrlreq;
+  ctrlreq       = (FAR struct usb_ctrlreq_s *)priv->ctrlreq;
   ctrlreq->type = type;
   ctrlreq->req  = req;
 
   usbhost_putle16(ctrlreq->value, value);
-  usbhost_putle16(ctrlreq->index, indx);
+  usbhost_putle16(ctrlreq->index, index);
   usbhost_putle16(ctrlreq->len,   len);
 
   if (type & USB_REQ_DIR_IN)
@@ -817,7 +815,7 @@ static void usbhost_event_work(FAR void *arg)
  ****************************************************************************/
 
 static ssize_t usbhost_cmd_tx(FAR struct usbhost_state_s *priv,
-                             FAR const void *buffer, size_t buflen)
+                              FAR const void *buffer, size_t buflen)
 {
   int ret;
 
@@ -826,7 +824,7 @@ static ssize_t usbhost_cmd_tx(FAR struct usbhost_state_s *priv,
   ret = usbhost_ctrl_cmd(priv,
                          USB_REQ_DIR_OUT | USB_REQ_TYPE_CLASS |
                          USB_REQ_RECIPIENT_DEVICE,
-                         0, 0, 0, (uint8_t *)buffer, buflen);
+                         0, 0, 0, (FAR uint8_t *)buffer, buflen);
 
   nxmutex_unlock(&priv->lock);
 
@@ -931,7 +929,7 @@ static void usbhost_acl_callback(FAR void *arg, ssize_t nbytes)
  ****************************************************************************/
 
 static ssize_t usbhost_acl_tx(FAR struct usbhost_state_s *priv,
-                             FAR const void *buffer, size_t buflen)
+                              FAR const void *buffer, size_t buflen)
 {
   ssize_t nwritten = 0;
   FAR struct usbhost_hubport_s *hport;
@@ -941,7 +939,7 @@ static ssize_t usbhost_acl_tx(FAR struct usbhost_state_s *priv,
   nxmutex_lock(&priv->lock);
 
   nwritten = DRVR_TRANSFER(hport->drvr, priv->bulkout,
-                               (uint8_t *)buffer, buflen);
+                               (FAR uint8_t *)buffer, buflen);
 
   if (nwritten < 0)
     {
@@ -976,8 +974,8 @@ static ssize_t usbhost_acl_tx(FAR struct usbhost_state_s *priv,
  ****************************************************************************/
 
 static int usbhost_bthci_send(FAR struct bt_driver_s *dev,
-                enum bt_buf_type_e type,
-                FAR void *data, size_t len)
+                              enum bt_buf_type_e type,
+                              FAR void *data, size_t len)
 {
   int ret;
   FAR struct usbhost_state_s *priv;
@@ -1056,7 +1054,7 @@ static void usbhost_bthci_close(FAR struct bt_driver_s *dev)
  ****************************************************************************/
 
 static int usbhost_bthci_ioctl(FAR struct bt_driver_s *dev,
-                 int cmd, unsigned long arg)
+                               int cmd, unsigned long arg)
 {
   return -ENOTTY;
 }
@@ -1135,7 +1133,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
  *
  ****************************************************************************/
 
-static inline uint16_t usbhost_getle16(const uint8_t *val)
+static inline uint16_t usbhost_getle16(FAR const uint8_t *val)
 {
   return (uint16_t)val[1] << 8 | (uint16_t)val[0];
 }
@@ -1155,7 +1153,7 @@ static inline uint16_t usbhost_getle16(const uint8_t *val)
  *
  ****************************************************************************/
 
-static void usbhost_putle16(uint8_t *dest, uint16_t val)
+static void usbhost_putle16(FAR uint8_t *dest, uint16_t val)
 {
   /* Little endian means LSB first in byte stream */
 
@@ -1383,7 +1381,7 @@ usbhost_create(FAR struct usbhost_hubport_s *hport,
  ****************************************************************************/
 
 static int usbhci_connect(FAR struct usbhost_class_s *usbclass,
-                           FAR const uint8_t *configdesc, int desclen)
+                          FAR const uint8_t *configdesc, int desclen)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)usbclass;
   int ret;
@@ -1442,18 +1440,15 @@ static int usbhci_connect(FAR struct usbhost_class_s *usbclass,
  *
  ****************************************************************************/
 
-static int usbhost_disconnected(struct usbhost_class_s *usbclass)
+static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)usbclass;
-  irqstate_t flags;
 
   DEBUGASSERT(priv != NULL);
 
   /* Set an indication to any users of the device that the device is no
    * longer available.
    */
-
-  flags              = enter_critical_section();
 
   priv->disconnected = true;
 
@@ -1486,7 +1481,6 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
       usbhost_destroy(priv);
     }
 
-  leave_critical_section(flags);
   return OK;
 }
 

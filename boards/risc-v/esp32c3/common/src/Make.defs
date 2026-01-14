@@ -1,6 +1,8 @@
 #############################################################################
 # boards/risc-v/esp32c3/common/src/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -20,6 +22,10 @@
 
 ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
 
+ifeq ($(CONFIG_ESPRESSIF_ADC),y)
+  CSRCS += esp_board_adc.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_LEDC),y)
   CSRCS += esp_board_ledc.c
 endif
@@ -32,16 +38,20 @@ ifeq ($(CONFIG_ESPRESSIF_SPI),y)
   CSRCS += esp_board_spi.c
 endif
 
-ifeq ($(CONFIG_SPI_DRIVER),y)
+ifeq ($(CONFIG_SPI),y)
   CSRCS += esp_board_spidev.c
 endif
 
-ifeq ($(CONFIG_SPI_SLAVE_DRIVER),y)
+ifeq ($(CONFIG_SPI_SLAVE),y)
   CSRCS += esp_board_spislavedev.c
 endif
 
-ifeq ($(CONFIG_I2C_DRIVER),y)
+ifeq ($(CONFIG_I2C),y)
   CSRCS += esp_board_i2c.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_I2S),y)
+  CSRCS += esp_board_i2s.c
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_SPIFLASH),y)
@@ -58,6 +68,18 @@ endif
 
 ifeq ($(CONFIG_SENSORS_BMP180),y)
   CSRCS += esp_board_bmp180.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BMP280),y)
+  CSRCS += esp_board_bmp280.c
+endif
+
+ifeq ($(CONFIG_MMCSD_SPI),y)
+  CSRCS += esp_board_mmcsd.c
+endif
+
+ifeq ($(CONFIG_ETC_ROMFS),y)
+  RCSRCS  = etc/init.d/rc.sysinit etc/init.d/rcS
 endif
 
 DEPPATH += --dep-path src

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_hprtc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -54,6 +56,7 @@
 /* Callback to use when the alarm expires */
 
 #if defined(CONFIG_RTC_ALARM) && defined(CONFIG_RTC_DRIVER)
+static spinlock_t g_imxrt_hprtc_lock = SP_UNLOCKED;
 static hprtc_alarm_callback_t g_hprtc_alarmcb;
 #endif
 
@@ -524,7 +527,7 @@ int imxrt_hprtc_setalarm(struct timespec *ts, hprtc_alarm_callback_t cb)
    * interrupted or preempted.
    */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_imxrt_hprtc_lock);
 
   now = imxrt_hprtc_time();
 
@@ -537,7 +540,7 @@ int imxrt_hprtc_setalarm(struct timespec *ts, hprtc_alarm_callback_t cb)
   if ((uint32_t)ts->tv_sec <= now)
     {
       rtcwarn("WARNING: time is in the past\n");
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_imxrt_hprtc_lock, flags);
       return -EINVAL;
     }
 
@@ -567,7 +570,7 @@ int imxrt_hprtc_setalarm(struct timespec *ts, hprtc_alarm_callback_t cb)
   /* Unconditionally enable the RTC alarm interrupt */
 
   imxrt_hprtc_alarmenable();
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_imxrt_hprtc_lock, flags);
   return OK;
 }
 #endif

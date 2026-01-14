@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/umm_heap/umm_memdump.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,7 +33,7 @@
  * Public data
  ****************************************************************************/
 
-#if CONFIG_MM_BACKTRACE >= 0
+#ifdef CONFIG_MM_BACKTRACE_SEQNO
 unsigned long g_mm_seqno;
 #endif
 

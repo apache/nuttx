@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/pipes/fifo.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,7 +51,9 @@ static const struct file_operations g_fifo_fops =
   pipecommon_ioctl,    /* ioctl */
   NULL,                /* mmap */
   NULL,                /* truncate */
-  pipecommon_poll      /* poll */
+  pipecommon_poll,     /* poll */
+  NULL,                /* readv */
+  NULL                 /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , pipecommon_unlink  /* unlink */
 #endif
@@ -63,7 +67,7 @@ static const struct file_operations g_fifo_fops =
  * Name: nx_mkfifo
  *
  * Description:
- *   nx_mkfifo() makes a FIFO device driver file with name 'pathname.' Unlike
+ *   nx_mkfifo() makes a FIFO device driver file with name 'pathname'. Unlike
  *   Linux, a NuttX FIFO is not a special file type but simply a device
  *   driver instance.  'mode' specifies the FIFO's permissions.
  *
@@ -72,7 +76,7 @@ static const struct file_operations g_fifo_fops =
  *   must have been opened from both reading and writing before input or
  *   output can be performed.  This FIFO implementation will block all
  *   attempts to open a FIFO read-only until at least one thread has opened
- *   the FIFO for  writing.
+ *   the FIFO for writing.
  *
  *   If all threads that write to the FIFO have closed, subsequent calls to
  *   read() on the FIFO will return 0 (end-of-file).

@@ -88,4 +88,33 @@ config FUSB303_NPOLLWAITERS
 
 endif
 
+config STUSB4500
+	bool "ST standalone USB PD sink controller"
+	default n
+	select I2C
+	---help---
+		Enable device driver for ST standalone USB PD (power delivery) sink
+		controller that addresses sink up to 100 W (20 V; 5 A).
+
+if STUSB4500
+
+config STUSB4500_I2C_FREQUENCY
+	int "STUSB4500 I2C frequency"
+	default 400000
+	range 1 400000
+
+config DEBUG_STUSB4500
+	bool "Enable debug support for the STUSB4500"
+	default n
+	---help---
+		Enables debug support for the STUSB4500
+
+config STUSB4500_NPOLLWAITERS
+	int "Number of waiters to poll"
+	default 2
+	---help---
+		Maximum number of threads that can be waiting on poll()
+
+endif
+
 endif # USBMISC

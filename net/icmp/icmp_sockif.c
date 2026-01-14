@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/icmp/icmp_sockif.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,6 +41,7 @@
 
 #include "icmp/icmp.h"
 #include "inet/inet.h"
+#include "utils/utils.h"
 
 #ifdef CONFIG_NET_ICMP_SOCKET
 
@@ -113,10 +116,10 @@ const struct sock_intf_s g_icmp_sockif =
 
 static int icmp_setup(FAR struct socket *psock)
 {
-  /* SOCK_DGRAM or SOCK_CTRL and IPPROTO_ICMP are supported */
+  /* SOCK_DGRAM and IPPROTO_ICMP are supported */
 
-  if ((psock->s_type == SOCK_DGRAM || psock->s_type == SOCK_CTRL ||
-      psock->s_type == SOCK_RAW) && psock->s_proto == IPPROTO_ICMP)
+  if ((psock->s_type == SOCK_DGRAM || psock->s_type == SOCK_RAW) &&
+       psock->s_proto == IPPROTO_ICMP)
     {
       /* Allocate the IPPROTO_ICMP socket connection structure and save in
        * the new socket instance.
@@ -142,6 +145,8 @@ static int icmp_setup(FAR struct socket *psock)
           conn->filter = UINT32_MAX;
         }
 
+      nxrmutex_init(&conn->sconn.s_lock);
+
       /* Save the pre-allocated connection in the socket structure */
 
       psock->s_conn = conn;
@@ -164,7 +169,7 @@ static int icmp_setup(FAR struct socket *psock)
  *           queried.
  *
  * Returned Value:
- *   The set of socket cababilities is returned.
+ *   The set of socket capabilities is returned.
  *
  ****************************************************************************/
 
@@ -264,10 +269,6 @@ static int icmp_close(FAR struct socket *psock)
 
   if (conn->crefs <= 1)
     {
-      /* Yes... free any read-ahead data */
-
-      iob_free_queue(&conn->readahead);
-
       /* Then free the connection structure */
 
       conn->crefs = 0;           /* No more references on the connection */
@@ -317,10 +318,9 @@ static int icmp_getsockopt_internal(FAR struct socket *psock, int option,
 
   if (psock->s_type != SOCK_RAW)
     {
-      return ENOPROTOOPT;
+      return -ENOPROTOOPT;
     }
 
-  net_lock();
   switch (option)
     {
       case ICMP_FILTER:
@@ -332,7 +332,9 @@ static int icmp_getsockopt_internal(FAR struct socket *psock, int option,
               *value_len = sizeof(uint32_t);
             }
 
+          conn_lock(&conn->sconn);
           memcpy(value, &conn->filter, *value_len);
+          conn_unlock(&conn->sconn);
           ret = OK;
         }
         break;
@@ -343,7 +345,6 @@ static int icmp_getsockopt_internal(FAR struct socket *psock, int option,
         break;
     }
 
-  net_unlock();
   return ret;
 }
 
@@ -379,10 +380,19 @@ static int icmp_getsockopt(FAR struct socket *psock, int level, int option,
 {
   switch (level)
   {
-    case IPPROTO_IP:
+    case SOL_SOCKET:
+
+      /* Socket-level options are handled by psock_getsockopt()/inet layer.
+       * Return -ENOPROTOOPT so upper layer will fallback to socket-level
+       * handler without emitting misleading ICMP error logs.
+       */
+
+      return -ENOPROTOOPT;
+
+    case SOL_IP:
       return ipv4_getsockopt(psock, option, value, value_len);
 
-    case IPPROTO_ICMP:
+    case SOL_RAW:
       return icmp_getsockopt_internal(psock, option, value, value_len);
 
     default:
@@ -425,10 +435,9 @@ static int icmp_setsockopt_internal(FAR struct socket *psock, int option,
 
   if (psock->s_type != SOCK_RAW)
     {
-      return ENOPROTOOPT;
+      return -ENOPROTOOPT;
     }
 
-  net_lock();
   switch (option)
     {
       case ICMP_FILTER:
@@ -440,7 +449,9 @@ static int icmp_setsockopt_internal(FAR struct socket *psock, int option,
               value_len = sizeof(uint32_t);
             }
 
+          conn_lock(&conn->sconn);
           memcpy(&conn->filter, value, value_len);
+          conn_unlock(&conn->sconn);
           ret = OK;
         }
         break;
@@ -451,7 +462,6 @@ static int icmp_setsockopt_internal(FAR struct socket *psock, int option,
         break;
     }
 
-  net_unlock();
   return ret;
 }
 
@@ -482,10 +492,19 @@ static int icmp_setsockopt(FAR struct socket *psock, int level, int option,
 {
   switch (level)
   {
-    case IPPROTO_IP:
+    case SOL_SOCKET:
+
+      /* Socket-level options are handled by psock_setsockopt()/inet layer.
+       * Return -ENOPROTOOPT so upper layer will fallback to socket-level
+       * handler without emitting misleading ICMP error logs.
+       */
+
+      return -ENOPROTOOPT;
+
+    case SOL_IP:
       return ipv4_setsockopt(psock, option, value, value_len);
 
-    case IPPROTO_ICMP:
+    case SOL_RAW:
       return icmp_setsockopt_internal(psock, option, value, value_len);
 
     default:

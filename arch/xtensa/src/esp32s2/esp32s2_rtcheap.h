@@ -55,7 +55,7 @@ void esp32s2_rtcheap_initialize(void);
  *   size - Size (in bytes) of the memory region to be allocated.
  *
  * Return Value:
- *   Adress of the allocated memory space. NULL, if allocation fails.
+ *   Address of the allocated memory space. NULL, if allocation fails.
  *
  ****************************************************************************/
 
@@ -73,7 +73,7 @@ void *esp32s2_rtcheap_malloc(size_t size);
  *   elem_size - Size (in bytes) of the type to be allocated.
  *
  * Return Value:
- *   Adress of the allocated memory space. NULL, if allocation fails.
+ *   Address of the allocated memory space. NULL, if allocation fails.
  *
  ****************************************************************************/
 
@@ -86,11 +86,11 @@ void *esp32s2_rtcheap_calloc(size_t n, size_t elem_size);
  *   Reallocate memory from the RTC heap.
  *
  * Parameters:
- *   ptr  - Adress to be reallocate.
+ *   ptr  - Address to be reallocate.
  *   size - Size (in bytes) to be reallocate.
  *
  * Return Value:
- *   Adress of the possibly moved memory space. NULL, if allocation fails.
+ *   Address of the possibly moved memory space. NULL, if allocation fails.
  *
  ****************************************************************************/
 
@@ -106,7 +106,7 @@ void *esp32s2_rtcheap_realloc(void *ptr, size_t size);
  *   size - Size (in bytes) of the memory region to be allocated.
  *
  * Return Value:
- *   Adress of the allocated memory space. NULL, if allocation fails.
+ *   Address of the allocated memory space. NULL, if allocation fails.
  *
  ****************************************************************************/
 
@@ -119,7 +119,7 @@ void *esp32s2_rtcheap_zalloc(size_t size);
  *   Free memory from the RTC heap.
  *
  * Parameters:
- *   mem - Adress to be freed.
+ *   mem - Address to be freed.
  *
  ****************************************************************************/
 
@@ -141,7 +141,7 @@ void esp32s2_rtcheap_free(void *mem);
  *   size      - Size (in bytes) of the memory region to be allocated.
  *
  * Return Value:
- *   Adress of the allocated adress. NULL, if allocation fails.
+ *   Address of the allocated address. NULL, if allocation fails.
  *
  ****************************************************************************/
 

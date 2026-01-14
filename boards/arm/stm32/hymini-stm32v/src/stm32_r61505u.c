@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/hymini-stm32v/src/stm32_r61505u.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -179,7 +181,7 @@ static const uint16_t fsmc_gpios[] =
   GPIO_NPS_D8, GPIO_NPS_D9, GPIO_NPS_D10, GPIO_NPS_D11,
   GPIO_NPS_D12, GPIO_NPS_D13, GPIO_NPS_D14, GPIO_NPS_D15,
 
-  /* NOE, NWE  */
+  /* NOE, NWE */
 
   GPIO_NPS_NOE, GPIO_NPS_NWE,
 

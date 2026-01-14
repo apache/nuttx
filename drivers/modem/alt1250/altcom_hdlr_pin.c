@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/modem/alt1250/altcom_hdlr_pin.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -59,27 +61,7 @@ int32_t altcom_getpinset_pkt_compose(FAR void **arg, size_t arglen,
                                      const size_t pktsz,
                                      FAR uint16_t *altcid)
 {
-  int32_t size = 0;
-
-#ifndef CONFIG_MODEM_ALT1250_DISABLE_PV1
-  if (altver == ALTCOM_VER1)
-    {
-      *altcid = APICMDID_GET_PINSET;
-    }
-  else
-#endif
-#ifndef CONFIG_MODEM_ALT1250_DISABLE_PV4
-  if (altver == ALTCOM_VER4)
-    {
-      *altcid = APICMDID_GET_PINSET_V4;
-    }
-  else
-#endif
-    {
-      size = -ENOSYS;
-    }
-
-  return size;
+  return -ENOTSUP;
 }
 
 int32_t altcom_setpinlock_pkt_compose(FAR void **arg, size_t arglen,
@@ -87,37 +69,7 @@ int32_t altcom_setpinlock_pkt_compose(FAR void **arg, size_t arglen,
                                       const size_t pktsz,
                                       FAR uint16_t *altcid)
 {
-  int32_t size = 0;
-  FAR bool *enable = (FAR bool *)arg[0];
-  FAR char *pincode = (FAR char *)arg[1];
-
-  FAR struct apicmd_cmddat_setpinlock_s *out =
-    (FAR struct apicmd_cmddat_setpinlock_s *)pktbuf;
-
-  out->mode = *enable;
-  strncpy((FAR char *)out->pincode, pincode, sizeof(out->pincode));
-
-  size = sizeof(struct apicmd_cmddat_setpinlock_s);
-
-#ifndef CONFIG_MODEM_ALT1250_DISABLE_PV1
-  if (altver == ALTCOM_VER1)
-    {
-      *altcid = APICMDID_SET_PIN_LOCK;
-    }
-  else
-#endif
-#ifndef CONFIG_MODEM_ALT1250_DISABLE_PV4
-  if (altver == ALTCOM_VER4)
-    {
-      *altcid = APICMDID_SET_PIN_LOCK_V4;
-    }
-  else
-#endif
-    {
-      size = -ENOSYS;
-    }
-
-  return size;
+  return -ENOTSUP;
 }
 
 int32_t altcom_setpincode_pkt_compose(FAR void **arg, size_t arglen,
@@ -125,94 +77,14 @@ int32_t altcom_setpincode_pkt_compose(FAR void **arg, size_t arglen,
                                       const size_t pktsz,
                                       FAR uint16_t *altcid)
 {
-  int32_t size = 0;
-  FAR int8_t *target_pin = (FAR int8_t *)arg[0];
-  FAR char *pincode = (FAR char *)arg[1];
-  FAR char *new_pincode = (FAR char *)arg[2];
-
-  FAR struct apicmd_cmddat_setpincode_s *out =
-    (FAR struct apicmd_cmddat_setpincode_s *)pktbuf;
-
-  if (LTE_TARGET_PIN == *target_pin)
-    {
-      out->chgtype = APICMD_SETPINCODE_CHGTYPE_PIN;
-    }
-  else
-    {
-      out->chgtype = APICMD_SETPINCODE_CHGTYPE_PIN2;
-    }
-
-  strncpy((FAR char *)out->pincode, pincode, sizeof(out->pincode));
-
-  strncpy((FAR char *)out->newpincode, new_pincode, sizeof(out->newpincode));
-
-  size = sizeof(struct apicmd_cmddat_setpincode_s);
-
-#ifndef CONFIG_MODEM_ALT1250_DISABLE_PV1
-  if (altver == ALTCOM_VER1)
-    {
-      *altcid = APICMDID_SET_PIN_CODE;
-    }
-  else
-#endif
-#ifndef CONFIG_MODEM_ALT1250_DISABLE_PV4
-  if (altver == ALTCOM_VER4)
-    {
-      *altcid = APICMDID_SET_PIN_CODE_V4;
-    }
-  else
-#endif
-    {
-      size = -ENOSYS;
-    }
-
-  return size;
+  return -ENOTSUP;
 }
 
 int32_t altcom_enterpin_pkt_compose(FAR void **arg, size_t arglen,
                                     uint8_t altver, FAR uint8_t *pktbuf,
                                     const size_t pktsz, FAR uint16_t *altcid)
 {
-  int32_t size = 0;
-  FAR char *pincode = (FAR char *)arg[0];
-  FAR char *new_pincode = (FAR char *)arg[1];
-
-  FAR struct apicmd_cmddat_enterpin_s *out =
-    (FAR struct apicmd_cmddat_enterpin_s *)pktbuf;
-
-  strncpy((FAR char *)out->pincode, pincode, sizeof(out->pincode));
-  if (new_pincode)
-    {
-      out->newpincodeuse = APICMD_ENTERPIN_NEWPINCODE_USE;
-      strncpy((FAR char *)out->newpincode,
-              new_pincode, sizeof(out->newpincode));
-    }
-  else
-    {
-      out->newpincodeuse = APICMD_ENTERPIN_NEWPINCODE_UNUSE;
-    }
-
-  size = sizeof(struct apicmd_cmddat_enterpin_s);
-
-#ifndef CONFIG_MODEM_ALT1250_DISABLE_PV1
-  if (altver == ALTCOM_VER1)
-    {
-      *altcid = APICMDID_ENTER_PIN;
-    }
-  else
-#endif
-#ifndef CONFIG_MODEM_ALT1250_DISABLE_PV4
-  if (altver == ALTCOM_VER4)
-    {
-      *altcid = APICMDID_ENTER_PIN_V4;
-    }
-  else
-#endif
-    {
-      size = -ENOSYS;
-    }
-
-  return size;
+  return -ENOTSUP;
 }
 
 int32_t altcom_getpinset_pkt_parse(FAR struct alt1250_dev_s *dev,

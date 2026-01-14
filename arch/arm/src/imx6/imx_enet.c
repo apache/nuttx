@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/imx6/imx_enet.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -2041,7 +2043,7 @@ static inline int imx_initphy(struct imx_driver_s *priv, bool renogphy)
       retries = 0;
       do
         {
-          nxsig_usleep(LINK_WAITUS);
+          nxsched_usleep(LINK_WAITUS);
 
           ninfo("%s: Read PHYID1, retries=%d\n",
                 BOARD_PHY_NAME, retries + 1);
@@ -2214,7 +2216,7 @@ static inline int imx_initphy(struct imx_driver_s *priv, bool renogphy)
               break;
             }
 
-          nxsig_usleep(LINK_WAITUS);
+          nxsched_usleep(LINK_WAITUS);
         }
 
       if (phydata & MII_MSR_ANEGCOMPLETE)
@@ -2508,7 +2510,7 @@ int imx_netinitialize(int intf)
 
   memset(priv, 0, sizeof(struct imx_driver_s));
 
-  priv->base = IMX_ENET_VBASE;        /* Assigne base address */
+  priv->base = IMX_ENET_VBASE;        /* Assign base address */
 
   priv->dev.d_ifup    = imx_ifup;     /* I/F up (new IP address) callback */
   priv->dev.d_ifdown  = imx_ifdown;   /* I/F down callback */

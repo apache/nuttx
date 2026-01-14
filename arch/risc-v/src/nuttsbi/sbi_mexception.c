@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/nuttsbi/sbi_mexception.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
 #include <stdint.h>
 
 /****************************************************************************
@@ -32,7 +35,10 @@
 
 void sbi_mexception(uintreg_t mcause, uintreg_t *mepc, uintreg_t tval)
 {
-  UNUSED(mcause);
-  UNUSED(mepc);
-  UNUSED(tval);
+  sinfo("cauz=%"PRIxREG" epc=%p tval=0x%"PRIxREG"\n", mcause, mepc, tval);
+
+  while (1)
+    {
+      __asm__ __volatile__("wfi");
+    }
 }

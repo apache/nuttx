@@ -21,6 +21,14 @@ endchoice # "Intel64 Chip Selection"
 config ARCH_INTEL64_HAVE_TSC
 	bool
 
+config ARCH_INTEL64_HAS_TSC_ADJUST
+	bool "MSR_IA32_TSC_ADJUST support"
+	depends on ARCH_INTEL64_HAVE_TSC
+	default y
+	---help---
+	MSR_IA32_TSC_ADJUST is used to adjust the offset of the Time Stamp Counter (TSC).
+
+
 config ARCH_INTEL64_CACHE_LINESIZE
 	int "Cache line size (hardcoded)"
 	depends on ARCH_DCACHE || ARCH_ICACHE
@@ -59,6 +67,10 @@ choice
 config ARCH_INTEL64_TSC_DEADLINE
 	bool "TSC DEADLINE timer support"
 	select ARCH_INTEL64_HAVE_TSC
+	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
+	select ALARM_ARCH
 	---help---
 		Select to enable the use of TSC DEADLINE timer of x86_64
 
@@ -67,6 +79,14 @@ config ARCH_INTEL64_TSC
 	select ARCH_INTEL64_HAVE_TSC
 	---help---
 		Select to enable the use of TSC APIC timer of x86_64
+
+config ARCH_INTEL64_HPET_ALARM
+	bool "HPET timer alarm support"
+	select ALARM_ARCH
+	---help---
+		With this option you can enable ALARM_ARCH features that works on top of
+		the HPET timer instance. This is an alternative method to TSC timer to
+		provide the system clock.
 
 endchoice # System Timer Source
 
@@ -80,6 +100,13 @@ config ARCH_INTEL64_CORE_FREQ_KHZ
 		to set the TSC deadline timer frequency. If set to 0 we try to get
 		frequency from CPUID.
 
+config ARCH_INTEL64_TSC_FREQ_VMWARE
+	bool "Use CPUID 0x40000010 to get CPU Core frequency"
+	default n
+	depends on ARCH_INTEL64_CORE_FREQ_KHZ = 0
+	---help---
+		Use CPUID 0x40000010 defined by VMware to get CPU Core frequency
+		in virtualized environments.
 endif
 
 if ARCH_INTEL64_TSC
@@ -108,12 +135,29 @@ config INTEL64_HPET_BASE
 		Configure base address for HPET. In the future, we can get this address from
 		the ACPI table if ACPI support is enabled.
 
+config INTEL64_HPET_32BIT
+	bool "HPET is 32bit"
+	default n
+	---help---
+		Configure HPET in 32-bit mode.
+
+config INTEL64_HPET_FSB
+	bool "HPET use FSB for interrupt"
+	default n
+	---help---
+		Use FSB for interrupt (works like MSI interrupts).
+
+config ARCH_INTEL64_HPET_ALARM_CHAN
+	int "HPET timer alarm channel"
+	depends on ARCH_INTEL64_HPET_ALARM
+	default 0
+
 config INTEL64_HPET_CHANNELS
 	int "HPET timer supported channels"
 	default 2
 	range 1 3
 	---help---
-		Configure the number of supported HPET channles (called HPET timers
+		Configure the number of supported HPET channels (called HPET timers
 		in HPET spec). We use HPET legacy replacement for interrupts which
 		means that Timer 0 and Timer 1 interrupts are hardcoded, but Timer 2
 		needs additional attention to configure interrupt routing.
@@ -123,7 +167,7 @@ config INTEL64_HPET_MIN_DELAY
 	int "HPET minimum supported delay in micro-seconds"
 	default 1000
 	---help---
-		HPET use free runnin up-counter and a comparators which generate events
+		HPET use free running up-counter and a comparators which generate events
 		only on a equal event. This can results in event miss if we set too small
 		delay. In that case we must set a minimum value for delay that always work.
 		For the QEMU target this value should be as high as 1000, but for real
@@ -132,7 +176,7 @@ config INTEL64_HPET_MIN_DELAY
 endif # INTEL64_HPET
 
 config INTEL64_ONESHOT
-	bool "Oneshot timer support"
+	bool "Oneshot HPET timer support"
 	select INTEL64_HPET
 	default n
 	---help---
@@ -169,5 +213,18 @@ config ARCH_INTEL64_DISABLE_INT_INIT
 		Select to disable all initialization related to interrupt
 		controllers. This is necessary if those are already
 		initialized, i.e. Jailhouse system.
+
+config ARCH_INTEL64_DISABLE_CET
+	bool "Disable CET completely"
+	---help---
+		Intel CET (Control-flow Enforcement Technology) is a hardware
+		enhancement aimed at mitigating the Retpoline vulnerability.
+		It inserts the endbr64 instruction at the beginning of functions,
+		which may impact CPU branch prediction performance.
+
+config ARCH_INTEL64_DISABLE_VECTORIZE
+	bool "Disable vectorize completely"
+	---help---
+		Disable the compiler from vectorizing code optimization during compilation
 
 endif

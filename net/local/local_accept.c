@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/local/local_accept.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -54,7 +56,9 @@ static int local_waitlisten(FAR struct local_conn_s *server)
     {
       /* No.. wait for a connection or a signal */
 
-      ret = net_sem_wait(&server->lc_waitsem);
+      local_unlock();
+      ret = nxsem_wait(&server->lc_waitsem);
+      local_lock();
       if (ret < 0)
         {
           return ret;
@@ -123,9 +127,10 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   /* Loop as necessary if we have to wait for a connection */
 
+  local_lock();
   for (; ; )
     {
-      /* Are there pending connections.  Remove the accpet from the
+      /* Are there pending connections.  Remove the accept from the
        * head of the waiting list.
        */
 
@@ -135,12 +140,12 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
           conn = container_of(waiter, struct local_conn_s,
                               u.accept.lc_waiter);
 
-          /* Decrement the number of pending accpets */
+          /* Decrement the number of pending accepts */
 
           DEBUGASSERT(server->u.server.lc_pending > 0);
           server->u.server.lc_pending--;
 
-          /* Setup the accpet socket structure */
+          /* Setup the accept socket structure */
 
           newsock->s_domain = psock->s_domain;
           newsock->s_type   = SOCK_STREAM;
@@ -149,9 +154,9 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
           /* Return the address family */
 
-          if (addr != NULL)
+          if (addr != NULL && conn->lc_peer != NULL)
             {
-              ret = local_getaddr(conn, addr, addrlen);
+              ret = local_getaddr(conn->lc_peer, addr, addrlen);
             }
 
           if (ret == OK && nonblock)
@@ -159,6 +164,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
               ret = local_set_nonblocking(conn);
             }
 
+          local_unlock();
           return ret;
         }
 
@@ -172,6 +178,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
         {
           /* Yes.. return EAGAIN */
 
+          local_unlock();
           return -EAGAIN;
         }
 
@@ -180,6 +187,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       ret = local_waitlisten(server);
       if (ret < 0)
         {
+          local_unlock();
           return ret;
         }
     }

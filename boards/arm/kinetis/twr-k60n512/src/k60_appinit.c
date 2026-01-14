@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/kinetis/twr-k60n512/src/k60_appinit.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -100,7 +102,7 @@
  ****************************************************************************/
 
 /* This structure encapsulates the global variable used in this file and
- * reduces the probability of name collistions.
+ * reduces the probability of name collisions.
  */
 
 #ifdef NSH_HAVEMMCSD

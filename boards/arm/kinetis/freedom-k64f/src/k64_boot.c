@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/kinetis/freedom-k64f/src/k64_boot.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,7 +51,7 @@
 
 void kinetis_boardinitialize(void)
 {
-#if defined(CONFIG_KINETIS_SPI1) || defined(CONFIG_KINETIS_SPI2)
+#if defined(CONFIG_KINETIS_SPI0) || defined(CONFIG_KINETIS_SPI1) || defined(CONFIG_KINETIS_SPI2)
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2)
    * the weak function k64_spidev_initialize() has been brought into the
    * link.

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/fork.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -90,6 +92,12 @@
 .type up_fork, function
 
 up_fork:
+
+#ifdef CONFIG_LIB_SYSCALL
+  /* When coming via system call, everything is in place already */
+
+  tail        riscv_fork
+#else
   /* Create a stack frame */
 
   addi        sp, sp, -FORK_SIZEOF
@@ -115,6 +123,10 @@ up_fork:
   REGSTORE    fp, FORK_FP_OFFSET(sp)
 #else
   REGSTORE    s0, FORK_S0_OFFSET(sp)
+#endif
+
+#ifdef RISCV_SAVE_GP
+  REGSTORE    gp, FORK_GP_OFFSET(sp)
 #endif
 
   addi        a0, sp, FORK_SIZEOF
@@ -148,6 +160,7 @@ up_fork:
   REGLOAD     x1, FORK_RA_OFFSET(sp)
   addi        sp, sp, FORK_SIZEOF
   ret
+#endif
 
   .size  up_fork, .-up_fork
   .end

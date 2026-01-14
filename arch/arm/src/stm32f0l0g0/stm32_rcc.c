@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/stm32_rcc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -71,6 +73,8 @@
 #  include "stm32l0_rcc.c"
 #elif defined(CONFIG_ARCH_CHIP_STM32G0)
 #  include "stm32g0_rcc.c"
+#elif defined(CONFIG_ARCH_CHIP_STM32C0)
+#  include "stm32c0_rcc.c"
 #else
 #  error "Unsupported STM32F0/L0 RCC"
 #endif

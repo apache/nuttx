@@ -125,7 +125,7 @@ Almost everything said here applies to mouse/touchscreen input as well. If we
 were to replace the names keyboard to mouse, kbdin to mousein, etc. you have a
 pretty good description of how mouse/touchscreen input works.
 
-The mouse/touchscreen input is a little simpler, however: The main simplication
+The mouse/touchscreen input is a little simpler, however: The main simplification
 is that the additional complexities of the NxConsole and its special input device
 do not apply. Mouse/touchscreen input as always steered to widgets when the
 callback is received in ``CCallback::newMouseEvent`` by an unconditional call to

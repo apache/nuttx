@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/include/spinlock.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,6 +30,8 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif /* __ASSEMBLY__ */
+
+#include <arch/barriers.h>
 
 /* Include RISC-V architecture-specific IRQ definitions (including register
  * save structure and up_irq_save()/up_irq_restore() functions)
@@ -59,9 +63,6 @@
  *
  */
 
-#define SP_DSB(n) __asm__ __volatile__ ("fence")
-#define SP_DMB(n) __asm__ __volatile__ ("fence")
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -72,10 +73,12 @@
  *
  * RISC-V architecture (in the standard atomic-instruction extension "A")
  * supports exclusive accesses to memory locations in the form of the
- * Load-Reserved (LR) and Store-Conditional (SC) instructions. RV64 supports
- * doubleword aligned data only but others supports word aligned data.
+ * Load-Reserved (LR), Store-Conditional (SC) and Atomic Memory Operations
+ * (AMO) instructions. For LR and SC, RV64 supports doubleword aligned data
+ * only but others supports word aligned data. For AMO, word and doubleword
+ * alignments are accepted.
  *
- * RISC-V architecture supports fence instruction to ensure memory ordering
+ * RISC-V architecture supports fence instruction to ensure memory ordering.
  */
 
 typedef uintptr_t spinlock_t;
@@ -103,6 +106,28 @@ typedef uintptr_t spinlock_t;
  *   (meaning that we successfully obtained the lock)
  *
  ****************************************************************************/
+
+#if defined(CONFIG_ARCH_RV_ISA_A)
+static inline_function spinlock_t up_testset(volatile spinlock_t *lock)
+{
+  spinlock_t ret = SP_LOCKED;
+
+  __asm__ __volatile__
+  (
+#ifdef CONFIG_ARCH_RV32
+    "amoswap.w %0, %0, %1\n"
+#else
+    "amoswap.d %0, %0, %1\n"
+#endif
+    "fence\n"
+    : "+r" (ret), "+A" (*lock)
+    :
+    : "memory"
+  );
+
+  return ret;
+}
+#endif
 
 /* See prototype in nuttx/include/nuttx/spinlock.h */
 

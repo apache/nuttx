@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/task/task_recover.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -70,7 +72,7 @@ void nxtask_recover(FAR struct tcb_s *tcb)
 
   /* The task is being deleted.  Cancel in pending timeout events. */
 
-  wd_recover(tcb);
+  wd_cancel(&tcb->waitdog);
 
   /* If the thread holds semaphore counts or is waiting for a semaphore
    *  count, then release the counts.

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/renesas/sh1/us7032evb1/shterm/shterm.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -739,7 +741,7 @@ int main(int argc, char **argv, char **envp)
       ret = readbyte(0, &ch);
       if (ret == 0)
         {
-          printconsole("End-of-file: exitting\n");
+          printconsole("End-of-file: exiting\n");
           close_tty();
           return 0;
         }

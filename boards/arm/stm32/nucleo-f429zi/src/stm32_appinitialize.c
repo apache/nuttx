@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/nucleo-f429zi/src/stm32_appinitialize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,6 +35,50 @@
 #include <nuttx/leds/userled.h>
 #ifdef CONFIG_STM32_ROMFS
 #include "stm32_romfs.h"
+#endif
+
+#ifdef CONFIG_SENSORS_AMG88XX
+#include "stm32_amg88xx.h"
+#endif
+
+#if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
+#  include "stm32_i2c.h"
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_i2c_register
+ *
+ * Description:
+ *   Register one I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
+static void stm32_i2c_register(int bus)
+{
+  struct i2c_master_s *i2c;
+  int ret;
+
+  i2c = stm32_i2cbus_initialize(bus);
+  if (i2c == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", bus);
+    }
+  else
+    {
+      ret = i2c_register(i2c, bus);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
+                 bus, ret);
+          stm32_i2cbus_uninitialize(i2c);
+        }
+    }
+}
 #endif
 
 /****************************************************************************
@@ -165,6 +211,14 @@ int board_app_initialize(uintptr_t arg)
     {
       syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
     }
+#endif
+
+#if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
+  stm32_i2c_register(1);
+#endif
+
+#ifdef CONFIG_SENSORS_AMG88XX
+  board_amg88xx_initialize(1);
 #endif
 
   UNUSED(ret);

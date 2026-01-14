@@ -1,6 +1,8 @@
 /*****************************************************************************
  * include/nuttx/motor/stepper.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -87,7 +89,7 @@ enum stepper_idle_e
 {
   STEPPER_ENABLE_IDLE  = 0,  /* Enable IDLE mode */
   STEPPER_DISABLE_IDLE = 1,  /* Disable IDLE mode */
-  STEPPER_AUTO_IDLE    = 2,  /* Set automaticaly IDLE when stepper not in movement */
+  STEPPER_AUTO_IDLE    = 2,  /* Set automatically IDLE when stepper not in movement */
 };
 
 /* Stepper driver status */

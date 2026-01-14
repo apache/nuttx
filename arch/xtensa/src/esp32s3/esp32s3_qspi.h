@@ -71,8 +71,8 @@ extern "C"
  *   dev        - Device-specific state data
  *   dummies    - Number of dummy cycles, this only works in command
  *                transfer, not works in memory transfer
- *   addr_lines - Number of address transmiting I/O pins
- *   data_lines - Number of data transmiting I/O pins
+ *   addr_lines - Number of address transmitting I/O pins
+ *   data_lines - Number of data transmitting I/O pins
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  Otherwise -1 (ERROR).
@@ -83,6 +83,28 @@ int esp32s3_qspibus_set_attr(struct qspi_dev_s *dev,
                              uint8_t dummies,
                              uint8_t addr_lines,
                              uint8_t data_lines);
+
+/****************************************************************************
+ * Name: esp32s3_qspibus_set_delay
+ *
+ * Description:
+ *   Set timing delay for QSPI input and output data.
+ *
+ * Input Parameters:
+ *   dev        - Device-specific state data
+ *   din_mode   - Input mode(0~3) to delay input data
+ *   din_num    - The delay number(0~3) to input data
+ *   dout_mode  - Output mode(0,1) to delay output data
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise -1 (ERROR).
+ *
+ ****************************************************************************/
+
+int esp32s3_qspibus_set_delay(struct qspi_dev_s *dev,
+                              uint8_t din_mode,
+                              uint8_t din_num,
+                              uint8_t dout_mode);
 
 /****************************************************************************
  * Name: esp32s3_qspibus_initialize

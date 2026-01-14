@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/contactless/mfrc522.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -98,7 +100,7 @@ int mfrc522_picc_select(FAR struct mfrc522_dev_s *dev,
 #if 0 /* TODO */
 /* IRQ Handling */
 
-static int mfrc522_irqhandler(FAR int irq, FAR void *context, FAR void *dev);
+static int mfrc522_irqhandler(int irq, FAR void *context, FAR void *dev);
 static inline int mfrc522_attachirq(FAR struct mfrc522_dev_s *dev,
                                     xcpt_t isr);
 #endif
@@ -1096,7 +1098,7 @@ void mfrc522_softreset(FAR struct mfrc522_dev_s *dev)
 
   /* Wait the internal state machine to initialize */
 
-  nxsig_usleep(50000);
+  nxsched_usleep(50000);
 
   /* Wait for the PowerDown bit in COMMAND_REG to be cleared */
 
@@ -1422,7 +1424,7 @@ static int mfrc522_open(FAR struct file *filep)
 
   mfrc522_configspi(dev->spi);
 
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
 
   mfrc522_getfwversion(dev);
 

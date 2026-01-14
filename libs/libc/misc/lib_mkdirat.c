@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/misc/lib_mkdirat.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -62,15 +64,25 @@
 
 int mkdirat(int dirfd, FAR const char *path, mode_t mode)
 {
-  char fullpath[PATH_MAX];
+  FAR char *fullpath;
   int ret;
 
-  ret = lib_getfullpath(dirfd, path, fullpath, sizeof(fullpath));
+  fullpath = lib_get_pathbuffer();
+  if (fullpath == NULL)
+    {
+      set_errno(ENOMEM);
+      return ERROR;
+    }
+
+  ret = lib_getfullpath(dirfd, path, fullpath, PATH_MAX);
   if (ret < 0)
     {
+      lib_put_pathbuffer(fullpath);
       set_errno(-ret);
       return ERROR;
     }
 
-  return mkdir(fullpath, mode);
+  ret = mkdir(fullpath, mode);
+  lib_put_pathbuffer(fullpath);
+  return ret;
 }

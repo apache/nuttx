@@ -1,8 +1,9 @@
 /******************************************************************************
  * drivers/wireless/spirit/include/spirit_pktstack.h
  *
- *   Copyright(c) 2015 STMicroelectronics
- *   Author: VMA division - AMS
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: Copyright(c) 2015 STMicroelectronics
+ * SPDX-FileContributor: Author: VMA division - AMS
  *   Version 3.2.2 08-July-2015
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,7 +50,7 @@
  * configure the link layer protocol features like autoack,
  * autoretransmission or piggybacking.
  *
- * In addiiton, functions to set the payload length and the destination
+ * In addition, functions to set the payload length and the destination
  * address are provided.
  *
  * Example:

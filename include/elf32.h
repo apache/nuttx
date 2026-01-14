@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/elf32.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,25 +36,27 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ELF_CLASS          ELFCLASS32
+#define ELF_CLASS              ELFCLASS32
 
-#define ELF32_ST_BIND(i)   ((i) >> 4)
-#define ELF32_ST_TYPE(i)   ((i) & 0xf)
-#define ELF32_ST_INFO(b,t) (((b) << 4) | ((t) & 0xf))
+#define ELF32_ST_BIND(i)       ((i) >> 4)
+#define ELF32_ST_TYPE(i)       ((i) & 0xf)
+#define ELF32_ST_INFO(b,t)     (((b) << 4) | ((t) & 0xf))
+#define ELF32_ST_VISIBILITY(o) ((o) & 0x3)
 
 /* Generic macro to abstract ELF32/ELF64 type/bind */
 
-#define ELF_ST_TYPE(a)     ELF32_ST_TYPE(a)
-#define ELF_ST_BIND(a)     ELF32_ST_BIND(a)
+#define ELF_ST_TYPE(a)         ELF32_ST_TYPE(a)
+#define ELF_ST_BIND(a)         ELF32_ST_BIND(a)
+#define ELF_ST_VISIBILITY(o)   ELF32_ST_VISIBILITY(o)
 
 /* Definitions for Elf32_Rel*::r_info */
 
-#define ELF32_R_SYM(i)     ((i) >> 8)
-#define ELF32_R_TYPE(i)    ((i) & 0xff)
-#define ELF32_R_INFO(s,t)  (((s)<< 8) | ((t) & 0xff))
+#define ELF32_R_SYM(i)         ((i) >> 8)
+#define ELF32_R_TYPE(i)        ((i) & 0xff)
+#define ELF32_R_INFO(s,t)      (((s)<< 8) | ((t) & 0xff))
 
-#define ELF_R_SYM(i)       ELF32_R_SYM(i)
-#define ELF_R_TYPE(i)      ELF32_R_TYPE(i)
+#define ELF_R_SYM(i)           ELF32_R_SYM(i)
+#define ELF_R_TYPE(i)          ELF32_R_TYPE(i)
 
 /****************************************************************************
  * Public Type Definitions

@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/sys/boardctl.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,6 +42,10 @@
 
 #ifdef CONFIG_NXTERM
 #  include <nuttx/nx/nxterm.h>
+#endif
+
+#ifdef CONFIG_BOARDCTL_SPINLOCK
+#  include <nuttx/spinlock.h>
 #endif
 
 #ifdef CONFIG_BOARDCTL
@@ -173,13 +179,12 @@
  * CONFIGURATION: CONFIG_NXTERM
  * DEPENDENCIES:  Base NX terminal logic provides nxterm_ioctl_tap()
  *
- * CMD:           BOARDIOC_TESTSET
- * DESCRIPTION:   Access architecture-specific up_testset() operation
- * ARG:           A pointer to a write-able spinlock object.  On success
- *                the  preceding spinlock state is returned:  0=unlocked,
- *                1=locked.
- * CONFIGURATION: CONFIG_BOARDCTL_TESTSET
- * DEPENDENCIES:  Architecture-specific logic provides up_testset()
+ * CMD:           BOARDIOC_SPINLOCK
+ * DESCRIPTION:   spinlock specific operation
+ * ARG:           A pointer to a write-able boardioc_spinlock_s
+ *
+ * CONFIGURATION: CONFIG_BOARDCTL_SPINLOCK
+ * DEPENDENCIES:  spinlock specific logic
  *
  * CMD:           BOARDIOC_RESET_CAUSE
  * DESCRIPTION:   Get the cause of last-time board reset
@@ -204,12 +209,13 @@
 #define BOARDIOC_VNC_START         _BOARDIOC(0x000e)
 #define BOARDIOC_NXTERM            _BOARDIOC(0x000f)
 #define BOARDIOC_NXTERM_IOCTL      _BOARDIOC(0x0010)
-#define BOARDIOC_TESTSET           _BOARDIOC(0x0011)
+#define BOARDIOC_SPINLOCK          _BOARDIOC(0x0011)
 #define BOARDIOC_UNIQUEKEY         _BOARDIOC(0x0012)
 #define BOARDIOC_SWITCH_BOOT       _BOARDIOC(0x0013)
 #define BOARDIOC_BOOT_IMAGE        _BOARDIOC(0x0014)
 #define BOARDIOC_RESET_CAUSE       _BOARDIOC(0x0015)
 #define BOARDIOC_IRQ_AFFINITY      _BOARDIOC(0x0016)
+#define BOARDIOC_START_CPU         _BOARDIOC(0x0017)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then board-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -218,7 +224,7 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x0017)
+#define BOARDIOC_USER              _BOARDIOC(0x0018)
 
 /****************************************************************************
  * Public Type Definitions
@@ -280,6 +286,22 @@ struct boardioc_romdisk_s
 };
 #endif
 
+#ifdef CONFIG_BOARDCTL_SPINLOCK
+enum boardioc_spinlock_e
+{
+  BOARDIOC_SPINLOCK_LOCK    = 0, /* call up_irq_save or/and spin_lock */
+  BOARDIOC_SPINLOCK_TRYLOCK = 1, /* call up_irq_save or/and spin_trylock */
+  BOARDIOC_SPINLOCK_UNLOCK  = 2, /* call up_irq_restore or/and spin_unlock */
+};
+
+struct boardioc_spinlock_s
+{
+  enum boardioc_spinlock_e action; /* see enum boardioc_spinlock_e */
+  FAR irqstate_t *flags;           /* whether we need to disable int */
+  FAR volatile spinlock_t *lock;   /* whether we need to call spinlock */
+};
+#endif
+
 /* In order to full describe a symbol table, a vector containing the address
  * of the symbol table and the number of elements in the symbol table is
  * required.
@@ -334,6 +356,7 @@ enum boardioc_usbdev_identifier_e
   BOARDIOC_USBDEV_NONE = 0        /* Not valid */
 #ifdef CONFIG_USBADB
   , BOARDIOC_USBDEV_ADB           /* ADB */
+  , BOARDIOC_USBDEV_FASTBOOT = BOARDIOC_USBDEV_ADB
 #endif
 #ifdef CONFIG_CDCACM
   , BOARDIOC_USBDEV_CDCACM        /* CDC/ACM */
@@ -443,7 +466,8 @@ enum boardioc_softreset_subreason_e
   BOARDIOC_SOFTRESETCAUSE_ENTER_BOOTLOADER,
   BOARDIOC_SOFTRESETCAUSE_ENTER_RECOVERY,
   BOARDIOC_SOFTRESETCAUSE_RESTORE_FACTORY,
-  BOARDIOC_SOFTRESETCAUSE_RESTORE_FACTORY_INQUIRY
+  BOARDIOC_SOFTRESETCAUSE_RESTORE_FACTORY_INQUIRY,
+  BOARDIOC_SOFTRESETCAUSE_THERMAL
 };
 
 struct boardioc_reset_cause_s

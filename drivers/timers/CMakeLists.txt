@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/timers/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -16,7 +18,6 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 #
-# ##############################################################################
 # ##############################################################################
 
 set(SRCS)
@@ -83,6 +84,22 @@ endif()
 
 if(CONFIG_CAPTURE)
   list(APPEND SRCS capture.c)
+
+  if(CONFIG_FAKE_CAPTURE)
+    list(APPEND SRCS fake_capture.c)
+  endif()
+endif()
+
+if(CONFIG_GOLDFISH_TIMER)
+  list(APPEND SRCS goldfish_timer.c)
+endif()
+
+if(CONFIG_PTP_CLOCK)
+  list(APPEND SRCS ptp_clock.c)
+endif()
+
+if(CONFIG_PTP_CLOCK_DUMMY)
+  list(APPEND SRCS ptp_clock_dummy.c)
 endif()
 
 target_sources(drivers PRIVATE ${SRCS})

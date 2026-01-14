@@ -1,4 +1,25 @@
 #!/usr/bin/python3
+############################################################################
+# tools/ci/testrun/script/test_framework/test_cmocka.py
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
 # encoding: utf-8
 
 import os
@@ -27,7 +48,7 @@ def test_cmocka(p):
 
     p.sendCommand(f"echo {cmocka_test_start}")
     ret = p.sendCommand(
-        "cmocka --skip test_case_posix_timer|test_case_oneshot|write_default|read_default|burst_test|gpiotest01|"
+        "cmocka --skip drivertest_pm|drivertest_posix_timer|drivertest_block*|"
         "test_playback.*|test_interaction.*|test_stress.*|test_capture.*",
         "Cmocka Test Completed",
         timeout=1200,

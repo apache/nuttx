@@ -5,13 +5,66 @@
 
 menu "System Logging"
 
-# Selected if the architecture has its own, built-in SYSLOGging enabled
+# Selected if the architecture has its own, built-in SYSLOG enabled
+
+choice
+	prompt "System logging"
+	default SYSLOG
+
+config SYSLOG
+	bool "Enable system logging"
+	---help---
+		Enables the SYSLOG interface.
 
 config ARCH_SYSLOG
-	bool
-	default n
+	bool "Architecture-specific SYSLOG support"
+	---help---
+		Architecture-specific SYSLOG support
 
+config SYSLOG_TO_SCHED_NOTE
+	bool "SYSLOG redirected to sched_note"
+	depends on SCHED_INSTRUMENTATION_DUMP
+	---help---
+		If this option is enabled, syslog will be redirected to sched_note,
+		It uses the sched_note_printf macro to replace syslog
+
+config SYSLOG_NONE
+	bool "Disable system logging"
+	---help---
+		System logging is disabled and all calls to syslog() are replaced with
+		an empty function. This option can be useful for small systems when we don't
+		have any logging support, so we can get rid of unused logic.
+		This way the final image also won't contain the strings that are present
+		in syslog().
+
+endchoice
+
+config SYSLOG_CHARDEV
+	bool "SYSLOG character device"
+	default n
+	---help---
+		Enables support for a simple character driver at /dev/log whose
+		write() method will transfer data to the SYSLOG device.  This can be
+		useful if, for example, you want to redirect the output of a program
+		to the SYSLOG.
+
+		NOTE that unlike other syslog output, this data is unformatted raw
+		byte output with no time-stamping or any other SYSLOG features
+		supported.
+
+config SYSLOG_DEFAULT_MASK
+	hex "syslog mask default value"
+	default 0xff
+
+if SYSLOG
 comment "SYSLOG options"
+
+config SYSLOG_CRLF
+	bool "Syslog convert LF to CRLF"
+	default y
+	---help---
+		Prepend a carriage return before every linefeed that goes into the
+		syslog.
 
 config SYSLOG_MAX_CHANNELS
 	int "Maximum SYSLOG channels"
@@ -34,13 +87,6 @@ config RAMLOG
 		details as needed to support logging.
 
 if RAMLOG
-config RAMLOG_CRLF
-	bool "RAMLOG CR/LF"
-	default n
-	---help---
-		Pre-pend a carriage return before every linefeed that goes into the
-		RAM log.
-
 config RAMLOG_NONBLOCKING
 	bool "RAMLOG non-block reads"
 	default y
@@ -94,11 +140,39 @@ config SYSLOG_INTBUFSIZE
 
 comment "Formatting options"
 
-config SYSLOG_TIMESTAMP
-	bool "Prepend timestamp to syslog message"
+config SYSLOG_RFC5424
+	bool "Standard syslog format (RFC 5424)"
 	default n
 	---help---
-		Prepend timestamp to syslog message.
+		Forces syslog logs to follow the RFC 5424 (syslog protocol) standard.
+		This allows for structured data elements, standard severity levels,
+		standard facilities, standard timestamps and other features that allow
+		syslogs to be compatible with other open source programs (such as
+		logging servers).
+
+if SYSLOG_RFC5424
+
+comment "RFC5424 options"
+
+config SYSLOG_RFC5424_HOSTNAME
+	bool "Enable hostname field"
+	default n
+	---help---
+		Adds the HOSTNAME field to the RFC 5424 compatible syslog output.
+
+config SYSLOG_RFC5424_TIMEQUALITY
+	bool "timeQuality structured data"
+	depends on SYSLOG_TIMESTAMP
+	default n
+	---help---
+		Enables the RFC 5424 'timeQuality' structured data element, which describes the
+		quality of the timestamp sent.
+
+endif # SYSLOG_RFC5424
+
+if !SYSLOG_RFC5424
+
+comment "Regular syslog formatting options"
 
 config SYSLOG_TIMESTAMP_REALTIME
 	bool "Use wall-clock for syslog timestamp"
@@ -134,8 +208,10 @@ config SYSLOG_TIMESTAMP_FORMAT
 
 config SYSLOG_TIMESTAMP_FORMAT_MICROSECOND
 	bool "Append microseconds after seconds"
-	default y
-	depends on SYSLOG_TIMESTAMP_FORMAT = "%d/%m/%y %H:%M:%S"
+	default y if SYSLOG_TIMESTAMP_FORMAT = "%d/%m/%y %H:%M:%S"
+	---help---
+		Append microseconds after seconds in syslog timestamp.
+		Suggest SYSLOG_TIMESTAMP_FORMAT end with %S.
 
 config SYSLOG_TIMESTAMP_BUFFER
 	int "Formatted timestamp buffer size"
@@ -149,18 +225,6 @@ config SYSLOG_PRIORITY
 	default n
 	---help---
 		Prepend log priority (severity) to syslog message.
-
-config SYSLOG_PROCESS_NAME
-	bool "Prepend process name to syslog message"
-	default n
-	---help---
-		Prepend Process name to syslog message.
-
-config SYSLOG_PROCESSID
-	bool "Prepend process ID to syslog message"
-	default n
-	---help---
-		Prepend Process ID to syslog message.
 
 config SYSLOG_PREFIX
 	bool "Prepend prefix to syslog message"
@@ -180,6 +244,28 @@ config SYSLOG_COLOR_OUTPUT
 	---help---
 		Enables colored output in syslog, according to message priority.
 
+endif # !SYSLOG_RFC5424
+
+config SYSLOG_TIMESTAMP
+	bool "Timestamp in syslog message"
+	default n
+	---help---
+		Prepend timestamp to syslog message, or include the TIMESTAMP field for
+		RFC 5424.
+
+config SYSLOG_PROCESS_NAME
+	bool "Prepend process name to syslog message"
+	default n
+	depends on TASK_NAME_SIZE > 0
+	---help---
+		Prepend Process name to syslog message.
+
+config SYSLOG_PROCESSID
+	bool "Prepend process ID to syslog message"
+	default n
+	---help---
+		Prepend Process ID to syslog message.
+
 comment "SYSLOG channels"
 
 config SYSLOG_DEVPATH
@@ -196,6 +282,7 @@ if !ARCH_SYSLOG
 config SYSLOG_CHAR
 	bool "Log to a character device"
 	default n
+	select SYSLOG_REGISTER
 	---help---
 		Enable the generic character device for the SYSLOG. The full path to the
 		SYSLOG device is provided by SYSLOG_DEVPATH. A valid character device (or
@@ -219,6 +306,21 @@ config SYSLOG_RPMSG
 	---help---
 		Use the RPMSG as a SYSLOG output device, send message to remote proc.
 
+config SYSLOG_CDCACM
+	bool "Log to CDCACM"
+	depends on CDCACM
+	default n
+	---help---
+		Use the CDCACM as a SYSLOG output device, send message to remote proc.
+
+config SYSLOG_CDCACM_MINOR
+	int "The syslog CDCACM minor number"
+	depends on SYSLOG_CDCACM
+	default 0
+	---help---
+		If there are more than one CDCACM devices, then a device minor number
+		may also need to be provided. Default: 0
+
 config SYSLOG_STREAM
 	bool "Log to stream"
 	default n
@@ -229,14 +331,15 @@ config SYSLOG_STREAM
 
 config SYSLOG_CONSOLE
 	bool "Log to /dev/console"
-	default !ARCH_LOWPUTC && !SYSLOG_CHAR && !RAMLOG_SYSLOG && !SYSLOG_RPMSG && !SYSLOG_RTT
+	default !ARCH_LOWPUTC && !SYSLOG_CHAR && !RAMLOG_SYSLOG && !SYSLOG_RPMSG && !SYSLOG_RTT && !SYSLOG_CDCACM
 	depends on DEV_CONSOLE
+	select SYSLOG_REGISTER
 	---help---
 		Use the system console as a SYSLOG output device.
 
 config SYSLOG_DEFAULT
 	bool "Default SYSLOG device"
-	default ARCH_LOWPUTC && !SYSLOG_CHAR && !RAMLOG_SYSLOG && !SYSLOG_RPMSG && !SYSLOG_RTT && !SYSLOG_CONSOLE
+	default ARCH_LOWPUTC && !SYSLOG_CHAR && !RAMLOG_SYSLOG && !SYSLOG_RPMSG && !SYSLOG_RTT && !SYSLOG_CDCACM && !SYSLOG_CONSOLE
 	---help---
 		syslog() interfaces will be present, but all output will go to the
 		up_putc(ARCH_LOWPUTC == y) or bit-bucket(ARCH_LOWPUTC == n).
@@ -291,6 +394,7 @@ config SYSLOG_RPMSG_SERVER_CHARDEV
 menuconfig SYSLOG_FILE
 	bool "Syslog file output"
 	default n
+	select SYSLOG_REGISTER
 	---help---
 		Build in support to use a file to collect SYSLOG output.  File SYSLOG
 		channels differ from other SYSLOG channels in that they cannot be
@@ -349,22 +453,9 @@ config CONSOLE_SYSLOG
 	---help---
 		Use the syslog logging device as a system console. If this feature is
 		enabled (along with DEV_CONSOLE), then all console output will be
-		re-directed to syslog output (syslog_putc). This is useful, for
+		re-directed to syslog output (syslog_write). This is useful, for
 		example, if the only console is a Telnet console.  Then in that case,
 		console output from non-Telnet threads will go to the syslog output.
-
-config SYSLOG_CHARDEV
-	bool "SYSLOG character device"
-	default n
-	---help---
-		Enables support for a simple character driver at /dev/log whose
-		write() method will transfer data to the SYSLOG device.  This can be
-		useful if, for example, you want to redirect the output of a program
-		to the SYSLOG.
-
-		NOTE that unlike other syslog output, this data is unformatted raw
-		byte output with no time-stamping or any other SYSLOG features
-		supported.
 
 config SYSLOG_IOCTL
 	bool "SYSLOG IOCTL support"
@@ -375,4 +466,10 @@ config SYSLOG_IOCTL
 		commands are SYSLOGIOC_SETFILTER/SYSLOGIOC_GETCHANNELS, which can be
 		used to set the enable status of different channels
 
+config SYSLOG_REGISTER
+	bool "Register syslog channel support"
+	---help---
+		This option will support register the syslog channel dynamically.
+
+endif # SYSLOG
 endmenu # System logging

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/misoc/src/lm32/lm32_decodeirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -84,7 +86,7 @@ uint32_t *lm32_decodeirq(uint32_t intstat, uint32_t *regs)
 
   /* Return the final task register save area.  This will typically be the
    * same as the value of regs on input.  In the event of a context switch,
-   * however, it will differ.  It will refere to the register save are in the
+   * however, it will differ.  It will refer to the register save are in the
    * TCB of the new thread.
    */
 

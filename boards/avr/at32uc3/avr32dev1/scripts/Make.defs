@@ -1,6 +1,8 @@
 ############################################################################
 # boards/avr/at32uc3/avr32dev1/scripts/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -27,8 +29,8 @@ ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)avr32dev1.ld
 ARCHCFLAGS = -muse-rodata-section
 ARCHNOPICFLAGS = -fno-pic
 ARCHPICFLAGS = -fpic
-ARCHALLCFLAGS = $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
-ARCHALLCXXFLAGS = $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+ARCHALLCFLAGS = $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+ARCHALLCXXFLAGS = $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 
 CFLAGS := $(ARCHNOPICFLAGS) $(ARCHALLCFLAGS)
 CPICFLAGS = $(ARCHPICFLAGS) $(ARCHALLCFLAGS)

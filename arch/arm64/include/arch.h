@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/include/arch.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,9 +35,10 @@
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
-#  include <nuttx/pgalloc.h>
-#  include <nuttx/addrenv.h>
+#  include <stddef.h>
 #endif
+
+#include <nuttx/irq.h>
 
 /****************************************************************************
  * Pre-processor Prototypes
@@ -45,6 +48,11 @@
 #if CONFIG_MM_PGSIZE != 4096
 #  error Only pages sizes of 4096 are currently supported (CONFIG_ARCH_ADDRENV)
 #endif
+
+/* All implementations have 4 levels of page tables */
+
+#define ARCH_PGT_MAX_LEVELS (4)
+#define ARCH_SPGTS          (ARCH_PGT_MAX_LEVELS - 1)
 
 #endif /* CONFIG_ARCH_ADDRENV */
 
@@ -57,40 +65,46 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-/* The task group resources are retained in a single structure, task_group_s
- * that is defined in the header file nuttx/include/nuttx/sched.h. The type
- * arch_addrenv_t must be defined by platform specific logic in
- * nuttx/arch/<architecture>/include/arch.h.
+#ifndef __ASSEMBLY__
+
+/* A task group must have its L1 table in memory always, and the rest can
+ * be dynamically committed to memory (and even swapped).
  *
- * These tables would hold the physical address of the level 2 page tables.
- * All would be initially NULL and would not be backed up with physical
- * memory until mappings in the level 2 page table are required.
+ * In this implementation level tables except the final level N are always
+ * kept in static memory, while the level N tables are always dynamically
+ * allocated. There is one static page per level in `spgtables[]`.
+ *
+ * For the VMSAv8-64 address translation system this means that:
+ * - A task can not have more than 1GB of memory allocated. This should be
+ *   plenty enough...
+ * - The minimum amount of memory needed for page tables per task is 12K,
+ *   which gives access to 2MB of memory. This is plenty for many tasks.
  */
 
 struct arch_addrenv_s
 {
-  /* Level 1 page table entries for each group section */
-
-  uintptr_t *text[ARCH_TEXT_NSECTS];
-  uintptr_t *data[ARCH_DATA_NSECTS];
-#ifdef CONFIG_BUILD_KERNEL
-  uintptr_t *heap[ARCH_HEAP_NSECTS];
-#ifdef CONFIG_ARCH_VMA_MAPPING
-  uintptr_t *shm[ARCH_SHM_NSECTS];
-#endif
-
-  /* Initial heap allocation (in bytes).  This exists only provide an
-   * indirect path for passing the size of the initial heap to the heap
-   * initialization logic.  These operations are separated in time and
-   * architecture.  REVISIT:  I would like a better way to do this.
+  /* Physical addresses of the static page tables (levels N-1) here, these
+   * are allocated when a task is created.
    */
 
-  size_t heapsize;
-#endif
+  uintptr_t spgtables[ARCH_SPGTS];
+
+  /* The text, data, heap bases and heap size here */
+
+  uintptr_t textvbase;
+  uintptr_t datavbase;
+  uintptr_t heapvbase;
+  size_t    heapsize;
+
+  /* The page directory root (ttbr0) value */
+
+  uintptr_t ttbr0;
 };
 
 typedef struct arch_addrenv_s arch_addrenv_t;
-#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* CONFIG_ARCH_ADDRENV */
 
 /****************************************************************************
  * Public Data

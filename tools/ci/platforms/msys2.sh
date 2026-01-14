@@ -2,6 +2,8 @@
 ############################################################################
 # tools/ci/platforms/msys2.sh
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -52,7 +54,7 @@ arm_gcc_toolchain() {
     local basefile
     basefile=arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-arm-none-eabi
     cd "${NUTTXTOOLS}"
-    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/${basefile}.zip
+    curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/${basefile}.zip
     unzip -qo ${basefile}.zip
     mv ${basefile} gcc-arm-none-eabi
     rm ${basefile}.zip
@@ -69,7 +71,7 @@ arm64_gcc_toolchain() {
     basefile=arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf
     cd "${NUTTXTOOLS}"
     # Download the latest ARM64 GCC toolchain prebuilt by ARM
-    wget --quiet https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/${basefile}.zip
+    curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/${basefile}.zip
     unzip -qo ${basefile}.zip
     mv ${basefile} gcc-aarch64-none-elf
     rm ${basefile}.zip
@@ -93,9 +95,9 @@ esp_tool() {
 
   if ! type esptool > /dev/null 2>&1; then
     local basefile
-    basefile=esptool-v4.7.0-win64
+    basefile=esptool-v4.8.0-win64
     cd "${NUTTXTOOLS}"
-    curl -O -L -s https://github.com/espressif/esptool/releases/download/v4.7.0/${basefile}.zip
+    curl -O -L -s https://github.com/espressif/esptool/releases/download/v4.8.0/${basefile}.zip
     unzip -qo ${basefile}.zip
     mv esptool-win64 esp-tool
     rm ${basefile}.zip
@@ -107,7 +109,7 @@ gen_romfs() {
   add_path "${NUTTXTOOLS}"/genromfs/usr/bin
 
   if ! type genromfs > /dev/null 2>&1; then
-    git clone https://bitbucket.org/nuttx/tools.git "${NUTTXTOOLS}"/nuttx-tools
+    git clone --depth 1 https://bitbucket.org/nuttx/tools.git "${NUTTXTOOLS}"/nuttx-tools
     cd "${NUTTXTOOLS}"/nuttx-tools
     tar zxf genromfs-0.5.2.tar.gz
     cd genromfs-0.5.2
@@ -121,7 +123,7 @@ kconfig_frontends() {
   add_path "${NUTTXTOOLS}"/kconfig-frontends/bin
 
   if [ ! -f "${NUTTXTOOLS}/kconfig-frontends/bin/kconfig-conf" ]; then
-    git clone https://bitbucket.org/nuttx/tools.git "${NUTTXTOOLS}"/nuttx-tools
+    git clone --depth 1 https://bitbucket.org/nuttx/tools.git "${NUTTXTOOLS}"/nuttx-tools
     cd "${NUTTXTOOLS}"/nuttx-tools/kconfig-frontends
     ./configure --prefix="${NUTTXTOOLS}"/kconfig-frontends \
       --disable-kconfig --disable-nconf --disable-qconf \
@@ -133,6 +135,11 @@ kconfig_frontends() {
     cd "${NUTTXTOOLS}"
     rm -rf nuttx-tools
   fi
+}
+
+python_tools() {
+  pip3 install \
+    construct
 }
 
 mips_gcc_toolchain() {
@@ -151,12 +158,12 @@ riscv_gcc_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/riscv-none-elf-gcc/bin/riscv-none-elf-gcc" ]; then
     local basefile
-    basefile=xpack-riscv-none-elf-gcc-13.2.0-2-win32-x64
+    basefile=xpack-riscv-none-elf-gcc-14.2.0-3-win32-x64
     cd "${NUTTXTOOLS}"
     # Download the latest RISCV GCC toolchain prebuilt by xPack
-    wget --quiet https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/${basefile}.zip
+    curl -O -L -s https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v14.2.0-3/${basefile}.zip
     unzip -qo ${basefile}.zip
-    mv xpack-riscv-none-elf-gcc-13.2.0-2 riscv-none-elf-gcc
+    mv xpack-riscv-none-elf-gcc-14.2.0-3 riscv-none-elf-gcc
     rm ${basefile}.zip
   fi
   command riscv-none-elf-gcc --version
@@ -181,6 +188,7 @@ rust() {
     # Install targets supported from NuttX
     "$CARGO_HOME"/bin/rustup target add thumbv6m-none-eabi
     "$CARGO_HOME"/bin/rustup target add thumbv7m-none-eabi
+    "$CARGO_HOME"/bin/rustup target add riscv64gc-unknown-none-elf
     rm rustup-init.exe
   fi
   command rustc --version
@@ -194,7 +202,7 @@ sparc_gcc_toolchain() {
     basefile=bcc-2.1.0-gcc-mingw64
     cd "${NUTTXTOOLS}"
     # Download the SPARC GCC toolchain prebuilt by Gaisler
-    wget --quiet https://www.gaisler.com/anonftp/bcc2/bin/${basefile}.zip
+    curl -O -L -s https://www.gaisler.com/anonftp/bcc2/bin/${basefile}.zip
     unzip -qo ${basefile}.zip
     mv bcc-2.1.0-gcc sparc-gaisler-elf-gcc
     rm ${basefile}.zip
@@ -203,52 +211,20 @@ sparc_gcc_toolchain() {
   command sparc-gaisler-elf-gcc --version
 }
 
-xtensa_esp32_gcc_toolchain() {
-  add_path "${NUTTXTOOLS}"/xtensa-esp32-elf/bin
+xtensa_esp_gcc_toolchain() {
+  add_path "${NUTTXTOOLS}"/xtensa-esp-elf/bin
 
-  if [ ! -f "${NUTTXTOOLS}/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc" ]; then
+  if [ ! -f "${NUTTXTOOLS}/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc" ]; then
     local basefile
-    basefile=xtensa-esp32-elf-12.2.0_20230208-x86_64-w64-mingw32
+    basefile=xtensa-esp-elf-14.2.0_20241119-x86_64-w64-mingw32
     cd "${NUTTXTOOLS}"
-    # Download the latest ESP32 GCC toolchain prebuilt by Espressif
-    wget --quiet https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.zip
+    # Download the latest ESP32, ESP32-S2 and ESP32-S3 GCC toolchain prebuilt by Espressif
+    curl -O -L -s https://github.com/espressif/crosstool-NG/releases/download/esp-14.2.0_20241119/${basefile}.zip
     unzip -qo ${basefile}.zip
     rm ${basefile}.zip
   fi
 
   command xtensa-esp32-elf-gcc --version
-}
-
-xtensa_esp32s2_gcc_toolchain() {
-  add_path "${NUTTXTOOLS}"/xtensa-esp32s2-elf/bin
-
-  if [ ! -f "${NUTTXTOOLS}/xtensa-esp32s2-elf/bin/xtensa-esp32s2-elf-gcc" ]; then
-    local basefile
-    basefile=xtensa-esp32s2-elf-12.2.0_20230208-x86_64-w64-mingw32
-    cd "${NUTTXTOOLS}"
-    # Download the latest ESP32 S2 GCC toolchain prebuilt by Espressif
-    wget --quiet https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.zip
-    unzip -qo ${basefile}.zip
-    rm ${basefile}.zip
-  fi
-
-  command xtensa-esp32s2-elf-gcc --version
-}
-
-xtensa_esp32s3_gcc_toolchain() {
-  add_path "${NUTTXTOOLS}"/xtensa-esp32s3-elf/bin
-
-  if [ ! -f "${NUTTXTOOLS}/xtensa-esp32s3-elf/bin/xtensa-esp32s3-elf-gcc" ]; then
-    local basefile
-    basefile=xtensa-esp32s3-elf-12.2.0_20230208-x86_64-w64-mingw32
-    cd "${NUTTXTOOLS}"
-    # Download the latest ESP32 S3 GCC toolchain prebuilt by Espressif
-    wget --quiet https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.zip
-    unzip -qo ${basefile}.zip
-    rm ${basefile}.zip
-  fi
-
-  command xtensa-esp32s3-elf-gcc --version
 }
 
 setup_links() {
@@ -274,13 +250,14 @@ setup_links() {
   ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/x86_64-elf-gcc
   ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/x86_64-elf-g++
   ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/xtensa-esp32-elf-gcc
+  ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/xtensa-esp32-elf-g++
 }
 
 install_build_tools() {
   mkdir -p "${NUTTXTOOLS}"
   echo "#!/usr/bin/env sh" > "${NUTTXTOOLS}"/env.sh
 
-  install="arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain kconfig_frontends riscv_gcc_toolchain rust"
+  install="arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain kconfig_frontends riscv_gcc_toolchain rust python_tools"
 
   oldpath=$(cd . && pwd -P)
   for func in ${install}; do

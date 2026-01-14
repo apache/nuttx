@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32f72xx73xx_rcc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -792,7 +794,7 @@ static void stm32_stdclockconfig(void)
       /* Over-drive is needed if
        *  - Voltage output scale 1 mode is selected and SYSCLK frequency is
        *    over 180 MHz.
-       *  - Voltage output scale 2 mode is selected and SYSCLK frequence is
+       *  - Voltage output scale 2 mode is selected and SYSCLK frequency is
        *    over 168 MHz.
        */
 

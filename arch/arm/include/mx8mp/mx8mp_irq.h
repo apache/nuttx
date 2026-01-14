@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/mx8mp/mx8mp_irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -205,7 +207,7 @@
 
 #define MX8MP_IRQ_SOFT_GPIO_START   MX8MP_IRQ_NVECTORS
 
-/* GPIO1 has dedicated interrupts for pins 0-7, however theses pin are also
+/* GPIO1 has dedicated interrupts for pins 0-7, however these pins are also
  * connected to the multiplexed IRQ and both can be triggered together is
  * enabled. Here we choose to no use the dedicated IRQ.
  * REVISIT: add an option to choose the strategy:

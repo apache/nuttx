@@ -518,4 +518,52 @@ config AUDIO_DMA
 	depends on AUDIO
 	depends on DMA
 
+config AUDIO_FAKE
+	bool "Fake audio device"
+	default n
+	depends on AUDIO
+	---help---
+		A fake audio device driver to simplify testing of audio
+		capture and playback.
+
+if AUDIO_FAKE
+
+config FAKE_AUDIO_DEVICE_PARAMS
+	string "fake audio device params"
+	default ""
+	---help---
+		This is a params for fake audio device. The format like:
+		{dev_name, playback, sample_rates[4], channels, format[4], period_time, periods}.
+
+		- dev_name (string): pcm2c or pcm2p or others.
+		- playback (bool): true or false.
+		- sample_rates(uint32 array): {16000, 32000}.
+		- channels  (uint8, {min_chan, max_chan}): {1, 2}.
+		- format(uint8 array): {8,16,32}.
+		- period_time(uint32): 100, unit ms.
+		- periods    (uint32): 4, buffer cnt.
+		e.g:
+			{"pcm2c", false, {8000, 16000, 44100}, {1, 2}, {16}, 100, 4},
+			{"pcm2p", true, {8000, 16000, 44100}, {1, 2}, {16}, 100, 4},
+
+config FAKE_AUDIO_DATA_PATH
+	string "fake audio device data path"
+	default "/data/"
+	---help---
+		This dir is used to store the audio file for virtual capture or playback device.
+		The filename for capture device should comply with the format "devname_samplerate_channels_format.pcm".
+		e.g: pcm2c_16000_2_16.pcm.
+		The filename format of playback device is the same as capture device.
+		e.g: pcm2p_16000_2_16.pcm.
+
+config AUDIO_FAKE_MSG_PRIO
+	int "Fake audio device message priority"
+	default 1
+
+config AUDIO_FAKE_WORKER_STACKSIZE
+	int "Fake audio device worker thread stack size"
+	default 768
+
+endif # AUDIO_FAKE
+
 endif # DRIVERS_AUDIO

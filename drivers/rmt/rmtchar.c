@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/rmt/rmtchar.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,7 +38,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/mm/circbuf.h>
+#include <nuttx/circbuf.h>
 #include <nuttx/mutex.h>
 #include <nuttx/rmt/rmt.h>
 
@@ -317,7 +319,7 @@ int rmtchar_register(FAR struct rmt_dev_s *rmt)
 
       /* Create the character device name */
 
-      snprintf(devname, DEVNAME_FMTLEN, DEVNAME_FMT, priv->minor);
+      snprintf(devname, sizeof(devname), DEVNAME_FMT, priv->minor);
       ret = register_driver(devname, &g_rmt_channel_fops, 0666, priv);
       if (ret < 0)
         {

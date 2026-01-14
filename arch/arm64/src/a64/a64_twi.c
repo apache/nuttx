@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/a64/a64_twi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1293,7 +1295,7 @@ static int a64_twi_isr_process(struct a64_twi_priv_s *priv)
 
         if (priv->dcnt > 0)
           {
-            /* get data then clear flag,then next data comming */
+            /* get data then clear flag, then next data coming */
 
             *priv->ptr++ = twi_get_byte(priv);
             priv->dcnt--;
@@ -1412,7 +1414,7 @@ static int twi_interrupt(int irq, void *context, void *arg)
 
   ret = a64_twi_isr_process(priv);
 
-  /* enable irq only when twi is transfering, otherwise disable irq */
+  /* enable irq only when twi is transferring, otherwise disable irq */
 
   if (priv->intstate != INTSTATE_IDLE)
     {
@@ -1564,7 +1566,7 @@ static int twi_transfer(struct i2c_master_s *dev,
    */
 
   twi_enable_irq(priv);  /* enable irq */
-  twi_disable_ack(priv); /* disabe ACK */
+  twi_disable_ack(priv); /* disable ACK */
 
   /* No Data Byte to be written after read command */
 
@@ -1608,7 +1610,7 @@ out:
 
   priv->intstate = INTSTATE_IDLE;
 
-  /* Release the port for re-use by other clients */
+  /* Release the port for reuse by other clients */
 
   leave_critical_section(flags);
   nxmutex_unlock(&priv->lock);

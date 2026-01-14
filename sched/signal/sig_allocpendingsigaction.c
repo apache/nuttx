@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/signal/sig_allocpendingsigaction.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -78,22 +80,6 @@ FAR sigq_t *nxsig_alloc_pendingsigaction(void)
       flags = enter_critical_section();
       sigq = (FAR sigq_t *)sq_remfirst(&g_sigpendingaction);
       leave_critical_section(flags);
-
-      /* Check if we got one. */
-
-      if (!sigq)
-        {
-          /* No...Try the resource pool */
-
-          sigq = kmm_malloc(sizeof(sigq_t));
-
-          /* Check if we got an allocated message */
-
-          if (sigq)
-            {
-              sigq->type = SIG_ALLOC_DYN;
-            }
-        }
     }
 
   return sigq;

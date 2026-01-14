@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/usbdev/usbdev_fs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 #include <poll.h>
 #include <stdio.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>
@@ -55,6 +58,12 @@ struct usbdev_fs_req_s
   uint16_t                 offset;  /* Offset to valid data in the RX request */
 };
 
+struct usbdev_ctrlreq_s
+{
+  sq_entry_t               node;    /* Implements a singly linked list */
+  struct usb_ctrlreq_s     req;     /* The contained request */
+};
+
 /* Manage char device non blocking io */
 
 typedef struct usbdev_fs_waiter_sem_s
@@ -76,6 +85,13 @@ struct usbdev_fs_ep_s
   struct sq_queue_s           reqq;       /* Available request containers */
   FAR struct usbdev_fs_req_s *reqbuffer;  /* Request buffer */
   FAR struct pollfd          *fds[CONFIG_USBDEV_FS_NPOLLWAITERS];
+  spinlock_t                  spinlock;
+
+  /* These member is valid for endpoint 0 */
+
+  struct sq_queue_s            ctrlreqq;      /* Available request containers */
+  struct sq_queue_s            ctrlreqq_free; /* Available request containers */
+  FAR struct usbdev_ctrlreq_s *ctrlreqbuffer; /* Ctrl Request buffer */
 };
 
 struct usbdev_fs_dev_s
@@ -274,7 +290,7 @@ static void usbdev_fs_rdcomplete(FAR struct usbdev_ep_s *ep,
 
       /* Queue request and notify readers */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave_nopreempt(&fs_ep->spinlock);
 
       /* Put request on RX pending queue */
 
@@ -283,7 +299,7 @@ static void usbdev_fs_rdcomplete(FAR struct usbdev_ep_s *ep,
 
       usbdev_fs_notify(fs_ep, POLLIN);
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore_nopreempt(&fs_ep->spinlock, flags);
       return;
 
       case -ESHUTDOWN: /* Disconnection */
@@ -336,7 +352,7 @@ static void usbdev_fs_wrcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Return the write request to the free list */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&fs_ep->spinlock);
   sq_addlast(&container->node, &fs_ep->reqq);
 
   /* Check for termination condition */
@@ -368,7 +384,7 @@ static void usbdev_fs_wrcomplete(FAR struct usbdev_ep_s *ep,
         break;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&fs_ep->spinlock, flags);
 }
 
 /****************************************************************************
@@ -387,13 +403,13 @@ static int usbdev_fs_blocking_io(FAR struct usbdev_fs_ep_s *fs_ep,
   irqstate_t flags;
   int ret;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&fs_ep->spinlock);
 
   if (!sq_empty(queue))
     {
       /* Queue not empty after all */
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&fs_ep->spinlock, flags);
       return 0;
     }
 
@@ -404,7 +420,7 @@ static int usbdev_fs_blocking_io(FAR struct usbdev_fs_ep_s *fs_ep,
   sem.next = *list;
   *list = &sem;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&fs_ep->spinlock, flags);
 
   nxmutex_unlock(&fs_ep->lock);
 
@@ -420,7 +436,7 @@ static int usbdev_fs_blocking_io(FAR struct usbdev_fs_ep_s *fs_ep,
 
   if (ret < 0)
     {
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&fs_ep->spinlock);
 
       FAR usbdev_fs_waiter_sem_t *cur_sem = *list;
 
@@ -442,7 +458,7 @@ static int usbdev_fs_blocking_io(FAR struct usbdev_fs_ep_s *fs_ep,
             }
         }
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&fs_ep->spinlock, flags);
       nxmutex_unlock(&fs_ep->lock);
     }
 
@@ -510,14 +526,12 @@ static int usbdev_fs_close(FAR struct file *filep)
 
   fs_ep->crefs -= 1;
 
-  ASSERT(fs_ep->crefs >= 0);
-
   if (fs_ep->unlinked && fs_ep->crefs == 0)
     {
       bool do_free = true;
 
       nxmutex_destroy(&fs_ep->lock);
-      for (i = 0; i < fs->devinfo.nendpoints; i++)
+      for (i = 0; i < fs->devinfo.nendpoints + 1; i++)
         {
           if (fs->eps[i].crefs > 0)
             {
@@ -556,6 +570,8 @@ static ssize_t usbdev_fs_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct usbdev_fs_ep_s *fs_ep = inode->i_private;
+  FAR struct sq_queue_s *queue;
+  bool is_ep0 = false;
   size_t retlen = 0;
   irqstate_t flags;
   int ret;
@@ -574,9 +590,16 @@ static ssize_t usbdev_fs_read(FAR struct file *filep, FAR char *buffer,
       return -ENOTCONN;
     }
 
+  queue = &fs_ep->reqq;
+  if (fs_ep == &fs_ep->dev->eps[0])
+    {
+      is_ep0 = true;
+      queue = &fs_ep->ctrlreqq;
+    }
+
   /* Check for available data */
 
-  if (sq_empty(&fs_ep->reqq))
+  if (sq_empty(queue))
     {
       if (filep->f_oflags & O_NONBLOCK)
         {
@@ -589,25 +612,51 @@ static ssize_t usbdev_fs_read(FAR struct file *filep, FAR char *buffer,
           /* RX queue seems empty. Check again with interrupts disabled */
 
           ret = usbdev_fs_blocking_io(
-            fs_ep, &fs_ep->sems, &fs_ep->reqq);
+            fs_ep, &fs_ep->sems, queue);
           if (ret < 0)
             {
               return ret;
             }
         }
-      while (sq_empty(&fs_ep->reqq));
+      while (sq_empty(queue));
     }
 
   /* Device ready for read */
 
-  while (!sq_empty(&fs_ep->reqq))
+  while (!sq_empty(queue))
     {
       FAR struct usbdev_fs_req_s *container;
       uint16_t reqlen;
 
+      if (is_ep0)
+        {
+          FAR struct usbdev_ctrlreq_s *ctrl_container;
+
+          retlen = MIN(sizeof(struct usb_ctrlreq_s), len);
+
+          /* Process each packet in the priv->reqq list */
+
+          ctrl_container = container_of(sq_peek(queue),
+                                        struct usbdev_ctrlreq_s, node);
+
+          /* Output buffer full */
+
+          if (buffer != NULL)
+            {
+              memcpy(buffer, &ctrl_container->req, retlen);
+            }
+
+          flags = spin_lock_irqsave(&fs_ep->spinlock);
+          sq_remfirst(queue);
+          sq_addlast(&ctrl_container->node, &fs_ep->ctrlreqq_free);
+          spin_unlock_irqrestore(&fs_ep->spinlock, flags);
+
+          break;
+        }
+
       /* Process each packet in the priv->reqq list */
 
-      container = container_of(sq_peek(&fs_ep->reqq),
+      container = container_of(sq_peek(queue),
                                struct usbdev_fs_req_s, node);
 
       reqlen = container->req->xfrd - container->offset;
@@ -643,9 +692,9 @@ static ssize_t usbdev_fs_read(FAR struct file *filep, FAR char *buffer,
 
       /* FIXME use atomic queue primitives ? */
 
-      flags = enter_critical_section();
-      sq_remfirst(&fs_ep->reqq);
-      leave_critical_section(flags);
+      flags = spin_lock_irqsave(&fs_ep->spinlock);
+      sq_remfirst(queue);
+      spin_unlock_irqrestore(&fs_ep->spinlock, flags);
 
       ret = usbdev_fs_submit_rdreq(fs_ep->ep, container);
       if (ret < 0)
@@ -735,12 +784,12 @@ static ssize_t usbdev_fs_write(FAR struct file *filep,
 
       /* Get available TX request slot */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&fs_ep->spinlock);
 
       container = container_of(sq_remfirst(&fs_ep->reqq),
                                struct usbdev_fs_req_s, node);
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&fs_ep->spinlock, flags);
 
       req = container->req;
 
@@ -824,7 +873,7 @@ static int usbdev_fs_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* FIXME only parts of this function required interrupt disabled */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&fs_ep->spinlock);
 
   /* This is a request to set up the poll. Find an available
    * slot for the poll structure reference
@@ -864,7 +913,11 @@ static int usbdev_fs_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   else if (!sq_empty(&fs_ep->reqq))
     {
-      if (USB_ISEPIN(fs_ep->ep->eplog))
+      if (fs_ep == &fs_ep->dev->eps[0])
+        {
+          eventset |= POLLOUT;
+        }
+      else if (USB_ISEPIN(fs_ep->ep->eplog))
         {
           eventset |= POLLOUT;
         }
@@ -874,10 +927,15 @@ static int usbdev_fs_poll(FAR struct file *filep, FAR struct pollfd *fds,
         }
     }
 
+  if (!sq_empty(&fs_ep->ctrlreqq))
+    {
+      eventset |= POLLIN;
+    }
+
   poll_notify(fs_ep->fds, CONFIG_USBDEV_FS_NPOLLWAITERS, eventset);
 
 exit_leave_critical:
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&fs_ep->spinlock, flags);
 errout:
   nxmutex_unlock(&fs_ep->lock);
   return ret;
@@ -895,32 +953,33 @@ static void usbdev_fs_connect(FAR struct usbdev_fs_dev_s *fs, int connect)
 {
   FAR struct usbdev_devinfo_s *devinfo = &fs->devinfo;
   FAR struct usbdev_fs_ep_s *fs_ep;
+  irqstate_t flags;
   uint16_t cnt;
-
-  irqstate_t flags = enter_critical_section();
 
   if (connect)
     {
       /* Notify poll/select with POLLPRI */
 
-      for (cnt = 0; cnt < devinfo->nendpoints; cnt++)
+      for (cnt = 0; cnt < devinfo->nendpoints + 1; cnt++)
         {
           fs_ep = &fs->eps[cnt];
+          flags = spin_lock_irqsave_nopreempt(&fs_ep->spinlock);
           poll_notify(fs_ep->fds, CONFIG_USBDEV_FS_NPOLLWAITERS, POLLPRI);
+          spin_unlock_irqrestore_nopreempt(&fs_ep->spinlock, flags);
         }
     }
   else
     {
       /* Notify all of the char device */
 
-      for (cnt = 0; cnt < devinfo->nendpoints; cnt++)
+      for (cnt = 0; cnt < devinfo->nendpoints + 1; cnt++)
         {
           fs_ep = &fs->eps[cnt];
+          flags = spin_lock_irqsave_nopreempt(&fs_ep->spinlock);
           usbdev_fs_notify(fs_ep, POLLERR | POLLHUP);
+          spin_unlock_irqrestore_nopreempt(&fs_ep->spinlock, flags);
         }
     }
-
-  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -935,31 +994,75 @@ static int usbdev_fs_ep_bind(FAR struct usbdev_s *dev, uint8_t epno,
                              FAR const struct usbdev_epinfo_s *epinfo,
                              FAR struct usbdev_fs_ep_s *fs_ep)
 {
-#ifdef CONFIG_USBDEV_DUALSPEED
-  uint16_t reqsize = epinfo->hssize;
+#if defined(CONFIG_USBDEV_SUPERSPEED)
+  size_t reqsize = epinfo->sssize;
+#elif defined(CONFIG_USBDEV_DUALSPEED)
+  size_t reqsize = epinfo->hssize;
 #else
-  uint16_t reqsize = epinfo->fssize;
+  size_t reqsize = epinfo->fssize;
 #endif
   uint16_t i;
 
   /* Initialize fs ep lock */
 
   nxmutex_init(&fs_ep->lock);
+  spin_lock_init(&fs_ep->spinlock);
 
   /* Initialize request queue */
 
   sq_init(&fs_ep->reqq);
+  sq_init(&fs_ep->ctrlreqq);
+  sq_init(&fs_ep->ctrlreqq_free);
 
   /* Pre-allocate the endpoint */
 
-  fs_ep->ep = DEV_ALLOCEP(dev, epno,
-                          USB_ISEPIN(epinfo->desc.addr),
-                          epinfo->desc.attr & USB_EP_ATTR_XFERTYPE_MASK);
-  if (fs_ep->ep == NULL)
+  if (epno != 0)
     {
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKINALLOCFAIL), 0);
-      return -ENODEV;
+      fs_ep->ep = DEV_ALLOCEP(dev, epno,
+                              USB_ISEPIN(epinfo->desc.addr),
+                              epinfo->desc.attr & USB_EP_ATTR_XFERTYPE_MASK);
+      if (fs_ep->ep == NULL)
+        {
+          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKINALLOCFAIL), 0);
+          return -ENODEV;
+        }
     }
+  else
+    {
+      fs_ep->ep = dev->ep0;
+    }
+
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  if (dev->speed == USB_SPEED_SUPER ||
+      dev->speed == USB_SPEED_SUPER_PLUS)
+    {
+      uint8_t transtpye;
+
+      transtpye = epinfo->desc.attr & USB_EP_ATTR_XFERTYPE_MASK;
+      if (transtpye == USB_EP_ATTR_XFER_BULK)
+        {
+          if (epinfo->compdesc.mxburst >= USB_SS_BULK_EP_MAXBURST)
+            {
+              reqsize = reqsize * USB_SS_BULK_EP_MAXBURST;
+            }
+          else
+            {
+              reqsize = reqsize * (epinfo->compdesc.mxburst + 1);
+            }
+        }
+      else if (transtpye == USB_EP_ATTR_XFER_INT)
+        {
+          if (epinfo->compdesc.mxburst >= USB_SS_INT_EP_MAXBURST)
+            {
+              reqsize = reqsize * USB_SS_INT_EP_MAXBURST;
+            }
+          else
+            {
+              reqsize = reqsize * (epinfo->compdesc.mxburst + 1);
+            }
+        }
+    }
+#endif
 
   fs_ep->ep->fs = fs_ep;
 
@@ -971,6 +1074,17 @@ static int usbdev_fs_ep_bind(FAR struct usbdev_s *dev, uint8_t epno,
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDALLOCREQ), 0);
       return -ENOMEM;
+    }
+
+  if (epno == 0)
+    {
+      fs_ep->ctrlreqbuffer =
+        kmm_zalloc(sizeof(struct usbdev_ctrlreq_s) * epinfo->reqnum);
+      if (!fs_ep->ctrlreqbuffer)
+        {
+          usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDALLOCREQ), 0);
+          return -ENOMEM;
+        }
     }
 
   for (i = 0; i < epinfo->reqnum; i++)
@@ -987,10 +1101,18 @@ static int usbdev_fs_ep_bind(FAR struct usbdev_s *dev, uint8_t epno,
 
       container->req->priv = container;
 
-      if (USB_ISEPIN(epinfo->desc.addr))
+      if (USB_ISEPIN(epinfo->desc.addr) || epno == 0)
         {
           container->req->callback = usbdev_fs_wrcomplete;
           sq_addlast(&container->node, &fs_ep->reqq);
+        }
+
+      if (epno == 0)
+        {
+          FAR struct usbdev_ctrlreq_s *ctrl_container;
+
+          ctrl_container = &fs_ep->ctrlreqbuffer[i];
+          sq_addlast(&ctrl_container->node, &fs_ep->ctrlreqq_free);
         }
     }
 
@@ -1033,11 +1155,19 @@ static void usbdev_fs_ep_unbind(FAR const char *devname,
       fs_ep->reqbuffer = NULL;
     }
 
+  if (fs_ep->ctrlreqbuffer)
+    {
+      kmm_free(fs_ep->ctrlreqbuffer);
+      fs_ep->ctrlreqbuffer = NULL;
+    }
+
   sq_init(&fs_ep->reqq);
+  sq_init(&fs_ep->ctrlreqq);
+  sq_init(&fs_ep->ctrlreqq_free);
 
   /* Release endpoint */
 
-  if (fs_ep->ep != NULL)
+  if (fs_ep->ep != dev->ep0 && fs_ep->ep != NULL)
     {
       fs_ep->ep->fs = NULL;
       DEV_FREEEP(dev, fs_ep->ep);
@@ -1089,7 +1219,7 @@ static void usbdev_fs_classresetconfig(FAR struct usbdev_fs_dev_s *fs)
 
       for (i = 0; i < devinfo->nendpoints; i++)
         {
-          EP_DISABLE(fs->eps[i].ep);
+          EP_DISABLE(fs->eps[i + 1].ep);
         }
     }
 }
@@ -1106,15 +1236,14 @@ static void usbdev_fs_register_driver(FAR void *arg)
 {
   FAR struct usbdev_fs_dev_s *fs = arg;
   FAR struct usbdev_devinfo_s *devinfo = &fs->devinfo;
+  char devname[32];
+  int ret;
   int i;
 
-  for (i = 0; i < devinfo->nendpoints; i++)
+  for (i = 0; i < devinfo->nendpoints + 1; i++)
     {
-      char devname[32];
-      int ret;
-
       snprintf(devname, sizeof(devname), "%s/ep%d",
-               devinfo->name, i + 1);
+               devinfo->name, i);
       ret = register_driver(devname, &g_usbdev_fs_fops, 0666, &fs->eps[i]);
       if (ret < 0)
         {
@@ -1122,7 +1251,7 @@ static void usbdev_fs_register_driver(FAR void *arg)
           while (i--)
             {
               snprintf(devname, sizeof(devname), "%s/ep%d",
-                       devinfo->name, i + 1);
+                       devinfo->name, i);
               unregister_driver(devname);
             }
 
@@ -1144,8 +1273,7 @@ static int usbdev_fs_classsetconfig(FAR struct usbdev_fs_dev_s *fs,
                                     uint8_t config)
 {
   FAR struct usbdev_devinfo_s *devinfo = &fs->devinfo;
-  struct usb_epdesc_s epdesc;
-  bool hispeed = false;
+  struct usb_ss_epdesc_s epdesc;
   uint16_t i;
   uint16_t j;
   int ret;
@@ -1162,17 +1290,13 @@ static int usbdev_fs_classsetconfig(FAR struct usbdev_fs_dev_s *fs,
       return 0;
     }
 
-#ifdef CONFIG_USBDEV_DUALSPEED
-  hispeed = (fs->cdev->usbdev->speed == USB_SPEED_HIGH);
-#endif
-
   for (i = 0; i < devinfo->nendpoints; i++)
     {
-      FAR struct usbdev_fs_ep_s *fs_ep = &fs->eps[i];
+      FAR struct usbdev_fs_ep_s *fs_ep = &fs->eps[i + 1];
 
-      usbdev_copy_epdesc(&epdesc, devinfo->epno[i],
-                         hispeed, devinfo->epinfos[i]);
-      ret = EP_CONFIGURE(fs_ep->ep, &epdesc,
+      usbdev_copy_epdesc(&epdesc.epdesc, devinfo->epno[i],
+                         fs->cdev->usbdev->speed, devinfo->epinfos[i]);
+      ret = EP_CONFIGURE(fs_ep->ep, &epdesc.epdesc,
                          (i == (devinfo->nendpoints - 1)));
       if (ret < 0)
         {
@@ -1222,6 +1346,7 @@ static int usbdev_fs_classbind(FAR struct usbdevclass_driver_s *driver,
     driver, FAR struct usbdev_fs_driver_s, drvr);
   FAR struct usbdev_fs_dev_s *fs = &fs_drvr->dev;
   FAR struct usbdev_devinfo_s *devinfo = &fs->devinfo;
+  struct usbdev_epinfo_s ep0info;
   uint16_t i;
   int ret;
 
@@ -1231,7 +1356,8 @@ static int usbdev_fs_classbind(FAR struct usbdevclass_driver_s *driver,
 
   /* Initialize fs eqs */
 
-  fs->eps = kmm_zalloc(devinfo->nendpoints * sizeof(struct usbdev_fs_ep_s));
+  fs->eps = kmm_zalloc((devinfo->nendpoints + 1) *
+                       sizeof(struct usbdev_fs_ep_s));
   if (fs->eps == NULL)
     {
       uerr("Failed to malloc fs eqs");
@@ -1240,16 +1366,34 @@ static int usbdev_fs_classbind(FAR struct usbdevclass_driver_s *driver,
 
   for (i = 0; i < devinfo->nendpoints; i++)
     {
-      fs->eps[i].dev = fs;
+      fs->eps[i + 1].dev = fs;
       ret = usbdev_fs_ep_bind(dev,
                               devinfo->epno[i],
                               devinfo->epinfos[i],
-                              &fs->eps[i]);
+                              &fs->eps[i + 1]);
       if (ret < 0)
         {
           uerr("Failed to bind fs ep");
           goto errout;
         }
+    }
+
+  /* Initialize fs ep0 */
+
+  ep0info.fssize = fs->cdev->cfgdescsize;
+#ifdef CONFIG_USBDEV_DUALSPEED
+  ep0info.hssize = fs->cdev->cfgdescsize;
+#endif
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  ep0info.sssize = fs->cdev->cfgdescsize;
+#endif
+  ep0info.reqnum = CONFIG_USBDEV_FS_NEP0REQS;
+  fs->eps[0].dev = fs;
+  ret = usbdev_fs_ep_bind(dev, 0, &ep0info, &fs->eps[0]);
+  if (ret < 0)
+    {
+      uerr("Failed to bind fs ep0");
+      goto errout;
     }
 
   return OK;
@@ -1274,19 +1418,30 @@ static void usbdev_fs_classunbind(FAR struct usbdevclass_driver_s *driver,
     driver, FAR struct usbdev_fs_driver_s, drvr);
   FAR struct usbdev_fs_dev_s *fs = &fs_drvr->dev;
   FAR struct usbdev_devinfo_s *devinfo = &fs->devinfo;
+  struct usbdev_epinfo_s ep0info;
   bool do_free = true;
   char devname[32];
   uint16_t i;
 
   if (fs->eps != NULL)
     {
-      for (i = 0; i < devinfo->nendpoints; i++)
+      ep0info.reqnum = CONFIG_USBDEV_FS_NEP0REQS;
+      for (i = 0; i < devinfo->nendpoints + 1; i++)
         {
+          FAR const struct usbdev_epinfo_s *epinfo;
+
+          if (i == 0)
+            {
+              epinfo = &ep0info;
+            }
+          else
+            {
+              epinfo = devinfo->epinfos[i - 1];
+            }
+
           snprintf(devname, sizeof(devname), "%s/ep%d",
-                   devinfo->name, i + 1);
-          usbdev_fs_ep_unbind(devname, dev,
-                              devinfo->epinfos[i],
-                              &fs->eps[i]);
+                   devinfo->name, i);
+          usbdev_fs_ep_unbind(devname, dev, epinfo, &fs->eps[i]);
           if (fs->eps[i].crefs > 0)
             {
               do_free = false;
@@ -1335,7 +1490,28 @@ static int usbdev_fs_classsetup(FAR struct usbdevclass_driver_s *driver,
     }
   else
     {
-      /* send to userspace???? */
+      FAR struct usbdev_fs_ep_s *ep0 = &fs->eps[0];
+      irqstate_t flags = spin_lock_irqsave_nopreempt(&ep0->spinlock);
+
+      if (!sq_empty(&ep0->ctrlreqq_free))
+        {
+          FAR struct usbdev_ctrlreq_s *container;
+
+          container = container_of(sq_remfirst(&ep0->ctrlreqq_free),
+                                   struct usbdev_ctrlreq_s, node);
+
+          memcpy(&container->req, ctrl, sizeof(*ctrl));
+
+          sq_addlast(&container->node, &ep0->ctrlreqq);
+          usbdev_fs_notify(ep0, POLLIN);
+          ret = OK;
+        }
+      else
+        {
+          uerr("Failed to find free control request for ep0");
+        }
+
+      spin_unlock_irqrestore_nopreempt(&ep0->spinlock, flags);
     }
 
   /* Returning a negative value will cause a STALL */
@@ -1465,7 +1641,7 @@ void usbdev_fs_classuninitialize(FAR struct usbdevclass_driver_s *classdev)
   int i;
 
   fs->uninitialized = true;
-  for (i = 0; i < fs->devinfo.nendpoints; i++)
+  for (i = 0; i < fs->devinfo.nendpoints + 1; i++)
     {
       if (fs->eps != NULL && fs->eps[i].crefs > 0)
         {

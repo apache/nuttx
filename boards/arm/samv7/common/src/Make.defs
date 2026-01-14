@@ -1,6 +1,8 @@
 #############################################################################
 # boards/arm/samv7/common/src/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -42,6 +44,10 @@ endif
 
 ifeq ($(CONFIG_SAMV7_GPIO_ENC),y)
 CSRCS += sam_gpio_enc.c
+endif
+
+ifeq ($(CONFIG_SAMV7_UART_RXDMA_POLL),y)
+CSRCS += sam_uart_rxdma_poll.c
 endif
 
 DEPPATH += --dep-path src

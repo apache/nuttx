@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f401rc-rs485/src/stm32_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -63,8 +65,40 @@
 #include "stm32_hcsr04.h"
 #endif
 
+#ifdef CONFIG_LCD_MAX7219
+#include "stm32_max7219_matrix.h"
+#endif
+
+#ifdef CONFIG_CL_MFRC522
+#include "stm32_mfrc522.h"
+#endif
+
 #ifdef CONFIG_STEPPER_DRV8825
 #include "stm32_drv8266.h"
+#endif
+
+#ifdef CONFIG_SENSORS_BMP280
+#include "stm32_bmp280.h"
+#endif
+
+#ifdef CONFIG_LCD_BACKPACK
+#include "stm32_lcd_backpack.h"
+#endif
+
+#ifdef CONFIG_WS2812
+#include "stm32_ws2812.h"
+#endif
+
+#ifdef CONFIG_SENSORS_BMP180
+#include "stm32_bmp180.h"
+#endif
+
+#ifdef CONFIG_SENSORS_MAX31855
+#include "stm32_max31855.h"
+#endif
+
+#ifdef CONFIG_SENSORS_MAX6675
+#include "stm32_max6675.h"
 #endif
 
 /****************************************************************************
@@ -156,6 +190,24 @@ int stm32_bringup(void)
   stm32_i2ctool();
 #endif
 
+#ifdef CONFIG_SENSORS_MAX31855
+  /* Register device 0 on spi channel 1 */
+
+  ret = board_max31855_initialize(0, 1);
+  if (ret < 0)
+    {
+      serr("ERROR:  stm32_max31855initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_MAX6675
+  ret = board_max6675_initialize(0, 1);
+  if (ret < 0)
+    {
+      serr("ERROR:  stm32_max6675initialize failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_I2C_EE_24XX
   ret = stm32_at24_init("/dev/eeprom");
   if (ret < 0)
@@ -185,7 +237,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ADC
+#if defined(CONFIG_ADC) && defined(CONFIG_STM32_ADC1)
   /* Initialize ADC and register the ADC driver. */
 
   ret = stm32_adc_setup();
@@ -202,6 +254,17 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_LCD_MAX7219
+  /* Configure and initialize the MAX7219 driver */
+
+  ret = board_max7219_matrix_initialize(1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, \
+       "ERROR: board_max7219_matrix_initialize failed: %d\n", ret);
     }
 #endif
 
@@ -268,6 +331,75 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_drv8825_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_CL_MFRC522
+  ret = stm32_mfrc522initialize("/dev/rfid0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_mfrc522initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_BMP280
+  /* Initialize the BMP280 pressure sensor. */
+
+  ret = board_bmp280_initialize(0, 1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize BMP280, error %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_LCD_BACKPACK
+  /* slcd:0, i2c:1, rows=2, cols=16 */
+
+  ret = board_lcd_backpack_init(0, 1, 2, 16);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize PCF8574 LCD, error %d\n", ret);
+      return ret;
+    }
+#endif
+
+#if defined(CONFIG_WS2812) && defined(CONFIG_WS2812_LED_COUNT)
+  /* Configure and initialize the WS2812 LEDs. */
+
+  ret = board_ws2812_initialize(0, WS2812_SPI, CONFIG_WS2812_LED_COUNT);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_ws2812_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DEV_GPIO
+  /* Initialize GPIO driver */
+
+  ret = stm32_gpio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_gpio_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_BMP180
+  /* Initialize the BMP180 pressure sensor. */
+
+  ret = board_bmp180_initialize(0, 1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize BMP180, error %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ADC_HX711
+  ret = stm32_hx711_initialize();
+  if (ret != OK)
+    {
+      aerr("ERROR: Failed to initialize hx711: %d\n", ret);
     }
 #endif
 

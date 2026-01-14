@@ -14,6 +14,12 @@ config SEGGER_RTT
 
 if SEGGER_RTT
 
+config SEGGER_SYSVIEW_TARGET_SOURCE
+	string "Segger SystemView target sources version"
+	default "356"
+	---help---
+		The Segger SystemView target sources version to use.
+
 config SEGGER_RTT_SECTION
 	string "Segger RTT Control Block Section"
 	default ""
@@ -33,9 +39,16 @@ config SEGGER_RTT_CPU_CACHE_LINE_SIZE
 	---help---
 		Largest cache line size (in bytes) in the target system.
 
+config SEGGER_RTT_UNCACHED_OFF_VARIABLE
+	bool
+	default n
+	---help---
+		Converting the macro for Segger RTT uncached offset to variable representation
+
 config SEGGER_RTT_UNCACHED_OFF
 	int "Segger RTT uncached offset"
 	default 0
+	depends on !SEGGER_RTT_UNCACHED_OFF_VARIABLE
 	---help---
 		Address alias where RTT CB and buffers can be accessed uncached
 
@@ -245,6 +258,12 @@ config SEGGER_SYSVIEW_RAM_BASE
 	default 0
 	---help---
 		The lowest RAM address used for IDs
+
+config SEGGER_SYSVIEW_POST_MORTEM
+	bool "Segger System View post-mortem mode"
+	default n
+	---help---
+		Configures the System View to record continuously in circular buffer
 
 endif # SEGGER_SYSVIEW
 

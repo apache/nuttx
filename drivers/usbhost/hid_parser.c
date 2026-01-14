@@ -1,12 +1,10 @@
 /****************************************************************************
  * drivers/usbhost/hid_parser.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *
- * Adapted from the LUFA Library:
- *
- *   Copyright 2011  Dean Camera (dean [at] fourwalledcubicle [dot] com)
- *   dean [at] fourwalledcubicle [dot] com, www.lufa-lib.org
+ * SPDX-License-Identifier: X11
+ * SPDX-FileCopyrightText: 2011 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2011 Dean Camera (dean@fourwalledcubicle.com)
+ * SPDX-FileContributor: dean@fourwalledcubicle.com, www.lufa-lib.org
  *
  * Permission to use, copy, modify, distribute, and sell this
  * software and its documentation for any purpose is hereby granted

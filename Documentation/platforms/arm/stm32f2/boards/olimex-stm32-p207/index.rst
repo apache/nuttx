@@ -2,6 +2,8 @@
 Olimex STM32-P207
 =================
 
+.. tags:: chip:stm32, chip:stm32f2, chip:stm32f207
+
 The NuttX configuration for the Olimex STM32-P207 is assembled mainly
 from the configurations stm32f4discovery and stm3240g-eval.
 

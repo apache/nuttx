@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/bch/bchdev_register.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -48,17 +50,17 @@
  ****************************************************************************/
 
 int bchdev_register(FAR const char *blkdev, FAR const char *chardev,
-                    bool readonly)
+                    int oflags)
 {
   FAR void *handle;
   int ret;
 
-  finfo("blkdev=\"%s\" chardev=\"%s\" readonly=%c\n",
-        blkdev, chardev, readonly ? 'T' : 'F');
+  finfo("blkdev=\"%s\" chardev=\"%s\" oflags=0x%x\n",
+        blkdev, chardev, oflags);
 
   /* Setup the BCH lib functions */
 
-  ret = bchlib_setup(blkdev, readonly, &handle);
+  ret = bchlib_setup(blkdev, oflags, &handle);
   if (ret < 0)
     {
       ferr("ERROR: bchlib_setup failed: %d\n", -ret);

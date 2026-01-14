@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/at32/at32_rtc_lowerhalf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -511,6 +513,7 @@ static int at32_setrelative(struct rtc_lowerhalf_s *lower,
   struct tm time;
   time_t seconds;
   int ret = -EINVAL;
+  irqstate_t flags;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL);
   DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
@@ -522,7 +525,7 @@ static int at32_setrelative(struct rtc_lowerhalf_s *lower,
        * about being suspended and working on an old time.
        */
 
-      sched_lock();
+      flags = enter_critical_section();
 
       /* Get the current time in broken out format */
 
@@ -552,7 +555,7 @@ static int at32_setrelative(struct rtc_lowerhalf_s *lower,
           ret = at32_setalarm(lower, &setalarm);
         }
 
-      sched_unlock();
+      leave_critical_section(flags);
     }
 
   return ret;
@@ -565,6 +568,7 @@ static int at32_setrelative(struct rtc_lowerhalf_s *lower,
 #endif
   struct timespec ts;
   int ret = -EINVAL;
+  irqstate_t flags;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->id == 0);
   priv = (struct at32_lowerhalf_s *)lower;
@@ -575,7 +579,7 @@ static int at32_setrelative(struct rtc_lowerhalf_s *lower,
        * about being suspended and working on an old time.
        */
 
-      sched_lock();
+      flags = enter_critical_section();
 
       /* Get the current time in seconds */
 
@@ -585,7 +589,7 @@ static int at32_setrelative(struct rtc_lowerhalf_s *lower,
       ret = up_rtc_getdatetime(&time);
       if (ret < 0)
         {
-          sched_unlock();
+          leave_critical_section(flags);
           return ret;
         }
 
@@ -598,7 +602,7 @@ static int at32_setrelative(struct rtc_lowerhalf_s *lower,
       ret = up_rtc_gettime(&ts);
       if (ret < 0)
         {
-          sched_unlock();
+          leave_critical_section(flags);
           return ret;
         }
 #else
@@ -629,7 +633,7 @@ static int at32_setrelative(struct rtc_lowerhalf_s *lower,
           cbinfo->priv = NULL;
         }
 
-      sched_unlock();
+      leave_critical_section(flags);
     }
 
   return ret;
@@ -734,6 +738,7 @@ static int at32_rdalarm(struct rtc_lowerhalf_s *lower,
 {
   struct alm_rdalarm_s lowerinfo;
   int ret = -EINVAL;
+  irqstate_t flags;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->time != NULL);
   DEBUGASSERT(alarminfo->id == RTC_ALARMA || alarminfo->id == RTC_ALARMB);
@@ -744,14 +749,14 @@ static int at32_rdalarm(struct rtc_lowerhalf_s *lower,
        * about being suspended and working on an old time.
        */
 
-      sched_lock();
+      flags = enter_critical_section();
 
       lowerinfo.ar_id   = alarminfo->id;
       lowerinfo.ar_time = alarminfo->time;
 
       ret = at32_rtc_rdalarm(&lowerinfo);
 
-      sched_unlock();
+      leave_critical_section(flags);
     }
 
   return ret;

@@ -1,6 +1,8 @@
 #############################################################################
 # boards/xtensa/esp32s3/common/src/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -36,7 +38,11 @@ ifeq ($(CONFIG_SPI_DRIVER),y)
   CSRCS += esp32s3_board_spidev.c
 endif
 
-ifeq ($(CONFIG_ESP32S3_WIFI),y)
+ifeq ($(CONFIG_SPI_SLAVE_DRIVER),y)
+  CSRCS += esp32s3_board_spislavedev.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
   CSRCS += esp32s3_board_wlan.c
 endif
 
@@ -44,12 +50,16 @@ ifeq ($(CONFIG_I2C_DRIVER),y)
   CSRCS += esp32s3_board_i2c.c
 endif
 
-ifeq ($(CONFIG_ESP32S3_I2S),y)
+ifeq ($(CONFIG_ESPRESSIF_I2S),y)
   CSRCS += esp32s3_board_i2s.c
 endif
 
 ifeq ($(CONFIG_AUDIO_CS4344),y)
   CSRCS += esp32s3_cs4344.c
+endif
+
+ifeq ($(CONFIG_AUDIO_ES8311),y)
+  CSRCS += esp32s3_es8311.c
 endif
 
 ifeq ($(CONFIG_SENSORS_BMP180),y)
@@ -60,12 +70,16 @@ ifeq ($(CONFIG_ESP32S3_OTG),y)
   CSRCS += esp32s3_board_usb.c
 endif
 
-ifeq ($(CONFIG_ESP32S3_ADC),y)
+ifeq ($(CONFIG_ESPRESSIF_ADC),y)
   CSRCS += esp32s3_board_adc.c
 endif
 
 ifeq ($(CONFIG_NET_LAN9250),y)
   CSRCS += esp32s3_lan9250.c
+endif
+
+ifeq ($(CONFIG_ESP_PCNT),y)
+  CSRCS += esp32s3_board_pcnt.c
 endif
 
 ifeq ($(CONFIG_ESP_RMT),y)
@@ -76,8 +90,47 @@ ifeq ($(CONFIG_ESP_MCPWM),y)
   CSRCS += esp32s3_board_mcpwm.c
 endif
 
+ifeq ($(CONFIG_MMCSD_SPI),y)
+  CSRCS += esp32s3_board_sdmmc.c
+endif
+
+ifeq ($(CONFIG_ESP32S3_SDMMC),y)
+  CSRCS += esp32s3_board_sdmmc.c
+endif
+
+ifeq ($(CONFIG_USBMSC),y)
+  CSRCS += esp32s3_usbmsc.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_LEDC),y)
+CSRCS += esp32s3_board_ledc.c
+endif
+
+ifeq ($(CONFIG_ETC_ROMFS),y)
+  RCSRCS  = etc/init.d/rc.sysinit etc/init.d/rcS
+ifeq ($(CONFIG_TXTABLE_PARTITION),y)
+  RCRAWS  = etc/txtable.txt
+endif
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_ULP_USE_TEST_BIN),y)
+  include $(TOPDIR)$(DELIM)Documentation$(DELIM)platforms$(DELIM)xtensa$(DELIM)esp32s3$(DELIM)boards$(DELIM)esp32s3-devkit$(DELIM)ulp_makefile
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
+
+ifeq ($(CONFIG_DEV_GPIO),y)
+ifeq ($(CONFIG_ESPRESSIF_USE_ULP_RISCV_CORE),y)
+  CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
+  CHIPHALDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)chip$(DELIM)esp-hal-3rdparty
+  CFLAGS += -Wno-undef
+  CFLAGS += ${INCDIR_PREFIX}$(CHIPHALDIR)$(DELIM)nuttx$(DELIM)$(CHIP_SERIES)$(DELIM)include
+  CFLAGS += ${INCDIR_PREFIX}$(CHIPHALDIR)$(DELIM)components$(DELIM)esp_common$(DELIM)include
+  CFLAGS += ${INCDIR_PREFIX}$(CHIPHALDIR)$(DELIM)components$(DELIM)soc$(DELIM)$(CHIP_SERIES)$(DELIM)include
+  CFLAGS += ${INCDIR_PREFIX}$(CHIPHALDIR)$(DELIM)components$(DELIM)soc$(DELIM)$(CHIP_SERIES)$(DELIM)register
+endif
+endif
 
 endif

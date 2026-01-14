@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_lowputc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -199,6 +201,25 @@
 #        define STM32_CONSOLE_RS485_DIR_POLARITY true
 #      endif
 #    endif
+#  elif defined(CONFIG_LPUART1_SERIAL_CONSOLE)
+#    define STM32_CONSOLE_BASE     STM32_LPUART1_BASE
+#    define STM32_APBCLOCK         STM32_PCLK1_FREQUENCY
+#    define STM32_CONSOLE_APBREG   STM32_RCC_APB1ENR2
+#    define STM32_CONSOLE_APBEN    RCC_APB1ENR2_LPUART1EN
+#    define STM32_CONSOLE_BAUD     CONFIG_LPUART1_BAUD
+#    define STM32_CONSOLE_BITS     CONFIG_LPUART1_BITS
+#    define STM32_CONSOLE_PARITY   CONFIG_LPUART1_PARITY
+#    define STM32_CONSOLE_2STOP    CONFIG_LPUART1_2STOP
+#    define STM32_CONSOLE_TX       GPIO_LPUART1_TX
+#    define STM32_CONSOLE_RX       GPIO_LPUART1_RX
+#    ifdef CONFIG_LPUART1_RS485
+#      define STM32_CONSOLE_RS485_DIR GPIO_LPUART1_RS485_DIR
+#      if (CONFIG_LPUART1_RS485_DIR_POLARITY == 0)
+#        define STM32_CONSOLE_RS485_DIR_POLARITY false
+#      else
+#        define STM32_CONSOLE_RS485_DIR_POLARITY true
+#      endif
+#    endif
 #  endif
 
 /* CR1 settings */
@@ -277,38 +298,50 @@
 #  undef USE_OVER8
 
 /* Calculate USART BAUD rate divider */
+#  if CONSOLE_LPUART > 0 && defined(CONFIG_STM32_STM32G4XXX)
 
-#  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
+      /* BRR = (256 * (APBCLOCK / Prescaler)) / (Baud rate)
+       * With Prescaler == 16, BRR = (16 * APBCLOCK / (Baud rate)
+       * Set Prescaler to 16 to support wide range of standard baud rates
+       */
 
-/* Baud rate for standard USART (SPI mode included):
- *
- * In case of oversampling by 16, the equation is:
- *   baud    = fCK / UARTDIV
- *   UARTDIV = fCK / baud
- *
- * In case of oversampling by 8, the equation is:
- *
- *   baud    = 2 * fCK / UARTDIV
- *   UARTDIV = 2 * fCK / baud
- */
+#    define STM32_BRR_VALUE \
+            (((STM32_APBCLOCK & 0xf0000000) / STM32_CONSOLE_BAUD) << 4) + \
+            (((STM32_APBCLOCK & 0x0fffffff) << 4) / STM32_CONSOLE_BAUD)
+#    define STM32_PRESC_VALUE 0x7
 
-#    define STM32_USARTDIV8 \
-      (((STM32_APBCLOCK << 1) + (STM32_CONSOLE_BAUD >> 1)) / STM32_CONSOLE_BAUD)
-#    define STM32_USARTDIV16 \
-      ((STM32_APBCLOCK + (STM32_CONSOLE_BAUD >> 1)) / STM32_CONSOLE_BAUD)
+#  else
 
+#    if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+        defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
+
+  /* Baud rate for standard USART (SPI mode included):
+   *
+   * In case of oversampling by 16, the equation is:
+   *   baud    = fCK / UARTDIV
+   *   UARTDIV = fCK / baud
+   *
+   * In case of oversampling by 8, the equation is:
+   *
+   *   baud    = 2 * fCK / UARTDIV
+   *   UARTDIV = 2 * fCK / baud
+   */
+
+#      define STM32_USARTDIV8 \
+        (((STM32_APBCLOCK << 1) + (STM32_CONSOLE_BAUD >> 1)) / STM32_CONSOLE_BAUD)
+#      define STM32_USARTDIV16 \
+        ((STM32_APBCLOCK + (STM32_CONSOLE_BAUD >> 1)) / STM32_CONSOLE_BAUD)
 /* Use oversamply by 8 only if the divisor is small.  But what is small? */
 
-#    if STM32_USARTDIV8 > 100
-#      define STM32_BRR_VALUE STM32_USARTDIV16
-#    else
-#      define USE_OVER8 1
-#      define STM32_BRR_VALUE \
-        ((STM32_USARTDIV8 & 0xfff0) | ((STM32_USARTDIV8 & 0x000f) >> 1))
-#    endif
+#      if STM32_USARTDIV8 > 100
+#        define STM32_BRR_VALUE STM32_USARTDIV16
+#      else
+#        define USE_OVER8 1
+#        define STM32_BRR_VALUE \
+          ((STM32_USARTDIV8 & 0xfff0) | ((STM32_USARTDIV8 & 0x000f) >> 1))
+#      endif
 
-#  else /* CONFIG_STM32_STM32F30XX */
+#    else /* CONFIG_STM32_STM32F30XX */
 
 /* The baud rate for the receiver and transmitter (Rx and Tx) are both set
  * to the same value as programmed in the Mantissa and Fraction values of
@@ -329,7 +362,7 @@
  * lose precision).  Eg. (same fCK and baud), usartdiv32 = 1250
  */
 
-#    define STM32_USARTDIV32 (STM32_APBCLOCK / (STM32_CONSOLE_BAUD >> 1))
+#      define STM32_USARTDIV32 (STM32_APBCLOCK / (STM32_CONSOLE_BAUD >> 1))
 
 /* The mantissa is then usartdiv32 / 32:
  *
@@ -338,7 +371,7 @@
  * Eg. usartdiv32=1250, mantissa = 39
  */
 
-#    define STM32_MANTISSA (STM32_USARTDIV32 >> 5)
+#      define STM32_MANTISSA (STM32_USARTDIV32 >> 5)
 
 /* And the fraction:
  *
@@ -347,16 +380,17 @@
  * Eg., (1,250 - 39*32 + 1)/2 = 1 (or 0.0625)
  */
 
-#    define STM32_FRACTION \
-      ((STM32_USARTDIV32 - (STM32_MANTISSA << 5) + 1) >> 1)
+#      define STM32_FRACTION \
+        ((STM32_USARTDIV32 - (STM32_MANTISSA << 5) + 1) >> 1)
 
-/* And, finally, the BRR value is: */
+  /* And, finally, the BRR value is: */
 
-#    define STM32_BRR_VALUE \
-      ((STM32_MANTISSA << USART_BRR_MANT_SHIFT) | \
-       (STM32_FRACTION << USART_BRR_FRAC_SHIFT))
+  #    define STM32_BRR_VALUE \
+        ((STM32_MANTISSA << USART_BRR_MANT_SHIFT) | \
+         (STM32_FRACTION << USART_BRR_FRAC_SHIFT))
 
-#  endif /* CONFIG_STM32_STM32F30XX */
+#    endif /* CONFIG_STM32_STM32F30XX */
+#  endif /* CONSOLE_LPUART > 0 */
 #endif /* HAVE_CONSOLE */
 
 /****************************************************************************
@@ -631,6 +665,10 @@ void stm32_lowsetup(void)
   putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR3_OFFSET);
 
   /* Configure the USART Baud Rate */
+
+#if CONSOLE_LPUART > 0 && defined(CONFIG_STM32_STM32G4XXX)
+  putreg32(STM32_PRESC_VALUE, STM32_CONSOLE_BASE + STM32_USART_PRESC_OFFSET);
+#endif
 
   putreg32(STM32_BRR_VALUE, STM32_CONSOLE_BASE + STM32_USART_BRR_OFFSET);
 

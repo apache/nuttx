@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/mx8mp/hardware/mx8mp_ccm.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -346,9 +348,9 @@
 #define AUDIO_PLL2_CLK               36
 #define VIDEO_PLL_CLK                37
 
-/* Theses definitions values are arbitrary: previous definitions
+/* These definitions values are arbitrary: previous definitions
  * are used in both PLL_CTRL and clock tree mapping while
- * theses definitions have no meaning for PLL_CTR (since they are
+ * these definitions have no meaning for PLL_CTR (since they are
  * external clock source) but are still use in clock tree mapping.
  */
 

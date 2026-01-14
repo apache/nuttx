@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/uuid/lib_uuid_from_string.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,7 +44,7 @@
  *
  ****************************************************************************/
 
-void uuid_from_string(const char *s, uuid_t *u, uint32_t *status)
+void uuid_from_string(FAR const char *s, FAR uuid_t *u, FAR uint32_t *status)
 {
   int n;
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f429i-disco/src/stm32_highpri.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -479,7 +481,7 @@ int highpri_main(int argc, char *argv[])
 
       adc1->ad_ops->ao_ioctl(adc1, IO_TRIGGER_REG, 0);
 
-      nxsig_usleep(100);
+      nxsched_usleep(100);
 #endif
 
 #ifdef HIGHPRI_HAVE_INJECTED
@@ -487,7 +489,7 @@ int highpri_main(int argc, char *argv[])
 
       adc1->ad_ops->ao_ioctl(adc1, IO_TRIGGER_INJ, 0);
 
-      nxsig_usleep(100);
+      nxsched_usleep(100);
 #endif
       /* Lock global data */
 
@@ -523,7 +525,7 @@ int highpri_main(int argc, char *argv[])
 
       g_highpri.lock = false;
 
-      nxsig_sleep(1);
+      nxsched_sleep(1);
     }
 
 errout:

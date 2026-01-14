@@ -1,6 +1,8 @@
 ############################################################################
 # arch/z80/src/ez80/Toolchain.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -36,7 +38,7 @@ ifeq ($(CONFIG_EZ80_TOOLCHAIN_CLANG),y)
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHASMOPTIMIZATION =
-  ARCHOPTIMIZATION = -g
+  ARCHOPTIMIZATION = $(CONFIG_DEBUG_SYMBOLS_LEVEL)
 else
   ARCHASMOPTIMIZATION =
   ARCHOPTIMIZATION =
@@ -100,6 +102,7 @@ STRIP = $(CROSSDEV)strip --strip-unneeded
 LD = $(CROSSDEV)ld
 AS = $(CROSSDEV)as
 AR = $(CROSSDEV)ar -r
+UNAR = $(CROSSDEV)ar -x
 OBJCOPY= $(CROSSDEV)objcopy
 
 # File extensions
@@ -209,3 +212,16 @@ LIBEXT = .lib
 EXEEXT = .lod
 
 endif
+
+# Loadable module definitions
+
+CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden
+LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
+
+# ELF module definitions
+
+CELFFLAGS = $(CFLAGS) -fvisibility=hidden
+CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
+
+LDELFFLAGS = -r -e _start
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)elf$(DELIM)gnu-elf.ld)

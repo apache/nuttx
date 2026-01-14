@@ -1,6 +1,8 @@
 ESP32-PICO-KIT V4
 =================
 
+.. tags:: chip:esp32, chip:esp32picod4
+
 This guide shows how to get started with the ESP32-PICO-KIT V4/V4.1 mini development board.
 
 This particular description covers ESP32-PICO-KIT V4 and V4.1. The difference is the upgraded USB-UART bridge from CP2102 in V4 with up to 1 Mbps transfer rates to CP2102N in V4.1 with up to 3 Mbps transfer rates.

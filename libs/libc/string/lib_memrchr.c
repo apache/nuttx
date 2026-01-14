@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/string/lib_memrchr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,7 +46,7 @@
  *
  ****************************************************************************/
 
-#undef memrchr /* See mm/README.txt */
+#undef memrchr
 FAR void *memrchr(FAR const void *s, int c, size_t n)
 {
   FAR const unsigned char *p = (FAR const unsigned char *)s + n;

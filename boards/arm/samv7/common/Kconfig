@@ -62,6 +62,37 @@ config SAMV7_HSMCI0_MOUNT_MOUNTPOINT
 
 endif # SAMV7_HSMCI0_MOUNT
 
+config SAMV7_UART_RXDMA_POLL
+	bool "Enable U(S)ART RX DMA Polling"
+	default n
+	depends on UART0_RXDMA || UART1_RXDMA || UART2_RXDMA || UART3_RXDMA || \
+	           UART4_RXDMA || USART0_RXDMA || USART1_RXDMA || USART2_RXDMA
+	---help---
+		UART peripheral with RX DMA need periodic polling that checks the received
+		DMA buffers for received bytes that have not accumulated to the point
+		where the DMA interrupt has triggered.
+
+if SAMV7_UART_RXDMA_POLL
+
+config SAMV7_UART_RXDMA_POLL_TIMER
+	int "Timer channel to trigger polling"
+	default 0
+	range 0 11
+	---help---
+		The number of timer channel to trigger the polling. Values from 0 to 11
+		are available. Be careful not to assign the same channel that is
+		already configured to other peripheral (ADC trigger for example).
+
+config SAMV7_UART_RXDMA_POLL_FREQUENCY
+	int "Timer frequency"
+	default 1000
+	---help---
+		Frequency of the timer to trigger the polling. You might want to keep
+		this reasonably low to avoid unnecessary overhead and negate
+		DMA benefit.
+
+endif # SAMV7_UART_RXDMA_POLL
+
 config SAMV7_PROGMEM_OTA_PARTITION
 	bool
 	default n

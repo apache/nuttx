@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32h7/stm32h745i-disco/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -501,6 +503,11 @@
 
 #define GPIO_USART3_RX   (GPIO_USART3_RX_1 | GPIO_SPEED_100MHz)  /* PB11 */
 #define GPIO_USART3_TX   (GPIO_USART3_TX_1 | GPIO_SPEED_100MHz)  /* PB10 */
+
+/* UART7 (Discovery Virtual Console) */
+
+#define GPIO_UART7_RX   (GPIO_UART7_RX_1 | GPIO_SPEED_100MHz)  /* PA8 */
+#define GPIO_UART7_TX   (GPIO_UART7_TX_2 | GPIO_SPEED_100MHz)  /* PB4 */
 
 /* I2C4 - Used by Touchscreen and Audio Codec */
 

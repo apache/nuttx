@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libm/libm/lib_sincosl.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,7 +44,7 @@
 #ifdef CONFIG_HAVE_LONG_DOUBLE
 
 nooptimiziation_function
-void sincosl(long double x, long double *s, long double *c)
+void sincosl(long double x, FAR long double *s, FAR long double *c)
 {
   *s = sinl(x);
   *c = cosl(x);

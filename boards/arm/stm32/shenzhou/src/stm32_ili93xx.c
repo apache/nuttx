@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/shenzhou/src/stm32_ili93xx.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -348,7 +350,7 @@
 #define ILI9919_ID            0x9919
 
 /****************************************************************************
- * Private Type Definition
+ * Private Types
  ****************************************************************************/
 
 /* LCD type */
@@ -805,39 +807,6 @@ static void stm32_setcursor(struct stm32_dev_s *priv,
       stm32_writereg(priv, LCD_REG_33, col); /* GRAM horizontal address */
     }
 }
-
-/****************************************************************************
- * Name:  stm32_dumprun
- *
- * Description:
- *   Dump the contexts of the run buffer:
- *
- *  run     - The buffer in containing the run read to be dumped
- *  npixels - The number of pixels to dump
- *
- ****************************************************************************/
-
-#if 0 /* Sometimes useful */
-static void stm32_dumprun(const char *msg,
-                          uint16_t *run, size_t npixels)
-{
-  int i;
-  int j;
-
-  syslog(LOG_DEBUG, "\n%s:\n", msg);
-  for (i = 0; i < npixels; i += 16)
-    {
-      up_putc(' ');
-      syslog(LOG_DEBUG, " ");
-      for (j = 0; j < 16; j++)
-        {
-          syslog(LOG_DEBUG, " %04x", *run++);
-        }
-
-      up_putc('\n');
-    }
-}
-#endif
 
 /****************************************************************************
  * Name:  stm32_putrun
@@ -1431,7 +1400,7 @@ static void stm32_lcd9300init(struct stm32_dev_s *priv,
 
   stm32_writereg(priv, LCD_REG_96,  0x2700); /* Driver Output Control */
   stm32_writereg(priv, LCD_REG_97,  0x0001); /* Driver Output Control */
-  stm32_writereg(priv, LCD_REG_106, 0x0000); /* Vertical Srcoll Control */
+  stm32_writereg(priv, LCD_REG_106, 0x0000); /* Vertical Scroll Control */
 
   stm32_writereg(priv, LCD_REG_128, 0x0000); /* Display Position? Partial Display 1 */
   stm32_writereg(priv, LCD_REG_129, 0x0000); /* RAM Address Start? Partial Display 1 */

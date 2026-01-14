@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/inode/inode.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,8 +37,11 @@
 #include <sched.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/sched.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/lib/lib.h>
+
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -60,28 +65,28 @@
     { \
       if ((d)->buffer != NULL) \
         { \
-          lib_free((d)->buffer); \
+          fs_heap_free((d)->buffer); \
           (d)->buffer  = NULL; \
         } \
     } \
   while (0)
 
 #if CONFIG_FS_BACKTRACE > 0
-#  define FS_ADD_BACKTRACE(filep) \
+#  define FS_ADD_BACKTRACE(fd) \
      do \
        { \
           int n = sched_backtrace(_SCHED_GETTID(), \
-                                  (filep)->f_backtrace, \
+                                  (fd)->f_backtrace, \
                                   CONFIG_FS_BACKTRACE, \
                                   CONFIG_FS_BACKTRACE_SKIP); \
           if (n < CONFIG_FS_BACKTRACE) \
             { \
-              (filep)->f_backtrace[n] = NULL; \
+              (fd)->f_backtrace[n] = NULL; \
             } \
        } \
      while (0)
 #else
-#  define FS_ADD_BACKTRACE(filep)
+#  define FS_ADD_BACKTRACE(fd)
 #endif
 
 /****************************************************************************
@@ -101,7 +106,7 @@
  *  relpath  - INPUT:  (not used)
  *             OUTPUT: If the returned inode is a mountpoint, this is the
  *                     relative path from the mountpoint.
- *             OUTPUT: If a symobolic link into a mounted file system is
+ *             OUTPUT: If a symbolic link into a mounted file system is
  *                     detected while traversing the path, then the link
  *                     will be converted to a mountpoint inode if the
  *                     mountpoint link is in an intermediate node of the
@@ -132,7 +137,7 @@ struct inode_search_s
  * file system.
  */
 
-typedef int (*foreach_inode_t)(FAR struct inode *node,
+typedef int (*foreach_inode_t)(FAR struct inode *inode,
                                FAR char dirpath[PATH_MAX],
                                FAR void *arg);
 
@@ -170,21 +175,41 @@ void inode_initialize(void);
  * Name: inode_lock
  *
  * Description:
- *   Get exclusive access to the in-memory inode tree (tree_sem).
+ *   Get writeable exclusive access to the in-memory inode tree.
  *
  ****************************************************************************/
 
-int inode_lock(void);
+void inode_lock(void);
+
+/****************************************************************************
+ * Name: inode_rlock
+ *
+ * Description:
+ *   Get readable exclusive access to the in-memory inode tree.
+ *
+ ****************************************************************************/
+
+void inode_rlock(void);
 
 /****************************************************************************
  * Name: inode_unlock
  *
  * Description:
- *   Relinquish exclusive access to the in-memory inode tree (tree_sem).
+ *   Relinquish writeable exclusive access to the in-memory inode tree.
  *
  ****************************************************************************/
 
 void inode_unlock(void);
+
+/****************************************************************************
+ * Name: inode_runlock
+ *
+ * Description:
+ *   Relinquish read exclusive access to the in-memory inode tree.
+ *
+ ****************************************************************************/
+
+void inode_runlock(void);
 
 /****************************************************************************
  * Name: inode_search
@@ -288,7 +313,7 @@ int inode_chstat(FAR struct inode *inode,
  *
  ****************************************************************************/
 
-int inode_getpath(FAR struct inode *node, FAR char *path, size_t len);
+int inode_getpath(FAR struct inode *inode, FAR char *path, size_t len);
 
 /****************************************************************************
  * Name: inode_free
@@ -298,7 +323,7 @@ int inode_getpath(FAR struct inode *node, FAR char *path, size_t len);
  *
  ****************************************************************************/
 
-void inode_free(FAR struct inode *node);
+void inode_free(FAR struct inode *inode);
 
 /****************************************************************************
  * Name: inode_nextname
@@ -372,7 +397,7 @@ int inode_remove(FAR const char *path);
  *
  ****************************************************************************/
 
-int inode_addref(FAR struct inode *inode);
+void inode_addref(FAR struct inode *inode);
 
 /****************************************************************************
  * Name: inode_release

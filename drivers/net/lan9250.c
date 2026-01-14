@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/net/lan9250.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,7 +28,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdint.h>
 #include <time.h>
 #include <string.h>
 #include <assert.h>
@@ -616,7 +617,9 @@ static void lan9250_wait_ready(FAR struct lan9250_driver_s *priv,
 
   if (timeout)
     {
-      nerr("ERROR: wait register:0x%02x, mask:0x%08x, expected:0x%08x\n",
+      nerr("ERROR: wait register:0x%04" PRIx16 \
+           ", mask:0x%08" PRIx32 \
+           ", expected:0x%08" PRIx32 "\n",
             address, mask, expected);
     }
 }
@@ -733,7 +736,8 @@ static void lan9250_wait_mac_ready(FAR struct lan9250_driver_s *priv,
 
   if (timeout)
     {
-      nerr("ERROR: wait MAC register:0x%02x, mask:0x%08x, expected:0x%08x\n",
+      nerr("ERROR: wait MAC register:0x%02" PRIx8 \
+           ", mask:0x%08" PRIx32 ", expect:0x%08" PRIx32 "\n",
             address, mask, expected);
     }
 }
@@ -973,7 +977,7 @@ static inline void lan9250_send_buffer(FAR struct lan9250_driver_s *priv,
   meminfo.cmd     = LAN9250_SPI_WRITE;
   meminfo.addr    = LAN9250_TXDFR;
   meminfo.addrlen = sizeof(uint16_t);
-  meminfo.buffer  = (void *)buffer;
+  meminfo.buffer  = (FAR void *)buffer;
   meminfo.buflen  = LAN9250_ALIGN(buflen);
   meminfo.dummies = 0;
   meminfo.flags   = QSPIMEM_WRITE;
@@ -1177,11 +1181,11 @@ static int lan9250_reset(FAR struct lan9250_driver_s *priv)
   regval = lan9250_get_reg(priv, LAN9250_CIARR);
   if ((regval & CIARR_CID_M) != CIARR_CID_V)
     {
-      nerr("ERROR: Bad Rev ID: %08x\n", regval);
+      nerr("ERROR: Bad Rev ID: %08" PRIx32 "\n", regval);
       return -ENODEV;
     }
 
-  ninfo("Rev ID: %08x\n", regval & CIARR_CREV_M);
+  ninfo("Rev ID: %08" PRIx32 "\n", regval & CIARR_CREV_M);
 
   /* Configure TX FIFO size mode to be 8:
    *
@@ -1333,7 +1337,7 @@ static int lan9250_reset(FAR struct lan9250_driver_s *priv)
 
   /* Configure HMAC control:
    *
-   *   - Automaticaly strip the pad field on incoming packets
+   *   - Automatically strip the pad field on incoming packets
    *   - TX enable
    *   - RX enable
    *   - Full duplex mode if !CONFIG_LAN9250_HALFDUPPLEX
@@ -1413,7 +1417,7 @@ static int lan9250_transmit(FAR struct lan9250_driver_s *priv)
   status_size = (regval & TXFIR_TXSFUS_M) >> TXFIR_TXSFUS_S;
   free_size = regval & TXFIR_TXDFFS_M;
 
-  ninfo("availabe status size:%d, free space size:%d\n",
+  ninfo("available status size:%d, free space size:%d\n",
         status_size, free_size);
 
   /* Clear TX status FIFO if it is no empty by reading data */
@@ -1521,7 +1525,7 @@ static void lan9250_txavail_work(FAR void *arg)
    * thread has been configured.
    */
 
-  net_lock();
+  netdev_lock(dev);
   lan9250_lock_spi(priv);
 
   /* Ignore the notification if the interface is not yet up */
@@ -1540,7 +1544,7 @@ static void lan9250_txavail_work(FAR void *arg)
   /* Release lock on the SPI bus and the network */
 
   lan9250_unlock_spi(priv);
-  net_unlock();
+  netdev_unlock(dev);
 }
 
 /****************************************************************************
@@ -1794,7 +1798,7 @@ static void lan9250_int_worker(FAR void *arg)
 
   /* Get exclusive access to both the network and the SPI bus. */
 
-  net_lock();
+  netdev_lock(&priv->dev);
   lan9250_lock_spi(priv);
 
   /* There is no infinite loop check... if there are always pending
@@ -1808,7 +1812,7 @@ static void lan9250_int_worker(FAR void *arg)
        * settings.
        */
 
-      ninfo("Interrupt status: %08x\n", regval);
+      ninfo("Interrupt status: %08" PRIx32 "\n", regval);
 
 #if LAN9250_INT_SOURCE & IER_SW
       if ((regval & ISR_SW) != 0)
@@ -1981,7 +1985,7 @@ static void lan9250_int_worker(FAR void *arg)
   /* Release lock on the SPI bus and the network */
 
   lan9250_unlock_spi(priv);
-  net_unlock();
+  netdev_unlock(&priv->dev);
 
   /* Enable ISR_GPIO interrupts after unlocking net so that application
    * could have chance to process Ethernet packet and free iob.
@@ -2029,7 +2033,7 @@ static int lan9250_interrupt(int irq, FAR void *context, FAR void *arg)
 
   priv->lower->disable(priv->lower);
   return work_queue(LAN9250_WORK, &priv->irq_work, lan9250_int_worker,
-                    (void *)priv, 0);
+                    (FAR void *)priv, 0);
 }
 
 /****************************************************************************
@@ -2057,7 +2061,7 @@ static void lan9250_txtout_worker(FAR void *arg)
 
   /* Get exclusive access to the network */
 
-  net_lock();
+  netdev_lock(&priv->dev);
 
   /* Increment statistics and dump debug info */
 
@@ -2079,7 +2083,7 @@ static void lan9250_txtout_worker(FAR void *arg)
 
   /* Release lock on the network */
 
-  net_unlock();
+  netdev_unlock(&priv->dev);
 }
 
 /****************************************************************************
@@ -2438,7 +2442,7 @@ int lan9250_initialize(
 
   memset(priv, 0, sizeof(struct lan9250_driver_s));
 
-  dev->d_buf     = (uint8_t *)priv->pktbuf;
+  dev->d_buf     = (FAR uint8_t *)priv->pktbuf;
   dev->d_ifup    = lan9250_ifup;
   dev->d_ifdown  = lan9250_ifdown;
   dev->d_txavail = lan9250_txavail;
@@ -2472,7 +2476,11 @@ int lan9250_initialize(
 
   if (lower->getmac)
     {
-      lower->getmac(lower, priv->dev.d_mac.ether.ether_addr_octet);
+      if (lower->getmac(lower, priv->dev.d_mac.ether.ether_addr_octet) < 0)
+        {
+          nerr("ERROR: Failed read MAC address\n");
+          return -EAGAIN;
+        }
     }
 
   /* Register the device with the OS so that socket IOCTLs can be performed */

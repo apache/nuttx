@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/imxrt/imxrt1064-evk/kernel/imxrt_userspace.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,7 +28,7 @@
 
 #include <stdlib.h>
 
-#include <nuttx/userspace.h>
+#include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/mm/mm.h>
 

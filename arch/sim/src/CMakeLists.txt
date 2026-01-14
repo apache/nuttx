@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/sim/src/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -27,4 +29,8 @@ target_include_directories(arch BEFORE PUBLIC ${CONFIG_ARCH_CHIP} common)
 if(NOT CONFIG_BUILD_FLAT)
   target_include_directories(arch_interface BEFORE PUBLIC ${CONFIG_ARCH_CHIP}
                                                           common)
+endif()
+
+if(CONFIG_FS_LARGEFILE)
+  target_compile_options(nuttx PRIVATE -D_FILE_OFFSET_BITS=64)
 endif()

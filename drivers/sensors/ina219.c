@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/ina219.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -62,10 +64,6 @@
 #define INA219_CONFIG_OPMODE_SCONT   (5 << INA219_CONFIG_OPMODE_SHIFT)
 #define INA219_CONFIG_OPMODE_BCONT   (6 << INA219_CONFIG_OPMODE_SHIFT)
 #define INA219_CONFIG_OPMODE_SBCONT  (7 << INA219_CONFIG_OPMODE_SHIFT)
-
-#ifndef CONFIG_INA219_I2C_FREQUENCY
-#  define CONFIG_INA219_I2C_FREQUENCY 400000
-#endif
 
 #define I2C_NOSTARTSTOP_MSGS              2
 #define I2C_NOSTARTSTOP_ADDRESS_MSG_INDEX 0

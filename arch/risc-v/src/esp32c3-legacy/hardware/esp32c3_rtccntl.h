@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/hardware/esp32c3_rtccntl.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -2438,7 +2440,7 @@
 
 /* RTC_CNTL_SWD_DISABLE : R/W ;bitpos:[30] ;default: 1'b0 ; */
 
-/* Description: disabel SWD */
+/* Description: disable SWD */
 
 #define RTC_CNTL_SWD_DISABLE  (BIT(30))
 #define RTC_CNTL_SWD_DISABLE_M  (BIT(30))

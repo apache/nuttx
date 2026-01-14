@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/timer/timer_release.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -55,7 +57,7 @@ static inline void timer_free(struct posix_timer_s *timer)
 
   /* Remove the timer from the allocated list */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_locktimers);
   sq_rem((FAR sq_entry_t *)timer, (FAR sq_queue_t *)&g_alloctimers);
 
   /* Return it to the free list if it is one of the preallocated timers */
@@ -64,14 +66,14 @@ static inline void timer_free(struct posix_timer_s *timer)
   if ((timer->pt_flags & PT_FLAGS_PREALLOCATED) != 0)
     {
       sq_addlast((FAR sq_entry_t *)timer, (FAR sq_queue_t *)&g_freetimers);
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_locktimers, flags);
     }
   else
 #endif
     {
       /* Otherwise, return it to the heap */
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_locktimers, flags);
       kmm_free(timer);
     }
 }

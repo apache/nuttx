@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_input.c
- * Handling incoming ICMPv6 input
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -442,17 +443,21 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
                     FAR struct icmpv6_prefixinfo_s *prefixopt =
                                       (FAR struct icmpv6_prefixinfo_s *)opt;
 
-                    /* if "M" flag isn't set, and the "A" flag is set.
-                     * Set the new network addresses.
-                     */
+                   /* Is the "A" flag set? */
 
-                    if ((adv->flags & ICMPv6_RADV_FLAG_M) == 0 &&
-                        (prefixopt->flags & ICMPv6_PRFX_FLAG_A) != 0)
+                    if ((prefixopt->flags & ICMPv6_PRFX_FLAG_A) != 0)
                       {
-                         icmpv6_setaddresses(dev, ipv6->srcipaddr,
+                        /* Yes.. Set the new network addresses. */
+
+                        icmpv6_setaddresses(dev, ipv6->srcipaddr,
                                     prefixopt->prefix, prefixopt->preflen);
                         netlink_ipv6_prefix_notify(dev, RTM_NEWPREFIX,
                                                    prefixopt);
+                      }
+                    else if ((adv->flags & ICMPv6_RADV_FLAG_M) != 0)
+                      {
+                        net_ipv6addr_copy(dev->d_ipv6draddr,
+                                          ipv6->srcipaddr);
                       }
 
                       /* Notify any waiting threads */
@@ -480,7 +485,6 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
                     struct sockaddr_in6 addr;
                     int nservers;
                     int ret;
-                    int i;
 
                     if (rdnss->optlen < 3)
                       {
@@ -497,15 +501,13 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
                     servers  = (FAR struct in6_addr *)rdnss->servers;
                     nservers = (rdnss->optlen - 1) / 2;
 
-                    /* Set the IPv6 DNS server address */
-
-                    memset(&addr, 0, sizeof(addr));
-                    addr.sin6_family = AF_INET6;
-
-                    for (i = 0; i < CONFIG_NETDB_DNSSERVER_NAMESERVERS &&
-                         i < nservers; i++)
+                    if (nservers > 0)
                       {
-                        net_ipv6addr_copy(&addr.sin6_addr, servers + i);
+                        /* Set the IPv6 DNS server address */
+
+                        memset(&addr, 0, sizeof(addr));
+                        addr.sin6_family = AF_INET6;
+                        net_ipv6addr_copy(&addr.sin6_addr, servers);
                         ret = dns_add_nameserver(
                                           (FAR const struct sockaddr *)&addr,
                                           sizeof(struct sockaddr_in6));
@@ -555,7 +557,10 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
         net_ipv6addr_copy(ipv6->srcipaddr, srcaddr);
 
         icmpv6->chksum = 0;
+
+#ifdef CONFIG_NET_ICMPv6_CHECKSUMS
         icmpv6->chksum = ~icmpv6_chksum(dev, iplen);
+#endif
       }
       break;
 

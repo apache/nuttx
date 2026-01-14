@@ -30,7 +30,7 @@ interface has also been removed, but more care will need to be exercised:
 `wd_delete()` also cancels any running timer so, in many case, calls to
 `wd_delete()` should be replaced with calls to `wd_cancel()`. If you are certain
 that the timer has never been started, then you must remove the call to
-`wd_delete()` altogether. Calling `wd_cancel()` with an un-initialized s`truct
+`wd_delete()` altogether. Calling `wd_cancel()` with an un-initialized `struct
 wdog_s` instance may well cause a fatal crash. *   Replace the first parameter
 of all remaining wdog function calls from. For example, replace a call like `ret
 = wd_cancel(priv->wdog)` where `priv->wdog` was type `WDOG_ID` with the call
@@ -210,7 +210,7 @@ error for ::setbuf if CONFIG\_STDIO\_DISABLE\_BUFFERING is set
 errno in mq\_open
 
 * [PR-1595](https://github.com/apache/nuttx/pull/1595) epoll\_wait()
-must loop until "maxevents" to fille output evs array
+must loop until "maxevents" to fill the output evs array
 
 * [PR-1519](https://github.com/apache/nuttx/pull/1519) libc: Replace
 index/rindex from macro to function to protect against side effects with
@@ -288,7 +288,7 @@ wiki instead of old nuttx.org resources
 
 * [PR-1501](https://github.com/apache/nuttx/pull/1501) Port all the
 existing documentation from HTML files to Sphinx based documentation along with
-a bunch of updates and improvments
+a bunch of updates and improvements
 
 * [PR-1433](https://github.com/apache/nuttx/pull/1433) Convert README
 documentation to Markdown
@@ -377,7 +377,7 @@ Flash driver
 Ethernet driver
 
 * [PR-1610](https://github.com/apache/nuttx/pull/1610) ESP32: Improve
-SPI transmision (DMA, IOMUX, software CS)
+SPI transmission (DMA, IOMUX, software CS)
 
 * [PR-1630](https://github.com/apache/nuttx/pull/1630) ESP32: Add
 support for HW RNG
@@ -401,7 +401,7 @@ driver
 #### Kinetis
 
 * [PR-1624](https://github.com/apache/nuttx/pull/1624) Kinetis:
-USBHOST improvements to avoid race condition durring freeing for queue head
+USBHOST improvements to avoid race condition during freeing for queue head
 structure by using Async Advance Doorbell.
 
 PR-1516 Kinetis K28: Add support for USB High Speed Host
@@ -956,7 +956,7 @@ missing options to kconfig
 to get hostname via syscall first
 
 * [PR-391](https://github.com/apache/nuttx-apps/pull/391) wapi: Add
-option to assocated directly via bssid
+option to associated directly via bssid
 
 * [PR-390](https://github.com/apache/nuttx-apps/pull/390) wapi: App
 option to scan partial channel

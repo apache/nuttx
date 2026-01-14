@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/bluetooth/bluetooth_recvmsg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -45,6 +47,7 @@
 #include "netdev/netdev.h"
 #include "devif/devif.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
 #include "bluetooth/bluetooth.h"
 
 #ifdef CONFIG_NET_BLUETOOTH
@@ -204,15 +207,15 @@ static ssize_t
  *
  ****************************************************************************/
 
-static uint16_t bluetooth_recvfrom_eventhandler(FAR struct net_driver_s *dev,
-                                                 FAR void *pvpriv,
-                                                 uint16_t flags)
+static uint32_t bluetooth_recvfrom_eventhandler(FAR struct net_driver_s *dev,
+                                                FAR void *pvpriv,
+                                                uint32_t flags)
 {
   FAR struct bluetooth_recvfrom_s *pstate;
   FAR struct radio_driver_s *radio;
   ssize_t ret;
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   DEBUGASSERT(pvpriv != NULL && dev != NULL);
 
@@ -328,13 +331,17 @@ ssize_t bluetooth_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       return -EPROTONOSUPPORT;
     }
 
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
+
   /* Perform the packet recvmsg() operation */
 
   /* Initialize the state structure.  This is done with the network
    * locked because we don't want anything to happen until we are ready.
    */
 
-  net_lock();
   memset(&state, 0, sizeof(struct bluetooth_recvfrom_s));
 
   state.ir_buflen = len;
@@ -351,6 +358,8 @@ ssize_t bluetooth_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       goto errout_with_lock;
     }
 
+  conn_dev_lock(&conn->bc_conn, &radio->r_dev);
+
   /* Before we wait for data, let's check if there are already frame(s)
    * waiting in the RX queue.
    */
@@ -360,7 +369,7 @@ ssize_t bluetooth_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
     {
       /* Good newe!  We have a frame and we are done. */
 
-      net_unlock();
+      conn_dev_unlock(&conn->bc_conn, &radio->r_dev);
       return ret;
     }
 
@@ -376,12 +385,14 @@ ssize_t bluetooth_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       state.ir_cb->event = bluetooth_recvfrom_eventhandler;
 
       /* Wait for either the receive to complete or for an error/timeout to
-       * occur. NOTES:  (1) net_sem_wait will also terminate if a signal
-       * is received, (2) the network is locked!  It will be un-locked while
-       * the task sleeps and automatically re-locked when the task restarts.
+       * occur. NOTES:  (1) conn_dev_sem_timedwait will also terminate if a
+       * signal is received, (2) the network is locked!  It will be un-locked
+       * while the task sleeps and automatically re-locked when the task
+       * restarts.
        */
 
-      net_sem_wait(&state.ir_sem);
+      conn_dev_sem_timedwait(&state.ir_sem, true, UINT_MAX,
+                             &conn->bc_conn, &radio->r_dev);
 
       /* Make sure that no further events are processed */
 
@@ -396,7 +407,7 @@ ssize_t bluetooth_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   nxsem_destroy(&state.ir_sem);
 
 errout_with_lock:
-  net_unlock();
+  conn_dev_unlock(&conn->bc_conn, &radio->r_dev);
   return ret;
 }
 

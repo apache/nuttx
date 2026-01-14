@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/inode/fs_inoderemove.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,7 +46,7 @@
  *   path refers to.  This is normally done in preparation to removing or
  *   moving an inode.
  *
- *   In symbolic links in the pseduo file system are enabled, then this
+ *   In symbolic links in the pseudo file system are enabled, then this
  *   logic will follow the symbolic links up until the terminal node.  Then
  *   that link in removed. So if this the terminal node is a symbolic link,
  *   the symbolic link node will be removed, not the target of the link.
@@ -57,7 +59,7 @@
 static FAR struct inode *inode_unlink(FAR const char *path)
 {
   struct inode_search_s desc;
-  FAR struct inode *node = NULL;
+  FAR struct inode *inode = NULL;
   int ret;
 
   /* Verify parameters.  Ignore null paths */
@@ -74,8 +76,8 @@ static FAR struct inode *inode_unlink(FAR const char *path)
   ret = inode_search(&desc);
   if (ret >= 0)
     {
-      node = desc.node;
-      DEBUGASSERT(node != NULL);
+      inode = desc.node;
+      DEBUGASSERT(inode != NULL);
 
       /* If peer is non-null, then remove the node from the right of
        * of that peer node.
@@ -83,23 +85,34 @@ static FAR struct inode *inode_unlink(FAR const char *path)
 
       if (desc.peer != NULL)
         {
-          desc.peer->i_peer = node->i_peer;
+          desc.peer->i_peer = inode->i_peer;
         }
 
       /* Then remove the node from head of the list of children. */
 
       else
         {
-          DEBUGASSERT(desc.parent != NULL);
-          desc.parent->i_child = node->i_peer;
+          /* The parent could be null if we are trying to remove the
+           * root inode. In that case, fail because we cannot remove it.
+           */
+
+          if (desc.parent == NULL)
+            {
+              inode = NULL;
+              goto errout;
+            }
+
+          desc.parent->i_child = inode->i_peer;
         }
 
-      node->i_peer   = NULL;
-      node->i_parent = NULL;
+      inode->i_peer   = NULL;
+      inode->i_parent = NULL;
+      atomic_fetch_sub(&inode->i_crefs, 1);
     }
 
+errout:
   RELEASE_SEARCH(&desc);
-  return node;
+  return inode;
 }
 
 /****************************************************************************
@@ -122,24 +135,19 @@ static FAR struct inode *inode_unlink(FAR const char *path)
 
 int inode_remove(FAR const char *path)
 {
-  FAR struct inode *node;
+  FAR struct inode *inode;
 
   /* Find the inode and unlink it from the in-memory inode tree */
 
-  node = inode_unlink(path);
-  if (node)
+  inode = inode_unlink(path);
+  if (inode)
     {
       /* Found it! But we cannot delete the inode if there are references
        * to it
        */
 
-      if (node->i_crefs)
+      if (atomic_read(&inode->i_crefs))
         {
-          /* In that case, we will mark it deleted, when the filesystem
-           * releases the inode, we will then, finally delete the subtree
-           */
-
-          node->i_flags |= FSNODEFLAG_DELETED;
           return -EBUSY;
         }
       else
@@ -149,8 +157,8 @@ int inode_remove(FAR const char *path)
            * NULL.
            */
 
-          DEBUGASSERT(node->i_peer == NULL);
-          inode_free(node);
+          DEBUGASSERT(inode->i_peer == NULL);
+          inode_free(inode);
           return OK;
         }
     }

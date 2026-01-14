@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/qemu/qemu_boot.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 #include <debug.h>
 
 #include <nuttx/cache.h>
+#include <nuttx/syslog/syslog_rpmsg.h>
 #ifdef CONFIG_LEGACY_PAGING
 #  include <nuttx/page.h>
 #endif
@@ -62,6 +65,18 @@ static const struct arm_mmu_region g_mmu_regions[] =
   MMU_REGION_FLAT_ENTRY("DRAM0_S0",
                         CONFIG_RAMBANK1_ADDR, CONFIG_RAMBANK1_SIZE,
                         MT_NORMAL | MT_RW | MT_SECURE),
+
+  MMU_REGION_FLAT_ENTRY("PCI_CFG",
+                        CONFIG_PCI_CFG_BASEADDR, CONFIG_PCI_CFG_SIZE,
+                        MT_NORMAL | MT_RW | MT_SECURE),
+
+  MMU_REGION_FLAT_ENTRY("PCI_MEM",
+                        CONFIG_PCI_MEM_BASEADDR, CONFIG_PCI_MEM_SIZE,
+                        MT_NORMAL | MT_RW | MT_SECURE),
+
+  MMU_REGION_FLAT_ENTRY("PCI_IO",
+                        CONFIG_PCI_IO_BASEADDR, CONFIG_PCI_IO_SIZE,
+                        MT_NORMAL | MT_RW | MT_SECURE),
 };
 
 const struct arm_mmu_config g_mmu_config =
@@ -69,6 +84,10 @@ const struct arm_mmu_config g_mmu_config =
   .num_regions = nitems(g_mmu_regions),
   .mmu_regions = g_mmu_regions,
 };
+
+#ifdef CONFIG_SYSLOG_RPMSG
+static char g_syslog_rpmsg_buf[4096];
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -142,6 +161,10 @@ void arm64_chip_boot(void)
 
   arm64_mmu_init(true);
 
+#ifdef CONFIG_ARM64_MTE
+  arm64_mte_init();
+#endif
+
 #ifdef CONFIG_DEVICE_TREE
   fdt_register((const char *)0x40000000);
 #endif
@@ -156,7 +179,9 @@ void arm64_chip_boot(void)
    * configuration of board specific resources such as GPIOs, LEDs, etc.
    */
 
+#ifndef CONFIG_ARCH_CHIP_CUSTOM
   qemu_board_initialize();
+#endif
 
 #ifdef USE_EARLYSERIALINIT
   /* Perform early serial initialization if we are going to use the serial
@@ -164,5 +189,13 @@ void arm64_chip_boot(void)
    */
 
   arm64_earlyserialinit();
+#endif
+
+#ifdef CONFIG_SYSLOG_RPMSG
+  syslog_rpmsg_init_early(g_syslog_rpmsg_buf, sizeof(g_syslog_rpmsg_buf));
+#endif
+
+#ifdef CONFIG_ARCH_PERF_EVENTS
+  up_perf_init((void *)CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC);
 #endif
 }

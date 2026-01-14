@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_adc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -185,7 +187,7 @@
 #  endif
 #  ifndef CONFIG_STM32F7_ADC1_TIMTRIG
 #    error "CONFIG_STM32F7_ADC1_TIMTRIG not defined"
-#    warning "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
+#    warning "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO 5:TRGO2"
 #  endif
 #endif
 
@@ -227,7 +229,7 @@
 #  endif
 #  ifndef CONFIG_STM32F7_ADC2_TIMTRIG
 #    error "CONFIG_STM32F7_ADC2_TIMTRIG not defined"
-#    warning "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
+#    warning "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO 5:TRGO2"
 #  endif
 #endif
 
@@ -265,7 +267,7 @@
 #  endif
 #  ifndef CONFIG_STM32F7_ADC3_TIMTRIG
 #    error "CONFIG_STM32F7_ADC3_TIMTRIG not defined"
-#    warning "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO"
+#    warning "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO 5:TRGO2"
 #  endif
 #endif
 

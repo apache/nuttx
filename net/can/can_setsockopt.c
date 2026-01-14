@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/can/can_setsockopt.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,8 +32,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <netpacket/can.h>
-
 #include <nuttx/net/net.h>
 #include <nuttx/net/can.h>
 
@@ -53,7 +53,7 @@
  *   'option' argument to the value pointed to by the 'value' argument for
  *   the socket specified by the 'psock' argument.
  *
- *   See <netinet/can.h> for the a complete list of values of CAN protocol
+ *   See <nuttx/can.h> for the a complete list of values of CAN protocol
  *   options.
  *
  * Input Parameters:
@@ -80,32 +80,6 @@ int can_setsockopt(FAR struct socket *psock, int level, int option,
   DEBUGASSERT(value_len == 0 || value != NULL);
 
   conn = psock->s_conn;
-
-#ifdef CONFIG_NET_TIMESTAMP
-
-  /* Generates a timestamp for each incoming packet */
-
-  if (level == SOL_SOCKET && option == SO_TIMESTAMP)
-    {
-      /* Verify that option is at least the size of an integer. */
-
-      if (value_len < sizeof(int32_t))
-        {
-          return -EINVAL;
-        }
-
-      /* Lock the network so that we have exclusive access to the socket
-       * options.
-       */
-
-      net_lock();
-
-      conn->timestamp = *((FAR int32_t *)value);
-
-      net_unlock();
-      return OK;
-    }
-#endif
 
   if (level != SOL_CAN_RAW)
     {
@@ -152,63 +126,53 @@ int can_setsockopt(FAR struct socket *psock, int level, int option,
           }
         break;
 
-      case CAN_RAW_ERR_FILTER:
 #ifdef CONFIG_NET_CAN_ERRORS
+      case CAN_RAW_ERR_FILTER:
         if (value_len != sizeof(can_err_mask_t))
           {
             return -EINVAL;
           }
 
         conn->err_mask = *(FAR can_err_mask_t *)value & CAN_ERR_MASK;
-#endif
         break;
+#endif
 
       case CAN_RAW_LOOPBACK:
-        if (value_len != sizeof(conn->loopback))
-          {
-            return -EINVAL;
-          }
-
-        conn->loopback = *(FAR int32_t *)value;
-
-        break;
-
       case CAN_RAW_RECV_OWN_MSGS:
-        if (value_len != sizeof(conn->recv_own_msgs))
-          {
-            return -EINVAL;
-          }
-
-        conn->recv_own_msgs = *(FAR int32_t *)value;
-
-        break;
-
 #ifdef CONFIG_NET_CAN_CANFD
       case CAN_RAW_FD_FRAMES:
-        if (value_len != sizeof(conn->fd_frames))
-          {
-            return -EINVAL;
-          }
-
-        conn->fd_frames = *(FAR int32_t *)value;
-
-        break;
 #endif
-
-      case CAN_RAW_JOIN_FILTERS:
-        break;
-
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
       case CAN_RAW_TX_DEADLINE:
-        if (value_len != sizeof(conn->tx_deadline))
+#endif
+        /* Verify that option is the size of an 'int'.  Should also check
+         * that 'value' is properly aligned for an 'int'
+         */
+
+        if (value_len != sizeof(int))
           {
             return -EINVAL;
           }
 
-        conn->tx_deadline = *(FAR int32_t *)value;
+        /* Lock the network so that we have exclusive access to the socket
+         * options.
+         */
 
+        conn_lock(&conn->sconn);
+
+        /* Set or clear the option bit */
+
+        if (*(FAR int *)value)
+          {
+            _SO_SETOPT(conn->sconn.s_options, option);
+          }
+        else
+          {
+            _SO_CLROPT(conn->sconn.s_options, option);
+          }
+
+        conn_unlock(&conn->sconn);
         break;
-#endif
 
 #if CONFIG_NET_RECV_BUFSIZE > 0
       case SO_RCVBUF:
@@ -235,10 +199,37 @@ int can_setsockopt(FAR struct socket *psock, int level, int option,
 #if CONFIG_NET_MAX_RECV_BUFSIZE > 0
           buffersize = MIN(buffersize, CONFIG_NET_MAX_RECV_BUFSIZE);
 #endif
+          conn->rcvbufs = buffersize;
 
-          conn->recv_buffnum = (buffersize + CONFIG_IOB_BUFSIZE - 1)
-                              / CONFIG_IOB_BUFSIZE;
+          break;
+        }
+#endif
 
+#if CONFIG_NET_SEND_BUFSIZE > 0
+      case SO_SNDBUF:
+        {
+          int buffersize;
+
+          /* Verify options */
+
+          if (value_len != sizeof(int))
+            {
+              return -EINVAL;
+            }
+
+          buffersize = *(FAR int *)value;
+          if (buffersize < 0)
+            {
+              return -EINVAL;
+            }
+
+#   if CONFIG_NET_MAX_SEND_BUFSIZE > 0
+          /* Limit the size of the send buffer */
+
+          buffersize = MIN(buffersize, CONFIG_NET_MAX_SEND_BUFSIZE);
+#   endif
+
+          conn->sndbufs = buffersize;
           break;
         }
 #endif

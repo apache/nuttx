@@ -1,6 +1,8 @@
 # ##############################################################################
 # openamp/open-amp.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -20,7 +22,7 @@
 if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/open-amp)
   FetchContent_Declare(
     open-amp
-    DOWNLOAD_NAME "libopen-amp-v${OPENAMP_VERSION}.zip"
+    DOWNLOAD_NAME "libopen-amp-main.zip"
     DOWNLOAD_DIR ${CMAKE_CURRENT_LIST_DIR}
     URL "https://github.com/OpenAMP/open-amp/archive/v${OPENAMP_VERSION}.zip"
         SOURCE_DIR
@@ -41,41 +43,21 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/open-amp)
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
       ${CMAKE_CURRENT_LIST_DIR}/0002-Negotiate-individual-buffer-size-dynamically.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0003-rpmsg-wait-endpoint-ready-in-rpmsg_send-and-rpmsg_se.patch
+      ${CMAKE_CURRENT_LIST_DIR}/0003-rpmsg-notify-the-user-when-the-remote-address-is-rec.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0004-openamp-add-new-ops-notify_wait-support.patch
+      ${CMAKE_CURRENT_LIST_DIR}/0004-rpmsg-wait-ept-ready-in-rpmsg_send.patch &&
+      patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0005-openamp-add-VIRTIO_RING_F_MUST_NOTIFY-event.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0005-rpmsg_virtio-don-t-need-check-status-when-get_tx_pay.patch
+      ${CMAKE_CURRENT_LIST_DIR}/0006-rpmsg_virtio-don-t-need-check-status-when-get_tx_pay.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0006-rpmsg-notify-the-user-when-the-remote-address-is-rec.patch
+      ${CMAKE_CURRENT_LIST_DIR}/0007-virtqueue-move-virtqueue_nused-and-virtqueue_navail-.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0007-openamp-avoid-double-calling-ns_bound-when-each-othe.patch
+      ${CMAKE_CURRENT_LIST_DIR}/0008-lib-rpmsg-rpmsg_virtio-add-last-buffer-check-to-fix-.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0008-remoteproc-make-all-elf_-functions-static-except-elf.patch
+      ${CMAKE_CURRENT_LIST_DIR}/0009-virtio-change-feature-to-64-bit-in-all-virtio_dispat.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0009-Fix-warn-declaration-of-vring_rsc-shadows-a-previous.patch
-      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0010-rptun-fix-rptun-don-t-wait-issue-when-get-tx-patyloa.patch
-      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0011-rpmsg-fix-rpmsg_virtio_get_tx_buffer-no-idx-return.patch
-      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0012-rpmsg-add-new-API-rpdev_release_tx-rx_buffer.patch
-      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0013-openamp-add-error-log-when-ept-cb-return-error.patch
-      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0014-rpmsg-add-cache-flash-when-hold-rx-buffer.patch
-      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0015-rpmsg-do-cache_invalidate-when-real-data-returned.patch
-      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0016-openamp-add-new-API-rpmsg_virtio_get_rxbuffer_size.patch
-      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0017-virtio-follow-virtio-1.2-spec-add-more-virtio-status.patch
-      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0018-virtio-decoupling-the-transport-layer-and-virtio-dev.patch
-      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0019-virtio.h-add-version-in-device-id-table.patch
-      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
-      ${CMAKE_CURRENT_LIST_DIR}/0020-virtio-Add-the-virtio_negotiate_features-interface.patch
+      ${CMAKE_CURRENT_LIST_DIR}/0010-openamp-add-assert-when-get-tx-buffer-failed.patch
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 
@@ -90,15 +72,27 @@ if(CONFIG_OPENAMP_CACHE)
   set(WITH_DCACHE_VRINGS ON)
 endif()
 
-if(CONFIG_OPENAMP_RPMSG_DEBUG)
+if(CONFIG_OPENAMP_DEBUG)
   add_compile_definitions(RPMSG_DEBUG)
-endif()
-
-if(CONFIG_OPENAMP_VQUEUE_DEBUG)
   add_compile_definitions(VQUEUE_DEBUG)
 endif()
 
+add_compile_definitions(elf_load=remoteproc_elf_load)
+
+if(CONFIG_OPENAMP_VIRTIO_DEVICE_SUPPORT)
+  add_compile_definitions(VIRTIO_DEVICE_SUPPORT=1)
+else()
+  add_compile_definitions(VIRTIO_DEVICE_SUPPORT=0)
+endif()
+
+if(CONFIG_OPENAMP_VIRTIO_DRIVER_SUPPORT)
+  add_compile_definitions(VIRTIO_DRIVER_SUPPORT=1)
+else()
+  add_compile_definitions(VIRTIO_DRIVER_SUPPORT=0)
+endif()
+
 set(WITH_LIBMETAL_FIND OFF)
+set(WITH_PROXY OFF)
 
 if(NOT CMAKE_SYSTEM_PROCESSOR)
   set(CMAKE_SYSTEM_PROCESSOR ${CONFIG_ARCH})
@@ -106,5 +100,8 @@ endif()
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/open-amp
                  ${CMAKE_CURRENT_BINARY_DIR}/open-amp EXCLUDE_FROM_ALL)
+
+target_include_directories(
+  open_amp-static PRIVATE $<TARGET_PROPERTY:metal-static,INCLUDE_DIRECTORIES>)
 
 nuttx_add_external_library(open_amp-static MODE KERNEL)

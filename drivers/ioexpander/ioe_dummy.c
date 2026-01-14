@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/ioexpander/ioe_dummy.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -708,8 +710,7 @@ static ioe_pinset_t ioe_dummy_int_update(FAR struct ioe_dummy_dev_s *priv)
             }
         }
 
-      diff  >>= 1;
-      input >>= 1;
+      diff >>= 1;
     }
 
   return intstat;

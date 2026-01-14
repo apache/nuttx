@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/lpc17xx_40xx/pnev5180b/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -53,7 +55,7 @@
  *
  *   SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Select Main oscillator for
  *                                               source
- *   PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> PLL0 multipler=20,
+ *   PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> PLL0 multiplier=20,
  *                                               pre-divider=1
  *   CCLCK = 480MHz / 4 = 120MHz              -> CCLK divider = 4
  */

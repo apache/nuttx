@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/udp/udp_sendto_buffered.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -92,8 +94,8 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
                                    FAR struct udp_conn_s *conn);
 #endif
 static int sendto_next_transfer(FAR struct udp_conn_s *conn);
-static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
-                                    FAR void *pvpriv, uint16_t flags);
+static uint32_t sendto_eventhandler(FAR struct net_driver_s *dev,
+                                    FAR void *pvpriv, uint32_t flags);
 
 /****************************************************************************
  * Private Functions
@@ -116,16 +118,16 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static void sendto_writebuffer_release(FAR struct udp_conn_s *conn)
+static void sendto_writebuffer_release(FAR struct udp_conn_s *conn,
+                                       FAR struct udp_wrbuffer_s *wrb)
 {
-  FAR struct udp_wrbuffer_s *wrb;
   int ret = OK;
 
   do
     {
       /* Check if the write queue became empty */
 
-      if (sq_empty(&conn->write_q))
+      if (wrb == NULL && sq_empty(&conn->write_q))
         {
           /* Yes.. stifle any further callbacks until more write data is
            * enqueued.
@@ -134,13 +136,16 @@ static void sendto_writebuffer_release(FAR struct udp_conn_s *conn)
           conn->sndcb->flags = 0;
           conn->sndcb->priv  = NULL;
           conn->sndcb->event = NULL;
-          wrb = NULL;
+          ret = OK;
 
-#ifdef CONFIG_NET_UDP_NOTIFIER
-          /* Notify any waiters that the write buffers have been drained. */
+          if (conn->txdrain_sem != NULL)
+            {
+              /* Notify the txdrain semaphore that the write buffer queue
+               * has been drained.
+               */
 
-          udp_writebuffer_signal(conn);
-#endif
+              nxsem_post(conn->txdrain_sem);
+            }
         }
       else
         {
@@ -148,10 +153,17 @@ static void sendto_writebuffer_release(FAR struct udp_conn_s *conn)
            * and release it.
            */
 
-          wrb = (FAR struct udp_wrbuffer_s *)sq_remfirst(&conn->write_q);
+          if (wrb == NULL)
+            {
+              /* Get the write buffer at the head of the queue */
+
+              wrb = (FAR struct udp_wrbuffer_s *)sq_remfirst(&conn->write_q);
+            }
+
           DEBUGASSERT(wrb != NULL);
 
           udp_wrbuffer_release(wrb);
+          wrb = NULL;
 
           /* Set up for the next packet transfer by setting the connection
            * address to the address of the next packet now at the header of
@@ -161,7 +173,7 @@ static void sendto_writebuffer_release(FAR struct udp_conn_s *conn)
           ret = sendto_next_transfer(conn);
         }
     }
-  while (wrb != NULL && ret < 0);
+  while (ret < 0);
 
 #if CONFIG_NET_SEND_BUFSIZE > 0
   /* Notify the send buffer available if wrbbuffer drained */
@@ -236,6 +248,7 @@ static int sendto_next_transfer(FAR struct udp_conn_s *conn)
 {
   FAR struct udp_wrbuffer_s *wrb;
   FAR struct net_driver_s *dev;
+  int ret = OK;
 
   /* Set the UDP "connection" to the destination address of the write buffer
    * at the head of the queue.
@@ -282,9 +295,9 @@ static int sendto_next_transfer(FAR struct udp_conn_s *conn)
 
   /* Make sure that the device is in the UP state */
 
-  if ((dev->d_flags & IFF_UP) == 0)
+  if (IFF_IS_RUNNING(dev->d_flags) == 0)
     {
-      nwarn("WARNING: device is DOWN\n");
+      nwarn("WARNING: device is not RUNNING\n");
       return -EHOSTUNREACH;
     }
 
@@ -298,6 +311,8 @@ static int sendto_next_transfer(FAR struct udp_conn_s *conn)
     }
 #endif
 
+  conn_unlock(&conn->sconn);
+
   /* If this is not the same device that we used in the last call to
    * udp_callback_alloc(), then we need to release and reallocate the old
    * callback instance.
@@ -305,14 +320,17 @@ static int sendto_next_transfer(FAR struct udp_conn_s *conn)
 
   if (conn->sndcb != NULL && conn->dev != dev)
     {
+      conn_dev_lock(&conn->sconn, conn->dev);
       udp_callback_free(conn->dev, conn, conn->sndcb);
       conn->sndcb = NULL;
+      conn_dev_unlock(&conn->sconn, conn->dev);
     }
 
   /* Allocate resources to receive a callback from this device if the
    * callback is not already in place.
    */
 
+  conn_dev_lock(&conn->sconn, dev);
   if (conn->sndcb == NULL)
     {
       conn->sndcb = udp_callback_alloc(dev, conn);
@@ -325,7 +343,8 @@ static int sendto_next_transfer(FAR struct udp_conn_s *conn)
       /* A buffer allocation error occurred */
 
       nerr("ERROR: Failed to allocate callback\n");
-      return -ENOMEM;
+      ret = -ENOMEM;
+      goto out;
     }
 
   conn->dev = dev;
@@ -338,8 +357,13 @@ static int sendto_next_transfer(FAR struct udp_conn_s *conn)
 
   /* Notify the device driver of the availability of TX data */
 
-  netdev_txnotify_dev(dev);
-  return OK;
+  netdev_txnotify_dev(dev, UDP_POLL);
+
+out:
+  conn_dev_unlock(&conn->sconn, dev);
+  conn_lock(&conn->sconn);
+
+  return ret;
 }
 
 /****************************************************************************
@@ -362,26 +386,26 @@ static int sendto_next_transfer(FAR struct udp_conn_s *conn)
  *
  ****************************************************************************/
 
-static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
-                                    FAR void *pvpriv, uint16_t flags)
+static uint32_t sendto_eventhandler(FAR struct net_driver_s *dev,
+                                    FAR void *pvpriv, uint32_t flags)
 {
   FAR struct udp_conn_s *conn = pvpriv;
 
   DEBUGASSERT(dev != NULL && conn != NULL);
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   /* Check if the network device has gone down  */
 
   if ((flags & NETDEV_DOWN) != 0)
     {
-      ninfo("Device down: %04x\n", flags);
+      ninfo("Device down: %" PRIx32 "\n", flags);
 
       /* Free the write buffer at the head of the queue and attempt to setup
        * the next transfer.
        */
 
-      sendto_writebuffer_release(conn);
+      sendto_writebuffer_release(conn, NULL);
       return flags;
     }
 
@@ -423,7 +447,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
        * the write_q is not empty.
        */
 
-      wrb = (FAR struct udp_wrbuffer_s *)sq_peek(&conn->write_q);
+      wrb = (FAR struct udp_wrbuffer_s *)sq_remfirst(&conn->write_q);
       DEBUGASSERT(wrb != NULL);
 
       /* If the udp socket not connected, it is possible to have
@@ -469,7 +493,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
        * setup the next transfer.
        */
 
-      sendto_writebuffer_release(conn);
+      sendto_writebuffer_release(conn, wrb);
 
       /* Only one data can be sent by low level driver at once,
        * tell the caller stop polling the other connections.
@@ -685,136 +709,137 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
   BUF_DUMP("psock_udp_sendto", buf, len);
 
-  if (len > 0)
-    {
-      net_lock();
-
 #if CONFIG_NET_SEND_BUFSIZE > 0
-      /* If the send buffer size exceeds the send limit,
-       * wait for the write buffer to be released
-       */
+  /* If the send buffer size exceeds the send limit,
+   * wait for the write buffer to be released
+   */
 
-      while (udp_wrbuffer_inqueue_size(conn) + len > conn->sndbufs)
+  conn_lock(&conn->sconn);
+  while (udp_wrbuffer_inqueue_size(conn) + len > conn->sndbufs)
+    {
+      if (nonblock)
         {
-          if (nonblock)
+          conn_unlock(&conn->sconn);
+          return -EAGAIN;
+        }
+
+      ret = conn_dev_sem_timedwait(&conn->sndsem, false,
+                                   udp_send_gettimeout(start, timeout),
+                                   &conn->sconn, NULL);
+      if (ret < 0)
+        {
+          if (ret == -ETIMEDOUT)
             {
               ret = -EAGAIN;
-              goto errout_with_lock;
             }
 
-          ret = net_sem_timedwait_uninterruptible(&conn->sndsem,
-            udp_send_gettimeout(start, timeout));
-          if (ret < 0)
-            {
-              if (ret == -ETIMEDOUT)
-                {
-                  ret = -EAGAIN;
-                }
-
-              goto errout_with_lock;
-            }
+          conn_unlock(&conn->sconn);
+          return ret;
         }
+    }
+
+  conn_unlock(&conn->sconn);
 #endif /* CONFIG_NET_SEND_BUFSIZE */
 
-      /* Allocate a write buffer.  Careful, the network will be momentarily
-       * unlocked here.
-       */
+  /* Allocate a write buffer.  Careful, the network will be momentarily
+   * unlocked here.
+   */
 
 #ifdef CONFIG_NET_JUMBO_FRAME
 
-      /* alloc iob of gso pkt for udp data */
+  /* alloc iob of gso pkt for udp data */
 
-      wrb = udp_wrbuffer_tryalloc(len + udpip_hdrsize(conn) +
-                                  CONFIG_NET_LL_GUARDSIZE);
+  wrb = udp_wrbuffer_tryalloc(len + udpip_hdrsize(conn) +
+                              CONFIG_NET_LL_GUARDSIZE);
 #else
-      if (nonblock)
+  if (nonblock)
+    {
+      wrb = udp_wrbuffer_tryalloc();
+    }
+  else
+    {
+      wrb = udp_wrbuffer_timedalloc(udp_send_gettimeout(start, timeout));
+    }
+#endif
+
+  if (wrb == NULL)
+    {
+      /* A buffer allocation error occurred */
+
+      nerr("ERROR: Failed to allocate write buffer\n");
+
+      if (nonblock || timeout != UINT_MAX)
         {
-          wrb = udp_wrbuffer_tryalloc();
+          ret = -EAGAIN;
         }
       else
         {
-          wrb = udp_wrbuffer_timedalloc(udp_send_gettimeout(start,
-                                                            timeout));
-        }
-#endif
-
-      if (wrb == NULL)
-        {
-          /* A buffer allocation error occurred */
-
-          nerr("ERROR: Failed to allocate write buffer\n");
-
-          if (nonblock || timeout != UINT_MAX)
-            {
-              ret = -EAGAIN;
-            }
-          else
-            {
-              ret = -ENOMEM;
-            }
-
-          goto errout_with_lock;
+          ret = -ENOMEM;
         }
 
-      /* Initialize the write buffer
-       *
-       * Check if the socket is connected
-       */
+      return ret;
+    }
 
-      if (_SS_ISCONNECTED(conn->sconn.s_flags))
-        {
-          /* Yes.. get the connection address from the connection structure */
+  /* Initialize the write buffer
+   *
+   * Check if the socket is connected
+   */
+
+  if (_SS_ISCONNECTED(conn->sconn.s_flags))
+    {
+      /* Yes.. get the connection address from the connection structure */
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-          if (conn->domain == PF_INET)
+      if (conn->domain == PF_INET)
 #endif
-            {
-              FAR struct sockaddr_in *addr4 =
-                (FAR struct sockaddr_in *)&wrb->wb_dest;
+        {
+          FAR struct sockaddr_in *addr4 =
+            (FAR struct sockaddr_in *)&wrb->wb_dest;
 
-              addr4->sin_family = AF_INET;
-              addr4->sin_port   = conn->rport;
-              net_ipv4addr_copy(addr4->sin_addr.s_addr, conn->u.ipv4.raddr);
-              memset(addr4->sin_zero, 0, sizeof(addr4->sin_zero));
-            }
+          addr4->sin_family = AF_INET;
+          addr4->sin_port   = conn->rport;
+          net_ipv4addr_copy(addr4->sin_addr.s_addr, conn->u.ipv4.raddr);
+          memset(addr4->sin_zero, 0, sizeof(addr4->sin_zero));
+        }
 #endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
-          else
-#endif
-            {
-              FAR struct sockaddr_in6 *addr6 =
-                (FAR struct sockaddr_in6 *)&wrb->wb_dest;
-
-              addr6->sin6_family = AF_INET6;
-              addr6->sin6_port   = conn->rport;
-              net_ipv6addr_copy(addr6->sin6_addr.s6_addr,
-                                conn->u.ipv6.raddr);
-            }
-#endif /* CONFIG_NET_IPv6 */
-        }
-
-      /* Not connected.  Use the provided destination address */
-
       else
+#endif
         {
-          memcpy(&wrb->wb_dest, to, tolen);
-          udp_connect(conn, to);
+          FAR struct sockaddr_in6 *addr6 =
+            (FAR struct sockaddr_in6 *)&wrb->wb_dest;
+
+          addr6->sin6_family = AF_INET6;
+          addr6->sin6_port   = conn->rport;
+          net_ipv6addr_copy(addr6->sin6_addr.s6_addr, conn->u.ipv6.raddr);
         }
+#endif /* CONFIG_NET_IPv6 */
+    }
 
-      /* Skip l2/l3/l4 offset before copy */
+  /* Not connected.  Use the provided destination address */
 
-      udpiplen = udpip_hdrsize(conn);
+  else
+    {
+      memcpy(&wrb->wb_dest, to, tolen);
+      udp_connect(conn, to);
+    }
 
-      iob_reserve(wrb->wb_iob, CONFIG_NET_LL_GUARDSIZE);
-      iob_update_pktlen(wrb->wb_iob, udpiplen, false);
+  /* Skip l2/l3/l4 offset before copy */
 
-      /* Copy the user data into the write buffer.  We cannot wait for
-       * buffer space if the socket was opened non-blocking.
-       */
+  udpiplen = udpip_hdrsize(conn);
 
+  iob_reserve(wrb->wb_iob, CONFIG_NET_LL_GUARDSIZE);
+  iob_update_pktlen(wrb->wb_iob, udpiplen, false);
+
+  /* Copy the user data into the write buffer.  We cannot wait for
+   * buffer space if the socket was opened non-blocking.
+   */
+
+  if (len > 0)
+    {
       if (nonblock)
         {
           ret = iob_trycopyin(wrb->wb_iob, (FAR uint8_t *)buf,
@@ -822,67 +847,56 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
         }
       else
         {
-          unsigned int count;
-          int blresult;
-
-          /* iob_copyin might wait for buffers to be freed, but if
-           * network is locked this might never happen, since network
-           * driver is also locked, therefore we need to break the lock
-           */
-
-          blresult = net_breaklock(&count);
           ret = iob_copyin(wrb->wb_iob, (FAR uint8_t *)buf,
                            len, udpiplen, false);
-          if (blresult >= 0)
-            {
-              net_restorelock(count);
-            }
         }
 
       if (ret < 0)
         {
           goto errout_with_wrb;
         }
+    }
 
-      /* Dump I/O buffer chain */
+  /* Dump I/O buffer chain */
 
-      UDP_WBDUMP("I/O buffer chain", wrb, wrb->wb_iob->io_pktlen, 0);
+  UDP_WBDUMP("I/O buffer chain", wrb, wrb->wb_iob->io_pktlen, 0);
 
-      /* sendto_eventhandler() will send data in FIFO order from the
-       * conn->write_q.
-       *
-       * REVISIT:  Why FIFO order?  Because it is easy.  In a real world
-       * environment where there are multiple network devices this might
-       * be inefficient because we could be sending data to different
-       * device out-of-queued-order to optimize performance.  Sending
-       * data to different networks from a single UDP socket is probably
-       * not a very common use case, however.
+  /* sendto_eventhandler() will send data in FIFO order from the
+   * conn->write_q.
+   *
+   * REVISIT:  Why FIFO order?  Because it is easy.  In a real world
+   * environment where there are multiple network devices this might
+   * be inefficient because we could be sending data to different
+   * device out-of-queued-order to optimize performance.  Sending
+   * data to different networks from a single UDP socket is probably
+   * not a very common use case, however.
+   */
+
+  conn_lock(&conn->sconn);
+  empty = sq_empty(&conn->write_q);
+
+  sq_addlast(&wrb->wb_node, &conn->write_q);
+  ninfo("Queued WRB=%p pktlen=%u write_q(%p,%p)\n",
+        wrb, wrb->wb_iob->io_pktlen,
+        conn->write_q.head, conn->write_q.tail);
+
+  if (empty)
+    {
+      /* The new write buffer lies at the head of the write queue.  Set
+       * up for the next packet transfer by setting the connection
+       * address to the address of the next packet now at the header of
+       * the write buffer queue.
        */
 
-      empty = sq_empty(&conn->write_q);
-
-      sq_addlast(&wrb->wb_node, &conn->write_q);
-      ninfo("Queued WRB=%p pktlen=%u write_q(%p,%p)\n",
-            wrb, wrb->wb_iob->io_pktlen,
-            conn->write_q.head, conn->write_q.tail);
-
-      if (empty)
+      ret = sendto_next_transfer(conn);
+      if (ret < 0)
         {
-          /* The new write buffer lies at the head of the write queue.  Set
-           * up for the next packet transfer by setting the connection
-           * address to the address of the next packet now at the header of
-           * the write buffer queue.
-           */
-
-          ret = sendto_next_transfer(conn);
-          if (ret < 0)
-            {
-              sq_remlast(&conn->write_q);
-              goto errout_with_wrb;
-            }
+          sq_remlast(&conn->write_q);
+          conn_unlock(&conn->sconn);
+          goto errout_with_wrb;
         }
 
-      net_unlock();
+      conn_unlock(&conn->sconn);
     }
 
   /* Return the number of bytes that will be sent */
@@ -892,8 +906,6 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 errout_with_wrb:
   udp_wrbuffer_release(wrb);
 
-errout_with_lock:
-  net_unlock();
   return ret;
 }
 
@@ -939,7 +951,11 @@ int psock_udp_cansend(FAR struct udp_conn_s *conn)
    * many more.
    */
 
-  if (udp_wrbuffer_test() < 0 || iob_navail(false) <= 0)
+  if (udp_wrbuffer_test() < 0 || iob_navail(false) <= 0
+#if CONFIG_NET_SEND_BUFSIZE > 0
+      || udp_wrbuffer_inqueue_size(conn) >= conn->sndbufs
+#endif
+     )
     {
       return -EWOULDBLOCK;
     }

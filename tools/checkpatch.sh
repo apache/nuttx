@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # tools/checkpatch.sh
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -19,13 +21,31 @@
 
 TOOLDIR=$(dirname $0)
 
+case "$OSTYPE" in
+  *bsd*) MAKECMD=gmake;;
+  *) MAKECMD=make;;
+esac
+
 check=check_patch
 fail=0
 range=0
 spell=0
 encoding=0
 message=0
+
+# CMake
 cmake_warning_once=0
+
+# Python
+black_warning_once=0
+flake8_warning_once=0
+isort_warning_once=0
+
+cvt2utf_warning_once=0
+codespell_config_file_location_was_shown_once=0
+
+# links
+COMMIT_URL="https://github.com/apache/nuttx/blob/master/CONTRIBUTING.md"
 
 usage() {
   echo "USAGE: ${0} [options] [list|-]"
@@ -36,9 +56,10 @@ usage() {
   echo "-u encoding check with cvt2utf (install with: pip install cvt2utf)"
   echo "-r range check only (coupled with -p or -g)"
   echo "-p <patch file names> (default)"
-  echo "-m Change-Id check in commit message (coupled with -g)"
+  echo "-m Check commit message (coupled with -g)"
   echo "-g <commit list>"
   echo "-f <file list>"
+  echo "-x format supported files (only .py, requires: pip install black)"
   echo "-  read standard input mainly used by git pre-commit hook as below:"
   echo "   git diff --cached | ./tools/checkpatch.sh -"
   echo "Where a <commit list> is any syntax supported by git for specifying git revision, see GITREVISIONS(7)"
@@ -59,12 +80,38 @@ is_rust_file() {
   fi
 }
 
-is_cmake_file() {
-  file_name=$(basename $@)
-  if [ "$file_name" == "CMakeLists.txt" ] || [[ "$file_name" =~ "cmake" ]]; then
+is_python_file() {
+  if [[ ${@##*.} == 'py' ]]; then
     echo 1
   else
     echo 0
+  fi
+}
+
+is_cmake_file() {
+  file_name=$(basename $@)
+  if [ "$file_name" == "CMakeLists.txt" ] || [[ "$file_name" =~ \.cmake$ ]]; then
+    echo 1
+  else
+    echo 0
+  fi
+}
+
+format_file() {
+  if [ "$(is_python_file $@)" == "1" ]; then
+    if command -v black >/dev/null; then
+      echo "Auto-formatting Python file with black: $@"
+      setupcfg="${TOOLDIR}/../.github/linters/setup.cfg"
+      isort --settings-path "${setupcfg}" "$@"
+      black $@
+    else
+      echo "$@: error: black not found. Please install with: pip install black"
+      fail=1
+    fi
+  else
+    # TODO: extend for other file types in the future
+    echo "$@: error: format files type not implemented"
+    fail=1
   fi
 }
 
@@ -80,12 +127,55 @@ check_file() {
     esac
   fi
 
-  if [ ${@##*.} == 'py' ]; then
-    black --check $@
-    flake8 --config ${TOOLDIR}/../.github/linters/setup.cfg $@
-    isort $@
+  if [ "$(is_python_file $@)" == "1" ]; then
+    setupcfg="${TOOLDIR}/../.github/linters/setup.cfg"
+    if ! command -v black &> /dev/null; then
+      if [ $black_warning_once == 0 ]; then
+        echo -e "\nblack not found, run following command to install:"
+        echo "  $ pip install black"
+        black_warning_once=1
+      fi
+      fail=1
+    elif ! black --check $@ 2>&1; then
+      if [ $black_warning_once == 0 ]; then
+        echo -e "\nblack check failed, run following command to update the style:"
+        echo -e "  $ black <src>\n"
+        black_warning_once=1
+      fi
+      fail=1
+    fi
+    if ! command -v flake8 &> /dev/null; then
+      if [ $flake8_warning_once == 0 ]; then
+        echo -e "\nflake8 not found, run following command to install:"
+        echo "  $ pip install flake8"
+        flake8_warning_once=1
+      fi
+      fail=1
+    elif ! flake8 --config "${setupcfg}" "$@" 2>&1; then
+      if [ $flake8_warning_once == 0 ]; then
+        echo -e "\nflake8 check failed !!!"
+        flake8_warning_once=1
+      fi
+      fail=1
+    fi
+    if ! command -v isort &> /dev/null; then
+      if [ $isort_warning_once == 0 ]; then
+        echo -e "\nisort not found, run following command to install:"
+        echo "  $ pip install isort"
+        isort_warning_once=1
+      fi
+      fail=1
+    elif ! isort --diff --check-only --settings-path "${setupcfg}" "$@" 2>&1; then
+      if [ $isort_warning_once == 0 ]; then
+        isort --settings-path "${setupcfg}" "$@"
+        isort_warning_once=1
+      fi
+      fail=1
+    fi
   elif [ "$(is_rust_file $@)" == "1" ]; then
     if ! command -v rustfmt &> /dev/null; then
+      echo -e "\nrustfmt not found, run following command to install:"
+      echo "  $ rustup component add rustfmt"
       fail=1
     elif ! rustfmt --edition 2021 --check $@ 2>&1; then
       fail=1
@@ -112,17 +202,45 @@ check_file() {
   fi
 
   if [ $spell != 0 ]; then
-    if ! codespell -q 7 ${@: -1}; then
+    if ! command -v codespell &> /dev/null; then
+      if [ $codespell_config_file_location_was_shown_once == 0 ]; then
+        echo -e "\ncodespell not found, run following command to install:"
+        echo "  $ pip install codespell"
+        codespell_config_file_location_was_shown_once=1
+      fi
       fail=1
+    else
+      if [ $codespell_config_file_location_was_shown_once != 1 ]; then
+        # show the configuration file location just once during (not for each input file)
+        codespell_args="-q 7"
+        codespell_config_file_location_was_shown_once=1
+      else
+        codespell_args=""
+      fi
+      if ! codespell $codespell_args ${@: -1}; then
+        fail=1
+      fi
     fi
   fi
 
   if [ $encoding != 0 ]; then
-    md5="$(md5sum $@)"
-    cvt2utf convert --nobak "$@" &> /dev/null
-    if [ "$md5" != "$(md5sum $@)" ]; then
-      echo "$@: error: Non-UTF8 characters detected!"
+    if ! command -v cvt2utf &> /dev/null; then
+      if [ $cvt2utf_warning_once == 0 ]; then
+        echo -e "\ncvt2utf not found, run following command to install:"
+        echo "  $ pip install cvt2utf"
+        cvt2utf_warning_once=1
+      fi
       fail=1
+    else
+      md5="$(md5sum $@)"
+      cvt2utf convert --nobak "$@" &> /dev/null
+      if [ "$md5" != "$(md5sum $@)" ]; then
+        if [ $cvt2utf_warning_once == 0 ]; then
+            echo "$@: error: Non-UTF8 characters detected!"
+            cvt2utf_warning_once=1
+        fi
+        fail=1
+      fi
     fi
   fi
 }
@@ -164,24 +282,81 @@ check_patch() {
 }
 
 check_msg() {
-  while read; do
+  signedoffby_found=0
+  num_lines=0
+  max_line_len=80
+  min_num_lines=5
+
+  first=$(head -n1 <<< "$msg")
+
+  # check for Merge line and remove from parsed string
+  if [[ $first == *Merge* ]]; then
+      msg="$(echo "$msg" | tail -n +2)"
+      first=$(head -n2 <<< "$msg")
+  fi
+
+  while IFS= read -r REPLY; do
     if [[ $REPLY =~  ^Change-Id ]]; then
-      echo "Remove Gerrit Change-ID's before submitting upstream"
+      echo "❌ Remove Gerrit Change-ID's before submitting upstream"
       fail=1
     fi
-  done
+
+    if [[ $REPLY =~  ^VELAPLATO ]]; then
+      echo "❌ Remove VELAPLATO before submitting upstream"
+      fail=1
+    fi
+
+    if [[ $REPLY =~  ^[Ww][Ii][Pp]: ]]; then
+      echo "❌ Remove WIP before submitting upstream"
+      fail=1
+    fi
+
+    if [[ $REPLY =~  ^Signed-off-by ]]; then
+      signedoffby_found=1
+    fi
+
+    ((num_lines++))
+  done <<< "$msg"
+
+  if ! [[ $first =~  : ]]; then
+    echo "❌ Commit subject missing colon (e.g. 'subsystem: msg')"
+    fail=1
+  fi
+
+  if (( ${#first} > $max_line_len )); then
+    echo "❌ Commit subject too long > $max_line_len"
+    fail=1
+  fi
+
+  if ! [ $signedoffby_found == 1 ]; then
+    echo "❌ Missing Signed-off-by"
+    fail=1
+  fi
+
+  if (( $num_lines < $min_num_lines && $signedoffby_found == 1 )); then
+    echo "❌ Missing git commit message"
+    fail=1
+  fi
 }
 
 check_commit() {
   if [ $message != 0 ]; then
-    msg=`git show -s --format=%B $1`
-    check_msg <<< "$msg"
+    # check each commit format separately if this is a series of commits
+    if [[ $1 =~  ..HEAD ]]; then
+      for commit in $(git rev-list --no-merges $1); do
+        msg=`git show -s --format=%B $commit`
+        check_msg <<< "$msg"
+      done
+    else
+      msg=`git show -s --format=%B $1`
+      check_msg <<< "$msg"
+    fi
   fi
   diffs=`git diff $1`
   check_ranges <<< "$diffs"
 }
 
-make -C $TOOLDIR -f Makefile.host nxstyle 1>/dev/null
+$MAKECMD -C $TOOLDIR -f Makefile.host nxstyle 1>/dev/null
 
 if [ -z "$1" ]; then
   usage
@@ -198,6 +373,9 @@ while [ ! -z "$1" ]; do
     ;;
   -u )
     encoding=1
+    ;;
+  -x )
+    check=format_file
     ;;
   -f )
     check=check_file
@@ -230,5 +408,12 @@ done
 for arg in $@; do
   $check $arg
 done
+
+if [ $fail == 1 ]; then
+    echo "Some checks failed. For contributing guidelines, see:"
+    echo "  $COMMIT_URL"
+else
+    echo "✔️ All checks pass."
+fi
 
 exit $fail

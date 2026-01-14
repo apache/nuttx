@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/signal/sig_ismember.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -66,7 +68,7 @@ int nxsig_ismember(FAR const sigset_t *set, int signo)
     {
       /* Check if the signal is in the set */
 
-      return ((set->_elem[_SIGSET_NDX(signo)] & _SIGNO2SET(signo)) != 0);
+      return (set->_elem[_SIGSET_NDX(signo)] & _SIGNO2SET(signo)) ? 1 : 0;
     }
 }
 

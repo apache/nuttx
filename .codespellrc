@@ -1,0 +1,67 @@
+[codespell]
+
+# Add complete lines to be ignored to this file.
+# Example for ignoring all current occurrences of (verifiably correct) word usage:
+#   grep -hirw "emac" | sort | uniq >>.codespell-ignore-lines
+exclude-file = .codespell-ignore-lines
+
+# Ignore complete files (e.g. legal text or other immutable material).
+skip =
+  LICENSE,
+  */CODEOWNERS,
+
+# Ignore seemingly misspelled words.
+#   lowercase: case insensitive
+#   uppercase: case sensitive
+# (see https://github.com/codespell-project/codespell/issues/3638)
+# This setting should be used only for frequently used words.
+# Exotic word occurrences should be filtered with the "exclude-file" setting instead.
+ignore-words-list =
+  ACI,
+  AFE,
+  afile,
+  als,
+  ameba,
+  ARCHTYPE,
+  BU,
+  DAA,
+  dout,
+  emac,
+  eeeprom,
+  extint,
+  filp,
+  finitel,
+  froms,
+  FRAM,
+  FRO,
+  hart,
+  hsi,
+  iif,
+  IST,
+  infor,
+  inport,
+  ist,
+  lod,
+  mot,
+  mis,
+  nexted,
+  numer,
+  nwe,
+  oen,
+  parm,
+  parms,
+  pres,
+  RCALL,
+  REGONS,
+  SAIs,
+  sie,
+  ser,
+  servent,
+  synopsys,
+  TE,
+  TIMOUT,
+  THRE,
+  tolen,
+  UE,
+  WRON,
+  SIE,

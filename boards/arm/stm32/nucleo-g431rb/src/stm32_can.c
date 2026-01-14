@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/nucleo-g431rb/src/stm32_can.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -45,7 +47,7 @@
 /* Configuration ************************************************************/
 
 #if !defined(CONFIG_STM32_FDCAN1)
-#  error "No CAN is enable. Please eneable at least one CAN device"
+#  error "No CAN is enable. Please enable at least one CAN device"
 #endif
 
 /****************************************************************************

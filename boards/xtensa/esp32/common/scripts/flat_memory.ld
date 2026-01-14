@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32/common/scripts/flat_memory.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -43,7 +45,9 @@
 #  define FLASH_SIZE 0x1000000
 #endif
 
-#define SRAM1_IRAM_LEN 0xa000
+#define SRAM1_IRAM_LEN        0xa000
+#define RTC_TIMER_RESERVE_RTC (24)
+#define RESERVE_RTC_MEM       (RTC_TIMER_RESERVE_RTC)
 
 MEMORY
 {
@@ -57,7 +61,7 @@ MEMORY
    * signing of firmware image.
    */
 
-  metadata (RX) :        org = CONFIG_ESP32_APP_MCUBOOT_HEADER_SIZE, len = 0x20
+  metadata (RX) :        org = CONFIG_ESP32_APP_MCUBOOT_HEADER_SIZE, len = 0x60
   ROM (RX) :             org = ORIGIN(metadata) + LENGTH(metadata),
                          len = FLASH_SIZE - ORIGIN(ROM)
 
@@ -152,12 +156,14 @@ MEMORY
   rtc_slow_seg (RW) :    org = 0x50000000 + CONFIG_ESP32_ULP_COPROC_RESERVE_MEM,
                          len = 0x1000 - CONFIG_ESP32_ULP_COPROC_RESERVE_MEM
 
+  rtc_reserved_seg(RW) : org = 0x50000000 + 0x2000 - RESERVE_RTC_MEM, len = RESERVE_RTC_MEM
+
   /* External memory, including data and text */
 
   extmem_seg (RWX) :     org = 0x3f800000, len = 0x400000
 }
 
-#if CONFIG_ESP32_RUN_IRAM
+#ifdef CONFIG_ESP32_RUN_IRAM
   REGION_ALIAS("default_rodata_seg", dram0_0_seg);
   REGION_ALIAS("default_code_seg", iram0_0_seg);
 #else

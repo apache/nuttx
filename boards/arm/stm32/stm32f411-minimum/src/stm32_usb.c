@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f411-minimum/src/stm32_usb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -117,7 +119,7 @@ static int usbhost_waiter(int argc, char *argv[])
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_boardinitialize very early in inialization to setup
+ *   Called from stm32_boardinitialize very early in initialization to setup
  *   USB-related GPIO pins for the WeAct Studio MiniF4 board.
  *
  ****************************************************************************/

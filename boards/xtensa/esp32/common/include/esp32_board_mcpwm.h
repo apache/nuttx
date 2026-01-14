@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32/common/include/esp32_board_mcpwm.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,6 +44,25 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32_motor_initialize
+ *
+ * Description:
+ *   Initialize MCPWM peripheral for motor control and register the motor
+ *   driver.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP_MCPWM_MOTOR_BDC
+int board_motor_initialize(void);
+#endif
 
 #ifdef CONFIG_ESP_MCPWM_CAPTURE
 

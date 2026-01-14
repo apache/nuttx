@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/imxrt/hardware/rt106x/imxrt106x_pinmux.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -758,7 +760,6 @@
 #define GPIO_LPUART6_RX_1              (GPIO_PERIPH | GPIO_ALT2 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_AD_B0_03_INDEX))
 #define GPIO_LPUART6_RX_2              (GPIO_PERIPH | GPIO_ALT2 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_EMC_26_INDEX))
 #define GPIO_LPUART6_TX_1              (GPIO_PERIPH | GPIO_ALT2 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_AD_B0_02_INDEX))
-#define GPIO_LPUART6_TX_2              (GPIO_PERIPH | GPIO_ALT2 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_EMC_25_INDEX))
 #define GPIO_LPUART6_TX_2              (GPIO_PERIPH | GPIO_ALT2 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_EMC_25_INDEX))
 
 #define GPIO_LPUART7_CTS_1             (GPIO_PERIPH | GPIO_ALT2 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_SD_B1_06_INDEX))

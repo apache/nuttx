@@ -1,7 +1,8 @@
 /****************************************************************************
  * libs/libm/libm/lib_copysignf.c
  *
- *   Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: Copyright (C) 1993 by Sun Microsystems, Inc.
  *
  *   Developed at SunPro, a Sun Microsystems, Inc. business.
  *   Permission to use, copy, modify, and distribute this

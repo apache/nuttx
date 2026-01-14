@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/mm/kmap.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -20,6 +22,16 @@
 
 #ifndef __INCLUDE_NUTTX_MM_KMAP_H
 #define __INCLUDE_NUTTX_MM_KMAP_H
+
+/****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+struct tcb_s;                  /* Forward reference to TCB */
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: kmm_map_initialize
@@ -79,6 +91,8 @@ void kmm_unmap(FAR void *kaddr);
  *   a continuous virtual memory area.
  *
  * Input Parameters:
+ *   tcb   - The tcb of the task whose address environment the mapping
+ *           belongs to.
  *   uaddr - The user virtual address where mapping begins.
  *   size  - Size of the region.
  *
@@ -87,7 +101,7 @@ void kmm_unmap(FAR void *kaddr);
  *
  ****************************************************************************/
 
-FAR void *kmm_map_user(FAR void *uaddr, size_t size);
+FAR void *kmm_map_user(FAR struct tcb_s *tcb, FAR void *uaddr, size_t size);
 
 /****************************************************************************
  * Name: kmm_map_user_page
@@ -97,6 +111,8 @@ FAR void *kmm_map_user(FAR void *uaddr, size_t size);
  *   returns the kernel addressable page pool virtual address.
  *
  * Input Parameters:
+ *   tcb   - The tcb of the task whose address environment the mapping
+ *           belongs to.
  *   uaddr - The virtual address of the user page.
  *
  * Returned Value:
@@ -104,6 +120,6 @@ FAR void *kmm_map_user(FAR void *uaddr, size_t size);
  *
  ****************************************************************************/
 
-FAR void *kmm_map_user_page(FAR void *uaddr);
+FAR void *kmm_map_user_page(FAR struct tcb_s *tcb, FAR void *uaddr);
 
 #endif /* __INCLUDE_NUTTX_MM_KMAP_H */

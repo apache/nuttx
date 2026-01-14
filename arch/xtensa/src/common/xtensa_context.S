@@ -1,14 +1,10 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_context.S
  *
- * Adapted from use in NuttX by:
- *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Derives from logic originally provided by Cadence Design Systems Inc.
- *
- *   Copyright (c) 2006-2015 Cadence Design Systems Inc.
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: 2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2006-2015 Cadence Design Systems Inc.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -133,6 +129,11 @@ _xtensa_context_save:
 	s32i	a13, sp, (4 * REG_A13)
 	s32i	a14, sp, (4 * REG_A14)
 	s32i	a15, sp, (4 * REG_A15)
+#endif
+
+#ifdef CONFIG_SCHED_THREAD_LOCAL
+	rur     a3, THREADPTR
+	s32i	a3, sp, (4 * REG_THREADPTR)
 #endif
 
 	rsr		a3, SAR
@@ -278,6 +279,11 @@ _xtensa_context_restore:
 #if XCHAL_HAVE_S32C1I != 0
 	l32i  a3, a2, (4 * REG_SCOMPARE1)
 	wsr   a3, SCOMPARE1
+#endif
+
+#ifdef CONFIG_SCHED_THREAD_LOCAL
+	l32i	a3, a2, (4 * REG_THREADPTR)
+	wur		a3, THREADPTR
 #endif
 
 	l32i	a3, a2, (4 * REG_SAR)

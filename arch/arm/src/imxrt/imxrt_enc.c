@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_enc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -284,8 +286,8 @@ struct imxrt_qeconfig_s
 
 struct imxrt_qedata_s
 {
-  int32_t  index_pos;      /* Last position of index occurance */
-  uint32_t index_cnt;      /* Number of index occurance */
+  int32_t  index_pos;      /* Last position of index occurrence */
+  uint32_t index_cnt;      /* Number of index occurrence */
 };
 
 /* ENC Device Private Data */

@@ -91,7 +91,7 @@ Albeit the current implementation has some limitations:
 
 * Max I2C speed of 400KHz
 * Max transfer of 12 bytes (Could be extended by utilizing EDMA)
-* No abort on NACK reception, shifter simplies continues on
+* No abort on NACK reception, shifter simply continues
 * No multi-master support
 * No restart support
 

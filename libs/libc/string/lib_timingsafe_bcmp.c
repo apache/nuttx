@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/string/lib_timingsafe_bcmp.c
- * $OpenBSD: timingsafe_bcmp.c,v 1.3 2015/08/31 02:53:57 guenther Exp $
  *
- * Copyright (c) 2010 Damien Miller.  All rights reserved.
+ * SPDX-License-Identifier: ISC
+ * SPDX-FileCopyrightText: 2010 Damien Miller.  All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

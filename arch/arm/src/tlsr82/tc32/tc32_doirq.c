@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tlsr82/tc32/tc32_doirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,7 +38,7 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-
+#include "sched/sched.h"
 #include "hardware/tlsr82_irq.h"
 
 /****************************************************************************
@@ -57,26 +59,18 @@
 
 uint32_t *arm_doirq(int irq, uint32_t *regs)
 {
+  struct tcb_s *tcb = this_task();
+
   board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
 #else
 
-  /* Nested interrupts are not supported in this implementation.  If you
-   * want to implement nested interrupts, you would have to (1) change the
-   * way that CURRENT_REGS is handled and (2) the design associated with
-   * CONFIG_ARCH_INTERRUPTSTACK.
-   */
+  /* Nested interrupts are not supported */
 
-  /* Current regs non-zero indicates that we are processing an interrupt;
-   * CURRENT_REGS is also used to manage interrupt level context switches.
-   */
+  DEBUGASSERT(!up_interrupt_context());
 
-  if (CURRENT_REGS == NULL)
-    {
-      CURRENT_REGS = regs;
-      regs         = NULL;
-    }
+  tcb->xcp.regs = regs;
 
   /* Acknowledge the interrupt */
 
@@ -84,28 +78,14 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   /* Deliver the IRQ */
 
-  irq_dispatch(irq, (uint32_t *)CURRENT_REGS);
+  irq_dispatch(irq, regs);
+  tcb = this_task();
 
-  /* If a context switch occurred while processing the interrupt then
-   * CURRENT_REGS may have change value.  If we return any value different
-   * from the input regs, then the lower level will know that a context
-   * switch occurred during interrupt processing.
-   */
-
-  if (regs == NULL)
+  if (regs != tcb->xcp.regs)
     {
-      /* Restore the cpu lock */
-
-      if (regs != CURRENT_REGS)
-        {
-          restore_critical_section();
-          regs = (uint32_t *)CURRENT_REGS;
-        }
-
-      /* Update the CURRENT_REGS to NULL. */
-
-      CURRENT_REGS = NULL;
+      regs = tcb->xcp.regs;
     }
+
 #endif
 
   board_autoled_off(LED_INIRQ);

@@ -2,6 +2,8 @@
 ET-STM32 Stamp
 ==============
 
+.. tags:: chip:stm32, chip:stm32f1, chip:stm32f103
+
 This page discusses issues/thoughts unique to NuttX configuration(s) for the
 ET-STM32 Stamp board from Futurlec (https://www.futurlec.com/ET-STM32_Stamp.shtml).
 

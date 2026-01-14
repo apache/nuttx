@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/odrive36/src/stm32_foc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -88,7 +90,7 @@
 /* Only 2-shunt configuration supported by board */
 
 #if CONFIG_MOTOR_FOC_SHUNTS != 2
-#  error For now ony 2-shunts configuration is supported
+#  error For now only 2-shunts configuration is supported
 #endif
 
 /* Configuration specific for DRV8301:
@@ -929,7 +931,7 @@ int stm32_adc_setup(void)
       goto errout;
     }
 
-  /* Regsiter ADC */
+  /* Register ADC */
 
   ret = adc_register(ODRIVE_ADC_AUX_DEVPATH, adc);
   if (ret < 0)

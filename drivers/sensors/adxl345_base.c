@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/adxl345_base.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,11 +42,7 @@
 #if defined(CONFIG_SENSORS_ADXL345)
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
+ * Private Functions Prototypes
  ****************************************************************************/
 
 /* Character driver methods */
@@ -316,7 +314,7 @@ static void adxl345_reset(FAR struct adxl345_dev_s *priv)
 
   /* Wait a bit to make the GOD of TIME happy */
 
-  nxsig_usleep(20 * 1000);
+  nxsched_usleep(20 * 1000);
 }
 
 /****************************************************************************

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_addrenv_shm.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,7 @@
 
 #include <arch/barriers.h>
 
+#include "sched/sched.h"
 #include "addrenv.h"
 #include "pgalloc.h"
 #include "riscv_mmu.h"
@@ -66,7 +69,7 @@
 
 int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
 {
-  struct tcb_s          *tcb     = nxsched_self();
+  struct tcb_s          *tcb     = this_task();
   struct arch_addrenv_s *addrenv = &tcb->addrenv_own->addrenv;
 
   /* Sanity checks */
@@ -100,7 +103,7 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
 
 int up_shmdt(uintptr_t vaddr, unsigned int npages)
 {
-  struct tcb_s          *tcb     = nxsched_self();
+  struct tcb_s          *tcb     = this_task();
   struct arch_addrenv_s *addrenv = &tcb->addrenv_own->addrenv;
 
   /* Sanity checks */

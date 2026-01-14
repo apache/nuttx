@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/sim_encoder.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,6 +28,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/video/v4l2_m2m.h>
+#include <nuttx/wqueue.h>
 
 #include "sim_x264encoder.h"
 #include "sim_internal.h"

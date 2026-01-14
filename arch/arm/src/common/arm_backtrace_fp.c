@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/common/arm_backtrace_fp.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -99,13 +101,20 @@ static int backtrace(uintptr_t *base, uintptr_t *limit,
  * Returned Value:
  *   up_backtrace() returns the number of addresses returned in buffer
  *
+ * Assumptions:
+ *   Have to make sure tcb keep safe during function executing, it means
+ *   1. Tcb have to be self or not-running.  In SMP case, the running task
+ *      PC & SP cannot be backtrace, as whose get from tcb is not the newest.
+ *   2. Tcb have to keep not be freed.  In task exiting case, have to
+ *      make sure the tcb get from pid and up_backtrace in one critical
+ *      section procedure.
+ *
  ****************************************************************************/
 
 int up_backtrace(struct tcb_s *tcb,
                  void **buffer, int size, int skip)
 {
   struct tcb_s *rtcb = running_task();
-  irqstate_t flags;
   int ret;
 
   if (size <= 0 || !buffer)
@@ -118,7 +127,7 @@ int up_backtrace(struct tcb_s *tcb,
       if (up_interrupt_context())
         {
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
-          void *istackbase = (void *)up_get_intstackbase(up_cpu_index());
+          void *istackbase = (void *)up_get_intstackbase(this_cpu());
 
           ret = backtrace(istackbase,
                           istackbase + INTSTACK_SIZE,
@@ -134,8 +143,8 @@ int up_backtrace(struct tcb_s *tcb,
             {
               ret += backtrace(rtcb->stack_base_ptr,
                                rtcb->stack_base_ptr + rtcb->adj_stack_size,
-                               (void *)CURRENT_REGS[REG_FP],
-                               (void *)CURRENT_REGS[REG_PC],
+                               (void *)((uint32_t *)running_regs())[REG_FP],
+                               (void *)((uint32_t *)running_regs())[REG_PC],
                                &buffer[ret], size - ret, &skip);
             }
         }
@@ -149,15 +158,11 @@ int up_backtrace(struct tcb_s *tcb,
     }
   else
     {
-      flags = enter_critical_section();
-
       ret = backtrace(tcb->stack_base_ptr,
                       tcb->stack_base_ptr + tcb->adj_stack_size,
                       (void *)tcb->xcp.regs[REG_FP],
                       (void *)tcb->xcp.regs[REG_PC],
                       buffer, size, &skip);
-
-      leave_critical_section(flags);
     }
 
   return ret;

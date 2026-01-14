@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/lpc31xx/ea3131/tools/lpchdr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -71,7 +73,7 @@ static void parse_args(int argc, char **argv)
             break;
 
           case ':':
-            fprintf(stderr, "Missing option argumen\n");
+            fprintf(stderr, "Missing option argument\n");
             show_usage(argv[0], 1);
 
           case '?':

@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/udp/udp_conn.c
  *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  *   Copyright (C) 2007-2009, 2011-2012, 2016, 2018 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -73,19 +75,22 @@
 #include "utils/utils.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_NET_UDP_MAX_CONNS
+#  define CONFIG_NET_UDP_MAX_CONNS 0
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /* The array containing all UDP connections. */
 
-#if CONFIG_NET_UDP_PREALLOC_CONNS > 0
-static struct udp_conn_s g_udp_connections[CONFIG_NET_UDP_PREALLOC_CONNS];
-#endif
-
-/* A list of all free UDP connections */
-
-static dq_queue_t g_free_udp_connections;
-static mutex_t g_free_lock = NXMUTEX_INITIALIZER;
+NET_BUFPOOL_DECLARE(g_udp_connections, sizeof(struct udp_conn_s),
+                    CONFIG_NET_UDP_PREALLOC_CONNS,
+                    CONFIG_NET_UDP_ALLOC_CONNS, CONFIG_NET_UDP_MAX_CONNS);
 
 /* A list of all allocated UDP connections */
 
@@ -106,7 +111,7 @@ static dq_queue_t g_active_udp_connections;
  *   ipaddr - The IP address to use in the lookup
  *   portno - The port to use in the lookup
  *   opt    - The option from another conn to match the conflict conn
- *              SO_REUSEADDR: If both sockets have this, they never confilct.
+ *              SO_REUSEADDR: If both sockets have this, they never conflict.
  *
  * Assumptions:
  *   This function must be called with the network locked.
@@ -124,6 +129,7 @@ static FAR struct udp_conn_s *udp_find_conn(uint8_t domain,
 
   /* Now search each connection structure. */
 
+  udp_conn_list_lock();
   while ((conn = udp_nextconn(conn)) != NULL)
     {
       /* With SO_REUSEADDR set for both sockets, we do not need to check its
@@ -152,7 +158,7 @@ static FAR struct udp_conn_s *udp_find_conn(uint8_t domain,
               (net_ipv4addr_cmp(conn->u.ipv4.laddr, ipaddr->ipv4.laddr) ||
                net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY)))
             {
-              return conn;
+              break;
             }
         }
 #endif /* CONFIG_NET_IPv4 */
@@ -166,13 +172,14 @@ static FAR struct udp_conn_s *udp_find_conn(uint8_t domain,
               (net_ipv6addr_cmp(conn->u.ipv6.laddr, ipaddr->ipv6.laddr) ||
                net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr)))
             {
-              return conn;
+              break;
             }
         }
 #endif /* CONFIG_NET_IPv6 */
     }
 
-  return NULL;
+  udp_conn_list_unlock();
+  return conn;
 }
 
 /****************************************************************************
@@ -311,7 +318,7 @@ udp_ipv4_active(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
 
       /* Look at the next active connection */
 
-      conn = (FAR struct udp_conn_s *)conn->sconn.node.flink;
+      conn = udp_nextconn(conn);
     }
 
   return conn;
@@ -451,60 +458,12 @@ udp_ipv6_active(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
 
       /* Look at the next active connection */
 
-      conn = (FAR struct udp_conn_s *)conn->sconn.node.flink;
+      conn = udp_nextconn(conn);
     }
 
   return conn;
 }
 #endif /* CONFIG_NET_IPv6 */
-
-/****************************************************************************
- * Name: udp_alloc_conn
- *
- * Description:
- *   Allocate a uninitialized UDP connection structure.
- *
- ****************************************************************************/
-
-#if CONFIG_NET_UDP_ALLOC_CONNS > 0
-static FAR struct udp_conn_s *udp_alloc_conn(void)
-{
-  FAR struct udp_conn_s *conn;
-  int i;
-
-  /* Return the entry from the head of the free list */
-
-  if (dq_peek(&g_free_udp_connections) == NULL)
-    {
-#if CONFIG_NET_UDP_MAX_CONNS > 0
-      if (dq_count(&g_active_udp_connections) +
-          CONFIG_NET_UDP_ALLOC_CONNS > CONFIG_NET_UDP_MAX_CONNS)
-        {
-          return NULL;
-        }
-#endif
-
-      conn = kmm_zalloc(sizeof(struct udp_conn_s) *
-                        CONFIG_NET_UDP_ALLOC_CONNS);
-      if (conn == NULL)
-        {
-          return conn;
-        }
-
-      /* Now initialize each connection structure */
-
-      for (i = 0; i < CONFIG_NET_UDP_ALLOC_CONNS; i++)
-        {
-          /* Mark the connection closed and move it to the free list */
-
-          conn[i].lport = 0;
-          dq_addlast(&conn[i].sconn.node, &g_free_udp_connections);
-        }
-    }
-
-  return (FAR struct udp_conn_s *)dq_remfirst(&g_free_udp_connections);
-}
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -535,8 +494,6 @@ uint16_t udp_select_port(uint8_t domain, FAR union ip_binding_u *u)
   static uint16_t g_last_udp_port;
   uint16_t portno;
 
-  net_lock();
-
   /* Generate port base dynamically */
 
   if (g_last_udp_port == 0)
@@ -557,8 +514,7 @@ uint16_t udp_select_port(uint8_t domain, FAR union ip_binding_u *u)
         {
           /* We have looped back, failed. */
 
-          portno = 0;
-          goto errout;
+          return 0;
         }
     }
   while (udp_find_conn(domain, u, HTONS(g_last_udp_port), 0) != NULL
@@ -574,34 +530,7 @@ uint16_t udp_select_port(uint8_t domain, FAR union ip_binding_u *u)
 
   portno = g_last_udp_port;
 
-errout:
-  net_unlock();
-
   return portno;
-}
-
-/****************************************************************************
- * Name: udp_initialize
- *
- * Description:
- *   Initialize the UDP connection structures.  Called once and only from
- *   the UIP layer.
- *
- ****************************************************************************/
-
-void udp_initialize(void)
-{
-#if CONFIG_NET_UDP_PREALLOC_CONNS > 0
-  int i;
-
-  for (i = 0; i < CONFIG_NET_UDP_PREALLOC_CONNS; i++)
-    {
-      /* Mark the connection closed and move it to the free list */
-
-      g_udp_connections[i].lport = 0;
-      dq_addlast(&g_udp_connections[i].sconn.node, &g_free_udp_connections);
-    }
-#endif
 }
 
 /****************************************************************************
@@ -619,16 +548,9 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
 
   /* The free list is protected by a mutex. */
 
-  nxmutex_lock(&g_free_lock);
+  NET_BUFPOOL_LOCK(g_udp_connections);
 
-  conn = (FAR struct udp_conn_s *)dq_remfirst(&g_free_udp_connections);
-
-#if CONFIG_NET_UDP_ALLOC_CONNS > 0
-  if (conn == NULL)
-    {
-      conn = udp_alloc_conn();
-    }
-#endif
+  conn = NET_BUFPOOL_TRYALLOC(g_udp_connections);
 
   if (conn)
     {
@@ -649,6 +571,7 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
       nxsem_init(&conn->sndsem, 0, 0);
 #endif
 
+      nxrmutex_init(&conn->sconn.s_lock);
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
       /* Initialize the write buffer lists */
 
@@ -659,7 +582,7 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
       dq_addlast(&conn->sconn.node, &g_active_udp_connections);
     }
 
-  nxmutex_unlock(&g_free_lock);
+  NET_BUFPOOL_UNLOCK(g_udp_connections);
   return conn;
 }
 
@@ -682,12 +605,13 @@ void udp_free(FAR struct udp_conn_s *conn)
 
   DEBUGASSERT(conn->crefs == 0);
 
-  nxmutex_lock(&g_free_lock);
+  NET_BUFPOOL_LOCK(g_udp_connections);
   conn->lport = 0;
 
   /* Remove the connection from the active list */
 
   dq_rem(&conn->sconn.node, &g_active_udp_connections);
+  nxrmutex_destroy(&conn->sconn.s_lock);
 
   /* Release any read-ahead buffers attached to the connection, NULL is ok */
 
@@ -710,25 +634,15 @@ void udp_free(FAR struct udp_conn_s *conn)
 
 #endif
 
-  /* Free the connection.
-   * If this is a preallocated or a batch allocated connection store it in
-   * the free connections list. Else free it.
-   */
-
-#if CONFIG_NET_UDP_ALLOC_CONNS == 1
-  if (conn < g_udp_connections || conn >= (g_udp_connections +
-      CONFIG_NET_UDP_PREALLOC_CONNS))
-    {
-      kmm_free(conn);
-    }
-  else
+#if CONFIG_NET_SEND_BUFSIZE > 0
+  nxsem_destroy(&conn->sndsem);
 #endif
-    {
-      memset(conn, 0, sizeof(*conn));
-      dq_addlast(&conn->sconn.node, &g_free_udp_connections);
-    }
 
-  nxmutex_unlock(&g_free_lock);
+  /* Free the connection. */
+
+  NET_BUFPOOL_FREE(g_udp_connections, conn);
+
+  NET_BUFPOOL_UNLOCK(g_udp_connections);
 }
 
 /****************************************************************************
@@ -767,13 +681,45 @@ FAR struct udp_conn_s *udp_active(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
+ * Name: udp_conn_list_lock
+ *
+ * Description:
+ *   Lock the UDP connection list
+ *
+ * Assumptions:
+ *   This function must be called by driver thread.
+ *
+ ****************************************************************************/
+
+void udp_conn_list_lock(void)
+{
+  NET_BUFPOOL_LOCK(g_udp_connections);
+}
+
+/****************************************************************************
+ * Name: udp_conn_list_unlock
+ *
+ * Description:
+ *   Unlock the UDP connection list
+ *
+ * Assumptions:
+ *   This function must be called by driver thread.
+ *
+ ****************************************************************************/
+
+void udp_conn_list_unlock(void)
+{
+  NET_BUFPOOL_UNLOCK(g_udp_connections);
+}
+
+/****************************************************************************
  * Name: udp_nextconn
  *
  * Description:
  *   Traverse the list of allocated UDP connections
  *
  * Assumptions:
- *   This function must be called with the network locked.
+ *   This function must be called with the udp_conn_list_lock.
  *
  ****************************************************************************/
 
@@ -818,7 +764,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
 
   /* Interrupts must be disabled while access the UDP connection list */
 
-  net_lock();
+  conn_lock(&conn->sconn);
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
@@ -835,6 +781,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
         {
           ret = -EADDRNOTAVAIL;
 
+          netdev_list_lock();
           for (dev = g_netdevices; dev; dev = dev->flink)
             {
               if (net_ipv4addr_cmp(inaddr->sin_addr.s_addr, dev->d_ipaddr))
@@ -844,9 +791,10 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
                 }
             }
 
+          netdev_list_unlock();
           if (ret == -EADDRNOTAVAIL)
             {
-              net_unlock();
+              conn_unlock(&conn->sconn);
               return ret;
             }
         }
@@ -882,6 +830,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
         {
           ret = -EADDRNOTAVAIL;
 
+          netdev_list_lock();
           for (dev = g_netdevices; dev; dev = dev->flink)
             {
               if (NETDEV_IS_MY_V6ADDR(dev,
@@ -892,9 +841,10 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
                 }
             }
 
+          netdev_list_unlock();
           if (ret == -EADDRNOTAVAIL)
             {
-              net_unlock();
+              conn_unlock(&conn->sconn);
               return ret;
             }
         }
@@ -960,7 +910,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
         }
     }
 
-  net_unlock();
+  conn_unlock(&conn->sconn);
   return ret;
 }
 

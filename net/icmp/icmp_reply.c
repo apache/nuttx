@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/icmp/icmp_reply.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -197,11 +199,13 @@ void icmp_reply(FAR struct net_driver_s *dev, int type, int code)
   /* Calculate the ICMP checksum. */
 
   icmp->icmpchksum  = 0;
+#ifdef CONFIG_NET_ICMP_CHECKSUMS
   icmp->icmpchksum  = ~icmp_chksum_iob(dev->d_iob);
   if (icmp->icmpchksum == 0)
     {
       icmp->icmpchksum = 0xffff;
     }
+#endif
 
   ninfo("Outgoing ICMP packet length: %d\n", dev->d_len);
 }

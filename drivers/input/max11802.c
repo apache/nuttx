@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/input/max11802.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -98,7 +100,7 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
                              size_t len);
 static int max11802_ioctl(FAR struct file *filep, int cmd,
                           unsigned long arg);
-static int max11802_poll(FAR struct file *filep, struct pollfd *fds,
+static int max11802_poll(FAR struct file *filep, FAR struct pollfd *fds,
                          bool setup);
 
 /****************************************************************************
@@ -1043,7 +1045,7 @@ static int max11802_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */

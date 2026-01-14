@@ -1,0 +1,35 @@
+From cb7a03b41fff563c0cbb5145eed09f9b17edf9e2 Mon Sep 17 00:00:00 2001
+From: Nikolas Klauser <nikolasklauser@berlin.de>
+Date: Sat, 1 Jun 2024 12:20:41 +0200
+Subject: [PATCH]  [libc++] Fix failures with GCC 14 (#92663)
+
+Fixes #91831
+
+Signed-off-by: chao an <anchao.archer@bytedance.com>
+
+---
+ libcxx/include/__type_traits/remove_pointer.h                | 5 +++++
+ 11 files changed, 22 insertions(+), 8 deletions(-)
+
+diff --git libcxx/include/__type_traits/remove_pointer.h b/libcxx/include/__type_traits/remove_pointer.h
+index 54390a1939f7..1048f67055a2 100644
+--- libcxx/include/__type_traits/remove_pointer.h
++++ libcxx/include/__type_traits/remove_pointer.h
+@@ -23,8 +23,13 @@ struct remove_pointer {
+   using type _LIBCPP_NODEBUG = __remove_pointer(_Tp);
+ };
+
++#  ifdef _LIBCPP_COMPILER_GCC
++template <class _Tp>
++using __remove_pointer_t = typename remove_pointer<_Tp>::type;
++#  else
+ template <class _Tp>
+ using __remove_pointer_t = __remove_pointer(_Tp);
++#  endif
+ #else
+ // clang-format off
+ template <class _Tp> struct _LIBCPP_TEMPLATE_VIS remove_pointer                      {typedef _LIBCPP_NODEBUG _Tp type;};
+
+--
+2.43.0
+

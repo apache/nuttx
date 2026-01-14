@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/arm/src/cmake/armv6-m.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -19,3 +21,8 @@
 # ##############################################################################
 
 add_compile_options(-mcpu=cortex-m0 -mthumb -mfloat-abi=soft)
+
+# LLVM Configuration
+set(LLVM_ARCHTYPE thumbv6m)
+set(LLVM_ABITYPE eabi)
+set(LLVM_CPUTYPE cortex-m0)

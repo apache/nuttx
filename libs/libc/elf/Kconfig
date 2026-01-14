@@ -1,0 +1,119 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config LIBC_ELF
+	bool "Enable module library"
+	default n
+	select LIBC_ARCH_ELF
+	select ARCH_USE_TEXT_HEAP if ARCH_HAVE_TEXT_HEAP
+
+menu "Module library configuration"
+	depends on LIBC_ELF
+
+config LIBC_ELF_MAXDEPEND
+	int "Max dependencies"
+	default 2
+	---help---
+		This setting controls the number of other modules that a new module
+		may depend on.  That is, when a new module in inserted via 'insmod'
+		it may depend on symbols exported by other, already installed
+		modules.  This is the maximum number of modules that export symbols
+		to the new module.  This maximum is artificial; it is used in the
+		current design because it uses some very simple, pre-allocated data
+		structures.
+
+		All dependencies logic my be eliminated by set CONFIG_LIBC_ELF_MAXDEPEND
+		to zero.
+
+config LIBC_ELF_ALIGN_LOG2
+	int "Log2 Section Alignment"
+	default 2
+	---help---
+		Align all sections to this Log2 value:  0->1, 1->2, 2->4, etc.
+
+config LIBC_ELF_BUFFERSIZE
+	int "Module I/O Buffer Size"
+	default 32
+	---help---
+		This is an I/O buffer that is used to access the module file.
+		Variable length items will need to be read (such as symbol names).
+		This is really just this initial size of the buffer; it will be
+		reallocated as necessary to hold large symbol names).  Default: 32
+
+config LIBC_ELF_BUFFERINCR
+	int "Module I/O Buffer Realloc Increment"
+	default 32
+	---help---
+		This is an I/O buffer that is used to access the module file.
+		Variable length items will need to be read (such as symbol names).
+		This value specifies the size increment to use each time the
+		buffer is reallocated.  Default: 32
+
+config LIBC_ELF_DUMPBUFFER
+	bool "Dump module buffers"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Dump various module buffers for debug purposes
+
+config LIBC_ELF_HAVE_SYMTAB
+	bool "Have symbol table"
+	default n
+	---help---
+		If you have a module library symbol table, then you may select this
+		option in order to use it.  Symbol tables are required in most
+		cases in order to link executable programs to the base code.
+
+config LIBC_ELF_RELOCATION_BUFFERCOUNT
+	int "LIBELF Relocation Table Buffer Count"
+	default 256
+	---help---
+		This is an cache buffer that is used to store elf relocation table to
+		reduce access fs. Default: 256
+
+config LIBC_ELF_SYMBOL_CACHECOUNT
+	int "LIBELF SYMBOL Table Cache Count"
+	default 256
+	---help---
+		This is an cache that is used to store elf symbol table to
+		reduce access fs. Default: 256
+
+if LIBC_ELF_HAVE_SYMTAB
+
+config LIBC_ELF_SYMTAB_ARRAY
+	string "Symbol table name used by dlsym"
+	default "g_mod_symtab" if !EXECFUNCS_HAVE_SYMTAB
+	default EXECFUNCS_SYMTAB_ARRAY if EXECFUNCS_HAVE_SYMTAB
+
+config LIBC_ELF_NSYMBOLS_VAR
+	string "Name of variable holding the number of symbols"
+	default "g_mod_nsymbols" if !EXECFUNCS_HAVE_SYMTAB
+	default EXECFUNCS_NSYMBOLS_VAR if EXECFUNCS_HAVE_SYMTAB
+
+config LIBC_ELF_SYSTEM_SYMTAB
+	bool "Generate the system symbol table"
+	default n
+
+endif # LIBC_ELF_HAVE_SYMTAB
+
+config LIBC_ELF_LOADTO_LMA
+	bool "elf load sections to LMA"
+	default n
+	---help---
+		Load all section to LMA not VMA, so the startup code(e.g. start.S) need
+		relocate .data section to the final address(VMA) and zero .bss section
+		by self.
+
+config LIBC_ELF_EXIDX_SECTNAME
+	string "ELF Section Name for Exception Index"
+	default ".ARM.exidx"
+	depends on CXX_EXCEPTION && ARCH_ARM
+	---help---
+		Set the name string for the exception index section on the ELF modules to
+		be loaded by the ELF binary loader.
+
+		This is needed to support exception handling on loadable ELF modules.
+
+endmenu # Module library configuration

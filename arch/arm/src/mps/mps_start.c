@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/mps/mps_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -23,17 +25,23 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <nuttx/cache.h>
 #include <nuttx/init.h>
+#include <arch/barriers.h>
+#include <arch/board/board.h>
 
 #include "arm_internal.h"
+#include "nvic.h"
 #include "mps_irq.h"
+#include "mps_userspace.h"
 #include "mpu.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#define HEAP_BASE      ((uintptr_t)_ebss + CONFIG_IDLETHREAD_STACKSIZE)
+#define HEAP_BASE ((uintptr_t)_ebss + CONFIG_IDLETHREAD_STACKSIZE)
 
 /****************************************************************************
  * Public Data
@@ -56,6 +64,48 @@ const uintptr_t g_idle_topstack = HEAP_BASE;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: mps_tcmenable
+ *
+ * Description:
+ *   Enable/disable tightly coupled memories.  Size of tightly coupled
+ *   memory regions is controlled by GPNVM Bits 7-8.
+ *
+ ****************************************************************************/
+
+static inline void mps_tcmenable(void)
+{
+  uint32_t regval;
+
+  UP_MB();
+
+  /* Enabled/disabled ITCM */
+
+#ifdef CONFIG_ARMV7M_ITCM
+  regval  = NVIC_TCMCR_EN | NVIC_TCMCR_RMW | NVIC_TCMCR_RETEN;
+#else
+  regval  = getreg32(NVIC_ITCMCR);
+  regval &= ~NVIC_TCMCR_EN;
+#endif
+  putreg32(regval, NVIC_ITCMCR);
+
+  /* Enabled/disabled DTCM */
+
+#ifdef CONFIG_ARMV7M_DTCM
+  regval  = NVIC_TCMCR_EN | NVIC_TCMCR_RMW | NVIC_TCMCR_RETEN;
+#else
+  regval  = getreg32(NVIC_DTCMCR);
+  regval &= ~NVIC_TCMCR_EN;
+#endif
+  putreg32(regval, NVIC_DTCMCR);
+
+  UP_MB();
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: __start
  *
  * Description:
@@ -65,13 +115,22 @@ const uintptr_t g_idle_topstack = HEAP_BASE;
 
 void __start(void)
 {
+#ifndef CONFIG_BUILD_PIC
   const uint32_t *src;
   uint32_t *dest;
+#endif
 
   /* If enabled reset the MPU */
 
   mpu_early_reset();
+#ifdef CONFIG_ARM_MPU
+  mpu_showtype();
+#endif
   arm_fpuconfig();
+
+  /* If used the PIC, then the PIC will have already been configured */
+
+#ifndef CONFIG_BUILD_PIC
 
   /* Set bss to zero */
 
@@ -88,10 +147,51 @@ void __start(void)
     {
       *dest++ = *src++;
     }
+#endif
+
+  /* Perform early serial initialization */
 
 #ifdef USE_EARLYSERIALINIT
   arm_earlyserialinit();
 #endif
 
+  /* Enable/disable tightly coupled memories */
+
+  mps_tcmenable();
+
+#ifdef CONFIG_ARMV7M_DCACHE
+  /* Memory barrier */
+
+  UP_DMB();
+
+#endif
+
+#ifdef CONFIG_BUILD_PROTECTED
+  /* For the case of the separate user-/kernel-space build, perform whatever
+   * platform specific initialization of the user memory is required.
+   * Normally this just means initializing the user space .data and .bss
+   * segments.
+   */
+
+  mps_userspace();
+#endif
+
+#ifdef CONFIG_ARM_MPU
+  /* Then enable the MPU */
+
+  mpu_control(true, false, true);
+#endif
+
+  /* Enable I- and D-Caches */
+
+  up_enable_icache();
+  up_enable_dcache();
+
+  /* Then start NuttX */
+
   nx_start();
+
+  /* Shouldn't get here */
+
+  for (; ; );
 }

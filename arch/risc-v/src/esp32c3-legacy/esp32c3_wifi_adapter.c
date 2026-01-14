@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/esp32c3_wifi_adapter.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -452,7 +454,7 @@ static bool g_softap_started;
 static wifi_txdone_cb_t g_softap_txdone_cb;
 #endif
 
-/* Wi-Fi and BT coexistance OS adapter data */
+/* Wi-Fi and BT coexistence OS adapter data */
 
 #ifdef CONFIG_ESP32C3_WIFI_BT_COEXIST
 coex_adapter_funcs_t g_coex_adapter_funcs =
@@ -858,15 +860,10 @@ static void esp_thread_semphr_free(void *semphr)
 
 static void esp_update_time(struct timespec *timespec, uint32_t ticks)
 {
-  uint32_t tmp;
+  struct timespec ts;
 
-  tmp = TICK2SEC(ticks);
-  timespec->tv_sec += tmp;
-
-  ticks -= SEC2TICK(tmp);
-  tmp = TICK2NSEC(ticks);
-
-  timespec->tv_nsec += tmp;
+  clock_ticks2time(&ts, ticks);
+  clock_timespec_add(timespec, &ts, timespec);
 }
 
 /****************************************************************************
@@ -932,7 +929,7 @@ static void esp_set_isr(int32_t n, void *f, void *arg)
 
   if (g_wifi_irq_bind)
     {
-      return ;
+      return;
     }
 
   adapter = kmm_malloc(sizeof(struct irq_adpt));
@@ -2056,7 +2053,7 @@ static void esp_task_delay(uint32_t tick)
 {
   useconds_t us = TICK2USEC(tick);
 
-  nxsig_usleep(us);
+  nxsched_usleep(us);
 }
 
 /****************************************************************************
@@ -2260,6 +2257,13 @@ static void esp_evt_work_cb(void *arg)
           break;
         }
 
+      /* Some of the following logic (eg. esp32c3_wlan_sta_set_linkstatus)
+       * can take net_lock(). To maintain the consistent locking order,
+       * we take net_lock() here before taking esp_wifi_lock. Note that
+       * net_lock() is a recursive lock.
+       */
+
+      net_lock();
       esp_wifi_lock(true);
 
       switch (evt_adpt->id)
@@ -2400,6 +2404,7 @@ static void esp_evt_work_cb(void *arg)
         }
 
       esp_wifi_lock(false);
+      net_unlock();
 
       kmm_free(evt_adpt);
     }
@@ -3346,7 +3351,7 @@ static uint32_t esp_rand(void)
    * faster than it is added, this function needs to wait for at least 16 APB
    * clock cycles after reading previous word. This implementation may
    * actually wait a bit longer due to extra time spent in arithmetic and
-   * branch statements. As a (probably unncessary) precaution to avoid
+   * branch statements. As a (probably unnecessary) precaution to avoid
    * returning the RNG state as-is, the result is XORed with additional
    * WDEV_RND_REG reads while waiting.
    * This code does not run in a critical section, so CPU frequency switch
@@ -6878,7 +6883,7 @@ int esp_wifi_softap_rssi(struct iwreq *iwr, bool set)
  * Name: esp32c3_wifi_bt_coexist_init
  *
  * Description:
- *   Initialize ESP32-C3 Wi-Fi and BT coexistance module.
+ *   Initialize ESP32-C3 Wi-Fi and BT coexistence module.
  *
  * Input Parameters:
  *   None
@@ -6924,6 +6929,6 @@ void esp_wifi_stop_callback(void)
     }
   else
     {
-      nxsig_sleep(1);
+      nxsched_sleep(1);
     }
 }

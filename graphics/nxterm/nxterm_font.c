@@ -1,6 +1,8 @@
 /****************************************************************************
  * graphics/nxterm/nxterm_font.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -129,7 +131,7 @@ static void nxterm_fillspace(FAR struct nxterm_state_s *priv,
  *
  * Description:
  *   This is part of the nxterm_putc logic.  It creates and positions a
- *   the character and renders (or re-uses) a glyph for font.
+ *   the character and renders (or reuses) a glyph for font.
  *
  ****************************************************************************/
 

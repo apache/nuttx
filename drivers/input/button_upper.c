@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/input/button_upper.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -59,7 +61,7 @@ struct btn_upperhalf_s
 
   FAR const struct btn_lowerhalf_s *bu_lower;
 
-  btn_buttonset_t bu_sample;  /* Last sampled button states */
+  btn_buttonset_t bu_sample; /* Last sampled button states */
   bool bu_enabled;
 
   /* The following is a singly linked list of open references to the

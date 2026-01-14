@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/rp2040/adafruit-kb2040/src/rp2040_pico.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,7 +31,7 @@
 
 int rp2040_bringup(void);
 
-#ifdef CONFIG_DEV_GPIO
+#if defined(CONFIG_DEV_GPIO) && !defined(CONFIG_ARCH_BOARD_COMMON)
 int rp2040_dev_gpio_init(void);
 #endif
 

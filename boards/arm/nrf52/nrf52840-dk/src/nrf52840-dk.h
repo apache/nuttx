@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/nrf52/nrf52840-dk/src/nrf52840-dk.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -193,12 +195,24 @@ int nrf52_adc_setup(void);
  * Name: nrf52_mx25_initialize
  *
  * Description:
- *   Initialize the MX25RXX QSPI memeory
+ *   Initialize the MX25RXX QSPI memory
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NRF52_QSPI
 int nrf52_mx25_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: nrf52_gpioleds_initialize
+ *
+ * Description:
+ *   Initialize GPIO devices with board LEDS and buttons.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NRF52840DK_BTNLEDS_GPIO
+int nrf52_gpioleds_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

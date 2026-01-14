@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/i2c/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -17,7 +19,6 @@
 # the License.
 #
 # ##############################################################################
-# ##############################################################################
 
 if(CONFIG_I2C)
   set(SRCS i2c_read.c i2c_write.c i2c_writeread.c)
@@ -28,6 +29,15 @@ if(CONFIG_I2C)
 
   if(CONFIG_I2C_BITBANG)
     list(APPEND SRCS i2c_bitbang.c)
+
+    if(CONFIG_I2C_BITBANG_IOEXPANDER)
+      list(APPEND SRCS i2c_bitbang_ioexpander.c)
+    endif()
+
+  endif()
+
+  if(CONFIG_I2C_SLAVE_DRIVER)
+    list(APPEND SRCS i2c_slave_driver.c)
   endif()
 
   # Include the selected I2C multiplexer drivers

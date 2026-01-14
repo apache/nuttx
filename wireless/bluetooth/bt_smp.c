@@ -1,6 +1,8 @@
 /****************************************************************************
  * wireless/bluetooth/bt_smp.c
  *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  *   Copyright (c) 2016, Intel Corporation
  *   All rights reserved.
  *
@@ -69,6 +71,16 @@
 
 /* SMP channel specific context */
 
+enum smp_pairing_method_e
+{
+    PAIRING_METHOD_JUST_WORKS,
+    PAIRING_METHOD_PASSKEY_DISPLAY, /* Local displays, remote inputs */
+    PAIRING_METHOD_PASSKEY_INPUT,   /* Local inputs, remote displays */
+    PAIRING_METHOD_OOB,
+    PAIRING_METHOD_NUM_COMP,        /* LESC only, not implemented yet */
+    PAIRING_METHOD_NOT_SUPPORTED
+};
+
 struct bt_smp_s
 {
   /* The connection this context is associated with */
@@ -82,6 +94,14 @@ struct bt_smp_s
   /* If we're waiting for an encryption change event */
 
   bool pending_encrypt;
+
+  /* Selected pairing method */
+
+  enum smp_pairing_method_e selected_method;
+
+  /* Passkey */
+
+  uint32_t passkey;
 
   /* Pairing Request PDU */
 
@@ -132,68 +152,77 @@ struct bt_smphandlers_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static const char *h(FAR const void *buf, size_t len);
+static FAR const char *h(FAR const void *buf, size_t len);
 static void     xor_128(FAR const struct uint128_s *p,
-                  FAR const struct uint128_s *q, FAR struct uint128_s *r);
-static int     le_encrypt(const uint8_t key[16], const uint8_t plaintext[16],
-                  uint8_t enc_data[16]);
+                        FAR const struct uint128_s *q,
+                        FAR struct uint128_s *r);
+static int     le_encrypt(FAR const uint8_t key[16],
+                          FAR const uint8_t plaintext[16],
+                          FAR uint8_t enc_data[16]);
 static int     le_rand(FAR void *buf, size_t len);
 static int     smp_ah(FAR const uint8_t irk[16], FAR const uint8_t r[3],
-                  FAR uint8_t out[3]);
+                      FAR uint8_t out[3]);
 static int     smp_c1(FAR const uint8_t k[16], FAR const uint8_t r[16],
-                  FAR const uint8_t preq[7], FAR const uint8_t pres[7],
-                  FAR const bt_addr_le_t *ia, FAR const bt_addr_le_t *ra,
-                  FAR uint8_t enc_data[16]);
-static int     smp_s1(const uint8_t k[16], const uint8_t r1[16],
-                  const uint8_t r2[16], uint8_t out[16]);
+                      FAR const uint8_t preq[7], FAR const uint8_t presp[7],
+                      FAR const bt_addr_le_t *ia, FAR const bt_addr_le_t *ra,
+                      FAR uint8_t enc_data[16]);
+static int     smp_s1(FAR const uint8_t k[16], FAR const uint8_t r1[16],
+                      FAR const uint8_t r2[16], FAR uint8_t out[16]);
 static FAR struct bt_buf_s *bt_smp_create_pdu(FAR struct bt_conn_s *conn,
-                  uint8_t op, size_t len);
+                                              uint8_t op, size_t len);
 static void    send_err_rsp(FAR struct bt_conn_s *conn, uint8_t reason);
 static int     smp_init(struct bt_smp_s *smp);
 static uint8_t smp_pairing_req(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                               FAR struct bt_buf_s *buf);
 static uint8_t smp_pairing_rsp(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                               FAR struct bt_buf_s *buf);
 static uint8_t smp_send_pairing_random(FAR struct bt_conn_s *conn);
 static uint8_t smp_pairing_confirm(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                                   FAR struct bt_buf_s *buf);
 static uint8_t smp_pairing_random(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                                  FAR struct bt_buf_s *buf);
 static uint8_t smp_pairing_failed(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                                  FAR struct bt_buf_s *buf);
 static void bt_smp_distribute_keys(FAR struct bt_conn_s *conn);
 static uint8_t smp_encrypt_info(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                                FAR struct bt_buf_s *buf);
 static uint8_t smp_master_ident(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                                FAR struct bt_buf_s *buf);
 static uint8_t smp_ident_info(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                              FAR struct bt_buf_s *buf);
 static uint8_t smp_ident_addr_info(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                                   FAR struct bt_buf_s *buf);
 static uint8_t smp_security_request(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                                    FAR struct bt_buf_s *buf);
+static void smp_auth_pairing_cancel(FAR struct bt_conn_s *conn);
+static void smp_auth_passkey_display(FAR struct bt_conn_s *conn,
+                                    unsigned int passkey);
+static void smp_auth_pairing_complete(FAR struct bt_conn_s *conn,
+                                      bool bonded);
+static void smp_auth_pairing_failed(FAR struct bt_conn_s *conn,
+                                    uint8_t reason);
 static void    bt_smp_receive(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf, FAR void *context,
-                  uint16_t cid);
+                              FAR struct bt_buf_s *buf, FAR void *context,
+                              uint16_t cid);
 static void    bt_smp_connected(FAR struct bt_conn_s *conn,
-                  FAR void *context, uint16_t cid);
+                                FAR void *context, uint16_t cid);
 static void    bt_smp_disconnected(FAR struct bt_conn_s *conn,
-                  FAR void *context, uint16_t cid);
-static void    bt_smp_encrypt_change(FAR FAR struct bt_conn_s *conn,
-                  FAR void *context, uint16_t cid);
+                                   FAR void *context, uint16_t cid);
+static void    bt_smp_encrypt_change(FAR struct bt_conn_s *conn,
+                                     FAR void *context, uint16_t cid);
 #ifdef CONFIG_BLUETOOTH_SMP_SELFTEST
 static void    swap_buf(FAR const uint8_t *src, FAR uint8_t *dst,
-                  uint16_t len);
+                        uint16_t len);
 static void    swap_in_place(FAR uint8_t * buf, uint16_t len);
 static int     cmac_subkey(FAR const uint8_t *key, FAR uint8_t *k1,
-                  FAR uint8_t *k2);
+                           FAR uint8_t *k2);
 static void    add_pad(FAR const uint8_t *in, FAR unsigned char *out,
-                  int len);
-static int     bt_smp_aes_cmac(const uint8_t *key, const uint8_t *in,
-                  size_t len, uint8_t *out);
+                       int len);
+static int     bt_smp_aes_cmac(const uint8_t *key, FAR const uint8_t *in,
+                               size_t len, uint8_t *out);
 static int     aes_test(FAR const char *prefix, FAR const uint8_t *key,
-                  FAR const uint8_t *m, uint16_t len,
-                  FAR const uint8_t *mac);
+                        FAR const uint8_t *m, uint16_t len,
+                        FAR const uint8_t *mac);
 static int     smp_aes_cmac_test(void);
 static int     smp_self_test(void);
 #else
@@ -205,6 +234,14 @@ static int     smp_self_test(void);
  ****************************************************************************/
 
 static struct bt_smp_s g_smp_pool[CONFIG_BLUETOOTH_MAX_CONN];
+static const struct bt_smp_auth_cb_s g_smp_auth_default_cb =
+{
+  smp_auth_passkey_display,
+  smp_auth_pairing_cancel,
+  smp_auth_pairing_complete,
+  smp_auth_pairing_failed
+};
+static const struct bt_smp_auth_cb_s *g_smp_auth_cb = &g_smp_auth_default_cb;
 static const struct bt_smphandlers_s g_smp_handlers[] =
 {
   {
@@ -315,7 +352,7 @@ static const uint8_t g_mac4[] =
  * in a single syslog call.
  */
 
-static const char *h(FAR const void *buf, size_t len)
+static FAR const char *h(FAR const void *buf, size_t len)
 {
   static const char hex[] = "0123456789abcdef";
   static char hexbufs[4][129];
@@ -352,8 +389,9 @@ static void xor_128(FAR const struct uint128_s *p,
   r->b = p->b ^ q->b;
 }
 
-static int le_encrypt(const uint8_t key[16], const uint8_t plaintext[16],
-                      uint8_t enc_data[16])
+static int le_encrypt(FAR const uint8_t key[16],
+                      FAR const uint8_t plaintext[16],
+                      FAR uint8_t enc_data[16])
 {
   FAR struct bt_hci_cp_le_encrypt_s *cp;
   FAR struct bt_hci_rp_le_encrypt_s *rp;
@@ -379,7 +417,7 @@ static int le_encrypt(const uint8_t key[16], const uint8_t plaintext[16],
       return err;
     }
 
-  rp = (void *)rsp->data;
+  rp = (FAR void *)rsp->data;
   memcpy(enc_data, rp->enc_data, sizeof(rp->enc_data));
   bt_buf_release(rsp);
 
@@ -453,7 +491,7 @@ static int smp_ah(FAR const uint8_t irk[16], FAR const uint8_t r[3],
 }
 
 static int smp_c1(FAR const uint8_t k[16], FAR const uint8_t r[16],
-                  FAR const uint8_t preq[7], FAR const uint8_t pres[7],
+                  FAR const uint8_t preq[7], FAR const uint8_t presp[7],
                   FAR const bt_addr_le_t *ia, FAR const bt_addr_le_t *ra,
                   FAR uint8_t enc_data[16])
 {
@@ -463,14 +501,14 @@ static int smp_c1(FAR const uint8_t k[16], FAR const uint8_t r[16],
 
   wlinfo("k %s r %s\n", h(k, 16), h(r, 16));
   wlinfo("ia %s ra %s\n", bt_addr_le_str(ia), bt_addr_le_str(ra));
-  wlinfo("preq %s pres %s\n", h(preq, 7), h(pres, 7));
+  wlinfo("preq %s presp %s\n", h(preq, 7), h(presp, 7));
 
-  /* pres, preq, rat and iat are concatenated to generate p1 */
+  /* presp, preq, rat and iat are concatenated to generate p1 */
 
   p1[0] = ia->type;
   p1[1] = ra->type;
   memcpy(p1 + 2, preq, 7);
-  memcpy(p1 + 9, pres, 7);
+  memcpy(p1 + 9, presp, 7);
 
   wlinfo("p1 %s\n", h(p1, 16));
 
@@ -501,8 +539,8 @@ static int smp_c1(FAR const uint8_t k[16], FAR const uint8_t r[16],
   return le_encrypt(k, enc_data, enc_data);
 }
 
-static int smp_s1(const uint8_t k[16], const uint8_t r1[16],
-                  const uint8_t r2[16], uint8_t out[16])
+static int smp_s1(FAR const uint8_t k[16], FAR const uint8_t r1[16],
+                  FAR const uint8_t r2[16], FAR uint8_t out[16])
 {
   /* The most significant 64-bits of r1 are discarded to generate r1' and the
    * most significant 64-bits of r2 are discarded to generate r2'. r1' is
@@ -551,6 +589,34 @@ static void send_err_rsp(FAR struct bt_conn_s *conn, uint8_t reason)
   rsp->reason = reason;
 
   bt_l2cap_send(conn, BT_L2CAP_CID_SMP, buf);
+
+  if (g_smp_auth_cb && g_smp_auth_cb->pairing_failed)
+    {
+      g_smp_auth_cb->pairing_failed(conn, reason);
+    }
+}
+
+static void smp_auth_pairing_cancel(FAR struct bt_conn_s *conn)
+{
+  wlwarn("Pairing cancelled (conn=%p)\n", conn);
+}
+
+static void smp_auth_passkey_display(FAR struct bt_conn_s *conn,
+    unsigned int passkey)
+{
+  wlwarn("Passkey: %d", passkey);
+}
+
+static void smp_auth_pairing_complete(FAR struct bt_conn_s *conn,
+                                      bool bonded)
+{
+  wlwarn("Bonding status: %s", bonded ? "success" : "failed");
+}
+
+static void smp_auth_pairing_failed(FAR struct bt_conn_s *conn,
+                                    uint8_t reason)
+{
+  wlwarn("Pairing failed with reason code %d", reason);
 }
 
 static int smp_init(struct bt_smp_s *smp)
@@ -571,17 +637,79 @@ static int smp_init(struct bt_smp_s *smp)
   return 0;
 }
 
+static enum smp_pairing_method_e smp_get_pairing_method(uint8_t local_io,
+                                                        uint8_t remote_io,
+                                                        uint8_t local_auth,
+                                                        uint8_t remote_auth)
+{
+  bool local_mitm = (local_auth & BT_SMP_AUTH_MITM);
+  bool remote_mitm = (remote_auth & BT_SMP_AUTH_MITM);
+  bool mitm_requested = local_mitm || remote_mitm;
+
+  wlinfo("Local IO: %d, Remote IO: %d, MITM Req: %d\n", local_io, remote_io,
+        mitm_requested);
+
+  /* Mapping based on Core Spec v4.2, Vol 3, Part H, Table 2.8
+   * and Figure 2.7 flow
+   */
+
+  switch (local_io)
+    {
+      case BT_SMP_IO_DISPLAY_ONLY:
+        switch (remote_io)
+          {
+            case BT_SMP_IO_DISPLAY_ONLY:
+            case BT_SMP_IO_NO_INPUT_OUTPUT:
+              return PAIRING_METHOD_JUST_WORKS;
+            case BT_SMP_IO_KEYBOARD_ONLY:
+            case BT_SMP_IO_KEYBOARD_DISPLAY:
+            case BT_SMP_IO_DISPLAY_YESNO:
+              return mitm_requested ? PAIRING_METHOD_PASSKEY_DISPLAY
+                                    : PAIRING_METHOD_JUST_WORKS;
+            default:
+              return PAIRING_METHOD_NOT_SUPPORTED;
+          }
+        break;
+      case BT_SMP_IO_NO_INPUT_OUTPUT:
+        return PAIRING_METHOD_JUST_WORKS; /* Cannot support MITM */
+      default:
+        wlwarn("Unhandled local IO Cap %d\n", local_io);
+        return PAIRING_METHOD_JUST_WORKS;
+    }
+}
+
+static bool smp_mitm_supported(enum smp_pairing_method_e method)
+{
+  return method == PAIRING_METHOD_PASSKEY_DISPLAY ||
+        method == PAIRING_METHOD_PASSKEY_INPUT;
+}
+
+static void smp_passkey_to_tk(uint32_t passkey, uint8_t *tk)
+{
+  memset(tk, 0, 16);
+  tk[0] = passkey & 0xff;
+  tk[1] = (passkey >> 8) & 0xff;
+  tk[2] = (passkey >> 16) & 0xff;
+  tk[3] = (passkey >> 24) & 0xff;
+}
+
 static uint8_t smp_pairing_req(FAR struct bt_conn_s *conn,
                                FAR struct bt_buf_s *buf)
 {
-  FAR struct bt_smp_pairing_s *req = (void *)buf->data;
+  FAR struct bt_smp_pairing_s *req = (FAR void *)buf->data;
   FAR struct bt_smp_pairing_s *rsp;
   FAR struct bt_buf_s *rsp_buf;
   FAR struct bt_smp_s *smp = conn->smp;
-  uint8_t auth;
+  uint8_t local_io_cap = CONFIG_BLUETOOTH_SMP_IO_CAPABILITY;
+  uint8_t local_auth_req = BT_SMP_AUTH_BONDING;
   int ret;
 
-  wlinfo("\n");
+  if (CONFIG_BLUETOOTH_SMP_IO_CAPABILITY != BT_SMP_IO_NO_INPUT_OUTPUT)
+    {
+      local_auth_req |= BT_SMP_AUTH_MITM;
+    }
+
+  wlinfo("Pairing Request Received\n");
 
   if ((req->max_key_size > BT_SMP_MAX_ENC_KEY_SIZE) ||
       (req->max_key_size < BT_SMP_MIN_ENC_KEY_SIZE))
@@ -595,6 +723,55 @@ static uint8_t smp_pairing_req(FAR struct bt_conn_s *conn,
       return ret;
     }
 
+  /* Perform pairing method selection before sending response */
+
+  smp->selected_method = smp_get_pairing_method(local_io_cap,
+                                                req->io_capability,
+                                                local_auth_req,
+                                                req->auth_req);
+  wlinfo("Selected pairing method: %d\n", smp->selected_method);
+  if (conn->sec_level >= BT_SECURITY_HIGH &&
+      !smp_mitm_supported(smp->selected_method))
+    {
+      wlerr("ERROR: Cannot achieve HIGH security (MITM) with "
+            "selected method %d\n", smp->selected_method);
+      return BT_SMP_ERR_AUTH_REQUIREMENTS;
+    }
+
+  if (smp->selected_method == PAIRING_METHOD_NOT_SUPPORTED)
+    {
+      wlerr("ERROR: Pairing method for IO Caps %d/%d not supported\n",
+          local_io_cap, req->io_capability);
+      return BT_SMP_ERR_PAIRING_NOTSUPP;
+    }
+
+  if (smp->selected_method == PAIRING_METHOD_PASSKEY_DISPLAY)
+    {
+      uint32_t passkey;
+      le_rand(&passkey, sizeof(passkey));
+      passkey %= 1000000; /* 6 digit passkey */
+      smp->passkey = passkey;
+      wlwarn("Using Passkey Display method. Generated Passkey: %06d\n",
+          (unsigned int) passkey);
+      smp_passkey_to_tk(passkey, smp->tk);
+      if (g_smp_auth_cb && g_smp_auth_cb->passkey_display)
+        {
+          g_smp_auth_cb->passkey_display(conn, passkey);
+        }
+    }
+
+  else if (smp->selected_method == PAIRING_METHOD_JUST_WORKS)
+    {
+      wlinfo("Using Just Works method.\n");
+      memset(smp->tk, 0, sizeof(smp->tk));
+    }
+  else
+    {
+      wlerr("ERROR: Invalid selected method %d here\n",
+          smp->selected_method);
+      return BT_SMP_ERR_UNSPECIFIED;
+    }
+
   rsp_buf = bt_smp_create_pdu(conn, BT_SMP_CMD_PAIRING_RSP, sizeof(*rsp));
   if (!rsp_buf)
     {
@@ -603,24 +780,16 @@ static uint8_t smp_pairing_req(FAR struct bt_conn_s *conn,
 
   rsp = bt_buf_extend(rsp_buf, sizeof(*rsp));
 
-  /* For JustWorks pairing simplify rsp parameters.
-   * TODO: needs to be reworked later on.
-   */
-
-  auth               = (req->auth_req & BT_SMP_AUTH_MASK);
-  auth              &= ~(BT_SMP_AUTH_MITM | BT_SMP_AUTH_SC |
-                         BT_SMP_AUTH_KEYPRESS);
-  rsp->auth_req      = auth;
-  rsp->io_capability = BT_SMP_IO_NO_INPUT_OUTPUT;
+  rsp->io_capability = local_io_cap;
+  rsp->auth_req      = local_auth_req;
   rsp->oob_flag      = BT_SMP_OOB_NOT_PRESENT;
-  rsp->max_key_size  = req->max_key_size;
+  rsp->max_key_size  = MIN(req->max_key_size, BT_SMP_MAX_ENC_KEY_SIZE);
+
   rsp->init_key_dist = (req->init_key_dist & RECV_KEYS);
   rsp->resp_key_dist = (req->resp_key_dist & SEND_KEYS);
 
   smp->local_dist    = rsp->resp_key_dist;
   smp->remote_dist   = rsp->init_key_dist;
-
-  memset(smp->tk, 0, sizeof(smp->tk));
 
   /* Store req/rsp for later use */
 
@@ -680,10 +849,12 @@ static uint8_t smp_send_pairing_confirm(FAR struct bt_conn_s *conn)
 static uint8_t smp_pairing_rsp(FAR struct bt_conn_s *conn,
                                FAR struct bt_buf_s *buf)
 {
-  struct bt_smp_pairing_s *rsp = (void *)buf->data;
+  struct bt_smp_pairing_s *rsp = (FAR void *)buf->data;
   struct bt_smp_s *smp = conn->smp;
+  uint8_t local_io_cap = CONFIG_BLUETOOTH_SMP_IO_CAPABILITY;
+  uint8_t local_auth_req = smp->preq[3];
 
-  wlinfo("\n");
+  wlinfo("Pairing Response Received\n");
 
   if ((rsp->max_key_size > BT_SMP_MAX_ENC_KEY_SIZE) ||
       (rsp->max_key_size < BT_SMP_MIN_ENC_KEY_SIZE))
@@ -691,11 +862,55 @@ static uint8_t smp_pairing_rsp(FAR struct bt_conn_s *conn,
       return BT_SMP_ERR_ENC_KEY_SIZE;
     }
 
+  smp->selected_method = smp_get_pairing_method(local_io_cap,
+                                                rsp->io_capability,
+                                                local_auth_req,
+                                                rsp->auth_req);
+
+  wlinfo("Selected pairing method: %d\n", smp->selected_method);
+
+  if (conn->sec_level >= BT_SECURITY_HIGH &&
+      !smp_mitm_supported(smp->selected_method))
+    {
+      wlerr("ERROR: Cannot achieve HIGH security (MITM) with selected "
+            "method %d\n", smp->selected_method);
+      return BT_SMP_ERR_AUTH_REQUIREMENTS;
+    }
+
+  if (smp->selected_method == PAIRING_METHOD_NOT_SUPPORTED)
+    {
+      wlerr("ERROR: Pairing method for IO Caps %d/%d not supported\n",
+            local_io_cap, rsp->io_capability);
+      return BT_SMP_ERR_PAIRING_NOTSUPP;
+    }
+
+  if (smp->selected_method == PAIRING_METHOD_PASSKEY_DISPLAY)
+    {
+      uint32_t passkey;
+      le_rand(&passkey, sizeof(passkey));
+      passkey %= 1000000; /* 6 digit passkey */
+      smp->passkey = passkey;
+      wlinfo("Using Passkey Display method. Generated Passkey: %06u\n",
+          (unsigned int) passkey);
+      smp_passkey_to_tk(passkey, smp->tk);
+      if (g_smp_auth_cb && g_smp_auth_cb->passkey_display)
+        {
+          g_smp_auth_cb->passkey_display(conn, passkey);
+        }
+    }
+  else if (smp->selected_method == PAIRING_METHOD_JUST_WORKS)
+    {
+      wlwarn("Using Just Works method.\n");
+      memset(smp->tk, 0, sizeof(smp->tk));
+    }
+  else
+    {
+      wlerr("ERROR: Invalid selected method %d\n", smp->selected_method);
+      return BT_SMP_ERR_UNSPECIFIED;
+    }
+
   smp->local_dist &= rsp->init_key_dist;
   smp->remote_dist &= rsp->resp_key_dist;
-
-  /* Store rsp for later use */
-
   smp->prsp[0] = BT_SMP_CMD_PAIRING_RSP;
   memcpy(smp->prsp + 1, rsp, sizeof(*rsp));
 
@@ -727,7 +942,7 @@ static uint8_t smp_send_pairing_random(FAR struct bt_conn_s *conn)
 static uint8_t smp_pairing_confirm(FAR struct bt_conn_s *conn,
                                    FAR struct bt_buf_s *buf)
 {
-  struct bt_smp_pairing_confirm_s *req = (void *)buf->data;
+  struct bt_smp_pairing_confirm_s *req = (FAR void *)buf->data;
   struct bt_smp_s *smp = conn->smp;
 
   wlinfo("\n");
@@ -747,15 +962,16 @@ static uint8_t smp_pairing_confirm(FAR struct bt_conn_s *conn,
 static uint8_t smp_pairing_random(FAR struct bt_conn_s *conn,
                                   FAR struct bt_buf_s *buf)
 {
-  FAR struct bt_smp_pairing_random_s *req = (void *)buf->data;
+  FAR struct bt_smp_pairing_random_s *req = (FAR void *)buf->data;
   FAR const bt_addr_le_t *ra;
   FAR const bt_addr_le_t *ia;
   FAR struct bt_smp_s *smp = conn->smp;
   FAR struct bt_keys_s *keys;
   uint8_t cfm[16];
+  enum bt_security_e pairing_sec_level;
   int err;
 
-  wlinfo("\n");
+  wlinfo("Received Pairing Random\n");
 
   memcpy(smp->rrnd, req->val, sizeof(smp->rrnd));
 
@@ -780,14 +996,43 @@ static uint8_t smp_pairing_random(FAR struct bt_conn_s *conn,
 
   if (memcmp(smp->pcnf, cfm, sizeof(smp->pcnf)))
     {
+      wlerr("ERROR: Pairing Confirm verification failed!\n");
       return BT_SMP_ERR_CONFIRM_FAILED;
+    }
+
+  wlinfo("Pairing Confirm verified successfully.\n");
+
+  /* Determine security level achieved by pairing method */
+
+  switch (smp->selected_method)
+    {
+      case PAIRING_METHOD_PASSKEY_DISPLAY:
+      case PAIRING_METHOD_PASSKEY_INPUT:
+        pairing_sec_level = BT_SECURITY_HIGH;
+        break;
+      case PAIRING_METHOD_JUST_WORKS:
+      default:
+        pairing_sec_level = BT_SECURITY_MEDIUM;
+        break;
+    }
+
+  wlinfo("Pairing method %d achieved security level %d\n",
+      smp->selected_method, pairing_sec_level);
+  conn->sec_level = pairing_sec_level;
+
+  /* Get/Create the keys structure for the peer */
+
+  keys = bt_keys_get_addr(&conn->dst);
+  if (!keys)
+    {
+      wlerr("ERROR: Failed to get/create keys entry for %s\n",
+            bt_addr_le_str(&conn->dst));
+      return BT_SMP_ERR_UNSPECIFIED;
     }
 
   if (conn->role == BT_HCI_ROLE_MASTER)
     {
       uint8_t stk[16];
-
-      /* No need to store master STK */
 
       err = smp_s1(smp->tk, smp->rrnd, smp->prnd, stk);
       if (err)
@@ -795,55 +1040,69 @@ static uint8_t smp_pairing_random(FAR struct bt_conn_s *conn,
           return BT_SMP_ERR_UNSPECIFIED;
         }
 
-      /* Rand and EDiv are 0 for the STK */
+      wlinfo("Master generated STK: %s\n", h(stk, 16));
+      bt_keys_add_type(keys, BT_KEYS_LTK);
+      keys->ltk.level = pairing_sec_level;
+
+      /* Start encryption using the generated STK */
 
       if (bt_conn_le_start_encryption(conn, 0, 0, stk))
         {
-          wlerr("ERROR: Failed to start encryption\n");
+          wlerr("ERROR: Failed to start encryption with STK\n");
+          bt_keys_clear(keys, BT_KEYS_LTK);
           return BT_SMP_ERR_UNSPECIFIED;
         }
 
       smp->pending_encrypt = true;
-
+      bt_atomic_set(&smp->allowed_cmds, 0);
+      bt_atomic_setbit(&smp->allowed_cmds, BT_SMP_CMD_PAIRING_FAIL);
       return 0;
     }
-
-  keys = bt_keys_get_type(BT_KEYS_SLAVE_LTK, &conn->dst);
-  if (keys == NULL)
+  else
     {
-      wlerr("ERROR: Unable to create new keys\n");
-      return BT_SMP_ERR_UNSPECIFIED;
+      /* Slave Role: Generate and store STK as the Slave LTK */
+
+      bt_keys_add_type(keys, BT_KEYS_SLAVE_LTK);
+      err = smp_s1(smp->tk, smp->prnd, smp->rrnd, keys->slave_ltk.val);
+      if (err)
+        {
+          bt_keys_clear(keys, BT_KEYS_SLAVE_LTK);
+          return BT_SMP_ERR_UNSPECIFIED;
+        }
+
+      keys->slave_ltk.level = pairing_sec_level;
+
+      /* Rand and EDiv are 0 for the STK */
+
+      keys->slave_ltk.rand = 0;
+      keys->slave_ltk.ediv = 0;
+
+      wlinfo("Slave generated STK/SlaveLTK: %s (level %d)\n",
+             h(keys->slave_ltk.val, 16), keys->slave_ltk.level);
+
+      smp->pending_encrypt = true;
+
+      smp_send_pairing_random(conn);
+
+      bt_atomic_set(&smp->allowed_cmds, 0);
+      bt_atomic_setbit(&smp->allowed_cmds, BT_SMP_CMD_PAIRING_FAIL);
+      return 0;
     }
-
-  err = smp_s1(smp->tk, smp->prnd, smp->rrnd, keys->slave_ltk.val);
-  if (err)
-    {
-      bt_keys_clear(keys, BT_KEYS_SLAVE_LTK);
-      return BT_SMP_ERR_UNSPECIFIED;
-    }
-
-  /* Rand and EDiv are 0 for the STK */
-
-  keys->slave_ltk.rand = 0;
-  keys->slave_ltk.ediv = 0;
-
-  wlinfo("generated STK %s\n", h(keys->slave_ltk.val, 16));
-
-  smp->pending_encrypt = true;
-
-  smp_send_pairing_random(conn);
-
-  return 0;
 }
 
 static uint8_t smp_pairing_failed(FAR struct bt_conn_s *conn,
                                   FAR struct bt_buf_s *buf)
 {
-  struct bt_smp_pairing_fail_s *req = (void *)buf->data;
-  struct bt_smp_s *smp = conn->smp;
+  FAR struct bt_smp_pairing_fail_s *req = (FAR void *)buf->data;
+  FAR struct bt_smp_s *smp = conn->smp;
 
   wlerr("ERROR: reason 0x%x\n", req->reason);
   UNUSED(req);
+
+  if (g_smp_auth_cb && g_smp_auth_cb->pairing_failed)
+    {
+      g_smp_auth_cb->pairing_failed(conn, req->reason);
+    }
 
   bt_atomic_set(&smp->allowed_cmds, 0);
   bt_atomic_setbit(&smp->allowed_cmds, BT_SMP_CMD_PAIRING_FAIL);
@@ -860,6 +1119,53 @@ static uint8_t smp_pairing_failed(FAR struct bt_conn_s *conn,
   /* return no error to avoid sending Pairing Failed in response */
 
   return 0;
+}
+
+static bool smp_check_pairing_complete(FAR struct bt_conn_s *conn)
+{
+  FAR struct bt_smp_s *smp = conn->smp;
+  bool complete = false;
+  bool bonded = false;
+
+  if (!smp) return false;
+
+  /* Pairing is considered complete when all keys BOTH sides intended to
+   *  distribute have been successfully sent/received.
+   */
+
+  if (smp->local_dist == 0 && smp->remote_dist == 0)
+    {
+      complete = true;
+      uint8_t local_auth = (conn->role == BT_HCI_ROLE_MASTER) ? smp->preq[3]
+          : smp->prsp[3];
+      uint8_t remote_auth = (conn->role == BT_HCI_ROLE_MASTER) ? smp->prsp[3]
+          : smp->preq[3];
+      if ((local_auth & BT_SMP_AUTH_BONDING) &&
+            (remote_auth & BT_SMP_AUTH_BONDING))
+        {
+          bonded = true;
+        }
+
+      wlinfo("Pairing complete. Bonded: %d\n", bonded);
+
+      if (g_smp_auth_cb && g_smp_auth_cb->pairing_complete)
+        {
+          g_smp_auth_cb->pairing_complete(conn, bonded);
+        }
+
+      bt_atomic_set(&smp->allowed_cmds, 0);
+      bt_atomic_setbit(&smp->allowed_cmds, BT_SMP_CMD_PAIRING_FAIL);
+      if (conn->role == BT_HCI_ROLE_MASTER)
+        {
+          bt_atomic_setbit(&smp->allowed_cmds, BT_SMP_CMD_SECURITY_REQUEST);
+        }
+      else
+        {
+          bt_atomic_setbit(&smp->allowed_cmds, BT_SMP_CMD_PAIRING_REQ);
+        }
+    }
+
+  return complete;
 }
 
 static void bt_smp_distribute_keys(FAR struct bt_conn_s *conn)
@@ -884,8 +1190,8 @@ static void bt_smp_distribute_keys(FAR struct bt_conn_s *conn)
 
   if (smp->local_dist & BT_SMP_DIST_ENC_KEY)
     {
-      struct bt_smp_encrypt_info_s *info;
-      struct bt_smp_master_ident_s *ident;
+      FAR struct bt_smp_encrypt_info_s *info;
+      FAR struct bt_smp_master_ident_s *ident;
 
       bt_keys_add_type(keys, BT_KEYS_SLAVE_LTK);
 
@@ -919,17 +1225,24 @@ static void bt_smp_distribute_keys(FAR struct bt_conn_s *conn)
       ident->ediv = keys->slave_ltk.ediv;
 
       bt_l2cap_send(conn, BT_L2CAP_CID_SMP, buf);
+      smp->local_dist &= ~BT_SMP_DIST_ENC_KEY;
+    }
+
+  if (smp->local_dist == 0)
+    {
+      wlinfo("Finished distributing local keys.\n");
+      smp_check_pairing_complete(conn);
     }
 }
 
 static uint8_t smp_encrypt_info(FAR struct bt_conn_s *conn,
                                 FAR struct bt_buf_s *buf)
 {
-  FAR struct bt_smp_encrypt_info_s *req = (void *)buf->data;
+  FAR struct bt_smp_encrypt_info_s *req = (FAR void *)buf->data;
   FAR struct bt_smp_s *smp = conn->smp;
   FAR struct bt_keys_s *keys;
 
-  wlinfo("\n");
+  wlinfo("Received Encrypt Info (LTK from Master)\n");
 
   keys = bt_keys_get_type(BT_KEYS_LTK, &conn->dst);
   if (!keys)
@@ -940,6 +1253,7 @@ static uint8_t smp_encrypt_info(FAR struct bt_conn_s *conn,
     }
 
   memcpy(keys->ltk.val, req->ltk, 16);
+  keys->ltk.level = conn->sec_level;
 
   bt_atomic_setbit(&smp->allowed_cmds, BT_SMP_CMD_MASTER_IDENT);
 
@@ -949,11 +1263,11 @@ static uint8_t smp_encrypt_info(FAR struct bt_conn_s *conn,
 static uint8_t smp_master_ident(FAR struct bt_conn_s *conn,
                                 FAR struct bt_buf_s *buf)
 {
-  FAR struct bt_smp_master_ident_s *req = (void *)buf->data;
+  FAR struct bt_smp_master_ident_s *req = (FAR void *)buf->data;
   FAR struct bt_smp_s *smp = conn->smp;
   FAR struct bt_keys_s *keys;
 
-  wlinfo("\n");
+  wlinfo("Received Master Identification (EDIV/Rand)\n");
 
   keys = bt_keys_get_type(BT_KEYS_LTK, &conn->dst);
   if (!keys)
@@ -963,17 +1277,34 @@ static uint8_t smp_master_ident(FAR struct bt_conn_s *conn,
       return BT_SMP_ERR_UNSPECIFIED;
     }
 
+  if (!(keys->keys & BT_KEYS_LTK))
+    {
+      return BT_SMP_ERR_UNSPECIFIED;
+    }
+
   keys->ltk.ediv = req->ediv;
   keys->ltk.rand = req->rand;
+  smp->remote_dist &= ~BT_SMP_DIST_ENC_KEY;
 
-  if (conn->role == BT_HCI_ROLE_MASTER)
+  if (conn->role == BT_HCI_ROLE_SLAVE)
     {
-      smp->remote_dist &= ~BT_SMP_DIST_ENC_KEY;
-      if (!smp->remote_dist)
+      if (smp->local_dist && !smp->remote_dist)
         {
+          wlinfo("Slave distributing keys now.\n");
           bt_smp_distribute_keys(conn);
+        }
+    }
+  else
+    {
+      /* conn->role == BT_HCI_ROLE_MASTER */
 
-          return 0;
+      if (!smp->local_dist && !smp->remote_dist)
+        {
+          wlinfo("Master: Key distribution complete.\n");
+          if (g_smp_auth_cb && g_smp_auth_cb->pairing_complete)
+            {
+              g_smp_auth_cb->pairing_complete(conn, true);
+            }
         }
     }
 
@@ -1012,7 +1343,7 @@ static uint8_t smp_ident_info(FAR struct bt_conn_s *conn,
 static uint8_t smp_ident_addr_info(FAR struct bt_conn_s *conn,
                                    FAR struct bt_buf_s *buf)
 {
-  FAR struct bt_smp_ident_addr_info_s *req = (void *)buf->data;
+  FAR struct bt_smp_ident_addr_info_s *req = (FAR void *)buf->data;
   FAR struct bt_smp_s *smp = conn->smp;
   FAR struct bt_keys_s *keys;
 
@@ -1021,7 +1352,7 @@ static uint8_t smp_ident_addr_info(FAR struct bt_conn_s *conn,
   if (!bt_addr_le_is_identity(&req->addr))
     {
       wlerr("ERROR: Invalid identity %s for %s\n",
-             bt_addr_le_str(&req->addr), bt_addr_le_str(&conn->dst));
+            bt_addr_le_str(&req->addr), bt_addr_le_str(&conn->dst));
       return BT_SMP_ERR_INVALID_PARAMS;
     }
 
@@ -1040,12 +1371,25 @@ static uint8_t smp_ident_addr_info(FAR struct bt_conn_s *conn,
       bt_addr_le_copy(&conn->dst, &req->addr);
     }
 
-  if (conn->role == BT_HCI_ROLE_MASTER)
+  smp->remote_dist &= ~BT_SMP_DIST_ID_KEY;
+
+  if (conn->role == BT_HCI_ROLE_SLAVE)
     {
-      smp->remote_dist &= ~BT_SMP_DIST_ID_KEY;
-      if (!smp->remote_dist)
+      if (smp->local_dist && !smp->remote_dist)
         {
+          wlinfo("Slave distributing keys now.\n");
           bt_smp_distribute_keys(conn);
+        }
+    }
+  else
+    {
+      if (!smp->local_dist && !smp->remote_dist)
+        {
+          wlinfo("Master: Key distribution complete.\n");
+          if (g_smp_auth_cb && g_smp_auth_cb->pairing_complete)
+            {
+              g_smp_auth_cb->pairing_complete(conn, true);
+            }
         }
     }
 
@@ -1057,30 +1401,49 @@ static uint8_t smp_security_request(FAR struct bt_conn_s *conn,
 {
   FAR struct bt_smp_security_request_s *req = (FAR void *)buf->data;
   FAR struct bt_keys_s *keys;
-  uint8_t auth;
+  uint8_t slave_auth_req = req->auth_req & BT_SMP_AUTH_MASK;
 
-  wlinfo("\n");
+  wlinfo("Security Request received (req=0x%02x)\n", slave_auth_req);
 
   keys = bt_keys_find(BT_KEYS_LTK, &conn->dst);
-  if (!keys)
+  if (keys)
     {
+      bool mitm_required_by_slave = (slave_auth_req & BT_SMP_AUTH_MITM);
+      bool key_has_mitm = (keys->ltk.level >= BT_SECURITY_HIGH);
+
+      wlinfo("Found existing LTK (level=%d)\n", keys->ltk.level);
+      if (mitm_required_by_slave && !key_has_mitm)
+        {
+          /* Slave requires MITM, but our key doesn't have it. Re-pair. */
+
+          wlinfo("Existing key level %d insufficient for slave MITM req. "
+                 "Re-pairing.\n", keys->ltk.level);
+          goto pair;
+        }
+      else
+        {
+          wlinfo("Attempting encryption with existing key.\n");
+          if (bt_conn_le_start_encryption(conn, keys->ltk.rand,
+              keys->ltk.ediv, keys->ltk.val) == 0)
+            {
+              wlinfo("Encryption started successfully.\n");
+              conn->sec_level = keys->ltk.level;
+              return 0;
+            }
+          else
+            {
+              wlerr("ERROR: Failed to start encryption with existing keys. "
+                    "Pairing.\n");
+              goto pair;
+            }
+        }
+    }
+  else
+    {
+      wlinfo("No existing keys found.\n");
       goto pair;
     }
 
-  auth = req->auth_req & BT_SMP_AUTH_MASK;
-  if (auth & (BT_SMP_AUTH_MITM | BT_SMP_AUTH_SC))
-    {
-      wlwarn("Unsupported auth requirements: 0x%x, repairing", auth);
-      goto pair;
-    }
-
-  if (bt_conn_le_start_encryption(conn, keys->ltk.rand, keys->ltk.ediv,
-                                  keys->ltk.val) < 0)
-    {
-      return BT_SMP_ERR_UNSPECIFIED;
-    }
-
-  return 0;
 pair:
   if (bt_smp_send_pairing_req(conn) < 0)
     {
@@ -1192,7 +1555,9 @@ static void bt_smp_connected(FAR struct bt_conn_s *conn, FAR void *context,
 static void bt_smp_disconnected(FAR struct bt_conn_s *conn,
                                 FAR void *context, uint16_t cid)
 {
-  struct bt_smp_s *smp = conn->smp;
+  FAR struct bt_smp_s *smp = conn->smp;
+  bool pairing_active =
+      (smp && smp->selected_method != PAIRING_METHOD_JUST_WORKS);
 
   if (!smp)
     {
@@ -1203,12 +1568,17 @@ static void bt_smp_disconnected(FAR struct bt_conn_s *conn,
 
   conn->smp = NULL;
   memset(smp, 0, sizeof(*smp));
+
+  if (pairing_active && g_smp_auth_cb && g_smp_auth_cb->pairing_cancel)
+    {
+      g_smp_auth_cb->pairing_cancel(conn);
+    }
 }
 
-static void bt_smp_encrypt_change(FAR FAR struct bt_conn_s *conn,
+static void bt_smp_encrypt_change(FAR struct bt_conn_s *conn,
                                   FAR void *context, uint16_t cid)
 {
-  struct bt_smp_s *smp = conn->smp;
+  FAR struct bt_smp_s *smp = conn->smp;
 
   wlinfo("conn %p handle %u encrypt 0x%02x\n", conn, conn->handle,
          conn->encrypt);
@@ -1257,7 +1627,7 @@ static void swap_buf(FAR const uint8_t *src, FAR uint8_t *dst, uint16_t len)
     }
 }
 
-static void swap_in_place(FAR uint8_t * buf, uint16_t len)
+static void swap_in_place(FAR uint8_t *buf, uint16_t len)
 {
   int i;
   int j;
@@ -1305,7 +1675,7 @@ static int cmac_subkey(FAR const uint8_t *key, FAR uint8_t *k1,
     0
    };
 
-  uint8_t *tmp = zero;
+  FAR uint8_t *tmp = zero;
   uint8_t l[16];
   int err;
 
@@ -1349,7 +1719,7 @@ static int cmac_subkey(FAR const uint8_t *key, FAR uint8_t *k1,
     {
       array_shift(k1, k2);
       xor_128((FAR struct uint128_s *)k2,
-              (struct uint128_s *FAR)rb,
+              (FAR struct uint128_s *)rb,
               (FAR struct uint128_s *)k2);
     }
 
@@ -1470,7 +1840,7 @@ static int bt_smp_aes_cmac(FAR const uint8_t *key, FAR const uint8_t *in,
 
       xor_128((FAR struct uint128_s *)x,
               (FAR struct uint128_s *)&in[i * 16],
-              (FAR struct uint128_s *) y);
+              (FAR struct uint128_s *)y);
 
       swap_in_place(y, 16);
 
@@ -1502,8 +1872,9 @@ static int bt_smp_aes_cmac(FAR const uint8_t *key, FAR const uint8_t *in,
   return err;
 }
 
-static int aes_test(const char *prefix, const uint8_t *key, const uint8_t *m,
-                    uint16_t len, const uint8_t * mac)
+static int aes_test(FAR const char *prefix, FAR  const uint8_t *key,
+                    FAR const uint8_t *m, uint16_t len,
+                    FAR const uint8_t * mac)
 {
   uint8_t out[16];
 
@@ -1573,6 +1944,11 @@ static int smp_self_test(void)
  * Public Functions
  ****************************************************************************/
 
+FAR void bt_smp_auth_cb_register(const struct bt_smp_auth_cb_s *cb)
+{
+  g_smp_auth_cb = cb;
+}
+
 int bt_smp_initialize(void)
 {
   static struct bt_l2cap_chan_s chan =
@@ -1593,10 +1969,10 @@ int bt_smp_initialize(void)
 
 int bt_smp_send_security_req(FAR struct bt_conn_s *conn)
 {
-  struct bt_smp_security_request_s *req;
+  FAR struct bt_smp_security_request_s *req;
   FAR struct bt_buf_s *req_buf;
 
-  wlinfo("\n");
+  wlinfo("security req\n");
 
   req_buf = bt_smp_create_pdu(conn, BT_SMP_CMD_SECURITY_REQUEST,
                               sizeof(struct bt_smp_security_request_s));
@@ -1607,6 +1983,12 @@ int bt_smp_send_security_req(FAR struct bt_conn_s *conn)
 
   req = bt_buf_extend(req_buf, sizeof(struct bt_smp_security_request_s));
   req->auth_req = BT_SMP_AUTH_BONDING;
+  if (conn->sec_level >= BT_SECURITY_HIGH &&
+      CONFIG_BLUETOOTH_SMP_IO_CAPABILITY != BT_SMP_IO_NO_INPUT_OUTPUT)
+    {
+      req->auth_req |= BT_SMP_AUTH_MITM;
+    }
+
   bt_l2cap_send(conn, BT_L2CAP_CID_SMP, req_buf);
 
   return 0;
@@ -1633,23 +2015,19 @@ int bt_smp_send_pairing_req(FAR struct bt_conn_s *conn)
 
   req = bt_buf_extend(req_buf, sizeof(*req));
 
-  /* For JustWorks pairing simplify req parameters.
-   * TODO: needs to be reworked later on
-   */
-
+  req->io_capability = CONFIG_BLUETOOTH_SMP_IO_CAPABILITY;
   req->auth_req      = BT_SMP_AUTH_BONDING;
-  req->io_capability = BT_SMP_IO_NO_INPUT_OUTPUT;
+  if (CONFIG_BLUETOOTH_SMP_IO_CAPABILITY != BT_SMP_IO_NO_INPUT_OUTPUT)
+    {
+      req->auth_req |= BT_SMP_AUTH_MITM;
+    }
+
   req->oob_flag      = BT_SMP_OOB_NOT_PRESENT;
   req->max_key_size  = BT_SMP_MAX_ENC_KEY_SIZE;
   req->init_key_dist = SEND_KEYS;
   req->resp_key_dist = RECV_KEYS;
-
-  smp->local_dist    = SEND_KEYS;
-  smp->remote_dist   = RECV_KEYS;
-
-  memset(smp->tk, 0, sizeof(smp->tk));
-
-  /* Store req for later use */
+  smp->local_dist    = req->init_key_dist;
+  smp->remote_dist   = req->resp_key_dist;
 
   smp->preq[0] = BT_SMP_CMD_PAIRING_REQ;
 

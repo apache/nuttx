@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/misc/rpmsgblk.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,7 +41,7 @@
 #include <nuttx/mtd/smart.h>
 #include <nuttx/mutex.h>
 #include <nuttx/mmcsd.h>
-#include <nuttx/rptun/openamp.h>
+#include <nuttx/rpmsg/rpmsg.h>
 
 #include "rpmsgblk.h"
 
@@ -54,19 +56,19 @@ struct rpmsgblk_s
   FAR const char         *remotecpu;   /* The server cpu name */
   FAR const char         *remotepath;  /* The device path in the server cpu */
   sem_t                   wait;        /* Wait sem, used for preventing any
-                                        * opreation until the connection
+                                        * operation until the connection
                                         * between two cpu established.
                                         */
   mutex_t                 lock;        /* Lock for thread-safe */
-  struct geometry         geo;         /* block geomerty */
-  int                     refs;        /* refence count */
+  struct geometry         geo;         /* block geometry */
+  int                     refs;        /* reference count */
 };
 
 /* Rpmsg device cookie used to handle the response from the remote cpu */
 
 struct rpmsgblk_cookie_s
 {
-  sem_t     sem;     /* Semaphore used fo rpmsg */
+  sem_t     sem;     /* Semaphore used for rpmsg */
   int       result;  /* The return value of the remote call */
   FAR void *data;    /* The return data buffer of the remote call */
 };
@@ -395,6 +397,7 @@ static ssize_t rpmsgblk_write(FAR struct inode *inode,
                               sizeof(*msg) - 1 + msg->nsectors * sectorsize);
       if (ret < 0)
         {
+          rpmsg_release_tx_buffer(&priv->ept, msg);
           goto out;
         }
     }
@@ -420,7 +423,7 @@ out:
  *
  * Parameters:
  *   inode    - the blk device inode
- *   geometry - pointer to the application geomoetry struct
+ *   geometry - pointer to the application geometry struct
  *
  * Returned Values:
  *   On success, the number of bytes written are returned (zero indicates
@@ -447,7 +450,7 @@ static int rpmsgblk_geometry(FAR struct inode *inode,
       return ret;
     }
 
-  /* Return the perviously got geometry */
+  /* Return the previously got geometry */
 
   if (priv->geo.geo_sectorsize != 0)
     {
@@ -536,25 +539,30 @@ static int rpmsgblk_mmc_cmd_ioctl(FAR struct inode *inode, unsigned long arg)
   FAR struct mmc_ioc_cmd *ioc = (FAR struct mmc_ioc_cmd *)(uintptr_t)arg;
   FAR struct rpmsgblk_ioctl_s *msg;
   uint32_t space;
-  ssize_t msglen;
+  size_t arglen;
+  size_t msglen;
 
-  msglen = sizeof(*msg) + sizeof(struct mmc_ioc_cmd) +
-           ioc->blksz * ioc->blocks - 1;
+  arglen = sizeof(struct mmc_ioc_cmd);
+  if (ioc->write_flag)
+    {
+      arglen += ioc->blksz * ioc->blocks;
+    }
 
+  msglen = sizeof(*msg) + arglen - 1;
   msg = rpmsgblk_get_tx_payload_buffer(priv, &space);
   if (msg == NULL)
     {
       return -ENOMEM;
     }
 
-  DEBUGASSERT(space > msglen);
+  DEBUGASSERT(space >= msglen);
 
   msg->request = MMC_IOC_CMD;
   msg->arg     = arg;
-  msg->arglen  = sizeof(struct mmc_ioc_cmd) + ioc->blksz * ioc->blocks;
+  msg->arglen  = arglen;
 
   memcpy(msg->buf, ioc, sizeof(*ioc));
-  if (ioc->data_ptr)
+  if (ioc->data_ptr && ioc->write_flag)
     {
       memcpy(msg->buf + sizeof(*ioc), (FAR void *)(uintptr_t)ioc->data_ptr,
              ioc->blksz * ioc->blocks);
@@ -578,22 +586,85 @@ static int rpmsgblk_mmc_cmd_ioctl(FAR struct inode *inode, unsigned long arg)
 static int rpmsgblk_mmc_multi_cmd_ioctl(FAR struct inode *inode,
                                         unsigned long arg)
 {
+  FAR struct rpmsgblk_s *priv = inode->i_private;
   FAR struct mmc_ioc_multi_cmd *mioc =
     (FAR struct mmc_ioc_multi_cmd *)(uintptr_t)arg;
-  int ret = 0;
+  FAR struct rpmsgblk_ioctl_s *msg;
+  size_t arglen;
+  size_t msglen;
+  size_t rsplen;
   uint64_t i;
 
+  arglen = sizeof(struct mmc_ioc_multi_cmd) +
+           mioc->num_of_cmds * sizeof(struct mmc_ioc_cmd);
+  rsplen = arglen;
   for (i = 0; i < mioc->num_of_cmds; i++)
     {
-      ret = rpmsgblk_mmc_cmd_ioctl(inode,
-        (unsigned long)(uintptr_t)&mioc->cmds[i]);
-      if (ret < 0)
+      if (mioc->cmds[i].data_ptr && mioc->cmds[i].write_flag)
         {
-          return ret;
+          arglen += mioc->cmds[i].blksz * mioc->cmds[i].blocks;
+        }
+      else
+        {
+          rsplen += mioc->cmds[i].blksz * mioc->cmds[i].blocks;
         }
     }
 
-  return ret;
+  /* When multi cmds are read cmd, it also needs to be split if the rsp
+   * msg is too large.
+   */
+
+  msglen = sizeof(*msg) + arglen - 1;
+  rsplen += sizeof(*msg) - 1;
+  if (MAX(msglen, rsplen) > rpmsg_get_tx_buffer_size(&priv->ept))
+    {
+      int ret = 0;
+
+      for (i = 0; i < mioc->num_of_cmds; i++)
+        {
+          ret = rpmsgblk_mmc_cmd_ioctl(inode,
+            (unsigned long)(uintptr_t)&mioc->cmds[i]);
+          if (ret < 0)
+            {
+              return ret;
+            }
+        }
+
+      return ret;
+    }
+  else
+    {
+      size_t off = sizeof(struct mmc_ioc_multi_cmd) +
+                   mioc->num_of_cmds * sizeof(struct mmc_ioc_cmd);
+      uint32_t space;
+
+      msg = rpmsgblk_get_tx_payload_buffer(priv, &space);
+      if (msg == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      DEBUGASSERT(space >= msglen);
+
+      msg->request = MMC_IOC_MULTI_CMD;
+      msg->arg     = arg;
+      msg->arglen  = arglen;
+
+      memcpy(msg->buf, mioc, off);
+      for (i = 0; i < mioc->num_of_cmds; i++)
+        {
+          if (mioc->cmds[i].data_ptr && mioc->cmds[i].write_flag)
+            {
+              memcpy(msg->buf + off,
+                     (FAR void *)(uintptr_t)mioc->cmds[i].data_ptr,
+                     mioc->cmds[i].blksz * mioc->cmds[i].blocks);
+              off += mioc->cmds[i].blksz * mioc->cmds[i].blocks;
+            }
+        }
+
+      return rpmsgblk_send_recv(priv, RPMSGBLK_IOCTL, false, &msg->header,
+                                msglen, (FAR void *)arg);
+    }
 }
 
 /****************************************************************************
@@ -625,7 +696,7 @@ static int rpmsgblk_default_ioctl(FAR struct inode *inode, int cmd,
       return -ENOMEM;
     }
 
-  DEBUGASSERT(space > msglen);
+  DEBUGASSERT(space >= msglen);
 
   msg->request = cmd;
   msg->arg     = arg;
@@ -709,7 +780,7 @@ static int rpmsgblk_unlink(FAR struct inode *inode)
  *
  * Parameters:
  *   priv  - The rpmsg-blk handle
- *   len   - The got memroy size
+ *   len   - The got memory size
  *
  * Returned Values:
  *   NULL     - failure
@@ -791,6 +862,11 @@ static int rpmsgblk_send_recv(FAR struct rpmsgblk_s *priv,
 
   if (ret < 0)
     {
+      if (copy == false)
+        {
+          rpmsg_release_tx_buffer(&priv->ept, msg);
+        }
+
       goto fail;
     }
 
@@ -817,8 +893,8 @@ fail:
  *   ept  - The rpmsg endpoint
  *   data - The return message
  *   len  - The return message length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   Always OK
@@ -853,8 +929,8 @@ static int rpmsgblk_default_handler(FAR struct rpmsg_endpoint *ept,
  *   ept  - The rpmsg endpoint
  *   data - The return message
  *   len  - The return message length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   Always OK
@@ -900,8 +976,8 @@ static int rpmsgblk_read_handler(FAR struct rpmsg_endpoint *ept,
  *   ept  - The rpmsg endpoint
  *   data - The return message
  *   len  - The return message length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   Always OK
@@ -926,6 +1002,57 @@ static int rpmsgblk_geometry_handler(FAR struct rpmsg_endpoint *ept,
 }
 
 /****************************************************************************
+ * Name: rpmsgblk_mmc_cmd_handler
+ ****************************************************************************/
+
+static void rpmsgblk_mmc_cmd_handler(FAR struct rpmsgblk_cookie_s *cookie,
+                                     FAR struct rpmsgblk_ioctl_s *rsp)
+{
+  FAR struct mmc_ioc_cmd *ioc =
+    (FAR struct mmc_ioc_cmd *)(uintptr_t)cookie->data;
+
+  /* Copy struct mmc_ioc_cmd back to the usrspace buffer
+   * except data_ptr which is another buffer pointer
+   */
+
+  memcpy(ioc, rsp->buf, sizeof(*ioc) - sizeof(ioc->data_ptr));
+  if (ioc->data_ptr && !ioc->write_flag)
+    {
+      memcpy((FAR void *)(uintptr_t)ioc->data_ptr, rsp->buf + sizeof(*ioc),
+             ioc->blksz * ioc->blocks);
+    }
+}
+
+/****************************************************************************
+ * Name: rpmsgblk_mmc_multi_cmd_handler
+ ****************************************************************************/
+
+static void
+rpmsgblk_mmc_multi_cmd_handler(FAR struct rpmsgblk_cookie_s *cookie,
+                               FAR struct rpmsgblk_ioctl_s *rsp)
+{
+  FAR struct mmc_ioc_multi_cmd *mioc =
+    (FAR struct mmc_ioc_multi_cmd *)(uintptr_t)cookie->data;
+  FAR struct mmc_ioc_multi_cmd *mioc_rsp =
+    (FAR struct mmc_ioc_multi_cmd *)(uintptr_t)rsp->buf;
+  size_t off = sizeof(struct mmc_ioc_multi_cmd) +
+               mioc->num_of_cmds * sizeof(struct mmc_ioc_cmd);
+  uint64_t i;
+
+  for (i = 0; i < mioc->num_of_cmds; i++)
+    {
+      memcpy(&mioc->cmds[i], &mioc_rsp->cmds[i],
+             sizeof(struct mmc_ioc_cmd) - sizeof(mioc->cmds[i].data_ptr));
+      if (mioc->cmds[i].data_ptr && !mioc->cmds[i].write_flag)
+        {
+          memcpy((FAR void *)(uintptr_t)mioc->cmds[i].data_ptr,
+                 rsp->buf + off, mioc->cmds[i].blksz * mioc->cmds[i].blocks);
+          off += mioc->cmds[i].blksz * mioc->cmds[i].blocks;
+        }
+    }
+}
+
+/****************************************************************************
  * Name: rpmsgblk_ioctl_handler
  *
  * Description:
@@ -936,8 +1063,8 @@ static int rpmsgblk_geometry_handler(FAR struct rpmsg_endpoint *ept,
  *   ept  - The rpmsg endpoint
  *   data - The return message
  *   len  - The return message length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   Always OK
@@ -959,22 +1086,11 @@ static int rpmsgblk_ioctl_handler(FAR struct rpmsg_endpoint *ept,
       switch (rsp->request)
         {
           case MMC_IOC_CMD:
-            {
-              FAR struct mmc_ioc_cmd *ioc =
-                (FAR struct mmc_ioc_cmd *)(uintptr_t)cookie->data;
+            rpmsgblk_mmc_cmd_handler(cookie, rsp);
+            break;
 
-              /* Copy struct mmc_ioc_cmd back to the usrspace buffer
-               * except data_ptr which is another buffer pointer
-               */
-
-              memcpy(ioc, rsp->buf, sizeof(*ioc) - sizeof(ioc->data_ptr));
-              if (ioc->data_ptr)
-                {
-                  memcpy((FAR void *)(uintptr_t)ioc->data_ptr,
-                         rsp->buf + sizeof(*ioc),
-                         ioc->blksz * ioc->blocks);
-                }
-            }
+          case MMC_IOC_MULTI_CMD:
+            rpmsgblk_mmc_multi_cmd_handler(cookie, rsp);
             break;
 
           default:
@@ -1080,8 +1196,8 @@ static void rpmsgblk_device_destroy(FAR struct rpmsg_device *rdev,
  *   ept  - The rpmsg-blk end point
  *   data - The received data
  *   len  - The received data length
- *   src  - unknow
- *   priv - unknow
+ *   src  - unknown
+ *   priv - unknown
  *
  * Returned Values:
  *   OK on success; A negated errno value is returned on any failure.
@@ -1118,7 +1234,7 @@ static int rpmsgblk_ept_cb(FAR struct rpmsg_endpoint *ept,
  *   remotecpu  - the server cpu name
  *   remotepath - the device you want to access in the remote cpu
  *   localpath  - the device path in local cpu, if NULL, the localpath is
- *                same as the remotepath, provide this argument to supoort
+ *                same as the remotepath, provide this argument to support
  *                custom device path
  *
  * Returned Values:

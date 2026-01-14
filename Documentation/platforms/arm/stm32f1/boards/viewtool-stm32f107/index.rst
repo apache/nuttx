@@ -2,6 +2,8 @@
 ViewTool STM32F103/F107
 =======================
 
+.. tags:: chip:stm32, chip:stm32f1, chip:stm32f103, chip:stm32f107
+
 This page discusses issues unique to NuttX configurations for the
 ViewTool STM32F103/F107 V1.2 board.  This board may be fitted with either
 

@@ -1,9 +1,10 @@
 /****************************************************************************
  * libs/libc/stdio/lib_vdprintf.c
  *
- *   Copyright (C) 2012 Andrew Tridgell. All rights reserved.
- *   Authors: Andrew Tridgell <andrew@tridgell.net>
- *            Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2012 Andrew Tridgell. All rights reserved.
+ * SPDX-FileContributor: Andrew Tridgell <andrew@tridgell.net>
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,11 +39,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdio.h>
-
-#include "libc.h"
+#include <nuttx/streams.h>
 
 /****************************************************************************
  * Public Functions

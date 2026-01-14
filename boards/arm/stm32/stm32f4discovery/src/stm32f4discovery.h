@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f4discovery/src/stm32f4discovery.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -201,7 +203,7 @@
 #elif defined(CONFIG_STM32_UART8_HCIUART)
 #  define HCIUART_SERDEV HCIUART8
 #else
-#  error No HCI UART specifified
+#  error No HCI UART specified
 #endif
 
 /* STM32F4 Discovery GPIOs **************************************************/
@@ -241,6 +243,15 @@
 
 #define GPIO_SX127X_RESET   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_OUTPUT_CLEAR|\
                              GPIO_SPEED_50MHz|GPIO_PORTD|GPIO_PIN4)
+/* HX711 PINs */
+
+#ifdef CONFIG_ADC_HX711
+#  define HX711_CLK_PIN     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_OUTPUT_SET|\
+                            GPIO_SPEED_2MHz|GPIO_PULLUP|\
+                            GPIO_PORTB|GPIO_PIN1)
+#  define HX711_DATA_PIN    (GPIO_INPUT|GPIO_SPEED_2MHz|GPIO_PULLUP|GPIO_EXTI|\
+                            GPIO_PORTB|GPIO_PIN2)
+#endif /* CONFIG_ADC_HX711 */
 
 /* PWM
  *
@@ -288,6 +299,9 @@
 
 #define GPIO_ENC28J60_INTR  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|\
                              GPIO_OPENDRAIN|GPIO_PORTE|GPIO_PIN4)
+
+#define GPIO_CS_MFRC522      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                            GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN3)
 
 /* Use same pins as ENC28J60 to W5500 */
 
@@ -895,6 +909,18 @@ int stm32_gs2200m_initialize(const char *devpath, int bus);
 
 #ifdef CONFIG_INPUT_DJOYSTICK
 int stm32_djoy_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_hx711_initialize
+ *
+ * Description:
+ *   Initialize hx711 chip
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ADC_HX711
+int stm32_hx711_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

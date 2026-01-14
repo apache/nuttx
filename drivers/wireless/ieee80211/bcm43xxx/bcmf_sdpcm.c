@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/wireless/ieee80211/bcm43xxx/bcmf_sdpcm.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -77,7 +79,7 @@ begin_packed_struct struct bcmf_sdpcm_header
 static int bcmf_sdpcm_rxfail(FAR bcmf_interface_dev_t *ibus, bool retry);
 
 static int bcmf_sdpcm_process_header(FAR bcmf_interface_dev_t *ibus,
-                              struct bcmf_sdpcm_header *header);
+                                     FAR struct bcmf_sdpcm_header *header);
 
 /****************************************************************************
  * Private Data
@@ -102,15 +104,15 @@ int bcmf_sdpcm_rxfail(FAR bcmf_interface_dev_t *ibus, bool retry)
       /* Send NAK to retry to read frame */
 
       bcmf_write_sbregb(ibus,
-                  CORE_BUS_REG(ibus->chip->core_base[SDIOD_CORE_ID],
-                  tosbmailbox), SMB_NAK);
+                        CORE_BUS_REG(ibus->chip->core_base[SDIOD_CORE_ID],
+                        tosbmailbox), SMB_NAK);
     }
 
   return 0;
 }
 
 int bcmf_sdpcm_process_header(FAR bcmf_interface_dev_t *ibus,
-                              struct bcmf_sdpcm_header *header)
+                              FAR struct bcmf_sdpcm_header *header)
 {
   if (header->data_offset < sizeof(struct bcmf_sdpcm_header) ||
       header->data_offset > header->size)
@@ -136,9 +138,9 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
   int ret;
   uint16_t len;
   uint16_t checksum;
-  struct bcmf_sdpcm_header *header;
-  struct bcmf_sdpcm_header tmp_hdr;
-  bcmf_interface_frame_t *iframe;
+  FAR struct bcmf_sdpcm_header *header;
+  FAR struct bcmf_sdpcm_header tmp_hdr;
+  FAR bcmf_interface_frame_t *iframe;
   FAR bcmf_interface_dev_t *ibus = (FAR bcmf_interface_dev_t *)priv->bus;
 
   /* Read the first 4 bytes of sdpcm header
@@ -146,7 +148,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
    */
 
   ret = bcmf_transfer_bytes(ibus, false, 2, 0,
-                            (uint8_t *)&tmp_hdr,
+                            (FAR uint8_t *)&tmp_hdr,
                             FIRST_WORD_SIZE);
   if (ret != OK)
     {
@@ -183,7 +185,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
       wlinfo("Flow control\n");
 
       ret = bcmf_transfer_bytes(ibus, false, 2, 0,
-                                (uint8_t *)&tmp_hdr + FIRST_WORD_SIZE,
+                                (FAR uint8_t *)&tmp_hdr + FIRST_WORD_SIZE,
                                 FC_UPDATE_PKT_LENGTH - FIRST_WORD_SIZE);
       if (ret != OK)
         {
@@ -214,7 +216,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
       /* Read out the rest of the header to get the bus credit information */
 
       ret = bcmf_transfer_bytes(ibus, false, 2, 0,
-                                (uint8_t *)&tmp_hdr + FIRST_WORD_SIZE,
+                                (FAR uint8_t *)&tmp_hdr + FIRST_WORD_SIZE,
                                 FC_UPDATE_PKT_LENGTH - FIRST_WORD_SIZE);
       if (ret != OK)
         {
@@ -247,7 +249,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
     }
 
   ret = bcmf_transfer_bytes(ibus, false, 2, 0,
-                            (uint8_t *)header + FIRST_WORD_SIZE,
+                            (FAR uint8_t *)header + FIRST_WORD_SIZE,
                             len - FIRST_WORD_SIZE);
   if (ret != OK)
     {
@@ -279,7 +281,7 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
           header->flow_control,
           header->credit);
 
-  bcmf_hexdump((uint8_t *)header, header->size, (unsigned int)header);
+  bcmf_hexdump((FAR uint8_t *)header, header->size, (unsigned int)header);
 #endif
 
   /* Process and validate header */
@@ -357,8 +359,8 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
 {
   int ret;
   bool is_txframe;
-  bcmf_interface_frame_t *iframe;
-  struct bcmf_sdpcm_header *header;
+  FAR bcmf_interface_frame_t *iframe;
+  FAR struct bcmf_sdpcm_header *header;
   FAR bcmf_interface_dev_t *ibus = (FAR bcmf_interface_dev_t *)priv->bus;
 
   if (list_is_empty(&ibus->tx_queue))
@@ -422,12 +424,12 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
 }
 
 int bcmf_sdpcm_queue_frame(FAR struct bcmf_dev_s *priv,
-                           struct bcmf_frame_s *frame, bool control)
+                           FAR struct bcmf_frame_s *frame, bool control)
 {
   FAR bcmf_interface_dev_t *ibus = (FAR bcmf_interface_dev_t *)priv->bus;
-  bcmf_interface_frame_t *iframe = (bcmf_interface_frame_t *)frame;
-  struct bcmf_sdpcm_header *header =
-    (struct bcmf_sdpcm_header *)iframe->data;
+  bcmf_interface_frame_t *iframe = (FAR bcmf_interface_frame_t *)frame;
+  FAR struct bcmf_sdpcm_header *header =
+    (FAR struct bcmf_sdpcm_header *)iframe->data;
   int semcount;
 
   /* Prepare sw header */
@@ -468,11 +470,11 @@ int bcmf_sdpcm_queue_frame(FAR struct bcmf_dev_s *priv,
   return OK;
 }
 
-struct bcmf_frame_s *bcmf_sdpcm_alloc_frame(FAR struct bcmf_dev_s *priv,
-                                            unsigned int len, bool block,
-                                            bool control)
+FAR struct bcmf_frame_s *bcmf_sdpcm_alloc_frame(FAR struct bcmf_dev_s *priv,
+                                                unsigned int len, bool block,
+                                                bool control)
 {
-  bcmf_interface_frame_t *iframe;
+  FAR bcmf_interface_frame_t *iframe;
   unsigned int header_len = sizeof(struct bcmf_sdpcm_header);
 
   if (!control)
@@ -501,14 +503,14 @@ struct bcmf_frame_s *bcmf_sdpcm_alloc_frame(FAR struct bcmf_dev_s *priv,
 }
 
 void bcmf_sdpcm_free_frame(FAR struct bcmf_dev_s *priv,
-                           struct bcmf_frame_s *frame)
+                           FAR struct bcmf_frame_s *frame)
 {
   bcmf_interface_free_frame(priv, (bcmf_interface_frame_t *)frame);
 }
 
-struct bcmf_frame_s *bcmf_sdpcm_get_rx_frame(FAR struct bcmf_dev_s *priv)
+FAR struct bcmf_frame_s *bcmf_sdpcm_get_rx_frame(FAR struct bcmf_dev_s *priv)
 {
-  bcmf_interface_frame_t *iframe;
+  FAR bcmf_interface_frame_t *iframe;
   FAR bcmf_interface_dev_t *ibus = (FAR bcmf_interface_dev_t *)priv->bus;
 
   if (nxmutex_lock(&ibus->queue_lock) < 0)

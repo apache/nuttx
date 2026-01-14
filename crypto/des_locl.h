@@ -1,10 +1,9 @@
 /****************************************************************************
  * crypto/des_locl.h
- * $OpenBSD: des_locl.h,v 1.7 2015/12/10 21:00:51 naddy Exp $
  *
- * lib/des/des_locl.h
- * Copyright (C) 1995 Eric Young (eay@mincom.oz.au)
- * All rights reserved.
+ * SPDX-License-Identifier: SSLeay-standalone
+ * SPDX-FileCopyrightText: Copyright (C) 1995 Eric Young (eay@mincom.oz.au)
+ * SPDX-FileCopyrightText: Eric Young (eay@mincom.oz.au).
  *
  * This file is part of an SSL implementation written
  * by Eric Young (eay@mincom.oz.au).

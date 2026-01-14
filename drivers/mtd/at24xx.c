@@ -1,8 +1,9 @@
 /****************************************************************************
  * drivers/mtd/at24xx.c
  *
- *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
- *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2013, 2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2011 Li Zhuoyi. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -291,7 +292,7 @@ static int at24c_eraseall(FAR struct at24c_dev_s *priv)
               return -ETIMEDOUT;
             }
 
-          nxsig_usleep(1000);
+          nxsched_usleep(1000);
         }
 
       at24c_i2c_write(priv,
@@ -367,7 +368,7 @@ static ssize_t at24c_read_internal(FAR struct at24c_dev_s *priv,
           return -ETIMEDOUT;
         }
 
-      nxsig_usleep(1000);
+      nxsched_usleep(1000);
     }
 
   /* Then transfer the following bytes */
@@ -491,7 +492,7 @@ static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
               return -ETIMEDOUT;
             }
 
-          nxsig_usleep(1000);
+          nxsched_usleep(1000);
         }
 
       memcpy(&buf[AT24XX_ADDRSIZE], buffer, priv->pagesize);

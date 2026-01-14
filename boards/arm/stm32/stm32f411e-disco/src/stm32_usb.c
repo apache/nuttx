@@ -1,11 +1,11 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f411e-disco/src/stm32_usb.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- *   Copyright (C) 2017 Brian Webb. All rights reserved.
- *   Author: Brian Webb <webbbn@gmail.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2017 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2017 Brian Webb. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Brian Webb <webbbn@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -135,7 +135,7 @@ static int usbhost_waiter(int argc, char *argv[])
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in inialization to setup
+ *   Called from stm32_usbinitialize very early in initialization to setup
  *   USB-related GPIO pins for the STM32F411 board.
  *
  ****************************************************************************/

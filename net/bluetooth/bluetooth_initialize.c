@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/bluetooth/bluetooth_initialize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,10 +48,6 @@
 
 void bluetooth_initialize(void)
 {
-  /* Initialize connection structions */
-
-  bluetooth_conn_initialize();
-
   /* Initialize the container allocator */
 
   bluetooth_container_initialize();

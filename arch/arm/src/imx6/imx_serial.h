@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/imx6/imx_serial.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -66,7 +68,7 @@ extern "C"
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before arm_serialinit.
  *
  ****************************************************************************/
@@ -80,7 +82,7 @@ void imx_earlyserialinit(void);
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before arm_serialinit.
  *
  ****************************************************************************/

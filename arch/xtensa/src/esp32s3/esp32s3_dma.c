@@ -35,6 +35,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/nuttx.h>
 #include <arch/irq.h>
 
 #include "xtensa.h"
@@ -44,13 +45,16 @@
 #include "hardware/esp32s3_soc.h"
 #include "hardware/esp32s3_system.h"
 
+#include "soc/gdma_periph.h"
+#include "hal/gdma_hal.h"
+#include "hal/gdma_types.h"
+#include "hal/gdma_ll.h"
+#include "periph_ctrl.h"
+#include "hal/dma_types.h"
+
 /****************************************************************************
  * Pre-processor Macros
  ****************************************************************************/
-
-#ifndef ALIGN_UP
-#  define ALIGN_UP(num, align) (((num) + ((align) - 1)) & ~((align) - 1))
-#endif
 
 #define DMA_INVALID_PERIPH_ID        (0x3F)
 #define GDMA_CH_REG_ADDR(_r, _ch)    ((_r) + (_ch) * GDMA_REG_OFFSET)
@@ -61,7 +65,7 @@
 
 static bool    g_dma_chan_used[ESP32S3_DMA_CHAN_MAX];
 static mutex_t g_dma_lock = NXMUTEX_INITIALIZER;
-static int g_dma_ref;
+static gdma_hal_context_t ctx;
 
 /****************************************************************************
  * Public Functions
@@ -392,6 +396,152 @@ void esp32s3_dma_load(struct esp32s3_dmadesc_s *dmadesc, int chan, bool tx)
 }
 
 /****************************************************************************
+ * Name: esp32s3_dma_reset_channel
+ *
+ * Description:
+ *   Resets dma channel.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_dma_reset_channel(int chan, bool tx)
+{
+  if (tx)
+    {
+      gdma_ll_tx_reset_channel(ctx.dev, chan);
+    }
+  else
+    {
+      gdma_ll_rx_reset_channel(ctx.dev, chan);
+    }
+}
+
+/****************************************************************************
+ * Name: esp32s3_dma_enable_interrupt
+ *
+ * Description:
+ *   Enable/Disable DMA interrupt.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *   mask - Interrupt mask to change
+ *   en   - true: enable; false: disable
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_dma_enable_interrupt(int chan, bool tx, uint32_t mask, bool en)
+{
+  if (tx)
+    {
+      gdma_ll_tx_enable_interrupt(ctx.dev, chan, mask, en);
+    }
+  else
+    {
+      gdma_ll_rx_enable_interrupt(ctx.dev, chan, mask, en);
+    }
+}
+
+/****************************************************************************
+ * Name: esp32s3_dma_get_interrupt
+ *
+ * Description:
+ *   Gets DMA interrupt status.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *
+ * Returned Value:
+ *   Interrupt status value.
+ *
+ ****************************************************************************/
+
+int esp32s3_dma_get_interrupt(int chan, bool tx)
+{
+  uint32_t intr_status = 0;
+
+  if (tx)
+    {
+      intr_status = gdma_ll_tx_get_interrupt_status(ctx.dev, chan, false);
+    }
+  else
+    {
+      intr_status = gdma_ll_rx_get_interrupt_status(ctx.dev, chan, false);
+    }
+
+  return intr_status;
+}
+
+/****************************************************************************
+ * Name: esp32s3_dma_clear_interrupt
+ *
+ * Description:
+ *   Clear DMA interrupt.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *   mask - Interrupt mask to change
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_dma_clear_interrupt(int chan, bool tx, uint32_t mask)
+{
+  if (tx)
+    {
+      gdma_ll_tx_clear_interrupt_status(ctx.dev, chan, mask);
+    }
+  else
+    {
+      gdma_ll_rx_clear_interrupt_status(ctx.dev, chan, mask);
+    }
+}
+
+/****************************************************************************
+ * Name: esp32s3_dma_get_desc_addr
+ *
+ * Description:
+ *   Gets desc addr of DMA interrupt.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *
+ * Returned Value:
+ *   Desc addr.
+ *
+ ****************************************************************************/
+
+int esp32s3_dma_get_desc_addr(int chan, bool tx)
+{
+  uint32_t desc_addr = 0;
+
+  if (tx)
+    {
+      desc_addr = gdma_ll_tx_get_eof_desc_addr(ctx.dev, chan);
+    }
+  else
+    {
+      desc_addr = gdma_ll_rx_get_success_eof_desc_addr(ctx.dev, chan);
+    }
+
+  return desc_addr;
+}
+
+/****************************************************************************
  * Name: esp32s3_dma_enable
  *
  * Description:
@@ -541,54 +691,12 @@ void esp32s3_dma_set_ext_memblk(int chan, bool tx,
 
 void esp32s3_dma_init(void)
 {
-  nxmutex_lock(&g_dma_lock);
+  modifyreg32(SYSTEM_PERIP_CLK_EN1_REG, 0, SYSTEM_DMA_CLK_EN_M);
+  modifyreg32(SYSTEM_PERIP_RST_EN1_REG, SYSTEM_DMA_RST_M, 0);
 
-  if (!g_dma_ref)
-    {
-      modifyreg32(SYSTEM_PERIP_CLK_EN1_REG, 0, SYSTEM_DMA_CLK_EN_M);
-      modifyreg32(SYSTEM_PERIP_RST_EN1_REG, SYSTEM_DMA_RST_M, 0);
+  ctx.dev = GDMA_LL_GET_HW(0);
 
-      modifyreg32(DMA_MISC_CONF_REG, 0, DMA_CLK_EN_M);
-    }
+  /* enable DMA clock gating */
 
-  g_dma_ref++;
-
-  nxmutex_unlock(&g_dma_lock);
-}
-
-/****************************************************************************
- * Name: esp32s3_dma_deinit
- *
- * Description:
- *   Deinitialize DMA driver.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void esp32s3_dma_deinit(void)
-{
-  nxmutex_lock(&g_dma_lock);
-
-  g_dma_ref--;
-
-  if (!g_dma_ref)
-    {
-      /* Disable DMA clock gating */
-
-      modifyreg32(DMA_MISC_CONF_REG, DMA_CLK_EN_M, 0);
-
-      /* Disable DMA module by gating the clock and asserting the reset
-       * signal.
-       */
-
-      modifyreg32(SYSTEM_PERIP_CLK_EN1_REG, SYSTEM_DMA_CLK_EN_M, 0);
-      modifyreg32(SYSTEM_PERIP_RST_EN1_REG, 0, SYSTEM_DMA_RST_M);
-    }
-
-  nxmutex_unlock(&g_dma_lock);
+  modifyreg32(DMA_MISC_CONF_REG, 0, DMA_CLK_EN_M);
 }

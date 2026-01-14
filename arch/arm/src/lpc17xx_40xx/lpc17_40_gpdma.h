@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc17_40_gpdma.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,7 +48,7 @@ typedef void *DMA_HANDLE;
  * same 'arg' value that was provided when lpc17_40_dmastart() was called and
  * result indicates the result of the transfer:  Zero indicates a successful
  * transfers.  On failure, a negated errno is returned indicating the general
- * nature of the DMA faiure.
+ * nature of the DMA failure.
  */
 
 typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);

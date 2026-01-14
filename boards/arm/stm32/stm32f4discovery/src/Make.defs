@@ -1,6 +1,8 @@
 ############################################################################
 # boards/arm/stm32/stm32f4discovery/src/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -185,6 +187,10 @@ endif
 
 ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
   CSRCS += stm32_composite.c
+endif
+
+ifeq ($(CONFIG_ADC_HX711),y)
+CSRCS += stm32_hx711.c
 endif
 
 DEPPATH += --dep-path board

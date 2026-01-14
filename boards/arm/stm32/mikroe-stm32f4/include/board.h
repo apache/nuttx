@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/mikroe-stm32f4/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -204,7 +206,6 @@
  *
  * The Mikroe-STM32F4 board has no on-board serial devices, but it brings out
  * UART2 to the expansion header.
- * (See the README.txt file for other options)
  */
 
 #define GPIO_USART2_RX GPIO_USART2_RX_2
@@ -232,7 +233,7 @@
 #define DMACHAN_SPI3_RX DMAMAP_SPI3_RX_2
 #define DMACHAN_SPI3_TX DMAMAP_SPI3_TX_2
 
-/* Timer Inputs/Outputs (see the README.txt file for options) */
+/* Timer Inputs/Outputs */
 
 #define GPIO_TIM2_CH1IN  GPIO_TIM2_CH1IN_2
 #define GPIO_TIM2_CH2IN  GPIO_TIM2_CH2IN_1

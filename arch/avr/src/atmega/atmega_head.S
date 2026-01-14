@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/avr/src/atmega/atmega_head.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,7 +48,9 @@
  * - If RAMPZ is not present, support for LPMX is assumed
  */
 
-#define HAVE_RAMPZ 1
+#ifdef AVR_HAS_RAMPZ
+#  define HAVE_RAMPZ 1
+#endif
 
 /****************************************************************************
  * External Symbols

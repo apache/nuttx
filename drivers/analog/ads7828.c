@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/analog/ads7828.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -236,7 +238,7 @@ static int ads7828_readchannel(FAR struct ads7828_dev_s *priv,
       i2cmsg[1].flags = I2C_M_READ;
 
       uint16_t buf;
-      i2cmsg[1].buffer = (uint8_t *)(&buf);
+      i2cmsg[1].buffer = (FAR uint8_t *)(&buf);
       i2cmsg[1].length = sizeof(buf);
       ret = I2C_TRANSFER(priv->i2c, i2cmsg, 2);
       if (ret < 0)

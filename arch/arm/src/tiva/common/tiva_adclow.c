@@ -1,17 +1,12 @@
 /****************************************************************************
  * arch/arm/src/tiva/common/tiva_adclow.c
  *
- *   Copyright (C) 2016-2018 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2015 TRD2 Inc. All rights reserved.
- *   Author: Calvin Maguranis <calvin.maguranis@trd2inc.com>
- *           Gregory Nutt <gnutt@nuttx.org>
- *
- * The Tivaware sample code has a BSD compatible license that requires this
- * copyright notice:
- *
- * Copyright (c) 2005-2014 Texas Instruments Incorporated.
- * All rights reserved.
- * Software License Agreement
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2016-2018 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2015 TRD2 Inc. All rights reserved.
+ * SPDX-FileCopyrightText: 2005-2014 Texas Instruments Incorporated.
+ * SPDX-FileContributor: Calvin Maguranis <calvin.maguranis@trd2inc.com>
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  *   Redistribution and use in source and binary forms, with or without
  *   modification, are permitted provided that the following conditions
@@ -608,7 +603,7 @@ static int tiva_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
           tiva_adc_proc_trig(priv->devno, (uint8_t)SSE_PROC_TRIG(sse));
           while (!tiva_adc_sse_int_status(priv->devno, sse))
             {
-              nxsig_usleep(100);
+              nxsched_usleep(100);
             }
 
           tiva_adc_sse_clear_int(priv->devno, sse);
@@ -711,7 +706,7 @@ static void tiva_adc_read(void *arg)
   ret = tiva_adc_lock(g_adcs[sse->adc], sse->num);
   if (ret < 0)
     {
-      return ;
+      return;
     }
 
   /* Get sampled data */

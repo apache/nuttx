@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_fork.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -119,6 +121,11 @@ struct fork_s
 {
   /* CPU registers */
 
+#ifdef CONFIG_RISCV_FRAMEPOINTER
+  uintreg_t fp;   /* Frame pointer */
+#else
+  uintreg_t s0;   /* Saved register s0 */
+#endif
   uintreg_t s1;   /* Saved register s1 */
   uintreg_t s2;   /* Saved register s2 */
   uintreg_t s3;   /* Saved register s3 */
@@ -130,11 +137,6 @@ struct fork_s
   uintreg_t s9;   /* Saved register s9 */
   uintreg_t s10;  /* Saved register s10 */
   uintreg_t s11;  /* Saved register s11 */
-#ifdef CONFIG_RISCV_FRAMEPOINTER
-  uintreg_t fp;   /* Frame pointer */
-#else
-  uintreg_t s0;   /* Saved register s0 */
-#endif
   uintreg_t sp;   /* Stack pointer */
   uintreg_t ra;   /* Return address */
 #ifdef RISCV_SAVE_GP

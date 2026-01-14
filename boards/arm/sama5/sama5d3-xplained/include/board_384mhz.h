@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/sama5/sama5d3-xplained/include/board_384mhz.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -59,7 +61,7 @@
 /* PLLA configuration.
  *
  *   Divider = 1
- *   Multipler = 64
+ *   Multiplier = 64
  */
 
 #define BOARD_CKGR_PLLAR_COUNT     (63 << PMC_CKGR_PLLAR_COUNT_SHIFT)

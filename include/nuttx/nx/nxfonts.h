@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/nx/nxfonts.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -434,11 +436,11 @@ struct nx_font_s
 
 struct nx_fontpackage_s
 {
-  uint8_t id;                            /* The font ID */
-  FAR const struct nx_font_s    metrics; /* Font set metrics */
-  FAR const struct nx_fontset_s font7;   /* Fonts for 7-bit encoding */
+  uint8_t id;                        /* The font ID */
+  const struct nx_font_s    metrics; /* Font set metrics */
+  const struct nx_fontset_s font7;   /* Fonts for 7-bit encoding */
 #if CONFIG_NXFONTS_CHARBITS >= 8
-  FAR const struct nx_fontset_s font8;   /* Fonts for 8-bit encoding */
+  const struct nx_fontset_s font8;   /* Fonts for 8-bit encoding */
 #endif
 };
 
@@ -457,7 +459,7 @@ struct nxfonts_glyph_s
   uint8_t height;                      /* Height of this glyph (in rows) */
   uint8_t width;                       /* Width of this glyph (in pixels) */
   uint8_t stride;                      /* Width of the glyph row (in bytes) */
-  FAR uint8_t bitmap[1];               /* Bitmap memory, actual size varies */
+  uint8_t bitmap[1];                   /* Bitmap memory, actual size varies */
 };
 
 #define SIZEOF_NXFONTS_GLYPH_S(b) (sizeof(struct nxfonts_glyph_s) + (b) - 1)

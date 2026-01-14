@@ -1,9 +1,10 @@
 /****************************************************************************
  * boards/arm/stm32l4/stm32l476-mdk/include/stm32l476-mdk-clocking.h
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2016 Motorola Mobility, LLC. All rights reserved.
- *   Author: dev@ziggurat29.com
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Motorola Mobility, LLC. All rights reserved.
+ * SPDX-FileContributor: Author: dev@ziggurat29.com
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

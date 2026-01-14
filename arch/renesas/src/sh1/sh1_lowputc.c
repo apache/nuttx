@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/renesas/src/sh1/sh1_lowputc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -96,7 +98,7 @@
 #endif
 
 /* The full SMR setting also includes internal clocking with no divisor,
- * aysnchronous operation and multiprocessor disabled:
+ * asynchronous operation and multiprocessor disabled:
  */
 
 #define SH1_SMR_VALUE (SH1_SMR_MODE|SH1_SMR_PARITY|SH1_SMR_STOP)

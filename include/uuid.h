@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/uuid.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -87,19 +89,20 @@ extern "C"
 {
 #endif
 
-int32_t  uuid_compare(const uuid_t *, const uuid_t *, uint32_t *);
-void     uuid_create(uuid_t *, uint32_t *);
-void     uuid_create_nil(uuid_t *, uint32_t *);
-int32_t  uuid_equal(const uuid_t *, const uuid_t *, uint32_t *);
-void     uuid_from_string(const char *, uuid_t *, uint32_t *);
-uint16_t uuid_hash(const uuid_t *, uint32_t *);
-int32_t  uuid_is_nil(const uuid_t *, uint32_t *);
-void     uuid_to_string(const uuid_t *, char **, uint32_t *);
+int32_t  uuid_compare(FAR const uuid_t *, FAR const uuid_t *,
+                      FAR uint32_t *);
+void     uuid_create(FAR uuid_t *, FAR uint32_t *);
+void     uuid_create_nil(FAR uuid_t *, FAR uint32_t *);
+int32_t  uuid_equal(FAR const uuid_t *, FAR const uuid_t *, FAR uint32_t *);
+void     uuid_from_string(FAR const char *, FAR uuid_t *, FAR uint32_t *);
+uint16_t uuid_hash(FAR const uuid_t *, FAR uint32_t *);
+int32_t  uuid_is_nil(FAR const uuid_t *, FAR uint32_t *);
+void     uuid_to_string(FAR const uuid_t *, FAR char **, FAR uint32_t *);
 
-void     uuid_enc_le(void *, const uuid_t *);
-void     uuid_dec_le(const void *, uuid_t *);
-void     uuid_enc_be(void *, const uuid_t *);
-void     uuid_dec_be(const void *, uuid_t *);
+void     uuid_enc_le(FAR void *, const FAR uuid_t *);
+void     uuid_dec_le(FAR const void *, FAR uuid_t *);
+void     uuid_enc_be(FAR void *, const FAR uuid_t *);
+void     uuid_dec_be(FAR const void *, FAR uuid_t *);
 
 #if defined(__cplusplus)
 }

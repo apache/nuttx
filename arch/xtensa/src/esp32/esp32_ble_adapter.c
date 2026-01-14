@@ -55,15 +55,16 @@
 #include "xtensa_attr.h"
 #include "utils/memory_reserve.h"
 #include "esp32_rt_timer.h"
-#include "esp32_wireless.h"
+#include "espressif/esp_wireless.h"
+#include "espressif/esp_wifi_utils.h"
 #include "esp32_irq.h"
-#include "esp32_spicache.h"
 
 #include "esp_bt.h"
 #include "esp_log.h"
 #include "esp_mac.h"
 #include "esp_private/phy.h"
 #include "esp_private/wifi.h"
+#include "esp_private/cache_utils.h"
 #include "esp_random.h"
 #include "esp_timer.h"
 #include "periph_ctrl.h"
@@ -71,7 +72,8 @@
 #include "soc/soc_caps.h"
 #include "xtensa/core-macros.h"
 #include "xtensa/xtensa_api.h"
-#include "esp_coexist_internal.h"
+#include "private/esp_coexist_internal.h"
+#include "private/esp_coexist_adapter.h"
 
 #include "esp32_ble_adapter.h"
 
@@ -107,7 +109,7 @@
 #define BTDM_MODEM_WAKE_UP_DELAY            (4)  /* delay in slots of modem wake up procedure, including re-enable PHY/RF */
 
 #define OSI_FUNCS_TIME_BLOCKING             0xffffffff
-#define OSI_VERSION                         0x00010004
+#define OSI_VERSION                         0x00010005
 #define OSI_MAGIC_VALUE                     0xfadebead
 
 #ifdef CONFIG_PM
@@ -121,13 +123,13 @@
 
 #define MSG_QUEUE_NAME_SIZE                 16
 
-#ifdef CONFIG_ESP32_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
 #  define BLE_TASK_EVENT_QUEUE_ITEM_SIZE    8
 #  define BLE_TASK_EVENT_QUEUE_LEN          8
 #endif
 
-#ifdef CONFIG_ESP32_BLE_INTERRUPT_SAVE_STATUS
-#  define NR_IRQSTATE_FLAGS   CONFIG_ESP32_BLE_INTERRUPT_SAVE_STATUS
+#ifdef CONFIG_ESPRESSIF_BLE_INTERRUPT_SAVE_STATUS
+#  define NR_IRQSTATE_FLAGS   CONFIG_ESPRESSIF_BLE_INTERRUPT_SAVE_STATUS
 #else
 #  define NR_IRQSTATE_FLAGS   3
 #endif
@@ -228,6 +230,7 @@ struct osi_funcs_s
   int (* _coex_version_get)(unsigned int *major,
                             unsigned int *minor,
                             unsigned int *patch);
+  void (* _patch_apply)(void);
   uint32_t _magic;
 };
 
@@ -275,7 +278,7 @@ typedef enum
 struct bt_sem_s
 {
   sem_t sem;
-#ifdef CONFIG_ESP32_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
   struct esp_semcache_s sc;
 #endif
 };
@@ -310,47 +313,49 @@ struct irqstate_list_s
  */
 
 static xt_handler ble_set_isr(int n, xt_handler f, void *arg);
-static void ints_on(uint32_t mask);
+static void ints_on(unsigned int mask);
 static void IRAM_ATTR interrupt_disable(void);
 static void IRAM_ATTR interrupt_restore(void);
 static void IRAM_ATTR task_yield_from_isr(void);
 static void *semphr_create_wrapper(uint32_t max, uint32_t init);
 static void semphr_delete_wrapper(void *semphr);
-static int IRAM_ATTR semphr_take_from_isr_wrapper(void *semphr, void *hptw);
-static int IRAM_ATTR semphr_give_from_isr_wrapper(void *semphr, void *hptw);
-static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms);
-static int semphr_give_wrapper(void *semphr);
+static int32_t IRAM_ATTR semphr_take_from_isr_wrapper(void *semphr,
+                                                      void *hptw);
+static int32_t IRAM_ATTR semphr_give_from_isr_wrapper(void *semphr,
+                                                      void *hptw);
+static int32_t semphr_take_wrapper(void *semphr, uint32_t block_time_ms);
+static int32_t semphr_give_wrapper(void *semphr);
 static void *mutex_create_wrapper(void);
 static void mutex_delete_wrapper(void *mutex);
-static int mutex_lock_wrapper(void *mutex);
-static int mutex_unlock_wrapper(void *mutex);
+static int32_t mutex_lock_wrapper(void *mutex);
+static int32_t mutex_unlock_wrapper(void *mutex);
 static void *queue_create_wrapper(uint32_t queue_len, uint32_t item_size);
 static void queue_delete_wrapper(void *queue);
-static int queue_send_wrapper(void *queue,
+static int32_t queue_send_wrapper(void *queue,
                               void *item,
                               uint32_t block_time_ms);
-static int IRAM_ATTR queue_send_from_isr_wrapper(void *queue,
-                                                 void *item,
-                                                 void *hptw);
-static int queue_recv_wrapper(void *queue,
-                              void *item,
-                              uint32_t block_time_ms);
-static int IRAM_ATTR queue_recv_from_isr_wrapper(void *queue,
-                                                 void *item,
-                                                 void *hptw);
-static int task_create_wrapper(void *task_func,
-                               const char *name,
-                               uint32_t stack_depth,
-                               void *param,
-                               uint32_t prio,
-                               void *task_handle,
-                               uint32_t core_id);
+static int32_t IRAM_ATTR queue_send_from_isr_wrapper(void *queue,
+                                                     void *item,
+                                                     void *hptw);
+static int32_t queue_recv_wrapper(void *queue,
+                                  void *item,
+                                  uint32_t block_time_ms);
+static int32_t IRAM_ATTR queue_recv_from_isr_wrapper(void *queue,
+                                                     void *item,
+                                                     void *hptw);
+static int32_t task_create_wrapper(void *task_func,
+                                   const char *name,
+                                   uint32_t stack_depth,
+                                   void *param,
+                                   uint32_t prio,
+                                   void *task_handle,
+                                   uint32_t core_id);
 static void task_delete_wrapper(void *task_handle);
 static bool IRAM_ATTR is_in_isr_wrapper(void);
 static int IRAM_ATTR cause_sw_intr_to_core_wrapper(int core_id, int intr_no);
 static void *malloc_wrapper(size_t size);
 static void *malloc_internal_wrapper(size_t size);
-static int IRAM_ATTR read_mac_wrapper(uint8_t mac[6]);
+static int32_t IRAM_ATTR read_mac_wrapper(uint8_t mac[6]);
 static void IRAM_ATTR srand_wrapper(unsigned int seed);
 static int IRAM_ATTR rand_wrapper(void);
 static uint32_t IRAM_ATTR btdm_lpcycles_2_us(uint32_t cycles);
@@ -381,6 +386,7 @@ static int coex_register_wifi_channel_change_callback_wrapper(void *cb);
 static int coex_version_get_wrapper(unsigned int *major,
                                     unsigned int *minor,
                                     unsigned int *patch);
+static void patch_apply(void);
 
 /****************************************************************************
  * Other functions
@@ -468,6 +474,8 @@ extern void btdm_controller_scan_duplicate_list_clear(void);
 /* Shutdown */
 
 extern void esp_bt_controller_shutdown(void);
+extern void sdk_config_set_bt_pll_track_enable(bool enable);
+extern void sdk_config_set_uart_flow_ctrl_enable(bool enable);
 
 extern uint8_t _bss_start_btdm[];
 extern uint8_t _bss_end_btdm[];
@@ -478,16 +486,16 @@ extern uint32_t _data_end_btdm_rom;
 
 extern uint32_t _bt_bss_start;
 extern uint32_t _bt_bss_end;
-extern uint32_t _nimble_bss_start;
-extern uint32_t _nimble_bss_end;
-extern uint32_t _btdm_bss_start;
-extern uint32_t _btdm_bss_end;
+extern uint32_t _bt_controller_bss_start;
+extern uint32_t _bt_controller_bss_end;
 extern uint32_t _bt_data_start;
 extern uint32_t _bt_data_end;
-extern uint32_t _nimble_data_start;
-extern uint32_t _nimble_data_end;
-extern uint32_t _btdm_data_start;
-extern uint32_t _btdm_data_end;
+extern uint32_t _bt_controller_data_start;
+extern uint32_t _bt_controller_data_end;
+
+extern void config_bt_funcs_reset(void);
+extern void config_ble_funcs_reset(void);
+extern void config_btdm_funcs_reset(void);
 
 /****************************************************************************
  * Private Data
@@ -560,6 +568,7 @@ static struct osi_funcs_s g_osi_funcs_ro =
   ._interrupt_l3_restore = interrupt_restore,
   ._customer_queue_create = NULL,
   ._coex_version_get = coex_version_get_wrapper,
+  ._patch_apply = patch_apply,
   ._magic = OSI_MAGIC_VALUE,
 };
 
@@ -682,7 +691,7 @@ static struct irqstate_list_s g_ble_int_flags[NR_IRQSTATE_FLAGS];
 
 /* Cached queue control variables */
 
-#ifdef CONFIG_ESP32_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
 static struct esp_queuecache_s g_esp_queuecache[BLE_TASK_EVENT_QUEUE_LEN];
 static uint8_t g_esp_queuecache_buffer[BLE_TASK_EVENT_QUEUE_ITEM_SIZE];
 #endif
@@ -836,7 +845,7 @@ static xt_handler ble_set_isr(int n, xt_handler f, void *arg)
   adapter = kmm_malloc(tmp);
   if (!adapter)
     {
-      wlerr("Failed to alloc %d memory\n", tmp);
+      wlerr("Failed to alloc %" PRIu32 " memory\n", tmp);
       DEBUGPANIC();
       return NULL;
     }
@@ -869,7 +878,7 @@ static xt_handler ble_set_isr(int n, xt_handler f, void *arg)
  *
  ****************************************************************************/
 
-static void ints_on(uint32_t mask)
+static void ints_on(unsigned int mask)
 {
   uint32_t bit;
   int irq;
@@ -1002,7 +1011,7 @@ static void *semphr_create_wrapper(uint32_t max, uint32_t init)
       return NULL;
     }
 
-#ifdef CONFIG_ESP32_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
   esp_init_semcache(&bt_sem->sc, &bt_sem->sem);
 #endif
 
@@ -1045,7 +1054,8 @@ static void semphr_delete_wrapper(void *semphr)
  *
  ****************************************************************************/
 
-static int IRAM_ATTR semphr_take_from_isr_wrapper(void *semphr, void *hptw)
+static int32_t IRAM_ATTR semphr_take_from_isr_wrapper(void *semphr,
+                                                      void *hptw)
 {
   *(int *)hptw = 0;
 
@@ -1068,12 +1078,13 @@ static int IRAM_ATTR semphr_take_from_isr_wrapper(void *semphr, void *hptw)
  *
  ****************************************************************************/
 
-static int IRAM_ATTR semphr_give_from_isr_wrapper(void *semphr, void *hptw)
+static int32_t IRAM_ATTR semphr_give_from_isr_wrapper(void *semphr,
+                                                      void *hptw)
 {
   int ret;
   struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
 
-#ifdef CONFIG_ESP32_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
   if (spi_flash_cache_enabled())
     {
       ret = semphr_give_wrapper(bt_sem);
@@ -1105,7 +1116,7 @@ static int IRAM_ATTR semphr_give_from_isr_wrapper(void *semphr, void *hptw)
  *
  ****************************************************************************/
 
-static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
+static int32_t semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
 {
   int ret;
   struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
@@ -1128,7 +1139,7 @@ static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
 
   if (ret)
     {
-      wlerr("ERROR: Failed to wait sem in %u ticks. Error=%d\n",
+      wlerr("ERROR: Failed to wait sem in %" PRIu32 " ticks. Error=%d\n",
             MSEC2TICK(block_time_ms), ret);
     }
 
@@ -1149,7 +1160,7 @@ static int semphr_take_wrapper(void *semphr, uint32_t block_time_ms)
  *
  ****************************************************************************/
 
-static int semphr_give_wrapper(void *semphr)
+static int32_t semphr_give_wrapper(void *semphr)
 {
   int ret;
   struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
@@ -1232,7 +1243,7 @@ static void mutex_delete_wrapper(void *mutex)
  *
  ****************************************************************************/
 
-static int mutex_lock_wrapper(void *mutex)
+static int32_t mutex_lock_wrapper(void *mutex)
 {
   int ret;
 
@@ -1259,7 +1270,7 @@ static int mutex_lock_wrapper(void *mutex)
  *
  ****************************************************************************/
 
-static int mutex_unlock_wrapper(void *mutex)
+static int32_t mutex_unlock_wrapper(void *mutex)
 {
   int ret;
 
@@ -1315,7 +1326,7 @@ static void *queue_create_wrapper(uint32_t queue_len, uint32_t item_size)
 
   mq_adpt->msgsize = item_size;
 
-#ifdef CONFIG_ESP32_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
   if (queue_len <= BLE_TASK_EVENT_QUEUE_LEN &&
       item_size == BLE_TASK_EVENT_QUEUE_ITEM_SIZE)
     {
@@ -1328,7 +1339,8 @@ static void *queue_create_wrapper(uint32_t queue_len, uint32_t item_size)
   else
     {
       wlerr("Failed to create queue cache."
-            " Please incresase BLE_TASK_EVENT_QUEUE_LEN to, at least, %d",
+            " Please incresase BLE_TASK_EVENT_QUEUE_LEN to,"
+            " at least, %" PRIu32 "",
             queue_len);
       return NULL;
     }
@@ -1376,8 +1388,8 @@ static void queue_delete_wrapper(void *queue)
  *
  ****************************************************************************/
 
-static int queue_send_wrapper(void *queue, void *item,
-                              uint32_t block_time_ms)
+static int32_t queue_send_wrapper(void *queue, void *item,
+                                  uint32_t block_time_ms)
 {
   return esp_queue_send_generic(queue, item, block_time_ms, 0);
 }
@@ -1399,9 +1411,9 @@ static int queue_send_wrapper(void *queue, void *item,
  *
  ****************************************************************************/
 
-static int IRAM_ATTR queue_send_from_isr_wrapper(void *queue,
-                                                 void *item,
-                                                 void *hptw)
+static int32_t IRAM_ATTR queue_send_from_isr_wrapper(void *queue,
+                                                     void *item,
+                                                     void *hptw)
 {
   *((int *)hptw) = false;
   return esp_queue_send_generic(queue, item, 0, 0);
@@ -1423,7 +1435,7 @@ static int IRAM_ATTR queue_send_from_isr_wrapper(void *queue,
  *
  ****************************************************************************/
 
-static int queue_recv_wrapper(void *queue, void *item,
+static int32_t queue_recv_wrapper(void *queue, void *item,
                               uint32_t block_time_ms)
 {
   ssize_t ret;
@@ -1484,9 +1496,9 @@ static int queue_recv_wrapper(void *queue, void *item,
  *
  ****************************************************************************/
 
-static int IRAM_ATTR queue_recv_from_isr_wrapper(void *queue,
-                                                 void *item,
-                                                 void *hptw)
+static int32_t IRAM_ATTR queue_recv_from_isr_wrapper(void *queue,
+                                                     void *item,
+                                                     void *hptw)
 {
   DEBUGPANIC();
   return 0;
@@ -1512,10 +1524,10 @@ static int IRAM_ATTR queue_recv_from_isr_wrapper(void *queue,
  *
  ****************************************************************************/
 
-static int task_create_wrapper(void *task_func, const char *name,
-                               uint32_t stack_depth, void *param,
-                               uint32_t prio, void *task_handle,
-                               uint32_t core_id)
+static int32_t task_create_wrapper(void *task_func, const char *name,
+                                   uint32_t stack_depth, void *param,
+                                   uint32_t prio, void *task_handle,
+                                   uint32_t core_id)
 {
   return esp_task_create_pinned_to_core(task_func, name,
                                         stack_depth, param,
@@ -1614,7 +1626,7 @@ static void *malloc_wrapper(size_t size)
  *   Malloc buffer in DRAM
  *
  * Input Parameters:
- *  szie - buffer size
+ *  size - buffer size
  *
  * Returned Value:
  *   None
@@ -1645,7 +1657,7 @@ static void *malloc_internal_wrapper(size_t size)
  *
  ****************************************************************************/
 
-static int IRAM_ATTR read_mac_wrapper(uint8_t mac[6])
+static int32_t IRAM_ATTR read_mac_wrapper(uint8_t mac[6])
 {
   return esp_read_mac(mac, ESP_MAC_BT);
 }
@@ -1834,7 +1846,7 @@ static void btdm_sleep_enter_phase2_wrapper(void)
 {
   if (btdm_controller_get_sleep_mode() == BTDM_MODEM_SLEEP_MODE_ORIG)
     {
-      esp_phy_disable();
+      esp_phy_disable(PHY_MODEM_BT);
 #ifdef CONFIG_PM
       if (g_pm_lock_acquired)
         {
@@ -1845,7 +1857,7 @@ static void btdm_sleep_enter_phase2_wrapper(void)
     }
   else if (btdm_controller_get_sleep_mode() == BTDM_MODEM_SLEEP_MODE_EVED)
     {
-      esp_phy_disable();
+      esp_phy_disable(PHY_MODEM_BT);
 
       /* pause bluetooth baseband */
 
@@ -1879,7 +1891,7 @@ void btdm_sleep_exit_phase3_wrapper(void)
 
   if (btdm_controller_get_sleep_mode() == BTDM_MODEM_SLEEP_MODE_ORIG)
     {
-      esp_phy_enable();
+      esp_phy_enable(PHY_MODEM_BT);
       btdm_check_and_init_bb();
 #ifdef CONFIG_PM
       esp_timer_stop(g_btdm_slp_tmr);
@@ -1890,7 +1902,7 @@ void btdm_sleep_exit_phase3_wrapper(void)
       /* resume bluetooth baseband */
 
       periph_module_enable(PERIPH_BT_BASEBAND_MODULE);
-      esp_phy_enable();
+      esp_phy_enable(PHY_MODEM_BT);
     }
 }
 
@@ -1952,7 +1964,7 @@ static int IRAM_ATTR coex_bt_request_wrapper(uint32_t event,
                                              uint32_t latency,
                                              uint32_t duration)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_bt_request(event, latency, duration);
 #else
   return 0;
@@ -1975,7 +1987,7 @@ static int IRAM_ATTR coex_bt_request_wrapper(uint32_t event,
 
 static int IRAM_ATTR coex_bt_release_wrapper(uint32_t event)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_bt_release(event);
 #else
   return 0;
@@ -1999,7 +2011,7 @@ static int IRAM_ATTR coex_bt_release_wrapper(uint32_t event)
 
 static int adapter_coex_register_bt_cb_wrapper(coex_func_cb_t cb)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_register_bt_cb(cb);
 #else
   return 0;
@@ -2023,7 +2035,7 @@ static int adapter_coex_register_bt_cb_wrapper(coex_func_cb_t cb)
 
 static uint32_t IRAM_ATTR coex_bb_reset_lock_wrapper(void)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_bb_reset_lock();
 #else
   return 0;
@@ -2048,7 +2060,7 @@ static uint32_t IRAM_ATTR coex_bb_reset_lock_wrapper(void)
 
 static void IRAM_ATTR coex_bb_reset_unlock_wrapper(uint32_t restore)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_bb_reset_unlock(restore);
 #endif
 }
@@ -2069,7 +2081,7 @@ static void IRAM_ATTR coex_bb_reset_unlock_wrapper(uint32_t restore)
 
 static int coex_schm_register_btdm_callback_wrapper(void *callback)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_schm_register_callback(COEX_SCHM_CALLBACK_TYPE_BT, callback);
 #else
   return 0;
@@ -2094,7 +2106,7 @@ static int coex_schm_register_btdm_callback_wrapper(void *callback)
 static void coex_schm_status_bit_clear_wrapper(uint32_t type,
                                                uint32_t status)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_schm_status_bit_clear(type, status);
 #endif
 }
@@ -2116,7 +2128,7 @@ static void coex_schm_status_bit_clear_wrapper(uint32_t type,
 
 static void coex_schm_status_bit_set_wrapper(uint32_t type, uint32_t status)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_schm_status_bit_set(type, status);
 #endif
 }
@@ -2137,7 +2149,7 @@ static void coex_schm_status_bit_set_wrapper(uint32_t type, uint32_t status)
 
 static uint32_t coex_schm_interval_get_wrapper(void)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_schm_interval_get();
 #else
   return 0;
@@ -2160,7 +2172,7 @@ static uint32_t coex_schm_interval_get_wrapper(void)
 
 static uint8_t coex_schm_curr_period_get_wrapper(void)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_schm_interval_get();
 #else
   return 0;
@@ -2183,7 +2195,7 @@ static uint8_t coex_schm_curr_period_get_wrapper(void)
 
 static void *coex_schm_curr_phase_get_wrapper(void)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_schm_curr_phase_get();
 #else
   return NULL;
@@ -2208,7 +2220,7 @@ static void *coex_schm_curr_phase_get_wrapper(void)
 static int coex_wifi_channel_get_wrapper(uint8_t *primary,
                                          uint8_t *secondary)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_wifi_channel_get(primary, secondary);
 #else
   return -1;
@@ -2232,7 +2244,7 @@ static int coex_wifi_channel_get_wrapper(uint8_t *primary,
 
 static int coex_register_wifi_channel_change_callback_wrapper(void *cb)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   return coex_register_wifi_channel_change_callback(cb);
 #else
   return -1;
@@ -2259,40 +2271,49 @@ static int coex_version_get_wrapper(unsigned int *major,
                                     unsigned int *minor,
                                     unsigned int *patch)
 {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
-  const char *ver_str = coex_version_get();
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
+  coex_version_t version;
 
-  if (ver_str != NULL)
-    {
-      unsigned int _major = 0;
-      unsigned int _minor = 0;
-      unsigned int _patch = 0;
+  ASSERT(coex_version_get_value(&version) == ESP_OK);
 
-      if (sscanf(ver_str, "%u.%u.%u", &_major, &_minor, &_patch) != 3)
-        {
-          return -1;
-        }
+  *major = (unsigned int)version.major;
+  *minor = (unsigned int)version.minor;
+  *patch = (unsigned int)version.patch;
 
-      if (major != NULL)
-        {
-          *major = _major;
-        }
-
-      if (minor != NULL)
-        {
-          *minor = _minor;
-        }
-
-      if (patch != NULL)
-        {
-          *patch = _patch;
-        }
-
-      return 0;
-    }
+  return 0;
 #endif
 
   return -1;
+}
+
+/****************************************************************************
+ * Name: patch_apply
+ *
+ * Description:
+ *   This function resets the BTDM and BT functions based on the current
+ *   configuration. If the configuration is not set to BLE only, it resets
+ *   the BT functions. If the configuration is not set to BR/EDR only, it
+ *   resets the BLE functions.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void patch_apply(void)
+{
+  config_btdm_funcs_reset();
+
+#ifndef CONFIG_BTDM_CTRL_MODE_BLE_ONLY
+  config_bt_funcs_reset();
+#endif
+
+#ifndef CONFIG_BTDM_CTRL_MODE_BR_EDR_ONLY
+  config_ble_funcs_reset();
+#endif
 }
 
 /****************************************************************************
@@ -2338,12 +2359,7 @@ static int32_t esp_task_create_pinned_to_core(void *entry,
   DEBUGASSERT(task_handle != NULL);
 
 #ifdef CONFIG_SMP
-  ret = sched_lock();
-  if (ret)
-    {
-      wlerr("Failed to lock scheduler before creating pinned thread\n");
-      return false;
-    }
+  sched_lock();
 #endif
 
   pid = kthread_create(name, prio, stack_depth, entry,
@@ -2375,12 +2391,7 @@ static int32_t esp_task_create_pinned_to_core(void *entry,
     }
 
 #ifdef CONFIG_SMP
-  ret = sched_unlock();
-  if (ret)
-    {
-      wlerr("Failed to unlock scheduler after creating pinned thread\n");
-      return false;
-    }
+  sched_unlock();
 #endif
 
   return pid > 0;
@@ -2410,7 +2421,7 @@ static IRAM_ATTR int32_t esp_queue_send_generic(void *queue, void *item,
   struct timespec timeout;
   struct mq_adpt_s *mq_adpt = (struct mq_adpt_s *)queue;
 
-#ifdef CONFIG_ESP32_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
   if (!spi_flash_cache_enabled())
     {
       esp_send_queuecache(queue, item, mq_adpt->msgsize);
@@ -2476,15 +2487,10 @@ static IRAM_ATTR int32_t esp_queue_send_generic(void *queue, void *item,
 
 static void esp_update_time(struct timespec *timespec, uint32_t ticks)
 {
-  uint32_t tmp;
+  struct timespec ts;
 
-  tmp = TICK2SEC(ticks);
-  timespec->tv_sec += tmp;
-
-  ticks -= SEC2TICK(tmp);
-  tmp = TICK2NSEC(ticks);
-
-  timespec->tv_nsec += tmp;
+  clock_ticks2time(&ts, ticks);
+  clock_timespec_add(timespec, &ts, timespec);
 }
 
 /****************************************************************************
@@ -2644,7 +2650,7 @@ static void btdm_controller_mem_init(void)
   memcpy(_data_start_btdm, (void *)_data_start_btdm_rom,
          _data_end_btdm - _data_start_btdm);
 
-  wlinfo(".data initialise [0x%08x] <== [0x%08x]\n",
+  wlinfo(".data initialise [0x0x08%" PRIx32 "] <== [0x0x08%" PRIx32 "]\n",
          (uint32_t)_data_start_btdm, _data_start_btdm_rom);
 
   /* initial em, .bss section */
@@ -2659,7 +2665,8 @@ static void btdm_controller_mem_init(void)
           memset((void *)g_btdm_dram_available_region[i].start, 0x0,
                  g_btdm_dram_available_region[i].end - \
                  g_btdm_dram_available_region[i].start);
-          wlinfo(".bss initialise [0x%08x] - [0x%08x]\n",
+          wlinfo(".bss initialise [0x0x08%" PRIxPTR "] - "
+                 "[0x0x08%" PRIxPTR "]\n",
                  g_btdm_dram_available_region[i].start,
                  g_btdm_dram_available_region[i].end);
         }
@@ -2899,7 +2906,7 @@ int esp32_bt_controller_init(void)
     }
 
   /* Initialize list of interrupt flags to enable chained critical sections
-   * to return sucessfully.
+   * to return successfully.
    */
 
   sq_init(&g_ble_int_flags_free);
@@ -2910,7 +2917,7 @@ int esp32_bt_controller_init(void)
       sq_addlast((sq_entry_t *)&g_ble_int_flags[i], &g_ble_int_flags_free);
     }
 
-#ifdef CONFIG_ESP32_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
 
   /* Initialize interfaces that enable BLE ISRs to run during a
    * SPI flash operation.
@@ -2944,8 +2951,8 @@ int esp32_bt_controller_init(void)
 
   /* overwrite some parameters */
 
-  cfg.controller_task_stack_size = CONFIG_ESP32_BLE_TASK_STACK_SIZE;
-  cfg.controller_task_prio       = CONFIG_ESP32_BLE_TASK_PRIORITY;
+  cfg.controller_task_stack_size = CONFIG_ESPRESSIF_BLE_TASK_STACK_SIZE;
+  cfg.controller_task_prio       = CONFIG_ESPRESSIF_BLE_TASK_PRIORITY;
   cfg.bt_max_sync_conn           = CONFIG_BTDM_CTRL_BR_EDR_MAX_SYNC_CONN_EFF;
   cfg.magic                      = ESP_BT_CONTROLLER_CONFIG_MAGIC_VAL;
 
@@ -3046,6 +3053,12 @@ int esp32_bt_controller_init(void)
   UNUSED(set_div_ret);
 #endif
 
+#if CONFIG_BTDM_CTRL_HCI_UART_FLOW_CTRL_EN
+  sdk_config_set_uart_flow_ctrl_enable(true);
+#else
+  sdk_config_set_uart_flow_ctrl_enable(false);
+#endif
+
 #ifdef CONFIG_PM
   if ((err = esp_timer_create(&create_args, &g_btdm_slp_tmr) != OK))
     {
@@ -3056,7 +3069,7 @@ int esp32_bt_controller_init(void)
   g_pm_lock_acquired = true;
 #endif
 
-#if CONFIG_ESP32_WIFI_BT_COEXIST
+#if CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_init();
 #endif
 
@@ -3154,9 +3167,9 @@ int esp32_bt_controller_enable(esp_bt_mode_t mode)
   esp32_pm_lockacquire();
 #endif
 
-  esp_phy_enable();
+  esp_phy_enable(PHY_MODEM_BT);
 
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_enable();
 #endif
 
@@ -3165,17 +3178,19 @@ int esp32_bt_controller_enable(esp_bt_mode_t mode)
       btdm_controller_enable_sleep(true);
     }
 
-  /* inititalize bluetooth baseband */
+  sdk_config_set_bt_pll_track_enable(true);
+
+  /* initialize bluetooth baseband */
 
   btdm_check_and_init_bb();
 
   ret = btdm_controller_enable(mode);
   if (ret != 0)
     {
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
       coex_disable();
 #endif
-      esp_phy_disable();
+      esp_phy_disable(PHY_MODEM_BT);
 #ifdef CONFIG_PM
       if (g_btdm_allow_light_sleep == false)
         {
@@ -3189,7 +3204,7 @@ int esp32_bt_controller_enable(esp_bt_mode_t mode)
 
   g_btdm_controller_status = ESP_BT_CONTROLLER_STATUS_ENABLED;
 
-  return OK;
+  return esp_wifi_to_errno(ret);
 }
 
 /****************************************************************************
@@ -3222,17 +3237,17 @@ int esp32_bt_controller_disable(void)
       async_wakeup_request(BTDM_ASYNC_WAKEUP_REQ_CTRL_DISA);
       while (btdm_power_state_active() == false)
         {
-          nxsig_usleep(1000);
+          nxsched_usleep(1000);
         }
     }
 
   btdm_controller_disable();
 
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
   coex_disable();
 #endif
 
-  esp_phy_disable();
+  esp_phy_disable(PHY_MODEM_BT);
   g_btdm_controller_status = ESP_BT_CONTROLLER_STATUS_INITED;
 
 #ifdef CONFIG_PM
@@ -3248,7 +3263,7 @@ int esp32_bt_controller_disable(void)
 }
 
 /****************************************************************************
- * Name: esp32_bt_controller_get_status
+ * Name: esp_bt_controller_get_status
  *
  * Description:
  *   Returns the status of the BT Controller
@@ -3261,7 +3276,7 @@ int esp32_bt_controller_disable(void)
  *
  ****************************************************************************/
 
-esp_bt_controller_status_t esp32_bt_controller_get_status(void)
+esp_bt_controller_status_t esp_bt_controller_get_status(void)
 {
   return g_btdm_controller_status;
 }

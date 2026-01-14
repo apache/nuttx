@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/gd32f4/gd32f4xx_gpio.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -250,6 +252,7 @@ EXTERN const uint32_t g_gpio_base[GD32_NGPIO_PORTS];
  * Return value:
  *   OK on success
  *   A negated errno value on invalid port or mode.
+ *
  ****************************************************************************/
 
 int gd32_gpio_config(uint32_t cfgset);

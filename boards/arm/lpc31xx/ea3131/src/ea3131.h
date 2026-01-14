@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/lpc31xx/ea3131/src/ea3131.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -101,7 +103,7 @@ void weak_function lpc31_usbdev_initialize(void);
  * Name: lpc31_usbhost_bootinitialize
  *
  * Description:
- *   Called from lpc31_boardinitialize very early in inialization to setup
+ *   Called from lpc31_boardinitialize very early in initialization to setup
  *   USB host-related GPIO pins for the EA3131 board.
  *
  ****************************************************************************/

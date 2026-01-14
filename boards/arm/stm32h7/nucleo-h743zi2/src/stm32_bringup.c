@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32h7/nucleo-h743zi2/src/stm32_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,6 +41,10 @@
 
 #ifdef CONFIG_STM32H7_FDCAN
 #include "stm32_fdcan_sock.h"
+#endif
+
+#ifdef CONFIG_SYSTEMTICK_HOOK
+#include <semaphore.h>
 #endif
 
 #include "nucleo-h743zi2.h"
@@ -258,3 +264,13 @@ int stm32_bringup(void)
 
   return OK;
 }
+
+#ifdef CONFIG_SYSTEMTICK_HOOK
+
+sem_t g_waitsem;
+
+void board_timerhook(void)
+{
+  (void)sem_post(&g_waitsem);
+}
+#endif

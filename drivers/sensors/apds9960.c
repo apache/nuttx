@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/apds9960.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -45,14 +47,6 @@
 #include <nuttx/sensors/apds9960.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_APDS9960)
-
-/****************************************************************************
- * Pre-process Definitions
- ****************************************************************************/
-
-#ifndef CONFIG_APDS9960_I2C_FREQUENCY
-#  define CONFIG_APDS9960_I2C_FREQUENCY 400000
-#endif
 
 /****************************************************************************
  * Private Types
@@ -991,7 +985,7 @@ static int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
     {
       /* Wait some time to collect next batch of FIFO data */
 
-      nxsig_usleep(FIFO_PAUSE_TIME);
+      nxsched_usleep(FIFO_PAUSE_TIME);
 
       /* Get the contents of the STATUS register. Is data still valid? */
 
@@ -1023,7 +1017,7 @@ static int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
             {
               bytes_read = fifo_level * 4;
               ret = apds9960_i2c_read(priv, APDS9960_GFIFO_U,
-                                      (uint8_t *) fifo_data, bytes_read);
+                                      (FAR uint8_t *)fifo_data, bytes_read);
               if (ret < 0)
                 {
                   snerr("ERROR: Failed to read APDS9960_GFIFO_U!\n");
@@ -1087,7 +1081,7 @@ static int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
         {
           /* Determine best guessed gesture and clean up */
 
-          nxsig_usleep(FIFO_PAUSE_TIME);
+          nxsched_usleep(FIFO_PAUSE_TIME);
           apds9960_decodegesture(priv);
           motion = priv->gesture_motion;
 
@@ -1232,7 +1226,7 @@ int apds9960_register(FAR const char *devpath,
 
   /* Wait 100ms */
 
-  nxsig_usleep(100000);
+  nxsched_usleep(100000);
 
   /* Initialize the device (leave RESET) */
 

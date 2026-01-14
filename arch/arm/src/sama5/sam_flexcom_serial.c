@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_flexcom_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1116,7 +1118,7 @@ static bool flexus_txempty(struct uart_dev_s *dev)
  *
  * Description:
  *   Performs the low level Flexcom USART initialization early so that the
- *   Flexcom serial console will be available during bootup.  This must be
+ *   Flexcom serial console will be available during boot up.  This must be
  *   called before flexus_serialinit.
  *
  ****************************************************************************/

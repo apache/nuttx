@@ -1,6 +1,8 @@
 ############################################################################
 # tools/Config.mk
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -93,7 +95,7 @@ else
 
 HOSTCC ?= cc
 HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow
-HOSTCFLAGS += -DHAVE_STRTOK_C=1
+HOSTCFLAGS += -DHAVE_STRTOK_C=1 -DHAVE_STRNDUP=1
 
 ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
 HOSTCFLAGS += -DHOST_CYGWIN=1
@@ -381,6 +383,25 @@ define COMPILED
 	$(ECHO_END)
 endef
 
+# COMPILESWIFT - Default macro to compile one Swift file
+# Example: $(call COMPILESWIFT, in-file, out-file)
+#
+# Depends on these settings defined in board-specific Make.defs file
+# installed at $(TOPDIR)/Make.defs:
+#
+#   SWIFTC - The command to invoke the Swift compiler
+#   SWIFTFLAGS - Options to pass to the Swift compiler
+#
+# '<filename>.swift_SWIFTFLAGS += <options>' may also be used, as an example, to
+# change the options used with the single file <filename>.swift. The same
+# applies mutatis mutandis.
+
+define COMPILESWIFT
+	$(ECHO_BEGIN)"SWIFTC: $1 "
+	$(Q) $(SWIFTC) -c $(SWIFTFLAGS) $($(strip $1)_SWIFTFLAGS) $1 -o $2
+	$(ECHO_END)
+endef
+
 # ASSEMBLE - Default macro to assemble one assembly language file
 # Example: $(call ASSEMBLE, in-file, out-file)
 #
@@ -539,6 +560,18 @@ define COPYFILE
 endef
 endif
 
+# COPYDIR - Copy one directory
+
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+define COPYDIR
+	$(Q) if exist $1 (xcopy /c /q /s /e /y /i $1 $2)
+endef
+else
+define COPYDIR
+	$(Q) cp -fr $1 $2
+endef
+endif
+
 # CATFILE - Cat a list of files
 #
 # USAGE: $(call CATFILE,dest,src1,src2,src3,...)
@@ -587,9 +620,46 @@ define DOWNLOAD
 	$(ECHO_END)
 endef
 
+# CLONE - Git clone repository. Initializes a new Git repository in the
+#         folder on your local machine and populates it with the contents
+#         of the central repository.
+#         The third argument is an storage path. The second argument is used
+#         if it is not provided or is empty.
+# Example: $(call CLONE,$(URL_BASE),$(PATH),$(STORAGE_FOLDER))
+
+define CLONE
+	$(ECHO_BEGIN)"Clone: $(if $3,$3,$2) "
+	if [ -z $3 ]; then \
+		git clone --quiet $1 $2; \
+	else \
+		if [ ! -d $3 ]; then \
+			git clone --quiet $1 $3; \
+		fi; \
+		$(DIRLINK) $3 $2; \
+	fi
+	$(ECHO_END)
+endef
+
+# CHECK_COMMITSHA - Check if the branch contains the commit SHA-1.
+#         Remove the folder if the commit is not present in the branch.
+#         The first argument is the repository folder on the local machine.
+#         The second argument is a unique SHA-1 hash value.
+# Example: $(call CHECK_COMMITSHA,$(GIT_FOLDER),$(COMMIT_SHA-1))
+
+define CHECK_COMMITSHA
+	$(ECHO_BEGIN)"COMMIT SHA-1: $2 "
+	if [ -d $1 ]; then \
+		if ! git -C $1 branch --contains $2 > /dev/null 2>&1; then \
+			echo "Commit is not present removed folder $1 "; \
+			rm -rf $1; \
+		fi \
+	fi
+	$(ECHO_END)
+endef
+
 # CLEAN - Default clean target
 
-ifeq ($(CONFIG_ARCH_COVERAGE),y)
+ifeq ($(CONFIG_COVERAGE_NONE),)
 	EXTRA = *.gcno *.gcda
 endif
 
@@ -714,7 +784,7 @@ else
   CONVERT_PATH = $1
 endif
 
-# Upper/Lower case string, add the `UL` prefix to private function 
+# Upper/Lower case string, add the `UL` prefix to private function
 
 ULPOP = $(wordlist 3,$(words $(1)),$(1))
 ULSUB = $(subst $(word 1,$(1)),$(word 2,$(1)),$(2))

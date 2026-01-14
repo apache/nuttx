@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/hts221.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -50,10 +52,6 @@
 #  define hts221_dbg(x, ...)    _info(x, ##__VA_ARGS__)
 #else
 #  define hts221_dbg(x, ...)    sninfo(x, ##__VA_ARGS__)
-#endif
-
-#ifndef CONFIG_HTS221_I2C_FREQUENCY
-#  define CONFIG_HTS221_I2C_FREQUENCY 400000
 #endif
 
 #define HTS221_WHO_AM_I             0x0f
@@ -126,12 +124,12 @@ static int hts221_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 struct hts221_dev_s
 {
-  struct i2c_master_s *i2c;
+  FAR struct i2c_master_s *i2c;
   uint8_t addr;
-  hts221_config_t *config;
+  FAR hts221_config_t *config;
   mutex_t devlock;
   volatile bool int_pending;
-  struct pollfd *fds[CONFIG_HTS221_NPOLLWAITERS];
+  FAR struct pollfd *fds[CONFIG_HTS221_NPOLLWAITERS];
   struct
   {
     int16_t t0_out;
@@ -403,7 +401,7 @@ static int hts221_config_ctrl_reg2(FAR struct hts221_dev_s *priv,
               break;
             }
 
-          nxsig_usleep(10 * 1000);
+          nxsched_usleep(10 * 1000);
           retries--;
         }
       while (retries);
@@ -756,7 +754,7 @@ static int hts221_load_calibration_data(FAR struct hts221_dev_s *priv)
    * they are a good candidate to be added to entropy pool.
    */
 
-  up_rngaddentropy(RND_SRC_HW, (uint32_t *)&priv->calib,
+  up_rngaddentropy(RND_SRC_HW, (FAR uint32_t *)&priv->calib,
                    sizeof(priv->calib) / sizeof(uint32_t));
 
   return OK;
@@ -1124,7 +1122,7 @@ static int hts221_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */

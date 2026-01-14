@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/rp2040/rp2040_i2c_slave.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -152,6 +154,7 @@ static int i2c_interrupt(int irq, void *context, void *arg)
   rp2040_i2c_slave_t *priv = (rp2040_i2c_slave_t *)arg;
   uint32_t  data_cmd;
   uint32_t  state;
+  int length;
 
   state = getreg32(RP2040_I2C_IC_INTR_STAT(priv->controller));
 
@@ -159,7 +162,8 @@ static int i2c_interrupt(int irq, void *context, void *arg)
 
   if (state & RP2040_I2C_IC_INTR_STAT_R_RD_REQ)
     {
-      if (priv->tx_buf_ptr < priv->tx_buf_end)
+      length = priv->tx_buf_end - priv->tx_buf_ptr;
+      if (length > 0)
         {
           while (priv->tx_buf_ptr < priv->tx_buf_end
                  &&   getreg32(RP2040_I2C_IC_TXFLR(priv->controller))
@@ -167,6 +171,11 @@ static int i2c_interrupt(int irq, void *context, void *arg)
             {
               putreg32(*priv->tx_buf_ptr++,
                        RP2040_I2C_IC_DATA_CMD(priv->controller));
+            }
+
+          if (priv->callback != NULL)
+            {
+              priv->callback(priv, I2CS_TX_COMPLETE, length);
             }
         }
       else
@@ -203,7 +212,8 @@ static int i2c_interrupt(int irq, void *context, void *arg)
     {
       if (priv->callback != NULL && priv->rx_buf_ptr > priv->rx_buffer)
         {
-          priv->callback(priv, priv->rx_buf_ptr - priv->rx_buffer);
+          priv->callback(priv, I2CS_RX_COMPLETE,
+                         priv->rx_buf_ptr - priv->rx_buffer);
           priv->rx_buf_ptr = priv->rx_buffer;
         }
 
@@ -216,7 +226,8 @@ static int i2c_interrupt(int irq, void *context, void *arg)
     {
       if (priv->callback != NULL && priv->rx_buf_ptr > priv->rx_buffer)
         {
-          priv->callback(priv, priv->rx_buf_ptr - priv->rx_buffer);
+          priv->callback(priv, I2CS_RX_COMPLETE,
+                         priv->rx_buf_ptr - priv->rx_buffer);
           priv->rx_buf_ptr = priv->rx_buffer;
         }
 

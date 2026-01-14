@@ -1,14 +1,11 @@
 /****************************************************************************
  * arch/arm/src/nrf52/nrf52_nvmc.c
  *
- *   Copyright (C) 2018 Zglue Inc. All rights reserved.
- *   Author: Levin Li <zhiqiang@zglue.com>
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
- *
- * Ported from the Nordic SDK, this is the original license:
- *
- * Copyright (c) 2012 - 2018, Nordic Semiconductor ASA
- * All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2018 Zglue Inc. All rights reserved.
+ * SPDX-FileCopyrightText: 2012 - 2018, Nordic Semiconductor ASA
+ * SPDX-FileContributor: Levin Li <zhiqiang@zglue.com>
+ * SPDX-FileContributor: Alan Carvalho de Assis <acassis@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -46,8 +43,9 @@
 #include <nuttx/config.h>
 #include <stdbool.h>
 
+#include <arch/barriers.h>
+
 #include "arm_internal.h"
-#include "barriers.h"
 
 #include "hardware/nrf52_ficr.h"
 #include "hardware/nrf52_nvmc.h"
@@ -102,8 +100,7 @@ static inline void wait_for_flash_ready(void)
 
 static inline void nrf_mem_barrier(void)
 {
-  ARM_ISB();
-  ARM_DSB();
+  UP_MB();
 }
 
 /****************************************************************************

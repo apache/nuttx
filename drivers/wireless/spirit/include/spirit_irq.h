@@ -1,8 +1,9 @@
 /******************************************************************************
  * drivers/wireless/spirit/include/spirit_irq.h
  *
- *   Copyright(c) 2015 STMicroelectronics
- *   Author: VMA division - AMS
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: Copyright(c) 2015 STMicroelectronics
+ * SPDX-FileContributor: Author: VMA division - AMS
  *   Version 3.2.2 08-July-2015
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,7 +55,7 @@
  * microcontroller EXTI line.  Then, the user can check which IRQ has been
  * raised using two different ways.
  *
- * On the ISR of the EXTI line phisically linked to the Spirit pin
+ * On the ISR of the EXTI line physically linked to the Spirit pin
  * configured for IRQ:
  *
  * Check only one Spirit IRQ (because the Spirit IRQ status register

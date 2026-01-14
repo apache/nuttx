@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/lpc31xx/ea3152/src/lpc31_fillpage.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -257,7 +259,8 @@ static inline void lpc31_initsrc(void)
 
       /* Now mount the file system */
 
-      snprintf(devname, 16, "/dev/mmcsd%d", CONFIG_EA3152_PAGING_MINOR);
+      snprintf(devname, sizeof(devname), "/dev/mmcsd%d",
+               CONFIG_EA3152_PAGING_MINOR);
       ret = nx_mount(devname, CONFIG_EA3152_PAGING_MOUNTPT, "vfat",
                      MS_RDONLY, NULL);
       DEBUGASSERT(ret == OK);

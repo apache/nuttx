@@ -1,6 +1,11 @@
 /****************************************************************************
  * include/crypto/cryptodev.h
- * $OpenBSD: cryptodev.h,v 1.58 2013/10/31 10:32:38 mikeb Exp $
+ *
+ * SPDX-License-Identifier: OAR AND BSD-2 Clause
+ * SPDX-FileCopyrightText: 2000 Angelos D. Keromytis
+ * SPDX-FileCopyrightText: 2001 Theo de Raadt
+ * SPDX-FileContributor: Angelos D. Keromytis (angelos@cis.upenn.edu)
+ *
  * The author of this code is Angelos D. Keromytis (angelos@cis.upenn.edu)
  *
  * This code was written by Angelos D. Keromytis in Athens, Greece, in
@@ -56,6 +61,7 @@
  ****************************************************************************/
 
 #include <sys/types.h>
+#include <sys/queue.h>
 
 /* Some initial values */
 
@@ -117,13 +123,18 @@
 #define CRYPTO_CHACHA20_POLY1305 24
 #define CRYPTO_CHACHA20_POLY1305_MAC 25
 #define CRYPTO_MD5              26
-#define CRYPTO_SHA1             27
-#define CRYPTO_SHA2_224         28
-#define CRYPTO_SHA2_256         29
-#define CRYPTO_SHA2_384         30
-#define CRYPTO_SHA2_512         31
-#define CRYPTO_ESN              32 /* Support for Extended Sequence Numbers */
-#define CRYPTO_ALGORITHM_MAX    32 /* Keep updated */
+#define CRYPTO_POLY1305         27
+#define CRYPTO_RIPEMD160        28
+#define CRYPTO_SHA1             29
+#define CRYPTO_SHA2_224         30
+#define CRYPTO_SHA2_256         31
+#define CRYPTO_SHA2_384         32
+#define CRYPTO_SHA2_512         33
+#define CRYPTO_CRC32            34
+#define CRYPTO_AES_CMAC         35
+#define CRYPTO_AES_128_CMAC     36
+#define CRYPTO_ESN              37 /* Support for Extended Sequence Numbers */
+#define CRYPTO_ALGORITHM_MAX    37 /* Keep updated */
 
 /* Algorithm flags */
 
@@ -138,6 +149,7 @@ struct cryptoini
   int cri_alg;       /* Algorithm to use */
   int cri_klen;      /* Key length, in bits */
   int cri_rnd;       /* Algorithm rounds, where relevant */
+  int cri_sid;
   caddr_t cri_key;   /* key to use */
   union
   {
@@ -166,6 +178,7 @@ struct cryptodesc
   #define CRD_F_COMP 0x10          /* Set when doing compression */
   #define CRD_F_ESN 0x20           /* Set when ESN field is provided */
   #define CRD_F_UPDATE 0x40        /* Set just update source */
+  #define CRD_F_UPDATE_AAD 0x80    /* Set just update aad */
 
   struct cryptoini CRD_INI; /* Initialization/context data */
   #define crd_esn CRD_INI.cri_esn
@@ -196,12 +209,15 @@ struct cryptop
                       * value on future requests.
                       */
   int crp_flags;
+  int crp_aadlen;
 
 #define CRYPTO_F_IMBUF 0x0001   /* Input/output are mbuf chains, otherwise contig */
 #define CRYPTO_F_IOV 0x0002     /* Input/output are uio */
 #define CRYPTO_F_REL 0x0004     /* Must return data in same place */
 #define CRYPTO_F_NOQUEUE 0x0008 /* Don't use crypto queue/thread */
 #define CRYPTO_F_DONE 0x0010    /* request completed */
+#define CRYPTO_F_CBIMM 0x0020   /* Do callback immediately */
+#define CRYPTO_F_CANCEL 0x0040  /* Cancel the current crypto operation */
 
   FAR void *crp_buf;               /* Data to be processed */
   FAR void *crp_opaque;            /* Opaque pointer, passed along */
@@ -212,6 +228,7 @@ struct cryptop
   caddr_t crp_mac;
   caddr_t crp_dst;
   caddr_t crp_iv;
+  caddr_t crp_aad;
 };
 
 #define CRYPTO_BUF_IOV 0x1
@@ -236,27 +253,36 @@ struct crypt_kop
   u_int crk_status;    /* return status */
   u_short crk_iparams; /* # of input parameters */
   u_short crk_oparams; /* # of output parameters */
-  u_int crk_pad1;
+  u_int crk_flags;
   struct crparam crk_param[CRK_MAXPARAM];
+  uint32_t crk_reqid;
 };
 
-#define CRK_MOD_EXP           0
-#define CRK_MOD_EXP_CRT       1
-#define CRK_DSA_SIGN          2
-#define CRK_DSA_VERIFY        3
-#define CRK_DH_COMPUTE_KEY    4
-#define CRK_RSA_PCKS15_VERIFY 5
-#define CRK_ALGORITHM_MAX     5 /* Keep updated */
+#define CRK_MOD_EXP                0
+#define CRK_MOD_EXP_CRT            1
+#define CRK_DSA_SIGN               2
+#define CRK_DSA_VERIFY             3
+#define CRK_DH_MAKE_PUBLIC         4
+#define CRK_DH_COMPUTE_KEY         5
+#define CRK_RSA_PKCS15_VERIFY      6
+#define CRK_ECDSA_SECP256R1_SIGN   7
+#define CRK_ECDSA_SECP256R1_VERIFY 8
+#define CRK_ECDSA_SECP256R1_GENKEY 9
+#define CRK_ALGORITHM_MAX          9 /* Keep updated */
 
-#define CRF_MOD_EXP           (1 << CRK_MOD_EXP)
-#define CRF_MOD_EXP_CRT       (1 << CRK_MOD_EXP_CRT)
-#define CRF_DSA_SIGN          (1 << CRK_DSA_SIGN)
-#define CRF_DSA_VERIFY        (1 << CRK_DSA_VERIFY)
-#define CRF_DH_COMPUTE_KEY    (1 << CRK_DH_COMPUTE_KEY)
-#define CRF_RSA_PCKS15_VERIFY (1 << CRK_RSA_PCKS15_VERIFY)
+#define CRF_MOD_EXP                (1 << CRK_MOD_EXP)
+#define CRF_MOD_EXP_CRT            (1 << CRK_MOD_EXP_CRT)
+#define CRF_DSA_SIGN               (1 << CRK_DSA_SIGN)
+#define CRF_DSA_VERIFY             (1 << CRK_DSA_VERIFY)
+#define CRF_DH_COMPUTE_KEY         (1 << CRK_DH_COMPUTE_KEY)
+#define CRF_RSA_PKCS15_VERIFY      (1 << CRK_RSA_PKCS15_VERIFY)
+#define CRF_ECDSA_SECP256R1_SIGN   (1 << CRK_ECDSA_SECP256R1_SIGN)
+#define CRF_ECDSA_SECP256R1_VERIFY (1 << CRK_ECDSA_SECP256R1_VERIFY)
+#define CRF_ECDSA_SECP256R1_GENKEY (1 << CRK_ECDSA_SECP256R1_GENKEY)
 
 struct cryptkop
 {
+  TAILQ_ENTRY(cryptkop) krp_next;
   u_int krp_op;        /* ie. CRK_MOD_EXP or other */
   u_int krp_status;    /* return status */
   u_short krp_iparams; /* # of input parameters */
@@ -264,6 +290,10 @@ struct cryptkop
   uint32_t krp_hid;
   struct crparam krp_param[CRK_MAXPARAM]; /* kvm */
   CODE int (*krp_callback)(FAR struct cryptkop *);
+
+  FAR struct fcrypt *krp_fcr;
+  u_int krp_flags;     /* same as cryptop */
+  uint32_t krp_reqid;  /* distinguish tasks in asynchronous calling */
 };
 
 /* Crypto capabilities structure */
@@ -326,12 +356,19 @@ struct crypt_op
                                    * be used, and the subsequent iv will be saved
                                    * in the driver.
                                    */
+#define COP_FLAG_UPDATE_AAD (1 << 1)
+/* Indicates that this operation processes aad
+ * (Additional Authenticated Data), which is only used
+ * in the authentication algorithm.
+ */
 
   uint16_t flags;
   unsigned len;
+  unsigned aadlen;
   caddr_t src, dst;   /* become iov[] inside kernel */
   caddr_t mac;        /* must be big enough for chosen MAC */
   caddr_t iv;
+  caddr_t aad;
 };
 
 /* hamc buffer, software & hardware need it */
@@ -353,15 +390,17 @@ extern const uint8_t hmac_opad_buffer[HMAC_MAX_BLOCK_LEN];
 #define CIOCFSESSION            102
 #define CIOCCRYPT               103
 #define CIOCKEY                 104
-#define CIOCASYMFEAT            105
+#define CIOCKEYRET              105
+#define CIOCASYMFEAT            106
 
 int crypto_newsession(FAR uint64_t *, FAR struct cryptoini *, int);
 int crypto_freesession(uint64_t);
 int crypto_register(uint32_t, FAR int *,
-                    CODE int (*)(uint32_t *, struct cryptoini *),
+                    CODE int (*)(FAR uint32_t *, FAR struct cryptoini *),
                     CODE int (*)(uint64_t),
                     CODE int (*)(FAR struct cryptop *));
-int crypto_kregister(uint32_t, FAR int *, CODE int (*)(struct cryptkop *));
+int crypto_kregister(uint32_t, FAR int *,
+                     CODE int (*)(FAR struct cryptkop *));
 int crypto_unregister(uint32_t, int);
 int crypto_get_driverid(uint8_t);
 int crypto_invoke(FAR struct cryptop *);

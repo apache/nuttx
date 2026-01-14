@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/sama5/jupiter-nano/src/sam_nandflash.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
  *  this work for additional information regarding copyright ownership.  The
@@ -170,12 +172,15 @@ int sam_nand_automount(int minor)
         }
 
 #if defined(CONFIG_SAMA5D3XPLAINED_NAND_FTL)
-      /* Use the FTL layer to wrap the MTD driver as a block driver */
+      /* Register the MTD driver */
 
-      ret = ftl_initialize(NAND_MINOR, mtd);
+      char path[32];
+      snprintf(path, sizeof(path), "/dev/mtdblock%d", NAND_MINOR);
+      ret = register_mtddriver(path, mtd, 0755, NULL);
       if (ret < 0)
         {
-          ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          ferr("ERROR: Failed to register the MTD driver %s, ret %d\n",
+               path, ret);
           return ret;
         }
 

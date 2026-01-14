@@ -100,13 +100,13 @@
 #define ESP32_MAX_PRIORITY     5
 #define ESP32_PRIO_INDEX(p)    ((p) - ESP32_MIN_PRIORITY)
 
-#ifdef CONFIG_ESP32_WIFI
+#ifdef CONFIG_ESPRESSIF_WIFI
 #  define ESP32_WIFI_RESERVE_INT  (1 << ESP32_CPUINT_MAC)
 #else
 #  define ESP32_WIFI_RESERVE_INT  0
 #endif
 
-#ifdef CONFIG_ESP32_BLE
+#ifdef CONFIG_ESPRESSIF_BLE
 #  define ESP32_BLE_RESERVE_INT ((1 << ESP32_PERIPH_BT_BB_NMI) | \
                                  (1 << ESP32_PERIPH_RWBLE_IRQ) | \
                                  (1 << ESP32_PERIPH_RWBT_NMI))
@@ -362,7 +362,7 @@ static int esp32_getcpuint(int cpu, uint32_t intmask)
 
   if (ret >= 0)
     {
-      xtensa_enable_cpuint(&g_intenable[cpu], 1ul << ret);
+      xtensa_enable_cpuint(&g_intenable[cpu], ret);
     }
 
   return ret;
@@ -393,8 +393,7 @@ static int esp32_alloc_cpuint(int cpu, int priority, int type)
 
   DEBUGASSERT(priority >= ESP32_MIN_PRIORITY &&
               priority <= ESP32_MAX_PRIORITY);
-  DEBUGASSERT(type == ESP32_CPUINT_LEVEL ||
-              type == ESP32_CPUINT_EDGE);
+  DEBUGASSERT(type & ESP32_CPUINT_TRIGGER_MASK);
 
   if ((type & (ESP32_CPUINT_LEVEL | ESP32_CPUINT_EDGE)) == 0)
     {
@@ -448,7 +447,7 @@ static void esp32_free_cpuint(int cpuint)
   bitmask = 1ul << cpuint;
 
 #ifdef CONFIG_SMP
-  if (up_cpu_index() != 0)
+  if (this_cpu() != 0)
     {
       freeints = &g_cpu1_freeints;
     }
@@ -521,11 +520,11 @@ void up_irqinitialize(void)
   g_irqmap[XTENSA_IRQ_SWINT] = IRQ_MKMAP(0, ESP32_CPUINT_SOFTWARE1);
   g_irqmap[XTENSA_IRQ_SWINT] = IRQ_MKMAP(1, ESP32_CPUINT_SOFTWARE1);
 
-#ifdef CONFIG_ESP32_WIFI
+#ifdef CONFIG_ESPRESSIF_WIFI
   g_irqmap[ESP32_IRQ_MAC] = IRQ_MKMAP(0, ESP32_CPUINT_MAC);
 #endif
 
-#ifdef CONFIG_ESP32_BLE
+#ifdef CONFIG_ESPRESSIF_BLE
   g_irqmap[ESP32_IRQ_BT_BB_NMI] = IRQ_MKMAP(0, ESP32_PERIPH_BT_BB_NMI);
   g_irqmap[ESP32_IRQ_RWBT_NMI]  = IRQ_MKMAP(0, ESP32_PERIPH_RWBT_NMI);
   g_irqmap[ESP32_IRQ_RWBLE_IRQ] = IRQ_MKMAP(0, ESP32_PERIPH_RWBLE_IRQ);
@@ -537,18 +536,18 @@ void up_irqinitialize(void)
 
   /* Reserve CPU0 interrupt for some special drivers */
 
-#ifdef CONFIG_ESP32_WIFI
+#ifdef CONFIG_ESPRESSIF_WIFI
   g_cpu0_intmap[ESP32_CPUINT_MAC] = CPUINT_ASSIGN(ESP32_IRQ_MAC);
-  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32_CPUINT_MAC);
+  xtensa_enable_cpuint(&g_intenable[0], ESP32_CPUINT_MAC);
 #endif
 
-#ifdef CONFIG_ESP32_BLE
+#ifdef CONFIG_ESPRESSIF_BLE
   g_cpu0_intmap[ESP32_PERIPH_BT_BB_NMI] = CPUINT_ASSIGN(ESP32_IRQ_BT_BB_NMI);
   g_cpu0_intmap[ESP32_PERIPH_RWBT_NMI]  = CPUINT_ASSIGN(ESP32_IRQ_RWBT_NMI);
   g_cpu0_intmap[ESP32_PERIPH_RWBLE_IRQ] = CPUINT_ASSIGN(ESP32_IRQ_RWBLE_IRQ);
-  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32_PERIPH_BT_BB_NMI);
-  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32_PERIPH_RWBT_NMI);
-  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32_PERIPH_RWBLE_IRQ);
+  xtensa_enable_cpuint(&g_intenable[0], ESP32_PERIPH_BT_BB_NMI);
+  xtensa_enable_cpuint(&g_intenable[0], ESP32_PERIPH_RWBT_NMI);
+  xtensa_enable_cpuint(&g_intenable[0], ESP32_PERIPH_RWBLE_IRQ);
 #endif
 
   /* Attach and enable internal interrupts */
@@ -574,16 +573,13 @@ void up_irqinitialize(void)
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And finally, enable interrupts.  Also clears PS.EXCM */
 
+  xtensa_color_intstack();
   up_irq_enable();
 #endif
 
   /* Attach the software interrupt */
 
-  irq_attach(XTENSA_IRQ_SWINT, (xcpt_t)xtensa_swint, NULL);
-
-  /* Enable the software interrupt. */
-
-  up_enable_irq(XTENSA_IRQ_SWINT);
+  irq_attach(XTENSA_IRQ_SYSCALL, xtensa_swint, NULL);
 }
 
 /****************************************************************************
@@ -616,7 +612,7 @@ void up_disable_irq(int irq)
        */
 
 #ifdef CONFIG_SMP
-      int me = up_cpu_index();
+      int me = this_cpu();
       if (me != cpu)
         {
           /* It was the other CPU that enabled this interrupt. */
@@ -625,7 +621,7 @@ void up_disable_irq(int irq)
         }
 #endif
 
-      xtensa_disable_cpuint(&g_intenable[cpu], 1ul << cpuint);
+      xtensa_disable_cpuint(&g_intenable[cpu], cpuint);
     }
   else
     {
@@ -677,11 +673,11 @@ void up_enable_irq(int irq)
        * we are just overwriting the cpu part of the map.
        */
 
-      int cpu = up_cpu_index();
+      int cpu = this_cpu();
 
       /* Enable the CPU interrupt now for internal CPU. */
 
-      xtensa_enable_cpuint(&g_intenable[cpu], (1ul << cpuint));
+      xtensa_enable_cpuint(&g_intenable[cpu], cpuint);
     }
   else
     {
@@ -704,7 +700,7 @@ void up_enable_irq(int irq)
 
       if (isr_in_iram && handler && !esp32_ptr_iram(handler))
         {
-          irqerr("Interrupt handler isn't in IRAM (%08" PRIx32 ")",
+          irqerr("Interrupt handler isn't in IRAM (0x08%" PRIx16 ")",
                  (intptr_t)handler);
           PANIC();
         }
@@ -782,7 +778,7 @@ int esp32_cpuint_initialize(void)
 #ifdef CONFIG_SMP
   /* Which CPU are we initializing */
 
-  cpu = up_cpu_index();
+  cpu = this_cpu();
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
 #endif
 
@@ -1060,7 +1056,7 @@ int esp32_getcpuint_from_irq(int irq, int *cpu)
  *
  ****************************************************************************/
 
-uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs)
+uint32_t *xtensa_int_decode(uint32_t *cpuints, uint32_t *regs)
 {
   uint8_t *intmap;
   uint32_t mask;
@@ -1073,7 +1069,7 @@ uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs)
 
   /* Select PRO or APP CPU interrupt mapping table */
 
-  cpu = up_cpu_index();
+  cpu = this_cpu();
 
 #ifdef CONFIG_SMP
   if (cpu != 0)
@@ -1089,15 +1085,15 @@ uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs)
   /* Skip over zero bits, eight at a time */
 
   for (bit = 0, mask = 0xff;
-       bit < ESP32_NCPUINTS && (cpuints & mask) == 0;
+       bit < ESP32_NCPUINTS && (cpuints[0] & mask) == 0;
        bit += 8, mask <<= 8);
 
   /* Process each pending CPU interrupt */
 
-  for (; bit < ESP32_NCPUINTS && cpuints != 0; bit++)
+  for (; bit < ESP32_NCPUINTS && cpuints[0] != 0; bit++)
     {
       mask = 1 << bit;
-      if ((cpuints & mask) != 0)
+      if ((cpuints[0] & mask) != 0)
         {
           /* Extract the IRQ number from the mapping table */
 
@@ -1119,7 +1115,7 @@ uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs)
 
           /* Clear software or edge-triggered interrupt */
 
-           xtensa_intclear(mask);
+           xtensa_intclear(bit);
 
           /* Dispatch the CPU interrupt.
            *
@@ -1133,7 +1129,7 @@ uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs)
            * we can exit the look early.
            */
 
-          cpuints &= ~mask;
+          cpuints[0] &= ~mask;
         }
     }
 
@@ -1159,12 +1155,14 @@ uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs)
 void esp32_irq_noniram_disable(void)
 {
   irqstate_t irqstate;
+  uint32_t mask;
+  int bit;
   int cpu;
   uint32_t oldint;
   uint32_t non_iram_ints;
 
   irqstate = enter_critical_section();
-  cpu = up_cpu_index();
+  cpu = this_cpu();
   non_iram_ints = g_non_iram_int_mask[cpu];
 
   ASSERT(!g_non_iram_int_disabled_flag[cpu]);
@@ -1172,7 +1170,14 @@ void esp32_irq_noniram_disable(void)
   g_non_iram_int_disabled_flag[cpu] = true;
   oldint = g_intenable[cpu];
 
-  xtensa_disable_cpuint(&g_intenable[cpu], non_iram_ints);
+  for (bit = 0; bit < ESP32_NCPUINTS; bit++)
+    {
+      mask = 1 << bit;
+      if ((non_iram_ints & mask) != 0)
+        {
+          xtensa_disable_cpuint(&g_intenable[cpu], bit);
+        }
+    }
 
   g_non_iram_int_disabled[cpu] = oldint & non_iram_ints;
 
@@ -1196,18 +1201,27 @@ void esp32_irq_noniram_disable(void)
 void esp32_irq_noniram_enable(void)
 {
   irqstate_t irqstate;
+  uint32_t mask;
+  int bit;
   int cpu;
   uint32_t non_iram_ints;
 
   irqstate = enter_critical_section();
-  cpu = up_cpu_index();
+  cpu = this_cpu();
   non_iram_ints = g_non_iram_int_disabled[cpu];
 
   ASSERT(g_non_iram_int_disabled_flag[cpu]);
 
   g_non_iram_int_disabled_flag[cpu] = false;
 
-  xtensa_enable_cpuint(&g_intenable[cpu], non_iram_ints);
+  for (bit = 0; bit < ESP32_NCPUINTS; bit++)
+    {
+      mask = 1 << bit;
+      if ((non_iram_ints & mask) != 0)
+        {
+          xtensa_enable_cpuint(&g_intenable[cpu], bit);
+        }
+    }
 
   leave_critical_section(irqstate);
 }

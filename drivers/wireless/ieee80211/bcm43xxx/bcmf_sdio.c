@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/wireless/ieee80211/bcm43xxx/bcmf_sdio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -169,7 +171,7 @@ int bcmf_sdio_kso_enable(FAR struct bcmf_sdio_dev_s *sbus, bool enable)
               return ret;
             }
 
-          nxsig_usleep(100 * 1000);
+          nxsched_usleep(100 * 1000);
           ret = bcmf_read_reg(sbus, 1, SBSDIO_FUNC1_SLEEPCSR, &value);
           if (ret != OK)
             {
@@ -239,7 +241,7 @@ int bcmf_sdio_bus_sleep(FAR struct bcmf_sdio_dev_s *sbus, bool sleep)
 
           /* Wait for High Throughput clock */
 
-          nxsig_usleep(100 * 1000);
+          nxsched_usleep(100 * 1000);
           ret = bcmf_read_reg(sbus, 1, SBSDIO_FUNC1_CHIPCLKCSR, &value);
 
           if (ret != OK)
@@ -352,7 +354,7 @@ int bcmf_probe(FAR struct bcmf_sdio_dev_s *sbus)
 #endif
 
   SDIO_CLOCK(sbus->sdio_dev, CLOCK_SD_TRANSFER_4BIT);
-  nxsig_usleep(BCMF_CLOCK_SETUP_DELAY_MS * 1000);
+  nxsched_usleep(BCMF_CLOCK_SETUP_DELAY_MS * 1000);
 
   /* Enable bus FN1 */
 
@@ -394,7 +396,7 @@ int bcmf_businitialize(FAR struct bcmf_sdio_dev_s *sbus)
   loops = 10;
   while (--loops > 0)
     {
-      nxsig_usleep(10 * 1000);
+      nxsched_usleep(10 * 1000);
       ret = bcmf_read_reg(sbus, 1, SBSDIO_FUNC1_CHIPCLKCSR, &value);
 
       if (ret != OK)
@@ -465,7 +467,7 @@ int bcmf_bus_setup_interrupts(FAR struct bcmf_sdio_dev_s *sbus)
 
   /* Configure gpio interrupt pin */
 
-  bcmf_board_setup_oob_irq(sbus->minor, bcmf_oob_irq, (void *)sbus);
+  bcmf_board_setup_oob_irq(sbus->minor, bcmf_oob_irq, (FAR void *)sbus);
 
   /* Enable function 2 interrupt */
 
@@ -538,12 +540,12 @@ int bcmf_hwinitialize(FAR struct bcmf_sdio_dev_s *sbus)
   /* Reset device */
 
   bcmf_board_reset(sbus->minor, true);
-  nxsig_usleep(BCMF_DEVICE_RESET_DELAY_MS * 1000);
+  nxsched_usleep(BCMF_DEVICE_RESET_DELAY_MS * 1000);
   bcmf_board_reset(sbus->minor, false);
 
   /* Wait for device to start */
 
-  nxsig_usleep(BCMF_DEVICE_START_DELAY_MS * 1000);
+  nxsched_usleep(BCMF_DEVICE_START_DELAY_MS * 1000);
 
   return OK;
 }
@@ -878,7 +880,7 @@ int bcmf_bus_sdio_active(FAR struct bcmf_dev_s *priv, bool active)
       goto exit_uninit_hw;
     }
 
-  nxsig_usleep(100 * 1000);
+  nxsched_usleep(100 * 1000);
 
   ret = bcmf_bus_setup_interrupts(sbus);
   if (ret != OK)
@@ -895,6 +897,7 @@ int bcmf_bus_sdio_active(FAR struct bcmf_dev_s *priv, bool active)
 exit_uninit_hw:
   sbus->ready = false;
   bcmf_hwuninitialize(sbus);
+  sbus->tx_seq = 0;
 
   return ret;
 }
@@ -965,7 +968,7 @@ int bcmf_sdio_thread(int argc, char **argv)
 
   /*  FIXME wait for the chip to be ready to receive commands */
 
-  nxsig_usleep(50 * 1000);
+  nxsched_usleep(50 * 1000);
 
   while (true)
     {

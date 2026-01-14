@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/bmp180_base.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -18,8 +20,6 @@
  *
  ****************************************************************************/
 
-/* Character driver for the Freescale BMP1801 Barometer Sensor */
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -29,23 +29,7 @@
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_BMP180)
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -122,7 +106,7 @@ uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
 
   /* Read register */
 
-  ret = i2c_read(priv->i2c, &config, (uint8_t *)&regval, 2);
+  ret = i2c_read(priv->i2c, &config, (FAR uint8_t *)&regval, 2);
   if (ret < 0)
     {
       snerr("ERROR: i2c_read failed: %d\n", ret);
@@ -165,7 +149,7 @@ void bmp180_putreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr,
 
   /* Write the register address and value */
 
-  ret = i2c_write(priv->i2c, &config, (uint8_t *) &data, 2);
+  ret = i2c_write(priv->i2c, &config, (FAR uint8_t *)&data, 2);
   if (ret < 0)
     {
       snerr("ERROR: i2c_write failed: %d\n", ret);
@@ -275,7 +259,7 @@ void bmp180_read_press_temp(FAR struct bmp180_dev_s *priv)
 
   /* Wait 5ms */
 
-  nxsig_usleep(5000);
+  nxsched_usleep(5000);
 
   /* Read temperature */
 
@@ -287,7 +271,7 @@ void bmp180_read_press_temp(FAR struct bmp180_dev_s *priv)
 
   /* Delay 25.5ms (to OverSampling 8X) */
 
-  nxsig_usleep(25500);
+  nxsched_usleep(25500);
 
   /* Read pressure */
 

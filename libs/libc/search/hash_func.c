@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/search/hash_func.c
  *
- * Copyright (c) 1990, 1993
- * The Regents of the University of California.  All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-UC
+ * SPDX-FileCopyrightText: 1990, 1993 The Regents of the University of California.
  *
  * This code is derived from software contributed to Berkeley by
  * Margo Seltzer.

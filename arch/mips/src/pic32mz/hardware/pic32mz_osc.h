@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/mips/src/pic32mz/hardware/pic32mz_osc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -148,7 +150,7 @@
 
 #define SPLLCON_PLLMULT_SHIFT    (16)      /* Bits 16-22 <6:0>: System PLL Multiplier bits */
 #define SPLLCON_PLLMULT_MASK     (0x7f << SPLLCON_PLLMULT_SHIFT)
-#  define SPLLCON_PLLMULT(n)     ((uint32_t)((n)-1) << SPLLCON_PLLMULT_SHIFT) /* Muliply by n, n=1..128 */
+#  define SPLLCON_PLLMULT(n)     ((uint32_t)((n)-1) << SPLLCON_PLLMULT_SHIFT) /* Multiply by n, n=1..128 */
 
 #define SPLLCON_PLLODIV_SHIFT    (24)      /* Bits 24-26: System PLL Output Clock Divider bits */
 #define SPLLCON_PLLODIV_MASK     (7 << SPLLCON_PLLODIV_SHIFT)

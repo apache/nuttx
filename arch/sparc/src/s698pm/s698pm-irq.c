@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sparc/src/s698pm/s698pm-irq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -143,6 +145,7 @@ void up_irqinitialize(void)
   /* And finally, enable cpu interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
+  sparc_color_intstack();
   up_irq_enable();
 #endif
 }
@@ -170,7 +173,7 @@ int s698pm_cpuint_initialize(void)
 #ifdef CONFIG_SMP
   /* Which CPU are we initializing */
 
-  cpu = up_cpu_index();
+  cpu = this_cpu();
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
 #endif
 
@@ -185,7 +188,7 @@ int s698pm_cpuint_initialize(void)
 #if defined CONFIG_SMP
   /* Attach IPI interrupts */
 
-  irq_attach(S698PM_IPI_IRQ, s698pm_pause_handler, NULL);
+  irq_attach(S698PM_IPI_IRQ, s698pm_smp_call_handler, NULL);
 
   (void)s698pm_setup_irq(cpu, S698PM_IPI_IRQ, 0);
 
@@ -228,10 +231,10 @@ int s698pm_setup_irq(int cpu, int irq, int priority)
     }
   else if (irq > S698PM_IRQ_LAST && irq < NR_IRQS)
     {
-      /* Second level interrupt share a IRQ and connnect to a interrupt 14
+      /* Second level interrupt share a IRQ and connect to a interrupt 14
        * of first level interrupt(that is IRQ 0x1E), We extend Second level
        * interrupt to IRQ 0x100~0x10F. because first level interrupt in the
-       * interrupt reister is bit 0~15 and second level interrupt is bit 16
+       * interrupt register is bit 0~15 and second level interrupt is bit 16
        * ~31, so cpuint of second level interrupt is irq - 256 +
        * S698PM_EXTENDED_START
        */

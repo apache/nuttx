@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/nat/ipv6_nat.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -627,6 +629,8 @@ ipv6_nat_outbound_internal(FAR struct net_driver_s *dev,
 void ipv6_nat_inbound(FAR struct net_driver_s *dev,
                       FAR struct ipv6_hdr_s *ipv6)
 {
+  nat_lock();
+
   /* We only process packets from NAT device and targeting at the address
    * assigned to the device.
    */
@@ -636,6 +640,8 @@ void ipv6_nat_inbound(FAR struct net_driver_s *dev,
     {
       ipv6_nat_inbound_internal(ipv6, NAT_MANIP_DST);
     }
+
+  nat_unlock();
 }
 
 /****************************************************************************
@@ -653,7 +659,7 @@ void ipv6_nat_inbound(FAR struct net_driver_s *dev,
  * Returned Value:
  *   Zero is returned if NAT is successfully applied, or is not enabled for
  *   this packet;
- *   A negated errno value is returned if error occured.
+ *   A negated errno value is returned if error occurred.
  *
  ****************************************************************************/
 
@@ -661,6 +667,8 @@ int ipv6_nat_outbound(FAR struct net_driver_s *dev,
                       FAR struct ipv6_hdr_s *ipv6,
                       enum nat_manip_type_e manip_type)
 {
+  nat_lock();
+
   /* We only process packets targeting at NAT device but not targeting at the
    * address assigned to the device.
    */
@@ -679,6 +687,7 @@ int ipv6_nat_outbound(FAR struct net_driver_s *dev,
         }
     }
 
+  nat_unlock();
   return OK;
 }
 

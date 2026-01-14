@@ -364,7 +364,7 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
 
           saveenv
 
-     4. If Ethernet Phy has not been detected during former bootup, reset
+     4. If Ethernet Phy has not been detected during former boot up, reset
         the board to reload U-Boot : the Ethernet address and Phy
         initialization shall be ok, now
 
@@ -867,7 +867,7 @@ Configurations
 
          b. Write the DRAMBOOT program binary (nuttx.bin) to a microSD
             card as "boot.bin".  Insert the microSD card into the boar;
-            The ROM Booloader should now boot DRAMBOOT on reset and you
+            The ROM Bootloader should now boot DRAMBOOT on reset and you
             should see this message:
 
               Send Intel HEX file now

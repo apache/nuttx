@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/avr/src/avr/avr_registerdump.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,22 +41,12 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_getusrsp
- ****************************************************************************/
-
-uintptr_t up_getusrsp(void *regs)
-{
-  uint8_t *ptr = regs;
-  return ptr[REG_R13];
-}
-
-/****************************************************************************
  * Name: up_dump_register
  ****************************************************************************/
 
 void up_dump_register(void *dumpregs)
 {
-  volatile uint8_t *regs = dumpregs ? dumpregs : g_current_regs;
+  volatile uint8_t *regs = dumpregs ? dumpregs : up_current_regs();
 
   /* Are user registers available from interrupt processing? */
 
@@ -98,6 +90,11 @@ void up_dump_register(void *dumpregs)
              regs[REG_PC0], regs[REG_PC1],
              regs[REG_PC2], regs[REG_SPH],
              regs[REG_SPL], regs[REG_SREG]);
+#endif
+
+#if defined(REG_RAMPZ)
+      _alert("RAMPZ:  %02x\n",
+             regs[REG_RAMPZ]);
 #endif
     }
 }

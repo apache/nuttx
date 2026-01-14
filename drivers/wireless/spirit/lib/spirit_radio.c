@@ -1,8 +1,9 @@
 /******************************************************************************
  * drivers/wireless/spirit/lib/spirit_radio.c
  *
- *   Copyright(c) 2015 STMicroelectronics
- *   Author: VMA division - AMS
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: Copyright(c) 2015 STMicroelectronics
+ * SPDX-FileContributor: Author: VMA division - AMS
  *   Version 3.2.2 08-July-2015
  *
  * Redistribution and use in source and binary forms, with or without
@@ -124,11 +125,11 @@ static const uint16_t g_vectn_bandwidth[90] =
 
 static const float g_power_factors[5][6] =
 {
-  {-2.11, 25.66, -2.11, 25.66, -2.00, 31.28},   /* 915 */
-  {-2.04, 23.45, -2.04, 23.45, -1.95, 27.66},   /* 868 */
-  {-3.48, 38.45, -1.89, 27.66, -1.92, 30.23},   /* 433 */
-  {-3.27, 35.43, -1.80, 26.31, -1.89, 29.61},   /* 315 */
-  {-4.18, 50.66, -1.80, 30.04, -1.86, 32.22},   /* 169 */
+  { -2.11, 25.66, -2.11, 25.66, -2.00, 31.28 },   /* 915 */
+  { -2.04, 23.45, -2.04, 23.45, -1.95, 27.66 },   /* 868 */
+  { -3.48, 38.45, -1.89, 27.66, -1.92, 30.23 },   /* 433 */
+  { -3.27, 35.43, -1.80, 26.31, -1.89, 29.61 },   /* 315 */
+  { -4.18, 50.66, -1.80, 30.04, -1.86, 32.22 },   /* 169 */
 };
 
 /* It represents the available VCO frequencies */
@@ -224,7 +225,7 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
 
   /* Delay for state transition */
 
-  nxsig_usleep(100);
+  nxsched_usleep(100);
 
   /* Wait for the device to enter STANDBY */
 
@@ -262,7 +263,7 @@ int spirit_radio_initialize(FAR struct spirit_library_s *spirit,
 
   /* Delay for state transition */
 
-  nxsig_usleep(100);
+  nxsched_usleep(100);
 
   /* Make sure that the device becomes READY */
 
@@ -1239,7 +1240,7 @@ int32_t spirit_radio_get_foffset(FAR struct spirit_library_s *spirit)
       offtmp &= 0x0fff;
     }
 
-  fcoffset = *((int16_t *)(&offtmp));
+  fcoffset = *((FAR int16_t *)(&offtmp));
 
   /* Calculates the frequency offset and return it */
 

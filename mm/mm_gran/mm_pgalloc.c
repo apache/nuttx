@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/mm_gran/mm_pgalloc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -146,6 +148,30 @@ void mm_pgreserve(uintptr_t start, size_t size)
 uintptr_t mm_pgalloc(unsigned int npages)
 {
   return (uintptr_t)gran_alloc(g_pgalloc, (size_t)npages << MM_PGSHIFT);
+}
+
+/****************************************************************************
+ * Name: mm_pgalloc_align
+ *
+ * Description:
+ *   Allocate page memory from the page memory pool.
+ *
+ * Input Parameters:
+ *   npages - The number of pages to allocate, each of size CONFIG_MM_PGSIZE.
+ *   align  - The number of pages to align, each of size CONFIG_MM_PGSIZE.
+ *
+ * Returned Value:
+ *   On success, a non-zero, physical address of the allocated page memory
+ *   is returned.  Zero is returned on failure.  NOTE:  This is an unmapped
+ *   physical address and cannot be used until it is appropriately mapped.
+ *
+ ****************************************************************************/
+
+uintptr_t mm_pgalloc_align(unsigned int npages, unsigned int align)
+{
+  size_t alloc_size = (size_t)npages << MM_PGSHIFT;
+  size_t align_size = (size_t)align << MM_PGSHIFT;
+  return (uintptr_t)gran_alloc_align(g_pgalloc, alloc_size, align_size);
 }
 
 /****************************************************************************

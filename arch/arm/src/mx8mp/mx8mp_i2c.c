@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/mx8mp/mx8mp_i2c.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -541,9 +543,9 @@ static void mx8mp_i2c_set_frequency(struct mx8mp_i2c_s *priv,
 static void mx8mp_i2c_reset_bus(struct mx8mp_i2c_s *priv)
 {
   mx8mp_i2c_disable(priv);
-  nxsig_usleep(50);
+  nxsched_usleep(50);
   mx8mp_i2c_enable(priv);
-  nxsig_usleep(50);
+  nxsched_usleep(50);
 }
 
 /****************************************************************************
@@ -677,7 +679,7 @@ error:
           break;
         }
 
-      nxsig_usleep(10);
+      nxsched_usleep(10);
     }
 
   /* Release access to I2C bus */
@@ -705,7 +707,7 @@ static int mx8mp_i2c_reset(struct i2c_master_s *dev)
 
   mx8mp_i2c_reset_bus(priv);
 
-  /* Release the port for re-use by other clients */
+  /* Release the port for reuse by other clients */
 
   nxmutex_unlock(&priv->lock);
 

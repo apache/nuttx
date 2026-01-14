@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/obstack/lib_obstack_vprintf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,8 +42,8 @@ struct obstack_stream
  * Private Functions
  ****************************************************************************/
 
-static int obstack_puts(FAR struct lib_outstream_s *self,
-    FAR const void *buf, int len)
+static ssize_t obstack_puts(FAR struct lib_outstream_s *self,
+                            FAR const void *buf, size_t len)
 {
   FAR struct obstack_stream *stream = (FAR struct obstack_stream *)self;
 
@@ -54,8 +56,11 @@ static int obstack_puts(FAR struct lib_outstream_s *self,
 
 static void obstack_putc(FAR struct lib_outstream_s *self, int ch)
 {
-  char tmp = ch;
-  obstack_puts(self, &tmp, 1);
+  FAR struct obstack_stream *stream = (FAR struct obstack_stream *)self;
+
+  DEBUGASSERT(self);
+
+  obstack_1grow(stream->h, ch);
 }
 
 /****************************************************************************
@@ -93,5 +98,13 @@ int obstack_vprintf(FAR struct obstack *h, FAR const char *fmt, va_list ap)
   outstream.common.nput = 0;
   outstream.h = h;
 
-  return lib_vsprintf(&outstream.common, fmt, ap);
+  int nbytes = lib_vsprintf(&outstream.common, fmt, ap);
+
+  if (nbytes < 0)
+    {
+      obstack_free(h, obstack_finish(h));
+      return ERROR;
+    }
+
+  return nbytes;
 }

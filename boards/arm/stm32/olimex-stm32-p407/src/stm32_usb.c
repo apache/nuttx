@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/olimex-stm32-p407/src/stm32_usb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -120,7 +122,7 @@ static int usbhost_waiter(int argc, char *argv[])
  * Name: stm32_usb_configure
  *
  * Description:
- *   Called from stm32_usb_configure very early in inialization to setup
+ *   Called from stm32_usb_configure very early in initialization to setup
  *   USB-related GPIO pins for the Olimex STM32 P407 board.
  *
  ****************************************************************************/

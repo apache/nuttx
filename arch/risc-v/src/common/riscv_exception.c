@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_exception.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -65,16 +67,10 @@ static const char *g_reasons_str[RISCV_MAX_EXCEPTION + 1] =
   "Load page fault",
   "Reserved",
   "Store/AMO page fault",
-#if RISCV_MAX_EXCEPTION > 15
+#ifdef CONFIG_ARCH_RV_MACHINE_ISA_1_13
   "Reserved",
-#endif
-#if RISCV_MAX_EXCEPTION > 16
   "Reserved",
-#endif
-#if RISCV_MAX_EXCEPTION > 17
   "Software check",
-#endif
-#if RISCV_MAX_EXCEPTION > 18
   "Hardware error",
 #endif
 #ifdef RISCV_CUSTOM_EXCEPTION_REASONS
@@ -97,7 +93,7 @@ static const char *g_reasons_str[RISCV_MAX_EXCEPTION + 1] =
 int riscv_exception(int mcause, void *regs, void *args)
 {
 #ifdef CONFIG_ARCH_KERNEL_STACK
-  FAR struct tcb_s *tcb = this_task();
+  struct tcb_s *tcb = this_task();
 #endif
   uintreg_t cause = mcause & RISCV_IRQ_MASK;
 
@@ -107,34 +103,34 @@ int riscv_exception(int mcause, void *regs, void *args)
          cause, READ_CSR(CSR_EPC), READ_CSR(CSR_TVAL));
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+  if (((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL) &&
+      ((tcb->flags & TCB_FLAG_SYSCALL) == false))
     {
-#  if CONFIG_TASK_NAME_SIZE > 0
-      _alert("Segmentation fault in PID %d: %s\n", tcb->pid, tcb->name);
-#  else
-      _alert("Segmentation fault in PID %d\n", tcb->pid);
-#  endif
+      struct tcb_s *ptcb = nxsched_get_tcb(tcb->group->tg_pid);
+
+      _alert("Segmentation fault in %s (PID %d: %s)\n", get_task_name(ptcb),
+             tcb->pid, get_task_name(tcb));
 
       tcb->flags |= TCB_FLAG_FORCED_CANCEL;
 
       /* Return to _exit function in privileged mode with argument SIGSEGV */
 
-      CURRENT_REGS[REG_EPC] = (uintptr_t)_exit;
-      CURRENT_REGS[REG_A0] = SIGSEGV;
-      CURRENT_REGS[REG_INT_CTX] |= STATUS_PPP;
+      running_regs()[REG_EPC] = _exit;
+      running_regs()[REG_A0] = (void *)SIGSEGV;
+      ((uintreg_t *)running_regs())[REG_INT_CTX] |= STATUS_PPP;
 
       /* Continue with kernel stack in use. The frame(s) in kernel stack
        * are no longer needed, so just set it to top
        */
 
-      CURRENT_REGS[REG_SP] = (uintptr_t)tcb->xcp.ktopstk;
+      running_regs()[REG_SP] = tcb->xcp.ktopstk;
     }
   else
 #endif
     {
       _alert("PANIC!!! Exception = %" PRIxREG "\n", cause);
       up_irq_save();
-      CURRENT_REGS = regs;
+      up_set_interrupt_context(true);
       PANIC_WITH_REGS("panic", regs);
     }
 
@@ -177,7 +173,7 @@ int riscv_fillpage(int mcause, void *regs, void *args)
   uintptr_t vaddr;
   uint32_t  ptlevel;
   uintptr_t satp;
-  uint32_t mmuflags;
+  uint64_t  mmuflags;
 
   _info("EXCEPTION: %s. MCAUSE: %" PRIxREG ", EPC: %" PRIxREG
         ", MTVAL: %" PRIxREG "\n",
@@ -206,14 +202,14 @@ int riscv_fillpage(int mcause, void *regs, void *args)
     {
       _alert("PANIC!!! virtual address not mappable: %" PRIxPTR "\n", vaddr);
       up_irq_save();
-      CURRENT_REGS = regs;
+      up_set_interrupt_context(true);
       PANIC_WITH_REGS("panic", regs);
     }
 
   satp    = READ_CSR(CSR_SATP);
   ptprev  = riscv_pgvaddr(mmu_satp_to_paddr(satp));
   ptlevel = ARCH_SPGTS;
-  paddr = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, ptprev, vaddr));
+  paddr   = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, ptprev, vaddr));
   if (!paddr)
     {
       /* Nothing yet, allocate one page for final level page table */
@@ -307,8 +303,8 @@ void riscv_exception_attach(void)
   irq_attach(RISCV_IRQ_RESERVED14, riscv_exception, NULL);
 
 #ifdef CONFIG_SMP
-  irq_attach(RISCV_IRQ_SOFT, riscv_pause_handler, NULL);
+  irq_attach(RISCV_IRQ_SOFT, riscv_smp_call_handler, NULL);
 #else
-  irq_attach(RISCV_IRQ_MSOFT, riscv_exception, NULL);
+  irq_attach(RISCV_IRQ_SOFT, riscv_exception, NULL);
 #endif
 }

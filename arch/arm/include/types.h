@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/types.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -81,6 +83,9 @@ typedef __WCHAR_TYPE__          _wchar_t;
 typedef int                     _wchar_t;
 #endif
 
+typedef int                     _wint_t;
+typedef int                     _wctype_t;
+
 /* A size is 4 bytes */
 
 #if defined(__SIZE_TYPE__)
@@ -107,7 +112,7 @@ typedef unsigned int            _size_t;
  */
 
 #ifdef __thumb2__
-#if defined(CONFIG_ARMV7M_USEBASEPRI) || defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARMV8M_USEBASEPRI)
+#if defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
 typedef unsigned char           irqstate_t;
 #else
 typedef unsigned short          irqstate_t;

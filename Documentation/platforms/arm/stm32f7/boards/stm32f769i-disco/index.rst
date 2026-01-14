@@ -2,6 +2,8 @@
 ST STM32F769I-DISCO
 ===================
 
+.. tags:: chip:stm32, chip:stm32f7, chip:stm32f769
+
 This page discusses issues unique to NuttX configurations for the
 STMicro STM32F769I-DISCO development board featuring the STM32F769NIH6
 MCU. The STM32F769NIH6 is a 216MHz Cortex-M7 operating with 2048K Flash

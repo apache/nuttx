@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/string/lib_strchrnul.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,7 +49,7 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_STRCHRNUL) && defined(LIBC_BUILD_STRCHRNUL)
-#undef strchrnul /* See mm/README.txt */
+#undef strchrnul
 FAR char *strchrnul(FAR const char *s, int c)
 {
   if (s)

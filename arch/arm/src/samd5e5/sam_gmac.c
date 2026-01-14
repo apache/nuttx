@@ -1,13 +1,10 @@
 /****************************************************************************
  * arch/arm/src/samd5e5/sam_gmac.c
  *
- *   Copyright (C) 2013-2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * The Atmel sample code has a BSD compatible license that requires this
- * copyright notice:
- *
- *   Copyright (c) 2012, Atmel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2013-2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2012 Atmel Corporation
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -386,7 +383,7 @@ static int  sam_gmac_configure(struct sam_gmac_s *priv);
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 
@@ -1450,7 +1447,7 @@ static void sam_interrupt_work(void *arg)
   /* Check for the receipt of an RX packet.
    *
    * RXCOMP indicates that a packet has been received and stored in memory.
-   *   The RXCOMP bit is cleared whent he interrupt status register was read.
+   *   The RXCOMP bit is cleared when the interrupt status register was read.
    * RSR:REC indicates that one or more frames have been received and placed
    *   in memory. This indication is cleared by writing a one to this bit.
    */

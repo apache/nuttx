@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/lcd/ug-2864ambag01.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -255,7 +257,7 @@
 #define MS_BIT                     (1 << 7)
 
 /****************************************************************************
- * Private Type Definition
+ * Private Types
  ****************************************************************************/
 
 /* This structure describes the state of this driver */

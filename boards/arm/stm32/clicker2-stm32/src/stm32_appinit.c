@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/clicker2-stm32/src/stm32_appinit.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -94,9 +96,9 @@ int board_app_initialize(uintptr_t arg)
    * bringing up file syslog.
    */
 
-  nxsig_usleep(CONFIG_CLICKER2_STM32_SYSLOG_FILE_DELAY * 1000);
+  nxsched_usleep(CONFIG_CLICKER2_STM32_SYSLOG_FILE_DELAY * 1000);
 
-  struct syslog_channel_s *channel;
+  syslog_channel_t *channel;
   channel = syslog_file_channel(CONFIG_CLICKER2_STM32_SYSLOG_FILE_PATH);
   if (channel == NULL)
     {

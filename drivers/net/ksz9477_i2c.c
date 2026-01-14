@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/net/ksz9477_i2c.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,13 +34,13 @@
  * Private Data
  ****************************************************************************/
 
-static struct i2c_master_s *g_ksz9477_i2c_bus;
+static FAR struct i2c_master_s *g_ksz9477_i2c_bus;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static void setup_i2c_transfer(struct i2c_msg_s *msg, uint8_t *data,
+static void setup_i2c_transfer(FAR struct i2c_msg_s *msg, uint8_t *data,
                                size_t len, bool read)
 {
   msg[0].frequency = KSZ9477_I2C_SPEED;
@@ -52,30 +54,30 @@ static void setup_i2c_transfer(struct i2c_msg_s *msg, uint8_t *data,
  * Public Functions
  ****************************************************************************/
 
-int ksz9477_read(struct ksz9477_transfer_s *read_msg)
+int ksz9477_read(FAR struct ksz9477_transfer_s *read_msg)
 {
   struct i2c_msg_s msg[2];
 
   /* Set up to write the address */
 
-  setup_i2c_transfer(&msg[0], (uint8_t *)&read_msg->reg,
+  setup_i2c_transfer(&msg[0], (FAR uint8_t *)&read_msg->reg,
                      sizeof(read_msg->reg), false);
 
   /* Followed by the read data */
 
-  setup_i2c_transfer(&msg[1], (uint8_t *)&read_msg->data,
+  setup_i2c_transfer(&msg[1], (FAR uint8_t *)&read_msg->data,
                      read_msg->len - sizeof(read_msg->reg), true);
 
   return I2C_TRANSFER(g_ksz9477_i2c_bus, msg, 2);
 }
 
-int ksz9477_write(struct ksz9477_transfer_s *write_msg)
+int ksz9477_write(FAR struct ksz9477_transfer_s *write_msg)
 {
   struct i2c_msg_s msg;
 
   /* Set up to write the address and data */
 
-  setup_i2c_transfer(&msg, (uint8_t *)&write_msg->reg,
+  setup_i2c_transfer(&msg, (FAR uint8_t *)&write_msg->reg,
                      write_msg->len, false);
 
   return I2C_TRANSFER(g_ksz9477_i2c_bus, &msg, 1);
@@ -95,7 +97,7 @@ int ksz9477_write(struct ksz9477_transfer_s *write_msg)
  *
  ****************************************************************************/
 
-int ksz9477_i2c_init(struct i2c_master_s *i2c_bus,
+int ksz9477_i2c_init(FAR struct i2c_master_s *i2c_bus,
                      ksz9477_port_t master_port)
 {
   if (!i2c_bus)

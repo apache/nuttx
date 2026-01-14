@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/timer/timer_create.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/spinlock.h>
 
+#include "sched/sched.h"
 #include "timer/timer.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
@@ -60,10 +63,10 @@ static FAR struct posix_timer_s *timer_allocate(void)
   /* Try to get a preallocated timer from the free list */
 
 #if CONFIG_PREALLOC_TIMERS > 0
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_locktimers);
   ret   = (FAR struct posix_timer_s *)
     sq_remfirst((FAR sq_queue_t *)&g_freetimers);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_locktimers, flags);
 
   /* Did we get one? */
 
@@ -92,9 +95,9 @@ static FAR struct posix_timer_s *timer_allocate(void)
 
       /* And add it to the end of the list of allocated timers */
 
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_locktimers);
       sq_addlast((FAR sq_entry_t *)ret, (FAR sq_queue_t *)&g_alloctimers);
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_locktimers, flags);
     }
 
   return ret;
@@ -156,11 +159,14 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
                  FAR timer_t *timerid)
 {
   FAR struct posix_timer_s *ret;
+  FAR struct tcb_s *tcb = this_task();
 
   /* Sanity checks. */
 
   if (timerid == NULL || (clockid != CLOCK_REALTIME &&
-      clockid != CLOCK_MONOTONIC && clockid != CLOCK_BOOTTIME))
+      clockid != CLOCK_MONOTONIC && clockid != CLOCK_BOOTTIME) ||
+      (evp != NULL && evp->sigev_notify == SIGEV_SIGNAL &&
+       !GOOD_SIGNO(evp->sigev_signo)))
     {
       set_errno(EINVAL);
       return ERROR;
@@ -179,8 +185,9 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
 
   ret->pt_clock = clockid;
   ret->pt_crefs = 1;
-  ret->pt_owner = nxsched_getpid();
+  ret->pt_owner = tcb->pid;
   ret->pt_delay = 0;
+  ret->pt_expected = 0;
 
   /* Was a struct sigevent provided? */
 

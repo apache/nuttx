@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/imx9/hardware/imx9_pinmux.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 
 #if defined(CONFIG_ARCH_CHIP_IMX93)
 #  include "hardware/imx93/imx93_pinmux.h"
+#elif defined(CONFIG_ARCH_CHIP_IMX95)
 #else
 #  error Unrecognized i.MX9 architecture
 #endif

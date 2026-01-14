@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/sim_head.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -108,17 +110,18 @@ static void allsyms_relocate(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SIM_ASAN
-const char *__asan_default_options(void)
+noprofile_function const char *__asan_default_options(void)
 {
   return "abort_on_error=1"
          " alloc_dealloc_mismatch=0"
          " allocator_frees_and_returns_null_on_realloc_zero=0"
          " check_initialization_order=1"
          " fast_unwind_on_malloc=0"
-         " strict_init_order=1";
+         " strict_init_order=1"
+         " detect_stack_use_after_return=0";
 }
 
-const char *__lsan_default_options(void)
+noprofile_function const char *__lsan_default_options(void)
 {
   /* The fast-unwind implementation of leak-sanitizer will obtain the
    * current stack top/bottom and frame address(Stack Pointer) for
@@ -140,7 +143,7 @@ const char *__lsan_default_options(void)
 #endif
 
 #ifdef CONFIG_SIM_UBSAN
-const char *__ubsan_default_options(void)
+noprofile_function const char *__ubsan_default_options(void)
 {
 #ifdef CONFIG_SIM_UBSAN_DUMMY
   return "";

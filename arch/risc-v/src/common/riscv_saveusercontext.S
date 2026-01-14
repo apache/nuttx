@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_saveusercontext.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,6 +28,10 @@
 
 #include "riscv_macros.S"
 
+#ifdef CONFIG_ARCH_RISCV_INTXCPT_EXTENSIONS
+#  include "riscv_extctx.S"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -49,6 +55,10 @@
 up_saveusercontext:
 
   save_ctx   a0
+
+#ifdef CONFIG_ARCH_RISCV_INTXCPT_EXTENSIONS
+  save_extctx a0
+#endif
 
   csrr       a1, CSR_STATUS
   REGSTORE   a1, REG_INT_CTX(a0)  /* status */

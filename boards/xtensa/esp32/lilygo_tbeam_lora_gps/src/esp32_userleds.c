@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32/lilygo_tbeam_lora_gps/src/esp32_userleds.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The

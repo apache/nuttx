@@ -1,6 +1,7 @@
 /****************************************************************************
  * include/nuttx/lib/lib.h
- * Non-standard, internal APIs available in lib/.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -30,6 +31,9 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 
+#include <limits.h>
+#include <alloca.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -41,7 +45,7 @@
  * then only the first mode is supported.
  */
 
-#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
+#if defined(__KERNEL__)
 
   /* Domain-specific allocations */
 
@@ -115,6 +119,24 @@ FAR struct file_struct *lib_get_stream(int fd);
 /* Functions defined in lib_srand.c *****************************************/
 
 unsigned long nrand(unsigned long limit);
+
+/* Functions defined in lib_tempbuffer.c ************************************/
+
+#ifdef CONFIG_LIBC_TEMPBUFFER
+FAR char *lib_get_tempbuffer(size_t nbytes);
+void lib_put_tempbuffer(FAR char *buffer);
+#else
+#  define lib_get_tempbuffer(n) alloca(n)
+#  define lib_put_tempbuffer(b)
+#endif
+
+#define lib_get_pathbuffer() lib_get_tempbuffer(PATH_MAX)
+#define lib_put_pathbuffer(b) lib_put_tempbuffer(b)
+
+/* Functions defined in lib_realpath.c **************************************/
+
+FAR char *lib_realpath(FAR const char *path, FAR char *resolved,
+                       bool notfollow);
 
 #undef EXTERN
 #ifdef __cplusplus

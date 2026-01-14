@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/tricore/src/tc3xx/tc3xx_libc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,8 +26,6 @@
 
 #include <nuttx/config.h>
 #include <stdint.h>
-
-#include "tricore_internal.h"
 
 /****************************************************************************
  * Public Functions
@@ -72,7 +72,7 @@ void _doexit(void)
 {
 }
 
-/* BUG, Workaroud for tasking compiler:
+/* BUG, Workaround for tasking compiler:
  *
  * ltc E106: unresolved external: regulator_gpio_init -
  *                                (drivers_initialize.o)

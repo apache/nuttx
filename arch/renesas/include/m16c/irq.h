@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/renesas/include/m16c/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -228,12 +230,6 @@
 #ifndef __ASSEMBLY__
 struct xcptcontext
 {
-  /* The following function pointer is non-zero if there are pending signals
-   * to be processed.
-   */
-
-  void *sigdeliver; /* Actual type is sig_deliver_t */
-
   /* These are saved copies of LR and SR used during signal processing.
    *
    * REVISIT:  Because there is only one copy of these save areas,
@@ -257,7 +253,7 @@ struct xcptcontext
 
 /* Return the current value of the stack pointer */
 
-static inline uint16_t up_getsp(void)
+static inline_function uint16_t up_getsp(void)
 {
   uint16_t sp;
 
@@ -301,7 +297,7 @@ extern "C"
 
 /* Return the current interrupt enable state and disable IRQs */
 
-static inline irqstate_t up_irq_save(void)
+static inline_function irqstate_t up_irq_save(void)
 {
   irqstate_t flags;
   __asm__ __volatile__
@@ -316,7 +312,7 @@ static inline irqstate_t up_irq_save(void)
 
 /* Restore saved IRQ state */
 
-static inline void up_irq_restore(irqstate_t flags)
+static inline_function void up_irq_restore(irqstate_t flags)
 {
   __asm__ __volatile__
     (
@@ -328,7 +324,7 @@ static inline void up_irq_restore(irqstate_t flags)
 
 /* Return the current interrupt enable state and enable IRQs */
 
-static inline irqstate_t up_irq_enable(void)
+static inline_function irqstate_t up_irq_enable(void)
 {
   irqstate_t flags;
   __asm__ __volatile__
@@ -346,6 +342,23 @@ static inline irqstate_t up_irq_enable(void)
 /****************************************************************************
  * Public Functions Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_getusrpc
+ ****************************************************************************/
+
+#define up_getusrpc(regs) \
+    (((uint32_t *)((regs) ? (regs) : up_current_regs()))[REG_PC])
+
+/****************************************************************************
+ * Name: up_getusrsp
+ ****************************************************************************/
+
+static inline_function uintptr_t up_getusrsp(void *regs)
+{
+  uint8_t *ptr = regs;
+  return (uintptr_t)(ptr[REG_SP] << 8 | ptr[REG_SP + 1]);
+}
 
 #undef EXTERN
 #ifdef __cplusplus

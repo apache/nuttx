@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/common/gnu/arm_fetchadd.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,7 +26,9 @@
 
 #include <nuttx/config.h>
 
+#ifndef __ghs__
 	.syntax		unified
+#endif
 	.file		"arm_fetchadd.S"
 
 /****************************************************************************
@@ -51,7 +55,11 @@
  ****************************************************************************/
 
 	.globl	up_fetchadd32
+#ifdef __ghs__
+	.type	up_fetchadd32, $function
+#else
 	.type	up_fetchadd32, %function
+#endif
 
 up_fetchadd32:
 
@@ -85,7 +93,11 @@ up_fetchadd32:
  ****************************************************************************/
 
 	.globl	up_fetchsub32
+#ifdef __ghs__
+	.type	up_fetchsub32, $function
+#else
 	.type	up_fetchsub32, %function
+#endif
 
 up_fetchsub32:
 
@@ -119,7 +131,11 @@ up_fetchsub32:
  ****************************************************************************/
 
 	.globl	up_fetchadd16
+#ifdef __ghs__
+	.type	up_fetchadd16, $function
+#else
 	.type	up_fetchadd16, %function
+#endif
 
 up_fetchadd16:
 
@@ -153,7 +169,11 @@ up_fetchadd16:
  ****************************************************************************/
 
 	.globl	up_fetchsub16
+#ifdef __ghs__
+	.type	up_fetchsub16, $function
+#else
 	.type	up_fetchsub16, %function
+#endif
 
 up_fetchsub16:
 
@@ -189,7 +209,11 @@ up_fetchsub16:
  ****************************************************************************/
 
 	.globl	up_fetchadd8
+#ifdef __ghs__
+	.type	up_fetchadd8, $function
+#else
 	.type	up_fetchadd8, %function
+#endif
 
 up_fetchadd8:
 
@@ -223,7 +247,11 @@ up_fetchadd8:
  ****************************************************************************/
 
 	.globl	up_fetchsub8
+#ifdef __ghs__
+	.type	up_fetchsub8, $function
+#else
 	.type	up_fetchsub8, %function
+#endif
 
 up_fetchsub8:
 

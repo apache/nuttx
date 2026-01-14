@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/at32/at32f43xxx_irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -116,7 +118,7 @@
 #define AT32_IRQ_DMA1CH3        (AT32_IRQ_FIRST+58)  /* 58: DMA1 Stream 3 global interrupt */
 #define AT32_IRQ_DMA1CH4        (AT32_IRQ_FIRST+59)  /* 59: DMA1 Stream 4 global interrupt */
 #define AT32_IRQ_DMA1CH5        (AT32_IRQ_FIRST+60)  /* 60: DMA1 Stream 5 global interrupt */
-#if defined(CONFIG_AT32_AT32F437)                    
+#if defined(CONFIG_AT32_AT32F437)
 #  define AT32_IRQ_ETH          (AT32_IRQ_FIRST+61)  /* 61: Ethernet global interrupt */
 #  define AT32_IRQ_ETHWKUP      (AT32_IRQ_FIRST+62)  /* 62: Ethernet Wakeup through EXTI line interrupt */
 #endif

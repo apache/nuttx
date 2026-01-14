@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/tricore/src/common/tricore_sigdeliver.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -59,8 +61,8 @@ void tricore_sigdeliver(void)
   board_autoled_on(LED_SIGNAL);
 
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
+        rtcb, rtcb->sigdeliver, rtcb->sigpendactionq.head);
+  DEBUGASSERT(rtcb->sigdeliver != NULL);
 
 retry:
 
@@ -74,7 +76,7 @@ retry:
 
   /* Deliver the signal */
 
-  ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
+  (rtcb->sigdeliver)(rtcb);
 
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original
@@ -106,7 +108,7 @@ retry:
    * could be modified by a hostile program.
    */
 
-  rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
+  rtcb->sigdeliver = NULL;  /* Allows next handler to be scheduled */
 
   /* Then restore the correct state for this thread of
    * execution.

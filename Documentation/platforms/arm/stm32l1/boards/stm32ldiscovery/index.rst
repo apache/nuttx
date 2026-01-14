@@ -2,6 +2,8 @@
  ST STM32L Discovery
 =====================
 
+.. tags:: chip:stm32, chip:stm32l1, chip:stm32l152
+
 This page discusses issues unique to NuttX configurations for the
 STMicro STM32L-Discovery development board.  The STM32L-Discovery board
 is based on the STM32L152RBT6 MCU (128KB FLASH and 16KB of SRAM).
@@ -225,8 +227,7 @@ Debugging
 If you are going to use a debugger, you should make sure that the following
 settings are selection in your configuration file::
 
-    CONFIG_DEBUG_SYMBOLS=y     : Enable debug symbols in the build
-    CONFIG_ARMV7M_USEBASEPRI=y : Use the BASEPRI register to disable interrupts
+    CONFIG_DEBUG_SYMBOLS=y : Enable debug symbols in the build
 
 STM32 ST-LINK Utility
 ---------------------

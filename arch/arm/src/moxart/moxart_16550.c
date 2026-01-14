@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/moxart/moxart_16550.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -69,15 +71,12 @@ void uart_decodeirq(int irq, void *context)
 }
 
 #ifdef CONFIG_SERIAL_UART_ARCH_IOCTL
-int uart_ioctl(struct file *filep, int cmd, unsigned long arg)
+int uart_ioctl(struct u16550_s *priv, int cmd, unsigned long arg)
 {
-  struct inode      *inode = filep->f_inode;
-  struct uart_dev_s *dev   = inode->i_private;
-  struct u16550_s   *priv  = (struct u16550_s *)dev->priv;
-  int                ret   = -ENOTTY;
-  uint32_t           vmode;
-  unsigned int       opmode;
-  int                bitm_off;
+  int          ret = -ENOTTY;
+  uint32_t     vmode;
+  unsigned int opmode;
+  int          bitm_off;
 
   /* TODO: calculate bit offset from UART_BASE address.
    *  E.g.:

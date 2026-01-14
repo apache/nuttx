@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_pgalloc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,6 +39,7 @@
 
 #include <arch/barriers.h>
 
+#include "sched/sched.h"
 #include "addrenv.h"
 #include "pgalloc.h"
 #include "riscv_mmu.h"
@@ -94,7 +97,7 @@
 
 uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
 {
-  struct tcb_s          *tcb = nxsched_self();
+  struct tcb_s          *tcb = this_task();
   struct arch_addrenv_s *addrenv;
   uintptr_t              ptlast;
   uintptr_t              paddr;
@@ -155,7 +158,7 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
 
   /* Flush the data cache, so the changes are committed to memory */
 
-  __DMB();
+  UP_DMB();
 
   return brkaddr;
 }

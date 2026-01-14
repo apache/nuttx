@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nrf52/nrf52_ieee802154_trace.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -48,7 +50,7 @@ struct radio_trace_s
 
 enum radio_trace_type_e
 {
-  /* Radio interupts */
+  /* Radio interrupts */
 
   RADIO_TRACE_IRQ_RADIO,
   RADIO_TRACE_IRQ_RXDONE,

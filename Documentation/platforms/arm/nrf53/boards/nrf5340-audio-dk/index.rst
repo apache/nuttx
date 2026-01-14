@@ -2,6 +2,8 @@
 Nordic nRF5340-Audio-DK
 =======================
 
+.. tags:: chip:nrf53, chip:nrf5340
+
 The `nRF5340-Audio-DK <https://www.nordicsemi.com/Products/Development-hardware/nRF5340-Audio-DK>`_
 is a development kit dedicated for Bluetooth LE Audio application based on the nRF5340 from Nordic.
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/net/net.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -111,7 +113,7 @@ enum net_lltype_e
   NET_LL_IEEE802154,   /* IEEE 802.15.4 MAC */
   NET_LL_PKTRADIO,     /* Non-standard packet radio */
   NET_LL_MBIM,         /* CDC-MBIM USB host driver */
-  NET_LL_CAN,          /* CAN bus */
+  NET_LL_CAN,          /* CAN/LIN bus */
   NET_LL_CELL          /* Cellular Virtual Network Device */
 };
 
@@ -204,6 +206,13 @@ struct socket_conn_s
   FAR struct devif_callback_s *list;
   FAR struct devif_callback_s *list_tail;
 
+  /* This lock protects the connection structure.  It is used to prevent
+   * re-entrance into the connection structure while it is being modified.
+   * This mutex is also used to protect the list of callbacks.
+   */
+
+  rmutex_t      s_lock;      /* Protect the connection structure */
+
   /* Socket options */
 
 #ifdef CONFIG_NET_SOCKOPTS
@@ -227,7 +236,7 @@ struct socket_conn_s
   /* Definitions of IPv4 TOS and IPv6 Traffic Class */
 
   uint8_t       s_tos;       /* IPv4 Type of Service */
-#define s_tclass s_tos       /* IPv6 traffic class defination */
+#define s_tclass s_tos       /* IPv6 traffic class definition */
 #if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
   uint8_t       s_ttl;       /* Default time-to-live */
 #endif
@@ -245,7 +254,7 @@ struct socket
 {
   uint8_t       s_domain;    /* IP domain */
   uint8_t       s_type;      /* Protocol type */
-  uint8_t       s_proto;     /* Socket Protocol */
+  uint16_t      s_proto;     /* Socket Protocol */
   FAR void     *s_conn;      /* Connection inherits from struct socket_conn_s */
 
   /* Socket interface */
@@ -337,7 +346,7 @@ ssize_t net_ioctl_arglen(uint8_t domain, int cmd);
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
- *   failured (probably -ECANCELED).
+ *   failure (probably -ECANCELED).
  *
  ****************************************************************************/
 
@@ -356,7 +365,7 @@ int net_lock(void);
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
- *   failured (probably -EAGAIN).
+ *   failure (probably -EAGAIN).
  *
  ****************************************************************************/
 
@@ -400,31 +409,7 @@ void net_unlock(void);
  *
  ****************************************************************************/
 
-int net_sem_timedwait(sem_t *sem, unsigned int timeout);
-
-/****************************************************************************
- * Name: net_mutex_timedlock
- *
- * Description:
- *   Atomically wait for mutex (or a timeout) while temporarily releasing
- *   the lock on the network.
- *
- *   Caution should be utilized.  Because the network lock is relinquished
- *   during the wait, there could be changes in the network state that occur
- *   before the lock is recovered.  Your design should account for this
- *   possibility.
- *
- * Input Parameters:
- *   mutex   - A reference to the mutex to be taken.
- *   timeout - The relative time to wait until a timeout is declared.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
- *
- ****************************************************************************/
-
-int net_mutex_timedlock(mutex_t *mutex, unsigned int timeout);
+int net_sem_timedwait(FAR sem_t *sem, unsigned int timeout);
 
 /****************************************************************************
  * Name: net_sem_wait
@@ -446,29 +431,7 @@ int net_mutex_timedlock(mutex_t *mutex, unsigned int timeout);
  *
  ****************************************************************************/
 
-int net_sem_wait(sem_t *sem);
-
-/****************************************************************************
- * Name: net_mutex_lock
- *
- * Description:
- *   Atomically wait for mutex while temporarily releasing the network lock.
- *
- *   Caution should be utilized.  Because the network lock is relinquished
- *   during the wait, there could be changes in the network state that occur
- *   before the lock is recovered.  Your design should account for this
- *   possibility.
- *
- * Input Parameters:
- *   mutex - A reference to the mutex to be taken.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
- *
- ****************************************************************************/
-
-int net_mutex_lock(mutex_t *mutex);
+int net_sem_wait(FAR sem_t *sem);
 
 /****************************************************************************
  * Name: net_sem_timedwait_uninterruptible
@@ -487,7 +450,7 @@ int net_mutex_lock(mutex_t *mutex);
  *
  ****************************************************************************/
 
-int net_sem_timedwait_uninterruptible(sem_t *sem, unsigned int timeout);
+int net_sem_timedwait_uninterruptible(FAR sem_t *sem, unsigned int timeout);
 
 /****************************************************************************
  * Name: net_sem_wait_uninterruptible
@@ -505,7 +468,32 @@ int net_sem_timedwait_uninterruptible(sem_t *sem, unsigned int timeout);
  *
  ****************************************************************************/
 
-int net_sem_wait_uninterruptible(sem_t *sem);
+int net_sem_wait_uninterruptible(FAR sem_t *sem);
+
+/****************************************************************************
+ * Name: net_sem_timedwait2
+ *
+ * Description:
+ *   Atomically wait for sem (or a timeout) while temporarily releasing
+ *   the lock on the conn and device.
+ *
+ * Input Parameters:
+ *   sem           - A reference to the semaphore to be taken.
+ *   interruptible - An indication of whether the wait is interruptible
+ *   timeout       - The relative time to wait until a timeout is declared.
+ *   mutex1        - The lock to be released during waiting and restored
+ *                   later, can be NULL.
+ *   mutex2        - Same as mutex1, but released after mutex1.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int net_sem_timedwait2(FAR sem_t *sem, bool interruptible,
+                       unsigned int timeout, FAR rmutex_t *mutex1,
+                       FAR rmutex_t *mutex2);
 
 #ifdef CONFIG_MM_IOB
 
@@ -597,7 +585,8 @@ int sockfd_allocate(FAR struct socket *psock, int oflags);
  ****************************************************************************/
 
 FAR struct socket *file_socket(FAR struct file *filep);
-int sockfd_socket(int sockfd, FAR struct socket **socketp);
+int sockfd_socket(int sockfd, FAR struct file **filep,
+                  FAR struct socket **socketp);
 
 /****************************************************************************
  * Name: psock_socket
@@ -955,7 +944,7 @@ ssize_t psock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  *
  ****************************************************************************/
 
-ssize_t psock_send(FAR struct socket *psock, const void *buf, size_t len,
+ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
                    int flags);
 
 /****************************************************************************
@@ -1494,6 +1483,26 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype);
  ****************************************************************************/
 
 int netdev_unregister(FAR struct net_driver_s *dev);
+
+/****************************************************************************
+ * Name: netdev_lock
+ *
+ * Description:
+ *   Lock the network device.
+ *
+ ****************************************************************************/
+
+void netdev_lock(FAR struct net_driver_s *dev);
+
+/****************************************************************************
+ * Name: netdev_unlock
+ *
+ * Description:
+ *   Unlock the network device.
+ *
+ ****************************************************************************/
+
+void netdev_unlock(FAR struct net_driver_s *dev);
 
 #undef EXTERN
 #ifdef __cplusplus

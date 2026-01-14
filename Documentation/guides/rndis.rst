@@ -13,7 +13,7 @@ over USB port without using any external device to it. Just a USB cable
 between your board (that has USB Device) and your computer.
 
 WARNING: RNDIS is going to be removed from Linux kernel because they
-understand it as an unsecure protocol. That said use it aware of this
+understand it as an insecure protocol. That said use it aware of this
 risk and also be aware that it was tested up to Ubuntu 22.04 LTS and
 couldn't work in future versions.
 

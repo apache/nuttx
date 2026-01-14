@@ -1,8 +1,8 @@
 /****************************************************************************
  * fs/spiffs/src/spiffs_core.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2018 Gregory Nutt
  *
  * This is a port of version 0.3.7 of SPIFFS by Peter Andersion.  That
  * version was originally released under the MIT license but is here re-
@@ -1392,8 +1392,8 @@ int spiffs_fobj_create(FAR struct spiffs_s *fs,
 #ifdef CONFIG_SPIFFS_LEADING_SLASH
   objndx_hdr.name[0] = '/';
 #endif
-  strlcpy((char *)objndx_hdr.name + SPIFFS_LEADING_SLASH_SIZE,
-          (const char *)name,
+  strlcpy((FAR char *)objndx_hdr.name + SPIFFS_LEADING_SLASH_SIZE,
+          (FAR const char *)name,
           CONFIG_SPIFFS_NAME_MAX);
 
   /* Update page */
@@ -2124,7 +2124,7 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
         {
           /* Update object index header page */
 
-          ((FAR int16_t *)((FAR uint8_t *) objhdr +
+          ((FAR int16_t *)((FAR uint8_t *)objhdr +
             sizeof(struct spiffs_pgobj_ndxheader_s)))[data_spndx] =
             data_page;
 
@@ -2137,7 +2137,7 @@ ssize_t spiffs_fobj_append(FAR struct spiffs_s *fs,
         {
           /* Update object index page */
 
-          ((FAR int16_t *)((FAR uint8_t *) objndx +
+          ((FAR int16_t *)((FAR uint8_t *)objndx +
             sizeof(struct spiffs_page_objndx_s)))
               [SPIFFS_OBJNDX_ENTRY(fs, data_spndx)] = data_page;
 
@@ -3000,7 +3000,7 @@ int spiffs_fobj_truncate(FAR struct spiffs_s *fs,
           /* Get data page from object index header page */
 
           data_pgndx =
-            ((FAR int16_t *)((FAR uint8_t *) objhdr +
+            ((FAR int16_t *)((FAR uint8_t *)objhdr +
               sizeof(struct spiffs_pgobj_ndxheader_s)))[data_spndx];
 
           ((FAR int16_t *)((FAR uint8_t *)objhdr +
@@ -3151,7 +3151,7 @@ int spiffs_fobj_truncate(FAR struct spiffs_s *fs,
             {
               /* Update object index header page */
 
-              ((FAR int16_t *)((FAR uint8_t *) objhdr +
+              ((FAR int16_t *)((FAR uint8_t *)objhdr +
                 sizeof(struct spiffs_pgobj_ndxheader_s)))[data_spndx] =
                   new_data_pgndx;
 
@@ -3413,7 +3413,7 @@ ssize_t spiffs_object_read(FAR struct spiffs_s *fs,
           /* Get data page from object index page */
 
           data_pgndx =
-            ((FAR int16_t *)((FAR uint8_t *) objndx +
+            ((FAR int16_t *)((FAR uint8_t *)objndx +
              sizeof(struct spiffs_page_objndx_s)))
                [SPIFFS_OBJNDX_ENTRY(fs, data_spndx)];
         }

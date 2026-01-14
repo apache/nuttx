@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s3/common/src/esp32s3_board_wlan.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,7 +36,7 @@
 #include <nuttx/wireless/wireless.h>
 
 #include "esp32s3_spiflash.h"
-#include "esp32s3_wlan.h"
+#include "espressif/esp_wlan_netdev.h"
 
 /****************************************************************************
  * Public Functions
@@ -59,24 +61,23 @@ int board_wlan_init(void)
 {
   int ret = OK;
 
-#ifdef ESP32S3_WLAN_HAS_STA
-  ret = esp32s3_wlan_sta_initialize();
+#ifdef ESP_WLAN_HAS_STA
+  ret = esp_wlan_sta_initialize();
   if (ret)
     {
       wlerr("ERROR: Failed to initialize Wi-Fi station\n");
       return ret;
     }
-#endif /* ESP32S3_WLAN_HAS_STA */
+#endif /* ESP_WLAN_HAS_STA */
 
-#ifdef ESP32S3_WLAN_HAS_SOFTAP
-  ret = esp32s3_wlan_softap_initialize();
+#ifdef ESP_WLAN_HAS_SOFTAP
+  ret = esp_wlan_softap_initialize();
   if (ret)
     {
       wlerr("ERROR: Failed to initialize Wi-Fi softAP\n");
       return ret;
     }
-#endif /* ESP32S3_WLAN_HAS_SOFTAP */
+#endif /* ESP_WLAN_HAS_SOFTAP */
 
   return ret;
 }
-

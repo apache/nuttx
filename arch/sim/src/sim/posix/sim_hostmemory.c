@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/posix/sim_hostmemory.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -92,30 +94,18 @@ void host_freeheap(void *mem)
   host_uninterruptible(munmap, mem, 0);
 }
 
-void *host_allocshmem(const char *name, size_t size, int master)
+void *host_allocshmem(const char *name, size_t size)
 {
   void *mem;
   int oflag;
   int ret;
   int fd;
 
-  oflag = O_RDWR;
-  if (master)
-    {
-      oflag |= O_CREAT | O_TRUNC;
-    }
-
+  oflag = O_RDWR | O_CREAT;
   fd = host_uninterruptible(shm_open, name, oflag, S_IRUSR | S_IWUSR);
   if (fd < 0)
     {
       return NULL;
-    }
-
-  if (!master)
-    {
-      /* Avoid the second slave instance open successfully */
-
-      host_unlinkshmem(name);
     }
 
   ret = host_uninterruptible(ftruncate, fd, size);

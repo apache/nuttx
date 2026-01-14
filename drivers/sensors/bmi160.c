@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/bmi160.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,14 +27,6 @@
 #include "bmi160_base.h"
 
 #if defined(CONFIG_SENSORS_BMI160)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -147,15 +141,15 @@ static ssize_t bmi160_read(FAR struct file *filep, FAR char *buffer,
 
   if (len < sizeof(struct accel_gyro_st_s))
     {
-      snerr("Expected buffer size is %u\n", sizeof(struct accel_gyro_st_s));
+      snerr("Expected buffer size is %zu\n", sizeof(struct accel_gyro_st_s));
       return 0;
     }
 
+  /* Set sensor_time to the lower 24 bits of SENSORTIME. */
+
+  p->sensor_time = 0;
+
   bmi160_getregs(priv, BMI160_DATA_8, (FAR uint8_t *)buffer, 15);
-
-  /* Adjust sensing time into 24 bit */
-
-  p->sensor_time >>= 8;
 
   return len;
 }

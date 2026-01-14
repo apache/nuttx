@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/pthread/pthread_condsignal.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,6 +30,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/atomic.h>
+
 #include "pthread/pthread.h"
 
 /****************************************************************************
@@ -53,7 +57,6 @@
 int pthread_cond_signal(FAR pthread_cond_t *cond)
 {
   int ret = OK;
-  int sval;
 
   sinfo("cond=%p\n", cond);
 
@@ -63,35 +66,15 @@ int pthread_cond_signal(FAR pthread_cond_t *cond)
     }
   else
     {
-      /* Get the current value of the semaphore */
+      int wcnt = atomic_read(COND_WAIT_COUNT(cond));
 
-      if (nxsem_get_value(&cond->sem, &sval) != OK)
+      while (wcnt > 0)
         {
-          ret = EINVAL;
-        }
-
-      /* If the value is less than zero (meaning that one or more
-       * thread is waiting), then post the condition semaphore.
-       * Only the highest priority waiting thread will get to execute
-       */
-
-      else
-        {
-          /* One of my objectives in this design was to make
-           * pthread_cond_signal() usable from interrupt handlers.  However,
-           * from interrupt handlers, you cannot take the associated mutex
-           * before signaling the condition.  As a result, I think that
-           * there could be a race condition with the following logic which
-           * assumes that the if sval < 0 then the thread is waiting.
-           * Without the mutex, there is no atomic, protected operation that
-           * will guarantee this to be so.
-           */
-
-          sinfo("sval=%d\n", sval);
-          if (sval < 0)
+          if (atomic_cmpxchg(COND_WAIT_COUNT(cond), &wcnt, wcnt - 1))
             {
               sinfo("Signalling...\n");
-              ret = pthread_sem_give(&cond->sem);
+              ret = -nxsem_post(&cond->sem);
+              break;
             }
         }
     }

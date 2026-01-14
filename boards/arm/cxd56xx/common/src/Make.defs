@@ -1,6 +1,8 @@
 ############################################################################
 # boards/arm/cxd56xx/common/src/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -186,6 +188,10 @@ endif
 
 ifeq ($(CONFIG_CXD56_GNSS_ADDON),y)
   CSRCS += cxd56_gnss_addon.c
+endif
+
+ifeq ($(CONFIG_SENSORS_CXD5602PWBIMU),y)
+  CSRCS += cxd56_cxd5602pwbimu.c
 endif
 
 DEPPATH += --dep-path src

@@ -1,7 +1,8 @@
 /****************************************************************************
  * libs/libc/stdio/lib_fgetwc.c
  *
- * Copyright © 2005-2014 Rich Felker, et al.
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: 2005-2014 Rich Felker, et al.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -46,12 +47,12 @@
  *
  * Input Parameters:
  *   f - Pointer to a FILE object that identifies an input stream, during
- *   the read operaiton, the stream will not be locked
+ *   the read operation, the stream will not be locked
  *
  * Returned Value:
  *   Return the character read is returned,
  *   Return WEOF is the sequence of bytes that read cannot be interpreted as
- *   a valid wide characted, and sets the errno to EILSEQ
+ *   a valid wide character, and sets the errno to EILSEQ
  *
  ****************************************************************************/
 
@@ -69,7 +70,8 @@ wint_t fgetwc_unlocked(FAR FILE *f)
 
   while (l == -2)
     {
-      b = c = getc_unlocked(f);
+      c = getc_unlocked(f);
+      b = (char)c;
       if (c < 0)
         {
           if (!mbsinit(&st))
@@ -105,7 +107,7 @@ wint_t fgetwc_unlocked(FAR FILE *f)
  * Returned Value:
  *   Return the character read is returned,
  *   Return WEOF is the sequence of bytes that read cannot be interpreted as
- *   a valid wide characted, and sets the errno to EILSEQ
+ *   a valid wide character, and sets the errno to EILSEQ
  *
  ****************************************************************************/
 

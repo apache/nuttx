@@ -1,8 +1,9 @@
 /****************************************************************************
  * include/nuttx/modem/u-blox.h
  *
- *   Copyright (C) 2016 Vladimir Komendantskiy. All rights reserved.
- *   Author: Vladimir Komendantskiy <vladimir@moixaenergy.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2016 Vladimir Komendantskiy. All rights reserved.
+ * SPDX-FileContributor: Vladimir Komendantskiy <vladimir@moixaenergy.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -59,7 +60,7 @@
 
 struct ubxmdm_regval
 {
-  FAR char name[3];
+  char name[3];
   bool val;
 };
 
@@ -67,19 +68,19 @@ struct ubxmdm_status
 {
   bool on;
   int register_values_size;
-  FAR struct ubxmdm_regval* register_values;
+  FAR struct ubxmdm_regval *register_values;
 };
 
 struct ubxmdm_lower;
 
 struct ubxmdm_ops
 {
-  CODE int (*poweron)  (FAR struct ubxmdm_lower* lower);
-  CODE int (*poweroff) (FAR struct ubxmdm_lower* lower);
-  CODE int (*reset)    (FAR struct ubxmdm_lower* lower);
-  CODE int (*getstatus)(FAR struct ubxmdm_lower* lower,
-                        FAR struct ubxmdm_status* status);
-  CODE int (*ioctl)    (FAR struct ubxmdm_lower* lower,
+  CODE int (*poweron)  (FAR struct ubxmdm_lower  *lower);
+  CODE int (*poweroff) (FAR struct ubxmdm_lower  *lower);
+  CODE int (*reset)    (FAR struct ubxmdm_lower  *lower);
+  CODE int (*getstatus)(FAR struct ubxmdm_lower  *lower,
+                        FAR struct ubxmdm_status *status);
+  CODE int (*ioctl)    (FAR struct ubxmdm_lower  *lower,
                         int cmd,
                         unsigned long arg);
 };
@@ -90,7 +91,7 @@ struct ubxmdm_lower
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 #undef EXTERN

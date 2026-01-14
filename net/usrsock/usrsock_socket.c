@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/usrsock/usrsock_socket.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,8 +46,8 @@
  * Private Functions
  ****************************************************************************/
 
-static uint16_t socket_event(FAR struct net_driver_s *dev,
-                             FAR void *pvpriv, uint16_t flags)
+static uint32_t socket_event(FAR struct net_driver_s *dev,
+                             FAR void *pvpriv, uint32_t flags)
 {
   FAR struct usrsock_reqstate_s *pstate = pvpriv;
   FAR struct usrsock_conn_s *conn = pstate->conn;
@@ -203,7 +205,7 @@ int usrsock_socket(int domain, int type, int protocol,
       return -ENOMEM;
     }
 
-  net_lock();
+  usrsock_lock();
 
   /* Set up event callback for usrsock. */
 
@@ -225,7 +227,7 @@ int usrsock_socket(int domain, int type, int protocol,
 
   /* Wait for completion of request. */
 
-  net_sem_wait_uninterruptible(&state.recvsem);
+  usrsock_sem_timedwait(&state.recvsem, false, UINT_MAX);
 
   if (state.result < 0)
     {
@@ -238,14 +240,14 @@ int usrsock_socket(int domain, int type, int protocol,
 
   usrsock_teardown_request_callback(&state);
 
-  net_unlock();
+  usrsock_unlock();
   return OK;
 
 errout_teardown_callback:
   usrsock_teardown_request_callback(&state);
 errout_free_conn:
   usrsock_free(conn);
-  net_unlock();
+  usrsock_unlock();
   return err;
 }
 

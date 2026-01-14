@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/net/loopback.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -192,7 +194,7 @@ static void lo_txavail_work(FAR void *arg)
 
   /* Ignore the notification if the interface is not yet up */
 
-  net_lock();
+  netdev_lock(&priv->lo_dev);
   if (priv->lo_bifup)
     {
       /* Reuse the devif_loopback() logic, Polling all pending events until
@@ -202,7 +204,7 @@ static void lo_txavail_work(FAR void *arg)
       while (devif_poll(&priv->lo_dev, NULL));
     }
 
-  net_unlock();
+  netdev_unlock(&priv->lo_dev);
 }
 
 /****************************************************************************
@@ -237,7 +239,7 @@ static int lo_txavail(FAR struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(LPWORK, &priv->lo_work, lo_txavail_work, priv, 0);
+      work_queue(HPWORK, &priv->lo_work, lo_txavail_work, priv, 0);
     }
 
   return OK;

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/rp2040/rp2040_adc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,9 +40,9 @@
  *
  *    -------------
  *
- *    This lower-half supports multiple drivers (/dev/adc0, /dav/dca1, etc.)
+ *    This lower-half supports multiple drivers (/dev/adc0, /dev/adc1, etc.)
  *    that each may read data from any of the ADC ports.  The driver reads
- *    whichever ADC ports are needed by ANY of ther drivers in strict
+ *    whichever ADC ports are needed by ANY of the drivers in strict
  *    round-robin fashion, passing the converted values to the drivers that
  *    needed it.  Data is only passed if the driver is open.
  *
@@ -48,7 +50,7 @@
  *
  *    This code reads the ADC ports at full speed.  At the time this comment
  *    was written, the upper-half will throw away any converted values it
- *    receives when the buffer is full; therefor, if the data is not read
+ *    receives when the buffer is full; therefore, if the data is not read
  *    for a while, the returned values may be stale when finally read. You
  *    can use the ANIOC_RESET_FIFO ioctl call to flush this stale data.
  ****************************************************************************/
@@ -61,7 +63,6 @@
 
 #include <stdlib.h>
 #include <fcntl.h>
-#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 
@@ -88,7 +89,7 @@
 #define PRIV(x) ((struct private_s *)(x)->ad_priv)
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 struct private_s
@@ -107,20 +108,20 @@ static int  interrupt_handler(int   irq,
                               void *context,
                               void *arg);
 
-static void get_next_channel(void);
-static void add_device(struct adc_dev_s *dev);
-static void remove_device(struct adc_dev_s *dev);
+static void adc_get_next_channel(void);
+static void adc_add_device(struct adc_dev_s *dev);
+static void adc_remove_device(struct adc_dev_s *dev);
 
 /* ADC methods */
 
-static int  my_bind(struct adc_dev_s            *dev,
-                    const struct adc_callback_s *callback);
+static int  adc_bind(struct adc_dev_s            *dev,
+                     const struct adc_callback_s *callback);
 
-static void my_reset(struct adc_dev_s *dev);
-static int  my_setup(struct adc_dev_s *dev);
-static void my_shutdown(struct adc_dev_s *dev);
-static void my_rxint(struct adc_dev_s *dev, bool enable);
-static int  my_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg);
+static void adc_reset(struct adc_dev_s *dev);
+static int  adc_setup(struct adc_dev_s *dev);
+static void adc_shutdown(struct adc_dev_s *dev);
+static void adc_rxint(struct adc_dev_s *dev, bool enable);
+static int  adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -128,12 +129,12 @@ static int  my_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg);
 
 static const struct adc_ops_s g_adcops =
 {
-  .ao_bind     = my_bind,     /*  Called first  during initialization. */
-  .ao_reset    = my_reset,    /*  Called second during intialization.  */
-  .ao_setup    = my_setup,    /*  Called during first open.            */
-  .ao_shutdown = my_shutdown, /*  Called during last close.            */
-  .ao_rxint    = my_rxint,    /*  Called to enable/disable interrupts. */
-  .ao_ioctl    = my_ioctl,    /*  Called for custom ioctls.            */
+  .ao_bind     = adc_bind,     /*  Called first during initialization. */
+  .ao_reset    = adc_reset,    /*  Called second during initialization. */
+  .ao_setup    = adc_setup,    /*  Called during first open.            */
+  .ao_shutdown = adc_shutdown, /*  Called during last close.            */
+  .ao_rxint    = adc_rxint,    /*  Called to enable/disable interrupts. */
+  .ao_ioctl    = adc_ioctl,    /*  Called for custom ioctls.            */
 };
 
 static const int8_t g_gpio_map[ADC_CHANNEL_COUNT] =
@@ -158,6 +159,7 @@ static uint8_t               g_active_count     = 0;
  *   all ADC devices.
  *
  *  Note: This is called from inside an interrupt service routine.
+ *
  ****************************************************************************/
 
 static int interrupt_handler(int irq, void *context, void *arg)
@@ -225,22 +227,23 @@ static int interrupt_handler(int irq, void *context, void *arg)
 
   /* Start next channel read */
 
-  get_next_channel();
+  adc_get_next_channel();
 
   return OK;
 }
 
 /****************************************************************************
- * Name: get_next_channel
+ * Name: adc_get_next_channel
  *
  * Description:
  *   Update g_current_channel to point to next channel in use and start
  *   the conversion.
  *
  *  Note: This is called from inside a critical section.
+ *
  ****************************************************************************/
 
-static void get_next_channel(void)
+static void adc_get_next_channel(void)
 {
   struct adc_dev_s *a_device;
   uint8_t           next = g_current_channel + 1;
@@ -313,16 +316,17 @@ static void get_next_channel(void)
 }
 
 /****************************************************************************
- * Name: add_device
+ * Name: adc_add_device
  *
  * Description:
  *   This function is called to link the device int the device list.
  *   It also makes sure ADC reads are taking place
  *
  *  Note: This is called from inside a critical section.
+ *
  ****************************************************************************/
 
-static void add_device(struct adc_dev_s *dev)
+static void adc_add_device(struct adc_dev_s *dev)
 {
   uint32_t value;
 
@@ -364,22 +368,23 @@ static void add_device(struct adc_dev_s *dev)
 
       /* Start conversions on first required channel.  */
 
-      get_next_channel();
+      adc_get_next_channel();
 
       ainfo("new cur %d\n", g_current_channel);
     }
 }
 
 /****************************************************************************
- * Name: remove_device
+ * Name: adc_remove_device
  *
  * Description:
  *   This function is called to unlink the device from the device list.
  *
  *  Note: This is called from inside a critical section.
+ *
  ****************************************************************************/
 
-void remove_device(struct adc_dev_s *dev)
+void adc_remove_device(struct adc_dev_s *dev)
 {
   struct adc_dev_s *a_device;
 
@@ -421,7 +426,7 @@ void remove_device(struct adc_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: my_bind
+ * Name: adc_bind
  *
  * Description:
  *   This function is called when a driver is registered.  It give us a
@@ -430,12 +435,12 @@ void remove_device(struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static int my_bind(struct adc_dev_s            *dev,
-                   const struct adc_callback_s *callback)
+static int adc_bind(struct adc_dev_s            *dev,
+                    const struct adc_callback_s *callback)
 {
   DEBUGASSERT(PRIV(dev) != NULL);
 
-  ainfo("entered\n");
+  ainfo("Binding: 0x%08lX\n", dev);
 
   PRIV(dev)->callback = callback;
 
@@ -443,7 +448,7 @@ static int my_bind(struct adc_dev_s            *dev,
 }
 
 /****************************************************************************
- * Name: my_reset
+ * Name: adc_reset
  *
  * Description:
  *   This is called by the upper-half as part of the driver registration
@@ -454,27 +459,35 @@ static int my_bind(struct adc_dev_s            *dev,
  *
  ****************************************************************************/
 
-static void my_reset(struct adc_dev_s *dev)
+static void adc_reset(struct adc_dev_s *dev)
 {
   int a_gpio;
 
-  ainfo("entered\n");
+  ainfo("Resetting: 0x%08lX\n", dev);
 
   for (int i = 0; i < ADC_CHANNEL_COUNT; ++i)
     {
       a_gpio = g_gpio_map[i];
 
-      if (a_gpio >= 0)
+      if (PRIV(dev)->has_channel[i])
         {
-          rp2040_gpio_setdir(a_gpio, false);
-          rp2040_gpio_set_function(a_gpio, RP2040_GPIO_FUNC_NULL);
-          rp2040_gpio_set_pulls(a_gpio, false, false);
+          if (a_gpio >= 0)
+            {
+              ainfo("Attaching GPIO %d to ADC channel %d\n", a_gpio, i + 1);
+              rp2040_gpio_setdir(a_gpio, false);
+              rp2040_gpio_set_function(a_gpio, RP2040_GPIO_FUNC_NULL);
+              rp2040_gpio_set_pulls(a_gpio, false, false);
+            }
+          else
+            {
+              ainfo("ADC channel %d is internally connected\n", i + 1);
+            }
         }
     }
 }
 
 /****************************************************************************
- * Name: my_setup
+ * Name: adc_setup
  *
  * Description:
  *   This is called when a particular ADC driver is first opened.
@@ -482,13 +495,14 @@ static void my_reset(struct adc_dev_s *dev)
  *   We don't do anything here.
  *
  *  Note: This is called from inside a critical section.
+ *
  ****************************************************************************/
 
-static int my_setup(struct adc_dev_s *dev)
+static int adc_setup(struct adc_dev_s *dev)
 {
   int ret;
 
-  ainfo("entered: 0x%08lX\n", dev);
+  ainfo("Setup: 0x%08lX\n", dev);
 
   /* Note: We check g_active_count here so we can return an error
    *       in the, probably impossible, case we have too many.
@@ -508,7 +522,7 @@ static int my_setup(struct adc_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: my_shutdown
+ * Name: adc_shutdown
  *
  * Description:
  *  This is called to shutdown an ADC device.  It unlinks the
@@ -516,57 +530,59 @@ static int my_setup(struct adc_dev_s *dev)
  *  more devices are active.
  *
  *  Note: This is called from inside a critical section.
+ *
  ****************************************************************************/
 
-static void my_shutdown(struct adc_dev_s *dev)
+static void adc_shutdown(struct adc_dev_s *dev)
 {
-  ainfo("entered: 0x%08lX\n", dev);
+  ainfo("Shutdown: 0x%08lX\n", dev);
 
   /* Remove adc_dev_s structure from the list */
 
-  remove_device(dev);
+  adc_remove_device(dev);
 }
 
 /****************************************************************************
- * Name: my_rxint
+ * Name: adc_rxint
  *
  * Description:
  *   Call to enable or disable ADC RX interrupts
  *
- *  Note: This is called from inside a critical section.
+ *   Note: This is called from inside a critical section.
+ *
  ****************************************************************************/
 
-static void my_rxint(struct adc_dev_s *dev, bool enable)
+static void adc_rxint(struct adc_dev_s *dev, bool enable)
 {
   if (enable)
     {
-      ainfo("entered: enable: 0x%08lX\n", dev);
+      ainfo("Enabling: 0x%08lX\n", dev);
 
-      add_device(dev);
+      adc_add_device(dev);
     }
   else
     {
-      ainfo("entered: disable: 0x%08lX\n", dev);
+      ainfo("Disabling: 0x%08lX\n", dev);
 
-      remove_device(dev);
+      adc_remove_device(dev);
     }
 }
 
 /****************************************************************************
- * Name: my_ioctl
+ * Name: adc_ioctl
  *
  * Description:
- *  All ioctl calls will be routed through this method
+ *   All ioctl calls will be routed through this method
  *
  ****************************************************************************/
 
-static int my_ioctl(struct adc_dev_s *dev,
-                    int               cmd,
-                    unsigned long     arg)
+static int adc_ioctl(struct adc_dev_s *dev,
+                     int               cmd,
+                     unsigned long     arg)
 {
   /* No ioctl commands supported */
 
-  ainfo("entered\n");
+  ainfo("ioctl: 0x%08lX\n", dev);
 
   return -ENOTTY;
 }
@@ -578,13 +594,13 @@ static int my_ioctl(struct adc_dev_s *dev,
 #ifdef CONFIG_ADC
 
 /****************************************************************************
- * Name: my_setup
+ * Name: rp2040_adc_initialize
  *
  * Description:
  *   Initialize and register the ADC driver.
  *
  * Input Parameters:
- *   path      - Path to the ws2812 device  (e.g. "/dev/adc0")
+ *   path      - Path to the adc device  (e.g. "/dev/adc0")
  *   read_adc0 - This device reads ADC0
  *   read_adc1 - This device reads ADC1
  *   read_adc2 - This device reads ADC3
@@ -596,18 +612,18 @@ static int my_ioctl(struct adc_dev_s *dev,
  *   success or NULL (with errno set) on failure
  ****************************************************************************/
 
-int rp2040_adc_setup(const char *path,
-                     bool        read_adc0,
-                     bool        read_adc1,
-                     bool        read_adc2,
-                     bool        read_adc3,
-                     bool        read_temp)
+int rp2040_adc_initialize(const char *path,
+                          bool        read_adc0,
+                          bool        read_adc1,
+                          bool        read_adc2,
+                          bool        read_adc3,
+                          bool        read_temp)
 {
   struct adc_dev_s *dev;
   struct private_s *priv;
   int               ret;
 
-  ainfo("entered\n");
+  ainfo("Initializing: 0x%08lX\n", dev);
 
   if (!read_adc0  && !read_adc1 && !read_adc2 && !read_adc3 && !read_temp)
     {

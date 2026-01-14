@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f401rc-rs485/src/stm32_lcd_ssd1306.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -64,14 +66,14 @@ int board_lcd_initialize(void)
 
   /* Initialize the RESET and DC pins */
 
-  stm32_configgpio(GPIO_OLED_RESET);
-  stm32_configgpio(GPIO_OLED_DC);
+  stm32_configgpio(GPIO_LCD_RESET);
+  stm32_configgpio(GPIO_LCD_DC);
 
   /* Reset the OLED display */
 
-  stm32_gpiowrite(GPIO_OLED_RESET, 0);
+  stm32_gpiowrite(GPIO_LCD_RESET, 0);
   up_mdelay(1);
-  stm32_gpiowrite(GPIO_OLED_RESET, 1);
+  stm32_gpiowrite(GPIO_LCD_RESET, 1);
   up_mdelay(120);
 
   ret = board_ssd1306_initialize(OLED_SPI_PORT);

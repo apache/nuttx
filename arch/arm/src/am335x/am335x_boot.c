@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/am335x/am335x_boot.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -205,7 +207,7 @@ static void am335x_vectorpermissions(uint32_t mmuflags)
    * table
    */
 
-  uint32_t pte = mmu_l2_getentry(PG_L2_VECT_VADDR, 0);
+  uintptr_t pte = mmu_l2_getentry(PG_L2_VECT_VADDR, 0);
 
   /* Mask out the old MMU flags from the page table entry.
    *

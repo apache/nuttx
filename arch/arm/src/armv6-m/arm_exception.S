@@ -1,12 +1,10 @@
 /****************************************************************************
  * arch/arm/src/armv6-m/arm_exception.S
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * This file was leveraged from the ARMv7-M version which has, in addition:
- *
- *   Copyright (C) 2012 Michael Smith. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2013 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2012 Michael Smith. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -87,7 +85,8 @@
 	.syntax	unified
 	.type	exception_common, function
 exception_common:
-
+	.cfi_sections	.debug_frame
+	.cfi_startproc
 	/* Complete the context save */
 
 	/* Get the current stack pointer.  The EXC_RETURN value tells us whether
@@ -164,7 +163,11 @@ exception_common:
 	isb		sy
 3:
 #endif
-
+	mov		fp,	r1
+	.cfi_def_cfa	fp,	0				/* Register in fp, so we just set fp as frame */
+	.cfi_offset	pc,	REG_PC * 4
+	.cfi_offset	sp,	REG_SP * 4
+	.cfi_offset	lr,	REG_LR * 4
 	bl		arm_doirq				/* R0=IRQ, R1=register save area on stack */
 
 	/* On return from arm_doirq, R0 will hold a pointer to register context
@@ -217,7 +220,7 @@ exception_common:
 	 */
 
 	bx		r14					/* And return */
-
+	.cfi_endproc
 	.size	exception_common, .-exception_common
 
 /****************************************************************************

@@ -1,8 +1,9 @@
 /******************************************************************************
  * drivers/wireless/spirit/include/spirit_pktcommon.h
  *
- *   Copyright(c) 2015 STMicroelectronics
- *   Author: VMA division - AMS
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: Copyright(c) 2015 STMicroelectronics
+ * SPDX-FileContributor: Author: VMA division - AMS
  *   Version 3.2.2 08-July-2015
  *
  * Redistribution and use in source and binary forms, with or without
@@ -981,7 +982,7 @@ int spirit_pktcommon_get_rxcrc(FAR struct spirit_library_s *spirit,
  * Name: spirit_pktcommon_enable_rxautoack
  *
  * Description:
- *   Sets the AUTO ACKNOLEDGEMENT mechanism on the receiver. When the feature
+ *   Sets the AUTO ACKNOWLEDGEMENT mechanism on the receiver. When the feature
  *   is enabled and a data packet has been correctly received, then an
  *   acknowledgement packet is sent back to the originator of the received
  *   packet. If the PIGGYBACKING bit is also set, payload data will be read
@@ -1007,7 +1008,7 @@ int spirit_pktcommon_enable_rxautoack(FAR struct spirit_library_s *spirit,
  * Name: spirit_pktcommon_enable_txautoack
  *
  * Description:
- *   Sets the AUTO ACKNOLEDGEMENT mechanism on the transmitter. On the
+ *   Sets the AUTO ACKNOWLEDGEMENT mechanism on the transmitter. On the
  *   transmitter side, the NACK_TX field can be used to require or not an
  *   acknowledgment for each individual packet: if NACK_TX is set to "1" then
  *   acknowledgment will not be required; if NACK_TX is set to "0" then

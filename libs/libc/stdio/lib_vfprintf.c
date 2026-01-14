@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stdio/lib_vfprintf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -22,11 +24,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdio.h>
-
-#include "libc.h"
+#include <nuttx/streams.h>
 
 /****************************************************************************
  * Public Functions
@@ -45,7 +43,7 @@ int vfprintf(FAR FILE *stream, FAR const IPTR char *fmt, va_list ap)
 
   /* Hold the stream semaphore throughout the lib_vsprintf
    * call so that this thread can get its entire message out
-   * before being pre-empted by the next thread.
+   * before being preempted by the next thread.
    */
 
   flockfile(stream);

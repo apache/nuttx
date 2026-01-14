@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/motor/a4988.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -139,7 +141,7 @@ static int a4988_work(FAR struct stepper_lowerhalf_s *dev,
   if (priv->auto_idle)
     {
       priv->ops->idle(false);
-      nxsig_usleep(USEC_PER_MSEC);
+      nxsched_usleep(USEC_PER_MSEC);
     }
 
   dev->status.state = STEPPER_STATE_RUN;
@@ -199,7 +201,7 @@ static int a4988_idle(FAR struct stepper_lowerhalf_s *dev, uint8_t idle)
   else
     {
       priv->ops->idle(false);
-      nxsig_usleep(USEC_PER_MSEC);
+      nxsched_usleep(USEC_PER_MSEC);
       dev->status.state = STEPPER_STATE_READY;
     }
 

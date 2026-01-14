@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/mpfs_gpio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -100,7 +102,7 @@ static struct gpio_callback_s g_mss_gpio_callbacks[GPIO_BANK0_NUM_PINS +
 static void mpfs_gpio_irq_clear(int bank, int pin)
 {
   putreg32(1 << pin, g_gpio_base[bank] + MPFS_GPIO_INTR_OFFSET);
-  __MB();
+  UP_DSB();
 }
 
 /****************************************************************************

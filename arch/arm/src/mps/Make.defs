@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm/src/mps/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -18,6 +20,14 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_ARCH_ARMV7M),y)
+include armv7-m/Make.defs
+else
 include armv8-m/Make.defs
+endif
 
 CHIP_CSRCS = mps_start.c mps_serial.c mps_irq.c mps_timer.c mps_allocateheap.c
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CHIP_CSRCS += mps_userspace.c
+endif

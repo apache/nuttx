@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp_appsend.c
  *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  *   Copyright (C) 2007-2010, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -188,17 +190,18 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
       tcp_send(dev, conn, TCP_RST | TCP_ACK, hdrlen);
     }
 
-  /* Check for connection closed */
+  /* Check for connection tx closed */
 
-  else if ((result & TCP_CLOSE) != 0)
+  else if ((result & TCP_TXCLOSE) != 0)
     {
-      conn->tcpstateflags = TCP_FIN_WAIT_1;
+      conn->tcpstateflags = conn->tcpstateflags == TCP_CLOSE_WAIT ?
+                            TCP_LAST_ACK : TCP_FIN_WAIT_1;
       conn->tx_unacked    = 1;
       conn->nrtx          = 0;
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
       conn->sndseq_max    = tcp_getsequence(conn->sndseq) + 1;
 #endif
-      ninfo("TCP state: TCP_FIN_WAIT_1\n");
+      ninfo("TCP state: %d\n", conn->tcpstateflags);
 
       dev->d_sndlen       = 0;
       tcp_send(dev, conn, TCP_FIN | TCP_ACK, hdrlen);

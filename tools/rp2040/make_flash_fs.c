@@ -1,6 +1,8 @@
 /****************************************************************************
  * tools/rp2040/make_flash_fs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -124,13 +126,27 @@ void put_name(const char * cp)
     {
       switch (*cp)
         {
-          case '\"': printf("\\\""); break;
-          case '\'': printf("\\\'"); break;
-          case '\\': printf("\\\\"); break;
-          case '\a': printf("\\a");  break;
-          case '\b': printf("\\b");  break;
-          case '\n': printf("\\n");  break;
-          case '\t': printf("\\t");  break;
+          case '\"':
+            printf("\\\"");
+            break;
+          case '\'':
+            printf("\\\'");
+            break;
+          case '\\':
+            printf("\\\\");
+            break;
+          case '\a':
+            printf("\\a");
+            break;
+          case '\b':
+            printf("\\b");
+            break;
+          case '\n':
+            printf("\\n");
+            break;
+          case '\t':
+            printf("\\t");
+            break;
           default:
             if (iscntrl(*cp))
               {

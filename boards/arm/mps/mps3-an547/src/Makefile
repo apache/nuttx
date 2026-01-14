@@ -1,6 +1,8 @@
 ############################################################################
 # boards/arm/mps/mps3-an547/src/Makefile
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -20,6 +22,6 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = mps3_bringup.c
+CSRCS = mps3_bringup.c mps3_reset.c
 
 include $(TOPDIR)/boards/Board.mk

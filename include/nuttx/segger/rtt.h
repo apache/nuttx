@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/segger/rtt.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -93,8 +95,8 @@ void lib_rttinstream_close(FAR struct lib_rttinstream_s *stream);
 #endif
 
 #ifdef CONFIG_SYSLOG_RTT
-int syslog_rtt_putc(FAR struct syslog_channel_s *channel, int ch);
-ssize_t syslog_rtt_write(FAR struct syslog_channel_s *channel,
+int syslog_rtt_putc(FAR syslog_channel_t *channel, int ch);
+ssize_t syslog_rtt_write(FAR syslog_channel_t *channel,
                          FAR const char *buffer, size_t buflen);
 #endif
 

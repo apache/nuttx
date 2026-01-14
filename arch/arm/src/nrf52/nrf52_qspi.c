@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nrf52/nrf52_qspi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/semaphore.h>
 #include <arch/board/board.h>
 
@@ -48,17 +51,6 @@
 #define QSPI_SECTOR_ERASE 0x20
 #define QSPI_BLOCK_ERASE  0xd8
 #define QSPI_ALL_ERASE    0xc7
-
-/* QSPI memory synchronization */
-
-#define MEMORY_SYNC()     do { ARM_DSB(); ARM_ISB(); } while (0)
-
-/* Ensure that the DMA buffers are word-aligned. */
-
-#define ALIGN_SHIFT       2
-#define ALIGN_MASK        3
-#define ALIGN_UP(n)       (((n)+ALIGN_MASK) & ~ALIGN_MASK)
-#define IS_ALIGNED(n)     (((uint32_t)(n) & ALIGN_MASK) == 0)
 
 /****************************************************************************
  * Private Types
@@ -692,7 +684,9 @@ static int nrf52_qspi_memory(struct qspi_dev_s *dev,
 
 static void *nrf52_qspi_alloc(struct qspi_dev_s *dev, size_t buflen)
 {
-  return kmm_malloc(ALIGN_UP(buflen));
+  /* Ensure that the DMA buffers are word-aligned. */
+
+  return kmm_malloc(ALIGN_UP(buflen, 4));
 }
 
 /****************************************************************************

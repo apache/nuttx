@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/input/gt9xx.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -76,12 +78,12 @@ struct gt9xx_dev_s
 {
   /* I2C bus and address for device */
 
-  struct i2c_master_s *i2c;
+  FAR struct i2c_master_s *i2c;
   uint8_t addr;
 
   /* Callback for Board-Specific Operations */
 
-  const struct gt9xx_board_s *board;
+  FAR const struct gt9xx_board_s *board;
 
   /* Device State */
 
@@ -94,7 +96,7 @@ struct gt9xx_dev_s
 
   /* Poll Waiters for device */
 
-  struct pollfd *fds[CONFIG_INPUT_GT9XX_NPOLLWAITERS];
+  FAR struct pollfd *fds[CONFIG_INPUT_GT9XX_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -124,7 +126,9 @@ static const struct file_operations g_gt9xx_fileops =
   NULL,         /* ioctl */
   NULL,         /* truncate */
   NULL,         /* mmap */
-  gt9xx_poll    /* poll */
+  gt9xx_poll,   /* poll */
+  NULL,         /* readv */
+  NULL          /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL        /* unlink */
 #endif
@@ -192,7 +196,7 @@ static int gt9xx_i2c_read(FAR struct gt9xx_dev_s *dev,
 
   const int msgv_len = sizeof(msgv) / sizeof(msgv[0]);
 
-  iinfo("reg=0x%x, buflen=%ld\n", reg, buflen);
+  iinfo("reg=0x%x, buflen=%zu\n", reg, buflen);
   DEBUGASSERT(dev && dev->i2c && buf);
 
   /* Execute the I2C Transfer */
@@ -478,10 +482,10 @@ static ssize_t gt9xx_read(FAR struct file *filep, FAR char *buffer,
 
   /* Returned Touch Sample will have 0 or 1 Touch Points */
 
-  iinfo("buflen=%ld\n", buflen);
+  iinfo("buflen=%zu\n", buflen);
   if (buflen < outlen)
     {
-      ierr("Buffer should be at least %ld bytes, got %ld bytes\n",
+      ierr("Buffer should be at least %zu bytes, got %zu bytes\n",
            outlen, buflen);
       return -EINVAL;
     }
@@ -635,7 +639,7 @@ static int gt9xx_open(FAR struct file *filep)
 
       /* Let Touch Panel power up before probing */
 
-      nxsig_usleep(100 * 1000);
+      nxsched_usleep(100 * 1000);
 
       /* Check that Touch Panel exists on I2C */
 

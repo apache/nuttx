@@ -32,16 +32,22 @@ config NET_ICMP_PMTU_TIMEOUT
 	default 10
 	depends on NET_ICMP_PMTU_ENTRIES != 0
 	---help---
-		The timout of the ICMP pmtu entry
+		The timeout of the ICMP pmtu entry
 
 config NET_ICMP_SOCKET
 	bool "IPPROTO_ICMP socket support"
 	default n
-	select MM_IOB
+	select NET_READAHEAD
 	---help---
 		Enable support for IPPROTO_ICMP sockets.  These sockets are needed
 		for application level support for sending ECHO (ping) requests and
 		receiving associated ECHO replies.
+
+config NET_ICMP_CHECKSUMS
+	bool "ICMP checksums"
+	default y
+	---help---
+		Enable/disable ICMP checksum support.
 
 if NET_ICMP_SOCKET
 

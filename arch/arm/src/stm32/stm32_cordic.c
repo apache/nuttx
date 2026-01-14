@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_cordic.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -270,7 +272,7 @@ int cordic_calc(struct cordic_lowerhalf_s *lower,
     }
 
   /* Read results - blocking.
-   * NOTE: We don't need to wait for RRDY flag as wait sates are
+   * NOTE: We don't need to wait for RRDY flag as wait states are
    *       inserted automatically on RDATA read.
    */
 

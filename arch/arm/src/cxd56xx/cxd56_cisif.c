@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_cisif.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -284,10 +286,7 @@ static uint64_t cisif_get_msec_time(void)
 {
   struct timespec tp;
 
-  if (clock_systime_timespec(&tp) < 0)
-    {
-      return 0;
-    }
+  clock_systime_timespec(&tp);
 
   return (((uint64_t)tp.tv_sec) * 1000 + tp.tv_nsec / 1000000);
 }

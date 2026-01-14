@@ -1,6 +1,8 @@
 /*****************************************************************************
  * include/nuttx/wireless/ieee802154/ieee802154_mac.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -309,34 +311,6 @@ enum ieee802154_status_e
   IEEE802154_STATUS_UNAVAILABLE_KEY,
   IEEE802154_STATUS_UNSUPPORTED_ATTRIBUTE,
   IEEE802154_STATUS_LIMITREACHED,
-};
-
-static const char *IEEE802154_STATUS_STRING[] =
-{
-  "Success",
-  "Out of capacity",
-  "Denied",
-  "Failure",
-  "Beacon loss",
-  "Channel access failure",
-  "Disable TRX failure",
-  "Failed security check",
-  "Frame too long",
-  "Invalid GTS",
-  "Invalid handle",
-  "Invalid parameter",
-  "No ack",
-  "No beacon",
-  "No data",
-  "No short address",
-  "PAN ID conflict",
-  "Realignment",
-  "Transaction expired",
-  "Transaction overflow",
-  "Tx active",
-  "Unavailable key",
-  "Unsupported attribute",
-  "Limit reached",
 };
 
 /* IEEE 802.15.4 PHY/MAC PIB attributes IDs */
@@ -1135,7 +1109,7 @@ struct ieee802154_disassoc_conf_s
 
   enum ieee802154_status_e status;
 
-  /* Address of device either requesting or being intructed to disassociate */
+  /* Address of device either requesting or being instructed to disassociate */
 
   struct ieee802154_addr_s dev_addr;
 };
@@ -1743,6 +1717,12 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/*****************************************************************************
+ * Public Data
+ *****************************************************************************/
+
+EXTERN FAR const char *g_ieee802154_status_string[];
 
 /*****************************************************************************
  * Public Function Prototypes

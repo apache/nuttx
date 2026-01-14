@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc17_40_usbdev.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -304,7 +306,7 @@ struct lpc17_40_dmadesc_s
   uint32_t                nextdesc;      /* Address of the next DMA descriptor in RAM */
   uint32_t                config;        /* Misc. bit encoded configuration information */
   uint32_t                start;         /* DMA start address */
-  uint32_t                status;        /* Misc. bit encoded status inforamation */
+  uint32_t                status;        /* Misc. bit encoded status information */
 #ifdef CONFIG_USBDEV_ISOCHRONOUS
   uint32_t                size;          /* Isochronous packet size address */
 #endif
@@ -1098,7 +1100,7 @@ static int lpc17_40_wrrequest(struct lpc17_40_ep_s *privep)
       return OK;
     }
 
-  uinfo("epphy=%d req=%p: len=%d xfrd=%d nullpkt=%d\n",
+  uinfo("epphy=%d req=%p: len=%zu xfrd=%zu nullpkt=%d\n",
         privep->epphy, privreq, privreq->req.len, privreq->req.xfrd,
         privep->txnullpkt);
 
@@ -1208,7 +1210,7 @@ static int lpc17_40_rdrequest(struct lpc17_40_ep_s *privep)
       return OK;
     }
 
-  uinfo("len=%d xfrd=%d nullpkt=%d\n",
+  uinfo("len=%zu xfrd=%zu nullpkt=%d\n",
         privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
 
   /* Ignore any attempt to receive a zero length packet */

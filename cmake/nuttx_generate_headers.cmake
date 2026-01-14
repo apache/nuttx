@@ -1,6 +1,8 @@
 # ##############################################################################
 # cmake/nuttx_generate_headers.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -33,42 +35,40 @@ include(nuttx_mkversion)
 
 # Setup symbolic link generation
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/include_arch/arch)
-  execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
-                          ${CMAKE_BINARY_DIR}/include_arch/arch)
-endif()
-
 if(NOT EXISTS ${CMAKE_BINARY_DIR}/include_apps)
   execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
                           ${CMAKE_BINARY_DIR}/include_apps)
 endif()
 
 if(NOT EXISTS ${CMAKE_BINARY_DIR}/include/arch)
-  nuttx_create_symlink(${NUTTX_DIR}/arch/${CONFIG_ARCH}/include
-                       ${CMAKE_BINARY_DIR}/include/arch)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
+                          ${CMAKE_BINARY_DIR}/include/arch)
+  file(GLOB CONTENTS ${NUTTX_DIR}/arch/${CONFIG_ARCH}/include/*)
+  foreach(ARCH_INCDIR ${CONTENTS})
+    get_filename_component(SUB_ELEMENT ${ARCH_INCDIR} NAME)
+    nuttx_create_symlink(${NUTTX_DIR}/arch/${CONFIG_ARCH}/include/${SUB_ELEMENT}
+                         ${CMAKE_BINARY_DIR}/include/arch/${SUB_ELEMENT})
+  endforeach()
 endif()
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/include_arch/arch/board)
+if(NOT EXISTS ${CMAKE_BINARY_DIR}/include/arch/board)
   if(EXISTS ${NUTTX_BOARD_DIR}/include)
     nuttx_create_symlink(${NUTTX_BOARD_DIR}/include
-                         ${CMAKE_BINARY_DIR}/include_arch/arch/board)
+                         ${CMAKE_BINARY_DIR}/include/arch/board)
   elseif(EXISTS ${NUTTX_BOARD_DIR}/../common/include)
     nuttx_create_symlink(${NUTTX_BOARD_DIR}/../common/include
-                         ${CMAKE_BINARY_DIR}/include_arch/arch/board)
+                         ${CMAKE_BINARY_DIR}/include/arch/board)
   endif()
 endif()
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/include_arch/arch/chip)
+if(NOT EXISTS ${CMAKE_BINARY_DIR}/include/arch/chip)
   if(CONFIG_ARCH_CHIP_CUSTOM)
-    execute_process(
-      COMMAND ${CMAKE_COMMAND} -E copy_directory ${NUTTX_CHIP_ABS_DIR}/include
-              ${CMAKE_BINARY_DIR}/include_arch/arch/chip)
+    nuttx_create_symlink(${NUTTX_CHIP_ABS_DIR}/include
+                         ${CMAKE_BINARY_DIR}/include/arch/chip)
   else()
-    execute_process(
-      COMMAND
-        ${CMAKE_COMMAND} -E copy_directory
-        ${NUTTX_DIR}/arch/${CONFIG_ARCH}/include/${CONFIG_ARCH_CHIP}
-        ${CMAKE_BINARY_DIR}/include_arch/arch/chip)
+    nuttx_create_symlink(
+      ${NUTTX_DIR}/arch/${CONFIG_ARCH}/include/${CONFIG_ARCH_CHIP}
+      ${CMAKE_BINARY_DIR}/include/arch/chip)
   endif()
 endif()
 
@@ -152,3 +152,7 @@ add_custom_target(
     $<$<BOOL:${NEED_MATH_H}>:${CMAKE_BINARY_DIR}/include/math.h>
     $<$<BOOL:${CONFIG_ARCH_FLOAT_H}>:${CMAKE_BINARY_DIR}/include/float.h>
     $<$<BOOL:${CONFIG_ARCH_SETJMP_H}>:${CMAKE_BINARY_DIR}/include/setjmp.h>)
+
+# apps_context is a PHONY target used as an intermediate process to control the
+# time order of context preparation actions of app building
+add_custom_target(apps_context ALL DEPENDS nuttx_context)

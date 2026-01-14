@@ -1,15 +1,12 @@
 /****************************************************************************
  * include/nuttx/net/can.h
- * Macros and definitions for the CAN link layer.
  *
- *   Copyright (C) 2007, 2009-2012, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Derived from uIP with has a similar BSD-styple license:
- *
- *   Author: Adam Dunkels <adam@dunkels.com>
- *   Copyright (c) 2001-2003, Adam Dunkels.
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2007, 2009-2012, 2015 Gregory Nutt. All
+ * rights reserved.
+ * SPDX-FileCopyrightText: 2001-2003, Adam Dunkels. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Adam Dunkels <adam@dunkels.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -47,20 +44,36 @@
 
 #include <nuttx/config.h>
 #include <nuttx/can.h>
+#include <nuttx/mm/iob.h>
+#include <nuttx/net/netconfig.h>
 #include <stdint.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 #ifdef CONFIG_NET_CAN_CANFD
-#define NET_CAN_PKTSIZE sizeof(struct canfd_frame)
+#  define NET_CAN_PKTSIZE sizeof(struct canfd_frame)
 #else
-#define NET_CAN_PKTSIZE sizeof(struct can_frame)
+#  define NET_CAN_PKTSIZE sizeof(struct can_frame)
 #endif
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* The structure holding the CAN statistics that are gathered if
+ * CONFIG_NET_STATISTICS is defined.
+ */
+
+#ifdef CONFIG_NET_STATISTICS
+struct can_stats_s
+{
+  net_stats_t drop;       /* Number of dropped CAN frames */
+  net_stats_t recv;       /* Number of received CAN frames */
+  net_stats_t sent;       /* Number of sent CAN frames */
+};
+#endif
 
 /****************************************************************************
  * Public Data
@@ -70,8 +83,8 @@
 
 /* Lookup tables convert can_dlc <-> payload len */
 
-extern const uint8_t can_dlc_to_len[16];
-extern const uint8_t len_to_can_dlc[65];
+extern const uint8_t g_can_dlc_to_len[16];
+extern const uint8_t g_len_to_can_dlc[65];
 
 #endif
 
@@ -113,6 +126,48 @@ extern "C"
 
 struct net_driver_s; /* Forward reference */
 int can_input(FAR struct net_driver_s *dev);
+
+/****************************************************************************
+ * Name: can_iob_timedalloc
+ *
+ * Description:
+ *  Allocate an CAN I/O buffer from the CAN buffer pool.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NET_CAN_NBUFFERS > 0
+FAR struct iob_s *can_iob_timedalloc(unsigned int timeout);
+#else
+#define can_iob_timedalloc(t) net_iobtimedalloc(true, t)
+#endif
+
+/****************************************************************************
+ * Name: can_iob_clone
+ *
+ * Description:
+ *  Clone an I/O buffer from the CAN buffer pool.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NET_CAN_NBUFFERS > 0
+FAR struct iob_s *can_iob_clone(FAR struct net_driver_s *dev);
+#else
+#define can_iob_clone(d) netdev_iob_clone(d, false)
+#endif
+
+/****************************************************************************
+ * Name: can_iob_navail
+ *
+ * Description:
+ *   Return the number of available CAN I/O buffers.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NET_CAN_NBUFFERS > 0
+int can_iob_navail(void);
+#else
+#define can_iob_navail() iob_navail(false)
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

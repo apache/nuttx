@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/usrsock/usrsock_getpeername.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -43,8 +45,8 @@
  * Private Functions
  ****************************************************************************/
 
-static uint16_t getpeername_event(FAR struct net_driver_s *dev,
-                                  FAR void *pvpriv, uint16_t flags)
+static uint32_t getpeername_event(FAR struct net_driver_s *dev,
+                                  FAR void *pvpriv, uint32_t flags)
 {
   FAR struct usrsock_data_reqstate_s *pstate = pvpriv;
   FAR struct usrsock_conn_s *conn = pstate->reqstate.conn;
@@ -164,7 +166,7 @@ int usrsock_getpeername(FAR struct socket *psock,
   socklen_t outaddrlen = 0;
   int ret;
 
-  net_lock();
+  usrsock_lock();
 
   if (conn->state == USRSOCK_CONN_STATE_UNINITIALIZED ||
       conn->state == USRSOCK_CONN_STATE_ABORTED)
@@ -202,7 +204,7 @@ int usrsock_getpeername(FAR struct socket *psock,
     {
       /* Wait for completion of request. */
 
-      net_sem_wait_uninterruptible(&state.reqstate.recvsem);
+      usrsock_sem_timedwait(&state.reqstate.recvsem, false, UINT_MAX);
       ret = state.reqstate.result;
 
       DEBUGASSERT(state.valuelen <= *addrlen);
@@ -220,7 +222,7 @@ int usrsock_getpeername(FAR struct socket *psock,
   usrsock_teardown_data_request_callback(&state);
 
 errout_unlock:
-  net_unlock();
+  usrsock_unlock();
 
   *addrlen = outaddrlen;
   return ret;

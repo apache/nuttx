@@ -1,0 +1,4 @@
+AK09912
+=======
+
+Magnetic compass IC with an I2C interface.

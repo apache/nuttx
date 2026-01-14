@@ -63,6 +63,13 @@ config MEADOW_PWR_MGMT_SUPPORT
 	bool "Enables Meadow power management support"
 	default n
 
+config BOARD_DUAL_CDCACM
+	bool "Enable ttyACM0 and ttyACM1"
+	select ARCH_BOARD_COMMON
+	---help---
+		When this option is enabled the board will register two
+		USB CDC/ACM interfaces.
+
 choice
 	prompt "Select Main Board Model"
 	default BOARD_MEADOW_F7MICRO_DEFAULT

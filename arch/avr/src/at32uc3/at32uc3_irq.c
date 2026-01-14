@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_irq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -219,6 +221,7 @@ void up_irqinitialize(void)
   /* And finally, enable interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
+  avr_color_intstack();
   up_irq_restore(0);
 #endif
 }
@@ -258,7 +261,7 @@ int up_prioritize_irq(int irq, int priority)
  *   Return the highest priority pending INTn interrupt (hwere n=level).
  *   This is called directly from interrupt handling logic.  This should be
  *   save since the UC3B will save all C scratch/volatile registers (and
- *   this function should not alter the perserved/static registers).
+ *   this function should not alter the preserved/static registers).
  *
  ****************************************************************************/
 

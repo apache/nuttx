@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/mx8mp/mx8mp_iomuxc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,7 +39,7 @@
  * Name: mx8mp_iomuxc_set_pin_config
  *
  * Description:
- *   Congigure the IOMUXC pin configuration.
+ *   Configure the IOMUXC pin configuration.
  *   The first five parameters can be filled with the pin function ID macros.
  *
  ****************************************************************************/

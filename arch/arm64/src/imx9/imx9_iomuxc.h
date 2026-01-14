@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/imx9/imx9_iomuxc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -82,6 +84,7 @@ struct iomux_cfg_s
   uint32_t pad;
   uint32_t mux;
 };
+
 typedef struct iomux_cfg_s iomux_cfg_t;
 
 /****************************************************************************

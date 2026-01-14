@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/common/addrenv.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -66,7 +68,7 @@
 
 /* Mark user memory if in kernel build */
 
-#ifndef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
 #  define MMU_USER_DEFAULT      (X86_PAGE_USER)
 #else
 #  define MMU_USER_DEFAULT      (0)

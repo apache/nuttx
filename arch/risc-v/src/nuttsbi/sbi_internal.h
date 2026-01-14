@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/nuttsbi/sbi_internal.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -112,7 +114,7 @@ void sbi_start(void) noreturn_function;
  *   Send an inter-processor interrupt to all the harts defined
  *
  * Input Parameters:
- *   hmask - Mask fo CPU to send IPI
+ *   hmask - Mask for CPU to send IPI
  *   hbase - The firset CPU id to send
  *
  ****************************************************************************/
@@ -169,7 +171,11 @@ void sbi_set_mtimecmp(uint64_t value);
  * Description:
  *   Conduct any device specific initialization before entering S-mode from
  *   NUTTSBI as some chips need such preparations. This function still runs
- *   in M-mode.
+ *   in M-mode. Things like PMP setting up or device specific prepration
+ *   before entering S-mode can be done here.
+ *
+ *   If this is enabled, PMP setup logic in sbi_start.c is bypassed so that
+ *   PMP management is done at one place.
  *
  ****************************************************************************/
 

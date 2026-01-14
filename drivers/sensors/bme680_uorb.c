@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/bme680_uorb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,6 +34,7 @@
 #include <debug.h>
 #include <string.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/signal.h>
@@ -267,7 +270,7 @@ const float const_array2[16] =
   ((type) >= BME680_OS_SKIPPED && (type) <= BME680_OS_16X)
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 struct bme680_data_s
@@ -422,9 +425,11 @@ static const struct sensor_ops_s g_sensor_ops =
   NULL,             /* set_interval */
   NULL,             /* batch */
   NULL,             /* fetch */
+  NULL,             /* flush */
   NULL,             /* selftest */
   NULL,             /* set_calibvalue */
   bme680_calibrate, /* calibrate */
+  NULL,             /* get_info */
   bme680_control    /* control */
 };
 
@@ -1596,7 +1601,7 @@ static int bme680_thread(int argc, char **argv)
         }
 
     thread_sleep:
-      nxsig_usleep(CONFIG_SENSORS_BME680_POLL_INTERVAL);
+      nxsched_usleep(CONFIG_SENSORS_BME680_POLL_INTERVAL);
     }
 
   return OK;

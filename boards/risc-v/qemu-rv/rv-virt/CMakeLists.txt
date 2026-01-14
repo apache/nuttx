@@ -1,6 +1,8 @@
 # ##############################################################################
 # boards/risc-v/qemu-rv/rv-virt/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -19,3 +21,10 @@
 # ##############################################################################
 
 add_subdirectory(src)
+
+if(CONFIG_BUILD_PROTECTED)
+  add_subdirectory(kernel)
+  set_property(
+    GLOBAL PROPERTY LD_SCRIPT_USER
+                    ${CMAKE_CURRENT_LIST_DIR}/scripts/ld-userland.script)
+endif()

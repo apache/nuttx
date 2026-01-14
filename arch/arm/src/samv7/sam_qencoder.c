@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_qencoder.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -73,7 +75,7 @@ struct sam_lowerhalf_s
    * All variables are of an unsigned type, while the variables in the
    * struct qe_index_s are of a signed type. The reason for using unsigned
    * types is that the operations on unsigned types when extending is
-   * defined (overflow arithmetics).
+   * defined (overflow arithmetic).
    */
 
   uint32_t last_pos;             /* The actual position */
@@ -381,7 +383,7 @@ static int sam_qeindex(struct qe_lowerhalf_s *lower, struct qe_index_s *dest)
   bool captured = false;
   struct sam_lowerhalf_s *priv = (struct sam_lowerhalf_s *)lower;
 
-  /* Perform the current position retrieval everytime */
+  /* Perform the current position retrieval every time */
 
   sam_position(lower, &current_pos);
   dest->qenc_pos = current_pos;

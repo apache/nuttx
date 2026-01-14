@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_flash.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,6 +36,28 @@
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+int stm32_flash_lock(void);
+int stm32_flash_unlock(void);
+
+/****************************************************************************
+ * Name: stm32_flash_user_optbytes
+ *
+ * Description:
+ *   Modify the contents of the user option bytes (USR OPT) on the flash.
+ *   This does not set OBL_LAUNCH so new options take effect only after
+ *   next power reset.
+ *
+ * Input Parameters:
+ *   clrbits - Bits in the option bytes to be cleared
+ *   setbits - Bits in the option bytes to be set
+ *
+ * Returned Value:
+ *   Option bytes after operation is completed
+ *
+ ****************************************************************************/
+
+uint32_t stm32_flash_users_optbytes(uint32_t clrbits, uint32_t setbits);
 
 /****************************************************************************
  * Name: stm32_eeprom_size

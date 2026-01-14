@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/pthread/pthread_condattr_init.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -61,6 +63,7 @@ int pthread_condattr_init(FAR pthread_condattr_t *attr)
   else
     {
       attr->clockid = CLOCK_REALTIME;
+      attr->pshared = PTHREAD_PROCESS_PRIVATE;
     }
 
   linfo("Returning %d\n", ret);

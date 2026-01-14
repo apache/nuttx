@@ -1,6 +1,8 @@
 ############################################################################
 # arch/xtensa/src/common/espressif/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -34,6 +36,106 @@ ifeq ($(filter $(CONFIG_ESPRESSIF_SIMPLE_BOOT) \
       $(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT) \
       $(CONFIG_ESP32S3_APP_FORMAT_MCUBOOT),y),y)
 CHIP_CSRCS += esp_loader.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_TEMP),y)
+CHIP_CSRCS += esp_temperature_sensor.c
+endif
+
+ifeq ($(CONFIG_ESP_SDM),y)
+CHIP_CSRCS += esp_sdm.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_I2S),y)
+CHIP_CSRCS += esp_i2s.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_I2C_BITBANG),y)
+CHIP_CSRCS += esp_i2c_bitbang.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_SPI_BITBANG),y)
+CHIP_CSRCS += esp_spi_bitbang.c
+endif
+
+ifeq ($(CONFIG_ESP_PCNT),y)
+CHIP_CSRCS += esp_pcnt.c
+ifeq ($(CONFIG_ESP_PCNT_AS_QE),y)
+CHIP_CSRCS += esp_qencoder.c
+endif
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_LEDC),y)
+CHIP_CSRCS += esp_ledc.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_SPIFLASH),y)
+CHIP_CSRCS += esp_spiflash.c
+ifeq ($(CONFIG_ESPRESSIF_MTD),y)
+CHIP_CSRCS += esp_spiflash_mtd.c
+endif
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_I2C_PERIPH_SLAVE_MODE),y)
+CHIP_CSRCS += esp_i2c_slave.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_DEDICATED_GPIO),y)
+CHIP_CSRCS += esp_dedic_gpio.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_SHA_ACCELERATOR),y)
+CHIP_CSRCS += esp_sha.c
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
+CHIP_CSRCS += esp_crypto.c
+endif
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_USE_ULP_RISCV_CORE), y)
+CHIP_CSRCS += esp_ulp.c
+endif
+
+ifeq ($(CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL),y)
+CHIP_CSRCS += esp_nxdiag.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
+CHIP_CSRCS += esp_wireless.c
+CHIP_CSRCS += esp_wifi_utils.c
+ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
+CHIP_CSRCS += esp_wifi_event_handler.c
+CHIP_CSRCS += esp_wlan_netdev.c
+CHIP_CSRCS += esp_wifi_api.c
+endif
+ifeq ($(CONFIG_ESPRESSIF_ESPNOW_PKTRADIO), y)
+CHIP_CSRCS += esp_espnow_pktradio.c
+EXTRA_LIBS += -lespnow
+endif
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_ADC),y)
+CHIP_CSRCS += esp_adc.c
+endif
+
+ifneq ($(CONFIG_ARCH_CHIP_ESP32),y)
+ifeq ($(CONFIG_PM),y)
+ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
+CHIP_CSRCS += esp_pm_initialize.c
+endif
+CHIP_CSRCS += esp_pm.c
+LDFLAGS += -u esp_timer_init_include_func
+endif
+endif
+
+CHIP_CSRCS += esp_efuse.c
+
+LDFLAGS += -u esp_system_include_startup_funcs
+ifeq ($(CONFIG_ESPRESSIF_EFUSE),y)
+LDFLAGS    += -u esp_efuse_startup_include_func
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
+include common$(DELIM)espressif$(DELIM)Wireless.mk
 endif
 
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif$(DELIM)platform_include

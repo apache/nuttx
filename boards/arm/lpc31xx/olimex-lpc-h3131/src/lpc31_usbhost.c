@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/lpc31xx/olimex-lpc-h3131/src/lpc31_usbhost.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -122,7 +124,7 @@ static int ehci_waiter(int argc, char *argv[])
  * Name: lpc31_usbhost_bootinitialize
  *
  * Description:
- *   Called from lpc31_boardinitialize very early in inialization to setup
+ *   Called from lpc31_boardinitialize very early in initialization to setup
  *   USB host-related GPIO pins for the LPC-H3131 board.
  *
  *   SIGNAL      GPIO

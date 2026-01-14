@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tlsr82/hardware/tlsr82_uart.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -138,7 +140,7 @@
 #define UART_GET_TX_BUF_CNT()          ((UART_BUF_CNT0_REG & UART_BUF_CNT0_TX_CNT) >>\
                                         UART_BUF_CNT0_TX_CNT_SHIFT)
 
-/* Uart interupt register definitions */
+/* Uart interrupt register definitions */
 
 #define UART_IRQ_REG                   REG_ADDR8(0x9e)
 

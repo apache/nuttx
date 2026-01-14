@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s2/common/src/esp32s2_board_i2sdev.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,10 +37,12 @@
 
 #include <arch/board/board.h>
 
-#include "esp32s2_i2s.h"
+#ifdef CONFIG_ESPRESSIF_I2S
+#  include "espressif/esp_i2s.h"
+#endif
 
-#if defined(CONFIG_ESP32S2_I2S) && !defined(CONFIG_AUDIO_CS4344) && \
-    !defined(CONFIG_AUDIO_ES8311)
+#if (defined(CONFIG_ESPRESSIF_I2S) && !defined(CONFIG_AUDIO_CS4344) && \
+    !defined(CONFIG_AUDIO_ES8311))
 
 /****************************************************************************
  * Public Functions
@@ -72,7 +76,7 @@ int board_i2sdev_initialize(bool enable_tx, bool enable_rx)
 
   ainfo("Initializing I2S\n");
 
-  i2s = esp32s2_i2sbus_initialize();
+  i2s = esp_i2sbus_initialize(0);
 
 #ifdef CONFIG_AUDIO_I2SCHAR
   ret = i2schar_register(i2s, 0);
@@ -153,5 +157,5 @@ int board_i2sdev_initialize(bool enable_tx, bool enable_rx)
   return ret;
 }
 
-#endif /* (CONFIG_ESP32S2_I2S) && !(CONFIG_AUDIO_CS4344)  *
+#endif /* (CONFIG_ESPRESSIF_I2S) && !(CONFIG_AUDIO_CS4344)  *
         * !(CONFIG_AUDIO_ES8311)                          */

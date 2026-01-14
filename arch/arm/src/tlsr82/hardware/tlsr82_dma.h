@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tlsr82/hardware/tlsr82_dma.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -90,7 +92,7 @@
 /* DMA irq register definitions
  * DMA_IRQ_MASK_REG: enable or disable the dma interrupt
  * DMA_IRQ_EN_REG  : enable or disable the dma channel
- * DMA_IRQ_STA_REG : get the dma interupt status and write 1 to clear
+ * DMA_IRQ_STA_REG : get the dma interrupt status and write 1 to clear
  */
 
 #define DMA_IRQ_MASK_REG           REG_ADDR8(0xc21)

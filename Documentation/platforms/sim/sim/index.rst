@@ -33,12 +33,8 @@ Running
 When the compilation finishes it will create a ``nuttx`` binary, then run it::
 
     $ ./nuttx 
-    login: admin
-    password: Administrator
-    User Logged-in!
 
-    NuttShell (NSH) NuttX-10.1.0
-    MOTD: username=admin password=Administrator
+    NuttShell (NSH) NuttX-12.10.0
     nsh> ?
     help usage:  help [-v] [<cmd>]
 
@@ -102,6 +98,21 @@ You should see some squares in different colors displayed in remmina:
    :width: 100%
 
    remmina connected to sim's VNC Server
+
+Running Simulated CAN
+=====================
+
+The simulator supports CAN support via SocketCAN on the host.
+The CAN interface of the host must be properly configured::
+
+  ip link set can0 type can bitrate 1000000
+  ip link set can0 up
+
+Virtual CAN interface can be used as well::
+
+  ip link add dev can0 type vcan
+  ifconfig can0 up
+
 
 Supported Boards
 ================

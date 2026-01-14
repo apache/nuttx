@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/esp32c3_adc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -570,7 +572,7 @@ static void adc_read_work(struct adc_dev_s *dev)
   if (ret < 0)
     {
       aerr("Failed to lock ret=%d\n", ret);
-      return ;
+      return;
     }
 
   adc_samplecfg(priv->channel);

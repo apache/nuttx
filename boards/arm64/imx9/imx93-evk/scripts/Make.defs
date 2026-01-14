@@ -1,6 +1,8 @@
 ############################################################################
 # boards/arm64/imx9/imx93-evk/scripts/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -25,6 +27,8 @@ include $(TOPDIR)/arch/arm64/src/Toolchain.defs
 
 ifeq ($(CONFIG_IMX9_BOOTLOADER),y)
   LDSCRIPT = ocramboot.ld
+else ifeq ($(CONFIG_BUILD_KERNEL),y)
+  LDSCRIPT = kernel.ld
 else
   LDSCRIPT = dramboot.ld
 endif
@@ -43,11 +47,3 @@ AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 NXFLATLDFLAGS1 = -r -d -warn-common
 NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)$(DELIM)binfmt$(DELIM)libnxflat$(DELIM)gnu-nxflat-pcrel.ld -no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
-
-# ELF module definitions
-
-CELFFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
-CXXELFFLAGS = $(CXXFLAGS) -mlong-calls # --target1-abs
-
-LDELFFLAGS = -r -e main
-LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)

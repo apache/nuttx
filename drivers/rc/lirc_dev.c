@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/rc/lirc_dev.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,9 +34,10 @@
 #include <poll.h>
 #include <fcntl.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
-#include <nuttx/mm/circbuf.h>
+#include <nuttx/circbuf.h>
 #include <nuttx/rc/lirc_dev.h>
 
 /****************************************************************************
@@ -256,7 +259,7 @@ static int lirc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct lirc_fh_s *fh = filep->f_priv;
   FAR struct lirc_lowerhalf_s *lower = fh->lower;
   FAR struct lirc_upperhalf_s *upper = lower->priv;
-  FAR unsigned int *val = (unsigned int *)(uintptr_t)arg;
+  FAR unsigned int *val = (FAR unsigned int *)(uintptr_t)arg;
   int ret;
 
   ret = nxmutex_lock(&upper->lock);
@@ -760,7 +763,7 @@ static ssize_t lirc_read(FAR struct file *filep, FAR char *buffer,
  * Input Parameters:
  *   lower - A pointer to an instance of lower half lirc driver.
  *   devno - The user specifies device number, from 0. If the
- *           devno alerady exists, -EEXIST will be returned.
+ *           devno already exists, -EEXIST will be returned.
  *
  * Returned Value:
  *   OK if the driver was successfully register; A negated errno value is

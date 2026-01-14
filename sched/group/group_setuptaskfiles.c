@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/group/group_setuptaskfiles.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -57,11 +59,11 @@
  *
  ****************************************************************************/
 
-int group_setuptaskfiles(FAR struct task_tcb_s *tcb,
+int group_setuptaskfiles(FAR struct tcb_s *tcb,
                          FAR const posix_spawn_file_actions_t *actions,
                          bool cloexec)
 {
-  FAR struct task_group_s *group = tcb->cmn.group;
+  FAR struct task_group_s *group = tcb->group;
   int ret = OK;
 #ifndef CONFIG_FDCLONE_DISABLE
   FAR struct tcb_s *rtcb = this_task();
@@ -70,24 +72,28 @@ int group_setuptaskfiles(FAR struct task_tcb_s *tcb,
   sched_trace_begin();
   DEBUGASSERT(group);
 #ifndef CONFIG_DISABLE_PTHREAD
-  DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) !=
+  DEBUGASSERT((tcb->flags & TCB_FLAG_TTYPE_MASK) !=
               TCB_FLAG_TTYPE_PTHREAD);
 #endif
 
 #ifndef CONFIG_FDCLONE_DISABLE
   DEBUGASSERT(rtcb->group);
 
-  /* Duplicate the parent task's file descriptors */
+  /* With the exception of kernel threads, duplicate the parent task's
+   * file descriptors.
+   */
 
-  if (group != rtcb->group)
+  if (group != rtcb->group &&
+      (tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
-      files_duplist(&rtcb->group->tg_filelist,
-                    &group->tg_filelist, actions, cloexec);
+      ret = fdlist_copy(&rtcb->group->tg_fdlist,
+                        &group->tg_fdlist, actions, cloexec);
     }
 
-  if (ret >= 0 && actions != NULL)
+  if (ret >= 0 && actions != NULL &&
+      (tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
-      ret = spawn_file_actions(&tcb->cmn, actions);
+      ret = spawn_file_actions(tcb, actions);
     }
 #endif
 

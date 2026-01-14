@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32f30xxx_rcc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -548,7 +550,7 @@ static void stm32_stdclockconfig(void)
 #endif
 
 #if defined(CONFIG_STM32_RTC_LSECLOCK)
-  /* Normally peripheral clocks are enabled later in bootup, but we need
+  /* Normally peripheral clocks are enabled later in boot up, but we need
    * clock on PWR *now* as without this setting registers that enable LSE
    * won't work.
    *

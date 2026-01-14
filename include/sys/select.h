@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/sys/select.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,25 +51,7 @@
  * many uint32_t's do we need to span all descriptors?
  */
 
-#if FD_SETSIZE <= 32
-#  define __SELECT_NUINT32 1
-#elif FD_SETSIZE <= 64
-#  define __SELECT_NUINT32 2
-#elif FD_SETSIZE <= 96
-#  define __SELECT_NUINT32 3
-#elif FD_SETSIZE <= 128
-#  define __SELECT_NUINT32 4
-#elif FD_SETSIZE <= 160
-#  define __SELECT_NUINT32 5
-#elif FD_SETSIZE <= 192
-#  define __SELECT_NUINT32 6
-#elif FD_SETSIZE <= 224
-#  define __SELECT_NUINT32 7
-#elif FD_SETSIZE <= 256
-#  define __SELECT_NUINT32 8
-#else
-#  warning "Larger fd_set needed"
-#endif
+#define __SELECT_NUINT32 ((FD_SETSIZE + 31) / 32)
 
 /* These macros map a file descriptor to an index and bit number */
 

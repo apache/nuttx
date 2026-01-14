@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/arm_tcbinfo.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -55,13 +57,8 @@ static const uint16_t g_reg_offs[] =
 #if 0
   UINT16_MAX,                         /* msp */
   TCB_REG_OFF(REG_R13),
-#  ifdef CONFIG_ARMV7M_USEBASEPRI
   UINT16_MAX,                         /* primask */
   TCB_REG_OFF(REG_BASEPRI),
-#  else
-  TCB_REG_OFF(REG_PRIMASK),
-  UINT16_MAX,                         /* basepri */
-#  endif
   UINT16_MAX,                         /* faultmask */
   UINT16_MAX,                         /* control */
 

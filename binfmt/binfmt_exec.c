@@ -1,6 +1,8 @@
 /****************************************************************************
  * binfmt/binfmt_exec.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -82,16 +84,23 @@ static int exec_internal(FAR const char *filename,
   irqstate_t flags;
   int pid;
   int ret;
+#ifndef CONFIG_BINFMT_LOADABLE
+  struct binary_s sbin;
+
+  bin = &sbin;
+  memset(bin, 0, sizeof(*bin));
+#else
 
   /* Allocate the load information */
 
   bin = kmm_zalloc(sizeof(struct binary_s));
-  if (!bin)
+  if (bin == NULL)
     {
       berr("ERROR: Failed to allocate binary_s\n");
       ret = -ENOMEM;
       goto errout;
     }
+#endif
 
   /* Load the module into memory */
 
@@ -152,14 +161,8 @@ static int exec_internal(FAR const char *filename,
   if (ret < 0)
     {
       berr("ERROR: Failed to schedule unload '%s': %d\n", filename, ret);
+      goto errout_with_lock;
     }
-
-#else
-  /* Free the binary_s structure here */
-
-  kmm_free(bin);
-
-  /* TODO: How does the module get unloaded in this case? */
 
 #endif
 
@@ -172,8 +175,10 @@ errout_with_lock:
   leave_critical_section(flags);
   unload_module(bin);
 errout_with_bin:
+#ifdef CONFIG_BINFMT_LOADABLE
   kmm_free(bin);
 errout:
+#endif
   return ret;
 }
 

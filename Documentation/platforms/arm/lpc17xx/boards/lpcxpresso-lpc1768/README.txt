@@ -601,7 +601,7 @@ Where <subdir> is one of the following:
        This support is, however, disabled in the base configuration.
 
        At last attempt, the SPI-based mircroSD does not work at
-       higher fequencies.  Setting the SPI frequency to 400000
+       higher frequencies.  Setting the SPI frequency to 400000
        removes the problem.   There must be some more optimal
        value that could be determined with additional experimentation.
 

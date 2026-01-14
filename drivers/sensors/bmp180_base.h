@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/bmp180_base.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -92,7 +94,7 @@
 #define CURRENT_OSS         (BMP180_OVERSAMPLE8X)
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Type
  ****************************************************************************/
 
 struct bmp180_dev_s

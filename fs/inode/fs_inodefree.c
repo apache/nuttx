@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/inode/fs_inodefree.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,6 +33,7 @@
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Public Functions
@@ -44,35 +47,35 @@
  *
  ****************************************************************************/
 
-void inode_free(FAR struct inode *node)
+void inode_free(FAR struct inode *inode)
 {
   /* Verify that we were passed valid pointer to an inode */
 
-  if (node != NULL)
+  if (inode != NULL)
     {
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
       /* Symbol links should never have peers or children */
 
-      DEBUGASSERT(!INODE_IS_SOFTLINK(node) ||
-                  (node->i_peer == NULL && node->i_child == NULL));
+      DEBUGASSERT(!INODE_IS_SOFTLINK(inode) ||
+                  (inode->i_peer == NULL && inode->i_child == NULL));
 #endif
 
       /* Free all peers and children of this i_node */
 
-      inode_free(node->i_peer);
-      inode_free(node->i_child);
+      inode_free(inode->i_peer);
+      inode_free(inode->i_child);
 
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
       /* If the inode is a symbolic link, the free the path to the linked
        * entity.
        */
 
-      if (INODE_IS_SOFTLINK(node) && node->u.i_link != NULL)
+      if (INODE_IS_SOFTLINK(inode) && inode->u.i_link != NULL)
         {
-          kmm_free(node->u.i_link);
+          fs_heap_free(inode->u.i_link);
         }
 #endif
 
-      kmm_free(node);
+      fs_heap_free(inode);
     }
 }

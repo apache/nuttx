@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/memoryregion.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,58 +41,5 @@ struct memory_region_s
   uintptr_t end;     /* End address of this region */
   uint32_t  flags;   /* Figure 5-3: Segment Flag Bits: PF_[X|W|R] */
 };
-
-/****************************************************************************
- * Public Function
- ****************************************************************************/
-
-/****************************************************************************
- * Name: parse_memory_region
- *
- * Input Parameters:
- *   format - The format string to parse. <start>,<end>,<flags>,...
- *            start - The start address of the memory region
- *            end   - The end address of the memory region
- *            flags - Readable 0x1, writable 0x2, executable 0x4
- *  region - The memory region to populate
- *  num    - The number of memory regions to parse
- *
- *  example: 0x1000,0x2000,0x1,0x2000,0x3000,0x3,0x3000,0x4000,0x7
- *
- ****************************************************************************/
-
-ssize_t parse_memory_region(FAR const char *format,
-                            FAR struct memory_region_s *region,
-                            size_t num);
-
-/****************************************************************************
- * Name: alloc_memory_region
- *
- * Input Parameters:
- *   format - The format string to parse. <start>,<end>,<flags>,...
- *            start - The start address of the memory region
- *            end   - The end address of the memory region
- *            flags - Readable 0x1, writable 0x2, executable 0x4
- *  example: 0x1000,0x2000,0x1,0x2000,0x3000,0x3,0x3000,0x4000,0x7
- *
- * Return:
- *   The parsed memory region list on success; NULL on failure.
- *   The boundary value of the memory region is zero.
- *   The return value need free by caller.
- *
- ****************************************************************************/
-
-FAR struct memory_region_s *
-alloc_memory_region(FAR const char *format);
-
-/****************************************************************************
- * Name: free_memory_region
- *
- * Input Parameters:
- *   region - The memory region list to free.
- *
- ****************************************************************************/
-
-void free_memory_region(FAR struct memory_region_s *region);
 
 #endif /* __INCLUDE_MEMORYREGION_H */

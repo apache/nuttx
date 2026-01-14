@@ -36,7 +36,6 @@
 #include "xtensa_attr.h"
 
 #include "esp32_clockconfig.h"
-#include "esp32_efuse.h"
 #include "esp32_region.h"
 #include "esp32_start.h"
 #include "esp32_spiram.h"
@@ -48,6 +47,11 @@
 #include "hardware/esp32_rtccntl.h"
 #include "rom/esp32_libc_stubs.h"
 #include "espressif/esp_loader.h"
+#include "espressif/esp_efuse.h"
+#include "esp_private/startup_internal.h"
+#include "esp_private/spi_flash_os.h"
+#include "esp_private/esp_mmu_map_private.h"
+#include "bootloader_flash_config.h"
 
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
 #  include "bootloader_init.h"
@@ -192,6 +196,16 @@ static noreturn_function void __esp32_start(void)
 
 #endif
 
+  /* Initialize flash state and MMU */
+
+  esp_mspi_pin_init();
+
+  bootloader_flash_update_id();
+
+  spi_flash_init_chip_state();
+
+  esp_mmu_map_init();
+
 #ifndef CONFIG_SMP
   /* Make sure that the APP_CPU is disabled for now */
 
@@ -225,26 +239,6 @@ static noreturn_function void __esp32_start(void)
 
   showprogress('A');
 
-  chip_rev = esp_efuse_hal_chip_revision();
-
-  _info("ESP32 chip revision is v%d.%01d\n", chip_rev / 100, chip_rev % 100);
-
-  if (chip_rev < 300)
-    {
-#ifndef ESP32_IGNORE_CHIP_REVISION_CHECK
-      ets_printf("ERROR: NuttX supports ESP32 chip revision >= v3.0"
-                 " (chip revision is v%d.%01d)\n",
-                 chip_rev / 100, chip_rev % 100);
-      PANIC();
-#endif
-      ets_printf("WARNING: NuttX supports ESP32 chip revision >= v3.0"
-                 " (chip is v%d.%01d).\n"
-                 "Ignoring this error and continuing because "
-                 "`ESP32_IGNORE_CHIP_REVISION_CHECK` is set...\n"
-                 "THIS MAY NOT WORK! DON'T USE THIS CHIP IN PRODUCTION!\n",
-                 chip_rev / 100, chip_rev % 100);
-    }
-
 #if defined(CONFIG_ESP32_SPIRAM_BOOT_INIT)
   if (esp_spiram_init() != OK)
     {
@@ -257,6 +251,13 @@ static noreturn_function void __esp32_start(void)
   else
     {
       esp_spiram_init_cache();
+#  if defined(CONFIG_ESP32_SPIRAM_MEMTEST)
+      if (esp_spiram_test() != OK)
+        {
+          ets_printf("SPIRAM test failed\n");
+          PANIC();
+        }
+#  endif // CONFIG_ESP32_SPIRAM_MEMTEST
     }
 
   /* Set external memory bss section to zero */
@@ -288,9 +289,35 @@ static noreturn_function void __esp32_start(void)
   showprogress('C');
 #endif
 
+  SYS_STARTUP_FN();
+
+  showprogress('D');
+
+  chip_rev = esp_efuse_hal_chip_revision();
+
+  _info("ESP32 chip revision is v%" PRId32 ".%01ld\n",
+        chip_rev / 100, chip_rev % 100);
+
+  if (chip_rev < 300)
+    {
+#ifndef CONFIG_ESP32_IGNORE_CHIP_REVISION_CHECK
+      ets_printf("ERROR: NuttX supports ESP32 chip revision >= v3.0"
+                 " (chip revision is v%" PRId32 ".%01ld)\n",
+                 chip_rev / 100, chip_rev % 100);
+      PANIC();
+#endif
+      ets_printf("WARNING: NuttX supports ESP32 chip revision >= v3.0"
+                 " (chip is v%" PRId32 ".%01ld).\n"
+                 "Ignoring this error and continuing because "
+                 "`ESP32_IGNORE_CHIP_REVISION_CHECK` is set...\n"
+                 "THIS MAY NOT WORK! DON'T USE THIS CHIP IN PRODUCTION!\n",
+                 chip_rev / 100, chip_rev % 100);
+    }
+
   /* Bring up NuttX */
 
   nx_start();
+
   for (; ; ); /* Should not return */
 }
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp_getsockopt.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -202,6 +204,7 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
 #endif /* CONFIG_NET_TCP_KEEPALIVE */
 
       case TCP_NODELAY:  /* Avoid coalescing of small segments. */
+      case TCP_CORK:     /* coalescing of small segments. */
         if (*value_len < sizeof(int))
           {
             ret                = -EINVAL;
@@ -212,7 +215,7 @@ int tcp_getsockopt(FAR struct socket *psock, int option,
 
             /* Always true here since we do not support Nagle. */
 
-            *nodelay           = 1;
+            *nodelay           = option == TCP_NODELAY ? 1 : 0;
             *value_len         = sizeof(int);
             ret                = OK;
           }

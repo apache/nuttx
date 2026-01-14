@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm/src/stm32f0l0g0/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -21,10 +23,14 @@
 include armv6-m/Make.defs
 
 CHIP_CSRCS  = stm32_start.c stm32_gpio.c stm32_exti_gpio.c stm32_irq.c
-CHIP_CSRCS += stm32_lse.c stm32_lowputc.c stm32_serial.c stm32_rcc.c
+CHIP_CSRCS += stm32_lowputc.c stm32_serial.c stm32_rcc.c stm32_lsi.c stm32_uid.c
+
+ifneq ($(CONFIG_STM32F0L0G0_RTC_LSECLOCK)$(CONFIG_STM32F0L0G0_LCD_LSECLOCK),)
+CHIP_CSRCS += stm32_lse.c
+endif
 
 ifeq ($(CONFIG_STM32F0L0G0_DMA),y)
-CHIP_CSRCS += stm32_dma_v1.c
+CHIP_CSRCS += stm32_dma.c
 endif
 
 ifeq ($(CONFIG_STM32F0L0G0_PWR),y)
@@ -41,6 +47,10 @@ endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += stm32_userspace.c
+endif
+
+ifeq ($(CONFIG_STM32F0L0G0_PROGMEM),y)
+CHIP_CSRCS += stm32_flash.c
 endif
 
 ifeq ($(CONFIG_STM32F0L0G0_GPIOIRQ),y)
@@ -85,4 +95,21 @@ endif
 
 ifeq ($(CONFIG_STM32F0L0G0_TIM),y)
 CHIP_CSRCS += stm32_tim.c stm32_tim_lowerhalf.c
+endif
+
+ifeq ($(CONFIG_STM32F0L0G0_IWDG),y)
+CHIP_CSRCS += stm32_iwdg.c
+endif
+
+ifeq ($(CONFIG_STM32F0L0G0_WWDG),y)
+CHIP_CSRCS += stm32_wwdg.c
+endif
+
+ifeq ($(CONFIG_STM32F0L0G0_FDCAN),y)
+ifeq ($(CONFIG_STM32F0L0G0_FDCAN_CHARDRIVER),y)
+CHIP_CSRCS += stm32_fdcan.c
+endif
+ifeq ($(CONFIG_STM32F0L0G0_FDCAN_SOCKET),y)
+CHIP_CSRCS += stm32_fdcan_sock.c
+endif
 endif

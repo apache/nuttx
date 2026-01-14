@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/wireless/lte/lte.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -497,25 +499,25 @@
 #define LTE_SIMINFO_GID_LEN   (128) /* Maximum length of GID */
 
 /* Maximum length of phone number
- * that includes a null terminater
+ * that includes a null terminator
  */
 
 #define LTE_PHONENO_LEN  (41)
 
 /* Maximum length of IMEI
- * that includes a null terminater
+ * that includes a null terminator
  */
 
 #define LTE_IMEI_LEN     (16)
 
 /* Maximum length of network operator
- * that includes a null terminater
+ * that includes a null terminator
  */
 
 #define LTE_OPERATOR_LEN (17)
 
 /* Maximum length of IMSI
- * that includes a null terminater
+ * that includes a null terminator
  */
 
 #define LTE_IMSI_LEN (LTE_SIMINFO_IMSI_LEN + 1)
@@ -932,7 +934,7 @@ typedef struct lte_edrx_setting
   bool     enable;
 
   /* eDRX cycle.
-   * This variable is not vaild when LTE_EDRX_ACTTYPE_NOTUSE
+   * This variable is not valid when LTE_EDRX_ACTTYPE_NOTUSE
    * is set to act_type.
    * Definitions are below:
    * - LTE_EDRX_CYC_512
@@ -954,7 +956,7 @@ typedef struct lte_edrx_setting
   uint32_t edrx_cycle;
 
   /* Paging time window.
-   * This variable is not vaild when LTE_EDRX_ACTTYPE_NOTUSE
+   * This variable is not valid when LTE_EDRX_ACTTYPE_NOTUSE
    * is set to act_type.
    * Definitions are below:
    * - LTE_EDRX_PTW_128
@@ -1148,7 +1150,7 @@ typedef struct lte_pdn
 
   lte_ipaddr_t address[LTE_PDN_IPADDR_MAX_COUNT];
 
-  /* IMS registored status.
+  /* IMS registered status.
    * This is valid when LTE_APN_TYPE_IMS is set in apn_type.
    * Definition is as below.
    * - LTE_IMS_NOT_REGISTERED
@@ -1241,7 +1243,7 @@ typedef struct lte_netinfo
 
   lte_nw_err_info_t nw_err;
 
-  /* Number of PDN status informations.
+  /* Number of PDN status information.
    * The maximum number of PDNs is LTE_SESSION_ID_MAX.
    */
 

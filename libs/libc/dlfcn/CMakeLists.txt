@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/dlfcn/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -21,3 +23,4 @@ if(CONFIG_LIBC_DLFCN)
   target_sources(c PRIVATE lib_dlopen.c lib_dlclose.c lib_dlsym.c lib_dlerror.c
                            lib_dlsymtab.c)
 endif()
+target_sources(c PRIVATE lib_dlfind_object.c)

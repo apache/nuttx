@@ -1,6 +1,7 @@
 /****************************************************************************
  * fs/mnemofs/mnemofs_blkalloc.c
- * Block Allocator for mnemofs
+ *
+ * SPDX-License-Identifier: Apache-2.0 or BSD-3-Clause
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -86,12 +87,13 @@
 #include <stdlib.h>
 
 #include "mnemofs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BMAP_GET(bmap, idx, off) ((bmap)[(idx)] & (1 << (off)))
+#define BMAP_GET(bmap, idx, off) (((bmap)[(idx)] & (1 << (off))) != 0)
 #define BMAP_SET(bmap, idx, off) ((bmap)[(idx)] |= (1 << (off)))
 #define DEL_ARR_BLK(sb, blk)     (MFS_BA((sb)).k_del[(blk) * sizeof(size_t)])
 #define DEL_ARR_PG(sb, pg)       (DEL_ARR_BLK(sb, MFS_PG2BLK((sb), (pg))))
@@ -134,14 +136,8 @@ static int         is_blk_writeable(FAR struct mfs_sb_s * const sb,
  *   idx - Populated later with the index of page in MFS_BA(sb).bmap_upgs
  *   off - Populated later with the offset of page in MFS_BA(sb).bmap_upgs
  *
- * Returned Value:
- *   MFS_BLK_BAD      - If the block of the page is a bad block.
- *   MFS_PG_USED      - If the page is being used.
- *   MFS_BLK_ERASABLE - If page can be allocated, but block needs erase.
- *   MFS_PG_FREE      - If the page is free.
- *
  * Assumptions/Limitations:
- *   Does not check validity of the page number.
+ *   Does not check validity of the index.
  *
  ****************************************************************************/
 
@@ -242,11 +238,11 @@ static int is_pg_writeable(FAR struct mfs_sb_s * const sb, mfs_t pg,
 
 static int is_blk_writeable(FAR struct mfs_sb_s * const sb, const mfs_t blk)
 {
-  mfs_t idx;
+  int     blkbad_status;
+  mfs_t   i;
+  mfs_t   pg            = MFS_BLK2PG(sb, blk);
+  mfs_t   idx;
   uint8_t off;
-  mfs_t pg = MFS_BLK2PG(sb, blk);
-  mfs_t i;
-  int blkbad_status;
 
   /* Bad block check. */
 
@@ -285,15 +281,14 @@ static int is_blk_writeable(FAR struct mfs_sb_s * const sb, const mfs_t blk)
  * Public Functions
  ****************************************************************************/
 
-int mfs_ba_init(FAR struct mfs_sb_s * const sb)
+int mfs_ba_fmt(FAR struct mfs_sb_s * const sb)
 {
   int     ret  = OK;
-  uint8_t log;
 
-/* We need at least 5 blocks, as one is occupied by superblock, at least
- * one for the journal, 2 for journal's master blocks, and at least one for
- * actual data.
- */
+  /* We need at least 5 blocks, as one is occupied by superblock, at least
+   * one for the journal, 2 for journal's master blocks, and at least one for
+   * actual data.
+   */
 
   if (MFS_NBLKS(sb) < 5)
     {
@@ -312,12 +307,10 @@ int mfs_ba_init(FAR struct mfs_sb_s * const sb)
 
   MFS_BA(sb).c_pg = MFS_BLK2PG(sb, MFS_BA(sb).s_blk);
 
-  log = ceil(log2(MFS_NBLKS(sb)));
-
   /* MFS_BA(sb).k_del_elemsz = ((log + 7) & (-8)) / 8; */
 
-  MFS_BA(sb).k_del = kmm_zalloc(sizeof(size_t) * MFS_NBLKS(sb));
-  if (!MFS_BA(sb).k_del)
+  MFS_BA(sb).k_del = fs_heap_zalloc(sizeof(size_t) * MFS_NBLKS(sb));
+  if (predict_false(MFS_BA(sb).k_del == NULL))
     {
       ret = -ENOMEM;
       goto errout;
@@ -325,21 +318,50 @@ int mfs_ba_init(FAR struct mfs_sb_s * const sb)
 
   MFS_BA(sb).n_bmap_upgs = MFS_UPPER8(MFS_NPGS(sb));
 
-  MFS_BA(sb).bmap_upgs = kmm_zalloc(MFS_BA(sb).n_bmap_upgs);
-  if (!MFS_BA(sb).bmap_upgs)
+  MFS_BA(sb).bmap_upgs = fs_heap_zalloc(MFS_BA(sb).n_bmap_upgs);
+  if (predict_false(MFS_BA(sb).bmap_upgs == NULL))
     {
       ret = -ENOMEM;
       goto errout_with_k_del;
     }
 
-  /* TODO: Fill MFS_BA(sb).bmap_upgs after tree traversal. */
+  /* TODO: Do not start from journal blocks. */
 
   finfo("mnemofs: Block Allocator initialized, starting at page %d.\n",
         MFS_BLK2PG(sb, MFS_BA(sb).s_blk));
   return ret;
 
 errout_with_k_del:
-  kmm_free(MFS_BA(sb).k_del);
+  fs_heap_free(MFS_BA(sb).k_del);
+
+errout:
+  return ret;
+}
+
+int mfs_ba_init(FAR struct mfs_sb_s * const sb)
+{
+  /* TODO: Ensure journal and master node are initialized before this. */
+
+  int ret = OK;
+
+  ret = mfs_ba_fmt(sb);
+  if (predict_false(ret < 0))
+    {
+      goto errout;
+    }
+
+  /* Traverse the FS tree. */
+
+  ret = mfs_pitr_traversefs(sb, MFS_MN(sb).root_ctz, MFS_ISDIR);
+  if (predict_false(ret < 0))
+    {
+      goto errout_with_ba;
+    }
+
+  return ret;
+
+errout_with_ba:
+  mfs_ba_free(sb);
 
 errout:
   return ret;
@@ -347,8 +369,8 @@ errout:
 
 void mfs_ba_free(FAR struct mfs_sb_s * const sb)
 {
-  kmm_free(MFS_BA(sb).k_del);
-  kmm_free(MFS_BA(sb).bmap_upgs);
+  fs_heap_free(MFS_BA(sb).k_del);
+  fs_heap_free(MFS_BA(sb).bmap_upgs);
 
   finfo("Block Allocator Freed.");
 }
@@ -503,13 +525,28 @@ void mfs_ba_pgmarkdel(FAR struct mfs_sb_s * const sb, mfs_t pg)
 
 void mfs_ba_blkmarkdel(FAR struct mfs_sb_s * const sb, mfs_t blk)
 {
-  mfs_erase_blk(sb, blk);
-  DEL_ARR_BLK(sb, blk) = 0;
+  DEL_ARR_BLK(sb, blk) = MFS_PGINBLK(sb);
 }
 
-void mfs_ba_delmarked(FAR struct mfs_sb_s * const sb)
+int mfs_ba_delmarked(FAR struct mfs_sb_s * const sb)
 {
-  /* TODO */
+  int   ret = OK;
+  mfs_t i;
+
+  for (i = 1; i < MFS_NBLKS(sb); i++)
+    {
+      if (DEL_ARR_BLK(sb, i) == MFS_PGINBLK(sb))
+        {
+          ret = mfs_erase_blk(sb, i);
+
+          if (ret != OK)
+            {
+              return ret;
+            }
+        }
+    }
+
+  return ret;
 }
 
 /* Mark a page as being used. Used by master node during initial format and
@@ -517,15 +554,16 @@ void mfs_ba_delmarked(FAR struct mfs_sb_s * const sb)
 
 void mfs_ba_markusedpg(FAR struct mfs_sb_s * const sb, mfs_t pg)
 {
-  mfs_t idx;
+  mfs_t   idx;
   uint8_t off;
+
   pg2bmap(pg, &idx, &off);
   BMAP_SET(MFS_BA(sb).bmap_upgs, idx, off); /* Set as used */
 }
 
 void mfs_ba_markusedblk(FAR struct mfs_sb_s * const sb, mfs_t blk)
 {
-  mfs_t i = 0;
+  mfs_t i  = 0;
   mfs_t pg = MFS_BLK2PG(sb, blk);
 
   for (i = 0; i < MFS_PGINBLK(sb); i++)

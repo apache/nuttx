@@ -202,6 +202,13 @@ config MTD_WRITE_ALIGN_SIZE
 	---help---
 		align size will be one of 1,2,4,8,16
 
+config MTD_BLOCKSIZE_MULTIPLE
+	int "Set NVS blocksize multiple"
+	default 1
+	depends on MTD_CONFIG_FAIL_SAFE
+	---help---
+		The size of a multiple of blocksize compared to erasize
+
 endif # MTD_CONFIG
 
 comment "MTD Device Drivers"
@@ -313,16 +320,18 @@ config MTD_NAND_RAM_STATUS
 	int "Log status of virtual NAND Flash."
 	depends on MTD_NAND_RAM_DEBUG
 	default 3
-	range 1 8
+	range 1 10
 	---help---
-		1 - Log every instruction.
-		2 - Log every 5 instructions.
-		3 - Log every 10 instructions.
-		4 - Log every 50 instructions.
-		5 - Log every 100 instructions.
-		6 - Log every 500 instructions.
-		7 - Log every 1000 instructions.
-		8 - Log every 5000 instructions.
+		1  - Log every instruction.
+		2  - Log every 5 instructions.
+		3  - Log every 10 instructions.
+		4  - Log every 50 instructions.
+		5  - Log every 100 instructions.
+		6  - Log every 500 instructions.
+		7  - Log every 1000 instructions.
+		8  - Log every 5000 instructions.
+		9  - Log every 10000 instructions.
+		10 - Log every 50000 instructions.
 
 endif #MTD_NAND_RAM
 
@@ -507,11 +516,16 @@ config MTD_AT25EE
 	default n
 	select SPI
 	select MTD_BYTE_WRITE
+	select EEPROM
+	select SPI_EE_25XX
 	---help---
 		Build support for SPI-based AT25xx type EEPROMs. MTD on EEPROM can
 		perform poorly, so it is possible only usable if the EEPROM has a
 		clock speed 10MHz or higher. EEPROMs that use the same commands as
 		the 25AA160 should work OK.
+
+		This is a convenience wrapper around the eeprom/spi_xx25xx driver.
+		It can be configured from the "EEPROM support" menu.
 
 if MTD_AT25EE
 
@@ -554,46 +568,6 @@ config AT25EE_ENABLE_BLOCK_ERASE
 		applications (e.g if an erase verify is wanted, or if a particular
 		file system requires this) block erase (i.e. writing each byte to
 		0xff) can be enabled here.
-
-config AT25EE_SPIMODE
-	int "AT25EE SPI Mode"
-	default 0
-
-config AT25EE_SPIFREQUENCY
-	int "AT25EE SPI Frequency"
-	default 10000000
-
-config AT25EE_START_DELAY
-	int "AT25EE startdelay"
-	---help---
-		The delay between CS active and first CLK. In ns.
-	depends on SPI_DELAY_CONTROL
-	range 0 1000000
-	default 5000
-
-config AT25EE_STOP_DELAY
-	int "AT25EE stopdelay"
-	---help---
-		The delay between last CLK and CS inactive. In ns.
-	depends on SPI_DELAY_CONTROL
-	range 0 1000000
-	default 5000
-
-config AT25EE_CS_DELAY
-	int "AT25EE csdelay"
-	---help---
-		The delay between CS inactive and CS active again. In ns.
-	depends on SPI_DELAY_CONTROL
-	range 0 1000000
-	default 5000
-
-config AT25EE_IFDELAY
-	int "AT25EE ifdelay"
-	---help---
-		The delay between frames. In ns.
-	depends on SPI_DELAY_CONTROL
-	range 0 1000000
-	default 5000
 
 endif # MTD_AT25EE
 
@@ -913,6 +887,38 @@ config MX25RXX_LXX
 	default n
 
 endif # MTD_MX25RXX
+
+config MTD_GD55
+	bool "QuadSPI-based GigaDevices GD55 family FLASH"
+	default n
+	---help---
+		Support GD55 QSPI devices
+
+if MTD_GD55
+
+config MTD_GD55_QSPIMODE
+	int "MTD_GD55 QuadSPI Mode"
+	default 3
+	---help---
+		This device can operate in SPI mode 0 or 3.
+
+config MTD_GD55_FREQUENCY
+	int "MTD_GD55 QSPI Frequency"
+	default 133000000
+	---help---
+		Clock frequency for all instructions except for non-QSPI read
+		commands (e.g. Read ID) and DTR read, neither of which are used in
+		this driver)
+
+config MTD_GD55_SECTOR512
+	bool "Emulate 512 byte Erase Blocks"
+	default n
+	---help---
+		This is used to map the native 256 byte sectors to 512 byte sectors.
+		It is useful if using a file system that demands 512 byte sectors,
+		such as FAT
+
+endif # MTD_GD55
 
 config MTD_SMART
 	bool "Sector Mapped Allocation for Really Tiny (SMART) Flash support"
@@ -1311,6 +1317,38 @@ config W25_SPIFREQUENCY
 	int "W25 SPI Frequency"
 	default 20000000
 
+config W25_START_DELAY
+	int "W25 SPI start delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 0
+	---help---
+		The delay between CS active and first CLK. In ns.
+
+config W25_STOP_DELAY
+	int "W25 SPI stop delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 0
+	---help---
+		The delay between last CLK and CS inactive. In ns.
+
+config W25_CS_DELAY
+	int "W25 SPI chip select delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 0
+	---help---
+		The delay between CS inactive and CS active again. In ns.
+
+config W25_IFDELAY
+	int "W25 SPI frames delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 0
+	---help---
+		The delay between consecutive frames. In ns.
+
 config W25_READONLY
 	bool "W25 Read-Only FLASH"
 	default n
@@ -1320,7 +1358,11 @@ config W25_SECTOR512
 	default n
 
 config W25_SLOWREAD
-	bool
+	bool "Enable slow read mode"
+	default n
+
+config W25_DEBUG
+	bool "Enable syslog W25 specific syslog traces"
 	default n
 
 endif # MTD_W25
@@ -1399,6 +1441,28 @@ config GD5F_SPIFREQUENCY
 
 endif # MTD_GD5F
 
+config MTD_W25N
+	bool "SPI-based W25N NAND FLASH"
+	default n
+	select SPI
+	---help---
+		Enable support for Winbond W25N SPI NAND flash.
+		Currently only W25N01GV (1Gbit/128MB) is supported.
+
+if MTD_W25N
+
+config W25N_SPIMODE
+	int "W25N SPI Mode"
+	default 0
+
+config W25N_SPIFREQUENCY
+	int "W25N SPI Frequency"
+	default 20000000
+	---help---
+		W25N01GV supports up to 104 MHz.
+
+endif # MTD_W25N
+
 config MTD_DHARA
 	bool "MTD Nandflash use dhara map"
 	default n
@@ -1413,5 +1477,30 @@ config DHARA_READ_NCACHES
 	int "dhara read cache numbers"
 	default 4
 endif
+
+config MTD_NVBLK
+	bool "MTD using Non Volatile BLock driver"
+	default n
+
+if MTD_NVBLK
+
+config MTD_NVBLK_DEFAULT_LBS
+	int "nvblk (logical) block size"
+	default 256
+
+config MTD_NVBLK_DEFAULT_IOBS
+	int "nvblk io block size (block device sector size)"
+	default 512
+
+config MTD_NVBLK_DEFAULT_SPEB
+	int "nvblk spare erase blocks"
+	default 1
+endif
+
+config MTD_CFI
+	bool "CFI(common flash interface) NOR FLASH"
+	default n
+	---help---
+		Support CFI(common flash interface) NOR FLASH.
 
 endif # MTD

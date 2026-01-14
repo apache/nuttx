@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/adxl372.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,6 +34,7 @@
 #include <debug.h>
 #include <string.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/mutex.h>
@@ -44,7 +47,7 @@
 #define ADXL372_INITIAL_CR_SIZE 7
 
 /****************************************************************************
- * Private structure definitions
+ * Private Types
  ****************************************************************************/
 
 struct sensor_data_s
@@ -565,7 +568,7 @@ static ssize_t adxl372_dvr_read(FAR void *instance, FAR char *buffer,
 
   DEBUGASSERT(priv != NULL);
 
-  adxl372_read_registerblk(priv, priv->seek_address, (uint8_t *)buffer,
+  adxl372_read_registerblk(priv, priv->seek_address, (FAR uint8_t *)buffer,
                           buflen);
 
   /* Permute accelerometer data out fields */
@@ -602,7 +605,7 @@ static ssize_t adxl372_dvr_write(FAR void *instance,
       return -EROFS;
     }
 
-  adxl372_write_registerblk(priv, priv->seek_address, (uint8_t *)buffer,
+  adxl372_write_registerblk(priv, priv->seek_address, (FAR uint8_t *)buffer,
                             buflen);
 
   return buflen;
@@ -877,7 +880,7 @@ int adxl372_register(FAR const char *devpath,
 
   priv->flink         = g_adxl372_list;
   g_adxl372_list      = priv;
-  config->leaf_handle = (void *) priv;
+  config->leaf_handle = (FAR void *)priv;
   config->sc_ops      = &g_adxl372_dops;
 
   return OK;

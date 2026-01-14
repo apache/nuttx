@@ -1,6 +1,8 @@
 # ##############################################################################
 # boards/arm/stm32/stm32f411-minimum/src/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -26,6 +28,22 @@ endif()
 
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS stm32_autoleds.c)
+endif()
+
+if(CONFIG_USERLED)
+  list(APPEND SRCS stm32_userleds.c)
+endif()
+
+if(CONFIG_ARCH_BUTTONS)
+  list(APPEND SRCS stm32_buttons.c)
+endif()
+
+if(CONFIG_PWM)
+  list(APPEND SRCS stm32_pwm.c)
+endif()
+
+if(CONFIG_RGBLED)
+  list(APPEND SRCS stm32_rgbled.c)
 endif()
 
 if(CONFIG_SPI)

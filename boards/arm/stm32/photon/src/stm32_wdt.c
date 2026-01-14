@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/photon/src/stm32_wdt.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -73,7 +75,7 @@ static int wdog_daemon(int argc, char *argv[])
 
   while (1)
     {
-      nxsig_usleep((CONFIG_PHOTON_WDG_THREAD_INTERVAL)*1000);
+      nxsched_usleep((CONFIG_PHOTON_WDG_THREAD_INTERVAL)*1000);
 
       /* Send keep alive ioctl */
 

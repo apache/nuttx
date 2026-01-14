@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/timers/capture.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -52,16 +54,35 @@
 /* Debug ********************************************************************/
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
+
+#ifdef CONFIG_CAPTURE_NOTIFY
+struct cap_signal_s
+{
+  pid_t                    pid;    /* The pid of the registering task */
+  struct cap_notify_s      notify; /* The notification callback info */
+#ifdef CONFIG_SIG_EVTHREAD
+  struct sigwork_s         work;   /* The signal work structure */
+#endif
+};
+#endif
 
 /* This structure describes the state of the upper half driver */
 
 struct cap_upperhalf_s
 {
-  uint8_t                    crefs;    /* The number of times the device has been opened */
-  mutex_t                    lock;     /* Supports mutual exclusion */
-  FAR struct cap_lowerhalf_s *lower;   /* lower-half state */
+  uint8_t                      crefs; /* The number of times the device has been opened */
+  uint8_t                      nchan; /* The number of channels, only invalid for multi channels */
+  mutex_t                      lock;  /* Supports mutual exclusion */
+  FAR struct cap_lowerhalf_s **lower; /* lower-half state */
+#ifdef CONFIG_CAPTURE_NOTIFY
+  /* The array of signal structures, the length of the array is nchan,
+   * save signal info for each channel.
+   */
+
+  struct cap_signal_s          signals[1];
+#endif
 };
 
 /****************************************************************************
@@ -93,6 +114,41 @@ static const struct file_operations g_capops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: cap_notify_cb
+ *
+ * Description:
+ *   Capture edge interrupt notification callback
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAPTURE_NOTIFY
+static void cap_notify_cb(FAR struct cap_lowerhalf_s *lower, FAR void *priv)
+{
+  FAR struct cap_upperhalf_s *upper = priv;
+  uint8_t i;
+
+  DEBUGASSERT(upper != NULL);
+
+  for (i = 0; i < upper->nchan; i++)
+    {
+      if (lower == upper->lower[i])
+        {
+          FAR struct cap_signal_s *signal = &upper->signals[i];
+
+#  ifdef CONFIG_SIG_EVTHREAD
+          nxsig_notification(signal->pid, &signal->notify.event,
+                             SI_QUEUE, &signal->work);
+#  else
+          nxsig_notification(signal->pid, &signal->notify.event,
+                             SI_QUEUE, NULL);
+#  endif
+          break;
+        }
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: cap_open
@@ -135,16 +191,21 @@ static int cap_open(FAR struct file *filep)
 
   if (tmp == 1)
     {
-      FAR struct cap_lowerhalf_s *lower = upper->lower;
+      FAR struct cap_lowerhalf_s **lower = upper->lower;
+      uint8_t i;
 
-      /* Yes.. perform one time hardware initialization. */
-
-      DEBUGASSERT(lower->ops->start != NULL);
-
-      ret = lower->ops->start(lower);
-      if (ret < 0)
+      for (i = 0; i < upper->nchan; i++)
         {
-          goto errout_with_lock;
+          ret = lower[i]->ops->start(lower[i]);
+          if (ret < 0)
+            {
+              while (i-- > 0)
+                {
+                  lower[i]->ops->stop(lower[i]);
+                }
+
+              goto errout_with_lock;
+            }
         }
     }
 
@@ -192,17 +253,19 @@ static int cap_close(FAR struct file *filep)
     }
   else
     {
-      FAR struct cap_lowerhalf_s *lower = upper->lower;
+      FAR struct cap_lowerhalf_s **lower = upper->lower;
+      uint8_t i;
 
       /* There are no more references to the port */
 
       upper->crefs = 0;
 
-      /* Disable the PWM Capture device */
+      for (i = 0; i < upper->nchan; i++)
+        {
+          /* Disable the PWM Capture device */
 
-      DEBUGASSERT(lower->ops->stop != NULL);
-
-      lower->ops->stop(lower);
+          lower[i]->ops->stop(lower[i]);
+        }
     }
 
   nxmutex_unlock(&upper->lock);
@@ -257,10 +320,11 @@ static ssize_t cap_write(FAR struct file *filep,
 
 static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode          *inode = filep->f_inode;
+  FAR struct inode           *inode = filep->f_inode;
   FAR struct cap_upperhalf_s *upper;
-  FAR struct cap_lowerhalf_s *lower;
+  FAR struct cap_lowerhalf_s **lower;
   int                        ret;
+  uint8_t                    i;
 
   cpinfo("cmd: %d arg: %ld\n", cmd, arg);
   upper = inode->i_private;
@@ -287,22 +351,154 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case CAPIOC_DUTYCYCLE:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
-          DEBUGASSERT(lower->ops->getduty != NULL && ptr);
-          ret = lower->ops->getduty(lower, ptr);
+          DEBUGASSERT(ptr);
+          for (i = 0; i < upper->nchan; i++)
+            {
+              DEBUGASSERT(lower[i]->ops->getduty != NULL);
+              ret = lower[i]->ops->getduty(lower[i], &ptr[i]);
+              if (ret < 0)
+                {
+                  break;
+                }
+            }
         }
         break;
 
-      /* CAPIOC_FREQUENCE - Get the pulse frequence from the capture.
-       * Argument: int32_t pointer to the location to return the frequence.
+      /* CAPIOC_FREQUENCE - Get the pulse frequency from the capture.
+       * Argument: int32_t pointer to the location to return the frequency.
        */
 
       case CAPIOC_FREQUENCE:
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
-          DEBUGASSERT(lower->ops->getfreq != NULL && ptr);
-          ret = lower->ops->getfreq(lower, ptr);
+          DEBUGASSERT(ptr);
+          for (i = 0; i < upper->nchan; i++)
+            {
+              DEBUGASSERT(lower[i]->ops->getfreq != NULL);
+              ret = lower[i]->ops->getfreq(lower[i], &ptr[i]);
+              if (ret < 0)
+                {
+                  break;
+                }
+            }
         }
         break;
+
+      /* CAPIOC_EDGES - Get the pwm edges from the capture.
+       * Argument: int32_t pointer to the location to return the edges.
+       */
+
+      case CAPIOC_EDGES:
+        {
+          FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
+          DEBUGASSERT(ptr);
+          for (i = 0; i < upper->nchan; i++)
+            {
+              DEBUGASSERT(lower[i]->ops->getedges != NULL);
+              ret = lower[i]->ops->getedges(lower[i], &ptr[i]);
+              if (ret < 0)
+                {
+                  break;
+                }
+            }
+        }
+        break;
+
+      /* CAPIOC_ALL - Get the pwm duty, pulse frequency, pwm edges, from
+       * the capture.
+       * Argument: A reference to struct cap_all_s.
+       */
+
+      case CAPIOC_ALL:
+        {
+          FAR struct cap_all_s *ptr =
+                     (FAR struct cap_all_s *)((uintptr_t)arg);
+          DEBUGASSERT(ptr);
+          for (i = 0 ; i < upper->nchan ; i++)
+            {
+              ret = lower[i]->ops->getduty(lower[i], &ptr[i].duty);
+              if (ret < 0)
+                {
+                  break;
+                }
+
+              ret = lower[i]->ops->getfreq(lower[i], &ptr[i].freq);
+              if (ret < 0)
+                {
+                  break;
+                }
+
+              ret = lower[i]->ops->getedges(lower[i], &ptr[i].edges);
+              if (ret < 0)
+                {
+                  break;
+                }
+            }
+        }
+        break;
+
+      /* CAPIOC_REGISTER - Register to receive a signal whenever there is
+       * an interrupt received on an input capture pin. This feature,
+       * of course, depends upon interrupt capture support from the platform.
+       * Argument: The event of signal to be generated when the interrupt
+       * occurs.
+       *
+       * the argument is a pointer to a struct cap_notify_s, that contains
+       * the channel number, edge type and signal event info.
+       */
+
+#ifdef CONFIG_CAPTURE_NOTIFY
+      case CAPIOC_REGISTER:
+        {
+          FAR struct cap_signal_s *tmp;
+          FAR struct cap_notify_s *new;
+          pid_t pid;
+
+          new = (FAR struct cap_notify_s *)(uintptr_t)arg;
+          if (!new || (new->chan >= upper->nchan && new->chan < 0))
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          pid = nxsched_getpid();
+          tmp = &upper->signals[new->chan];
+          if (tmp->pid != 0 && tmp->pid != pid)
+            {
+              ret = -EBUSY;
+              break;
+            }
+
+          tmp->pid = pid;
+          memcpy(&tmp->notify, new, sizeof(*new));
+          DEBUGASSERT(lower[new->chan]->ops->bind != NULL);
+          ret = lower[new->chan]->ops->bind(lower[new->chan], new->type,
+                                            cap_notify_cb, upper);
+        }
+        break;
+
+      /* CAPIOC_UNREGISTER - Stop receiving signals for capture interrupts.
+       * Argument: The channel number
+       */
+
+      case CAPIOC_UNREGISTER:
+        {
+#  ifdef CONFIG_SIG_EVTHREAD
+          FAR struct sigwork_s *work;
+#  endif
+          int chan = (int)arg;
+
+          upper->signals[chan].pid = 0;
+#  ifdef CONFIG_SIG_EVTHREAD
+          work = &upper->signals[chan].work;
+          nxsig_cancel_notification(work);
+#  endif
+
+          DEBUGASSERT(lower[chan]->ops->unbind != NULL);
+          ret = lower[chan]->ops->unbind(lower[chan]);
+        }
+        break;
+#endif
 
       /* Any unrecognized IOCTL commands might be platform-specific ioctl
        * commands
@@ -311,6 +507,22 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       default:
         {
           cperr("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
+
+          /* Unrecognized cmd will be forwarded to lower half driver for
+           * specific use cases (e.g Pulse Counter (PCNT))
+           */
+
+          FAR unsigned long int *ptr =
+                     (FAR unsigned long int *)arg;
+          for (i = 0; i < upper->nchan; i++)
+            {
+              ret = lower[i]->ops->ioctl(lower[i], cmd,
+                                         (unsigned long)&ptr[i]);
+              if (ret < 0)
+                {
+                  break;
+                }
+            }
         }
         break;
     }
@@ -351,7 +563,8 @@ int cap_register(FAR const char *devpath, FAR struct cap_lowerhalf_s *lower)
   /* Allocate the upper-half data structure */
 
   upper = (FAR struct cap_upperhalf_s *)
-           kmm_zalloc(sizeof(struct cap_upperhalf_s));
+           kmm_zalloc(sizeof(struct cap_upperhalf_s) +
+                      sizeof(FAR struct cap_lowerhalf_s *));
   if (!upper)
     {
       return -ENOMEM;
@@ -362,11 +575,51 @@ int cap_register(FAR const char *devpath, FAR struct cap_lowerhalf_s *lower)
    */
 
   nxmutex_init(&upper->lock);
-  upper->lower = lower;
+  upper->lower = (FAR struct cap_lowerhalf_s **)(upper + 1);
+  upper->lower[0] = lower;
+  upper->nchan = 1;
 
   /* Register the PWM Capture device */
 
   return register_driver(devpath, &g_capops, 0666, upper);
+}
+
+int cap_register_multiple(FAR const char *devpath,
+                          FAR struct cap_lowerhalf_s **lower,
+                          int n)
+{
+  char fullpath[32];
+  int ret;
+
+  if (!devpath || !lower || n < 1)
+    {
+      return -EINVAL;
+    }
+
+  for (int i = 0; i < n; i++)
+    {
+      int written = snprintf(fullpath, sizeof(fullpath), "%s%d", devpath, i);
+
+      if (written < 0)
+        {
+          return -EIO;
+        }
+
+      if ((size_t)written >= sizeof(fullpath))
+        {
+          return -ENAMETOOLONG;
+        }
+
+      ret = cap_register(fullpath, lower[i]);
+      if (ret < 0)
+        {
+          /* TODO: unwind */
+
+          return ret;
+        }
+    }
+
+  return OK;
 }
 
 #endif /* CONFIG_CAPTURE */

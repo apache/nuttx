@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/max31855.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -50,16 +52,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private
- ****************************************************************************/
-
 #define MAX31855_FAULT         (1 << 16)
 #define MAX31855_SHORT_VCC     (1 << 2)
 #define MAX31855_SHORT_GND     (1 << 1)
 #define MAX31855_OPEN_CIRCUIT  (1 << 0)
 #define MAX31855_TEMP_COUPLE   0xffffc000
 #define MAX31855_TEMP_JUNCTION 0xfff0
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
 
 struct max31855_dev_s
 {

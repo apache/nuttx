@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/olimex-stm32-h405/src/stm32_boot.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -51,7 +53,7 @@ void stm32_boardinitialize(void)
 {
   /* Initialize USB if the 1) OTG FS controller is in the configuration and
    * 2) disabled, and 3) the weak function stm32_usbinitialize() has been
-   * brought into the build. Presumeably either CONFIG_USBDEV is also
+   * brought into the build. Presumably either CONFIG_USBDEV is also
    * selected.
    */
 

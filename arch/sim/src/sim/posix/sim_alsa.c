@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/posix/sim_alsa.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,8 +28,8 @@
 #include <nuttx/nuttx.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/queue.h>
 #include <nuttx/nuttx.h>
+#include <nuttx/wdog.h>
 
 #include <debug.h>
 #include <sys/param.h>
@@ -36,6 +38,12 @@
 
 #include "sim_internal.h"
 #include "sim_offload.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define SIM_AUDIO_PERIOD  MSEC2TICK(CONFIG_SIM_LOOP_INTERVAL)
 
 /****************************************************************************
  * Private Types
@@ -47,7 +55,7 @@ struct sim_audio_s
   struct dq_queue_s pendq;
   mutex_t pendlock;
 
-  sq_entry_t link;
+  struct wdog_s wdog;           /* Watchdog for event loop */
 
   bool playback;
   bool offload;
@@ -132,8 +140,6 @@ static const struct audio_ops_s g_sim_audio_ops =
   .reserve       = sim_audio_reserve,
   .release       = sim_audio_release,
 };
-
-static sq_queue_t g_sim_audio;
 
 /****************************************************************************
  * Private Functions
@@ -301,6 +307,7 @@ static int sim_audio_close(struct sim_audio_s *priv)
   host_uninterruptible(snd_pcm_close, priv->pcm);
 
   priv->pcm = NULL;
+  priv->paused = false;
 
   return 0;
 }
@@ -369,8 +376,9 @@ static int sim_audio_getcaps(struct audio_lowerhalf_s *dev, int type,
 
               /* Report the Sample rates we support */
 
-              caps->ac_controls.b[0] = AUDIO_SAMP_RATE_8K |
+             caps->ac_controls.hw[0] = AUDIO_SAMP_RATE_8K |
                                        AUDIO_SAMP_RATE_11K |
+                                       AUDIO_SAMP_RATE_12K |
                                        AUDIO_SAMP_RATE_16K |
                                        AUDIO_SAMP_RATE_22K |
                                        AUDIO_SAMP_RATE_24K |
@@ -462,9 +470,16 @@ static int sim_audio_configure(struct audio_lowerhalf_s *dev,
         priv->sample_rate = caps->ac_controls.hw[0] |
                             (caps->ac_controls.b[3] << 16);
         priv->channels    = caps->ac_channels;
-        priv->bps         = caps->ac_controls.b[2];
-        priv->frame_size  = priv->bps / 8 * priv->channels;
 
+        /* offload mode, bps keep default value */
+
+        priv->bps = 16;
+        if (!priv->offload)
+          {
+            priv->bps = caps->ac_controls.b[2];
+          }
+
+        priv->frame_size  = priv->bps / 8 * priv->channels;
         sim_audio_config_ops(priv, caps->ac_subtype);
 
         info.samplerate = priv->sample_rate;
@@ -552,11 +567,17 @@ static int sim_audio_stop(struct audio_lowerhalf_s *dev)
   priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_COMPLETE, NULL, OK);
 #endif
 
-  apb_free(priv->aux);
-  priv->aux = NULL;
+  if (priv->aux)
+    {
+      apb_free(priv->aux);
+      priv->aux = NULL;
+    }
 
-  priv->ops->uninit(priv->codec);
-  priv->ops = NULL;
+  if (priv->ops)
+    {
+      priv->ops->uninit(priv->codec);
+      priv->ops = NULL;
+    }
 
   return 0;
 }
@@ -619,6 +640,7 @@ static int sim_audio_flush(struct audio_lowerhalf_s *dev)
       struct ap_buffer_s *apb;
 
       apb = (struct ap_buffer_s *)dq_remfirst(&priv->pendq);
+      apb->flags &= ~AUDIO_APB_FINAL;
 #ifdef CONFIG_AUDIO_MULTI_SESSION
       priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK, NULL);
 #else
@@ -716,15 +738,21 @@ static int sim_audio_ioctl(struct audio_lowerhalf_s *dev, int cmd,
           struct ap_buffer_info_s *info =
               (struct ap_buffer_info_s *)arg;
 
-          info->nbuffers    = priv->nbuffers;
-          info->buffer_size = priv->buffer_size;
-
-          if (priv->ops->get_samples)
+          if (priv->offload && priv->playback)
             {
-              info->buffer_size = MAX(info->buffer_size,
+              priv->nbuffers = CONFIG_SIM_OFFLOAD_NUM_BUFFERS;
+              priv->buffer_size = CONFIG_SIM_OFFLOAD_BUFFER_NUMBYTES;
+            }
+
+          if (priv->ops && priv->ops->get_samples)
+            {
+              priv->buffer_size = MAX(priv->buffer_size,
                                       priv->ops->get_samples(priv->codec) *
                                       priv->frame_size);
             }
+
+          info->nbuffers    = priv->nbuffers;
+          info->buffer_size = priv->buffer_size;
         }
         break;
 
@@ -1106,22 +1134,18 @@ fail:
   return 0;
 }
 
+static void sim_alsa_interrupt(wdparm_t arg)
+{
+  struct sim_audio_s *priv = (struct sim_audio_s *)arg;
+
+  sim_audio_process(priv);
+
+  wd_start_next(&priv->wdog, SIM_AUDIO_PERIOD, sim_alsa_interrupt, arg);
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-void sim_audio_loop(void)
-{
-  sq_entry_t *entry;
-
-  for (entry = sq_peek(&g_sim_audio); entry; entry = sq_next(entry))
-    {
-      struct sim_audio_s *priv =
-        container_of(entry, struct sim_audio_s, link);
-
-      sim_audio_process(priv);
-    }
-}
 
 struct audio_lowerhalf_s *sim_audio_initialize(bool playback, bool offload)
 {
@@ -1145,7 +1169,7 @@ struct audio_lowerhalf_s *sim_audio_initialize(bool playback, bool offload)
       return NULL;
     }
 
-  sq_addlast(&priv->link, &g_sim_audio);
+  wd_start(&priv->wdog, 0, sim_alsa_interrupt, (wdparm_t)priv);
 
   /* Setting default config */
 

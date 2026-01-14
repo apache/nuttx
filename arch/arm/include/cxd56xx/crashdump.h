@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/cxd56xx/crashdump.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -100,19 +102,17 @@ typedef enum
 
 typedef struct
 {
-  struct timespec ts;                   /* timestamp */
-  fault_flags_t flags;                  /* What is in the dump */
-  uintptr_t     current_regs;           /* Used to validate the dump */
-  int           lineno;                 /* __LINE__ to up_assert */
-  pid_t         pid;                    /* Process ID */
-  uint32_t      regs[XCPTCONTEXT_REGS]; /* Interrupt register save area */
-  crash_stack_t stacks;                 /* Stack info */
-#if CONFIG_TASK_NAME_SIZE > 0
-  char          name[CONFIG_TASK_NAME_SIZE + 1]; /* Task name (with NULL
-                                                  * terminator) */
-#endif
-  char          filename[MAX_FILE_PATH_LENGTH];  /* the Last of chars in
-                                                  * __FILE__ to up_assert */
+  struct timespec ts;                             /* timestamp */
+  fault_flags_t flags;                            /* What is in the dump */
+  uintptr_t     current_regs;                     /* Used to validate the dump */
+  int           lineno;                           /* __LINE__ to up_assert */
+  pid_t         pid;                              /* Process ID */
+  uint32_t      regs[XCPTCONTEXT_REGS];           /* Interrupt register save area */
+  crash_stack_t stacks;                           /* Stack info */
+  char          name[CONFIG_TASK_NAME_SIZE + 1];  /* Task name (with NULL
+                                                   * terminator) */
+  char          filename[MAX_FILE_PATH_LENGTH];   /* the Last of chars in
+                                                   * __FILE__ to up_assert */
 } info_t;
 
 typedef struct

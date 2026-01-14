@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/netdev/netdev_input.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -53,7 +55,7 @@
  *           pkt/ipv[4|6]_input()/...
  *                     |
  *                     |
- *     NICs io vector receive(Orignal flat buffer)
+ *     NICs io vector receive(Original flat buffer)
  *
  * Input Parameters:
  *   NULL

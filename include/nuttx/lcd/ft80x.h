@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/lcd/ft80x.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1702,7 +1704,7 @@ struct ft80x_registers_s
 
 struct ft80x_fade_s
 {
-  uint8_t duty ;   /* Terminal backlight duty as a percentage (0-100) */
+  uint8_t duty;    /* Terminal backlight duty as a percentage (0-100) */
   uint16_t delay;  /* Total number of milliseconds for the fade (10-16700) */
 };
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stream/lib_syslogstream.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,8 +49,8 @@ static void syslogstream_putc(FAR struct lib_outstream_s *self, int ch)
   stream->common.nput++;
 }
 
-static int syslogstream_puts(FAR struct lib_outstream_s *self,
-                             FAR const void *buff, int len)
+static ssize_t syslogstream_puts(FAR struct lib_outstream_s *self,
+                                 FAR const void *buff, size_t len)
 {
   FAR struct lib_syslogstream_s *stream =
                                        (FAR struct lib_syslogstream_s *)self;
@@ -59,7 +61,7 @@ static int syslogstream_puts(FAR struct lib_outstream_s *self,
       return 0;
     }
 
-  syslog(stream->priority, "%.*s", len, (FAR const char *)buff);
+  syslog(stream->priority, "%.*s", (int)len, (FAR const char *)buff);
   return len;
 }
 

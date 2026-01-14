@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/sixlowpan/sixlowpan_reassbuf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -132,7 +134,7 @@ static void sixlowpan_reass_expire(void)
       next = reass->rb_flink;
 
       /* Free any inactive reassembly buffers.  This is done because the life
-       * the reassembly buffer is not cerain.
+       * the reassembly buffer is not certain.
        */
 
       if (!reass->rb_active)

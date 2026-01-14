@@ -1,0 +1,181 @@
+/****************************************************************************
+ * arch/arm64/src/bcm2711/hardware/bcm2711_mailbox.h
+ *
+ * Author: Matteo Golin <matteo.golin@gmail.com>
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#ifndef __ARCH_ARM64_SRC_BCM2711_MAILBOX_H
+#define __ARCH_ARM64_SRC_BCM2711_MAILBOX_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include "bcm2711_memmap.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* ARM_LOCAL mailbox register offsets */
+
+#define BCM_MBOX_SET00_OFFSET 0x80
+#define BCM_MBOX_SET01_OFFSET 0x84
+#define BCM_MBOX_SET02_OFFSET 0x88
+#define BCM_MBOX_SET03_OFFSET 0x8c
+#define BCM_MBOX_SET04_OFFSET 0x90
+#define BCM_MBOX_SET05_OFFSET 0x94
+#define BCM_MBOX_SET06_OFFSET 0x98
+#define BCM_MBOX_SET07_OFFSET 0x9c
+#define BCM_MBOX_SET08_OFFSET 0xa0
+#define BCM_MBOX_SET09_OFFSET 0xa4
+#define BCM_MBOX_SET10_OFFSET 0xa8
+#define BCM_MBOX_SET11_OFFSET 0xac
+#define BCM_MBOX_SET12_OFFSET 0xb0
+#define BCM_MBOX_SET13_OFFSET 0xb4
+#define BCM_MBOX_SET14_OFFSET 0xb8
+#define BCM_MBOX_SET15_OFFSET 0xbc
+#define BCM_MBOX_CLR00_OFFSET 0xc0
+#define BCM_MBOX_CLR01_OFFSET 0xc4
+#define BCM_MBOX_CLR02_OFFSET 0xc8
+#define BCM_MBOX_CLR03_OFFSET 0xcc
+#define BCM_MBOX_CLR04_OFFSET 0xd0
+#define BCM_MBOX_CLR05_OFFSET 0xd4
+#define BCM_MBOX_CLR06_OFFSET 0xd8
+#define BCM_MBOX_CLR07_OFFSET 0xdc
+#define BCM_MBOX_CLR08_OFFSET 0xe0
+#define BCM_MBOX_CLR09_OFFSET 0xe4
+#define BCM_MBOX_CLR10_OFFSET 0xe8
+#define BCM_MBOX_CLR11_OFFSET 0xec
+#define BCM_MBOX_CLR12_OFFSET 0xf0
+#define BCM_MBOX_CLR13_OFFSET 0xf4
+#define BCM_MBOX_CLR14_OFFSET 0xf8
+#define BCM_MBOX_CLR15_OFFSET 0xfc
+
+/* ARM_LOCAL mailbox register addresses */
+
+#define _BCM_MBOX(offset) (BCM_ARMLOCAL_BASEADDR + (offset))
+
+#define BCM_MBOX_SET00 _BCM_MBOX(BCM_MBOX_SET00_OFFSET)
+#define BCM_MBOX_SET01 _BCM_MBOX(BCM_MBOX_SET01_OFFSET)
+#define BCM_MBOX_SET02 _BCM_MBOX(BCM_MBOX_SET02_OFFSET)
+#define BCM_MBOX_SET03 _BCM_MBOX(BCM_MBOX_SET03_OFFSET)
+#define BCM_MBOX_SET04 _BCM_MBOX(BCM_MBOX_SET04_OFFSET)
+#define BCM_MBOX_SET05 _BCM_MBOX(BCM_MBOX_SET05_OFFSET)
+#define BCM_MBOX_SET06 _BCM_MBOX(BCM_MBOX_SET06_OFFSET)
+#define BCM_MBOX_SET07 _BCM_MBOX(BCM_MBOX_SET07_OFFSET)
+#define BCM_MBOX_SET08 _BCM_MBOX(BCM_MBOX_SET08_OFFSET)
+#define BCM_MBOX_SET09 _BCM_MBOX(BCM_MBOX_SET09_OFFSET)
+#define BCM_MBOX_SET10 _BCM_MBOX(BCM_MBOX_SET10_OFFSET)
+#define BCM_MBOX_SET11 _BCM_MBOX(BCM_MBOX_SET11_OFFSET)
+#define BCM_MBOX_SET12 _BCM_MBOX(BCM_MBOX_SET12_OFFSET)
+#define BCM_MBOX_SET13 _BCM_MBOX(BCM_MBOX_SET13_OFFSET)
+#define BCM_MBOX_SET14 _BCM_MBOX(BCM_MBOX_SET14_OFFSET)
+#define BCM_MBOX_SET15 _BCM_MBOX(BCM_MBOX_SET15_OFFSET)
+#define BCM_MBOX_CLR00 _BCM_MBOX(BCM_MBOX_CLR00_OFFSET)
+#define BCM_MBOX_CLR01 _BCM_MBOX(BCM_MBOX_CLR01_OFFSET)
+#define BCM_MBOX_CLR02 _BCM_MBOX(BCM_MBOX_CLR02_OFFSET)
+#define BCM_MBOX_CLR03 _BCM_MBOX(BCM_MBOX_CLR03_OFFSET)
+#define BCM_MBOX_CLR04 _BCM_MBOX(BCM_MBOX_CLR04_OFFSET)
+#define BCM_MBOX_CLR05 _BCM_MBOX(BCM_MBOX_CLR05_OFFSET)
+#define BCM_MBOX_CLR06 _BCM_MBOX(BCM_MBOX_CLR06_OFFSET)
+#define BCM_MBOX_CLR07 _BCM_MBOX(BCM_MBOX_CLR07_OFFSET)
+#define BCM_MBOX_CLR08 _BCM_MBOX(BCM_MBOX_CLR08_OFFSET)
+#define BCM_MBOX_CLR09 _BCM_MBOX(BCM_MBOX_CLR09_OFFSET)
+#define BCM_MBOX_CLR10 _BCM_MBOX(BCM_MBOX_CLR10_OFFSET)
+#define BCM_MBOX_CLR11 _BCM_MBOX(BCM_MBOX_CLR11_OFFSET)
+#define BCM_MBOX_CLR12 _BCM_MBOX(BCM_MBOX_CLR12_OFFSET)
+#define BCM_MBOX_CLR13 _BCM_MBOX(BCM_MBOX_CLR13_OFFSET)
+#define BCM_MBOX_CLR14 _BCM_MBOX(BCM_MBOX_CLR14_OFFSET)
+#define BCM_MBOX_CLR15 _BCM_MBOX(BCM_MBOX_CLR15_OFFSET)
+
+/* VideoCore mailbox offsets */
+
+#define BCM_VC_MBOX0                                                         \
+  (BCM_VC_MBOX_BASEADDR + 0x00) /* Always for VC -> ARM, never write */
+#define BCM_VC_MBOX1                                                         \
+  (BCM_VC_MBOX_BASEADDR + 0x20) /* Always for ARM -> VC, never read */
+
+/* VideoCore mailbox register offsets (from mailbox<n> base) */
+
+#define BCM_VC_MBOX_RW_OFFSET (0x00) /* Read/write */
+#define BCM_VC_MBOX_PEEK_OFFSET (0x10)
+#define BCM_VC_MBOX_SENDER_OFFSET (0x14)
+#define BCM_VC_MBOX_STATUS_OFFSET (0x18)
+#define BCM_VC_MBOX_CONFIG_OFFSET (0x1c)
+
+/* VideoCore mailbox registers */
+
+#define BCM_VC_MBOX_RW(base) (BCM_VC_MBOX_RW_OFFSET + (base))
+#define BCM_VC_MBOX_PEEK(base) (BCM_VC_MBOX_PEEK_OFFSET + (base))
+#define BCM_VC_MBOX_SENDER(base) (BCM_VC_MBOX_SENDER_OFFSET + (base))
+#define BCM_VC_MBOX_STATUS(base) (BCM_VC_MBOX_STATUS_OFFSET + (base))
+#define BCM_VC_MBOX_CONFIG(base) (BCM_VC_MBOX_CONFIG_OFFSET + (base))
+
+/* VideoCore mailbox flags */
+
+#define BCM_VC_MBOX_STATUS_FULL (1 << 31)
+#define BCM_VC_MBOX_STATUS_EMPTY (1 << 30)
+
+#define BCM_VC_MBOX_CONFIG_ERR_EMPTY (1 << 10)  /* Read from empty MBOX */
+#define BCM_VC_MBOX_CONFIG_ERR_FULL (1 << 9)    /* Write to full mbox */
+#define BCM_VC_MBOX_CONFIG_ERR_OWN (1 << 8)     /* Non-owner read attempt */
+#define BCM_VC_MBOX_CONFIG_IRQEN_EMPTY (1 << 6) /* Enable opp empty IRQ */
+#define BCM_VC_MBOX_CONFIG_IRQEN_NEWM (1 << 5)  /* Enable new mail IRQ */
+#define BCM_VC_MBOX_CONFIG_IRQEN_SPACE (1 << 4) /* Enable space avail IRQ */
+#define BCM_VC_MBOX_CONFIG_CLEAR (1 << 3)       /* Clear mailbox */
+#define BCM_VC_MBOX_CONFIG_INT_EMPTY (1 << 2)   /* IRQ pend opp empty */
+#define BCM_VC_MBOX_CONFIG_INT_NEWM (1 << 1)    /* IRQ pend new mail */
+#define BCM_VC_MBOX_CONFIG_INT_SPACE (1 << 0)   /* IRQ pend new mail */
+
+/* NOTE: bitbanged.com article about these configuration register bits states
+ * there is currently no documentation for the 'opp empty' IRQ.
+ */
+
+#define BCM_VC_MBOX_RW_CHAN_MASK (0xf) /* Mask for channel ID */
+#define BCM_VC_MBOX_RW_DATSHIFT (4)    /* Shift amount for data */
+
+#define BCM_VC_MBOX_REQUEST (0)           /* Request code */
+#define BCM_VC_MBOX_RESP_OK (0x80000000)  /* Response: success */
+#define BCM_VC_MBOX_RESP_ERR (0x80000001) /* Response: error */
+#define BCM_VC_MBOX_TAGLIST_END (0)       /* End of tag list in request */
+
+/* VideoCore mailbox information */
+
+#define BCM_VC_MBOX_FIFO_DEPTH (8) /* 8-deep FIFO of 32-bit words */
+
+/* We assume L2 cache enabled. The user can disable this from config.txt but
+ * that's their problem.
+ */
+
+#define L2_CACHE_EN 1
+
+/* Physical address mappings between VideoCore and ARM bus */
+
+#ifdef L2_CACHE_EN
+#define PHY_MEM_START (0x40000000)
+#else
+#define PHY_MEM_START (0xc0000000)
+#endif /* L2_CACHE_EN */
+
+/* Maps VideoCore addresses to ARM addresses. As seen in LLD */
+
+#define VCADDR_TO_ARM(addr) (((addr) | PHY_MEM_START) & ~(0xc0000000))
+
+#endif /* __ARCH_ARM64_SRC_BCM2711_MAILBOX_H */

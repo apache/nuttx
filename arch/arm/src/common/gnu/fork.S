@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/common/fork.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,7 +28,6 @@
 
 #include "arm_fork.h"
 
-	.syntax	unified
 	.file	"fork.S"
 
 /****************************************************************************
@@ -78,7 +79,11 @@
  ****************************************************************************/
 
 	.globl	up_fork
+#ifdef __ghs__
+	.type	up_fork, $function
+#else
 	.type	up_fork, function
+#endif
 
 up_fork:
 	/* Create a stack frame */

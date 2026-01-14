@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/input/keyboard_upper.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,9 +32,11 @@
 #include <poll.h>
 
 #include <nuttx/input/keyboard.h>
+#include <nuttx/input/kbd_codec.h>
+#include <nuttx/input/virtio-input-event-codes.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/list.h>
-#include <nuttx/mm/circbuf.h>
+#include <nuttx/circbuf.h>
 #include <nuttx/mutex.h>
 
 /****************************************************************************
@@ -418,4 +422,95 @@ void keyboard_event(FAR struct keyboard_lowerhalf_s *lower, uint32_t keycode,
     }
 
   nxmutex_unlock(&upper->lock);
+}
+
+/****************************************************************************
+ * keyboard_translate_virtio_code
+ ****************************************************************************/
+
+uint32_t keyboard_translate_virtio_code(uint16_t keycode)
+{
+  switch (keycode)
+    {
+      case KEY_DELETE:
+        return KEYCODE_FWDDEL;
+      case KEY_BACKSPACE:
+        return KEYCODE_BACKDEL;
+      case KEY_HOME:
+        return KEYCODE_HOME;
+      case KEY_END:
+        return KEYCODE_END;
+      case KEY_LEFT:
+        return KEYCODE_LEFT;
+      case KEY_RIGHT:
+        return KEYCODE_RIGHT;
+      case KEY_UP:
+        return KEYCODE_UP;
+      case KEY_DOWN:
+        return KEYCODE_DOWN;
+      case KEY_PAGEUP:
+        return KEYCODE_PAGEUP;
+      case KEY_PAGEDOWN:
+        return KEYCODE_PAGEDOWN;
+      case KEY_ENTER:
+        return KEYCODE_ENTER;
+      case KEY_CAPSLOCK:
+        return KEYCODE_CAPSLOCK;
+      case KEY_SCROLLLOCK:
+        return KEYCODE_SCROLLLOCK;
+      case KEY_NUMLOCK:
+        return KEYCODE_NUMLOCK;
+      case KEY_SYSRQ:
+        return KEYCODE_PRTSCRN;
+      case KEY_F1:
+        return KEYCODE_F1;
+      case KEY_F2:
+        return KEYCODE_F2;
+      case KEY_F3:
+        return KEYCODE_F3;
+      case KEY_F4:
+        return KEYCODE_F4;
+      case KEY_F5:
+        return KEYCODE_F5;
+      case KEY_F6:
+        return KEYCODE_F6;
+      case KEY_F7:
+        return KEYCODE_F7;
+      case KEY_F8:
+        return KEYCODE_F8;
+      case KEY_F9:
+        return KEYCODE_F9;
+      case KEY_F10:
+        return KEYCODE_F10;
+      case KEY_F11:
+        return KEYCODE_F11;
+      case KEY_F12:
+        return KEYCODE_F12;
+      case KEY_F13:
+        return KEYCODE_F13;
+      case KEY_F14:
+        return KEYCODE_F14;
+      case KEY_F15:
+        return KEYCODE_F15;
+      case KEY_F16:
+        return KEYCODE_F16;
+      case KEY_F17:
+        return KEYCODE_F17;
+      case KEY_F18:
+        return KEYCODE_F18;
+      case KEY_F19:
+        return KEYCODE_F19;
+      case KEY_F20:
+        return KEYCODE_F20;
+      case KEY_F21:
+        return KEYCODE_F21;
+      case KEY_F22:
+        return KEYCODE_F22;
+      case KEY_F23:
+        return KEYCODE_F23;
+      case KEY_F24:
+        return KEYCODE_F24;
+      default:
+        return keycode;
+    }
 }

@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/time/lib_difftime.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -48,7 +50,7 @@ double difftime(time_t time1, time_t time0)
 {
   return (double)time1 - (double)time0;
 }
-#else
+#elif defined(CONFIG_HAVE_FLOAT)
 float difftime(time_t time1, time_t time0)
 {
   if (time1 >= time0)

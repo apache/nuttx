@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/mm_heap/mm_malloc_size.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,6 +29,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/mm/kasan.h>
 #include <nuttx/mm/mm.h>
 
 #include "mm_heap/mm.h"
@@ -38,12 +41,17 @@
 size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
 {
   FAR struct mm_freenode_s *node;
+  ssize_t size;
+  bool flag;
+
+  flag = kasan_bypass(true);
 #ifdef CONFIG_MM_HEAP_MEMPOOL
   if (heap->mm_mpool)
     {
-      ssize_t size = mempool_multiple_alloc_size(heap->mm_mpool, mem);
+      size = mempool_multiple_alloc_size(heap->mm_mpool, mem);
       if (size >= 0)
         {
+          kasan_bypass(flag);
           return size;
         }
     }
@@ -64,5 +72,8 @@ size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
 
   DEBUGASSERT(MM_NODE_IS_ALLOC(node));
 
-  return MM_SIZEOF_NODE(node) - MM_ALLOCNODE_OVERHEAD;
+  size = MM_SIZEOF_NODE(node) - MM_ALLOCNODE_OVERHEAD;
+
+  kasan_bypass(flag);
+  return size;
 }

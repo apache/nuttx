@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sparc/include/sparc_v8/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -160,28 +162,28 @@
 #define REG_Y               (18)
 #define REG_FSR             (19)
 
-/* %l0: loacal 0 */
+/* %l0: local 0 */
 #define REG_L0              (52)
 
-/* %l1: loacal 1 */
+/* %l1: local 1 */
 #define REG_L1              (53)
 
-/* %l2: loacal 2 */
+/* %l2: local 2 */
 #define REG_L2              (54)
 
-/* %l3: loacal 3 */
+/* %l3: local 3 */
 #define REG_L3              (55)
 
-/* %l4: loacal 4 */
+/* %l4: local 4 */
 #define REG_L4              (56)
 
-/* %l5: loacal 5 */
+/* %l5: local 5 */
 #define REG_L5              (57)
 
-/* %l6: loacal 6 */
+/* %l6: local 6 */
 #define REG_L6              (58)
 
-/* %l7: loacal 7 */
+/* %l7: local 7 */
 #define REG_L7              (59)
 
 /* %o0: outgoing param 0, incoming return value */
@@ -427,12 +429,6 @@ struct xcpt_syscall_s
 
 struct xcptcontext
 {
-  /* The following function pointer is non-NULL if there are pending signals
-   * to be processed.
-   */
-
-  void *sigdeliver; /* Actual type is sig_deliver_t */
-
   /* These additional register save locations are used to implement the
    * signal delivery trampoline.
    *
@@ -507,7 +503,7 @@ struct xcptcontext
  */
 #define sparc_get_tbr( _tbr ) \
   do { \
-     (_tbr) = 0; /* to avoid unitialized warnings */ \
+     (_tbr) = 0; /* to avoid uninitialized warnings */ \
      __asm__ volatile( "rd %%tbr, %0" :  "=r" (_tbr) : "0" (_tbr) ); \
   } while ( 0 )
 
@@ -559,7 +555,7 @@ struct xcptcontext
  */
 #define sparc_get_asr17( _asr17 ) \
   do { \
-     (_asr17) = 0; /* to avoid unitialized warnings */ \
+     (_asr17) = 0; /* to avoid uninitialized warnings */ \
      __asm__ volatile( "rd %%asr17, %0" :  "=r" (_asr17) : "0" (_asr17) ); \
   } while ( 0 )
 
@@ -568,7 +564,7 @@ struct xcptcontext
  * This method returns the entire PSR contents.
  */
 
-static inline uint32_t sparc_disable_interrupts(void)
+static inline_function uint32_t sparc_disable_interrupts(void)
 {
   register uint32_t psr __asm__("g1"); /* return value of trap handler */
   __asm__ volatile ("ta %1\n\t" : "=r" (psr) : "i" (SPARC_SWTRAP_IRQDIS));
@@ -580,7 +576,7 @@ static inline uint32_t sparc_disable_interrupts(void)
  * psr is the PSR returned by sparc_disable_interrupts.
  */
 
-static inline void sparc_enable_interrupts(uint32_t psr)
+static inline_function void sparc_enable_interrupts(uint32_t psr)
 {
   register uint32_t _psr __asm__("g1") = psr; /* input to trap handler */
 

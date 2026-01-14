@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/devif/devif_poll.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -77,7 +79,7 @@ enum devif_packet_type
  *   other non-standard packet radios) for now but this is a point where
  *   support for other conversions may be provided.
  *
- *   TCP output comes through three different mechansims.  Either from:
+ *   TCP output comes through three different mechanisms.  Either from:
  *
  *   1. TCP socket output.  For the case of TCP output to a radio,
  *      the TCP output is caught in the socket send()/sendto() logic and
@@ -199,8 +201,9 @@ static void devif_packet_conversion(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPFILTER
-static int devif_poll_local_out(FAR struct net_driver_s *dev,
-                                devif_poll_callback_t callback)
+static inline_function int
+devif_poll_local_out(FAR struct net_driver_s *dev,
+                     devif_poll_callback_t callback)
 {
   /* Maybe we need to reply REJECT to ourself, so filter before loopback. */
 
@@ -224,8 +227,9 @@ static int devif_poll_local_out(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_PKT
-static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
-                                      devif_poll_callback_t callback)
+static inline_function int
+devif_poll_pkt_connections(FAR struct net_driver_s *dev,
+                           devif_poll_callback_t callback)
 {
   FAR struct pkt_conn_s *pkt_conn = NULL;
   int bstop = 0;
@@ -234,6 +238,7 @@ static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
    * action.
    */
 
+  pkt_conn_list_lock();
   while (!bstop && (pkt_conn = pkt_nextconn(pkt_conn)))
     {
       /* Skip packet connections that are bound to other polling devices */
@@ -257,6 +262,7 @@ static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
         }
     }
 
+  pkt_conn_list_unlock();
   return bstop;
 }
 #endif /* CONFIG_NET_PKT */
@@ -274,8 +280,9 @@ static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_CAN
-static int devif_poll_can_connections(FAR struct net_driver_s *dev,
-                                      devif_poll_callback_t callback)
+static inline_function int
+devif_poll_can_connections(FAR struct net_driver_s *dev,
+                           devif_poll_callback_t callback)
 {
   FAR struct can_conn_s *can_conn = NULL;
   int bstop = 0;
@@ -284,6 +291,7 @@ static int devif_poll_can_connections(FAR struct net_driver_s *dev,
    * perform the poll action
    */
 
+  can_conn_list_lock();
   while (!bstop && (can_conn = can_nextconn(can_conn)))
     {
       /* Skip connections that are bound to other polling devices */
@@ -303,6 +311,7 @@ static int devif_poll_can_connections(FAR struct net_driver_s *dev,
         }
     }
 
+  can_conn_list_unlock();
   return bstop;
 }
 #endif /* CONFIG_NET_PKT */
@@ -320,8 +329,9 @@ static int devif_poll_can_connections(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_BLUETOOTH
-static int devif_poll_bluetooth_connections(FAR struct net_driver_s *dev,
-                                            devif_poll_callback_t callback)
+static inline_function int
+devif_poll_bluetooth_connections(FAR struct net_driver_s *dev,
+                                 devif_poll_callback_t callback)
 {
   FAR struct bluetooth_conn_s *bluetooth_conn = NULL;
   int bstop = 0;
@@ -330,6 +340,7 @@ static int devif_poll_bluetooth_connections(FAR struct net_driver_s *dev,
    * action.
    */
 
+  bluetooth_conn_list_lock();
   while (!bstop && (bluetooth_conn = bluetooth_conn_next(bluetooth_conn)))
     {
       /* Perform the packet TX poll */
@@ -343,6 +354,8 @@ static int devif_poll_bluetooth_connections(FAR struct net_driver_s *dev,
           bstop = callback(dev);
         }
     }
+
+  bluetooth_conn_list_unlock();
 
   return bstop;
 }
@@ -361,8 +374,9 @@ static int devif_poll_bluetooth_connections(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IEEE802154
-static int devif_poll_ieee802154_connections(FAR struct net_driver_s *dev,
-                                             devif_poll_callback_t callback)
+static inline_function int
+devif_poll_ieee802154_connections(FAR struct net_driver_s *dev,
+                                  devif_poll_callback_t callback)
 {
   FAR struct ieee802154_conn_s *ieee802154_conn = NULL;
   int bstop = 0;
@@ -371,6 +385,7 @@ static int devif_poll_ieee802154_connections(FAR struct net_driver_s *dev,
    * action.
    */
 
+  ieee802154_conn_list_lock();
   while (!bstop && (ieee802154_conn = ieee802154_conn_next(ieee802154_conn)))
     {
       /* Perform the packet TX poll */
@@ -385,6 +400,7 @@ static int devif_poll_ieee802154_connections(FAR struct net_driver_s *dev,
         }
     }
 
+  ieee802154_conn_list_unlock();
   return bstop;
 }
 #endif /* CONFIG_NET_IEEE802154 */
@@ -398,8 +414,8 @@ static int devif_poll_ieee802154_connections(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_SOCKET)
-static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
-                                  devif_poll_callback_t callback)
+static inline_function int devif_poll_icmp(FAR struct net_driver_s *dev,
+                                           devif_poll_callback_t callback)
 {
   FAR struct icmp_conn_s *conn = NULL;
   int bstop = 0;
@@ -408,6 +424,7 @@ static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
    * action.
    */
 
+  icmp_conn_list_lock();
   while (!bstop && (conn = icmp_nextconn(conn)) != NULL)
     {
       /* Skip ICMP connections that are bound to other polling devices */
@@ -428,6 +445,7 @@ static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
         }
     }
 
+  icmp_conn_list_unlock();
   return bstop;
 }
 #endif /* CONFIG_NET_ICMP && CONFIG_NET_ICMP_SOCKET */
@@ -441,8 +459,8 @@ static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_ICMPv6_SOCKET) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
-static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
-                                    devif_poll_callback_t callback)
+static inline_function int devif_poll_icmpv6(FAR struct net_driver_s *dev,
+                                             devif_poll_callback_t callback)
 {
   FAR struct icmpv6_conn_s *conn = NULL;
   int bstop = 0;
@@ -489,8 +507,8 @@ static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPFORWARD
-static inline int devif_poll_forward(FAR struct net_driver_s *dev,
-                                     devif_poll_callback_t callback)
+static inline_function int devif_poll_forward(FAR struct net_driver_s *dev,
+                                              devif_poll_callback_t callback)
 {
   /* Perform the forwarding poll */
 
@@ -520,8 +538,8 @@ static inline int devif_poll_forward(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static inline int devif_poll_igmp(FAR struct net_driver_s *dev,
-                                  devif_poll_callback_t callback)
+static inline_function int devif_poll_igmp(FAR struct net_driver_s *dev,
+                                           devif_poll_callback_t callback)
 {
   /* Perform the IGMP TX poll */
 
@@ -550,8 +568,8 @@ static inline int devif_poll_igmp(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MLD
-static inline int devif_poll_mld(FAR struct net_driver_s *dev,
-                                 devif_poll_callback_t callback)
+static inline_function int devif_poll_mld(FAR struct net_driver_s *dev,
+                                          devif_poll_callback_t callback)
 {
   /* Perform the MLD TX poll */
 
@@ -580,8 +598,9 @@ static inline int devif_poll_mld(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef NET_UDP_HAVE_STACK
-static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
-                                      devif_poll_callback_t callback)
+static inline_function int
+devif_poll_udp_connections(FAR struct net_driver_s *dev,
+                           devif_poll_callback_t callback)
 {
   FAR struct udp_conn_s *conn = NULL;
   int bstop = 0;
@@ -590,6 +609,7 @@ static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
    * action.
    */
 
+  udp_conn_list_lock();
   while (!bstop && (conn = udp_nextconn(conn)))
     {
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
@@ -612,6 +632,7 @@ static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
         }
     }
 
+  udp_conn_list_unlock();
   return bstop;
 }
 #endif /* NET_UDP_HAVE_STACK */
@@ -629,14 +650,16 @@ static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef NET_TCP_HAVE_STACK
-static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
-                                             devif_poll_callback_t callback)
+static inline_function int
+devif_poll_tcp_connections(FAR struct net_driver_s *dev,
+                           devif_poll_callback_t callback)
 {
   FAR struct tcp_conn_s *conn  = NULL;
   int bstop = 0;
 
   /* Traverse all of the active TCP connections and perform the poll action */
 
+  tcp_conn_list_lock();
   while (!bstop && (conn = tcp_nextconn(conn)))
     {
       /* Skip TCP connections that are bound to other polling devices */
@@ -657,10 +680,82 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
         }
     }
 
+  tcp_conn_list_unlock();
   return bstop;
 }
 #else
 #  define devif_poll_tcp_connections(dev, callback) (0)
+#endif
+
+/****************************************************************************
+ * Name: devif_poll_queue
+ *
+ * Description:
+ *   Poll iob to send.
+ *
+ * Input Parameters:
+ *   iobq - the iob queue to poll.
+ *   dev - NIC Device instance.
+ *   callback - the actual sending API provided by each NIC driver.
+ *
+ * Returned Value:
+ *   Zero indicated the polling will continue, else stop the polling.
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver with the network
+ *   locked.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_ARP_SEND_QUEUE) || defined(CONFIG_NET_IPFRAG)
+static int devif_poll_queue(FAR struct iob_queue_s *iobq,
+                            FAR struct net_driver_s *dev,
+                            devif_poll_callback_t callback)
+{
+  FAR struct iob_s *iob;
+  bool reused = false;
+  int bstop = false;
+
+  while (!bstop)
+    {
+      /* Dequeue outgoing iob from iobq */
+
+      iob = iob_remove_queue(iobq);
+      if (iob == NULL)
+        {
+          break;
+        }
+
+      /* buffer could be reused for other protocols */
+
+      reused = true;
+
+      /* Replace original iob */
+
+      netdev_iob_replace(dev, iob);
+
+      /* build L2 headers */
+
+      devif_out(dev);
+
+      /* Call back into the driver */
+
+      if (dev->d_len > 0)
+        {
+          bstop = callback(dev);
+        }
+    }
+
+  /* Reuse iob buffer */
+
+  if (!bstop && reused)
+    {
+      iob_update_pktlen(dev->d_iob, 0, false);
+      netdev_iob_prepare(dev, true, 0);
+    }
+
+  return bstop;
+}
 #endif
 
 /****************************************************************************
@@ -683,56 +778,46 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPFRAG
-static int devif_poll_ipfrag(FAR struct net_driver_s *dev,
-                             devif_poll_callback_t callback)
+static inline_function int devif_poll_ipfrag(FAR struct net_driver_s *dev,
+                                             devif_poll_callback_t callback)
 {
-  FAR struct iob_s *frag;
-  bool reused = false;
-  int bstop = false;
+  return devif_poll_queue(&dev->d_fragout, dev, callback);
+}
+#endif
 
-  while (!bstop)
+/****************************************************************************
+ * Name: devif_poll_arp
+ *
+ * Description:
+ *   Poll all queue iobs with arp finished to send.
+ *
+ * Input Parameters:
+ *   dev - NIC Device instance.
+ *   callback - the actual sending API provided by each NIC driver.
+ *
+ * Returned Value:
+ *   Zero indicated the polling will continue, else stop the polling.
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver with the network
+ *   locked.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_ARP_SEND_QUEUE) || defined(CONFIG_NET_ARP_SEND)
+static inline_function int devif_poll_arp(FAR struct net_driver_s *dev,
+                                          devif_poll_callback_t callback)
+{
+  int bstop;
+
+#  ifdef CONFIG_NET_ARP_SEND
+  bstop = arp_poll(dev, callback);
+  if (!bstop)
+#  endif
     {
-      /* Dequeue outgoing fragment from dev->d_fragout */
-
-      frag = iob_remove_queue(&dev->d_fragout);
-      if (frag == NULL)
-        {
-          break;
-        }
-
-      /* Frag buffer could be reused for other protocols */
-
-      reused = true;
-
-      /* Replace original iob */
-
-      netdev_iob_replace(dev, frag);
-
-      /* build L2 headers */
-
-      devif_out(dev);
-
-      /* Call back into the driver */
-
-      if (dev->d_len > 0)
-        {
-          bstop = callback(dev);
-        }
-    }
-
-  /* Notify the device driver that ip fragments is available. */
-
-  if (iob_peek_queue(&dev->d_fragout) != NULL)
-    {
-      netdev_txnotify_dev(dev);
-    }
-
-  /* Reuse iob buffer */
-
-  if (!bstop && reused)
-    {
-      iob_update_pktlen(dev->d_iob, 0, false);
-      netdev_iob_prepare(dev, true, 0);
+#  ifdef CONFIG_NET_ARP_SEND_QUEUE
+      bstop = devif_poll_queue(&dev->d_arpout, dev, callback);
+#  endif
     }
 
   return bstop;
@@ -768,6 +853,7 @@ static int devif_poll_connections(FAR struct net_driver_s *dev,
                                   devif_poll_callback_t callback)
 {
   int bstop = false;
+  int i;
 
   /* Reset device buffer length */
 
@@ -777,128 +863,143 @@ static int devif_poll_connections(FAR struct net_driver_s *dev,
    * action.
    */
 
-#ifdef CONFIG_NET_IPFRAG
-  /* Traverse all of ip fragments for available packets to transfer */
-
-  bstop = devif_poll_ipfrag(dev, callback);
-  if (!bstop)
-#endif
-#ifdef CONFIG_NET_ARP_SEND
+  while (!bstop)
     {
-      /* Check for pending ARP requests */
+      i = ffsl(dev->d_polltype);
+      if (i == 0)
+        {
+          break;
+        }
 
-      bstop = arp_poll(dev, callback);
-    }
+      switch (1 << (i - 1))
+        {
+#if defined(CONFIG_NET_ARP_SEND_QUEUE) || defined(CONFIG_NET_ARP_SEND)
+          case ARP_POLL:
 
-  if (!bstop)
+            /* Traverse all of arp request or arp send queue pending iobs
+             * for available packets to transfer
+             */
+
+            bstop = devif_poll_arp(dev, callback);
+            break;
+#endif
+#ifdef CONFIG_NET_IPFRAG
+          case IPFRAG_POLL:
+
+            /* Traverse all of ip fragments for available packets to
+             * transfer
+             */
+
+            bstop = devif_poll_ipfrag(dev, callback);
+            break;
 #endif
 #ifdef CONFIG_NET_PKT
-    {
-      /* Check for pending packet socket transfer */
+          case PKT_POLL:
 
-      bstop = devif_poll_pkt_connections(dev, callback);
-    }
+            /* Check for pending packet socket transfer */
 
-  if (!bstop)
+            bstop = devif_poll_pkt_connections(dev, callback);
+            break;
 #endif
 #ifdef CONFIG_NET_CAN
-    {
-      /* Check for pending CAN socket transfer */
+          case CAN_POLL:
 
-      bstop = devif_poll_can_connections(dev, callback);
-    }
+            /* Check for pending CAN socket transfer */
 
-  if (!bstop)
+            bstop = devif_poll_can_connections(dev, callback);
+            break;
 #endif
 #ifdef CONFIG_NET_BLUETOOTH
-    {
-      /* Check for pending PF_BLUETOOTH socket transfer */
+          case BLUETOOTH_POLL:
 
-      bstop = devif_poll_bluetooth_connections(dev, callback);
-    }
+            /* Check for pending PF_BLUETOOTH socket transfer */
 
-  if (!bstop)
+            bstop = devif_poll_bluetooth_connections(dev, callback);
+            break;
 #endif
 #ifdef CONFIG_NET_IEEE802154
-    {
-      /* Check for pending PF_IEEE802154 socket transfer */
+          case IEEE802154_POLL:
 
-      bstop = devif_poll_ieee802154_connections(dev, callback);
-    }
+            /* Check for pending PF_IEEE802154 socket transfer */
 
-  if (!bstop)
+            bstop = devif_poll_ieee802154_connections(dev, callback);
+            break;
 #endif
 #ifdef CONFIG_NET_IGMP
-    {
-      /* Check for pending IGMP messages */
+          case IGMP_POLL:
 
-      bstop = devif_poll_igmp(dev, callback);
-    }
+            /* Check for pending IGMP messages */
 
-  if (!bstop)
+            bstop = devif_poll_igmp(dev, callback);
+            break;
 #endif
 #ifdef CONFIG_NET_MLD
-    {
-      /* Check for pending MLD messages */
+          case MLD_POLL:
 
-      bstop = devif_poll_mld(dev, callback);
-    }
+            /* Check for pending MLD messages */
 
-  if (!bstop)
+            bstop = devif_poll_mld(dev, callback);
+            break;
 #endif
 #ifdef NET_TCP_HAVE_STACK
-    {
-      /* Traverse all of the active TCP connections and perform the poll
-       * action.
-       */
+          case TCP_POLL:
 
-      bstop = devif_poll_tcp_connections(dev, callback);
-    }
+            /* Traverse all of the active TCP connections and perform the
+             * poll action.
+             */
 
-  if (!bstop)
+            bstop = devif_poll_tcp_connections(dev, callback);
+            break;
 #endif
 #ifdef NET_UDP_HAVE_STACK
-    {
-      /* Traverse all of the allocated UDP connections and perform
-       * the poll action
-       */
+          case UDP_POLL:
 
-      bstop = devif_poll_udp_connections(dev, callback);
-    }
+            /* Traverse all of the allocated UDP connections and perform
+             * the poll action
+             */
 
-  if (!bstop)
+            bstop = devif_poll_udp_connections(dev, callback);
+            break;
 #endif
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_SOCKET)
-    {
-      /* Traverse all of the tasks waiting to send an ICMP ECHO request. */
+          case ICMP_POLL:
 
-      bstop = devif_poll_icmp(dev, callback);
-    }
+            /* Traverse all of the tasks waiting to send an ICMP ECHO
+             * request.
+             */
 
-  if (!bstop)
+            bstop = devif_poll_icmp(dev, callback);
+            break;
 #endif
 #if defined(CONFIG_NET_ICMPv6_SOCKET) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
-    {
-      /* Traverse all of the tasks waiting to send an ICMPv6 ECHO request. */
+          case ICMPv6_POLL:
 
-      bstop = devif_poll_icmpv6(dev, callback);
-    }
+            /* Traverse all of the tasks waiting to send an ICMPv6 ECHO
+             * request.
+             */
 
-  if (!bstop)
+            bstop = devif_poll_icmpv6(dev, callback);
+            break;
 #endif
 #ifdef CONFIG_NET_IPFORWARD
-    {
-      /* Traverse all of the tasks waiting to forward a packet to this
-       * device.
-       */
 
-      bstop = devif_poll_forward(dev, callback);
-    }
+          /* Traverse all of the tasks waiting to forward a packet to this
+           * device.
+           */
 
-  if (!bstop)
+          case IPFWD_POLL:
+            bstop = devif_poll_forward(dev, callback);
+            break;
 #endif
-    {
-      /* Nothing more to do */
+          default:
+            nerr("ERROR: Unhandled poll type: %d\n", i - 1);
+            break;
+        }
+
+      if (!bstop)
+        {
+          dev->d_polltype &= ~(1 << (i - 1));
+        }
     }
 
   return bstop;
@@ -948,8 +1049,8 @@ static int devif_poll_connections(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static int devif_iob_poll(FAR struct net_driver_s *dev,
-                          devif_poll_callback_t callback)
+static inline_function int devif_iob_poll(FAR struct net_driver_s *dev,
+                                          devif_poll_callback_t callback)
 {
   int bstop;
 
@@ -1030,13 +1131,17 @@ static int devif_poll_callback(FAR struct net_driver_s *dev)
 
 int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 {
+  unsigned len;
   uint16_t llhdrlen;
   FAR uint8_t *buf;
   int bstop;
 
+  netdev_lock(dev);
   if (dev->d_buf == NULL)
     {
-      return devif_iob_poll(dev, callback);
+      bstop = devif_iob_poll(dev, callback);
+      netdev_unlock(dev);
+      return bstop;
     }
 
   buf = dev->d_buf;
@@ -1052,7 +1157,8 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
         {
           /* Copy iob to flat buffer */
 
-          iob_copyout(buf, dev->d_iob, dev->d_len, -llhdrlen);
+          len = MAX(dev->d_len, dev->d_sndlen);
+          iob_copyout(buf, dev->d_iob, len, -llhdrlen);
 
           /* Restore flat buffer pointer */
 
@@ -1090,6 +1196,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
   /* Restore the flat buffer */
 
   dev->d_buf = buf;
+  netdev_unlock(dev);
 
   return bstop;
 }

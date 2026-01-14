@@ -1,6 +1,8 @@
 ############################################################################
 # boards/arm/nrf52/nrf52840-dk/src/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -34,6 +36,10 @@ endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += nrf52_buttons.c
+endif
+
+ifeq ($(CONFIG_NRF52840DK_BTNLEDS_GPIO),y)
+CSRCS += nrf52_gpio.c
 endif
 
 ifeq ($(CONFIG_NRF52_SPI_MASTER),y)

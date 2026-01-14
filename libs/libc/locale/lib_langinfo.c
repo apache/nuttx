@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/locale/lib_langinfo.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -116,7 +118,7 @@ FAR char *nl_langinfo(nl_item item)
       case MON_1:
         return "January";
       case MON_2:
-        return "Feburary";
+        return "February";
       case MON_3:
         return "March";
       case MON_4:

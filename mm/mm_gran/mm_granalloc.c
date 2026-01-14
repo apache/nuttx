@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/mm_gran/mm_granalloc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -62,6 +64,53 @@ FAR void *gran_alloc(GRAN_HANDLE handle, size_t size)
   posi = gran_search(gran, ngran);
   if (posi >= 0)
     {
+      gran_set(gran, posi, ngran);
+    }
+
+  gran_leave_critical(gran);
+  if (posi < 0)
+    {
+      return NULL;
+    }
+
+  retp = gran->heapstart + (posi << gran->log2gran);
+  graninfo("heap=%"PRIxPTR" posi=%d retp=%"PRIxPTR" size=%zu n=%zu\n",
+           gran->heapstart, posi, retp, size, ngran);
+  DEBUGASSERT(retp >= gran->heapstart);
+  DEBUGASSERT(retp < gran->heapstart + GRANBYTE(gran));
+  return (FAR void *)retp;
+}
+
+FAR void *gran_alloc_align(GRAN_HANDLE handle, size_t size, size_t align)
+{
+  FAR gran_t *gran = (FAR gran_t *)handle;
+  uintptr_t retp;
+  size_t nalign;
+  size_t ngran;
+  size_t naligned_up;
+  int posi;
+  int ret;
+
+  DEBUGASSERT(gran);
+  nalign = NGRANULE(gran, align);
+  ngran = NGRANULE(gran, size);
+
+  naligned_up = ngran + (nalign - 1);
+  if (!naligned_up || naligned_up > gran->ngranules)
+    {
+      return NULL;
+    }
+
+  ret = gran_enter_critical(gran);
+  if (ret < 0)
+    {
+      return NULL;
+    }
+
+  posi = gran_search(gran, naligned_up);
+  if (posi >= 0)
+    {
+      posi = (posi + nalign - 1) & ~(nalign - 1);
       gran_set(gran, posi, ngran);
     }
 

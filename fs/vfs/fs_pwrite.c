@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_pwrite.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -135,7 +137,7 @@ ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset)
 
   /* Get the file structure corresponding to the file descriptor. */
 
-  ret = (ssize_t)fs_getfilep(fd, &filep);
+  ret = (ssize_t)file_get(fd, &filep);
   if (ret < 0)
     {
       goto errout;
@@ -144,6 +146,7 @@ ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset)
   /* Let file_pwrite do the real work */
 
   ret = file_pwrite(filep, buf, nbytes, offset);
+  file_put(filep);
   if (ret < 0)
     {
       goto errout;

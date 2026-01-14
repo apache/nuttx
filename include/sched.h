@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/sched.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -73,21 +75,25 @@
 
 /* These are not standard but are defined for Linux compatibility */
 
+/* Maximum number of CPUs */
+
+#define CPU_SETSIZE CONFIG_SMP_NCPUS
+
 /* void CPU_ZERO(FAR cpu_set_t *set); */
 
 #define CPU_ZERO(s) do { *(s) = 0; } while (0)
 
 /* void CPU_SET(int cpu, FAR cpu_set_t *set); */
 
-#define CPU_SET(c,s) do { *(s) |= (1 << (c)); } while (0)
+#define CPU_SET(c,s) do { *(s) |= (1u << (c)); } while (0)
 
 /* void CPU_CLR(int cpu, FAR cpu_set_t *set); */
 
-#define CPU_CLR(c,s) do { *(s) &= ~(1 << (c)); } while (0)
+#define CPU_CLR(c,s) do { *(s) &= ~(1u << (c)); } while (0)
 
 /* int  CPU_ISSET(int cpu, FAR const cpu_set_t *set); */
 
-#define CPU_ISSET(c,s) ((*(s) & (1 << (c))) != 0)
+#define CPU_ISSET(c,s) ((*(s) & (1u << (c))) != 0)
 
 /* int CPU_COUNT(FAR const cpu_set_t *set); */
 
@@ -233,6 +239,7 @@ void   task_testcancel(void);
 
 /* Task Scheduling Interfaces (based on POSIX APIs) */
 
+int    sched_getcpu(void);
 int    sched_setparam(pid_t pid, FAR const struct sched_param *param);
 int    sched_getparam(pid_t pid, FAR struct sched_param *param);
 int    sched_setscheduler(pid_t pid, int policy,
@@ -250,18 +257,16 @@ int    sched_setaffinity(pid_t pid, size_t cpusetsize,
                          FAR const cpu_set_t *mask);
 int    sched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
 int    sched_cpucount(FAR const cpu_set_t *set);
-int    sched_getcpu(void);
 #else
 #  define sched_setaffinity(p, c, m) 0
 #  define sched_getaffinity(p, c, m) (*(m) |= (1 << 0), 0)
 #  define sched_cpucount(s) 1
-#  define sched_getcpu() 0
 #endif /* CONFIG_SMP */
 
 /* Task Switching Interfaces (non-standard) */
 
-int    sched_lock(void);
-int    sched_unlock(void);
+void   sched_lock(void);
+void   sched_unlock(void);
 int    sched_lockcount(void);
 
 /* Queries */

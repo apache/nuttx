@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/mtd/at25.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -306,7 +308,7 @@ static void at25_waitwritecomplete(struct at25_dev_s *priv)
       if ((status & AT25_SR_BUSY) != 0)
         {
           at25_unlock(priv->dev);
-          nxsig_usleep(10000);
+          nxsched_usleep(10000);
           at25_lock(priv->dev);
         }
     }

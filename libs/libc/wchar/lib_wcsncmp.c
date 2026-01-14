@@ -1,7 +1,8 @@
 /****************************************************************************
  * libs/libc/wchar/lib_wcsncmp.c
  *
- * Copyright © 2005-2014 Rich Felker, et al.
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: 2005-2014 Rich Felker, et al.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -51,7 +52,7 @@
  *   string.
  *   Return value greater than 0 if the first character that does not match
  *   has a greater value in "l" than in "r"
- *   Reutrn value less than 0 otherswise
+ *   Return value less than 0 otherswise
  *
  ****************************************************************************/
 

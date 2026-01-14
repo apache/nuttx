@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/lcd/lcd_framebuffer.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -105,7 +107,7 @@ static int lcdfb_setcursor(FAR struct fb_vtable_s *vtable,
              FAR struct fb_setcursor_s *settings);
 #endif
 
-static int lcdfb_setpower(FAR struct fb_vtable_s *vtable, FAR int power);
+static int lcdfb_setpower(FAR struct fb_vtable_s *vtable, int power);
 
 /****************************************************************************
  * Private Data
@@ -467,7 +469,7 @@ static int lcdfb_setcursor(FAR struct fb_vtable_s *vtable,
  * Name: lcdfb_setpower
  ****************************************************************************/
 
-static int lcdfb_setpower(FAR struct fb_vtable_s *vtable, FAR int power)
+static int lcdfb_setpower(FAR struct fb_vtable_s *vtable, int power)
 {
   int ret = -EINVAL;
   FAR struct lcdfb_dev_s *priv;

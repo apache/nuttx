@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/sixlowpan/sixlowpan_utils.c
  *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -541,7 +543,7 @@ static inline bool sixlowpan_issaddrbased(const net_ipv6addr_t ipaddr,
 {
   return (ipaddr[5] == HTONS(0x00ff) &&
           ipaddr[6] == HTONS(0xfe00) &&
-          ipaddr[7] == *(uint16_t *)saddr);
+          ipaddr[7] == *(FAR uint16_t *)saddr);
 }
 #endif
 
@@ -553,12 +555,15 @@ static inline bool sixlowpan_iseaddrbased(const net_ipv6addr_t ipaddr,
    * can not be eaddr-based since EUI-64's are always universal
    */
 
-  if ((ipaddr[4] & HTONS(0x0200)) == 0) return false;
+  if ((ipaddr[4] & HTONS(0x0200)) == 0)
+    {
+      return false;
+    }
 
-  return (ipaddr[4] == ((*(uint16_t *)eaddr) ^ HTONS(0x0200)) &&
-          ipaddr[5] ==   *(uint16_t *)(eaddr + 2) &&
-          ipaddr[6] ==   *(uint16_t *)(eaddr + 4) &&
-          ipaddr[7] ==   *(uint16_t *)(eaddr + 6));
+  return (ipaddr[4] == ((*(FAR uint16_t *)eaddr) ^ HTONS(0x0200)) &&
+          ipaddr[5] ==   *(FAR uint16_t *)(eaddr + 2) &&
+          ipaddr[6] ==   *(FAR uint16_t *)(eaddr + 4) &&
+          ipaddr[7] ==   *(FAR uint16_t *)(eaddr + 6));
 }
 #endif
 

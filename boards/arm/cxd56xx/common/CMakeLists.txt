@@ -1,6 +1,8 @@
 # ##############################################################################
 # boards/arm/cxd56xx/common/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -185,6 +187,10 @@ if(CONFIG_ARCH_BOARD_COMMON)
 
   if(CONFIG_CXD56_GNSS_ADDON)
     list(APPEND SRCS src/cxd56_gnss_addon.c)
+  endif()
+
+  if(CONFIG_SENSORS_CXD5602PWBIMU)
+    list(APPEND SRCS src/cxd56_cxd5602pwbimu.c)
   endif()
 
   target_sources(board PRIVATE ${SRCS})

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/motor/foc/drv8301.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -143,7 +145,7 @@ static void drv8301_read(FAR struct drv8301_priv_s *priv, uint8_t addr,
   regval = 0;
   SPI_RECVBLOCK(priv->spi, &regval, 1);
 
-  /* Retrun data */
+  /* Return data */
 
   *data = (regval & 0x7ff);
 

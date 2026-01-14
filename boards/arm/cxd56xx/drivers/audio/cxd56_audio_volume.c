@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/cxd56xx/drivers/audio/cxd56_audio_volume.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -113,7 +115,7 @@ static CXD56_AUDIO_ECODE set_mute(cxd56_audio_volid_t id,
 
   if (wait)
     {
-      nxsig_usleep(waittime);
+      nxsched_usleep(waittime);
     }
 
   g_volparam[id].mute_bit |= type;
@@ -179,7 +181,7 @@ static CXD56_AUDIO_ECODE set_unmute(cxd56_audio_volid_t id,
 
       if (wait)
         {
-          nxsig_usleep(waittime);
+          nxsched_usleep(waittime);
         }
     }
 

@@ -1,0 +1,472 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "RA Configuration Options"
+
+choice
+	prompt "RA Chip Selection"
+	default ARCH_CHIP_R7FA4M1ABxxFM
+	depends on ARCH_CHIP_RA4
+
+config ARCH_CHIP_R7FA4M1ABxxFP
+	bool "R7FA4M1ABxxFP"
+	select RA_HAVE_SCI0_UART
+	select RA_HAVE_SCI1_UART
+	select RA_HAVE_SCI2_UART
+	select RA_HAVE_SCI9_UART
+	select RA_HAVE_GPT0
+	select RA_HAVE_GPT1
+	select RA_HAVE_GPT2
+	select RA_HAVE_GPT3
+	select RA_HAVE_GPT4
+	select RA_HAVE_GPT5
+	select RA_HAVE_GPT6
+	select RA_HAVE_GPT7
+	select RA4M1_FAMILY
+
+config ARCH_CHIP_R7FA4M1ABxxFM
+	bool "R7FA4M1ABxxFM"
+	select RA_HAVE_SCI0_UART
+	select RA_HAVE_SCI1_UART
+	select RA_HAVE_SCI2_UART
+	select RA_HAVE_SCI9_UART
+	select RA_HAVE_GPT0
+	select RA_HAVE_GPT1
+	select RA_HAVE_GPT2
+	select RA_HAVE_GPT3
+	select RA_HAVE_GPT4
+	select RA_HAVE_GPT5
+	select RA4M1_FAMILY
+
+config ARCH_CHIP_R7FA4M1ABxxFL
+	bool "R7FA4M1ABxxFL"
+	select RA_HAVE_SCI0_UART
+	select RA_HAVE_SCI1_UART
+	select RA_HAVE_SCI2_UART
+	select RA_HAVE_SCI9_UART
+	select RA_HAVE_GPT0
+	select RA_HAVE_GPT1
+	select RA_HAVE_GPT2
+	select RA_HAVE_GPT3
+	select RA_HAVE_GPT4
+	select RA_HAVE_GPT5
+	select RA4M1_FAMILY
+
+endchoice # RA4 Chip Selection
+
+config RA4M1_FAMILY
+	bool
+	default n
+	select ARCH_CORTEXM4
+
+menu "RA4M1 Peripheral Support"
+
+config RA_HAVE_SCI0_UART
+	bool
+	default n
+
+config RA_HAVE_SCI1_UART
+	bool
+	default n
+
+config RA_HAVE_SCI2_UART
+	bool
+	default n
+
+config RA_HAVE_SCI9_UART
+	bool
+	default n
+
+config RA_HAVE_GPT0
+	bool
+	default n
+
+config RA_HAVE_GPT1
+	bool
+	default n
+
+config RA_HAVE_GPT2
+	bool
+	default n
+
+config RA_HAVE_GPT3
+	bool
+	default n
+
+config RA_HAVE_GPT4
+	bool
+	default n
+
+config RA_HAVE_GPT5
+	bool
+	default n
+
+config RA_HAVE_GPT6
+	bool
+	default n
+
+config RA_HAVE_GPT7
+	bool
+	default n
+
+config RA_GPT
+	bool
+	default n
+
+config RA_SCI0_UART
+	bool "UART 0"
+	default n
+	depends on RA_HAVE_SCI0_UART
+	select SCI0_SERIALDRIVER
+
+config RA_SCI1_UART
+	bool "UART 1"
+	default n
+	depends on RA_HAVE_SCI1_UART
+	select SCI1_SERIALDRIVER
+
+config RA_SCI2_UART
+	bool "UART 2"
+	default y
+	depends on RA_HAVE_SCI2_UART
+	select SCI2_SERIALDRIVER
+
+config RA_SCI9_UART
+	bool "UART 9"
+	default n
+	depends on RA_HAVE_SCI9_UART
+	select SCI9_SERIALDRIVER
+
+config RA_GPT0
+	bool "GPT 0"
+	default n
+	depends on RA_HAVE_GPT0
+	select RA_GPT
+
+config RA_GPT1
+	bool "GPT 1"
+	default n
+	depends on RA_HAVE_GPT1
+	select RA_GPT
+
+config RA_GPT2
+	bool "GPT 2"
+	default n
+	depends on RA_HAVE_GPT2
+	select RA_GPT
+
+config RA_GPT3
+	bool "GPT 3"
+	default n
+	depends on RA_HAVE_GPT3
+	select RA_GPT
+
+config RA_GPT4
+	bool "GPT 4"
+	default n
+	depends on RA_HAVE_GPT4
+	select RA_GPT
+
+config RA_GPT5
+	bool "GPT 5"
+	default n
+	depends on RA_HAVE_GPT5
+	select RA_GPT
+
+config RA_GPT6
+	bool "GPT 6"
+	default n
+	depends on RA_HAVE_GPT6
+	select RA_GPT
+
+config RA_GPT7
+	bool "GPT 7"
+	default n
+	depends on RA_HAVE_GPT7
+	select RA_GPT
+
+config RA_PWM
+	bool
+	default n
+	select PWM
+
+menu "Timer Configuration"
+	depends on RA_GPT
+
+config RA_GPT0_PWM
+	bool "GPT0 PWM"
+	default n
+	depends on RA_GPT0
+	select RA_PWM
+	---help---
+		Reserve GPT 0 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If RA_GPT0
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+config RA_GPT0_OUTPUTA
+	bool "GPT0 OUTPUTA"
+	depends on RA_GPT0
+	default n
+
+config RA_GPT0_OUTPUTB
+	bool "GPT0 OUTPUTB"
+	depends on RA_GPT0
+	default n
+
+if RA_GPT0_PWM
+
+config RA_GPT0_MODE
+	int "GPT0 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+endif # RA_GPT0_PWM
+
+config RA_GPT1_PWM
+	bool "GPT1 PWM"
+	default n
+	depends on RA_GPT1
+	select RA_PWM
+	---help---
+		Reserve GPT 1 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If RA_GPT1
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+config RA_GPT1_OUTPUTA
+	bool "GPT1 OUTPUTA"
+	depends on RA_GPT1
+	default n
+
+config RA_GPT1_OUTPUTB
+	bool "GPT1 OUTPUTB"
+	depends on RA_GPT1
+	default n
+
+if RA_GPT1_PWM
+
+config RA_GPT1_MODE
+	int "GPT1 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+endif # RA_GPT1_PWM
+
+config RA_GPT2_PWM
+	bool "GPT2 PWM"
+	default n
+	depends on RA_GPT2
+	select RA_PWM
+	---help---
+		Reserve GPT 2 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If RA_GPT2
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+config RA_GPT2_OUTPUTA
+	bool "GPT2 OUTPUTA"
+	depends on RA_GPT2
+	default n
+
+config RA_GPT2_OUTPUTB
+	bool "GPT2 OUTPUTB"
+	depends on RA_GPT2
+	default n
+
+if RA_GPT2_PWM
+
+config RA_GPT2_MODE
+	int "GPT2 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+endif # RA_GPT2_PWM
+
+config RA_GPT3_PWM
+	bool "GPT3 PWM"
+	default n
+	depends on RA_GPT3
+	select RA_PWM
+	---help---
+		Reserve GPT 3 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If RA_GPT3
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+config RA_GPT3_OUTPUTA
+	bool "GPT3 OUTPUTA"
+	depends on RA_GPT3
+	default n
+
+config RA_GPT3_OUTPUTB
+	bool "GPT3 OUTPUTB"
+	depends on RA_GPT3
+	default n
+
+if RA_GPT3_PWM
+
+config RA_GPT3_MODE
+	int "GPT3 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+endif # RA_GPT3_PWM
+
+config RA_GPT4_PWM
+	bool "GPT4 PWM"
+	default n
+	depends on RA_GPT4
+	select RA_PWM
+	---help---
+		Reserve GPT 4 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If RA_GPT4
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+config RA_GPT4_OUTPUTA
+	bool "GPT4 OUTPUTA"
+	depends on RA_GPT4
+	default n
+
+config RA_GPT4_OUTPUTB
+	bool "GPT4 OUTPUTB"
+	depends on RA_GPT4
+	default n
+
+if RA_GPT4_PWM
+
+config RA_GPT4_MODE
+	int "GPT4 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+endif # RA_GPT4_PWM
+
+config RA_GPT5_PWM
+	bool "GPT5 PWM"
+	default n
+	depends on RA_GPT5
+	select RA_PWM
+	---help---
+		Reserve GPT 5 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If RA_GPT5
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+config RA_GPT5_OUTPUTA
+	bool "GPT5 OUTPUTA"
+	depends on RA_GPT5
+	default n
+
+config RA_GPT5_OUTPUTB
+	bool "GPT5 OUTPUTB"
+	depends on RA_GPT5
+	default n
+
+if RA_GPT5_PWM
+
+config RA_GPT5_MODE
+	int "GPT5 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+endif # RA_GPT5_PWM
+
+config RA_GPT6_PWM
+	bool "GPT6 PWM"
+	default n
+	depends on RA_GPT6
+	select RA_PWM
+	---help---
+		Reserve GPT 6 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If RA_GPT6
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+config RA_GPT6_OUTPUTA
+	bool "GPT6 OUTPUTA"
+	depends on RA_GPT6
+	default n
+
+config RA_GPT6_OUTPUTB
+	bool "GPT6 OUTPUTB"
+	depends on RA_GPT6
+	default n
+
+if RA_GPT6_PWM
+
+config RA_GPT6_MODE
+	int "GPT6 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+endif # RA_GPT6_PWM
+
+config RA_GPT7_PWM
+	bool "GPT7 PWM"
+	default n
+	depends on RA_GPT7
+	select RA_PWM
+	---help---
+		Reserve GPT 7 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If RA_GPT7
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+config RA_GPT7_OUTPUTA
+	bool "GPT7 OUTPUTA"
+	depends on RA_GPT7
+	default n
+
+config RA_GPT7_OUTPUTB
+	bool "GPT7 OUTPUTB"
+	depends on RA_GPT7
+	default n
+
+if RA_GPT7_PWM
+
+config RA_GPT7_MODE
+	int "GPT7 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+endif # RA_GPT7_PWM
+
+endmenu # Timer Configuration
+
+endmenu # RA4M1 Peripheral Support

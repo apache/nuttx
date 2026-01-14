@@ -1,6 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/hardware/stm32g4xxxx_rcc.h
- *  Register offsets, addresses, and bitfield defines for STM32G4Xxxx RCC
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
@@ -669,10 +670,19 @@
 #define STM32_RCC_APB1ENR_OFFSET       STM32_RCC_APB1ENR1_OFFSET
 #define STM32_RCC_APB1ENR              STM32_RCC_APB1ENR1
 
+#define STM32_RCC_APB1RSTR_OFFSET      STM32_RCC_APB1RSTR1_OFFSET
+#define STM32_RCC_APB1RSTR             STM32_RCC_APB1RSTR1
+
 #define RCC_APB1ENR_USART2EN           RCC_APB1ENR1_USART2EN
 #define RCC_APB1ENR_USART3EN           RCC_APB1ENR1_USART3EN
 #define RCC_APB1ENR_UART4EN            RCC_APB1ENR1_UART4EN
 #define RCC_APB1ENR_UART5EN            RCC_APB1ENR1_UART5EN
+
+#define RCC_APB1ENR_I2C1EN             RCC_APB1ENR1_I2C1EN
+#define RCC_APB1ENR_I2C2EN             RCC_APB1ENR1_I2C2EN
+
+#define RCC_APB1RSTR_I2C1RST           RCC_APB1RSTR1_I2C1RST
+#define RCC_APB1RSTR_I2C2RST           RCC_APB1RSTR1_I2C2RST
 
 #define RCC_APB1ENR_TIM2EN             RCC_APB1ENR1_TIM2EN
 #define RCC_APB1ENR_TIM3EN             RCC_APB1ENR1_TIM3EN

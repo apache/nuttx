@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/crypto/dev_urandom.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -148,9 +150,8 @@ static ssize_t devurand_read(FAR struct file *filep, FAR char *buffer,
 #ifdef CONFIG_DEV_URANDOM_RANDOM_POOL
   if (len > 0)
     {
-      arc4random_buf(buffer, len);
+      up_rngbuf(buffer, len);
     }
-
 #else
   size_t n;
   uint32_t rnd;
@@ -182,7 +183,7 @@ static ssize_t devurand_read(FAR struct file *filep, FAR char *buffer,
 
   while (n >= 4)
     {
-      *(uint32_t *)buffer = PRNG();
+      *(FAR uint32_t *)buffer = PRNG();
       buffer += 4;
       n -= 4;
     }

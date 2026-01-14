@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/phy62xx/gpio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -626,7 +628,7 @@ int hal_gpioin_enable(gpio_pin_e pin)
   p_irq_ctx[pin].enable = TRUE;
   hal_gpio_pin_init(pin, GPIO_INPUT);
 
-  /* hal_gpio_pull_set(pin, PULL_DOWN); fixme: need disccuss */
+  /* hal_gpio_pull_set(pin, PULL_DOWN); fixme: need discuss */
 
   if (p_irq_ctx[pin].posedgeHdl && p_irq_ctx[pin].negedgeHdl)  /* both raise and fall */
     {

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/mx8mp/mx8mp_config.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -64,10 +66,10 @@
 #  undef  HAVE_UART_CONSOLE
 #endif
 
-/* Ensure that the MPU is enabled: it is requiered to access devices */
+/* Ensure that the MPU is enabled: it is required to access devices */
 
 #ifndef CONFIG_ARM_MPU
-#error "MPU is requiered for proper behavior"
+#error "MPU is required for proper behavior"
 #endif
 
 #endif /* __ARCH_ARM_SRC_MX8MP_MX8MP_CONFIG_H */

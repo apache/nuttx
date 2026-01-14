@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/can/can_input.c
- * Handling incoming packet input
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -31,100 +32,103 @@
 
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/can.h>
+#include <nuttx/net/netstats.h>
+#include <nuttx/net/net.h>
 
 #include "devif/devif.h"
+#include "utils/utils.h"
 #include "can/can.h"
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-const uint8_t can_dlc_to_len[16] =
+const uint8_t g_can_dlc_to_len[16] =
 {
-    0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    12,
-    16,
-    20,
-    24,
-    32,
-    48,
-    64,
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  12,
+  16,
+  20,
+  24,
+  32,
+  48,
+  64,
 };
-const uint8_t len_to_can_dlc[65] =
+const uint8_t g_len_to_can_dlc[65] =
 {
-    0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    9,
-    9,
-    9,
-    10,
-    10,
-    10,
-    10,
-    11,
-    11,
-    11,
-    11,
-    12,
-    12,
-    12,
-    12,
-    13,
-    13,
-    13,
-    13,
-    13,
-    13,
-    13,
-    13,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    14,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
-    15,
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  9,
+  9,
+  9,
+  10,
+  10,
+  10,
+  10,
+  11,
+  11,
+  11,
+  11,
+  12,
+  12,
+  12,
+  12,
+  13,
+  13,
+  13,
+  13,
+  13,
+  13,
+  13,
+  13,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  14,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
+  15,
 };
 
 /****************************************************************************
@@ -155,7 +159,7 @@ const uint8_t len_to_can_dlc[65] =
 static int can_input_conn(FAR struct net_driver_s *dev,
                           FAR struct can_conn_s *conn)
 {
-  uint16_t flags;
+  uint32_t flags;
   uint16_t buflen = dev->d_len;
   int ret = OK;
 
@@ -216,6 +220,16 @@ static int can_in(FAR struct net_driver_s *dev)
 {
   FAR struct can_conn_s *conn = can_active(dev, NULL);
   FAR struct can_conn_s *nextconn;
+  int ret;
+
+  if (conn == NULL)
+    {
+      /* There is no listener on the dev.  Just drop the packet. */
+
+      return OK;
+    }
+
+  can_conn_list_lock();
 
   /* Do we have second connection that can hold this packet? */
 
@@ -225,7 +239,7 @@ static int can_in(FAR struct net_driver_s *dev)
        * We need to clone the packet and deliver it to each listener.
        */
 
-      FAR struct iob_s *iob = netdev_iob_clone(dev, false);
+      FAR struct iob_s *iob = can_iob_clone(dev);
 
       if (iob == NULL)
         {
@@ -241,7 +255,11 @@ static int can_in(FAR struct net_driver_s *dev)
 
   /* We can deliver the packet directly to the last listener. */
 
-  return can_input_conn(dev, conn);
+  ret = can_input_conn(dev, conn);
+
+  can_conn_list_unlock();
+
+  return ret;
 }
 
 /****************************************************************************
@@ -269,6 +287,11 @@ int can_input(FAR struct net_driver_s *dev)
   FAR uint8_t *buf;
   int ret;
 
+#ifdef CONFIG_NET_STATISTICS
+  g_netstats.can.recv++;
+#endif
+  netdev_lock(dev);
+
   if (dev->d_iob != NULL)
     {
       buf = dev->d_buf;
@@ -280,10 +303,20 @@ int can_input(FAR struct net_driver_s *dev)
 
       dev->d_buf = buf;
 
+      netdev_unlock(dev);
       return ret;
     }
 
-  return netdev_input(dev, can_in, false);
+  ret = netdev_input(dev, can_in, false);
+  if (ret < 0)
+    {
+#ifdef CONFIG_NET_STATISTICS
+    g_netstats.can.drop++;
+#endif
+    }
+
+  netdev_unlock(dev);
+  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_CAN */

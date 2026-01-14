@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32h7x3xx_rcc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -568,8 +570,21 @@
 
 #define RCC_D2CCIP2R_USART234578SEL_SHIFT  (0)  /* Bits 0-2 */
 #  define RCC_D2CCIP2R_USART234578SEL_MASK (7 << RCC_D2CCIP2R_USART234578SEL_SHIFT)
+#  define RCC_D2CCIP2R_USART234578SEL_RCC  (0 << RCC_D2CCIP2R_USART234578SEL_SHIFT)
+#  define RCC_D2CCIP2R_USART234578SEL_PLL2 (1 << RCC_D2CCIP2R_USART234578SEL_SHIFT)
+#  define RCC_D2CCIP2R_USART234578SEL_PLL3 (2 << RCC_D2CCIP2R_USART234578SEL_SHIFT)
+#  define RCC_D2CCIP2R_USART234578SEL_HSI  (3 << RCC_D2CCIP2R_USART234578SEL_SHIFT)
+#  define RCC_D2CCIP2R_USART234578SEL_CSI  (4 << RCC_D2CCIP2R_USART234578SEL_SHIFT)
+#  define RCC_D2CCIP2R_USART234578SEL_LSE  (5 << RCC_D2CCIP2R_USART234578SEL_SHIFT)
 #define RCC_D2CCIP2R_USART16SEL_SHIFT      (3)  /* Bits 3-5 */
 #  define RCC_D2CCIP2R_USART16SEL_MASK     (7 << RCC_D2CCIP2R_USART16SEL_SHIFT)
+#  define RCC_D2CCIP2R_USART16SEL_MASK     (7 << RCC_D2CCIP2R_USART16SEL_SHIFT)
+#  define RCC_D2CCIP2R_USART16SEL_RCC      (0 << RCC_D2CCIP2R_USART16SEL_SHIFT)
+#  define RCC_D2CCIP2R_USART16SEL_PLL2     (1 << RCC_D2CCIP2R_USART16SEL_SHIFT)
+#  define RCC_D2CCIP2R_USART16SEL_PLL3     (2 << RCC_D2CCIP2R_USART16SEL_SHIFT)
+#  define RCC_D2CCIP2R_USART16SEL_HSI      (3 << RCC_D2CCIP2R_USART16SEL_SHIFT)
+#  define RCC_D2CCIP2R_USART16SEL_CSI      (4 << RCC_D2CCIP2R_USART16SEL_SHIFT)
+#  define RCC_D2CCIP2R_USART16SEL_LSE      (5 << RCC_D2CCIP2R_USART16SEL_SHIFT)
                                                 /* Bits 6-7: Reserved */
 #define RCC_D2CCIP2R_RNGSEL_SHIFT          (8)  /* Bits 8-9 */
 #  define RCC_D2CCIP2R_RNGSEL_MASK         (3 << RCC_D2CCIP2R_RNGSEL_SHIFT)

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/intel64/intel64_oneshot.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,6 +30,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/compiler.h>
+#include <nuttx/clock.h>
 
 #include <intel64_hpet.h>
 
@@ -167,6 +170,17 @@ int intel64_oneshot_start(struct intel64_oneshot_s *oneshot,
 
 int intel64_oneshot_cancel(struct intel64_oneshot_s *oneshot,
                            struct timespec *ts);
+
+/****************************************************************************
+ * Name: intel64_oneshot_current
+ *
+ * Description:
+ *   Get the current time.
+ *
+ ****************************************************************************/
+
+int intel64_oneshot_current(struct intel64_oneshot_s *oneshot,
+                            uint64_t *usec);
 
 #undef EXTERN
 #if defined(__cplusplus)

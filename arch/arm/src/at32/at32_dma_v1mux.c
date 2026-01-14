@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/at32/at32_dma_v1mux.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -959,7 +961,7 @@ static void at32_dmamux_sample(DMA_MUX dmamux, uint8_t chan,
 static void at32_dmamux_dump(DMA_MUX dmamux, uint8_t channel,
                               const struct at32_dmaregs_s *regs)
 {
-#if 0  
+#if 0
   dmainfo("DMAMUX%d CH=%d\n", dmamux->id, channel);
   dmainfo("    CCR[%08x]: %08x\n",
           dmamux->base + AT32_DMAMUX_CXCR_OFFSET(channel),

@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/net/usrsock.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,8 +34,10 @@
 #include <sys/uio.h>
 #include <sys/param.h>
 
+#include <nuttx/net/net.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/compiler.h>
+#include <nuttx/mutex.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -266,6 +270,121 @@ begin_packed_struct struct usrsock_message_socket_event_s
 } end_packed_struct;
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Global protection lock for usrsock socket */
+
+#ifdef CONFIG_NET_USRSOCK
+extern rmutex_t g_usrsock_lock;
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: usrsock_lock
+ *
+ * Description:
+ *   Take the global usrsock socket lock
+ *
+ ****************************************************************************/
+
+static inline_function void usrsock_lock(void)
+{
+  nxrmutex_lock(&g_usrsock_lock);
+}
+
+/****************************************************************************
+ * Name: usrsock_unlock
+ *
+ * Description:
+ *   Release the global usrsock socket lock
+ *
+ ****************************************************************************/
+
+static inline_function void usrsock_unlock(void)
+{
+  nxrmutex_unlock(&g_usrsock_lock);
+}
+
+/****************************************************************************
+ * Name: usrsock_sem_timedwait
+ *
+ * Description:
+ *   Wait for sem while temporarily releasing the usrsock lock.
+ *
+ ****************************************************************************/
+
+static inline_function int
+usrsock_sem_timedwait(FAR sem_t *sem, bool interruptible,
+                      unsigned int timeout)
+{
+  return net_sem_timedwait2(sem, interruptible, timeout, &g_usrsock_lock,
+                            NULL);
+}
+
+/****************************************************************************
+ * Name: usrsock_mutex_timedlock
+ *
+ * Description:
+ *   Atomically wait for mutex (or a timeout) while temporarily releasing
+ *   the lock on the usrsock.
+ *
+ *   Caution should be utilized.  Because the usrsock lock is relinquished
+ *   during the wait, there could be changes in the usrsock state that occur
+ *   before the lock is recovered.  Your design should account for this
+ *   possibility.
+ *
+ * Input Parameters:
+ *   mutex    - A reference to the mutex to be taken.
+ *   timeout  - The relative time to wait until a timeout is declared.
+ *   brkmutex - A reference to the mutex to be temporarily released while
+ *              waiting.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+static inline_function int
+usrsock_mutex_timedlock(FAR mutex_t *mutex, unsigned int timeout)
+{
+  unsigned int count;
+  int          blresult;
+  int          ret;
+
+  /* Release the network lock, remembering my count.  net_breaklock will
+   * return a negated value if the caller does not hold the network lock.
+   */
+
+  blresult = nxrmutex_breaklock(&g_usrsock_lock, &count);
+
+  /* Now take the mutex, waiting if so requested. */
+
+  if (timeout != UINT_MAX)
+    {
+      ret = nxmutex_timedlock(mutex, timeout);
+    }
+  else
+    {
+      /* Wait as long as necessary to get the lock */
+
+      ret = nxmutex_lock(mutex);
+    }
+
+  /* Recover the network lock at the proper count (if we held it before) */
+
+  if (blresult >= 0)
+    {
+      nxrmutex_restorelock(&g_usrsock_lock, count);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: usrsock_iovec_get() - copy from iovec to buffer.
  ****************************************************************************/
 
@@ -308,5 +427,6 @@ int usrsock_request(FAR struct iovec *iov, unsigned int iovcnt);
  ****************************************************************************/
 
 void usrsock_register(void);
+#endif /* CONFIG_NET_USRSOCK */
 
 #endif /* __INCLUDE_NUTTX_NET_USRSOCK_H */

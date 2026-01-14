@@ -3,7 +3,7 @@
 =======================
 
 If the CAN device is configured in loopback mode, then this example can be used
-to test the CAN device in loop back mode. It simple sinces a sequence of CAN
+to test the CAN device in loop back mode. It simply sends a sequence of CAN
 messages and verifies that those messages are returned exactly as sent.
 
 This test depends on these specific CAN/NSH configurations settings (your

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/bmi160_uorb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -45,7 +47,7 @@
 struct bmi160_odr_s
 {
   uint8_t regval;    /* the data of register */
-  unsigned long odr; /* the unit is us */
+  uint32_t odr;      /* the unit is us */
 };
 
 /* Device struct */
@@ -57,7 +59,7 @@ struct bmi160_dev_uorb_s
   struct sensor_lowerhalf_s lower;      /* Lower half sensor driver. */
 
   struct work_s work;                   /* Interrupt handler worker. */
-  unsigned long interval;               /* Sensor acquisition interval. */
+  uint32_t interval;                    /* Sensor acquisition interval. */
 
   struct bmi160_dev_s dev;
 };
@@ -77,10 +79,10 @@ static void bmi160_gyro_enable(FAR struct bmi160_dev_uorb_s *priv,
 
 static int bmi160_set_accel_interval(FAR struct sensor_lowerhalf_s *lower,
                                      FAR struct file *filep,
-                                     FAR unsigned long *period_us);
+                                     FAR uint32_t *period_us);
 static int bmi160_set_gyro_interval(FAR struct sensor_lowerhalf_s *lower,
                                     FAR struct file *filep,
-                                    FAR unsigned long *period_us);
+                                    FAR uint32_t *period_us);
 static int bmi160_accel_activate(FAR struct sensor_lowerhalf_s *lower,
                                  FAR struct file *filep,
                                  bool enable);
@@ -92,7 +94,7 @@ static int bmi160_gyro_activate(FAR struct sensor_lowerhalf_s *lower,
 
 static void bmi160_accel_worker(FAR void *arg);
 static void bmi160_gyro_worker(FAR void *arg);
-static int bmi160_findodr(unsigned long time,
+static int bmi160_findodr(uint32_t time,
                           FAR const struct bmi160_odr_s *odr_s,
                           int len);
 
@@ -159,7 +161,7 @@ static const struct bmi160_odr_s g_bmi160_accel_odr[] =
  *
  ****************************************************************************/
 
-static int bmi160_findodr(unsigned long time,
+static int bmi160_findodr(uint32_t time,
                           FAR const struct bmi160_odr_s *odr_s,
                           int len)
 {
@@ -207,7 +209,7 @@ static void bmi160_accel_enable(FAR struct bmi160_dev_uorb_s *priv,
       /* Set accel as normal mode. */
 
       bmi160_putreg8(&priv->dev, BMI160_CMD, ACCEL_PM_NORMAL);
-      nxsig_usleep(30000);
+      nxsched_usleep(30000);
 
       idx = bmi160_findodr(priv->interval, g_bmi160_accel_odr,
                            nitems(g_bmi160_accel_odr));
@@ -258,7 +260,7 @@ static void bmi160_gyro_enable(FAR struct bmi160_dev_uorb_s *priv,
       /* Set gyro as normal mode. */
 
       bmi160_putreg8(&priv->dev, BMI160_CMD, GYRO_PM_NORMAL);
-      nxsig_usleep(30000);
+      nxsched_usleep(30000);
 
       idx = bmi160_findodr(priv->interval, g_bmi160_gyro_odr,
                            nitems(g_bmi160_gyro_odr));
@@ -304,7 +306,7 @@ static void bmi160_gyro_enable(FAR struct bmi160_dev_uorb_s *priv,
 
 static int bmi160_set_accel_interval(FAR struct sensor_lowerhalf_s *lower,
                                      FAR struct file *filep,
-                                     FAR unsigned long *period_us)
+                                     FAR uint32_t *period_us)
 {
   FAR struct bmi160_dev_uorb_s *priv = (FAR struct bmi160_dev_uorb_s *)lower;
   int num;
@@ -351,7 +353,7 @@ static int bmi160_set_accel_interval(FAR struct sensor_lowerhalf_s *lower,
 
 static int bmi160_set_gyro_interval(FAR struct sensor_lowerhalf_s *lower,
                                     FAR struct file *filep,
-                                    FAR unsigned long *period_us)
+                                    FAR uint32_t *period_us)
 {
   FAR struct bmi160_dev_uorb_s *priv = (FAR struct bmi160_dev_uorb_s *)lower;
   int num;
@@ -547,7 +549,7 @@ static void bmi160_gyro_worker(FAR void *arg)
  *
  * Input Parameters:
  *   devno   - Sensor device number.
- *   config  - Interrupt fuctions.
+ *   config  - Interrupt functions.
  *
  * Returned Value:
  *   Description of the value returned by this function (if any),
@@ -589,19 +591,18 @@ static int bmi160_register_accel(int devno,
   priv->dev.freq = BMI160_I2C_FREQ;
 
 #else /* CONFIG_SENSORS_BMI160_SPI */
-  priv->devl.spi = dev;
+  priv->dev.spi = dev;
 
   /* BMI160 detects communication bus is SPI by rising edge of CS. */
 
-  bmi160_getreg8(priv, 0x7f);
-  bmi160_getreg8(priv, 0x7f); /* workaround: fail to switch SPI, run twice */
-  nxsig_usleep(200);
+  bmi160_getreg8(&priv->dev, 0x7f);
+  bmi160_getreg8(&priv->dev, 0x7f); /* workaround: fail to switch SPI, run twice */
+  nxsched_usleep(200);
 
 #endif
 
   priv->lower.ops = &g_bmi160_accel_ops;
-  priv->lower.type = SENSOR_TYPE_ACCELEROMETER;
-  priv->lower.uncalibrated = true;
+  priv->lower.type = SENSOR_TYPE_ACCELEROMETER_UNCALIBRATED;
   priv->interval = BMI160_DEFAULT_INTERVAL;
   priv->lower.nbuffer = 1;
 
@@ -639,7 +640,7 @@ static int bmi160_register_accel(int devno,
  *
  * Input Parameters:
  *   devno   - Sensor device number.
- *   config  - Interrupt fuctions.
+ *   config  - Interrupt functions.
  *
  * Returned Value:
  *   Description of the value returned by this function (if any),
@@ -685,8 +686,7 @@ static int bmi160_register_gyro(int devno,
 #endif
 
   priv->lower.ops = &g_bmi160_gyro_ops;
-  priv->lower.type = SENSOR_TYPE_GYROSCOPE;
-  priv->lower.uncalibrated = true;
+  priv->lower.type = SENSOR_TYPE_GYROSCOPE_UNCALIBRATED;
   priv->interval = BMI160_DEFAULT_INTERVAL;
   priv->lower.nbuffer = 1;
 

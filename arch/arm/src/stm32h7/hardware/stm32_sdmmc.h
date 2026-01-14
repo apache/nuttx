@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32_sdmmc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,7 +30,9 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32H7_STM32H7X3XX)
+#if defined(CONFIG_STM32H7_STM32H7X0XX)
+#  include "stm32h7x3xx_sdmmc.h"
+#elif defined(CONFIG_STM32H7_STM32H7X3XX)
 #  include "stm32h7x3xx_sdmmc.h"
 #elif defined(CONFIG_STM32H7_STM32H7B3XX)
 #  include "stm32h7x3xx_sdmmc.h"

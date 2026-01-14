@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32l4/stm32l4r9ai-disco/scripts/stm32l4r9ai-disco.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -62,7 +64,7 @@ SECTIONS
     .init_section : {
         _sinit = ABSOLUTE(.);
         KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
-        KEEP(*(.init_array .ctors))
+        KEEP(*(.init_array EXCLUDE_FILE(*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o) .ctors))
         _einit = ABSOLUTE(.);
     } > flash
 

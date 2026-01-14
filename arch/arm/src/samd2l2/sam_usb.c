@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samd2l2/sam_usb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -223,7 +225,7 @@
 #endif
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* State of an endpoint */
@@ -520,7 +522,7 @@ static const struct usb_epdesc_s g_ep0desc =
   .interval      = 0
 };
 
-/* Device error strings that may be enabled for more desciptive USB trace
+/* Device error strings that may be enabled for more descriptive USB trace
  * output.
  */
 
@@ -560,7 +562,7 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
 };
 #endif
 
-/* Interrupt event strings that may be enabled for more desciptive USB trace
+/* Interrupt event strings that may be enabled for more descriptive USB trace
  * output.
  */
 
@@ -1086,7 +1088,7 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
           return -ENOENT;
         }
 
-      uinfo("epno=%d req=%p: len=%d xfrd=%d inflight=%d\n",
+      uinfo("epno=%d req=%p: len=%zu xfrd=%zu inflight=%d\n",
             epno, privreq, privreq->req.len, privreq->req.xfrd,
             privreq->inflight);
 
@@ -1227,7 +1229,7 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
           return -ENOENT;
         }
 
-      uinfo("EP%d: req.len=%d xfrd=%d recvsize=%d\n",
+      uinfo("EP%d: req.len=%zu xfrd=%zu recvsize=%d\n",
             epno, privreq->req.len, privreq->req.xfrd, recvsize);
 
       /* Ignore any attempt to receive a zero length packet */
@@ -1522,7 +1524,7 @@ sam_ep_reserve(struct sam_usbdev_s *priv, uint8_t epset)
  *
  * Description:
  *   The endpoint is no long in-used.  It will be unreserved and can be
- *   re-used if needed.
+ *   reused if needed.
  *
  ****************************************************************************/
 

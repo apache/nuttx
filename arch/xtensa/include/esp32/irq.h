@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/include/esp32/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,6 +46,11 @@
 #define ESP32_CPUINT_FLAG_EDGE    (1 << 1) /* Edge-triggered interrupt */
 #define ESP32_CPUINT_FLAG_SHARED  (1 << 2) /* Interrupt can be shared between ISRs */
 #define ESP32_CPUINT_FLAG_IRAM    (1 << 3) /* ISR can be called if cache is disabled */
+
+/* Trigger mask useful on debug assertion */
+
+#define ESP32_CPUINT_TRIGGER_MASK (ESP32_CPUINT_FLAG_LEVEL | \
+                                   ESP32_CPUINT_FLAG_EDGE)
 
 /* Interrupt Matrix
  *
@@ -472,7 +479,7 @@
 
 #ifdef CONFIG_ESP32_GPIO_IRQ
 #ifdef CONFIG_SMP
-static inline int esp32_irq_gpio(int cpu)
+static inline_function int esp32_irq_gpio(int cpu)
 {
   if (cpu == 0)
     {
@@ -487,6 +494,23 @@ static inline int esp32_irq_gpio(int cpu)
 #  define esp32_irq_gpio(c)   (UNUSED(c), ESP32_IRQ_CPU_GPIO)
 #endif
 #endif
+
+#ifdef CONFIG_ARCH_HAVE_MULTICPU
+noinstrument_function
+static inline_function int xtensa_cpu_index(void)
+{
+  int index;
+
+  __asm__ __volatile__
+  (
+    "rsr.prid %0\n"
+    "extui %0,%0,13,1\n"
+    : "=r"(index)
+  );
+
+  return index;
+}
+#endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
 /****************************************************************************
  * Public Data

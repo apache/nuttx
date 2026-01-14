@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/power/battery/bq769x0.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -635,7 +637,7 @@ static int bq769x0_updategain(FAR struct bq769x0_dev_s *priv)
       return ret;
     }
 
-  ret = bq769x0_getreg8(priv, BQ769X0_REG_ADCOFFSET, (uint8_t *)&offset);
+  ret = bq769x0_getreg8(priv, BQ769X0_REG_ADCOFFSET, (FAR uint8_t *)&offset);
   if (ret < 0)
     {
       baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
@@ -1588,7 +1590,7 @@ static int bq769x0_getcurrent(FAR struct bq769x0_dev_s *priv,
           /* Get the CC register data (a signed value) */
 
           ret = bq769x0_getreg16(priv, BQ769X0_REG_CC_HI,
-                                 (uint16_t *)&ccval);
+                                 (FAR uint16_t *)&ccval);
           if (ret < 0)
             {
               baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
@@ -1620,7 +1622,7 @@ static int bq769x0_getcurrent(FAR struct bq769x0_dev_s *priv,
 
       /* Sample is not complete, wait and try again */
 
-      nxsig_usleep(BQ769X0_CC_POLL_INTERVAL * USEC_PER_MSEC);
+      nxsched_usleep(BQ769X0_CC_POLL_INTERVAL * USEC_PER_MSEC);
     }
 
   /* CC value didn't become available in the expected amount of time */

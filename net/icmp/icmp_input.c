@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/icmp/icmp_input.c
- * Handling incoming ICMP input
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *
  *   Copyright (C) 2007-2009, 2012, 2014-2015, 2017, 2019 Gregory Nutt. All
  *     rights reserved.
@@ -165,6 +166,7 @@ static uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
    * without waiting).
    */
 
+  conn_lock(&conn->sconn);
   ret = iob_tryadd_queue(iob, &conn->readahead);
   if (ret < 0)
     {
@@ -176,6 +178,7 @@ static uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
       ninfo("Buffered %d bytes\n", buflen);
     }
 
+  conn_unlock(&conn->sconn);
   return buflen;
 }
 
@@ -246,6 +249,39 @@ static bool icmp_deliver(FAR struct net_driver_s *dev, uint16_t iphdrlen)
 #endif
 
 /****************************************************************************
+ * Name: icmp_timestamp
+ *
+ * Description:
+ *   Return milliseconds since midnight.
+ *
+ ****************************************************************************/
+
+static uint32_t icmp_timestamp(void)
+{
+  struct timespec ts;
+  uint32_t secs;
+  uint32_t msecs;
+
+  nxclock_gettime(CLOCK_REALTIME, &ts);
+
+  /* Get secs since midnight. */
+
+  secs = ts.tv_sec % 86400;
+
+  /* Convert to msecs. */
+
+  msecs = secs * MSEC_PER_SEC;
+
+  /* Convert nsec to msec. */
+
+  msecs += ts.tv_nsec / NSEC_PER_MSEC;
+
+  /* Convert to network byte order. */
+
+  return msecs;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -271,7 +307,9 @@ void icmp_input(FAR struct net_driver_s *dev)
 {
   FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
   FAR struct icmp_hdr_s *icmp;
-
+#ifdef CONFIG_NET_ICMP_CHECKSUMS
+  uint16_t csum;
+#endif
   /* Get the IP header length (accounting for possible options). */
 
   uint16_t iphdrlen = (ipv4->vhl & IPv4_HLMASK) << 2;
@@ -287,6 +325,18 @@ void icmp_input(FAR struct net_driver_s *dev)
 
   icmp = IPBUF(iphdrlen);
 
+#ifdef CONFIG_NET_ICMP_CHECKSUMS
+  csum = icmp_chksum_iob(dev->d_iob);
+  if (csum != 0xffff)
+    {
+      ninfo("ICMP checksum error\n");
+#ifdef CONFIG_NET_STATISTICS
+      g_netstats.icmp.csumerr++;
+#endif
+      goto drop;
+    }
+#endif
+
   /* ICMP echo (i.e., ping) processing. This is simple, we only change the
    * ICMP type from ECHO to ECHO_REPLY and adjust the ICMP checksum before
    * we return the packet.
@@ -294,6 +344,21 @@ void icmp_input(FAR struct net_driver_s *dev)
 
   if (icmp->type == ICMP_ECHO_REQUEST)
     {
+      in_addr_t src_ipaddr;
+
+      /* According to RFC1122 section 3.2.2.6， an ICMP Echo Request
+       * which has a broadcast/multicast ip address should be discarded
+       */
+
+      src_ipaddr = net_ip4addr_conv32(ipv4->srcipaddr);
+
+      if (net_ipv4addr_cmp(src_ipaddr, INADDR_BROADCAST) ||
+          IN_MULTICAST(NTOHL(src_ipaddr)))
+        {
+          ninfo("ICMP ECHO request from broadcast/multicast address\n");
+          goto typeerr;
+        }
+
       /* Change the ICMP type */
 
       icmp->type = ICMP_ECHO_REPLY;
@@ -324,7 +389,7 @@ void icmp_input(FAR struct net_driver_s *dev)
       /* The quick way -- Since only the type has changed, just adjust the
        * checksum for the change of type
        */
-
+#ifdef CONFIG_NET_ICMP_CHECKSUMS
       if (icmp->icmpchksum >= HTONS(0xffff - (ICMP_ECHO_REQUEST << 8)))
         {
           icmp->icmpchksum += HTONS(ICMP_ECHO_REQUEST << 8) + 1;
@@ -333,6 +398,10 @@ void icmp_input(FAR struct net_driver_s *dev)
         {
           icmp->icmpchksum += HTONS(ICMP_ECHO_REQUEST << 8);
         }
+#else
+      icmp->icmpchksum = 0;
+#endif
+
 #endif
 
       ninfo("Outgoing ICMP packet length: %d (%d)\n",
@@ -376,6 +445,62 @@ void icmp_input(FAR struct net_driver_s *dev)
         }
     }
 #endif
+  else if (icmp->type == ICMP_TIMESTAMP_REQUEST)
+    {
+      uint16_t len = iphdrlen + sizeof(struct icmp_hdr_s) +
+                     3 * sizeof(uint32_t);
+      uint32_t timestamp;
+      FAR uint8_t *buf;
+
+      /* Change the ICMP type */
+
+      icmp->type = ICMP_TIMESTAMP_REPLY;
+
+      /* Swap IP addresses. */
+
+      net_ipv4addr_hdrcopy(ipv4->destipaddr, ipv4->srcipaddr);
+      net_ipv4addr_hdrcopy(ipv4->srcipaddr, &dev->d_ipaddr);
+
+      ipv4->len[0] = (len >> 8);
+      ipv4->len[1] = (len & 0xff);
+
+      ipv4->ipchksum = 0;
+#ifdef CONFIG_NET_IPV4_CHECKSUMS
+      ipv4->ipchksum = ~ipv4_chksum(ipv4);
+#endif
+
+      dev->d_len = len;
+
+      /* Update device buffer length */
+
+      iob_update_pktlen(dev->d_iob, dev->d_len, false);
+
+      /* Set Receive Timestamp and Transmit Timestamp */
+
+      buf = (FAR uint8_t *)(icmp + 1);
+      timestamp = htonl(icmp_timestamp());
+      memcpy(buf + 4, &timestamp, 4);
+      memcpy(buf + 8, &timestamp, 4);
+
+      /* Recalculate the ICMP checksum */
+
+      icmp->icmpchksum = 0;
+#ifdef CONFIG_NET_ICMP_CHECKSUMS
+      icmp->icmpchksum = ~icmp_chksum_iob(dev->d_iob);
+      if (icmp->icmpchksum == 0)
+        {
+          icmp->icmpchksum = 0xffff;
+        }
+#endif
+
+      ninfo("Outgoing ICMP packet length: %d (%d)\n",
+            dev->d_len, (ipv4->len[0] << 8) | ipv4->len[1]);
+
+#ifdef CONFIG_NET_STATISTICS
+      g_netstats.icmp.sent++;
+      g_netstats.ipv4.sent++;
+#endif
+    }
 
   /* Otherwise the ICMP input was not processed */
 
@@ -403,7 +528,7 @@ typeerr:
   g_netstats.icmp.typeerr++;
 #endif
 
-#ifdef CONFIG_NET_ICMP_SOCKET
+#if defined(CONFIG_NET_ICMP_SOCKET) || defined(CONFIG_NET_ICMP_CHECKSUMS)
 drop:
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.icmp.drop++;

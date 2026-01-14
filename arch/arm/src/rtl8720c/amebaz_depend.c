@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/rtl8720c/amebaz_depend.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -398,7 +400,7 @@ void rtw_yield_os(void)
 
 void rtw_usleep_os(int us)
 {
-  nxsig_usleep(us);
+  nxsched_usleep(us);
 }
 
 void rtw_msleep_os(int ms)

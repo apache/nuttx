@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f401rc-rs485/src/stm32_usb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -54,7 +56,7 @@
  * Name: stm32_usb_configure
  *
  * Description:
- *   Called from stm32_boardinitialize very early in inialization to setup
+ *   Called from stm32_boardinitialize very early in initialization to setup
  *   USB-related GPIO pins for the Olimex STM32 P407 board.
  *
  ****************************************************************************/

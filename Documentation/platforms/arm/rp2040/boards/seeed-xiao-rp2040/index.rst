@@ -1,6 +1,8 @@
 ========================
-Seeed Studio Xiao RP2040
+Seeed Studio XIAO RP2040
 ========================
+
+.. tags:: chip:rp2040
 
 The `Seeed Studio Xiao RP2040 <https://wiki.seeedstudio.com/XIAO-RP2040/>`_ is a general purpose board supplied by
 Seeed Studio and it is compatible with the Raspberry Pi RP2040 ecosystem as they share the same RP2040 chip.
@@ -19,13 +21,6 @@ Features
 * USB Type-C interface
 * 1 user LED, 1 power LED, two LEDs for serial port downloading, 1 RGB LED
 * 1 RESET button, 1 BOOT button
-
-Serial Console
-==============
-
-By default a serial console appears on pins 6 (TX GPIO0) and pin 7
-(RX GPIO1).  This console runs a 115200-8N1.
-The board can be configured to use the USB connection as the serial console.
 
 LEDs
 ====
@@ -82,17 +77,36 @@ For power supply pins:
 The built-in DC-DC converter circuit able to change 5V voltage into 3.3V allows
 to power the device with a 5V supply via VIN-PIN and via the USB connector.
 
+Installation & Build
+====================
+
+For instructions on how to to install the build dependencies and create a NuttX
+image for this board, consult the main :doc:`RP2040 documentation
+<../../index>`.
+
 Configurations
 ==============
+
+All configurations listed below can be configured using the following command in
+the ``nuttx`` directory (again, consult the main :doc:`RP2040 documentation
+<../../index>`):
+
+.. code:: console
+
+   $ ./tools/configure.sh seeed-xiao-rp2040:<configname>
 
 nsh
 ---
 
 Basic NuttShell configuration (console enabled in UART0, at 115200 bps).
 
+userled
+-------
 
-README.txt
-==========
+This is an nsh configuration with added support for user LEDs.
 
-.. include:: README.txt
-   :literal:
+usbnsh
+------
+
+Basic NuttShell configuration using CDC/ACM serial (console enabled in USB Port,
+at 115200 bps).

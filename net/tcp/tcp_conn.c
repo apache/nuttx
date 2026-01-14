@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp_conn.c
  *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  *   Copyright (C) 2007-2011, 2013-2015, 2018 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -72,18 +74,22 @@
 #include "utils/utils.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_NET_TCP_MAX_CONNS
+#  define CONFIG_NET_TCP_MAX_CONNS 0
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /* The array containing all TCP connections. */
 
-#if CONFIG_NET_TCP_PREALLOC_CONNS > 0
-static struct tcp_conn_s g_tcp_connections[CONFIG_NET_TCP_PREALLOC_CONNS];
-#endif
-
-/* A list of all free TCP connections */
-
-static dq_queue_t g_free_tcp_connections;
+NET_BUFPOOL_DECLARE(g_tcp_connections, sizeof(struct tcp_conn_s),
+                    CONFIG_NET_TCP_PREALLOC_CONNS,
+                    CONFIG_NET_TCP_ALLOC_CONNS, CONFIG_NET_TCP_MAX_CONNS);
 
 /* A list of all connected TCP connections */
 
@@ -119,51 +125,29 @@ static FAR struct tcp_conn_s *
        * matches the requested port number.
        */
 
-      if (conn->tcpstateflags != TCP_CLOSED && conn->lport == portno
+      if (conn->tcpstateflags != TCP_CLOSED &&
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-          && domain == conn->domain
+          tcp_conn_cmp(domain, ipaddr, portno, conn)
+#else
+          tcp_conn_cmp(ipaddr, portno, conn)
 #endif
          )
         {
-          /* If there are multiple interface devices, then the local IP
-           * address of the connection must also match.  INADDR_ANY is a
-           * special case:  There can only be instance of a port number
-           * with INADDR_ANY.
-           */
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-          if (domain == PF_INET)
-#endif /* CONFIG_NET_IPv6 */
-            {
-              if (net_ipv4addr_cmp(conn->u.ipv4.laddr, ipaddr->ipv4) ||
-                  net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY))
-                {
-                  /* The port number is in use, return the connection */
-
-                  return conn;
-                }
-            }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-          else
-#endif /* CONFIG_NET_IPv4 */
-            {
-              if (net_ipv6addr_cmp(conn->u.ipv6.laddr, ipaddr->ipv6) ||
-                  net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
-                {
-                  /* The port number is in use, return the connection */
-
-                  return conn;
-                }
-            }
-#endif /* CONFIG_NET_IPv6 */
+          return conn;
         }
     }
 
-  return NULL;
+/* Check if this port number is in use by any listen TCP connection.
+ * Since tcp_findlistener only uses laddr internally, and laddr offset is
+ * 0 in the ip_binding_u union, ipaddr can be passed in through directly.
+ */
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+  return tcp_findlistener((FAR union ip_binding_u *)ipaddr,
+                          portno, domain);
+#else
+  return tcp_findlistener((FAR union ip_binding_u *)ipaddr, portno);
+#endif
 }
 
 /****************************************************************************
@@ -325,11 +309,8 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
 
   /* Verify or select a local port and address */
 
-  net_lock();
-
   if (conn->lport != 0)
     {
-      net_unlock();
       return -EINVAL;
     }
 
@@ -340,6 +321,7 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
     {
       ret = -EADDRNOTAVAIL;
 
+      netdev_list_lock();
       for (dev = g_netdevices; dev; dev = dev->flink)
         {
           if (net_ipv4addr_cmp(addr->sin_addr.s_addr, dev->d_ipaddr))
@@ -349,9 +331,10 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
             }
         }
 
+      netdev_list_unlock();
+
       if (ret == -EADDRNOTAVAIL)
         {
-          net_unlock();
           return ret;
         }
     }
@@ -364,7 +347,6 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
   if (port < 0)
     {
       nerr("ERROR: tcp_selectport failed: %d\n", port);
-      net_unlock();
       return port;
     }
 
@@ -390,7 +372,6 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
       net_ipv4addr_copy(conn->u.ipv4.laddr, INADDR_ANY);
     }
 
-  net_unlock();
   return ret;
 }
 #endif /* CONFIG_NET_IPv4 */
@@ -420,11 +401,8 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
 
   /* Verify or select a local port and address */
 
-  net_lock();
-
   if (conn->lport != 0)
     {
-      net_unlock();
       return -EINVAL;
     }
 
@@ -438,6 +416,7 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
     {
       ret = -EADDRNOTAVAIL;
 
+      netdev_list_lock();
       for (dev = g_netdevices; dev; dev = dev->flink)
         {
           if (NETDEV_IS_MY_V6ADDR(dev, addr->sin6_addr.in6_u.u6_addr16))
@@ -447,9 +426,9 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
             }
         }
 
+      netdev_list_unlock();
       if (ret == -EADDRNOTAVAIL)
         {
-          net_unlock();
           return ret;
         }
     }
@@ -464,7 +443,6 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
   if (port < 0)
     {
       nerr("ERROR: tcp_selectport failed: %d\n", port);
-      net_unlock();
       return port;
     }
 
@@ -490,58 +468,9 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
       net_ipv6addr_copy(conn->u.ipv6.laddr, g_ipv6_unspecaddr);
     }
 
-  net_unlock();
   return ret;
 }
 #endif /* CONFIG_NET_IPv6 */
-
-/****************************************************************************
- * Name: tcp_alloc_conn
- *
- * Description:
- *   Find or allocate a free TCP/IP connection structure for use.
- *
- ****************************************************************************/
-
-#if CONFIG_NET_TCP_ALLOC_CONNS > 0
-static FAR struct tcp_conn_s *tcp_alloc_conn(void)
-{
-  FAR struct tcp_conn_s *conn;
-  int i;
-
-  /* Return the entry from the head of the free list */
-
-  if (dq_peek(&g_free_tcp_connections) == NULL)
-    {
-#if CONFIG_NET_TCP_MAX_CONNS > 0
-      if (dq_count(&g_active_tcp_connections) +
-          CONFIG_NET_TCP_ALLOC_CONNS > CONFIG_NET_TCP_MAX_CONNS)
-        {
-          return NULL;
-        }
-#endif
-
-      conn = kmm_zalloc(sizeof(struct tcp_conn_s) *
-                        CONFIG_NET_TCP_ALLOC_CONNS);
-      if (conn == NULL)
-        {
-          return conn;
-        }
-
-      /* Now initialize each connection structure */
-
-      for (i = 0; i < CONFIG_NET_TCP_ALLOC_CONNS; i++)
-        {
-          /* Mark the connection closed and move it to the free list */
-
-          conn[i].tcpstateflags = TCP_CLOSED;
-          dq_addlast(&conn[i].sconn.node, &g_free_tcp_connections);
-        }
-    }
-
-  return (FAR struct tcp_conn_s *)dq_remfirst(&g_free_tcp_connections);
-}
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -586,6 +515,7 @@ int tcp_selectport(uint8_t domain,
       NET_PORT_RANDOM_INIT(g_last_tcp_port);
     }
 
+  tcp_conn_list_lock();
   if (portno == 0)
     {
       uint16_t loop_start = g_last_tcp_port;
@@ -605,6 +535,7 @@ int tcp_selectport(uint8_t domain,
             {
               /* We have looped back, failed. */
 
+              tcp_conn_list_unlock();
               return -EADDRINUSE;
             }
         }
@@ -628,37 +559,15 @@ int tcp_selectport(uint8_t domain,
         {
           /* It is in use... return EADDRINUSE */
 
+          tcp_conn_list_unlock();
           return -EADDRINUSE;
         }
     }
 
   /* Return the selected or verified port number (host byte order) */
 
+  tcp_conn_list_unlock();
   return portno;
-}
-
-/****************************************************************************
- * Name: tcp_initialize
- *
- * Description:
- *   Initialize the TCP/IP connection structures.  Called only once and only
- *   from the network layer at start-up.
- *
- ****************************************************************************/
-
-void tcp_initialize(void)
-{
-#if CONFIG_NET_TCP_PREALLOC_CONNS > 0
-  int i;
-
-  for (i = 0; i < CONFIG_NET_TCP_PREALLOC_CONNS; i++)
-    {
-      /* Mark the connection closed and move it to the free list */
-
-      g_tcp_connections[i].tcpstateflags = TCP_CLOSED;
-      dq_addlast(&g_tcp_connections[i].sconn.node, &g_free_tcp_connections);
-    }
-#endif
 }
 
 /****************************************************************************
@@ -681,11 +590,11 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
    * locked in any cased while accessing g_free_tcp_connections[];
    */
 
-  net_lock();
+  tcp_conn_list_lock();
 
   /* Return the entry from the head of the free list */
 
-  conn = (FAR struct tcp_conn_s *)dq_remfirst(&g_free_tcp_connections);
+  conn = NET_BUFPOOL_TRYALLOC(g_tcp_connections);
 
 #ifndef CONFIG_NET_SOLINGER
   /* Is the free list empty? */
@@ -730,7 +639,7 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
           tmp = (FAR struct tcp_conn_s *)tmp->sconn.node.flink;
         }
 
-      /* Did we find a connection that we can re-use? */
+      /* Did we find a connection that we can reuse? */
 
       if (conn != NULL)
         {
@@ -758,22 +667,12 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
            * a new connection.
            */
 
-          conn = (FAR struct tcp_conn_s *)
-            dq_remfirst(&g_free_tcp_connections);
+          conn = NET_BUFPOOL_TRYALLOC(g_tcp_connections);
         }
     }
 #endif
 
-  /* Allocate the connect entry from heap */
-
-#if CONFIG_NET_TCP_ALLOC_CONNS > 0
-  if (conn == NULL)
-    {
-      conn = tcp_alloc_conn();
-    }
-#endif
-
-  net_unlock();
+  tcp_conn_list_unlock();
 
   /* Mark the connection allocated */
 
@@ -798,6 +697,7 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 
       nxsem_init(&conn->snd_sem, 0, 0);
 #endif
+      nxrmutex_init(&conn->sconn.s_lock);
 
       /* Set the default value of mss to max, this field will changed when
        * receive SYN.
@@ -874,13 +774,6 @@ void tcp_free(FAR struct tcp_conn_s *conn)
   FAR struct tcp_wrbuffer_s *wrbuffer;
 #endif
 
-  /* Because g_free_tcp_connections is accessed from user level and event
-   * processing logic, it is necessary to keep the network locked during this
-   * operation.
-   */
-
-  net_lock();
-
   DEBUGASSERT(conn->crefs == 0);
 
   /* Cancel close work */
@@ -890,17 +783,13 @@ void tcp_free(FAR struct tcp_conn_s *conn)
     {
       /* Close work is already running, tcp_free will be called again. */
 
-      net_unlock();
       return;
     }
 
-  /* Cancel tcp timer */
-
-  tcp_stop_timer(conn);
-
   /* Make sure monitor is stopped. */
 
-  tcp_stop_monitor(conn, TCP_CLOSE);
+  conn_dev_lock(&conn->sconn, conn->dev);
+  tcp_stop_monitor(conn, TCP_TXCLOSE);
 
   /* Free remaining callbacks, actually there should be only the send
    * callback for CONFIG_NET_TCP_WRITE_BUFFERS is left.
@@ -912,6 +801,8 @@ void tcp_free(FAR struct tcp_conn_s *conn)
       tcp_callback_free(conn, cb);
     }
 
+  conn_dev_unlock(&conn->sconn, conn->dev);
+
   /* TCP_ALLOCATED means that that the connection is not in the active list
    * yet.
    */
@@ -920,9 +811,16 @@ void tcp_free(FAR struct tcp_conn_s *conn)
     {
       /* Remove the connection from the active list */
 
+      tcp_conn_list_lock();
       dq_rem(&conn->sconn.node, &g_active_tcp_connections);
+      tcp_conn_list_unlock();
     }
 
+  /* Cancel tcp timer */
+
+  tcp_stop_timer(conn);
+
+  nxrmutex_destroy(&conn->sconn.s_lock);
   tcp_free_rx_buffers(conn);
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
@@ -948,6 +846,10 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 
 #endif
 
+#if CONFIG_NET_SEND_BUFSIZE > 0
+  nxsem_destroy(&conn->snd_sem);
+#endif
+
 #ifdef CONFIG_NET_TCPBACKLOG
   /* Remove any backlog attached to this connection */
 
@@ -970,23 +872,68 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 
   conn->tcpstateflags = TCP_CLOSED;
 
-  /* If this is a preallocated or a batch allocated connection store it in
-   * the free connections list. Else free it.
-   */
+  /* Free the connection structure */
 
-#if CONFIG_NET_TCP_ALLOC_CONNS == 1
-  if (conn < g_tcp_connections || conn >= (g_tcp_connections +
-      CONFIG_NET_TCP_PREALLOC_CONNS))
+  NET_BUFPOOL_FREE(g_tcp_connections, conn);
+}
+
+/****************************************************************************
+ * Name: tcp_conn_cmp
+ *
+ * Description:
+ *   Compare a connection with domain, IP address and port number
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+bool tcp_conn_cmp(uint8_t domain, FAR const union ip_addr_u *ipaddr,
+                  uint16_t portno, FAR struct tcp_conn_s *conn)
+#else
+bool tcp_conn_cmp(FAR const union ip_addr_u *ipaddr, uint16_t portno,
+                  FAR struct tcp_conn_s *conn)
+#endif
+{
+  if (conn == NULL)
     {
-      kmm_free(conn);
+      return false;
     }
-  else
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+  if (conn->lport == portno && conn->domain == domain)
+#else
+  if (conn->lport == portno)
 #endif
     {
-      dq_addlast(&conn->sconn.node, &g_free_tcp_connections);
+#ifdef CONFIG_NET_IPv6
+#  ifdef CONFIG_NET_IPv4
+      if (domain == PF_INET6)
+#  endif
+        {
+          if (net_ipv6addr_cmp(ipaddr->ipv6, g_ipv6_unspecaddr) ||
+              net_ipv6addr_cmp(conn->u.ipv6.laddr, ipaddr->ipv6) ||
+              net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
+            {
+              return true;
+            }
+        }
+#endif
+
+#ifdef CONFIG_NET_IPv4
+#  ifdef CONFIG_NET_IPv6
+      if (domain == PF_INET)
+#  endif
+        {
+          if (net_ipv4addr_cmp(ipaddr->ipv4, INADDR_ANY) ||
+              net_ipv4addr_cmp(conn->u.ipv4.laddr, ipaddr->ipv4) ||
+              net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY))
+            {
+              return true;
+            }
+        }
+#endif
     }
 
-  net_unlock();
+  return false;
 }
 
 /****************************************************************************
@@ -1004,12 +951,15 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 FAR struct tcp_conn_s *tcp_active(FAR struct net_driver_s *dev,
                                   FAR struct tcp_hdr_s *tcp)
 {
+  FAR struct tcp_conn_s *conn = NULL;
+
+  tcp_conn_list_lock();
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
   if (IFF_IS_IPv6(dev->d_flags))
 #endif
     {
-      return tcp_ipv6_active(dev, tcp);
+      conn = tcp_ipv6_active(dev, tcp);
     }
 #endif /* CONFIG_NET_IPv6 */
 
@@ -1018,9 +968,12 @@ FAR struct tcp_conn_s *tcp_active(FAR struct net_driver_s *dev,
   else
 #endif
     {
-      return tcp_ipv4_active(dev, tcp);
+      conn = tcp_ipv4_active(dev, tcp);
     }
 #endif /* CONFIG_NET_IPv4 */
+
+  tcp_conn_list_unlock();
+  return conn;
 }
 
 /****************************************************************************
@@ -1191,16 +1144,14 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
       conn->tcpstateflags    = TCP_SYN_RCVD;
 
       tcp_initsequence(conn);
-#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS)
       conn->rexmit_seq       = tcp_getsequence(conn->sndseq);
-#endif
 
       conn->tx_unacked       = 1;
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
       conn->expired          = 0;
       conn->isn              = 0;
       conn->sent             = 0;
-      conn->sndseq_max       = 0;
+      conn->sndseq_max       = tcp_getsequence(conn->sndseq) + 1;
 #endif
 
 #ifdef CONFIG_NET_TCP_CC_NEWRENO
@@ -1229,7 +1180,10 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
        * Interrupts should already be disabled in this context.
        */
 
+      tcp_conn_list_lock();
       dq_addlast(&conn->sconn.node, &g_active_tcp_connections);
+      tcp_conn_list_unlock();
+
       tcp_update_retrantimer(conn, TCP_RTO);
     }
 
@@ -1310,7 +1264,7 @@ int tcp_bind(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 {
   int port;
-  int ret = OK;
+  int ret;
 
   /* The connection is expected to be in the TCP_ALLOCATED state.. i.e.,
    * allocated via up_tcpalloc(), but not yet put into the active connections
@@ -1326,8 +1280,6 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
    * one now. We assume that the IP address has been bound to a local device,
    * but the port may still be INPORT_ANY.
    */
-
-  net_lock();
 
   /* Check if the local port has been bind() */
 
@@ -1369,8 +1321,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 
       if (port < 0)
         {
-          ret = port;
-          goto errout_with_lock;
+          return port;
         }
     }
 
@@ -1454,7 +1405,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
        */
 
       nerr("ERROR: Failed to find network device: %d\n", ret);
-      goto errout_with_lock;
+      return ret;
     }
 
 #if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
@@ -1484,8 +1435,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 
   if (ret < 0)
     {
-      ret = -ENETUNREACH;
-      goto errout_with_lock;
+      return -ENETUNREACH;
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
 
@@ -1504,22 +1454,21 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   conn->sa         = 0;
   conn->sv         = 16;   /* Initial value of the RTT variance. */
   conn->lport      = (uint16_t)port;
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  conn->expired    = 0;
-  conn->isn        = 0;
-  conn->sent       = 0;
-  conn->sndseq_max = 0;
-#endif
 
   /* Set initial sndseq when we have both local/remote addr and port */
 
   tcp_initsequence(conn);
 
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+  conn->expired    = 0;
+  conn->isn        = 0;
+  conn->sent       = 0;
+  conn->sndseq_max = tcp_getsequence(conn->sndseq) + 1;
+#endif
+
   /* Save initial sndseq to rexmit_seq, otherwise it will be zero */
 
-#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS)
   conn->rexmit_seq = tcp_getsequence(conn->sndseq);
-#endif
 
 #ifdef CONFIG_NET_TCP_CC_NEWRENO
   /* Initialize the variables of congestion control. */
@@ -1540,12 +1489,93 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 
   /* And, finally, put the connection structure into the active list. */
 
+  tcp_conn_list_lock();
   dq_addlast(&conn->sconn.node, &g_active_tcp_connections);
-  ret = OK;
+  tcp_conn_list_unlock();
 
-errout_with_lock:
-  net_unlock();
-  return ret;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: tcp_conn_list_lock
+ *
+ * Description:
+ *   Lock the TCP connection list.
+ *
+ ****************************************************************************/
+
+void tcp_conn_list_lock(void)
+{
+  NET_BUFPOOL_LOCK(g_tcp_connections);
+}
+
+/****************************************************************************
+ * Name: tcp_conn_list_unlock
+ *
+ * Description:
+ *   Unlock the TCP connection list.
+ *
+ ****************************************************************************/
+
+void tcp_conn_list_unlock(void)
+{
+  NET_BUFPOOL_UNLOCK(g_tcp_connections);
+}
+
+/****************************************************************************
+ * Name: tcp_removeconn
+ *
+ * Description:
+ *   remove the connection from the list of active TCP connections
+ *
+ * Assumptions:
+ *   This function is called from network logic with the network locked.
+ *
+ ****************************************************************************/
+
+void tcp_removeconn(FAR struct tcp_conn_s *conn)
+{
+  dq_rem(&conn->sconn.node, &g_active_tcp_connections);
+}
+
+/****************************************************************************
+ * Name: tcp_remove_syn_backlog
+ *
+ * Description:
+ *   This function is used to remove the currently SYN_RCVD connection
+ *   created by the listener
+ *
+ * Assumptions:
+ *   This function is called from network logic with the tcp conn list
+ *   locked.
+ *
+ ****************************************************************************/
+
+void tcp_remove_syn_backlog(FAR struct tcp_conn_s *listener)
+{
+  FAR struct tcp_conn_s *conn;
+  FAR struct tcp_conn_s *next;
+
+  next = (FAR struct tcp_conn_s *)g_active_tcp_connections.head;
+  while (next)
+    {
+      conn = next;
+      next = (FAR struct tcp_conn_s *)conn->sconn.node.flink;
+      if (conn->tcpstateflags == TCP_SYN_RCVD &&
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+          tcp_conn_cmp(listener->domain,
+                       (FAR const union ip_addr_u *)&listener->u,
+                       listener->lport, conn)
+#else
+          tcp_conn_cmp((FAR const union ip_addr_u *)&listener->u,
+                       listener->lport, conn)
+#endif
+         )
+        {
+          conn->crefs = 0;
+          tcp_free(conn);
+        }
+    }
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_TCP */

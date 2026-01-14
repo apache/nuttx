@@ -1,6 +1,8 @@
 # ##############################################################################
 # cmake/nuttx_add_subdirectory.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -19,6 +21,14 @@
 # ##############################################################################
 
 function(nuttx_add_subdirectory)
+  # Parse arguments: EXCLUDE can be a list of directories
+  set(options)
+  set(oneValueArgs)
+  set(multiValueArgs EXCLUDE)
+  cmake_parse_arguments(NUTTX "${options}" "${oneValueArgs}"
+                        "${multiValueArgs}" ${ARGN})
+
+  # Find all subdirs that have a CMakeLists.txt
   file(
     GLOB subdir
     LIST_DIRECTORIES false
@@ -27,6 +37,14 @@ function(nuttx_add_subdirectory)
 
   foreach(dir ${subdir})
     get_filename_component(dir ${dir} DIRECTORY)
+
+    # Skip excluded directories
+    list(FIND NUTTX_EXCLUDE ${dir} _skip_index)
+    if(_skip_index GREATER -1)
+      message(STATUS "nuttx_add_subdirectory: Skipping ${dir}")
+      continue()
+    endif()
+
     add_subdirectory(${dir})
   endforeach()
 endfunction()

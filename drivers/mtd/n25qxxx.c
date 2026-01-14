@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/mtd/n25qxxx.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -337,10 +339,10 @@ static int  n25qxxx_write_page(FAR struct n25qxxx_dev_s *priv,
                                off_t address,
                                size_t nbytes);
 #ifdef CONFIG_N25QXXX_SECTOR512
-static int  n25qxxx_flush_cache(struct n25qxxx_dev_s *priv);
-static FAR uint8_t *n25qxxx_read_cache(struct n25qxxx_dev_s *priv,
+static int  n25qxxx_flush_cache(FAR struct n25qxxx_dev_s *priv);
+static FAR uint8_t *n25qxxx_read_cache(FAR struct n25qxxx_dev_s *priv,
                                        off_t sector);
-static void n25qxxx_erase_cache(struct n25qxxx_dev_s *priv,
+static void n25qxxx_erase_cache(FAR struct n25qxxx_dev_s *priv,
                                 off_t sector);
 static int  n25qxxx_write_cache(FAR struct n25qxxx_dev_s *priv,
                                 FAR const uint8_t *buffer,
@@ -503,7 +505,7 @@ static int n25qxxx_command_write(FAR struct qspi_dev_s *qspi, uint8_t cmd,
 static uint8_t n25qxxx_read_status(FAR struct n25qxxx_dev_s *priv)
 {
   DEBUGVERIFY(n25qxxx_command_read(priv->qspi, N25QXXX_READ_STATUS,
-                                  (FAR void *)&priv->readbuf[0], 1));
+                                   (FAR void *)&priv->readbuf[0], 1));
   return priv->readbuf[0];
 }
 
@@ -520,7 +522,7 @@ static void n25qxxx_write_status(FAR struct n25qxxx_dev_s *priv)
   priv->cmdbuf[0] &= ~STATUS_SRP0_MASK;
 
   n25qxxx_command_write(priv->qspi, N25QXXX_WRITE_STATUS,
-                       (FAR const void *)priv->cmdbuf, 1);
+                        (FAR const void *)priv->cmdbuf, 1);
   n25qxxx_write_disable(priv);
 }
 
@@ -531,7 +533,7 @@ static void n25qxxx_write_status(FAR struct n25qxxx_dev_s *priv)
 static uint8_t n25qxxx_read_volcfg(FAR struct n25qxxx_dev_s *priv)
 {
   DEBUGVERIFY(n25qxxx_command_read(priv->qspi, N25QXXX_READ_VOLCFG,
-                                  (FAR void *)&priv->readbuf[0], 1));
+                                   (FAR void *)&priv->readbuf[0], 1));
   return priv->readbuf[0];
 }
 
@@ -543,7 +545,7 @@ static void n25qxxx_write_volcfg(FAR struct n25qxxx_dev_s *priv)
 {
   n25qxxx_write_enable(priv);
   n25qxxx_command_write(priv->qspi, N25QXXX_WRITE_VOLCFG,
-                       (FAR const void *)priv->cmdbuf, 1);
+                        (FAR const void *)priv->cmdbuf, 1);
   n25qxxx_write_disable(priv);
 }
 
@@ -670,7 +672,7 @@ static inline int n25qxxx_readid(struct n25qxxx_dev_s *priv)
  ****************************************************************************/
 
 static int n25qxxx_protect(FAR struct n25qxxx_dev_s *priv,
-                          off_t startblock, size_t nblocks)
+                           off_t startblock, size_t nblocks)
 {
   /* Get the status register value to check the current protection */
 
@@ -718,7 +720,7 @@ static int n25qxxx_protect(FAR struct n25qxxx_dev_s *priv,
  ****************************************************************************/
 
 static int n25qxxx_unprotect(FAR struct n25qxxx_dev_s *priv,
-                            off_t startblock, size_t nblocks)
+                             off_t startblock, size_t nblocks)
 {
   /* Get the status register value to check the current protection */
 
@@ -823,7 +825,7 @@ static bool n25qxxx_isprotected(FAR struct n25qxxx_dev_s *priv,
  * Name:  n25qxxx_erase_sector
  ****************************************************************************/
 
-static int n25qxxx_erase_sector(struct n25qxxx_dev_s *priv, off_t sector)
+static int n25qxxx_erase_sector(FAR struct n25qxxx_dev_s *priv, off_t sector)
 {
   off_t address;
   uint8_t status;
@@ -866,7 +868,7 @@ static int n25qxxx_erase_sector(struct n25qxxx_dev_s *priv, off_t sector)
  * Name:  n25qxxx_erase_chip
  ****************************************************************************/
 
-static int n25qxxx_erase_chip(struct n25qxxx_dev_s *priv)
+static int n25qxxx_erase_chip(FAR struct n25qxxx_dev_s *priv)
 {
   uint8_t status;
 
@@ -889,7 +891,7 @@ static int n25qxxx_erase_chip(struct n25qxxx_dev_s *priv)
   status = n25qxxx_read_status(priv);
   while ((status & STATUS_BUSY_MASK) != 0)
     {
-      nxsig_usleep(200 * 1000);
+      nxsched_usleep(200 * 1000);
       status = n25qxxx_read_status(priv);
     }
 
@@ -924,7 +926,7 @@ static int n25qxxx_read_byte(FAR struct n25qxxx_dev_s *priv,
  * Name:  n25qxxx_write_page
  ****************************************************************************/
 
-static int n25qxxx_write_page(struct n25qxxx_dev_s *priv,
+static int n25qxxx_write_page(FAR struct n25qxxx_dev_s *priv,
                               FAR const uint8_t *buffer,
                               off_t address,
                               size_t buflen)
@@ -957,7 +959,7 @@ static int n25qxxx_write_page(struct n25qxxx_dev_s *priv,
       /* Set up varying parts of the transfer description */
 
       meminfo.addr   = address;
-      meminfo.buffer = (void *)buffer;
+      meminfo.buffer = (FAR void *)buffer;
 
       /* Write one page */
 
@@ -993,7 +995,7 @@ static int n25qxxx_write_page(struct n25qxxx_dev_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_N25QXXX_SECTOR512
-static int n25qxxx_flush_cache(struct n25qxxx_dev_s *priv)
+static int n25qxxx_flush_cache(FAR struct n25qxxx_dev_s *priv)
 {
   int ret = OK;
 
@@ -1034,7 +1036,7 @@ static int n25qxxx_flush_cache(struct n25qxxx_dev_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_N25QXXX_SECTOR512
-static FAR uint8_t *n25qxxx_read_cache(struct n25qxxx_dev_s *priv,
+static FAR uint8_t *n25qxxx_read_cache(FAR struct n25qxxx_dev_s *priv,
                                        off_t sector)
 {
   off_t esectno;
@@ -1103,7 +1105,7 @@ static FAR uint8_t *n25qxxx_read_cache(struct n25qxxx_dev_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_N25QXXX_SECTOR512
-static void n25qxxx_erase_cache(struct n25qxxx_dev_s *priv, off_t sector)
+static void n25qxxx_erase_cache(FAR struct n25qxxx_dev_s *priv, off_t sector)
 {
   FAR uint8_t *dest;
 
@@ -1145,8 +1147,8 @@ static void n25qxxx_erase_cache(struct n25qxxx_dev_s *priv, off_t sector)
 
 #ifdef CONFIG_N25QXXX_SECTOR512
 static int n25qxxx_write_cache(FAR struct n25qxxx_dev_s *priv,
-                              FAR const uint8_t *buffer, off_t sector,
-                              size_t nsectors)
+                               FAR const uint8_t *buffer, off_t sector,
+                               size_t nsectors)
 {
   FAR uint8_t *dest;
   int ret;
@@ -1250,7 +1252,7 @@ static int n25qxxx_erase(FAR struct mtd_dev_s *dev,
  ****************************************************************************/
 
 static ssize_t n25qxxx_bread(FAR struct mtd_dev_s *dev, off_t startblock,
-                            size_t nblocks, FAR uint8_t *buffer)
+                             size_t nblocks, FAR uint8_t *buffer)
 {
 #ifndef CONFIG_N25QXXX_SECTOR512
   FAR struct n25qxxx_dev_s *priv = (FAR struct n25qxxx_dev_s *)dev;
@@ -1287,7 +1289,7 @@ static ssize_t n25qxxx_bread(FAR struct mtd_dev_s *dev, off_t startblock,
  ****************************************************************************/
 
 static ssize_t n25qxxx_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-                             size_t nblocks, FAR const uint8_t *buffer)
+                              size_t nblocks, FAR const uint8_t *buffer)
 {
   FAR struct n25qxxx_dev_s *priv = (FAR struct n25qxxx_dev_s *)dev;
   int ret = (int)nblocks;

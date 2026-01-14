@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samd5e5/sam_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -113,6 +115,7 @@ void __start(void) noinstrument_function;
  *
  ****************************************************************************/
 
+osentry_function
 void __start(void)
 {
 #if defined(CONFIG_BOOT_RUNFROMFLASH) || defined(CONFIG_ARCH_RAMFUNCS)

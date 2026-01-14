@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/samv7/same70-xplained/src/same70-xplained.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -233,7 +235,7 @@
  *
  *   ------ --------- ---------
  *   SAME70 SAME70    Ethernet
- *   Pin    Function  Functio
+ *   Pin    Function  Function
  *   ------ --------- ---------
  *   PD0    GTXCK     REF_CLK
  *   PD1    GTXEN     TXEN

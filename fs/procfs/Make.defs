@@ -1,6 +1,8 @@
 ############################################################################
 # fs/procfs/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -25,6 +27,10 @@ CSRCS += fs_procfs.c fs_procfscpuinfo.c fs_procfscpuload.c
 CSRCS += fs_procfscritmon.c fs_procfsfdt.c fs_procfsiobinfo.c
 CSRCS += fs_procfsmeminfo.c fs_procfsproc.c fs_procfstcbinfo.c
 CSRCS += fs_procfsuptime.c fs_procfsutil.c fs_procfsversion.c
+
+ifeq ($(CONFIG_FS_PROCFS_INCLUDE_PRESSURE),y)
+CSRCS += fs_procfspressure.c
+endif
 
 # Include procfs build support
 

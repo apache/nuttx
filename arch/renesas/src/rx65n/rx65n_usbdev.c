@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/renesas/src/rx65n/rx65n_usbdev.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -764,7 +766,7 @@ static void hw_usb_write_fifo16(uint16_t pipemode, uint16_t data)
       case USB_D1USE:
         USB0_D1FIFO16 = data;
         break;
-      default :
+      default:
         break;
   }
 }
@@ -790,7 +792,7 @@ static void hw_usb_write_fifo8(uint16_t pipemode, uint8_t data)
       case USB_D1USE:
         USB0_D1FIFO8 = data;
         break;
-      default :
+      default:
         break;
     }
 }
@@ -1202,7 +1204,7 @@ uint16_t usb_pstd_ctrl_read(uint32_t bsize, uint8_t *table)
       case USB_ERROR :
         break;
 
-      default :
+      default:
         break;
     }
 
@@ -1906,7 +1908,7 @@ static int rx65n_wrrequest(uint8_t epno, struct rx65n_usbdev_s *priv,
     }
 
   epno = USB_EPNO(privep->ep.eplog);
-  uinfo("epno=%d req=%p: len=%d xfrd=%d nullpkt=%d\n",
+  uinfo("epno=%d req=%p: len=%zu xfrd=%zu nullpkt=%d\n",
         epno, privreq, privreq->req.len, privreq->req.xfrd,
         privep->txnullpkt);
 
@@ -2007,7 +2009,7 @@ static int rx65n_rdrequest(uint8_t epno, struct rx65n_usbdev_s *priv,
       return OK;
     }
 
-  uinfo("len=%d xfrd=%d nullpkt=%d\n",
+  uinfo("len=%zu xfrd=%zu nullpkt=%d\n",
         privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
 
   usbtrace(TRACE_READ(privep->epphy), privreq->req.xfrd);
@@ -5506,7 +5508,7 @@ void usb_pstd_brdy_pipe(uint16_t bitsts, struct rx65n_usbdev_s *priv,
        * which further, unblocks the semaphore waiting
        * on read()
        * Failing to invoke this function will result,
-       * in failiure of application specific read
+       * in failure of application specific read.
        *
        */
 
@@ -5968,7 +5970,7 @@ static int rx65n_usbinterrupt(int irq, void *context, void *arg)
       }
     else
       {
-        /* Vender Specific */
+        /* Vendor Specific */
 
         type = LSBYTE(rx65n_getreg16(RX65N_USB_USBREQ));
         rx65n_ep0setup(priv);

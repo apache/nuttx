@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/scsi.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -335,9 +337,9 @@
 #define SCSI_KCQUA_PARAMETERSCHANGED             0x062a00  /* Unit Attention - parameters changed */
 #define SCSI_KCQUA_MODEPARAMETERSCHANGED         0x062a01  /* Unit Attention - mode parameters changed */
 #define SCSI_KCQUA_LOGSELECTPARMSCHANGED         0x062a02  /* Unit Attention - log select parms changed */
-#define SCSI_KCQUA_RESERVATIONSPREEMPTED         0x062a03  /* Unit Attention - Reservations pre-empted */
+#define SCSI_KCQUA_RESERVATIONSPREEMPTED         0x062a03  /* Unit Attention - Reservations preempted */
 #define SCSI_KCQUA_RESERVATIONSRELEASED          0x062a04  /* Unit Attention - Reservations released */
-#define SCSI_KCQUA_REGISTRATIONSPREEMPTED        0x062a05  /* Unit Attention - Registrations pre-empted */
+#define SCSI_KCQUA_REGISTRATIONSPREEMPTED        0x062a05  /* Unit Attention - Registrations preempted */
 #define SCSI_KCQUA_COMMANDSCLEARED               0x062f00  /* Unit Attention - commands cleared by another initiator */
 #define SCSI_KCQUA_OPERATINGCONDITIONSCHANGED    0x063f00  /* Unit Attention - target operating conditions have changed */
 #define SCSI_KCQUA_MICROCODECHANGED              0x063f01  /* Unit Attention - microcode changed */

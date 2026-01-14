@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nrf91/nrf91_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -224,7 +226,7 @@ void __start(void)
 
   showprogress('C');
 
-#ifdef CONFIG_ARCH_HAVE_FPU
+#ifdef CONFIG_ARCH_FPU
   /* Initialize the FPU (if available) */
 
   arm_fpuconfig();

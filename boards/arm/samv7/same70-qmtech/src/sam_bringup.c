@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/samv7/same70-qmtech/src/sam_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -173,7 +175,7 @@ int sam_bringup(void)
     {
       if (sam_cardinserted(HSMCI0_SLOTNO))
         {
-          nxsig_usleep(1000 * 1000);
+          nxsched_usleep(1000 * 1000);
 
           /* Mount the volume on HSMCI0 */
 

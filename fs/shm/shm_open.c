@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/shm/shm_open.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 #include <errno.h>
 
 #include "inode/inode.h"
+#include "vfs/vfs.h"
 #include "shm/shmfs.h"
 
 /****************************************************************************
@@ -80,12 +83,7 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
 
   SETUP_SEARCH(&desc, fullpath, false);
 
-  ret = inode_lock();
-  if (ret < 0)
-    {
-      goto errout_with_search;
-    }
-
+  inode_lock();
   ret = inode_find(&desc);
   if (ret >= 0)
     {
@@ -112,6 +110,17 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
           inode_release(inode);
           goto errout_with_sem;
         }
+
+      /* If the shared memory object already exists, truncate it to
+       * zero bytes.
+       */
+
+      if ((oflags & O_TRUNC) == O_TRUNC && inode->i_private != NULL)
+        {
+          shmfs_free_object(inode->i_private);
+          inode->i_private = NULL;
+          inode->i_size = 0;
+        }
     }
   else
     {
@@ -136,19 +145,24 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
       INODE_SET_SHM(inode);
       inode->u.i_ops = &g_shmfs_operations;
       inode->i_private = NULL;
-      inode->i_crefs = 1;
+      atomic_fetch_add(&inode->i_crefs, 1);
     }
 
   /* Associate the inode with a file structure */
 
-  memset(shm, 0, sizeof(*shm));
-  shm->f_oflags = oflags | O_CLOEXEC | O_NOFOLLOW;
+  shm->f_oflags = oflags | O_NOFOLLOW;
   shm->f_inode = inode;
 
 errout_with_sem:
   inode_unlock();
-errout_with_search:
   RELEASE_SEARCH(&desc);
+#ifdef CONFIG_FS_NOTIFY
+  if (ret >= 0)
+    {
+      notify_open(fullpath, oflags);
+    }
+#endif
+
   return ret;
 }
 
@@ -158,24 +172,33 @@ errout_with_search:
 
 int shm_open(FAR const char *name, int oflag, mode_t mode)
 {
-  struct file shm;
+  FAR struct file *shm;
   int ret;
+  int fd;
 
-  ret = file_shm_open(&shm, name, oflag, mode);
+  shm = file_allocate();
+  if (shm == NULL)
+    {
+      set_errno(ENOMEM);
+      return ERROR;
+    }
+
+  ret = file_shm_open(shm, name, oflag, mode);
   if (ret < 0)
     {
+      file_deallocate(shm);
       set_errno(-ret);
       return ERROR;
     }
 
-  ret = file_allocate(shm.f_inode, shm.f_oflags, shm.f_pos, shm.f_priv, 0,
-                      false);
-  if (ret < 0)
+  fd = file_dup(shm, 0, oflag | O_CLOEXEC);
+  if (fd < 0)
     {
-      set_errno(-ret);
-      file_close(&shm);
+      file_close(shm);
+      file_deallocate(shm);
+      set_errno(-fd);
       return ERROR;
     }
 
-  return ret;
+  return fd;
 }

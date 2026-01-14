@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/include/spinlock.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -77,6 +79,26 @@ typedef uint32_t spinlock_t;
  *   (meaning that we successfully obtained the lock)
  *
  ****************************************************************************/
+
+#if defined(CONFIG_SPINLOCK)
+static inline_function spinlock_t up_testset(volatile spinlock_t *lock)
+{
+  /* Perform the 32-bit compare and set operation */
+
+  spinlock_t ret;
+
+  __asm__ __volatile__
+  (
+    "WSR    %2, SCOMPARE1\n" /* Initialize SCOMPARE1 */
+    "S32C1I %0, %1, 0\n"     /* Store the compare value into the lock,
+                              * if the lock is the same as compare1.
+                              * Otherwise, no write-access */
+    : "=r"(ret) : "r"(lock), "r"(SP_UNLOCKED), "0"(SP_LOCKED)
+  );
+
+  return ret;
+}
+#endif
 
 /* See prototype in nuttx/include/nuttx/spinlock.h */
 

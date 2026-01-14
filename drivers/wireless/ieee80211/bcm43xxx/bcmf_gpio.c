@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/wireless/ieee80211/bcm43xxx/bcmf_gpio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,16 +49,19 @@ int bcmf_set_gpio(FAR struct bcmf_dev_s *priv, int pin, bool value)
 
   uint32_t buf_len = sizeof(buffer);
 
-  if (!(((FAR bcmf_interface_dev_t *)priv->bus)->ready)) return -EIO;
+  if (!(((FAR bcmf_interface_dev_t *)priv->bus)->ready))
+    {
+      return -EIO;
+    }
 
-  buffer.mask  = 1 << pin;
-  buffer.value = value ? (1 << pin) : 0;
+  buffer.mask  = 1u << pin;
+  buffer.value = value ? (1u << pin) : 0;
 
   return bcmf_cdc_iovar_request(priv,
                                 CHIP_STA_INTERFACE,
                                 true,
                                 IOVAR_STR_GPIOOUT,
-                                (uint8_t *)&buffer,
+                                (FAR uint8_t *)&buffer,
                                 &buf_len);
 }
 
@@ -70,15 +75,21 @@ int bcmf_get_gpio(FAR struct bcmf_dev_s *priv, int pin, bool *value)
   uint32_t buf_len = sizeof(buffer);
   int      ret;
 
-  if (!(((FAR bcmf_interface_dev_t *)priv->bus)->ready)) return -EIO;
+  if (!(((FAR bcmf_interface_dev_t *)priv->bus)->ready))
+    {
+      return -EIO;
+    }
 
   ret = bcmf_cdc_iovar_request(priv,
                                CHIP_STA_INTERFACE,
                                false,
                                IOVAR_STR_CCGPIOIN,
-                               (uint8_t *)&buffer,
+                               (FAR uint8_t *)&buffer,
                                &buf_len);
-  if (ret != OK) return ret;
+  if (ret != OK)
+    {
+      return ret;
+    }
 
   *value = (buffer & (1 << pin)) != 0;
 

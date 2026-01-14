@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/ioexpander/ioexpander.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -73,9 +75,19 @@
 #define IOEXPANDER_OPTION_NONGENERIC  4  /* Non generic option interface. Some
                                           * IO expanders have more advance
                                           * options for pins and communication.
-                                          * This is used to pass driver dependend
+                                          * This is used to pass driver dependent
                                           * structure to expander driver.
                                           */
+
+#define IOEXPANDER_OPTION_WAKEUPCFG   5  /* Configure interrupt for a pin to wake up the Soc */
+#define IOEXPANDER_WAKEUP_DISABLE     0  /* Do not cfg the pin as wake up source */
+#define IOEXPANDER_WAKEUP_ENABLE      1  /* Cfg the pin as wake up source */
+#define IOEXPANDER_OPTION_SETDEBOUNCE 6  /* Configure debounce duration */
+#  define IOEXPANDER_DEBOUNCE_DISABLE 0  /* Disable debounce */
+#  define IOEXPANDER_DEBOUNCE_ENABLE  1  /* Enable debounce */
+#define IOEXPANDER_OPTION_SETMASK     7  /* Mask the interrupter */
+#  define IOEXPANDER_MASK_DISABLE     0  /* Unmask the interrupter */
+#  define IOEXPANDER_MASK_ENABLE      1  /* Mask the interrupter */
 
 /* Access macros ************************************************************/
 

@@ -2,11 +2,16 @@
 Adafruit QT Py RP2040
 =======================
 
+.. tags:: chip:rp2040
+
 The QT Py RP2040 is a tiny general purpose RP2040 board supplied by 
 Adafruit.
 
 .. figure:: QT-Py.png
    :align: center
+
+See the `Adafruit website <https://learn.adafruit.com/adafruit-qt-py-2040/>`_
+for information about the Adafruit QT Py RP2040.
 
 Features
 ========
@@ -24,14 +29,6 @@ Features
 * Temperature sensor
 * Accelerated floating point libraries on-chip
 * 8 × Programmable IO (PIO) state machines for custom peripheral support
-
-Serial Console
-==============
-
-By default a serial console appears on GPIO pins 20 (RX GPIO1) and pin 5
-(TX GPIO1).  This console runs a 115200-8N1.
-
-The board can be configured to use the USB connection as the serial console.
 
 Buttons and LEDs
 ================
@@ -86,9 +83,23 @@ is need to run as a usb host.
 The Raspberry Pi Pico chip run on 3.3 volts which is supplied by
 an on board regulator.
 
+Installation & Build
+====================
+
+For instructions on how to to install the build dependencies and create a NuttX
+image for this board, consult the main :doc:`RP2040 documentation
+<../../index>`.
 
 Configurations
 ==============
+
+All configurations listed below can be configured using the following command in
+the ``nuttx`` directory (again, consult the main :doc:`RP2040 documentation
+<../../index>`):
+
+.. code:: console
+
+   $ ./tools/configure.sh adafruit-qt-py-rp2040:<configname>
 
 gpio
 --------
@@ -121,10 +132,5 @@ both ARM cores enabled.
 usbnsh
 ------
 
-Basic NuttShell configuration (console enabled in USB Port, at 115200 bps).
-
-README.txt
-==========
-
-.. include:: README.txt
-   :literal:
+Basic NuttShell configuration using CDC/ACM serial (console enabled in USB Port,
+at 115200 bps).

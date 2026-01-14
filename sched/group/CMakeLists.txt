@@ -1,6 +1,8 @@
 # ##############################################################################
 # sched/group/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -26,8 +28,7 @@ set(SRCS
     group_setuptaskfiles.c
     group_foreachchild.c
     group_killchildren.c
-    group_signal.c
-    group_argvstr.c)
+    group_signal.c)
 
 if(CONFIG_SCHED_HAVE_PARENT)
   if(CONFIG_SCHED_CHILD_STATUS)

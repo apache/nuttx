@@ -228,7 +228,7 @@
 #define _IMCR_MASK                 (0x01ff << _IMCR_SHIFT)
 #  define IMCR(n)                  ((((n) - 512) << _IMCR_SHIFT) & _IMCR_MASK)
 
-#define _WKPU_SHIFT                _IMCR_SHIFT /* WKPU number re-uses the IMCR field, only applicable if Input SSS = 12 */
+#define _WKPU_SHIFT                _IMCR_SHIFT /* WKPU number reuses the IMCR field, only applicable if Input SSS = 12 */
 #define _WKPU_MASK                 (0x3f << _WKPU_SHIFT)
 #  define WPKU(n)                  (((n) << _WKPU_SHIFT) & _WKPU_MASK)
 
@@ -287,7 +287,7 @@
  * --o- ---- ---- ---- ---- ---- ---- ----
  */
 
-#define _PIN_OUTPUT_INVAL_SHIFT    (29) /* Bit 29: GPIO Inititial Value */
+#define _PIN_OUTPUT_INVAL_SHIFT    (29) /* Bit 29: GPIO Initial Value */
 #define _PIN_OUTPUT_INVAL_MASK     (1 << _PIN_OUTPUT_INVAL_SHIFT)
 #  define GPIO_OUTPUT_ZERO         (0 << _PIN_OUTPUT_INVAL_SHIFT) /* 0: Initial output value is 0 */
 #  define GPIO_OUTPUT_ONE          (1 << _PIN_OUTPUT_INVAL_SHIFT) /* 1: Initial output value is 1 */

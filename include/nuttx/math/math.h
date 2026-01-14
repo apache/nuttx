@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/math/math.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,6 +27,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/mutex.h>
 #ifdef CONFIG_MATH_CORDIC
 #include <nuttx/math/cordic.h>
 #endif
@@ -55,6 +58,7 @@ struct math_config_s
 #ifdef CONFIG_MATH_MPI
   FAR struct mpi_lowerhalf_s    *mpi;
 #endif
+  mutex_t lock;
 };
 
 /****************************************************************************

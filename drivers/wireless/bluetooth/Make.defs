@@ -1,6 +1,8 @@
 ############################################################################
 # drivers/wireless/bluetooth/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -23,6 +25,8 @@
 ifeq ($(CONFIG_DRIVERS_BLUETOOTH),y)
 
 # Include Bluetooth drivers into the build
+
+CSRCS += bt_driver.c
 
 ifeq ($(CONFIG_BLUETOOTH_UART),y)
 CSRCS += bt_uart.c
@@ -54,6 +58,10 @@ endif
 
 ifeq ($(CONFIG_BLUETOOTH_RPMSG),y)
 CSRCS += bt_rpmsghci.c
+endif
+
+ifeq ($(CONFIG_BLUETOOTH_SLIP),y)
+CSRCS += bt_slip.c
 endif
 
 # Include common Bluetooth driver build support

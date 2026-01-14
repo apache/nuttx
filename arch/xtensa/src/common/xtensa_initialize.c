@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_initialize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,44 +34,9 @@
  * Public Data
  ****************************************************************************/
 
-/* g_current_regs[] holds a reference to the current interrupt level
- * register storage structure.  It is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the macro
- * CURRENT_REGS for portability.
- */
+/* g_interrupt_context store irq status */
 
-/* For the case of architectures with multiple CPUs, then there must be one
- * such value for each processor that can receive an interrupt.
- */
-
-volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: xtensa_color_intstack
- *
- * Description:
- *   Set the interrupt stack to a value so that later we can determine how
- *   much stack space was used by interrupt handling logic
- *
- ****************************************************************************/
-
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 15
-static inline void xtensa_color_intstack(void)
-{
-  int cpu;
-
-  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
-    {
-      xtensa_stack_color((void *)up_get_intstackbase(cpu), INTSTACK_SIZE);
-    }
-}
-#else
-#  define xtensa_color_intstack()
-#endif
+volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Functions
@@ -97,8 +64,6 @@ void up_initialize(void)
 #if XCHAL_CP_NUM > 0
   xtensa_set_cpenable(CONFIG_XTENSA_CP_INITSET);
 #endif
-
-  xtensa_color_intstack();
 
   /* Add any extra memory fragments to the memory manager */
 

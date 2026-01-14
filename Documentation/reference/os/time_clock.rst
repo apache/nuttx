@@ -260,7 +260,7 @@ Tickless Configuration Options
    simulated platform:
 
    .. code-block:: console
- 
+
      config ARCH_SIM
         bool "Simulation"
         select ARCH_HAVE_TICKLESS
@@ -372,8 +372,7 @@ In addition to these imported interfaces, the RTOS will export the
 following interfaces for use by the platform-specific interval
 timer implementation:
 
-- ``nxsched_alarm_expiration()``: called by the platform-specific logic when the alarm expires.
-- ``nxsched_timer_expiration()``: called by the platform-specific logic when the interval time expires.
+- ``nxsched_process_timer()``: called by the platform-specific logic when the interval time expires.
 
 .. c:function:: void archname_timer_initialize(void)
 
@@ -411,7 +410,7 @@ timer implementation:
 
   Cancel the alarm and return the time of cancellation of the alarm.
   These two steps need to be as nearly atomic as possible.
-  ``nxsched_timer_expiration()`` will not be called unless the alarm
+  ``nxsched_process_timer()`` will not be called unless the alarm
   is restarted with ``up_alarm_start()``. If, as a race condition,
   the alarm has already expired when this function is called, then
   time returned is the current time.
@@ -428,13 +427,13 @@ timer implementation:
 
 .. c:function:: int up_alarm_start(FAR const struct timespec *ts)
 
-  Start the alarm. ``nxsched_timer_expiration()`` will be called
+  Start the alarm. ``nxsched_process_timer()`` will be called
   when the alarm occurs (unless ``up_alarm_cancel`` is called to
   stop it).
 
   :param ts: The time in the future at the alarm is expected to
     occur. When the alarm occurs the timer logic will call
-    ``nxsched_timer_expiration()``.
+    ``nxsched_process_timer()``.
 
   :return: Zero (OK) on success; a negated errno value on failure.
 
@@ -446,11 +445,11 @@ timer implementation:
 
 Cancel the interval timer and return the time remaining on the
 timer. These two steps need to be as nearly atomic as possible.
-``nxsched_timer_expiration()`` will not be called unless the timer
+``nxsched_process_timer()`` will not be called unless the timer
 is restarted with ``up_timer_start()``. If, as a race condition,
 the timer has already expired when this function is called, then
 that pending interrupt must be cleared so that
-``nxsched_timer_expiration()`` is not called spuriously and the
+``nxsched_process_timer()`` is not called spuriously and the
 remaining time of zero should be returned.
 
 :param ts: Location to return the remaining time. Zero should be
@@ -464,12 +463,12 @@ disabled internally to assure non-reentrancy.
 
 .. c:function:: int up_timer_start(FAR const struct timespec *ts)
 
-Start the interval timer. ``nxsched_timer_expiration()`` will be
+Start the interval timer. ``nxsched_process_timer()`` will be
 called at the completion of the timeout (unless
 ``up_timer_cancel()`` is called to stop the timing).
 
 :param ts: Provides the time interval until
-  ``nxsched_timer_expiration()`` is called.
+  ``nxsched_process_timer()`` is called.
 
 :return: Zero (OK) on success; a negated errno value on failure.
 
@@ -482,19 +481,22 @@ Watchdog Timer Interfaces
 
 NuttX provides a general watchdog timer facility. This facility
 allows the NuttX user to specify a watchdog timer function that
-will run after a specified delay. The watchdog timer function will
-run in the context of the timer interrupt handler. Because of
-this, a limited number of NuttX interfaces are available to he
-watchdog timer function. However, the watchdog timer function may
-use ``mq_send()``, ``sigqueue()``, or ``kill()`` to communicate
-with NuttX tasks.
+will run after a specified delay in tick level resolution. The
+watchdog timer function will run in the context of the timer
+interrupt handler. Because of this, a limited number of NuttX
+interfaces are available to he watchdog timer function. However,
+the watchdog timer function may use ``mq_send()``, ``sigqueue()``,
+or ``kill()`` to communicate with NuttX tasks.
 
 - :c:func:`wd_start`
+- :c:func:`wd_start_next`
+- :c:func:`wd_restart`
+- :c:func:`wd_restart_next`
 - :c:func:`wd_cancel`
 - :c:func:`wd_gettime`
 - Watchdog Timer Callback
 
-.. c:function:: int wd_start(FAR struct wdog_s *wdog, int delay, \
+.. c:function:: int wd_start(FAR struct wdog_s *wdog, clock_t delay, \
                  wdentry_t wdentry, wdparm_t arg)
 
   This function adds a watchdog to the timer queue.
@@ -537,6 +539,30 @@ with NuttX tasks.
   -  The present implementation supports multiple parameters passed
      to wdentry; VxWorks supports only a single parameter. The
      maximum number of parameters is determined by
+
+.. c:function:: int wd_start_next(FAR struct wdog_s *wdog, clock_t delay, \
+                 wdentry_t wdentry, wdparm_t arg)
+
+   This function restart watchdog timer based on the last expiration time.
+   It can be used to implement a periodic watchdog timer. E.g, Call this
+   function instead of wd_start in the watchdog callback to restart the
+   next timer for better timing accuracy.
+   Note that calling this function outside the watchdog callback requires
+   the wdog->expired being set.
+
+  :param wdog: Watchdog ID
+  :param delay: Delay count in clock ticks
+  :param wdentry: Function to call on timeout
+  :param arg: The parameter to pass to wdentry.
+
+  **NOTE**: The parameter must be of type ``wdparm_t``.
+
+  :return: Zero (``OK``) is returned on success; a negated ``errno`` value
+    is return to indicate the nature of any failure.
+
+  **Assumptions/Limitations:** The watchdog routine runs in the
+  context of the timer interrupt handler and is subject to all ISR
+  restrictions.
 
 .. c:function:: int wd_cancel(FAR struct wdog_s *wdog)
 
@@ -595,3 +621,113 @@ with NuttX tasks.
     #else
     typedef uint32_t  wdparm_t;
     #endif
+
+High-resolution Timer Interfaces
+================================
+
+Hard real-time applications, such as motor control, often
+require nanosecond-level task timing, which tick-based timers
+like wdog cannot provide. Reducing the tick interval to micro-
+or nanoseconds is impractical, as it would overload the CPU with interrupts.
+
+To address this, NuttX provides a high-resolution timer (hrtimer),
+which delivers true nanosecond-level precision. Unlike wdog’s list-based timers,
+hrtimer uses a red-black tree for efficient management of large numbers of timers,
+an important advantage in hard real-time systems like vehicle control.
+
+A user can register an hrtimer callback to execute after a specified delay.
+The callback runs in the timer interrupt context, so only limited NuttX interfaces
+are available, such as ``mq_send()``, ``sigqueue()``, ``nxevent_post()``, or ``kill()``,
+to communicate with tasks.
+
+High-resolution timers (hrtimers) use a spinlock to protect internal timer data structures,
+allowing them to be safely accessed from interrupt context. This design makes hrtimers
+suitable for high-frequency timer operations.
+
+However, in SMP systems, a potential issue arises when a user cancels a timer that is currently
+executing: the timer instance may be freed prematurely while its callback is still running.
+To address this problem, a state machine is introduced in the hrtimer implementation:
+
+.. image:: hrtimer_state_machine.png
+   :alt: hrtimer state machine
+
+Users may call ``hrtimer_cancel_sync()`` to synchronously cancel a timer and wait until the
+timer becomes fully inactive. In contrast, ``hrtimer_cancel()`` is a non-blocking variant
+that returns immediately without waiting for the timer to stop executing.
+
+- :c:func:`hrtimer_init`
+- :c:func:`hrtimer_cancel`
+- :c:func:`hrtimer_cancel_sync`
+- :c:func:`hrtimer_start`
+- High-resolution Timer Callback
+
+.. c:function:: void hrtimer_init(FAR hrtimer_t *hrtimer, hrtentry_t func)
+
+  This function initializes a high-resolution timer instance.
+  Sets the expiration callback and its argument. The timer is
+  not started by this function.
+
+  :param hrtimer: Pointer to hrtimer instance
+  :param func: Expiration callback function
+
+  :return: None.
+
+  **POSIX Compatibility:** This is a NON-POSIX interface.
+
+.. c:function:: int hrtimer_cancel(FAR hrtimer_t *hrtimer)
+
+  If the timer is armed but has not yet expired, it will be removed from
+  the timer queue and the callback will not be invoked.
+
+  If the timer callback is currently executing, this function will mark
+  the timer as canceled and return immediately. The running callback is
+  allowed to complete, but it will not be invoked again.
+
+  This function is non-blocking and does not wait for a running callback
+  to finish.
+
+  :param hrtimer: Timer instance to cancel
+
+  :return: ``OK`` on success; negated errno on failure.
+
+  **POSIX Compatibility:** This is a NON-POSIX interface.
+
+.. c:function:: int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer)
+
+  Cancel a high-resolution timer and wait synchronously until the timer
+  becomes inactive.
+
+  This function first calls hrtimer_cancel() to request cancellation of
+  the timer.  If the timer callback is currently executing, this function
+  will wait until the callback has completed and the timer state has
+  transitioned to HRTIMER_STATE_INACTIVE.
+
+  This function may sleep and must not be called from interrupt context.
+
+  :param hrtimer: Timer instance to cancel
+
+  :return: ``OK`` on success; negated errno on failure.
+
+  **POSIX Compatibility:** This is a NON-POSIX interface.
+
+.. c:function:: int hrtimer_start(FAR hrtimer_t *hrtimer, \
+                                  hrtimer_entry_t func, \
+                                  uint64_t expired, \
+                                  enum hrtimer_mode_e mode)
+
+  This function starts a high-resolution timer in absolute or relative mode.
+
+  :param hrtimer: Timer instance to cancel
+  :param func: Expiration callback function
+  :param ns: Timer expiration in nanoseconds (absolute or relative)
+  :param mode: HRTIMER_MODE_ABS or HRTIMER_MODE_REL
+
+  :return: ``OK`` on success; negated errno on failure.
+
+  **POSIX Compatibility:** This is a NON-POSIX interface.
+
+.. c:type:: uint64_t (*hrtimer_entry_t)(FAR hrtimer_t *hrtimer, \
+                                        uint64_t expired)
+
+  **High-resolution Timer Callback**: when a hrtimer expires,
+  the callback function with this type is called.

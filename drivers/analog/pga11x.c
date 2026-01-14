@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/analog/pga11x.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -135,8 +137,8 @@ static void pga11x_lock(FAR struct spi_dev_s *spi)
 {
   spiinfo("Locking\n");
 
-  /* On SPI busses where there are multiple devices, it will be necessary to
-   * lock SPI to have exclusive access to the busses for a sequence of
+  /* On SPI buses where there are multiple devices, it will be necessary to
+   * lock SPI to have exclusive access to the buses for a sequence of
    * transfers. The bus should be locked before the chip is selected.
    *
    * This is a blocking call and will not return until we have exclusive
@@ -148,7 +150,7 @@ static void pga11x_lock(FAR struct spi_dev_s *spi)
 
   /* After locking the SPI bus, the we also need call the setfrequency,
    * setbits, and setmode methods to make sure that the SPI is properly
-   * configured for the device. If the SPI buss is being shared, then it may
+   * configured for the device. If the SPI bus is being shared, then it may
    * have been left in an incompatible state.
    */
 

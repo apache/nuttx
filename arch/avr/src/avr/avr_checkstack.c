@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/avr/src/avr/avr_checkstack.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -48,6 +50,30 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: avr_color_intstack
+ *
+ * Description:
+ *   Set the interrupt stack to a value so that later we can determine how
+ *   much stack space was used by interrupt handling logic
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+void avr_color_intstack(void)
+{
+  uint8_t *ptr = g_intstackalloc;
+  ssize_t size;
+
+  for (size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
+       size > 0;
+       size -= sizeof(uint8_t))
+    {
+      *ptr++ = STACK_COLOR;
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: avr_stack_check
@@ -142,17 +168,20 @@ size_t avr_stack_check(uintptr_t alloc, size_t size)
  *
  ****************************************************************************/
 
-size_t up_check_tcbstack(FAR struct tcb_s *tcb)
+size_t up_check_tcbstack(FAR struct tcb_s *tcb, size_t check_size)
 {
-  return avr_stack_check((uintptr_t)tcb->stack_base_ptr,
-                                    tcb->adj_stack_size);
+  return avr_stack_check((uintptr_t)tcb->stack_base_ptr, check_size);
 }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-size_t up_check_intstack(int cpu)
+size_t up_check_intstack(int cpu, size_t check_size)
 {
-  uintptr_t start = (uintptr_t)g_intstackalloc;
-  return avr_stack_check(start, CONFIG_ARCH_INTERRUPTSTACK & ~3);
+  if (check_size == 0)
+    {
+      check_size = CONFIG_ARCH_INTERRUPTSTACK & ~3;
+    }
+
+  return avr_stack_check((uintptr_t)g_intstackalloc, check_size);
 }
 #endif
 

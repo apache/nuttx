@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/phy62xx/pwrmgr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -430,7 +432,7 @@ void hal_pwrmgr_poweroff(pwroff_cfg_t *pcfg, uint8_t wakeup_pin_num)
    *    }
    */
 
-  /*     config reset casue as RSTC_OFF_MODE
+  /*     config reset cause as RSTC_OFF_MODE
    *     reset path walkaround dwc
    */
 

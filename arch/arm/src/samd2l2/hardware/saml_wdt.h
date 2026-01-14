@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samd2l2/hardware/saml_wdt.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -128,10 +130,10 @@
 
 /* Synchronization busy register */
 
-#define WDT_SYNCBUSY_ENABLE        (1 << 1)  /* Bit 1:  Enable syncrhonization busy */
+#define WDT_SYNCBUSY_ENABLE        (1 << 1)  /* Bit 1:  Enable synchronization busy */
 #define WDT_SYNCBUSY_WEN           (1 << 2)  /* Bit 2:  Window enable synchronization busy */
 #define WDT_SYNCBUSY_ALWAYSON      (1 << 3)  /* Bit 3:  Always-on synchronization busy */
-#define WDT_SYNCBUSY_CLEAR         (1 << 4)  /* Bit 4:  Clear syncrhonization busy */
+#define WDT_SYNCBUSY_CLEAR         (1 << 4)  /* Bit 4:  Clear synchronization busy */
 
 /* Clear register */
 

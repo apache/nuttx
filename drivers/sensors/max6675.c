@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/max6675.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,14 +51,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private
- ****************************************************************************/
-
 #define MAX6675_THREE_STATE   (1 << 0)
 #define MAX6675_DEV_ID        (1 << 1)
 #define MAX6675_OPEN_CIRCUIT  (1 << 2)
 #define MAX6675_TEMP_COUPLE   0x7ff8
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
 
 struct max6675_dev_s
 {

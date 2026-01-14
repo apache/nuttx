@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/tms570/launchxl-tms57004/scripts/flash-sram.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -19,7 +21,7 @@
  ****************************************************************************/
 
 /* The TMS570LS0432PZ has 384KB of FLASH beginning at address 0x0000:0000 and
- * 32Kb of SRAM beginining at 0x0800:0000
+ * 32Kb of SRAM beginning at 0x0800:0000
  */
 
 MEMORY
@@ -52,7 +54,7 @@ SECTIONS
     .init_section : {
         _sinit = ABSOLUTE(.);
         KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
-        KEEP(*(.init_array .ctors))
+        KEEP(*(.init_array EXCLUDE_FILE(*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o) .ctors))
         _einit = ABSOLUTE(.);
     } > flash
 

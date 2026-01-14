@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/can.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,153 +29,34 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_CAN_TXREADY
-#  include <nuttx/wqueue.h>
-#endif
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <stdint.h>
 
-#include <nuttx/queue.h>
-
-#ifdef CONFIG_NET_CAN
+#include <nuttx/can/can_common.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Ioctl Commands ***********************************************************/
+/* Special address description flags for the CAN_ID */
 
-/* Ioctl commands supported by the upper half CAN driver.
- *
- * CANIOC_RTR:
- *   Description:  Send the remote transmission request and wait for the
- *                 response.
- *   Argument:     A reference to struct canioc_rtr_s
- *
- * Ioctl commands that may or may not be supported by the lower half CAN
- * driver.
- *
- * CANIOC_ADD_STDFILTER:
- *   Description:    Add an address filter for a standard 11 bit address.
- *   Argument:       A reference to struct canioc_stdfilter_s
- *   Returned Value: A non-negative filter ID is returned on success.
- *                   Otherwise -1 (ERROR) is returned with the errno
- *                   variable set to indicate the nature of the error.
- *   Dependencies:   None
- *
- * CANIOC_ADD_EXTFILTER:
- *   Description:    Add an address filter for a extended 29 bit address.
- *   Argument:       A reference to struct canioc_extfilter_s
- *   Returned Value: A non-negative filter ID is returned on success.
- *                   Otherwise -1 (ERROR) is returned with the errno
- *                   variable set to indicate the nature of the error.
- *   Dependencies:   Requires CONFIG_CAN_EXTID=y
- *
- * CANIOC_DEL_STDFILTER:
- *   Description:    Remove an address filter for a standard 11 bit address.
- *   Argument:       The filter index previously returned by the
- *                   CANIOC_ADD_STDFILTER command
- *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
- *                   is returned with the errno variable set to indicate the
- *                   nature of the error.
- *   Dependencies:   None
- *
- * CANIOC_DEL_EXTFILTER:
- *   Description:    Remove an address filter for a standard 29 bit address.
- *   Argument:       The filter index previously returned by the
- *                   CANIOC_ADD_EXTFILTER command
- *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
- *                   is returned with the errno variable set to indicate the
- *                   nature of the error.
- *   Dependencies:   Requires CONFIG_CAN_EXTID=y
- *
- * CANIOC_GET_BITTIMING:
- *   Description:    Return the current bit timing settings
- *   Argument:       A pointer to a write-able instance of struct
- *                   canioc_bittiming_s in which current bit timing values
- *                   will be returned.
- *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
- *                   is returned with the errno variable set to indicate the
- *                   nature of the error.
- *   Dependencies:   None
- *
- * CANIOC_SET_BITTIMING:
- *   Description:    Set new current bit timing values
- *   Argument:       A pointer to a read-able instance of struct
- *                   canioc_bittiming_s in which the new bit timing values
- *                   are provided.
- *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
- *                   is returned with the errno variable set to indicate the
- *                   nature of the error.
- *   Dependencies:   None
- *
- * CANIOC_GET_CONNMODES:
- *   Description:    Get the current bus connection modes
- *   Argument:       A pointer to a write-able instance of struct
- *                   canioc_connmodes_s in which the new bus modes will be
- *                   returned.
- *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
- *                   is returned with the errno variable set to indicate the
- *                   nature of the error.
- *   Dependencies:   None
- *
- * CANIOC_SET_CONNMODES:
- *   Description:    Set new bus connection modes values
- *   Argument:       A pointer to a read-able instance of struct
- *                   canioc_connmodes_s in which the new bus modes are
- *                   provided.
- *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
- *                   is returned with the errno variable set to indicate the
- *                   nature of the error.
- *   Dependencies:   None
- *
- * CANIOC_BUSOFF_RECOVERY:
- *   Description:    Initiates the BUS-OFF recovery sequence
- *   Argument:       None
- *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
- *                   is returned with the errno variable set to indicate the
- *                   nature of the error.
- *   Dependencies:   None
- */
+#define CAN_EFF_FLAG 0x80000000  /* EFF/SFF is set in the MSB */
+#define CAN_RTR_FLAG 0x40000000  /* Remote transmission request */
+#define CAN_ERR_FLAG 0x20000000  /* Error message frame */
+#define CAN_EVT_FLAG 0x10000000  /* Lower_half use this flags to report state switch event */
 
-#define CANIOC_RTR                _CANIOC(1)
-#define CANIOC_GET_BITTIMING      _CANIOC(2)
-#define CANIOC_SET_BITTIMING      _CANIOC(3)
-#define CANIOC_ADD_STDFILTER      _CANIOC(4)
-#define CANIOC_ADD_EXTFILTER      _CANIOC(5)
-#define CANIOC_DEL_STDFILTER      _CANIOC(6)
-#define CANIOC_DEL_EXTFILTER      _CANIOC(7)
-#define CANIOC_GET_CONNMODES      _CANIOC(8)
-#define CANIOC_SET_CONNMODES      _CANIOC(9)
-#define CANIOC_BUSOFF_RECOVERY    _CANIOC(10)
+/* Valid bits in CAN ID for frame formats */
 
-#define CAN_FIRST                 0x0001         /* First common command */
-#define CAN_NCMDS                 10             /* Ten common commands */
+#define CAN_SFF_MASK 0x000007ff  /* Standard frame format (SFF) */
+#define CAN_EFF_MASK 0x1fffffff  /* Extended frame format (EFF) */
+#define CAN_ERR_MASK 0x1fffffff  /* Omit EFF, RTR, ERR flags */
 
-/* User defined ioctl commands are also supported. These will be forwarded
- * by the upper-half CAN driver to the lower-half CAN driver via the
- * co_ioctl()  method fo the CAN lower-half interface.
- * However, the lower-half driver must reserve a block of commands as follows
- * in order prevent IOCTL command numbers from overlapping.
- *
- * This is generally done as follows.  The first reservation for CAN driver A
- * would look like:
- *
- *   CAN_A_FIRST                (CAN_FIRST + CAN_NCMDS) <- First command
- *   CAN_A_NCMDS                42                      <- Number of commands
- *
- * IOCTL commands for CAN driver A would then be defined in a CAN A header
- * file like:
- *
- *   CANIOC_A_CMD1       _CANIOC(CAN_A_FIRST+0)
- *   CANIOC_A_CMD2       _CANIOC(CAN_A_FIRST+1)
- *   CANIOC_A_CMD3       _CANIOC(CAN_A_FIRST+2)
- *   ...
- *   CANIOC_A_CMD42      _CANIOC(CAN_A_FIRST+41)
- *
- * The next reservation would look like:
- *
- *   CAN_B_FIRST           (CAN_A_FIRST + CAN_A_NCMDS) <- Next command
- *   CAN_B_NCMDS           77                          <- Number of commands
- */
+#define CAN_SFF_ID_BITS 11
+#define CAN_EFF_ID_BITS 29
+
+#define CAN_MTU (sizeof(struct can_frame))
+#define CANFD_MTU (sizeof(struct canfd_frame))
 
 /* CAN payload length and DLC definitions according to ISO 11898-1 */
 
@@ -203,10 +86,58 @@
  * frames.
  */
 
-#define CANFD_BRS 0x01 /* bit rate switch (second bitrate for payload data) */
-#define CANFD_ESI 0x02 /* error state indicator of the transmitting node */
+#define CANFD_BRS 0x01 /* Bit rate switch (second bitrate for payload data) */
+#define CANFD_ESI 0x02 /* Error state indicator of the transmitting node */
+#define CANFD_FDF 0x04 /* Mark CAN FD for dual use of struct canfd_frame */
 
-#define CAN_INV_FILTER     0x20000000U /* to be set in can_filter.can_id */
+#define CAN_INV_FILTER 0x20000000u /* To be set in can_filter.can_id */
+
+/* PF_CAN protocols */
+
+#define CAN_RAW      1           /* RAW sockets */
+#define CAN_BCM      2           /* Broadcast Manager */
+#define CAN_TP16     3           /* VAG Transport Protocol v1.6 */
+#define CAN_TP20     4           /* VAG Transport Protocol v2.0 */
+#define CAN_MCNET    5           /* Bosch MCNet */
+#define CAN_ISOTP    6           /* ISO 15765-2 Transport Protocol */
+#define CAN_J1939    7           /* SAE J1939 */
+#define CAN_NPROTO   8
+
+#define SOL_CAN_BASE 100
+#define SOL_CAN_RAW  (SOL_CAN_BASE + CAN_RAW)
+
+/* CAN_RAW socket options */
+
+#define CAN_RAW_FILTER         (__SO_PROTOCOL + 0)
+                                 /* Set 0 .. n can_filter(s) */
+#define CAN_RAW_ERR_FILTER     (__SO_PROTOCOL + 1)
+                                 /* Set filter for error frames */
+#define CAN_RAW_LOOPBACK       (__SO_PROTOCOL + 2)
+                                 /* Local loopback (default:on) */
+#define CAN_RAW_RECV_OWN_MSGS  (__SO_PROTOCOL + 3)
+                                 /* Receive my own msgs (default:off) */
+#define CAN_RAW_FD_FRAMES      (__SO_PROTOCOL + 4)
+                                 /* Allow CAN FD frames (default:off) */
+#define CAN_RAW_JOIN_FILTERS   (__SO_PROTOCOL + 5)
+                                 /* All filters must match to trigger */
+#define CAN_RAW_TX_DEADLINE    (__SO_PROTOCOL + 6)
+                                 /* Abort frame when deadline passed */
+
+/* CAN filter support (Hardware level filtering) ****************************/
+
+/* Some CAN hardware supports a notion of prioritizing messages that match
+ * filters. Only two priority levels are currently supported and are encoded
+ * as defined below:
+ */
+
+#define CAN_MSGPRIO_LOW   0
+#define CAN_MSGPRIO_HIGH  1
+
+/* Filter type.  Not all CAN hardware will support all filter types. */
+
+#define CAN_FILTER_MASK   0  /* Address match under a mask */
+#define CAN_FILTER_DUAL   1  /* Dual address match */
+#define CAN_FILTER_RANGE  2  /* Match a range of addresses */
 
 /* CAN Error Indications ****************************************************/
 
@@ -283,20 +214,42 @@
 
 /* Data[4]: Error status of CAN-transceiver */
 
-#define CAN_ERR_TRX_UNSPEC       0x00     /* Unspecified error */
+#define CAN_ERR_TRX_UNSPEC             0x00 /* Unspecified error */
+#define CAN_ERR_TRX_CANH_NO_WIRE       0x04
+#define CAN_ERR_TRX_CANH_SHORT_TO_BAT  0x05
+#define CAN_ERR_TRX_CANH_SHORT_TO_VCC  0x06
+#define CAN_ERR_TRX_CANH_SHORT_TO_GND  0x07
+#define CAN_ERR_TRX_CANL_NO_WIRE       0x40
+#define CAN_ERR_TRX_CANL_SHORT_TO_BAT  0x50
+#define CAN_ERR_TRX_CANL_SHORT_TO_VCC  0x60
+#define CAN_ERR_TRX_CANL_SHORT_TO_GND  0x70
+#define CAN_ERR_TRX_CANL_SHORT_TO_CANH 0x80
+
+/* CAN state thresholds
+ *
+ * Error counter        Error state
+ * -----------------------------------
+ * 0 -  95              Error-active
+ * 96 - 127             Error-warning
+ * 128 - 255            Error-passive
+ * 256 and greater      Bus-off
+ */
+
+#define CAN_ERROR_WARNING_THRESHOLD 96
+#define CAN_ERROR_PASSIVE_THRESHOLD 128
+#define CAN_BUS_OFF_THRESHOLD       256
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-typedef FAR void *CAN_HANDLE;
-
-struct can_response_s
-{
-  sq_entry_t flink;
-
-  /* Message-specific data may follow */
-}; /* FIXME remove */
+/* Controller Area Network Identifier structure
+ *
+ * bit 0-28: CAN identifier (11/29 bit)
+ * bit 29: error message frame flag (0 = data frame, 1 = error message)
+ * bit 30: remote transmission request flag (1 = rtr frame)
+ * bit 31: frame format flag (0 = standard 11 bit, 1 = extended 29 bit)
+ */
 
 typedef uint32_t canid_t;
 
@@ -321,12 +274,12 @@ typedef uint32_t can_err_mask_t;
 
 struct can_frame
 {
-  canid_t can_id;   /* 32 bit CAN_ID + EFF/RTR/ERR flags */
-  uint8_t  can_dlc; /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
-  uint8_t  __pad;   /* padding */
-  uint8_t  __res0;  /* reserved / padding */
-  uint8_t  __res1;  /* reserved / padding */
-  uint8_t  data[CAN_MAX_DLEN] aligned_data(8);
+  canid_t can_id;  /* 32 bit CAN_ID + EFF/RTR/ERR flags */
+  uint8_t can_dlc; /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
+  uint8_t __pad;   /* padding */
+  uint8_t __res0;  /* reserved / padding */
+  uint8_t __res1;  /* reserved / padding */
+  uint8_t data[CAN_MAX_DLEN];
 };
 
 /* struct canfd_frame - CAN flexible data rate frame structure
@@ -345,11 +298,56 @@ struct canfd_frame
   uint8_t flags;   /* additional flags for CAN FD */
   uint8_t __res0;  /* reserved / padding */
   uint8_t __res1;  /* reserved / padding */
-  uint8_t data[CANFD_MAX_DLEN] aligned_data(8);
+  uint8_t data[CANFD_MAX_DLEN];
+};
+
+/* The sockaddr structure for CAN sockets
+ *
+ *   can_family:  Address family number AF_CAN.
+ *   can_ifindex: CAN network interface index.
+ *   can_addr:    Protocol specific address information
+ */
+
+struct sockaddr_can
+{
+  sa_family_t can_family;
+  int16_t     can_ifindex;
+  union
+  {
+    /* Transport protocol class address information */
+
+    struct
+    {
+      canid_t rx_id;
+      canid_t tx_id;
+    } tp;
+
+    /* J1939 address information */
+
+    struct
+    {
+      /* 8 byte name when using dynamic addressing */
+
+      uint64_t name;
+
+      /* pgn:
+       *   8 bit: PS in PDU2 case, else 0
+       *   8 bit: PF
+       *   1 bit: DP
+       *   1 bit: reserved
+       */
+
+      uint32_t pgn;
+
+      /* 1 byte address */
+
+      uint8_t addr;
+    } j1939;
+  } can_addr;
 };
 
 /* struct can_filter - CAN ID based filter in can_register().
- * can_id:   relevant bits of CAN ID which are not masked out.
+ * can_id:   Relevant bits of CAN ID which are not masked out.
  * can_mask: CAN mask (see description)
  *
  * Description:
@@ -385,5 +383,4 @@ extern "C"
 }
 #endif
 
-#endif /* CONFIG_CAN */
 #endif /* __INCLUDE_NUTTX_CAN_H */

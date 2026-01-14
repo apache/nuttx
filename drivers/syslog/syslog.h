@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/syslog/syslog.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,9 +49,12 @@ extern "C"
  * g_default_channel.
  */
 
-struct syslog_channel_s; /* Forward reference */
-EXTERN FAR struct syslog_channel_s *g_syslog_channel
-                                                [CONFIG_SYSLOG_MAX_CHANNELS];
+#ifdef CONFIG_SYSLOG
+EXTERN FAR syslog_channel_t *
+#ifndef CONFIG_SYSLOG_REGISTER
+const
+#endif
+g_syslog_channel[CONFIG_SYSLOG_MAX_CHANNELS];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -81,8 +86,8 @@ EXTERN FAR struct syslog_channel_s *g_syslog_channel
  *
  ****************************************************************************/
 
-FAR struct syslog_channel_s *syslog_dev_initialize(FAR const char *devpath,
-                                                   int oflags, int mode);
+FAR syslog_channel_t *syslog_dev_initialize(FAR const char *devpath,
+                                            int oflags, int mode);
 
 /****************************************************************************
  * Name: syslog_dev_uninitialize
@@ -100,7 +105,7 @@ FAR struct syslog_channel_s *syslog_dev_initialize(FAR const char *devpath,
  *
  ****************************************************************************/
 
-void syslog_dev_uninitialize(FAR struct syslog_channel_s *channel);
+void syslog_dev_uninitialize(FAR syslog_channel_t *channel);
 
 /****************************************************************************
  * Name: syslog_dev_channel
@@ -110,9 +115,10 @@ void syslog_dev_uninitialize(FAR struct syslog_channel_s *channel);
  *   CONFIG_SYSLOG_DEVPATH as the SYSLOG channel.
  *
  *   This tiny function is simply a wrapper around syslog_dev_initialize()
- *   and syslog_channel().  It calls syslog_dev_initialize() to configure
- *   the character device at CONFIG_SYSLOG_DEVPATH then calls
- *   syslog_channel() to use that device as the SYSLOG output channel.
+ *   and syslog_channel_register().  It calls syslog_dev_initialize() to
+ *   configure the character device at CONFIG_SYSLOG_DEVPATH then calls
+ *   syslog_channel_register() to use that device as the SYSLOG output
+ *   channel.
  *
  *   NOTE interrupt level SYSLOG output will be lost in this case unless
  *   the interrupt buffer is used.
@@ -126,7 +132,7 @@ void syslog_dev_uninitialize(FAR struct syslog_channel_s *channel);
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_CHAR
-FAR struct syslog_channel_s *syslog_dev_channel(void);
+FAR syslog_channel_t *syslog_dev_channel(void);
 #endif
 
 /****************************************************************************
@@ -137,9 +143,10 @@ FAR struct syslog_channel_s *syslog_dev_channel(void);
  *   SYSLOG channel.
  *
  *   This tiny function is simply a wrapper around syslog_dev_initialize()
- *   and syslog_channel().  It calls syslog_dev_initialize() to configure
- *   the character device at /dev/console then calls syslog_channel() to
- *   use that device as the SYSLOG output channel.
+ *   and syslog_channel_register().  It calls syslog_dev_initialize() to
+ *   configure the character device at /dev/console then calls
+ *   syslog_channel_register() to use that device as the SYSLOG output
+ *   channel.
  *
  *   NOTE interrupt level SYSLOG output will be lost in the general case
  *   unless the interrupt buffer is used.  As a special case:  If the serial
@@ -156,7 +163,7 @@ FAR struct syslog_channel_s *syslog_dev_channel(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_CONSOLE
-FAR struct syslog_channel_s *syslog_console_channel(void);
+FAR syslog_channel_t *syslog_console_channel(void);
 #endif
 
 /****************************************************************************
@@ -189,8 +196,7 @@ void syslog_register(void);
  *   ch - The character to add to the interrupt buffer (must be positive).
  *
  * Returned Value:
- *   Zero success, the character is echoed back to the caller.  A negated
- *   errno value is returned on any failure.
+ *   None
  *
  * Assumptions:
  *   Called only from interrupt handling logic; Interrupts will be disabled.
@@ -198,7 +204,7 @@ void syslog_register(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_INTBUFFER
-int syslog_add_intbuffer(int ch);
+void syslog_add_intbuffer(FAR const char *buffer, size_t buflen);
 #endif
 
 /****************************************************************************
@@ -212,8 +218,7 @@ int syslog_add_intbuffer(int ch);
  *   force   - Use the force() method of the channel vs. the putc() method.
  *
  * Returned Value:
- *   On success, the character is echoed back to the caller.  A negated
- *   errno value is returned on any failure.
+ *   None
  *
  * Assumptions:
  *   Interrupts may or may not be disabled.
@@ -221,8 +226,31 @@ int syslog_add_intbuffer(int ch);
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_INTBUFFER
-int syslog_flush_intbuffer(bool force);
+void syslog_flush_intbuffer(bool force);
 #endif
+
+/****************************************************************************
+ * Name: syslog_write_foreach
+ *
+ * Description:
+ *   This provides a default write method for syslog devices that do not
+ *   support multiple byte writes  This functions simply loops, outputting
+ *   one character at a time.
+ *
+ * Input Parameters:
+ *   buffer - The buffer containing the data to be output
+ *   buflen - The number of bytes in the buffer
+ *   force  - Use the force() method of the channel vs. the putc() method.
+ *
+ * Returned Value:
+ *   On success, the number of characters written is returned.  A negated
+ *   errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+ssize_t syslog_write_foreach(FAR const char *buffer,
+                             size_t buflen, bool force);
+#endif /* CONFIG_SYSLOG */
 
 #undef EXTERN
 #ifdef __cplusplus

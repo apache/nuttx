@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/inode/fs_inodereserve.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,6 +33,7 @@
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Data
@@ -48,7 +51,7 @@ static ino_t g_ino;
 
 static int inode_namelen(FAR const char *name)
 {
-  const char *tmp = name;
+  FAR const char *tmp = name;
   while (*tmp && *tmp != '/')
     {
       tmp++;
@@ -61,7 +64,7 @@ static int inode_namelen(FAR const char *name)
  * Name: inode_namecpy
  ****************************************************************************/
 
-static void inode_namecpy(char *dest, const char *src)
+static void inode_namecpy(FAR char *dest, FAR const char *src)
 {
   while (*src && *src != '/')
     {
@@ -77,31 +80,32 @@ static void inode_namecpy(char *dest, const char *src)
 
 static FAR struct inode *inode_alloc(FAR const char *name, mode_t mode)
 {
-  FAR struct inode *node;
+  FAR struct inode *inode;
   int namelen;
 
   namelen = inode_namelen(name);
-  node    = kmm_zalloc(FSNODE_SIZE(namelen));
-  if (node)
+  inode   = fs_heap_zalloc(FSNODE_SIZE(namelen));
+  if (inode)
     {
-      node->i_ino   = g_ino++;
+      inode->i_ino   = g_ino++;
+      atomic_set(&inode->i_crefs, 1);
 #ifdef CONFIG_PSEUDOFS_ATTRIBUTES
-      node->i_mode  = mode;
-      clock_gettime(CLOCK_REALTIME, &node->i_atime);
-      node->i_mtime = node->i_atime;
-      node->i_ctime = node->i_atime;
+      inode->i_mode  = mode;
+      clock_gettime(CLOCK_REALTIME, &inode->i_atime);
+      inode->i_mtime = inode->i_atime;
+      inode->i_ctime = inode->i_atime;
 #endif
-      inode_namecpy(node->i_name, name);
+      inode_namecpy(inode->i_name, name);
     }
 
-  return node;
+  return inode;
 }
 
 /****************************************************************************
  * Name: inode_insert
  ****************************************************************************/
 
-static void inode_insert(FAR struct inode *node,
+static void inode_insert(FAR struct inode *inode,
                          FAR struct inode *peer,
                          FAR struct inode *parent)
 {
@@ -111,9 +115,9 @@ static void inode_insert(FAR struct inode *node,
 
   if (peer)
     {
-      node->i_peer   = peer->i_peer;
-      node->i_parent = parent;
-      peer->i_peer   = node;
+      inode->i_peer   = peer->i_peer;
+      inode->i_parent = parent;
+      peer->i_peer    = inode;
     }
 
   /* Then it must go at the head of parent's list of children. */
@@ -121,9 +125,9 @@ static void inode_insert(FAR struct inode *node,
   else
     {
       DEBUGASSERT(parent != NULL);
-      node->i_peer    = parent->i_child;
-      node->i_parent  = parent;
-      parent->i_child = node;
+      inode->i_peer   = parent->i_child;
+      inode->i_parent = parent;
+      parent->i_child = inode;
     }
 }
 

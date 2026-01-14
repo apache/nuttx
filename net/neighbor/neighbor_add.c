@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/neighbor/neighbor_add.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -99,7 +101,7 @@ void neighbor_add(FAR struct net_driver_s *dev, FAR net_ipv6addr_t ipaddr,
         }
     }
 
-  /* When overwite old entry, need to notify RTM_DELNEIGH */
+  /* When overwrite old entry, need to notify RTM_DELNEIGH */
 
   if (!found && g_neighbors[oldest_ndx].ne_time != 0)
     {

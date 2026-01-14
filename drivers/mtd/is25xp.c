@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/mtd/is25xp.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -457,7 +459,7 @@ static void is25xp_waitwritecomplete(struct is25xp_dev_s *priv)
       if ((status & IS25_SR_WIP) != 0)
         {
           is25xp_unlock(priv->dev);
-          nxsig_usleep(1000);
+          nxsched_usleep(1000);
           is25xp_lock(priv->dev);
         }
     }

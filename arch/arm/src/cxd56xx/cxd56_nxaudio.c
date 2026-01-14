@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_nxaudio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -81,18 +83,14 @@
 /* Samplerates field is split into low and high byte */
 
 #ifdef CONFIG_AUDIO_CXD56_SRC
-#define CXD56_SUPP_RATES_L  (AUDIO_SAMP_RATE_8K  | AUDIO_SAMP_RATE_11K | \
-                             AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K | \
-                             AUDIO_SAMP_RATE_32K | AUDIO_SAMP_RATE_44K | \
-                             AUDIO_SAMP_RATE_48K)
-#define CXD56_SUPP_RATES_H  ((AUDIO_SAMP_RATE_96K  | AUDIO_SAMP_RATE_128K | \
-                              AUDIO_SAMP_RATE_192K) >> 8)
-#define CXD56_SUPP_RATES    (CXD56_SUPP_RATES_L | CXD56_SUPP_RATES_H)
+#define CXD56_SUPP_RATES  (AUDIO_SAMP_RATE_8K   | AUDIO_SAMP_RATE_11K | \
+                           AUDIO_SAMP_RATE_16K  | AUDIO_SAMP_RATE_22K | \
+                           AUDIO_SAMP_RATE_32K  | AUDIO_SAMP_RATE_44K | \
+                           AUDIO_SAMP_RATE_48K  | AUDIO_SAMP_RATE_96K | \
+                           AUDIO_SAMP_RATE_128K | AUDIO_SAMP_RATE_192K)
 #else
 /* No sample rate converter, only support system rate of 48kHz */
-#define CXD56_SUPP_RATES_L  AUDIO_SAMP_RATE_48K
-#define CXD56_SUPP_RATES_H  0x0
-#define CXD56_SUPP_RATES    (CXD56_SUPP_RATES_L | CXD56_SUPP_RATES_H)
+#define CXD56_SUPP_RATES  AUDIO_SAMP_RATE_48K
 #endif
 
 /* Mic setting definitions */
@@ -2096,15 +2094,10 @@ static int cxd56_power_on_micbias(struct cxd56_dev_s *dev)
 
   /* Set mic boot time */
 
-  if (clock_systime_timespec(&start) < 0)
-    {
-      dev->mic_boot_start = 0x0ull;
-    }
-  else
-    {
-      dev->mic_boot_start = (uint64_t)start.tv_sec * 1000 +
-                            (uint64_t)start.tv_nsec / 1000000;
-    }
+  clock_systime_timespec(&start);
+
+  dev->mic_boot_start = (uint64_t)start.tv_sec * 1000 +
+                        (uint64_t)start.tv_nsec / 1000000;
 
   return OK;
 }
@@ -2631,8 +2624,7 @@ static int cxd56_getcaps(struct audio_lowerhalf_s *lower, int type,
 
               /* Report supported output sample rates */
 
-              caps->ac_controls.b[0] = CXD56_SUPP_RATES_L;
-              caps->ac_controls.b[1] = CXD56_SUPP_RATES_H;
+              caps->ac_controls.hw[0] = CXD56_SUPP_RATES;
               break;
 
             default:
@@ -2652,8 +2644,7 @@ static int cxd56_getcaps(struct audio_lowerhalf_s *lower, int type,
 
               /* Report supported input sample rates */
 
-              caps->ac_controls.b[0] = CXD56_SUPP_RATES_L;
-              caps->ac_controls.b[1] = CXD56_SUPP_RATES_H;
+              caps->ac_controls.hw[0] = CXD56_SUPP_RATES;
               break;
 
             default:
@@ -2957,16 +2948,16 @@ static int cxd56_start(struct audio_lowerhalf_s *lower)
       if (priv->mic_boot_start != 0x0ull)
         {
           struct timespec end;
-          if (clock_systime_timespec(&end) == 0)
-            {
-              uint64_t time = (uint64_t)end.tv_sec * 1000 +
-                              (uint64_t)end.tv_nsec / 1000000 -
-                               priv->mic_boot_start;
 
-              if (time < CXD56_MIC_BOOT_WAIT)
-                {
-                  nxsig_usleep((CXD56_MIC_BOOT_WAIT - time) * 1000);
-                }
+          clock_systime_timespec(&end);
+
+          uint64_t time = (uint64_t)end.tv_sec * 1000 +
+                          (uint64_t)end.tv_nsec / 1000000 -
+                           priv->mic_boot_start;
+
+          if (time < CXD56_MIC_BOOT_WAIT)
+            {
+              nxsched_usleep((CXD56_MIC_BOOT_WAIT - time) * 1000);
             }
         }
     }

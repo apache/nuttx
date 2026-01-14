@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s3/esp32s3-lcd-ev/src/esp32s3_lcd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,7 +31,6 @@
 #include <debug.h>
 #include <assert.h>
 #include <sys/param.h>
-#include <unistd.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/video/fb.h>
@@ -613,7 +614,7 @@ static void lcd_initialize_spi(void)
 
 static void lcd_configure_display(void)
 {
-  /* Pull-up V-SYNC pin to start configurating LCD */
+  /* Pull-up V-SYNC pin to start configuring LCD */
 
   esp32s3_configgpio(CONFIG_ESP32S3_LCD_VSYNC_PIN, OUTPUT | PULLUP);
   esp32s3_gpiowrite(CONFIG_ESP32S3_LCD_VSYNC_PIN, 1);
@@ -630,7 +631,7 @@ static void lcd_configure_display(void)
 
   /* Wait until LCD is ready */
 
-  nxsig_usleep(120 * 1000);
+  nxsched_usleep(120 * 1000);
 
   /* Display on */
 
@@ -638,7 +639,7 @@ static void lcd_configure_display(void)
 
   /* Wait until LCD is on */
 
-  nxsig_usleep(20 * 1000);
+  nxsched_usleep(20 * 1000);
 }
 
 /****************************************************************************

@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/usb/usb.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -65,10 +67,35 @@
 #define MSBYTE(u16)                             ((u16) >> 8)     /* Get MS byte from uint16_t */
 #define LSBYTE(u16)                             ((u16) & 0xff)   /* Get LS byte from uint16_t */
 
-#define GETUINT16(p)                            ((uint16_t)((uint16_t)(p[1] << 8) | (uint16_t)p[0]))
-#define GETUINT32(p)                            ((uint32_t)((uint32_t)p[3] << 24) | \
-                                                           ((uint32_t)p[2] << 16) | \
-                                                           ((uint32_t)p[1] << 8) | (uint32_t)p[0])
+#define GETUINT16(p)                            ((uint16_t)(((uint16_t)(p)[1] << 8) | \
+                                                             (uint16_t)(p)[0]))
+
+#define PUTUINT16(p, v)                         do                                   \
+                                                  {                                  \
+                                                    uint8_t *__p;       \
+                                                     __p   = (FAR uint8_t *)(p);     \
+                                                    *__p++ = ((uint16_t)(v) & 0xff); \
+                                                    *__p   = ((uint16_t)(v) >> 8);   \
+                                                  }                                  \
+                                                while (0)
+
+/* All 32-bit values must be little-endian */
+
+#define GETUINT32(p)                            ((uint32_t)(((uint32_t)(p)[3] << 24) | \
+                                                            ((uint32_t)(p)[2] << 16) | \
+                                                            ((uint32_t)(p)[1] << 8)  | \
+                                                             (uint32_t)(p)[0]))
+
+#define PUTUINT32(p, v)                         do                                          \
+                                                  {                                         \
+                                                    uint8_t *__p;              \
+                                                     __p   = (FAR uint8_t *)(p);            \
+                                                    *__p++ = ((uint32_t)(v)        & 0xff); \
+                                                    *__p++ = ((uint32_t)(v) >> 8)  & 0xff;  \
+                                                    *__p++ = ((uint32_t)(v) >> 16) & 0xff;  \
+                                                    *__p   = ((uint32_t)(v) >> 24);         \
+                                                  }                                         \
+                                                while (0)
 
 /* USB directions (in endpoint addresses) */
 
@@ -173,6 +200,8 @@
 #define USB_DESC_TYPE_CSSTRING                  (0x23)
 #define USB_DESC_TYPE_CSINTERFACE               (0x24)
 #define USB_DESC_TYPE_CSENDPOINT                (0x25)
+#define USB_DESC_TYPE_ENDPOINT_COMPANION        (0x30)
+#define USB_DESC_TYPE_ISO_ENDPOINT_COMPANION    (0x31)
 
 /* Device and interface descriptor class codes */
 
@@ -227,6 +256,14 @@
 #  define USB_EP_ATTR_USAGE_IMPLICIT            (2 << USB_EP_ATTR_USAGE_SHIFT)
 #define USB_EP_ATTR_MAX_ADJUSTABLE              (1 << 7)
 
+/* Endpoint descriptor max packet size */
+
+#define USB_EP_MAX_PACKET_MASK                  (0x07ff)
+#define USB_EP_MAX_PACKET_MULT_SHIFT            (11)
+#define USB_EP_MAX_PACKET_MULT_MASK             (3 << USB_EP_MAX_PACKET_MULT_SHIFT)
+#define USB_EP_MAX_PACKET_MULT(m)               (((m) & USB_EP_MAX_PACKET_MULT_MASK) >> \
+                                                 USB_EP_MAX_PACKET_MULT_SHIFT)
+
 /* OTG Definitions */
 
 /* OTG SET FEATURE Constants */
@@ -242,10 +279,18 @@
 #define USB_SPEED_FULL                          2 /* USB 1.1 */
 #define USB_SPEED_HIGH                          3 /* USB 2.0 */
 #define USB_SPEED_VARIABLE                      4 /* Wireless USB 2.5 */
+#define USB_SPEED_SUPER                         5 /* usb 3.0 */
+#define USB_SPEED_SUPER_PLUS                    6 /* usb 3.1 */
 
 /* Maximum number of devices per controller */
 
 #define USB_MAX_DEVICES                         (127)
+
+/* Maximum burst number of super speed devices */
+
+#define USB_SS_INT_EP_MAXBURST                  (3)
+#define USB_SS_BULK_EP_MAXBURST                 (16)
+#define USB_SS_BULK_EP_MAXSTREAM                (16)
 
 /* Microsoft OS Descriptor specific values */
 
@@ -379,6 +424,35 @@ struct usb_audioepdesc_s
 };
 
 #define USB_SIZEOF_AUDIOEPDESC 9
+
+/* Super speed endpoint companion descriptor */
+
+struct usb_ss_epcompdesc_s
+{
+  uint8_t  len;
+  uint8_t  type;
+  uint8_t  mxburst;
+  uint8_t  attr;
+  uint8_t  wbytes[2];
+};
+
+#define USB_SIZEOF_SS_EPCOMPDESC 6
+
+/* Super speed endpoint descriptor */
+
+struct usb_ss_epdesc_s
+{
+  struct usb_epdesc_s epdesc;
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  struct usb_ss_epcompdesc_s epcompdesc;
+#endif
+};
+
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  #define USB_SIZEOF_SS_EPDESC 13
+#else
+  #define USB_SIZEOF_SS_EPDESC 7
+#endif
 
 /* Device qualifier descriptor */
 

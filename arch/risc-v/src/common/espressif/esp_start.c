@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/espressif/esp_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,8 +39,11 @@
 #include "esp_lowputc.h"
 #include "esp_start.h"
 
+#include "esp_rom_sys.h"
 #include "esp_clk_internal.h"
+#include "esp_private/rtc_clk.h"
 #include "esp_cpu.h"
+#include "esp_private/esp_mmu_map_private.h"
 #include "esp_private/brownout.h"
 #include "hal/wdt_hal.h"
 #include "hal/mmu_hal.h"
@@ -52,21 +57,25 @@
 #include "soc/reg_base.h"
 #include "spi_flash_mmap.h"
 #include "rom/cache.h"
+#include "soc/rtc.h"
+
+#include "bootloader_init.h"
 
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
-#include "bootloader_init.h"
 #include "bootloader_flash_priv.h"
 #include "esp_rom_uart.h"
-#include "esp_rom_sys.h"
 #include "esp_app_format.h"
 #endif
+
+#include "esp_private/startup_internal.h"
+#include "esp_private/spi_flash_os.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c)     riscv_lowputc(c)
+#  define showprogress(c)     esp_rom_printf(c)
 #else
 #  define showprogress(c)
 #endif
@@ -344,7 +353,7 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
   ets_printf("total segments stored %d\n", segments - 1);
 #endif
 
-  cache_hal_disable(CACHE_TYPE_ALL);
+  cache_hal_disable(CACHE_LL_LEVEL_EXT_MEM, CACHE_TYPE_ALL);
 
   /* Clear the MMU entries that are already set up,
    * so the new app only has the mappings it creates.
@@ -376,9 +385,42 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
 
   /* ------------------Enable Cache----------------------------------- */
 
-  cache_hal_enable(CACHE_TYPE_ALL);
+  cache_hal_enable(CACHE_LL_LEVEL_EXT_MEM, CACHE_TYPE_ALL);
 
   return (int)rc;
+}
+#endif
+
+/****************************************************************************
+ * Name: recalib_bbpll
+ *
+ * Description:
+ *   Workaround for bootloader calibration issues. This function is placed in
+ *   IRAM because disabling BBPLL may influence the cache.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_CHIP_ESP32C6) || defined(CONFIG_ARCH_CHIP_ESP32H2)
+static void IRAM_ATTR NOINLINE_ATTR recalib_bbpll(void)
+{
+    rtc_cpu_freq_config_t old_config;
+    rtc_clk_cpu_freq_get_config(&old_config);
+
+  if (old_config.source == SOC_CPU_CLK_SRC_PLL
+#ifdef CONFIG_ARCH_CHIP_ESP32H2
+      || old_config.source == SOC_CPU_CLK_SRC_FLASH_PLL
+#endif
+      )
+    {
+      rtc_clk_cpu_freq_set_xtal();
+      rtc_clk_cpu_freq_set_config(&old_config);
+    }
 }
 #endif
 
@@ -403,6 +445,8 @@ void __esp_start(void)
       ets_printf("Hardware init failed, aborting\n");
       while (true);
     }
+#else
+  bootloader_clear_bss_section();
 #endif
 
 #if defined(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT) || \
@@ -436,11 +480,25 @@ void __esp_start(void)
                            CACHE_DROM_MMU_MAX_END - cache_mmu_irom_size);
 #endif /* CONFIG_ESP_ROM_NEEDS_SET_CACHE_MMU_SIZE */
 
+#if CONFIG_ESP_SYSTEM_BBPLL_RECALIB
+  recalib_bbpll();
+#endif
+
 #ifdef CONFIG_ESPRESSIF_REGION_PROTECTION
   /* Configure region protection */
 
   esp_cpu_configure_region_protection();
 #endif
+
+  /* Configure the power related stuff. */
+
+  esp_rtc_init();
+
+  /* Configure SPI Flash chip state */
+
+  spi_flash_init_chip_state();
+
+  esp_mmu_map_init();
 
   /* Configures the CPU clock, RTC slow and fast clocks, and performs
    * RTC slow clock calibration.
@@ -468,22 +526,13 @@ void __esp_start(void)
   riscv_earlyserialinit();
 #endif
 
-  showprogress('A');
-
-  /* Clear .bss. We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
-
-  for (uint32_t *dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
-    {
-      *dest++ = 0;
-    }
+  showprogress("A");
 
   /* Setup the syscall table needed by the ROM code */
 
   esp_setup_syscall_table();
 
-  showprogress('B');
+  showprogress("B");
 
   /* The 2nd stage bootloader enables RTC WDT to monitor any issues that may
    * prevent the startup sequence from finishing correctly. Hence disable it
@@ -492,17 +541,21 @@ void __esp_start(void)
 
   wdt_hal_context_t rwdt_ctx = RWDT_HAL_CONTEXT_DEFAULT();
   wdt_hal_write_protect_disable(&rwdt_ctx);
-#if defined(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT) && defined(CONFIG_ESPRESSIF_ESP32H2)
   wdt_hal_set_flashboot_en(&rwdt_ctx, false);
-#endif
   wdt_hal_disable(&rwdt_ctx);
   wdt_hal_write_protect_enable(&rwdt_ctx);
+
+  showprogress("C");
 
   /* Initialize onboard resources */
 
   esp_board_initialize();
 
-  showprogress('C');
+  showprogress("D");
+
+  SYS_STARTUP_FN();
+
+  showprogress("E");
 
   /* Bring up NuttX */
 

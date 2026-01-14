@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/nat/nat.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -212,7 +214,7 @@ void ipv6_nat_inbound(FAR struct net_driver_s *dev,
  * Returned Value:
  *   Zero is returned if NAT is successfully applied, or is not enabled for
  *   this packet;
- *   A negated errno value is returned if error occured.
+ *   A negated errno value is returned if error occurred.
  *
  ****************************************************************************/
 
@@ -397,6 +399,26 @@ ipv6_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
                              const net_ipv6addr_t peer_ip,
                              uint16_t peer_port, bool try_create);
 #endif
+
+/****************************************************************************
+ * Name: nat_lock
+ *
+ * Description:
+ *   Lock the NAT lock.
+ *
+ ****************************************************************************/
+
+void nat_lock(void);
+
+/****************************************************************************
+ * Name: nat_unlock
+ *
+ * Description:
+ *   Unlock the NAT lock.
+ *
+ ****************************************************************************/
+
+void nat_unlock(void);
 
 #endif /* CONFIG_NET_NAT */
 #endif /* __NET_NAT_NAT_H */

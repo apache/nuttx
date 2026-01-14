@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/cxd32xx/hardware/cxd32_timer.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,7 +41,7 @@
 #define CXD32_TIMER_INTCLR      (0x000C)    /* Clear Interrupt register [WO] */
 #define CXD32_TIMER_RIS         (0x0010)    /* Raw Interrupt Status register [RO] */
 #define CXD32_TIMER_MIS         (0x0014)    /* Interrupt Status register [RO] */
-#define CXD32_TIMER_BGLOAD      (0x0018)    /* Backround Load register [RO] */
+#define CXD32_TIMER_BGLOAD      (0x0018)    /* Background Load register [RO] */
 #define CXD32_TIMER_ITCR        (0x0F00)    /* Integration Test Control register */
 #define CXD32_TIMER_ITOP        (0x0F04)    /* Integration Test Output register [WO] */
 #define CXD32_TIMER_PERIPHID0   (0x0FE0)    /* Peripheral ID0 register [RO] */

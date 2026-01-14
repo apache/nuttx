@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/cxd56xx/drivers/sensors/cxd5610_gnss.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1631,7 +1633,7 @@ static int cxd5610_gnss_finalize(struct cxd5610_gnss_dev_s *priv)
   /* Finalize CXD5610 device */
 
   cxd5610_gnss_core_finalize(priv);
-  nxsig_sleep(1);
+  nxsched_sleep(1);
 
   /* Terminate thread */
 

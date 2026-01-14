@@ -422,7 +422,7 @@ int psram_enable(int mode, int vaddrmode)
       psram_read_id(SPI1_NUM, &g_psram_id);
       if (!PSRAM_IS_VALID(g_psram_id))
         {
-          merr("PSRAM ID read error: 0x%08x", g_psram_id);
+          merr("PSRAM ID read error: 0x%08" PRIx32 "", g_psram_id);
           return -EFAULT;
         }
     }
@@ -564,4 +564,3 @@ int psram_get_available_size(uint32_t *out_size_bytes)
   *out_size_bytes = g_psram_size;
   return (g_psram_size ? OK : -EINVAL);
 }
-

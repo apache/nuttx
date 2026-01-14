@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/arm_virtpgaddr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,7 +35,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_virtpgaddr
+ * Name: up_addrenv_pa_to_va
  *
  * Description:
  *   Check if the physical address lies in the page pool and, if so
@@ -41,7 +43,7 @@
  *
  ****************************************************************************/
 
-uintptr_t arm_virtpgaddr(uintptr_t paddr)
+void *up_addrenv_pa_to_va(uintptr_t paddr)
 {
   /* REVISIT: Not implemented correctly.  The reverse lookup from physical
    * to virtual.  This will return a kernel accessible virtual address, but
@@ -52,10 +54,11 @@ uintptr_t arm_virtpgaddr(uintptr_t paddr)
 
   if (paddr >= CONFIG_ARCH_PGPOOL_PBASE && paddr < CONFIG_ARCH_PGPOOL_PEND)
     {
-      return paddr - CONFIG_ARCH_PGPOOL_PBASE + CONFIG_ARCH_PGPOOL_VBASE;
+      return (void *)(paddr - CONFIG_ARCH_PGPOOL_PBASE +
+                      CONFIG_ARCH_PGPOOL_VBASE);
     }
 
-  return 0;
+  return (void *)paddr;
 }
 
 #endif /* CONFIG_MM_PGALLOC */

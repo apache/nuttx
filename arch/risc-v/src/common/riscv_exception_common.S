@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_exception_common.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,6 +42,21 @@
 
 #include "riscv_macros.S"
 
+/*
+ * The riscv_extctx.S should be placed in the chip directory, for example:
+ *   arch/risc-v/src/qemu-rv/riscv_extctx.S
+ *
+ * These macros should be provided by the chip-specific code:
+ *   * save_extctx (extended context save)
+ *   * load_extctx (extended context restore)
+ *
+ * Refer to the riscv_macros.S for implementation details.
+ */
+
+#ifdef CONFIG_ARCH_RISCV_INTXCPT_EXTENSIONS
+#  include "riscv_extctx.S"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -55,7 +72,15 @@
 #  endif
 #endif
 
-/* Provide a default section for the exeception handler. */
+/* System calls require the per CPU scratch area */
+
+#ifdef CONFIG_LIB_SYSCALL
+#  ifndef CONFIG_RISCV_PERCPU_SCRATCH
+#    error "CONFIG_RISCV_PERCPU_SCRATCH is needed for handling system calls"
+#  endif
+#endif
+
+/* Provide a default section for the exception handler. */
 
 #ifndef EXCEPTION_SECTION
 #  define EXCEPTION_SECTION .text
@@ -81,6 +106,8 @@
   .align  8
 
 exception_common:
+  .cfi_sections .debug_frame
+  .cfi_startproc
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
   /* Take the kernel stack into use */
@@ -104,6 +131,12 @@ exception_common:
   addi       sp, sp, -XCPTCONTEXT_SIZE
   save_ctx   sp
 
+  /* Save the extended context */
+
+#ifdef CONFIG_ARCH_RISCV_INTXCPT_EXTENSIONS
+  save_extctx sp
+#endif
+
   csrr       s0, CSR_STATUS       /* s0=status */
   csrr       s1, CSR_EPC          /* s1=exception PC */
   csrr       s2, CSR_CAUSE        /* s2=cause */
@@ -120,6 +153,9 @@ exception_common:
   REGSTORE   s3, REG_SP(sp)
 
 #ifdef CONFIG_LIB_SYSCALL
+  csrr       tp, CSR_SCRATCH      /* Load kernel TP */
+  REGLOAD    tp, RISCV_PERCPU_TCB(tp)
+
   /* Check whether it is an exception or interrupt */
 
   blt        s2, x0, handle_irq   /* If cause < 0 it is interrupt */
@@ -144,9 +180,7 @@ exception_common:
   addi       s1, s1, 0x4          /* Must move EPC forward by +4 */
   REGSTORE   s1, REG_EPC(sp)      /* Updated EPC to user context */
 
-  csrr       tp, CSR_SCRATCH      /* Load kernel TP */
-  REGLOAD    tp, RISCV_PERCPU_TCB(tp)
-
+  mv         a7, sp               /* a7 = context */
   call       x1, dispatch_syscall /* Dispatch the system call */
 
 return_from_syscall:
@@ -168,6 +202,15 @@ handle_irq:
 
   mv         a0, s2               /* exception cause */
   mv         a1, sp               /* context = sp */
+  mv         fp, a1               /* Use fp to debug frame */
+  .cfi_def_cfa fp, 0              /* Register in fp, so we just set fp as frame */
+  .cfi_offset x2, 8               /* Toolchain not support macro, is REG_X2 * 4 */
+  .cfi_offset ra, 0               /* Toolchain not support macro, is REG_EPC * 4 */
+
+#ifdef CONFIG_SCHED_BACKTRACE
+  REGLOAD    ra, REG_EPC(sp)
+  REGLOAD    s0, REG_X8(sp)
+#endif
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
 
@@ -175,18 +218,36 @@ handle_irq:
 
   setintstack t0, t1
 
+  addi       sp, sp, -(INT_REG_SIZE * 2)
+  REGSTORE   ra, INT_REG_SIZE(sp)
+  REGSTORE   s0, 0(sp)
+  add        s0, sp, (INT_REG_SIZE * 2)
+
   /* Call interrupt handler in C */
 
   jal        x1, riscv_dispatch_irq
 
+  REGLOAD    ra, INT_REG_SIZE(sp)
+  REGLOAD    s0, 0(sp)
+  add        sp, sp, (INT_REG_SIZE * 2)
+
 #else
-  /* Reserve some space for CURRENT_REGS if interrupt stack disabled */
+  /* Reserve some space for current_regs if interrupt stack disabled */
+
+  addi       sp, sp, -(INT_REG_SIZE * 2)
+  REGSTORE   ra, INT_REG_SIZE(sp)
+  REGSTORE   s0, 0(sp)
+  add        s0, sp, (INT_REG_SIZE * 2)
 
   addi       sp, sp, -XCPTCONTEXT_SIZE
 
   /* Call interrupt handler in C */
 
   jal        x1, riscv_dispatch_irq
+
+  REGLOAD    ra, INT_REG_SIZE(sp)
+  REGLOAD    s0, 0(sp)
+  add        sp, sp, (INT_REG_SIZE * 2)
 
   /* Restore sp */
 
@@ -208,9 +269,8 @@ return_from_exception:
 #ifdef CONFIG_LIB_SYSCALL
   /* Store tcb to scratch register */
 
-  call       x1, nxsched_self
   csrr       s1, CSR_SCRATCH
-  REGSTORE   a0, RISCV_PERCPU_TCB(s1)
+  REGSTORE   tp, RISCV_PERCPU_TCB(s1)
 #endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
@@ -220,26 +280,65 @@ return_from_exception:
   and        s0, s0, s1
   bnez       s0, 1f
 
-  /* Set the next task's kernel stack to the scratch area */
+  /* Set the unwound kernel stack to the scratch area */
 
-  jal        x1, riscv_current_ksp
+  addi       a0, sp, XCPTCONTEXT_SIZE
   csrr       s0, CSR_SCRATCH
   REGSTORE   a0, RISCV_PERCPU_KSP(s0)
 
 1:
 #endif
 
+  /* Restore the extended context */
+
+#ifdef CONFIG_ARCH_RISCV_INTXCPT_EXTENSIONS
+  load_extctx sp
+#endif
+
   load_ctx   sp
 
-#ifdef CONFIG_ARCH_KERNEL_STACK
   REGLOAD    sp, REG_SP(sp)      /* restore original sp */
-#else
-  addi       sp, sp, XCPTCONTEXT_SIZE
-#endif
 
   /* Return from exception */
 
   ERET
+  .cfi_endproc
+
+/****************************************************************************
+ * Function: riscv_jump_to_user
+ *
+ * Description:
+ *  Routine to jump to user space, called when a user process is started and
+ *  the kernel is ready to give control to the user task in user space.
+ *
+ * riscv_jump_to_user(entry, a0, a1, a2, sp, regs)
+ *     entry:  process entry point
+ *     a0:     parameter 0 for process
+ *     a1:     parameter 1 for process
+ *     a2:     parameter 2 for process
+ *     sp:     user stack pointer
+ *     regs:   integer register save area to use
+ *
+ ****************************************************************************/
+
+  .section EXCEPTION_SECTION
+  .global riscv_jump_to_user
+
+riscv_jump_to_user:
+
+  csrc     CSR_STATUS, STATUS_IE
+  mv       sp, a5
+  REGSTORE a0, REG_EPC(sp)
+  REGSTORE a1, REG_A0(sp)
+  REGSTORE a2, REG_A1(sp)
+  REGSTORE a3, REG_A2(sp)
+  REGSTORE a4, REG_SP(sp)
+  csrr     a0, CSR_STATUS
+  li       a1, ~STATUS_PPP
+  and      a0, a0, a1
+  REGSTORE a0, REG_INT_CTX(sp)
+  mv       a0, sp
+  tail return_from_exception
 
 /*****************************************************************************
  *  Name: g_intstackalloc and g_intstacktop

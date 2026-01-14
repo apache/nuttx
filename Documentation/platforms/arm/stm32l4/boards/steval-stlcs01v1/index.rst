@@ -2,6 +2,8 @@
 ST STEVAL-STLCS01V1
 ===================
 
+.. tags:: chip:stm32, chip:stm32l4, chip:stm32l476
+
 This page discusses issues unique to NuttX configurations for the ST
 STEVAL-STLCS01V1 board (SensorTile module) from ST Micro based on
 STM32L476JG MCU. The board features:

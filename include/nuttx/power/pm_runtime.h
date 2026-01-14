@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/power/pm_runtime.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -68,6 +70,15 @@ struct pm_runtime_ops_s
  * Public Function Prototypes
  ****************************************************************************/
 
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 void pm_runtime_init(FAR struct pm_runtime_s *rpm, rpm_state_e state,
                      FAR struct pm_runtime_ops_s *rops);
 int pm_runtime_get(FAR struct pm_runtime_s *rpm);
@@ -75,5 +86,11 @@ int pm_runtime_put(FAR struct pm_runtime_s *rpm);
 int pm_runtime_put_autosuspend(FAR struct pm_runtime_s *rpm);
 void pm_runtime_set_autosuspend_delay(FAR struct pm_runtime_s *rpm,
                                       unsigned int delay);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
 #endif /* CONFIG_PM_RUNTIME */
 #endif /* __INCLUDE_NUTTX_POWER_PM_RUNTIME_H */

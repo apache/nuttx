@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/stm32_adc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,9 +42,29 @@
 
 /* Configuration ************************************************************/
 
-/* Timer ADC trigger not supported yet */
+/* Timer devices may be used for different purposes.  One special purpose is
+ * to control periodic ADC sampling.  If CONFIG_STM32F0L0G0_TIMn is defined
+ * then CONFIG_STM32F0L0G0_TIMn_ADC must also be defined to indicate that
+ * timer "n" is intended to be used for that purpose. Timers 1-6 and 8 may
+ * be used.
+ */
 
-#undef  ADC1_HAVE_TIMER
+#ifndef CONFIG_STM32F0L0G0_TIM1
+#  undef CONFIG_STM32F0L0G0_TIM1_ADC
+#  undef CONFIG_STM32F0L0G0_TIM1_ADC1
+#endif
+#ifndef CONFIG_STM32F0L0G0_TIM2
+#  undef CONFIG_STM32F0L0G0_TIM2_ADC
+#  undef CONFIG_STM32F0L0G0_TIM2_ADC1
+#endif
+#ifndef CONFIG_STM32F0L0G0_TIM3
+#  undef CONFIG_STM32F0L0G0_TIM3_ADC
+#  undef CONFIG_STM32F0L0G0_TIM3_ADC1
+#endif
+#ifndef CONFIG_STM32F0L0G0_TIM15
+#  undef CONFIG_STM32F0L0G0_TIM15_ADC
+#  undef CONFIG_STM32F0L0G0_TIM15_ADC1
+#endif
 
 /* Up to 1 ADC interfaces are supported */
 
@@ -63,6 +85,46 @@
 #  define ADC1_HAVE_DMA 1
 #else
 #  undef  ADC1_HAVE_DMA
+#endif
+
+/* Timer configuration:  If a timer trigger is specified, then get
+ * information about the timer.
+ */
+
+#if defined(CONFIG_STM32F0L0G0_TIM1_ADC1)
+#    define ADC1_HAVE_TIMER           1
+#    define ADC1_TIMER_BASE           STM32_TIM1_BASE
+#    define ADC1_TIMER_PCLK_FREQUENCY STM32_APB2_TIM1_CLKIN
+#elif defined(CONFIG_STM32F0L0G0_TIM2_ADC1)
+#    define ADC1_HAVE_TIMER           1
+#    define ADC1_TIMER_BASE           STM32_TIM2_BASE
+#    define ADC1_TIMER_PCLK_FREQUENCY STM32_APB1_TIM2_CLKIN
+#elif defined(CONFIG_STM32F0L0G0_TIM3_ADC1)
+#    define ADC1_HAVE_TIMER           1
+#    define ADC1_TIMER_BASE           STM32_TIM3_BASE
+#    define ADC1_TIMER_PCLK_FREQUENCY STM32_APB1_TIM3_CLKIN
+#elif defined(CONFIG_STM32F0L0G0_TIM15_ADC1)
+#    define ADC1_HAVE_TIMER           1
+#    define ADC1_TIMER_BASE           STM32_TIM15_BASE
+#    define ADC1_TIMER_PCLK_FREQUENCY STM32_APB1_TIM15_CLKIN
+#else
+#    undef  ADC1_HAVE_TIMER
+#endif
+
+#ifdef ADC1_HAVE_TIMER
+#  ifndef CONFIG_STM32F0L0G0_ADC1_SAMPLE_FREQUENCY
+#    error "CONFIG_STM32F0L0G0_ADC1_SAMPLE_FREQUENCY not defined"
+#  endif
+#  ifndef CONFIG_STM32F0L0G0_ADC1_TIMTRIG
+#    error "CONFIG_STM32F0L0G0_ADC1_TIMTRIG not defined"
+#    warning "Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO 5:TRGO2"
+#  endif
+#endif
+
+#if defined(ADC1_HAVE_TIMER)
+#  define ADC_HAVE_TIMER 1
+#else
+#  undef ADC_HAVE_TIMER
 #endif
 
 /* EXTSEL */
@@ -92,8 +154,15 @@
 #  define ADC1_EXTSEL_T2TRGO  ADC12_CFGR1_EXTSEL_TRG2
 #  define ADC1_EXTSEL_T3TRGO  ADC12_CFGR1_EXTSEL_TRG3
 #  define ADC1_EXTSEL_T15TRGO ADC12_CFGR1_EXTSEL_TRG4
-#  define ADC1_EXTSEL_T6TRGO  ADC12_CFGR1_EXTSEL_TRG5
-                              /* TRG6 reserved */
+                              /* TRG5 and TRG6 reserved */
+#  define ADC1_EXTSEL_EXTI11  ADC12_CFGR1_EXTSEL_TRG7
+#elif defined(CONFIG_STM32F0L0G0_STM32C0)
+#  define ADC1_EXTSEL_T1TRGO2 ADC12_CFGR1_EXTSEL_TRG0
+#  define ADC1_EXTSEL_T1CC4   ADC12_CFGR1_EXTSEL_TRG1
+#  define ADC1_EXTSEL_T2TRGO  ADC12_CFGR1_EXTSEL_TRG2
+#  define ADC1_EXTSEL_T3TRGO  ADC12_CFGR1_EXTSEL_TRG3
+#  define ADC1_EXTSEL_T15TRGO ADC12_CFGR1_EXTSEL_TRG4
+                              /* TRG5 and TRG6 reserved */
 #  define ADC1_EXTSEL_EXTI11  ADC12_CFGR1_EXTSEL_TRG7
 #else
 #  error
@@ -101,7 +170,68 @@
 
 /* EXTSEL configuration *****************************************************/
 
-/* TODO */
+/* NOTE:
+ * this configuration if used only if CONFIG_STM32F0L0G0_TIMx_ADCy is
+ * selected.
+ * You can still connect the ADC with a timer trigger using the
+ * CONFIG_STM32F0L0G0_ADCx_EXTSEL option.
+ */
+
+#if defined(CONFIG_STM32F0L0G0_TIM1_ADC1)
+#  if CONFIG_STM32F0L0G0_ADC1_TIMTRIG == 3
+#    define ADC1_EXTSEL_VALUE ADC1_EXTSEL_T1CC4
+#  elif CONFIG_STM32F0L0G0_ADC1_TIMTRIG == 4
+#    define ADC1_EXTSEL_VALUE ADC1_EXTSEL_T1TRGO
+#  elif CONFIG_STM32F0L0G0_ADC1_TIMTRIG == 5
+#    define ADC1_EXTSEL_VALUE ADC1_EXTSEL_T1TRGO2
+#  else
+#    error "CONFIG_STM32F0L0G0_ADC1_TIMTRIG is out of range"
+#  endif
+#elif defined(CONFIG_STM32F0L0G0_TIM2_ADC1)
+#  if CONFIG_STM32F0L0G0_ADC1_TIMTRIG == 3
+#    define ADC1_EXTSEL_VALUE ADC1_EXTSEL_T2CC4
+#  elif CONFIG_STM32F0L0G0_ADC1_TIMTRIG == 4
+#    define ADC1_EXTSEL_VALUE ADC1_EXTSEL_T2TRGO
+#  else
+#    error "CONFIG_STM32F0L0G0_ADC1_TIMTRIG is out of range"
+#  endif
+#elif defined(CONFIG_STM32F0L0G0_TIM3_ADC1)
+#  if CONFIG_STM32F0L0G0_ADC1_TIMTRIG == 4
+#    define ADC1_EXTSEL_VALUE ADC1_EXTSEL_T3TRGO
+#  else
+#    error "CONFIG_STM32F0L0G0_ADC1_TIMTRIG is out of range"
+#  endif
+#elif defined(CONFIG_STM32F0L0G0_TIM15_ADC1)
+#  if CONFIG_STM32F0L0G0_ADC1_TIMTRIG == 4
+#    define ADC1_EXTSEL_VALUE ADC1_EXTSEL_T15TRGO
+#  else
+#    error "CONFIG_STM32F0L0G0_ADC1_TIMTRIG is out of range"
+#  endif
+#elif defined(CONFIG_STM32F0L0G0_TIM21_ADC1)
+#  if CONFIG_STM32F0L0G0_ADC1_TIMTRIG == 1
+#    define ADC1_EXTSEL_VALUE ADC1_EXTSEL_T21CC2
+#  elif CONFIG_STM32F0L0G0_ADC1_TIMTRIG == 4
+#    define ADC1_EXTSEL_VALUE ADC1_EXTSEL_T21TRGO
+#  else
+#    error "CONFIG_STM32F0L0G0_ADC1_TIMTRIG is out of range"
+#  endif
+#endif
+
+/* Regular channels external trigger support */
+
+#ifdef ADC1_EXTSEL_VALUE
+#  define ADC1_HAVE_EXTCFG  1
+#  define ADC1_EXTCFG_VALUE (ADC1_EXTSEL_VALUE | ADC_EXTREG_EXTEN_DEFAULT)
+#elif defined(CONFIG_STM32F0L0G0_ADC1_EXTSEL)
+#  define ADC1_HAVE_EXTCFG  1
+#  define ADC1_EXTCFG_VALUE 0
+#else
+#  undef ADC1_HAVE_EXTCFG
+#endif
+
+#if defined(ADC1_HAVE_EXTCFG)
+#  define ADC_HAVE_EXTCFG
+#endif
 
 /* ADC interrupts ***********************************************************/
 
@@ -196,30 +326,11 @@ enum stm32_adc_resoluton_e
 
 #ifdef CONFIG_STM32F0L0G0_ADC_CHANGE_SAMPLETIME
 
-/* Channel and sample time pair */
-
-typedef struct adc_channel_s
-{
-  uint8_t channel:5;
-
-  /* Sampling time individually for each channel.
-   * It differs between families
-   */
-
-  uint8_t sample_time:3;
-} adc_channel_t;
-
-/* This structure will be used while setting channels to specified by the
- * "channel-sample time" pairs' values
- */
-
 struct adc_sample_time_s
 {
-  adc_channel_t *channel;                /* Array of channels */
-  uint8_t        channels_nbr:5;         /* Number of channels in array */
-  bool           all_same:1;             /* All channels will get the
-                                          * same value of the sample time */
-  uint8_t        all_ch_sample_time:3;   /* Sample time for all channels */
+  uint8_t smp1;     /* Sample time for channels with SMPSEL bit = 0 */
+  uint8_t smp2;     /* Sample time for channels with SMPSEL bit = 1 */
+  uint32_t smpsel;  /* Bitmask for selecting which channels use SMP2 */
 };
 #endif /* CONFIG_STM32F0L0G0_ADC_CHANGE_SAMPLETIME */
 

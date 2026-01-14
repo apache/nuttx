@@ -17,7 +17,7 @@ Supported Segger drivers:
 Segger SystemView
 =================
 
-Steps to enable SystemView support:
+1. Steps to enable SystemView support:
 
 #. Make sure your architecture supports a high-performance counter.
    In most cases it will be:
@@ -62,3 +62,14 @@ Steps to enable SystemView support:
 
    In case SystemView returns buffer overflow errors, you should increase
    ``CONFIG_NOTE_RTT_BUFFER_SIZE_UP``.
+
+2. Use SystemView for heap tracing:
+
+Refer to example configuration at ``stm32f429i-disco/configs/systemview``.
+Make sure that ``CONFIG_SCHED_INSTRUMENTATION_HEAP`` is enabled.
+
+Example of screenshot from SystemView:
+
+.. image:: sysview.png
+   :width: 800px
+   :align: center

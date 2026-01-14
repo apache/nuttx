@@ -23,7 +23,7 @@ just run ``nxcodec -h``::
  [-i | --infile]  Input filename for M2M devices
  [-o | --outfile] Outputs stream to filename
 
-By default, it is the decodeing mode, with a default parameter size of
+By default, it is the decoding mode, with a default parameter size of
 640x480, input format of H264, and output format of YUV420. The ``-i``
 parameter corresponds to the input parameter before it, and the ``-i``
 parameter corresponds to the output parameter after it.

@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/bluetooth/bluetooth_sendmsg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -81,9 +83,9 @@ struct bluetooth_sendto_s
  * Name: bluetooth_sendto_eventhandler
  ****************************************************************************/
 
-static uint16_t bluetooth_sendto_eventhandler(FAR struct net_driver_s *dev,
-                                               FAR void *pvpriv,
-                                               uint16_t flags)
+static uint32_t bluetooth_sendto_eventhandler(FAR struct net_driver_s *dev,
+                                              FAR void *pvpriv,
+                                              uint32_t flags)
 {
   FAR struct radio_driver_s *radio;
   FAR struct bluetooth_sendto_s *pstate;
@@ -108,7 +110,7 @@ static uint16_t bluetooth_sendto_eventhandler(FAR struct net_driver_s *dev,
   pstate = pvpriv;
   radio  = (FAR struct radio_driver_s *)dev;
 
-  ninfo("flags: %04x sent: %zd\n", flags, pstate->is_sent);
+  ninfo("flags: %" PRIx32 " sent: %zd\n", flags, pstate->is_sent);
 
   if (pstate != NULL && (flags & BLUETOOTH_POLL) != 0)
     {
@@ -300,7 +302,7 @@ static ssize_t bluetooth_sendto(FAR struct socket *psock,
    * because we don't want anything to happen until we are ready.
    */
 
-  net_lock();
+  conn_dev_lock(&conn->bc_conn, &radio->r_dev);
   memset(&state, 0, sizeof(struct bluetooth_sendto_s));
   nxsem_init(&state.is_sem, 0, 0); /* Doesn't really fail */
 
@@ -336,19 +338,21 @@ static ssize_t bluetooth_sendto(FAR struct socket *psock,
         {
           /* Set up the callback in the connection */
 
-          state.is_cb->flags = PKT_POLL;
+          state.is_cb->flags = BLUETOOTH_POLL;
           state.is_cb->priv  = (FAR void *)&state;
           state.is_cb->event = bluetooth_sendto_eventhandler;
 
           /* Notify the device driver that new TX data is available. */
 
-          netdev_txnotify_dev(&radio->r_dev);
+          netdev_txnotify_dev(&radio->r_dev, BLUETOOTH_POLL);
 
           /* Wait for the send to complete or an error to occur.
-           * net_sem_wait will also terminate if a signal is received.
+           * conn_dev_sem_timedwait will also terminate if a signal is
+           * received.
            */
 
-          ret = net_sem_wait(&state.is_sem);
+          ret = conn_dev_sem_timedwait(&state.is_sem, true, UINT_MAX,
+                                       &conn->bc_conn, &radio->r_dev);
 
           /* Make sure that no further events are processed */
 
@@ -357,7 +361,7 @@ static ssize_t bluetooth_sendto(FAR struct socket *psock,
     }
 
   nxsem_destroy(&state.is_sem);
-  net_unlock();
+  conn_dev_unlock(&conn->bc_conn, &radio->r_dev);
 
   /* Check for a errors, Errors are signaled by negative errno values
    * for the send length
@@ -368,9 +372,9 @@ static ssize_t bluetooth_sendto(FAR struct socket *psock,
       return state.is_sent;
     }
 
-  /* If net_sem_wait failed, then we were probably reawakened by a signal.
-   * In this case, net_sem_wait will have returned negated errno
-   * appropriately.
+  /* If conn_dev_sem_timedwait failed, then we were probably reawakened by
+   * a signal. In this case, conn_dev_sem_timedwait will have returned
+   * negated errno appropriately.
    */
 
   if (ret < 0)
@@ -384,7 +388,7 @@ static ssize_t bluetooth_sendto(FAR struct socket *psock,
 
 err_with_net:
   nxsem_destroy(&state.is_sem);
-  net_unlock();
+  conn_dev_unlock(&conn->bc_conn, &radio->r_dev);
 
   return ret;
 }

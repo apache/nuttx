@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/icmp/icmp_recvmsg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,7 @@
 
 #include "devif/devif.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
 #include "icmp/icmp.h"
 
 #ifdef CONFIG_NET_ICMP_SOCKET
@@ -83,14 +86,14 @@ struct icmp_recvfrom_s
  *
  ****************************************************************************/
 
-static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
-                                      FAR void *pvpriv, uint16_t flags)
+static uint32_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
+                                      FAR void *pvpriv, uint32_t flags)
 {
   FAR struct icmp_recvfrom_s *pstate = pvpriv;
   FAR struct socket *psock;
   FAR struct ipv4_hdr_s *ipv4;
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   if (pstate != NULL)
     {
@@ -294,6 +297,11 @@ ssize_t icmp_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Some sanity checks */
 
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
+
   DEBUGASSERT(buf != NULL);
 
   if (len < ICMP_HDRLEN)
@@ -313,15 +321,14 @@ ssize_t icmp_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
         }
     }
 
-  net_lock();
-
   conn = psock->s_conn;
+  dev = conn->dev;
+
+  conn_dev_lock(&conn->sconn, dev);
   if (psock->s_type != SOCK_RAW)
     {
       /* Get the device that was used to send the ICMP request. */
 
-      dev = conn->dev;
-      DEBUGASSERT(dev != NULL);
       if (dev == NULL)
         {
           ret = -EPROTO;
@@ -367,12 +374,13 @@ ssize_t icmp_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
           state.recv_cb->event = recvfrom_eventhandler;
 
           /* Wait for either the response to be received or for timeout to
-           * occur. net_sem_timedwait will also terminate if a signal is
+           * occur. conn_dev_sem_timedwait will also terminate if a signal is
            * received.
            */
 
-          ret = net_sem_timedwait(&state.recv_sem,
-                              _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
+          ret = conn_dev_sem_timedwait(&state.recv_sem, true,
+                                       _SO_TIMEOUT(conn->sconn.s_rcvtimeo),
+                                       &conn->sconn, dev);
           if (ret < 0)
             {
               state.recv_result = ret;
@@ -419,7 +427,7 @@ errout:
         }
     }
 
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, dev);
 
   return ret;
 }

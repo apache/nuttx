@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/udp/udp_recvfrom.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,6 +39,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/udp.h>
+#include <nuttx/tls.h>
 #include <netinet/in.h>
 
 #include "netdev/netdev.h"
@@ -437,12 +440,12 @@ static void udp_terminate(FAR struct udp_recvfrom_s *pstate, int result)
  *
  ****************************************************************************/
 
-static uint16_t udp_eventhandler(FAR struct net_driver_s *dev,
-                                 FAR void *pvpriv, uint16_t flags)
+static uint32_t udp_eventhandler(FAR struct net_driver_s *dev,
+                                 FAR void *pvpriv, uint32_t flags)
 {
   FAR struct udp_recvfrom_s *pstate = pvpriv;
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 
@@ -559,7 +562,7 @@ static void udp_recvfrom_initialize(FAR struct udp_conn_s *conn,
  *   Evaluate the result of the recv operations
  *
  * Input Parameters:
- *   result   The result of the net_sem_timedwait operation
+ *   result   The result of the conn_dev_sem_timedwait operation
  *            (may indicate EINTR)
  *   pstate   A pointer to the state structure to be initialized
  *
@@ -585,8 +588,8 @@ static ssize_t udp_recvfrom_result(int result, struct udp_recvfrom_s *pstate)
       return pstate->ir_result;
     }
 
-  /* If net_sem_timedwait failed, then we were probably reawakened by a
-   * signal. In this case, net_sem_timedwait will have returned negated
+  /* If conn_dev_sem_timedwait failed, then we were probably reawakened by a
+   * signal. In this case, conn_dev_sem_timedwait will have returned negated
    * errno appropriately.
    */
 
@@ -597,6 +600,57 @@ static ssize_t udp_recvfrom_result(int result, struct udp_recvfrom_s *pstate)
 
   return pstate->ir_recvlen;
 }
+
+/****************************************************************************
+ * Name: udp_notify_recvcpu
+ *
+ * Description:
+ *   This function will check current cpu id with conn->rcvcpu, if
+ *   not same, then use netdev_notify_recvcpu to notify the new cpu id
+ *
+ * Input Parameters:
+ *   conn    - A reference to UDP connection structure.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   conn is not NULL.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_RSS
+static void udp_notify_recvcpu(FAR struct udp_conn_s *conn)
+{
+  int cpu;
+
+  if (!conn)
+    {
+      return;
+    }
+
+  cpu = this_cpu();
+  if (cpu != conn->rcvcpu)
+    {
+      if (conn->domain == PF_INET)
+        {
+          netdev_notify_recvcpu(conn->dev, cpu, conn->domain,
+                                &(conn->u.ipv4.laddr), conn->lport,
+                                &(conn->u.ipv4.raddr), conn->rport);
+        }
+      else
+        {
+          netdev_notify_recvcpu(conn->dev, cpu, conn->domain,
+                                &(conn->u.ipv6.laddr), conn->lport,
+                                &(conn->u.ipv6.raddr), conn->rport);
+        }
+
+      conn->rcvcpu = cpu;
+    }
+}
+#else
+#  define udp_notify_recvcpu(c)
+#endif /* CONFIG_NETDEV_RSS */
 
 /****************************************************************************
  * Public Functions
@@ -625,17 +679,31 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
 {
   FAR struct udp_conn_s *conn = psock->s_conn;
   FAR struct net_driver_s *dev;
+  struct udp_callback_s info;
   struct udp_recvfrom_s state;
-  int ret;
+  ssize_t ret;
 
   /* Perform the UDP recvfrom() operation */
+
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
 
   /* Initialize the state structure.  This is done with the network locked
    * because we don't want anything to happen until we are ready.
    */
 
-  net_lock();
   udp_recvfrom_initialize(conn, msg, &state, flags);
+
+  /* Get the device that will handle the packet transfers.  This may be
+   * NULL if the UDP socket is bound to INADDR_ANY.  In that case, no
+   * NETDEV_DOWN notifications will be received.
+   */
+
+  dev = udp_find_laddr_device(conn);
+
+  conn_dev_lock(&conn->sconn, dev);
 
   /* Copy the read-ahead data from the packet */
 
@@ -675,13 +743,6 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
 
   else if (state.ir_recvlen <= 0)
     {
-      /* Get the device that will handle the packet transfers.  This may be
-       * NULL if the UDP socket is bound to INADDR_ANY.  In that case, no
-       * NETDEV_DOWN notifications will be received.
-       */
-
-      dev = udp_find_laddr_device(conn);
-
       /* Set up the callback in the connection */
 
       state.ir_cb = udp_callback_alloc(dev, conn);
@@ -693,13 +754,25 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
           state.ir_cb->priv  = (FAR void *)&state;
           state.ir_cb->event = udp_eventhandler;
 
-          /* Wait for either the receive to complete or for an error/timeout
-           * to occur.  net_sem_timedwait will also terminate if a signal is
-           * received.
+          /* Push a cancellation point onto the stack.  This will be
+           * called if the thread is canceled.
            */
 
-          ret = net_sem_timedwait(&state.ir_sem,
-                              _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
+          info.dev  = dev;
+          info.conn = conn;
+          info.udp_cb = state.ir_cb;
+          info.sem = &state.ir_sem;
+          tls_cleanup_push(tls_get_info(), udp_callback_cleanup, &info);
+
+          /* Wait for either the receive to complete or for an error/timeout
+           * to occur.  conn_dev_sem_timedwait will also terminate if a
+           * signal is received.
+           */
+
+          ret = conn_dev_sem_timedwait(&state.ir_sem, true,
+                                       _SO_TIMEOUT(conn->sconn.s_rcvtimeo),
+                                       &conn->sconn, dev);
+          tls_cleanup_pop(tls_get_info(), 0);
           if (ret == -ETIMEDOUT)
             {
               ret = -EAGAIN;
@@ -716,7 +789,9 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
         }
     }
 
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, dev);
+  udp_notify_recvcpu(conn);
+
   udp_recvfrom_uninitialize(&state);
   return ret;
 }

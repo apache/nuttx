@@ -161,7 +161,7 @@ Sample Code to Mount the ROMFS Filesystem
 
      /* Use the minor number to create a name for the ROM disk block device */
 
-     snprintf(devname, 32, "/dev/ram%d", minor);
+     snprintf(devname, sizeof(devname), "/dev/ram%d", minor);
 
      /* Mount the ROMFS file system */
 

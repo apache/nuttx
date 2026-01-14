@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/timers/capture.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,6 +29,9 @@
 
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/signal.h>
+
+#include <nuttx/signal.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -34,18 +39,144 @@
 
 /* IOCTL Commands ***********************************************************/
 
+/* Command:     CAPIOC_DUTYCYCLE
+ * Description: Get the pwm duty from the capture.
+ * Arguments:   int8_t pointer to the location to return the duty.
+ * Return:      Zero (OK) on success.  Minus one will be returned on failure
+ *              with the errno value set appropriately.
+ */
+
 #define CAPIOC_DUTYCYCLE _CAPIOC(1)
+
+/* Command:     CAPIOC_FREQUENCE
+ * Description: Get the pulse frequency from the capture.
+ * Arguments:   int32_t pointer to the location to return the frequency.
+ * Return:      Zero (OK) on success.  Minus one will be returned on failure
+ *              with the errno value set appropriately.
+ */
+
 #define CAPIOC_FREQUENCE _CAPIOC(2)
+
+/* Command:     CAPIOC_EDGES
+ * Description: Get the pwm edges from the capture.
+ * Arguments:   int32_t pointer to the location to return the edges.
+ * Return:      Zero (OK) on success.  Minus one will be returned on failure
+ *              with the errno value set appropriately.
+ */
+
+#define CAPIOC_EDGES     _CAPIOC(3)
+
+/* Command:     CAPIOC_ALL
+ * Description: Get the pwm duty, pulse frequency, pwm edges, from
+ *              the capture.
+ * Arguments:   A reference to struct cap_all_s.
+ * Return:      Zero (OK) on success.  Minus one will be returned on failure
+ *              with the errno value set appropriately.
+ */
+
+#define CAPIOC_ALL       _CAPIOC(4)
+
+/* Command:     CAPIOC_PULSES
+ * Description: Read pulse count value.
+ * Arguments:   Int pointer to the location to return the count value.
+ * Return:      OK on success; ERROR on failure.
+ */
+
+#define CAPIOC_PULSES    _CAPIOC(5)
+
+/* Command:     CAPIOC_CLR_CNT
+ * Description: Clear pulse count value. Stop counting and then starting
+ *              back holds previous count value.
+ * Arguments:   None.
+ * Return:      OK on success; ERROR on failure.
+ */
+
+#define CAPIOC_CLR_CNT   _CAPIOC(6)
+
+/* Command:     CAPIOC_FILTER
+ * Description: Configures glitch filter.
+ * Arguments:   uint32_t for glitch filter value in ns
+ *              or 0 for disable.
+ * Return:      OK on success; ERROR on failure.
+ */
+
+#define CAPIOC_FILTER    _CAPIOC(7)
+
+/* Command:     CAPIOC_HANDLER
+ * Description: Set user function on event callback.
+ * Arguments:   xcpt_t type for callback function or NULL
+ * Return:      OK on success; ERROR on failure.
+ */
+
+#define CAPIOC_HANDLER   _CAPIOC(8)
+
+/* Command:     CAPIOC_ADD_WP
+ * Description: Add wacthpoint to unit.
+ * Arguments:   Int value to watch.
+ * Return:      OK on success; ERROR on failure.
+ */
+
+#define CAPIOC_ADD_WP    _CAPIOC(9)
+
+/* Command:     CAPIOC_REGISTER
+ * Description: Register capture event notification.
+ * Arguments:   A reference to struct cap_notify_s.
+ * Return:      OK on success; ERROR on failure.
+ */
+
+#define CAPIOC_REGISTER  _CAPIOC(10)
+
+/* Command:     CAPIOC_UNREGISTER
+ * Description: Unregister capture event notification.
+ * Arguments:   Int value for capture channel.
+ * Return:      OK on success; ERROR on failure.
+ */
+
+#define CAPIOC_UNREGISTER _CAPIOC(11)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
+struct cap_all_s
+{
+  uint32_t freq;
+  uint32_t edges;
+  uint8_t  duty;
+};
+
+struct cap_lowerhalf_s;
+#ifdef CONFIG_CAPTURE_NOTIFY
+
+/* Capture type */
+
+enum cap_type_e
+{
+  CAP_TYPE_RISING,
+  CAP_TYPE_FALLING,
+  CAP_TYPE_BOTH,
+};
+
+/* Capture notify information, used to cmd:CAPIOC_REGISTER */
+
+struct cap_notify_s
+{
+  struct sigevent event; /* The signal to be sent */
+  int chan;              /* Capture channel */
+  enum cap_type_e type;  /* Capture edge type */
+  FAR void *ptr;         /* User data pointer */
+};
+
+/* Capture edge interrupt notification callback */
+
+typedef CODE void (*capture_notify_t)(FAR struct cap_lowerhalf_s *lower,
+                                      FAR void *priv);
+#endif
+
 /* This structure provides the "lower-half" driver operations available to
  * the "upper-half" driver.
  */
 
-struct cap_lowerhalf_s;
 struct cap_ops_s
 {
   /* Required methods *******************************************************/
@@ -63,10 +194,32 @@ struct cap_ops_s
   CODE int (*getduty)(FAR struct cap_lowerhalf_s *lower,
                       FAR uint8_t *duty);
 
-  /* Get the result pwm capture frequence value */
+  /* Get the result pwm capture frequency value */
 
   CODE int (*getfreq)(FAR struct cap_lowerhalf_s *lower,
                       FAR uint32_t *freq);
+
+  /* Get the result pwm capture edges value */
+
+  CODE int (*getedges)(FAR struct cap_lowerhalf_s *lower,
+                       FAR uint32_t *edges);
+
+  /* Lower-half logic may support platform-specific ioctl commands */
+
+  CODE int (*ioctl)(FAR struct cap_lowerhalf_s *dev,
+                    int cmd, unsigned long arg);
+
+#ifdef CONFIG_CAPTURE_NOTIFY
+  /* Bind the capture edge interrupt notification callback */
+
+  CODE int (*bind)(FAR struct cap_lowerhalf_s *lower,
+                   enum cap_type_e type, capture_notify_t cb,
+                   FAR void *priv);
+
+  /* Un-Bind the capture edge interrupt notification callback */
+
+  CODE int (*unbind)(FAR struct cap_lowerhalf_s *lower);
+#endif
 };
 
 /* This structure provides the publicly visible representation of the
@@ -119,6 +272,30 @@ extern "C"
 
 int cap_register(FAR const char *devpath,
                  FAR struct cap_lowerhalf_s *lower);
+
+int cap_register_multiple(FAR const char *devpath,
+                          FAR struct cap_lowerhalf_s **lower, int n);
+
+/****************************************************************************
+ * Name: fake_capture_initialize
+ *
+ * Description:
+ *   This function is called by board-specific logic to initialize
+ *   fake capture.
+ *
+ * Input Parameters:
+ *   channel - The capture channel number to initialize.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.  The following
+ *   possible error values may be returned (most are returned by
+ *   register_driver()):
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FAKE_CAPTURE
+int fake_capture_initialize(int channels);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/kinetis/freedom-k66f/src/freedom-k66f.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -43,6 +45,11 @@
 #define HAVE_AUTOMOUNTER 1
 #define HAVE_SPI         1
 #define HAVE_USBDEV      1
+
+#undef HAVE_LEDS
+#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
+#  define HAVE_LEDS 1
+#endif
 
 #if defined(CONFIG_KINETIS_RTC)
 #define HAVE_RTC_DRIVER  1
@@ -283,7 +290,7 @@ int k66_bringup(void);
  * Name: k66_sdhc_initialize
  *
  * Description:
- *   Inititialize the SDHC SD card slot
+ *   Initialize the SDHC SD card slot
  *
  ****************************************************************************/
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/esp32/hardware/esp32_ledc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -90,7 +92,7 @@
 /* LEDC_DUTY_HSCH0 : R/W ;bitpos:[24:0] ;default: 25'h0 ; */
 
 /* Description: The register is used to control output duty.
- * When hstimerx(x=[0 3]) choosed by high speed channel0
+ * When hstimerx(x=[0 3]) chosen by high speed channel0
  * has reached reg_lpoint_hsch0 the output signal changes to low.
  * reg_lpoint_hsch0=(reg_hpoint_hsch0[19:0]+reg_duty_hsch0[24:4]) (1)
  * reg_lpoint_hsch0=(reg_hpoint_hsch0[19:0]+reg_duty_hsch0[24:4] + 1) (2)
@@ -232,7 +234,7 @@
 /* LEDC_DUTY_HSCH1 : R/W ;bitpos:[24:0] ;default: 25'h0 ; */
 
 /* Description: The register is used to control output duty.
- * When hstimerx(x=[0 3]) choosed by high speed channel1 has reached
+ * When hstimerx(x=[0 3]) chosen by high speed channel1 has reached
  * reg_lpoint_hsch1 the output signal changes to low.
  * reg_lpoint_hsch1=(reg_hpoint_hsch1[19:0]+reg_duty_hsch1[24:4]) (1)
  * reg_lpoint_hsch1=(reg_hpoint_hsch1[19:0]+reg_duty_hsch1[24:4] + 1) (2)
@@ -375,7 +377,7 @@
 /* LEDC_DUTY_HSCH2 : R/W ;bitpos:[24:0] ;default: 25'h0 ; */
 
 /* Description: The register is used to control output duty.
- * When hstimerx(x=[0 3]) choosed by high speed channel2 has reached
+ * When hstimerx(x=[0 3]) chosen by high speed channel2 has reached
  * reg_lpoint_hsch2 the output signal changes to low.
  * reg_lpoint_hsch2=(reg_hpoint_hsch2[19:0]+reg_duty_hsch2[24:4]) (1)
  * reg_lpoint_hsch2=(reg_hpoint_hsch2[19:0]+reg_duty_hsch2[24:4] + 1) (2)
@@ -518,7 +520,7 @@
 /* LEDC_DUTY_HSCH3 : R/W ;bitpos:[24:0] ;default: 25'h0 ; */
 
 /* Description: The register is used to control output duty.
- * When hstimerx(x=[0 3]) choosed by high speed channel3 has reached
+ * When hstimerx(x=[0 3]) chosen by high speed channel3 has reached
  * reg_lpoint_hsch3 the output signal changes to low.
  * reg_lpoint_hsch3=(reg_hpoint_hsch3[19:0]+reg_duty_hsch3[24:4]) (1)
  * reg_lpoint_hsch3=(reg_hpoint_hsch3[19:0]+reg_duty_hsch3[24:4] + 1) (2)
@@ -662,7 +664,7 @@
 /* LEDC_DUTY_HSCH4 : R/W ;bitpos:[24:0] ;default: 25'h0 ; */
 
 /* Description: The register is used to control output duty.
- * When hstimerx(x=[0 3]) choosed by high speed channel4 has reached
+ * When hstimerx(x=[0 3]) chosen by high speed channel4 has reached
  * reg_lpoint_hsch4 the output signal changes to low.
  * reg_lpoint_hsch4=(reg_hpoint_hsch4[19:0]+reg_duty_hsch4[24:4]) (1)
  * reg_lpoint_hsch4=(reg_hpoint_hsch4[19:0]+reg_duty_hsch4[24:4] + 1) (2)
@@ -805,7 +807,7 @@
 /* LEDC_DUTY_HSCH5 : R/W ;bitpos:[24:0] ;default: 25'h0 ; */
 
 /* Description: The register is used to control output duty.
- * When hstimerx(x=[0 3]) choosed by high speed channel5 has reached
+ * When hstimerx(x=[0 3]) chosen by high speed channel5 has reached
  * reg_lpoint_hsch5 the output signal changes to low.
  * reg_lpoint_hsch5=(reg_hpoint_hsch5[19:0]+reg_duty_hsch5[24:4]) (1)
  * reg_lpoint_hsch5=(reg_hpoint_hsch5[19:0]+reg_duty_hsch5[24:4] + 1) (2)
@@ -949,7 +951,7 @@
 /* LEDC_DUTY_HSCH6 : R/W ;bitpos:[24:0] ;default: 25'h0 ; */
 
 /* Description: The register is used to control output duty.
- * When hstimerx(x=[0 3]) choosed by high speed channel6 has reached
+ * When hstimerx(x=[0 3]) chosen by high speed channel6 has reached
  * reg_lpoint_hsch6 the output signal changes to low.
  * reg_lpoint_hsch6=(reg_hpoint_hsch6[19:0]+reg_duty_hsch6[24:4]) (1)
  * reg_lpoint_hsch6=(reg_hpoint_hsch6[19:0]+reg_duty_hsch6[24:4] + 1) (2)
@@ -1093,7 +1095,7 @@
 /* LEDC_DUTY_HSCH7 : R/W ;bitpos:[24:0] ;default: 25'h0 ; */
 
 /* Description: The register is used to control output duty.
- * When hstimerx(x=[0 3]) choosed by high speed channel7 has reached
+ * When hstimerx(x=[0 3]) chosen by high speed channel7 has reached
  * reg_lpoint_hsch7 the output signal changes to low.
  * reg_lpoint_hsch7=(reg_hpoint_hsch7[19:0]+reg_duty_hsch7[24:4]) (1)
  * reg_lpoint_hsch7=(reg_hpoint_hsch7[19:0]+reg_duty_hsch7[24:4] + 1) (2)
@@ -1248,7 +1250,7 @@
 /* LEDC_DUTY_LSCH0 : R/W ;bitpos:[24:0] ;default: 25'h0 ; */
 
 /* Description: The register is used to control output duty.
- * When lstimerx(x=[0 3]) choosed by low speed channel0 has reached
+ * When lstimerx(x=[0 3]) chosen by low speed channel0 has reached
  * reg_lpoint_lsch0 the output signal changes to low.
  * reg_lpoint_lsch0=(reg_hpoint_lsch0[19:0]+reg_duty_lsch0[24:4]) (1)
  * reg_lpoint_lsch0=(reg_hpoint_lsch0[19:0]+reg_duty_lsch0[24:4] + 1) (2)
@@ -1404,7 +1406,7 @@
 /* LEDC_DUTY_LSCH1 : R/W ;bitpos:[24:0] ;default: 25'h0 ; */
 
 /* Description: The register is used to control output duty.
- * When lstimerx(x=[0 3]) choosed by low speed channel1 has reached
+ * When lstimerx(x=[0 3]) chosen by low speed channel1 has reached
  * reg_lpoint_lsch1 the output signal changes to low.
  * reg_lpoint_lsch1=(reg_hpoint_lsch1[19:0]+reg_duty_lsch1[24:4]) (1)
  * reg_lpoint_lsch1=(reg_hpoint_lsch1[19:0]+reg_duty_lsch1[24:4] + 1) (2)
@@ -1559,7 +1561,7 @@
 /* LEDC_DUTY_LSCH2 : R/W ;bitpos:[24:0] ;default: 25'h0 ; */
 
 /* Description: The register is used to control output duty.
- * When lstimerx(x=[0 3]) choosed by low speed channel2 has reached
+ * When lstimerx(x=[0 3]) chosen by low speed channel2 has reached
  * reg_lpoint_lsch2 the output signal changes to low.
  * reg_lpoint_lsch2=(reg_hpoint_lsch2[19:0]+reg_duty_lsch2[24:4]) (1)
  * reg_lpoint_lsch2=(reg_hpoint_lsch2[19:0]+reg_duty_lsch2[24:4] + 1) (2)
@@ -1714,7 +1716,7 @@
 /* LEDC_DUTY_LSCH3 : R/W ;bitpos:[24:0] ;default: 25'h0 ; */
 
 /* Description: The register is used to control output duty.
- * When lstimerx(x=[0 3]) choosed by low speed channel3 has reached
+ * When lstimerx(x=[0 3]) chosen by low speed channel3 has reached
  * reg_lpoint_lsch3 the output signal changes to low.
  * reg_lpoint_lsch3=(reg_hpoint_lsch3[19:0]+reg_duty_lsch3[24:4]) (1)
  * reg_lpoint_lsch3=(reg_hpoint_lsch3[19:0]+reg_duty_lsch3[24:4] + 1) (2)
@@ -1869,7 +1871,7 @@
 /* LEDC_DUTY_LSCH4 : R/W ;bitpos:[24:0] ;default: 25'h0 ; */
 
 /* Description: The register is used to control output duty.
- * When lstimerx(x=[0 3]) choosed by low speed channel4 has reached
+ * When lstimerx(x=[0 3]) chosen by low speed channel4 has reached
  * reg_lpoint_lsch4 the output signal changes to low.
  * reg_lpoint_lsch4=(reg_hpoint_lsch4[19:0]+reg_duty_lsch4[24:4]) (1)
  * reg_lpoint_lsch4=(reg_hpoint_lsch4[19:0]+reg_duty_lsch4[24:4] +1) (2)
@@ -2024,7 +2026,7 @@
 /* LEDC_DUTY_LSCH5 : R/W ;bitpos:[24:0] ;default: 25'h0 ; */
 
 /* Description: The register is used to control output duty.
- * When lstimerx(x=[0 3]) choosed by low speed channel5 has reached
+ * When lstimerx(x=[0 3]) chosen by low speed channel5 has reached
  * reg_lpoint_lsch5 the output signal changes to low.
  * reg_lpoint_lsch5=(reg_hpoint_lsch5[19:0]+reg_duty_lsch5[24:4]) (1)
  * reg_lpoint_lsch5=(reg_hpoint_lsch5[19:0]+reg_duty_lsch5[24:4] + 1) (2)
@@ -2179,7 +2181,7 @@
 /* LEDC_DUTY_LSCH6 : R/W ;bitpos:[24:0] ;default: 25'h0 ; */
 
 /* Description: The register is used to control output duty.
- * When lstimerx(x=[0 3]) choosed by low speed channel6 has reached
+ * When lstimerx(x=[0 3]) chosen by low speed channel6 has reached
  * reg_lpoint_lsch6 the output signal changes to low.
  * reg_lpoint_lsch6=(reg_hpoint_lsch6[19:0]+reg_duty_lsch6[24:4]) (1)
  * reg_lpoint_lsch6=(reg_hpoint_lsch6[19:0]+reg_duty_lsch6[24:4] + 1) (2)
@@ -2334,7 +2336,7 @@
 /* LEDC_DUTY_LSCH7 : R/W ;bitpos:[24:0] ;default: 25'h0 ; */
 
 /* Description: The register is used to control output duty.
- * When lstimerx(x=[0 3]) choosed by low speed channel7 has reached
+ * When lstimerx(x=[0 3]) chosen by low speed channel7 has reached
  * reg_lpoint_lsch7 the output signal changes to low.
  * reg_lpoint_lsch7=(reg_hpoint_lsch7[19:0]+reg_duty_lsch7[24:4]) (1)
  * reg_lpoint_lsch7=(reg_hpoint_lsch7[19:0]+reg_duty_lsch7[24:4] + 1) (2)

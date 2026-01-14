@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/dlfcn/lib_dlsymtab.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,7 +29,7 @@
 #include <dlfcn.h>
 #include <errno.h>
 
-#include <nuttx/lib/modlib.h>
+#include <nuttx/lib/elf.h>
 
 /****************************************************************************
  * Public Functions
@@ -71,7 +73,7 @@ int dlsymtab(FAR const struct symtab_s *symtab, int nsymbols)
    * the module library.
    */
 
-  modlib_setsymtab(symtab, nsymbols);
+  libelf_setsymtab(symtab, nsymbols);
   return OK;
 #endif
 }

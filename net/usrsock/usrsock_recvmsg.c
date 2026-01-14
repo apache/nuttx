@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/usrsock/usrsock_recvmsg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -43,8 +45,8 @@
  * Private Functions
  ****************************************************************************/
 
-static uint16_t recvfrom_event(FAR struct net_driver_s *dev,
-                               FAR void *pvpriv, uint16_t flags)
+static uint32_t recvfrom_event(FAR struct net_driver_s *dev,
+                               FAR void *pvpriv, uint32_t flags)
 {
   FAR struct usrsock_data_reqstate_s *pstate = pvpriv;
   FAR struct usrsock_conn_s *conn = pstate->reqstate.conn;
@@ -220,6 +222,11 @@ ssize_t usrsock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   socklen_t outaddrlen = 0;
   ssize_t ret;
 
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
+
   if (fromlen)
     {
       if (*fromlen > 0 && from == NULL)
@@ -230,7 +237,7 @@ ssize_t usrsock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       addrlen = *fromlen;
     }
 
-  net_lock();
+  usrsock_lock();
 
   if (conn->state == USRSOCK_CONN_STATE_UNINITIALIZED ||
       conn->state == USRSOCK_CONN_STATE_ABORTED)
@@ -323,8 +330,8 @@ ssize_t usrsock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
           /* Wait for receive-avail (or abort, or timeout, or signal). */
 
-          ret = net_sem_timedwait(&state.reqstate.recvsem,
-                              _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
+          ret = usrsock_sem_timedwait(&state.reqstate.recvsem, true,
+                                      _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
           usrsock_teardown_data_request_callback(&state);
           if (ret < 0)
             {
@@ -340,7 +347,7 @@ ssize_t usrsock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                 }
               else
                 {
-                  nerr("net_sem_timedwait errno: %zd\n", ret);
+                  nerr("usrsock_sem_timedwait errno: %zd\n", ret);
                   DEBUGPANIC();
                 }
 
@@ -396,7 +403,7 @@ ssize_t usrsock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
         {
           /* Wait for completion of request. */
 
-          net_sem_wait_uninterruptible(&state.reqstate.recvsem);
+          usrsock_sem_timedwait(&state.reqstate.recvsem, false, UINT_MAX);
           ret = state.reqstate.result;
 
           DEBUGASSERT(ret <= (ssize_t)len);
@@ -428,7 +435,7 @@ ssize_t usrsock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   while (ret == -EAGAIN);
 
 errout_unlock:
-  net_unlock();
+  usrsock_unlock();
 
   if (fromlen)
     {

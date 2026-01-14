@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_DEBUG_OPT_UNUSED_SECTIONS is not set
 # CONFIG_DISABLE_ENVIRON is not set
 # CONFIG_NSH_DISABLEBG is not set
 # CONFIG_NSH_DISABLE_IFCONFIG is not set

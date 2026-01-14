@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/rpmsg/rpmsg_ping.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,7 +41,7 @@ struct rpmsg_ping_s
 {
   int  times;
   int  len;
-  int  ack;
+  int  cmd;
   int  sleep; /* unit: ms */
 };
 

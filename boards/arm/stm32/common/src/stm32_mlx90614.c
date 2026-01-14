@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/common/src/stm32_mlx90614.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -78,7 +80,7 @@ int board_mlx90614_initialize(int devno, int busno)
 
   /* Then register the Infrared Thermometer sensor */
 
-  snprintf(devpath, 12, "/dev/therm%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/therm%d", devno);
   ret = mlx90614_register(devpath, i2c, MLX90614_ADDRESS);
   if (ret < 0)
     {

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/i2c/i2c_bitbang.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,6 +48,7 @@ struct i2c_bitbang_dev_s
 {
   struct i2c_master_s i2c;
   struct i2c_bitbang_lower_dev_s *lower;
+  spinlock_t lock;
 
 #ifndef CONFIG_I2C_BITBANG_NO_DELAY
   int32_t delay;
@@ -114,7 +117,7 @@ static int i2c_bitbang_transfer(FAR struct i2c_master_s *dev,
 
   /* Lock to enforce timings */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
 
   for (i = 0; i < count; i++)
     {
@@ -243,7 +246,7 @@ out:
   i2c_bitbang_set_scl(priv, true, false);
   i2c_bitbang_set_sda(priv, true);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return ret;
 }
@@ -389,6 +392,7 @@ FAR struct i2c_master_s *i2c_bitbang_initialize(
   dev->i2c.ops = &g_i2c_ops;
   dev->lower = lower;
   dev->lower->ops->initialize(dev->lower);
+  spin_lock_init(&dev->lock);
 
   return &dev->i2c;
 }

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/sim/sim/sim/src/sim_zoneinfo.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -113,7 +115,7 @@ int sim_zoneinfo(int minor)
 
   /* Use the minor number to create a name for the ROM disk block device */
 
-  snprintf(devname, 32, "/dev/ram%d", minor);
+  snprintf(devname, sizeof(devname), "/dev/ram%d", minor);
 
   /* Mount the ROMFS file system */
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/stm32_pwr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,16 +27,16 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
 /* This file is only a thin shell that includes the proper PWR implementation
  * according to the selected MCU family.
  */
 
 #if defined(CONFIG_STM32F0L0G0_STM32G0)
 #  include "stm32g0_pwr.c"
-#else
+#elif defined(CONFIG_STM32F0L0G0_STM32F0) || defined(CONFIG_STM32F0L0G0_STM32L0)
 #  include "stm32f0l0_pwr.c"
 #endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/

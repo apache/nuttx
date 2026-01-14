@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/stm32u5/stm32u5xx_irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -192,7 +194,7 @@
 #if defined(CONFIG_STM32U5_STM32U535XX) || defined(CONFIG_STM32U5_STM32U545XX) || \
     defined(CONFIG_STM32U5_STM32U575XX) || defined(CONFIG_STM32U5_STM32U585XX) || \
     defined(CONFIG_STM32U5_STM32U59XX) || defined(CONFIG_STM32U5_STM32U59AXX)  || \
-    defined(CONFIG_STM32U5_STM32U5A5XX) || defined(CONFIG_STM32U5_STM32U5A9XX)    
+    defined(CONFIG_STM32U5_STM32U5A5XX) || defined(CONFIG_STM32U5_STM32U5A9XX)
 #  define STM32_IRQ_NEXTINTS  125
 #else
 #  error "Unsupported STM32U5 chip"

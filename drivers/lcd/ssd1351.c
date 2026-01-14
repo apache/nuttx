@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/lcd/ssd1351.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -825,7 +827,7 @@ static int ssd1351_getplaneinfo(FAR struct lcd_dev_s *dev,
 
   pinfo->putrun = ssd1351_putrun;
   pinfo->getrun = ssd1351_getrun;
-  pinfo->buffer = (uint8_t *)priv->runbuffer;
+  pinfo->buffer = (FAR uint8_t *)priv->runbuffer;
   pinfo->bpp    = SSD1351_BPP;
   pinfo->dev    = dev;
 

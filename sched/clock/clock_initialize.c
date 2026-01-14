@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/clock/clock_initialize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,6 +40,8 @@
 #include <nuttx/clock.h>
 #include <nuttx/trace.h>
 
+#include <nuttx/spinlock.h>
+
 #include "clock/clock.h"
 #ifdef CONFIG_CLOCK_TIMEKEEPING
 #  include "clock/clock_timekeeping.h"
@@ -47,16 +51,9 @@
  * Public Data
  ****************************************************************************/
 
-#ifndef CONFIG_SCHED_TICKLESS
-#ifdef CONFIG_SYSTEM_TIME64
-volatile uint64_t g_system_ticks = INITIAL_SYSTEM_TIMER_TICKS;
-#else
-volatile uint32_t g_system_ticks = INITIAL_SYSTEM_TIMER_TICKS;
-#endif
-#endif
-
 #ifndef CONFIG_CLOCK_TIMEKEEPING
 struct timespec   g_basetime;
+spinlock_t g_basetime_lock = SP_UNLOCKED;
 #endif
 
 /****************************************************************************
@@ -154,14 +151,17 @@ int clock_basetime(FAR struct timespec *tp)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RTC
 static void clock_inittime(FAR const struct timespec *tp)
 {
   /* (Re-)initialize the time value to match the RTC */
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
   struct timespec ts;
+  irqstate_t flags;
 
+  clock_systime_timespec(&ts);
+
+  flags = spin_lock_irqsave(&g_basetime_lock);
   if (tp)
     {
       memcpy(&g_basetime, tp, sizeof(struct timespec));
@@ -170,8 +170,6 @@ static void clock_inittime(FAR const struct timespec *tp)
     {
       clock_basetime(&g_basetime);
     }
-
-  clock_systime_timespec(&ts);
 
   /* Adjust base time to hide initial timer ticks. */
 
@@ -182,11 +180,12 @@ static void clock_inittime(FAR const struct timespec *tp)
       g_basetime.tv_nsec += NSEC_PER_SEC;
       g_basetime.tv_sec--;
     }
+
+  spin_unlock_irqrestore(&g_basetime_lock, flags);
 #else
   clock_inittimekeeping(tp);
 #endif
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -219,15 +218,20 @@ void clock_initialize(void)
 
   up_rtc_initialize();
 
-#if !defined(CONFIG_RTC_EXTERNAL)
+#endif
+
+#if !defined(CONFIG_RTC_EXTERNAL) || \
+    !defined(CONFIG_RTC)
   /* Initialize the time value to match the RTC */
 
   clock_inittime(NULL);
 #endif
 
-#endif
-
   perf_init();
+
+#ifdef CONFIG_SCHED_CPULOAD_SYSCLK
+  cpuload_init();
+#endif
 
   sched_trace_end();
 }
@@ -263,13 +267,9 @@ void clock_initialize(void)
 #ifdef CONFIG_RTC
 void clock_synchronize(FAR const struct timespec *tp)
 {
-  irqstate_t flags;
-
   /* Re-initialize the time value to match the RTC */
 
-  flags = enter_critical_section();
   clock_inittime(tp);
-  leave_critical_section(flags);
 }
 #endif
 
@@ -299,7 +299,9 @@ void clock_synchronize(FAR const struct timespec *tp)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_RTC) && !defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_CLOCK_TIMEKEEPING)
+#if defined(CONFIG_RTC) && !defined(CONFIG_SCHED_TICKLESS) && \
+    !defined(CONFIG_CLOCK_TIMEKEEPING) && !defined(CONFIG_ALARM_ARCH) && \
+    !defined(CONFIG_TIMER_ARCH)
 void clock_resynchronize(FAR struct timespec *rtc_diff)
 {
   struct timespec rtc_time;
@@ -307,17 +309,12 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
   struct timespec curr_ts;
   struct timespec rtc_diff_tmp;
   irqstate_t flags;
-  int32_t carry;
   int ret;
 
   if (rtc_diff == NULL)
     {
       rtc_diff = &rtc_diff_tmp;
     }
-
-  /* Set the time value to match the RTC */
-
-  flags = enter_critical_section();
 
   /* Get RTC time */
 
@@ -330,8 +327,10 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
 
       rtc_diff->tv_sec = 0;
       rtc_diff->tv_nsec = 0;
-      goto skip;
+      return;
     }
+
+  /* Set the time value to match the RTC */
 
   /* Get the elapsed time since power up (in milliseconds).  This is a
    * bias value that we need to use to correct the base time.
@@ -344,17 +343,9 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
    * was last set, this gives us the current time.
    */
 
-  curr_ts.tv_sec  = bias.tv_sec + g_basetime.tv_sec;
-  curr_ts.tv_nsec = bias.tv_nsec + g_basetime.tv_nsec;
-
-  /* Handle carry to seconds. */
-
-  if (curr_ts.tv_nsec >= NSEC_PER_SEC)
-    {
-      carry            = curr_ts.tv_nsec / NSEC_PER_SEC;
-      curr_ts.tv_sec  += carry;
-      curr_ts.tv_nsec -= (carry * NSEC_PER_SEC);
-    }
+  flags = spin_lock_irqsave(&g_basetime_lock);
+  clock_timespec_add(&bias, &g_basetime, &curr_ts);
+  spin_unlock_irqrestore(&g_basetime_lock, flags);
 
   /* Check if RTC has advanced past system time. */
 
@@ -375,56 +366,14 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
     {
       /* Output difference between time at entry and new current time. */
 
-      rtc_diff->tv_sec  = rtc_time.tv_sec  - curr_ts.tv_sec;
-      rtc_diff->tv_nsec = rtc_time.tv_nsec - curr_ts.tv_nsec;
-
-      /* Handle carry to seconds. */
-
-      if (rtc_diff->tv_nsec < 0)
-        {
-          carry = -((-(rtc_diff->tv_nsec + 1)) / NSEC_PER_SEC + 1);
-        }
-      else if (rtc_diff->tv_nsec >= NSEC_PER_SEC)
-        {
-          carry = rtc_diff->tv_nsec / NSEC_PER_SEC;
-        }
-      else
-        {
-          carry = 0;
-        }
-
-      if (carry != 0)
-        {
-          rtc_diff->tv_sec  += carry;
-          rtc_diff->tv_nsec -= (carry * NSEC_PER_SEC);
-        }
+      clock_timespec_subtract(&rtc_time, &curr_ts, rtc_diff);
 
       /* Add the sleep time to correct system timer */
 
-      g_system_ticks += SEC2TICK(rtc_diff->tv_sec);
-      g_system_ticks += NSEC2TICK(rtc_diff->tv_nsec);
+      clock_t diff_ticks = SEC2TICK(rtc_diff->tv_sec) +
+                           NSEC2TICK(rtc_diff->tv_nsec);
+
+      clock_increase_sched_ticks(diff_ticks);
     }
-
-skip:
-  leave_critical_section(flags);
-}
-#endif
-
-/****************************************************************************
- * Name: clock_timer
- *
- * Description:
- *   This function must be called once every time the real time clock
- *   interrupt occurs.  The interval of this clock interrupt must be
- *   USEC_PER_TICK
- *
- ****************************************************************************/
-
-#ifndef CONFIG_SCHED_TICKLESS
-void clock_timer(void)
-{
-  /* Increment the per-tick system counter */
-
-  g_system_ticks++;
 }
 #endif

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/posix/sim_linuxspi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,6 +38,7 @@
 
 #include <linux/spi/spidev.h>
 
+#include "sim_internal.h"
 #include "sim_spi.h"
 
 /****************************************************************************
@@ -110,7 +113,7 @@ static int linux_spi_transfer(struct spi_dev_s *dev, const void *txbuffer,
 static struct spi_ops_s spi_linux_ops =
 {
   /* The operations below are the same as those in nuttx/spi/spi.h.
-   * Some perations are dummy, merely for compatiablity with nuttx spi.
+   * Some operations are dummy, merely for compatibility with nuttx spi.
    */
 
   .lock             = linux_spi_lock,          /* Dummy for compatibility. */
@@ -191,26 +194,10 @@ static int linux_spi_lock(struct spi_dev_s *dev, bool lock)
 static void linux_spi_select(struct spi_dev_s *dev, uint32_t devid,
                              bool selected)
 {
-  if (!selected)
-    {
-      struct linux_spi_dev_s *priv = (struct linux_spi_dev_s *)dev;
-
-      /* Some members of struct spi_ioc_transfer transfer_data is default 0:
-       * @speed_hz = 0, thus it's ignored, MAX_SEPPD_HZ will be used.
-       * @bits_per_word = 0, thus it's ignored, BITS_PER_WORD will be used.
-       * @delay_usecs = 0, thus thers's no delay before next transfer.
-       */
-
-      struct spi_ioc_transfer transfer_data =
-        {
-          .tx_buf = (unsigned long)NULL,
-          .rx_buf = (unsigned long)NULL,
-          .len = 0,
-          .cs_change = false,
-        };
-
-      ioctl(priv->file, SPI_IOC_MESSAGE(1), &transfer_data);
-    }
+  /**
+   * linux kernel not supported cs changed command, so the map is not fitting
+   * and it will send len zero to impact transmission, now we delete it
+   * */
 }
 
 /****************************************************************************
@@ -219,14 +206,14 @@ static void linux_spi_select(struct spi_dev_s *dev, uint32_t devid,
  * Description:
  *   Provide spi setfrequency, used for set SPI clock frequency.
  *   Note that only MAX_SPEED_HZ could be configured out of a transfer for a
- *   Linux SPI port. The Linux SPI may set a exact frequecy using the value
+ *   Linux SPI port. The Linux SPI may set a exact frequency using the value
  *   of spi_ioc_transfer.speed_hz when transferring. If the
  *   spi_ioc_transfer.speed_hz is 0, the MAX_SPEED_HZ is used. In practice,
- *   the real frequecy on the CLK wire will be affected by the hardware.
+ *   the real frequency on the CLK wire will be affected by the hardware.
  *
  * Input Parameters:
  *   dev - A pointer to instance of Linux SPI device.
- *   frequency - The frequencey of SPI clock in Hz.
+ *   frequency - The frequency of SPI clock in Hz.
  *
  * Returned Value:
  *   Returns the actual frequency in Hz.
@@ -240,8 +227,8 @@ static uint32_t linux_spi_setfrequency(struct spi_dev_s *dev,
   int file = priv->file;
   uint32_t actualfreq;
 
-  ioctl(file, SPI_IOC_WR_MAX_SPEED_HZ, &frequency);
-  ioctl(file, SPI_IOC_RD_MAX_SPEED_HZ, &actualfreq);
+  host_uninterruptible(ioctl, file, SPI_IOC_WR_MAX_SPEED_HZ, &frequency);
+  host_uninterruptible(ioctl, file, SPI_IOC_RD_MAX_SPEED_HZ, &actualfreq);
 
   return actualfreq;
 }
@@ -286,7 +273,7 @@ static int linux_spi_setdelay(struct spi_dev_s *dev, uint32_t startdelay,
  *
  * Description:
  *   Provide spi setmode.
- *   SPI mode defination in nuttx is almost the same to that in Linux.
+ *   SPI mode definition in nuttx is almost the same to that in Linux.
  *
  * Input Parameters:
  *   dev - A pointer to instance of Linux SPI device.
@@ -340,7 +327,7 @@ static void linux_spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
         break;
     }
 
-    ioctl(file, SPI_IOC_WR_MODE, &spilinuxmode);
+    host_uninterruptible(ioctl, file, SPI_IOC_WR_MODE, &spilinuxmode);
 }
 
 /****************************************************************************
@@ -364,7 +351,8 @@ static void linux_spi_setbits(struct spi_dev_s *dev, int nbits)
   int file = priv->file;
   uint8_t bits_per_word = (uint8_t)nbits;
 
-  ioctl(file, SPI_IOC_WR_BITS_PER_WORD, &bits_per_word);
+  host_uninterruptible(ioctl, file, SPI_IOC_WR_BITS_PER_WORD,
+                       &bits_per_word);
 }
 
 /****************************************************************************
@@ -414,7 +402,7 @@ static int linux_spi_hwfeatures(struct spi_dev_s *dev,
    * Among them, features on bit 1, 2, 4 is supported.
    * And CS_ACTIVE/INACTIVE can not be set immediately until calling
    * linux_spi_transfer. Here it's recorded in linux_spi_dev_s.hwfeatures
-   * for furture use.
+   * for future use.
    */
 
   priv->hwfeatures = features;
@@ -426,7 +414,7 @@ static int linux_spi_hwfeatures(struct spi_dev_s *dev,
       lsb = 1;
     }
 
-  return ioctl(file, SPI_IOC_WR_LSB_FIRST, &lsb);
+  return host_uninterruptible(ioctl, file, SPI_IOC_WR_LSB_FIRST, &lsb);
 }
 #endif
 
@@ -677,7 +665,8 @@ static int linux_spi_transfer(struct spi_dev_s *dev, const void *txbuffer,
     }
 #endif
 
-  return ioctl(file, SPI_IOC_MESSAGE(1), &transfer_data);
+  return host_uninterruptible(ioctl, file, SPI_IOC_MESSAGE(1),
+                              &transfer_data);
 }
 
 /****************************************************************************
@@ -709,7 +698,7 @@ struct spi_dev_s *sim_spi_initialize(const char *filename)
       return NULL;
     }
 
-  priv->file = open(filename, O_RDWR);
+  priv->file = host_uninterruptible(open, filename, O_RDWR);
   if (priv->file < 0)
     {
       ERROR("Failed to open %s: %d", filename, priv->file);
@@ -744,7 +733,7 @@ int sim_spi_uninitialize(struct spi_dev_s *dev)
   struct linux_spi_dev_s *priv = (struct linux_spi_dev_s *)dev;
   if (priv->file >= 0)
     {
-      close(priv->file);
+      host_uninterruptible(close, priv->file);
     }
 
   free(priv);

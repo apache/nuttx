@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nrf53/nrf53_tim_lowerhalf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -52,7 +54,7 @@
 
 /* Maximum supported timeout */
 
-#define NRF53_TIMER_MAXTIMEOUT (NRF53_TIMER_MAX * 1000000 / NRF53_TIMER_PER)
+#define NRF53_TIMER_MAXTIMEOUT (NRF53_TIMER_MAX * (1000000 / NRF53_TIMER_PER))
 
 /****************************************************************************
  * Private Types

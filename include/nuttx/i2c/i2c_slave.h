@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/i2c/i2c_slave.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -171,33 +173,72 @@
 #define I2CS_REGISTERCALLBACK(d,c,a) ((d)->ops->registercallback(d,c,a))
 
 /****************************************************************************
+ * Name: I2CS_SETUP
+ *
+ * Description:
+ *   I2c slave initialize.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#define I2CS_SETUP(d) ((d)->ops->setup(d))
+
+/****************************************************************************
+ * Name: I2CS_SHUTDOWN
+ *
+ * Description:
+ *   I2c slave uninitialize.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#define I2CS_SHUTDOWN(d) ((d)->ops->shutdown(d))
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
+typedef enum i2c_slave_complete_e
+{
+  I2CS_RX_COMPLETE = 0,
+  I2CS_TX_COMPLETE
+} i2c_slave_complete_t;
+
 /* The callback function */
 
-typedef int (i2c_slave_callback_t)(void *arg, size_t rx_len);
+typedef CODE int (i2c_slave_callback_t)(FAR void *arg,
+                                        i2c_slave_complete_t state,
+                                        size_t len);
 
 /* The I2C vtable */
 
 struct i2c_slave_s;
 struct i2c_slaveops_s
 {
-  int (*setownaddress)(FAR struct i2c_slave_s *dev,
-                       int                     addr,
-                       int                     nbits);
+  CODE int (*setownaddress)(FAR struct i2c_slave_s *dev, int addr,
+                            int nbits);
 
-  int (*write)(FAR struct i2c_slave_s *dev,
-               FAR const uint8_t      *buffer,
-               int                     buflen);
+  CODE int (*write)(FAR struct i2c_slave_s *dev, FAR const uint8_t *buffer,
+                    int buflen);
 
-  int (*read)(FAR struct i2c_slave_s *dev,
-              FAR uint8_t            *buffer,
-              int                     buflen);
+  CODE int (*read)(FAR struct i2c_slave_s *dev, FAR uint8_t *buffer,
+                   int buflen);
 
-  int (*registercallback)(FAR struct i2c_slave_s *dev,
-                          i2c_slave_callback_t   *callback,
-                          FAR void               *arg);
+  CODE int (*registercallback)(FAR struct i2c_slave_s *dev,
+                               FAR i2c_slave_callback_t *callback,
+                               FAR void *arg);
+  CODE int (*setup)(FAR struct i2c_slave_s *dev);
+  CODE int (*shutdown)(FAR struct i2c_slave_s *dev);
 };
 
 /* I2C private data.  This structure only defines the initial fields of the
@@ -207,7 +248,7 @@ struct i2c_slaveops_s
 
 struct i2c_slave_s
 {
-  const struct i2c_slaveops_s *ops; /* I2C vtable */
+  FAR const struct i2c_slaveops_s *ops; /* I2C vtable */
 };
 
 /****************************************************************************
@@ -221,6 +262,33 @@ extern "C"
 {
 #else
 #define EXTERN extern
+#endif
+
+#ifdef CONFIG_I2C_SLAVE_DRIVER
+
+/****************************************************************************
+ * Name: i2c_slave_register
+ *
+ * Description:
+ *   Register the I2C Slave character device driver as 'devpath'.
+ *
+ * Input Parameters:
+ *   dev   - An instance of the I2C Slave interface to use to communicate
+ *           with the I2C Slave device
+ *   bus   - The I2C Slave bus number. This will be used as the I2C device
+ *           minor number. The I2C Slave character device will be
+ *           registered as /dev/i2cslvN where N is the minor number
+ *   addr  - I2C Slave address
+ *   nbits - The number of address bits provided (7 or 10)
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int i2c_slave_register(FAR struct i2c_slave_s *dev, int bus, int addr,
+                       int nbit);
+
 #endif
 
 #undef EXTERN

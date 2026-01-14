@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/crt0.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,11 +29,10 @@
 #include <sys/types.h>
 #include <stdlib.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/addrenv.h>
 
 #include <arch/syscall.h>
-
-#ifdef CONFIG_BUILD_KERNEL
 
 /****************************************************************************
  * Public Function Prototypes
@@ -66,32 +67,88 @@ int main(int argc, char *argv[]);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_BUILD_KERNEL
 static void sig_trampoline(void) naked_function;
 static void sig_trampoline(void)
 {
   __asm__ __volatile__
   (
-    " push {lr}\n"       /* Save LR on the stack */
-    " mov  ip, r0\n"     /* IP=sighand */
-    " mov  r0, r1\n"     /* R0=signo */
-    " mov  r1, r2\n"     /* R1=info */
-    " mov  r2, r3\n"     /* R2=ucontext */
-    " blx  ip\n"         /* Call the signal handler */
-    " pop  {r2}\n"       /* Recover LR in R2 */
-    " mov  lr, r2\n"     /* Restore LR */
-    " mov  r0, %0\n"     /* SYS_signal_handler_return */
-    " svc %1\n"          /* Return from the SYSCALL */
-    ::"i"(SYS_signal_handler_return),
+    " sub sp, sp, #16\n"  /* Create a stack frame to hold LR */
+    " str lr, [sp, #0]\n" /* Save LR on the stack */
+    " mov ip0, x0\n"      /* IP=sighand */
+    " mov x0, x1\n"       /* R0=signo */
+    " mov x1, x2\n"       /* R1=info */
+    " mov x2, x3\n"       /* R2=ucontext */
+    " blr ip0\n"          /* Call the signal handler */
+    " ldr lr, [sp, #0]\n" /* Recover LR in R2 */
+    " add sp, sp, #16\n"  /* Destroy the stack frame */
+    " mov x0, %0\n"       /* SYS_signal_handler_return */
+    " svc %1\n"           /* Return from the SYSCALL */
+    :
+    : "i"(SYS_signal_handler_return),
       "i"(SYS_syscall)
+    :
   );
 }
+#endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Linker defined symbols to .ctors and .dtors */
+
+extern initializer_t _sctors[];
+extern initializer_t _ectors[];
+extern initializer_t _sdtors[];
+extern initializer_t _edtors[];
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_HAVE_CXXINITIALIZE
+
+/****************************************************************************
+ * Name: exec_ctors
+ *
+ * Description:
+ *   Call static constructors
+ *
+ ****************************************************************************/
+
+static void exec_ctors(void)
+{
+  for (initializer_t *ctor = _sctors; ctor != _ectors; ctor++)
+    {
+      (*ctor)();
+    }
+}
+
+/****************************************************************************
+ * Name: exec_dtors
+ *
+ * Description:
+ *   Call static destructors
+ *
+ ****************************************************************************/
+
+static void exec_dtors(void)
+{
+  for (initializer_t *dtor = _sdtors; dtor != _edtors; dtor++)
+    {
+      (*dtor)();
+    }
+}
+
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: __start
+ * Name: _start
  *
  * Description:
  *   This function is the low level entry point into the main thread of
@@ -110,7 +167,7 @@ static void sig_trampoline(void)
  *
  ****************************************************************************/
 
-void __start(int argc, char *argv[])
+void _start(int argc, char *argv[])
 {
   int ret;
 
@@ -118,21 +175,31 @@ void __start(int argc, char *argv[])
    * that is visible to the RTOS.
    */
 
+#ifdef CONFIG_BUILD_KERNEL
   ARCH_DATA_RESERVE->ar_sigtramp = (addrenv_sigtramp_t)sig_trampoline;
+#endif
 
+#ifdef CONFIG_HAVE_CXXINITIALIZE
   /* Call C++ constructors */
+
+  exec_ctors();
 
   /* Setup so that C++ destructors called on task exit */
 
-  /* REVISIT: Missing logic */
+#  if CONFIG_LIBC_MAX_EXITFUNS > 0
+  atexit(exec_dtors);
+#  endif
+#endif
 
   /* Call the main() entry point passing argc and argv. */
 
   ret = main(argc, argv);
 
+#if defined(CONFIG_HAVE_CXXINITIALIZE) && CONFIG_LIBC_MAX_EXITFUNS <= 0
+  exec_dtors();
+#endif
+
   /* Call exit() if/when the main() returns */
 
   exit(ret);
 }
-
-#endif /* CONFIG_BUILD_KERNEL */

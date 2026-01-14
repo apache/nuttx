@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/reset/reset.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,9 +28,9 @@
  ****************************************************************************/
 
 #include <sys/types.h>
-#include <stdatomic.h>
 #include <stdbool.h>
 
+#include <nuttx/atomic.h>
 #include <nuttx/list.h>
 
 /****************************************************************************
@@ -58,12 +60,12 @@ struct reset_control
   FAR struct reset_controller_dev *rcdev;
   struct list_node list;
   unsigned int id;
-  atomic_int refcnt;
+  atomic_t refcnt;
   bool acquired;
   bool shared;
   bool array;
-  atomic_int deassert_count;
-  atomic_int triggered_count;
+  atomic_t deassert_count;
+  atomic_t triggered_count;
 };
 
 /****************************************************************************
@@ -135,13 +137,13 @@ int reset_control_status(FAR struct reset_control *rstc);
  *
  *   Firstly, get a reset controller device from list, and then call
  *   reset_control_get_internal function by index, shared or acquired
- *   parameters retrun a reset control.
+ *   parameters return a reset control.
  *
  * Input Parameters:
  *   name     - The reset controller name
  *   index    - The reset controller in reset controller device
  *   shared   - Is this a shared (1), or an exclusive (0) reset_control
- *   acquired - flags that used to get a exculsive reset control
+ *   acquired - flags that used to get a exclusive reset control
  *
  * Returned Value:
  *   Return reset_control if success, others return NULL if failed
@@ -308,7 +310,7 @@ reset_control_get_shared(FAR const char *name)
  *   This is to be used to perform a list of resets for a device or power
  *   domain in whatever order. Returns a struct reset_control or NULL errno.
  * Input Parameters:
- *   name  - The controller name symble
+ *   name  - The controller name symbol
  *   index - Index of the reset controller
  *
  * Returned Value:

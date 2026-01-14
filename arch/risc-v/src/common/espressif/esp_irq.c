@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/espressif/esp_irq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -78,6 +80,11 @@
 
 #define NO_CPUINT                     ETS_INVALID_INUM
 
+/* Masks for interrupt type used on esp_setup_irq */
+
+#define ESP_CPUINT_IRAM_MASK       (1 << 1)
+#define ESP_CPUINT_TRIGGER_MASK    (1 << 0)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -115,8 +122,7 @@ static volatile uint8_t g_irq_map[NR_IRQS];
  * devices.
  */
 
-static uint32_t g_cpuint_freelist = ESP_CPUINT_PERIPHSET & \
-                                    ~ESP_WIRELESS_RESERVE_INT;
+static uint32_t g_cpuint_freelist = ESP_CPUINT_PERIPHSET;
 
 /* This bitmask has an 1 if the int should be disabled
  * when the flash is disabled.
@@ -130,6 +136,14 @@ static uint32_t non_iram_int_mask[CONFIG_ESPRESSIF_NUM_CPUS];
 
 static uint32_t non_iram_int_disabled[CONFIG_ESPRESSIF_NUM_CPUS];
 static bool non_iram_int_disabled_flag[CONFIG_ESPRESSIF_NUM_CPUS];
+
+#ifdef CONFIG_ESPRESSIF_IRAM_ISR_DEBUG
+/* The g_iram_count keeps track of how many times such an IRQ ran when the
+ * non-IRAM interrupts were disabled.
+ */
+
+static uint64_t g_iram_count[NR_IRQS];
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -267,12 +281,39 @@ static void esp_cpuint_initialize(void)
 
   /* Set CPU interrupt threshold level */
 
-  esprv_intc_int_set_threshold(ESP_DEFAULT_INT_THRESHOLD);
+  esprv_int_set_threshold(ESP_DEFAULT_INT_THRESHOLD);
 
   /* Indicate that no interrupt sources are assigned to CPU interrupts */
 
   memset(g_cpuint_map, 0, sizeof(g_cpuint_map));
 }
+
+#ifdef CONFIG_ESPRESSIF_IRAM_ISR_DEBUG
+
+/****************************************************************************
+ * Name:  esp_iram_interrupt_record
+ *
+ * Description:
+ *   This function keeps track of the IRQs that ran when non-IRAM interrupts
+ *   are disabled and enables debugging of the IRAM-enabled interrupts.
+ *
+ * Input Parameters:
+ *   irq - The IRQ associated with a CPU interrupt
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+IRAM_ATTR void esp_irq_iram_interrupt_record(int irq)
+{
+  irqstate_t flags = enter_critical_section();
+
+  g_iram_count[irq]++;
+
+  leave_critical_section(flags);
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -333,6 +374,7 @@ void up_irqinitialize(void)
 
   /* And finally, enable interrupts */
 
+  riscv_color_intstack();
   up_irq_enable();
 #endif
 }
@@ -364,7 +406,7 @@ void up_enable_irq(int irq)
   irqstate_t irqstate = enter_critical_section();
 
   CPUINT_ENABLE(g_cpuint_map[cpuint]);
-  esprv_intc_int_enable(BIT(cpuint));
+  esprv_int_enable(BIT(cpuint));
 
   leave_critical_section(irqstate);
 }
@@ -396,7 +438,7 @@ void up_disable_irq(int irq)
   irqstate_t irqstate = enter_critical_section();
 
   CPUINT_DISABLE(g_cpuint_map[cpuint]);
-  esprv_intc_int_disable(BIT(cpuint));
+  esprv_int_disable(BIT(cpuint));
 
   leave_critical_section(irqstate);
 }
@@ -425,21 +467,21 @@ void esp_route_intr(int source, int cpuint, irq_priority_t priority,
 {
   /* Ensure the CPU interrupt is disabled */
 
-  esprv_intc_int_disable(BIT(cpuint));
+  esprv_int_disable(BIT(cpuint));
 
   /* Set the interrupt priority */
 
-  esprv_intc_int_set_priority(cpuint, priority);
+  esprv_int_set_priority(cpuint, priority);
 
   /* Set the interrupt trigger type (Edge or Level) */
 
   if (type == ESP_IRQ_TRIGGER_EDGE)
     {
-      esprv_intc_int_set_type(cpuint, INTR_TYPE_EDGE);
+      esprv_int_set_type(cpuint, INTR_TYPE_EDGE);
     }
   else
     {
-      esprv_intc_int_set_type(cpuint, INTR_TYPE_LEVEL);
+      esprv_int_set_type(cpuint, INTR_TYPE_LEVEL);
     }
 
   /* Route the interrupt source to the provided CPU interrupt */
@@ -465,7 +507,7 @@ void esp_route_intr(int source, int cpuint, irq_priority_t priority,
  *
  ****************************************************************************/
 
-int esp_setup_irq(int source, irq_priority_t priority, irq_trigger_t type)
+int esp_setup_irq(int source, irq_priority_t priority, int type)
 {
   irqstate_t irqstate;
   int irq;
@@ -488,12 +530,22 @@ int esp_setup_irq(int source, irq_priority_t priority, irq_trigger_t type)
   if (cpuint < 0)
     {
       _alert("Unable to allocate CPU interrupt for source=%d\n",
-             priority, type);
+             source);
 
       PANIC();
     }
 
-  esp_route_intr(source, cpuint, priority, type);
+  esp_route_intr(source, cpuint, priority, (type & ESP_CPUINT_TRIGGER_MASK));
+
+  if ((type & ESP_CPUINT_IRAM_MASK) == ESP_IRQ_IRAM)
+    {
+      esp_irq_set_iram_isr(irq);
+      irqinfo("source %d marked IRAM (irq=%d)\n", source, irq);
+    }
+  else
+    {
+      esp_irq_unset_iram_isr(irq);
+    }
 
   leave_critical_section(irqstate);
 
@@ -558,6 +610,7 @@ IRAM_ATTR void *riscv_dispatch_irq(uintreg_t mcause, uintreg_t *regs)
   int irq;
   bool is_irq = (RISCV_IRQ_BIT & mcause) != 0;
   bool is_edge = false;
+  uint32_t cpu = esp_cpu_get_core_id();
 
   if (is_irq)
     {
@@ -569,7 +622,18 @@ IRAM_ATTR void *riscv_dispatch_irq(uintreg_t mcause, uintreg_t *regs)
 
       irq = g_cpuint_map[cpuint].irq;
 
-      is_edge = esprv_intc_int_get_type(cpuint) == INTR_TYPE_EDGE;
+#ifdef CONFIG_ESPRESSIF_IRAM_ISR_DEBUG
+      /* Check if non-IRAM interrupts are disabled */
+
+      if (esp_irq_noniram_status(cpu) == 0)
+        {
+          /* Sum-up the IRAM-enabled counter associated with the IRQ */
+
+          esp_irq_iram_interrupt_record(irq);
+        }
+#endif
+
+      is_edge = esprv_int_get_type(cpuint) == INTR_TYPE_LEVEL;
       if (is_edge)
         {
           /* Clear edge interrupts. */
@@ -627,7 +691,7 @@ irqstate_t up_irq_enable(void)
  *
  ****************************************************************************/
 
-void IRAM_ATTR esp_intr_noniram_disable(void)
+void esp_intr_noniram_disable(void)
 {
   uint32_t oldint;
   irqstate_t irqstate;
@@ -667,7 +731,7 @@ void IRAM_ATTR esp_intr_noniram_disable(void)
  *
  ****************************************************************************/
 
-void IRAM_ATTR esp_intr_noniram_enable(void)
+void esp_intr_noniram_enable(void)
 {
   irqstate_t irqstate;
   uint32_t cpu;
@@ -685,6 +749,27 @@ void IRAM_ATTR esp_intr_noniram_enable(void)
   non_iram_int_disabled_flag[cpu] = false;
   esp_cpu_intr_enable(non_iram_ints);
   leave_critical_section(irqstate);
+}
+
+/****************************************************************************
+ * Name:  esp_irq_noniram_status
+ *
+ * Description:
+ *   Get the current status of non-IRAM interrupts on a specific CPU core
+ *
+ * Input Parameters:
+ *   cpu - The CPU to check the non-IRAM interrupts state
+ *
+ * Returned Value:
+ *   true if non-IRAM interrupts are enabled, false otherwise.
+ *
+ ****************************************************************************/
+
+bool esp_irq_noniram_status(int cpu)
+{
+  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
+
+  return !non_iram_int_disabled_flag[cpu];
 }
 
 /****************************************************************************
@@ -732,3 +817,89 @@ void esp_set_irq(int irq, int cpuint)
   CPUINT_ASSIGN(g_cpuint_map[cpuint], irq);
   g_irq_map[irq] = cpuint;
 }
+
+/****************************************************************************
+ * Name:  esp_irq_set_iram_isr
+ *
+ * Description:
+ *   Set the ISR associated to an IRQ as a IRAM-enabled ISR.
+ *
+ * Input Parameters:
+ *   irq - The associated IRQ to set
+ *
+ * Returned Value:
+ *   OK on success; A negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int esp_irq_set_iram_isr(int irq)
+{
+  uint32_t cpu = esp_cpu_get_core_id();
+  int cpuint = g_irq_map[irq];
+
+  if (cpuint == IRQ_UNMAPPED)
+    {
+      return -EINVAL;
+    }
+
+  non_iram_int_mask[cpu] &= ~(1 << cpuint);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name:  esp_irq_unset_iram_isr
+ *
+ * Description:
+ *   Set the ISR associated to an IRQ as a non-IRAM ISR.
+ *
+ * Input Parameters:
+ *   irq - The associated IRQ to set
+ *
+ * Returned Value:
+ *   OK on success; A negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int esp_irq_unset_iram_isr(int irq)
+{
+  uint32_t cpu = esp_cpu_get_core_id();
+  int cpuint = g_irq_map[irq];
+
+  if (cpuint == IRQ_UNMAPPED)
+    {
+      return -EINVAL;
+    }
+
+  non_iram_int_mask[cpu] |= (1 << cpuint);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name:  esp_get_iram_interrupt_records
+ *
+ * Description:
+ *   This function copies the vector that keeps track of the IRQs that ran
+ *   when non-IRAM interrupts were disabled.
+ *
+ * Input Parameters:
+ *
+ *   irq_count - A previously allocated pointer to store the counter of the
+ *               interrupts that ran when non-IRAM interrupts were disabled.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_IRAM_ISR_DEBUG
+void esp_get_iram_interrupt_records(uint64_t *irq_count)
+{
+  irqstate_t flags = enter_critical_section();
+
+  memcpy(irq_count, &g_iram_count, sizeof(uint64_t) * NR_IRQS);
+
+  leave_critical_section(flags);
+}
+#endif

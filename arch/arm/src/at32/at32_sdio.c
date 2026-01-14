@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/at32/at32_sdio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -104,7 +106,7 @@
 #ifdef CONFIG_AT32_SDIO_DMA
 #  ifndef CONFIG_AT32_SDIO_DMAPRIO
 #    if defined(CONFIG_AT32_AT32F43XX)
-#      define CONFIG_AT32_SDIO_DMAPRIO  DMA_CCR_PRIMED  
+#      define CONFIG_AT32_SDIO_DMAPRIO  DMA_CCR_PRIMED
 #    else
 #      error "Unknown AT32 DMA"
 #    endif
@@ -990,9 +992,9 @@ static void at32_dataconfig(uint32_t timeout, uint32_t dlen, uint32_t dctrl)
   dctrl  &=  (SDIO_DCTRL_DTDIR | SDIO_DCTRL_DTMODE |
               SDIO_DCTRL_DBLOCKSIZE_MASK);
 
-#ifdef CONFIG_AT32_SDIO_CARD              
+#ifdef CONFIG_AT32_SDIO_CARD
   regval |=  (dctrl | SDIO_DCTRL_DTEN | SDIO_DCTRL_SDIOEN);
-#else  
+#else
   regval |=  (dctrl | SDIO_DCTRL_DTEN);
 #endif
 
@@ -2187,7 +2189,7 @@ static int at32_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
  *
  * Returned Value:
  *   Number of bytes sent on success; a negated errno on failure.  Here a
- *   failure means only a faiure to obtain the requested response (due to
+ *   failure means only a failure to obtain the requested response (due to
  *   transport problem -- timeout, CRC, etc.).  The implementation only
  *   assures that the response is returned intacta and does not check errors
  *   within the response itself.

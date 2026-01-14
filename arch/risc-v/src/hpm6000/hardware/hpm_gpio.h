@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/hpm6000/hardware/hpm_gpio.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,7 +34,7 @@
 #include "hpm6300/hpm6300_ioc.h"
 #include "hpm6300/hpm6300_pinmux.h"
 #else
-#error The selected HPM variant is not impelemented
+#error The selected HPM variant is not implemented
 #endif
 
 /****************************************************************************

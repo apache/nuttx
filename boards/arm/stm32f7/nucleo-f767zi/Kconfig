@@ -1,0 +1,96 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_NUCLEO_F767ZI
+
+choice
+	prompt "Select Console wiring."
+	default NUCLEO_F767ZI_CONSOLE_ARDUINO
+	---help---
+		Select where you will connect the console.
+
+		Virtual COM Port:
+
+		Advantage: Use the ST-Link as a console. No Extra wiring
+		needed.
+
+		Disadvantage: Not the best choice for initial bring up.
+
+		ARDUINO Connector:
+
+		Advantage: You have a shield so it is easy.
+
+		Disadvantage: You loose the use of the
+		other functions on PC6, PC7
+
+				STM32F7
+			ARDUINO  FUNCTION  GPIO
+			-- ----- --------- ----
+			DO RX    USART6_RX PG9
+			D1 TX    USART6_TX PG14
+			-- ----- --------- ---
+
+					OR
+
+		Morpho Connector:
+
+				STM32F7
+			MORPHO   FUNCTION  GPIO
+			-------- --------- -----
+			CN12-64  UART8_RX  PE0
+			CN11-61  UART8_TX  PE1
+			-------- --------- -----
+
+					OR
+
+		Morpho Connector UART4:
+
+				STM32F7
+			MORPHO   FUNCTION  GPIO
+			-------- --------- -----
+			CN11-30  UART4_RX  PA0
+			CN11-28  UART4_TX  PA1
+			-------- --------- -----
+			Note: SB13 must be removed to disable Ethernet.
+
+config NUCLEO_F767ZI_CONSOLE_ARDUINO
+	bool "Arduino Connector"
+	select STM32F7_USART6
+	select USART6_SERIALDRIVER
+
+config NUCLEO_F767ZI_CONSOLE_VIRTUAL
+	bool "Virtual Comport"
+	select STM32F7_USART3
+	select USART3_SERIALDRIVER
+
+config NUCLEO_F767ZI_CONSOLE_MORPHO
+	bool "Morpho Connector"
+	select STM32F7_UART8
+	select UART8_SERIALDRIVER
+
+config NUCLEO_F767ZI_CONSOLE_MORPHO_UART4
+	bool "Morpho Connector UART4"
+	select STM32F7_UART4
+	select UART4_SERIALDRIVER
+
+config NUCLEO_F767ZI_CONSOLE_NONE
+	bool "No Console"
+
+endchoice # "Select Console wiring"
+
+choice
+	prompt "CAN1 pins selection"
+	default NUCLEO_F767ZI_CAN1_MAP_PD0PD1
+	depends on STM32F7_CAN1
+
+config NUCLEO_F767ZI_CAN1_MAP_D14D15
+	bool "CAN1_TX=D14 CAN1_RX=D15"
+
+config NUCLEO_F767ZI_CAN1_MAP_PD0PD1
+	bool "CAN1_RX=PD0 CAN1_TX=PD1"
+
+endchoice # CAN1 pins selection
+
+endif # ARCH_BOARD_NUCLEO_F767ZI

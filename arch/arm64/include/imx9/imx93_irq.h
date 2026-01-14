@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/include/imx9/imx93_irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -200,8 +202,8 @@
 #define IMX9_IRQ_RESERVED208            (IMX9_IRQ_EXT + 176)   /* LCDIF Sync Interrupt */
 #define IMX9_IRQ_DSI                    (IMX9_IRQ_EXT + 177)   /* MIPI DSI Interrupt Request */
 #define IMX9_IRQ_RESERVED210            (IMX9_IRQ_EXT + 178)   /* Machine learning processor interrupt */
-#define IMX9_IRQ_ENET_MAC0_RX_TX_D ONE1 (IMX9_IRQ_EXT + 179)   /* MAC 0 Receive/ Trasmit Frame/ Buffer Done */
-#define IMX9_IRQ_ENET_MAC0_RX_TX_D ONE2 (IMX9_IRQ_EXT + 180)   /* MAC 0 Receive/ Trasmit Frame/ Buffer Done */
+#define IMX9_IRQ_ENET_MAC0_RX_TX_D ONE1 (IMX9_IRQ_EXT + 179)   /* MAC 0 Receive/ Transmit Frame/ Buffer Done */
+#define IMX9_IRQ_ENET_MAC0_RX_TX_D ONE2 (IMX9_IRQ_EXT + 180)   /* MAC 0 Receive/ Transmit Frame/ Buffer Done */
 #define IMX9_IRQ_ENET                   (IMX9_IRQ_EXT + 181)   /* MAC 0 IRQ */
 #define IMX9_IRQ_ENET_1588              (IMX9_IRQ_EXT + 182)   /* MAC 0 1588 Timer Interrupt - synchronous */
 #define IMX9_IRQ_ENET_QOS_PMT           (IMX9_IRQ_EXT + 183)   /* ENET QOS PMT interrupt */
@@ -294,5 +296,9 @@
 /* Total amount of entries in system vector table */
 
 #define NR_IRQS                         (301)
+
+/* Cores are at 100h offset from each other (affinity 1) */
+
+#define MPID_TO_CORE(mpid)              (((mpid) >> MPIDR_AFF1_SHIFT) & MPIDR_AFFLVL_MASK)
 
 #endif /* __ARCH_ARM64_INCLUDE_IMX9_IMX93_IRQ_H */

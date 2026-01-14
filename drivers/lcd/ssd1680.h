@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/lcd/ssd1680.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -41,7 +43,8 @@
 
 /* Limitations of the current configuration that I hope to fix someday */
 
-#if !defined(CONFIG_LCD_SSD1680_2_13_V2) && !defined(CONFIG_LCD_SSD1680_2_90)
+#if !defined(CONFIG_LCD_SSD1680_2_13_V2) &&                                 \
+    !defined(CONFIG_LCD_SSD1680_2_90) && !defined(CONFIG_LCD_SSD1681_1_54)
 #  error "Unknown and unsupported SSD16800 LCD"
 #endif
 
@@ -119,16 +122,21 @@
 #  define SSD1680_VALUE_VCOM          0x55
 #  define SSD1680_VALUE_DUMMY_LINE    0x30
 #  define SSD1680_VALUE_GATE_TIME     0x0A
+#  define SSD1680_VALUE_UPDATE_CTRL   0xC7
 #elif defined(CONFIG_LCD_SSD1680_2_90) || defined(CONFIG_LCD_SSD1680_2_90_RED)
 #  define SSD1680_VALUE_VCOM          0xA8
 #  define SSD1680_VALUE_DUMMY_LINE    0x1A
 #  define SSD1680_VALUE_GATE_TIME     0x08
+#  define SSD1680_VALUE_UPDATE_CTRL   0xC7
+#elif defined(CONFIG_LCD_SSD1681_1_54)
+#  define SSD1680_VALUE_UPDATE_CTRL   0xF7
 #else
 #  error "Not supported display"
 #endif
 
 /* Color Properties *********************************************************/
-#if defined(CONFIG_LCD_SSD1680_2_13_V2) || defined(CONFIG_LCD_SSD1680_2_90)
+#if defined(CONFIG_LCD_SSD1680_2_13_V2) ||                                  \
+    defined(CONFIG_LCD_SSD1680_2_90) || defined(CONFIG_LCD_SSD1681_1_54)
 /* 1 bit per pixel */
 #  define SSD1680_DEV_COLORFMT  FB_FMT_Y1
 #  define SSD1680_DEV_BPP       1
@@ -169,6 +177,10 @@
 #  define SSD1680_DEV_GATE_LAYOUT 0x00
 #  define SSD1680_DEV_NATIVE_XRES 128
 #  define SSD1680_DEV_NATIVE_YRES 296
+#elif defined(CONFIG_LCD_SSD1681_1_54)
+#  define SSD1680_DEV_GATE_LAYOUT 0x01
+#  define SSD1680_DEV_NATIVE_XRES 200
+#  define SSD1680_DEV_NATIVE_YRES 200
 #else
 #  error "Unknown resolution"
 #endif

@@ -1,6 +1,8 @@
 /****************************************************************************
  * wireless/bluetooth/bt_att.h
  *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  *   Copyright (c) 2016, Intel Corporation
  *   All rights reserved.
  *

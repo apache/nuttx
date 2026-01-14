@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/esp32/hardware/esp32_uart.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -319,7 +321,7 @@
 
 /* UART_TX_BRK_IDLE_DONE_INT_ST : RO ;bitpos:[13] ;default: 1'b0 ; */
 
-/* Description: This is the stauts bit for tx_brk_idle_done_int_raw when
+/* Description: This is the status bit for tx_brk_idle_done_int_raw when
  * tx_brk_idle_done_int_ena is set to 1.
  */
 

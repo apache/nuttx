@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/veml6070.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,14 +41,6 @@
 #include <nuttx/sensors/veml6070.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_VEML6070)
-
-/****************************************************************************
- * Pre-process Definitions
- ****************************************************************************/
-
-#ifndef CONFIG_VEML6070_I2C_FREQUENCY
-#  define CONFIG_VEML6070_I2C_FREQUENCY 100000
-#endif
 
 /****************************************************************************
  * Private Types
@@ -199,7 +193,7 @@ static ssize_t veml6070_read(FAR struct file *filep, FAR char *buffer,
 
   /* 1T for Rset 270Kohms is 125ms */
 
-  nxsig_usleep(125000);
+  nxsched_usleep(125000);
 
   /* Read the MSB first */
 

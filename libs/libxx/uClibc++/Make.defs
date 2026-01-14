@@ -1,0 +1,60 @@
+############################################################################
+# libs/libxx/uClibc++/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+###########################################################################
+
+UCLIBCXX_VERSION=0.2.5
+
+# Download and unpack tarball if no git repo found
+ifeq ($(wildcard uClibc++/uClibc++/.git),)
+uClibc++-$(UCLIBCXX_VERSION).tar.bz2:
+	curl -O -L https://cxx.uclibc.org/src/$@
+
+uClibc++/uClibc++: uClibc++-$(UCLIBCXX_VERSION).tar.bz2
+	$(Q) tar -xf $<
+	$(Q) $(DELFILE) $<
+	$(Q) mv uClibc++-$(UCLIBCXX_VERSION) $@
+	$(Q) patch -p0 < uClibc++/0001-uClibcxx-basic_definitions-fix-GCC-specific-definiti.patch -d uClibc++
+	$(Q) patch -p0 < uClibc++/0001-uclibxx-use-overload-constructor-of-filebuf-ostream.patch -d uClibc++
+endif
+
+$(TOPDIR)/include/uClibc++: uClibc++/uClibc++
+	$(Q) $(DIRLINK) $(CURDIR)/uClibc++/uClibc++/include $(TOPDIR)/include/uClibc++
+	$(Q) $(COPYFILE) $(CURDIR)/uClibc++/system_configuration.h $(TOPDIR)/include/uClibc++
+
+context:: $(TOPDIR)/include/uClibc++
+
+distclean::
+	$(Q) $(DELFILE) $(TOPDIR)/include/uClibc++/system_configuration.h
+	$(Q) $(DIRUNLINK) $(TOPDIR)/include/uClibc++
+ifeq ($(wildcard uClibc++/uClibc++/.git),)
+	$(call DELDIR, uClibc++/uClibc++)
+endif
+
+CPPSRCS += algorithm.cpp associative_base.cpp bitset.cpp char_traits.cpp
+CPPSRCS += complex.cpp deque.cpp exception.cpp fstream.cpp
+CPPSRCS += func_exception.cpp iomanip.cpp ios.cpp iostream.cpp istream.cpp
+CPPSRCS += iterator.cpp limits.cpp list.cpp locale.cpp map.cpp numeric.cpp
+CPPSRCS += ostream.cpp queue.cpp set.cpp sstream.cpp stack.cpp stdexcept.cpp
+CPPSRCS += streambuf.cpp string.cpp utility.cpp valarray.cpp
+CPPSRCS += vector.cpp
+
+DEPPATH += --dep-path uClibc++/uClibc++/src
+VPATH += uClibc++/uClibc++/src

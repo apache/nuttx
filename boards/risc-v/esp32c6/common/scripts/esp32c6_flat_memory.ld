@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/esp32c6/common/scripts/esp32c6_flat_memory.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -72,7 +74,7 @@ MEMORY
    * signing of firmware image.
    */
 
-  metadata (RX) :        org = CONFIG_ESPRESSIF_APP_MCUBOOT_HEADER_SIZE, len = 0x20
+  metadata (RX) :        org = CONFIG_ESPRESSIF_APP_MCUBOOT_HEADER_SIZE, len = 0x60
   ROM (RX) :             org = ORIGIN(metadata) + LENGTH(metadata),
                          len = FLASH_SIZE - ORIGIN(ROM)
 #elif defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
@@ -139,9 +141,14 @@ MEMORY
   drom_seg    (R) :       org = 0x42000000, len = IDRAM0_2_SEG_SIZE
 #endif
 
+#if CONFIG_ESPRESSIF_USE_LP_CORE
+  lp_ram_seg(RW)  :       org = 0x50000000 + CONFIG_ESPRESSIF_ULP_COPROC_RESERVE_MEM_SIZE,
+                          len = 0x4000 - CONFIG_ESPRESSIF_ULP_COPROC_RESERVE_MEM_SIZE - RESERVE_RTC_MEM
+#else
   /* RTC fast memory (executable). Persists over deep sleep. */
 
   lp_ram_seg  (RWX) :     org = 0x50000000, len = 0x4000 - RESERVE_RTC_MEM
+#endif /* CONFIG_ESPRESSIF_USE_LP_CORE */
 
   /* We reduced the size of lp_ram_seg by RESERVE_RTC_MEM value.
    * It reserves the amount of LP memory that we use for this memory segment.

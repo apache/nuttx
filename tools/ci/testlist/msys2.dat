@@ -5,8 +5,11 @@
 
 /arm/stm32/nucleo-l152re/configs/nsh,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
-/arm/stm32/nucleo-f4x1re/configs/f411-nsh,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/stm32/nucleo-f411re/configs/nsh,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
 # ARM64
 
 /arm64/qemu/qemu-armv8a/configs/nsh_smp
+
+# Boards build by CMake
+CMake,nucleo-l152re:nsh

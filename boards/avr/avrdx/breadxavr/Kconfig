@@ -1,0 +1,16 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_AVRDX_BREADXAVR
+
+config BREADXAVR_BUTTONS_DRIVER
+	bool "Enable button input driver for GPIO pins"
+	depends on INPUT_BUTTONS && INPUT_BUTTONS_LOWER && BOARD_EARLY_INITIALIZE && AVR_AVRDX_GPIO_ISR_MUX
+	default n
+	---help---
+		If set, button driver registered as /dev/buttons
+		for PORT A and PORT C (pins 2 and 3 for both ports.)
+
+endif

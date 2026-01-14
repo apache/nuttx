@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/sam34/sam3u-ek/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -61,7 +63,7 @@
 /* PLLA configuration.
  *
  *   Divider = 1
- *   Multipler = 16
+ *   Multiplier = 16
  */
 
 #define BOARD_CKGR_PLLAR_MUL       (15 << PMC_CKGR_PLLAR_MUL_SHIFT)

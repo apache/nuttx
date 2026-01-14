@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/esp32c3/common/scripts/esp32c3_flat_memory.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,6 +32,7 @@
  ****************************************************************************/
 
 #include "common.ld"
+#include "esp32c3_aliases.ld"
 
 #define SRAM_IRAM_START     0x4037c000
 #define SRAM_DRAM_START     0x3fc7c000
@@ -70,7 +73,7 @@ MEMORY
    * signing of firmware image.
    */
 
-  metadata (RX) :        org = CONFIG_ESPRESSIF_APP_MCUBOOT_HEADER_SIZE, len = 0x20
+  metadata (RX) :        org = CONFIG_ESPRESSIF_APP_MCUBOOT_HEADER_SIZE, len = 0x60
   ROM (RX) :             org = ORIGIN(metadata) + LENGTH(metadata),
                          len = FLASH_SIZE - ORIGIN(ROM)
 #elif defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f4discovery/src/stm32_cs43l22.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -342,7 +344,7 @@ int stm32_cs43l22_initialize(int minor)
 
       /* Create a device name */
 
-      snprintf(devname, 12, "pcm%d",  minor);
+      snprintf(devname, sizeof(devname), "pcm%d",  minor);
 
       /* Finally, we can register the PCM/CS43L22/I2C/I2S audio device.
        *

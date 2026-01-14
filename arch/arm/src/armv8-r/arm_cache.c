@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv8-r/arm_cache.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,43 +28,14 @@
 #include <nuttx/cache.h>
 #include <nuttx/irq.h>
 #include <sys/param.h>
+#include <arch/barriers.h>
 
 #include "cp15_cacheops.h"
-#include "barriers.h"
+#include "l2cc.h"
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-#if defined(CONFIG_ARCH_ICACHE) || defined(CONFIG_ARCH_DCACHE)
-
-/****************************************************************************
- * Name: up_get_cache_linesize
- *
- * Description:
- *   Get cache linesize
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Cache line size
- *
- ****************************************************************************/
-
-static size_t up_get_cache_linesize(void)
-{
-  static uint32_t clsize;
-
-  if (clsize == 0)
-    {
-      clsize = MAX(cp15_cache_linesize(), l2cc_get_linesize());
-    }
-
-  return clsize;
-}
-
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -86,7 +59,40 @@ static size_t up_get_cache_linesize(void)
 
 size_t up_get_icache_linesize(void)
 {
-  return up_get_cache_linesize();
+  static uint32_t clsize;
+
+  if (clsize == 0)
+    {
+      clsize = MAX(cp15_icache_linesize(), l2cc_linesize());
+    }
+
+  return clsize;
+}
+
+/****************************************************************************
+ * Name: up_get_icache_size
+ *
+ * Description:
+ *   Get icache size
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Cache size
+ *
+ ****************************************************************************/
+
+size_t up_get_icache_size(void)
+{
+  static uint32_t csize;
+
+  if (csize == 0)
+    {
+      csize = MAX(cp15_icache_size(), l2cc_size());
+    }
+
+  return csize;
 }
 
 /****************************************************************************
@@ -188,7 +194,40 @@ void up_disable_icache(void)
 
 size_t up_get_dcache_linesize(void)
 {
-  return up_get_cache_linesize();
+  static uint32_t clsize;
+
+  if (clsize == 0)
+    {
+      clsize = MAX(cp15_dcache_linesize(), l2cc_linesize());
+    }
+
+  return clsize;
+}
+
+/****************************************************************************
+ * Name: up_get_dcache_size
+ *
+ * Description:
+ *   Get dcache size
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Cache size
+ *
+ ****************************************************************************/
+
+size_t up_get_dcache_size(void)
+{
+  static uint32_t csize;
+
+  if (csize == 0)
+    {
+      csize = MAX(cp15_dcache_size(), l2cc_size());
+    }
+
+  return csize;
 }
 
 /****************************************************************************
@@ -209,13 +248,14 @@ size_t up_get_dcache_linesize(void)
  * Assumptions:
  *   This operation is not atomic.  This function assumes that the caller
  *   has exclusive access to the address range so that no harm is done if
- *   the operation is pre-empted.
+ *   the operation is preempted.
  *
  ****************************************************************************/
 
 void up_invalidate_dcache(uintptr_t start, uintptr_t end)
 {
   cp15_invalidate_dcache(start, end);
+  l2cc_invalidate(start, end);
 }
 
 /****************************************************************************
@@ -238,9 +278,8 @@ void up_invalidate_dcache(uintptr_t start, uintptr_t end)
 void up_invalidate_dcache_all(void)
 {
 #ifdef CONFIG_ARCH_L2CACHE
-  irqstate_t flags = enter_critical_section();
   cp15_invalidate_dcache_all();
-  leave_critical_section(flags);
+  l2cc_invalidate_all();
 #else
   cp15_invalidate_dcache_all();
 #endif
@@ -263,13 +302,16 @@ void up_invalidate_dcache_all(void)
  * Assumptions:
  *   This operation is not atomic.  This function assumes that the caller
  *   has exclusive access to the address range so that no harm is done if
- *   the operation is pre-empted.
+ *   the operation is preempted.
  *
  ****************************************************************************/
 
 void up_clean_dcache(uintptr_t start, uintptr_t end)
 {
-  if ((end - start) < cp15_cache_size())
+#ifdef CONFIG_SMP
+  cp15_clean_dcache(start, end);
+#else
+  if ((end - start) < cp15_dcache_size())
     {
       cp15_clean_dcache(start, end);
     }
@@ -277,6 +319,7 @@ void up_clean_dcache(uintptr_t start, uintptr_t end)
     {
       cp15_clean_dcache_all();
     }
+#endif
 
   l2cc_clean(start, end);
 }
@@ -300,7 +343,7 @@ void up_clean_dcache(uintptr_t start, uintptr_t end)
  * Assumptions:
  *   This operation is not atomic.  This function assumes that the caller
  *   has exclusive access to the address range so that no harm is done if
- *   the operation is pre-empted.
+ *   the operation is preempted.
  *
  ****************************************************************************/
 
@@ -327,13 +370,16 @@ void up_clean_dcache_all(void)
  * Assumptions:
  *   This operation is not atomic.  This function assumes that the caller
  *   has exclusive access to the address range so that no harm is done if
- *   the operation is pre-empted.
+ *   the operation is preempted.
  *
  ****************************************************************************/
 
 void up_flush_dcache(uintptr_t start, uintptr_t end)
 {
-  if ((end - start) < cp15_cache_size())
+#ifdef CONFIG_SMP
+  cp15_flush_dcache(start, end);
+#else
+  if ((end - start) < cp15_dcache_size())
     {
       cp15_flush_dcache(start, end);
     }
@@ -341,6 +387,7 @@ void up_flush_dcache(uintptr_t start, uintptr_t end)
     {
       cp15_flush_dcache_all();
     }
+#endif
 
   l2cc_flush(start, end);
 }
@@ -363,7 +410,7 @@ void up_flush_dcache(uintptr_t start, uintptr_t end)
  * Assumptions:
  *   This operation is not atomic.  This function assumes that the caller
  *   has exclusive access to the address range so that no harm is done if
- *   the operation is pre-empted.
+ *   the operation is preempted.
  *
  ****************************************************************************/
 
@@ -389,6 +436,15 @@ void up_flush_dcache_all(void)
 
 void up_enable_dcache(void)
 {
+  /* Check if the D-Cache is enabled */
+
+  if (cp15_dcache_is_enabled())
+    {
+      return;
+    }
+
+  up_invalidate_dcache_all();
+
   cp15_enable_dcache();
   l2cc_enable();
 }

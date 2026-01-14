@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/espressif/esp_twai.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -53,88 +55,87 @@
 #include "soc/gpio_sig_map.h"
 #include "soc/reg_base.h"
 
-#if defined(CONFIG_ESPRESSIF_TWAI)
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-#  if defined(CONFIG_CAN_LOOPBACK) && defined(CONFIG_ESPRESSIF_TWAI_TEST_MODE)
-#   define TX_PIN_ATTR (OUTPUT_FUNCTION_1 | INPUT_FUNCTION_1)
-#   define RX_PIN_ATTR (OUTPUT_FUNCTION_1 | INPUT_FUNCTION_1)
+
+#if defined(CONFIG_CAN_LOOPBACK) && defined(CONFIG_ESPRESSIF_TWAI_TEST_MODE)
+#  define TX_PIN_ATTR (OUTPUT_FUNCTION_1 | INPUT_FUNCTION_1)
+#  define RX_PIN_ATTR (OUTPUT_FUNCTION_1 | INPUT_FUNCTION_1)
+#else
+#  define TX_PIN_ATTR OUTPUT_FUNCTION_1
+#  define RX_PIN_ATTR INPUT_FUNCTION_1
+#endif
+
+#ifdef CONFIG_ESPRESSIF_TWAI0
+#  ifdef CONFIG_TWAI0_TIMING_100KBITS
+#    define TWAI0_TIMING_CONFIG TWAI_TIMING_CONFIG_100KBITS()
+#  elif CONFIG_TWAI0_TIMING_125KBITS
+#    define TWAI0_TIMING_CONFIG TWAI_TIMING_CONFIG_125KBITS()
+#  elif CONFIG_TWAI0_TIMING_250KBITS
+#    define TWAI0_TIMING_CONFIG TWAI_TIMING_CONFIG_250KBITS()
+#  elif CONFIG_TWAI0_TIMING_500KBITS
+#    define TWAI0_TIMING_CONFIG TWAI_TIMING_CONFIG_500KBITS()
 #  else
-#   define TX_PIN_ATTR OUTPUT_FUNCTION_1
-#   define RX_PIN_ATTR INPUT_FUNCTION_1
+#    define TWAI0_TIMING_CONFIG TWAI_TIMING_CONFIG_800KBITS()
 #  endif
+#endif
 
-#  ifdef CONFIG_ESPRESSIF_TWAI0
-#   ifdef CONFIG_TWAI0_TIMING_100KBITS
-      #define TWAI0_TIMING_CONFIG TWAI_TIMING_CONFIG_100KBITS()
-#   elif CONFIG_TWAI0_TIMING_125KBITS
-      #define TWAI0_TIMING_CONFIG TWAI_TIMING_CONFIG_125KBITS()
-#   elif CONFIG_TWAI0_TIMING_250KBITS
-      #define TWAI0_TIMING_CONFIG TWAI_TIMING_CONFIG_250KBITS()
-#   elif CONFIG_TWAI0_TIMING_500KBITS
-      #define TWAI0_TIMING_CONFIG TWAI_TIMING_CONFIG_500KBITS()
-#   else
-      #define TWAI0_TIMING_CONFIG TWAI_TIMING_CONFIG_800KBITS()
-#   endif
-#  endif
-
-#  ifdef CONFIG_ESPRESSIF_TWAI1
-#   ifdef CONFIG_TWAI1_TIMING_100KBITS
-      #define TWAI1_TIMING_CONFIG TWAI_TIMING_CONFIG_100KBITS()
-#   elif CONFIG_TWAI1_TIMING_125KBITS
-      #define TWAI1_TIMING_CONFIG TWAI_TIMING_CONFIG_125KBITS()
-#   elif CONFIG_TWAI1_TIMING_250KBITS
-      #define TWAI1_TIMING_CONFIG TWAI_TIMING_CONFIG_250KBITS()
-#   elif CONFIG_TWAI1_TIMING_500KBITS
-      #define TWAI1_TIMING_CONFIG TWAI_TIMING_CONFIG_500KBITS()
-#   else
-      #define TWAI1_TIMING_CONFIG TWAI_TIMING_CONFIG_800KBITS()
-#   endif
-#  endif
-
-#  ifdef CONFIG_ESPRESSIF_ESP32C3
-#    define INT_ENA_REG(hw)       hw->interrupt_enable_reg.val
-#    define PERIPH_TWAI0_MODULE   PERIPH_TWAI_MODULE
-#    define TWAI0_TX_IDX          TWAI_TX_IDX
-#    define TWAI0_RX_IDX          TWAI_RX_IDX
-#    define ETS_TWAI0_INTR_SOURCE ETS_TWAI_INTR_SOURCE
-#    define ESP_IRQ_TWAI0         ESP_IRQ_TWAI
+#ifdef CONFIG_ESPRESSIF_TWAI1
+#  ifdef CONFIG_TWAI1_TIMING_100KBITS
+#    define TWAI1_TIMING_CONFIG TWAI_TIMING_CONFIG_100KBITS()
+#  elif CONFIG_TWAI1_TIMING_125KBITS
+#    define TWAI1_TIMING_CONFIG TWAI_TIMING_CONFIG_125KBITS()
+#  elif CONFIG_TWAI1_TIMING_250KBITS
+#    define TWAI1_TIMING_CONFIG TWAI_TIMING_CONFIG_250KBITS()
+#  elif CONFIG_TWAI1_TIMING_500KBITS
+#    define TWAI1_TIMING_CONFIG TWAI_TIMING_CONFIG_500KBITS()
 #  else
-#    define INT_ENA_REG(hw)       hw->interrupt_enable.val
-#  endif /* CONFIG_ESPRESSIF_ESP32C3 */
+#    define TWAI1_TIMING_CONFIG TWAI_TIMING_CONFIG_800KBITS()
+#  endif
+#endif
 
-#  ifdef CONFIG_ESPRESSIF_ESP32H2
-#    define TWAI0_TX_IDX          TWAI_TX_IDX
-#    define TWAI0_RX_IDX          TWAI_RX_IDX
-#  endif /* CONFIG_ESPRESSIF_ESP32H2 */
+#ifdef CONFIG_ARCH_CHIP_ESP32C3
+#  define INT_ENA_REG(hw)       hw->interrupt_enable_reg.val
+#else
+#  define INT_ENA_REG(hw)       hw->interrupt_enable.val
+#endif /* CONFIG_ARCH_CHIP_ESP32C3 */
+
+#if !SOC_RCC_IS_INDEPENDENT
+#  define TWAI_RCC_ATOMIC() PERIPH_RCC_ATOMIC()
+#else
+#  define TWAI_RCC_ATOMIC()
+#endif
+
+#if SOC_PERIPH_CLK_CTRL_SHARED
+#  define TWAI_PERI_ATOMIC() PERIPH_RCC_ATOMIC()
+#else
+#  define TWAI_PERI_ATOMIC()
+#endif
 
 /* Configuration ************************************************************/
 
-#  ifndef CONFIG_CAN_EXTID
-#   define EXTID 0
-#  else
-#   define EXTID 1
-#  endif
+#ifndef CONFIG_CAN_EXTID
+#  define EXTID 0
+#else
+#  define EXTID 1
+#endif
 
-#  ifndef CONFIG_CAN_LOOPBACK
-#   define LOOPBACK 0
-#  else
-#   define LOOPBACK 1
-#  endif
+#ifndef CONFIG_CAN_LOOPBACK
+#  define LOOPBACK 0
+#else
+#  define LOOPBACK 1
+#endif
 
 /* Default values written to various registers on initialization */
 
-#  define TWAI_DEFAULT_INTERRUPTS   0xe7  /* Exclude data overrun (bit[3]) and brp_div (bit[4]) */
+#define DRIVER_DEFAULT_INTERRUPTS   0xe7  /* Exclude data overrun (bit[3]) and brp_div (bit[4]) */
 
 struct esp_twai_dev_s
 {
   /* Device configuration */
 
   uint8_t port;                   /* TWAI port number */
-  uint8_t periph;                 /* Peripheral ID */
-  uint8_t irq;                    /* IRQ associated with this TWAI */
   int8_t cpuint;                  /* CPU interrupt assigned to this TWAI */
   twai_hal_context_t ctx;         /* Context struct of common layer */
   twai_timing_config_t t_config;  /* Timing struct of common layer */
@@ -184,8 +185,6 @@ static const struct can_ops_s g_twaiops =
 static struct esp_twai_dev_s g_twai0priv =
 {
   .port             = 0,
-  .periph           = ETS_TWAI0_INTR_SOURCE,
-  .irq              = ESP_IRQ_TWAI0,
   .cpuint           = -ENOMEM,
   .t_config         = TWAI0_TIMING_CONFIG,
 };
@@ -201,8 +200,6 @@ static struct can_dev_s g_twai0dev =
 static struct esp_twai_dev_s g_twai1priv =
 {
   .port             = 1,
-  .periph           = ETS_TWAI1_INTR_SOURCE,
-  .irq              = ESP_IRQ_TWAI1,
   .cpuint           = -ENOMEM,
   .t_config         = TWAI1_TIMING_CONFIG,
 };
@@ -242,26 +239,40 @@ static void esp_twai_reset(struct can_dev_s *dev)
   int ret;
   twai_hal_config_t hal_config =
     {
-      .clock_source_hz = esp_clk_apb_freq(),
+      .clock_source_hz = TWAI_CLK_SRC_DEFAULT,
       .controller_id = priv->port,
+      .intr_mask = DRIVER_DEFAULT_INTERRUPTS,
+#ifdef CONFIG_CAN_LOOPBACK
+      .enable_self_test = true,
+#else
+      .enable_self_test = false,
+#endif
+      .enable_listen_only = false,
     };
 
   caninfo("TWAI%" PRIu8 "\n", priv->port);
+
+  TWAI_RCC_ATOMIC()
+    {
+      twai_ll_enable_bus_clock(priv->port, true);
+      twai_ll_reset_register(priv->port);
+    }
+
+  TWAI_PERI_ATOMIC()
+    {
+      twai_ll_set_clock_source(priv->port, TWAI_CLK_SRC_DEFAULT);
+      twai_ll_enable_clock(priv->port, true);
+    }
 
   flags = enter_critical_section();
 
   ret = twai_hal_init(&priv->ctx, &hal_config);
   ASSERT(ret);
-  twai_hal_configure(&priv->ctx, &priv->t_config, &f_config,
-                     TWAI_DEFAULT_INTERRUPTS, 0);
+  twai_hal_configure(&priv->ctx, &priv->t_config, &f_config, 0);
 
   /* Restart the TWAI */
 
-#ifdef CONFIG_CAN_LOOPBACK
-  twai_hal_start(&priv->ctx, TWAI_MODE_NO_ACK); /* Leave Reset Mode, enter Test Mode */
-#else
-  twai_hal_start(&priv->ctx, TWAI_MODE_NORMAL); /* Leave Reset Mode */
-#endif
+  twai_hal_start(&priv->ctx);
 
   /* Abort transmission, release RX buffer and clear overrun.
    * Command register can only be modified when in Operation Mode.
@@ -294,23 +305,26 @@ static int esp_twai_setup(struct can_dev_s *dev)
   struct esp_twai_dev_s *priv = (struct esp_twai_dev_s *)dev->cd_priv;
   irqstate_t flags;
   int ret = OK;
+  int irq;
 
   caninfo("TWAI%" PRIu8 "\n", priv->port);
 
   flags = enter_critical_section();
 
-  twai_ll_set_enabled_intrs(priv->ctx.dev, TWAI_DEFAULT_INTERRUPTS);
+  twai_ll_set_enabled_intrs(priv->ctx.dev, DRIVER_DEFAULT_INTERRUPTS);
 
   twai_ll_get_and_clear_intrs(priv->ctx.dev); /* clear latched interrupts */
+
+  irq = twai_controller_periph_signals.controllers[priv->port].irq_id;
 
   if (priv->cpuint != -ENOMEM)
     {
       /* Disable the provided CPU Interrupt to configure it. */
 
-      up_disable_irq(priv->irq);
+      up_disable_irq(ESP_SOURCE2IRQ(irq));
     }
 
-  priv->cpuint = esp_setup_irq(priv->periph,
+  priv->cpuint = esp_setup_irq(irq,
                                ESP_IRQ_PRIORITY_DEFAULT,
                                ESP_IRQ_TRIGGER_LEVEL);
   if (priv->cpuint < 0)
@@ -323,12 +337,12 @@ static int esp_twai_setup(struct can_dev_s *dev)
       return ret;
     }
 
-  ret = irq_attach(priv->irq, esp_twai_interrupt, dev);
+  ret = irq_attach(ESP_SOURCE2IRQ(irq), esp_twai_interrupt, dev);
   if (ret != OK)
     {
       /* Failed to attach IRQ, so CPU interrupt must be freed. */
 
-      esp_teardown_irq(priv->periph, priv->cpuint);
+      esp_teardown_irq(irq, priv->cpuint);
       priv->cpuint = -ENOMEM;
       leave_critical_section(flags);
 
@@ -337,7 +351,7 @@ static int esp_twai_setup(struct can_dev_s *dev)
 
   /* Enable the CPU interrupt that is linked to the TWAI device. */
 
-  up_enable_irq(priv->irq);
+  up_enable_irq(ESP_SOURCE2IRQ(irq));
 
   leave_critical_section(flags);
 
@@ -369,17 +383,21 @@ static void esp_twai_shutdown(struct can_dev_s *dev)
 
   if (priv->cpuint != -ENOMEM)
     {
+      int irq;
+
+      irq = twai_controller_periph_signals.controllers[priv->port].irq_id;
+
       /* Disable cpu interrupt */
 
-      up_disable_irq(priv->irq);
+      up_disable_irq(ESP_SOURCE2IRQ(irq));
 
       /* Dissociate the IRQ from the ISR */
 
-      irq_detach(priv->irq);
+      irq_detach(ESP_SOURCE2IRQ(irq));
 
       /* Free cpu interrupt that is attached to this peripheral */
 
-      esp_teardown_irq(priv->periph, priv->cpuint);
+      esp_teardown_irq(irq, priv->cpuint);
       priv->cpuint = -ENOMEM;
     }
 }
@@ -741,7 +759,8 @@ static int esp_twai_interrupt(int irq, void *context, void *arg)
       /* Release the receive buffer */
 
       twai_ll_set_cmd_release_rx_buffer(priv->ctx.dev);
-      twai_ll_parse_frame_buffer(&rx_frame, &id, &dlc, data, &flags);
+      twai_ll_parse_frame_buffer(&rx_frame, &id, &dlc, data,
+                                 TWAI_FRAME_MAX_LEN, &flags);
       hdr.ch_id = id;
       hdr.ch_dlc = dlc;
       hdr.ch_rtr = (flags && TWAI_MSG_FLAG_RTR) ? 1 : 0;
@@ -795,20 +814,16 @@ struct can_dev_s *esp_twaiinitialize(int port)
 #ifdef CONFIG_ESPRESSIF_TWAI0
   if (port == 0)
     {
-      /* Enable power to the TWAI module and
-       * Enable clocking to the TWAI module
-       */
-
-      periph_module_reset(PERIPH_TWAI0_MODULE);
-      periph_module_enable(PERIPH_TWAI0_MODULE);
+      int tx_sig = twai_controller_periph_signals.controllers[0].tx_sig;
+      int rx_sig = twai_controller_periph_signals.controllers[0].rx_sig;
 
       /* Configure CAN GPIO pins */
 
-      esp_gpio_matrix_out(CONFIG_ESPRESSIF_TWAI0_TXPIN, TWAI0_TX_IDX, 0, 0);
+      esp_gpio_matrix_out(CONFIG_ESPRESSIF_TWAI0_TXPIN, tx_sig, 0, 0);
       esp_configgpio(CONFIG_ESPRESSIF_TWAI0_TXPIN, TX_PIN_ATTR);
 
+      esp_gpio_matrix_in(CONFIG_ESPRESSIF_TWAI0_RXPIN, rx_sig, 0);
       esp_configgpio(CONFIG_ESPRESSIF_TWAI0_RXPIN, RX_PIN_ATTR);
-      esp_gpio_matrix_in(CONFIG_ESPRESSIF_TWAI0_RXPIN, TWAI0_RX_IDX, 0);
 
       dev = &g_twai0dev;
     }
@@ -818,20 +833,16 @@ struct can_dev_s *esp_twaiinitialize(int port)
 #ifdef CONFIG_ESPRESSIF_TWAI1
   if (port == 1)
     {
-      /* Enable power to the TWAI module and
-       * Enable clocking to the TWAI module
-       */
-
-      periph_module_reset(PERIPH_TWAI1_MODULE);
-      periph_module_enable(PERIPH_TWAI1_MODULE);
+      int tx_sig = twai_controller_periph_signals.controllers[1].tx_sig;
+      int rx_sig = twai_controller_periph_signals.controllers[1].rx_sig;
 
       /* Configure CAN GPIO pins */
 
-      esp_gpio_matrix_out(CONFIG_ESPRESSIF_TWAI1_TXPIN, TWAI1_TX_IDX, 0, 0);
+      esp_gpio_matrix_out(CONFIG_ESPRESSIF_TWAI1_TXPIN, tx_sig, 0, 0);
       esp_configgpio(CONFIG_ESPRESSIF_TWAI1_TXPIN, TX_PIN_ATTR);
 
+      esp_gpio_matrix_in(CONFIG_ESPRESSIF_TWAI1_RXPIN, rx_sig, 0);
       esp_configgpio(CONFIG_ESPRESSIF_TWAI1_RXPIN, RX_PIN_ATTR);
-      esp_gpio_matrix_in(CONFIG_ESPRESSIF_TWAI1_RXPIN, TWAI1_RX_IDX, 0);
 
       dev = &g_twai1dev;
     }
@@ -852,4 +863,3 @@ struct can_dev_s *esp_twaiinitialize(int port)
 
   return dev;
 }
-#endif /* CONFIG_ESPRESSIF_TWAI */

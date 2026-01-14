@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_waitid.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -384,7 +386,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 
       /* Wait for any death-of-child signal */
 
-      ret = nxsig_waitinfo(&set, info);
+      ret = nxsig_timedwait(&set, info, NULL);
       if (ret < 0)
         {
           errcode = -ret;

@@ -1,10 +1,8 @@
 /****************************************************************************
  * arch/arm/src/rp2040/hardware/rp2040_pio.h
  *
- * Generated from rp2040.svd originally provided by
- *   Raspberry Pi (Trading) Ltd.
- *
- * Copyright 2020 (c) 2020 Raspberry Pi (Trading) Ltd.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2020 Raspberry Pi (Trading) Ltd.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -108,15 +106,7 @@
 #define RP2040_PIO_FDEBUG(n)             (RP2040_PIO_BASE(n) + RP2040_PIO_FDEBUG_OFFSET)
 #define RP2040_PIO_FLEVEL(n)             (RP2040_PIO_BASE(n) + RP2040_PIO_FLEVEL_OFFSET)
 #define RP2040_PIO_TXF(n, m)             (RP2040_PIO_BASE(n) + RP2040_PIO_TXF_OFFSET(m))
-#define RP2040_PIO_TXF0(n)               (RP2040_PIO_BASE(n) + RP2040_PIO_TXF0_OFFSET)
-#define RP2040_PIO_TXF1(n)               (RP2040_PIO_BASE(n) + RP2040_PIO_TXF1_OFFSET)
-#define RP2040_PIO_TXF2(n)               (RP2040_PIO_BASE(n) + RP2040_PIO_TXF2_OFFSET)
-#define RP2040_PIO_TXF3(n)               (RP2040_PIO_BASE(n) + RP2040_PIO_TXF3_OFFSET)
 #define RP2040_PIO_RXF(n, m)             (RP2040_PIO_BASE(n) + RP2040_PIO_RXF_OFFSET(m))
-#define RP2040_PIO_RXF0(n)               (RP2040_PIO_BASE(n) + RP2040_PIO_RXF0_OFFSET)
-#define RP2040_PIO_RXF1(n)               (RP2040_PIO_BASE(n) + RP2040_PIO_RXF1_OFFSET)
-#define RP2040_PIO_RXF2(n)               (RP2040_PIO_BASE(n) + RP2040_PIO_RXF2_OFFSET)
-#define RP2040_PIO_RXF3(n)               (RP2040_PIO_BASE(n) + RP2040_PIO_RXF3_OFFSET)
 #define RP2040_PIO_IRQ(n)                (RP2040_PIO_BASE(n) + RP2040_PIO_IRQ_OFFSET)
 #define RP2040_PIO_IRQ_FORCE(n)          (RP2040_PIO_BASE(n) + RP2040_PIO_IRQ_FORCE_OFFSET)
 #define RP2040_PIO_INPUT_SYNC_BYPASS(n)  (RP2040_PIO_BASE(n) + RP2040_PIO_INPUT_SYNC_BYPASS_OFFSET)

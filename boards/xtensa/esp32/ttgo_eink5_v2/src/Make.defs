@@ -1,6 +1,8 @@
 ############################################################################
 # boards/xtensa/esp32/ttgo_eink5_v2/src/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -18,8 +20,6 @@
 #
 ############################################################################
 
-include $(TOPDIR)/Make.defs
-
 CSRCS = esp32_boot.c esp32_bringup.c
 
 ifeq ($(CONFIG_BOARDCTL),y)
@@ -27,10 +27,6 @@ CSRCS += esp32_appinit.c
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += esp32_reset.c
 endif
-endif
-
-ifeq ($(CONFIG_MMCSD),y)
-CSRCS += esp32_mmcsd.c
 endif
 
 ifeq ($(CONFIG_DEV_GPIO),y)
@@ -56,4 +52,3 @@ endif
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board
-

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/usbdev/dfu.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -182,9 +184,13 @@ static void usbclass_ep0incomplete(FAR struct usbdev_ep_s *ep,
 }
 
 static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
-                                  FAR struct usbdev_devinfo_s *devinfo)
+                                  FAR struct usbdev_devinfo_s *devinfo,
+                                  uint8_t speed, uint8_t type)
 {
   FAR struct dfu_cfgdesc_s *dest = (FAR struct dfu_cfgdesc_s *)buf;
+
+  UNUSED(speed);
+  UNUSED(type);
 
   *dest = g_dfu_cfgdesc;
   dest->ifdesc.ifno += devinfo->ifnobase;
@@ -308,7 +314,8 @@ static int  usbclass_setup(FAR struct usbdevclass_driver_s *driver,
         {
           if (ctrl->value[1] == USB_DESC_TYPE_CONFIG)
             {
-              ret = usbclass_mkcfgdesc(ctrlreq->buf, &priv->devinfo);
+              ret = usbclass_mkcfgdesc(ctrlreq->buf, &priv->devinfo,
+                                       dev->speed, ctrl->value[1]);
             }
           else if (ctrl->value[1] == USB_DESC_TYPE_STRING)
             {

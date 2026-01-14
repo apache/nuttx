@@ -1,6 +1,8 @@
 # ##############################################################################
 # boards/risc-v/k230/canmv230/src/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -33,11 +35,7 @@ target_sources(board PRIVATE ${SRCS})
 if(CONFIG_ARCH_CHIP_K230)
   if(CONFIG_BUILD_KERNEL)
     if(CONFIG_NUTTSBI)
-      if(CONFIG_RPTUN)
-        set(LDFILE ld-rptun.script)
-      else()
-        set(LDFILE ld-nuttsbi.script)
-      endif()
+      set(LDFILE ld-nuttsbi.script)
     else()
       set(LDFILE ld-kernel.script)
     endif()

@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/smartfs/smartfs_procfs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,6 +49,7 @@
 
 #include <arch/irq.h>
 #include "smartfs.h"
+#include "fs_heap.h"
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
 
@@ -168,7 +171,7 @@ static const uint8_t g_direntrycount = sizeof(g_direntry) /
  * with any compiler.
  */
 
-const struct procfs_operations g_smartfs_operations =
+const struct procfs_operations g_smartfs_procfs_operations =
 {
   smartfs_open,       /* open */
   smartfs_close,      /* close */
@@ -349,7 +352,7 @@ static int smartfs_open(FAR struct file *filep, FAR const char *relpath,
    */
 
   if (((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0) &&
-      (g_smartfs_operations.write == NULL))
+      (g_smartfs_procfs_operations.write == NULL))
     {
       ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;
@@ -357,7 +360,7 @@ static int smartfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Allocate a container to hold the task and attribute selection */
 
-  priv = kmm_malloc(sizeof(struct smartfs_file_s));
+  priv = fs_heap_malloc(sizeof(struct smartfs_file_s));
   if (!priv)
     {
       ferr("ERROR: Failed to allocate file attributes\n");
@@ -371,7 +374,7 @@ static int smartfs_open(FAR struct file *filep, FAR const char *relpath,
     {
       /* Entry not found */
 
-      kmm_free(priv);
+      fs_heap_free(priv);
       return ret;
     }
 
@@ -398,7 +401,7 @@ static int smartfs_close(FAR struct file *filep)
 
   /* Release the file attributes structure */
 
-  kmm_free(priv);
+  fs_heap_free(priv);
   filep->f_priv = NULL;
   return OK;
 }
@@ -509,7 +512,7 @@ static int smartfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and attribute selection */
 
-  newpriv = kmm_malloc(sizeof(struct smartfs_file_s));
+  newpriv = fs_heap_malloc(sizeof(struct smartfs_file_s));
   if (!newpriv)
     {
       ferr("ERROR: Failed to allocate file attributes\n");
@@ -548,7 +551,7 @@ static int smartfs_opendir(FAR const char *relpath,
    */
 
   level1 = (FAR struct smartfs_level1_s *)
-     kmm_malloc(sizeof(struct smartfs_level1_s));
+     fs_heap_malloc(sizeof(struct smartfs_level1_s));
 
   if (!level1)
     {
@@ -566,7 +569,7 @@ static int smartfs_opendir(FAR const char *relpath,
     }
   else
     {
-      kmm_free(level1);
+      fs_heap_free(level1);
     }
 
   return ret;
@@ -582,7 +585,7 @@ static int smartfs_opendir(FAR const char *relpath,
 static int smartfs_closedir(FAR struct fs_dirent_s *dir)
 {
   DEBUGASSERT(dir);
-  kmm_free(dir);
+  fs_heap_free(dir);
   return OK;
 }
 

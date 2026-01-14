@@ -118,10 +118,10 @@ void esp_spiram_init_cache(void);
  *              stuff in SPI RAM.
  *
  * return:
- *   true on success, false on failed memory test
+ *   OK on success, ERROR on failed memory test
  */
 
-bool esp_spiram_test(void);
+int esp_spiram_test(void);
 
 /* Description Add the initialized SPI RAM to the heap allocator. */
 
@@ -144,6 +144,24 @@ size_t esp_spiram_get_size(void);
  */
 
 void esp_spiram_writeback_cache(void);
+
+/****************************************************************************
+ * Name: esp_spiram_writeback_range
+ *
+ * Description:
+ *   Writeback the Cache items (also clean the dirty bit) in the region from
+ *   DCache. If the region is not in DCache addr room, nothing will be done.
+ *
+ * Input Parameters:
+ *   addr - writeback region start address
+ *   size - writeback region size
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_spiram_writeback_range(uint32_t addr, uint32_t size);
 
 /* Description: Reserve a pool of internal memory for specific DMA/internal
  *              allocations.

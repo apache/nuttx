@@ -2,6 +2,8 @@
 ESP32-S3-EYE
 =============
 
+.. tags:: chip:esp32, chip:esp32s3
+
 The `ESP32-S3-EYE <https://github.com/espressif/esp-who/blob/master/docs/en/get-started/ESP32-S3-EYE_Getting_Started_Guide.md>`_ is a small-sized AI development board from Espressif featuring the ESP32-S3 CPU with a 2-Megapixel camera, an LCD display, a microphone, an 8 MB Octal PSRAM and an 8 MB flash.
 
 .. list-table::

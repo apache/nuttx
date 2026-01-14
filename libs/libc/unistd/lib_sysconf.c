@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/unistd/lib_sysconf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -223,6 +225,10 @@ long sysconf(int name)
         return _POSIX_PRIORITIZED_IO;
       case _SC_AIO_MAX:
         return _POSIX_AIO_MAX;
+#ifdef CONFIG_LIBC_PASSWD_LINESIZE
+      case _SC_GETPW_R_SIZE_MAX:
+        return _POSIX_GETPW_R_SIZE_MAX;
+#endif
       case _SC_CPUTIME:
         return _POSIX_CPUTIME;
       case _SC_THREAD_CPUTIME:

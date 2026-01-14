@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/mqueue/mq_notify.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -102,7 +104,7 @@ int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification)
   irqstate_t flags;
   int errval;
 
-  errval = fs_getfilep(mqdes, &filep);
+  errval = file_get(mqdes, &filep);
   if (errval < 0)
     {
       errval = -errval;
@@ -113,12 +115,12 @@ int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification)
 
   /* Was a valid message queue descriptor provided? */
 
-  if (!inode || !inode->i_private)
+  if (!inode->i_private)
     {
       /* No.. return EBADF */
 
       errval = EBADF;
-      goto errout_without_lock;
+      goto errout_with_filep;
     }
 
   /* Get a pointer to the message queue */
@@ -182,10 +184,14 @@ int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification)
     }
 
   leave_critical_section(flags);
+  file_put(filep);
   return OK;
 
 errout:
   leave_critical_section(flags);
+
+errout_with_filep:
+  file_put(filep);
 
 errout_without_lock:
   set_errno(errval);

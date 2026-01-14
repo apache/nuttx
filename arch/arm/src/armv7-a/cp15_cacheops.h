@@ -1,14 +1,10 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/cp15_cacheops.h
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Portions of this file derive from Atmel sample code for the SAMA5D3
- * Cortex-A5 which also has a modified BSD-style license:
- *
- *   Copyright (c) 2012, Atmel Corporation
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2013-2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright (c) 2012, Atmel Corporation
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -552,6 +548,25 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
+ * Name: cp15_dcache_is_enabled
+ *
+ * Description:
+ *   Check if L1 D Cache is enabled
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   true if L1 D Cache is enabled, false otherwise
+ *
+ ****************************************************************************/
+
+static inline int cp15_dcache_is_enabled(void)
+{
+  return (CP15_GET(SCTLR) & SCTLR_C) != 0;
+}
+
+/****************************************************************************
  * Name: cp15_enable_dcache
  *
  * Description:
@@ -572,7 +587,7 @@ static inline void cp15_enable_dcache(void)
   sctlr = CP15_GET(SCTLR);
   sctlr |= SCTLR_C;
   CP15_SET(SCTLR, sctlr);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -596,7 +611,7 @@ static inline void cp15_disable_dcache(void)
   sctlr = CP15_GET(SCTLR);
   sctlr &= ~SCTLR_C;
   CP15_SET(SCTLR, sctlr);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -620,7 +635,7 @@ static inline void cp15_enable_icache(void)
   sctlr = CP15_GET(SCTLR);
   sctlr |= SCTLR_I;
   CP15_SET(SCTLR, sctlr);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -644,7 +659,7 @@ static inline void cp15_disable_icache(void)
   sctlr = CP15_GET(SCTLR);
   sctlr &= ~SCTLR_I;
   CP15_SET(SCTLR, sctlr);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -664,7 +679,7 @@ static inline void cp15_disable_icache(void)
 static inline void cp15_invalidate_icache_inner_sharable(void)
 {
   CP15_SET(ICIALLUIS, 0);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -684,7 +699,7 @@ static inline void cp15_invalidate_icache_inner_sharable(void)
 static inline void cp15_invalidate_btb_inner_sharable(void)
 {
   CP15_SET(BPIALLIS, 0);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -705,7 +720,7 @@ static inline void cp15_invalidate_btb_inner_sharable(void)
 static inline void cp15_invalidate_icache_all(void)
 {
   CP15_SET(ICIALLU, 0);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -725,7 +740,7 @@ static inline void cp15_invalidate_icache_all(void)
 static inline void cp15_invalidate_icache_bymva(unsigned int va)
 {
   CP15_SET(ICIMVAU, va);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -745,7 +760,7 @@ static inline void cp15_invalidate_icache_bymva(unsigned int va)
 static inline void cp15_flush_btb(void)
 {
   CP15_SET(BPIALL, 0);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -765,7 +780,7 @@ static inline void cp15_flush_btb(void)
 static inline void cp15_flush_btb_bymva(unsigned int va)
 {
   CP15_SET(BPIMVA, va);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -787,7 +802,7 @@ static inline void cp15_flush_btb_bymva(unsigned int va)
 static inline void cp15_invalidate_dcacheline_bymva(unsigned int va)
 {
   CP15_SET(DCIMVAC, va);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -809,7 +824,7 @@ static inline void cp15_invalidate_dcacheline_bymva(unsigned int va)
 static inline void cp15_invalidate_dcacheline_bysetway(unsigned int setway)
 {
   CP15_SET(DCISW, setway);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -831,7 +846,7 @@ static inline void cp15_invalidate_dcacheline_bysetway(unsigned int setway)
 static inline void cp15_clean_dcache_bymva(unsigned int va)
 {
   CP15_SET(DCCMVAC, va);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -851,7 +866,7 @@ static inline void cp15_clean_dcache_bymva(unsigned int va)
 static inline void cp15_clean_dcache_bysetway(unsigned int setway)
 {
   CP15_SET(DCCSW, setway);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -871,7 +886,7 @@ static inline void cp15_clean_dcache_bysetway(unsigned int setway)
 static inline void cp15_clean_ucache_bymva(unsigned int va)
 {
   CP15_SET(DCCMVAU, va);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -891,7 +906,7 @@ static inline void cp15_clean_ucache_bymva(unsigned int va)
 static inline void cp15_cleaninvalidate_dcacheline_bymva(unsigned int va)
 {
   CP15_SET(DCCIMVAC, va);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -911,7 +926,7 @@ static inline void cp15_cleaninvalidate_dcacheline_bymva(unsigned int va)
 static inline void cp15_cleaninvalidate_dcacheline(unsigned int setway)
 {
   CP15_SET(DCCISW, setway);
-  ARM_ISB();
+  UP_ISB();
 }
 
 #endif /* __ASSEMBLY__ */
@@ -1107,7 +1122,7 @@ void cp15_flush_dcache_all(void);
 uint32_t cp15_icache_size(void);
 
 /****************************************************************************
- * Name: cp15_cache_size
+ * Name: cp15_dcache_size
  *
  * Description:
  *   Get cp15 dcache size in byte

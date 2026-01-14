@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libm/libm/lib_sincos.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,7 +44,7 @@
 #ifdef CONFIG_HAVE_DOUBLE
 
 nooptimiziation_function
-void sincos(double x, double *s, double *c)
+void sincos(double x, FAR double *s, FAR double *c)
 {
   *s = sin(x);
   *c = cos(x);

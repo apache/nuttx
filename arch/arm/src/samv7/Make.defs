@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm/src/samv7/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -29,7 +31,7 @@ include armv7-m/Make.defs
 
 CHIP_CSRCS  = sam_start.c sam_clockconfig.c sam_irq.c sam_allocateheap.c
 CHIP_CSRCS += sam_lowputc.c sam_serial.c sam_gpio.c sam_pck.c sam_uid.c
-CHIP_CSRCS += sam_systemreset.c
+CHIP_CSRCS += sam_systemreset.c sam_chipid.c
 
 # Configuration-dependent SAMV7 files
 
@@ -62,6 +64,10 @@ endif
 
 ifeq ($(CONFIG_SAMV7_1WIREDRIVER),y)
 CHIP_CSRCS += sam_1wire.c
+endif
+
+ifeq ($(CONFIG_SAMV7_LIN_SOCKET),y)
+CHIP_CSRCS += sam_lin_sock.c
 endif
 
 ifeq ($(CONFIG_SAMV7_USART_IS_SPI_MASTER),y)

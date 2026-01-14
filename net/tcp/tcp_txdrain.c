@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp_txdrain.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -102,7 +104,7 @@ int tcp_txdrain(FAR struct socket *psock, unsigned int timeout)
 
   /* The following needs to be done with the network stable */
 
-  net_lock();
+  conn_lock(&conn->sconn);
 
   /* Get a notification when the write buffers are drained */
 
@@ -143,7 +145,8 @@ int tcp_txdrain(FAR struct socket *psock, unsigned int timeout)
            * wait for it to drain or be be disconnected.
            */
 
-          ret = net_sem_timedwait_uninterruptible(&waitsem, timeout);
+          ret = conn_dev_sem_timedwait(&waitsem, false, timeout,
+                                       &conn->sconn, conn->dev);
 
           /* Tear down the disconnect notifier */
 
@@ -155,7 +158,7 @@ int tcp_txdrain(FAR struct socket *psock, unsigned int timeout)
       tcp_notifier_teardown(drain_key);
     }
 
-  net_unlock();
+  conn_unlock(&conn->sconn);
   nxsem_destroy(&waitsem);
   return ret;
 }

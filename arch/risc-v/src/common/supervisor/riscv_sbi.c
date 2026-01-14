@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/supervisor/riscv_sbi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -111,7 +113,11 @@ uint64_t riscv_sbi_get_time(void)
   sbiret_t ret = sbi_ecall(SBI_EXT_FIRMWARE, SBI_EXT_FIRMWARE_GET_MTIME,
                            0, 0, 0, 0, 0, 0);
 
-  return ret.value;
+#  ifdef CONFIG_ARCH_RV64
+  return ret.error;
+#  else
+  return (((uint64_t)ret.value << 32) | ret.error);
+#  endif
 #elif defined(CONFIG_ARCH_RV64)
   return READ_CSR(CSR_TIME);
 #else

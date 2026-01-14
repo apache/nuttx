@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/wireless/ieee80211/bcm43xxx/bcmf_core.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -66,7 +68,7 @@ static inline int bcmf_read_sbregw(FAR bcmf_interface_dev_t *ibus,
                                    uint32_t                  address,
                                    void                     *value)
 {
-  return bcmf_read_sbreg(ibus, address, (uint8_t *)value, 4);
+  return bcmf_read_sbreg(ibus, address, (FAR uint8_t *)value, 4);
 }
 
 static inline int bcmf_write_sbregb(FAR bcmf_interface_dev_t *ibus,
@@ -78,7 +80,7 @@ static inline int bcmf_write_sbregb(FAR bcmf_interface_dev_t *ibus,
 static inline int bcmf_write_sbregw(FAR bcmf_interface_dev_t *ibus,
                                     uint32_t address, uint32_t reg)
 {
-    return bcmf_write_sbreg(ibus, address, (uint8_t *)&reg, 4);
+    return bcmf_write_sbreg(ibus, address, (FAR uint8_t *)&reg, 4);
 }
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_CORE_H */

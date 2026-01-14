@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp_devpoll.c
- * Driver poll for the availability of TCP TX data
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *
  *   Copyright (C) 2007-2009, 2016-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,6 +55,7 @@
 #include <nuttx/net/tcp.h>
 
 #include "devif/devif.h"
+#include "utils/utils.h"
 #include "tcp/tcp.h"
 
 /****************************************************************************
@@ -108,13 +110,17 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
   /* Verify that the connection is established. */
 
-  if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED)
+  if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED ||
+      (conn->tcpstateflags & TCP_STATE_MASK) == TCP_CLOSE_WAIT ||
+      (conn->tcpstateflags & TCP_STATE_MASK) == TCP_FIN_WAIT_1 ||
+      (conn->tcpstateflags & TCP_STATE_MASK) == TCP_FIN_WAIT_2)
     {
       /* Set up for the callback.  We can't know in advance if the
        * application is going to send a IPv4 or an IPv6 packet, so this
        * setup may not actually be used.
        */
 
+      conn_lock(&conn->sconn);
       tcp_ip_select(conn);
 
       /* Perform the callback */
@@ -124,6 +130,7 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
       /* Handle the callback response */
 
       tcp_appsend(dev, conn, result);
+      conn_unlock(&conn->sconn);
     }
 }
 

@@ -1,10 +1,11 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_tickless.c
  *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2017 Ansync Labs. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Konstantin Berezenko <kpberezenko@gmail.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2016-2017 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2017 Ansync Labs. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Konstantin Berezenko <kpberezenko@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -53,7 +54,7 @@
  * The RTOS will provide the following interfaces for use by the platform-
  * specific interval timer implementation:
  *
- *   void nxsched_timer_expiration(void):  Called by the platform-specific
+ *   void nxsched_process_timer(void):  Called by the platform-specific
  *     logic when the interval timer expires.
  *
  ****************************************************************************/
@@ -317,7 +318,7 @@ static void stm32_interval_handler(void)
 
   g_tickless.pending = false;
 
-  nxsched_timer_expiration();
+  nxsched_process_timer();
 }
 
 /****************************************************************************
@@ -745,7 +746,7 @@ void up_timer_getmask(clock_t *mask)
  * Description:
  *   Cancel the interval timer and return the time remaining on the timer.
  *   These two steps need to be as nearly atomic as possible.
- *   nxsched_timer_expiration() will not be called unless the timer is
+ *   nxsched_process_timer() will not be called unless the timer is
  *   restarted with up_timer_start().
  *
  *   If, as a race condition, the timer has already expired when this
@@ -882,14 +883,14 @@ int up_timer_cancel(struct timespec *ts)
  * Name: up_timer_start
  *
  * Description:
- *   Start the interval timer.  nxsched_timer_expiration() will be
+ *   Start the interval timer.  nxsched_process_timer() will be
  *   called at the completion of the timeout (unless up_timer_cancel
  *   is called to stop the timing.
  *
  *   Provided by platform-specific code and called from the RTOS base code.
  *
  * Input Parameters:
- *   ts - Provides the time interval until nxsched_timer_expiration() is
+ *   ts - Provides the time interval until nxsched_process_timer() is
  *        called.
  *
  * Returned Value:

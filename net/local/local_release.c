@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/local/local_release.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -56,7 +58,7 @@ int local_release(FAR struct local_conn_s *conn)
   /* There should be no references on this structure */
 
   DEBUGASSERT(conn->lc_crefs == 0);
-  net_lock();
+  local_lock();
 
 #ifdef CONFIG_NET_LOCAL_STREAM
   /* We should not bet here with state LOCAL_STATE_ACCEPT.  That is an
@@ -71,14 +73,13 @@ int local_release(FAR struct local_conn_s *conn)
     {
       FAR struct local_conn_s *accept;
       FAR dq_entry_t *waiter;
+      FAR dq_entry_t *tmp;
 
       DEBUGASSERT(conn->lc_proto == SOCK_STREAM);
 
       /* Are there still clients waiting for a connection to the server? */
 
-      for (waiter = dq_peek(&conn->u.server.lc_waiters);
-           waiter != NULL;
-           waiter = dq_next(&accept->u.accept.lc_waiter))
+      dq_for_every_safe(&conn->u.server.lc_waiters, waiter, tmp)
         {
           accept = container_of(waiter, struct local_conn_s,
                                 u.accept.lc_waiter);
@@ -96,6 +97,6 @@ int local_release(FAR struct local_conn_s *conn)
   /* Free the connection structure */
 
   local_free(conn);
-  net_unlock();
+  local_unlock();
   return OK;
 }

@@ -1,0 +1,245 @@
+From 33fca04b5d33b7b501775f2384a6374eef302729 Mon Sep 17 00:00:00 2001
+From: Yongrong Wang <wangyongrong@xiaomi.com>
+Date: Wed, 10 Jul 2024 18:47:33 +0800
+Subject: [PATCH 09/10] virtio: change feature to 64 bit in all virtio_dispatch
+
+The virtio device feature bit has exceeded 32 bits, so change feature
+to 64 bit like linux does to support more features
+
+Signed-off-by: Yongrong Wang <wangyongrong@xiaomi.com>
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/include/openamp/rpmsg_virtio.h |  2 +-
+ lib/include/openamp/virtio.h       | 22 +++++++--------
+ lib/remoteproc/remoteproc_virtio.c | 12 ++++----
+ lib/rpmsg/rpmsg_virtio.c           |  2 +-
+ lib/virtio_mmio/virtio_mmio_drv.c  | 45 +++++++++++++++---------------
+ 5 files changed, 41 insertions(+), 42 deletions(-)
+
+diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
+index a757166082..a069bb02b0 100644
+--- a/lib/include/openamp/rpmsg_virtio.h
++++ open-amp/lib/include/openamp/rpmsg_virtio.h
+@@ -176,7 +176,7 @@ static inline uint8_t rpmsg_virtio_get_status(struct rpmsg_virtio_device *rvdev)
+  * @return The features supported by both the rpmsg driver and rpmsg device.
+  */
+ __deprecated
+-static inline uint32_t
++static inline uint64_t
+ rpmsg_virtio_get_features(struct rpmsg_virtio_device *rvdev)
+ {
+ 	return rvdev->vdev->func->get_features(rvdev->vdev);
+diff --git a/lib/include/openamp/virtio.h open-amp/lib/include/openamp/virtio.h
+index 5e244f6a01..0c35c45ccf 100644
+--- a/lib/include/openamp/virtio.h
++++ open-amp/lib/include/openamp/virtio.h
+@@ -163,7 +163,7 @@ struct virtio_memory_ops;
+ /** @brief Device features. */
+ struct virtio_feature_desc {
+ 	/** Unique feature ID, defined in the virtio specification. */
+-	uint32_t vfd_val;
++	uint64_t vfd_val;
+ 
+ 	/** Name of the feature (for debug). */
+ 	const char *vfd_str;
+@@ -246,17 +246,17 @@ struct virtio_dispatch {
+ 	void (*set_status)(struct virtio_device *dev, uint8_t status);
+ 
+ 	/** Get the feature exposed by the virtio device. */
+-	uint32_t (*get_features)(struct virtio_device *dev);
++	uint64_t (*get_features)(struct virtio_device *dev);
+ 
+ 	/** Set the supported `feature` (virtio driver only). */
+-	void (*set_features)(struct virtio_device *dev, uint32_t feature);
++	void (*set_features)(struct virtio_device *dev, uint64_t feature);
+ 
+ 	/**
+ 	 * Set the supported features negotiate between the `features` parameter and features
+ 	 * supported by the device (virtio driver only).
+ 	 */
+-	uint32_t (*negotiate_features)(struct virtio_device *dev,
+-				       uint32_t features);
++	uint64_t (*negotiate_features)(struct virtio_device *dev,
++				       uint64_t features);
+ 
+ 	/**
+ 	 * Read a variable amount from the device specific (ie, network)
+@@ -427,7 +427,7 @@ static inline int virtio_write_config(struct virtio_device *vdev,
+  * @return 0 on success, otherwise error code.
+  */
+ static inline int virtio_get_features(struct virtio_device *vdev,
+-				      uint32_t *features)
++				      uint64_t *features)
+ {
+ 	if (!vdev || !features)
+ 		return -EINVAL;
+@@ -451,7 +451,7 @@ static inline int virtio_get_features(struct virtio_device *vdev,
+  * @return 0 on success, otherwise error code.
+  */
+ static inline int virtio_set_features(struct virtio_device *vdev,
+-				      uint32_t features)
++				      uint64_t features)
+ {
+ 	if (!vdev)
+ 		return -EINVAL;
+@@ -473,8 +473,8 @@ static inline int virtio_set_features(struct virtio_device *vdev,
+  * @return 0 on success, otherwise error code.
+  */
+ static inline int virtio_negotiate_features(struct virtio_device *vdev,
+-					    uint32_t features,
+-					    uint32_t *final_features)
++					    uint64_t features,
++					    uint64_t *final_features)
+ {
+ 	if (!vdev)
+ 		return -EINVAL;
+@@ -566,7 +566,7 @@ static inline int virtio_free_buf(struct virtio_device *vdev, void *buf)
+ static inline bool virtio_has_feature(struct virtio_device *vdev,
+ 				      unsigned int feature_bit)
+ {
+-	uint32_t features;
++	uint64_t features;
+ 
+ 	if (!vdev && feature_bit >= sizeof(features) * 8)
+ 		return false;
+@@ -574,7 +574,7 @@ static inline bool virtio_has_feature(struct virtio_device *vdev,
+ 	if (!vdev->features)
+ 		virtio_get_features(vdev, &features);
+ 
+-	return (vdev->features & (1UL << feature_bit)) != 0;
++	return (vdev->features & (1ULL << feature_bit)) != 0;
+ }
+ 
+ #if defined __cplusplus
+diff --git a/lib/remoteproc/remoteproc_virtio.c open-amp/lib/remoteproc/remoteproc_virtio.c
+index 4eb40768d6..b07c0b3e45 100644
+--- a/lib/remoteproc/remoteproc_virtio.c
++++ open-amp/lib/remoteproc/remoteproc_virtio.c
+@@ -165,7 +165,7 @@ static uint32_t rproc_virtio_get_dfeatures(struct virtio_device *vdev)
+ 	return features;
+ }
+ 
+-static uint32_t rproc_virtio_get_features(struct virtio_device *vdev)
++static uint64_t rproc_virtio_get_features(struct virtio_device *vdev)
+ {
+ 	struct remoteproc_virtio *rpvdev;
+ 	struct fw_rsc_vdev *vdev_rsc;
+@@ -181,12 +181,12 @@ static uint32_t rproc_virtio_get_features(struct virtio_device *vdev)
+ 			metal_io_virt_to_offset(io, &vdev_rsc->gfeatures));
+ 	dfeatures = rproc_virtio_get_dfeatures(vdev);
+ 
+-	return dfeatures & gfeatures;
++	return (uint64_t)(dfeatures & gfeatures);
+ }
+ 
+ #if VIRTIO_ENABLED(VIRTIO_DRIVER_SUPPORT)
+ static void rproc_virtio_set_features(struct virtio_device *vdev,
+-				      uint32_t features)
++				      uint64_t features)
+ {
+ 	struct remoteproc_virtio *rpvdev;
+ 	struct fw_rsc_vdev *vdev_rsc;
+@@ -197,13 +197,13 @@ static void rproc_virtio_set_features(struct virtio_device *vdev,
+ 	io = rpvdev->vdev_rsc_io;
+ 	metal_io_write32(io,
+ 			 metal_io_virt_to_offset(io, &vdev_rsc->gfeatures),
+-			 features);
++			 (uint32_t)features);
+ 	RSC_TABLE_FLUSH(vdev_rsc, sizeof(struct fw_rsc_vdev));
+ 	rpvdev->notify(rpvdev->priv, vdev->notifyid);
+ }
+ 
+-static uint32_t rproc_virtio_negotiate_features(struct virtio_device *vdev,
+-						uint32_t features)
++static uint64_t rproc_virtio_negotiate_features(struct virtio_device *vdev,
++						uint64_t features)
+ {
+ 	features = features & rproc_virtio_get_dfeatures(vdev);
+ 	rproc_virtio_set_features(vdev, features);
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 4aba94e973..4bc6fb21cb 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -807,7 +807,7 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
+ 	const char *vq_names[RPMSG_NUM_VRINGS];
+ 	vq_callback callback[RPMSG_NUM_VRINGS];
+ 	struct fw_rsc_config fw_config;
+-	uint32_t features;
++	uint64_t features;
+ 	int status;
+ 	unsigned int i;
+ 
+diff --git a/lib/virtio_mmio/virtio_mmio_drv.c open-amp/lib/virtio_mmio/virtio_mmio_drv.c
+index 9f72f0fe04..45dab76c02 100644
+--- a/lib/virtio_mmio/virtio_mmio_drv.c
++++ open-amp/lib/virtio_mmio/virtio_mmio_drv.c
+@@ -75,44 +75,43 @@ static void virtio_mmio_read_config(struct virtio_device *vdev,
+ 		d[i] = virtio_mmio_read8(vdev, VIRTIO_MMIO_CONFIG + i);
+ }
+ 
+-static uint32_t _virtio_mmio_get_features(struct virtio_device *vdev, int idx)
++static uint64_t virtio_mmio_get_features(struct virtio_device *vdev)
+ {
+-	uint32_t hfeatures;
++	uint32_t feature_hi;
++	uint32_t feature_lo;
+ 
+ 	/* Writing selection register VIRTIO_MMIO_DEVICE_FEATURES_SEL. In pure AMP
+ 	 * mode this needs to be followed by a synchronization w/ the device
+ 	 * before reading VIRTIO_MMIO_DEVICE_FEATURES
+ 	 */
+-	virtio_mmio_write32(vdev, VIRTIO_MMIO_DEVICE_FEATURES_SEL, idx);
+-	hfeatures = virtio_mmio_read32(vdev, VIRTIO_MMIO_DEVICE_FEATURES);
+-	return hfeatures & vdev->features;
++	virtio_mmio_write32(vdev, VIRTIO_MMIO_DEVICE_FEATURES_SEL, 0);
++	feature_lo = virtio_mmio_read32(vdev, VIRTIO_MMIO_DEVICE_FEATURES);
++	virtio_mmio_write32(vdev, VIRTIO_MMIO_DEVICE_FEATURES_SEL, 1);
++	feature_hi = virtio_mmio_read32(vdev, VIRTIO_MMIO_DEVICE_FEATURES);
++	return (((uint64_t)feature_hi << 32) | (uint64_t)feature_lo) &
++		   vdev->features;
+ }
+ 
+-static uint32_t virtio_mmio_get_features(struct virtio_device *vdev)
++static void virtio_mmio_set_features(struct virtio_device *vdev, uint64_t features)
+ {
+-	return _virtio_mmio_get_features(vdev, 0);
+-}
+-
+-/* This is more like negotiate_features */
+-static void _virtio_mmio_set_features(struct virtio_device *vdev,
+-				      uint32_t features, int idx)
+-{
+-	uint32_t hfeatures;
++	uint32_t feature_hi;
++	uint32_t feature_lo;
+ 
+ 	/* Writing selection register VIRTIO_MMIO_DEVICE_FEATURES_SEL. In pure AMP
+ 	 * mode this needs to be followed by a synchronization w/ the device
+ 	 * before reading VIRTIO_MMIO_DEVICE_FEATURES
+ 	 */
+-	virtio_mmio_write32(vdev, VIRTIO_MMIO_DEVICE_FEATURES_SEL, idx);
+-	hfeatures = virtio_mmio_read32(vdev, VIRTIO_MMIO_DEVICE_FEATURES);
+-	features &= hfeatures;
+-	virtio_mmio_write32(vdev, VIRTIO_MMIO_DRIVER_FEATURES, features);
+-	vdev->features = features;
+-}
++	virtio_mmio_write32(vdev, VIRTIO_MMIO_DEVICE_FEATURES_SEL, 0);
++	feature_lo = virtio_mmio_read32(vdev, VIRTIO_MMIO_DEVICE_FEATURES) &
++				 (uint32_t)features;
++	virtio_mmio_write32(vdev, VIRTIO_MMIO_DRIVER_FEATURES, feature_lo);
+ 
+-static void virtio_mmio_set_features(struct virtio_device *vdev, uint32_t features)
+-{
+-	_virtio_mmio_set_features(vdev, features, 0);
++	virtio_mmio_write32(vdev, VIRTIO_MMIO_DEVICE_FEATURES_SEL, 1);
++	feature_hi = virtio_mmio_read32(vdev, VIRTIO_MMIO_DEVICE_FEATURES) &
++				 (uint32_t)(features >> 32);
++	virtio_mmio_write32(vdev, VIRTIO_MMIO_DRIVER_FEATURES, feature_hi);
++
++	vdev->features = ((uint64_t)feature_hi << 32) | (uint64_t)feature_lo;
+ }
+ 
+ static void virtio_mmio_reset_device(struct virtio_device *vdev)
+-- 
+2.34.1
+

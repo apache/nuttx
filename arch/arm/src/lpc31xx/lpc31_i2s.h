@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_i2s.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -286,8 +288,8 @@
 
 /* II2SCONFIG_CFGMUX address 0x16000004 */
 
-#define I2SCONFIG_CFGMUX_I2SRX1OEN        (1 << 2)  /* Bit 2:  Selects faster mode for I2SRX1 */
-#define I2SCONFIG_CFGMUX_I2SRX0OEN        (1 << 1)  /* Bit 1:  Slects master mode for I2SRX0 */
+#define I2SCONFIG_CFGMUX_I2SRX1OEN        (1 << 2)  /* Bit 2:  Selects master mode for I2SRX1 */
+#define I2SCONFIG_CFGMUX_I2SRX0OEN        (1 << 1)  /* Bit 1:  Selects master mode for I2SRX0 */
 
 /* I2SCONFIG_NSOFCNT address 0x16000010 */
 

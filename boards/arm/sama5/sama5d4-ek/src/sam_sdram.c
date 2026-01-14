@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/sama5/sama5d4-ek/src/sam_sdram.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -417,7 +419,7 @@ void sam_sdram_config(void)
            MPDDRC_CR_ZQ_INIT  |
            MPDDRC_CR_8BANKS   | /* Number of Banks */
            MPDDRC_CR_NDQS     | /* Not DQS */
-           MPDDRC_CR_UNAL;      /* upport Unaligned Access */
+           MPDDRC_CR_UNAL;      /* support Unaligned Access */
 
 #else
 #  error Unknown SDRAM type

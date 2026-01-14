@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/kl/freedom-kl25z/src/freedom-kl25z.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -106,7 +108,7 @@ void weak_function kl_spidev_initialize(void);
  * Name: kl_usbinitialize
  *
  * Description:
- *   Called from kl_usbinitialize very early in inialization to setup
+ *   Called from kl_usbinitialize very early in initialization to setup
  *   USB-related GPIO pins for the Freedom KL25Z board.
  *
  ****************************************************************************/

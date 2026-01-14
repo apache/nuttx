@@ -18,12 +18,16 @@ config OPENAMP_CACHE
 		Enable or disable OpenAMP Cache support (VIRTIO_CACHED_BUFFERS and
 		VIRTIO_CACHED_VRINGS)
 
-config OPENAMP_RPMSG_DEBUG
-	bool "Enable OpenAMP Rpmsg Debug"
+config OPENAMP_DEBUG
+	bool "Enable OpenAMP Debug"
 	default n
 
-config OPENAMP_VQUEUE_DEBUG
-	bool "Enable OpenAMP Virtio Queue Debug"
-	default n
+config OPENAMP_VIRTIO_DEVICE_SUPPORT
+	bool "Enable VIRTIO_DEVICE_SUPPORT"
+	default y
+
+config OPENAMP_VIRTIO_DRIVER_SUPPORT
+	bool "Enable VIRTIO_DRIVER_SUPPORT"
+	default y
 
 endif # OPENAMP

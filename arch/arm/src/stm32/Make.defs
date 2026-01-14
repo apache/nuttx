@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm/src/stm32/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -23,9 +25,13 @@ include armv7-m/Make.defs
 CHIP_CSRCS  = stm32_allocateheap.c stm32_start.c stm32_rcc.c stm32_lse.c
 CHIP_CSRCS += stm32_lsi.c stm32_gpio.c stm32_exti_gpio.c stm32_flash.c
 CHIP_CSRCS += stm32_irq.c stm32_lowputc.c
-CHIP_CSRCS += stm32_serial.c stm32_spi.c stm32_i2s.c stm32_sdio.c stm32_tim.c
+CHIP_CSRCS += stm32_spi.c stm32_i2s.c stm32_sdio.c stm32_tim.c
 CHIP_CSRCS += stm32_waste.c stm32_ccm.c stm32_uid.c stm32_capture.c
 CHIP_CSRCS += stm32_dfumode.c
+
+ifeq ($(CONFIG_STM32_USART),y)
+CHIP_CSRCS += stm32_serial.c
+endif
 
 ifeq ($(CONFIG_STM32_DMA),y)
 CHIP_CSRCS += stm32_dma.c
@@ -63,6 +69,9 @@ CHIP_CSRCS += stm32_i2c.c
 endif
 else ifeq ($(CONFIG_STM32_HAVE_IP_I2C_V2),y)
 CHIP_CSRCS += stm32_i2c_v2.c
+ifeq ($(CONFIG_STM32_I2C_SLAVE),y)
+CHIP_CSRCS += stm32_i2cslave_v2.c
+endif
 endif
 
 ifeq ($(CONFIG_USBDEV),y)

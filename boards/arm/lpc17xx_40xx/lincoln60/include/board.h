@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/lpc17xx_40xx/lincoln60/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -51,7 +53,7 @@
 /* This is the clock setup we configure for:
  *
  *   SYSCLK = BOARD_OSCCLK_FREQUENCY = 12MHz  -> Main oscillator for source
- *   PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> multipler=20, pre-divider=1
+ *   PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz -> multiplier=20, pre-divider=1
  *   CCLCK = 480MHz / 6 = 80MHz               -> divider = 6
  */
 

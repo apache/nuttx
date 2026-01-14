@@ -12,8 +12,7 @@ Using Sphinx, the RST files are rendered into HTML files that can be read in you
 Building
 ========
 
-To render the Documentation locally, you should clone the NuttX main repository, and
-go into ``Documentation`` directory. Then,
+To render the Documentation locally, you should clone the NuttX main repository and navigate into it. Then,
 
   1. Install Sphinx and other dependencies using pipenv.
      You may also find it helpful on platforms such as Windows and MacOS to use *pyenv*
@@ -21,8 +20,10 @@ go into ``Documentation`` directory. Then,
      project `site <https://github.com/pyenv/pyenv#installation>`_.
 
     .. code-block:: console
-
+      
       $ pip3 install pipenv
+      $ cd Documentation/
+      $ # install the dependencies into a virtual environment
       $ pipenv install
       $ # activate the virtual environment
       $ pipenv shell
@@ -66,6 +67,16 @@ changes such as documenting parts of NuttX which are not yet covered or even wri
 
 The contribution workflow is the same as for the code, so check the :doc:`/contributing/workflow` to understand
 how your changes should be upstreamed.
+
+Some templates are available below for standard documentation types, such as board support documentation or certain
+drivers, etc. These templates can be viewed here in the browser as an HTML render, but when writing your own
+documentation from these templates you will want to copy their corresponding ``.rst`` file and modify it.
+
+.. toctree::
+   :caption: Documentation templates
+   :glob:
+
+   doc_templates/*
 
 Writing ReStructure Text with Sphinx
 ====================================
@@ -154,6 +165,19 @@ such as a note that should be prominently displayed.
 In case you need to leave a TODO note in the documentation to point that something needs to be improved, use a ``todo`` admonition,
 which is available via the ``sphinx.ext.todo`` extension. This will let the reader of the documentation also know that the documentation
 is not yet finished somewhere and may further motivate a contribution.
+
+Tags
+----
+
+Use the ``tag`` admonition from `sphinx-tags <https://sphinx-tags.readthedocs.io/en/latest/quickstart.html#usage>`_ to
+tag your pages appropriately. This makes it easier for users to search and index the documentation. There are some tags
+which should always be included:
+
+- ``chip:*`` tags are for board/chip documentation, to indicate which boards use which chip
+- ``experimental`` tags for boards/features that are experimental and should not be considered stable
+- Tags with the names of supported peripherals can be included for boards too, like ``wifi`` and ``ethernet``
+
+Include the tags directive at the top of the page, with comma separators for each tag listed.
 
 User Indications
 ----------------

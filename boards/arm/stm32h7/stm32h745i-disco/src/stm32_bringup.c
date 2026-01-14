@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32h7/stm32h745i-disco/src/stm32_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -41,6 +43,14 @@
 #  include <nuttx/video/fb.h>
 #endif
 
+#ifdef CONFIG_RPTUN
+#  include "stm32_rptun.h"
+#endif
+
+#ifdef CONFIG_RPMSG_UART
+#  include <nuttx/serial/uart_rpmsg.h>
+#endif
+
 #include "stm32_gpio.h"
 
 #include "stm32h745i_disco.h"
@@ -74,6 +84,27 @@ static void convert_lcd_rgb565(void)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#ifdef CONFIG_RPMSG_UART
+/****************************************************************************
+ * Name: rpmsg_serialinit
+ ****************************************************************************/
+
+void rpmsg_serialinit(void)
+{
+#ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM7
+  uart_rpmsg_init("cm4", "proxy", 4096, false);
+#endif
+
+#ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM4
+#  ifdef CONFIG_RPMSG_UART_CONSOLE
+  uart_rpmsg_init("cm7", "proxy", 4096, true);
+#  else
+  uart_rpmsg_init("cm7", "proxy", 4096, false);
+#  endif
+#endif
+}
+#endif
 
 /****************************************************************************
  * Name: stm32_bringup
@@ -111,6 +142,14 @@ int stm32_bringup(void)
              "ERROR: Failed to mount the PROC filesystem: %d\n",  ret);
     }
 #endif /* CONFIG_FS_PROCFS */
+
+#ifdef CONFIG_RPTUN
+#  ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM7
+  stm32_rptun_init("cm4");
+#  else
+  stm32_rptun_init("cm7");
+#  endif
+#endif
 
 #ifdef CONFIG_INPUT_FT5X06
   /* Initialize the touchscreen.

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86/src/common/x86_internal.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -96,7 +98,7 @@
  * referenced is passed to get the state from the TCB.
  */
 
-#define x86_restorestate(regs) (g_current_regs = regs)
+#define x86_restorestate(regs) up_set_current_regs(regs)
 
 /****************************************************************************
  * Public Types

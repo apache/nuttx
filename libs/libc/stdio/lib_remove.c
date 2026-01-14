@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stdio/lib_remove.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -55,9 +57,7 @@ int remove(FAR const char *path)
    * more frequently the necessary action.
    */
 
-  if (unlink(path) != 0     && /* If it is indeed a directory...  */
-      (get_errno() != EPERM || /* ...try to remove it.  */
-       rmdir(path) != 0))
+  if (unlink(path) != 0 && (get_errno() != EISDIR || rmdir(path) != 0))
     {
       /* Cannot remove the object for whatever reason. */
 

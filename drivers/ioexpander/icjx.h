@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/ioexpander/icjx.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -97,6 +99,11 @@
 
 #define ICJX_CTRL_WORD_2_NIOL   (1 << 3)
 #define ICJX_CTRL_WORD_2_NIOH   (1 << 7)
+
+/* Control Word 3 */
+
+#define ICJX_CTRL_WORD_3_ICLK   (1 << 2)
+#define ICJX_CTRL_WORD_3_DIS    (1 << 3)
 
 /* Control Word 4 */
 

@@ -187,7 +187,7 @@ adds an option to use binfs with the Union FS.
 
 * Applications: apps/examples:
 
-- Modify/simpify apps/examples build files. From Roman Saveljev.
+- Modify/simplify apps/examples build files. From Roman Saveljev.
 - apps/examples/ltdc: Add testing support for the STM32 LTDC's 2D DMA.
 From Marco Krahl.
 - apps/examples/ostest: Add a test of nested signals. There are no
@@ -291,7 +291,7 @@ callers of net_startmonitor() to assume that the connection was
 okay, undoing the good things that net_startmonitor() did and
 causing the socket to be incorrectly marked as connected. This
 behavior was noted by Pelle Windestam.
-- setsockopt() failed when setting timeouts to values less tha 100
+- setsockopt() failed when setting timeouts to values less than 100
 msec. That is because the timeout is limited to stops of 1
 decisecond and because the conversion of structure timeval was
 truncating the microsecond remainder. The utility

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lc823450/lc823450_mtd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -393,6 +395,7 @@ static int lc823450_ioctl(struct mtd_dev_s *dev, int cmd,
  *
  * Precondition:
  *   Semaphore has been taken.
+ *
  ****************************************************************************/
 
 static int mtd_mediainitialize(struct lc823450_mtd_dev_s *dev)
@@ -502,6 +505,7 @@ exit_with_error:
  *
  * Precondition:
  *   Semaphore has been taken.
+ *
  ****************************************************************************/
 
 static struct mtd_dev_s *lc823450_mtd_allocdev(uint32_t channel)
@@ -789,7 +793,7 @@ int lc823450_mtd_uninitialize(uint32_t devno)
       return -ENODEV;
     }
 
-  snprintf(devname, 16, "/dev/mtdblock%" PRId32, devno);
+  snprintf(devname, sizeof(devname), "/dev/mtdblock%" PRId32, devno);
 
 #ifdef CONFIG_MTD_REGISTRATION
   mtd_unregister(g_mtdmaster[ch]);

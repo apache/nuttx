@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/uuid/lib_uuid_is_nil.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,7 +42,7 @@
  *
  ****************************************************************************/
 
-int32_t uuid_is_nil(const uuid_t *u, uint32_t *status)
+int32_t uuid_is_nil(FAR const uuid_t *u, FAR uint32_t *status)
 {
   static const uuid_t nil;
 

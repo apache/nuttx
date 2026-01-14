@@ -58,7 +58,7 @@ or::
 
   nsh> i2c ?
 
-Here is an example of the help output. I shows the general form of the command
+Here is an example of the help output. It shows the general form of the command
 line, the various I2C commands supported with their unique command line options,
 and a more detailed summary of the command I2C command options::
 
@@ -88,7 +88,7 @@ and a more detailed summary of the command I2C command options::
 
 - An environment variable like ``$PATH`` may be used for any argument.
 - Arguments are _sticky_. For example, once the I2C address is specified, that
-  address will be re-used until it is changed.
+  address will be reused until it is changed.
 
 **Warning**:
 

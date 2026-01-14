@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/wireless/ieee80211/bcm43xxx/bcmf_driver.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -498,6 +500,8 @@ int bcmf_wl_active(FAR struct bcmf_dev_s *priv, bool active)
       goto errout_in_sdio_active;
     }
 
+  wlinfo("set roam_off as value %"PRIu32"\n", value);
+
   /* TODO configure EAPOL version to default */
 
   out_len = 8;
@@ -628,7 +632,7 @@ void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
       return;
     }
 
-  bcmf_hexdump((uint8_t *)event, len, (unsigned long)event);
+  bcmf_hexdump((FAR uint8_t *)event, len, (unsigned long)event);
 
   if (type == WLC_E_PSK_SUP)
     {
@@ -884,7 +888,7 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
           ie_offset += ie_buffer[ie_offset + 1] + 2;
         }
 
-      /* Check if AP is configured for WEP or unsupport privacy */
+      /* Check if AP is configured for WEP or unsupported privacy */
 
       if ((vaild_bss && (bss->capability & DOT11_CAP_PRIVACY)) || !vaild_bss)
         {
@@ -1203,7 +1207,7 @@ int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable)
 
   /* TODO wait for WLC_E_RADIO event */
 
-  nxsig_usleep(3000);
+  nxsched_usleep(3000);
 
   if (ret == OK)
     {
@@ -1716,7 +1720,7 @@ int bcmf_wl_get_channel(FAR struct bcmf_dev_s *priv, int interface)
 
   out_len = sizeof(ci);
   ret = bcmf_cdc_ioctl(priv, interface, false,
-                       WLC_GET_CHANNEL, (uint8_t *)&ci, &out_len);
+                       WLC_GET_CHANNEL, (FAR uint8_t *)&ci, &out_len);
   return ret == OK ? ci.target_channel : ret;
 }
 
@@ -1780,7 +1784,7 @@ int bcmf_wl_get_rate(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
  * Name: bcmf_wl_get_txpower
  *
  * Description:
- *   Get the tranmit power for the device
+ *   Get the transmit power for the device
  ****************************************************************************/
 
 int bcmf_wl_get_txpower(FAR struct bcmf_dev_s *priv, struct iwreq *iwr)
@@ -2152,7 +2156,7 @@ int bcmf_wl_get_country(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr)
   if (ret == OK)
     {
       memcpy(iwr->u.data.pointer, country, 2);
-      ((uint8_t *)iwr->u.data.pointer)[2] = '\0';
+      ((FAR uint8_t *)iwr->u.data.pointer)[2] = '\0';
     }
 
   return ret;
@@ -2245,7 +2249,7 @@ int bcmf_wl_set_pta_priority(FAR struct bcmf_dev_s *priv, uint32_t prio)
   out_len = sizeof(wl_pta_t);
   ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
                                IOVAR_STR_COEX_PARA,
-                               (uint8_t *)&pta_prio_map[prio],
+                               (FAR uint8_t *)&pta_prio_map[prio],
                                &out_len);
   if (ret == OK)
     {

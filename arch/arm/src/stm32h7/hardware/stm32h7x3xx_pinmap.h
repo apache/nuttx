@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32h7x3xx_pinmap.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,7 +31,8 @@
 
 #include "stm32_gpio.h"
 
-#if defined(CONFIG_STM32H7_STM32H7X3XX) || \
+#if defined(CONFIG_STM32H7_STM32H7X0XX) || \
+    defined(CONFIG_STM32H7_STM32H7X3XX) || \
     defined(CONFIG_STM32H7_STM32H7B3XX) || \
     defined(CONFIG_STM32H7_STM32H7X5XX) || \
     defined(CONFIG_STM32H7_STM32H7X7XX)
@@ -1535,5 +1538,5 @@
 #define GPIO_UART8_TX_1           (GPIO_ALT|GPIO_AF8|GPIO_PUSHPULL|GPIO_PULLUP|GPIO_PORTE|GPIO_PIN1)
 #define GPIO_UART8_TX_2           (GPIO_ALT|GPIO_AF8|GPIO_PUSHPULL|GPIO_PULLUP|GPIO_PORTJ|GPIO_PIN8)
 
-#endif /* CONFIG_STM32H7_STM32H7X3XX || CONFIG_STM32H7_STM32H7X7XX || CONFIG_STM32H7_STM32H7B3XX */
+#endif /* CONFIG_STM32H7_STM32H7X0XX CONFIG_STM32H7_STM32H7X3XX || CONFIG_STM32H7_STM32H7X7XX || CONFIG_STM32H7_STM32H7B3XX */
 #endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_PINMAP_H */

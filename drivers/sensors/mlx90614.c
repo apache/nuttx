@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/mlx90614.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,10 +46,6 @@
 #endif
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_MLX90614)
-
-/****************************************************************************
- * Pre-process Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Private Types
@@ -127,7 +125,7 @@ static int mlx90614_read_word(FAR struct mlx90614_dev_s *priv, uint8_t cmd,
 
   /* Point "buffer" to checkcrc[3] to fill it with received bytes */
 
-  buffer = (uint8_t *) &checkcrc[3];
+  buffer = (FAR uint8_t *)&checkcrc[3];
 #endif
 
   /* Set up the I2C configuration */
@@ -217,7 +215,7 @@ static int mlx90614_write_word(FAR struct mlx90614_dev_s *priv, uint8_t cmd,
 
   /* Wait the EEPROM erase */
 
-  nxsig_usleep(10 * 1000);
+  nxsched_usleep(10 * 1000);
 
   /* Create the I2C command that will be sent to device */
 

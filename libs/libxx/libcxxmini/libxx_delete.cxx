@@ -1,6 +1,8 @@
 //***************************************************************************
 // libs/libxx/libcxxmini/libxx_delete.cxx
 //
+// SPDX-License-Identifier: Apache-2.0
+//
 // Licensed to the Apache Software Foundation (ASF) under one or more
 // contributor license agreements.  See the NOTICE file distributed with
 // this work for additional information regarding copyright ownership.  The
@@ -23,6 +25,8 @@
 
 #include <nuttx/config.h>
 
+#include <cstddef>
+
 #include <nuttx/lib/lib.h>
 
 //***************************************************************************
@@ -37,3 +41,30 @@ void operator delete(FAR void *ptr) throw()
 {
   lib_free(ptr);
 }
+
+#ifdef CONFIG_HAVE_CXX14
+
+//***************************************************************************
+// Operators
+//***************************************************************************
+
+//***************************************************************************
+// Name: delete
+//
+// NOTE:
+//   This should take a type of size_t.  But size_t has an unknown underlying
+//   type.  In the nuttx sys/types.h header file, size_t is typed as uint32_t
+//   (which is determined by architecture-specific logic).  But the C++
+//   compiler may believe that size_t is of a different type resulting in
+//   compilation errors in the operator.  Using the underlying integer type
+//   instead of size_t seems to resolve the compilation issues. Need to
+//   REVISIT this.
+//
+//***************************************************************************
+
+void operator delete(FAR void *ptr, std::size_t size)
+{
+  lib_free(ptr);
+}
+
+#endif /* CONFIG_HAVE_CXX14 */

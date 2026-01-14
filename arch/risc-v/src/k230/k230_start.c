@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/k230/k230_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -117,7 +119,8 @@ void k230_start(int mhartid, const char *dtb)
 
 #ifdef CONFIG_RISCV_PERCPU_SCRATCH
       riscv_percpu_add_hart(mhartid);
-#else
+#endif
+#ifndef CONFIG_BUILD_KERNEL
       k230_copy_init_data();
 #endif
     }
@@ -190,10 +193,7 @@ void riscv_serialinit(void)
 }
 
 #ifdef CONFIG_RPMSG_UART_CONSOLE
-int up_putc(int ch)
+void up_putc(int ch)
 {
-  /* place holder for now */
-
-  return ch;
 }
 #endif

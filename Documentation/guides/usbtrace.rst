@@ -5,7 +5,7 @@ USB Device Trace
 ================
 
 **USB Device Tracing Controls**. The NuttX USB device subsystem supports
-a fairly sophisticated tracing facility. The basic trace cabability is
+a fairly sophisticated tracing facility. The basic trace capability is
 controlled by these NuttX configuration settings:
 
   -  ``CONFIG_USBDEV_TRACE``: Enables USB tracing

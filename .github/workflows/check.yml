@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Checkout nuttx repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: apache/nuttx
           path: nuttx
@@ -39,9 +39,11 @@ jobs:
       - name: Check Pull Request
         run: |
           echo "::add-matcher::nuttx/.github/nxstyle.json"
-          pip install cmake-format
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install codespell cmake-format black isort flake8 cvt2utf
           cd nuttx
           commits="${{ github.event.pull_request.base.sha }}..HEAD"
           git log --oneline $commits
-          echo "../nuttx/tools/checkpatch.sh -u -m -g $commits"
-          ../nuttx/tools/checkpatch.sh -u -m -g $commits
+          echo "../nuttx/tools/checkpatch.sh -c -u -m -g $commits"
+          ../nuttx/tools/checkpatch.sh -c -u -m -g $commits

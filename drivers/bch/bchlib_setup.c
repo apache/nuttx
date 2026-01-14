@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/bch/bchlib_setup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -53,10 +55,11 @@
  *
  ****************************************************************************/
 
-int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
+int bchlib_setup(FAR const char *blkdev, int oflags, FAR void **handle)
 {
   FAR struct bchlib_s *bch;
   struct geometry geo;
+  bool readonly = (oflags & O_WROK) == 0;
   int ret;
 
   DEBUGASSERT(blkdev);
@@ -72,7 +75,7 @@ int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
 
   /* Open the block driver */
 
-  ret = open_blockdriver(blkdev, readonly ? MS_RDONLY : 0, &bch->inode);
+  ret = open_blockdriver(blkdev, oflags, &bch->inode);
   if (ret < 0)
     {
       ferr("ERROR: Failed to open driver %s: %d\n", blkdev, -ret);
@@ -110,21 +113,6 @@ int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
   bch->sectsize = geo.geo_sectorsize;
   bch->sector   = (size_t)-1;
   bch->readonly = readonly;
-
-  /* Allocate the sector I/O buffer */
-
-#if CONFIG_BCH_BUFFER_ALIGNMENT != 0
-  bch->buffer = kmm_memalign(CONFIG_BCH_BUFFER_ALIGNMENT, bch->sectsize);
-#else
-  bch->buffer = kmm_malloc(bch->sectsize);
-#endif
-  if (!bch->buffer)
-    {
-      ferr("ERROR: Failed to allocate sector buffer\n");
-      ret = -ENOMEM;
-      goto errout_with_bch;
-    }
-
   *handle = bch;
   return OK;
 

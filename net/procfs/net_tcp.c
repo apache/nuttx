@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/procfs/net_tcp.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -66,8 +68,6 @@ static ssize_t netprocfs_tcpstats(FAR struct netprocfs_file_s *priv,
   FAR void *laddr;
   FAR void *raddr;
 
-  net_lock();
-
   while ((conn = tcp_nextconn(conn)) != NULL)
     {
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
@@ -123,8 +123,6 @@ static ssize_t netprocfs_tcpstats(FAR struct netprocfs_file_s *priv,
                       ntohs(conn->rport));
     }
 
-  net_unlock();
-
   return len;
 }
 
@@ -156,7 +154,7 @@ ssize_t netprocfs_read_tcpstats(FAR struct netprocfs_file_s *priv,
   int skip = 1;
   int len = 0;
 
-  net_lock();
+  tcp_conn_list_lock();
 
   if (tcp_nextconn(NULL) != NULL)
     {
@@ -190,7 +188,7 @@ ssize_t netprocfs_read_tcpstats(FAR struct netprocfs_file_s *priv,
 #endif /* CONFIG_NET_IPv6 */
     }
 
-  net_unlock();
+  tcp_conn_list_unlock();
 
   return len;
 }

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,12 +32,13 @@
 
 #include <nuttx/cache.h>
 #include <nuttx/init.h>
+#include <arch/barriers.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
+#include "itm_syslog.h"
 #include "nvic.h"
 #include "mpu.h"
-#include "barriers.h"
 
 #include "stm32_rcc.h"
 #include "stm32_userspace.h"
@@ -120,8 +123,7 @@ static inline void stm32_tcmenable(void)
 {
   uint32_t regval;
 
-  ARM_DSB();
-  ARM_ISB();
+  UP_MB();
 
   /* Enabled/disabled ITCM */
 
@@ -147,8 +149,7 @@ static inline void stm32_tcmenable(void)
 #endif
   putreg32(regval, NVIC_DTCMCR);
 
-  ARM_DSB();
-  ARM_ISB();
+  UP_MB();
 
 #ifdef CONFIG_ARMV7M_ITCM
   /* Copy TCM code from flash to ITCM */
@@ -169,6 +170,7 @@ static inline void stm32_tcmenable(void)
  *
  ****************************************************************************/
 
+osentry_function
 void __start(void)
 {
   const uint32_t *src;

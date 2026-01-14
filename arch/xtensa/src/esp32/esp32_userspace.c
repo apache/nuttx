@@ -188,6 +188,11 @@ static noinline_function IRAM_ATTR void configure_flash_mmu(void)
                              irom_lma_aligned, 64,
                              (int)irom_page_count) == 0);
 
+#ifdef CONFIG_ESP32_PID
+  extern void esp32_userspace_init_for_pid(void);
+  esp32_userspace_init_for_pid();
+#endif
+
   cache_read_enable(0);
 }
 
@@ -224,7 +229,7 @@ static noinline_function IRAM_ATTR void configure_sram_mmu(void)
 
 #ifdef CONFIG_SMP
   regval  = getreg32(DPORT_APP_CACHE_CTRL1_REG);
-  regval &= ~(1 << DPORT_APP_CACHE_MASK_DRAM1);
+  regval &= ~DPORT_APP_CACHE_MASK_DRAM1;
   putreg32(regval, DPORT_APP_CACHE_CTRL1_REG);
   ASSERT(cache_sram_mmu_set(1, PIDCTRL_PID_KERNEL, SOC_EXTRAM_DATA_LOW, 0,
                             32, 128) == 0);

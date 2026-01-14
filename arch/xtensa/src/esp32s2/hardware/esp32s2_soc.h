@@ -222,7 +222,7 @@ extern void rom_i2c_writereg_mask(uint8_t block, uint8_t host_id,
  * 2. running with 80MHz Flash frequency
  */
 
-#ifdef CONFIG_ESP32S2_FLASH_FREQ_80M
+#ifdef CONFIG_ESPRESSIF_FLASH_FREQ_80M
 #define DIG_DBIAS_80M_160M          RTC_CNTL_DBIAS_1V25
 #else
 #define DIG_DBIAS_80M_160M          RTC_CNTL_DBIAS_1V10
@@ -434,6 +434,19 @@ static inline bool IRAM_ATTR esp32s2_ptr_extram(const void *p)
 }
 
 /****************************************************************************
+ * Name: esp32s2_ptr_iram
+ *
+ * Description:
+ *   Check if the pointer is in IRAM
+ *
+ ****************************************************************************/
+
+static inline bool IRAM_ATTR esp32s2_ptr_iram(const void *p)
+{
+  return ((intptr_t)p >= SOC_IRAM_LOW && (intptr_t)p < SOC_IRAM_HIGH);
+}
+
+/****************************************************************************
  * Name: esp32s2_ptr_exec
  *
  * Description:
@@ -460,7 +473,7 @@ static inline bool IRAM_ATTR esp32s2_ptr_exec(const void *p)
  *   Check if the buffer comes from the RTC RAM.
  *
  * Parameters:
- *   p - Adress of the buffer.
+ *   p - Address of the buffer.
  *
  * Return Value:
  *   True if given buffer comes from RTC RAM. False if not.

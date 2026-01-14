@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/hardware/stm32_tim_v1v2.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -511,7 +513,7 @@
 #define ATIM_CR2_OIS3N            (1 << 13)                     /* Bit 13: Output Idle state 3 (OC3N output) */
 #define ATIM_CR2_OIS4             (1 << 14)                     /* Bit 14: Output Idle state 4 (OC4 output) */
 #ifdef HAVE_IP_TIMERS_V2
-#  define ATIM_CR2_OIS5             (1 << 16)                   /* Bit 16: OOutput Idle state 5 (OC5 output) */
+#  define ATIM_CR2_OIS5             (1 << 16)                   /* Bit 16: Output Idle state 5 (OC5 output) */
 #  define ATIM_CR2_OIS6             (1 << 18)                   /* Bit 18: Output Idle state 6 (OC6 output) */
 #  define ATIM_CR2_MMS2_SHIFT       (20)                        /* Bits 20-23: Master Mode Selection 2 */
 #  define ATIM_CR2_MMS2_MASK        (15 << ATIM_CR2_MMS2_SHIFT)

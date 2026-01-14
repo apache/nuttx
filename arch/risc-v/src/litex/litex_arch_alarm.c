@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/litex/litex_arch_alarm.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -51,6 +53,10 @@ void up_timer_initialize(void)
                                 RISCV_IRQ_TIMER, litex_get_hfclk());
 
   DEBUGASSERT(lower);
+
+#ifdef CONFIG_ARCH_HAVE_PERF_EVENTS
+  up_perf_init((void *)CONFIG_LITEX_SYS_CORE_FREQ_HZ);
+#endif
 
   up_alarm_set_lowerhalf(lower);
 }

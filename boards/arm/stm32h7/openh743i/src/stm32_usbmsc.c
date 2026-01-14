@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32h7/openh743i/src/stm32_usbmsc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,7 +40,7 @@
 
 #if !defined(CONFIG_USBDEV_CUSTOM_TXFIFO_SIZE) && \
   defined(CONFIG_USBDEV_DUALSPEED)
-#  error USBMSC high-speed require custom TXFIFO configuratin that set EPIN FIFO to >=512
+#  error USBMSC high-speed require custom TXFIFO configuration that set EPIN FIFO to >=512
 #endif
 
 /****************************************************************************

@@ -6,7 +6,7 @@ ESP32-H2-DevKitM-1 is an entry-level development board based on Bluetooth® Low 
 IEEE 802.15.4 combo module ESP32-H2-MINI-1 or ESP32-H2-MINI-1U. You can find the board schematic
 `here <https://espressif-docs.readthedocs-hosted.com/projects/esp-dev-kits/en/latest/_static/esp32-h2-devkitm-1/esp32-h2-devkitm-1_v1.2_schematics_20230306.pdf>`_.
 
-Most of the I/O pins on the ESP32-H2-MINI-1/1U module are broken out to the pin headers on 
+Most of the I/O pins on the ESP32-H2-MINI-1/1U module are broken out to the pin headers on
 both sides of this board for easy interfacing. Developers can either connect peripherals with
 jumper wires or mount ESP32-H2-DevKitM-1 on a breadboard.
 
@@ -87,6 +87,27 @@ All of the configurations presented below can be tested by running the following
 Where <config_name> is the name of board configuration you want to use, i.e.: nsh, buttons, wifi...
 Then use a serial console terminal like ``picocom`` configured to 115200 8N1.
 
+adc
+---
+
+The ``adc`` configuration enables the ADC driver and the ADC example application.
+ADC Unit 1 is registered to ``/dev/adc0`` with channels 0, 1, 2 and 3 enabled by default.
+Currently, the ADC operates in oneshot mode.
+
+More ADC channels can be enabled or disabled in ``ADC Configuration`` menu.
+
+This example shows channels 0 and 1 connected to 3.3 V and channels 2 and 3 to GND (all readings
+show in units of mV)::
+
+    nsh> adc -n 1
+    adc_main: g_adcstate.count: 1
+    adc_main: Hardware initialized. Opening the ADC device: /dev/adc0
+    Sample:
+    1: channel: 0 value: 3713
+    2: channel: 1 value: 3714
+    3: channel: 2 value: 1
+    4: channel: 3 value: 0
+
 bmp180
 ------
 
@@ -98,6 +119,21 @@ You can check that the sensor is working by using the ``bmp180`` application::
     Pressure value = 91526
     Pressure value = 91525
 
+buttons
+-------
+
+This configuration shows the use of the buttons subsystem. It can be used by executing
+the ``buttons`` application and pressing the ``BOOT`` button on the board::
+
+    nsh> buttons
+    buttons_main: Starting the button_daemon
+    buttons_main: button_daemon started
+    button_daemon: Running
+    button_daemon: Opening /dev/buttons
+    button_daemon: Supported BUTTONs 0x01
+    nsh> Sample = 1
+    Sample = 0
+
 coremark
 --------
 
@@ -107,6 +143,61 @@ disables the NuttShell to get the best possible score.
 
 .. note:: As the NSH is disabled, the application will start as soon as the
   system is turned on.
+
+crypto
+------
+
+This configuration enables support for the cryptographic hardware and
+the ``/dev/crypto`` device file. Currently, we are supporting SHA-1,
+SHA-224 and SHA-256 algorithms using hardware.
+To test hardware acceleration, you can use `hmac` example and following output
+should look like this::
+
+    nsh> hmac
+    ...
+    hmac sha1 success
+    hmac sha1 success
+    hmac sha1 success
+    hmac sha256 success
+    hmac sha256 success
+    hmac sha256 success
+
+efuse
+-----
+
+This configuration demonstrates the use of the eFuse driver. It can be accessed
+through the ``/dev/efuse`` device file.
+Virtual eFuse mode can be used by enabling `CONFIG_ESPRESSIF_EFUSE_VIRTUAL`
+option to prevent possible damages on chip.
+
+The following snippet demonstrates how to read MAC address:
+
+.. code-block:: C
+
+   int fd;
+   int ret;
+   uint8_t mac[6];
+   struct efuse_param_s param;
+   struct efuse_desc_s mac_addr =
+   {
+     .bit_offset = 1,
+     .bit_count = 48
+   };
+
+   const efuse_desc_t* desc[] =
+   {
+       &mac_addr,
+       NULL
+   };
+   param.field = desc;
+   param.size = 48;
+   param.data = mac;
+
+   fd = open("/dev/efuse", O_RDONLY);
+   ret = ioctl(fd, EFUSEIOC_READ_FIELD, &param);
+
+To find offset and count variables for related eFuse,
+please refer to Espressif's Technical Reference Manuals.
 
 gpio
 ----
@@ -129,6 +220,41 @@ We can use the interrupt pin to send a signal when the interrupt fires::
 The pin is configured as a rising edge interrupt, so after issuing the
 above command, connect it to 3.3V.
 
+To use dedicated gpio for controlling multiple gpio pin at the same time
+or having better response time, you need to enable
+`CONFIG_ESPRESSIF_DEDICATED_GPIO` option. Dedicated GPIO is suitable
+for faster response times required applications like simulate serial/parallel
+interfaces in a bit-banging way.
+After this option enabled GPIO4 and GPIO5 pins are ready to used as dedicated GPIO pins
+as input/output mode. These pins are for example, you can use any pin up to 8 pins for
+input and 8 pins for output for dedicated gpio.
+To write and read data from dedicated gpio, you need to use
+`write` and `read` calls.
+
+The following snippet demonstrates how to read/write to dedicated GPIO pins:
+
+.. code-block:: C
+
+    int fd; = open("/dev/dedic_gpio0", O_RDWR);
+    int rd_val = 0;
+    int wr_mask = 0xffff;
+    int wr_val = 3;
+
+    while(1)
+      {
+        write(fd, &wr_val, wr_mask);
+        if (wr_val == 0)
+          {
+            wr_val = 3;
+          }
+        else
+          {
+            wr_val = 0;
+          }
+        read(fd, &rd_val, sizeof(uint32_t));
+        printf("rd_val: %d", rd_val);
+      }
+
 i2c
 ---
 
@@ -136,6 +262,46 @@ This configuration can be used to scan and manipulate I2C devices.
 You can scan for all I2C devices using the following command::
 
     nsh> i2c dev 0x00 0x7f
+
+To use slave mode, you can enable `ESPRESSIF_I2C0_SLAVE_MODE` option.
+To use slave mode driver following snippet demonstrates how write to i2c bus
+using slave driver:
+
+.. code-block:: C
+
+   #define ESP_I2C_SLAVE_PATH  "/dev/i2cslv0"
+   int main(int argc, char *argv[])
+     {
+       int i2c_slave_fd;
+       int ret;
+       uint8_t buffer[5] = {0xAA};
+       i2c_slave_fd = open(ESP_I2C_SLAVE_PATH, O_RDWR);
+       ret = write(i2c_slave_fd, buffer, 5);
+       close(i2c_slave_fd);
+    }
+
+i2schar
+-------
+
+This configuration enables the I2S character device and the i2schar example
+app, which provides an easy-to-use way of testing the I2S peripheral,
+enabling both the TX and the RX for those peripherals.
+
+**I2S pinout**
+
+============ ========== =========================================
+ESP32-C3 Pin Signal Pin Description
+============ ========== =========================================
+0            MCLK       Master Clock
+4            SCLK       Bit Clock (SCLK)
+5            LRCK       Word Select (LRCLK)
+10           DOUT       Data Out
+11           DIN        Data In
+============ ========== =========================================
+
+After successfully built and flashed, run on the boards's terminal::
+
+    nsh> i2schar
 
 mcuboot_nsh
 --------------------
@@ -155,6 +321,69 @@ ostest
 This is the NuttX test at ``apps/testing/ostest`` that is run against all new
 architecture ports to assure a correct implementation of the OS.
 
+pm
+-------
+
+This config demonstrate the use of power management.
+You can use the ``pmconfig`` command to check current power state and time spent in other power states.
+Also you can define time will spend in standby and sleep modes::
+
+    $ make menuconfig
+    -> Board Selection
+        -> (15) PM_STANDBY delay (seconds)
+           (0)  PM_STANDBY delay (nanoseconds)
+           (20) PM_SLEEP delay (seconds)
+           (0)  PM_SLEEP delay (nanoseconds)
+
+Timer wakeup is not only way to wake up the chip. Other wakeup modes include:
+
+- EXT1 wakeup mode: Uses RTC GPIO pins to wake up the chip. Enabled with ``CONFIG_PM_EXT1_WAKEUP`` option.
+- ULP coprocessor wakeup mode: Uses ULP co-processor to wake up the chip. Enabled with ``CONFIG_PM_ULP_WAKEUP`` option.
+- GPIO wakeup mode: Uses GPIO pins to wakeup the chip. Only wakes up the chip from ``PM_STANDBY`` mode and requires ``CONFIG_PM_GPIO_WAKEUP``.
+- UART wakeup mode: Uses UART to wakeup the chip. Only wakes up the chip from ``PM_STANDBY`` mode and requires ``CONFIG_PM_GPIO_WAKEUP``.
+
+Before switching PM status, you need to query the current PM status to call correct number of relax command to correct modes::
+
+    nsh> pmconfig
+    Last state 0, Next state 0
+
+    /proc/pm/state0:
+    DOMAIN0           WAKE         SLEEP         TOTAL
+    normal          0s 00%        0s 00%        0s 00%
+    idle            0s 00%        0s 00%        0s 00%
+    standby         0s 00%        0s 00%        0s 00%
+    sleep           0s 00%        0s 00%        0s 00%
+
+    /proc/pm/wakelock0:
+    DOMAIN0      STATE     COUNT      TIME
+    system       normal        2        1s
+    system       idle          1        1s
+    system       standby       1        1s
+    system       sleep         1        1s
+
+In this case, needed commands to switch the system into PM idle mode::
+
+    nsh> pmconfig relax normal
+    nsh> pmconfig relax normal
+
+In this case, needed commands to switch the system into PM standby mode::
+
+    nsh> pmconfig relax idle
+    nsh> pmconfig relax normal
+    nsh> pmconfig relax normal
+
+System switch to the PM sleep mode, you need to enter::
+
+    nsh> pmconfig relax standby
+    nsh> pmconfig relax idle
+    nsh> pmconfig relax normal
+    nsh> pmconfig relax normal
+
+Note: When normal mode COUNT is 0, it will switch to the next PM state where COUNT is not 0.
+
+Note: During light sleep, overall current consumption of board should drop from 14mA (without any system load) to 880 μA on ESP32-H2 DevkitM-1.
+During deep sleep, current consumption of module (ESP32-H2-MINI-1) should drop from 9mA (without any system load) to 8 μA.
+
 pwm
 ---
 
@@ -164,6 +393,16 @@ To test it, just execute the ``pwm`` application::
     nsh> pwm
     pwm_main: starting output with frequency: 10000 duty: 00008000
     pwm_main: stopping output
+
+qencoder
+---
+
+This configuration demonstrates the use of Quadrature Encoder connected to pins
+GPIO10 and GPIO11. You can start measurement of pulses using the following
+command (by default, it will open ``\dev\qe0`` device and print 20 samples
+using 1 second delay)::
+
+    nsh> qe
 
 rmt
 ---
@@ -194,6 +433,59 @@ This same configuration enables the usage of the RMT peripheral and the example
 Please note that this board contains an on-board WS2812 LED connected to GPIO8
 and, by default, this config configures the RMT transmitter in the same pin.
 
+romfs
+-----
+
+This configuration demonstrates the use of ROMFS (Read-Only Memory File System) to provide
+automated system initialization and startup scripts. ROMFS allows embedding a read-only
+filesystem directly into the NuttX binary, which is mounted at ``/etc`` during system startup.
+
+**What ROMFS provides:**
+
+* **System initialization script** (``/etc/init.d/rc.sysinit``): Executed after board bring-up
+* **Startup script** (``/etc/init.d/rcS``): Executed after system init, typically used to start applications
+
+**Default behavior:**
+
+When this configuration is used, NuttX will:
+
+1. Create a read-only RAM disk containing the ROMFS filesystem
+2. Mount the ROMFS at ``/etc``
+3. Execute ``/etc/init.d/rc.sysinit`` during system initialization
+4. Execute ``/etc/init.d/rcS`` for application startup
+
+**Customizing startup scripts:**
+
+The startup scripts are located in:
+``boards/risc-v/esp32h2/common/src/etc/init.d/``
+
+* ``rc.sysinit`` - System initialization script
+* ``rcS`` - Application startup script
+
+To customize these scripts:
+
+1. **Edit the script files** in ``boards/risc-v/esp32h2/common/src/etc/init.d/``
+2. **Add your initialization commands** using any NSH-compatible commands
+
+**Example customizations:**
+
+* **rc.sysinit** - Set up system services, mount additional filesystems, configure network.
+* **rcS** - Start your application, launch daemons, configure peripherals. This is executed after the rc.sysinit script.
+
+Example output::
+
+    *** Booting NuttX ***
+    [...]
+    rc.sysinit is called!
+    rcS file is called!
+    NuttShell (NSH) NuttX-12.8.0
+    nsh> ls /etc/init.d
+    /etc/init.d:
+    .
+    ..
+    rc.sysinit
+    rcS
+
 rtc
 ---
 
@@ -210,16 +502,66 @@ You can set an alarm, check its progress and receive a notification after it exp
     Alarm 0 is active with 10 seconds to expiration
     nsh> alarm_daemon: alarm 0 received
 
+sdm
+---
+
+This configuration enables the support for the Sigma-Delta Modulation (SDM) driver
+which can be used for LED dimming, simple dac with help of an low pass filter either
+active or passive and so on. ESP32-H2 supports 1 group of SDM up to 4 channels with
+any GPIO up to user. This configuration enables 1 channel of SDM on GPIO5. You can test
+DAC feature with following command with connecting simple LED on GPIO5
+
+    nsh> dac -d 100 -s 10 test
+
+After this command you will see LED will light up in different brightness.
+
+sdmmc_spi
+---------
+
+This configuration is used to mount a FAT/FAT32 SD Card into the OS' filesystem.
+It uses SPI to communicate with the SD Card, defaulting to SPI2.
+
+The SD slot number, SPI port number and minor number can be modified in ``Application Configuration → NSH Library``.
+
+To access the card's files, make sure ``/dev/mmcsd0`` exists and then execute the following commands::
+
+    nsh> ls /dev
+    /dev:
+    console
+    mmcsd0
+    null
+    ttyS0
+    zero
+    nsh> mount -t vfat /dev/mmcsd0 /mnt
+
+This will mount the SD Card to ``/mnt``. Now, you can use the SD Card as a normal filesystem.
+For example, you can read a file and write to it::
+
+    nsh> ls /mnt
+    /mnt:
+    hello.txt
+    nsh> cat /mnt/hello.txt
+    Hello World
+    nsh> echo 'NuttX RTOS' >> /mnt/hello.txt
+    nsh> cat /mnt/hello.txt
+    Hello World!
+    NuttX RTOS
+    nsh>
+
 spi
 --------
 
 This configuration enables the support for the SPI driver.
-You can test it by connecting MOSI and MISO pins which are GPIO7 and GPIO2
+You can test it by connecting MOSI and MISO pins which are GPIO5 and GPIO0
 by default to each other and running the ``spi`` example::
 
     nsh> spi exch -b 2 "AB"
     Sending:	AB
     Received:	AB
+
+If SPI peripherals are already in use you can also use bitbang driver which is a
+software implemented SPI peripheral by enabling `CONFIG_ESPRESSIF_SPI_BITBANG`
+option.
 
 spiflash
 --------

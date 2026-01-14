@@ -1,8 +1,7 @@
 /****************************************************************************
  * include/search.h
  *
- * $NetBSD: search.h,v 1.12 1999/02/22 10:34:28 christos Exp $
- * $FreeBSD: src/include/search.h,v 1.4 2002/03/23 17:24:53 imp Exp $
+ * SPDX-License-Identifier: LicenseRef-NuttX-PublicDomain
  *
  * Written by J.T. Conklin <jtc@netbsd.org>
  * Public domain.
@@ -43,7 +42,12 @@ struct hsearch_data
 {
   FAR struct internal_head *htable;
   size_t htablesize;
+  CODE void (*free_entry)(FAR ENTRY *entry);
 };
+
+/* This is the callback type used by hforeach() */
+
+typedef CODE void (*hforeach_t)(FAR ENTRY *entry, FAR void *data);
 
 /****************************************************************************
  * Public Function Prototypes
@@ -109,6 +113,24 @@ void hdestroy(void);
 FAR ENTRY *hsearch(ENTRY, ACTION);
 
 /****************************************************************************
+ * Name: hforeach
+ *
+ * Description:
+ *   The hforeach() function iterates over the entries in the hashing table
+ *   specified by htab.  The function is called for each entry in the
+ *   table.  The function fn is called with the entry and the data argument.
+ *   The data argument is passed to the function.
+ *
+ *   The hforeach_r() function is the reentrant version of hforeach().
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void hforeach(hforeach_t, FAR void *);
+
+/****************************************************************************
  * Name: hcreate_r
  *
  * Description:
@@ -159,5 +181,23 @@ void hdestroy_r(FAR struct hsearch_data *);
  ****************************************************************************/
 
 int hsearch_r(ENTRY, ACTION, FAR ENTRY **, FAR struct hsearch_data *);
+
+/****************************************************************************
+ * Name: hforeach_r
+ *
+ * Description:
+ *   Iterate over the entries in a hash table.
+ *
+ * Input Parameters:
+ *   handle - The function to call for each entry.
+ *   data - The data to pass to the function.
+ *   htab - The hash table to be iterated.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void hforeach_r(hforeach_t, FAR void *, FAR struct hsearch_data *);
 
 #endif /* __INCLUDE_SEARCH_H */

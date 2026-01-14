@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/imxrt/imxrt1060-evk/scripts/flash-ocram.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,7 +37,7 @@
  * This is the OCRAM inker script.
  * The NXP ROM bootloader will move the FLASH image to OCRAM.
  * We must reserve 32K for the bootloader' OCRAM usage from  the OCRAM Size
- * and an additinal 8K for the ivt_s which is IVT_SIZE(8K) This 40K can be
+ * and an additional 8K for the ivt_s which is IVT_SIZE(8K) This 40K can be
  * reused once the application is running.
  *
  *      0x2020:A000 to 0x202d:ffff - The application Image's vector table
@@ -123,7 +125,7 @@ SECTIONS
     {
         _sinit = ABSOLUTE(.);
         KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
-        KEEP(*(.init_array .ctors))
+        KEEP(*(.init_array EXCLUDE_FILE(*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o) .ctors))
         _einit = ABSOLUTE(.);
     } > flash
 

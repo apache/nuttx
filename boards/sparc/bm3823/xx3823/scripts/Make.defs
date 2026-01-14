@@ -1,6 +1,8 @@
 ############################################################################
 # boards/sparc/bm3823/xx3823/scripts/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -25,8 +27,8 @@ include ${TOPDIR}/arch/sparc/src/sparc_v8/Toolchain.defs
 LDSCRIPT = linksparc.ld
 ARCHSCRIPT += $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)
 
-CFLAGS = $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
-CXXFLAGS = $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CFLAGS = $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+CXXFLAGS = $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS = $(CFLAGS) -D__ASSEMBLY__

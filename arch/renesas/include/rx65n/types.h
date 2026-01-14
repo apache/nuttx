@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/renesas/include/rx65n/types.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -69,6 +71,9 @@ typedef __WCHAR_TYPE__     _wchar_t;
 #else
 typedef int                _wchar_t;
 #endif
+
+typedef int                _wint_t;
+typedef int                _wctype_t;
 
 /* A size is 4 bytes */
 

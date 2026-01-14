@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/sim_schedulesigaction.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -71,27 +73,15 @@
  *
  ****************************************************************************/
 
-void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
+void up_schedule_sigaction(struct tcb_s *tcb)
 {
-  irqstate_t flags;
-
   /* We don't have to anything complex for the simulated target */
 
-  sinfo("tcb=%p sigdeliver=%p\n", tcb, sigdeliver);
+  sinfo("tcb=%p\n", tcb);
 
-  /* Make sure that interrupts are disabled */
-
-  flags = enter_critical_section();
-
-  if (tcb->xcp.sigdeliver == NULL)
+  if (tcb == this_task())
     {
-      tcb->xcp.sigdeliver = sigdeliver;
-      if (tcb == this_task())
-        {
-          sigdeliver(tcb);
-          tcb->xcp.sigdeliver = NULL;
-        }
+      (tcb->sigdeliver)(tcb);
+      tcb->sigdeliver = NULL;
     }
-
-  leave_critical_section(flags);
 }

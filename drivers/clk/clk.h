@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/clk/clk.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,7 +32,9 @@
 #include <stdint.h>
 #include <strings.h>
 #include <sys/param.h>
+
 #include <nuttx/bits.h>
+#include <nuttx/lib/math32.h>
 
 #ifdef CONFIG_CLK
 
@@ -40,9 +44,6 @@
 
 #define MASK(width)                 (BIT(width) - 1)
 #define MULT_ROUND_UP(r, m)         ((r) * (m) + (m) - 1)
-#define DIV_ROUND_UP(n,d)           (((n) + (d) - 1) / (d))
-#define DIV_ROUND_CLOSEST(n, d)     ((((n) < 0) ^ ((d) < 0)) ? \
-                                    (((n) - (d)/2)/(d)) : (((n) + (d)/2)/(d)))
 
 /****************************************************************************
  * Inline Functions
@@ -50,12 +51,20 @@
 
 static inline void clk_write(uint32_t reg, uint32_t value)
 {
-  *((volatile uint32_t *) (reg)) = value;
+  *((volatile uint32_t *)(uintptr_t)reg) = value;
 }
 
 static inline uint32_t clk_read(uint32_t reg)
 {
-  return *((volatile uint32_t *) (reg));
+  return *((volatile uint32_t *)(uintptr_t)reg);
+}
+
+static inline bool clk_is_best_rate_closest(uint32_t rate, uint32_t now,
+                                            uint32_t best)
+{
+  uint32_t rate1 = rate > now ? (rate - now) : (now - rate);
+  uint32_t rate2 = rate > best ? (rate - best) : (best - rate);
+  return rate1 < rate2;
 }
 
 static inline uint32_t gcd(uint32_t a, uint32_t b)
@@ -82,21 +91,6 @@ static inline uint32_t gcd(uint32_t a, uint32_t b)
     }
 
   return b;
-}
-
-static inline int is_power_of_2(uint32_t n)
-{
-  return (n != 0 && ((n & (n - 1)) == 0));
-}
-
-static inline uint32_t roundup_pow_of_two(uint32_t n)
-{
-  return 1 << fls(n - 1);
-}
-
-static inline uint32_t rounddown_pow_of_two(uint32_t n)
-{
-  return 1 << (fls(n) - 1);
 }
 
 static inline uint32_t roundup_double(double n)

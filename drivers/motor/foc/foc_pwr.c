@@ -1,6 +1,7 @@
 /****************************************************************************
  * drivers/motor/foc/foc_pwr.c
- * Power-stage FOC logic
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -61,7 +62,7 @@ int focpwr_initialize(FAR struct focpwr_dev_s *pwr,
   pwr->devno = devno;
   pwr->ops   = ops;
 
-  /* Connet to FOC device */
+  /* Connect to FOC device */
 
   dev->pwr = pwr;
 

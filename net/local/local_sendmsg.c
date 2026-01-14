@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/local/local_sendmsg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -63,8 +65,7 @@ static void local_freectl(FAR struct local_conn_s *conn, int count)
 
   while (count-- > 0)
     {
-      file_close(peer->lc_cfps[--peer->lc_cfpcount]);
-      kmm_free(peer->lc_cfps[peer->lc_cfpcount]);
+      file_put(peer->lc_cfps[--peer->lc_cfpcount]);
       peer->lc_cfps[peer->lc_cfpcount] = NULL;
     }
 }
@@ -73,15 +74,14 @@ static int local_sendctl(FAR struct local_conn_s *conn,
                          FAR struct msghdr *msg)
 {
   FAR struct local_conn_s *peer;
-  FAR struct file *filep2;
   FAR struct file *filep;
-  struct cmsghdr *cmsg;
+  FAR struct cmsghdr *cmsg;
   int count = 0;
-  int *fds;
+  FAR int *fds;
   int ret;
   int i = 0;
 
-  net_lock();
+  local_lock();
   peer = conn->lc_peer;
   if (peer == NULL)
     {
@@ -98,7 +98,7 @@ static int local_sendctl(FAR struct local_conn_s *conn,
           goto fail;
         }
 
-      fds = (int *)CMSG_DATA(cmsg);
+      fds = (FAR int *)CMSG_DATA(cmsg);
       count = (cmsg->cmsg_len - sizeof(struct cmsghdr)) / sizeof(int);
 
       if (count + peer->lc_cfpcount >= LOCAL_NCONTROLFDS)
@@ -109,36 +109,22 @@ static int local_sendctl(FAR struct local_conn_s *conn,
 
       for (i = 0; i < count; i++)
         {
-          ret = fs_getfilep(fds[i], &filep);
+          ret = file_get(fds[i], &filep);
           if (ret < 0)
             {
               goto fail;
             }
 
-          filep2 = kmm_zalloc(sizeof(*filep2));
-          if (!filep2)
-            {
-              ret = -ENOMEM;
-              goto fail;
-            }
-
-          ret = file_dup2(filep, filep2);
-          if (ret < 0)
-            {
-              kmm_free(filep2);
-              goto fail;
-            }
-
-          peer->lc_cfps[peer->lc_cfpcount++] = filep2;
+          peer->lc_cfps[peer->lc_cfpcount++] = filep;
         }
     }
 
-  net_unlock();
+  local_unlock();
   return count;
 
 fail:
   local_freectl(conn, i);
-  net_unlock();
+  local_unlock();
   return ret;
 }
 #endif /* CONFIG_NET_LOCAL_SCM */
@@ -210,8 +196,7 @@ static ssize_t local_send(FAR struct socket *psock,
               return ret;
             }
 
-          ret = local_send_packet(&conn->lc_outfile, buf, len,
-                                  psock->s_type == SOCK_DGRAM);
+          ret = local_send_packet(&conn->lc_outfile, buf, len);
           nxmutex_unlock(&conn->lc_sendlock);
         }
         break;
@@ -262,7 +247,8 @@ static ssize_t local_sendto(FAR struct socket *psock,
 {
 #ifdef CONFIG_NET_LOCAL_DGRAM
   FAR struct local_conn_s *conn = psock->s_conn;
-  FAR struct sockaddr_un *unaddr = (FAR struct sockaddr_un *)to;
+  FAR struct local_conn_s *server;
+  FAR const struct sockaddr_un *unaddr = (FAR const struct sockaddr_un *)to;
   ssize_t ret;
 
   /* Verify that a valid address has been provided */
@@ -272,6 +258,17 @@ static ssize_t local_sendto(FAR struct socket *psock,
       nerr("ERROR: Unrecognized address family: %d\n",
            to->sa_family);
       return -EAFNOSUPPORT;
+    }
+
+  /* At present, only standard pathname type address are support */
+
+  if (tolen < sizeof(sa_family_t) + 2)
+    {
+      /* EFAULT
+       * - An invalid user space address was specified for a parameter
+       */
+
+      return -EFAULT;
     }
 
   /* If this is a connected socket, then return EISCONN */
@@ -296,31 +293,43 @@ static ssize_t local_sendto(FAR struct socket *psock,
       return -EISCONN;
     }
 
+  local_lock();
+
+  server = local_findconn(conn, unaddr);
+  if (server == NULL)
+    {
+      local_unlock();
+      nerr("ERROR: No such file or directory\n");
+      return -ENOENT;
+    }
+
+  local_unlock();
+
+  /* Make sure that dgram is sent safely */
+
+  ret = nxmutex_lock(&conn->lc_sendlock);
+  if (ret < 0)
+    {
+      /* May fail because the task was canceled. */
+
+      nerr("ERROR: Failed to get localsocket sendlock: %zd\n", ret);
+      return ret;
+    }
+
   /* The outgoing FIFO should not be open */
 
   DEBUGASSERT(conn->lc_outfile.f_inode == NULL);
-
-  /* At present, only standard pathname type address are support */
-
-  if (tolen < sizeof(sa_family_t) + 2)
-    {
-      /* EFAULT
-       * - An invalid user space address was specified for a parameter
-       */
-
-      return -EFAULT;
-    }
 
   /* Make sure that half duplex FIFO has been created.
    * REVISIT:  Or should be just make sure that it already exists?
    */
 
-  ret = local_create_halfduplex(conn, unaddr->sun_path);
+  ret = local_create_halfduplex(conn, unaddr->sun_path, server->lc_rcvsize);
   if (ret < 0)
     {
       nerr("ERROR: Failed to create FIFO for %s: %zd\n",
-           conn->lc_path, ret);
-      return ret;
+           unaddr->sun_path, ret);
+      goto errout_with_lock;
     }
 
   /* Open the sending side of the transfer */
@@ -336,25 +345,24 @@ static ssize_t local_sendto(FAR struct socket *psock,
       goto errout_with_halfduplex;
     }
 
-  /* Make sure that dgram is sent safely */
+  /* Send the preamble */
 
-  ret = nxmutex_lock(&conn->lc_sendlock);
+  ret = local_send_preamble(conn, &conn->lc_outfile, buf, len,
+                            server->lc_rcvsize);
   if (ret < 0)
     {
-      /* May fail because the task was canceled. */
-
+      nerr("ERROR: Failed to send the preamble: %zd\n", ret);
       goto errout_with_sender;
     }
 
   /* Send the packet */
 
-  ret = local_send_packet(&conn->lc_outfile, buf, len, true);
+  ret = local_send_packet(&conn->lc_outfile, buf, len);
   if (ret < 0)
     {
       nerr("ERROR: Failed to send the packet: %zd\n", ret);
+      goto errout_with_sender;
     }
-
-  nxmutex_unlock(&conn->lc_sendlock);
 
 errout_with_sender:
 
@@ -368,6 +376,12 @@ errout_with_halfduplex:
   /* Release our reference to the half duplex FIFO */
 
   local_release_halfduplex(conn);
+
+errout_with_lock:
+
+  /* Release localsocket sendlock */
+
+  nxmutex_unlock(&conn->lc_sendlock);
   return ret;
 #else
   return -EISCONN;
@@ -403,6 +417,7 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   FAR const struct iovec *buf = msg->msg_iov;
   socklen_t tolen = msg->msg_namelen;
   size_t len = msg->msg_iovlen;
+
 #ifdef CONFIG_NET_LOCAL_SCM
   FAR struct local_conn_s *conn = psock->s_conn;
   int count = 0;
@@ -416,17 +431,19 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
           return count;
         }
     }
-#endif /* CONFIG_NET_LOCAL_SCM */
 
   len = to ? local_sendto(psock, buf, len, flags, to, tolen) :
              local_send(psock, buf, len, flags);
-#ifdef CONFIG_NET_LOCAL_SCM
+
   if (len < 0 && count > 0)
     {
-      net_lock();
+      local_lock();
       local_freectl(conn, count);
-      net_unlock();
+      local_unlock();
     }
+#else
+  len = to ? local_sendto(psock, buf, len, flags, to, tolen) :
+             local_send(psock, buf, len, flags);
 #endif
 
   return len;

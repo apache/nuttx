@@ -1,11 +1,10 @@
 /****************************************************************************
  * include/nuttx/power/bq2429x.h
- * Lower half driver for BQ2429X battery charger
  *
- *   Copyright (C) 2017 Neil Hancock. All rights reserved.
- *
- *   Copyright (C) 2017 Haltian Ltd. All rights reserved.
- *   Author: Juha Niskanen <juha.niskanen@haltian.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2017 Neil Hancock. All rights reserved.
+ * SPDX-FileCopyrightText: 2017 Haltian Ltd. All rights reserved.
+ * SPDX-FileContributor: Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

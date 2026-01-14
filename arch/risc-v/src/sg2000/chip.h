@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/sg2000/chip.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,14 +49,14 @@
  * Name: setintstack
  *
  * Description:
- *   Set the current stack pointer to the  "top" the correct interrupt stack
- *   for the current CPU.
+ *   Set the current stack pointer to the "top" of the correct interrupt
+ *   stack for the current CPU.
  *
  ****************************************************************************/
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
 .macro  setintstack tmp0, tmp1
-  riscv_mhartid \tmp0
+  up_cpu_index \tmp0
   li    \tmp1, STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK)
   mul   \tmp1, \tmp0, \tmp1
   la    \tmp0, g_intstacktop

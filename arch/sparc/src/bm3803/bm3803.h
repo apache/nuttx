@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sparc/src/bm3803/bm3803.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -439,7 +441,7 @@ static inline unsigned int bm3803_r32_no_cache(uintptr_t addr)
  * Name: up_clkinit
  *
  * Description:
- *   Initialiaze clock/PLL settings per the definitions in the board.h file.
+ *   Initialize clock/PLL settings per the definitions in the board.h file.
  *
  ****************************************************************************/
 

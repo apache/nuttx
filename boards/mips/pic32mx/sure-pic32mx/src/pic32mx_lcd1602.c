@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/mips/pic32mx/sure-pic32mx/src/pic32mx_lcd1602.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -23,7 +25,7 @@
  * controller
  */
 
-/* LCD pin mapping (see boards/sure-pic32mx/README.txt)
+/* LCD pin mapping
  *
  *  --------------------- ---------- ----------------------------------
  *  PIC32                  Sure JP1   Sure Signal Description
@@ -107,7 +109,7 @@
 #define NOP              __asm__ __volatile__ ("nop");
 
 /****************************************************************************
- * Private Type Definition
+ * Private Types
  ****************************************************************************/
 
 /* Global LCD state */

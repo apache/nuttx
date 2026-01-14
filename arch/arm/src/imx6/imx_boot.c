@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/imx6/imx_boot.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -116,7 +118,7 @@ static void imx_vectorpermissions(uint32_t mmuflags)
 {
   /* The PTE for the beginning of OCRAM is at the base of the L2 page table */
 
-  uint32_t pte = mmu_l2_getentry(PG_L2_VECT_VADDR, 0);
+  uintptr_t pte = mmu_l2_getentry(PG_L2_VECT_VADDR, 0);
 
   /* Mask out the old MMU flags from the page table entry.
    *
@@ -359,6 +361,7 @@ static inline void imx_wdtdisable(void)
  *
  ****************************************************************************/
 
+osentry_function
 void arm_boot(void)
 {
 #if defined(CONFIG_ARCH_RAMFUNCS)

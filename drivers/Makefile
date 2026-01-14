@@ -1,6 +1,8 @@
 ############################################################################
 # drivers/Makefile
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -38,6 +40,7 @@ include math/Make.defs
 include motor/Make.defs
 include i2c/Make.defs
 include i2s/Make.defs
+include i3c/Make.defs
 include ipcc/Make.defs
 include input/Make.defs
 include ioexpander/Make.defs
@@ -52,6 +55,7 @@ include eeprom/Make.defs
 include efuse/Make.defs
 include net/Make.defs
 include note/Make.defs
+include pinctrl/Make.defs
 include pipes/Make.defs
 include power/Make.defs
 include regmap/Make.defs
@@ -62,11 +66,13 @@ include sensors/Make.defs
 include serial/Make.defs
 include spi/Make.defs
 include syslog/Make.defs
+include thermal/Make.defs
 include timers/Make.defs
 include usbdev/Make.defs
 include usbhost/Make.defs
 include usbmisc/Make.defs
 include usbmonitor/Make.defs
+include vhost/Make.defs
 include video/Make.defs
 include virtio/Make.defs
 include wireless/Make.defs
@@ -78,7 +84,8 @@ include segger/Make.defs
 include usrsock/Make.defs
 include reset/Make.defs
 include pci/Make.defs
-include virt/Make.defs
+include coresight/Make.defs
+include aie/Make.defs
 
 ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
 -include platform/Make.defs

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/bl808/bl808_spi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1296,7 +1298,7 @@ static void bl808_spi_init(struct spi_dev_s *dev)
  * Name: bl808_spibus_initialize
  *
  * Description:
- *   Initialize and register the configured SPI busses
+ *   Initialize and register the configured SPI buses
  *
  ****************************************************************************/
 

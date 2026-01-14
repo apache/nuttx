@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/common/src/stm32_ws2812.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -94,7 +96,7 @@ int board_ws2812_initialize(int devno, int spino, uint16_t nleds)
 
   /* Register the WS2812 driver at the specified location. */
 
-  snprintf(devpath, 13, "/dev/leddrv%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/leddrv%d", devno);
   ret = ws2812_leds_register(devpath, spi, nleds);
   if (ret < 0)
     {

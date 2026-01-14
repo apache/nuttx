@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/rv32m1/rv32m1_head.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,6 +36,7 @@
   /* Exported Symbols */
 
   .global exception_common
+  .global return_from_exception
   .global __start
 
   .section .text
@@ -154,6 +157,8 @@ exception_common:
   /* Call interrupt handler in C */
 
   jal  x1, rv32m1_dispatch_irq
+
+return_from_exception:
 
   /* If context switch is needed, return a new sp */
 

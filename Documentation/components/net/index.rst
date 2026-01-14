@@ -12,10 +12,14 @@ Network Support
   nat.rst
   netdev.rst
   netdriver.rst
+  mdio.rst
   netguardsize.rst
   netlink.rst
   slip.rst
   wqueuedeadlocks.rst
+  tcp_network_perf.rst
+  delay_act_and_tcp_perf.rst
+  tcp_state_machine.rst
 
 ``net`` Directory Structure ::
 

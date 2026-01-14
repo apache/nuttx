@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_rtc_lowerhalf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -361,6 +363,7 @@ static int cxd56_setrelative(struct rtc_lowerhalf_s *lower,
   struct timespec ts;
   time_t seconds;
   int ret = -EINVAL;
+  irqstate_t flags;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL);
   DEBUGASSERT((RTC_ALARM0 <= alarminfo->id) &&
@@ -372,7 +375,7 @@ static int cxd56_setrelative(struct rtc_lowerhalf_s *lower,
        * about being suspended and working on an old time.
        */
 
-      sched_lock();
+      flags = enter_critical_section();
 
 #if defined(CONFIG_RTC_HIRES)
       /* Get the higher resolution time */
@@ -380,7 +383,7 @@ static int cxd56_setrelative(struct rtc_lowerhalf_s *lower,
       ret = up_rtc_gettime(&ts);
       if (ret < 0)
         {
-          sched_unlock();
+          leave_critical_section(flags);
           return ret;
         }
 #else
@@ -406,7 +409,7 @@ static int cxd56_setrelative(struct rtc_lowerhalf_s *lower,
 
       ret = cxd56_setalarm(lower, &setalarm);
 
-      sched_unlock();
+      leave_critical_section(flags);
     }
 
   return ret;

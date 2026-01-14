@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_pwm.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -252,7 +254,7 @@ static int convert_freq2period(uint32_t freq, ub16_t duty, uint32_t *param,
       return -1;
     }
 
-  /* calcurate prescale */
+  /* calculate prescale */
 
   if ((freq << 8) < (pwmfreq >> 8))
     {

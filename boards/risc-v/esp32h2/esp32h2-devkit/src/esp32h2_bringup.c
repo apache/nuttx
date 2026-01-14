@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/esp32h2/esp32h2-devkit/src/esp32h2_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -63,22 +65,62 @@
 #  include <nuttx/input/buttons.h>
 #endif
 
+#ifdef CONFIG_ESPRESSIF_EFUSE
+#  include "espressif/esp_efuse.h"
+#endif
+
 #ifdef CONFIG_ESP_RMT
 #  include "esp_board_rmt.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_I2S
+#  include "esp_board_i2s.h"
 #endif
 
 #ifdef CONFIG_ESPRESSIF_SPI
 #  include "espressif/esp_spi.h"
 #  include "esp_board_spidev.h"
+#  ifdef CONFIG_ESPRESSIF_SPI_BITBANG
+#    include "espressif/esp_spi_bitbang.h"
+#  endif
 #endif
 
-#ifdef CONFIG_SPI_SLAVE_DRIVER
+#ifdef CONFIG_SPI_SLAVE
 #  include "espressif/esp_spi.h"
 #  include "esp_board_spislavedev.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_TEMP
+#  include "espressif/esp_temperature_sensor.h"
+#endif
+
 #ifdef CONFIG_ESP_MCPWM
 #  include "esp_board_mcpwm.h"
+#endif
+
+#ifdef CONFIG_ESP_PCNT
+#  include "espressif/esp_pcnt.h"
+#  include "esp_board_pcnt.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_ADC
+#  include "esp_board_adc.h"
+#endif
+
+#ifdef CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL
+#  include "espressif/esp_nxdiag.h"
+#endif
+
+#ifdef CONFIG_ESP_SDM
+#  include "espressif/esp_sdm.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_SHA_ACCELERATOR
+#  include "espressif/esp_sha.h"
+#endif
+
+#ifdef CONFIG_MMCSD_SPI
+#  include "esp_board_mmcsd.h"
 #endif
 
 #include "esp32h2-devkit.h"
@@ -133,6 +175,24 @@ int esp_bringup(void)
   if (ret < 0)
     {
       _err("Failed to mount tmpfs at %s: %d\n", CONFIG_LIBC_TMPDIR, ret);
+    }
+#endif
+
+#if defined(CONFIG_ESPRESSIF_EFUSE)
+  ret = esp_efuse_initialize("/dev/efuse");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init EFUSE: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_ESPRESSIF_SHA_ACCELERATOR) && \
+    !defined(CONFIG_CRYPTO_CRYPTODEV_HARDWARE)
+  ret = esp_sha_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize SHA: %d\n", ret);
     }
 #endif
 
@@ -208,11 +268,29 @@ int esp_bringup(void)
     }
 #endif
 
-#if defined(CONFIG_ESPRESSIF_SPI) && defined(CONFIG_SPI_DRIVER)
+#ifdef CONFIG_ESPRESSIF_SPI
+#  ifdef CONFIG_ESPRESSIF_SPI2
   ret = board_spidev_initialize(ESPRESSIF_SPI2);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to init spidev 2: %d\n", ret);
+    }
+#  endif /* CONFIG_ESPRESSIF_SPI2 */
+
+#  ifdef CONFIG_ESPRESSIF_SPI_BITBANG
+  ret = board_spidev_initialize(ESPRESSIF_SPI_BITBANG);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init spidev 3: %d\n", ret);
+    }
+#  endif /* CONFIG_ESPRESSIF_SPI_BITBANG */
+#endif /* CONFIG_ESPRESSIF_SPI */
+
+#if defined(CONFIG_ESPRESSIF_SPI) && defined(CONFIG_MMCSD_SPI)
+  ret = esp_mmcsd_spi_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: failed to init MMCSD SPI\n");
     }
 #endif
 
@@ -224,7 +302,17 @@ int esp_bringup(void)
     }
 #endif
 
-#if defined(CONFIG_I2C_DRIVER)
+#if defined(CONFIG_ESPRESSIF_I2S)
+  /* Configure I2S peripheral interfaces */
+
+  ret = board_i2s_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize I2S driver: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_I2C)
   /* Configure I2C peripheral interfaces */
 
   ret = board_i2c_init();
@@ -247,6 +335,33 @@ int esp_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESP_SDM
+  struct esp_sdm_chan_config_s config =
+  {
+    .gpio_num = 5,
+    .sample_rate_hz = 1000 * 1000,
+    .flags = 0,
+  };
+
+  struct dac_dev_s *dev = esp_sdminitialize(config);
+  ret = dac_register("/dev/dac0", dev);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize DAC driver: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_TEMP
+  struct esp_temp_sensor_config_t cfg = TEMPERATURE_SENSOR_CONFIG(10, 50);
+  ret = esp_temperature_sensor_initialize(cfg);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize temperature sensor driver: %d\n",
+             ret);
+    }
+#endif
+
 #ifdef CONFIG_ESPRESSIF_TWAI
 
   /* Initialize TWAI and register the TWAI driver. */
@@ -258,7 +373,7 @@ int esp_bringup(void)
     }
 #endif
 
-#if defined(CONFIG_SPI_SLAVE_DRIVER) && defined(CONFIG_ESPRESSIF_SPI2)
+#if defined(CONFIG_SPI_SLAVE) && defined(CONFIG_ESPRESSIF_SPI2)
   ret = board_spislavedev_initialize(ESPRESSIF_SPI2);
   if (ret < 0)
     {
@@ -298,6 +413,38 @@ int esp_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_capture_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP_MCPWM_MOTOR
+  ret = board_motor_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_motor_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP_PCNT
+  ret = board_pcnt_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_pcnt_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL
+  ret = esp_nxdiag_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_nxdiag_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_ADC
+  ret = board_adc_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_adc_init failed: %d\n", ret);
     }
 #endif
 

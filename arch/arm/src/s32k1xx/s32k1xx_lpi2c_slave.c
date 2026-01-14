@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/s32k1xx/s32k1xx_lpi2c_slave.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -427,8 +429,18 @@ static int s32k1xx_lpi2c_slave_isr_process(
 
       if ((priv->read_bufindex > 0) && (priv->callback != NULL))
         {
-          priv->callback(priv->callback_arg, priv->read_bufindex);
+          priv->callback(priv->callback_arg, I2CS_RX_COMPLETE,
+                         priv->read_bufindex);
           priv->read_bufindex = 0;
+        }
+
+      /* Execute the registered callback function if data was send */
+
+      if ((priv->write_bufindex > 0) && (priv->callback != NULL))
+        {
+          priv->callback(priv->callback_arg, I2CS_TX_COMPLETE,
+                         priv->write_bufindex);
+          priv->write_bufindex = 0;
         }
     }
 

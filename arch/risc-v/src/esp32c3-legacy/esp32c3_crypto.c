@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/esp32c3_crypto.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -329,7 +331,7 @@ static int esp32c3_newsession(uint32_t *sid, struct cryptoini *cri)
 
             data->hw_axf = axf;
             break;
-          default :
+          default:
             esp32c3_freesession(i);
             kmm_free(data);
             return -EINVAL;

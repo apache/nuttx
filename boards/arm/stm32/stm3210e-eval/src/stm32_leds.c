@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm3210e-eval/src/stm32_leds.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -256,25 +258,25 @@ static void led_pm_notify(struct pm_callback_s *cb, int domain,
 {
   switch (pmstate)
     {
-      case(PM_NORMAL):
+      case PM_NORMAL:
         {
           /* Restore normal LEDs operation */
         }
         break;
 
-      case(PM_IDLE):
+      case PM_IDLE:
         {
           /* Entering IDLE mode - Turn leds off */
         }
         break;
 
-      case(PM_STANDBY):
+      case PM_STANDBY:
         {
           /* Entering STANDBY mode - Logic for PM_STANDBY goes here */
         }
         break;
 
-      case(PM_SLEEP):
+      case PM_SLEEP:
         {
           /* Entering SLEEP mode - Logic for PM_SLEEP goes here */
         }

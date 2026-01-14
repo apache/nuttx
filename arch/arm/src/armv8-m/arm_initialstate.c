@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv8-m/arm_initialstate.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -117,6 +119,12 @@ void up_initial_state(struct tcb_s *tcb)
 
   xcp->regs[REG_XPSR]    = ARMV8M_XPSR_T;
 
+  /* All tasks need to set pic address to special register */
+
+#ifdef CONFIG_BUILD_PIC
+  __asm__ ("mov %0, r9" : "=r"(xcp->regs[REG_R9]));
+#endif
+
   /* If this task is running PIC, then set the PIC base register to the
    * address of the allocated D-Space region.
    */
@@ -160,17 +168,11 @@ void up_initial_state(struct tcb_s *tcb)
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
 
-#ifdef CONFIG_ARMV8M_USEBASEPRI
   xcp->regs[REG_BASEPRI] = NVIC_SYSH_DISABLE_PRIORITY;
-#else
-  xcp->regs[REG_PRIMASK] = 1;
-#endif
 
 #else /* CONFIG_SUPPRESS_INTERRUPTS */
 
-#ifdef CONFIG_ARMV8M_USEBASEPRI
-  xcp->regs[REG_BASEPRI] = NVIC_SYSH_PRIORITY_MIN;
-#endif
+  xcp->regs[REG_BASEPRI] = 0;
 
 #endif /* CONFIG_SUPPRESS_INTERRUPTS */
 }
@@ -186,7 +188,7 @@ void up_initial_state(struct tcb_s *tcb)
 
 noinline_function void arm_initialize_stack(void)
 {
-  uint32_t stacklim = up_get_intstackbase(up_cpu_index());
+  uint32_t stacklim = up_get_intstackbase(this_cpu());
   uint32_t stack = stacklim + INTSTACK_SIZE;
   uint32_t temp = 0;
 

@@ -1,13 +1,9 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/mpfs_opensbi_trap.S
  *
- * mpfs_exception_opensbi function is based on OpenSBI fw_base.S
- *
- * The 2-Clause BSD License
  * SPDX short identifier: BSD-2-Clause
- *
- * Copyright (c) 2019 Western Digital Corporation or its affiliates and other
- * contributors.
+ * SPDX-FileCopyrightText: 2019 Western Digital Corporation or
+ * SPDX-FileCopyrightText: or affiliates and other contributors.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -132,7 +128,7 @@ mpfs_global_pointer:
   REG_S   t0, SBI_TRAP_REGS_OFFSET(mstatus)(sp)
   REG_S   zero, SBI_TRAP_REGS_OFFSET(mstatusH)(sp)
 
-  /* Save all general regisers except SP and T0 */
+  /* Save all general registers except SP and T0 */
 
   REG_S   zero, SBI_TRAP_REGS_OFFSET(zero)(sp)
   REG_S   ra, SBI_TRAP_REGS_OFFSET(ra)(sp)
@@ -175,7 +171,7 @@ mpfs_global_pointer:
   add     a0, sp, zero
   call    sbi_trap_handler
 
-  /* Restore all general regisers except A0 and T0 */
+  /* Restore all general registers except A0 and T0 */
 
   REG_L   ra, SBI_TRAP_REGS_OFFSET(ra)(a0)
   REG_L   sp, SBI_TRAP_REGS_OFFSET(sp)(a0)

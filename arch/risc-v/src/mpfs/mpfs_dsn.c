@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/mpfs_dsn.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,6 +28,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <nuttx/signal.h>
+#include <nuttx/spinlock.h>
 #include "mpfs_dsn.h"
 #include "riscv_internal.h"
 
@@ -57,6 +60,12 @@
 #define RETRIES            500
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static spinlock_t          g_dsn_lock;
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -79,7 +88,7 @@ int mpfs_read_dsn(uint8_t *dsn, size_t len)
 {
   uint32_t reg;
   uintptr_t p = MSS_SCBMAILBOX;
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = spin_lock_irqsave(&g_dsn_lock);
   unsigned retries = RETRIES;
 
   /* Wait until the system controller is not busy.
@@ -89,9 +98,9 @@ int mpfs_read_dsn(uint8_t *dsn, size_t len)
 
   while ((getreg32(SERVICES_SR) & SCBCTRL_SERVICESSR_BUSY) && --retries > 0)
     {
-      leave_critical_section(flags);
-      nxsig_usleep(1000);
-      flags = enter_critical_section();
+      spin_unlock_irqrestore(&g_dsn_lock, flags);
+      nxsched_usleep(1000);
+      flags = spin_lock_irqsave(&g_dsn_lock);
     }
 
   if (retries == 0)
@@ -149,7 +158,7 @@ int mpfs_read_dsn(uint8_t *dsn, size_t len)
 
 out:
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_dsn_lock, flags);
 
   return retries > 0 ? len : -ETIMEDOUT;
 }

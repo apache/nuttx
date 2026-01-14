@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/string/lib_strtokr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -75,7 +77,7 @@
  *
  ****************************************************************************/
 
-#undef strtok_r /* See mm/README.txt */
+#undef strtok_r
 FAR char *strtok_r(FAR char *str, FAR const char *delim, FAR char **saveptr)
 {
   FAR char *pbegin;

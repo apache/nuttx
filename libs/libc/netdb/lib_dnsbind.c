@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/netdb/lib_dnsbind.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -53,7 +55,8 @@
  *   server.  The name server was previously selected via dns_server().
  *
  * Input Parameters:
- *   None
+ *   retry_count - Current retry attempt (0 for first attempt)
+ *   stream - Whether to use stream socket
  *
  * Returned Value:
  *   On success, the bound, non-negative socket descriptor is returned.  A
@@ -61,15 +64,34 @@
  *
  ****************************************************************************/
 
-int dns_bind(sa_family_t family)
+int dns_bind(sa_family_t family, bool stream, int retry_count)
 {
+  int stype = stream ? SOCK_STREAM : SOCK_DGRAM;
   struct timeval tv;
   int sd;
   int ret;
+  int timeout_sec;
+
+  /* Calculate progressive timeout: (base timeout * 2^retry_count)
+   * For retry_count 0: base timeout, 1: base*2, 2: base*4, etc.
+   */
+
+  timeout_sec = CONFIG_NETDB_DNSCLIENT_RECV_TIMEOUT;
+  if (retry_count > 0)
+    {
+      /* Apply exponential backoff with configurable maximum */
+
+      timeout_sec = timeout_sec << retry_count;
+      if (CONFIG_NETDB_DNSCLIENT_MAX_TIMEOUT > 0 &&
+          timeout_sec > CONFIG_NETDB_DNSCLIENT_MAX_TIMEOUT)
+        {
+          timeout_sec = CONFIG_NETDB_DNSCLIENT_MAX_TIMEOUT;
+        }
+    }
 
   /* Create a new socket */
 
-  sd = socket(family, SOCK_DGRAM, 0);
+  sd = socket(family, stype | SOCK_CLOEXEC, 0);
   if (sd < 0)
     {
       ret = -get_errno();
@@ -77,17 +99,17 @@ int dns_bind(sa_family_t family)
       return ret;
     }
 
-  /* Set up a receive timeout */
+  /* Set up a receive timeout with progressive strategy */
 
-  tv.tv_sec  = CONFIG_NETDB_DNSCLIENT_RECV_TIMEOUT;
+  tv.tv_sec  = timeout_sec;
   tv.tv_usec = 0;
 
   ret = setsockopt(sd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(struct timeval));
   if (ret >= 0)
     {
-      /* Set up a send timeout */
+      /* Set up a send timeout (same progressive strategy) */
 
-      tv.tv_sec  = CONFIG_NETDB_DNSCLIENT_SEND_TIMEOUT;
+      tv.tv_sec  = timeout_sec;
       tv.tv_usec = 0;
 
       ret = setsockopt(sd, SOL_SOCKET, SO_SNDTIMEO, &tv,

@@ -26,8 +26,10 @@ config ARCH_ARM
 config ARCH_ARM64
 	bool "ARM64"
 	select ALARM_ARCH
+	select ARCH_64BIT
 	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_FORK if !BUILD_KERNEL
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_STDARG_H
@@ -38,6 +40,7 @@ config ARCH_ARM64
 	select ARCH_HAVE_THREAD_LOCAL
 	select ARCH_HAVE_PERF_EVENTS
 	select ONESHOT
+	select ONESHOT_COUNT
 	---help---
 		The ARM64 architectures
 
@@ -94,13 +97,14 @@ config ARCH_RISCV
 	select ARCH_HAVE_THREAD_LOCAL
 	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_LAZYFPU if ARCH_HAVE_FPU
+	select ARCH_HAVE_CPUID_MAPPING if ARCH_HAVE_MULTICPU
 	---help---
 		RISC-V 32 and 64-bit RV32 / RV64 architectures.
 
 config ARCH_SIM
 	bool "Simulation"
 	select ARCH_HAVE_BACKTRACE
-	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_MULTICPU if !CONFIG_WINDOWS_NATIVE
 	select ARCH_HAVE_RTC_SUBSECONDS
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select ARCH_HAVE_SYSCALL_HOOKS
@@ -115,6 +119,7 @@ config ARCH_SIM
 	select ARCH_SETJMP_H
 	select ALARM_ARCH
 	select ONESHOT
+	select ONESHOT_COUNT
 	select SERIAL_CONSOLE
 	select SERIAL_IFLOWCONTROL
 	select SCHED_HPWORK
@@ -130,6 +135,7 @@ config ARCH_X86
 
 config ARCH_X86_64
 	bool "x86_64"
+	select ARCH_64BIT
 	select ARCH_HAVE_TCBINFO
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
@@ -137,8 +143,13 @@ config ARCH_X86_64
 	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_CUSTOMOPT
-	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
+	select ARCH_HAVE_THREAD_LOCAL
+	select PCI_LATE_DRIVERS_REGISTER if PCI
 	select ARCH_TOOLCHAIN_GNU
+	select ARCH_HAVE_BACKTRACE
+	select ARCH_HAVE_FORK if !BUILD_KERNEL
+	select ARCH_HAVE_SETJMP
+	select ARCH_HAVE_PERF_EVENTS
 	---help---
 		x86-64 architectures.
 
@@ -149,6 +160,7 @@ config ARCH_XTENSA
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
+	select ARCH_HAVE_THREAD_LOCAL
 	select ARCH_HAVE_TCBINFO
 	select ARCH_HAVE_STDARG_H
 	select ARCH_HAVE_SETJMP if ARCH_TOOLCHAIN_GNU
@@ -213,23 +225,57 @@ config ARCH
 	default "sparc"   if ARCH_SPARC
 	default "tricore" if ARCH_TRICORE
 
+if ARCH_ARM
 source "arch/arm/Kconfig"
+endif
+if ARCH_ARM64
 source "arch/arm64/Kconfig"
+endif
+if ARCH_AVR
 source "arch/avr/Kconfig"
+endif
+if ARCH_HC
 source "arch/hc/Kconfig"
+endif
+if ARCH_MIPS
 source "arch/mips/Kconfig"
+endif
+if ARCH_MISOC
 source "arch/misoc/Kconfig"
+endif
+if ARCH_RENESAS
 source "arch/renesas/Kconfig"
+endif
+if ARCH_RISCV
 source "arch/risc-v/Kconfig"
+endif
+if ARCH_SIM
 source "arch/sim/Kconfig"
+endif
+if ARCH_X86
 source "arch/x86/Kconfig"
+endif
+if ARCH_X86_64
 source "arch/x86_64/Kconfig"
+endif
+if ARCH_XTENSA
 source "arch/xtensa/Kconfig"
+endif
+if ARCH_Z16
 source "arch/z16/Kconfig"
+endif
+if ARCH_Z80
 source "arch/z80/Kconfig"
+endif
+if ARCH_OR1K
 source "arch/or1k/Kconfig"
+endif
+if ARCH_SPARC
 source "arch/sparc/Kconfig"
+endif
+if ARCH_TRICORE
 source "arch/tricore/Kconfig"
+endif
 
 config ARCH_CHIP_CUSTOM
 	bool "Custom Chip Support"
@@ -269,17 +315,32 @@ endif #ARCH_CHIP_CUSTOM
 
 source "$BINDIR/arch/dummy/Kconfig"
 
-config ARCH_TOOLCHAIN_IAR
+config ARCH_TOOLCHAIN_GNU
 	bool
 	default n
 
-config ARCH_TOOLCHAIN_GNU
+config ARCH_TOOLCHAIN_ARMCLANG
 	bool
+	select ARCH_TOOLCHAIN_GNU
 	default n
 
 config ARCH_TOOLCHAIN_CLANG
 	bool
 	select ARCH_TOOLCHAIN_GNU
+	default n
+
+config ARCH_TOOLCHAIN_GCC
+	bool
+	select ARCH_TOOLCHAIN_GNU
+	default n
+
+config ARCH_TOOLCHAIN_GHS
+	bool
+	select ARCH_TOOLCHAIN_GNU
+	default n
+
+config ARCH_TOOLCHAIN_IAR
+	bool
 	default n
 
 config ARCH_TOOLCHAIN_TASKING
@@ -301,25 +362,6 @@ config ARCH_SIZET_LONG
 		C++ library routines because the NuttX size_t might not have
 		the same underlying type as your toolchain's size_t.
 
-config ARCH_COVERAGE
-	bool "Enable code coverage analysis"
-	select HAVE_CXXINITIALIZE
-	default n
-	---help---
-		Generate code coverage
-
-config ARCH_COVERAGE_ALL
-	bool "Enable code coverage for the entire image"
-	depends on ARCH_COVERAGE
-	default n
-	---help---
-		This option activates code coverage instrumentation for the
-		entire image. If you don't enable this option, you have to
-		explicitly specify "-fprofile-generate -ftest-coverage" for
-		the files/directories you want to check. Enabling this option
-		will get image size increased and performance decreased
-		significantly.
-
 config ARCH_INSTRUMENT_ALL
 	bool "Instrument All"
 	default n
@@ -328,6 +370,12 @@ config ARCH_INSTRUMENT_ALL
 		to register the instrument function.
 
 comment "Architecture Options"
+
+config ARCH_64BIT
+	bool
+	default n
+	---help---
+		Indicates that the current architecture is 64-bit.
 
 config ARCH_NOINTC
 	bool
@@ -424,9 +472,20 @@ config ARCH_HAVE_MULTICPU
 	bool
 	default n
 
+config ARCH_HAVE_CPUID_MAPPING
+	bool
+	default n
+	depends on ARCH_HAVE_MULTICPU
+
 config ARCH_HAVE_FORK
 	bool
 	default n
+
+config ARCH_HAVE_CRC32
+	bool
+	default n
+	---help---
+		Architecture supports CRC32 instruction
 
 config ARCH_HAVE_FPU
 	bool
@@ -480,9 +539,31 @@ config ARCH_HAVE_RESET
 	bool
 	default n
 
+config ARCH_LDST_16BIT_NOT_ATOMIC
+	bool
+	default n
+	select ARCH_HAVE_8BIT_SERIAL_BUFSIZE
+	---help---
+	This configuration option denotes architecture incapable of loading
+	16-bit values atomically, ie. in a single instruction. If this is set,
+	it means that the architecture needs two (or more) instructions
+	to perform such load AND that a interrupt service routine may run
+	between their execution. The same applies for stores.
+
+	If set, any code running in non-interrupt context that reads 16-bit
+	variable that may be written in interrupt context must disable
+	interrupts or use another method that makes the read atomic.
+	(The same applies for non-interrupt context write and interrupt
+	context read.)
+
 config ARCH_HAVE_TESTSET
 	bool
 	default n
+
+config ARCH_HAVE_CUSTOM_TESTSET
+	bool
+	default n
+	select ARCH_HAVE_TESTSET
 
 config ARCH_HAVE_THREAD_LOCAL
 	bool
@@ -512,6 +593,10 @@ config ARCH_HAVE_DEBUG
 	bool "Architecture have debug support"
 	default n
 
+config ARCH_HAVE_MEMTAG
+	bool "Architecture have memory tagging support"
+	default n
+
 config ARCH_HAVE_PERF_EVENTS
 	bool
 	default n
@@ -534,6 +619,13 @@ config ARCH_HAVE_BOOTLOADER
 config ARCH_HAVE_CPUINFO
 	bool
 	default n
+
+config ARCH_CPUINFO_FREQ_KHZ
+	int "Default CPU frequency"
+	default 0
+	depends on ARCH_HAVE_CPUINFO
+	---help---
+		Defines the CPU's default maximum frequency. Frequency unit KHZ.
 
 config ARCH_HAVE_TCBINFO
 	bool
@@ -662,6 +754,14 @@ config ARCH_USE_DATA_HEAP
 	---help---
 		This option enables architecture-specific memory allocator
 		for dynamic data loading.
+
+config ARCH_USE_SEPARATED_SECTION
+	bool "Enable separate section allocation for dynamic loading"
+	default n
+	depends on ARCH_USE_TEXT_HEAP || ARCH_USE_DATA_HEAP
+	---help---
+		This option enables loading different sections into different
+		memory areas, allowing for different speeds.
 
 menuconfig ARCH_ADDRENV
 	bool "Address environments"
@@ -880,7 +980,7 @@ config PAGING
 	default n
 	depends on BUILD_KERNEL && ARCH_USE_MMU && !ARCH_ROMPGTABLE && !LEGACY_PAGING
 	---help---
-		If set =y in your configation file, this setting will enable on-demand
+		If set =y in your configuration file, this setting will enable on-demand
 		paging, which relies on a MMU to enable larger virtual memory spaces
 		and map it to physical memory on-demand (usually during a page-fault
 		exception).
@@ -890,7 +990,7 @@ menuconfig LEGACY_PAGING
 	default n
 	depends on EXPERIMENTAL && ARCH_USE_MMU && !ARCH_ROMPGTABLE
 	---help---
-		If set =y in your configation file, this setting will enable lazy loading
+		If set =y in your configuration file, this setting will enable lazy loading
 		backed up by the experimental on-demand paging feature as described in
 		https://nuttx.apache.org/docs/latest/components/paging.html.
 
@@ -1039,12 +1139,6 @@ config ARCH_STACKDUMP_MAX_LENGTH
 	depends on ARCH_STACKDUMP
 	default 0
 
-config DUMP_ON_EXIT
-	bool "Dump all tasks state on exit"
-	default n
-	---help---
-		Dump all tasks state on exit()
-
 config ARCH_USBDUMP
 	bool "Dump USB trace data"
 	default n
@@ -1111,6 +1205,13 @@ config ARCH_RAMFUNCS
 		so that FLASH can be reconfigured while the MCU executes out of
 		SRAM.
 
+config ARCH_HAVE_CUSTOM_VECTORS
+	bool
+	default n
+	---help---
+		If ARCH_HAVE_CUSTOM_VECTORS is defined, Chip should provide vectors
+		table as an optimization.
+
 config ARCH_HAVE_RAMVECTORS
 	bool
 	default n
@@ -1151,6 +1252,13 @@ config ARCH_MINIMAL_VECTORTABLE
 		interrupt vector table at index 24.  if g_irqmap[42] ==
 		IRQMAPPED_MAX, then hardware interrupt vector 42 is not used and
 		if it occurs will result in an unexpected interrupt crash.
+
+config ARCH_MINIMAL_VECTORTABLE_DYNAMIC
+	bool "Dynamic Minimal RAM usage for vector table"
+	default n
+	depends on ARCH_MINIMAL_VECTORTABLE
+	---help---
+		Use a minimum amount of RAM for the vector table.
 
 config ARCH_NUSER_INTERRUPTS
 	int "Number of interrupts"
@@ -1245,11 +1353,6 @@ config ARCH_HIPRI_INTERRUPT
 		general feature is not conceptually unique to the Cortex-M but if it
 		is extended to any other family, then this discussion will have to
 		be generalized.
-
-		If ARMV7M_USEBASEPRI is selected, then interrupts will be disabled
-		by setting the BASEPRI register to NVIC_SYSH_DISABLE_PRIORITY so
-		that most interrupts will not have execution priority.  SVCall must
-		have execution priority in all cases.
 
 		In the normal cases, interrupts are not nest-able and all interrupts
 		run at an execution priority between NVIC_SYSH_PRIORITY_MIN and
@@ -1368,7 +1471,7 @@ config RAM_SIZE
 		does not execute out of RAM but from FLASH, then you may designate
 		any block of RAM as "primary."
 
-if BOOT_RUNFROMFLASH && ARCH_USE_MMU
+if BOOT_RUNFROMFLASH
 
 config FLASH_START
 	hex "Boot FLASH start address (physical)"
@@ -1380,6 +1483,7 @@ config FLASH_START
 config FLASH_VSTART
 	hex "Boot FLASH start address (virtual)"
 	default 0x0
+	depends on ARCH_USE_MMU
 	---help---
 		The virtual start address of installed boot FLASH.  "Boot" FLASH
 		refers to the FLASH that you link program code into.
@@ -1391,7 +1495,7 @@ config FLASH_SIZE
 		The size in bytes of the installed boot FLASH.  "Boot" FLASH
 		refers to the FLASH that you link program code into.
 
-endif # BOOT_RUNFROMFLASH && ARCH_USE_MMU
+endif # BOOT_RUNFROMFLASH
 
 config ARCH_HAVE_SDRAM
 	bool

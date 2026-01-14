@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/mmap/fs_rammap.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,6 +49,15 @@
 #include <sys/types.h>
 #include <nuttx/mm/map.h>
 
+/* A memory mapping type definition */
+
+enum mm_map_type_e
+{
+  MAP_USER = 0,
+  MAP_KERNEL,
+  MAP_XIP,
+};
+
 #ifdef CONFIG_FS_RAMMAP
 
 /****************************************************************************
@@ -72,8 +83,7 @@
  *   length  The length of the mapping.  For exception #1 above, this length
  *           ignored:  The entire underlying media is always accessible.
  *   offset  The offset into the file to map
- *   kernel  kmm_zalloc or kumm_zalloc
- *   mapped  The pointer to the mapped area
+ *   type    fs_heap_zalloc or kumm_zalloc or xip_base
  *
  * Returned Value:
  *   On success rammmap returns 0. Otherwise errno is returned appropriately.
@@ -88,9 +98,9 @@
  ****************************************************************************/
 
 int rammap(FAR struct file *filep, FAR struct mm_map_entry_s *entry,
-           bool kernel);
+           enum mm_map_type_e type);
 #else
-#  define rammap(file, entry, kernel) (-ENOSYS)
+#  define rammap(file, entry, type) (-ENOSYS)
 #endif /* CONFIG_FS_RAMMAP */
 
 #endif /* __FS_MMAP_FS_RAMMAP_H */

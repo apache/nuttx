@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/rp2040/common/src/rp2040_common_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,7 +36,7 @@
 
 #include <arch/board/board.h>
 
-#include "rp2040_pico.h"
+#include "rp2040_common_pico.h"
 #include "rp2040_common_bringup.h"
 
 #ifdef CONFIG_LCD_BACKPACK
@@ -68,9 +70,30 @@
 #include "rp2040_bmp280.h"
 #endif
 
+#ifdef CONFIG_SENSORS_SHT4X
+#include <nuttx/sensors/sht4x.h>
+#include "rp2040_i2c.h"
+#endif
+
+#ifdef CONFIG_SENSORS_MCP9600
+#include <nuttx/sensors/mcp9600.h>
+#include "rp2040_i2c.h"
+#endif
+
+#ifdef CONFIG_SENSORS_MS56XX
+#include <nuttx/sensors/ms56xx.h>
+#include "rp2040_i2c.h"
+#endif
+
 #ifdef CONFIG_SENSORS_MAX6675
 #include <nuttx/sensors/max6675.h>
 #include "rp2040_max6675.h"
+#endif
+
+#ifdef CONFIG_SENSORS_TMP112
+#include <nuttx/sensors/tmp112.h>
+#include "rp2040_tmp112.h"
+#include "rp2040_i2c.h"
 #endif
 
 #ifdef CONFIG_RP2040_PWM
@@ -80,6 +103,19 @@
 
 #if defined(CONFIG_ADC) && defined(CONFIG_RP2040_ADC)
 #include "rp2040_adc.h"
+#endif
+
+#if defined(CONFIG_ADC) && defined(CONFIG_ADC_MCP3008)
+#include <nuttx/analog/mcp3008.h>
+#include <nuttx/analog/adc.h>
+#include "rp2040_spi.h"
+#endif
+
+#if defined(CONFIG_ADC) && defined(CONFIG_ADC_ADS7046)
+#include <nuttx/analog/ads7046.h>
+#include <nuttx/analog/adc.h>
+#include "rp2040_spi.h"
+#include "rp2040_ads7046.h"
 #endif
 
 #if defined(CONFIG_RP2040_BOARD_HAS_WS2812) && defined(CONFIG_WS2812)
@@ -441,6 +477,44 @@ int rp2040_common_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ADC_MCP3008
+  /* Register the MCP3008 ADC. */
+
+  struct spi_dev_s *mcp3008_spi = rp2040_spibus_initialize(0);
+  if (mcp3008_spi == NULL)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI bus 0\n");
+    }
+
+  struct adc_dev_s *mcp3008 = mcp3008_initialize(mcp3008_spi);
+  if (mcp3008 == NULL)
+    {
+      syslog(LOG_ERR, "Failed to initialize MCP3008\n");
+    }
+
+  ret = adc_register("/dev/adc1", mcp3008);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to register MCP3008 device driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC_ADS7046
+  /* Register the ADS7046 ADC. */
+
+  struct spi_dev_s *ads7046_spi = rp2040_spibus_initialize(1);
+  if (ads7046_spi == NULL)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI bus 1\n");
+    }
+
+  ret = board_ads7046_initialize(ads7046_spi, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize ADS7046 driver: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
@@ -488,6 +562,50 @@ int rp2040_common_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: rp2040_ina219_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_SHT4X
+
+  /* Try to register SHT4X device on I2C0 */
+
+  ret = sht4x_register(rp2040_i2cbus_initialize(0), 0,
+                       CONFIG_SHT4X_I2C_ADDR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: couldn't initialize SHT4x: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_MCP9600
+  /* Try to register MCP9600 device as /dev/therm0 at I2C0. */
+
+  ret = mcp9600_register(rp2040_i2cbus_initialize(0), 0x60, 1, 2, 3);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: couldn't initialize MCP9600: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_MS56XX
+  /* Try to register MS56xx device at I2C0 */
+
+  ret = ms56xx_register(rp2040_i2cbus_initialize(0), 0, MS56XX_ADDR0,
+                        MS56XX_MODEL_MS5611);
+  if (ret < 0)
+    {
+        syslog(LOG_ERR, "ERROR: couldn't register MS5611: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_TMP112
+  /* Try to register TMP112 device at I2C0 with a common address */
+
+  ret = board_tmp112_initialize(rp2040_i2cbus_initialize(0), 0,
+                                TMP112_ADDR_1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize TMP112 driver: %d\n", ret);
     }
 #endif
 
@@ -543,37 +661,38 @@ int rp2040_common_bringup(void)
 
 #if defined(CONFIG_ADC) && defined(CONFIG_RP2040_ADC)
 
-#  ifdef CONFIG_RPC2040_ADC_CHANNEL0
+#  ifdef CONFIG_RP2040_ADC_CHANNEL0
 #    define ADC_0 true
 #  else
 #    define ADC_0 false
 #  endif
 
-#  ifdef CONFIG_RPC2040_ADC_CHANNEL1
+#  ifdef CONFIG_RP2040_ADC_CHANNEL1
 #    define ADC_1 true
 #  else
 #    define ADC_1 false
 #  endif
 
-#  ifdef CONFIG_RPC2040_ADC_CHANNEL2
+#  ifdef CONFIG_RP2040_ADC_CHANNEL2
 #    define ADC_2 true
 #  else
 #    define ADC_2 false
 #  endif
 
-#  ifdef CONFIG_RPC2040_ADC_CHANNEL3
+#  ifdef CONFIG_RP2040_ADC_CHANNEL3
 #    define ADC_3 true
 #  else
 #    define ADC_3 false
 #  endif
 
-#  ifdef CONFIG_RPC2040_ADC_TEMPERATURE
+#  ifdef CONFIG_RP2040_ADC_TEMPERATURE
 #    define ADC_TEMP true
 #  else
 #    define ADC_TEMP false
 #  endif
 
-  ret = rp2040_adc_setup("/dev/adc0", ADC_0, ADC_1, ADC_2, ADC_3, ADC_TEMP);
+  ret = rp2040_adc_initialize("/dev/adc0",
+                              ADC_0, ADC_1, ADC_2, ADC_3, ADC_TEMP);
   if (ret != OK)
     {
       syslog(LOG_ERR, "Failed to initialize ADC Driver: %d\n", ret);

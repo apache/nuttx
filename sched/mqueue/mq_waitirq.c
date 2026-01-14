@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/mqueue/mq_waitirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -105,6 +107,6 @@ void nxmq_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 
   if (nxsched_add_readytorun(wtcb))
     {
-      up_switch_context(wtcb, rtcb);
+      up_switch_context(this_task(), rtcb);
     }
 }

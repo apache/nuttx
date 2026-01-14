@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_lpi2c.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,7 +49,6 @@
 #include "imxrt_lpi2c.h"
 #include "imxrt_edma.h"
 #include "imxrt_gpio.h"
-#include "imxrt_lpi2c.h"
 
 #include "hardware/imxrt_dmamux.h"
 #include "hardware/imxrt_pinmux.h"
@@ -1023,8 +1024,8 @@ static void imxrt_lpi2c_traceevent(struct imxrt_lpi2c_priv_s *priv,
 
       /* Initialize the new trace entry */
 
-      trace->event  = event;
-      trace->parm   = parm;
+      trace->event = event;
+      trace->parm  = parm;
 
       /* Bump up the trace index (unless we are out of trace entries) */
 
@@ -1160,7 +1161,7 @@ static void imxrt_lpi2c_setclock(struct imxrt_lpi2c_priv_s *priv,
 #endif
 
           /* LPI2C output frequency = (Source Clock (Hz)/ 2^prescale) /
-           *   (CLKLO + 1 + CLKHI + 1 + ROUNDDOWN((2 + FILTSCL) / 2^prescale)
+           *   (CLKLO + 1 + CLKHI + 1 + ALIGN_DOWN((2 + FILTSCL)/2^prescale)
            *
            * Assume  CLKLO = 2 * CLKHI, SETHOLD = CLKHI, DATAVD = CLKHI / 2
            */
@@ -2097,7 +2098,7 @@ static int imxrt_lpi2c_dma_transfer(struct imxrt_lpi2c_priv_s *priv)
                                                      LPI2C_MSR_ALF |
                                                      LPI2C_MSR_FEF);
 
-  /* Enable the Iterrupts */
+  /* Enable the Interrupts */
 
   imxrt_lpi2c_putreg(priv, IMXRT_LPI2C_MIER_OFFSET,
                      LPI2C_MIER_NDIE | LPI2C_MIER_ALIE |
@@ -2389,7 +2390,7 @@ static int imxrt_lpi2c_reset(struct i2c_master_s *dev)
 
 out:
 
-  /* Release the port for re-use by other clients */
+  /* Release the port for reuse by other clients */
 
   nxmutex_unlock(&priv->lock);
   return ret;

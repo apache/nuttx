@@ -21,7 +21,7 @@ USB Host-Side Drivers
    ``arch/arm/src/sama5/sam_ohci.c``, and
    ``arch/arm/src/sama5/sam_ehci.c``.
 
--  **USB host class driver** abstracts USB peripherals conected to
+-  **USB host class driver** abstracts USB peripherals connected to
    the USB host controller. Each USB host class driver must implement
    an instance of ``struct usbhost_class_s`` defined also in
    ``include/nuttx/usb/usbhost.h``.

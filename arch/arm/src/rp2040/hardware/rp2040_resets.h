@@ -1,10 +1,8 @@
 /****************************************************************************
  * arch/arm/src/rp2040/hardware/rp2040_resets.h
  *
- * Generated from rp2040.svd originally provided by
- *   Raspberry Pi (Trading) Ltd.
- *
- * Copyright 2020 (c) 2020 Raspberry Pi (Trading) Ltd.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2020 Raspberry Pi (Trading) Ltd.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -62,6 +60,7 @@
 
 /* Register bit definitions *************************************************/
 
+#define RP2040_RESETS_RESET_MASK             (0x1ffffff)
 #define RP2040_RESETS_RESET_USBCTRL          (1 << 24)
 #define RP2040_RESETS_RESET_UART1            (1 << 23)
 #define RP2040_RESETS_RESET_UART0            (1 << 22)

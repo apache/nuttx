@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tlsr82/tc32/tc32_backtrace.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,7 +37,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Macro and definitions for simple decoding of instuctions.
+/* Macro and definitions for simple decoding of instructions.
  * To check an instruction, it is ANDed with the IMASK_ and
  * the result is compared with the IOP_. The macro INSTR_IS
  * does this and returns !0 to indicate a match.
@@ -87,7 +89,7 @@ static inline uint32_t tc32_getsp(void)
  * Name: getlroffset
  *
  * Description:
- *  getlroffset()  returns the currect link address offset.
+ *  getlroffset()  returns the current link address offset.
  *
  * Input Parameters:
  *   lr    - Link register address
@@ -162,13 +164,13 @@ static bool in_code_region(void *pc)
  * Name: backtrace_push_internal
  *
  * Description:
- *  backtrace_push_internal()  returns the currect link address from
+ *  backtrace_push_internal()  returns the current link address from
  *  program counter and stack pointer
  *
  * Input Parameters:
- *   psp    - Double poninter to the SP, this parameter will be changed if
+ *   psp    - Double pointer to the SP, this parameter will be changed if
  *            the corresponding LR address is successfully found.
- *   ppc    - Double poninter to the PC, this parameter will be changed if
+ *   ppc    - Double pointer to the PC, this parameter will be changed if
  *            the corresponding LR address is successfully found.
  *
  * Returned Value:
@@ -400,7 +402,7 @@ static int backtrace_branch(void *limit, void *sp,
  *  The up call up_backtrace_init_code_regions() will set the start
  *  and end addresses of the customized program sections, this method
  *  will help the different boards to configure the current text
- *  sections for some complicate platfroms
+ *  sections for some complicate platforms.
  *
  * Input Parameters:
  *   regions  The start and end address of the text segment
@@ -448,13 +450,20 @@ void up_backtrace_init_code_regions(void **regions)
  * Returned Value:
  *   up_backtrace() returns the number of addresses returned in buffer
  *
+ * Assumptions:
+ *   Have to make sure tcb keep safe during function executing, it means
+ *   1. Tcb have to be self or not-running.  In SMP case, the running task
+ *      PC & SP cannot be backtrace, as whose get from tcb is not the newest.
+ *   2. Tcb have to keep not be freed.  In task exiting case, have to
+ *      make sure the tcb get from pid and up_backtrace in one critical
+ *      section procedure.
+ *
  ****************************************************************************/
 
 nosanitize_address
 int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
 {
   struct tcb_s *rtcb = running_task();
-  irqstate_t flags;
   void *sp;
   int ret = 0;
 
@@ -476,7 +485,7 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
         {
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
           ret = backtrace_push((void *)(INTSTACK_SIZE +
-                               up_get_intstackbase(up_cpu_index())),
+                               up_get_intstackbase(this_cpu())),
                                &sp, (void *)up_backtrace + 16,
                                buffer, size, &skip);
 #else
@@ -487,10 +496,11 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
 #endif
           if (ret < size)
             {
-              sp = (void *)CURRENT_REGS[REG_SP];
+              sp = ((uint32_t *)running_regs())[REG_SP];
               ret += backtrace_push(rtcb->stack_base_ptr +
                                     rtcb->adj_stack_size, &sp,
-                                    (void *)CURRENT_REGS[REG_PC],
+                                    (void *)((uint32_t *)
+                                    running_regs())[REG_PC],
                                     &buffer[ret], size - ret, &skip);
             }
         }
@@ -511,8 +521,6 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
     }
   else
     {
-      flags = enter_critical_section();
-
       if (skip-- <= 0)
         {
           buffer[ret++] = (void *)tcb->xcp.regs[REG_PC];
@@ -533,8 +541,6 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
                                       &buffer[ret], size - ret, &skip);
             }
         }
-
-      leave_critical_section(flags);
     }
 
   return ret;

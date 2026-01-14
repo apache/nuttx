@@ -1,0 +1,372 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_MCX_NXXX
+
+menu "MCX NXXx Chip Selection"
+
+choice
+	prompt "MCX NXXx Core Configuration"
+	default ARCH_CHIP_N236
+
+config ARCH_CHIP_N236
+	bool "MCXN236 Processor"
+	select ARCH_HAVE_RESET
+	select ARMV8M_HAVE_ICACHE
+
+endchoice # MCX NXXx Chip Selection
+
+endmenu # "MCX NXXx Chip Selection"
+
+menu "NXXX Peripheral Selection"
+
+config NXXX_GPIO_IRQ
+	bool "GPIO Interrupt Support"
+	default y
+
+config NXXX_LPI2C
+	bool "LPI2C support"
+	default n
+
+menu "LPUART"
+
+config NXXX_LPUART
+	bool
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config NXXX_LPUART1
+	bool "LPUART1"
+	default n
+	select NXXX_LPUART
+	select LPUART1_SERIALDRIVER
+
+config NXXX_LPUART2
+	bool "LPUART2"
+	default n
+	select NXXX_LPUART
+	select LPUART2_SERIALDRIVER
+
+config NXXX_LPUART3
+	bool "LPUART3"
+	default n
+	select NXXX_LPUART
+	select LPUART3_SERIALDRIVER
+
+config NXXX_LPUART4
+	bool "LPUART4"
+	default n
+	select NXXX_LPUART
+	select LPUART4_SERIALDRIVER
+
+config NXXX_LPUART5
+	bool "LPUART5"
+	default n
+	select NXXX_LPUART
+	select LPUART5_SERIALDRIVER
+
+config NXXX_LPUART6
+	bool "LPUART6"
+	default n
+	select NXXX_LPUART
+	select LPUART6_SERIALDRIVER
+
+config NXXX_LPUART7
+	bool "LPUART7"
+	default n
+	select NXXX_LPUART
+	select LPUART7_SERIALDRIVER
+
+config NXXX_LPUART8
+	bool "LPUART8"
+	default n
+	select NXXX_LPUART
+	select LPUART8_SERIALDRIVER
+
+config NXXX_LPUART9
+	bool "LPUART9"
+	default n
+	select NXXX_LPUART
+	select LPUART9_SERIALDRIVER
+	
+menu "LPUART Configuration"
+	depends on NXXX_LPUART
+
+config NXXX_LPUART_INVERT
+	bool "Signal Invert Support"
+	default n
+
+config NXXX_LPUART_SINGLEWIRE
+	bool "Signal Wire Support"
+	default n
+
+config NXXX_SERIAL_RXDMA_BUFFER_SIZE
+	int "RX DMA buffer size"
+	default 32
+	depends on LPUART1_RXDMA || LPUART2_RXDMA || LPUART3_RXDMA || LPUART4_RXDMA || \
+               LPUART5_RXDMA || LPUART6_RXDMA || LPUART7_RXDMA || LPUART8_RXDMA || \
+               LPUART9_RXDMA
+
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half this number of bytes.
+
+		Value given here will be rounded up to next multiple of 32 bytes.
+
+endmenu # LPUART Configuration
+
+endmenu # LPUART
+
+menu "LPI2C Peripherals"
+
+menuconfig NXXX_LPI2C0
+	bool "LPI2C0"
+	default n
+	select NXXX_LPI2C
+
+if NXXX_LPI2C0
+
+config NXXX_LPI2C0_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config NXXX_LPI2C0_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config NXXX_LPI2C0_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # NXXX_LPI2C0
+
+menuconfig NXXX_LPI2C1
+	bool "LPI2C1"
+	default n
+	select NXXX_LPI2C
+
+if NXXX_LPI2C1
+
+config NXXX_LPI2C1_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config NXXX_LPI2C1_DMA
+	bool "Enable DMA for I2C1"
+	default n
+	depends on NXXX_LPI2C_DMA
+
+config NXXX_LPI2C1_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config NXXX_LPI2C1_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # NXXX_LPI2C1
+
+menuconfig NXXX_LPI2C2
+	bool "LPI2C2"
+	default n
+	select NXXX_LPI2C
+
+if NXXX_LPI2C2
+
+config NXXX_LPI2C2_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config NXXX_LPI2C2_DMA
+	bool "Enable DMA for I2C2"
+	default n
+	depends on NXXX_LPI2C_DMA
+
+config NXXX_LPI2C2_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config NXXX_LPI2C2_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # NXXX_LPI2C2
+
+menuconfig NXXX_LPI2C3
+	bool "LPI2C3"
+	default n
+	select NXXX_LPI2C
+
+if NXXX_LPI2C3
+
+config NXXX_LPI2C3_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config NXXX_LPI2C3_DMA
+	bool "Enable DMA for I2C3"
+	default n
+	depends on NXXX_LPI2C_DMA
+
+config NXXX_LPI2C3_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config NXXX_LPI2C3_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # NXXX_LPI2C3
+
+menuconfig NXXX_LPI2C4
+	bool "LPI2C4"
+	default n
+	select NXXX_LPI2C
+
+if NXXX_LPI2C4
+
+config NXXX_LPI2C4_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config NXXX_LPI2C4_DMA
+	bool "Enable DMA for I2C4"
+	default n
+	depends on NXXX_LPI2C_DMA
+
+config NXXX_LPI2C4_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config NXXX_LPI2C4_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # NXXX_LPI2C4
+
+menuconfig NXXX_LPI2C5
+	bool "LPI2C5"
+	default n
+	select NXXX_LPI2C
+
+if NXXX_LPI2C5
+
+config NXXX_LPI2C5_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config NXXX_LPI2C5_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config NXXX_LPI2C5_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # NXXX_LPI2C5
+
+menuconfig NXXX_LPI2C6
+	bool "LPI2C6"
+	default n
+	select NXXX_LPI2C
+
+if NXXX_LPI2C6
+
+config NXXX_LPI2C6_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config NXXX_LPI2C6_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config NXXX_LPI2C6_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # NXXX_LPI2C6
+
+menuconfig NXXX_LPI2C7
+	bool "LPI2C7"
+	default n
+	select NXXX_LPI2C
+
+if NXXX_LPI2C7
+
+config NXXX_LPI2C7_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config NXXX_LPI2C7_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config NXXX_LPI2C7_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # NXXX_LPI2C7
+
+endmenu # LPI2C Peripherals
+
+menu "LPI2C Configuration"
+	depends on NXXX_LPI2C
+
+config NXXX_LPI2C_DMA
+	bool "I2C DMA Support"
+	default n
+	depends on NXXX_LPI2C && NXXX_EDMA && !I2C_POLLED
+	---help---
+		This option enables the DMA for I2C transfers.
+		Note: The user can define CONFIG_I2C_DMAPRIO: a custom priority value
+		for the I2C dma streams, else the default priority level is set to
+		medium.
+
+config NXXX_LPI2C_DMA_MAXMSG
+	int "Maximum number messages that will be DMAed"
+	default 8
+	depends on NXXX_LPI2C_DMA
+	---help---
+		This option sets the number of mesg that can be in a transfer.
+		It is used to allocate space for the 16 bit LPI2C commands
+		that will be DMA-ed to the LPI2C device.
+
+config NXXX_LPI2C_DYNTIMEO
+	bool "Use dynamic timeouts"
+	default n
+	depends on NXXX_LPI2C
+
+config NXXX_LPI2C_DYNTIMEO_USECPERBYTE
+	int "Timeout Microseconds per Byte"
+	default 500
+	depends on NXXX_LPI2C_DYNTIMEO
+
+config NXXX_LPI2C_DYNTIMEO_STARTSTOP
+	int "Timeout for Start/Stop (Milliseconds)"
+	default 1000
+	depends on NXXX_LPI2C_DYNTIMEO
+
+config NXXX_LPI2C_TIMEOSEC
+	int "Timeout seconds"
+	default 0
+	depends on NXXX_LPI2C
+
+config NXXX_LPI2C_TIMEOMS
+	int "Timeout Milliseconds"
+	default 500
+	depends on NXXX_LPI2C && !NXXX_LPI2C_DYNTIMEO
+
+config NXXX_LPI2C_TIMEOTICKS
+	int "Timeout for Done and Stop (ticks)"
+	default 500
+	depends on NXXX_LPI2C && !NXXX_LPI2C_DYNTIMEO
+
+endmenu # LPI2C Configuration
+
+endmenu # NXXX Peripheral Selection
+
+endif # ARCH_CHIP_NXXX

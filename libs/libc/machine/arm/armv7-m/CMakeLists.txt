@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/machine/arm/armv7-m/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -20,8 +22,12 @@
 
 set(SRCS)
 
+if(CONFIG_ARMV7M_MEMCHR)
+  list(APPEND SRCS arch_memchr.S)
+endif()
+
 if(CONFIG_ARMV7M_MEMCPY)
-  list(APPEND SRCS gnu/arch_memcpy.S)
+  list(APPEND SRCS arch_memcpy.S)
 endif()
 
 if(CONFIG_ARMV7M_MEMSET)

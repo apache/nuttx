@@ -47,10 +47,13 @@
 #  define ESP32S3_I2C1 1
 #endif
 
+#define ESP32S3_RTC_I2C 2
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE
 /****************************************************************************
  * Name: esp32s3_i2cbus_initialize
  *
@@ -86,6 +89,7 @@ struct i2c_master_s *esp32s3_i2cbus_initialize(int port);
  ****************************************************************************/
 
 int esp32s3_i2cbus_uninitialize(struct i2c_master_s *dev);
+#endif /* CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE */
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_I2C_H */

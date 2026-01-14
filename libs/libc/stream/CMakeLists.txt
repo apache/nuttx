@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/stream/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -33,12 +35,24 @@ list(
   lib_nullinstream.c
   lib_nulloutstream.c
   lib_mtdoutstream.c
+  lib_mtdsostream.c
   lib_libnoflush.c
   lib_libsnoflush.c
   lib_syslogstream.c
   lib_syslograwstream.c
   lib_bufferedoutstream.c
-  lib_hexdumpstream.c)
+  lib_hexdumpstream.c
+  lib_base64outstream.c
+  lib_fileinstream.c
+  lib_fileoutstream.c
+  lib_libbsprintf.c
+  lib_libvscanf.c
+  lib_libvsprintf.c
+  lib_ultoa_invert.c)
+
+if(CONFIG_LIBC_FLOATINGPOINT)
+  list(APPEND SRCS lib_dtoa_engine.c lib_dtoa_data.c)
+endif()
 
 if(CONFIG_FILE_STREAM)
   list(APPEND SRCS lib_stdinstream.c lib_stdoutstream.c lib_stdsistream.c

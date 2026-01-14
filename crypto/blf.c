@@ -1,12 +1,9 @@
 /****************************************************************************
  * crypto/blf.c
- * $OpenBSD: blf.c,v 1.8 2021/11/29 01:04:45 djm Exp $ *
  *
- * Blowfish block cipher for OpenBSD
- * Copyright 1997 Niels Provos <provos@physnet.uni-hamburg.de>
- * All rights reserved.
- *
- * Implementation advice by David Mazieres <dm@lcs.mit.edu>.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 1997 Niels Provos <provos@physnet.uni-hamburg.de>
+ * SPDX-FileContributor: advice by David Mazieres <dm@lcs.mit.edu>.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

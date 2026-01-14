@@ -1,6 +1,8 @@
 # ##############################################################################
 # boards/arm/nrf53/nrf5340-dk/src/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -32,6 +34,10 @@ if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS nrf53_autoleds.c)
 else()
   list(APPEND SRCS nrf53_userleds.c)
+endif()
+
+if(CONFIG_DEV_GPIO)
+  list(APPEND SRCS nrf53_gpio.c)
 endif()
 
 if(CONFIG_ARCH_BUTTONS)

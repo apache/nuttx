@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32_rcc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -54,7 +56,9 @@
 
 /* Include chip-specific clocking initialization logic */
 
-#if defined(CONFIG_STM32H7_STM32H7X3XX)
+#if defined(CONFIG_STM32H7_STM32H7X0XX)
+#  include "stm32h7x3xx_rcc.c"
+#elif defined(CONFIG_STM32H7_STM32H7X3XX)
 #  include "stm32h7x3xx_rcc.c"
 #elif defined(CONFIG_STM32H7_STM32H7B3XX)
 #  include "stm32h7x3xx_rcc.c"

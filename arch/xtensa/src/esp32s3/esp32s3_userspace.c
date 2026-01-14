@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/userspace.h>
 
 #include <arch/board/board_memorymap.h>
@@ -109,14 +110,6 @@
 
 #define PIF_PMS_MAX_REG_ENTRY     16
 #define PIF_PMS_V                 3
-
-#ifndef ALIGN_UP
-#  define ALIGN_UP(num, align) (((num) + ((align) - 1)) & ~((align) - 1))
-#endif
-
-#ifndef ALIGN_DOWN
-#  define ALIGN_DOWN(num, align)  ((num) & ~((align) - 1))
-#endif
 
 /****************************************************************************
  * Private Types
@@ -390,14 +383,14 @@ static noinline_function IRAM_ATTR void configure_flash_mmu(void)
   drom_lma_aligned = app_drom_lma & MMU_FLASH_MASK;
   drom_vma_aligned = app_drom_vma & MMU_FLASH_MASK;
   drom_page_count = calc_mmu_pages(app_drom_size, app_drom_vma);
-  ASSERT(cache_dbus_mmu_set(MMU_ACCESS_FLASH, drom_vma_aligned,
+  ASSERT(cache_dbus_mmu_set(SOC_MMU_ACCESS_FLASH, drom_vma_aligned,
                             drom_lma_aligned, 64,
                             (int)drom_page_count, 0) == 0);
 
   irom_lma_aligned = app_irom_lma & MMU_FLASH_MASK;
   irom_vma_aligned = app_irom_vma & MMU_FLASH_MASK;
   irom_page_count = calc_mmu_pages(app_irom_size, app_irom_vma);
-  ASSERT(cache_ibus_mmu_set(MMU_ACCESS_FLASH, irom_vma_aligned,
+  ASSERT(cache_ibus_mmu_set(SOC_MMU_ACCESS_FLASH, irom_vma_aligned,
                             irom_lma_aligned, 64,
                             (int)irom_page_count, 0) == 0);
 
@@ -430,7 +423,7 @@ static noinline_function IRAM_ATTR const void *map_flash(uint32_t src_addr,
   src_addr_aligned = src_addr & MMU_FLASH_MASK;
   page_count = calc_mmu_pages(size, src_addr);
 
-  ASSERT(cache_dbus_mmu_set(MMU_ACCESS_FLASH, MMU_BLOCK63_VADDR,
+  ASSERT(cache_dbus_mmu_set(SOC_MMU_ACCESS_FLASH, MMU_BLOCK63_VADDR,
                             src_addr_aligned, 64, (int)page_count, 0) == 0);
 
   dcache_resume(cache_state);

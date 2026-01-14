@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/leds/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -17,7 +19,6 @@
 # the License.
 #
 # ##############################################################################
-# ##############################################################################
 
 set(SRCS)
 
@@ -31,6 +32,10 @@ endif()
 
 if(CONFIG_LEDS_APA102)
   list(APPEND SRCS apa102.c)
+endif()
+
+if(CONFIG_KTD2052)
+  list(APPEND SRCS ktd2052.c)
 endif()
 
 if(CONFIG_LEDS_MAX7219)

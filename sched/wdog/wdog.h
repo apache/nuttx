@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/wdog/wdog.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,27 +36,11 @@
 #include <nuttx/clock.h>
 #include <nuttx/queue.h>
 #include <nuttx/wdog.h>
+#include <nuttx/arch.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: wd_elapse
- *
- * Description:
- *   This function is used to get time-elapse from last time wd_timer() be
- *   called. In case of CONFIG_SCHED_TICKLESS configured, wd_timer() may
- *   take lots of ticks, during this time, wd_start()/wd_cancel() may
- *   called, so we need wd_elapse() to correct the delay/lag.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SCHED_TICKLESS
-#  define wd_elapse() (clock_systime_ticks() - g_wdtickbase)
-#else
-#  define wd_elapse() (0)
-#endif
 
 /****************************************************************************
  * Public Data
@@ -73,15 +59,66 @@ extern "C"
  * this linked list are removed and the function is called.
  */
 
-extern sq_queue_t g_wdactivelist;
-
-/* This is wdog tickbase, for wd_gettime() may called many times
- * between 2 times of wd_timer(), we use it to update wd_gettime().
- */
+extern struct list_node g_wdactivelist;
 
 #ifdef CONFIG_SCHED_TICKLESS
-extern clock_t g_wdtickbase;
+extern bool g_wdtimernested;
 #endif
+
+/****************************************************************************
+ * Inline functions
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_TICKLESS
+#  define wd_in_callback() (g_wdtimernested)
+#  define wd_set_nested(f) (g_wdtimernested = (f))
+#else
+#  define wd_in_callback() (false)
+#  define wd_set_nested(f)
+#endif
+
+#ifdef CONFIG_SCHED_TICKLESS
+static inline_function void wd_timer_start(clock_t next_tick)
+{
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
+#  ifndef CONFIG_ALARM_ARCH
+  struct timespec ts;
+  clock_ticks2time(&ts, next_tick);
+  up_alarm_start(&ts);
+#  else
+  up_alarm_tick_start(next_tick);
+#  endif
+#else
+#  ifndef CONFIG_TIMER_ARCH
+  struct timespec ts1;
+  struct timespec ts2;
+  clock_ticks2time(&ts1, next_tick);
+  clock_systime_timespec(&ts2);
+  clock_timespec_subtract(&ts1, &ts2, &ts1);
+  up_timer_start(&ts1);
+#  else
+  up_timer_tick_start(next_tick - clock_systime_ticks());
+#  endif
+#endif
+}
+static inline_function void wd_timer_cancel(void)
+{
+  struct timespec ts;
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
+  up_alarm_cancel(&ts);
+#else
+  up_timer_cancel(&ts);
+#endif
+}
+#else
+#  define wd_timer_start(next_tick)
+#  define wd_timer_cancel()
+#endif
+
+static inline_function clock_t wd_next_expire(void)
+{
+  return list_first_entry(&g_wdactivelist, struct wdog_s, node)->expired;
+}
 
 /****************************************************************************
  * Public Function Prototypes
@@ -113,33 +150,7 @@ extern clock_t g_wdtickbase;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_TICKLESS
-unsigned int wd_timer(int ticks, bool noswitches);
-#else
-void wd_timer(void);
-#endif
-
-/****************************************************************************
- * Name: wd_recover
- *
- * Description:
- *   This function is called from nxtask_recover() when a task is deleted via
- *   task_delete() or via pthread_cancel(). It checks if the deleted task
- *   is waiting for a timed event and if so cancels the timeout
- *
- * Input Parameters:
- *   tcb - The TCB of the terminated task or thread
- *
- * Returned Value:
- *   None.
- *
- * Assumptions:
- *   This function is called from task deletion logic in a safe context.
- *
- ****************************************************************************/
-
-struct tcb_s;
-void wd_recover(FAR struct tcb_s *tcb);
+void wd_timer(clock_t ticks);
 
 #undef EXTERN
 #ifdef __cplusplus

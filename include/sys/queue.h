@@ -1,10 +1,10 @@
 /****************************************************************************
  * include/sys/queue.h
- * $OpenBSD: queue.h,v 1.46 2020/12/30 13:33:12 millert Exp $
- * $NetBSD: queue.h,v 1.11 1996/05/16 05:17:14 mycroft Exp $
  *
- * Copyright (c) 1991, 1993
- * The Regents of the University of California.  All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 1991, 1993 The Regents of the University of California.
+ *
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,7 +30,6 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * @(#)queue.h 8.5 (Berkeley) 8/20/94
  ****************************************************************************/
 
 #ifndef __INCLUDE_SYS_QUEUE_H

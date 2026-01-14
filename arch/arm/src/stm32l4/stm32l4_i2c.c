@@ -1,37 +1,19 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_i2c.c
- * STM32L4 I2C driver - based on STM32F7 I2C Hardware Layer - Device Driver
  *
- * Original STM32L4 I2C driver:
- *
- *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Author: Uros Platise <uros.platise@isotel.eu>
- *   Copyright (C) 2011-2013, 2016-2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *   Author: John Wharington
- *   Author: Sebastien Lorquet
- *   Author: dev@ziggurat29.com
- *
- * STM32L4 I2C driver based on STM32F7 I2C driver:
- *
- *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Author: Uros Platise <uros.platise@isotel.eu>
- *
- * With extensions and modifications for the F1, F2, and F4 by:
- *
- *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            John Wharington
- *            David Sidrane <david_s5@nscdg.com>
- *
- * Major rewrite of ISR and supporting methods, including support
- * for NACK and RELOAD by:
- *
- *   Copyright (c) 2016 Doug Vetter.  All rights reserved.
- *   Author: Doug Vetter <oss@aileronlabs.com>
- *
- * Port from STM32F7 to STM32L4:
- *   Author: Jussi Kivilinna <jussi.kivilinna@haltian.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2016-2018 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2011-2013 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Doug Vetter.  All rights reserved.
+ * SPDX-FileCopyrightText: 2011 Uros Platise. All rights reserved.
+ * SPDX-FileContributor: Uros Platise <uros.platise@isotel.eu>
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: John Wharington
+ * SPDX-FileContributor: David Sidrane <david_s5@nscdg.com>
+ * SPDX-FileContributor: Doug Vetter <oss@aileronlabs.com>
+ * SPDX-FileContributor: Sebastien Lorquet
+ * SPDX-FileContributor: dev@ziggurat29.com
+ * SPDX-FileContributor: Jussi Kivilinna <jussi.kivilinna@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -168,7 +150,7 @@
  * Interrupt mode relies on the following interrupt events:
  *
  *   TXIS  - Transmit interrupt
- *           (data transmitted to bus and acknowedged)
+ *           (data transmitted to bus and acknowledged)
  *   NACKF - Not Acknowledge Received
  *           (data transmitted to bus and NOT acknowledged)
  *   RXNE  - Receive interrupt
@@ -1165,8 +1147,8 @@ static void stm32l4_i2c_traceevent(struct stm32l4_i2c_priv_s *priv,
 
       /* Initialize the new trace entry */
 
-      trace->event  = event;
-      trace->parm   = parm;
+      trace->event = event;
+      trace->parm  = parm;
 
       /* Bump up the trace index (unless we are out of trace entries) */
 
@@ -2825,7 +2807,7 @@ static int stm32l4_i2c_reset(struct i2c_master_s *dev)
 
 out:
 
-  /* Release the port for re-use by other clients */
+  /* Release the port for reuse by other clients */
 
   nxmutex_unlock(&priv->lock);
   return ret;

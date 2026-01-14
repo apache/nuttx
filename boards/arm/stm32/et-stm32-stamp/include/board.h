@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/et-stm32-stamp/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,7 +42,7 @@
 
 #define STM32_BOARD_XTAL        8000000ul
 
-/* PLL source is HSE/1, PLL multipler is 9:
+/* PLL source is HSE/1, PLL multiplier is 9:
  * PLL frequency is 8MHz (XTAL) x 9 = 72MHz
  */
 

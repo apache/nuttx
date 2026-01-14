@@ -817,7 +817,7 @@
 #define EFUSE_FLASH_ECC_MODE_S  3
 
 /* EFUSE_UART_PRINT_CHANNEL : RO; bitpos: [2]; default: 0;
- * Selectes the default UART print channel. 0: UART0. 1: UART1.
+ * Selects the default UART print channel. 0: UART0. 1: UART1.
  */
 
 #define EFUSE_UART_PRINT_CHANNEL    (BIT(2))
@@ -2917,7 +2917,7 @@
 #define EFUSE_EFUSE_MEM_FORCE_PD_S  0
 
 /* EFUSE_CONF_REG register
- * eFuse operation mode configuraiton register
+ * eFuse operation mode configuration register
  */
 
 #define EFUSE_CONF_REG (DR_REG_EFUSE_BASE + 0x1cc)

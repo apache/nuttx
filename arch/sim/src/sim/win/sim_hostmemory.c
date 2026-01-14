@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/win/sim_hostmemory.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -23,6 +25,8 @@
  ****************************************************************************/
 
 #include <windows.h>
+
+#include "sim_internal.h"
 
 /****************************************************************************
  * Public Functions
@@ -54,7 +58,7 @@ void host_freeheap(void *mem)
   _aligned_free(mem);
 }
 
-void *host_allocshmem(const char *name, size_t size, int master)
+void *host_allocshmem(const char *name, size_t size)
 {
   HANDLE handle;
   void *mem;

@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/driver/fs_registerblockdriver.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,6 +32,7 @@
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
+#include "vfs/vfs.h"
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 
@@ -73,12 +76,7 @@ int register_blockdriver(FAR const char *path,
    * valid data.
    */
 
-  ret = inode_lock();
-  if (ret < 0)
-    {
-      return ret;
-    }
-
+  inode_lock();
   ret = inode_reserve(path, mode, &node);
   if (ret >= 0)
     {
@@ -90,7 +88,11 @@ int register_blockdriver(FAR const char *path,
 
       node->u.i_bops  = bops;
       node->i_private = priv;
-      ret             = OK;
+      inode_unlock();
+#ifdef CONFIG_FS_NOTIFY
+      notify_create(path);
+#endif
+      return OK;
     }
 
   inode_unlock();

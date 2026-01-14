@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_max3421e.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1081,7 +1083,7 @@ static void max3421e_sndblock(FAR struct max3421e_usbhost_s *priv,
 
   SPI_SELECT(spi, SPIDEV_USBHOST(lower->devid), true);
 
-  /* Send the wrte command byte */
+  /* Send the write command byte */
 
   cmd = max3421e_fmtcmd(priv, addr, MAX3421E_DIR_WRITE);
   SPI_SEND(spi, cmd);
@@ -1825,7 +1827,7 @@ static ssize_t max3421e_out_transfer(FAR struct max3421e_usbhost_s *priv,
            * transfer using the same buffer pointer and length.
            */
 
-          nxsig_usleep(20 * 1000);
+          nxsched_usleep(20 * 1000);
         }
       else
         {
@@ -2713,9 +2715,9 @@ static ssize_t max3421e_in_transfer(FAR struct max3421e_usbhost_s *priv,
                    *
                    * Small delays could require more resolution than is
                    * provided by the system timer.  For example, if the
-                   * system timer resolution is 10MS, then nxsig_usleep(1000)
-                   * will actually request a delay 20MS (due to both
-                   * quantization and rounding).
+                   * system timer resolution is 10MS, then
+                   * nxsched_usleep(1000) will actually request a delay
+                   * 20MS (due to both quantization and rounding).
                    *
                    * REVISIT: So which is better?  To ignore tiny delays and
                    * hog the system bandwidth?  Or to wait for an excessive
@@ -2724,7 +2726,7 @@ static ssize_t max3421e_in_transfer(FAR struct max3421e_usbhost_s *priv,
 
                   if (delay > CONFIG_USEC_PER_TICK)
                     {
-                      nxsig_usleep(delay - CONFIG_USEC_PER_TICK);
+                      nxsched_usleep(delay - CONFIG_USEC_PER_TICK);
                     }
                 }
             }
@@ -2965,7 +2967,7 @@ static int max3421e_connected(FAR struct max3421e_usbhost_s *priv)
   /* Stop SOF generation and reset the bus */
 
   max3421e_busreset(priv);
-  nxsig_sleep(1);
+  nxsched_sleep(1);
 
   /* Check for low- or full-speed and restart SOF generation. */
 
@@ -3259,7 +3261,7 @@ static void max3421e_int_wait(FAR struct max3421e_usbhost_s *priv,
 
       if (regval == 0 && usec > 0)
         {
-          nxsig_usleep(usec);
+          nxsched_usleep(usec);
         }
     }
   while (regval == 0);
@@ -3417,7 +3419,7 @@ static int max3421e_getspeed(FAR struct max3421e_usbhost_s *priv,
    * 100ms.
    */
 
-  nxsig_usleep(100 * 1000);
+  nxsched_usleep(100 * 1000);
 
   /* Make sure we are still connected */
 
@@ -3433,7 +3435,7 @@ static int max3421e_getspeed(FAR struct max3421e_usbhost_s *priv,
   /* Stop SOF generation and reset the host port */
 
   max3421e_busreset(priv);
-  nxsig_sleep(1);
+  nxsched_sleep(1);
 
   /* Get the current device speed */
 
@@ -4546,7 +4548,7 @@ static int max3421e_startsof(FAR struct max3421e_usbhost_s *priv)
   while ((max3421e_getreg(priv, MAX3421E_USBHOST_HCTL) &
           USBHOST_HCTL_BUSSAMPLE) == 0)
     {
-      nxsig_usleep(5);
+      nxsched_usleep(5);
     }
 
   /* Check for low- or full-speed and start SOF (actually already started
@@ -4620,7 +4622,7 @@ static int max3421e_startsof(FAR struct max3421e_usbhost_s *priv)
   /* Wait for the first SOF received and 20ms has passed */
 
   max3421e_int_wait(priv, USBHOST_HIRQ_FRAMEIRQ, 0);
-  nxsig_usleep(20 * 1000);
+  nxsched_usleep(20 * 1000);
   return OK;
 }
 

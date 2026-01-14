@@ -1,9 +1,10 @@
 /****************************************************************************
  * include/lzf.h
- * http://liblzf.plan9.de/
  *
- *   Copyright (c) 2000-2008 Marc Alexander Lehmann <schmorp@schmorp.de>
- *   This algorithm is believed to be patent-free.
+ * SPDX-License-Identifier: BSD-2-Clause
+ * SPDX-FileCopyrightText: 2000-2008 Marc Alexander Lehmann <schmorp@schmorp.de>
+ *
+ * This algorithm is believed to be patent-free.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

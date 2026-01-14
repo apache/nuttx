@@ -312,6 +312,37 @@ config PCA9538_RETRY
 
 endif # IOEXPANDER_PCA9538
 
+config IOEXPANDER_PCA9557
+	bool "PCA9557 I2C IO expander"
+	default n
+	depends on I2C
+	---help---
+		Enable support for the NXP PCA9557 IO Expander
+
+if IOEXPANDER_PCA9557
+
+config PCA9557_SHADOW_MODE
+	bool "Use Shadow Mode instead of Read-Modify-Write Operations"
+	default n
+	---help---
+		This setting enables a mode where the output and pin
+		configuration registers are held in RAM.
+		With this for example we do not need to read back the
+		output-register every time we want to change one pin.
+		We do instead change the bit in the internal register
+		and then just write this register to the IO-Expander.
+		This reduces bus traffic and eliminates the problem of
+		EMC-caused toggling of output pins.
+
+config PCA9557_RETRY
+	bool "Retry to send commands and data at I2C communication errors"
+	default n
+	---help---
+		Retry to send commands and data if a I2C-communication
+		error occurs (eg. caused by EMC).
+
+endif # IOEXPANDER_PCA9557
+
 config IOEXPANDER_TCA64XX
 	bool "TCA64XX I2C IO expander"
 	default n
@@ -464,6 +495,63 @@ config SX1509_RETRY
 
 endif # IOEXPANDER_SX1509
 
+config IOEXPANDER_AW9523B
+	bool "AW9523B I2C IO expander"
+	default n
+	depends on I2C
+	---help---
+		Enable support for the Awinic AW9523B IO Expander
+
+if IOEXPANDER_AW9523B
+
+config AW9523B_MULTIPLE
+	bool "Multiple AW9523B Devices"
+	default n
+	---help---
+		Can be defined to support multiple AW9523B devices on board.
+
+config AW9523B_LED_ENABLE
+	bool "Enable AW9523B LED Support"
+	default y
+	---help---
+		Enable driver LED functionality
+
+config AW9523B_INT_ENABLE
+	bool "Enable AW9523B Interrupt Support"
+	default n
+	select IOEXPANDER_INT_ENABLE
+	---help---
+		Enable driver interrupt functionality
+
+config AW9523B_INT_NCALLBACKS
+	int "Max number of interrupt callbacks"
+	default 4
+	depends on AW9523B_INT_ENABLE
+	---help---
+		This is the maximum number of interrupt callbacks supported
+
+config AW9523B_SHADOW_MODE
+	bool "Use Shadow Mode instead of Read-Modify-Write Operations"
+	default n
+	---help---
+		This setting enables a mode where the output and pin
+		configuration registers are held in RAM.
+		With this for example we do not need to read back the
+		output-register every time we want to change one pin.
+		We do instead change the bit in the internal register
+		and then just write this register to the IO-Expander.
+		This reduces bus traffic and eliminates the problem of
+		EMC-caused toggling of output pins.
+
+config AW9523B_RETRY
+	bool "Retry to send commands and data at I2C communication errors"
+	default n
+	---help---
+		Retry to send commands and data if a I2C-communication
+		error occurs (eg. caused by EMC).
+
+endif # IOEXPANDER_AW9523B
+
 config IOEXPANDER_INT_ENABLE
 	bool
 	default n
@@ -498,6 +586,14 @@ config DEV_GPIO
 	---help---
 		Enables a simple GPIO input/output driver to support application-
 		space testing of hardware.
+
+config DEV_GPIO_NPOLLWAITERS
+	int "Max number of polls"
+	default 1
+	depends on DEV_GPIO
+	---help---
+		The maximum number of polls that can be registered with the GPIO
+		driver
 
 config DEV_GPIO_NSIGNALS
 	int "Max number of signals"

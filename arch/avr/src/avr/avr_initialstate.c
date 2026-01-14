@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/avr/src/avr/avr_initialstate.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -103,6 +105,12 @@ void up_initial_state(struct tcb_s *tcb)
   xcp->regs[REG_PC0]  = (uint8_t)((uint32_t)(uintptr_t)tcb->start >> 16);
   xcp->regs[REG_PC1]  = (uint8_t)((uintptr_t)tcb->start >> 8);
   xcp->regs[REG_PC2]  = (uint8_t)((uintptr_t)tcb->start & 0xff);
+#endif
+
+  /* Set RAMPZ to zero, the default value (if the MCU has one) */
+
+#if defined(REG_RAMPZ)
+  xcp->regs[REG_RAMPZ] = 0;
 #endif
 
   /* Enable or disable interrupts, based on user configuration */

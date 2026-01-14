@@ -1,6 +1,8 @@
 ############################################################################
 # boards/arm/stm32f7/stm32f777zit6-meadow/src/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -187,6 +189,10 @@ endif
 
 ifeq ($(CONFIG_BOARD_MEADOW_PROJECTLAB),y)
 CSRCS += board_projlab.c
+endif
+
+ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
+CSRCS += stm32_composite.c
 endif
 
 DEPPATH += --dep-path board

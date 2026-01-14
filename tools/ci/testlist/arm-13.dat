@@ -1,13 +1,90 @@
-/arm/stm32l*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
-/arm/stm32u*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
-/arm/stm32w*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/stm32f*,CONFIG_ARM_TOOLCHAIN_CLANG
 
-/arm/str71x,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/stm32h*,CONFIG_ARM_TOOLCHAIN_CLANG
 
-/arm/[t-z]*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
--eagle100:nxflat
--eagle100:thttpd
--launchxl-cc1310:nsh
--lm3s6965-ek:qemu-nxflat
--tms570ls31x-usb-kit:nsh
--tlsr8278adk80d:nsh
+# Boards build by CMake
+
+CMake,b-l072z-lrwan1:adc
+CMake,b-l072z-lrwan1:nsh
+#CMake,b-l072z-lrwan1:nxlines_oled
+CMake,b-l072z-lrwan1:sx127x
+
+CMake,nucleo-f072rb:nsh
+
+CMake,nucleo-f091rc:nsh
+CMake,nucleo-f091rc:sx127x
+
+CMake,nucleo-g070rb:nsh
+
+CMake,nucleo-g071rb:nsh
+
+CMake,nucleo-l073rz:nsh
+CMake,nucleo-l073rz:sx127x
+
+CMake,stm32f051-discovery:nsh
+
+CMake,stm32f072-discovery:nsh
+
+CMake,stm32g071b-disco:nsh
+#CMake,stm32g071b-disco:oled
+
+CMake,stm32l0538-disco:nsh
+
+CMake,nucleo-f722ze:can
+CMake,nucleo-f722ze:cansock
+CMake,nucleo-f722ze:composite
+
+CMake,nucleo-f746zg:evalos
+CMake,nucleo-f746zg:nsh
+CMake,nucleo-f746zg:pysim
+
+CMake,nucleo-f767zi:evalos
+CMake,nucleo-f767zi:netnsh
+CMake,nucleo-f767zi:nsh
+
+CMake,steval-eth001v1:foc_b16
+CMake,steval-eth001v1:foc_f32
+CMake,steval-eth001v1:nsh
+
+CMake,stm32f746g-disco:audio
+CMake,stm32f746g-disco:fb
+# CMake,stm32f746g-disco:lvgl
+CMake,stm32f746g-disco:netnsh
+CMake,stm32f746g-disco:nsh
+# CMake,stm32f746g-disco:nxdemo
+# CMake,stm32f746g-disco:nxterm
+
+CMake,stm32f746-ws:nsh
+
+CMake,stm32f769i-disco:netnsh
+CMake,stm32f769i-disco:nsh
+
+CMake,stm32f777zit6-meadow:nsh
+# CMake,stm32f777zit6-meadow:sdram
+
+CMake,nucleo-h743zi:composite
+# CMake,nucleo-h743zi:elf
+CMake,nucleo-h743zi:mcuboot-app
+CMake,nucleo-h743zi:mcuboot-loader
+CMake,nucleo-h743zi:netnsh
+CMake,nucleo-h743zi:nsh
+# CMake,nucleo-h743zi:nxlines_oled
+CMake,nucleo-h743zi:otg_fs_host
+CMake,nucleo-h743zi:pwm
+CMake,nucleo-h743zi:rndis
+
+# CMake,nucleo-h743zi2:jumbo
+CMake,nucleo-h743zi2:netnsh
+CMake,nucleo-h743zi2:nsh
+CMake,nucleo-h743zi2:pysim
+CMake,nucleo-h743zi2:socketcan
+
+# CMake,stm32h745i-disco:lvgl
+CMake,stm32h745i-disco:netnsh
+CMake,stm32h745i-disco:nsh
+CMake,stm32h745i-disco:touchtest
+
+CMake,nucleo-h745zi:nsh_cm4
+CMake,nucleo-h745zi:nsh_cm4_rptun
+CMake,nucleo-h745zi:nsh_cm7
+CMake,nucleo-h745zi:nsh_cm7_rptun

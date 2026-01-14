@@ -340,7 +340,7 @@ void esp32_rtcioirqinitialize(void)
 {
   /* Setup the RTCIO interrupt. */
 
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
   g_rtcio_cpuint = esp32_setup_irq(cpu, ESP32_PERIPH_RTC_CORE,
                                    1, ESP32_CPUINT_LEVEL);
   DEBUGASSERT(g_rtcio_cpuint >= 0);

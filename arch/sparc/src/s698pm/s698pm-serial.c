@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sparc/src/s698pm/s698pm-serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -881,7 +883,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before sparc_serialinit.  NOTE:  This function depends on GPIO pin
  *   configuration performed in sparc_consoleinit() and main clock
  *   iniialization performed in up_clkinitialize().
@@ -951,27 +953,16 @@ void sparc_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   struct uart_dev_s *dev = (struct uart_dev_s *)&CONSOLE_DEV;
   uint8_t imr = 0;
 
   up_disableuartint(dev, &imr);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      sparc_lowputc('\r');
-    }
-
   sparc_lowputc(ch);
   up_restoreuartint(dev, imr);
 #endif
-  return ch;
 }
 
 /****************************************************************************
@@ -993,9 +984,8 @@ void sparc_serialinit(void)
 {
 }
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
-  return ch;
 }
 
 #endif /* HAVE_UART_DEVICE */
@@ -1009,21 +999,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      sparc_lowputc('\r');
-    }
-
   sparc_lowputc(ch);
 #endif
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

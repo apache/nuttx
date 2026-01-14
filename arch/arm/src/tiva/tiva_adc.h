@@ -1,8 +1,9 @@
 /****************************************************************************
  * arch/arm/src/tiva/tiva_adc.h
  *
- *   Copyright (C) 2015 TRD2 Inc. All rights reserved.
- *   Author: Calvin Maguranis <calvin.maguranis@trd2inc.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2015 TRD2 Inc. All rights reserved.
+ * SPDX-FileContributor: Calvin Maguranis <calvin.maguranis@trd2inc.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

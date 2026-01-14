@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/cxd56xx/common/src/cxd56_alt1250.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -240,7 +242,7 @@ static struct spi_dev_s *alt1250_poweron(bool keep_on)
 
   up_mdelay(TIME_TO_STABLE_VDDIO);
 
-  /* Initialize spi deivce */
+  /* Initialize spi device */
 
   spi = cxd56_spibus_initialize(SPI_CH);
   if (!spi)

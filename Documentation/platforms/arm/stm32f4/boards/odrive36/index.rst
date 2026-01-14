@@ -2,6 +2,8 @@
 ODrive V3.6
 ===========
 
+.. tags:: chip:stm32, chip:stm32f4, chip:stm32f405
+
 ODrive V3.6 is an open-source dual-motor FOC controller based on
 the STMicro STM32F405RG and TI DRV8301 gate drivers.
 

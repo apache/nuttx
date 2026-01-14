@@ -35,7 +35,9 @@ There are currently be three ways to execute applications from NSH:
    This functionality depends on these configuration settings:
 
      * ``CONFIG_BUILTIN=y`` Enables NuttX support for builtin applications, and
-     * ``CONFIG_NSH_BUILTIN_APPS=y`` Enables NSH support for builtin applications
+     * ``CONFIG_NSH_BUILTIN_APPS=y`` Enables NSH support for builtin applications, and
+     * ``CONFIG_NSH_BUILTIN_AS_COMMAND``: Enable NSH run builtin applications directly
+       without creating a separate thread (optional).
 
    In additional to other configuration needed by NSH.
 
@@ -175,6 +177,6 @@ There are currently be three ways to execute applications from NSH:
 
    **Next Steps**
 
-   In the longer term, I would like to see an option to move most of the larger
+   In the longer term, it would be good to optionally move most of the larger
    NSH commands out of RAM and built them as standalone programs that can reside,
    for example, on an SD card (**NOT implemented**).

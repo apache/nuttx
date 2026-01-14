@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/mmu.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,12 +37,12 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <arch/barriers.h>
 #include "sctlr.h"
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #  include "chip.h"
-#  include "barriers.h"
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************
@@ -161,6 +163,31 @@
                                        /* Bits 11: Reserved */
 #define IFSR_EXT             (1 << 12) /* Bit 12: External Abort Qualifier */
                                        /* Bits 13-31: Reserved */
+
+#define FSR_FAULT(fsr)                (((fsr) & 0x0f) | (((fsr) & 0x400) >> 6))
+#define FSR_FAULT_ALIGNMENT           0x01 /* Alignment fault (DFSR only) */
+#define FSR_FAULT_DEBUG               0x02 /* Debug event */
+#define FSR_FAULT_TRANSLATION_L1      0x05 /* Translation fault, first level */
+#define FSR_FAULT_TRANSLATION_L2      0x07 /* Translation fault, second level */
+#define FSR_FAULT_ACCESS_FLAG_L1      0x06 /* Access flag fault, first level */
+#define FSR_FAULT_ACCESS_FLAG_L2      0x08 /* Access flag fault, second level */
+#define FSR_FAULT_DOMAIN_L1           0x09 /* Domain fault, first level */
+#define FSR_FAULT_DOMAIN_L2           0x0b /* Domain fault, second level */
+#define FSR_FAULT_PERMISSION_L1       0x0d /* Permission fault, first level */
+#define FSR_FAULT_PERMISSION_L2       0x0f /* Permission fault, second level */
+#define FSR_FAULT_SYNC_EXTERNAL_ABORT 0x08 /* Synchronous external abort */
+#define FSR_FAULT_SYNC_EXTERNAL_L1    0x0c /* External abort on translation table walk, first level */
+#define FSR_FAULT_SYNC_EXTERNAL_L2    0x0e /* External abort on translation table walk, second level */
+#define FSR_FAULT_SYNC_PARITY_L1      0x1c /* Synchronous parity error on translation table walk, first level */
+#define FSR_FAULT_SYNC_PARITY_L2      0x1e /* Synchronous parity error on translation table walk, second level */
+#define FSR_FAULT_PARITY              0x19 /* Parity error on memory access */
+#define FSR_FAULT_TLB_CONFLICT        0x10 /* TLB conflict abort */
+#define FSR_FAULT_ICACHE_MAINT        0x04 /* Fault on instruction cache maintenance */
+#define FSR_FAULT_LOCKDOWN            0x14 /* Implementation defined: lockdown */
+#define FSR_FAULT_COPROC_ABORT        0x1a /* Implementation defined: coprocessor abort */
+#define FSR_FAULT_PARITY_MEM_SYNC     0x11 /* Synchronous parity error on memory access */
+#define FSR_FAULT_EXTERNAL_ASYNC      0x16 /* Asynchronous external abort (DFSR only) */
+#define FSR_FAULT_PARITY_MEM_ASYNC    0x18 /* Asynchronous parity error on memory access (DFSR only) */
 
 /* Data Fault Address Register(DFAR).  Holds the MVA of the faulting address
  * when a synchronous fault occurs
@@ -912,24 +939,24 @@
 
 struct section_mapping_s
 {
-  uint32_t physbase;   /* Physical address of the region to be mapped */
-  uint32_t virtbase;   /* Virtual address of the region to be mapped */
-  uint32_t mmuflags;   /* MMU settings for the region (e.g., cache-able) */
-  uint32_t nsections;  /* Number of mappings in the region */
+  uintptr_t physbase;  /* Physical address of the region to be mapped */
+  uintptr_t virtbase;  /* Virtual address of the region to be mapped */
+  uint32_t  mmuflags;  /* MMU settings for the region (e.g., cache-able) */
+  uint32_t  nsections; /* Number of mappings in the region */
 };
 
 struct page_entry_s
 {
-  uint32_t physbase;        /* Physical address of the region to be mapped */
-  uint32_t virtbase;        /* Virtual address of the region to be mapped */
-  uint32_t mmuflags;        /* MMU settings for the region (e.g., cache-able) */
-  uint32_t npages;          /* Number of mappings in the region */
+  uintptr_t physbase; /* Physical address of the region to be mapped */
+  uintptr_t virtbase; /* Virtual address of the region to be mapped */
+  uint32_t  mmuflags; /* MMU settings for the region (e.g., cache-able) */
+  uint32_t  npages;   /* Number of mappings in the region */
 };
 
 struct page_mapping_s
 {
-  uint32_t l2table;                 /* Virtual address of l2 table */
-  uint32_t entrynum;                /* Page entry number */
+  uintptr_t l2table;                /* Virtual address of l2 table */
+  uint32_t  entrynum;               /* Page entry number */
   const struct page_entry_s *entry; /* Page entry */
 };
 #endif
@@ -1248,7 +1275,7 @@ static inline void cp15_disable_mmu(void)
 
 static inline void cp15_invalidate_tlbs(void)
 {
-  ARM_DSB();
+  UP_DSB();
 #ifdef CONFIG_ARM_HAVE_MPCORE
   CP15_SET(TLBIALLIS, 0);
   CP15_SET(BPIALLIS, 0);
@@ -1256,8 +1283,7 @@ static inline void cp15_invalidate_tlbs(void)
   CP15_SET2(TLBIALL, c7, 0);
   CP15_SET(BPIALL, 0);
 #endif
-  ARM_DSB();
-  ARM_ISB();
+  UP_MB();
 }
 
 /****************************************************************************
@@ -1273,7 +1299,7 @@ static inline void cp15_invalidate_tlbs(void)
 
 static inline void cp15_invalidate_tlb_bymva(uint32_t vaddr)
 {
-  ARM_DSB();
+  UP_DSB();
 #ifdef CONFIG_ARM_HAVE_MPCORE
   CP15_SET(TLBIMVAAIS, vaddr);
   CP15_SET(BPIALLIS, 0);
@@ -1281,8 +1307,7 @@ static inline void cp15_invalidate_tlb_bymva(uint32_t vaddr)
   CP15_SET2(TLBIMVA, c7, vaddr);
   CP15_SET(BPIALL, 0);
 #endif
-  ARM_DSB();
-  ARM_ISB();
+  UP_MB();
 }
 
 /****************************************************************************
@@ -1296,17 +1321,17 @@ static inline void cp15_invalidate_tlb_bymva(uint32_t vaddr)
  *
  ****************************************************************************/
 
-static inline void cp15_wrdacr(unsigned int dacr)
+static inline void cp15_wrdacr(uint32_t dacr)
 {
   CP15_SET(DACR, dacr);
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
 }
 
 /****************************************************************************
@@ -1324,22 +1349,22 @@ static inline void cp15_wrdacr(unsigned int dacr)
  *
  ****************************************************************************/
 
-static inline void cp15_wrttb(unsigned int ttb)
+static inline void cp15_wrttb(uint32_t ttb)
 {
   CP15_SET(TTBR0, ttb);
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
   CP15_SET(TTBCR, 0);
 }
 
 /****************************************************************************
- * Name: mmu_l1_pgtable
+ * Name: mmu_l1_getpgtable
  *
  * Description:
  *   Return the value of the L1 page table base address.
@@ -1351,19 +1376,43 @@ static inline void cp15_wrttb(unsigned int ttb)
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-static inline uint32_t *mmu_l1_pgtable(void)
+static inline uintptr_t *mmu_l1_getpgtable(void)
 {
-#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_ADDRENV)
+#ifdef CONFIG_ARCH_ADDRENV
   uint32_t ttbr0;
   uint32_t pgtable;
 
   ttbr0 = CP15_GET(TTBR0);
   pgtable = ttbr0 & TTBR0_BASE_MASK(0);
-  return (uint32_t *)(pgtable - PGTABLE_BASE_PADDR + PGTABLE_BASE_VADDR);
+  return (uintptr_t *)(pgtable - PGTABLE_BASE_PADDR + PGTABLE_BASE_VADDR);
 #else
-  return (uint32_t *)PGTABLE_BASE_VADDR;
+  return (uintptr_t *)PGTABLE_BASE_VADDR;
 #endif
 }
+#endif
+
+/****************************************************************************
+ * Name: mmu_l1_setpgtable
+ *
+ * Description:
+ *   Update current L1 page table base address.
+ *   The TTBR0 register contains the phys address for each cpu.
+ *
+ * Input Parameters:
+ *   ttb - The new value of the TTBR0 register
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_ARCH_ROMPGTABLE
+#  ifdef CONFIG_ARCH_ADDRENV
+static inline void mmu_l1_setpgtable(uintptr_t *ttb)
+{
+  cp15_wrttb((uint32_t)ttb | TTBR0_RGN_WBWA | TTBR0_IRGN0);
+  cp15_invalidate_tlbs();
+}
+#  else
+#    define mmu_l1_setpgtable(ttb)
+#  endif
 #endif
 
 /****************************************************************************
@@ -1379,14 +1428,19 @@ static inline uint32_t *mmu_l1_pgtable(void)
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-static inline uint32_t mmu_l1_getentry(uint32_t vaddr)
+static inline
+uintptr_t mmu_l1table_getentry(uintptr_t *l1table, uintptr_t vaddr)
 {
-  uint32_t *l1table = mmu_l1_pgtable();
-  uint32_t  index   = vaddr >> 20;
+  uint32_t index = vaddr >> 20;
 
   /* Return the address of the page table entry */
 
   return l1table[index];
+}
+
+static inline uintptr_t mmu_l1_getentry(uintptr_t vaddr)
+{
+  return mmu_l1table_getentry(mmu_l1_getpgtable(), vaddr);
 }
 #endif
 
@@ -1404,10 +1458,10 @@ static inline uint32_t mmu_l1_getentry(uint32_t vaddr)
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-static inline uint32_t mmu_l2_getentry(uint32_t l2vaddr, uint32_t vaddr)
+static inline uintptr_t mmu_l2_getentry(uintptr_t l2vaddr, uintptr_t vaddr)
 {
-  uint32_t *l2table  = (uint32_t *)l2vaddr;
-  uint32_t  index;
+  uintptr_t *l2table  = (uintptr_t *)l2vaddr;
+  uint32_t index;
 
   /* The table divides a 1Mb address space up into 256 entries, each
    * corresponding to 4Kb of address space.  The page table index is
@@ -1458,7 +1512,9 @@ extern "C"
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-void mmu_l1_setentry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags);
+void mmu_l1_setentry(uintptr_t paddr, uintptr_t vaddr, uint32_t mmuflags);
+void mmu_l1table_setentry(uintptr_t *l1table, uintptr_t paddr,
+                          uintptr_t vaddr, uint32_t mmuflags);
 #endif
 
 /****************************************************************************
@@ -1475,7 +1531,7 @@ void mmu_l1_setentry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags);
  ****************************************************************************/
 
 #if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_ADDRENV)
-void mmu_l1_restore(uintptr_t vaddr, uint32_t l1entry);
+void mmu_l1_restore(uintptr_t vaddr, uintptr_t l1entry);
 #endif
 
 /****************************************************************************
@@ -1512,7 +1568,7 @@ void mmu_l1_restore(uintptr_t vaddr, uint32_t l1entry);
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-void mmu_l2_setentry(uint32_t l2vaddr, uint32_t paddr, uint32_t vaddr,
+void mmu_l2_setentry(uintptr_t l2vaddr, uintptr_t paddr, uintptr_t vaddr,
                      uint32_t mmuflags);
 #endif
 
@@ -1554,7 +1610,7 @@ void mmu_l1_map_regions(const struct section_mapping_s *mappings,
  * Name: mmu_l1_map_page
  *
  * Description:
- *   Set level 1 page entrie in order to map a region
+ *   Set level 1 page entry in order to map a region
  *   array of memory.
  *
  * Input Parameters:
@@ -1588,7 +1644,7 @@ void mmu_l1_map_pages(const struct section_mapping_s *mappings,
  * Name: mmu_l2_map_page
  *
  * Description:
- *   Set level 2 page entrie in order to map a region
+ *   Set level 2 page entry in order to map a region
  *   array of memory.
  *
  * Input Parameters:
@@ -1631,7 +1687,7 @@ void mmu_l2_map_pages(const struct page_mapping_s *mappings,
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-void mmu_invalidate_region(uint32_t vstart, size_t size);
+void mmu_invalidate_region(uintptr_t vstart, size_t size);
 #endif
 
 #undef EXTERN

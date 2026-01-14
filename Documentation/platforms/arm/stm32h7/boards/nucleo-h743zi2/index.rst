@@ -1,6 +1,8 @@
-================
-ST Nucle H743ZI2
-================
+=================
+ST Nucleo H743ZI2
+=================
+
+.. tags:: chip:stm32, chip:stm32h7, chip:stm32h743
 
 This page discusses issues unique to NuttX configurations for the
 STMicro NUCLEO-H743ZI2 development board featuring the STM32H743ZI

@@ -1,0 +1,18 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_CSK6011A_NANO
+choice
+	prompt "Console Mode"
+	default CSK6_CONSOLE_UART0
+
+config CSK6_CONSOLE_UART0
+	bool "USART0 is a console port"
+	select USART0_SERIALDRIVER
+
+#TODO add support other port
+endchoice # USART0 Mode
+endif
+

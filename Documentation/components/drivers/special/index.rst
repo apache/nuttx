@@ -25,12 +25,14 @@ following section.
   audio.rst
   clk.rst
   devicetree.rst
+  devmem.rst
   dma.rst
   framebuffer.rst
   i2c.rst
+  i3c.rst
   ioexpander.rst
   lcd.rst
-  mtd.rst
+  mtd/index.rst
   regmap.rst
   reset.rst
   rptun.rst
@@ -47,8 +49,11 @@ following section.
   usrsock.rst
   mmcsd.rst
   net/index.rst
+  pci/index.rst
+  pinctrl.rst
   pipes.rst
   power/index.rst
+  ptp.rst
   virtio.rst
   video.rst
   wireless.rst

@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/semaphore/sem_timeout.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -45,7 +47,7 @@
  *   semaphore is acquired.
  *
  * Input Parameters:
- *   pid  - The task ID of the task to wakeup
+ *   arg - The argument that was provided when the timeout was configured.
  *
  * Returned Value:
  *   None
@@ -55,26 +57,20 @@
  *
  ****************************************************************************/
 
-void nxsem_timeout(wdparm_t pid)
+void nxsem_timeout(wdparm_t arg)
 {
-  FAR struct tcb_s *wtcb;
+  FAR struct tcb_s *wtcb = (FAR struct tcb_s *)(uintptr_t)arg;
   irqstate_t flags;
 
   /* Disable interrupts to avoid race conditions */
 
   flags = enter_critical_section();
 
-  /* Get the TCB associated with this PID.  It is possible that
-   * task may no longer be active when this watchdog goes off.
-   */
-
-  wtcb = nxsched_get_tcb(pid);
-
   /* It is also possible that an interrupt/context switch beat us to the
    * punch and already changed the task's state.
    */
 
-  if (wtcb && wtcb->task_state == TSTATE_WAIT_SEM)
+  if (wtcb->task_state == TSTATE_WAIT_SEM)
     {
       /* Cancel the semaphore wait */
 

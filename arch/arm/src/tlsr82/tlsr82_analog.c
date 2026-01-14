@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tlsr82/tlsr82_analog.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -109,7 +111,7 @@ uint8_t locate_code(".ram_code") tlsr82_analog_read(uint8_t addr)
 
   tlsr82_analog_wait();
 
-  /* Get the data and clear the analog contrl register */
+  /* Get the data and clear the analog control register */
 
   data = ANALOG_DATA_REG;
   ANALOG_CTRL_REG = 0;
@@ -149,7 +151,7 @@ void locate_code(".ram_code") tlsr82_analog_write(uint8_t addr, uint8_t val)
 
   tlsr82_analog_wait();
 
-  /* Clear the analog contrl register */
+  /* Clear the analog control register */
 
   ANALOG_CTRL_REG = 0;
 

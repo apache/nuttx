@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stream/lib_blkoutstream.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -43,7 +45,7 @@
  * Name: blkoutstream_flush
  ****************************************************************************/
 
-static int blkoutstream_flush(FAR struct lib_outstream_s *self)
+static int blkoutstream_flush(FAR struct lib_sostream_s *self)
 {
   FAR struct lib_blkoutstream_s *stream =
                                  (FAR struct lib_blkoutstream_s *)self;
@@ -60,11 +62,81 @@ static int blkoutstream_flush(FAR struct lib_outstream_s *self)
 }
 
 /****************************************************************************
+ * Name: blkoutstream_seek
+ ****************************************************************************/
+
+static off_t blkoutstream_seek(FAR struct lib_sostream_s *self,
+                               off_t offset, int whence)
+{
+  FAR struct lib_blkoutstream_s *stream =
+                                 (FAR struct lib_blkoutstream_s *)self;
+  size_t sectorsize = stream->geo.geo_sectorsize;
+  off_t streamsize = sectorsize * stream->geo.geo_nsectors;
+  FAR struct inode *inode = stream->inode;
+  off_t sector;
+  off_t ret;
+
+  switch (whence)
+    {
+      case SEEK_SET:
+        break;
+      case SEEK_END:
+        offset += streamsize;
+        break;
+      case SEEK_CUR:
+        offset += self->nput;
+        break;
+      default:
+        return -ENOTSUP;
+    }
+
+  /* Seek to negative value or value larger than maximum size shall fail. */
+
+  if (offset < 0 || offset > streamsize)
+    {
+      return -EINVAL;
+    }
+
+  if (self->nput % sectorsize)
+    {
+      sector = self->nput / sectorsize;
+      if (offset >= sector * sectorsize &&
+          offset < (sector + 1) * sectorsize)
+        {
+          /* Inside same sector */
+
+          goto out;
+        }
+
+      ret = inode->u.i_bops->write(stream->inode, stream->cache,
+                                   sector, 1);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+
+  if (offset % sectorsize)
+    {
+      ret = inode->u.i_bops->read(inode, stream->cache,
+                                  offset / sectorsize, 1);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+
+out:
+  self->nput = offset;
+  return offset;
+}
+
+/****************************************************************************
  * Name: blkoutstream_puts
  ****************************************************************************/
 
-static int blkoutstream_puts(FAR struct lib_outstream_s *self,
-                             FAR const void *buf, int len)
+static ssize_t blkoutstream_puts(FAR struct lib_sostream_s *self,
+                                 FAR const void *buf, size_t len)
 {
   FAR struct lib_blkoutstream_s *stream =
                                  (FAR struct lib_blkoutstream_s *)self;
@@ -72,55 +144,62 @@ static int blkoutstream_puts(FAR struct lib_outstream_s *self,
   FAR struct inode *inode = stream->inode;
   FAR const unsigned char *ptr = buf;
   size_t remain = len;
-  int ret;
+  ssize_t ret;
 
   while (remain > 0)
     {
-      size_t sblock = self->nput / sectorsize;
-      size_t offset = self->nput % sectorsize;
+      off_t sector = self->nput / sectorsize;
+      off_t offset = self->nput % sectorsize;
 
       if (offset > 0)
         {
-          size_t copyin = offset + remain > sectorsize ?
-                          sectorsize - offset : remain;
+          size_t copying = offset + remain > sectorsize ?
+                           sectorsize - offset : remain;
 
-          memcpy(stream->cache + offset, ptr, copyin);
+          memcpy(stream->cache + offset, ptr, copying);
 
-          ptr        += copyin;
-          offset     += copyin;
-          self->nput += copyin;
-          remain     -= copyin;
+          ptr        += copying;
+          offset     += copying;
+          self->nput += copying;
+          remain     -= copying;
 
-          if (offset == stream->geo.geo_sectorsize)
+          if (offset == sectorsize)
             {
-              ret = inode->u.i_bops->write(inode, stream->cache, sblock, 1);
+              ret = inode->u.i_bops->write(inode, stream->cache, sector, 1);
               if (ret < 0)
                 {
                   return ret;
                 }
             }
         }
-      else if (remain < stream->geo.geo_sectorsize)
+      else if (remain < sectorsize)
         {
-          memcpy(stream->cache, ptr, remain);
-          self->nput += remain;
-          remain      = 0;
-        }
-      else if (remain >= stream->geo.geo_sectorsize)
-        {
-          size_t copyin = (remain / stream->geo.geo_sectorsize) *
-                                    stream->geo.geo_sectorsize;
+          /* Read sector back to keep as more as possible old data */
 
-          ret = inode->u.i_bops->write(inode, ptr, sblock,
-                                       remain / stream->geo.geo_sectorsize);
+          ret = inode->u.i_bops->read(inode, stream->cache, sector, 1);
           if (ret < 0)
             {
               return ret;
             }
 
-          ptr        += copyin;
-          self->nput += copyin;
-          remain     -= copyin;
+          memcpy(stream->cache, ptr, remain);
+          self->nput += remain;
+          remain      = 0;
+        }
+      else
+        {
+          size_t nsector = remain / sectorsize;
+          size_t copying = nsector * sectorsize;
+
+          ret = inode->u.i_bops->write(inode, ptr, sector, nsector);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          ptr        += copying;
+          self->nput += copying;
+          remain     -= copying;
         }
     }
 
@@ -131,7 +210,7 @@ static int blkoutstream_puts(FAR struct lib_outstream_s *self,
  * Name: blkoutstream_putc
  ****************************************************************************/
 
-static void blkoutstream_putc(FAR struct lib_outstream_s *self, int ch)
+static void blkoutstream_putc(FAR struct lib_sostream_s *self, int ch)
 {
   char tmp = ch;
   blkoutstream_puts(self, &tmp, 1);
@@ -160,16 +239,17 @@ void lib_blkoutstream_close(FAR struct lib_blkoutstream_s *stream)
 {
   if (stream != NULL)
     {
+      if (stream->cache != NULL)
+        {
+          blkoutstream_flush(&stream->common);
+          lib_free(stream->cache);
+          stream->cache = NULL;
+        }
+
       if (stream->inode != NULL)
         {
           close_blockdriver(stream->inode);
           stream->inode = NULL;
-        }
-
-      if (stream->cache != NULL)
-        {
-          lib_free(stream->cache);
-          stream->cache = NULL;
         }
     }
 }
@@ -230,6 +310,7 @@ int lib_blkoutstream_open(FAR struct lib_blkoutstream_s *stream,
   stream->common.putc  = blkoutstream_putc;
   stream->common.puts  = blkoutstream_puts;
   stream->common.flush = blkoutstream_flush;
+  stream->common.seek  = blkoutstream_seek;
 
   return OK;
 }

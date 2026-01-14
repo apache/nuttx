@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/semaphore/sem_post.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,7 +41,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsem_post
+ * Name: nxsem_post_slow
  *
  * Description:
  *   When a kernel thread has finished with a semaphore, it will call
@@ -67,16 +69,16 @@
  *
  ****************************************************************************/
 
-int nxsem_post(FAR sem_t *sem)
+int nxsem_post_slow(FAR sem_t *sem)
 {
   FAR struct tcb_s *stcb = NULL;
   irqstate_t flags;
-  int16_t sem_count;
-#ifdef CONFIG_PRIORITY_INHERITANCE
-  uint8_t prioinherit;
+#if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
+  uint8_t proto;
 #endif
-
-  DEBUGASSERT(sem != NULL);
+  bool blocking = false;
+  bool mutex = NXSEM_IS_MUTEX(sem);
+  uint32_t mholder = NXSEM_NO_MHOLDER;
 
   /* The following operations must be performed with interrupts
    * disabled because sem_post() may be called from an interrupt
@@ -85,14 +87,57 @@ int nxsem_post(FAR sem_t *sem)
 
   flags = enter_critical_section();
 
-  sem_count = sem->semcount;
-
-  /* Check the maximum allowable value */
-
-  if (sem_count >= SEM_VALUE_MAX)
+  if (mutex)
     {
-      leave_critical_section(flags);
-      return -EOVERFLOW;
+      /* Mutex post from interrupt context is not allowed */
+
+      DEBUGASSERT(!up_interrupt_context());
+
+      /* Lock the mutex for us by setting the blocking bit */
+
+      mholder = atomic_fetch_or(NXSEM_MHOLDER(sem), NXSEM_MBLOCKING_BIT);
+
+      /* Mutex post from another thread is not allowed, unless
+       * called from nxsem_reset
+       */
+
+      DEBUGASSERT(mholder == (NXSEM_MBLOCKING_BIT | NXSEM_MRESET) ||
+                  (mholder & (~NXSEM_MBLOCKING_BIT)) == nxsched_gettid());
+
+      blocking = NXSEM_MBLOCKING(mholder);
+
+      if (!blocking)
+        {
+          if (mholder != NXSEM_MRESET)
+            {
+              mholder = NXSEM_NO_MHOLDER;
+            }
+
+          atomic_set(NXSEM_MHOLDER(sem), mholder);
+        }
+    }
+  else
+    {
+      int32_t sem_count;
+
+      /* Check the maximum allowable value */
+
+      sem_count = atomic_read(NXSEM_COUNT(sem));
+      do
+        {
+#ifdef CONFIG_CUSTOM_SEMAPHORE_MAXVALUE
+          if (sem_count >= sem->maxvalue)
+#else
+          if (sem_count >= SEM_VALUE_MAX)
+#endif
+            {
+              leave_critical_section(flags);
+              return -EOVERFLOW;
+            }
+        }
+      while (!atomic_try_cmpxchg_release(NXSEM_COUNT(sem), &sem_count,
+                                         sem_count + 1));
+      blocking = sem_count < 0;
     }
 
   /* Perform the semaphore unlock operation, releasing this task as a
@@ -112,11 +157,12 @@ int nxsem_post(FAR sem_t *sem)
    * initialized if the semaphore is to used for signaling purposes.
    */
 
-  nxsem_release_holder(sem);
-  sem_count++;
-  sem->semcount = sem_count;
+  if (!mutex || blocking)
+    {
+      nxsem_release_holder(sem);
+    }
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
+#if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
   /* Don't let any unblocked tasks run until we complete any priority
    * restoration steps.  Interrupts are disabled, but we do not want
    * the head of the ready-to-run list to be modified yet.
@@ -125,8 +171,8 @@ int nxsem_post(FAR sem_t *sem)
    * will do nothing.
    */
 
-  prioinherit = sem->flags & SEM_PRIO_MASK;
-  if (prioinherit == SEM_PRIO_INHERIT)
+  proto = sem->flags & SEM_PRIO_MASK;
+  if (proto != SEM_PRIO_NONE)
     {
       sched_lock();
     }
@@ -136,7 +182,7 @@ int nxsem_post(FAR sem_t *sem)
    * there must be some task waiting for the semaphore.
    */
 
-  if (sem_count <= 0)
+  if (blocking)
     {
       /* Check if there are any tasks in the waiting for semaphore
        * task list that are waiting for this semaphore.  This is a
@@ -145,7 +191,6 @@ int nxsem_post(FAR sem_t *sem)
        */
 
       stcb = (FAR struct tcb_s *)dq_remfirst(SEM_WAITLIST(sem));
-
       if (stcb != NULL)
         {
           FAR struct tcb_s *rtcb = this_task();
@@ -154,14 +199,21 @@ int nxsem_post(FAR sem_t *sem)
            * it is awakened.
            */
 
-          nxsem_add_holder_tcb(stcb, sem);
+          if (mutex)
+            {
+              uint32_t blocking_bit = dq_empty(SEM_WAITLIST(sem)) ?
+                0 : NXSEM_MBLOCKING_BIT;
+              atomic_set(NXSEM_MHOLDER(sem),
+                         ((uint32_t)stcb->pid) | blocking_bit);
+            }
+          else
+            {
+              nxsem_add_holder_tcb(stcb, sem);
+            }
 
           /* Stop the watchdog timer */
 
-          if (WDOG_ISACTIVE(&stcb->waitdog))
-            {
-              wd_cancel(&stcb->waitdog);
-            }
+          wd_cancel(&stcb->waitdog);
 
           /* Indicate that the wait is over. */
 
@@ -173,17 +225,9 @@ int nxsem_post(FAR sem_t *sem)
 
           if (nxsched_add_readytorun(stcb))
             {
-              up_switch_context(stcb, rtcb);
+              up_switch_context(this_task(), rtcb);
             }
         }
-#if 0 /* REVISIT:  This can fire on IOB throttle semaphore */
-      else
-        {
-          /* This should not happen. */
-
-          DEBUGPANIC();
-        }
-#endif
     }
 
   /* Check if we need to drop the priority of any threads holding
@@ -191,10 +235,20 @@ int nxsem_post(FAR sem_t *sem)
    * held the semaphore.
    */
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
-  if (prioinherit == SEM_PRIO_INHERIT)
+#if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
+  if (proto != SEM_PRIO_NONE)
     {
-      nxsem_restore_baseprio(stcb, sem);
+      if (proto == SEM_PRIO_INHERIT)
+        {
+#ifdef CONFIG_PRIORITY_INHERITANCE
+          nxsem_restore_baseprio(stcb, sem);
+#endif
+        }
+      else if (proto == SEM_PRIO_PROTECT)
+        {
+          nxsem_protect_post(sem);
+        }
+
       sched_unlock();
     }
 #endif

@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_waitpid.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -218,7 +220,7 @@ pid_t nxsched_waitpid(pid_t pid, int *stat_loc, int options)
   FAR struct child_status_s *child = NULL;
   bool retains;
 #endif
-  FAR struct siginfo info;
+  struct siginfo info;
   irqstate_t flags;
   sigset_t set;
   int ret;
@@ -426,7 +428,7 @@ pid_t nxsched_waitpid(pid_t pid, int *stat_loc, int options)
 
       /* Wait for any death-of-child signal */
 
-      ret = nxsig_waitinfo(&set, &info);
+      ret = nxsig_timedwait(&set, &info, NULL);
       if (ret < 0)
         {
           goto errout;

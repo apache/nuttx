@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sama5/hardware/sam_classd.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -76,15 +78,15 @@
 /* ClassD Register Addresses */
 
 #define SAM_CLASSD_CR       (SAM_CLASSD_VBASE + SAM_CLASSD_CR_OFFSET)
-#define SAM_CLASSD_MR       (SAM_CLASSD_VBASE + SAM_CLASSD_MR_OFFSET)   
-#define SAM_CLASSD_INTPMR   (SAM_CLASSD_VBASE + SAM_CLASSD_INTPMR_OFFSET) 
-#define SAM_CLASSD_INTSR    (SAM_CLASSD_VBASE + SAM_CLASSD_INTSR_OFFSET) 
-#define SAM_CLASSD_THR      (SAM_CLASSD_VBASE + SAM_CLASSD_THR_OFFSET) 
-#define SAM_CLASSD_IER      (SAM_CLASSD_VBASE + SAM_CLASSD_IER_OFFSET) 
-#define SAM_CLASSD_IDR      (SAM_CLASSD_VBASE + SAM_CLASSD_IDR_OFFSET) 
-#define SAM_CLASSD_IMR      (SAM_CLASSD_VBASE + SAM_CLASSD_IMR_OFFSET) 
-#define SAM_CLASSD_ISR      (SAM_CLASSD_VBASE + SAM_CLASSD_ISR_OFFSET) 
-#define SAM_CLASSD_WPMR     (SAM_CLASSD_VBASE + SAM_CLASSD_WPMR_OFFSET) 
+#define SAM_CLASSD_MR       (SAM_CLASSD_VBASE + SAM_CLASSD_MR_OFFSET)
+#define SAM_CLASSD_INTPMR   (SAM_CLASSD_VBASE + SAM_CLASSD_INTPMR_OFFSET)
+#define SAM_CLASSD_INTSR    (SAM_CLASSD_VBASE + SAM_CLASSD_INTSR_OFFSET)
+#define SAM_CLASSD_THR      (SAM_CLASSD_VBASE + SAM_CLASSD_THR_OFFSET)
+#define SAM_CLASSD_IER      (SAM_CLASSD_VBASE + SAM_CLASSD_IER_OFFSET)
+#define SAM_CLASSD_IDR      (SAM_CLASSD_VBASE + SAM_CLASSD_IDR_OFFSET)
+#define SAM_CLASSD_IMR      (SAM_CLASSD_VBASE + SAM_CLASSD_IMR_OFFSET)
+#define SAM_CLASSD_ISR      (SAM_CLASSD_VBASE + SAM_CLASSD_ISR_OFFSET)
+#define SAM_CLASSD_WPMR     (SAM_CLASSD_VBASE + SAM_CLASSD_WPMR_OFFSET)
 
 /* ClassD Register Bit Field Definitions */
 
@@ -103,7 +105,7 @@
 #define CLASSD_MR_PWMTYP_BIT         (1 << CLASSD_MR_PWMTYP_SHIFT)
                                           /* Bit 8, PWM Modulation Type     */
 #define CLASSD_MR_NOVR_SHIFT         (16) /* Bit 16, Non-Overlapping Enable */
-#define CLASSD_MR_NOVR_BIT           (1 << CLASSD_MR_NOVR_SHIFT) 
+#define CLASSD_MR_NOVR_BIT           (1 << CLASSD_MR_NOVR_SHIFT)
 #define CLASSD_MR_NOVRVAL_SHIFT      (20) /* Bit 20/21, Non-Overlap Value   */
 #define CLASSD_MR_NOVRVAL_MASK       (3 << CLASSD_MR_NOVRVAL_SHIFT)
 #define CLASSD_MR_NOVR(n)            ((n) << CLASSD_MR_NOVRVAL_SHIFT)
@@ -117,7 +119,7 @@
 #define CLASSD_VOL_RIGHT(n)          ((n) << CLASSD_INTPMR_ATTR_SHIFT)
 
 #define CLASSD_INTPMR_DSPCLKF_SHIFT  (16) /* Bit 16, DSP Clock Frequency    */
-#define CLASSD_INTPMR_DSPCLKF_BIT    (1 << CLASSD_INTPMR_DSPCLKF_SHIFT) 
+#define CLASSD_INTPMR_DSPCLKF_BIT    (1 << CLASSD_INTPMR_DSPCLKF_SHIFT)
 #define CLASSD_INTPMR_DEEMP_SHIFT    (18) /* Bit 18, Enable De-emph. filter */
 #define CLASSD_INTPMR_DEEMP_BIT      (1 << CLASSD_INTPMR_DEEMP_SHIFT)
 #define CLASSD_INTPMR_SWAP_SHIFT     (19) /* Bit 19, Swap L&R Channels      */

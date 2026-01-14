@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/rp2040/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -75,8 +77,8 @@
 #define RP2040_DMA_IRQ_1      (RP2040_IRQ_EXTINT+12)
 #define RP2040_IO_IRQ_BANK0   (RP2040_IRQ_EXTINT+13)
 #define RP2040_IO_IRQ_QSPI    (RP2040_IRQ_EXTINT+14)
-#define RP2040_SIO_IRQ_PROC0  (RP2040_IRQ_EXTINT+15)
-#define RP2040_SIO_IRQ_PROC1  (RP2040_IRQ_EXTINT+16)
+#define RP2040_SMP_CALL_PROC0 (RP2040_IRQ_EXTINT+15)
+#define RP2040_SMP_CALL_PROC1 (RP2040_IRQ_EXTINT+16)
 #define RP2040_CLOCKS_IRQ     (RP2040_IRQ_EXTINT+17)
 #define RP2040_SPI0_IRQ       (RP2040_IRQ_EXTINT+18)
 #define RP2040_SPI1_IRQ       (RP2040_IRQ_EXTINT+19)

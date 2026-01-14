@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32/common/src/esp32_board_wlan.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -23,18 +25,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <stdio.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/stat.h>
+#include <sys/types.h>
 #include <syslog.h>
-#include <debug.h>
 
-#include <nuttx/wireless/wireless.h>
-
-#include "esp32_spiflash.h"
-#include "esp32_wlan.h"
+#include "espressif/esp_wlan_netdev.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -64,24 +58,23 @@ int board_wlan_init(void)
 {
   int ret = OK;
 
-#ifdef ESP32_WLAN_HAS_STA
-  ret = esp32_wlan_sta_initialize();
+#ifdef ESP_WLAN_HAS_STA
+  ret = esp_wlan_sta_initialize();
   if (ret)
     {
-      wlerr("ERROR: Failed to initialize Wi-Fi station\n");
+      syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi station\n");
       return ret;
     }
-#endif /* ESP32_WLAN_HAS_STA */
+#endif /* ESP_WLAN_HAS_STA */
 
-#ifdef ESP32_WLAN_HAS_SOFTAP
-  ret = esp32_wlan_softap_initialize();
+#ifdef ESP_WLAN_HAS_SOFTAP
+  ret = esp_wlan_softap_initialize();
   if (ret)
     {
-      wlerr("ERROR: Failed to initialize Wi-Fi softAP\n");
+      syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi softAP\n");
       return ret;
     }
-#endif /* ESP32_WLAN_HAS_SOFTAP */
+#endif /* ESP_WLAN_HAS_SOFTAP */
 
   return ret;
 }
-

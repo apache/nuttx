@@ -1,0 +1,13 @@
+config:
+  cwd: './'
+
+product:
+  name: "ntfc-rv-virt64"
+  cores:
+    core0:
+      name: 'main'
+      device: 'qemu'
+      exec_path: 'qemu-system-riscv64'
+      exec_args: '-semihosting -M virt,aclint=on -smp 1 -bios none -nographic'
+      conf_path: './.config'
+      elf_path: './nuttx'

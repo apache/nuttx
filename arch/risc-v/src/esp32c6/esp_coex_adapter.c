@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c6/esp_coex_adapter.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,16 +37,16 @@
 #include <nuttx/kmalloc.h>
 
 #include "esp_hr_timer.h"
-#include "esp_wlan.h"
+#include "esp_wifi_utils.h"
 
 #include "esp_attr.h"
 #include "esp_timer.h"
 #include "soc/rtc.h"
 #include "esp_private/esp_clk.h"
-#include "esp_coexist_adapter.h"
+#include "private/esp_coexist_adapter.h"
 #include "rom/ets_sys.h"
 #include "soc/soc_caps.h"
-#include "esp_modem_wrapper.h"
+#include "private/esp_modem_wrapper.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -135,7 +137,7 @@ static int32_t IRAM_ATTR esp_coex_semphr_take_from_isr_wrapper(void *semphr,
 {
   *(int *)hptw = 0;
 
-  return nuttx_err_to_freertos(nxsem_trywait(semphr));
+  return nuttx_err_to_common_err(nxsem_trywait(semphr));
 }
 
 /****************************************************************************
@@ -236,7 +238,7 @@ void *esp_coex_common_spin_lock_create_wrapper(void)
       DEBUGPANIC();
     }
 
-  spin_initialize(lock, SP_UNLOCKED);
+  spin_lock_init(lock);
 
   return lock;
 }
@@ -314,7 +316,7 @@ void IRAM_ATTR esp_coex_common_task_yield_from_isr_wrapper(void)
  *   Create and initialize semaphore
  *
  * Input Parameters:
- *   max  - No meanining for NuttX
+ *   max  - No meaning for NuttX
  *   init - semaphore initialization value
  *
  * Returned Value:
@@ -416,7 +418,7 @@ int32_t esp_coex_common_semphr_take_wrapper(void *semphr,
             block_time_tick, ret);
     }
 
-  return nuttx_err_to_freertos(ret);
+  return nuttx_err_to_common_err(ret);
 }
 
 /****************************************************************************
@@ -447,7 +449,7 @@ int32_t esp_coex_common_semphr_give_wrapper(void *semphr)
       wlerr("Failed to post sem error=%d\n", ret);
     }
 
-  return nuttx_err_to_freertos(ret);
+  return nuttx_err_to_common_err(ret);
 }
 
 /****************************************************************************

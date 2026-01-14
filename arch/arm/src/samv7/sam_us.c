@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_us.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,10 +30,10 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
+#include <arch/barriers.h>
 #include <arch/samv7/chip.h>
 
 #include "arm_internal.h"
-#include "barriers.h"
 
 #include "hardware/sam_memorymap.h"
 
@@ -96,6 +98,7 @@ int sam_erase_user_signature(void)
 
 int sam_write_user_signature(void *buffer, size_t buflen)
 {
+  irqstate_t flags;
   uint32_t *dest;
   int ret;
 
@@ -118,19 +121,22 @@ int sam_write_user_signature(void *buffer, size_t buflen)
    * within the internal memory area address space.
    */
 
+  flags = up_irq_save();
   dest = (uint32_t *)SAMV7_US_START;
   for (int i = 0; i < SAMV7_US_PAGE_WORDS; i++)
     {
       *dest++ = g_page_buffer[i];
 
 #ifdef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
-      ARM_DMB();
+      UP_DMB();
 #endif
     }
 
   /* Flush the data cache to memory */
 
   up_clean_dcache(SAMV7_US_START, SAMV7_US_START + SAMV7_US_SIZE);
+
+  up_irq_restore(flags);
 
   /* EEFC_FCR_FARG does not have any affect for user signature,
    * therefore second argument can be zero.
@@ -164,6 +170,7 @@ int sam_write_user_signature(void *buffer, size_t buflen)
 
 int sam_read_user_signature(void *buffer, size_t buflen)
 {
+  irqstate_t flags;
   size_t nwords;
   int ret;
 
@@ -177,8 +184,10 @@ int sam_read_user_signature(void *buffer, size_t buflen)
 
   /* sam_eefc_readsequence requires read length in bit words. */
 
-  nwords = (buflen + sizeof(uint32_t) / sizeof(uint32_t));
+  nwords = (buflen + sizeof(uint32_t)) / sizeof(uint32_t);
+  flags = up_irq_save();
   sam_eefc_readsequence(FCMD_STUS, FCMD_SPUS, g_page_buffer, nwords);
+  up_irq_restore(flags);
 
   /* Copy local buffer to void *buffer provided by the user. */
 

@@ -1,6 +1,8 @@
 ############################################################################
 # drivers/rptun/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -23,6 +25,14 @@
 ifeq ($(CONFIG_RPTUN),y)
 
 CSRCS += rptun.c
+
+ifeq ($(CONFIG_RPTUN_BMP),y)
+CSRCS += rptun_bmp.c
+endif
+
+ifeq ($(CONFIG_RPTUN_IVSHMEM),y)
+CSRCS += rptun_ivshmem.c
+endif
 
 DEPPATH += --dep-path rptun
 VPATH += :rptun

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/audio/wm8904.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -898,7 +900,7 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
   retries = 5;
   do
     {
-      nxsig_usleep(5 * 5000);
+      nxsched_usleep(5 * 5000);
     }
   while (priv->locked == false && --retries > 0);
 
@@ -921,7 +923,7 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
   retries = 5;
   do
     {
-       nxsig_usleep(5 * 5000);
+       nxsched_usleep(5 * 5000);
     }
   while ((wm8904_readreg(priv, WM8904_INT_STATUS) &
          WM8904_FLL_LOCK_INT) != 0 ||
@@ -1016,7 +1018,7 @@ static int wm8904_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* Report the Sample rates we support */
 
-              caps->ac_controls.b[0] =
+              caps->ac_controls.hw[0] =
                 AUDIO_SAMP_RATE_8K | AUDIO_SAMP_RATE_11K |
                 AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K |
                 AUDIO_SAMP_RATE_32K | AUDIO_SAMP_RATE_44K |
@@ -1673,7 +1675,7 @@ static int wm8904_pause(FAR struct audio_lowerhalf_s *dev)
 
   if (priv->running && !priv->paused)
     {
-      /* Disable interrupts to prevent us from suppling any more data */
+      /* Disable interrupts to prevent us from supplying any more data */
 
       priv->paused = true;
       wm8904_setvolume(priv, priv->volume, true);

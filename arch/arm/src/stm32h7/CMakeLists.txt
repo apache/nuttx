@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/arm/src/stm32h7/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -140,6 +142,18 @@ if(CONFIG_TIMER)
   list(APPEND SRCS stm32_tim_lowerhalf.c)
 endif()
 
+if(CONFIG_STM32H7_TIMX_CAP)
+  list(APPEND SRCS stm32_capture.c)
+endif()
+
+if(CONFIG_CAPTURE)
+  list(APPEND SRCS stm32_capture_lowerhalf.c)
+endif()
+
+if(CONFIG_STM32H7_LTDC)
+  list(APPEND SRCS stm32_ltdc.c)
+endif()
+
 if(CONFIG_USBDEV)
   list(APPEND SRCS stm32_otgdev.c)
 endif()
@@ -169,6 +183,10 @@ endif()
 
 if(CONFIG_STM32H7_ETHMAC)
   list(APPEND SRCS stm32_ethernet.c)
+endif()
+
+if(CONFIG_MDIO_BUS)
+  list(APPEND SRCS stm32_mdio.c)
 endif()
 
 if(CONFIG_SENSORS_QENCODER)

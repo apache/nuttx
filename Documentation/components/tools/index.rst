@@ -13,19 +13,6 @@ cmpconfig.c
 This C file can be used to build a utility for comparing two NuttX
 configuration files.
 
-Config.mk
----------
-
-Config.mk contains common definitions used by many configuration files.
-This file (along with <nuttx>/.config) must be included at the top of
-each configuration-specific Make.defs file like::
-
-    include $(TOPDIR)/.config
-    include $(TOPDIR)/tools/Config.mk
-
-Subsequent logic within the configuration-specific Make.defs file may then
-override these default definitions as necessary.
-
 checkpatch.sh
 -------------
 
@@ -41,9 +28,11 @@ Help message::
 
   Options:
   -h
-  -c spell check with codespell(install with: pip install codespell)
+  -c spell check with codespell (install with: pip install codespell)
+  -u encoding check with cvt2utf (install with: pip install cvt2utf)
   -r range check only (coupled with -p or -g)
   -p <patch list> (default)
+  -m Change-Id check in commit message (coupled with -g)
   -g <commit list>
   -f <file list>
   -  read standard input mainly used by git pre-commit hook as below:
@@ -738,6 +727,8 @@ these problems::
      -   option env="APPSDIR"
      +   default "../apps"
 
+.. _build_system_linking:
+
 link.sh, link.bat, copydir.sh, copydir.bat, unlink.sh, and unlink.bat
 ---------------------------------------------------------------------
 
@@ -778,6 +769,8 @@ this case.  link.bat will attempt to create a symbolic link using the
 NTFS mklink.exe command instead of copying files.  That logic, however,
 has not been verified as of this writing.
 
+.. _makefile_host:
+
 Makefile.host
 -------------
 
@@ -798,6 +791,8 @@ may be mounted under /etc in the NuttX pseudo file system.
 
 TIP: Edit the resulting header file and mark the generated data values
 as 'const' so that they will be stored in FLASH.
+
+.. _mkdeps:
 
 mkdeps.c, cnvwindeps.c, mkwindeps.sh, and mknulldeps.sh
 -------------------------------------------------------
@@ -849,6 +844,28 @@ This has been tested on the SAMA5D3-Xplained board; see
 `Documentation/platforms/arm/sama5/boards/sama5d3-xplained/README.txt`
 for more information on how to configure the CDC ECM driver for that board.
 
+nxtagspkgsfetch.sh
+------------------
+
+This script downloads all NuttX RTOS and Application snapshot packages
+from the upstream git repository based on the provided git tags list.
+These are NOT official release packages as checksum will differ.
+When launched from the local NuttX git repository clone the script will
+obtain all available tags to be downloaded, otherwise list of tags needs
+to be provided manually (or when just selected tag is required).
+This script uses ``wget`` underneath, make sure this tool is installed.
+Fetch log file is created with a timestamp in name next to the packages.
+
+Having all tags packaged is important for changes comparison
+between specific versions, testing a specific version, compatibility
+checks, searching for a feature introduction timeline, etc.
+
+Usage: ``./nxtagspkgsfetch.sh [download_path] [tags_list_space_separated]``
+
+You can provide optional download path (default ``../../nuttx-packages``)
+and tags list to get packages for (default all tags from local git clone).
+When providing tags you also need to provide download path.
+
 refresh.sh
 ----------
 
@@ -875,7 +892,7 @@ Help is also available::
     $ tools/refresh.sh --help
     tools/refresh.sh is a tool for refreshing board configurations
 
-USAGE: ``./refresh.sh [options] <board>/<config>+``
+USAGE: ``./refresh.sh [options] <arch>|<chip>|<board>:<config>+``
 
 Where [options] include::
 
@@ -927,6 +944,28 @@ The steps to refresh the file taken by refresh.sh are:
    option, this file copy will occur automatically.  Otherwise,
    refresh.sh will prompt you first to avoid overwriting the
    defconfig file with changes that you may not want.
+
+Usage examples:
+
+Update all boards without verbose output::
+
+       $ ./tools/refresh.sh --silent --defaults all
+
+Update all boards and configs from `arm` architecture::
+
+       $ ./tools/refresh.sh --silent arch:arm
+
+Update all boards from `stm32f7` chip family::
+
+       $ ./tools/refresh.sh --silent chip:stm32f7
+
+Update all configs from `stm32f103-minimum` board::
+
+       $ ./tools/refresh.sh --silent board:stm32f103-minimum
+
+Update only the `nsh` config from stm32f103-minimum board::
+
+       $ ./tools/refresh.sh --silent stm32f103-minimum:nsh
 
 rmcr.c
 ------

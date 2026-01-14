@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s2/esp32s2-saola-1/src/esp32s2-saola-1.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -102,7 +104,7 @@ int esp32s2_bringup(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S2_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
 int board_spiflash_init(void);
 #endif
 
@@ -196,7 +198,8 @@ int board_bmp180_initialize(int devno, int busno);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ESP32S2_I2S) && !defined(CONFIG_AUDIO_CS4344)
+#if (defined(CONFIG_ESPRESSIF_I2S) && !defined(CONFIG_AUDIO_ES8311)) || \
+    defined(CONFIG_ESPRESSIF_I2S)
 int board_i2sdev_initialize(bool enable_tx, bool enable_rx);
 #endif
 
@@ -229,7 +232,7 @@ int esp32s2_cs4344_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S2_LEDC
+#ifdef CONFIG_ESPRESSIF_LEDC
 int esp32s2_pwm_setup(void);
 #endif
 

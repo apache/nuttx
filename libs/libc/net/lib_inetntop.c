@@ -1,14 +1,11 @@
 /****************************************************************************
  * libs/libc/net/lib_inetntop.c
  *
- *   Copyright (C) 2012, 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Includes some logic extracted from hwport_ftpd, written by Jaehyuk Cho
- * <minzkn@minzkn.com> which was released under the BSD license.
- *
- *   Copyright (C) HWPORT.COM. All rights reserved.
- *   Author: JAEHYUK CHO <mailto:minzkn@minzkn.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2012, 2015 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: HWPORT.COM. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: JAEHYUK CHO <mailto:minzkn@minzkn.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

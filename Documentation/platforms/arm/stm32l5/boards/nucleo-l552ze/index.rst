@@ -2,6 +2,8 @@
 ST Nucleo L552ZE-Q
 ==================
 
+.. tags:: chip:stm32, chip:stm32l5, chip:stm32l552
+
 This page discusses the port of NuttX to the STMicro Nucleo-L552ZE
 board.  That board features the STM32L552ZET6Q MCU with 512KiB of FLASH
 and 256KiB of SRAM.

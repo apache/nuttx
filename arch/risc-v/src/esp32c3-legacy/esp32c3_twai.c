@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/esp32c3_twai.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1218,7 +1220,7 @@ struct can_dev_s *esp32c3_twaiinitialize(int port)
       modifyreg32(SYSTEM_PERIP_RST_EN0_REG, 0, SYSTEM_TWAI_RST_M);
       modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, SYSTEM_TWAI_CLK_EN_M, 0);
 
-      nxsig_usleep(1);
+      nxsched_usleep(1);
 
       modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, 0, SYSTEM_TWAI_CLK_EN_M);
       modifyreg32(SYSTEM_PERIP_RST_EN0_REG, SYSTEM_TWAI_RST_M, 0);

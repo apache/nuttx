@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/intel64/intel64_oneshot.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -79,16 +81,24 @@ static int intel64_oneshot_handler(int irg_num, void * context, void *arg)
   void                     *oneshot_arg;
   oneshot_handler_t         oneshot_handler;
 
-  tmrinfo("Expired...\n");
-  DEBUGASSERT(oneshot != NULL && oneshot->handler);
+  DEBUGASSERT(oneshot != NULL);
 
-  if (INTEL64_TIM_GETINT(oneshot->tch, oneshot->chan))
+  /* Additional check for spurious interrupts. We can't check interrupt
+   * status here, because it doesn't work for FSB which is edge tirggered
+   */
+
+  if (oneshot->running)
     {
+      DEBUGASSERT(oneshot->handler);
+      tmrinfo("Expired...\n");
+
+#ifndef CONFIG_INTEL64_HPET_FSB
       /* Disable any further interrupts. */
 
       INTEL64_TIM_DISABLEINT(oneshot->tch, oneshot->chan);
       INTEL64_TIM_SETISR(oneshot->tch, oneshot->chan, NULL, NULL, false);
       INTEL64_TIM_ACKINT(oneshot->tch, oneshot->chan);
+#endif
 
       /* The timer is no longer running */
 
@@ -102,6 +112,10 @@ static int intel64_oneshot_handler(int irg_num, void * context, void *arg)
       oneshot->arg     = NULL;
 
       oneshot_handler(oneshot_arg);
+    }
+  else
+    {
+      tmrinfo("Spurious...\n");
     }
 
   return OK;
@@ -191,12 +205,39 @@ int intel64_oneshot_initialize(struct intel64_oneshot_s *oneshot, int chan,
   oneshot->period = INTEL64_TIM_GETPERIOD(oneshot->tch);
   oneshot->frequency = 1e15 / oneshot->period;
 
+  /* Calculations in intel64_oneshot_current() requires that HPET
+   * frequency is less than 1GHz
+   */
+
+  DEBUGASSERT(oneshot->frequency < 1000000000);
+
   /* Initialize the remaining fields in the state structure. */
 
   oneshot->chan       = chan;
   oneshot->running    = false;
   oneshot->handler    = NULL;
   oneshot->arg        = NULL;
+
+#ifdef CONFIG_INTEL64_HPET_FSB
+  /* IMPORTANT: HPET in edge triggered mode is broken on some hardware
+   * and generate spurious interrupts when we enable timer. On the other
+   * hand FSB works only with edge triggered mode.
+   *
+   * We use the following work around for this:
+   * 1. enable interrupts now for FSB so we can catch initial spurious
+   *    interrupt.
+   * 2. NEVER disable interrupts, so we avoid spurious interrupt when we
+   *    re-enabled interrupt.
+   * 3. The previous step requires that we must filter out unwanted
+   *    interrupts for 32-bit mode HPET, that will happen with HPET
+   *    period interval.
+   */
+
+  INTEL64_TIM_SETISR(oneshot->tch, oneshot->chan, intel64_oneshot_handler,
+                     oneshot, false);
+  INTEL64_TIM_SETCOMPARE(oneshot->tch, oneshot->chan, 0);
+  INTEL64_TIM_ENABLEINT(oneshot->tch, oneshot->chan);
+#endif
 
   /* Assign a callback handler to the oneshot */
 
@@ -277,7 +318,7 @@ int intel64_oneshot_start(struct intel64_oneshot_s *oneshot,
   usec = (uint64_t)ts->tv_sec * USEC_PER_SEC +
          (uint64_t)(ts->tv_nsec / NSEC_PER_USEC);
 
-  /* HPET use free runnin up-counter and a comparators which generate events
+  /* HPET use free running up-counter and a comparators which generate events
    * only on a equal event. This can results in event miss if we set too
    * small delay. In that case we just set a minimum value for delay that
    * seem to work.
@@ -298,21 +339,25 @@ int intel64_oneshot_start(struct intel64_oneshot_s *oneshot,
 
   compare = (usec * (uint64_t)oneshot->frequency) / USEC_PER_SEC;
 
+#ifndef CONFIG_INTEL64_HPET_FSB
   /* Set up to receive the callback when the interrupt occurs */
 
   INTEL64_TIM_SETISR(oneshot->tch, oneshot->chan, intel64_oneshot_handler,
                      oneshot, false);
+#endif
 
-  /* Set comparator ahed of the current counter */
+  /* Set comparator ahead of the current counter */
 
   compare += INTEL64_TIM_GETCOUNTER(oneshot->tch);
   INTEL64_TIM_SETCOMPARE(oneshot->tch, oneshot->chan, compare);
 
+#ifndef CONFIG_INTEL64_HPET_FSB
   /* Enable interrupts.  We should get the callback when the interrupt
    * occurs.
    */
 
   INTEL64_TIM_ENABLEINT(oneshot->tch, oneshot->chan);
+#endif
 
   oneshot->running = true;
   spin_unlock_irqrestore(&g_oneshot_spin, flags);
@@ -378,10 +423,12 @@ int intel64_oneshot_cancel(struct intel64_oneshot_s *oneshot,
   counter = INTEL64_TIM_GETCOUNTER(oneshot->tch);
   compare = INTEL64_TIM_GETCOMPARE(oneshot->tch, oneshot->chan);
 
+#ifndef CONFIG_INTEL64_HPET_FSB
   /* Now we can disable the interrupt and stop the timer. */
 
   INTEL64_TIM_DISABLEINT(oneshot->tch, oneshot->chan);
   INTEL64_TIM_SETISR(oneshot->tch, oneshot->chan, NULL, NULL, false);
+#endif
 
   oneshot->running = false;
   oneshot->handler = NULL;
@@ -420,6 +467,30 @@ int intel64_oneshot_cancel(struct intel64_oneshot_s *oneshot,
       tmrinfo("remaining (%lu, %lu)\n",
              (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
     }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: intel64_oneshot_current
+ *
+ * Description:
+ *   Get the current time.
+ *
+ ****************************************************************************/
+
+int intel64_oneshot_current(struct intel64_oneshot_s *oneshot,
+                            uint64_t *usec)
+{
+  uint64_t counter;
+
+  /* Get the current counter value */
+
+  counter = INTEL64_TIM_GETCOUNTER(oneshot->tch);
+
+  /* Use nano seconds to avoid 64-bit overflow */
+
+  *usec = (counter * (NSEC_PER_SEC / oneshot->frequency)) / 1000;
 
   return OK;
 }

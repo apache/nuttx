@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/sys/time.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -251,7 +253,7 @@ int settimeofday(FAR const struct timeval *tv,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_CLOCK_TIMEKEEPING) || defined(CONFIG_CLOCK_ADJTIME)
+#ifdef CONFIG_CLOCK_ADJTIME
 int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta);
 #endif
 

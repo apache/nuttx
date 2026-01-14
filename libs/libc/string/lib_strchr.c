@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/string/lib_strchr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,7 +49,8 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_STRCHR) && defined(LIBC_BUILD_STRCHR)
-#undef strchr /* See mm/README.txt */
+#undef strchr
+no_builtin("strchr")
 FAR char *strchr(FAR const char *s, int c)
 {
   for (; ; s++)

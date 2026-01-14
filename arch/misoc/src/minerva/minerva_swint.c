@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/misoc/src/minerva/minerva_swint.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -93,7 +95,7 @@ int minerva_swint(int irq, void *context, void *arg)
 {
   uint32_t *regs = (uint32_t *) context;
 
-  DEBUGASSERT(regs != NULL && regs == g_current_regs);
+  DEBUGASSERT(regs != NULL && regs == up_current_regs());
 
   /* Software interrupt 0 is invoked with REG_A0 (REG_X10) = system call
    * command and REG_A1-6 = variable number of arguments depending on the
@@ -137,7 +139,7 @@ int minerva_swint(int irq, void *context, void *arg)
     case SYS_restore_context:
       {
         DEBUGASSERT(regs[REG_A1] != 0);
-        g_current_regs = (uint32_t *) regs[REG_A1];
+        up_set_current_regs((uint32_t *)regs[REG_A1]);
       }
       break;
 
@@ -154,7 +156,7 @@ int minerva_swint(int irq, void *context, void *arg)
       {
         DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
         minerva_copystate((uint32_t *) regs[REG_A1], regs);
-        g_current_regs = (uint32_t *) regs[REG_A2];
+        up_set_current_regs((uint32_t *)regs[REG_A2]);
       }
       break;
 
@@ -167,7 +169,7 @@ int minerva_swint(int irq, void *context, void *arg)
 #ifdef CONFIG_BUILD_KERNEL
     case SYS_syscall_return:
       {
-        struct tcb_s *rtcb = nxsched_self();
+        struct tcb_s *rtcb = this_task();
         int index = (int)rtcb->xcp.nsyscalls - 1;
 
         /* Make sure that there is a saved syscall return address. */
@@ -178,7 +180,8 @@ int minerva_swint(int irq, void *context, void *arg)
          * original mode.
          */
 
-        g_current_regs[REG_CSR_MEPC] = rtcb->xcp.syscall[index].sysreturn;
+        up_current_regs()[REG_CSR_MEPC] =
+          rtcb->xcp.syscall[index].sysreturn;
 #error "Missing logic -- need to restore the original mode"
         rtcb->xcp.nsyscalls          = index;
 
@@ -200,12 +203,12 @@ int minerva_swint(int irq, void *context, void *arg)
     default:
       {
 #ifdef CONFIG_BUILD_KERNEL
-        struct tcb_s *rtcb = nxsched_self();
+        struct tcb_s *rtcb = this_task();
         int index = rtcb->xcp.nsyscalls;
 
         /* Verify that the SYS call number is within range */
 
-        DEBUGASSERT(g_current_regs[REG_A0] < SYS_maxsyscall);
+        DEBUGASSERT(up_current_regs()[REG_A0] < SYS_maxsyscall);
 
         /* Make sure that we got here that there is a no saved syscall return
          * address.  We cannot yet handle nested system calls.
@@ -225,7 +228,7 @@ int minerva_swint(int irq, void *context, void *arg)
 
         /* Offset R0 to account for the reserved values */
 
-        g_current_regs[REG_A0] -= CONFIG_SYS_RESERVED;
+        up_current_regs()[REG_A0] -= CONFIG_SYS_RESERVED;
 
         /* Indicate that we are in a syscall handler. */
 
@@ -242,10 +245,10 @@ int minerva_swint(int irq, void *context, void *arg)
    */
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
-  if (regs != g_current_regs)
+  if (regs != up_current_regs())
     {
       svcinfo("SWInt Return: Context switch!\n");
-      minerva_registerdump(g_current_regs);
+      minerva_registerdump(up_current_regs());
     }
   else
     {

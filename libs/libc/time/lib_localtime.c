@@ -1,19 +1,12 @@
 /****************************************************************************
  * libs/libc/time/lib_localtime.c
  *
- * Re-released as part of NuttX under the 3-clause BSD license:
- *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Ported to NuttX by Max Neklyudov
- *   Style updates by Gregory Nutt
- *
- * With these notes:
- *
- *   This file is in the public domain, so clarified as of
- *   1996-06-05 by Arthur David Olson.
- *
- *   Leap second handling from Bradley White.
- *   POSIX-style TZ environment variable handling from Guy Harris.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileContributor: Ported to NuttX by Max Neklyudov
+ * SPDX-FileContributor: Guy Harris
+ * SPDX-FileContributor: Bradley White
+ * SPDX-FileContributor: Arthur David Olson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -60,6 +53,7 @@
 
 #include <sys/param.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/init.h>
 #include <nuttx/fs/fs.h>
@@ -352,7 +346,7 @@ static FAR const char *getnum(FAR const char *strp, FAR int *nump,
 static FAR const char *getsecs(FAR const char *strp,
               FAR int_fast32_t *secsp);
 static FAR const char *getoffset(FAR const char *strp,
-              FAR int_fast32_t *offsetp);
+              FAR int_fast32_t *poffset);
 static FAR const char *getrule(FAR const char *strp,
               FAR struct rule_s *rulep);
 static void gmtload(FAR struct state_s *sp);
@@ -395,6 +389,30 @@ static int  tzparse(FAR const char *name, FAR struct state_s *sp,
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static inline void tz_lock(FAR rmutex_t *lock)
+{
+#if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
+  if (up_interrupt_context() || (sched_idletask() && OSINIT_IDLELOOP()))
+    {
+      return;
+    }
+#endif
+
+  nxrmutex_lock(lock);
+}
+
+static inline void tz_unlock(FAR rmutex_t *lock)
+{
+#if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
+  if (up_interrupt_context() || (sched_idletask() && OSINIT_IDLELOOP()))
+    {
+      return;
+    }
+#endif
+
+  nxrmutex_unlock(lock);
+}
 
 /* Initialize *S to a value based on UTOFF, ISDST, and DESIGIDX. */
 
@@ -661,7 +679,7 @@ static int tzload(FAR const char *name,
       goto oops;
     }
 
-  fid = _NX_OPEN(name, O_RDONLY);
+  fid = _NX_OPEN(name, O_RDONLY | O_CLOEXEC);
   if (fid < 0)
     {
       goto oops;
@@ -1256,7 +1274,7 @@ static FAR const char *getsecs(FAR const char *strp,
  */
 
 static FAR const char *getoffset(FAR const char *strp,
-                                 FAR int_fast32_t *offsetp)
+                                 FAR int_fast32_t *poffset)
 {
   int neg = FALSE;
 
@@ -1270,7 +1288,7 @@ static FAR const char *getoffset(FAR const char *strp,
       ++strp;
     }
 
-  strp = getsecs(strp, offsetp);
+  strp = getsecs(strp, poffset);
   if (strp == NULL)
     {
       return NULL; /* illegal time */
@@ -1278,7 +1296,7 @@ static FAR const char *getoffset(FAR const char *strp,
 
   if (neg)
     {
-      *offsetp = -*offsetp;
+      *poffset = -*poffset;
     }
 
   return strp;
@@ -1371,7 +1389,7 @@ static int_fast32_t transtime(int year,
                               FAR const struct rule_s *rulep,
                               int_fast32_t offset)
 {
-  int leapyear;
+  int leap_year;
   int_fast32_t value;
   int i;
   int d;
@@ -1382,7 +1400,7 @@ static int_fast32_t transtime(int year,
   int dow;
 
   value = 0;
-  leapyear = isleap(year);
+  leap_year = isleap(year);
   switch (rulep->r_type)
     {
     case JULIAN_DAY:
@@ -1395,7 +1413,7 @@ static int_fast32_t transtime(int year,
        */
 
       value = (rulep->r_day - 1) * SECSPERDAY;
-      if (leapyear && rulep->r_day >= 60)
+      if (leap_year && rulep->r_day >= 60)
         {
           value += SECSPERDAY;
         }
@@ -1443,7 +1461,7 @@ static int_fast32_t transtime(int year,
 
       for (i = 1; i < rulep->r_week; ++i)
         {
-          if (d + DAYSPERWEEK >= g_mon_lengths[leapyear][rulep->r_mon - 1])
+          if (d + DAYSPERWEEK >= g_mon_lengths[leap_year][rulep->r_mon - 1])
             {
               break;
             }
@@ -1456,7 +1474,7 @@ static int_fast32_t transtime(int year,
       value = d * SECSPERDAY;
       for (i = 0; i < rulep->r_mon - 1; ++i)
         {
-          value += g_mon_lengths[leapyear][i] * SECSPERDAY;
+          value += g_mon_lengths[leap_year][i] * SECSPERDAY;
         }
       break;
     }
@@ -1912,6 +1930,7 @@ static FAR struct tm *localsub(FAR const time_t *timep,
       return NULL;
     }
 
+  tz_lock(&g_lcl_lock);
   if ((sp->goback && t < sp->ats[0]) ||
       (sp->goahead && t > sp->ats[sp->timecnt - 1]))
     {
@@ -1948,6 +1967,7 @@ static FAR struct tm *localsub(FAR const time_t *timep,
 
       if (newt < sp->ats[0] || newt > sp->ats[sp->timecnt - 1])
         {
+          tz_unlock(&g_lcl_lock);
           return NULL; /* "cannot happen" */
         }
 
@@ -1968,12 +1988,14 @@ static FAR struct tm *localsub(FAR const time_t *timep,
 
           if (newy < INT_MIN || newy > INT_MAX)
             {
+              tz_unlock(&g_lcl_lock);
               return NULL;
             }
 
           result->tm_year = newy;
         }
 
+      tz_unlock(&g_lcl_lock);
       return result;
     }
 
@@ -2019,6 +2041,7 @@ static FAR struct tm *localsub(FAR const time_t *timep,
       result->tm_zone = tzname[result->tm_isdst];
     }
 
+  tz_unlock(&g_lcl_lock);
   return result;
 }
 
@@ -2029,14 +2052,7 @@ static FAR struct tm *gmtsub(FAR const time_t *timep,
 {
   if (!g_gmt_isset)
     {
-#ifndef __KERNEL__
-      if (up_interrupt_context() || (sched_idletask() && OSINIT_IDLELOOP()))
-        {
-          return NULL;
-        }
-#endif
-
-      nxrmutex_lock(&g_gmt_lock);
+      tz_lock(&g_gmt_lock);
 
       if (!g_gmt_isset)
         {
@@ -2048,7 +2064,7 @@ static FAR struct tm *gmtsub(FAR const time_t *timep,
             }
         }
 
-      nxrmutex_unlock(&g_gmt_lock);
+      tz_unlock(&g_gmt_lock);
     }
 
   tmp->tm_zone = ((FAR char *)(offset ? g_wildabbr :
@@ -2758,13 +2774,6 @@ void tzset(void)
 {
   FAR const char *name;
 
-#ifndef __KERNEL__
-  if (up_interrupt_context() || (sched_idletask() && OSINIT_IDLELOOP()))
-    {
-      return;
-    }
-#endif
-
   name = getenv("TZ");
   if (name == NULL)
     {
@@ -2781,7 +2790,7 @@ void tzset(void)
       return;
     }
 
-  nxrmutex_lock(&g_lcl_lock);
+  tz_lock(&g_lcl_lock);
 
   if (g_lcl_ptr == NULL)
     {
@@ -2802,7 +2811,7 @@ void tzset(void)
 tzname:
   settzname();
   g_lcl_isset = 1;
-  nxrmutex_unlock(&g_lcl_lock);
+  tz_unlock(&g_lcl_lock);
 }
 
 FAR struct tm *localtime(FAR const time_t *timep)

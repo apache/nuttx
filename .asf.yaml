@@ -1,10 +1,9 @@
+# Reference: https://github.com/apache/infrastructure-asfyaml.
 github:
   description: "Apache NuttX is a mature, real-time embedded operating system (RTOS)"
   homepage: https://nuttx.apache.org/
   features:
-    # Enable issues management
     issues: true
-    # Enable project for project management boards
     projects: true
   labels:
     - nuttx
@@ -14,9 +13,22 @@ github:
     - mcu
     - microcontroller
   enabled_merge_buttons:
-    # disable squash button:
     squash: false
-    # disable merge button:
     merge: false
-    # enable rebase button:
     rebase: true
+  protected_branches:
+    master:
+      required_status_checks:
+        strict: false
+# Contexts cause hanging CI etc disable for now.
+#        contexts:
+#          - Check
+#          - Lint
+#          - Build
+      required_pull_request_reviews:
+        dismiss_stale_reviews: true
+        require_last_push_approval: true
+        required_approving_review_count: 2
+      required_linear_history: true
+      required_signatures: false
+      required_conversation_resolution: true

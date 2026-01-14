@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/esp32c3/common/src/esp_board_i2c.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,39 +26,111 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 #include <sys/types.h>
 
 #include <nuttx/i2c/i2c_master.h>
 
+#ifdef CONFIG_ESPRESSIF_I2C_BITBANG
+#include "espressif/esp_i2c_bitbang.h"
+#endif
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE
 #include "espressif/esp_i2c.h"
+#endif
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+#include "espressif/esp_i2c_slave.h"
+#endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+#define I2C0_SLAVE_ADDR   0x28
+#define I2C0_SLAVE_NBITS  7
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_ESPRESSIF_I2C_BITBANG
+static int i2c_bitbang_driver_init(int bus)
+{
+  struct i2c_master_s *i2c;
+  int ret = OK;
+
+  i2c = esp_i2cbus_bitbang_initialize();
+  if (i2c == NULL)
+    {
+      syslog(LOG_ERR, "Failed to get I2C%d interface\n", bus);
+      return -ENODEV;
+    }
+
+#ifdef CONFIG_I2C_DRIVER
+  ret = i2c_register(i2c, bus);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to register I2C%d driver: %d\n", bus, ret);
+    }
+#endif
+
+  return ret;
+}
+#endif
+
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE
 static int i2c_driver_init(int bus)
 {
   struct i2c_master_s *i2c;
-  int ret;
+  int ret = OK;
 
   i2c = esp_i2cbus_initialize(bus);
   if (i2c == NULL)
     {
-      i2cerr("Failed to get I2C%d interface\n", bus);
+      syslog(LOG_ERR, "Failed to get I2C%d interface\n", bus);
       return -ENODEV;
     }
 
+#ifdef CONFIG_I2C_DRIVER
   ret = i2c_register(i2c, bus);
   if (ret < 0)
     {
-      i2cerr("Failed to register I2C%d driver: %d\n", bus, ret);
+      syslog(LOG_ERR, "Failed to register I2C%d driver: %d\n", bus, ret);
       esp_i2cbus_uninitialize(i2c);
     }
+#endif
 
   return ret;
 }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+static int i2c_slave_driver_init(int bus, int addr)
+{
+  struct i2c_slave_s *i2c;
+  int ret = OK;
+
+  i2c = esp_i2cbus_slave_initialize(bus, addr);
+  if (i2c == NULL)
+    {
+      syslog(LOG_ERR, "Failed to get I2C%d interface\n", bus);
+      return -ENODEV;
+    }
+
+#ifdef CONFIG_I2C_DRIVER
+  ret = i2c_slave_register(i2c, bus, addr, I2C0_SLAVE_NBITS);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to register I2C%d driver: %d\n", bus, ret);
+      esp_i2cbus_slave_uninitialize(i2c);
+    }
+#endif
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: board_i2c_init
@@ -74,8 +148,22 @@ int board_i2c_init(void)
 {
   int ret = OK;
 
-#ifdef CONFIG_ESPRESSIF_I2C0
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE
+#  ifdef CONFIG_ESPRESSIF_I2C0_MASTER_MODE
   ret = i2c_driver_init(ESPRESSIF_I2C0);
+#  endif
+#endif
+
+#ifdef CONFIG_ESPRESSIF_I2C_BITBANG
+#  ifdef CONFIG_ESPRESSIF_I2C_BITBANG_MASTER_MODE
+  ret = i2c_bitbang_driver_init(ESPRESSIF_I2C_BITBANG);
+#  endif
+#endif
+
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_SLAVE_MODE
+#  ifdef CONFIG_ESPRESSIF_I2C0_SLAVE_MODE
+  ret = i2c_slave_driver_init(ESPRESSIF_I2C0_SLAVE, I2C0_SLAVE_ADDR);
+#  endif
 #endif
 
   return ret;

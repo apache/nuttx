@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32/common/src/esp32_sht3x.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -96,7 +98,7 @@ int board_sht3x_initialize(int devno, int busno)
     {
       /* Then try to register the sensor in I2C Bus */
 
-      snprintf(devpath, 12, "/dev/temp%d", devno);
+      snprintf(devpath, sizeof(devpath), "/dev/temp%d", devno);
       ret = sht3x_register(devpath, i2c, SHT3X_I2CADDR);
       if (ret < 0)
         {

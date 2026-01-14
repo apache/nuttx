@@ -1,10 +1,10 @@
 /****************************************************************************
  * crypto/poly1305.c
- * $OpenBSD: poly1305.c,v 1.2 2020/07/22 13:54:30 tobhe Exp $
+ *
+ * SPDX-License-Identifier: LicenseRef-NuttX-PublicDomain
  *
  * Public Domain poly1305 from Andrew Moon
- * Based on poly1305-donna.c, poly1305-donna-32.h and poly1305-donna.h from:
- *   https://github.com/floodyberry/poly1305-donna
+ *
  ****************************************************************************/
 
 /****************************************************************************
@@ -236,9 +236,9 @@ void poly1305_update(FAR poly1305_state *st,
 
   if (bytes)
     {
-      for (i = 0; i < bytes; i++)
+      for (i = 0; i < bytes && i < poly1305_block_size; i++)
         {
-          st->buffer[st->leftover + i] = m[i];
+          st->buffer[i] = m[i];
         }
 
       st->leftover += bytes;

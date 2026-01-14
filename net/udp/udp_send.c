@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/udp/udp_send.c
  *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  *   Copyright (C) 2007-2009, 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -153,7 +155,7 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 
   ninfo("UDP payload: %d (%d) bytes\n", dev->d_sndlen, dev->d_len);
 
-  if (dev->d_sndlen > 0)
+  if (dev->d_len > 0)
     {
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6

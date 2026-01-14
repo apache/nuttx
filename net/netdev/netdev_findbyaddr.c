@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/netdev/netdev_findbyaddr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -78,12 +80,12 @@ netdev_prefixlen_findby_lipv4addr(in_addr_t lipaddr, FAR int8_t *prefixlen)
 
   /* Examine each registered network device */
 
-  net_lock();
+  netdev_list_lock();
   for (dev = g_netdevices; dev; dev = dev->flink)
     {
-      /* Is the interface in the "up" state? */
+      /* Is the interface in the "running" state? */
 
-      if ((dev->d_flags & IFF_UP) != 0 &&
+      if (IFF_IS_RUNNING(dev->d_flags) != 0 &&
           !net_ipv4addr_cmp(dev->d_ipaddr, INADDR_ANY))
         {
 #ifndef CONFIG_ROUTE_LONGEST_MATCH
@@ -95,7 +97,7 @@ netdev_prefixlen_findby_lipv4addr(in_addr_t lipaddr, FAR int8_t *prefixlen)
               /* Its a match */
 
               bestdev  = dev;
-              bestpref = 32; /* Regard as best (exact) match */
+              bestpref = (int8_t)net_ipv4_mask2pref(dev->d_netmask);
               break;
             }
 #else
@@ -138,7 +140,7 @@ netdev_prefixlen_findby_lipv4addr(in_addr_t lipaddr, FAR int8_t *prefixlen)
         }
     }
 
-  net_unlock();
+  netdev_list_unlock();
   *prefixlen = bestpref;
   return bestdev;
 }
@@ -177,7 +179,7 @@ netdev_prefixlen_findby_lipv6addr(const net_ipv6addr_t lipaddr,
   int16_t len;
 #endif
 
-  net_lock();
+  netdev_list_lock();
 
 #ifdef CONFIG_ROUTE_LONGEST_MATCH
   /* Find a hint from neighbor table in case same prefix length exists on
@@ -192,9 +194,9 @@ netdev_prefixlen_findby_lipv6addr(const net_ipv6addr_t lipaddr,
 
   for (dev = g_netdevices; dev; dev = dev->flink)
     {
-      /* Is the interface in the "up" state? */
+      /* Is the interface in the "running" state? */
 
-      if ((dev->d_flags & IFF_UP) != 0 && NETDEV_HAS_V6ADDR(dev))
+      if (IFF_IS_RUNNING(dev->d_flags) != 0 && NETDEV_HAS_V6ADDR(dev))
         {
 #ifndef CONFIG_ROUTE_LONGEST_MATCH
           /* Yes.. check for an address match (under the netmask) */
@@ -242,7 +244,7 @@ netdev_prefixlen_findby_lipv6addr(const net_ipv6addr_t lipaddr,
         }
     }
 
-  net_unlock();
+  netdev_list_unlock();
   *prefixlen = bestpref;
   return bestdev;
 }

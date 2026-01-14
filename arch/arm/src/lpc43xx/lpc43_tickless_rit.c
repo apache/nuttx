@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lpc43xx/lpc43_tickless_rit.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -494,13 +496,7 @@ static inline void lpc43_tl_alarm(uint32_t curr)
   lpc43_tl_init_timer_vars();
   lpc43_tl_set_default_compare(curr);
 
-#ifdef CONFIG_SCHED_TICKLESS_ALARM
-  struct timespec ts;
-  up_timer_gettime(&ts);
-  nxsched_alarm_expiration(&ts);
-#else
-  nxsched_timer_expiration();
-#endif
+  nxsched_process_timer();
 }
 
 /* Interrupt handler */

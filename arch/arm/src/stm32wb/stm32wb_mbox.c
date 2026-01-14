@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32wb/stm32wb_mbox.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -729,7 +731,7 @@ void stm32wb_mboxenable(void)
 
   stm32wb_ipcc_unmaskrxo(STM32WB_MBOX_SYSEVT_CHANNEL);
 
-  /* Enable IPCC hardware and bootup CPU2 */
+  /* Enable IPCC hardware and boot up CPU2 */
 
   stm32wb_ipccenable();
 }

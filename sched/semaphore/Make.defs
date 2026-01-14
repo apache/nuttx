@@ -1,6 +1,8 @@
 ############################################################################
 # sched/semaphore/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -26,6 +28,10 @@ CSRCS += sem_recover.c sem_reset.c sem_waitirq.c sem_rw.c
 
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 CSRCS += sem_initialize.c sem_holder.c sem_setprotocol.c
+endif
+
+ifeq ($(CONFIG_PRIORITY_PROTECT),y)
+CSRCS += sem_protect.c
 endif
 
 # Include semaphore build support

@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stream/lib_nulloutstream.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,8 +41,8 @@ static void nulloutstream_putc(FAR struct lib_outstream_s *self, int ch)
   self->nput++;
 }
 
-static int nulloutstream_puts(FAR struct lib_outstream_s *self,
-                              FAR const void *buffer, int len)
+static ssize_t nulloutstream_puts(FAR struct lib_outstream_s *self,
+                                  FAR const void *buffer, size_t len)
 {
   UNUSED(buffer);
   UNUSED(len);

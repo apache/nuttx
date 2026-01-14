@@ -1,6 +1,8 @@
 # ##############################################################################
 # sched/sched/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -19,11 +21,9 @@
 # ##############################################################################
 set(SRCS
     sched_getfiles.c
+    sched_profil.c
     sched_addreadytorun.c
     sched_removereadytorun.c
-    sched_addprioritized.c
-    sched_mergeprioritized.c
-    sched_mergepending.c
     sched_addblocked.c
     sched_removeblocked.c
     sched_gettcb.c
@@ -42,25 +42,30 @@ set(SRCS
     sched_lockcount.c
     sched_idletask.c
     sched_self.c
+    sched_getcpu.c
     sched_get_stackinfo.c
     sched_get_tls.c
     sched_sysinfo.c
-    sched_reprioritizertr.c
-    sched_get_stateinfo.c)
+    sched_get_stateinfo.c
+    sched_switchcontext.c
+    sched_sleep.c
+    sched_processtimer.c)
+
+if(DEFINED CONFIG_STACKCHECK_MARGIN)
+  if(NOT CONFIG_STACKCHECK_MARGIN EQUAL -1)
+    list(APPEND SRCS nxsched_checkstackoverflow.c)
+  endif()
+endif()
 
 if(CONFIG_PRIORITY_INHERITANCE)
   list(APPEND SRCS sched_reprioritize.c)
 endif()
 
 if(CONFIG_SMP)
-  list(
-    APPEND
-    SRCS
-    sched_cpuselect.c
-    sched_cpupause.c
-    sched_getcpu.c
-    sched_getaffinity.c
-    sched_setaffinity.c)
+  list(APPEND SRCS sched_getaffinity.c sched_setaffinity.c
+       sched_process_delivered.c)
+else()
+  list(APPEND SRCS sched_reprioritizertr.c sched_mergepending.c)
 endif()
 
 if(CONFIG_SIG_SIGSTOP_ACTION)
@@ -82,16 +87,6 @@ if(CONFIG_SCHED_SPORADIC)
   list(APPEND SRCS sched_sporadic.c)
 endif()
 
-if(CONFIG_SCHED_SUSPENDSCHEDULER)
-  list(APPEND SRCS sched_suspendscheduler.c)
-endif()
-
-if(NOT "${CONFIG_RR_INTERVAL}" STREQUAL "0")
-  list(APPEND SRCS sched_resumescheduler.c)
-elseif(CONFIG_SCHED_RESUMESCHEDULER)
-  list(APPEND SRCS sched_resumescheduler.c)
-endif()
-
 if(NOT CONFIG_SCHED_CPULOAD_NONE)
   list(APPEND SRCS sched_cpuload.c)
   if(CONFIG_CPULOAD_ONESHOT)
@@ -104,12 +99,6 @@ endif()
 
 if(CONFIG_SCHED_TICKLESS)
   list(APPEND SRCS sched_timerexpiration.c)
-else()
-  list(APPEND SRCS sched_processtimer.c)
-endif()
-
-if(CONFIG_SMP)
-  list(APPEND SRCS sched_thistask.c)
 endif()
 
 if(CONFIG_SCHED_CRITMONITOR)
@@ -120,11 +109,11 @@ if(CONFIG_SCHED_BACKTRACE)
   list(APPEND SRCS sched_backtrace.c)
 endif()
 
-if(CONFIG_DUMP_ON_EXIT)
+if(CONFIG_SCHED_DUMP_ON_EXIT)
   list(APPEND SRCS sched_dumponexit.c)
 endif()
 
-if(CONFIG_SMP_CALL)
+if(CONFIG_SMP)
   list(APPEND SRCS sched_smp.c)
 endif()
 

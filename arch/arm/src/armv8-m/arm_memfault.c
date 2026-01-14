@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv8-m/arm_memfault.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -66,9 +68,9 @@ int arm_memfault(int irq, void *context, void *arg)
 
   mfalert("PANIC!!! Memory Management Fault:\n");
   mfalert("\tIRQ: %d context: %p\n", irq, context);
-  mfalert("\tCFSR: %08x MMFAR: %08x\n",
+  mfalert("\tCFSR: %08" PRIx32 " MMFAR: %08" PRIx32 "\n",
           getreg32(NVIC_CFAULTS), getreg32(NVIC_MEMMANAGE_ADDR));
-  mfalert("\tBASEPRI: %08x PRIMASK: %08x IPSR: %08"
+  mfalert("\tBASEPRI: %08" PRIx32 " PRIMASK: %08" PRIx32 " IPSR: %08"
           PRIx32 " CONTROL: %08" PRIx32 "\n",
           getbasepri(), getprimask(), getipsr(), getcontrol());
 

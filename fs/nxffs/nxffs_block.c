@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/nxffs/nxffs_block.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -125,7 +127,7 @@ int nxffs_verifyblock(FAR struct nxffs_volume_s *volume, off_t block)
  *
  ****************************************************************************/
 
-int nxffs_validblock(struct nxffs_volume_s *volume, off_t *block)
+int nxffs_validblock(FAR struct nxffs_volume_s *volume, FAR off_t *block)
 {
   off_t i;
   int ret;

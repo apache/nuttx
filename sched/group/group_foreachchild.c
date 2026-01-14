@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/group/group_foreachchild.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -62,7 +64,7 @@ int group_foreachchild(FAR struct task_group_s *group,
 {
   FAR sq_entry_t *curr;
   FAR sq_entry_t *next;
-  int ret = OK;
+  int ret;
 
   DEBUGASSERT(group);
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/sim_sigdeliver.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -61,7 +63,7 @@ void sim_sigdeliver(void)
   int16_t saved_irqcount;
   irqstate_t flags;
 #endif
-  if (NULL == (rtcb->xcp.sigdeliver))
+  if (NULL == (rtcb->sigdeliver))
     {
       return;
     }
@@ -75,8 +77,8 @@ void sim_sigdeliver(void)
 #endif
 
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
+        rtcb, rtcb->sigdeliver, rtcb->sigpendactionq.head);
+  DEBUGASSERT(rtcb->sigdeliver != NULL);
 
   /* NOTE: we do not save the return state for sim */
 
@@ -103,7 +105,7 @@ retry:
 
   /* Deliver the signal */
 
-  ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
+  (rtcb->sigdeliver)(rtcb);
 
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original
@@ -135,7 +137,7 @@ retry:
 
   /* Allows next handler to be scheduled */
 
-  rtcb->xcp.sigdeliver = NULL;
+  rtcb->sigdeliver = NULL;
 
   /* NOTE: we leave a critical section here for sim */
 

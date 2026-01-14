@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/stdbool.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -78,6 +80,8 @@
 #    define false (bool)0
 
 #    define __bool_true_false_are_defined 1
+#  else
+#    define _Bool uint8_t
 #  endif /* __cplusplus */
 
 #  endif /* CONFIG_ARCH_STDBOOL_H */

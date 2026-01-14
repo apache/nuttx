@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32_ethernet.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,9 +33,11 @@
  * families
  */
 
-#if defined(CONFIG_STM32H7_STM32H7X3XX) || \
+#if defined(CONFIG_STM32H7_STM32H7X0XX) || \
+    defined(CONFIG_STM32H7_STM32H7X3XX) || \
     defined(CONFIG_STM32H7_STM32H7B3XX) || \
-    defined(CONFIG_STM32H7_STM32H7X5XX)
+    defined(CONFIG_STM32H7_STM32H7X5XX) || \
+    defined(CONFIG_STM32H7_STM32H7X7XX)
 
 /****************************************************************************
  * Pre-processor Definitions

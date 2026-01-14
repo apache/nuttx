@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/sensors/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -18,6 +20,8 @@
 #
 # ##############################################################################
 
+# Include sensor drivers
+
 if(CONFIG_SENSORS)
   set(SRCS sensor.c)
 
@@ -25,15 +29,27 @@ if(CONFIG_SENSORS)
     list(APPEND SRCS usensor.c)
   endif()
 
+  if(CONFIG_SENSORS_MONITOR)
+    list(APPEND SRCS sensor_monitor.c)
+  endif()
+
   if(CONFIG_SENSORS_RPMSG)
     list(APPEND SRCS sensor_rpmsg.c)
   endif()
 
-  if(CONFIG_SENSORS_GPS)
+  if(CONFIG_SENSORS_NAU7802)
+    list(APPEND SRCS nau7802.c)
+  endif()
+
+  if(CONFIG_SENSORS_L86_XXX)
+    list(APPEND SRCS l86xxx_uorb.c)
+  endif()
+
+  if(CONFIG_SENSORS_GNSS)
     set_source_files_properties(
-      gps_uorb.c DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/..
-      PROPERTIES INCLUDE_DIRECTORIES ${NUTTX_DIR}/libs/libc/gpsutils)
-    list(APPEND SRCS gps_uorb.c)
+      gnss_uorb.c DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/..
+      PROPERTIES INCLUDE_DIRECTORIES ${NUTTX_DIR}/libs/libc/gnssutils)
+    list(APPEND SRCS gnss_uorb.c)
   endif()
 
   if(CONFIG_SENSORS_WTGAHRS2)
@@ -44,8 +60,12 @@ if(CONFIG_SENSORS)
     list(APPEND SRCS fakesensor_uorb.c)
   endif()
 
-  if(CONFIG_SENSORS_GOLDFISH_GPS)
-    list(APPEND SRCS goldfish_gps_uorb.c)
+  if(CONFIG_SENSORS_GOLDFISH_GNSS)
+    list(APPEND SRCS goldfish_gnss_uorb.c)
+  endif()
+
+  if(CONFIG_SENSORS_GOLDFISH_SENSOR)
+    list(APPEND SRCS goldfish_sensor_uorb.c)
   endif()
 
   if(CONFIG_SENSORS_HCSR04)
@@ -56,22 +76,11 @@ if(CONFIG_SENSORS)
     list(APPEND SRCS adxl345_base.c)
   endif()
 
-  if(CONFIG_SENSORS_ADXL362)
-    list(APPEND SRCS adxl362_uorb.c)
-  endif()
-
-  if(CONFIG_SENSORS_BH1749NUC)
-    list(APPEND SRCS bh1749nuc_base.c)
-    if(CONFIG_SENSORS_BH1749NUC_UORB)
-      list(APPEND SRCS bh1749nuc_uorb.c)
-    else()
-      list(APPEND SRCS bh1749nuc.c)
-    endif()
-  endif()
-
   if(CONFIG_SENSORS_DHTXX)
     list(APPEND SRCS dhtxx.c)
   endif()
+
+  # These drivers can be used with sensor connected over SPI or I2C bus
 
   if(CONFIG_SENSORS_BMI270)
     list(APPEND SRCS bmi270_base.c)
@@ -88,6 +97,10 @@ if(CONFIG_SENSORS)
 
     if(CONFIG_SENSORS_APDS9960)
       list(APPEND SRCS apds9960.c)
+    endif()
+
+    if(CONFIG_SENSORS_APDS9922)
+      list(APPEND SRCS apds9922.c)
     endif()
 
     if(CONFIG_SENSORS_AK09912)
@@ -130,6 +143,10 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS lsm6dsl.c)
     endif()
 
+    if(CONFIG_SENSORS_LSM6DSO32)
+      list(APPEND SRCS lsm6dso32_uorb.c)
+    endif()
+
     if(CONFIG_SENSORS_LSM9DS1)
       list(APPEND SRCS lsm9ds1_base.c)
       if(CONFIG_SENSORS_LSM9DS1_UORB)
@@ -151,6 +168,15 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS adxl345_i2c.c)
     endif()
 
+    if(CONFIG_SENSORS_BH1749NUC)
+      list(APPEND SRCS bh1749nuc_base.c)
+      if(CONFIG_SENSORS_BH1749NUC_UORB)
+        list(APPEND SRCS bh1749nuc_uorb.c)
+      else()
+        list(APPEND SRCS bh1749nuc.c)
+      endif()
+    endif()
+
     if(CONFIG_SENSORS_BH1750FVI)
       list(APPEND SRCS bh1750fvi.c)
     endif()
@@ -168,8 +194,22 @@ if(CONFIG_SENSORS)
       endif()
     endif()
 
+    if(CONFIG_SENSORS_BMI088)
+      list(APPEND SRCS bmi088_base.c)
+      if(CONFIG_SENSORS_BMI088_UORB)
+        list(APPEND SRCS bmi088_uorb.c)
+      else()
+        list(APPEND SRCS bmi088.c)
+      endif()
+    endif()
+
     if(CONFIG_SENSORS_BMP180)
-      list(APPEND SRCS bmp180.c)
+      list(APPEND SRCS bmp180_base.c)
+      if(CONFIG_SENSORS_BMP180_UORB)
+        list(APPEND SRCS bmp180_uorb.c)
+      else()
+        list(APPEND SRCS bmp180.c)
+      endif()
     endif()
 
     if(CONFIG_SENSORS_BMP280)
@@ -180,12 +220,20 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS bme680_uorb.c)
     endif()
 
+    if(CONFIG_SENSORS_BME688)
+      list(APPEND SRCS bme688_uorb.c)
+    endif()
+
     if(CONFIG_SENSORS_ISL29023)
       list(APPEND SRCS isl29023.c)
     endif()
 
     if(CONFIG_SENSORS_HTS221)
       list(APPEND SRCS hts221.c)
+    endif()
+
+    if(CONFIG_SENSORS_LIS2MDL)
+      list(APPEND SRCS lis2mdl_uorb.c)
     endif()
 
     if(CONFIG_LM75_I2C)
@@ -202,6 +250,10 @@ if(CONFIG_SENSORS)
 
     if(CONFIG_SENSORS_MB7040)
       list(APPEND SRCS mb7040.c)
+    endif()
+
+    if(CONFIG_SENSORS_MCP9600)
+      list(APPEND SRCS mcp9600_uorb.c)
     endif()
 
     if(CONFIG_SENSORS_MCP9844)
@@ -264,6 +316,10 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS sht3x.c)
     endif()
 
+    if(CONFIG_SENSORS_SHT4X)
+      list(APPEND SRCS sht4x_uorb.c)
+    endif()
+
     if(CONFIG_SENSORS_SPS30)
       list(APPEND SRCS sps30.c)
     endif()
@@ -276,8 +332,26 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS ltr308_uorb.c)
     endif()
 
+    if(CONFIG_SENSORS_FS3000)
+      list(APPEND SRCS fs3000_uorb.c)
+    endif()
+
     if(CONFIG_SENSORS_BMM150)
       list(APPEND SRCS bmm150_uorb.c)
+    endif()
+
+    if(CONFIG_SENSORS_AMG88XX)
+      list(APPEND SRCS amg88xx.c)
+    endif()
+
+    if(CONFIG_SENSORS_TMP112)
+      list(APPEND SRCS tmp112.c)
+    endif()
+
+    # QMI8658 6-axis IMU
+
+    if(CONFIG_SENSORS_QMI8658)
+      list(APPEND SRCS qmi8658_uorb.c)
     endif()
 
   endif() # CONFIG_I2C
@@ -288,6 +362,10 @@ if(CONFIG_SENSORS)
 
     if(CONFIG_ADXL345_SPI)
       list(APPEND SRCS adxl345_spi.c)
+    endif()
+
+    if(CONFIG_SENSORS_ADXL362)
+      list(APPEND SRCS adxl362_uorb.c)
     endif()
 
     if(CONFIG_SENSORS_ADXL372)
@@ -398,6 +476,18 @@ if(CONFIG_SENSORS)
 
   if(CONFIG_SENSORS_HDC1008)
     list(APPEND SRCS hdc1008.c)
+  endif()
+
+  # ANALOG MAX31865
+
+  if(CONFIG_SENSORS_MAX31865)
+    list(APPEND SRCS max31865.c)
+  endif()
+
+  # SONY CXD5602PWBIMU
+
+  if(CONFIG_SENSORS_CXD5602PWBIMU)
+    list(APPEND SRCS cxd5602pwbimu.c)
   endif()
 
   target_sources(drivers PRIVATE ${SRCS})

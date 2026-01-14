@@ -2,6 +2,8 @@
 ST STEVAL-ETH001V1
 ==================
 
+.. tags:: chip:stm32, chip:stm32f7, chip:stm32f767
+
 This page discusses issues unique to NuttX configurations for the
 STMicro STEVAL-ETH001V1 servo drive evaluation board.
 The STEVAL-ETH001V1 board is based on the STM32F767ZI MCU (2Mbytes FLASH

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/xmc4/xmc4_i2c.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,7 +29,6 @@
 
 #include <nuttx/config.h>
 #include <nuttx/i2c/i2c_master.h>
-#include "hardware/xmc4_i2c.h"
 
 /****************************************************************************
  * Public Function Prototypes

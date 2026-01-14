@@ -1,6 +1,8 @@
 # ##############################################################################
 # cmake/nuttx_generate_outputs.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -25,6 +27,7 @@ function(nuttx_generate_outputs target)
       COMMAND ${CMAKE_OBJCOPY} -O ihex ${target} ${target}.hex
       DEPENDS ${target})
     add_custom_target(${target}-hex ALL DEPENDS ${target}.hex)
+    add_dependencies(nuttx_post ${target}-hex)
     file(APPEND ${CMAKE_BINARY_DIR}/nuttx.manifest "${target}.hex\n")
   endif()
 
@@ -34,6 +37,7 @@ function(nuttx_generate_outputs target)
       COMMAND ${CMAKE_OBJCOPY} -O srec ${target} ${target}.srec
       DEPENDS ${target})
     add_custom_target(${target}-srec ALL DEPENDS ${target}.srec)
+    add_dependencies(nuttx_post ${target}-srec)
     file(APPEND ${CMAKE_BINARY_DIR}/nuttx.manifest "${target}.srec\n")
   endif()
 
@@ -43,6 +47,23 @@ function(nuttx_generate_outputs target)
       COMMAND ${CMAKE_OBJCOPY} -O binary ${target} ${target}.bin
       DEPENDS ${target})
     add_custom_target(${target}-bin ALL DEPENDS ${target}.bin)
+    add_dependencies(nuttx_post ${target}-bin)
     file(APPEND ${CMAKE_BINARY_DIR}/nuttx.manifest "${target}.bin\n")
+  endif()
+
+  if(CONFIG_RAW_DISASSEMBLY)
+    if(CONFIG_ARCH_TOOLCHAIN_GHS)
+      add_custom_command(
+        OUTPUT ${target}.asm
+        COMMAND ${CMAKE_OBJDUMP} ${target} -ytext -yl -yp > ${target}.asm
+        DEPENDS ${target})
+    else()
+      add_custom_command(
+        OUTPUT ${target}.asm
+        COMMAND ${CMAKE_OBJDUMP} -d ${target} > ${target}.asm
+        DEPENDS ${target})
+    endif()
+    add_custom_target(${target}-asm ALL DEPENDS ${target}.asm)
+    file(APPEND ${CMAKE_BINARY_DIR}/nuttx.manifest "${target}.asm\n")
   endif()
 endfunction(nuttx_generate_outputs)

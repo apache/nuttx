@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/sim_copyfullstate.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <string.h>
 #include <arch/irq.h>
 
 #include "sim_internal.h"
@@ -41,10 +44,8 @@
  *
  ****************************************************************************/
 
-void sim_copyfullstate(unsigned long *dest, unsigned long *src)
+void sim_copyfullstate(xcpt_reg_t *dest, xcpt_reg_t *src)
 {
-  int i;
-
   /* In the sim model, the state is copied from the stack to the TCB,
    * but only a reference is passed to get the state from the TCB.  So the
    * following check avoids copying the TCB save area onto itself:
@@ -52,9 +53,6 @@ void sim_copyfullstate(unsigned long *dest, unsigned long *src)
 
   if (src != dest)
     {
-      for (i = 0; i < XCPTCONTEXT_REGS; i++)
-        {
-          *dest++ = *src++;
-        }
+      memmove(dest, src, XCPTCONTEXT_REGS * sizeof(xcpt_reg_t));
     }
 }

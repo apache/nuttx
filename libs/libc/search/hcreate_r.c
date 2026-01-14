@@ -1,10 +1,8 @@
 /****************************************************************************
  * libs/libc/search/hcreate_r.c
  *
- * $NetBSD: hcreate.c,v 1.2 2001/02/19 21:26:04 ross Exp $
- *
- * Copyright (c) 2001 Christopher G. Demetriou
- * All rights reserved.
+ * SPDX-License-Identifier: BSD-2-Clause
+ * SPDX-FileCopyrightText: 2001 Christopher G. Demetriou,All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,8 +25,6 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * <<Id: LICENSE_GC,v 1.1 2001/10/01 23:24:05 cgd Exp>>
  *
  * hcreate() / hsearch() / hdestroy()
  *
@@ -81,6 +77,16 @@ struct internal_entry
 
 SLIST_HEAD(internal_head, internal_entry);
 extern uint32_t (*g_default_hash)(FAR const void *, size_t);
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static void hfree_r(FAR ENTRY *entry)
+{
+  lib_free(entry->key);
+  lib_free(entry->data);
+}
 
 /****************************************************************************
  * Public Functions
@@ -157,6 +163,11 @@ int hcreate_r(size_t nel, FAR struct hsearch_data *htab)
       SLIST_INIT(&(htab->htable[idx]));
     }
 
+  if (htab->free_entry == NULL)
+    {
+      htab->free_entry = hfree_r;
+    }
+
   return 1;
 }
 
@@ -190,8 +201,7 @@ void hdestroy_r(FAR struct hsearch_data *htab)
         {
           ie = SLIST_FIRST(&(htab->htable[idx]));
           SLIST_REMOVE_HEAD(&(htab->htable[idx]), link);
-          lib_free(ie->ent.key);
-          lib_free(ie->ent.data);
+          htab->free_entry(&ie->ent);
           lib_free(ie);
         }
     }
@@ -245,8 +255,7 @@ int hsearch_r(ENTRY item, ACTION action, FAR ENTRY **retval,
       if (ie != NULL)
         {
           SLIST_REMOVE(head, ie, internal_entry, link);
-          lib_free(ie->ent.key);
-          lib_free(ie->ent.data);
+          htab->free_entry(&ie->ent);
           lib_free(ie);
           return 1;
         }
@@ -277,4 +286,42 @@ int hsearch_r(ENTRY item, ACTION action, FAR ENTRY **retval,
   SLIST_INSERT_HEAD(head, ie, link);
   *retval = &ie->ent;
   return 1;
+}
+
+/****************************************************************************
+ * Name: hforeach_r
+ *
+ * Description:
+ *   Iterate over the entries in a hash table.
+ *
+ * Input Parameters:
+ *   handle - The function to call for each entry.
+ *   data - The data to pass to the function.
+ *   htab - The hash table to be iterated.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void hforeach_r(hforeach_t handle, FAR void *data,
+                FAR struct hsearch_data *htab)
+{
+  FAR struct internal_head *head;
+  FAR struct internal_entry *ie;
+  FAR struct internal_entry *tmp;
+  size_t len;
+
+  for (len = 0; len < htab->htablesize; len++)
+    {
+      head = &htab->htable[len];
+
+      SLIST_FOREACH_SAFE(ie, head, link, tmp)
+        {
+          if (ie != NULL && ie->ent.key != NULL)
+            {
+              handle(&ie->ent, data);
+            }
+        }
+    }
 }

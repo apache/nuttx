@@ -1,8 +1,9 @@
 /****************************************************************************
  * include/sys/epoll.h
  *
- *   Copyright (C) 2015 Anton D. Kachalov. All rights reserved.
- *   Author: Anton D. Kachalov <mouse@mayc.ru>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2015 Anton D. Kachalov. All rights reserved.
+ * SPDX-FileContributor: Anton D. Kachalov <mouse@mayc.ru>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -78,7 +79,7 @@ enum EPOLL_EVENTS
 #define EPOLLERR EPOLLERR
     EPOLLHUP = POLLHUP,
 #define EPOLLHUP EPOLLHUP
-    EPOLLRDHUP = 0x2000,
+    EPOLLRDHUP = POLLRDHUP,
 #define EPOLLRDHUP EPOLLRDHUP
     EPOLLWAKEUP = 1u << 29,
 #define EPOLLWAKEUP EPOLLWAKEUP

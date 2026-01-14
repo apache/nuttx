@@ -18,7 +18,7 @@ Values from tensometer can be easily read from shell with ``cat`` command
 
    cat /dev/hxx711_0
 
-Altough it may be better to dump values with example ``hx711`` program,
+Although it may be better to dump values with example ``hx711`` program,
 since ``cat`` will just read until the end of time, and if ctrl+c is
 not working, it will steal shell forever.
 
@@ -110,7 +110,7 @@ HX711_SET_VAL_PER_UNIT
 
 Driver can perform calculations so that you can read physical values like
 grams, ounce or pounds, or your own artificial unit. You just need to specify
-what value from tensometer coresponds to one unit.
+what value from tensometer corresponds to one unit.
 
 Say you have tensometer that has max value of 1'000'000. Value 100'000 means
 1kg and sensor is fully linear. If you want to get readings in kg, you would
@@ -164,7 +164,7 @@ hx711 example program
 
 There is also companion program in Application Configuration ---> Examples
 called ``HX711 driver example``. Main purpose of this is to show how to
-use the driver, but it also is a very good tool for quickly debuging chip
+use the driver, but it also is a very good tool for quickly debugging chip
 from the shell, as it can dump readings and set all options.
 
 .. code-block::
@@ -174,7 +174,7 @@ from the shell, as it can dump readings and set all options.
    -t<prec> tares the scale with specified precision, might take few seconds to complete.
             If you set value per unit, precision is in units, otherwise it's raw values.
             If units are used, float can be passed like 0.1
-   -v<val>  value read that coresponds to one unit. This value has to be
+   -v<val>  value read that corresponds to one unit. This value has to be
             calibrated first before it's known
    -s       reverse sign, if values decreses when mass increases, pass this
    -D       dumps current device settings (like, average, channel, gain etc.)
@@ -186,7 +186,7 @@ from the shell, as it can dump readings and set all options.
    -r<num>  read this number of samples before exiting, samples will be printed
             on stdout as string, one sample per line
 
-   Set values are persistant, as in once set they are stored in driver and
+   Set values are persistent, as in once set they are stored in driver and
    will be applied during execution of this program.
 
    If you specify only <-a|-c|-g|-v|-t> without -r, program will set new parameters

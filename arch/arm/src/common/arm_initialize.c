@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/common/arm_initialize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,44 +34,9 @@
  * Public Data
  ****************************************************************************/
 
-/* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  It is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the macro
- * CURRENT_REGS for portability.
- */
+/* g_interrupt_context store irq status */
 
-volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: arm_color_intstack
- *
- * Description:
- *   Set the interrupt stack to a value so that later we can determine how
- *   much stack space was used by interrupt handling logic
- *
- ****************************************************************************/
-
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
-static inline void arm_color_intstack(void)
-{
-#ifdef CONFIG_SMP
-  int cpu;
-
-  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
-    {
-      arm_stack_color((void *)up_get_intstackbase(cpu), INTSTACK_SIZE);
-    }
-#else
-  arm_stack_color((void *)g_intstackalloc, INTSTACK_SIZE);
-#endif
-}
-#else
-#  define arm_color_intstack()
-#endif
+volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Functions
@@ -99,10 +66,6 @@ void up_initialize(void)
 
   arm_initialize_stack();
 #endif
-
-  /* Colorize the interrupt stack */
-
-  arm_color_intstack();
 
   /* Add any extra memory fragments to the memory manager */
 
@@ -145,6 +108,10 @@ void up_initialize(void)
   /* Initialize USB -- device and/or host */
 
   arm_usbinitialize();
+#endif
+
+#ifdef CONFIG_ARM_COREDUMP_REGION
+  arm_coredump_add_region();
 #endif
 
   /* Initialize the L2 cache if present and selected */

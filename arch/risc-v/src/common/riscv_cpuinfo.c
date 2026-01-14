@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_cpuinfo.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -63,6 +65,9 @@ ssize_t up_show_cpuinfo(char *buf, size_t buf_size, off_t file_off)
 #endif
 #ifdef CONFIG_ARCH_RV_ISA_C
       procfs_sprintf(buf, buf_size, &file_off, "%s", "c");
+#endif
+#ifdef CONFIG_ARCH_RV_ISA_V
+      procfs_sprintf(buf, buf_size, &file_off, "%s", "v");
 #endif
 
       /* MMU type */

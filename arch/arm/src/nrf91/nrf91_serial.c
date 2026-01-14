@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nrf91/nrf91_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -729,7 +731,7 @@ static bool nrf91_txempty(struct uart_dev_s *dev)
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before nrf91_serialinit.  NOTE:  This function depends on GPIO pin
  *   configuration performed in nrf91_lowsetup() and main clock
  *   initialization performed in nrf_clock_configure().
@@ -812,24 +814,13 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
   /* struct nrf91_dev_s *priv = (struct nrf91_dev_s *)CONSOLE_DEV.priv; */
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
 #endif
-
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -842,21 +833,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
 #endif
-  return ch;
 }
 
 #endif /* HAVE_UART_DEVICE && USE_SERIALDRIVER */

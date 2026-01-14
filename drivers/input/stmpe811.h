@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/input/stmpe811.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -157,7 +159,7 @@ struct stmpe811_dev_s
    * retained in the f_priv field of the 'struct file'.
    */
 
-  struct pollfd *fds[CONFIG_STMPE811_NPOLLWAITERS];
+  FAR struct pollfd *fds[CONFIG_STMPE811_NPOLLWAITERS];
 #endif
 
   /* Fields that may be disabled to save size of GPIO support is not used */

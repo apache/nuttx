@@ -1,6 +1,7 @@
 /****************************************************************************
  * drivers/i2c/tca9548a.c
- * Driver for the TCA9448A i2c multiplexer
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -35,8 +36,6 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/i2c/tca9548a.h>
-
-#ifdef CONFIG_I2CMULTIPLEXER_TCA9548A
 
 #ifndef CONFIG_TCA9548A_I2C_FREQUENCY
 #  define CONFIG_TCA9548A_I2C_FREQUENCY    400000
@@ -409,4 +408,3 @@ FAR struct tca9548a_dev_s *
   return priv;
 }
 
-#endif /* CONFIG_I2CMULTIPLEXER_TCA9548A */

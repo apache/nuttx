@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/arp/arp_send.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -79,12 +81,12 @@ static void arp_send_terminate(FAR struct net_driver_s *dev,
  * Name: arp_send_eventhandler
  ****************************************************************************/
 
-static uint16_t arp_send_eventhandler(FAR struct net_driver_s *dev,
-                                      FAR void *priv, uint16_t flags)
+static uint32_t arp_send_eventhandler(FAR struct net_driver_s *dev,
+                                      FAR void *priv, uint32_t flags)
 {
   FAR struct arp_send_s *state = (FAR struct arp_send_s *)priv;
 
-  ninfo("flags: %04x sent: %d\n", flags, state->snd_sent);
+  ninfo("flags: %" PRIx32 " sent: %d\n", flags, state->snd_sent);
 
   if (state)
     {
@@ -132,12 +134,6 @@ static uint16_t arp_send_eventhandler(FAR struct net_driver_s *dev,
 
       arp_format(dev, state->snd_ipaddr);
 
-      /* Make sure no ARP request overwrites this ARP request.  This
-       * flag will be cleared in arp_out().
-       */
-
-      IFF_SET_NOARP(dev->d_flags);
-
       /* Don't allow any further call backs. */
 
       arp_send_terminate(dev, state, OK);
@@ -184,6 +180,7 @@ int arp_send(in_addr_t ipaddr)
   FAR struct net_driver_s *dev;
   struct arp_notify_s notify;
   struct arp_send_s state;
+  bool sending = false;
   int ret;
 
   /* First check if destination is a local broadcast. */
@@ -219,8 +216,7 @@ int arp_send(in_addr_t ipaddr)
   if (!dev)
     {
       nerr("ERROR: Unreachable: %08lx\n", (unsigned long)ipaddr);
-      ret = -EHOSTUNREACH;
-      goto errout;
+      return -EHOSTUNREACH;
     }
 
   /* ARP support is only built if the Ethernet link layer is supported.
@@ -258,6 +254,10 @@ int arp_send(in_addr_t ipaddr)
       net_ipv4addr_copy(dripaddr, dev->d_draddr);
 #endif
       ipaddr = dripaddr;
+      if (ipaddr == INADDR_ANY)
+        {
+          return -EHOSTUNREACH;
+        }
     }
 
   /* The destination address is on the local network.  Check if it is
@@ -271,24 +271,24 @@ int arp_send(in_addr_t ipaddr)
       return OK;
     }
 
+  /* No ARP packet if this device do not support ARP */
+
+  if (IFF_IS_NOARP(dev->d_flags))
+    {
+      ninfo("ARP not supported on %s, no send!\n", dev->d_ifname);
+      return OK;
+    }
+
   /* Allocate resources to receive a callback.  This and the following
    * initialization is performed with the network lock because we don't
    * want anything to happen until we are ready.
    */
 
-  net_lock();
-  state.snd_cb = arp_callback_alloc(dev);
-  if (!state.snd_cb)
-    {
-      nerr("ERROR: Failed to allocate a callback\n");
-      ret = -ENOMEM;
-      goto errout_with_lock;
-    }
-
   nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
 
   state.snd_retries = 0;            /* No retries yet */
   state.snd_ipaddr  = ipaddr;       /* IP address to query */
+  state.snd_cb      = NULL;         /* No callback allocated yet */
 
   /* Remember the routing device name */
 
@@ -310,17 +310,45 @@ int arp_send(in_addr_t ipaddr)
        * issue.
        */
 
-      if (arp_find(ipaddr, NULL, dev) >= 0)
+      netdev_lock(dev);
+      ret = arp_find(ipaddr, NULL, dev);
+      if (ret >= 0 || ret == -ENETUNREACH)
         {
-          /* We have it!  Break out with success */
+          /* We have it! Break out with ret value */
 
-          ret = OK;
+          netdev_unlock(dev);
           break;
         }
 
       /* Set up the ARP response wait BEFORE we send the ARP request */
 
       arp_wait_setup(ipaddr, &notify);
+
+      if (ret == -EINPROGRESS && !sending)
+        {
+          /* ARP request for the same destination is in progress, directly
+           * wait arp response notify.
+           */
+
+          goto wait;
+        }
+
+      /* Allocate resources to receive a callback.  This and the following
+       * initialization is performed with the network lock because we don't
+       * want anything to happen until we are ready.
+       */
+
+      if (state.snd_cb == NULL)
+        {
+          state.snd_cb = arp_callback_alloc(dev);
+          if (!state.snd_cb)
+            {
+              nerr("ERROR: Failed to allocate a callback\n");
+              netdev_unlock(dev);
+              ret = -ENOMEM;
+              break;
+            }
+        }
 
       /* Arm/re-arm the callback */
 
@@ -331,18 +359,30 @@ int arp_send(in_addr_t ipaddr)
       state.snd_cb->event = arp_send_eventhandler;
       state.finish_cb     = NULL;
 
+      /* MAC address marked with all zeros to limit concurrent task
+       * send ARP request for same destination.
+       */
+
+      if (state.snd_retries == 0)
+        {
+          arp_update(dev, ipaddr, NULL, 0);
+          sending = true;
+        }
+
       /* Notify the device driver that new TX data is available. */
 
-      netdev_txnotify_dev(dev);
+      netdev_txnotify_dev(dev, ARP_POLL);
 
       /* Wait for the send to complete or an error to occur.
-       * net_sem_wait will also terminate if a signal is received.
+       * nxsem_tickwait will also terminate if a signal is received.
        */
+
+      netdev_unlock(dev);
 
       do
         {
-          ret = net_sem_timedwait_uninterruptible(&state.snd_sem,
-                                              CONFIG_ARP_SEND_DELAYMSEC);
+          ret = nxsem_tickwait(&state.snd_sem,
+                               MSEC2TICK(CONFIG_ARP_SEND_DELAYMSEC));
           if (ret == -ETIMEDOUT)
             {
               arp_wait_cancel(&notify);
@@ -365,6 +405,7 @@ int arp_send(in_addr_t ipaddr)
 
       /* Now wait for response to the ARP response to be received. */
 
+wait:
       ret = arp_wait(&notify, CONFIG_ARP_SEND_DELAYMSEC);
 
       /* arp_wait will return OK if and only if the matching ARP response
@@ -390,9 +431,6 @@ timeout:
 
   nxsem_destroy(&state.snd_sem);
   arp_callback_free(dev, state.snd_cb);
-errout_with_lock:
-  net_unlock();
-errout:
   return ret;
 }
 
@@ -440,7 +478,7 @@ int arp_send_async(in_addr_t ipaddr, arp_send_finish_cb_t cb)
       goto errout;
     }
 
-  net_lock();
+  netdev_lock(dev);
   state->snd_cb = arp_callback_alloc(dev);
   if (!state->snd_cb)
     {
@@ -466,10 +504,10 @@ int arp_send_async(in_addr_t ipaddr, arp_send_finish_cb_t cb)
 
   /* Notify the device driver that new TX data is available. */
 
-  netdev_txnotify_dev(dev);
+  netdev_txnotify_dev(dev, ARP_POLL);
 
 errout_with_lock:
-  net_unlock();
+  netdev_unlock(dev);
 errout:
   return ret;
 }

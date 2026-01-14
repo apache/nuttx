@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/esp32c3_aes.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -158,7 +160,7 @@ int esp32c3_aes_xts_cypher(struct esp32c3_aes_xts_s *aes, bool encrypt,
  * Name: esp32c3_aes_setkey
  *
  * Description:
- *   Configurate AES key.
+ *   Configure AES key.
  *
  * Input Parameters:
  *   aes     - AES object data pointer
@@ -177,7 +179,7 @@ int esp32c3_aes_setkey(struct esp32c3_aes_s *aes, const void *keyptr,
  * Name: esp32c3_aes_xts_setkey
  *
  * Description:
- *   Configurate AES XTS key.
+ *   Configure AES XTS key.
  *
  * Input Parameters:
  *   aes     - AES object data pointer

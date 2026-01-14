@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/arm_saveusercontext.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,8 +30,12 @@
 	.file	"arm_saveusercontext.S"
 
 	.text
+#ifdef __ghs__
+	.thumb2
+#else
 	.syntax	unified
 	.thumb
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -52,7 +58,11 @@
 
 	.globl	up_saveusercontext
 	.globl	up_saveusercontext
+#ifdef __ghs__
+	.type	up_saveusercontext, $function
+#else
 	.type	up_saveusercontext, %function
+#endif
 
 up_saveusercontext:
 
@@ -81,11 +91,7 @@ up_saveusercontext:
 	/* Save r13, primask, r4~r11 */
 
 	mov		r2, sp
-#ifdef CONFIG_ARMV7M_USEBASEPRI
 	mrs		r3, basepri
-#else
-	mrs		r3, primask
-#endif
 	stmia		r0!, {r2-r11}
 
 	/* Save EXC_RETURN to 0xffffffff */

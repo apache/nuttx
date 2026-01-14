@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/include/esp32s2/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,6 +39,16 @@
 
 #define ESP32S2_INT_PRIO_DEF        1
 
+/* CPU interrupt flags:
+ *   These flags can be used to specify which interrupt qualities the
+ *   code calling esp32s3_setup_irq needs.
+ */
+
+#define ESP32S2_CPUINT_FLAG_LEVEL   (1 << 0) /* Level-triggered interrupt */
+#define ESP32S2_CPUINT_FLAG_EDGE    (1 << 1) /* Edge-triggered interrupt */
+#define ESP32S2_CPUINT_FLAG_SHARED  (1 << 2) /* Interrupt can be shared between ISRs */
+#define ESP32S2_CPUINT_FLAG_IRAM    (1 << 3) /* ISR can be called if cache is disabled */
+
 /* Interrupt Matrix
  *
  * The Interrupt Matrix embedded in the ESP32-S2 independently allocates
@@ -59,8 +71,12 @@
  *   sources.
  */
 
-/* RESERVED interrupts: 0, 1, 3, 4, 5, 6, 7, 8, 9 */
+/* RESERVED interrupts: 0, 1, 3, 4, 5, 6, 7, 8, 9
+ * 0 and 1 are the exception because it is required for WiFi.
+ */
 
+#define ESP32S2_PERIPH_MAC               0
+#define ESP32S2_PERIPH_MAC_NMI           1
 #define ESP32S2_PERIPH_PWR               2
 
 /* RESERVED interrupts: 10, 11, 12, 14 */
@@ -196,6 +212,9 @@
 
 #define ESP32S2_IRQ2PERIPH(irq)       ((irq) - XTENSA_IRQ_FIRSTPERIPH)
 #define ESP32S2_PERIPH2IRQ(id)        ((id) + XTENSA_IRQ_FIRSTPERIPH)
+
+#define ESP32S2_IRQ_MAC               (XTENSA_IRQ_FIRSTPERIPH + ESP32S2_PERIPH_MAC)
+#define ESP32S2_IRQ_MAC_NMI           (XTENSA_IRQ_FIRSTPERIPH + ESP32S2_PERIPH_MAC_NMI)
 
 #define ESP32S2_IRQ_PWR               (XTENSA_IRQ_FIRSTPERIPH + ESP32S2_PERIPH_PWR)
 
@@ -415,6 +434,7 @@
 #define ESP32S2_CPUINT_NMISET         0x00004000
 
 #define ESP32S2_CPUINT_MAC            0
+#define ESP32S2_CPUINT_PWR            0
 #define ESP32S2_CPUINT_TIMER0         6
 #define ESP32S2_CPUINT_SOFTWARE0      7
 #define ESP32S2_CPUINT_PROFILING      11

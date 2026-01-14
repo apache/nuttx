@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/sama5/sama5d4-ek/src/sam_audio_null.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -100,7 +102,7 @@ int sam_audio_null_initialize(int minor)
       /* Get a null audio interface
        */
 
-      nullaudio = audio_null_initialize();
+      nullaudio = audio_null_initialize(true);
       if (!nullaudio)
         {
           auderr("ERROR: Failed to get the NULL audio interface\n");
@@ -123,7 +125,7 @@ int sam_audio_null_initialize(int minor)
 
       /* Create a device name */
 
-      snprintf(devname, 12, "pcm%d",  minor);
+      snprintf(devname, sizeof(devname), "pcm%d",  minor);
 
       /* Finally, we can register the PCM/NULL audio device. */
 

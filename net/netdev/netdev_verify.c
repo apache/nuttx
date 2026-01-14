@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/netdev/netdev_verify.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -53,7 +55,7 @@ bool netdev_verify(FAR struct net_driver_s *dev)
 
   /* Search the list of registered devices */
 
-  net_lock();
+  netdev_list_lock();
   for (chkdev = g_netdevices; chkdev != NULL; chkdev = chkdev->flink)
     {
       /* Is the network device that we are looking for? */
@@ -67,6 +69,6 @@ bool netdev_verify(FAR struct net_driver_s *dev)
         }
     }
 
-  net_unlock();
+  netdev_list_unlock();
   return valid;
 }

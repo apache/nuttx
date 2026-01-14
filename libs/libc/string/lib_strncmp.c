@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/string/lib_strncmp.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,7 +35,8 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_STRNCMP) && defined(LIBC_BUILD_STRNCMP)
-#undef strncmp /* See mm/README.txt */
+#undef strncmp
+no_builtin("strncmp")
 int strncmp(FAR const char *cs, FAR const char *ct, size_t nb)
 {
   register int result = 0;

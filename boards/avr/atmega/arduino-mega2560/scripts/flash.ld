@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/avr/atmega/arduino-mega2560/scripts/flash.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -110,16 +112,15 @@ SECTIONS
     .text            :
     {
         _stext = . ;
-        *(.vectors)
+        KEEP(*(.vectors))
         *(.init)
         *(.handlers)
         *(.progmem .progmem.*)
+        . = ALIGN(2);
         *(.text)
         *(.text.*)
         _etext = . ;
     } > flash
-
-    _eronly = ABSOLUTE(.);
 
     .data            :
     {
@@ -130,6 +131,8 @@ SECTIONS
         CONSTRUCTORS
         _edata = ABSOLUTE(.);
     } > sram AT > flash
+
+    _eronly = LOADADDR(.data);
 
     .bss            :
     {

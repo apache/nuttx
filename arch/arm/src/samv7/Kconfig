@@ -121,6 +121,50 @@ config ARCH_CHIP_SAMV71J21
 	select SAMV7_MEM_FLASH_2048
 	select SAMV7_MEM_RAM_384
 
+config ARCH_CHIP_PIC32CZCA70064
+	bool "PIC32CZ CA70 064"
+	select ARCH_CHIP_PIC32CZCA70
+	select SAMV7_MEM_FLASH_2048
+	select SAMV7_MEM_RAM_512
+	select SAMV7_QSPI_IS_SPI
+	select SAMV7_HAVE_USBFS
+	select SAMV7_HAVE_ISI8
+
+config ARCH_CHIP_PIC32CZCA70100
+	bool "PIC32CZ CA70 100"
+	select ARCH_CHIP_PIC32CZCA70
+	select SAMV7_MEM_FLASH_2048
+	select SAMV7_MEM_RAM_512
+	select SAMV7_QSPI_IS_SPI
+	select SAMV7_HAVE_MCAN1
+	select SAMV7_HAVE_DAC1 if !SAMV7_EMAC0
+	select SAMV7_HAVE_HSMCI0
+	select SAMV7_HAVE_SPI0
+	select SAMV7_HAVE_TWIHS2
+	select SAMV7_HAVE_USBHS
+	select SAMV7_HAVE_USART0
+	select SAMV7_HAVE_USART1
+	select SAMV7_HAVE_USART2
+
+config ARCH_CHIP_PIC32CZCA70144
+	bool "PIC32CZ CA70 144"
+	select ARCH_CHIP_PIC32CZCA70
+	select SAMV7_MEM_FLASH_2048
+	select SAMV7_MEM_RAM_512
+	select SAMV7_QSPI_IS_SPI
+	select SAMV7_HAVE_MCAN1
+	select SAMV7_HAVE_DAC1 if !SAMV7_EMAC0
+	select SAMV7_HAVE_EBI
+	select SAMV7_HAVE_HSMCI0
+	select SAMV7_HAVE_SDRAMC
+	select SAMV7_HAVE_SPI0
+	select SAMV7_HAVE_SPI1
+	select SAMV7_HAVE_TWIHS2
+	select SAMV7_HAVE_USBHS
+	select SAMV7_HAVE_USART0
+	select SAMV7_HAVE_USART1
+	select SAMV7_HAVE_USART2
+
 endchoice # Atmel SAMV7 Chip Selection
 
 config ARCH_CHIP_SAME70
@@ -173,6 +217,8 @@ config ARCH_CHIP_SAME70J
 	select SAMV7_QSPI_IS_SPI
 	select SAMV7_HAVE_USBFS
 	select SAMV7_HAVE_ISI8
+	select SAMV7_HAVE_USART0
+	select SAMV7_HAVE_USART1
 
 config ARCH_CHIP_SAMV71
 	bool
@@ -225,6 +271,18 @@ config ARCH_CHIP_SAMV71J
 	select SAMV7_QSPI_IS_SPI
 	select SAMV7_HAVE_USBFS
 	select SAMV7_HAVE_ISI8
+	select SAMV7_HAVE_USART0
+	select SAMV7_HAVE_USART1
+
+config ARCH_CHIP_PIC32CZCA70
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU # REVISIT
+	select ARMV7M_HAVE_ICACHE
+	select ARMV7M_HAVE_DCACHE
+	select ARMV7M_HAVE_ITCM
+	select ARMV7M_HAVE_DTCM
 
 # Chip Capabilities
 
@@ -254,10 +312,15 @@ config SAMV7_MEM_RAM_384
 	bool
 	default n
 
+config SAMV7_MEM_RAM_512
+	bool
+	default n
+
 config ARCH_CHIP_SAMV7_MEM_RAM
 	hex
 	default 0x40000 if SAMV7_MEM_RAM_256
 	default 0x60000 if SAMV7_MEM_RAM_384
+	default 0x80000 if SAMV7_MEM_RAM_512
 
 config SAMV7_MCAN
 	bool
@@ -365,6 +428,10 @@ config SAMV7_HAVE_USBHS
 	default n
 
 config SAMV7_1WIREDRIVER
+	bool
+	default n
+
+config SAMV7_LIN_SOCKET
 	bool
 	default n
 
@@ -853,6 +920,15 @@ config SAMV7_PWM0_PA9_POL
 		Fault input is by default active on high level. This config
 		inverts the logic and makes fault active on low level.
 
+config SAMV7_PWM0_PA9_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
 endif
 
 config SAMV7_PWM0_PD8
@@ -867,6 +943,15 @@ config SAMV7_PWM0_PD8_POL
 	---help---
 		Fault input is by default active on high level. This config
 		inverts the logic and makes fault active on low level.
+
+config SAMV7_PWM0_PD8_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
 
 endif
 
@@ -883,27 +968,101 @@ config SAMV7_PWM0_PD9_POL
 		Fault input is by default active on high level. This config
 		inverts the logic and makes fault active on low level.
 
+config SAMV7_PWM0_PD9_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
 endif
 
 config SAMV7_PWM0_PMC
 	bool "External fault input from PMC"
 	default n
 
+if SAMV7_PWM0_PMC
+
+config SAMV7_PWM0_PMC_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
+
 config SAMV7_PWM0_AFEC0
 	bool "External fault input from AFEC0"
 	default n
+
+if SAMV7_PWM0_AFEC0
+
+config SAMV7_PWM0_AFEC0_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
 
 config SAMV7_PWM0_AFEC1
 	bool "External fault input from AFEC1"
 	default n
 
+if SAMV7_PWM0_AFEC1
+
+config SAMV7_PWM0_AFEC1_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
+
 config SAMV7_PWM0_ACC
 	bool "External fault input from ACC"
 	default n
 
+if SAMV7_PWM0_ACC
+
+config SAMV7_PWM0_ACC_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
+
 config SAMV7_PWM0_TIM0
 	bool "External fault input from Timer 0"
 	default n
+
+if SAMV7_PWM0_TIM0
+
+config SAMV7_PWM0_TIM0_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
 
 endmenu
 
@@ -1114,6 +1273,15 @@ config SAMV7_PWM1_PA21_POL
 		Fault input is by default active on high level. This config
 		inverts the logic and makes fault active on low level.
 
+config SAMV7_PWM1_PA21_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
 endif
 
 config SAMV7_PWM1_PA26
@@ -1128,6 +1296,15 @@ config SAMV7_PWM1_PA26_POL
 	---help---
 		Fault input is by default active on high level. This config
 		inverts the logic and makes fault active on low level.
+
+config SAMV7_PWM1_PA26_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
 
 endif
 
@@ -1144,30 +1321,103 @@ config SAMV7_PWM1_PA28_POL
 		Fault input is by default active on high level. This config
 		inverts the logic and makes fault active on low level.
 
+config SAMV7_PWM1_PA28_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
 endif
 
 config SAMV7_PWM1_PMC
 	bool "External fault input from PMC"
 	default n
 
+if SAMV7_PWM1_PMC
+
+config SAMV7_PWM1_PMC_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
+
 config SAMV7_PWM1_AFEC0
 	bool "External fault input from AFEC0"
 	default n
+
+if SAMV7_PWM1_AFEC0
+
+config SAMV7_PWM1_AFEC0_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
 
 config SAMV7_PWM1_AFEC1
 	bool "External fault input from AFEC1"
 	default n
 
+if SAMV7_PWM1_AFEC1
+
+config SAMV7_PWM1_AFEC1_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
+
 config SAMV7_PWM1_ACC
 	bool "External fault input from ACC"
 	default n
+
+if SAMV7_PWM1_ACC
+
+config SAMV7_PWM1_ACC_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
 
 config SAMV7_PWM1_TIM0
 	bool "External fault input from Timer 0"
 	default n
 
-endmenu
+if SAMV7_PWM1_TIM0
 
+config SAMV7_PWM1_TIM0_LATCHED
+	bool "Latched fault"
+	default n
+	---help---
+		When this option is selected, the fault input remains active until it
+		is cleared by the software. When this option is not selected, the
+		fault is cleared once the fault input changes its polarity level back
+		to normal state.
+
+endif
+
+endmenu
 
 config SAMV7_PWM1_EVENT0
 	bool "Generate trigger on Event Line 0"
@@ -1445,6 +1695,11 @@ config SAMV7_USART0_1WIREDRIVER
 	bool "1-Wire driver"
 	select SAMV7_1WIREDRIVER
 
+config SAMV7_USART0_LIN_SOCKET
+	bool "LIN driver over SocketCAN"
+	select SAMV7_LIN_SOCKET
+	depends on NET_CAN
+
 config SAMV7_USART0_SPI_MASTER
 	bool "USART0 as SPI Master driver"
 	select SAMV7_USART_IS_SPI_MASTER
@@ -1474,6 +1729,17 @@ config SAMV7_USART0_RS485MODE
 		opened for the first time.
 
 endif # SAMV7_USART0_SERIALDRIVER
+
+if SAMV7_USART0_LIN_SOCKET
+
+config SAMV7_USART0_LIN_BAUD
+	int "BAUD rate"
+	default 19200
+	---help---
+		The configured BAUD of the LIN bus.
+
+endif # SAMV7_USART0_LIN_SOCKET
+
 endif # SAMV7_USART0
 
 menuconfig SAMV7_USART1
@@ -1496,6 +1762,11 @@ config SAMV7_USART1_SERIALDRIVER
 config SAMV7_USART1_1WIREDRIVER
 	bool "1-Wire driver"
 	select SAMV7_1WIREDRIVER
+
+config SAMV7_USART1_LIN_SOCKET
+	bool "LIN driver over SocketCAN"
+	select SAMV7_LIN_SOCKET
+	depends on NET_CAN
 
 config SAMV7_USART1_SPI_MASTER
 	bool "USART1 as SPI Master driver"
@@ -1526,6 +1797,17 @@ config SAMV7_USART1_RS485MODE
 		opened for the first time.
 
 endif # SAMV7_USART1_SERIALDRIVER
+
+if SAMV7_USART1_LIN_SOCKET
+
+config SAMV7_USART1_LIN_BAUD
+	int "BAUD rate"
+	default 19200
+	---help---
+		The configured BAUD of the LIN bus.
+
+endif # SAMV7_USART1_LIN_SOCKET
+
 endif # SAMV7_USART1
 
 menuconfig SAMV7_USART2
@@ -1548,6 +1830,11 @@ config SAMV7_USART2_SERIALDRIVER
 config SAMV7_USART2_1WIREDRIVER
 	bool "1-Wire driver"
 	select SAMV7_1WIREDRIVER
+
+config SAMV7_USART2_LIN_SOCKET
+	bool "LIN driver over SocketCAN"
+	select SAMV7_LIN_SOCKET
+	depends on NET_CAN
 
 config SAMV7_USART2_SPI_MASTER
 	bool "USART2 as SPI Master driver"
@@ -1578,7 +1865,28 @@ config SAMV7_USART2_RS485MODE
 		opened for the first time.
 
 endif # SAMV7_USART2_SERIALDRIVER
+
+if SAMV7_USART2_LIN_SOCKET
+
+config SAMV7_USART2_LIN_BAUD
+	int "BAUD rate"
+	default 19200
+	---help---
+		The configured BAUD of the LIN bus.
+
+endif # SAMV7_USART2_LIN_SOCKET
+
 endif # SAMV7_USART2
+
+if SAMV7_LIN_SOCKET
+config SAMV7_LIN_REGDEBUG
+	bool "Register level debug"
+	default n
+	depends on DEBUG_NET_INFO
+	---help---
+		Output detailed register-level LIN device debug information.
+		Requires also CONFIG_DEBUG_NET_INFO.
+endif # SAMV7_LIN_SOCKET
 
 config SAMV7_WDT
 	bool "Watchdog Timer (WDT)"
@@ -3373,7 +3681,7 @@ endchoice # MCAN0 RX buffer element size
 config SAMV7_MCAN0_RXFIFO0_SIZE
 	int "MCAN0 RX FIFO0 size"
 	default 8
-	range 1 64
+	range 0 64
 	---help---
 		Number of receive FIFO 0 elements.  Zero disables FIFO 0.
 
@@ -3417,7 +3725,7 @@ endchoice # MCAN0 RX buffer element size
 config SAMV7_MCAN0_RXFIFO1_SIZE
 	int "MCAN0 RX FIFO1 size"
 	default 4
-	range 1 64
+	range 0 64
 	---help---
 		Number of receive FIFO 1 elements for MCAN0.  Zero disables FIFO 1.
 
@@ -3689,7 +3997,7 @@ endchoice # MCAN1 RX buffer element size
 config SAMV7_MCAN1_RXFIFO0_SIZE
 	int "MCAN1 RX FIFO0 size"
 	default 8
-	range 1 64
+	range 0 64
 	---help---
 		Number of receive FIFO 0 elements.  Zero disables FIFO 0.
 
@@ -3733,7 +4041,7 @@ endchoice # MCAN1 RX buffer element size
 config SAMV7_MCAN1_RXFIFO1_SIZE
 	int "MCAN1 RX FIFO1 size"
 	default 4
-	range 1 64
+	range 0 64
 	---help---
 		Number of receive FIFO 1 elements for MCAN1.  Zero disables FIFO 1.
 

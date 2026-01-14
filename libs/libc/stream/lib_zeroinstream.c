@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stream/lib_zeroinstream.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,8 +38,8 @@ static int zeroinstream_getc(FAR struct lib_instream_s *self)
   return 0;
 }
 
-static int zeroinstream_gets(FAR struct lib_instream_s *self,
-                             FAR void *buffer, int len)
+static ssize_t zeroinstream_gets(FAR struct lib_instream_s *self,
+                                 FAR void *buffer, size_t len)
 {
   self->nget += len;
   memset(buffer, 0, len);

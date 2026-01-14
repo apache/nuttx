@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/dirent/lib_scandir.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -154,7 +156,7 @@ int scandir(FAR const char *path, FAR struct dirent ***namelist,
        * is really required given the directories' path name.
        */
 
-      dsize = (size_t)(&d->d_name[strlen(d->d_name) + 1] - (char *)d);
+      dsize = (size_t)(&d->d_name[strlen(d->d_name) + 1] - (FAR char *)d);
       dnew = lib_malloc(dsize);
       if (!dnew)
         {

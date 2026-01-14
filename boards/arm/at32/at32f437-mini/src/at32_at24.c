@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/at32/at32f437-mini/src/at32_at24.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -105,15 +107,16 @@ int at32_at24_automount(int minor)
           ferr("ERROR: Failed to mount the NXFFS volume: %d\n", ret);
           return ret;
         }
-#else 
-      /* And use the FTL layer to wrap the MTD driver as a block driver */
+#else
+      /* Register the MTD driver */
 
-      finfo("Initialize the FTL layer to create /dev/mtdblock%d\n",
-            AT24_MINOR);
-      ret = ftl_initialize(AT24_MINOR, mtd);
+      char path[32];
+      snprintf(path, sizeof(path), "/dev/mtdblock%d", AT24_MINOR);
+      ret = register_mtddriver(path, mtd, 0755, NULL);
       if (ret < 0)
         {
-          ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          ferr("ERROR: Failed to register the MTD driver %s, ret %d\n",
+               path, ret);
           return ret;
         }
 #endif

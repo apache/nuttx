@@ -202,7 +202,7 @@ I2C Tool
 
     NOTES:
     o Arguments are "sticky".  For example, once the I2C address is
-      specified, that address will be re-used until it is changed.
+      specified, that address will be reused until it is changed.
 
     WARNING:
     o The I2C dev command may have bad side effects on your I2C devices.

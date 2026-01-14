@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/sys/videoio.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1342,7 +1344,7 @@ struct v4l2_ext_controls
 
 struct v4s_ext_controls_scene
 {
-  enum v4l2_scene_mode     mode;       /* Scene mode to be controled */
+  enum v4l2_scene_mode     mode;       /* Scene mode to be controlled */
   struct v4l2_ext_controls control;    /* Same as VIDIOC_S_EXT_CTRLS */
 };
 

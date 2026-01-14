@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/sys/mman.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -56,7 +58,7 @@
 #define MAP_ANONYMOUS   (1 << 4)        /* Bit 4:  The mapping is not backed by any file */
 #define MAP_ANON        MAP_ANONYMOUS   /*         Alias */
 
-/* These are Linux-specific (none are implemented).  */
+/* These are Linux-specific (most are not implemented).  */
 
 #define MAP_GROWSDOWN   (1 << 5)        /* Bit 5:  Used to stack allocations */
 #define MAP_DENYWRITE   (1 << 6)        /* Bit 6:  Do not permit writes to file */
@@ -65,6 +67,8 @@
 #define MAP_NORESERVE   (1 << 9)        /* Bit 9:  Do not reserve swap space for this mapping */
 #define MAP_POPULATE    (1 << 10)       /* Bit 10: populate (prefault) page tables */
 #define MAP_NONBLOCK    (1 << 11)       /* Bit 11: Do not block on IO */
+
+#define MAP_UNINITIALIZED (1 << 26)     /* Bit 26: Do not clear the anonymous pages */
 
 /* Failure return */
 
@@ -113,6 +117,17 @@
 #define MADV_RANDOM           POSIX_MADV_RANDOM
 #define MADV_WILLNEED         POSIX_MADV_WILLNEED
 #define MADV_DONTNEED         POSIX_MADV_DONTNEED
+
+/* The following flags are defined since Linux 2.6.38.
+ * None of these flags have been implemented yet.
+ * MADV_HUGEPAGE
+ *   Enable Transparent Huge Pages (THP) for pages.
+ * MADV_NOHUGEPAGE
+ *   Ensure the pages will not be backed by transparent hugepages.
+ */
+
+#define MADV_HUGEPAGE         (14)
+#define MADV_NOHUGEPAGE       (15)
 
 /* The following flags are defined for posix_typed_mem_open():
  *
@@ -199,8 +214,13 @@ int posix_mem_offset(FAR const void *addr, size_t len, FAR off_t *off,
 int posix_typed_mem_get_info(int fildes,
                              FAR struct posix_typed_mem_info *info);
 int posix_typed_mem_open(FAR const char *name, int oflag, int tflag);
+#ifdef CONFIG_FS_SHMFS
 int shm_open(FAR const char *name, int oflag, mode_t mode);
 int shm_unlink(FAR const char *name);
+#else
+#define shm_open(...)   (-ENOSYS)
+#define shm_unlink(...) (-ENOSYS)
+#endif
 int memfd_create(FAR const char *name, unsigned int flags);
 
 #undef EXTERN

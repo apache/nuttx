@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/win/sim_hosttime.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -41,6 +43,15 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: host_inittimer
+ ****************************************************************************/
+
+int host_inittimer(void)
+{
+  return 0;
+}
 
 /****************************************************************************
  * Name: host_gettime

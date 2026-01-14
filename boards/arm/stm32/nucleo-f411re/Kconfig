@@ -1,0 +1,25 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_NUCLEO_F411RE
+
+config NUCLEO_F411RE_QETIMER
+	int "Timer to use with QE encoder"
+	default 3
+	depends on SENSORS_QENCODER
+
+config NUCLEO_F411RE_AJOY_MINBUTTONS
+	bool "Minimal Joystick Buttons"
+	default STM32_USART1
+	depends on INPUT_AJOYSTICK
+	---help---
+		The Itead Joystick shield supports analog X/Y position and up to 5
+		buttons.  Some of these buttons may conflict with other resources
+		(Button F, for example, conflicts with the default USART1 pin usage).
+		Selecting this option will return the number of buttons to the
+		minimal set:  SELECT (joystick down), FIRE (BUTTON B), and JUMP
+		(BUTTON A).
+
+endif # ARCH_BOARD_NUCLEO_F411RE

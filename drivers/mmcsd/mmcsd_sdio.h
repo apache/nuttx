@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/mmcsd/mmcsd_sdio.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,23 +42,59 @@
  *  [23:16] Location of target Byte in EXT_CSD
  *  [15:08] Value Byte
  *  [07:03] Always 0
- *  [02:00] Command Set
+ *  [02:00] Command Set(Ignored if not used to change the command set)
  */
-#define MMCSD_CMD6_BUSWIDTH_RWSHIFT   (16)
-#  define MMCSD_CMD6_BUSWIDTH_RW      ((uint32_t)0xb7 << MMCSD_CMD6_BUSWIDTH_RWSHIFT)  /* R/W */
 
-#define MMCSD_CMD6_WRITE_BYTE_SHIFT   (24)
-#  define MMCSD_CMD6_MODE_CMD_SET     ((uint32_t)0x00 << MMCSD_CMD6_WRITE_BYTE_SHIFT)  /* Change the command set */
-#  define MMCSD_CMD6_MODE_SET_BITS    ((uint32_t)0x01 << MMCSD_CMD6_WRITE_BYTE_SHIFT)  /* Set bits which are 1 in value */
-#  define MMCSD_CMD6_MODE_CLEAR_BITS  ((uint32_t)0x02 << MMCSD_CMD6_WRITE_BYTE_SHIFT)  /* Clear bits which are 1 in value */
-#  define MMCSD_CMD6_MODE_WRITE_BYTE  ((uint32_t)0x03 << MMCSD_CMD6_WRITE_BYTE_SHIFT)  /* Set target to value */
+#define MMC_CMD6_CMDSET_SHIFT       (0)
+#define MMC_CMD6_VALUE_SHIFT        (8)
+#define MMC_CMD6_INDEX_SHIFT        (16)
+#define MMC_CMD6_MODE_SHIFT         (24)
 
-#define MMCSD_CMD6_BUS_WIDTH_SHIFT    (8)
-#  define MMCSD_CMD6_BUS_WIDTH_1      ((uint32_t)0x00 << MMCSD_CMD6_BUS_WIDTH_SHIFT)  /* Card is in 1 bit mode */
-#  define MMCSD_CMD6_BUS_WIDTH_4      ((uint32_t)0x01 << MMCSD_CMD6_BUS_WIDTH_SHIFT)  /* Card is in 4 bit mode */
-#  define MMCSD_CMD6_CSD_BUS_WIDTH_8  ((uint32_t)0x02 << MMCSD_CMD6_BUS_WIDTH_SHIFT)  /* Card is in 8 bit mode */
-#  define MMCSD_CMD6_DDR_BUS_WIDTH_4  ((uint32_t)0x05 << MMCSD_CMD6_BUS_WIDTH_SHIFT)  /* Card is in 4 bit DDR mode */
-#  define MMCSD_CMD6_DDR_BUS_WIDTH_8  ((uint32_t)0x06 << MMCSD_CMD6_BUS_WIDTH_SHIFT)  /* Card is in 8 bit DDR mode */
+#define MMC_CMD6_CMDSET(cmdset)     ((uint32_t)(cmdset) << MMC_CMD6_CMDSET_SHIFT)
+#define MMC_CMD6_VALUE(value)       ((uint32_t)(value) << MMC_CMD6_VALUE_SHIFT)
+#define MMC_CMD6_INDEX(index)       ((uint32_t)(index) << MMC_CMD6_INDEX_SHIFT)
+#define MMC_CMD6_MODE(mode)         ((uint32_t)(mode) << MMC_CMD6_MODE_SHIFT)
+
+#define MMC_CMD6_MODE_CMD_SET       (0x00)  /* Change the command set */
+#define MMC_CMD6_MODE_SET_BITS      (0x01)  /* Set bits which are 1 in value */
+#define MMC_CMD6_MODE_CLEAR_BITS    (0x02)  /* Clear bits which are 1 in value */
+#define MMC_CMD6_MODE_WRITE_BYTE    (0x03)  /* Set target to value */
+
+#define EXT_CSD_PART_CONF           179     /* R/W */
+#define EXT_CSD_BUS_WIDTH           183     /* WO */
+#define EXT_CSD_HS_TIMING           185     /* R/W */
+
+/* EXT_CSD_BUS_WIDTH */
+#define EXT_CSD_BUS_WIDTH_1         (0x00)  /* Card is in 1 bit mode */
+#define EXT_CSD_BUS_WIDTH_4         (0x01)  /* Card is in 4 bit mode */
+#define EXT_CSD_BUS_WIDTH_8         (0x02)  /* Card is in 8 bit mode */
+#define EXT_CSD_DDR_BUS_WIDTH_4     (0x05)  /* Card is in 4 bit DDR mode */
+#define EXT_CSD_DDR_BUS_WIDTH_8     (0x06)  /* Card is in 8 bit DDR mode */
+
+#define MMC_CMD6_BUSWIDTH(width)    (MMC_CMD6_VALUE(width) | \
+                                     MMC_CMD6_INDEX(EXT_CSD_BUS_WIDTH) | \
+                                     MMC_CMD6_MODE(MMC_CMD6_MODE_WRITE_BYTE))
+
+/* EXT_CSD_HS_TIMING */
+#define EXT_CSD_HS_TIMING_BC        0
+#define EXT_CSD_HS_TIMING_HS        1
+#define EXT_CSD_HS_TIMING_HS200     2
+#define EXT_CSD_HS_TIMING_HS400     3
+
+#define MMC_CMD6_HS_TIMING(timing)  (MMC_CMD6_VALUE(timing) | \
+                                     MMC_CMD6_INDEX(EXT_CSD_HS_TIMING) | \
+                                     MMC_CMD6_MODE(MMC_CMD6_MODE_WRITE_BYTE))
+
+/* Partition type */
+
+#  define MMCSD_PART_UDATA            0
+#  define MMCSD_PART_BOOT0            1
+#  define MMCSD_PART_BOOT1            2
+#  define MMCSD_PART_RPMB             3
+#  define MMCSD_PART_GENP0            4
+#  define MMCSD_PART_GENP1            5
+#  define MMCSD_PART_GENP2            6
+#  define MMCSD_PART_GENP3            7
 
 /* CMD8 Argument:
  *    [31:12]: Reserved (shall be set to '0')
@@ -131,9 +169,10 @@
 #  define MMCSD_R1_STATE_DIS        ((uint32_t)8 << MMCSD_R1_STATE_SHIFT) /* 8=Disconnect state */
 
 #define MMCSD_R1_READYFORDATA       ((uint32_t)1 << 8)     /* Buffer empty */
+#define MMCSD_R1_SWITCHERROR        ((uint32_t)1 << 7)     /* Device mode switch error */
 #define MMCSD_R1_APPCMD             ((uint32_t)1 << 5)     /* Next CMD is ACMD */
 #define MMCSD_R1_AKESEQERROR        ((uint32_t)1 << 3)     /* Authentication error */
-#define MMCSD_R1_ERRORMASK          ((uint32_t)0xfdffe008) /* Error mask */
+#define MMCSD_R1_ERRORMASK          ((uint32_t)0xfdffe088) /* Error mask */
 
 #define IS_STATE(v,s)               ((((uint32_t)v)&MMCSD_R1_STATE_MASK)==(s))
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/nx/nxmu.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -120,7 +122,7 @@ enum nxmsg_e
   NX_SVRMSG_OPENWINDOW,       /* Create a new window */
   NX_SVRMSG_CLOSEWINDOW,      /* Close an existing window */
   NX_SVRMSG_BLOCKED,          /* The window is blocked */
-  NX_SVRMSG_SYNCH,            /* Window syncrhonization request */
+  NX_SVRMSG_SYNCH,            /* Window synchronization request */
   NX_SVRMSG_CURSOR_ENABLE,    /* Enable/disablel cursor presentation */
   NX_SVRMSG_CURSOR_IMAGE,     /* Set cursor image */
   NX_SVRMSG_CURSOR_SETPOS,    /* Set cursor position */
@@ -177,7 +179,7 @@ struct nxclimsg_redraw_s
 {
   uint32_t msgid;                /* NX_CLIMSG_REDRAW */
   FAR struct nxbe_window_s *wnd; /* The handle to the window to redraw in */
-  FAR struct nxgl_rect_s rect;   /* The rectangle to be redrawn */
+  struct nxgl_rect_s rect;       /* The rectangle to be redrawn */
   bool more;                     /* true: more redraw messages follow */
 };
 
@@ -189,9 +191,9 @@ struct nxclimsg_newposition_s
 {
   uint32_t msgid;                /* NX_CLIMSG_NEWPOSITION */
   FAR struct nxbe_window_s *wnd; /* The window whose position/size has changed */
-  FAR struct nxgl_size_s size;   /* The current window size */
-  FAR struct nxgl_point_s pos;   /* The current window position */
-  FAR struct nxgl_rect_s bounds; /* Size of screen */
+  struct nxgl_size_s size;       /* The current window size */
+  struct nxgl_point_s pos;       /* The current window position */
+  struct nxgl_rect_s bounds;     /* Size of screen */
 };
 
 /* This message reports a new mouse event to a particular window */
@@ -298,7 +300,7 @@ struct nxsvrmsg_curenable_s
 struct nxsvrmsg_curimage_s
 {
   uint32_t msgid;                    /* NX_SVRMSG_CURSOR_IMAGE */
-  FAR struct nx_cursorimage_s image  /* Describes the cursor image */
+  struct nx_cursorimage_s image      /* Describes the cursor image */
 };
 #endif
 
@@ -307,7 +309,7 @@ struct nxsvrmsg_curimage_s
 struct nxsvrmsg_curpos_s
 {
   uint32_t msgid;                  /* NX_SVRMSG_CURSOR_SETPOS */
-  FAR struct nxgl_point_s pos;     /* The new cursor position */
+  struct nxgl_point_s pos;         /* The new cursor position */
 };
 #endif
 
@@ -337,7 +339,7 @@ struct nxsvrmsg_setposition_s
 {
   uint32_t msgid;                  /* NX_SVRMSG_SETPOSITION */
   FAR struct nxbe_window_s *wnd;   /* The window whose position/size has changed */
-  FAR struct nxgl_point_s pos;     /* The new window position */
+  struct nxgl_point_s pos;         /* The new window position */
 };
 
 /* This message informs the server that the size
@@ -348,7 +350,7 @@ struct nxsvrmsg_setsize_s
 {
   uint32_t msgid;                  /* NX_SVRMSG_SETSIZE */
   FAR struct nxbe_window_s *wnd;   /* The window whose position/size has changed */
-  FAR struct nxgl_size_s  size;    /* The new window size */
+  struct nxgl_size_s size;         /* The new window size */
 };
 
 /* This message informs the server that the size
@@ -435,7 +437,7 @@ struct nxsvrmsg_getrectangle_s
   unsigned int plane;              /* The plane number to read */
   FAR uint8_t *dest;               /* Memory location in which to store the graphics data */
   unsigned int deststride;         /* Width of the destination memory in bytes */
-  sem_t *sem_done;                 /* Semaphore to report when command is done. */
+  FAR sem_t *sem_done;             /* Semaphore to report when command is done. */
 };
 
 /* Fill a trapezoidal region in the window with a color */
@@ -444,7 +446,7 @@ struct nxsvrmsg_filltrapezoid_s
 {
   uint32_t msgid;                  /* NX_SVRMSG_FILLTRAP */
   FAR struct nxbe_window_s *wnd;   /* The window to fill  */
-  FAR struct nxgl_rect_s clip;     /* The clipping window */
+  struct nxgl_rect_s clip;         /* The clipping window */
   struct nxgl_trapezoid_s trap;    /* The trapezoidal region in the window to fill */
 
   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]; /* Color to use in the fill */
@@ -472,7 +474,7 @@ struct nxsvrmsg_bitmap_s
 
   struct nxgl_point_s origin;     /* Offset into the source image data */
   unsigned int stride;            /* The width of the full source image in pixels. */
-  sem_t *sem_done;                /* Semaphore to report when command is done. */
+  FAR sem_t *sem_done;            /* Semaphore to report when command is done. */
 };
 
 /* Set the color of the background */
@@ -506,7 +508,7 @@ struct nxsvrmsg_mousein_s
 struct nxsvrmsg_kbdin_s
 {
   uint32_t msgid;                  /* NX_SVRMSG_KBDIN */
-  uint8_t nch ;                    /* Number of characters received */
+  uint8_t nch;                     /* Number of characters received */
   uint8_t ch[1];                   /* Array of received characters */
 };
 #endif

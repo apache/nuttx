@@ -1,6 +1,8 @@
 /****************************************************************************
  * binfmt/nxflat.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -81,7 +83,6 @@ static struct binfmt_s g_nxflatbinfmt =
   NULL,                /* next */
   nxflat_loadbinary,   /* load */
   nxflat_unloadbinary, /* unload */
-  NULL,                /* coredump */
 };
 
 /****************************************************************************
@@ -194,7 +195,7 @@ static int nxflat_loadbinary(FAR struct binary_s *binp,
 #ifdef CONFIG_ARCH_ADDRENV
 #  warning "REVISIT"
 #else
-  binp->alloc[0]  = (FAR void *)loadinfo.dspace;
+  binp->picbase  = (FAR void *)loadinfo.dspace;
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -230,7 +231,7 @@ errout:
 
 static int nxflat_unloadbinary(FAR struct binary_s *binp)
 {
-  FAR struct dspace_s *dspace = (FAR struct dspace_s *)binp->alloc[0];
+  FAR struct dspace_s *dspace = (FAR struct dspace_s *)binp->picbase;
 
   /* Check if this is the last reference to dspace.  It may still be needed
    * by other threads.  In that case, it must persist after this thread
@@ -244,9 +245,9 @@ static int nxflat_unloadbinary(FAR struct binary_s *binp)
       kumm_free(dspace->region);
       dspace->region = NULL;
 
-      /* Mark alloc[0] (dspace) as freed */
+      /* Mark picbase (dspace) as freed */
 
-      binp->alloc[0] = NULL;
+      binp->picbase = NULL;
 
       /* The reference count will be decremented to zero and the dspace
        * container will be freed in sched/nxsched_release_tcb.c

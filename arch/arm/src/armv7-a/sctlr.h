@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/sctlr.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,8 +36,8 @@
  * Included Files
  ****************************************************************************/
 
-#include "barriers.h"
-#include "cp15.h"
+#include <arch/barriers.h>
+#include <arch/irq.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -61,20 +63,6 @@
  * The Cortex-A5 MPCore processor does not implement instruction or data
  * Tightly CoupledMemory (TCM), so this register always Reads-As-Zero (RAZ).
  */
-
-/* Multiprocessor Affinity Register (MPIDR) */
-
-#define MPIDR_CPUID_SHIFT        (0)       /* Bits 0-1: CPU ID */
-#define MPIDR_CPUID_MASK         (3 << MPIDR_CPUID_SHIFT)
-#  define MPIDR_CPUID_CPU0       (0 << MPIDR_CPUID_SHIFT)
-#  define MPIDR_CPUID_CPU1       (1 << MPIDR_CPUID_SHIFT)
-#  define MPIDR_CPUID_CPU2       (2 << MPIDR_CPUID_SHIFT)
-#  define MPIDR_CPUID_CPU3       (3 << MPIDR_CPUID_SHIFT)
-                                           /* Bits 2-7: Reserved */
-#define MPIDR_CLUSTID_SHIFT      (8)       /* Bits 8-11: Cluster ID value */
-#define MPIDR_CLUSTID_MASK       (15 << MPIDR_CLUSTID_SHIFT)
-                                           /* Bits 12-29: Reserved */
-#define MPIDR_U                  (1 << 30) /* Bit 30: Multiprocessing Extensions. */
 
 /* Processor Feature Register 0 (ID_PFR0) */
 
@@ -461,14 +449,6 @@ static inline unsigned int cp15_rdid(void)
   return CP15_GET(MIDR);
 }
 
-/* Get the Multiprocessor Affinity Register (MPIDR) */
-
-noinstrument_function
-static inline unsigned int cp15_rdmpidr(void)
-{
-  return CP15_GET(MPIDR);
-}
-
 /* Read/write the system control register (SCTLR) */
 
 static inline unsigned int cp15_rdsctlr(void)
@@ -479,14 +459,14 @@ static inline unsigned int cp15_rdsctlr(void)
 static inline void cp15_wrsctlr(unsigned int sctlr)
 {
   CP15_SET(SCTLR, sctlr);
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
 }
 
 /* Read/write the vector base address register (VBAR) */

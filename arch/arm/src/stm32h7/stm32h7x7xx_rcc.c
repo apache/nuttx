@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32h7x7xx_rcc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -768,7 +770,7 @@ void stm32_stdclockconfig(void)
       putreg32(regval, STM32_RCC_CFGR);
 #endif
 
-      /* Configure PLL123 clock source and multipiers */
+      /* Configure PLL123 clock source and multipliers */
 
 #ifdef STM32_BOARD_USEHSI
       regval = (RCC_PLLCKSELR_PLLSRC_HSI |
@@ -890,11 +892,13 @@ void stm32_stdclockconfig(void)
         {
         }
 
+#ifndef CONFIG_STM32H7_PWR_IGNORE_ACTVOSRDY
       /* See Reference manual Section 5.4.1, System supply startup */
 
       while ((getreg32(STM32_PWR_CSR1) & PWR_CSR1_ACTVOSRDY) == 0)
         {
         }
+#endif
 
 #if STM32_VOS_OVERDRIVE && (STM32_PWR_VOS_SCALE == PWR_D3CR_VOS_SCALE_1)
       /* Over-drive support for VOS1 */
@@ -991,6 +995,23 @@ void stm32_stdclockconfig(void)
       regval = getreg32(STM32_RCC_D2CCIP2R);
       regval &= ~RCC_D2CCIP2R_USBSEL_MASK;
       regval |= STM32_RCC_D2CCIP2R_USBSRC;
+      putreg32(regval, STM32_RCC_D2CCIP2R);
+#endif
+      /* Configure USART2, 3, 4, 5, 7, and 8 kernel clock source selection */
+
+#if defined(STM32_RCC_D2CCIP2R_USART234578_SEL)
+      regval = getreg32(STM32_RCC_D2CCIP2R);
+      regval &= ~RCC_D2CCIP2R_USART234578SEL_MASK;
+      regval |= STM32_RCC_D2CCIP2R_USART234578_SEL;
+      putreg32(regval, STM32_RCC_D2CCIP2R);
+#endif
+
+      /* Configure USART1 and 6 kernel clock source selection */
+
+#if defined(STM32_RCC_D2CCIP2R_USART16_SEL)
+      regval = getreg32(STM32_RCC_D2CCIP2R);
+      regval &= ~RCC_D2CCIP2R_USART16SEL_MASK;
+      regval |= STM32_RCC_D2CCIP2R_USART16_SEL;
       putreg32(regval, STM32_RCC_D2CCIP2R);
 #endif
 

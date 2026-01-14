@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/nxffs/nxffs_pack.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,6 +36,7 @@
 #include <nuttx/kmalloc.h>
 
 #include "nxffs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Types
@@ -251,7 +254,7 @@ static inline off_t nxffs_mediacheck(FAR struct nxffs_volume_s *volume,
 
 static inline int nxffs_startpos(FAR struct nxffs_volume_s *volume,
                                  FAR struct nxffs_pack_s *pack,
-                                 off_t *froffset)
+                                 FAR off_t *froffset)
 {
   struct nxffs_blkentry_s blkentry;
   off_t offset = *froffset;
@@ -782,7 +785,7 @@ static void nxffs_packtransfer(FAR struct nxffs_volume_s *volume,
 
   uint16_t destlen = volume->geo.blocksize - pack->iooffset;
 
-  /* Dermined how much data is available in the src data block */
+  /* Determined how much data is available in the src data block */
 
   uint16_t srclen = pack->src.blklen - pack->src.blkpos;
 
@@ -1089,7 +1092,7 @@ nxffs_setupwriter(FAR struct nxffs_volume_s *volume,
           /* Initialize for the packing operation. */
 
           memset(&pack->dest, 0, sizeof(struct nxffs_packstream_s));
-          pack->dest.entry.name   = strdup(wrfile->ofile.entry.name);
+          pack->dest.entry.name   = fs_heap_strdup(wrfile->ofile.entry.name);
           pack->dest.entry.utc    = wrfile->ofile.entry.utc;
           pack->dest.entry.datlen = wrfile->ofile.entry.datlen;
 

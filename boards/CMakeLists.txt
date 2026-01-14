@@ -1,6 +1,8 @@
 # ##############################################################################
 # boards/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -53,8 +55,8 @@ if(EXISTS ${NUTTX_BOARD_ABS_DIR}/../common/CMakeLists.txt)
   # Create link ARCH_SRC_BOARD_BOARD_SYMLINK
 
   file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/arch/${CONFIG_ARCH}/src/board)
-  file(CREATE_LINK ${NUTTX_BOARD_ABS_DIR}/src
-       ${CMAKE_BINARY_DIR}/arch/${CONFIG_ARCH}/src/board/board SYMBOLIC)
+  nuttx_create_symlink(${NUTTX_BOARD_ABS_DIR}/src
+                       ${CMAKE_BINARY_DIR}/arch/${CONFIG_ARCH}/src/board/board)
 endif()
 
 if(EXISTS ${NUTTX_BOARD_ABS_DIR}/../drivers/CMakeLists.txt)

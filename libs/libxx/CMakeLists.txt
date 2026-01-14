@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libxx/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -18,25 +20,4 @@
 #
 # ##############################################################################
 
-# Include the uClibc++ Make.defs file if selected.  If it is included, the
-# uClibc++/Make.defs file will add its files to the source file list, add its
-# DEPPATH info, and will add the appropriate paths to the VPATH variable
-#
-# Note that an error will occur if you select CONFIG_LIBXX_UCLIBCXX without
-# installing the uClibc++ package.  This is intentional to let you know about
-# the configuration problem.  Refer to the README.txt file in the NuttX uClibc++
-# GIT repository for more information
-
-if(CONFIG_HAVE_CXX)
-  if(CONFIG_UCLIBCXX)
-    include(uClibc++.cmake)
-  elseif(CONFIG_LIBCXX)
-    include(libcxx.cmake)
-  else()
-    include(libcxxmini.cmake)
-  endif()
-
-  if(CONFIG_LIBCXXABI)
-    include(libcxxabi.cmake)
-  endif()
-endif()
+nuttx_add_subdirectory()

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/gd32f4/gd32f4xx_syscfg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -215,7 +217,7 @@ void gd32_syscfg_clock_enable(void)
 
   regaddr = GD32_RCU_APB2EN;
 
-  /* Check clock if alreay enable. */
+  /* Check clock if already enable. */
 
   if (rcu_en != (rcu_en & getreg32(regaddr)))
     {

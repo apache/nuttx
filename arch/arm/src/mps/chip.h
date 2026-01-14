@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/mps/chip.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,6 +34,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ARMV8M_PERIPHERAL_INTERRUPTS NR_IRQS
+#ifdef CONFIG_ARCH_ARMV7M
+#  define ARMV7M_PERIPHERAL_INTERRUPTS NR_IRQS
+#else
+#  define ARMV8M_PERIPHERAL_INTERRUPTS NR_IRQS
+#endif
 
 #endif /* __ARCH_ARM_SRC_MPS_CHIP_H */

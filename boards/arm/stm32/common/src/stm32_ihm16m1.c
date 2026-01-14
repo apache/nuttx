@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/common/src/stm32_ihm16m1.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,7 +42,7 @@
  ****************************************************************************/
 
 #if CONFIG_MOTOR_FOC_SHUNTS != 3
-#  error For now ony 3-shunts configuration is supported
+#  error For now only 3-shunts configuration is supported
 #endif
 
 /* Configuration specific for STSPIN830:

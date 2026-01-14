@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/lcd/pcf8574_lcd_backpack.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/signal.h>
@@ -119,7 +122,9 @@ static const struct file_operations g_pcf8574_lcd_fops =
   pcf8574_lcd_ioctl,            /* ioctl */
   NULL,                         /* mmap */
   NULL,                         /* truncate */
-  pcf8574_lcd_poll              /* poll */
+  pcf8574_lcd_poll,             /* poll */
+  NULL,                         /* readv */
+  NULL                          /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , pcf8574_lcd_unlink          /* unlink */
 #endif
@@ -530,7 +535,7 @@ static void lcd_init(FAR struct pcf8574_lcd_dev_s *priv)
 {
   /* Wait for more than 15 ms after Vcc for the LCD to stabilize */
 
-  nxsig_usleep(50000);
+  nxsched_usleep(50000);
 
   /* Perform the init sequence.  This sequence of commands is constructed so
    * that it will get the device into nybble mode irrespective of what state
@@ -543,24 +548,24 @@ static void lcd_init(FAR struct pcf8574_lcd_dev_s *priv)
   /* Send Command 0x30, set 8-bit mode, and wait > 4.1 ms */
 
   latch_nybble(priv, 0x30 >> 4, false);
-  nxsig_usleep(5000);
+  nxsched_usleep(5000);
 
   /* Send Command 0x30, set 8-bit mode, and wait > 100 us */
 
   latch_nybble(priv, 0x30 >> 4, false);
-  nxsig_usleep(5000);
+  nxsched_usleep(5000);
 
   /* Send Command 0x30, set 8-bit mode */
 
   latch_nybble(priv, 0x30 >> 4, false);
-  nxsig_usleep(200);
+  nxsched_usleep(200);
 
   /* now Function set: Set interface to be 4 bits long (only 1 cycle write
    * for the first time).
    */
 
   latch_nybble(priv, 0x20 >> 4, false);
-  nxsig_usleep(5000);
+  nxsched_usleep(5000);
 
   /* Function set: DL=0;Interface is 4 bits, N=1 (2 Lines), F=0 (5x8 dots
    * font)

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/bmp280_uorb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,6 +32,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
@@ -42,7 +45,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef  CONFIG_BMP280_I2C_ADDR_76
 #define BMP280_ADDR         0x76
+#else
+#define BMP280_ADDR         0x77
+#endif
 #define BMP280_FREQ         CONFIG_BMP280_I2C_FREQUENCY
 #define DEVID               0x58
 
@@ -118,7 +125,7 @@
 #define COMBINE(d) (((int)(d)[0] << 12) | ((int)(d)[1] << 4) | ((int)(d)[2] >> 4))
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Type
  ****************************************************************************/
 
 struct bmp280_dev_s
@@ -161,7 +168,7 @@ static int bmp280_putreg8(FAR struct bmp280_dev_s *priv, uint8_t regaddr,
 
 static int bmp280_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                FAR struct file *filep,
-                               FAR unsigned long *period_us);
+                               FAR uint32_t *period_us);
 static int bmp280_activate(FAR struct sensor_lowerhalf_s *lower,
                            FAR struct file *filep,
                            bool enable);
@@ -420,13 +427,13 @@ static int bmp280_initialize(FAR struct bmp280_dev_s *priv)
  * Name: bmp280_compensate
  *
  * Description:
- *   calculate compensate tempreture
+ *   calculate compensate temperature
  *
  * Input Parameters:
- *   temp - uncompensate value of tempreture.
+ *   temp - uncompensate value of temperature.
  *
  * Returned Value:
- *   calculate result of compensate tempreture.
+ *   calculate result of compensate temperature.
  *
  ****************************************************************************/
 
@@ -508,7 +515,7 @@ static uint32_t bmp280_compensate_press(FAR struct bmp280_dev_s *priv,
 
 static int bmp280_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                FAR struct file *filep,
-                               FAR unsigned long *period_us)
+                               FAR uint32_t *period_us)
 {
   FAR struct bmp280_dev_s *priv = container_of(lower,
                                                FAR struct bmp280_dev_s,

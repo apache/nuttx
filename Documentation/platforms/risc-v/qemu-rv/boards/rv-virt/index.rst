@@ -34,7 +34,21 @@ Build and install ``qemu``::
   $ make
   $ sudo make install
 
-QEMU 7.2.9 or later and OpenSBI v1.1 or later (usually shipped with QEMU) is required, to support RISC-V "Sstc" Extension. It is also recommended to use the latest QEMU and OpenSBI.
+Minimum Requirement
+===================
+
+The table below lists all the minimum versions for QEMU and OpenSBI.
+For stability, it is also recommended to use the latest QEMU and OpenSBI.
+
++----------------------------+--------------+-----------------+
+| Extension                  | QEMU Version | OpenSBI Version |
++============================+==============+=================+
+| No extension               | 6.2.0        | v1.0            |
++----------------------------+--------------+-----------------+
+| SSTC                       | 7.2.9        | v1.1            |
++----------------------------+--------------+-----------------+
+| AIA                        | 8.2.0        | v1.2            |
++----------------------------+--------------+-----------------+
 
 For users who wish to use their own OpenSBI, please refer to `OpenSBI repository <https://github.com/riscv-software-src/opensbi>`_.
 
@@ -45,7 +59,7 @@ All of the configurations presented below can be tested by running the following
 
    $ ./tools/configure.sh rv-virt:<config_name>
 
-Where <config_name> is the name of the configuration you want to use, i.e.: nsh, knsh32, knsh64...
+Where <config_name> is the name of the configuration you want to use, i.e.: nsh, knsh, knsh64...
 
 To build it, run the following command::
 
@@ -74,6 +88,10 @@ to be set to the same value as ``CONFIG_SMP_NCPUS`` in the build config file.
 
 If testing with S-mode build, remove the ``-bios none`` option. S-mode build
 requires SBI to function properly.
+
+For BUILD_PROTECTED the user-space binary must also be loaded, which can be
+done by adding ``-device loader,file=./nuttx_user`` to the command line
+arguments.
 
 citest
 ------
@@ -125,10 +143,48 @@ To run it with QEMU, use the following command::
       -mon chardev=con,mode=readline \
       -bios none -kernel nuttx
 
+lvgl64_vector
+-------------
+
+This configuration uses the LVGL graphics framework with RISC-V 64-bit support
+and Vector Extension (V-extension) enabled. It allows developers to create
+graphical applications with LVGL on RISC-V QEMU while leveraging the Vector
+extension for potential SIMD optimization.
+
+Features:
+
+- 64-bit RISC-V architecture (RV64)
+- RISC-V Vector Extension (RVV/V-extension) support
+- LVGL graphics framework with 32-bit color depth
+- VirtIO GPU device for framebuffer access
+- NSH shell with built-in applications
+
+To build it::
+
+    $ ./tools/configure.sh rv-virt:lvgl64_vector
+    $ make -j$(nproc)
+
+To run it with QEMU with graphics output::
+
+    $ qemu-system-riscv64 -semihosting -M virt,aclint=on -cpu rv64,v=true -smp 1 \
+      -chardev stdio,id=con,mux=on \
+      -serial chardev:con \
+      -device virtio-gpu-device,xres=640,yres=480,bus=virtio-mmio-bus.0 \
+      -device virtio-mouse-device,bus=virtio-mmio-bus.1 \
+      -mon chardev=con,mode=readline \
+      -bios none -kernel nuttx
+
+After booting into the NSH shell, you can run the LVGL demo with::
+
+    nsh> lvgldemo
+
+This configuration is suitable for developing and testing LVGL applications
+on 64-bit RISC-V targets with Vector extension support.
+
 knetnsh64
 ---------
 
-Similar to the `knsh32`_ configuration, but with networking support and 64-bit RISC-V.
+Similar to the `knsh`_ configuration, but with networking support and 64-bit RISC-V.
 
 To run it with QEMU, use the following command::
 
@@ -151,7 +207,7 @@ knetnsh64_smp
 
 Similar to the `knetnsh64`_ configuration, but with SMP support for 64-bit RISC-V.
 
-knsh32
+knsh
 ------
 
 This is similar to the `nsh`_ configuration except that NuttX
@@ -174,12 +230,12 @@ In `nsh`, applications can be run from the `/system/bin` directory::
 
     nsh> /system/bin/hello
 
-.. _knsh32_paging:
+.. _knsh_paging:
 
-knsh32_paging
+knsh_paging
 -------------
 
-Similar to ``knsh32_romfs``, but enabling on-demand paging: this
+Similar to ``knsh_romfs``, but enabling on-demand paging: this
 configuration simulates a 4MiB device (using QEMU), but sets the number of
 heap pages equal to ``CONFIG_ARCH_HEAP_NPAGES=2048``. This means that each
 process's heap is 8MiB, whereas ``CONFIG_POSIX_SPAWN_DEFAULT_STACKSIZE`` is
@@ -190,10 +246,10 @@ to have their own address space larger than the available physical memory.
 This is particularly useful for implementing a set of programming language
 interpreters.
 
-knsh32_romfs
+knsh_romfs
 ------------
 
-Similar to the `knsh32`_ configuration, but uses ROMFS instead of `hostfs`.
+Similar to the `knsh`_ configuration, but uses ROMFS instead of `hostfs`.
 A ROMFS image is generated and linked to the kernel. This requires re-running ``make``::
 
     $ make V=1 -j$(nproc)
@@ -216,7 +272,7 @@ In `nsh`, applications can be run from the `/system/bin` directory::
 knsh64
 ------
 
-Similar to the `knsh32`_ configuration, but for 64-bit RISC-V.
+Similar to the `knsh`_ configuration, but for 64-bit RISC-V.
 
 Run it with QEMU using the default command for 64-bit RISC-V.
 
@@ -228,6 +284,26 @@ ksmp64
 ------
 
 Identical to the `knsh64`_ configuration but with SMP support.
+
+leds
+----
+
+Similar to the `nsh`_ configuration, but with User LEDs support for 32-bit RISC-V.
+
+leds64
+------
+
+Similar to the `nsh64`_ configuration, but with User LEDs support for 64-bit RISC-V.
+
+leds64_rust
+-----------
+
+Similar to the `leds64`_ configuration, but with ``leds_rust`` example enabled.
+
+leds64_zig
+-----------
+
+Similar to the `leds64`_ configuration, but with ``leds_zig`` example enabled.
 
 netnsh
 ------
@@ -320,10 +396,51 @@ Configures the NuttShell (nsh) located at examples/nsh.  This NSH
 configuration is focused on low-level, command-line driver testing.
 This configuration is used for 32-bit RISC-V
 
+python
+------
+
+Enables the Python interpreter for NuttX. This configuration is based on `netnsh`_.
+
+For more information on how to build and run Python on NuttX,
+please refer to the :doc:`Python Interpreter </applications/interpreters/python/index>` page.
+
 nsh64
 -----
 
 Identical to the `nsh`_ configuration, but for 64-bit RISC-V.
+
+nsbi
+----
+
+This is similar to the `knsh`, but using NuttX's native (minimalistic)
+SBI. It uses `hostfs` and QEMU in semi-hosting mode to load the
+user-space applications. This is intended for 32-bit RISC-V.
+
+To build it, use the following command::
+
+    $ make V=1 -j$(nproc)
+    $ make export V=1 -j$(nproc)
+    $ pushd ../apps
+    $ ./tools/mkimport.sh -z -x ../nuttx/nuttx-export-*.tar.gz
+    $ make import V=1 -j$(nproc)
+    $ popd
+
+Run it with QEMU using the default command for 32-bit RISC-V without
+the ``-bios none`` option. Please note that it still runs in S-mode,
+but bypasses QEMU's OpenSBI.
+
+In `nsh`, applications can be run directly::
+
+    nsh> hello
+
+nsbi64
+------
+
+Identical to the `nsbi`_ configuration, but for 64-bit RISC-V.
+
+Run it with QEMU using the default command for 64-bit RISC-V without
+the ``-bios none`` option. Please note that it still runs in S-mode,
+but bypasses QEMU's OpenSBI.
 
 smp
 ---
@@ -349,6 +466,26 @@ flats64
 Similar to the `nsh`_ configuration, but running in S-mode.
 This configuration is used for 64-bit RISC-V
 
+virt_nsh
+--------
+
+Similar to `nsh`_ configuration, but uses virtio serial device as console.
+Use it below with QEMU::
+
+    $ qemu-system-riscv32 -M virt,aclint=on -nographic \
+    -chardev socket,id=aux,path=/tmp/aux,server=on,wait=on \
+    -device virtio-serial-device,bus=virtio-mmio-bus.0 \
+    -device virtconsole,chardev=aux \
+    -bios nuttx
+
+Then from another terminal, use below command to access the console::
+
+    $ socat UNIX-CLIENT:/tmp/aux -
+
+We can finish the session with ``quit`` command in NSH session.
+
+Note the above command line uses UNIX domain socket so please change the socket parameters on hosts without UNIX domain socket.
+
 RISC-V GDB Debugging
 ====================
 
@@ -358,7 +495,7 @@ After building the kernel (and the applications, in kernel mode), use the toolch
 to debug RISC-V applications. For instance, if you are using the xPack's prebuilt toolchain,
 you can use the following command to start GDB::
 
-    $ riscv-none-elf-gdb-py3 -ix tools/gdb/__init__.py --tui nuttx
+    $ riscv-none-elf-gdb-py3 -ix tools/pynuttx/gdbinit.py --tui nuttx
 
 To use QEMU for debugging, one should add the parameters ``-s -S`` to the QEMU command line.
 

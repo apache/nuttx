@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/cxd32xx/cxd32_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -326,7 +328,7 @@ static void up_set_format(struct uart_dev_s *dev)
 
   up_serialout(priv, CXD32_UART_LCR_H, lcr);
 
-  /* CXD32 does not have CTS/RTS pin, so these are disbled */
+  /* CXD32 does not have CTS/RTS pin, so these are disabled */
 
   cr &= ~(UART_CR_RTSEN | UART_CR_CTSEN);
   up_serialout(priv, CXD32_UART_CR, cr | cr_en);
@@ -923,7 +925,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before arm_serialinit.
  *
  *   NOTE: Configuration of the CONSOLE UART was performed by up_lowsetup()
@@ -970,7 +972,7 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
@@ -978,21 +980,10 @@ int up_putc(int ch)
   up_disableuartint(priv, &ier);
 #endif
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
 #ifdef HAVE_CONSOLE
   up_restoreuartint(priv, ier);
 #endif
-
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

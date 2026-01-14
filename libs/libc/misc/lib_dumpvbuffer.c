@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/misc/lib_dumpvbuffer.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -97,7 +99,7 @@ static void lib_dumpvfile_handler(FAR void *arg, FAR const char *fmt,
                                   ...)
 {
   va_list ap;
-  int *fd = (int *)arg;
+  FAR int *fd = (FAR int *)arg;
 
   va_start(ap, fmt);
   vdprintf(*fd, fmt, ap);

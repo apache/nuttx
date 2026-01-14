@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32g0_memorymap.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -72,6 +74,7 @@
 #define STM32_USART4_BASE    0x40004c00     /* 0x40004c00-0x40004fff USART4 */
 #define STM32_I2C1_BASE      0x40005400     /* 0x40005400-0x400057ff I2C1 */
 #define STM32_I2C2_BASE      0x40005800     /* 0x40005800-0x40005bff I2C2 */
+#define STM32_CRS_BASE       0x40006C00     /* 0x40006C00-0x40006fff CRS */
 #define STM32_PWR_BASE       0x40007000     /* 0x40007000-0x400073ff PWR */
 #define STM32_DAC1_BASE      0x40007400     /* 0x40007400-0x400077ff DAC 1 */
 #define STM32_CEC_BASE       0x40007800     /* 0x40007800-0x40007bff HDMI CEC */
@@ -98,7 +101,7 @@
 /* AHB1 Base Addresses ******************************************************/
 
 #define STM32_DMA1_BASE      0x40020000     /* 0x40020000-0x400203ff: DMA1  */
-#define STM32_DMAMUX_BASE    0x40020800     /* 0x40020800-0x40020bff: DMAMUX  */
+#define STM32_DMAMUX1_BASE   0x40020800     /* 0x40020800-0x40020bff: DMAMUX  */
 #define STM32_RCC_BASE       0x40021000     /* 0x40021000-0x400213ff: Reset and Clock control RCC */
 #define STM32_EXTI_BASE      0x40021800     /* 0x40021800-0x40021bff: EXTI */
 #define STM32_FLASHIF_BASE   0x40022000     /* 0x40022000-0x400223ff: Flash memory interface */
@@ -123,5 +126,9 @@
 
 #define STM32_SCS_BASE       0xe000e000
 #define STM32_DEBUGMCU_BASE  0xe0042000
+
+/* System Memory Addresses **************************************************/
+
+#define STM32_SYSMEM_UID     0x1fff7590     /* The 96-bit unique device identifier */
 
 #endif /* __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32G0_MEMORYMAP_H */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/local/local_sockif.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,6 +36,7 @@
 #include <debug.h>
 
 #include <netinet/in.h>
+#include <sys/param.h>
 
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/net/net.h>
@@ -128,7 +131,10 @@ static int local_sockif_alloc(FAR struct socket *psock)
 {
   /* Allocate the local connection structure */
 
-  FAR struct local_conn_s *conn = local_alloc();
+  FAR struct local_conn_s *conn;
+  local_lock();
+  conn = local_alloc();
+  local_unlock();
   if (conn == NULL)
     {
       /* Failed to reserve a connection structure */
@@ -197,17 +203,6 @@ static int local_setup(FAR struct socket *psock)
         return local_sockif_alloc(psock);
 #endif /* CONFIG_NET_LOCAL_DGRAM */
 
-      case SOCK_CTRL:
-        if (psock->s_proto == 0 || psock->s_proto == IPPROTO_TCP ||
-            psock->s_proto == IPPROTO_UDP)
-          {
-            /* Allocate and attach the local connection structure */
-
-            return local_sockif_alloc(psock);
-          }
-
-        return -EPROTONOSUPPORT;
-
       default:
         return -EPROTONOSUPPORT;
     }
@@ -224,7 +219,7 @@ static int local_setup(FAR struct socket *psock)
  *           queried.
  *
  * Returned Value:
- *   The set of socket cababilities is returned.
+ *   The set of socket capabilities is returned.
  *
  ****************************************************************************/
 
@@ -300,7 +295,6 @@ static int local_bind(FAR struct socket *psock,
 #ifdef CONFIG_NET_LOCAL_DGRAM
       case SOCK_DGRAM:
 #endif
-      case SOCK_CTRL:
         {
           /* Bind the Unix domain connection structure */
 
@@ -542,6 +536,8 @@ static int local_getpeername(FAR struct socket *psock,
 static int local_getsockopt(FAR struct socket *psock, int level, int option,
                             FAR void *value, FAR socklen_t *value_len)
 {
+  FAR struct local_conn_s *conn = psock->s_conn;
+
   DEBUGASSERT(psock->s_domain == PF_LOCAL);
 
   if (level == SOL_SOCKET)
@@ -551,7 +547,6 @@ static int local_getsockopt(FAR struct socket *psock, int level, int option,
 #ifdef CONFIG_NET_LOCAL_SCM
           case SO_PEERCRED:
             {
-              FAR struct local_conn_s *conn = psock->s_conn;
               if (*value_len != sizeof(struct ucred))
                 {
                   return -EINVAL;
@@ -564,12 +559,51 @@ static int local_getsockopt(FAR struct socket *psock, int level, int option,
 
           case SO_SNDBUF:
             {
+              int sendsize;
+
               if (*value_len != sizeof(int))
                 {
                   return -EINVAL;
                 }
 
-              *(FAR int *)value = LOCAL_SEND_LIMIT;
+              if (conn->lc_peer)
+                {
+                  sendsize = conn->lc_peer->lc_rcvsize;
+                }
+              else
+                {
+                  sendsize = CONFIG_DEV_FIFO_SIZE;
+                }
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+              if (psock->s_type == SOCK_DGRAM)
+                {
+                  sendsize -= sizeof(lc_size_t) * 2 + UNIX_PATH_MAX;
+                }
+#endif
+
+              *(FAR int *)value = sendsize;
+              return OK;
+            }
+
+          case SO_RCVBUF:
+            {
+              int recvsize;
+
+              if (*value_len != sizeof(int))
+                {
+                  return -EINVAL;
+                }
+
+              recvsize = conn->lc_rcvsize;
+#ifdef CONFIG_NET_LOCAL_DGRAM
+              if (psock->s_type == SOCK_DGRAM)
+                {
+                  recvsize -= sizeof(lc_size_t) * 2 + UNIX_PATH_MAX;
+                }
+#endif
+
+              *(FAR int *)value = recvsize;
               return OK;
             }
         }
@@ -603,6 +637,116 @@ static int local_getsockopt(FAR struct socket *psock, int level, int option,
 static int local_setsockopt(FAR struct socket *psock, int level, int option,
                             FAR const void *value, socklen_t value_len)
 {
+  FAR struct local_conn_s *conn = psock->s_conn;
+
+  DEBUGASSERT(psock->s_domain == PF_LOCAL);
+
+  if (level == SOL_SOCKET)
+    {
+      switch (option)
+        {
+          case SO_SNDBUF:
+            {
+              int ret = OK;
+              int rcvsize;
+
+              if (value_len < sizeof(int))
+                {
+                  return -EINVAL;
+                }
+
+              local_lock();
+
+              /* Only SOCK_STREAM sockets need set the send buffer size */
+
+              if (conn->lc_peer)
+                {
+                  rcvsize = MIN(*(FAR const int *)value,
+                                CONFIG_DEV_PIPE_MAXSIZE);
+                  if (conn->lc_peer->lc_infile.f_inode != NULL)
+                    {
+                      ret = file_ioctl(&conn->lc_peer->lc_infile,
+                                       PIPEIOC_SETSIZE, rcvsize);
+                    }
+
+                  if (ret == OK)
+                    {
+                      conn->lc_peer->lc_rcvsize = rcvsize;
+                    }
+                }
+#ifdef CONFIG_NET_LOCAL_STREAM
+              else if (psock->s_type == SOCK_STREAM)
+                {
+                  ret = -ENOTCONN;
+                }
+#endif
+
+              local_unlock();
+
+              return ret;
+            }
+
+          case SO_RCVBUF:
+            {
+              int ret = OK;
+              int rcvsize;
+
+              if (value_len < sizeof(int))
+                {
+                  return -EINVAL;
+                }
+
+              local_lock();
+
+              rcvsize = *(FAR const int *)value;
+#ifdef CONFIG_NET_LOCAL_DGRAM
+              if (psock->s_type == SOCK_DGRAM)
+                {
+                  rcvsize += sizeof(lc_size_t) * 2 + UNIX_PATH_MAX;
+                }
+#endif
+
+              rcvsize = MIN(rcvsize, CONFIG_DEV_PIPE_MAXSIZE);
+              if (conn->lc_infile.f_inode != NULL)
+                {
+                  ret = file_ioctl(&conn->lc_infile, PIPEIOC_SETSIZE,
+                                   rcvsize);
+                }
+#ifdef CONFIG_NET_LOCAL_DGRAM
+              else if (psock->s_type == SOCK_DGRAM &&
+                       conn->lc_state == LOCAL_STATE_BOUND)
+                {
+                  ret = local_create_halfduplex(conn, conn->lc_path,
+                                                rcvsize);
+                  if (ret >= 0)
+                    {
+                      ret = local_open_receiver(conn, true);
+                      if (ret >= 0)
+                        {
+                          ret = file_ioctl(&conn->lc_infile, PIPEIOC_SETSIZE,
+                                           rcvsize);
+                        }
+
+                      if (conn->lc_infile.f_inode != NULL)
+                        {
+                          file_close(&conn->lc_infile);
+                        }
+                    }
+                }
+#endif
+
+              if (ret == OK)
+                {
+                  conn->lc_rcvsize = rcvsize;
+                }
+
+              local_unlock();
+
+              return ret;
+            }
+        }
+    }
+
   return -ENOPROTOOPT;
 }
 
@@ -683,12 +827,6 @@ static int local_connect(FAR struct socket *psock,
         break;
 #endif /* CONFIG_NET_LOCAL_DGRAM */
 
-      case SOCK_CTRL:
-        {
-          return -ENOSYS;
-        }
-        break;
-
       default:
         return -EBADF;
     }
@@ -759,7 +897,6 @@ static int local_close(FAR struct socket *psock)
 #ifdef CONFIG_NET_LOCAL_DGRAM
       case SOCK_DGRAM:
 #endif
-      case SOCK_CTRL:
         {
           /* Is this the last reference to the connection structure (there
            * could be more if the socket was dup'ed).
@@ -899,7 +1036,8 @@ static int local_socketpair(FAR struct socket *psocks[2])
 
   /* Create the FIFOs needed for the connection */
 
-  ret = local_create_fifos(conns[0]);
+  ret = local_create_fifos(conns[0], conns[0]->lc_rcvsize,
+                           conns[1]->lc_rcvsize);
   if (ret < 0)
     {
       goto errout;
@@ -909,7 +1047,7 @@ static int local_socketpair(FAR struct socket *psocks[2])
 
   /* Open the client-side write-only FIFO. */
 
-  ret = local_open_client_tx(conns[0], nonblock);
+  ret = local_open_client_tx(conns[0], conns[1], nonblock);
   if (ret < 0)
     {
       goto errout;
@@ -933,7 +1071,7 @@ static int local_socketpair(FAR struct socket *psocks[2])
 
   /* Open the client-side read-only FIFO */
 
-  ret = local_open_client_rx(conns[0], nonblock);
+  ret = local_open_client_rx(conns[0], conns[1], nonblock);
   if (ret < 0)
     {
       goto errout;
@@ -947,7 +1085,7 @@ static int local_socketpair(FAR struct socket *psocks[2])
     {
       for (i = 0; i < 2; i++)
         {
-          ret = local_set_pollthreshold(conns[i], sizeof(uint16_t));
+          ret = local_set_pollthreshold(conns[i], sizeof(lc_size_t));
           if (ret < 0)
             {
               goto errout;
@@ -1019,8 +1157,6 @@ static int local_shutdown(FAR struct socket *psock, int how)
       case SOCK_DGRAM:
         return -EOPNOTSUPP;
 #endif
-      case SOCK_CTRL:
-        return -EOPNOTSUPP;
       default:
         return -EBADF;
     }

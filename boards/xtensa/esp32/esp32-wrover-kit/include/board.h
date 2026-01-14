@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32/esp32-wrover-kit/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -117,7 +119,7 @@
 #ifdef CONFIG_ARCH_LEDS_CPU_ACTIVITY
 #  define LED_CPU0        8
 #  define LED_CPU1        9
-#  define LED_CPU         (LED_CPU0 + up_cpu_index())
+#  define LED_CPU         (LED_CPU0 + this_cpu())
 #endif
 
 /* GPIO pins used by the GPIO Subsystem */

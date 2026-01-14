@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm64/a64/pinephone/src/pinephone_display.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,6 +46,7 @@
 #include <errno.h>
 
 #include <nuttx/board.h>
+#include <arch/barriers.h>
 #include <arch/board/board.h>
 #include <nuttx/video/fb.h>
 #include "chip.h"
@@ -912,9 +915,8 @@ void pinephone_display_test_pattern(void)
 
       /* Fixes missing rows in the rendered image, not sure why */
 
-      ARM64_DMB();
-      ARM64_DSB();
-      ARM64_ISB();
+      UP_DMB();
+      UP_MB();
     }
 
   /* Init Framebuffer 1:
@@ -929,9 +931,8 @@ void pinephone_display_test_pattern(void)
 
       /* Fixes missing rows in the rendered image, not sure why */
 
-      ARM64_DMB();
-      ARM64_DSB();
-      ARM64_ISB();
+      UP_DMB();
+      UP_MB();
     }
 
   /* Init Framebuffer 2:
@@ -970,9 +971,8 @@ void pinephone_display_test_pattern(void)
 
           /* Fixes missing rows in the rendered image, not sure why */
 
-          ARM64_DMB();
-          ARM64_DSB();
-          ARM64_ISB();
+          UP_DMB();
+          UP_MB();
         }
     }
 }

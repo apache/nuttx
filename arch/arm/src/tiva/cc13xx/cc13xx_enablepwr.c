@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tiva/cc13xx/cc13xx_enablepwr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,6 +39,7 @@
  * Private Data
  ****************************************************************************/
 
+static spinlock_t g_cc13xx_enablepwr_lock = SP_UNLOCKED;
 static uint16_t g_domain_usage[2];
 
 /****************************************************************************
@@ -64,13 +67,13 @@ void cc13xx_periph_enablepwr(uint32_t peripheral)
 
   /* Remember that this peripheral needs power in this domain */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_cc13xx_enablepwr_lock);
   g_domain_usage[dndx] |= (1 << pndx);
 
   /* Make sure that power is enabled in that domain */
 
   prcm_powerdomain_on(domain);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_cc13xx_enablepwr_lock, flags);
 
   /* Wait for the power domain to be ready.  REVISIT:  This really should be
    * in the critical section but this could take too long.
@@ -98,7 +101,7 @@ void cc13xx_periph_disablepwr(uint32_t peripheral)
 
   /* This peripheral no longer needs power in this domain */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_cc13xx_enablepwr_lock);
   g_domain_usage[dndx] &= ~(1 << pndx);
 
   /* If there are no peripherals needing power in this domain, then turn off
@@ -111,5 +114,5 @@ void cc13xx_periph_disablepwr(uint32_t peripheral)
                            PRCM_DOMAIN_SERIAL : PRCM_DOMAIN_PERIPH);
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_cc13xx_enablepwr_lock, flags);
 }

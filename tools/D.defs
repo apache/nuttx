@@ -1,6 +1,8 @@
 ############################################################################
 # tools/D.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -23,7 +25,7 @@ DC := ldmd2
 DFLAGS := -i
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  DFLAGS += -g
+  DFLAGS += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
 endif
 
 ifeq ($(CONFIG_DEBUG_NOOPT),y)
@@ -46,10 +48,18 @@ ifeq ($(CONFIG_ARCH_SIM),y)
     DFLAGS += -mtriple=$(LLVM_ARCHTYPE)-apple-$(LLVM_ABITYPE)
   endif
 else ifeq ($(CONFIG_ARCH_RISCV),y)
-  # Traget triple is riscv[32|64][isa]-unknown-none-elf
-  DFLAGS += -mtriple=$(LLVM_ARCHTYPE)$(ARCHRVISAM)$(ARCHRVISAA)$(ARCHRVISAF)$(ARCHRVISAD)$(ARCHRVISAC)-unknown-none-elf
-  DFLAGS += -mattr=+m,+a,+f,+d,+c -mabi=ilp32d
-  DFLAGS += -mcpu=generic-rv32
+  # Target triple is riscv[32|64]-unknown-none-elf
+  DFLAGS += -mtriple=$(LLVM_ARCHTYPE)-unknown-none-elf
+  DFLAGS += -mattr=+m,+a,+f,+d,+c
+
+  # Handle ABI and CPU
+  ifeq ($(CONFIG_ARCH_RV32),y)
+    DFLAGS += -mcpu=generic-rv32
+    DFLAGS += -mabi=ilp32d
+  else ifeq ($(CONFIG_ARCH_RV64),y)
+    DFLAGS += -mcpu=generic-rv64
+    DFLAGS += -mabi=lp64d
+  endif
 else
   # For arm, but there are some other archs not support yet,
   # such as xtensa, x86 bare metal, etc.

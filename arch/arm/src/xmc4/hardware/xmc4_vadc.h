@@ -1,6 +1,8 @@
 /******************************************************************************************************************
  * arch/arm/src/xmc4/hardware/xmc4_vadc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -16,6 +18,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
+ ******************************************************************************************************************/
+
+/******************************************************************************************************************
  * May include some logic from sample code provided by Infineon:
  *
  * Copyright (C) 2011-2015 Infineon Technologies AG. All rights reserved.
@@ -185,7 +190,7 @@ typedef struct                                   /* (@ 0x40004400) */
   volatile uint32_t  RESD[16];                   /* (@ 0x40004780) Result Register, Debug */
 } vadc_group_t;
 
-/* Define pointers for VADC global and group stuctures */
+/* Define pointers for VADC global and group structures */
 #define VADC      ((vadc_global_t *) XMC4_VADC_BASE)
 #define VADC_G0   ((vadc_group_t *) XMC4_VADC_G0_BASE)
 #define VADC_G1   ((vadc_group_t *) XMC4_VADC_G1_BASE)

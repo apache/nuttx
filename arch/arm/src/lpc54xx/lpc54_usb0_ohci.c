@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lpc54xx/lpc54_usb0_ohci.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -2170,7 +2172,7 @@ static int lpc54_rh_enumerate(struct usbhost_connection_s *conn,
 
   /* USB 2.0 spec says at least 50ms delay before port reset */
 
-  nxsig_usleep(100 * 1000);
+  nxsched_usleep(100 * 1000);
 
   /* Put RH port 1 in reset
    * (the LPC546x supports only a single downstream port)
@@ -2185,7 +2187,7 @@ static int lpc54_rh_enumerate(struct usbhost_connection_s *conn,
   /* Release RH port 1 from reset and wait a bit */
 
   lpc54_putreg(OHCI_RHPORTST_PRSC, LPC54_OHCI_RHPORTST1);
-  nxsig_usleep(200 * 1000);
+  nxsched_usleep(200 * 1000);
   return OK;
 }
 
@@ -2461,7 +2463,7 @@ static int lpc54_epalloc(struct usbhost_driver_s *drvr,
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the
  *     call to the class create() method.
- *   ep - The endpint to be freed.
+ *   ep - The endpoint to be freed.
  *
  * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value

@@ -1,6 +1,8 @@
 ############################################################################
 # libs/libc/machine/arm/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -40,14 +42,25 @@ else ifeq ($(CONFIG_ARCH_ARMV7M),y)     # All ARMv7-M
 include $(TOPDIR)/libs/libc/machine/arm/armv7-m/Make.defs
 else ifeq ($(CONFIG_ARCH_ARMV8M),y)     # All ARMv8-M
 include $(TOPDIR)/libs/libc/machine/arm/armv8-m/Make.defs
+else ifeq ($(CONFIG_ARCH_ARMV8R),y)     # All ARMv8-R
+include $(TOPDIR)/libs/libc/machine/arm/armv8-r/Make.defs
 endif
 
-ifneq ($(CONFIG_LIBSUPCXX),y)
-CSRCS += aeabi_atexit.c
+CSRCS += aeabi_memclr.c aeabi_memclr4.c aeabi_memclr8.c
+CSRCS += aeabi_memcpy.c aeabi_memcpy4.c aeabi_memcpy8.c
+CSRCS += aeabi_memmove.c aeabi_memmove4.c aeabi_memmove8.c
+CSRCS += aeabi_memset.c aeabi_memset4.c aeabi_memset8.c
+
+ifneq ($(CONFIG_LIBSUPCXX_TOOLCHAIN),y)
+CSRCS += arch_atexit.c
+endif
+
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GHS),y)
+  CMN_CSRCS += arch_dummy.c
 endif
 
 ifeq ($(CONFIG_CXX_EXCEPTION),y)
-CSRCS += gnu_unwind_find_exidx.c
+CSRCS += arch_unwind_find_exidx.c
 endif
 
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
@@ -58,9 +71,12 @@ ASRCS += arch_setjmp.S
 endif
 endif
 
-ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
-DEPPATH += --dep-path machine/arm/gnu
-VPATH += :machine/arm/gnu
+ifeq ($(CONFIG_PROFILE_MINI),y)
+ASRCS += arch_mcount.S
+endif
+
+ifeq ($(CONFIG_LIBC_ARCH_CRC32),y)
+CSRCS += arch_crc32.c
 endif
 
 DEPPATH += --dep-path machine/arm

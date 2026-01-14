@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/sim_lcd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -84,7 +86,7 @@
 #endif
 
 /****************************************************************************
- * Private Type Definition
+ * Private Types
  ****************************************************************************/
 
 /* This structure describes the state of this driver */
@@ -261,7 +263,7 @@ static int sim_putrun(struct lcd_dev_s *dev, fb_coord_t row, fb_coord_t col,
  *   buffer    - The buffer containing the area to be written to the LCD
  *   stride    - Length of a line in bytes. This parameter may be necessary
  *               to allow the LCD driver to calculate the offset for partial
- *               writes when the buffer needs to be splited for row-by-row
+ *               writes when the buffer needs to be split for row-by-row
  *               writing.
  *
  ****************************************************************************/
@@ -467,26 +469,19 @@ static int sim_closewindow(struct lcd_dev_s *dev)
 }
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: sim_x11loop
  ****************************************************************************/
 
+#ifdef CONFIG_SIM_X11FB
 void sim_x11loop(void)
 {
-#ifdef CONFIG_SIM_X11FB
-  static clock_t last;
-  clock_t now = clock_systime_ticks();
-
-  if (now - last >= MSEC2TICK(16))
-    {
-      sim_x11update();
-      last = now;
-    }
-#endif
+  sim_x11update();
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+#endif
 
 /****************************************************************************
  * Name:  board_lcd_initialize
@@ -507,7 +502,8 @@ int board_lcd_initialize(void)
 #ifdef CONFIG_SIM_X11FB
   ret = sim_x11initialize(CONFIG_SIM_FBWIDTH, CONFIG_SIM_FBHEIGHT,
                           (void**)&g_planeinfo.buffer, &g_fblen,
-                          &g_planeinfo.bpp, &g_stride, CONFIG_LCD_FBCOUNT);
+                          &g_planeinfo.bpp, &g_stride, CONFIG_LCD_FBCOUNT,
+                          0);
 #endif
 
   return ret;

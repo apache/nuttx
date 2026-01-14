@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/hardware/esp32c3_aes.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -645,7 +647,7 @@
 #define AES_BLOCK_NUM_REG (DR_REG_AES_BASE + 0x98)
 
 /* AES_BLOCK_NUM : R/W; bitpos: [31:0]; default: 0;
- * Stores the Block Number of plaintext or cipertext when the AES
+ * Stores the Block Number of plaintext or ciphertext when the AES
  * Accelerator operates under the DMA-AES working mode. For details, see
  * Section 1.5.4.
  */

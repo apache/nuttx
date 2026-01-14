@@ -1,6 +1,8 @@
 #############################################################################
 # boards/arm/stm32/common/src/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -22,6 +24,10 @@ ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
 
 ifeq ($(CONFIG_SENSORS_BMP180),y)
   CSRCS += stm32_bmp180.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BMP280),y)
+  CSRCS += stm32_bmp280.c
 endif
 
 ifeq ($(CONFIG_SENSORS_MS56XX),y)
@@ -124,6 +130,18 @@ ifeq ($(CONFIG_SENSORS_MAX31855),y)
   CSRCS += stm32_max31855.c
 endif
 
+ifeq ($(CONFIG_LCD_MAX7219),y)
+  CSRCS += stm32_max7219_matrix.c
+endif
+
+ifeq ($(CONFIG_CL_MFRC522),y)
+  CSRCS += stm32_mfrc522.c
+endif
+
+ifeq ($(CONFIG_SENSORS_AMG88XX),y)
+  CSRCS+= stm32_amg88xx.c
+endif
+
 ifeq ($(CONFIG_LIS3DSH),y)
   CSRCS += stm32_lis3dsh.c
 endif
@@ -142,6 +160,10 @@ endif
 
 ifeq ($(CONFIG_STEPPER_DRV8825),y)
   CSRCS += stm32_drv8825.c
+endif
+
+ifeq ($(CONFIG_INPUT_SBUTTON),y)
+  CSRCS += stm32_sbutton.c
 endif
 
 DEPPATH += --dep-path src

@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp_ioctl.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,6 +38,7 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
 
+#include "utils/utils.h"
 #include "tcp/tcp.h"
 
 /****************************************************************************
@@ -119,7 +122,7 @@ int tcp_ioctl(FAR struct tcp_conn_s *conn, int cmd, unsigned long arg)
 {
   int ret = OK;
 
-  net_lock();
+  conn_lock(&conn->sconn);
 
   switch (cmd)
     {
@@ -154,7 +157,7 @@ int tcp_ioctl(FAR struct tcp_conn_s *conn, int cmd, unsigned long arg)
         break;
     }
 
-  net_unlock();
+  conn_unlock(&conn->sconn);
 
   return ret;
 }

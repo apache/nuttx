@@ -28,8 +28,9 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <nuttx/bits.h>
 
-#include "esp32s2_touch_lowerhalf.h"
+#include "hardware/esp32s2_touch.h"
 
 /****************************************************************************
  * Pre-processor Definitions

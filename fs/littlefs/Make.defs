@@ -1,6 +1,8 @@
 ############################################################################
 # fs/littlefs/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -23,6 +25,10 @@ ifeq ($(CONFIG_FS_LITTLEFS),y)
 
 CSRCS += lfs_vfs.c
 
+ifeq ($(CONFIG_TRACE_LITTLEFS_FS),y)
+littlefs/lfs_vfs.c_CFLAGS += -finstrument-functions
+endif
+
 DEPPATH += --dep-path littlefs
 VPATH += :littlefs
 
@@ -31,27 +37,41 @@ CSRCS += lfs.c lfs_util.c
 DEPPATH += --dep-path littlefs/littlefs
 VPATH += :littlefs/littlefs
 
+# Note: the littlefs upstream doesn't seems to care -Wshadow
+# cf. https://github.com/littlefs-project/littlefs/pull/873
+CFLAGS += -Wno-shadow
+
+ifeq ($(CONFIG_FS_LITTLEFS_HAS_LFS_DEFINES),y)
+CFLAGS += -DLFS_DEFINES=../lfs_nuttx_defines.h
+else
 CFLAGS += -DLFS_TRACE=finfo
 CFLAGS += -DLFS_DEBUG=finfo
 CFLAGS += -DLFS_WARN=fwarn
 CFLAGS += -DLFS_ERROR=ferr
 CFLAGS += -DLFS_ASSERT=DEBUGASSERT
 CFLAGS += -DLFS_CONFIG=../lfs_vfs.h
+endif
+
 CFLAGS += -DLFS_NAME_MAX=$(CONFIG_FS_LITTLEFS_NAME_MAX)
 CFLAGS += -DLFS_FILE_MAX=$(CONFIG_FS_LITTLEFS_FILE_MAX)
 CFLAGS += -DLFS_ATTR_MAX=$(CONFIG_FS_LITTLEFS_ATTR_MAX)
+ifeq ($(CONFIG_FS_LITTLEFS_MULTI_VERSION),y)
+CFLAGS += -DLFS_MULTIVERSION
+endif
 
-LITTLEFS_VERSION ?= 2.5.1
-LITTLEFS_TARBALL = v$(LITTLEFS_VERSION).tar.gz
+LITTLEFS_TARBALL = $(shell echo $(CONFIG_FS_LITTLEFS_VERSION).tar.gz)
 
 $(LITTLEFS_TARBALL):
 	$(call DOWNLOAD,https://github.com/ARMmbed/littlefs/archive,$(LITTLEFS_TARBALL),littlefs/$(LITTLEFS_TARBALL))
 
 .littlefsunpack: $(LITTLEFS_TARBALL)
 	$(Q) tar zxf littlefs/$(LITTLEFS_TARBALL) -C littlefs
-	$(Q) mv littlefs/littlefs-$(LITTLEFS_VERSION) littlefs/littlefs
+	$(Q) mv littlefs/littlefs-* littlefs/littlefs
+ifeq ($(CONFIG_FS_LITTLEFS_LOCAL_PATCHES),y)
 	$(Q) git apply littlefs/lfs_util.patch
 	$(Q) git apply littlefs/lfs_getpath.patch
+	$(Q) git apply littlefs/lfs_getsetattr.patch
+endif
 	$(Q) touch littlefs/.littlefsunpack
 
 # Download and unpack tarball if no git repo found

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_rtc_lowerhalf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -363,6 +365,7 @@ kinetis_setrelative(struct rtc_lowerhalf_s *lower,
   time_t seconds;
   struct timespec ts;
   int ret = -EINVAL;
+  irqstate_t flags;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL);
   DEBUGASSERT(alarminfo->id == RTC_ALARMA);
@@ -374,7 +377,7 @@ kinetis_setrelative(struct rtc_lowerhalf_s *lower,
        * about being suspended and working on an old time.
        */
 
-      sched_lock();
+      flags = enter_critical_section();
 
 #if defined(CONFIG_RTC_DATETIME)
       /* Get the broken out time and convert to seconds */
@@ -382,7 +385,7 @@ kinetis_setrelative(struct rtc_lowerhalf_s *lower,
       ret = up_rtc_getdatetime(&time);
       if (ret < 0)
         {
-          sched_unlock();
+          leave_critical_section(flags);
           return ret;
         }
 
@@ -394,7 +397,7 @@ kinetis_setrelative(struct rtc_lowerhalf_s *lower,
       ret = up_rtc_gettime(&ts);
       if (ret < 0)
         {
-          sched_unlock();
+          leave_critical_section(flags);
           return ret;
         }
 #endif
@@ -421,7 +424,7 @@ kinetis_setrelative(struct rtc_lowerhalf_s *lower,
 
       ret = kinetis_setalarm(lower, &setalarm);
 
-      sched_unlock();
+      leave_critical_section(flags);
     }
 
   return ret;
@@ -498,6 +501,7 @@ static int kinetis_rdalarm(struct rtc_lowerhalf_s *lower,
 {
   struct timespec ts;
   int ret = -EINVAL;
+  irqstate_t flags;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->time != NULL);
   DEBUGASSERT(alarminfo->id == RTC_ALARMA);
@@ -508,12 +512,12 @@ static int kinetis_rdalarm(struct rtc_lowerhalf_s *lower,
        * about being suspended and working on an old time.
        */
 
-      sched_lock();
+      flags = enter_critical_section();
       ret = kinetis_rtc_rdalarm(&ts);
 
       localtime_r((const time_t *)&ts.tv_sec,
                   (struct tm *)alarminfo->time);
-      sched_unlock();
+      leave_critical_section(flags);
     }
 
   return ret;

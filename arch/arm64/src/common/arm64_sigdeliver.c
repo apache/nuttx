@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_sigdeliver.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,10 +40,6 @@
 #include "irq/irq.h"
 #include "arm64_fatal.h"
 
-#ifdef CONFIG_ARCH_FPU
-#include "arm64_fpu.h"
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -58,7 +56,7 @@
 
 void arm64_sigdeliver(void)
 {
-  struct tcb_s  *rtcb = this_task();
+  struct tcb_s *rtcb = this_task();
 
 #ifdef CONFIG_SMP
   /* In the SMP case, we must terminate the critical section while the signal
@@ -68,14 +66,12 @@ void arm64_sigdeliver(void)
 
   irqstate_t  flags;
   int16_t saved_irqcount;
-  struct regs_context  *pctx =
-                (struct regs_context *)rtcb->xcp.saved_reg;
-  flags = (pctx->spsr & SPSR_DAIF_MASK);
+  flags = (rtcb->xcp.saved_regs[REG_SPSR] & SPSR_DAIF_MASK);
 #endif
 
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
+        rtcb, rtcb->sigdeliver, rtcb->sigpendactionq.head);
+  DEBUGASSERT(rtcb->sigdeliver != NULL);
 
 retry:
 #ifdef CONFIG_SMP
@@ -107,7 +103,7 @@ retry:
 
   /* Deliver the signal */
 
-  ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
+  (rtcb->sigdeliver)(rtcb);
 
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original
@@ -154,22 +150,16 @@ retry:
    * could be modified by a hostile program.
    */
 
-  rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
-  rtcb->xcp.regs = rtcb->xcp.saved_reg;
-
-#ifdef CONFIG_ARCH_FPU
-  arm64_destory_fpu(rtcb);
-  rtcb->xcp.fpu_regs = rtcb->xcp.saved_fpu_regs;
-#endif
+  rtcb->sigdeliver = NULL;  /* Allows next handler to be scheduled */
+  rtcb->xcp.regs = rtcb->xcp.saved_regs;
 
   /* Then restore the correct state for this thread of execution. */
 
 #ifdef CONFIG_SMP
   /* We need to keep the IRQ lock until task switching */
 
-  rtcb->irqcount++;
-  leave_critical_section(flags);
-  rtcb->irqcount--;
+  leave_critical_section(up_irq_save());
 #endif
-  arm64_fullcontextrestore(rtcb->xcp.regs);
+
+  arm64_fullcontextrestore();
 }

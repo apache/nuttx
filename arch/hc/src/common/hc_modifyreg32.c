@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/hc/src/common/hc_modifyreg32.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #include "hc_internal.h"
 
@@ -39,6 +42,8 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static spinlock_t g_modifyreg_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -61,10 +66,10 @@ void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits)
   irqstate_t flags;
   uint32_t   regval;
 
-  flags   = enter_critical_section();
+  flags   = spin_lock_irqsave(&g_modifyreg_lock);
   regval  = getreg32(addr);
   regval &= ~clearbits;
   regval |= setbits;
   putreg32(regval, addr);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_modifyreg_lock, flags);
 }

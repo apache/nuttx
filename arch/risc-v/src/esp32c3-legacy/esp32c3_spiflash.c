@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/esp32c3_spiflash.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -348,7 +350,7 @@ int spi_flash_read_encrypted(uint32_t addr, void *buffer, uint32_t size)
  *   func - Function pointer
  *
  * Returned Value:
- *   Absolute address if success or negtive value if failed.
+ *   Absolute address if success or negative value if failed.
  *
  ****************************************************************************/
 

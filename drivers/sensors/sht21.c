@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/sht21.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,10 +51,6 @@
 #  define sht21_dbg(x, ...)    sninfo(x, ##__VA_ARGS__)
 #endif
 
-#ifndef CONFIG_SHT21_I2C_FREQUENCY
-#  define CONFIG_SHT21_I2C_FREQUENCY 400000
-#endif
-
 /* I2C command bytes */
 
 #define SHT21_TRIG_T_MEAS_HM         0xe3
@@ -62,7 +60,7 @@
 #define SHT21_SOFT_RESET             0xfe
 
 /****************************************************************************
- * Private
+ * Private Types
  ****************************************************************************/
 
 struct sht21_dev_s
@@ -133,7 +131,9 @@ static const struct file_operations g_sht21fops =
   sht21_ioctl,    /* ioctl */
   NULL,           /* mmap */
   NULL,           /* truncate */
-  NULL            /* poll */
+  NULL,           /* poll */
+  NULL,           /* readv */
+  NULL            /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , sht21_unlink /* unlink */
 #endif

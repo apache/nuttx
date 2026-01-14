@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/esp32h2/common/include/esp_board_i2c.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -61,7 +63,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_I2C_DRIVER
+#ifdef CONFIG_I2C
 int board_i2c_init(void);
 #endif
 

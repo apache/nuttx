@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/arm_ramvec_initialize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -60,7 +62,7 @@
  */
 
 up_vector_t g_ram_vectors[ARMV7M_VECTAB_SIZE]
-  locate_data(".ram_vectors") aligned_data(VECTOR_ALIGN);
+  locate_data(".ram_vectors") aligned_data(VECTAB_ALIGN);
 
 /****************************************************************************
  * Public Functions

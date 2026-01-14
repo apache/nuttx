@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/misc/lib_crc16ccitt.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,7 +35,7 @@
 
 /* From CRC-16-CCITT (x^16+x^12+x^5+1) */
 
-static uint16_t crc16ccitt_tab[256] =
+static const uint16_t crc16ccitt_tab[256] =
 {
   0x0000, 0x1189, 0x2312, 0x329b, 0x4624, 0x57ad, 0x6536, 0x74bf,
   0x8c48, 0x9dc1, 0xaf5a, 0xbed3, 0xca6c, 0xdbe5, 0xe97e, 0xf8f7,
@@ -80,6 +82,16 @@ static uint16_t crc16ccitt_tab[256] =
  *   Continue 16-bit CRC-CCITT calculation on a part of the buffer using the
  *   polynomial x^16+x^12+x^5+1.
  *
+ *   This function is able to calculate any CRC that uses 0x1021 as it
+ *   polynomial and requires reflecting both the input and the output.
+ *   The following checksums can, among others, be calculated by this
+ *   function, depending on the value provided for the initial seed and the
+ *   value the final calculated CRC is XORed with:
+ *
+ *   - CRC-16/CCITT, CRC-16/CCITT-TRUE, CRC-16/KERMIT
+ *   https://reveng.sourceforge.io/crc-catalogue/16.htm#crc.cat.crc-16-kermit
+ *   initial seed: 0x0000, xor output: 0x0000
+ *
  ****************************************************************************/
 
 uint16_t crc16ccittpart(FAR const uint8_t *src, size_t len,
@@ -102,6 +114,16 @@ uint16_t crc16ccittpart(FAR const uint8_t *src, size_t len,
  * Description:
  *   Return a 16-bit CRC-CCITT of the contents of the 'src' buffer, length
  *   'len' using the polynomial x^16+x^12+x^5+1.
+ *
+ *   This function is able to calculate any CRC that uses 0x1021 as it
+ *   polynomial and requires reflecting both the input and the output.
+ *   The following checksums can, among others, be calculated by this
+ *   function, depending on the value provided for the initial seed and the
+ *   value the final calculated CRC is XORed with:
+ *
+ *   - CRC-16/CCITT, CRC-16/CCITT-TRUE, CRC-16/KERMIT
+ *   https://reveng.sourceforge.io/crc-catalogue/16.htm#crc.cat.crc-16-kermit
+ *   initial seed: 0x0000, xor output: 0x0000
  *
  ****************************************************************************/
 

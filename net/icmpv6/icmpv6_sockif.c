@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_sockif.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,6 +40,7 @@
 
 #include "icmpv6/icmpv6.h"
 #include "inet/inet.h"
+#include "utils/utils.h"
 
 #ifdef CONFIG_NET_ICMPv6_SOCKET
 
@@ -112,10 +115,10 @@ const struct sock_intf_s g_icmpv6_sockif =
 
 static int icmpv6_setup(FAR struct socket *psock)
 {
-  /* SOCK_DGRAM or SOCK_CTRL and IPPROTO_ICMP6 are supported */
+  /* SOCK_DGRAM and IPPROTO_ICMP6 are supported */
 
-  if ((psock->s_type == SOCK_DGRAM || psock->s_type == SOCK_CTRL ||
-      psock->s_type == SOCK_RAW) && psock->s_proto == IPPROTO_ICMP6)
+  if ((psock->s_type == SOCK_DGRAM || psock->s_type == SOCK_RAW) &&
+       psock->s_proto == IPPROTO_ICMP6)
     {
       /* Allocate the IPPROTO_ICMP6 socket connection structure and save in
        * the new socket instance.
@@ -141,6 +144,8 @@ static int icmpv6_setup(FAR struct socket *psock)
           memset(&conn->filter, 0xff, sizeof(conn->filter));
         }
 
+      nxrmutex_init(&conn->sconn.s_lock);
+
       /* Save the pre-allocated connection in the socket structure */
 
       psock->s_conn = conn;
@@ -163,7 +168,7 @@ static int icmpv6_setup(FAR struct socket *psock)
  *           queried.
  *
  * Returned Value:
- *   The set of socket cababilities is returned.
+ *   The set of socket capabilities is returned.
  *
  ****************************************************************************/
 
@@ -317,10 +322,9 @@ static int icmpv6_getsockopt_internal(FAR struct socket *psock, int option,
 
   if (psock->s_type != SOCK_RAW)
     {
-      return ENOPROTOOPT;
+      return -ENOPROTOOPT;
     }
 
-  net_lock();
   switch (option)
     {
       case ICMP6_FILTER:
@@ -332,7 +336,9 @@ static int icmpv6_getsockopt_internal(FAR struct socket *psock, int option,
               *value_len = sizeof(struct icmp6_filter);
             }
 
+          conn_lock(&conn->sconn);
           memcpy(value, &conn->filter, *value_len);
+          conn_unlock(&conn->sconn);
           ret = OK;
         }
         break;
@@ -343,7 +349,6 @@ static int icmpv6_getsockopt_internal(FAR struct socket *psock, int option,
         break;
     }
 
-  net_unlock();
   return ret;
 }
 
@@ -379,10 +384,10 @@ static int icmpv6_getsockopt(FAR struct socket *psock, int level, int option,
 {
   switch (level)
     {
-      case IPPROTO_IPV6:
+      case SOL_IPV6:
         return ipv6_getsockopt(psock, option, value, value_len);
 
-      case IPPROTO_ICMPV6:
+      case SOL_ICMPV6:
         return icmpv6_getsockopt_internal(psock, option, value, value_len);
 
       default:
@@ -425,10 +430,9 @@ static int icmpv6_setsockopt_internal(FAR struct socket *psock, int option,
 
   if (psock->s_type != SOCK_RAW)
     {
-      return ENOPROTOOPT;
+      return -ENOPROTOOPT;
     }
 
-  net_lock();
   switch (option)
     {
       case ICMP6_FILTER:
@@ -440,7 +444,9 @@ static int icmpv6_setsockopt_internal(FAR struct socket *psock, int option,
               value_len = sizeof(struct icmp6_filter);
             }
 
+          conn_lock(&conn->sconn);
           memcpy(&conn->filter, value, value_len);
+          conn_unlock(&conn->sconn);
           ret = OK;
         }
         break;
@@ -451,7 +457,6 @@ static int icmpv6_setsockopt_internal(FAR struct socket *psock, int option,
         break;
     }
 
-  net_unlock();
   return ret;
 }
 
@@ -482,10 +487,10 @@ static int icmpv6_setsockopt(FAR struct socket *psock, int level, int option,
 {
   switch (level)
     {
-      case IPPROTO_IPV6:
+      case SOL_IPV6:
         return ipv6_setsockopt(psock, option, value, value_len);
 
-      case IPPROTO_ICMPV6:
+      case SOL_ICMPV6:
         return icmpv6_setsockopt_internal(psock, option, value, value_len);
 
       default:

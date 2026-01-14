@@ -1,6 +1,8 @@
 ############################################################################
 # openamp/libmetal.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -54,6 +56,10 @@ CSRCS += libmetal/lib/log.c
 CSRCS += libmetal/lib/shmem.c
 CSRCS += libmetal/lib/version.c
 
+ifeq ($(CONFIG_OPENAMP_CACHE),y)
+  CFLAGS += -DMETAL_CACHE
+endif
+
 CFLAGS += -DMETAL_INTERNAL
 
 LIBMETAL_HDRS_SEDEXP := \
@@ -67,27 +73,25 @@ LIBMETAL_HDRS_SEDEXP := \
 	 s/@PROJECT_SYSTEM_UPPER@/nuttx/g; \
 	 s/@PROJECT_PROCESSOR_UPPER@/$(LIBMETAL_ARCH)/g; \
 	 s/@PROJECT_MACHINE_UPPER@/$(CONFIG_ARCH_CHIP)/g; \
-	 s/cmakedefine HAVE_STDATOMIC_H/include <nuttx\/compiler.h>/g; \
-	 s/defined(HAVE_STDATOMIC_H)/defined(CONFIG_HAVE_ATOMICS)/g; \
+	 s/cmakedefine HAVE_STDATOMIC_H/define HAVE_STDATOMIC_H/g; \
 	 s/cmakedefine/undef/g"
 
 ifeq ($(wildcard libmetal/.git),)
 libmetal.zip:
 # Download and unpack tarball if no git repo found
-	$(call DOWNLOAD,https://github.com/OpenAMP/libmetal/archive,v$(VERSION).zip,libmetal.zip)
+	$(call DOWNLOAD,https://github.com/OpenAMP/libmetal/archive,v$(LIBMETAL_VERSION).zip,libmetal.zip)
 	$(Q) unzip -o libmetal.zip
-	$(Q) mv libmetal-$(VERSION) libmetal
-	$(Q) patch -p0 < 0001-libmetal-add-metal_list_for_each_safe-support.patch
-	$(Q) patch -p0 < 0002-libmetal-nuttx-io.c-align-access-when-read-write-siz.patch
-	$(Q) patch -p0 < 0003-libmetal-nuttx-io.c-Fix-void-pointer-arithmetic-in-a.patch
-	$(Q) patch -p0 < 0004-libmetal-atomic-enable-64-bit-atomic-by-toolchain-bu.patch
+	mv libmetal-$(LIBMETAL_VERSION) libmetal
+	$(Q) patch -p0 < 0001-libmetal-cmake-set-HAVE_STDATOMIC_H-default-true-in-.patch
+	$(Q) patch -p0 < 0002-libmetal-atomic-enable-64-bit-atomic-by-toolchain-bu.patch
+	$(Q) patch -p0 < 0003-mutex-change-the-libmetal-nuttx-mutex-to-recursive-m.patch
 
 .libmetal_headers: libmetal.zip
 else
 .libmetal_headers:
 endif
 	$(eval headers := $(wildcard libmetal/lib/compiler/gcc/*.h))
-	$(eval headers += $(wildcard libmetal/lib/processor/$(LIBMETAL_ARCH)/*.h))
+	$(eval headers += $(wildcard libmetal/lib/processor/generic/*.h))
 	$(eval headers += $(wildcard libmetal/lib/system/nuttx/*.h))
 	$(eval headers += $(wildcard libmetal/lib/*.h))
 	$(foreach header,$(headers), \

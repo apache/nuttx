@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/regmap/regmap.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -375,6 +377,11 @@ void regmap_exit(FAR struct regmap_s *map)
   if (!map->disable_locking)
     {
       nxmutex_destroy(&map->mutex[0]);
+    }
+
+  if (map->bus->exit != NULL)
+    {
+      map->bus->exit(map->bus);
     }
 
   kmm_free(map->bus);

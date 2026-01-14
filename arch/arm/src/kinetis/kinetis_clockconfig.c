@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_clockconfig.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -115,20 +117,17 @@
 
 #if BOARD_PRDIV > KINETIS_MCG_C5_PRDIV_MAX || \
     BOARD_PRDIV < KINETIS_MCG_C5_PRDIV_BASE
-#  error BOARD_PRDIV must satisfy KINETIS_MCG_C5_PRDIV_BASE >= \
-         BOARD_VDIV <= KINETIS_MCG_C5_PRDIV_MAX
+#  error Must hold: KINETIS_MCG_C5_PRDIV_BASE <= BOARD_PRDIV <= KINETIS_MCG_C5_PRDIV_MAX
 #endif
 
 #if BOARD_VDIV > KINETIS_MCG_C6_VDIV_MAX || \
     BOARD_VDIV < KINETIS_MCG_C6_VDIV_BASE
-#  error BOARD_VDIV must satisfy KINETIS_MCG_C6_VDIV_BASE >= \
-         BOARD_VDIV <= KINETIS_MCG_C6_VDIV_MAX
+#  error Must hold: KINETIS_MCG_C6_VDIV_BASE <= BOARD_VDIV <= KINETIS_MCG_C6_VDIV_MAX
 #endif
 
 #if BOARD_PLLIN_FREQ < KINETIS_MCG_PLL_REF_MIN || \
     BOARD_PLLIN_FREQ > KINETIS_MCG_PLL_REF_MAX
-#  error BOARD_PLLIN_FREQ must satisfy KINETIS_MCG_PLL_REF_MIN >= \
-         BOARD_PLLIN_FREQ <= KINETIS_MCG_PLL_REF_MAX
+#  error Must hold: KINETIS_MCG_PLL_REF_MIN <= BOARD_PLLIN_FREQ <= KINETIS_MCG_PLL_REF_MAX
 #endif
 
 #if ((BOARD_FRDIV & MCG_C1_FRDIV_MASK) >> MCG_C1_FRDIV_SHIFT) > KINETIS_MCG_C1_FRDIV_MAX

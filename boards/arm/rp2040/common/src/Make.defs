@@ -1,6 +1,8 @@
 #############################################################################
 # boards/arm/rp2040/common/src/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -25,6 +27,10 @@ CSRCS += rp2040_common_initialize.c
 
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += rp2040_reset.c
+endif
+
+ifeq ($(CONFIG_BOARDCTL_BOOT_IMAGE),y)
+CSRCS += rp2040_boot_image.c
 endif
 
 ifeq ($(CONFIG_SPI),y)
@@ -105,6 +111,14 @@ endif
 
 ifeq ($(CONFIG_SENSORS_MAX6675),y)
   CSRCS += rp2040_max6675.c
+endif
+
+ifeq ($(CONFIG_SENSORS_TMP112),y)
+  CSRCS += rp2040_tmp112.c
+endif
+
+ifeq ($(CONFIG_ADC_ADS7046),y)
+  CSRCS += rp2040_ads7046.c
 endif
 
 DEPPATH += --dep-path src

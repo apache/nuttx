@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/rpmsg/rpmsg.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,6 +42,9 @@
 #define RPMSGIOC_PANIC              _RPMSGIOC(1)
 #define RPMSGIOC_DUMP               _RPMSGIOC(2)
 #define RPMSGIOC_PING               _RPMSGIOC(3)
+#define RPMSGIOC_TEST               _RPMSGIOC(4)
+
+#define RPMSG_SIGNAL_RUNNING        TIOCM_CD
 
 /****************************************************************************
  * Public Types
@@ -47,12 +52,16 @@
 
 struct rpmsg_s
 {
+  bool                         init;
   struct metal_list            bind;
   rmutex_t                     lock;
   struct metal_list            node;
   FAR const struct rpmsg_ops_s *ops;
 #ifdef CONFIG_RPMSG_PING
   struct rpmsg_endpoint        ping;
+#endif
+#ifdef CONFIG_RPMSG_TEST
+  struct rpmsg_endpoint        test;
 #endif
   struct rpmsg_device          rdev[0];
 };
@@ -62,8 +71,6 @@ struct rpmsg_s
  * wait: wait sem.
  * post: post sem.
  * get_cpuname: get cpu name.
- * get_tx_buffer_size: get tx buffer size.
- * get_rx_buffer_size: get rx buffer size.
  */
 
 struct rpmsg_ops_s
@@ -73,9 +80,9 @@ struct rpmsg_ops_s
   CODE int (*ioctl)(FAR struct rpmsg_s *rpmsg, int cmd, unsigned long arg);
   CODE void (*panic)(FAR struct rpmsg_s *rpmsg);
   CODE void (*dump)(FAR struct rpmsg_s *rpmsg);
+  CODE FAR const char *(*get_local_cpuname)(FAR struct rpmsg_s *rpmsg);
   CODE FAR const char *(*get_cpuname)(FAR struct rpmsg_s *rpmsg);
-  CODE int (*get_tx_buffer_size)(FAR struct rpmsg_s *rpmsg);
-  CODE int (*get_rx_buffer_size)(FAR struct rpmsg_s *rpmsg);
+  CODE int (*get_signals)(FAR struct rpmsg_s *rpmsg);
 };
 
 CODE typedef void (*rpmsg_dev_cb_t)(FAR struct rpmsg_device *rdev,
@@ -102,10 +109,14 @@ extern "C"
 int rpmsg_wait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem);
 int rpmsg_post(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem);
 
+FAR const char *rpmsg_get_local_cpuname(FAR struct rpmsg_device *rdev);
 FAR const char *rpmsg_get_cpuname(FAR struct rpmsg_device *rdev);
+int rpmsg_get_signals(FAR struct rpmsg_device *rdev);
 
-int rpmsg_get_tx_buffer_size(FAR struct rpmsg_device *rdev);
-int rpmsg_get_rx_buffer_size(FAR struct rpmsg_device *rdev);
+static inline_function bool rpmsg_is_running(FAR struct rpmsg_device *rdev)
+{
+  return rpmsg_get_signals(rdev) & RPMSG_SIGNAL_RUNNING;
+}
 
 int rpmsg_register_callback(FAR void *priv,
                             rpmsg_dev_cb_t device_created,
@@ -117,17 +128,20 @@ void rpmsg_unregister_callback(FAR void *priv,
                                rpmsg_dev_cb_t device_destroy,
                                rpmsg_match_cb_t ns_match,
                                rpmsg_bind_cb_t ns_bind);
+
 void rpmsg_ns_bind(FAR struct rpmsg_device *rdev,
                    FAR const char *name, uint32_t dest);
 void rpmsg_ns_unbind(FAR struct rpmsg_device *rdev,
                      FAR const char *name, uint32_t dest);
+
 void rpmsg_device_created(FAR struct rpmsg_s *rpmsg);
 void rpmsg_device_destory(FAR struct rpmsg_s *rpmsg);
+
 int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
                    FAR const struct rpmsg_ops_s *ops);
 void rpmsg_unregister(FAR const char *path, FAR struct rpmsg_s *rpmsg);
-int rpmsg_ioctl(FAR const char *cpuname, int cmd, unsigned long arg);
 
+int rpmsg_ioctl(FAR const char *cpuname, int cmd, unsigned long arg);
 int rpmsg_panic(FAR const char *cpuname);
 void rpmsg_dump_all(void);
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/sys/poll.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -64,8 +66,8 @@
  *
  *   POLLALWAYS
  *     Indicate that should ALWAYS call the poll callback whether the
- *     drvier notified the user expected event or not, and this value is
- *     used inside kernal only (events only).
+ *     driver notified the user expected event or not, and this value is
+ *     used inside kernel only (events only).
  */
 
 #define POLLIN       (0x01)  /* NuttX does not make priority distinctions */
@@ -152,7 +154,6 @@ int ppoll(FAR struct pollfd *fds, nfds_t nfds,
           FAR const struct timespec *timeout_ts,
           FAR const sigset_t *sigmask);
 
-int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup);
 void poll_default_cb(FAR struct pollfd *fds);
 void poll_notify(FAR struct pollfd **afds, int nfds, pollevent_t eventset);
 

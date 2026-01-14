@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/renesas/src/rx65n/rx65n_rtc_lowerhalf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -416,6 +418,7 @@ static int rx65n_setrelative(struct rtc_lowerhalf_s *lower,
   struct timespec rtc_time;
   time_t seconds;
   int ret = -EINVAL;
+  irqstate_t flags;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL);
 
@@ -425,7 +428,7 @@ static int rx65n_setrelative(struct rtc_lowerhalf_s *lower,
        * about being suspended and working on an old time.
        */
 
-      sched_lock();
+      flags = enter_critical_section();
 
 #if defined(CONFIG_RTC_DATETIME)
       /* Get the broken out time and convert to seconds */
@@ -434,7 +437,7 @@ static int rx65n_setrelative(struct rtc_lowerhalf_s *lower,
       ret = up_rtc_getdatetime(&time);
       if (ret < 0)
         {
-          sched_unlock();
+          leave_critical_section(flags);
           return ret;
         }
 
@@ -478,7 +481,7 @@ static int rx65n_setrelative(struct rtc_lowerhalf_s *lower,
 
       /* Remember the callback information */
 
-      sched_unlock();
+      leave_critical_section(flags);
     }
 
   return ret;
@@ -546,6 +549,7 @@ static int rx65n_rdalarm(struct rtc_lowerhalf_s *lower,
 {
   struct alm_rdalarm_s lowerinfo;
   int ret = -EINVAL;
+  irqstate_t flags;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->time != NULL);
   if (alarminfo->id >= 0)
@@ -554,14 +558,14 @@ static int rx65n_rdalarm(struct rtc_lowerhalf_s *lower,
        * about being suspended and working on an old time.
        */
 
-      sched_lock();
+      flags = enter_critical_section();
 
       lowerinfo.ar_id = alarminfo->id;
       lowerinfo.ar_time = alarminfo->time;
 
       ret = rx65n_rtc_rdalarm(&lowerinfo);
 
-      sched_unlock();
+      leave_critical_section(flags);
     }
 
   return ret;

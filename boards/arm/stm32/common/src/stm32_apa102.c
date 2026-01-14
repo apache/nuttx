@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/common/src/stm32_apa102.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -93,7 +95,7 @@ int board_apa102_initialize(int devno, int spino)
 
   /* Register the APA102 Driver at the specified location. */
 
-  snprintf(devpath, 13, "/dev/leddrv%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/leddrv%d", devno);
   ret = apa102_register(devpath, spi);
   if (ret < 0)
     {

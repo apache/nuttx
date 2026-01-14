@@ -1,15 +1,12 @@
 /****************************************************************************
  * arch/arm/src/tiva/common/tiva_qencoder.c
  *
- *   Copyright (C) 2016 Young Mu. All rights reserved.
- *   Author: Young Mu <young.mu@aliyun.com>
- *
- * The basic structure of this driver derives in spirit (if nothing more)
- * from the NuttX STM32 QEI driver which has:
- *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Diego Sanchez <dsanchez@nx-engineering.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2016 Young Mu. All rights reserved.
+ * SPDX-FileCopyrightText: 2012 Gregory Nutt. All rights reserved.
+ * SPDX-FileContributor: Young Mu <young.mu@aliyun.com>
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Diego Sanchez <dsanchez@nx-engineering.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

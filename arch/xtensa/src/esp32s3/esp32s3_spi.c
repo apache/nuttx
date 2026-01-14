@@ -493,11 +493,16 @@ static inline bool esp32s3_spi_iomux(struct esp32s3_spi_priv_s *priv)
 
   if (cfg->id == 2)
     {
-      if (cfg->mosi_pin == SPI2_IOMUX_MOSIPIN &&
+      if (
+#if CONFIG_ESP32S3_SPI2_MOSIPIN >= 0
+          cfg->mosi_pin == SPI2_IOMUX_MOSIPIN &&
+#endif
 #ifndef CONFIG_ESP32S3_SPI_SWCS
           cfg->cs_pin == SPI2_IOMUX_CSPIN &&
 #endif
+#if CONFIG_ESP32S3_SPI2_MISOPIN >= 0
           cfg->miso_pin == SPI2_IOMUX_MISOPIN &&
+#endif
           cfg->clk_pin == SPI2_IOMUX_CLKPIN)
         {
           mapped = true;
@@ -590,7 +595,10 @@ static void esp32s3_spi_select(struct spi_dev_s *dev,
 #if SPI_HAVE_SWCS
   struct esp32s3_spi_priv_s *priv = (struct esp32s3_spi_priv_s *)dev;
 
-  esp32s3_gpiowrite(priv->config->cs_pin, !selected);
+  if (priv->config->cs_pin >= 0)
+    {
+      esp32s3_gpiowrite(priv->config->cs_pin, !selected);
+    }
 #endif
 
   spiinfo("devid: %08" PRIx32 " CS: %s\n",
@@ -1349,10 +1357,6 @@ static int esp32s3_spi_dma_init(struct spi_dev_s *dev)
 
   modifyreg32(SYSTEM_PERIP_RST_EN0_REG, priv->config->dma_rst_bit, 0);
 
-  /* Initialize GDMA controller */
-
-  esp32s3_dma_init();
-
   /* Request a GDMA channel for SPI peripheral */
 
   priv->dma_channel = esp32s3_dma_request(priv->config->dma_periph, 1, 1,
@@ -1360,8 +1364,6 @@ static int esp32s3_spi_dma_init(struct spi_dev_s *dev)
   if (priv->dma_channel < 0)
     {
       spierr("Failed to allocate GDMA channel\n");
-
-      esp32s3_dma_deinit();
       return ERROR;
     }
 
@@ -1395,10 +1397,6 @@ void esp32s3_spi_dma_deinit(struct spi_dev_s *dev)
 
   esp32s3_dma_release(priv->dma_channel);
 
-  /* Deinitialize DMA controller */
-
-  esp32s3_dma_deinit();
-
   /* Disable DMA clock for the SPI peripheral */
 
   modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, priv->config->dma_clk_bit, 0);
@@ -1425,14 +1423,57 @@ static int esp32s3_spi_init(struct spi_dev_s *dev)
   const struct esp32s3_spi_config_s *config = priv->config;
   uint32_t regval;
 
-  esp32s3_gpiowrite(config->cs_pin, true);
-  esp32s3_gpiowrite(config->mosi_pin, true);
-  esp32s3_gpiowrite(config->miso_pin, true);
+  if (config->cs_pin >= 0)
+    {
+      esp32s3_gpiowrite(config->cs_pin, true);
+    }
+#ifdef CONFIG_ESP32S3_SPI_UDCS
+#ifdef CONFIG_ESP32S3_SPI2
+  else if (config->id == ESP32S3_SPI2)
+    {
+      esp32s3_spi2_select(dev, config->id, false);
+    }
+#endif
+#ifdef CONFIG_ESP32S3_SPI3
+  else if (config->id == ESP32S3_SPI3)
+    {
+      esp32s3_spi3_select(dev, config->id, false);
+    }
+#endif
+#endif
+
+  if (config->mosi_pin >= 0)
+    {
+      esp32s3_gpiowrite(config->mosi_pin, true);
+    }
+
+  if (config->miso_pin >= 0)
+    {
+      esp32s3_gpiowrite(config->miso_pin, true);
+    }
+
   esp32s3_gpiowrite(config->clk_pin, true);
 
 #if SPI_HAVE_SWCS
-  esp32s3_configgpio(config->cs_pin, OUTPUT_FUNCTION_1);
-  esp32s3_gpio_matrix_out(config->cs_pin, SIG_GPIO_OUT_IDX, 0, 0);
+  if (config->cs_pin >= 0)
+    {
+      esp32s3_configgpio(config->cs_pin, OUTPUT_FUNCTION_1);
+      esp32s3_gpio_matrix_out(config->cs_pin, SIG_GPIO_OUT_IDX, 0, 0);
+    }
+#ifdef CONFIG_ESP32S3_SPI_UDCS
+#ifdef CONFIG_ESP32S3_SPI2
+  else if (config->id == ESP32S3_SPI2)
+    {
+      esp32s3_spi2_select(dev, config->id, false);
+    }
+#endif
+#ifdef CONFIG_ESP32S3_SPI3
+  else if (config->id == ESP32S3_SPI3)
+    {
+      esp32s3_spi3_select(dev, config->id, false);
+    }
+#endif
+#endif
 #endif
 
   /* SPI3 doesn't have IOMUX, if SPI3 is enabled use GPIO Matrix for both */
@@ -1440,14 +1481,24 @@ static int esp32s3_spi_init(struct spi_dev_s *dev)
   if (esp32s3_spi_iomux(priv))
     {
 #if !SPI_HAVE_SWCS
-      esp32s3_configgpio(config->cs_pin, OUTPUT_FUNCTION_5);
-      esp32s3_gpio_matrix_out(config->cs_pin, SIG_GPIO_OUT_IDX, 0, 0);
+      if (config->cs_pin >= 0)
+        {
+          esp32s3_configgpio(config->cs_pin, OUTPUT_FUNCTION_5);
+          esp32s3_gpio_matrix_out(config->cs_pin, SIG_GPIO_OUT_IDX, 0, 0);
+        }
 #endif
-      esp32s3_configgpio(config->mosi_pin, OUTPUT_FUNCTION_5);
-      esp32s3_gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
 
-      esp32s3_configgpio(config->miso_pin, INPUT_FUNCTION_5 | PULLUP);
-      esp32s3_gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
+      if (config->mosi_pin >= 0)
+        {
+          esp32s3_configgpio(config->mosi_pin, OUTPUT_FUNCTION_5);
+          esp32s3_gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
+        }
+
+      if (config->miso_pin >= 0)
+        {
+          esp32s3_configgpio(config->miso_pin, INPUT_FUNCTION_5 | PULLUP);
+          esp32s3_gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
+        }
 
       esp32s3_configgpio(config->clk_pin, OUTPUT_FUNCTION_5);
       esp32s3_gpio_matrix_out(config->clk_pin, SIG_GPIO_OUT_IDX, 0, 0);
@@ -1455,14 +1506,25 @@ static int esp32s3_spi_init(struct spi_dev_s *dev)
   else
     {
 #if !SPI_HAVE_SWCS
-      esp32s3_configgpio(config->cs_pin, OUTPUT);
-      esp32s3_gpio_matrix_out(config->cs_pin, config->cs_outsig, 0, 0);
+      if (config->cs_pin >= 0)
+        {
+          esp32s3_configgpio(config->cs_pin, OUTPUT);
+          esp32s3_gpio_matrix_out(config->cs_pin, config->cs_outsig, 0, 0);
+        }
 #endif
-      esp32s3_configgpio(config->mosi_pin, OUTPUT);
-      esp32s3_gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
 
-      esp32s3_configgpio(config->miso_pin, INPUT | PULLUP);
-      esp32s3_gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
+      if (config->mosi_pin >= 0)
+        {
+          esp32s3_configgpio(config->mosi_pin, OUTPUT);
+          esp32s3_gpio_matrix_out(config->mosi_pin,
+                                  config->mosi_outsig, 0, 0);
+        }
+
+      if (config->miso_pin >= 0)
+        {
+          esp32s3_configgpio(config->miso_pin, INPUT | PULLUP);
+          esp32s3_gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
+        }
 
       esp32s3_configgpio(config->clk_pin, OUTPUT);
       esp32s3_gpio_matrix_out(config->clk_pin, config->clk_outsig, 0, 0);
@@ -1629,7 +1691,7 @@ struct spi_dev_s *esp32s3_spibus_initialize(int port)
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
   priv->cpuint = esp32s3_setup_irq(priv->cpu, priv->config->periph,
                                    ESP32S3_INT_PRIO_DEF,
                                    ESP32S3_CPUINT_LEVEL);

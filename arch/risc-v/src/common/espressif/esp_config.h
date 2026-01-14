@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/espressif/esp_config.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,8 +40,17 @@
 /* Are any UARTs enabled? */
 
 #undef HAVE_UART_DEVICE
-#if defined(CONFIG_ESPRESSIF_UART0) || defined(CONFIG_ESPRESSIF_UART1)
+#if defined(CONFIG_ESPRESSIF_UART0) || \
+    defined(CONFIG_ESPRESSIF_UART1) || \
+    defined(CONFIG_ESPRESSIF_LP_UART0)
 #  define HAVE_UART_DEVICE 1 /* Flag to indicate a UART has been selected */
+#endif
+
+/* Is RS-485 used? */
+
+#if defined(CONFIG_ESPRESSIF_UART0_RS485) || \
+    defined(CONFIG_ESPRESSIF_UART1_RS485)
+#  define HAVE_RS485 1
 #endif
 
 /* Serial Console ***********************************************************/
@@ -52,15 +63,23 @@
 #undef CONSOLE_UART
 #if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_ESPRESSIF_UART0)
 #  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef CONFIG_LPUART0_SERIAL_CONSOLE
 #  define HAVE_SERIAL_CONSOLE 1
 #  define CONSOLE_UART 1
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_ESPRESSIF_UART1)
 #  undef CONFIG_UART0_SERIAL_CONSOLE
+#  undef CONFIG_LPUART0_SERIAL_CONSOLE
+#  define HAVE_SERIAL_CONSOLE 1
+#  define CONSOLE_UART 1
+#elif defined(CONFIG_LPUART0_SERIAL_CONSOLE) && defined(CONFIG_ESPRESSIF_LP_UART0)
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#  undef CONFIG_UART1_SERIAL_CONSOLE
 #  define HAVE_SERIAL_CONSOLE 1
 #  define CONSOLE_UART 1
 #else
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef CONFIG_LPUART0_SERIAL_CONSOLE
 #endif
 
 #ifdef CONFIG_ESPRESSIF_USBSERIAL

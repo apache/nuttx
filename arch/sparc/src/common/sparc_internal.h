@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sparc/src/common/sparc_internal.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -246,6 +248,13 @@ void sparc_usbuninitialize(void);
 #ifdef CONFIG_STACK_COLORATION
 size_t sparc_stack_check(void *stackbase, size_t nbytes);
 void sparc_stack_color(void *stackbase, size_t nbytes);
+#endif
+
+#if defined(CONFIG_STACK_COLORATION) && \
+    defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 7
+void sparc_color_intstack(void);
+#else
+#  define sparc_color_intstack()
 #endif
 
 #endif /* __ASSEMBLY__ */

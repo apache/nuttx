@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm/src/armv7-a/Toolchain.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -33,7 +35,7 @@ else ifeq ($(CONFIG_ARCH_CORTEXA9),y)
 endif
 
 ifeq ($(CONFIG_ARM_THUMB),y)
-  LLVM_ARCHTYPE := thumbv7
+  LLVM_ARCHTYPE := thumbv7a
 else
   LLVM_ARCHTYPE := armv7a
 endif

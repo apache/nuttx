@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tlsr82/tlsr82_cpu.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,7 +37,7 @@ typedef enum
 {
   LDO_MODE      = 0x40, /* LDO mode */
   DCDC_LDO_MODE = 0x41, /* DCDC_LDO mode */
-  DCDC_MODE     = 0x43, /* DCDC mode (16pin chip not suported) */
+  DCDC_MODE     = 0x43, /* DCDC mode (16pin chip not supported) */
 } power_mode_t;
 
 typedef enum

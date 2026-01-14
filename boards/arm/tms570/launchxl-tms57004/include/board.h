@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/tms570/launchxl-tms57004/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,7 +51,7 @@
  *  NR = REFCLKDIV+1
  *  Fintclk = Fclkin / NR
  *
- * PLLMUL controls multipler on divided input clock (Fintclk):
+ * PLLMUL controls multiplier on divided input clock (Fintclk):
  *
  *  Non-modulated:
  *    NF = (PLLMUL + 256) / 256

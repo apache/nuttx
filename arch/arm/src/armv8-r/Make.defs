@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm/src/armv8-r/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -29,7 +31,7 @@ HEAD_ASRC += arm_vectortab.S
 
 # Common assembly language files
 
-CMN_CSRCS += arm_arch_timer.c arm_cache.c arm_cpuinfo.c arm_dataabort.c
+CMN_CSRCS += arm_timer.c arm_cache.c arm_cpuinfo.c arm_dataabort.c
 CMN_CSRCS += arm_doirq.c arm_gicv3.c
 CMN_CSRCS += arm_initialstate.c arm_prefetchabort.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
@@ -49,3 +51,10 @@ ifeq ($(CONFIG_ARCH_FPU),y)
   CMN_ASRCS += arm_fpuconfig.S
 endif
 
+ifeq ($(CONFIG_ARMV8R_L2CC_PL310),y)
+  CMN_CSRCS += arm_l2cc_pl310.c
+endif
+
+ifeq ($(CONFIG_ARCH_HIPRI_INTERRUPT),y)
+  CMN_CSRCS += arm_dofiq.c
+endif

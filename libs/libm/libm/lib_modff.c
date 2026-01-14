@@ -1,10 +1,9 @@
 /****************************************************************************
  * libs/libm/libm/lib_modff.c
  *
- * This file is a part of NuttX:
- *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Ported by: Darcy Gong
+ * SPDX-License-Identifier: ISC
+ * SPDX-FileCopyrightText: Copyright (C) 2012 Gregory Nutt.
+ * SPDX-FileContributor: Ported by: Darcy Gong
  *
  * It derives from the Rhombus OS math library by Nick Johnson which has
  * a compatible, MIT-style license:
@@ -29,13 +28,15 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/compiler.h>
+
 #include <math.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-float modff(float x, float *iptr)
+float modff(float x, FAR float *iptr)
 {
   if (fabsf(x) >= 8388608.0F)
     {

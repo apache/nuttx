@@ -1,15 +1,12 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_edma.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Portions of the eDMA logic derive from NXP sample code which has a
- * compatible BSD 3-clause license:
- *
- *   Copyright (c) 2015, Freescale Semiconductor, Inc.
- *   Copyright 2016-2017 NXP
- *   All rights reserved
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2018 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016-2017 NXP
+ * SPDX-FileCopyrightText: 2015, Freescale Semiconductor, Inc.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -140,6 +137,7 @@ struct imxrt_edma_s
   /* These mutex protect the DMA channel and descriptor tables */
 
   mutex_t chlock;                 /* Protects channel table */
+  spinlock_t lock;
 #if CONFIG_IMXRT_EDMA_NTCD > 0
   sem_t dsem;                     /* Supports wait for free descriptors */
 #endif
@@ -161,6 +159,7 @@ static struct imxrt_edma_s g_edma =
 #if CONFIG_IMXRT_EDMA_NTCD > 0
   .dsem = SEM_INITIALIZER(CONFIG_IMXRT_EDMA_NTCD),
 #endif
+  .lock = SP_UNLOCKED
 };
 
 #if CONFIG_IMXRT_EDMA_NTCD > 0
@@ -200,15 +199,15 @@ static struct imxrt_edmatcd_s *imxrt_tcd_alloc(void)
    * waiting.
    */
 
-  flags = enter_critical_section();
   nxsem_wait_uninterruptible(&g_edma.dsem);
 
   /* Now there should be a TCD in the free list reserved just for us */
 
+  flags = spin_lock_irqsave(&g_edma.lock);
   tcd = (struct imxrt_edmatcd_s *)sq_remfirst(&g_tcd_free);
   DEBUGASSERT(tcd != NULL);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_edma.lock, flags);
   return tcd;
 }
 #endif
@@ -222,6 +221,17 @@ static struct imxrt_edmatcd_s *imxrt_tcd_alloc(void)
  ****************************************************************************/
 
 #if CONFIG_IMXRT_EDMA_NTCD > 0
+static void imxrt_tcd_free_nolock(struct imxrt_edmatcd_s *tcd)
+{
+  /* Add the the TCD to the end of the free list and post the 'dsem',
+   * possibly waking up another thread that might be waiting for
+   * a TCD.
+   */
+
+  sq_addlast((sq_entry_t *)tcd, &g_tcd_free);
+  nxsem_post(&g_edma.dsem);
+}
+
 static void imxrt_tcd_free(struct imxrt_edmatcd_s *tcd)
 {
   irqstate_t flags;
@@ -231,10 +241,9 @@ static void imxrt_tcd_free(struct imxrt_edmatcd_s *tcd)
    * a TCD.
    */
 
-  flags = spin_lock_irqsave(NULL);
-  sq_addlast((sq_entry_t *)tcd, &g_tcd_free);
-  nxsem_post(&g_edma.dsem);
-  spin_unlock_irqrestore(NULL, flags);
+  flags = spin_lock_irqsave(&g_edma.lock);
+  imxrt_tcd_free_nolock(tcd);
+  spin_unlock_irqrestore(&g_edma.lock, flags);
 }
 #endif
 
@@ -439,7 +448,10 @@ static void imxrt_dmaterminate(struct imxrt_dmach_s *dmach, int result)
   uint8_t regval8;
   uint8_t chan;
   edma_callback_t callback;
+  irqstate_t flags;
   void *arg;
+
+  flags = spin_lock_irqsave(&g_edma.lock);
 
   /* Disable channel ERROR interrupts */
 
@@ -472,7 +484,7 @@ static void imxrt_dmaterminate(struct imxrt_dmach_s *dmach, int result)
        next = dmach->flags & EDMA_CONFIG_LOOPDEST ?
               NULL : (struct imxrt_edmatcd_s *)tcd->dlastsga;
 
-       imxrt_tcd_free(tcd);
+       imxrt_tcd_free_nolock(tcd);
     }
 
   dmach->head = NULL;
@@ -492,6 +504,8 @@ static void imxrt_dmaterminate(struct imxrt_dmach_s *dmach, int result)
     {
       callback((DMACH_HANDLE)dmach, arg, true, result);
     }
+
+  spin_unlock_irqrestore(&g_edma.lock, flags);
 }
 
 /****************************************************************************
@@ -1146,7 +1160,7 @@ int imxrt_dmach_start(DMACH_HANDLE handle, edma_callback_t callback,
 
   /* Save the callback info.  This will be invoked when the DMA completes */
 
-  flags           = spin_lock_irqsave(NULL);
+  flags           = spin_lock_irqsave(&g_edma.lock);
   dmach->callback = callback;
   dmach->arg      = arg;
 
@@ -1171,7 +1185,7 @@ int imxrt_dmach_start(DMACH_HANDLE handle, edma_callback_t callback,
       putreg8(regval8, IMXRT_EDMA_SERQ);
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_edma.lock, flags);
   return OK;
 }
 
@@ -1194,14 +1208,11 @@ int imxrt_dmach_start(DMACH_HANDLE handle, edma_callback_t callback,
 void imxrt_dmach_stop(DMACH_HANDLE handle)
 {
   struct imxrt_dmach_s *dmach = (struct imxrt_dmach_s *)handle;
-  irqstate_t flags;
 
   dmainfo("dmach: %p\n", dmach);
   DEBUGASSERT(dmach != NULL);
 
-  flags = spin_lock_irqsave(NULL);
   imxrt_dmaterminate(dmach, -EINTR);
-  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -1316,7 +1327,7 @@ void imxrt_dmasample(DMACH_HANDLE handle, struct imxrt_dmaregs_s *regs)
 
   /* eDMA Global Registers */
 
-  flags          = spin_lock_irqsave(NULL);
+  flags          = spin_lock_irqsave(&g_edma.lock);
 
   regs->cr       = getreg32(IMXRT_EDMA_CR);   /* Control */
   regs->es       = getreg32(IMXRT_EDMA_ES);   /* Error Status */
@@ -1351,7 +1362,7 @@ void imxrt_dmasample(DMACH_HANDLE handle, struct imxrt_dmaregs_s *regs)
   regaddr        = IMXRT_DMAMUX_CHCFG(chan);
   regs->dmamux   = getreg32(regaddr);         /* Channel configuration */
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_edma.lock, flags);
 }
 #endif /* CONFIG_DEBUG_DMA */
 

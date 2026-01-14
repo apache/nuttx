@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/lcd/jd9851.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -263,7 +265,7 @@ static struct jd9851_dev_s g_lcddev;
  *
  ****************************************************************************/
 
-static void jd9851_select(FAR FAR struct spi_dev_s *spi, int bits)
+static void jd9851_select(FAR struct spi_dev_s *spi, int bits)
 {
   /* Select JD9851 chip (locking the SPI bus in case there are multiple
    * devices competing for the SPI bus
@@ -297,7 +299,7 @@ static void jd9851_select(FAR FAR struct spi_dev_s *spi, int bits)
  *
  ****************************************************************************/
 
-static void jd9851_deselect(FAR FAR struct spi_dev_s *spi)
+static void jd9851_deselect(FAR struct spi_dev_s *spi)
 {
   /* De-select JD9851 chip and relinquish the SPI bus. */
 
@@ -661,7 +663,7 @@ static int jd9851_putrun(FAR struct lcd_dev_s *dev,
  *   buffer    - The buffer containing the area to be written to the LCD
  *   stride    - Length of a line in bytes. This parameter may be necessary
  *               to allow the LCD driver to calculate the offset for partial
- *               writes when the buffer needs to be splited for row-by-row
+ *               writes when the buffer needs to be split for row-by-row
  *               writing.
  *
  ****************************************************************************/
@@ -886,7 +888,7 @@ static int jd9851_setcontrast(FAR struct lcd_dev_s *dev,
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *jd9851_lcdinitialize(FAR FAR struct spi_dev_s *spi)
+FAR struct lcd_dev_s *jd9851_lcdinitialize(FAR struct spi_dev_s *spi)
 {
   FAR struct jd9851_dev_s *priv = &g_lcddev;
 

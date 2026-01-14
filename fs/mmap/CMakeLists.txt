@@ -1,6 +1,8 @@
 # ##############################################################################
 # fs/mmap/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -18,7 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS fs_mmap.c fs_munmap.c fs_mmisc.c)
+set(SRCS fs_mmap.c fs_munmap.c fs_mmisc.c fs_msync.c)
 
 if(CONFIG_FS_RAMMAP)
   list(APPEND SRCS fs_rammap.c)

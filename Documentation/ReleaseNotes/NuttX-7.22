@@ -514,7 +514,7 @@ frame for testing purposes. From Anthony Merlino.
 poll various attributes related to the coordinator. From Anthony
 Merlino.
 - wireless/ieee802154/i8sak: Add a option to retry on failures to the
-assoc command (usually meaning tht the coordinator is not yet up).
+assoc command (usually meaning that the coordinator is not yet up).
 - iwireless/ieee802154/8sak: Add reset command to reset the MAC layer.
 Adds option to assoc command -t to specify how long to wait for a
 response from the Coordinator. From Anthony Merlino.
@@ -626,7 +626,7 @@ when both IPv4 and IPv6 are enabled.
 - UDP Networking: When upd_input() cannot process a packet, it returns
 ERROR so that network drivers may try calling ipv4_input() later. In
 this case, it must also set d_len to zero. Otherwise, all network
-drivers will assume tht there is also an outgoing packet. This
+drivers will assume that there is also an outgoing packet. This
 results in a gratuitous ARP.
 - TCP Networking: Correct some issues that prevent TCP from working
 correctly when both IPv4 and IPv6 are enabled.
@@ -787,7 +787,7 @@ problem occurs, and is easily reproducible, if the device is connected
 to a CAN network with a wrongly configured CAN speed (baud rate). In
 our tests we set the CAN speed of the device to 1000000 and the speed
 of the other CAN nodes to 500000. The device is restarted and sends a
-CANopen "bootup message" to the CAN network. This results in huge
+CANopen "boot up message" to the CAN network. This results in huge
 amount of errors messages on the CAN bus, probably because of the CAN
 feature for acknowledging error messages. The error messages can't be
 read by the device because of the misconfigured CAN speed, instead the
@@ -994,7 +994,7 @@ in included system files. From Jeff.
 Makefile. Hopefully this will end awkward problems when you Control-C
 out of a build and libapps.a is deleted.
 - platform/Makefile: More attempts to fix for Windows native build.
-Backslash as a delimiter causes problems in pattern subsitutions.
+Backslash as a delimiter causes problems in pattern substitutions.
 
 * NSH: apps/nshlib:
 

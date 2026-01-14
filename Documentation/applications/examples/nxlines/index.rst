@@ -2,7 +2,7 @@
 ``nxlines`` NX Line Drawing
 ===========================
 
-A very simple graphics example that just exercised the NX line drawing logic.
+A very simple graphics example that just exercises the NX line drawing logic.
 
 The following configuration options can be selected:
 
@@ -28,7 +28,7 @@ The following configuration options can be selected:
 - ``CONFIG_EXAMPLES_NXLINES_BORDERCOLOR`` – The color of the lines drawn in the
   background window. Default depends on ``CONFIG_EXAMPLES_NXLINES_BPP`` (there
   really is no meaningful default).
-- ``CONFIG_EXAMPLES_NXLINES_BPP`` – Pixels per pixel to use. Valid options include
+- ``CONFIG_EXAMPLES_NXLINES_BPP`` – Bits per pixel to use. Valid options include
   ``2``, ``4``, ``8``, ``16``, ``24``, and ``32``. Default is ``16``.
 - ``CONFIG_NSH_BUILTIN_APPS`` – Build the NX lines examples as an NSH built-in
   function.

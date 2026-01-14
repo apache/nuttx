@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tlsr82/tlsr82_aes.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -107,7 +109,7 @@ int tlsr82_aes_encrypt(const uint8_t *key, const uint8_t *data,
 
   while ((AES_CTRL_REG & AES_CTRL_CODEC_FINISHED) == 0);
 
-  /* Asign the result */
+  /* Assign the result */
 
   for (i = 0; i < 4; i++)
     {

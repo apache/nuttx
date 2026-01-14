@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/include/sam34/sam4cm_irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -114,7 +116,7 @@
 #define SAM_IRQ_TC5          (SAM_IRQ_EXTINT+SAM_PID_TC5)         /* PID 28: Timer Counter 5 */
 #define SAM_IRQ_ADC          (SAM_IRQ_EXTINT+SAM_PID_ADC)         /* PID 29: Analog To Digital Converter */
 #define SAM_IRQ_ARM          (SAM_IRQ_EXTINT+SAM_PID_ARM)         /* PID 30: FPU signals (only on CM4P1 core): FPIXC, FPOFC, FPUFC, FPIOC, FPDZC, FPIDC, FPIXC */
-#define SAM_IRQ_IPC0         (SAM_IRQ_EXTINT+SAM_PID_IPC0)        /* PID 31: Interprocessor communication 0 */
+#define SAM_IRQ_SMP_CALL0    (SAM_IRQ_EXTINT+SAM_PID_IPC0)        /* PID 31: Interprocessor communication 0 */
 #define SAM_IRQ_SLCDC        (SAM_IRQ_EXTINT+SAM_PID_SLCDC)       /* PID 32: Segment LCD Controller */
 #define SAM_IRQ_TRNG         (SAM_IRQ_EXTINT+SAM_PID_TRNG)        /* PID 33: True Random Generator */
 #define SAM_IRQ_ICM          (SAM_IRQ_EXTINT+SAM_PID_ICM)         /* PID 34: Integrity Check Module */
@@ -122,7 +124,7 @@
 #define SAM_IRQ_AES          (SAM_IRQ_EXTINT+SAM_PID_AES)         /* PID 36: Advanced Enhanced Standard */
 #define SAM_IRQ_PIOC         (SAM_IRQ_EXTINT+SAM_PID_PIOC)        /* PID 37: Parallel I/O Controller C */
 #define SAM_IRQ_UART1        (SAM_IRQ_EXTINT+SAM_PID_UART1)       /* PID 38: Universal Asynchronous Receiver Transmitter 1 */
-#define SAM_IRQ_IPC1         (SAM_IRQ_EXTINT+SAM_PID_IPC1)        /* PID 39: Interprocessor communication 1 */
+#define SAM_IRQ_SMP_CALL1    (SAM_IRQ_EXTINT+SAM_PID_IPC1)        /* PID 39: Interprocessor communication 1 */
 #define SAM_IRQ_RESERVED_40  (SAM_IRQ_EXTINT+SAM_PID_RESERVED_40) /* PID 40: Reserved */
 #define SAM_IRQ_PWM          (SAM_IRQ_EXTINT+SAM_PID_PWM)         /* PID 41: Pulse Width Modulation */
 #define SAM_IRQ_SRAM         (SAM_IRQ_EXTINT+SAM_PID_SRAM)        /* PID 42: SRAM1 (I/D Code bus of CM4P1), SRAM2 (Systembus of CM4P1) */

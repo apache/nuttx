@@ -1,9 +1,10 @@
 /****************************************************************************
  * drivers/sensors/vl53l1x.c
- * Character driver for the ST vl53l1x distance.
  *
- *   Copyright (C) 2019 Acutronics Robotics
- *   Author: Acutronics Robotics (Juan Flores Muñoz) <juan@erlerobotics.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: Copyright (C) 2019 Acutronics Robotics
+ * SPDX-FileCopyrightText: Acutronics Robotics
+ * SPDX-FileCopyrightText: (Juan Flores Muñoz) <juan@erlerobotics.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -63,7 +64,7 @@
 #define VL53L1X_ADDR  0x29
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 struct vl53l1x_dev_s
@@ -784,7 +785,7 @@ static uint8_t vl53l1x_getreg8(FAR struct vl53l1x_dev_s *priv,
 
   /* Write the register address */
 
-  ret = i2c_write(priv->i2c, &config, (uint8_t *)&regaddr, 2);
+  ret = i2c_write(priv->i2c, &config, (FAR uint8_t *)&regaddr, 2);
   if (ret < 0)
     {
       snerr("ERROR: i2c_write failed: %d\n", ret);
@@ -836,7 +837,7 @@ static uint16_t vl53l1x_getreg16(FAR struct vl53l1x_dev_s *priv,
   /* Register to read */
 
   sninfo("Reg %02x %\n", reg_addr_aux[0], reg_addr_aux[1]);
-  ret = i2c_write(priv->i2c, &config, (uint8_t *)&reg_addr_aux, 2);
+  ret = i2c_write(priv->i2c, &config, (FAR uint8_t *)&reg_addr_aux, 2);
   if (ret < 0)
     {
       snerr("ERROR: i2c_write failed: %d\n", ret);
@@ -845,7 +846,7 @@ static uint16_t vl53l1x_getreg16(FAR struct vl53l1x_dev_s *priv,
 
   /* Read register */
 
-  ret = i2c_read(priv->i2c, &config, (uint8_t *) & regval, 2);
+  ret = i2c_read(priv->i2c, &config, (FAR uint8_t *) & regval, 2);
   if (ret < 0)
     {
       snerr("ERROR: i2c_read failed: %d\n", ret);
@@ -942,7 +943,7 @@ static void vl53l1x_putreg8(FAR struct vl53l1x_dev_s *priv, uint16_t regaddr,
 
   /* Write the register address and value */
 
-  ret = i2c_write(priv->i2c, &config, (uint8_t *) & data, 3);
+  ret = i2c_write(priv->i2c, &config, (FAR uint8_t *) & data, 3);
   if (ret < 0)
     {
       snerr("ERROR: i2c_write failed: %d\n", ret);
@@ -978,7 +979,7 @@ static void vl53l1x_putreg16(FAR struct vl53l1x_dev_s *priv,
 
   /* Write the register address and value */
 
-  ret = i2c_write(priv->i2c, &config, (uint8_t *) & data, 4);
+  ret = i2c_write(priv->i2c, &config, (FAR uint8_t *) & data, 4);
   if (ret < 0)
     {
       snerr("ERROR: i2c_write failed: %d\n", ret);
@@ -1016,7 +1017,7 @@ static void vl53l1x_putreg32(FAR struct vl53l1x_dev_s *priv,
 
   /* Write the register address and value */
 
-  ret = i2c_write(priv->i2c, &config, (uint8_t *) & data, 7);
+  ret = i2c_write(priv->i2c, &config, (FAR uint8_t *) & data, 7);
   if (ret < 0)
     {
       snerr("ERROR: i2c_write failed: %d\n", ret);
@@ -1079,8 +1080,8 @@ static void vl53l1x_ioctl(FAR struct file *filep, int cmd, uint16_t arg)
       {
         sninfo("Calibrating distance\n");
         int16_t offset;
-        vl53l1x_getoffset(priv, (int16_t *)&offset);
-        vl53l1x_calibrateoffset(priv, arg, (int16_t *)&offset);
+        vl53l1x_getoffset(priv, (FAR int16_t *)&offset);
+        vl53l1x_calibrateoffset(priv, arg, (FAR int16_t *)&offset);
       }
       break;
 

@@ -1,0 +1,211 @@
+=======
+NAU7802
+=======
+
+Contributed by Daniel Byshkin.
+
+The Adafruit NAU7802 is a high-resolution 24-bit ADC with an integrated load cell amplifier. It is designed for use with load cells and other sensors that require high precision and low noise measurements. The NAU7802 features a built-in programmable gain amplifier (PGA) that allows for easy calibration and adjustment of the sensor's output.
+
+The driver uses the :doc:`uorb
+</components/drivers/special/sensors/sensors_uorb>` interface.
+
+Application Programming Interface
+=================================
+
+.. code-block:: c
+
+   #include <nuttx/sensors/nau7802.h>
+
+The NAU7802 registration function allows the driver to be registered as a UORB
+driver. Registering this driver will cause the ``/dev/uorb/sensor_force<n>`` topic
+to appear, where ``n`` is the value of ``devno``.
+
+Registering the device in polling mode will create a kernel thread to poll the sensor
+
+.. code-block:: c
+
+   int err = nau7802_register(i2c_master, 0, 0x2a);
+   if(err < 0){
+     printf("Failed to register NAU7802: %d\n", err);
+   }
+
+The following are available commands for the NAU7802 driver:
+
+``SNIOC_RESET``
+----------------
+
+Performs a reset of all registers on the NAU7802.
+
+.. code-block:: c
+
+   orb_ioctl(sensor, SNIOC_RESET);
+
+``SNIOC_SET_GAIN``
+------------------------
+
+This command sets the gain of the NAU7802. The possible values are dictated by the
+``nau7802_gain_e`` enum. The default value is 128x.
+
+.. code-block:: c
+
+   orb_ioctl(sensor, SNIOC_SET_GAIN, NAU7802_GAIN_128);
+
+``SNIOC_SET_INTERVAL``
+------------------------
+
+This commands sets the polling interval of the NAU7802. The possible values are dictated by the
+``nau7802_odr_e`` enum. The default value is 10HZ.
+
+.. code-block:: c
+
+   orb_ioctl(sensor, SNIOC_SET_INTERVAL, NAU7802_ODR_10HZ);
+
+``SNIOC_SET_LDO``
+------------------------
+
+This command sets the LDO voltage of the NAU7802. The possible values are dictated by the
+``nau7802_ldo_e`` enum. The default value is 3.0V.
+
+.. code-block:: c
+
+    orb_ioctl(sensor, SNIOC_SET_LDO, NAU7802_LDO_3V0);
+
+``SNIOC_CALIBRATE``
+------------------------
+
+This commands performs one of the calibration procedures of the NAU7802. The possible calibration modes are:
+
+ - NAU7802_CALMOD_INTERNAL: Removes internal PGA gain and offset errors.
+ - NAU7802_CALMOD_OFFSET: Calibrates the zero point of the sensor. 
+ - NAU7802_CALMOD_GAIN: Calibrates the max value of the sensor. 
+
+.. code-block:: c
+
+   orb_ioctl(sensor, SNIOC_CALIBRATE, NAU7802_CALMOD_INTERNAL);
+
+For the gain calibration mode the user must place a known weight on the sensor. Unfortunately the NAU7802 records it as the maximum value, thus if your loadcell supports up to 100kg you shall put a 100kg weight on. 
+
+A workaround would be to do a manual calibration by placing a smaller known weight and polling the sensor to get an average point, then using such point to offset the recorded values. An example is provided below.
+
+.. code-block:: c
+
+  #include "stdio.h"
+  #include <errno.h>
+  #include <fcntl.h>
+  #include <nuttx/sensors/nau7802.h>
+  #include <signal.h>
+  #include <stdbool.h>
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include <sys/ioctl.h>
+  #include <uORB/uORB.h>
+  #include <unistd.h>
+
+  int get_data(const struct orb_metadata *imu_meta, int imu, struct sensor_force *data) {
+    int err = 0;
+    bool update = false;
+    err = orb_check(imu, &update);
+    if (err < 0) {
+        return err;
+    }
+
+    err = orb_copy(imu_meta, imu, data);
+    if (err < 0) {
+        return err;
+    }
+    return err;
+  }
+
+  int main(int argc, char **argv) {
+    int err;
+    int imu;
+    char *name = "sensor_force0";
+
+    const struct orb_metadata *imu_meta = orb_get_meta(name);
+    if (imu_meta == NULL) {
+        fprintf(stderr, "Failed to get metadata for %s\n", name);
+        return EXIT_FAILURE;
+    }
+
+    imu = orb_subscribe(imu_meta);
+    if (imu < 0) {
+        fprintf(stderr, "Could not subscribe to %s: %d\n", name, errno);
+        return EXIT_FAILURE;
+    }
+
+    struct sensor_force data;
+
+    // flush 10 readings
+    for (int i = 0; i < 10; i++) {
+        err = get_data(imu_meta, imu, &data);
+        if (err < 0) {
+            printf("Error reading data\n");
+        }
+        usleep(100000); 
+    }
+
+    long zero_point = 0;
+    for (int i = 0; i < 10; i++) {
+        err = get_data(imu_meta, imu, &data);
+        if (err < 0) {
+            printf("Error reading data\n");
+        } else {
+            zero_point += data.force / 10;
+        }
+        usleep(100000); 
+    }
+    printf("Zero point: %ld\n", zero_point);
+
+    printf("Place weight on the sensor... you have 5 seconds from when you see this message\n");
+    usleep(5000000);
+    printf("Starting gain calibration\n");
+
+    long weight_point = 0;
+    for (int i = 0; i < 10; i++) {
+        err = get_data(imu_meta, imu, &data);
+        if (err < 0) {
+            printf("Error reading data\n");
+        } else {
+            weight_point += data.force / 10;
+        }
+        usleep(100000);
+    }
+    printf("Weight value: %ld\n", weight_point);
+    float known_weight_val = 15000; // 1.5kg
+
+    while (true) {
+        err = get_data(imu_meta, imu, &data);
+        if (err < 0) {
+            printf("Error reading data\n");
+        } else {
+            printf("Force: %.3f\n", known_weight_val * (data.force - zero_point) / (weight_point - zero_point));
+        }
+        usleep(50000);
+    }
+
+    orb_unsubscribe(imu);
+    return EXIT_SUCCESS;
+  }  
+
+
+
+``SNIOC_GET_CALIBVALUE:``
+----------------------------
+
+This commands gets the gain calibration value when set by the ``SNIOC_CALIBRATE`` command. 
+
+.. code-block:: c
+
+    uint32_t cal_value;
+    orb_ioctl(sensor, SNIOC_GET_CALIBVALUE, (unsigned long)&cal_value);
+
+
+``SNIOC_SET_CALIBVALUE:``
+---------------------------
+
+This commands sets the gain calibration value, useful when you calibrated the sensor with the gain calibration mode once and want to reuse it later on.
+
+.. code-block:: c
+
+    uint32_t cal_value;
+    orb_ioctl(sensor, SNIOC_SET_CALIBVALUE, cal_value);

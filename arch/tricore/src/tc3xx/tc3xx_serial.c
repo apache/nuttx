@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/tricore/src/tc3xx/tc3xx_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,6 +44,8 @@
 #include "tricore_internal.h"
 
 #include "Asclin/Asc/IfxAsclin_Asc.h"
+
+#include <chip.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -158,9 +162,6 @@ static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
 
 #ifdef CONFIG_TC3XX_UART0
 
-#define UART_PIN_RX IfxAsclin0_RXA_P14_1_IN     /* UART receive port pin  */
-#define UART_PIN_TX IfxAsclin0_TX_P14_0_OUT     /* UART transmit port pin */
-
 /* Pin configuration */
 
 static const IfxAsclin_Asc_Pins g_uart0_pins =
@@ -177,7 +178,7 @@ static struct up_dev_s g_uart0priv =
   .uartbase  = &MODULE_ASCLIN0,
   .pins      = &g_uart0_pins,
   .baud      = CONFIG_UART0_BAUD,
-  .irq       = 21,
+  .irq       = TRICORE_UART_RX_IRQ,
 };
 
 static uart_dev_t g_uart0port =
@@ -674,7 +675,7 @@ void tricore_lowputc(char ch)
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before tricore_serialinit.  NOTE:  This function depends on GPIO pin
  *   configuration performed in up_consoleinit() and main clock
  *   initialization performed in up_clkinitialize().
@@ -722,20 +723,10 @@ void tricore_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      tricore_lowputc('\r');
-    }
-
   tricore_lowputc(ch);
 #endif
-  return ch;
 }
 #endif /* USE_SERIALDRIVER */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s2/esp32s2-saola-1/src/esp32s2_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,9 +33,7 @@
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
-#include <syslog.h>
 #include <debug.h>
-#include <stdio.h>
 
 #include <errno.h>
 #include <nuttx/fs/fs.h>
@@ -50,6 +50,10 @@
 #  include "esp32s2_tim_lowerhalf.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_WIFI
+#  include "esp32s2_board_wlan.h"
+#endif
+
 #ifdef CONFIG_ESP32S2_I2C
 #  include "esp32s2_i2c.h"
 #endif
@@ -58,12 +62,12 @@
 #  include "esp32s2_rt_timer.h"
 #endif
 
-#ifdef CONFIG_ESP32S2_EFUSE
-#  include "esp32s2_efuse.h"
+#ifdef CONFIG_ESPRESSIF_EFUSE
+#  include "espressif/esp_efuse.h"
 #endif
 
-#ifdef CONFIG_ESP32S2_LEDC
-#  include "esp32s2_ledc.h"
+#ifdef CONFIG_ESPRESSIF_LEDC
+#  include "espressif/esp_ledc.h"
 #endif
 
 #ifdef CONFIG_WATCHDOG
@@ -90,6 +94,42 @@
 
 #ifdef CONFIG_ESP_RMT
 #  include "esp32s2_board_rmt.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_TEMP
+#  include "espressif/esp_temperature_sensor.h"
+#endif
+
+#ifdef CONFIG_ESP_PCNT
+#  include "espressif/esp_pcnt.h"
+#  include "esp32s2_board_pcnt.h"
+#endif
+
+#ifdef CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL
+#  include "espressif/esp_nxdiag.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_ADC
+#  include "esp32s2_board_adc.h"
+#endif
+
+#ifdef CONFIG_ESP_SDM
+#  include "espressif/esp_sdm.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_SHA_ACCELERATOR
+#  include "espressif/esp_sha.h"
+#endif
+
+#ifdef CONFIG_MMCSD_SPI
+#  include "esp32s2_board_sdmmc.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_USE_ULP_RISCV_CORE
+#  include "espressif/esp_ulp.h"
+#  ifdef CONFIG_ESPRESSIF_ULP_USE_TEST_BIN
+#    include "ulp/ulp_code.h"
+#  endif
 #endif
 
 #include "esp32s2-saola-1.h"
@@ -137,11 +177,21 @@ int esp32s2_bringup(void)
     }
 #endif
 
-#if defined(CONFIG_ESP32S2_EFUSE)
-  ret = esp32s2_efuse_initialize("/dev/efuse");
+#if defined(CONFIG_ESPRESSIF_EFUSE)
+  ret = esp_efuse_initialize("/dev/efuse");
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to init EFUSE: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_ESPRESSIF_SHA_ACCELERATOR) && \
+    !defined(CONFIG_CRYPTO_CRYPTODEV_HARDWARE)
+  ret = esp_sha_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize SHA: %d\n", ret);
     }
 #endif
 
@@ -155,15 +205,15 @@ int esp32s2_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32S2_LEDC
+#ifdef CONFIG_ESPRESSIF_LEDC
   ret = esp32s2_pwm_setup();
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: esp32s2_pwm_setup() failed: %d\n", ret);
     }
-#endif /* CONFIG_ESP32S2_LEDC */
+#endif /* CONFIG_ESPRESSIF_LEDC */
 
-#ifdef CONFIG_ESP32S2_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
   ret = board_spiflash_init();
   if (ret)
     {
@@ -298,6 +348,17 @@ int esp32s2_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESPRESSIF_WIFI
+
+  ret = board_wlan_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize wlan subsystem=%d\n",
+              ret);
+    }
+
+#endif
+
 #ifdef CONFIG_SENSORS_BMP180
   /* Try to register BMP180 device in I2C0 */
 
@@ -327,7 +388,7 @@ int esp32s2_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32S2_I2S
+#if defined(CONFIG_ESPRESSIF_I2S) || defined(CONFIG_ESPRESSIF_I2S)
 
 #ifdef CONFIG_AUDIO_CS4344
 
@@ -343,17 +404,17 @@ int esp32s2_bringup(void)
   bool i2s_enable_tx;
   bool i2s_enable_rx;
 
-#ifdef CONFIG_ESP32S2_I2S_TX
+#if defined(CONFIG_ESPRESSIF_I2S_TX) || defined(CONFIG_ESPRESSIF_I2S0_TX)
   i2s_enable_tx = true;
 #else
   i2s_enable_tx = false;
-#endif /* CONFIG_ESP32S2_I2S_TX */
+#endif /* CONFIG_ESPRESSIF_I2S_TX || CONFIG_ESPRESSIF_I2S0_TX */
 
-#ifdef CONFIG_ESP32S2_I2S_RX
+#if defined(CONFIG_ESPRESSIF_I2S_RX) || defined(CONFIG_ESPRESSIF_I2S0_RX)
     i2s_enable_rx = true;
 #else
     i2s_enable_rx = false;
-#endif /* CONFIG_ESP32S2_I2S_RX */
+#endif /* CONFIG_ESPRESSIF_I2S_RX || CONFIG_ESPRESSIF_I2S0_RX */
 
   /* Configure I2S generic audio on I2S0 */
 
@@ -364,7 +425,7 @@ int esp32s2_bringup(void)
     }
 #endif /* CONFIG_AUDIO_CS4344 */
 
-#endif /* CONFIG_ESP32S2_I2S */
+#endif /* CONFIG_ESPRESSIF_I2S || CONFIG_ESPRESSIF_I2S */
 
 #ifdef CONFIG_ESP_RMT
   ret = board_rmt_txinitialize(RMT_TXCHANNEL, RMT_OUTPUT_PIN);
@@ -380,6 +441,41 @@ int esp32s2_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESPRESSIF_TEMP
+  struct esp_temp_sensor_config_t cfg = TEMPERATURE_SENSOR_CONFIG(10, 50);
+  ret = esp_temperature_sensor_initialize(cfg);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize temperature sensor driver: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP_SDM
+  struct esp_sdm_chan_config_s config =
+  {
+    .gpio_num = 5,
+    .sample_rate_hz = 1000 * 1000,
+    .flags = 0,
+  };
+
+  struct dac_dev_s *dev = esp_sdminitialize(config);
+  ret = dac_register("/dev/dac0", dev);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize DAC driver: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP_PCNT
+  ret = board_pcnt_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_pcnt_initialize failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_RTC_DRIVER
   /* Instantiate the ESP32 RTC driver */
 
@@ -389,6 +485,42 @@ int esp32s2_bringup(void)
       syslog(LOG_ERR,
              "ERROR: Failed to Instantiate the RTC driver: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL
+  ret = esp_nxdiag_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_nxdiag_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_ADC
+  ret = board_adc_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_adc_init failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_MMCSD_SPI
+  ret = board_sdmmc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SDMMC: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_USE_ULP_RISCV_CORE
+
+  /* ULP initialization should be the handled later than
+   * peripherals to use supported peripherals properly on ULP core
+   */
+
+  esp_ulp_init();
+#  ifdef CONFIG_ESPRESSIF_ULP_USE_TEST_BIN
+  esp_ulp_load_bin((char *)esp_ulp_bin, esp_ulp_bin_len);
+#  endif
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but

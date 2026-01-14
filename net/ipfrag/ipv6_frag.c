@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/ipfrag/ipv6_frag.c
- * Handling incoming IPv6 fragment input
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -82,7 +83,7 @@ static uint16_t ipv6_fragout_getunfraginfo(FAR struct iob_s *iob,
  * Name: ipv6_fragin_getinfo
  *
  * Description:
- *   Polulate fragment information from the input ipv6 packet data.
+ *   Populate fragment information from the input ipv6 packet data.
  *
  * Input Parameters:
  *   iob      - An IPv6 fragment
@@ -141,8 +142,9 @@ static int32_t ipv6_fragin_getinfo(FAR struct iob_s *iob,
       fraglink->morefrags = fraglink->fragoff & 0x1;
       fraglink->fragoff  &= 0xfff8;
       fraglink->fraglen   = paylen;
-      fraglink->ipid      = NTOHL((*(uint16_t *)(&fraghdr->id[0]) << 16) +
-                                  *(uint16_t *)(&fraghdr->id[2]));
+      fraglink->ipid      = NTOHL(
+        ((uint32_t)(*(FAR uint16_t *)(&fraghdr->id[0])) << 16) +
+         (uint32_t)(*(FAR uint16_t *)(&fraghdr->id[2])));
 
       fraglink->frag      = iob;
 
@@ -291,7 +293,7 @@ static uint32_t ipv6_fragin_reassemble(FAR struct ip_fragsnode_s *node)
  *   ref    - The reference IPv6 Header
  *   ipv6   - The pointer of the newly generated IPv6 Header
  *   hdrlen - Including the length of IPv6 basic header and all
- *            extention headers
+ *            extension headers
  *   datalen   - The data length follows the IPv6 basic header
  *   nxthdroff - The offset of 'next header' to be updated
  *   nxtprot   - The value of 'next header' to be updated
@@ -353,8 +355,8 @@ ipv6_fragout_buildipv6fragheader(FAR struct ipv6_fragment_extension_s *frag,
   frag->reserved = 0;
   frag->msoffset = ipoff >> 8;
   frag->lsoffset = ipoff & 0xff;
-  *(uint16_t *)&frag->id[0] = HTONL(ipid) & 0xffff;
-  *(uint16_t *)&frag->id[2] = HTONL(ipid) >> 16;
+  *(FAR uint16_t *)&frag->id[0] = HTONL(ipid) & 0xffff;
+  *(FAR uint16_t *)&frag->id[2] = HTONL(ipid) >> 16;
 }
 
 /****************************************************************************
@@ -399,7 +401,7 @@ static uint16_t ipv6_fragout_getunfraginfo(FAR struct iob_s *iob,
   *hdrtype = ipv6->proto;
 
   /* Traverse up to three extension headers, if the Destination Options
-   * Header appears repeatedly, ingore the secondary one and end the search.
+   * Header appears repeatedly, ignore the secondary one and end the search.
    * refer to rfc2460, section-4.1
    */
 
@@ -481,7 +483,7 @@ int32_t ipv6_fragin(FAR struct net_driver_s *dev)
       return -ENOMEM;
     }
 
-  /* Polulate fragment information from input packet data */
+  /* Populate fragment information from input packet data */
 
   ipv6_fragin_getinfo(dev->d_iob, fraginfo);
 
@@ -568,7 +570,7 @@ int32_t ipv6_fragout(FAR struct net_driver_s *dev, uint16_t mtu)
   uint32_t nfrags;
   uint16_t hdroff;
   uint16_t hdrtype;
-  FAR struct iob_s *frag;
+  FAR struct iob_s *frag = NULL;
   FAR struct ipv6_hdr_s *ref = NULL;
   FAR struct ipv6_fragment_extension_s *fraghdr;
   struct iob_queue_s fragq =
@@ -588,8 +590,14 @@ int32_t ipv6_fragout(FAR struct net_driver_s *dev, uint16_t mtu)
    */
 
   nfrags = ip_fragout_slice(dev->d_iob, PF_INET6, mtu, unfraglen, &fragq);
-  ASSERT(nfrags > 1);
   netdev_iob_clear(dev);
+
+  /* No I/O Buffer is the only cause of failure */
+
+  if (nfrags == 0)
+    {
+      goto fail;
+    }
 
   ipid = ++g_ipv6id;
 
@@ -654,7 +662,7 @@ int32_t ipv6_fragout(FAR struct net_driver_s *dev, uint16_t mtu)
   g_netstats.ipv6.sent += nfrags - 1;
 #endif
 
-  netdev_txnotify_dev(dev);
+  netdev_txnotify_dev(dev, IPFRAG_POLL);
 
   return OK;
 

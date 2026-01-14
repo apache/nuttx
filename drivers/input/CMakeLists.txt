@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/input/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -25,6 +27,18 @@ if(CONFIG_INPUT)
 
   if(CONFIG_INPUT_TOUCHSCREEN)
     list(APPEND SRCS touchscreen_upper.c)
+  endif()
+
+  if(CONFIG_INPUT_FF)
+    list(APPEND SRCS ff_upper.c)
+  endif()
+
+  if(CONFIG_FF_DUMMY)
+    list(APPEND SRCS ff_dummy.c)
+  endif()
+
+  if(CONFIG_FF_AW86225)
+    list(APPEND SRCS aw86225.c)
   endif()
 
   if(CONFIG_INPUT_MOUSE)
@@ -92,6 +106,10 @@ if(CONFIG_INPUT)
     list(APPEND SRCS keyboard_upper.c)
   endif()
 
+  if(CONFIG_INPUT_SBUTTON)
+    list(APPEND SRCS sbutton.c)
+  endif()
+
   if(CONFIG_INPUT_DJOYSTICK)
     list(APPEND SRCS djoystick.c)
   endif()
@@ -106,6 +124,10 @@ if(CONFIG_INPUT)
 
   if(CONFIG_INPUT_SPQ10KBD)
     list(APPEND SRCS spq10kbd.c)
+  endif()
+
+  if(CONFIG_INPUT_GOLDFISH_EVENTS)
+    list(APPEND SRCS goldfish_events.c)
   endif()
 
   target_sources(drivers PRIVATE ${SRCS})

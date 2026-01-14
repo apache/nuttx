@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/lis3mdl.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 #include <debug.h>
 #include <string.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/random.h>
@@ -39,7 +42,7 @@
 #if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_LIS3MDL)
 
 /****************************************************************************
- * Private
+ * Private Types
  ****************************************************************************/
 
 struct lis3mdl_sensor_data_s

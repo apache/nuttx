@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/posix/sim_hostsmp.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,6 +51,8 @@ struct sim_cpuinfo_s
  ****************************************************************************/
 
 static pthread_key_t g_cpu_key;
+
+#ifdef CONFIG_SMP
 static pthread_t     g_cpu_thread[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
@@ -106,6 +110,8 @@ static void *sim_idle_trampoline(void *arg)
 
   host_cpu_started();
 
+  sim_unlock();
+
   /* The idle Loop */
 
   for (; ; )
@@ -159,28 +165,6 @@ void host_cpu0_start(void)
     {
       return;
     }
-}
-
-/****************************************************************************
- * Name: up_cpu_index
- *
- * Description:
- *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
- *
- ****************************************************************************/
-
-int up_cpu_index(void)
-{
-  void *value = pthread_getspecific(g_cpu_key);
-  return (int)((uintptr_t)value);
 }
 
 /****************************************************************************
@@ -263,3 +247,29 @@ void host_send_ipi(int cpu)
 {
   pthread_kill(g_cpu_thread[cpu], SIGUSR1);
 }
+
+/****************************************************************************
+ * Name: host_send_func_call_ipi(int cpu)
+ ****************************************************************************/
+
+void host_send_func_call_ipi(int cpu)
+{
+  pthread_kill(g_cpu_thread[cpu], SIGUSR2);
+}
+#endif
+
+/****************************************************************************
+ * Name: up_cpu_index
+ *
+ * Description:
+ *   Return the real core number regardless CONFIG_SMP setting
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_MULTICPU
+int up_cpu_index(void)
+{
+  void *value = pthread_getspecific(g_cpu_key);
+  return (int)((uintptr_t)value);
+}
+#endif

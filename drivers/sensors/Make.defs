@@ -1,6 +1,8 @@
 ############################################################################
 # drivers/sensors/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -32,8 +34,20 @@ ifeq ($(CONFIG_SENSORS_RPMSG),y)
   CSRCS += sensor_rpmsg.c
 endif
 
-ifeq ($(CONFIG_SENSORS_GPS),y)
-  CSRCS += gps_uorb.c
+ifeq ($(CONFIG_SENSORS_NAU7802),y)
+  CSRCS += nau7802.c
+endif
+
+ifeq ($(CONFIG_SENSORS_L86_XXX),y)
+  CSRCS += l86xxx_uorb.c
+endif
+
+ifeq ($(CONFIG_SENSORS_MONITOR),y)
+CSRCS += sensor_monitor.c
+endif
+
+ifeq ($(CONFIG_SENSORS_GNSS),y)
+  CSRCS += gnss_uorb.c
 endif
 
 ifeq ($(CONFIG_SENSORS_WTGAHRS2),y)
@@ -44,8 +58,8 @@ ifeq ($(CONFIG_SENSORS_FAKESENSOR),y)
   CSRCS += fakesensor_uorb.c
 endif
 
-ifeq ($(CONFIG_SENSORS_GOLDFISH_GPS),y)
-  CSRCS += goldfish_gps_uorb.c
+ifeq ($(CONFIG_SENSORS_GOLDFISH_GNSS),y)
+  CSRCS += goldfish_gnss_uorb.c
 endif
 
 ifeq ($(CONFIG_SENSORS_GOLDFISH_SENSOR),y)
@@ -125,6 +139,10 @@ ifeq ($(CONFIG_SENSORS_LSM6DSL),y)
   CSRCS += lsm6dsl.c
 endif
 
+ifeq ($(CONFIG_SENSORS_LSM6DSO32),y)
+  CSRCS += lsm6dso32_uorb.c
+endif
+
 ifeq ($(CONFIG_SENSORS_LSM9DS1),y)
   CSRCS += lsm9ds1_base.c
   ifeq ($(CONFIG_SENSORS_LSM9DS1_UORB),y)
@@ -172,8 +190,13 @@ else
 endif
 endif
 
-ifeq ($(CONFIG_SENSORS_BMM150),y)
-  CSRCS += bmm150.c
+ifeq ($(CONFIG_SENSORS_BMI088),y)
+  CSRCS += bmi088_base.c
+ifeq ($(CONFIG_SENSORS_BMI088_UORB),y)
+  CSRCS += bmi088_uorb.c
+else
+  CSRCS += bmi088.c
+endif
 endif
 
 ifeq ($(CONFIG_SENSORS_BMP180),y)
@@ -193,12 +216,20 @@ ifeq ($(CONFIG_SENSORS_BME680),y)
   CSRCS += bme680_uorb.c
 endif
 
+ifeq ($(CONFIG_SENSORS_BME688),y)
+  CSRCS += bme688_uorb.c
+endif
+
 ifeq ($(CONFIG_SENSORS_ISL29023),y)
   CSRCS += isl29023.c
 endif
 
 ifeq ($(CONFIG_SENSORS_HTS221),y)
   CSRCS += hts221.c
+endif
+
+ifeq ($(CONFIG_SENSORS_LIS2MDL),y)
+  CSRCS += lis2mdl_uorb.c
 endif
 
 ifeq ($(CONFIG_LM75_I2C),y)
@@ -215,6 +246,10 @@ endif
 
 ifeq ($(CONFIG_SENSORS_MB7040),y)
   CSRCS += mb7040.c
+endif
+
+ifeq ($(CONFIG_SENSORS_MCP9600),y)
+  CSRCS += mcp9600_uorb.c
 endif
 
 ifeq ($(CONFIG_SENSORS_MCP9844),y)
@@ -277,6 +312,10 @@ ifeq ($(CONFIG_SENSORS_SHT3X),y)
   CSRCS += sht3x.c
 endif
 
+ifeq ($(CONFIG_SENSORS_SHT4X),y)
+  CSRCS += sht4x_uorb.c
+endif
+
 ifeq ($(CONFIG_SENSORS_SPS30),y)
   CSRCS += sps30.c
 endif
@@ -289,8 +328,16 @@ ifeq ($(CONFIG_SENSORS_LTR308),y)
   CSRCS += ltr308_uorb.c
 endif
 
+ifeq ($(CONFIG_SENSORS_FS3000),y)
+  CSRCS += fs3000_uorb.c
+endif
+
 ifeq ($(CONFIG_SENSORS_BMM150),y)
   CSRCS += bmm150_uorb.c
+endif
+
+ifeq ($(CONFIG_SENSORS_TMP112),y)
+  CSRCS += tmp112.c
 endif
 
 endif # CONFIG_I2C
@@ -375,6 +422,12 @@ ifeq ($(CONFIG_SENSORS_MPU9250),y)
   CSRCS += mpu9250_uorb.c
 endif
 
+# QMI8658 6-axis IMU
+
+ifeq ($(CONFIG_SENSORS_QMI8658),y)
+  CSRCS += qmi8658_uorb.c
+endif
+
 # Quadrature encoder upper half
 
 ifeq ($(CONFIG_SENSORS_QENCODER),y)
@@ -421,6 +474,12 @@ endif
 
 ifeq ($(CONFIG_SENSORS_MAX31865),y)
   CSRCS += max31865.c
+endif
+
+# SONY CXD5602PWBIMU
+
+ifeq ($(CONFIG_SENSORS_CXD5602PWBIMU),y)
+  CSRCS += cxd5602pwbimu.c
 endif
 
 # Include sensor driver build support

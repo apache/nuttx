@@ -1,6 +1,8 @@
 # ##############################################################################
 # boards/arm/nrf52/nrf52840-dk/src/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -32,6 +34,10 @@ endif()
 
 if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS nrf52_buttons.c)
+endif()
+
+if(CONFIG_NRF52840DK_BTNLEDS_GPIO)
+  list(APPEND SRCS nrf52_gpio.c)
 endif()
 
 if(CONFIG_NRF52_SPI_MASTER)

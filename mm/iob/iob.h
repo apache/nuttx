@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/iob/iob.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,16 +32,14 @@
 #include <debug.h>
 
 #include <nuttx/mm/iob.h>
-#include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_MM_IOB
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define ROUNDUP(x, y)            (((x) + (y) - 1) / (y) * (y))
 
 #if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
 #  define ioberr                 _err
@@ -73,17 +73,30 @@ extern FAR struct iob_qentry_s *g_iob_freeqlist;
 extern FAR struct iob_qentry_s *g_iob_qcommitted;
 #endif
 
-/* Counting semaphores that tracks the number of free IOBs/qentries */
+/* semaphores that IOBs need wait */
 
-extern sem_t g_iob_sem;       /* Counts free I/O buffers */
+extern sem_t g_iob_sem;
+
+/* Counts free I/O buffers */
+
+extern int16_t g_iob_count;
+
 #if CONFIG_IOB_THROTTLE > 0
-extern sem_t g_throttle_sem;  /* Counts available I/O buffers when throttled */
+extern sem_t g_throttle_sem;
+
+/* Wait Counts for throttle */
+
+extern int16_t g_throttle_wait;
 #endif
 #if CONFIG_IOB_NCHAINS > 0
-extern sem_t g_qentry_sem;    /* Counts free I/O buffer queue containers */
+extern sem_t g_qentry_sem;
+
+/* Wait Counts for qentry */
+
+extern int16_t g_qentry_wait;
 #endif
 
-extern spinlock_t g_iob_lock;
+extern volatile spinlock_t g_iob_lock;
 
 /****************************************************************************
  * Public Function Prototypes

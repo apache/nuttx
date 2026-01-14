@@ -1,11 +1,11 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32g0_pinmap.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Mateusz Szafoni <raiden00@railab.me>
- *
- *   Copyright (C) 2019 Fundação CERTI. All rights reserved.
- *   Author: Daniel Pereira Volpato <dpo@certi.org.br>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2019 Fundação CERTI. All rights reserved.
+ * SPDX-FileContributor: Mateusz Szafoni <raiden00@railab.me>
+ * SPDX-FileContributor: Daniel Pereira Volpato <dpo@certi.org.br>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -70,7 +70,29 @@
  * defined for most pins in this file.
  */
 
-/* TODO: ADC */
+/* ADC */
+
+#define GPIO_ADC1_IN0_1     (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN0)
+#define GPIO_ADC1_IN1_1     (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN1)
+#define GPIO_ADC1_IN2_1     (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN2)
+#define GPIO_ADC1_IN3_1     (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN3)
+#define GPIO_ADC1_IN4_1     (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN4)
+#define GPIO_ADC1_IN5_1     (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN5)
+#define GPIO_ADC1_IN6_1     (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN6)
+#define GPIO_ADC1_IN7_1     (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN7)
+#define GPIO_ADC1_IN8_1     (GPIO_ANALOG | GPIO_PORTB | GPIO_PIN0)
+#define GPIO_ADC1_IN9_1     (GPIO_ANALOG | GPIO_PORTB | GPIO_PIN1)
+#define GPIO_ADC1_IN10_1    (GPIO_ANALOG | GPIO_PORTB | GPIO_PIN2)
+#define GPIO_ADC1_IN11_1    (GPIO_ANALOG | GPIO_PORTB | GPIO_PIN10)
+#define GPIO_ADC1_IN11_2    (GPIO_ANALOG | GPIO_PORTB | GPIO_PIN7)
+#define GPIO_ADC1_IN15_1    (GPIO_ANALOG | GPIO_PORTB | GPIO_PIN11)
+#define GPIO_ADC1_IN15_2    (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN11)
+#define GPIO_ADC1_IN16_1    (GPIO_ANALOG | GPIO_PORTB | GPIO_PIN12)
+#define GPIO_ADC1_IN16_2    (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN12)
+#define GPIO_ADC1_IN17_1    (GPIO_ANALOG | GPIO_PORTC | GPIO_PIN4)
+#define GPIO_ADC1_IN17_2    (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN13)
+#define GPIO_ADC1_IN18_1    (GPIO_ANALOG | GPIO_PORTC | GPIO_PIN5)
+#define GPIO_ADC1_IN18_2    (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN14)
 
 /* TODO: DAC */
 

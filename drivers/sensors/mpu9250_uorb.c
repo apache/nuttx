@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/mpu9250_uorb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -318,7 +320,7 @@ struct mpu9250_sensor_s
   bool                      enabled;
   float                     scale;
   float                     adj[3];
-  unsigned long             interval;
+  uint32_t                  interval;
   FAR void  *dev; /* The pointer to common device data of mpu9250 */
 };
 
@@ -340,7 +342,7 @@ struct mpu9250_dev_s
 
 static int mpu9250_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                 FAR struct file *filep,
-                                FAR unsigned long *period_us);
+                                FAR uint32_t *period_us);
 static int mpu9250_activate(FAR struct sensor_lowerhalf_s *lower,
                             FAR struct file *filep, bool enable);
 static int mpu9250_control(FAR struct sensor_lowerhalf_s *lower,
@@ -374,9 +376,11 @@ static const struct sensor_ops_s g_mpu9250_ops =
   mpu9250_set_interval, /* set_interval */
   NULL,                 /* batch */
   NULL,                 /* fetch */
+  NULL,                 /* flush */
   NULL,                 /* selftest */
   NULL,                 /* set_calibvalue */
   NULL,                 /* calibrate */
+  NULL,                 /* get_info */
   mpu9250_control       /* control */
 };
 
@@ -432,7 +436,7 @@ static int mpu9250_activate(FAR struct sensor_lowerhalf_s *lower,
 
 static int mpu9250_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                 FAR struct file *filep,
-                                FAR unsigned long *interval)
+                                FAR uint32_t *interval)
 {
   FAR struct mpu9250_sensor_s *priv = (FAR struct mpu9250_sensor_s *)lower;
 
@@ -924,7 +928,8 @@ static inline int mpu9250_modify_reg(FAR struct mpu9250_dev_s *dev,
 static inline int mpu9250_read_imu(FAR struct mpu9250_dev_s *dev,
                                    FAR struct sensor_data_s *buf)
 {
-  return mpu9250_read_reg(dev, ACCEL_XOUT_H, (uint8_t *) buf, sizeof(*buf));
+  return mpu9250_read_reg(dev, ACCEL_XOUT_H, (FAR uint8_t *)buf,
+                          sizeof(*buf));
 }
 
 /* mpu9250_read_pwr_mgmt_1()
@@ -941,7 +946,7 @@ static inline uint8_t mpu9250_read_pwr_mgmt_1(FAR struct mpu9250_dev_s *dev)
 }
 
 static inline int mpu9250_write_signal_reset(FAR struct mpu9250_dev_s *dev,
-                                                  uint8_t val)
+                                             uint8_t val)
 {
   return mpu9250_write_reg(dev, SIGNAL_PATH_RESET, &val, sizeof(val));
 }
@@ -977,7 +982,7 @@ static inline int mpu9250_write_fifo_en(FAR struct mpu9250_dev_s *dev,
 }
 
 /****************************************************************************
- * mpu9250_write_gyro_range() :
+ * Name: mpu9250_write_gyro_range()
  *
  * Sets the @fs_sel bit in GYRO_CONFIG to the value provided. Per the
  * datasheet, the meaning of @fs_sel is as follows:
@@ -992,6 +997,7 @@ static inline int mpu9250_write_fifo_en(FAR struct mpu9250_dev_s *dev,
  *         1 -> ±  500 deg/sec
  *         2 -> ± 1000 deg/sec
  *         3 -> ± 2000 deg/sec
+ *
  ****************************************************************************/
 
 static inline int mpu9250_write_gyro_range(FAR struct mpu9250_dev_s *dev,
@@ -1002,7 +1008,7 @@ static inline int mpu9250_write_gyro_range(FAR struct mpu9250_dev_s *dev,
 }
 
 /****************************************************************************
- * mpu9250_write_accel_range() :
+ * Name: mpu9250_write_accel_range()
  *
  * Sets the @afs_sel bit in ACCEL_CONFIG to the value provided. Per
  * the datasheet, the meaning of @afs_sel is as follows:
@@ -1017,6 +1023,7 @@ static inline int mpu9250_write_gyro_range(FAR struct mpu9250_dev_s *dev,
  *         1 -> ±  4 g
  *         2 -> ±  8 g
  *         3 -> ± 16 g
+ *
  ****************************************************************************/
 
 static inline int mpu9250_write_accel_range(FAR struct mpu9250_dev_s *dev,
@@ -1031,6 +1038,7 @@ static inline int mpu9250_write_accel_range(FAR struct mpu9250_dev_s *dev,
  *
  *    EXT_SYNC_SET  : frame sync bit position
  *    DLPF_CFG      : digital low-pass filter bandwidth
+ *
  ****************************************************************************/
 
 static inline int mpu9250_write_config(FAR struct mpu9250_dev_s *dev,
@@ -1046,6 +1054,7 @@ static inline int mpu9250_write_config(FAR struct mpu9250_dev_s *dev,
  *
  *    accel_fchoice_b  : he inverted version of accel_fchoice
  *    A_DLPF_CFG      : Accelerometer low pass filter setting
+ *
  ****************************************************************************/
 
 static inline int mpu9250_write_config2(FAR struct mpu9250_dev_s *dev,
@@ -1066,6 +1075,7 @@ static inline int mpu9250_write_config2(FAR struct mpu9250_dev_s *dev,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int mpu9250_initialize(FAR struct mpu9250_dev_s *dev)
@@ -1101,7 +1111,7 @@ static int mpu9250_initialize(FAR struct mpu9250_dev_s *dev)
 
   do
     {
-      nxsig_usleep(50000);            /* usecs (arbitrary) */
+      nxsched_usleep(50000);            /* usecs (arbitrary) */
     }
   while (mpu9250_read_pwr_mgmt_1(dev) & PWR_MGMT_1_DEVICE_RESET);
 
@@ -1114,7 +1124,7 @@ static int mpu9250_initialize(FAR struct mpu9250_dev_s *dev)
       goto errout;
     }
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* Disable SLEEP, use PLL with z-axis clock source */
 
@@ -1125,7 +1135,7 @@ static int mpu9250_initialize(FAR struct mpu9250_dev_s *dev)
       goto errout;
     }
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* Disable low-power mode, enable all gyros and accelerometers */
 
@@ -1136,7 +1146,7 @@ static int mpu9250_initialize(FAR struct mpu9250_dev_s *dev)
       goto errout;
     }
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* clear first, and separate *_RST from *_EN */
 
@@ -1147,7 +1157,7 @@ static int mpu9250_initialize(FAR struct mpu9250_dev_s *dev)
       goto errout;
     }
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   ret = mpu9250_write_fifo_en(dev, 0);
   if (ret < 0)
@@ -1156,7 +1166,7 @@ static int mpu9250_initialize(FAR struct mpu9250_dev_s *dev)
       goto errout;
     }
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* Reset I2C Master module. */
 
@@ -1169,7 +1179,7 @@ static int mpu9250_initialize(FAR struct mpu9250_dev_s *dev)
       goto errout;
     }
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* Disable i2c if we're on spi. */
 
@@ -1192,7 +1202,7 @@ static int mpu9250_initialize(FAR struct mpu9250_dev_s *dev)
       goto errout;
     }
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* default No FSYNC, set accel LPF at 184 Hz, gyro LPF at 188 Hz in
    * menuconfig
@@ -1206,7 +1216,7 @@ static int mpu9250_initialize(FAR struct mpu9250_dev_s *dev)
       goto errout;
     }
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* default ± 1000 deg/sec in menuconfig */
 
@@ -1217,7 +1227,7 @@ static int mpu9250_initialize(FAR struct mpu9250_dev_s *dev)
       goto errout;
     }
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* default ± 8g in menuconfig */
 
@@ -1228,7 +1238,7 @@ static int mpu9250_initialize(FAR struct mpu9250_dev_s *dev)
       goto errout;
     }
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* Accelerometer low pass filter setting */
 
@@ -1240,7 +1250,7 @@ static int mpu9250_initialize(FAR struct mpu9250_dev_s *dev)
       goto errout;
     }
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* clear INT on any read (we aren't using that pin right now) */
 
@@ -1251,7 +1261,7 @@ static int mpu9250_initialize(FAR struct mpu9250_dev_s *dev)
       goto errout;
     }
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* Initialize ak8963 magnetometer inside the IMU */
 
@@ -1278,6 +1288,7 @@ errout:
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ak8963_initialize(FAR struct mpu9250_dev_s *dev,
@@ -1306,7 +1317,7 @@ static int ak8963_initialize(FAR struct mpu9250_dev_s *dev,
       return ret;
     }
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* First set power-down mode */
 
@@ -1323,7 +1334,7 @@ static int ak8963_initialize(FAR struct mpu9250_dev_s *dev,
       return ret;
     }
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* get mag version ID */
 
@@ -1361,7 +1372,7 @@ static int ak8963_initialize(FAR struct mpu9250_dev_s *dev,
       return ret;
     }
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* Slave 0 provides ST1, mag data, and ST2 data in a bulk transfer of
    * 8 bytes of data.  Use the address of ST1 in SLV0_REG as the beginning
@@ -1392,7 +1403,7 @@ static int ak8963_initialize(FAR struct mpu9250_dev_s *dev,
       return ret;
     }
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* Enable reading of the mag every n samples, dividing down from the
    * output data rate provided by the caller.
@@ -1406,7 +1417,7 @@ static int ak8963_initialize(FAR struct mpu9250_dev_s *dev,
       return ret;
     }
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* Enable delayed I2C transfers for the mag on Slave 0 registers. */
 
@@ -1418,7 +1429,7 @@ static int ak8963_initialize(FAR struct mpu9250_dev_s *dev,
       return ret;
     }
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   return 0;
 }
@@ -1433,6 +1444,7 @@ static int ak8963_initialize(FAR struct mpu9250_dev_s *dev,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int get_mag_adjustment(FAR struct mpu9250_dev_s *dev)
@@ -1451,7 +1463,7 @@ static int get_mag_adjustment(FAR struct mpu9250_dev_s *dev)
       return ret;
     }
 
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
 
   /* Enable FUSE ROM, since the sensitivity adjustment data is stored in
    * compass registers 0x10, 0x11 and 0x12 which is only accessible in Fuse
@@ -1465,7 +1477,7 @@ static int get_mag_adjustment(FAR struct mpu9250_dev_s *dev)
       return ret;
     }
 
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
 
   /* Get compass calibration register 0x10, 0x11, 0x12 store into context */
 
@@ -1494,7 +1506,7 @@ static int get_mag_adjustment(FAR struct mpu9250_dev_s *dev)
       return ret;
     }
 
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
 
   return 0;
 }
@@ -1511,6 +1523,7 @@ static int get_mag_adjustment(FAR struct mpu9250_dev_s *dev)
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int read_ak8963_reg(FAR struct mpu9250_dev_s *dev,
@@ -1565,7 +1578,7 @@ static int read_ak8963_reg(FAR struct mpu9250_dev_s *dev,
 
   do
     {
-      nxsig_usleep(1000);
+      nxsched_usleep(1000);
       ret = mpu9250_read_reg(dev, I2C_MST_STATUS,  &b, sizeof(b));
       if (ret < 0)
         {
@@ -1603,6 +1616,7 @@ static int read_ak8963_reg(FAR struct mpu9250_dev_s *dev,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int write_ak8963_reg(FAR struct mpu9250_dev_s *dev,
@@ -1661,13 +1675,13 @@ static int write_ak8963_reg(FAR struct mpu9250_dev_s *dev,
       return ret;
     }
 
-  /* Continuously check I2C_MST_STATUS regsiter value for the completion
+  /* Continuously check I2C_MST_STATUS register value for the completion
    * of I2C transfer until timeout.
    */
 
   do
     {
-      nxsig_usleep(1000);
+      nxsched_usleep(1000);
       ret = mpu9250_read_reg(dev, I2C_MST_STATUS, &b, sizeof(b));
       if (ret < 0)
         {
@@ -1695,6 +1709,7 @@ static int write_ak8963_reg(FAR struct mpu9250_dev_s *dev,
  *
  * Return:
  *   do nothing if Big endian, swap H and L byte if little endian
+ *
  ****************************************************************************/
 
 static uint16_t swap16(uint16_t val)
@@ -1717,6 +1732,7 @@ static uint16_t swap16(uint16_t val)
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static void mpu9250_accel_data(FAR struct mpu9250_sensor_s *priv,
@@ -1755,6 +1771,7 @@ static void mpu9250_accel_data(FAR struct mpu9250_sensor_s *priv,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static void mpu9250_gyro_data(FAR struct mpu9250_sensor_s *priv,
@@ -1793,6 +1810,7 @@ static void mpu9250_gyro_data(FAR struct mpu9250_sensor_s *priv,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static void mpu9250_mag_data(FAR struct mpu9250_sensor_s *priv,
@@ -1844,6 +1862,7 @@ static void mpu9250_mag_data(FAR struct mpu9250_sensor_s *priv,
  * Parameter:
  *   argc - Number of arguments
  *   argv - Pointer to argument list
+ *
  ****************************************************************************/
 
 static int mpu9250_thread(int argc, FAR char **argv)
@@ -1896,7 +1915,7 @@ static int mpu9250_thread(int argc, FAR char **argv)
 
       min_interval = MIN(accel->interval, gyro->interval);
       min_interval = MIN(min_interval, mag->interval);
-      nxsig_usleep(min_interval);
+      nxsched_usleep(min_interval);
     }
 
   return OK;

@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm/src/armv7-m/Toolchain.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -22,22 +24,44 @@
 
 ifeq ($(CONFIG_ARCH_CORTEXM4),y)
   TOOLCHAIN_ARM7EM   := y
-  TOOLCHAIN_MTUNE    := -mtune=cortex-m4
-  TOOLCHAIN_MARCH    := -march=armv7e-m
-  LLVM_CPUTYPE       := cortex-m4
-  ifeq ($(CONFIG_ARCH_FPU),y)
-    TOOLCHAIN_MFLOAT := -mfpu=fpv4-sp-d16
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    TOOLCHAIN_MTUNE  := -cpu=cortexm4
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      ifeq ($(CONFIG_ARCH_DPFPU),y)
+        TOOLCHAIN_MFLOAT := -fpu=vfpv4
+      else
+        TOOLCHAIN_MFLOAT := -fpu=vfpv4_d16
+      endif
+    endif
+  else
+    TOOLCHAIN_MTUNE    := -mtune=cortex-m4
+    TOOLCHAIN_MARCH    := -march=armv7e-m
+    LLVM_CPUTYPE       := cortex-m4
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      TOOLCHAIN_MFLOAT := -mfpu=fpv4-sp-d16
+    endif
   endif
 else ifeq ($(CONFIG_ARCH_CORTEXM7),y)
   TOOLCHAIN_ARM7EM   := y
-  TOOLCHAIN_MTUNE    := -mtune=cortex-m7
-  TOOLCHAIN_MARCH    := -march=armv7e-m
-  LLVM_CPUTYPE       := cortex-m7
-  ifeq ($(CONFIG_ARCH_FPU),y)
-    ifeq ($(CONFIG_ARCH_DPFPU),y)
-      TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16
-    else
-      TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    TOOLCHAIN_MTUNE  := -cpu=cortexm7
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      ifeq ($(CONFIG_ARCH_DPFPU),y)
+        TOOLCHAIN_MFLOAT := -fpu=vfpv5
+      else
+        TOOLCHAIN_MFLOAT := -fpu=vfpv5_d16
+      endif
+    endif
+  else
+    TOOLCHAIN_MTUNE  := -mtune=cortex-m7
+    TOOLCHAIN_MARCH  := -march=armv7e-m
+    LLVM_CPUTYPE     := cortex-m7
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      ifeq ($(CONFIG_ARCH_DPFPU),y)
+        TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16
+      else
+        TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16
+      endif
     endif
   endif
 else # ifeq ($(CONFIG_ARCH_CORTEXM3),y)
@@ -50,14 +74,28 @@ endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
   LLVM_ABITYPE := eabihf
-  ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
-    TOOLCHAIN_MFLOAT += -mfloat-abi=softfp
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
+      TOOLCHAIN_MFLOAT += -fsoft
+    else ifeq ($(CONFIG_ARCH_DPFPU),y)
+      TOOLCHAIN_MFLOAT += -fhard
+    else
+      TOOLCHAIN_MFLOAT += -fsingle
+    endif
   else
-    TOOLCHAIN_MFLOAT += -mfloat-abi=hard
+    ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
+      TOOLCHAIN_MFLOAT += -mfloat-abi=softfp
+    else
+      TOOLCHAIN_MFLOAT += -mfloat-abi=hard
+    endif
   endif
 else
-  LLVM_ABITYPE 		 := eabi
-  TOOLCHAIN_MFLOAT += -mfloat-abi=soft
+  LLVM_ABITYPE := eabi
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),)
+    TOOLCHAIN_MFLOAT += -mfloat-abi=soft
+  else
+    TOOLCHAIN_MFLOAT += -fsoft
+  endif
 endif
 
 ifeq ($(CONFIG_ARCH_CORTEXM3),y)
@@ -107,6 +145,21 @@ else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
   else # ifeq ($(CONFIG_ARCH_CORTEXM3),y)
     LDFLAGS += --cpu=Cortex-M3
   endif
+
+else ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+  MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mknulldeps.sh
+
+  undefine PREPROCESS
+  define PREPROCESS
+    $(ECHO_BEGIN)"CPP: $1->$2 "
+    $(Q) $(CPP) $(CPPFLAGS) $($(strip $1)_CPPFLAGS) -filetype.cpp $1 -o $2
+    $(ECHO_END)
+  endef
+
+  undefine ARCHIVE
+  define ARCHIVE
+    $(AR) $2 -archive -o $1
+  endef
 
 endif
 

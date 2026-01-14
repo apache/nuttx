@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/viewtool-stm32f107/src/viewtool_stm32f107.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -296,7 +298,7 @@
 #define GPIO_MPL115A_CS   (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
                            GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN6)
 
-/* FT80x GUI Discrete I/O (See README.txt for details):
+/* FT80x GUI Discrete I/O:
  *
  * ------ ----------- --------------------
  * NAME   VIEWTOOL    STM32
@@ -321,7 +323,7 @@
 #define GPIO_FT80_PD      (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
                            GPIO_OUTPUT_CLEAR | GPIO_PORTC| GPIO_PIN5)
 
-/* MAX3421E USB HOST Discrete I/O (See README.txt for details):
+/* MAX3421E USB HOST Discrete I/O:
  *
  * ------ ----------- --------------------
  * NAME   VIEWTOOL    STM32

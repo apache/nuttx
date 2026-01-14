@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/pipes/pipe.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -48,8 +50,6 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int pipe_close(FAR struct file *filep);
-
 static int pipe_mmap(FAR struct file *filep,
                      FAR struct mm_map_entry_s *entry);
 
@@ -60,7 +60,7 @@ static int pipe_mmap(FAR struct file *filep,
 static const struct file_operations g_pipe_fops =
 {
   pipecommon_open,     /* open */
-  pipe_close,          /* close */
+  pipecommon_close,    /* close */
   pipecommon_read,     /* read */
   pipecommon_write,    /* write */
   NULL,                /* seek */
@@ -98,31 +98,6 @@ static inline int pipe_allocate(void)
     }
 
   nxmutex_unlock(&g_pipelock);
-  return ret;
-}
-
-/****************************************************************************
- * Name: pipe_close
- ****************************************************************************/
-
-static int pipe_close(FAR struct file *filep)
-{
-  FAR struct inode *inode    = filep->f_inode;
-  FAR struct pipe_dev_s *dev = inode->i_private;
-  int ret;
-
-  DEBUGASSERT(dev);
-
-  /* Perform common close operations */
-
-  ret = pipecommon_close(filep);
-  if (ret == 0 && inode->i_crefs == 1)
-    {
-      /* Release the pipe when there are no further open references to it. */
-
-      pipecommon_freedev(dev);
-    }
-
   return ret;
 }
 
@@ -169,6 +144,8 @@ static int pipe_register(size_t bufsize, int flags,
     {
       return -ENOMEM;
     }
+
+  PIPE_UNLINK(dev->d_flags);
 
   /* Register the pipe device */
 

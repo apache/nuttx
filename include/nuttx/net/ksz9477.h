@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/net/ksz9477.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -85,7 +87,7 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_NET_KSZ9477_I2C
-int ksz9477_i2c_init(struct i2c_master_s *i2c_bus,
+int ksz9477_i2c_init(FAR struct i2c_master_s *i2c_bus,
                      ksz9477_port_t master_port);
 #else
 #  error Only I2c interface currently supported

@@ -30,7 +30,7 @@ PROTECTED mode build.
 - Interrupt handling: irq_attach() now includes an argument of type
 xcpt_t that retained with the handler address. That argument is
 then provided to the interrupt handler when the interrupt occurs.
-The common parameter passing replaces the ad hoc parmater passing
+The common parameter passing replaces the ad hoc parameter passing
 implemented in current drivers. From Mark Schulte.
 - Adapt many drivers to utilize the IRQ argument feature.
 - All functions that used to return an xcpt_t old handler value, now
@@ -69,7 +69,7 @@ multiple low-priority work queues are used.
 * Other Common Device Drivers:
 
 - Add capabilities() method to SDIO interface. Remove
-CONFIG_SDIO_WIDTH_D1_ONLY. That should not be a global propertie,
+CONFIG_SDIO_WIDTH_D1_ONLY. That should not be a global property,
 but rather a capability/limitation of single slot when there may be
 multiple slots.
 - Removed dmasupported() method from the SDIO interface. That is now
@@ -207,7 +207,7 @@ sync.
 * NSH: apps/nshlib:
 
 - NSH: Add support for the 'ln' command.
-- NSH ls command: if node is a symobolic link, use readlink() to get
+- NSH ls command: if node is a symbolic link, use readlink() to get
 and the display the target of the symbolic link.
 - NSH: Add readlink command.
 
@@ -374,7 +374,7 @@ David Sidrane.
 - Kinetis Ethernet: Add #define for number of loops for auto
 negotiation to complete. From Marc Rechté.
 - Kinetis Werial: Fixed up_rxint - did not disable the RX
-interuppts. There was an OR where and AND NOT was needed. From
+interrupts. There was an OR where and AND NOT was needed. From
 David Sidrane.
 
 * NXP/Freescale LPC43xx:

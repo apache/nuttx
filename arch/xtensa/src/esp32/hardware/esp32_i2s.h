@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/esp32/hardware/esp32_i2s.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1639,7 +1641,7 @@
 
 /* I2S_TX_STOP_EN : R/W; bitpos: [8]; default: 0;
  * Set this bit to stop disable output BCK signal and WS signal when tx FIFO
- * is emtpy
+ * is empty.
  */
 
 #define I2S_TX_STOP_EN    (BIT(8))

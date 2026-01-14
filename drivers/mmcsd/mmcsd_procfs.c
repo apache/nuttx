@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/mmcsd/mmcsd_procfs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -334,6 +336,7 @@ static ssize_t mmcsd_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct mmcsd_file_s *mmcsdfile = filep->f_priv;
   FAR struct inode *inode;
+  FAR struct mmcsd_part_s *part;
   char path[32];
   ssize_t ret;
 
@@ -345,7 +348,8 @@ static ssize_t mmcsd_read(FAR struct file *filep, FAR char *buffer,
     }
 
   DEBUGASSERT(filep->f_priv);
-  ret = mmcsdfile->read(filep, buffer, buflen, inode->i_private);
+  part = inode->i_private;
+  ret = mmcsdfile->read(filep, buffer, buflen, part->priv);
   close_blockdriver(inode);
 
   return ret;

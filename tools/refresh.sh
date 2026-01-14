@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # tools/refresh.sh
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -76,9 +78,11 @@ while [ ! -z "$1" ]; do
     echo "     The architecture directory under nuttx/boards/"
     echo "  <chipname>"
     echo "     The chip family directory under nuttx/boards/<arch>/"
-    echo "  Note1: all configuration is refreshed if <board>:<config> equals all."
-    echo "  Note2: all configuration of arch XYZ is refreshed if \"arch:<namearch>\" is passed"
-    echo "  Note3: all configuration of chip XYZ is refreshed if \"chip:<chipname>\" is passed"
+    echo " "
+    echo "  Note1: all configurations are refreshed if <board>:<config> is replaced with \"all\" keyword" 
+    echo "  Note2: all configurations of arch XYZ are refreshed if \"arch:<namearch>\" is passed"
+    echo "  Note3: all configurations of chip XYZ are refreshed if \"chip:<chipname>\" is passed"
+    echo "  Note4: all configurations of board XYZ are refreshed if \"board:<boardname>\" is passed"
     exit 0
     ;;
   * )
@@ -114,50 +118,58 @@ fi
 
 if [ "X${CONFIGS}" == "Xall" ]; then
   echo "Normalizing all boards!"
-  CONFIGS=`find boards -name defconfig | cut -d'/' -f4,6`
+  CONFIGS=(`find boards -name defconfig | cut -d'/' -f4,6`)
 else
   if [[ "X${CONFIGS}" == "Xarch:"* ]]; then
     IFS=: read -r atype archname <<< "${CONFIGS}"
     ARCH=$archname
     echo "Normalizing all boards in arch: ${ARCH} !"
-    CONFIGS=`find boards/${ARCH} -name defconfig | cut -d'/' -f4,6`
+    CONFIGS=(`find boards/${ARCH} -name defconfig | cut -d'/' -f4,6`)
   else
     if [[ "X${CONFIGS}" == "Xchip:"* ]]; then
       IFS=: read -r atype chipname <<< "${CONFIGS}"
       CHIP=$chipname
       echo "Normalizing all boards in chip: ${CHIP} !"
-      CONFIGS=`find boards/*/${CHIP} -name defconfig | cut -d'/' -f4,6`
+      CONFIGS=(`find boards/*/${CHIP} -name defconfig | cut -d'/' -f4,6`)
+    else
+      if [[ "X${CONFIGS}" == "Xboard:"* ]]; then
+        IFS=: read -r atype boardname <<< "${CONFIGS}"
+        BOARD=$boardname
+        echo "Normalizing all configs in board: ${BOARD} !"
+	# ATTENTION: It assumes we don't have a board with same name in other arch or chip
+        CONFIGS=(`find boards/*/*/${boardname} -name defconfig | cut -d'/' -f4,6`)
+      fi
     fi
   fi
 fi
 
-for CONFIG in ${CONFIGS}; do
-  echo "  Normalize ${CONFIG}"
+for i in ${!CONFIGS[@]}; do
+  echo "  [$((${i} + 1))/${#CONFIGS[@]}] Normalize ${CONFIGS[$i]}"
 
   # Set up the environment
 
-  CONFIGSUBDIR=`echo ${CONFIG} | cut -s -d':' -f2`
+  CONFIGSUBDIR=`echo ${CONFIGS[$i]} | cut -s -d':' -f2`
   if [ -z "${CONFIGSUBDIR}" ]; then
-    CONFIGSUBDIR=`echo ${CONFIG} | cut -s -d'/' -f2`
+    CONFIGSUBDIR=`echo ${CONFIGS[$i]} | cut -s -d'/' -f2`
     if [ -z "${CONFIGSUBDIR}" ]; then
-      echo "ERROR: Malformed configuration: ${CONFIG}"
+      echo "ERROR: Malformed configuration: ${CONFIGS[$i]}"
       echo $USAGE
       echo $ADVICE
       exit 1
     else
-      BOARDSUBDIR=`echo ${CONFIG} | cut -d'/' -f1`
+      BOARDSUBDIR=`echo ${CONFIGS[$i]} | cut -d'/' -f1`
     fi
   else
-    BOARDSUBDIR=`echo ${CONFIG} | cut -d':' -f1`
+    BOARDSUBDIR=`echo ${CONFIGS[$i]} | cut -d':' -f1`
   fi
 
-  BOARDDIR=${CONFIG}
+  BOARDDIR=${CONFIGS[$i]}
   if [ ! -d $BOARDDIR ]; then
     BOARDDIR="${CWD}/${BOARDDIR}"
   fi
 
   if [ -d $BOARDDIR ]; then
-    CONFIGSUBDIR=`basename ${CONFIG}`
+    CONFIGSUBDIR=`basename ${CONFIGS[$i]}`
     BOARDDIR=$(dirname `dirname ${BOARDDIR}`)
   else
     BOARDDIR=boards/*/*/$BOARDSUBDIR
@@ -203,6 +215,12 @@ for CONFIG in ${CONFIGS}; do
         exit 1
       fi
     fi
+  fi
+
+  # skip refresh if defconfig contains `#include`
+  if grep -q "#include" $DEFCONFIG; then
+    echo "Note: skipping refresh for debug defconfig."
+    continue
   fi
 
   # Copy the .config and Make.defs to the toplevel directory

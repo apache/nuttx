@@ -37,6 +37,9 @@
 #include "esp32s3_irq.h"
 #include "esp32s3_gpio.h"
 
+#include "soc/periph_defs.h"
+#include "esp_private/periph_ctrl.h"
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -749,7 +752,7 @@ static int tim_setisr(struct esp32s3_tim_dev_s *dev, xcpt_t handler,
 
       /* Set up to receive peripheral interrupts on the current CPU */
 
-      priv->core = up_cpu_index();
+      priv->core = this_cpu();
       priv->cpuint = esp32s3_setup_irq(priv->core, priv->periph,
                                        priv->priority, ESP32S3_CPUINT_LEVEL);
       if (priv->cpuint < 0)
@@ -967,6 +970,15 @@ struct esp32s3_tim_dev_s *esp32s3_tim_init(int timer)
           tmrerr("Unsupported TIMER %d\n", timer);
           goto errout;
         }
+    }
+
+  if (tim->gid == ESP32S3_TIM_GROUP0)
+    {
+      periph_module_enable(PERIPH_TIMG0_MODULE);
+    }
+  else
+    {
+      periph_module_enable(PERIPH_TIMG1_MODULE);
     }
 
   /* Verify if it is in use */

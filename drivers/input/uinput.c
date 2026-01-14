@@ -1,17 +1,23 @@
 /****************************************************************************
  * drivers/input/uinput.c
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * SPDX-License-Identifier: Apache-2.0
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
  ****************************************************************************/
 
 /****************************************************************************
@@ -35,7 +41,7 @@
 #include <nuttx/list.h>
 
 #ifdef CONFIG_UINPUT_RPMSG
-#  include <nuttx/rptun/openamp.h>
+#  include <nuttx/rpmsg/rpmsg.h>
 #endif
 
 /****************************************************************************
@@ -303,8 +309,7 @@ static ssize_t uinput_touch_notify(FAR void *uinput_lower,
 {
   FAR struct uinput_touch_lowerhalf_s *utcs_lower =
     (FAR struct uinput_touch_lowerhalf_s *)uinput_lower;
-  FAR const struct touch_sample_s *sample =
-    (FAR const struct touch_sample_s *)buffer;
+  FAR struct touch_sample_s *sample = (FAR struct touch_sample_s *)buffer;
 
   touch_event(utcs_lower->lower.priv, sample);
   return buflen;

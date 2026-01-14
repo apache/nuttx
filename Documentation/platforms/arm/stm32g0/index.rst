@@ -29,7 +29,7 @@ SYSCFG      Yes
 DMA         Yes
 DMAMUX      Yes
 EXTI        Yes
-CRC         Yes
+CRC         No
 ADC         Yes
 DAC         No
 VREFBUF     ?
@@ -39,8 +39,8 @@ AES         Yes
 TIM         Yes
 LPTIM       No
 IRTIM       No
-IWDG        No
-WWDG        No
+IWDG        Yes
+WWDG        Yes
 RTC         No
 TAMP        No
 I2C         Yes

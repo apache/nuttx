@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32/lilygo_tbeam_lora_gps/src/esp32_sx127x.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -127,7 +129,7 @@ static void sx127x_chip_reset(void)
 
   /* Wait 1 ms */
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* Set pin to high */
 
@@ -135,7 +137,7 @@ static void sx127x_chip_reset(void)
 
   /* Wait 10 ms */
 
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
 }
 
 /****************************************************************************

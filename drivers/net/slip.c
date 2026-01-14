@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/net/slip.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -297,7 +299,7 @@ static void slip_transmit(FAR struct slip_driver_s *self)
                            self->txlen - self->txsent);
           if (ssz <= 0)
             {
-              nxsig_usleep(10000);
+              nxsched_usleep(10000);
               i++;
               continue;
             }
@@ -748,7 +750,7 @@ static void slip_interrupt_work(FAR void *arg)
    * thread has been configured.
    */
 
-  net_lock();
+  netdev_lock(&self->dev);
 
   /* Process pending Ethernet interrupts */
 
@@ -796,7 +798,7 @@ static void slip_interrupt_work(FAR void *arg)
       slip_txdone(self);
     }
 
-  net_unlock();
+  netdev_unlock(&self->dev);
 }
 
 /****************************************************************************
@@ -897,7 +899,7 @@ static void slip_txavail_work(FAR void *arg)
    * thread has been configured.
    */
 
-  net_lock();
+  netdev_lock(&self->dev);
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -915,7 +917,7 @@ static void slip_txavail_work(FAR void *arg)
         }
     }
 
-  net_unlock();
+  netdev_unlock(&self->dev);
 }
 
 /****************************************************************************

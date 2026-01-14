@@ -1,6 +1,8 @@
 ############################################################################
 # boards/risc-v/bl602/bl602evb/scripts/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -29,7 +31,6 @@ LDSCRIPT = ld.script
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
 ARCHCPUFLAGS += -mno-relax
-ARCHCXXFLAGS += -pipe
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 
 ifeq ($(CONFIG_STACK_OVERFLOW_CHECK),y)
@@ -38,7 +39,7 @@ endif
 
 ARCHDEFINES += -DARCH_RISCV
 
-CFLAGS = $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CFLAGS = $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
 CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
@@ -47,8 +48,4 @@ AFLAGS += $(CFLAGS) -D__ASSEMBLY__
 
 # ELF module definitions
 
-CELFFLAGS = $(CFLAGS)
-CXXELFFLAGS = $(CXXFLAGS)
-
-LDELFFLAGS = -melf32lriscv -r -e main
-LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)
+LDELFFLAGS += -melf32lriscv

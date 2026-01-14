@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/wireless/cc1101.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -659,7 +661,7 @@ void cc1101_access_begin(FAR struct cc1101_dev_s *dev)
     }
   else
     {
-      nxsig_usleep(150 * 1000);
+      nxsched_usleep(150 * 1000);
     }
 }
 
@@ -932,7 +934,7 @@ void cc1101_setpacketctrl(struct cc1101_dev_s *dev)
  *
  ****************************************************************************/
 
-FAR int cc1101_init2(FAR struct cc1101_dev_s *dev)
+int cc1101_init2(FAR struct cc1101_dev_s *dev)
 {
   int ret;
 

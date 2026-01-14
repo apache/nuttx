@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/clk/clk_phase.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,7 +44,7 @@ static int clk_phase_get_phase(FAR struct clk_s *clk)
   uint32_t val;
 
   val = (clk_read(phase->reg) >> phase->shift) & MASK(phase->width);
-  return DIV_ROUND_CLOSEST(360 * val, MASK(phase->width) + 1);
+  return div_round_closest(360 * val, MASK(phase->width) + 1);
 }
 
 static int clk_phase_set_phase(FAR struct clk_s *clk, int degrees)
@@ -51,7 +53,7 @@ static int clk_phase_set_phase(FAR struct clk_s *clk, int degrees)
   uint32_t pha;
   uint32_t val;
 
-  pha = DIV_ROUND_CLOSEST((MASK(phase->width) + 1) * degrees, 360);
+  pha = div_round_closest((MASK(phase->width) + 1) * degrees, 360);
 
   if (pha > MASK(phase->width))
     {

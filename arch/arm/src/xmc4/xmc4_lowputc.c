@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/xmc4/xmc4_lowputc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -110,30 +112,30 @@
 
 #define UART_OVERSAMPLING    16
 
-#if defined(CONFIG_XMC4_USIC0_CHAN0_ISUART) 
-#if CONFIG_XMC4_USIC0_CHAN0_TX_BUFFER_SIZE  < 2 \
+#if defined(CONFIG_XMC4_USIC0_CHAN0_ISUART)
+#if CONFIG_XMC4_USIC0_CHAN0_TX_BUFFER_SIZE < 2 \
     || CONFIG_XMC4_USIC0_CHAN0_TX_BUFFER_SIZE > 64 \
     || !IS_POWER_OF_2(CONFIG_XMC4_USIC0_CHAN0_TX_BUFFER_SIZE)
 #  error Tx Buffer Size should be a power of 2 between 2 and 64
 #endif
 
-#if CONFIG_XMC4_USIC0_CHAN0_RX_BUFFER_SIZE  < 2 \
-    || CONFIG_XMC4_USIC0_CHAN0_RX_BUFFER_SIZE > 64  \
+#if CONFIG_XMC4_USIC0_CHAN0_RX_BUFFER_SIZE < 2 \
+    || CONFIG_XMC4_USIC0_CHAN0_RX_BUFFER_SIZE > 64 \
     || !IS_POWER_OF_2(CONFIG_XMC4_USIC0_CHAN0_RX_BUFFER_SIZE)
 #  error Rx Buffer Size should be a power of 2 between 2 and 64
 #endif
 
 #endif
 
-#if defined(CONFIG_XMC4_USIC0_CHAN1_ISUART) 
-#if CONFIG_XMC4_USIC0_CHAN1_TX_BUFFER_SIZE  < 2 \
+#if defined(CONFIG_XMC4_USIC0_CHAN1_ISUART)
+#if CONFIG_XMC4_USIC0_CHAN1_TX_BUFFER_SIZE < 2 \
     || CONFIG_XMC4_USIC0_CHAN1_TX_BUFFER_SIZE > 64 \
     || !IS_POWER_OF_2(CONFIG_XMC4_USIC0_CHAN1_TX_BUFFER_SIZE)
 #  error Tx Buffer Size should be a power of 2 between 2 and 64
 #endif
 
-#if CONFIG_XMC4_USIC0_CHAN1_RX_BUFFER_SIZE  < 2 \
-    || CONFIG_XMC4_USIC0_CHAN1_RX_BUFFER_SIZE > 64  \
+#if CONFIG_XMC4_USIC0_CHAN1_RX_BUFFER_SIZE < 2 \
+    || CONFIG_XMC4_USIC0_CHAN1_RX_BUFFER_SIZE > 64 \
     || !IS_POWER_OF_2(CONFIG_XMC4_USIC0_CHAN1_RX_BUFFER_SIZE)
 #  error Rx Buffer Size should be a power of 2 between 2 and 64
 #endif
@@ -142,43 +144,43 @@
 
 #if defined(CONFIG_XMC4_USIC0_CHAN0_ISUART) && defined(CONFIG_XMC4_USIC0_CHAN1_ISUART)
 #if CONFIG_XMC4_USIC0_CHAN0_TX_BUFFER_SIZE + CONFIG_XMC4_USIC0_CHAN0_RX_BUFFER_SIZE + \
-    CONFIG_XMC4_USIC0_CHAN1_TX_BUFFER_SIZE + CONFIG_XMC4_USIC0_CHAN1_RX_BUFFER_SIZE > 64 
+    CONFIG_XMC4_USIC0_CHAN1_TX_BUFFER_SIZE + CONFIG_XMC4_USIC0_CHAN1_RX_BUFFER_SIZE > 64
 #  error The sum of Rx and Tx Buffers sizes should be inferior to 64
 #endif
 #endif
 
-#if defined(CONFIG_XMC4_USIC1_CHAN0_ISUART) 
-#if CONFIG_XMC4_USIC1_CHAN0_TX_BUFFER_SIZE  < 2 \
+#if defined(CONFIG_XMC4_USIC1_CHAN0_ISUART)
+#if CONFIG_XMC4_USIC1_CHAN0_TX_BUFFER_SIZE < 2 \
     || CONFIG_XMC4_USIC1_CHAN0_TX_BUFFER_SIZE > 64 \
     || !IS_POWER_OF_2(CONFIG_XMC4_USIC1_CHAN0_TX_BUFFER_SIZE)
 #  error Tx Buffer Size should be a power of 2 between 2 and 64
 #endif
 
-#if CONFIG_XMC4_USIC1_CHAN0_RX_BUFFER_SIZE  < 2 \
-    || CONFIG_XMC4_USIC1_CHAN0_RX_BUFFER_SIZE > 64  \
+#if CONFIG_XMC4_USIC1_CHAN0_RX_BUFFER_SIZE < 2 \
+    || CONFIG_XMC4_USIC1_CHAN0_RX_BUFFER_SIZE > 64 \
     || !IS_POWER_OF_2(CONFIG_XMC4_USIC1_CHAN0_RX_BUFFER_SIZE)
 #  error Rx Buffer Size should be a power of 2 between 2 and 64
 #endif
 
-#if CONFIG_XMC4_USIC1_CHAN0_TX_BUFFER_SIZE + CONFIG_XMC4_USIC1_CHAN0_RX_BUFFER_SIZE > 64 
+#if CONFIG_XMC4_USIC1_CHAN0_TX_BUFFER_SIZE + CONFIG_XMC4_USIC1_CHAN0_RX_BUFFER_SIZE > 64
 #  error The sum of Rx and Tx Buffer sizes should be inferior to 64
 #endif
 #endif
 
-#if defined(CONFIG_XMC4_USIC1_CHAN1_ISUART) 
-#if CONFIG_XMC4_USIC1_CHAN1_TX_BUFFER_SIZE  < 2 \
+#if defined(CONFIG_XMC4_USIC1_CHAN1_ISUART)
+#if CONFIG_XMC4_USIC1_CHAN1_TX_BUFFER_SIZE < 2 \
     || CONFIG_XMC4_USIC1_CHAN1_TX_BUFFER_SIZE > 64 \
     || !IS_POWER_OF_2(CONFIG_XMC4_USIC1_CHAN1_TX_BUFFER_SIZE)
 #  error Tx Buffer Size should be a power of 2 between 2 and 64
 #endif
 
-#if CONFIG_XMC4_USIC1_CHAN1_RX_BUFFER_SIZE  < 2 \
-    || CONFIG_XMC4_USIC1_CHAN1_RX_BUFFER_SIZE > 64  \
+#if CONFIG_XMC4_USIC1_CHAN1_RX_BUFFER_SIZE < 2 \
+    || CONFIG_XMC4_USIC1_CHAN1_RX_BUFFER_SIZE > 64 \
     || !IS_POWER_OF_2(CONFIG_XMC4_USIC1_CHAN1_RX_BUFFER_SIZE)
 #  error Rx Buffer Size should be a power of 2 between 2 and 64
 #endif
 
-#if CONFIG_XMC4_USIC1_CHAN1_TX_BUFFER_SIZE + CONFIG_XMC4_USIC1_CHAN1_RX_BUFFER_SIZE > 64 
+#if CONFIG_XMC4_USIC1_CHAN1_TX_BUFFER_SIZE + CONFIG_XMC4_USIC1_CHAN1_RX_BUFFER_SIZE > 64
 #  error The sum of Rx and Tx Buffer sizes should be inferior to 64
 #endif
 #endif
@@ -190,38 +192,38 @@
 #endif
 #endif
 
-#if defined(CONFIG_XMC4_USIC2_CHAN0_ISUART) 
-#if CONFIG_XMC4_USIC2_CHAN0_TX_BUFFER_SIZE  < 2 \
+#if defined(CONFIG_XMC4_USIC2_CHAN0_ISUART)
+#if CONFIG_XMC4_USIC2_CHAN0_TX_BUFFER_SIZE < 2 \
     || CONFIG_XMC4_USIC2_CHAN0_TX_BUFFER_SIZE > 64 \
     || !IS_POWER_OF_2(CONFIG_XMC4_USIC2_CHAN0_TX_BUFFER_SIZE)
 #  error Tx Buffer Size should be a power of 2 between 2 and 64
 #endif
 
-#if CONFIG_XMC4_USIC2_CHAN0_RX_BUFFER_SIZE  < 2 \
-    || CONFIG_XMC4_USIC2_CHAN0_RX_BUFFER_SIZE > 64  \
+#if CONFIG_XMC4_USIC2_CHAN0_RX_BUFFER_SIZE < 2 \
+    || CONFIG_XMC4_USIC2_CHAN0_RX_BUFFER_SIZE > 64 \
     || !IS_POWER_OF_2(CONFIG_XMC4_USIC2_CHAN0_RX_BUFFER_SIZE)
 #  error Rx Buffer Size should be a power of 2 between 2 and 64
 #endif
 
-#if CONFIG_XMC4_USIC2_CHAN0_TX_BUFFER_SIZE + CONFIG_XMC4_USIC2_CHAN0_RX_BUFFER_SIZE > 64 
+#if CONFIG_XMC4_USIC2_CHAN0_TX_BUFFER_SIZE + CONFIG_XMC4_USIC2_CHAN0_RX_BUFFER_SIZE > 64
 #  error The sum of Rx and Tx Buffer sizes should be inferior to 64
 #endif
 #endif
 
-#if defined(CONFIG_XMC4_USIC2_CHAN1_ISUART) 
-#if CONFIG_XMC4_USIC2_CHAN1_TX_BUFFER_SIZE  < 2 \
+#if defined(CONFIG_XMC4_USIC2_CHAN1_ISUART)
+#if CONFIG_XMC4_USIC2_CHAN1_TX_BUFFER_SIZE < 2 \
     || CONFIG_XMC4_USIC2_CHAN1_TX_BUFFER_SIZE > 64 \
     || !IS_POWER_OF_2(CONFIG_XMC4_USIC2_CHAN1_TX_BUFFER_SIZE)
 #  error Tx Buffer Size should be a power of 2 between 2 and 64
 #endif
 
-#if CONFIG_XMC4_USIC2_CHAN1_RX_BUFFER_SIZE  < 2 \
-    || CONFIG_XMC4_USIC2_CHAN1_RX_BUFFER_SIZE > 64  \
+#if CONFIG_XMC4_USIC2_CHAN1_RX_BUFFER_SIZE < 2 \
+    || CONFIG_XMC4_USIC2_CHAN1_RX_BUFFER_SIZE > 64 \
     || !IS_POWER_OF_2(CONFIG_XMC4_USIC2_CHAN1_RX_BUFFER_SIZE)
 #  error Rx Buffer Size should be a power of 2 between 2 and 64
 #endif
 
-#if CONFIG_XMC4_USIC2_CHAN1_TX_BUFFER_SIZE + CONFIG_XMC4_USIC2_CHAN1_RX_BUFFER_SIZE > 64 
+#if CONFIG_XMC4_USIC2_CHAN1_TX_BUFFER_SIZE + CONFIG_XMC4_USIC2_CHAN1_RX_BUFFER_SIZE > 64
 #  error The sum of Rx and Tx Buffer sizes should be inferior to 64
 #endif
 #endif

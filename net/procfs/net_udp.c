@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/procfs/net_udp.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -66,8 +68,6 @@ static ssize_t netprocfs_udpstats(FAR struct netprocfs_file_s *priv,
   FAR void *laddr;
   FAR void *raddr;
 
-  net_lock();
-
   while ((conn = udp_nextconn(conn)) != NULL)
     {
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
@@ -93,13 +93,13 @@ static ssize_t netprocfs_udpstats(FAR struct netprocfs_file_s *priv,
       len += snprintf(buffer + len, buflen - len,
                       "    %2" PRIu8
                       ": %3" PRIx8
-#if CONFIG_NET_SEND_BUFSIZE > 0
+#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
                       " %6" PRIu32
 #endif
                       " %6u",
                       priv->offset++,
                       conn->sconn.s_flags,
-#if CONFIG_NET_SEND_BUFSIZE > 0
+#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
                       udp_wrbuffer_inqueue_size(conn),
 #endif
                       (conn->readahead) ? conn->readahead->io_pktlen : 0);
@@ -113,8 +113,6 @@ static ssize_t netprocfs_udpstats(FAR struct netprocfs_file_s *priv,
                       inet_ntop(domain, raddr, remote, addrlen),
                       ntohs(conn->rport));
     }
-
-  net_unlock();
 
   return len;
 }
@@ -147,8 +145,7 @@ ssize_t netprocfs_read_udpstats(FAR struct netprocfs_file_s *priv,
   int skip = 1;
   int len = 0;
 
-  net_lock();
-
+  udp_conn_list_lock();
   if (udp_nextconn(NULL) != NULL)
     {
       if (priv->offset == 0)
@@ -181,9 +178,8 @@ ssize_t netprocfs_read_udpstats(FAR struct netprocfs_file_s *priv,
 #endif /* CONFIG_NET_IPv6 */
     }
 
-  net_unlock();
-
+  udp_conn_list_unlock();
   return len;
 }
 
-#endif /* CONFIG_NET_UDP && !CONFIG_NET_UDP_NO_STACK */
+#endif /* NET_UDP_HAVE_STACK */

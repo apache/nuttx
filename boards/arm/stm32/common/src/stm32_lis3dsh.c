@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/common/src/stm32_lis3dsh.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -107,7 +109,7 @@ int board_lis3dsh_initialize(int devno, int busno)
     }
   else
     {
-      snprintf(devpath, 12, "/dev/acc%d", devno);
+      snprintf(devpath, sizeof(devpath), "/dev/acc%d", devno);
       ret = lis3dsh_register(devpath, spi, &acc0_config);
     }
 

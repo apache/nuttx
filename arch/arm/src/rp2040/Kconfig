@@ -300,7 +300,7 @@ config RP2040_PWM0A_INVERT
 
 if RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
-	config RP2040_PWM0B_INVERT
+config RP2040_PWM0B_INVERT
 	bool "PWM0 channel 2 invert"
 	default n
 	---help---
@@ -309,7 +309,7 @@ if RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
 endif # RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
-	config RP2040_PWM0_PHASE_CORRECT
+config RP2040_PWM0_PHASE_CORRECT
 	bool "PWM0 phase correct"
 	default n
 
@@ -578,7 +578,7 @@ config RP2040_I2S_PIO_SM
 endif # RP2040_I2S
 
 #####################################################################
-#  I2S Configuration
+#  SPISD Configuration
 #####################################################################
 
 config RP2040_SPISD
@@ -617,41 +617,33 @@ config RP2040_ADC
 
 if RP2040_ADC
 
-config ADC
-	bool "Include ADC device driver"
-	default n
-	---help---
-		Additional ADC device drivers can be set under the
-		"Analog-to-Digital Conversion" item in the
-		"Device Driver/Analog Device Support" menu.
-
 if ADC
 
-config RPC2040_ADC_CHANNEL0
+config RP2040_ADC_CHANNEL0
 	bool "Read ADC channel 0"
 	default n
 	---help---
 		If y, then ADC0 will be read.
 
-config RPC2040_ADC_CHANNEL1
+config RP2040_ADC_CHANNEL1
 	bool "Read ADC channel 1"
 	default n
 	---help---
 		If y, then ADC1 will be read.
 
-config RPC2040_ADC_CHANNEL2
+config RP2040_ADC_CHANNEL2
 	bool "Read ADC channel 2"
 	default n
 	---help---
 		If y, then ADC2 will be read.
 
-config RPC2040_ADC_CHANNEL3
+config RP2040_ADC_CHANNEL3
 	bool "Read ADC channel 3"
 	default n
 	---help---
 		If y, then ADC3 will be read.
 
-config RPC2040_ADC_TEMPERATURE
+config RP2040_ADC_TEMPERATURE
 	bool "Read ADC chip temperature channel"
 	default n
 	---help---

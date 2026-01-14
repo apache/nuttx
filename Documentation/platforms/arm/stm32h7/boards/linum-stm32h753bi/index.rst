@@ -2,6 +2,8 @@
 linum-stm32h753bi
 =================
 
+.. tags:: chip:stm32, chip:stm32h7, chip:stm32h753
+
 This page discusses issues unique to NuttX configurations for the
 LINUM-STM32H753BI board.
 
@@ -15,7 +17,7 @@ Board information
 =================
 
 This board was release by Witte Tenology in 2023 and developed based on
-STM32H753BI microcontroller. The board has 2 expansion connectors used by the LCD display with 
+STM32H753BI microcontroller. The board has 2 expansion connectors used by the LCD display with
 touchscreen and another for access to other peripherals of microcontroller.
 
 The board features:
@@ -38,7 +40,7 @@ The board features:
   - 2 On-board CAN-FD Transceiver
 
 Expansion connector 1 features:
-  - 1 Display RBG 888 
+  - 1 Display RBG 565
   - 1 Capacitive Touchscreen sensor
 
 Expansion connector 2 features.
@@ -61,7 +63,7 @@ The LINUM-STM32H753BI has 3 software controllable LEDs.
   ======= =====
   LED_R   PG2
   LED_G   PG3
-  LED_B   PB2  
+  LED_B   PB2
   ======= =====
 
 UART/USART
@@ -76,7 +78,7 @@ USART1
   USART1 PINS
   ====== =====
   TX     PB14
-  RX     PB15 
+  RX     PB15
   ====== =====
 
 The LINUM-STM32H753BI board has two on-board RS-232 transceiver connected to USART2 and USART3.
@@ -114,9 +116,9 @@ The LINUM-STM32H753BI board has two on-board RS-485 transceiver connected to USA
   ====== =====
   TXD    PC6
   RXD    PC7
-  DE     PG12  
+  DE     PG12
   ====== =====
-  
+
 SDMMC
 ======
 
@@ -137,7 +139,7 @@ The LINUM-STM32H753BI has one SDCard slot connected as below:
   =============== =====
   SDCARD_DETECTED PG7
   SDCARD_PWR_EN   PD7
-  =============== =====      
+  =============== =====
 
 ETHERNET
 ========
@@ -170,7 +172,7 @@ The LINUM-STM32H753BI board has two on-board CAN-FD transceiver connected to FDC
   ====== =====
   TXD    PH13
   RXD    PH14
-  STD    PI2  
+  STD    PI2
   ====== =====
 
   ====== =====
@@ -178,7 +180,7 @@ The LINUM-STM32H753BI board has two on-board CAN-FD transceiver connected to FDC
   ====== =====
   TXD    PB13
   RXD    PB12
-  STD    PE3  
+  STD    PE3
   ====== =====
 
 USB
@@ -212,7 +214,7 @@ The NOR memory used is the W25Q128JV with 16MB
   CLK     PF10
   NCS     PG6
   ======= =====
-  
+
 I2C3
 ============
 The LINUM-STM32H753BI connects the EEPROM memory and the touchscreen sensor to I2C3.
@@ -232,7 +234,7 @@ EEPROM memory used is the 24LC256 with 256Kb with the control bytes value 0x54.
 TOUCHSCREEN SENSOR
 ------------------
 
-The touchscreen sensor used is the GT928.
+The touchscreen sensor used is the FT5X06.
 
   ======== =====
   GPIO     PINS
@@ -244,7 +246,7 @@ The touchscreen sensor used is the GT928.
 I2C4
 =======
 The I2C4 is available for general use on the expansion connector.
-  
+
   ====== =====
   I2C4   PINS
   ====== =====
@@ -259,7 +261,7 @@ The LINUM-STM32H753BI has a external SDRAM with 16Mbits connected to FMC periphe
   =========== =====
   FMC         PINS
   =========== =====
-  FMC_A0      PF0
+  FMC_A0      PJ12
   FMC_A1      PF1
   FMC_A2      PF2
   FMC_A3      PF3
@@ -356,7 +358,7 @@ The LINUM-STM32H753BI has a buzzer without internal oscillator connected to PB7
   ========= =====
   GPIO      PINS
   ========= =====
-  BUZZER    PB7  
+  BUZZER    PB7
   ========= =====
 
 ==============
@@ -383,7 +385,7 @@ usbnsh
 
 Configures the NuttShell (nsh) located at apps/examples/nsh. This configuration enables a serial console over USB.
 
-After flasing and reboot your board you should see in your dmesg logs::
+After flashing and reboot your board you should see in your dmesg logs::
 
     $ sudo dmesg | tail
     [ 9180.937813] usb 3-1.1.2: SerialNumber: 0
@@ -533,7 +535,7 @@ Sending files to target::
     /tmp:
     -rw-rw-rw-        1942 nuttx_logo.txt
 
-Transmiting a file to PC::
+Transmitting a file to PC::
 
     # Sending the file nuttx_logo.txt to PC
     nsh> sz -x 1 /tmp/nuttx_logo.txt
@@ -541,7 +543,7 @@ Transmiting a file to PC::
 
     # Using zmodem to receive a file from target
     my_pc/temp$ rz > /dev/ttyACM0 < /dev/ttyACM0
-    Receiving: nuttx_logo.txt                         
+    Receiving: nuttx_logo.txt
     Bytes received:    1942/   1942   BPS:124544
 
     Transfer complete
@@ -672,7 +674,7 @@ In your pc you will be able connect to target using telnet and access their shel
     nsh> exit
     Connection closed by foreign host.
     $
-    
+
 Testing wget to download file from server::
 
     # PC: Creating a http server and sharing local folder.
@@ -682,7 +684,7 @@ Testing wget to download file from server::
     Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
     10.42.0.2 - - [28/Apr/2024 16:14:39] "GET /nuttx_logo.txt HTTP/1.0" 200 -
 
-    # Using wget on target    
+    # Using wget on target
     nsh> mount -t tmpfs /tmp
     nsh> cd /tmp
     nsh> pwd
@@ -707,7 +709,7 @@ Enable the USB Mass Storage with the command **msconn**::
 After that check if your PC recognized the usb driver::
 
     $ sudo dmesg | tail
-    [sudo] password for jaga: 
+    [sudo] password for jaga:
     [27219.361934] usbcore: registered new interface driver uas
     [27220.378231] scsi 0:0:0:0: Direct-Access     NuttX    Mass Storage     0101 PQ: 0 ANSI: 2
     [27220.378646] sd 0:0:0:0: Attached scsi generic sg0 type 0
@@ -759,7 +761,7 @@ This configuration is focused on network testing using the ethernet periferal::
 qencoder
 --------
 
-Configures and enables TIM5 on CH1(PA0) and CH2(PH11) to handle Quadrature Encoder:
+Configures and enables TIM5 on CH1(PA0) and CH2(PH11) to handle Quadrature Encoder::
 
     nsh> qe
     qe_main: Hardware initialized. Opening the encoder device: /dev/qe0
@@ -769,3 +771,152 @@ Configures and enables TIM5 on CH1(PA0) and CH2(PH11) to handle Quadrature Encod
     qe_main:   3. 3
     qe_main:   4. 2
     qe_main:   5. 1
+
+sdram
+--------
+
+This configuration uses the FMC peripheral to connect to external SDRAM with 8 MB and add it to the nuttx heap.
+
+To test the sdram use the command **ramtest**::
+
+    nsh> free
+                    total       used       free    maxused    maxfree  nused  nfree
+          Umem:    9397168       5488    9391680       5880    8388592     28      5
+    nsh> ramtest -w -a 0xc0000000 -s 8388608
+    RAMTest: Marching ones: c0000000 8388608
+    RAMTest: Marching zeroes: c0000000 8388608
+    RAMTest: Pattern test: c0000000 8388608 55555555 aaaaaaaa
+    RAMTest: Pattern test: c0000000 8388608 66666666 99999999
+    RAMTest: Pattern test: c0000000 8388608 33333333 cccccccc
+    RAMTest: Address-in-address test: c0000000 8388608
+
+mfrc522
+--------
+
+Configures the board to use the SPI4 and enables RFID driver with MFRC522::
+
+    nsh> ls /dev/
+    /dev:
+    console
+    null
+    rfid0
+    rtc0
+    ttyS0
+    nsh> rfid_readuid
+    Trying to READ: Card is not present!
+    Trying to READ: Card is not present!
+    Trying to READ: RFID CARD UID = 0x3DB3F169
+
+  ======== =====
+  MFRC522  PINS
+  ======== =====
+  SCK      PE2
+  MISO     PE5
+  MOSI     PE6
+  CS       PE4
+  ======== =====
+
+lvgl
+----
+
+Configures the board to use display of 7 inch with lvgl example. The touch screen functionality is implemented using
+the FT5X06 capacitive touch controller connected to I2C3 interface, with interrupt handling configured on pin PH9 for touch event detection.
+
+To verify if the touch controller is functioning correctly, use the **tc** command.::
+
+  nsh> tc 2
+  tc_main: nsamples: 2
+  tc_main: Opening /dev/input0
+  Sample     :
+    npoints : 1
+  Point 1    :
+          id : 0
+      flags : 19
+          x : 0
+          y : 52
+          h : 0
+          w : 0
+    pressure : 0
+  timestamp : 0
+  Sample     :
+    npoints : 1
+  Point 1    :
+          id : 0
+      flags : 1a
+          x : 0
+          y : 52
+          h : 0
+          w : 0
+    pressure : 0
+  timestamp : 0
+  Terminating!
+
+To verify if the display is functioning correctly, use the **fb** command. You should see the display change colors.::
+
+  nsh> fb
+  VideoInfo:
+        fmt: 11
+      xres: 1024
+      yres: 600
+    nplanes: 1
+  noverlays: 1
+  OverlayInfo (overlay 0):
+      fbmem: 0xc0000000
+      fblen: 1228800
+    stride: 2048
+    overlay: 0
+        bpp: 16
+      blank: 0
+  chromakey: 0x00000000
+      color: 0x00000000
+    transp: 0xff
+      mode: 0
+      area: (0,0) => (1024,600)
+      accl: 1
+  PlaneInfo (plane 0):
+      fbmem: 0xc0000000
+      fblen: 1228800
+    stride: 2048
+    display: 0
+        bpp: 16
+  Mapped FB: 0xc0000000
+  0: (  0,  0) (1024,600)
+  1: ( 93, 54) (838,492)
+  2: (186,108) (652,384)
+  3: (279,162) (466,276)
+  4: (372,216) (280,168)
+  5: (465,270) ( 94, 60)
+  Test finished
+
+Once the **fd** command works, run the lvgl examples. ::
+
+  nsh> lvgldemo
+  nsh> lvgldemo benchmark
+
+**WARNING:** For this example, the total SDRAM size was reduced from 8M to 6M and the LTDC base address was moved to address 0xC0600000 to avoid video memory invasion since the SDRAM was mapped to use the nuttx heap. If using the example with 2 layers, the reserved value will need to be doubled.
+
+tone
+----
+
+This example demonstrates how to use PWM4 and Timer17 to play music using the Tone library and the board's buzzer.
+
+socketcan
+---------
+
+This example demonstrates how to use the CAN-FD peripherals can0 and can1 with the SocketCAN protocol.::
+
+  # Configure the can0 and can1 to send messages
+  nsh> ifup can0
+  ifup can0...OK
+  nsh> ifup can1
+  ifup can1 ...OK
+  nsh> cansend can0 123#DEADBEEF
+  nsh> cansend can1 5A1#11.2233.44556677.88
+
+  # Reset the board and configure the can0 peripheral to receive messages
+  nsh> ifup can0
+  ifup can0...OK
+  nsh> candump can0
+    can0  051   [8]  00 11 22 33 44 55 66 77
+    can0  051  [16]  00 11 22 33 44 55 66 77 88 99 AA BB CC DD EE FF
+

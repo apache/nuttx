@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/imx6/imx_cpuboot.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#include <arch/barriers.h>
 #include <arch/irq.h>
 
 #include "arm_internal.h"
@@ -38,7 +41,6 @@
 #include "scu.h"
 #include "gic.h"
 #include "mmu.h"
-#include "barriers.h"
 
 #ifdef CONFIG_SMP
 
@@ -207,7 +209,7 @@ void imx_cpu_enable(void)
 
       memcpy((uint32_t *)(PGTABLE_BASE_VADDR + PGTABLE_SIZE * cpu),
              (uint32_t *)PGTABLE_BASE_VADDR, PGTABLE_SIZE);
-      ARM_DSB();
+      UP_DSB();
 #endif
 
       /* Set the start up address */
@@ -238,7 +240,7 @@ void imx_cpu_enable(void)
  *
  * Input Parameters:
  *   cpu - The CPU index.  This is the same value that would be obtained by
- *      calling up_cpu_index();
+ *      calling this_cpu();
  *
  * Returned Value:
  *   Does not return.
@@ -257,34 +259,7 @@ void arm_cpu_boot(int cpu)
 
   /* Initialize the Generic Interrupt Controller (GIC) for CPUn (n != 0) */
 
-  arm_gic_initialize();
-
-#ifdef CONFIG_ARCH_LOWVECTORS
-  /* If CONFIG_ARCH_LOWVECTORS is defined, then the vectors located at the
-   * beginning of the .text region must appear at address at the address
-   * specified in the VBAR.  There are two ways to accomplish this:
-   *
-   *   1. By explicitly mapping the beginning of .text region with a page
-   *      table entry so that the virtual address zero maps to the beginning
-   *      of the .text region.  VBAR == 0x0000:0000.
-   *
-   *   2. Set the Cortex-A5 VBAR register so that the vector table address
-   *      is moved to a location other than 0x0000:0000.
-   *
-   *  The second method is used by this logic.
-   */
-
-  /* Set the VBAR register to the address of the vector table */
-
-  DEBUGASSERT((((uintptr_t)_vector_start) & ~VBAR_MASK) == 0);
-  cp15_wrvbar((uint32_t)_vector_start);
-#endif /* CONFIG_ARCH_LOWVECTORS */
-
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-  /* And finally, enable interrupts */
-
-  up_irq_enable();
-#endif
+  up_irqinitialize();
 
   /* The next thing that we expect to happen is for logic running on CPU0
    * to call up_cpu_start() which generate an SGI and a context switch to

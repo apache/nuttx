@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nrf53/nrf53_gpio.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -275,7 +277,7 @@ int nrf53_gpio_dump(nrf53_pinset_t pinset, const char *msg);
  *
  * Description:
  *  Allow GPIO to be used by the net core.
- *  Can be used only with te app core.
+ *  Can be used only with the app core.
  *
  ****************************************************************************/
 

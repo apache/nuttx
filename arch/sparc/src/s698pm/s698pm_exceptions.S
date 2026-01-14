@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sparc/src/s698pm/up_exceptions.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -65,7 +67,7 @@
  *    l3 = trap type
  *
  *  NOTE: By an executive defined convention, trap type is between 0 and 255 if
- *        it is an asynchonous trap and 256 and 511 if it is synchronous.
+ *        it is an asynchronous trap and 256 and 511 if it is synchronous.
  */
 
 _ISR_Handler:

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_timerisr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -108,6 +110,7 @@ static int sam_timerisr(int irq, uint32_t *regs, void *arg)
  *
  * Assumptions:
  *   Called from within critical section or interrupt context.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_CLOCK_ADJTIME

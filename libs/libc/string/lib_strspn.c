@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/string/lib_strspn.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,7 +41,7 @@
  *
  ****************************************************************************/
 
-#undef strspn /* See mm/README.txt */
+#undef strspn
 size_t strspn(const char *s, const char *accept)
 {
   size_t i;

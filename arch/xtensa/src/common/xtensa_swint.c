@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_swint.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,6 +34,7 @@
 #include <nuttx/arch.h>
 #include <sys/syscall.h>
 
+#include "sched/sched.h"
 #include "chip.h"
 #include "signal/signal.h"
 #include "xtensa.h"
@@ -56,9 +59,10 @@
 int xtensa_swint(int irq, void *context, void *arg)
 {
   uint32_t *regs = (uint32_t *)context;
+  struct tcb_s *tcb = this_task();
   uint32_t cmd;
 
-  DEBUGASSERT(regs != NULL && regs == CURRENT_REGS);
+  DEBUGASSERT(regs != NULL);
 
   cmd = regs[REG_A2];
 
@@ -95,52 +99,14 @@ int xtensa_swint(int irq, void *context, void *arg)
         }
         break;
 
-      /* A2=SYS_restore_context:  This is a restore context command:
-       *
-       * void xtensa_fullcontextrestore(uint32_t *restoreregs)
-       *      noreturn_function;
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   A2 = SYS_restore_context
-       *   A3 = restoreregs
-       *
-       * In this case, we simply need to set CURRENT_REGS to restore
-       * register area referenced in the saved A3. context == CURRENT_REGS
-       * is the normal exception return.  By setting CURRENT_REGS =
-       * context[A3], we force the return to the saved context referenced
-       * in A3.
-       */
-
       case SYS_restore_context:
-        {
-          DEBUGASSERT(regs[REG_A3] != 0);
-          CURRENT_REGS = (uint32_t *)regs[REG_A3];
-        }
-        break;
-
-      /* A2=SYS_switch_context:  This is a switch context command:
-       *
-       * void xtensa_switchcontext
-       *      (uint32_t *saveregs, uint32_t *restoreregs);
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   A2 = SYS_switch_context
-       *   A3 = saveregs
-       *   A4 = restoreregs
-       *
-       * In this case, we do both: We save the context registers to the save
-       * register area reference by the saved contents of A3 and then set
-       * CURRENT_REGS to the save register area referenced by the saved
-       * contents of A4.
-       */
-
       case SYS_switch_context:
         {
-          DEBUGASSERT(regs[REG_A3] != 0 && regs[REG_A4] != 0);
-          *(uint32_t **)regs[REG_A3] = regs;
-          CURRENT_REGS = (uint32_t *)regs[REG_A4];
+          restore_critical_section(tcb, this_cpu());
+#ifdef CONFIG_DEBUG_SYSCALL_INFO
+          svcinfo("SYSCALL Return: Context switch!\n");
+          up_dump_register(tcb->xcp.regs);
+#endif
         }
         break;
 
@@ -159,7 +125,7 @@ int xtensa_swint(int irq, void *context, void *arg)
 #ifdef CONFIG_LIB_SYSCALL
       case SYS_syscall_return:
         {
-          struct tcb_s *rtcb = nxsched_self();
+          struct tcb_s *rtcb = this_task();
           int index = (int)rtcb->xcp.nsyscalls - 1;
 
           /* Make sure that there is a saved syscall return address. */
@@ -298,7 +264,7 @@ int xtensa_swint(int irq, void *context, void *arg)
 #ifndef CONFIG_BUILD_FLAT
       case SYS_signal_handler:
         {
-          struct tcb_s *rtcb  = nxsched_self();
+          struct tcb_s *rtcb  = this_task();
 
           /* Remember the caller's return address */
 
@@ -337,7 +303,7 @@ int xtensa_swint(int irq, void *context, void *arg)
 #ifndef CONFIG_BUILD_FLAT
       case SYS_signal_handler_return:
         {
-          struct tcb_s *rtcb  = nxsched_self();
+          struct tcb_s *rtcb  = this_task();
 
           /* Set up to return to the kernel-mode signal dispatching logic. */
 
@@ -359,7 +325,7 @@ int xtensa_swint(int irq, void *context, void *arg)
       default:
         {
 #ifdef CONFIG_LIB_SYSCALL
-          struct tcb_s *rtcb = nxsched_self();
+          struct tcb_s *rtcb = this_task();
           int index = rtcb->xcp.nsyscalls;
 
           /* Verify that the syscall number is within range */
@@ -418,26 +384,10 @@ int xtensa_swint(int irq, void *context, void *arg)
         break;
     }
 
-  if ((CURRENT_REGS[REG_PS] & PS_EXCM_MASK) != 0)
+  if ((tcb->xcp.regs[REG_PS] & PS_EXCM_MASK) != 0)
     {
-      CURRENT_REGS[REG_PS] &= ~PS_EXCM_MASK;
+      tcb->xcp.regs[REG_PS] &= ~PS_EXCM_MASK;
     }
-
-  /* Report what happened.  That might difficult in the case of a context
-   * switch.
-   */
-
-#ifdef CONFIG_DEBUG_SYSCALL_INFO
-  if (regs != CURRENT_REGS)
-    {
-      svcinfo("SYSCALL Return: Context switch!\n");
-      up_dump_register(CURRENT_REGS);
-    }
-  else
-    {
-      svcinfo("SYSCALL Return: %" PRIu32 "\n", cmd);
-    }
-#endif
 
   return OK;
 }

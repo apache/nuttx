@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/pkt/pkt_input.c
- * Handling incoming packet input
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -35,6 +36,8 @@
 
 #include "devif/devif.h"
 #include "pkt/pkt.h"
+#include "utils/utils.h"
+#include "socket/socket.h"
 
 /****************************************************************************
  * Private Functions
@@ -67,6 +70,22 @@ static uint16_t pkt_datahandler(FAR struct net_driver_s *dev,
       return 0;
     }
 
+#ifdef CONFIG_NET_TIMESTAMP
+  if (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP) ||
+      _SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMPNS))
+    {
+      ret = iob_trycopyin(iob, (FAR const uint8_t *)&dev->d_rxtime,
+                          sizeof(struct timespec), 0, true);
+      if (ret != sizeof(struct timespec))
+        {
+          nerr("ERROR: Failed to write timestamp: %d\n", ret);
+          goto errout;
+        }
+
+      iob_reserve(iob, sizeof(struct timespec));
+    }
+#endif
+
   /* Clone an I/O buffer chain of the L2 data, use throttled IOB to avoid
    * overconsumption.
    * TODO: Optimize IOB clone after we support shared IOB.
@@ -84,7 +103,11 @@ static uint16_t pkt_datahandler(FAR struct net_driver_s *dev,
    * without waiting).
    */
 
-  if ((ret = iob_tryadd_queue(iob, &conn->readahead)) < 0)
+  conn_lock(&conn->sconn);
+  ret = iob_tryadd_queue(iob, &conn->readahead);
+  conn_unlock(&conn->sconn);
+
+  if (ret < 0)
     {
       nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
       goto errout;
@@ -133,10 +156,30 @@ static int pkt_in(FAR struct net_driver_s *dev)
   FAR struct pkt_conn_s *conn;
   int ret = OK;
 
+  pkt_conn_list_lock();
   conn = pkt_active(dev);
   if (conn)
     {
-      uint16_t flags;
+      uint32_t flags;
+
+      if (conn->pendiob == dev->d_iob)
+        {
+          /* Do not read back the packet sent by oneself */
+
+          conn->pendiob = NULL;
+          pkt_conn_list_unlock();
+          return OK;
+        }
+
+#if defined(CONFIG_NET_TIMESTAMP) && !defined(CONFIG_ARCH_HAVE_NETDEV_TIMESTAMP)
+      /* Get system as timestamp if no hardware timestamp */
+
+      if (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMP) ||
+          _SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMPNS))
+        {
+          clock_gettime(CLOCK_REALTIME, &dev->d_rxtime);
+        }
+#endif /* CONFIG_NET_TIMESTAMP */
 
       /* Setup for the application callback */
 
@@ -171,6 +214,7 @@ static int pkt_in(FAR struct net_driver_s *dev)
       ninfo("No PKT listener\n");
     }
 
+  pkt_conn_list_unlock();
   return ret;
 }
 
@@ -203,6 +247,8 @@ int pkt_input(FAR struct net_driver_s *dev)
   FAR uint8_t *buf;
   int ret;
 
+  netdev_lock(dev);
+
   if (dev->d_iob != NULL)
     {
       buf = dev->d_buf;
@@ -214,10 +260,13 @@ int pkt_input(FAR struct net_driver_s *dev)
 
       dev->d_buf = buf;
 
+      netdev_unlock(dev);
       return ret;
     }
 
-  return netdev_input(dev, pkt_in, false);
+  ret = netdev_input(dev, pkt_in, false);
+  netdev_unlock(dev);
+  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_PKT */

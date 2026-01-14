@@ -1,0 +1,65 @@
+############################################################################
+# drivers/coresight/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# Include coresight driver build surrport
+
+ifeq ($(CONFIG_CORESIGHT),y)
+
+CSRCS += coresight_core.c coresight_common.c
+
+ifeq ($(CONFIG_CORESIGHT_ETB),y)
+CSRCS += coresight_etb.c
+endif
+
+ifeq ($(CONFIG_CORESIGHT_ETM_VERSION),"v3")
+CSRCS += coresight_etm3.c
+endif
+
+ifeq ($(CONFIG_CORESIGHT_ETM_VERSION),"v4")
+CSRCS += coresight_etm4.c
+endif
+
+ifeq ($(CONFIG_CORESIGHT_FUNNEL),y)
+CSRCS += coresight_funnel.c
+endif
+
+ifeq ($(CONFIG_CORESIGHT_REPLICATOR),y)
+CSRCS += coresight_replicator.c
+endif
+
+ifeq ($(CONFIG_CORESIGHT_STM),y)
+CSRCS += coresight_stm.c
+endif
+
+ifeq ($(CONFIG_CORESIGHT_TMC),y)
+CSRCS += coresight_tmc_core.c coresight_tmc_etf.c coresight_tmc_etr.c
+endif
+
+ifeq ($(CONFIG_CORESIGHT_TPIU),y)
+CSRCS += coresight_tpiu.c
+endif
+
+DEPPATH += --dep-path coresight
+VPATH += :coresight
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)coresight
+
+endif # CONFIG_CORESIGHT

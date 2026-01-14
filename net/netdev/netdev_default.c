@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/netdev/netdev_default.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -61,26 +63,27 @@ FAR struct net_driver_s *netdev_default(void)
 
   /* Examine each registered network device */
 
-  net_lock();
+  netdev_list_lock();
   for (dev = g_netdevices; dev; dev = dev->flink)
     {
-      /* Is the interface in the "up" state? */
+      /* Is the interface in the "running" state? */
 
-      if ((dev->d_flags & IFF_UP) != 0)
+      if (IFF_IS_RUNNING(dev->d_flags) != 0)
         {
           /* Return a reference to the first device that we find in the UP
            * state (but not the loopback device unless it is the only
            * device).
            */
 
-          ret = dev;
-          if (dev->d_lltype != NET_LL_LOOPBACK)
+          if (dev->d_lltype != NET_LL_LOOPBACK &&
+              dev->d_lltype != NET_LL_CAN)
             {
+              ret = dev;
               break;
             }
         }
     }
 
-  net_unlock();
+  netdev_list_unlock();
   return ret;
 }

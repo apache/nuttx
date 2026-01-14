@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/sim_initialize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,8 +26,8 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/audio/audio.h>
+#include <nuttx/audio/audio_fake.h>
 #include <nuttx/kthread.h>
-#include <nuttx/motor/foc/foc_dummy.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/power/pm.h>
 #include <nuttx/spi/spi_flash.h>
@@ -35,6 +37,26 @@
 
 #include "sim_internal.h"
 #include "sim_hostusrsock.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define SIM_X11EVENT_PERIOD    MSEC2TICK(CONFIG_SIM_X11EVENT_INTERVAL)
+#define SIM_X11UPDATE_PERIOD   MSEC2TICK(CONFIG_SIM_X11UPDATE_INTERVAL)
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
+    defined(CONFIG_SIM_BUTTONS)
+static struct wdog_s g_x11event_wdog;   /* Watchdog for event loop */
+#endif
+
+#ifdef CONFIG_SIM_X11FB
+static struct wdog_s g_x11update_wdog;  /* Watchdog for update loop */
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -53,6 +75,41 @@ static void sim_init_cmdline(void)
     }
 
   setenv("CMDLINE", cmdline, true);
+}
+#endif
+
+/****************************************************************************
+ * Name: sim_x11event_interrupt
+ *
+ * Description:
+ *   interrupts event process function
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
+    defined(CONFIG_SIM_BUTTONS)
+static void sim_x11event_interrupt(wdparm_t arg)
+{
+  sim_x11events();
+  wd_start_next((FAR struct wdog_s *)arg, SIM_X11EVENT_PERIOD,
+                sim_x11event_interrupt, arg);
+}
+#endif
+
+/****************************************************************************
+ * Name: sim_x11update_interrupt
+ *
+ * Description:
+ *   interrupts event process function
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SIM_X11FB
+static void sim_x11update_interrupt(wdparm_t arg)
+{
+  sim_x11loop();
+  wd_start_next((FAR struct wdog_s *)arg, SIM_X11UPDATE_PERIOD,
+                sim_x11update_interrupt, arg);
 }
 #endif
 
@@ -158,68 +215,6 @@ static void sim_init_smartfs(void)
 }
 #endif
 
-static int sim_loop_task(int argc, char **argv)
-{
-  while (1)
-    {
-      irqstate_t flags = up_irq_save();
-
-      sched_lock();
-
-#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
-    defined(CONFIG_SIM_BUTTONS)
-      /* Drive the X11 event loop */
-
-      sim_x11events();
-#endif
-
-#if defined(CONFIG_SIM_LCDDRIVER) || defined(CONFIG_SIM_FRAMEBUFFER)
-      sim_x11loop();
-#endif
-
-#ifdef CONFIG_SIM_NETDEV
-      /* Run the network if enabled */
-
-      sim_netdriver_loop();
-#endif
-
-#ifdef CONFIG_SIM_NETUSRSOCK
-      host_usrsock_loop();
-#endif
-
-#ifdef CONFIG_SIM_SOUND
-      sim_audio_loop();
-#endif
-
-#ifdef CONFIG_SIM_CAMERA
-      sim_camera_loop();
-#endif
-
-#ifdef CONFIG_SIM_USB_DEV
-      sim_usbdev_loop();
-#endif
-
-#ifdef CONFIG_MOTOR_FOC_DUMMY
-      /* Update simulated FOC device */
-
-      foc_dummy_update();
-#endif
-
-      sched_unlock();
-      up_irq_restore(flags);
-
-#ifdef CONFIG_SIM_USB_HOST
-      sim_usbhost_loop();
-#endif
-
-      /* Sleep minimal time, let the idle run */
-
-      usleep(CONFIG_SIM_LOOPTASK_INTERVAL);
-    }
-
-  return 0;
-}
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -296,6 +291,12 @@ void up_initialize(void)
 
   audio_register("mixer", sim_audio_initialize(false, false));
 
+#ifdef CONFIG_AUDIO_FAKE
+  /* Register fake audio driver */
+
+  audio_fake_initialize();
+#endif
+
 #endif
 
 #ifdef CONFIG_SIM_USB_DEV
@@ -314,7 +315,14 @@ void up_initialize(void)
   sim_encoder_initialize();
 #endif
 
-  kthread_create("loop_task", CONFIG_SIM_LOOPTASK_PRIORITY,
-                 CONFIG_DEFAULT_TASK_STACKSIZE,
-                 sim_loop_task, NULL);
+#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
+    defined(CONFIG_SIM_BUTTONS)
+  wd_start(&g_x11event_wdog, 0, sim_x11event_interrupt,
+           (wdparm_t)&g_x11event_wdog);
+#endif
+
+#ifdef CONFIG_SIM_X11FB
+  wd_start(&g_x11update_wdog, 0, sim_x11update_interrupt,
+           (wdparm_t)&g_x11update_wdog);
+#endif
 }

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/cxd56xx/common/src/cxd56_crashdump.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -145,29 +147,22 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
    * fault.
    */
 
-  pdump->info.current_regs = (uintptr_t)CURRENT_REGS;
+  pdump->info.current_regs = (uintptr_t)running_regs();
 
   /* Save Context */
 
-#if CONFIG_TASK_NAME_SIZE > 0
-  strlcpy(pdump->info.name, tcb->name, sizeof(pdump->info.name));
-#endif
+  strlcpy(pdump->info.name, get_task_name(tcb), sizeof(pdump->info.name));
 
   pdump->info.pid = tcb->pid;
 
-  /* If  current_regs is not NULL then we are in an interrupt context
-   * and the user context is in current_regs else we are running in
-   * the users context
-   */
-
-  if (CURRENT_REGS)
+  if (up_interrupt_context())
     {
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
       pdump->info.stacks.interrupt.sp = sp;
 #endif
-      pdump->info.flags |= (REGS_PRESENT | USERSTACK_PRESENT | \
+      pdump->info.flags |= (REGS_PRESENT | USERSTACK_PRESENT |
                             INTSTACK_PRESENT);
-      memcpy(pdump->info.regs, (void *)CURRENT_REGS,
+      memcpy(pdump->info.regs, running_regs(),
              sizeof(pdump->info.regs));
       pdump->info.stacks.user.sp = pdump->info.regs[REG_R13];
     }
@@ -187,7 +182,7 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
   /* Get the limits on the interrupt stack memory */
 
   pdump->info.stacks.interrupt.top =
-    up_get_intstackbase(up_cpu_index()) + INTSTACK_SIZE;
+    up_get_intstackbase(this_cpu()) + INTSTACK_SIZE;
   pdump->info.stacks.interrupt.size = INTSTACK_SIZE;
 
   /* If In interrupt Context save the interrupt stack data centered

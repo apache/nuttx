@@ -8,3 +8,10 @@ menuconfig RESET
 	default n
 	---help---
 		This selection enables building of the "upper-half" reset driver.
+
+config RESET_RPMSG
+	bool "Reset rpmsg driver support"
+	depends on RESET && RPTUN
+	default n
+	---help---
+		This selection enables rpmsg support for reset.

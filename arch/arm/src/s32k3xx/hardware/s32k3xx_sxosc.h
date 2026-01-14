@@ -57,7 +57,7 @@
 /* SXOSC Status Register (STAT) */
 
                                                  /* Bits 0-30: Reserved */
-#define SXOSC_STAT_OSC_STAT            (1 << 31) /* Bit 31: Crystal oscilator status (OSC_STAT) */
+#define SXOSC_STAT_OSC_STAT            (1 << 31) /* Bit 31: Crystal oscillator status (OSC_STAT) */
 #  define SXOSC_STAT_OSC_STAT_UNSTABLE (0 << 31) /*         Crystal oscillator is unstable */
 #  define SXOSC_STAT_OSC_STAT_STABLE   (1 << 31) /*         Crystal oscillator is stable */
 

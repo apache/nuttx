@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32/esp32-ethernet-kit/src/esp32_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,13 +29,9 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <syslog.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
-#include <sys/types.h>
-#include <syslog.h>
 #include <debug.h>
-#include <stdio.h>
 
 #include <errno.h>
 #include <nuttx/fs/fs.h>
@@ -65,11 +63,11 @@
 #  include "esp32_board_spiflash.h"
 #endif
 
-#ifdef CONFIG_ESP32_BLE
+#ifdef CONFIG_ESPRESSIF_BLE
 #  include "esp32_ble.h"
 #endif
 
-#ifdef CONFIG_ESP32_WIFI
+#ifdef CONFIG_ESPRESSIF_WIFI
 #  include "esp32_board_wlan.h"
 #endif
 
@@ -79,6 +77,10 @@
 
 #ifdef CONFIG_RTC_DRIVER
 #  include "esp32_rtc_lowerhalf.h"
+#endif
+
+#ifdef CONFIG_MMCSD_SPI
+#  include "esp32_board_sdmmc.h"
 #endif
 
 #include "esp32-ethernet-kit.h"
@@ -135,8 +137,8 @@ int esp32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_MMCSD
-  ret = esp32_mmcsd_initialize(0);
+#ifdef CONFIG_MMCSD_SPI
+  ret = board_sdmmc_initialize();
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize SD slot: %d\n", ret);
@@ -168,7 +170,7 @@ int esp32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32_BLE
+#ifdef CONFIG_ESPRESSIF_BLE
   ret = esp32_ble_initialize();
   if (ret)
     {
@@ -176,11 +178,11 @@ int esp32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32_WIFI
+#ifdef CONFIG_ESPRESSIF_WIFI
   ret = board_wlan_init();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize wireless subsystem=%d\n",
+      syslog(LOG_ERR, "ERROR: Failed to initialize wlan subsystem=%d\n",
              ret);
     }
 #endif

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32h7/nucleo-h745zi/src/stm32_adc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -142,7 +144,7 @@ int stm32_adc_setup(int adcno)
 
   if (!initialized)
     {
-      snprintf(devname, 1, "/dev/adc%d", adcno);
+      snprintf(devname, sizeof(devname), "/dev/adc%d", adcno);
 
 #endif
 #if defined(CONFIG_STM32H7_ADC1)

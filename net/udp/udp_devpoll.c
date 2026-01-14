@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/udp/udp_devpoll.c
- * Network device poll for the availability of UDP TX data
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -102,7 +103,7 @@ void udp_poll(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 
       /* If the application has data to send, setup the UDP/IP header */
 
-      if (dev->d_sndlen > 0)
+      if (dev->d_len > 0)
         {
           udp_send(dev, conn);
           return;

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nrf52/nrf52_gpiote.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -74,7 +76,7 @@ void nrf52_gpiote_set_ch_event(uint32_t pinset, int channel,
  *
  * Description:
  *   Configures a GPIOTE channel in EVENT mode, assigns it to a given pin
- *   and sets a handler for the first availalbe GPIOTE channel
+ *   and sets a handler for the first available GPIOTE channel.
  *
  * Input Parameters:
  *  - pinset:      GPIO pin configuration

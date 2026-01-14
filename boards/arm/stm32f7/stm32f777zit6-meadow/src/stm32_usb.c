@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32f7/stm32f777zit6-meadow/src/stm32_usb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -122,7 +124,7 @@ static int usbhost_waiter(int argc, char *argv[])
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in inialization to setup
+ *   Called from stm32_usbinitialize very early in initialization to setup
  *   USB-related GPIO pins for the STM32F4Discovery board.
  *
  ****************************************************************************/

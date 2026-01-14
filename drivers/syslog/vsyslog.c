@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/syslog/vsyslog.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -83,8 +85,8 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 {
   struct lib_syslograwstream_s stream;
   int ret = 0;
-#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_SYSLOG_PROCESS_NAME)
-  FAR struct tcb_s *tcb = nxsched_get_tcb(nxsched_gettid());
+#ifdef CONFIG_SYSLOG_PROCESS_NAME
+  FAR struct tcb_s *tcb = nxsched_self();
 #endif
 #ifdef CONFIG_SYSLOG_TIMESTAMP
   struct timespec ts;
@@ -165,7 +167,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
                              "[%s] "
 #    endif
 #  else
-                             "[%5jd.%06ld] "
+                             "[%5ju.%06ld] "
 #  endif
 #endif
 
@@ -196,7 +198,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 
                              "[%s] "
 #endif
-#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_SYSLOG_PROCESS_NAME)
+#ifdef CONFIG_SYSLOG_PROCESS_NAME
   /* Prepend the thread name */
 
                              "%s: "
@@ -215,7 +217,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #endif
 
 #if defined(CONFIG_SMP)
-                             , up_cpu_index()
+                             , this_cpu()
 #endif
 
 #if defined(CONFIG_SYSLOG_PROCESSID)
@@ -227,13 +229,13 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #if defined(CONFIG_SYSLOG_COLOR_OUTPUT)
   /* Set the terminal style according to message priority. */
 
-                             , g_priority_color[priority]
+                             , g_priority_color[LOG_PRI(priority)]
 #endif
 
 #if defined(CONFIG_SYSLOG_PRIORITY)
   /* Prepend the message priority. */
 
-                             , g_priority_str[priority]
+                             , g_priority_str[LOG_PRI(priority)]
 #endif
 
 #if defined(CONFIG_SYSLOG_PREFIX)
@@ -242,10 +244,10 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
                              , CONFIG_SYSLOG_PREFIX_STRING
 #endif
 
-#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_SYSLOG_PROCESS_NAME)
+#ifdef CONFIG_SYSLOG_PROCESS_NAME
   /* Prepend the thread name */
 
-                             , tcb != NULL ? tcb->name : "(null)"
+                             , get_task_name(tcb)
 #endif
                     );
 

@@ -208,6 +208,94 @@ uint32_t esp32s3_dma_setup(struct esp32s3_dmadesc_s *dmadesc, uint32_t num,
 void esp32s3_dma_load(struct esp32s3_dmadesc_s *dmadesc, int chan, bool tx);
 
 /****************************************************************************
+ * Name: esp32s3_dma_reset_channel
+ *
+ * Description:
+ *   Resets dma channel.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_dma_reset_channel(int chan, bool tx);
+
+/****************************************************************************
+ * Name: esp32s3_dma_enable_interrupt
+ *
+ * Description:
+ *   Enable/Disable DMA interrupt.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *   mask - Interrupt mask to change
+ *   en   - true: enable; false: disable
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_dma_enable_interrupt(int chan, bool tx, uint32_t mask, bool en);
+
+/****************************************************************************
+ * Name: esp32s3_dma_get_interrupt
+ *
+ * Description:
+ *   Gets DMA interrupt status.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *
+ * Returned Value:
+ *   Interrupt status value.
+ *
+ ****************************************************************************/
+
+int esp32s3_dma_get_interrupt(int chan, bool tx);
+
+/****************************************************************************
+ * Name: esp32s3_dma_clear_interrupt
+ *
+ * Description:
+ *   Clear DMA interrupt.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *   mask - Interrupt mask to change
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_dma_clear_interrupt(int chan, bool tx, uint32_t mask);
+
+/****************************************************************************
+ * Name: esp32s3_dma_get_desc_addr
+ *
+ * Description:
+ *   Gets desc addr of DMA interrupt.
+ *
+ * Input Parameters:
+ *   chan - DMA channel
+ *   tx   - true: TX mode; false: RX mode
+ *
+ * Returned Value:
+ *   Desc addr.
+ *
+ ****************************************************************************/
+
+int esp32s3_dma_get_desc_addr(int chan, bool tx);
+
+/****************************************************************************
  * Name: esp32s3_dma_enable
  *
  * Description:
@@ -292,22 +380,6 @@ void esp32s3_dma_set_ext_memblk(int chan, bool tx,
  ****************************************************************************/
 
 void esp32s3_dma_init(void);
-
-/****************************************************************************
- * Name: esp32s3_dma_deinit
- *
- * Description:
- *   Deinitialize DMA driver.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void esp32s3_dma_deinit(void);
 
 #ifdef __cplusplus
 }

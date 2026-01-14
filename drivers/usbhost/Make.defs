@@ -1,6 +1,8 @@
 ############################################################################
 # drivers/usbhost/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -25,6 +27,10 @@ ifeq ($(CONFIG_USBHOST),y)
 
 CSRCS += usbhost_registry.c usbhost_registerclass.c usbhost_findclass.c
 CSRCS += usbhost_enumerate.c usbhost_devaddr.c
+
+ifeq ($(CONFIG_USBHOST_WAITER),y)
+CSRCS += usbhost_waiter.c usbhost_drivers.c
+endif
 
 ifeq ($(CONFIG_USBHOST_HUB),y)
 CSRCS += usbhost_hub.c
@@ -72,6 +78,10 @@ endif
 
 ifeq ($(CONFIG_USBHOST_BTHCI),y)
 CSRCS += usbhost_bthci.c
+endif
+
+ifeq ($(CONFIG_USBHOST_XHCI_PCI),y)
+CSRCS += usbhost_xhci_pci.c usbhost_xhci_trace.c
 endif
 
 # HCD debug/trace logic

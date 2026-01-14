@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32h7/stm32h745i-disco/scripts/flash.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -93,6 +95,9 @@
  * the 0x0800:0000 address range.
  */
 
+#include <nuttx/config.h>
+
+#ifndef CONFIG_STM32H7_CORTEXM4_ENABLED
 MEMORY
 {
   itcm  (rwx) : ORIGIN = 0x00000000, LENGTH =   64K
@@ -106,6 +111,22 @@ MEMORY
   sram4 (rwx) : ORIGIN = 0x38000000, LENGTH =   64K
   bbram (rwx) : ORIGIN = 0x38800000, LENGTH =    4K
 }
+#else
+MEMORY
+{
+  itcm  (rwx) : ORIGIN = 0x00000000, LENGTH = 64K
+  flash (rx)  : ORIGIN = 0x08000000, LENGTH = CONFIG_STM32H7_CORTEXM7_FLASH_SIZE
+  dtcm1 (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
+  dtcm2 (rwx) : ORIGIN = 0x20010000, LENGTH = 64K
+  sram  (rwx) : ORIGIN = 0x24000000, LENGTH = 512K
+
+  /* shared memory on SRAM3 */
+
+  shmem (rwx) : ORIGIN = 0x30040000, LENGTH = 32K
+  sram4 (rwx) : ORIGIN = 0x38000000, LENGTH = 64K
+  bbram (rwx) : ORIGIN = 0x38800000, LENGTH = 4K
+}
+#endif
 
 OUTPUT_ARCH(arm)
 EXTERN(_vectors)
@@ -132,7 +153,8 @@ SECTIONS
     .init_section :
     {
         _sinit = ABSOLUTE(.);
-        *(.init_array .init_array.*)
+        KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
+        KEEP(*(.init_array EXCLUDE_FILE(*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o) .ctors))
         _einit = ABSOLUTE(.);
     } > flash
 
@@ -169,6 +191,15 @@ SECTIONS
         . = ALIGN(4);
         _ebss = ABSOLUTE(.);
     } > sram
+
+#ifdef CONFIG_STM32H7_CORTEXM4_ENABLED
+    .shmem (NOLOAD):
+    {
+        . = ALIGN(4);
+        *(.shmem);
+        KEEP(*(.shmem))
+    } > shmem
+#endif
 
     /* Emit the the D3 power domain section for locating BDMA data
      *

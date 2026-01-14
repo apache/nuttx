@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/nxffs/nxffs.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -555,8 +557,8 @@ int nxffs_getc(FAR struct nxffs_volume_s *volume, uint16_t reserve);
  *   to dispose of that memory when the inode entry is no longer needed.
  *
  *   Note that the nxffs_entry_s containing structure is not freed.  The
- *   caller may call kmm_free upon return of this function if necessary to
- *   free the entry container.
+ *   caller may call fs_heap_free upon return of this function if necessary
+ *   to free the entry container.
  *
  * Input Parameters:
  *   entry  - The entry to be freed.
@@ -691,7 +693,7 @@ int nxffs_verifyblock(FAR struct nxffs_volume_s *volume, off_t block);
  *
  ****************************************************************************/
 
-int nxffs_validblock(struct nxffs_volume_s *volume, off_t *block);
+int nxffs_validblock(FAR struct nxffs_volume_s *volume, FAR off_t *block);
 
 /****************************************************************************
  * Name: nxffs_blockstats

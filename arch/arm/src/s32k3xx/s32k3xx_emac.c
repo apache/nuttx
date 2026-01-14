@@ -36,6 +36,7 @@
 #include <errno.h>
 
 #include <sys/param.h>
+#include <arch/barriers.h>
 
 #include <arpa/inet.h>
 
@@ -71,10 +72,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Memory synchronization */
-
-#define MEMORY_SYNC() //do { ARM_DSB(); ARM_ISB(); } while (0)
 
 /* If processing is not done at the interrupt level, then work queue support
  * is required.
@@ -839,7 +836,7 @@ static int s32k3xx_transmit(struct s32k3xx_driver_s *priv)
       s32k3xx_disableint(priv, EMAC_DMA_CH0_INTERRUPT_ENABLE_RIE);
     }
 
-  MEMORY_SYNC();
+  UP_MB();
 
   /* Enable TX interrupts */
 
@@ -1233,7 +1230,7 @@ static int s32k3xx_recvframe(struct s32k3xx_driver_s *priv)
    *   3) All of the TX descriptors are in flight.
    *
    * This last case is obscure.  It is due to that fact that each packet
-   * that we receive can generate an unstoppable transmisson.  So we have
+   * that we receive can generate an unstoppable transmission.  So we have
    * to stop receiving when we can not longer transmit.  In this case, the
    * transmit logic should also have disabled further RX interrupts.
    */
@@ -1502,7 +1499,7 @@ static void s32k3xx_receive(struct s32k3xx_driver_s *priv)
         }
 
       /* We are finished with the RX buffer.  NOTE:  If the buffer is
-       * re-used for transmission, the dev->d_buf field will have been
+       * reused for transmission, the dev->d_buf field will have been
        * nullified.
        */
 
@@ -1754,7 +1751,7 @@ static void s32k3xx_interrupt_work(void *arg)
       putreg32(EMAC_DMA_CH0_STATUS_NIS, S32K3XX_EMAC_DMA_CH0_STATUS);
     }
 
-  /* Handle error interrupt only if CONFIG_DEBUG_NET is eanbled */
+  /* Handle error interrupt only if CONFIG_DEBUG_NET is enabled */
 
 #ifdef CONFIG_DEBUG_NET
   /* Check if there are pending "abnormal" interrupts */
@@ -2809,7 +2806,7 @@ static inline int s32k3xx_initphy(struct s32k3xx_driver_s *priv,
       retries = 0;
       do
         {
-          nxsig_usleep(LINK_WAITUS);
+          nxsched_usleep(LINK_WAITUS);
 
           ninfo("%s: Read PHYID1, retries=%d\n",
                 BOARD_PHY_NAME, retries + 1);
@@ -2966,7 +2963,7 @@ static inline int s32k3xx_initphy(struct s32k3xx_driver_s *priv,
               break;
             }
 
-          nxsig_usleep(LINK_WAITUS);
+          nxsched_usleep(LINK_WAITUS);
         }
 
       if (phydata & MII_MSR_ANEGCOMPLETE)

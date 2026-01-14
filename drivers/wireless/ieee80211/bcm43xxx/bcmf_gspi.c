@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/wireless/ieee80211/bcm43xxx/bcmf_gspi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -205,7 +207,7 @@ static int bcmf_gspi_kso_enable(FAR bcmf_gspi_dev_t *gbus, bool enable)
                                   SBSDIO_FUNC1_SLEEPCSR_KSO_MASK
                                 | SBSDIO_FUNC1_SLEEPCSR_DEVON_MASK);
 
-          nxsig_usleep(100 * 1000);
+          nxsched_usleep(100 * 1000);
 
           value = bcmf_gspi_read_reg_8(gspi, 1, SBSDIO_FUNC1_SLEEPCSR);
 
@@ -284,7 +286,7 @@ static int bcmf_gspi_bus_sleep(FAR bcmf_gspi_dev_t *gbus, bool sleep)
 
           /* Wait for High Throughput clock */
 
-          nxsig_usleep(100 * 1000);
+          nxsched_usleep(100 * 1000);
           value = bcmf_gspi_read_reg_8(gspi, 1, SBSDIO_FUNC1_CHIPCLKCSR);
 
           if (value & SBSDIO_HT_AVAIL)
@@ -347,7 +349,7 @@ static int bcmf_gspi_thread_isr(int isr, FAR void *context, FAR void *arg)
  * Name: bcmf_gspi_thread
  ****************************************************************************/
 
-static int bcmf_gspi_thread(int argc, char **argv)
+static int bcmf_gspi_thread(int argc, FAR char **argv)
 {
   FAR struct bcmf_dev_s *priv;
   FAR bcmf_gspi_dev_t   *gbus;
@@ -365,7 +367,7 @@ static int bcmf_gspi_thread(int argc, char **argv)
 
   wlinfo(">>>> entered\n");
 
-  nxsig_usleep(50 * 1000);
+  nxsched_usleep(50 * 1000);
 
   gbus->thread_run = true;
 
@@ -465,7 +467,7 @@ static int bcmf_gspi_thread(int argc, char **argv)
 #ifdef CONFIG_DEBUG_WIRELESS_ERROR
                   wlerr("error sending f2 frame: %d\n", ret);
 #endif
-                  nxsig_usleep(10 * 1000);
+                  nxsched_usleep(10 * 1000);
                 }
             }
         }
@@ -544,7 +546,10 @@ static int bcmf_gspi_init_device(FAR bcmf_gspi_dev_t *gbus)
           return ret;
         }
 
-      if (REV16(buffer[0]) == CYW_REG_TEST_RO_PATTERN) break;
+      if (REV16(buffer[0]) == CYW_REG_TEST_RO_PATTERN)
+        {
+          break;
+        }
     }
 
   if (i == BCMF_GSPI_READY_TRYS)
@@ -670,7 +675,7 @@ static int bcmf_gspi_init_alp_clock(FAR bcmf_gspi_dev_t *gbus)
   loops = 10;
   while (--loops > 0)
     {
-      nxsig_usleep(10 * 1000);
+      nxsched_usleep(10 * 1000);
 
       value = bcmf_gspi_read_reg_8(gspi,
                                    gspi_f1_backplane,
@@ -699,7 +704,7 @@ static int bcmf_gspi_init_alp_clock(FAR bcmf_gspi_dev_t *gbus)
 
   wlinfo("ALP initialization complete\n");
 
-  nxsig_usleep(100 * 1000);
+  nxsched_usleep(100 * 1000);
 
   return OK;
 }

@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_open.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,11 +35,14 @@
 #include <assert.h>
 #include <stdarg.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
 
+#include "sched/sched.h"
 #include "inode/inode.h"
 #include "driver/driver.h"
+#include "vfs.h"
 
 /****************************************************************************
  * Private Functions
@@ -76,8 +81,8 @@ static int inode_checkflags(FAR struct inode *inode, int oflags)
       return -ENXIO;
     }
 
-  if (((oflags & O_RDOK) != 0 && !ops->read && !ops->ioctl) ||
-      ((oflags & O_WROK) != 0 && !ops->write && !ops->ioctl))
+  if (((oflags & O_RDOK) != 0 && !ops->readv && !ops->read && !ops->ioctl) ||
+      ((oflags & O_WROK) != 0 && !ops->writev && !ops->write && !ops->ioctl))
     {
       return -EACCES;
     }
@@ -196,7 +201,20 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 
       /* Get the file structure of the opened character driver proxy */
 
-      return block_proxy(filep, path, oflags);
+#ifdef CONFIG_BCH_DEVICE_READONLY
+      oflags &= ~O_RDWR;
+      oflags |= O_RDOK;
+#endif
+
+      ret = block_proxy(filep, path, oflags);
+#ifdef CONFIG_FS_NOTIFY
+      if (ret >= 0)
+        {
+          notify_open(path, filep->f_oflags);
+        }
+#endif
+
+      return ret;
     }
 #endif
 
@@ -210,7 +228,6 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 
   /* Associate the inode with a file structure */
 
-  memset(filep, 0, sizeof(*filep));
   filep->f_oflags = oflags;
   filep->f_inode  = inode;
 
@@ -244,7 +261,7 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
       ret = -ENXIO;
     }
 
-  if (ret == -EISDIR)
+  if (ret == -EISDIR && ((oflags & O_WRONLY) == 0))
     {
       ret = dir_allocate(filep, desc.relpath);
     }
@@ -255,6 +272,9 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
     }
 
   RELEASE_SEARCH(&desc);
+#ifdef CONFIG_FS_NOTIFY
+  notify_open(path, filep->f_oflags);
+#endif
   return OK;
 
 errout_with_inode:
@@ -288,28 +308,31 @@ errout_with_search:
  *
  ****************************************************************************/
 
-static int nx_vopen(FAR struct tcb_s *tcb,
+static int nx_vopen(FAR struct fdlist *list,
                     FAR const char *path, int oflags, va_list ap)
 {
-  struct file filep;
+  FAR struct file *filep;
   int ret;
   int fd;
 
-  /* Let file_vopen() do all of the work */
+  filep = file_allocate();
+  if (filep == NULL)
+    {
+      return -ENOMEM;
+    }
 
-  ret = file_vopen(&filep, path, oflags, getumask(), ap);
+  ret = file_vopen(filep, path, oflags, getumask(), ap);
   if (ret < 0)
     {
+      file_deallocate(filep);
       return ret;
     }
 
-  /* Allocate a new file descriptor for the inode */
-
-  fd = file_allocate_from_tcb(tcb, filep.f_inode, filep.f_oflags,
-                              filep.f_pos, filep.f_priv, 0, false);
+  fd = fdlist_dupfile(list, oflags, 0, filep);
   if (fd < 0)
     {
-      file_close(&filep);
+      file_close(filep);
+      file_deallocate(filep);
     }
 
   return fd;
@@ -346,27 +369,29 @@ int file_open(FAR struct file *filep, FAR const char *path, int oflags, ...)
   va_list ap;
   int ret;
 
+  memset(filep, 0, sizeof(*filep));
+
   va_start(ap, oflags);
   ret = file_vopen(filep, path, oflags, 0, ap);
   va_end(ap);
 
   if (ret >= OK)
     {
-      FS_ADD_BACKTRACE(filep);
+      atomic_fetch_add(&filep->f_refs, 1);
     }
 
   return ret;
 }
 
 /****************************************************************************
- * Name: nx_open_from_tcb
+ * Name: fdlist_open
  *
  * Description:
- *   nx_open_from_tcb() is similar to the standard 'open' interface except
+ *   fdlist_open() is similar to the standard 'open' interface except
  *   that it is not a cancellation point and it does not modify the errno
  *   variable.
  *
- *   nx_open_from_tcb() is an internal NuttX interface and should not be
+ *   fdlist_open() is an internal NuttX interface and should not be
  *   called from applications.
  *
  * Input Parameters:
@@ -381,8 +406,8 @@ int file_open(FAR struct file *filep, FAR const char *path, int oflags, ...)
  *
  ****************************************************************************/
 
-int nx_open_from_tcb(FAR struct tcb_s *tcb,
-                     FAR const char *path, int oflags, ...)
+int fdlist_open(FAR struct fdlist *list,
+                FAR const char *path, int oflags, ...)
 {
   va_list ap;
   int fd;
@@ -390,7 +415,7 @@ int nx_open_from_tcb(FAR struct tcb_s *tcb,
   /* Let nx_vopen() do all of the work */
 
   va_start(ap, oflags);
-  fd = nx_vopen(tcb, path, oflags, ap);
+  fd = nx_vopen(list, path, oflags, ap);
   va_end(ap);
 
   return fd;
@@ -425,7 +450,7 @@ int nx_open(FAR const char *path, int oflags, ...)
   /* Let nx_vopen() do all of the work */
 
   va_start(ap, oflags);
-  fd = nx_vopen(nxsched_self(), path, oflags, ap);
+  fd = nx_vopen(nxsched_get_fdlist_from_tcb(this_task()), path, oflags, ap);
   va_end(ap);
 
   return fd;
@@ -455,7 +480,7 @@ int open(FAR const char *path, int oflags, ...)
   /* Let nx_vopen() do most of the work */
 
   va_start(ap, oflags);
-  fd = nx_vopen(nxsched_self(), path, oflags, ap);
+  fd = nx_vopen(nxsched_get_fdlist_from_tcb(this_task()), path, oflags, ap);
   va_end(ap);
 
   /* Set the errno value if any errors were reported by nx_open() */

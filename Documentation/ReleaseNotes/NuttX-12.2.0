@@ -27,7 +27,7 @@ sched
 * [#8743](https://github.com/apache/nuttx/pull/8743) sched/nxmutex: mutex priority inheritance optimization
 * [#9066](https://github.com/apache/nuttx/pull/9066) sched/pthread: pthread_barrierwait can not be preemption
 * [#9067](https://github.com/apache/nuttx/pull/9067) sched/pthread: pthread_cond_wait dead lock
-* [#9002](https://github.com/apache/nuttx/pull/9002) sched/pthread: repalce sched_lock to enter_critical_section
+* [#9002](https://github.com/apache/nuttx/pull/9002) sched/pthread: replace sched_lock to enter_critical_section
 * [#9539](https://github.com/apache/nuttx/pull/9539) sched/pthread: Return ESRCH when the task is in the process of exit.
 * [#9202](https://github.com/apache/nuttx/pull/9202) sched/pthread: sched_lock should replace with enter_critical_secion
 * [#9091](https://github.com/apache/nuttx/pull/9091) sched/sem/sem_init: Change sem_xxx -> nxsem_xxx in kernel modules
@@ -124,7 +124,7 @@ Misc
 * [#9149](https://github.com/apache/nuttx/pull/9149) Remove #warning in the unnecessary places
 * [#9594](https://github.com/apache/nuttx/pull/9594) Replace $(INCDIR) and ${DEFINE} with $(INCDIR_PREFIX) and $(DEFINE_PREFIX)
 * [#8726](https://github.com/apache/nuttx/pull/8726) Replace the unsafe function(strcat, sprintf) with the safe one(strlcat, snprintf)  
-* [#9509](https://github.com/apache/nuttx/pull/9509) sdcard: update sdcard detection to avoid 0xff asignment to bool type
+* [#9509](https://github.com/apache/nuttx/pull/9509) sdcard: update sdcard detection to avoid 0xff assignment to bool type
 * [#9424](https://github.com/apache/nuttx/pull/9424) semantic/parser: fix compile warning found by sparse
 * [#9142](https://github.com/apache/nuttx/pull/9142) signal: add macro NSIG
 * [#9201](https://github.com/apache/nuttx/pull/9201) system/signal: in interrupting the context, regs modify logic error  
@@ -214,7 +214,7 @@ Improvements
 * [#9604](https://github.com/apache/nuttx/pull/9604) arch/arm/stm: Fix duplicate include guard
 * [#8992](https://github.com/apache/nuttx/pull/8992) arch/arm/stm32: Remove GPIO_{SPEED|MODE}_xxx and provide a legacy path for lazy migration
 * [#9491](https://github.com/apache/nuttx/pull/9491) arch/arm/stm32: Removed unused STM32_TICKLESS_SYSTICK Kconfig option.
-* [#8976](https://github.com/apache/nuttx/pull/8976) arch/arm/stm32/otg: rasie an assertion if IN request is not possible to transfer
+* [#8976](https://github.com/apache/nuttx/pull/8976) arch/arm/stm32/otg: raise an assertion if IN request is not possible to transfer
 * [#8943](https://github.com/apache/nuttx/pull/8943) arch/arm/stm32/stm32_eth: Added error handling for abnormal interrupts.
 * [#8975](https://github.com/apache/nuttx/pull/8975) arch/arm/{stm32f7,stm32h7,stm32l4}/sdmmc: callback support requires HPWORK
 * [#9228](https://github.com/apache/nuttx/pull/9228) arch/arm/stm32h7: sdmmc It is not an error if no wait was needed
@@ -289,7 +289,7 @@ Improvements
 * [#9020](https://github.com/apache/nuttx/pull/9020) arch/xtensa/esp32: ESP32 not use IMEM in user heap mode
 * [#9408](https://github.com/apache/nuttx/pull/9408) arch/xtensa/esp32: Fix build issues for SoftAP mode
 * [#9236](https://github.com/apache/nuttx/pull/9236) arch/xtensa/esp32: Fix himem driver crash in SMP mode
-* [#8926](https://github.com/apache/nuttx/pull/8926) arch/xtensa/esp32: fix signal deliver when task is running on ther CPU
+* [#8926](https://github.com/apache/nuttx/pull/8926) arch/xtensa/esp32: fix signal deliver when task is running on other CPU
 * [#8963](https://github.com/apache/nuttx/pull/8963) arch/xtensa/esp32: Fix Wi-Fi driver parameter settings
 * [#8974](https://github.com/apache/nuttx/pull/8974) arch/xtensa/esp32: Make asprintf and lib_free corresponding
 * [#9077](https://github.com/apache/nuttx/pull/9077) arch/xtensa/esp32: Ssd1306
@@ -405,11 +405,11 @@ Improvements
 * [#8907](https://github.com/apache/nuttx/pull/#8907) drivers/video/fb: add vsync offset support
 * [#9101](https://github.com/apache/nuttx/pull/#9101) drivers/video/fb: fix pollnotify calling crash in advance
 * [#9328](https://github.com/apache/nuttx/pull/#9328) drivers/video/fb_driver: add fb_open and fb_close
-* [#9388](https://github.com/apache/nuttx/pull/#9388) drivers/video/vnc_server: Fix that vnc_updater thread exited caused by readed a null data
+* [#9388](https://github.com/apache/nuttx/pull/#9388) drivers/video/vnc_server: Fix that vnc_updater thread exited caused by reading a null data
 * [#9329](https://github.com/apache/nuttx/pull/#9329) drivers/video/vnc_server: set touch.maxpoint to 1 for circbuf_init
 * [#9447](https://github.com/apache/nuttx/pull/#9447) drivers/virtio: Fix virtnet_transmit() in virtio-mmio-net.c
 * [#9457](https://github.com/apache/nuttx/pull/#9457) drivers/virtio: Fix virtio-mmio-net
-* [#9582](https://github.com/apache/nuttx/pull/#9582) drivers/virtio: Use one dscriptor for RX in virtio-mmio-net.c
+* [#9582](https://github.com/apache/nuttx/pull/#9582) drivers/virtio: Use one descriptor for RX in virtio-mmio-net.c
 * [#9134](https://github.com/apache/nuttx/pull/#9134) drivers/wireless: Fix mtu info for gs2200m
 
 Audio Support

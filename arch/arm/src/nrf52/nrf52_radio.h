@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nrf52/nrf52_radio.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -158,7 +160,7 @@ enum nrf52_radio_cca_mode_e
  * +--------------------------------------------------------------------+
  * |         PHY protocol data unit (PPDU)                              |
  * +--------------------+-----+---------+-------------------------------+
- * | Preamble sequence  | SFD | Lenght  | PHY payload                   |
+ * | Preamble sequence  | SFD | Length  | PHY payload                   |
  * |--------------------+-----+---------+-------------------------------+
  * | 5 octets synchronization | 1 octet | Maximum 127 octets (PSDU)     |
  * | header (SHR)             | (PHR)   +-------------------------------+
@@ -220,7 +222,7 @@ struct nrf52_radio_cca_s
   uint8_t mode;                 /* CCA mode of operation */
   uint8_t edthres;              /* CCA energy busy threshold */
   uint8_t corrthres;            /* CCA correlator busy threshold */
-  uint8_t corrcnt;              /* Limit for occurances above CCACORRTHRES */
+  uint8_t corrcnt;              /* Limit for occurrences above CCACORRTHRES */
 };
 #endif
 

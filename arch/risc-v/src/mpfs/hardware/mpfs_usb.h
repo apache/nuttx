@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/hardware/mpfs_usb.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -407,6 +409,7 @@ union wb_u
 
 struct mpfs_rqhead_s
 {
+  spinlock_t            qlock;         /* Lock to protect access to the queue */
   struct mpfs_req_s     *head;         /* Requests are added to the head of the list */
   struct mpfs_req_s     *tail;         /* Requests are removed from the tail of the list */
 };
@@ -415,10 +418,12 @@ struct mpfs_ep_s
 {
   struct usbdev_ep_s    ep;           /* Standard endpoint structure */
 
+  spinlock_t            eplock;       /* Lock for endpoint access */
   struct mpfs_usbdev_s  *dev;         /* Reference to private driver data */
   struct mpfs_rqhead_s  reqq;         /* Read/write request queue */
   struct mpfs_rqhead_s  pendq;        /* Write requests pending stall sent */
   struct usbdev_epdesc_s *descb[2];   /* Pointers to this endpoint descriptors */
+  uint32_t              linkdead;     /* Remote end has closed the connection */
   volatile uint8_t      epstate;      /* State of the endpoint (see enum mpfs_epstate_e) */
   uint8_t               stalled:1;    /* true: Endpoint is stalled */
   uint8_t               pending:1;    /* true: IN Endpoint stall is pending */
@@ -444,8 +449,13 @@ struct mpfs_usbdev_s
 
   struct usbdevclass_driver_s *driver;
 
+  /* Device specific fields */
+
+  spinlock_t           lock;          /* Device lock */
+
   /* USB-specific fields */
 
+  aligned_data(4)
   struct usb_ctrlreq_s ctrl;          /* Last EP0 request */
   uint8_t              devstate;      /* State of the device (see enum mpfs_devstate_e) */
   uint8_t              prevstate;     /* Previous state of the device before SUSPEND */

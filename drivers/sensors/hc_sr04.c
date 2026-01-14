@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/hc_sr04.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -75,7 +77,7 @@ struct hcsr04_dev_s
   int time_start_pulse;
   int time_finish_pulse;
   volatile bool rising;
-  struct pollfd *fds[CONFIG_HCSR04_NPOLLWAITERS];
+  FAR struct pollfd *fds[CONFIG_HCSR04_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -126,7 +128,7 @@ static int hcsr04_start_measuring(FAR struct hcsr04_dev_s *priv)
   /* Send to 10uS trigger pulse */
 
   priv->config->set_trigger(priv->config, true);
-  nxsig_usleep(10);
+  nxsched_usleep(10);
   priv->config->set_trigger(priv->config, false);
 
   return 0;
@@ -341,7 +343,7 @@ static int hcsr04_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */

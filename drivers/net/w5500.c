@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/net/w5500.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -469,11 +471,11 @@ static void w5500_reset(FAR struct w5500_driver_s *self, bool keep)
 
   if (!keep)
     {
-      nxsig_usleep(500);   /* [W5500]: T_RC (Reset Cycle Time) min 500 us   */
+      nxsched_usleep(500);   /* [W5500]: T_RC (Reset Cycle Time) min 500 us   */
 
       self->lower->reset(self->lower, false);
 
-      nxsig_usleep(1000);  /* [W5500]: T_PL (RSTn to internal PLL lock) 1ms */
+      nxsched_usleep(1000);  /* [W5500]: T_PL (RSTn to internal PLL lock) 1ms */
     }
 }
 
@@ -1052,7 +1054,7 @@ static int w5500_unfence(FAR struct w5500_driver_s *self)
                           W5500_BSB_COMMON_REGS,
                           W5500_PHYCFGR);
 
-      nxsig_usleep(100000); /* 100 ms x 100 = 10 sec */
+      nxsched_usleep(100000); /* 100 ms x 100 = 10 sec */
     }
 
   if (value & PHYCFGR_LNK)
@@ -1104,13 +1106,13 @@ static void w5500_transmit(FAR struct w5500_driver_s *self)
   if (!w5500_txbuf_numfree(self))
     {
       ninfo("Dropping Tx packet due to no buffer available.\n");
-      NETDEV_TXERRORS(self->w_dev);
+      NETDEV_TXERRORS(&self->w_dev);
       return;
     }
 
   /* Increment statistics */
 
-  NETDEV_TXPACKETS(self->w_dev);
+  NETDEV_TXPACKETS(&self->w_dev);
 
   /* Copy packet data to TX buffer */
 
@@ -1457,7 +1459,7 @@ static void w5500_txdone(FAR struct w5500_driver_s *self)
 {
   /* Check for errors and update statistics */
 
-  NETDEV_TXDONE(self->w_dev);
+  NETDEV_TXDONE(&self->w_dev);
 
   /* Check if there are pending transmissions. */
 
@@ -1511,7 +1513,7 @@ static void w5500_interrupt_work(FAR void *arg)
    * thread has been configured.
    */
 
-  net_lock();
+  netdev_lock(&self->w_dev);
 
   /* Process pending Ethernet interrupts.  Read IR, MIR and SIR in one shot
    * to optimize latency, although MIR is not actually used.
@@ -1590,7 +1592,7 @@ static void w5500_interrupt_work(FAR void *arg)
     }
 
 done:
-  net_unlock();
+  netdev_unlock(&self->w_dev);
 
   /* Re-enable Ethernet interrupts */
 
@@ -1600,7 +1602,7 @@ done:
 
 error:
   w5500_fence(self);
-  net_unlock();
+  netdev_unlock(&self->w_dev);
 }
 
 /****************************************************************************
@@ -1665,11 +1667,11 @@ static void w5500_txtimeout_work(FAR void *arg)
    * thread has been configured.
    */
 
-  net_lock();
+  netdev_lock(&self->w_dev);
 
   /* Increment statistics and dump debug info */
 
-  NETDEV_TXTIMEOUTS(self->w_dev);
+  NETDEV_TXTIMEOUTS(&self->w_dev);
 
   /* Then reset the hardware */
 
@@ -1682,7 +1684,7 @@ static void w5500_txtimeout_work(FAR void *arg)
       devif_poll(&self->w_dev, w5500_txpoll);
     }
 
-  net_unlock();
+  netdev_unlock(&self->w_dev);
 }
 
 /****************************************************************************
@@ -1846,7 +1848,7 @@ static void w5500_txavail_work(FAR void *arg)
    * thread has been configured.
    */
 
-  net_lock();
+  netdev_lock(&priv->w_dev);
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -1859,7 +1861,7 @@ static void w5500_txavail_work(FAR void *arg)
       devif_poll(&priv->w_dev, w5500_txpoll);
     }
 
-  net_unlock();
+  netdev_unlock(&priv->w_dev);
 }
 
 /****************************************************************************

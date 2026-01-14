@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/pthread/pthread_join.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -81,7 +83,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
 
   enter_cancellation_point();
 
-  nxrmutex_lock(&group->tg_joinlock);
+  nxrmutex_lock(&group->tg_mutex);
 
   tcb = nxsched_get_tcb((pid_t)thread);
   if (tcb == NULL || (tcb->flags & TCB_FLAG_JOIN_COMPLETED) != 0)
@@ -134,7 +136,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
 
   sq_addfirst(&rtcb->join_entry, &tcb->join_queue);
 
-  nxrmutex_unlock(&group->tg_joinlock);
+  nxrmutex_unlock(&group->tg_mutex);
 
   /* Take the thread's thread exit semaphore.  We will sleep here
    * until the thread exits.  We need to exercise caution because
@@ -144,7 +146,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
 
   nxsem_wait_uninterruptible(&rtcb->join_sem);
 
-  nxrmutex_lock(&group->tg_joinlock);
+  nxrmutex_lock(&group->tg_mutex);
 
   /* The thread has exited! Get the thread exit value */
 
@@ -154,7 +156,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
     }
 
 errout:
-  nxrmutex_unlock(&group->tg_joinlock);
+  nxrmutex_unlock(&group->tg_mutex);
 
   leave_cancellation_point();
 

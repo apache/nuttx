@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/common/src/stm32_lm75.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -92,7 +94,7 @@ int board_lm75_initialize(int devno, int busno)
 
   /* Then register the temperature sensor */
 
-  snprintf(devpath, 12, "/dev/temp%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/temp%d", devno);
   ret = lm75_register(devpath, i2c, 0x48);
   if (ret < 0)
     {

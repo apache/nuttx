@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/unistd/lib_getopt_common.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -112,7 +114,7 @@ static int getopt_long_option(FAR struct getopt_s *go,
     }
 
   /* Search the list of long options for a matching name.
-   * The last element of the option arry must be filled with zeroes.
+   * The last element of the option array must be filled with zeroes.
    */
 
   for (ndx = 0; longopts[ndx].name != NULL; ndx++)

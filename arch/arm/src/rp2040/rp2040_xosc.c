@@ -80,7 +80,9 @@ void rp2040_xosc_init(void)
 
   /* Set xosc startup delay */
 
-  uint32_t startup_delay = (((12 * MHZ) / 1000) + 128) / 256;
+  uint32_t startup_delay = ((BOARD_XOSC_FREQ / 1000) *
+                            BOARD_XOSC_STARTUPDELAY + 255) / 256;
+  ASSERT(startup_delay < 1 << 13);
   putreg32(startup_delay, RP2040_XOSC_STARTUP);
 
   /* Set the enable bit now that we have set freq range and startup delay */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/misc/lib_mknod.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -132,15 +134,25 @@ int mknod(FAR const char *path, mode_t mode, dev_t dev)
 
 int mknodat(int dirfd, FAR const char *path, mode_t mode, dev_t dev)
 {
-  char fullpath[PATH_MAX];
+  FAR char *fullpath;
   int ret;
 
-  ret = lib_getfullpath(dirfd, path, fullpath, sizeof(fullpath));
+  fullpath = lib_get_pathbuffer();
+  if (fullpath == NULL)
+    {
+      set_errno(ENOMEM);
+      return ERROR;
+    }
+
+  ret = lib_getfullpath(dirfd, path, fullpath, PATH_MAX);
   if (ret < 0)
     {
+      lib_put_pathbuffer(fullpath);
       set_errno(-ret);
       return ERROR;
     }
 
-  return mknod(fullpath, mode, dev);
+  ret = mknod(fullpath, mode, dev);
+  lib_put_pathbuffer(fullpath);
+  return ret;
 }

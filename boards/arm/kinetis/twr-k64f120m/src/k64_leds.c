@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/kinetis/twr-k64f120m/src/k64_leds.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -212,7 +214,7 @@ void board_autoled_initialize(void)
  * Name: board_autoled_on
  *
  * Description:
- *   Puts on the relevants LEDs for one of the LED_condition (see board.h)
+ *   Puts on the relevant LEDs for one of the LED_condition (see board.h)
  ****************************************************************************/
 
 void board_autoled_on(int led)
@@ -224,7 +226,7 @@ void board_autoled_on(int led)
  * Name: board_autoled_off
  *
  * Description:
- *   Puts off the relevants LEDs for one of the LED_condition (see board.h)
+ *   Puts off the relevant LEDs for one of the LED_condition (see board.h)
  ****************************************************************************/
 
 void board_autoled_off(int led)

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/isl29023.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,10 +44,6 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-
-#ifndef CONFIG_ISL29023_I2C_FREQUENCY
-#  define CONFIG_ISL29023_I2C_FREQUENCY 400000
-#endif
 
 /* Registers definitions */
 

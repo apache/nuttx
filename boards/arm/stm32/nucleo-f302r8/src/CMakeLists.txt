@@ -1,6 +1,8 @@
 # ##############################################################################
 # boards/arm/stm32/nucleo-f302r8/src/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -44,6 +46,10 @@ endif()
 
 if(CONFIG_BOARD_STM32_IHM07M1)
   list(APPEND SRCS stm32_foc_ihm07m1.c)
+else()
+  if(CONFIG_ADC)
+    list(APPEND SRCS stm32_adc.c)
+  endif()
 endif()
 
 if(CONFIG_STM32_CAN)

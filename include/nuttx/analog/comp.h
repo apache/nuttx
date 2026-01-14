@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/analog/comp.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -108,7 +110,7 @@ struct comp_dev_s
 
   /* pollfd's for output transition events */
 
-  struct pollfd *d_fds[CONFIG_DEV_COMP_NPOLLWAITERS];
+  FAR struct pollfd *d_fds[CONFIG_DEV_COMP_NPOLLWAITERS];
 #endif
 
   /* Fields provided by lower half COMP logic */

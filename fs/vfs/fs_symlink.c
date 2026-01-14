@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_symlink.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,6 +38,8 @@
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
+#include "fs_heap.h"
+#include "vfs.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -52,7 +56,7 @@
  *
  * Description:
  *   The symlink() function will create a new link (directory entry) for the
- *   existing file, path2.  This implementation is simplied for use with
+ *   existing file, path2.  This implementation is simplified for use with
  *   NuttX in these ways:
  *
  *   - Links may be created only within the NuttX top-level, pseudo file
@@ -128,7 +132,7 @@ int symlink(FAR const char *path1, FAR const char *path2)
     {
       /* Copy path1 */
 
-      FAR char *newpath2 = strdup(path1);
+      FAR char *newpath2 = fs_heap_strdup(path1);
       if (newpath2 == NULL)
         {
           errcode = ENOMEM;
@@ -140,20 +144,12 @@ int symlink(FAR const char *path1, FAR const char *path2)
        * count of zero.
        */
 
-      ret = inode_lock();
-      if (ret < 0)
-        {
-          lib_free(newpath2);
-          errcode = -ret;
-          goto errout_with_search;
-        }
-
+      inode_lock();
       ret = inode_reserve(path2, 0777, &inode);
       inode_unlock();
-
       if (ret < 0)
         {
-          lib_free(newpath2);
+          fs_heap_free(newpath2);
           errcode = -ret;
           goto errout_with_search;
         }
@@ -167,6 +163,9 @@ int symlink(FAR const char *path1, FAR const char *path2)
   /* Symbolic link successfully created */
 
   RELEASE_SEARCH(&desc);
+#ifdef CONFIG_FS_NOTIFY
+  notify_create(path2);
+#endif
   return OK;
 
 errout_with_inode:

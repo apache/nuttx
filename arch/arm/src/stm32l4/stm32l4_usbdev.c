@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_usbdev.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -229,7 +231,7 @@
 #endif
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* The various states of a control pipe */
@@ -1335,7 +1337,7 @@ static int stm32l4_wrrequest(struct stm32l4_usbdev_s *priv,
     }
 
   epno = USB_EPNO(privep->ep.eplog);
-  uinfo("epno=%d req=%p: len=%d xfrd=%d nullpkt=%d\n",
+  uinfo("epno=%d req=%p: len=%zu xfrd=%zu nullpkt=%d\n",
         epno, privreq, privreq->req.len, privreq->req.xfrd,
         privep->txnullpkt);
   UNUSED(epno);
@@ -1483,7 +1485,8 @@ static int stm32l4_rdrequest(struct stm32l4_usbdev_s *priv,
       return -ENOENT;
     }
 
-  uinfo("EP%d: len=%d xfrd=%d\n", epno, privreq->req.len, privreq->req.xfrd);
+  uinfo("EP%d: len=%zu xfrd=%zu\n",
+        epno, privreq->req.len, privreq->req.xfrd);
 
   /* Ignore any attempt to receive a zero length packet */
 

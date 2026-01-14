@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/signal/sig_unmaskpendingsignal.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -102,7 +104,8 @@ bool nxsig_unmask_pendingsignal(void)
                * other than this thread.
                */
 
-              nxsig_tcbdispatch(rtcb, &pendingsig->info);
+              nxsig_tcbdispatch(rtcb, &pendingsig->info,
+                                pendingsig->tcb == NULL);
 
               /* Then remove it from the pending signal list */
 

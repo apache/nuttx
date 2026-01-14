@@ -279,7 +279,7 @@ Where <subdir> is one of the following:
   netnsh:
     Configures the NuttShell (nsh) located at apps/examples/nsh.  This
     configuration is similar to the nsh configuration except that network
-    upport is enabled.
+    support is enabled.
 
     NOTES:
 

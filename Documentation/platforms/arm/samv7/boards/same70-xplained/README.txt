@@ -346,7 +346,7 @@ KSZ8081RNACA Connections
 
   ------ --------- ---------
   SAME70 SAME70    Ethernet
-  Pin    Function  Functio
+  Pin    Function  Function
   ------ --------- ---------
   PD0    GTXCK     REF_CLK
   PD1    GTXEN     TXEN
@@ -695,7 +695,8 @@ MCAN1 Loopback Test
 
     Device Drivers -> CAN Driver support
        CONFIG_CAN=y                            # Enable the upper-half CAN driver
-       CONFIG_CAN_FIFOSIZE=8
+       CONFIG_CAN_TXFIFOSIZE=8
+       CONFIG_CAN_RXFIFOSIZE=8
        CONFIG_CAN_NPENDINGRTR=4
 
     System Type -> SAMV7 Peripheral Selections
@@ -1436,7 +1437,7 @@ Configuration sub-directories
        Application Configuration:
          CONFIG_NSH_BUILTIN_APPS=y  : Enable starting apps from NSH command line
 
-    4. The network initialization thread and the NSH network montior are
+    4. The network initialization thread and the NSH network monitor are
        enabled in this configuration. As a result, networking initialization
        is performed asynchronously with NSH bring-up.  For more information,
        see the paragraphs above entitled "Network Initialization Thread" and
@@ -1612,7 +1613,7 @@ Configuration sub-directories
          NOTES:
          o An environment variable like $PATH may be used for any argument.
          o Arguments are "sticky".  For example, once the I2C address is
-           specified, that address will be re-used until it is changed.
+           specified, that address will be reused until it is changed.
 
          WARNING:
          o The I2C dev command may have bad side effects on your I2C devices.
@@ -1743,7 +1744,7 @@ Configuration sub-directories
       CONFIG_INIT_ENTRYPOINT="mcuboot_confirm_main"
 
   pysim:
-    This configuration includes support for pysimCoder appliaction (for further
+    This configuration includes support for pysimCoder application (for further
     information regarding NuttX and pysimCoder please refer to NuttX documentation).
 
     Following peripherals are included:

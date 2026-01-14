@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/unionfs/fs_unionfs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,6 +48,7 @@
 #include <nuttx/mutex.h>
 
 #include "inode/inode.h"
+#include "fs_heap.h"
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_UNIONFS)
 
@@ -81,7 +84,7 @@ struct unionfs_inode_s
   bool ui_unmounted;                 /* File system has been unmounted */
 };
 
-/* This structure descries one opened file */
+/* This structure describes one opened file */
 
 struct unionfs_file_s
 {
@@ -96,105 +99,119 @@ struct unionfs_file_s
 /* Helper functions */
 
 static FAR const char *unionfs_offsetpath(FAR const char *relpath,
-                 FAR const char *prefix);
+                                          FAR const char *prefix);
 static bool    unionfs_ispartprefix(FAR const char *partprefix,
-                 FAR const char *prefix);
+                                    FAR const char *prefix);
 static int     unionfs_tryopen(FAR struct file *filep,
-                 FAR const char *relpath, FAR const char *prefix, int oflags,
-                 mode_t mode);
+                               FAR const char *relpath,
+                               FAR const char *prefix, int oflags,
+                               mode_t mode);
 static int     unionfs_tryopendir(FAR struct inode *inode,
-                 FAR const char *relpath, FAR const char *prefix,
-                 FAR struct fs_dirent_s **dir);
+                                  FAR const char *relpath,
+                                  FAR const char *prefix,
+                                  FAR struct fs_dirent_s **dir);
 static int     unionfs_trymkdir(FAR struct inode *inode,
-                 FAR const char *relpath, FAR const char *prefix,
-                 mode_t mode);
+                                FAR const char *relpath,
+                                FAR const char *prefix,
+                                mode_t mode);
 static int     unionfs_tryrmdir(FAR struct inode *inode,
-                 FAR const char *relpath, FAR const char *prefix);
+                                FAR const char *relpath,
+                                FAR const char *prefix);
 static int     unionfs_tryunlink(FAR struct inode *inode,
-                 FAR const char *relpath, FAR const char *prefix);
+                                 FAR const char *relpath,
+                                 FAR const char *prefix);
 static int     unionfs_tryrename(FAR struct inode *mountpt,
-                 FAR const char *oldrelpath, FAR const char *newrelpath,
-                 FAR const char *prefix);
+                                 FAR const char *oldrelpath,
+                                 FAR const char *newrelpath,
+                                 FAR const char *prefix);
 static int     unionfs_trystat(FAR struct inode *inode,
-                 FAR const char *relpath, FAR const char *prefix,
-                 FAR struct stat *buf);
+                               FAR const char *relpath,
+                               FAR const char *prefix,
+                               FAR struct stat *buf);
 static int     unionfs_trychstat(FAR struct inode *inode,
-                 FAR const char *relpath, FAR const char *prefix,
-                 FAR const struct stat *buf, int flags);
+                                 FAR const char *relpath,
+                                 FAR const char *prefix,
+                                 FAR const struct stat *buf, int flags);
 static int     unionfs_trystatdir(FAR struct inode *inode,
-                 FAR const char *relpath, FAR const char *prefix);
+                                  FAR const char *relpath,
+                                  FAR const char *prefix);
 static int     unionfs_trystatfile(FAR struct inode *inode,
-                 FAR const char *relpath, FAR const char *prefix);
+                                   FAR const char *relpath,
+                                   FAR const char *prefix);
 static FAR char *unionfs_relpath(FAR const char *path,
-                 FAR const char *name);
+                                 FAR const char *name);
 
 static int     unionfs_unbind_child(FAR struct unionfs_mountpt_s *um);
 static void    unionfs_destroy(FAR struct unionfs_inode_s *ui);
 
 /* Operations on opened files (with struct file) */
 
-static int     unionfs_open(FAR struct file *filep, const char *relpath,
-                 int oflags, mode_t mode);
+static int     unionfs_open(FAR struct file *filep, FAR const char *relpath,
+                            int oflags, mode_t mode);
 static int     unionfs_close(FAR struct file *filep);
 static ssize_t unionfs_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
+                            size_t buflen);
 static ssize_t unionfs_write(FAR struct file *filep, FAR const char *buffer,
-                 size_t buflen);
+                             size_t buflen);
 static off_t   unionfs_seek(FAR struct file *filep, off_t offset,
-                 int whence);
+                            int whence);
 static int     unionfs_ioctl(FAR struct file *filep, int cmd,
-                 unsigned long arg);
+                             unsigned long arg);
 static int     unionfs_sync(FAR struct file *filep);
 static int     unionfs_dup(FAR const struct file *oldp,
-                 FAR struct file *newp);
+                           FAR struct file *newp);
 static int     unionfs_fstat(FAR const struct file *filep,
-                 FAR struct stat *buf);
+                             FAR struct stat *buf);
 static int     unionfs_fchstat(FAR const struct file *filep,
-                 FAR const struct stat *buf, int flags);
+                               FAR const struct stat *buf, int flags);
 static int     unionfs_truncate(FAR struct file *filep, off_t length);
 
 /* Operations on directories */
 
-static int     unionfs_opendir(struct inode *mountpt, const char *relpath,
-                 FAR struct fs_dirent_s **dir);
+static int     unionfs_opendir(FAR struct inode *mountpt,
+                               FAR const char *relpath,
+                               FAR struct fs_dirent_s **dir);
 static int     unionfs_closedir(FAR struct inode *mountpt,
-                 FAR struct fs_dirent_s *dir);
+                                FAR struct fs_dirent_s *dir);
 static int     unionfs_readdir(FAR struct inode *mountpt,
-                 FAR struct fs_dirent_s *dir,
-                 FAR struct dirent *entry);
+                               FAR struct fs_dirent_s *dir,
+                               FAR struct dirent *entry);
 static int     unionfs_rewinddir(FAR struct inode *mountpt,
-                 FAR struct fs_dirent_s *dir);
+                                 FAR struct fs_dirent_s *dir);
 
 static int     unionfs_bind(FAR struct inode *blkdriver,
-                 FAR const void *data, FAR void **handle);
+                            FAR const void *data, FAR void **handle);
 static int     unionfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
-                 unsigned int flags);
+                              unsigned int flags);
 static int     unionfs_statfs(FAR struct inode *mountpt,
-                 FAR struct statfs *buf);
+                              FAR struct statfs *buf);
 
   /* Operations on paths */
 
 static int     unionfs_unlink(FAR struct inode *mountpt,
-                 FAR const char *relpath);
+                              FAR const char *relpath);
 static int     unionfs_mkdir(FAR struct inode *mountpt,
-                 FAR const char *relpath, mode_t mode);
+                             FAR const char *relpath, mode_t mode);
 static int     unionfs_rmdir(FAR struct inode *mountpt,
-                 FAR const char *relpath);
+                             FAR const char *relpath);
 static int     unionfs_rename(FAR struct inode *mountpt,
-                 FAR const char *oldrelpath, FAR const char *newrelpath);
+                              FAR const char *oldrelpath,
+                              FAR const char *newrelpath);
 static int     unionfs_stat(FAR struct inode *mountpt,
-                 FAR const char *relpath, FAR struct stat *buf);
+                            FAR const char *relpath, FAR struct stat *buf);
 static int     unionfs_chstat(FAR struct inode *mountpt,
-                 FAR const char *relpath,
-                 FAR const struct stat *buf, int flags);
+                              FAR const char *relpath,
+                              FAR const struct stat *buf, int flags);
 
 /* Initialization */
 
 static int     unionfs_getmount(FAR const char *path,
-                 FAR struct inode **inode);
+                                FAR struct inode **inode);
 static int     unionfs_dobind(FAR const char *fspath1,
-                 FAR const char *prefix1, FAR const char *fspath2,
-                 FAR const char *prefix2, FAR void **handle);
+                              FAR const char *prefix1,
+                              FAR const char *fspath2,
+                              FAR const char *prefix2,
+                              FAR void **handle);
 
 /****************************************************************************
  * Public Data
@@ -215,7 +232,9 @@ const struct mountpt_operations g_unionfs_operations =
   unionfs_ioctl,       /* ioctl */
   NULL,                /* mmap */
   unionfs_truncate,    /* truncate */
-  NULL,                /* pool */
+  NULL,                /* poll */
+  NULL,                /* readv */
+  NULL,                /* writev */
 
   unionfs_sync,        /* sync */
   unionfs_dup,         /* dup */
@@ -594,7 +613,7 @@ static int unionfs_trystatdir(FAR struct inode *inode,
                               FAR const char *relpath,
                               FAR const char *prefix)
 {
-  FAR struct stat buf;
+  struct stat buf;
   int ret;
 
   /* Check if relative path refers to a directory. */
@@ -616,7 +635,7 @@ static int unionfs_trystatfile(FAR struct inode *inode,
                                FAR const char *relpath,
                                FAR const char *prefix)
 {
-  FAR struct stat buf;
+  struct stat buf;
   int ret;
 
   /* Check if relative path refers to a regular file.  We specifically
@@ -714,11 +733,11 @@ static FAR char *unionfs_relpath(FAR const char *path, FAR const char *name)
 
       if (path[pathlen - 1] == '/')
         {
-          ret = asprintf(&relpath, "%s%s", path, name);
+          ret = fs_heap_asprintf(&relpath, "%s%s", path, name);
         }
       else
         {
-          ret = asprintf(&relpath, "%s/%s", path, name);
+          ret = fs_heap_asprintf(&relpath, "%s/%s", path, name);
         }
 
       /* Handle errors */
@@ -734,11 +753,11 @@ static FAR char *unionfs_relpath(FAR const char *path, FAR const char *name)
     }
   else
     {
-      /* There is no path... just duplicate the name (so that kmm_free()
+      /* There is no path... just duplicate the name (so that fs_heap_free()
        * will work later).
        */
 
-      return strdup(name);
+      return fs_heap_strdup(name);
     }
 }
 
@@ -825,18 +844,18 @@ static void unionfs_destroy(FAR struct unionfs_inode_s *ui)
 
   if (ui->ui_fs[0].um_prefix)
     {
-      lib_free(ui->ui_fs[0].um_prefix);
+      fs_heap_free(ui->ui_fs[0].um_prefix);
     }
 
   if (ui->ui_fs[1].um_prefix)
     {
-      lib_free(ui->ui_fs[1].um_prefix);
+      fs_heap_free(ui->ui_fs[1].um_prefix);
     }
 
   /* And finally free the allocated unionfs state structure as well */
 
   nxmutex_destroy(&ui->ui_lock);
-  kmm_free(ui);
+  fs_heap_free(ui);
 }
 
 /****************************************************************************
@@ -868,7 +887,7 @@ static int unionfs_open(FAR struct file *filep, FAR const char *relpath,
   /* Allocate a container to hold the open file system information */
 
   uf = (FAR struct unionfs_file_s *)
-    kmm_zalloc(sizeof(struct unionfs_file_s));
+    fs_heap_zalloc(sizeof(struct unionfs_file_s));
   if (uf == NULL)
     {
       ret = -ENOMEM;
@@ -986,7 +1005,7 @@ static int unionfs_close(FAR struct file *filep)
 
   /* Free the open file container */
 
-  kmm_free(uf);
+  fs_heap_free(uf);
   filep->f_priv = NULL;
   return ret;
 }
@@ -996,7 +1015,7 @@ static int unionfs_close(FAR struct file *filep)
  ****************************************************************************/
 
 static ssize_t unionfs_read(FAR struct file *filep, FAR char *buffer,
-                           size_t buflen)
+                            size_t buflen)
 {
   FAR struct unionfs_inode_s *ui;
   FAR struct unionfs_file_s *uf;
@@ -1029,7 +1048,7 @@ static ssize_t unionfs_read(FAR struct file *filep, FAR char *buffer,
  ****************************************************************************/
 
 static ssize_t unionfs_write(FAR struct file *filep, FAR const char *buffer,
-                            size_t buflen)
+                             size_t buflen)
 {
   FAR struct unionfs_inode_s *ui;
   FAR struct unionfs_file_s *uf;
@@ -1234,7 +1253,7 @@ static int unionfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   /* Allocate a new container for the union FS open file */
 
   newpriv = (FAR struct unionfs_file_s *)
-    kmm_malloc(sizeof(struct unionfs_file_s));
+    fs_heap_malloc(sizeof(struct unionfs_file_s));
   if (newpriv != NULL)
     {
       /* Clone the old file structure into the newly allocated one */
@@ -1250,7 +1269,7 @@ static int unionfs_dup(FAR const struct file *oldp, FAR struct file *newp)
           ret = ops->dup(&oldpriv->uf_file, &newpriv->uf_file);
           if (ret < 0)
             {
-              kmm_free(newpriv);
+              fs_heap_free(newpriv);
               newpriv = NULL;
             }
         }
@@ -1399,7 +1418,7 @@ static int unionfs_opendir(FAR struct inode *mountpt,
   DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL);
   ui = mountpt->i_private;
 
-  udir = kmm_zalloc(sizeof(*udir));
+  udir = fs_heap_zalloc(sizeof(*udir));
   if (udir == NULL)
     {
       return -ENOMEM;
@@ -1421,7 +1440,7 @@ static int unionfs_opendir(FAR struct inode *mountpt,
 
   if (strlen(relpath) > 0)
     {
-      udir->fu_relpath = strdup(relpath);
+      udir->fu_relpath = fs_heap_strdup(relpath);
       if (!udir->fu_relpath)
         {
           goto errout_with_lock;
@@ -1507,14 +1526,14 @@ static int unionfs_opendir(FAR struct inode *mountpt,
 errout_with_relpath:
   if (udir->fu_relpath != NULL)
     {
-      lib_free(udir->fu_relpath);
+      fs_heap_free(udir->fu_relpath);
     }
 
 errout_with_lock:
   nxmutex_unlock(&ui->ui_lock);
 
 errout_with_udir:
-  kmm_free(udir);
+  fs_heap_free(udir);
   return ret;
 }
 
@@ -1523,7 +1542,7 @@ errout_with_udir:
  ****************************************************************************/
 
 static int unionfs_closedir(FAR struct inode *mountpt,
-                           FAR struct fs_dirent_s *dir)
+                            FAR struct fs_dirent_s *dir)
 {
   FAR struct unionfs_inode_s *ui;
   FAR struct unionfs_mountpt_s *um;
@@ -1577,10 +1596,10 @@ static int unionfs_closedir(FAR struct inode *mountpt,
 
   if (udir->fu_relpath != NULL)
     {
-      kmm_free(udir->fu_relpath);
+      fs_heap_free(udir->fu_relpath);
     }
 
-  kmm_free(udir);
+  fs_heap_free(udir);
 
   /* Decrement the count of open reference.  If that count would go to zero
    * and if the file system has been unmounted, then destroy the file system
@@ -1761,7 +1780,7 @@ static int unionfs_readdir(FAR struct inode *mountpt,
 
                       /* Free the allocated relpath */
 
-                      lib_free(relpath);
+                      fs_heap_free(relpath);
 
                       /* Check for a duplicate */
 
@@ -1848,7 +1867,7 @@ static int unionfs_readdir(FAR struct inode *mountpt,
 
                   /* Free the allocated relpath */
 
-                  lib_free(relpath);
+                  fs_heap_free(relpath);
                 }
             }
         }
@@ -1862,7 +1881,8 @@ static int unionfs_readdir(FAR struct inode *mountpt,
  * Name: unionfs_rewindir
  ****************************************************************************/
 
-static int unionfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
+static int unionfs_rewinddir(FAR struct inode *mountpt,
+                             FAR struct fs_dirent_s *dir)
 {
   FAR struct unionfs_inode_s *ui;
   FAR struct unionfs_mountpt_s *um;
@@ -1930,7 +1950,7 @@ static int unionfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Parse options from mount syscall */
 
-  dup = tmp = strdup(data);
+  dup = tmp = fs_heap_strdup(data);
   if (!dup)
     {
       return -ENOMEM;
@@ -1959,7 +1979,7 @@ static int unionfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   /* Call unionfs_dobind to do the real work. */
 
   ret = unionfs_dobind(fspath1, prefix1, fspath2, prefix2, handle);
-  lib_free(dup);
+  fs_heap_free(dup);
 
   return ret;
 }
@@ -2324,8 +2344,8 @@ static int unionfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
  ****************************************************************************/
 
 static int unionfs_rename(FAR struct inode *mountpt,
-                         FAR const char *oldrelpath,
-                         FAR const char *newrelpath)
+                          FAR const char *oldrelpath,
+                          FAR const char *newrelpath)
 {
   FAR struct unionfs_inode_s *ui;
   FAR struct unionfs_mountpt_s *um;
@@ -2390,7 +2410,7 @@ static int unionfs_rename(FAR struct inode *mountpt,
  ****************************************************************************/
 
 static int unionfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
-                       FAR struct stat *buf)
+                        FAR struct stat *buf)
 {
   FAR struct unionfs_inode_s *ui;
   FAR struct unionfs_mountpt_s *um;
@@ -2580,7 +2600,7 @@ static int unionfs_dobind(FAR const char *fspath1, FAR const char *prefix1,
    */
 
   ui = (FAR struct unionfs_inode_s *)
-    kmm_zalloc(sizeof(struct unionfs_inode_s));
+    fs_heap_zalloc(sizeof(struct unionfs_inode_s));
   if (!ui)
     {
       ferr("ERROR: Failed to allocated union FS state structure\n");
@@ -2609,10 +2629,10 @@ static int unionfs_dobind(FAR const char *fspath1, FAR const char *prefix1,
 
   if (prefix1 && strlen(prefix1) > 0)
     {
-      ui->ui_fs[0].um_prefix = strdup(prefix1);
+      ui->ui_fs[0].um_prefix = fs_heap_strdup(prefix1);
       if (ui->ui_fs[0].um_prefix == NULL)
         {
-          ferr("ERROR: strdup(prefix1) failed\n");
+          ferr("ERROR: fs_heap_strdup(prefix1) failed\n");
           ret = -ENOMEM;
           goto errout_with_fs2;
         }
@@ -2620,10 +2640,10 @@ static int unionfs_dobind(FAR const char *fspath1, FAR const char *prefix1,
 
   if (prefix2 && strlen(prefix2) > 0)
     {
-      ui->ui_fs[1].um_prefix = strdup(prefix2);
+      ui->ui_fs[1].um_prefix = fs_heap_strdup(prefix2);
       if (ui->ui_fs[1].um_prefix == NULL)
         {
-          ferr("ERROR: strdup(prefix2) failed\n");
+          ferr("ERROR: fs_heap_strdup(prefix2) failed\n");
           ret = -ENOMEM;
           goto errout_with_prefix1;
         }
@@ -2645,7 +2665,7 @@ static int unionfs_dobind(FAR const char *fspath1, FAR const char *prefix1,
 errout_with_prefix1:
   if (ui->ui_fs[0].um_prefix != NULL)
     {
-      lib_free(ui->ui_fs[0].um_prefix);
+      fs_heap_free(ui->ui_fs[0].um_prefix);
     }
 
 errout_with_fs2:
@@ -2656,7 +2676,7 @@ errout_with_fs1:
 
 errout_with_uinode:
   nxmutex_destroy(&ui->ui_lock);
-  kmm_free(ui);
+  fs_heap_free(ui);
   return ret;
 }
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/cxd56xx/spresense/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -67,6 +69,7 @@
 #include "cxd56_scd41.h"
 #include "cxd56_sensors.h"
 #include "cxd56_gnss_addon.h"
+#include "cxd56_cxd5602pwbimu.h"
 
 #ifdef CONFIG_VIDEO_ISX012
 #  include "cxd56_isx012.h"
@@ -135,7 +138,7 @@
 #define LED_CPU1                (101)
 #define LED_CPU2                (102)
 #define LED_CPU3                (103)
-#define LED_CPU                 (LED_CPU0 + up_cpu_index())
+#define LED_CPU                 (LED_CPU0 + this_cpu())
 #endif
 
 /* Buttons definitions ******************************************************/
@@ -299,7 +302,7 @@ enum board_power_device
  * supply current value.
  * signal returns "usbdev_notify_s" struct pointer in sival_ptr.
  *
- * Arg: Value of sinal number
+ * Arg: Value of signal number
  */
 
 #define BOARDIOC_USBDEV_SETNOTIFYSIG      (BOARDIOC_USER+0x0001)

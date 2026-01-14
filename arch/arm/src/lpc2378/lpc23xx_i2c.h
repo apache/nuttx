@@ -1,13 +1,11 @@
 /****************************************************************************
  * arch/arm/src/lpc2378/lpc23xx_i2c.h
  *
- *   Copyright (C) 2013 Li Zhuoyi. All rights reserved.
- *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
- *
- * Derived arch/arm/src/lpc17xx_40xx/lpc17_40_i2c.h
- *
- *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2010,2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2013 Li Zhuoyi. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Li Zhuoyi <lzyy.cn@gmail.com> (Original author)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

@@ -1,13 +1,11 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_flash.c
  *
- *   Copyright (C) 2018 Wolpike LLC. All rights reserved.
- *   Author: Evgeniy Bobkov <evgen@wolpike.com>
- *
- * Ported from stm32f20xxf40xx_flash.c, this is the original license:
- *
- *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Author: Uros Platise <uros.platise@isotel.eu>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2018 Wolpike LLC. All rights reserved.
+ * SPDX-FileCopyrightText: 2011 Uros Platise. All rights reserved.
+ * SPDX-FileContributor: Evgeniy Bobkov <evgen@wolpike.com>
+ * SPDX-FileContributor: Uros Platise <uros.platise@isotel.eu>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -53,12 +51,11 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
+#include <arch/barriers.h>
 
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
-
-#include "barriers.h"
 
 #include "hardware/stm32_flash.h"
 #include "stm32_waste.h"
@@ -413,7 +410,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
        * optimization).
        */
 
-      ARM_DSB();
+      UP_DSB();
 
       while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
         {

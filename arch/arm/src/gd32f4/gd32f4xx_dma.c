@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/gd32f4/gd32f4xx_dma.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -564,7 +566,7 @@ void weak_function arm_dma_initialize(void)
  *   gd32_dma_channel_free().
  *
  * Input Parameters:
- *   periph_req - Identifies the DMA channle is request by which peripheral
+ *   periph_req - Identifies the DMA channel is request by which peripheral
  *
  * Returned Value:
  *   If periph_req is valid, this function ALWAYS returns a non-NULL
@@ -702,7 +704,7 @@ void gd32_dma_singlemode_setup(struct gd32_dma_channel_s *dmachan,
   regaddr = GD32_DMA_CHCNT(dmachan->dmabase, dmachan->chan_num);
   putreg32(init_struct->number, regaddr);
 
-  /* Configure peripheral and memory transfer width, channel priotity,
+  /* Configure peripheral and memory transfer width, channel priority,
    * transfer mode
    */
 

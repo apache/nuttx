@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_checkstack.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -45,6 +47,27 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: xtensa_color_intstack
+ *
+ * Description:
+ *   Set the interrupt stack to a value so that later we can determine how
+ *   much stack space was used by interrupt handling logic
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 15
+void xtensa_color_intstack(void)
+{
+  int cpu;
+
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
+      xtensa_stack_color((void *)up_get_intstackbase(cpu), INTSTACK_SIZE);
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: xtensa_stack_check
@@ -156,16 +179,20 @@ size_t xtensa_stack_check(uintptr_t alloc, size_t size)
  *
  ****************************************************************************/
 
-size_t up_check_tcbstack(struct tcb_s *tcb)
+size_t up_check_tcbstack(struct tcb_s *tcb, size_t check_size)
 {
-  return xtensa_stack_check((uintptr_t)tcb->stack_base_ptr,
-                                       tcb->adj_stack_size);
+  return xtensa_stack_check((uintptr_t)tcb->stack_base_ptr, check_size);
 }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
-size_t up_check_intstack(int cpu)
+size_t up_check_intstack(int cpu, size_t check_size)
 {
-  return xtensa_stack_check(up_get_intstackbase(cpu), INTSTACK_SIZE);
+  if (check_size == 0)
+    {
+      check_size = INTSTACK_SIZE;
+    }
+
+  return xtensa_stack_check(up_get_intstackbase(cpu), check_size);
 }
 #endif
 

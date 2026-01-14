@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/usrsock/usrsock_devif.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -52,7 +54,7 @@ struct usrsock_req_s
   mutex_t  lock;              /* Request mutex (only one outstanding
                                * request) */
   sem_t    acksem;            /* Request acknowledgment notification */
-  uint32_t newxid;            /* New transcation Id */
+  uint32_t newxid;            /* New transaction Id */
   uint32_t ackxid;            /* Exchange id for which waiting ack */
   uint16_t nbusy;             /* Number of requests blocked from different
                                * threads */
@@ -131,7 +133,7 @@ static ssize_t usrsock_iovec_do(FAR void *srcdst, size_t srcdstlen,
 
   while ((srclen > 0 || iovcnt > 0) && srcdstlen > 0)
     {
-      size_t clen = srclen;
+      size_t len = srclen;
 
       if (srclen == 0)
         {
@@ -145,25 +147,25 @@ static ssize_t usrsock_iovec_do(FAR void *srcdst, size_t srcdstlen,
           continue;
         }
 
-      if (clen > srcdstlen)
+      if (len > srcdstlen)
         {
-          clen = srcdstlen;
+          len = srcdstlen;
         }
 
       if (from_iov)
         {
-          memmove(ioout, iovbuf, clen);
+          memmove(ioout, iovbuf, len);
         }
       else
         {
-          memmove(iovbuf, ioout, clen);
+          memmove(iovbuf, ioout, len);
         }
 
-      ioout += clen;
-      srcdstlen -= clen;
-      iovbuf += clen;
-      srclen -= clen;
-      total += clen;
+      ioout += len;
+      srcdstlen -= len;
+      iovbuf += len;
+      srclen -= len;
+      total += len;
 
       if (srclen == 0)
         {
@@ -465,7 +467,7 @@ static ssize_t usrsock_handle_req_response(FAR const void *buffer,
       return -EINVAL;
     }
 
-  net_lock();
+  usrsock_lock();
 
   /* Get corresponding usrsock connection for this transfer */
 
@@ -501,7 +503,7 @@ static ssize_t usrsock_handle_req_response(FAR const void *buffer,
   ret = handle_response(conn, buffer, len);
 
 unlock_out:
-  net_unlock();
+  usrsock_unlock();
   return ret;
 }
 
@@ -648,7 +650,7 @@ int usrsock_do_request(FAR struct usrsock_conn_s *conn,
 
   /* Set outstanding request for daemon to handle. */
 
-  net_mutex_lock(&req->lock);
+  usrsock_mutex_timedlock(&req->lock, UINT_MAX);
   if (++req->newxid == 0)
     {
       ++req->newxid;
@@ -668,9 +670,9 @@ int usrsock_do_request(FAR struct usrsock_conn_s *conn,
     {
       /* Wait ack for request. */
 
-      ++req->nbusy; /* net_lock held. */
-      net_sem_wait_uninterruptible(&req->acksem);
-      --req->nbusy; /* net_lock held. */
+      ++req->nbusy; /* usrsock_lock held. */
+      usrsock_sem_timedwait(&req->acksem, false, UINT_MAX);
+      --req->nbusy; /* usrsock_lock held. */
     }
   else
     {
@@ -693,7 +695,7 @@ void usrsock_abort(void)
   FAR struct usrsock_conn_s *conn = NULL;
   int ret;
 
-  net_lock();
+  usrsock_lock();
 
   /* Set active usrsock sockets to aborted state. */
 
@@ -711,12 +713,12 @@ void usrsock_abort(void)
        * requests.
        */
 
-      ret = net_mutex_timedlock(&req->lock, 10);
+      ret = usrsock_mutex_timedlock(&req->lock, 10);
       if (ret < 0)
         {
           if (ret != -ETIMEDOUT && ret != -EINTR)
             {
-              ninfo("net_sem_timedwait errno: %d\n", ret);
+              ninfo("usrsock_mutex_timedlock errno: %d\n", ret);
               DEBUGASSERT(false);
             }
         }
@@ -736,7 +738,7 @@ void usrsock_abort(void)
     }
   while (true);
 
-  net_unlock();
+  usrsock_unlock();
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_USRSOCK */

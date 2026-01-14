@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/serial/pty.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,6 +46,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/serial/pty.h>
+#include <nuttx/signal.h>
 
 #include "pty.h"
 
@@ -77,6 +80,9 @@ struct pty_dev_s
   struct file pd_sink;          /* Accepts data from write() method (pipe input) */
   bool pd_master;               /* True: this is the master */
   uint8_t pd_escape;            /* Number of the character to be escaped */
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+  pid_t pd_pid;                 /* Thread PID to receive signals (-1 if none) */
+#endif
   tcflag_t pd_iflag;            /* Terminal input modes */
   tcflag_t pd_lflag;            /* Terminal local modes */
   tcflag_t pd_oflag;            /* Terminal output modes */
@@ -132,7 +138,9 @@ static const struct file_operations g_pty_fops =
   pty_ioctl,     /* ioctl */
   NULL,          /* mmap */
   NULL,          /* truncate */
-  pty_poll       /* poll */
+  pty_poll,      /* poll */
+  NULL,          /* readv */
+  NULL           /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , pty_unlink   /* unlink */
 #endif
@@ -158,7 +166,7 @@ static void pty_destroy(FAR struct pty_devpair_s *devpair)
 
       /* Un-register the slave device */
 
-      snprintf(devname, 16, "/dev/pts/%d", devpair->pp_minor);
+      snprintf(devname, sizeof(devname), "/dev/pts/%u", devpair->pp_minor);
     }
   else
     {
@@ -166,12 +174,12 @@ static void pty_destroy(FAR struct pty_devpair_s *devpair)
        * unlinked).
        */
 
-      snprintf(devname, 16, "/dev/pty%d", (int)devpair->pp_minor);
+      snprintf(devname, sizeof(devname), "/dev/pty%u", devpair->pp_minor);
       unregister_driver(devname);
 
       /* Un-register the slave device */
 
-      snprintf(devname, 16, "/dev/ttyp%d", devpair->pp_minor);
+      snprintf(devname, sizeof(devname), "/dev/ttyp%u", devpair->pp_minor);
     }
 
   unregister_driver(devname);
@@ -332,7 +340,8 @@ static int pty_close(FAR struct file *filep)
 
   /* Check if the decremented inode reference count would go to zero */
 
-  if (inode->i_crefs == 1)
+  if ((!dev->pd_master && atomic_load(&inode->i_crefs) == 2) ||
+       (dev->pd_master && atomic_load(&inode->i_crefs) == 1))
     {
       /* Did the (single) master just close its reference? */
 
@@ -540,12 +549,23 @@ static ssize_t pty_write(FAR struct file *filep,
   FAR struct pty_dev_s *dev;
   ssize_t ntotal;
   ssize_t nwritten;
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+  pid_t pid;
+#endif
   size_t i;
   char ch;
 
   inode = filep->f_inode;
   dev   = inode->i_private;
   DEBUGASSERT(dev != NULL);
+
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+  pid = dev->pd_devpair->pp_master.pd_pid;
+  if (dev->pd_master)
+    {
+      pid = dev->pd_devpair->pp_slave.pd_pid;
+    }
+#endif
 
   /* Do output post-processing */
 
@@ -598,6 +618,22 @@ static ssize_t pty_write(FAR struct file *filep,
                   break;
                 }
             }
+
+#ifdef CONFIG_TTY_SIGINT
+          if (pid > 0 && ch == CONFIG_TTY_SIGINT_CHAR)
+            {
+              nxsig_kill(pid, SIGINT);
+              return 1;
+            }
+#endif
+
+#ifdef CONFIG_TTY_SIGTSTP
+          if (pid > 0 && ch == CONFIG_TTY_SIGTSTP_CHAR)
+            {
+              nxsig_kill(pid, SIGTSTP);
+              return 1;
+            }
+#endif
 
           /* Transfer the (possibly translated) character..  This will block
            * if the sink pipe is full
@@ -797,6 +833,33 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
         }
         break;
+
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+      /* Make the controlling terminal of the calling process */
+
+      case TIOCSCTTY:
+        {
+          /* Save the PID of the recipient of the SIGINT signal. */
+
+          if ((int)arg < 0 || dev->pd_pid >= 0)
+            {
+              ret = -EINVAL;
+            }
+          else
+            {
+              dev->pd_pid = (pid_t)arg;
+              ret = 0;
+            }
+        }
+        break;
+
+      case TIOCNOTTY:
+        {
+          dev->pd_pid = INVALID_PROCESS_ID;
+          ret = 0;
+        }
+        break;
+#endif
 
       /* Any unrecognized IOCTL commands will be passed to the contained
        * pipe driver.
@@ -1016,7 +1079,13 @@ int pty_register2(int minor, bool susv1)
   devpair->pp_master.pd_oflag   = OPOST | OCRNL;
   devpair->pp_slave.pd_devpair  = devpair;
   devpair->pp_slave.pd_oflag    = OPOST | ONLCR;
-  devpair->pp_slave.pd_lflag    = ECHO;
+  devpair->pp_slave.pd_lflag    = ECHO | ICANON;
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+  /* Initialize  of the task that will receive SIGINT signals. */
+
+  devpair->pp_master.pd_pid = INVALID_PROCESS_ID;
+  devpair->pp_slave.pd_pid = INVALID_PROCESS_ID;
+#endif
 
   /* Register the master device
    *
@@ -1026,7 +1095,7 @@ int pty_register2(int minor, bool susv1)
    * Where N is the minor number
    */
 
-  snprintf(devname, 16, "/dev/pty%d", minor);
+  snprintf(devname, sizeof(devname), "/dev/pty%d", minor);
 
   ret = register_driver(devname, &g_pty_fops, 0666, &devpair->pp_master);
   if (ret < 0)
@@ -1044,11 +1113,11 @@ int pty_register2(int minor, bool susv1)
 
   if (susv1)
     {
-      snprintf(devname, 16, "/dev/pts/%d", minor);
+      snprintf(devname, sizeof(devname), "/dev/pts/%d", minor);
     }
   else
     {
-      snprintf(devname, 16, "/dev/ttyp%d", minor);
+      snprintf(devname, sizeof(devname), "/dev/ttyp%d", minor);
     }
 
   ret = register_driver(devname, &g_pty_fops, 0666, &devpair->pp_slave);
@@ -1060,7 +1129,7 @@ int pty_register2(int minor, bool susv1)
   return OK;
 
 errout_with_master:
-  snprintf(devname, 16, "/dev/pty%d", minor);
+  snprintf(devname, sizeof(devname), "/dev/pty%d", minor);
   unregister_driver(devname);
 
 errout_with_devpair:

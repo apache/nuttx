@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/time/lib_gmtime.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,6 +33,12 @@
 #include <nuttx/clock.h>
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static struct tm g_gmtime;
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -44,8 +52,7 @@
 
 FAR struct tm *gmtime(FAR const time_t *timep)
 {
-  static struct tm tm;
-  return gmtime_r(timep, &tm);
+  return gmtime_r(timep, &g_gmtime);
 }
 
 FAR struct tm *localtime(FAR const time_t *timep)

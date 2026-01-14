@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/misc/rwbuffer.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -334,6 +336,8 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
         {
           return ret;
         }
+
+      nblocks = 0;
     }
 
   while (nblocks > 0)
@@ -1270,6 +1274,32 @@ int rwb_flush(FAR struct rwbuffer_s *rwb)
   rwb_wrcanceltimeout(rwb);
   rwb_wrflush(rwb);
   rwb_unlock(&rwb->wrlock);
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: rwb_flush
+ *
+ * Description:
+ *   Flush the write buffer
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DRVR_READAHEAD
+int rwb_discard(FAR struct rwbuffer_s *rwb)
+{
+  int ret;
+
+  ret = rwb_lock(&rwb->rhlock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  rwb_resetrhbuffer(rwb);
+  rwb_unlock(&rwb->rhlock);
 
   return ret;
 }

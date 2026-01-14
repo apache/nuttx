@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/semaphore/sem_open.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,6 +42,7 @@
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
+#include "vfs/vfs.h"
 #include "semaphore/semaphore.h"
 
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
@@ -152,7 +155,7 @@ int nxsem_open(FAR sem_t **sem, FAR const char *name, int oflags, ...)
           /* The semaphore does not exist and O_CREAT is not set */
 
           ret = -ENOENT;
-          goto errout_with_lock;
+          goto errout_with_search;
         }
 
       /* Create the semaphore.  First we have to extract the additional
@@ -170,25 +173,20 @@ int nxsem_open(FAR sem_t **sem, FAR const char *name, int oflags, ...)
       if (value > SEM_VALUE_MAX)
         {
           ret = -EINVAL;
-          goto errout_with_lock;
+          goto errout_with_search;
         }
 
       /* Create an inode in the pseudo-filesystem at this path.  The new
        * inode will be created with a reference count of zero.
        */
 
-      ret = inode_lock();
-      if (ret < 0)
-        {
-          goto errout_with_lock;
-        }
-
+      inode_lock();
       ret = inode_reserve(fullpath, mode, &inode);
       inode_unlock();
 
       if (ret < 0)
         {
-          goto errout_with_lock;
+          goto errout_with_search;
         }
 
       /* Allocate the semaphore structure (using the appropriate allocator
@@ -210,7 +208,7 @@ int nxsem_open(FAR sem_t **sem, FAR const char *name, int oflags, ...)
       /* Initialize the inode */
 
       INODE_SET_NAMEDSEM(inode);
-      inode->i_crefs = 1;
+      atomic_fetch_add(&inode->i_crefs, 1);
 
       /* Initialize the semaphore */
 
@@ -222,12 +220,15 @@ int nxsem_open(FAR sem_t **sem, FAR const char *name, int oflags, ...)
     }
 
   RELEASE_SEARCH(&desc);
+#ifdef CONFIG_FS_NOTIFY
+  notify_open(fullpath, oflags);
+#endif
   return OK;
 
 errout_with_inode:
   inode_release(inode);
 
-errout_with_lock:
+errout_with_search:
   RELEASE_SEARCH(&desc);
   return ret;
 }

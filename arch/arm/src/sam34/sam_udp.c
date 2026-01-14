@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_udp.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -187,7 +189,7 @@
 #endif
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* State of an endpoint */
@@ -941,7 +943,7 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
           return -ENOENT;
         }
 
-      uinfo("epno=%d req=%p: len=%d xfrd=%d inflight=%d zlpneeded=%d\n",
+      uinfo("epno=%d req=%p: len=%zu xfrd=%zu inflight=%d zlpneeded=%d\n",
             epno, privreq, privreq->req.len, privreq->req.xfrd,
             privreq->inflight, privep->zlpneeded);
 
@@ -1113,7 +1115,7 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
           return -ENOENT;
         }
 
-      uinfo("EP%d: len=%d xfrd=%d\n",
+      uinfo("EP%d: len=%zu xfrd=%zu\n",
             epno, privreq->req.len, privreq->req.xfrd);
 
       /* Ignore any attempt to receive a zero length packet */
@@ -2770,7 +2772,7 @@ sam_ep_reserve(struct sam_usbdev_s *priv, uint8_t epset)
  *
  * Description:
  *   The endpoint is no long in-used.  It will be unreserved and can be
- *   re-used if needed.
+ *   reused if needed.
  *
  ****************************************************************************/
 
@@ -3522,7 +3524,7 @@ static int sam_wakeup(struct usbdev_s *dev)
 
   /* Wait 5msec in case we just entered the resume state */
 
-  nxsig_usleep(5 * 1000);
+  nxsched_usleep(5 * 1000);
 
   /* Set the ESR bit to send the remote resume */
 

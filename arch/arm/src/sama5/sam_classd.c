@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_classd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -335,7 +337,7 @@ static void classd_putreg(uint32_t regaddr, uint32_t regval);
 static void classd_dump_registers(const char *msg);
 #else
 #  define classd_dump_registers(msg);
-#endif 
+#endif
 
 /* Audio lower half functions */
 
@@ -501,9 +503,9 @@ static struct sam_classd_config_s sam_classd_const =
 
 #if defined(CONFIG_SAMA5D2_CLASSD_EQ_FLAT)
   .eq_mode = CLASSD_EQ_FLAT,
-#  elif defined(CONFIG_SAMA5D2_CLASSD_EQ_BB12)  
+#  elif defined(CONFIG_SAMA5D2_CLASSD_EQ_BB12)
   .eq_mode = CLASSD_EQ_BASS_BOOST_12DB,
-#  elif defined(CONFIG_SAMA5D2_CLASSD_EQ_BB6)  
+#  elif defined(CONFIG_SAMA5D2_CLASSD_EQ_BB6)
   .eq_mode = CLASSD_EQ_BASS_BOOST_6DB,
 #  elif defined(CONFIG_SAMA5D2_CLASSD_EQ_BC12)
   .eq_mode = CLASSD_EQ_BASS_CUT_12DB,
@@ -666,7 +668,7 @@ void classd_enable_audio(struct classd_dev_s *priv, bool pmc_clock_enable)
 
   /* wait for Audio PLL startup time */
 
-  nxsig_usleep(100);
+  nxsched_usleep(100);
 #endif
 }
 
@@ -909,7 +911,7 @@ void classd_dsp_clock_config(struct classd_dev_s *priv)
 #ifdef CONFIG_CLASSD_REGDEBUG
   /* double check clock settings */
 
-  uint32_t nd;
+  uint32_t divider;
   uint32_t fracr;
   uint32_t qdpmc;
   uint64_t clk = BOARD_MAINOSC_FREQUENCY;
@@ -988,11 +990,11 @@ void classd_dsp_clock_config(struct classd_dev_s *priv)
   classd_dump_registers("After dsp clock setup");
 
 #ifdef CONFIG_CLASSD_REGDEBUG
-  nd = (pll0 & PMC_AUDIO_PLL0_ND_MASK) >> PMC_AUDIO_PLL0_ND_SHIFT;
-  fracr = (pll1 & PMC_AUDIO_PLL1_FRACR_MASK) >> PMC_AUDIO_PLL1_FRACR_SHIFT;
-  qdpmc = (pll0 & PMC_AUDIO_PLL0_QDPMC_MASK) >> PMC_AUDIO_PLL0_QDPMC_SHIFT;
+  divider = (pll0 & PMC_AUDIO_PLL0_ND_MASK) >> PMC_AUDIO_PLL0_ND_SHIFT;
+  fracr   = (pll1 & PMC_AUDIO_PLL1_FRACR_MASK) >> PMC_AUDIO_PLL1_FRACR_SHIFT;
+  qdpmc   = (pll0 & PMC_AUDIO_PLL0_QDPMC_MASK) >> PMC_AUDIO_PLL0_QDPMC_SHIFT;
 
-  clk *= ((nd + 1) << 22) + fracr;
+  clk *= ((divider + 1) << 22) + fracr;
   clk /= 1 << 22;
   clk /= (qdpmc + 1);
   clk /= 8;
@@ -1310,7 +1312,7 @@ static void classd_reset(struct classd_dev_s *priv)
  *   Calculate the right and left attenuation values based on the
  *   volume and balance settings.
  *
- *   The range is limited to 0..78 since any value <77 wil be treated as
+ *   The range is limited to 0..78 since any value <77 will be treated as
  *   mutes.
  *
  *  Input Parameters:
@@ -1357,8 +1359,8 @@ inline static uint8_t classd_get_atten(uint16_t volume, uint16_t balance)
 static int classd_setvolume(struct classd_dev_s *priv, uint16_t vol)
 {
   struct sam_classd_config_s *config;
-  uint32_t levl;
-  uint32_t levr;
+  uint32_t left;
+  uint32_t right;
   uint32_t bal;
   uint32_t regval;
 
@@ -1375,11 +1377,11 @@ static int classd_setvolume(struct classd_dev_s *priv, uint16_t vol)
   /* Calculate the attenuation value to send to the peripheral */
 
 #ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
-  levl = classd_get_atten(vol, AUDIO_BALANCE_RIGHT - bal);
-  levr = classd_get_atten(vol, bal);
+  left  = classd_get_atten(vol, AUDIO_BALANCE_RIGHT - bal);
+  right = classd_get_atten(vol, bal);
 #else
-  levl = classd_get_atten(volume, AUDIO_BALANCE_CENTER);
-  levr = classd_get_atten(volume, AUDIO_BALANCE_CENTER);
+  left  = classd_get_atten(volume, AUDIO_BALANCE_CENTER);
+  right = classd_get_atten(volume, AUDIO_BALANCE_CENTER);
 #endif
 
   /* Set the volume */
@@ -1387,8 +1389,8 @@ static int classd_setvolume(struct classd_dev_s *priv, uint16_t vol)
   regval = classd_getreg(priv, SAM_CLASSD_INTPMR);
   regval &= ~CLASSD_INTPMR_ATTL_MASK;
   regval &= ~CLASSD_INTPMR_ATTR_MASK;
-  regval |= CLASSD_VOL_LEFT(levl);
-  regval |= CLASSD_VOL_RIGHT(levr);
+  regval |= CLASSD_VOL_LEFT(left);
+  regval |= CLASSD_VOL_RIGHT(right);
 
   classd_putreg(SAM_CLASSD_INTPMR, regval);
 

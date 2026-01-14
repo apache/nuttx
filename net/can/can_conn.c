@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/can/can_conn.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,19 +46,22 @@
 #ifdef CONFIG_NET_CAN
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_CAN_MAX_CONNS
+#  define CONFIG_CAN_MAX_CONNS 0
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /* The array containing all NetLink connections. */
 
-#if CONFIG_CAN_PREALLOC_CONNS > 0
-static struct can_conn_s g_can_connections[CONFIG_CAN_PREALLOC_CONNS];
-#endif
-
-/* A list of all free NetLink connections */
-
-static dq_queue_t g_free_can_connections;
-static mutex_t g_free_lock = NXMUTEX_INITIALIZER;
+NET_BUFPOOL_DECLARE(g_can_connections, sizeof(struct can_conn_s),
+                    CONFIG_CAN_PREALLOC_CONNS, CONFIG_CAN_ALLOC_CONNS,
+                    CONFIG_CAN_MAX_CONNS);
 
 /* A list of all allocated NetLink connections */
 
@@ -65,29 +70,6 @@ static dq_queue_t g_active_can_connections;
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: can_initialize()
- *
- * Description:
- *   Initialize the User Socket connection structures.  Called once and only
- *   from the networking layer.
- *
- ****************************************************************************/
-
-void can_initialize(void)
-{
-#if CONFIG_CAN_PREALLOC_CONNS > 0
-  int i;
-
-  for (i = 0; i < CONFIG_CAN_PREALLOC_CONNS; i++)
-    {
-      /* Mark the connection closed and move it to the free list */
-
-      dq_addlast(&g_can_connections[i].sconn.node, &g_free_can_connections);
-    }
-#endif
-}
 
 /****************************************************************************
  * Name: can_alloc()
@@ -101,37 +83,12 @@ void can_initialize(void)
 FAR struct can_conn_s *can_alloc(void)
 {
   FAR struct can_conn_s *conn;
-#if CONFIG_CAN_ALLOC_CONNS > 0
-  int i;
-#endif
 
   /* The free list is protected by a a mutex. */
 
-  nxmutex_lock(&g_free_lock);
-#if CONFIG_CAN_ALLOC_CONNS > 0
-  if (dq_peek(&g_free_can_connections) == NULL)
-    {
-#if CONFIG_CAN_MAX_CONNS > 0
-      if (dq_count(&g_active_can_connections) +
-          CONFIG_CAN_ALLOC_CONNS > CONFIG_CAN_MAX_CONNS)
-        {
-          nxmutex_unlock(&g_free_lock);
-          return NULL;
-        }
-#endif
+  NET_BUFPOOL_LOCK(g_can_connections);
 
-      conn = kmm_zalloc(sizeof(*conn) * CONFIG_CAN_ALLOC_CONNS);
-      if (conn != NULL)
-        {
-          for (i = 0; i < CONFIG_CAN_ALLOC_CONNS; i++)
-            {
-              dq_addlast(&conn[i].sconn.node, &g_free_can_connections);
-            }
-        }
-    }
-#endif
-
-  conn = (FAR struct can_conn_s *)dq_remfirst(&g_free_can_connections);
+  conn = NET_BUFPOOL_TRYALLOC(g_can_connections);
   if (conn != NULL)
     {
       /* FIXME SocketCAN default behavior enables loopback */
@@ -157,7 +114,7 @@ FAR struct can_conn_s *can_alloc(void)
       dq_addlast(&conn->sconn.node, &g_active_can_connections);
     }
 
-  nxmutex_unlock(&g_free_lock);
+  NET_BUFPOOL_UNLOCK(g_can_connections);
   return conn;
 }
 
@@ -176,31 +133,93 @@ void can_free(FAR struct can_conn_s *conn)
 
   DEBUGASSERT(conn->crefs == 0);
 
-  nxmutex_lock(&g_free_lock);
+  NET_BUFPOOL_LOCK(g_can_connections);
 
   /* Remove the connection from the active list */
 
   dq_rem(&conn->sconn.node, &g_active_can_connections);
+  nxrmutex_destroy(&conn->sconn.s_lock);
 
-  /* If this is a preallocated or a batch allocated connection store it in
-   * the free connections list. Else free it.
-   */
+#ifdef CONFIG_NET_CAN_WRITE_BUFFERS
+  /* Free the write queue */
 
-#if CONFIG_CAN_ALLOC_CONNS == 1
-  if (conn < g_can_connections || conn >= (g_can_connections +
-      CONFIG_CAN_PREALLOC_CONNS))
-    {
-      kmm_free(conn);
-    }
-  else
+  iob_free_queue(&conn->write_q);
+
+#   if CONFIG_NET_SEND_BUFSIZE > 0
+  /* Notify the send buffer available */
+
+  can_sendbuffer_notify(conn);
+#   endif /* CONFIG_NET_SEND_BUFSIZE */
+
 #endif
+
+#if CONFIG_NET_SEND_BUFSIZE > 0
+  nxsem_destroy(&conn->sndsem);
+#endif
+
+  /* Free the readahead queue */
+
+  iob_free_queue(&conn->readahead);
+
+  /* Free the connection. */
+
+  NET_BUFPOOL_FREE(g_can_connections, conn);
+
+  NET_BUFPOOL_UNLOCK(g_can_connections);
+}
+
+/****************************************************************************
+ * Name: can_recv_filter
+ *
+ * Description:
+ *   filter incoming packet
+ *
+ * Input Parameters:
+ *   conn - A pointer to the CAN connection structure
+ *   id   - The CAN identifier
+ *
+ * Returned Value: 0 - Filter not passed, 1 - Filter passed
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+static int can_recv_filter(FAR struct can_conn_s *conn, canid_t id)
+{
+  uint32_t i;
+
+#ifdef CONFIG_NET_CAN_ERRORS
+  /* error message frame */
+
+  if ((id & CAN_ERR_FLAG) != 0)
     {
-      memset(conn, 0, sizeof(*conn));
-      dq_addlast(&conn->sconn.node, &g_free_can_connections);
+      return id & conn->err_mask ? 1 : 0;
+    }
+#endif
+
+  for (i = 0; i < conn->filter_count; i++)
+    {
+      if (conn->filters[i].can_id & CAN_INV_FILTER)
+        {
+          if ((id & conn->filters[i].can_mask) !=
+                ((conn->filters[i].can_id & ~CAN_INV_FILTER) &
+                 conn->filters[i].can_mask))
+            {
+              return 1;
+            }
+        }
+      else
+        {
+          if ((id & conn->filters[i].can_mask) ==
+                (conn->filters[i].can_id & conn->filters[i].can_mask))
+            {
+              return 1;
+            }
+        }
     }
 
-  nxmutex_unlock(&g_free_lock);
+  return 0;
 }
+#endif
 
 /****************************************************************************
  * Name: can_nextconn()
@@ -226,6 +245,29 @@ FAR struct can_conn_s *can_nextconn(FAR struct can_conn_s *conn)
 }
 
 /****************************************************************************
+ * Name: can_conn_list_lock
+ *       can_conn_list_unlock
+ *
+ * Description:
+ *   Lock and unlock the CAN connection list. This is used to protect
+ *   the list of active connections.
+ *
+ * Assumptions:
+ *   This function is called from driver.
+ *
+ ****************************************************************************/
+
+void can_conn_list_lock(void)
+{
+  NET_BUFPOOL_LOCK(g_can_connections);
+}
+
+void can_conn_list_unlock(void)
+{
+  NET_BUFPOOL_UNLOCK(g_can_connections);
+}
+
+/****************************************************************************
  * Name: can_active()
  *
  * Description:
@@ -244,14 +286,28 @@ FAR struct can_conn_s *can_nextconn(FAR struct can_conn_s *conn)
 FAR struct can_conn_s *can_active(FAR struct net_driver_s *dev,
                                   FAR struct can_conn_s *conn)
 {
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+  canid_t can_id;
+  memcpy(&can_id, NETLLBUF, sizeof(canid_t));
+#endif
+
+  can_conn_list_lock();
   while ((conn = can_nextconn(conn)) != NULL)
     {
-      if (conn->dev == NULL || conn->dev == dev)
+      if ((conn->dev == NULL && _SS_ISBOUND(conn->sconn.s_flags)) ||
+          conn->dev == dev)
         {
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+          if (can_recv_filter(conn, can_id) == 0)
+            {
+              continue;
+            }
+#endif
           break;
         }
     }
 
+  can_conn_list_unlock();
   return conn;
 }
 

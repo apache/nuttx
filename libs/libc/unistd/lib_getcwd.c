@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/unistd/lib_getcwd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,14 +34,12 @@
 
 #include "libc.h"
 
-#ifndef CONFIG_DISABLE_ENVIRON
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getwcd
+ * Name: getcwd
  *
  * Description:
  *   getcwd() function places the absolute pathname of the current working
@@ -93,10 +93,13 @@ FAR char *getcwd(FAR char *buf, size_t size)
       size = PATH_MAX + 1;
     }
 
+#ifndef CONFIG_DISABLE_ENVIRON
+
   /* If no working directory is defined, then default to the home directory */
 
   pwd = getenv("PWD");
   if (pwd == NULL)
+#endif /* !CONFIG_DISABLE_ENVIRON */
     {
       pwd = CONFIG_LIBC_HOMEDIR;
     }
@@ -124,4 +127,28 @@ FAR char *getcwd(FAR char *buf, size_t size)
   strlcpy(buf, pwd, size);
   return buf;
 }
-#endif /* !CONFIG_DISABLE_ENVIRON */
+
+/****************************************************************************
+ * Name: get_current_dir_name
+ *
+ * Description:
+ *   get_current_dir_name() will allocate an buffer to hold the current
+ *   working directory info, and this buffer will be returned to user.
+ *   the user will be responsible to free the buffer.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   On success, get_current_dir_name() returns a pointer to a string
+ *   containing the pathname of the current working directory.
+ *   Otherwise, get_current_dir_name() returns a null pointer and
+ *   sets errno to indicate the error.
+ *   the errno can refer to: getcwd() function's comments.
+ *
+ ****************************************************************************/
+
+FAR char *get_current_dir_name(void)
+{
+  return getcwd(NULL, 0);
+}

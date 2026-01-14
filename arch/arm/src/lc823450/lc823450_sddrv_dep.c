@@ -1,11 +1,13 @@
 /****************************************************************************
  * arch/arm/src/lc823450/lc823450_sddrv_dep.c
  *
- *   Copyright (C) 2014-2015 ON Semiconductor. All rights reserved.
- *   Copyright 2014,2015,2016,2017,2018 Sony Video & Sound Products Inc.
- *   Author: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
- *   Author: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
- *   Author: Nobutaka Toyoshima <Nobutaka.Toyoshima@jp.sony.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2016,2017 Sony Video & Sound Products Inc.
+ * SPDX-FileCopyrightText: 2014,2015 Sony Video & Sound Products Inc.
+ * SPDX-FileCopyrightText: 2014-2015 ON Semiconductor. All rights reserved.
+ * SPDX-FileContributor: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
+ * SPDX-FileContributor: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
+ * SPDX-FileContributor: Nobutaka Toyoshima <Nobutaka.Toyoshima@jp.sony.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,7 +59,6 @@
 #include "arm_internal.h"
 #include "lc823450_sddrv_type.h"
 #include "lc823450_sddrv_if.h"
-#include "lc823450_dma.h"
 #include "lc823450_gpio.h"
 #include "lc823450_syscontrol.h"
 #include "lc823450_timer.h"
@@ -181,7 +182,7 @@ SINT_T sddep1_hw_init(struct sddrcfg_s *cfg)
 
   /* wait 15ms */
 
-  nxsig_usleep(15000);
+  nxsched_usleep(15000);
 
   irqstate_t flags = enter_critical_section();
 
@@ -275,7 +276,7 @@ void sddep_voltage_switch(struct sddrcfg_s *cfg)
 
   lc823450_gpio_config(GPIO_PORT0 | GPIO_PIN6 |
                        GPIO_MODE_OUTPUT | GPIO_VALUE_ONE);
-  nxsig_usleep(200 * 1000);
+  nxsched_usleep(200 * 1000);
 #endif
 }
 
@@ -332,7 +333,7 @@ SINT_T sddep_wait(UI_32 ms, struct sddrcfg_s *cfg)
     }
   else
     {
-      nxsig_usleep(ms * 1000);
+      nxsched_usleep(ms * 1000);
     }
 #endif
 

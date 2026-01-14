@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/netdb/lib_gethostentbynamer.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,10 +44,8 @@
 #include "netdb/lib_dns.h"
 #include "netdb/lib_netdb.h"
 
-#ifdef CONFIG_LIBC_NETDB
-
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* This is the layout of the caller provided memory area */
@@ -433,7 +433,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent_s *host,
 
 #ifdef CONFIG_NETDB_DNSCLIENT
 static int lib_dns_query(FAR const char *hostname,
-                         FAR union dns_addr_u *addr, int *naddr)
+                         FAR union dns_addr_u *addr, FAR int *naddr)
 {
   /* Perform the query to get the IP address */
 
@@ -789,4 +789,3 @@ int gethostentbyname_r(FAR const char *name,
   return ERROR;
 }
 
-#endif /* CONFIG_LIBC_NETDB */

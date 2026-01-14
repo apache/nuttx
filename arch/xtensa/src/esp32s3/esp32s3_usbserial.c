@@ -280,7 +280,7 @@ static int esp32s3_attach(struct uart_dev_s *dev)
 
   /* Try to attach the IRQ to a CPU int */
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
   priv->cpuint = esp32s3_setup_irq(priv->cpu, priv->periph,
                                    ESP32S3_INT_PRIO_DEF,
                                    ESP32S3_CPUINT_LEVEL);

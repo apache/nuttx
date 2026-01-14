@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/devif/devif.h
  *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  *   Copyright (C) 2007-2009, 2013-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -60,8 +62,8 @@
 
 /* The following flags may be set in the set of flags by the lower, device-
  * interfacing layer before calling through the socket layer callback. The
- * TCP_ACKDATA, XYZ_NEWDATA, and TCP_CLOSE flags may be set at the same time,
- * whereas the others are mutually exclusive.
+ * TCP_ACKDATA, XYZ_NEWDATA, TCP_RXCLOSE and TCP_TXCLOSE flags may be set
+ * at the same time, whereas the others are mutually exclusive.
  *
  * Connection Specific Events:  These are events that may be notified
  * through callback lists residing in TCP, UDP, or PKT port connection
@@ -94,17 +96,12 @@
  *   PKT_POLL             (1) timed operations, and (2) to check if the
  *   BLUETOOTH_POLL       socket layer has data that it wants to send.
  *   IEEE802154_POLL      These are socket oriented callbacks where the
- *                        context depends on the specific set.
+ *   CAN_POLL             context depends on the specific set.
  *                   OUT: Not used
  *
  *   TCP_BACKLOG      IN: There is a new connection in the backlog list set
  *                        up by the listen() command. (TCP only)
  *                   OUT: Not used
- *
- *   TCP_CLOSE        IN: The remote host has closed the connection, thus the
- *                        connection has gone away. (TCP only)
- *                   OUT: The socket layer signals that it wants to close the
- *                        connection. (TCP only)
  *
  *   TCP_ABORT        IN: The remote host has aborted the connection, thus
  *                        the connection has gone away. (TCP only)
@@ -121,15 +118,29 @@
  *                        retransmissions. (TCP only)
  *                   OUT: Not used
  *
+ *   TCP_RXCLOSE      IN: The remote host has closed the connection, thus the
+ *                        connection has gone away. (TCP only)
+ *                   OUT: The socket layer signals that it wants to close the
+ *                        connection. (TCP only)
+ *
+ *   TCP_TXCLOSE      IN: The local host has closed the connection, thus the
+ *                        connection has gone away. (TCP only)
+ *                   OUT: The socket layer signals that it wants to close the
+ *                        connection. (TCP only)
+ *
+ *   NETDEV_DOWN:     IN: The network device has been taken down.
+ *                   OUT: Not used
+ *
  * Device Specific Events:  These are events that may be notified through
  * callback lists residing in the network device structure.
  *
  *   ARP_POLL         IN: Used for polling the socket layer.  This is
  *                        provided periodically from the drivers to support
  *                        (1) timed operations, and (2) to check if the ARP
- *                        layer needs to send an ARP request.  This is a
- *                        device oriented event, not associated with a
- *                        socket.
+ *                        layer needs to send an ARP request, and (3) polling
+ *                        the ARP send queue to send out pending ARP
+ *                        requests. This is a device oriented event,
+ *                        not associated with a socket.
  *                   OUT: Not used
  *
  *   ICMP_POLL        IN: Used for polling the socket layer.  This is
@@ -157,12 +168,26 @@
  *                        event, not associated with a socket.  The appdata
  *                        pointer is not used in this case.
  *                   OUT: Not used
- *
- *   NETDEV_DOWN:     IN: The network device has been taken down.
+ *   IGMP_POLL        IN: Used for polling the socket layer.  This is
+ *                        provided periodically from the drivers to support
+ *                        (1) timed operations, and (2) to check if the IGMP
+ *                        layer needs to send an IGMP report.  This is a
+ *                        device oriented event, not associated with a
+ *                        socket.
+ *                   OUT: Not used
+ *   MLD_POLL         IN: Used for polling the socket layer.  This is
+ *                        provided periodically from the drivers to support
+ *                        (1) timed operations, and (2) to check if the MLD
+ *                        layer needs to send an MLD report.  This is a
+ *                        device oriented event, not associated with a
+ *                        socket.
+ *   IPFRAG_POLL      IN: Used for polling the IP fragment send queue to send
+ *                        out pending IP fragments.  This is a device
+ *                        oriented event, not associated with a socket.
  *                   OUT: Not used
  */
 
-/* Bits 0-9: Connection specific event bits */
+/* Bits 0-10: Connection specific event bits */
 
 #define TCP_ACKDATA        (1 << 0)
 #define TCP_NEWDATA        (1 << 1)
@@ -178,46 +203,45 @@
 #define TCP_SNDACK         (1 << 2)
 #define TCP_REXMIT         (1 << 3)
 #define TCP_POLL           (1 << 4)
-#define UDP_POLL           TCP_POLL
-#define PKT_POLL           TCP_POLL
-#define CAN_POLL           TCP_POLL
-#define BLUETOOTH_POLL     TCP_POLL
-#define IEEE802154_POLL    TCP_POLL
-#define WPAN_POLL          TCP_POLL
-#define TCP_BACKLOG        (1 << 5)
-#define TCP_CLOSE          (1 << 6)
-#define TCP_ABORT          (1 << 7)
-#define TCP_CONNECTED      (1 << 8)
-#define TCP_TIMEDOUT       (1 << 9)
-#define TCP_WAITALL        (1 << 10)
+#define UDP_POLL           (1 << 5)
+#define PKT_POLL           (1 << 6)
+#define CAN_POLL           (1 << 7)
+#define BLUETOOTH_POLL     (1 << 8)
+#define IEEE802154_POLL    (1 << 9)
+#define TCP_BACKLOG        (1 << 10)
+#define TCP_ABORT          (1 << 11)
+#define TCP_CONNECTED      (1 << 12)
+#define TCP_TIMEDOUT       (1 << 13)
+#define TCP_WAITALL        (1 << 14)
+#define TCP_TXCLOSE        (1 << 15)
+#define TCP_RXCLOSE        (1 << 16)
 
-/* Bits 10-11: Unused, available */
+/* Bit 17: Device specific event bits */
 
-/* Bit 12: Device specific event bits */
+#define NETDEV_DOWN        (1 << 17)
 
-#define NETDEV_DOWN        (1 << 12)
-
-/* Bits 13-15: Encoded device specific poll events.  Unlike connection
+/* Bits 18-24: device specific poll events.  Unlike connection
  * oriented poll events, device related poll events must distinguish
  * between what is being polled for since the callbacks all reside in
  * the same list in the network device structure.
  */
 
-#define DEVPOLL_SHIFT      (13)
-#define DEVPOLL_MASK       (7 << DEVPOLL_SHIFT)
-#  define DEVPOLL_NONE     (0 << DEVPOLL_SHIFT)
-#  define ARP_POLL         (1 << DEVPOLL_SHIFT)
-#  define ICMP_POLL        (2 << DEVPOLL_SHIFT)
-#  define ICMPv6_POLL      (3 << DEVPOLL_SHIFT)
-#  define IPFWD_POLL       (4 << DEVPOLL_SHIFT)
+#define IPFRAG_POLL        (1 << 18)
+#define ARP_POLL           (1 << 19)
+#define IGMP_POLL          (1 << 20)
+#define MLD_POLL           (1 << 21)
+#define ICMP_POLL          (1 << 22)
+#define ICMPv6_POLL        (1 << 23)
+#define IPFWD_POLL         (1 << 24)
 
 /* The set of events that and implications to the TCP connection state */
 
 #define TCP_CONN_EVENTS \
-  (TCP_CLOSE | TCP_ABORT | TCP_CONNECTED | TCP_TIMEDOUT | NETDEV_DOWN)
+  (TCP_ABORT | TCP_CONNECTED | TCP_TIMEDOUT | NETDEV_DOWN | \
+   TCP_TXCLOSE | TCP_RXCLOSE)
 
 #define TCP_DISCONN_EVENTS \
-  (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT | NETDEV_DOWN)
+  (TCP_ABORT | TCP_TIMEDOUT | NETDEV_DOWN)
 
 /* IPv4/IPv6 Helpers */
 
@@ -260,9 +284,9 @@
 
 struct net_driver_s;       /* Forward reference */
 
-typedef CODE uint16_t (*devif_callback_event_t)(FAR struct net_driver_s *dev,
+typedef CODE uint32_t (*devif_callback_event_t)(FAR struct net_driver_s *dev,
                                                 FAR void *pvpriv,
-                                                uint16_t flags);
+                                                uint32_t flags);
 
 struct devif_callback_s
 {
@@ -271,7 +295,8 @@ struct devif_callback_s
   FAR struct devif_callback_s *nxtdev;
   FAR devif_callback_event_t event;
   FAR void *priv;
-  uint16_t flags;
+  uint32_t flags;
+  uint8_t free_flags;
 };
 
 /****************************************************************************
@@ -290,35 +315,6 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: devif_initialize
- *
- * Description:
- *   Perform initialization of the network device interface layer
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void devif_initialize(void);
-
-/****************************************************************************
- * Name: devif_callback_init
- *
- * Description:
- *   Configure the pre-allocated callback structures into a free list.
- *
- * Assumptions:
- *   This function must be called with the network locked.
- *
- ****************************************************************************/
-
-void devif_callback_init(void);
 
 /****************************************************************************
  * Name: devif_callback_alloc
@@ -407,7 +403,7 @@ void devif_dev_callback_free(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-uint16_t devif_conn_event(FAR struct net_driver_s *dev, uint16_t flags,
+uint32_t devif_conn_event(FAR struct net_driver_s *dev, uint32_t flags,
                           FAR struct devif_callback_s *list);
 
 /****************************************************************************
@@ -429,7 +425,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, uint16_t flags,
  *
  ****************************************************************************/
 
-uint16_t devif_dev_event(FAR struct net_driver_s *dev, uint16_t flags);
+uint32_t devif_dev_event(FAR struct net_driver_s *dev, uint32_t flags);
 
 /****************************************************************************
  * Name: devif_send

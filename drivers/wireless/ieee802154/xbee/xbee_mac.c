@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/wireless/ieee802154/xbee/xbee_mac.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -119,7 +121,7 @@ static void xbee_assoctimer(wdparm_t arg)
  * Name: xbee_assocworker
  *
  * Description:
- *   Poll the device for the assosciation status. This function is indirectly
+ *   Poll the device for the association status. This function is indirectly
  *   scheduled rom xbee_req_associate in order to poll the device for
  *   association progress.
  *

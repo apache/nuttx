@@ -23,8 +23,9 @@
 
 # You can set these variables from the command line, and also
 # from the environment for the first two.
+# Ignore the _tags directory as per sphinx-tags docs to avoid infinite loop
 SPHINXOPTS      ?= -j 1 -W -A nuttx_versions="latest,${NUTTX_VERSIONS}"
-SPHINXAUTOOPTS  ?= -j 8 -W
+SPHINXAUTOOPTS  ?= -j 8 -W --ignore "_tags/*"
 SPHINXBUILD     ?= sphinx-build
 SPHINXAUTOBUILD ?= sphinx-autobuild
 SOURCEDIR       = .

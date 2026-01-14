@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/1wire/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -23,6 +25,11 @@ if(CONFIG_1WIRE)
 
   if(CONFIG_1WIRE_DS28E17)
     list(APPEND SRCS ds28e17.c)
+  endif()
+
+  # Include the 1WIRE driver for DS2XXX EEPROMs
+  if(CONFIG_1WIRE_EE_DS2XXX)
+    list(APPEND SRCS 1wire_ds2xxx.c)
   endif()
 
   target_sources(drivers PRIVATE ${SRCS})

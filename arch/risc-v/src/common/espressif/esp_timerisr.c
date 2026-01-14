@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/espressif/esp_timerisr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -48,6 +50,8 @@
 #else
 #  define SYSTIMER_TRIGGER_TYPE ESP_IRQ_TRIGGER_EDGE
 #endif /* SOC_SYSTIMER_INT_LEVEL */
+
+#define CHIP_SYSTIMER_SOURCE SYSTIMER_TARGET0_EDGE_INTR_SOURCE
 
 /****************************************************************************
  * Private Data
@@ -111,7 +115,15 @@ static int systimer_irq_handler(int irq, void *context, void *arg)
 
 void up_timer_initialize(void)
 {
-  periph_module_enable(PERIPH_SYSTIMER_MODULE);
+  PERIPH_RCC_ACQUIRE_ATOMIC(PERIPH_SYSTIMER_MODULE, ref_count)
+    {
+      if (ref_count == 0)
+        {
+          systimer_ll_enable_bus_clock(true);
+          systimer_ll_reset_register();
+        }
+    }
+
   systimer_hal_init(&systimer_hal);
   systimer_hal_tick_rate_ops_t ops =
     {
@@ -145,17 +157,17 @@ void up_timer_initialize(void)
                                 SYSTIMER_ALARM_OS_TICK_CORE0);
   systimer_hal_enable_counter(&systimer_hal, SYSTIMER_COUNTER_OS_TICK);
 
-  esp_setup_irq(SYSTIMER_TARGET0_EDGE_INTR_SOURCE,
+  esp_setup_irq(CHIP_SYSTIMER_SOURCE,
                 ESP_IRQ_PRIORITY_DEFAULT,
                 SYSTIMER_TRIGGER_TYPE);
 
   /* Attach the timer interrupt. */
 
-  irq_attach(ESP_IRQ_SYSTIMER_TARGET0_EDGE,
+  irq_attach(ESP_SOURCE2IRQ(CHIP_SYSTIMER_SOURCE),
              (xcpt_t)systimer_irq_handler,
              NULL);
 
   /* Enable the allocated CPU interrupt. */
 
-  up_enable_irq(ESP_IRQ_SYSTIMER_TARGET0_EDGE);
+  up_enable_irq(ESP_SOURCE2IRQ(CHIP_SYSTIMER_SOURCE));
 }

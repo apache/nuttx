@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/local/local_fifo.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -166,7 +168,7 @@ static bool local_fifo_exists(FAR const char *path)
  *
  ****************************************************************************/
 
-static int local_create_fifo(FAR const char *path)
+static int local_create_fifo(FAR const char *path, uint32_t bufsize)
 {
   int ret;
 
@@ -174,7 +176,7 @@ static int local_create_fifo(FAR const char *path)
 
   if (!local_fifo_exists(path))
     {
-      ret = nx_mkfifo(path, 0644, CONFIG_DEV_FIFO_SIZE);
+      ret = nx_mkfifo(path, 0644, bufsize);
       if (ret < 0)
         {
           nerr("ERROR: Failed to create FIFO %s: %d\n", path, ret);
@@ -235,10 +237,10 @@ static int local_release_fifo(FAR const char *path)
 static int local_rx_open(FAR struct local_conn_s *conn, FAR const char *path,
                          bool nonblock)
 {
-  int oflags = nonblock ? O_RDONLY | O_NONBLOCK : O_RDONLY;
   int ret;
 
-  ret = file_open(&conn->lc_infile, path, oflags | O_CLOEXEC);
+  ret = file_open(&conn->lc_infile, path, O_RDONLY | O_NONBLOCK |
+                  O_CLOEXEC);
   if (ret < 0)
     {
       nerr("ERROR: Failed on open %s for reading: %d\n",
@@ -253,6 +255,20 @@ static int local_rx_open(FAR struct local_conn_s *conn, FAR const char *path,
        */
 
       return ret == -ENOENT ? -EFAULT : ret;
+    }
+
+  /* Clear O_NONBLOCK if it's meant to be blocking */
+
+  if (nonblock == false)
+    {
+      ret = nonblock;
+      ret = file_ioctl(&conn->lc_infile, FIONBIO, &ret);
+      if (ret < 0)
+        {
+          file_close(&conn->lc_infile);
+          conn->lc_infile.f_inode = NULL;
+          return ret;
+        }
     }
 
   return OK;
@@ -297,6 +313,8 @@ static int local_tx_open(FAR struct local_conn_s *conn, FAR const char *path,
       ret = file_ioctl(&conn->lc_outfile, FIONBIO, &ret);
       if (ret < 0)
         {
+          file_close(&conn->lc_outfile);
+          conn->lc_outfile.f_inode = NULL;
           return ret;
         }
     }
@@ -422,7 +440,8 @@ int local_set_pollthreshold(FAR struct local_conn_s *conn,
  *
  ****************************************************************************/
 
-int local_create_fifos(FAR struct local_conn_s *conn)
+int local_create_fifos(FAR struct local_conn_s *conn,
+                       uint32_t cssize, uint32_t scsize)
 {
   char path[LOCAL_FULLPATH_LEN];
   int ret;
@@ -430,13 +449,13 @@ int local_create_fifos(FAR struct local_conn_s *conn)
   /* Create the client-to-server FIFO if it does not already exist. */
 
   local_cs_name(conn, path);
-  ret = local_create_fifo(path);
+  ret = local_create_fifo(path, cssize);
   if (ret >= 0)
     {
       /* Create the server-to-client FIFO if it does not already exist. */
 
       local_sc_name(conn, path);
-      ret = local_create_fifo(path);
+      ret = local_create_fifo(path, scsize);
     }
 
   return ret;
@@ -452,14 +471,14 @@ int local_create_fifos(FAR struct local_conn_s *conn)
 
 #ifdef CONFIG_NET_LOCAL_DGRAM
 int local_create_halfduplex(FAR struct local_conn_s *conn,
-                            FAR const char *path)
+                            FAR const char *path, uint32_t bufsize)
 {
   char fullpath[LOCAL_FULLPATH_LEN];
 
   /* Create the half duplex FIFO if it does not already exist. */
 
   local_hd_name(path, fullpath);
-  return local_create_fifo(fullpath);
+  return local_create_fifo(fullpath, bufsize);
 }
 #endif /* CONFIG_NET_LOCAL_DGRAM */
 
@@ -540,14 +559,15 @@ int local_release_halfduplex(FAR struct local_conn_s *conn)
  *
  ****************************************************************************/
 
-int local_open_client_rx(FAR struct local_conn_s *client, bool nonblock)
+int local_open_client_rx(FAR struct local_conn_s *client,
+                         FAR struct local_conn_s *server, bool nonblock)
 {
   char path[LOCAL_FULLPATH_LEN];
   int ret;
 
   /* Get the server-to-client path name */
 
-  local_sc_name(client, path);
+  local_sc_name(server, path);
 
   /* Then open the file for read-only access */
 
@@ -570,14 +590,15 @@ int local_open_client_rx(FAR struct local_conn_s *client, bool nonblock)
  *
  ****************************************************************************/
 
-int local_open_client_tx(FAR struct local_conn_s *client, bool nonblock)
+int local_open_client_tx(FAR struct local_conn_s *client,
+                         FAR struct local_conn_s *server, bool nonblock)
 {
   char path[LOCAL_FULLPATH_LEN];
   int ret;
 
   /* Get the client-to-server path name */
 
-  local_cs_name(client, path);
+  local_cs_name(server, path);
 
   /* Then open the file for write-only access */
 
@@ -686,7 +707,7 @@ int local_open_receiver(FAR struct local_conn_s *conn, bool nonblock)
            */
 
           ret = local_set_pollinthreshold(&conn->lc_infile,
-                                          sizeof(uint16_t));
+                                          2 * sizeof(lc_size_t));
         }
     }
 
@@ -729,7 +750,7 @@ int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path,
            */
 
           ret = local_set_polloutthreshold(&conn->lc_outfile,
-                                           sizeof(uint16_t));
+                                           2 * sizeof(lc_size_t));
         }
     }
 

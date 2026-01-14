@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/nrf52/common/src/nrf52_ieee802154.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -73,7 +75,7 @@ int nrf52_ieee802154_initialize(void)
 
 #ifdef CONFIG_IEEE802154_NETDEV
   /* Use the IEEE802.15.4 MAC interface instance to create a 6LoWPAN
-   * network interface by wrapping the MAC intrface instance in a
+   * network interface by wrapping the MAC interface instance in a
    * network device driver via mac802154dev_register().
    */
 

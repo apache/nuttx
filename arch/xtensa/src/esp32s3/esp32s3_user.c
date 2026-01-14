@@ -27,6 +27,9 @@
 #include <stdint.h>
 
 #include "xtensa.h"
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
+#include "esp_private/cache_utils.h"
+#endif
 
 /****************************************************************************
  * Public Data
@@ -61,6 +64,15 @@
 
 uint32_t *xtensa_user(int exccause, uint32_t *regs)
 {
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
+  int cpu = this_cpu();
+
+  if (!spi_flash_cache_enabled())
+    {
+      spi_flash_restore_cache(cpu, 0);
+    }
+#endif /* CONFIG_ESPRESSIF_SPIFLASH */
+
   /* xtensa_user_panic never returns. */
 
   xtensa_user_panic(exccause, regs);

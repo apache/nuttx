@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/icmpv6/icmpv6.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -415,9 +417,10 @@ int icmpv6_wait_cancel(FAR struct icmpv6_notify_s *notify);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
-int icmpv6_wait(FAR struct icmpv6_notify_s *notify, unsigned int timeout);
+int icmpv6_wait(FAR struct net_driver_s *dev,
+                FAR struct icmpv6_notify_s *notify, unsigned int timeout);
 #else
-#  define icmpv6_wait(n,t) (0)
+#  define icmpv6_wait(d,n,t) (0)
 #endif
 
 /****************************************************************************
@@ -536,9 +539,10 @@ int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
-int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify, unsigned int timeout);
+int icmpv6_rwait(FAR struct net_driver_s *dev,
+                 FAR struct icmpv6_rnotify_s *notify, unsigned int timeout);
 #else
-#  define icmpv6_rwait(n,t) (0)
+#  define icmpv6_rwait(d,n,t) (0)
 #endif
 
 /****************************************************************************
@@ -559,19 +563,6 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify, unsigned int timeout);
 void icmpv6_rnotify(FAR struct net_driver_s *dev, int result);
 #else
 #  define icmpv6_rnotify(d,r) (0)
-#endif
-
-/****************************************************************************
- * Name: icmpv6_sock_initialize
- *
- * Description:
- *   Initialize the IPPROTO_ICMP socket connection structures.  Called once
- *   and only from the network initialization layer.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_ICMPv6_SOCKET
-void icmpv6_sock_initialize(void);
 #endif
 
 /****************************************************************************

@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/i2c/i2c_master.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -172,6 +174,38 @@
 #endif
 
 /****************************************************************************
+ * Name: I2C_SETUP
+ *
+ * Description:
+ *   I2c master initialize.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#define I2C_SETUP(d) ((d)->ops->setup(d))
+
+/****************************************************************************
+ * Name: I2C_SHUTDOWN
+ *
+ * Description:
+ *   I2c master uninitialize.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#define I2C_SHUTDOWN(d) ((d)->ops->shutdown(d))
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -186,6 +220,8 @@ struct i2c_ops_s
 #ifdef CONFIG_I2C_RESET
   CODE int (*reset)(FAR struct i2c_master_s *dev);
 #endif
+  CODE int (*setup)(FAR struct i2c_master_s *dev);
+  CODE int (*shutdown)(FAR struct i2c_master_s *dev);
 };
 
 /* This structure contains the full state of I2C as needed for a specific

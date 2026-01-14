@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/esp32c3_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -384,7 +386,7 @@ static int esp32c3_setup(struct uart_dev_s *dev)
 
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-  /* Configure the ouput flow control */
+  /* Configure the output flow control */
 
   if (priv->oflow)
     {
@@ -801,7 +803,7 @@ static int esp32c3_ioctl(struct file *filep, int cmd, unsigned long arg)
         termiosp->c_cflag |=  (priv->iflow) ? CRTS_IFLOW : 0;
 #endif
 
-        /* Set the baud rate in ther termiosp using the
+        /* Set the baud rate in the termiosp using the
          * cfsetispeed interface.
          */
 
@@ -1031,7 +1033,7 @@ static bool esp32c3_rxflowcontrol(struct uart_dev_s *dev,
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before riscv_serialinit.  NOTE:  This function depends on GPIO pin
  *   configuration performed in up_consoleinit() and main clock
  *   initialization performed in up_clkinitialize().
@@ -1055,7 +1057,7 @@ void riscv_earlyserialinit(void)
 #endif
 
   /* Configure console in early step.
-   * Setup for other serials will be perfomed when the serial driver is
+   * Setup for other serials will be performed when the serial driver is
    * open.
    */
 
@@ -1102,7 +1104,7 @@ void riscv_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_UART
   uint32_t int_status;
@@ -1110,21 +1112,11 @@ int up_putc(int ch)
   esp32c3_lowputc_disable_all_uart_int(CONSOLE_DEV.priv, &int_status);
 #endif
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      riscv_lowputc('\r');
-    }
-
   riscv_lowputc(ch);
 
 #ifdef CONSOLE_UART
   esp32c3_lowputc_restore_all_uart_int(CONSOLE_DEV.priv, &int_status);
 #endif
-  return ch;
 }
 
 #endif /* HAVE_UART_DEVICE */
@@ -1139,7 +1131,7 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_UART
   uint32_t int_status;
@@ -1147,21 +1139,11 @@ int up_putc(int ch)
   esp32c3_lowputc_disable_all_uart_int(CONSOLE_DEV.priv, &int_status);
 #endif
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      riscv_lowputc('\r');
-    }
-
   riscv_lowputc(ch);
 
 #ifdef CONSOLE_UART
   esp32c3_lowputc_restore_all_uart_int(CONSOLE_DEV.priv, &int_status);
 #endif
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

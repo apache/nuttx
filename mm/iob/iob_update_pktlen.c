@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/iob/iob_update_pktlen.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -136,7 +138,7 @@ int iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen,
   /* Update size of each iob */
 
   next = iob;
-  while (next != NULL && pktlen > 0)
+  while (next != NULL && pktlen >= 0)
     {
       if (pktlen + next->io_offset > IOB_BUFSIZE(next))
         {

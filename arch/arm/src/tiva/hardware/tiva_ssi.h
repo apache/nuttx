@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/tiva/hardware/tiva_ssi.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -157,7 +159,7 @@
 #define SSI_CR0_FRF_SHIFT           4                            /* Bits 5-4: SSI Frame Format Select */
 #define SSI_CR0_FRF_MASK            (3 << SSI_CR0_FRF_SHIFT)
 #define   SSI_CR0_FRF_SPI           (0 << SSI_CR0_FRF_SHIFT)     /* Freescale SPI format */
-#define   SSI_CR0_FRF_SSFF          (1 << SSI_CR0_FRF_SHIFT)     /* TI synchronous serial fram format */
+#define   SSI_CR0_FRF_SSFF          (1 << SSI_CR0_FRF_SHIFT)     /* TI synchronous serial frame format */
 #define   SSI_CR0_FRF_UWIRE         (2 << SSI_CR0_FRF_SHIFT)     /* MICROWIRE frame format */
   #define SSI_CR0_SPO               (1 << 6)                     /* Bit 6:  SSI Serial Clock Polarity */
 #define SSI_CR0_SPH                 (1 << 7)                     /* Bit 7:  SSI Serial Clock Phase */

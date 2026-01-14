@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_can.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1445,7 +1447,7 @@ static int stm32l4can_rxinterrupt(int irq, void *context, int rxmb)
 #ifdef CONFIG_CAN_ERRORS
   hdr.ch_error  = 0; /* Error reporting not supported */
 #endif
-  hdr.ch_unused = 0;
+  hdr.ch_tcf    = 0;
 
   /* Extract the RTR bit */
 
@@ -1567,7 +1569,7 @@ static int stm32l4can_txinterrupt(int irq, void *context, void *arg)
 
       if ((regval & CAN_TSR_TXOK0) != 0)
         {
-          /* Tell the upper half that the tansfer is finished. */
+          /* Tell the upper half that the transfer is finished. */
 
           can_txdone(dev);
         }
@@ -1587,7 +1589,7 @@ static int stm32l4can_txinterrupt(int irq, void *context, void *arg)
 
       if ((regval & CAN_TSR_TXOK1) != 0)
         {
-          /* Tell the upper half that the tansfer is finished. */
+          /* Tell the upper half that the transfer is finished. */
 
           can_txdone(dev);
         }
@@ -1607,7 +1609,7 @@ static int stm32l4can_txinterrupt(int irq, void *context, void *arg)
 
       if ((regval & CAN_TSR_TXOK2) != 0)
         {
-          /* Tell the upper half that the tansfer is finished. */
+          /* Tell the upper half that the transfer is finished. */
 
           can_txdone(dev);
         }

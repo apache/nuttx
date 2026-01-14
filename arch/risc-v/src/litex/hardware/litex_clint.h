@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/litex/hardware/litex_clint.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,7 +26,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-#ifdef CONFIG_LITEX_CORE_VEXRISCV_SMP
+#if defined(CONFIG_LITEX_CORE_VEXRISCV_SMP) || defined(CONFIG_LITEX_CORE_VEXIIRISCV)
 
 #define LITEX_CLINT_MSIP      (LITEX_CLINT_BASE + 0x0000)
 #define LITEX_CLINT_MTIMECMP  (LITEX_CLINT_BASE + 0x4000)
@@ -36,6 +38,6 @@
 #define LITEX_CLINT_MTIME      (LITEX_CPUTIMER_BASE + 0x04)
 #define LITEX_CLINT_MTIMECMP   (LITEX_CPUTIMER_BASE + 0x0C)
 
-#endif /* CONFIG_LITEX_CORE_VEXRISCV_SMP */
+#endif /* CONFIG_LITEX_CORE_VEXRISCV_SMP || CONFIG_LITEX_CORE_VEXIIRISCV */
 
 #endif /* __ARCH_RISCV_SRC_LITEX_HARDWARE_LITEX_CLINT_H */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/nrf52/nrf52840-dk/src/nrf52_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -162,12 +164,21 @@ int nrf52_bringup(void)
 #ifdef CONFIG_USERLED
   /* Register the LED driver */
 
-  ret = userled_lower_initialize(CONFIG_EXAMPLES_LEDS_DEVPATH);
+  ret = userled_lower_initialize("/dev/userleds");
   if (ret < 0)
     {
       syslog(LOG_ERR,
              "ERROR: userled_lower_initialize() failed: %d\n",
              ret);
+    }
+#endif
+
+#ifdef CONFIG_NRF52840DK_BTNLEDS_GPIO
+  ret = nrf52_gpioleds_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: nrf52_gpioleds_initialize() failed: %d\n", ret);
     }
 #endif
 

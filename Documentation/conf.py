@@ -53,12 +53,15 @@ version = release = "latest"
 # ones.
 extensions = [
     "sphinx_rtd_theme",
-    "m2r2",
+    "myst_parser",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.todo",
     "sphinx_tabs.tabs",
     "sphinx_copybutton",
     "warnings_filter",
+    "sphinx_tags",
+    "sphinx_design",
+    "sphinx_collapse",
 ]
 
 source_suffix = [".rst", ".md"]
@@ -77,14 +80,12 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "legacy_README.md"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "legacy_README.md", "venv"]
 
 # list of documentation versions to offer (besides latest). this will be
 # overridden by command line option but we can provide a sane default
 # this way
 
-html_context = dict()
-html_context["nuttx_versions"] = "latest"
 
 # TODO: append other options using releases detected from git (or maybe just
 # a few hand-selected ones, or maybe just a "stable" option)
@@ -99,6 +100,15 @@ html_theme = "sphinx_rtd_theme"
 html_show_sphinx = False
 
 html_theme_options = {"navigation_depth": 5}
+
+html_context = {
+    "display_github": True,
+    "github_user": "apache",
+    "github_repo": "nuttx",
+    "github_version": "master",
+    "conf_py_path": "/Documentation/",
+    "nuttx_versions": "latest",
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -132,3 +142,16 @@ copybutton_exclude = ".linenos, .gp, .go"
 # -- Options for warnings_filter ------------------------------------------
 
 warnings_filter_config = "known-warnings.txt"
+
+# -- Options for sphinx_tags ----------------------------------------------
+
+tags_create_tags = True
+tags_page_title = "Tags"
+tags_page_header = "Pages with this tag"
+tags_overview_title = "Tags"
+
+tags_create_badges = True
+tags_badge_colors = {
+    "chip:*": "secondary",
+    "experimental": "warning",
+}

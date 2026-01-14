@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/shenzhou/src/stm32_relays.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -229,11 +231,11 @@ void relays_onoff(int relays, uint32_t mdelay)
           if (relays_getstat(relays))
             {
               relays_setstat(relays, false);
-              nxsig_usleep(RELAYS_MIN_RESET_TIME * 1000 * 1000);
+              nxsched_usleep(RELAYS_MIN_RESET_TIME * 1000 * 1000);
             }
 
           relays_setstat(relays, true);
-          nxsig_usleep(mdelay * 100 * 1000);
+          nxsched_usleep(mdelay * 100 * 1000);
           relays_setstat(relays, false);
         }
     }

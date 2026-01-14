@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/string/lib_strcmp.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,7 +35,7 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_STRCMP) && defined(LIBC_BUILD_STRCMP)
-#undef strcmp /* See mm/README.txt */
+#undef strcmp
 int strcmp(FAR const char *cs, FAR const char *ct)
 {
   register int result;

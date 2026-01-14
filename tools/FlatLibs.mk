@@ -1,6 +1,8 @@
 ############################################################################
 # tools/FlatLibs.mk
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -47,6 +49,12 @@ NUTTXLIBS += staging$(DELIM)libboards$(LIBEXT)
 NUTTXLIBS += staging$(DELIM)libc$(LIBEXT)
 NUTTXLIBS += staging$(DELIM)libmm$(LIBEXT)
 NUTTXLIBS += staging$(DELIM)libarch$(LIBEXT)
+
+# Add toolchain library support
+
+ifeq ($(CONFIG_LIB_BUILTIN),y)
+NUTTXLIBS += staging$(DELIM)libbuiltin$(LIBEXT)
+endif
 
 # Add libraries for math support.
 

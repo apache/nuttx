@@ -1,6 +1,8 @@
 /****************************************************************************
  * audio/audio_comp.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,8 +51,8 @@ struct audio_comp_priv_s
 
   /* This is the contained, low-level audio device array and count. */
 
-  FAR struct audio_lowerhalf_s **lower;
   int count;
+  FAR struct audio_lowerhalf_s *lower[1];
 };
 
 /****************************************************************************
@@ -226,7 +228,7 @@ static int audio_comp_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
  * Name: audio_comp_configure
  *
  * Description:
- *   Configure the audio device for the specified  mode of operation.
+ *   Configure the audio device for the specified mode of operation.
  *
  ****************************************************************************/
 
@@ -601,7 +603,7 @@ static int audio_comp_freebuffer(FAR struct audio_lowerhalf_s *dev,
 /****************************************************************************
  * Name: audio_comp_enqueuebuffer
  *
- * Description: Enqueue an Audio Pipeline Buffer for playback/ processing.
+ * Description: Enqueue an Audio Pipeline Buffer for playback/processing.
  *
  ****************************************************************************/
 
@@ -697,7 +699,7 @@ static int audio_comp_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
 /****************************************************************************
  * Name: audio_comp_read
  *
- * Description:  Lower-half logic for read commands.
+ * Description: Lower-half logic for read commands.
  *
  ****************************************************************************/
 
@@ -727,7 +729,7 @@ static int audio_comp_read(FAR struct audio_lowerhalf_s *dev,
 /****************************************************************************
  * Name: audio_comp_write
  *
- * Description:  Lower-half logic for write commands.
+ * Description: Lower-half logic for write commands.
  *
  ****************************************************************************/
 
@@ -940,30 +942,31 @@ FAR struct audio_lowerhalf_s *audio_comp_initialize(FAR const char *name,
 {
   FAR struct audio_comp_priv_s *priv;
   va_list ap;
-  int ret = -ENOMEM;
-  int i;
+  int ret;
+  int i = 0;
 
-  priv = kmm_zalloc(sizeof(struct audio_comp_priv_s));
+  va_start(ap, name);
+  while (va_arg(ap, FAR void *))
+    {
+      i++;
+    }
+
+  va_end(ap);
+
+  if (i == 0)
+    {
+      return NULL;
+    }
+
+  priv = kmm_zalloc(sizeof(struct audio_comp_priv_s) +
+                    sizeof(FAR void *) * (i - 1));
   if (priv == NULL)
     {
       return NULL;
     }
 
   priv->export.ops = &g_audio_comp_ops;
-
-  va_start(ap, name);
-  while (va_arg(ap, FAR struct audio_lowerhalf_s *))
-    {
-      priv->count++;
-    }
-
-  va_end(ap);
-  priv->lower = kmm_calloc(priv->count,
-                           sizeof(FAR struct audio_lowerhalf_s *));
-  if (priv->lower == NULL)
-    {
-      goto free_priv;
-    }
+  priv->count = i;
 
   va_start(ap, name);
   for (i = 0; i < priv->count; i++)
@@ -978,20 +981,16 @@ FAR struct audio_lowerhalf_s *audio_comp_initialize(FAR const char *name,
     }
 
   va_end(ap);
+
   if (name != NULL)
     {
       ret = audio_register(name, &priv->export);
       if (ret < 0)
         {
-          goto free_lower;
+          kmm_free(priv);
+          return NULL;
         }
     }
 
   return &priv->export;
-
-free_lower:
-  kmm_free(priv->lower);
-free_priv:
-  kmm_free(priv);
-  return NULL;
 }

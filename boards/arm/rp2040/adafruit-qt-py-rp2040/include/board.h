@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/rp2040/adafruit-qt-py-rp2040/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,6 +48,7 @@
 #define MHZ                     1000000
 
 #define BOARD_XOSC_FREQ         (12 * MHZ)
+#define BOARD_XOSC_STARTUPDELAY 64
 #define BOARD_PLL_SYS_FREQ      (125 * MHZ)
 #define BOARD_PLL_USB_FREQ      (48 * MHZ)
 

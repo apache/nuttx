@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/esp32h2/common/src/esp_board_bmp180.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,7 +33,11 @@
 #include <nuttx/sensors/bmp180.h>
 #include <nuttx/i2c/i2c_master.h>
 
+#ifndef CONFIG_ESPRESSIF_I2C_BITBANG
 #include "espressif/esp_i2c.h"
+#else
+#include "espressif/esp_i2c_bitbang.h"
+#endif
 
 #include "esp_board_bmp180.h"
 
@@ -63,13 +69,17 @@ int board_bmp180_initialize(int devno)
 
   /* Initialize BMP180 */
 
+#ifndef CONFIG_ESPRESSIF_I2C_BITBANG
   i2c = esp_i2cbus_initialize(ESPRESSIF_I2C0);
+#else
+  i2c = esp_i2cbus_bitbang_initialize();
+#endif
 
   if (i2c)
     {
       /* Then try to register the barometer sensor in I2C0 */
 
-      snprintf(devpath, 12, "/dev/press%d", devno);
+      snprintf(devpath, sizeof(devpath), "/dev/press%d", devno);
       ret = bmp180_register(devpath, i2c);
       if (ret < 0)
         {

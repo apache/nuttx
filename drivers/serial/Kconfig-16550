@@ -57,6 +57,11 @@ config 16550_UART0_2STOP
 	---help---
 		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
 
+config 16550_UART0_RX_TRIGGER
+  int "16550 UART0 RX interrupt trigger level"
+	default 2
+	range 0 3
+
 config 16550_UART0_RXBUFSIZE
 	int "16550 UART0 Rx buffer size"
 	default 256
@@ -164,6 +169,11 @@ config 16550_UART1_2STOP
 	default 0
 	---help---
 		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+config 16550_UART1_RX_TRIGGER
+  int "16550 UART1 RX interrupt trigger level"
+	default 2
+	range 0 3
 
 config 16550_UART1_RXBUFSIZE
 	int "16550 UART1 Rx buffer size"
@@ -273,6 +283,11 @@ config 16550_UART2_2STOP
 	---help---
 		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
 
+config 16550_UART2_RX_TRIGGER
+  int "16550 UART2 RX interrupt trigger level"
+	default 2
+	range 0 3
+
 config 16550_UART2_RXBUFSIZE
 	int "16550 UART2 Rx buffer size"
 	default 256
@@ -380,6 +395,11 @@ config 16550_UART3_2STOP
 	default 0
 	---help---
 		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+config 16550_UART3_RX_TRIGGER
+  int "16550 UART3 RX interrupt trigger level"
+	default 2
+	range 0 3
 
 config 16550_UART3_RXBUFSIZE
 	int "16550 UART3 Rx buffer size"
@@ -527,5 +547,18 @@ config 16550_WAIT_LCR
 		not busy.  This is required for Synopsys DesignWare 8250, which
 		will trigger spurious interrupts when setting the LCR without
 		waiting.  Default: n
+
+config 16550_SET_MCR_OUT2
+	bool "Set MCR OUT2 bit high"
+	default n
+	---help---
+		Some platforms require OUT2 of MCR being set for interrupt to be triggered
+
+config 16550_DLF_SIZE
+	int "DLF(Divisor Latch Fraction) size of DesignWare APB UART"
+	default 0
+	---help---
+		The bit width of DLF register for DesignWare APB UART.
+		DLF_SIZE=0 means no support. Default: 0
 
 endif # 16550_UART

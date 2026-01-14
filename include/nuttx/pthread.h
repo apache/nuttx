@@ -1,6 +1,7 @@
 /****************************************************************************
  * include/nuttx/pthread.h
- * Non-standard, NuttX-specific pthread-related declarations.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -55,6 +56,7 @@
     0,                        /* affinity */ \
     NULL,                     /* stackaddr */ \
     PTHREAD_STACK_DEFAULT,    /* stacksize */ \
+    PTHREAD_GUARD_DEFAULT,    /* guardsize */ \
     {0, 0},                   /* repl_period */ \
     {0, 0}                    /* budget */ \
   }
@@ -69,6 +71,7 @@
     0,                        /* max_repl */ \
     NULL,                     /* stackaddr */ \
     PTHREAD_STACK_DEFAULT,    /* stacksize */ \
+    PTHREAD_GUARD_DEFAULT,    /* guardsize */   \
     {0, 0},                   /* repl_period */ \
     {0, 0},                   /* budget */ \
   }
@@ -82,6 +85,7 @@
     0,                        /* affinity */ \
     NULL,                     /* stackaddr */ \
     PTHREAD_STACK_DEFAULT,    /* stacksize */ \
+    PTHREAD_GUARD_DEFAULT,    /* guardsize */ \
   }
 #else
 #  define PTHREAD_ATTR_INITIALIZER \
@@ -92,6 +96,7 @@
     PTHREAD_CREATE_JOINABLE,  /* detachstate */ \
     NULL,                     /* stackaddr */ \
     PTHREAD_STACK_DEFAULT,    /* stacksize */ \
+    PTHREAD_GUARD_DEFAULT,    /* guardsize */ \
   }
 #endif
 
@@ -162,27 +167,6 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
  ****************************************************************************/
 
 void nx_pthread_exit(FAR void *exit_value) noreturn_function;
-
-/****************************************************************************
- * Name: pthread_cleanup_popall
- *
- * Description:
- *   The pthread_cleanup_popall() is an internal function that will pop and
- *   execute all clean-up functions.  This function is only called from
- *   within the pthread_exit() and pthread_cancellation() logic
- *
- * Input Parameters:
- *   tls - The local storage info of the exiting thread
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if defined(CONFIG_PTHREAD_CLEANUP_STACKSIZE) && CONFIG_PTHREAD_CLEANUP_STACKSIZE > 0
-struct tls_info_s;
-void pthread_cleanup_popall(FAR struct tls_info_s *tls);
-#endif
 
 #undef EXTERN
 #ifdef __cplusplus

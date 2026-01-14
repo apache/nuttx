@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/stdlib/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -46,7 +48,6 @@ set(SRCS
     lib_strtoll.c
     lib_strtoul.c
     lib_strtoull.c
-    lib_strtold.c
     lib_checkbase.c
     lib_mktemp.c
     lib_mkstemp.c
@@ -59,7 +60,12 @@ set(SRCS
     lib_wctomb.c
     lib_mbstowcs.c
     lib_wcstombs.c
+    lib_arc4random.c
     lib_atexit.c)
+
+if(NOT CONFIG_LIBM_NONE)
+  list(APPEND SRCS lib_strtold.c)
+endif()
 
 if(CONFIG_PSEUDOTERM)
   list(APPEND SRCS lib_ptsname.c lib_ptsnamer.c lib_unlockpt.c lib_openpty.c)

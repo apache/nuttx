@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/arm/arm_dataabort.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -70,15 +72,14 @@ void arm_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
 {
   struct tcb_s *tcb = this_task();
 #ifdef CONFIG_LEGACY_PAGING
-  uint32_t *savestate;
+  uint32_t *saveregs;
+  bool savestate;
 
-  /* Save the saved processor context in CURRENT_REGS where it can be
-   * accessed for register dumps and possibly context switching.
-   */
-
-  savestate    = (uint32_t *)CURRENT_REGS;
+  savestate = up_interrupt_context();
+  saveregs = tcb->xcp.regs;
 #endif
-  CURRENT_REGS = regs;
+  tcb->xcp.regs = regs;
+  up_set_interrupt_context(true);
 
 #ifdef CONFIG_LEGACY_PAGING
   /* In the NuttX on-demand paging implementation, only the read-only, .text
@@ -133,12 +134,10 @@ void arm_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
 
   pg_miss();
 
-  /* Restore the previous value of CURRENT_REGS.  NULL would indicate that
-   * we are no longer in an interrupt handler.  It will be non-NULL if we
-   * are returning from a nested interrupt.
-   */
+  /* Restore the previous value of irq flag. */
 
-  CURRENT_REGS = savestate;
+  up_set_interrupt_context(savestate);
+  tcb->xcp.regs = saveregs;
   return;
 
 segfault:
@@ -153,11 +152,10 @@ segfault:
 
 void arm_dataabort(uint32_t *regs)
 {
-  /* Save the saved processor context in CURRENT_REGS where it can be
-   * accessed for register dumps and possibly context switching.
-   */
+  struct tcb_s *tcb = this_task();
 
-  CURRENT_REGS = regs;
+  tcb->xcp.regs = regs;
+  up_set_interrupt_context(true);
 
   /* Crash -- possibly showing diagnost debug information. */
 

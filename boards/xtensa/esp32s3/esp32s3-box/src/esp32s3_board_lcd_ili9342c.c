@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s3/esp32s3-box/src/esp32s3_board_lcd_ili9342c.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,6 +30,7 @@
 #include <stdbool.h>
 #include <debug.h>
 #include <errno.h>
+#include <endian.h>
 #include <sys/param.h>
 
 #include <nuttx/arch.h>
@@ -91,7 +94,7 @@ static const struct ili9342c_config_data g_lcd_config[] =
     }
   },
   {
-    /* Power contorl B, power control = 0, DC_ENA = 1 */
+    /* Power control B, power control = 0, DC_ENA = 1 */
 
     ILI9341_POWER_CONTROL_B, 3,
     {
@@ -171,7 +174,7 @@ static const struct ili9342c_config_data g_lcd_config[] =
     }
   },
   {
-    /* Memory access contorl, MX=MY=0, MV=1, ML=0, BGR=1, MH=0 */
+    /* Memory access control, MX=MY=0, MV=1, ML=0, BGR=1, MH=0 */
 
     ILI9341_MEMORY_ACCESS_CONTROL, 1,
     {
@@ -418,6 +421,11 @@ static int ili9342c_sendgram(struct ili9341_lcd_s *lcd,
 {
   struct ili9342c_lcd_dev *priv = (struct ili9342c_lcd_dev *)lcd;
 
+  for (uint32_t i = 0; i < nwords; i++)
+    {
+      ((uint16_t *)wd)[i] = swap16(wd[i]);
+    }
+
   lcdinfo("lcd:%p, wd=%p, nwords=%" PRIu32 "\n", lcd, wd, nwords);
 
   SPI_SETBITS(priv->spi_dev, 16);
@@ -486,11 +494,11 @@ static struct ili9341_lcd_s *esp32s3_initializa_ili9342c(int spi_port)
 
   /* Reset LCD */
 
-  nxsig_usleep(10 * 1000);
+  nxsched_usleep(10 * 1000);
   esp32s3_gpiowrite(DISPLAY_RST, true);
-  nxsig_usleep(10 * 1000);
+  nxsched_usleep(10 * 1000);
   esp32s3_gpiowrite(DISPLAY_RST, false);
-  nxsig_usleep(50 * 1000);
+  nxsched_usleep(50 * 1000);
 
   /* Turn on LCD backlight */
 
@@ -602,7 +610,7 @@ int board_lcd_initialize(void)
  *   allows support for multiple LCD devices.
  *
  * Input Parameters:
- *   devno - LCD device nmber
+ *   devno - LCD device number
  *
  * Returned Value:
  *   LCD device pointer if success or NULL if failed.

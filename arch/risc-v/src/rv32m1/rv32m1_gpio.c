@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/rv32m1/rv32m1_gpio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,7 +34,6 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>
 
@@ -343,7 +344,7 @@ static int rv32m1_gpio_interrupt(int irq, void *context, void *arg)
     {
       priv = container_of(e, const struct rv32m1_isr_s, link);
 
-      /* Dispatch services to whom has subcribed(registered) the
+      /* Dispatch services to whom has subscribed(registered) the
        * corresponding pin.
        */
 
@@ -421,7 +422,7 @@ int rv32m1_gpio_config(uint32_t cfgset)
       rv32m1_pcc_clock_enable(g_ctrlbase[port].gpiogate);
     }
 
-  /* Cofigure Open Drain, Pull Up/Down, Filter and Slew Rate abilities */
+  /* Configure Open Drain, Pull Up/Down, Filter and Slew Rate abilities */
 
   rv32m1_gpio_portconfig(cfgset);
 
@@ -483,7 +484,7 @@ void rv32m1_gpio_write(uint32_t cfgset, bool value)
   port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   if (port >= RV32M1_NGPIO_PORTS)
     {
-      return ;
+      return;
     }
 
   /* Get the gpio base address */
@@ -517,7 +518,7 @@ void rv32m1_gpio_toggle(uint32_t cfgset)
   port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   if (port >= RV32M1_NGPIO_PORTS)
     {
-      return ;
+      return;
     }
 
   /* Get the gpio base address */
@@ -568,7 +569,7 @@ void rv32m1_gpio_irqenable(uint32_t cfgset)
   port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   if (port >= RV32M1_NGPIO_PORTS)
     {
-      return ;
+      return;
     }
 
   /* Get the irq */
@@ -597,7 +598,7 @@ void rv32m1_gpio_irqdisable(uint32_t cfgset)
   port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   if (port >= RV32M1_NGPIO_PORTS)
     {
-      return ;
+      return;
     }
 
   /* Get the port base address */

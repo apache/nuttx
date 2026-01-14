@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_esrndx.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,7 +46,7 @@
  *   Given a clock ID, return the index of the corresponding ESR
  *   register (or ESRNDX_INVALID if there is no ESR associated with
  *   this clock ID).  Indexing of ESRs differs slightly from the clock
- *   ID:  There are 92 clock IDs but only 89 ESR regisers. There are no
+ *   ID:  There are 92 clock IDs but only 89 ESR registers. There are no
  *   ESR registers for:
  *
  *  CLKID_I2SRXBCK0         Clock ID 87: I2SRX_BCK0

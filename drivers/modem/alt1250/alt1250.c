@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/modem/alt1250/alt1250.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -856,6 +858,24 @@ static int parse_altcompkt(FAR struct alt1250_dev_s *dev, FAR uint8_t *pkt,
       if (*container)
         {
           (*container)->result = -ENOSYS;
+          *bitmap = get_bitmap(dev, cid, get_altver(h));
+          if (LTE_IS_ASYNC_CMD((*container)->cmdid))
+            {
+              /* Asynchronous types need to call the callback corresponding
+               * to the received event, so the REPLY bit is added to the
+               * received event.
+               */
+
+              *bitmap |= ALT1250_EVTBIT_REPLY;
+            }
+          else
+            {
+              /* Synchronous types do not call a callback,
+               * so only the REPLY bit is needed.
+               */
+
+              *bitmap = ALT1250_EVTBIT_REPLY;
+            }
         }
 
       return *container == NULL ? ERROR: OK;
@@ -999,7 +1019,7 @@ static int altcom_recvthread(int argc, FAR char *argv[])
         }
       else if (ret == ALTMDM_RETURN_RESET_PKT)
         {
-          m_info("recieve ALTMDM_RETURN_RESET_PKT\n");
+          m_info("receive ALTMDM_RETURN_RESET_PKT\n");
           set_senddisable(dev, true);
         }
       else if (ret == ALTMDM_RETURN_RESET_V1 ||
@@ -1007,7 +1027,7 @@ static int altcom_recvthread(int argc, FAR char *argv[])
         {
           reason = altmdm_get_reset_reason();
 
-          m_info("recieve ALTMDM_RETURN_RESET_V%s reason: %d\n",
+          m_info("receive ALTMDM_RETURN_RESET_V%s reason: %d\n",
                  (ret == ALTMDM_RETURN_RESET_V1) ? "1" : "4",
                  reason);
 
@@ -1044,7 +1064,7 @@ static int altcom_recvthread(int argc, FAR char *argv[])
         }
       else if (ret == ALTMDM_RETURN_SUSPENDED)
         {
-          m_info("recieve ALTMDM_RETURN_SUSPENDED\n");
+          m_info("receive ALTMDM_RETURN_SUSPENDED\n");
           nxsem_post(&dev->rxthread_sem);
           while (1)
             {
@@ -1052,12 +1072,12 @@ static int altcom_recvthread(int argc, FAR char *argv[])
                * does not accept any requests and must stay alive.
                */
 
-              nxsig_sleep(1);
+              nxsched_sleep(1);
             }
         }
       else if (ret == ALTMDM_RETURN_EXIT)
         {
-          m_info("recieve ALTMDM_RETURN_EXIT\n");
+          m_info("receive ALTMDM_RETURN_EXIT\n");
           is_running = false;
         }
       else

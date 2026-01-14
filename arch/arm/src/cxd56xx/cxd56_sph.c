@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_sph.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -104,7 +106,7 @@ static int sph_open(struct file *filep)
 {
   /* Exclusive access */
 
-  if (filep->f_inode->i_crefs > 1)
+  if (atomic_read(&filep->f_inode->i_crefs) > 2)
     {
       return ERROR;
     }

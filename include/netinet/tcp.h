@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/netinet/tcp.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -55,5 +57,6 @@
 #define TCP_KEEPCNT   (__SO_PROTOCOL + 3) /* Number of keepalives before death
                                            * Argument: max retry count */
 #define TCP_MAXSEG    (__SO_PROTOCOL + 4) /* The maximum segment size */
+#define TCP_CORK      (__SO_PROTOCOL + 5) /* Coalescing of small segments */
 
 #endif /* __INCLUDE_NETINET_TCP_H */

@@ -40,7 +40,7 @@ NuttX-11.0.0
 * [#6392](https://github.com/apache/nuttx/pull/6392) sched/mqueue: remove sched_lock to improve performance
 * [#6377](https://github.com/apache/nuttx/pull/6377) sched/tls: Shouldn't get tls info directly from sp in kernel space
 * [#6365](https://github.com/apache/nuttx/pull/6365) sched/tls: Wrap up_info_size into tls_info_size
-* [#6340](https://github.com/apache/nuttx/pull/6340) Change dpends on SCHED_[L|H]PWORK to SCHED_WORKQUEUE
+* [#6340](https://github.com/apache/nuttx/pull/6340) Change depends on SCHED_[L|H]PWORK to SCHED_WORKQUEUE
 * [#6250](https://github.com/apache/nuttx/pull/6250) sched: Remove task_restart in case of CONFIG_BUILD_KERNEL
 * [#6236](https://github.com/apache/nuttx/pull/6236) sched: Remove task_delete in case of CONFIG_BUILD_KERNEL
 * [#5822](https://github.com/apache/nuttx/pull/5822) sched/dumpstack: Print "backtrace:" only in the first iteration
@@ -65,7 +65,7 @@ NuttX-11.0.0
 * [#6120](https://github.com/apache/nuttx/pull/6120) Implement execle, execve, execvp, execlp and execvpe
 * [#5814](https://github.com/apache/nuttx/pull/5814) env_dup: Allocate memory from the correct memory pool
 
-* [#5914](https://github.com/apache/nuttx/pull/5914) mm/mm_heap: place alloc-bit at the LSB of node->preceeding
+* [#5914](https://github.com/apache/nuttx/pull/5914) mm/mm_heap: place alloc-bit at the LSB of node->preceding
 * [#6685](https://github.com/apache/nuttx/pull/6685) mm/mm_heap: update MM_BACKTRACE and malloc failed output
 * [#6658](https://github.com/apache/nuttx/pull/6658) mm: Fixed the usage of CONFIG_MM_BACKTRACE & CONFIG_DEBUG_MM
 * [#5906](https://github.com/apache/nuttx/pull/5906) mm_heap: heapsize align with MM_MIN_CHUNK
@@ -103,7 +103,7 @@ NuttX-11.0.0
 * [#6196](https://github.com/apache/nuttx/pull/6196) libxx: Make HAVE_CXXINITIALIZE workable even HAVE_CXX isn't enabled
 * [#6175](https://github.com/apache/nuttx/pull/6175) libc: Remove the redundant seek in writev
 * [#6184](https://github.com/apache/nuttx/pull/6184) libc/assert: let CONFIG_NDEBUG default to !CONFIG_DEBUG_ASSERTIONS
-* [#6169](https://github.com/apache/nuttx/pull/6169) libc/arch_atomic: add gcc legacy __sync buitins support and add FAR to pointers
+* [#6169](https://github.com/apache/nuttx/pull/6169) libc/arch_atomic: add gcc legacy __sync builtins support and add FAR to pointers
 * [#6140](https://github.com/apache/nuttx/pull/6140) libs/libc/string: unify implementation across the functions
 * [#5948](https://github.com/apache/nuttx/pull/5948) libc/lib_localtime:fix deadcode
 * [#5861](https://github.com/apache/nuttx/pull/5861) libs/libc/time: update description of strftime
@@ -124,7 +124,7 @@ NuttX-11.0.0
 * [#6714](https://github.com/apache/nuttx/pull/6714) libc: Remove the unnecessary include from wchar and wctype
 * [#6613](https://github.com/apache/nuttx/pull/6613) libc/stdio: Support "long long" type if CONFIG_HAVE_LONG_LONG is enabled
 * [#6607](https://github.com/apache/nuttx/pull/6607) libc/stdio: Enable LIBC_FLOATINGPOINT by default if ARCH_FPU is enabled
-* [#6606](https://github.com/apache/nuttx/pull/6606) libc/stdio: enable long long formating by CONFIG_HAVE_LONG_LONG
+* [#6606](https://github.com/apache/nuttx/pull/6606) libc/stdio: enable long long formatting by CONFIG_HAVE_LONG_LONG
 * [#6547](https://github.com/apache/nuttx/pull/6547) libc: Fix getrandom() bug: Didn't propagate read error
 * [#6241](https://github.com/apache/nuttx/pull/6241) libs: risc-v: Add R_RISCV_JAL support to arch_elf.c
 * [#6667](https://github.com/apache/nuttx/pull/6667) libs/libc/string: add memmem
@@ -140,7 +140,7 @@ NuttX-11.0.0
 * [#6709](https://github.com/apache/nuttx/pull/6709) Imx6 adb
 * [#6586](https://github.com/apache/nuttx/pull/6586) Sabre6quad netknsh
 * [#6482](https://github.com/apache/nuttx/pull/6482) Use builtins for byteswapping
-* [#6421](https://github.com/apache/nuttx/pull/6421) getrandom: use _NX_XXXX interface to remove cancelation point for kernel
+* [#6421](https://github.com/apache/nuttx/pull/6421) getrandom: use _NX_XXXX interface to remove cancellation point for kernel
 
 * [#6205](https://github.com/apache/nuttx/pull/6205) binfmt/libelf: Fix function description field
 * [#6190](https://github.com/apache/nuttx/pull/6190) binfmt_execmodule: Use heap size getter for print
@@ -188,7 +188,7 @@ NuttX-11.0.0
 * [#5920](https://github.com/apache/nuttx/pull/5920) ARCH_ADDRENV: Add guard against mis-configuration
 * [#6105](https://github.com/apache/nuttx/pull/6105) arch/clang: add support for Clang LTO
 * [#6089](https://github.com/apache/nuttx/pull/6089) arch: Move group_addrenv to common place
-* [#6183](https://github.com/apache/nuttx/pull/6183) arch: Remvoe the error message when toolchain can't find
+* [#6183](https://github.com/apache/nuttx/pull/6183) arch: Remove the error message when toolchain can't find
 * [#6080](https://github.com/apache/nuttx/pull/6080) arch/ostest: remove CONFIG_TESTING_OSTEST_FPUSIZE & board level implement
 * [#6086](https://github.com/apache/nuttx/pull/6086) Remove FAR from the arch and board files of ceva/mips/misoc/or1k/sim/sparc/x86_64/xtensa
 * [#6778](https://github.com/apache/nuttx/pull/6778) arch: common: Fix up_check_tcbstack() for CONFIG_ARCH_ADDRENV=y
@@ -281,7 +281,7 @@ NuttX-11.0.0
 * [#5907](https://github.com/apache/nuttx/pull/5907) riscv/bl602: Remove check for LCD driver
 * [#5908](https://github.com/apache/nuttx/pull/5908) riscv/esp32c3: Remove check for LCD driver
 * [#5746](https://github.com/apache/nuttx/pull/5746) RISCV: Fix nasty bug in PMP region test
-* [#5842](https://github.com/apache/nuttx/pull/5842) arch/risc-v: improve style consistency accross chip variants
+* [#5842](https://github.com/apache/nuttx/pull/5842) arch/risc-v: improve style consistency across chip variants
 * [#5913](https://github.com/apache/nuttx/pull/5913) arch/risc-v: Move group_addrenv to correct place
 * [#5922](https://github.com/apache/nuttx/pull/5922) arch/risc-v: get wider visibility for arch instruction macros
 * [#5940](https://github.com/apache/nuttx/pull/5940) arch/risc-v: Add handler for misaligned load/store
@@ -550,7 +550,7 @@ NuttX-11.0.0
 * [#5747](https://github.com/apache/nuttx/pull/5747) drivers/timers: rename notification parameter oneshot to periodic
 * [#5849](https://github.com/apache/nuttx/pull/5849) pm: remove unnecessary depends on OSINIT_OS_READY
 * [#5853](https://github.com/apache/nuttx/pull/5853) driver/syslog: Add microseconds after date time
-* [#5901](https://github.com/apache/nuttx/pull/5901) power: unify lock sates and move pm_auto_update to outer dir
+* [#5901](https://github.com/apache/nuttx/pull/5901) power: unify lock states and move pm_auto_update to outer dir
 * [#5990](https://github.com/apache/nuttx/pull/5990) fix uinput rpmsg logic error
 * [#5816](https://github.com/apache/nuttx/pull/5816) drivers/mtd/mtd_config: set different format versions for named and ID modes
 * [#5736](https://github.com/apache/nuttx/pull/5736) driver/uinput: add cross core control function
@@ -573,7 +573,7 @@ NuttX-11.0.0
 * [#6704](https://github.com/apache/nuttx/pull/6704) driver/sensors: enhance sensor driver
 * [#6696](https://github.com/apache/nuttx/pull/6696) driver/sensor: add sensor type of cap and wake_gesture
 * [#6698](https://github.com/apache/nuttx/pull/6698) driver/power:add ioctl cmd for voltage info and protocol and add update event mask
-* [#6727](https://github.com/apache/nuttx/pull/6727) power: add PM_IDLE_DOMAIN to pm.h and remove definations
+* [#6727](https://github.com/apache/nuttx/pull/6727) power: add PM_IDLE_DOMAIN to pm.h and remove definitions
 * [#6759](https://github.com/apache/nuttx/pull/6759) drivers: Reorganize the power related code layout
 * [#6748](https://github.com/apache/nuttx/pull/6748) power/axp202: Replace battery_charger_operations_s * with battery_charger_dev_s
 * [#6761](https://github.com/apache/nuttx/pull/6761) drivers/wireless/gs2200m: Fix short bit length
@@ -594,7 +594,7 @@ NuttX-11.0.0
 * [#6455](https://github.com/apache/nuttx/pull/6455) usbhost_cdcacm: fix error with interrupt IN endpoint
 * [#6369](https://github.com/apache/nuttx/pull/6369) Fix in default syslog date format
 * [#6601](https://github.com/apache/nuttx/pull/6601) usbdev/usbmsc: introduce USBMSC_WRMULTIPLE for faster writes
-* [#6571](https://github.com/apache/nuttx/pull/6571) fix sd can't usage when mult-block receive errro
+* [#6571](https://github.com/apache/nuttx/pull/6571) fix sd can't usage when mult-block receive error
 * [#6551](https://github.com/apache/nuttx/pull/6551) framebuffer for e-ink display. Added callback function to redraw
 * [#6456](https://github.com/apache/nuttx/pull/6456) mmcsd/sdio: correct return value of sdio_probe()
 * [#6363](https://github.com/apache/nuttx/pull/6363) Added color reset when a syslog channel is added
@@ -635,7 +635,7 @@ NuttX-11.0.0
 
 * [#6216](https://github.com/apache/nuttx/pull/6216) Nucleo G474RE board support including USB Full Speed Device
 * [#6754](https://github.com/apache/nuttx/pull/6754) NXP S32K1XX: add initial support for NXP RDDRONE-BMS772 board
-* [#6730](https://github.com/apache/nuttx/pull/6730) boards/stm32f7: add intial support for ST steval-eth001v1 board
+* [#6730](https://github.com/apache/nuttx/pull/6730) boards/stm32f7: add initial support for ST steval-eth001v1 board
 * [#6691](https://github.com/apache/nuttx/pull/6691) boards: add initial support for ST steval-stlcs01v1
 * [#6383](https://github.com/apache/nuttx/pull/6383) boards/nucleo-wl55jc: add new board
 * [#6448](https://github.com/apache/nuttx/pull/6448) xtensa/esp32s3: Add esp32s3-eye board support
@@ -693,7 +693,7 @@ NuttX-11.0.0
 * [#6287](https://github.com/apache/nuttx/pull/6287) stm32h7: allow definition of HSI divider in board config
 * [#6373](https://github.com/apache/nuttx/pull/6373) board: nucleo-l432kc: Add missing nucleo 432kc spi driver setting
 * [#6275](https://github.com/apache/nuttx/pull/6275) boards/arm: Remove "LDFLAGS += -g" whichi is already added by Toolchain.defs
-* [#6439](https://github.com/apache/nuttx/pull/6439) boards/esp32: Increase the NTP deamon stack size as it was overflowing
+* [#6439](https://github.com/apache/nuttx/pull/6439) boards/esp32: Increase the NTP daemon stack size as it was overflowing
 * [#6273](https://github.com/apache/nuttx/pull/6273) board/sim: Enable hellocxx in loadable config
 * [#6580](https://github.com/apache/nuttx/pull/6580) Add ws2812 bringup logic to all RP2040 boards
 * [#6511](https://github.com/apache/nuttx/pull/6511) esp32_board_spi:Missing Data Command pin support
@@ -715,7 +715,7 @@ NuttX-11.0.0
 
 ## Bug Fixes and Improvements
 
-* [#6726](https://github.com/apache/nuttx/pull/6726) vfs: Remove the unnessary check when CONFIG_DEBUG_MM enable
+* [#6726](https://github.com/apache/nuttx/pull/6726) vfs: Remove the unnecessary check when CONFIG_DEBUG_MM enable
 * [#6007](https://github.com/apache/nuttx/pull/6007) fs/vfs: fix st_mode mask check
 * [#6002](https://github.com/apache/nuttx/pull/6002) fs/poll: change format for type pollevent_t
 * [#5797](https://github.com/apache/nuttx/pull/5797) fs/rpmsgfs: minor refine the return value
@@ -757,7 +757,7 @@ NuttX-11.0.0
 * [#5856](https://github.com/apache/nuttx/pull/5856) rpmsgfs/rename: fix bug about pathname align with 8bytes
 * [#5892](https://github.com/apache/nuttx/pull/5892) rpmsgfs related update
 * [#5846](https://github.com/apache/nuttx/pull/5846) epoll: fix epoll close error, report by kasan
-* [#6680](https://github.com/apache/nuttx/pull/6680) poll: defalut set POLLERR POLLHUP to events
+* [#6680](https://github.com/apache/nuttx/pull/6680) poll: default set POLLERR POLLHUP to events
 * [#6681](https://github.com/apache/nuttx/pull/6681) unlink: don't do unlink with inode_semtake
 * [#6637](https://github.com/apache/nuttx/pull/6637) mtd/smartfs: Fix uninitialized variable
 

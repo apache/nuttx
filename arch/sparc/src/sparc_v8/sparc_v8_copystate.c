@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sparc/src/sparc_v8/sparc_v8_copystate.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -71,7 +73,7 @@ void sparc_copystate(uint32_t *dest, uint32_t *src)
 
 void task_flush_trap(uint32_t *trap, uint32_t *task)
 {
-  CURRENT_REGS = task;
+  up_set_current_regs(task);
 }
 
 void trap_flush_task(uint32_t *task, uint32_t *trap)

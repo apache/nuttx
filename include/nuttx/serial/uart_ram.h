@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/serial/uart_ram.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,8 +31,8 @@
 
 #ifdef CONFIG_RAM_UART
 
-#include <stdatomic.h>
 #include <stdbool.h>
+#include <nuttx/atomic.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -43,8 +45,8 @@
 struct uart_rambuf_s
 {
     char buffer[CONFIG_RAM_UART_BUFSIZE];
-    atomic_uint wroff;
-    atomic_uint rdoff;
+    atomic_t wroff;
+    atomic_t rdoff;
 };
 
 /****************************************************************************

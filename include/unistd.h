@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/unistd.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -57,6 +59,9 @@
 #undef  _POSIX_MEMLOCK_RANGE
 #undef  _POSIX_FSYNC
 #define _POSIX_SYNCHRONIZED_IO 1
+#ifdef CONFIG_LIBC_PASSWD_LINESIZE
+#  define _POSIX_GETPW_R_SIZE_MAX CONFIG_LIBC_PASSWD_LINESIZE
+#endif
 
 #define _POSIX_VERSION 201712L
 #define _POSIX_PRIORITIZED_IO _POSIX_VERSION
@@ -255,6 +260,23 @@
 #define _SC_NPROCESSORS_CONF             0x007d
 #define _SC_NPROCESSORS_ONLN             0x007e
 
+/* Constants used with POSIX confstr(). */
+
+#define _CS_PATH                           1
+#define _CS_POSIX_V6_ILP32_OFF32_CFLAGS    2
+#define _CS_POSIX_V6_ILP32_OFF32_LDFLAGS   3
+#define _CS_POSIX_V6_ILP32_OFF32_LIBS      4
+#define _CS_POSIX_V6_ILP32_OFFBIG_CFLAGS   5
+#define _CS_POSIX_V6_ILP32_OFFBIG_LDFLAGS  6
+#define _CS_POSIX_V6_ILP32_OFFBIG_LIBS     7
+#define _CS_POSIX_V6_LP64_OFF64_CFLAGS     8
+#define _CS_POSIX_V6_LP64_OFF64_LDFLAGS    9
+#define _CS_POSIX_V6_LP64_OFF64_LIBS       10
+#define _CS_POSIX_V6_LPBIG_OFFBIG_CFLAGS   11
+#define _CS_POSIX_V6_LPBIG_OFFBIG_LDFLAGS  12
+#define _CS_POSIX_V6_LPBIG_OFFBIG_LIBS     13
+#define _CS_POSIX_V6_WIDTH_RESTRICTED_ENVS 14
+
 /* The following symbolic constants must be defined for file streams: */
 
 #define STDERR_FILENO                    2       /* File number of stderr */
@@ -372,7 +394,7 @@ FAR void *sbrk(intptr_t incr);
 
 /* Special devices */
 
-#define pipe(fd) pipe2(fd, 0)
+int     pipe(int pipefd[2]);
 int     pipe2(int pipefd[2], int flags);
 
 /* Schedule an alarm */
@@ -384,6 +406,7 @@ unsigned int alarm(unsigned int seconds);
 int     chdir(FAR const char *path);
 int     fchdir(int fd);
 FAR char *getcwd(FAR char *buf, size_t size);
+FAR char *get_current_dir_name(void);
 
 /* File path operations */
 
@@ -440,6 +463,7 @@ int     sethostname(FAR const char *name, size_t namelen);
 long    sysconf(int name);
 long    fpathconf(int fildes, int name);
 long    pathconf(FAR const char *path, int name);
+size_t  confstr(int name, FAR char *buf, size_t len);
 
 /* User and group identity management */
 
@@ -460,6 +484,16 @@ int     getentropy(FAR void *buffer, size_t length);
 
 void    sync(void);
 int     syncfs(int fd);
+
+int     profil(FAR unsigned short *buf, size_t bufsiz,
+               size_t offset, unsigned int scale);
+
+FAR char *getpass(FAR const char *prompt);
+#ifdef CONFIG_CRYPTO
+FAR char *crypt(FAR const char *key, FAR const char *salt);
+FAR char *crypt_r(FAR const char *key, FAR const char *salt,
+                  FAR char *output);
+#endif
 
 #if CONFIG_FORTIFY_SOURCE > 0
 fortify_function(getcwd) FAR char *getcwd(FAR char *buf,

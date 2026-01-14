@@ -1,6 +1,8 @@
 /****************************************************************************
  * tools/mkdeps.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,9 +46,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define MAX_BUFFER  (16384)
-#define MAX_EXPAND  (16384)
-#define MAX_SHQUOTE (16384)
+#define MAX_BUFFER  (65536)
+#define MAX_EXPAND  (65536)
+#define MAX_SHQUOTE (65536)
 
 /* MAX_PATH might be defined in stdlib.h */
 
@@ -387,6 +389,10 @@ static void parse_args(int argc, char **argv)
   /* Always look in the current directory */
 
   g_altpath = strdup(".");
+
+  /* Ensure dep target obj path has a default value */
+
+  g_objpath = strdup(".");
 
   /* Accumulate CFLAGS up to "--" */
 
@@ -763,7 +769,19 @@ static void do_dependency(const char *file)
           exit(EXIT_FAILURE);
         }
 
-      objname = basename(dupname);
+      /* Check g_altpath. If only the CURRENT path is included,
+       * the obj target use its own full path.
+       */
+
+      if (strcmp(g_altpath, ".") == 0)
+        {
+          objname = dupname;
+        }
+      else
+        {
+          objname = basename(dupname);
+        }
+
       dotptr  = strrchr(objname, '.');
       if (dotptr)
         {

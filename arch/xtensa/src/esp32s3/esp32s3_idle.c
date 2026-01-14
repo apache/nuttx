@@ -32,7 +32,7 @@
 #include <nuttx/spinlock.h>
 
 #include "xtensa.h"
-#include "esp32s3_pm.h"
+#include "espressif/esp_pm.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -64,6 +64,14 @@
 #endif
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static spinlock_t g_esp32s3_idle_lock = SP_UNLOCKED;
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -82,6 +90,18 @@ static void up_idlepm(void)
   static enum pm_state_e oldstate = PM_NORMAL;
   enum pm_state_e newstate;
   int ret;
+  int count;
+
+  count = pm_staycount(PM_IDLE_DOMAIN, PM_NORMAL);
+  if (oldstate != PM_NORMAL && count == 0)
+    {
+      pm_stay(PM_IDLE_DOMAIN, PM_NORMAL);
+
+      /* Keep working in normal stage */
+
+      pm_changestate(PM_IDLE_DOMAIN, PM_NORMAL);
+      newstate = PM_NORMAL;
+    }
 
   /* Decide, which power saving level can be obtained */
 
@@ -91,7 +111,7 @@ static void up_idlepm(void)
 
   if (newstate != oldstate)
     {
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_esp32s3_idle_lock);
 
       /* Perform board-specific, state-dependent logic here */
 
@@ -113,7 +133,7 @@ static void up_idlepm(void)
           oldstate = newstate;
         }
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_esp32s3_idle_lock, flags);
 
       /* MCU-specific power management logic */
 
@@ -129,8 +149,8 @@ static void up_idlepm(void)
           {
             /* Enter Force-sleep mode */
 
-            esp32s3_pmstandby(CONFIG_PM_ALARM_SEC * 1000000 +
-                              CONFIG_PM_ALARM_NSEC / 1000);
+            esp_pmstandby(CONFIG_PM_ALARM_SEC * 1000000 +
+                          CONFIG_PM_ALARM_NSEC / 1000);
           }
           break;
 
@@ -138,8 +158,8 @@ static void up_idlepm(void)
           {
             /* Enter Deep-sleep mode */
 
-            esp32s3_pmsleep(CONFIG_PM_SLEEP_WAKEUP_SEC * 1000000 +
-                            CONFIG_PM_SLEEP_WAKEUP_NSEC / 1000);
+            esp_pmsleep(CONFIG_PM_SLEEP_WAKEUP_SEC * 1000000 +
+                        CONFIG_PM_SLEEP_WAKEUP_NSEC / 1000);
           }
 
         default:

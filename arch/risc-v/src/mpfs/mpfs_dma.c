@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/mpfs_dma.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -419,7 +421,7 @@ int mpfs_dma_get_complete_status(unsigned int channel)
  *
  * Returned Value:
  *   0  - No Error
- *   1  - Transfer Errror
+ *   1  - Transfer Error
  *
  ****************************************************************************/
 
@@ -488,7 +490,7 @@ int mpfs_dma_clear_complete_status(unsigned int channel)
  *
  * Returned Value:
  *   0  - No Error
- *   1  - Transfer Errror
+ *   1  - Transfer Error
  *
  ****************************************************************************/
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/ieee802154/ieee802154_initialize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,10 +48,6 @@
 
 void ieee802154_initialize(void)
 {
-  /* Initialize connection structions */
-
-  ieee802154_conn_initialize();
-
   /* Initialize the container allocator */
 
   ieee802154_container_initialize();

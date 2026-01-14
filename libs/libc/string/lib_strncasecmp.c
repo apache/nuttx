@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/string/lib_strncasecmp.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,7 +37,7 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_STRNCASECMP) && defined(LIBC_BUILD_STRNCASECMP)
-#undef strncasecmp /* See mm/README.txt */
+#undef strncasecmp
 int strncasecmp(FAR const char *cs, FAR const char *ct, size_t nb)
 {
   register int result = 0;

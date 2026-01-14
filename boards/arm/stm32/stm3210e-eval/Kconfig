@@ -28,7 +28,7 @@ config STM3210E_LCD_PWM
 	depends on STM3210E_LCD_BACKLIGHT && STM32_TIM1
 	---help---
 		If STM32_TIM1 is also defined, then an adjustable backlight will be
-		provided using timer 1 to generate various pulse widthes.  The
+		provided using timer 1 to generate various pulse widths.  The
 		granularity of the settings is determined by LCD_MAXPOWER.  If STM3210E_LCD_PWM
 		(or STM32_TIM1) is not defined, then a simple on/off backlight is
 		provided.

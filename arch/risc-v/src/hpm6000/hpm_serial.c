@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/hpm6000/hpm_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1221,7 +1223,7 @@ static bool hpm_txempty(struct uart_dev_s *dev)
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before riscv_serialinit.  NOTE:  This function depends on GPIO pin
  *   configuration performed in up_consoleinit() and main clock iniialization
  *   performed in up_clkinitialize().
@@ -1292,27 +1294,16 @@ void riscv_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_DEV
   struct hpm_uart_s *priv = (struct hpm_uart_s *)CONSOLE_DEV.dev.priv;
   uint32_t im;
 
   hpm_disableuartint(priv, &im);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      hpm_lowputc('\r');
-    }
-
   hpm_lowputc(ch);
   hpm_restoreuartint(priv, im);
 #endif
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -1325,21 +1316,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      riscv_lowputc('\r');
-    }
-
   riscv_lowputc(ch);
 #endif
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

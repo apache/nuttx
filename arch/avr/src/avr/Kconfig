@@ -37,9 +37,20 @@ config AVR_ATMEL_AVR_TOOLCHAIN
 config AVR_LINUXGCC_TOOLCHAIN
 	bool "Linux GCC"
 	depends on HOST_LINUX
+	select ARCH_TOOLCHAIN_GCC
 	---help---
 		For Linux, there are widely available avr-gcc packages. On
 		Ubuntu, use: sudo apt-get install gcc-avr gdb-avr avr-libc
+
+		Note that unlike other toolchains, this one is marked
+		with ARCH_TOOLCHAIN_GCC which in turn enables other GCC-
+		and GNU-specific optimizations. One of them is removal
+		of unused code sections by the linker.
+
+		Linker script for the board must take this into account
+		and flag unreferenced sections that need to be present
+		in the compiled binary with a KEEP statement. Most notably,
+		this applies to .vectors section.
 
 config AVR_CROSSPACK_TOOLCHAIN
 	bool "CrossPack-AVR"
@@ -57,20 +68,129 @@ config AVR_BUILDROOT_TOOLCHAIN
 
 endchoice # Toolchain
 
-menu "Atmel AVR Toolchain options"
-	depends on AVR_ATMEL_AVR_TOOLCHAIN
+choice
+	prompt "Const variable placement"
+	default AVR_CONST_TO_FLMAP if AVR_HAVE_BOARD_FLMAP && AVR_HAVE_FLMAP
+	default AVR_HAS_MEMX_PTR if ARCH_DEBUG_H
+	default AVR_CONST_TO_RAM
+
+config AVR_CONST_TO_RAM
+	bool "No special handling, copy to RAM"
+	---help---
+		Initialization code will copy const variables into RAM.
+		This is a standard option available for all compilers and it is
+		fully supported in the kernel (because there are no special
+		requirements for such support.)
+
+		Main disadvantage of this option is that it may severely reduce
+		RAM available for the application and it may even be impossible
+		to fit all data into the RAM.
 
 config AVR_HAS_MEMX_PTR
-	bool "Enable in-flash static const stings"
-	depends on AVR_ATMEL_AVR_TOOLCHAIN
-	depends on ARCH_DEBUG_H
-	default y
+	bool "Mark const variables with __memx"
+	depends on AVR_ATMEL_AVR_TOOLCHAIN || AVR_LINUXGCC_TOOLCHAIN
 	---help---
-		Enabling this option (recommended) will place all constant
-		strings used for debugging and assertion in program memory
-		and allow the corresponding routines to get the strings
-		directly from there. This will dramatically decrease amount
-		of RAM needed to hold this static data.
+		Enabling this option activates IOBJ and IPTR qualifiers
+		for pointers in the source code. Compiler will then be allowed
+		to place constants into program memory without copying them to RAM,
+		reducing amount of RAM needed to hold static data.
 
-endmenu # Atmel AVR Toolchain options
+		The compiler then extends pointers with these qualifiers enabled
+		to 24bit length with highest bit set for data that reside in RAM.
+		Based on this bit, it will then read the data using instructions
+		appropriate for the underlying storage. As such, there is
+		a potentially significant performance tradeoff.
+
+		Additionally, if this is enabled, all constant strings used
+		for debugging and assertion are placed into program memory,
+		corresponding routines are then able to get them directly
+		from there.
+
+		Note that this doesn't allow the application to use program memory
+		pointers in arbitrary interaction with the kernel. Not all API
+		functions have these qualifiers added to their parameters.
+
+config AVR_CONST_TO_FLMAP
+	bool "Use memory-mapped access to flash"
+	depends on AVR_HAVE_BOARD_FLMAP && AVR_HAVE_FLMAP
+	---help---
+		Newer AVR chips - namely tinyAVR and AVR families - have (part of)
+		their program memory (flash) mapped into data memory address space.
+		The mapping is limited to 32kB window.
+
+		With this option enabled, const variables are kept in the program
+		memory and no copy to RAM is done. Yet it is still possible to use
+		such variables in any interaction with the kernel as they are
+		visible in data memory address space.
+
+		Note that this option only triggers some basic configuration
+		in the init function. It is the linker script of the board that needs
+		to ensure variables are placed correctly.
+
+		Beware that FLMAP bits in NVMCTRL.CTRLB I/O register which select
+		the segment of program memory to be mapped may not be changed freely
+		by the application. If the application needs to change the mapping,
+		it may only do so while observing these rules:
+
+		1. No kernel function must be called until the original value
+		is restored.
+
+		2. Interrupts must be disabled for as long as the value is changed.
+
+endchoice # Const variable placement
+
+config AVR_FLMAP_RODATA_SIZE
+	int "Size of .rodata FLMAP section"
+	depends on AVR_CONST_TO_FLMAP
+	default 4096
+	---help---
+		Specify size of .rodata memory section, ie. the section that stores
+		const variables. This will be passed as a parameter to the linker
+		to be used by the board's linker script.
+
+		Value must be divisible by 512 and no more than 32 kilobytes
+		is possible.
+
+config AVR_FLMAP_RODATA_OFFSET
+	int "Offset of .rodata FLMAP section"
+	depends on AVR_CONST_TO_FLMAP
+	default 0
+	---help---
+		Specify size of memory block between end of the .rodata section
+		(counting its full size as defined in AVR_FLMAP_RODATA_SIZE)
+		and the end of flash.
+
+		This value is intended to leave the end of the flash unused,
+		presumably for the purpose of placing APPDATA section in there
+		(see the chip documentation for details about subdividing
+		the program flash to BOOT, APPCODE and APPDATA sections.)
+
+		Note that this value is only passed to the linker to be used
+		by the linker script - the script then needs to place
+		the .rodata section accordingly.
+
+		Value must be divisible by 512 and no more than 31 kilobytes
+		is possible. Sum of this value and AVR_FLMAP_RODATA_SIZE must
+		also not exceed 32kB.
+
+config AVR_HAS_RAMPZ
+	bool
+
+config AVR_HAVE_BOARD_FLMAP
+	bool
+	---help---
+		This configuration option is supposed to be selected by board's
+		Kconfig if the board's linker script responds to __RODATA_SIZE__
+		and __RODATA_OFFSET__ passed by the linker and if it configures
+		.rodata section's size and position accordingly. Configuration
+		options that allow the user to configure values in these symbols
+		are unlocked if this is set and if the chip has support
+		for memory-mapped flash
+
+config AVR_HAVE_FLMAP
+	bool
+	---help---
+		This configuration option is set by chips that have (at least
+		some part of their) flash mapped into data memory address space.
+
 endif # ARCH_FAMILY_AVR

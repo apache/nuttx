@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/common/src/stm32_mpl115a.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -72,7 +74,7 @@ int board_mpl115a_initialize(int devno, int busno)
 
   /* Then register the barometer sensor */
 
-  snprintf(devpath, 12, "/dev/press%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/press%d", devno);
   ret = mpl115a_register(devpath, spi);
   if (ret < 0)
     {

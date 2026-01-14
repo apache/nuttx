@@ -25,7 +25,7 @@ still needed). From Gregory Nutt.
 - Rename all internal OS functions from task_* to nxtask_* to indicate
 that they are NuttX internal functions. From Gregory Nutt.
 - Rename sched_process_timer to nxsched_process_timer. Rename
-sched_timer_expiration to nxsched_timer_expiration. Rename
+sched_timer_expiration to nxsched_tick_expiration. Rename
 sched_alarm_expiration to nxsched_alarm_expiration. Those are the
 appropriate names for an internal sched/ function (still many named
 incorrectly). From Gregory Nutt.
@@ -480,7 +480,7 @@ It is using inih ini library in fsutils/inih. From Michal Lyszczek.
 - apps/examples/modbusmaster: Add Simple Modbus master example.
 This example only supports Read/Write HoldingRegisters, but it is
 easy to extend it to support Read/Write Input/Coils/etc.
-Originally creatd by Vytautas in 2016 and updated with minor fixes
+Originally created by Vytautas in 2016 and updated with minor fixes
 for this commit. From Alan Carvalho de Assis.
 - apps/examples/pwfb: Added a test/example at apps/examples/pwfb
 that was used for initial testing of the per-window framebuffer
@@ -576,7 +576,7 @@ avoid a potential race condition. From Xiang Xiao.
 multiple timestamp prefix in each line. From Xiang Xiao.
 - SHM: Convert bytes to pages by MM_NPAGES instead of MM_PGALIGNUP
 From Xiang Xiao.
-- SHM: shmget() should hould call shm_extend() to allocate the
+- SHM: shmget() should call shm_extend() to allocate the
 physical memory. From Xiang Xiao.
 - Page Allocator: mm/pgalloc: shouldn't just allocate one page
 always. From Xiang Xiao.
@@ -639,7 +639,7 @@ without sockets (CONFIG_NSOCKET_DESCRIPTORS == 0). That is not the
 case; if the network is enabled, sockets must be provided. From
 Gregory Nutt.
 - Networking: The value ERROR should never be returned from internal
-OS functions. That is reserved for returning values to appliations
+OS functions. That is reserved for returning values to applications
 with the errno value set. Within the OS, errors are returned with
 a negated errno value ALWAYS. From Gregory Nutt.
 - Networking: The struct in_addr doesn't have the member sin_addr.
@@ -937,7 +937,7 @@ Gregory Nutt.
 
 * C Library/Header Files:
 
-- strto*: In alll strto* function family, did't consume single '-'
+- strto*: In all strto* function family, did't consume single '-'
 or '+', allow sign in strotul(l)). From Johannes.
 - getopt(): Add logic to reinitialize the stale context for the
 FLAT/PROTECTED builds. In these builds getopt() global variables
@@ -1021,7 +1021,7 @@ Gregory Nutt.
 - tools/nxstyle.c: Was confusing hex constants with strings staring
 with 'x'. Added logic to complain about hex constants containing
 upper case characters. From Gregory Nutt.
-- tools/nxstyle.c: Fix logic error that prevent detecion of '/' and
+- tools/nxstyle.c: Fix logic error that prevent detection of '/' and
 '/=' as operators. net/: Minor updates resulting from testing
 tools/nxstyle. From Gregory Nutt.
 

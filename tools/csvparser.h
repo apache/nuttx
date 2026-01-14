@@ -1,6 +1,8 @@
 /****************************************************************************
  * tools/csvparser.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,7 +34,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define LINESIZE      (PATH_MAX > 256 ? PATH_MAX : 256)
+#define LINESIZE      (PATH_MAX > 512 ? PATH_MAX : 512)
 
 #define MAX_FIELDS    16
 #define MAX_PARMSIZE  256

@@ -1,0 +1,62 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_ESP32S3_8048S043
+
+config ESP32S3_BOARD_LCD
+	bool "Enable Board LCD"
+	default n
+	depends on ESP32S3_LCD
+	---help---
+		Enable board LCD support.
+
+config ESP32S3_BOARD_TOUCHSCREEN
+	bool "Enable Board Touchscreen"
+	default n
+	select ESP32S3_I2C0
+	select INPUT
+	select INPUT_TOUCHSCREEN
+	select INPUT_GT9XX
+	---help---
+		Enable board touchscreen support, IC is: GT911
+
+menu "Board Touchscreen Configuration"
+	depends on ESP32S3_BOARD_TOUCHSCREEN
+
+config ESP32S3_BOARD_TOUCHSCREEN_PATH
+	string "Touchscreen Path for VFS"
+	default "/dev/input0"
+
+config ESP32S3_BOARD_TOUCHSCREEN_WIDTH
+	int "Touchscreen Width"
+	default 800
+	depends on ESP32S3_8048S043
+
+config ESP32S3_BOARD_TOUCHSCREEN_HEIGHT
+	int "Touchscreen Height"
+	default 480
+	depends on ESP32S3_8048S043
+
+config ESP32S3_BOARD_TOUCHSCREEN_SAMPLE_CACHES
+	int "Touchscreen Sample Cache Number"
+	default 64
+
+config ESP32S3_BOARD_TOUCHSCREEN_SAMPLE_DELAYS
+	int "Touchscreen Sample Delay Ticks"
+	default 20
+
+config ESP32S3_BOARD_TOUCHSCREEN_X_MIRROR
+	bool "Touchscreen X Mirror"
+	default y
+	depends on ESP32S3_8048S043
+
+config ESP32S3_BOARD_TOUCHSCREEN_Y_MIRROR
+	bool "Touchscreen Y Mirror"
+	default n
+	depends on ESP32S3_8048S043
+
+endmenu # Touchscreen Configuration
+
+endif # ARCH_BOARD_ESP32S3_8048S043

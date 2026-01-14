@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/elf.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,7 +35,7 @@
 
 /* NOTE: elf64.h and elf32.h refer EI_NIDENT defined above */
 
-#ifdef CONFIG_LIBC_ARCH_ELF_64BIT
+#ifdef CONFIG_ARCH_64BIT
 #  include <elf64.h>
 #else
 #  include <elf32.h>
@@ -189,6 +191,7 @@
 #define SHF_WRITE          1
 #define SHF_ALLOC          2
 #define SHF_EXECINSTR      4
+#define SHF_INFO_LINK      0x40
 #define SHF_MASKPROC       0xf0000000
 
 /* Figure 4-16: Symbol Binding, ELF_ST_BIND */
@@ -208,6 +211,13 @@
 #define STT_FILE           4
 #define STT_LOPROC         13
 #define STT_HIPROC         15
+
+/* Table 7-21 ELF Symbol Visibility */
+
+#define STV_DEFAULT        0
+#define STV_INTERNAL       1
+#define STV_HIDDEN         2
+#define STV_PROTECTED      3
 
 /* Figure 5-2: Segment Types, p_type */
 
@@ -233,6 +243,12 @@
 #define PF_X               1          /* Execute */
 #define PF_W               2          /* Write */
 #define PF_R               4          /* Read */
+#define PF_MASKOS          0x0ff00000 /* All bits included in the PF_MASKOS
+                                       * mask are reserved for operating system-specific
+                                       * semantics.
+                                       */
+#define PF_REGISTER        0x00100000 /* Register, need pointer aligned access */
+
 #define PF_MASKPROC        0xf0000000 /* Unspecified */
 
 /* Figure 5-10: Dynamic Array Tags, d_tag */

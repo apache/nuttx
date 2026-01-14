@@ -1,6 +1,8 @@
 /****************************************************************************
  * wireless/bluetooth/bt_l2cap.c
  *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  *   Copyright (c) 2016, Intel Corporation
  *   All rights reserved.
  *
@@ -217,7 +219,7 @@ static void rej_not_understood(FAR struct bt_conn_s *conn, uint8_t ident)
 static void le_conn_param_rsp(FAR struct bt_conn_s *conn,
                               FAR struct bt_buf_s *buf)
 {
-  struct bt_l2cap_conn_param_rsp_s *rsp = (void *)buf->data;
+  FAR struct bt_l2cap_conn_param_rsp_s *rsp = (FAR void *)buf->data;
 
   if (buf->len < sizeof(*rsp))
     {
@@ -262,7 +264,7 @@ static void le_conn_param_update_req(FAR struct bt_conn_s *conn,
 {
   FAR struct bt_l2cap_sig_hdr_s *hdr;
   FAR struct bt_l2cap_conn_param_rsp_s *rsp;
-  FAR struct bt_l2cap_conn_param_req_s *req = (void *)buf->data;
+  FAR struct bt_l2cap_conn_param_req_s *req = (FAR void *)buf->data;
   uint16_t min;
   uint16_t max;
   uint16_t latency;
@@ -316,7 +318,7 @@ static void le_conn_param_update_req(FAR struct bt_conn_s *conn,
 static void le_sig(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
                    FAR void *context, uint16_t cid)
 {
-  struct bt_l2cap_sig_hdr_s *hdr = (FAR void *)buf->data;
+  FAR struct bt_l2cap_sig_hdr_s *hdr = (FAR void *)buf->data;
   uint16_t len;
 
   if (buf->len < sizeof(*hdr))

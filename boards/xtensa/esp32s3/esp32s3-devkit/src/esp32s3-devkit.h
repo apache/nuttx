@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s3/esp32s3-devkit/src/esp32s3-devkit.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -177,7 +179,7 @@ int board_bmp180_initialize(int devno, int busno);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S3_I2S
+#if defined(CONFIG_ESPRESSIF_I2S)
 int board_i2sdev_initialize(int port, bool enable_tx, bool enable_rx);
 #endif
 
@@ -214,22 +216,11 @@ int esp32s3_cs4344_initialize(int port);
 int esp32s3_djoy_initialize(void);
 #endif
 
-/****************************************************************************
- * Name: esp32s3_ledc_setup
- *
- * Description:
- *   Initialize LEDC PWM and register the PWM device.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32S3_LEDC
-int esp32s3_pwm_setup(void);
-#endif
-
 #ifdef CONFIG_ESP32S3_TWAI
 int esp32s3_twai_setup(void);
 #endif
 
+#ifdef CONFIG_NET_LAN9250
 /****************************************************************************
  * Name: esp32s3_lan9250_initialize
  *
@@ -247,8 +238,29 @@ int esp32s3_twai_setup(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_LAN9250
 int esp32s3_lan9250_initialize(int port);
+
+/****************************************************************************
+ * Name: esp32s3_lan9250_uninitialize
+ *
+ * Description:
+ *   This function is called by platform-specific setup logic to uninitialize
+ *   the LAN9250 device. This function will unregister the network device.
+ *
+ * Input Parameters:
+ *   port - The SPI port used for the device
+ *
+ * Returned Value:
+ *   Zero is returned on success. Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int esp32s3_lan9250_uninitialize(int port);
+#endif
+
+#ifdef CONFIG_ESP32S3_OPENETH
+int esp_openeth_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/mpu60x0.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -542,10 +544,10 @@ static inline int __mpu_read_imu(FAR struct mpu_dev_s *dev,
 {
   if (dev->fifo_enabled)
     {
-      return __mpu_read_reg(dev, FIFO_R_W, (uint8_t *)buf, sizeof(*buf));
+      return __mpu_read_reg(dev, FIFO_R_W, (FAR uint8_t *)buf, sizeof(*buf));
     }
 
-  return __mpu_read_reg(dev, ACCEL_XOUT_H, (uint8_t *)buf, sizeof(*buf));
+  return __mpu_read_reg(dev, ACCEL_XOUT_H, (FAR uint8_t *)buf, sizeof(*buf));
 }
 
 /* __mpu_read_pwr_mgmt_1()
@@ -785,19 +787,19 @@ static int mpu_reset(FAR struct mpu_dev_s *dev)
 
   do
     {
-      nxsig_usleep(50000);            /* usecs (arbitrary) */
+      nxsched_usleep(50000);            /* usecs (arbitrary) */
     }
   while (__mpu_read_pwr_mgmt_1(dev) & PWR_MGMT_1__DEVICE_RESET);
 
   /* Reset signal paths */
 
   __mpu_write_signal_path_reset(dev, SIGNAL_PATH_RESET__ALL_RESET);
-  nxsig_usleep(2000);
+  nxsched_usleep(2000);
 
   /* Disable SLEEP, use PLL with z-axis clock source */
 
   __mpu_write_pwr_mgmt_1(dev, 3);
-  nxsig_usleep(2000);
+  nxsched_usleep(2000);
 
   /* Disable i2c if we're on spi. */
 
@@ -950,7 +952,7 @@ static ssize_t mpu_read(FAR struct file *filep, FAR char *buf, size_t len)
 
   if (send_len)
     {
-      memcpy(buf, ((uint8_t *)&dev->buf) + dev->bufpos, send_len);
+      memcpy(buf, ((FAR uint8_t *)&dev->buf) + dev->bufpos, send_len);
     }
 
   /* Move the cursor, to mark them as sent. */

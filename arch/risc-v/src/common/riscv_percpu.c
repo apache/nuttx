@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_percpu.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -152,7 +154,7 @@ void riscv_percpu_add_hart(uintptr_t hartid)
 
   /* Make sure it sticks */
 
-  __MB();
+  UP_DSB();
 }
 
 /****************************************************************************
@@ -220,14 +222,14 @@ void riscv_percpu_set_kstack(uintptr_t ksp)
 
   /* This must be done with interrupts disabled */
 
-  flags   = enter_critical_section();
+  flags   = up_irq_save();
   scratch = READ_CSR(CSR_SCRATCH);
 
   DEBUGASSERT(scratch >= (uintptr_t) &g_percpu &&
               scratch <  (uintptr_t) &g_percpu + sizeof(g_percpu));
 
   ((riscv_percpu_t *)scratch)->ksp = ksp;
-  leave_critical_section(flags);
+  up_irq_restore(flags);
 }
 
 /****************************************************************************
@@ -252,12 +254,12 @@ void riscv_percpu_set_thread(struct tcb_s *tcb)
 
   /* This must be done with interrupts disabled */
 
-  flags   = enter_critical_section();
+  flags   = up_irq_save();
   scratch = READ_CSR(CSR_SCRATCH);
 
   DEBUGASSERT(scratch >= (uintptr_t) &g_percpu &&
               scratch <  (uintptr_t) &g_percpu + sizeof(g_percpu));
 
   ((riscv_percpu_t *)scratch)->tcb = tcb;
-  leave_critical_section(flags);
+  up_irq_restore(flags);
 }

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32_spi.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,7 +32,9 @@
 
 /* Select STM32 SPI IP core */
 
-#if defined(CONFIG_STM32F0L0G0_STM32F0) || defined(CONFIG_STM32F0L0G0_STM32G0)
+#if defined(CONFIG_STM32F0L0G0_STM32F0) || \
+    defined(CONFIG_STM32F0L0G0_STM32G0) || \
+    defined(CONFIG_STM32F0L0G0_STM32C0)
 #  define HAVE_IP_SPI_V2
 #elif defined(CONFIG_STM32F0L0G0_STM32L0)
 #  define HAVE_IP_SPI_V1

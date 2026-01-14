@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp_send_unbuffered.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,6 +42,7 @@
 #include <arch/irq.h>
 
 #include <nuttx/semaphore.h>
+#include <nuttx/tls.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/tcp.h>
@@ -52,6 +55,7 @@
 #include "icmpv6/icmpv6.h"
 #include "neighbor/neighbor.h"
 #include "route/route.h"
+#include "utils/utils.h"
 #include "tcp/tcp.h"
 
 /****************************************************************************
@@ -121,8 +125,8 @@ struct send_s
  *
  ****************************************************************************/
 
-static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
-                                     FAR void *pvpriv, uint16_t flags)
+static uint32_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
+                                     FAR void *pvpriv, uint32_t flags)
 {
   FAR struct send_s *pstate = pvpriv;
   FAR struct tcp_conn_s *conn;
@@ -147,7 +151,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
       return flags;
     }
 
-  ninfo("flags: %04x acked: %" PRId32 " sent: %zd\n",
+  ninfo("flags: %" PRIx32 " acked: %" PRId32 " sent: %zd\n",
         flags, pstate->snd_acked, pstate->snd_sent);
 
   /* The TCP_ACKDATA, TCP_REXMIT and TCP_DISCONN_EVENTS flags are expected to
@@ -479,6 +483,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
                        FAR const void *buf, size_t len, int flags)
 {
   FAR struct tcp_conn_s *conn;
+  struct tcp_callback_s info;
   struct send_s state;
   int ret = OK;
 
@@ -503,6 +508,13 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
     {
       nerr("ERROR: Not connected\n");
       ret = -ENOTCONN;
+      goto errout;
+    }
+
+  if ((conn->shutdown & SHUT_WR) != 0)
+    {
+      nerr("ERROR: Connection is shutdown\n");
+      ret = -EPIPE;
       goto errout;
     }
 
@@ -544,7 +556,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
    * ready.
    */
 
-  net_lock();
+  conn_dev_lock(&conn->sconn, conn->dev);
 
   /* Now that we have the network locked, we need to check the connection
    * state again to ensure the connection is still valid.
@@ -553,7 +565,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
   if (!_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       nerr("ERROR: No longer connected\n");
-      net_unlock();
+      conn_dev_unlock(&conn->sconn, conn->dev);
       ret = -ENOTCONN;
       goto errout;
     }
@@ -585,25 +597,37 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
           /* Set up the callback in the connection */
 
-          state.snd_cb->flags   = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
-                                   TCP_DISCONN_EVENTS);
-          state.snd_cb->priv    = (FAR void *)&state;
-          state.snd_cb->event   = tcpsend_eventhandler;
+          state.snd_cb->flags = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
+                                 TCP_DISCONN_EVENTS | TCP_TXCLOSE);
+          state.snd_cb->priv  = (FAR void *)&state;
+          state.snd_cb->event = tcpsend_eventhandler;
 
           /* Notify the device driver of the availability of TX data */
 
           tcp_send_txnotify(psock, conn);
 
           /* Wait for the send to complete or an error to occur:  NOTES:
-           * net_sem_wait will also terminate if a signal is received.
+           * conn_dev_sem_timedwait will also terminate if a signal is
+           * received.
            */
 
           for (; ; )
             {
               uint32_t acked = state.snd_acked;
 
-              ret = net_sem_timedwait(&state.snd_sem,
-                                  _SO_TIMEOUT(conn->sconn.s_sndtimeo));
+              /* Push a cancellation point onto the stack.  This will be
+               * called if the thread is canceled.
+               */
+
+              info.tc_conn = conn;
+              info.tc_cb   = &state.snd_cb;
+              info.tc_sem  = &state.snd_sem;
+              tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
+
+              ret = conn_dev_sem_timedwait(&state.snd_sem, true,
+                                         _SO_TIMEOUT(conn->sconn.s_sndtimeo),
+                                         &conn->sconn, conn->dev);
+              tls_cleanup_pop(tls_get_info(), 0);
               if (ret != -ETIMEDOUT || acked == state.snd_acked)
                 {
                   if (ret == -ETIMEDOUT)
@@ -622,7 +646,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
     }
 
   nxsem_destroy(&state.snd_sem);
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, conn->dev);
 
   /* Check for a errors.  Errors are signalled by negative errno values
    * for the send length
@@ -634,8 +658,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
       goto errout;
     }
 
-  /* If net_sem_timedwait failed, then we were probably reawakened by a
-   * signal. In this case, net_sem_timedwait will have returned negated
+  /* If conn_dev_sem_timedwait failed, then we were probably reawakened by a
+   * signal. In this case, conn_dev_sem_timedwait will have returned negated
    * errno appropriately.
    */
 

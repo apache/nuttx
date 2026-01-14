@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/imx9/imx9_dma_alloc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -139,12 +141,12 @@ void imx9_dma_free(void *memory, size_t size)
 }
 
 #ifdef CONFIG_FAT_DMAMEMORY
-FAR void *fat_dma_alloc(size_t size)
+void *fat_dma_alloc(size_t size)
 {
   return imx9_dma_alloc(size);
 }
 
-void fat_dma_free(FAR void *memory, size_t size)
+void fat_dma_free(void *memory, size_t size)
 {
   imx9_dma_free(memory, size);
 }

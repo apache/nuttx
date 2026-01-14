@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/stm32f103-minimum/src/stm32f103_minimum.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -370,18 +372,6 @@ int stm32_hyt271initialize(int devno);
 
 #ifdef CONFIG_SENSORS_DS18B20
 int stm32_ds18b20initialize(int devno);
-#endif
-
-/****************************************************************************
- * Name: stm32_mfrc522initialize
- *
- * Description:
- *   Function used to initialize the MFRC522 RFID Transceiver
- *
- ****************************************************************************/
-
-#ifdef CONFIG_CL_MFRC522
-int stm32_mfrc522initialize(const char *devpath);
 #endif
 
 #endif /* __ASSEMBLY__ */

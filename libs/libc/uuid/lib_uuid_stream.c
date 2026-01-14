@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/uuid/lib_uuid_stream.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,9 +32,9 @@
  * Public Functions
  ****************************************************************************/
 
-void uuid_enc_le(void *buf, const uuid_t *uuid)
+void uuid_enc_le(FAR void *buf, FAR const uuid_t *uuid)
 {
-  uuid_t *temp = buf;
+  FAR uuid_t *temp = buf;
 
   memcpy(temp, uuid, sizeof(*uuid));
 #if BYTE_ORDER == BIG_ENDIAN
@@ -42,9 +44,9 @@ void uuid_enc_le(void *buf, const uuid_t *uuid)
 #endif
 }
 
-void uuid_dec_le(const void *buf, uuid_t *uuid)
+void uuid_dec_le(FAR const void *buf, FAR uuid_t *uuid)
 {
-  const uuid_t *temp = buf;
+  FAR const uuid_t *temp = buf;
 
   memcpy(uuid, temp, sizeof(*uuid));
 #if BYTE_ORDER == BIG_ENDIAN
@@ -54,9 +56,9 @@ void uuid_dec_le(const void *buf, uuid_t *uuid)
 #endif
 }
 
-void uuid_enc_be(void *buf, const uuid_t *uuid)
+void uuid_enc_be(FAR void *buf, FAR const uuid_t *uuid)
 {
-  uuid_t *temp = buf;
+  FAR uuid_t *temp = buf;
 
   memcpy(temp, uuid, sizeof(*uuid));
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -66,9 +68,9 @@ void uuid_enc_be(void *buf, const uuid_t *uuid)
 #endif
 }
 
-void uuid_dec_be(const void *buf, uuid_t *uuid)
+void uuid_dec_be(FAR const void *buf, FAR uuid_t *uuid)
 {
-  const uuid_t *temp = buf;
+  FAR const uuid_t *temp = buf;
 
   memcpy(uuid, temp, sizeof(*uuid));
 #if BYTE_ORDER == LITTLE_ENDIAN

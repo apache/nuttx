@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/usbdev/usbmsc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -207,7 +209,9 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
    * const, canned descriptors.
    */
 
+#if !defined(CONFIG_USBDEV_SUPERSPEED) && !defined(CONFIG_USBMSC_COMPOSITE)
   DEBUGASSERT(CONFIG_USBMSC_EP0MAXPACKET == dev->ep0->maxpacket);
+#endif
 
   /* Preallocate control request */
 
@@ -258,9 +262,22 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
 
   for (i = 0; i < CONFIG_USBMSC_NRDREQS; i++)
     {
-      reqcontainer      = &priv->rdreqs[i];
-      reqcontainer->req = usbdev_allocreq(priv->epbulkout,
-                                          CONFIG_USBMSC_BULKOUTREQLEN);
+      reqcontainer = &priv->rdreqs[i];
+#ifdef CONFIG_USBDEV_SUPERSPEED
+      if (dev->speed == USB_SPEED_SUPER ||
+          dev->speed == USB_SPEED_SUPER_PLUS)
+        {
+          reqcontainer->req = usbdev_allocreq(priv->epbulkout,
+                                              USBMSC_SSBULKMAXPACKET *
+                                              (USBMSC_SSBULKMAXBURST + 1));
+        }
+      else
+#endif
+        {
+          reqcontainer->req = usbdev_allocreq(priv->epbulkout,
+                                              CONFIG_USBMSC_BULKOUTREQLEN);
+        }
+
       if (reqcontainer->req == NULL)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_RDALLOCREQ),
@@ -277,9 +294,22 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
 
   for (i = 0; i < CONFIG_USBMSC_NWRREQS; i++)
     {
-      reqcontainer      = &priv->wrreqs[i];
-      reqcontainer->req = usbdev_allocreq(priv->epbulkin,
-                                          CONFIG_USBMSC_BULKINREQLEN);
+      reqcontainer = &priv->wrreqs[i];
+#ifdef CONFIG_USBDEV_SUPERSPEED
+      if (dev->speed == USB_SPEED_SUPER ||
+          dev->speed == USB_SPEED_SUPER_PLUS)
+        {
+          reqcontainer->req = usbdev_allocreq(priv->epbulkin,
+                                              USBMSC_SSBULKMAXPACKET *
+                                              (USBMSC_SSBULKMAXBURST + 1));
+        }
+      else
+#endif
+        {
+          reqcontainer->req = usbdev_allocreq(priv->epbulkin,
+                                              CONFIG_USBMSC_BULKINREQLEN);
+        }
+
       if (reqcontainer->req == NULL)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_WRALLOCREQ),
@@ -291,9 +321,9 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
       reqcontainer->req->priv     = reqcontainer;
       reqcontainer->req->callback = usbmsc_wrcomplete;
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&priv->spinlock);
       sq_addlast((FAR sq_entry_t *)reqcontainer, &priv->wrreqlist);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->spinlock, flags);
     }
 
   /* Report if we are selfpowered (unless we are part of a composite
@@ -411,17 +441,22 @@ static void usbmsc_unbind(FAR struct usbdevclass_driver_s *driver,
        * of them
        */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&priv->spinlock);
       while (!sq_empty(&priv->wrreqlist))
         {
           reqcontainer = (struct usbmsc_req_s *)
             sq_remfirst(&priv->wrreqlist);
+          spin_unlock_irqrestore(&priv->spinlock, flags);
 
           if (reqcontainer->req != NULL)
             {
               usbdev_freereq(priv->epbulkin, reqcontainer->req);
             }
+
+          flags = spin_lock_irqsave(&priv->spinlock);
         }
+
+      spin_unlock_irqrestore(&priv->spinlock, flags);
 
       /* Free the bulk IN endpoint */
 
@@ -430,8 +465,6 @@ static void usbmsc_unbind(FAR struct usbdevclass_driver_s *driver,
           DEV_FREEEP(dev, priv->epbulkin);
           priv->epbulkin = NULL;
         }
-
-      leave_critical_section(flags);
     }
 }
 
@@ -513,8 +546,9 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
 #ifndef CONFIG_USBMSC_COMPOSITE
               case USB_DESC_TYPE_DEVICE:
                 {
-                  ret = USB_SIZEOF_DEVDESC;
-                  memcpy(ctrlreq->buf, usbmsc_getdevdesc(), ret);
+                  ret = usbdev_copy_devdesc(ctrlreq->buf,
+                                            usbmsc_getdevdesc(),
+                                            dev->speed);
                 }
                 break;
 #endif
@@ -543,12 +577,8 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
 #ifndef CONFIG_USBMSC_COMPOSITE
               case USB_DESC_TYPE_CONFIG:
                 {
-#ifdef CONFIG_USBDEV_DUALSPEED
                   ret = usbmsc_mkcfgdesc(ctrlreq->buf, &priv->devinfo,
                                          dev->speed, ctrl->value[1]);
-#else
-                  ret = usbmsc_mkcfgdesc(ctrlreq->buf, &priv->devinfo);
-#endif
                 }
                 break;
 #endif
@@ -699,8 +729,8 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
                      * state.
                      */
 
-                     priv->theventset |= USBMSC_EVENT_RESET;
-                     usbmsc_scsi_signal(priv);
+                    priv->theventset |= USBMSC_EVENT_RESET;
+                    usbmsc_scsi_signal(priv);
 
                     /* Return here... the response will be provided later by
                      * the worker thread.
@@ -817,14 +847,14 @@ static void usbmsc_disconnect(FAR struct usbdevclass_driver_s *driver,
 
   /* Reset the configuration */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&priv->spinlock);
   usbmsc_resetconfig(priv);
 
   /* Signal the worker thread */
 
   priv->theventset |= USBMSC_EVENT_DISCONNECT;
   usbmsc_scsi_signal(priv);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&priv->spinlock, flags);
 
   /* Perform the soft connect function so that we will we can be
    * re-enumerated (unless we are part of a composite device)
@@ -870,8 +900,7 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
 {
   FAR struct usbmsc_req_s *privreq;
   FAR struct usbdev_req_s *req;
-  struct usb_epdesc_s epdesc;
-  bool hispeed = false;
+  struct usb_ss_epdesc_s epdesc;
   int i;
   int ret = 0;
 
@@ -890,10 +919,6 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_ALREADYCONFIGURED), 0);
       return OK;
     }
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-  hispeed = (priv->usbdev->speed == USB_SPEED_HIGH);
-#endif
 
   /* Discard the previous configuration data */
 
@@ -917,9 +942,9 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
 
   /* Configure the IN bulk endpoint */
 
-  usbmsc_copy_epdesc(USBMSC_EPBULKIN, &epdesc, &priv->devinfo,
-                     hispeed);
-  ret = EP_CONFIGURE(priv->epbulkin, &epdesc, false);
+  usbmsc_copy_epdesc(USBMSC_EPBULKIN, &epdesc.epdesc, &priv->devinfo,
+                     priv->usbdev->speed);
+  ret = EP_CONFIGURE(priv->epbulkin, &epdesc.epdesc, false);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_EPBULKINCONFIGFAIL), 0);
@@ -930,9 +955,9 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
 
   /* Configure the OUT bulk endpoint */
 
-  usbmsc_copy_epdesc(USBMSC_EPBULKOUT, &epdesc, &priv->devinfo,
-                     hispeed);
-  ret = EP_CONFIGURE(priv->epbulkout, &epdesc, true);
+  usbmsc_copy_epdesc(USBMSC_EPBULKOUT, &epdesc.epdesc, &priv->devinfo,
+                     priv->usbdev->speed);
+  ret = EP_CONFIGURE(priv->epbulkout, &epdesc.epdesc, true);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_EPBULKOUTCONFIGFAIL), 0);
@@ -1028,9 +1053,9 @@ void usbmsc_wrcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Return the write request to the free list */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
   sq_addlast((FAR sq_entry_t *)privreq, &priv->wrreqlist);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
 
   /* Process the received data unless this is some unusual condition */
 
@@ -1052,8 +1077,10 @@ void usbmsc_wrcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Inform the worker thread that a write request has been returned */
 
+  flags = spin_lock_irqsave_nopreempt(&priv->spinlock);
   priv->theventset |= USBMSC_EVENT_WRCOMPLETE;
   usbmsc_scsi_signal(priv);
+  spin_unlock_irqrestore_nopreempt(&priv->spinlock, flags);
 }
 
 /****************************************************************************
@@ -1098,9 +1125,8 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep,
 
         /* Add the filled read request from the rdreqlist */
 
-        flags = enter_critical_section();
+        flags = spin_lock_irqsave_nopreempt(&priv->spinlock);
         sq_addlast((FAR sq_entry_t *)privreq, &priv->rdreqlist);
-        leave_critical_section(flags);
 
         /* Signal the worker thread that there is received data to be
          * processed.
@@ -1108,6 +1134,7 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep,
 
         priv->theventset |= USBMSC_EVENT_RDCOMPLETE;
         usbmsc_scsi_signal(priv);
+        spin_unlock_irqrestore_nopreempt(&priv->spinlock, flags);
       }
       break;
 
@@ -1244,7 +1271,7 @@ static int usbmsc_sync_wait(FAR struct usbmsc_dev_s *priv)
  *
  ****************************************************************************/
 
-int usbmsc_configure(unsigned int nluns, void **handle)
+int usbmsc_configure(unsigned int nluns, FAR void **handle)
 {
   FAR struct usbmsc_alloc_s  *alloc;
   FAR struct usbmsc_dev_s    *priv;
@@ -1278,6 +1305,7 @@ int usbmsc_configure(unsigned int nluns, void **handle)
   nxsem_init(&priv->thsynch, 0, 0);
   nxmutex_init(&priv->thlock);
   nxsem_init(&priv->thwaitsem, 0, 0);
+  spin_lock_init(&priv->spinlock);
 
   sq_init(&priv->wrreqlist);
   priv->nluns = nluns;
@@ -1296,7 +1324,9 @@ int usbmsc_configure(unsigned int nluns, void **handle)
   /* Initialize the USB class driver structure */
 
   drvr             = &alloc->drvr;
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_SUPERSPEED)
+  drvr->drvr.speed = USB_SPEED_SUPER;
+#elif defined(CONFIG_USBDEV_DUALSPEED)
   drvr->drvr.speed = USB_SPEED_HIGH;
 #else
   drvr->drvr.speed = USB_SPEED_FULL;
@@ -1674,10 +1704,10 @@ int usbmsc_exportluns(FAR void *handle)
   /* Signal to start the thread */
 
   uinfo("Signalling for the SCSI worker thread\n");
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&priv->spinlock);
   priv->theventset |= USBMSC_EVENT_READY;
   usbmsc_scsi_signal(priv);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&priv->spinlock, flags);
 
 errout_with_lock:
   nxmutex_unlock(&priv->thlock);
@@ -1761,7 +1791,7 @@ void usbmsc_uninitialize(FAR void *handle)
 
   priv = &alloc->dev;
 
-  /* If the thread hasn't already exitted, tell it to exit now */
+  /* If the thread hasn't already exited, tell it to exit now */
 
   if (priv->thstate != USBMSC_STATE_NOTSTARTED)
     {
@@ -1786,10 +1816,10 @@ void usbmsc_uninitialize(FAR void *handle)
         {
           /* Yes.. Ask the thread to stop */
 
-          flags = enter_critical_section();
+          flags = spin_lock_irqsave_nopreempt(&priv->spinlock);
           priv->theventset |= USBMSC_EVENT_TERMINATEREQUEST;
           usbmsc_scsi_signal(priv);
-          leave_critical_section(flags);
+          spin_unlock_irqrestore_nopreempt(&priv->spinlock, flags);
         }
 
       nxmutex_unlock(&priv->thlock);

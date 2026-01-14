@@ -40,4 +40,74 @@ config ARCH_CHIP_QEMU_RV_ISA_V
 	default n
 	select ARCH_RV_ISA_V
 
-endif
+config ARCH_CHIP_QEMU_RV_CLUSTER
+	bool "Enable cluster support"
+	default y if RPTUN
+	default n
+
+if ARCH_CHIP_QEMU_RV_CLUSTER
+
+config ARCH_CHIP_QEMU_RV_PLIC
+	hex "Base address of PLIC device"
+	default 0xc000000
+
+config ARCH_CHIP_QEMU_RV_CLINT
+	hex "Base address of CLINT device"
+	default 0x2000000
+
+config ARCH_CHIP_QEMU_RV_ACLINT
+	hex "Base address of ACLINT device"
+	default 0x2f00000
+
+endif # ARCH_CHIP_QEMU_RV_CLUSTER
+
+if RPTUN
+
+config QEMU_RPTUN_MASTER
+	bool "RPTUN master node"
+	default n
+
+config QEMU_RPTUN_SHM_BASE
+	hex "RPTUN share memory base"
+	default 0x80ff8000
+	---help---
+		For master node, this is base of all RPTUN shared
+		memory blocks, one for each remote node. To avoid
+		overlapping of RPTUN memory with NuttX memory,
+		memory configs of NuttX for master node shall be
+		carefully checked.
+		For remote node, this is base of its block.
+		RPTUN memory preparation is done by master node.
+
+config QEMU_RPTUN_SHM_SIZE
+	int "RPTUN share memory block size"
+	default 32768
+	---help---
+		The size of RPTUN shared memory block between two
+		peers. There are multiple blocks at the master node.
+
+config QEMU_RPTUN_MASTER_IPI
+	hex "RPTUN master's IPI address"
+	default 0x2000000
+	depends on !QEMU_RPTUN_MASTER
+	---help---
+		The IPI address of master node, used by remote RPTUN
+		nodes to notify master.
+
+config QEMU_RPTUN_REMOTE_NUM
+	int "Number of remote nodes"
+	depends on QEMU_RPTUN_MASTER
+	default 1
+
+config QEMU_RPTUN_REMOTE_IPIS
+	string "RPTUN remote IPI addresses"
+	depends on QEMU_RPTUN_MASTER
+	default "0x2010000"
+	---help---
+		A comma separated list of IPI addresses for remote
+		nodes, addresses shall be in hex with leading 0x and
+		only the first RPTUM_REMOTE_NUM entries be used.
+
+endif # RPTUN
+
+endif # ARCH_CHIP_QEMU_RV

@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/machine/arm/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -42,22 +44,41 @@ elseif(CONFIG_ARCH_ARMV7M) # All ARMv7-M
   add_subdirectory(armv7-m)
 elseif(CONFIG_ARCH_ARMV8M) # All ARMv8-M
   add_subdirectory(armv8-m)
+elseif(CONFIG_ARCH_ARMV8R) # All ARMv8-R
+  add_subdirectory(armv8-r)
 endif()
 
-if(NOT CONFIG_LIBSUPCXX)
-  list(APPEND SRCS aeabi_atexit.c)
+list(APPEND SRCS aeabi_memclr.c aeabi_memclr4.c aeabi_memclr8.c)
+list(APPEND SRCS aeabi_memcpy.c aeabi_memcpy4.c aeabi_memcpy8.c)
+list(APPEND SRCS aeabi_memmove.c aeabi_memmove4.c aeabi_memmove8.c)
+list(APPEND SRCS aeabi_memset.c aeabi_memset4.c aeabi_memset8.c)
+
+if(NOT CONFIG_LIBSUPCXX_TOOLCHAIN)
+  list(APPEND SRCS arch_atexit.c)
+endif()
+
+if(CONFIG_ARCH_TOOLCHAIN_GHS)
+  list(APPEND SRCS arch_dummy.c)
 endif()
 
 if(CONFIG_CXX_EXCEPTION)
-  list(APPEND SRCS gnu_unwind_find_exidx.c)
+  list(APPEND SRCS arch_unwind_find_exidx.c)
 endif()
 
 if(CONFIG_ARCH_SETJMP_H)
   if(CONFIG_ARCH_CHIP_TLSR82)
-    list(APPEND SRCS gnu/tc32_setjmp.S)
-  elseif(CONFIG_ARCH_TOOLCHAIN_GNU)
-    list(APPEND SRCS gnu/arch_setjmp.S)
+    list(APPEND SRCS tc32_setjmp.S)
+  else()
+    list(APPEND SRCS arch_setjmp.S)
   endif()
+endif()
+
+if(CONFIG_PROFILE_MINI)
+  list(APPEND SRCS arch_mcount.S)
+endif()
+
+if(CONFIG_LIBC_ARCH_CRC32)
+  list(APPEND SRCS arch_crc32.c)
 endif()
 
 target_sources(c PRIVATE ${SRCS})

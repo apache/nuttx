@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam4l_clockconfig.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -332,7 +334,7 @@
 #    error Missing PLL0 source
 #  endif
 
-/* PLL0 Multipler and Divider */
+/* PLL0 Multiplier and Divider */
 
 #  if !defined(BOARD_PLL0_MUL)
 #    error BOARD_PLL0_MUL is not defined
@@ -821,12 +823,12 @@ static inline void sam_enabledfll0(void)
                      SAM_SCIF_DFLL0STEP,
                      SAM_SCIF_DFLL0STEP_OFFSET);
 
-  /* Set the DFLL0 multipler register */
+  /* Set the DFLL0 multiplier register */
 
   sam_dfll0_putreg32(BOARD_DFLL0_MUL, SAM_SCIF_DFLL0MUL,
                      SAM_SCIF_DFLL0MUL_OFFSET);
 
-  /* Set the multipler and spread spectrum generator control registers */
+  /* Set the multiplier and spread spectrum generator control registers */
 
   sam_dfll0_putreg32(0, SAM_SCIF_DFLL0SSG, SAM_SCIF_DFLL0SSG_OFFSET);
 
@@ -1269,7 +1271,7 @@ void sam_clockconfig(void)
   fastwkup = false;
 
 #elif BOARD_CPU_FREQUENCY <= FLASH_MAXFREQ_PS1_HSDIS_FWS1
-  /* Not high speed mode and frequency is below the thrshold.  We can go to
+  /* Not high speed mode and frequency is below the threshold.  We can go to
    * power scaling mode 1.
    */
 

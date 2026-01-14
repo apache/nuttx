@@ -1,8 +1,9 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/stm32_tim.h
  *
- *   Copyright (C) 2019 Fundação CERTI. All rights reserved.
- *   Author: Daniel Pereira Volpato <dpo@certi.org.br>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2019 Fundação CERTI. All rights reserved.
+ * SPDX-FileContributor: Daniel Pereira Volpato <dpo@certi.org.br>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -64,6 +65,8 @@
 #define STM32_TIM_ENABLEINT(d,s)        ((d)->ops->enableint(d,s))
 #define STM32_TIM_DISABLEINT(d,s)       ((d)->ops->disableint(d,s))
 #define STM32_TIM_ACKINT(d,s)           ((d)->ops->ackint(d,s))
+#define STM32_TIM_ENABLE(d)             ((d)->ops->enable(d))
+#define STM32_TIM_DISABLE(d)            ((d)->ops->disable(d))
 
 /****************************************************************************
  * Public Types
@@ -159,6 +162,8 @@ struct stm32_tim_ops_s
 {
   /* Basic Timers */
 
+  void (*enable)(struct stm32_tim_dev_s *dev);
+  void (*disable)(struct stm32_tim_dev_s *dev);
   int  (*setmode)(struct stm32_tim_dev_s *dev, stm32_tim_mode_t mode);
   int  (*setclock)(struct stm32_tim_dev_s *dev, uint32_t freq);
   uint32_t (*getclock)(struct stm32_tim_dev_s *dev);

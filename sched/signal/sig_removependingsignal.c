@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/signal/sig_removependingsignal.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -61,9 +63,14 @@ FAR sigpendq_t *nxsig_remove_pendingsignal(FAR struct tcb_s *stcb, int signo)
 
   flags = enter_critical_section();
 
+  /* If stcb == NULL, the signal is for whole group. Otherwise only
+   * remove the one which is to be delivered to the stcb
+   */
+
   for (prevsig = NULL,
        currsig = (FAR sigpendq_t *)group->tg_sigpendingq.head;
-       (currsig && currsig->info.si_signo != signo);
+       currsig && (currsig->info.si_signo != signo ||
+                   (currsig->tcb != NULL && currsig->tcb != stcb));
        prevsig = currsig, currsig = currsig->flink);
 
   if (currsig)

@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/sys/mount.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,6 +29,7 @@
 
 #include <nuttx/compiler.h>
 #include <nuttx/fs/ioctl.h>
+#include <fcntl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -37,7 +40,16 @@
 
 /* Mount flags */
 
-#define MS_RDONLY 1 /* Mount file system read-only */
+#define MS_RDONLY       O_RDONLY    /* Mount file system read-only */
+#define MS_SYNCHRONOUS  O_SYNC      /* Writes are synced at once */
+#define MS_NOSYMFOLLOW  O_NOFOLLOW  /* Do not follow symlinks */
+#define MS_NOATIME      O_NOATIME   /* Do not update access times. */
+#define MS_NOSUID       O_RESERVE14 /* Ignore suid and sgid bits */
+#define MS_NODEV        O_RESERVE15 /* Disallow access to device special files */
+#define MS_DIRSYNC      O_RESERVE16 /* Directory modifications are synchronous */
+#define MS_REMOUNT      O_RESERVE17 /* Alter flags of a mounted FS */
+#define MS_MANDLOCK     O_RESERVE19 /* Allow mandatory locks on an FS */
+#define MS_NOEXEC       O_RESERVE20 /* Disallow program execution */
 
 /* Un-mount flags
  *

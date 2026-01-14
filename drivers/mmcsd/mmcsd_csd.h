@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/mmcsd/mmcsd_csd.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -115,6 +117,8 @@
 /* VDD_W_CURR_MAX 50-52 = Max. write current at Vcc max */
 
 #define MMCSD_CSD_VDDWCURRMAX(csd) ((csd[4] >> 2) & 7)
+
+#define MMCSD_CSD_CSIZE_THRESHOLD   0xfff
 
 /* C_SIZE_MULT 47-49 Device size multiplier */
 
@@ -289,6 +293,8 @@
 
 #define MMCSD_CSD_VDDWCURRMAX(csd) ((csd[9] >> 2) & 7)
 #define SD20_CSD_VDDWCURRMAX(csd) (6)
+
+#define MMCSD_CSD_CSIZE_THRESHOLD   0xfff
 
 /* C_SIZE_MULT 47-49 Device size multiplier */
 

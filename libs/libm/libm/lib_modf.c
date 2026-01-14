@@ -1,10 +1,9 @@
 /****************************************************************************
  * libs/libm/libm/lib_modf.c
  *
- * This file is a part of NuttX:
- *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
- *   Ported by: Darcy Gong
+ * SPDX-License-Identifier: ISC
+ * SPDX-FileCopyrightText: Copyright (C) 2012 Gregory Nutt.
+ * SPDX-FileContributor: Ported by: Darcy Gong
  *
  * It derives from the Rhombus OS math library by Nick Johnson which has
  * a compatible, MIT-style license:
@@ -29,6 +28,9 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+#include <nuttx/compiler.h>
+
 #include <stdint.h>
 #include <math.h>
 
@@ -37,7 +39,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_HAVE_DOUBLE
-double modf(double x, double *iptr)
+double modf(double x, FAR double *iptr)
 {
   if (fabs(x) >= 4503599627370496.0)
     {

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/goldfish/goldfish_memorymap.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,21 +40,24 @@
 
 /* Goldfish virt Physical Memory Map ****************************************/
 
-#define VIRT_FLASH_PSECTION      0x00000000  /* 0x00000000-0x08000000 */
+#define VIRT_FLASH_PSECTION      0x00600000  /* 0x00600000-0x08000000 */
 #define VIRT_IO_PSECTION         0x08000000  /* 0x08000000-0x0f000000 */
 #define VIRT_PCIE_PSECTION       0x10000000  /* 0x10000000-0x40000000 */
+#define VIRT_DDR_PSECTION        0x40000000  /* 0x40000000-0x50000000 */
 
 /* Goldfish virt Virtual Memory Map *****************************************/
 
 #define VIRT_FLASH_VSECTION      VIRT_FLASH_PSECTION
 #define VIRT_IO_VSECTION         VIRT_IO_PSECTION
 #define VIRT_PCIE_VSECTION       VIRT_PCIE_PSECTION
+#define VIRT_DDR_VSECTION        VIRT_DDR_PSECTION
 
 /* Sizes of memory regions in bytes. */
 
-#define VIRT_FLASH_SECSIZE       (128*1024*1024)
+#define VIRT_FLASH_SECSIZE       (122*1024*1024)
 #define VIRT_IO_SECSIZE          (112*1024*1024)
 #define VIRT_PCIE_SECSIZE        (3*256*1024*1024)
+#define VIRT_DDR_SECSIZE         (256*1024*1024)
 
 /****************************************************************************
  * Public Function Prototypes

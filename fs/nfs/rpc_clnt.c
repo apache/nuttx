@@ -1,10 +1,11 @@
 /****************************************************************************
  * fs/nfs/rpc_clnt.c
  *
- *   Copyright (C) 2012-2013, 2018 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2012 Jose Pablo Rojas Vargas. All rights reserved.
- *   Author: Jose Pablo Rojas Vargas <jrojas@nx-engineering.com>
- *           Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2012-2018 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2012 Jose Pablo Rojas Vargas. All rights reserved.
+ * SPDX-FileContributor: Jose Pablo Rojas Vargas <jrojas@nx-engineering.com>
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Leveraged from OpenBSD:
  *
@@ -131,7 +132,9 @@ static uint32_t rpc_vers;
 static uint32_t rpc_auth_null;
 static uint32_t rpc_auth_unix;
 
-/* Global statics for all client instances.  Cleared by NuttX on boot-up. */
+/* Global statistics for all client instances.
+ * Cleared by NuttX on boot-up.
+ */
 
 #ifdef CONFIG_NFS_STATISTICS
 static struct rpcstats rpcstats;
@@ -184,8 +187,8 @@ static int rpcclnt_socket(FAR struct rpcclnt *rpc, in_port_t rport)
 
   memcpy(&raddr, rpc->rc_name, sizeof(raddr));
 
+  memset(&laddr, 0, sizeof(laddr));
   laddr.ss_family = raddr.ss_family;
-  memset(laddr.ss_data, 0, sizeof(laddr.ss_data));
 
   if (raddr.ss_family == AF_INET6)
     {

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/imxrt/hardware/rt117x/imxrt117x_ccm.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -257,7 +259,7 @@
 #define CCM_CG_CTRL_RSTDIV_SHIFT          (16)      /* Bits 16-23: Clock group global restart count (RSTDIV) */
 #define CCM_CG_CTRL_RSTDIV_MASK           (0xff << CCM_CG_CTRL_RSTDIV_SHIFT)
 #  define CCM_CG_CTRL_RSTDIV(n)           (((n)-1) << CCM_CG_CTRL_RSTDIV_SHIFT) /* Divide selected clock by n */
-#define CCM_CG_CTRL_OFF                   (1 << 24)  
+#define CCM_CG_CTRL_OFF                   (1 << 24)
                                                     /* Bit 24: Shutdown all clocks in clock group (OFF) */
                                                     /* Bits 25-31: Reserved */
 
@@ -724,7 +726,7 @@
 #define CCM_CR_CKO2        78 /* CLOCK ROOT CKO2. */
 
 /* Note IMXRT7 uses the definition LPCG instead of CCGR as the clock gate
- * register but for compatiblity we define them as LPCG
+ * register but for compatibility we define them as LPCG.
  */
 
 #define CCM_CG_OFF                               (0)  /* Clock is off during all modes */
@@ -754,7 +756,7 @@
 #define CCM_CCGR_MU_A                        20
 #define CCM_CCGR_MU_B                        21
 #define CCM_CCGR_EDMA                        22
-#define CCM_CCGR_DMA                         22 /* Note Added CTRL for compatiblity */
+#define CCM_CCGR_DMA                         22 /* Note Added CTRL for compatibility */
 #define CCM_CCGR_EDMA_LPSR                   23
 #define CCM_CCGR_ROMCP                       24
 #define CCM_CCGR_OCRAM                       25
@@ -770,10 +772,10 @@
 #define CCM_CCGR_IEE                         35
 #define CCM_CCGR_KEY_MANAGER                 36
 #define CCM_CCGR_PUF                         36
-#define CCM_CCGR_OCOTP_CTRL                  37 /* Note Added CTRL for compatiblity */
+#define CCM_CCGR_OCOTP_CTRL                  37 /* Note Added CTRL for compatibility */
 #define CCM_CCGR_SNVS_HP                     38
 #define CCM_CCGR_SNVS                        39
-#define CCM_CCGR_SNVS_LP                     39 /* Note Added CTRL for compatiblity */
+#define CCM_CCGR_SNVS_LP                     39 /* Note Added CTRL for compatibility */
 #define CCM_CCGR_CAAM                        40
 #define CCM_CCGR_JTAG_MUX                    41
 #define CCM_CCGR_CSTRACE                     42

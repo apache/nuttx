@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/local/local.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,7 +33,6 @@
 #include <sys/un.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdint.h>
 #include <poll.h>
 
 #include <nuttx/fs/fs.h>
@@ -49,7 +50,13 @@
 #define LOCAL_NPOLLWAITERS 2
 #define LOCAL_NCONTROLFDS  4
 
-#define LOCAL_SEND_LIMIT   (CONFIG_DEV_FIFO_SIZE - sizeof(uint16_t))
+#if CONFIG_DEV_PIPE_MAXSIZE > 65535
+typedef uint32_t lc_size_t;  /* 32-bit index */
+#elif CONFIG_DEV_PIPE_MAXSIZE > 255
+typedef uint16_t lc_size_t;  /* 16-bit index */
+#else
+typedef uint8_t lc_size_t;   /*  8-bit index */
+#endif
 
 /****************************************************************************
  * Public Type Definitions
@@ -122,9 +129,7 @@ struct local_conn_s
   char lc_path[UNIX_PATH_MAX];   /* Path assigned by bind() */
   int32_t lc_instance_id;        /* Connection instance ID for stream
                                   * server<->client connection pair */
-#ifdef CONFIG_NET_LOCAL_DGRAM
-  uint16_t pktlen;                 /* Read-ahead packet length */
-#endif /* CONFIG_NET_LOCAL_DGRAM */
+  lc_size_t lc_rcvsize;          /* Receive buffer size */
 
   FAR struct local_conn_s *
                         lc_peer; /* Peer connection instance */
@@ -147,7 +152,7 @@ struct local_conn_s
    * socket events.
    */
 
-  struct pollfd *lc_event_fds[LOCAL_NPOLLWAITERS];
+  FAR struct pollfd *lc_event_fds[LOCAL_NPOLLWAITERS];
   struct pollfd lc_inout_fds[2*LOCAL_NPOLLWAITERS];
 
   /* Union of fields unique to SOCK_STREAM client, server, and connected
@@ -190,6 +195,40 @@ extern "C"
 /* The local socket interface */
 
 EXTERN const struct sock_intf_s g_local_sockif;
+
+/* Global protection lock for local socket */
+
+extern mutex_t g_local_lock;
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: local_lock
+ *
+ * Description:
+ *   Take the global local socket lock
+ *
+ ****************************************************************************/
+
+static inline_function void local_lock(void)
+{
+  nxmutex_lock(&g_local_lock);
+}
+
+/****************************************************************************
+ * Name: local_unlock
+ *
+ * Description:
+ *   Release the global local socket lock
+ *
+ ****************************************************************************/
+
+static inline_function void local_unlock(void)
+{
+  nxmutex_unlock(&g_local_lock);
+}
 
 /****************************************************************************
  * Public Function Prototypes
@@ -280,6 +319,21 @@ void local_subref(FAR struct local_conn_s *conn);
  ****************************************************************************/
 
 FAR struct local_conn_s *local_nextconn(FAR struct local_conn_s *conn);
+
+/****************************************************************************
+ * Name: local_findconn
+ *
+ * Description:
+ *   Traverse the connections list to find the server
+ *
+ * Assumptions:
+ *   This function must be called with the network locked.
+ *
+ ****************************************************************************/
+
+FAR struct local_conn_s *
+local_findconn(FAR const struct local_conn_s *conn,
+               FAR const struct sockaddr_un *unaddr);
 
 /****************************************************************************
  * Name: local_peerconn
@@ -423,6 +477,30 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                       int flags);
 
 /****************************************************************************
+ * Name: local_send_preamble
+ *
+ * Description:
+ *   Send a packet on the write-only FIFO.
+ *
+ * Input Parameters:
+ * conn      A reference to local connection structure
+ * filep     File structure of write-only FIFO.
+ * buf       Data to send
+ * len       Length of data to send
+ * preamble  preamble Flag to indicate the preamble sync header assembly
+ *
+ * Returned Value:
+ *   Packet length is returned on success; a negated errno value is returned
+ *   on any failure.
+ *
+ ****************************************************************************/
+
+int local_send_preamble(FAR struct local_conn_s *conn,
+                        FAR struct file *filep,
+                        FAR const struct iovec *buf,
+                        size_t len, size_t rcvsize);
+
+/****************************************************************************
  * Name: local_send_packet
  *
  * Description:
@@ -432,7 +510,6 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  *   filep    File structure of write-only FIFO.
  *   buf      Data to send
  *   len      Length of data to send
- *   preamble Flag to indicate the preamble sync header assembly
  *
  * Returned Value:
  *   Zero is returned on success; a negated errno value is returned on any
@@ -441,7 +518,7 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  ****************************************************************************/
 
 int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
-                      size_t len, bool preamble);
+                      size_t len);
 
 /****************************************************************************
  * Name: local_recvmsg
@@ -516,23 +593,6 @@ int local_getaddr(FAR struct local_conn_s *conn, FAR struct sockaddr *addr,
                   FAR socklen_t *addrlen);
 
 /****************************************************************************
- * Name: local_sync
- *
- * Description:
- *   Read a sync bytes until the start of the packet is found.
- *
- * Input Parameters:
- *   filep - File structure of write-only FIFO.
- *
- * Returned Value:
- *   The non-zero size of the following packet is returned on success; a
- *   negated errno value is returned on any failure.
- *
- ****************************************************************************/
-
-int local_sync(FAR struct file *filep);
-
-/****************************************************************************
  * Name: local_create_fifos
  *
  * Description:
@@ -540,7 +600,8 @@ int local_sync(FAR struct file *filep);
  *
  ****************************************************************************/
 
-int local_create_fifos(FAR struct local_conn_s *conn);
+int local_create_fifos(FAR struct local_conn_s *conn,
+                       uint32_t cssize, uint32_t scsize);
 
 /****************************************************************************
  * Name: local_create_halfduplex
@@ -552,7 +613,7 @@ int local_create_fifos(FAR struct local_conn_s *conn);
 
 #ifdef CONFIG_NET_LOCAL_DGRAM
 int local_create_halfduplex(FAR struct local_conn_s *conn,
-                            FAR const char *path);
+                            FAR const char *path, uint32_t bufsize);
 #endif
 
 /****************************************************************************
@@ -585,7 +646,8 @@ int local_release_halfduplex(FAR struct local_conn_s *conn);
  *
  ****************************************************************************/
 
-int local_open_client_rx(FAR struct local_conn_s *client, bool nonblock);
+int local_open_client_rx(FAR struct local_conn_s *client,
+                         FAR struct local_conn_s *server, bool nonblock);
 
 /****************************************************************************
  * Name: local_open_client_tx
@@ -595,7 +657,8 @@ int local_open_client_rx(FAR struct local_conn_s *client, bool nonblock);
  *
  ****************************************************************************/
 
-int local_open_client_tx(FAR struct local_conn_s *client, bool nonblock);
+int local_open_client_tx(FAR struct local_conn_s *client,
+                         FAR struct local_conn_s *server, bool nonblock);
 
 /****************************************************************************
  * Name: local_open_server_rx

@@ -1,8 +1,11 @@
 /****************************************************************************
  * arch/arm/src/s32k1xx/s32k1xx_clockconfig.c
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016-2018 NXP
+ * SPDX-FileCopyrightText: 2013 - 2015, Freescale Semiconductor, Inc.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -1757,7 +1760,7 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
     {
       /* if it needs to be set to RUN mode */
 
-      case(PM_NORMAL):
+      case (PM_NORMAL):
         {
           /* Logic for PM_NORMAL goes here */
 
@@ -1888,7 +1891,7 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
         }
         break;
 
-      case(PM_IDLE):
+      case (PM_IDLE):
         {
           /* Logic for PM_IDLE goes here */
         }
@@ -1896,7 +1899,7 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
 
       /* if it needs to be set to VLPR mode */
 
-      case(PM_STANDBY):
+      case (PM_STANDBY):
         {
           /* Logic for PM_STANDBY goes here */
 
@@ -2027,8 +2030,8 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
 
           /* set the system clock to the SIRC 8MHz freq */
 
-          /* this freq will change to the predefined vccr settings
-           * when the mode change occures
+          /* This freq will change to the predefined vccr settings
+           * when the mode change occurs.
            */
 
           /* and wait until system clock changed */
@@ -2095,7 +2098,7 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
         }
         break;
 
-      case(PM_SLEEP):
+      case (PM_SLEEP):
         {
           /* Logic for PM_SLEEP goes here */
 
@@ -2225,8 +2228,8 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
 
           /* set the system clock to the SIRC 8MHz freq */
 
-          /* this freq will change to the predefined vccr settings
-           * when the mode change occures
+          /* This freq will change to the predefined vccr settings
+           * when the mode change occurs.
            */
 
           /* and wait until system clock changed */

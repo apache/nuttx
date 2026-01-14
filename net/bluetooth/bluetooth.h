@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/bluetooth/bluetooth.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,6 +32,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#include <nuttx/mutex.h>
 #include <nuttx/net/net.h>
 
 #include <nuttx/wireless/bluetooth/bt_hci.h>
@@ -117,6 +120,40 @@ extern "C"
 
 EXTERN const struct sock_intf_s g_bluetooth_sockif;
 
+/* The Bluetooth connections rmutex */
+
+extern rmutex_t g_bluetooth_connections_lock;
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: bluetooth_conn_list_lock
+ *
+ * Description:
+ *   Lock the Bluetooth connection list.
+ *
+ ****************************************************************************/
+
+static inline_function void bluetooth_conn_list_lock(void)
+{
+  nxrmutex_lock(&g_bluetooth_connections_lock);
+}
+
+/****************************************************************************
+ * Name: bluetooth_conn_list_unlock
+ *
+ * Description:
+ *   Unlock the Bluetooth connection list.
+ *
+ ****************************************************************************/
+
+static inline_function void bluetooth_conn_list_unlock(void)
+{
+  nxrmutex_unlock(&g_bluetooth_connections_lock);
+}
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -140,20 +177,6 @@ struct sockaddr;                /* Forward reference */
  ****************************************************************************/
 
 void bluetooth_initialize(void);
-
-/****************************************************************************
- * Name: bluetooth_conn_initialize
- *
- * Description:
- *   Initialize the Bluetooth connection structure allocator.  Called
- *   once and only from bluetooth_initialize().
- *
- * Assumptions:
- *   Called early in the initialization sequence
- *
- ****************************************************************************/
-
-void bluetooth_conn_initialize(void);
 
 /****************************************************************************
  * Name: bluetooth_conn_alloc()
@@ -266,9 +289,9 @@ FAR struct bluetooth_conn_s *
  *
  ****************************************************************************/
 
-uint16_t bluetooth_callback(FAR struct radio_driver_s *radio,
-                             FAR struct bluetooth_conn_s *conn,
-                             uint16_t flags);
+uint32_t bluetooth_callback(FAR struct radio_driver_s *radio,
+                            FAR struct bluetooth_conn_s *conn,
+                            uint32_t flags);
 
 /****************************************************************************
  * Name: bluetooth_recvmsg

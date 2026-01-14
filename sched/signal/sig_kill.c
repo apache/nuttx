@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/signal/sig_kill.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -107,7 +109,7 @@ int nxsig_kill(pid_t pid, int signo)
 
   /* Send the signal */
 
-  return nxsig_dispatch(pid, &info);
+  return nxsig_dispatch(pid, &info, false);
 }
 
 /****************************************************************************

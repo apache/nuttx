@@ -179,7 +179,7 @@ Key features of NuttX include:
 * **USB Device Support**
 
   * *Gadget*-like architecture for USB device controller drivers and device-dependent USB class drivers.
-  * USB device controller drivers available for the most MCU architectures includeing PIC32,
+  * USB device controller drivers available for the most MCU architectures including PIC32,
     Atmel AVR, SAM3, SAM4, SAMv7, and SAMA5Dx, NXP/Freescale LPC17xx, LPC214x, LPC313x, LPC43xx, and
     Kinetis, Silicon Laboraties EFM32, STMicro STM32 F1, F2, F3, F4, and F7, TI DM320, and others.
   * Device-dependent USB class drivers available for USB serial (CDC/ACM and a PL2303 emulation),
@@ -239,7 +239,7 @@ OS with all of that?
     you actually use.
 
     Using a variety of technologies, NuttX can scale from the very tiny to the moderate-size system.
-    I have executed NuttX with some simple applications in as little as 32K *total* memory (code and
+    NuttX was seen operating with some simple applications in as little as 32K *total* memory (code and
     data). On the other hand, typical, richly featured NuttX builds require more like 64K (and
     if all of the features are used, this can push 100K).
 

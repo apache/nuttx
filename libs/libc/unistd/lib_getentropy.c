@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/unistd/lib_getentropy.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -22,8 +24,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/random.h>
 #include <errno.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 /****************************************************************************
@@ -54,30 +56,12 @@
 
 int getentropy(FAR void *buffer, size_t length)
 {
-  FAR char *pos = buffer;
-
   if (length > 256)
     {
       set_errno(EIO);
       return -1;
     }
 
-  while (length > 0)
-    {
-      int ret = getrandom(pos, length, 0);
-      if (ret < 0)
-        {
-          if (get_errno() == EINTR)
-            {
-              continue;
-            }
-
-          return ret;
-        }
-
-      pos += ret;
-      length -= ret;
-    }
-
+  arc4random_buf(buffer, length);
   return 0;
 }

@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/assert/lib_stackchk.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -23,8 +25,6 @@
  ****************************************************************************/
 
 #include <assert.h>
-
-#ifdef CONFIG_STACK_CANARIES
 
 /****************************************************************************
  * Public Data
@@ -56,5 +56,3 @@ void __stack_chk_fail(void)
 {
   PANIC();
 }
-
-#endif /* CONFIG_STACK_CANARIES */

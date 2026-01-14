@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/armv7-r/arm_gicv2.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -160,12 +162,8 @@ void arm_gic0_initialize(void)
   /* Attach SGI interrupt handlers. This attaches the handler to all CPUs. */
 
   DEBUGVERIFY(irq_attach(GIC_SMP_CPUSTART, arm_start_handler, NULL));
-  DEBUGVERIFY(irq_attach(GIC_SMP_CPUPAUSE, arm_pause_handler, NULL));
-
-#  ifdef CONFIG_SMP_CALL
-  DEBUGVERIFY(irq_attach(GIC_SMP_CPUCALL,
-                         nxsched_smp_call_handler, NULL));
-#  endif
+  DEBUGVERIFY(irq_attach(GIC_SMP_SCHED, arm_smp_sched_handler, NULL));
+  DEBUGVERIFY(irq_attach(GIC_SMP_CALL, nxsched_smp_call_handler, NULL));
 #endif
 
   arm_gic_dump("Exit arm_gic0_initialize", true, 0);
@@ -662,10 +660,4 @@ int arm_gic_irq_trigger(int irq, bool edge)
   return -EINVAL;
 }
 
-#  ifdef CONFIG_SMP_CALL
-void up_send_smp_call(cpu_set_t cpuset)
-{
-  up_trigger_irq(GIC_SMP_CPUCALL, cpuset);
-}
-#  endif
 #endif /* CONFIG_ARMV7R_HAVE_GICv2 */

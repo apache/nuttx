@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lpc54xx/lpc54_rng.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -95,7 +97,7 @@ static ssize_t lpc54_read(struct file *filep, char *buffer, size_t buflen)
       return ret;
     }
 
-  /* Copy the requested number of randome bytes. */
+  /* Copy the requested number of random bytes. */
 
   for (remaining = buflen;
        remaining > 0;

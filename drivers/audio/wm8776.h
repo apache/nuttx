@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/audio/wm8776.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,6 +36,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/spinlock_type.h>
 
 #ifdef CONFIG_AUDIO
 
@@ -105,6 +108,7 @@ struct wm8776_dev_s
 #endif
   bool                    reserved;         /* True: Device is reserved */
   volatile int            result;           /* The result of the last transfer */
+  spinlock_t              lock;             /* Spinlock */
 };
 
 #endif /* CONFIG_AUDIO */

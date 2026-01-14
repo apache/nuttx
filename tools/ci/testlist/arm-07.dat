@@ -1,39 +1,11 @@
-/arm/stm32/[a-m]*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/s32k1xx,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
-/arm/stm32/nucleo-f1*,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/sam34,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
-/arm/stm32/nucleo-f2*,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/sama5,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
-/arm/stm32/nucleo-f30*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/samd2l2,CONFIG_ARM_TOOLCHAIN_CLANG
 
-# Boards build by CMake
+/arm/samd5e5,CONFIG_ARM_TOOLCHAIN_CLANG
 
-CMake,nucleo-f103rb:adc
-CMake,nucleo-f103rb:ihm07m1_b16
-CMake,nucleo-f103rb:nsh
-CMake,nucleo-f103rb:pwm
-CMake,nucleo-f103rb:qenco
-
-CMake,nucleo-f207zg:adc
-CMake,nucleo-f207zg:nsh
-CMake,nucleo-f207zg:pwm
-
-# CMake,nucleo-f302r8:can
-CMake,nucleo-f302r8:cansock
-CMake,nucleo-f302r8:highpri
-CMake,nucleo-f302r8:ihm07m1_b16
-CMake,nucleo-f302r8:ihm07m1_f32
-CMake,nucleo-f302r8:nsh
-CMake,nucleo-f302r8:qenco
-
-CMake,nucleo-f303re:adc
-# CMake,nucleo-f303re:can
-CMake,nucleo-f303re:hello
-CMake,nucleo-f303re:nsh
-# CMake,nucleo-f303re:nxlines
-CMake,nucleo-f303re:pwm
-# CMake,nucleo-f303re:serialrx
-
-CMake,nucleo-f303ze:adc
-CMake,nucleo-f303ze:nsh
-# CMake,nucleo-f303ze:nxlines_oled
+/arm/samv7,CONFIG_ARM_TOOLCHAIN_GNU_EABI

@@ -1,6 +1,8 @@
 # ##############################################################################
 # openamp/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -19,7 +21,8 @@
 # ##############################################################################
 if(CONFIG_OPENAMP)
 
-  set(OPENAMP_VERSION 2022.10.0)
+  set(OPENAMP_VERSION 2025.10.0)
+  set(LIBMETAL_VERSION 2025.10.0)
 
   include(libmetal.cmake)
   include(open-amp.cmake)

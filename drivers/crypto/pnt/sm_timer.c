@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/crypto/pnt/sm_timer.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,5 +36,5 @@
 
 void sm_sleep(uint32_t msec)
 {
-  nxsig_usleep(1000 * msec);
+  nxsched_usleep(1000 * msec);
 }

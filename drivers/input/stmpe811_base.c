@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/input/stmpe811_base.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -222,7 +224,7 @@ static void stmpe811_reset(FAR struct stmpe811_dev_s *priv)
 
   /* Wait a bit */
 
-  nxsig_usleep(20 * 1000);
+  nxsched_usleep(20 * 1000);
 
   /* Then power on again.  All registers will be in their reset state. */
 

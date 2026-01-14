@@ -128,7 +128,7 @@ information about the currently running task. From Gregory Nutt.
 From ligd.
 - HostFS: Add re-try when hostfs mount() fails From ligd.
 - NFS: Update NFS client mount to VER3 From zhangyuan7.
-- Partitions: Add PTABLE parser fs/partion: Add a partition parser
+- Partitions: Add PTABLE parser fs/partition: Add a partition parser
 framework fs/driver/fs_blockpartition.c: Add
 register_blockpartition for block partition From Xiang Xiao.
 - MTD: Add gd25 driver From wangyanjiong.
@@ -288,7 +288,7 @@ architectures. From Gregory Nutt.
 - syslog: Channel configuration. Decouple SYSLOG_SERIAL_CONSOLE and
 ARCH_LOWPUTC. Since some hardware can output log to the special
 debug channel not serial. From anchao.
-- syslog: Support pre-pending a prefix string to log output if
+- syslog: Support prepending a prefix string to log output if
 enabled. This very useful to identify which CPU send out the log
 in AMP SoC. From anchao.
 - Serial: Add Ctrl-C/Ctrl-X support. From ligd.
@@ -493,7 +493,7 @@ the Serial driver. From David Sidrane.
 - LPC54xx: The LPC54608 can only run at a maximum frequency of
 180Mhz. This configuration requires uses the clk_in, external
 crystal clock, to drive the PLL. When that input was selected, the
-board bootup failed waiting for the PLL to lock. After referring
+board boot up failed waiting for the PLL to lock. After referring
 the driver from NXP, we should turn on power sources for the ext
 clock if system pll input select clk_in. NOTE that the LPC54628
 did not require this step... perhaps because the system oscillator
@@ -643,7 +643,7 @@ FOC. From Mateusz Szafoni.
 if the compiler supports anonymous structures and unions. From
 Gregory Nutt.
 - include/nuttx/mutex.h: Add inline wrapper functions to more
-clearly support semaphores when used as mutexs. From QianWenfa.
+clearly support semaphores when used as mutexes. From QianWenfa.
 - include/nuttx/nuttx.h: Added nuttx.h header file which is
 analogous to the linux.h header file. Currently, it contains on
 the definition of the container_of() macro. From zhuyanlin.
@@ -797,7 +797,7 @@ before performing the mount. From Gregory Nutt.
 - apps/examples/module: When built in the PROTECTED or KERNEL
 modes, the symbol table is not built by the application. That is
 because the build will fail since the kernel module depends on
-internal OS symbols thar are not available to the application
+internal OS symbols that are not available to the application
 build. With this change the examples does not attempt to build
 the kernel symbol table in these modes. Instead it just copies
 the kernel module symbol table into the nuttx/pass1 directory

@@ -1,6 +1,8 @@
 /*****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/rom/esp32c3_spiflash.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -378,7 +380,7 @@ esp32c3_spiflash_read_statushigh(esp32c3_spiflash_chip_t *spi,
  * Name: esp32c3_spiflash_write_status
  *
  * Description:
- *   Write status to Falsh status register.
+ *   Write status to Flash status register.
  *
  *   Please do not call this function in SDK.
  *
@@ -481,7 +483,7 @@ esp_rom_spiflash_config_clk(uint8_t freqdiv,
  *
  *   Please do not call this function in SDK.
  *
- * Input Paramater:
+ * Input Parameter:
  *   esp_rom_spiflash_common_cmd_t *cmd : A struct to show the action of a
  *                                        command.
  *

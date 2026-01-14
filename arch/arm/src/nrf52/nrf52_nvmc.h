@@ -1,13 +1,10 @@
 /****************************************************************************
  * arch/arm/src/nrf52/nrf52_nvmc.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Ported from the Nordic SDK, this is the original license:
- *
- * Copyright (c) 2012 - 2018, Nordic Semiconductor ASA
- * All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2018 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2012 - 2018, Nordic Semiconductor ASA
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are

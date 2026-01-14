@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/signal/sig_pause.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -75,11 +77,11 @@ int pause(void)
 
   sigemptyset(&set);
 
-  /* sigtwaitinfo() cannot succeed.  It should always return error EINTR
+  /* nxsig_timedwait() cannot succeed.  It should always return error EINTR
    * meaning that some unblocked signal was caught.
    */
 
-  ret = nxsig_waitinfo(&set, NULL);
+  ret = nxsig_timedwait(&set, NULL, NULL);
   if (ret < 0)
     {
       set_errno(-ret);

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/hardware/stm32g0_rcc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -91,7 +93,9 @@
 #define RCC_CR_HSEBYP               (1 << 18) /* Bit 18: External high speed clock bypass */
 
 #define RCC_CR_CSSON                (1 << 19) /* Bit 19: Clock security system enable */
-                                              /* Bits 20-23: Reserved */
+                                              /* Bits 20-21: Reserved */
+#define RCC_CR_HSI48ON              (1 << 22) /* Bit 22: HSI48 On */
+#define RCC_CR_HSI48RDY             (1 << 23) /* Bit 23: HSI48 Ready */
 #define RCC_CR_PLLON                (1 << 24) /* Bit 24: PLL enable */
 #define RCC_CR_PLLRDY               (1 << 25) /* Bit 25: PLL clock ready flag */
                                               /* Bits 26-27: Reserved */
@@ -198,7 +202,8 @@
 /* AHB peripheral reset register */
 
 #define RCC_AHBRSTR_DMA1RST         (1 << 0)  /* Bit 0: DMA 1 reset */
-                                              /* Bits 1-7: Reserved */
+#define RCC_AHBRSTR_DMA2RST         (1 << 1)  /* Bit 1: DMA 2 reset */
+                                              /* Bits 2-7: Reserved */
 #define RCC_AHBRSTR_MIFRST          (1 << 8)  /* Bit 8: Memory interface reset */
                                               /* Bits 9-11: Reserved */
 #define RCC_AHBRSTR_CRCRST          (1 << 12) /* Bit 12: Memory interface reset */
@@ -261,7 +266,8 @@
 /* AHB Peripheral Clock enable register */
 
 #define RCC_AHBENR_DMA1EN           (1 << 0)  /* Bit 0: DMA 1 enable */
-                                              /* Bits 1-7: Reserved */
+#define RCC_AHBENR_DMA2EN           (1 << 1)  /* Bit 1: DMA 2 enable */
+                                              /* Bits 2-7: Reserved */
 #define RCC_AHBENR_MIFEN            (1 << 8)  /* Bit 8: Memory interface enable */
                                               /* Bits 9-11: Reserved */
 #define RCC_AHBENR_CRCEN            (1 << 12) /* Bit 12: Memory interface enable */
@@ -317,7 +323,8 @@
 /* AHB peripheral clock enable in Sleep mode register */
 
 #define RCC_AHBSMENR_DMA1SMEN       (1 << 0)  /* Bit 0: DMA 1 enable in Sleep mode */
-                                              /* Bits 1-7: Reserved */
+#define RCC_AHBSMENR_DMA2SMEN       (1 << 1)  /* Bit 1: DMA 2 enable in Sleep mode */
+                                              /* Bits 2-7: Reserved */
 #define RCC_AHBSMENR_MIFSMEN        (1 << 8)  /* Bit 8: Memory interface enable in Sleep mode */
                                               /* Bits 9-11: Reserved */
 #define RCC_AHBSMENR_CRCSMEN        (1 << 12) /* Bit 12: Memory interface enable in Sleep mode */
@@ -332,6 +339,12 @@
 /* TODO: APB2 peripheral clock enable in Sleep mode register */
 
 /* TODO: Clock configuration register */
+
+#define RCC_CCIPR_ADCSEL_SHIFT      (30)
+#define RCC_CCIPR_ADCSEL_MASK       (3 << RCC_CCIPR_ADCSEL_SHIFT)
+#define RCC_CCIPR_ADCSEL_SYSCLK     (0)
+#define RCC_CCIPR_ADCSEL_PLLPCLK    (1 << RCC_CCIPR_ADCSEL_SHIFT)
+#define RCC_CCIPR_ADCSEL_HSI16      (2 << RCC_CCIPR_ADCSEL_SHIFT)
 
 /* TODO: RTC domain control register */
 

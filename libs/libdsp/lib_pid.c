@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libdsp/lib_pid.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -229,7 +231,7 @@ float pi_controller(FAR pid_controller_f32_t *pid, float err)
 
   pid->part[0] = pid->KP * err;
 
-  /* Get intergral part */
+  /* Get integral part */
 
   pid->part[1] += pid->KI * (err - pid->aw);
 

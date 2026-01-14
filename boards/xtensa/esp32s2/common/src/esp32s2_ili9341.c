@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s2/common/src/esp32s2_ili9341.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -72,7 +74,7 @@
 #endif
 
 /****************************************************************************
- * Private Type Definition
+ * Private Types
  ****************************************************************************/
 
 struct ili93414ws_lcd_s

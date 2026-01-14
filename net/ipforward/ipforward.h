@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/ipforward/ipforward.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -80,19 +82,6 @@ struct forward_s
 
 struct ipv4_hdr_s; /* Forward reference */
 struct ipv6_hdr_s; /* Forward reference */
-
-/****************************************************************************
- * Name: ipfwd_initialize
- *
- * Description:
- *   Initialize the struct forward_s allocator.
- *
- * Assumptions:
- *   Called early in system initialization.
- *
- ****************************************************************************/
-
-void ipfwd_initialize(void);
 
 /****************************************************************************
  * Name: ipfwd_alloc

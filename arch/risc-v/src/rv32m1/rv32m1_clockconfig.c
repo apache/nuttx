@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/rv32m1/rv32m1_clockconfig.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -384,7 +386,7 @@ void rv32m1_clockconfig(void)
  * Name: rv32m1_clockfreq
  *
  * Description:
- *   Query the frequecy of a given clock source.
+ *   Query the frequency of a given clock source.
  *
  ****************************************************************************/
 

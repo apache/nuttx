@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/moxart/moxa/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -62,7 +64,7 @@
 /* PLLA configuration.
  *
  *   Divider = 1
- *   Multipler = 14
+ *   Multiplier = 14
  */
 
 #define BOARD_CKGR_PLLAR_MUL       (13 << PMC_CKGR_PLLAR_MUL_SHIFT)

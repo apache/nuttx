@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32u5/stm32_pwr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -252,7 +254,7 @@ void stm32_pwr_adjustvcore(unsigned sysclock)
  * Name stm32_pwr_enable_smps
  *
  * Description:
- *   Select between the Low-Drop Out (LDO) or Switched Mode Power Suppy
+ *   Select between the Low-Drop Out (LDO) or Switched Mode Power Supply
  *   (SMPS) regulator.  Compare [RM0456], section 10.5.1 SMPS and LDO
  *   embedded regulators.
  *

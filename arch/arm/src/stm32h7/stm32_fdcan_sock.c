@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32_fdcan_sock.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,7 +35,6 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/can.h>
 #include <nuttx/wdog.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -41,7 +42,6 @@
 #include <nuttx/signal.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/can.h>
-#include <netpacket/can.h>
 
 #if defined(CONFIG_NET_CAN_RAW_TX_DEADLINE) || defined(CONFIG_NET_TIMESTAMP)
 #include <sys/time.h>
@@ -882,7 +882,7 @@ static int fdcan_transmit(struct fdcan_driver_s *priv)
 
       header.id.esi = (frame->can_id & CAN_ERR_FLAG) ? 1 : 0;
       header.id.rtr = (frame->can_id & CAN_RTR_FLAG) ? 1 : 0;
-      header.dlc = len_to_can_dlc[frame->len];
+      header.dlc = g_len_to_can_dlc[frame->len];
       header.brs = brs; /* Bitrate switching */
       header.fdf = 1;   /* CAN-FD frame */
       header.efc = 0;   /* Don't store Tx events */
@@ -1142,8 +1142,10 @@ static void fdcan_receive_work(void *arg)
       /* Read the frame contents */
 
 #ifdef CONFIG_NET_CAN_CANFD
-      if (rf->header.fdf) /* CAN FD frame */
+      if (rf->header.fdf)
         {
+          /* CAN FD frame */
+
           struct canfd_frame *frame = (struct canfd_frame *)priv->rx_pool;
 
           if (rf->header.id.xtd)
@@ -1161,7 +1163,7 @@ static void fdcan_receive_work(void *arg)
               frame->can_id |= CAN_RTR_FLAG;
             }
 
-          frame->len = can_dlc_to_len[rf->header.dlc];
+          frame->len = g_can_dlc_to_len[rf->header.dlc];
 
           uint32_t *frame_data_word = (uint32_t *)&frame->data[0];
 
@@ -1181,9 +1183,11 @@ static void fdcan_receive_work(void *arg)
           priv->dev.d_len = sizeof(struct canfd_frame);
           priv->dev.d_buf = (uint8_t *)frame;
         }
-      else /* CAN 2.0 Frame */
+      else
 #endif
         {
+          /* CAN 2.0 Frame */
+
           struct can_frame *frame = (struct can_frame *)priv->rx_pool;
 
           if (rf->header.id.xtd)
@@ -1947,9 +1951,9 @@ static int fdcan_netdev_ioctl(struct net_driver_s *dev, int cmd,
         {
           struct can_ioctl_data_s *req =
               (struct can_ioctl_data_s *)((uintptr_t)arg);
-          req->arbi_bitrate = priv->arbi_timing.bitrate / 1000; /* kbit/s */
+          req->arbi_bitrate = priv->arbi_timing.bitrate;
 #ifdef CONFIG_NET_CAN_CANFD
-          req->data_bitrate = priv->data_timing.bitrate / 1000; /* kbit/s */
+          req->data_bitrate = priv->data_timing.bitrate;
 #else
           req->data_bitrate = 0;
 #endif
@@ -1962,19 +1966,13 @@ static int fdcan_netdev_ioctl(struct net_driver_s *dev, int cmd,
           struct can_ioctl_data_s *req =
               (struct can_ioctl_data_s *)((uintptr_t)arg);
 
-          priv->arbi_timing.bitrate = req->arbi_bitrate * 1000;
+          /* Apply the new timings (interface is guaranteed to be down) */
+
+          priv->arbi_timing.bitrate = req->arbi_bitrate;
 #ifdef CONFIG_NET_CAN_CANFD
-          priv->data_timing.bitrate = req->data_bitrate * 1000;
+          priv->data_timing.bitrate = req->data_bitrate;
 #endif
-
-          /* Reset CAN controller and start with new timings */
-
-          ret = fdcan_initialize(priv);
-
-          if (ret == OK)
-            {
-              ret = fdcan_ifup(dev);
-            }
+          ret = OK;
         }
         break;
 #endif /* CONFIG_NETDEV_CAN_BITRATE_IOCTL */
@@ -2613,15 +2611,16 @@ static void fdcan_error_work(void *arg)
   psr = getreg32(priv->base + STM32_FDCAN_PSR_OFFSET);
 
   pending = (ir);
+  ie |= FDCAN_ANYERR_INTS;
 
   /* Check for common errors */
 
   if ((pending & FDCAN_CMNERR_INTS) != 0)
     {
-      /* When a protocol error ocurrs, the problem is recorded in
+      /* When a protocol error occurs, the problem is recorded in
        * the LEC/DLEC fields of the PSR register. In lieu of
-       * seprate interrupt flags for each error, the hardware
-       * groups procotol errors under a single interrupt each for
+       * separate interrupt flags for each error, the hardware
+       * groups protocol errors under a single interrupt each for
        * arbitration and data phases.
        *
        * These errors have a tendency to flood the system with
@@ -2632,7 +2631,6 @@ static void fdcan_error_work(void *arg)
       if ((psr & FDCAN_PSR_LEC_MASK) != 0)
         {
           ie &= ~(FDCAN_IE_PEAE | FDCAN_IE_PEDE);
-          putreg32(ie, priv->base + STM32_FDCAN_IE_OFFSET);
         }
 
       /* Clear the error indications */
@@ -2674,7 +2672,6 @@ static void fdcan_error_work(void *arg)
        */
 
       ie &= ~(pending & FDCAN_RXERR_INTS);
-      putreg32(ie, priv->base + STM32_FDCAN_IE_OFFSET);
 
       /* Clear the error indications */
 
@@ -2689,7 +2686,7 @@ static void fdcan_error_work(void *arg)
 
   /* Re-enable ERROR interrupts */
 
-  fdcan_errint(priv, true);
+  putreg32(ie, priv->base + STM32_FDCAN_IE_OFFSET);
 }
 
 /****************************************************************************

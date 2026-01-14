@@ -1,8 +1,8 @@
 /****************************************************************************
  * include/nuttx/tee.h
  *
- * Copyright (c) 2015-2016, Linaro Limited
- * All rights reserved.
+ * SPDX-License-Identifier: BSD-2-Clause
+ * SPDX-FileCopyrightText: 2015-2016, Linaro Limited. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following
@@ -198,6 +198,10 @@ struct tee_ioctl_shm_register_fd_data
 
 #define TEE_IOCTL_LOGIN_REE_KERNEL              0x80000000
 
+/* Macro to help calculate the total size of n params */
+
+#define TEE_IOCTL_PARAM_SIZE(x)                 (sizeof(struct tee_ioctl_param) * (x))
+
 /* struct tee_ioctl_param - parameter
  * attr: attributes
  * a: if a memref, offset into the shared memory object, else a value
@@ -373,6 +377,13 @@ struct tee_iocl_supp_send_arg
  */
 
 #define TEE_IOC_SUPPL_SEND _IOC(TEE_IOC_MAGIC << 8, TEE_IOC_BASE + 7)
+
+/* Shared memory-specific defines */
+
+#define TEE_SHM_ALLOC    (1 << 0) /* Kernel-malloced and must freed */
+#define TEE_SHM_REGISTER (1 << 1) /* Registered with TEE OS */
+#define TEE_SHM_USER_MAP (1 << 2) /* Will be used by userspace after mmap */
+#define TEE_SHM_SUPP     (1 << 4) /* Registered by supplicant */
 
 /* struct tee_ioctl_shm_register_data - Shared memory register argument
  * addr:      [in] Start address of shared memory to register

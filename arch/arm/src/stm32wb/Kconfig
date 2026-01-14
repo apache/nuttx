@@ -1182,11 +1182,6 @@ config STM32WB_BLE_LE_CODED_PHY
 	default STM32WB_STM32WB15 || STM32WB_STM32WB35 || STM32WB_STM32WB55
 	depends on STM32WB_STM32WB15 || STM32WB_STM32WB35 || STM32WB_STM32WB55
 
-config STM32WB_BLE_TTY_NAME
-	string "BLE TTY device name"
-	default "/dev/ttyHCI0"
-	depends on UART_BTH4
-
 config STM32WB_BLE_FICR_STATIC_ADDR
 	bool "Configure factory generated static random address"
 	default n

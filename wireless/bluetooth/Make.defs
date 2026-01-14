@@ -1,6 +1,8 @@
 ############################################################################
 # wireless/bluetooth/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -28,7 +30,7 @@ ifeq ($(CONFIG_WIRELESS_BLUETOOTH_HOST),y)
 
 # Host-layer
 
-CSRCS += bt_atomic.c bt_att.c  bt_conn.c bt_gatt.c
+CSRCS += bt_att.c  bt_conn.c bt_gatt.c
 CSRCS += bt_ioctl.c bt_keys.c bt_l2cap.c bt_smp.c
 CSRCS += bt_uuid.c bt_services.c
 

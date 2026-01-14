@@ -60,7 +60,7 @@ config MMCSD_MULTIBLOCK_LIMIT
 	---help---
 		The max block can be handled in single transfer.
 		Default to 0, means no limitation. Block count larger than this
-		limit will be splited to multiple multi-block transfer. Set it to 1 will
+		limit will be split to multiple multi-block transfer. Set it to 1 will
 		only use single-block transfer mode, and can be used to work around
 		buggy SDIO drivers that cannot handle multiple block transfers.
 
@@ -176,6 +176,19 @@ config MMCSD_BLOCK_WDATADELAY
 	---help---
 		Some hardware needs to configure this delay to write one data block, because
 		the hardware needs more time for wear leveling and bad block management.
+
+config MMCSD_CHECK_READY_STATUS_WITHOUT_SLEEP
+	bool "No sleep in ready-check function."
+	default n
+	---help---
+		Since nxsched_usleep returns at the tick after the next tick, when
+		CONFIG_USEC_PER_TICK is big, the real sleep time is much more than
+		desired in mmcsd_transferready(). As a result, write speed is
+		affected seriously.
+
+		When this configuration is enabled, the sleep in mmcsd_transferready
+		will be skipped. However, CPU will be hogged by the process during
+		this period of writing time.
 
 endif
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/intel64/intel64_idle.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -64,9 +66,27 @@ void up_idle(void)
    * "fake" timer interrupts. Hopefully, something will wake up.
    */
 
-  sched_process_timer();
+  nxsched_process_timer();
+#elif defined(CONFIG_ARCH_X86_64_IDLE_NOP)
+  __asm__ volatile("nop");
+#elif defined(CONFIG_ARCH_X86_64_IDLE_MWAIT_ECX)
+  /* Dummy value to make MONITOR/MWAIT work */
+
+  int dummy;
+
+  /* MONITOR eax, ecx, edx */
+
+  __asm__ volatile(".byte 0x0f, 0x01, 0xc8" ::
+                   "a"(&dummy), "c"(0), "d"(0));
+
+  /* We enable sub C-state here and wait for interrupts */
+
+  /* MWAIT eax, ecx */
+
+  __asm__ volatile(".byte 0x0f, 0x01, 0xc9" ::
+                   "a"(0), "c"(CONFIG_ARCH_X86_64_IDLE_MWAIT_ECX));
 #else
-  asm volatile("hlt");
+  __asm__ volatile("hlt");
 #endif
 }
 #endif

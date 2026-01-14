@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/pthread/pthread_setcancelstate.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -53,12 +55,12 @@
  *
  * Description:
  *   The pthread_setcancelstate() function atomically both sets the calling
- *   thread's cancelability state to the indicated state and returns the
- *   previous cancelability state at the location referenced by oldstate.
+ *   thread's cancellability state to the indicated state and returns the
+ *   previous cancellability state at the location referenced by oldstate.
  *   Legal values for state are PTHREAD_CANCEL_ENABLE and
  *   PTHREAD_CANCEL_DISABLE.
  *
- *   The cancelability state and type of any newly created threads,
+ *   The cancellability state and type of any newly created threads,
  *   including the thread in which main() was first invoked, are
  *   PTHREAD_CANCEL_ENABLE and PTHREAD_CANCEL_DEFERRED respectively.
  *

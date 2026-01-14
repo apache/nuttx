@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/mount/fs_gettype.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -150,6 +152,12 @@ FAR const char *fs_gettype(FAR struct statfs *statbuf)
 #ifdef CONFIG_FS_ZIPFS
       case ZIPFS_MAGIC:
         fstype = "zipfs";
+        break;
+#endif
+
+#ifdef CONFIG_FS_V9FS
+      case V9FS_MAGIC:
+        fstype = "v9fs";
         break;
 #endif
 

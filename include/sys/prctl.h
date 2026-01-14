@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/sys/prctl.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -73,6 +75,9 @@
 #define PR_GET_NAME     2
 #define PR_SET_NAME_EXT 3
 #define PR_GET_NAME_EXT 4
+
+#define PR_SET_DUMPABLE 5
+#define PR_GET_DUMPABLE 6
 
 /****************************************************************************
  * Public Type Definitions

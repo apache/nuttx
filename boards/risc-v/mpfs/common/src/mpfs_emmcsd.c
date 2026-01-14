@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/mpfs/common/src/mpfs_emmcsd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,7 +44,7 @@ static struct sdio_dev_s *g_sdio_dev;
  * Private Functions
  ****************************************************************************/
 
-static void partition_handler(FAR struct partition_s *part, FAR void *arg)
+static void partition_handler(struct partition_s *part, void *arg)
 {
   unsigned partition = *(int *)arg;
   char devname[] = "/dev/mmcsd0p0";

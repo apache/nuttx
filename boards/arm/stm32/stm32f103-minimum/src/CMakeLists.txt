@@ -1,6 +1,8 @@
 # ##############################################################################
 # boards/arm/stm32/stm32f103-minimum/src/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -77,10 +79,6 @@ endif()
 
 if(CONFIG_CAN_MCP2515)
   list(APPEND SRCS stm32_mcp2515.c)
-endif()
-
-if(CONFIG_CL_MFRC522)
-  list(APPEND SRCS stm32_mfrc522.c)
 endif()
 
 if(CONFIG_LCD_MAX7219)

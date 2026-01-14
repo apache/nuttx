@@ -10,7 +10,8 @@ choice
 	default ARCH_CHIP_STM32F051R8 if ARCH_CHIP_STM32F0
 	default ARCH_CHIP_STM32L073RZ if ARCH_CHIP_STM32L0
 	default ARCH_CHIP_STM32G071RB if ARCH_CHIP_STM32G0
-	depends on ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32L0 || ARCH_CHIP_STM32G0
+	default ARCH_CHIP_STM32C071RB if ARCH_CHIP_STM32C0
+	depends on ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32L0 || ARCH_CHIP_STM32G0 || ARCH_CHIP_STM32C0
 
 config ARCH_CHIP_STM32F030C6
 	bool "STM32F030C6"
@@ -452,82 +453,274 @@ config ARCH_CHIP_STM32F098VC
 
 config ARCH_CHIP_STM32G070CB
 	bool "STM32G070CB"
-	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G070
+	select STM32F0L0G0_FLASH_CONFIG_B
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G070KB
 	bool "STM32G070KB"
-	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G070
+	select STM32F0L0G0_FLASH_CONFIG_B
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G070RB
 	bool "STM32G070RB"
-	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G070
+	select STM32F0L0G0_FLASH_CONFIG_B
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071EB
 	bool "STM32G071EB"
-	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G071
+	select STM32F0L0G0_FLASH_CONFIG_B
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071G8
 	bool "STM32G071G8"
-	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G071
+	select STM32F0L0G0_FLASH_CONFIG_8
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071GB
 	bool "STM32G071GB"
-	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G071
+	select STM32F0L0G0_FLASH_CONFIG_B
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071G8XN
 	bool "STM32G071G8XN"
-	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G071
+	select STM32F0L0G0_FLASH_CONFIG_8
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071GBXN
 	bool "STM32G071GBXN"
-	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G071
+	select STM32F0L0G0_FLASH_CONFIG_B
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071K8
 	bool "STM32G071K8"
-	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G071
+	select STM32F0L0G0_FLASH_CONFIG_8
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071KB
 	bool "STM32G071KB"
-	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G071
+	select STM32F0L0G0_FLASH_CONFIG_B
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071K8XN
 	bool "STM32G071K8XN"
-	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G071
+	select STM32F0L0G0_FLASH_CONFIG_8
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071KBXN
 	bool "STM32G071KBXN"
-	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G071
+	select STM32F0L0G0_FLASH_CONFIG_B
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071C8
 	bool "STM32G071C8"
-	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G071
+	select STM32F0L0G0_FLASH_CONFIG_8
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071CB
 	bool "STM32G071CB"
-	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G071
+	select STM32F0L0G0_FLASH_CONFIG_B
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071R8
 	bool "STM32G071R8"
-	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G071
+	select STM32F0L0G0_FLASH_CONFIG_8
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32G071RB
 	bool "STM32G071RB"
-	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G071
+	select STM32F0L0G0_FLASH_CONFIG_B
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1KB
+	bool "STM32G0B1KB"
+	select STM32F0L0G0_STM32G0B1
+	select STM32F0L0G0_FLASH_CONFIG_B
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1CB
+	bool "STM32G0B1CB"
+	select STM32F0L0G0_STM32G0B1
+	select STM32F0L0G0_FLASH_CONFIG_B
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1RB
+	bool "STM32G0B1RB"
+	select STM32F0L0G0_STM32G0B1
+	select STM32F0L0G0_FLASH_CONFIG_B
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1MB
+	bool "STM32G0B1MB"
+	select STM32F0L0G0_STM32G0B1
+	select STM32F0L0G0_FLASH_CONFIG_B
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1VB
+	bool "STM32G0B1VB"
+	select STM32F0L0G0_STM32G0B1
+	select STM32F0L0G0_FLASH_CONFIG_B
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1KC
+	bool "STM32G0B1KC"
+	select STM32F0L0G0_STM32G0B1
+	select STM32F0L0G0_FLASH_CONFIG_C
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1CC
+	bool "STM32G0B1CC"
+	select STM32F0L0G0_STM32G0B1
+	select STM32F0L0G0_FLASH_CONFIG_C
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1RC
+	bool "STM32G0B1RC"
+	select STM32F0L0G0_STM32G0B1
+	select STM32F0L0G0_FLASH_CONFIG_C
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1MC
+	bool "STM32G0B1MC"
+	select STM32F0L0G0_STM32G0B1
+	select STM32F0L0G0_FLASH_CONFIG_C
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1VC
+	bool "STM32G0B1VC"
+	select STM32F0L0G0_STM32G0B1
+	select STM32F0L0G0_FLASH_CONFIG_C
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1KE
+	bool "STM32G0B1KE"
+	select STM32F0L0G0_STM32G0B1
+	select STM32F0L0G0_FLASH_CONFIG_E
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1CE
+	bool "STM32G0B1CE"
+	select STM32F0L0G0_STM32G0B1
+	select STM32F0L0G0_FLASH_CONFIG_E
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1RE
+	bool "STM32G0B1RE"
+	select STM32F0L0G0_STM32G0B1
+	select STM32F0L0G0_FLASH_CONFIG_E
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1NE
+	bool "STM32G0B1NE"
+	select STM32F0L0G0_STM32G0B1
+	select STM32F0L0G0_FLASH_CONFIG_E
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1ME
+	bool "STM32G0B1ME"
+	select STM32F0L0G0_STM32G0B1
+	select STM32F0L0G0_FLASH_CONFIG_E
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1VE
+	bool "STM32G0B1VE"
+	select STM32F0L0G0_STM32G0B1
+	select STM32F0L0G0_FLASH_CONFIG_E
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1KB
+	bool "STM32G0B1KB"
+	select STM32F0L0G0_STM32G0B1
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1CB
+	bool "STM32G0B1CB"
+	select STM32F0L0G0_STM32G0B1
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1RB
+	bool "STM32G0B1RB"
+	select STM32F0L0G0_STM32G0B1
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1MB
+	bool "STM32G0B1MB"
+	select STM32F0L0G0_STM32G0B1
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1VB
+	bool "STM32G0B1VB"
+	select STM32F0L0G0_STM32G0B1
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1KC
+	bool "STM32G0B1KC"
+	select STM32F0L0G0_STM32G0B1
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1CC
+	bool "STM32G0B1CC"
+	select STM32F0L0G0_STM32G0B1
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1RC
+	bool "STM32G0B1RC"
+	select STM32F0L0G0_STM32G0B1
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1MC
+	bool "STM32G0B1MC"
+	select STM32F0L0G0_STM32G0B1
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1VC
+	bool "STM32G0B1VC"
+	select STM32F0L0G0_STM32G0B1
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1KE
+	bool "STM32G0B1KE"
+	select STM32F0L0G0_STM32G0B1
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1CE
+	bool "STM32G0B1CE"
+	select STM32F0L0G0_STM32G0B1
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1RE
+	bool "STM32G0B1RE"
+	select STM32F0L0G0_STM32G0B1
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1NE
+	bool "STM32G0B1NE"
+	select STM32F0L0G0_STM32G0B1
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1ME
+	bool "STM32G0B1ME"
+	select STM32F0L0G0_STM32G0B1
+	depends on ARCH_CHIP_STM32G0
+
+config ARCH_CHIP_STM32G0B1VE
+	bool "STM32G0B1VE"
+	select STM32F0L0G0_STM32G0B1
 	depends on ARCH_CHIP_STM32G0
 
 config ARCH_CHIP_STM32L053C8
@@ -713,12 +906,263 @@ config ARCH_CHIP_STM32L073RZ
 	select ARCH_CHIP_STM32L073XX
 	depends on ARCH_CHIP_STM32L0
 
-endchoice # ST STM32F0/L0 Chip Selection
+config ARCH_CHIP_STM32C051D8
+	bool "STM32C051D8"
+	select ARCH_CHIP_STM32C051XX
+	select STM32F0L0G0_FLASH_CONFIG_8
+
+config ARCH_CHIP_STM32C051F6
+	bool "STM32C051F6"
+	select ARCH_CHIP_STM32C051XX
+	select STM32F0L0G0_FLASH_CONFIG_6
+
+config ARCH_CHIP_STM32C051F8
+	bool "STM32C051F8"
+	select ARCH_CHIP_STM32C051XX
+	select STM32F0L0G0_FLASH_CONFIG_8
+
+config ARCH_CHIP_STM32C051G6
+	bool "STM32C051G6"
+	select ARCH_CHIP_STM32C051XX
+	select STM32F0L0G0_FLASH_CONFIG_6
+
+config ARCH_CHIP_STM32C051G8
+	bool "STM32C051G8"
+	select ARCH_CHIP_STM32C051XX
+	select STM32F0L0G0_FLASH_CONFIG_8
+
+config ARCH_CHIP_STM32C051K6
+	bool "STM32C051K6"
+	select ARCH_CHIP_STM32C051XX
+	select STM32F0L0G0_FLASH_CONFIG_6
+
+config ARCH_CHIP_STM32C051K8
+	bool "STM32C051K8"
+	select ARCH_CHIP_STM32C051XX
+	select STM32F0L0G0_FLASH_CONFIG_8
+
+config ARCH_CHIP_STM32C051C6
+	bool "STM32C051C6"
+	select ARCH_CHIP_STM32C051XX
+	select STM32F0L0G0_FLASH_CONFIG_6
+
+config ARCH_CHIP_STM32C051C8
+	bool "STM32C051C8"
+	select ARCH_CHIP_STM32C051XX
+	select STM32F0L0G0_FLASH_CONFIG_8
+
+config ARCH_CHIP_STM32C071F8
+	bool "STM32C071F8"
+	select ARCH_CHIP_STM32C071XX
+	select STM32F0L0G0_FLASH_CONFIG_8
+
+config ARCH_CHIP_STM32C071FB
+	bool "STM32C071FB"
+	select ARCH_CHIP_STM32C071XX
+	select STM32F0L0G0_FLASH_CONFIG_B
+
+config ARCH_CHIP_STM32C071G8
+	bool "STM32C071G8"
+	select ARCH_CHIP_STM32C071XX
+	select STM32F0L0G0_FLASH_CONFIG_8
+
+config ARCH_CHIP_STM32C071GB
+	bool "STM32C071GB"
+	select ARCH_CHIP_STM32C071XX
+	select STM32F0L0G0_FLASH_CONFIG_B
+
+config ARCH_CHIP_STM32C071K8
+	bool "STM32C071K8"
+	select ARCH_CHIP_STM32C071XX
+	select STM32F0L0G0_FLASH_CONFIG_8
+
+config ARCH_CHIP_STM32C071KB
+	bool "STM32C071KB"
+	select ARCH_CHIP_STM32C071XX
+	select STM32F0L0G0_FLASH_CONFIG_B
+
+config ARCH_CHIP_STM32C071C8
+	bool "STM32C071C8"
+	select ARCH_CHIP_STM32C071XX
+	select STM32F0L0G0_FLASH_CONFIG_8
+
+config ARCH_CHIP_STM32C071CB
+	bool "STM32C071CB"
+	select ARCH_CHIP_STM32C071XX
+	select STM32F0L0G0_FLASH_CONFIG_B
+
+config ARCH_CHIP_STM32C071R8
+	bool "STM32C071R8"
+	select ARCH_CHIP_STM32C071XX
+	select STM32F0L0G0_FLASH_CONFIG_8
+
+config ARCH_CHIP_STM32C071RB
+	bool "STM32C071RB"
+	select ARCH_CHIP_STM32C071XX
+	select STM32F0L0G0_FLASH_CONFIG_B
+
+config ARCH_CHIP_STM32C091FB
+	bool "STM32C091FB"
+	select ARCH_CHIP_STM32C091XX
+	select STM32F0L0G0_FLASH_CONFIG_B
+
+config ARCH_CHIP_STM32C091FC
+	bool "STM32C091FC"
+	select ARCH_CHIP_STM32C091XX
+	select STM32F0L0G0_FLASH_CONFIG_C
+
+config ARCH_CHIP_STM32C091EC
+	bool "STM32C091EC"
+	select ARCH_CHIP_STM32C091XX
+	select STM32F0L0G0_FLASH_CONFIG_C
+
+config ARCH_CHIP_STM32C091GB
+	bool "STM32C091GB"
+	select ARCH_CHIP_STM32C091XX
+	select STM32F0L0G0_FLASH_CONFIG_B
+
+config ARCH_CHIP_STM32C091GC
+	bool "STM32C091GC"
+	select ARCH_CHIP_STM32C091XX
+	select STM32F0L0G0_FLASH_CONFIG_C
+
+config ARCH_CHIP_STM32C091KB
+	bool "STM32C091KB"
+	select ARCH_CHIP_STM32C091XX
+	select STM32F0L0G0_FLASH_CONFIG_B
+
+config ARCH_CHIP_STM32C091KC
+	bool "STM32C091KC"
+	select ARCH_CHIP_STM32C091XX
+	select STM32F0L0G0_FLASH_CONFIG_C
+
+config ARCH_CHIP_STM32C091CB
+	bool "STM32C091CB"
+	select ARCH_CHIP_STM32C091XX
+	select STM32F0L0G0_FLASH_CONFIG_B
+
+config ARCH_CHIP_STM32C091CC
+	bool "STM32C091CC"
+	select ARCH_CHIP_STM32C091XX
+	select STM32F0L0G0_FLASH_CONFIG_C
+
+config ARCH_CHIP_STM32C091RB
+	bool "STM32C091RB"
+	select ARCH_CHIP_STM32C091XX
+	select STM32F0L0G0_FLASH_CONFIG_B
+
+config ARCH_CHIP_STM32C091RC
+	bool "STM32C091RC"
+	select ARCH_CHIP_STM32C091XX
+	select STM32F0L0G0_FLASH_CONFIG_C
+
+config ARCH_CHIP_STM32C092FB
+	bool "STM32C092FB"
+	select ARCH_CHIP_STM32C092XX
+	select STM32F0L0G0_FLASH_CONFIG_B
+
+config ARCH_CHIP_STM32C092FC
+	bool "STM32C092FC"
+	select ARCH_CHIP_STM32C092XX
+	select STM32F0L0G0_FLASH_CONFIG_C
+
+config ARCH_CHIP_STM32C092EC
+	bool "STM32C092EC"
+	select ARCH_CHIP_STM32C092XX
+	select STM32F0L0G0_FLASH_CONFIG_C
+
+config ARCH_CHIP_STM32C092GB
+	bool "STM32C092GB"
+	select ARCH_CHIP_STM32C092XX
+	select STM32F0L0G0_FLASH_CONFIG_B
+
+config ARCH_CHIP_STM32C092GC
+	bool "STM32C092GC"
+	select ARCH_CHIP_STM32C092XX
+	select STM32F0L0G0_FLASH_CONFIG_C
+
+config ARCH_CHIP_STM32C092KB
+	bool "STM32C092KB"
+	select ARCH_CHIP_STM32C092XX
+	select STM32F0L0G0_FLASH_CONFIG_B
+
+config ARCH_CHIP_STM32C092KC
+	bool "STM32C092KC"
+	select ARCH_CHIP_STM32C092XX
+	select STM32F0L0G0_FLASH_CONFIG_C
+
+config ARCH_CHIP_STM32C092CB
+	bool "STM32C092CB"
+	select ARCH_CHIP_STM32C092XX
+	select STM32F0L0G0_FLASH_CONFIG_B
+
+config ARCH_CHIP_STM32C092CC
+	bool "STM32C092CC"
+	select ARCH_CHIP_STM32C092XX
+	select STM32F0L0G0_FLASH_CONFIG_C
+
+config ARCH_CHIP_STM32C092RB
+	bool "STM32C092RB"
+	select ARCH_CHIP_STM32C092XX
+	select STM32F0L0G0_FLASH_CONFIG_B
+
+config ARCH_CHIP_STM32C092RC
+	bool "STM32C092RC"
+	select ARCH_CHIP_STM32C092XX
+	select STM32F0L0G0_FLASH_CONFIG_C
+
+endchoice # ST STM32F0/L0/G0/C0 Chip Selection
+
+# Flash configurations
+
+config STM32F0L0G0_FLASH_CONFIG_4
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_CONFIG_6
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_CONFIG_8
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_CONFIG_B
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_CONFIG_C
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_CONFIG_D
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_CONFIG_E
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_CONFIG_F
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_CONFIG_G
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_CONFIG_I
+	bool
+	default n
+
+config STM32F0L0G0_FLASH_OVERRIDE
+	bool "Override Flash Designator"
+	default n
 
 choice
 	prompt "Override Flash Size Designator"
-	default STM32F0L0G0_FLASH_CONFIG_DEFAULT
-	depends on ARCH_CHIP_STM32
+	depends on STM32F0L0G0_FLASH_OVERRIDE
+	default STM32F0L0G0_FLASH_OVERRIDE_B
 	---help---
 		STM32F series parts numbering (sans the package type) ends with a number or letter
 		that designates the FLASH size.
@@ -740,47 +1184,41 @@ choice
 		STM32 Chip Selection.
 
 		Examples:
-			If the STM32F407VE is chosen, the Flash configuration would be 'E', if a variant of
+			If the STM32G071RB is chosen, the Flash configuration would be 'B', if a variant of
 			the part with a  2048 KiB Flash is released in the future one could simply select
 			the 'I' designator here.
 
-			If an STM32F42xxx or  Series parts is chosen the default Flash configuration will be 'G'
-			and can be set herein to 'I' to choose the larger FLASH part.
-
-config STM32F0L0G0_FLASH_CONFIG_DEFAULT
-	bool "Default"
-
-config STM32F0L0G0_FLASH_CONFIG_4
+config STM32F0L0G0_FLASH_OVERRIDE_4
 	bool "4 16KiB"
 
-config STM32F0L0G0_FLASH_CONFIG_6
+config STM32F0L0G0_FLASH_OVERRIDE_6
 	bool "6 32KiB"
 
-config STM32F0L0G0_FLASH_CONFIG_8
+config STM32F0L0G0_FLASH_OVERRIDE_8
 	bool "8 64KiB"
 
-config STM32F0L0G0_FLASH_CONFIG_B
+config STM32F0L0G0_FLASH_OVERRIDE_B
 	bool "B 128KiB"
 
-config STM32F0L0G0_FLASH_CONFIG_C
+config STM32F0L0G0_FLASH_OVERRIDE_C
 	bool "C 256KiB"
 
-config STM32F0L0G0_FLASH_CONFIG_D
+config STM32F0L0G0_FLASH_OVERRIDE_D
 	bool "D 384KiB"
 
-config STM32F0L0G0_FLASH_CONFIG_E
+config STM32F0L0G0_FLASH_OVERRIDE_E
 	bool "E 512KiB"
 
-config STM32F0L0G0_FLASH_CONFIG_F
+config STM32F0L0G0_FLASH_OVERRIDE_F
 	bool "F 768KiB"
 
-config STM32F0L0G0_FLASH_CONFIG_G
+config STM32F0L0G0_FLASH_OVERRIDE_G
 	bool "G 1024KiB"
 
-config STM32F0L0G0_FLASH_CONFIG_I
+config STM32F0L0G0_FLASH_OVERRIDE_I
 	bool "I 2048KiB"
 
-endchoice
+endchoice # Override Flash Size Designator
 
 config STM32F0L0G0_STM32F0
 	bool
@@ -803,20 +1241,17 @@ config STM32F0L0G0_STM32F0
 config STM32F0L0G0_STM32G0
 	bool
 	default n
-	select STM32F0L0G0_HAVE_USART3
-	select STM32F0L0G0_HAVE_USART4
+	select STM32F0L0G0_HAVE_ADC1_DMA
 	select STM32F0L0G0_HAVE_DMAMUX
 	select STM32F0L0G0_HAVE_IP_USART_V2
 	select STM32F0L0G0_HAVE_IP_EXTI_V2
 	select STM32F0L0G0_HAVE_TIM1
 	select STM32F0L0G0_HAVE_TIM3
-	select STM32F0L0G0_HAVE_TIM6
-	select STM32F0L0G0_HAVE_TIM7
 	select STM32F0L0G0_HAVE_TIM14
-	select STM32F0L0G0_HAVE_TIM15
 	select STM32F0L0G0_HAVE_TIM16
 	select STM32F0L0G0_HAVE_TIM17
 	select STM32F0L0G0_HAVE_I2C2
+	select ARCH_HAVE_PROGMEM
 
 config STM32F0L0G0_STM32L0
 	bool
@@ -826,6 +1261,23 @@ config STM32F0L0G0_STM32L0
 	select STM32F0L0G0_HAVE_ADC1_DMA
 	select STM32F0L0G0_HAVE_IP_USART_V1
 	select STM32F0L0G0_HAVE_IP_EXTI_V1
+
+config STM32F0L0G0_STM32C0
+	bool
+	default n
+	select STM32F0L0G0_HAVE_SPI2
+	select STM32F0L0G0_HAVE_I2C2
+	select STM32F0L0G0_HAVE_DMAMUX
+	select STM32F0L0G0_HAVE_ADC1_DMA
+	select STM32F0L0G0_HAVE_IP_USART_V2
+	select STM32F0L0G0_HAVE_IP_EXTI_V2
+	select STM32F0L0G0_HAVE_TIM1
+	select STM32F0L0G0_HAVE_TIM2
+	select STM32F0L0G0_HAVE_TIM3
+	select STM32F0L0G0_HAVE_TIM14
+	select STM32F0L0G0_HAVE_TIM16
+	select STM32F0L0G0_HAVE_TIM17
+	select ARCH_HAVE_PROGMEM
 
 config STM32F0L0G0_STM32F03X
 	bool
@@ -853,6 +1305,189 @@ config STM32F0L0G0_STM32F09X
 	select STM32F0L0G0_STM32F0
 	select STM32F0L0G0_HAVE_HSI48
 	select STM32F0L0G0_HAVE_DMA2
+
+config STM32F0L0G0_STM32G030
+	bool
+	default n
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G03X
+
+config STM32F0L0G0_STM32G031
+	bool
+	default n
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G03X
+	select STM32F0L0G0_HAVE_LPUART1
+
+config STM32F0L0G0_STM32G03X
+	bool
+	default n
+
+config STM32F0L0G0_STM32G041
+	bool
+	default n
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_HAVE_RNG
+	select STM32F0L0G0_HAVE_AES
+	select STM32F0L0G0_HAVE_LPUART1
+
+config STM32F0L0G0_STM32G050
+	bool
+	default n
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G05X
+
+config STM32F0L0G0_STM32G051
+	bool
+	default n
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G05X
+	select STM32F0L0G0_HAVE_DAC1
+	select STM32F0L0G0_HAVE_COMP1
+	select STM32F0L0G0_HAVE_COMP2
+	select STM32F0L0G0_HAVE_TIM15
+	select STM32F0L0G0_HAVE_LPUART1
+
+config STM32F0L0G0_STM32G05X
+	bool
+	default n
+	select STM32F0L0G0_HAVE_TIM6
+	select STM32F0L0G0_HAVE_TIM7
+
+config STM32F0L0G0_STM32G061
+	bool
+	default n
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_HAVE_RNG
+	select STM32F0L0G0_HAVE_AES
+	select STM32F0L0G0_HAVE_DAC1
+	select STM32F0L0G0_HAVE_COMP1
+	select STM32F0L0G0_HAVE_COMP2
+	select STM32F0L0G0_HAVE_TIM6
+	select STM32F0L0G0_HAVE_TIM7
+	select STM32F0L0G0_HAVE_TIM15
+	select STM32F0L0G0_HAVE_LPUART1
+
+config STM32F0L0G0_STM32G070
+	bool
+	default n
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G07X
+
+config STM32F0L0G0_STM32G071
+	bool
+	default n
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G07X
+	select STM32F0L0G0_HAVE_DAC1
+	select STM32F0L0G0_HAVE_COMP1
+	select STM32F0L0G0_HAVE_COMP2
+	select STM32F0L0G0_HAVE_CEC
+	select STM32F0L0G0_HAVE_LPUART1
+
+config STM32F0L0G0_STM32G07X
+	bool
+	default n
+	select STM32F0L0G0_HAVE_USART3
+	select STM32F0L0G0_HAVE_USART4
+	select STM32F0L0G0_HAVE_TIM6
+	select STM32F0L0G0_HAVE_TIM7
+	select STM32F0L0G0_HAVE_TIM15
+	select STM32F0L0G0_HAVE_UCPD1
+	select STM32F0L0G0_HAVE_UCPD2
+
+config STM32F0L0G0_STM32G081
+	bool
+	default n
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_HAVE_USART3
+	select STM32F0L0G0_HAVE_USART4
+	select STM32F0L0G0_HAVE_RNG
+	select STM32F0L0G0_HAVE_AES
+	select STM32F0L0G0_HAVE_DAC1
+	select STM32F0L0G0_HAVE_COMP1
+	select STM32F0L0G0_HAVE_COMP2
+	select STM32F0L0G0_HAVE_TIM6
+	select STM32F0L0G0_HAVE_TIM7
+	select STM32F0L0G0_HAVE_TIM15
+	select STM32F0L0G0_HAVE_UCPD1
+	select STM32F0L0G0_HAVE_UCPD2
+	select STM32F0L0G0_HAVE_CEC
+	select STM32F0L0G0_HAVE_LPUART1
+
+config STM32F0L0G0_STM32G0B0
+	bool
+	default n
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G0BX
+
+config STM32F0L0G0_STM32G0B1
+	bool
+	default n
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_STM32G0BX
+	select STM32F0L0G0_HAVE_DAC1
+	select STM32F0L0G0_HAVE_COMP1
+	select STM32F0L0G0_HAVE_COMP2
+	select STM32F0L0G0_HAVE_COMP3
+	select STM32F0L0G0_HAVE_FDCAN1
+	select STM32F0L0G0_HAVE_FDCAN2
+	select STM32F0L0G0_HAVE_CEC
+
+config STM32F0L0G0_STM32G0BX
+	bool
+	default n
+	select STM32F0L0G0_HAVE_DMA2
+	select STM32F0L0G0_HAVE_USART3
+	select STM32F0L0G0_HAVE_USART4
+	select STM32F0L0G0_HAVE_USART5
+	select STM32F0L0G0_HAVE_USART6
+	select STM32F0L0G0_HAVE_LPUART1
+	select STM32F0L0G0_HAVE_LPUART2
+	select STM32F0L0G0_HAVE_CRS
+	select STM32F0L0G0_HAVE_TIM4
+	select STM32F0L0G0_HAVE_TIM6
+	select STM32F0L0G0_HAVE_TIM7
+	select STM32F0L0G0_HAVE_TIM15
+	select STM32F0L0G0_HAVE_I2C3
+	select STM32F0L0G0_HAVE_SPI3
+	select STM32F0L0G0_HAVE_I2S2
+	select STM32F0L0G0_HAVE_USBDEV
+	select STM32F0L0G0_HAVE_UCPD1
+	select STM32F0L0G0_HAVE_UCPD2
+	select STM32F0L0G0_HAVE_HSI48
+
+config STM32F0L0G0_STM32G0C1
+	bool
+	default n
+	select STM32F0L0G0_STM32G0
+	select STM32F0L0G0_HAVE_DMA2
+	select STM32F0L0G0_HAVE_USART3
+	select STM32F0L0G0_HAVE_USART4
+	select STM32F0L0G0_HAVE_USART5
+	select STM32F0L0G0_HAVE_USART6
+	select STM32F0L0G0_HAVE_CRS
+	select STM32F0L0G0_HAVE_RNG
+	select STM32F0L0G0_HAVE_AES
+	select STM32F0L0G0_HAVE_DAC1
+	select STM32F0L0G0_HAVE_COMP1
+	select STM32F0L0G0_HAVE_COMP2
+	select STM32F0L0G0_HAVE_COMP3
+	select STM32F0L0G0_HAVE_TIM4
+	select STM32F0L0G0_HAVE_TIM6
+	select STM32F0L0G0_HAVE_TIM7
+	select STM32F0L0G0_HAVE_TIM15
+	select STM32F0L0G0_HAVE_I2C3
+	select STM32F0L0G0_HAVE_SPI3
+	select STM32F0L0G0_HAVE_I2S2
+	select STM32F0L0G0_HAVE_LPUART2
+	select STM32F0L0G0_HAVE_USBDEV
+	select STM32F0L0G0_HAVE_UCPD1
+	select STM32F0L0G0_HAVE_UCPD2
+	select STM32F0L0G0_HAVE_FDCAN1
+	select STM32F0L0G0_HAVE_FDCAN2
+	select STM32F0L0G0_HAVE_CEC
+	select STM32F0L0G0_HAVE_HSI48
 
 config STM32F0L0G0_VALUELINE
 	bool
@@ -919,6 +1554,29 @@ config ARCH_CHIP_STM32L073XX
 	select STM32F0L0G0_HAVE_I2C3
 	select STM32F0L0G0_HAVE_USBDEV
 
+config ARCH_CHIP_STM32C051XX
+	bool
+	select STM32F0L0G0_STM32C0
+
+config ARCH_CHIP_STM32C071XX
+	bool
+	select STM32F0L0G0_STM32C0
+	select STM32F0L0G0_HAVE_USBDEV
+
+config ARCH_CHIP_STM32C091XX
+	bool
+	select STM32F0L0G0_STM32C0
+	select STM32F0L0G0_HAVE_USART3
+	select STM32F0L0G0_HAVE_USART4
+	select STM32F0L0G0_HAVE_TIM15
+
+config ARCH_CHIP_STM32C092XX
+	bool
+	select STM32F0L0G0_STM32C0
+	select STM32F0L0G0_HAVE_USART3
+	select STM32F0L0G0_HAVE_USART4
+	select STM32F0L0G0_HAVE_FDCAN1
+
 config STM32F0L0G0_DFU
 	bool "DFU bootloader"
 	default n
@@ -926,6 +1584,16 @@ config STM32F0L0G0_DFU
 	---help---
 		Configure and position code for use with the STMicro DFU bootloader.  Do
 		not select this option if you will load code using JTAG/SWM.
+
+config STM32F0L0G0_PROGMEM
+	bool "Flash PROGMEM support"
+	default n
+	depends on ARCH_HAVE_PROGMEM
+	select MTD
+	select MTD_PROGMEM
+	---help---
+		Add progmem support, start block and end block options are provided to
+		obtain a uniform flash memory mapping.
 
 choice
 	prompt "SysTick clock source"
@@ -937,7 +1605,7 @@ config STM32F0L0G0_SYSTICK_CORECLK
 config STM32F0L0G0_SYSTICK_CORECLK_DIV16
 	bool "Cortex-M0 core clock divided by 16"
 
-endchoice
+endchoice # SysTick clock source
 
 config ARCH_BOARD_STM32F0G0L0_CUSTOM_CLOCKCONFIG
 	bool "Custom clock configuration"
@@ -1022,6 +1690,14 @@ config STM32F0L0G0_HAVE_USART8
 	bool
 	default n
 
+config STM32F0L0G0_HAVE_LPUART1
+	bool
+	default n
+
+config STM32F0L0G0_HAVE_LPUART2
+	bool
+	default n
+
 config STM32F0L0G0_HAVE_TIM1
 	bool
 	default n
@@ -1031,6 +1707,10 @@ config STM32F0L0G0_HAVE_TIM2
 	default n
 
 config STM32F0L0G0_HAVE_TIM3
+	bool
+	default n
+
+config STM32F0L0G0_HAVE_TIM4
 	bool
 	default n
 
@@ -1066,6 +1746,10 @@ config STM32F0L0G0_HAVE_ADC1_DMA
 	bool
 	default n
 
+config STM32F0L0G0_HAVE_ADC_OVERSAMPLE
+	bool
+	default STM32F0L0G0_STM32L0 || STM32F0L0G0_STM32G0 || STM32F0L0G0_STM32C0
+
 config STM32F0L0G0_HAVE_CEC
 	bool
 	default n
@@ -1082,6 +1766,10 @@ config STM32F0L0G0_HAVE_COMP2
 	bool
 	default n
 
+config STM32F0L0G0_HAVE_COMP3
+	bool
+	default n
+
 config STM32F0L0G0_HAVE_DAC1
 	bool
 	default n
@@ -1095,6 +1783,10 @@ config STM32F0L0G0_HAVE_DMA2
 	default n
 
 config STM32F0L0G0_HAVE_RNG
+	bool
+	default n
+
+config STM32F0L0G0_HAVE_CRS
 	bool
 	default n
 
@@ -1142,6 +1834,26 @@ config STM32F0L0G0_HAVE_OPAMP4
 	bool
 	default n
 
+config STM32F0L0G0_HAVE_FDCAN1
+	bool
+	default n
+
+config STM32F0L0G0_HAVE_FDCAN2
+	bool
+	default n
+
+config STM32F0L0G0_HAVE_I2S2
+	bool
+	default n
+
+config STM32F0L0G0_HAVE_UCPD1
+	bool
+	default n
+
+config STM32F0L0G0_HAVE_UCPD2
+	bool
+	default n
+
 # These are STM32 peripherals IP blocks
 
 config STM32F0L0G0_HAVE_IP_USART_V1
@@ -1165,7 +1877,6 @@ config STM32F0L0G0_HAVE_IP_EXTI_V2
 config STM32F0L0G0_ADC1
 	bool "ADC1"
 	default n
-	depends on EXPERIMENTAL
 	select STM32F0L0G0_ADC
 
 config STM32F0L0G0_COMP1
@@ -1237,6 +1948,12 @@ config STM32F0L0G0_DAC1
 	default n
 	depends on STM32F0L0G0_HAVE_DAC1
 	select STM32F0L0G0_DAC
+
+config STM32F0L0G0_FDCAN1
+	bool "FDCAN1"
+	default n
+	depends on STM32F0L0G0_HAVE_FDCAN1
+	select STM32F0L0G0_FDCAN
 
 config STM32F0L0G0_FSMC
 	bool "FSMC"
@@ -1434,7 +2151,7 @@ config STM32F0L0G0_WWDG
 	default n
 	select WATCHDOG
 
-endmenu
+endmenu # STM32 Peripheral Support
 
 config STM32F0L0G0_COMP
 	bool
@@ -1477,6 +2194,10 @@ config STM32F0L0G0_USART
 	default n
 
 config STM32F0L0G0_TIM
+	bool
+	default n
+
+config STM32F0L0G0_FDCAN
 	bool
 	default n
 
@@ -2277,7 +2998,257 @@ config STM32F0L0G0_PWM_MULTICHAN
 	---help---
 		Specifies that the PWM driver supports multiple output channels per timer.
 
+config STM32F0L0G0_TIM1_ADC
+	bool "TIM1 ADC"
+	default n
+	depends on STM32F0L0G0_TIM1 && STM32F0L0G0_ADC
+	---help---
+		Reserve timer 1 for use by ADC
+
+choice
+	prompt "Select TIM1 ADC channel"
+	default STM32F0L0G0_TIM1_ADC1
+	depends on STM32F0L0G0_TIM1_ADC
+
+config STM32F0L0G0_TIM1_ADC1
+	bool "TIM1 ADC channel 1"
+	depends on STM32F0L0G0_ADC1
+	select STM32F0L0G0_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM1 to trigger ADC1
+
+endchoice
+
+config STM32F0L0G0_TIM2_ADC
+	bool "TIM2 ADC"
+	default n
+	depends on STM32F0L0G0_TIM2 && STM32F0L0G0_ADC
+	---help---
+		Reserve timer 1 for use by ADC
+
+choice
+	prompt "Select TIM2 ADC channel"
+	default STM32F0L0G0_TIM2_ADC1
+	depends on STM32F0L0G0_TIM2_ADC
+
+config STM32F0L0G0_TIM2_ADC1
+	bool "TIM2 ADC channel 1"
+	depends on STM32F0L0G0_ADC1
+	select STM32F0L0G0_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM2 to trigger ADC1
+
+endchoice
+
+config STM32F0L0G0_TIM3_ADC
+	bool "TIM3 ADC"
+	default n
+	depends on STM32F0L0G0_TIM3 && STM32F0L0G0_ADC
+	---help---
+		Reserve timer 1 for use by ADC
+
+choice
+	prompt "Select TIM3 ADC channel"
+	default STM32F0L0G0_TIM3_ADC1
+	depends on STM32F0L0G0_TIM3_ADC
+
+config STM32F0L0G0_TIM3_ADC1
+	bool "TIM3 ADC channel 1"
+	depends on STM32F0L0G0_ADC1
+	select STM32F0L0G0_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM3 to trigger ADC1
+
+endchoice
+
+config STM32F0L0G0_TIM15_ADC
+	bool "TIM15 ADC"
+	default n
+	depends on STM32F0L0G0_TIM15 && STM32F0L0G0_ADC
+	---help---
+		Reserve timer 1 for use by ADC
+
+choice
+	prompt "Select TIM15 ADC channel"
+	default STM32F0L0G0_TIM15_ADC1
+	depends on STM32F0L0G0_TIM15_ADC
+
+config STM32F0L0G0_TIM15_ADC1
+	bool "TIM15 ADC channel 1"
+	depends on STM32F0L0G0_ADC1
+	select STM32F0L0G0_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM15 to trigger ADC1
+
+endchoice
+
+config STM32F0L0G0_HAVE_ADC1_TIMER
+	bool
+
+config STM32F0L0G0_ADC1_SAMPLE_FREQUENCY
+	int "ADC1 Sampling Frequency"
+	default 100
+	depends on STM32F0L0G0_HAVE_ADC1_TIMER
+	---help---
+		ADC1 sampling frequency.  Default:  100Hz
+
+config STM32F0L0G0_ADC1_TIMTRIG
+	int "ADC1 Timer Trigger"
+	default 0
+	range 0 5
+	depends on STM32F0L0G0_HAVE_ADC1_TIMER
+	---help---
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO 5:TRGO2.
+		This option must match with the MCU's supported EXTSEL.
+
 endmenu # Timer Configuration
+
+menu "FDCAN driver configuration"
+	depends on STM32F0L0G0_FDCAN
+
+choice
+	prompt "FDCAN character driver or SocketCAN support"
+	default STM32F0L0G0_FDCAN_CHARDRIVER
+
+config STM32F0L0G0_FDCAN_CHARDRIVER
+	bool "STM32 FDCAN character driver support"
+	select ARCH_HAVE_CAN_ERRORS
+	select CAN
+
+config STM32F0L0G0_FDCAN_SOCKET
+	bool "STM32 FDCAN SocketCAN support"
+	select NET_CAN_HAVE_ERRORS
+	select NET_CAN_HAVE_CANFD
+
+endchoice # FDCAN character driver or SocketCAN support
+
+config STM32F0L0G0_FDCAN_REGDEBUG
+	bool "CAN Register level debug"
+	depends on DEBUG_CAN_INFO
+	default n
+	---help---
+		Output detailed register-level CAN device debug information.
+		Requires also CONFIG_DEBUG_CAN_INFO.
+
+config STM32F0L0G0_FDCAN_QUEUE_MODE
+	bool "FDCAN QUEUE mode (vs FIFO mode)"
+	default n
+
+menu "FDCAN1 device driver options"
+	depends on STM32F0L0G0_FDCAN1
+
+choice
+	prompt "FDCAN1 frame format"
+	default STM32F0L0G0_FDCAN1_ISO11898_1
+
+config STM32F0L0G0_FDCAN1_ISO11898_1
+	bool "ISO11898-1"
+	---help---
+		Enable ISO11898-1 frame format
+
+config STM32F0L0G0_FDCAN1_NONISO_FORMAT
+	bool "Non ISO"
+	---help---
+		Enable Non ISO, Bosch CAN FD Specification V1.0
+
+endchoice # FDCAN1 frame format
+
+choice
+	prompt "FDCAN1 mode"
+	default STM32F0L0G0_FDCAN1_CLASSIC
+
+config STM32F0L0G0_FDCAN1_CLASSIC
+	bool "Classic CAN"
+	---help---
+		Enable Classic CAN mode
+
+config STM32F0L0G0_FDCAN1_FD
+	bool "CAN FD"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode
+
+config STM32F0L0G0_FDCAN1_FD_BRS
+	bool "CAN FD with fast bit rate switching"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode with fast bit rate switching mode.
+
+endchoice # FDCAN1 mode
+
+config STM32F0L0G0_FDCAN1_LOOPBACK
+	bool "Enable FDCAN1 loopback mode"
+	default n
+	---help---
+		Enable the FDCAN1 local loopback mode for testing purposes.
+
+comment "Nominal Bit Timing"
+
+config STM32F0L0G0_FDCAN1_BITRATE
+	int "FDCAN bitrate"
+	default 500000
+	range 0 1000000
+	---help---
+		FDCAN1 bitrate in bits per second.  Required if STM32F0L0G0_FDCAN1 is defined.
+
+config STM32F0L0G0_FDCAN1_NTSEG1
+	int "FDCAN1 NTSEG1 (PropSeg + PhaseSeg1)"
+	default 6
+	range 1 256
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32F0L0G0_FDCAN1_NTSEG2
+	int "FDCAN1 NTSEG2 (PhaseSeg2)"
+	default 7
+	range 1 128
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32F0L0G0_FDCAN1_NSJW
+	int "FDCAN1 synchronization jump width"
+	default 1
+	range 1 128
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+comment "Data Bit Timing"
+	depends on CAN_FD && STM32F0L0G0_FDCAN1_FD_BRS
+
+config STM32F0L0G0_FDCAN1_DBITRATE
+	int "FDCAN1 data bitrate"
+	default 2000000
+	depends on CAN_FD && STM32F0L0G0_FDCAN1_FD_BRS
+	---help---
+		FDCAN1 bitrate in bits per second.  Required if operating in FD mode with bit rate switching (BRS).
+
+config STM32F0L0G0_FDCAN1_DTSEG1
+	int "FDCAN1 DTSEG1 (PropSeg + PhaseSeg1 of data phase)"
+	default 4
+	range 1 31
+	depends on CAN_FD && STM32F0L0G0_FDCAN1_FD_BRS
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32F0L0G0_FDCAN1_DTSEG2
+	int "FDCAN1 DTSEG2 (PhaseSeg2 of data phase)"
+	default 4
+	range 1 15
+	depends on CAN_FD && STM32F0L0G0_FDCAN1_FD_BRS
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32F0L0G0_FDCAN1_DSJW
+	int "FDCAN1 fast synchronization jump width"
+	default 2
+	range 1 15
+	depends on CAN_FD && STM32F0L0G0_FDCAN1_FD_BRS
+	---help---
+		The duration of a synchronization jump is Tcan_clk x DSJW.
+
+endmenu # FDCAN1 device driver options
+
+endmenu # "FDCAN driver configuration"
 
 menu "U[S]ART Configuration"
 	depends on STM32F0L0G0_USART
@@ -2653,9 +3624,9 @@ config STM32F0L0G0_PM_SERIAL_ACTIVITY
 		PM activity reported to power management logic on every serial
 		interrupt.
 
-endif
+endif # PM
 
-endmenu
+endmenu # U[S]ART Configuration
 
 menu "ADC Configuration"
 	depends on STM32F0L0G0_ADC
@@ -2667,6 +3638,18 @@ config STM32F0L0G0_ADC1_RESOLUTION
 	range 0 3
 	---help---
 		ADC1 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config STM32F0L0G0_ADC_MAX_SAMPLES
+	int "The maximum number of channels that can be sampled"
+	default 16 if STM32F0L0G0_ADC1_DMA
+	default 1 if !STM32F0L0G0_ADC1_DMA
+	---help---
+		The maximum number of samples which can be handled without
+		overrun depends on various factors. This is the user's
+		responsibility to correctly select this value.
+		Since the interface to update the sampling time is available
+		for all supported devices, the user can change the default
+		values in the board initialization logic and avoid ADC overrun.
 
 config STM32F0L0G0_ADC_NO_STARTUP_CONV
 	bool "Do not start conversion when opening ADC device"
@@ -2710,7 +3693,73 @@ config STM32F0L0G0_ADC1_DMA_CFG
 	---help---
 		0 - ADC1 DMA in One Shot Mode, 1 - ADC1 DMA in Circular Mode
 
-endmenu
+config STM32F0L0G0_ADC_OVERSAMPLE
+	bool "Enable ADC hardware oversampling support"
+	depends on STM32F0L0G0_ADC1 && STM32F0L0G0_HAVE_ADC_OVERSAMPLE
+	default n
+	---help---
+		Enable the on-chip ADC oversampling/accumulation block (CFGR2.OVSE).
+		Only STM32G0 and STM32L0 series include this hardware block.
+
+if STM32F0L0G0_ADC_OVERSAMPLE
+
+config STM32F0L0G0_ADC_TOVS
+	bool "Enable triggered oversampling (CFGR2.TOVS)"
+	default n
+	---help---
+		If set, oversampling will only occur when a trigger event occurs.
+		If not set, oversampling occurs continuously (TOVS=0).
+
+config STM32F0L0G0_ADC_OVSR
+	int "Oversampling ratio (CFGR2.OVSR)"
+	default 0
+	range 0 7
+	---help---
+		Sets the oversampling ratio as 2^(OVSR+1). For example:
+		0 -> 2×
+		1 -> 4×
+		2 -> 8×
+		...
+		7 -> 256×
+
+config STM32F0L0G0_ADC_OVSS
+	int "Oversampling right-shift bits (CFGR2.OVSS)"
+	default 0
+	range 0 8
+	---help---
+		Sets how many bits the accumulated result is right-shifted.
+		Max of 8-bits.
+
+endif # STM32F0L0G0_ADC_OVERSAMPLE
+
+config STM32F0L0G0_ADC1_DMA_BATCH
+	int "ADC1 DMA number of conversions"
+	depends on STM32F0L0G0_ADC1 && STM32F0L0G0_ADC1_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
+
+config STM32F0L0G0_ADC1_EXTSEL
+	bool "ADC1 external trigger for regular group"
+	depends on STM32F0L0G0_ADC1 && !STM32F0L0G0_HAVE_ADC1_TIMER
+	default n
+	---help---
+		Enable EXTSEL for ADC1.
+
+config STM32F0L0G0_ADC1_CONTINUOUS
+	bool "Enable ADC1 Continuous Conversion Mode"
+	default n
+	depends on STM32F0L0G0_ADC1
+	---help---
+		If enabled, the ADC will operate in continuous conversion mode.
+		Otherwise, it will perform single conversions.
+		Note: Continuous and discontinuous mode cannot be defined at
+		      the same time
+
+endmenu # ADC Configuration
 
 menu "SPI Configuration"
 	depends on STM32F0L0G0_SPI

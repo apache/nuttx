@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/strings.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <string.h>
 
@@ -41,12 +44,16 @@
  * IEEE Std 1003.1-2008
  */
 
-#ifndef bcmp /* See mm/README.txt */
+#ifndef bcmp
 #define bcmp(b1,b2,len)  memcmp(b1,b2,(size_t)len)
 #endif
 
-#ifndef bcopy /* See mm/README.txt */
+#ifndef bcopy
 #define bcopy(b1,b2,len) memmove(b2,b1,len)
+#endif
+
+#ifndef bzero
+#define bzero(s,n)       memset(s,0,n)
 #endif
 
 #define strcasecmp_l(s1, s2, l)     strcasecmp(s1, s2)
@@ -69,76 +76,51 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_HAVE_BUILTIN_FFS
-static inline_function int ffs(int j)
-{
-  return __builtin_ffs(j);
-}
-#elif defined (CONFIG_HAVE_BUILTIN_CTZ)
-static inline_function int ffs(int j)
-{
-  return __builtin_ctz(j) + 1;
-}
-#else
 int ffs(int j);
+
+#ifdef CONFIG_HAVE_BUILTIN_FFS
+#  define ffs(j)  __builtin_ffs(j)
+#elif defined (CONFIG_HAVE_BUILTIN_CTZ)
+#  define ffs(j)  (__builtin_ctz(j) + 1)
 #endif
 
-#ifdef CONFIG_HAVE_BUILTIN_FFSL
-static inline_function int ffsl(long j)
-{
-  return __builtin_ffsl(j);
-}
-#elif defined (CONFIG_HAVE_BUILTIN_CTZ)
-static inline_function int ffsl(long j)
-{
-  return __builtin_ctzl(j) + 1;
-}
-#else
 int ffsl(long j);
+
+#ifdef CONFIG_HAVE_BUILTIN_FFSL
+#  define ffsl(j) __builtin_ffsl(j)
+#elif defined (CONFIG_HAVE_BUILTIN_CTZ)
+#  define ffsl(j) (__builtin_ctzl(j) + 1)
 #endif
 
 #ifdef CONFIG_HAVE_LONG_LONG
-#  ifdef CONFIG_HAVE_BUILTIN_FFSLL
-static inline_function int ffsll(long long j)
-{
-    return __builtin_ffsll(j);
-}
-#  elif defined (CONFIG_HAVE_BUILTIN_CTZ)
-static inline_function int ffsll(long long j)
-{
-    return __builtin_ctzll(j) + 1;
-}
-#  else
+
 int ffsll(long long j);
+
+#  ifdef CONFIG_HAVE_BUILTIN_FFSLL
+#    define ffsll(j)  __builtin_ffsll(j)
+#  elif defined (CONFIG_HAVE_BUILTIN_CTZ)
+#    define ffsll(j)  (__builtin_ctzll(j) + 1)
 #  endif
+
 #endif
 
-#ifdef CONFIG_HAVE_BUILTIN_CLZ
-static inline_function int fls(int j)
-{
-  return (8 * sizeof(int)) - __builtin_clz(j);
-}
-#else
 int fls(int j);
-#endif
 
 #ifdef CONFIG_HAVE_BUILTIN_CLZ
-static inline_function int flsl(long j)
-{
-  return (8 * sizeof(long)) - __builtin_clzl(j);
-}
-#else
-int flsl(long j);
+#  define fls(j)  ((8 * sizeof(int)) - __builtin_clz(j))
 #endif
+
+int flsl(long j);
+
+#ifdef CONFIG_HAVE_BUILTIN_CLZ
+#  define flsl(j)  ((8 * sizeof(long)) - __builtin_clzl(j))
+#endif
+
+int flsll(long long j);
 
 #ifdef CONFIG_HAVE_LONG_LONG
 #  ifdef CONFIG_HAVE_BUILTIN_CLZ
-static inline_function int flsll(long long j)
-{
-  return (8 * sizeof(long long)) - __builtin_clzll(j);
-}
-#  else
-int flsll(long long j);
+#    define flsll(j)  ((8 * sizeof(long long)) - __builtin_clzll(j))
 #  endif
 #endif
 
@@ -151,16 +133,6 @@ FAR char *rindex(FAR const char *s, int c);
 
 int strcasecmp(FAR const char *, FAR const char *);
 int strncasecmp(FAR const char *, FAR const char *, size_t);
-
-void bzero(FAR void *s, size_t n);
-
-#if CONFIG_FORTIFY_SOURCE > 0
-fortify_function(bzero) void bzero(FAR void *s, size_t n)
-{
-  fortify_assert(n <= fortify_size(s, 0));
-  return __real_bzero(s, n);
-}
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

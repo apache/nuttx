@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/wireless/bluetooth/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -21,6 +23,8 @@
 if(CONFIG_DRIVERS_BLUETOOTH)
   set(SRCS)
 
+  list(APPEND SRCS bt_driver.c)
+
   if(CONFIG_BLUETOOTH_UART)
     list(APPEND SRCS bt_uart.c)
 
@@ -38,6 +42,10 @@ if(CONFIG_DRIVERS_BLUETOOTH)
     endif()
   endif()
 
+  if(CONFIG_BLUETOOTH_BRIDGE)
+    list(APPEND SRCS bt_bridge.c)
+  endif()
+
   if(CONFIG_BLUETOOTH_NULL)
     list(APPEND SRCS bt_null.c)
   endif()
@@ -48,6 +56,10 @@ if(CONFIG_DRIVERS_BLUETOOTH)
 
   if(CONFIG_BLUETOOTH_RPMSG)
     list(APPEND SRCS bt_rpmsghci.c)
+  endif()
+
+  if(CONFIG_BLUETOOTH_SLIP)
+    list(APPEND SRCS bt_slip.c)
   endif()
 
   target_sources(drivers PRIVATE ${SRCS})

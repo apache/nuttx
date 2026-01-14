@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/netinet/in.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -199,7 +201,7 @@
   ((a)->s6_addr[0] == 0xff)
 
 #define IN6_IS_ADDR_LINKLOCAL(a) \
-  ((a)->s6_addr16[0] & HTONS(0xffc0) == HTONS(0xfe80))
+  (((a)->s6_addr16[0] & HTONS(0xffc0)) == HTONS(0xfe80))
 
 #define IN6_IS_ADDR_LOOPBACK(a) \
   ((a)->s6_addr32[0] == 0 && \
@@ -213,6 +215,12 @@
    (a)->s6_addr32[2] == 0 && \
    (a)->s6_addr32[3] == 0)
 
+#define IN6_IS_ADDR_GLOBAL(a) \
+  (!IN6_IS_ADDR_MULTICAST(a) && \
+   !IN6_IS_ADDR_LINKLOCAL(a) && \
+   !IN6_IS_ADDR_LOOPBACK(a) && \
+   !IN6_IS_ADDR_UNSPECIFIED(a))
+
 #define IN6_IS_ADDR_V4COMPAT(a) \
   ((a)->s6_addr32[0] == 0 && \
    (a)->s6_addr32[1] == 0 && \
@@ -224,6 +232,12 @@
   ((a)->s6_addr32[0] == 0 && \
    (a)->s6_addr32[1] == 0 && \
    (a)->s6_addr32[2] == HTONL(0xffff))
+
+#define IN6_IS_ADDR_MC_LINKLOCAL(a) \
+  (IN6_IS_ADDR_MULTICAST(a) && ((a)->s6_addr[1] & 0xf) == 0x2)
+
+#define IN6_IS_ADDR_SITELOCAL(a) \
+  (((a)->s6_addr16[0] & HTONS(0xffc0)) == HTONS(0xfec0))
 
 /* This macro to convert a 16/32-bit constant values quantity from host byte
  * order to network byte order.  The 16-bit version of this macro is required

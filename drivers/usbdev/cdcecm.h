@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/usbdev/cdcecm.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,7 +39,7 @@
  ****************************************************************************/
 
 #define CDCECM_VERSIONNO         (0x0100)
-#define CDCECM_MXDESCLEN         (80)
+#define CDCECM_MXDESCLEN         (120)
 #define CDCECM_MAXSTRLEN         (CDCECM_MXDESCLEN - 2)
 #define CDCECM_NCONFIGS          (1)
 #define CDCECM_NINTERFACES       (2)
@@ -57,5 +59,8 @@
 
 #define CDCECM_SELFPOWERED       (0)
 #define CDCECM_REMOTEWAKEUP      (0)
+
+#define CDCECM_LOW_BITRATE       (19 * 64 * 1 * 1000 * 8)
+#define CDCECM_HIGH_BITRATE      (13 * 512 * 8 * 1000 * 8)
 
 #endif /* __DRIVERS_USBDEV_CDCECM_H */

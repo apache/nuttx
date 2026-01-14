@@ -221,7 +221,7 @@ static void touch_restore_irq(void *arg)
 {
   if (touch_last_irq > 0 && touch_release_cb != NULL)
     {
-      /* Call the button interrup handler again so we can detect touch pad
+      /* Call the button interrupt handler again so we can detect touch pad
        * releases
        */
 
@@ -562,7 +562,7 @@ uint32_t esp32s2_touchreadraw(enum touch_pad_e tp)
   uint32_t value = touch_lh_read_raw_data(tp);
 #endif
 
-  iinfo("Touch pad %d value: %u\n", tp, value);
+  iinfo("Touch pad %d value: %" PRIu32 "\n", tp, value);
 
   return value;
 }
@@ -593,7 +593,7 @@ uint32_t esp32s2_touchbenchmark(enum touch_pad_e tp)
 
   leave_critical_section(flags);
 
-  iinfo("Touch pad %d benchmark value: %u\n", tp, value);
+  iinfo("Touch pad %d benchmark value: %" PRIu32 "\n", tp, value);
 
   return value;
 }
@@ -624,7 +624,7 @@ void esp32s2_touchsetthreshold(enum touch_pad_e tp, uint32_t threshold)
 
   leave_critical_section(flags);
 
-  iinfo("Touch pad %d threshold set to: %u\n", tp, threshold);
+  iinfo("Touch pad %d threshold set to: %" PRIu32 "\n", tp, threshold);
 }
 
 /****************************************************************************

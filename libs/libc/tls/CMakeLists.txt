@@ -1,6 +1,8 @@
 # ##############################################################################
 # libs/libc/tls/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -26,6 +28,10 @@ endif()
 
 if(NOT CONFIG_TLS_NELEM EQUAL 0)
   list(APPEND SRCS tls_destruct.c)
+endif()
+
+if(NOT CONFIG_TLS_NCLEANUP EQUAL 0)
+  list(APPEND SRCS tls_cleanup.c)
 endif()
 
 target_sources(c PRIVATE ${SRCS})

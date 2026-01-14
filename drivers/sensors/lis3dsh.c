@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/lis3dsh.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 #include <debug.h>
 #include <string.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/random.h>
@@ -39,7 +42,7 @@
 #if defined(CONFIG_SPI) && defined(CONFIG_LIS3DSH)
 
 /****************************************************************************
- * Private
+ * Private Types
  ****************************************************************************/
 
 struct lis3dsh_sensor_data_s
@@ -209,7 +212,7 @@ static void lis3dsh_read_measurement_data(FAR struct lis3dsh_dev_s *dev)
   uint16_t z_acc = 0;
   int ret;
 
-  /* Read acclerometer data */
+  /* Read accelerometer data */
 
   lis3dsh_read_acclerometer_data(dev, &x_acc, &y_acc, &z_acc);
 

@@ -301,6 +301,8 @@ static int esp32s2_setup(struct uart_dev_s *dev)
 
   /* Initialize UART module */
 
+  esp32s2_lowputc_enable_sysclk(priv);
+
   /* Discard corrupt RX data */
 
   modifyreg32(UART_CONF0_REG(priv->id), 0, UART_ERR_WR_MASK_M);
@@ -371,7 +373,7 @@ static int esp32s2_setup(struct uart_dev_s *dev)
 
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-  /* Configure the ouput flow control */
+  /* Configure the output flow control */
 
   if (priv->oflow)
     {
@@ -1056,7 +1058,7 @@ static bool esp32s2_rxflowcontrol(struct uart_dev_s *dev,
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before xtensa_serialinit.  NOTE:  This function depends on GPIO pin
  *   configuration performed in esp32s2_lowsetup.
  *
@@ -1076,7 +1078,7 @@ void xtensa_earlyserialinit(void)
 #endif
 
   /* Configure console in early step.
-   * Setup for other serials will be perfomed when the serial driver is
+   * Setup for other serials will be performed when the serial driver is
    * open.
    */
 
@@ -1119,26 +1121,15 @@ void xtensa_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   uint32_t int_status;
 
   esp32s2_lowputc_disable_all_uart_int(CONSOLE_DEV.priv, &int_status);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      xtensa_lowputc('\r');
-    }
-
   xtensa_lowputc(ch);
   esp32s2_lowputc_restore_all_uart_int(CONSOLE_DEV.priv, &int_status);
 #endif
-  return ch;
 }
 
 #else /* HAVE_UART_DEVICE */
@@ -1165,9 +1156,8 @@ void xtensa_serialinit(void)
 {
 }
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
-  return ch;
 }
 
 #endif /* HAVE_UART_DEVICE */
@@ -1183,23 +1173,13 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   uint32_t int_status;
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      xtensa_lowputc('\r');
-    }
-
   xtensa_lowputc(ch);
 #endif
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

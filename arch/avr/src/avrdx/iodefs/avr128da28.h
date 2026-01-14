@@ -1,0 +1,215 @@
+/****************************************************************************
+ * arch/avr/src/avrdx/iodefs/avr128da28.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#ifndef __ARCH_AVR_SRC_AVRDX_IODEFS_AVR128DA28_H
+#define __ARCH_AVR_SRC_AVRDX_IODEFS_AVR128DA28_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <avr/io.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef __ARCH_AVR_SRC_AVRDX_AVRDX_IODEFS_H
+#  error "Do not include this file directly, use avrdx_iodefs.h instead"
+#endif
+
+/* PORTMUX.USARTROUTEA */
+
+#define PORTMUX_USART0_DEFAULT_GC (0)
+#define PORTMUX_USART0_ALT1_GC (PORTMUX_USART0_0_bm )
+#define PORTMUX_USART0_NONE_GC (PORTMUX_USART0_1_bm | PORTMUX_USART0_0_bm)
+#define PORTMUX_USART0_GM (PORTMUX_USART0_1_bm | PORTMUX_USART0_0_bm)
+
+#define PORTMUX_USART1_DEFAULT_GC (0)
+#define PORTMUX_USART1_NONE_GC (PORTMUX_USART1_1_bm | PORTMUX_USART1_0_bm)
+#define PORTMUX_USART1_GM (PORTMUX_USART1_1_bm | PORTMUX_USART1_0_bm)
+
+#define PORTMUX_USART2_DEFAULT_GC (0)
+#define PORTMUX_USART2_NONE_GC (PORTMUX_USART2_1_bm | PORTMUX_USART2_0_bm)
+#define PORTMUX_USART2_GM (PORTMUX_USART2_1_bm | PORTMUX_USART2_0_bm)
+
+/* PORTMUX.TWIROUTEA */
+
+#define PORTMUX_TWI0_DEFAULT_GC (0)
+#define PORTMUX_TWI0_ALT2_GC = (PORTMUX_TWI0_1_bm)
+#define PORTMUX_TWI0_GM (PORTMUX_TWI0_1_bm | PORTMUX_TWI0_0_bm)
+
+/* PORT.PINCONFIG */
+
+#define PORT_ISC_GM ( PORT_ISC_0_bm | PORT_ISC_1_bm | PORT_ISC_2_bm )
+
+#define PORT_ISC_BOTHEDGES_GC ( PORT_ISC_0_bm )
+
+/* CLKCTRL.MCLKCTRLB */
+
+#define CLKCTRL_PDIV_GM ( CLKCTRL_PDIV_0_bm | CLKCTRL_PDIV_1_bm | \
+                          CLKCTRL_PDIV_2_bm | CLKCTRL_PDIV_3_bm )
+#define CLKCTRL_PDIV_GP (1)
+
+/* CLKCTRL.OSCHFCTRLA */
+
+#define CLKCTRL_FRQSEL_GM ( CLKCTRL_FRQSEL_0_bm | CLKCTRL_FRQSEL_1_bm | \
+                            CLKCTRL_FRQSEL_2_bm | CLKCTRL_FRQSEL_3_bm )
+#define CLKCTRL_FRQSEL_GP (2)
+
+#define CLKCTRL_FRQSEL_1M_GC (0)
+#define CLKCTRL_FRQSEL_2M_GC (CLKCTRL_FRQSEL_0_bm)
+#define CLKCTRL_FRQSEL_3M_GC (CLKCTRL_FRQSEL_1_bm)
+#define CLKCTRL_FRQSEL_4M_GC (CLKCTRL_FRQSEL_1_bm | CLKCTRL_FRQSEL_0_bm)
+#define CLKCTRL_FRQSEL_8M_GC (CLKCTRL_FRQSEL_2_bm | CLKCTRL_FRQSEL_0_bm)
+#define CLKCTRL_FRQSEL_12M_GC (CLKCTRL_FRQSEL_2_bm | CLKCTRL_FRQSEL_1_bm)
+#define CLKCTRL_FRQSEL_16M_GC (CLKCTRL_FRQSEL_2_bm | CLKCTRL_FRQSEL_1_bm | \
+                               CLKCTRL_FRQSEL_0_bm )
+#define CLKCTRL_FRQSEL_20M_GC (CLKCTRL_FRQSEL_3_bm)
+#define CLKCTRL_FRQSEL_24M_GC (CLKCTRL_FRQSEL_3_bm | CLKCTRL_FRQSEL_0_bm)
+
+/* RTC.CTRLA */
+
+#define RTC_PRESCALER_GM ( RTC_PRESCALER_0_bm | RTC_PRESCALER_1_bm | \
+                           RTC_PRESCALER_2_bm | RTC_PRESCALER_3_bm )
+
+#define RTC_PRESCALER_DIV2_GC (RTC_PRESCALER_0_bm)
+
+/* USART.CTRLB */
+
+#define USART_RXMODE_NORMAL_GC (0)
+#define USART_RXMODE_CLK2X_GC (USART_RXMODE_0_bm)
+
+/* USART.CTRLC */
+
+#define USART_PMODE_DISABLED_GC (0)
+#define USART_PMODE_EVEN_GC = (USART_PMODE_1_bm)
+#define USART_PMODE_ODD_GC = (USART_PMODE_1_bm | USART_PMODE_0_bm)
+
+#define USART_SBMODE_1BIT_GC (0)
+#define USART_SBMODE_2BIT_GC (USART_SBMODE_bm)
+
+#define USART_CHSIZE_7BIT_GC (USART_CHSIZE_1_bm)
+#define USART_CHSIZE_8BIT_GC (USART_CHSIZE_1_bm | USART_CHSIZE_0_bm)
+
+/* TWI.MCTRLA */
+
+#define TWI_FMPEN_ON_GC (TWI_FMPEN_bm)
+
+#define TWI_SDAHOLD_OFF_GC (0)
+#define TWI_SDAHOLD_50NS_GC (TWI_SDAHOLD_0_bm)
+#define TWI_SDAHOLD_300NS_GC (TWI_SDAHOLD_1_bm)
+#define TWI_SDAHOLD_500NS_GC (TWI_SDAHOLD_1_bm | TWI_SDAHOLD_0_bm)
+
+#define TWI_TIMEOUT_200US_GC (TWI_TIMEOUT_1_bm | TWI_TIMEOUT_0_bm)
+
+/* TWI.MCTRLB */
+
+#define TWI_MCMD_NOACT_GC (0)
+#define TWI_MCMD_REPSTART_GC (TWI_MCMD_0_bm)
+#define TWI_MCMD_RECVTRANS_GC (TWI_MCMD_1_bm)
+#define TWI_MCMD_STOP_GC (TWI_MCMD_0_bm | TWI_MCMD_1_bm)
+
+#define TWI_ACKACT_ACK_GC (0)
+#define TWI_ACKACT_NACK_GC (TWI_ACKACT_bm)
+
+/* TWI.MSTATUS */
+
+#define TWI_BUSSTATE_UNKNOWN_GC (0)
+#define TWI_BUSSTATE_IDLE_GC (TWI_BUSSTATE_0_bm)
+#define TWI_BUSSTATE_OWNER_GC (TWI_BUSSTATE_1_bm)
+#define TWI_BUSSTATE_BUSY_GC (TWI_BUSSTATE_1_bm | TWI_BUSSTATE_0_bm)
+#define TWI_BUSSTATE_GM (TWI_BUSSTATE_1_bm | TWI_BUSSTATE_0_bm)
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+typedef struct avr_usart_struct
+{
+  register8_t RXDATAL;  /* Receive Data Low Byte */
+  register8_t RXDATAH;  /* Receive Data High Byte */
+  register8_t TXDATAL;  /* Transmit Data Low Byte */
+  register8_t TXDATAH;  /* Transmit Data High Byte */
+  register8_t STATUS;   /* Status */
+  register8_t CTRLA;    /* Control A */
+  register8_t CTRLB;    /* Control B */
+  register8_t CTRLC;    /* Control C */
+  _WORDREGISTER(BAUD);  /* Baud Rate */
+  register8_t CTRLD;    /* Control D */
+  register8_t DBGCTRL;  /* Debug Control */
+  register8_t EVCTRL;   /* Event Control */
+  register8_t TXPLCTRL; /* IRCOM Transmitter Pulse Length Control */
+  register8_t RXPLCTRL; /* IRCOM Receiver Pulse Length Control */
+  register8_t reserved_1[1];
+} avr_usart_t;
+
+typedef struct avr_twi_struct
+{
+  register8_t CTRLA;     /* Control A */
+  register8_t DUALCTRL;  /* Dual Control */
+  register8_t DBGCTRL;   /* Debug Control Register */
+  register8_t MCTRLA;    /* Host Control A */
+  register8_t MCTRLB;    /* Host Control B */
+  register8_t MSTATUS;   /* Host Status */
+  register8_t MBAUD;     /* Host Baud Rate Control */
+  register8_t MADDR;     /* Host Address */
+  register8_t MDATA;     /* Host Data */
+  register8_t SCTRLA;    /* Client Control A */
+  register8_t SCTRLB;    /* Client Control B */
+  register8_t SSTATUS;   /* Client Status */
+  register8_t SADDR;     /* Client Address */
+  register8_t SDATA;     /* Client Data */
+  register8_t SADDRMASK; /* Client Address Mask */
+  register8_t reserved_1[1];
+} avr_twi_t;
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_AVR_SRC_AVRDX_AVRDX_H */

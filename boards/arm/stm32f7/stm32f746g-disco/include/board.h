@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32f7/stm32f746g-disco/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -573,5 +575,8 @@
 #define GPIO_FMC_D13          (GPIO_FMC_D13_0|GPIO_SPEED_100MHz)
 #define GPIO_FMC_D14          (GPIO_FMC_D14_0|GPIO_SPEED_100MHz)
 #define GPIO_FMC_D15          (GPIO_FMC_D15_0|GPIO_SPEED_100MHz)
+#define GPIO_FMC_SDCKE0       (GPIO_FMC_SDCKE0_1|GPIO_SPEED_100MHz)
+#define GPIO_FMC_SDNE0        (GPIO_FMC_SDNE0_3|GPIO_SPEED_100MHz)
+#define GPIO_FMC_SDNWE        (GPIO_FMC_SDNWE_3|GPIO_SPEED_100MHz)
 
 #endif  /* __BOARDS_ARM_STM32F7_STM32F746G_DISCO_INCLUDE_BOARD_H */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/wireless/bluetooth/bt_null.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,7 +37,6 @@
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/wireless/bluetooth/bt_hci.h>
 #include <nuttx/wireless/bluetooth/bt_null.h>
-#include <nuttx/wireless/bluetooth/bt_driver.h>
 
 /****************************************************************************
  * Private Function Prototypes

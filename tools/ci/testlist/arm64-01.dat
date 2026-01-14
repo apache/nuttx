@@ -1,0 +1,12 @@
+/arm64
+
+/arm64/qemu/qemu-armv8a/configs/nsh_fiq,CONFIG_ARM_TOOLCHAIN_CLANG
+
+# arm64 Boards build by CMake
+CMake,qemu-armv8a:citest
+CMake,qemu-armv8a:citest_smp
+CMake,qemu-armv8a:nsh
+CMake,qemu-armv8a:nsh_gicv2
+CMake,qemu-armv8a:nsh_smp
+CMake,qemu-armv8a:nsh_smp_tickless
+CMake,qemu-armv8a:sotest

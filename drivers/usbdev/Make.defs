@@ -1,6 +1,8 @@
 ############################################################################
 # drivers/usbdev/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -60,6 +62,10 @@ endif
 
 ifeq ($(CONFIG_NET_CDCECM),y)
   CSRCS += cdcecm.c
+endif
+
+ifeq ($(CONFIG_NET_CDCNCM),y)
+  CSRCS += cdcncm.c
 endif
 
 ifeq ($(CONFIG_USBDEV_FS),y)

@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/semaphore/sem_recover.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#include <nuttx/mm/kmap.h>
 
 #include "semaphore/semaphore.h"
 
@@ -83,7 +86,8 @@ void nxsem_recover(FAR struct tcb_s *tcb)
   if (tcb->task_state == TSTATE_WAIT_SEM)
     {
       FAR sem_t *sem = tcb->waitobj;
-      DEBUGASSERT(sem != NULL && sem->semcount < 0);
+
+      DEBUGASSERT(sem != NULL);
 
       /* Restore the correct priority of all threads that hold references
        * to this semaphore.
@@ -91,16 +95,39 @@ void nxsem_recover(FAR struct tcb_s *tcb)
 
       nxsem_canceled(tcb, sem);
 
+      /* Remove the tcb from the semaphore wait list if it exists there */
+
+      dq_rem((FAR dq_entry_t *)tcb, SEM_WAITLIST(sem));
+
       /* And increment the count on the semaphore.  This releases the count
        * that was taken by sem_wait().  This count decremented the semaphore
        * count to negative and caused the thread to be blocked in the first
        * place.
        */
 
-      sem->semcount++;
+      if (NXSEM_IS_MUTEX(sem))
+        {
+          /* Clear the blocking bit, if not blocked any more */
+
+          if (dq_empty(SEM_WAITLIST(sem)))
+            {
+              uint32_t mholder =
+                atomic_fetch_and(NXSEM_MHOLDER(sem), ~NXSEM_MBLOCKING_BIT);
+              DEBUGASSERT(NXSEM_MBLOCKING(mholder));
+            }
+        }
+      else
+        {
+          DEBUGASSERT(atomic_read(NXSEM_COUNT(sem)) < 0);
+          atomic_fetch_add(NXSEM_COUNT(sem), 1);
+        }
+
+#ifdef CONFIG_MM_KMAP
+      kmm_unmap(sem);
+#endif
     }
 
-  /* Release all semphore holders for the task */
+  /* Release all semaphore holders for the task */
 
   nxsem_release_all(tcb);
 

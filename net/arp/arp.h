@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/arp/arp.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -162,7 +164,12 @@ struct arp_entry_s
   in_addr_t                at_ipaddr;   /* IP address */
   struct ether_addr        at_ethaddr;  /* Hardware address */
   clock_t                  at_time;     /* Time of last usage */
+  uint8_t                  at_flags;    /* Flags, examples: ATF_PERM */
   FAR struct net_driver_s *at_dev;      /* The device driver structure */
+#ifdef CONFIG_NET_ARP_SEND_QUEUE
+  struct iob_queue_s       at_queue;    /* Queue iobs to wait arp complete */
+  struct work_s            at_work;     /* Arp response timeout handle */
+#endif
 };
 
 /****************************************************************************
@@ -226,7 +233,7 @@ void arp_ipin(FAR struct net_driver_s *dev);
  *   If the destination IPv4 address is in the local network (determined
  *   by logical ANDing of netmask and our IPv4 address), the function
  *   checks the ARP cache to see if an entry for the destination IPv4
- *   address is found.  If so, an Ethernet header is pre-pended at the
+ *   address is found.  If so, an Ethernet header is prepended at the
  *   beginning of the packet and the function returns.
  *
  *   If no ARP cache entry is found for the destination IIPv4P address, the
@@ -469,6 +476,7 @@ void arp_cleanup(FAR struct net_driver_s *dev);
  *   dev     - The device driver structure
  *   ipaddr  - The IP address as an inaddr_t
  *   ethaddr - Refers to a HW address uint8_t[IFHWADDRLEN]
+ *   flags   - Flags, examples: ATF_PERM(Permanent entry)
  *
  * Returned Value:
  *   Zero (OK) if the ARP table entry was successfully modified.  A negated
@@ -480,7 +488,7 @@ void arp_cleanup(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
-               FAR const uint8_t *ethaddr);
+               FAR const uint8_t *ethaddr, uint8_t flags);
 
 /****************************************************************************
  * Name: arp_hdr_update
@@ -605,6 +613,32 @@ void arp_acd_setup(FAR struct net_driver_s *dev);
 
 #endif /* CONFIG_NET_ARP_ACD */
 
+/****************************************************************************
+ * Name: arp_queue_iob
+ *
+ * Description:
+ *   Queue an IOB which L2 layer is unfinished to the target arp entry's
+ *   deley queue which in progress waiting for an ARP response
+ *
+ * Input Parameters:
+ *   dev     - The device driver structure
+ *   ipaddr  - The IP address as an inaddr_t
+ *   iob     - The IOB to be queued
+ *
+ * Returned Value:
+ *   Zero (OK) if the ARP table entry was successfully modified.  A negated
+ *   errno value is returned on any error.
+ *
+ * Assumptions
+ *   The network is locked to assure exclusive access to the ARP table
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ARP_SEND_QUEUE
+int arp_queue_iob(FAR struct net_driver_s *dev, in_addr_t ipaddr,
+                  FAR struct iob_s *iob);
+#endif
+
 #else /* CONFIG_NET_ARP */
 
 /* If ARP is disabled, stub out all ARP interfaces */
@@ -621,7 +655,7 @@ void arp_acd_setup(FAR struct net_driver_s *dev);
 #  define arp_find(i,e,d) (-ENOSYS)
 #  define arp_delete(i,d) (-ENOSYS)
 #  define arp_cleanup(d)
-#  define arp_update(d,i,m);
+#  define arp_update(d,i,m,f);
 #  define arp_hdr_update(d,i,m);
 #  define arp_snapshot(s,n) (0)
 #  define arp_dump(arp)

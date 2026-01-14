@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32_ltdc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -202,11 +204,15 @@
 #  error Undefined or unrecognized base resolution
 #endif
 
-/* LTDC only supports 8 bit per pixel overal */
+/* LTDC only supports 8 bit per pixel overall */
 
 #define STM32_LTDC_LX_BYPP(n)       ((n) / 8)
 
+#if defined(CONFIG_STM32H7_LTDC_FB_DOUBLE_BUFFER)
+#define STM32_LTDC_L1_FBSIZE        (STM32_LTDC_L1_STRIDE * STM32_LTDC_HEIGHT * 2)
+#else
 #define STM32_LTDC_L1_FBSIZE        (STM32_LTDC_L1_STRIDE * STM32_LTDC_HEIGHT)
+#endif
 
 #ifdef CONFIG_STM32H7_LTDC_L2
 #  ifndef CONFIG_STM32H7_LTDC_L2_WIDTH
@@ -665,7 +671,7 @@ struct stm32_interrupt_s
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Overal LTDC helper */
+/* Overall LTDC helper */
 
 static void stm32_ltdc_enable(bool enable);
 static void stm32_ltdc_gpioconfig(void);
@@ -738,6 +744,11 @@ static int stm32_putcmap(struct fb_vtable_s *vtable,
 
 #ifdef CONFIG_FB_SYNC
 static int stm32_waitforvsync(struct fb_vtable_s *vtable);
+#endif
+
+#if defined(CONFIG_STM32H7_LTDC_FB_DOUBLE_BUFFER)
+static int stm32_pandisplay(struct fb_vtable_s *vtable,
+                            struct fb_planeinfo_s *pinfo);
 #endif
 
 /* The following is provided only if the video hardware supports overlays */
@@ -836,6 +847,11 @@ static struct stm32_ltdcdev_s g_vtable =
       .waitforvsync    = stm32_waitforvsync
 #endif
 
+#if defined(CONFIG_STM32H7_LTDC_FB_DOUBLE_BUFFER)
+      ,
+      .pandisplay = stm32_pandisplay
+#endif
+
 #ifdef CONFIG_STM32H7_FB_CMAP
       ,
       .getcmap         = stm32_getcmap,
@@ -883,7 +899,15 @@ static struct stm32_ltdcdev_s g_vtable =
       .fblen           = STM32_LTDC_L1_FBSIZE,
       .stride          = STM32_LTDC_L1_STRIDE,
       .display         = 0,
-      .bpp             = STM32_LTDC_L1_BPP
+      .bpp             = STM32_LTDC_L1_BPP,
+      .xres_virtual    = STM32_LTDC_WIDTH,
+#if defined(CONFIG_STM32H7_LTDC_FB_DOUBLE_BUFFER)
+      .yres_virtual    = STM32_LTDC_HEIGHT * 2,
+#else
+      .yres_virtual    = STM32_LTDC_HEIGHT,
+#endif
+      .xoffset = 0,
+      .yoffset = 0
     },
   .vinfo =
     {
@@ -1469,6 +1493,10 @@ static int stm32_ltdcirq(int irq, void *context, void *arg)
       reginfo("Register reloaded\n");
       putreg32(LTDC_ICR_CRRIF, STM32_LTDC_ICR);
       priv->error = OK;
+
+#if defined(CONFIG_STM32H7_LTDC_FB_DOUBLE_BUFFER)
+      fb_remove_paninfo(&g_vtable.vtable, FB_NO_OVERLAY);
+#endif
     }
   else if (regval & LTDC_IER_LIE)
     {
@@ -2530,6 +2558,32 @@ static int stm32_waitforvsync(struct fb_vtable_s *vtable)
 #endif /* CONFIG_FB_SYNC */
 
 /****************************************************************************
+ * Name: stm32_pandisplay
+ * Description:
+ *   Entrypoint ioctl FBIOPAN_DISPLAY
+ ****************************************************************************/
+#if defined(CONFIG_STM32H7_LTDC_FB_DOUBLE_BUFFER)
+static int stm32_pandisplay(struct fb_vtable_s *vtable,
+                            struct fb_planeinfo_s *pinfo)
+{
+  DEBUGASSERT(vtable != NULL && vtable == &g_vtable.vtable);
+  DEBUGASSERT(pinfo != NULL);
+
+  struct stm32_ltdcdev_s *dev = &g_vtable;
+  struct stm32_ltdc_s *layer = &dev->layer[LTDC_LAYER_L1];
+
+  uint32_t new_fb_start = (uint32_t)pinfo->fbmem +
+                         pinfo->yoffset * pinfo->stride +
+                         pinfo->xoffset * (pinfo->bpp / 8);
+
+  putreg32(new_fb_start, stm32_cfbar_layer_t[layer->layerno]);
+  putreg32(LTDC_SRCR_VBR, STM32_LTDC_SRCR);
+
+  return 0;
+}
+#endif
+
+/****************************************************************************
  * Name: stm32_getoverlayinfo
  * Description:
  *   Entrypoint ioctl FBIOGET_OVERLAYINFO
@@ -2624,7 +2678,7 @@ static int stm32_setchromakey(struct fb_vtable_s *vtable,
   struct stm32_ltdcdev_s *priv = (struct stm32_ltdcdev_s *)vtable;
 
   DEBUGASSERT(vtable != NULL && priv == &g_vtable && oinfo != NULL);
-  lcdinfo("vtable=%p, overlay=%d, chromakey=%08x\n", vtable,
+  lcdinfo("vtable=%p, overlay=%d, chromakey=%08" PRIx32 "\n", vtable,
           oinfo->overlay, oinfo->chromakey);
 
   if (oinfo->overlay < LTDC_NLAYERS)
@@ -2690,7 +2744,8 @@ static int stm32_setcolor(struct fb_vtable_s *vtable,
                           const struct fb_overlayinfo_s *oinfo)
 {
   DEBUGASSERT(vtable != NULL && vtable == &g_vtable.vtable && oinfo != NULL);
-  lcdinfo("vtable=%p, overlay=%d, color=%08x\n", vtable, oinfo->color);
+  lcdinfo("vtable=%p, overlay=%d, color=%08" PRIx32 "\n",
+          vtable, oinfo->overlay, oinfo->color);
 
   if (oinfo->overlay < LTDC_NOVERLAYS)
     {
@@ -2737,7 +2792,8 @@ static int stm32_setblank(struct fb_vtable_s *vtable,
   struct stm32_ltdcdev_s *priv = (struct stm32_ltdcdev_s *)vtable;
 
   DEBUGASSERT(vtable != NULL && priv == &g_vtable && oinfo != NULL);
-  lcdinfo("vtable=%p, overlay=%d, blank=%02x\n", vtable, oinfo->blank);
+  lcdinfo("vtable=%p, overlay=%d, blank=%02x\n",
+          vtable, oinfo->overlay, oinfo->blank);
 
   if (oinfo->overlay < LTDC_NLAYERS)
     {

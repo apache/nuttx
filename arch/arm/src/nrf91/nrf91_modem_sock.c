@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/nrf91/nrf91_modem_sock.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -683,7 +685,7 @@ static void nrf91_usrsock_poll_work(void *arg)
         {
           while (g_usrsock.sock[pollfd->fd].recvpending == true)
             {
-              nxsig_usleep(100);
+              nxsched_usleep(100);
             }
         }
 

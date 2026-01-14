@@ -1,0 +1,7 @@
+/xtensa/esp32
+
+# We do not set ESPTOOL_BINDIR in this build
+-esp32-devkitc:qemu_openeth
+
+# Temporary
+-esp32-devkitc:nxlooper

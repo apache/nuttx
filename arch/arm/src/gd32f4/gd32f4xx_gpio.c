@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/gd32f4/gd32f4xx_gpio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -147,7 +149,7 @@ static void gd32_gpio_clock_enable(uint32_t port_base)
 
   regaddr = GD32_RCU_AHB1EN;
 
-  /* Check clock if alreay enable. */
+  /* Check clock if already enable. */
 
   if (rcu_en != (rcu_en & getreg32(regaddr)))
     {
@@ -211,6 +213,7 @@ static inline bool gd32_gpio_input_get(uint32_t port_base, uint32_t pin)
  *
  * Description:
  *   Configure a GPIO pin as the Alternative function.
+ *
  ****************************************************************************/
 
 static void gd32_gpio_af_config(uint32_t cfgset, uint32_t port_base,
@@ -244,6 +247,7 @@ static void gd32_gpio_af_config(uint32_t cfgset, uint32_t port_base,
  *
  * Description:
  *   Configure a GPIO pin's Alternative function as reset value.
+ *
  ****************************************************************************/
 
 static void gd32_gpio_af_unconfig(uint32_t cfgset, uint32_t port_base,
@@ -314,7 +318,7 @@ int gd32_gpio_config(uint32_t cfgset)
 
   port_base = g_gpio_base[port];
 
-  /* Eable the GPIO port clock */
+  /* Enable the GPIO port clock */
 
   gd32_gpio_clock_enable(port_base);
 

@@ -2,6 +2,8 @@
 ############################################################################
 # tools/copydir.sh
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -26,7 +28,7 @@
 # rather, just look link files with the extension .lnk
 #
 # In this environment, the build system will work around this using this script
-# as a replacement for the 'ln' command.  This scrpt will simply copy the
+# as a replacement for the 'ln' command.  This script will simply copy the
 # directory into the expected positiion.
 #
 #set -x

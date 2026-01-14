@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s2/esp32s2-saola-1/src/esp32s2_board_i2c.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,7 +42,7 @@
 static int i2c_driver_init(int bus)
 {
   struct i2c_master_s *i2c;
-  int ret;
+  int ret = OK;
 
   i2c = esp32s2_i2cbus_initialize(bus);
   if (i2c == NULL)
@@ -75,19 +77,24 @@ int board_i2c_init(void)
 {
   int ret = OK;
 
-#ifdef CONFIG_ESP32S2_I2C0
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE
+#  ifdef CONFIG_ESP32S2_I2C0_MASTER_MODE
   ret = i2c_driver_init(ESP32S2_I2C0);
   if (ret != OK)
     {
       goto done;
     }
-#endif
+#  endif
 
-#ifdef CONFIG_ESP32S2_I2C1
+#  ifdef CONFIG_ESP32S2_I2C1_MASTER_MODE
   ret = i2c_driver_init(ESP32S2_I2C1);
-#endif
+#  endif
+
+#  ifdef CONFIG_ESP32S2_RTC_I2C
+  ret = i2c_driver_init(ESP32S2_RTC_I2C);
+#  endif
+#endif /* #ifdef CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE */
 
 done:
   return ret;
 }
-

@@ -17,6 +17,8 @@ config ARCH_CHIP_FE310
 	select ARCH_RV_ISA_A
 	select ARCH_RV_ISA_C
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		SiFive FE310 processor (E31 RISC-V Core with MAC extensions).
@@ -34,13 +36,14 @@ config ARCH_CHIP_K210
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_MISALIGN_EXCEPTION
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		Kendryte K210 processor (RISC-V 64bit core with GC extensions)
 
 config ARCH_CHIP_LITEX
 	bool "Enjoy Digital LITEX VEXRISCV"
-	select ARCH_RV32
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_A
 	select ARCH_DCACHE
@@ -49,31 +52,31 @@ config ARCH_CHIP_LITEX
 	select LIBC_FDT
 	select DEVICE_TREE
 	---help---
-		Enjoy Digital LITEX VEXRISCV softcore processor (RV32IMA).
+		Enjoy Digital LITEX VEXRISCV softcore processor (RV32IMA or RV64GC).
 
 config ARCH_CHIP_BL602
 	bool "BouffaloLab BL602"
 	select ARCH_RV32
 	select ARCH_RV_ISA_M
-	select ARCH_RV_ISA_A
 	select ARCH_RV_ISA_C
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_MISALIGN_EXCEPTION
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		BouffaloLab BL602(rv32imfc)
 
-config ARCH_CHIP_ESP32C3
-	bool "Espressif ESP32-C3"
+config ARCH_CHIP_ESP32C3_LEGACY
+	bool "Espressif ESP32-C3 (Legacy)"
 	select ARCH_RV32
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_C
 	select ARCH_VECNOTIRQ
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_RESET
-	select LIBC_ARCH_ATOMIC
 	select LIBC_ARCH_MEMCPY
 	select LIBC_ARCH_MEMCHR
 	select LIBC_ARCH_MEMCMP
@@ -90,21 +93,24 @@ config ARCH_CHIP_ESP32C3
 	select ARCH_HAVE_BOOTLOADER
 	select ARCH_HAVE_PERF_EVENTS
 	select ARCH_HAVE_DEBUG
+	select ARCH_HAVE_RAMFUNCS
+	select ONESHOT_COUNT if ONESHOT
+	select ONESHOT_FAST_DIVISION if ONESHOT
 	---help---
-		Espressif ESP32-C3 (RV32IMC).
+		Espressif ESP32-C3 (RV32IMC). Legacy implementation.
 
-config ARCH_CHIP_ESP32C3_GENERIC
+config ARCH_CHIP_ESP32C3
 	bool "ESP32-C3"
 	select ARCH_RV32
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_C
 	select ARCH_VECNOTIRQ
 	select ARCH_HAVE_BOOTLOADER if !ESPRESSIF_SIMPLE_BOOT
+	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_RNG
 	select ARCH_HAVE_TICKLESS
-	select LIBC_ARCH_ATOMIC
 	select LIBC_ARCH_MEMCPY
 	select LIBC_ARCH_MEMCHR
 	select LIBC_ARCH_MEMCMP
@@ -120,6 +126,9 @@ config ARCH_CHIP_ESP32C3_GENERIC
 	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 	select ARCH_CHIP_ESPRESSIF
 	select ARCH_HAVE_DEBUG
+	select ARCH_HAVE_RAMFUNCS
+	select ONESHOT_COUNT if ONESHOT
+	select ONESHOT_FAST_DIVISION if ONESHOT
 	---help---
 		ESP32-C3 chip with a single RISC-V IMC core, no embedded Flash memory
 
@@ -131,6 +140,7 @@ config ARCH_CHIP_ESP32C6
 	select ARCH_RV_ISA_C
 	select ARCH_VECNOTIRQ
 	select ARCH_HAVE_BOOTLOADER if !ESPRESSIF_SIMPLE_BOOT
+	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_RNG
@@ -149,6 +159,9 @@ config ARCH_CHIP_ESP32C6
 	select LIBC_ARCH_STRNLEN
 	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 	select ARCH_CHIP_ESPRESSIF
+	select ARCH_HAVE_RAMFUNCS
+	select ONESHOT_COUNT if ONESHOT
+	select ONESHOT_FAST_DIVISION if ONESHOT
 	---help---
 		Espressif ESP32-C6 (RV32IMAC).
 
@@ -159,11 +172,11 @@ config ARCH_CHIP_ESP32H2
 	select ARCH_RV_ISA_C
 	select ARCH_VECNOTIRQ
 	select ARCH_HAVE_BOOTLOADER if !ESPRESSIF_SIMPLE_BOOT
+	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_RNG
 	select ARCH_HAVE_TICKLESS
-	select LIBC_ARCH_ATOMIC
 	select LIBC_ARCH_MEMCPY
 	select LIBC_ARCH_MEMCHR
 	select LIBC_ARCH_MEMCMP
@@ -176,9 +189,11 @@ config ARCH_CHIP_ESP32H2
 	select LIBC_ARCH_STRNCPY
 	select LIBC_ARCH_STRLEN
 	select LIBC_ARCH_STRNLEN
-	select ESPRESSIF_ESPTOOLPY_NO_STUB
 	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 	select ARCH_CHIP_ESPRESSIF
+	select ARCH_HAVE_RAMFUNCS
+	select ONESHOT_COUNT if ONESHOT
+	select ONESHOT_FAST_DIVISION if ONESHOT
 	---help---
 		Espressif ESP32-H2 (RV32IMC).
 
@@ -192,6 +207,8 @@ config ARCH_CHIP_C906
 	select ARCH_HAVE_DPFPU
 	select ARCH_HAVE_MPU
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		THEAD C906 processor (RISC-V 64bit core with GCVX extensions).
@@ -204,15 +221,21 @@ config ARCH_CHIP_MPFS
 	select ARCH_RV_ISA_C
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_MPU
 	select ARCH_MMU_TYPE_SV39
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_ELF_EXECUTABLE
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_SPI_CS_CONTROL
 	select ARCH_HAVE_PWM_MULTICHAN
 	select ARCH_HAVE_S_MODE
+	select ARCH_RV_CPUID_MAP
+	select ARCH_HAVE_PERF_EVENTS
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		MicroChip Polarfire processor (RISC-V 64bit core with GCVX extensions).
@@ -222,6 +245,10 @@ config ARCH_CHIP_RV32M1
 	select ARCH_RV32
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_C
+	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
+	select ALARM_ARCH
 	---help---
 		NXP RV32M1 processor (RISC-V Core with PULP extensions).
 
@@ -233,11 +260,14 @@ config ARCH_CHIP_QEMU_RV
 	select ARCH_HAVE_MPU
 	select ARCH_MMU_TYPE_SV39 if ARCH_CHIP_QEMU_RV64
 	select ARCH_MMU_TYPE_SV32 if ARCH_CHIP_QEMU_RV32
+	select NUTTSBI_LATE_INIT if NUTTSBI
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_S_MODE
 	select ARCH_HAVE_ELF_EXECUTABLE
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	select ARCH_HAVE_DEBUG
 	---help---
@@ -250,6 +280,8 @@ config ARCH_CHIP_HPM6000
 	select ARCH_RV_ISA_A
 	select ARCH_RV_ISA_C
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		Hpmicro HPM6000 processor (D45 RISC-V Core with MAC extensions).
@@ -261,6 +293,8 @@ config ARCH_CHIP_HPM6750
 	select ARCH_RV_ISA_A
 	select ARCH_RV_ISA_C
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		Hpmicro HPM6750 processor (D45 RISC-V Core with MAC extensions).
@@ -280,6 +314,8 @@ config ARCH_CHIP_JH7110
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_S_MODE
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		StarFive JH7110 SoC.
@@ -295,10 +331,13 @@ config ARCH_CHIP_BL808
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_MPU
 	select ARCH_MMU_TYPE_SV39
+	select ARCH_MMU_EXT_THEAD
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_S_MODE
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		Bouffalo Lab BL808 SoC.
@@ -321,6 +360,8 @@ config ARCH_CHIP_K230
 	select ARCH_NEED_ADDRENV_MAPPING
 	select NUTTSBI_LATE_INIT if NUTTSBI
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		Kendryte K230 SoC (RV64GCV and RV64GCVX C908 cores).
@@ -336,13 +377,57 @@ config ARCH_CHIP_SG2000
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_MPU
 	select ARCH_MMU_TYPE_SV39
+	select ARCH_MMU_EXT_THEAD
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_S_MODE
 	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		SOPHGO SG2000 SoC.
+
+config ARCH_CHIP_EIC7700X
+	bool "ESWIN EIC7700X"
+	select ARCH_RV64
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_MPU
+	select ARCH_MMU_TYPE_SV39
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_S_MODE
+	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
+	select ALARM_ARCH
+	---help---
+		ESWIN EIC7700X SoC.
+
+config ARCH_CHIP_RP23XX_RV
+	bool "Raspberry Pi RP23XX RISC-V"
+	select ARCH_RV32
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
+	select ARCH_HAVE_PWM_MULTICHAN
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_TICKLESS
+	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
+	select ALARM_ARCH
+	select ARCH_HAVE_I2CRESET
+	select ARCH_BOARD_COMMON
+	---help---
+		Raspberry Pi RP23XX architectures (RISC-V dual Hazard3).
 
 config ARCH_CHIP_RISCV_CUSTOM
 	bool "Custom RISC-V chip"
@@ -359,7 +444,7 @@ config ARCH_RV32
 config ARCH_RV64
 	bool
 	default n
-	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF && !ARCH_RV64ILP32
+	select ARCH_64BIT if !ARCH_RV64ILP32
 
 config ARCH_RV64ILP32
 	bool
@@ -401,8 +486,16 @@ config ARCH_RV_VECTOR_BYTE_LENGTH
 
 endif
 
+config ARCH_RV_MACHINE_ISA_1_13
+	bool "Machine ISA Version 1.13 or later"
+	default n
+	---help---
+		Indicates support for Machine ISA Version 1.13 or later.
+		This version defined hardware error and software check exception codes,
+		which extend the range of exception codes from 0 ~ 15 to 0 ~ 19.
+
 config ARCH_RV_ISA_ZICSR_ZIFENCEI
-	bool
+	bool "Enable Zicsr and Zifencei extensions (GCC >= 12.1.0.)"
 	default y
 	---help---
 		https://sourceware.org/git/?p=binutils-gdb.git;a=commit;h=aed44286efa8ae8717a77d94b51ac3614e2ca6dc
@@ -450,6 +543,51 @@ config ARCH_RV_MMIO_BITS
 	default 32 if ARCH_RV32
 	default 64 if ARCH_RV64
 
+config ARCH_RV_CPUID_MAP
+	bool "Enable CPUID mapping"
+	default n
+	---help---
+		Enable CPUID mapping for systems where the hardware CPU IDs
+		need to be mapped to logical CPU IDs. This is useful for
+		systems with non-contiguous or non-linear CPU numbering.
+
+config ARCH_RV_HARTID_BASE
+	int "Base hartid of this cluster"
+	default 0
+	---help---
+		This setting is used in multi-cluster RISC-V systems where each hardware
+		thread (hart) has a globally unique mhartid value.
+
+		Purpose:
+		- Maps global hardware thread IDs (mhartid) to cluster-local IDs
+		- Enables NuttX to work with cluster-local hart IDs while maintaining
+		  global uniqueness across the system
+
+		Example:
+		In a system with:
+		- Cluster A: harts 100-103
+		- Cluster B: harts 200-203
+		- Cluster C: harts 300-303
+
+		If this is Cluster B's configuration, set ARCH_RV_HARTID_BASE=200.
+		NuttX will then map:
+		- Global hart 200 -> Local hart 0
+		- Global hart 201 -> Local hart 1
+		- Global hart 202 -> Local hart 2
+		- Global hart 203 -> Local hart 3
+
+		Key Points:
+		1. SMP_NCPUS defines the number of harts in this cluster
+		2. Global hart IDs within a cluster must be consecutive
+		3. Some chips like K230 don't use global mhartid numbering
+		4. The base value should match the starting mhartid of this cluster
+		5. Local hart IDs always start from 0 within each cluster
+
+		Special Cases:
+		- For chips like K230 that don't use global mhartid numbering,
+		  this value should typically be set to 0
+		- In single-cluster systems, this can usually remain at default (0)
+
 config ARCH_FAMILY
 	string
 	default "rv32" if ARCH_RV32
@@ -461,8 +599,8 @@ config ARCH_CHIP
 	default "k210"                  if ARCH_CHIP_K210
 	default "litex"                 if ARCH_CHIP_LITEX
 	default "bl602"                 if ARCH_CHIP_BL602
-	default "esp32c3-legacy"        if ARCH_CHIP_ESP32C3
-	default "esp32c3"               if ARCH_CHIP_ESP32C3_GENERIC
+	default "esp32c3-legacy"        if ARCH_CHIP_ESP32C3_LEGACY
+	default "esp32c3"               if ARCH_CHIP_ESP32C3
 	default "esp32c6"               if ARCH_CHIP_ESP32C6
 	default "esp32h2"               if ARCH_CHIP_ESP32H2
 	default "c906"                  if ARCH_CHIP_C906
@@ -475,11 +613,12 @@ config ARCH_CHIP
 	default "bl808"                 if ARCH_CHIP_BL808
 	default "k230"                  if ARCH_CHIP_K230
 	default "sg2000"                if ARCH_CHIP_SG2000
+	default "eic7700x"              if ARCH_CHIP_EIC7700X
+	default "rp23xx-rv"             if ARCH_CHIP_RP23XX_RV
 
 config ARCH_RISCV_INTXCPT_EXTENSIONS
 	bool "RISC-V Integer Context Extensions"
 	default n
-	depends on RV32M1_OPENISA_TOOLCHAIN
 	---help---
 		RISC-V could be customized with extensions. Some Integer Context
 		Registers have to be saved and restored when Contexts switch.
@@ -502,6 +641,13 @@ config ARCH_MMU_TYPE_SV32
 	default n
 	select ARCH_HAVE_MMU
 
+config ARCH_MMU_EXT_THEAD
+	bool "Enable T-Head MMU extension support"
+	default n
+	depends on ARCH_HAVE_MMU
+	---help---
+		Enable support for T-Head MMU extension.
+
 config ARCH_HAVE_S_MODE
 	bool
 	default n
@@ -519,7 +665,7 @@ config RISCV_MISALIGNED_HANDLER
 
 config RISCV_PERCPU_SCRATCH
 	bool "Enable Scratch-based Per-CPU storage"
-	default n
+	default y if LIB_SYSCALL
 	---help---
 		In some special chipsets, multiple CPUs may be bundled in one hardware
 		thread cluster, which results in hartid and cpuindex not being exactly
@@ -552,6 +698,30 @@ config ARCH_RV_EXT_SSTC
 	bool "Enable RISC-V SSTC extension support"
 	default n
 	depends on ARCH_USE_S_MODE
+
+config ARCH_RV_HAVE_APLIC
+	bool "Enable RISC-V Advanced Platform-Level Interrupt Controller support"
+	default n
+	---help---
+		Instead of PLIC, RISC-V also defines Advanced Platform-Level Interrupt
+		Controller (APLIC) to provide flexible interrupt control. This device
+		is not backward compatible with PLIC.
+
+config ARCH_RV_EXT_AIA
+	bool "Enable RISC-V SxAIA support"
+	default n
+	---help---
+		Advanced Interrupt Architecture defines necessary features that
+		impact the ISA at a hart. This should not be selected if the
+		target does not support SxAIA for the operating mode of NuttX.
+
+if ARCH_RV_EXT_AIA
+
+config ARCH_RV_HAVE_IMSIC
+	bool "Enable RISC-V AIA Incoming Message Controller support"
+	default n
+
+endif # ARCH_RV_EXT_AIA
 
 choice
 	prompt "Toolchain Selection"
@@ -600,7 +770,7 @@ config RISCV_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
 	bool "Cache coherence in semihosting hostfs"
 	depends on ARCH_DCACHE
 	---help---
-		Flush & Invalidte cache before & after bkpt instruction.
+		Flush & Invalidate cache before & after bkpt instruction.
 
 endif # RISCV_SEMIHOSTING_HOSTFS
 
@@ -612,9 +782,11 @@ choice
 
 config LITEX_CORE_VEXRISCV
 	bool "vexriscv core"
+	select ARCH_RV32
 
 config LITEX_CORE_VEXRISCV_SMP
 	bool "vexriscv_smp core"
+	select ARCH_RV32
 	select ARCH_HAVE_MPU
 	select ARCH_RV_ISA_C
 	select ARCH_MMU_TYPE_SV32
@@ -622,6 +794,23 @@ config LITEX_CORE_VEXRISCV_SMP
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_S_MODE
 	select ARCH_HAVE_ELF_EXECUTABLE
+	select ARCH_HAVE_PERF_EVENTS
+
+config LITEX_CORE_VEXIIRISCV
+	bool "vexiiriscv core"
+	select ARCH_RV64
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_MPU
+	select ARCH_MMU_TYPE_SV39
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_S_MODE
+	select ARCH_HAVE_ELF_EXECUTABLE
+	select ARCH_HAVE_PERF_EVENTS
 
 endchoice # LITEX Core Selection
 
@@ -642,10 +831,10 @@ endif
 if ARCH_CHIP_BL602
 source "arch/risc-v/src/bl602/Kconfig"
 endif
-if ARCH_CHIP_ESP32C3
+if ARCH_CHIP_ESP32C3_LEGACY
 source "arch/risc-v/src/esp32c3-legacy/Kconfig"
 endif
-if ARCH_CHIP_ESP32C3_GENERIC
+if ARCH_CHIP_ESP32C3
 source "arch/risc-v/src/esp32c3/Kconfig"
 endif
 if ARCH_CHIP_ESP32C6
@@ -684,4 +873,11 @@ endif
 if ARCH_CHIP_SG2000
 source "arch/risc-v/src/sg2000/Kconfig"
 endif
+if ARCH_CHIP_EIC7700X
+source "arch/risc-v/src/eic7700x/Kconfig"
+endif
+if ARCH_CHIP_RP23XX_RV
+source "arch/risc-v/src/rp23xx-rv/Kconfig"
+endif
+
 endif # ARCH_RISCV

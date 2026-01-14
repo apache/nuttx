@@ -1,15 +1,12 @@
 /****************************************************************************
  * arch/arm/src/lpc54xx/lpc54_lowputc.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Parts of this file were adapted from sample code provided for the
- * LPC54xx family from NXP which has a compatible BSD license.
- *
- *   Copyright (c) 2016, Freescale Semiconductor, Inc.
- *   Copyright (c) 2016 - 2017 , NXP
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2017 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Freescale Semiconductor Inc.
+ * SPDX-FileCopyrightText: 2016 - 2017, NXP
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -247,6 +244,8 @@
  ****************************************************************************/
 
 #ifdef HAVE_USART_CONSOLE
+static spinlock_t g_console_lock = SP_UNLOCKED;
+
 /* USART console configuration */
 
 static const struct uart_config_s g_console_config =
@@ -787,31 +786,17 @@ void arm_lowputc(char ch)
 #ifdef HAVE_USART_CONSOLE
   irqstate_t flags;
 
-  for (; ; )
-    {
-      /* Wait for the transmit FIFO to be not full */
+  /* Wait for the transmit FIFO to be not full */
 
-      while ((getreg32(CONSOLE_BASE + LPC54_USART_FIFOSTAT_OFFSET) &
-             USART_FIFOSTAT_TXNOTFULL) == 0)
-        {
-        }
+  flags = spin_lock_irqsave(&g_console_lock);
+  while ((getreg32(CONSOLE_BASE + LPC54_USART_FIFOSTAT_OFFSET) &
+          USART_FIFOSTAT_TXNOTFULL) == 0);
 
-      /* Disable interrupts so that the fest test and the transmission are
-       * atomic.
-       */
+  /* Send the character */
 
-      flags = spin_lock_irqsave(NULL);
-      if ((getreg32(CONSOLE_BASE + LPC54_USART_FIFOSTAT_OFFSET) &
-          USART_FIFOSTAT_TXNOTFULL) != 0)
-        {
-          /* Send the character */
+  putreg32((uint32_t)ch, CONSOLE_BASE + LPC54_USART_FIFOWR_OFFSET);
 
-          putreg32((uint32_t)ch, CONSOLE_BASE + LPC54_USART_FIFOWR_OFFSET);
-          spin_unlock_irqrestore(NULL, flags);
-          return;
-        }
+  spin_unlock_irqrestore(&g_console_lock, flags);
 
-      spin_unlock_irqrestore(NULL, flags);
-    }
 #endif
 }

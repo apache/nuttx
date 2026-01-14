@@ -1,13 +1,11 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_tsd.c
  *
- *   Copyright (C) 2013, 2016-2017 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *
- * The Atmel sample code has a BSD compatible license that requires this
- * copyright notice:
- *
- *   Copyright (c) 2011, Atmel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2016-2017 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2013 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2011 Atmel Corporation
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.orgr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -525,7 +523,7 @@ static void sam_tsd_bottomhalf(void *arg)
   uint32_t yscale;
   uint32_t y;
   uint32_t ydiff;
-#ifdef CONFIG_SAMA5_TSD_4WIRE  
+#ifdef CONFIG_SAMA5_TSD_4WIRE
   uint32_t z1;
   uint32_t z2;
   uint32_t pressr;
@@ -544,7 +542,7 @@ static void sam_tsd_bottomhalf(void *arg)
   /* Check the pen state. Down if:
    *   - Pen status is down OR
    *   - Pen down interrupt seen, but NOT if
-   *   - Pen up interrrupt occurred as we need to deal with that
+   *   - Pen up interrupt occurred as we need to deal with that
    */
 
   pendown = ((((pending & ADC_SR_PENS) != 0) ||
@@ -570,7 +568,7 @@ static void sam_tsd_bottomhalf(void *arg)
       ier = ADC_INT_PEN;
 #else
       ier = ADC_TSD_PRESSINTS;
-#endif      
+#endif
 
       /* Ignore the interrupt if the pen was already up (CONTACT_NONE == pen
        * up and already reported; CONTACT_UP == pen up, but not reported)
@@ -1473,7 +1471,7 @@ static void sam_tsd_trigperiod(struct sam_tsd_s *priv, uint32_t period)
   uint32_t regval;
   uint32_t div;
 
-  /* Divide trigger period avoid overflows.  Division by ten is awkard, but
+  /* Divide trigger period avoid overflows.  Division by ten is awkward, but
    * appropriate here because times are specified in decimal with lots of
    * zeroes.
    */
@@ -1549,7 +1547,7 @@ static void sam_tsd_debounce(struct sam_tsd_s *priv, uint32_t time)
 
   DEBUGASSERT(time > 0);
 
-  /* Divide time and ADCCLK to avoid overflows.  Division by ten is awkard,
+  /* Divide time and ADCCLK to avoid overflows.  Division by ten is awkward,
    * but appropriate here because times are specified in decimal with lots of
    * zeroes.
    */

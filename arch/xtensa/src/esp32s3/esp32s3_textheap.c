@@ -32,6 +32,7 @@
 #include <nuttx/kmalloc.h>
 
 #include "hal/cache_hal.h"
+#include "hal/cache_ll.h"
 #include "hardware/esp32s3_soc.h"
 
 #ifdef CONFIG_ESP32S3_RTC_HEAP
@@ -86,7 +87,7 @@ void *up_textheap_memalign(size_t align, size_t size)
 
   if (ret == NULL)
     {
-      ret = kmm_memalign(align, size);
+      ret = memalign(align, size);
       if (ret)
         {
           /* kmm_memalign buffer is at the Data bus offset.  Adjust it so we
@@ -136,7 +137,7 @@ void up_textheap_free(void *p)
 #endif
         {
           p = up_textheap_data_address(p);
-          kmm_free(p);
+          free(p);
         }
     }
 }
@@ -170,7 +171,7 @@ bool up_textheap_heapmember(void *p)
 #endif
 
   p = up_textheap_data_address(p);
-  return kmm_heapmember(p);
+  return umm_heapmember(p);
 }
 
 /****************************************************************************
@@ -191,7 +192,7 @@ bool up_textheap_heapmember(void *p)
  *
  ****************************************************************************/
 
-FAR void *up_textheap_data_address(FAR void *p)
+void *up_textheap_data_address(void *p)
 {
   uintptr_t addr = (uintptr_t)p;
   if (SOC_DIRAM_IRAM_LOW <= addr && addr < SOC_DIRAM_IRAM_HIGH)
@@ -206,7 +207,7 @@ FAR void *up_textheap_data_address(FAR void *p)
       addr -= EXTRAM_D_I_BUS_OFFSET;
     }
 
-  return (FAR void *)addr;
+  return (void *)addr;
 }
 
 /****************************************************************************
@@ -223,9 +224,39 @@ IRAM_ATTR void up_textheap_data_sync(void)
 {
   irqstate_t flags = enter_critical_section();
 
+#ifdef CONFIG_ESP32S3_SPIRAM
   esp_spiram_writeback_cache();
-  cache_hal_disable(CACHE_TYPE_INSTRUCTION);
-  cache_hal_enable(CACHE_TYPE_INSTRUCTION);
+#endif
+
+  cache_hal_disable(CACHE_LL_LEVEL_EXT_MEM, CACHE_TYPE_ALL);
+  cache_hal_enable(CACHE_LL_LEVEL_EXT_MEM, CACHE_TYPE_ALL);
 
   leave_critical_section(flags);
 }
+
+/****************************************************************************
+ * Name: up_copy_section
+ *
+ * Description:
+ *   This function copies a section from a general temporary buffer (src) to
+ *   a specific address (dest). This is typically used in architectures that
+ *   require specific handling of memory sections.
+ *
+ * Input Parameters:
+ *   dest - A pointer to the destination where the data needs to be copied.
+ *   src  - A pointer to the source from where the data needs to be copied.
+ *   n    - The number of bytes to be copied from src to dest.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_COPY_SECTION)
+int up_copy_section(void *dest, const void *src, size_t n)
+{
+  memcpy(up_textheap_data_address(dest), src, n);
+
+  return OK;
+}
+#endif

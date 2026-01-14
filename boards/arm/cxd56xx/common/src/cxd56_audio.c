@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/cxd56xx/common/src/cxd56_audio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -290,13 +292,13 @@ int board_external_amp_mute_control(bool en)
       /* Mute ON */
 
       ret = board_power_control(POWER_AUDIO_MUTE, false);
-      nxsig_usleep(MUTE_ON_DELAY);
+      nxsched_usleep(MUTE_ON_DELAY);
     }
   else
     {
       /* Mute OFF */
 
-      nxsig_usleep(MUTE_OFF_DELAY);
+      nxsched_usleep(MUTE_OFF_DELAY);
       ret = board_power_control(POWER_AUDIO_MUTE, true);
     }
 
@@ -499,7 +501,7 @@ int board_audio_initialize_driver(int minor)
 
   /* Create a device name */
 
-  snprintf(devname, 12, "pcm%d",  minor);
+  snprintf(devname, sizeof(devname), "pcm%d",  minor);
 
   /* Finally, we can register the PCM/CXD56 audio device. */
 
@@ -524,7 +526,7 @@ int board_audio_initialize_driver(int minor)
 
   /* Create a device name */
 
-  snprintf(devname, 12, "pcm_in%d",  minor);
+  snprintf(devname, sizeof(devname), "pcm_in%d",  minor);
 
   /* Finally, we can register the CXD56 audio input device. */
 

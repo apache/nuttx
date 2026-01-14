@@ -1,13 +1,11 @@
 /****************************************************************************
  * arch/arm/src/tiva/hardware/tm4c/tm4c_ethernet.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Includes some register bit definitions provided by:
- *
- *   Copyright (C) 2014 TRD2 Inc. All rights reserved.
- *   Author: Calvin Maguranis <calvin.maguranis@trd2inc.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2014 TRD2 Inc. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Calvin Maguranis <calvin.maguranis@trd2inc.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

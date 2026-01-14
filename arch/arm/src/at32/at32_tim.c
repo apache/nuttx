@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/at32/at32_tim.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -261,7 +263,7 @@
     defined(CONFIG_AT32_TIM9)  || defined(CONFIG_AT32_TIM10) || \
     defined(CONFIG_AT32_TIM11) || defined(CONFIG_AT32_TIM12) || \
     defined(CONFIG_AT32_TIM13) || defined(CONFIG_AT32_TIM14) || \
-    defined(CONFIG_AT32_TIM20) 
+    defined(CONFIG_AT32_TIM20)
 
 /****************************************************************************
  * Private Types

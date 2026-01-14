@@ -57,7 +57,7 @@ details on how an LCD screen is bound to an LCD character driver.
 Supported devices
 =================
 
-Re-usable LCD drivers reside in the drivers/lcd directory:
+Reusable LCD drivers reside in the drivers/lcd directory:
 
 LCDs
 ----

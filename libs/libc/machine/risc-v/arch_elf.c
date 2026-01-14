@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/risc-v/arch_elf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,6 +33,7 @@
 #include <assert.h>
 
 #include <nuttx/elf.h>
+#include <arch/barriers.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -43,11 +46,11 @@
 
 /* ELF32 and ELF64 definitions */
 
-#ifdef CONFIG_LIBC_ARCH_ELF_64BIT
+#ifdef CONFIG_ARCH_64BIT
 #  define ARCH_ELF_TYP_STR "64"
-#else /* !CONFIG_LIBC_ARCH_ELF_64BIT */
+#else /* !CONFIG_ARCH_64BIT */
 #  define ARCH_ELF_TYP_STR "32"
-#endif /* CONFIG_LIBC_ARCH_ELF_64BIT */
+#endif /* CONFIG_ARCH_64BIT */
 
 /****************************************************************************
  * Private Data Types
@@ -127,7 +130,7 @@ static void _set_val(uint16_t *addr, uint32_t val)
 
   /* NOTE: Ensure relocation before execution */
 
-  asm volatile ("fence.i");
+  UP_ISB();
 }
 
 static void _add_val(uint16_t *addr, uint32_t val)
@@ -272,7 +275,7 @@ static uintptr_t _find_hi20(void *arch_data, uintptr_t hi20_rel)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIBC_ARCH_ELF_64BIT
+#ifdef CONFIG_ARCH_64BIT
 static inline bool _valid_hi20_imm(long imm_hi)
 {
   /* 32-bit sign extend imm_hi and compare with the original value */
@@ -578,7 +581,7 @@ int up_relocateadd(const Elf_Rela *rel, const Elf_Sym *sym,
                 addr, _get_val((uint16_t *)addr),
                 sym, (uintptr_t)sym->st_value);
 
-          /* P.21 Unconditinal Jumps : UJ type (imm=20bit) */
+          /* P.21 Unconditional Jumps : UJ type (imm=20bit) */
 
           offset = (long)sym->st_value + (long)rel->r_addend - (long)addr;
           uint32_t val = _get_val((uint16_t *)addr) & 0xfffff000;

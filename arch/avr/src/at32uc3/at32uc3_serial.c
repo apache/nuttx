@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/avr/src/at32uc3/at32uc3_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -690,7 +692,7 @@ static bool up_txready(struct uart_dev_s *dev)
  *
  * Description:
  *   Performs the low level USART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before avr_serialinit.  NOTE:  This function depends on GPIO pin
  *   configuration performed in up_consoleinit() and main clock
  *   initialization performed in up_clkinitialize().
@@ -754,27 +756,16 @@ void avr_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   uint32_t imr;
 
   up_disableusartint(priv, &imr);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      avr_lowputc('\r');
-    }
-
   avr_lowputc(ch);
   up_restoreusartint(priv, imr);
 #endif
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -787,21 +778,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      avr_lowputc('\r');
-    }
-
   avr_lowputc(ch);
 #endif
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

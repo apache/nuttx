@@ -1,6 +1,8 @@
 /************************************************************************************
  * arch/hc/src/m9s12/m9s12_vectors.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -202,7 +204,7 @@ handlers:
  * Description:
  *	 Common IRQ handling logic
  *
- *   On entry in to vcommon: (1) The interrupt stack fram is in place, and (2) the
+ *   On entry in to vcommon: (1) The interrupt stack frame is in place, and (2) the
  *   IRQ number is in B.
  *
  *   On entry into an I- or X-interrupt, into an SWI, or into an undefined
@@ -223,7 +225,7 @@ handlers:
  *
  *   Low Address        <-- SP after state save
  *                [PPAGE]
- *                [soft regisers]
+ *                [soft registers]
  *                XYH
  *                XYL
  *                ZH
@@ -339,7 +341,7 @@ vcommon:
  *   thread, thereby completing a context switch.
  *
  *   Low Address  [PPAGE]
- *                [soft regisers]
+ *                [soft registers]
  *                XYH
  *                XYL
  *                ZH

@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/iob/iob_add_queue.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -61,7 +63,6 @@ static int iob_add_queue_internal(FAR struct iob_s *iob,
 
   qentry->qe_flink = NULL;
 
-  irqstate_t flags = spin_lock_irqsave(&g_iob_lock);
   if (!iobq->qh_head)
     {
       iobq->qh_head = qentry;
@@ -73,8 +74,6 @@ static int iob_add_queue_internal(FAR struct iob_s *iob,
       iobq->qh_tail->qe_flink = qentry;
       iobq->qh_tail = qentry;
     }
-
-  spin_unlock_irqrestore(&g_iob_lock, flags);
 
   return 0;
 }
@@ -131,5 +130,46 @@ int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
     }
 
   return iob_add_queue_internal(iob, iobq, qentry);
+}
+
+/****************************************************************************
+ * Name: iob_concat_queue
+ *
+ * Description:
+ *   Concatenate iob_s queue src to dest
+ *
+ ****************************************************************************/
+
+int iob_concat_queue(FAR struct iob_queue_s *dest,
+                     FAR struct iob_queue_s *src)
+{
+  FAR struct iob_qentry_s *qentry;
+  FAR struct iob_qentry_s *tailq;
+
+  /* Detach the list from the queue head so first for safety (should be safe
+   * anyway).
+   */
+
+  qentry = src->qh_head;
+  tailq = src->qh_tail;
+  src->qh_head = NULL;
+  src->qh_tail = NULL;
+
+  if (qentry)
+    {
+      if (!dest->qh_head)
+        {
+          dest->qh_head = qentry;
+          dest->qh_tail = tailq;
+        }
+      else
+        {
+          DEBUGASSERT(dest->qh_tail);
+          dest->qh_tail->qe_flink = qentry;
+          dest->qh_tail = tailq;
+        }
+    }
+
+  return 0;
 }
 #endif /* CONFIG_IOB_NCHAINS > 0 */

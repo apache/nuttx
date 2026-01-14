@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/mpfs/common/src/mpfs_ihc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -50,7 +52,7 @@ int mpfs_board_ihc_init(void)
 {
   int ret = 0;
 
-  /* With OpenSBI, initilization comes via mpfs_opensbi.c, not here */
+  /* With OpenSBI, initialization comes via mpfs_opensbi.c, not here */
 
 #ifndef CONFIG_MPFS_OPENSBI
 

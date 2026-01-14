@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/netlink/netlink_sockif.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,6 +36,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
@@ -140,8 +143,7 @@ static int netlink_setup(FAR struct socket *psock)
 
   /* Verify the socket type (domain should always be PF_NETLINK here) */
 
-  if (domain == PF_NETLINK &&
-      (type == SOCK_RAW || type == SOCK_DGRAM || type == SOCK_CTRL))
+  if (domain == PF_NETLINK && (type == SOCK_RAW || type == SOCK_DGRAM))
     {
       /* Allocate the NetLink socket connection structure and save it in the
        * new socket instance.
@@ -426,7 +428,7 @@ static void netlink_response_available(FAR void *arg)
    * condition?
    */
 
-  net_lock();
+  netlink_lock();
 
   if (conn->fds != NULL)
     {
@@ -443,7 +445,7 @@ static void netlink_response_available(FAR void *arg)
 
   conn->fds = NULL;
 
-  net_unlock();
+  netlink_unlock();
 }
 
 /****************************************************************************
@@ -489,7 +491,7 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
        * immediately (maybe).
        */
 
-      net_lock();
+      netlink_lock();
       if (netlink_check_response(conn))
         {
           revents |= POLLIN;
@@ -502,7 +504,7 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
       poll_notify(&fds, 1, revents);
       if (fds->revents != 0)
         {
-          net_unlock();
+          netlink_unlock();
           return OK;
         }
 
@@ -519,7 +521,7 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
           if (conn->fds != NULL)
             {
               nerr("ERROR: Multiple polls() on socket not supported.\n");
-              net_unlock();
+              netlink_unlock();
               return -EBUSY;
             }
 
@@ -536,7 +538,7 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
             }
         }
 
-      net_unlock();
+      netlink_unlock();
     }
   else
     {
@@ -672,9 +674,15 @@ static ssize_t netlink_recvmsg(FAR struct socket *psock,
   FAR socklen_t *fromlen = &msg->msg_namelen;
   FAR struct netlink_response_s *entry;
   FAR struct socket_conn_s *conn;
+  int ret = OK;
 
   DEBUGASSERT(from == NULL ||
               (fromlen != NULL && *fromlen >= sizeof(struct sockaddr_nl)));
+
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
 
   /* Find the response to this message.  The return value */
 
@@ -683,7 +691,7 @@ static ssize_t netlink_recvmsg(FAR struct socket *psock,
     {
       conn = psock->s_conn;
 
-      /* No response is variable, but presumably, one is expected.  Check
+      /* No response is available, but presumably, one is expected.  Check
        * if the socket has been configured for non-blocking operation.
        */
 
@@ -692,13 +700,15 @@ static ssize_t netlink_recvmsg(FAR struct socket *psock,
           return -EAGAIN;
         }
 
-      /* Wait for the response.  This should always succeed. */
+      /* Wait for the response. */
 
-      entry = netlink_get_response(psock->s_conn);
-      DEBUGASSERT(entry != NULL);
+      ret = netlink_get_response(psock->s_conn, &entry);
+
+      /* If interrupted by signals, return errno */
+
       if (entry == NULL)
         {
-          return -EPIPE;
+          return ret;
         }
     }
 
@@ -739,7 +749,6 @@ static ssize_t netlink_recvmsg(FAR struct socket *psock,
 static int netlink_close(FAR struct socket *psock)
 {
   FAR struct netlink_conn_s *conn = psock->s_conn;
-  int ret = OK;
 
   /* Perform some pre-close operations for the NETLINK socket type. */
 
@@ -753,14 +762,6 @@ static int netlink_close(FAR struct socket *psock)
 
       conn->crefs = 0;
       netlink_free(psock->s_conn);
-
-      if (ret < 0)
-        {
-          /* Return with error code, but free resources. */
-
-          nerr("ERROR: netlink_close failed: %d\n", ret);
-          return ret;
-        }
     }
   else
     {
@@ -769,7 +770,7 @@ static int netlink_close(FAR struct socket *psock)
       conn->crefs--;
     }
 
-  return ret;
+  return OK;
 }
 
 #endif /* CONFIG_NET_NETLINK */

@@ -2,6 +2,8 @@
 ESP-WROVER-KIT
 ==============
 
+.. tags:: chip:esp32, chip:esp32wrover32
+
 The `ESP-WROVER-KIT <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-wrover-kit.html>`_ is a development board for the ESP32 SoC from Espressif, based on a ESP32-WROVER-B module.
 
 .. list-table::
@@ -200,10 +202,13 @@ driver. You can find LVGL here::
 
 This configuration uses the LVGL demonstration at `apps/examples/lvgldemo`.
 
-mmcsdspi
---------
+sdmmc_spi
+---------
 
 This configuration is used to mount a FAT/FAT32 SD Card into the OS' filesystem.
+
+The SD slot number, SPI port number and minor number can be modified in ``Application Configuration → NSH Library``.
+
 To access the card's files, execute the following commands::
 
     nsh> mount -t vfat /dev/mmcsd0 /mnt

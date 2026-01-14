@@ -1,6 +1,8 @@
 # ##############################################################################
 # sched/misc/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -24,7 +26,7 @@ if(CONFIG_ARCH_DEADLOCKDUMP)
   list(APPEND SRCS deadlock.c)
 endif()
 
-if(CONFIG_BOARD_COREDUMP_SYSLOG OR CONFIG_BOARD_COREDUMP_BLKDEV)
+if(CONFIG_COREDUMP)
   list(APPEND SRCS coredump.c)
 endif()
 

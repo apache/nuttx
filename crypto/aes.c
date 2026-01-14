@@ -1,8 +1,8 @@
 /****************************************************************************
  * crypto/aes.c
- * $OpenBSD: aes.c,v 1.2 2020/07/22 13:54:30 tobhe Exp $
  *
- * Copyright (c) 2016 Thomas Pornin <pornin@bolet.org>
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: 2016 Thomas Pornin <pornin@bolet.org>
  *
  * Modified for OpenBSD by Thomas Pornin and Mike Belopuhov.
  *
@@ -25,6 +25,7 @@
  * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  ****************************************************************************/
 
 /****************************************************************************

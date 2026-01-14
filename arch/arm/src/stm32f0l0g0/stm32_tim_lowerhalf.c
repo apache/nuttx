@@ -1,14 +1,13 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/stm32_tim_lowerhalf.c
  *
- *   Copyright (C) 2019 Fundação CERTI. All rights reserved.
- *   Author: Daniel Pereira Volpato <dpo@certi.org.br>
- *
- *   Based on: arch/arm/src/stm32l4/stm32l4_tim_lowerhalf.c
- *   Authors: Wail Khemir <khemirwail@gmail.com>
- *            Paul Alexander Patience <paul-a.patience@polymtl.ca>
- *            dev@ziggurat29.com
- *            Sebastien Lorquet <sebastien@lorquet.fr>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2019 Fundação CERTI. All rights reserved.
+ * SPDX-FileContributor: Daniel Pereira Volpato <dpo@certi.org.br>
+ * SPDX-FileContributor: Wail Khemir <khemirwail@gmail.com>
+ * SPDX-FileContributor: Paul Alexander Patience <paul-a.patience@polymtl.ca>
+ * SPDX-FileContributor: dev@ziggurat29.com
+ * SPDX-FileContributor: Sebastien Lorquet <sebastien@lorquet.fr>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

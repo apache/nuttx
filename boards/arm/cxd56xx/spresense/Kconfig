@@ -409,7 +409,7 @@ endmenu
 endif # CXD56_AUDIO_ALC_SPC_SEL_ALC
 
 if CXD56_AUDIO_ALC_SPC_SEL_SPC
-menu "Sound Pressure Conter setting"
+menu "Sound Pressure Counter setting"
 config CXD56_AUDIO_SPC_LIMIT
 	int "Limit levels of Sound Pressure Counter.[(1/10)dB]"
 	default 0
@@ -870,5 +870,24 @@ config CXD56_GNSS_ADDON_LATE_INITIALIZE
 		after system booted up by enabling this configuration switch.
 
 endif # CXD56_GNSS_ADDON
+
+menu "CXD5602PWBIMU Add-on board"
+	depends on SENSORS_CXD5602PWBIMU
+
+config CXD56_CXD5602PWBIMU_SPI5_DMAC
+	bool "Use DMAC on data transfer"
+	default y
+	select CXD56_SPI5
+	select CXD56_DMAC_SPI5_TX
+	select CXD56_DMAC_SPI5_RX
+
+config CXD56_CXD5602PWBIMU_LATE_INITIALIZE
+	bool "CXD5602PWBIMU driver late initialization"
+	default n
+	---help---
+		The CXD5602PWBIMU driver can be initialized on an application code
+		after system booted up by enabling this configuration switch.
+
+endmenu # CXD5602PWBIMU Add-on board
 
 endif

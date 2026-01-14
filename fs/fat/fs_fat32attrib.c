@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/fat/fs_fat32attrib.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,11 +48,11 @@
 static int fat_attrib(const char *path, fat_attrib_t *retattrib,
                       fat_attrib_t setbits, fat_attrib_t clearbits)
 {
-  struct fat_mountpt_s *fs;
+  FAR struct fat_mountpt_s *fs;
   struct fat_dirinfo_s dirinfo;
   struct inode_search_s desc;
   FAR struct inode *inode;
-  uint8_t *direntry;
+  FAR uint8_t *direntry;
   uint8_t oldattributes;
   uint8_t newattributes;
   int ret;
@@ -174,7 +176,7 @@ errout:
  * Name: fat_getattrib
  ****************************************************************************/
 
-int fat_getattrib(const char *path, fat_attrib_t *attrib)
+int fat_getattrib(FAR const char *path, FAR fat_attrib_t *attrib)
 {
   return fat_attrib(path, attrib, 0, 0);
 }
@@ -183,7 +185,7 @@ int fat_getattrib(const char *path, fat_attrib_t *attrib)
  * Name: fat_setattrib
  ****************************************************************************/
 
-int fat_setattrib(const char *path, fat_attrib_t setbits,
+int fat_setattrib(FAR const char *path, fat_attrib_t setbits,
                   fat_attrib_t clearbits)
 {
   return fat_attrib(path, NULL, setbits, clearbits);

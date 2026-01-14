@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/rtl8720c/ameba_uart.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1017,7 +1019,7 @@ static void ameba_putc(struct ameba_s *priv, int ch)
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before uart_serialinit.
  *
  *   NOTE: Configuration of the CONSOLE UART was performed by uart_lowsetup()
@@ -1074,21 +1076,11 @@ void arm_serialinit(void)
  ****************************************************************************/
 
 #ifdef HAVE_AMEBA_CONSOLE
-int up_putc(int ch)
+void up_putc(int ch)
 {
   struct ameba_s *priv = (struct ameba_s *)CONSOLE_DEV.priv;
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      ameba_putc(priv, '\r');
-    }
-
   ameba_putc(priv, ch);
-  return ch;
 }
 
 #endif

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_allocateheap.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -201,7 +203,7 @@ extern  const uint32_t  _ram_size[];  /* See linker script */
 #  define IMXRT_OCRAM_ASSIGNED 1
 #elif defined(CONFIG_IMXRT_DTCM_HEAP) && !defined(IMXRT_DCTM_ASSIGNED)
 #  define REGION1_RAM_START    IMXRT_DTCM_BASE
-#  define REGION1_RAM_SIZE     CONFIG_DTCM_USED
+#  define REGION1_RAM_SIZE     (CONFIG_IMXRT_DTCM_HEAP_SIZE * 1024)
 #  define IMXRT_DCTM_ASSIGNED 1
 #elif defined(CONFIG_IMXRT_SDRAM_HEAP) && !defined(IMXRT_SDRAM_ASSIGNED)
 #  define REGION1_RAM_START    (CONFIG_IMXRT_SDRAM_START + CONFIG_IMXRT_SDRAM_HEAPOFFSET)

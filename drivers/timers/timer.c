@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/timers/timer.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,11 +41,12 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/mutex.h>
 #include <nuttx/timers/timer.h>
+#include <sys/poll.h>
 
 #ifdef CONFIG_TIMER
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* This structure describes the state of the upper half driver */
@@ -53,6 +56,7 @@ struct timer_upperhalf_s
   mutex_t lock;            /* Supports mutual exclusion */
   uint8_t crefs;           /* The number of times the device has been opened */
   FAR char *path;          /* Registration path */
+  FAR struct pollfd *fds;
 
   /* The contained signal info */
 
@@ -77,6 +81,8 @@ static ssize_t timer_write(FAR struct file *filep, FAR const char *buffer,
                            size_t buflen);
 static int     timer_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
+static int     timer_poll(FAR struct file *filep,
+                          FAR struct pollfd *fds, bool setup);
 
 /****************************************************************************
  * Private Data
@@ -90,6 +96,9 @@ static const struct file_operations g_timerops =
   timer_write, /* write */
   NULL,        /* seek */
   timer_ioctl, /* ioctl */
+  NULL,        /* mmap */
+  NULL,        /* truncate */
+  timer_poll,  /* poll */
 };
 
 /****************************************************************************
@@ -114,6 +123,8 @@ static bool timer_notifier(FAR uint32_t *next_interval_us, FAR void *arg)
   DEBUGASSERT(upper != NULL);
 
   /* Signal the waiter.. if there is one */
+
+  poll_notify(&upper->fds, 1, POLLIN);
 
   nxsig_notification(notify->pid, &notify->event, SI_QUEUE, &upper->work);
 
@@ -195,15 +206,7 @@ static int timer_close(FAR struct file *filep)
       return ret;
     }
 
-  /* Decrement the references to the driver.  If the reference count will
-   * decrement to 0, then uninitialize the driver.
-   */
-
-  if (upper->crefs > 0)
-    {
-      upper->crefs--;
-    }
-
+  upper->crefs--;
   nxmutex_unlock(&upper->lock);
   return OK;
 }
@@ -322,6 +325,24 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 
+    case TCIOC_TICK_GETSTATUS:
+      {
+        FAR struct timer_status_s *status;
+
+        /* Get the current timer status */
+
+        status = (FAR struct timer_status_s *)((uintptr_t)arg);
+        if (status)
+          {
+            ret = TIMER_TICK_GETSTATUS(lower, status);
+          }
+        else
+          {
+            ret = -EINVAL;
+          }
+      }
+      break;
+
     /* cmd:         TCIOC_SETTIMEOUT
      * Description: Reset the timeout to this value
      * Argument:    A 32-bit timeout value in microseconds.
@@ -335,6 +356,22 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         /* Set a new timeout value (and reset the timer) */
 
         ret = TIMER_SETTIMEOUT(lower, (uint32_t)arg);
+      }
+      break;
+
+    /* cmd:         TCIOC_TICK_SETTIMEOUT
+     * Description: Reset the timeout to this value
+     * Argument:    A 32-bit timeout value in ticks.
+     *
+     * TODO: pass pointer to uint64 ns? Need to determine if these timers
+     * are 16 or 32 bit...
+     */
+
+    case TCIOC_TICK_SETTIMEOUT:
+      {
+        /* Set a new timeout value (and reset the timer) */
+
+        ret = TIMER_TICK_SETTIMEOUT(lower, (uint32_t)arg);
       }
       break;
 
@@ -374,6 +411,19 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 
+    /* cmd:         TCIOC_TICK_MAXTIMEOUT
+     * Description: Get the maximum supported timeout value
+     * Argument:    A 32-bit timeout value in ticks.
+     */
+
+    case TCIOC_TICK_MAXTIMEOUT:
+      {
+        /*  Get the maximum supported timeout value */
+
+        ret = TIMER_TICK_MAXTIMEOUT(lower, (FAR uint32_t *)arg);
+      }
+      break;
+
     /* Any unrecognized IOCTL commands might be platform-specific ioctl
      * commands
      */
@@ -393,6 +443,43 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     }
 
   nxmutex_unlock(&upper->lock);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: timer_poll
+ ****************************************************************************/
+
+static int timer_poll(FAR struct file *filep,
+                      FAR struct pollfd *fds, bool setup)
+{
+  FAR struct inode             *inode = filep->f_inode;
+  FAR struct timer_upperhalf_s *upper = inode->i_private;
+  irqstate_t flags;
+  int ret = OK;
+
+  DEBUGASSERT(upper != NULL && fds != NULL);
+
+  flags = enter_critical_section();
+
+  if (setup)
+    {
+      if (upper->fds)
+        {
+          ret = -EBUSY;
+          goto errout;
+        }
+
+      upper->fds = fds;
+    }
+  else
+    {
+      upper->fds = NULL;
+    }
+
+errout:
+  leave_critical_section(flags);
+
   return ret;
 }
 
@@ -560,7 +647,7 @@ int timer_setcallback(FAR void *handle, tccb_t callback, FAR void *arg)
 
   /* Check if the lower half driver supports the setcallback method */
 
-  if (lower->ops->setcallback != NULL) /* Optional */
+  if (lower->ops->setcallback != NULL)
     {
       /* Yes.. Defer the handler attachment to the lower half driver */
 

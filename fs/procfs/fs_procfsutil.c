@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/procfs/fs_procfsutil.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -91,7 +93,7 @@
 
 size_t procfs_memcpy(FAR const char *src, size_t srclen,
                      FAR char *dest, size_t destlen,
-                     off_t *offset)
+                     FAR off_t *offset)
 {
   size_t copysize;
   size_t lnoffset;
@@ -152,7 +154,7 @@ int procfs_snprintf(FAR char *buf, size_t size,
  * Name: procfs_sprintf
  *
  * Description:
- *   This function used to continous format string and copy it to buffer.
+ *   This function used to continuous format string and copy it to buffer.
  *   Every single string length must be smaller then LINEBUF_SIZE.
  *
  * Input Parameters:

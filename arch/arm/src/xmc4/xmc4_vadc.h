@@ -1,6 +1,8 @@
 /********************************************************************************************************
  * arch/arm/src/xmc4/xmc4_vadc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -16,19 +18,22 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
+ ********************************************************************************************************/
+
+/********************************************************************************************************
  * May include some logic from sample code provided by Infineon:
  *
- * Copyright (C) 2011-2015 Infineon Technologies AG. All rights reserved.
+ *   Copyright (C) 2011-2015 Infineon Technologies AG. All rights reserved.
  *
  * Infineon Technologies AG (Infineon) is supplying this software for use
  * with Infineon's microcontrollers.  This file can be freely distributed
  * within development tools that are supporting such microcontrollers.
  *
- * THIS SOFTWARE IS PROVIDED AS IS. NO WARRANTIES, WHETHER EXPRESS,
- * IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS
- * SOFTWARE. INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR
- * SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+ * THIS SOFTWARE IS PROVIDED AS IS. NO WARRANTIES, WHETHER EXPRESS, IMPLIED
+ * OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS
+ * SOFTWARE. INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL,
+ * INCIDENTAL, OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
  ********************************************************************************************************/
 
@@ -582,7 +587,7 @@ int xmc4_vadc_group_channel_initialize(vadc_group_t *const group_ptr,
  *
  * Description:
  *   Adds a channel to the background scan sequence. The pending
- *   register are updated only after a new load event occured.
+ *   register are updated only after a new load event occurred.
  *   Configures the register bit fields of BRSSEL.
  *
  * Returned Value:

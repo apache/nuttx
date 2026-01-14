@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/common/src/stm32_tone.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -22,7 +24,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
 #include <nuttx/config.h>
 
 #include <errno.h>
@@ -115,7 +116,7 @@ int board_tone_initialize(int devno)
 
       /* Register the Audio Tone driver at "/dev/tone0" */
 
-      snprintf(devpath, 12, "/dev/tone%d", devno);
+      snprintf(devpath, sizeof(devpath), "/dev/tone%d", devno);
       ret = tone_register(devpath, tone, oneshot);
       if (ret < 0)
         {

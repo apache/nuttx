@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/rp2040/common/src/rp2040_max6675.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -74,7 +76,7 @@ int board_max6675_initialize(int devno, int busno)
 
   /* Then register the temperature sensor */
 
-  snprintf(devpath, 12, "/dev/temp%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/temp%d", devno);
   ret = max6675_register(devpath, spi);
   if (ret < 0)
     {

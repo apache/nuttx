@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/nucleo-f446re/src/stm32_adc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -69,7 +71,7 @@ static const uint8_t  g_adc1_chanlist[ADC1_NCHANNELS] =
 static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS]  =
 {
   GPIO_ADC1_IN0,
-  GPIO_ADC1_IN0
+  GPIO_ADC1_IN1
 };
 
 #else

@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stdlib/lib_realpath.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,7 +38,8 @@
  * Public Functions
  ****************************************************************************/
 
-FAR char *realpath(FAR const char *path, FAR char *resolved)
+FAR char *lib_realpath(FAR const char *path, FAR char *resolved,
+                       bool notfollow)
 {
 #ifdef CONFIG_PSEUDOFS_SOFTLINKS
   FAR char *wbuf[2] =
@@ -179,6 +182,13 @@ loop:
   memcpy(&p[1], path, q - path);
   p[1 + q - path] = '\0';
 
+  if (notfollow)
+    {
+      p += 1 + q - path;
+      path = q;
+      goto loop;
+    }
+
   /* If this component is a symlink, toss it and prepend link
    * target to unresolved path.
    */
@@ -265,4 +275,9 @@ out:
 #endif
 
   return NULL;
+}
+
+FAR char *realpath(FAR const char *path, FAR char *resolved)
+{
+  return lib_realpath(path, resolved, false);
 }

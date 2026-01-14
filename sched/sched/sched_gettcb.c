@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_gettcb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -56,7 +58,7 @@ FAR struct tcb_s *nxsched_get_tcb(pid_t pid)
   irqstate_t flags;
   int hash_ndx;
 
-  flags = spin_lock_irqsave_wo_note(NULL);
+  flags = enter_critical_section();
 
   /* Verify whether g_pidhash hash table has already been allocated and
    * whether the PID is within range.
@@ -84,7 +86,7 @@ FAR struct tcb_s *nxsched_get_tcb(pid_t pid)
         }
     }
 
-  spin_unlock_irqrestore_wo_note(NULL, flags);
+  leave_critical_section(flags);
 
   /* Return the TCB. */
 

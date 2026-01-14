@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/esp32c3_spiflash_mtd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -407,7 +409,7 @@ static ssize_t esp32c3_bread_decrypt(struct mtd_dev_s *dev,
  *   buffer - data buffer pointer
  *
  * Returned Value:
- *   Writen bytes if success or a negative value if fail.
+ *   Written bytes if success or a negative value if fail.
  *
  ****************************************************************************/
 
@@ -461,7 +463,7 @@ static ssize_t esp32c3_write(struct mtd_dev_s *dev, off_t offset,
  *   buffer     - data buffer pointer
  *
  * Returned Value:
- *   Writen block number if success or a negative value if fail.
+ *   Written block number if success or a negative value if fail.
  *
  ****************************************************************************/
 
@@ -510,7 +512,7 @@ static ssize_t esp32c3_bwrite(struct mtd_dev_s *dev, off_t startblock,
  *   buffer     - data buffer pointer
  *
  * Returned Value:
- *   Writen block number if success or a negative value if fail.
+ *   Written block number if success or a negative value if fail.
  *
  ****************************************************************************/
 

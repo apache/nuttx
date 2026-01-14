@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/risc-v/src/qemu-rv/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -35,6 +37,14 @@ endif()
 
 if(CONFIG_MM_PGALLOC)
   list(APPEND SRCS qemu_rv_pgalloc.c)
+endif()
+
+if(CONFIG_BUILD_PROTECTED)
+  list(APPEND SRCS qemu_rv_userspace.c)
+endif()
+
+if(CONFIG_RPTUN)
+  list(APPEND SRCS qemu_rv_rptun.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32/common/src/esp32_board_spi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -71,7 +73,7 @@ static inline uint8_t spi_status(struct spi_dev_s *dev, uint32_t devid)
 static inline int spi_cmddata(struct spi_dev_s *dev, uint32_t devid,
                               bool cmd)
 {
-#if defined(CONFIG_LCD_ILI9341) || defined(CONFIG_LCD_SSD1680) || defined(CONFIG_LCD_ST7789)
+#if defined(CONFIG_LCD_ILI9341) || defined(CONFIG_LCD_SSD1680) || defined(CONFIG_LCD_ST7789) || defined(CONFIG_LCD_GC9A01)
   if (devid == SPIDEV_DISPLAY(0))
     {
       /*  This is the Data/Command control pad which determines whether the

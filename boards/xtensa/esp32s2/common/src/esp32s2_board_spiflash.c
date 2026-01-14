@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s2/common/src/esp32s2_board_spiflash.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <sys/mount.h>
+#include <sys/param.h>
 
 #include "inttypes.h"
 #include <stdbool.h>
@@ -38,29 +41,97 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/nxffs.h>
-#ifdef CONFIG_BCH
-#include <nuttx/drivers/drivers.h>
-#endif
+#include <nuttx/fs/partition.h>
 
-#include "esp32s2_spiflash.h"
-#include "esp32s2_spiflash_mtd.h"
+#include "espressif/esp_spiflash.h"
+#include "espressif/esp_spiflash_mtd.h"
 #include "esp32s2-saola-1.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_ESP32S2_STORAGE_MTD_OFFSET
-#  define CONFIG_ESP32S2_STORAGE_MTD_OFFSET 0x10000
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_HAVE_OTA_PARTITION
+static int init_ota_partitions(void);
 #endif
 
-#ifndef CONFIG_ESP32S2_STORAGE_MTD_SIZE
-#  define CONFIG_ESP32S2_STORAGE_MTD_SIZE 0x100000
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_HAVE_OTA_PARTITION
+static const struct partition_s g_ota_partition_table[] =
+{
+  {
+    .name       = CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_DEVPATH,
+    .index      = 0,
+    .firstblock = CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET,
+    .blocksize  = CONFIG_ESPRESSIF_OTA_SLOT_SIZE,
+  },
+  {
+    .name       = CONFIG_ESPRESSIF_OTA_SECONDARY_SLOT_DEVPATH,
+    .index      = 1,
+    .firstblock = CONFIG_ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET,
+    .blocksize  = CONFIG_ESPRESSIF_OTA_SLOT_SIZE,
+  },
+  {
+    .name       = CONFIG_ESPRESSIF_OTA_SCRATCH_DEVPATH,
+    .index      = 2,
+    .firstblock = CONFIG_ESPRESSIF_OTA_SCRATCH_OFFSET,
+    .blocksize  = CONFIG_ESPRESSIF_OTA_SCRATCH_SIZE,
+  }
+};
 #endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: init_ota_partitions
+ *
+ * Description:
+ *   Initialize partitions that are dedicated to firmware OTA update.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_HAVE_OTA_PARTITION
+static int init_ota_partitions(void)
+{
+  struct mtd_dev_s *mtd;
+  int ret = OK;
+
+  for (int i = 0; i < nitems(g_ota_partition_table); ++i)
+    {
+      const struct partition_s *part = &g_ota_partition_table[i];
+      mtd = esp_spiflash_alloc_mtdpart(part->firstblock, part->blocksize);
+
+      ret = register_mtddriver(part->name, mtd, 0755, NULL);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: register_mtddriver %s failed: %d\n",
+                 part->name, ret);
+          return ret;
+        }
+    }
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: setup_smartfs
@@ -281,9 +352,8 @@ static int init_storage_partition(void)
   int ret = OK;
   struct mtd_dev_s *mtd;
 
-  mtd = esp32s2_spiflash_alloc_mtdpart(CONFIG_ESP32S2_STORAGE_MTD_OFFSET,
-                                       CONFIG_ESP32S2_STORAGE_MTD_SIZE,
-                                       false);
+  mtd = esp_spiflash_alloc_mtdpart(CONFIG_ESPRESSIF_STORAGE_MTD_OFFSET,
+                                   CONFIG_ESPRESSIF_STORAGE_MTD_SIZE);
   if (!mtd)
     {
       syslog(LOG_ERR, "ERROR: Failed to alloc MTD partition of SPI Flash\n");
@@ -330,10 +400,10 @@ static int init_storage_partition(void)
 
 #else
 
-  ret = register_mtddriver("/dev/esp32s2flash", mtd, 0755, NULL);
+  ret = register_mtddriver("/dev/mtdblock0", mtd, 0755, NULL);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register MTD: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to register MTD mtdblock0: %d\n", ret);
       return ret;
     }
 
@@ -358,11 +428,19 @@ int board_spiflash_init(void)
 {
   int ret = OK;
 
-  ret = esp32s2_spiflash_init();
+  ret = esp_spiflash_init();
   if (ret < 0)
     {
       return ret;
     }
+
+#ifdef CONFIG_ESPRESSIF_HAVE_OTA_PARTITION
+  ret = init_ota_partitions();
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
 
   ret = init_storage_partition();
   if (ret < 0)
@@ -372,4 +450,3 @@ int board_spiflash_init(void)
 
   return ret;
 }
-

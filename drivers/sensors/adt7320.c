@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/adt7320.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,10 +46,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_ADT7320_SPI_FREQUENCY
-#  define CONFIG_ADT7320_SPI_FREQUENCY 1000000
-#endif
-
 #define ADT7320_SPI_MODE (SPIDEV_MODE3) /* SPI Mode 3: CPOL=1,CPHA=1 */
 
 /* Centigrade to Fahrenheit conversion:  F = 9*C/5 + 32 */
@@ -56,7 +54,7 @@
 #define B16_32     (32 * 65536)
 
 /****************************************************************************
- * Private
+ * Private Types
  ****************************************************************************/
 
 struct adt7320_dev_s

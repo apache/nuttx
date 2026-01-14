@@ -1,23 +1,16 @@
 /****************************************************************************
  * arch/arm/src/lpc2378/lpc23xx_i2c.c
  *
- *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Derived from arch/arm/src/lpc17xx_40xx/lpc17xx_40xx_i2c.c
- *
- *   Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
- *   Author: Li Zhuoyi <lzyy.cn@gmail.com> (Original author)
- *
- * Derived from arch/arm/src/lpc31xx/lpc31_i2c.c
- *
- *   Author: David Hewson
- *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2011 Li Zhuoyi. All rights reserved.
+ * SPDX-FileCopyrightText: 2010 Rommel Marcelo. All rights reserved.
+ * SPDX-FileCopyrightText: 2014-2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2012,2013 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2010-2011 Gregory Nutt. All rights reserved.
+ * SPDX-FileContributor: David Hewson
+ * SPDX-FileContributor: Rommel Marcelo
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Li Zhuoyi <lzyy.cn@gmail.com> (Original author)
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/hardware/mpfs_sysreg.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -134,6 +136,11 @@
 #define MPFS_SYSREG_SPARE_REGISTER_RO_OFFSET           0x02D8 /* Register for ECO usage */
 #define MPFS_SYSREG_SPARE_PERIM_RW_OFFSET              0x02DC /* Spare signal back to G5C */
 #define MPFS_SYSREG_SPARE_FIC_OFFSET                   0x02E0 /* Unused FIC resets */
+
+#define MPFS_SYSREG_SOFT_RESET_CR     (MPFS_SYSREG_BASE + \
+                                       MPFS_SYSREG_SOFT_RESET_CR_OFFSET)
+#define MPFS_SYSREG_SUBBLK_CLOCK_CR   (MPFS_SYSREG_BASE + \
+                                       MPFS_SYSREG_SUBBLK_CLOCK_CR_OFFSET)
 
 /* Register bit field definitions *******************************************/
 

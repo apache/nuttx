@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/phy62xx/flash.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -68,7 +70,7 @@
 
 #define CHIP_MADDR_LEN          6
 
-/* xip flash read instrcution */
+/* xip flash read instruction */
 
 #define XFRD_FCMD_READ          0x0000003
 #define XFRD_FCMD_READ_DUAL     0x801003B

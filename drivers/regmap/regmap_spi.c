@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/regmap/regmap_spi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -189,7 +191,7 @@ regmap_init_spi(FAR struct spi_dev_s *spi, uint32_t freq,
   dev->base.read      = regmap_spi_read;
 
   dev->trans.deselect = true;        /* De-select after transfer. */
-  dev->seq.dev        = devid;       /* SPI controler hard cs index. */
+  dev->seq.dev        = devid;       /* SPI controller hard cs index. */
   dev->seq.mode       = mode;        /* See enum spi_mode_e. */
   dev->seq.nbits      = 8;           /* Number of bits, Only supports 8bit. */
   dev->seq.ntrans     = 1;           /* Number of transactions. */

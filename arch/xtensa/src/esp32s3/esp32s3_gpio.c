@@ -403,7 +403,7 @@ void esp32s3_gpioirqinitialize(void)
 
   /* Setup the GPIO interrupt. */
 
-  cpu = up_cpu_index();
+  cpu = this_cpu();
 
   g_gpio_cpuint = esp32s3_setup_irq(cpu, ESP32S3_PERIPH_GPIO_INT_CPU, 1,
                                     ESP32S3_CPUINT_LEVEL);

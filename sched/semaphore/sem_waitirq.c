@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/semaphore/sem_waitirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,7 +30,6 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/addrenv.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
@@ -52,16 +53,16 @@
  *   2. From logic associated with sem_timedwait().  This function is called
  *      when the timeout elapses without receiving the semaphore.
  *
- *   Note: this function should used within critical_section
+ *   Note: this function should be used within critical_section.
  *
  * Input Parameters:
  *   wtcb    - A pointer to the TCB of the task that is waiting on a
  *             semphaphore, but has received a signal or timeout instead.
  *   errcode - EINTR if the semaphore wait was awakened by a signal;
- *             ETIMEDOUT if awakened by a timeout
+ *             ETIMEDOUT if awakened by a timeout.
  *
  * Returned Value:
- *   None
+ *   None.
  *
  * Assumptions:
  *
@@ -71,21 +72,22 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR sem_t *sem = wtcb->waitobj;
-
-#ifdef CONFIG_ARCH_ADDRENV
-  FAR struct addrenv_s *oldenv;
-
-  if (wtcb->addrenv_own)
-    {
-      addrenv_select(wtcb->addrenv_own, &oldenv);
-    }
-#endif
+  bool mutex = NXSEM_IS_MUTEX(sem);
 
   /* It is possible that an interrupt/context switch beat us to the punch
    * and already changed the task's state.
    */
 
-  DEBUGASSERT(sem != NULL && sem->semcount < 0);
+  DEBUGASSERT(sem != NULL);
+  DEBUGASSERT(mutex || atomic_read(NXSEM_COUNT(sem)) < 0);
+  DEBUGASSERT(!mutex || NXSEM_MBLOCKING(atomic_read(NXSEM_MHOLDER(sem))));
+
+  /* Mutex is never interrupted by a signal or canceled */
+
+  if (mutex && (errcode == EINTR || errcode == ECANCELED))
+    {
+      return;
+    }
 
   /* Restore the correct priority of all threads that hold references
    * to this semaphore.
@@ -93,24 +95,21 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 
   nxsem_canceled(wtcb, sem);
 
-  /* And increment the count on the semaphore.  This releases the count
-   * that was taken by sem_post().  This count decremented the semaphore
-   * count to negative and caused the thread to be blocked in the first
-   * place.
-   */
-
-  sem->semcount++;
-
   /* Remove task from waiting list */
 
   dq_rem((FAR dq_entry_t *)wtcb, SEM_WAITLIST(sem));
 
-#ifdef CONFIG_ARCH_ADDRENV
-  if (wtcb->addrenv_own)
+  /* This restores the value to what it was before the previous sem_wait.
+   * This caused the thread to be blocked in the first place.
+   *
+   * For mutexes, the holder is updated by the thread itself
+   * when it exits nxsem_wait
+   */
+
+  if (!mutex)
     {
-      addrenv_restore(oldenv);
+      atomic_fetch_add(NXSEM_COUNT(sem), 1);
     }
-#endif
 
   /* Indicate that the wait is over. */
 
@@ -126,6 +125,6 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 
   if (nxsched_add_readytorun(wtcb))
     {
-      up_switch_context(wtcb, rtcb);
+      up_switch_context(this_task(), rtcb);
     }
 }

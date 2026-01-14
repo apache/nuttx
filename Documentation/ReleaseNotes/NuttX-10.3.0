@@ -25,9 +25,9 @@ NuttX-10.3.0
 * [#5681](https://github.com/apache/nuttx/pull/5681) Simplify and unify fcntl with FIOCLEX and FIONCLEX 
 * [#5082](https://github.com/apache/nuttx/pull/5082) compile/flags: add FRAME_POINTER into Toolchain.defs 
 * [#5199](https://github.com/apache/nuttx/pull/5199) file_operations: get back C89 compatible initializer 
-* [#5065](https://github.com/apache/nuttx/pull/5065) reanme CONFIG_USER_ENTRYPOINT to CONFIG_INIT_ENTRYPOINT
+* [#5065](https://github.com/apache/nuttx/pull/5065) rename CONFIG_USER_ENTRYPOINT to CONFIG_INIT_ENTRYPOINT
 * [#5399](https://github.com/apache/nuttx/pull/5399) Add CONFIG_NDEBUG Kconfig to control NDEBUG definition 
-* [#5347](https://github.com/apache/nuttx/pull/5347) register_driver: fix driver modes accross the code 
+* [#5347](https://github.com/apache/nuttx/pull/5347) register_driver: fix driver modes across the code 
 * [#5509](https://github.com/apache/nuttx/pull/5509) libc.csv: Add pthread_setname_np and pthread_getname_np 
 * [#5364](https://github.com/apache/nuttx/pull/5364) libc.csv: Add more symbols 
 
@@ -106,7 +106,7 @@ NuttX-10.3.0
 * [#5527](https://github.com/apache/nuttx/pull/5527) libnx: handle the bad message correctly 
 * [#5321](https://github.com/apache/nuttx/pull/5321) libxx: uclibxx: add patch use overload constructor of filebuf & ostream 
 * [#4747](https://github.com/apache/nuttx/pull/4747) Revert "libc: Implement fesetround & fegetround for arm" 
-* [#4739](https://github.com/apache/nuttx/pull/4739) Revert "lib/netdb: Change the default NETDB_DNSCLIENT_NAMESIZE to NAM… 
+* [#4739](https://github.com/apache/nuttx/pull/4739) Revert "lib/netdb: Change the default NETDB_DNSCLIENT_NAMESIZE to NAME… 
 
 * [#5459](https://github.com/apache/nuttx/pull/5459) mm: mm_heap: add mm_foreach to run handler for every memory node
 * [#5504](https://github.com/apache/nuttx/pull/5504) mm: handle take mm sem in IRQ 
@@ -157,7 +157,7 @@ NuttX-10.3.0
 * [#5266](https://github.com/apache/nuttx/pull/5266) sched: IDLE thread will not boost up when IDLE hold sem 
 * [#5540](https://github.com/apache/nuttx/pull/5540) sched: semaphore: fix corner case sem_waitirq assert crash 
 * [#4682](https://github.com/apache/nuttx/pull/4682) sched: cpuload: fix crash because of the member of g_pidhash is NULL 
-* [#5171](https://github.com/apache/nuttx/pull/5171) sched: semphore: release all semphores' holder that the task held when exit 
+* [#5171](https://github.com/apache/nuttx/pull/5171) sched: semaphore: release all semaphores' holder that the task held when exit 
 * [#5063](https://github.com/apache/nuttx/pull/5063) sched: wqueue: fix NO leave_critical_section() when only CONFIG_SCHED_HPWORK 
 
 ## Major Changes to the Build System
@@ -409,11 +409,11 @@ NuttX-10.3.0
 * [#5188](https://github.com/apache/nuttx/pull/5188) arch: sim: Rename up_vfork_x[32|64].S to up_vfork_x86[_64].S 
 * [#5179](https://github.com/apache/nuttx/pull/5179) arch: sim: Move spiflash simulation to drivers/spi instead 
 * [#5178](https://github.com/apache/nuttx/pull/5178) arch: sim: Rename up_vfork[32|64].S to up_vfork_x[32|64].S 
-* [#5431](https://github.com/apache/nuttx/pull/5431) arch: sim: Don't add up_tls_size in up_use_stack before foward to up_create_stack 
+* [#5431](https://github.com/apache/nuttx/pull/5431) arch: sim: Don't add up_tls_size in up_use_stack before forward to up_create_stack 
 * [#4487](https://github.com/apache/nuttx/pull/4487) arch: sim: Don't add -lc++abi to STDLIBS 
 * [#4791](https://github.com/apache/nuttx/pull/4791) arch: sim: btuart: Remove the unnecessary config 
 * [#5313](https://github.com/apache/nuttx/pull/5313) arch: sim: netdev: retrieve all the queued RX frames from the network device on every poll 
-* [#4696](https://github.com/apache/nuttx/pull/4696) arch: sim: rptun: Trigger the callback only the sequnece number change 
+* [#4696](https://github.com/apache/nuttx/pull/4696) arch: sim: rptun: Trigger the callback only the sequence number change 
 * [#5286](https://github.com/apache/nuttx/pull/5286) arch: sim: up_macho_init.c: Add a workaround for Monterey 
 * [#5046](https://github.com/apache/nuttx/pull/5046) arch: sim: usrsock: increase the sim usrsock buffer size 
 * [#5030](https://github.com/apache/nuttx/pull/5030) arch: sim: usrsock: reuse the socket address to avoid bind timeout 
@@ -531,7 +531,7 @@ NuttX-10.3.0
 * [#5636](https://github.com/apache/nuttx/pull/5636) arch: risc-v/qemu-rv: Set FS bits in mstatus 
 * [#5529](https://github.com/apache/nuttx/pull/5529) arch: risc-v/qemu-rv: Supports SMP up to 8 cores and other minor changes 
 * [#4825](https://github.com/apache/nuttx/pull/4825) arch: risc-v/xtensa: Kconfig: Some cleanup and improvements to arch versions of C library functions. 
-* [#5683](https://github.com/apache/nuttx/pull/5683) arch: risc-v/xtensa: corrent dumpstate xcp size 
+* [#5683](https://github.com/apache/nuttx/pull/5683) arch: risc-v/xtensa: correct dumpstate xcp size 
 * [#5717](https://github.com/apache/nuttx/pull/5717) Revert "arch: risc-v: Correct FPU register save area in riscv_copystate" 
 
 #### SPARC
@@ -544,7 +544,7 @@ NuttX-10.3.0
 * [#4688](https://github.com/apache/nuttx/pull/4688) arch: xtensa: Kconfig: add quotes in source to clean warnings from setconfig 
 * [#5738](https://github.com/apache/nuttx/pull/5738) arch: xtensa: Save exception cause and vaddr into the user frame 
 * [#5149](https://github.com/apache/nuttx/pull/5149) arch: xtensa: Rename up_stack_color to xtensa_stack_color. 
-* [#5198](https://github.com/apache/nuttx/pull/5198) arch: xtensa: fix lack of float register save & resotre 
+* [#5198](https://github.com/apache/nuttx/pull/5198) arch: xtensa: fix lack of float register save & restore 
 * [#4663](https://github.com/apache/nuttx/pull/4663) arch: xtensa: Correctly save/restore coprocessor0 state. 
 * [#5450](https://github.com/apache/nuttx/pull/5450) arch: xtensa: kconfig: move ARCH_HAVE_TESTSET config to chip 
 * [#5648](https://github.com/apache/nuttx/pull/5648) arch: xtensa: fix sp duplicate reduce in handler enter 
@@ -558,7 +558,7 @@ NuttX-10.3.0
 * [#4683](https://github.com/apache/nuttx/pull/4683) arch: xtensa: mpu: modify acc and memtype to uint32_t 
 * [#4664](https://github.com/apache/nuttx/pull/4664) arch: xtensa: xtensa_context.S: Save and restore SCOMPARE1 when necessary. 
 * [#4669](https://github.com/apache/nuttx/pull/4669) arch: xtensa: xtensa_cpupause.c: Allow a spin before taking the g_cpu_wait spinlock. 
-* [#5336](https://github.com/apache/nuttx/pull/5336) arch: xtensa: use swint to swith context 
+* [#5336](https://github.com/apache/nuttx/pull/5336) arch: xtensa: use swint to switch context 
 * [#5679](https://github.com/apache/nuttx/pull/5679) arch: xtensa: xtensa_user_handler.S: Store EXCCAUSE and EXCVADDR into the user frame.
 * [#5000](https://github.com/apache/nuttx/pull/5000) arch: xtensa: correct the interrupt stack on irq handler 
 
@@ -644,7 +644,7 @@ NuttX-10.3.0
 * [#4530](https://github.com/apache/nuttx/pull/4530) drivers: mmcsd: Add RPMB ioctl 
 * [#5215](https://github.com/apache/nuttx/pull/5215) drivers: mmcsd: sdio.c: Fix struct packing of sdio_resp_r5 
 * [#5155](https://github.com/apache/nuttx/pull/5155) drivers: mmcsd: sdio: Move sdio utils functions to drivers/mmcsd
-* [#4472](https://github.com/apache/nuttx/pull/4472) drivers: mmcsd: sdio: Update the defintion to the latest spec 
+* [#4472](https://github.com/apache/nuttx/pull/4472) drivers: mmcsd: sdio: Update the definition to the latest spec 
 * [#5294](https://github.com/apache/nuttx/pull/5294) drivers: mmcsd: add option to limit block count in multiple-block trans… 
 * [#5182](https://github.com/apache/nuttx/pull/5182) drivers: motor: Move simulated drivers from sim to common place 
 * [#4833](https://github.com/apache/nuttx/pull/4833) drivers: motor: add upperhalf structure 
@@ -655,7 +655,7 @@ NuttX-10.3.0
 * [#4891](https://github.com/apache/nuttx/pull/4891) drivers: mtd: ramtron: Remove errant code and definitions 
 * [#4995](https://github.com/apache/nuttx/pull/4995) drivers: mtd/filemtd: improve write and erase access 
 * [#4964](https://github.com/apache/nuttx/pull/4964) drivers: note: noteram: when the buffer overflow happen and give the asan report 
-* [#4763](https://github.com/apache/nuttx/pull/4763) drivers: pipes: pipe close should notify block writting, and write will return … 
+* [#4763](https://github.com/apache/nuttx/pull/4763) drivers: pipes: pipe close should notify block writing, and write will return … 
 * [#5425](https://github.com/apache/nuttx/pull/5425) drivers: pipes: Remove pipe from file system after open 
 * [#5475](https://github.com/apache/nuttx/pull/5475) drivers: pipes: Don't use sched_[lock|unlock] to do protection 
 * [#5423](https://github.com/apache/nuttx/pull/5423) drivers: pipes: Add DEV_PIPE_VFS_PATH to specify the pipe location 
@@ -703,7 +703,7 @@ NuttX-10.3.0
 * [#5217](https://github.com/apache/nuttx/pull/5217) drivers: syslog: Fix in file channel initialization. 
 * [#5021](https://github.com/apache/nuttx/pull/5021) drivers: syslog/rpmsg: using up_putc to force flush syslog_rpmsg buffer 
 * [#5333](https://github.com/apache/nuttx/pull/5333) drivers: timers: Add weak_function for up_ function 
-* [#5265](https://github.com/apache/nuttx/pull/5265) drivers: timers: dirctly call rpmsg_rtc_server_xx() in server_ept_cb() 
+* [#5265](https://github.com/apache/nuttx/pull/5265) drivers: timers: directly call rpmsg_rtc_server_xx() in server_ept_cb() 
 * [#5743](https://github.com/apache/nuttx/pull/5743) drivers: timers: timer: Add option for non-periodic notification 
 * [#5232](https://github.com/apache/nuttx/pull/5232) drivers: timers: rpmsg_rtc: resolve deadlock when the receive SYNC cmd 
 * [#5230](https://github.com/apache/nuttx/pull/5230) drivers: timers: Simplify the RTC rpmsg driver implementation 
@@ -711,7 +711,7 @@ NuttX-10.3.0
 * [#5594](https://github.com/apache/nuttx/pull/5594) drivers: video: vncserver: Allow fb operation while no connection 
 * [#5510](https://github.com/apache/nuttx/pull/5510) drivers: video: vncserver: Fix dead lock on re-connect 
 * [#5369](https://github.com/apache/nuttx/pull/5369) drivers: usbdev: cdcacm:support returning c_cflag & speed via termios 
-* [#5249](https://github.com/apache/nuttx/pull/5249) drivers: usbdev: Fix aligment issue: pktbuf needs to be 16bit aligned 
+* [#5249](https://github.com/apache/nuttx/pull/5249) drivers: usbdev: Fix alignment issue: pktbuf needs to be 16bit aligned 
 * [#4766](https://github.com/apache/nuttx/pull/4766) drivers: Fix syslog_write failed 
 * [#4757](https://github.com/apache/nuttx/pull/4757) drivers: rptun: add ns_unbind_notify support 
 * [#4974](https://github.com/apache/nuttx/pull/4974) drivers: rptun: support can_recursive check for openamp 
@@ -845,7 +845,7 @@ NuttX-10.3.0
 * [#4665](https://github.com/apache/nuttx/pull/4665) boards: risc-v: k210: Fix -march and -mabi 
 * [#5067](https://github.com/apache/nuttx/pull/5067) boards: risc-v: mpfs: update m100pfsevp board info 
 * [#5688](https://github.com/apache/nuttx/pull/5688) boards: risc-v: mpfs: MPFS USB driver 
-* [#5111](https://github.com/apache/nuttx/pull/5111) boards: risc-v: m100pfsevp: Decrease DDR lane temination values to 40 ohm and … 
+* [#5111](https://github.com/apache/nuttx/pull/5111) boards: risc-v: m100pfsevp: Decrease DDR lane termination values to 40 ohm and … 
 * [#5500](https://github.com/apache/nuttx/pull/5500) boards: risc-v: bl602: Remove -D__NuttX__ from Makefile 
 * [#5515](https://github.com/apache/nuttx/pull/5515) boards: risc-v: rv-virt: Supports FPU test and ostest in both rv32/rv64 
 
@@ -857,7 +857,7 @@ NuttX-10.3.0
 * [#5186](https://github.com/apache/nuttx/pull/5186) boards: sim: Turn on more rpmsg drivers in rpserver config 
 * [#5101](https://github.com/apache/nuttx/pull/5101) boards: sim: Remove sim_tsc_setup 
 * [#5561](https://github.com/apache/nuttx/pull/5561) boards: sim: defconfig for hello_rust 
-* [#5535](https://github.com/apache/nuttx/pull/5535) boards: sim: Enable Rust suppport for hello_rust application. 
+* [#5535](https://github.com/apache/nuttx/pull/5535) boards: sim: Enable Rust support for hello_rust application. 
 * [#5640](https://github.com/apache/nuttx/pull/5640) boards: sim: Remove CCLINKFLAGS, use CFLAGS/CXXFLAGS instead 
 * [#5501](https://github.com/apache/nuttx/pull/5501) boards: sim: Add adb config for test 
 * [#5121](https://github.com/apache/nuttx/pull/5121) boards: sim: recovered eth0 interface in sim:tcpblaster configuration 
@@ -978,7 +978,7 @@ NuttX-10.3.0
 * [#5239](https://github.com/apache/nuttx/pull/5239) net: tcp/sendfile: NET_TCP_WRITE_BUFFERS and NET_SENDFILE were inconsistent with each other 
 * [#5293](https://github.com/apache/nuttx/pull/5293) net: tcp/sendfile: fixed an issue with unackseq calculation. 
 * [#5272](https://github.com/apache/nuttx/pull/5272) net: tcp/sendfile: retransmit only one the earliest not acknowledged segment 
-* [#5013](https://github.com/apache/nuttx/pull/5013) net: udp: fix the invaild udp destination address 
+* [#5013](https://github.com/apache/nuttx/pull/5013) net: udp: fix the invalid udp destination address 
 * [#4890](https://github.com/apache/nuttx/pull/4890) net: udp/icmp: correct the unreadchable handling 
 * [#5154](https://github.com/apache/nuttx/pull/5154) net: usrsock: replace xid type to uint64_t to avoid limitation of connections 
 

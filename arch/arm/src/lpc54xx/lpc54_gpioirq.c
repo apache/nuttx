@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lpc54xx/lpc54_gpioirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -78,7 +80,7 @@ static const uint8_t g_pinirq[MAX_PININT] =
  *
  * Description:
  *   Initialize logic to support interrupting GPIO pins.  This function is
- *   called by the OS inialization logic and is not a user interface.
+ *   called by the OS initialization logic and is not a user interface.
  *
  ****************************************************************************/
 
@@ -118,7 +120,7 @@ static int lpc54_alloc_pinint(lpc54_pinset_t pinset)
  *
  * Description:
  *   Initialize logic to support interrupting GPIO pins.  This function is
- *   called by the OS inialization logic and is not a user interface.
+ *   called by the OS initialization logic and is not a user interface.
  *
  ****************************************************************************/
 

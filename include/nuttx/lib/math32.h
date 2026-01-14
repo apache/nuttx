@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/lib/math32.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,13 +28,20 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
+#include <limits.h>
 #include <inttypes.h>
 #include <stdint.h>
+#include <strings.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define div_round_up(n, d)      (((n) + (d) - 1) / (d))
+#define div_round_closest(n, d) ((((n) < 0) ^ ((d) < 0)) ? \
+                                (((n) - (d)/2)/(d)) : (((n) + (d)/2)/(d)))
 
 /* Returns one plus the index of the most significant 1-bit of n,
  * or if n is zero, returns zero.
@@ -91,6 +100,18 @@ struct uint64_s
 #endif
 };
 
+typedef struct invdiv_param32_s
+{
+  uint32_t mult;
+  uint8_t  shift;
+} invdiv_param32_t;
+
+typedef struct invdiv_param64_s
+{
+  uint64_t mult;
+  uint8_t  shift;
+} invdiv_param64_t;
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -106,6 +127,465 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+#define flsx(n) ((sizeof(n) <= sizeof(long)) ? flsl(n) : flsll(n))
+
+/****************************************************************************
+ * Name: log2ceil
+ *
+ * Description:
+ *   Calculate the up-rounded power-of-two for input.
+ *
+ * Input Parameters:
+ *   x - Argument to calculate the power-of-two from.
+ *
+ * Returned Value:
+ *   Power-of-two for argument, rounded up.
+ *
+ ****************************************************************************/
+
+#define log2ceil(n) (IS_POWER_OF_2(n) ? (flsx(n) - 1) : flsx(n))
+
+/****************************************************************************
+ * Name: log2floor
+ *
+ * Description:
+ *   Calculate the down-rounded (truncated) power-of-two for input.
+ *
+ * Input Parameters:
+ *   x - Argument to calculate the power-of-two from.
+ *
+ * Returned Value:
+ *   Power-of-two for argument, rounded (truncated) down.
+ *
+ ****************************************************************************/
+
+#define log2floor(n) (flsx(n) - 1)
+
+/* roundup_pow_of_two() - Round up to nearest power of two
+ * n: value to round up
+ */
+
+#define roundup_pow_of_two(n) (((n) - (n) + 1) << flsx((n) - 1))
+
+/* rounddown_pow_of_two() - Round down to nearest power of two
+ * n: value to round down
+ */
+
+#define rounddown_pow_of_two(n) (((n) - (n) + 1) << (flsx(n) - 1))
+
+/* order_base_2 - Calculate the (rounded up) base 2 order of the argument
+ * n: parameter
+ *
+ * The first few values calculated by this routine:
+ *  ob2(0) = 0
+ *  ob2(1) = 0
+ *  ob2(2) = 1
+ *  ob2(3) = 2
+ *  ob2(4) = 2
+ *  ob2(5) = 3
+ *  ... and so on.
+ */
+
+#define order_base_2(n) ((n) > 1 ? log2floor((n) - 1) + 1 : 0)
+
+/* If the divisor happens to be constant, we determine the appropriate
+ * inverse at compile time to turn the division into a few inline
+ * multiplications which ought to be much faster.
+ *
+ * (It is unfortunate that gcc doesn't perform all this internally.)
+ */
+
+#ifdef CONFIG_HAVE_LONG_LONG
+/* Default C implementation for umul64_const()
+ *
+ * Prototype: uint64_t umul64_const(uint64_t retval, uint64_t m,
+ *                                  uint64_t n, bool bias);
+ * Semantic:  retval = ((bias ? m : 0) + m * n) >> 64
+ *
+ * The product is a 128-bit value, scaled down to 64 bits.
+ * Assuming constant propagation to optimize away unused conditional code.
+ * Architectures may provide their own optimized assembly implementation.
+ */
+
+#  ifdef up_umul64_const
+#    define umul64_const(res, m, n, bias) \
+      (res) = up_umul64_const(m, n, bias)
+#  else
+#    define umul64_const(res, m, n, bias) \
+      do \
+        { \
+          uint32_t __m_lo = (m) & 0xffffffff; \
+          uint32_t __m_hi = (m) >> 32; \
+          uint32_t __n_lo = (n) & 0xffffffff; \
+          uint32_t __n_hi = (n) >> 32; \
+          uint32_t __res_lo; \
+          uint32_t __res_hi; \
+          uint32_t __tmp; \
+          \
+          if (!(bias)) \
+            { \
+              (res) = ((uint64_t)__m_lo * __n_lo) >> 32; \
+            } \
+          else if (!((m) & ((1ULL << 63) | (1ULL << 31)))) \
+            { \
+              (res) = ((m) + (uint64_t)__m_lo * __n_lo) >> 32; \
+            } \
+          else \
+            { \
+              (res) = (m) + (uint64_t)__m_lo * __n_lo; \
+              __res_lo = (res) >> 32; \
+              __res_hi = (__res_lo < __m_hi); \
+              (res) = __res_lo | ((uint64_t)__res_hi << 32); \
+            } \
+          \
+          if (!((m) & ((1ULL << 63) | (1ULL << 31)))) \
+            { \
+              (res) += (uint64_t)__m_lo * __n_hi; \
+              (res) += (uint64_t)__m_hi * __n_lo; \
+              (res) >>= 32; \
+            } \
+          else \
+            { \
+              (res) += (uint64_t)__m_lo * __n_hi; \
+              __tmp = (res) >> 32; \
+              (res) += (uint64_t)__m_hi * __n_lo; \
+              __res_lo = (res) >> 32; \
+              __res_hi = (__res_lo < __tmp); \
+              (res) = __res_lo | ((uint64_t)__res_hi << 32); \
+            } \
+          \
+          (res) += (uint64_t)__m_hi * __n_hi; \
+        } \
+      while (0)
+#  endif
+
+#  define div64_const32(n, b) \
+    do \
+      { \
+        uint64_t ___res; \
+        uint64_t ___x; \
+        uint64_t ___t; \
+        uint64_t ___m; \
+        uint64_t ___n = (n); \
+        uint32_t ___p; \
+        uint32_t ___bias; \
+        uint32_t ___b = (b); \
+        ___p = 1 << LOG2_FLOOR(___b); \
+        ___m = (~0ULL / ___b) * ___p; \
+        ___m += (((~0ULL % ___b + 1) * ___p) + ___b - 1) / ___b; \
+        ___x = ~0ULL / ___b * ___b - 1; \
+        ___res = ((___m & 0xffffffff) * (___x & 0xffffffff)) >> 32; \
+        ___t = ___res += (___m & 0xffffffff) * (___x >> 32); \
+        ___res += (___x & 0xffffffff) * (___m >> 32); \
+        ___t = (___res < ___t) ? (1ULL << 32) : 0; \
+        ___res = (___res >> 32) + ___t; \
+        ___res += (___m >> 32) * (___x >> 32); \
+        ___res /= ___p; \
+        if (~0ULL % (___b / (___b & -___b)) == 0) \
+          { \
+            ___n /= (___b & -___b); \
+            ___m = ~0ULL / (___b / (___b & -___b)); \
+            ___p = 1; \
+            ___bias = 1; \
+          } \
+        else if (___res != ___x / ___b) \
+          { \
+            ___bias = 1; \
+            ___m = (~0ULL / ___b) * ___p; \
+            ___m += ((~0ULL % ___b + 1) * ___p) / ___b; \
+          } \
+        else \
+          { \
+            uint32_t ___bits = -(___m & -___m); \
+            ___bits |= ___m >> 32; \
+            ___bits = (~___bits) << 1; \
+            if (!___bits) \
+              { \
+                ___p /= (___m & -___m); \
+                ___m /= (___m & -___m); \
+              } \
+            else \
+              { \
+                ___p >>= LOG2_FLOOR(___bits); \
+                ___m >>= LOG2_FLOOR(___bits); \
+              } \
+            ___bias = 0; \
+          } \
+        umul64_const(___res, ___m, ___n, ___bias); \
+        \
+        ___res /= ___p; \
+        (n) = ___res; \
+      } \
+    while (0)
+
+#endif
+
+#if defined(CONFIG_HAVE_LONG_LONG) && defined(CONFIG_HAVE_EXPRESSION_STATEMENT)
+#  define div64_const(n, base) \
+    ({ \
+      uint64_t __n = (n); \
+      uint32_t __base = (base); \
+      if (IS_POWER_OF_2(__base)) \
+        { \
+          (__n) >>= LOG2_FLOOR(__base); \
+        } \
+      else if (UINTPTR_MAX == UINT32_MAX) \
+        { \
+          div64_const32(__n, __base); \
+        } \
+      else \
+        { \
+          __n /= __base; \
+        } \
+        __n; \
+      })
+
+#  define div_const(n, base) \
+    ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const(n, base) : ((n) / (base)))
+#  define div_const_roundup(n, base) \
+    ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + (base) - 1, base) : \
+     (((n) + (base) - 1) / (base)))
+#  define div_const_roundnearest(n, base) \
+    ((sizeof(typeof(n)) == sizeof(uint64_t)) ? div64_const((n) + ((base) / 2), base) : \
+     (((n) + ((base) / 2)) / (base)))
+#else
+#  define div_const(n, base) ((n) / (base))
+#  define div_const_roundup(n, base) (((n) + (base) - 1) / (base))
+#  define div_const_roundnearest(n, base) (((n) + ((base) / 2)) / (base))
+#endif
+
+/* Division optimizing method proposed by T. Granlund and L. Montgomery.
+ * This method converts the runtime-invariant integer division
+ * into multiplication and right-shifting.
+ *
+ * Usage:
+ * If you want to do n/d division where d is an invariant integer,
+ * initialize the param by `invdiv_init_param(d, param)` first,
+ * then do the division by `invdiv(n, param)`.
+ */
+
+/****************************************************************************
+ * Name: invdiv_init_param32
+ *
+ * Description:
+ *   Calculate the triple (multiplier, right shift number 1, right shift
+ * number 2) during initialization.
+ *
+ * Input Parameters:
+ *   d - The divisor (unsigned integer). d != 0 and d != 1 is required.
+ *
+ * Output Parameters:
+ *   param - The invariant division parameter to be cached.
+ *
+ ****************************************************************************/
+
+static inline_function
+void invdiv_init_param32(uint32_t d, FAR invdiv_param32_t *param)
+{
+  int      l  = log2ceil(d);
+  uint64_t t1 = (uint64_t)1 << 32;
+  uint64_t t2 = (uint64_t)1 << l;
+
+  param->mult  = (t1 * (t2 - d)) / d + 1;
+#if ULONG_MAX == 4294967295UL
+  param->shift = l - 1;
+#else
+  param->shift = l;
+#endif
+}
+
+/****************************************************************************
+ * Name: invdiv_u32
+ *
+ * Description:
+ *   Return the result of `n / d`
+ *   The division is realized by multiplication and right shift,
+ *   where d is already converted to invdiv_param_t.
+ *
+ * Input Parameters:
+ *   n - The dividend (uint32_t).
+ *   param - The invariant division parameter already cached.
+ *
+ * Returned Value:
+ *  The result of `n / d`
+ *
+ ****************************************************************************/
+
+static inline_function
+uint64_t invdiv_u32(uint32_t n, FAR const invdiv_param32_t *param)
+{
+  uint8_t  sh = param->shift;
+#if ULONG_MAX == 4294967295UL
+  uint32_t m  = param->mult;
+  uint32_t t1 = ((uint64_t)m * n) >> 32; /* UMULH if supported */
+  uint32_t t2 = (n - t1) >> 1;
+#else
+  /* This division can be 25% faster using 64-bit register. */
+
+  uint64_t m  = param->mult;
+  uint64_t t1 = (m * n) >> 32;
+  uint32_t t2 = n;
+#endif
+
+  return (t1 + t2) >> sh;
+}
+
+/* Helper function to do n bits integer division. */
+
+#define invdiv_udiv_soft(arr, n, q, d) \
+do \
+{ \
+    uint32_t idx; \
+    uint32_t bits_per_idx = sizeof(uint64_t) * 8; \
+    uint32_t bits_max = bits_per_idx * n; \
+    uint64_t reminder = 0ull; \
+    uint64_t high_rem = 0ull; \
+    for (idx = 0; idx < bits_max; idx++) \
+      { \
+        uint32_t bits = bits_max - idx - 1; \
+        uint32_t bits_idx = bits / bits_per_idx; \
+        uint32_t bits_idx_off = bits % bits_per_idx; \
+        reminder <<= 1u; \
+        reminder |= ((arr)[bits_idx] >> bits_idx_off) & 1u; \
+        if (reminder >= (d)) \
+          { \
+            reminder    -= (d); \
+            q[bits_idx] |= (1ull << bits_idx_off); \
+          } \
+        else if (high_rem != 0) \
+          { \
+            uint64_t c   = 0ull - (d); \
+            high_rem    -= 1; \
+            reminder    += c; \
+            q[bits_idx] |= (1ull << bits_idx_off); \
+          } \
+        high_rem += (reminder >> (bits_per_idx - 1)) & 1u; \
+      } \
+} \
+while(0)
+
+/* Helper function to calculate 2 64-bit unsigned integers multiplication
+ * The result is the highest half of the 128-bit unsigned integer.
+ */
+
+static inline_function uint64_t invdiv_umulh64(uint64_t a, uint64_t b)
+{
+#ifndef __SIZEOF_INT128__
+  /* If the compiler do not support uint128_t */
+
+  uint64_t al = a & UINT32_MAX;
+  uint64_t ah = a >> 32;
+  uint64_t bl = b & UINT32_MAX;
+  uint64_t bh = b >> 32;
+
+  uint64_t m1 = al * bl;
+  uint64_t m2 = ah * bl;
+  uint64_t m3 = al * bh;
+  uint64_t m4 = ah * bh;
+
+  uint64_t c = (m1 >> 32) + (m2 & UINT32_MAX) + (m3 & UINT32_MAX);
+
+  return m4 + (m2 >> 32) + (m3 >> 32) + (c >> 32);
+#else
+  /* This code will be compiled to UMULH instruction
+   * on the architectures like x86_64 and AArch64.
+   * The UMULH instruction can calculate the highest half
+   * of the 128-bit multiplication result.
+   * It is faster than any of software implementation.
+   * If the compiler do not support uint128_t, it is better to manually
+   * implement this function using UMULH instructions via
+   * the inline assembly.
+   */
+
+  __uint128_t res128 = (__uint128_t)a * b;
+  return res128 >> 64;
+#endif
+}
+
+/****************************************************************************
+ * Name: invdiv_init_param64
+ *
+ * Description:
+ *   Calculate the triple (multiplier, right shift number 1, right shift
+ * number 2) during initialization.
+ *
+ * Input Parameters:
+ *   d - The divisor (unsigned integer), d != 0 and d != 1 is required.
+ *
+ * Output Parameters:
+ *   param - The invariant division parameter to be cached.
+ *
+ ****************************************************************************/
+
+static inline_function
+void invdiv_init_param64(uint64_t d, FAR invdiv_param64_t *param)
+{
+  int      l = log2ceil(d);
+  uint64_t t = ((uint64_t)1 << l) - d;
+
+#ifndef __SIZEOF_INT128__
+  /* If the compiler do not support UINT128 */
+
+  uint64_t q[2];
+  uint64_t mres[2];
+
+  /* Calculate the mult via 2^64 * (2^l - d) / d + 1
+   * It is equal to ((2^l - d) << 64) / d + 1. So...
+   */
+
+  mres[1] = t;
+  mres[0] = 0;
+  q[0] = 0;
+  q[1] = 0;
+
+  /* Then, do the 128-bit division. */
+
+  invdiv_udiv_soft(mres, 2, q, d);
+
+  param->mult = q[0] + 1;
+#else
+  param->mult  = ((__uint128_t)1 << 64) * t / d + 1;
+#endif
+  param->shift = l - 1;
+}
+
+/****************************************************************************
+ * Name: invdiv_u64
+ *
+ * Description:
+ *   Return the result of `n / d`
+ *   The division is realized by multiplication and right shift,
+ *   where d is already converted to invdiv_param_t.
+ *
+ * Input Parameters:
+ *   n - The dividend (uint64_t).
+ *   param - The invariant division parameter already cached.
+ *
+ * Returned Value:
+ *  The result of `n / d`
+ *
+ ****************************************************************************/
+
+static inline_function
+uint64_t invdiv_u64(uint64_t n, FAR const invdiv_param64_t *param)
+{
+  uint64_t t1;
+  uint64_t t2;
+  uint64_t m   = param->mult;
+  uint8_t  sh1 = 1;
+  uint8_t  sh2 = param->shift;
+
+  /* Calculate the 128-bit mres = 64-bit n * 64-bit m, where t1 = mres >> 64.
+   * Please do not use `umul64_const` or `umul64` here.
+   * The `invdiv_umulh64` has significant better performance over them.
+   */
+
+  t1 = invdiv_umulh64(n, m);
+  t2 = (n - t1) >> sh1;
+
+  return (t1 + t2) >> sh2;
+}
 
 /****************************************************************************
  * Name: uneg64
@@ -252,38 +732,6 @@ void umul32x64(uint32_t factor1, FAR const struct uint64_s *factor2,
 void umul64(FAR const struct uint64_s *factor1,
             FAR const struct uint64_s *factor2,
             FAR struct uint64_s *product);
-
-/****************************************************************************
- * Name: log2ceil
- *
- * Description:
- *   Calculate the up-rounded power-of-two for input.
- *
- * Input Parameters:
- *   x - Argument to calculate the power-of-two from.
- *
- * Returned Value:
- *   Power-of-two for argument, rounded up.
- *
- ****************************************************************************/
-
-uintptr_t log2ceil(uintptr_t x);
-
-/****************************************************************************
- * Name: log2floor
- *
- * Description:
- *   Calculate the down-rounded (truncated) power-of-two for input.
- *
- * Input Parameters:
- *   x - Argument to calculate the power-of-two from.
- *
- * Returned Value:
- *   Power-of-two for argument, rounded (truncated) down.
- *
- ****************************************************************************/
-
-uintptr_t log2floor(uintptr_t x);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_qencoder.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,6 +33,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/sensors/qencoder.h>
 
 #include <arch/board/board.h>
@@ -206,6 +209,7 @@ struct stm32l4_lowerhalf_s
 #ifdef HAVE_16BIT_TIMERS
   volatile int32_t position; /* The current position offset */
 #endif
+  spinlock_t       lock;     /* Spinlock */
 };
 
 /****************************************************************************
@@ -286,6 +290,7 @@ static struct stm32l4_lowerhalf_s g_tim1lower =
   .ops      = &g_qecallbacks,
   .config   = &g_tim1config,
   .inuse    = false,
+  .lock     = SP_UNLOCKED,
 };
 
 #endif
@@ -309,6 +314,7 @@ static struct stm32l4_lowerhalf_s g_tim2lower =
   .ops      = &g_qecallbacks,
   .config   = &g_tim2config,
   .inuse    = false,
+  .lock     = SP_UNLOCKED,
 };
 
 #endif
@@ -332,6 +338,7 @@ static struct stm32l4_lowerhalf_s g_tim3lower =
   .ops      = &g_qecallbacks,
   .config   = &g_tim3config,
   .inuse    = false,
+  .lock     = SP_UNLOCKED,
 };
 
 #endif
@@ -355,6 +362,7 @@ static struct stm32l4_lowerhalf_s g_tim4lower =
   .ops      = &g_qecallbacks,
   .config   = &g_tim4config,
   .inuse    = false,
+  .lock     = SP_UNLOCKED,
 };
 
 #endif
@@ -378,6 +386,7 @@ static struct stm32l4_lowerhalf_s g_tim5lower =
   .ops      = &g_qecallbacks,
   .config   = &g_tim5config,
   .inuse    = false,
+  .lock     = SP_UNLOCKED,
 };
 
 #endif
@@ -401,6 +410,7 @@ static struct stm32l4_lowerhalf_s g_tim8lower =
   .ops      = &g_qecallbacks,
   .config   = &g_tim8config,
   .inuse    = false,
+  .lock     = SP_UNLOCKED,
 };
 
 #endif
@@ -1024,6 +1034,7 @@ static int stm32l4_position(struct qe_lowerhalf_s *lower,
   struct stm32l4_lowerhalf_s *priv =
                               (struct stm32l4_lowerhalf_s *)lower;
 #ifdef HAVE_16BIT_TIMERS
+  irqstate_t flags;
   int32_t position;
   int32_t verify;
   uint32_t count;
@@ -1032,19 +1043,15 @@ static int stm32l4_position(struct qe_lowerhalf_s *lower,
 
   /* Loop until we are certain that no interrupt occurred between samples */
 
+  flags = spin_lock_irqsave(&priv->lock);
   do
     {
-      /* Don't let another task preempt us until we get the measurement.
-       * The timer interrupt may still be processed
-       */
-
-      sched_lock();
       position = priv->position;
       count    = stm32l4_getreg32(priv, STM32L4_GTIM_CNT_OFFSET);
       verify   = priv->position;
-      sched_unlock();
     }
   while (position != verify);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   /* Return the position measurement */
 
@@ -1079,10 +1086,10 @@ static int stm32l4_reset(struct qe_lowerhalf_s *lower)
    * Interrupts are disabled to make this atomic (if possible)
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   stm32l4_putreg32(priv, STM32L4_GTIM_CNT_OFFSET, 0);
   priv->position = 0;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 #else
   sninfo("Resetting position to zero\n");
   DEBUGASSERT(lower && priv->inuse);

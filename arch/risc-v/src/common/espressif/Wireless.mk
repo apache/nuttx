@@ -1,6 +1,8 @@
 ############################################################################
 # arch/risc-v/src/common/espressif/Wireless.mk
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -24,11 +26,12 @@ INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)$(CHIP_SERIES)$(DELIM)include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)include$(DELIM)esp_wifi
 
+EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)controller$(DELIM)lib_esp32c3_family$(DELIM)$(CHIP_SERIES)
 EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_coex$(DELIM)lib$(DELIM)$(CHIP_SERIES)
 EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_phy$(DELIM)lib$(DELIM)$(CHIP_SERIES)
 EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_wifi$(DELIM)lib$(DELIM)$(CHIP_SERIES)
 
-EXTRA_LIBS += -lphy -lcoexist -lmesh
+EXTRA_LIBS += -lphy -lcoexist -lmesh -lespnow
 
 ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
 
@@ -68,6 +71,7 @@ CHIP_CSRCS += pkcs5.c
 CHIP_CSRCS += platform_util.c
 CHIP_CSRCS += platform.c
 CHIP_CSRCS += sha1.c
+CHIP_CSRCS += sha3.c
 CHIP_CSRCS += sha256.c
 CHIP_CSRCS += sha512.c
 CHIP_CSRCS += pk.c
@@ -81,9 +85,9 @@ CHIP_CSRCS += md5.c
 CHIP_CSRCS += oid.c
 CHIP_CSRCS += pem.c
 CHIP_CSRCS += hmac_drbg.c
-CHIP_CSRCS += hash_info.c
 CHIP_CSRCS += rsa_alt_helpers.c
 CHIP_CSRCS += ecdh.c
+CHIP_CSRCS += pk_ecc.c
 
 VPATH += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)port
 
@@ -111,10 +115,18 @@ CFLAGS += $(DEFINE_PREFIX)ESPRESSIF_USE
 CFLAGS += $(DEFINE_PREFIX)IEEE8021X_EAPOL
 CFLAGS += $(DEFINE_PREFIX)USE_WPA2_TASK
 CFLAGS += $(DEFINE_PREFIX)CONFIG_SHA256
+CFLAGS += $(DEFINE_PREFIX)USE_WPS_TASK
+
+ifeq ($(CONFIG_ESPRESSIF_WIFI_SOFTAP_SAE_SUPPORT),y)
 CFLAGS += $(DEFINE_PREFIX)CONFIG_SAE
+endif
 
 ifeq ($(CONFIG_ESPRESSIF_WIFI_ENABLE_SAE_PK),y)
 CFLAGS += $(DEFINE_PREFIX)CONFIG_SAE_PK
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_WIFI_ENABLE_SAE_H2E),y)
+CFLAGS += $(DEFINE_PREFIX)CONFIG_SAE_H2E
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_WIFI_ENABLE_WPA3_OWE_STA),y)
@@ -151,7 +163,9 @@ INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)$(WIFI_WPA_SUPPLICANT)$(DELIM)
 CHIP_CSRCS += dragonfly.c
 CHIP_CSRCS += sae.c
 CHIP_CSRCS += wpa_common.c
+ifeq ($(CONFIG_ESPRESSIF_WIFI_ENABLE_SAE_PK),y)
 CHIP_CSRCS += sae_pk.c
+endif
 CHIP_CSRCS += bss.c
 CHIP_CSRCS += scan.c
 CHIP_CSRCS += ieee802_11_common.c
@@ -222,11 +236,11 @@ INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)$(WIFI_WPA_SUPPLICANT)$(DELIM)
 CHIP_CSRCS += esp_common.c
 CHIP_CSRCS += esp_hostap.c
 CHIP_CSRCS += esp_wpa_main.c
-CHIP_CSRCS += esp_wpa2.c
 CHIP_CSRCS += esp_wpa3.c
 CHIP_CSRCS += esp_wpas_glue.c
 CHIP_CSRCS += esp_owe.c
 CHIP_CSRCS += esp_scan.c
+CHIP_CSRCS += esp_wps.c
 
 VPATH += $(WIFI_WPA_SUPPLICANT)$(DELIM)esp_supplicant$(DELIM)src$(DELIM)crypto
 
@@ -238,5 +252,9 @@ CHIP_CSRCS += crypto_mbedtls-rsa.c
 CHIP_CSRCS += crypto_mbedtls.c
 CHIP_CSRCS += tls_mbedtls.c
 CHIP_CSRCS += aes-siv.c
+
+CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_wifi$(DELIM)src$(DELIM)wifi_init.c
+CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_wifi$(DELIM)src$(DELIM)lib_printf.c
+CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_wifi$(DELIM)regulatory$(DELIM)esp_wifi_regulatory.c
 
 endif

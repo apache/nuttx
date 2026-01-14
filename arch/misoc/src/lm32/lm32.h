@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/misoc/src/lm32/lm32.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,9 +44,9 @@
  * only a referenced is passed to get the state from the TCB.
  */
 
-#define misoc_savestate(regs)      lm32_copystate(regs, (uint32_t*)g_current_regs)
-#define up_copystate(rega,regb) lm32_copystate(rega, regb)
-#define misoc_restorestate(regs)   (g_current_regs = regs)
+#define misoc_savestate(regs)      lm32_copystate(regs, up_current_regs())
+#define up_copystate(rega,regb)    lm32_copystate(rega, regb)
+#define misoc_restorestate(regs)   (up_set_current_regs(regs))
 
 /* Determine which (if any) console driver to use.  If a console is enabled
  * and no other console device is specified, then a serial console is

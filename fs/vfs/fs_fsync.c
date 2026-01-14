@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_fsync.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -104,17 +106,16 @@ int fsync(int fd)
 
   /* Get the file structure corresponding to the file descriptor. */
 
-  ret = fs_getfilep(fd, &filep);
+  ret = file_get(fd, &filep);
   if (ret < 0)
     {
       goto errout;
     }
 
-  DEBUGASSERT(filep != NULL);
-
   /* Perform the fsync operation */
 
   ret = file_fsync(filep);
+  file_put(filep);
   if (ret < 0)
     {
       goto errout;

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/stm32_hsi48.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -43,6 +45,10 @@
 #  define STM32_HSI48_REG STM32_RCC_CRRCR
 #  define STM32_HSI48ON   RCC_CRRCR_HSI48ON
 #  define STM32_HSI48RDY  RCC_CRRCR_HSI48RDY
+#elif defined(CONFIG_ARCH_CHIP_STM32G0)
+#  define STM32_HSI48_REG STM32_RCC_CR
+#  define STM32_HSI48ON   RCC_CR_HSI48ON
+#  define STM32_HSI48RDY  RCC_CR_HSI48RDY
 #else
 #  error "Unsupported STM32F0/L0 HSI48"
 #endif
@@ -70,7 +76,7 @@
  *   frequency which is subject to manufacturing process variations.
  *
  * Input Parameters:
- *   Identifies the syncrhonization source for the HSI48.  When used as the
+ *   Identifies the synchronization source for the HSI48.  When used as the
  *   USB source clock, this must be set to SYNCSRC_USB.
  *
  * Returned Value:

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/wireless/bluetooth/bt_uart_shim.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -57,6 +59,7 @@ struct hciuart_state_s
 
   struct file f;                /* File structure */
   struct pollfd p;              /* Poll structure */
+  spinlock_t lock;              /* Spinlock */
 };
 
 struct hciuart_config_s
@@ -118,7 +121,7 @@ hciuart_rxattach(FAR const struct btuart_lowerhalf_s *lower,
 
   /* If the callback is NULL, then we are detaching */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&state->lock);
   if (callback == NULL)
     {
       /* Disable Rx callbacks and detach the Rx callback */
@@ -135,7 +138,7 @@ hciuart_rxattach(FAR const struct btuart_lowerhalf_s *lower,
       state->callback = callback;
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&state->lock, flags);
 }
 
 /****************************************************************************
@@ -359,7 +362,7 @@ FAR struct btuart_lowerhalf_s *btuart_shim_getdevice(FAR const char *path)
 
   s = &n->state;
 
-  ret = file_open(&s->f, path, O_RDWR | O_CLOEXEC);
+  ret = file_open(&s->f, path, O_RDWR | O_CLOEXEC | O_NONBLOCK);
   if (ret < 0)
     {
       kmm_free(n);
@@ -371,6 +374,7 @@ FAR struct btuart_lowerhalf_s *btuart_shim_getdevice(FAR const char *path)
   s->p.events = POLLIN;
   s->p.arg    = n;
   s->p.cb     = hciuart_rxpollcb;
+  spin_lock_init(&s->lock);
 
   /* Hook the routines in */
 

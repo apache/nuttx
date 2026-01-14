@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/stm32_dma.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,10 @@
 #include <sys/types.h>
 
 #include "hardware/stm32_dma_v1.h"
+
+#ifdef CONFIG_STM32F0L0G0_HAVE_DMAMUX
+#  include "hardware/stm32_dmamux.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions

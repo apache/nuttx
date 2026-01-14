@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32l4/nucleo-l496zg/src/nucleo-144.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -162,6 +164,22 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: stm32_bringup
+ *
+ * Description:
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=y :
+ *     Called from board_late_initialize().
+ *
+ *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
+ *     Called from the NSH library
+ *
+ ****************************************************************************/
+
+int stm32_bringup(void);
+
+/****************************************************************************
  * Name: stm32_spidev_initialize
  *
  * Description:
@@ -220,7 +238,7 @@ int stm32_sdio_initialize(void);
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in inialization to setup
+ *   Called from stm32_usbinitialize very early in initialization to setup
  *   USB-related GPIO pins for the nucleo-144 board.
  *
  ****************************************************************************/

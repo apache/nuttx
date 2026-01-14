@@ -1,6 +1,8 @@
 ############################################################################
 # boards/renesas/m16c/skp16c26/scripts/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -31,7 +33,7 @@ OBJCOPY			= $(CROSSDEV)objcopy
 OBJDUMP			= $(CROSSDEV)objdump
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION	= -g
+  ARCHOPTIMIZATION	= $(CONFIG_DEBUG_SYMBOLS_LEVEL)
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
@@ -45,6 +47,6 @@ ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)skp16c26.ld
 
 CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 CPPFLAGS		= $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS			= $(CFLAGS) -D__ASSEMBLY__

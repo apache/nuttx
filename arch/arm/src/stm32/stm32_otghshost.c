@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_otghshost.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1946,7 +1948,7 @@ static ssize_t stm32_in_transfer(struct stm32_usbhost_s *priv, int chidx,
                    * Small delays could require more resolution than is
                    * provided by the system timer.  For example, if the
                    * system timer resolution is 10MS, then
-                   * nxsig_usleep(1000) will actually request a delay 20MS
+                   * nxsched_usleep(1000) will actually request a delay 20MS
                    * (due to both quantization and rounding).
                    *
                    * REVISIT: So which is better?  To ignore tiny delays and
@@ -1956,7 +1958,7 @@ static ssize_t stm32_in_transfer(struct stm32_usbhost_s *priv, int chidx,
 
                   if (delay > CONFIG_USEC_PER_TICK)
                     {
-                      nxsig_usleep(delay - CONFIG_USEC_PER_TICK);
+                      nxsched_usleep(delay - CONFIG_USEC_PER_TICK);
                     }
                 }
             }
@@ -2261,7 +2263,7 @@ static ssize_t stm32_out_transfer(struct stm32_usbhost_s *priv,
            * transfer using the same buffer pointer and length.
            */
 
-          nxsig_usleep(20 * 1000);
+          nxsched_usleep(20 * 1000);
         }
       else
         {
@@ -2773,7 +2775,7 @@ static inline void stm32_gint_hcoutisr(struct stm32_usbhost_s *priv,
 
   else if ((pending & OTGHS_HCINT_STALL) != 0)
     {
-      /* Clear the pending the STALL response receiv (STALL) interrupt */
+      /* Clear the pending the STALL response receive (STALL) interrupt */
 
       stm32_putreg(STM32_OTGHS_HCINT(chidx), OTGHS_HCINT_STALL);
 
@@ -3957,7 +3959,7 @@ static int stm32_rh_enumerate(struct stm32_usbhost_s *priv,
    * 100ms.
    */
 
-  nxsig_usleep(100 * 1000);
+  nxsched_usleep(100 * 1000);
 
   /* Reset the host port */
 

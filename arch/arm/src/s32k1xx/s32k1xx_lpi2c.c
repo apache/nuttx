@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/s32k1xx/s32k1xx_lpi2c.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -872,8 +874,8 @@ static void s32k1xx_lpi2c_traceevent(struct s32k1xx_lpi2c_priv_s *priv,
 
       /* Initialize the new trace entry */
 
-      trace->event  = event;
-      trace->parm   = parm;
+      trace->event = event;
+      trace->parm  = parm;
 
       /* Bump up the trace index (unless we are out of trace entries) */
 
@@ -1008,7 +1010,7 @@ static void s32k1xx_lpi2c_setclock(struct s32k1xx_lpi2c_priv_s *priv,
           DEBUGASSERT(src_freq != 0);
 
           /* LPI2C output frequency = (Source Clock (Hz)/ 2^prescale) /
-           *   (CLKLO + 1 + CLKHI + 1 + ROUNDDOWN((2 + FILTSCL) / 2^prescale)
+           *   (CLKLO + 1 + CLKHI + 1 + ALIGN_DOWN((2 + FILTSCL)/2^prescale)
            *
            * Assume  CLKLO = 2 * CLKHI, SETHOLD = CLKHI, DATAVD = CLKHI / 2
            */
@@ -1833,7 +1835,7 @@ static int s32k1xx_lpi2c_dma_transfer(struct s32k1xx_lpi2c_priv_s *priv)
                                                        LPI2C_MSR_ALF |
                                                        LPI2C_MSR_FEF);
 
-  /* Enable the Iterrupts */
+  /* Enable the Interrupts */
 
   s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MIER_OFFSET,
                      LPI2C_MIER_NDIE | LPI2C_MIER_ALIE |
@@ -2136,7 +2138,7 @@ static int s32k1xx_lpi2c_reset(struct i2c_master_s *dev)
 
 out:
 
-  /* Release the port for re-use by other clients */
+  /* Release the port for reuse by other clients */
 
   nxmutex_unlock(&priv->lock);
   return ret;

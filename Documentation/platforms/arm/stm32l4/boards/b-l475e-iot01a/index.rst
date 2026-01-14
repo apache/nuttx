@@ -2,6 +2,8 @@
 ST B-L475E-IOT01A
 =================
 
+.. tags:: chip:stm32, chip:stm32l4, chip:stm32l475
+
 This page discusses the port of NuttX to the STMicro B-L475E-IOT01A
 Discovery kit powered by STM32L475VG Cortex-M4.  This board targets IoT
 nodes with a choice of connectivity options including WiFi, Bluetooth LE,
@@ -434,7 +436,7 @@ configuration and most of the notes there apply here as well.
    forward those packets appropriately.
 
 3. TCP and UDP Tests:  The same TCP and UDP tests as described for
-   the spirit-6lowpan coniguration are supported on the star
+   the spirit-6lowpan configuration are supported on the star
    endpoints, but NOT on the star hub.  Therefore, all network testing
    is between endpoints with the hub acting, well, only like a hub.
 
@@ -583,7 +585,7 @@ configuration and most of the notes there apply here as well.
         IPHC headers and is unable to uncompress the rest of the packet
         correctly.
 
-        Trying again with HC1 compression, I see other isses.  The first
+        Trying again with HC1 compression, I see other issues.  The first
         frame is received correctly, but the following frames have an incorrect
         packet length and generate RX FIFO errors.  Forcing the send size to
         12 bytes of payload in apps/examples/udp (vs 96), eliminates this

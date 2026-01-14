@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/usbmisc/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -33,6 +35,10 @@ if(CONFIG_USBMISC)
 
   if(CONFIG_FUSB303)
     list(APPEND SRCS fusb303.c)
+  endif()
+
+  if(CONFIG_STUSB4500)
+    list(APPEND SRCS stusb4500.c)
   endif()
 
   target_sources(drivers PRIVATE ${SRCS})

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s3/esp32s3-eye/src/esp32s3_board_lcd.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -109,7 +111,7 @@ int board_lcd_initialize(void)
  *   allows support for multiple LCD devices.
  *
  * Input Parameters:
- *   devno - LCD device nmber
+ *   devno - LCD device number
  *
  * Returned Value:
  *   LCD device pointer if success or NULL if failed.

@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/usrsock/usrsock_poll.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -45,8 +47,8 @@
  * Private Functions
  ****************************************************************************/
 
-static uint16_t poll_event(FAR struct net_driver_s *dev,
-                           FAR void *pvpriv, uint16_t flags)
+static uint32_t poll_event(FAR struct net_driver_s *dev,
+                           FAR void *pvpriv, uint32_t flags)
 {
   FAR struct usrsock_poll_s *info = pvpriv;
   FAR struct usrsock_conn_s *conn = info->conn;
@@ -140,7 +142,7 @@ static int usrsock_pollsetup(FAR struct socket *psock,
     }
 #endif
 
-  net_lock();
+  usrsock_lock();
 
   /* Find a container to hold the poll information */
 
@@ -241,7 +243,7 @@ static int usrsock_pollsetup(FAR struct socket *psock,
   poll_notify(&fds, 1, eventset);
 
 errout_unlock:
-  net_unlock();
+  usrsock_unlock();
   return ret;
 }
 
@@ -276,6 +278,8 @@ static int usrsock_pollteardown(FAR struct socket *psock,
     }
 #endif
 
+  usrsock_lock();
+
   /* Recover the socket descriptor poll state info from the poll structure */
 
   info = (FAR struct usrsock_poll_s *)fds->priv;
@@ -297,6 +301,8 @@ static int usrsock_pollteardown(FAR struct socket *psock,
 
       info->conn = NULL;
     }
+
+  usrsock_unlock();
 
   return OK;
 }

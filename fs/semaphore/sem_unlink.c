@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/semaphore/sem_unlink.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,6 +36,7 @@
 #include <nuttx/semaphore.h>
 
 #include "inode/inode.h"
+#include "vfs/vfs.h"
 #include "semaphore/semaphore.h"
 
 /****************************************************************************
@@ -101,12 +104,7 @@ int nxsem_unlink(FAR const char *name)
    * functioning as a directory and the directory is not empty.
    */
 
-  ret = inode_lock();
-  if (ret < 0)
-    {
-      goto errout_with_inode;
-    }
-
+  inode_lock();
   if (inode->i_child != NULL)
     {
       ret = -ENOTEMPTY;
@@ -114,19 +112,20 @@ int nxsem_unlink(FAR const char *name)
     }
 
   /* Remove the old inode from the tree.  Because we hold a reference count
-   * on the inode, it will not be deleted now.  This will set the
-   * FSNODEFLAG_DELETED bit in the inode flags.
+   * on the inode, it will not be deleted now. This will put reference of
+   * inode.
    */
 
   ret = inode_remove(fullpath);
 
-  /* inode_remove() should always fail with -EBUSY because we hae a reference
-   * on the inode.  -EBUSY means that the inode was, indeed, unlinked but
-   * thatis could not be freed because there are references.
+  /* The inode may has been unlinked from the tree in other core,
+   * but it is not yet freed.
    */
 
-  DEBUGASSERT(ret >= 0 || ret == -EBUSY);
-  UNUSED(ret);
+  if (ret < 0 && ret != -EBUSY)
+    {
+      goto errout_with_lock;
+    }
 
   /* Now we do not release the reference count in the normal way (by calling
    * inode release.  Rather, we call sem_close().  sem_close will decrement
@@ -138,6 +137,9 @@ int nxsem_unlink(FAR const char *name)
   inode_unlock();
   ret = nxsem_close(&inode->u.i_nsem->ns_sem);
   RELEASE_SEARCH(&desc);
+#ifdef CONFIG_FS_NOTIFY
+  notify_unlink(fullpath);
+#endif
   return ret;
 
 errout_with_lock:

@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/task/task_gettid.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -88,23 +90,4 @@ pid_t nxsched_gettid(void)
    */
 
   return 0;
-}
-
-/****************************************************************************
- * Name: gettid
- *
- * Description:
- *   Get the thread ID of the currently executing thread.
- *
- * Input parameters:
- *   None
- *
- * Returned Value:
- *   On success, returns the thread ID of the calling process.
- *
- ****************************************************************************/
-
-pid_t gettid(void)
-{
-  return nxsched_gettid();
 }

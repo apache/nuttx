@@ -2,6 +2,8 @@
 STM32F3Discovery
 ================
 
+.. tags:: chip:stm32, chip:stm32f3, chip:stm32f303
+
 This README discusses issues unique to NuttX configurations for the
 STMicro STM32F3Discovery development board.
 
@@ -109,8 +111,7 @@ Debugging
 If you are going to use a debugger, you should make sure that the following
 settings are selection in your configuration file::
 
-  CONFIG_DEBUG_SYMBOLS=y     : Enable debug symbols in the build
-  CONFIG_ARMV7M_USEBASEPRI=y : Use the BASEPRI register to disable interrupts
+  CONFIG_DEBUG_SYMBOLS=y : Enable debug symbols in the build
 
 STM32 ST-LINK Utility
 ---------------------

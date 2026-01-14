@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/semaphore/sem_clockwait.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -92,8 +94,6 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
 {
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
-  sclock_t ticks;
-  int status;
   int ret = ERROR;
 
   DEBUGASSERT(sem != NULL && abstime != NULL);
@@ -131,34 +131,16 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
     }
 #endif
 
-  /* Convert the timespec to clock ticks.  We must have interrupts
-   * disabled here so that this time stays valid until the wait begins.
-   *
-   * clock_abstime2ticks() returns zero on success or a POSITIVE errno
-   * value on failure.
-   */
-
-  status = clock_abstime2ticks(clockid, abstime, &ticks);
-
-  /* If the time has already expired return immediately. */
-
-  if (status == OK && ticks <= 0)
+  if (clockid == CLOCK_REALTIME)
     {
-      ret = -ETIMEDOUT;
-      goto out;
+      wd_start_realtime(&rtcb->waitdog, abstime,
+                        nxsem_timeout, (uintptr_t)rtcb);
     }
-
-  /* Handle any time-related errors */
-
-  if (status != OK)
+  else
     {
-      ret = -status;
-      goto out;
+      wd_start_abstime(&rtcb->waitdog, abstime,
+                       nxsem_timeout, (uintptr_t)rtcb);
     }
-
-  /* Start the watchdog */
-
-  wd_start(&rtcb->waitdog, ticks, nxsem_timeout, nxsched_gettid());
 
   /* Now perform the blocking wait.  If nxsem_wait() fails, the
    * negated errno value will be returned below.

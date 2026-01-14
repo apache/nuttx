@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_hsi48.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -64,7 +66,7 @@ enum syncsrc_e
  *   frequency which is subject to manufacturing process variations.
  *
  * Input Parameters:
- *   Identifies the syncrhonization source for the HSI48.  When used as the
+ *   Identifies the synchronization source for the HSI48.  When used as the
  *   USB source clock, this must be set to SYNCSRC_USB.
  *
  * Returned Value:

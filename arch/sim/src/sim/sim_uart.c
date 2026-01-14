@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/sim_uart.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -26,7 +28,7 @@
 #include <nuttx/serial/serial.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/uart_ram.h>
-#include <nuttx/wqueue.h>
+#include <nuttx/wdog.h>
 #include <string.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -40,7 +42,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SIM_UART_WORK_DELAY           USEC2TICK(1000)
+#define SIM_UART_WDOG_DELAY           USEC2TICK(1000)
 
 #ifndef CONFIG_SIM_UART_BUFFER_SIZE
   #define CONFIG_SIM_UART_BUFFER_SIZE 256
@@ -54,23 +56,23 @@ struct tty_priv_s
 {
   /* tty-port path name */
 
-  const char    *path;
+  const char           *path;
 
   /* The file descriptor. It is returned by open */
 
-  int           fd;
+  int                  fd;
 
   /* TX interrupt enable or not */
 
-  bool          txint;
+  bool                 txint;
 
   /* RX interrupt enable or not */
 
-  bool          rxint;
+  bool                 rxint;
 
-  /* Work queue for transmit */
+  /* Wd timer for transmit */
 
-  struct work_s worker;
+  struct wdog_s        wdog;
 };
 
 /****************************************************************************
@@ -279,6 +281,29 @@ static struct uart_dev_s g_tty3_dev =
 
 #if defined(USE_DEVCONSOLE) || CONFIG_SIM_UART_NUMBER > 0
 /****************************************************************************
+ * Name: uart_nputs
+ *
+ * Description:
+ *   Loop to write data to the UART until all the data is sent
+ *
+ ****************************************************************************/
+
+static void uart_nputs(int fd, const char *buf, size_t size)
+{
+  while (size > 0)
+    {
+      int ret = host_uart_puts(fd, buf, size);
+      if (ret < 0)
+        {
+          continue;
+        }
+
+      buf += ret;
+      size -= ret;
+    }
+}
+
+/****************************************************************************
  * Name: tty_setup
  *
  * Description:
@@ -406,16 +431,16 @@ static int tty_receive(struct uart_dev_s *dev, uint32_t *status)
 }
 
 /****************************************************************************
- * Name: tty_work
+ * Name: sim_tty_interrupt
  *
  * Description:
  * Notify DMA that there is data to be transferred in the TX buffer
  *
  ****************************************************************************/
 
-static void tty_work(void *arg)
+static void sim_tty_interrupt(wdparm_t arg)
 {
-  struct uart_dev_s *dev = arg;
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct tty_priv_s *priv = dev->priv;
 
   if (priv->fd < 0)
@@ -441,8 +466,7 @@ static void tty_work(void *arg)
 #endif
     }
 
-  work_queue(HPWORK, &priv->worker,
-             tty_work, dev, SIM_UART_WORK_DELAY);
+  wd_start_next(&priv->wdog, SIM_UART_WDOG_DELAY, sim_tty_interrupt, arg);
 }
 
 /****************************************************************************
@@ -460,7 +484,7 @@ static void tty_rxint(struct uart_dev_s *dev, bool enable)
   priv->rxint = enable;
   if (enable)
     {
-      work_queue(HPWORK, &priv->worker, tty_work, dev, 0);
+      wd_start(&priv->wdog, 0, sim_tty_interrupt, (wdparm_t)dev);
     }
 }
 
@@ -617,7 +641,7 @@ static void tty_send(struct uart_dev_s *dev, int ch)
   struct tty_priv_s *priv = dev->priv;
   char c = ch;
 
-  host_uart_puts(dev->isconsole ? 1 : priv->fd, &c, 1);
+  uart_nputs(dev->isconsole ? 1 : priv->fd, &c, 1);
 }
 
 /****************************************************************************
@@ -635,7 +659,7 @@ static void tty_txint(struct uart_dev_s *dev, bool enable)
   priv->txint = enable;
   if (enable)
     {
-      work_queue(HPWORK, &priv->worker, tty_work, dev, 0);
+      wd_start(&priv->wdog, 0, sim_tty_interrupt, (wdparm_t)dev);
     }
 }
 
@@ -669,13 +693,13 @@ static bool tty_txempty(struct uart_dev_s *dev)
 #endif
 
 #ifdef CONFIG_SIM_RAM_UART
-static int sim_uartram_register(FAR const char *devname, bool slave)
+static int sim_uartram_register(const char *devname, bool slave)
 {
   char name[NAME_MAX];
-  FAR struct uart_rambuf_s *shmem;
+  struct uart_rambuf_s *shmem;
 
   strlcpy(name, strrchr(devname, '/') + 1, NAME_MAX);
-  shmem = host_allocshmem(name, sizeof(struct uart_rambuf_s) * 2, !slave);
+  shmem = host_allocshmem(name, sizeof(struct uart_rambuf_s) * 2);
   DEBUGASSERT(shmem);
 
   memset(shmem, 0, sizeof(struct uart_rambuf_s) * 2);
@@ -755,15 +779,7 @@ void sim_uartinit(void)
 void up_nputs(const char *str, size_t len)
 {
 #ifdef USE_DEVCONSOLE
-  if (str[len - 1] == '\n')
-    {
-      host_uart_puts(1, str, len - 1);
-      host_uart_puts(1, "\r\n", 2);
-    }
-  else
-    {
-      host_uart_puts(1, str, len);
-    }
+  uart_nputs(1, str, len);
 #endif
 }
 
@@ -771,11 +787,10 @@ void up_nputs(const char *str, size_t len)
  * Name: up_putc
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef USE_DEVCONSOLE
   char c = ch;
   up_nputs(&c, 1);
 #endif
-  return 0;
 }

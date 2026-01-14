@@ -1,6 +1,10 @@
 /****************************************************************************
  * drivers/spi/ice40.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: Jakub Janousek <janouja9@fel.cvut.cz>
+ * SPDX-FileContributor: Jakub Janousek <janouja9@fel.cvut.cz>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at

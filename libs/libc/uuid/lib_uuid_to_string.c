@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/uuid/lib_uuid_to_string.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -41,7 +43,7 @@
  *
  ****************************************************************************/
 
-void uuid_to_string(const uuid_t *u, char **s, uint32_t *status)
+void uuid_to_string(FAR const uuid_t *u, FAR char **s, FAR uint32_t *status)
 {
   static const uuid_t nil;
   int c;

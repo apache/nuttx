@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/espressif/esp_timer.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -48,6 +50,6 @@
  *
  ****************************************************************************/
 
-int esp_timer_initialize(uint32_t timer_id);
+int esp_timer_initialize(int timer_id);
 
 #endif /* __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_TIMER_H */

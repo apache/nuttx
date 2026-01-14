@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx_40xx/lpc176x_clockconfig.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -195,7 +197,7 @@ void lpc17_40_clockconfig(void)
   putreg32(0, LPC17_40_SYSCON_PCLKSEL0);
   putreg32(0, LPC17_40_SYSCON_PCLKSEL1);
 
-  /* Disable power to all peripherals (execpt GPIO).  Peripherals must be
+  /* Disable power to all peripherals (except GPIO).  Peripherals must be
    * re-powered one at a time by each device driver when the driver is
    * initialized.
    */

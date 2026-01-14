@@ -1,9 +1,11 @@
 /****************************************************************************
  * arch/arm/src/stm32f7/stm32_sai.c
  *
- *   Copyright (C) 2013-2014, 2019 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *   Copyright (c) 2016 Motorola Mobility, LLC. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Motorola Mobility LLC. All rights reserved.
+ * SPDX-FileCopyrightText: 2013-2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -620,8 +622,8 @@ static void sai_dump_regs(struct stm32f7_sai_s *priv, const char *msg)
 
   uint32_t cpl = cr2 & SAI_CR2_CPL;
   i2sinfo("\t\tCR2: CPL[13] = %s\n",
-          cpl ? "1's complement represention"
-              : "2's complement represention");
+          cpl ? "1's complement representation"
+              : "2's complement representation");
   uint32_t comp = (cr2 & SAI_CR2_COMP_MASK) >> SAI_CR2_COMP_SHIFT;
   const char *comp_string[] =
   { "No companding algorithm",

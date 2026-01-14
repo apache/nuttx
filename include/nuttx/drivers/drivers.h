@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/drivers/drivers.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -145,6 +147,18 @@ void devurandom_register(void);
 void devcrypto_register(void);
 
 /****************************************************************************
+ * Name: devmem_register
+ *
+ * Description:
+ *   Register devmem driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_MEM
+int devmem_register(void);
+#endif
+
+/****************************************************************************
  * Name: devzero_register
  *
  * Description:
@@ -170,7 +184,7 @@ void devzero_register(void);
  ****************************************************************************/
 
 int bchdev_register(FAR const char *blkdev, FAR const char *chardev,
-                    bool readonly);
+                    int oflags);
 
 /****************************************************************************
  * Name: bchdev_unregister
@@ -197,7 +211,7 @@ int bchdev_unregister(FAR const char *chardev);
  *
  ****************************************************************************/
 
-int bchlib_setup(FAR const char *blkdev, bool readonly, FAR void **handle);
+int bchlib_setup(FAR const char *blkdev, int oflags, FAR void **handle);
 
 /****************************************************************************
  * Name: bchlib_teardown
@@ -219,7 +233,7 @@ int bchlib_teardown(FAR void *handle);
  *
  ****************************************************************************/
 
-ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset,
+ssize_t bchlib_read(FAR void *handle, FAR char *buffer, off_t offset,
                     size_t len);
 
 /****************************************************************************
@@ -231,7 +245,7 @@ ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset,
  *
  ****************************************************************************/
 
-ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset,
+ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, off_t offset,
                      size_t len);
 
 /****************************************************************************

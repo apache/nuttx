@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/group/group_childstatus.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -308,7 +310,7 @@ FAR struct child_status_s *group_exit_child(FAR struct task_group_s *group)
 {
   FAR struct child_status_s *child;
 
-  /* Find the status structure of any child task that has exitted. */
+  /* Find the status structure of any child task that has exited. */
 
   for (child = group->tg_children; child; child = child->flink)
     {

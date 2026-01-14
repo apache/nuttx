@@ -50,6 +50,12 @@ config NET_TCPURGDATA
 		compiled in. Urgent data (out-of-band data) is a rarely used TCP feature
 		that is very seldom would be required.
 
+config NET_TCP_CHECKSUMS
+	bool "TCP checksums"
+	default y
+	---help---
+		Enable/disable TCP checksum support.
+
 config NET_TCP_PREALLOC_CONNS
 	int "Preallocated TCP/IP connections"
 	default 8
@@ -93,13 +99,27 @@ config NET_TCP_MAX_CONNS
 
 config NET_TCP_NPOLLWAITERS
 	int "Number of TCP poll waiters"
-	default 1
+	default 2
 
 config NET_TCP_RTO
 	int "RTO of TCP/IP connections"
 	default 3
 	---help---
-		RTO of TCP/IP connections (all tasks)
+		Default retransmission timeout (RTO) of TCP/IP connections (all tasks).
+		In units of half seconds. When the same data packet is retransmitted
+		multiple times due to timeout, the RTO will be doubled. but the maximum
+		RTO is NET_TCP_RTO * 16. When this packet is ACKed, the RTO will be
+		reset to this value. This algorithm helps to reduce network congestion
+		to some extent.
+
+config NET_TCP_FIXED_RTO
+	bool "Use fixed RTO"
+	default n
+	---help---
+		Use fixed RTO for TCP/IP connections (all tasks), i.e. do not use
+		the RTO exponentially increasing algorithm. This is useful for projects
+		that require a fixed RTO value or have restrictions on the maximum
+		retransmission time.
 
 config NET_TCP_MAXRTX
 	int "Maximum retransmitted number of TCP/IP data packet"
@@ -253,6 +273,20 @@ config NET_TCP_NWRBCHAINS
 		choice for this value would be the same as the maximum number of
 		TCP connections.
 
+config NET_TCP_ALLOC_WRBCHAINS
+	int "Dynamic I/O buffer chain heads allocation"
+	default 1
+	---help---
+		When set to 0 all dynamic allocations are disabled
+
+		When set to 1 a new I/O buffer chain head will be allocated every
+		time, and it will be free'd when no longer needed.
+
+		Setting this to 2 or more will allocate the I/O buffer chain heads
+		in batches (with batch size equal to this config). When a I/O buffer
+		chain head is no longer needed, it will be returned to the free
+		I/O buffer chain heads pool, and it will never be deallocated!
+
 config NET_TCP_WRBUFFER_DEBUG
 	bool "Force write buffer debug"
 	default n
@@ -279,7 +313,7 @@ endif # NET_TCP_WRITE_BUFFERS
 
 config NET_TCPBACKLOG
 	bool "TCP/IP backlog support"
-	default n
+	default y
 	---help---
 		Incoming connections pend in a backlog until accept() is called.
 		The size of the backlog is selected when listen() is called.

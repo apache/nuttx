@@ -1,6 +1,8 @@
 # ##############################################################################
 # boards/arm/stm32h7/linum-stm32h753bi/src/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -18,7 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS stm32_boot.c stm32_bringup.c)
+set(SRCS stm32_boot.c stm32_bringup.c stm32_spi.c)
 
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS stm32_autoleds.c)
@@ -52,6 +54,10 @@ if(CONFIG_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
+if(CONFIG_AUDIO_TONE)
+  list(APPEND SRCS stm32_tone.c)
+endif()
+
 if(CONFIG_MTD_W25QXXXJV)
   list(APPEND SRCS stm32_w25q.c)
 endif()
@@ -62,6 +68,18 @@ endif()
 
 if(CONFIG_SENSORS_QENCODER)
   list(APPEND SRCS stm32_qencoder.c)
+endif()
+
+if(CONFIG_CL_MFRC522)
+  list(APPEND SRCS stm32_mfrc522.c)
+endif()
+
+if(CONFIG_STM32H7_LTDC)
+  list(APPEND SRCS stm32_lcd.c)
+endif()
+
+if(CONFIG_INPUT_FT5X06)
+  list(APPEND SRCS stm32_touchscreen.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})

@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/umm_heap/umm_zalloc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,7 +51,7 @@
  *
  ****************************************************************************/
 
-#undef zalloc /* See mm/README.txt */
+#undef zalloc
 FAR void *zalloc(size_t size)
 {
 #ifdef CONFIG_ARCH_ADDRENV
@@ -71,6 +73,11 @@ FAR void *zalloc(size_t size)
   if (ret == NULL)
     {
       set_errno(ENOMEM);
+    }
+  else
+    {
+      mm_notify_pressure(mm_heapfree(USR_HEAP),
+                         mm_heapfree_largest(USR_HEAP));
     }
 
   return ret;

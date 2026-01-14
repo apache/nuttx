@@ -1,6 +1,8 @@
 ############################################################################
 # arch/risc-v/src/common/espressif/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -17,6 +19,8 @@
 # under the License.
 #
 ############################################################################
+
+STORAGETMP = $(if $(wildcard $(NXTMPDIR)/.*),y,)
 
 # The start-up, "head", file. May be either a .S or a .c file.
 
@@ -69,12 +73,23 @@ ifeq ($(CONFIG_ESPRESSIF_DMA),y)
 	CHIP_CSRCS += esp_dma.c
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_EFUSE),y)
+	CHIP_CSRCS += esp_efuse.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_TWAI),y)
 	CHIP_CSRCS += esp_twai.c
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_LEDC),y)
 	CHIP_CSRCS += esp_ledc.c
+endif
+
+ifeq ($(CONFIG_ESP_PCNT),y)
+	CHIP_CSRCS += esp_pcnt.c
+	ifeq ($(CONFIG_ESP_PCNT_AS_QE),y)
+		CHIP_CSRCS += esp_qencoder.c
+	endif
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_USBSERIAL),y)
@@ -88,14 +103,43 @@ ifeq ($(CONFIG_ESP_RMT),y)
 	endif
 endif
 
+ifeq ($(CONFIG_ESP_SDM),y)
+	CHIP_CSRCS += esp_sdm.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_DEDICATED_GPIO),y)
+	CHIP_CSRCS += esp_dedic_gpio.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_TEMP),y)
+	CHIP_CSRCS += esp_temperature_sensor.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_I2C),y)
-	CHIP_CSRCS += esp_i2c.c
+	ifeq ($(CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE),y)
+		CHIP_CSRCS += esp_i2c.c
+	endif
+	ifeq ($(CONFIG_ESPRESSIF_I2C_BITBANG),y)
+		CHIP_CSRCS += esp_i2c_bitbang.c
+	endif
+	ifeq ($(CONFIG_ESPRESSIF_I2C_PERIPH_SLAVE_MODE),y)
+		CHIP_CSRCS += esp_i2c_slave.c
+	endif
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_I2S),y)
+CHIP_CSRCS += esp_i2s.c
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_SPI),y)
-	CHIP_CSRCS += esp_spi.c
+	ifeq ($(CONFIG_ESPRESSIF_SPI_PERIPH),y)
+		CHIP_CSRCS += esp_spi.c
+	endif
 	ifeq ($(CONFIG_SPI_SLAVE),y)
 		CHIP_CSRCS += esp_spi_slave.c
+	endif
+	ifeq ($(CONFIG_ESPRESSIF_SPI_BITBANG),y)
+		CHIP_CSRCS += esp_spi_bitbang.c
 	endif
 endif
 
@@ -108,14 +152,51 @@ endif
 
 ifeq ($(CONFIG_ESP_WIRELESS),y)
 	ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
-		CHIP_CSRCS += esp_wifi_init.c
-		CHIP_CSRCS += esp_wlan.c
-		CHIP_CSRCS += esp_wifi_utils.c
+		CHIP_CSRCS += esp_wifi_event_handler.c
+		CHIP_CSRCS += esp_wifi_api.c
+		CHIP_CSRCS += esp_wlan_netdev.c
 	endif
+	CHIP_CSRCS += esp_wifi_utils.c
 endif
 
 ifeq ($(CONFIG_ESP_MCPWM),y)
 	CHIP_CSRCS += esp_mcpwm.c
+endif
+
+ifeq ($(CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL),y)
+	CHIP_CSRCS += esp_nxdiag.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_ADC),y)
+CHIP_CSRCS += esp_adc.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_SHA_ACCELERATOR),y)
+	CHIP_CSRCS += esp_sha.c
+endif
+
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
+	CHIP_CSRCS += esp_crypto.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_USE_LP_CORE), y)
+	CHIP_CSRCS += esp_ulp.c
+endif
+
+ifeq ($(CONFIG_PM),y)
+	ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
+		CHIP_CSRCS += esp_pm_initialize.c
+	endif
+	CHIP_CSRCS += esp_pm.c
+	LDFLAGS += -u esp_timer_init_include_func
+endif
+
+# Required for initialization hooks on common code
+
+LDFLAGS += -u esp_system_include_startup_funcs
+
+ifeq ($(CONFIG_ESPRESSIF_EFUSE),y)
+	LDFLAGS += -u esp_efuse_startup_include_func
 endif
 
 #############################################################################
@@ -126,7 +207,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 9bc2c73838d497b7742f37e9b5099d6c49081fce
+	ESP_HAL_3RDPARTY_VERSION = bb255ca422f4b4d60c9f4f74dbdf51316dc2b669
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -140,15 +221,42 @@ endif
 	GIT_DEPTH_PARAMETER = --depth=$(GIT_DEPTH)
 endif
 
+# When set USE_NXTMPDIR_ESP_REPO_DIRECTLY=y, will directly use esp-hal-3rdparty
+# under nxtmpdir without CHECK_COMMITSHA, reset, checkout and update.
+
+USE_NXTMPDIR_ESP_REPO_DIRECTLY ?= n
+
+ifeq ($(STORAGETMP),y)
+ifeq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
+define CLONE_ESP_HAL_3RDPARTY_REPO
+	$(call COPYDIR, $(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO),chip/$(ESP_HAL_3RDPARTY_REPO))
+endef
+else
+define CLONE_ESP_HAL_3RDPARTY_REPO
+	$(call CHECK_COMMITSHA, $(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO),$(ESP_HAL_3RDPARTY_VERSION))
+	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),chip/$(ESP_HAL_3RDPARTY_REPO),$(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO))
+endef
+endif
+else
+define CLONE_ESP_HAL_3RDPARTY_REPO
+	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),chip/$(ESP_HAL_3RDPARTY_REPO))
+endef
+endif
+
 chip/$(ESP_HAL_3RDPARTY_REPO):
 	$(Q) echo "Cloning Espressif HAL for 3rd Party Platforms"
-	$(Q) git clone --quiet $(ESP_HAL_3RDPARTY_URL) chip/$(ESP_HAL_3RDPARTY_REPO)
+	$(Q) $(call CLONE_ESP_HAL_3RDPARTY_REPO)
+ifneq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: ${ESP_HAL_3RDPARTY_VERSION}"
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/mbedtls/mbedtls
+endif
 ifeq ($(CONFIG_ESP_WIRELESS),y)
+ifneq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: initializing submodules..."
-	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/mbedtls/mbedtls components/esp_phy/lib components/esp_wifi/lib components/esp_coex/lib
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32c3_family components/esp_coex/lib
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls reset --quiet --hard
+endif
 	$(Q) echo "Applying patches..."
 	$(Q) cd chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls && git apply ../../../nuttx/patches/components/mbedtls/mbedtls/*.patch
 endif
@@ -157,7 +265,7 @@ include common$(DELIM)espressif$(DELIM)Bootloader.mk
 
 # Silent preprocessor warnings
 
-CFLAGS += -Wno-undef -Wno-unused-variable
+CFLAGS += -Wno-undef -Wno-unused-variable -fno-jump-tables -fno-tree-switch-conversion
 
 # Remove quotes from CONFIG_ESPRESSIF_CHIP_SERIES configuration
 
@@ -176,7 +284,11 @@ context:: chip/$(ESP_HAL_3RDPARTY_REPO)
 distclean::
 	$(call DELFILE,../include/chip/gpio_sig_map.h)
 	$(call DELFILE,../include/chip/irq.h)
+	$(call DELFILE,../../../vefuse.bin)
 	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
+ifeq ($(CONFIG_ESPRESSIF_USE_LP_CORE),y)
+	$(call DELDIR,chip/ulp)
+endif
 
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif$(DELIM)platform_include

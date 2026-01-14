@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/power/regulator.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -114,14 +116,17 @@ struct regulator_desc_s
   unsigned int   pulldown;          /* Enable pulldown when disabled */
   unsigned int   pulldown_reg;      /* Device register, for pulldown enable */
   unsigned int   pulldown_mask;     /* Register mask, for pulldown enable */
-  unsigned int   apply_uv;          /* If true, the voltage specifed (between)
+  unsigned int   apply_uv;          /* If true, the voltage specified (between)
                                      * min_uv and max_uv will be applied during
                                      * initialisation.
                                      */
   unsigned int   boot_on;           /* true if this regulator is to be enabled
                                      * at power up/reset
                                      */
-  unsigned int   always_on;
+  unsigned int   always_on;         /* true if this regulator is always on */
+  unsigned int   bypass_on;         /* true if this regulator should be ignored
+                                     * during initialization
+                                     */
   FAR const char *supply_name;
 #ifdef CONFIG_PM
   unsigned int auto_lp;
@@ -221,6 +226,7 @@ void regulator_unregister(FAR struct regulator_dev_s *rdev);
  *
  ****************************************************************************/
 
+struct ioexpander_dev_s;
 int regulator_gpio_init(FAR struct ioexpander_dev_s *iodev,
                         FAR const struct regulator_desc_s *desc);
 

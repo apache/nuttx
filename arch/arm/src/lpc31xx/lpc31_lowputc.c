@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lpc31xx/lpc31_lowputc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -95,7 +97,7 @@ static inline void up_waittxready(void)
 
   for (tmp = 1000 ; tmp > 0 ; tmp--)
     {
-      /* Check if the tranmitter holding register (THR) is empty */
+      /* Check if the transmitter holding register (THR) is empty */
 
       if ((getreg32(LPC31_UART_LSR) & UART_LSR_THRE) != 0)
         {

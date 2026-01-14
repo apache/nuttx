@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/spi/spi_bitbang.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -77,7 +79,7 @@ struct spi_bitbang_ops_s
 
 /* This is the type of the function that can exchange one bit */
 
-typedef CODE uint8_t (*bitexchange_t)(uint8_t dataout, uint32_t holdtime);
+typedef CODE uint16_t (*bitexchange_t)(uint16_t dataout, uint32_t holdtime);
 
 /* This structure provides the state of the SPI bit-bang driver */
 

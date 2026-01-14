@@ -2,6 +2,8 @@
 Particle.io Photon
 ==================
 
+.. tags:: chip:stm32, chip:stm32f2, chip:stm32f205
+
 This page discusses issues unique to NuttX configurations for the
 Particle.io Photon board featuring the STM32F205RG MCU.
 The STM32F205RG is a 120 MHz Cortex-M3 operation with 1MB Flash

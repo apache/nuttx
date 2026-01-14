@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/mpl115a.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -41,11 +43,7 @@
 #if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_MPL115A)
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private
+ * Private Types
  ****************************************************************************/
 
 struct mpl115a_dev_s
@@ -208,7 +206,7 @@ static void mpl115a_read_press_temp(FAR struct mpl115a_dev_s *priv)
 
   /* Delay 5ms */
 
-  nxsig_usleep(5000);
+  nxsched_usleep(5000);
 
   priv->mpl115a_pressure =
     mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_PADC_MSB << 1)) << 8;

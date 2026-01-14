@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/mpfs_clockconfig.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -142,6 +144,8 @@ enum part_type_e
  ****************************************************************************/
 
 static uint64_t g_cpu_clock = MPFS_MSS_EXT_SGMII_REF_CLK;
+
+#ifdef CONFIG_MPFS_BOOTLOADER
 
 /****************************************************************************
  * Private Functions
@@ -629,6 +633,8 @@ void mpfs_clockconfig(void)
 
   mpfs_pll_config();
 }
+
+#endif
 
 /****************************************************************************
  * Name: mpfs_get_cpuclk

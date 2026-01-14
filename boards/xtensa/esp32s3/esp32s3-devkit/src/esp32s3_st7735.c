@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s3/esp32s3-devkit/src/esp32s3_st7735.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -85,9 +87,9 @@ int board_lcd_initialize(void)
 
   esp32s3_configgpio(GPIO_LCD_RST, OUTPUT);
   esp32s3_gpiowrite(GPIO_LCD_RST, false);
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
   esp32s3_gpiowrite(GPIO_LCD_RST, true);
-  nxsig_usleep(100000);
+  nxsched_usleep(100000);
 
   return OK;
 }

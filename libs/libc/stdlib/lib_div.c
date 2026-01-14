@@ -1,8 +1,9 @@
 /****************************************************************************
  * libs/libc/stdlib/lib_div.c
  *
- *   Copyright (C) 2015 Stavros Polymenis. All rights reserved.
- *   Author: Stavros Polymenis <sp@orbitalfox.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2015 Stavros Polymenis. All rights reserved.
+ * SPDX-FileContributor: Author: Stavros Polymenis <sp@orbitalfox.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

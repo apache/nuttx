@@ -229,6 +229,154 @@ config ADC_HA711_ADD_DELAY
 
 endif # ADC_HX711
 
+config ADC_MCP3008
+	bool "MCP3008 support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the Microchip MCP3008 8-channel, 10-bit ADC.
+
+if ADC_MCP3008
+
+config ADC_MCP3008_SPI_FREQUENCY
+	int "Frequency in Hz"
+	default 2340000
+	range 0 3600000
+	---help---
+		The frequency of SPI communications to the MCP3008, which also has an
+		effect on sample frequency. 3.6MHz is recommended for VDD >= 4V, 2.34MHz
+		for VDD >= 3.3V and 1.35MHz for VDD = 2.7V.
+
+config ADC_MCP3008_DIFFERENTIAL
+	bool "Differential mode"
+	default n
+	---help---
+		If yes, MCP3008 will be used in differential mode, which uses channel pairs
+		to measure differential signals. Otherwise, single-ended mode is used which
+		measures the voltage on each channel individually.
+
+endif # ADC_MCP3008
+
+config ADC_ADS7046
+	bool "TI ADS7046 support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the Texas Instruments ADS7046 12-bit ADC.
+
+if ADC_ADS7046
+
+config ADS7046_FREQUENCY
+	int "TI ADS7046 SPI frequency"
+	default 1000000
+	---help---
+		ADS7046 SPI frequency. Maximum is 60 MHz.
+
+endif # ADC_ADS7046
+
+config ADC_ADS1115
+	bool "ADS1115 support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Texas Instruments ADS1115 16-bit ADC.
+		Currently support is experimental, especially the comparator and ALRT/RDY
+		pin functions.
+
+if ADC_ADS1115
+
+config ADC_ADS1115_I2C_FREQUENCY
+	int "ADS1115 I2C frequency"
+	default 100000
+	---help---
+		ADS1115 I2C frequency.
+
+config ADC_ADS1115_ADDR
+	hex "ADS1115 I2C address"
+	default 0x48
+	---help---
+		ADS1115 I2C address. Default is 0x48.
+
+config ADC_ADS1115_CHANNEL
+	int "ADS1115 channel"
+	default 0
+	range 0 7
+	---help---
+		Default ADS1115 channel/mux configuration.
+		0-3 are the differential channels.
+		4-7 are the single ended channels for A0 to A3
+		See the datasheet or ads1115.h for more info.
+
+config ADC_ADS1115_PGA
+	int "ADS1115 PGA"
+	default 2
+	range 0 7
+	---help---
+		ADS1115 PGA configuration.
+		0 is +/-6.144V, 1 is +/-4.096V, 2 is +/-2.048V, 3 is +/-1.024V,
+		4 is +/-0.512V, 5 is +/-0.256V, 6 is +/-0.256V, 7 is +/-0.256V.
+
+config ADC_ADS1115_CONTINOUS
+	bool "ADS1115 continuous mode"
+	default n
+	---help---
+		ADS1115 continuous mode. The ADS1115 will repeatedly take conversions.
+		If changing channels in this mode, there is a chance of old data being
+		read. To avoid this, use one shot mode or use the ALERT/RDY pin.
+
+config ADC_ADS1115_DR
+	int "ADS1115 data rate"
+	default 4
+	range 0 7
+	---help---
+		ADS1115 data rate.
+		0 is 8sps, 1 is 16sps, 2 is 32sps, 3 is 64sps,
+		4 is 128sps, 5 is 250sps, 6 is 475sps, 7 is 860sps.
+
+config ADC_ADS1115_COMP_MODE
+	bool "ADS1115 window comparator mode"
+	default n
+	---help---
+		ADS1115 window comparator mode.
+
+config ADC_ADS1115_COMP_POL
+	bool "ADS1115 comparator polarity"
+	default n
+	---help---
+		ADS1115 comparator polarity. n is active low, y is active high.
+
+config ADC_ADS1115_COMP_LAT
+	bool "ADS1115 comparator latching"
+	default n
+	---help---
+		ADS1115 comparator latching. n is non-latching, y is latching.
+		Note that this is cleared when reading from the conversion register.
+
+config ADC_ADS1115_COMP_QUE
+	int "ADS1115 comparator queue"
+	default 3
+	range 0 3
+	---help---
+		ADS1115 comparator queue. 0 is assert after 1 conversion, 1, is
+		assert after 2 conversions, 2 is assert after 4 conversions, 3
+		is disable comparator, and set ALERT/RDY to high-impedence.
+
+config ADC_ADS1115_HI_THRESH
+	int "ADS1115 high threshold"
+	default 32767
+	range 0 65536
+	---help---
+		ADS1115 high threshold.
+
+config ADC_ADS1115_LO_THRESH
+	int "ADS1115 low threshold"
+	range 0 65536
+	default 32768
+	---help---
+		ADS1115 low threshold.
+
+endif # ADC_ADS1115
+
 endif # ADC
 
 config COMP
@@ -279,6 +427,34 @@ config DAC7554
 	select SPI
 	---help---
 		Enable driver support for the Texas Instruments DAC7554 dac.
+
+config MCP47X6
+	bool "MCP4706/4716/4726 support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Microchip MCP4706/4716/4726 DAC.
+
+choice
+	prompt "MCP47X6 variant"
+	default MCP4706
+	depends on MCP47X6
+
+config MCP4706
+	bool "MCP4706 (8-bit) DAC"
+
+config MCP4716
+	bool "MCP4716 (10-bit) DAC"
+
+config MCP4726
+	bool "MCP4726 (12-bit) DAC"
+
+endchoice # MCP47X6 variant
+
+config MCP47X6_I2C_FREQUENCY
+	int "MCP47X6 I2C frequency"
+	default 400000
+	depends on MCP47X6
 
 config MCP48XX
 	bool "MCP4802/4812/4822 support"

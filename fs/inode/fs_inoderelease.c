@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/inode/fs_inoderelease.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -45,51 +47,16 @@
  *
  ****************************************************************************/
 
-void inode_release(FAR struct inode *node)
+void inode_release(FAR struct inode *inode)
 {
-  int ret;
-
-  if (node)
+  if (inode)
     {
       /* Decrement the references of the inode */
 
-      do
+      if (atomic_fetch_sub(&inode->i_crefs, 1) <= 1)
         {
-          ret = inode_lock();
-
-          /* This only possible error is due to cancellation of the thread.
-           * We need to try again anyway in this case, otherwise the
-           * reference count would be wrong.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -ECANCELED);
-        }
-      while (ret < 0);
-
-      if (node->i_crefs)
-        {
-          node->i_crefs--;
-        }
-
-      /* If the subtree was previously deleted and the reference
-       * count has decrement to zero,  then delete the inode
-       * now.
-       */
-
-      if (node->i_crefs <= 0 && (node->i_flags & FSNODEFLAG_DELETED) != 0)
-        {
-          /* If the inode has been properly unlinked, then the peer pointer
-           * should be NULL.
-           */
-
-          inode_unlock();
-
-          DEBUGASSERT(node->i_peer == NULL);
-          inode_free(node);
-        }
-      else
-        {
-          inode_unlock();
+          DEBUGASSERT(inode->i_peer == NULL);
+          inode_free(inode);
         }
     }
 }

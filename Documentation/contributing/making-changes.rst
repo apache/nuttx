@@ -8,8 +8,7 @@ Making Changes Using Git
 The Apache NuttX project uses the `Git version control system <https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control>`_
 to track changes, and the source code is hosted on `GitHub <https://www.github.com>`_.
 
-If you want to make changes to NuttX, for your own personal use, or to submit them back to project to improve NuttX,
-that's easy. For the purposes of this guide, you'll need a `GitHub <https://www.github.com>`_ account, since
+If you want to make changes to NuttX, for your own personal use, or to submit them back to the project to improve NuttX, that's easy. For the purposes of this guide, you will need a `GitHub <https://www.github.com>`_ account, since
 the Apache NuttX team uses GitHub. (You could also use git locally, or save your changes to other sites like
 `GitLab <https://about.gitlab.com/>`_ or `BitBucket <https://bitbucket.org>`_, but that's beyond the scope of this
 guide).
@@ -71,10 +70,10 @@ Git Workflow With an Upstream Repository
 The main NuttX git repository is called an "upstream" repository - this is because it's the main source of truth, and
 its changes flow downstream to people who've forked that repository, like us.
 
-Working with an upstream repo is a bit more complex, but it's worth it since you can submit fixes and features
+Working with an upstream repo is a bit more complex, but it is worth the effort since you can submit fixes and features
 to the main NuttX repos. One of the things you need to do regularly is keep your local repo in sync
-with the upstream. I work with a local branch, make changes, pull new software from the upstream and merge it in,
-maybe doing that several times. Then when everything works, I get my branch ready to do a Pull Request. Here's how:
+with the upstream. While working with a local branch you can make changes, pull new software from the upstream and merge it in,
+maybe doing that several times. Then when everything works, the branch is ready to be proposed as a Pull Request. That is how it works:
 
 #. Fetch upstream changes and merge into my local master:
 
@@ -171,10 +170,10 @@ Submitting Your Changes to NuttX
 
 Before you do a Pull Request, the NuttX team will usually want all the changes you made in your branch "squashed" into
 a single commit, so that when they review your changes, there's a clean view of the history. If there are changes
-after Pull Request review feedback, they can be separate commits. Here's the easiest way I found to do that initial
+after Pull Request review feedback, they can be separate commits. Here is the easiest way to do this initial
 squash before submitting the Pull Request:
 
-#. Check out my branch
+#. Check out ``my-branch``
 
     .. code-block:: bash
 
@@ -206,11 +205,80 @@ squash before submitting the Pull Request:
 
    Here's `GitHub's instructions for creating a Pull Request <https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request>`_.
 
+   It is important to include an informative commit title and a commit message.
+
+   .. note::
+
+      You can setup the Git configuration local to your cloned copy of NuttX to
+      use the provided commit template every time you commit.
+
+      .. code:: console
+
+         $ cd nuttx
+         $ git config commit.template .gitmessage
+
+      This will pre-populate the commit message in your editor with the
+      template, which you can edit as a starting point.
+
+   In the commit title please include the subsystem/area related to your contribution,
+   followed by a descriptive message. Some examples:
+
+    Adding or fixing a platform
+
+    .. code-block:: bash
+
+       arch/arm/stm32/: Add arch support for stm32 platform
+
+       This patch adds initial support for stm32 platform. Please read
+       the documentation included for more details how to wire the display.
+
+       Signed-off-by: Your Name <you@whoareyou.com>
+
+    Adding or fixing a board
+
+    .. code-block:: bash
+
+       arm/stm32f4discover: Add board initialization for SSD1306 OLED Display
+
+       This patch adds support to use the display SSD1306 on I2C1, please read
+       the documentation included for more details how to wire the display.
+
+       Signed-off-by: Your Name <you@whoareyou.com>
+
+   Another example, submitting a commit to fix an issue in the fictional sensor xyz123:
+
+    .. code-block:: bash
+
+       sensors/xyz123: Fix a pressure conversion resolution issue
+
+       I found an issue in the XYZ123 sensor when converting the
+       pressure. The raw value should be divided by 4.25 instead
+       of 4.52.
+
+       Signed-off-by: Your Name <you@whoareyou.com>
+
+   You can search in the github commit history for more examples.
+
 #. Get Pull Request feedback and implement changes
 
    Get suggestions for improvements from reviewers, make changes, and push them to the branch. Once the reviewers are
    happy, they may suggest squashing and merging again to make a single commit. In this case you would repeat steps
    1 through 6.
+
+   .. note::
+
+      NuttX uses a ``CODEOWNERS`` file to help track which users are "experts"
+      on certain NuttX subsystems. Sometimes, this will result in certain
+      reviewers being automatically requested to review your PR if you have
+      modified a file they are marked as a "code owner" for. This is just to
+      help contributors get more relevant reviews from someone who knows the
+      subject area.
+
+      If you've created a new file, let's say for a driver, you can add yourself
+      as a code owner for that file by modifying ``.github/CODEOWNERS``. Read
+      the `GitHub documentation for CODEOWNERS
+      <https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners>`_
+      for more information.
 
 How to Include the Suggestions on Your Pull Request?
 ====================================================
@@ -227,7 +295,7 @@ So, someone will ask you some enigmatic thing: "Please rebase and squash these c
 Basically what they are saying is that you need to update your repository
 and fuse your commits in a single commit.
 
-Let walk through the steps to do it!
+Let us walk through the steps to do it!
 
 Move to upstream branch and pull the new commits from there:
 

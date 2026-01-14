@@ -20,14 +20,16 @@
 
 include common/Make.defs
 
+STORAGETMP = $(if $(wildcard $(NXTMPDIR)/.*),y,)
+
 # The start-up, "head", file.  May be either a .S or a .c file.
 
 HEAD_CSRC  = esp32s3_start.c
 
 # Required ESP32-S3 files (arch/xtensa/src/esp32s3)
 
-CHIP_CSRCS  = esp32s3_irq.c esp32s3_clockconfig.c esp32s3_region.c
-CHIP_CSRCS += esp32s3_systemreset.c esp32s3_user.c esp32s3_allocateheap.c
+CHIP_CSRCS  = esp32s3_cache.c esp32s3_irq.c esp32s3_clockconfig.c esp32s3_region.c
+CHIP_CSRCS += esp32s3_systemreset.c esp32s3_user.c esp32s3_allocateheap.c esp32s3_reset_reasons.c
 CHIP_CSRCS += esp32s3_wdt.c esp32s3_gpio.c esp32s3_lowputc.c esp32s3_serial.c
 CHIP_CSRCS += esp32s3_rtc_gpio.c esp32s3_libc_stubs.c esp32s3_spi_timing.c
 
@@ -42,14 +44,7 @@ CHIP_CSRCS += esp32s3_userspace.c
 endif
 
 ifeq ($(CONFIG_SMP),y)
-CHIP_ASRCS  = esp32s3_cpuindex.S
 CHIP_CSRCS += esp32s3_cpuidlestack.c esp32s3_cpustart.c esp32s3_intercpu_interrupt.c
-endif
-
-ifeq ($(CONFIG_ESP32S3_EFUSE),y)
-CHIP_CSRCS += esp32s3_efuse.c
-CHIP_CSRCS += esp32s3_efuse_table.c
-CHIP_CSRCS += esp32s3_efuse_lowerhalf.c
 endif
 
 ifeq ($(CONFIG_ESP32S3_RNG),y)
@@ -58,10 +53,6 @@ endif
 
 ifeq ($(CONFIG_ESP32S3_TWAI),y)
 CHIP_CSRCS += esp32s3_twai.c
-endif
-
-ifeq ($(CONFIG_ESP32S3_LEDC),y)
-CHIP_CSRCS += esp32s3_ledc.c
 endif
 
 ifeq ($(CONFIG_ESP32S3_USBSERIAL),y)
@@ -104,16 +95,10 @@ ifeq ($(CONFIG_ESP32S3_RT_TIMER),y)
 CHIP_CSRCS += esp32s3_rt_timer.c
 endif
 
-ifeq ($(CONFIG_ESP32S3_ADC),y)
-CHIP_CSRCS += esp32s3_adc.c
-endif
-
 ifeq ($(CONFIG_ESP32S3_I2C),y)
+ifeq ($(CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE),y)
 CHIP_CSRCS += esp32s3_i2c.c
 endif
-
-ifeq ($(CONFIG_ESP32S3_I2S),y)
-CHIP_CSRCS += esp32s3_i2s.c
 endif
 
 ifeq ($(CONFIG_ESP32S3_SPI),y)
@@ -128,15 +113,17 @@ ifeq ($(CONFIG_ESP32S3_SPI),y)
   endif
 endif
 
+# Partition table and SPIRAM requires legacy spiflash driver
+
 ifeq ($(CONFIG_ESP32S3_SPIFLASH),y)
-CHIP_CSRCS += esp32s3_spiflash.c
-ifeq ($(CONFIG_ESP32S3_MTD),y)
-CHIP_CSRCS += esp32s3_spiflash_mtd.c
-endif
+  ifeq ($(filter y,$(CONFIG_ESP32S3_PARTITION_TABLE) $(CONFIG_ESP32S3_SPIRAM)),y)
+    CHIP_CSRCS += esp32s3_spiflash.c
+    CHIP_CSRCS += esp32s3_spiflash_mtd.c
+  endif
 endif
 
 ifeq ($(CONFIG_ESP32S3_PARTITION_TABLE),y)
-CHIP_CSRCS += esp32s3_partition.c
+CHIP_CSRCS +=  esp32s3_partition.c
 endif
 
 ifeq ($(CONFIG_ESP32S3_SPIRAM),y)
@@ -186,15 +173,25 @@ ifeq ($(CONFIG_ESP32S3_LCD),y)
 CHIP_CSRCS += esp32s3_lcd.c
 endif
 
+ifeq ($(CONFIG_ESP32S3_SDMMC),y)
+CHIP_CSRCS += esp32s3_sdmmc.c
+endif
+
 ifeq ($(CONFIG_ESP32S3_AES_ACCELERATOR),y)
 CHIP_CSRCS += esp32s3_aes.c
 endif
 
-ifeq ($(CONFIG_PM),y)
-ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
-CHIP_CSRCS += esp32s3_pminitialize.c
+ifeq ($(CONFIG_ESP32S3_OPENETH),y)
+CHIP_CSRCS += esp_openeth.c
 endif
-CHIP_CSRCS += esp32s3_pm.c
+
+ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
+CHIP_CSRCS += esp32s3_wifi_adapter.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_BLE),y)
+CHIP_CSRCS += esp32s3_ble_adapter.c esp32s3_ble.c
+EXTRA_LIBS += -lbtbb -lbtdm_app
 endif
 
 #############################################################################
@@ -203,9 +200,9 @@ endif
 
 # Fetch source files and add them to build
 
-ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
+ESP_HAL_3RDPARTY_REPO = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 7c4fae7ebc5342b19cab03511bfa277176bba377
+	ESP_HAL_3RDPARTY_VERSION = 6b4f19b48c5ba0e847511b5b21584e797ec795dc
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -219,15 +216,39 @@ endif
 	GIT_DEPTH_PARAMETER = --depth=$(GIT_DEPTH)
 endif
 
+# When set USE_NXTMPDIR_ESP_REPO_DIRECTLY=y, will directly use esp-hal-3rdparty
+# under nxtmpdir without CHECK_COMMITSHA, reset, checkout and update.
+
+USE_NXTMPDIR_ESP_REPO_DIRECTLY ?= n
+
+ifeq ($(STORAGETMP),y)
+ifeq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
+define CLONE_ESP_HAL_3RDPARTY_REPO
+	$(call COPYDIR, $(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO),chip/$(ESP_HAL_3RDPARTY_REPO))
+endef
+else
+define CLONE_ESP_HAL_3RDPARTY_REPO
+	$(call CHECK_COMMITSHA, $(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO),$(ESP_HAL_3RDPARTY_VERSION))
+	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),chip/$(ESP_HAL_3RDPARTY_REPO),$(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO))
+endef
+endif
+else
+define CLONE_ESP_HAL_3RDPARTY_REPO
+	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),chip/$(ESP_HAL_3RDPARTY_REPO))
+endef
+endif
+
 chip/$(ESP_HAL_3RDPARTY_REPO):
 	$(Q) echo "Cloning Espressif HAL for 3rd Party Platforms"
-	$(Q) git clone --quiet $(ESP_HAL_3RDPARTY_URL) chip/$(ESP_HAL_3RDPARTY_REPO)
+	$(Q) $(call CLONE_ESP_HAL_3RDPARTY_REPO)
+ifneq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: ${ESP_HAL_3RDPARTY_VERSION}"
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
+endif
 
 # Silent preprocessor warnings
 
-CFLAGS += -Wno-undef -Wno-unused-variable
+CFLAGS += -Wno-undef -Wno-unused-variable -fno-jump-tables -fno-tree-switch-conversion
 CFLAGS += ${DEFINE_PREFIX}_RETARGETABLE_LOCKING
 
 # Enable strict volatile bitfield access
@@ -247,17 +268,19 @@ include chip/hal.mk
 include common/espressif/Make.defs
 
 context:: chip/$(ESP_HAL_3RDPARTY_REPO)
-ifeq ($(CONFIG_ESP32S3_WIRELESS),y)
+ifneq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: initializing submodules..."
-	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/mbedtls/mbedtls components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32c3_family components/esp_coex/lib
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/mbedtls/mbedtls
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls reset --quiet --hard
+endif
 	$(Q) echo "Applying patches..."
 	$(Q) cd chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls && git apply ../../../nuttx/patches/components/mbedtls/mbedtls/*.patch
+ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
+ifneq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32c3_family components/esp_coex/lib
 endif
-
-ifeq ($(CONFIG_ESP32S3_WIRELESS),y)
-include chip/Wireless.mk
 endif
 
 distclean::
 	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
+	$(call DELFILE,../../../vefuse.bin)

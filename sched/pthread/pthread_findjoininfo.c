@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/pthread/pthread_findjoininfo.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -74,7 +76,7 @@ int pthread_findjoininfo(FAR struct task_group_s *group, pid_t pid,
   FAR sq_entry_t *curr;
   FAR sq_entry_t *next;
 
-  nxrmutex_lock(&group->tg_joinlock);
+  nxrmutex_lock(&group->tg_mutex);
 
   sq_for_every_safe(&group->tg_joinqueue, curr, next)
     {
@@ -86,7 +88,7 @@ int pthread_findjoininfo(FAR struct task_group_s *group, pid_t pid,
         }
     }
 
-  nxrmutex_unlock(&group->tg_joinlock);
+  nxrmutex_unlock(&group->tg_mutex);
 
   if (!create)
     {
@@ -101,12 +103,12 @@ int pthread_findjoininfo(FAR struct task_group_s *group, pid_t pid,
 
   join->pid = pid;
 
-  nxrmutex_lock(&group->tg_joinlock);
+  nxrmutex_lock(&group->tg_mutex);
 
   sq_addfirst(&join->entry, &group->tg_joinqueue);
 
 found:
-  nxrmutex_unlock(&group->tg_joinlock);
+  nxrmutex_unlock(&group->tg_mutex);
 
   *pjoin = join;
 

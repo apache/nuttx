@@ -1,10 +1,9 @@
 /****************************************************************************
  * libs/libm/libm/lib_log.c
  *
- * This file is a part of NuttX:
- *
- *   Copyright (C) 2012, 2018 Gregory Nutt. All rights reserved.
- *   Ported by: Darcy Gong
+ * SPDX-License-Identifier: ISC
+ * SPDX-FileCopyrightText: Copyright (C) 2012 Gregory Nutt.
+ * SPDX-FileContributor: Ported by: Darcy Gong
  *
  * It derives from the Rhombus OS math library by Nick Johnson which has
  * a compatible, MIT-style license:
@@ -46,7 +45,7 @@
  * todo: might need to adjust the double floating point version too.
  */
 
-#define LOG_MAX_ITER         10
+#define LOG_MAX_ITER         400
 #define LOG_RELAX_MULTIPLIER 2.0
 
 /****************************************************************************
@@ -64,15 +63,15 @@ double log(double x)
   double y_old;
   double ey;
   double epsilon;
-  double relax_factor;
+  double rf; /* epsilon relax factor */
   int    iter;
 
   y = 0.0;
   y_old = 1.0;
   epsilon = DBL_EPSILON;
 
-  iter         = 0;
-  relax_factor = 1.0;
+  iter = 0;
+  rf = 1.0;
 
   while (y > y_old + epsilon || y < y_old - epsilon)
     {
@@ -90,17 +89,12 @@ double log(double x)
           y = -DBL_MAX_EXP_X;
         }
 
-      epsilon = (fabs(y) > 1.0) ? fabs(y) * DBL_EPSILON : DBL_EPSILON;
+      epsilon = ((fabs(y) > rf) ? fabs(y) : rf) * DBL_EPSILON;
 
       if (++iter >= LOG_MAX_ITER)
         {
-          relax_factor *= LOG_RELAX_MULTIPLIER;
+          rf *= LOG_RELAX_MULTIPLIER;
           iter = 0;
-        }
-
-      if (relax_factor > 1.0)
-        {
-          epsilon *= relax_factor;
         }
     }
 

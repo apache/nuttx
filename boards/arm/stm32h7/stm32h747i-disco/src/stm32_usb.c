@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32h7/stm32h747i-disco/src/stm32_usb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -61,7 +63,7 @@
 #endif
 
 #ifndef CONFIG_STM32H747XI_DISCO_USBHOST_STACKSIZE
-#  define CONFIG_STM32H747XI_DISCO_USBHOST_STACKSIZE 1024
+#  define CONFIG_STM32H747XI_DISCO_USBHOST_STACKSIZE 2048
 #endif
 
 /****************************************************************************
@@ -121,7 +123,7 @@ static int usbhost_waiter(int argc, char *argv[])
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32_usbinitialize very early in inialization to setup
+ *   Called from stm32_usbinitialize very early in initialization to setup
  *   USB-related GPIO pins for the STM32H747I DISCO board.
  *
  ****************************************************************************/

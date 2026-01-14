@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/kinetis/freedom-k64f/src/k64_spi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -55,7 +57,7 @@
 
 void weak_function k64_spidev_initialize(void)
 {
-# warning "Missing logic"
+  kinetis_pinconfig(GPIO_SPI0_CS);
 }
 
 /****************************************************************************
@@ -96,7 +98,7 @@ void kinetis_spi0select(struct spi_dev_s *dev, uint32_t devid,
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
           selected ? "assert" : "de-assert");
-# warning "Missing logic"
+  kinetis_gpiowrite(GPIO_SPI0_CS, !selected);
 }
 
 uint8_t kinetis_spi0status(struct spi_dev_s *dev, uint32_t devid)

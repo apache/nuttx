@@ -13,6 +13,57 @@ menuconfig INPUT
 
 if INPUT
 
+config INPUT_GOLDFISH_EVENTS
+	bool "Goldfish input events driver"
+	select INPUT_TOUCHSCREEN
+	select INPUT_KEYBOARD
+	select INPUT_MOUSE
+	default n
+
+config INPUT_GOLDFISH_NBUFFER
+	int "Number of goldfish events buffer"
+	depends on INPUT_GOLDFISH_EVENTS
+	default 8
+
+config INPUT_FF
+	bool "Support Force Feedback device"
+	default n
+	---help---
+		Enable support for force feedback devices.
+		The doc link: https://www.kernel.org/doc/html/v4.19/input/ff.html.
+
+if INPUT_FF
+
+config FF_DUMMY
+	bool "Enable dummy force feedback driver"
+	default n
+	---help---
+		Enable support for a dummy force feedback driver.
+
+config FF_AW86225
+	bool "Enable aw86225 driver"
+	default n
+	---help---
+		Enable aw86225 haptic controller chip.
+
+if FF_AW86225
+
+config AW86225_RTP_FILE_SUPPORT
+	bool "Enable aw86225 rtp file support"
+	default n
+	---help---
+		Enable support for aw86225 rtp file.
+
+config AW86225_RTP_FILE_PATH
+	string "Path of aw86225 rtp file"
+	default "/etc"
+	---help---
+		File path depend on the opening of FF_AW86225.
+
+endif # FF_AW86225
+
+endif # INPUT_FF
+
 config INPUT_MOUSE
 	bool
 	default n
@@ -167,12 +218,6 @@ config FT5X06_POLLMODE
 		in detecting touch related events and (2) it will consume a
 		significant amount of CPU time to perform the polling.
 
-config FT5X06_SWAPXY
-	bool "Swap X/Y"
-	default n
-	---help---
-		Reverse the meaning of X and Y to handle different LCD orientations.
-
 config FT5X06_SINGLEPOINT
 	bool "Single point"
 	default n
@@ -201,11 +246,11 @@ config FT5X06_THRESHY
 
 endif # FT5X06_SINGLEPOINT
 
-config FT5X06_NPOLLWAITERS
-	int "Number FT5336/FT5x06 poll waiters"
+config FT5X06_SAMPLE_NBUFFER
+	int "Number FT5336/FT5x06 sample buffers"
 	default 4
 	---help---
-		Maximum number of threads that can be waiting on poll()
+	Maximum number of samples buffered.
 
 endif # INPUT_FT5X06
 
@@ -576,6 +621,47 @@ config INPUT_BUTTONS_NPOLLWAITERS
 	default 2
 
 endif # INPUT_BUTTONS
+
+config INPUT_SBUTTON
+	bool "Single Button Multi Actions"
+	select INPUT_KEYBOARD
+	default n
+	---help---
+		Enable the Single Button Multi Actions upper half driver.
+		This driver allows using a single button to generate two
+		events (mapped to short press and long press). Using it
+		is possible navigate a menu interface when using with a
+		LCD/OLED display.
+
+if INPUT_SBUTTON
+
+config INPUT_SBUTTON_KEY1
+	int "ASCII code to generate for short press"
+	default 9
+	---help---
+		Which key will be generated when user do a short press.
+		Default key is TAB (ASCII 9)
+
+config INPUT_SBUTTON_KEY2
+	int "ASCII code to generate for long press"
+	default 13
+	---help---
+		Which key will be generated when user do a short press.
+		Default key is ENTER (ASCII 13)
+
+config INPUT_SBUTTON_BUFSIZE
+	int "Buffer size to store keys"
+	default 8
+
+config INPUT_SBUTTON_KEY_THRESH_MS
+	int "Threshold in milliseconds for short press"
+	default 500
+
+config INPUT_SBUTTON_KEY_DEBOUNCE_MS
+	int "Key Debounce value in milliseconds"
+	default 30
+
+endif # INPUT_SBUTTON
 
 config INPUT_DJOYSTICK
 	bool "Discrete Joystick"

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_cache.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,6 +29,7 @@
 #include <nuttx/irq.h>
 
 #include <nuttx/arch.h>
+#include <arch/barriers.h>
 #include <arch/irq.h>
 #include <arch/chip/chip.h>
 #include <nuttx/spinlock.h>
@@ -74,19 +77,13 @@
 
 #define dc_ops(op, val)                                          \
   ({                                                             \
-    __asm__ volatile ("dc " op ", %0" : : "r" (val) : "memory"); \
+    __asm__ volatile ("dc " op ", %x0" : : "r" (val) : "memory"); \
   })
 
-/* IC IALLUIS, Instruction Cache Invalidate All to PoU, Inner Shareable
- * Purpose
- * Invalidate all instruction caches in the Inner Shareable domain of
- * the PE executing the instruction to the Point of Unification.
- */
-
-static inline void __ic_iallu(void)
-{
-  __asm__ volatile ("ic  iallu" : : : "memory");
-}
+#define ic_ops(op, val)                                          \
+  ({                                                             \
+    __asm__ volatile ("ic " op ", %0" : : "r" (val) : "memory"); \
+  })
 
 /* IC IALLU, Instruction Cache Invalidate All to PoU
  * Purpose
@@ -99,11 +96,48 @@ static inline void __ic_ialluis(void)
   __asm__ volatile ("ic  ialluis" : : : "memory");
 }
 
-static size_t g_dcache_line_size;
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+static inline uint32_t arm64_cache_get_info(uint32_t *sets, uint32_t *ways,
+                                            bool icache)
+{
+  uint32_t csselr;
+  uint32_t ccsidr;
+
+  csselr = read_sysreg(csselr_el1);
+  write_sysreg((csselr & ~CSSELR_EL1_IND_MASK) |
+               (icache << CSSELR_EL1_IND_SHIFT),
+               csselr_el1);
+
+  ccsidr = read_sysreg(ccsidr_el1);
+
+  if (sets)
+    {
+      *sets = ((ccsidr >> CCSIDR_EL1_SETS_SHIFT) & CCSIDR_EL1_SETS_MASK) + 1;
+    }
+
+  if (ways)
+    {
+      *ways = ((ccsidr >> CCSIDR_EL1_WAYS_SHIFT) & CCSIDR_EL1_WAYS_MASK) + 1;
+    }
+
+  write_sysreg(csselr, csselr_el1);
+
+  return (1 << ((ccsidr & CCSIDR_EL1_LN_SZ_MASK) + 2)) * 4;
+}
+
+static inline size_t arm64_get_cache_size(bool icache)
+{
+  uint32_t sets;
+  uint32_t ways;
+  uint32_t line;
+
+  line = arm64_cache_get_info(&sets, &ways, icache);
+
+  return sets * ways * line;
+}
 
 /* operation for data cache by virtual address to PoC */
 
@@ -162,8 +196,7 @@ static inline int arm64_dcache_range(uintptr_t start_addr,
       start_addr += line_size;
     }
 
-  ARM64_DSB();
-  ARM64_ISB();
+  UP_MB();
 
   return 0;
 }
@@ -188,7 +221,7 @@ static inline int arm64_dcache_all(int op)
 
   /* Data barrier before start */
 
-  ARM64_DSB();
+  UP_DSB();
 
   clidr_el1 = read_sysreg(clidr_el1);
 
@@ -215,7 +248,7 @@ static inline int arm64_dcache_all(int op)
 
       csselr_el1 = cache_level << 1;
       write_sysreg(csselr_el1, csselr_el1);
-      ARM64_ISB();
+      UP_ISB();
 
       ccsidr_el1    = read_sysreg(ccsidr_el1);
       line_size     =
@@ -275,8 +308,7 @@ static inline int arm64_dcache_all(int op)
   /* Restore csselr_el1 to level 0 */
 
   write_sysreg(0, csselr_el1);
-  ARM64_DSB();
-  ARM64_ISB();
+  UP_MB();
 
   return 0;
 }
@@ -284,6 +316,8 @@ static inline int arm64_dcache_all(int op)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ICACHE
 
 /****************************************************************************
  * Name: up_get_icache_linesize
@@ -301,7 +335,40 @@ static inline int arm64_dcache_all(int op)
 
 size_t up_get_icache_linesize(void)
 {
-  return 64;
+  static uint32_t clsize;
+
+  if (clsize == 0)
+    {
+      clsize = arm64_cache_get_info(NULL, NULL, true);
+    }
+
+  return clsize;
+}
+
+/****************************************************************************
+ * Name: up_get_icache_size
+ *
+ * Description:
+ *   Get icache size
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Cache size
+ *
+ ****************************************************************************/
+
+size_t up_get_icache_size(void)
+{
+  static uint32_t csize;
+
+  if (csize == 0)
+    {
+      csize = arm64_get_cache_size(true);
+    }
+
+  return csize;
 }
 
 /****************************************************************************
@@ -325,6 +392,41 @@ void up_invalidate_icache_all(void)
 }
 
 /****************************************************************************
+ * Name: up_invalidate_icache
+ *
+ * Description:
+ *   Validate the specified range instruction cache as PoU,
+ *   and flush the branch target cache
+ *
+ * Input Parameters:
+ *   start - virtual start address of region
+ *   end   - virtual end address of region + 1
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_invalidate_icache(uintptr_t start, uintptr_t end)
+{
+  size_t line_size = up_get_icache_linesize();
+
+  /* Align address to line size */
+
+  start = LINE_ALIGN_DOWN(start, line_size);
+
+  UP_DSB();
+
+  while (start < end)
+    {
+      ic_ops("ivau", start);
+      start += line_size;
+    }
+
+  UP_ISB();
+}
+
+/****************************************************************************
  * Name: up_enable_icache
  *
  * Description:
@@ -342,7 +444,7 @@ void up_enable_icache(void)
 {
   uint64_t value = read_sysreg(sctlr_el1);
   write_sysreg((value | SCTLR_I_BIT), sctlr_el1);
-  ARM64_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -363,8 +465,12 @@ void up_disable_icache(void)
 {
   uint64_t value = read_sysreg(sctlr_el1);
   write_sysreg((value & ~SCTLR_I_BIT), sctlr_el1);
-  ARM64_ISB();
+  UP_ISB();
 }
+
+#endif /* CONFIG_ARCH_ICACHE */
+
+#ifdef CONFIG_ARCH_DCACHE
 
 /****************************************************************************
  * Name: up_invalidate_dcache
@@ -384,7 +490,7 @@ void up_disable_icache(void)
  * Assumptions:
  *   This operation is not atomic.  This function assumes that the caller
  *   has exclusive access to the address range so that no harm is done if
- *   the operation is pre-empted.
+ *   the operation is preempted.
  *
  ****************************************************************************/
 
@@ -431,21 +537,40 @@ void up_invalidate_dcache_all(void)
 
 size_t up_get_dcache_linesize(void)
 {
-  uint64_t ctr_el0;
-  uint32_t dminline;
+  static uint32_t clsize;
 
-  if (g_dcache_line_size != 0)
+  if (clsize == 0)
     {
-      return g_dcache_line_size;
+      clsize = arm64_cache_get_info(NULL, NULL, false);
     }
 
-  /* get cache line size */
+  return clsize;
+}
 
-  ctr_el0 = read_sysreg(CTR_EL0);
-  dminline = (ctr_el0 >> CTR_EL0_DMINLINE_SHIFT) & CTR_EL0_DMINLINE_MASK;
-  g_dcache_line_size = 4 << dminline;
+/****************************************************************************
+ * Name: up_get_dcache_size
+ *
+ * Description:
+ *   Get dcache size
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Cache size
+ *
+ ****************************************************************************/
 
-  return g_dcache_line_size;
+size_t up_get_dcache_size(void)
+{
+  static uint32_t csize;
+
+  if (csize == 0)
+    {
+      csize = arm64_get_cache_size(false);
+    }
+
+  return csize;
 }
 
 /****************************************************************************
@@ -465,7 +590,7 @@ size_t up_get_dcache_linesize(void)
  * Assumptions:
  *   This operation is not atomic.  This function assumes that the caller
  *   has exclusive access to the address range so that no harm is done if
- *   the operation is pre-empted.
+ *   the operation is preempted.
  *
  ****************************************************************************/
 
@@ -493,7 +618,7 @@ void up_clean_dcache(uintptr_t start, uintptr_t end)
  * Assumptions:
  *   This operation is not atomic.  This function assumes that the caller
  *   has exclusive access to the address range so that no harm is done if
- *   the operation is pre-empted.
+ *   the operation is preempted.
  *
  ****************************************************************************/
 
@@ -519,8 +644,19 @@ void up_clean_dcache_all(void)
 void up_enable_dcache(void)
 {
   uint64_t value = read_sysreg(sctlr_el1);
+
+  /* Check if the D-Cache is enabled */
+
+  if ((value & SCTLR_C_BIT) != 0)
+    {
+      return;
+    }
+
+  up_invalidate_dcache_all();
+
+  value = read_sysreg(sctlr_el1);
   write_sysreg((value | SCTLR_C_BIT), sctlr_el1);
-  ARM64_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -541,7 +677,7 @@ void up_disable_dcache(void)
 {
   uint64_t value = read_sysreg(sctlr_el1);
   write_sysreg((value & ~SCTLR_C_BIT), sctlr_el1);
-  ARM64_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -561,7 +697,7 @@ void up_disable_dcache(void)
  * Assumptions:
  *   This operation is not atomic.  This function assumes that the caller
  *   has exclusive access to the address range so that no harm is done if
- *   the operation is pre-empted.
+ *   the operation is preempted.
  *
  ****************************************************************************/
 
@@ -588,7 +724,7 @@ void up_flush_dcache(uintptr_t start, uintptr_t end)
  * Assumptions:
  *   This operation is not atomic.  This function assumes that the caller
  *   has exclusive access to the address range so that no harm is done if
- *   the operation is pre-empted.
+ *   the operation is preempted.
  *
  ****************************************************************************/
 
@@ -623,3 +759,5 @@ void up_coherent_dcache(uintptr_t addr, size_t len)
       up_invalidate_icache_all();
     }
 }
+
+#endif /* CONFIG_ARCH_DCACHE */

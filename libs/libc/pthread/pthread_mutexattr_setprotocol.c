@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/pthread/pthread_mutexattr_setprotocol.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -54,21 +56,33 @@ int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
   linfo("attr=%p protocol=%d\n", attr, protocol);
   DEBUGASSERT(attr != NULL);
 
-  if (protocol >= PTHREAD_PRIO_NONE && protocol <= PTHREAD_PRIO_PROTECT)
+  switch (protocol)
     {
-      switch (protocol)
-        {
-          case PTHREAD_PRIO_NONE:
-#ifdef CONFIG_PRIORITY_INHERITANCE
-          case PTHREAD_PRIO_INHERIT:
-            attr->proto = protocol;
-#endif /* CONFIG_PRIORITY_INHERITANCE */
-            return OK;
+      case PTHREAD_PRIO_NONE:
+#if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
+        attr->proto = PTHREAD_PRIO_NONE;
+#endif
+        break;
 
-          default:
-            return ENOTSUP;
-        }
+      case PTHREAD_PRIO_INHERIT:
+#ifdef CONFIG_PRIORITY_INHERITANCE
+        attr->proto = PTHREAD_PRIO_INHERIT;
+        break;
+#else
+        return ENOTSUP;
+#endif /* CONFIG_PRIORITY_INHERITANCE */
+
+      case PTHREAD_PRIO_PROTECT:
+#ifdef CONFIG_PRIORITY_PROTECT
+        attr->proto = PTHREAD_PRIO_PROTECT;
+        break;
+#else
+        return ENOTSUP;
+#endif /* CONFIG_PRIORITY_PROTECT */
+
+      default:
+        return EINVAL;
     }
 
-  return EINVAL;
+  return OK;
 }

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s3/common/scripts/flat_memory.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -93,7 +95,7 @@ MEMORY
    * signing of firmware image.
    */
 
-  metadata (RX) :        org = CONFIG_ESP32S3_APP_MCUBOOT_HEADER_SIZE, len = 0x20
+  metadata (RX) :        org = CONFIG_ESP32S3_APP_MCUBOOT_HEADER_SIZE, len = 0x60
   ROM (RX) :             org = ORIGIN(metadata) + LENGTH(metadata),
                          len = FLASH_SIZE - ORIGIN(ROM)
 #elif defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
@@ -182,6 +184,19 @@ MEMORY
 
   rtc_slow_seg(RW)  :    org = 0x50000000 + CONFIG_ESP32S3_ULP_COPROC_RESERVE_MEM,
                          len = 0x2000 - CONFIG_ESP32S3_ULP_COPROC_RESERVE_MEM
+
+  /* `extern_ram_seg` and `drom0_0_seg` share the same bus and the address region.
+   * A dummy section is used to avoid overlap. See `.ext_ram.dummy` in `esp32s3_sections.ld
+   */
+
+#ifdef CONFIG_XTENSA_EXTMEM_BSS
+#  ifdef CONFIG_ESP32S3_APP_FORMAT_MCUBOOT
+  extern_ram_seg(RWX) :               org = 0x3c000000 + ORIGIN(ROM),
+                                      len = 0x2000000 - ORIGIN(ROM)
+#  else
+  extern_ram_seg(RWX) :               org = 0x3c000020 , len = 0x2000000-0x20
+#  endif
+#endif
 }
 
 #ifdef CONFIG_ESP32S3_RUN_IRAM
@@ -194,4 +209,4 @@ MEMORY
 
 /* Mark the end of the RTC heap (top of the RTC region) */
 
-_ertcheap = 0x50001fff;
+_ertcheap = ORIGIN(rtc_slow_seg) + LENGTH(rtc_slow_seg);

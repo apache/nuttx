@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/tricore/src/common/tricore_systimer.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -22,7 +24,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
 
 #include <nuttx/timers/oneshot.h>
@@ -31,6 +33,26 @@
 #include "tricore_internal.h"
 
 #include "IfxStm.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Since the tricore hardware timer triggers an interrupt only when the
+ * compare value is equal to the counter, setting a compare value that has
+ * already timed out will not trigger an interrupt. To avoid missing
+ * interrupts when setting the timer, we should set a minimum delay.
+ * The minimum delay is calculated based on the CPU frequency and the timer
+ * frequency. We assume that the worst-case execution time for setting the
+ * timer does not exceed 40 CPU cycles, and calculate the minimum timer
+ * delay accordingly.
+ * 40 CPU cycles (100ns at 400Mhz) ~ 10 timer cycles (for 100 Mhz timer).
+ */
+
+#define IFX_CFG_CPU_CLOCK_FREQUENCY 100000000
+
+#define TRICORE_SYSTIMER_MIN_DELAY \
+  (40ull * SCU_FREQUENCY / IFX_CFG_CPU_CLOCK_FREQUENCY)
 
 /****************************************************************************
  * Private Types
@@ -44,42 +66,8 @@
 struct tricore_systimer_lowerhalf_s
 {
   struct oneshot_lowerhalf_s lower;
-  volatile void              *tbase;
-  uint64_t                   freq;
-  uint64_t                   alarm;
-  oneshot_callback_t         callback;
-  void                       *arg;
-};
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-static int tricore_systimer_max_delay(struct oneshot_lowerhalf_s *lower,
-                                      struct timespec *ts);
-static int tricore_systimer_start(struct oneshot_lowerhalf_s *lower,
-                                  oneshot_callback_t callback, void *arg,
-                                  const struct timespec *ts);
-static int tricore_systimer_cancel(struct oneshot_lowerhalf_s *lower,
-                                   struct timespec *ts);
-static int tricore_systimer_current(struct oneshot_lowerhalf_s *lower,
-                                    struct timespec *ts);
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static const struct oneshot_operations_s g_tricore_systimer_ops =
-{
-  .max_delay = tricore_systimer_max_delay,
-  .start     = tricore_systimer_start,
-  .cancel    = tricore_systimer_cancel,
-  .current   = tricore_systimer_current,
-};
-
-static struct tricore_systimer_lowerhalf_s g_systimer_lower =
-{
-  .lower.ops = &g_tricore_systimer_ops,
+  volatile void             *tbase;
+  spinlock_t                lock;
 };
 
 /****************************************************************************
@@ -92,11 +80,11 @@ tricore_systimer_get_time(struct tricore_systimer_lowerhalf_s *priv)
   irqstate_t flags;
   uint64_t ticks;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   ticks = IfxStm_get(priv->tbase);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return ticks;
 }
@@ -107,11 +95,11 @@ tricore_systimer_set_timecmp(struct tricore_systimer_lowerhalf_s *priv,
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   IfxStm_updateCompare(priv->tbase, IfxStm_Comparator_0, value);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -124,63 +112,87 @@ tricore_systimer_set_timecmp(struct tricore_systimer_lowerhalf_s *priv,
  *   lower   An instance of the lower-half oneshot state structure.  This
  *           structure must have been previously initialized via a call to
  *           oneshot_initialize();
- *   ts      The location in which to return the maximum delay.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned
- *   on failure.
+ *   The maximum delay value.
  *
  ****************************************************************************/
 
-static int tricore_systimer_max_delay(struct oneshot_lowerhalf_s *lower,
-                                      struct timespec *ts)
+static clkcnt_t tricore_systimer_max_delay(struct oneshot_lowerhalf_s *lower)
 {
-  ts->tv_sec  = UINT32_MAX;
-  ts->tv_nsec = NSEC_PER_SEC - 1;
-
-  return 0;
+  return UINT32_MAX;
 }
 
 /****************************************************************************
  * Name: tricore_systimer_start
  *
  * Description:
- *   Start the oneshot timer
+ *   Start the oneshot timer. Note that the tricore systimer is special, the
+ *   IRQ is only triggered when timecmp == mtime, so we should avoid the case
+ *   that we miss the timecmp.
  *
  * Input Parameters:
  *   lower   An instance of the lower-half oneshot state structure.  This
  *           structure must have been previously initialized via a call to
  *           oneshot_initialize();
- *   handler The function to call when when the oneshot timer expires.
- *   arg     An opaque argument that will accompany the callback.
- *   ts      Provides the duration of the one shot timer.
+ *   delta   Provides the duration of delta count.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned
- *   on failure.
+ *   None.
  *
  ****************************************************************************/
 
-static int tricore_systimer_start(struct oneshot_lowerhalf_s *lower,
-                                  oneshot_callback_t callback, void *arg,
-                                  const struct timespec *ts)
+static void tricore_systimer_start(struct oneshot_lowerhalf_s *lower,
+                                   clkcnt_t delta)
 {
   struct tricore_systimer_lowerhalf_s *priv =
     (struct tricore_systimer_lowerhalf_s *)lower;
-  uint64_t mtime = tricore_systimer_get_time(priv);
+  irqstate_t flags;
+  uint64_t   mtime;
 
-  priv->alarm = mtime + ts->tv_sec * priv->freq +
-                ts->tv_nsec * priv->freq / NSEC_PER_SEC;
-  if (priv->alarm < mtime)
-    {
-      priv->alarm = UINT64_MAX;
-    }
+  delta = delta < TRICORE_SYSTIMER_MIN_DELAY ?
+                  TRICORE_SYSTIMER_MIN_DELAY : delta;
+  flags = up_irq_save();
+  mtime = tricore_systimer_get_time(priv);
 
-  priv->callback = callback;
-  priv->arg      = arg;
+  tricore_systimer_set_timecmp(priv, mtime + delta);
 
-  tricore_systimer_set_timecmp(priv, priv->alarm);
-  return 0;
+  up_irq_restore(flags);
+}
+
+/****************************************************************************
+ * Name: tricore_systimer_start_absolute
+ *
+ * Description:
+ *   Start the oneshot timer. Note that the tricore systimer is special, the
+ *   IRQ is only triggered when timecmp == mtime, so we should avoid the case
+ *   that we miss the timecmp.
+ *
+ * Input Parameters:
+ *   lower    An instance of the lower-half oneshot state structure.  This
+ *            structure must have been previously initialized via a call to
+ *            oneshot_initialize();
+ *   expected Target
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void
+tricore_systimer_start_absolute(struct oneshot_lowerhalf_s *lower,
+                                clkcnt_t expected)
+{
+  struct tricore_systimer_lowerhalf_s *priv =
+    (struct tricore_systimer_lowerhalf_s *)lower;
+
+  irqstate_t flags = up_irq_save();
+  uint64_t min_expected = tricore_systimer_get_time(priv) +
+                          TRICORE_SYSTIMER_MIN_DELAY;
+  expected = expected < min_expected ? min_expected : expected;
+  tricore_systimer_set_timecmp(priv, expected);
+
+  up_irq_restore(flags);
 }
 
 /****************************************************************************
@@ -196,46 +208,18 @@ static int tricore_systimer_start(struct oneshot_lowerhalf_s *lower,
  *   lower   Caller allocated instance of the oneshot state structure.  This
  *           structure must have been previously initialized via a call to
  *           oneshot_initialize();
- *   ts      The location in which to return the time remaining on the
- *           oneshot timer.  A time of zero is returned if the timer is
- *           not running.
  *
  * Returned Value:
- *   Zero (OK) is returned on success.  A call to up_timer_cancel() when
- *   the timer is not active should also return success; a negated errno
- *   value is returned on any failure.
+ *   None.
  *
  ****************************************************************************/
 
-static int tricore_systimer_cancel(struct oneshot_lowerhalf_s *lower,
-                                   struct timespec *ts)
+static void tricore_systimer_cancel(struct oneshot_lowerhalf_s *lower)
 {
   struct tricore_systimer_lowerhalf_s *priv =
     (struct tricore_systimer_lowerhalf_s *)lower;
-  uint64_t mtime;
 
   tricore_systimer_set_timecmp(priv, UINT64_MAX);
-
-  mtime = tricore_systimer_get_time(priv);
-  if (priv->alarm > mtime)
-    {
-      uint64_t nsec = (priv->alarm - mtime) *
-                      NSEC_PER_SEC / priv->freq;
-
-      ts->tv_sec  = nsec / NSEC_PER_SEC;
-      ts->tv_nsec = nsec % NSEC_PER_SEC;
-    }
-  else
-    {
-      ts->tv_sec  = 0;
-      ts->tv_nsec = 0;
-    }
-
-  priv->alarm    = 0;
-  priv->callback = NULL;
-  priv->arg      = NULL;
-
-  return 0;
 }
 
 /****************************************************************************
@@ -248,27 +232,18 @@ static int tricore_systimer_cancel(struct oneshot_lowerhalf_s *lower,
  *   lower   Caller allocated instance of the oneshot state structure.  This
  *           structure must have been previously initialized via a call to
  *           oneshot_initialize();
- *   ts      The location in which to return the current time. A time of zero
- *           is returned for the initialization moment.
  *
  * Returned Value:
- *   Zero (OK) is returned on success, a negated errno value is returned on
- *   any failure.
+ *   Current timer count.
  *
  ****************************************************************************/
 
-static int tricore_systimer_current(struct oneshot_lowerhalf_s *lower,
-                                    struct timespec *ts)
+static clkcnt_t tricore_systimer_current(struct oneshot_lowerhalf_s *lower)
 {
   struct tricore_systimer_lowerhalf_s *priv =
     (struct tricore_systimer_lowerhalf_s *)lower;
-  uint64_t mtime = tricore_systimer_get_time(priv);
-  uint64_t nsec = mtime / (priv->freq / USEC_PER_SEC) * NSEC_PER_USEC;
 
-  ts->tv_sec  = nsec / NSEC_PER_SEC;
-  ts->tv_nsec = nsec % NSEC_PER_SEC;
-
-  return 0;
+  return tricore_systimer_get_time(priv);
 }
 
 /****************************************************************************
@@ -284,14 +259,30 @@ static int tricore_systimer_interrupt(int irq, void *context, void *arg)
 {
   struct tricore_systimer_lowerhalf_s *priv = arg;
 
-  tricore_systimer_set_timecmp(priv, UINT64_MAX);
-  if (priv->callback != NULL)
-    {
-      priv->callback(&priv->lower, priv->arg);
-    }
+  /* We do not need to clear the compare register here. */
+
+  oneshot_process_callback(&priv->lower);
 
   return 0;
 }
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static const struct oneshot_operations_s g_tricore_oneshot_ops =
+{
+  .current        = tricore_systimer_current,
+  .start          = tricore_systimer_start,
+  .start_absolute = tricore_systimer_start_absolute,
+  .cancel         = tricore_systimer_cancel,
+  .max_delay      = tricore_systimer_max_delay
+};
+
+static struct tricore_systimer_lowerhalf_s g_tricore_oneshot_lowerhalf =
+{
+  .lower.ops = &g_tricore_oneshot_ops
+};
 
 /****************************************************************************
  * Public Functions
@@ -309,10 +300,13 @@ static int tricore_systimer_interrupt(int irq, void *context, void *arg)
 struct oneshot_lowerhalf_s *
 tricore_systimer_initialize(volatile void *tbase, int irq, uint64_t freq)
 {
-  struct tricore_systimer_lowerhalf_s *priv = &g_systimer_lower;
+  struct tricore_systimer_lowerhalf_s *priv = &g_tricore_oneshot_lowerhalf;
 
   priv->tbase = tbase;
-  priv->freq  = freq;
+
+  ASSERT(freq <= UINT32_MAX);
+
+  oneshot_count_init(&priv->lower, (uint32_t)freq);
 
   IfxStm_setCompareControl(tbase,
       IfxStm_Comparator_0,

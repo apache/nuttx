@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/avr/at32uc3/avr32dev1/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -121,7 +123,7 @@
 #define AVR32_CPU_CLOCK       AVR32_FOSC0
 #define AVR32_PBA_CLOCK       AVR32_FOSC0
 
-/* Pin muliplexing selecion *************************************************/
+/* Pin muliplexing selection ************************************************/
 
 #define PINMUX_USART1_RXD     PINMUX_USART1_RXD_2
 #define PINMUX_USART1_TXD     PINMUX_USART1_TXD_2

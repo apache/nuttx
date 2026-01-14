@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libdsp/lib_pmsm_model.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -230,14 +232,14 @@ int pmsm_model_elec(FAR struct pmsm_model_f32_s *model,
 
 int pmsm_model_mech(FAR struct pmsm_model_f32_s *model, float load)
 {
-  float angle = 0.0f;
-  float dir   = 0.0f;
-  float te    = 0.0f;
-  float tmp1  = 0.0f;
-  float tmp2  = 0.0f;
-  float tmp3  = 0.0f;
-  float tmp4  = 0.0f;
-  float tmp5  = 0.0f;
+  float angle  = 0.0f;
+  float dir    = 0.0f;
+  float torque = 0.0f;
+  float tmp1   = 0.0f;
+  float tmp2   = 0.0f;
+  float tmp3   = 0.0f;
+  float tmp4   = 0.0f;
+  float tmp5   = 0.0f;
 
   DEBUGASSERT(model);
 
@@ -249,11 +251,11 @@ int pmsm_model_mech(FAR struct pmsm_model_f32_s *model, float load)
   tmp4 = 1.5f * model->phy.motor.p;
   tmp5 = tmp4 * model->state.i_dq.q;
 
-  te =  tmp5 * tmp3;
+  torque =  tmp5 * tmp3;
 
   /* Get new mechanical velocity */
 
-  tmp1 = te - load;
+  tmp1 = torque - load;
   tmp2 = model->per * tmp1 ;
   tmp3 = tmp2 * model->phy.one_by_iner;
 

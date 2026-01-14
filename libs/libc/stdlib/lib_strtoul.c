@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stdlib/lib_strtoul.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -52,9 +54,10 @@
 
 unsigned long strtoul(FAR const char *nptr, FAR char **endptr, int base)
 {
+  FAR const char *origin = nptr;
   unsigned long accum = 0;
   unsigned long limit;
-  int value;
+  int value = -1;
   int last_digit;
   char sign = 0;
 
@@ -79,7 +82,6 @@ unsigned long strtoul(FAR const char *nptr, FAR char **endptr, int base)
       if (base < 0)
         {
           set_errno(EINVAL);
-          accum = 0;
         }
       else
         {
@@ -127,7 +129,7 @@ unsigned long strtoul(FAR const char *nptr, FAR char **endptr, int base)
             }
         }
 
-      *endptr = (FAR char *)nptr;
+      *endptr = (FAR char *)(value == -1 ? origin : nptr);
     }
 
   return accum;

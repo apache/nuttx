@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_reprioritizertr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -62,7 +64,7 @@ bool nxsched_reprioritize_rtr(FAR struct tcb_s *tcb, int priority)
    * remove the head of the ready to run list.
    */
 
-  switch_needed = nxsched_remove_readytorun(tcb, false);
+  switch_needed = nxsched_remove_readytorun(tcb);
 
   /* Setup up the new task priority */
 

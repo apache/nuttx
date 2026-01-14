@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/hc/src/m9s12/m9s12_start.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -116,7 +118,7 @@
 
 	clr 	HCS12_CRG_CLKSEL
 
-	/* Set the multipler and divider and enable the PLL */
+	/* Set the multiplier and divider and enable the PLL */
 
 	bclr	*HCS12_CRG_PLLCTL #CRG_PLLCTL_PLLON
 	ldab	#HCS12_SYNR_VALUE

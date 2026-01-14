@@ -1,0 +1,19 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_NUCLEO_H563ZI
+
+config STM32H5_USE_HSE
+	bool "Use on-board HSE"
+	default n
+	---help---
+		Use the supplied on-board 25 MHz HSE. If selected, board.h must supply
+		appropriate clock setup. Requires board modification: 
+			- SB3 and SB4 ON
+			- SB49 OFF
+			- SB48 and SB50 OFF (Default)
+			- C69 and C70 ON, 5.6 pF (Default)
+		
+endif

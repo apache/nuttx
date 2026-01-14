@@ -2,6 +2,8 @@
 Nordic Thingy:53
 ================
 
+.. tags:: chip:nrf53, chip:nrf5340
+
 The `Thingy:53 (PCA20053) <https://www.nordicsemi.com/Products/Development-hardware/Nordic-Thingy-53>`_
 is a prototyping platform build around the nRF5340 from Nordic.
 
@@ -26,7 +28,7 @@ Low power accelerometer (ADXL362)  Yes     SPI
 IMU (BMI270)                       Yes     SPI or I2C 0x68
 Magnetometer (BMM150)              Yes     I2C 0x10
 Color sensor (BH1749NUC)           Yes     I2C 0x38
-Air quality sensor (BME688)        No      I2C 0x76
+Air quality sensor (BME688)        Yes     I2C 0x76
 ================================== ======= =============
 
 Serial Console
@@ -75,6 +77,18 @@ nsh_cpunet
 
 Basic NuttShell configuration for the network core (console enabled in UART0,
 exposed via J-Link VCOM1, at 115200 bps).
+
+rpmsghci_nimble_cpuapp
+----------------------
+
+This configuration enables RPMSG Bluetooth HCI client on the application core
+and uses nimBLE for the host-layer
+
+rpmsghci_sdc_cpunet
+-------------------
+
+This configuration enables RPMSG Bluetooth HCI server on the network core which
+can be accessed using RPMSG Bluetooth HCI client on the application core.
 
 Flash & Debug
 =============

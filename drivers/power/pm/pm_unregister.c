@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/power/pm/pm_unregister.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -56,8 +58,12 @@
 
 int pm_domain_unregister(int domain, FAR struct pm_callback_s *cb)
 {
+  FAR struct pm_domain_s *pdom;
   irqstate_t flags;
-  struct pm_domain_s *pdom = &g_pmdomains[domain];
+
+  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
+
+  pdom  = &g_pmdomains[domain];
   flags = spin_lock_irqsave(&pdom->lock);
 
   /* Remove entry from the list of registered callbacks. */

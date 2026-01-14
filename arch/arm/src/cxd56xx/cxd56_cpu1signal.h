@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/cxd56xx/cxd56_cpu1signal.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -21,7 +23,7 @@
 #ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_CPU1SIGNAL_H
 #define __ARCH_ARM_SRC_CXD56XX_CXD56_CPU1SIGNAL_H
 
-/* CPU1 Notifyable functions */
+/* CPU1 Notifiable functions */
 
 #define CXD56_CPU1_DATA_TYPE_GNSS         0
 #define CXD56_CPU1_DATA_TYPE_GEOFENCE     1

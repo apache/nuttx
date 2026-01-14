@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/icmp/icmp_ioctl.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,6 +38,7 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
 
+#include "utils/utils.h"
 #include "icmp/icmp.h"
 
 /****************************************************************************
@@ -60,7 +63,7 @@ int icmp_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
   FAR struct icmp_conn_s *conn = psock->s_conn;
   int ret = OK;
 
-  net_lock();
+  conn_lock(&conn->sconn);
 
   switch (cmd)
     {
@@ -89,7 +92,7 @@ int icmp_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
         break;
     }
 
-  net_unlock();
+  conn_unlock(&conn->sconn);
 
   return ret;
 }

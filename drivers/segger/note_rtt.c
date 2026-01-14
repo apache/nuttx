@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/segger/note_rtt.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -55,6 +57,17 @@ static const struct note_driver_ops_s g_notertt_ops =
 struct notertt_s g_notertt =
 {
   {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
+    "rtt",
+    {
+      {
+        CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE,
+#  ifdef CONFIG_SMP
+        CONFIG_SCHED_INSTRUMENTATION_CPUSET
+#  endif
+      },
+    },
+#endif
     &g_notertt_ops
   }
 };

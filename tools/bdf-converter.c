@@ -1,6 +1,8 @@
 /****************************************************************************
  * tools/bdf-converter.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -389,12 +391,12 @@ static void bdf_getglyphbitmap(FILE *file, glyphinfo_t *ginfo)
 {
   char line[BDF_MAX_LINE_LENGTH];
   uint64_t *bitmap;
-  bool readingbitmap;
+  int readingbitmap;
 
   bitmap = ginfo->bitmap;
-  readingbitmap = true;
+  readingbitmap = ginfo->bb_h;
 
-  while (readingbitmap)
+  while (readingbitmap > 0)
     {
       if (fgets(line, BDF_MAX_LINE_LENGTH, file) != NULL)
         {
@@ -402,20 +404,21 @@ static void bdf_getglyphbitmap(FILE *file, glyphinfo_t *ginfo)
 
           if (strcmp(line, "ENDCHAR") == 0)
             {
-              readingbitmap = false;
+              readingbitmap = 0;
             }
           else
             {
               char *endptr;
               *bitmap = strtoul(line, &endptr, 16);
               bitmap++;
+              readingbitmap--;
             }
         }
       else
         {
           /* error condition */
 
-          readingbitmap = false;
+          readingbitmap = 0;
         }
     }
 }

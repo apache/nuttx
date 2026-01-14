@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/include/syscall.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -52,7 +54,7 @@
  */
 
 #ifndef CONFIG_BUILD_FLAT
-#  define CONFIG_SYS_RESERVED 8
+#  define CONFIG_SYS_RESERVED 6
 #else
 #  define CONFIG_SYS_RESERVED 4
 #endif
@@ -80,32 +82,7 @@
 
 #define SYS_switch_context        (2)
 
-#ifdef CONFIG_LIB_SYSCALL
-/* SYS call 3:
- *
- * void arm_syscall_return(void);
- */
-
-#define SYS_syscall_return        (3)
-#endif /* CONFIG_LIB_SYSCALL */
-
 #ifndef CONFIG_BUILD_FLAT
-/* SYS call 4:
- *
- * void up_task_start(main_t taskentry, int argc, char *argv[])
- *        noreturn_function;
- */
-
-#define SYS_task_start            (4)
-
-/* SYS call 5:
- *
- * void up_pthread_start((pthread_startroutine_t startup,
- *                        pthread_startroutine_t entrypt, pthread_addr_t arg)
- *        noreturn_function
- */
-
-#define SYS_pthread_start         (5)
 
 /* SYS call 6:
  *
@@ -114,14 +91,14 @@
  *                     void *ucontext);
  */
 
-#define SYS_signal_handler        (6)
+#define SYS_signal_handler        (4)
 
 /* SYS call 7:
  *
  * void signal_handler_return(void);
  */
 
-#define SYS_signal_handler_return (7)
+#define SYS_signal_handler_return (5)
 #endif /* !CONFIG_BUILD_FLAT */
 
 #define ARM_SMCC_RES_A0       (0)
@@ -132,6 +109,50 @@
 #define ARM_SMCC_RES_A5       (5)
 #define ARM_SMCC_RES_A6       (6)
 #define ARM_SMCC_RES_A7       (7)
+
+#define ARM_SMCCC_STD_CALL    0UL
+#define ARM_SMCCC_FAST_CALL   1UL
+#define ARM_SMCCC_TYPE_SHIFT  31
+
+#define ARM_SMCCC_SMC_32      0
+#define ARM_SMCCC_SMC_64      1
+#define ARM_SMCCC_CALL_CONV_SHIFT 30
+
+#define ARM_SMCCC_OWNER_MASK  0x3F
+#define ARM_SMCCC_OWNER_SHIFT 24
+
+#define ARM_SMCCC_FUNC_MASK   0xFFFF
+
+#define ARM_SMCCC_IS_FAST_CALL(smc_val) \
+  ((smc_val) & (ARM_SMCCC_FAST_CALL << ARM_SMCCC_TYPE_SHIFT))
+#define ARM_SMCCC_IS_64(smc_val) \
+  ((smc_val) & (ARM_SMCCC_SMC_64 << ARM_SMCCC_CALL_CONV_SHIFT))
+#define ARM_SMCCC_FUNC_NUM(smc_val)  ((smc_val) & ARM_SMCCC_FUNC_MASK)
+#define ARM_SMCCC_OWNER_NUM(smc_val) \
+  (((smc_val) >> ARM_SMCCC_OWNER_SHIFT) & ARM_SMCCC_OWNER_MASK)
+
+#define ARM_SMCCC_CALL_VAL(type, calling_convention, owner, func_num) \
+  (((type) << ARM_SMCCC_TYPE_SHIFT) | \
+  ((calling_convention) << ARM_SMCCC_CALL_CONV_SHIFT) | \
+  (((owner) & ARM_SMCCC_OWNER_MASK) << ARM_SMCCC_OWNER_SHIFT) | \
+  ((func_num) & ARM_SMCCC_FUNC_MASK))
+
+#define ARM_SMCCC_OWNER_ARCH            0
+#define ARM_SMCCC_OWNER_CPU             1
+#define ARM_SMCCC_OWNER_SIP             2
+#define ARM_SMCCC_OWNER_OEM             3
+#define ARM_SMCCC_OWNER_STANDARD        4
+#define ARM_SMCCC_OWNER_TRUSTED_APP     48
+#define ARM_SMCCC_OWNER_TRUSTED_APP_END 49
+#define ARM_SMCCC_OWNER_TRUSTED_OS      50
+#define ARM_SMCCC_OWNER_TRUSTED_OS_END  63
+
+#define ARM_SMCCC_QUIRK_NONE            0
+#define ARM_SMCCC_QUIRK_QCOM_A6         1 /* Save/restore register a6 */
+
+#define ARM_SMCCC_ARCH_FEATURES         0x80000001
+
+#define ARM_SMCCC_RET_NOT_SUPPORTED     ((unsigned long)-1)
 
 #ifndef __ASSEMBLY__
 
@@ -323,10 +344,10 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
 
 /* semihosting(SMH) call with call number and one parameter */
 
-static inline long smh_call(unsigned int nbr, void *parm)
+static inline long smh_call(unsigned int nbr, void *param)
 {
   register uint64_t reg0 __asm__("x0") = (uint64_t)(nbr);
-  register uint64_t reg1 __asm__("x1") = (uint64_t)(parm);
+  register uint64_t reg1 __asm__("x1") = (uint64_t)(param);
 
   __asm__ __volatile__
   (

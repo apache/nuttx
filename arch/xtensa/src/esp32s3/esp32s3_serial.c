@@ -295,7 +295,7 @@ static uart_dev_t g_uart2_dev =
 #ifdef CONFIG_ESP32S3_UART
 
 /****************************************************************************
- * Name: uart_interrupt
+ * Name: uart_handler
  *
  * Description:
  *   This is the UART interrupt handler.  It will be invoked when an
@@ -312,6 +312,7 @@ static int uart_handler(int irq, void *context, void *arg)
   struct esp32s3_uart_s *priv = dev->priv;
   uint32_t tx_mask = UART_TXFIFO_EMPTY_INT_ST_M | UART_TX_DONE_INT_ST_M;
   uint32_t rx_mask = UART_RXFIFO_TOUT_INT_ST_M | UART_RXFIFO_FULL_INT_ST_M;
+  uint32_t rx_ovf_mask = UART_RXFIFO_OVF_INT_ST_M;
   uint32_t int_status;
 
   int_status = getreg32(UART_INT_ST_REG(priv->id));
@@ -342,6 +343,12 @@ static int uart_handler(int irq, void *context, void *arg)
     {
       uart_recvchars(dev);
       modifyreg32(UART_INT_CLR_REG(priv->id), rx_mask, rx_mask);
+    }
+
+  if ((int_status & rx_ovf_mask) != 0)
+    {
+      esp32s3_lowputc_rst_rxfifo(priv);
+      modifyreg32(UART_INT_CLR_REG(priv->id), rx_ovf_mask, rx_ovf_mask);
     }
 
   return OK;
@@ -385,11 +392,18 @@ static int esp32s3_setup(struct uart_dev_s *dev)
   modifyreg32(UART_CONF1_REG(priv->id), UART_TXFIFO_EMPTY_THRHD_M, 0);
 
   /* Define a threshold to trigger an RX FIFO FULL interrupt.
-   * Define just one byte to read data immediately.
    */
 
   modifyreg32(UART_CONF1_REG(priv->id), UART_RXFIFO_FULL_THRHD_M,
-              1 << UART_RXFIFO_FULL_THRHD_S);
+              CONFIG_ESP32S3_RX_FIFO_THRD << UART_RXFIFO_FULL_THRHD_S);
+
+  /* Define a rx fifo timeout to trigger RX TOUT interrupt.
+   */
+
+  modifyreg32(UART_CONF1_REG(priv->id),
+            UART_RX_TOUT_THRHD_M | UART_RX_TOUT_EN_M,
+            (CONFIG_ESP32S3_RX_FIFO_TOUT << UART_RX_TOUT_THRHD_S) |
+            UART_RX_TOUT_EN_M);
 
   /* Define the maximum FIFO size for RX and TX FIFO.
    * That means, 1 block = 128 bytes.
@@ -446,7 +460,7 @@ static int esp32s3_setup(struct uart_dev_s *dev)
 
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-  /* Configure the ouput flow control */
+  /* Configure the output flow control */
 
   if (priv->oflow)
     {
@@ -537,7 +551,7 @@ static int esp32s3_attach(struct uart_dev_s *dev)
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
   priv->cpuint = esp32s3_setup_irq(priv->cpu, priv->periph, priv->int_pri,
                                    ESP32S3_CPUINT_LEVEL);
   if (priv->cpuint < 0)
@@ -901,7 +915,7 @@ static int esp32s3_ioctl(struct file *filep, int cmd, unsigned long arg)
         termiosp->c_cflag |=  priv->iflow != 0 ? CRTS_IFLOW : 0;
 #endif
 
-        /* Set the baud rate in ther termiosp using the
+        /* Set the baud rate in the termiosp using the
          * cfsetispeed interface.
          */
 
@@ -1131,7 +1145,7 @@ static bool esp32s3_rxflowcontrol(struct uart_dev_s *dev,
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before xtensa_serialinit.  NOTE:  This function depends on GPIO pin
  *   configuration performed in xtensa_consoleinit() and main clock
  *   initialization performed in up_clkinitialize().
@@ -1159,7 +1173,7 @@ void xtensa_earlyserialinit(void)
 #endif
 
   /* Configure console in early step.
-   * Setup for other serials will be perfomed when the serial driver is
+   * Setup for other serials will be performed when the serial driver is
    * open.
    */
 
@@ -1210,7 +1224,7 @@ void xtensa_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_UART
   uint32_t int_status;
@@ -1218,21 +1232,11 @@ int up_putc(int ch)
   esp32s3_lowputc_disable_all_uart_int(CONSOLE_DEV.priv, &int_status);
 #endif
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      xtensa_lowputc('\r');
-    }
-
   xtensa_lowputc((char)ch);
 
 #ifdef CONSOLE_UART
   esp32s3_lowputc_restore_all_uart_int(CONSOLE_DEV.priv, &int_status);
 #endif
-  return ch;
 }
 
 #endif /* HAVE_UART_DEVICE */
@@ -1247,7 +1251,7 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_UART
   uint32_t int_status;
@@ -1255,21 +1259,11 @@ int up_putc(int ch)
   esp32s3_lowputc_disable_all_uart_int(CONSOLE_DEV.priv, &int_status);
 #endif
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      xtensa_lowputc('\r');
-    }
-
   xtensa_lowputc(ch);
 
 #ifdef CONSOLE_UART
   esp32s3_lowputc_restore_all_uart_int(CONSOLE_DEV.priv, &int_status);
 #endif
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

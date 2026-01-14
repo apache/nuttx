@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/serial/serial_cmsdk.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -497,8 +499,8 @@ static int uart_cmsdk_tx_interrupt(int irq, FAR void *context, FAR void *arg)
 static int uart_cmsdk_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct uart_dev_s *dev = filep->f_inode->i_private;
-  FAR struct uart_cmsdk_s *priv = dev->priv;
-  int ret;
+  FAR struct uart_cmsdk_s *priv = (FAR struct uart_cmsdk_s *)dev->priv;
+  int ret = OK;
 
   switch (cmd)
     {
@@ -514,7 +516,6 @@ static int uart_cmsdk_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         cfsetispeed(termiosp, priv->baud);
         termiosp->c_cflag = CS8;
-        break;
       }
       break;
 
@@ -702,7 +703,7 @@ static void uart_cmsdk_putc(FAR struct uart_cmsdk_s *priv, int ch)
 #endif
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -710,7 +711,7 @@ static void uart_cmsdk_putc(FAR struct uart_cmsdk_s *priv, int ch)
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
- *   serial console will be available during bootup.  This must be called
+ *   serial console will be available during boot up.  This must be called
  *   before uart_serialinit.
  *
  *   NOTE: Configuration of the CONSOLE UART was performed by uart_lowsetup()
@@ -773,24 +774,13 @@ void cmsdk_serialinit(void)
  ****************************************************************************/
 
 #ifdef HAVE_CMSDK_CONSOLE
-int up_putc(int ch)
+void up_putc(int ch)
 {
   FAR struct uart_cmsdk_s *priv = CONSOLE_DEV.priv;
   uint32_t ier;
 
   ier = uart_cmsdk_disableuartint(priv);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      uart_cmsdk_putc(priv, '\r');
-    }
-
   uart_cmsdk_putc(priv, ch);
   uart_cmsdk_restoreuartint(priv, ier);
-  return ch;
 }
 #endif

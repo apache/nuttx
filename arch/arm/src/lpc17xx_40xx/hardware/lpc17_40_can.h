@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx_40xx/hardware/lpc17_40_can.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -438,7 +440,7 @@
 #define CAN_RID_ID11_MASK               (0x7ff)   /* Bits 0-10: 11-bit Identifier (FF=0) */
                                                   /* Bits 11-31: Reserved */
 
-#define CAN_RID_ID29_MASK               (0x1fffffff) /* Bits 0-28: 29-bit Identifiter (FF=1) */
+#define CAN_RID_ID29_MASK               (0x1fffffff) /* Bits 0-28: 29-bit Identifier (FF=1) */
                                                      /* Bits 29-31: Reserved */
 
 /* Received data bytes 1-4 */
@@ -485,7 +487,7 @@
 #define CAN_TID_ID11_MASK               (0x7ff)   /* Bits 0-10: 11-bit Identifier (FF=0) */
                                                   /* Bits 11-31: Reserved */
 
-#define CAN_TID_ID29_MASK               (0x1fffffff) /* Bits 0-28: 29-bit Identifiter (FF=1) */
+#define CAN_TID_ID29_MASK               (0x1fffffff) /* Bits 0-28: 29-bit Identifier (FF=1) */
                                                      /* Bits 29-31: Reserved */
 
 /* Transmit data bytes 1-4 (Tx Buffer 1),

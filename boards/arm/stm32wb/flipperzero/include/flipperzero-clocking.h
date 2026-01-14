@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32wb/flipperzero/include/flipperzero-clocking.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -229,7 +231,7 @@
 #define BOARD_TIM16_FREQUENCY       STM32WB_APB2_TIM16_CLKIN
 #define BOARD_TIM17_FREQUENCY       STM32WB_APB2_TIM17_CLKIN
 
-/* Higher SYSCLK reguires more flash wait states. */
+/* Higher SYSCLK requires more flash wait states. */
 
 #define BOARD_FLASH_WAITSTATES      3
 

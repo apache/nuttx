@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s2/esp32s2-kaluga-1/src/esp32s2_buttons.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,7 +40,6 @@
 #include <arch/irq.h>
 
 #include "esp32s2_gpio.h"
-#include "esp32s2_rtc_gpio.h"
 #include "esp32s2_touch.h"
 
 #include "esp32s2-kaluga-1.h"

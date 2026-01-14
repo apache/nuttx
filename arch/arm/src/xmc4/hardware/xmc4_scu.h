@@ -1,39 +1,29 @@
 /****************************************************************************
  * arch/arm/src/xmc4/hardware/xmc4_scu.h
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: Apache-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
+ ****************************************************************************/
+
+/****************************************************************************
  * May include some logic from sample code provided by Infineon:
  *
- * Copyright (C) 2011-2015 Infineon Technologies AG. All rights reserved.
+ *   Copyright (C) 2011-2015 Infineon Technologies AG. All rights reserved.
  *
  * Infineon Technologies AG (Infineon) is supplying this software for use
  * with Infineon's microcontrollers.  This file can be freely distributed
@@ -475,7 +465,7 @@
 #define SCU_ECAT0CON_PHY_OFFSET (1 << SCU_ECAT0CON_PHY_OFFSET_SHIFT)
 
 #define SCU_ECAT0CON_ECATRSTEN_SHIFT  (0)
-#define SCU_ECAT0CON_ECATRSTEN        (0 << SCU_ECAT0CON_ECATRSTEN_SHIFT)
+#define SCU_ECAT0CON_ECATRSTEN        (1 << SCU_ECAT0CON_ECATRSTEN_SHIFT)
 
 /* Port 0 */
 #define SCU_ECAT0CON_RXD0_SHIFT  (0)
@@ -1106,6 +1096,12 @@
 #define SCU_DSLEEPCR_EBUCR          (1 << 19) /* Bit 19: EBU Clock Control in Deep Sleep Mode */
 #define SCU_DSLEEPCR_CCUCR          (1 << 20) /* Bit 20: CCU Clock Control in Deep Sleep Mod */
 #define SCU_DSLEEPCR_WDTCR          (1 << 21) /* Bit 21: WDT Clock Control in Deep Sleep Mode */
+
+/* EtherCAT clocking */
+#define SCU_ECATCLKCR_ECADIV_SHIFT (0)   /* Bit 0-1: EtherCAT Clock Divider Value */
+#define SCU_ECATCLKCR_ECATSEL_SHIFT (16) /* Bit 16: EtherCAT Clock Selection Value */
+#  define SCU_ECATCLKCR_ECATSEL_FPLLUSB (0 << SCU_ECATCLKCR_ECATSEL_SHIFT)
+#  define SCU_ECATCLKCR_ECATSEL_FPLL    (1 << SCU_ECATCLKCR_ECATSEL_SHIFT)
 
 /* Peripheral 0 Clock Gating Status, Peripheral 0 Clock Gating Set,
  * Peripheral 0 Clock Gating Clear

@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/misc/lib_envpath.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -177,7 +179,7 @@ FAR char *envpath_next(ENVPATH_HANDLE handle, FAR const char *relpath)
       if (*path == '\0')
         {
           /* If it points to a NULL it means that either (1) the PATH
-           * varialbe is empty, or (2) we have already examined all of the
+           * variable is empty, or (2) we have already examined all of the
            * paths in the path variable.
            */
 

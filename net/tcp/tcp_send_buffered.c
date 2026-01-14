@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp_send_buffered.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,11 +49,11 @@
 #include <debug.h>
 
 #include <arch/irq.h>
+#include <nuttx/tls.h>
 #include <nuttx/net/net.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/tcp.h>
-#include <nuttx/net/net.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
@@ -195,8 +197,8 @@ static void retransmit_segment(FAR struct tcp_conn_s *conn,
        * retransmitted, and un-ACKed, if expired is not zero, the
        * connection will be closed.
        *
-       * field expired can only be updated at TCP_ESTABLISHED
-       * state
+       * field expired can only be updated at TCP_ESTABLISHED and
+       * TCP_CLOSE_WAIT state.
        */
 
       conn->expired++;
@@ -429,8 +431,8 @@ static int parse_sack(FAR struct tcp_conn_s *conn, FAR struct tcp_hdr_s *tcp,
  *
  ****************************************************************************/
 
-static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
-                                        FAR void *pvpriv, uint16_t flags)
+static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
+                                        FAR void *pvpriv, uint32_t flags)
 {
   FAR struct tcp_conn_s *conn = pvpriv;
 #ifdef CONFIG_NET_TCP_SELECTIVE_ACK
@@ -457,7 +459,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
       return flags;
     }
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   /* The TCP_ACKDATA, TCP_REXMIT and TCP_DISCONN_EVENTS flags are expected to
    * appear here strictly one at a time, except for the FIN + ACK case.
@@ -503,7 +505,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
       /* Get the ACK number from the TCP header */
 
       ackno = tcp_getsequence(tcp->ackno);
-      ninfo("ACK: ackno=%" PRIu32 " flags=%04x\n", ackno, flags);
+      ninfo("ACK: ackno=%" PRIu32 " flags=%" PRIx32 "\n", ackno, flags);
 
       /* Look at every write buffer in the unacked_q.  The unacked_q
        * holds write buffers that have been entirely sent, but which
@@ -591,18 +593,51 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_TCP_CC_NEWRENO
               if (conn->dupacks >= TCP_FAST_RETRANSMISSION_THRESH)
 #else
-              /* Reset the duplicate ack counter */
-
-              if ((flags & TCP_NEWDATA) != 0)
-                {
-                  TCP_WBNACK(wrb) = 0;
-                }
-
               /* Duplicate ACK? Retransmit data if need */
 
               if (++TCP_WBNACK(wrb) == TCP_FAST_RETRANSMISSION_THRESH)
 #endif
                 {
+                  /* Fast retransmission has been triggered */
+
+#ifndef CONFIG_NET_TCP_CC_NEWRENO
+                  /* Reset counter */
+
+                  TCP_WBNACK(wrb) = 0;
+#endif
+
+                  if ((flags & TCP_NEWDATA) != 0)
+                    {
+                      FAR uint8_t *buf = dev->d_buf;
+                      FAR uint8_t *appdata = dev->d_appdata;
+                      uint16_t len = dev->d_len;
+#ifdef CONFIG_NET_TCPURGDATA
+                      FAR uint8_t *urgdata = dev->d_urgdata;
+                      uint16_t urglen = dev->d_urglen;
+#endif
+                      FAR struct iob_s *iob = dev->d_iob;
+
+                      dev->d_buf = NULL;
+                      dev->d_iob = NULL;
+
+                      /* The current receive data needs to be handled by
+                       * following tcp_recvhandler or tcp_data_event. Notify
+                       * driver to send the message and marked as rexmit
+                       */
+
+                      conn->timeout = true;
+                      netdev_txnotify_dev(conn->dev, TCP_POLL);
+                      netdev_iob_replace(dev, iob);
+                      dev->d_buf = buf;
+                      dev->d_appdata = appdata;
+                      dev->d_len = len;
+#ifdef CONFIG_NET_TCPURGDATA
+                      dev->d_urgdata = urgdata;
+                      dev->d_urglen = urglen;
+#endif
+                      return flags;
+                    }
+
 #ifdef CONFIG_NET_TCP_SELECTIVE_ACK
                   if ((conn->flags & TCP_SACK) &&
                       (tcp->tcpoffset & 0xf0) > 0x50)
@@ -622,13 +657,12 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                       /* Do fast retransmit */
 
                       rexmitno = ackno;
-#ifndef CONFIG_NET_TCP_CC_NEWRENO
-                      /* Reset counter */
-
-                      TCP_WBNACK(wrb) = 0;
-#endif
 #endif
                     }
+
+#ifdef CONFIG_NET_TCP_CC_NEWRENO
+                  conn->dupacks = 0;
+#endif
                 }
             }
         }
@@ -672,7 +706,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
   if ((flags & TCP_DISCONN_EVENTS) != 0)
     {
-      ninfo("Lost connection: %04x\n", flags);
+      ninfo("Lost connection: %" PRIx32 "\n", flags);
 
       /* We could get here recursively through the callback actions of
        * tcp_lost_connection().  So don't repeat that action if we have
@@ -858,7 +892,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
       FAR struct tcp_wrbuffer_s *wrb;
       FAR sq_entry_t *entry;
 
-      ninfo("REXMIT: %04x\n", flags);
+      ninfo("REXMIT: %" PRIx32 "\n", flags);
 
       /* If there is a partially sent write buffer at the head of the
        * write_q?  Has anything been sent from that write buffer?
@@ -901,7 +935,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                * retransmitted, and un-ACKed, if expired is not zero, the
                * connection will be closed.
                *
-               * field expired can only be updated at TCP_ESTABLISHED state
+               * field expired can only be updated at TCP_ESTABLISHED and
+               * TCP_CLOSE_WAIT state.
                */
 
               conn->expired++;
@@ -977,7 +1012,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
    * will have to wait for the next polling cycle.
    */
 
-  if ((conn->tcpstateflags & TCP_ESTABLISHED) &&
+  if ((conn->tcpstateflags & TCP_ESTABLISHED ||
+       conn->tcpstateflags & TCP_CLOSE_WAIT) &&
       ((flags & TCP_NEWDATA) == 0) &&
       (flags & (TCP_POLL | TCP_REXMIT | TCP_ACKDATA)) &&
       !(sq_empty(&conn->write_q)) &&
@@ -1054,11 +1090,11 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
             }
 
           ninfo("SEND: wrb=%p seq=%" PRIu32 " pktlen=%u sent=%u sndlen=%zu "
-                "mss=%u snd_wnd=%u seq=%" PRIu32
+                "mss=%u snd_wnd=%" PRIu32 " seq=%" PRIu32
                 " remaining_snd_wnd=%" PRIu32 "\n",
                 wrb, TCP_WBSEQNO(wrb), TCP_WBPKTLEN(wrb), TCP_WBSENT(wrb),
                 sndlen, conn->mss,
-                conn->snd_wnd, seq, remaining_snd_wnd);
+                (uint32_t)conn->snd_wnd, seq, remaining_snd_wnd);
 
           /* The TCP stack updates sndseq on receipt of ACK *before*
            * this function is called. In that case sndseq will point
@@ -1324,6 +1360,13 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       goto errout;
     }
 
+  if ((conn->shutdown & SHUT_WR) != 0)
+    {
+      nerr("ERROR: Connection is shutdown\n");
+      ret = -EPIPE;
+      goto errout;
+    }
+
   /* Make sure that we have the IP address mapping */
 
 #if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
@@ -1372,7 +1415,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       size_t chunk_len = len;
       ssize_t chunk_result;
 
-      net_lock();
+      conn_dev_lock(&conn->sconn, conn->dev);
 
       /* Now that we have the network locked, we need to check the connection
        * state again to ensure the connection is still valid.
@@ -1406,7 +1449,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       /* Set up the callback in the connection */
 
       conn->sndcb->flags = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
-                               TCP_DISCONN_EVENTS);
+                            TCP_DISCONN_EVENTS | TCP_TXCLOSE);
       conn->sndcb->priv  = (FAR void *)conn;
       conn->sndcb->event = psock_send_eventhandler;
 
@@ -1417,14 +1460,27 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
       while (tcp_wrbuffer_inqueue_size(conn) >= conn->snd_bufs)
         {
+          struct tcp_callback_s info;
+
           if (nonblock)
             {
               ret = -EAGAIN;
               goto errout_with_lock;
             }
 
-          ret = net_sem_timedwait_uninterruptible(&conn->snd_sem,
-            tcp_send_gettimeout(start, timeout));
+          /* Push a cancellation point onto the stack.  This will be
+           * called if the thread is canceled.
+           */
+
+          info.tc_conn = conn;
+          info.tc_cb   = &conn->sndcb;
+          info.tc_sem  = &conn->snd_sem;
+          tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
+
+          ret = conn_dev_sem_timedwait(&conn->snd_sem, false,
+                                       tcp_send_gettimeout(start, timeout),
+                                       &conn->sconn, conn->dev);
+          tls_cleanup_pop(tls_get_info(), 0);
           if (ret < 0)
             {
               if (ret == -ETIMEDOUT)
@@ -1474,8 +1530,10 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
             }
           else
             {
+              conn_dev_unlock(&conn->sconn, conn->dev);
               wrb = tcp_wrbuffer_timedalloc(tcp_send_gettimeout(start,
                                                                 timeout));
+              conn_dev_lock(&conn->sconn, conn->dev);
               ninfo("new wrb %p\n", wrb);
             }
 
@@ -1581,7 +1639,9 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
            * we risk a deadlock with other threads competing on IOBs.
            */
 
+          conn_dev_unlock(&conn->sconn, conn->dev);
           iob = net_iobtimedalloc(true, tcp_send_gettimeout(start, timeout));
+          conn_dev_lock(&conn->sconn, conn->dev);
           if (iob != NULL)
             {
               iob_free_chain(iob);
@@ -1604,7 +1664,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       /* Notify the device driver of the availability of TX data */
 
       tcp_send_txnotify(psock, conn);
-      net_unlock();
+      conn_dev_unlock(&conn->sconn, conn->dev);
 
       if (chunk_result == 0)
         {
@@ -1650,7 +1710,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
   return result;
 
 errout_with_lock:
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, conn->dev);
 
 errout:
   if (result > 0)

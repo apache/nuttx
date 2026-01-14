@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/clock/clock_timekeeping.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -51,6 +53,7 @@ static struct timespec g_clock_wall_time;
 static uint64_t        g_clock_last_counter;
 static uint64_t        g_clock_mask;
 static long            g_clock_adjust;
+static spinlock_t      g_clock_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -70,7 +73,7 @@ static int clock_get_current_time(FAR struct timespec *ts,
   time_t sec;
   int ret;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_clock_lock);
 
   ret = up_timer_gettick(&counter);
   if (ret < 0)
@@ -94,7 +97,7 @@ static int clock_get_current_time(FAR struct timespec *ts,
   ts->tv_sec = base->tv_sec + sec;
 
 errout_in_critical_section:
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_clock_lock, flags);
   return ret;
 }
 
@@ -121,7 +124,7 @@ int clock_timekeeping_set_wall_time(FAR const struct timespec *ts)
   uint64_t counter;
   int ret;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_clock_lock);
 
   ret = up_timer_gettick(&counter);
   if (ret < 0)
@@ -135,7 +138,7 @@ int clock_timekeeping_set_wall_time(FAR const struct timespec *ts)
   g_clock_last_counter = counter;
 
 errout_in_critical_section:
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_clock_lock, flags);
   return ret;
 }
 
@@ -186,7 +189,7 @@ int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta)
       return -1;
     }
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_clock_lock);
 
   adjust_usec = delta->tv_sec * USEC_PER_SEC + delta->tv_usec;
 
@@ -197,7 +200,7 @@ int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta)
 
   g_clock_adjust = adjust_usec;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_clock_lock, flags);
 
   return OK;
 }
@@ -215,7 +218,7 @@ void clock_update_wall_time(void)
   time_t sec;
   int ret;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_clock_lock);
 
   ret = up_timer_gettick(&counter);
   if (ret < 0)
@@ -269,7 +272,7 @@ void clock_update_wall_time(void)
   g_clock_last_counter = counter;
 
 errout_in_critical_section:
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_clock_lock, flags);
 }
 
 /****************************************************************************
@@ -278,6 +281,9 @@ errout_in_critical_section:
 
 void clock_inittimekeeping(FAR const struct timespec *tp)
 {
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&g_clock_lock);
   up_timer_getmask(&g_clock_mask);
 
   if (tp)
@@ -290,6 +296,7 @@ void clock_inittimekeeping(FAR const struct timespec *tp)
     }
 
   up_timer_gettick(&g_clock_last_counter);
+  spin_unlock_irqrestore(&g_clock_lock, flags);
 }
 
 #endif /* CONFIG_CLOCK_TIMEKEEPING */

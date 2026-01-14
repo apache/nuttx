@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/hardware/sam_memorymap.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,7 +29,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_ARCH_CHIP_SAMV71)
+#if defined(CONFIG_ARCH_CHIP_SAMV71) || defined(CONFIG_ARCH_CHIP_PIC32CZCA70)
 #  include "hardware/samv71_memorymap.h"
 #elif defined(CONFIG_ARCH_CHIP_SAME70)
 #  include "hardware/same70_memorymap.h"

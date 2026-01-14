@@ -1,6 +1,9 @@
 /****************************************************************************
  * include/crypto/xform.h
- * $OpenBSD: xform.h,v 1.32 2021/10/22 12:30:53 bluhm Exp $
+ *
+ * SPDX-License-Identifier: OAR
+ * SPDX-FileCopyrightText: 2000 Angelos D. Keromytis
+ * SPDX-FileContributor: Angelos D. Keromytis (angelos@cis.upenn.edu)
  *
  * The author of this code is Angelos D. Keromytis (angelos@cis.upenn.edu)
  *
@@ -20,6 +23,7 @@
  * REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE
  * MERCHANTABILITY OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR
  * PURPOSE.
+ *
  ****************************************************************************/
 
 #ifndef __INCLUDE_CRYPTO_XFORM_H
@@ -56,11 +60,11 @@ struct auth_hash
   uint16_t authsize;
   uint16_t ctxsize;
   uint16_t blocksize;
-  CODE void (*init) (FAR void *);
-  CODE void (*setkey) (FAR void *, FAR const uint8_t *, uint16_t);
-  CODE void (*reinit) (FAR void *, FAR const uint8_t *, uint16_t);
-  CODE int  (*update) (FAR void *, FAR const uint8_t *, size_t);
-  CODE void (*final) (FAR uint8_t *, FAR void *);
+  CODE void (*init)(FAR void *);
+  CODE void (*setkey)(FAR void *, FAR const uint8_t *, uint16_t);
+  CODE void (*reinit)(FAR void *, FAR const uint8_t *, uint16_t);
+  CODE int  (*update)(FAR void *, FAR const uint8_t *, size_t);
+  CODE void (*final)(FAR uint8_t *, FAR void *);
 };
 
 struct enc_xform
@@ -72,10 +76,10 @@ struct enc_xform
   uint16_t minkey;
   uint16_t maxkey;
   uint16_t ctxsize;
-  CODE void (*encrypt) (caddr_t, FAR uint8_t *);
-  CODE void (*decrypt) (caddr_t, FAR uint8_t *);
-  CODE int  (*setkey) (void *, FAR uint8_t *, int len);
-  CODE void (*reinit) (caddr_t, FAR uint8_t *);
+  CODE void (*encrypt)(caddr_t, FAR uint8_t *);
+  CODE void (*decrypt)(caddr_t, FAR uint8_t *);
+  CODE int  (*setkey)(FAR void *, FAR uint8_t *, int len);
+  CODE void (*reinit)(caddr_t, FAR uint8_t *);
 };
 
 struct comp_algo
@@ -103,6 +107,7 @@ extern const struct enc_xform enc_xform_aes;
 extern const struct enc_xform enc_xform_aes_ctr;
 extern const struct enc_xform enc_xform_aes_gcm;
 extern const struct enc_xform enc_xform_aes_gmac;
+extern const struct enc_xform enc_xform_aes_cmac;
 extern const struct enc_xform enc_xform_aes_xts;
 extern const struct enc_xform enc_xform_aes_ofb;
 extern const struct enc_xform enc_xform_aes_cfb_8;
@@ -121,10 +126,14 @@ extern const struct auth_hash auth_hash_gmac_aes_192;
 extern const struct auth_hash auth_hash_gmac_aes_256;
 extern const struct auth_hash auth_hash_chacha20_poly1305;
 extern const struct auth_hash auth_hash_md5;
+extern const struct auth_hash auth_hash_poly1305;
+extern const struct auth_hash auth_hash_ripemd_160;
 extern const struct auth_hash auth_hash_sha1;
 extern const struct auth_hash auth_hash_sha2_224;
 extern const struct auth_hash auth_hash_sha2_256;
 extern const struct auth_hash auth_hash_sha2_384;
 extern const struct auth_hash auth_hash_sha2_512;
+extern const struct auth_hash auth_hash_crc32;
+extern const struct auth_hash auth_hash_cmac_aes_128;
 
 #endif /* __INCLUDE_CRYPTO_XFORM_H */

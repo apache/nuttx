@@ -8,7 +8,8 @@
 config LIBC_DLFCN
 	bool "Shared library support"
 	default n
-	select LIBC_MODLIB if !BUILD_FLAT
+	select MODULES
+	select LIBC_ELF if !BUILD_FLAT
 	select MODULE if BUILD_FLAT
 	---help---
 		Enabled support for user-space shared libraries.

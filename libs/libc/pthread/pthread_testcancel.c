@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/pthread/pthread_testcancel.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,7 +37,7 @@
  * Description:
  *   The pthread_testcancel() function creates a cancellation point in the
  *   calling thread. The pthread_testcancel() function has no effect if
- *   cancelability is disabled
+ *   cancellability is disabled
  *
  ****************************************************************************/
 

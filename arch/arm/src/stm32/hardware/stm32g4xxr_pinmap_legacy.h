@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32/hardware/stm32g4xxr_pinmap_legacy.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
  *  this work for additional information regarding copyright ownership.  The
@@ -333,16 +335,20 @@
 
 #define GPIO_LPUART1_CTS_1             (GPIO_ALT | GPIO_AF12 | GPIO_PORTA | GPIO_PIN6)
 #define GPIO_LPUART1_CTS_2             (GPIO_ALT | GPIO_AF8 | GPIO_PORTB | GPIO_PIN13)
+#define GPIO_LPUART1_CTS_3             (GPIO_ALT | GPIO_AF8 | GPIO_PORTG | GPIO_PIN5)
 #define GPIO_LPUART1_DE_1              (GPIO_ALT | GPIO_AF12 | GPIO_PORTB | GPIO_PIN1)
 #define GPIO_LPUART1_DE_2              (GPIO_ALT | GPIO_AF8 | GPIO_PORTB | GPIO_PIN12)
 #define GPIO_LPUART1_RTS_1             (GPIO_ALT | GPIO_AF12 | GPIO_PORTB | GPIO_PIN1)
 #define GPIO_LPUART1_RTS_2             (GPIO_ALT | GPIO_AF8 | GPIO_PORTB | GPIO_PIN12)
+#define GPIO_LPUART1_RTS_3             (GPIO_ALT | GPIO_AF8 | GPIO_PORTG | GPIO_PIN6)
 #define GPIO_LPUART1_RX_1              (GPIO_ALT | GPIO_AF12 | GPIO_PORTA | GPIO_PIN3)
 #define GPIO_LPUART1_RX_2              (GPIO_ALT | GPIO_AF8 | GPIO_PORTB | GPIO_PIN10)
 #define GPIO_LPUART1_RX_3              (GPIO_ALT | GPIO_AF8 | GPIO_PORTC | GPIO_PIN0)
+#define GPIO_LPUART1_RX_4              (GPIO_ALT | GPIO_AF8 | GPIO_PORTG | GPIO_PIN8)
 #define GPIO_LPUART1_TX_1              (GPIO_ALT | GPIO_AF12 | GPIO_PORTA | GPIO_PIN2)
 #define GPIO_LPUART1_TX_2              (GPIO_ALT | GPIO_AF8 | GPIO_PORTB | GPIO_PIN11)
 #define GPIO_LPUART1_TX_3              (GPIO_ALT | GPIO_AF8 | GPIO_PORTC | GPIO_PIN1)
+#define GPIO_LPUART1_TX_4              (GPIO_ALT | GPIO_AF8 | GPIO_PORTG | GPIO_PIN7)
 
 /* JTAG *********************************************************************/
 

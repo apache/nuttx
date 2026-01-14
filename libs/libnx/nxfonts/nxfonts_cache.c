@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libnx/nxfonts/nxfonts_cache.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -382,7 +384,7 @@ static inline void nxf_fillglyph(FAR struct nxfonts_fcache_s *priv,
   if (priv->bpp == 24)
     {
       FAR uint32_t *ptr = (FAR uint32_t *)glyph->bitmap;
-      FAR uint32_t pixel[3];
+      uint32_t pixel[3];
 
       /* Get two 32-bit values for alternating 32 representations */
 
@@ -527,7 +529,7 @@ nxf_renderglyph(FAR struct nxfonts_fcache_s *priv,
  * Name: nxf_findcache
  *
  * Description:
- *   Find a font cache tht matches the font charcteristics.
+ *   Find a font cache that matches the font characteristics.
  *
  * Assumptions:
  *   The caller holds the font cache list lock.

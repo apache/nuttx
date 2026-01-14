@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/mtd/sst26.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -412,7 +414,7 @@ static void sst26_waitwritecomplete(struct sst26_dev_s *priv)
       if ((status & SST26_SR_WIP) != 0)
         {
           sst26_unlock(priv->dev);
-          nxsig_usleep(1000);
+          nxsched_usleep(1000);
           sst26_lock(priv->dev);
         }
     }

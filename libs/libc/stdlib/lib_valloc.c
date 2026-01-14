@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/stdlib/lib_valloc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,7 +51,7 @@
  *
  ****************************************************************************/
 
-#undef valloc /* See mm/README.txt */
+#undef valloc
 FAR void *valloc(size_t size)
 {
   return lib_memalign(sysconf(_SC_PAGESIZE), size);

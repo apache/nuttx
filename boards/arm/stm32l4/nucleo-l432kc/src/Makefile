@@ -1,6 +1,8 @@
 ############################################################################
 # boards/arm/stm32l4/nucleo-l432kc/src/Makefile
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -20,7 +22,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = stm32_boot.c stm32_spi.c
+CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
@@ -38,6 +40,10 @@ endif
 
 ifeq ($(CONFIG_STM32L4_ADC),y)
 CSRCS += stm32_adc.c
+endif
+
+ifeq ($(CONFIG_STM32L4_DAC),y)
+CSRCS += stm32_dac.c
 endif
 
 ifeq ($(CONFIG_DAC7571),y)
@@ -74,6 +80,13 @@ endif
 
 ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinit.c
+ifeq ($(CONFIG_BOARDCTL_IOCTL),y)
+CSRCS += stm32_ioctl.c
+endif
+endif
+
+ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
+CSRCS += stm32_uid.c
 endif
 
 ifeq ($(CONFIG_NUCLEOL432KC_SPWM),y)
@@ -82,6 +95,12 @@ endif
 
 ifeq ($(CONFIG_NUCLEOL432KC_DAC_WGEN),y)
 CSRCS += stm32_dac_wgen.c
+endif
+
+ifneq ($(CONFIG_STM32_ETHMAC),y)
+ifeq ($(CONFIG_NETDEVICES),y)
+CSRCS += stm32_netinit.c
+endif
 endif
 
 include $(TOPDIR)/boards/Board.mk

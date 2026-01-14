@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/inode/fs_inodefind.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -55,25 +57,20 @@ int inode_find(FAR struct inode_search_s *desc)
    * references on the node.
    */
 
-  ret = inode_lock();
-  if (ret < 0)
-    {
-      return ret;
-    }
-
+  inode_rlock();
   ret = inode_search(desc);
   if (ret >= 0)
     {
       /* Found it */
 
-      FAR struct inode *node = desc->node;
-      DEBUGASSERT(node != NULL);
+      FAR struct inode *inode = desc->node;
+      DEBUGASSERT(inode != NULL);
 
       /* Increment the reference count on the inode */
 
-      node->i_crefs++;
+      atomic_fetch_add(&inode->i_crefs, 1);
     }
 
-  inode_unlock();
+  inode_runlock();
   return ret;
 }

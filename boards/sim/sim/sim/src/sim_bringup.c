@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/sim/sim/sim/src/sim_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -48,7 +50,6 @@
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/video/v4l2_cap.h>
-#include <nuttx/timers/oneshot.h>
 #include <nuttx/wireless/pktradio.h>
 #include <nuttx/wireless/bluetooth/bt_null.h>
 #include <nuttx/wireless/bluetooth/bt_uart_shim.h>
@@ -483,6 +484,22 @@ int sim_bringup(void)
 #  endif
 #endif
 
+#ifdef CONFIG_RPMSG_VIRTIO_LITE
+#  ifdef CONFIG_SIM_RPMSG_MASTER
+  sim_rpmsg_virtio_init("server-proxy", "proxy", true);
+#  else
+  sim_rpmsg_virtio_init("server-proxy", "server", false);
+#  endif
+#endif
+
+#ifdef CONFIG_RPMSG_PORT_UART
+#  ifdef CONFIG_SIM_RPMSG_MASTER
+  sim_rpmsg_port_uart_init("server", "proxy", "/dev/ttyVS0");
+#  else
+  sim_rpmsg_port_uart_init("proxy", "server", "/dev/ttyVS0");
+#  endif
+#endif
+
 #ifdef CONFIG_DEV_RPMSG
   rpmsgdev_register("server", "/dev/console", "/dev/server-console", 0);
   rpmsgdev_register("server", "/dev/null", "/dev/server-null", 0);
@@ -534,6 +551,22 @@ int sim_bringup(void)
   mac[4] = (CONFIG_SIM_RNDIS_MACADDR >> (8 * 1)) & 0xff;
   mac[5] = (CONFIG_SIM_RNDIS_MACADDR >> (8 * 0)) & 0xff;
   usbdev_rndis_initialize(mac);
+#endif
+
+#ifdef CONFIG_SIM_CANDEV_CHAR
+  ret = sim_canchar_initialize(CONFIG_SIM_CANDEV_CHAR_IDX, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sim_canchar_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SIM_CANDEV_SOCK
+  ret = sim_cansock_initialize(CONFIG_SIM_CANDEV_SOCK_IDX);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sim_cansock_initialize() failed: %d\n", ret);
+    }
 #endif
 
   return ret;

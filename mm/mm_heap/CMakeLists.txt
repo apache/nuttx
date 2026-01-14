@@ -1,6 +1,8 @@
 # ##############################################################################
 # mm/mm_heap/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -25,8 +27,6 @@ if(CONFIG_MM_DEFAULT_MANAGER)
   set(SRCS
       mm_initialize.c
       mm_lock.c
-      mm_addfreechunk.c
-      mm_size2ndx.c
       mm_malloc_size.c
       mm_shrinkchunk.c
       mm_brkaddr.c

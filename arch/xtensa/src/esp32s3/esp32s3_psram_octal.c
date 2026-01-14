@@ -52,6 +52,7 @@
 #define OCT_PSRAM_WR_CMD_BITLEN         16
 #define OCT_PSRAM_ADDR_BITLEN           32
 #define OCT_PSRAM_RD_DUMMY_BITLEN       (2 * (10 - 1))
+#define OCT_PSRAM_RD_REG_DUMMY_BITLEN   (2 * (5 - 1))
 #define OCT_PSRAM_WR_DUMMY_BITLEN       (2 * (5 - 1))
 
 #define OCT_PSRAM_CS_SETUP_TIME         3
@@ -189,7 +190,7 @@ static void IRAM_ATTR set_psram_reg(int spi_num,
   int cmd_len = 16;
   uint32_t addr = 0x0;
   int addr_bit_len = 32;
-  int dummy = OCT_PSRAM_RD_DUMMY_BITLEN;
+  int dummy = OCT_PSRAM_RD_REG_DUMMY_BITLEN;
   int data_bit_len = 16;
   struct opi_psram_reg psram_reg =
     {
@@ -277,7 +278,7 @@ static void IRAM_ATTR get_psram_reg(int spi_num,
   esp_rom_spiflash_read_mode_t mode = ESP_ROM_SPIFLASH_OPI_DTR_MODE;
   int cmd_len = 16;
   int addr_bit_len = 32;
-  int dummy = OCT_PSRAM_RD_DUMMY_BITLEN;
+  int dummy = OCT_PSRAM_RD_REG_DUMMY_BITLEN;
   int data_bit_len = 16;
 
   /* Read MR0~1 register */
@@ -586,72 +587,6 @@ static void IRAM_ATTR config_psram_spi_phases(void)
 }
 
 /****************************************************************************
- * Name: spi_flash_set_rom_required_regs
- *
- * Description:
- *   Set flash ROM required register.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void IRAM_ATTR spi_flash_set_rom_required_regs(void)
-{
-#ifdef CONFIG_ESP32S3_FLASH_MODE_OCT
-
-  /* Disable the variable dummy mode when doing timing tuning.
-   * STR /DTR mode setting is done every time when
-   * "esp_rom_opiflash_exec_cmd" is called.
-   * Add any registers that are not set in ROM SPI flash functions here
-   * in the future.
-   */
-
-  CLEAR_PERI_REG_MASK(SPI_MEM_DDR_REG(1), SPI_MEM_SPI_FMEM_VAR_DUMMY);
-#endif
-}
-
-/****************************************************************************
- * Name: flash_set_vendor_required_regs
- *
- * Description:
- *   Set flash vendor required register.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-static inline void flash_set_vendor_required_regs(void)
-{
-#ifdef CONFIG_ESP32S3_FLASH_MODE_OCT
-  /* Set MSPI specifical configuration,
-   * "esp32s3_bsp_opiflash_set_required_regs" is board defined function.
-   */
-
-  esp32s3_bsp_opiflash_set_required_regs();
-
-  SET_PERI_REG_BITS(SPI_MEM_CACHE_FCTRL_REG(1),
-                    SPI_MEM_CACHE_USR_CMD_4BYTE_V,
-                    1,
-                    SPI_MEM_CACHE_USR_CMD_4BYTE_S);
-#else
-  /* Restore MSPI registers after Octal PSRAM initialization. */
-
-  SET_PERI_REG_BITS(SPI_MEM_CACHE_FCTRL_REG(1),
-                    SPI_MEM_CACHE_USR_CMD_4BYTE_V,
-                    0,
-                    SPI_MEM_CACHE_USR_CMD_4BYTE_S);
-#endif
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -721,7 +656,7 @@ int IRAM_ATTR psram_enable(int mode, int vaddrmode)
 
   /* Flash chip requires MSPI specifically, call this function to set them */
 
-  flash_set_vendor_required_regs();
+  spi_flash_set_vendor_required_regs();
 
   config_psram_spi_phases();
 

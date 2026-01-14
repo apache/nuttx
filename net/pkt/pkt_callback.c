@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/pkt/pkt_callback.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,6 +35,7 @@
 
 #include "devif/devif.h"
 #include "pkt/pkt.h"
+#include "utils/utils.h"
 
 /****************************************************************************
  * Public Functions
@@ -52,10 +55,10 @@
  *
  ****************************************************************************/
 
-uint16_t pkt_callback(FAR struct net_driver_s *dev,
-                      FAR struct pkt_conn_s *conn, uint16_t flags)
+uint32_t pkt_callback(FAR struct net_driver_s *dev,
+                      FAR struct pkt_conn_s *conn, uint32_t flags)
 {
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   /* Some sanity checking */
 
@@ -63,7 +66,9 @@ uint16_t pkt_callback(FAR struct net_driver_s *dev,
     {
       /* Perform the callback */
 
+      conn_lock(&conn->sconn);
       flags = devif_conn_event(dev, flags, conn->sconn.list);
+      conn_unlock(&conn->sconn);
     }
 
   return flags;

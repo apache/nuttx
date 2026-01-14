@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/pthread/pthread_completejoin.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -72,7 +74,7 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
 
   sinfo("pid=%d exit_value=%p\n", pid, exit_value);
 
-  nxrmutex_lock(&group->tg_joinlock);
+  nxrmutex_lock(&group->tg_mutex);
 
   if (!sq_empty(&tcb->join_queue))
     {
@@ -107,7 +109,7 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
 
   tcb->flags |= TCB_FLAG_JOIN_COMPLETED;
 
-  nxrmutex_unlock(&group->tg_joinlock);
+  nxrmutex_unlock(&group->tg_mutex);
 
   return ret;
 }
@@ -124,7 +126,7 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
  *   no thread ever calls pthread_join.  In case, there is a memory leak!
  *
  * Assumptions:
- *   The caller holds tg_joinlock
+ *   The caller holds tg_mutex
  *
  ****************************************************************************/
 
@@ -135,9 +137,9 @@ void pthread_destroyjoin(FAR struct task_group_s *group,
 
   /* Remove the join info from the set of joins */
 
-  nxrmutex_lock(&group->tg_joinlock);
+  nxrmutex_lock(&group->tg_mutex);
   sq_rem(&pjoin->entry, &group->tg_joinqueue);
-  nxrmutex_unlock(&group->tg_joinlock);
+  nxrmutex_unlock(&group->tg_mutex);
 
   /* And deallocate the pjoin structure */
 

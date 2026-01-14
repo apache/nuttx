@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/string/lib_memchr.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,7 +49,8 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_MEMCHR) && defined(LIBC_BUILD_MEMCHR)
-#undef memchr /* See mm/README.txt */
+#undef memchr
+no_builtin("memchr")
 FAR void *memchr(FAR const void *s, int c, size_t n)
 {
   FAR const unsigned char *p = (FAR const unsigned char *)s;

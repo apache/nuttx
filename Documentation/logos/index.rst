@@ -1,5 +1,5 @@
 .. todo::
-  Add NuttX Logo to use on eletronic boards PCBs.
+  Add NuttX Logo to use on electronic boards PCBs.
 
 ===========
 NuttX Logos

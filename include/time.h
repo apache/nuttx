@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/time.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -217,7 +219,7 @@ time_t time(FAR time_t *timep);
 
 #ifdef CONFIG_HAVE_DOUBLE
 double difftime(time_t time1, time_t time0);
-#else
+#elif defined(CONFIG_HAVE_FLOAT)
 float difftime(time_t time1, time_t time0);
 #endif
 

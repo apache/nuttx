@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/1wire/1wire.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -45,6 +48,11 @@
 #define ONEWIRE_CMD_READ_ROM         0x33
 #define ONEWIRE_CMD_MATCH_ROM        0x55
 #define ONEWIRE_CMD_RESUME           0xa5
+
+/* Supported ioctl commands */
+
+#define ONEWIREIOC_SETROM          _1WIREIOC(0x0001)
+#define ONEWIREIOC_GETFAMILYROMS   _1WIREIOC(0x0002)
 
 /****************************************************************************
  * Name: ONEWIRE_RESET
@@ -177,16 +185,17 @@
 struct onewire_dev_s;
 struct onewire_ops_s
 {
-  int    (*reset)(FAR struct onewire_dev_s *dev);
-  int    (*write)(FAR struct onewire_dev_s *dev, FAR const uint8_t *buffer,
-           int buflen);
-  int    (*read)(FAR struct onewire_dev_s *dev, FAR uint8_t *buffer,
-           int buflen);
-  int    (*exchange)(FAR struct onewire_dev_s *dev, bool reset,
-                     FAR const uint8_t *txbuffer, int txbuflen,
-                     FAR uint8_t *rxbuffer, int rxbuflen);
-  int    (*writebit)(FAR struct onewire_dev_s *dev, FAR const uint8_t *bit);
-  int    (*readbit)(FAR struct onewire_dev_s *dev, FAR uint8_t *bit);
+  CODE int (*reset)(FAR struct onewire_dev_s *dev);
+  CODE int (*write)(FAR struct onewire_dev_s *dev, FAR const uint8_t *buffer,
+                    int buflen);
+  CODE int (*read)(FAR struct onewire_dev_s *dev, FAR uint8_t *buffer,
+                   int buflen);
+  CODE int (*exchange)(FAR struct onewire_dev_s *dev, bool reset,
+                       FAR const uint8_t *txbuffer, int txbuflen,
+                       FAR uint8_t *rxbuffer, int rxbuflen);
+  CODE int (*writebit)(FAR struct onewire_dev_s *dev,
+                       FAR const uint8_t *bit);
+  CODE int (*readbit)(FAR struct onewire_dev_s *dev, FAR uint8_t *bit);
 };
 
 /* 1-Wire private data. This structure only defines the initial fields of the
@@ -196,7 +205,21 @@ struct onewire_ops_s
 
 struct onewire_dev_s
 {
-  const struct onewire_ops_s *ops; /* 1-Wire vtable */
+  FAR const struct onewire_ops_s *ops; /* 1-Wire vtable */
+};
+
+/* A struct to be passed to the ONEWIREIOC_GETFAMILYROMS ioctl call.
+ * The user fills in the target roms array in the userspace application
+ * to get all the available roms. The user can limit the number obtained
+ * roms using the maxroms field. The actual count of roms on the bus
+ * is then stored in the actual field.
+ */
+
+struct onewire_availroms_s
+{
+  uint64_t *roms;
+  int maxroms;
+  int actual;
 };
 
 /****************************************************************************

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_xdmac.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1533,7 +1535,7 @@ static int sam_txbuffer(struct sam_xdmach_s *xdmach, uint32_t paddr,
 {
   uint32_t cubc;
 
-  /* If we are appending a buffer to a linklist, then re-use the previously
+  /* If we are appending a buffer to a linklist, then reuse the previously
    * calculated CC register value.  Otherwise, create the CC register value
    * from the properties of the transfer.
    */
@@ -1573,7 +1575,7 @@ static int sam_rxbuffer(struct sam_xdmach_s *xdmach, uint32_t paddr,
 {
   uint32_t cubc;
 
-  /* If we are appending a buffer to a linklist, then re-use the previously
+  /* If we are appending a buffer to a linklist, then reuse the previously
    * calculated CC register value.  Otherwise, create the CC register value
    * from the properties of the transfer.
    */

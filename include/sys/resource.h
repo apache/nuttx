@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/sys/resource.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -58,6 +60,12 @@
 #define RLIMIT_STACK    6           /* Limit on stack size */
 #define RLIMIT_AS       7           /* Limit on address space size */
 #define RLIMIT_MEMLOCK  8           /* Limit on memory use */
+#define RLIMIT_NICE     10          /* Limit on nice level */
+
+/* Below are not implemented yet: */
+
+#define RLIMIT_RTPRIO   14          /* Limit on RT tasks priority */
+#define RLIMIT_RTTIME   15          /* Limit on timeout for RT tasks (us) */
 
 #if defined(CONFIG_FS_LARGEFILE)
 #  define RLIM_INFINITY    UINT64_MAX /* No limit */

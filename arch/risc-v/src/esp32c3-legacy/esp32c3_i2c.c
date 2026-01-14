@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/esp32c3_i2c.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -621,7 +623,7 @@ static void esp32c3_i2c_init_clock(struct esp32c3_i2c_priv_s *priv,
 {
   if (bus_freq == priv->clk_freq)
     {
-      return ;
+      return;
     }
 
   uint32_t reg_value = 0;
@@ -818,7 +820,7 @@ static int esp32c3_i2c_sem_waitdone(struct esp32c3_i2c_priv_s *priv)
  *   priv          - Pointer to the internal driver state structure.
  *
  * Returned Values:
- *   Zero (OK) is returned on successfull transfer. -ETIMEDOUT is returned
+ *   Zero (OK) is returned on successful transfer. -ETIMEDOUT is returned
  *   in case a transfer didn't finish within the timeout interval. And ERROR
  *   is returned in case of any I2C error during the transfer has happened.
  *
@@ -1245,8 +1247,8 @@ static void esp32c3_i2c_traceevent(struct esp32c3_i2c_priv_s *priv,
 
       /* Initialize the new trace entry */
 
-      trace->event  = event;
-      trace->parm   = parm;
+      trace->event = event;
+      trace->parm  = parm;
 
       /* Bump up the trace index (unless we are out of trace entries) */
 

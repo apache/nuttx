@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_composite.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -588,15 +590,17 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
 
           if (desc->type == USB_DESC_TYPE_INTERFACE)
             {
-#ifdef CONFIG_DEBUG_ASSERTIONS
               FAR struct usb_ifdesc_s *ifdesc =
                 (FAR struct usb_ifdesc_s *)desc;
 
               DEBUGASSERT(ifdesc->ifno < 32);
-#endif
+
               /* Increment the count of interfaces */
 
-              nintfs++;
+              if (ifdesc->alt == 0)
+                {
+                  nintfs++;
+                }
             }
 
           /* Check for IAD descriptors that will be used when it is

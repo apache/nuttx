@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32l4/stm32l4r9ai-disco/include/stm32l4r9ai-disco-clocking.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -59,7 +61,7 @@
 #define STM32L4_SYSCLK_FREQUENCY  120000000ul
 #define BOARD_AHB_FREQUENCY       STM32L4_SYSCLK_FREQUENCY
 
-/* Higher SYSCLK reguires more flash wait states. */
+/* Higher SYSCLK requires more flash wait states. */
 
 #define BOARD_FLASH_WAITSTATES    5
 

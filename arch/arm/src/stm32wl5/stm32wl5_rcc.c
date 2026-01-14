@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/stm32wl5/stm32wl5_rcc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,7 +33,6 @@
 
 #include <arch/board/board.h>
 
-#include "arm_internal.h"
 #include "arm_internal.h"
 
 #include "chip.h"
@@ -675,7 +676,7 @@ void stm32wl5_stdclockconfig(void)
 
 #if defined(STM32WL5_BOARD_USETCXO)
   /* nucleo-wl55jc uses TCXO crystal, which needs to be first
-   * powered up with PB0 pin - or more convinently by setting
+   * powered up with PB0 pin - or more conveniently by setting
    * HSEBYPPWR register. This has to be done before HSE is enabled
    */
 

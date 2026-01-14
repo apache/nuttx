@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/common/arm_nputs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -37,6 +39,7 @@
  *
  ****************************************************************************/
 
+#ifndef CONFIG_ARM_SEMIHOSTING_SYSLOG
 void up_nputs(const char *str, size_t len)
 {
   while (len-- > 0 && *str)
@@ -44,3 +47,4 @@ void up_nputs(const char *str, size_t len)
       up_putc(*str++);
     }
 }
+#endif

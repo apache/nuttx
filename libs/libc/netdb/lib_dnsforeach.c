@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/netdb/lib_dnsforeach.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -83,7 +85,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
   unsigned int count;
   uint16_t port;
   int keylen;
-  int ret;
+  int ret = OK;
 
   /* Open the resolver configuration file */
 
@@ -176,6 +178,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
             }
 #endif /* CONFIG_NETDB_RESOLVCONF_NONSTDPORT */
 
+          memset(&u, 0, sizeof(u));
 #ifdef CONFIG_NET_IPv4
           /* Try to convert the IPv4 address */
 

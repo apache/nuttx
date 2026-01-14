@@ -33,7 +33,7 @@ Logic Design Description
 
 When an application is being loaded ``up_addrenv_create`` is called to create
 the process's address environment. This includes mapping the commonly used
-``text``, ``data`` and ``heap`` sections withing the virtual memory space.
+``text``, ``data`` and ``heap`` sections within the virtual memory space.
 Without on-demand paging, the physical memory is then allocated and mapped
 accordingly, before the process is started. When on-demand paging is enabled,
 usually only one single page for each section is allocated and mapped.
@@ -65,7 +65,7 @@ allocates a physical page and maps it to the virtual memory space that
 triggered the page fault exception and then resumes execution from the same
 point where the page fault first occurred.
 
-:ref:`knsh32_paging` simulates a device with 4MiB physical memory with 8MiB
+:ref:`knsh_paging` simulates a device with 4MiB physical memory with 8MiB
 of virtual heap memory allocated for each process. This is possible by
 enabling on-demand paging.
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/nuttsbi/sbi_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,7 +38,7 @@
  * Preprocecssor definitions
  ****************************************************************************/
 
-#define NAPOT_OPENALL   (PMPCFG_A_NAPOT | PMPCFG_RWX_MASK)
+#define NAPOT_RWX   (PMPCFG_A_NAPOT | PMPCFG_RWX_MASK)
 
 /****************************************************************************
  * Private Functions
@@ -113,19 +115,19 @@ void sbi_start(void)
   WRITE_CSR(CSR_MCOUNTEREN, UINT32_C(~0));
   WRITE_CSR(CSR_SCOUNTEREN, UINT32_C(~0));
 
-#ifdef CONFIG_NUTTSBI_LATE_INIT
-  /* Do device specific initialization as needed */
-
-  sbi_late_initialize();
-#endif
-
   /* Set program counter to __start_s */
 
   WRITE_CSR(CSR_MEPC, __start_s);
 
-  /* Open everything for PMP */
+#ifdef CONFIG_NUTTSBI_LATE_INIT
+  /* Do device specific handling */
 
-  DEBUGASSERT(riscv_append_pmp_region(NAPOT_OPENALL, 0, 0) == 0);
+  sbi_late_initialize();
+#else
+  /* Open everything for PMP, may fail if no empty entry left */
+
+  DEBUGASSERT(riscv_append_pmp_region(NAPOT_RWX, 0, 0) == 0);
+#endif
 
   /* Then jump to the S-mode start function */
 

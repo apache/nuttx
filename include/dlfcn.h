@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/dlfcn.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -76,6 +78,30 @@
 #define RTLD_NOW    (1 << 0)
 #define RTLD_GLOBAL (1 << 1)
 #define RTLD_LOCAL  (1 << 2)
+
+/****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: Dl_info
+ *
+ * Description: The Dl_info structure is used by the dladdr() function.
+ *
+ * Notice:
+ *   The name of this structure is Dl_info_t in POSIX.
+ *   But, the Dl_info (maybe from Linux?) seems to be used more widely:
+ *   https://man7.org/linux/man-pages/man3/dladdr.3.html
+ *   So, we use Dl_info here.
+ ****************************************************************************/
+
+typedef struct
+{
+  FAR const char *dli_fname;  /* Pathname of shared object that contains address */
+  FAR void       *dli_fbase;  /* Base address at which shared object is loaded */
+  FAR const char *dli_sname;  /* Name of symbol whose definition overlaps addr */
+  FAR void       *dli_saddr;  /* Exact address of symbol named in dli_sname */
+} Dl_info;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -308,6 +334,26 @@ int dlclose(FAR void *handle);
  ****************************************************************************/
 
 FAR char *dlerror(void);
+
+/****************************************************************************
+ * Name: dladdr
+ *
+ * Description:
+ *   dladdr() provides information about the address of a symbol in a
+ *   dynamically loaded object.
+ *
+ * Input Parameters:
+ *   addr - The address of the symbol for which information is desired.
+ *   info - A pointer to a Dl_info structure that is filled in by dladdr().
+ *
+ * Returned Value:
+ *   On success, these functions return a nonzero value.
+ *
+ * Reference: OpenGroup.org
+ *
+ ****************************************************************************/
+
+int dladdr(const FAR void *addr, FAR Dl_info *info);
 
 #undef EXTERN
 #ifdef __cplusplus

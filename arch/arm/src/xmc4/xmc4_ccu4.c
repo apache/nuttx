@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/xmc4/xmc4_ccu4.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -22,7 +24,7 @@
  * XMC CCU Driver
  *
  * For now, this file contains only helper methods mandatory for xmc tickless
- * feature. Contibutions are welcomed.
+ * feature. Contributions are welcome.
  *
  ****************************************************************************/
 

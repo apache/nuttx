@@ -2,6 +2,8 @@
 ESP32-S2-Kaluga-1 Kit v1.3
 ==========================
 
+.. tags:: chip:esp32, chip:esp32s2
+
 The `ESP32-S2-Kaluga-1 kit v1.3 <https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/hw-reference/esp32s2/user-guide-esp32-s2-kaluga-1-kit.html>`_
 is a development kit by Espressif that is mainly created to:
 
@@ -247,6 +249,23 @@ This configuration can be used to scan and manipulate I2C devices.
 You can scan for all I2C devices using the following command::
 
     nsh> i2c dev 0x00 0x7f
+
+To use slave mode, you can enable `ESP32S2_I2S_ROLE_SLAVE` option.
+To use slave mode driver following snippet demonstrates how write to i2c bus
+using slave driver:
+
+.. code-block:: C
+
+   #define ESP_I2C_SLAVE_PATH  "/dev/i2cslv0"
+   int main(int argc, char *argv[])
+     {
+       int i2c_slave_fd;
+       int ret;
+       uint8_t buffer[5] = {0xAA};
+       i2c_slave_fd = open(ESP_I2C_SLAVE_PATH, O_RDWR);
+       ret = write(i2c_slave_fd, buffer, 5);
+       close(i2c_slave_fd);
+    }
 
 lvgl_ili9341
 ------------

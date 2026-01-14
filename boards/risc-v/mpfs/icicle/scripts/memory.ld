@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/mpfs/icicle/scripts/memory.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -25,4 +27,6 @@ MEMORY
 
   ksram (rwx)  : ORIGIN = 0x80080000, LENGTH = 256K /* w/ cache */
   usram (rwx)  : ORIGIN = 0x800C0000, LENGTH = 256K /* w/ cache */
+
+  usrio  (r)   : ORIGIN = 0x80100000, LENGTH = 32K
 }

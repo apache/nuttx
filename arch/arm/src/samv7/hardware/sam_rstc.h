@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/samv7/hardware/sam_rstc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -15,7 +17,7 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
  * License for the specific language governing permissions and limitations
  * under the License.
-y *
+ *
  ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_RSTC_H

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/video/goldfish_fb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,11 +35,11 @@
  ****************************************************************************/
 
 #ifndef putreg32
-#define putreg32(v, x) (*(volatile uint32_t *)(x) = (v))
+#define putreg32(v, x) (*(FAR volatile uint32_t *)(x) = (v))
 #endif
 
 #ifndef getreg32
-#define getreg32(x) (*(uint32_t *)(x))
+#define getreg32(x) (*(FAR volatile uint32_t *)(x))
 #endif
 
 /****************************************************************************
@@ -125,6 +127,8 @@ static void goldfish_fb_vsync_irq(FAR struct goldfish_fb_s *fb)
       fb_remove_paninfo(&fb->vtable, FB_NO_OVERLAY);
     }
 #endif
+
+  fb_notify_vsync(&fb->vtable);
 
   if (fb_peek_paninfo(&fb->vtable, &info, FB_NO_OVERLAY) == OK)
     {

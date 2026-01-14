@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt106x_flash.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,13 +31,12 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
+#include <arch/barriers.h>
 #include <debug.h>
 
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
-
-#include "barriers.h"
 
 #include "hardware/rt106x/imxrt106x_memorymap.h"
 #include "arm_internal.h"

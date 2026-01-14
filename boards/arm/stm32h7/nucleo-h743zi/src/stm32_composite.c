@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32h7/nucleo-h743zi/src/stm32_composite.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -137,7 +139,7 @@ static int board_mscclassobject(int minor,
  *   that is called form the composite device logic.
  *
  * Input Parameters:
- *   classdev - The class driver instrance previously give to the composite
+ *   classdev - The class driver instance previously given to the composite
  *     driver by board_mscclassobject().
  *
  * Returned Value:

@@ -34,16 +34,22 @@ config NET_ICMPv6_PMTU_TIMEOUT
 	default 10
 	depends on NET_ICMPv6_PMTU_ENTRIES != 0
 	---help---
-		The timout of the ICMPv6 pmtu entry
+		The timeout of the ICMPv6 pmtu entry
 
 config NET_ICMPv6_SOCKET
 	bool "IPPROTO_ICMP6 socket support"
 	default n
-	select MM_IOB
+	select NET_READAHEAD
 	---help---
 		Enable support for IPPROTO_ICMP6 sockets.  These sockets are needed
 		for application level support for sending ICMPv7 ECHO requests and
 		receiving associated ICMPv6 ECHO replies.
+
+config NET_ICMPv6_CHECKSUMS
+	bool "ICMPv6 checksums"
+	default y
+	---help---
+		Enable/disable ICMPv6 checksum support.
 
 config NET_ICMPv6_NEIGHBOR
 	bool "Solicit destination addresses"

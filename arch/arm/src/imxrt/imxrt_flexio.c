@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_flexio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,6 +35,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <arch/barriers.h>
 #include <arch/board/board.h>
 
 #include <nuttx/arch.h>
@@ -42,7 +45,6 @@
 #include <nuttx/mutex.h>
 
 #include "arm_internal.h"
-#include "barriers.h"
 
 #include "imxrt_gpio.h"
 #include "imxrt_periphclks.h"

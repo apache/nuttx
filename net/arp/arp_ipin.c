@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/arp/arp_ipin.c
  *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  *   Copyright (C) 2007-2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -81,8 +83,9 @@ void arp_ipin(FAR struct net_driver_s *dev)
    * Ethernet link layer protocol.
    */
 
-  if (dev->d_lltype != NET_LL_ETHERNET &&
-      dev->d_lltype != NET_LL_IEEE80211)
+  if (IFF_IS_NOARP(dev->d_flags) ||
+      (dev->d_lltype != NET_LL_ETHERNET &&
+       dev->d_lltype != NET_LL_IEEE80211))
     {
       return;
     }

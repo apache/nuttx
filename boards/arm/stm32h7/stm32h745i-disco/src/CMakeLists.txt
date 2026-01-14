@@ -1,6 +1,8 @@
 # ##############################################################################
 # boards/arm/stm32h7/stm32h745i-disco/src/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -52,4 +54,9 @@ endif()
 
 target_sources(board PRIVATE ${SRCS})
 
-set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flash.ld")
+if(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7)
+  set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flash.ld")
+else()
+  set_property(GLOBAL PROPERTY LD_SCRIPT
+                               "${NUTTX_BOARD_DIR}/scripts/flash_m4.ld")
+endif()

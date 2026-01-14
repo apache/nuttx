@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/litex/hardware/litex_plic.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,7 +33,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_LITEX_CORE_VEXRISCV_SMP
+#if defined(CONFIG_LITEX_CORE_VEXRISCV_SMP) || defined(CONFIG_LITEX_CORE_VEXIIRISCV)
 #  define LITEX_PLIC_PRIORITY    (LITEX_PLIC_BASE + 0x000000)
 #  define LITEX_PLIC_PENDING1    (LITEX_PLIC_BASE + 0x001000)
 

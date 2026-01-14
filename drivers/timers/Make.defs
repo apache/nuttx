@@ -1,6 +1,8 @@
 ############################################################################
 # drivers/timers/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -112,8 +114,27 @@ endif
 
 ifeq ($(CONFIG_CAPTURE),y)
   CSRCS += capture.c
+
+  ifeq ($(CONFIG_FAKE_CAPTURE),y)
+    CSRCS += fake_capture.c
+  endif
+
   TMRDEPPATH = --dep-path timers
   TMRVPATH = :timers
+endif
+
+ifeq ($(CONFIG_GOLDFISH_TIMER),y)
+  CSRCS += goldfish_timer.c
+  TMRDEPPATH = --dep-path timers
+  TMRVPATH = :timers
+endif
+
+ifeq ($(CONFIG_PTP_CLOCK),y)
+  CSRCS += ptp_clock.c
+endif
+
+ifeq ($(CONFIG_PTP_CLOCK_DUMMY),y)
+  CSRCS += ptp_clock_dummy.c
 endif
 
 # Include timer build support (if any were selected)

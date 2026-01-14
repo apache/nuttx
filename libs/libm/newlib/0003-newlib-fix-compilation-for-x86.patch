@@ -3,7 +3,6 @@ From: p-szafonimateusz <p-szafonimateusz@xiaomi.com>
 Date: Thu, 22 Feb 2024 15:05:36 +0100
 Subject: [PATCH] newlib: fix compilation for x86
 
-Change-Id: I5286ef72e358010ea7b4805e6087b06f67e42d44
 Signed-off-by: p-szafonimateusz <p-szafonimateusz@xiaomi.com>
 ---
  newlib/libc/machine/shared_x86/sys/fenv.h | 1 +

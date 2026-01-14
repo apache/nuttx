@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/ieee802154/ieee802154_container.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -131,17 +133,17 @@ FAR struct ieee802154_container_s *ieee802154_container_allocate(void)
 
   /* Try the free list first */
 
-  net_lock();
+  ieee802154_conn_list_lock();
   if (g_free_container != NULL)
     {
       container         = g_free_container;
       g_free_container  = container->ic_flink;
       pool             = IEEE802154_POOL_PREALLOCATED;
-      net_unlock();
+      ieee802154_conn_list_unlock();
     }
   else
     {
-      net_unlock();
+      ieee802154_conn_list_unlock();
       container = (FAR struct ieee802154_container_s *)
         kmm_malloc((sizeof (struct ieee802154_container_s)));
       pool     = IEEE802154_POOL_DYNAMIC;
@@ -186,12 +188,12 @@ void ieee802154_container_free(FAR struct ieee802154_container_s *container)
    * in the free list.
    */
 
-  net_lock();
+  ieee802154_conn_list_lock();
   if (container->ic_pool == IEEE802154_POOL_PREALLOCATED)
     {
       container->ic_flink = g_free_container;
       g_free_container    = container;
-      net_unlock();
+      ieee802154_conn_list_unlock();
     }
   else
     {
@@ -199,7 +201,7 @@ void ieee802154_container_free(FAR struct ieee802154_container_s *container)
 
       /* Otherwise, deallocate it. */
 
-      net_unlock();
+      ieee802154_conn_list_unlock();
       kmm_free(container);
     }
 }

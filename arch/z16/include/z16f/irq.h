@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/z16/include/z16f/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -164,12 +166,6 @@ struct xcptcontext
   /* Register save area */
 
   uint16_t regs[XCPTCONTEXT_REGS];
-
-  /* The following function pointer is non-zero if there
-   * are pending signals to be processed.
-   */
-
-  CODE void *sigdeliver; /* Actual type is sig_deliver_t */
 
   /* The following retains that state during signal execution.
    *

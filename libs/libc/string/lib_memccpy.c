@@ -1,6 +1,8 @@
 /****************************************************************************
  * libs/libc/string/lib_memccpy.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,7 +48,7 @@
  *
  ****************************************************************************/
 
-#undef memccpy /* See mm/README.txt */
+#undef memccpy
 FAR void *memccpy(FAR void *s1, FAR const void *s2, int c, size_t n)
 {
   FAR unsigned char *pout = (FAR unsigned char *)s1;

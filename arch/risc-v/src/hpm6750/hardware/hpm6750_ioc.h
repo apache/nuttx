@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/hpm6750/hardware/hpm6750_ioc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -302,7 +304,7 @@
 
 /* SMT (RW)
  *
- * schmitt trigger enable, only avaiable in high-speed IO
+ * schmitt trigger enable, only available in high-speed IO
  * 0: disable
  * 1: enable
  */

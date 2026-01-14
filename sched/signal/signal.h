@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/signal/signal.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,12 +33,21 @@
 #include <stdbool.h>
 #include <sched.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* These are special values of si_signo that mean that either the wait was
+ * awakened with a timeout, or the wait was canceled... not the receipt of a
+ * signal.
+ */
+
+#define SIG_CANCEL_TIMEOUT 0xfe
+#define SIG_WAIT_TIMEOUT   0xff
 
 /* The following definition determines the number of signal structures to
  * allocate in a block
@@ -77,6 +88,7 @@ typedef struct sigactq  sigactq_t;
 struct sigpendq
 {
   FAR struct sigpendq *flink;    /* Forward link */
+  FAR struct tcb_s *tcb;         /* TCB of thread to deliver to */
   siginfo_t info;                /* Signal information */
   uint8_t   type;                /* (Used to manage allocations) */
 };
@@ -103,6 +115,12 @@ typedef struct sigq_s sigq_t;
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+/* The g_sigactions data structure a pool of pre-allocated signal action
+ * structures buffers structures.
+ */
+
+extern  sigactq_t  g_sigactions[CONFIG_SIG_PREALLOC_ACTIONS];
 
 /* The g_sigfreeaction data structure is a list of available signal action
  * structures.
@@ -165,8 +183,10 @@ int                nxsig_default_initialize(FAR struct tcb_s *tcb);
 /* sig_dispatch.c */
 
 int                nxsig_tcbdispatch(FAR struct tcb_s *stcb,
-                                     FAR siginfo_t *info);
-int                nxsig_dispatch(pid_t pid, FAR siginfo_t *info);
+                                     FAR siginfo_t *info,
+                                     bool group_dispatch);
+int                nxsig_dispatch(pid_t pid, FAR siginfo_t *info,
+                                  bool thread);
 
 /* sig_cleanup.c */
 
@@ -175,9 +195,8 @@ void               nxsig_release(FAR struct task_group_s *group);
 
 /* sig_timedwait.c */
 
-#ifdef CONFIG_CANCELLATION_POINTS
-void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode);
-#endif
+void nxsig_wait_irq(FAR struct tcb_s *wtcb, uint8_t signo,
+                    uint8_t code, int errcode);
 
 /* In files of the same name */
 

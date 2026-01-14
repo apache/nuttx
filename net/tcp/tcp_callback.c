@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp_callback.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -58,9 +60,9 @@
  *
  ****************************************************************************/
 
-static inline uint16_t
+static inline uint32_t
 tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
-               uint16_t flags)
+               uint32_t flags)
 {
   uint16_t recvlen;
 
@@ -107,9 +109,9 @@ tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP_OUT_OF_ORDER
-static uint16_t tcp_ofoseg_data_event(FAR struct net_driver_s *dev,
+static uint32_t tcp_ofoseg_data_event(FAR struct net_driver_s *dev,
                                       FAR struct tcp_conn_s *conn,
-                                      uint16_t flags)
+                                      uint32_t flags)
 {
   FAR struct tcp_ofoseg_s *seg;
   uint32_t rcvseq;
@@ -255,11 +257,11 @@ int tcp_ofoseg_bufsize(FAR struct tcp_conn_s *conn)
  *
  ****************************************************************************/
 
-uint16_t tcp_callback(FAR struct net_driver_s *dev,
-                      FAR struct tcp_conn_s *conn, uint16_t flags)
+uint32_t tcp_callback(FAR struct net_driver_s *dev,
+                      FAR struct tcp_conn_s *conn, uint32_t flags)
 {
 #if defined(CONFIG_NET_TCP_NOTIFIER) || defined(CONFIG_NET_TCP_OUT_OF_ORDER)
-  uint16_t orig = flags;
+  uint32_t orig = flags;
 #endif
 
   /* Prepare device buffer */
@@ -269,21 +271,21 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
       return 0;
     }
 
-  /* Preserve the TCP_ACKDATA, TCP_CLOSE, and TCP_ABORT in the response.
-   * These is needed by the network to handle responses and buffer state.
-   * The TCP_NEWDATA indication will trigger the ACK response, but must be
-   * explicitly set in the callback.
+  /* Preserve the TCP_ACKDATA, TCP_RXCLOSE, TCP_TXCLOSE, and TCP_ABORT in the
+   * response.  These is needed by the network to handle responses and buffer
+   * state.  The TCP_NEWDATA indication will trigger the ACK response, but
+   * must be explicitly set in the callback.
    */
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   /* Perform the data callback.  When a data callback is executed from
    * 'list', the input flags are normally returned, however, the
    * implementation may set one of the following:
    *
-   *   TCP_CLOSE   - Gracefully close the current connection
-   *   TCP_ABORT   - Abort (reset) the current connection on an error that
-   *                 prevents TCP_CLOSE from working.
+   *   TCP_RXCLOSE - Gracefully close the current connection (RX)
+   *   TCP_TXCLOSE - Gracefully close the current connection (TX)
+   *   TCP_ABORT   - Abort (reset) the current connection
    *
    * And/Or set/clear the following:
    *
@@ -420,4 +422,26 @@ uint16_t tcp_datahandler(FAR struct net_driver_s *dev,
   return buflen;
 }
 
+/****************************************************************************
+ * Name: tcp_callback_cleanup
+ *
+ * Description:
+ *   Cleanup data and cb when thread is canceled.
+ *
+ * Input Parameters:
+ *   arg - A pointer with conn and callback struct.
+ *
+ ****************************************************************************/
+
+void tcp_callback_cleanup(FAR void *arg)
+{
+  FAR struct tcp_callback_s *cb = (FAR struct tcp_callback_s *)arg;
+  FAR struct tcp_conn_s *conn = cb->tc_conn;
+
+  conn_dev_lock(&conn->sconn, conn->dev);
+  nerr("ERROR: pthread is being canceled, need to cleanup cb\n");
+  tcp_callback_free(cb->tc_conn, *(cb->tc_cb));
+  nxsem_destroy(cb->tc_sem);
+  conn_dev_unlock(&conn->sconn, conn->dev);
+}
 #endif /* NET_TCP_HAVE_STACK */

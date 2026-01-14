@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/espressif/esp_tickless.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -57,6 +59,8 @@
  * Private Data
  ****************************************************************************/
 
+static spinlock_t g_esp_tickless_lock = SP_UNLOCKED;
+
 /* Systimer HAL layer object */
 
 static systimer_hal_context_t systimer_hal;
@@ -93,7 +97,7 @@ static int esp_tickless_isr(int irq, void *context, void *arg)
   systimer_ll_clear_alarm_int(systimer_hal.dev,
                               SYSTIMER_ALARM_OS_TICK_CORE0);
 
-  nxsched_timer_expiration();
+  nxsched_process_timer();
 
   return OK;
 }
@@ -124,10 +128,10 @@ uint32_t up_get_idletime(void)
   uint64_t counter;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_esp_tickless_lock);
   if (!g_timer_started)
     {
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_esp_tickless_lock, flags);
 
       return 0;
     }
@@ -145,7 +149,7 @@ uint32_t up_get_idletime(void)
       us = 0;
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_esp_tickless_lock, flags);
 
   return us;
 }
@@ -170,12 +174,12 @@ void up_step_idletime(uint32_t idletime_us)
 
   DEBUGASSERT(g_timer_started);
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_esp_tickless_lock);
 
   systimer_hal_counter_value_advance(&systimer_hal, SYSTIMER_COUNTER_OS_TICK,
                                      idletime_us);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_esp_tickless_lock, flags);
 }
 
 /****************************************************************************
@@ -214,13 +218,13 @@ void up_step_idletime(uint32_t idletime_us)
 int IRAM_ATTR up_timer_gettime(struct timespec *ts)
 {
   uint64_t time_us;
-  irqstate_t flags = spin_lock_irqsave(NULL);
+  irqstate_t flags = spin_lock_irqsave(&g_esp_tickless_lock);
 
   time_us = systimer_hal_get_time(&systimer_hal, SYSTIMER_COUNTER_OS_TICK);
   ts->tv_sec  = time_us / USEC_PER_SEC;
   ts->tv_nsec = (time_us % USEC_PER_SEC) * NSEC_PER_USEC;
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_esp_tickless_lock, flags);
 
   return OK;
 }
@@ -231,7 +235,7 @@ int IRAM_ATTR up_timer_gettime(struct timespec *ts)
  * Description:
  *   Cancel the interval timer and return the time remaining on the timer.
  *   These two steps need to be as nearly atomic as possible.
- *   nxsched_timer_expiration() will not be called unless the timer is
+ *   nxsched_process_timer() will not be called unless the timer is
  *   restarted with up_timer_start().
  *
  *   If, as a race condition, the timer has already expired when this
@@ -265,7 +269,7 @@ int IRAM_ATTR up_timer_cancel(struct timespec *ts)
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_esp_tickless_lock);
 
   if (ts != NULL)
     {
@@ -312,7 +316,7 @@ int IRAM_ATTR up_timer_cancel(struct timespec *ts)
   systimer_ll_clear_alarm_int(systimer_hal.dev,
                               SYSTIMER_ALARM_OS_TICK_CORE0);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_esp_tickless_lock, flags);
 
   return OK;
 }
@@ -321,14 +325,14 @@ int IRAM_ATTR up_timer_cancel(struct timespec *ts)
  * Name: up_timer_start
  *
  * Description:
- *   Start the interval timer.  nxsched_timer_expiration() will be
+ *   Start the interval timer.  nxsched_process_timer() will be
  *   called at the completion of the timeout (unless up_timer_cancel
  *   is called to stop the timing.
  *
  *   Provided by platform-specific code and called from the RTOS base code.
  *
  * Input Parameters:
- *   ts - Provides the time interval until nxsched_timer_expiration() is
+ *   ts - Provides the time interval until nxsched_process_timer() is
  *        called.
  *
  * Returned Value:
@@ -348,7 +352,7 @@ int IRAM_ATTR up_timer_start(const struct timespec *ts)
   uint64_t alarm_ticks;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_esp_tickless_lock);
 
   if (g_timer_started)
     {
@@ -373,7 +377,7 @@ int IRAM_ATTR up_timer_start(const struct timespec *ts)
 
   g_timer_started = true;
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_esp_tickless_lock, flags);
 
   return OK;
 }
@@ -397,7 +401,15 @@ void up_timer_initialize(void)
 {
   g_timer_started = false;
 
-  periph_module_enable(PERIPH_SYSTIMER_MODULE);
+  PERIPH_RCC_ACQUIRE_ATOMIC(PERIPH_SYSTIMER_MODULE, ref_count)
+    {
+      if (ref_count == 0)
+        {
+          systimer_ll_enable_bus_clock(true);
+          systimer_ll_reset_register();
+        }
+    }
+
   systimer_hal_init(&systimer_hal);
   systimer_hal_tick_rate_ops_t ops =
     {

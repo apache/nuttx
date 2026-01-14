@@ -1,6 +1,9 @@
 ==========
-imx8qm-mek
+IMX8QM MEK
 ==========
 
-.. include:: README.txt
-   :literal:
+.. tags:: chip:imx8, arch:arm64, experimental
+
+.. todo::
+
+   Document this board.

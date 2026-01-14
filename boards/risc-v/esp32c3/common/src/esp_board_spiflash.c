@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/esp32c3/common/src/esp_board_spiflash.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -41,9 +43,7 @@
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/mtd/configdata.h>
 #include <nuttx/fs/nxffs.h>
-#ifdef CONFIG_BCH
-#include <nuttx/drivers/drivers.h>
-#endif
+#include <nuttx/fs/partition.h>
 
 #include "espressif/esp_spiflash.h"
 #include "espressif/esp_spiflash_mtd.h"
@@ -62,13 +62,81 @@
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_ESPRESSIF_HAVE_OTA_PARTITION
+static int init_ota_partitions(void);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_ESPRESSIF_HAVE_OTA_PARTITION
+static const struct partition_s g_ota_partition_table[] =
+{
+  {
+    .name       = CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_DEVPATH,
+    .index      = 0,
+    .firstblock = CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET,
+    .blocksize  = CONFIG_ESPRESSIF_OTA_SLOT_SIZE,
+  },
+  {
+    .name       = CONFIG_ESPRESSIF_OTA_SECONDARY_SLOT_DEVPATH,
+    .index      = 1,
+    .firstblock = CONFIG_ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET,
+    .blocksize  = CONFIG_ESPRESSIF_OTA_SLOT_SIZE,
+  },
+  {
+    .name       = CONFIG_ESPRESSIF_OTA_SCRATCH_DEVPATH,
+    .index      = 2,
+    .firstblock = CONFIG_ESPRESSIF_OTA_SCRATCH_OFFSET,
+    .blocksize  = CONFIG_ESPRESSIF_OTA_SCRATCH_SIZE,
+  }
+};
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: init_ota_partitions
+ *
+ * Description:
+ *   Initialize partitions that are dedicated to firmware OTA update.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_HAVE_OTA_PARTITION
+static int init_ota_partitions(void)
+{
+  struct mtd_dev_s *mtd;
+  int ret = OK;
+  int i;
+
+  for (i = 0; i < nitems(g_ota_partition_table); ++i)
+    {
+      const struct partition_s *part = &g_ota_partition_table[i];
+      mtd = esp_spiflash_alloc_mtdpart(part->firstblock, part->blocksize);
+
+      ret = register_mtddriver(part->name, mtd, 0755, NULL);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: register_mtddriver %s failed: %d\n",
+                 part->name, ret);
+          return ret;
+        }
+    }
+
+  return ret;
+}
+
+#endif
 
 /****************************************************************************
  * Name: setup_smartfs
@@ -123,7 +191,8 @@ static int setup_smartfs(int smartn, struct mtd_dev_s *mtd,
       ret = nx_mount(path, mnt_pt, "smartfs", 0, NULL);
       if (ret < 0)
         {
-          syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n", ret);
+          syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n",
+                 ret);
           if (ret == -ENODEV)
             {
               syslog(LOG_WARNING, "Smartfs seems unformatted. "
@@ -222,7 +291,8 @@ static int setup_spiffs(const char *path, struct mtd_dev_s *mtd,
       ret = nx_mount(path, mnt_pt, "spiffs", 0, NULL);
       if (ret < 0)
         {
-          syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n", ret);
+          syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n",
+                 ret);
           return ret;
         }
     }
@@ -263,7 +333,8 @@ static int setup_nxffs(struct mtd_dev_s *mtd, const char *mnt_pt)
       ret = nx_mount(NULL, mnt_pt, "nxffs", 0, NULL);
       if (ret < 0)
         {
-          syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n", ret);
+          syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n",
+                 ret);
           return ret;
         }
     }
@@ -295,13 +366,13 @@ static int init_storage_partition(void)
                                    CONFIG_ESPRESSIF_STORAGE_MTD_SIZE);
   if (!mtd)
     {
-      syslog(LOG_ERR, "ERROR: Failed to alloc MTD partition of SPI Flash\n");
+      syslog(LOG_ERR, "ERROR: Fail to alloc MTD partition of SPI Flash\n");
       return ERROR;
     }
 
 #if defined (CONFIG_ESPRESSIF_SPIFLASH_SMARTFS)
 
-  ret = setup_smartfs(0, mtd, "/data");
+  ret = setup_smartfs(0, mtd, CONFIG_ESPRESSIF_SPIFLASH_FS_MOUNT_PT);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to setup smartfs\n");
@@ -310,7 +381,7 @@ static int init_storage_partition(void)
 
 #elif defined (CONFIG_ESPRESSIF_SPIFLASH_NXFFS)
 
-  ret = setup_nxffs(mtd, "/data");
+  ret = setup_nxffs(mtd, CONFIG_ESPRESSIF_SPIFLASH_FS_MOUNT_PT);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to setup nxffs\n");
@@ -320,7 +391,8 @@ static int init_storage_partition(void)
 #elif defined (CONFIG_ESPRESSIF_SPIFLASH_LITTLEFS)
 
   const char *path = "/dev/espflash";
-  ret = setup_littlefs(path, mtd, "/data", 0755);
+  ret = setup_littlefs(path, mtd, CONFIG_ESPRESSIF_SPIFLASH_FS_MOUNT_PT,
+                       0755);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to setup littlefs\n");
@@ -330,7 +402,8 @@ static int init_storage_partition(void)
 #elif defined (CONFIG_ESPRESSIF_SPIFLASH_SPIFFS)
 
   const char *path = "/dev/espflash";
-  ret = setup_spiffs(path, mtd, "/data", 0755);
+  ret = setup_spiffs(path, mtd, CONFIG_ESPRESSIF_SPIFLASH_FS_MOUNT_PT,
+                     0755);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to setup spiffs\n");
@@ -369,10 +442,10 @@ static int init_storage_partition(void)
 
 #else
 
-  ret = register_mtddriver("/dev/espflash", mtd, 0755, NULL);
+  ret = register_mtddriver("/dev/mtdblock0", mtd, 0755, NULL);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to register MTD: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to register MTD mtdblock0: %d\n", ret);
       return ret;
     }
 
@@ -406,6 +479,14 @@ int board_spiflash_init(void)
 
   esp_spiflash_init();
 
+#ifdef CONFIG_ESPRESSIF_HAVE_OTA_PARTITION
+  ret = init_ota_partitions();
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
+
   ret = init_storage_partition();
   if (ret < 0)
     {
@@ -414,4 +495,3 @@ int board_spiflash_init(void)
 
   return ret;
 }
-

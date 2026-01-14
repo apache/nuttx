@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/posix/sim_hostfs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,7 @@
 #include <errno.h>
 
 #include "hostfs.h"
+#include "sim_internal.h"
 
 /****************************************************************************
  * Private Functions
@@ -194,7 +197,7 @@ int host_open(const char *pathname, int flags, int mode)
   int ret = open(pathname, mapflags, mode);
   if (ret == -1)
     {
-      ret = -errno;
+      ret = host_errno_convert(-errno);
     }
 
   return ret;
@@ -211,7 +214,7 @@ int host_close(int fd)
   int ret = close(fd);
   if (ret == -1)
     {
-      ret = -errno;
+      ret = host_errno_convert(-errno);
     }
 
   return ret;
@@ -228,7 +231,7 @@ nuttx_ssize_t host_read(int fd, void *buf, nuttx_size_t count)
   nuttx_ssize_t ret = read(fd, buf, count);
   if (ret == -1)
     {
-      ret = -errno;
+      ret = host_errno_convert(-errno);
     }
 
   return ret;
@@ -245,7 +248,7 @@ nuttx_ssize_t host_write(int fd, const void *buf, nuttx_size_t count)
   nuttx_ssize_t ret = write(fd, buf, count);
   if (ret == -1)
     {
-      ret = -errno;
+      ret = host_errno_convert(-errno);
     }
 
   return ret;
@@ -263,7 +266,7 @@ nuttx_off_t host_lseek(int fd, nuttx_off_t pos, nuttx_off_t offset,
   nuttx_off_t ret = lseek(fd, offset, whence);
   if (ret == (nuttx_off_t)-1)
     {
-      ret = -errno;
+      ret =  host_errno_convert(-errno);
     }
 
   return ret;
@@ -277,7 +280,13 @@ int host_ioctl(int fd, int request, unsigned long arg)
 {
   /* Just call the ioctl routine */
 
-  return ioctl(fd, request, arg);
+  int ret = ioctl(fd, request, arg);
+  if (ret < 0)
+    {
+      ret = host_errno_convert(-errno);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -297,7 +306,13 @@ void host_sync(int fd)
 
 int host_dup(int fd)
 {
-  return dup(fd);
+  int ret = dup(fd);
+  if (ret < 0)
+    {
+      ret = host_errno_convert(-errno);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -314,7 +329,7 @@ int host_fstat(int fd, struct nuttx_stat_s *buf)
   ret = fstat(fd, &hostbuf);
   if (ret < 0)
     {
-      ret = -errno;
+      ret = host_errno_convert(-errno);
     }
 
   /* Map the return values */
@@ -337,7 +352,7 @@ int host_fchstat(int fd, const struct nuttx_stat_s *buf, int flags)
       ret = fchmod(fd, buf->st_mode);
       if (ret < 0)
         {
-          return -errno;
+          return host_errno_convert(-errno);
         }
     }
 
@@ -346,7 +361,7 @@ int host_fchstat(int fd, const struct nuttx_stat_s *buf, int flags)
       ret = fchown(fd, buf->st_uid, buf->st_gid);
       if (ret < 0)
         {
-          return -errno;
+          return host_errno_convert(-errno);
         }
     }
 
@@ -377,7 +392,7 @@ int host_fchstat(int fd, const struct nuttx_stat_s *buf, int flags)
       ret = futimens(fd, times);
       if (ret < 0)
         {
-          return -errno;
+          return host_errno_convert(-errno);
         }
     }
 
@@ -393,7 +408,7 @@ int host_ftruncate(int fd, nuttx_off_t length)
   int ret = ftruncate(fd, length);
   if (ret < 0)
     {
-      ret = -errno;
+      ret = host_errno_convert(-errno);
     }
 
   return ret;
@@ -489,7 +504,7 @@ int host_closedir(void *dirp)
   int ret = closedir(dirp);
   if (ret < 0)
     {
-      ret = -errno;
+      ret = host_errno_convert(-errno);
     }
 
   return ret;
@@ -509,7 +524,7 @@ int host_statfs(const char *path, struct nuttx_statfs_s *buf)
   ret = statvfs(path, &hostbuf);
   if (ret < 0)
     {
-      ret = -errno;
+      ret = host_errno_convert(-errno);
     }
 
   /* Map the struct statfs value */
@@ -535,7 +550,7 @@ int host_unlink(const char *pathname)
   int ret = unlink(pathname);
   if (ret < 0)
     {
-      ret = -errno;
+      ret = host_errno_convert(-errno);
     }
 
   return ret;
@@ -552,7 +567,7 @@ int host_mkdir(const char *pathname, int mode)
   int ret = mkdir(pathname, mode);
   if (ret < 0)
     {
-      ret = -errno;
+      ret = host_errno_convert(-errno);
     }
 
   return ret;
@@ -567,7 +582,7 @@ int host_rmdir(const char *pathname)
   int ret = rmdir(pathname);
   if (ret < 0)
     {
-      ret = -errno;
+      ret = host_errno_convert(-errno);
     }
 
   return ret;
@@ -582,7 +597,7 @@ int host_rename(const char *oldpath, const char *newpath)
   int ret = rename(oldpath, newpath);
   if (ret < 0)
     {
-      ret = -errno;
+      ret = host_errno_convert(-errno);
     }
 
   return ret;
@@ -602,7 +617,7 @@ int host_stat(const char *path, struct nuttx_stat_s *buf)
   ret = stat(path, &hostbuf);
   if (ret < 0)
     {
-      ret = -errno;
+      ret = host_errno_convert(-errno);
     }
 
   /* Map the return values */
@@ -625,7 +640,7 @@ int host_chstat(const char *path, const struct nuttx_stat_s *buf, int flags)
       ret = chmod(path, buf->st_mode);
       if (ret < 0)
         {
-          return -errno;
+          return host_errno_convert(-errno);
         }
     }
 
@@ -634,7 +649,7 @@ int host_chstat(const char *path, const struct nuttx_stat_s *buf, int flags)
       ret = chown(path, buf->st_uid, buf->st_gid);
       if (ret < 0)
         {
-          return -errno;
+          return host_errno_convert(-errno);
         }
     }
 
@@ -665,7 +680,7 @@ int host_chstat(const char *path, const struct nuttx_stat_s *buf, int flags)
       ret = utimensat(AT_FDCWD, path, times, 0);
       if (ret < 0)
         {
-          return -errno;
+          return host_errno_convert(-errno);
         }
     }
 

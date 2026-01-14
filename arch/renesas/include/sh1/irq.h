@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/renesas/include/sh1/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -449,12 +451,6 @@
 #ifndef __ASSEMBLY__
 struct xcptcontext
 {
-  /* The following function pointer is non-zero if there are pending signals
-   * to be processed.
-   */
-
-  void *sigdeliver; /* Actual type is sig_deliver_t */
-
   /* These are saved copies of LR and SR used during signal processing.
    *
    * REVISIT:  Because there is only one copy of these save areas,
@@ -493,7 +489,7 @@ extern "C"
 
 /* Get the current value of the SR */
 
-static inline irqstate_t __getsr(void)
+static inline_function irqstate_t __getsr(void)
 {
   irqstate_t flags;
 
@@ -503,14 +499,14 @@ static inline irqstate_t __getsr(void)
 
 /* Set the new value of the SR */
 
-static inline void __setsr(irqstate_t sr)
+static inline_function void __setsr(irqstate_t sr)
 {
   __asm__ __volatile__ ("ldc %0, sr" : : "r" (sr));
 }
 
 /* Return the current value of the stack pointer */
 
-static inline uint32_t up_getsp(void)
+static inline_function uint32_t up_getsp(void)
 {
   uint32_t sp;
 
@@ -526,7 +522,7 @@ static inline uint32_t up_getsp(void)
 
 /* Return the current interrupt enable state and disable interrupts */
 
-static inline irqstate_t up_irq_save(void)
+static inline_function irqstate_t up_irq_save(void)
 {
   irqstate_t flags = __getsr();
   __setsr(flags | 0x000000f0);
@@ -535,7 +531,7 @@ static inline irqstate_t up_irq_save(void)
 
 /* Disable interrupts */
 
-static inline void up_irq_disable(void)
+static inline_function void up_irq_disable(void)
 {
   uint32_t flags = __getsr();
   __setsr(flags | 0x000000f0);
@@ -543,7 +539,7 @@ static inline void up_irq_disable(void)
 
 /* Enable interrupts */
 
-static inline void up_irq_enable(void)
+static inline_function void up_irq_enable(void)
 {
   uint32_t flags = __getsr();
   __setsr(flags & ~0x000000f0);
@@ -551,7 +547,7 @@ static inline void up_irq_enable(void)
 
 /* Restore saved interrupt state */
 
-static inline void up_irq_restore(irqstate_t flags)
+static inline_function void up_irq_restore(irqstate_t flags)
 {
   if ((flags & 0x000000f0) != 0x000000f0)
     {
@@ -567,6 +563,20 @@ static inline void up_irq_restore(irqstate_t flags)
 /****************************************************************************
  * Public Functions Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_getusrpc
+ ****************************************************************************/
+
+#define up_getusrpc(regs) \
+    (((uint32_t *)((regs) ? (regs) : up_current_regs()))[REG_PC])
+
+/****************************************************************************
+ * Name: up_getusrsp
+ ****************************************************************************/
+
+#define up_getusrsp(regs) \
+    ((uintptr_t)((uint32_t *)(regs))[REG_SP])
 
 #undef EXTERN
 #ifdef __cplusplus

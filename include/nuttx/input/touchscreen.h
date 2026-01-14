@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/nuttx/input/touchscreen.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,7 +38,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/mm/circbuf.h>
+#include <nuttx/circbuf.h>
 #include <nuttx/semaphore.h>
 #include <time.h>
 #include <inttypes.h>
@@ -89,8 +91,12 @@
                                              * int Y threshold value
                                              */
 
+#define TSIOC_GRAB           _TSIOC(0x000e) /* arg: Pointer to
+                                             * int for enable grab
+                                             */
+
 #define TSC_FIRST            0x0001          /* First common command */
-#define TSC_NCMDS            13              /* Thirteen common commands */
+#define TSC_NCMDS            14              /* Fourteen common commands */
 
 /* Backward compatible IOCTL */
 
@@ -134,6 +140,14 @@
 #define TOUCH_PRESSURE_VALID (1 << 5) /* Hardware provided a valid pressure */
 #define TOUCH_SIZE_VALID     (1 << 6) /* Hardware provided a valid H/W contact size */
 #define TOUCH_GESTURE_VALID  (1 << 7) /* Hardware provided a valid gesture */
+
+/* These definitions provide the meaning of all of the bits that may be
+ * reported in the struct touch_lowerhalf_s flags.
+ */
+
+#define TOUCH_FLAG_SWAPXY    (1 << 0) /* Swap the X and Y coordinates */
+#define TOUCH_FLAG_MIRRORX   (1 << 1) /* Mirror X coordinate */
+#define TOUCH_FLAG_MIRRORY   (1 << 2) /* Mirror Y coordinate */
 
 /* These are definitions for touch gesture */
 
@@ -228,6 +242,9 @@ struct touch_sample_s
 struct touch_lowerhalf_s
 {
   uint8_t       maxpoint;       /* Maximal point supported by the touchscreen */
+  uint8_t       flags;          /* Flags for rotation, see TOUCH_FLAG_* */
+  uint16_t      xres;           /* Horizontal resolution in pixels */
+  uint16_t      yres;           /* Vertical   resolution in pixels */
   FAR void      *priv;          /* Save the upper half pointer */
 
   /**************************************************************************
@@ -261,12 +278,42 @@ struct touch_lowerhalf_s
    *   buflen  - User defined specific buffer size.
    *
    * Return Value:
-   *   Number of bytes written；a negated errno value on failure.
+   *   Number of bytes written; a negated errno value on failure.
    *
    **************************************************************************/
 
   CODE ssize_t (*write)(FAR struct touch_lowerhalf_s *lower,
                         FAR const char *buffer, size_t buflen);
+
+  /**************************************************************************
+   * Name: open
+   *
+   * Description:
+   *   Users can use this interface to implement custom open().
+   *
+   * Arguments:
+   *   lower   - The instance of lower half of touchscreen device.
+   *
+   * Return Value:
+   *   Zero(OK) on success; a negated errno value on failure.
+   **************************************************************************/
+
+  CODE int (*open)(FAR struct touch_lowerhalf_s *lower);
+
+  /**************************************************************************
+   * Name: close
+   *
+   * Description:
+   *   Users can use this interface to implement custom close().
+   *
+   * Arguments:
+   *   lower   - The instance of lower half of touchscreen device.
+   *
+   * Return Value:
+   *   Zero(OK) on success; a negated errno value on failure.
+   **************************************************************************/
+
+  CODE int (*close)(FAR struct touch_lowerhalf_s *lower);
 };
 
 /****************************************************************************
@@ -297,7 +344,7 @@ static inline uint64_t touch_get_time(void)
  *   sample  - pointer to data of touch point event.
  ****************************************************************************/
 
-void touch_event(FAR void *priv, FAR const struct touch_sample_s *sample);
+void touch_event(FAR void *priv, FAR struct touch_sample_s *sample);
 
 /****************************************************************************
  * Name: touch_register
@@ -328,7 +375,7 @@ int touch_register(FAR struct touch_lowerhalf_s *lower,
  *   release the occupied resources.
  *
  * Arguments:
- *   lower     - A pointer to an insatnce of touchscreen lower half driver.
+ *   lower     - A pointer to an instance of touchscreen lower half driver.
  *   path      - The path of touchscreen device. such as "/dev/input0"
  ****************************************************************************/
 

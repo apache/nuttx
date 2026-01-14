@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/nucleo-f302r8/include/board.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -51,7 +53,7 @@
 #define STM32_HSE_FREQUENCY     STM32_BOARD_XTAL
 #define STM32_LSE_FREQUENCY     32768            /* X2 on board */
 
-/* PLL source is HSE/1, PLL multipler is 9: PLL frequency is
+/* PLL source is HSE/1, PLL multiplier is 9: PLL frequency is
  * 8MHz (XTAL) x 9 = 72MHz
  */
 
@@ -130,7 +132,7 @@
  *
  * And one can be controlled by software:
  *
- * User LD2: green LED is a user LED connected to the I/O PA5 of the
+ * User LD2: green LED is a user LED connected to the I/O PB13 of the
  *           STM32F302R8T6.
  *
  * If CONFIG_ARCH_LEDS is not defined, then the user can control the LED in
@@ -204,10 +206,31 @@
 #define GPIO_USART2_RX GPIO_USART2_RX_2 /* PA3 */
 #define GPIO_USART2_TX GPIO_USART2_TX_2 /* PA2 */
 
-/* USART1 */
+/* USART1
+ *
+ * At default use:
+ *   USART1_RX - PB7
+ *   USART1_TX - PB6
+ *
+ * If CONFIG_NUCLEOF302R8_RS485_WAVESHARE=y use configuration to match RS485
+ * shield from Waveshare:
+ *
+ *   USART1_RX - PA10
+ *   USART1_TX - PA9
+ *   RS485_DIR - PA8 (arduino D7)
+ *
+ */
 
-#define GPIO_USART1_RX GPIO_USART1_RX_2 /* PB7 */
-#define GPIO_USART1_TX GPIO_USART1_TX_2 /* PB6 */
+#ifdef CONFIG_NUCLEOF302R8_RS485_WAVESHARE
+#  define GPIO_USART1_RX GPIO_USART1_RX_1 /* PA10 */
+#  define GPIO_USART1_TX GPIO_USART1_TX_1 /* PA9 */
+#  define GPIO_USART1_RS485_DIR (GPIO_OUTPUT | GPIO_PUSHPULL |          \
+                                 GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
+                                 GPIO_PORTA | GPIO_PIN8)
+#else
+#  define GPIO_USART1_RX GPIO_USART1_RX_2 /* PB7 */
+#  define GPIO_USART1_TX GPIO_USART1_TX_2 /* PB6 */
+#endif
 
 /* CAN */
 

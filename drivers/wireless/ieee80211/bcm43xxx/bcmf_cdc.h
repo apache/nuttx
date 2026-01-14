@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/wireless/ieee80211/bcm43xxx/bcmf_cdc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,21 +38,21 @@
 /* Send safe cdc request */
 
 int bcmf_cdc_iovar_request(FAR struct bcmf_dev_s *priv,
-                           uint32_t ifidx, bool set, char *name,
-                           uint8_t *data, uint32_t *len);
+                           uint32_t ifidx, bool set, FAR char *name,
+                           FAR uint8_t *data, FAR uint32_t *len);
 
 int bcmf_cdc_ioctl(FAR struct bcmf_dev_s *priv, uint32_t ifidx, bool set,
-                   uint32_t cmd, uint8_t *data, uint32_t *len);
+                   uint32_t cmd, FAR uint8_t *data, FAR uint32_t *len);
 
 /* Send cdc request without locking control_mutex */
 
 int bcmf_cdc_iovar_request_unsafe(FAR struct bcmf_dev_s *priv,
-                                  uint32_t ifidx, bool set, char *name,
-                                  uint8_t *data, uint32_t *len);
+                                  uint32_t ifidx, bool set, FAR char *name,
+                                  FAR uint8_t *data, FAR uint32_t *len);
 
 /* Callback used by bus layer to notify cdc response frame is available */
 
 int bcmf_cdc_process_control_frame(FAR struct bcmf_dev_s *priv,
-                                   struct bcmf_frame_s *frame);
+                                   FAR struct bcmf_frame_s *frame);
 
 #endif /* __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_CDC_H */

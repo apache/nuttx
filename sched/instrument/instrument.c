@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/instrument/instrument.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,7 +31,7 @@
  ****************************************************************************/
 
 #if CONFIG_SCHED_STACK_RECORD > 0
-extern struct instrument_s g_stack_record;
+extern struct instrument_s g_stack_monitor;
 #endif
 
 /****************************************************************************
@@ -53,6 +55,6 @@ extern struct instrument_s g_stack_record;
 void instrument_initialize(void)
 {
 #if CONFIG_SCHED_STACK_RECORD > 0
-  instrument_register(&g_stack_record);
+  instrument_register(&g_stack_monitor);
 #endif
 }

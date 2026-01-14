@@ -4,4 +4,19 @@
 #
 
 if ARCH_BOARD_MPS3_AN547
+
+
+choice
+prompt "choice product board"
+
+config MPS3_AN547_NSH
+	bool "mps3an547 NSH"
+
+config MPS3_AN547_AP
+	bool "mps3an547 AP"
+
+config MPS3_AN547_BL
+	bool "mps3an547 BL"
+
+endchoice
 endif

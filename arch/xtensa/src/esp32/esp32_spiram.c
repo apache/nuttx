@@ -32,17 +32,18 @@
 #include <debug.h>
 #include <string.h>
 #include <sys/param.h>
-#include <nuttx/config.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/init.h>
+#include <nuttx/nuttx.h>
 
 #include "esp32_spiram.h"
-#include "esp32_spicache.h"
 #include "esp32_psram.h"
 #include "xtensa.h"
 #include "xtensa_attr.h"
 #include "hardware/esp32_soc.h"
 #include "hardware/esp32_dport.h"
+
+#include "esp_private/cache_utils.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -74,6 +75,32 @@
 
 static bool spiram_inited = false;
 
+#ifdef CONFIG_SMP
+static int pause_cpu_handler(void *cookie);
+static struct smp_call_data_s g_call_data =
+SMP_CALL_INITIALIZER(pause_cpu_handler, NULL);
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: pause_cpu_handler
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+static volatile bool g_cpu_wait = true;
+static volatile bool g_cpu_pause = false;
+static int pause_cpu_handler(void *cookie)
+{
+  g_cpu_pause = true;
+  while (g_cpu_wait);
+
+  return OK;
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -86,8 +113,8 @@ unsigned int IRAM_ATTR cache_sram_mmu_set(int cpu_no, int pid,
   uint32_t regval;
 #ifdef CONFIG_SMP
   int cpu_to_stop = 0;
-  bool smp_start = OSINIT_OS_READY();
 #endif
+  const bool os_ready = OSINIT_OS_READY();
   unsigned int i;
   unsigned int shift;
   unsigned int mask_s;
@@ -169,23 +196,30 @@ unsigned int IRAM_ATTR cache_sram_mmu_set(int cpu_no, int pid,
    * the flash guards to make sure the cache is disabled.
    */
 
-  flags = enter_critical_section();
+  flags = 0; /* suppress GCC warning */
+  if (os_ready)
+    {
+      flags = enter_critical_section();
+    }
 
 #ifdef CONFIG_SMP
   /* The other CPU might be accessing the cache at the same time, just by
    * using variables in external RAM.
    */
 
-  if (smp_start)
+  if (os_ready)
     {
-      cpu_to_stop = up_cpu_index() == 1 ? 0 : 1;
-      up_cpu_pause(cpu_to_stop);
+      cpu_to_stop = this_cpu() == 1 ? 0 : 1;
+      g_cpu_wait  = true;
+      g_cpu_pause = false;
+      nxsched_smp_call_single_async(cpu_to_stop, &g_call_data);
+      while (!g_cpu_pause);
     }
 
-  spi_disable_cache(1);
+    spi_flash_disable_cache(1, 0);
 #endif
 
-  spi_disable_cache(0);
+  spi_flash_disable_cache(0, 0);
 
   /* mmu change */
 
@@ -199,29 +233,33 @@ unsigned int IRAM_ATTR cache_sram_mmu_set(int cpu_no, int pid,
   if (cpu_no == 0)
     {
       regval  = getreg32(DPORT_PRO_CACHE_CTRL1_REG);
-      regval &= ~DPORT_PRO_CMMU_SRAM_PAGE_MODE;
-      regval |= mask_s;
+      regval &= ~DPORT_PRO_CMMU_SRAM_PAGE_MODE_M;
+      regval |= mask_s << DPORT_PRO_CMMU_SRAM_PAGE_MODE_S;
       putreg32(regval, DPORT_PRO_CACHE_CTRL1_REG);
     }
   else
     {
       regval  = getreg32(DPORT_APP_CACHE_CTRL1_REG);
-      regval &= ~DPORT_APP_CMMU_SRAM_PAGE_MODE;
-      regval |= mask_s;
+      regval &= ~DPORT_APP_CMMU_SRAM_PAGE_MODE_M;
+      regval |= mask_s << DPORT_APP_CMMU_SRAM_PAGE_MODE_S;
       putreg32(regval, DPORT_APP_CACHE_CTRL1_REG);
     }
 
-  spi_enable_cache(0);
+  spi_flash_enable_cache(0);
 #ifdef CONFIG_SMP
-  spi_enable_cache(1);
+  spi_flash_enable_cache(1);
 
-  if (smp_start)
+  if (os_ready)
     {
-      up_cpu_resume(cpu_to_stop);
+      g_cpu_wait = false;
     }
 #endif
 
-  leave_critical_section(flags);
+  if (os_ready)
+    {
+      leave_critical_section(flags);
+    }
+
   return 0;
 }
 
@@ -239,10 +277,67 @@ void IRAM_ATTR esp_spiram_init_cache(void)
 
 #ifdef CONFIG_SMP
   regval  = getreg32(DPORT_APP_CACHE_CTRL1_REG);
-  regval &= ~(1 << DPORT_APP_CACHE_MASK_DRAM1);
+  regval &= ~DPORT_APP_CACHE_MASK_DRAM1;
   putreg32(regval, DPORT_APP_CACHE_CTRL1_REG);
   cache_sram_mmu_set(1, 0, SOC_EXTRAM_DATA_LOW, 0, 32, 128);
 #endif
+}
+
+/* Simple RAM test. Writes a word every 32 bytes. Takes about a second
+ * to complete for 4MiB. Returns OK when RAM seems OK, ERROR when test
+ * fails. WARNING: Do not run this before the 2nd cpu has been initialized
+ * (in a two-core system) or after the heap allocator has taken ownership
+ * of the memory.
+ */
+
+int esp_spiram_test(void)
+{
+  volatile int *spiram = (volatile int *)PRO_DRAM1_START_ADDR;
+
+  /* Set size value to 4 MB which is related to psize argument on
+   * cache_sram_mmu_set() calls. In this SoC, psize is 32 Mbit.
+   */
+
+  size_t s = 4 * 1024 * 1024;
+  size_t p;
+  int errct = 0;
+  int initial_err = -1;
+
+  for (p = 0; p < (s / sizeof(int)); p += 8)
+    {
+      spiram[p] = p ^ 0xaaaaaaaa;
+    }
+
+  for (p = 0; p < (s / sizeof(int)); p += 8)
+    {
+      if (spiram[p] != (p ^ 0xaaaaaaaa))
+        {
+          errct++;
+          if (errct == 1)
+            {
+              initial_err = p * sizeof(int);
+            }
+
+          if (errct < 4)
+            {
+              merr("SPI SRAM error@%p:0x08%" PRIxPTR "/0x08%" PRIxPTR " \n",
+                   &spiram[p], spiram[p],
+                   p ^ 0xaaaaaaaa);
+            }
+        }
+    }
+
+  if (errct != 0)
+    {
+      merr("SPI SRAM memory test fail. %d/%d writes failed, first @ %X\n",
+           errct, s / 32, initial_err + SOC_EXTRAM_DATA_LOW);
+      return ERROR;
+    }
+  else
+    {
+      minfo("SPI SRAM memory test OK!");
+      return OK;
+    }
 }
 
 int esp_spiram_get_chip_size(void)
@@ -411,6 +506,123 @@ void IRAM_ATTR esp_spiram_writeback_cache(void)
       i += psram[x + (1024 * 1024 * 2)];
     }
 #endif
+
+  if (cache_was_disabled & (1 << 0))
+    {
+      while (((getreg32(DPORT_PRO_DCACHE_DBUG0_REG) >>
+              (DPORT_PRO_CACHE_STATE_S)) &
+              (DPORT_PRO_CACHE_STATE)) != 1)
+        {
+        };
+
+      regval  = getreg32(DPORT_PRO_CACHE_CTRL_REG);
+      regval &= ~(1 << DPORT_PRO_CACHE_ENABLE_S);
+      putreg32(regval, DPORT_PRO_CACHE_CTRL_REG);
+    }
+
+#ifdef CONFIG_SMP
+  if (cache_was_disabled & (1 << 1))
+    {
+      while (((getreg32(DPORT_APP_DCACHE_DBUG0_REG) >>
+              (DPORT_APP_CACHE_STATE_S)) &
+              (DPORT_APP_CACHE_STATE)) != 1)
+        {
+        };
+
+      regval  = getreg32(DPORT_APP_CACHE_CTRL_REG);
+      regval &= ~(1 << DPORT_APP_CACHE_ENABLE_S);
+      putreg32(regval, DPORT_APP_CACHE_CTRL_REG);
+    }
+#endif
+}
+
+/****************************************************************************
+ * Name: esp_spiram_writeback_range
+ *
+ * Description:
+ *   Writeback the Cache items (also clean the dirty bit) in the region from
+ *   DCache. If the region is not in DCache addr room, nothing will be done.
+ *
+ * Input Parameters:
+ *   addr - writeback region start address
+ *   size - writeback region size
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_spiram_writeback_range(uint32_t addr, uint32_t size)
+{
+  int x;
+  uint32_t regval;
+  uint32_t start_len;
+  uint32_t end_len;
+  uint32_t start = addr;
+  uint32_t end = addr + size;
+  uint32_t dcache_line_size = 32;
+  volatile int i = 0;
+  volatile uint8_t *psram = (volatile uint8_t *)SOC_EXTRAM_DATA_LOW;
+  int cache_was_disabled = 0;
+
+  if (!spiram_inited)
+    {
+      return;
+    }
+
+  /* We need cache enabled for this to work. Re-enable it if needed; make
+   * sure we disable it again on exit as well.
+   */
+
+  regval = getreg32(DPORT_PRO_CACHE_CTRL_REG);
+
+  if ((regval & DPORT_PRO_CACHE_ENABLE) == 0)
+    {
+      cache_was_disabled |= (1 << 0);
+      regval  = getreg32(DPORT_PRO_CACHE_CTRL_REG);
+      regval |= (1 << DPORT_PRO_CACHE_ENABLE_S);
+      putreg32(regval, DPORT_PRO_CACHE_CTRL_REG);
+    }
+
+#ifdef CONFIG_SMP
+  regval = getreg32(DPORT_APP_CACHE_CTRL_REG);
+
+  if ((regval & DPORT_APP_CACHE_ENABLE) == 0)
+    {
+      cache_was_disabled |= (1 << 1);
+      regval  = getreg32(DPORT_APP_CACHE_CTRL_REG);
+      regval |= 1 << DPORT_APP_CACHE_ENABLE_S;
+      putreg32(regval, DPORT_APP_CACHE_CTRL_REG);
+    }
+#endif
+
+  /* the start address is unaligned */
+
+  if (start & (dcache_line_size -1))
+    {
+      addr = ALIGN_UP_MASK(start, dcache_line_size);
+      start_len = addr - start;
+      size = (size < start_len) ? 0 : (size - start_len);
+      i += psram[start_len];
+    }
+
+  /* the end address is unaligned */
+
+  if ((end & (dcache_line_size -1)) && (size != 0))
+    {
+      end = ALIGN_DOWN_MASK(end, dcache_line_size);
+      end_len = addr + size - end;
+      size = (size - end_len);
+      i += psram[end_len];
+    }
+
+  if (size != 0)
+    {
+      for (x = addr; x < addr + size; x += 32)
+        {
+          i += psram[x];
+        }
+    }
 
   if (cache_was_disabled & (1 << 0))
     {

@@ -1,8 +1,9 @@
 /****************************************************************************
  * arch/x86/src/qemu/qemu_keypad.c
  *
- *   Copyright (C) 2013 Li Zhuoyi. All rights reserved.
- *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2013 Li Zhuoyi. All rights reserved.
+ * SPDX-FileContributor: Li Zhuoyi <lzyy.cn@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

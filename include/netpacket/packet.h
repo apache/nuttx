@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/netpacket/packet.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,27 @@
 #include <stdint.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Valid packet types for sll_pkttype */
+
+#define PACKET_HOST       0   /* To us.  */
+#define PACKET_BROADCAST  1   /* To all.  */
+#define PACKET_MULTICAST  2   /* To group.  */
+#define PACKET_OTHERHOST  3   /* To someone else.  */
+#define PACKET_OUTGOING   4   /* Originated by us . */
+#define PACKET_LOOPBACK   5
+#define PACKET_FASTROUTE  6
+
+/* Packet socket options */
+
+#define PACKET_ADD_MEMBERSHIP  1 /* Add a multicast address to the interface */
+#define PACKET_DROP_MEMBERSHIP 2 /* Drop a multicast address from the interface */
+
+#define PACKET_MR_MULTICAST    0 /* Multicast address */
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -41,6 +64,14 @@ struct sockaddr_ll
   unsigned char  sll_pkttype;
   unsigned char  sll_halen;
   unsigned char  sll_addr[8];
+};
+
+struct packet_mreq
+{
+  int            mr_ifindex;
+  unsigned short mr_type;
+  unsigned short mr_alen;
+  unsigned char  mr_address[8];
 };
 
 #endif /* __INCLUDE_NETPACKET_PACKET_H */

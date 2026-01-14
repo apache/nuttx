@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/usrsock/usrsock_dev.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -488,7 +490,7 @@ int usrsock_request(FAR struct iovec *iov, unsigned int iovcnt)
 
   /* Set outstanding request for daemon to handle. */
 
-  net_mutex_lock(&dev->devlock);
+  usrsock_mutex_timedlock(&dev->devlock, UINT_MAX);
 
   if (usrsockdev_is_opened(dev))
     {

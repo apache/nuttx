@@ -2,6 +2,8 @@
 ST Nucleo F334R8
 ================
 
+.. tags:: chip:stm32, chip:stm32f3, chip:stm32f334
+
 The Nucleo F334R8 is a member of the Nucleo-64 board family.
 
 Configurations

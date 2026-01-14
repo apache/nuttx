@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/sama5/jupiter-nano/include/board_384mhz.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -59,7 +61,7 @@
 
 /* PLLA configuration.
  *
- *   Multipler = 64: PLLACK = 64 * 12MHz = 768MHz
+ *   Multiplier = 64: PLLACK = 64 * 12MHz = 768MHz
  */
 
 #define BOARD_CKGR_PLLAR_COUNT     (63 << PMC_CKGR_PLLAR_COUNT_SHIFT)

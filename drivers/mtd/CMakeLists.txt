@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/mtd/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -15,8 +17,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
 # License for the specific language governing permissions and limitations under
 # the License.
-#
-# ##############################################################################
 #
 # ##############################################################################
 
@@ -56,8 +56,17 @@ if(CONFIG_MTD)
       mtd_nandscheme.c
       mtd_nandmodel.c
       mtd_modeltab.c)
+
     if(CONFIG_MTD_NAND_SWECC)
       list(APPEND SRCS mtd_nandecc.c hamming.c)
+    endif()
+
+    if(CONFIG_MTD_NAND_RAM)
+      list(APPEND SRCS mtd_nandram.c)
+    endif()
+
+    if(CONFIG_MTD_NAND_WRAPPER)
+      list(APPEND SRCS mtd_nandwrapper.c)
     endif()
   endif()
 
@@ -121,8 +130,16 @@ if(CONFIG_MTD)
     list(APPEND SRCS gd25.c)
   endif()
 
+  if(CONFIG_MTD_GD55)
+    list(APPEND SRCS gd55.c)
+  endif()
+
   if(CONFIG_MTD_GD5F)
     list(APPEND SRCS gd5f.c)
+  endif()
+
+  if(CONFIG_MTD_W25N)
+    list(APPEND SRCS w25n.c)
   endif()
 
   if(CONFIG_MTD_AT25)
@@ -163,6 +180,42 @@ if(CONFIG_MTD)
 
   if(CONFIG_MTD_SMART AND CONFIG_FS_SMARTFS)
     list(APPEND SRCS smart.c)
+  endif()
+
+  if(CONFIG_MTD_DHARA)
+    if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/dhara)
+      FetchContent_Declare(
+        dhara
+        URL https://github.com/dlbeer/dhara/archive/refs/heads/master.zip
+            SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/dhara BINARY_DIR
+            ${CMAKE_BINARY_DIR}/drivers/mtd/dhara
+        DOWNLOAD_NO_PROGRESS true)
+      FetchContent_Populate(dhara)
+    endif()
+
+    list(APPEND SRCS dhara.c mtd/dhara/dhara/map.c mtd/dhara/dhara/error.c
+         mtd/dhara/dhara/journal.c)
+    target_include_directories(drivers PRIVATE ${CMAKE_CURRENT_LIST_DIR}/dhara)
+  endif()
+
+  if(CONFIG_MTD_NVBLK)
+    if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/nvblk)
+      FetchContent_Declare(
+        nvblk
+        URL https://github.com/Laczen/nvblk/archive/refs/heads/main.zip
+            SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/nvblk BINARY_DIR
+            ${CMAKE_BINARY_DIR}/drivers/mtd/nvblk
+        DOWNLOAD_NO_PROGRESS true)
+      FetchContent_Populate(nvblk)
+    endif()
+
+    list(APPEND SRCS nvblk.c mtd/nvblk/src/nvblk.c)
+    target_include_directories(drivers PRIVATE ${CMAKE_CURRENT_LIST_DIR}/nvblk)
+  endif()
+
+  if(CONFIG_MTD_CFI)
+    list(APPEND SRCS mtd_cfi.c)
+    list(APPEND SRCS cfi.c)
   endif()
 
   target_sources(drivers PRIVATE ${SRCS})

@@ -2,9 +2,7 @@
  * libs/libc/wchar/lib_wcslcat.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- *
- * Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
- * All rights reserved.
+ * SPDX-FileCopyrightText: 1998 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -28,8 +26,6 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * from OpenBSD: strlcat.c,v 1.3 2000/11/24 11:10:02 itojun Exp
- *
  ****************************************************************************/
 
 /****************************************************************************
@@ -46,27 +42,27 @@
  * Name:  wcslcat
  *
  * Description:
- *     Appends src to string dst of size siz (unlike wcsncat, siz is the
- *     full size of dst, not space left).  At most siz-1 characters
- *     will be copied.  Always NUL terminates (unless siz == 0).
- *     Returns wcslen(initial dst) + wcslen(src); if retval >= siz,
+ *     Appends src to string dst of size "size" (unlike wcsncat, "size"
+ *     is the full size of dst, no space left).  At most size-1 characters
+ *     will be copied.  Always NUL terminates (unless size == 0).
+ *     Returns wcslen(initial dst) + wcslen(src); if retval >= size,
  *     truncation occurred.
  *
  * Input Parameters:
- *   dst - the dest wchar string that contains the concatenated string
- *   src - the source wchar string that we need to concatenate
- *   siz - the max length that can be written to the end of the dst string
+ *   dst  - the dest wchar string that contains the concatenated string
+ *   src  - the source wchar string that we need to concatenate
+ *   size - the max length that can be written to the end of the dst string
  *
  * Returned Value:
  *   The total length of the wchar string that concatenated
  *
  ****************************************************************************/
 
-size_t wcslcat(FAR wchar_t *dst, FAR const wchar_t *src, size_t siz)
+size_t wcslcat(FAR wchar_t *dst, FAR const wchar_t *src, size_t size)
 {
   FAR wchar_t *d = dst;
   FAR const wchar_t *s = src;
-  size_t n = siz;
+  size_t n = size;
   size_t dlen;
 
   /* Find the end of dst and adjust bytes left but don't go past end */
@@ -77,7 +73,7 @@ size_t wcslcat(FAR wchar_t *dst, FAR const wchar_t *src, size_t siz)
     }
 
   dlen = d - dst;
-  n = siz - dlen;
+  n = size - dlen;
 
   if (n == 0)
     {

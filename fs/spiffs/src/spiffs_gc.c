@@ -1,8 +1,8 @@
 /****************************************************************************
  * fs/spiffs/src/spiffs_gc.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2018 Gregory Nutt
  *
  * This is a port of version 0.3.7 of SPIFFS by Peter Andersion.  That
  * version was originally released under the MIT license but is here re-
@@ -160,7 +160,7 @@ static int spiffs_gc_erase_block(FAR struct spiffs_s *fs, int16_t blkndx)
 
 static int spiffs_gc_epage_stats(FAR struct spiffs_s *fs, int16_t blkndx)
 {
-  FAR int16_t *objlu_buf = (int16_t *) fs->lu_work;
+  FAR int16_t *objlu_buf = (FAR int16_t *)fs->lu_work;
   uint32_t dele          = 0;
   uint32_t allo          = 0;
   int entries_per_page   = (SPIFFS_GEO_PAGE_SIZE(fs) / sizeof(int16_t));
@@ -993,7 +993,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
 
 int spiffs_gc_quick(FAR struct spiffs_s *fs, uint16_t max_free_pages)
 {
-  FAR int16_t *objlu_buf  = (int16_t *) fs->lu_work;
+  FAR int16_t *objlu_buf  = (FAR int16_t *)fs->lu_work;
   uint32_t cur_block_addr = 0;
   uint32_t blocks         = SPIFFS_GEO_BLOCK_COUNT(fs);
   int16_t cur_block       = 0;

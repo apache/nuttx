@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/rv32m1/rv32m1_timersvc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -89,7 +91,7 @@ uint32_t rv32m1_timersvc_value(void)
 
   uint64_t value = *(volatile uint64_t *)(RV32M1_TSTMR_BASE);
 
-  /* It is ok to return the ONLY low valud caused the it is accumulated
+  /* It is ok to return ONLY the low value because the it is accumulated
    * outside.
    */
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/can/can_sendmsg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,10 +42,12 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/net/netstats.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
 #include "can/can.h"
 
 #include <sys/time.h>
@@ -75,8 +79,8 @@ struct send_s
  * Name: psock_send_eventhandler
  ****************************************************************************/
 
-static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
-                                        FAR void *pvpriv, uint16_t flags)
+static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
+                                        FAR void *pvpriv, uint32_t flags)
 {
   FAR struct send_s *pstate = pvpriv;
 
@@ -107,8 +111,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           /* Copy the packet data into the device packet buffer and send it */
 
           int ret = devif_send(dev, pstate->snd_buffer,
-                               pstate->snd_buflen, 0);
-          dev->d_len = dev->d_sndlen;
+                               pstate->snd_buflen + pstate->pr_msglen, 0);
+          dev->d_len = dev->d_sndlen - pstate->pr_msglen;
           if (ret <= 0)
             {
               pstate->snd_sent = ret;
@@ -120,7 +124,6 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
             {
               memcpy(dev->d_buf + pstate->snd_buflen, pstate->pr_msgbuf,
                      pstate->pr_msglen);
-              dev->d_sndlen = pstate->snd_buflen + pstate->pr_msglen;
             }
         }
 
@@ -200,7 +203,7 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
     }
 
 #if defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)
-  if (conn->fd_frames)
+  if (_SO_GETOPT(conn->sconn.s_options, CAN_RAW_FD_FRAMES))
     {
       if (msg->msg_iov->iov_len != CANFD_MTU &&
           msg->msg_iov->iov_len != CAN_MTU)
@@ -223,7 +226,7 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
    * because we don't want anything to happen until we are ready.
    */
 
-  net_lock();
+  conn_dev_lock(&conn->sconn, dev);
   memset(&state, 0, sizeof(struct send_s));
   nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
 
@@ -234,7 +237,7 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   if (msg->msg_controllen > sizeof(struct cmsghdr))
     {
       FAR struct cmsghdr *cmsg = CMSG_FIRSTHDR(msg);
-      if (conn->tx_deadline &&
+      if (_SO_GETOPT(conn->sconn.s_options, CAN_RAW_TX_DEADLINE) &&
           cmsg->cmsg_level == SOL_CAN_RAW &&
           cmsg->cmsg_type == CAN_RAW_TX_DEADLINE &&
           cmsg->cmsg_len == sizeof(struct timeval))
@@ -258,19 +261,21 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
       /* Notify the device driver that new TX data is available. */
 
-      netdev_txnotify_dev(dev);
+      netdev_txnotify_dev(dev, CAN_POLL);
 
       /* Wait for the send to complete or an error to occur.
-       * net_sem_timedwait will also terminate if a signal is received.
+       * conn_dev_sem_timedwait will also terminate if a signal is received.
        */
 
       if (_SS_ISNONBLOCK(conn->sconn.s_flags) || (flags & MSG_DONTWAIT) != 0)
         {
-          ret = net_sem_timedwait(&state.snd_sem, 0);
+          ret = conn_dev_sem_timedwait(&state.snd_sem, true, 0,
+                                       &conn->sconn, dev);
         }
       else
         {
-          ret = net_sem_timedwait(&state.snd_sem, UINT_MAX);
+          ret = conn_dev_sem_timedwait(&state.snd_sem, true, UINT_MAX,
+                                       &conn->sconn, dev);
         }
 
       /* Make sure that no further events are processed */
@@ -279,7 +284,7 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
     }
 
   nxsem_destroy(&state.snd_sem);
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, dev);
 
   /* Check for a errors, Errors are signalled by negative errno values
    * for the send length
@@ -290,15 +295,19 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       return state.snd_sent;
     }
 
-  /* If net_sem_wait failed, then we were probably reawakened by a signal.
-   * In this case, net_sem_wait will have returned negated errno
-   * appropriately.
+  /* If conn_dev_sem_timedwait failed, then we were probably reawakened by
+   * a signal. In this case, conn_dev_sem_timedwait will have returned
+   * negated errno appropriately.
    */
 
   if (ret < 0)
     {
       return ret;
     }
+
+#ifdef CONFIG_NET_STATISTICS
+  g_netstats.can.sent++;
+#endif
 
   /* Return the number of bytes actually sent */
 

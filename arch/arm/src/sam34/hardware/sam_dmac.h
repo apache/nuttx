@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sam34/hardware/sam_dmac.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -309,7 +311,7 @@
 #  define DMAC_CHDR_DIS2               (1 << (DMAC_CHDR_DIS_SHIFT+2))
 #  define DMAC_CHDR_DIS3               (1 << (DMAC_CHDR_DIS_SHIFT+3))
 #  define DMAC_CHDR_DIS_ALL            DMAC_CHDR_DIS_MASK
-#define DMAC_CHDR_RES_SHIFT            (8)       /* Bits 8-11:  Resume trasnfer, restoring context */
+#define DMAC_CHDR_RES_SHIFT            (8)       /* Bits 8-11:  Resume transfer, restoring context */
 #define DMAC_CHDR_RES_MASK             (15 << DMAC_CHDR_RES_SHIFT)
 #  define DMAC_CHDR_RES(n)             (1 << (DMAC_CHDR_RES_SHIFT+(n)))
 #  define DMAC_CHDR_RES0               (1 << (DMAC_CHDR_RES_SHIFT+0))

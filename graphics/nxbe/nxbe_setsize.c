@@ -1,6 +1,8 @@
 /****************************************************************************
  * graphics/nxbe/nxbe_setsize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -282,7 +284,7 @@ void nxbe_setsize(FAR struct nxbe_window_s *wnd,
   nxgl_rectunion(&bounds, &bounds, &wnd->bounds);
 
   /* Then redraw this window AND all windows below it. Having resized the
-   * window, we may have exposed previoulsy obscured portions of windows
+   * window, we may have exposed previously obscured portions of windows
    * below this one.
    */
 

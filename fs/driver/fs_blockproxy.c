@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/driver/fs_blockproxy.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,6 +44,7 @@
 #include <nuttx/mutex.h>
 
 #include "driver.h"
+#include "fs_heap.h"
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && \
     !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
@@ -66,19 +69,17 @@ static mutex_t g_devno_lock = NXMUTEX_INITIALIZER;
  *   attempt to open() the file.
  *
  * Input Parameters:
- *   None
+ *   devbuf - Buffer to store the generated device name
+ *   len    - Length of the buffer
  *
  * Returned Value:
- *   The allocated path to the device.  This must be released by the caller
- *   to prevent memory links.  NULL will be returned only the case where
- *   we fail to allocate memory.
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-static FAR char *unique_chardev(void)
+static int unique_chardev(FAR char *devbuf, size_t len)
 {
   struct stat statbuf;
-  char devbuf[16];
   uint32_t devno;
   int ret;
 
@@ -92,7 +93,7 @@ static FAR char *unique_chardev(void)
       if (ret < 0)
         {
           ferr("ERROR: nxmutex_lock failed: %d\n", ret);
-          return NULL;
+          return ret;
         }
 
       /* Get the next device number and release the semaphore */
@@ -103,7 +104,7 @@ static FAR char *unique_chardev(void)
       /* Construct the full device number */
 
       devno &= 0xffffff;
-      snprintf(devbuf, 16, "/dev/tmpc%06lx", (unsigned long)devno);
+      snprintf(devbuf, len, "/dev/tmpc%06lx", (unsigned long)devno);
 
       /* Make sure that file name is not in use */
 
@@ -111,7 +112,7 @@ static FAR char *unique_chardev(void)
       if (ret < 0)
         {
           DEBUGASSERT(ret == -ENOENT);
-          return strdup(devbuf);
+          return OK;
         }
 
       /* It is in use, try again */
@@ -143,44 +144,49 @@ static FAR char *unique_chardev(void)
 
 int block_proxy(FAR struct file *filep, FAR const char *blkdev, int oflags)
 {
-  FAR char *chardev;
-  bool readonly;
+  char chardev[16];
+  struct file temp;
   int ret;
 
   DEBUGASSERT(blkdev);
 
   /* Create a unique temporary file name for the character device */
 
-  chardev = unique_chardev();
-  if (chardev == NULL)
+  ret = unique_chardev(chardev, sizeof(chardev));
+  if (ret != OK)
     {
       ferr("ERROR: Failed to create temporary device name\n");
-      return -ENOMEM;
+      return ret;
     }
-
-  /* Should this character driver be read-only? */
-
-  readonly = ((oflags & O_WROK) == 0);
 
   /* Wrap the block driver with an instance of the BCH driver */
 
-  ret = bchdev_register(blkdev, chardev, readonly);
+  ret = bchdev_register(blkdev, chardev, oflags);
   if (ret < 0)
     {
       ferr("ERROR: bchdev_register(%s, %s) failed: %d\n",
            blkdev, chardev, ret);
-
-      goto errout_with_chardev;
+      return ret;
     }
 
   /* Open the newly created character driver */
 
   oflags &= ~(O_CREAT | O_EXCL | O_APPEND | O_TRUNC);
-  ret = file_open(filep, chardev, oflags);
+  ret = file_open(&temp, chardev, oflags);
   if (ret < 0)
     {
       ferr("ERROR: Failed to open %s: %d\n", chardev, ret);
-      goto errout_with_bchdev;
+      nx_unlink(chardev);
+      return ret;
+    }
+
+  ret = file_dup2(&temp, filep);
+  file_close(&temp);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to dup2%s: %d\n", chardev, ret);
+      nx_unlink(chardev);
+      return ret;
     }
 
   /* Unlink the character device name.  The driver instance will persist,
@@ -192,19 +198,8 @@ int block_proxy(FAR struct file *filep, FAR const char *blkdev, int oflags)
   if (ret < 0)
     {
       ferr("ERROR: Failed to unlink %s: %d\n", chardev, ret);
-      goto errout_with_chardev;
     }
 
-  /* Free the allocated character driver name. */
-
-  lib_free(chardev);
-  return OK;
-
-errout_with_bchdev:
-  nx_unlink(chardev);
-
-errout_with_chardev:
-  lib_free(chardev);
   return ret;
 }
 

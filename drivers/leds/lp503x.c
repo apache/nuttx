@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/leds/lp503x.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -48,7 +50,7 @@
 #endif
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 enum lp503x_state
@@ -417,7 +419,7 @@ static int lp503x_open(struct file *filep)
 
   /* reset and enable the device */
 
-  /* means the device was possibly never regsitered? */
+  /* means the device was possibly never registered? */
 
   if (priv->state == LP503X_STATE_UNINIT)
     {

@@ -2,6 +2,8 @@
 ST STM32G071B-DISCO
 ===================
 
+.. tags:: chip:stm32, chip:stm32g0, chip:stm32g071
+
 This page discusses issues unique to NuttX configurations for the
 STMicro STM32G071B-DISCO development board.  The STM32G071B-DISCO board
 is based on the STM32G071RB MCU (128Kbytes FLASH and 32Kbytes of SRAM).

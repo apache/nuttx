@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/mpu.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,6 +51,14 @@
 #define MPU_ENTRY_AR(access, memtype) \
         (((ENCODE_MEMORY_TYPE(memtype)) << (12)) | \
         (((access) & (0xf)) << (8)))
+
+struct mpu_region_s
+{
+  uintptr_t base;    /* Region Base Address */
+  size_t    size;    /* Unused */
+  uint32_t  acc;     /* Access permissions */
+  uint32_t  memtype; /* memory type */
+};
 
 /****************************************************************************
  *  MPU access rights constants
@@ -185,7 +195,18 @@ extern "C"
  * Name: mpu_allocregion
  *
  * Description:
- *  Allocate the next region
+ *   Allocate the next region
+ *
+ * Assumptions:
+ *   - Regions are never deallocated
+ *   - Regions are only allocated early in initialization, so no special
+ *     protection against re-entrancy is required;
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   The index of the allocated region.
  *
  ****************************************************************************/
 
@@ -197,20 +218,91 @@ unsigned int mpu_allocregion(void);
  * Description:
  *   Configure and enable (or disable) the MPU
  *
+ * Input Parameters:
+ *   enable - Flag indicating whether to enable the MPU.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void mpu_control(bool enable);
 
 /****************************************************************************
+ * Name: mpu_modify_region
+ *
+ * Description:
+ *   Modify a region for privileged, strongly ordered memory
+ *
+ * Input Parameters:
+ *   region  - Region number to modify.
+ *   base    - Base address of the region.
+ *   size    - Unused.
+ *   acc     - A uint32_t value representing the access permissions of
+ *             the region.
+ *   memtype - A uint32_t value representing the memory type of the region.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void mpu_modify_region(unsigned int region, uintptr_t base, size_t size,
+                       uint32_t acc, uint32_t memtype);
+
+/****************************************************************************
  * Name: mpu_configure_region
+ *
+ * Description:
+ *   Configure a region
+ *
+ * Input Parameters:
+ *   base    - Base address of the region.
+ *   size    - Unused.
+ *   acc     - A uint32_t value representing the access permissions of
+ *             the region.
+ *   memtype - A uint32_t value representing the memory type of the region.
+ *
+ * Returned Value:
+ *   The region number allocated for the configured region.
+ *
+ ****************************************************************************/
+
+unsigned int mpu_configure_region(uintptr_t base, size_t size,
+                                  uint32_t acc, uint32_t memtype);
+
+/****************************************************************************
+ * Name: mpu_initialize
  *
  * Description:
  *   Configure a region for privileged, strongly ordered memory
  *
+ * Input Parameters:
+ *   table - MPU initialization table.
+ *   count - Initialize the number of entries in the region table.
+ *
+ * Returned Value:
+ *   NULL.
+ *
  ****************************************************************************/
 
-void mpu_configure_region(uintptr_t base, size_t size,
-                          uint32_t acc, uint32_t memtype);
+void mpu_initialize(const struct mpu_region_s *table, size_t count);
+
+/****************************************************************************
+ * Name: mpu_dump_region
+ *
+ * Description:
+ *   Dump the region that has been used.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void mpu_dump_region(void);
 
 /****************************************************************************
  * Name: mpu_priv_stronglyordered
@@ -221,13 +313,10 @@ void mpu_configure_region(uintptr_t base, size_t size,
  ****************************************************************************/
 
 #define mpu_priv_stronglyordered(base, size) \
-  do \
-    { \
-      /* The configure the region */ \
-      mpu_configure_region(base, size, \
-                          MPU_AR_RWX, \
-                          MPU_MEM_DEVICE); \
-    } while (0)
+  /* The configure the region */ \
+  mpu_configure_region(base, size, \
+                       MPU_AR_RWX, \
+                       MPU_MEM_DEVICE)
 
 /****************************************************************************
  * Name: mpu_user_flash
@@ -238,13 +327,10 @@ void mpu_configure_region(uintptr_t base, size_t size,
  ****************************************************************************/
 
 #define mpu_user_flash(base, size) \
-  do \
-    { \
-      /* The configure the region */ \
-      mpu_configure_region(base, size, \
-                          MPU_AR_RXrx, \
-                          MPU_MEM_WRITEBACK);\
-    } while (0)
+  /* The configure the region */ \
+  mpu_configure_region(base, size, \
+                       MPU_AR_RXrx, \
+                       MPU_MEM_WRITEBACK)
 
 /****************************************************************************
  * Name: mpu_priv_flash
@@ -255,13 +341,10 @@ void mpu_configure_region(uintptr_t base, size_t size,
  ****************************************************************************/
 
 #define mpu_priv_flash(base, size) \
-  do \
-    { \
-      /* The configure the region */   \
-      mpu_configure_region(base, size, \
-                          MPU_AR_RX, \
-                          MPU_MEM_WRITEBACK);\
-    } while (0)
+  /* The configure the region */   \
+  mpu_configure_region(base, size, \
+                       MPU_AR_RX, \
+                       MPU_MEM_WRITEBACK)
 
 /****************************************************************************
  * Name: mpu_user_intsram
@@ -272,13 +355,10 @@ void mpu_configure_region(uintptr_t base, size_t size,
  ****************************************************************************/
 
 #define mpu_user_intsram(base, size) \
-  do \
-    { \
-      /* The configure the region */ \
-      mpu_configure_region(base, size, \
-                          MPU_AR_RWXrwx, \
-                          MPU_MEM_WRITEBACK);\
-    } while (0)
+  /* The configure the region */ \
+  mpu_configure_region(base, size, \
+                       MPU_AR_RWXrwx, \
+                       MPU_MEM_WRITEBACK)
 
 /****************************************************************************
  * Name: mpu_priv_intsram
@@ -289,13 +369,10 @@ void mpu_configure_region(uintptr_t base, size_t size,
  ****************************************************************************/
 
 #define mpu_priv_intsram(base, size) \
-  do \
-    { \
-      /* The configure the region */ \
-      mpu_configure_region(base, size,\
-                          MPU_AR_RWX, \
-                          MPU_MEM_WRITEBACK);\
-    } while (0)
+  /* The configure the region */ \
+  mpu_configure_region(base, size,\
+                       MPU_AR_RWX, \
+                       MPU_MEM_WRITEBACK)
 
 /****************************************************************************
  * Name: mpu_user_extsram
@@ -306,13 +383,10 @@ void mpu_configure_region(uintptr_t base, size_t size,
  ****************************************************************************/
 
 #define mpu_user_extsram(base, size) \
-  do \
-    { \
-      /* The configure the region */ \
-      mpu_configure_region(base, size, \
-                          MPU_AR_RWXrwx, \
-                          MPU_MEM_WRITEBACK);\
-    } while (0)
+  /* The configure the region */ \
+  mpu_configure_region(base, size, \
+                       MPU_AR_RWXrwx, \
+                       MPU_MEM_WRITEBACK)
 
 /****************************************************************************
  * Name: mpu_priv_extsram
@@ -323,13 +397,10 @@ void mpu_configure_region(uintptr_t base, size_t size,
  ****************************************************************************/
 
 #define mpu_priv_extsram(base, size) \
-  do \
-    { \
-      /* The configure the region */ \
-      mpu_configure_region(base, size,  \
-                          MPU_AR_RWX, \
-                          MPU_MEM_WRITEBACK);\
-    } while (0)
+  /* The configure the region */ \
+  mpu_configure_region(base, size,  \
+                       MPU_AR_RWX, \
+                       MPU_MEM_WRITEBACK)
 
 /****************************************************************************
  * Name: mpu_peripheral
@@ -340,13 +411,10 @@ void mpu_configure_region(uintptr_t base, size_t size,
  ****************************************************************************/
 
 #define mpu_peripheral(base, size) \
-  do \
-    { \
-      /* Then configure the region */  \
-      mpu_configure_region(base, size, \
-                          MPU_AR_RW, \
-                          MPU_MEM_DEVICE);\
-    } while (0)
+  /* Then configure the region */  \
+  mpu_configure_region(base, size, \
+                       MPU_AR_RW, \
+                       MPU_MEM_DEVICE)
 
 /****************************************************************************
  * Name: mpu_user_peripheral
@@ -357,13 +425,10 @@ void mpu_configure_region(uintptr_t base, size_t size,
  ****************************************************************************/
 
 #define mpu_user_peripheral(base, size) \
-  do \
-    { \
-      /* Then configure the region */     \
-      mpu_configure_region(base, size,    \
-                          MPU_AR_RWrw,  \
-                          MPU_MEM_DEVICE);\
-    } while (0)
+  /* Then configure the region */     \
+  mpu_configure_region(base, size,    \
+                       MPU_AR_RWrw,  \
+                       MPU_MEM_DEVICE)
 
 #undef EXTERN
 #if defined(__cplusplus)

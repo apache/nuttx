@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -14,7 +16,7 @@
 # under the License.
 
 FROM ubuntu:22.04 AS builder-base
-# NOTE WE ARE NOT REMOVEING APT CACHE.
+# NOTE WE ARE NOT REMOVING APT CACHE.
 # This should only be used for temp build images that artifacts will be copied from
 RUN apt-get update -qq && apt-get install -y -qq \
   curl \
@@ -40,24 +42,58 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   ninja-build \
   nodejs \
   npm \
-  unzip
+  unzip \
+  zip \
+  python3
 
-RUN mkdir /tools
+RUN mkdir -p /tools
 WORKDIR /tools
 
 RUN mkdir -p /tools/nuttx-tools
 RUN curl -s -L https://bitbucket.org/nuttx/tools/get/9ad3e1ee75c7.tar.gz \
   | tar -C nuttx-tools --strip-components=1 -xz
 
-RUN mkdir bloaty -p \
-  && git clone --depth 1 --branch v1.1 https://github.com/google/bloaty bloaty \
-  && cd bloaty \
-  && cmake -DCMAKE_SYSTEM_PREFIX_PATH=/tools/bloaty \
-  && make install
+RUN mkdir -p /tools/bloaty \
+  && git clone --depth 1 --branch v1.1 https://github.com/google/bloaty bloaty-src \
+  && cd bloaty-src \
+  && cmake -B build -DCMAKE_INSTALL_PREFIX=/tools/bloaty \
+  && cmake --build build \
+  && cmake --build build --target install \
+  && cd /tools && rm -rf bloaty-src
 
 RUN cd nuttx-tools/kconfig-frontends \
   && ./configure --enable-mconf --disable-gconf --disable-qconf --enable-static --prefix=/tools/kconfig-frontends \
-  && make install
+  && make install && cd /tools && rm -rf nuttx-tools
+
+RUN mkdir -p /tools/gn \
+  && cd /tools/gn \
+  && git clone https://gn.googlesource.com/gn gn \
+  && cd gn \
+  && git checkout 5d0a4153b0bcc86c5a23310d5b648a587be3c56d \
+  && python3 build/gen.py \
+  && ninja -C out
+
+# Upgrade nodejs to the stable version we need before install zap
+RUN npm install -g n && n 20.10.0 node && hash -r
+
+ENV ZAP_INSTALL_PATH=/tools/zap_release
+RUN mkdir -p $ZAP_INSTALL_PATH \
+  && cd $ZAP_INSTALL_PATH \
+  && curl -s -O -L https://github.com/project-chip/zap/releases/download/v2023.10.09-nightly/zap-linux-x64.zip \
+  && unzip zap-linux-x64.zip \
+  && rm zap-linux-x64.zip
+
+ENV ZAP_DEVELOPMENT_PATH=/tools/zap
+RUN cd /tools \
+  && curl -s -O -L https://github.com/project-chip/zap/archive/refs/tags/v2023.10.09-nightly.zip \
+  && unzip v2023.10.09-nightly.zip \
+  && mv zap-2023.10.09-nightly zap \
+  && rm v2023.10.09-nightly.zip \
+  && cd zap && npm install cross-spawn folder-hash
+
+#########################
+# Programming languages
+#########################
 
 # Install Rust and targets supported from NuttX
 ENV RUST_HOME=/tools/rust
@@ -66,24 +102,35 @@ ENV RUSTUP_HOME=$RUST_HOME/rustup
 RUN mkdir -p $CARGO_HOME \
   && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
   && $CARGO_HOME/bin/rustup target add thumbv6m-none-eabi \
-  && $CARGO_HOME/bin/rustup target add thumbv7m-none-eabi
+  && $CARGO_HOME/bin/rustup target add thumbv7m-none-eabi \
+  && $CARGO_HOME/bin/rustup target add riscv64gc-unknown-none-elf
 
-RUN mkdir /tools/gn -p \
-  && cd /tools/gn \
-  && git clone https://gn.googlesource.com/gn gn \
-  && cd gn && ./build/gen.py && cd out && ninja
+# Install Swift
+# ENV SWIFT_VERSION=6.0-DEVELOPMENT-SNAPSHOT-2024-08-22-a
+# ENV SWIFT_HOME=/tools/swift
+# RUN mkdir -p ${SWIFT_HOME} \
+#  && curl -s -O -L https://download.swift.org/swift-6.0-branch/ubuntu2204/swift-${SWIFT_VERSION}/swift-${SWIFT_VERSION}-ubuntu22.04.tar.gz \
+#  && tar xzf swift-${SWIFT_VERSION}-ubuntu22.04.tar.gz -C ${SWIFT_HOME} \
+#  && rm swift-${SWIFT_VERSION}-ubuntu22.04.tar.gz
 
-ENV ZAP_INSTALL_PATH=/tools/zap_release
-RUN mkdir $ZAP_INSTALL_PATH -p \
-  && cd $ZAP_INSTALL_PATH \
-  && curl -s -O -L https://github.com/project-chip/zap/releases/download/v2023.10.09-nightly/zap-linux-x64.zip \
-  && unzip zap-linux-x64.zip
+# Install Zig latest release
+ENV ZIG_VERSION=0.13.0
+ENV ZIG_HOME=/tools/zig
+RUN mkdir -p ${ZIG_HOME} \
+  && curl -s -O -L https://github.com/marler8997/zigup/releases/download/v2024_05_05/zigup-x86_64-linux.tar.gz \
+  && tar xzf zigup-x86_64-linux.tar.gz -C ${ZIG_HOME} \
+  && rm zigup-x86_64-linux.tar.gz \
+  && chmod +x ${ZIG_HOME}/zigup \
+  && ${ZIG_HOME}/zigup fetch --install-dir ${ZIG_HOME} ${ZIG_VERSION} \
+  && chmod +x ${ZIG_HOME}/${ZIG_VERSION}/files/zig
 
-ENV ZAP_DEVELOPMENT_PATH=/tools/zap
-RUN cd /tools \
-  && curl -s -O -L https://github.com/project-chip/zap/archive/refs/tags/v2023.10.09-nightly.zip \
-  && unzip v2023.10.09-nightly.zip && mv zap-2023.10.09-nightly zap \
-  && cd zap && npm install cross-spawn folder-hash
+# Install LDC2 latest release
+ENV LDC_VERSION=1.39.0
+ENV D_HOME=/tools/ldc2
+RUN mkdir -p ${D_HOME} \
+  && curl -s -O -L https://github.com/ldc-developers/ldc/releases/download/v${LDC_VERSION}/ldc2-${LDC_VERSION}-linux-x86_64.tar.xz \
+  && tar xf ldc2-${LDC_VERSION}-linux-x86_64.tar.xz -C ${D_HOME} \
+  && rm ldc2-${LDC_VERSION}-linux-x86_64.tar.xz
 
 CMD [ "/bin/bash" ]
 
@@ -92,7 +139,7 @@ CMD [ "/bin/bash" ]
 ###############################################################################
 FROM builder-base AS nuttx-toolchain-base
 
-RUN mkdir /tools
+RUN mkdir -p /tools
 WORKDIR /tools
 
 ###############################################################################
@@ -100,12 +147,12 @@ WORKDIR /tools
 ###############################################################################
 FROM nuttx-toolchain-base AS nuttx-toolchain-arm
 # Download the latest ARM clang toolchain prebuilt by ARM
-RUN mkdir clang-arm-none-eabi && \
+RUN mkdir -p clang-arm-none-eabi && \
   curl -s -L  "https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-17.0.1/LLVMEmbeddedToolchainForArm-17.0.1-Linux-x86_64.tar.xz" \
   | tar -C clang-arm-none-eabi --strip-components 1 -xJ
 
 # Download the latest ARM GCC toolchain prebuilt by ARM
-RUN mkdir gcc-arm-none-eabi && \
+RUN mkdir -p gcc-arm-none-eabi && \
   curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi.tar.xz" \
   | tar -C gcc-arm-none-eabi --strip-components 1 -xJ
 
@@ -135,7 +182,7 @@ RUN mkdir -p gcc-avr32-gnu && \
 FROM nuttx-toolchain-base AS nuttx-toolchain-pinguino
 # Download the pinguino compilers. Note this includes both 8bit and 32bit
 # toolchains and builds for multiple host systems. Only copy what is needed.
-RUN mkdir pinguino-compilers && \
+RUN mkdir -p pinguino-compilers && \
   curl -s -L "https://github.com/PinguinoIDE/pinguino-compilers/archive/62db5158d7f6d41c6fadb05de81cc31dd81a1958.tar.gz" \
   | tar -C pinguino-compilers --strip-components=2 --wildcards -xz */linux64
 
@@ -195,15 +242,15 @@ RUN cd renesas-tools/source/newlib && \
   /tools/renesas-tools/source/newlib/configure --target=rx-elf --prefix=/tools/renesas-toolchain/rx-elf-gcc && \
   make && make install
 RUN cd /tools/renesas-tools/build/gcc && \
-  make && make install
+  make && make install && cd /tools && rm -rf renesas-tools
 
 ###############################################################################
 # Build image for tool required by RISCV builds
 ###############################################################################
 FROM nuttx-toolchain-base AS nuttx-toolchain-riscv
 # Download the latest RISCV GCC toolchain prebuilt by xPack
-RUN mkdir riscv-none-elf-gcc && \
-  curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/xpack-riscv-none-elf-gcc-13.2.0-2-linux-x64.tar.gz" \
+RUN mkdir -p riscv-none-elf-gcc && \
+  curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v14.2.0-3/xpack-riscv-none-elf-gcc-14.2.0-3-linux-x64.tar.gz" \
   | tar -C riscv-none-elf-gcc --strip-components 1 -xz
 
 ###############################################################################
@@ -211,7 +258,7 @@ RUN mkdir riscv-none-elf-gcc && \
 ###############################################################################
 FROM nuttx-toolchain-base AS nuttx-toolchain-sparc
 # Download the SPARC GCC toolchain prebuilt by Gaisler
-RUN mkdir sparc-gaisler-elf-gcc && \
+RUN mkdir -p sparc-gaisler-elf-gcc && \
   curl -s -L "https://www.gaisler.com/anonftp/bcc2/bin/bcc-2.1.0-gcc-linux64.tar.xz" \
   | tar -C sparc-gaisler-elf-gcc --strip-components 1 -xJ
 
@@ -219,18 +266,10 @@ RUN mkdir sparc-gaisler-elf-gcc && \
 # Build image for tool required by ESP32 builds
 ###############################################################################
 FROM nuttx-toolchain-base AS nuttx-toolchain-esp32
-# Download the latest ESP32 GCC toolchain prebuilt by Espressif
-RUN mkdir -p xtensa-esp32-elf-gcc && \
-  curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz" \
-  | tar -C xtensa-esp32-elf-gcc --strip-components 1 -xJ
-
-RUN mkdir -p xtensa-esp32s2-elf-gcc && \
-  curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32s2-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz" \
-  | tar -C xtensa-esp32s2-elf-gcc --strip-components 1 -xJ
-
-RUN mkdir -p xtensa-esp32s3-elf-gcc && \
-  curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32s3-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz" \
-  | tar -C xtensa-esp32s3-elf-gcc --strip-components 1 -xJ
+# Download the latest ESP32, ESP32-S2 and ESP32-S3 GCC toolchain prebuilt by Espressif
+RUN mkdir -p xtensa-esp-elf-gcc && \
+  curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-14.2.0_20241119/xtensa-esp-elf-14.2.0_20241119-x86_64-linux-gnu.tar.xz" \
+  | tar -C xtensa-esp-elf-gcc --strip-components 1 -xJ
 
 RUN echo "ESP Binaries: 2022/01/26"
 RUN mkdir -p /tools/blobs && cd /tools/blobs \
@@ -248,14 +287,32 @@ RUN mkdir -p /tools/blobs && cd /tools/blobs \
 ###############################################################################
 FROM nuttx-toolchain-base AS nuttx-toolchain-wasm
 # Download the latest WASI-enabled WebAssembly C/C++ toolchain prebuilt by WASM
-RUN mkdir wasi-sdk && \
+RUN mkdir -p wasi-sdk && \
   curl -s -L  "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-19/wasi-sdk-19.0-linux.tar.gz" \
   | tar -C wasi-sdk --strip-components 1 -xz
 
 # Download the latest "wamrc" AOT compiler prebuilt by WAMR
-RUN mkdir wamrc && \
+RUN mkdir -p wamrc && \
   curl -s -L  "https://github.com/bytecodealliance/wasm-micro-runtime/releases/download/WAMR-1.1.2/wamrc-1.1.2-x86_64-ubuntu-20.04.tar.gz" \
   | tar -C wamrc -xz
+
+###############################################################################
+# Build image for tool required by Raspberry Pi pico-sdk builds
+###############################################################################
+FROM nuttx-toolchain-base AS nuttx-toolchain-raspberrypi-pico-sdk
+# Download the latest pico-sdk source archive
+RUN mkdir -p pico-sdk && \
+  curl -s -L "https://github.com/raspberrypi/pico-sdk/releases/download/2.2.0/pico-sdk-2.2.0.tar.gz" \
+  | tar -C pico-sdk --strip-components 1 -xz
+
+###############################################################################
+# Build image for tool required by Raspberry Pi picotool builds
+###############################################################################
+FROM nuttx-toolchain-base AS nuttx-toolchain-raspberrypi-picotool
+# Download the prebuilt Raspberry Pi picotool
+RUN mkdir -p picotool && \
+  curl -s -L "https://github.com/raspberrypi/pico-sdk-tools/releases/download/v2.2.0-0/picotool-2.2.0-x86_64-lin.tar.gz" \
+  | tar -C picotool --strip-components 1 -xz
 
 ###############################################################################
 # Final Docker image used for running CI system.  This includes all toolchains
@@ -271,9 +328,9 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   libssl-dev
 
 RUN mkdir -p cmake && \
-  curl -s -L wget https://cmake.org/files/v3.26/cmake-3.26.0.tar.gz \
-  | tar -C cmake --strip-components=1 -xz && \
-  cd cmake && ./bootstrap && make && make install && rm -rf cmake
+  curl -s -L https://cmake.org/files/v3.26/cmake-3.26.0.tar.gz \
+  | tar -C cmake --strip-components=1 -xz \
+  && cd cmake && ./bootstrap && make && make install && rm -rf cmake
 
 RUN dpkg --add-architecture i386
 # This is used for the final images so make sure to not store apt cache
@@ -318,7 +375,9 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" TZ=Etc/UTC apt-get in
   wget \
   xxd \
   file \
+  subversion \
   tclsh \
+  zip \
   && rm -rf /var/lib/apt/lists/*
 
 # Set GCC-12 as Default compiler
@@ -346,6 +405,7 @@ RUN pip3 install cmake-format
 RUN pip3 install cvt2utf
 # Install pytest
 RUN pip3 install cxxfilt
+RUN pip3 install construct
 RUN pip3 install esptool==4.8.dev4
 RUN pip3 install imgtool
 RUN pip3 install kconfiglib
@@ -362,17 +422,18 @@ RUN pip3 install stringcase
 RUN pip3 install jinja2
 RUN pip3 install coloredlogs
 
-# Upgrade nodejs to the latest version
-RUN npm install -g n && n stable && hash -r
+# Upgrade nodejs to the stable version we need
+RUN npm install -g n && n 20.10.0 node && hash -r
 
 # Used to generate symbol table files
 
-RUN mkdir /tools
+RUN mkdir -p /tools
 WORKDIR /tools
 
 # Pull in the tools we just built for nuttx
 COPY --from=nuttx-tools /tools/bloaty/ bloaty/
 ENV PATH="/tools/bloaty/bin:$PATH"
+
 COPY --from=nuttx-tools /tools/kconfig-frontends/ kconfig-frontends/
 ENV PATH="/tools/kconfig-frontends/bin:$PATH"
 
@@ -382,11 +443,24 @@ ENV CARGO_HOME=/tools/rust/cargo
 ENV RUSTUP_HOME=/tools/rust/rustup
 ENV PATH="/tools/rust/cargo/bin:$PATH"
 
-# ARM toolchain
+# Pull in the Zig v0.13.0 toolchain
+COPY --from=nuttx-tools /tools/zig/ /tools/zig/
+ENV PATH="/tools/zig/0.13.0/files:$PATH"
+
+# Pull in the ldc2 1.39.0 toolchain
+COPY --from=nuttx-tools /tools/ldc2/ /tools/ldc2/
+ENV PATH="/tools/ldc2/ldc2-1.39.0-linux-x86_64/bin:$PATH"
+
+# Pull in the swift 6.0 toolchain
+# COPY --from=nuttx-tools /tools/swift/ /tools/swift/
+# ENV PATH="/tools/swift/swift-6.0-DEVELOPMENT-SNAPSHOT-2024-08-22-a/usr/bin:$PATH"
+
+# ARM clang toolchain
 COPY --from=nuttx-toolchain-arm /tools/clang-arm-none-eabi/ clang-arm-none-eabi/
 # RUN cp /usr/bin/clang-extdef-mapping-10 clang-arm-none-eabi/bin/clang-extdef-mapping
 ENV PATH="/tools/clang-arm-none-eabi/bin:$PATH"
 
+# ARM GCC toolchain
 COPY --from=nuttx-toolchain-arm /tools/gcc-arm-none-eabi/ gcc-arm-none-eabi/
 ENV PATH="/tools/gcc-arm-none-eabi/bin:$PATH"
 
@@ -414,17 +488,9 @@ ENV PATH="/tools/riscv-none-elf-gcc/bin:$PATH"
 COPY --from=nuttx-toolchain-sparc /tools/sparc-gaisler-elf-gcc/ sparc-gaisler-elf-gcc/
 ENV PATH="/tools/sparc-gaisler-elf-gcc/bin:$PATH"
 
-# ESP32 toolchain
-COPY --from=nuttx-toolchain-esp32 /tools/xtensa-esp32-elf-gcc/ xtensa-esp32-elf-gcc/
-ENV PATH="/tools/xtensa-esp32-elf-gcc/bin:$PATH"
-
-# ESP32-S2 toolchain
-COPY --from=nuttx-toolchain-esp32 /tools/xtensa-esp32s2-elf-gcc/ xtensa-esp32s2-elf-gcc/
-ENV PATH="/tools/xtensa-esp32s2-elf-gcc/bin:$PATH"
-
-# ESP32-S3 toolchain
-COPY --from=nuttx-toolchain-esp32 /tools/xtensa-esp32s3-elf-gcc/ xtensa-esp32s3-elf-gcc/
-ENV PATH="/tools/xtensa-esp32s3-elf-gcc/bin:$PATH"
+# ESP32, ESP32-S2, ESP32-S3 toolchain
+COPY --from=nuttx-toolchain-esp32 /tools/xtensa-esp-elf-gcc/ xtensa-esp-elf-gcc/
+ENV PATH="/tools/xtensa-esp-elf-gcc/bin:$PATH"
 
 RUN mkdir -p /tools/blobs/esp-bins
 COPY --from=nuttx-toolchain-esp32 /tools/blobs/* /tools/blobs/esp-bins/
@@ -433,6 +499,15 @@ COPY --from=nuttx-toolchain-esp32 /tools/blobs/* /tools/blobs/esp-bins/
 COPY --from=nuttx-toolchain-wasm /tools/wasi-sdk/ wasi-sdk/
 ENV WASI_SDK_PATH="/tools/wasi-sdk"
 ENV PATH="/tools/wamr:$PATH"
+COPY --from=nuttx-toolchain-esp32 /tools/blobs/* /tools/blobs/esp-bins/
+
+# Raspberry Pi pico-sdk source
+COPY --from=nuttx-toolchain-raspberrypi-pico-sdk /tools/pico-sdk/ pico-sdk/
+ENV PICO_SDK_PATH="/tools/pico-sdk"
+
+# Raspberry Pi picotool
+COPY --from=nuttx-toolchain-raspberrypi-picotool /tools/picotool/ picotool/
+ENV PATH="/tools/picotool:$PATH"
 
 # gn tool
 RUN mkdir -p /tools/gn
@@ -446,7 +521,10 @@ ENV ZAP_INSTALL_PATH=/tools/zap_release
 ENV ZAP_DEVELOPMENT_PATH=/tools/zap
 
 # Configure ccache
-RUN mkdir -p /tools/ccache/bin && \
+# use `/ccache` as cachedir for all users
+RUN mkdir -p /ccache && \
+  chmod 666 /ccache && \
+  mkdir -p /tools/ccache/bin && \
   ln -sf `which ccache` /tools/ccache/bin/aarch64-none-elf-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/aarch64-none-elf-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/arm-none-eabi-gcc && \
@@ -473,6 +551,8 @@ RUN mkdir -p /tools/ccache/bin && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32s2-elf-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32s3-elf-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32s3-elf-g++
+
 ENV PATH="/tools/ccache/bin:$PATH"
+ENV CCACHE_DIR="/ccache"
 
 CMD [ "/bin/bash" ]

@@ -1,6 +1,8 @@
 /****************************************************************************
  * audio/audio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -64,7 +66,7 @@
 #endif
 
 /****************************************************************************
- * Private Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /* This structure describes the state of the upper half driver */
@@ -238,7 +240,7 @@ errout:
  * Name: audio_read
  *
  * Description:
- *   A dummy read method.  This is provided only to satsify the VFS layer.
+ *   A dummy read method.  This is provided only to satisfy the VFS layer.
  *
  ****************************************************************************/
 
@@ -266,7 +268,7 @@ static ssize_t audio_read(FAR struct file *filep,
  * Name: audio_write
  *
  * Description:
- *   A dummy write method.  This is provided only to satsify the VFS layer.
+ *   A dummy write method.  This is provided only to satisfy the VFS layer.
  *
  ****************************************************************************/
 
@@ -588,7 +590,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           audinfo("AUDIOIOC_REGISTERMQ\n");
 
-          ret = fs_getfilep((mqd_t)arg, &upper->usermq);
+          ret = file_get((mqd_t)arg, &upper->usermq);
         }
         break;
 
@@ -601,6 +603,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           audinfo("AUDIOIOC_UNREGISTERMQ\n");
 
+          file_put(upper->usermq);
           upper->usermq = NULL;
           ret = OK;
         }
@@ -684,7 +687,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Input Parameters:
  *   handle - This is the handle that was provided to the lower-half
  *     start() method.
- *   apb - A pointer to the previsously enqueued ap_buffer_s
+ *   apb - A pointer to the previously enqueued ap_buffer_s
  *   status - Status of the dequeue operation
  *
  * Returned Value:
@@ -748,7 +751,6 @@ static inline void audio_complete(FAR struct audio_upperhalf_s *upper,
 
   /* Send a dequeue message to the user if a message queue is registered */
 
-  upper->started = false;
   if (upper->usermq != NULL)
     {
       msg.msg_id = AUDIO_MSG_COMPLETE;
@@ -795,6 +797,80 @@ static inline void audio_message(FAR struct audio_upperhalf_s *upper,
 }
 
 /****************************************************************************
+ * Name: audio_ioerr
+ *
+ * Description:
+ *   Send an AUDIO_MSG_IOERR message to the client to indicate that
+ *   audio driver have io error.  The lower-half driver initiates this
+ *   call via its callback pointer to our upper-half driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static inline void audio_ioerr(FAR struct audio_upperhalf_s *upper,
+                    FAR struct ap_buffer_s *apb, uint16_t status,
+                    FAR void *session)
+#else
+static inline void audio_ioerr(FAR struct audio_upperhalf_s *upper,
+                    FAR struct ap_buffer_s *apb, uint16_t status)
+#endif
+{
+  struct audio_msg_s msg;
+
+  audinfo("Entry\n");
+
+  /* Send io error message to the user if a message queue is registered */
+
+  if (upper->usermq != NULL)
+    {
+      msg.msg_id = AUDIO_MSG_IOERR;
+      msg.u.data = status;
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      msg.session = session;
+#endif
+      file_mq_send(upper->usermq, (FAR const char *)&msg, sizeof(msg),
+                   CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
+    }
+}
+
+/****************************************************************************
+ * Name: audio_underrun
+ *
+ * Description:
+ *   Send an AUDIO_MSG_UNDERRUN message to the client to indicate that the
+ *   active playback is underrun.  The lower-half driver initiates this
+ *   call via its callback pointer to our upper-half driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static inline void audio_underrun(FAR struct audio_upperhalf_s *upper,
+                    FAR struct ap_buffer_s *apb, uint16_t status,
+                    FAR void *session)
+#else
+static inline void audio_underrun(FAR struct audio_upperhalf_s *upper,
+                    FAR struct ap_buffer_s *apb, uint16_t status)
+#endif
+{
+  struct audio_msg_s    msg;
+
+  audinfo("Entry\n");
+
+  /* Send a dequeue message to the user if a message queue is registered */
+
+  if (upper->usermq != NULL)
+    {
+      msg.msg_id = AUDIO_MSG_UNDERRUN;
+      msg.u.ptr = NULL;
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      msg.session = session;
+#endif
+      file_mq_send(upper->usermq, (FAR const char *)&msg, sizeof(msg),
+                   CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
+    }
+}
+
+/****************************************************************************
  * Name: audio_callback
  *
  * Description:
@@ -804,7 +880,7 @@ static inline void audio_message(FAR struct audio_upperhalf_s *upper,
  * Input Parameters:
  *   priv - Private context data owned by the upper-half
  *   reason - The reason code for the callback
- *   apb - A pointer to the previsously enqueued ap_buffer_s
+ *   apb - A pointer to the previously enqueued ap_buffer_s
  *   status - Status information associated with the callback
  *
  * Returned Value:
@@ -849,6 +925,11 @@ static void audio_callback(FAR void *handle, uint16_t reason,
 
       case AUDIO_CALLBACK_IOERR:
         {
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+          audio_ioerr(upper, apb, status, session);
+#else
+          audio_ioerr(upper, apb, status);
+#endif
         }
         break;
 
@@ -874,6 +955,17 @@ static void audio_callback(FAR void *handle, uint16_t reason,
           audio_message(upper, apb, status, session);
 #else
           audio_message(upper, apb, status);
+#endif
+        }
+        break;
+
+      case AUDIO_CALLBACK_UNDERRUN:
+        {
+          /* send underrun status */
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+          audio_underrun(upper, apb, status, session);
+#else
+          audio_underrun(upper, apb, status);
 #endif
         }
         break;

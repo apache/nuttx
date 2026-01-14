@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/esp32c3_wlan.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1261,7 +1263,7 @@ static int esp32c3_net_initialize(int devno, uint8_t *mac_addr,
  *
  * Description:
  *   Wi-Fi station RX done callback function. If this is called, it means
- *   station receiveing packet.
+ *   station receiving packet.
  *
  * Input Parameters:
  *   buffer - Wi-Fi received packet buffer
@@ -1312,7 +1314,7 @@ static void wlan_sta_tx_done(uint8_t *data, uint16_t *len, bool status)
  *
  * Description:
  *   Wi-Fi softAP RX done callback function. If this is called, it means
- *   softAP receiveing packet.
+ *   softAP receiving packet.
  *
  * Input Parameters:
  *   buffer - Wi-Fi received packet buffer

@@ -1,6 +1,8 @@
 ############################################################################
 # arch/sim/src/Makefile
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -18,7 +20,7 @@
 #
 ############################################################################
 
-include $(TOPDIR)/tools/apps-or-nuttx-Make.defs
+include $(TOPDIR)/tools/Make.defs
 
 ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
 APPSDIR     = $(TOPDIR)$(DELIM)$(CONFIG_APPS_DIR)
@@ -33,6 +35,14 @@ endif
 
 ifeq ($(CONFIG_VIDEOUTILS_LIBX264),y)
 INCLUDES += ${INCDIR_PREFIX}$(APPSDIR)/videoutils/x264/x264
+endif
+
+ifeq ($(CONFIG_VIDEOUTILS_LIBMAD),y)
+INCLUDES += ${INCDIR_PREFIX}$(APPSDIR)/audioutils/libmad/libmad
+endif
+
+ifeq ($(CONFIG_VIDEOUTILS_LAME),y)
+INCLUDES += ${INCDIR_PREFIX}$(APPSDIR)/audioutils/lame/lame
 endif
 
 CPPFLAGS += $(INCLUDES)
@@ -73,7 +83,7 @@ CSRCS  = sim_initialize.c sim_idle.c sim_doirq.c sim_initialstate.c
 CSRCS += sim_createstack.c sim_usestack.c sim_releasestack.c sim_stackframe.c
 CSRCS += sim_exit.c sim_schedulesigaction.c sim_switchcontext.c sim_heap.c
 CSRCS += sim_uart.c sim_copyfullstate.c sim_sigdeliver.c sim_tcbinfo.c sim_cpuinfo.c
-CSRCS += sim_registerdump.c sim_saveusercontext.c sim_textheap.c
+CSRCS += sim_registerdump.c sim_saveusercontext.c sim_sectionheap.c
 CSRCS += sim_checkhostfstypes.c
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
@@ -94,7 +104,7 @@ DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 
 CFLAGS += -fvisibility=default
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-   $(ARCHCFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ -pipe \
+   $(ARCHCFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ \
    -fvisibility=default
 
 HOSTCFLAGS += ${INCDIR_PREFIX}$(ARCH_SRCDIR)
@@ -108,7 +118,7 @@ ifeq ($(CONFIG_FS_LARGEFILE),y)
 endif
 
 HOSTSRCS  = sim_hostirq.c sim_hostmemory.c sim_hostmisc.c sim_hosttime.c sim_hostuart.c
-HOSTSRCS += sim_hostfs.c
+HOSTSRCS += sim_hostfs.c sim_errno.c
 
 hostfs.h: $(TOPDIR)/include/nuttx/fs/hostfs.h
 	@echo "CP:  $<"
@@ -123,6 +133,13 @@ ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
   # the place in the object list for linking. Namely, its constructor
   # should be the first one in the executable.
   HEADSRC = sim_macho_init.c
+
+  # sim_macho_init.c is not compatible with chained fixups.
+  # cf. https://github.com/apache/nuttx/issues/15208
+  ifeq ($(shell $(LD) -ld_classic -no_fixup_chains 2>&1 | grep "unknown option"),)
+    LDLINKFLAGS += -ld_classic -no_fixup_chains
+    LDFLAGS += -Wl,-ld_classic,-no_fixup_chains
+  endif
 endif
 else
   STDLIBS += -lrt
@@ -132,7 +149,7 @@ ifeq ($(CONFIG_LIBM_TOOLCHAIN),y)
   STDLIBS += -lm
 endif
 
-ifeq ($(CONFIG_ARCH_COVERAGE),y)
+ifeq ($(CONFIG_COVERAGE_TOOLCHAIN),y)
   STDLIBS += -lgcov
 endif
 
@@ -146,6 +163,9 @@ endif
 
 ifeq ($(CONFIG_SMP),y)
   CSRCS += sim_smpsignal.c sim_cpuidlestack.c
+endif
+
+ifeq ($(CONFIG_ARCH_HAVE_MULTICPU),y)
   HOSTSRCS += sim_hostsmp.c
 endif
 
@@ -189,8 +209,9 @@ ifeq ($(CONFIG_FS_FAT),y)
   STDLIBS += -lz
 endif
 
-ifneq ($(CONFIG_SIM_WIFIDEV_NUMBER),0)
+ifeq ($(CONFIG_SIM_WIFIDEV_HOST),y)
   CFLAGS += -DTOPDIR=\"$(TOPDIR)\"
+  CSRCS += sim_wifihost.c
 endif
 
 ifeq ($(CONFIG_SIM_NETDEV_TAP),y)
@@ -226,6 +247,11 @@ ifeq ($(CONFIG_SIM_SPI_LINUX),y)
   HOSTSRCS += sim_linuxspi.c
 endif
 
+ifeq ($(CONFIG_SIM_GPIOCHIP_LINUX),y)
+  HOSTSRCS += sim_linux_gpiochip.c
+  CSRCS += sim_gpiochip.c
+endif
+
 ifeq ($(CONFIG_SIM_USB_DEV),y)
   CSRCS += sim_usbdev.c
 ifeq ($(CONFIG_SIM_USB_RAW_GADGET),y)
@@ -241,6 +267,26 @@ ifeq ($(CONFIG_SIM_LIBUSB),y)
 endif
 endif
 
+ifeq ($(CONFIG_SIM_CANDEV),y)
+  HOSTSRCS += sim_hostcan.c
+endif
+
+ifeq ($(CONFIG_SIM_CANDEV_CHAR),y)
+  CSRCS += sim_canchar.c
+endif
+
+ifeq ($(CONFIG_SIM_CANDEV_SOCK),y)
+  CSRCS += sim_cansock.c
+endif
+
+ifeq ($(CONFIG_RPMSG_VIRTIO_LITE),y)
+  CSRCS += sim_rpmsg_virtio.c
+endif
+
+ifeq ($(CONFIG_RPMSG_PORT_UART),y)
+  CSRCS += sim_rpmsg_port_uart.c
+endif
+
 ifeq ($(CONFIG_RPTUN),y)
   CSRCS += sim_rptun.c
 endif
@@ -249,8 +295,6 @@ ifeq ($(CONFIG_SIM_SOUND_ALSA),y)
   CSRCS += sim_alsa.c
   CSRCS += sim_offload.c
   STDLIBS += -lasound
-  STDLIBS += -lmad
-  STDLIBS += -lmp3lame
 endif
 
 ifeq ($(CONFIG_SIM_CAMERA_V4L2),y)
@@ -389,7 +433,7 @@ define LINK_ALLSYMS_KASAN
 		$(Q) $(call COMPILE, allsyms.tmp, allsyms$(OBJEXT), -x c)
 		$(Q) $(call DELFILE, allsyms.tmp))
 	$(if $(CONFIG_MM_KASAN_GLOBAL),
-	$(Q) $(TOPDIR)/tools/kasan_global.py -e $(NUTTX) -o kasan_globals.tmp
+	$(Q) $(TOPDIR)/tools/kasan_global.py -e $(NUTTX) -o kasan_globals.tmp -a $(CONFIG_MM_KASAN_GLOBAL_ALIGN)
 	$(Q) $(call COMPILE, kasan_globals.tmp, kasan_globals$(OBJEXT) -fno-sanitize=kernel-address, -x c)
 	$(Q) $(call DELFILE, kasan_globals.tmp))
 	$(if $(CONFIG_HAVE_CXX),\
@@ -410,7 +454,8 @@ nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(HEADOBJ) $(LINKOBJS) 
 ifneq ($(CONFIG_HOST_MACOS),y)
 	$(Q) $(OBJCOPY) --redefine-syms=nuttx-names.dat nuttx.rel
 	$(Q) $(CC) $(CFLAGS) -Wl,-verbose 2>&1 | \
-	     sed -e '/====/,/====/!d;//d' -e 's/__executable_start/_stext/g' \
+	     sed -e '/====/,/====/!d;//d' \
+	         -e '/__executable_start/s/$$/PROVIDE(_stext = .);/' \
 	         -e 's/^\(\s\+\)\(\.init_array\)/\1\2 : { }\n\1.sinit/g' \
 	         -e 's/^\(\s\+\)\(\.fini_array\)/\1\2 : { }\n\1.einit/g' \
 	         -e 's/__init_array_start/_sinit/g' -e 's/__init_array_end/_einit/g' \

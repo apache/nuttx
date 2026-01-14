@@ -199,6 +199,22 @@ struct alm_setalarm_s
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: esp32s3_rtc_clk_slow_freq_get
+ *
+ * Description:
+ *   This function gets the frequency of the slow clock from the RTC.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The frequency of the slow clock from the RTC.
+ *
+ ****************************************************************************/
+
+int esp32s3_rtc_clk_slow_freq_get(void);
+
+/****************************************************************************
  * Name: esp32s3_rtc_clk_slow_freq_get_hz
  *
  * Description:
@@ -300,22 +316,6 @@ enum esp32s3_rtc_xtal_freq_e esp32s3_rtc_clk_xtal_freq_get(void);
  ****************************************************************************/
 
 void esp32s3_rtc_update_to_xtal(int freq, int div);
-
-/****************************************************************************
- * Name: esp32s3_rtc_bbpll_enable
- *
- * Description:
- *   Reset BBPLL configuration.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32s3_rtc_bbpll_enable(void);
 
 /****************************************************************************
  * Name: esp32s3_rtc_clk_set
@@ -435,22 +435,6 @@ uint64_t esp32s3_rtc_time_slowclk_to_us(uint64_t rtc_cycles,
 uint32_t esp32s3_clk_slowclk_cal_get(void);
 
 /****************************************************************************
- * Name: esp32s3_rtc_bbpll_disable
- *
- * Description:
- *   disable BBPLL.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32s3_rtc_bbpll_disable(void);
-
-/****************************************************************************
  * Name: esp32s3_rtc_sleep_set_wakeup_time
  *
  * Description:
@@ -529,6 +513,23 @@ int esp_rtc_clk_get_cpu_freq(void);
  ****************************************************************************/
 
 void esp32s3_rtc_sleep_init(uint32_t flags);
+
+/****************************************************************************
+ * Name: esp32s3_rtc_ext1_prepare
+ *
+ * Description:
+ *   Configure RTC_EXT1 wakeup sources
+ *
+ * Input Parameters:
+ *   trigger_mode - trigger mode for RTC_EXT1 wakeup sources
+ *   rtc_gpio_mask - mask of GPIOs to be used as RTC_EXT1 wakeup sources
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32s3_rtc_ext1_prepare(uint32_t trigger_mode, uint32_t rtc_gpio_mask);
 
 /****************************************************************************
  * Name: esp32s3_rtc_sleep_start

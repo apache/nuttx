@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32h7/nucleo-h743zi/src/stm32_progmem.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -39,9 +41,6 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mtd/mtd.h>
-#ifdef CONFIG_BCH
-#include <nuttx/drivers/drivers.h>
-#endif
 
 #include <stm32.h>
 #include "nucleo-h743zi.h"

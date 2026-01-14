@@ -553,7 +553,7 @@ UART Usage
 
   If you are not using MPLAB to debug, you may also want to change Make.defs
   to use the release.ld linker script instead of the debug.ld link script.  This
-  change will give you a little more memory by re-using the boot FLASH and SRAM
+  change will give you a little more memory by reusing the boot FLASH and SRAM
   that would otherwise be reserved for MPLAB.
 
 Analog Input
@@ -929,7 +929,6 @@ Where <subdir> is one of the following:
        CONFIG_NSH_DISABLESCRIPT=y
        CONFIG_NSH_DISABLEBG=y
 
-       CONFIG_NSH_DISABLE_DD=y
        CONFIG_NSH_DISABLE_EXEC=y
        CONFIG_NSH_DISABLE_EXIT=y
        CONFIG_NSH_DISABLE_GET=y

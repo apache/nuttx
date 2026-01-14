@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/rp2040/rp2040_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -91,7 +93,7 @@ void __start(void)
 
   __asm__ __volatile__ ("\tmsr msp, %0\n" :: "r" (g_idle_topstack));
 
-  if (up_cpu_index() != 0)
+  if (this_cpu() != 0)
     {
       while (1)
         {

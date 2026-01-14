@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # tools/mkexport.sh
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -16,6 +18,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
+
+set -e   # Exit on error
 
 # Get the input parameter list
 
@@ -183,10 +187,11 @@ cp "${TOPDIR}/tools/incdir.c" "${EXPORTDIR}/tools/."
 # Copy the board specific linker if found, or use the default when not.
 
 APPLD=gnu-elf.ld
+
 if [ -f "${BOARDDIR}/scripts/${APPLD}" ]; then
   cp -f "${BOARDDIR}/scripts/${APPLD}" "${EXPORTDIR}/scripts/."
-else
-  cp -f "${TOPDIR}/binfmt/libelf/${APPLD}" "${EXPORTDIR}/scripts/."
+elif [ -f "${TOPDIR}/libs/libc/elf/${APPLD}" ]; then
+  cp -f "${TOPDIR}/libs/libc/elf/${APPLD}" "${EXPORTDIR}/scripts/."
 fi
 
 if [ "${NUTTX_BUILD}" = "kernel" ]; then
@@ -229,6 +234,14 @@ if [ "X${USRONLY}" != "Xy" ]; then
   done
 fi
 
+# Drop kernel folder elf/gnu-elf.ld as the exported script shall suffice
+
+LDELFFLAGS=$(echo "$LDELFFLAGS" | sed -e 's:-T.*ld::')
+
+# Set LDMODULEFLAGS so that kernel modules can build in kernel mode
+
+LDMODULEFLAGS="-r"
+
 # Save the compilation options
 
 echo "ARCHCFLAGS       = ${ARCHCFLAGS}" >"${EXPORTDIR}/scripts/Make.defs"
@@ -252,6 +265,8 @@ echo "ZIG              = ${ZIG}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "ZIGFLAGS         = ${ZIGFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "DC               = ${DC}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "DFLAGS           = ${DFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "SWIFTC           = ${SWIFTC}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "SWIFTFLAGS       = ${SWIFTFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "NXFLATLDFLAGS1   = ${NXFLATLDFLAGS1}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "NXFLATLDFLAGS2   = ${NXFLATLDFLAGS2}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "OBJEXT           = ${OBJEXT}" >>"${EXPORTDIR}/scripts/Make.defs"
@@ -264,11 +279,15 @@ echo "HOSTLDFLAGS      = ${HOSTLDFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "HOSTEXEEXT       = ${HOSTEXEEXT}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "LDNAME           = ${LDNAME}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "LDELFFLAGS       = ${LDELFFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "LDMODULEFLAGS    = ${LDMODULEFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "NUTTX_ARCH       = ${NUTTX_ARCH}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "NUTTX_ARCH_CHIP  = ${NUTTX_ARCH_CHIP}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "NUTTX_BOARD      = ${NUTTX_BOARD}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "NUTTX_BUILD      = ${NUTTX_BUILD}" >>"${EXPORTDIR}/scripts/Make.defs"
 echo "NUTTX_CXX        = ${NUTTX_CXX}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "LLVM_ARCHTYPE    = ${LLVM_ARCHTYPE}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "LLVM_CPUTYPE     = ${LLVM_CPUTYPE}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "LLVM_ABITYPE     = ${LLVM_ABITYPE}" >>"${EXPORTDIR}/scripts/Make.defs"
 
 echo "set(ARCHCFLAGS          \"${ARCHCFLAGS}\")"       > "${EXPORTDIR}/scripts/target.cmake"
 echo "set(ARCHCPUFLAGS        \"${ARCHCPUFLAGS}\")"     >>"${EXPORTDIR}/scripts/target.cmake"
@@ -295,11 +314,15 @@ echo "set(HOSTLDFLAGS         \"${HOSTLDFLAGS}\")"      >>"${EXPORTDIR}/scripts/
 echo "set(HOSTEXEEXT          \"${HOSTEXEEXT}\")"       >>"${EXPORTDIR}/scripts/target.cmake"
 echo "set(LDNAME              \"${LDNAME}\")"           >>"${EXPORTDIR}/scripts/target.cmake"
 echo "set(LDELFFLAGS          \"${LDELFFLAGS}\")"       >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(LDMODULEFLAGS       \"${LDMODULEFLAGS}\")"    >>"${EXPORTDIR}/scripts/target.cmake"
 echo "set(NUTTX_ARCH          \"${NUTTX_ARCH}\")"       >>"${EXPORTDIR}/scripts/target.cmake"
 echo "set(NUTTX_ARCH_CHIP     \"${NUTTX_ARCH_CHIP}\")"  >>"${EXPORTDIR}/scripts/target.cmake"
 echo "set(NUTTX_BOARD         \"${NUTTX_BOARD}\")"      >>"${EXPORTDIR}/scripts/target.cmake"
 echo "set(NUTTX_BUILD         \"${NUTTX_BUILD}\")"      >>"${EXPORTDIR}/scripts/target.cmake"
 echo "set(NUTTX_CXX           \"${NUTTX_CXX}\")"        >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(LLVM_ARCHTYPE       \"${LLVM_ARCHTYPE}\")"    >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(LLVM_CPUTYPE        \"${LLVM_CPUTYPE}\")"     >>"${EXPORTDIR}/scripts/target.cmake"
+echo "set(LLVM_ABITYPE        \"${LLVM_ABITYPE}\")"     >>"${EXPORTDIR}/scripts/target.cmake"
 
 
 # Additional compilation options when the kernel is built
@@ -344,70 +367,101 @@ cp -LR -p "${TOPDIR}/include" "${EXPORTDIR}/." || \
 ${MAKE} -C ${ARCHDIR} export_startup TOPDIR=${TOPDIR} EXPORT_DIR="${EXPORTDIR}"
 
 # Copy architecture-specific header files into the arch export sub-directory.
-# This is tricky because each architecture does things in a little different
-# way.
-#
-# First copy any header files in the architecture src/ sub-directory (some
-# architectures keep all of the header files there, some a few, and others
-# none
+# Some architectures keep all headers in src/, some only a few, and others none.
 
-cp -f "${ARCHDIR}"/*.h "${EXPORTDIR}"/arch/. 2>/dev/null
-
-# Then look a list of possible places where other architecture-specific
-# header files might be found.  If those places exist (as directories or
-# as symbolic links to directories, then copy the header files from
-# those directories into the EXPORTDIR
+if [ -d "${ARCHDIR}" ]; then
+    # Expand the glob safely
+    set -- "${ARCHDIR}"/*.h
+    if [ -e "$1" ]; then
+        echo "MK: Copying architecture headers from ${ARCHDIR} to ${EXPORTDIR}/arch"
+        if ! cp -f "$@" "${EXPORTDIR}/arch/"; then
+            echo "MK: Error: Failed to copy headers from ${ARCHDIR}" >&2
+            exit 1
+        fi
+    else
+        echo "MK: Notice: No header files found in ${ARCHDIR}" >&2
+    fi
+else
+    echo "MK: Warning: Architecture directory ${ARCHDIR} does not exist" >&2
+fi
 
 if [ "X${USRONLY}" != "Xy" ]; then
   ARCH_HDRDIRS="arm armv7-m avr avr32 board common chip mips32"
+
   for hdir in $ARCH_HDRDIRS; do
+    srcdir="${ARCHDIR}/${hdir}"
+    dstdir="${EXPORTDIR}/arch/${hdir}"
 
     # Does the directory (or symbolic link) exist?
+    if [ -d "$srcdir" ] || [ -h "$srcdir" ]; then
+      mkdir -p "$dstdir" || {
+        echo "MK: Error: mkdir $dstdir failed" >&2
+        exit 1
+      }
 
-    if [ -d "${ARCHDIR}/${hdir}" -o -h "${ARCHDIR}/${hdir}" ]; then
+      # Copy headers if they exist
+      set -- "$srcdir"/*.h
+      if [ -e "$1" ]; then
+        echo "MK: Copying headers from $srcdir to $dstdir"
+        if ! cp -f "$@" "$dstdir/"; then
+          echo "MK: Error: Failed to copy headers from $srcdir" >&2
+          exit 1
+        fi
+      else
+        echo "MK: Notice: No header files found in $srcdir" >&2
+      fi
 
-      # Yes.. create a export sub-directory of the same name
+      # Handle hardware subdir if it exists
+      if [ -d "$srcdir/hardware" ]; then
+        mkdir -p "$dstdir/hardware" || {
+          echo "MK: Error: mkdir $dstdir/hardware failed" >&2
+          exit 1
+        }
 
-      mkdir "${EXPORTDIR}/arch/${hdir}" || \
-        { echo "MK: 'mkdir ${EXPORTDIR}/arch/${hdir}' failed"; exit 1; }
-
-      # Then copy the header files (only) into the new directory
-
-      cp -f "${ARCHDIR}"/${hdir}/*.h "${EXPORTDIR}"/arch/${hdir}/. 2>/dev/null
-
-      # Most architectures have low directory called "hardware" that
-      # holds the header files
-
-      if [ -d "${ARCHDIR}/${hdir}/hardware" ]; then
-
-        # Yes.. create a export sub-directory of the same name
-
-        mkdir "${EXPORTDIR}/arch/${hdir}/hardware" || \
-          { echo "MK: 'mkdir ${EXPORTDIR}/arch/${hdir}/hardware' failed"; exit 1; }
-
-        # Then copy the header files (only) into the new directory
-
-        cp -f "${ARCHDIR}"/${hdir}/hardware/*.h "${EXPORTDIR}"/arch/${hdir}/hardware/. 2>/dev/null
+        set -- "$srcdir/hardware"/*.h
+        if [ -e "$1" ]; then
+          echo "MK: Copying headers from $srcdir/hardware to $dstdir/hardware"
+          if ! cp -f "$@" "$dstdir/hardware/"; then
+            echo "MK: Error: Failed to copy headers from $srcdir/hardware" >&2
+            exit 1
+          fi
+        else
+          echo "MK: Notice: No hardware headers in $srcdir/hardware" >&2
+        fi
       fi
     fi
   done
 
-  # Copy OS internal header files as well.  They are used by some architecture-
-  # specific header files.
-
-  mkdir "${EXPORTDIR}/arch/os" || \
-    { echo "MK: 'mkdir ${EXPORTDIR}/arch/os' failed"; exit 1; }
+  # Copy OS internal header files
+  mkdir -p "${EXPORTDIR}/arch/os" || {
+    echo "MK: Error: mkdir ${EXPORTDIR}/arch/os failed" >&2
+    exit 1
+  }
 
   OSDIRS="clock environ errno group init irq mqueue paging pthread sched semaphore signal task timer wdog"
 
   for dir in ${OSDIRS}; do
-    mkdir "${EXPORTDIR}/arch/os/${dir}" || \
-      { echo "MK: 'mkdir ${EXPORTDIR}/arch/os/${dir}' failed"; exit 1; }
-    cp -f "${TOPDIR}"/sched/${dir}/*.h "${EXPORTDIR}"/arch/os/${dir}/. 2>/dev/null
+    srcdir="${TOPDIR}/sched/${dir}"
+    dstdir="${EXPORTDIR}/arch/os/${dir}"
+
+    mkdir -p "$dstdir" || {
+      echo "MK: Error: mkdir $dstdir failed" >&2
+      exit 1
+    }
+
+    set -- "$srcdir"/*.h
+    if [ -e "$1" ]; then
+      echo "MK: Copying OS headers from $srcdir to $dstdir"
+      if ! cp -f "$@" "$dstdir/"; then
+        echo "MK: Error: Failed to copy headers from $srcdir" >&2
+        exit 1
+      fi
+    else
+      echo "MK: Notice: No headers in $srcdir" >&2
+    fi
   done
 
-  # Add the board library to the list of libraries
-
+  # Add the board library if present
   if [ -f "${ARCHDIR}/board/libboard${LIBEXT}" ]; then
     LIBLIST="${LIBLIST} ${ARCHSUBDIR}/board/libboard${LIBEXT}"
   fi
