@@ -26,6 +26,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/timers/arch_timer.h>
@@ -34,8 +36,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM)
-#  error CONFIG_SCHED_TICKLESS_ALARM must be unset to use the arch timer
+#ifndef CONFIG_BOARD_LOOPSPERMSEC
+#  define CONFIG_BOARD_LOOPSPERMSEC 0
 #endif
 
 #define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
@@ -121,6 +123,8 @@ static void udelay_accurate(useconds_t microseconds)
 static void udelay_coarse(useconds_t microseconds)
 {
   volatile int i;
+
+  DEBUGASSERT(CONFIG_BOARD_LOOPSPERMSEC != 0);
 
   /* We'll do this a little at a time because we expect that the
    * CONFIG_BOARD_LOOPSPERUSEC is very inaccurate during to truncation in
