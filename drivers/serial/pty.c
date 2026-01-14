@@ -185,13 +185,14 @@ static void pty_destroy(FAR struct pty_devpair_s *devpair)
 
   if (devpair->pp_susv1)
     {
-      /* Free this minor number so that it can be reused */
-
-      ptmx_minor_free(devpair->pp_minor);
-
       /* Un-register the slave device */
 
       snprintf(devname, sizeof(devname), "/dev/pts/%u", devpair->pp_minor);
+      unregister_driver(devname);
+
+      /* Free this minor number so that it can be reused */
+
+      ptmx_minor_free(devpair->pp_minor);
     }
   else
     {
@@ -205,9 +206,8 @@ static void pty_destroy(FAR struct pty_devpair_s *devpair)
       /* Un-register the slave device */
 
       snprintf(devname, sizeof(devname), "/dev/ttyp%u", devpair->pp_minor);
+      unregister_driver(devname);
     }
-
-  unregister_driver(devname);
 
   /* And free the device structure */
 
@@ -1442,6 +1442,15 @@ int pty_register2(int minor, bool susv1)
 errout_with_master:
   snprintf(devname, sizeof(devname), "/dev/pty%d", minor);
   unregister_driver(devname);
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+
+  /* unregister_driver() will call pty_unlink(), which may call
+   * pty_destroy() to free devpair if pp_nopen == 0. So we must return
+   * here directly to avoid use-after-free.
+   */
+
+  return ret;
+#endif
 
 errout_with_devpair:
   nxmutex_destroy(&devpair->pp_lock);
