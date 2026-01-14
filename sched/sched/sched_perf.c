@@ -1379,10 +1379,7 @@ static int perf_event_do_enable(FAR void *arg)
 
   perf_context_disable(ctx);
 
-  if (ctx->active_num != 0)
-    {
-      perf_context_sched_out(ctx);
-    }
+  perf_context_sched_out(ctx);
 
   event->state = PERF_EVENT_STATE_INACTIVE;
 
