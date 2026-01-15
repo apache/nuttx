@@ -95,5 +95,5 @@ struct list_node g_hrtimer_list = LIST_INITIAL_VALUE(g_hrtimer_list);
  ****************************************************************************/
 
 #ifdef CONFIG_HRTIMER_TREE
-RB_GENERATE(hrtimer_tree_s, hrtimer_node_s, entry, hrtimer_compare);
+RB_GENERATE(hrtimer_tree_s, hrtimer_s, node, hrtimer_compare);
 #endif

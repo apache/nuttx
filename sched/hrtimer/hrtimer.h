@@ -51,6 +51,13 @@
 
 #define hrtimer_is_pending(hrtimer)    ((hrtimer)->func != NULL)
 
+/* Compare functions for the expired time. Since some compilers may not
+ * optimize the compare.
+ */
+
+#define HRTIMER_TIME_BEFORE(t1, t2)    ((int64_t)((t2) - (t1)) > 0)
+#define HRTIMER_TIME_BEFORE_EQ(t1, t2) ((int64_t)((t2) - (t1)) >= 0)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -62,7 +69,7 @@
  */
 
 #ifdef CONFIG_HRTIMER_TREE
-RB_HEAD(hrtimer_tree_s, hrtimer_node_s);
+RB_HEAD(hrtimer_tree_s, hrtimer_s);
 #endif
 
 /****************************************************************************
@@ -171,13 +178,13 @@ static inline_function void hrtimer_reprogram(uint64_t next_expired)
 
 #ifdef CONFIG_HRTIMER_TREE
 static inline_function
-int hrtimer_compare(FAR const hrtimer_node_t *a,
-                    FAR const hrtimer_node_t *b)
+int hrtimer_compare(FAR const hrtimer_t *a, FAR const hrtimer_t *b)
 {
-  FAR const hrtimer_t *atimer = (FAR const hrtimer_t *)a;
-  FAR const hrtimer_t *btimer = (FAR const hrtimer_t *)b;
+  /* This branchless compare is equivalent to:
+   * (int64_t)(a->expired - b->expired) >= 0 ? 1 : -1;
+   */
 
-  return clock_compare(atimer->expired, btimer->expired) ? -1 : 1;
+  return 1 - (HRTIMER_TIME_BEFORE(a->expired, b->expired) << 1u);
 }
 #endif
 
@@ -191,7 +198,7 @@ int hrtimer_compare(FAR const hrtimer_node_t *a,
  ****************************************************************************/
 
 #ifdef CONFIG_HRTIMER_TREE
-RB_PROTOTYPE(hrtimer_tree_s, hrtimer_node_s, entry, hrtimer_compare);
+RB_PROTOTYPE(hrtimer_tree_s, hrtimer_s, node, hrtimer_compare);
 #endif
 
 /****************************************************************************
@@ -204,9 +211,9 @@ RB_PROTOTYPE(hrtimer_tree_s, hrtimer_node_s, entry, hrtimer_compare);
 static inline_function void hrtimer_remove(FAR hrtimer_t *hrtimer)
 {
 #ifdef CONFIG_HRTIMER_TREE
-  RB_REMOVE(hrtimer_tree_s, &g_hrtimer_tree, &hrtimer->node);
+  RB_REMOVE(hrtimer_tree_s, &g_hrtimer_tree, hrtimer);
 #else
-  list_delete_fast(&hrtimer->node.entry);
+  list_delete_fast(&hrtimer->node);
 #endif
 
   /* Explicitly mark the timer as dequeued. */
@@ -225,12 +232,12 @@ static inline_function void hrtimer_remove(FAR hrtimer_t *hrtimer)
 static inline_function void hrtimer_insert(FAR hrtimer_t *hrtimer)
 {
 #ifdef CONFIG_HRTIMER_TREE
-  RB_INSERT(hrtimer_tree_s, &g_hrtimer_tree, &hrtimer->node);
+  RB_INSERT(hrtimer_tree_s, &g_hrtimer_tree, hrtimer);
 #else
   FAR hrtimer_t *curr;
   uint64_t expired = hrtimer->expired;
 
-  list_for_every_entry(&g_hrtimer_list, curr, hrtimer_t, node.entry)
+  list_for_every_entry(&g_hrtimer_list, curr, hrtimer_t, node)
     {
       /* Until curr->expired has not timed out relative to expired */
 
@@ -240,7 +247,7 @@ static inline_function void hrtimer_insert(FAR hrtimer_t *hrtimer)
         }
     }
 
-  list_add_before(&curr->node.entry, &hrtimer->node.entry);
+  list_add_before(&curr->node, &hrtimer->node);
 #endif
 }
 
@@ -257,9 +264,9 @@ static inline_function void hrtimer_insert(FAR hrtimer_t *hrtimer)
 static inline_function FAR hrtimer_t *hrtimer_get_first(void)
 {
 #ifdef CONFIG_HRTIMER_TREE
-  return (FAR hrtimer_t *)RB_MIN(hrtimer_tree_s, &g_hrtimer_tree);
+  return RB_MIN(hrtimer_tree_s, &g_hrtimer_tree);
 #else
-  return list_first_entry(&g_hrtimer_list, FAR hrtimer_t, node.entry);
+  return list_first_entry(&g_hrtimer_list, FAR hrtimer_t, node);
 #endif
 }
 
@@ -285,9 +292,9 @@ static inline_function FAR hrtimer_t *hrtimer_get_first(void)
 static inline_function bool hrtimer_is_first(FAR hrtimer_t *hrtimer)
 {
 #ifdef CONFIG_HRTIMER_TREE
-  return RB_LEFT(&hrtimer->node, entry) == NULL;
+  return RB_LEFT(hrtimer, node) == NULL;
 #else
-  return hrtimer == list_first_entry(&g_hrtimer_list, hrtimer_t, node.entry);
+  return hrtimer == list_first_entry(&g_hrtimer_list, hrtimer_t, node);
 #endif
 }
 
