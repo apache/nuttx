@@ -111,6 +111,24 @@ int up_timer_gettick(FAR clock_t *ticks)
 }
 #endif
 
+#if defined(CONFIG_SCHED_TICKLESS_ALARM) && !defined(CONFIG_ALARM_ARCH)
+int up_alarm_tick_start(clock_t ticks)
+{
+  struct timespec ts;
+  clock_ticks2time(&ts, ticks);
+  return up_alarm_start(&ts);
+}
+#endif
+
+#if !defined(CONFIG_SCHED_TICKLESS_ALARM) && !defined(CONFIG_TIMER_ARCH)
+int up_timer_tick_start(clock_t ticks)
+{
+  struct timespec ts;
+  clock_ticks2time(&ts, ticks);
+  return up_timer_start(&ts);
+}
+#endif
+
 static void nxsched_process_event(clock_t ticks, bool noswitches)
 {
   clock_t next;
