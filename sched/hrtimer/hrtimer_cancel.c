@@ -93,11 +93,9 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer)
 
   if (hrtimer_is_pending(hrtimer))
     {
-      hrtimer_remove(hrtimer);
-
       /* Update the hardware timer if the queue head changed. */
 
-      if (hrtimer_is_first(hrtimer))
+      if (hrtimer_remove(hrtimer))
         {
           first = hrtimer_get_first();
           if (first != NULL)
