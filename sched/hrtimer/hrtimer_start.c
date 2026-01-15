@@ -75,7 +75,7 @@ int hrtimer_start_absolute(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
 
   hrtimer_cancel_running(hrtimer);
 
-  if (hrtimer_is_armed(hrtimer))
+  if (hrtimer_is_pending(hrtimer))
     {
       hrtimer_remove(hrtimer);
     }
