@@ -73,6 +73,10 @@ int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
 
   flags = spin_lock_irqsave(&g_hrtimer_spinlock);
 
+  /* Ensure no core can write the hrtimer. */
+
+  hrtimer_cancel_running(hrtimer);
+
   if (hrtimer_is_armed(hrtimer))
     {
       hrtimer_remove(hrtimer);

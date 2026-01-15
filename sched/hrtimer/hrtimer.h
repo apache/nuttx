@@ -71,7 +71,7 @@ extern struct list_node g_hrtimer_list;
  */
 
 #ifdef CONFIG_SMP
-extern FAR hrtimer_t *g_hrtimer_running[CONFIG_SMP_NCPUS];
+extern uintptr_t g_hrtimer_running[CONFIG_SMP_NCPUS];
 #endif
 
 /****************************************************************************
@@ -308,6 +308,116 @@ static inline_function bool hrtimer_is_first(FAR hrtimer_t *hrtimer)
 #else
   return hrtimer == list_first_entry(&g_hrtimer_list, hrtimer_t, node.entry);
 #endif
+}
+
+/****************************************************************************
+ * Name: hrtimer_mark_running
+ *
+ * Description:
+ *   Mark the timer as running.
+ *
+ * Input Parameters:
+ *   timer - The timer to be marked.
+ *   cpu   - The CPU core Id.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumption:
+ *   The caller must hold the lock.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+#  define hrtimer_mark_running(timer, cpu) \
+  (g_hrtimer_running[cpu] = (uintptr_t)(timer))
+#else
+#  define hrtimer_mark_running(timer, cpu) UNUSED(cpu)
+#endif
+#define hrtimer_unmark_running(cpu) hrtimer_mark_running(NULL, cpu)
+
+/****************************************************************************
+ * Name: hrtimer_is_running
+ *
+ * Description:
+ *   Check if the CPU core is running the timer.
+ *
+ * Input Parameters:
+ *   timer - The timer to be marked.
+ *   cpu   - The CPU core Id.
+ *
+ * Returned Value:
+ *   true if the CPU core is running the timer, false otherwise.
+ *
+ * Assumption:
+ *   The caller must hold the lock.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+#  define hrtimer_is_running(timer, cpu) \
+  (g_hrtimer_running[cpu] == (uintptr_t)(timer))
+#else
+#  define hrtimer_is_running(timer, cpu) (true)
+#endif
+#define hrtimer_is_cancelling(timer, cpu) \
+  hrtimer_is_running((uintptr_t)(timer) | 0x1u, cpu)
+
+/****************************************************************************
+ * Name: hrtimer_cancel_running
+ *
+ * Description:
+ *   Cancel the timer, revoke the ownership of the cancelled timer, and
+ *   return the references count to the timer.
+ *
+ * Input Parameters:
+ *   hrtimer - The cancelled timer.
+ *
+ * Returned Value:
+ *   The references count to the timer.
+ *
+ * Assumption:
+ *   The caller must hold the queue lock.
+ *
+ ****************************************************************************/
+
+static inline_function
+int hrtimer_cancel_running(FAR hrtimer_t *timer)
+{
+  int refs            = 0;
+#ifdef CONFIG_SMP
+  uintptr_t cancelled = (uintptr_t)timer | 0x1u;
+  int cpu;
+
+  /* Check if the timer is referenced by any CPU core.
+   * Generally, only one reference to a timer can exist at the same time.
+   * However, when a timer may be restarted at the cancelled state,
+   * more references to the timer may exist.
+   */
+
+  unroll_loop(CONFIG_SMP_NCPUS) /* Tell the compiler to unroll the loop. */
+
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
+      /* This is a faster implementation equivalent to
+       * (g_hrtimer_running[cpu] & (~(uintptr_t)0x1u)) == timer,
+       * Assuming the pointer of the timer is at least 2-bytes aligned
+       * (the last bit must be zero).
+       */
+
+      if ((g_hrtimer_running[cpu] ^ cancelled) <= 0x1u)
+        {
+          /* Set the timer to the cancelled state and revoke the write
+           * ownership of the timer from the queue.
+           */
+
+          g_hrtimer_running[cpu] = cancelled;
+          refs++;
+        }
+    }
+#endif
+
+  return refs;
 }
 
 #endif /* CONFIG_HRTIMER */
