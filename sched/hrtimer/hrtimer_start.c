@@ -63,7 +63,8 @@ int hrtimer_start_absolute(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
                            uint64_t expired)
 {
   irqstate_t flags;
-  int ret = OK;
+  bool       reprogram = false;
+  int        ret       = OK;
 
   DEBUGASSERT(hrtimer != NULL);
 
@@ -77,7 +78,7 @@ int hrtimer_start_absolute(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
 
   if (hrtimer_is_pending(hrtimer))
     {
-      hrtimer_remove(hrtimer);
+      reprogram = hrtimer_remove(hrtimer);
     }
 
   hrtimer->func    = func;
@@ -85,11 +86,11 @@ int hrtimer_start_absolute(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
 
   /* Insert the timer into the hrtimer queue. */
 
-  hrtimer_insert(hrtimer);
+  reprogram |= hrtimer_insert(hrtimer);
 
   /* If the inserted timer is now the earliest, start hardware timer */
 
-  if (hrtimer_is_first(hrtimer))
+  if (reprogram)
     {
       hrtimer_reprogram(hrtimer->expired);
     }

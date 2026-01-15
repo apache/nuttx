@@ -206,9 +206,17 @@ RB_PROTOTYPE(hrtimer_tree_s, hrtimer_s, node, hrtimer_compare);
  *
  * Description:
  *   Remove a timer from the queue and mark it as dequeued.
+ *
+ * Returned Value:
+ *   true if the timer is the head of the queue, otherwise false.
+ *
+ * Assumption:
+ *   The caller must hold the queue lock.
+ *   The caller must ensure that the timer is in the queue.
+ *
  ****************************************************************************/
 
-static inline_function void hrtimer_remove(FAR hrtimer_t *hrtimer)
+static inline_function bool hrtimer_remove(FAR hrtimer_t *hrtimer)
 {
 #ifdef CONFIG_HRTIMER_TREE
   RB_REMOVE(hrtimer_tree_s, &g_hrtimer_tree, hrtimer);
@@ -219,20 +227,29 @@ static inline_function void hrtimer_remove(FAR hrtimer_t *hrtimer)
   /* Explicitly mark the timer as dequeued. */
 
   hrtimer->func = NULL;
+  return RB_LEFT(hrtimer, node) == NULL;
 }
 
 /****************************************************************************
  * Name: hrtimer_insert
  *
  * Description:
- *   Insert a timer into the timer container according to its
- *   expiration time.
+ *   Insert a timer into the hrtimer queue according to its expiration time.
+ *
+ * Returned Value:
+ *   true if the timer is added to the head of the queue, otherwise false.
+ *
+ * Assumption:
+ *   The caller must hold the queue lock.
+ *   The caller must ensure that the timer is in the queue.
+ *
  ****************************************************************************/
 
-static inline_function void hrtimer_insert(FAR hrtimer_t *hrtimer)
+static inline_function bool hrtimer_insert(FAR hrtimer_t *hrtimer)
 {
 #ifdef CONFIG_HRTIMER_TREE
   RB_INSERT(hrtimer_tree_s, &g_hrtimer_tree, hrtimer);
+  return RB_LEFT(hrtimer, node) == NULL;
 #else
   FAR hrtimer_t *curr;
   uint64_t expired = hrtimer->expired;
@@ -248,6 +265,7 @@ static inline_function void hrtimer_insert(FAR hrtimer_t *hrtimer)
     }
 
   list_add_before(&curr->node, &hrtimer->node);
+  return list_is_head(&g_hrtimer_list, &hrtimer->node);
 #endif
 }
 
@@ -267,34 +285,6 @@ static inline_function FAR hrtimer_t *hrtimer_get_first(void)
   return RB_MIN(hrtimer_tree_s, &g_hrtimer_tree);
 #else
   return list_first_entry(&g_hrtimer_list, FAR hrtimer_t, node);
-#endif
-}
-
-/****************************************************************************
- * Name: hrtimer_is_first
- *
- * Description:
- *   Test whether the given high-resolution timer is the earliest
- *   expiring timer in the container.
- *
- *   In a container ordered by expiration time, the earliest timer
- *   is represented by the left-most node. Therefore, a timer is the
- *   earliest one if it has no left child.
- *
- * Input Parameters:
- *   hrtimer - Pointer to the high-resolution timer to be tested.
- *
- * Returned Value:
- *   true  - The timer is the earliest expiring pending timer.
- *   false - The timer is not the earliest timer.
- ****************************************************************************/
-
-static inline_function bool hrtimer_is_first(FAR hrtimer_t *hrtimer)
-{
-#ifdef CONFIG_HRTIMER_TREE
-  return RB_LEFT(hrtimer, node) == NULL;
-#else
-  return hrtimer == list_first_entry(&g_hrtimer_list, hrtimer_t, node);
 #endif
 }
 
