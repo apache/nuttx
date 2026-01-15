@@ -80,6 +80,7 @@ open-amp.zip:
 	$(Q) patch -p0 < 0012-remoteproc-sync-the-virtio-rpmsg-config-with-linux-s.patch
 	$(Q) patch -p0 < 0013-virtio.h-add-mm_priv-to-struct-virtio_deivce.patch
 	$(Q) patch -p0 < 0014-lib-rpmsg_virtio-use-virtio_alloc_buf-to-alloc-share.patch
+	$(Q) patch -p0 < 0015-lib-remoteproc_virtio-optimize-virtqueue_notificatio.patch
 
 .openamp_headers: open-amp.zip
 else
