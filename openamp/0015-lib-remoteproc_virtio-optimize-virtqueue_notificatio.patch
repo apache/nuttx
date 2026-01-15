@@ -1,0 +1,54 @@
+From ab744079b1c9905a06a0f235bbfb852a83aa20d3 Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Thu, 21 Nov 2024 16:53:11 +0800
+Subject: [PATCH 15/15] lib/remoteproc_virtio: optimize
+ virtqueue_notification() called condition
+
+1. call virtqueue_notification() only when buffer exist to avoid unnecessary
+calls to virtqueue callback.
+
+2. call virtqueue_notification() only when vq != NULL, because
+rproc_virtio_notified() may be called when the virtqueues is not created:
+virtqueue created in the virtio/vhost driver but the virtio devices
+has been added to the remoteproc virtio devices list after the remoteproc
+transport layer create the virtio devices.
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/remoteproc/remoteproc_virtio.c | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/lib/remoteproc/remoteproc_virtio.c open-amp/lib/remoteproc/remoteproc_virtio.c
+index 7dee1354e0..2470454377 100644
+--- a/lib/remoteproc/remoteproc_virtio.c
++++ open-amp/lib/remoteproc/remoteproc_virtio.c
+@@ -403,6 +403,7 @@ int rproc_virtio_notified(struct virtio_device *vdev, uint32_t notifyid)
+ 	unsigned int num_vrings, i;
+ 	struct virtio_vring_info *vring_info;
+ 	struct virtqueue *vq;
++	bool notify;
+ 
+ 	if (!vdev)
+ 		return -RPROC_EINVAL;
+@@ -412,9 +413,15 @@ int rproc_virtio_notified(struct virtio_device *vdev, uint32_t notifyid)
+ 	num_vrings = vdev->vrings_num;
+ 	for (i = 0; i < num_vrings; i++) {
+ 		vring_info = &vdev->vrings_info[i];
+-		if (vring_info->notifyid == notifyid ||
+-		    notifyid == RSC_NOTIFY_ID_ANY) {
+-			vq = vring_info->vq;
++		vq = vring_info->vq;
++		if (!vq)
++			continue;
++		if (vdev->role == VIRTIO_DEV_DRIVER)
++			notify = virtqueue_nused(vq) > 0;
++		else
++			notify = virtqueue_navail(vq) > 0;
++		if (notify && (vring_info->notifyid == notifyid ||
++		    notifyid == RSC_NOTIFY_ID_ANY)) {
+ 			virtqueue_notification(vq);
+ 		}
+ 	}
+-- 
+2.34.1
+
