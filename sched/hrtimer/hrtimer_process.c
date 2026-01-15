@@ -120,8 +120,6 @@ void hrtimer_process(uint64_t now)
 
       flags = write_seqlock_irqsave(&g_hrtimer_lock);
 
-      hrtimer_mark_running(NULL, cpu);
-
       /* If the timer is periodic and has not been rearmed or
        * cancelled concurrently,
        * compute next expiration and reinsert into container
@@ -129,7 +127,7 @@ void hrtimer_process(uint64_t now)
 
       if (period != 0u && hrtimer_is_running(hrtimer, cpu))
         {
-          hrtimer->expired += period;
+          hrtimer->expired = expired + period;
 
           /* Ensure no overflow occurs */
 
