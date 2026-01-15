@@ -85,22 +85,12 @@ void hrtimer_process(uint64_t now)
 
   hrtimer = hrtimer_get_first();
 
-  while (hrtimer != NULL)
+  /* Check if the timer has expired */
+
+  while (hrtimer != NULL && HRTIMER_TIME_BEFORE_EQ(hrtimer->expired, now))
     {
-      func = hrtimer->func;
-
-      /* Ensure the timer callback is valid */
-
-      DEBUGASSERT(func != NULL);
-
+      func    = hrtimer->func;
       expired = hrtimer->expired;
-
-      /* Check if the timer has expired */
-
-      if (!clock_compare(expired, now))
-        {
-          break;
-        }
 
       /* Remove the expired timer from the timer queue */
 
