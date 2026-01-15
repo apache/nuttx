@@ -66,7 +66,7 @@ int hrtimer_start_absolute(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
   bool       reprogram = false;
   int        ret       = OK;
 
-  DEBUGASSERT(hrtimer != NULL);
+  DEBUGASSERT(hrtimer != NULL && func != NULL);
 
   /* Acquire the lock and seize the ownership of the hrtimer queue. */
 
