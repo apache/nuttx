@@ -94,16 +94,16 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer)
   if (hrtimer_is_armed(hrtimer))
     {
       hrtimer_remove(hrtimer);
-    }
 
-  /* If the canceled timer was the earliest one, update the hardware timer */
+      /* Update the hardware timer if the queue head changed. */
 
-  if (hrtimer_is_first(hrtimer))
-    {
-      first = hrtimer_get_first();
-      if (first != NULL)
+      if (hrtimer_is_first(hrtimer))
         {
-          hrtimer_reprogram(first->expired);
+          first = hrtimer_get_first();
+          if (first != NULL)
+            {
+              hrtimer_reprogram(first->expired);
+            }
         }
     }
 
