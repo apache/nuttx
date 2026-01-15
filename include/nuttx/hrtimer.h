@@ -37,6 +37,18 @@
 #include <sys/tree.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* The maximum delay tick should be INT64_MAX. However, if there are expired
+ * hrtimer in the queue, HRTIMER_TIME_BEFORE/AFTER might be incorrect, so we
+ * limited the delay to INT64_MAX >> 1, assuming all expired hrtimer can be
+ * processed within HRTIMER_MAX_DELAY.
+ */
+
+#define HRTIMER_MAX_DELAY              (INT64_MAX >> 1)
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 

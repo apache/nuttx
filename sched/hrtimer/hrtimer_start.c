@@ -64,8 +64,21 @@ int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
                   uint64_t expired,
                   enum hrtimer_mode_e mode)
 {
+  uint64_t next_expired;
   irqstate_t flags;
   int ret = OK;
+
+  /* Compute absolute expiration time */
+
+  if (mode == HRTIMER_MODE_ABS)
+    {
+      next_expired = expired;
+    }
+  else
+    {
+      expired = expired <= HRTIMER_MAX_DELAY ? expired : HRTIMER_MAX_DELAY;
+      next_expired = clock_systime_nsec() + expired;
+    }
 
   DEBUGASSERT(hrtimer != NULL);
 
@@ -82,22 +95,8 @@ int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
       hrtimer_remove(hrtimer);
     }
 
-  hrtimer->func = func;
-
-  /* Compute absolute expiration time */
-
-  if (mode == HRTIMER_MODE_ABS)
-    {
-      hrtimer->expired = expired;
-    }
-  else
-    {
-      hrtimer->expired = clock_systime_nsec() + expired;
-    }
-
-  /* Ensure expiration time does not overflow */
-
-  DEBUGASSERT(hrtimer->expired >= expired);
+  hrtimer->func    = func;
+  hrtimer->expired = next_expired;
 
   /* Insert the timer into the container */
 
