@@ -115,24 +115,9 @@ static inline_function void wd_timer_start(clock_t tick)
 {
   clock_t next_tick = wd_adjust_next_tick(tick);
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
-#  ifndef CONFIG_ALARM_ARCH
-  struct timespec ts;
-  clock_ticks2time(&ts, next_tick);
-  up_alarm_start(&ts);
-#  else
   up_alarm_tick_start(next_tick);
-#  endif
 #else
-#  ifndef CONFIG_TIMER_ARCH
-  struct timespec ts1;
-  struct timespec ts2;
-  clock_ticks2time(&ts1, next_tick);
-  clock_systime_timespec(&ts2);
-  clock_timespec_subtract(&ts1, &ts2, &ts1);
-  up_timer_start(&ts1);
-#  else
   up_timer_tick_start(next_tick - clock_systime_ticks());
-#  endif
 #endif
 }
 static inline_function void wd_timer_cancel(void)
