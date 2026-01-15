@@ -45,6 +45,12 @@
 
 #define HRTIMER_CANCEL_SYNC_DELAY_US CONFIG_USEC_PER_TICK
 
+/* The pending state indicates the timer belongs to the shared hrtimer queue
+ * and is waiting for the next hrtimer expiry.
+ */
+
+#define hrtimer_is_pending(hrtimer)    ((hrtimer)->func != NULL)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -189,25 +195,10 @@ RB_PROTOTYPE(hrtimer_tree_s, hrtimer_node_s, entry, hrtimer_compare);
 #endif
 
 /****************************************************************************
- * Name: hrtimer_is_armed
- *
- * Description:
- *   Test whether a timer is currently armed (inserted into the container).
- *
- * Returned Value:
- *   true if armed, false otherwise.
- ****************************************************************************/
-
-static inline_function bool hrtimer_is_armed(FAR hrtimer_t *hrtimer)
-{
-  return hrtimer->func != NULL;
-}
-
-/****************************************************************************
  * Name: hrtimer_remove
  *
  * Description:
- *   Remove a timer from the container and mark it as unarmed.
+ *   Remove a timer from the queue and mark it as dequeued.
  ****************************************************************************/
 
 static inline_function void hrtimer_remove(FAR hrtimer_t *hrtimer)
@@ -218,7 +209,7 @@ static inline_function void hrtimer_remove(FAR hrtimer_t *hrtimer)
   list_delete_fast(&hrtimer->node.entry);
 #endif
 
-  /* Explicitly mark the timer as unarmed */
+  /* Explicitly mark the timer as dequeued. */
 
   hrtimer->func = NULL;
 }
@@ -257,10 +248,10 @@ static inline_function void hrtimer_insert(FAR hrtimer_t *hrtimer)
  * Name: hrtimer_get_first
  *
  * Description:
- *   Return the earliest expiring armed timer.
+ *   Return the earliest expiring pending timer.
  *
  * Returned Value:
- *   Pointer to the earliest timer, or NULL if none are armed.
+ *   Pointer to the earliest timer, or NULL if none are pending.
  ****************************************************************************/
 
 static inline_function FAR hrtimer_t *hrtimer_get_first(void)
@@ -287,7 +278,7 @@ static inline_function FAR hrtimer_t *hrtimer_get_first(void)
  *   hrtimer - Pointer to the high-resolution timer to be tested.
  *
  * Returned Value:
- *   true  - The timer is the earliest expiring armed timer.
+ *   true  - The timer is the earliest expiring pending timer.
  *   false - The timer is not the earliest timer.
  ****************************************************************************/
 

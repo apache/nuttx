@@ -91,7 +91,7 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer)
 
   ret = hrtimer_cancel_running(hrtimer);
 
-  if (hrtimer_is_armed(hrtimer))
+  if (hrtimer_is_pending(hrtimer))
     {
       hrtimer_remove(hrtimer);
 
