@@ -125,23 +125,31 @@ extern "C"
  * Name: hrtimer_cancel
  *
  * Description:
- *   Cancel a high-resolution timer.
- *
- *   If the timer is armed but has not yet expired, it will be removed from
- *   the timer queue and the callback will not be invoked.
- *
- *   If the timer callback is currently executing, this function will mark
- *   the timer as canceled and return immediately. The running callback is
- *   allowed to complete, but it will not be invoked again.
+ *   Cancel a high-resolution timer asynchronously. This function set the
+ *   timer to the cancelled state. The caller will acquire the limited
+ *   ownership of the hrtimer, which allow the caller restart the hrtimer,
+ *   but the callback function may still be executing on another CPU, which
+ *   prevent the caller from freeing the hrtimer. The caller must call
+ *   `hrtimer_cancel` to wait for the callback to be finished. Please use
+ *   the function with care. Concurrency errors are prone to occur in this
+ *   use case.
  *
  *   This function is non-blocking and does not wait for a running callback
  *   to finish.
  *
  * Input Parameters:
- *   hrtimer - Timer instance to cancel
+ *   hrtimer - Pointer to the high-resolution timer instance to cancel.
  *
  * Returned Value:
- *   OK on success; a negated errno value on failure.
+ *   OK (0) on success; a negated errno value on failure.
+ *   > 0 on if the timer callback is running.
+ *
+ * Assumptions/Notes:
+ *   - This function acquires the global hrtimer spinlock to protect both
+ *     the red-black tree and the timer state.
+ *   - The caller must ensure that the timer structure is not freed until
+ *     it is guaranteed that any running callback has returned.
+ *
  ****************************************************************************/
 
 int hrtimer_cancel(FAR hrtimer_t *hrtimer);
@@ -152,12 +160,11 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer);
  * Description:
  *   Cancel a high-resolution timer and wait until it becomes inactive.
  *
- *   - Calls hrtimer_cancel() to request timer cancellation.
- *   - If the timer callback is running, waits until it completes and
- *     the timer state transitions to HRTIMER_STATE_INACTIVE.
- *   - If sleeping is allowed (normal task context), yields CPU briefly
- *     to avoid busy-waiting.
- *   - Otherwise (interrupt or idle task context), spins until completion.
+ *   Cancel a high-resolution timer and synchronously wait the callback to
+ *   be finished. This function set the timer to the cancelled state and wait
+ *   for all references to be released. The caller will then acquire full
+ *   ownership of the hrtimer. After the function returns, the caller can
+ *   safely deallocate the hrtimer.
  *
  * Input Parameters:
  *   hrtimer - Pointer to the high-resolution timer instance to cancel.
