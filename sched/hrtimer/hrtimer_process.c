@@ -74,7 +74,7 @@ void hrtimer_process(uint64_t now)
   irqstate_t flags;
   hrtimer_entry_t func;
   uint64_t expired;
-  uint64_t period;
+  uint64_t delay;
   int cpu = this_cpu();
 
   /* Acquire the lock and seize the ownership of the hrtimer queue. */
@@ -104,7 +104,12 @@ void hrtimer_process(uint64_t now)
 
       /* Invoke the timer callback */
 
-      period = func(hrtimer, expired);
+      delay = func(hrtimer, expired);
+
+      /* Ensure the delay is valid. */
+
+      DEBUGASSERT(HRTIMER_TIME_BEFORE_EQ(expired + delay,
+                                         now + HRTIMER_MAX_DELAY));
 
       /* Re-enter critical section to update timer state */
 
@@ -115,15 +120,10 @@ void hrtimer_process(uint64_t now)
        * re-insert into the timer queue.
        */
 
-      if (period != 0u && hrtimer_is_running(hrtimer, cpu))
+      if (delay != 0u && hrtimer_is_running(hrtimer, cpu))
         {
-          hrtimer->expired = expired + period;
-
-          /* Ensure no overflow occurs */
-
-          DEBUGASSERT(hrtimer->expired >= period);
-
-          hrtimer->func = func;
+          hrtimer->expired = expired + delay;
+          hrtimer->func    = func;
           hrtimer_insert(hrtimer);
         }
 
