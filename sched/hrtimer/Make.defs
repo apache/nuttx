@@ -24,6 +24,7 @@
 
 ifeq ($(CONFIG_HRTIMER),y)
   CSRCS += hrtimer_cancel.c hrtimer_initialize.c hrtimer_process.c hrtimer_start.c
+  CSRCS += hrtimer_gettime.c
 endif
 
 # Include hrtimer build support

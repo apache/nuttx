@@ -199,6 +199,25 @@ int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
                   uint64_t expired,
                   enum hrtimer_mode_e mode);
 
+/****************************************************************************
+ * Name: hrtimer_gettime
+ *
+ * Description:
+ *   Get the rest of the delay time of the hrtimer in nanoseconds.
+ *
+ * Input Parameters:
+ *   timer - The hrtimer to be queried.
+ *
+ * Returned Value
+ *   The time until next expiration in nanoseconds.
+ *
+ * Assumption:
+ *   The timer should not be NULL.
+ *
+ ****************************************************************************/
+
+uint64_t hrtimer_gettime(FAR hrtimer_t *timer);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
