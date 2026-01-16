@@ -1034,20 +1034,6 @@ static int perf_inherit_group_events(FAR struct perf_event_s *group_leader,
       return OK;
     }
 
-  if (child->perf_event_ctx == NULL)
-    {
-      child->perf_event_ctx =
-        kmm_zalloc(sizeof(struct perf_event_context_s));
-      if (child->perf_event_ctx == NULL)
-        {
-          serr("malloc task perf event fail\n");
-          return -ENOMEM;
-        }
-
-      perf_init_context(child->perf_event_ctx);
-      child->perf_event_ctx->tcb = child;
-    }
-
   child_leader = perf_inherit_event(group_leader, NULL, parent, child);
   if (child_leader == NULL)
     {
@@ -2036,12 +2022,25 @@ static int perf_setup_task_context(FAR struct tcb_s *tcb)
   irqstate_t flags;
   int ret = OK;
 
+  DEBUGASSERT(tcb->perf_event_ctx == NULL);
+  nxmutex_init(&tcb->perf_event_mutex);
+
   /* Inherit parent event if it has */
 
   if (parent_ctx == NULL)
     {
       return OK;
     }
+
+  tcb->perf_event_ctx = kmm_zalloc(sizeof(struct perf_event_context_s));
+  if (tcb->perf_event_ctx == NULL)
+    {
+      serr("malloc task perf event fail\n");
+      return -ENOMEM;
+    }
+
+  perf_init_context(tcb->perf_event_ctx);
+  tcb->perf_event_ctx->tcb = tcb;
 
   flags = spin_lock_irqsave(&parent_ctx->lock);
 
@@ -2845,9 +2844,6 @@ void perf_pmu_unregister(FAR struct pmu_s *pmu)
 int perf_event_task_init(FAR struct tcb_s *tcb)
 {
   int ret;
-
-  tcb->perf_event_ctx = NULL;
-  nxmutex_init(&tcb->perf_event_mutex);
 
   ret = perf_setup_task_context(tcb);
   if (ret < 0)
