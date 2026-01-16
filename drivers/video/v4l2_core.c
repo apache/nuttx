@@ -494,6 +494,17 @@ static int v4l2_ioctl(FAR struct file *filep,
         return v4l2->vops->encoder_cmd(filep,
                              (FAR struct v4l2_encoder_cmd *)arg);
 
+#ifdef CONFIG_DMA_SHARED_BUFFER
+      case VIDIOC_EXPBUF:
+        if (v4l2->vops->expbuf == NULL)
+          {
+            break;
+          }
+
+        return v4l2->vops->expbuf(filep,
+                             (FAR struct v4l2_exportbuffer *)arg);
+#endif
+
       default:
         verr("Unrecognized cmd: %d\n", cmd);
         break;

@@ -1499,6 +1499,18 @@ struct v4s_querymenu_scene
   struct v4l2_querymenu      menu;     /* Same as VIDIOC_QUERYMENU */
 };
 
+/* Structure for VIDIOC_EXPBUF */
+
+struct v4l2_exportbuffer
+{
+  uint32_t type; /* enum v4l2_buf_type */
+  uint32_t index;
+  uint32_t plane;
+  uint32_t flags;
+  uint32_t fd;
+  uint32_t reserved[11];
+};
+
 #define V4L2_ENC_CMD_START      (0)
 #define V4L2_ENC_CMD_STOP       (1)
 #define V4L2_ENC_CMD_PAUSE      (2)
