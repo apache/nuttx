@@ -221,6 +221,8 @@ struct cryptop
 #define CRYPTO_F_CBIMM 0x0020   /* Do callback immediately */
 #define CRYPTO_F_CANCEL 0x0040  /* Cancel the current crypto operation */
 
+#define CRYPTO_F_NOT_EXPORTABLE 0x0080 /* Mark key unexportable from secure module */
+
   FAR void *crp_buf;               /* Data to be processed */
   FAR void *crp_opaque;            /* Opaque pointer, passed along */
   FAR struct cryptodesc *crp_desc; /* Linked list of processing descriptors */
@@ -270,7 +272,22 @@ struct crypt_kop
 #define CRK_ECDSA_SECP256R1_SIGN   7
 #define CRK_ECDSA_SECP256R1_VERIFY 8
 #define CRK_ECDSA_SECP256R1_GENKEY 9
-#define CRK_ALGORITHM_MAX          9 /* Keep updated */
+
+/* key management */
+
+#define CRK_ALLOCATE_KEY           10 /* Request an available keyid from the driver */
+#define CRK_VALIDATE_KEYID         11 /* Check the specified keyid is available */
+#define CRK_IMPORT_KEY             12 /* Import key data into driver */
+#define CRK_DELETE_KEY             13 /* Request to remove key with specified keyid */
+#define CRK_EXPORT_KEY             14 /* Export raw data or private key if keypair */
+#define CRK_EXPORT_PUBLIC_KEY      15 /* Export public key of keypair */
+#define CRK_GENERATE_AES_KEY       16 /* Generate key data for AES with specified keyid */
+#define CRK_GENERATE_RSA_KEY       17 /* Generate keypair for RSA with specified keyid */
+#define CRK_GENERATE_SECP256R1_KEY 18 /* Generate keypair for ECC256 with specified keyid */
+#define CRK_SAVE_KEY               19 /* Save key data into FLASH */
+#define CRK_LOAD_KEY               20 /* Load key data from FLASH into RAM */
+#define CRK_UNLOAD_KEY             21 /* Unload key data from RAM */
+#define CRK_ALGORITHM_MAX          21 /* Keep updated */
 
 #define CRF_MOD_EXP                (1 << CRK_MOD_EXP)
 #define CRF_MOD_EXP_CRT            (1 << CRK_MOD_EXP_CRT)
@@ -281,6 +298,18 @@ struct crypt_kop
 #define CRF_ECDSA_SECP256R1_SIGN   (1 << CRK_ECDSA_SECP256R1_SIGN)
 #define CRF_ECDSA_SECP256R1_VERIFY (1 << CRK_ECDSA_SECP256R1_VERIFY)
 #define CRF_ECDSA_SECP256R1_GENKEY (1 << CRK_ECDSA_SECP256R1_GENKEY)
+#define CRF_ALLOCATE_KEY           (1 << CRK_ALLOCATE_KEY)
+#define CRF_VALIDATE_KEYID         (1 << CRK_VALIDATE_KEYID)
+#define CRF_IMPORT_KEY             (1 << CRK_IMPORT_KEY)
+#define CRF_DELETE_KEY             (1 << CRK_DELETE_KEY)
+#define CRF_EXPORT_KEY             (1 << CRK_EXPORT_KEY)
+#define CRF_EXPORT_PUBLIC_KEY      (1 << CRK_EXPORT_PUBLIC_KEY)
+#define CRF_GENERATE_AES_KEY       (1 << CRK_GENERATE_AES_KEY)
+#define CRF_GENERATE_RSA_KEY       (1 << CRK_GENERATE_RSA_KEY)
+#define CRF_GENERATE_SECP256R1_KEY (1 << CRK_GENERATE_SECP256R1_KEY)
+#define CRF_SAVE_KEY               (1 << CRK_SAVE_KEY)
+#define CRF_LOAD_KEY               (1 << CRK_LOAD_KEY)
+#define CRF_UNLOAD_KEY             (1 << CRK_UNLOAD_KEY)
 
 struct cryptkop
 {
