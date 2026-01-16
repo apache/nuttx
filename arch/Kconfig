@@ -976,6 +976,14 @@ config ARCH_PGPOOL_SIZE
 endif # ARCH_PGPOOL_MAPPING
 endif # ARCH_ADDRENV && ARCH_NEED_ADDRENV_MAPPING
 
+config NCPUS
+	int "Number of CPUs we will use"
+	default SMP_NCPUS if SMP
+	default 1
+	range 1 32
+	---help---
+		Number of CPUs we will use.
+
 config PAGING
 	bool "On-demand paging"
 	default n
