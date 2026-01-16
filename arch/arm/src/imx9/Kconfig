@@ -118,12 +118,12 @@ menu "FLEXCAN1 Configuration"
 
 config FLEXCAN1_BITRATE
 	int "CAN bitrate"
-	depends on !(NET_CAN_CANFD)
+	depends on !NET_CAN_CANFD
 	default 1000000
 
 config FLEXCAN1_SAMPLEP
 	int "CAN sample point"
-	depends on !(NET_CAN_CANFD)
+	depends on !NET_CAN_CANFD
 	default 80
 
 config FLEXCAN1_ARBI_BITRATE
@@ -153,32 +153,32 @@ menu "FLEXCAN2 Configuration"
 
 config FLEXCAN2_BITRATE
 	int "CAN bitrate"
-	depends on !(NET_CAN_CANFD && IMX9_FLEXCAN2_FD)
+	depends on !NET_CAN_CANFD
 	default 1000000
 
 config FLEXCAN2_SAMPLEP
 	int "CAN sample point"
-	depends on !(NET_CAN_CANFD && IMX9_FLEXCAN2_FD)
+	depends on !NET_CAN_CANFD
 	default 80
 
 config FLEXCAN2_ARBI_BITRATE
 	int "CAN FD Arbitration phase bitrate"
-	depends on NET_CAN_CANFD && IMX9_FLEXCAN2_FD
+	depends on NET_CAN_CANFD
 	default 1000000
 
 config FLEXCAN2_ARBI_SAMPLEP
 	int "CAN FD Arbitration phase sample point"
-	depends on NET_CAN_CANFD && IMX9_FLEXCAN2_FD
+	depends on NET_CAN_CANFD
 	default 80
 
 config FLEXCAN2_DATA_BITRATE
 	int "CAN FD Data phase bitrate"
-	depends on NET_CAN_CANFD && IMX9_FLEXCAN2_FD
+	depends on NET_CAN_CANFD
 	default 4000000
 
 config FLEXCAN2_DATA_SAMPLEP
 	int "CAN FD Data phase sample point"
-	depends on NET_CAN_CANFD && IMX9_FLEXCAN2_FD
+	depends on NET_CAN_CANFD
 	default 90
 
 endmenu # IMX9_FLEXCAN2
@@ -223,12 +223,12 @@ menu "FLEXCAN4 Configuration"
 
 config FLEXCAN4_BITRATE
 	int "CAN bitrate"
-	depends on !(NET_CAN_CANFD)
+	depends on !NET_CAN_CANFD
 	default 4000000
 
 config FLEXCAN4_SAMPLEP
 	int "CAN sample point"
-	depends on !(NET_CAN_CANFD)
+	depends on !NET_CAN_CANFD
 	default 80
 
 config FLEXCAN4_ARBI_BITRATE
@@ -258,12 +258,12 @@ menu "FLEXCAN5 Configuration"
 
 config FLEXCAN5_BITRATE
 	int "CAN bitrate"
-	depends on !(NET_CAN_CANFD)
+	depends on !NET_CAN_CANFD
 	default 5000000
 
 config FLEXCAN5_SAMPLEP
 	int "CAN sample point"
-	depends on !(NET_CAN_CANFD)
+	depends on !NET_CAN_CANFD
 	default 80
 
 config FLEXCAN5_ARBI_BITRATE
