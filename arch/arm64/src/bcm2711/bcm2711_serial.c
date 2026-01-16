@@ -568,7 +568,9 @@ static int bcm2711_miniuart_attach(struct uart_dev_s *dev)
 
   /* Set interrupt priority in GICv2 */
 
+#ifdef CONFIG_ARCH_IRQPRIO
   up_prioritize_irq(BCM_IRQ_VC_AUX, 0);
+#endif
   up_set_irq_type(BCM_IRQ_VC_AUX, IRQ_HIGH_LEVEL);
 
   /* Enable UART interrupt */

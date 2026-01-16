@@ -272,7 +272,9 @@ static int bcm2711_gpio_irqs_init(void)
   for (int i = 0; i < NUM_GPIO_IRQS; i++)
     {
       up_enable_irq(g_gpio_irqs[i]);
+#ifdef CONFIG_ARCH_IRQPRIO
       up_prioritize_irq(g_gpio_irqs[i], 0);
+#endif
       up_set_irq_type(g_gpio_irqs[i], IRQ_HIGH_LEVEL);
     }
 
