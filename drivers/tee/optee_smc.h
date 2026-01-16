@@ -1,13 +1,13 @@
 /****************************************************************************
- * drivers/misc/optee_smc.h
+ * drivers/tee/optee_smc.h
  *
  * SPDX-License-Identifier: BSD-2-Clause
  * Copyright (c) 2015-2018, Linaro Limited
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_MISC_OPTEE_SMC_H
-#define __DRIVERS_MISC_OPTEE_SMC_H
+#ifndef __DRIVERS_TEE_OPTEE_SMC_H
+#define __DRIVERS_TEE_OPTEE_SMC_H
 
 /****************************************************************************
  * Included Files
@@ -445,4 +445,4 @@ static inline bool optee_smc_return_is_rpc(uint32_t ret)
           OPTEE_SMC_RETURN_RPC_PREFIX;
 }
 
-#endif /* __DRIVERS_MISC_OPTEE_SMC_H */
+#endif /* __DRIVERS_TEE_OPTEE_SMC_H */
