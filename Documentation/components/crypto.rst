@@ -135,3 +135,57 @@ Basic Usage Pattern
 4. Close the session when done
 
 For more details, refer to the cryptodev.h header file and specific driver documentation.
+
+Asymmetric Cryptography and Key Management
+===========================================
+
+Public Key Algorithms
+---------------------
+
+**RSA (Rivest-Shamir-Adleman)**
+
+- RSA key pair generation for variable key sizes
+- Digital signature generation and verification
+- Public key encryption and decryption
+
+**ECDSA (Elliptic Curve Digital Signature Algorithm)**
+
+- ECDSA key pair generation for different curves
+- Digital signature generation and verification
+
+Key Management Operations
+--------------------------
+
+The cryptodev module provides comprehensive key management interfaces:
+
+**Key Allocation and Validation**
+
+- CRK_ALLOCATE_KEY: Request an available key ID from the driver
+- CRK_VALIDATE_KEYID: Check if a specified key ID is available in the driver
+
+**Key Import and Export**
+
+- CRK_IMPORT_KEY: Import key data into the driver for use in cryptographic operations
+- CRK_EXPORT_KEY: Export raw key data or private key from a keypair
+- CRK_EXPORT_PUBLIC_KEY: Export only the public key portion of a keypair
+
+**Key Generation**
+
+- CRK_GENERATE_AES_KEY: Generate AES key data with specified key ID
+- CRK_GENERATE_RSA_KEY: Generate RSA keypair (public and private) with specified key ID
+- CRK_GENERATE_SECP256R1_KEY: Generate ECDSA keypair on SECP256R1 curve with specified key ID
+
+**Key Lifecycle Management**
+
+- CRK_DELETE_KEY: Remove key with specified key ID from the driver
+- CRK_SAVE_KEY: Persist key data to FLASH storage for non-volatile storage
+- CRK_LOAD_KEY: Load previously saved key data from FLASH into RAM
+
+**Cryptographic Operations Using Keys**
+
+Once keys are allocated, generated, or imported, they can be used for:
+
+- Symmetric encryption/decryption operations (AES)
+- RSA signature generation and verification
+- ECDSA digital signature operations
+- Key exchange protocols
