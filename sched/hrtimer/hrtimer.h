@@ -84,6 +84,7 @@ extern seqcount_t g_hrtimer_lock;
 /* Red-Black tree containing all active high-resolution timers */
 
 extern struct hrtimer_tree_s g_hrtimer_tree;
+extern struct FAR hrtimer_s *g_hrtimer_head;
 #else
 /* List containing all active high-resolution timers */
 
@@ -218,16 +219,26 @@ RB_PROTOTYPE(hrtimer_tree_s, hrtimer_s, node, hrtimer_compare);
 
 static inline_function bool hrtimer_remove(FAR hrtimer_t *hrtimer)
 {
+  bool is_head;
 #ifdef CONFIG_HRTIMER_TREE
+  is_head = g_hrtimer_head == hrtimer;
+
   RB_REMOVE(hrtimer_tree_s, &g_hrtimer_tree, hrtimer);
+
+  if (is_head)
+    {
+      g_hrtimer_head = RB_MIN(hrtimer_tree_s, &g_hrtimer_tree);
+    }
 #else
+  is_head = list_is_head(&g_hrtimer_list, &hrtimer->node);
   list_delete_fast(&hrtimer->node);
 #endif
 
   /* Explicitly mark the timer as dequeued. */
 
   hrtimer->func = NULL;
-  return RB_LEFT(hrtimer, node) == NULL;
+
+  return is_head;
 }
 
 /****************************************************************************
@@ -248,8 +259,17 @@ static inline_function bool hrtimer_remove(FAR hrtimer_t *hrtimer)
 static inline_function bool hrtimer_insert(FAR hrtimer_t *hrtimer)
 {
 #ifdef CONFIG_HRTIMER_TREE
+  bool is_head = false;
   RB_INSERT(hrtimer_tree_s, &g_hrtimer_tree, hrtimer);
-  return RB_LEFT(hrtimer, node) == NULL;
+
+  if (g_hrtimer_head == NULL ||
+      HRTIMER_TIME_BEFORE(hrtimer->expired, g_hrtimer_head->expired))
+    {
+      g_hrtimer_head = hrtimer;
+      is_head        = true;
+    }
+
+  return is_head;
 #else
   FAR hrtimer_t *curr;
   uint64_t expired = hrtimer->expired;
@@ -282,7 +302,7 @@ static inline_function bool hrtimer_insert(FAR hrtimer_t *hrtimer)
 static inline_function FAR hrtimer_t *hrtimer_get_first(void)
 {
 #ifdef CONFIG_HRTIMER_TREE
-  return RB_MIN(hrtimer_tree_s, &g_hrtimer_tree);
+  return g_hrtimer_head;
 #else
   return list_first_entry(&g_hrtimer_list, FAR hrtimer_t, node);
 #endif
