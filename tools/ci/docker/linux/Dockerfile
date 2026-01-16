@@ -153,18 +153,18 @@ RUN mkdir -p clang-arm-none-eabi && \
   curl -s -L  "https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-19.1.5/LLVM-ET-Arm-19.1.5-Linux-x86_64.tar.xz" \
   | tar -C clang-arm-none-eabi --strip-components 1 -xJ
 
-# ARM GCC 15.2
+# ARM GCC 14.3
 RUN mkdir -p gcc-arm-none-eabi && \
-  curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/15.2.Rel1/binrel/arm-gnu-toolchain-15.2.Rel1-x86_64-arm-none-eabi.tar.xz" \
+  curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/14.3.Rel1/binrel/arm-gnu-toolchain-14.3.Rel1-x86_64-arm-none-eabi.tar.xz" \
   | tar -C gcc-arm-none-eabi --strip-components 1 -xJ
 
 ###############################################################################
 # Build image for tool required by ARM64 builds
 ###############################################################################
 FROM nuttx-toolchain-base AS nuttx-toolchain-arm64
-# ARM64 GCC 15.2
+# ARM64 GCC 14.3
 RUN mkdir gcc-aarch64-none-elf && \
-  curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/15.2.Rel1/binrel/arm-gnu-toolchain-15.2.Rel1-x86_64-aarch64-none-elf.tar.xz" \
+  curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/14.3.Rel1/binrel/arm-gnu-toolchain-14.3.Rel1-x86_64-aarch64-none-elf.tar.xz" \
   | tar -C gcc-aarch64-none-elf --strip-components 1 -xJ
 
 ###############################################################################
@@ -246,9 +246,9 @@ RUN cd /tools/renesas-tools/build/gcc && \
 # Build image for tool required by RISCV builds
 ###############################################################################
 FROM nuttx-toolchain-base AS nuttx-toolchain-riscv
-# RISCV GCC 15.2.0-1
+# RISCV GCC 14.3.0-1
 RUN mkdir -p riscv-none-elf-gcc && \
-  curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v15.2.0-1/xpack-riscv-none-elf-gcc-15.2.0-1-linux-x64.tar.gz" \
+  curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v14.3.0-1/xpack-riscv-none-elf-gcc-14.3.0-1-linux-x64.tar.gz" \
   | tar -C riscv-none-elf-gcc --strip-components 1 -xz
 
 ###############################################################################
@@ -263,9 +263,9 @@ RUN mkdir -p sparc-gaisler-elf-gcc && \
 # Build image for tool required by ESP32 builds
 ###############################################################################
 FROM nuttx-toolchain-base AS nuttx-toolchain-esp32
-# ESP 15.2.0
+# ESP 14.2.0
 RUN mkdir -p xtensa-esp-elf-gcc && \
-  curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-15.2.0_20251204/xtensa-esp-elf-15.2.0_20251204-x86_64-linux-gnu.tar.xz" \
+  curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-14.2.0_20251219/xtensa-esp-elf-14.2.0_20251219-x86_64-linux-gnu.tar.xz" \
   | tar -C xtensa-esp-elf-gcc --strip-components 1 -xJ
 
 RUN echo "ESP Binaries: 2022/01/26"
@@ -386,61 +386,35 @@ RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-21 50 && \
   update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-21 50 && \
   update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-21 50
 
-# Install GCC 15.2.0 from source
-# Install build dependencies
+# Install GCC 14 from Ubuntu packages
 RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq \
-  libgmp-dev \
-  libmpfr-dev \
-  libmpc-dev \
-  libisl-dev \
-  zlib1g-dev \
-  texinfo \
+  gcc-14 \
+  g++-14 \
   && rm -rf /var/lib/apt/lists/*
-
-# Download, build and install GCC 15.2.0
-RUN mkdir -p /tmp/gcc-build && cd /tmp/gcc-build && \
-  wget -q https://ftp.gnu.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.xz && \
-  tar xf gcc-15.2.0.tar.xz && \
-  cd gcc-15.2.0 && \
-  ./contrib/download_prerequisites && \
-  mkdir build && cd build && \
-  ../configure \
-  --prefix=/usr/local/gcc-15 \
-  --enable-languages=c,c++ \
-  --disable-multilib \
-  --disable-bootstrap \
-  --enable-checking=release && \
-  make -j$(nproc) && \
-  make install && \
-  cd / && rm -rf /tmp/gcc-build
-
-# Configure library path for GCC 15
-RUN echo "/usr/local/gcc-15/lib64" > /etc/ld.so.conf.d/gcc-15.conf && \
-  ldconfig
 
 # Remove existing cpp symlinks to avoid circular reference
 RUN rm -f /lib/cpp /usr/bin/cpp /etc/alternatives/cpp
 
-# Set up update-alternatives for GCC 15 and system GCC 13
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/local/gcc-15/bin/gcc 100 && \
+# Set up update-alternatives for GCC 14 and system GCC 13
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100 && \
   update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 50 && \
-  update-alternatives --install /usr/bin/g++ g++ /usr/local/gcc-15/bin/g++ 100 && \
+  update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 100 && \
   update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 50 && \
-  update-alternatives --install /usr/bin/cpp cpp /usr/local/gcc-15/bin/cpp 100 && \
+  update-alternatives --install /usr/bin/cpp cpp /usr/bin/cpp-14 100 && \
   update-alternatives --install /usr/bin/cpp cpp /usr/bin/cpp-13 50 && \
-  update-alternatives --install /usr/bin/gcc-ar gcc-ar /usr/local/gcc-15/bin/gcc-ar 100 && \
+  update-alternatives --install /usr/bin/gcc-ar gcc-ar /usr/bin/gcc-ar-14 100 && \
   update-alternatives --install /usr/bin/gcc-ar gcc-ar /usr/bin/gcc-ar-13 50 && \
-  update-alternatives --install /usr/bin/gcc-nm gcc-nm /usr/local/gcc-15/bin/gcc-nm 100 && \
+  update-alternatives --install /usr/bin/gcc-nm gcc-nm /usr/bin/gcc-nm-14 100 && \
   update-alternatives --install /usr/bin/gcc-nm gcc-nm /usr/bin/gcc-nm-13 50 && \
-  update-alternatives --install /usr/bin/gcc-ranlib gcc-ranlib /usr/local/gcc-15/bin/gcc-ranlib 100 && \
+  update-alternatives --install /usr/bin/gcc-ranlib gcc-ranlib /usr/bin/gcc-ranlib-14 100 && \
   update-alternatives --install /usr/bin/gcc-ranlib gcc-ranlib /usr/bin/gcc-ranlib-13 50 && \
-  update-alternatives --install /usr/bin/gcov gcov /usr/local/gcc-15/bin/gcov 100 && \
+  update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-14 100 && \
   update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-13 50 && \
-  update-alternatives --install /usr/bin/gcov-tool gcov-tool /usr/local/gcc-15/bin/gcov-tool 100 && \
+  update-alternatives --install /usr/bin/gcov-tool gcov-tool /usr/bin/gcov-tool-14 100 && \
   update-alternatives --install /usr/bin/gcov-tool gcov-tool /usr/bin/gcov-tool-13 50 && \
-  update-alternatives --install /usr/bin/gcov-dump gcov-dump /usr/local/gcc-15/bin/gcov-dump 100 && \
+  update-alternatives --install /usr/bin/gcov-dump gcov-dump /usr/bin/gcov-dump-14 100 && \
   update-alternatives --install /usr/bin/gcov-dump gcov-dump /usr/bin/gcov-dump-13 50 && \
-  update-alternatives --install /usr/bin/lto-dump lto-dump /usr/local/gcc-15/bin/lto-dump 100 && \
+  update-alternatives --install /usr/bin/lto-dump lto-dump /usr/bin/lto-dump-14 100 && \
   update-alternatives --install /usr/bin/lto-dump lto-dump /usr/bin/lto-dump-13 50
 
 # Configure Python Environment
