@@ -35,6 +35,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
+              "Configure BOARD_LOOPSPERMSEC to non-default value.");
+
 #define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
 #define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
 #define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)

@@ -91,11 +91,16 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include "hardware/stm32g4xxxx_pwr.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
+              "Configure BOARD_LOOPSPERMSEC to non-default value.");
 
 #if (STM32_SYSCLK_SW == RCC_CFGR_SW_HSE)
 #  define USE_HSE

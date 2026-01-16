@@ -28,6 +28,8 @@
 
 #include <arch/board/board.h>
 
+#include <assert.h>
+
 #include "chip.h"
 #include "at32_pwr.h"
 #include "hardware/at32f43xxx_rcc.h"
@@ -36,6 +38,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
+              "Configure BOARD_LOOPSPERMSEC to non-default value.");
 
 /* Allow up to 100 milliseconds for the high speed clock to become ready.
  * that is a very long delay, but if the clock does not become ready we are

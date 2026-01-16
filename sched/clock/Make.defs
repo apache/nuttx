@@ -31,7 +31,7 @@ CSRCS += clock_notifier.c
 
 ifneq ($(CONFIG_TIMER_ARCH),y)
   ifneq ($(CONFIG_ALARM_ARCH),y)
-    CSRCS += delay.c
+    CSRCS += clock_delay.c
   endif
 endif
 
