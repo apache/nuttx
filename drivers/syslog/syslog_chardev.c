@@ -33,10 +33,17 @@
 #include <errno.h>
 #include <syslog.h>
 
+#include <fcntl.h>
+
+#include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/syslog/syslog.h>
 
 #include "syslog.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_CHARDEV
 
@@ -78,11 +85,22 @@ static const struct file_operations g_syslog_fops =
 static ssize_t syslog_chardev_write(FAR struct file *filep,
                                     FAR const char *buffer, size_t len)
 {
-  struct lib_syslograwstream_s stream;
+  /* Check if opened with O_DIRECT - bypass syslog stream */
 
-  lib_syslograwstream_open(&stream);
-  lib_stream_puts(&stream.common, buffer, len);
-  lib_syslograwstream_close(&stream);
+#ifdef CONFIG_ARCH_LOWPUTC
+  if (filep->f_oflags & O_DIRECT)
+    {
+      up_nputs(buffer, len);
+    }
+  else /* Default path: use syslog stream */
+#endif
+    {
+      struct lib_syslograwstream_s stream;
+
+      lib_syslograwstream_open(&stream);
+      lib_stream_puts(&stream.common, buffer, len);
+      lib_syslograwstream_close(&stream);
+    }
 
   return len;
 }
