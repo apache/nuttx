@@ -250,7 +250,9 @@ static sockcaps_t local_sockcaps(FAR struct socket *psock)
 static void local_sockaddref(FAR struct socket *psock)
 {
   DEBUGASSERT(psock->s_domain == PF_LOCAL);
+  local_lock();
   local_addref(psock->s_conn);
+  local_unlock();
 }
 
 /****************************************************************************
@@ -1013,7 +1015,9 @@ static int local_close(FAR struct socket *psock)
            * could be more if the socket was dup'ed).
            */
 
+          local_lock();
           local_subref(psock->s_conn);
+          local_unlock();
           return OK;
         }
 
