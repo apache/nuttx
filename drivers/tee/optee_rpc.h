@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/misc/optee_supplicant.h
+ * drivers/tee/optee_rpc.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,14 +20,12 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_MISC_OPTEE_SUPPLICANT_H
-#define __DRIVERS_MISC_OPTEE_SUPPLICANT_H
+#ifndef __DRIVERS_TEE_OPTEE_RPC_H
+#define __DRIVERS_TEE_OPTEE_RPC_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-
-#include <sys/types.h>
 
 #include "optee.h"
 
@@ -40,25 +38,11 @@ extern "C"
 {
 #endif
 
-void optee_supplicant_init(FAR struct idr_s **shm_idr);
-void optee_supplicant_uninit(void);
-
-FAR struct optee_shm *optee_supplicant_search_shm(uint32_t id);
-
-uint32_t optee_supplicant_free(int32_t shm_id);
-int optee_supplicant_alloc(FAR struct optee_priv_data *priv,
-                           size_t sz, FAR struct optee_shm **shm);
-
-void optee_supplicant_cmd(FAR struct optee_priv_data *priv,
-                          FAR struct optee_msg_arg *arg);
-
-int optee_supplicant_send(uint32_t ret, uint32_t num_params,
-                          FAR struct tee_ioctl_param *param);
-
-int optee_supplicant_recv(FAR uint32_t *func, FAR uint32_t *num_params,
-                          FAR struct tee_ioctl_param *params);
+void optee_rpc_handle_cmd(FAR struct optee_priv_data *priv,
+                          FAR struct optee_shm *shm,
+                          FAR void **last_page_list);
 
 #if defined(__cplusplus)
 }
 #endif
-#endif /* __DRIVERS_MISC_OPTEE_SUPPLICANT_H */
+#endif /* __DRIVERS_TEE_OPTEE_RPC_H */
