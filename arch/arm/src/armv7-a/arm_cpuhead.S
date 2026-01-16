@@ -101,6 +101,12 @@ __cpu1_start:
 
 	b		.Lcpu_start
 
+	.globl	cpu1_start
+	.type	cpu1_start, object
+
+	cpu1_start:
+	.long	__cpu1_start
+
 .Lcpu1_stackpointer:
 	.long	.Lcpu1_stacktop
 	.size	__cpu1_start, .-__cpu1_start
@@ -124,6 +130,12 @@ __cpu2_start:
 
 	b		.Lcpu_start
 
+	.globl	cpu2_start
+	.type	cpu2_start, object
+
+	cpu2_start:
+	.long	__cpu2_start
+
 .Lcpu2_stackpointer:
 	.long	.Lcpu2_stacktop
 	.size	__cpu2_start, .-__cpu2_start
@@ -146,6 +158,12 @@ __cpu3_start:
 	/* Then branch to the common startup logic (PC-relative) */
 
 	b		.Lcpu_start
+
+	.globl	cpu3_start
+	.type	cpu3_start, object
+
+	cpu3_start:
+	.long	__cpu3_start
 
 .Lcpu3_stackpointer:
 	.long	.Lcpu3_stacktop
