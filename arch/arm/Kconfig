@@ -115,7 +115,6 @@ config ARCH_CHIP_CSK6
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_TIMEKEEPING
 	select ARM_HAVE_MPU_UNIFIED
-	select ARMV8M_HAVE_STACKCHECK
 	select ARCH_HAVE_ADJTIME
 	select ARCH_CORTEXM33
 	---help---
@@ -585,7 +584,6 @@ config ARCH_CHIP_STM32H5
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_TRUSTZONE
 	select ARM_HAVE_MPU_UNIFIED
-	select ARMV8M_HAVE_STACKCHECK
 	---help---
 		STMicro STM32 H5 architectures (ARM Cortex-M33).
 
@@ -601,7 +599,6 @@ config ARCH_CHIP_STM32L5
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_TRUSTZONE
 	select ARM_HAVE_MPU_UNIFIED
-	select ARMV8M_HAVE_STACKCHECK
 	---help---
 		STMicro STM32 L5 architectures (ARM Cortex-M33).
 
@@ -617,7 +614,6 @@ config ARCH_CHIP_STM32U5
 	select ARCH_HAVE_SPI_BITORDER
 	select ARCH_HAVE_TICKLESS
 	select ARM_HAVE_MPU_UNIFIED
-	select ARMV8M_HAVE_STACKCHECK
 	select ARCH_HAVE_TRUSTZONE
 	---help---
 		STMicro STM32 U5 architectures (ARM Cortex-M33).
