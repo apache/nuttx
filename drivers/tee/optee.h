@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/misc/optee.h
+ * drivers/tee/optee.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_MISC_OPTEE_H
-#define __DRIVERS_MISC_OPTEE_H
+#ifndef __DRIVERS_TEE_OPTEE_H
+#define __DRIVERS_TEE_OPTEE_H
 
 /****************************************************************************
  * Included Files
@@ -141,4 +141,4 @@ uint32_t optee_convert_from_errno(int err);
 #if defined(__cplusplus)
 }
 #endif
-#endif /* __DRIVERS_MISC_OPTEE_H */
+#endif /* __DRIVERS_TEE_OPTEE_H */
