@@ -35,7 +35,7 @@ following section.
   mtd/index.rst
   regmap.rst
   reset.rst
-  rptun.rst
+  rptun/index.rst
   rwbuffer.rst
   sensors.rst
   segger.rst
