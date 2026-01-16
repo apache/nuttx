@@ -40,6 +40,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
+              "Configure BOARD_LOOPSPERMSEC to non-default value.");
+
 #define PWR_TIMEOUT (10 * CONFIG_BOARD_LOOPSPERMSEC)
 
 /****************************************************************************
