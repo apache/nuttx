@@ -616,7 +616,7 @@ static const uint8_t ucmap[USBHID_NUMSCANCODES] =
   0,    0,       0,      0,      0,    0,    0,      0,    /* 0xa0-0xa7: Out,Oper,Clear,CrSel,Excel,(reserved) */
   0,    0,       0,      0,      0,    0,    0,      0,    /* 0xa8-0xaf: (reserved) */
   0,    0,       0,      0,      0,    0,    '(',    ')',  /* 0xb0-0xb7: 00,000,ThouSeparator,DecSeparator,CurrencyUnit,SubUnit,(,) */
-  '{',  '}',    '\t',    \177,   'A',  'B',  'C',    'D',  /* 0xb8-0xbf: {,},tab,backspace,A-D */
+  '{',  '}',    '\t',    '\177', 'A',  'B',  'C',    'D',  /* 0xb8-0xbf: {,},tab,backspace,A-D */
   'F',  'F',     0,      '^',    '%',  '<', '>',     '&',  /* 0xc0-0xc7: E-F,XOR,^,%,<,>,& */
   0,    '|',     0,      ':',    '%',  ' ', '@',     '!',  /* 0xc8-0xcf: &&,|,||,:,#, ,@,! */
   0,    0,       0,      0,      0,    0,   0,       0,    /* 0xd0-0xd7: Memory Store,Recall,Clear,Add,Subtract,Multiply,Divide,+/- */
