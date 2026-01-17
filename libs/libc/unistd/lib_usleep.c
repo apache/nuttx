@@ -30,6 +30,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <nuttx/clock.h>
+#include <nuttx/sched.h>
 
 /****************************************************************************
  * Public Functions
@@ -108,7 +109,11 @@ int usleep(useconds_t usec)
       rqtp.tv_sec  = sec;
       rqtp.tv_nsec = (usec - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
+#ifdef CONFIG_DISABLE_ALL_SIGNALS
+      ret = nxsched_nanosleep(&rqtp, NULL);
+#else
       ret = clock_nanosleep(CLOCK_REALTIME, 0, &rqtp, NULL);
+#endif
     }
 
   return ret;
