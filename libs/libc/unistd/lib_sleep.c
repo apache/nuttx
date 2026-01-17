@@ -31,6 +31,7 @@
 
 #include <nuttx/clock.h>
 #include <arch/irq.h>
+#include <nuttx/sched.h>
 
 /****************************************************************************
  * Public Functions
@@ -109,7 +110,11 @@ unsigned int sleep(unsigned int seconds)
       rqtp.tv_sec  = seconds;
       rqtp.tv_nsec = 0;
 
+#ifdef CONFIG_DISABLE_ALL_SIGNALS
+      ret = nxsched_nanosleep(&rqtp, &rmtp);
+#else
       ret = clock_nanosleep(CLOCK_REALTIME, 0, &rqtp, &rmtp);
+#endif
 
       /* clock_nanosleep() should only fail if it was interrupted by a
        * signal, but we treat all errors the same,
