@@ -199,6 +199,10 @@ void up_disable_irq(int irq)
 
 void host_irqinitialize(void)
 {
+  /* Default ignore SIGPIPE */
+
+  signal(SIGPIPE, SIG_IGN);
+
 #ifdef CONFIG_SMP
   /* Register the pause handler */
 
