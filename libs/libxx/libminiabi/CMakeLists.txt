@@ -1,5 +1,5 @@
 # ##############################################################################
-# libs/libxx/libcxxmini/CMakeLists.txt
+# libs/libxx/libminiabi/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,16 +20,16 @@
 #
 # ##############################################################################
 
-if(CONFIG_LIBCXXMINI)
+if(CONFIG_LIBMINIABI)
 
-  nuttx_add_system_library(libcxxmini)
+  nuttx_add_system_library(libminiabi)
 
   if(NOT CONFIG_XTENSA_TOOLCHAIN_XCC)
     add_compile_options(-Wno-missing-exception-spec)
   endif()
 
   target_sources(
-    libcxxmini
+    libminiabi
     PRIVATE libxx_cxa_guard.cxx
             libxx_cxapurevirtual.cxx
             libxx_delete.cxx

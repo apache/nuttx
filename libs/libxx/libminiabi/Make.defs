@@ -1,5 +1,5 @@
 ############################################################################
-# libs/libxx/libcxxmini/Make.defs
+# libs/libxx/libminiabi/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -29,5 +29,5 @@ ifneq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)
   CXXFLAGS += -Wno-missing-exception-spec
 endif
 
-DEPPATH += --dep-path libcxxmini
-VPATH += libcxxmini
+DEPPATH += --dep-path libminiabi
+VPATH += libminiabi

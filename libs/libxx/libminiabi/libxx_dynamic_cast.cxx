@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libxx/libcxxmini/libxx_dynamic_cast.cxx
+ * libs/libxx/libminiabi/libxx_dynamic_cast.cxx
  *
  * Copyright 2010-2011 PathScale, Inc. All rights reserved.
  *

@@ -1,5 +1,5 @@
 //***************************************************************************
-// libs/libxx/libcxxmini/libxx_delete.cxx
+// libs/libxx/libminiabi/libxx_cxa_guard.cxx
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -16,6 +16,7 @@
 // distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
 // License for the specific language governing permissions and limitations
+// under the License.
 //
 //***************************************************************************
 
@@ -23,48 +24,72 @@
 // Included Files
 //***************************************************************************
 
-#include <nuttx/config.h>
-
-#include <cstddef>
-
-#include <nuttx/lib/lib.h>
+#include <nuttx/compiler.h>
 
 //***************************************************************************
-// Operators
+// Pre-processor Definitions
 //***************************************************************************
 
 //***************************************************************************
-// Name: delete
+// Private Types
 //***************************************************************************
 
-void operator delete(FAR void *ptr) throw()
+#ifdef __ARM_EABI__
+// The 32-bit ARM C++ ABI specifies that the guard is a 32-bit
+// variable and the least significant bit contains 0 prior to
+// initialization, and 1 after.
+
+typedef int __guard;
+
+#else
+// The "standard" C++ ABI specifies that the guard is a 64-bit
+// variable and the first byte contains 0 prior to initialization, and
+// 1 after.
+
+__extension__ typedef int __guard __attribute__((mode(__DI__)));
+#endif
+
+//***************************************************************************
+// Private Data
+//***************************************************************************
+
+//***************************************************************************
+// Public Functions
+//***************************************************************************
+
+extern "C"
 {
-  lib_free(ptr);
+  //*************************************************************************
+  // Name: __cxa_guard_acquire
+  //*************************************************************************
+
+  int __cxa_guard_acquire(FAR __guard *g)
+  {
+#ifdef __ARM_EABI__
+    return !(*g & 1);
+#else
+    return !*(FAR char *)g;
+#endif
+  }
+
+  //*************************************************************************
+  // Name: __cxa_guard_release
+  //*************************************************************************
+
+  void __cxa_guard_release(FAR __guard *g)
+  {
+#ifdef __ARM_EABI__
+    *g = 1;
+#else
+    *(FAR char *)g = 1;
+#endif
+  }
+
+  //*************************************************************************
+  // Name: __cxa_guard_abort
+  //*************************************************************************
+
+  void __cxa_guard_abort(FAR __guard *)
+  {
+  }
 }
-
-#ifdef CONFIG_HAVE_CXX14
-
-//***************************************************************************
-// Operators
-//***************************************************************************
-
-//***************************************************************************
-// Name: delete
-//
-// NOTE:
-//   This should take a type of size_t.  But size_t has an unknown underlying
-//   type.  In the nuttx sys/types.h header file, size_t is typed as uint32_t
-//   (which is determined by architecture-specific logic).  But the C++
-//   compiler may believe that size_t is of a different type resulting in
-//   compilation errors in the operator.  Using the underlying integer type
-//   instead of size_t seems to resolve the compilation issues. Need to
-//   REVISIT this.
-//
-//***************************************************************************
-
-void operator delete(FAR void *ptr, std::size_t size)
-{
-  lib_free(ptr);
-}
-
-#endif /* CONFIG_HAVE_CXX14 */
