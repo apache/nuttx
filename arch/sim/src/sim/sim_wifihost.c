@@ -32,6 +32,7 @@
 #include <netpacket/netlink.h>
 #include <nuttx/net/netlink.h>
 #include <sys/time.h>
+#include <nuttx/mm/mm.h>
 
 #include "sim_internal.h"
 #include "sim_wifihost.h"
@@ -1036,8 +1037,8 @@ static int wifi_send_event(struct net_driver_s *dev, unsigned int cmd,
 
   /* Allocate the response buffer */
 
-  alloc = (struct wireless_event_list_s *)
-          kmm_zalloc(RTA_SPACE(sizeof(struct wireless_event_list_s)));
+  alloc = (struct wireless_event_list_s *)mm_zalloc(g_mmheap,
+           RTA_SPACE(sizeof(struct wireless_event_list_s)));
   if (alloc == NULL)
     {
       nerr("ERROR: Failed to allocate wifi event buffer.\n");
@@ -2016,7 +2017,7 @@ int sim_wifihost_init(struct sim_wifihost_lowerhalf_s *dev, int devidx)
 {
   struct sim_wifi_s *priv;
 
-  priv = kmm_zalloc(sizeof(*priv));
+  priv = mm_zalloc(g_mmheap, sizeof(*priv));
   if (priv == NULL)
     {
       nerr("wifi driver priv alloc failed\n");

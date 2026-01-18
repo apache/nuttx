@@ -271,7 +271,7 @@ static void netdriver_rxready_interrupt(void *priv)
 static void sim_netdev_work(void *arg)
 {
   struct sim_netdev_s *priv = (struct sim_netdev_s *)arg;
-  struct netdev_lowerhalf_s *dev = &priv->dev;
+  struct netdev_lowerhalf_s *dev = (struct netdev_lowerhalf_s *)&priv->dev;
 
   if (sim_netdev_avail(DEVIDX(dev)))
     {
