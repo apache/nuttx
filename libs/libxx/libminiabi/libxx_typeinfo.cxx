@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libxx/libcxxmini/libxx_typeinfo.cxx
+ * libs/libxx/libminiabi/libxx_typeinfo.cxx
  *
  * Copyright 2010-2011 PathScale, Inc. All rights reserved.
  *

@@ -1,5 +1,5 @@
 //***************************************************************************
-// libs/libxx/libcxxmini/libxx_cxapurevirtual.cxx
+// libs/libxx/libminiabi/libxx_cxapurevirtual.cxx
 //
 // SPDX-License-Identifier: Apache-2.0
 //

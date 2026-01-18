@@ -24,20 +24,16 @@ if HAVE_CXX
 
 choice
 	prompt "C++ Library"
-	default LIBCXXMINI
+	default LIBCXXNONE
+
+config LIBCXXNONE
+	bool "No default C++ Standard Template Library"
 
 config LIBCXXTOOLCHAIN
 	bool "Toolchain C++ support"
 	select HAVE_CXXINITIALIZE
 	---help---
 		Use Standard C++ library from toolchain.
-
-config LIBCXXMINI
-	bool "Basic C++ support"
-	---help---
-		A fragmentary C++ library that will allow to build only
-		the simplest of C++ applications. Only contain basic C++
-		runtime support function.
 
 config LIBCXX
 	bool "LLVM libc++ C++ Standard Library"
@@ -60,17 +56,23 @@ endchoice
 
 config ETL
 	bool "Embedded Template Library (ETL)"
-	depends on LIBCXXMINI && ALLOW_MIT_COMPONENTS
+	depends on ALLOW_MIT_COMPONENTS
 	---help---
 		ETL A C++ Template library for Embedded applications
 		Implements C++ templates such as containers, string
 		singleton math without C++ STL libraries
 
-if !LIBCXXMINI
-
 choice
 	prompt "C++ low level library select"
+	default LIBMINIABI if LIBCXXNONE
 	default LIBSUPCXX_TOOLCHAIN
+
+config LIBMINIABI
+	bool "Basic C++ support"
+	---help---
+		A fragmentary C++ library that will allow to build only
+		the simplest of C++ applications. Only contain basic C++
+		runtime support function.
 
 config LIBCXXABI
 	bool "LLVM low level C++ Library"
@@ -92,8 +94,6 @@ config LIBSUPCXX_TOOLCHAIN
 		level c++ library.
 
 endchoice
-
-endif
 
 config LIBCXXABI_VERSION
 	string "Select libcxxabi version"

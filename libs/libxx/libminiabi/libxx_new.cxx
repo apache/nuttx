@@ -1,5 +1,5 @@
 //***************************************************************************
-// libs/libxx/libcxxmini/libxx_newa.cxx
+// libs/libxx/libminiabi/libxx_new.cxx
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -31,14 +31,6 @@
 #include <nuttx/lib/lib.h>
 
 //***************************************************************************
-// Pre-processor Definitions
-//***************************************************************************
-
-//***************************************************************************
-// Private Data
-//***************************************************************************
-
-//***************************************************************************
 // Operators
 //***************************************************************************
 
@@ -56,7 +48,7 @@
 //
 //***************************************************************************
 
-FAR void *operator new[](std::size_t nbytes)
+FAR void *operator new(std::size_t nbytes)
 {
   // Perform the allocation
 
@@ -79,7 +71,7 @@ FAR void *operator new[](std::size_t nbytes)
   return alloc;
 }
 
-FAR void *operator new[](std::size_t nbytes, FAR void *ptr)
+FAR void *operator new(std::size_t nbytes, FAR void *ptr)
 {
   DEBUGASSERT(ptr != NULL);
 
