@@ -38,12 +38,15 @@ if(NOT CONFIG_DISABLE_PTHREAD)
       pthread_condsignal.c
       pthread_condbroadcast.c
       pthread_condclockwait.c
-      pthread_sigmask.c
       pthread_cancel.c
       pthread_completejoin.c
       pthread_findjoininfo.c
       pthread_release.c
       pthread_setschedprio.c)
+
+  if(NOT CONFIG_DISABLE_ALL_SIGNALS)
+    list(APPEND SRCS pthread_sigmask.c)
+  endif()
 
   if(NOT CONFIG_PTHREAD_MUTEX_UNSAFE)
     list(APPEND SRCS pthread_mutex.c pthread_mutexconsistent.c)

@@ -51,10 +51,12 @@
 
 int pthread_getcpuclockid(pthread_t thread_id, FAR clockid_t *clockid)
 {
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   if (pthread_kill(thread_id, 0) != 0)
     {
       return ESRCH;
     }
+#endif
 
   /* for pthread_getcpuclockid, the clock type are
    * CLOCK_THREAD_CPUTIME_ID
