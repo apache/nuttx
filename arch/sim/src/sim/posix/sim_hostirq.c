@@ -38,6 +38,12 @@
 volatile void *g_current_regs[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static sigset_t g_sigset;
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -95,7 +101,7 @@ uint64_t up_irq_save(void)
   union sigset_u nmask;
   union sigset_u omask;
 
-  sigfillset(&nmask.sigset);
+  memcpy(&nmask.sigset, &g_sigset, sizeof(nmask.sigset));
   pthread_sigmask(SIG_SETMASK, &nmask.sigset, &omask.sigset);
 
   return omask.flags;
@@ -147,12 +153,22 @@ void up_enable_irq(int irq)
   struct sigaction act;
   sigset_t set;
 
+  /* Add the signal to the set */
+
+  sigaddset(&g_sigset, irq);
+
   /* Register signal handler */
 
   memset(&act, 0, sizeof(act));
   act.sa_sigaction = up_handle_irq;
   act.sa_flags     = SA_SIGINFO;
   sigfillset(&act.sa_mask);
+
+  /* Allow SIGSTOP signal to be received when signal is blocked,
+   * so that gdb can stop normally when used (ctrl-Z).
+   */
+
+  sigdelset(&act.sa_mask, SIGSTOP);
   sigaction(irq, &act, NULL);
 
   /* Unmask the signal */
@@ -172,6 +188,10 @@ void up_enable_irq(int irq)
 
 void up_disable_irq(int irq)
 {
+  /* Remove the signal from the set */
+
+  sigdelset(&g_sigset, irq);
+
   /* Since it's hard to mask the signal on all threads,
    * let's change the signal handler to ignore instead.
    */
@@ -185,6 +205,10 @@ void up_disable_irq(int irq)
 
 void host_irqinitialize(void)
 {
+  /* Default ignore SIGPIPE */
+
+  signal(SIGPIPE, SIG_IGN);
+
 #ifdef CONFIG_SMP
   /* Register the pause handler */
 

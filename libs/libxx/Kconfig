@@ -70,6 +70,7 @@ if !LIBCXXMINI
 
 choice
 	prompt "C++ low level library select"
+	default LIBCXXABI if LIBCXX
 	default LIBSUPCXX_TOOLCHAIN
 
 config LIBCXXABI
