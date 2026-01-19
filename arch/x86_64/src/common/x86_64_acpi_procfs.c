@@ -118,7 +118,6 @@ static const struct procfs_entry_s g_acpi_procfs =
   "acpi",
   &g_acpi_operations,
   PROCFS_DIR_TYPE,
-  0444
 };
 
 static const struct procfs_entry_s g_acpi_file_procfs =
@@ -126,7 +125,6 @@ static const struct procfs_entry_s g_acpi_file_procfs =
   "acpi/**",
   &g_acpi_operations,
   PROCFS_FILE_TYPE,
-  0
 };
 #endif
 
