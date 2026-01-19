@@ -330,7 +330,7 @@ int stm32wl5_flash_init(void)
         }
 #endif
 
-#if defined(CONFIG_MTD_CONFIG)
+#if !defined(CONFIG_MTD_CONFIG_NONE)
       else if (strcmp(fs, "mtdconfig") == 0)
         {
           if (mtdconfig_minor)
