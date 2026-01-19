@@ -776,6 +776,7 @@ static void rpmsg_virtio_start_worker(FAR void *arg)
 
   if (vdev->role == VIRTIO_DEV_DRIVER)
     {
+      atomic_or(&rpmsg->signals, RPMSG_SIGNAL_ALLOC_LOCAL);
       if (virtio_has_feature(vdev, VIRTIO_RPMSG_F_BUFADDR))
         {
           FAR void *shmbuf_va0;

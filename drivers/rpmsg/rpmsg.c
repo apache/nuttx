@@ -850,7 +850,7 @@ int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
               list_initialize(&rpmsg->bind);
               nxrmutex_init(&rpmsg->lock);
               rpmsg->ops = ops;
-              atomic_set(&rpmsg->signals, RPMSG_SIGNAL_RUNNING);
+              atomic_or(&rpmsg->signals, RPMSG_SIGNAL_RUNNING);
 
               /* Add priv to list */
 
