@@ -30,6 +30,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/mm/mm.h>
+#include <nuttx/mm/kasan.h>
 
 #include "mm_heap/mm.h"
 
@@ -69,10 +70,12 @@ static void mallinfo_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
       FAR struct mm_freenode_s *fnode = (FAR void *)node;
 
       DEBUGASSERT(nodesize >= MM_MIN_CHUNK);
-      DEBUGASSERT(fnode->blink->flink == fnode);
+      DEBUGASSERT(kasan_clear_tag(fnode->blink->flink) ==
+                  kasan_clear_tag(fnode));
       DEBUGASSERT(MM_SIZEOF_NODE(fnode->blink) <= nodesize);
       DEBUGASSERT(fnode->flink == NULL ||
-                  fnode->flink->blink == fnode);
+                  kasan_clear_tag(fnode->flink->blink) ==
+                  kasan_clear_tag(fnode));
       DEBUGASSERT(fnode->flink == NULL ||
                   MM_SIZEOF_NODE(fnode->flink) == 0 ||
                   MM_SIZEOF_NODE(fnode->flink) >= nodesize);

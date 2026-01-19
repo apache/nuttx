@@ -32,6 +32,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/irq.h>
+#include <nuttx/mm/kasan.h>
 
 #include "mm_heap/mm.h"
 
@@ -53,10 +54,10 @@ static void checkcorruption_handler(FAR struct mm_allocnode_s *node,
       FAR struct mm_freenode_s *fnode = (FAR void *)node;
 
       ASSERT(nodesize >= MM_MIN_CHUNK);
-      ASSERT(fnode->blink->flink == fnode);
+      ASSERT(kasan_clear_tag(fnode->blink->flink) == kasan_clear_tag(fnode));
       ASSERT(MM_SIZEOF_NODE(fnode->blink) <= nodesize);
       ASSERT(fnode->flink == NULL ||
-             fnode->flink->blink == fnode);
+             kasan_clear_tag(fnode->flink->blink) == kasan_clear_tag(fnode));
       ASSERT(fnode->flink == NULL ||
              MM_SIZEOF_NODE(fnode->flink) == 0 ||
              MM_SIZEOF_NODE(fnode->flink) >= nodesize);
