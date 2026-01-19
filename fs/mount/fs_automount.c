@@ -109,8 +109,11 @@ struct automounter_open_s
   /* Mount event notification information */
 
   pid_t ao_pid;
+
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   struct automount_notify_s ao_notify;
   struct sigwork_s ao_work;
+#endif
 };
 #endif /* CONFIG_FS_AUTOMOUNTER_DRIVER */
 
@@ -177,6 +180,7 @@ static void automount_notify(FAR struct automounter_state_s *priv)
 
   /* Visit each opened reference to the device */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   for (opriv = priv->ao_open; opriv != NULL; opriv = opriv->ao_flink)
     {
       /* Have any signal events occurred? */
@@ -191,6 +195,7 @@ static void automount_notify(FAR struct automounter_state_s *priv)
                              SI_QUEUE, &opriv->ao_work);
         }
     }
+#endif
 
   nxmutex_unlock(&priv->lock);
 }
@@ -349,6 +354,7 @@ static int automount_ioctl(FAR struct file *filep, int cmd,
        *              failure with the errno value set appropriately.
        */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
       case FIOC_NOTIFY:
         {
           FAR struct automount_notify_s *notify =
@@ -366,6 +372,7 @@ static int automount_ioctl(FAR struct file *filep, int cmd,
             }
         }
         break;
+#endif
 
       default:
         ferr("ERROR: Unrecognized command: %d\n", cmd);
