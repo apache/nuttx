@@ -210,6 +210,11 @@ static void lio_sighandler(int signo, siginfo_t *info, void *ucontext)
 static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
                         FAR struct sigevent *sig)
 {
+#ifdef CONFIG_DISABLE_ALL_SIGNALS
+  UNUSED(list);
+  UNUSED(nent);
+  UNUSED(sig);
+#else
   FAR struct aiocb *aiocbp;
   struct lio_sighand_s sighand;
   sigset_t set;
@@ -288,6 +293,7 @@ static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
           aiocbp->aio_priv = priv;
         }
     }
+#endif
 
   return OK;
 }
@@ -647,6 +653,7 @@ int lio_listio(int mode, FAR struct aiocb * const list[], int nent,
    *   caller ourself?
    */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   else if (sig != NULL)
     {
       if (nqueued > 0)
@@ -679,6 +686,7 @@ int lio_listio(int mode, FAR struct aiocb * const list[], int nent,
             }
         }
     }
+#endif
 
   /* Case 3: mode == LIO_NOWAIT and sig == NULL
    *

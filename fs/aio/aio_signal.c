@@ -76,12 +76,14 @@ int aio_signal(pid_t pid, FAR struct aiocb *aiocbp)
 
   /* Signal the client */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   ret = nxsig_notification(pid, &aiocbp->aio_sigevent,
                            SI_ASYNCIO, &aiocbp->aio_sigwork);
   if (ret < 0)
     {
       ferr("ERROR: nxsig_notification failed: %d\n", ret);
     }
+#endif
 
   /* Send the poll signal in any event in case the caller is waiting
    * on sig_suspend();
