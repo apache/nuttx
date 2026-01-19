@@ -297,6 +297,7 @@ static void btn_sample(wdparm_t arg)
 
       /* Have any signal events occurred? */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
       if ((press & opriv->bo_notify.bn_press)     != 0 ||
           (release & opriv->bo_notify.bn_release) != 0)
         {
@@ -306,6 +307,7 @@ static void btn_sample(wdparm_t arg)
           nxsig_notification(opriv->bo_pid, &opriv->bo_notify.bn_event,
                              SI_QUEUE, &opriv->bo_work);
         }
+#endif
     }
 
   priv->bu_sample = sample;
