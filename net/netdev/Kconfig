@@ -99,14 +99,4 @@ config NETDOWN_NOTIFIER
 		notifier, but was developed specifically to support SIGHUP poll()
 		logic.
 
-config NETDEV_CHECKSUM
-	bool "Enable support to netdev checksum in Hardware"
-	default n
-	depends on ARCH_HAVE_NETDEV_CHECKSUM_HW
-	---help---
-		To support hardware checksum calculation for network cards, we
-		need to know the starting position of the L4 layer header in
-		the iob buffer, as well as the offset of the checksum field
-		within the L4 layer.
-
 endmenu # Network Device Operations

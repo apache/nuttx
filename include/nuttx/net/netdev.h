@@ -1310,9 +1310,7 @@ void netdev_statistics_log(FAR void *arg);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_CHECKSUM
 int netdev_checksum_start(FAR struct net_driver_s *dev);
-#endif
 
 /****************************************************************************
  * Name: netdev_checksum_offset
@@ -1329,9 +1327,7 @@ int netdev_checksum_start(FAR struct net_driver_s *dev);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_CHECKSUM
 int netdev_checksum_offset(FAR struct net_driver_s *dev);
-#endif
 
 /****************************************************************************
  * Name: netdev_upperlayer_header_checksum
@@ -1347,8 +1343,6 @@ int netdev_checksum_offset(FAR struct net_driver_s *dev);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_CHECKSUM
 uint16_t netdev_upperlayer_header_checksum(FAR struct net_driver_s *dev);
-#endif
 
 #endif /* __INCLUDE_NUTTX_NET_NETDEV_H */
