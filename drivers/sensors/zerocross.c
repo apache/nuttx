@@ -175,6 +175,7 @@ static void zerocross_interrupt(FAR const struct zc_lowerhalf_s *lower,
 
   /* Visit each opened reference and notify a zero cross event */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   for (opriv = priv->zu_open; opriv; opriv = opriv->do_flink)
     {
       /* Signal the waiter */
@@ -183,6 +184,7 @@ static void zerocross_interrupt(FAR const struct zc_lowerhalf_s *lower,
       nxsig_notification(opriv->do_pid, &opriv->do_event,
                          SI_QUEUE, &opriv->do_work);
     }
+#endif
 
   leave_critical_section(flags);
 }
