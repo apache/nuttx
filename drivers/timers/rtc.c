@@ -176,6 +176,10 @@ static void rtc_destroy(FAR struct rtc_upperhalf_s *upper)
 #ifdef CONFIG_RTC_ALARM
 static void rtc_alarm_callback(FAR void *priv, int alarmid)
 {
+#ifdef CONFIG_DISABLE_ALL_SIGNALS
+  UNUSED(priv);
+  UNUSED(alarmid);
+#else
   FAR struct rtc_upperhalf_s *upper = (FAR struct rtc_upperhalf_s *)priv;
   FAR struct rtc_alarminfo_s *alarminfo;
 
@@ -198,6 +202,7 @@ static void rtc_alarm_callback(FAR void *priv, int alarmid)
       nxsig_notification(alarminfo->pid, &alarminfo->event,
                          SI_QUEUE, &alarminfo->work);
     }
+#endif
 }
 #endif
 
@@ -208,6 +213,10 @@ static void rtc_alarm_callback(FAR void *priv, int alarmid)
 #ifdef CONFIG_RTC_PERIODIC
 static void rtc_periodic_callback(FAR void *priv, int alarmid)
 {
+#ifdef CONFIG_DISABLE_ALL_SIGNALS
+  UNUSED(priv);
+  UNUSED(alarmid);
+#else
   FAR struct rtc_upperhalf_s *upper = (FAR struct rtc_upperhalf_s *)priv;
   FAR struct rtc_alarminfo_s *alarminfo;
 
@@ -226,6 +235,7 @@ static void rtc_periodic_callback(FAR void *priv, int alarmid)
       nxsig_notification(alarminfo->pid, &alarminfo->event,
                          SI_QUEUE, &alarminfo->work);
     }
+#endif
 }
 #endif
 
