@@ -1023,6 +1023,12 @@ config ESPRESSIF_SHA_ACCELERATOR
 	---help---
 		Enable SHA accelerator support.
 
+config ESPRESSIF_AES_ACCELERATOR
+	bool "AES Accelerator"
+	default n
+	---help---
+		Enable AES accelerator support.
+
 config ESPRESSIF_ADC
 	bool "Analog-to-digital converter (ADC)"
 	default n
