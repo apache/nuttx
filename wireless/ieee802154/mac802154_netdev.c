@@ -378,12 +378,14 @@ static int macnet_notify(FAR struct mac802154_maccb_s *maccb,
           nxsem_post(&priv->md_eventsem);
         }
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
       if (priv->md_notify_registered)
         {
           priv->md_notify_event.sigev_value.sival_int = primitive->type;
           nxsig_notification(priv->md_notify_pid, &priv->md_notify_event,
                              SI_QUEUE, &priv->md_notify_work);
         }
+#endif
 
       nxmutex_unlock(&priv->md_lock);
       return OK;
