@@ -306,7 +306,7 @@ TRNG               No
 ECDSA              No
 TEE                No
 APM                No
-AES                No
+AES                Yes
 Digital Signature  No
 Secure Boot        No
 XTS_AES            No

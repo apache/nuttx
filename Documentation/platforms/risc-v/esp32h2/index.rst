@@ -339,7 +339,7 @@ The following list indicates the state of peripherals' support in NuttX:
 Peripheral      Support NOTES
 ==============  ======= ====================
 ADC              Yes     Oneshot and internal temperature sensor
-AES              No
+AES              Yes
 Bluetooth        No
 CAN/TWAI         Yes
 DMA              Yes
