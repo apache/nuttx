@@ -47,7 +47,6 @@ CMN_CSRCS += arm64_arch_timer.c arm64_cache.c
 CMN_CSRCS += arm64_doirq.c arm64_fatal.c
 CMN_CSRCS += arm64_syscall.c
 CMN_CSRCS += arm64_modifyreg8.c arm64_modifyreg16.c arm64_modifyreg32.c
-CMN_CSRCS += arm64_hwdebug.c
 
 ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
 CMN_CSRCS += arm64_schedulesigaction.c arm64_sigdeliver.c
