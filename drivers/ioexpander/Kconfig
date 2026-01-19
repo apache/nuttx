@@ -598,7 +598,7 @@ config DEV_GPIO_NPOLLWAITERS
 config DEV_GPIO_NSIGNALS
 	int "Max number of signals"
 	default 1
-	depends on DEV_GPIO
+	depends on DEV_GPIO && !DISABLE_ALL_SIGNALS
 	---help---
 		The maximum number of signals that can be registered with the GPIO
 		driver
