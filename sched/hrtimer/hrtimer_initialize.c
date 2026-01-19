@@ -57,7 +57,11 @@ spinlock_t g_hrtimer_spinlock = SP_UNLOCKED;
  * The tree is ordered by absolute expiration time.
  */
 
+#ifdef CONFIG_HRTIMER_TREE
 struct hrtimer_tree_s g_hrtimer_tree = RB_INITIALIZER(g_hrtimer_tree);
+#else
+struct list_node g_hrtimer_list = LIST_INITIAL_VALUE(g_hrtimer_list);
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -83,4 +87,6 @@ struct hrtimer_tree_s g_hrtimer_tree = RB_INITIALIZER(g_hrtimer_tree);
  *     core (e.g., hrtimer_start(), hrtimer_cancel(), and expire paths).
  ****************************************************************************/
 
+#ifdef CONFIG_HRTIMER_TREE
 RB_GENERATE(hrtimer_tree_s, hrtimer_node_s, entry, hrtimer_compare);
+#endif

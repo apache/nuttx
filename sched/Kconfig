@@ -2067,3 +2067,28 @@ config HRTIMER
 	default n
 	---help---
 		Enable to support high resolution timer
+
+if HRTIMER
+
+choice
+    prompt "HRTimer management data structure type"
+    default HRTIMER_TREE
+
+config HRTIMER_LIST
+    bool "List-based timer management"
+    help
+        Use a simple list to manage timers. This method is
+        suitable for systems with a small number of timers.
+        It is more memory-efficient but may become slower
+        as the number of timers increases.
+
+config HRTIMER_TREE
+    bool "RB-tree-based timer management"
+    help
+        Use a red-black tree to manage timers. This method
+        provides better performance for systems with many
+        timers, at the cost of slightly higher memory usage.
+
+endchoice
+
+endif # HRTIMER
