@@ -124,6 +124,10 @@
 #  include "espressif/esp_sha.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_AES_ACCELERATOR
+#  include "espressif/esp_aes.h"
+#endif
+
 #ifdef CONFIG_MMCSD_SPI
 #  include "esp_board_mmcsd.h"
 #endif
@@ -191,14 +195,23 @@ int esp_bringup(void)
     }
 #endif
 
-#if defined(CONFIG_ESPRESSIF_SHA_ACCELERATOR) && \
-    !defined(CONFIG_CRYPTO_CRYPTODEV_HARDWARE)
+#if !defined(CONFIG_CRYPTO_CRYPTODEV_HARDWARE)
+#  if defined(CONFIG_ESPRESSIF_SHA_ACCELERATOR)
   ret = esp_sha_init();
   if (ret < 0)
     {
       syslog(LOG_ERR,
              "ERROR: Failed to initialize SHA: %d\n", ret);
     }
+#  endif
+
+#  if defined(CONFIG_ESPRESSIF_AES_ACCELERATOR)
+  ret = esp_aes_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize AES: %d\n", ret);
+    }
+#  endif
 #endif
 
 #ifdef CONFIG_ESPRESSIF_MWDT0

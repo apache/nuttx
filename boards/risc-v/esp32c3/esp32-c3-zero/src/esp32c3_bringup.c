@@ -129,6 +129,10 @@
 #  include "espressif/esp_sha.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_AES_ACCELERATOR
+#  include "espressif/esp_aes.h"
+#endif
+
 #ifdef CONFIG_MMCSD_SPI
 #  include "esp_board_mmcsd.h"
 #endif
