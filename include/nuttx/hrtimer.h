@@ -31,6 +31,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/compiler.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/list.h>
 
 #include <stdint.h>
 #include <sys/tree.h>
@@ -68,7 +69,11 @@ typedef CODE uint64_t (*hrtimer_entry_t)(FAR const struct hrtimer_s *hrtimer,
 
 typedef struct hrtimer_node_s
 {
+#ifdef CONFIG_HRTIMER_TREE
   RB_ENTRY(hrtimer_node_s) entry;  /* RB-tree linkage */
+#else
+  struct list_node entry;  /* List linkage */
+#endif
 } hrtimer_node_t;
 
 /* High-resolution timer object
