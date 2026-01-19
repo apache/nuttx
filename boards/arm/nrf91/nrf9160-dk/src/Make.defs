@@ -40,6 +40,11 @@ endif
 
 ifeq ($(CONFIG_NRF91_MODEM),y)
 CSRCS += nrf91_modem.c
+
+# The modem glue pulls in headers from the proprietary NRFXlib drop, so make
+# sure the board objects see the same include path the arch build relies on.
+NRFXLIB_DIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)chip$(DELIM)sdk-nrfxlib
+CFLAGS += ${INCDIR_PREFIX}$(NRFXLIB_DIR)$(DELIM)nrf_modem$(DELIM)include
 endif
 
 DEPPATH += --dep-path board

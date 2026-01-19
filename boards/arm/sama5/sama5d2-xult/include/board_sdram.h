@@ -29,6 +29,25 @@
 
 #include <nuttx/config.h>
 
+#ifndef __ASSEMBLY__
+
+#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+uint32_t sam_pllack_frequency(uint32_t mainclk);
+uint32_t sam_plladiv2_frequency(uint32_t mainclk);
+uint32_t sam_pck_frequency(uint32_t mainclk);
+uint32_t sam_mck_frequency(uint32_t mainclk);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -47,22 +66,23 @@
  * crystal.
  */
 
-#define BOARD_MAINCK_FREQUENCY     BOARD_MAINOSC_FREQUENCY
-#define BOARD_PLLA_FREQUENCY       (sam_pllack_frequency(BOARD_MAINOSC_FREQUENCY))
-#define BOARD_PLLADIV2_FREQUENCY   (sam_plladiv2_frequency(BOARD_MAINOSC_FREQUENCY))
-#define BOARD_PCK_FREQUENCY        (sam_pck_frequency(BOARD_MAINOSC_FREQUENCY))
-#define BOARD_MCK_FREQUENCY        (sam_mck_frequency(BOARD_MAINOSC_FREQUENCY))
+#define BOARD_MAINCK_FREQUENCY BOARD_MAINOSC_FREQUENCY
+#define BOARD_PLLA_FREQUENCY (sam_pllack_frequency(BOARD_MAINOSC_FREQUENCY))
+#define BOARD_PLLADIV2_FREQUENCY                                               \
+  (sam_plladiv2_frequency(BOARD_MAINOSC_FREQUENCY))
+#define BOARD_PCK_FREQUENCY (sam_pck_frequency(BOARD_MAINOSC_FREQUENCY))
+#define BOARD_MCK_FREQUENCY (sam_mck_frequency(BOARD_MAINOSC_FREQUENCY))
 
 /* Clocking to certain peripherals may be MCK/2.
  *
  * REVISIT:  I am not sure why this is.  Perhaps because of H32MXDIV?
  */
 
-#define BOARD_PIT_FREQUENCY        (BOARD_MCK_FREQUENCY >> 1)
-#define BOARD_USART_FREQUENCY      (BOARD_MCK_FREQUENCY >> 1)
-#define BOARD_FLEXCOM_FREQUENCY    (BOARD_MCK_FREQUENCY >> 1)
+#define BOARD_PIT_FREQUENCY (BOARD_MCK_FREQUENCY >> 1)
+#define BOARD_USART_FREQUENCY (BOARD_MCK_FREQUENCY >> 1)
+#define BOARD_FLEXCOM_FREQUENCY (BOARD_MCK_FREQUENCY >> 1)
 
-#if defined(CONFIG_SAMA5_EHCI) || defined(CONFIG_SAMA5_OHCI) || \
+#if defined(CONFIG_SAMA5_EHCI) || defined(CONFIG_SAMA5_OHCI) ||                \
     defined(CONFIG_SAMA5_UDPHS)
 
 /* The USB Host High Speed requires a 480 MHz clock (UPLLCK) for the embedded
@@ -90,10 +110,10 @@
  * driver is initialized.
  */
 
-#  define BOARD_USE_UPLL             1     /* Use UPLL for clock source */
-#  define BOARD_CKGR_UCKR_UPLLCOUNT  (15)  /* Maximum value */
-#  define BOARD_CKGR_UCKR_BIASCOUNT  (15)  /* Maximum value */
-#  define BOARD_UPLL_OHCI_DIV        (10)  /* Divide by 10 */
+#define BOARD_USE_UPLL 1               /* Use UPLL for clock source */
+#define BOARD_CKGR_UCKR_UPLLCOUNT (15) /* Maximum value */
+#define BOARD_CKGR_UCKR_BIASCOUNT (15) /* Maximum value */
+#define BOARD_UPLL_OHCI_DIV (10)       /* Divide by 10 */
 #endif
 
 /* ADC Configuration
@@ -102,14 +122,15 @@
  * PRESCAL  = (MCK / (2 * ADCClock) - 1)
  */
 
-#define BOARD_ADCCLK_FREQUENCY     (8000000)   /* ADCCLK:  MCK / ((7+1)*2) */
-#define BOARD_ADCCLK_FREQUENCY \
-  ((BOARD_PLLADIV2_FREQUENCY / (2 *BOARD_PLLADIV2_FREQUENCY)) - 1)
+#define BOARD_ADCCLK_FREQUENCY (8000000) /* ADCCLK:  MCK / ((7+1)*2) */
+#define BOARD_ADCCLK_FREQUENCY                                                 \
+  ((BOARD_PLLADIV2_FREQUENCY / (2 * BOARD_PLLADIV2_FREQUENCY)) - 1)
 
-#define BOARD_ADC_PRESCAL          (7)
-#define BOARD_TSD_STARTUP          (40)        /* 40 nanoseconds */
-#define BOARD_TSD_TRACKTIM         (2000)      /* Min 1µs at 8MHz */
-#define BOARD_TSD_DEBOUNCE         (10000000)  /* 10 milliseconds (units nanoseconds) */
+#define BOARD_ADC_PRESCAL (7)
+#define BOARD_TSD_STARTUP (40)        /* 40 nanoseconds */
+#define BOARD_TSD_TRACKTIM (2000)     /* Min 1µs at 8MHz */
+#define BOARD_TSD_DEBOUNCE (10000000) /* 10 milliseconds (units nanoseconds)   \
+                                       */
 
 /* HSMCI clocking
  *
@@ -128,17 +149,17 @@
 
 /* Initial clock: 400 KHz (target) */
 
-#define HSMCI_INIT_CLKDIV          sam_hsmci_clkdiv(400000)
+#define HSMCI_INIT_CLKDIV sam_hsmci_clkdiv(400000)
 
 /* MMC transfer clock: 20 MHz (target) */
 
-#define HSMCI_MMCXFR_CLKDIV        sam_hsmci_clkdiv(20000000)
+#define HSMCI_MMCXFR_CLKDIV sam_hsmci_clkdiv(20000000)
 
 /* SD transfer clock: 25 MHz (target) */
 
-#define HSMCI_SDXFR_CLKDIV         sam_hsmci_clkdiv(25000000)
+#define HSMCI_SDXFR_CLKDIV sam_hsmci_clkdiv(25000000)
 
-#define HSMCI_SDWIDEXFR_CLKDIV     HSMCI_SDXFR_CLKDIV
+#define HSMCI_SDWIDEXFR_CLKDIV HSMCI_SDXFR_CLKDIV
 
 /****************************************************************************
  * Public Data
@@ -149,8 +170,7 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C"
-{
+extern "C" {
 #else
 #define EXTERN extern
 #endif

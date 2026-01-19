@@ -34,6 +34,12 @@ endif
 
 ifeq ($(CONFIG_NRF91_MODEM),y)
 CSRCS += nrf91_modem.c
+
+# Give the board objects access to the NRFXlib headers required by the modem
+# glue.  The archive is downloaded into the chip directory when the feature
+# is enabled, so reuse that location here as well.
+NRFXLIB_DIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)chip$(DELIM)sdk-nrfxlib
+CFLAGS += ${INCDIR_PREFIX}$(NRFXLIB_DIR)$(DELIM)nrf_modem$(DELIM)include
 endif
 
 DEPPATH += --dep-path board
