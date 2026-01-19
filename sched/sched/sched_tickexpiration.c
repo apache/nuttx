@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sched/sched_timerexpiration.c
+ * sched/sched/sched_tickexpiration.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -388,7 +388,7 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
  *
  ****************************************************************************/
 
-void nxsched_process_timer(void)
+void nxsched_process_tick(void)
 {
   irqstate_t flags;
   clock_t ticks;
