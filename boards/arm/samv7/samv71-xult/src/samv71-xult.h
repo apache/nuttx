@@ -159,7 +159,7 @@
 #  undef HAVE_MACADDR
 #endif
 
-#if !defined(CONFIG_MTD_CONFIG)
+#if defined(CONFIG_MTD_CONFIG_NONE)
 #  undef HAVE_MTDCONFIG
 #endif
 
