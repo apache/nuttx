@@ -98,6 +98,10 @@ static const struct file_operations g_oneshot_ops =
 static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
                              FAR void *arg)
 {
+#ifdef CONFIG_DISABLE_ALL_SIGNALS
+  UNUSED(lower);
+  UNUSED(arg);
+#else
   FAR struct oneshot_dev_s *priv = (FAR struct oneshot_dev_s *)arg;
 
   DEBUGASSERT(priv != NULL);
@@ -106,6 +110,7 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
 
   nxsig_notification(priv->od_pid, &priv->od_event, SI_QUEUE,
                      &priv->od_work);
+#endif
 }
 
 /****************************************************************************
