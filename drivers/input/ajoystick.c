@@ -553,7 +553,6 @@ static int ajoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
      *              failure with the errno value set appropriately.
      */
 
-
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
     case AJOYIOC_REGISTER:
       {
