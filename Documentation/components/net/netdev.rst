@@ -180,17 +180,10 @@ The structure :c:struct:`net_driver_s` includes fields to support hardware
 checksum offloading. This feature allows the network stack to delegate
 checksum calculation to the network device hardware, improving performance.
 
-Checksum Configuration Options
-------------------------------
-
-* :c:macro:`CONFIG_NETDEV_CHECKSUM`: Enable support for hardware checksum
-  offloading in the network stack. This option requires the architecture
-  to support it (:c:macro:`ARCH_HAVE_NETDEV_CHECKSUM_HW`).
-
 Implementation Details
 ----------------------
 
-When :c:macro:`CONFIG_NETDEV_CHECKSUM` is enabled, the driver should use the
+Drivers that support hardware checksum offloading should use the
 following helper functions to retrieve checksum offload information:
 
 * :c:func:`netdev_checksum_start`: Get the offset from the beginning of the
@@ -202,11 +195,9 @@ following helper functions to retrieve checksum offload information:
 
 .. code-block:: c
 
-   #ifdef CONFIG_NETDEV_CHECKSUM
-     int netdev_checksum_start(FAR struct net_driver_s *dev);
-     int netdev_checksum_offset(FAR struct net_driver_s *dev);
-     uint16_t netdev_upperlayer_header_checksum(FAR struct net_driver_s *dev);
-   #endif
+   int netdev_checksum_start(FAR struct net_driver_s *dev);
+   int netdev_checksum_offset(FAR struct net_driver_s *dev);
+   uint16_t netdev_upperlayer_header_checksum(FAR struct net_driver_s *dev);
 
 Drivers that support hardware checksum offloading should use these functions
 to configure the hardware accordingly before transmitting the packet.

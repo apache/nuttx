@@ -27,10 +27,9 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/udp.h>
 #include <nuttx/net/tcp.h>
+#include <nuttx/mm/iob.h>
 
 #include "netdev/netdev.h"
-
-#ifdef CONFIG_NETDEV_CHECKSUM
 
 /****************************************************************************
  * Private Functions
@@ -51,6 +50,8 @@
  *
  ****************************************************************************/
 
+#if defined(CONFIG_MM_IOB) && \
+    (defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6))
 static int32_t hardware_chksum_start(FAR struct iob_s *iob,
                                      uint16_t iphdrlen)
 {
@@ -68,6 +69,7 @@ static int32_t hardware_chksum_start(FAR struct iob_s *iob,
 
   return start;
 }
+#endif
 
 /****************************************************************************
  * Name: hardware_chksum_get_proto
@@ -83,23 +85,33 @@ static int32_t hardware_chksum_start(FAR struct iob_s *iob,
  *
  ****************************************************************************/
 
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
 static uint8_t hardware_chksum_get_proto(FAR struct net_driver_s *dev)
 {
-  uint8_t proto;
+  uint8_t proto = 0;
 
+#ifdef CONFIG_NET_IPv6
+#  ifdef CONFIG_NET_IPv4
   if (IFF_IS_IPv6(dev->d_flags))
+#  endif
     {
       FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
       proto = ipv6->proto;
     }
+#endif
+#ifdef CONFIG_NET_IPv4
+#  ifdef CONFIG_NET_IPv6
   else
+#  endif
     {
       FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
       proto = ipv4->proto;
     }
+#endif
 
   return proto;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -123,9 +135,13 @@ static uint8_t hardware_chksum_get_proto(FAR struct net_driver_s *dev)
 
 int netdev_checksum_start(FAR struct net_driver_s *dev)
 {
-  int start;
+#ifdef CONFIG_MM_IOB
+  int start = -EINVAL;
 
+#ifdef CONFIG_NET_IPv6
+#  ifdef CONFIG_NET_IPv4
   if (IFF_IS_IPv6(dev->d_flags))
+#  endif
     {
       FAR struct ipv6_hdr_s *ipv6 =
         (FAR struct ipv6_hdr_s *)(IOB_DATA(dev->d_iob));
@@ -139,7 +155,11 @@ int netdev_checksum_start(FAR struct net_driver_s *dev)
           return -EINVAL;
         }
     }
+#endif
+#ifdef CONFIG_NET_IPv4
+#  ifdef CONFIG_NET_IPv6
   else
+#  endif
     {
       FAR struct ipv4_hdr_s *ipv4 =
         (FAR struct ipv4_hdr_s *)(IOB_DATA(dev->d_iob));
@@ -154,8 +174,12 @@ int netdev_checksum_start(FAR struct net_driver_s *dev)
           return -EINVAL;
         }
     }
+#endif
 
   return start;
+#else
+  return -EINVAL;
+#endif
 }
 
 /****************************************************************************
@@ -175,23 +199,25 @@ int netdev_checksum_start(FAR struct net_driver_s *dev)
 
 int netdev_checksum_offset(FAR struct net_driver_s *dev)
 {
-  int offset = 0;
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
   uint8_t proto = hardware_chksum_get_proto(dev);
+#endif
 
+#ifdef CONFIG_NET_UDP
   if (proto == IP_PROTO_UDP)
     {
-      offset = offsetof(struct udp_hdr_s, udpchksum);
+      return offsetof(struct udp_hdr_s, udpchksum);
     }
-  else if (proto == IP_PROTO_TCP)
-    {
-      offset = offsetof(struct tcp_hdr_s, tcpchksum);
-    }
-  else
-    {
-      return -EINVAL;
-    }
+#endif
 
-  return offset;
+#ifdef CONFIG_NET_TCP
+  if (proto == IP_PROTO_TCP)
+    {
+      return offsetof(struct tcp_hdr_s, tcpchksum);
+    }
+#endif
+
+  return -EINVAL;
 }
 
 /****************************************************************************
@@ -210,7 +236,10 @@ int netdev_checksum_offset(FAR struct net_driver_s *dev)
 
 uint16_t netdev_upperlayer_header_checksum(FAR struct net_driver_s *dev)
 {
+#ifdef CONFIG_NET_IPv6
+#  ifdef CONFIG_NET_IPv4
   if (IFF_IS_IPv6(dev->d_flags))
+#  endif
     {
       FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
 
@@ -218,15 +247,18 @@ uint16_t netdev_upperlayer_header_checksum(FAR struct net_driver_s *dev)
                                                  ipv6->proto,
                                                  IPv6_HDRLEN));
     }
+#endif
+#ifdef CONFIG_NET_IPv4
+#  ifdef CONFIG_NET_IPv6
   else
+#  endif
     {
       FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
 
       return HTONS(ipv4_upperlayer_header_chksum(dev,
                                                  ipv4->proto));
     }
+#endif
 
   return 0;
 }
-
-#endif /* CONFIG_NETDEV_CHECKSUM */
