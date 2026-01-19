@@ -226,12 +226,14 @@ static int phy_handler(int irq, FAR void *context, FAR void *arg)
 
   /* Signal the client that the PHY has something interesting to say to us */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   ret = nxsig_notification(client->pid, &client->event,
                            SI_QUEUE, &client->work);
   if (ret < 0)
     {
       phyerr("ERROR: nxsig_notification failed: %d\n", ret);
     }
+#endif
 
   return OK;
 }
