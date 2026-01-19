@@ -188,7 +188,9 @@ struct ft80x_dev_s
 
   /* Event notification support */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   struct ft80x_eventinfo_s notify[FT80X_INT_NEVENTS];
+#endif
 };
 
 /****************************************************************************
