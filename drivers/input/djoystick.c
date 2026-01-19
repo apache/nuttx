@@ -84,9 +84,11 @@ struct djoy_open_s
 
   /* Joystick event notification information */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   pid_t do_pid;
   struct djoy_notify_s do_notify;
   struct sigwork_s do_work;
+#endif
 
   /* Poll event information */
 
@@ -172,9 +174,10 @@ static void djoy_enable(FAR struct djoy_upperhalf_s *priv)
       release |= opriv->do_pollevents.dp_release;
 
       /* OR in the signal events */
-
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
       press   |= opriv->do_notify.dn_press;
       release |= opriv->do_notify.dn_release;
+#endif
     }
 
   /* Enable/disable button interrupts */
@@ -271,6 +274,7 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
 
       /* Have any signal events occurred? */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
       if ((press & opriv->do_notify.dn_press)     != 0 ||
           (release & opriv->do_notify.dn_release) != 0)
         {
@@ -280,6 +284,7 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
           nxsig_notification(opriv->do_pid, &opriv->do_notify.dn_event,
                              SI_QUEUE, &opriv->do_work);
         }
+#endif
     }
 
   priv->du_sample = sample;
@@ -541,6 +546,7 @@ static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
      *              failure with the errno value set appropriately.
      */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
     case DJOYIOC_REGISTER:
       {
         FAR struct djoy_notify_s *notify =
@@ -562,6 +568,7 @@ static int djoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
       }
       break;
+#endif
 
     default:
       ierr("ERROR: Unrecognized command: %d\n", cmd);
