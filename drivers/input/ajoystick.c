@@ -84,9 +84,11 @@ struct ajoy_open_s
 
   /* Joystick event notification information */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   pid_t ao_pid;
   struct ajoy_notify_s ao_notify;
   struct sigwork_s ao_work;
+#endif
 
   /* Poll event information */
 
@@ -173,8 +175,10 @@ static void ajoy_enable(FAR struct ajoy_upperhalf_s *priv)
 
       /* OR in the signal events */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
       press   |= opriv->ao_notify.an_press;
       release |= opriv->ao_notify.an_release;
+#endif
     }
 
   /* Enable/disable button interrupts */
@@ -271,6 +275,7 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
 
       /* Have any signal events occurred? */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
       if ((press & opriv->ao_notify.an_press)     != 0 ||
           (release & opriv->ao_notify.an_release) != 0)
         {
@@ -280,6 +285,7 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
           nxsig_notification(opriv->ao_pid, &opriv->ao_notify.an_event,
                              SI_QUEUE, &opriv->ao_work);
         }
+#endif
     }
 
   priv->au_sample = sample;
@@ -394,7 +400,9 @@ static int ajoy_close(FAR struct file *filep)
 
   /* Cancel any pending notification */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   nxsig_cancel_notification(&opriv->ao_work);
+#endif
 
   /* And free the open structure */
 
@@ -545,6 +553,7 @@ static int ajoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
      *              failure with the errno value set appropriately.
      */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
     case AJOYIOC_REGISTER:
       {
         FAR struct ajoy_notify_s *notify =
@@ -566,6 +575,7 @@ static int ajoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
       }
       break;
+#endif
 
     default:
       ierr("ERROR: Unrecognized command: %ld\n", cmd);
