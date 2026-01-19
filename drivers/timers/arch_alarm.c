@@ -126,7 +126,7 @@ static void ndelay_accurate(unsigned long nanoseconds)
 static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
                              FAR void *arg)
 {
-#ifdef CONFIG_SCHED_TICKLESS
+#if defined(CONFIG_SCHED_TICKLESS) || defined(CONFIG_HRTIMER)
   nxsched_process_timer();
 #else
   clock_t now;
@@ -388,7 +388,7 @@ int weak_function up_alarm_tick_cancel(FAR clock_t *ticks)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_TICKLESS
+#if defined(CONFIG_SCHED_TICKLESS) || defined(CONFIG_HRTIMER)
 int weak_function up_alarm_start(FAR const struct timespec *ts)
 {
   int ret = -EAGAIN;
