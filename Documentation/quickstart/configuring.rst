@@ -151,3 +151,22 @@ Multiple config fragments can be merged manually using the tools/merge_config.py
 
    $ cd nuttx
    $ ./tools/merge_config.py -o defconfig .config1 .config2
+
+License Setup
+=============
+
+NuttX includes components with various open source licenses. To use these components,
+you must explicitly enable the corresponding license configuration option in the
+:menuselection:`License Setup` menu:
+
+* ``CONFIG_ALLOW_BSD_COMPONENTS`` - BSD licensed components (NFS, SPIFFS, Bluetooth LE, etc.)
+* ``CONFIG_ALLOW_GPL_COMPONENTS`` - GPL/LGPL licensed components
+* ``CONFIG_ALLOW_MIT_COMPONENTS`` - MIT licensed components
+* ``CONFIG_ALLOW_BSDNORDIC_COMPONENTS`` - 5-Clause Nordic licensed components (NRF chips only)
+* ``CONFIG_ALLOW_ECLIPSE_COMPONENTS`` - Eclipse Public License components
+* ``CONFIG_ALLOW_ICS_COMPONENTS`` - ICS licensed components
+* ``CONFIG_ALLOW_CUSTOM_PERMISSIVE_COMPONENTS`` - Custom permissive licensed components
+
+.. warning::
+   Please carefully review the license terms for each enabled component to ensure
+   compliance with your project's licensing requirements.

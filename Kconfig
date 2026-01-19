@@ -97,6 +97,22 @@ config ALLOW_ICS_COMPONENTS
 		NOTE: Please check that the license for each enabled
 		component matches your project license.
 
+config ALLOW_CUSTOM_PERMISSIVE_COMPONENTS
+	bool "Use components that have custom permissive licenses"
+	default n
+	---help---
+		When this option is enabled the project will allow the use
+		of components that have custom permissive licenses which
+		are not covered by the standard license options above.
+
+		This includes components with custom permissive licenses
+		that allow free use, modification, and distribution but
+		may have specific attribution or notice requirements.
+
+		NOTE: Please carefully review the license terms for each
+		enabled component to ensure compliance with your project
+		requirements.
+
 endmenu # License Setup
 
 menu "Build Setup"
