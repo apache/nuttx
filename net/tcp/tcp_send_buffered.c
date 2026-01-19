@@ -217,15 +217,6 @@ static void retransmit_segment(FAR struct tcp_conn_s *conn,
 
       /* Reset the number of bytes sent sent from the write buffer */
 
-      if (conn->tx_unacked > sent)
-        {
-          conn->tx_unacked -= sent;
-        }
-      else
-        {
-          conn->tx_unacked = 0;
-        }
-
       if (conn->sent > sent)
         {
           conn->sent -= sent;
@@ -958,15 +949,6 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                * the write buffer
                */
 
-              if (conn->tx_unacked > sent)
-                {
-                  conn->tx_unacked -= sent;
-                }
-              else
-                {
-                  conn->tx_unacked = 0;
-                }
-
               if (conn->sent > sent)
                 {
                   conn->sent -= sent;
@@ -1147,11 +1129,10 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
            * number calculations.
            */
 
-          conn->tx_unacked += sndlen;
-          conn->sent       += sndlen;
+          conn->sent += sndlen;
 
-          /* Below prediction will become true,
-           * unless retransmission occurrence
+          /* Below prediction will become true, unless retransmission
+           * occurrence. tx_unacked does not update during retransmission.
            */
 
           predicted_seqno = tcp_getsequence(conn->sndseq) + sndlen;
@@ -1159,6 +1140,7 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           if (TCP_SEQ_GT(predicted_seqno, conn->sndseq_max))
             {
               conn->sndseq_max = predicted_seqno;
+              conn->tx_unacked += sndlen;
             }
 
           ninfo("SEND: wrb=%p nrtx=%u tx_unacked=%" PRIu32
