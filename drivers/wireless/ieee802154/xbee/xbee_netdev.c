@@ -136,10 +136,12 @@ struct xbeenet_driver_s
 
   /* MAC Service notification information */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   bool    xd_notify_registered;
   pid_t   xd_notify_pid;
   struct sigevent xd_notify_event;
   struct sigwork_s xd_notify_work;
+#endif
 };
 
 /****************************************************************************
@@ -410,12 +412,14 @@ static int xbeenet_notify(FAR struct xbee_maccb_s *maccb,
           nxsem_post(&priv->xd_eventsem);
         }
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
       if (priv->xd_notify_registered)
         {
           priv->xd_notify_event.sigev_value.sival_int = primitive->type;
           nxsig_notification(priv->xd_notify_pid, &priv->xd_notify_event,
                              SI_QUEUE, &priv->xd_notify_work);
         }
+#endif
 
       nxmutex_unlock(&priv->xd_lock);
       return OK;
@@ -940,6 +944,7 @@ static int xbeenet_ioctl(FAR struct net_driver_s *dev, int cmd,
                *              appropriately.
                */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
               case MAC802154IOC_NOTIFY_REGISTER:
                 {
                   /* Save the notification events */
@@ -950,6 +955,7 @@ static int xbeenet_ioctl(FAR struct net_driver_s *dev, int cmd,
                   ret = OK;
                 }
                 break;
+#endif
 
               case MAC802154IOC_GET_EVENT:
                 {
@@ -1293,7 +1299,10 @@ int xbee_netdev_register(XBEEHANDLE xbee)
   sq_init(&priv->primitive_queue);
 
   priv->xd_enableevents = false;
+
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   priv->xd_notify_registered = false;
+#endif
 
   /* Initialize the XBee MAC callbacks */
 
