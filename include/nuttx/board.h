@@ -636,6 +636,26 @@ void board_autoled_off(int led);
 #endif
 
 /****************************************************************************
+ * Name: board_macaddr
+ *
+ * Description:
+ *   Get the network driver mac address.
+ *
+ * Input Parameters:
+ *   ifname   - The interface name.
+ *   macaddr  - The mac address.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_MACADDR
+int board_macaddr(FAR const char *ifname, FAR uint8_t *macaddr);
+#endif
+
+/****************************************************************************
  * Name:  board_userled_initialize
  *
  * Description:

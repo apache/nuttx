@@ -5322,6 +5322,14 @@ config BOARDCTL_START_CPU
 		Architecture specific logic must provide the board_start_cpu()
 		interface.
 
+config BOARDCTL_MACADDR
+	bool "Get network MAC address"
+	default n
+	---help---
+		Enables support for the BOARDIOC_MACADDR boardctl() command.
+		Architecture specific logic must provide the board_macaddr()
+		interface.
+
 config BOARDCTL_IOCTL
 	bool "Board-specific boardctl() commands"
 	default n

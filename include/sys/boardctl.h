@@ -48,6 +48,11 @@
 #  include <nuttx/spinlock.h>
 #endif
 
+#ifdef CONFIG_BOARDCTL_MACADDR
+#  include <net/if.h>
+#  include <nuttx/net/netdev.h>
+#endif
+
 #ifdef CONFIG_BOARDCTL
 
 /****************************************************************************
@@ -216,6 +221,7 @@
 #define BOARDIOC_RESET_CAUSE       _BOARDIOC(0x0015)
 #define BOARDIOC_IRQ_AFFINITY      _BOARDIOC(0x0016)
 #define BOARDIOC_START_CPU         _BOARDIOC(0x0017)
+#define BOARDIOC_MACADDR           _BOARDIOC(0x0018)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then board-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -224,7 +230,7 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x0018)
+#define BOARDIOC_USER              _BOARDIOC(0x0019)
 
 /****************************************************************************
  * Public Type Definitions
@@ -475,6 +481,14 @@ struct boardioc_reset_cause_s
   enum boardioc_reset_cause_e cause;  /* The reason of last reset */
   uint32_t flag;                      /* watchdog number when watchdog reset,
                                        * or soft-reset subreason */
+};
+#endif
+
+#ifdef CONFIG_BOARDCTL_MACADDR
+struct boardioc_macaddr_s
+{
+  char ifname[IFNAMSIZ];
+  uint8_t macaddr[RADIO_MAX_ADDRLEN];
 };
 #endif
 
