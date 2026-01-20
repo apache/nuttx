@@ -1146,7 +1146,7 @@ static int ctucanfd_sock_transmit(FAR struct netdev_lowerhalf_s *dev,
 
       /* CAN FD frame */
 
-      fmt.s.fdf = 1;
+      fmt.s.fdf = (frame->flags & CANFD_FDF);
 
       /* Set up the DLC */
 
