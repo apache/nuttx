@@ -2062,6 +2062,54 @@ config PERF_EVENTS
 	---help---
 		Enable to support perf events.
 
+if PERF_EVENTS
+
+config PERF_EVENTS_SW_MIN_PERIOD_NSEC
+	int "Minimum period in nanoseconds for software perf events"
+	default 100000
+
+config PERF_EVENTS_HW_CPU_CYCLES_SAMPLE_PERIOD
+	int "Sampling period of the Perf hardware CPU cycle"
+	default 100000
+
+config PERF_EVENTS_HW_INSTRUCTIONS_SAMPLE_PERIOD
+	int "Sampling period of the Perf hardware instructions"
+	default 100000
+
+config PERF_EVENTS_HW_CACHE_REFERENCES_SAMPLE_PERIOD
+	int "Sampling period of the Perf hardware cache references"
+	default 100000
+
+config PERF_EVENTS_HW_CACHE_MISSES_SAMPLE_PERIOD
+	int "Sampling period of the Perf hardware cache misses"
+	default 100000
+
+config PERF_EVENTS_HW_BRANCH_INSTRUCTIONS_SAMPLE_PERIOD
+	int "Sampling period of the Perf hardware branch instructions"
+	default 100000
+
+config PERF_EVENTS_HW_BRANCH_MISSES_SAMPLE_PERIOD
+	int "Sampling period of the Perf hardware branch misses"
+	default 100000
+
+config PERF_EVENTS_HW_BUS_CYCLES_SAMPLE_PERIOD
+	int "Sampling period of the Perf hardware bus cycles"
+	default 100000
+
+config PERF_EVENTS_HW_STALLED_CYCLES_FRONTEND_SAMPLE_PERIOD
+	int "Sampling period of the Perf hardware stalled cycles frontend"
+	default 100000
+
+config PERF_EVENTS_HW_STALLED_CYCLES_BACKEND_SAMPLE_PERIOD
+	int "Sampling period of the Perf hardware stalled cycles backend"
+	default 100000
+
+config PERF_EVENTS_HW_REF_CPU_CYCLES_SAMPLE_PERIOD
+	int "Sampling period of the Perf hardware reference CPU cycles"
+	default 100000
+
+endif #PERF_EVENTS
+
 config ASSERT_PAUSE_CPU_TIMEOUT
 	int "Timeout in millisecond to pause another CPU when assert"
 	default 2000

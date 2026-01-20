@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <stdbool.h>
 #include <poll.h>
+#include <sys/param.h>
 
 #include <nuttx/atomic.h>
 #include <nuttx/kmalloc.h>
@@ -46,7 +47,6 @@
 #define PERF_GET_COUNT(event) \
         (atomic64_read(&(event)->count) + atomic64_read(&(event)->child_count))
 
-#define PERF_DEFAULT_PERIOD 1000
 #define PERF_RECORD_MISC_USER (2 << 0)
 #define FLAME_GRAPH_SKIP 11
 #define PERF_MAX_BACKTRACE 20
@@ -167,6 +167,42 @@ static struct pmu_s g_perf_swevent =
 #ifdef CONFIG_SMP
 static struct smp_call_data_s g_perf_call_data;
 #endif
+
+static const int64_t g_perf_sample_period[PERF_TYPE_MAX]
+                     [MAX(PERF_COUNT_HW_MAX, PERF_COUNT_SW_MAX)] =
+{
+  [PERF_TYPE_HARDWARE] =
+    {
+      [0 ... PERF_COUNT_HW_MAX - 1] = UINT32_MAX - 1,
+      [PERF_COUNT_HW_CPU_CYCLES] =
+        CONFIG_PERF_EVENTS_HW_CPU_CYCLES_SAMPLE_PERIOD,
+      [PERF_COUNT_HW_INSTRUCTIONS] =
+        CONFIG_PERF_EVENTS_HW_INSTRUCTIONS_SAMPLE_PERIOD,
+      [PERF_COUNT_HW_CACHE_REFERENCES] =
+        CONFIG_PERF_EVENTS_HW_CACHE_REFERENCES_SAMPLE_PERIOD,
+      [PERF_COUNT_HW_CACHE_MISSES] =
+        CONFIG_PERF_EVENTS_HW_CACHE_MISSES_SAMPLE_PERIOD,
+      [PERF_COUNT_HW_BRANCH_INSTRUCTIONS] =
+        CONFIG_PERF_EVENTS_HW_BRANCH_INSTRUCTIONS_SAMPLE_PERIOD,
+      [PERF_COUNT_HW_BRANCH_MISSES] =
+        CONFIG_PERF_EVENTS_HW_BRANCH_MISSES_SAMPLE_PERIOD,
+      [PERF_COUNT_HW_BUS_CYCLES] =
+        CONFIG_PERF_EVENTS_HW_BUS_CYCLES_SAMPLE_PERIOD,
+      [PERF_COUNT_HW_STALLED_CYCLES_FRONTEND] =
+        CONFIG_PERF_EVENTS_HW_STALLED_CYCLES_FRONTEND_SAMPLE_PERIOD,
+      [PERF_COUNT_HW_STALLED_CYCLES_BACKEND] =
+        CONFIG_PERF_EVENTS_HW_STALLED_CYCLES_BACKEND_SAMPLE_PERIOD,
+      [PERF_COUNT_HW_REF_CPU_CYCLES] =
+        CONFIG_PERF_EVENTS_HW_REF_CPU_CYCLES_SAMPLE_PERIOD,
+    },
+
+  [PERF_TYPE_SOFTWARE] =
+    {
+      [0 ... PERF_COUNT_SW_MAX - 1] = UINT32_MAX - 1,
+      [PERF_COUNT_SW_CPU_CLOCK] = CONFIG_PERF_EVENTS_SW_MIN_PERIOD_NSEC,
+    },
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -849,6 +885,12 @@ perf_event_alloc(FAR struct perf_event_attr_s *attr,
     {
       serr("perf event alloc fail\n");
       return NULL;
+    }
+
+  if (!attr->sample_period)
+    {
+      attr->sample_period =
+        g_perf_sample_period[attr->type][attr->config];
     }
 
   event->attr  = *attr;
