@@ -83,7 +83,7 @@ int puts(FAR const IPTR char *s)
         }
     }
 
-  funlockfile(stdout);
+  funlockfile(stream);
   return nput;
 #else
   size_t len = strlen(s);
