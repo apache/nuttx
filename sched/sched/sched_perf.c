@@ -2605,6 +2605,20 @@ static int perf_swevent_match(FAR struct perf_event_s *event)
 
 int perf_event_overflow(FAR struct perf_event_s *event)
 {
+  struct perf_sample_data_s data;
+
+  if (!event->buf)
+    {
+      return 0;
+    }
+
+  /* TODO: ISR thread cannot get pc */
+
+  uintptr_t pc = up_getusrpc(NULL);
+
+  perf_sample_data_init(&data, event->hw.last_period);
+
+  perf_event_data_overflow(event, &data, pc);
   return 0;
 }
 
