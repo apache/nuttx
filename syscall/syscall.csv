@@ -205,4 +205,4 @@
 "waitpid","sys/wait.h","defined(CONFIG_SCHED_WAITPID)","pid_t","pid_t","FAR int *","int"
 "write","unistd.h","","ssize_t","int","FAR const void *","size_t"
 "writev","sys/uio.h","","ssize_t","int","FAR const struct iovec *","int"
-"perf_event_open", "nuttx/perf.h", "defined(CONFIG_SCHED_PERF_EVENTS)", "int", "FAR struct perf_event_attr_s *", "pid_t", "int", "int", "unsigned long"
+"perf_event_open", "nuttx/perf.h", "defined(CONFIG_PERF_EVENTS)", "int", "FAR struct perf_event_attr_s *", "pid_t", "int", "int", "unsigned long"

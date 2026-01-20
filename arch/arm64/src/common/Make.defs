@@ -146,6 +146,6 @@ ifeq ($(CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS),y)
   CMN_UCSRCS += arm64_perf.c
 #endif
 
-ifeq ($(CONFIG_SCHED_PERF_EVENTS),y)
+ifeq ($(CONFIG_PERF_EVENTS),y)
   CMN_CSRCS += arm64_pmuv3.c
 endif

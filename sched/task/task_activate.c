@@ -34,7 +34,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched_note.h>
 
-#ifdef CONFIG_SCHED_PERF_EVENTS
+#ifdef CONFIG_PERF_EVENTS
 #  include <nuttx/perf.h>
 #endif
 
@@ -86,7 +86,7 @@ void nxtask_activate(FAR struct tcb_s *tcb)
   sched_note_start(tcb);
 #endif
 
-#ifdef CONFIG_SCHED_PERF_EVENTS
+#ifdef CONFIG_PERF_EVENTS
   perf_event_task_init(tcb);
 #endif
 

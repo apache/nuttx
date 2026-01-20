@@ -27,7 +27,7 @@
 #include "sched/sched.h"
 
 #include <nuttx/sched_note.h>
-#ifdef CONFIG_SCHED_PERF_EVENTS
+#ifdef CONFIG_PERF_EVENTS
 #  include <nuttx/perf.h>
 #endif
 
@@ -79,10 +79,7 @@ void nxsched_switch_context(FAR struct tcb_s *from, FAR struct tcb_s *to)
   sched_note_resume(to);
 #endif
 
-#ifdef CONFIG_SCHED_PERF_EVENTS
-  perf_event_task_sched_out(tcb);
-#endif
-#ifdef CONFIG_SCHED_PERF_EVENTS
+#ifdef CONFIG_PERF_EVENTS
   perf_event_task_sched_out(tcb);
 #endif
 }

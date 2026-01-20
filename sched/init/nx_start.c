@@ -49,7 +49,7 @@
 #include <nuttx/init.h>
 #include <nuttx/lib/math32.h>
 
-#ifdef CONFIG_SCHED_PERF_EVENTS
+#ifdef CONFIG_PERF_EVENTS
 #  include <nuttx/perf.h>
 #endif
 
@@ -597,7 +597,7 @@ void nx_start(void)
   iob_initialize();
 #endif
 
-#ifdef CONFIG_SCHED_PERF_EVENTS
+#ifdef CONFIG_PERF_EVENTS
   perf_event_init();
 #endif
 

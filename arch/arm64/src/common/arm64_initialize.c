@@ -42,7 +42,7 @@
 
 #include "arm64_arch.h"
 
-#ifdef CONFIG_SCHED_PERF_EVENTS
+#ifdef CONFIG_PERF_EVENTS
 #include "arm64_pmuv3.h"
 #endif
 
@@ -159,7 +159,7 @@ void up_initialize(void)
 
 #endif
 
-#ifdef CONFIG_SCHED_PERF_EVENTS
+#ifdef CONFIG_PERF_EVENTS
   arm64_pmu_initialize();
 #endif
 

@@ -715,7 +715,7 @@ struct tcb_s
 
   /* Perf support ***********************************************************/
 
-#ifdef CONFIG_SCHED_PERF_EVENTS
+#ifdef CONFIG_PERF_EVENTS
   FAR struct perf_event_context_s *perf_event_ctx;
   mutex_t perf_event_mutex;
 #endif

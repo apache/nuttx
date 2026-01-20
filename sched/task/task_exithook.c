@@ -37,7 +37,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/mm/mm.h>
 
-#ifdef CONFIG_SCHED_PERF_EVENTS
+#ifdef CONFIG_PERF_EVENTS
 #  include <nuttx/perf.h>
 #endif
 
@@ -435,7 +435,7 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
 
   nxtask_recover(tcb);
 
-#ifdef CONFIG_SCHED_PERF_EVENTS
+#ifdef CONFIG_PERF_EVENTS
   perf_event_task_exit(tcb);
 #endif
 

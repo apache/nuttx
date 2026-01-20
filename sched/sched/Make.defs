@@ -100,7 +100,7 @@ ifeq ($(CONFIG_SMP),y)
 CSRCS += sched_smp.c
 endif
 
-ifeq ($(CONFIG_SCHED_PERF_EVENTS),y)
+ifeq ($(CONFIG_PERF_EVENTS),y)
 CSRCS += sched_perf.c
 endif
 

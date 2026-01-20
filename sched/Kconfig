@@ -2054,7 +2054,7 @@ config SCHED_EVENTS
 		objects for specific events, but both threads and ISRs may deliver
 		events to event objects.
 
-config SCHED_PERF_EVENTS
+config PERF_EVENTS
 	bool "Support Perf Events"
 	select SCHED_RESUMESCHEDULER
 	select SCHED_SUSPENDSCHEDULER
