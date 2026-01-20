@@ -66,7 +66,6 @@ int fputws_unlocked(FAR const wchar_t *ws, FAR FILE *f)
     {
       if (lib_fwrite_unlocked(buf, l, f) < l)
         {
-          funlockfile(f);
           return -1;
         }
     }
