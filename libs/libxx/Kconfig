@@ -101,6 +101,11 @@ config LIBCXXABI_VERSION
 	default LIBCXX_VERSION if LIBCXX
 	default "17.0.6" if !LIBCXX
 
+config LIBSTDCXX_VERSION
+	string "Select libstdcxx version"
+	depends on LIBSUPCXX
+	default "14.2.0"
+
 config CXX_STANDARD
 	string "Language standard"
 	default "c++14"   if TRICORE_TOOLCHAIN_TASKING
