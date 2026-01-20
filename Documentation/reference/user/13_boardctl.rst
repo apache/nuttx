@@ -110,6 +110,16 @@ Board information
      which to receive the board unique ID.
  
    :dependencies: Board logic must provide the :c:func:`board_uniqueid` interface.
+
+.. c:macro:: BOARDIOC_MACADDR
+
+   Get the network driver MAC address.
+
+   :Argument: A pointer to an instance of :c:struct:`boardioc_macaddr_s`.
+
+   :configuration: CONFIG_BOARDCTL_MACADDR
+
+   :dependencies: Board logic must provide the :c:func:`board_macaddr` interface.
    
 Filesystems
 -----------

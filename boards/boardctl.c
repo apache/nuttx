@@ -906,6 +906,25 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
+#ifdef CONFIG_BOARDCTL_MACADDR
+      /* CMD:           BOARDIOC_MACADDR
+       * DESCRIPTION:   Get the network driver mac address.
+       * ARG:           A pointer to an instance of struct
+       *                boardioc_macaddr_s.
+       * CONFIGURATION: CONFIG_BOARDCTL_MACADDR
+       * DEPENDENCIES:  Board logic must provide board_macaddr()
+       */
+
+      case BOARDIOC_MACADDR:
+        {
+          FAR struct boardioc_macaddr_s *req =
+            (FAR struct boardioc_macaddr_s *)arg;
+
+          ret = board_macaddr(req->ifname, req->macaddr);
+        }
+        break;
+#endif
+
        default:
          {
 #ifdef CONFIG_BOARDCTL_IOCTL
