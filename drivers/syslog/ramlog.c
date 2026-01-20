@@ -75,7 +75,7 @@ struct ramlog_ratelimit_s
 
 struct ramlog_header_s
 {
-  uint32_t          rl_magic;    /* The rl_magic number for ramlog buffer init */
+  atomic_t          rl_magic;    /* The rl_magic number for ramlog buffer init */
   volatile uint32_t rl_head;     /* The head index (where data is added,natural growth) */
   char              rl_buffer[]; /* Circular RAM buffer */
 };
@@ -181,6 +181,42 @@ static struct ramlog_dev_s g_sysdev =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: ramlog_header_init
+ *
+ * Description:
+ *   Initialize the header of circular buffer.
+ *
+ * Input Parameters:
+ *   driver - The channel of note driver
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static inline_function void ramlog_header_init(FAR struct ramlog_dev_s *dev)
+{
+  uint32_t magic;
+  irqstate_t flags;
+
+  while ((magic = atomic_read_acquire(&dev->rl_header->rl_magic)) !=
+         RAMLOG_MAGIC_READY)
+    {
+      flags = up_irq_save();
+      while (magic != RAMLOG_MAGIC_INIT &&
+             atomic_cmpxchg_relaxed(&dev->rl_header->rl_magic, &magic,
+                                    RAMLOG_MAGIC_INIT))
+        {
+          dev->rl_header->rl_head = 0;
+          spin_lock_init(&dev->rl_lock);
+          atomic_set_release(&dev->rl_header->rl_magic, RAMLOG_MAGIC_READY);
+        }
+
+        up_irq_restore(flags);
+    }
+}
 
 /****************************************************************************
  * Name: ramlog_ratelimit
@@ -359,11 +395,17 @@ static void ramlog_copybuf(FAR struct ramlog_dev_s *priv,
 static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
                              FAR const char *buffer, size_t len)
 {
-#ifdef CONFIG_RAMLOG_SYSLOG
-  FAR struct ramlog_header_s *header = priv->rl_header;
-#endif
   size_t buflen = len;
   irqstate_t flags;
+
+  /* Initialize the ramlog header if it has not been initialized yet. */
+
+#ifdef CONFIG_RAMLOG_SYSLOG
+  if (priv == &g_sysdev)
+    {
+      ramlog_header_init(priv);
+    }
+#endif
 
   /* Disable interrupts (in case we are NOT called from interrupt handler) */
 
@@ -374,14 +416,6 @@ static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
       leave_critical_section(flags);
       return len;
     }
-
-#ifdef CONFIG_RAMLOG_SYSLOG
-  if (header->rl_magic != RAMLOG_MAGIC_NUMBER && priv == &g_sysdev)
-    {
-      memset(header, 0, sizeof(g_sysbuffer));
-      header->rl_magic = RAMLOG_MAGIC_NUMBER;
-    }
-#endif
 
   if (buflen > priv->rl_bufsize)
     {
@@ -783,6 +817,10 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
       list_initialize(&priv->rl_list);
       priv->rl_bufsize = buflen - sizeof(struct ramlog_header_s);
       priv->rl_header = (FAR struct ramlog_header_s *)buffer;
+
+      /* Initialize the ramlog header if it has not been initialized yet. */
+
+      ramlog_header_init(priv);
 
       /* Register the character driver */
 
