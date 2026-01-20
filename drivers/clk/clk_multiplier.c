@@ -97,8 +97,21 @@ static uint32_t clk_multiplier_recalc_rate(FAR struct clk_s *clk,
         {
           return -EINVAL;
         }
+	  else
+	    {
+          return parent_rate;
+		}
+    }
 
-      return parent_rate;
+  if (multiplier->flags & CLK_MULT_MINMULT_MSK)
+    {
+      uint32_t minmult = (multiplier->flags & CLK_MULT_MINMULT_MSK)
+        >> CLK_MULT_MINMULT_OFF;
+
+      if (mult < minmult)
+        {
+          return -EINVAL;
+        }
     }
 
   return parent_rate * mult;
@@ -193,11 +206,22 @@ static int clk_multiplier_set_rate(FAR struct clk_s *clk, uint32_t rate,
       value = MASK(multiplier->width);
     }
 
+  if (multiplier->flags & CLK_MULT_MINMULT_MSK)
+    {
+      uint32_t minmult = (multiplier->flags & CLK_MULT_MINMULT_MSK)
+        >> CLK_MULT_MINMULT_OFF;
+
+      if (mult < minmult)
+        {
+          return -EINVAL;
+        }
+    }
+
+
   if (multiplier->flags & CLK_MULT_HIWORD_MASK)
     {
       val = MASK(multiplier->width) << (multiplier->shift + 16);
     }
-
   else
     {
       val = clk_read(multiplier->reg);

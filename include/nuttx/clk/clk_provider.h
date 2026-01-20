@@ -58,6 +58,7 @@
 #define CLK_DIVIDER_MAX_HALF            0x10
 #define CLK_DIVIDER_DIV_NEED_EVEN       0x20
 #define CLK_DIVIDER_POWER_OF_TWO        0x40
+#define CLK_DIVIDER_APPLY_OFFSET        0x80
 #define CLK_DIVIDER_MINDIV_OFF          8
 #define CLK_DIVIDER_MINDIV_MSK          0xff00
 
@@ -69,6 +70,8 @@
 #define CLK_MULT_HIWORD_MASK            0x04
 #define CLK_MULT_MAX_HALF               0x08
 #define CLK_MULT_ROUND_CLOSEST          0x10
+#define CLK_MULT_MINMULT_OFF            8
+#define CLK_MULT_MINMULT_MSK            0xff00
 
 #define CLK_MUX_HIWORD_MASK             0x01
 #define CLK_MUX_READ_ONLY               0x02

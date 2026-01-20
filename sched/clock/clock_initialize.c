@@ -42,6 +42,10 @@
 
 #include <nuttx/spinlock.h>
 
+#if defined (CONFIG_CLK)
+#  include <nuttx/clk/clk.h>
+#endif
+
 #include "clock/clock.h"
 #ifdef CONFIG_CLOCK_TIMEKEEPING
 #  include "clock/clock_timekeeping.h"
@@ -202,6 +206,10 @@ static void clock_inittime(FAR const struct timespec *tp)
 void clock_initialize(void)
 {
   sched_trace_begin();
+
+#if defined(CONFIG_CLK)
+  up_clk_initialize();
+#endif
 
 #if !defined(CONFIG_SUPPRESS_INTERRUPTS) && \
     !defined(CONFIG_SUPPRESS_TIMER_INTS) && \
