@@ -364,11 +364,11 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* CAPIOC_FREQUENCE - Get the pulse frequency from the capture.
+      /* CAPIOC_FREQUENCY - Get the pulse frequency from the capture.
        * Argument: int32_t pointer to the location to return the frequency.
        */
 
-      case CAPIOC_FREQUENCE:
+      case CAPIOC_FREQUENCY:
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
           DEBUGASSERT(ptr);

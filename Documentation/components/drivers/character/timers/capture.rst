@@ -24,7 +24,7 @@ Supported ``ioctl`` Commands
 
    **Argument:** ``int8_t *`` (pointer to duty cycle percentage).
 
-.. c:macro:: CAPIOC_FREQUENCE
+.. c:macro:: CAPIOC_FREQUENCY
 
    Get the pulse frequency from the capture unit.
 
@@ -153,7 +153,7 @@ frequency:
           return 1;
         }
 
-      if (ioctl(fd, CAPIOC_FREQUENCE, (unsigned long)&frequency) < 0)
+      if (ioctl(fd, CAPIOC_FREQUENCY, (unsigned long)&frequency) < 0)
         {
           perror("Failed to get frequency");
           close(fd);
@@ -229,7 +229,7 @@ Here is an example using signal notifications for event-driven capture
       sleep(2);
 
       /* Get frequency and duty cycle */
-      ioctl(fd, CAPIOC_FREQUENCE, (unsigned long)&frequency);
+      ioctl(fd, CAPIOC_FREQUENCY, (unsigned long)&frequency);
       ioctl(fd, CAPIOC_DUTYCYCLE, (unsigned long)&duty);
 
       printf("Captured %d edges\n", edge_count);
@@ -276,7 +276,7 @@ The fake capture driver can be used for testing without hardware
       sleep(1);
 
       /* Read values (should be 10Hz, 50% duty) */
-      ioctl(fd, CAPIOC_FREQUENCE, (unsigned long)&frequency);
+      ioctl(fd, CAPIOC_FREQUENCY, (unsigned long)&frequency);
       ioctl(fd, CAPIOC_DUTYCYCLE, (unsigned long)&duty);
 
       printf("Fake Capture - Frequency: %u Hz, Duty: %u%%\n",
@@ -294,7 +294,7 @@ Notes
 
 * The actual set of supported ``ioctl`` commands may vary depending on
   the hardware and driver implementation.
-* The ``CAPIOC_FREQUENCE`` macro name is preserved for compatibility,
+* The ``CAPIOC_FREQUENCY`` macro name is preserved for compatibility,
   even though "frequency" is the correct English spelling.
 * Always check return values from ``ioctl()`` calls for error handling.
 * **Important:** In debug builds of NuttX, calling an unsupported
