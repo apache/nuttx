@@ -36,6 +36,10 @@
 
     .file    "arm64_vector_table.S"
 
+/* Emit CFI to .debug_frame for exception unwinding */
+
+    .cfi_sections .debug_frame
+
 /****************************************************************************
  * Assembly Macros
  ****************************************************************************/
@@ -49,26 +53,58 @@
 
 .macro arm64_enter_exception xreg0, xreg1
     sub    sp, sp, #8 * XCPTCONTEXT_REGS
+    .cfi_def_cfa sp, 8 * XCPTCONTEXT_REGS
 
     stp    x0,  x1,  [sp, #8 * REG_X0]
+    .cfi_offset x0, 8 * REG_X0 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x1, 8 * REG_X1 - 8 * XCPTCONTEXT_REGS
     stp    x2,  x3,  [sp, #8 * REG_X2]
+    .cfi_offset x2, 8 * REG_X2 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x3, 8 * REG_X3 - 8 * XCPTCONTEXT_REGS
     stp    x4,  x5,  [sp, #8 * REG_X4]
+    .cfi_offset x4, 8 * REG_X4 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x5, 8 * REG_X5 - 8 * XCPTCONTEXT_REGS
     stp    x6,  x7,  [sp, #8 * REG_X6]
+    .cfi_offset x6, 8 * REG_X6 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x7, 8 * REG_X7 - 8 * XCPTCONTEXT_REGS
     stp    x8,  x9,  [sp, #8 * REG_X8]
+    .cfi_offset x8, 8 * REG_X8 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x9, 8 * REG_X9 - 8 * XCPTCONTEXT_REGS
     stp    x10, x11, [sp, #8 * REG_X10]
+    .cfi_offset x10, 8 * REG_X10 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x11, 8 * REG_X11 - 8 * XCPTCONTEXT_REGS
     stp    x12, x13, [sp, #8 * REG_X12]
+    .cfi_offset x12, 8 * REG_X12 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x13, 8 * REG_X13 - 8 * XCPTCONTEXT_REGS
     stp    x14, x15, [sp, #8 * REG_X14]
+    .cfi_offset x14, 8 * REG_X14 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x15, 8 * REG_X15 - 8 * XCPTCONTEXT_REGS
     stp    x16, x17, [sp, #8 * REG_X16]
+    .cfi_offset x16, 8 * REG_X16 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x17, 8 * REG_X17 - 8 * XCPTCONTEXT_REGS
     stp    x18, x19, [sp, #8 * REG_X18]
+    .cfi_offset x18, 8 * REG_X18 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x19, 8 * REG_X19 - 8 * XCPTCONTEXT_REGS
     stp    x20, x21, [sp, #8 * REG_X20]
+    .cfi_offset x20, 8 * REG_X20 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x21, 8 * REG_X21 - 8 * XCPTCONTEXT_REGS
     stp    x22, x23, [sp, #8 * REG_X22]
+    .cfi_offset x22, 8 * REG_X22 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x23, 8 * REG_X23 - 8 * XCPTCONTEXT_REGS
     stp    x24, x25, [sp, #8 * REG_X24]
+    .cfi_offset x24, 8 * REG_X24 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x25, 8 * REG_X25 - 8 * XCPTCONTEXT_REGS
     stp    x26, x27, [sp, #8 * REG_X26]
+    .cfi_offset x26, 8 * REG_X26 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x27, 8 * REG_X27 - 8 * XCPTCONTEXT_REGS
     stp    x28, x29, [sp, #8 * REG_X28]
+    .cfi_offset x28, 8 * REG_X28 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x29, 8 * REG_X29 - 8 * XCPTCONTEXT_REGS
 
     /* Save the current task's SP_ELx and x30 */
     add    \xreg0, sp,  #8 * XCPTCONTEXT_REGS
     stp    x30, \xreg0, [sp, #8 * REG_X30]
+    .cfi_offset x30, 8 * REG_X30 - 8 * XCPTCONTEXT_REGS
 
     /* ELR and SPSR */
 #if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
@@ -79,6 +115,8 @@
     mrs    \xreg1, spsr_el1
 #endif
     stp    \xreg0, \xreg1,  [sp, #8 * REG_ELR]
+    .cfi_return_column 32 /* Use ELR as return address */
+    .cfi_offset 32, 8 * REG_ELR - 8 * XCPTCONTEXT_REGS
 
     mrs    \xreg0, sctlr_el1
     str    \xreg0,  [sp, #8 * REG_SCTLR_EL1]
@@ -154,98 +192,162 @@ GTEXT(_vector_table)
     /* Current EL with SP0 / Synchronous */
 
     .align 7
+    .cfi_startproc simple
+    .cfi_signal_frame
+    .cfi_def_cfa sp, 0
     arm64_enter_exception x9, x10
     b    arm64_sync_exc
+    .cfi_endproc
 
     /* Current EL with SP0 / IRQ */
 
     .align 7
+    .cfi_startproc simple
+    .cfi_signal_frame
+    .cfi_def_cfa sp, 0
     arm64_enter_exception x0, x1
     b    arm64_irq_handler
+    .cfi_endproc
 
     /* Current EL with SP0 / FIQ */
 
     .align 7
+    .cfi_startproc simple
+    .cfi_signal_frame
+    .cfi_def_cfa sp, 0
     arm64_enter_exception x0, x1
     b     arm64_fiq_handler
+    .cfi_endproc
 
     /* Current EL with SP0 / SError */
 
     .align 7
+    .cfi_startproc simple
+    .cfi_signal_frame
+    .cfi_def_cfa sp, 0
     arm64_enter_exception x0, x1
     b    arm64_serror_handler
+    .cfi_endproc
 
     /* Current EL with SPx / Synchronous */
 
     .align 7
+    .cfi_startproc simple
+    .cfi_signal_frame
+    .cfi_def_cfa sp, 0
     arm64_enter_exception x9, x10
     b    arm64_sync_exc
+    .cfi_endproc
 
     /* Current EL with SPx / IRQ */
 
     .align 7
+    .cfi_startproc simple
+    .cfi_signal_frame
+    .cfi_def_cfa sp, 0
     arm64_enter_exception x0, x1
     b    arm64_irq_handler
+    .cfi_endproc
 
     /* Current EL with SPx / FIQ */
 
     .align 7
+    .cfi_startproc simple
+    .cfi_signal_frame
+    .cfi_def_cfa sp, 0
     arm64_enter_exception x0, x1
     b     arm64_fiq_handler
+    .cfi_endproc
 
     /* Current EL with SPx / SError */
 
     .align 7
+    .cfi_startproc simple
+    .cfi_signal_frame
+    .cfi_def_cfa sp, 0
     arm64_enter_exception x0, x1
     b    arm64_serror_handler
+    .cfi_endproc
 
     /* Lower EL using AArch64 / Synchronous */
 
     .align 7
+    .cfi_startproc simple
+    .cfi_signal_frame
+    .cfi_def_cfa sp, 0
     arm64_enter_exception x9, x10
     b    arm64_sync_exc
+    .cfi_endproc
 
     /* Lower EL using AArch64 / IRQ */
 
     .align 7
+    .cfi_startproc simple
+    .cfi_signal_frame
+    .cfi_def_cfa sp, 0
     arm64_enter_exception x0, x1
     b    arm64_irq_handler
+    .cfi_endproc
 
     /* Lower EL using AArch64 / FIQ */
 
     .align 7
+    .cfi_startproc simple
+    .cfi_signal_frame
+    .cfi_def_cfa sp, 0
     arm64_enter_exception x0, x1
     b     arm64_fiq_handler
+    .cfi_endproc
 
     /* Lower EL using AArch64 / SError */
 
     .align 7
+    .cfi_startproc simple
+    .cfi_signal_frame
+    .cfi_def_cfa sp, 0
     arm64_enter_exception x0, x1
     b    arm64_serror_handler
+    .cfi_endproc
 
     /* Lower EL using AArch32 / Synchronous */
 
     .align 7
+    .cfi_startproc simple
+    .cfi_signal_frame
+    .cfi_def_cfa sp, 0
     arm64_enter_exception x0, x1
     b    arm64_mode32_handler
+    .cfi_endproc
 
     /* Lower EL using AArch32 / IRQ */
 
     .align 7
+    .cfi_startproc simple
+    .cfi_signal_frame
+    .cfi_def_cfa sp, 0
     arm64_enter_exception x0, x1
     b    arm64_mode32_handler
+    .cfi_endproc
 
     /* Lower EL using AArch32 / FIQ */
 
     .align 7
+    .cfi_startproc simple
+    .cfi_signal_frame
+    .cfi_def_cfa sp, 0
     arm64_enter_exception x0, x1
     b    arm64_mode32_handler
+    .cfi_endproc
 
     /* Lower EL using AArch32 / SError */
 
     .align 7
+    .cfi_startproc simple
+    .cfi_signal_frame
+    .cfi_def_cfa sp, 0
     arm64_enter_exception x0, x1
     b    arm64_mode32_handler
+    .cfi_endproc
 
 /* Restore Corruptible Registers and exception context
  * from the task stack.
@@ -253,6 +355,43 @@ GTEXT(_vector_table)
 
 GTEXT(arm64_exit_exception)
 SECTION_FUNC(text, arm64_exit_exception)
+    .cfi_startproc simple
+    .cfi_signal_frame
+    .cfi_def_cfa sp, 8 * XCPTCONTEXT_REGS
+    .cfi_offset x0, 8 * REG_X0 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x1, 8 * REG_X1 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x2, 8 * REG_X2 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x3, 8 * REG_X3 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x4, 8 * REG_X4 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x5, 8 * REG_X5 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x6, 8 * REG_X6 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x7, 8 * REG_X7 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x8, 8 * REG_X8 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x9, 8 * REG_X9 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x10, 8 * REG_X10 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x11, 8 * REG_X11 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x12, 8 * REG_X12 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x13, 8 * REG_X13 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x14, 8 * REG_X14 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x15, 8 * REG_X15 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x16, 8 * REG_X16 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x17, 8 * REG_X17 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x18, 8 * REG_X18 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x19, 8 * REG_X19 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x20, 8 * REG_X20 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x21, 8 * REG_X21 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x22, 8 * REG_X22 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x23, 8 * REG_X23 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x24, 8 * REG_X24 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x25, 8 * REG_X25 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x26, 8 * REG_X26 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x27, 8 * REG_X27 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x28, 8 * REG_X28 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x29, 8 * REG_X29 - 8 * XCPTCONTEXT_REGS
+    .cfi_offset x30, 8 * REG_X30 - 8 * XCPTCONTEXT_REGS
+    .cfi_return_column 32
+    .cfi_offset 32, 8 * REG_ELR - 8 * XCPTCONTEXT_REGS
+
 #ifdef CONFIG_ARCH_FPU
     add    x0, sp, #8 * ARM64_CONTEXT_REGS
     bl     arm64_fpu_restore
@@ -308,3 +447,4 @@ SECTION_FUNC(text, arm64_exit_exception)
     add    sp, sp, #8 * XCPTCONTEXT_REGS
 
     eret
+    .cfi_endproc
