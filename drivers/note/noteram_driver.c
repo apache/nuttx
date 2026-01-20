@@ -196,6 +196,138 @@ struct noteram_driver_s g_noteram_driver =
  * Private Functions
  ****************************************************************************/
 
+#if CONFIG_DRIVERS_NOTERAM_POLLTIMEOUT_MS > 0
+static inline_function
+void noteram_timeout_reset(FAR struct noteram_driver_s *drv)
+{
+  /* We need locked to ensure the wdog status and dq status aligned. */
+
+  irqstate_t flags = spin_lock_irqsave(&drv->header->lock);
+  if (!drv->pfd)
+    {
+      wd_cancel(&drv->wdog);
+    }
+  else
+    {
+      wd_start(&drv->wdog, MSEC2TICK(CONFIG_DRIVERS_NOTERAM_POLLTIMEOUT_MS),
+               noteram_timeout_handler, (wdparm_t)drv);
+    }
+
+  spin_unlock_irqrestore(&drv->header->lock, flags);
+}
+
+static void noteram_timeout_handler(wdparm_t arg)
+{
+  FAR struct noteram_driver_s *drv = (FAR struct noteram_driver_s *)arg;
+
+  if (drv->pfd && (noteram_unread_length(drv) >= drv->threshold))
+    {
+      poll_notify(&drv->pfd, 1, POLLIN);
+    }
+
+  noteram_timeout_reset(drv);
+}
+#else
+#  define noteram_timeout_reset(drv)
+#endif /* CONFIG_RAMLOG_POLLTIMEOUT_MS > 0 */
+
+/****************************************************************************
+ * Name: noteram_header_init
+ *
+ * Description:
+ *   Initialize the header of circular buffer.
+ *
+ * Input Parameters:
+ *   driver - The channel of note driver
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static inline void noteram_header_init(FAR struct noteram_driver_s *drv)
+{
+  uint32_t magic;
+  irqstate_t flags;
+
+  while ((magic = atomic_read_acquire(&drv->header->magic)) !=
+         NOTERAM_MAGIC_READY)
+    {
+      flags = up_irq_save();
+      while (magic != NOTERAM_MAGIC_INIT &&
+             atomic_cmpxchg_relaxed(&drv->header->magic, &magic,
+                                    NOTERAM_MAGIC_INIT))
+        {
+          drv->header->head = 0;
+          drv->header->tail = 0;
+          drv->header->read = 0;
+          spin_lock_init(&drv->header->lock);
+          atomic_set_release(&drv->header->magic, NOTERAM_MAGIC_READY);
+        }
+
+      up_irq_restore(flags);
+    }
+}
+
+/****************************************************************************
+ * Name: noteram_ratelimit
+ *
+ * Description:
+ *   Check whether the instrumentation is limited.
+ *
+ * Input Parameters:
+ *   driver - The channel of note driver
+ *
+ * Returned Value:
+ *   True is returned if the instrumentation is limited.
+ *
+ ****************************************************************************/
+
+static bool noteram_ratelimit(FAR struct noteram_driver_s *drv)
+{
+  bool ret;
+  clock_t ticks;
+  uint32_t seconds;
+  FAR struct noteram_ratelimit_s *limit;
+
+  limit = &drv->ratelimit;
+
+  if (limit->interval == 0)
+    {
+      return false;
+    }
+
+  ticks = clock_systime_ticks();
+  seconds = ticks * CONFIG_USEC_PER_TICK / 1000000;
+
+  if (limit->begin == 0)
+    {
+      limit->begin = seconds;
+    }
+
+  /* Reset statistical information */
+
+  if ((seconds - limit->begin) >= limit->interval)
+    {
+      limit->begin = seconds;
+      limit->printed = 0;
+    }
+
+  /* Check if the note is limited */
+
+  if (limit->burst && limit->burst > limit->printed)
+    {
+      limit->printed++;
+      ret = false;
+    }
+  else
+    {
+      ret = true;
+    }
+
+  return ret;
+}
+
 /****************************************************************************
  * Name: noteram_buffer_clear
  *
