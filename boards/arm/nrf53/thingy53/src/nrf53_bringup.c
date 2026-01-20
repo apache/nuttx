@@ -83,7 +83,7 @@ static int nrf53_appcore_bleinit(void)
 #ifdef CONFIG_BLUETOOTH_RPMSG
   struct bt_driver_s *bt_dev = NULL;
 
-  bt_dev = rpmsghci_register("appcore", "bthci");
+  bt_dev = rpmsghci_register("netcore", "bthci");
   if (bt_dev == NULL)
     {
       syslog(LOG_ERR, "ERROR: rpmsghci_register() failed: %d\n", -errno);
@@ -144,9 +144,9 @@ static int nrf53_netcore_bleinit(void)
 void rpmsg_serialinit(void)
 {
 #ifdef CONFIG_NRF53_APPCORE
-  uart_rpmsg_init("appcore", "proxy", 4096, false);
+  uart_rpmsg_init("netcore", "proxy", 4096, false);
 #else
-  uart_rpmsg_init("netcore", "proxy", 4096, true);
+  uart_rpmsg_init("appcore", "proxy", 4096, true);
 #endif
 }
 #endif
@@ -192,9 +192,9 @@ int nrf53_bringup(void)
 
 #ifdef CONFIG_RPTUN
 #ifdef CONFIG_NRF53_APPCORE
-  nrf53_rptun_init("appcore");
-#else
   nrf53_rptun_init("netcore");
+#else
+  nrf53_rptun_init("appcore");
 #endif
 #endif
 
