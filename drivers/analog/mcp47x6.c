@@ -305,7 +305,7 @@ static int mcp47x6_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
   uint32_t data;
   data = msg->am_data & MCP47X6_DATA_MASK;
   data <<= MCP47X6_DATA_SHIFT;
-  buffer[0] = (uint8_t)(data >> 8);
+  buffer[0] = (uint8_t)(data >> 8) | MCP47X6_COMMAND_WRITE_DAC;
   buffer[1] = (uint8_t)(data);
 
   ret = mcp47x6_i2c_write(priv, buffer, sizeof(buffer));
@@ -396,7 +396,8 @@ static int mcp47x6_ioctl(FAR struct dac_dev_s *dev, int cmd,
 
   if (command_prepared)
     {
-      ret = mcp47x6_i2c_write(priv, &priv->cmd, sizeof(priv->cmd));
+      uint8_t raw_cmd = MCP47X6_COMMAND_WRITE_CONFIG | priv->cmd;
+      ret = mcp47x6_i2c_write(priv, &raw_cmd, sizeof(raw_cmd));
     }
 
   return ret;
