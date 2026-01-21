@@ -574,6 +574,23 @@ static int esp_newsession(uint32_t *sid, struct cryptoini *cri)
 
       switch (cri->cri_alg)
         {
+#ifdef CONFIG_CRYPTO_AES
+          case CRYPTO_AES_CBC:
+              break;
+
+          case CRYPTO_AES_CTR:
+            if ((cri->cri_klen / 8 - 4) != 16 &&
+                (cri->cri_klen / 8 -4) != 32)
+              {
+                /* esp aes-ctr key bits just support 128 & 256 */
+
+                esp_freesession(i);
+                kmm_free(data);
+                return -EINVAL;
+              }
+
+            break;
+#endif
           case CRYPTO_SHA1:
             axf = &g_auth_hash_sha1_esp;
             goto sha_common;
@@ -767,6 +784,7 @@ static int esp_process(struct cryptop *crp)
   struct cryptodesc *crd;
   struct esp_crypto_list *session;
   struct esp_crypto_data *data;
+  uint8_t iv[AESCTR_BLOCKSIZE];
   uint32_t lid;
   int err = 0;
 
@@ -793,6 +811,35 @@ static int esp_process(struct cryptop *crp)
 
       switch (data->alg)
         {
+#ifdef CONFIG_CRYPTO_AES
+          case CRYPTO_AES_CBC:
+            err = aes_cypher(crp->crp_dst, crp->crp_buf, crd->crd_len,
+                             crp->crp_iv, crd->crd_key, crd->crd_klen / 8,
+                             AES_MODE_CBC, crd->crd_flags & CRD_F_ENCRYPT);
+
+            if (err < 0)
+              {
+                return err;
+              }
+            break;
+          case CRYPTO_AES_CTR:
+            memcpy(iv, crd->crd_key + crd->crd_klen / 8 - AESCTR_NONCESIZE,
+                   AESCTR_NONCESIZE);
+            memcpy(iv + AESCTR_NONCESIZE, crp->crp_iv, AESCTR_IVSIZE);
+            memcpy(iv + AESCTR_NONCESIZE + AESCTR_IVSIZE,
+                   (uint8_t *)crp->crp_iv + AESCTR_IVSIZE, 4);
+            err = aes_cypher(crp->crp_dst, crp->crp_buf, crd->crd_len, iv,
+                             crd->crd_key,
+                             crd->crd_klen / 8 - AESCTR_NONCESIZE,
+                             AES_MODE_CTR, crd->crd_flags & CRD_F_ENCRYPT);
+
+            if (err < 0)
+              {
+                return err;
+              }
+
+            break;
+#endif
           case CRYPTO_SHA1:
           case CRYPTO_SHA2_256:
           case CRYPTO_SHA2_384:
@@ -854,6 +901,10 @@ void hwcr_init(void)
   algs[CRYPTO_SHA2_256_HMAC] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_SHA2_384_HMAC] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_SHA2_512_HMAC] = CRYPTO_ALG_FLAG_SUPPORTED;
+#ifdef CONFIG_CRYPTO_AES
+  algs[CRYPTO_AES_CBC] = CRYPTO_ALG_FLAG_SUPPORTED;
+  algs[CRYPTO_AES_CTR] = CRYPTO_ALG_FLAG_SUPPORTED;
+#endif
 
   esp_sha_init();
   crypto_register(hwcr_id, algs, esp_newsession,
