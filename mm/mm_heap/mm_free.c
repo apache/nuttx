@@ -61,9 +61,9 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
   tmp->flink = heap->mm_delaylist[this_cpu()];
   heap->mm_delaylist[this_cpu()] = tmp;
 
-#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
+#  if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
   heap->mm_delaycount[this_cpu()]++;
-#endif
+#  endif
 
   mm_unlock_irq(heap, flags);
 #endif
@@ -102,7 +102,7 @@ void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay)
 
   nodesize = mm_malloc_size(heap, mem);
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
-#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
+#  if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
   /* If delay free is enabled, a memory node will be freed twice.
    * The first time is to add the node to the delay list, and the second
    * time is to actually free the node. Therefore, we only colorize the
@@ -110,7 +110,7 @@ void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay)
    */
 
   if (delay)
-#endif
+#  endif
     {
       memset(mem, MM_FREE_MAGIC, nodesize);
     }

@@ -65,7 +65,7 @@ int mm_lock(FAR struct mm_heap_s *heap)
 
   if (up_interrupt_context())
     {
-#  if !defined(CONFIG_SMP)
+#  ifndef CONFIG_SMP
       /* Check the mutex value, if held by someone, then return false.
        * Or, touch the heap internal data directly.
        */

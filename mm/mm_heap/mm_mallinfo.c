@@ -190,6 +190,7 @@ struct mallinfo_task mm_mallinfo_task(FAR struct mm_heap_s *heap,
 
 size_t mm_heapfree(FAR struct mm_heap_s *heap)
 {
+  mm_free_delaylist(heap);
   return heap->mm_heapsize - heap->mm_curused;
 }
 
@@ -204,6 +205,9 @@ size_t mm_heapfree(FAR struct mm_heap_s *heap)
 size_t mm_heapfree_largest(FAR struct mm_heap_s *heap)
 {
   FAR struct mm_freenode_s *node;
+
+  mm_free_delaylist(heap);
+
   for (node = heap->mm_nodelist[MM_NNODES - 1].blink; node;
        node = node->blink)
     {

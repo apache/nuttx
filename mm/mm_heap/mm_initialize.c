@@ -387,6 +387,8 @@ void mm_uninitialize(FAR struct mm_heap_s *heap)
   mempool_multiple_deinit(heap->mm_mpool);
 #endif
 
+  mm_free_delaylist(heap);
+
   for (i = 0; i < CONFIG_MM_REGIONS; i++)
     {
       if (!heap->mm_nokasan)
@@ -399,10 +401,9 @@ void mm_uninitialize(FAR struct mm_heap_s *heap)
                       (uintptr_t)heap->mm_heapstart[i], heap->mm_curused);
     }
 
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-#  if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#if defined(CONFIG_FS_PROCFS) && (defined(CONFIG_BUILD_FLAT) || \
+    defined(__KERNEL__)) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
   procfs_unregister_meminfo(&heap->mm_procfs);
-#  endif
 #endif
   nxmutex_destroy(&heap->mm_lock);
 }

@@ -98,18 +98,18 @@ static void    meminfo_progmem(FAR struct progmem_info_s *progmem);
 /* File system methods */
 
 static int     meminfo_open(FAR struct file *filep, FAR const char *relpath,
-                 int oflags, mode_t mode);
+                            int oflags, mode_t mode);
 static int     meminfo_close(FAR struct file *filep);
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMDUMP
 static ssize_t memdump_read(FAR struct file *filep, FAR char *buffer,
-                             size_t buflen);
+                            size_t buflen);
 static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen);
 #endif
 static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
+                            size_t buflen);
 static int     meminfo_dup(FAR const struct file *oldp,
-                 FAR struct file *newp);
+                           FAR struct file *newp);
 static int     meminfo_stat(FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
@@ -230,7 +230,7 @@ static void meminfo_progmem(FAR struct progmem_info_s *progmem)
  ****************************************************************************/
 
 static int meminfo_open(FAR struct file *filep, FAR const char *relpath,
-                      int oflags, mode_t mode)
+                        int oflags, mode_t mode)
 {
   FAR struct meminfo_file_s *procfile;
 
@@ -318,16 +318,17 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
           buffer    += copysize;
           buflen    -= copysize;
 
-          /* Trigger reclamation of delay list otherwise they will be
-           * counted as used, which often confuses people like memory
-           * leakages. see pull/12817 for more information.
-           */
-
-          mm_free_delaylist(entry->heap);
-
           /* Show heap information */
 
-          info      = mm_mallinfo(entry->heap);
+          if (entry->mallinfo)
+            {
+              info = entry->mallinfo(entry->heap);
+            }
+          else
+            {
+              info = mm_mallinfo(entry->heap);
+            }
+
           linesize   = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
                                        "%11lu%11lu%11lu%11lu%11lu"
                                        "%7lu%7lu %s\n",
@@ -640,7 +641,14 @@ dump:
 
   for (entry = g_procfs_meminfo; entry != NULL; entry = entry->next)
     {
-      mm_memdump(entry->heap, &dump);
+      if (entry->memdump)
+        {
+          entry->memdump(entry->heap, &dump);
+        }
+      else
+        {
+          mm_memdump(entry->heap, &dump);
+        }
     }
 
   return buflen;
@@ -720,13 +728,11 @@ static int meminfo_stat(FAR const char *relpath, FAR struct stat *buf)
 
 void procfs_register_meminfo(FAR struct procfs_meminfo_entry_s *entry)
 {
-  if (NULL == entry->name)
+  if (entry->name != NULL)
     {
-      return;
+      entry->next = g_procfs_meminfo;
+      g_procfs_meminfo = entry;
     }
-
-  entry->next = g_procfs_meminfo;
-  g_procfs_meminfo = entry;
 }
 
 /****************************************************************************

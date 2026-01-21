@@ -306,6 +306,10 @@ void mm_foreach(FAR struct mm_heap_s *heap, mm_node_handler_t handler,
 
 void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay);
 
+/* Functions contained in mm_malloc.c ***************************************/
+
+void mm_free_delaylist(FAR struct mm_heap_s *heap);
+
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/

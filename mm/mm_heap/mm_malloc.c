@@ -69,17 +69,16 @@ static bool free_delaylist(FAR struct mm_heap_s *heap, bool force)
 
   tmp = heap->mm_delaylist[this_cpu()];
 
-#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
-  if (tmp == NULL ||
-      (!force &&
-        heap->mm_delaycount[this_cpu()] < CONFIG_MM_FREE_DELAYCOUNT_MAX))
+#  if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
+  if (tmp == NULL || (!force &&
+      heap->mm_delaycount[this_cpu()] < CONFIG_MM_FREE_DELAYCOUNT_MAX))
     {
       mm_unlock_irq(heap, flags);
       return false;
     }
 
   heap->mm_delaycount[this_cpu()] = 0;
-#endif
+#  endif
 
   heap->mm_delaylist[this_cpu()] = NULL;
 
@@ -87,7 +86,7 @@ static bool free_delaylist(FAR struct mm_heap_s *heap, bool force)
 
   /* Test if the delayed is empty */
 
-  ret = tmp != NULL;
+  ret = !!tmp;
 
   while (tmp)
     {
@@ -351,7 +350,6 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
     }
 #endif
 
-#ifdef CONFIG_DEBUG_MM
   else if (MM_INTERNAL_HEAP(heap))
     {
 #ifdef CONFIG_MM_DUMP_ON_FAILURE
@@ -368,7 +366,9 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 #  endif
 #endif
 
+#ifdef CONFIG_DEBUG_MM
       mwarn("WARNING: Allocation failed, size %zu\n", alignsize);
+#endif
 #ifdef CONFIG_MM_DUMP_ON_FAILURE
       minfo = mm_mallinfo(heap);
       mwarn("Total:%d, used:%d, free:%d, largest:%d, nused:%d, nfree:%d\n",
@@ -406,7 +406,6 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
       PANIC();
 #endif
     }
-#endif
 
   DEBUGASSERT(ret == NULL || ((uintptr_t)ret) % MM_ALIGN == 0);
   return ret;
