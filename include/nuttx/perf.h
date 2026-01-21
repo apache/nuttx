@@ -262,8 +262,6 @@ struct perf_event_s
   FAR struct perf_event_s *group_leader;    /* Indicate the group leader of this event */
   FAR struct perf_event_s *parent_event;    /* Indicate the parent event of this event */
   uint64_t id;                              /* Event id */
-  uint64_t total_time_enabled;
-  uint64_t total_time_running;
   FAR struct perf_buffer_s *buf;
   FAR struct pollfd *pfd;
 };
@@ -289,7 +287,6 @@ struct pmu_event_context_s
 struct pmu_cpu_context_s
 {
   struct pmu_event_context_s pmuctx;
-  FAR struct pmu_event_context_s *task_pmuctx;
 };
 
 struct pmu_ops_s
