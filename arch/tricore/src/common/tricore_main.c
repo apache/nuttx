@@ -28,8 +28,8 @@
 #include <nuttx/init.h>
 
 #include "Ifx_Types.h"
-#include "IfxScuWdt.h"
 #include "IfxCpu.h"
+#include "IfxScuWdt.h"
 
 /****************************************************************************
  * Private Functions
@@ -42,9 +42,6 @@ static void core_main(void)
   /* !!WATCHDOG0 AND SAFETY WATCHDOG ARE DISABLED HERE!!
    * Enable the watchdogs and service them periodically if it is required
    */
-
-  IfxScuWdt_disableCpuWatchdog(IfxScuWdt_getCpuWatchdogPassword());
-  IfxScuWdt_disableSafetyWatchdog(IfxScuWdt_getSafetyWatchdogPassword());
 
   /* Wait for CPU sync event */
 
@@ -66,6 +63,19 @@ static void core_main(void)
 
 void core0_main(void)
 {
+  /* All WDTs except WDTCPU0 and system watchdog WDTSYS are in
+   * disabled mode after Boot-FW execution. Disable the watchdog
+   * to ensure the normal startup of the system.
+   */
+
+#if defined(CONFIG_ARCH_CHIP_AURIX_TC3XX)
+  IfxScuWdt_disableCpuWatchdog(IfxScuWdt_getCpuWatchdogPassword());
+  IfxScuWdt_disableSafetyWatchdog(IfxScuWdt_getSafetyWatchdogPassword());
+#elif defined(CONFIG_ARCH_CHIP_AURIX_TC4XX)
+  IfxWtu_disableCpuWatchdog(IfxWtu_getCpuWatchdogPassword());
+  IfxWtu_disableSystemWatchdog(IfxWtu_getSystemWatchdogPassword());
+#endif
+
   core_main();
 }
 
