@@ -376,7 +376,7 @@ The following list indicates the state of peripherals' support in NuttX:
 Peripheral Support NOTES
 ========== ======= =====
 ADC          Yes   Oneshot
-AES          No
+AES          Yes
 CAN/TWAI     Yes
 DAC          No
 DMA          Yes
