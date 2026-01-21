@@ -124,7 +124,7 @@ function arm_gcc_toolchain() {
         $basefile = "arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-arm-none-eabi"
         Set-Location "$NUTTXTOOLS"
         # Download the latest ARM GCC toolchain prebuilt by ARM
-        Invoke-WebRequest -Uri "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
+        Invoke-WebRequest -Uri "https://developer.arm.com/-/media/files/downloads/gnu/13.2.rel1/binrel/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
         Expand-Archive "$NUTTXTOOLS\$basefile.zip"
         Move-Item -Path "$basefile\$basefile" -Destination "gcc-arm-none-eabi"
         Remove-Item "$basefile*" -Force
@@ -350,3 +350,4 @@ function install_build_tools {
 }
 
 install_build_tools
+
