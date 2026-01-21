@@ -127,6 +127,7 @@ static int bluetooth_sockif_alloc(FAR struct socket *psock)
 
   DEBUGASSERT(conn->bc_crefs == 0);
   conn->bc_crefs = 1;
+  nxrmutex_init(&conn->bc_conn.s_lock);
 
   /* Save the pre-allocated connection in the socket structure */
 
