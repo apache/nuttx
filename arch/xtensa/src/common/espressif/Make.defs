@@ -86,6 +86,13 @@ endif
 
 ifeq ($(CONFIG_ESPRESSIF_SHA_ACCELERATOR),y)
 CHIP_CSRCS += esp_sha.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_AES_ACCELERATOR),y)
+CHIP_CSRCS += esp_aes.c
+endif
+
+ifeq ($(CONFIG_ARCH_CHIP_ESP32),)
 ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
 CHIP_CSRCS += esp_crypto.c
 endif

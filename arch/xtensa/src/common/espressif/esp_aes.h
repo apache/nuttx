@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s3/esp32s3_aes.h
+ * arch/xtensa/src/common/espressif/esp_aes.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,8 +22,8 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_AES_H
-#define __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_AES_H
+#ifndef __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_AES_H
+#define __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_AES_H
 
 #include <nuttx/config.h>
 #include <stdint.h>
@@ -45,7 +45,7 @@ extern "C"
 
 /* AES private description */
 
-struct esp32s3_aes_s
+struct esp_aes_s
 {
   uint32_t  key[8];     /* Key data value */
   uint16_t  keybits;    /* Key data bits */
@@ -53,10 +53,10 @@ struct esp32s3_aes_s
 
 /* AES XTS private description */
 
-struct esp32s3_aes_xts_s
+struct esp_aes_xts_s
 {
-  struct esp32s3_aes_s crypt;  /* AES block encryption/decryption */
-  struct esp32s3_aes_s tweak;  /* AES tweak encryption/decryption */
+  struct esp_aes_s crypt;  /* AES block encryption/decryption */
+  struct esp_aes_s tweak;  /* AES tweak encryption/decryption */
 };
 
 /****************************************************************************
@@ -64,7 +64,7 @@ struct esp32s3_aes_xts_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32s3_aes_ecb_cypher
+ * Name: esp_aes_ecb_cypher
  *
  * Description:
  *   Process AES ECB encryption/decryption.
@@ -81,11 +81,11 @@ struct esp32s3_aes_xts_s
  *
  ****************************************************************************/
 
-int esp32s3_aes_ecb_cypher(struct esp32s3_aes_s *aes, bool encrypt,
-                           const void *input, void *output, uint32_t size);
+int esp_aes_ecb_cypher(struct esp_aes_s *aes, bool encrypt,
+                       const void *input, void *output, uint32_t size);
 
 /****************************************************************************
- * Name: esp32s3_aes_cbc_cypher
+ * Name: esp_aes_cbc_cypher
  *
  * Description:
  *   Process AES CBC encryption/decryption.
@@ -103,12 +103,12 @@ int esp32s3_aes_ecb_cypher(struct esp32s3_aes_s *aes, bool encrypt,
  *
  ****************************************************************************/
 
-int esp32s3_aes_cbc_cypher(struct esp32s3_aes_s *aes, bool encrypt,
-                           void *ivptr, const void *input, void *output,
-                           uint32_t size);
+int esp_aes_cbc_cypher(struct esp_aes_s *aes, bool encrypt,
+                       void *ivptr, const void *input, void *output,
+                       uint32_t size);
 
 /****************************************************************************
- * Name: esp32s3_aes_ctr_cypher
+ * Name: esp_aes_ctr_cypher
  *
  * Description:
  *   Process AES CTR encryption/decryption.
@@ -127,12 +127,12 @@ int esp32s3_aes_cbc_cypher(struct esp32s3_aes_s *aes, bool encrypt,
  *
  ****************************************************************************/
 
-int esp32s3_aes_ctr_cypher(struct esp32s3_aes_s *aes, uint32_t *offptr,
-                           void *cntptr, void *cacheptr, const void *input,
-                           void *output, uint32_t size);
+int esp_aes_ctr_cypher(struct esp_aes_s *aes, uint32_t *offptr,
+                       void *cntptr, void *cacheptr, const void *input,
+                       void *output, uint32_t size);
 
 /****************************************************************************
- * Name: esp32s3_aes_xts_cypher
+ * Name: esp_aes_xts_cypher
  *
  * Description:
  *   Process AES XTS encryption/decryption.
@@ -150,12 +150,12 @@ int esp32s3_aes_ctr_cypher(struct esp32s3_aes_s *aes, uint32_t *offptr,
  *
  ****************************************************************************/
 
-int esp32s3_aes_xts_cypher(struct esp32s3_aes_xts_s *aes, bool encrypt,
-                           void *unitptr, const void *input, void *output,
-                           uint32_t size);
+int esp_aes_xts_cypher(struct esp_aes_xts_s *aes, bool encrypt,
+                       void *unitptr, const void *input, void *output,
+                       uint32_t size);
 
 /****************************************************************************
- * Name: esp32s3_aes_setkey
+ * Name: esp_aes_setkey
  *
  * Description:
  *   Configure AES key.
@@ -170,11 +170,11 @@ int esp32s3_aes_xts_cypher(struct esp32s3_aes_xts_s *aes, bool encrypt,
  *
  ****************************************************************************/
 
-int esp32s3_aes_setkey(struct esp32s3_aes_s *aes, const void *keyptr,
-                       uint16_t keybits);
+int esp_aes_setkey(struct esp_aes_s *aes, const void *keyptr,
+                   uint16_t keybits);
 
 /****************************************************************************
- * Name: esp32s3_aes_xts_setkey
+ * Name: esp_aes_xts_setkey
  *
  * Description:
  *   Configure AES XTS key.
@@ -189,14 +189,14 @@ int esp32s3_aes_setkey(struct esp32s3_aes_s *aes, const void *keyptr,
  *
  ****************************************************************************/
 
-int esp32s3_aes_xts_setkey(struct esp32s3_aes_xts_s *aes, const void *keyptr,
-                           uint16_t keybits);
+int esp_aes_xts_setkey(struct esp_aes_xts_s *aes, const void *keyptr,
+                       uint16_t keybits);
 
 /****************************************************************************
- * Name: esp32s3_aes_init
+ * Name: esp_aes_init
  *
  * Description:
- *   Initialize ESP32-S3 AES hardware driver.
+ *   Initialize AES hardware driver.
  *
  * Input Parameters:
  *   None
@@ -206,17 +206,26 @@ int esp32s3_aes_xts_setkey(struct esp32s3_aes_xts_s *aes, const void *keyptr,
  *
  ****************************************************************************/
 
-int esp32s3_aes_init(void);
+int esp_aes_init(void);
 
 #ifdef CONFIG_ESP32S3_AES_ACCELERATOR_TEST
 
 /****************************************************************************
- * Name: esp32s3_aes_test
+ * Name: esp_aes_test
+ *
+ * Description:
+ *   Test AES implementation
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
-void esp32s3_aes_test(void);
-
-#endif
+void esp_aes_test(void);
+#endif /* CONFIG_ESP32S3_AES_ACCELERATOR_TEST */
 
 #ifdef __cplusplus
 }
@@ -224,4 +233,4 @@ void esp32s3_aes_test(void);
 #undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_RISCV_SRC_ESP32S3_LEGACY_ESP32S3_AES_H */
+#endif /* __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_AES_H */

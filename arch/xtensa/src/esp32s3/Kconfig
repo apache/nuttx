@@ -940,8 +940,12 @@ config ESP32S3_CAM
 		Camera controller that receives parallel DVP data from image sensors.
 
 config ESP32S3_AES_ACCELERATOR
-	bool "AES Accelerator"
+	bool "AES Accelerator (legacy implementation: read help)"
 	default n
+	select ESPRESSIF_AES_ACCELERATOR
+	---help---
+		This is a deprecated Kconfig macro. Its kept for retrocompatibility only.
+		Use "CONFIG_ESPRESSIF_AES_ACCELERATOR" instead.
 
 endmenu # ESP32-S3 Peripheral Selection
 
