@@ -130,6 +130,34 @@ config RPMSG_VIRTIO_STACKSIZE
 	int "rpmsg virtio stack size"
 	default DEFAULT_TASK_STACKSIZE
 
+config RPMSG_VIRTIO_PM
+	bool "RPMsg VirtIO power management"
+	depends on PM
+	default n
+	---help---
+		If TX/RX buffer is supplied and powered by each CPU.
+		And when one CPU in DEEP sleep, then it's buffer will
+		goto RAM-retention mode, can't access from another CPU.
+		So, we provide this method to resolve this.
+
+config RPMSG_VIRTIO_PM_AUTORELAX
+	bool "RPMsg VirtIO pm autorelax"
+	depends on RPMSG_VIRTIO_PM
+	default y
+	---help---
+		Enable automatic power management wakelock relaxation using watchdog timer.
+
+		When enabled, this option uses a watchdog timer to periodically check if
+		there are any tx buffers is not returned by remote core. If the tx buffers
+		are returned by remote core, the power management wakelock is automatically
+		released, allowing the system to enter low-power states. If the tx buffers
+		are still not returned by remote core, the wakelock is maintained and the
+		timer is restarted.
+
+		Autorelax feature can improve power efficiency in multi-core systems because
+		it prevents unnecessary power consumption by reducing the times that system
+		enter and leave low-power states.
+
 endif # RPMSG_VIRTIO
 
 config RPMSG_VIRTIO_LITE

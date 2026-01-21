@@ -30,10 +30,13 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
+#include <nuttx/power/pm.h>
 #include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/rpmsg/rpmsg_virtio.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/virtio/virtio-config.h>
+#include <nuttx/wdog.h>
 #include <metal/utilities.h>
 #include <openamp/rpmsg_virtio.h>
 
@@ -41,6 +44,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define RPMSG_VIRTIO_TIMEOUT_MS      20
 #define RPMSG_VIRTIO_FEATURES        (1 << VIRTIO_RPMSG_F_NS | \
                                       1 << VIRTIO_RPMSG_F_ACK | \
                                       1 << VIRTIO_RPMSG_F_BUFSZ | \
@@ -67,13 +71,23 @@ struct rpmsg_virtio_priv_s
   pid_t                        tid;
   vq_callback                  cbrx;
   vq_callback                  cbtx;
+  vq_notify                    notifytx;
   char                         local_cpuname[VIRTIO_RPMSG_CPUNAME_SIZE];
   char                         cpuname[VIRTIO_RPMSG_CPUNAME_SIZE];
+  uint16_t                     headrx;
+#ifdef CONFIG_RPMSG_VIRTIO_PM
+  spinlock_t                   lock;
+  struct pm_wakelock_s         wakelock;
+  struct wdog_s                wdog;
+#endif
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+static void rpmsg_virtio_wakeup_rx(FAR struct rpmsg_virtio_priv_s *priv);
+static void rpmsg_virtio_wakeup_tx(FAR struct rpmsg_virtio_priv_s *priv);
 
 static int rpmsg_virtio_wait(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
 static int rpmsg_virtio_post(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
@@ -84,6 +98,7 @@ static FAR const char *rpmsg_virtio_get_cpuname(FAR struct rpmsg_s *rpmsg);
 
 static void rpmsg_virtio_rx_callback(FAR struct virtqueue *vq);
 static void rpmsg_virtio_tx_callback(FAR struct virtqueue *vq);
+static void rpmsg_virtio_tx_notify(FAR struct virtqueue *vq);
 
 /****************************************************************************
  * Private Data
@@ -103,97 +118,6 @@ static const struct rpmsg_ops_s g_rpmsg_virtio_ops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: rpmsg_virtio_is_recursive
- ****************************************************************************/
-
-static bool rpmsg_virtio_is_recursive(FAR struct rpmsg_virtio_priv_s *priv)
-{
-  return nxsched_gettid() == priv->tid;
-}
-
-/****************************************************************************
- * Name: rpmsg_virtio_wakeup_rx
- ****************************************************************************/
-
-static void rpmsg_virtio_wakeup_rx(FAR struct rpmsg_virtio_priv_s *priv)
-{
-  int semcount;
-
-  nxsem_get_value(&priv->semrx, &semcount);
-  while (semcount++ < 1)
-    {
-      nxsem_post(&priv->semrx);
-    }
-}
-
-/****************************************************************************
- * Name: rpmsg_virtio_wakeup_tx
- ****************************************************************************/
-
-static void rpmsg_virtio_wakeup_tx(FAR struct rpmsg_virtio_priv_s *priv)
-{
-  int semcount;
-
-  nxsem_get_value(&priv->semtx, &semcount);
-  while (semcount++ < 1)
-    {
-      nxsem_post(&priv->semtx);
-    }
-}
-
-/****************************************************************************
- * Name: rpmsg_virtio_wait
- ****************************************************************************/
-
-static int rpmsg_virtio_wait(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem)
-{
-  FAR struct rpmsg_virtio_priv_s *priv =
-    (FAR struct rpmsg_virtio_priv_s *)rpmsg;
-  int ret;
-
-  if (!rpmsg_virtio_is_recursive(priv))
-    {
-      return nxsem_wait_uninterruptible(sem);
-    }
-
-  while (1)
-    {
-      ret = nxsem_trywait(sem);
-      if (ret >= 0)
-        {
-          break;
-        }
-
-      nxsem_wait(&priv->semtx);
-      priv->cbrx(priv->rvdev.rvq);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: rpmsg_virtio_post
- ****************************************************************************/
-
-static int rpmsg_virtio_post(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem)
-{
-  FAR struct rpmsg_virtio_priv_s *priv =
-    (FAR struct rpmsg_virtio_priv_s *)rpmsg;
-  int semcount;
-  int ret;
-
-  nxsem_get_value(sem, &semcount);
-  ret = nxsem_post(sem);
-
-  if (priv && semcount >= 0)
-    {
-      rpmsg_virtio_wakeup_tx(priv);
-    }
-
-  return ret;
-}
 
 /****************************************************************************
  * Name: rpmsg_virtio_buffer_nused
@@ -224,6 +148,203 @@ static int rpmsg_virtio_buffer_nused(FAR struct rpmsg_virtio_device *rvdev,
     {
       return vq->vq_nentries - nused;
     }
+}
+
+/****************************************************************************
+ * Name: rpmsg_virtio_pm_callback
+ ****************************************************************************/
+
+#ifdef CONFIG_RPMSG_VIRTIO_PM_AUTORELAX
+static void rpmsg_virtio_pm_callback(wdparm_t arg)
+{
+  FAR struct rpmsg_virtio_priv_s *priv =
+    (FAR struct rpmsg_virtio_priv_s *)arg;
+
+  if (rpmsg_virtio_buffer_nused(&priv->rvdev, false))
+    {
+      wd_start(&priv->wdog, MSEC2TICK(RPMSG_VIRTIO_TIMEOUT_MS),
+               rpmsg_virtio_pm_callback, (wdparm_t)priv);
+    }
+  else
+    {
+      pm_wakelock_relax(&priv->wakelock);
+    }
+}
+#endif
+
+#ifdef CONFIG_RPMSG_VIRTIO_PM
+
+/****************************************************************************
+ * Name: rpmsg_virtio_pm_action
+ ****************************************************************************/
+
+static inline void
+rpmsg_virtio_pm_action(FAR struct rpmsg_virtio_priv_s *priv, bool stay)
+{
+  irqstate_t flags;
+  int count;
+
+  flags = spin_lock_irqsave(&priv->lock);
+
+  count = pm_wakelock_staycount(&priv->wakelock);
+  if (stay && count == 0)
+    {
+      pm_wakelock_stay(&priv->wakelock);
+#ifdef CONFIG_RPMSG_VIRTIO_PM_AUTORELAX
+      wd_start(&priv->wdog, MSEC2TICK(RPMSG_VIRTIO_TIMEOUT_MS),
+               rpmsg_virtio_pm_callback, (wdparm_t)priv);
+#endif
+    }
+
+#ifndef CONFIG_RPMSG_VIRTIO_PM_AUTORELAX
+  /* When enabled the CONFIG_RPMSG_VIRTIO_PM_AUTORELAX, use a timer to check
+   * the buffers periodically and relax the pm wakelock and do not use this
+   * logic.
+   */
+
+  if (!stay && count > 0 &&
+      rpmsg_virtio_buffer_nused(&priv->rvdev, false) == 0)
+    {
+      pm_wakelock_relax(&priv->wakelock);
+    }
+#endif
+
+  spin_unlock_irqrestore(&priv->lock, flags);
+}
+
+/****************************************************************************
+ * Name: rpmsg_virtio_available_rx
+ ****************************************************************************/
+
+static inline bool
+rpmsg_virtio_available_rx(FAR struct rpmsg_virtio_priv_s *priv)
+{
+  FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
+  FAR struct virtqueue *rvq = rvdev->rvq;
+
+  if (rpmsg_virtio_get_role(rvdev) == RPMSG_HOST)
+    {
+      return priv->headrx != rvq->vq_used_cons_idx;
+    }
+  else
+    {
+      return priv->headrx != rvq->vq_available_idx;
+    }
+}
+
+#else
+#  define rpmsg_virtio_pm_action(priv, stay)
+#  define rpmsg_virtio_available_rx(priv) true
+#endif
+
+/****************************************************************************
+ * Name: rpmsg_virtio_is_recursive
+ ****************************************************************************/
+
+static bool rpmsg_virtio_is_recursive(FAR struct rpmsg_virtio_priv_s *priv)
+{
+  return nxsched_gettid() == priv->tid;
+}
+
+/****************************************************************************
+ * Name: rpmsg_virtio_rx_worker
+ ****************************************************************************/
+
+static void rpmsg_virtio_rx_worker(FAR struct rpmsg_virtio_priv_s *priv)
+{
+  if (rpmsg_virtio_available_rx(priv))
+    {
+      priv->cbrx(priv->rvdev.rvq);
+    }
+}
+
+/****************************************************************************
+ * Name: rpmsg_virtio_wakeup_rx
+ ****************************************************************************/
+
+static void rpmsg_virtio_wakeup_rx(FAR struct rpmsg_virtio_priv_s *priv)
+{
+  int semcount;
+
+  nxsem_get_value(&priv->semrx, &semcount);
+  while (semcount++ < 1)
+    {
+      nxsem_post(&priv->semrx);
+    }
+}
+
+/****************************************************************************
+ * Name: rpmsg_virtio_wakeup_tx
+ ****************************************************************************/
+
+static void rpmsg_virtio_wakeup_tx(FAR struct rpmsg_virtio_priv_s *priv)
+{
+  int semcount;
+
+  nxsem_get_value(&priv->semtx, &semcount);
+  while (semcount++ < 1)
+    {
+      nxsem_post(&priv->semtx);
+    }
+
+  /* rpmsg_virtio_wakeup_tx() called normally means the tx buffer has been
+   * returned by peer, so call rpmsg_virtio_pm_action(false) to enter
+   * lowe power mode when there is no pending tx buffer.
+   */
+
+  rpmsg_virtio_pm_action(priv, false);
+}
+
+/****************************************************************************
+ * Name: rpmsg_virtio_wait
+ ****************************************************************************/
+
+static int rpmsg_virtio_wait(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem)
+{
+  FAR struct rpmsg_virtio_priv_s *priv =
+    (FAR struct rpmsg_virtio_priv_s *)rpmsg;
+  int ret;
+
+  if (!rpmsg_virtio_is_recursive(priv))
+    {
+      return nxsem_wait_uninterruptible(sem);
+    }
+
+  while (1)
+    {
+      ret = nxsem_trywait(sem);
+      if (ret >= 0)
+        {
+          break;
+        }
+
+      nxsem_wait(&priv->semtx);
+      rpmsg_virtio_rx_worker(priv);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: rpmsg_virtio_post
+ ****************************************************************************/
+
+static int rpmsg_virtio_post(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem)
+{
+  FAR struct rpmsg_virtio_priv_s *priv =
+    (FAR struct rpmsg_virtio_priv_s *)rpmsg;
+  int semcount;
+  int ret;
+
+  nxsem_get_value(sem, &semcount);
+  ret = nxsem_post(sem);
+
+  if (priv && semcount >= 0)
+    {
+      rpmsg_virtio_wakeup_tx(priv);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -293,6 +414,9 @@ static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg)
   FAR struct rpmsg_endpoint *ept;
   FAR struct metal_list *node;
   bool needunlock = false;
+
+  metal_log(METAL_LOG_EMERGENCY, "Local: %s Remote: %s Headrx %u\n",
+            priv->local_cpuname, priv->cpuname, priv->headrx);
 
   if (!rvdev->vdev)
     {
@@ -368,6 +492,19 @@ static void rpmsg_virtio_rx_callback(FAR struct virtqueue *vq)
 {
   FAR struct rpmsg_virtio_priv_s *priv =
     metal_container_of(vq->vq_dev->priv, struct rpmsg_virtio_priv_s, rvdev);
+  FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
+  FAR struct virtqueue *rvq = rvdev->rvq;
+
+  if (rpmsg_virtio_get_role(rvdev) == RPMSG_HOST)
+    {
+      RPMSG_VIRTIO_INVALIDATE(rvq->vq_ring.used->idx);
+      priv->headrx = rvq->vq_ring.used->idx;
+    }
+  else
+    {
+      RPMSG_VIRTIO_INVALIDATE(rvq->vq_ring.avail->idx);
+      priv->headrx = rvq->vq_ring.avail->idx;
+    }
 
   rpmsg_virtio_wakeup_rx(priv);
 }
@@ -382,6 +519,25 @@ static void rpmsg_virtio_tx_callback(FAR struct virtqueue *vq)
     metal_container_of(vq->vq_dev->priv, struct rpmsg_virtio_priv_s, rvdev);
 
   rpmsg_virtio_wakeup_tx(priv);
+  rpmsg_virtio_pm_action(priv, false);
+}
+
+/****************************************************************************
+ * Name: rpmsg_virtio_tx_notify
+ ****************************************************************************/
+
+static void rpmsg_virtio_tx_notify(FAR struct virtqueue *vq)
+{
+  FAR struct rpmsg_virtio_priv_s *priv =
+    metal_container_of(vq->vq_dev->priv, struct rpmsg_virtio_priv_s, rvdev);
+
+  /* rpmsg_virtio_tx_notify() called normally means send the buffer to peer,
+   * so call rpmsg_virtio_pm_action(true) to hold the pm wakelock to avoid to
+   * enter to low power mode until all the buffers are returned by peer.
+   */
+
+  rpmsg_virtio_pm_action(priv, true);
+  priv->notifytx(vq);
 }
 
 /****************************************************************************
@@ -402,9 +558,10 @@ static int rpmsg_virtio_notify_wait(FAR struct rpmsg_device *rdev,
   /* Wait to wakeup */
 
   virtqueue_enable_cb(priv->rvdev.svq);
-  nxsem_tickwait(&priv->semtx, MSEC2TICK(20));
+  nxsem_tickwait(&priv->semtx, MSEC2TICK(RPMSG_VIRTIO_TIMEOUT_MS));
   virtqueue_disable_cb(priv->rvdev.svq);
-  priv->cbrx(priv->rvdev.rvq);
+  rpmsg_virtio_rx_worker(priv);
+
   return 0;
 }
 
@@ -427,8 +584,10 @@ static int rpmsg_virtio_start(FAR struct rpmsg_virtio_priv_s *priv)
 
   priv->cbrx = priv->rvdev.rvq->callback;
   priv->cbtx = priv->rvdev.svq->callback;
+  priv->notifytx = priv->rvdev.svq->notify;
   priv->rvdev.rvq->callback = rpmsg_virtio_rx_callback;
   priv->rvdev.svq->callback = rpmsg_virtio_tx_callback;
+  priv->rvdev.svq->notify = rpmsg_virtio_tx_notify;
   priv->rvdev.notify_wait_cb = rpmsg_virtio_notify_wait;
   priv->rvdev.rdev.ns_unbind_cb = rpmsg_ns_unbind;
 
@@ -464,7 +623,7 @@ static int rpmsg_virtio_thread(int argc, FAR char *argv[])
   while (1)
     {
       nxsem_wait_uninterruptible(&priv->semrx);
-      priv->cbrx(priv->rvdev.rvq);
+      rpmsg_virtio_rx_worker(priv);
     }
 
   return 0;
@@ -553,6 +712,13 @@ int rpmsg_virtio_probe(FAR struct virtio_device *vdev)
     }
 
   priv->tid = ret;
+
+#ifdef CONFIG_RPMSG_VIRTIO_PM
+  spin_lock_init(&priv->lock);
+  snprintf(name, sizeof(name), "rpmsg-virtio-%s", priv->cpuname);
+  pm_wakelock_init(&priv->wakelock, name, PM_IDLE_DOMAIN, PM_IDLE);
+#endif
+
   return ret;
 
 err_kthread:
