@@ -166,6 +166,8 @@ void bluetooth_conn_free(FAR struct bluetooth_conn_s *conn)
       bluetooth_container_free(container);
     }
 
+  nxrmutex_destroy(&conn->bc_conn.s_lock);
+
   /* Free the connection structure */
 
   NET_BUFPOOL_FREE(g_bluetooth_connections, conn);
