@@ -153,6 +153,14 @@ Public Key Algorithms
 - ECDSA key pair generation for different curves
 - Digital signature generation and verification
 
+ECC / ECDSA (Software)
+----------------------
+
+NuttX also provides a lightweight ECC implementation and public API in
+``include/crypto/ecc.h``. It can be used for ECC key generation, ECDH shared
+secret computation, and ECDSA sign/verify. Public key export is available in
+compressed form (``ECC_BYTES + 1``) as well as X/Y uncompressed form.
+
 Key Management Operations
 --------------------------
 
