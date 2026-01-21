@@ -185,7 +185,8 @@ struct hw_perf_event_s
       int flags;                 /* Event flags */
     };
   int state;                     /* Event status */
-  uint64_t prev_count;           /* Value of the previous count */
+  atomic64_t prev_count;         /* Value of the previous count */
+  atomic64_t last_period;        /* Last programmed period */
   struct wdog_s waitdog;
 };
 

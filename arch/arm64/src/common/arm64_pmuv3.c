@@ -456,6 +456,7 @@ static int arm64pmu_event_init(FAR struct perf_event_s *event)
 
   hwc->idx          = -1;
   hwc->config_base  = 0;
+  atomic64_set(&hwc->prev_count, 0);
 
   if (arm64pmu->set_event_filter &&
       arm64pmu->set_event_filter(hwc, &event->attr))

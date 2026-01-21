@@ -43,7 +43,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PERF_GET_COUNT(event) ((event)->count + (event)->child_count)
+#define PERF_GET_COUNT(event) \
+        (atomic64_read(&(event)->count) + atomic64_read(&(event)->child_count))
+
 #define PERF_DEFAULT_PERIOD 1000
 #define PERF_RECORD_MISC_USER (2 << 0)
 #define FLAME_GRAPH_SKIP 11
@@ -199,6 +201,7 @@ static void perf_sample_data_init(FAR struct perf_sample_data_s *data,
                                   uint64_t period)
 {
   data->sample_flags = PERF_SAMPLE_PERIOD;
+  data->period = period;
 }
 
 static uint16_t perf_prepare_sample(FAR struct perf_sample_data_s *data,
@@ -260,7 +263,6 @@ static uint16_t perf_prepare_sample(FAR struct perf_sample_data_s *data,
   if (sample_type & PERF_SAMPLE_PERIOD)
     {
       size += sizeof(data->period);
-      data->period = event->attr.sample_period;
     }
 
   if (sample_type & PERF_SAMPLE_TID)
@@ -440,7 +442,6 @@ static int perf_event_data_overflow(FAR struct perf_event_s *event,
       return -ENOMEM;
     }
 
-  event->count++;
   header.size = perf_prepare_sample(data, event, ip);
   header.misc = PERF_RECORD_MISC_USER;
   header.type = PERF_RECORD_SAMPLE;
@@ -1525,7 +1526,7 @@ static int perf_event_reset(FAR void *arg)
 {
   FAR struct perf_event_s *event = arg;
 
-  event->count = 0;
+  atomic64_set(&event->count, 0);
   return 0;
 }
 
@@ -1692,7 +1693,7 @@ static uint64_t perf_read_event_count(FAR struct perf_event_s *event)
                        struct perf_event_s, child_list)
     {
       perf_function_call(child_event, perf_get_event_count);
-      count += child_event->count;
+      count += atomic64_read(&child_event->count);
     }
 
   nxmutex_unlock(&event->child_mutex);
@@ -2315,7 +2316,9 @@ static int perf_swevent_timer_handle_cpu(FAR void *arg)
 
   uintptr_t pc = up_getusrpc(NULL);
 
-  perf_sample_data_init(&data, event->attr.sample_period);
+  perf_get_event_count(event);
+
+  perf_sample_data_init(&data, atomic64_read(&event->hw.last_period));
 
   perf_event_data_overflow(event, &data, pc);
   return 0;
@@ -2367,6 +2370,9 @@ static int perf_cpuclock_event_init(FAR struct perf_event_s *event)
       return -ENOENT;
     }
 
+  atomic64_set(&event->hw.prev_count, 0);
+  atomic64_set(&event->hw.last_period, 0);
+  atomic64_set(&event->count, 0);
   return 0;
 }
 
@@ -2428,12 +2434,8 @@ static void perf_cpuclock_event_del(FAR struct perf_event_s *event,
 static int perf_cpuclock_event_start(FAR struct perf_event_s *event,
                                      int flags)
 {
-  sclock_t period = event->attr.sample_period;
-
-  period = (PERF_DEFAULT_PERIOD > event->attr.sample_period) ?
-           PERF_DEFAULT_PERIOD : event->attr.sample_period;
-
-  wd_start(&event->hw.waitdog, NSEC2TICK(period),
+  atomic64_set(&event->hw.prev_count, TICK2NSEC(clock_systime_ticks()));
+  wd_start(&event->hw.waitdog, NSEC2TICK(event->attr.sample_period),
            perf_swevent_timer_handle, (wdparm_t)event);
   return 0;
 }
@@ -2476,6 +2478,10 @@ static int perf_cpuclock_event_stop(FAR struct perf_event_s *event,
 
 static int perf_cpuclock_event_read(FAR struct perf_event_s *event)
 {
+  uint64_t now = TICK2NSEC(clock_systime_ticks());
+  uint64_t delta = now - atomic64_xchg(&event->hw.prev_count, now);
+  atomic64_set(&event->hw.last_period, delta);
+  atomic64_add(&event->count, delta);
   return 0;
 }
 
