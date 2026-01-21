@@ -358,7 +358,7 @@ jobs:
   msys2:
     needs: msys2-Arch
     if: ${{ needs.msys2-Arch.outputs.skip_all_builds != '1' }}
-    runs-on: windows-latest
+    runs-on: windows-2022
     strategy:
       fail-fast: false
       max-parallel: 1
@@ -441,7 +441,7 @@ jobs:
   msvc:
     needs: msvc-Arch
     if: ${{ needs.msvc-Arch.outputs.skip_all_builds != '1' }}
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v6
       # Set up Python environment and install kconfiglib
