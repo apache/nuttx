@@ -387,8 +387,8 @@ void bluetooth_poll(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-ssize_t bluetooth_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
-                          int flags);
+ssize_t bluetooth_sendmsg(FAR struct socket *psock,
+                          FAR const struct msghdr *msg, int flags);
 
 /****************************************************************************
  * Name: bluetooth_container_initialize

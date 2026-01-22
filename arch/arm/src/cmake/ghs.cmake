@@ -151,6 +151,9 @@ endif()
 
 if(CONFIG_DEBUG_OPT_UNUSED_SECTIONS)
   add_compile_options(-ffunction-sections -fdata-sections)
+
+  # instruct the exlr deletet the unused functions during link procedure
+  add_link_options(-delete)
 endif()
 
 # Debug --whole-archive
@@ -163,10 +166,29 @@ endif()
 
 if(CONFIG_DEBUG_LINK_MAP)
   add_link_options(-map=nuttx.map)
+  # instruct the exlr the contents that needs to be contained in the generated
+  # map file
+  add_link_options(-Mn -map_eofn_symbols -Mx -Ms -Mu -Ml)
+
+  # instruct the compiler to keep the temp files generated at compile time after
+  # they are used
+  add_compile_options(-keeptempfiles)
+  # instruct the compiler to generate a source listing of the asm file
+  add_compile_options(-list)
 endif()
 
 if(CONFIG_DEBUG_SYMBOLS)
-  add_compile_options(-G -gdwarf-2)
+  add_compile_options(-G -dual_debug)
+  # instruct the exlr to ignore relocations from DWARF debug sections when using
+  # -delete
+  add_link_options(-ignore_debug_references)
+
+  # instruct the exlr to dump verbose information during link procedure
+  add_link_options(-v)
+
+  # instruct the gsize to generate a "*.siz" file that contains the detailed
+  # section size
+  add_link_options(-gsize)
 endif()
 
 add_compile_options(
@@ -200,6 +222,20 @@ endif()
 if(NOT CONFIG_CXX_RTTI)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
 endif()
+
+# instruct the compiler to treat the functions referenced or called when no
+# prototype has been provided as error
+
+add_compile_options(--prototype_errors)
+
+# instruct the compiler to treat #pragma directives that using wrong syntax as
+# warnings
+
+add_compile_options(--incorrect_pragma_warnings)
+
+# instruct the exlr do not link the start files into executable
+
+add_link_options(-nostartfiles)
 
 set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P)
 
@@ -239,8 +275,11 @@ function(nuttx_generate_preprocess_target)
 
   add_custom_command(
     OUTPUT ${EXPECT_TARGET_FILE_NAME}
-    COMMAND ${PREPROCESS} -I${CMAKE_BINARY_DIR}/include -filetype.cpp
-            ${SOURCE_FILE} -o ${EXPECT_TARGET_FILE_NAME}
+    COMMAND
+      ${PREPROCESS}
+      $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_CPP_COMPILE_OPTIONS>>
+      -I${CMAKE_BINARY_DIR}/include -filetype.cpp ${SOURCE_FILE} -o
+      ${EXPECT_TARGET_FILE_NAME}
     DEPENDS ${SOURCE_FILE} ${DEPENDS})
 
   if(NOT ${EXPECT_TARGET_FILE_NAME} STREQUAL ${TARGET_FILE})

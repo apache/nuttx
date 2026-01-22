@@ -95,6 +95,10 @@ uint32_t *arm_syscall(uint32_t *regs)
         nxsched_switch_context(*running_task, tcb);
 
       case SYS_restore_context:
+#ifdef CONFIG_ARCH_ADDRENV
+        addrenv_switch(tcb);
+        tcb = this_task();
+#endif
 
         /* No context switch occurs in SYS_restore_context, or the
          * context switch has been completed, so there is no
@@ -106,9 +110,6 @@ uint32_t *arm_syscall(uint32_t *regs)
         /* Restore the cpu lock */
 
         restore_critical_section(tcb, cpu);
-#ifdef CONFIG_ARCH_ADDRENV
-        addrenv_switch(tcb);
-#endif
         break;
 
       default:

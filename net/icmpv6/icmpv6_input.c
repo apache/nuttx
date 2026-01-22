@@ -144,7 +144,7 @@ static uint16_t icmpv6_datahandler(FAR struct net_driver_s *dev,
   /* Copy the ICMPv6 message into the I/O buffer chain (without waiting) */
 
   ret = iob_clone_partial(dev->d_iob, dev->d_iob->io_pktlen,
-                          iplen, iob, 0, true, false);
+                          iplen, iob, 0, false, false);
   if (ret < 0)
     {
       iob_free_chain(iob);

@@ -1,0 +1,114 @@
+From 22493676819e3acce3a98d0169fe7754c9f8dce7 Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Wed, 21 Aug 2024 21:56:36 +0800
+Subject: [PATCH 14/14] lib/rpmsg_virtio: use virtio_alloc_buf to alloc share
+ memory when shpool is NULL
+
+Before this patch, rpmsg virtio need the user pass a shmpool and
+rpmsg virtio will alloc the virtqueue buffers from this shmpool.
+
+After this patch, the rpmsg virtio do not need user pass the shmpool,
+can directly alloc the share memory from the virtio transport layer.
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/include/openamp/rpmsg_virtio.h |  4 +++
+ lib/rpmsg/rpmsg_virtio.c           | 41 ++++++++++++++++++++++--------
+ 2 files changed, 35 insertions(+), 10 deletions(-)
+
+diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
+index da6cb62709..8d686f72f1 100644
+--- a/lib/include/openamp/rpmsg_virtio.h
++++ open-amp/lib/include/openamp/rpmsg_virtio.h
+@@ -96,6 +96,10 @@ struct rpmsg_virtio_device {
+ 	/** Pointer to the shared buffers pool */
+ 	struct rpmsg_virtio_shm_pool *shpool;
+ 
++	/** Pointer to the alloced shared buffers */
++
++	void *shbuf;
++
+ 	/**
+ 	 * RPMsg buffer reclaimer that contains buffers released by the
+ 	 * \ref rpmsg_virtio_release_tx_buffer function
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 0293d17d24..8a72d8f8ef 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -862,16 +862,6 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
+ 	}
+ 
+ 	if (VIRTIO_ROLE_IS_DRIVER(vdev)) {
+-		/*
+-		 * Since device is RPMSG Remote so we need to manage the
+-		 * shared buffers. Create shared memory pool to handle buffers.
+-		 */
+-		rvdev->shpool = config->split_shpool ? shpool + 1 : shpool;
+-		if (!shpool)
+-			return RPMSG_ERR_PARAM;
+-		if (!shpool->size || !rvdev->shpool->size)
+-			return RPMSG_ERR_NO_BUFF;
+-
+ 		vq_names[0] = "rx_vq";
+ 		vq_names[1] = "tx_vq";
+ 		callback[0] = rpmsg_virtio_rx_callback;
+@@ -919,11 +909,37 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
+ 		vq->shm_io = shm_io;
+ 	}
+ 
++	rvdev->shbuf = NULL;
+ 	if (VIRTIO_ROLE_IS_DRIVER(vdev)) {
+ 		struct virtqueue_buf vqbuf;
+ 		unsigned int idx;
++		size_t shbufsz = 0;
+ 		void *buffer;
+ 
++		/*
++		 * Since device is RPMSG Remote so we need to manage the
++		 * shared buffers. Create shared memory pool to handle buffers.
++		 */
++		if (!shpool)
++			return RPMSG_ERR_PARAM;
++		if (!shpool->size) {
++			shbufsz = rvdev->config.h2r_buf_size * rvdev->svq->vq_nentries +
++				  rvdev->config.r2h_buf_size * rvdev->rvq->vq_nentries;
++			status = virtio_alloc_buf(vdev, &rvdev->shbuf, shbufsz, 8);
++			if (status < 0) {
++				status = RPMSG_ERR_NO_MEM;
++				goto err;
++			}
++			rpmsg_virtio_init_shm_pool(shpool, rvdev->shbuf, shbufsz);
++			rvdev->shpool = shpool;
++		} else {
++			rvdev->shpool = config->split_shpool ? shpool + 1 : shpool;
++			if (!rvdev->shpool->size) {
++				status = RPMSG_ERR_PARAM;
++				goto err;
++			}
++		}
++
+ 		vqbuf.len = rvdev->config.r2h_buf_size;
+ 		for (idx = 0; idx < rvdev->rvq->vq_nentries; idx++) {
+ 			/* Initialize TX virtqueue buffers for remote device */
+@@ -973,6 +989,8 @@ int rpmsg_init_vdev_with_config(struct rpmsg_virtio_device *rvdev,
+ 	return RPMSG_SUCCESS;
+ 
+ err:
++	if (rvdev->shbuf)
++		virtio_free_buf(vdev, rvdev->shbuf);
+ 	virtio_delete_virtqueues(vdev);
+ 	return status;
+ }
+@@ -991,6 +1009,9 @@ void rpmsg_deinit_vdev(struct rpmsg_virtio_device *rvdev)
+ 			rpmsg_destroy_ept(ept);
+ 		}
+ 
++		if (rvdev->shbuf)
++			virtio_free_buf(rvdev->vdev, rvdev->shbuf);
++
+ 		rvdev->rvq = 0;
+ 		rvdev->svq = 0;
+ 
+-- 
+2.34.1
+

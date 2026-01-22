@@ -52,11 +52,14 @@ if(NOT CONFIG_ARCH_IDLE_CUSTOM)
 endif()
 
 if(CONFIG_BUILD_PROTECTED OR CONFIG_BUILD_KERNEL)
-  list(APPEND SRCS arm_task_start.c arm_pthread_start.c arm_signal_dispatch.c)
+  list(APPEND SRCS arm_task_start.c arm_pthread_start.c)
 
-  if(CONFIG_BUILD_PROTECTED)
-    target_sources(arch_interface
-                   PRIVATE ${ARCH_TOOLCHAIN_PATH}/arm_signal_handler.S)
+  if(CONFIG_ENABLE_ALL_SIGNALS)
+    list(APPEND SRCS arm_signal_dispatch.c)
+    if(CONFIG_BUILD_PROTECTED)
+      target_sources(arch_interface
+                     PRIVATE ${ARCH_TOOLCHAIN_PATH}/arm_signal_handler.S)
+    endif()
   endif()
 endif()
 
@@ -89,3 +92,10 @@ if(CONFIG_ARCH_HAVE_FETCHADD)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+nuttx_add_aux_library(STARTUP_OBJS crt0.c)
+
+target_compile_options(
+  STARTUP_OBJS
+  PRIVATE
+    $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_APP_COMPILE_OPTIONS>>)

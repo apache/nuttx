@@ -80,6 +80,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Hardware features bits */
+
+#define NETDEV_TX_CSUM  (1 << 1) /* Netdev support hardware tx checksum */
+#define NETDEV_RX_CSUM  (1 << 2) /* Netdev support hardware rx checksum */
+
 /* Determine the largest possible address */
 
 #if defined(CONFIG_WIRELESS_IEEE802154) && defined(CONFIG_WIRELESS_PKTRADIO)
@@ -340,6 +345,10 @@ struct net_driver_s
   /* Drivers interface flags.  See IFF_* definitions in include/net/if.h */
 
   uint32_t d_flags;
+
+  /* Hardware features. See NETDEV_* definitions */
+
+  uint8_t d_features;
 
   /* Multi network devices using multiple link layer protocols are
    * supported
@@ -912,46 +921,6 @@ uint16_t net_chksum_iob(uint16_t sum, FAR struct iob_s *iob,
 #ifdef CONFIG_NET_IPv4
 
 /****************************************************************************
- * Name: ipv4_upperlayer_header_chksum
- *
- * Description:
- *   Perform the checksum calculation over the IPv4, protocol headers,
- *   IP source and destination addresses
- *
- * Input Parameters:
- *   dev   - The network driver instance. The packet data is in the d_buf
- *           of the device.
- *   proto - The protocol being supported
- *
- * Returned Value:
- *   The calculated checksum with pseudo-header and IP source and
- *   destination addresses
- *
- ****************************************************************************/
-
-uint16_t ipv4_upperlayer_header_chksum(FAR struct net_driver_s *dev,
-                                       uint8_t proto);
-
-/****************************************************************************
- * Name: ipv4_upperlayer_payload_chksum
- *
- * Description:
- *   Perform the checksum calculation over the iob data payload
- *
- * Input Parameters:
- *   dev   - The network driver instance. The packet data is in the d_buf
- *           of the device.
- *   sum   - The default checksum
- *
- * Returned Value:
- *   The calculated checksum with iob data payload and default checksum
- *
- ****************************************************************************/
-
-uint16_t ipv4_upperlayer_payload_chksum(FAR struct net_driver_s *dev,
-                                        uint16_t sum);
-
-/****************************************************************************
  * Name: ipv4_upperlayer_chksum
  *
  * Description:
@@ -972,52 +941,6 @@ uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto);
 #endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
-
-/****************************************************************************
- * Name: ipv6_upperlayer_header_chksum
- *
- * Description:
- *   Perform the checksum calculation over the IPv6, protocol headers,
- *   IP source and destination addresses.
- *
- * Input Parameters:
- *   dev   - The network driver instance.  The packet data is in the d_buf
- *           of the device.
- *   proto - The protocol being supported
- *   iplen - The size of the IPv6 header.  This may be larger than
- *           IPv6_HDRLEN the IPv6 header if IPv6 extension headers are
- *           present.
- *
- * Returned Value:
- *   The calculated checksum
- *
- ****************************************************************************/
-
-uint16_t ipv6_upperlayer_header_chksum(FAR struct net_driver_s *dev,
-                                       uint8_t proto, unsigned int iplen);
-
-/****************************************************************************
- * Name: ipv6_upperlayer_payload_chksum
- *
- * Description:
- *   Perform the checksum calculation over the iob data payload and
- *   default checksum.
- *
- * Input Parameters:
- *   dev   - The network driver instance.  The packet data is in the d_buf
- *           of the device.
- *   proto - The protocol being supported
- *   iplen - The size of the IPv6 header.  This may be larger than
- *           IPv6_HDRLEN the IPv6 header if IPv6 extension headers are
- *           present.
- *
- * Returned Value:
- *   The calculated checksum
- *
- ****************************************************************************/
-
-uint16_t ipv6_upperlayer_payload_chksum(FAR struct net_driver_s *dev,
-                                        unsigned int iplen, uint16_t sum);
 
 /****************************************************************************
  * Name: ipv6_upperlayer_chksum
@@ -1370,5 +1293,56 @@ int netdev_ipv6_foreach(FAR struct net_driver_s *dev,
 #if CONFIG_NETDEV_STATISTICS_LOG_PERIOD > 0
 void netdev_statistics_log(FAR void *arg);
 #endif
+
+/****************************************************************************
+ * Name: netdev_checksum_start
+ *
+ * Description:
+ *   Get checksum start offset position with iob, then hardware can
+ *   use to calculate the package payload checksum value.
+ *
+ * Input Parameters:
+ *   dev  -  The driver structure
+ *
+ * Returned Value:
+ *   The checksum start offset position, -EINVAL is mean not need calculate
+ *   with hardware
+ *
+ ****************************************************************************/
+
+int netdev_checksum_start(FAR struct net_driver_s *dev);
+
+/****************************************************************************
+ * Name: netdev_checksum_offset
+ *
+ * Description:
+ *   Get checksum field offset with tcp/udp header.
+ *
+ * Input Parameters:
+ *   dev  -  The driver structure
+ *
+ * Returned Value:
+ *   The checksum field offset with L4, -EINVAL is mean not need calculate
+ *   with hardware
+ *
+ ****************************************************************************/
+
+int netdev_checksum_offset(FAR struct net_driver_s *dev);
+
+/****************************************************************************
+ * Name: netdev_upperlayer_header_checksum
+ *
+ * Description:
+ *   get upperlayer header checksum with tcp/udp header.
+ *
+ * Input Parameters:
+ *   dev  -  The driver structure
+ *
+ * Returned Value:
+ *   The upperlayer header checksum
+ *
+ ****************************************************************************/
+
+uint16_t netdev_upperlayer_header_checksum(FAR struct net_driver_s *dev);
 
 #endif /* __INCLUDE_NUTTX_NET_NETDEV_H */

@@ -60,7 +60,7 @@
 
     .syntax unified
     .text
-    .section .text.strcpy
+    .section .text.strcpy, "ax"
     .align  2
     .global ARCH_LIBCFUN(strcpy)
     .thumb

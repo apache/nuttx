@@ -58,6 +58,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* The CPU12 stack should be aligned at half-word (2 byte) boundaries. If
+ * necessary frame_size must be rounded up to the next boundary
+ */
+
+#define STACK_ALIGNMENT     2
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

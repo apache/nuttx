@@ -354,7 +354,7 @@ int psock_can_cansend(FAR struct socket *psock);
  *
  ****************************************************************************/
 
-ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
                     int flags);
 
 /****************************************************************************

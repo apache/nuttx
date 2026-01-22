@@ -37,12 +37,16 @@ CMN_CSRCS += xtensa_getintstack.c xtensa_initialize.c xtensa_initialstate.c
 CMN_CSRCS += xtensa_irqdispatch.c xtensa_lowputs.c
 CMN_CSRCS += xtensa_modifyreg8.c xtensa_modifyreg16.c xtensa_modifyreg32.c
 CMN_CSRCS += xtensa_mpu.c xtensa_nputs.c xtensa_oneshot.c xtensa_perf.c
-CMN_CSRCS += xtensa_releasestack.c xtensa_registerdump.c xtensa_sigdeliver.c
+CMN_CSRCS += xtensa_releasestack.c xtensa_registerdump.c
 CMN_CSRCS += xtensa_swint.c xtensa_stackframe.c
-CMN_CSRCS += xtensa_saveusercontext.c xtensa_schedsigaction.c
+CMN_CSRCS += xtensa_saveusercontext.c
 CMN_CSRCS += xtensa_usestack.c xtensa_tcbinfo.c
 
 # Configuration-dependent common Xtensa files
+
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+CMN_CSRCS += xtensa_schedsigaction.c xtensa_sigdeliver.c
+endif
 
 ifeq ($(CONFIG_ARCH_USE_TEXT_HEAP),y)
   CMN_ASRCS += xtensa_loadstore.S
@@ -80,5 +84,8 @@ endif
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
   CMN_UASRCS += xtensa_signal_handler.S
   CMN_ASRCS  += xtensa_dispatch_syscall.S
-  CMN_CSRCS  += xtensa_signal_dispatch.c xtensa_task_start.c xtensa_pthread_start.c
+  CMN_CSRCS  += xtensa_task_start.c xtensa_pthread_start.c
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+  CMN_CSRCS += xtensa_signal_dispatch.c
+endif
 endif

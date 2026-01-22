@@ -93,6 +93,7 @@ FAR chipreg_t *z80_doirq(uint8_t irq, FAR chipreg_t *regs)
            */
 
           addrenv_switch(tcb);
+          tcb = this_task();
 #endif
 
           /* Update scheduler parameters */

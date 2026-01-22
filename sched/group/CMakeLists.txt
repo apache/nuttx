@@ -27,8 +27,11 @@ set(SRCS
     group_setupidlefiles.c
     group_setuptaskfiles.c
     group_foreachchild.c
-    group_killchildren.c
-    group_signal.c)
+    group_killchildren.c)
+
+if(NOT CONFIG_DISABLE_ALL_SIGNALS)
+  list(APPEND SRCS group_signal.c)
+endif()
 
 if(CONFIG_SCHED_HAVE_PARENT)
   if(CONFIG_SCHED_CHILD_STATUS)
@@ -54,10 +57,6 @@ endif()
 
 if(CONFIG_SIG_SIGSTOP_ACTION)
   list(APPEND SRCS group_suspendchildren.c group_continue.c)
-endif()
-
-if(CONFIG_BINFMT_LOADABLE)
-  list(APPEND SRCS group_exitinfo.c)
 endif()
 
 if(CONFIG_MM_KERNEL_HEAP)

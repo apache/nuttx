@@ -48,6 +48,8 @@ ifeq ($(CONFIG_NETDEV_RSS),y)
 NETDEV_CSRCS += netdev_notify_recvcpu.c
 endif
 
+NETDEV_CSRCS += netdev_checksum.c
+
 # Include netdev build support
 
 DEPPATH += --dep-path netdev

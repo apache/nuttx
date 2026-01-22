@@ -78,4 +78,8 @@ if(CONFIG_X86_64_STRNCMP)
   list(APPEND SRCS arch_strncmp.S)
 endif()
 
+if(CONFIG_PROFILE_MINI)
+  list(APPEND SRCS gnu/mcount.S)
+endif()
+
 target_sources(c PRIVATE ${SRCS})

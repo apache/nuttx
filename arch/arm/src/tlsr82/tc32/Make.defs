@@ -55,8 +55,12 @@ CMN_CSRCS += arm_sigdeliver.c
 CMN_ASRCS += tc32_fullcontextrestore.S tc32_switchcontext.S
 CMN_ASRCS += tc32_saveusercontext.S tc32_exception.S
 
-CMN_CSRCS += tc32_doirq.c tc32_initialstate.c tc32_schedulesigaction.c
+CMN_CSRCS += tc32_doirq.c tc32_initialstate.c
 CMN_CSRCS += tc32_syscall.c tc32_udelay.c
+
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+  CHIP_CSRCS += tc32_schedulesigaction.c
+endif
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
   CMN_CSRCS += tc32_backtrace.c

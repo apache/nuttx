@@ -198,31 +198,42 @@ static void mm_delayfree(struct mm_heap_s *heap, void *mem, bool delay)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mm_initialize
+ * Name: mm_initialize_heap
  *
  * Description:
  *   Initialize the selected heap data structures, providing the initial
  *   heap region.
  *
  * Input Parameters:
- *   heap      - The selected heap
- *   heapstart - Start of the initial heap region
- *   heapsize  - Size of the initial heap region
+ *   config - The heap config structure
  *
  * Returned Value:
- *   None
+ *   Return the address of a new heap instance.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-struct mm_heap_s *mm_initialize(const char *name,
-                                void *heap_start, size_t heap_size)
+struct mm_heap_s *mm_initialize_heap(const struct mm_heap_config_s *config)
 {
-  struct mm_heap_s *heap;
+  struct mm_heap_s *heap = config->heap;
+  const char *name = config->name;
+  void *heap_start = config->start;
+  size_t heap_size = config->size;
 
-  heap = host_memalign(sizeof(void *), sizeof(*heap));
-  DEBUGASSERT(heap);
+  if (heap == NULL)
+    {
+      heap = host_memalign(sizeof(void *), sizeof(*heap));
+    }
+  else
+    {
+      heap = mm_memalign(heap, MM_ALIGN, sizeof(struct mm_heap_s));
+    }
+
+  if (heap == NULL)
+    {
+      return NULL;
+    }
 
   memset(heap, 0, sizeof(struct mm_heap_s));
 
@@ -233,6 +244,8 @@ struct mm_heap_s *mm_initialize(const char *name,
 #endif
 
   sched_note_heap(NOTE_HEAP_ADD, heap, heap_start, heap_size, 0);
+  UNUSED(heap_start);
+  UNUSED(heap_size);
   return heap;
 }
 

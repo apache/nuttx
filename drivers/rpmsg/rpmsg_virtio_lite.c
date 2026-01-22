@@ -37,7 +37,6 @@
 #include <nuttx/power/pm.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/rpmsg/rpmsg_virtio_lite.h>
-#include <rpmsg/rpmsg_internal.h>
 
 /****************************************************************************
  * Pre-processor Definitions

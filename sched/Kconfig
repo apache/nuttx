@@ -1547,6 +1547,54 @@ endmenu # RTOS hooks
 
 menu "Signal Configuration"
 
+choice
+	prompt "Signal support level"
+	default ENABLE_ALL_SIGNALS if !DEFAULT_SMALL
+	default ENABLE_PARTIAL_SIGNALS if DEFAULT_SMALL
+
+config ENABLE_ALL_SIGNALS
+	bool "Enable full signal support"
+	---help---
+		Enable full POSIX signal support, including signal handling,
+		thread cancellation, timers, and process-related notifications.
+
+		This option provides the most complete signal functionality,
+		but increases code size and resource usage.
+
+		Typical use cases:
+		  - Applications relying on POSIX signals or timers
+		  - Systems where memory and CPU resources are sufficient
+
+config ENABLE_PARTIAL_SIGNALS
+	bool "Enable partial signal support"
+	---help---
+		Disable process-related signal functionality while keeping
+		basic signal handling support.
+
+		This option provides a balance between reduced resource usage
+		and limited signal functionality.
+
+		Typical use cases:
+		  - Applications using basic signals without fork/exec
+		  - Resource-constrained real-time systems
+
+config DISABLE_ALL_SIGNALS
+	bool "Disable all signal support"
+	select DISABLE_MQUEUE_NOTIFICATION
+	---help---
+		Disable all signal-related functionality, including signal
+		handling, thread cancellation, timers, and process-related
+		notifications.
+
+		This option provides the smallest footprint and maximum
+		resource savings.
+
+		Typical use cases:
+		  - Hard real-time or safety-critical systems
+		  - Applications that do not use POSIX signals or timers
+
+endchoice
+
 config SIG_PREALLOC_ACTIONS
 	int "Number of pre-allocated sigactions"
 	default 4
@@ -2017,6 +2065,30 @@ config HRTIMER
 	bool "High resolution timer support"
 	depends on SYSTEM_TIME64
 	default n
-	depends on SYSTEM_TIME64
 	---help---
 		Enable to support high resolution timer
+
+if HRTIMER
+
+choice
+    prompt "HRTimer management data structure type"
+    default HRTIMER_TREE
+
+config HRTIMER_LIST
+    bool "List-based timer management"
+    help
+        Use a simple list to manage timers. This method is
+        suitable for systems with a small number of timers.
+        It is more memory-efficient but may become slower
+        as the number of timers increases.
+
+config HRTIMER_TREE
+    bool "RB-tree-based timer management"
+    help
+        Use a red-black tree to manage timers. This method
+        provides better performance for systems with many
+        timers, at the cost of slightly higher memory usage.
+
+endchoice
+
+endif # HRTIMER

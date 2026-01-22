@@ -1106,7 +1106,8 @@ struct i2c_master_s *bcm2711_i2cbus_initialize(int port)
 
       /* Enable interrupt handler */
 
-      arm64_gic_irq_set_priority(BCM_IRQ_VC_I2C, 0, IRQ_TYPE_EDGE);
+      up_prioritize_irq(BCM_IRQ_VC_I2C, 0);
+      up_set_irq_type(BCM_IRQ_VC_I2C, IRQ_RISING_EDGE);
       up_enable_irq(BCM_IRQ_VC_I2C);
       g_i2c_irqinit = true; /* Mark IRQ handler as initialized */
       i2cinfo("I2C IRQ enabled\n");

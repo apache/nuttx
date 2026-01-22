@@ -3688,6 +3688,7 @@ void stm32_serial_dma_poll(void)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_ARM_SEMIHOSTING_SYSLOG
 void up_putc(int ch)
 {
 #if CONSOLE_UART > 0
@@ -3704,6 +3705,7 @@ void up_putc(int ch)
   up_restoreusartint(priv, ie);
 #endif
 }
+#endif
 
 #else /* USE_SERIALDRIVER */
 
@@ -3715,11 +3717,13 @@ void up_putc(int ch)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_ARM_SEMIHOSTING_SYSLOG
 void up_putc(int ch)
 {
 #if CONSOLE_UART > 0 || CONSOLE_LPUART > 0
   arm_lowputc(ch);
 #endif
 }
+#endif
 
 #endif /* USE_SERIALDRIVER */

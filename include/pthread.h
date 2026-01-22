@@ -604,7 +604,7 @@ pid_t pthread_gettid_np(pthread_t thread);
 
 /* Compare two thread IDs. */
 
-#define pthread_equal(t1,t2) ((t1) == (t2))
+int pthread_equal(pthread_t t1, pthread_t t2);
 
 /* Thread scheduling parameters */
 
@@ -774,11 +774,6 @@ int pthread_rwlock_clockwrlock(FAR pthread_rwlock_t *lock,
 int pthread_rwlock_trywrlock(FAR pthread_rwlock_t *lock);
 int pthread_rwlock_unlock(FAR pthread_rwlock_t *lock);
 
-/* Pthread signal management APIs */
-
-int pthread_kill(pthread_t thread, int sig);
-int pthread_sigmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
-
 #ifdef CONFIG_PTHREAD_SPINLOCKS
 /* Pthread spinlocks */
 
@@ -820,48 +815,9 @@ int pthread_atfork(CODE void (*prepare)(void),
  * available in any inclusion ordering.
  */
 
-#ifndef __PTHREAD_KEY_T_DEFINED
-typedef int pthread_key_t;
-#  define __PTHREAD_KEY_T_DEFINED 1
-#endif
-
 #ifndef __PTHREAD_ADDR_T_DEFINED
 typedef FAR void *pthread_addr_t;
 #  define __PTHREAD_ADDR_T_DEFINED 1
-#endif
-
-#ifndef __PTHREAD_ATTR_T_DEFINED
-struct pthread_attr_s;
-typedef struct pthread_attr_s pthread_attr_t;
-#  define __PTHREAD_ATTR_T_DEFINED 1
-#endif
-
-#ifndef __PTHREAD_T_DEFINED
-typedef pid_t pthread_t;
-#  define __PTHREAD_T_DEFINED 1
-#endif
-
-#ifndef __PTHREAD_CONDATTR_T_DEFINED
-typedef struct pthread_condattr_s pthread_condattr_t;
-#  define __PTHREAD_CONDATTR_T_DEFINED 1
-#endif
-
-#ifndef __PTHREAD_COND_T_DEFINED
-struct pthread_cond_s;
-typedef struct pthread_cond_s pthread_cond_t;
-#  define __PTHREAD_COND_T_DEFINED 1
-#endif
-
-#ifndef __PTHREAD_MUTEXATTR_T_DEFINED
-struct pthread_mutexattr_s;
-typedef struct pthread_mutexattr_s pthread_mutexattr_t;
-#  define __PTHREAD_MUTEXATTR_T_DEFINED 1
-#endif
-
-#ifndef __PTHREAD_MUTEX_T_DEFINED
-struct pthread_mutex_s;
-typedef struct pthread_mutex_s pthread_mutex_t;
-#  define __PTHREAD_MUTEX_T_DEFINED 1
 #endif
 
 #ifndef __PTHREAD_BARRIERATTR_T_DEFINED
@@ -895,11 +851,5 @@ typedef struct pthread_spinlock_s pthread_spinlock_t;
 #    define __PTHREAD_SPINLOCK_T_DEFINED 1
 #  endif
 #endif /* CONFIG_PTHREAD_SPINLOCKS */
-
-#ifndef __PTHREAD_ONCE_T_DEFINED
-struct pthread_once_s;
-typedef struct pthread_once_s pthread_once_t;
-#  define __PTHREAD_ONCE_T_DEFINED 1
-#endif
 
 #endif /* __INCLUDE_PTHREAD_H */

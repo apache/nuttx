@@ -106,22 +106,18 @@ int crypto_newsession(FAR uint64_t *sid,
 
           if (cpc->cc_flags & CRYPTOCAP_F_SOFTWARE)
             {
-              /* First round of search, ignore
-               * software drivers.
-               */
+              /* Thread round of search only for software */
 
-              if (turn == 0)
+              if (turn != 2)
                 {
                   continue;
                 }
             }
-          else
+          else if (cpc->cc_flags & CRYPTOCAP_F_REMOTE)
             {
-              /* !CRYPTOCAP_F_SOFTWARE
-               * Second round of search, only software.
-               */
+              /* Second round of search only for remote */
 
-              if (turn == 1)
+              if (turn != 1)
                 {
                   continue;
                 }
@@ -189,7 +185,7 @@ int crypto_newsession(FAR uint64_t *sid,
 
       /* If we only want hardware drivers, don't do second pass. */
     }
-  while (turn <= 2 && hard == 0);
+  while (turn < 2 || (turn == 2 && !hard));
 
   hid = hid2;
 
@@ -624,65 +620,6 @@ migrate:
   return 0;
 }
 
-/* Release a set of crypto descriptors. */
-
-void crypto_freereq(FAR struct cryptop *crp)
-{
-  FAR struct cryptodesc *crd;
-
-  if (crp == NULL)
-    {
-      return;
-    }
-
-  nxmutex_lock(&g_crypto_lock);
-
-  while ((crd = crp->crp_desc) != NULL)
-    {
-      crp->crp_desc = crd->crd_next;
-      kmm_free(crd);
-    }
-
-  kmm_free(crp);
-  nxmutex_unlock(&g_crypto_lock);
-}
-
-/* Acquire a set of crypto descriptors. */
-
-FAR struct cryptop *crypto_getreq(int num)
-{
-  FAR struct cryptodesc *crd;
-  FAR struct cryptop *crp;
-
-  nxmutex_lock(&g_crypto_lock);
-
-  crp = kmm_malloc(sizeof(struct cryptop));
-  if (crp == NULL)
-    {
-      nxmutex_unlock(&g_crypto_lock);
-      return NULL;
-    }
-
-  bzero(crp, sizeof(struct cryptop));
-
-  while (num--)
-    {
-      crd = kmm_calloc(1, sizeof(struct cryptodesc));
-      if (crd == NULL)
-        {
-          nxmutex_unlock(&g_crypto_lock);
-          crypto_freereq(crp);
-          return NULL;
-        }
-
-      crd->crd_next = crp->crp_desc;
-      crp->crp_desc = crd;
-    }
-
-  nxmutex_unlock(&g_crypto_lock);
-  return crp;
-}
-
 int crypto_getfeat(FAR int *featp)
 {
   extern int cryptodevallowsoft;
@@ -722,6 +659,32 @@ int crypto_getfeat(FAR int *featp)
 out:
   *featp = feat;
   return 0;
+}
+
+int crypto_driver_set_priv(uint32_t driverid, FAR void *priv)
+{
+  if (driverid >= crypto_drivers_num || crypto_drivers == NULL)
+    {
+      return -EINVAL;
+    }
+
+  nxmutex_lock(&g_crypto_lock);
+
+  crypto_drivers[driverid].priv = priv;
+
+  nxmutex_unlock(&g_crypto_lock);
+
+  return 0;
+}
+
+FAR void *crypto_driver_get_priv(uint32_t driverid)
+{
+  if (driverid >= crypto_drivers_num || crypto_drivers == NULL)
+    {
+      return NULL;
+    }
+
+  return crypto_drivers[driverid].priv;
 }
 
 int up_cryptoinitialize(void)

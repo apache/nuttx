@@ -105,7 +105,7 @@ up_saveusercontext:
 
 	movq    %rbp, (8*REG_RBP)(%rdi)
 
-#ifdef CONFIG_LIB_SYSCALL
+#ifdef CONFIG_ARCH_HAVE_SYSCALL
 	/* Save CS and SS if we support syscalls */
 	xor     %rax, %rax
 	mov     %cs, %ax

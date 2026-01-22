@@ -397,7 +397,7 @@ int pkt_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
  *
  ****************************************************************************/
 
-ssize_t pkt_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
                     int flags);
 
 #ifdef CONFIG_NET_PKTPROTO_OPTIONS

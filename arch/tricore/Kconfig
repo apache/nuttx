@@ -26,6 +26,8 @@ config ARCH_TC3XX
 	bool
 	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_IRQTRIGGER
+	select ARCH_MINIMAL_VECTORTABLE
+	select ARCH_MINIMAL_VECTORTABLE_DYNAMIC
 	default n
 
 config ARCH_FAMILY
@@ -44,6 +46,13 @@ config ARCH_CHIP_TC397
 	select ONESHOT_COUNT
 	---help---
 		AURIX TC39x family: TC397
+
+config ARCH_DCACHE_ADDR
+	hex "AURIX Dcache base address"
+	default 0x7003C000
+	---help---
+		AURIX Dcache base address, dcache line clear and invalidate need
+		use the address.
 
 if ARCH_TC3XX
 source "arch/tricore/src/tc3xx/Kconfig"

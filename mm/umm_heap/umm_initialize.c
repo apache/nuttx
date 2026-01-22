@@ -86,10 +86,16 @@
 
 void umm_initialize(FAR void *heap_start, size_t heap_size)
 {
+  struct mm_heap_config_s config;
+
+  memset(&config, 0, sizeof(config));
+  config.start = heap_start;
+  config.size  = heap_size;
 #ifdef CONFIG_BUILD_KERNEL
-  USR_HEAP = mm_initialize_pool(NULL, heap_start, heap_size, NULL);
+  USR_HEAP = mm_initialize_pool(&config, NULL);
 #else
-  USR_HEAP = mm_initialize_pool("Umem", heap_start, heap_size, NULL);
+  config.name = "Umem";
+  USR_HEAP = mm_initialize_pool(&config, NULL);
 #endif
 }
 

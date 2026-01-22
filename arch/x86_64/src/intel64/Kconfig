@@ -6,27 +6,15 @@
 if ARCH_INTEL64
 comment "intel64 Configuration Options"
 
-choice
-	prompt "Intel64 Chip Selection"
-	default ARCH_CHIP_INTEL64_QEMU
-
-config ARCH_CHIP_INTEL64_QEMU
-	bool "Intel64 QEMU"
-
-config ARCH_CHIP_INTEL64_CUSTOM
-	bool "Custom Intel64 chip"
-
-endchoice # "Intel64 Chip Selection"
-
 config ARCH_INTEL64_HAVE_TSC
 	bool
 
 config ARCH_INTEL64_HAS_TSC_ADJUST
 	bool "MSR_IA32_TSC_ADJUST support"
-	depends on ARCH_INTEL64_HAVE_TSC
+	depends on ARCH_INTEL64_HAVE_TSC && SCHED_TICKLESS
 	default y
 	---help---
-	MSR_IA32_TSC_ADJUST is used to adjust the offset of the Time Stamp Counter (TSC).
+		MSR_IA32_TSC_ADJUST is used to adjust the offset of the Time Stamp Counter (TSC).
 
 
 config ARCH_INTEL64_CACHE_LINESIZE

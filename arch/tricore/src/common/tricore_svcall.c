@@ -56,17 +56,12 @@
 
 void tricore_svcall(volatile void *trap)
 {
-  struct tcb_s *running_task;
-  struct tcb_s *tcb;
-  int cpu = this_cpu();
-
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+  struct tcb_s *tcb = this_task();
   uintptr_t *regs;
   uint32_t cmd;
 
   regs = (uintptr_t *)__mfcr(CPU_PCXI);
-
-  running_task = g_running_tasks[cpu];
-  tcb = this_task();
 
   /* DSYNC instruction should be executed immediately prior to the MTCR */
 
@@ -74,69 +69,40 @@ void tricore_svcall(volatile void *trap)
 
   regs = tricore_csa2addr((uintptr_t)regs);
 
-  up_set_current_regs(regs);
+  /* Set irq flag */
+
+  up_set_interrupt_context(true);
 
   cmd = regs[REG_D8];
+
+  if (cmd != SYS_restore_context)
+    {
+      (*running_task)->xcp.regs = tricore_csa2addr(regs[REG_UPCXI]);
+    }
+  else
+    {
+      tricore_reclaim_csa(regs[REG_UPCXI]);
+    }
 
   /* Handle the SVCall according to the command in R0 */
 
   switch (cmd)
     {
-      /* R0=SYS_restore_context:  This a restore context command:
-       *
-       *   void tricore_fullcontextrestore(uint32_t *restoreregs)
-       *          noreturn_function;
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   R0 = SYS_restore_context
-       *   R1 = restoreregs
-       *
-       * In this case, we simply need to set g_current_regs to restore
-       * register area referenced in the saved R1. context == g_current_regs
-       * is the normal exception return.  By setting g_current_regs =
-       * context[R1], we force the return to the saved context referenced
-       * in R1.
-       */
+      case SYS_switch_context:
+        nxsched_switch_context(*running_task, tcb);
 
       case SYS_restore_context:
-        {
-          tricore_reclaim_csa(regs[REG_UPCXI]);
-          up_set_current_regs((uintptr_t *)regs[REG_D9]);
-        }
-        break;
-
-      case SYS_switch_context:
-        {
-          *(uintptr_t **)regs[REG_D9] = (uintptr_t *)regs[REG_UPCXI];
-          up_set_current_regs((uintptr_t *)regs[REG_D10]);
-        }
+        *running_task = tcb;
+        regs[REG_UPCXI] = tricore_addr2csa(tcb->xcp.regs);
+        __isync();
         break;
 
       default:
-        {
-          svcerr("ERROR: Bad SYS call: %d\n", (int)regs[REG_D0]);
-        }
+        svcerr("ERROR: Bad SYS call: %d\n", (int)regs[REG_D0]);
         break;
     }
 
-  if (regs != up_current_regs())
-    {
-      /* Update scheduler parameters */
+  /* Set irq flag */
 
-      nxsched_switch_context(running_task, tcb);
-
-      /* Record the new "running" task when context switch occurred.
-       * g_running_tasks[] is only used by assertion logic for reporting
-       * crashes.
-       */
-
-      g_running_tasks[cpu] = this_task();
-
-      regs[REG_UPCXI] = (uintptr_t)up_current_regs();
-
-      __isync();
-    }
-
-  up_set_current_regs(NULL);
+  up_set_interrupt_context(false);
 }

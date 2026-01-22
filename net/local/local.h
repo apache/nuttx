@@ -473,7 +473,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *
  ****************************************************************************/
 
-ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+ssize_t local_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
                       int flags);
 
 /****************************************************************************

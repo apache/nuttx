@@ -135,20 +135,6 @@ void up_irq_enable(void)
 }
 
 /****************************************************************************
- * Name: up_irqinitialize
- ****************************************************************************/
-
-void up_irqinitialize(void)
-{
-#ifdef CONFIG_SMP
-  /* Register the pause handler */
-
-  sim_init_ipi(SIGUSR1);
-  sim_init_func_call_ipi(SIGUSR2);
-#endif
-}
-
-/****************************************************************************
  * Name: up_enable_irq
  *
  * Description:
@@ -191,4 +177,18 @@ void up_disable_irq(int irq)
    */
 
   signal(irq, SIG_IGN);
+}
+
+/****************************************************************************
+ * Name: host_irqinitialize
+ ****************************************************************************/
+
+void host_irqinitialize(void)
+{
+#ifdef CONFIG_SMP
+  /* Register the pause handler */
+
+  sim_init_ipi(SIGUSR1);
+  sim_init_func_call_ipi(SIGUSR2);
+#endif
 }

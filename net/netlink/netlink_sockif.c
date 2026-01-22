@@ -67,7 +67,7 @@ static int  netlink_connect(FAR struct socket *psock,
 static int  netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
                          bool setup);
 static ssize_t netlink_sendmsg(FAR struct socket *psock,
-                               FAR struct msghdr *msg, int flags);
+                               FAR const struct msghdr *msg, int flags);
 static ssize_t netlink_recvmsg(FAR struct socket *psock,
                                FAR struct msghdr *msg, int flags);
 static int netlink_close(FAR struct socket *psock);
@@ -575,7 +575,7 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
  ****************************************************************************/
 
 static ssize_t netlink_sendmsg(FAR struct socket *psock,
-                               FAR struct msghdr *msg, int flags)
+                               FAR const struct msghdr *msg, int flags)
 {
   FAR const void *buf = msg->msg_iov->iov_base;
   FAR const struct sockaddr *to = msg->msg_name;

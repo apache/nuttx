@@ -162,7 +162,7 @@ struct sock_intf_s
   CODE int        (*si_poll)(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
   CODE ssize_t    (*si_sendmsg)(FAR struct socket *psock,
-                    FAR struct msghdr *msg, int flags);
+                    FAR const struct msghdr *msg, int flags);
   CODE ssize_t    (*si_recvmsg)(FAR struct socket *psock,
                     FAR struct msghdr *msg, int flags);
   CODE int        (*si_close)(FAR struct socket *psock);
@@ -880,7 +880,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
  *
  ****************************************************************************/
 
-ssize_t psock_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+ssize_t psock_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
                       int flags);
 
 /****************************************************************************
@@ -1503,6 +1503,41 @@ void netdev_lock(FAR struct net_driver_s *dev);
  ****************************************************************************/
 
 void netdev_unlock(FAR struct net_driver_s *dev);
+
+/****************************************************************************
+ * Name: netdev_findbyname
+ *
+ * Description:
+ *   Find a previously registered network device using its assigned
+ *   network interface name
+ *
+ * Input Parameters:
+ *   ifname The interface name of the device of interest
+ *
+ * Returned Value:
+ *  Pointer to driver on success; null on failure
+ *
+ ****************************************************************************/
+
+FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname);
+
+/****************************************************************************
+ * Name: netdev_findbyindex
+ *
+ * Description:
+ *   Find a previously registered network device by assigned interface index.
+ *
+ * Input Parameters:
+ *   ifindex - The interface index.  This is a one-based index and must be
+ *             greater than zero.
+ *
+ * Returned Value:
+ *  Pointer to driver on success; NULL on failure.  This function will return
+ *  NULL only if there is no device corresponding to the provided index.
+ *
+ ****************************************************************************/
+
+FAR struct net_driver_s *netdev_findbyindex(int ifindex);
 
 #undef EXTERN
 #ifdef __cplusplus

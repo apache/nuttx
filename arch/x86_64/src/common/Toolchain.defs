@@ -63,6 +63,24 @@ ifeq ($(CONFIG_ARCH_INTEL64_DISABLE_VECTORIZE),y)
   ARCHOPTIMIZATION += -fno-tree-vectorize
 endif
 
+ifeq ($(CONFIG_STACK_USAGE),y)
+  ARCHOPTIMIZATION += -fstack-usage
+endif
+
+ifneq ($(CONFIG_STACK_USAGE_WARNING),0)
+  ARCHOPTIMIZATION += -Wstack-usage=$(CONFIG_STACK_USAGE_WARNING)
+endif
+
+# Instrumentation options
+
+ifeq ($(CONFIG_ARCH_INSTRUMENT_ALL),y)
+  ARCHOPTIMIZATION += -finstrument-functions
+endif
+
+ifeq ($(CONFIG_PROFILE_ALL),y)
+  ARCHOPTIMIZATION += -pg
+endif
+
 ARCHCFLAGS += -fno-common -Wno-attributes
 ARCHCXXFLAGS += -fno-common -Wno-attributes -nostdinc++
 
@@ -252,6 +270,16 @@ AFLAGS := $(CFLAGS) -D__ASSEMBLY__ -Wa,--divide
 
 CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden
 LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
+
+# Debug link map
+
+ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
+  LDFLAGS += --cref -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
+endif
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  ARCHOPTIMIZATION += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
+endif
 
 # ELF module definitions
 

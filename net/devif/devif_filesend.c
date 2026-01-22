@@ -87,14 +87,14 @@ int devif_file_send(FAR struct net_driver_s *dev, FAR struct file *file,
 
   /* Append the send buffer after device buffer */
 
-  if (len > iob_navail(false) * CONFIG_IOB_BUFSIZE ||
-      netdev_iob_prepare(dev, false, 0) != OK)
+  if (len > iob_navail(true) * CONFIG_IOB_BUFSIZE ||
+      netdev_iob_prepare(dev, true, 0) != OK)
     {
       ret = -ENOMEM;
       goto errout;
     }
 
-  iob_update_pktlen(dev->d_iob, target_offset, false);
+  iob_update_pktlen(dev->d_iob, target_offset, true);
 
   ret = file_seek(file, offset, SEEK_SET);
   if (ret < 0)
@@ -111,7 +111,7 @@ int devif_file_send(FAR struct net_driver_s *dev, FAR struct file *file,
         {
           if (iob->io_flink == NULL)
             {
-              iob->io_flink = iob_tryalloc(false);
+              iob->io_flink = iob_tryalloc(true);
               if (iob->io_flink == NULL)
                 {
                   ret = -ENOMEM;
@@ -144,7 +144,7 @@ int devif_file_send(FAR struct net_driver_s *dev, FAR struct file *file,
         }
     }
 
-  iob_update_pktlen(dev->d_iob, target_offset + len, false);
+  iob_update_pktlen(dev->d_iob, target_offset + len, true);
 
   dev->d_sndlen = len;
   return len;

@@ -270,6 +270,10 @@ struct mm_heap_s
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
   struct procfs_meminfo_entry_s mm_procfs;
 #endif
+
+  /* Kasan is disable or enable for this heap */
+
+  bool mm_nokasan;
 };
 
 /* This describes the callback for mm_foreach */

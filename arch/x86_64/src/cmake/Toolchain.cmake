@@ -77,6 +77,10 @@ if(${CONFIG_STACK_USAGE_WARNING})
   endif()
 endif()
 
+if(CONFIG_ARCH_INSTRUMENT_ALL)
+  add_compile_options(-finstrument-functions)
+endif()
+
 if(CONFIG_COVERAGE_ALL)
   add_compile_options(-fprofile-arcs -ftest-coverage -fno-inline)
 endif()

@@ -121,12 +121,12 @@ function arm_gcc_toolchain() {
       if (-not (Test-Path -Path "$NUTTXTOOLS\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe")) {
         # Download the file
         Write-Host "Download: ARM GCC toolchain" -ForegroundColor Green
-        $basefile = "arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-arm-none-eabi"
+        $basefile = "xpack-arm-none-eabi-gcc-13.2.1-1.1-win32-x64"
         Set-Location "$NUTTXTOOLS"
-        # Download the latest ARM GCC toolchain prebuilt by ARM
-        Invoke-WebRequest -Uri "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
+        # Download ARM GCC toolchain from xPack
+        Invoke-WebRequest -Uri "https://github.com/xpack-dev-tools/arm-none-eabi-gcc-xpack/releases/download/v13.2.1-1.1/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
         Expand-Archive "$NUTTXTOOLS\$basefile.zip"
-        Move-Item -Path "$basefile\$basefile" -Destination "gcc-arm-none-eabi"
+        Move-Item -Path "$basefile\xpack-arm-none-eabi-gcc-13.2.1-1.1" -Destination "gcc-arm-none-eabi"
         Remove-Item "$basefile*" -Force
       }
     }
@@ -146,12 +146,12 @@ function arm64_gcc_toolchain() {
       if (-not (Test-Path -Path "$NUTTXTOOLS\gcc-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe")) {
         # Download the file
         Write-Host "Download: ARM64 GCC toolchain" -ForegroundColor Green
-        $basefile = "arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf"
+        $basefile = "xpack-aarch64-none-elf-gcc-13.2.1-1.1-win32-x64"
         Set-Location "$NUTTXTOOLS"
-        # Download the latest ARM64 GCC toolchain prebuilt by ARM
-        Invoke-WebRequest -Uri "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
+        # Download ARM64 GCC toolchain from xPack
+        Invoke-WebRequest -Uri "https://github.com/xpack-dev-tools/aarch64-none-elf-gcc-xpack/releases/download/v13.2.1-1.1/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
         Expand-Archive "$NUTTXTOOLS\$basefile.zip"
-        Move-Item -Path "$basefile\$basefile" -Destination "gcc-aarch64-none-elf"
+        Move-Item -Path "$basefile\xpack-aarch64-none-elf-gcc-13.2.1-1.1" -Destination "gcc-aarch64-none-elf"
         Remove-Item "$basefile*" -Force
       }
     }

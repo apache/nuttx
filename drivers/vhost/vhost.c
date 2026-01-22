@@ -32,6 +32,7 @@
 #include <nuttx/vhost/vhost.h>
 
 #include "vhost-rng.h"
+#include "vhost-rpmsg.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -394,6 +395,14 @@ void vhost_register_drivers(void)
   if (ret < 0)
     {
       vhosterr("vhost_register_rng_driver failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_VHOST_RPMSG
+  ret = vhost_register_rpmsg_driver();
+  if (ret < 0)
+    {
+      vhosterr("vhost_register_rpmsg_driver failed, ret=%d\n", ret);
     }
 #endif
 

@@ -84,18 +84,6 @@
 #  define CONFIG_SIM_FB_INTERVAL_LINE 0
 #endif
 
-/* Use a stack alignment of 16 bytes.  If necessary frame_size must be
- * rounded up to the next boundary
- */
-
-#define STACK_ALIGNMENT     16
-
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
 /* Simulated Heap Definitions ***********************************************/
 
 /* Size of the simulated heap */
@@ -198,6 +186,7 @@ struct i2c_master_s;
 
 extern int g_argc;
 extern char **g_argv;
+extern struct kwork_wqueue_s *g_work_queue;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -218,6 +207,10 @@ int host_errno_convert(int errcode);
 int host_errno_get(void);
 void host_errno_set(int errcode);
 
+/* sim_hostirq.c ************************************************************/
+
+void host_irqinitialize(void);
+
 /* sim_hostmisc.c ***********************************************************/
 
 void host_abort(int status);
@@ -231,6 +224,7 @@ void host_init_cwd(void);
 pid_t host_posix_spawn(const char *path,
                        char *const argv[], char *const envp[]);
 int   host_waitpid(pid_t pid);
+int   host_kill(pid_t pid, int sig);
 
 /* sim_hostmemory.c *********************************************************/
 

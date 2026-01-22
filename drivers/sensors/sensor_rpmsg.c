@@ -774,7 +774,8 @@ static int sensor_rpmsg_get_info(FAR struct sensor_lowerhalf_s *lower,
     {
       ret = drv->ops->get_info(drv, filep, info);
     }
-  else if (!(filep->f_oflags & SENSOR_REMOTE))
+
+  if (ret == -ENOTTY && !(filep->f_oflags & SENSOR_REMOTE))
     {
       ret = sensor_rpmsg_ioctl(dev, SNIOC_GET_INFO,
                                (unsigned long)(uintptr_t)info,

@@ -206,7 +206,7 @@ Subdirectories of ``nuttx/drivers``
 
   RF Device Support.
 
-* ``rptun/`` :doc:`special/rptun`
+* ``rptun/`` :doc:`special/rptun/index`
 
   Remote Proc Tunnel Driver Support.
 

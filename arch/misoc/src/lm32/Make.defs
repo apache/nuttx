@@ -33,5 +33,8 @@ CHIP_CSRCS  = lm32_allocateheap.c lm32_copystate.c lm32_createstack.c
 CHIP_CSRCS += lm32_decodeirq.c lm32_doirq.c lm32_exit.c lm32_flushcache.c
 CHIP_CSRCS += lm32_idle.c lm32_initialstate.c lm32_irq.c lm32_usetack.c
 CHIP_CSRCS += lm32_registerdump.c lm32_releasestack.c lm32_swint.c
-CHIP_CSRCS += lm32_stackframe.c lm32_switchcontext.c lm32_sigdeliver.c
-CHIP_CSRCS += lm32_schedulesigaction.c lm32_saveusercontext.c
+CHIP_CSRCS += lm32_stackframe.c lm32_switchcontext.c lm32_saveusercontext.c
+
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+CHIP_CSRCS += lm32_schedulesigaction.c lm32_sigdeliver.c
+endif

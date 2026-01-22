@@ -1,0 +1,76 @@
+From 29314d06426b678c60cfb4d109147b2a9cdcb7b6 Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Thu, 25 Jul 2024 20:30:19 +0800
+Subject: [PATCH 12/12] remoteproc: sync the virtio rpmsg config with linux
+ side
+
+Add feature bit VIRTIO_RPMSG_F_CPUNAME and then add the host_cpuname
+and remote_cpuname to the resource table to make the rpmsg virtio
+device know the local and peer cpuname.
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/include/openamp/remoteproc.h   | 21 ++++++++++++++++-----
+ lib/include/openamp/rpmsg_virtio.h |  1 +
+ 2 files changed, 17 insertions(+), 5 deletions(-)
+
+diff --git a/lib/include/openamp/remoteproc.h open-amp/lib/include/openamp/remoteproc.h
+index aadc7a798f..ea2c39ecfe 100644
+--- a/lib/include/openamp/remoteproc.h
++++ open-amp/lib/include/openamp/remoteproc.h
+@@ -24,6 +24,8 @@ extern "C" {
+ 
+ #define RPROC_MAX_NAME_LEN 32
+ 
++#define VIRTIO_RPMSG_CPUNAME_SIZE 8
++
+ /**
+  * @brief Resource table header
+  *
+@@ -361,17 +363,26 @@ struct fw_rsc_vendor {
+ 	uint32_t len;
+ } METAL_PACKED_END;
+ 
+-/** @brief Configuration space declaration ((if VIRTIO_RPMSG_F_BUFSZ)) */
++/** @brief Configuration space declaration */
+ METAL_PACKED_BEGIN
+ struct fw_rsc_config {
+-	/** The host to remote buffer size */
++	/** The host to remote buffer size (if VIRTIO_RPMSG_F_BUFSZ) */
+ 	uint32_t h2r_buf_size;
+ 
+-	/** The remote to host buffer size */
++	/** The remote to host buffer size (if VIRTIO_RPMSG_F_BUFSZ) */
+ 	uint32_t r2h_buf_size;
+ 
+-	/** Reserve for the future use */
+-	uint32_t reserved[14];
++	/* The host side cpu name (if VIRTIO_RPMSG_F_CPUNAME) */
++
++	uint8_t host_cpuname[VIRTIO_RPMSG_CPUNAME_SIZE];
++
++	/* The remote side cpu name (if VIRTIO_RPMSG_F_CPUNAME) */
++
++	uint8_t remote_cpuname[VIRTIO_RPMSG_CPUNAME_SIZE];
++
++	/* Reserve for the future use */
++
++	uint32_t reserved[10];
+ 
+ 	/** Put the customize config here */
+ } METAL_PACKED_END;
+diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
+index a069bb02b0..da6cb62709 100644
+--- a/lib/include/openamp/rpmsg_virtio.h
++++ open-amp/lib/include/openamp/rpmsg_virtio.h
+@@ -31,6 +31,7 @@ extern "C" {
+ #define VIRTIO_RPMSG_F_NS	0 /* RP supports name service notifications */
+ #define VIRTIO_RPMSG_F_ACK	1 /* RP supports name service acknowledge */
+ #define VIRTIO_RPMSG_F_BUFSZ	2 /* RP supports get buffer size from config space */
++#define VIRTIO_RPMSG_F_CPUNAME	3 /* RP supports get local and peer cpu name */
+ 
+ #if defined(VIRTIO_USE_DCACHE)
+ #define BUFFER_FLUSH(x, s)		metal_cache_flush(x, s)
+-- 
+2.34.1
+

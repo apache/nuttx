@@ -76,5 +76,14 @@ ifeq ($(CONFIG_X86_64_STRNCMP),y)
 ASRCS += arch_strncmp.S
 endif
 
+ifeq ($(CONFIG_PROFILE_MINI),y)
+ASRCS += mcount.S
+endif
+
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
+DEPPATH += --dep-path machine/x86_64/gnu
+VPATH += :machine/x86_64/gnu
+endif
+
 DEPPATH += --dep-path machine/x86_64
 VPATH += :machine/x86_64

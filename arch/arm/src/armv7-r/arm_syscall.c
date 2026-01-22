@@ -270,7 +270,10 @@ uint32_t *arm_syscall(uint32_t *regs)
         nxsched_switch_context(*running_task, tcb);
 
       case SYS_restore_context:
-
+#ifdef CONFIG_ARCH_ADDRENV
+        addrenv_switch(tcb);
+        tcb = this_task();
+#endif
         /* No context switch occurs in SYS_restore_context, or the
          * context switch has been completed, so there is no
          * need to update scheduler parameters.
@@ -282,9 +285,6 @@ uint32_t *arm_syscall(uint32_t *regs)
 
         restore_critical_section(tcb, cpu);
         regs = tcb->xcp.regs;
-#ifdef CONFIG_ARCH_ADDRENV
-        addrenv_switch(tcb);
-#endif
         break;
 
       /* R0=SYS_task_start:  This a user task start
@@ -353,7 +353,7 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
 #endif
 
-#ifdef CONFIG_BUILD_PROTECTED
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_ENABLE_ALL_SIGNALS)
       /* R0=SYS_signal_handler:  This a user signal handler callback
        *
        * void signal_handler(_sa_sigaction_t sighand, int signo,
@@ -433,9 +433,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 #endif
         }
         break;
-#endif
 
-#ifdef CONFIG_BUILD_PROTECTED
       /* R0=SYS_signal_handler_return:  This a user signal handler callback
        *
        *   void signal_handler_return(void);
@@ -474,7 +472,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 #endif
         }
         break;
-#endif
+#endif /* CONFIG_BUILD_PROTECTED && CONFIG_ENABLE_ALL_SIGNALS */
 
       /* This is not an architecture-specific system call.  If NuttX is built
        * as a standalone kernel with a system call interface, then all of the

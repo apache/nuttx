@@ -951,7 +951,7 @@ static void mmcsd_decode_csd(FAR struct mmcsd_state_s *priv, uint32_t csd[4])
   finfo("  FILE_FORMAT: %d ECC: %d (MMC) CRC: %d\n",
         decoded.fileformat, decoded.mmcecc, decoded.crc);
 
-  finfo("Capacity: %luKb, Block size: %db, nblocks: %d wrprotect: %d\n",
+  finfo("Capacity: %luKB, Block size: %dB, nblocks: %d wrprotect: %d\n",
         (unsigned long)MMCSD_CAPACITY(priv->part[0].nblocks,
                                       priv->blockshift),
         priv->blocksize, priv->part[0].nblocks, priv->wrprotect);

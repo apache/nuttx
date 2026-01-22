@@ -243,6 +243,10 @@
 
 #define IRQ_SPSR_MASK       (IRQ_DAIF_MASK << 6)
 
+/* AArch64 the stack-pointer must be 128-bit aligned */
+
+#define STACK_ALIGNMENT     16
+
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
@@ -259,6 +263,11 @@ extern "C"
 
 struct xcptcontext
 {
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
+  /* task context, for signal process */
+
+  uint64_t *saved_regs;
+
 #ifdef CONFIG_BUILD_KERNEL
   /* This is the saved address to use when returning from a user-space
    * signal handler.
@@ -267,16 +276,13 @@ struct xcptcontext
   uintptr_t sigreturn;
 
 #endif
+#endif /* CONFIG_ENABLE_ALL_SIGNALS */
   /* task stack reg context */
 
   uint64_t *regs;
 #ifndef CONFIG_BUILD_FLAT
   uint64_t *initregs;
 #endif
-
-  /* task context, for signal process */
-
-  uint64_t *saved_regs;
 
 #ifdef CONFIG_ARCH_FPU
   uint64_t *fpu_regs;

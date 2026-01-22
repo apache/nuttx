@@ -31,12 +31,15 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <sys/param.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
+#define ABS(a) ((a) > 0 ? (a) : -(a))
+
 float atanf(float x)
 {
-  return asinf(x / sqrtf(x * x + 1.0F));
+  return asinf(x / MAX(ABS(x), sqrtf(x * x + 1.0F)));
 }

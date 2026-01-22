@@ -66,6 +66,12 @@ config NET_RPMSG_STACKSIZE
 	---help---
 		The stack size allocated for the net RPMSG task.
 
+config NET_RPMSG_DRV_SERVER
+	bool "Net rpmsg default server"
+	default n
+	---help---
+		Enable the net rpmsg default server.
+
 endif # NET_RPMSG_DRV
 
 config NETDEV_TELNET

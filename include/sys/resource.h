@@ -67,6 +67,8 @@
 #define RLIMIT_RTPRIO   14          /* Limit on RT tasks priority */
 #define RLIMIT_RTTIME   15          /* Limit on timeout for RT tasks (us) */
 
+#define RLIM_NLIMITS    16          /* Limits of all supported kinds */
+
 #if defined(CONFIG_FS_LARGEFILE)
 #  define RLIM_INFINITY    UINT64_MAX /* No limit */
 #  define RLIM_SAVED_MAX   UINT64_MAX /* Unrepresentable saved hard limit */

@@ -988,10 +988,12 @@
 #ifndef __ASSEMBLY__
 struct xcptcontext
 {
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   /* These are saved copies of LR and SR used during signal processing. */
 
   uint32_t saved_pc;
   uint32_t saved_sr;
+#endif
 
   /* Register save area */
 

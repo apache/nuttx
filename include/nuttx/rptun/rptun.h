@@ -40,20 +40,22 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define _RPTUNIOCVALID(c)           _RPMSGIOCVALID(c)
-#define _RPTUNIOC(nr)               _RPMSGIOC(nr)
+#define _RPTUNIOCVALID(c)     _RPMSGIOCVALID(c)
+#define _RPTUNIOC(nr)         _RPMSGIOC(nr)
 
-#define RPTUNIOC_START              _RPTUNIOC(100)
-#define RPTUNIOC_STOP               _RPTUNIOC(101)
-#define RPTUNIOC_RESET              _RPTUNIOC(102)
+#define RPTUNIOC_START        _RPTUNIOC(100)
+#define RPTUNIOC_STOP         _RPTUNIOC(101)
+#define RPTUNIOC_RESET        _RPTUNIOC(102)
+#define RPTUNIOC_PANIC        _RPTUNIOC(103)
 
-#define RPTUN_NOTIFY_ALL            (UINT32_MAX - 0)
+#define RPTUN_NOTIFY_ALL      (UINT32_MAX - 0)
 
-#define RPTUN_CMD_DEFAULT     0x0
-#define RPTUN_CMD_PANIC       0x1
-#define RPTUN_CMD_STOP        0x2
-#define RPTUN_CMD_READY       0x3
-#define RPTUN_CMD_RESTART     0x4
+#define RPTUN_CMD_DONE        0x0
+#define RPTUN_CMD_READY       0x1
+#define RPTUN_CMD_PANIC       0x2
+#define RPTUN_CMD_RESET       0x3
+#define RPTUN_CMD_STOP        0x4
+#define RPTUN_CMD_ACK         0xffff
 #define RPTUN_CMD_MASK        0xffff
 #define RPTUN_CMD_SHIFT       16
 
@@ -71,23 +73,6 @@
 #endif
 
 /* Access macros ************************************************************/
-
-/****************************************************************************
- * Name: RPTUN_GET_LOCAL_CPUNAME
- *
- * Description:
- *   Get local cpu name
- *
- * Input Parameters:
- *   dev  - Device-specific state data
- *
- * Returned Value:
- *   Cpu name on success, NULL on failure.
- *
- ****************************************************************************/
-
-#define RPTUN_GET_LOCAL_CPUNAME(d) ((d)->ops->get_local_cpuname ? \
-                                    (d)->ops->get_local_cpuname(d) : "")
 
 /****************************************************************************
  * Name: RPTUN_GET_CPUNAME
@@ -353,24 +338,25 @@ begin_packed_struct struct rptun_cmd_s
 struct aligned_data(8) rptun_rsc_s
 {
   struct resource_table    rsc_tbl_hdr;
-  uint32_t                 offset[2];
+  uint32_t                 offset[3];
   struct fw_rsc_trace      log_trace;
   struct fw_rsc_vdev       rpmsg_vdev;
   struct fw_rsc_vdev_vring rpmsg_vring0;
   struct fw_rsc_vdev_vring rpmsg_vring1;
   struct fw_rsc_config     config;
+  struct fw_rsc_carveout   carveout;
 };
 
 struct rptun_dev_s;
 struct rptun_ops_s
 {
-  CODE FAR const char *(*get_local_cpuname)(FAR struct rptun_dev_s *dev);
   CODE FAR const char *(*get_cpuname)(FAR struct rptun_dev_s *dev);
   CODE FAR const char *(*get_firmware)(FAR struct rptun_dev_s *dev);
 
   CODE FAR const struct rptun_addrenv_s *(*get_addrenv)(
                         FAR struct rptun_dev_s *dev);
-  CODE FAR struct rptun_rsc_s *(*get_resource)(FAR struct rptun_dev_s *dev);
+  CODE FAR struct resource_table *(*get_resource)(
+                        FAR struct rptun_dev_s *dev);
 
   CODE bool (*is_autostart)(FAR struct rptun_dev_s *dev);
   CODE bool (*is_master)(FAR struct rptun_dev_s *dev);
@@ -389,6 +375,8 @@ struct rptun_ops_s
 struct rptun_dev_s
 {
   FAR const struct rptun_ops_s *ops;
+  FAR void *stack;
+  size_t stack_size;
 };
 
 /****************************************************************************
@@ -407,6 +395,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev);
 int rptun_boot(FAR const char *cpuname);
 int rptun_poweroff(FAR const char *cpuname);
 int rptun_reset(FAR const char *cpuname, int value);
+int rptun_panic(FAR const char *cpuname);
 
 #ifdef __cplusplus
 }

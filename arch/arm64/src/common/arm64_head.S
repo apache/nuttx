@@ -179,6 +179,8 @@ real_start:
     str    w2, [x24], #4
     cmp    w1, #0
     bne    .loop
+#  else
+    add    x24, x24, #(SMP_STACK_SIZE)
 #  endif
 
     /* Initialize percpu reg tpidr_el1 */

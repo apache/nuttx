@@ -81,7 +81,7 @@
 
 /* rptun initialization names */
 
-#define MPFS_RPTUN_CPU_NAME      "mpfs-ihc"
+#define MPFS_RPTUN_CPU_NAME      "mpfsihc"
 
 /* Vring configuration parameters */
 
@@ -147,7 +147,8 @@ struct mpfs_ihc_work_arg_s
  ****************************************************************************/
 
 static const char *mpfs_rptun_get_cpuname(struct rptun_dev_s *dev);
-static struct rptun_rsc_s *mpfs_rptun_get_resource(struct rptun_dev_s *dev);
+static struct resource_table *
+mpfs_rptun_get_resource(struct rptun_dev_s *dev);
 static bool mpfs_rptun_is_autostart(struct rptun_dev_s *dev);
 static bool mpfs_rptun_is_master(struct rptun_dev_s *dev);
 static int mpfs_rptun_start(struct rptun_dev_s *dev);
@@ -845,7 +846,7 @@ static const char *mpfs_rptun_get_cpuname(struct rptun_dev_s *dev)
  *
  ****************************************************************************/
 
-static struct rptun_rsc_s *
+static struct resource_table *
 mpfs_rptun_get_resource(struct rptun_dev_s *dev)
 {
   struct mpfs_rptun_dev_s *priv = container_of(dev,
@@ -857,7 +858,7 @@ mpfs_rptun_get_resource(struct rptun_dev_s *dev)
 
   if (priv->shmem != NULL)
     {
-      return &priv->shmem->rsc;
+      return &priv->shmem->rsc.rsc_tbl_hdr;
     }
   else
     {
@@ -876,10 +877,12 @@ mpfs_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->rpmsg_vdev.id            = VIRTIO_ID_RPMSG;
       rsc->rpmsg_vdev.notifyid      = VDEV_NOTIFYID;
       rsc->rpmsg_vdev.dfeatures     = 1 << VIRTIO_RPMSG_F_NS  |
-                                      1 << VIRTIO_RPMSG_F_ACK;
+                                      1 << VIRTIO_RPMSG_F_ACK |
+                                      1 << VIRTIO_RPMSG_F_CPUNAME;
 
       rsc->rpmsg_vdev.gfeatures     = 1 << VIRTIO_RPMSG_F_NS  |
-                                      1 << VIRTIO_RPMSG_F_ACK;
+                                      1 << VIRTIO_RPMSG_F_ACK |
+                                      1 << VIRTIO_RPMSG_F_CPUNAME;
 
       /* If the master is up already, don't clear the status here */
 
@@ -888,6 +891,8 @@ mpfs_rptun_get_resource(struct rptun_dev_s *dev)
           rsc->rpmsg_vdev.status    = 0;
         }
 
+      rsc->rpmsg_vdev.reserved[0]   = VIRTIO_DEV_DRIVER;
+      rsc->rpmsg_vdev.reserved[1]   = 0;
       rsc->rpmsg_vdev.config_len    = sizeof(struct fw_rsc_config);
       rsc->rpmsg_vdev.num_of_vrings = VRINGS;
       rsc->rpmsg_vring0.align       = VRING_ALIGN;
@@ -900,6 +905,10 @@ mpfs_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->rpmsg_vring1.notifyid    = VRING1_NOTIFYID;
       rsc->config.r2h_buf_size      = VRING_SIZE;
       rsc->config.h2r_buf_size      = VRING_SIZE;
+      strlcpy((char *)rsc->config.host_cpuname, MPFS_RPTUN_CPU_NAME,
+              VIRTIO_RPMSG_CPUNAME_SIZE);
+      strlcpy((char *)rsc->config.remote_cpuname, "nuttx",
+              VIRTIO_RPMSG_CPUNAME_SIZE);
     }
 
   /* It might be tempting to set this at mpfs_rptun_start(), but it's only
@@ -914,7 +923,7 @@ mpfs_rptun_get_resource(struct rptun_dev_s *dev)
 
   up_enable_irq(g_plic_irq);
 
-  return &priv->shmem->rsc;
+  return &priv->shmem->rsc.rsc_tbl_hdr;
 }
 
 /****************************************************************************

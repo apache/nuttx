@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <syslog.h>
+#include <execinfo.h>
 
 #include "sched/sched.h"
 
@@ -61,6 +62,8 @@ void nxsched_dumponexit(void)
          "entry:%p pid: %d, stack_alloc_ptr: %p, adj_stack_size: %zu\n",
          tcb, name, tcb->pid, tcb->sched_priority, tcb->entry.main,
          tcb->group->tg_pid, tcb->stack_base_ptr, tcb->adj_stack_size);
+
+  dump_stack();
 }
 
 #endif /* CONFIG_SCHED_DUMP_ON_EXIT */

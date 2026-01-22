@@ -93,16 +93,6 @@
 #define STACK_COLOR    0xdeaddead
 #define HEAP_COLOR     'h'
 
-/* AArch64 the stack-pointer must be 128-bit aligned */
-
-#define STACK_ALIGNMENT     16
-
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
 #ifdef CONFIG_SMP
 /* The size of interrupt and idle stack.  This is the configured
  * value aligned the 8-bytes as required by the ARM EABI.

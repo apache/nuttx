@@ -31,6 +31,7 @@
 #include <endian.h>
 #include <strings.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/lib/math32.h>
 #include <crypto/bn.h>
 #include <crypto/cryptodev.h>
 #include <crypto/cryptosoft.h>
@@ -41,10 +42,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifndef howmany
-#  define howmany(x, y)  (((x) + ((y) - 1)) / (y))
-#endif
 
 /****************************************************************************
  * Private Data
@@ -275,7 +272,7 @@ int swcr_hash(FAR struct cryptop *crp,
 
 int swcr_authenc(FAR struct cryptop *crp)
 {
-  uint32_t blkbuf[howmany(EALG_MAX_BLOCK_LEN, sizeof(uint32_t))];
+  uint32_t blkbuf[div_round_up(EALG_MAX_BLOCK_LEN, sizeof(uint32_t))];
   FAR u_char *blk = (u_char *)blkbuf;
   u_char aalg[AALG_MAX_RESULT_LEN];
   u_char iv[EALG_MAX_BLOCK_LEN];

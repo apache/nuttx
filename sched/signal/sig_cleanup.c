@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #include "signal/signal.h"
 
@@ -82,13 +83,17 @@ void nxsig_release(FAR struct task_group_s *group)
 {
   FAR sigactq_t  *sigact;
   FAR sigpendq_t *sigpend;
+  irqstate_t flags;
 
   /* Deallocate all entries in the list of signal actions */
 
+  flags = spin_lock_irqsave(&group->tg_lock);
   while ((sigact = (FAR sigactq_t *)sq_remfirst(&group->tg_sigactionq))
          != NULL)
     {
+      spin_unlock_irqrestore(&group->tg_lock, flags);
       nxsig_release_action(sigact);
+      flags = spin_lock_irqsave(&group->tg_lock);
     }
 
   /* Deallocate all entries in the list of pending signals */
@@ -96,6 +101,10 @@ void nxsig_release(FAR struct task_group_s *group)
   while ((sigpend = (FAR sigpendq_t *)sq_remfirst(&group->tg_sigpendingq))
          != NULL)
     {
+      spin_unlock_irqrestore(&group->tg_lock, flags);
       nxsig_release_pendingsignal(sigpend);
+      flags = spin_lock_irqsave(&group->tg_lock);
     }
+
+  spin_unlock_irqrestore(&group->tg_lock, flags);
 }

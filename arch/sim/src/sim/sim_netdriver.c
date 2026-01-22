@@ -108,7 +108,7 @@ struct sim_netdev_s
   struct netdev_lowerhalf_s dev;
 #endif
   uint8_t buf[SIM_NETDEV_BUFSIZE]; /* Used when packet buffer is fragmented */
-  struct wdog_s wdog;
+  struct work_s work;
 };
 
 /****************************************************************************
@@ -268,18 +268,18 @@ static void netdriver_rxready_interrupt(void *priv)
   netdev_lower_rxready(dev);
 }
 
-static void sim_netdev_interrupt(wdparm_t arg)
+static void sim_netdev_work(void *arg)
 {
   struct sim_netdev_s *priv = (struct sim_netdev_s *)arg;
-  struct netdev_lowerhalf_s *dev = &priv->dev;
+  struct netdev_lowerhalf_s *dev = (struct netdev_lowerhalf_s *)&priv->dev;
 
   if (sim_netdev_avail(DEVIDX(dev)))
     {
       netdev_lower_rxready(dev);
     }
 
-  wd_start_next(&priv->wdog, SIM_NETDEV_PERIOD,
-                sim_netdev_interrupt, arg);
+  work_queue_next_wq(g_work_queue, &priv->work, sim_netdev_work, arg,
+                     SIM_NETDEV_PERIOD);
 }
 
 /****************************************************************************
@@ -330,8 +330,9 @@ int sim_netdriver_init(void)
 
       netdev_lower_register(dev, devidx < CONFIG_SIM_WIFIDEV_NUMBER ?
                                  NET_LL_IEEE80211 : NET_LL_ETHERNET);
-      wd_start(&g_sim_dev[devidx].wdog, 0,
-               sim_netdev_interrupt, (wdparm_t)&g_sim_dev[devidx]);
+      work_queue_wq(g_work_queue, &g_sim_dev[devidx].work,
+                    sim_netdev_work, &g_sim_dev[devidx],
+                    SIM_NETDEV_PERIOD);
     }
 
   return OK;

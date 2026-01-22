@@ -109,7 +109,10 @@ uint64_t *x86_64_syscall(uint64_t *regs)
   uint64_t     arg4 = regs[REG_R10];
   uint64_t     arg5 = regs[REG_R8];
   uint64_t     arg6 = regs[REG_R9];
-  uintptr_t    ret  = 0;
+
+  UNUSED(arg4);
+  UNUSED(arg5);
+  UNUSED(arg6);
 
   /* The syscall command is in RAX on entry */
 
@@ -181,6 +184,7 @@ uint64_t *x86_64_syscall(uint64_t *regs)
           break;
         }
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
       /* cmd=SYS_signal_handler:  This a user signal handler callback
        *
        * void signal_handler(_sa_sigaction_t sighand, int signo,
@@ -283,6 +287,7 @@ uint64_t *x86_64_syscall(uint64_t *regs)
 
           break;
         }
+#endif  /* CONFIG_ENABLE_ALL_SIGNALS*/
 #endif  /* CONFIG_BUILD_KERNEL */
 
       /* This is not an architecture-specific system call.  If NuttX is
@@ -293,11 +298,13 @@ uint64_t *x86_64_syscall(uint64_t *regs)
 
       default:
         {
+#ifdef CONFIG_LIB_SYSCALL
           int             nbr  = cmd - CONFIG_SYS_RESERVED;
-          struct tcb_s   *rtcb = nxsched_self();
           syscall_stub_t  stub = (syscall_stub_t)g_stublookup[nbr];
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
+          struct tcb_s   *rtcb = nxsched_self();
+
           /* Store reference to user RSP for signals */
 
           rtcb->xcp.saved_ursp = regs[REG_RSP];
@@ -312,19 +319,17 @@ uint64_t *x86_64_syscall(uint64_t *regs)
               up_irq_restore(X86_64_RFLAGS_IF);
             }
 
-          /* Call syscall function */
+          /* Call syscall function and store return value in RAX register */
 
-          ret = stub(nbr, arg1, arg2, arg3, arg4, arg5, arg6);
-
+          regs[REG_RAX] = stub(nbr, arg1, arg2, arg3, arg4, arg5, arg6);
+#else
+          svcerr("ERROR: Bad SYS call: %" PRId32 "\n", cmd);
+#endif
           break;
         }
     }
 
   dump_syscall("Exit", regs);
-
-  /* Store return value in RAX register */
-
-  regs[REG_RAX] = ret;
 
   /* Return pointer to regs */
 

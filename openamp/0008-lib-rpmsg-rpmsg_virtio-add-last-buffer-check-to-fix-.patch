@@ -1,7 +1,7 @@
 From fc9d645243c585731832ba42aa960a4ebb6656ab Mon Sep 17 00:00:00 2001
 From: Bowen Wang <wangbowen6@xiaomi.com>
 Date: Mon, 26 May 2025 21:38:28 +0800
-Subject: [PATCH 08/10] lib/rpmsg/rpmsg_virtio: add last buffer check to fix
+Subject: [PATCH 08/12] lib/rpmsg/rpmsg_virtio: add last buffer check to fix
  low power issue
 
 add `last` argument to rpmsg_virtio_get_rx_buffer() to know whether

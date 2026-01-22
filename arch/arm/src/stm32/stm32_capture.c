@@ -1126,7 +1126,11 @@ static int stm32_cap_setchannel(struct stm32_cap_dev_s *dev,
 
       case STM32_CAP_EDGE_BOTH:
         ccer_en_bit = GTIM_CCER_CC1E;
+#ifdef HAVE_GTIM_CCXNP
         regval      = GTIM_CCER_CC1P | GTIM_CCER_CC1NP;
+#else
+        regval      = GTIM_CCER_CC1P;
+#endif
         break;
 
       default:
@@ -1134,8 +1138,11 @@ static int stm32_cap_setchannel(struct stm32_cap_dev_s *dev,
     }
 
   /* Shift all CCER bits to corresponding channel */
-
+#ifdef HAVE_GTIM_CCXNP
   mask = (GTIM_CCER_CC1E | GTIM_CCER_CC1P | GTIM_CCER_CC1NP);
+#else
+  mask = (GTIM_CCER_CC1E | GTIM_CCER_CC1P);
+#endif
   mask          <<= GTIM_CCER_CCXBASE(channel);
   regval        <<= GTIM_CCER_CCXBASE(channel);
   ccer_en_bit   <<= GTIM_CCER_CCXBASE(channel);

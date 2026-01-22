@@ -115,7 +115,7 @@ size_t sparc_stack_check(void *stackbase, size_t nbytes)
    */
 
   for (ptr = (uint32_t *)start, mark = (nbytes >> 2);
-       *ptr == STACK_COLOR && mark > 0;
+       mark > 0 && *ptr == STACK_COLOR;
        ptr++, mark--);
 
   /* If the stack is completely used, then this might mean that the stack

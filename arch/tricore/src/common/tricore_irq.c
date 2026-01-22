@@ -37,6 +37,7 @@
 
 #include "IfxSrc.h"
 #include "IfxCpu.h"
+#include "IfxInt_reg.h"
 
 /****************************************************************************
  * Private Functions
@@ -69,6 +70,51 @@ static inline void tricore_color_intstack(void)
 #endif
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
+/****************************************************************************
+ * Name: tricore_gpsrinitialize
+ *
+ * Description:
+ *   Perform gpsr initialization for the CPU
+ *
+ ****************************************************************************/
+
+static void tricore_gpsrinitialize(void)
+{
+  volatile Ifx_SRC_SRCR *src = &SRC_GPSR00 + up_cpu_index();
+  int i;
+
+  /* Cpux gpsr init */
+
+  for (i = 0; i < 6; i++)
+    {
+#ifdef CONFIG_ARCH_TC3XX
+      IfxSrc_init(src, IfxSrc_Tos_cpu0 + up_cpu_index(),
+                  IRQ_TO_NDX(TRICORE_SRC2IRQ(src)));
+#else
+      IfxSrc_init(src, IfxSrc_Tos_cpu0 + up_cpu_index(),
+                  IRQ_TO_NDX(TRICORE_SRC2IRQ(src)),
+                  IfxSrc_VmId_none);
+#endif
+
+      src += TRICORE_SRCNUM_PER_GPSR;
+    }
+
+  /* Cpucs gpsr init */
+
+#ifndef CONFIG_ARCH_TC3XX
+  src = &SRC_GPSR6_SR0 + up_cpu_index();
+  IfxSrc_init(src, IfxSrc_Tos_cpu0 + up_cpu_index(),
+              IRQ_TO_NDX(TRICORE_SRC2IRQ(src)),
+              IfxSrc_VmId_none);
+#endif
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -91,6 +137,10 @@ void up_irq_enable(void)
 
 void up_irqinitialize(void)
 {
+#ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
+  tricore_gpsrinitialize();
+#endif
+
   tricore_color_intstack();
   up_irq_enable();
 }
@@ -122,29 +172,14 @@ void up_enable_irq(int irq)
 {
   volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
 
-  IfxSrc_init(src, IfxSrc_Tos_cpu0, irq);
+#ifdef CONFIG_ARCH_TC3XX
+  IfxSrc_init(src, IfxSrc_Tos_cpu0, IRQ_TO_NDX(irq));
+#else
+  IfxSrc_init(src, IfxSrc_Tos_cpu0, IRQ_TO_NDX(irq), IfxSrc_VmId_none);
+#endif
+
   IfxSrc_enable(src);
 }
-
-#ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
-
-/****************************************************************************
- * Name: up_trigger_irq
- *
- * Description:
- *   Trigger an IRQ by software.
- *
- ****************************************************************************/
-
-void up_trigger_irq(int irq, cpu_set_t cpuset)
-{
-  (void) cpuset;
-  volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
-
-  IfxSrc_setRequest(src);
-}
-
-#endif
 
 /****************************************************************************
  * Name: up_affinity_irq
@@ -179,4 +214,22 @@ void up_affinity_irq(int irq, cpu_set_t cpuset)
 
 void tricore_ack_irq(int irq)
 {
+  volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
+  IfxSrc_clearRequest(src);
 }
+
+#ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
+/****************************************************************************
+ * Name: up_trigger_irq
+ *
+ * Description:
+ *   Trigger an IRQ by software. May not be supported by all architectures.
+ *
+ ****************************************************************************/
+
+void up_trigger_irq(int irq, cpu_set_t cpuset)
+{
+  volatile Ifx_INT_SRB *srb = &INT_SRB0 + up_cpu_index();
+  srb->U = cpuset;
+}
+#endif

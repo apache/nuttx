@@ -1,7 +1,7 @@
 From a4f6ac1cb1545fdadf7f80cf34f1d31b15d543f7 Mon Sep 17 00:00:00 2001
 From: Xiang Xiao <xiaoxiang@xiaomi.com>
 Date: Mon, 7 Jan 2019 02:15:42 +0800
-Subject: [PATCH 01/10] ns: acknowledge the received creation message
+Subject: [PATCH 01/12] ns: acknowledge the received creation message
 
 the two phase handshake make the client could initiate the transfer
 immediately without the server side send any dummy message first.

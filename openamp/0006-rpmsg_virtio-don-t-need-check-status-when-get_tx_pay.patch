@@ -1,7 +1,7 @@
 From 8dcd7daec66939841c10872a0ca310ac16f10be2 Mon Sep 17 00:00:00 2001
 From: wangyongrong <wangyongrong@xiaomi.com>
 Date: Wed, 3 Jul 2024 10:28:31 +0800
-Subject: [PATCH 06/10] rpmsg_virtio: don't need check status when
+Subject: [PATCH 06/12] rpmsg_virtio: don't need check status when
  get_tx_payload
 
 Signed-off-by: ligd <liguiding1@xiaomi.com>

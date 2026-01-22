@@ -48,14 +48,14 @@
 
 #define CAPIOC_DUTYCYCLE _CAPIOC(1)
 
-/* Command:     CAPIOC_FREQUENCE
+/* Command:     CAPIOC_FREQUENCY
  * Description: Get the pulse frequency from the capture.
  * Arguments:   int32_t pointer to the location to return the frequency.
  * Return:      Zero (OK) on success.  Minus one will be returned on failure
  *              with the errno value set appropriately.
  */
 
-#define CAPIOC_FREQUENCE _CAPIOC(2)
+#define CAPIOC_FREQUENCY _CAPIOC(2)
 
 /* Command:     CAPIOC_EDGES
  * Description: Get the pwm edges from the capture.

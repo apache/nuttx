@@ -70,10 +70,6 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
       sim_savestate(rtcb->xcp.regs);
 
-      /* Restore the cpu lock */
-
-      restore_critical_section(tcb, this_cpu());
-
       /* Then switch contexts */
 
       sim_restorestate(tcb->xcp.regs);
@@ -109,11 +105,13 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
     }
   else
     {
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
       /* The way that we handle signals in the simulation is kind of
        * a kludge.  This would be unsafe in a truly multi-threaded,
        * interrupt driven environment.
        */
 
       sim_sigdeliver();
+#endif
     }
 }

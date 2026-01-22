@@ -228,6 +228,8 @@ static int cryptof_ioctl(FAR struct file *filep,
             case CRYPTO_BLF_CBC:
             case CRYPTO_CAST_CBC:
             case CRYPTO_AES_CBC:
+            case CRYPTO_AES_192_CBC:
+            case CRYPTO_AES_256_CBC:
             case CRYPTO_AES_CMAC:
             case CRYPTO_AES_CTR:
             case CRYPTO_AES_XTS:
@@ -275,6 +277,7 @@ static int cryptof_ioctl(FAR struct file *filep,
           {
             crie.cri_alg = sop->cipher;
             crie.cri_klen = sop->keylen * 8;
+            crie.cri_op = sop->op;
 
             crie.cri_key = kmm_malloc(crie.cri_klen / 8);
             if (crie.cri_key == NULL)
@@ -387,170 +390,110 @@ bail:
 static int cryptodev_op(FAR struct csession *cse,
                         FAR struct crypt_op *cop)
 {
-  FAR struct cryptop *crp = NULL;
-  FAR struct cryptodesc *crde = NULL;
-  FAR struct cryptodesc *crda = NULL;
+  struct cryptop crp;
+  struct cryptodesc crda;
+  struct cryptodesc crde;
   int error = OK;
   uint32_t hid;
 
   /* number of requests, not logical and */
 
-  crp = crypto_getreq(cse->txform + cse->thash);
-  if (crp == NULL)
-    {
-      error = -ENOMEM;
-      goto bail;
-    }
-
+  bzero(&crp, sizeof(struct cryptop));
+  bzero(&crda, sizeof(struct cryptodesc));
+  bzero(&crde, sizeof(struct cryptodesc));
   if (cse->thash)
     {
-      crda = crp->crp_desc;
-      if (cse->txform)
-        crde = crda->crd_next;
-    }
-  else
-    {
-      if (cse->txform)
-        {
-          crde = crp->crp_desc;
-        }
-      else
-        {
-          error = -EINVAL;
-          goto bail;
-        }
-    }
+      crp.crp_desc = &crda;
+      crda.crd_skip = 0;
+      crda.crd_len = cop->len;
+      crda.crd_inject = 0;
 
-  if (crda)
-    {
-      crda->crd_skip = 0;
-      crda->crd_len = cop->len;
-      crda->crd_inject = 0;
-
-      crda->crd_alg = cse->mac;
-      crda->crd_key = cse->mackey;
-      crda->crd_klen = cse->mackeylen * 8;
+      crda.crd_alg = cse->mac;
+      crda.crd_key = cse->mackey;
+      crda.crd_klen = cse->mackeylen * 8;
       if (cop->flags & COP_FLAG_UPDATE)
         {
-          crda->crd_flags |= CRD_F_UPDATE;
+          crda.crd_flags |= CRD_F_UPDATE;
         }
       else
         {
-          crda->crd_flags &= ~CRD_F_UPDATE;
+          crda.crd_flags &= ~CRD_F_UPDATE;
         }
     }
 
-  if (crde)
+  if (cse->txform)
     {
+      if (cse->thash)
+        {
+          crda.crd_next = &crde;
+        }
+      else
+        {
+          crp.crp_desc = &crde;
+        }
+
       if (cop->op == COP_ENCRYPT)
         {
-          crde->crd_flags |= CRD_F_ENCRYPT;
+          crde.crd_flags |= CRD_F_ENCRYPT;
         }
       else
         {
-          crde->crd_flags &= ~CRD_F_ENCRYPT;
+          crde.crd_flags &= ~CRD_F_ENCRYPT;
         }
 
-      crde->crd_len = cop->len;
-      crde->crd_inject = 0;
-      crde->crd_alg = cse->cipher;
-      crde->crd_key = cse->key;
-      crde->crd_klen = cse->keylen * 8;
+      crde.crd_len = cop->len;
+      crde.crd_inject = 0;
+      crde.crd_alg = cse->cipher;
+      crde.crd_key = cse->key;
+      crde.crd_klen = cse->keylen * 8;
     }
 
-  crp->crp_ilen = cop->len;
-  crp->crp_buf = cop->src;
-  crp->crp_sid = cse->sid;
-  crp->crp_opaque = cse;
+  crp.crp_ilen = cop->len;
+  crp.crp_olen = cop->olen;
+  crp.crp_buf = cop->src;
+  crp.crp_sid = cse->sid;
+  crp.crp_opaque = cse;
 
   if (cop->iv)
     {
-      if (crde == NULL)
-        {
-          error = -EINVAL;
-          goto bail;
-        }
-
-      crp->crp_iv = cop->iv;
+      crp.crp_iv = cop->iv;
+      crp.crp_ivlen = cop->ivlen;
     }
 
   if (cop->dst)
     {
-      if (crde == NULL)
-        {
-          error = -EINVAL;
-          goto bail;
-        }
-
-      crp->crp_dst = cop->dst;
+      crp.crp_dst = cop->dst;
     }
 
   if (cop->mac)
     {
-      if (crda == NULL)
-        {
-          error = -EINVAL;
-          goto bail;
-        }
-
-      crp->crp_mac = cop->mac;
+      crp.crp_mac = cop->mac;
     }
 
   /* try the fast path first */
 
-  crp->crp_flags = CRYPTO_F_IOV | CRYPTO_F_NOQUEUE;
-  hid = (crp->crp_sid >> 32) & 0xffffffff;
-  if (hid >= crypto_drivers_num)
+  crp.crp_flags = CRYPTO_F_IOV | CRYPTO_F_NOQUEUE;
+  hid = (crp.crp_sid >> 32) & 0xffffffff;
+  if (hid >= crypto_drivers_num ||
+      (crypto_drivers[hid].cc_flags & CRYPTOCAP_F_SOFTWARE) ||
+      crypto_drivers[hid].cc_process == NULL)
     {
-      goto dispatch;
+      crp.crp_flags = CRYPTO_F_IOV;
+      crypto_invoke(&crp);
+    }
+  else
+    {
+      error = crypto_drivers[hid].cc_process(&crp);
     }
 
-  if (crypto_drivers[hid].cc_flags & CRYPTOCAP_F_SOFTWARE)
+  if ((cop->flags & COP_FLAG_UPDATE) == 0)
     {
-      goto dispatch;
+      crde.crd_flags &= ~CRD_F_IV_EXPLICIT;
     }
 
-  if (crypto_drivers[hid].cc_process == NULL)
+  if (!error && crp.crp_etype != 0)
     {
-      goto dispatch;
-    }
-
-  error = crypto_drivers[hid].cc_process(crp);
-  if (error)
-    {
-      /* clear error */
-
-      crp->crp_etype = 0;
-      goto dispatch;
-    }
-
-  goto processed;
-dispatch:
-  crp->crp_flags = CRYPTO_F_IOV;
-  crypto_invoke(crp);
-processed:
-
-  if (crde && (cop->flags & COP_FLAG_UPDATE) == 0)
-    {
-      crde->crd_flags &= ~CRD_F_IV_EXPLICIT;
-    }
-
-  if (cse->error)
-    {
-      error = cse->error;
-      goto bail;
-    }
-
-  if (crp->crp_etype != 0)
-    {
-      error = crp->crp_etype;
-      goto bail;
-    }
-
-bail:
-  if (crp)
-    {
-      crypto_freereq(crp);
+      error = crp.crp_etype;
     }
 
   return error;
@@ -639,6 +582,68 @@ static int cryptodev_key(FAR struct fcrypt *fcr, FAR struct crypt_kop *kop)
         return -EINVAL;
       case CRK_ECDSA_SECP256R1_GENKEY:
         if (in == 0 && out == 4)
+          {
+            break;
+          }
+
+        return -EINVAL;
+
+      /* key management */
+
+      case CRK_ALLOCATE_KEY:
+
+      /* outparam: keyid */
+
+        if (in == 0 && out == 1)
+          {
+            break;
+          }
+
+        return -EINVAL;
+      case CRK_VALIDATE_KEYID:
+      case CRK_DELETE_KEY:
+      case CRK_GENERATE_AES_KEY:
+      case CRK_SAVE_KEY:
+      case CRK_LOAD_KEY:
+      case CRK_UNLOAD_KEY:
+
+      /* inparam: keyid */
+
+        if (in == 1 && out == 0)
+          {
+            break;
+          }
+
+        return -EINVAL;
+      case CRK_IMPORT_KEY:
+
+      /* inparam: keyid, raw data */
+
+        if (in == 2 && out == 0)
+          {
+            break;
+          }
+
+        return -EINVAL;
+      case CRK_EXPORT_KEY:
+      case CRK_EXPORT_PUBLIC_KEY:
+
+      /* inparam: keyid, outparam: key data */
+
+        if (in == 1 && out == 1)
+          {
+            break;
+          }
+
+        return -EINVAL;
+      case CRK_GENERATE_RSA_KEY:
+      case CRK_GENERATE_SECP256R1_KEY:
+
+      /* 1 inparam : keypair id or private keyid
+       * 2 inparam : private keyid, public keyid
+       */
+
+        if ((in == 1 || in == 2) && out == 0)
           {
             break;
           }
@@ -980,6 +985,7 @@ bail:
       kmm_free(cria.cri_key);
     }
 
+  free(fcrd);
   return ret;
 }
 

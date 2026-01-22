@@ -28,6 +28,16 @@ define_property(
   BRIEF_DOCS "NuttX application libs"
   FULL_DOCS "List of all NuttX application libraries")
 
+# Create a directories for the application binaries `bin` for stripped binaries
+# `bin_debug` for debug binaries
+if(NOT EXISTS ${CMAKE_BINARY_DIR}/bin)
+  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+endif()
+
+if(NOT EXISTS ${CMAKE_BINARY_DIR}/bin_debug)
+  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin_debug)
+endif()
+
 # ~~~
 # nuttx_add_application
 #
@@ -55,6 +65,8 @@ define_property(
 #                         CONFIG_<app> value)
 #   SRCS                : source files
 #   NO_MAIN_ALIAS       : do not add a main=<app>_main alias(*)
+#   DYNLIB              : if "y", build as dynamic loadable library
+#   LINK_FLAGS          : link flags only for elf or loadable link
 #
 # (*) This is only really needed in convoluted cases where a single .c file
 # contains differently named <app>_main() entries for different <app>. This
@@ -82,8 +94,10 @@ function(nuttx_add_application)
     PRIORITY
     STACKSIZE
     MODULE
+    DYNLIB
     MULTI_VALUE
     COMPILE_FLAGS
+    LINK_FLAGS
     INCLUDE_DIRECTORIES
     SRCS
     DEPENDS
@@ -104,28 +118,70 @@ function(nuttx_add_application)
   if(SRCS_EXIST)
     if(MODULE
        AND ("${MODULE}" STREQUAL "m")
-       OR CONFIG_BUILD_KERNEL)
+       OR CONFIG_BUILD_KERNEL
+       OR "${DYNLIB}" STREQUAL "y")
       # create as standalone executable (loadable application or "module")
       set(TARGET "${NAME}")
+
+      # determine the compiled elf mode
+      if(CONFIG_BUILD_KERNEL)
+        set(KERNEL_ELF_MODE True) # kernel elf will link all user libs
+      elseif("${MODULE}" STREQUAL "m")
+        set(LOADABLE_ELF_MODE True) # loadable elf only link extra libs
+      elseif("${DYNLIB}" STREQUAL "y")
+        set(DYNLIB_ELF_MODE True) # dynlib elf dont need start obj and other lib
+      endif()
 
       # Use ELF capable toolchain, by building manually and overwriting the
       # non-elf output
       if(NOT CMAKE_C_ELF_COMPILER)
+        set(ELF_NAME "${NAME}")
+        set(TARGET "ELF_${TARGET}")
         add_library(${TARGET} ${SRCS})
-
+        add_dependencies(${TARGET} apps_post)
+        if(TARGET STARTUP_OBJS)
+          add_dependencies(${TARGET} STARTUP_OBJS)
+        endif()
+        if(NOT "${CMAKE_LD}" MATCHES "gcc$")
+          set(USE_LINKER True)
+        endif()
         add_custom_command(
           TARGET ${TARGET}
           POST_BUILD
           COMMAND
-            ${CMAKE_C_COMPILER}
-            $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_ELF_APP_LINK_OPTIONS>>
-            $<TARGET_FILE:${TARGET}> -o ${TARGET}
+            # add default link option
+            ${CMAKE_LD} -T ${CMAKE_BINARY_DIR}/gnu-elf.ld
+            # add global MOD link option if dynlib link
+            $<$<BOOL:${DYNLIB_ELF_MODE}>:$<TARGET_PROPERTY:nuttx_global,NUTTX_MOD_APP_LINK_OPTIONS>>
+            # add global ELF link option if m&kernel link
+            $<$<OR:$<BOOL:${KERNEL_ELF_MODE}>,$<BOOL:${LOADABLE_ELF_MODE}>>:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_APP_LINK_OPTIONS>>
+            # add local link option last
+            ${LINK_FLAGS}
+            # link startup obj if m&kernel link
+            $<$<AND:$<TARGET_EXISTS:STARTUP_OBJS>,$<NOT:$<BOOL:${DYNLIB_ELF_MODE}>>>:$<TARGET_OBJECTS:STARTUP_OBJS>>
+            $<$<NOT:$<BOOL:${USE_LINKER}>>:-Wl,>--start-group
+            # link user lib if kernel link
+            $<$<BOOL:${KERNEL_ELF_MODE}>:$<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_LINK_LIBRARIES>>>
+            # always link extra libs
+            $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_LINK_EXTRA_LIBRARIES>>
+            $<$<NOT:$<BOOL:${USE_LINKER}>>:-Wl,>--whole-archive
+            $<TARGET_FILE:${TARGET}>
+            $<$<NOT:$<BOOL:${USE_LINKER}>>:-Wl,>--no-whole-archive
+            $<$<NOT:$<BOOL:${USE_LINKER}>>:-Wl,>--end-group -o
+            ${CMAKE_BINARY_DIR}/bin_debug/${ELF_NAME}
+          COMMAND
+            ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bin_debug/${ELF_NAME}
+            ${CMAKE_BINARY_DIR}/bin/${ELF_NAME}
+          COMMAND ${CMAKE_STRIP} ${CMAKE_BINARY_DIR}/bin/${ELF_NAME}
+          COMMENT "Building ELF:${ELF_NAME}"
           COMMAND_EXPAND_LISTS)
       else()
         add_executable(${TARGET} ${SRCS})
         target_link_options(
-          ${TARGET} PRIVATE
-          $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_ELF_APP_LINK_OPTIONS>>)
+          ${TARGET}
+          PRIVATE
+          $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_APP_LINK_OPTIONS>>
+        )
       endif()
 
       # easy access to final ELF, regardless of how it was created
@@ -137,10 +193,19 @@ function(nuttx_add_application)
       # loadable build requires applying ELF flags to all applications
 
       if(CONFIG_MODULES)
+        add_dependencies(nuttx_apps_mksymtab ${TARGET})
         target_compile_options(
           ${TARGET}
           PRIVATE
-            $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_ELF_APP_COMPILE_OPTIONS>>
+            $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_APP_COMPILE_OPTIONS>>
+        )
+      endif()
+
+      if(DYNLIB_ELF_MODE)
+        target_compile_options(
+          ${TARGET}
+          PRIVATE
+            $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_MOD_APP_COMPILE_OPTIONS>>
         )
       endif()
 
@@ -153,24 +218,6 @@ function(nuttx_add_application)
       # create as library to be archived into libapps.a
       set(TARGET "apps_${NAME}")
       add_library(${TARGET} ${SRCS})
-
-      # Set apps global compile options & definitions hold by
-      # nuttx_apps_interface
-      target_compile_options(
-        ${TARGET}
-        PRIVATE
-          $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_apps_interface,APPS_COMPILE_OPTIONS>>
-      )
-      target_compile_definitions(
-        ${TARGET}
-        PRIVATE
-          $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_apps_interface,APPS_COMPILE_DEFINITIONS>>
-      )
-      target_include_directories(
-        ${TARGET}
-        PRIVATE
-          $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_apps_interface,APPS_INCLUDE_DIRECTORIES>>
-      )
 
       nuttx_add_library_internal(${TARGET})
       # add to list of application libraries
@@ -236,6 +283,23 @@ function(nuttx_add_application)
       target_include_directories(${TARGET} BEFORE
                                  PRIVATE ${INCLUDE_DIRECTORIES})
     endif()
+
+    # Set apps global compile options & definitions hold by nuttx_apps_interface
+    target_compile_options(
+      ${TARGET}
+      PRIVATE
+        $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_apps_interface,APPS_COMPILE_OPTIONS>>
+    )
+    target_compile_definitions(
+      ${TARGET}
+      PRIVATE
+        $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_apps_interface,APPS_COMPILE_DEFINITIONS>>
+    )
+    target_include_directories(
+      ${TARGET}
+      PRIVATE
+        $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_apps_interface,APPS_INCLUDE_DIRECTORIES>>
+    )
   endif()
 
   # add supplied dependencies

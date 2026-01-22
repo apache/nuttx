@@ -796,3 +796,52 @@ int up_connect_irq(const int *irq, int num, uintptr_t *mar, uint32_t *mdr)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: up_set_irq_type
+ *
+ * Description:
+ *   Config an IRQ trigger type.
+ *
+ ****************************************************************************/
+
+int up_set_irq_type(int irq, int mode)
+{
+  enum ioapic_trigger_mode trigger_mode = 0;
+  uint32_t maxintr;
+  uint32_t data;
+
+  /* Setup the IO-APIC, remap the interrupt to 32~ */
+
+  maxintr = (up_ioapic_read(IOAPIC_REG_VER) >> 16) & 0xff;
+  if (irq < 0 || irq - IRQ0 > maxintr)
+    {
+      return -EINVAL;
+    }
+
+  if (mode == IRQ_RISING_EDGE)
+    {
+      trigger_mode = TRIGGER_RISING_EDGE;
+    }
+  else if (mode == IRQ_FALLING_EDGE)
+    {
+      trigger_mode = TRIGGER_FALLING_EDGE;
+    }
+  else if (mode == IRQ_HIGH_LEVEL)
+    {
+      trigger_mode = TRIGGER_LEVEL_ACTIVE_HIGH;
+    }
+  else if (mode == IRQ_LOW_LEVEL)
+    {
+      trigger_mode = TRIGGER_LEVEL_ACTIVE_LOW;
+    }
+
+  data = up_ioapic_read(IOAPIC_REG_TABLE + (irq - IRQ0) * 2);
+
+  data &= ~TRIGGER_MODE_MASK;
+  data |= trigger_mode;
+
+  up_ioapic_write(IOAPIC_REG_TABLE + (irq - IRQ0) * 2, data);
+
+  return 0;
+}

@@ -384,4 +384,21 @@ SECTIONS
     . = ALIGN (4);
     _srtcheap = ABSOLUTE(.);
   } > rtc_slow_seg
+
+   /*
+    * This section holds RTC data that should have fixed addresses.
+    * The data are not initialized at power-up and are retained during deep sleep.
+    */
+  .rtc_reserved (NOLOAD):
+  {
+    . = ALIGN(4);
+    _rtc_reserved_start = ABSOLUTE(.);
+    /* New data can only be added here to ensure existing data are not moved.
+        Because data have adhered to the end of the segment and code is relied on it.
+        >> put new data here << */
+
+    *(.rtc_timer_data_in_rtc_mem .rtc_timer_data_in_rtc_mem.*)
+    KEEP(*(.bootloader_data_rtc_mem .bootloader_data_rtc_mem.*))
+    _rtc_reserved_end = ABSOLUTE(.);
+  } > rtc_reserved_seg
 }

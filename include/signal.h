@@ -486,6 +486,11 @@ int  sigwaitinfo(FAR const sigset_t *set, FAR struct siginfo *value);
 int  sigaltstack(FAR const stack_t *ss, FAR stack_t *oss);
 int  siginterrupt(int signo, int flag);
 
+/* Pthread signal management APIs */
+
+int pthread_kill(pthread_t thread, int sig);
+int pthread_sigmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

@@ -29,6 +29,7 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/list_type.h>
 #include <nuttx/compiler.h>
 #include <nuttx/clock.h>
 #include <nuttx/list.h>
@@ -83,13 +84,13 @@ typedef CODE void (*wdentry_t)(wdparm_t arg);
 
 struct wdog_s
 {
-  struct list_node  node;        /* Supports a doubly linked list */
-  wdparm_t           arg;        /* Callback argument */
-  wdentry_t          func;       /* Function to execute when delay expires */
+  struct list_node node;    /* Supports a doubly linked list */
+  wdparm_t         arg;     /* Callback argument */
+  wdentry_t        func;    /* Function to execute when delay expires */
 #ifdef CONFIG_PIC
-  FAR void          *picbase;    /* PIC base address */
+  FAR void        *picbase; /* PIC base address */
 #endif
-  clock_t            expired;    /* Timer associated with the absolute time */
+  clock_t          expired; /* Timer associated with the absolute time */
 };
 
 /****************************************************************************

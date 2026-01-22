@@ -168,6 +168,19 @@ int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
       goto errout_with_group;
     }
 
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_KERNEL_STACK)
+  /* Allocate the kernel stack */
+
+  if (ttype != TCB_FLAG_TTYPE_KERNEL)
+    {
+      ret = up_addrenv_kstackalloc(tcb);
+      if (ret < 0)
+        {
+          goto errout_with_group;
+        }
+    }
+#endif
+
   /* Initialize the task control block */
 
   ret = nxtask_setup_scheduler(tcb, priority, nxtask_start,

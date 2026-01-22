@@ -28,7 +28,6 @@
 
 SYSCALL_LOOKUP1(_exit,                     1)
 SYSCALL_LOOKUP(_assert,                    4)
-SYSCALL_LOOKUP(getpid,                     0)
 SYSCALL_LOOKUP(prctl,                      2)
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
@@ -154,13 +153,17 @@ SYSCALL_LOOKUP(nxsem_wait_slow,            1)
 
 SYSCALL_LOOKUP(kill,                       2)
 SYSCALL_LOOKUP(tgkill,                     3)
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
 SYSCALL_LOOKUP(sigaction,                  3)
 SYSCALL_LOOKUP(sigpending,                 1)
+#endif
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
 SYSCALL_LOOKUP(sigprocmask,                3)
 SYSCALL_LOOKUP(sigqueue,                   3)
 SYSCALL_LOOKUP(sigsuspend,                 1)
 SYSCALL_LOOKUP(sigtimedwait,               3)
 SYSCALL_LOOKUP(sigwaitinfo,                2)
+#endif
 SYSCALL_LOOKUP(clock_nanosleep,            4)
 
 /* The following are only defined if the system clock is enabled in the

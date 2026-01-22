@@ -31,6 +31,7 @@
 #include <stdint.h>
 
 #include <arch/acpi.h>
+#include <nuttx/kmalloc.h>
 
 #include "x86_64_internal.h"
 
@@ -60,6 +61,7 @@ struct acpi_s
   struct acpi_xsdt_s *xsdt;
   struct acpi_madt_s *madt;
   struct acpi_mcfg_s *mcfg;
+  struct acpi_facp_s *facp;
 };
 
 /****************************************************************************
@@ -477,7 +479,99 @@ int acpi_init(uintptr_t rsdp)
 
   acpi_table_find(ACPI_SIG_MCFG, (struct acpi_sdt_s **)&acpi->mcfg);
 
+  /* Get FACP */
+
+  acpi_table_find(ACPI_SIG_FACP, (struct acpi_sdt_s **)&acpi->facp);
+
   return OK;
+}
+
+/****************************************************************************
+ * Name: acpi_table_get
+ *
+ * Description:
+ *   Cache acpi tables as a copy.
+ *
+ ****************************************************************************/
+
+ssize_t acpi_table_get(const char *name, void **data)
+{
+  struct acpi_sdt_s *dsdt = NULL;
+  struct acpi_s     *acpi = &g_acpi;
+  ssize_t             len = 0;
+
+  /* Copy APIC */
+
+  if (strncmp(name, ACPI_SIG_APIC, 4) == 0)
+    {
+      if (data != NULL && acpi->madt)
+        {
+          *data = kmm_zalloc(acpi->madt->sdt.length);
+          if (!*data)
+            {
+              ferr("ERROR: Failed to allocate apic table\n");
+              return -ENOMEM;
+            }
+
+          len = acpi->madt->sdt.length;
+          memcpy(*data, acpi->madt, len);
+        }
+    }
+  else if (strncmp(name, ACPI_SIG_MCFG, 4) == 0)
+    {
+      if (data != NULL && acpi->mcfg)
+        {
+          *data = kmm_zalloc(acpi->mcfg->sdt.length);
+          if (!*data)
+            {
+              ferr("ERROR: Failed to allocate mcfs table\n");
+              return -ENOMEM;
+            }
+
+          len = acpi->mcfg->sdt.length;
+          memcpy(*data, acpi->mcfg, len);
+        }
+    }
+  else if (strncmp(name, ACPI_SIG_FACP, 4) == 0)
+    {
+      if (data != NULL && acpi->facp)
+        {
+          *data = kmm_zalloc(acpi->facp->sdt.length);
+          if (!*data)
+            {
+              ferr("ERROR: Failed to allocate facp table\n");
+              return -ENOMEM;
+            }
+
+          len = acpi->facp->sdt.length;
+          memcpy(*data, acpi->facp, len);
+        }
+    }
+  else if (strncmp(name, ACPI_SIG_DSDT, 4) == 0)
+    {
+      dsdt = (struct acpi_sdt_s *)(uintptr_t)acpi->facp->dsdt;
+      if (data != NULL && dsdt)
+        {
+          acpi_map_region((uintptr_t)dsdt, sizeof(struct acpi_sdt_s));
+          acpi_map_region((uintptr_t)dsdt + sizeof(struct acpi_sdt_s),
+                          dsdt->length - sizeof(struct acpi_sdt_s));
+          *data = kmm_zalloc(dsdt->length);
+          if (!*data)
+            {
+              ferr("ERROR: Failed to allocate dsdt table\n");
+              return -ENOMEM;
+            }
+
+          len = dsdt->length;
+          memcpy(*data, dsdt, len);
+        }
+    }
+  else
+    {
+      return -ENOENT;
+    }
+
+  return len;
 }
 
 /****************************************************************************
@@ -537,6 +631,122 @@ int acpi_lapic_get(int cpu, struct acpi_lapic_s **lapic)
   return acpi_madt_get(ACPI_MADT_TYPE_LOCAL_APIC, cpu,
                        (struct acpi_entry_s **)lapic);
 }
+
+#ifdef CONFIG_BOARDCTL_POWEROFF
+/****************************************************************************
+ * Name: acpi_poweroff_param_get
+ *
+ * Description:
+ *   Get Poweroff Parm .
+ *
+ ****************************************************************************/
+
+int acpi_poweroff_param_get(uint32_t *pm1a_cnt, uint32_t *pm1b_cnt,
+                            uint32_t *regvala, uint32_t *regvalb)
+{
+  void                *tps   = NULL;
+  uint32_t            *tp32  = NULL;
+  uint32_t            *end32 = NULL;
+  struct acpi_sdt_s   *sdt      = NULL;
+  struct acpi_facp_s  *facp     = NULL;
+  struct acpi_sdt_s   *dsdt_h   = NULL;
+  char                *s5_addr  = NULL;
+  int                  dsdt_len = 0;
+
+  if (g_acpi.rsdt == 0)
+    {
+      acpi_info("rsdt is null");
+      return -EINVAL;
+    }
+
+  tps   = &g_acpi.rsdt->table_ptrs;
+  tp32  = (uint32_t *)tps;
+  end32 = (uint32_t *)((uintptr_t)g_acpi.rsdt + g_acpi.rsdt->sdt.length);
+
+  while (tp32 < end32)
+    {
+      sdt = (struct acpi_sdt_s *)(uintptr_t)*tp32;
+
+      if (strncmp(sdt->signature, ACPI_SIG_FACP, 4) == 0)
+        {
+          facp = (struct acpi_facp_s *)(uintptr_t)*tp32;
+          dsdt_h = (struct acpi_sdt_s *)(uintptr_t)facp->dsdt;
+          acpi_map_region((uintptr_t)dsdt_h, sizeof(struct acpi_sdt_s));
+
+          if (strncmp(dsdt_h->signature, ACPI_SIG_DSDT, 4) == 0)
+            {
+              /* search the _S5_ package in the DSDT, skip header */
+
+              s5_addr  = (char *)(uintptr_t)facp->dsdt
+                          + sizeof(struct acpi_sdt_s);
+              dsdt_len = dsdt_h->length - sizeof(struct acpi_sdt_s);
+              acpi_map_region((uintptr_t)s5_addr, dsdt_len);
+
+              while (dsdt_len-- > 0)
+                {
+                  if (strncmp(s5_addr, ACPI_AML_S5_NAME, 4) == 0)
+                    {
+                      break;
+                    }
+
+                  s5_addr++;
+                }
+
+              if (dsdt_len > 0)
+                {
+                  /* check for valid AML structure */
+
+                  if ((*(s5_addr - 1) == ACPI_AML_NAME_OP
+                      || (*(s5_addr - 2) == ACPI_AML_NAME_OP
+                      && *(s5_addr - 1) == ACPI_AML_ROOT_PREFIX))
+                      && *(s5_addr + 4) == ACPI_AML_PACKAGE_OP)
+                    {
+                      s5_addr += strlen(ACPI_AML_S5_NAME) + 1;
+
+                      /* calculate PkgLength size */
+
+                      s5_addr += ((*s5_addr & 0xc0) >> 6) + 2;
+
+                      if (*s5_addr == ACPI_AML_BYTE_PREFIX)
+                        {
+                          /* skip byteprefix */
+
+                          s5_addr++;
+                        }
+
+                      *regvala = *(s5_addr) << 10;
+                      s5_addr++;
+
+                      if (*s5_addr == ACPI_AML_BYTE_PREFIX)
+                        {
+                          /* skip byteprefix */
+
+                          s5_addr++;
+                        }
+
+                      *regvalb = *(s5_addr) << 10;
+                      *pm1a_cnt = facp->pm1a_cnt_blk;
+                      *pm1b_cnt = facp->pm1b_cnt_blk;
+
+                      return OK;
+                    }
+                  else
+                    {
+                      acpi_info("\\_S5 parse error");
+                      break;
+                    }
+                }
+            }
+        }
+
+      /* Next table */
+
+      tp32 += 1;
+    }
+
+  return -ENOENT;
+}
+#endif
 
 #ifdef CONFIG_ARCH_X86_64_ACPI_DUMP
 /****************************************************************************

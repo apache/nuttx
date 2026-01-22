@@ -147,19 +147,6 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr)
 
   child->flags |= TCB_FLAG_FREE_TCB;
 
-#if defined(CONFIG_ARCH_ADDRENV)
-  /* Join the parent address environment (REVISIT: vfork() only) */
-
-  if (ttype != TCB_FLAG_TTYPE_KERNEL)
-    {
-      ret = addrenv_join(parent, child);
-      if (ret < 0)
-        {
-          goto errout_with_tcb;
-        }
-    }
-#endif
-
   /* Initialize the task join */
 
   nxtask_joininit(child);
@@ -175,6 +162,19 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr)
     {
       goto errout_with_tcb;
     }
+
+#if defined(CONFIG_ARCH_ADDRENV)
+  /* Join the parent address environment */
+
+  if (ttype != TCB_FLAG_TTYPE_KERNEL)
+    {
+      ret = addrenv_join(parent, child);
+      if (ret < 0)
+        {
+          goto errout_with_tcb;
+        }
+    }
+#endif
 
   /* Duplicate the parent tasks environment */
 
@@ -221,14 +221,6 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr)
     }
 #endif
 
-  /* Setup thread local storage */
-
-  ret = tls_dup_info(child, parent);
-  if (ret < OK)
-    {
-      goto errout_with_tcb;
-    }
-
   /* Get the priority of the parent task */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
@@ -242,6 +234,14 @@ FAR struct tcb_s *nxtask_setup_fork(start_t retaddr)
   sinfo("Child priority=%d start=%p\n", priority, retaddr);
   ret = nxtask_setup_scheduler(child, priority, retaddr,
                                ptcb->entry.main, ttype);
+  if (ret < OK)
+    {
+      goto errout_with_tcb;
+    }
+
+  /* Setup thread local storage */
+
+  ret = tls_dup_info(child, parent);
   if (ret < OK)
     {
       goto errout_with_tcb;

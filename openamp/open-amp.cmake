@@ -58,6 +58,16 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/open-amp)
       ${CMAKE_CURRENT_LIST_DIR}/0009-virtio-change-feature-to-64-bit-in-all-virtio_dispat.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
       ${CMAKE_CURRENT_LIST_DIR}/0010-openamp-add-assert-when-get-tx-buffer-failed.patch
+      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0011-remoteproc_virtio-add-shm_io-for-remoteproc-virtio-a.patch
+      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0012-remoteproc-sync-the-virtio-rpmsg-config-with-linux-s.patch
+      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0013-virtio.h-add-mm_priv-to-struct-virtio_deivce.patch
+      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0014-lib-rpmsg_virtio-use-virtio_alloc_buf-to-alloc-share.patch
+      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0015-lib-remoteproc_virtio-optimize-virtqueue_notificatio.patch
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 
@@ -100,6 +110,16 @@ endif()
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/open-amp
                  ${CMAKE_CURRENT_BINARY_DIR}/open-amp EXCLUDE_FROM_ALL)
+
+# install nuttx openamp binary dir headers
+set(OPENAMP_HEADER_DIR ${CMAKE_BINARY_DIR}/include/openamp)
+file(GLOB headers open-amp/lib/include/openamp/*.h open-amp/lib/remoteproc/*.h
+     open-amp/lib/rpmsg/*h)
+file(MAKE_DIRECTORY ${OPENAMP_HEADER_DIR})
+
+foreach(header ${headers})
+  file(COPY ${header} DESTINATION ${OPENAMP_HEADER_DIR})
+endforeach()
 
 target_include_directories(
   open_amp-static PRIVATE $<TARGET_PROPERTY:metal-static,INCLUDE_DIRECTORIES>)

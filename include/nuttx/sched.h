@@ -514,8 +514,10 @@ struct task_group_s
 
   /* POSIX Signal Control Fields ********************************************/
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   sq_queue_t tg_sigactionq;         /* List of actions for signals              */
   sq_queue_t tg_sigpendingq;        /* List of pending signals                  */
+#endif /* CONFIG_ENABLE_ALL_SIGNALS */
 #ifdef CONFIG_SIG_DEFAULT
   sigset_t tg_sigdefault;           /* Set of signals set to the default action */
 #endif
@@ -660,11 +662,16 @@ struct tcb_s
 
   /* POSIX Signal Control Fields ********************************************/
 
-  sigset_t   sigprocmask;                /* Signals that are blocked        */
-  sigset_t   sigwaitmask;                /* Waiting for pending signals     */
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
+  sig_deliver_t sigdeliver;
   sq_queue_t sigpendactionq;             /* List of pending signal actions  */
   sq_queue_t sigpostedq;                 /* List of posted signals          */
+#endif /* CONFIG_ENABLE_ALL_SIGNALS*/
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+  sigset_t   sigprocmask;                /* Signals that are blocked        */
+  sigset_t   sigwaitmask;                /* Waiting for pending signals     */
   siginfo_t  *sigunbinfo;                /* Signal info when task unblocked */
+#endif /* !CONFIG_DISABLE_ALL_SIGNALS */
 
   /* Robust mutex support ***************************************************/
 
@@ -707,11 +714,6 @@ struct tcb_s
 
   struct xcptcontext xcp;                /* Interrupt register save area    */
 
-  /* The following function pointer is non-zero if there are pending signals
-   * to be processed.
-   */
-
-  sig_deliver_t sigdeliver;
 #if CONFIG_TASK_NAME_SIZE > 0
   char name[CONFIG_TASK_NAME_SIZE + 1];  /* Task name (with NUL terminator) */
 #endif
@@ -1167,31 +1169,6 @@ void nxtask_abort_fork(FAR struct tcb_s *child, int errcode);
  ****************************************************************************/
 
 size_t nxtask_argvstr(FAR struct tcb_s *tcb, FAR char *args, size_t size);
-
-/****************************************************************************
- * Name: group_exitinfo
- *
- * Description:
- *   This function may be called to when a task is loaded into memory.  It
- *   will setup the to automatically unload the module when the task exits.
- *
- * Input Parameters:
- *   pid     - The task ID of the newly loaded task
- *   bininfo - This structure allocated with kmm_malloc().  This memory
- *             persists until the task exits and will be used unloads
- *             the module from memory.
- *
- * Returned Value:
- *   This is a NuttX internal function so it follows the convention that
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BINFMT_LOADABLE
-struct binary_s;  /* Forward reference */
-int group_exitinfo(pid_t pid, FAR struct binary_s *bininfo);
-#endif
 
 /****************************************************************************
  * Name: nxsched_get_param

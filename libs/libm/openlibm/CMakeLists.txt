@@ -228,6 +228,8 @@ if(CONFIG_LIBM_OPENLIBM)
   file(GLOB_RECURSE ARCH_ASRCS ${OPENLIBM_DIR}/${ARCH}/*.S)
   file(GLOB_RECURSE BD_CSRCS ${OPENLIBM_DIR}/bsdsrc/*.c)
 
+  add_compile_options(-Wno-attribute-alias -Wno-shadow -Wno-maybe-uninitialized)
+
   # ############################################################################
   # Include Directory
   # ############################################################################

@@ -412,7 +412,7 @@ static inline FAR struct cmsghdr *__cmsg_nxthdr(FAR void *__ctl,
   return __ptr;
 }
 
-static inline FAR struct cmsghdr *cmsg_nxthdr(FAR struct msghdr *__msg,
+static inline FAR struct cmsghdr *cmsg_nxthdr(FAR const struct msghdr *__msg,
                                               FAR struct cmsghdr *__cmsg)
 {
   return __cmsg_nxthdr(__msg->msg_control, __msg->msg_controllen, __cmsg);
@@ -462,7 +462,7 @@ int getpeername(int sockfd, FAR struct sockaddr *addr,
                 FAR socklen_t *addrlen);
 
 ssize_t recvmsg(int sockfd, FAR struct msghdr *msg, int flags);
-ssize_t sendmsg(int sockfd, FAR struct msghdr *msg, int flags);
+ssize_t sendmsg(int sockfd, FAR const struct msghdr *msg, int flags);
 
 #if CONFIG_FORTIFY_SOURCE > 0
 fortify_function(send) ssize_t send(int sockfd, FAR const void *buf,

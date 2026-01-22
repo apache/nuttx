@@ -52,6 +52,10 @@
 #endif
 #define __XSTR(s)   __STR(s)
 
+/* RISC-V requires a 16-byte stack alignment. */
+
+#define STACK_ALIGNMENT     16
+
 /****************************************************************************
  * Map RISC-V exception code to NuttX IRQ,
  * the exception that code > 19 is reserved or custom exception.
@@ -569,6 +573,7 @@
 
 struct xcptcontext
 {
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   /* These additional register save locations are used to implement the
    * signal delivery trampoline.
    *
@@ -587,6 +592,7 @@ struct xcptcontext
 
   uintptr_t sigreturn;
 #endif
+#endif /* CONFIG_ENABLE_ALL_SIGNALS */
 
 #ifdef CONFIG_ARCH_ADDRENV
 #ifdef CONFIG_ARCH_KERNEL_STACK

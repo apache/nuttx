@@ -171,7 +171,8 @@ FAR static struct note_driver_s *
 static struct note_taskname_s g_note_taskname;
 #endif
 
-#if defined(CONFIG_SCHED_INSTRUMENTATION_FILTER)
+#if defined(CONFIG_SCHED_INSTRUMENTATION_FILTER) || \
+    defined(CONFIG_SCHED_INSTRUMENTATION_PREEMPTION)
 static spinlock_t g_note_lock;
 #endif
 
@@ -1056,7 +1057,9 @@ void sched_note_preemption(FAR struct tcb_s *tcb, bool locked)
   struct note_preempt_s note;
   FAR struct note_driver_s **driver;
   bool formatted = false;
+  irqstate_t flags;
 
+  flags = spin_lock_irqsave_notrace(&g_note_lock);
   for (driver = g_note_drivers; *driver; driver++)
     {
       if (!note_isenabled(*driver))
@@ -1088,6 +1091,8 @@ void sched_note_preemption(FAR struct tcb_s *tcb, bool locked)
 
       note_add(*driver, &note, sizeof(struct note_preempt_s));
     }
+
+  spin_unlock_irqrestore_notrace(&g_note_lock, flags);
 }
 #endif
 

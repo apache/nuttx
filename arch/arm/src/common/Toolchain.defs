@@ -443,7 +443,10 @@ ZIGFLAGS = -target $(ZARCH)-freestanding-$(ZEABI) $(ZARCHCPUFLAGS)
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
   ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
-    ifeq ($(CONFIG_ARCH_TOOLCHAIN_GHS),)
+    ifeq ($(CONFIG_ARCH_TOOLCHAIN_GHS),y)
+      # instruct the exlr deletet the unused functions during link procedure
+      LDFLAGS += -delete
+    else
       LDFLAGS          += --gc-sections
     endif
     ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
@@ -461,6 +464,15 @@ endif
 ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
   ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
     LDFLAGS += -map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
+    # instruct the compiler to keep the temp files generated at
+    # compile time after they are used
+    ARCHOPTIMIZATION += -keeptempfiles
+
+    # instruct the compiler to generate a source listing of the asm file
+    ARCHOPTIMIZATION += -list
+
+    # instruct the exlr the contents that needs to be contained in the generated map file
+    LDFLAGS += -map_eofn_symbols -Mn -Mx -Ms -Mu -Ml
   else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
     LDFLAGS += --cref -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
   else
@@ -476,8 +488,32 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
       LDFLAGS += --debug
     endif
   else
-    ARCHOPTIMIZATION += -G -gdwarf-2
+    # instruct the exlr to ignore relocations from DWARF debug sections when using -delete
+    LDFLAGS += -ignore_debug_references
+
+    # instruct the exlr to dump verbose information during link procedure
+    LDFLAGS += -v
+
+    # instruct the gsize to generate a "*.siz" file that contains the detailed section size
+    LDFLAGS += -gsize
+
+    ARCHOPTIMIZATION += -G -dual_debug
   endif
+endif
+
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GHS),y)
+
+  # instruct the compiler to treat the functions referenced or called when no prototype has
+  # been provided as error
+  ARCHCFLAGS += --prototype_errors
+  ARCHCXXFLAGS += --prototype_errors
+
+  # instruct the compiler to treat #pragma directives that using wrong syntax as warnings
+  ARCHCFLAGS += --incorrect_pragma_warnings
+  ARCHCXXFLAGS += --incorrect_pragma_warnings
+
+  # instruct the exlr do not link the start files into executable
+  LDFLAGS += -nostartfiles
 endif
 
 # Add the builtin library

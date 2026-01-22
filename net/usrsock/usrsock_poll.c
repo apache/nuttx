@@ -83,7 +83,13 @@ static uint32_t poll_event(FAR struct net_driver_s *dev,
 
       /* Remote closed. */
 
-      eventset |= (POLLHUP | POLLIN);
+      eventset |= POLLHUP;
+      if (flags & USRSOCK_EVENT_RECVFROM_AVAIL)
+        {
+          ninfo("socket recv avail.\n");
+
+          eventset |= POLLIN;
+        }
     }
   else
     {
@@ -217,7 +223,13 @@ static int usrsock_pollsetup(FAR struct socket *psock,
 
       /* Remote closed. */
 
-      eventset |= (POLLHUP | POLLIN);
+      eventset |= POLLHUP;
+      if (conn->flags & USRSOCK_EVENT_RECVFROM_AVAIL)
+        {
+          ninfo("socket recv avail.\n");
+
+          eventset |= POLLIN;
+        }
     }
   else
     {

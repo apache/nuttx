@@ -185,7 +185,7 @@ struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
  * hardware resources may not yet be available to the kernel logic.
  */
 
-volatile uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
+volatile enum nx_initstate_e g_nx_initstate;  /* See enum nx_initstate_e */
 
 /* This is an array of task control block (TCB) for the IDLE thread of each
  * CPU.  For the non-SMP case, this is a a single TCB; For the SMP case,
@@ -644,7 +644,9 @@ void nx_start(void)
 
   /* Initialize the signal facility (if in link) */
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   nxsig_initialize();
+#endif
 
 #if !defined(CONFIG_DISABLE_MQUEUE) || !defined(CONFIG_DISABLE_MQUEUE_SYSV)
   /* Initialize the named message queue facility (if in link) */

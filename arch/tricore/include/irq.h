@@ -34,6 +34,7 @@
 #include <sys/types.h>
 #ifndef __ASSEMBLY__
 #  include <stdbool.h>
+#  include <syscall.h>
 #endif
 
 /* Include NuttX-specific IRQ definitions */
@@ -59,6 +60,12 @@
 #define tricore_addr2csa(addr) ((uintptr_t)(((((uintptr_t)(addr)) & 0xF0000000) >> 12) \
                                             | (((uintptr_t)(addr) & 0x003FFFC0) >> 6)))
 
+/* For use with EABI and floating point, the stack must be aligned to 8-byte
+ * addresses.
+ */
+
+#define STACK_ALIGNMENT     8
+
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
@@ -73,17 +80,9 @@ extern "C"
  * Public Data
  ****************************************************************************/
 
-/* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the macro
- * g_current_regs for portability.
- */
+/* g_interrupt_context store irq status */
 
-/* For the case of architectures with multiple CPUs, then there must be one
- * such value for each processor that can receive an interrupt.
- */
-
-EXTERN volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
+EXTERN volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -155,21 +154,21 @@ void up_irq_restore(irqstate_t flags)
  * Inline Functions
  ****************************************************************************/
 
-static inline_function uintptr_t *up_current_regs(void)
-{
-#ifdef CONFIG_SMP
-  return (uintptr_t *)g_current_regs[up_cpu_index()];
-#else
-  return (uintptr_t *)g_current_regs[0];
-#endif
-}
+/****************************************************************************
+ * Name: up_set_interrupt_context
+ *
+ * Description:
+ *   Set the interrupt handler context.
+ *
+ ****************************************************************************/
 
-static inline_function void up_set_current_regs(uintptr_t *regs)
+noinstrument_function
+static inline_function void up_set_interrupt_context(bool flag)
 {
 #ifdef CONFIG_SMP
-  g_current_regs[up_cpu_index()] = regs;
+  g_interrupt_context[up_this_cpu()] = flag;
 #else
-  g_current_regs[0] = regs;
+  g_interrupt_context[0] = flag;
 #endif
 }
 
@@ -187,15 +186,14 @@ static inline_function bool up_interrupt_context(void)
 {
 #ifdef CONFIG_SMP
   irqstate_t flags = up_irq_save();
-#endif
+  bool ret = g_interrupt_context[up_this_cpu()];
 
-  bool ret = up_current_regs() != NULL;
-
-#ifdef CONFIG_SMP
   up_irq_restore(flags);
-#endif
 
   return ret;
+#else
+  return g_interrupt_context[0];
+#endif
 }
 
 /****************************************************************************
@@ -204,20 +202,41 @@ static inline_function bool up_interrupt_context(void)
 
 static inline_function uintptr_t up_getusrsp(void *regs)
 {
-  uintptr_t *csa = regs;
+  uintptr_t *csaregs = regs;
 
-  while (((uintptr_t)csa & PCXI_UL) == 0)
+  if (csaregs[REG_LPCXI] & PCXI_UL)
     {
-      csa = tricore_csa2addr((uintptr_t)csa);
-      csa = (uintptr_t *)csa[0];
+      csaregs = tricore_csa2addr(csaregs[REG_LPCXI]);
+    }
+  else
+    {
+       csaregs += TC_CONTEXT_REGS;
     }
 
-  csa = tricore_csa2addr((uintptr_t)csa);
-
-  return csa[REG_SP];
+  return csaregs[REG_SP];
 }
 
 #endif /* __ASSEMBLY__ */
+
+/****************************************************************************
+ * Name: up_switch_context
+ ****************************************************************************/
+
+#define up_switch_context(tcb, rtcb)                              \
+  do {                                                            \
+    if (!up_interrupt_context())                                  \
+      {                                                           \
+        sys_call0(SYS_switch_context);                            \
+      }                                                           \
+      UNUSED(rtcb);                                               \
+  } while (0)
+
+/****************************************************************************
+ * Name: up_getusrpc
+ ****************************************************************************/
+
+#define up_getusrpc(regs) \
+    (((uint32_t *)((regs) ? (regs) : running_regs()))[REG_UPC])
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -401,8 +401,8 @@ void ieee802154_poll(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-ssize_t ieee802154_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
-                           int flags);
+ssize_t ieee802154_sendmsg(FAR struct socket *psock,
+                           FAR const struct msghdr *msg, int flags);
 
 /****************************************************************************
  * Name: ieee802154_container_initialize

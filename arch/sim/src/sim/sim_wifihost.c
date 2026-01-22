@@ -32,6 +32,7 @@
 #include <netpacket/netlink.h>
 #include <nuttx/net/netlink.h>
 #include <sys/time.h>
+#include <nuttx/kmalloc.h>
 
 #include "sim_internal.h"
 #include "sim_wifihost.h"

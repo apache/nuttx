@@ -254,4 +254,6 @@ void group_initialize(FAR struct tcb_s *tcb)
     {
       group->tg_pid = tcb->pid;
     }
+
+  group->tg_info->ta_pid = group->tg_pid;
 }

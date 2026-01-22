@@ -97,6 +97,22 @@ config ALLOW_ICS_COMPONENTS
 		NOTE: Please check that the license for each enabled
 		component matches your project license.
 
+config ALLOW_CUSTOM_PERMISSIVE_COMPONENTS
+	bool "Use components that have custom permissive licenses"
+	default n
+	---help---
+		When this option is enabled the project will allow the use
+		of components that have custom permissive licenses which
+		are not covered by the standard license options above.
+
+		This includes components with custom permissive licenses
+		that allow free use, modification, and distribution but
+		may have specific attribution or notice requirements.
+
+		NOTE: Please carefully review the license terms for each
+		enabled component to ensure compliance with your project
+		requirements.
+
 endmenu # License Setup
 
 menu "Build Setup"
@@ -2432,6 +2448,38 @@ config DEBUG_RPMSG_INFO
 		Enable RPMSG driver informational output to SYSLOG.
 
 endif # DEBUG_RPMSG
+
+config DEBUG_RPTUN
+	bool "Rptun Debug Features"
+	default n
+	depends on RPTUN
+	---help---
+		Enable rptun debug features.
+
+if DEBUG_RPTUN
+
+config DEBUG_RPTUN_ERROR
+	bool "Rptun Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable rptun error output to SYSLOG.
+
+config DEBUG_RPTUN_WARN
+	bool "Rptun Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable rptun warning output to SYSLOG.
+
+config DEBUG_RPTUN_INFO
+	bool "Rptun Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable rptun informational output to SYSLOG.
+
+endif # DEBUG_RPTUN
 
 config DEBUG_CORESIGHT
 	bool "Coresight Debug Features"

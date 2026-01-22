@@ -30,7 +30,7 @@
 
 #include <arch/syscall.h>
 
-#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
+#ifdef __KERNEL__
 
 /****************************************************************************
  * Public Functions
@@ -74,4 +74,4 @@ void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
             (uintptr_t)info, (uintptr_t)ucontext);
 }
 
-#endif /* !CONFIG_BUILD_FLAT && __KERNEL__ */
+#endif /* __KERNEL__ */

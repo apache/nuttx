@@ -226,3 +226,12 @@ int host_waitpid(pid_t pid)
   pid = host_uninterruptible(waitpid, pid, &status, 0);
   return pid < 0 ? -errno : status;
 }
+
+/****************************************************************************
+ * Name: host_kill
+ ****************************************************************************/
+
+int host_kill(pid_t pid, int sig)
+{
+  return host_uninterruptible(kill, pid, sig);
+}

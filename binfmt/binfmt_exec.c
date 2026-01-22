@@ -81,7 +81,6 @@ static int exec_internal(FAR const char *filename,
                          FAR const posix_spawnattr_t *attr, bool spawn)
 {
   FAR struct binary_s *bin;
-  irqstate_t flags;
   int pid;
   int ret;
 #ifndef CONFIG_BINFMT_LOADABLE
@@ -133,14 +132,6 @@ static int exec_internal(FAR const char *filename,
 #endif
     }
 
-  /* Disable pre-emption so that the executed module does
-   * not return until we get a chance to connect the on_exit
-   * handler.
-   */
-
-  flags = enter_critical_section();
-  sched_lock();
-
   /* Then start the module */
 
   pid = exec_module(bin, filename, argv, envp, actions, attr, spawn);
@@ -152,27 +143,9 @@ static int exec_internal(FAR const char *filename,
       goto errout_with_lock;
     }
 
-#ifdef CONFIG_BINFMT_LOADABLE
-  /* Set up to unload the module (and free the binary_s structure)
-   * when the task exists.
-   */
-
-  ret = group_exitinfo(pid, bin);
-  if (ret < 0)
-    {
-      berr("ERROR: Failed to schedule unload '%s': %d\n", filename, ret);
-      goto errout_with_lock;
-    }
-
-#endif
-
-  sched_unlock();
-  leave_critical_section(flags);
   return pid;
 
 errout_with_lock:
-  sched_unlock();
-  leave_critical_section(flags);
   unload_module(bin);
 errout_with_bin:
 #ifdef CONFIG_BINFMT_LOADABLE

@@ -32,6 +32,7 @@
 #include <nuttx/power/pm.h>
 #include <nuttx/spi/spi_flash.h>
 #include <nuttx/spi/qspi_flash.h>
+#include <nuttx/wqueue.h>
 
 #include <stdlib.h>
 
@@ -51,12 +52,18 @@
 
 #if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
     defined(CONFIG_SIM_BUTTONS)
-static struct wdog_s g_x11event_wdog;   /* Watchdog for event loop */
+static struct work_s g_x11event_work;   /* Watchdog for event loop */
 #endif
 
 #ifdef CONFIG_SIM_X11FB
-static struct wdog_s g_x11update_wdog;  /* Watchdog for update loop */
+static struct work_s g_x11update_work;  /* Watchdog for update loop */
 #endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+struct kwork_wqueue_s *g_work_queue;
 
 /****************************************************************************
  * Private Functions
@@ -88,11 +95,11 @@ static void sim_init_cmdline(void)
 
 #if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
     defined(CONFIG_SIM_BUTTONS)
-static void sim_x11event_interrupt(wdparm_t arg)
+static void sim_x11event_work(void *arg)
 {
   sim_x11events();
-  wd_start_next((FAR struct wdog_s *)arg, SIM_X11EVENT_PERIOD,
-                sim_x11event_interrupt, arg);
+  work_queue_next_wq(g_work_queue, &g_x11event_work, sim_x11event_work,
+                     NULL, SIM_X11EVENT_PERIOD);
 }
 #endif
 
@@ -105,11 +112,11 @@ static void sim_x11event_interrupt(wdparm_t arg)
  ****************************************************************************/
 
 #ifdef CONFIG_SIM_X11FB
-static void sim_x11update_interrupt(wdparm_t arg)
+static void sim_x11update_work(void *arg)
 {
   sim_x11loop();
-  wd_start_next((FAR struct wdog_s *)arg, SIM_X11UPDATE_PERIOD,
-                sim_x11update_interrupt, arg);
+  work_queue_next_wq(g_work_queue, &g_x11update_work, sim_x11update_work,
+                     NULL, SIM_X11UPDATE_PERIOD);
 }
 #endif
 
@@ -317,12 +324,31 @@ void up_initialize(void)
 
 #if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
     defined(CONFIG_SIM_BUTTONS)
-  wd_start(&g_x11event_wdog, 0, sim_x11event_interrupt,
-           (wdparm_t)&g_x11event_wdog);
+  work_queue_wq(g_work_queue, &g_x11event_work, sim_x11event_work,
+                NULL, SIM_X11EVENT_PERIOD);
 #endif
 
 #ifdef CONFIG_SIM_X11FB
-  wd_start(&g_x11update_wdog, 0, sim_x11update_interrupt,
-           (wdparm_t)&g_x11update_wdog);
+  work_queue_wq(g_work_queue, &g_x11update_work, sim_x11update_work,
+                NULL, SIM_X11UPDATE_PERIOD);
 #endif
+}
+
+/****************************************************************************
+ * Name: up_irqinitialize
+ *
+ * Description:
+ *   initialize the high-priority work queue used for handling
+ *   periodic or async tasks within the simulator, then invokes the
+ *   platform-specific IRQ initialize.
+ *
+ ****************************************************************************/
+
+void up_irqinitialize(void)
+{
+  g_work_queue = work_queue_create("sim_loop_wq",
+                                   CONFIG_SCHED_HPWORKPRIORITY, NULL,
+                                   CONFIG_SCHED_HPWORKSTACKSIZE, 1u);
+
+  host_irqinitialize();
 }

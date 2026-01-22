@@ -72,11 +72,12 @@ static mutex_t g_irq_wqueue_lock = NXMUTEX_INITIALIZER;
 static FAR struct kwork_wqueue_s *g_irq_wqueue[CONFIG_IRQ_NWORKS];
 
 #ifdef IRQ_WORK_SECTION
-static uint8_t g_irq_work_stack[CONFIG_IRQ_NWORKS][CONFIG_IRQ_WORK_STACKSIZE]
+static aligned_data(STACK_ALIGNMENT) uint8_t
+g_irq_work_stack[CONFIG_IRQ_NWORKS][CONFIG_IRQ_WORK_STACKSIZE]
 locate_data(IRQ_WORK_SECTION);
 #else
-static uint8_t g_irq_work_stack[CONFIG_IRQ_NWORKS]
-                               [CONFIG_IRQ_WORK_STACKSIZE];
+static aligned_data(STACK_ALIGNMENT) uint8_t
+g_irq_work_stack[CONFIG_IRQ_NWORKS][CONFIG_IRQ_WORK_STACKSIZE];
 #endif
 
 /****************************************************************************
@@ -128,9 +129,12 @@ static void irq_work_handler(FAR void *arg)
 static int irq_default_handler(int irq, FAR void *regs, FAR void *arg)
 {
   FAR struct irq_work_info_s *info = arg;
-  int ret;
+  int ret = IRQ_WAKE_THREAD;
 
-  ret = info->handler(irq, regs, arg);
+  if (info->handler != NULL)
+    {
+      ret = info->handler(irq, regs, info->arg);
+    }
 
   if (ret == IRQ_WAKE_THREAD)
     {
@@ -156,7 +160,7 @@ static int irq_default_handler(int irq, FAR void *regs, FAR void *arg)
  *   irq - Irq num
  *   isr - Function to be called when the IRQ occurs, called in interrupt
  *   context.
- *   If isr is NULL the default handler is installed(irq_default_handler).
+ *   If isr is NULL, isrthread will be called.
  *   isrwork - called in thread context, If the isrwork is NULL,
  *   then the ISR is being detached.
  *   arg - privdate data

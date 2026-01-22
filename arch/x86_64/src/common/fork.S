@@ -118,9 +118,13 @@ up_fork:
     pushq   %r12
     movq    %rsp, %rdi
 
+    subq    $8, %rsp
+
     /* call function */
 
     callq x86_64_fork
+
+    addq    $8, %rsp
 
     /* Do not modify return value %rax */
     /* Restore non-volatile registers */

@@ -26,6 +26,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/cache.h>
 #include <arch/board/board.h>
 
 #include "tricore_internal.h"
@@ -34,7 +35,9 @@
  * Public Data
  ****************************************************************************/
 
-volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
+/* g_interrupt_context store irq status */
+
+volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Functions
@@ -59,6 +62,16 @@ volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
 
 void up_initialize(void)
 {
+  tricore_trapinit();
+
+#ifdef CONFIG_ARCH_ICACHE
+  up_enable_icache();
+#endif
+
+#ifdef CONFIG_ARCH_DCACHE
+  up_enable_dcache();
+#endif
+
   /* Initialize the serial device driver */
 
 #ifdef USE_SERIALDRIVER

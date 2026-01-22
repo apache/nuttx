@@ -51,6 +51,33 @@
  * Macros
  ****************************************************************************/
 
+#define CFI_UNWIND_REGS(reg, offst)             \
+	.cfi_def_cfa    %##reg, (offst);            \
+	.cfi_rel_offset %rip, (REG_RIP * 8);        \
+	.cfi_rel_offset %rsp, (REG_RSP * 8);        \
+	.cfi_rel_offset %rbp, (REG_RBP * 8);        \
+	.cfi_rel_offset %rsi, (REG_RSI * 8);        \
+	.cfi_rel_offset %rdi, (REG_RDI * 8);        \
+	.cfi_rel_offset %rdx, (REG_RDX * 8);        \
+	.cfi_rel_offset %rcx, (REG_RCX * 8);        \
+	.cfi_rel_offset %r8, (REG_R8 * 8);          \
+	.cfi_rel_offset %r9, (REG_R9 * 8);          \
+	.cfi_rel_offset %r15, (REG_R15 * 8);        \
+	.cfi_rel_offset %r14, (REG_R14 * 8);        \
+	.cfi_rel_offset %r13, (REG_R13 * 8);        \
+	.cfi_rel_offset %r12, (REG_R12 * 8);        \
+	.cfi_rel_offset %r11, (REG_R11 * 8);        \
+	.cfi_rel_offset %r10, (REG_R10 * 8);        \
+	.cfi_rel_offset %rbx, (REG_RBX * 8);        \
+	.cfi_rel_offset %rax, (REG_RAX * 8);        \
+	.cfi_rel_offset %rflags, (REG_RFLAGS * 8);  \
+	.cfi_rel_offset %cs, (REG_CS * 8);          \
+	.cfi_rel_offset %ss, (REG_SS * 8);          \
+	.cfi_rel_offset %ds, (REG_DS * 8);          \
+	.cfi_rel_offset %es, (REG_ES * 8);          \
+	.cfi_rel_offset %fs, (REG_FS * 8);          \
+	.cfi_rel_offset %gs, (REG_GS * 8);
+
 	/* This macro creates a stub for an ISR which does NOT pass it's own
 	 * error code (adds a dummy errcode byte).
 	 */
@@ -701,6 +728,8 @@ vector_isr\intno:
  *
  ****************************************************************************/
 
+.cfi_sections .debug_frame
+
 	.type   irq_common, @function
 irq_common:
 	/* Already swap to the interrupt stack
@@ -710,6 +739,8 @@ irq_common:
 	/* Get current task regs area - this logic assumes that irq_xcp_regs
 	 * corrupts only RAX, RDI and RDX registers.
 	 */
+
+	.cfi_startproc
 
 	pushq   %rax
 	pushq   %rdx
@@ -785,88 +816,20 @@ irq_common:
 	 * that we don't lose the correct stack alignment for vector operations
 	 */
 
+	CFI_UNWIND_REGS(rdi, 0)
+
 	pushq   %rdi
 	pushq   $0
 	call    irq_handler
 	add     $8, %rsp
 	popq    %rdi
 
+	.cfi_endproc
+
 	/* The common return point for irq_handler */
-
-.Lreturn:
-
-	/* Check if full context switch is required for signal handling */
-
-	movq    (8*REG_AUX)(%rax), %rcx
-	cmp     $(REG_AUX_FULLCONTEXT), %rcx
-	je      .Lfullswitch
-
-	/* EAX may possibly hold a pointer to a different register save area on
-	 * return.  Are we switching to a new context?
-	 */
-
-	cmp     %rax, %rdi
-	je      .Lnoswitch
-
-.Lfullswitch:
-	/* Reset flag */
-
-	movq    $0x0, (8*REG_AUX)(%rdi)
-
-	/* A context switch will be performed. RAX holds the address of the new
-	 * register save structure.
-	 *
-	 * Jump to x86_64_fullcontextrestore().  We perform a call here, but that function
-	 * never returns.  The address of the new register save block is the argument
-	 * to the x86_64_fullcontextrestore().
-	 */
 
 	movq    %rax, %rdi
 	call    x86_64_fullcontextrestore
-
-.Lnoswitch:
-#ifndef CONFIG_ARCH_X86_64_HAVE_XSAVE
-	fxrstorq (%rdi)
-#else
-	movl $XSAVE_STATE_COMPONENTS, %eax
-	xor     %edx, %edx
-	xrstor  (%rdi)
-#endif
-
-	movq    (8*REG_FS)(%rdi), %rax
-	mov     %fs, %ax
-	movq    (8*REG_GS)(%rdi), %rax
-	mov     %gs, %ax
-	movq    (8*REG_ES)(%rdi), %rax
-	mov     %es, %ax
-	movq    (8*REG_DS)(%rdi), %rax
-	mov     %ds, %ax
-
-	movq    (8*REG_RAX)(%rdi), %rax
-	movq    (8*REG_RBX)(%rdi), %rbx
-	movq    (8*REG_RBP)(%rdi), %rbp
-	movq    (8*REG_R10)(%rdi), %r10
-	movq    (8*REG_R11)(%rdi), %r11
-	movq    (8*REG_R12)(%rdi), %r12
-	movq    (8*REG_R13)(%rdi), %r13
-	movq    (8*REG_R14)(%rdi), %r14
-	movq    (8*REG_R15)(%rdi), %r15
-
-	movq    (8*REG_R9)(%rdi), %r9
-	movq    (8*REG_R8)(%rdi), %r8
-	movq    (8*REG_RCX)(%rdi), %rcx
-	movq    (8*REG_RDX)(%rdi), %rdx
-
-	/* Pop RDI and RSI pushed on interrupt entry */
-
-	popq   %rsi
-	popq   %rdi
-
-	/* Cleans up the pushed error code */
-
-	add     $8, %rsp
-
-	iretq                /* Pops 5 things at once: RIP, CS, RFLAGS RSP and SS */
 	.size	irq_common, . - irq_common
 	.end
 

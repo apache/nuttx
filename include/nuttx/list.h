@@ -48,6 +48,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#include <nuttx/list_type.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -314,16 +316,6 @@
   for(entry = list_container_of((list)->prev, type, member); \
       &entry->member != (list); \
       entry = list_container_of(entry->member.prev, type, member))
-
-/****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
-
-struct list_node
-{
-  FAR struct list_node *prev;
-  FAR struct list_node *next;
-};
 
 /****************************************************************************
  * Inline Functions

@@ -22,11 +22,11 @@
 
 # Add the internal C files to the build
 
-CSRCS += lib_bitmap.c lib_circbuf.c lib_mknod.c lib_umask.c lib_utsname.c
-CSRCS += lib_getrandom.c lib_xorshift128.c lib_tea_encrypt.c lib_tea_decrypt.c
-CSRCS += lib_cxx_initialize.c lib_impure.c lib_memfd.c lib_mutex.c
-CSRCS += lib_fchmodat.c lib_fstatat.c lib_getfullpath.c lib_openat.c
-CSRCS += lib_mkdirat.c lib_utimensat.c lib_mallopt.c
+CSRCS += lib_bitmap.c lib_circbuf.c lib_creat.c lib_mknod.c lib_umask.c
+CSRCS += lib_utsname.c lib_getrandom.c lib_xorshift128.c lib_tea_encrypt.c
+CSRCS += lib_tea_decrypt.c lib_cxx_initialize.c lib_impure.c lib_memfd.c
+CSRCS += lib_mutex.c lib_fchmodat.c lib_fstatat.c lib_getfullpath.c
+CSRCS += lib_openat.c lib_mkdirat.c lib_utimensat.c lib_mallopt.c
 CSRCS += lib_idr.c lib_getnprocs.c
 
 ifeq ($(CONFIG_LIBC_TEMPBUFFER),y)

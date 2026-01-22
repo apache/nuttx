@@ -101,7 +101,7 @@ static inline uint64_t x86_64_timer_tsc_freq_15h(void)
       return 0;
     }
 
-  return crystal_freq / denominator * numerator;
+  return (uint64_t)(crystal_freq / denominator) * numerator;
 }
 
 /****************************************************************************

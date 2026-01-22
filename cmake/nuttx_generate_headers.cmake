@@ -156,3 +156,7 @@ add_custom_target(
 # apps_context is a PHONY target used as an intermediate process to control the
 # time order of context preparation actions of app building
 add_custom_target(apps_context ALL DEPENDS nuttx_context)
+
+# apps_post is a PHONY target used as an intermediate process to control the
+# time order of all apps library has been built
+add_custom_target(apps_post)

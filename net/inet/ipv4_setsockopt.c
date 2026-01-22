@@ -267,7 +267,7 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
             {
               if (net_ipv4addr_cmp(mreq.imr_multiaddr.s_addr, INADDR_ANY))
                 {
-                  conn->mreq.imr_interface.s_addr = 0;
+                  conn->mreq.imr_address.s_addr = 0;
                   conn->mreq.imr_ifindex = 0;
                   ret = OK;
                   break;
@@ -299,7 +299,7 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
             }
 #endif
 
-          conn->mreq.imr_interface.s_addr = mreq.imr_multiaddr.s_addr;
+          conn->mreq.imr_address.s_addr = mreq.imr_multiaddr.s_addr;
           conn->mreq.imr_ifindex = mreq.imr_ifindex;
           ret = OK;
           break;

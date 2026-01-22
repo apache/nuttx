@@ -32,9 +32,12 @@ CMN_CSRCS += riscv_allocateheap.c riscv_createstack.c riscv_cpuinfo.c
 CMN_CSRCS += riscv_cpuidlestack.c riscv_doirq.c riscv_exit.c riscv_exception.c
 CMN_CSRCS += riscv_getnewintctx.c riscv_getintstack.c riscv_initialstate.c
 CMN_CSRCS += riscv_modifyreg32.c riscv_nputs.c riscv_releasestack.c
-CMN_CSRCS += riscv_registerdump.c riscv_stackframe.c riscv_schedulesigaction.c
-CMN_CSRCS += riscv_sigdeliver.c riscv_switchcontext.c
+CMN_CSRCS += riscv_registerdump.c riscv_stackframe.c riscv_switchcontext.c
 CMN_CSRCS += riscv_usestack.c riscv_tcbinfo.c
+
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+CMN_CSRCS += riscv_schedulesigaction.c riscv_sigdeliver.c
+endif
 
 ifeq ($(CONFIG_ONESHOT),y)
   CMN_CSRCS += riscv_mtimer.c
@@ -69,7 +72,9 @@ endif
 ifneq ($(CONFIG_BUILD_FLAT),y)
 CMN_CSRCS  += riscv_task_start.c
 CMN_CSRCS  += riscv_pthread_start.c
-CMN_CSRCS  += riscv_signal_dispatch.c
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+  CMN_CSRCS += riscv_signal_dispatch.c
+endif
 CMN_UASRCS += riscv_signal_handler.S
 endif
 

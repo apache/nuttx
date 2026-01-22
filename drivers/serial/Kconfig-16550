@@ -92,7 +92,8 @@ config 16550_UART0_DMA
 	bool "16550 UART0 DMA support"
 	default n
 	select ARCH_DMA
-	select SERIAL_DMA
+	select SERIAL_TXDMA
+	select SERIAL_RXDMA
 	---help---
 		Enable DMA transfers on 16550 UART0
 
@@ -205,7 +206,8 @@ config 16550_UART1_DMA
 	bool "16550 UART1 DMA support"
 	default n
 	select ARCH_DMA
-	select SERIAL_DMA
+	select SERIAL_TXDMA
+	select SERIAL_RXDMA
 	---help---
 		Enable DMA transfers on 16550 UART1
 
@@ -318,7 +320,8 @@ config 16550_UART2_DMA
 	bool "16550 UART2 DMA support"
 	default n
 	select ARCH_DMA
-	select SERIAL_DMA
+	select SERIAL_TXDMA
+	select SERIAL_RXDMA
 	---help---
 		Enable DMA transfers on 16550 UART2
 
@@ -431,7 +434,8 @@ config 16550_UART3_DMA
 	bool "16550 UART3 DMA support"
 	default n
 	select ARCH_DMA
-	select SERIAL_DMA
+	select SERIAL_TXDMA
+	select SERIAL_RXDMA
 	---help---
 		Enable DMA transfers on 16550 UART3
 

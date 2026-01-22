@@ -187,4 +187,10 @@ config FS_LITTLEFS_DISK_VERSION
 		0x00020000 means 2.0.
 		0x00020001 means 2.1.
 
+config FS_LITTLEFS_DEBUG
+	bool "LITTLEFS file system read/write double check"
+	depends on DEBUG_FS_ERROR
+	---help---
+		Enable LITTLEFS file system read/write double check.
+
 endif

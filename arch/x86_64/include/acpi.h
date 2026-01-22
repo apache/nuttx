@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/compiler.h>
+#include <sys/types.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -134,6 +135,14 @@
 #define ACPI_LAPIC_FLAGS_ONLINECAP   (1 << 1)
 #define ACPI_LAPIC_FLAGS_RESERVED    (0xfffffffc)
 
+/* ACPI Machine Language */
+
+#define ACPI_AML_NAME_OP             (0x08)
+#define ACPI_AML_PACKAGE_OP          (0x12)
+#define ACPI_AML_BYTE_PREFIX         (0x0A)
+#define ACPI_AML_ROOT_PREFIX         '\\'
+#define ACPI_AML_S5_NAME             "_S5_"
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -182,6 +191,33 @@ begin_packed_struct struct acpi_xsdt_s
 {
   struct acpi_sdt_s sdt;
   uint64_t          table_ptrs;
+} end_packed_struct;
+
+/* Fixed ACPI Description Table */
+
+begin_packed_struct struct acpi_facp_s
+{
+  struct acpi_sdt_s sdt;             /* Standard ACPI table header */
+  uint32_t          firmware_ctrl;   /* Physical address of FACS table */
+  uint32_t          dsdt;            /* Physical address of DSDT table */
+  uint8_t           reserved;        /* Reserved field, usually 0 */
+  uint8_t           pre_pm_profile;  /* Preferred power management profile */
+  uint16_t          sci_int;         /* System Control Interrupt (SCI) number */
+  uint32_t          smi_cmd;         /* SMI command port address */
+  uint8_t           acpi_enable;     /* Command to enable ACPI */
+  uint8_t           acpi_disable;    /* Command to disable ACPI */
+  uint8_t           s4bios_req;      /* Command for S4BIOS (hibernate request) */
+  uint8_t           pstate_cnt;      /* Processor performance state control */
+  uint32_t          pm1a_evt_blk;    /* Address of PM1a event register block */
+  uint32_t          pm1b_evt_blk;    /* Address of PM1b event register block */
+  uint32_t          pm1a_cnt_blk;    /* Address of PM1a control register block */
+  uint32_t          pm1b_cnt_blk;    /* Address of PM1b control register block */
+  uint32_t          pm2_cnt_blk;     /* Address of PM2 control register block */
+  uint32_t          pm_tmr_blk;      /* Address of power management timer block */
+  uint32_t          gpe0_blk;        /* Address of General Purpose Event 0 register block */
+  uint32_t          gpe1_blk;        /* Address of General Purpose Event 1 register block */
+  uint8_t           pm1_evt_len;     /* Length of PM1 event register block */
+  uint8_t           pm1_cnt_len;     /* Length of PM1 control register block */
 } end_packed_struct;
 
 /* Common structure for tables entry */
@@ -285,6 +321,17 @@ int acpi_madt_get(int type, int n, struct acpi_entry_s **entry);
 
 int acpi_lapic_get(int cpu, struct acpi_lapic_s **lapic);
 
+/****************************************************************************
+ * Name: acpi_poweroff_param_get
+ *
+ * Description:
+ *   Get Poweroff Parm .
+ *
+ ****************************************************************************/
+
+int acpi_poweroff_param_get(uint32_t *pm1a_cnt, uint32_t *pm1b_cnt,
+                            uint32_t *regvala, uint32_t *regvalb);
+
 #ifdef CONFIG_ARCH_X86_64_ACPI_DUMP
 /****************************************************************************
  * Name: acpi_dump
@@ -296,6 +343,29 @@ int acpi_lapic_get(int cpu, struct acpi_lapic_s **lapic);
 
 void acpi_dump(void);
 #endif
+
+/****************************************************************************
+ * Name: acpi_table_get
+ *
+ * Description:
+ *   Cache acpi tables as a copy.
+ *
+ ****************************************************************************/
+
+ssize_t acpi_table_get(const char *name, void **data);
+
+/****************************************************************************
+ * Name: acpi_procfs_register
+ *
+ * Description:
+ *   Register the acpi_procfs  procfs file system entry
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+int acpi_procfs_register(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

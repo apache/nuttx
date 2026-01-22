@@ -36,6 +36,7 @@
 #include <sys/param.h>
 
 #ifdef CONFIG_ARCH_ADDRENV
+#  include <nuttx/addrenv.h>
 #  include <nuttx/pgalloc.h>
 #  include <nuttx/sched.h>
 #  include <nuttx/arch.h>
