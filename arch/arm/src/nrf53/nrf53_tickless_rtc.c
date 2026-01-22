@@ -200,8 +200,6 @@ static void rtc_cancel_ack(void)
   g_tickless_dev.alarm_set = false;
 
   leave_critical_section(flags);
-
-  return OK;
 }
 
 /****************************************************************************
