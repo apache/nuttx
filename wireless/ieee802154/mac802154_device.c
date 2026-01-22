@@ -721,12 +721,14 @@ static int mac802154dev_notify(FAR struct mac802154_maccb_s *maccb,
           nxsem_post(&dev->geteventsem);
         }
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
       if (dev->md_notify_registered)
         {
           dev->md_notify_event.sigev_value.sival_int = primitive->type;
           nxsig_notification(dev->md_notify_pid, &dev->md_notify_event,
                              SI_QUEUE, &dev->md_notify_work);
         }
+#endif
 
       nxmutex_unlock(&dev->md_lock);
       return OK;

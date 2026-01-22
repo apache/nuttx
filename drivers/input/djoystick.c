@@ -271,6 +271,7 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
 
       /* Have any signal events occurred? */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
       if ((press & opriv->do_notify.dn_press)     != 0 ||
           (release & opriv->do_notify.dn_release) != 0)
         {
@@ -280,6 +281,7 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
           nxsig_notification(opriv->do_pid, &opriv->do_notify.dn_event,
                              SI_QUEUE, &opriv->do_work);
         }
+#endif
     }
 
   priv->du_sample = sample;

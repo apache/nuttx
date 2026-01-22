@@ -40,8 +40,11 @@ if(CONFIG_MODEM_ALT1250)
       altcom_errno.c
       altmdm.c
       altmdm_event.c
-      altmdm_spi.c
-      altmdm_timer.c)
+      altmdm_spi.c)
+
+  if(NOT CONFIG_DISABLE_ALL_SIGNALS)
+    list(APPEND SRCS altmdm_timer.c)
+  endif()
 
   target_sources(drivers PRIVATE ${SRCS})
 endif()

@@ -126,7 +126,9 @@ static bool timer_notifier(FAR uint32_t *next_interval_us, FAR void *arg)
 
   poll_notify(&upper->fds, 1, POLLIN);
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   nxsig_notification(notify->pid, &notify->event, SI_QUEUE, &upper->work);
+#endif
 
   return notify->periodic;
 }

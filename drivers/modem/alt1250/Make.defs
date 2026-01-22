@@ -42,7 +42,9 @@ CSRCS += altcom_errno.c
 CSRCS += altmdm.c
 CSRCS += altmdm_event.c
 CSRCS += altmdm_spi.c
-CSRCS += altmdm_timer.c
+  ifneq ($(CONFIG_DISABLE_ALL_SIGNALS),y)
+    CSRCS += altmdm_timer.c
+  endif
 endif
 
 DEPPATH += --dep-path modem$(DELIM)alt1250
