@@ -1286,7 +1286,8 @@ errout:
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
+#if defined(CONFIG_LPWAN_SX127X_RXSUPPORT) && \
+    CONFIG_LPWAN_SX127X_RX_TIMEOUT > 0
 static void sx127x_rx_watchdog(FAR void *arg)
 {
   FAR struct sx127x_dev_s *dev = (FAR struct sx127x_dev_s *)arg;
@@ -1320,7 +1321,7 @@ static void sx127x_rx_watchdog(FAR void *arg)
              sx127x_rx_watchdog, dev,
              MSEC2TICK(dev->rx_timeout));
 }
-#endif
+#endif /* CONFIG_LPWAN_SX127X_RXSUPPORT && CONFIG_LPWAN_SX127X_RX_TIMEOUT > 0 */
 
 /****************************************************************************
  * Name: sx127x_lora_isr0_process
@@ -1519,6 +1520,7 @@ static int sx127x_fskook_isr0_process(FAR struct sx127x_dev_s *dev)
                 {
                   /* Should we take care of RX timeout? */
 
+#if CONFIG_LPWAN_SX127X_RX_TIMEOUT > 0
                   if (dev->rx_timeout > 0)
                     {
                       /* Keep a track of last RX time to detect timeout */
@@ -1531,6 +1533,7 @@ static int sx127x_fskook_isr0_process(FAR struct sx127x_dev_s *dev)
                                  sx127x_rx_watchdog, dev,
                                  MSEC2TICK(dev->rx_timeout));
                     }
+#endif
 
                   if (dev->pfd)
                     {
@@ -4268,7 +4271,9 @@ static int sx127x_deinit(FAR struct sx127x_dev_s *dev)
 #ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
   /* Cancel any running watchdog */
 
+#  if CONFIG_LPWAN_SX127X_RX_TIMEOUT > 0
   work_cancel(LPWORK, &dev->rx_watchdog);
+#  endif
 #endif
 
   /* Enter SLEEP mode */
@@ -4626,7 +4631,9 @@ static int sx127x_unregister(FAR struct sx127x_dev_s *dev)
   nxsem_destroy(&dev->tx_sem);
 #endif
 #ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
+#  if CONFIG_LPWAN_SX127X_RX_TIMEOUT > 0
   work_cancel(LPWORK, &dev->rx_watchdog);
+#  endif
   nxsem_destroy(&dev->rx_sem);
   nxmutex_destroy(&dev->rx_buffer_lock);
 #endif
