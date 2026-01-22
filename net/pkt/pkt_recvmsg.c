@@ -154,7 +154,7 @@ static inline void pkt_add_recvlen(FAR struct pkt_recvfrom_s *pstate,
 static void pkt_recvfrom_newdata(FAR struct net_driver_s *dev,
                                  FAR struct pkt_recvfrom_s *pstate)
 {
-  unsigned int offset = 0;
+  int offset = 0;
   size_t recvlen;
 
 #ifdef CONFIG_NET_TIMESTAMP
