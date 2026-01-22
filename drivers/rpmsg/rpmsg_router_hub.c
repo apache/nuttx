@@ -96,7 +96,7 @@ static int rpmsg_router_hub_cb(FAR struct rpmsg_endpoint *ept,
 
   /* Retransmit data to dest edge core */
 
-  if (!peer_ept)
+  if (peer_ept == NULL)
     {
       return -EINVAL;
     }
@@ -518,13 +518,13 @@ int rpmsg_router_hub_init(FAR const char *edge0,
   FAR struct rpmsg_router_hub_s *hub;
   int ret;
 
-  if (!edge0 || !edge1)
+  if (edge0 == NULL || edge1 == NULL)
     {
       return -EINVAL;
     }
 
   hub = kmm_zalloc(sizeof(*hub));
-  if (!hub)
+  if (hub == NULL)
     {
       return -ENOMEM;
     }
