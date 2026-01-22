@@ -227,7 +227,9 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
           ret = OK;
         }
 
-      goto errout;
+      dns_unlock();
+      fclose(stream);
+      return ret;
     }
 
 #if CONFIG_NETDB_DNSSERVER_NAMESERVERS > 1

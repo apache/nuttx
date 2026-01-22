@@ -216,6 +216,18 @@ function(nuttx_olddefconfig)
         "nuttx_olddefconfig: Failed to initialize Kconfig configuration: ${KCONFIG_OUTPUT}"
     )
   endif()
+
+  # save the orig compressed formatted defconfig at the very beginning
+  execute_process(COMMAND savedefconfig --out ${CMAKE_BINARY_DIR}/defconfig.tmp
+                  WORKING_DIRECTORY ${NUTTX_DIR})
+
+  execute_process(
+    COMMAND
+      ${CMAKE_COMMAND} -P ${NUTTX_DIR}/cmake/savedefconfig.cmake
+      ${CMAKE_BINARY_DIR}/.config.compressed ${CMAKE_BINARY_DIR}/defconfig.tmp
+      ${CMAKE_BINARY_DIR}/defconfig.orig
+    WORKING_DIRECTORY ${NUTTX_DIR})
+
 endfunction()
 
 function(nuttx_setconfig)

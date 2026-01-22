@@ -129,22 +129,7 @@
 #define modreg32(v,m,a) putreg32((getreg32(a) & ~(m)) | ((v) & (m)), (a))
 #define modreg64(v,m,a) putreg64((getreg64(a) & ~(m)) | ((v) & (m)), (a))
 
-/* Context switching */
-
-#ifndef tricore_fullcontextrestore
-#  define tricore_fullcontextrestore(restoreregs) \
-    sys_call1(SYS_restore_context, (uintptr_t)restoreregs);
-#else
-extern void tricore_fullcontextrestore(uintptr_t *restoreregs);
-#endif
-
-#ifndef tricore_switchcontext
-#  define tricore_switchcontext(saveregs, restoreregs) \
-    sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs);
-#else
-extern void tricore_switchcontext(uintptr_t **saveregs,
-                                  uintptr_t *restoreregs);
-#endif
+#define tricore_fullcontextrestore() sys_call0(SYS_restore_context)
 
 /****************************************************************************
  * Public Types
@@ -204,11 +189,6 @@ extern uintptr_t        __A0_MEM[];    /* End+1 of .data */
  * Inline Functions
  ****************************************************************************/
 
-/* Macros to handle saving and restoring interrupt state. */
-
-#define tricore_savestate(regs)    (regs = up_current_regs())
-#define tricore_restorestate(regs) (up_set_current_regs(regs))
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -221,6 +201,7 @@ void tricore_sigdeliver(void);
 
 void tricore_svcall(volatile void *trap);
 void tricore_trapcall(volatile void *trap);
+void tricore_trapinit(void);
 
 /* Context Save Areas *******************************************************/
 

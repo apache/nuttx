@@ -59,35 +59,10 @@
 
 void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
-  /* Are we in an interrupt handler? */
-
-  if (up_current_regs())
-    {
-      /* Yes, then we have to do things differently.
-       * Just copy the g_current_regs into the OLD rtcb.
-       */
-
-      tricore_savestate(rtcb->xcp.regs);
-
-      /* Then switch contexts.  Any necessary address environment
-       * changes will be made when the interrupt returns.
-       */
-
-      tricore_restorestate(tcb->xcp.regs);
-    }
-
-  /* No, then we will need to perform the user context switch */
-
-  else
+  if (!up_interrupt_context())
     {
       /* Then switch contexts */
 
       tricore_switchcontext(&rtcb->xcp.regs, tcb->xcp.regs);
-
-      /* tricore_switchcontext forces a context switch to the task at the
-       * head of the ready-to-run list.  It does not 'return' in the
-       * normal sense.  When it does return, it is because the blocked
-       * task is again ready to run and has execution priority.
-       */
     }
 }

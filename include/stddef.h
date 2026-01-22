@@ -37,6 +37,8 @@
  * Type Definitions
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
+
 /* The <stddef.h> header shall define the following types:
  *
  * ptrdiff_t
@@ -83,5 +85,7 @@ typedef struct
   float max_align_f;
 #endif
 } max_align_t;
+
+#endif /* __ASSEMBLY__ */
 
 #endif /* __INCLUDE_STDDEF_H */

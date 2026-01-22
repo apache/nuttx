@@ -95,6 +95,13 @@ add_custom_target(
           ${CMAKE_BINARY_DIR}/defconfig.tmp
   COMMAND ${CMAKE_COMMAND} -P ${NUTTX_DIR}/cmake/savedefconfig.cmake
           ${CMAKE_BINARY_DIR}/.config ${CMAKE_BINARY_DIR}/defconfig.tmp
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/defconfig
-          ${NUTTX_DEFCONFIG}
+  COMMAND
+    ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/process_config.py
+    postprocess ${CMAKE_BINARY_DIR}/config_tree.json
+    ${CMAKE_BINARY_DIR}/defconfig.orig ${CMAKE_BINARY_DIR}/defconfig
+    ${CMAKE_BINARY_DIR}/defconfig.post
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+          ${CMAKE_BINARY_DIR}/defconfig.post ${NUTTX_DEFCONFIG}
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+          ${CMAKE_BINARY_DIR}/defconfig.post ${NUTTX_ORIG_DEFCONFIG}
   WORKING_DIRECTORY ${NUTTX_DIR})

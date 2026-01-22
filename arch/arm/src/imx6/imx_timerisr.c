@@ -246,7 +246,7 @@ void up_timer_initialize(void)
 
   /* Configure as a (rising) edge-triggered interrupt */
 
-  arm_gic_irq_trigger(IMX_IRQ_GPT, true);
+  up_set_irq_type(IMX_IRQ_GPT, IRQ_RISING_EDGE);
 
   /* Attach the timer interrupt vector */
 

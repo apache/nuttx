@@ -382,11 +382,11 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
 
   if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_SUSPEND)
     {
-      atomic_fetch_and(&rpspi->port.signals, ~RPMSG_SIGNAL_RUNNING);
+      rpmsg_modify_signals(&rpspi->port.rpmsg, 0, RPMSG_SIGNAL_RUNNING);
     }
   else if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_RESUME)
     {
-      atomic_fetch_or(&rpspi->port.signals, RPMSG_SIGNAL_RUNNING);
+      rpmsg_modify_signals(&rpspi->port.rpmsg, RPMSG_SIGNAL_RUNNING, 0);
     }
   else if (rpspi->rxhdr->cmd != RPMSG_PORT_SPI_CMD_AVAIL)
     {

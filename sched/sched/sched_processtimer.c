@@ -49,6 +49,7 @@
  * Private Functions
  ****************************************************************************/
 
+#ifndef CONFIG_SCHED_TICKLESS
 /****************************************************************************
  * Name:  nxsched_cpu_scheduler
  *
@@ -145,18 +146,6 @@ static inline void nxsched_process_scheduler(void)
 #endif
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * System Timer Hooks
- *
- * These are standard interfaces that are exported by the OS
- * for use by the architecture specific logic
- *
- ****************************************************************************/
-
-/****************************************************************************
  * Name:  nxsched_process_timer
  *
  * Description:
@@ -165,6 +154,8 @@ static inline void nxsched_process_scheduler(void)
  *   architecture specific code, but must call the following OS
  *   function periodically -- the calling interval must be
  *   USEC_PER_TICK
+ *   These are standard interfaces that are exported by the OS
+ *   for use by the architecture specific logic
  *
  * Input Parameters:
  *   None
@@ -204,3 +195,4 @@ void nxsched_process_timer(void)
   board_timerhook();
 #endif
 }
+#endif

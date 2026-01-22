@@ -166,20 +166,9 @@ if(NOT EXISTS "${NUTTX_DEFCONFIG}")
 endif()
 
 # Process initial defconfig ###################################################
-# Process initial defconfig to recursively expand #include in it
 
+# Process initial defconfig to recursively expand #include in it
 include(nuttx_process_config)
-get_filename_component(NUTTX_DEFCONFIG_DIR "${NUTTX_DEFCONFIG}" DIRECTORY)
-process_config(
-  ${CMAKE_BINARY_DIR}/.defconfig.processed
-  ${NUTTX_DEFCONFIG}
-  INCLUDE_PATHS
-  ${NUTTX_DEFCONFIG_DIR}/../../common/configs
-  ${NUTTX_DEFCONFIG_DIR}/../common
-  ${NUTTX_DEFCONFIG_DIR}
-  ${NUTTX_DIR}/../apps
-  ${NUTTX_DIR}/../nuttx-apps)
-set(NUTTX_DEFCONFIG ${CMAKE_BINARY_DIR}/.defconfig.processed)
 
 # Generate initial .config ###################################################
 # This is needed right before any other configure step so that we can source
@@ -500,22 +489,6 @@ endif()
 
 if(CONFIG_NDEBUG)
   add_compile_options(-DNDEBUG)
-endif()
-
-# Cmake build provide absolute paths to compile files. If __FILE__ macros are
-# used in the source code(ASSERT), the binary will contain many invalid paths.
-# This saves some memory, stops exposing build systems locations in binaries,
-# make failure logs more deterministic and most importantly makes builds more
-# failure logs more deterministic and most importantly makes builds more
-# deterministic. Debuggers usually have a path mapping feature to ensure the
-# files are still found.
-if(NOT MSVC)
-  if(CONFIG_OUTPUT_STRIP_PATHS)
-    add_compile_options(-fmacro-prefix-map=${NUTTX_DIR}=)
-    add_compile_options(-fmacro-prefix-map=${NUTTX_APPS_DIR}=)
-    add_compile_options(-fmacro-prefix-map=${NUTTX_BOARD_ABS_DIR}=)
-    add_compile_options(-fmacro-prefix-map=${NUTTX_CHIP_ABS_DIR}=)
-  endif()
 endif()
 
 add_definitions(-D__NuttX__)

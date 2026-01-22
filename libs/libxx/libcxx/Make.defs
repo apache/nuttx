@@ -31,30 +31,19 @@ libcxx/libcxx: libcxx-$(LIBCXX_VERSION).src.tar.xz
 	$(Q) tar -xf $< \
 	         --exclude libcxx-$(LIBCXX_VERSION).src/test/std/pstl
 	$(Q) mv libcxx-$(LIBCXX_VERSION).src $@
-	$(Q) patch -p1 < libcxx/0001_fix_stdatomic_h_miss_typedef_21.1.8.patch -d libcxx/libcxx
-	$(Q) patch -p1 < libcxx/mbstate_t_21.1.8.patch -d libcxx/libcxx
-	$(Q) patch -p1 < libcxx/0001-libcxx-remove-mach-time-h_21.1.8.patch -d libcxx/libcxx
-	$(Q) patch -p1 < libcxx/0001-libcxx-fix-exception-no-rtti_21.1.8.patch -d libcxx/libcxx
-	$(Q) patch -p1 < libcxx/0001-Fix-build-error-about-__GLIBC___21.1.8.patch -d libcxx/libcxx
-	$(Q) patch -p1 < libcxx/0001-libcxx-fix-ostream-no-exceptions_21.1.8.patch -d libcxx/libcxx
-ifdef CONFIG_ARCH_ARM
-	$(Q) patch -p1 < libcxx/0009-libcxx-add-string-template-instantiations_21.1.8.patch -d libcxx/libcxx
-endif
-ifdef CONFIG_ARCH_ARM64
-	$(Q) patch -p1 < libcxx/0009-libcxx-add-string-template-instantiations_21.1.8.patch -d libcxx/libcxx
-endif
-ifdef CONFIG_ARCH_RISCV
-	$(Q) patch -p1 < libcxx/0009-libcxx-add-string-template-instantiations_21.1.8.patch -d libcxx/libcxx
-endif
-	$(Q) patch -p1 < libcxx/0010-libcxx-fix-locale-call-once-no-threads_21.1.8.patch -d libcxx/libcxx
-	$(Q) patch -p1 < libcxx/0011-libcxx-fix-deprecation-warnings-redefinition_21.1.8.patch -d libcxx/libcxx
+	$(Q) patch -p0 < libcxx/0001_fix_stdatomic_h_miss_typedef.patch -d libcxx
+	$(Q) patch -p0 < libcxx/0001-libcxx-remove-mach-time-h.patch -d libcxx
+	$(Q) patch -p0 < libcxx/0001-libcxx-fix-ld-errors.patch -d libcxx
+	$(Q) patch -p0 < libcxx/0001-Fix-build-error-about-__GLIBC__.patch -d libcxx
+	$(Q) patch -p0 < libcxx/0002-libcxx-decay-and-tzdb-fixes.patch -d libcxx
+	$(Q) patch -p0 < libcxx/mbstate_t.patch -d libcxx
+	$(Q) cp $(CURDIR)/__assertion_handler libcxx/libcxx/include/__assertion_handler
 
 endif
 
 $(TOPDIR)/include/libcxx: libcxx/libcxx
 	$(Q) $(DIRLINK) $(CURDIR)/$</include $(TOPDIR)/include/libcxx
 	$(Q) cp $(CURDIR)/__config_site $(TOPDIR)/include/libcxx/__config_site
-	$(Q) cp $(CURDIR)/libcxx/__assertion_handler $(TOPDIR)/include/libcxx/__assertion_handler
 
 context:: $(TOPDIR)/include/libcxx
 
@@ -84,23 +73,36 @@ ifeq ($(shell expr "$(GCCVER)" \>= 12), 1)
 endif
 
 CPPSRCS += $(wildcard libcxx/libcxx/src/*.cpp)
-CPPSRCS += $(wildcard libcxx/libcxx/src/filesystem/*.cpp)
-CPPSRCS += $(wildcard libcxx/libcxx/src/ryu/*.cpp)
+CPPSRCS += libcxx/nuttx_string_instantiations.cpp
+CPP_STD_VER := $(shell echo $(CONFIG_CXX_STANDARD) | sed -E 's/.*\+\+([0-9]+)$$/\1/')
+ifeq ($(shell [ $(CPP_STD_VER) -ge 20 ] && echo true),true)
+  CPPSRCS += $(wildcard libcxx/libcxx/src/experimental/*.cpp)
+  CPPSRCS += $(wildcard libcxx/libcxx/src/filesystem/*.cpp)
+  CPPSRCS += $(wildcard libcxx/libcxx/src/ryu/*.cpp)
+endif
 
-# Always exclude C++20 barrier (has additional dependencies not available in NuttX)
-CPPSRCS := $(filter-out libcxx/libcxx/src/barrier.cpp, $(CPPSRCS))
+ifeq ($(shell [ $(CPP_STD_VER) -le 14 ] && echo true),true)
+  EXCLUDE_CPP := libcxx/libcxx/src/any.cpp
+  EXCLUDE_CPP += libcxx/libcxx/src/variant.cpp
+  EXCLUDE_CPP += libcxx/libcxx/src/optional.cpp
+  EXCLUDE_CPP += libcxx/libcxx/src/memory_resource.cpp
+  EXCLUDE_CPP += libcxx/libcxx/src/legacy_debug_handler.cpp
+  EXCLUDE_CPP += $(wildcard libcxx/libcxx/src/pstl/*.cpp)
+  CPPSRCS := $(filter-out $(EXCLUDE_FILES), $(CPPSRCS))
+endif
 
-# Exclude files with embedded-incompatible dependencies
-INCOMPATIBLE_CPPSRCS := libcxx/libcxx/src/charconv.cpp
-INCOMPATIBLE_CPPSRCS += libcxx/libcxx/src/random.cpp
-CPPSRCS := $(filter-out $(INCOMPATIBLE_CPPSRCS), $(CPPSRCS))
-
-ifeq ($(CONFIG_CXX_LOCALIZATION),)
+ifeq ($(CONFIG_CXX_NO_LOCALIZATION),y)
   LOCALE_CPPSRCS := libcxx/libcxx/src/ios.cpp
   LOCALE_CPPSRCS += libcxx/libcxx/src/ios.instantiations.cpp
   LOCALE_CPPSRCS += libcxx/libcxx/src/iostream.cpp
   LOCALE_CPPSRCS += libcxx/libcxx/src/locale.cpp
   LOCALE_CPPSRCS += libcxx/libcxx/src/regex.cpp
   LOCALE_CPPSRCS += libcxx/libcxx/src/strstream.cpp
+  LOCALE_CPPSRCS += libcxx/libcxx/src/fstream.cpp
+  LOCALE_CPPSRCS += libcxx/libcxx/src/ostream.cpp
+  LOCALE_CPPSRCS += libcxx/libcxx/src/experimental/chrono_exception.cpp
+  LOCALE_CPPSRCS += libcxx/libcxx/src/experimental/time_zone.cpp
+  LOCALE_CPPSRCS += libcxx/libcxx/src/experimental/tzdb.cpp
+  LOCALE_CPPSRCS += libcxx/libcxx/src/experimental/tzdb_list.cpp
   CPPSRCS := $(filter-out $(LOCALE_CPPSRCS), $(CPPSRCS))
 endif

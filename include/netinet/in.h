@@ -287,7 +287,7 @@ struct ip_mreq
 struct ip_mreqn
 {
   struct in_addr  imr_multiaddr;    /* IPv4 multicast address of group */
-  struct in_addr  imr_interface;    /* Local IPv4 address of interface */
+  struct in_addr  imr_address;      /* Local IPv4 address of interface */
   unsigned int    imr_ifindex;      /* Local interface index */
 };
 

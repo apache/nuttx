@@ -29,8 +29,6 @@
 
 #include <nuttx/rpmsg/rpmsg.h>
 
-#ifdef CONFIG_RPMSG_ROUTER
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -43,6 +41,10 @@
 
 #define RPMSG_ROUTER_CREATE          1
 #define RPMSG_ROUTER_DESTROY         2
+#define RPMSG_ROUTER_SUSPEND         3
+#define RPMSG_ROUTER_RESUME          4
+
+#ifdef CONFIG_RPMSG_ROUTER
 
 /****************************************************************************
  * Public Types

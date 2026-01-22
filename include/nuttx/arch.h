@@ -92,6 +92,12 @@
  * Pre-processor definitions
  ****************************************************************************/
 
+#define IRQ_RISING_EDGE          0x00
+#define IRQ_FALLING_EDGE         0x01
+#define IRQ_BOTH_EDGE            0x02
+#define IRQ_HIGH_LEVEL           0x03
+#define IRQ_LOW_LEVEL            0x04
+
 #define DEBUGPOINT_NONE          0x00
 #define DEBUGPOINT_WATCHPOINT_RO 0x01
 #define DEBUGPOINT_WATCHPOINT_WO 0x02
@@ -1822,6 +1828,18 @@ void up_trigger_irq(int irq, cpu_set_t cpuset);
 #endif
 
 /****************************************************************************
+ * Name: up_set_irq_type
+ *
+ * Description:
+ *   Config an IRQ trigger type.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_ARCH_NOINTC
+int up_set_irq_type(int irq, int mode);
+#endif
+
+/****************************************************************************
  * Name: up_prioritize_irq
  *
  * Description:
@@ -1925,7 +1943,7 @@ void up_timer_initialize(void);
  * The RTOS will provide the following interfaces for use by the platform-
  * specific interval timer implementation:
  *
- *   void nxsched_timer_expiration(void):  Called by the platform-specific
+ *   void nxsched_process_timer(void):  Called by the platform-specific
  *     logic when the interval timer expires.
  *
  ****************************************************************************/
@@ -1973,7 +1991,7 @@ void up_timer_getmask(FAR clock_t *mask);
  * Description:
  *   Cancel the alarm and return the time of cancellation of the alarm.
  *   These two steps need to be as nearly atomic as possible.
- *   nxsched_timer_expiration() will not be called unless the alarm is
+ *   nxsched_process_timer() will not be called unless the alarm is
  *   restarted with up_alarm_start().
  *
  *   If, as a race condition, the alarm has already expired when this
@@ -2010,7 +2028,7 @@ int up_alarm_tick_cancel(FAR clock_t *ticks);
  * Name: up_alarm_start
  *
  * Description:
- *   Start the alarm.  nxsched_timer_expiration() will be called when the
+ *   Start the alarm.  nxsched_process_timer() will be called when the
  *   alarm occurs (unless up_alaram_cancel is called to stop it).
  *
  *   Provided by platform-specific code and called from the RTOS base code.
@@ -2018,7 +2036,7 @@ int up_alarm_tick_cancel(FAR clock_t *ticks);
  * Input Parameters:
  *   ts - The time in the future at the alarm is expected to occur.  When
  *        the alarm occurs the timer logic will call
- *        nxsched_timer_expiration().
+ *        nxsched_process_timer().
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -2042,7 +2060,7 @@ int up_alarm_tick_start(clock_t ticks);
  * Description:
  *   Cancel the interval timer and return the time remaining on the timer.
  *   These two steps need to be as nearly atomic as possible.
- *   nxsched_timer_expiration() will not be called unless the timer is
+ *   nxsched_process_timer() will not be called unless the timer is
  *   restarted with up_timer_start().
  *
  *   If, as a race condition, the timer has already expired when this
@@ -2081,14 +2099,14 @@ int up_timer_tick_cancel(FAR clock_t *ticks);
  * Name: up_timer_start
  *
  * Description:
- *   Start the interval timer.  nxsched_timer_expiration() will be called at
+ *   Start the interval timer.  nxsched_process_timer() will be called at
  *   the completion of the timeout (unless up_timer_cancel is called to stop
  *   the timing.
  *
  *   Provided by platform-specific code and called from the RTOS base code.
  *
  * Input Parameters:
- *   ts - Provides the time interval until nxsched_timer_expiration() is
+ *   ts - Provides the time interval until nxsched_process_timer() is
  *        called.
  *
  * Returned Value:
@@ -2461,33 +2479,7 @@ void up_ndelay(unsigned long nanoseconds);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SCHED_TICKLESS
 void nxsched_process_timer(void);
-#endif
-
-/****************************************************************************
- * Name:  nxsched_timer_expiration
- *
- * Description:
- *   If CONFIG_SCHED_TICKLESS is defined, then this function is provided by
- *   the RTOS base code and called from platform-specific code when the
- *   interval timer used to implement the tick-less OS expires.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- * Assumptions/Limitations:
- *   Base code implementation assumes that this function is called from
- *   interrupt handling logic with interrupts disabled.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SCHED_TICKLESS)
-void nxsched_timer_expiration(void);
-#endif
 
 /****************************************************************************
  * Name:  nxsched_get_next_expired
@@ -2937,6 +2929,16 @@ int up_saveusercontext(FAR void *saveregs);
 bool up_fpucmp(FAR const void *saveregs1, FAR const void *saveregs2);
 #else
 #define up_fpucmp(r1, r2) (true)
+#endif
+
+/****************************************************************************
+ * Name: up_regs_memcpy
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_REGCPY
+void up_regs_memcpy(FAR void *dest, FAR void *src, size_t count);
+#else
+#define up_regs_memcpy(dest, src, count) memcpy(dest, src, count)
 #endif
 
 #ifdef CONFIG_ARCH_HAVE_DEBUG

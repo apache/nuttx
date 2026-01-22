@@ -630,6 +630,9 @@ int nxtask_setup_stackargs(FAR struct tcb_s *tcb,
 
   stackargv[argc + 1] = NULL;
 
+  /* Initialize argv last to avoid accessing the partial initialized fields */
+
+  nxsched_get_tls(tcb)->tl_argv = stackargv;
   return OK;
 }
 

@@ -72,9 +72,25 @@ SECTIONS
     *(.noinit.*)
   } >dram0_0_seg
 
+  .tbss (NOLOAD) :
+  {
+    . = ALIGN(4);
+    _stbss = ABSOLUTE(.);
+    *(.tbss .tbss.* .gnu.linkonce.tb.* .tcommon)
+    _etbss = ABSOLUTE(.);
+    . = ALIGN(4);
+  } >dram0_0_seg
+
   .dram0.data :
   {
+    . = ALIGN(4);
+    _stdata = ABSOLUTE(.);
+    *(.tdata .tdata.* .gnu.linkonce.td.*)
+    _etdata = ABSOLUTE(.);
+    . = ALIGN(4);
+
     _sdata = ABSOLUTE(.);
+
     *(.data)
     *(.data.*)
     *(.gnu.linkonce.d.*)

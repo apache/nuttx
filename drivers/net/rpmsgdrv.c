@@ -34,30 +34,27 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wqueue.h>
 
 #include <nuttx/net/dns.h>
 #include <nuttx/net/ip.h>
-#include <nuttx/net/netdev.h>
+#include <nuttx/net/netdev_lowerhalf.h>
 #include <nuttx/net/pkt.h>
 #include <nuttx/net/rpmsg.h>
+#include <nuttx/net/rpmsgdrv.h>
 #include <nuttx/rpmsg/rpmsg.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Work queue support is required. */
-
-#if !defined(CONFIG_SCHED_WORKQUEUE)
-#  error Work queue support is required in this configuration (CONFIG_SCHED_WORKQUEUE)
-#endif
-
-#ifdef CONFIG_NET_DUMPPACKET
-#  define net_rpmsg_drv_dumppacket lib_dumpbuffer
-#else
-#  define net_rpmsg_drv_dumppacket(m, b, l)
-#endif
+#define NET_RPMSG_DRV_BUFSIZE (CONFIG_NET_ETH_PKTSIZE + CONFIG_NET_GUARDSIZE)
+#define NET_RPMSG_DRV_MAX_PKT_SIZE \
+    ((CONFIG_NET_LL_GUARDSIZE - ETH_HDRLEN) + NET_RPMSG_DRV_BUFSIZE)
+#define NET_RPMSG_DRV_MAX_NIOB \
+    ((NET_RPMSG_DRV_MAX_PKT_SIZE + CONFIG_IOB_BUFSIZE - 1) / \
+     CONFIG_IOB_BUFSIZE)
 
 /****************************************************************************
  * Private Types
@@ -75,32 +72,39 @@ struct net_rpmsg_drv_cookie_s
 
 struct net_rpmsg_drv_s
 {
-  FAR const char        *cpuname;
-  FAR const char        *devname;
+  char                  cpuname[RPMSG_NAME_SIZE];
+  netpkt_queue_t        rxqueue; /* RX packet queue */
+  spinlock_t            lock;    /* Spinlock for protecting rxqueue */
+  FAR void             *priv;    /* Private data for upper layer */
+  net_rpmsg_drv_cb_t    cb;      /* IFUP/DOWN Callback function */
+  sem_t                 wait;    /* Wait sem, used for preventing any
+                                  * operation until the connection
+                                  * between two cpu established.
+                                  */
   struct rpmsg_endpoint ept;
-  struct work_s         pollwork; /* For deferring poll work to the work queue */
 
   /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s  dev;      /* Interface understood by the network */
+  struct netdev_lowerhalf_s dev; /* Interface understood by the network */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Common TX logic */
-
-static int  net_rpmsg_drv_transmit(FAR struct net_driver_s *dev,
-                                   bool nocopy);
-static int  net_rpmsg_drv_txpoll(FAR struct net_driver_s *dev);
-static void net_rpmsg_drv_reply(FAR struct net_driver_s *dev);
-
 /* RPMSG related functions */
+
+/* Request handler functions */
 
 static int net_rpmsg_drv_default_handler(FAR struct rpmsg_endpoint *ept,
                                          FAR void *data, size_t len,
                                          uint32_t src, FAR void *priv);
+static int net_rpmsg_drv_ifup_handler(FAR struct rpmsg_endpoint *ept,
+                                      FAR void *data, size_t len,
+                                      uint32_t src, FAR void *priv);
+static int net_rpmsg_drv_ifdown_handler(FAR struct rpmsg_endpoint *ept,
+                                        FAR void *data, size_t len,
+                                        uint32_t src, FAR void *priv);
 static int net_rpmsg_drv_sockioctl_handler(FAR struct rpmsg_endpoint *ept,
                                            FAR void *data, size_t len,
                                            uint32_t src, FAR void *priv);
@@ -108,35 +112,46 @@ static int net_rpmsg_drv_transfer_handler(FAR struct rpmsg_endpoint *ept,
                                           FAR void *data, size_t len,
                                           uint32_t src, FAR void *priv);
 
+/* Response handler functions */
+
+static int net_rpmsg_drv_default_response(FAR struct rpmsg_endpoint *ept,
+                                          FAR void *data, size_t len,
+                                          uint32_t src, FAR void *priv);
+
+/* RPMSG device related functions */
+
 static void net_rpmsg_drv_device_created(FAR struct rpmsg_device *rdev,
-                                         FAR void *priv_);
+                                         FAR void *priv);
 static void net_rpmsg_drv_device_destroy(FAR struct rpmsg_device *rdev,
-                                         FAR void *priv_);
+                                         FAR void *priv);
 static int  net_rpmsg_drv_ept_cb(FAR struct rpmsg_endpoint *ept, void *data,
                                  size_t len, uint32_t src, FAR void *priv);
 
-static int  net_rpmsg_drv_send_recv(struct net_driver_s *dev,
-                    void *header_, uint32_t command, int len);
+static int  net_rpmsg_drv_send_recv(struct netdev_lowerhalf_s *dev,
+                                    void *header_, uint32_t command,
+                                    int len);
 
 /* NuttX callback functions */
 
-static int  net_rpmsg_drv_ifup(FAR struct net_driver_s *dev);
-static int  net_rpmsg_drv_ifdown(FAR struct net_driver_s *dev);
+static int  net_rpmsg_drv_ifup(FAR struct netdev_lowerhalf_s *dev);
+static int  net_rpmsg_drv_ifdown(FAR struct netdev_lowerhalf_s *dev);
 
-static void net_rpmsg_drv_txavail_work(FAR void *arg);
-static int  net_rpmsg_drv_txavail(FAR struct net_driver_s *dev);
+static int  net_rpmsg_drv_transmit(FAR struct netdev_lowerhalf_s *dev,
+                                   FAR netpkt_t *pkt);
+static FAR netpkt_t *
+net_rpmsg_drv_receive(FAR struct netdev_lowerhalf_s *dev);
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
-static int  net_rpmsg_drv_addmac(FAR struct net_driver_s *dev,
-              FAR const uint8_t *mac);
+#ifdef CONFIG_NET_MCASTGROUP
+static int  net_rpmsg_drv_addmac(FAR struct netdev_lowerhalf_s *dev,
+                                 FAR const uint8_t *mac);
 #ifdef CONFIG_NET_IGMP
-static int  net_rpmsg_drv_rmmac(FAR struct net_driver_s *dev,
-              FAR const uint8_t *mac);
+static int  net_rpmsg_drv_rmmac(FAR struct netdev_lowerhalf_s *dev,
+                                FAR const uint8_t *mac);
 #endif
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
-static int  net_rpmsg_drv_ioctl(FAR struct net_driver_s *dev, int cmd,
-              unsigned long arg);
+static int  net_rpmsg_drv_ioctl(FAR struct netdev_lowerhalf_s *dev, int cmd,
+                                unsigned long arg);
 #endif
 
 /****************************************************************************
@@ -145,8 +160,8 @@ static int  net_rpmsg_drv_ioctl(FAR struct net_driver_s *dev, int cmd,
 
 static const rpmsg_ept_cb g_net_rpmsg_drv_handler[] =
 {
-  [NET_RPMSG_IFUP]      = net_rpmsg_drv_default_handler,
-  [NET_RPMSG_IFDOWN]    = net_rpmsg_drv_default_handler,
+  [NET_RPMSG_IFUP]      = net_rpmsg_drv_ifup_handler,
+  [NET_RPMSG_IFDOWN]    = net_rpmsg_drv_ifdown_handler,
   [NET_RPMSG_ADDMCAST]  = net_rpmsg_drv_default_handler,
   [NET_RPMSG_RMMCAST]   = net_rpmsg_drv_default_handler,
   [NET_RPMSG_DEVIOCTL]  = net_rpmsg_drv_default_handler,
@@ -154,23 +169,45 @@ static const rpmsg_ept_cb g_net_rpmsg_drv_handler[] =
   [NET_RPMSG_TRANSFER]  = net_rpmsg_drv_transfer_handler,
 };
 
+static const rpmsg_ept_cb g_net_rpmsg_drv_response[] =
+{
+  [NET_RPMSG_IFUP]      = net_rpmsg_drv_default_response,
+  [NET_RPMSG_IFDOWN]    = net_rpmsg_drv_default_response,
+  [NET_RPMSG_ADDMCAST]  = net_rpmsg_drv_default_response,
+  [NET_RPMSG_RMMCAST]   = net_rpmsg_drv_default_response,
+  [NET_RPMSG_DEVIOCTL]  = net_rpmsg_drv_default_response,
+  [NET_RPMSG_SOCKIOCTL] = net_rpmsg_drv_default_response,
+  [NET_RPMSG_TRANSFER]  = net_rpmsg_drv_default_response,
+};
+
+static const struct netdev_ops_s g_net_rpmsg_drv_ops =
+{
+  .ifup     = net_rpmsg_drv_ifup,
+  .ifdown   = net_rpmsg_drv_ifdown,
+  .transmit = net_rpmsg_drv_transmit,
+  .receive  = net_rpmsg_drv_receive,
+#ifdef CONFIG_NET_MCASTGROUP
+  .addmac   = net_rpmsg_drv_addmac,
+  .rmmac    = net_rpmsg_drv_rmmac,
+#endif
+#ifdef CONFIG_NETDEV_IOCTL
+  .ioctl    = net_rpmsg_drv_ioctl,
+#endif
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-static void net_rpmsg_drv_wait(FAR sem_t *sem)
-{
-  net_sem_wait_uninterruptible(sem);
-}
 
 /****************************************************************************
  * Name: net_rpmsg_drv_transmit
  *
  * Description:
- *   Start hardware transmission. Called from watchdog based polling.
+ *   Start hardware transmission.
  *
  * Parameters:
  *   dev - Reference to the NuttX driver state structure
+ *   pkt - The packet to be sent
  *
  * Returned Value:
  *   OK on success; a negated errno on failure
@@ -180,148 +217,123 @@ static void net_rpmsg_drv_wait(FAR sem_t *sem)
  *
  ****************************************************************************/
 
-static int net_rpmsg_drv_transmit(FAR struct net_driver_s *dev, bool nocopy)
+static int net_rpmsg_drv_transmit(FAR struct netdev_lowerhalf_s *dev,
+                                  FAR netpkt_t *pkt)
 {
-  FAR struct net_rpmsg_drv_s *priv = dev->d_private;
-  FAR struct net_rpmsg_transfer_s *msg;
+  FAR struct net_rpmsg_drv_s *drv =
+                              container_of(dev, struct net_rpmsg_drv_s, dev);
+  FAR struct net_rpmsg_transfer_s *transfer;
+  unsigned int datalen = netpkt_getdatalen(dev, pkt);
+  uint32_t len;
   int ret;
 
-  /* Verify that the hardware is ready to send another packet. If we get
-   * here, then we are committed to sending a packet; Higher level logic
-   * must have assured that there is no transmission in progress.
-   */
-
-  /* Increment statistics */
-
-  net_rpmsg_drv_dumppacket("transmit", dev->d_buf, dev->d_len);
-  NETDEV_TXPACKETS(dev);
-
-  /* Send the packet: address=dev->d_buf, length=dev->d_len */
-
-  msg = (FAR struct net_rpmsg_transfer_s *)dev->d_buf - 1;
-
-  msg->header.command = NET_RPMSG_TRANSFER;
-  msg->header.result  = 0;
-  msg->header.cookie  = 0;
-  msg->length         = dev->d_len;
-
-  if (nocopy)
+  transfer = rpmsg_get_tx_payload_buffer(&drv->ept, &len, true);
+  if (transfer == NULL)
     {
-      ret = rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + msg->length);
-    }
-  else
-    {
-      ret = rpmsg_send(&priv->ept, msg, sizeof(*msg) + msg->length);
+      nwarn("WARNING: Failed to get buffer for xmit\n");
+      return -ENOMEM;
     }
 
+  if (len < sizeof(*transfer) + datalen)
+    {
+      nerr("ERROR: Buffer is too small for xmit\n");
+      rpmsg_release_tx_buffer(&drv->ept, transfer);
+      return -ENOMEM;
+    }
+
+  transfer->header.command = NET_RPMSG_TRANSFER;
+  transfer->header.result  = 0;
+  transfer->header.cookie  = 0;
+  transfer->length         = datalen;
+  netpkt_copyout(dev, (FAR uint8_t *)(transfer + 1), pkt, datalen, 0);
+
+  len = sizeof(*transfer) + datalen;
+  ret = rpmsg_send_nocopy(&drv->ept, transfer, len);
   if (ret < 0)
     {
-      if (nocopy)
-        {
-          rpmsg_release_tx_buffer(&priv->ept, msg);
-        }
-
-      NETDEV_TXERRORS(dev);
+      nerr("ERROR: Failed to send packet\n");
+      rpmsg_release_tx_buffer(&drv->ept, transfer);
       return ret;
     }
-  else
-    {
-      NETDEV_TXDONE(dev);
-      return OK;
-    }
+
+  netpkt_free(dev, pkt, NETPKT_TX);
+  netdev_lower_txdone(dev);
+  return OK;
 }
 
-/****************************************************************************
- * Name: net_rpmsg_drv_txpoll
- *
- * Description:
- *   The transmitter is available, check if the network has any outgoing
- *   packets ready to send.  This is a callback from devif_poll().
- *   devif_poll() may be called:
- *
- *   1. When the preceding TX packet send is complete,
- *   2. When the preceding TX packet send fail
- *   3. During normal TX polling
- *
- * Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static int net_rpmsg_drv_txpoll(FAR struct net_driver_s *dev)
+static FAR netpkt_t *
+net_rpmsg_drv_receive(FAR struct netdev_lowerhalf_s *dev)
 {
-  FAR struct net_rpmsg_drv_s *priv = dev->d_private;
-  uint32_t size;
+  FAR struct net_rpmsg_drv_s *drv =
+                              container_of(dev, struct net_rpmsg_drv_s, dev);
+  FAR netpkt_t *pkt;
+  irqstate_t flags;
 
-  /* Send the packet */
+  flags = spin_lock_irqsave(&drv->lock);
+  pkt = netpkt_remove_queue(&drv->rxqueue);
+  spin_unlock_irqrestore(&drv->lock, flags);
 
-  net_rpmsg_drv_transmit(dev, true);
-
-  /* Check if there is room in the device to hold another packet. If
-   * not, return a non-zero value to terminate the poll.
-   */
-
-  dev->d_buf = rpmsg_get_tx_payload_buffer(&priv->ept, &size, false);
-  if (dev->d_buf)
-    {
-      dev->d_buf += sizeof(struct net_rpmsg_transfer_s);
-      dev->d_pktsize = size - sizeof(struct net_rpmsg_transfer_s);
-    }
-
-  return dev->d_buf == NULL;
-}
-
-/****************************************************************************
- * Name: net_rpmsg_drv_reply
- *
- * Description:
- *   After a packet has been received and dispatched to the network, it
- *   may return with an outgoing packet. This function checks for
- *   that case and performs the transmission if necessary.
- *
- * Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void net_rpmsg_drv_reply(FAR struct net_driver_s *dev)
-{
-  /* If the packet dispatch resulted in data that should be sent out on the
-   * network, the field d_len will set to a value > 0.
-   */
-
-  if (dev->d_len > 0)
-    {
-      /* And send the packet */
-
-      net_rpmsg_drv_transmit(dev, false);
-    }
+  return pkt;
 }
 
 /* RPMSG related functions */
+
+static void rpmsg_send_response(FAR struct rpmsg_endpoint *ept,
+                                FAR struct net_rpmsg_header_s *header,
+                                size_t len, int result)
+{
+  header->command |= NET_RPMSG_RESPONSE;
+  header->result   = result;
+  rpmsg_send(ept, header, len);
+}
 
 static int net_rpmsg_drv_default_handler(FAR struct rpmsg_endpoint *ept,
                                          FAR void *data, size_t len,
                                          uint32_t src, FAR void *priv)
 {
   FAR struct net_rpmsg_header_s *header = data;
-  FAR struct net_rpmsg_drv_cookie_s *cookie =
-    (struct net_rpmsg_drv_cookie_s *)(uintptr_t)header->cookie;
 
-  memcpy(cookie->header, header, len);
-  nxsem_post(&cookie->sem);
+  if (header->cookie)
+    {
+      rpmsg_send_response(ept, header, sizeof(*header), -EOPNOTSUPP);
+    }
+
+  return 0;
+}
+
+static int net_rpmsg_drv_ifup_handler(FAR struct rpmsg_endpoint *ept,
+                                        FAR void *data, size_t len,
+                                        uint32_t src, FAR void *priv)
+{
+  FAR struct net_rpmsg_drv_s *drv = priv;
+  FAR struct net_rpmsg_header_s *header = data;
+
+  netdev_lower_carrier_on(&drv->dev);
+  if (drv->cb != NULL)
+    {
+      drv->cb(&drv->dev, NET_RPMSG_EVENT_CARRIER_ON);
+    }
+
+  rpmsg_send_response(ept, header, sizeof(*header), 0);
+
+  return 0;
+}
+
+static int net_rpmsg_drv_ifdown_handler(FAR struct rpmsg_endpoint *ept,
+                                        FAR void *data, size_t len,
+                                        uint32_t src, FAR void *priv)
+{
+  FAR struct net_rpmsg_drv_s *drv = priv;
+  FAR struct net_rpmsg_header_s *header = data;
+
+  netdev_lower_carrier_off(&drv->dev);
+  if (drv->cb != NULL)
+    {
+      drv->cb(&drv->dev, NET_RPMSG_EVENT_CARRIER_OFF);
+    }
+
+  rpmsg_send_response(ept, header, sizeof(*header), 0);
+
   return 0;
 }
 
@@ -361,7 +373,8 @@ static int net_rpmsg_drv_sockioctl_task(int argc, FAR char *argv[])
 
   if (msg->header.cookie)
     {
-      rpmsg_send(ept, msg, sizeof(*msg) + msg->length);
+      rpmsg_send_response(ept, &msg->header, sizeof(*msg) + msg->length,
+                          msg->header.result);
     }
 
   rpmsg_release_rx_buffer(ept, msg);
@@ -394,58 +407,6 @@ static int net_rpmsg_drv_sockioctl_handler(FAR struct rpmsg_endpoint *ept,
   return 0;
 }
 
-#ifdef CONFIG_NET_IPv4
-static bool net_rpmsg_drv_is_ipv4(FAR struct net_driver_s *dev)
-{
-  FAR struct ipv4_hdr_s *ip =
-    (FAR struct ipv4_hdr_s *)(dev->d_buf + dev->d_llhdrlen);
-  FAR struct eth_hdr_s *eth = (FAR struct eth_hdr_s *)dev->d_buf;
-
-  if (dev->d_lltype == NET_LL_ETHERNET || dev->d_lltype == NET_LL_IEEE80211)
-    {
-      return eth->type == HTONS(ETHTYPE_IP);
-    }
-  else
-    {
-      return (ip->vhl & IP_VERSION_MASK) == IPv4_VERSION;
-    }
-}
-#endif
-
-#ifdef CONFIG_NET_IPv6
-static bool net_rpmsg_drv_is_ipv6(FAR struct net_driver_s *dev)
-{
-  FAR struct ipv6_hdr_s *ip =
-    (FAR struct ipv6_hdr_s *)(dev->d_buf + dev->d_llhdrlen);
-  FAR struct eth_hdr_s *eth = (FAR struct eth_hdr_s *)dev->d_buf;
-
-  if (dev->d_lltype == NET_LL_ETHERNET || dev->d_lltype == NET_LL_IEEE80211)
-    {
-      return eth->type == HTONS(ETHTYPE_IP6);
-    }
-  else
-    {
-      return (ip->vtc & IP_VERSION_MASK) == IPv6_VERSION;
-    }
-}
-#endif
-
-#ifdef CONFIG_NET_ARP
-static bool net_rpmsg_drv_is_arp(FAR struct net_driver_s *dev)
-{
-  FAR struct eth_hdr_s *eth = (FAR struct eth_hdr_s *)dev->d_buf;
-
-  if (dev->d_lltype == NET_LL_ETHERNET || dev->d_lltype == NET_LL_IEEE80211)
-    {
-      return eth->type == HTONS(ETHTYPE_ARP);
-    }
-  else
-    {
-      return false;
-    }
-}
-#endif
-
 /****************************************************************************
  * Name: net_rpmsg_drv_transfer_handler
  *
@@ -467,128 +428,145 @@ static int net_rpmsg_drv_transfer_handler(FAR struct rpmsg_endpoint *ept,
                                           FAR void *data, size_t len,
                                           uint32_t src, FAR void *priv)
 {
-  FAR struct net_driver_s *dev = ept->priv;
-  FAR struct net_rpmsg_transfer_s *msg = data;
-  FAR void *oldbuf;
+  FAR struct net_rpmsg_transfer_s *transfer = data;
+  FAR struct net_rpmsg_drv_s *drv = priv;
+  FAR struct netdev_lowerhalf_s *dev = &drv->dev;
+  FAR netpkt_t *pkt;
+  irqstate_t flags;
+  int ret;
 
-  /* Lock the network and serialize driver operations if necessary.
-   * NOTE: Serialization is only required in the case where the driver work
-   * is performed on an LP worker thread and where more than one LP worker
-   * thread has been configured.
-   */
-
-  net_lock();
-
-  /* Check for errors and update statistics */
-
-  net_rpmsg_drv_dumppacket("receive", msg->data, msg->length);
-
-  NETDEV_RXPACKETS(dev);
-
-  /* Copy the data from the hardware to dev->d_buf. Set
-   * amount of data in dev->d_len
-   */
-
-  oldbuf = dev->d_buf;
-
-  dev->d_buf = msg->data;
-  dev->d_len = msg->length;
-
-#ifdef CONFIG_NET_PKT
-  /* When packet sockets are enabled, feed the frame into the tap */
-
-  pkt_input(dev);
-#endif
-
-  /* We only accept IP packets of the configured type and ARP packets */
-
-#ifdef CONFIG_NET_IPv4
-  if (net_rpmsg_drv_is_ipv4(dev))
+  if (transfer->length > len - sizeof(*transfer))
     {
-      ninfo("IPv4 frame\n");
-      NETDEV_RXIPV4(dev);
-
-      /* Receive an IPv4 packet from the network device */
-
-      ipv4_input(dev);
-
-      /* Check for a reply to the IPv4 packet */
-
-      net_rpmsg_drv_reply(dev);
-    }
-  else
-#endif
-#ifdef CONFIG_NET_IPv6
-  if (net_rpmsg_drv_is_ipv6(dev))
-    {
-      ninfo("IPv6 frame\n");
-      NETDEV_RXIPV6(dev);
-
-      /* Dispatch IPv6 packet to the network layer */
-
-      ipv6_input(dev);
-
-      /* Check for a reply to the IPv6 packet */
-
-      net_rpmsg_drv_reply(dev);
-    }
-  else
-#endif
-#ifdef CONFIG_NET_ARP
-  if (net_rpmsg_drv_is_arp(dev))
-    {
-      ninfo("ARP frame\n");
-      NETDEV_RXARP(dev);
-
-      /* Dispatch ARP packet to the network layer */
-
-      arp_input(dev);
-
-      /* Check for a reply to the ARP packet */
-
-      net_rpmsg_drv_reply(dev);
-    }
-  else
-#endif
-    {
-      NETDEV_RXDROPPED(dev);
+      nerr("ERROR: net_rpmsg got invalid transfer length!");
+      goto drop;
     }
 
-  dev->d_buf = oldbuf;
-  net_unlock();
+  /* TODO: No-Copy, hold rx buffer */
 
+  pkt = netpkt_alloc(dev, NETPKT_RX);
+  if (pkt == NULL)
+    {
+      nerr("ERROR: Failed to allocate buffer!\n");
+      goto drop;
+    }
+
+  if (netpkt_copyin(dev, pkt, (FAR uint8_t *)(transfer + 1),
+                    transfer->length, 0) < 0)
+    {
+      nerr("ERROR: Failed to copy in data!\n");
+      goto free;
+    }
+
+  flags = spin_lock_irqsave(&drv->lock);
+  ret = netpkt_tryadd_queue(pkt, &drv->rxqueue);
+  spin_unlock_irqrestore(&drv->lock, flags);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to add pkt to queue!\n");
+      goto free;
+    }
+
+  netdev_lower_rxready(dev);
+  return 0;
+
+free:
+  netpkt_free(dev, pkt, NETPKT_RX);
+
+drop:
+  NETDEV_RXDROPPED(&dev->netdev);
   return 0;
 }
 
-static void net_rpmsg_drv_device_created(FAR struct rpmsg_device *rdev,
-                                         FAR void *priv_)
+/****************************************************************************
+ * Name: net_rpmsg_drv_default_response
+ *
+ * Description:
+ *   This function is used to handle the response from the RPMSG device.
+ *   It is used to copy the response to the cookie and post the semaphore.
+ *
+ ****************************************************************************/
+
+static int net_rpmsg_drv_default_response(FAR struct rpmsg_endpoint *ept,
+                                          FAR void *data, size_t len,
+                                          uint32_t src, FAR void *priv)
 {
-  FAR struct net_driver_s *dev = priv_;
-  FAR struct net_rpmsg_drv_s *priv = dev->d_private;
+  FAR struct net_rpmsg_header_s *header = data;
+  FAR struct net_rpmsg_drv_cookie_s *cookie =
+    (struct net_rpmsg_drv_cookie_s *)(uintptr_t)header->cookie;
+
+  memcpy(cookie->header, header, len);
+  nxsem_post(&cookie->sem);
+  return 0;
+}
+
+/****************************************************************************
+ * Name: net_rpmsg_drv_ept_release
+ ****************************************************************************/
+
+static void net_rpmsg_drv_ept_release(FAR struct rpmsg_endpoint *ept)
+{
+  FAR struct net_rpmsg_drv_s *drv = ept->priv;
+
+  netdev_lower_carrier_off(&drv->dev);
+  rpmsg_wait(&drv->ept, &drv->wait);
+}
+
+/****************************************************************************
+ * Name: net_rpmsg_drv_ns_bound
+ *
+ * Description:
+ *   Rpmsg device end point service bound callback function , called when
+ *   remote end point address is received.
+ *
+ * Parameters:
+ *   ept  - The rpmsg-device end point
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+static void net_rpmsg_drv_ns_bound(FAR struct rpmsg_endpoint *ept)
+{
+  FAR struct net_rpmsg_drv_s *drv = ept->priv;
+
+  rpmsg_post(&drv->ept, &drv->wait);
+}
+
+/****************************************************************************
+ * Name: net_rpmsg_drv_device_created
+ ****************************************************************************/
+
+static void net_rpmsg_drv_device_created(FAR struct rpmsg_device *rdev,
+                                         FAR void *priv)
+{
+  FAR struct net_rpmsg_drv_s *drv = priv;
   char eptname[RPMSG_NAME_SIZE];
 
-  if (!strcmp(priv->cpuname, rpmsg_get_cpuname(rdev)))
+  if (!strcmp(drv->cpuname, rpmsg_get_cpuname(rdev)))
     {
-      priv->ept.priv = dev;
+      drv->ept.priv = drv;
       snprintf(eptname, sizeof(eptname),
-               NET_RPMSG_EPT_NAME, priv->devname);
+               NET_RPMSG_EPT_PREFIX "%s", drv->dev.netdev.d_ifname);
 
-      rpmsg_create_ept(&priv->ept, rdev, eptname,
+      rpmsg_create_ept(&drv->ept, rdev, eptname,
                        RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
                        net_rpmsg_drv_ept_cb, NULL);
     }
 }
 
-static void net_rpmsg_drv_device_destroy(FAR struct rpmsg_device *rdev,
-                                         FAR void *priv_)
-{
-  FAR struct net_driver_s *dev = priv_;
-  FAR struct net_rpmsg_drv_s *priv = dev->d_private;
+/****************************************************************************
+ * Name: net_rpmsg_drv_device_destroy
+ ****************************************************************************/
 
-  if (!strcmp(priv->cpuname, rpmsg_get_cpuname(rdev)))
+static void net_rpmsg_drv_device_destroy(FAR struct rpmsg_device *rdev,
+                                         FAR void *priv)
+{
+  FAR struct net_rpmsg_drv_s *drv = priv;
+
+  if (!strcmp(drv->cpuname, rpmsg_get_cpuname(rdev)))
     {
-      rpmsg_destroy_ept(&priv->ept);
-      dev->d_buf = NULL;
+      rpmsg_destroy_ept(&drv->ept);
     }
 }
 
@@ -596,25 +574,40 @@ static int net_rpmsg_drv_ept_cb(FAR struct rpmsg_endpoint *ept, void *data,
                                 size_t len, uint32_t src, FAR void *priv)
 {
   FAR struct net_rpmsg_header_s *header = data;
-  uint32_t command = header->command;
+  uint32_t cmd = NET_RPMSG_GET_COMMAND(header->command);
 
-  if (command < sizeof(g_net_rpmsg_drv_handler) /
-                sizeof(g_net_rpmsg_drv_handler[0]))
+  if (cmd < nitems(g_net_rpmsg_drv_handler))
     {
-      return g_net_rpmsg_drv_handler[command](ept, data, len, src, priv);
+      if (NET_RPMSG_IS_RESPONSE(header->command))
+        {
+          return g_net_rpmsg_drv_response[cmd](ept, data, len, src, priv);
+        }
+      else
+        {
+          return g_net_rpmsg_drv_handler[cmd](ept, data, len, src, priv);
+        }
     }
 
   return -EINVAL;
 }
 
-static int net_rpmsg_drv_send_recv(FAR struct net_driver_s *dev,
+static int net_rpmsg_drv_send_recv(FAR struct netdev_lowerhalf_s *dev,
                                    FAR void *header_, uint32_t command,
                                    int len)
 {
-  FAR struct net_rpmsg_drv_s *priv = dev->d_private;
+  FAR struct net_rpmsg_drv_s *drv =
+                              container_of(dev, struct net_rpmsg_drv_s, dev);
   FAR struct net_rpmsg_header_s *header = header_;
   FAR struct net_rpmsg_drv_cookie_s cookie;
+  int sval = 0;
   int ret;
+
+  nxsem_get_value(&drv->wait, &sval);
+  if (sval <= 0)
+    {
+      rpmsg_wait(&drv->ept, &drv->wait);
+      rpmsg_post(&drv->ept, &drv->wait);
+    }
 
   nxsem_init(&cookie.sem, 0, 0);
 
@@ -623,13 +616,14 @@ static int net_rpmsg_drv_send_recv(FAR struct net_driver_s *dev,
   header->result  = -ENXIO;
   header->cookie  = (uintptr_t)&cookie;
 
-  ret = rpmsg_send(&priv->ept, header, len);
+  ret = rpmsg_send(&drv->ept, header, len);
   if (ret < 0)
     {
       goto out;
     }
 
-  net_rpmsg_drv_wait(&cookie.sem);
+  net_sem_timedwait2(&cookie.sem, false, UINT_MAX, &dev->netdev.d_lock,
+                     NULL);
   ret = cookie.header->result;
 
 out:
@@ -655,8 +649,10 @@ out:
  *
  ****************************************************************************/
 
-static int net_rpmsg_drv_ifup(FAR struct net_driver_s *dev)
+static int net_rpmsg_drv_ifup(FAR struct netdev_lowerhalf_s *dev)
 {
+  FAR struct net_rpmsg_drv_s *drv =
+                              container_of(dev, struct net_rpmsg_drv_s, dev);
   struct net_rpmsg_ifup_s msg =
   {
   };
@@ -665,33 +661,34 @@ static int net_rpmsg_drv_ifup(FAR struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_IPv4
   ninfo("Bringing up: %u.%u.%u.%u\n",
-        ip4_addr1(dev->d_ipaddr), ip4_addr2(dev->d_ipaddr),
-        ip4_addr3(dev->d_ipaddr), ip4_addr4(dev->d_ipaddr));
+        ip4_addr1(dev->netdev.d_ipaddr), ip4_addr2(dev->netdev.d_ipaddr),
+        ip4_addr3(dev->netdev.d_ipaddr), ip4_addr4(dev->netdev.d_ipaddr));
 #endif
 #ifdef CONFIG_NET_IPv6
   ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
+        dev->netdev.d_ipv6addr[0], dev->netdev.d_ipv6addr[1],
+        dev->netdev.d_ipv6addr[2], dev->netdev.d_ipv6addr[3],
+        dev->netdev.d_ipv6addr[4], dev->netdev.d_ipv6addr[5],
+        dev->netdev.d_ipv6addr[6], dev->netdev.d_ipv6addr[7]);
 #endif
 
-  net_lock();
+  netdev_lock(&dev->netdev);
 
   /* Prepare the message */
 
-  msg.lnkaddr.length = netdev_lladdrsize(dev);
-  memcpy(msg.lnkaddr.addr, &dev->d_mac, msg.lnkaddr.length);
+  msg.lnkaddr.length = netdev_lladdrsize(&dev->netdev);
+  memcpy(msg.lnkaddr.addr, &dev->netdev.d_mac, msg.lnkaddr.length);
 
 #ifdef CONFIG_NET_IPv4
-  net_ipv4addr_copy(msg.ipaddr, dev->d_ipaddr);
-  net_ipv4addr_copy(msg.draddr, dev->d_draddr);
-  net_ipv4addr_copy(msg.netmask, dev->d_netmask);
+  net_ipv4addr_copy(msg.ipaddr, dev->netdev.d_ipaddr);
+  net_ipv4addr_copy(msg.draddr, dev->netdev.d_draddr);
+  net_ipv4addr_copy(msg.netmask, dev->netdev.d_netmask);
 #endif
 
 #ifdef CONFIG_NET_IPv6
-  net_ipv6addr_copy(msg.ipv6addr, dev->d_ipv6addr);
-  net_ipv6addr_copy(msg.ipv6draddr, dev->d_ipv6draddr);
-  net_ipv6addr_copy(msg.ipv6netmask, dev->d_ipv6netmask);
+  net_ipv6addr_copy(msg.ipv6addr, dev->netdev.d_ipv6addr);
+  net_ipv6addr_copy(msg.ipv6draddr, dev->netdev.d_ipv6draddr);
+  net_ipv6addr_copy(msg.ipv6netmask, dev->netdev.d_ipv6netmask);
 #endif
 
   /* Send the message */
@@ -699,27 +696,27 @@ static int net_rpmsg_drv_ifup(FAR struct net_driver_s *dev)
   ret = net_rpmsg_drv_send_recv(dev, &msg, NET_RPMSG_IFUP, sizeof(msg));
   if (ret < 0)
     {
-      net_unlock();
+      netdev_unlock(&dev->netdev);
       return ret;
     }
 
   /* Update net_driver_t field */
 
-  memcpy(&dev->d_mac, msg.lnkaddr.addr, msg.lnkaddr.length);
+  memcpy(&dev->netdev.d_mac, msg.lnkaddr.addr, msg.lnkaddr.length);
 
 #ifdef CONFIG_NET_IPv4
-  net_ipv4addr_copy(dev->d_ipaddr, msg.ipaddr);
-  net_ipv4addr_copy(dev->d_draddr, msg.draddr);
-  net_ipv4addr_copy(dev->d_netmask, msg.netmask);
+  net_ipv4addr_copy(dev->netdev.d_ipaddr, msg.ipaddr);
+  net_ipv4addr_copy(dev->netdev.d_draddr, msg.draddr);
+  net_ipv4addr_copy(dev->netdev.d_netmask, msg.netmask);
 #endif
 
 #ifdef CONFIG_NET_IPv6
-  net_ipv6addr_copy(dev->d_ipv6addr, msg.ipv6addr);
-  net_ipv6addr_copy(dev->d_ipv6draddr, msg.ipv6draddr);
-  net_ipv6addr_copy(dev->d_ipv6netmask, msg.ipv6netmask);
+  net_ipv6addr_copy(dev->netdev.d_ipv6addr, msg.ipv6addr);
+  net_ipv6addr_copy(dev->netdev.d_ipv6draddr, msg.ipv6draddr);
+  net_ipv6addr_copy(dev->netdev.d_ipv6netmask, msg.ipv6netmask);
 #endif
 
-  net_unlock();
+  netdev_unlock(&dev->netdev);
 
 #ifdef CONFIG_NETDB_DNSCLIENT
 #  ifdef CONFIG_NET_IPv4
@@ -755,6 +752,11 @@ static int net_rpmsg_drv_ifup(FAR struct net_driver_s *dev)
 #  endif
 #endif
 
+  if (drv->cb != NULL)
+    {
+      drv->cb(dev, NET_RPMSG_EVENT_IF_UP);
+    }
+
   return OK;
 }
 
@@ -775,120 +777,28 @@ static int net_rpmsg_drv_ifup(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int net_rpmsg_drv_ifdown(FAR struct net_driver_s *dev)
+static int net_rpmsg_drv_ifdown(FAR struct netdev_lowerhalf_s *dev)
 {
-  FAR struct net_rpmsg_drv_s *priv = dev->d_private;
-  FAR struct net_rpmsg_ifdown_s msg;
+  FAR struct net_rpmsg_drv_s *drv =
+                              container_of(dev, struct net_rpmsg_drv_s, dev);
+  struct net_rpmsg_ifdown_s msg =
+  {
+  };
 
-  work_cancel(LPWORK, &priv->pollwork);
+  int ret;
 
-  /* Put the EMAC in its reset, non-operational state.  This should be
-   * a known configuration that will guarantee the net_rpmsg_drv_ifup()
-   * always successfully brings the interface back up.
-   */
-
-  return net_rpmsg_drv_send_recv(dev, &msg, NET_RPMSG_IFDOWN, sizeof(msg));
-}
-
-/****************************************************************************
- * Name: net_rpmsg_drv_txavail_work
- *
- * Description:
- *   Perform an out-of-cycle poll on the worker thread.
- *
- * Parameters:
- *   arg - Reference to the NuttX driver state structure (cast to void*)
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Runs on a work queue thread.
- *
- ****************************************************************************/
-
-static void net_rpmsg_drv_txavail_work(FAR void *arg)
-{
-  FAR struct net_driver_s *dev = arg;
-  FAR struct net_rpmsg_drv_s *priv = dev->d_private;
-  uint32_t size;
-
-  /* Lock the network and serialize driver operations if necessary.
-   * NOTE: Serialization is only required in the case where the driver work
-   * is performed on an LP worker thread and where more than one LP worker
-   * thread has been configured.
-   */
-
-  net_lock();
-
-  /* Ignore the notification if the interface is not yet up */
-
-  if (IFF_IS_UP(dev->d_flags))
+  ret = net_rpmsg_drv_send_recv(dev, &msg, NET_RPMSG_IFDOWN, sizeof(msg));
+  if (ret < 0)
     {
-      /* Try to get the payload buffer if not yet */
-
-      if (dev->d_buf == NULL)
-        {
-          dev->d_buf = rpmsg_get_tx_payload_buffer(&priv->ept, &size, false);
-          if (dev->d_buf)
-            {
-              dev->d_buf += sizeof(struct net_rpmsg_transfer_s);
-              dev->d_pktsize = size - sizeof(struct net_rpmsg_transfer_s);
-            }
-        }
-
-      /* Check if there is room in the hardware to hold another outgoing
-       * packet.
-       */
-
-      if (dev->d_buf)
-        {
-          /* If so, then poll the network for new XMIT data */
-
-          devif_poll(dev, net_rpmsg_drv_txpoll);
-        }
+      return ret;
     }
 
-  net_unlock();
-}
-
-/****************************************************************************
- * Name: net_rpmsg_drv_txavail
- *
- * Description:
- *   Driver callback invoked when new TX data is available.  This is a
- *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
- *   latency.
- *
- * Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static int net_rpmsg_drv_txavail(FAR struct net_driver_s *dev)
-{
-  FAR struct net_rpmsg_drv_s *priv = dev->d_private;
-
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions and we will have to ignore the Tx
-   * availability action.
-   */
-
-  if (work_available(&priv->pollwork))
+  if (drv->cb != NULL)
     {
-      /* Schedule to serialize the poll on the worker thread. */
-
-      work_queue(LPWORK, &priv->pollwork, net_rpmsg_drv_txavail_work,
-                 dev, 0);
+      drv->cb(dev, NET_RPMSG_EVENT_IF_DOWN);
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -907,19 +817,18 @@ static int net_rpmsg_drv_txavail(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_ICMPv6)
-static int net_rpmsg_drv_addmac(FAR struct net_driver_s *dev,
+#ifdef CONFIG_NET_MCASTGROUP
+static int net_rpmsg_drv_addmac(FAR struct netdev_lowerhalf_s *dev,
                                 FAR const uint8_t *mac)
 {
   struct net_rpmsg_mcast_s msg;
 
   /* Add the MAC address to the hardware multicast routing table */
 
-  msg.lnkaddr.length = netdev_lladdrsize(dev);
+  msg.lnkaddr.length = netdev_lladdrsize(&dev->netdev);
   memcpy(msg.lnkaddr.addr, mac, msg.lnkaddr.length);
   return net_rpmsg_drv_send_recv(dev, &msg, NET_RPMSG_ADDMCAST, sizeof(msg));
 }
-#endif
 
 /****************************************************************************
  * Name: net_rpmsg_drv_rmmac
@@ -937,15 +846,14 @@ static int net_rpmsg_drv_addmac(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_IGMP
-static int net_rpmsg_drv_rmmac(FAR struct net_driver_s *dev,
+static int net_rpmsg_drv_rmmac(FAR struct netdev_lowerhalf_s *dev,
                                FAR const uint8_t *mac)
 {
   struct net_rpmsg_mcast_s msg;
 
   /* Remove the MAC address from the hardware multicast routing table */
 
-  msg.lnkaddr.length = netdev_lladdrsize(dev);
+  msg.lnkaddr.length = netdev_lladdrsize(&dev->netdev);
   memcpy(msg.lnkaddr.addr, mac, msg.lnkaddr.length);
   return net_rpmsg_drv_send_recv(dev, &msg, NET_RPMSG_RMMCAST, sizeof(msg));
 }
@@ -971,7 +879,7 @@ static int net_rpmsg_drv_rmmac(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_IOCTL
-static int net_rpmsg_drv_ioctl(FAR struct net_driver_s *dev, int cmd,
+static int net_rpmsg_drv_ioctl(FAR struct netdev_lowerhalf_s *dev, int cmd,
                                unsigned long arg)
 {
   ssize_t len;
@@ -1006,6 +914,93 @@ static int net_rpmsg_drv_ioctl(FAR struct net_driver_s *dev, int cmd,
 #endif
 
 /****************************************************************************
+ * Name: net_rpmsg_drv_alloc
+ ****************************************************************************/
+
+static FAR struct net_rpmsg_drv_s *
+net_rpmsg_drv_alloc(FAR const char *devname, enum net_lltype_e lltype)
+{
+  FAR struct net_rpmsg_drv_s *drv = kmm_zalloc(sizeof(*drv));
+  FAR struct netdev_lowerhalf_s *netdev;
+
+  if (!drv)
+    {
+      return NULL;
+    }
+
+  netdev = &drv->dev;
+  netdev->quota[NETPKT_RX] = CONFIG_IOB_NBUFFERS /
+                             NET_RPMSG_DRV_MAX_NIOB / 4;
+  netdev->quota[NETPKT_TX] = 1;
+  netdev->ops = &g_net_rpmsg_drv_ops;
+
+  drv->ept.priv = drv;
+  drv->ept.release_cb = net_rpmsg_drv_ept_release;
+  drv->ept.ns_bound_cb = net_rpmsg_drv_ns_bound;
+
+  nxsem_init(&drv->wait, 0, 0);
+  spin_lock_init(&drv->lock);
+
+  /* Init a random MAC address, the caller can override it. */
+
+  arc4random_buf(&netdev->netdev.d_mac.ether.ether_addr_octet,
+                 sizeof(netdev->netdev.d_mac.ether.ether_addr_octet));
+
+  strlcpy(netdev->netdev.d_ifname, devname, IFNAMSIZ);
+
+  netdev_lower_register(netdev, lltype);
+
+  return drv;
+}
+
+#ifdef CONFIG_NET_RPMSG_DRV_SERVER
+/****************************************************************************
+ * Name: net_rpmsg_drv_ns_match
+ ****************************************************************************/
+
+static bool net_rpmsg_drv_ns_match(FAR struct rpmsg_device *rdev,
+                                   FAR void *priv, FAR const char *name,
+                                   uint32_t dest)
+{
+  return !strncmp(name, NET_RPMSG_EPT_PREFIX, strlen(NET_RPMSG_EPT_PREFIX));
+}
+
+/****************************************************************************
+ * Name: net_rpmsg_drv_ns_bind
+ ****************************************************************************/
+
+static void net_rpmsg_drv_ns_bind(FAR struct rpmsg_device *rdev,
+                                  FAR void *priv_, FAR const char *name,
+                                  uint32_t dest)
+{
+  FAR struct net_rpmsg_drv_s *drv;
+  FAR struct net_driver_s *dev;
+  const char *devname = name + strlen(NET_RPMSG_EPT_PREFIX);
+
+  dev = netdev_findbyname(devname);
+  if (dev)
+    {
+      drv = container_of(dev, struct net_rpmsg_drv_s, dev.netdev);
+      drv->ept.priv = drv;
+      drv->ept.release_cb = net_rpmsg_drv_ept_release;
+      drv->ept.ns_bound_cb = net_rpmsg_drv_ns_bound;
+    }
+  else
+    {
+      drv = net_rpmsg_drv_alloc(devname, NET_LL_ETHERNET);
+      if (!drv)
+        {
+          return;
+        }
+    }
+
+  rpmsg_create_ept(&drv->ept, rdev, name, RPMSG_ADDR_ANY, dest,
+                   net_rpmsg_drv_ept_cb, rpmsg_destroy_ept);
+  rpmsg_post(&drv->ept, &drv->wait);
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1013,82 +1008,97 @@ static int net_rpmsg_drv_ioctl(FAR struct net_driver_s *dev, int cmd,
  * Name: net_rpmsg_drv_init
  *
  * Description:
- *   Initialize the net rpmsg driver
+ *   Allocate a new network device instance for the RPMSG network and
+ *   register it with the network device manager.  This is the client side of
+ *   the RPMSG driver.  The RPMSG driver is the server side of the driver.
  *
  * Parameters:
- *   name - Specify the netdev name
- *   lltype - Identify the link type
+ *   cpuname    - Remote CPU name
+ *   devname    - Local and remote network device name
+ *   lltype     - Link layer type
  *
  * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *   Called early in initialization before multi-tasking is initiated.
+ *   A pointer to the allocated network device instance.  NULL is returned on
+ *   failure.
  *
  ****************************************************************************/
 
-int net_rpmsg_drv_init(FAR const char *cpuname,
-                       FAR const char *devname,
-                       enum net_lltype_e lltype)
+FAR struct netdev_lowerhalf_s *
+net_rpmsg_drv_init(FAR const char *cpuname, FAR const char *devname,
+                   enum net_lltype_e lltype)
 {
-  FAR struct net_rpmsg_drv_s *priv;
-  FAR struct net_driver_s *dev;
+  FAR struct net_rpmsg_drv_s *drv;
+  FAR struct netdev_lowerhalf_s *dev;
   int ret;
 
   /* Allocate the interface structure */
 
-  priv = kmm_zalloc(sizeof(*priv));
-  if (priv == NULL)
+  if (!devname || !cpuname ||
+      !(drv = net_rpmsg_drv_alloc(devname, lltype)))
     {
-      return -ENOMEM;
+      return NULL;
     }
 
-  dev = &priv->dev;
+  strlcpy(drv->cpuname, cpuname, RPMSG_NAME_SIZE);
 
-  priv->cpuname = cpuname;
-  priv->devname = devname;
-
-  /* Initialize the driver structure */
-
-  strlcpy(dev->d_ifname, devname, sizeof(dev->d_ifname));
-  dev->d_ifup    = net_rpmsg_drv_ifup;    /* I/F up (new IP address) callback */
-  dev->d_ifdown  = net_rpmsg_drv_ifdown;  /* I/F down callback */
-  dev->d_txavail = net_rpmsg_drv_txavail; /* New TX data callback */
-#ifdef CONFIG_NET_IGMP
-  dev->d_addmac  = net_rpmsg_drv_addmac;  /* Add multicast MAC address */
-  dev->d_rmmac   = net_rpmsg_drv_rmmac;   /* Remove multicast MAC address */
-#endif
-#ifdef CONFIG_NETDEV_IOCTL
-  dev->d_ioctl   = net_rpmsg_drv_ioctl;   /* Handle network IOCTL commands */
-#endif
-  dev->d_private = priv;                  /* Used to recover private state from dev */
+  dev = &drv->dev;
 
   /* Register the device with the openamp */
 
-  ret = rpmsg_register_callback(dev,
-                          net_rpmsg_drv_device_created,
-                          net_rpmsg_drv_device_destroy,
-                          NULL,
-                          NULL);
+  ret = rpmsg_register_callback(drv,
+                                net_rpmsg_drv_device_created,
+                                net_rpmsg_drv_device_destroy,
+                                NULL,
+                                NULL);
 
   if (ret < 0)
     {
-      kmm_free(priv);
-      return ret;
+      netdev_lower_unregister(dev);
+      nxsem_destroy(&drv->wait);
+      kmm_free(drv);
+      return NULL;
     }
 
-  /* Register the device with the OS so that socket IOCTLs can be performed */
-
-  ret = netdev_register(dev, lltype);
-  if (ret < 0)
-    {
-      rpmsg_unregister_callback(dev,
-                          net_rpmsg_drv_device_created,
-                          net_rpmsg_drv_device_destroy,
-                          NULL,
-                          NULL);
-      kmm_free(priv);
-    }
-
-  return ret;
+  return dev;
 }
+
+/****************************************************************************
+ * Name: net_rpmsg_drv_priv
+ ****************************************************************************/
+
+FAR void *net_rpmsg_drv_priv(FAR struct netdev_lowerhalf_s *dev)
+{
+  FAR struct net_rpmsg_drv_s *drv =
+                              container_of(dev, struct net_rpmsg_drv_s, dev);
+
+  return drv->priv;
+}
+
+/****************************************************************************
+ * Name: net_rpmsg_drv_set_callback
+ ****************************************************************************/
+
+void net_rpmsg_drv_set_callback(FAR struct netdev_lowerhalf_s *dev,
+                                net_rpmsg_drv_cb_t cb, FAR void *priv)
+{
+  FAR struct net_rpmsg_drv_s *drv =
+                              container_of(dev, struct net_rpmsg_drv_s, dev);
+
+  drv->cb = cb;
+  drv->priv = priv;
+}
+
+#ifdef CONFIG_NET_RPMSG_DRV_SERVER
+/****************************************************************************
+ * Name: net_rpmsg_drv_server_init
+ ****************************************************************************/
+
+int net_rpmsg_drv_server_init(void)
+{
+  return rpmsg_register_callback(NULL,
+                                 NULL,
+                                 NULL,
+                                 net_rpmsg_drv_ns_match,
+                                 net_rpmsg_drv_ns_bind);
+}
+#endif

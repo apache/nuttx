@@ -515,7 +515,7 @@ int32_t ipv6_fragin(FAR struct net_driver_s *dev)
        */
 
       ipv6_fragin_reassemble(node);
-      netdev_iob_replace(dev, node->outgoframe);
+      netdev_iob_replace_l2(dev, node->outgoframe);
 
       /* Free the memory of node */
 

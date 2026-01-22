@@ -220,6 +220,10 @@ if(CONFIG_LIBCXX)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-D_LIBCPP_DISABLE_AVAILABILITY>)
 endif()
 
+if(CONFIG_LIBCXX_TEST)
+  add_link_options(-Wl,-latomic)
+endif()
+
 if(APPLE)
   add_link_options(-Wl,-dead_strip)
 else()

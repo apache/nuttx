@@ -188,7 +188,7 @@ static int optname_to_native(int optname)
 
       default:
         syslog(LOG_ERR, "Invalid optname: %x\n", optname);
-        return -1;
+        return -ENOPROTOOPT;
     }
 }
 
@@ -197,6 +197,10 @@ static int host_usrsock_sockopt(int sockfd, int level, int optname,
                                 bool set)
 {
   int ret = -EINVAL;
+
+  /* For the parameters that nuttx does not support,
+   * return the ENOPROTOOPT.
+   */
 
   if (level == NUTTX_SOL_SOCKET)
     {
@@ -216,13 +220,13 @@ static int host_usrsock_sockopt(int sockfd, int level, int optname,
     }
   else
     {
-      return ret;
+      return -ENOPROTOOPT;
     }
 
   optname = optname_to_native(optname);
   if (optname < 0)
     {
-      return ret;
+      return optname;
     }
 
   if (set)
@@ -262,6 +266,10 @@ int host_usrsock_socket(int domain, int type, int protocol)
   else if (type == NUTTX_SOCK_DGRAM)
     {
       type = SOCK_DGRAM;
+    }
+  else if (type == NUTTX_SOCK_RAW)
+    {
+      type = SOCK_RAW;
     }
   else
     {

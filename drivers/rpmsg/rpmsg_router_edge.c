@@ -683,15 +683,34 @@ static int rpmsg_router_cb(FAR struct rpmsg_endpoint *ept,
   if (msg->cmd == RPMSG_ROUTER_DESTROY)
     {
       edge = ept->priv;
-
-      if (edge)
+      if (edge == NULL)
         {
-          rpmsg_router_edge_destroy(edge);
-          ept->priv = NULL;
-          return 0;
+          return -EINVAL;
         }
 
-      return -EINVAL;
+      rpmsg_router_edge_destroy(edge);
+      ept->priv = NULL;
+      return 0;
+    }
+  else if (msg->cmd == RPMSG_ROUTER_SUSPEND ||
+           msg->cmd == RPMSG_ROUTER_RESUME)
+    {
+      edge = ept->priv;
+      if (edge == NULL)
+        {
+          return -EINVAL;
+        }
+
+      if (msg->cmd == RPMSG_ROUTER_SUSPEND)
+        {
+          rpmsg_modify_signals(&edge->rpmsg, 0, RPMSG_SIGNAL_RUNNING);
+        }
+      else
+        {
+          rpmsg_modify_signals(&edge->rpmsg, RPMSG_SIGNAL_RUNNING, 0);
+        }
+
+      return 0;
     }
 
   /* Create the router edge device */

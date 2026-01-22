@@ -189,20 +189,12 @@ config MTD_CONFIG_NAME_LEN
 config MTD_CONFIG_FAIL_SAFE
 	bool "Enable Fail Safe MTD Config"
 	default n
-	depends on MTD_BYTE_WRITE
 	---help---
 		Enable the new storage layout to support the resilient to power loss.
 		This replaces the drivers/mtd/mtd_config, which
 		is resilient to power loss.
 
-config MTD_WRITE_ALIGN_SIZE
-	int "align size [1,2,4,8,16] for per write operation"
-	default 1
-	depends on MTD_CONFIG_FAIL_SAFE
-	---help---
-		align size will be one of 1,2,4,8,16
-
-config MTD_BLOCKSIZE_MULTIPLE
+config MTD_CONFIG_BLOCKSIZE_MULTIPLE
 	int "Set NVS blocksize multiple"
 	default 1
 	depends on MTD_CONFIG_FAIL_SAFE
@@ -1503,4 +1495,17 @@ config MTD_CFI
 	---help---
 		Support CFI(common flash interface) NOR FLASH.
 
+config MTD_CFI_PAGE_SIZE
+	int "Page Size of MTD CFI NOR FLASH (bytes)"
+	default 16
+	range 1 524288
+	depends on MTD_CFI
+	---help---
+		Configure the write page size (in bytes) used by the CFI NOR Flash
+		driver. The value must be at least 1 and should not exceed the maximum
+		write buffer size supported by the CFI device.
+		In the driver, this capability is typically exposed as the device's
+		"write page size" parameter for each write, so this configuration
+		value should be chosen such that it is equal to write page size for
+		the target flash.
 endif # MTD

@@ -113,7 +113,7 @@
  */
 
 	.text
-	.section    .text.exception_common
+	.section    .text.exception_common, "ax"
 #ifdef __ghs__
 	.type	exception_common, $function
 #else

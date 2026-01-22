@@ -1318,7 +1318,7 @@ void up_trigger_irq(int irq, cpu_set_t cpuset)
 }
 
 /****************************************************************************
- * Name: arm64_gicv_irq_trigger
+ * Name: up_set_irq_type
  *
  * Description:
  *   Set the trigger type for the specified IRQ source and the current CPU.
@@ -1327,31 +1327,36 @@ void up_trigger_irq(int irq, cpu_set_t cpuset)
  *   avoided in common implementations where possible.
  *
  * Input Parameters:
- *   irq - The interrupt request to modify.
- *   edge - False: Active HIGH level sensitive, True: Rising edge sensitive
+ *   irq  - The interrupt request to modify.
+ *   mode - Level sensitive or edge sensitive
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value is returned on any failure.
  *
  ****************************************************************************/
 
-int arm64_gicv_irq_trigger(int irq, bool edge)
+int up_set_irq_type(int irq, int mode)
 {
   uintptr_t regaddr;
   uint32_t regval;
   uint32_t intcfg;
 
-  if (irq > GIC_IRQ_SGI15 && irq < NR_IRQS)
+  if (!GIC_IS_SGI(irq))
     {
+      if (mode == IRQ_HIGH_LEVEL || mode == IRQ_LOW_LEVEL)
+        {
+          intcfg = INT_ICDICFR_1N;
+        }
+      else
+        {
+          intcfg = INT_ICDICFR_EDGE | INT_ICDICFR_1N;
+        }
+
       /* Get the address of the Interrupt Configuration Register for this
        * irq.
        */
 
       regaddr = GIC_ICDICFR(irq);
-
-      /* Get the new Interrupt configuration bit setting */
-
-      intcfg = (edge ? (INT_ICDICFR_EDGE | INT_ICDICFR_1N) : INT_ICDICFR_1N);
 
       /* Write the correct interrupt trigger to the Interrupt Configuration
        * Register.
@@ -1366,56 +1371,6 @@ int arm64_gicv_irq_trigger(int irq, bool edge)
     }
 
   return -EINVAL;
-}
-
-/****************************************************************************
- * Name: arm64_gic_irq_set_priority
- *
- * Description:
- *   Set the interrupt priority and type.
- *
- *   If CONFIG_SMP is not selected, the cpuset is ignored and SGI is sent
- *   only to the current CPU.
- *
- * Input Parameters
- *   intid  - The SGI interrupt ID (0-15)
- *   prio   - The interrupt priority
- *   flags  - Bit IRQ_TYPE_EDGE is 1 if interrupt should be edge-triggered
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void arm64_gic_irq_set_priority(unsigned int intid, unsigned int prio,
-                                uint32_t flags)
-{
-  int ret;
-
-  /* Disable the interrupt */
-
-  up_disable_irq(intid);
-
-  /* Set the interrupt priority */
-
-  ret = up_prioritize_irq(intid, prio);
-  DEBUGASSERT(ret == OK);
-
-  /* Configure interrupt type */
-
-  if (!GIC_IS_SGI(intid))
-    {
-      if (flags & IRQ_TYPE_EDGE)
-        {
-          ret = arm64_gicv_irq_trigger(intid, true);
-          DEBUGASSERT(ret == OK);
-        }
-      else
-        {
-          ret = arm64_gicv_irq_trigger(intid, false);
-          DEBUGASSERT(ret == OK);
-        }
-    }
 }
 
 /****************************************************************************

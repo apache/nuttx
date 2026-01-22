@@ -3258,7 +3258,6 @@ config SAMV7_EMAC0_MII
 
 config SAMV7_EMAC0_RMII
 	bool "RMII"
-	depends on !ARCH_CHIP_SAM4E
 	---help---
 		Support Ethernet RMII interface (vs MII).
 

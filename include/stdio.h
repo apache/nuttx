@@ -87,7 +87,7 @@
 
 /* The maximum number of unique temporary file names that can be generated */
 
-#define TMP_MAX 56800235584ull
+#define TMP_MAX 308915776
 
 #if defined(CONFIG_FS_LARGEFILE)
 #  define tmpfile64 tmpfile
@@ -163,7 +163,7 @@ int    fscanf(FAR FILE *stream, FAR const IPTR char *fmt, ...)
        scanf_like(2, 3);
 int    fseek(FAR FILE *stream, long int offset, int whence);
 int    fseeko(FAR FILE *stream, off_t offset, int whence);
-int    fsetpos(FAR FILE *stream, FAR fpos_t *pos);
+int    fsetpos(FAR FILE *stream, FAR const fpos_t *pos);
 long   ftell(FAR FILE *stream);
 off_t  ftello(FAR FILE *stream);
 size_t fwrite(FAR const void *ptr, size_t size, size_t n_items,

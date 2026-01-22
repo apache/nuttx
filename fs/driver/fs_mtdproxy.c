@@ -40,7 +40,6 @@
 #include <nuttx/mutex.h>
 
 #include "driver/driver.h"
-#include "fs_heap.h"
 
 /****************************************************************************
  * Private Data
@@ -62,19 +61,17 @@ static mutex_t g_devno_lock = NXMUTEX_INITIALIZER;
  *   attempt to open() the file.
  *
  * Input Parameters:
- *   None
+ *   devbuf - Buffer to store the generated device name
+ *   len    - Length of the buffer
  *
  * Returned Value:
- *   The allocated path to the device.  This must be released by the caller
- *   to prevent memory links.  NULL will be returned only the case where
- *   we fail to allocate memory.
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-static FAR char *unique_blkdev(void)
+static int unique_blkdev(FAR char *devbuf, size_t len)
 {
   struct stat statbuf;
-  char devbuf[16];
   uint32_t devno;
   int ret;
 
@@ -88,7 +85,7 @@ static FAR char *unique_blkdev(void)
       if (ret < 0)
         {
           ferr("ERROR: nxmutex_lock failed: %d\n", ret);
-          return NULL;
+          return ret;
         }
 
       /* Get the next device number and release the semaphore */
@@ -99,8 +96,7 @@ static FAR char *unique_blkdev(void)
       /* Construct the full device number */
 
       devno &= 0xffffff;
-      snprintf(devbuf, sizeof(devbuf), "/dev/tmpb%06lx",
-               (unsigned long)devno);
+      snprintf(devbuf, len, "/dev/tmpb%06lx", (unsigned long)devno);
 
       /* Make sure that file name is not in use */
 
@@ -108,7 +104,7 @@ static FAR char *unique_blkdev(void)
       if (ret < 0)
         {
           DEBUGASSERT(ret == -ENOENT);
-          return fs_heap_strdup(devbuf);
+          return OK;
         }
 
       /* It is in use, try again */
@@ -143,17 +139,17 @@ static FAR char *unique_blkdev(void)
 int mtd_proxy(FAR const char *mtddev, int mountflags,
               FAR struct inode **ppinode)
 {
+  char blkdev[16];
   FAR struct inode *mtd;
-  FAR char *blkdev;
   int ret;
 
   /* Create a unique temporary file name for the block device */
 
-  blkdev = unique_blkdev();
-  if (blkdev == NULL)
+  ret = unique_blkdev(blkdev, sizeof(blkdev));
+  if (ret != OK)
     {
       ferr("ERROR: Failed to create temporary device name\n");
-      return -ENOMEM;
+      return ret;
     }
 
   /* Wrap the mtd driver with an instance of the ftl driver */
@@ -162,7 +158,7 @@ int mtd_proxy(FAR const char *mtddev, int mountflags,
   if (ret < 0)
     {
       ferr("ERROR: Failed to find %s mtd driver\n", mtddev);
-      goto out_with_blkdev;
+      return ret;
     }
 
   ret = ftl_initialize_by_path(blkdev, mtd->u.i_mtd, mountflags);
@@ -171,7 +167,7 @@ int mtd_proxy(FAR const char *mtddev, int mountflags,
     {
       ferr("ERROR: ftl_initialize_by_path(%s, %s) failed: %d\n",
            mtddev, blkdev, ret);
-      goto out_with_blkdev;
+      return ret;
     }
 
   /* Open the newly created block driver */
@@ -180,7 +176,8 @@ int mtd_proxy(FAR const char *mtddev, int mountflags,
   if (ret < 0)
     {
       ferr("ERROR: Failed to open %s: %d\n", blkdev, ret);
-      goto out_with_fltdev;
+      nx_unlink(blkdev);
+      return ret;
     }
 
   /* Unlink and free the block device name.  The driver instance will
@@ -188,9 +185,11 @@ int mtd_proxy(FAR const char *mtddev, int mountflags,
    * we have a problem here!)
    */
 
-out_with_fltdev:
-  nx_unlink(blkdev);
-out_with_blkdev:
-  fs_heap_free(blkdev);
+  ret = nx_unlink(blkdev);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to unlink %s: %d\n", blkdev, ret);
+    }
+
   return ret;
 }

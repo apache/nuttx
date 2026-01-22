@@ -29,7 +29,6 @@ choice
 config LIBCXXTOOLCHAIN
 	bool "Toolchain C++ support"
 	select HAVE_CXXINITIALIZE
-	select LIBC_LOCALE
 	---help---
 		Use Standard C++ library from toolchain.
 
@@ -75,6 +74,7 @@ choice
 
 config LIBCXXABI
 	bool "LLVM low level C++ Library"
+	select SCHED_THREAD_LOCAL
 	---help---
 		LLVM "libc++abi" C++ Standard Library
 		https://libcxxabi.llvm.org/
@@ -100,10 +100,11 @@ config LIBCXXABI_VERSION
 	string "Select libcxxabi version"
 	depends on LIBCXXABI
 	default LIBCXX_VERSION if LIBCXX
-	default "21.1.8" if !LIBCXX
+	default "19.1.7" if !LIBCXX
 
 config CXX_STANDARD
 	string "Language standard"
+	default "c++14"   if TRICORE_TOOLCHAIN_TASKING
 	default "gnu++23" if LIBCXX
 	default "gnu++17" if !LIBCXX
 	---help---
@@ -119,9 +120,21 @@ config CXX_RTTI
 config CXX_WCHAR
 	bool "Enable Wide Character Support"
 
+choice
+	prompt "C++ Locale and Stream select"
+	default CXX_NO_LOCALIZATION
+
+config CXX_NO_LOCALIZATION
+	bool "No Locale and Stream Support"
+
+config CXX_MINI_LOCALIZATION
+	bool "Enable mini Locale and Stream Support"
+
 config CXX_LOCALIZATION
 	bool "Enable Locale and Stream Support"
 	depends on LIBC_LOCALE
+
+endchoice
 
 if UCLIBCXX
 
@@ -134,6 +147,11 @@ endif
 config LIBCXX_VERSION
 	string "Select libcxx version"
 	depends on LIBCXX
-	default "21.1.8"
+	default "19.1.7"
+
+config LIBCXX_TEST
+	bool "LLVM Libcxx Library Test"
+	depends on LIBCXX && CXX_EXCEPTION
+	default n
 
 endif

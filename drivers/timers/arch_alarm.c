@@ -26,6 +26,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/timers/arch_alarm.h>
@@ -33,6 +35,10 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifndef CONFIG_BOARD_LOOPSPERMSEC
+#  define CONFIG_BOARD_LOOPSPERMSEC 0
+#endif
 
 #define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
 #define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
@@ -55,6 +61,8 @@ static clock_t g_current_tick;
 static void udelay_coarse(useconds_t microseconds)
 {
   volatile int i;
+
+  DEBUGASSERT(CONFIG_BOARD_LOOPSPERMSEC != 0);
 
   /* We'll do this a little at a time because we expect that the
    * CONFIG_BOARD_LOOPSPERUSEC is very inaccurate during to truncation in
@@ -119,7 +127,7 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
                              FAR void *arg)
 {
 #ifdef CONFIG_SCHED_TICKLESS
-  nxsched_timer_expiration();
+  nxsched_process_timer();
 #else
   clock_t now;
 
@@ -301,7 +309,7 @@ int weak_function up_timer_gettime(struct timespec *ts)
  * Description:
  *   Cancel the alarm and return the time of cancellation of the alarm.
  *   These two steps need to be as nearly atomic as possible.
- *   nxsched_timer_expiration() will not be called unless the alarm is
+ *   nxsched_process_timer() will not be called unless the alarm is
  *   restarted with up_alarm_start().
  *
  *   If, as a race condition, the alarm has already expired when this
@@ -360,14 +368,14 @@ int weak_function up_alarm_tick_cancel(FAR clock_t *ticks)
  * Name: up_alarm_start
  *
  * Description:
- *   Start the alarm.  nxsched_timer_expiration() will be called when the
+ *   Start the alarm.  nxsched_process_timer() will be called when the
  *   alarm occurs (unless up_alaram_cancel is called to stop it).
  *
  *   Provided by platform-specific code and called from the RTOS base code.
  *
  * Input Parameters:
  *   ts - The time in the future at the alarm is expected to occur. When the
- *        alarm occurs the timer logic will call nxsched_timer_expiration().
+ *        alarm occurs the timer logic will call nxsched_process_timer().
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on

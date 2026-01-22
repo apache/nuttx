@@ -44,6 +44,7 @@
  *
  * Input Parameters:
  *   hrtimer - Pointer to the hrtimer structure.
+ *   func    - Expiration callback function.
  *   expired - Expiration time in nanoseconds. Interpretation
  *             depends on mode.
  *   mode    - Timer mode (HRTIMER_MODE_ABS or HRTIMER_MODE_REL).
@@ -59,7 +60,7 @@
  *     nanoseconds from the current time.
  ****************************************************************************/
 
-int hrtimer_start(FAR hrtimer_t *hrtimer,
+int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
                   uint64_t expired,
                   enum hrtimer_mode_e mode)
 {
@@ -76,6 +77,8 @@ int hrtimer_start(FAR hrtimer_t *hrtimer,
     {
       hrtimer_remove(hrtimer);
     }
+
+  hrtimer->func = func;
 
   /* Compute absolute expiration time */
 

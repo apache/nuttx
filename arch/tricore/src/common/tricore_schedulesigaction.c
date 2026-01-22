@@ -90,7 +90,7 @@ void up_schedule_sigaction(struct tcb_s *tcb)
        * a task is signalling itself for some reason.
        */
 
-      if (up_current_regs() == NULL)
+      if (!up_interrupt_context())
         {
           /* In this case just deliver the signal now. */
 
@@ -117,16 +117,16 @@ void up_schedule_sigaction(struct tcb_s *tcb)
            * been delivered.
            */
 
-          tricore_savestate(tcb->xcp.saved_regs);
+          tcb->xcp.saved_regs = tcb->xcp.regs;
 
           /* Create a new CSA for signal delivery. The new context
            * will borrow the process stack of the current tcb.
            */
 
-          up_set_current_regs(tricore_alloc_csa((uintptr_t)
-            tricore_sigdeliver,
-            STACK_ALIGN_DOWN(up_getusrsp(tcb->xcp.regs)),
-            PSW_IO_SUPERVISOR | PSW_CDE, true));
+          tcb->xcp.regs =
+            tricore_alloc_csa((uintptr_t)tricore_sigdeliver,
+                              STACK_ALIGN_DOWN(up_getusrsp(tcb->xcp.regs)),
+                              PSW_IO_SUPERVISOR | PSW_CDE, true);
         }
     }
 
@@ -151,8 +151,9 @@ void up_schedule_sigaction(struct tcb_s *tcb)
        * will borrow the process stack of the current tcb.
        */
 
-      tcb->xcp.regs = tricore_alloc_csa((uintptr_t)tricore_sigdeliver,
-        STACK_ALIGN_DOWN(up_getusrsp(tcb->xcp.regs)),
-        PSW_IO_SUPERVISOR | PSW_CDE, true);
+      tcb->xcp.regs =
+        tricore_alloc_csa((uintptr_t)tricore_sigdeliver,
+                          STACK_ALIGN_DOWN(up_getusrsp(tcb->xcp.regs)),
+                          PSW_IO_SUPERVISOR | PSW_CDE, true);
     }
 }

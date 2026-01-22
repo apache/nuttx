@@ -78,5 +78,11 @@ int tls_init_info(FAR struct tcb_s *tcb)
 
   info->tl_tid = tcb->pid;
 
+  /* Initialize the starting address of argv to NULL to prevent
+   * it from being misused.
+   */
+
+  info->tl_argv = NULL;
+
   return OK;
 }

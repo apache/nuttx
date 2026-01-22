@@ -379,14 +379,16 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
           else if (buf[i] == RPMSG_PORT_UART_SUSPEND)
             {
               rpmsgdbg("Received suspend command\n");
-              atomic_fetch_and(&rpuart->port.signals, ~RPMSG_SIGNAL_RUNNING);
+              rpmsg_modify_signals(&rpuart->port.rpmsg,
+                                   0, RPMSG_SIGNAL_RUNNING);
               nxsem_wait(&rpuart->wake);
               continue;
             }
           else if (buf[i] == RPMSG_PORT_UART_RESUME)
             {
               rpmsgdbg("Received resume command\n");
-              atomic_fetch_or(&rpuart->port.signals, RPMSG_SIGNAL_RUNNING);
+              rpmsg_modify_signals(&rpuart->port.rpmsg,
+                                   RPMSG_SIGNAL_RUNNING, 0);
               nxsem_post(&rpuart->wake);
               continue;
             }

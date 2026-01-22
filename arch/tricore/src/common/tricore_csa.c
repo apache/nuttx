@@ -64,8 +64,8 @@ uintptr_t *tricore_alloc_csa(uintptr_t pc, uintptr_t sp,
 
   __isync();
 
-  memset(pucsa, 0, XCPTCONTEXT_SIZE);
-  memset(plcsa, 0, XCPTCONTEXT_SIZE);
+  memset(pucsa, 0, TC_CONTEXT_SIZE);
+  memset(plcsa, 0, TC_CONTEXT_SIZE);
 
   pucsa[REG_SP]  = sp;
   pucsa[REG_PSW] = psw;
@@ -82,7 +82,7 @@ uintptr_t *tricore_alloc_csa(uintptr_t pc, uintptr_t sp,
       plcsa[REG_LPCXI] |= PCXI_PIE;
     }
 
-  return (uintptr_t *)tricore_addr2csa(plcsa);
+  return plcsa;
 }
 
 /****************************************************************************

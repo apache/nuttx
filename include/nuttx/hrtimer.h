@@ -54,10 +54,6 @@ enum hrtimer_mode_e
 /* Forward declarations */
 
 struct hrtimer_s;
-struct hrtimer_node_s;
-
-typedef struct hrtimer_s      hrtimer_t;
-typedef struct hrtimer_node_s hrtimer_node_t;
 
 /* Callback type for high-resolution timer expiration
  *
@@ -65,15 +61,15 @@ typedef struct hrtimer_node_s hrtimer_node_t;
  * timer context and must not block.
  */
 
-typedef CODE uint64_t (*hrtimer_entry_t)(FAR const hrtimer_t *hrtimer,
+typedef CODE uint64_t (*hrtimer_entry_t)(FAR const struct hrtimer_s *hrtimer,
                                          uint64_t expired);
 
 /* Red-black tree node used to order hrtimers by expiration time */
 
-struct hrtimer_node_s
+typedef struct hrtimer_node_s
 {
   RB_ENTRY(hrtimer_node_s) entry;  /* RB-tree linkage */
-};
+} hrtimer_node_t;
 
 /* High-resolution timer object
  *
@@ -82,12 +78,12 @@ struct hrtimer_node_s
  * directly by users except through the provided APIs.
  */
 
-struct hrtimer_s
+typedef struct hrtimer_s
 {
   hrtimer_node_t node;   /* RB-tree node for sorted insertion */
   hrtimer_entry_t func;  /* Expiration callback function */
   uint64_t expired;      /* Absolute expiration time (ns) */
-};
+} hrtimer_t;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -118,12 +114,7 @@ extern "C"
  *   None
  ****************************************************************************/
 
-static inline_function
-void hrtimer_init(FAR hrtimer_t *hrtimer, hrtimer_cb func)
-{
-  memset(hrtimer, 0, sizeof(hrtimer_t));
-  hrtimer->func = func;
-}
+#define hrtimer_init(hrtimer) memset(hrtimer, 0, sizeof(hrtimer_t))
 
 /****************************************************************************
  * Name: hrtimer_cancel
@@ -184,6 +175,7 @@ int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer);
  *
  * Input Parameters:
  *   hrtimer - Timer instance to start
+ *   func    - Expiration callback function
  *   expired - Expiration time in nanoseconds
  *   mode    - HRTIMER_MODE_ABS or HRTIMER_MODE_REL
  *
@@ -191,7 +183,7 @@ int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer);
  *   OK on success; a negated errno value on failure.
  ****************************************************************************/
 
-int hrtimer_start(FAR hrtimer_t *hrtimer,
+int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
                   uint64_t expired,
                   enum hrtimer_mode_e mode);
 

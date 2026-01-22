@@ -71,7 +71,7 @@
  ****************************************************************************/
 
 __asm__ (
-  "   .section .rodata                            \n"
+  "   .section .rodata, \"a\"                     \n"
   "   .balign  16                                 \n"
   "   .globl   romfs_data_begin                   \n"
   "romfs_data_begin:                              \n"

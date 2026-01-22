@@ -244,7 +244,7 @@ void x86_64_cpu_init(void)
           g_cpu_priv[i].loapic_id = lapic->apic_id;
           g_cpu_priv[i].id        = i;
           g_cpu_priv[i].ready     = false;
-#ifdef CONFIG_LIB_SYSCALL
+#ifdef CONFIG_ARCH_HAVE_SYSCALL
           g_cpu_priv[i].ustack    = NULL;
           g_cpu_priv[i].uvbase    = (uint64_t *)CONFIG_ARCH_TEXT_VBASE;
 #endif
@@ -383,7 +383,7 @@ void x86_64_cpu_priv_set(uint8_t cpu)
 
   write_gsbase((uintptr_t)&g_cpu_priv[cpu]);
 
-#ifdef CONFIG_LIB_SYSCALL
+#ifdef CONFIG_ARCH_HAVE_SYSCALL
   /* Configure SYSCALL instruction entry point */
 
   write_msr(MSR_LSTAR, (uintptr_t)x86_64_syscall_entry);

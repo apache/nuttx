@@ -248,10 +248,26 @@ SECTIONS
     . = ALIGN(4) ;
   } >dram0_0_seg
 
+  .tbss (NOLOAD) :
+  {
+    . = ALIGN(4);
+    _stbss = ABSOLUTE(.);
+    *(.tbss .tbss.* .gnu.linkonce.tb.* .tcommon)
+    _etbss = ABSOLUTE(.);
+    . = ALIGN(4);
+  } >dram0_0_seg
+
   .dram0.data :
   {
     . = ALIGN (16);
     _data_start = ABSOLUTE(.);
+
+    . = ALIGN(4);
+    _stdata = ABSOLUTE(.);
+    *(.tdata .tdata.* .gnu.linkonce.td.*)
+    _etdata = ABSOLUTE(.);
+    . = ALIGN(4);
+
     _sdata = ABSOLUTE(.);
     *(.data)
     *(.data.*)
@@ -401,7 +417,7 @@ SECTIONS
     *(.fini)
     *(.gnu.version)
 
-    . = ALIGN(4);
+    . += 16;
 
     _text_end = ABSOLUTE(.);
     _instruction_reserved_end = ABSOLUTE(.);  /* This is a symbol marking the flash.text end, this can be used for mmu driver to maintain virtual address */
@@ -511,7 +527,6 @@ SECTIONS
     __init_array_start = ABSOLUTE(.);
     KEEP (*(EXCLUDE_FILE (*crtend.* *crtbegin.*) .init_array))
     __init_array_end = ABSOLUTE(.);
-
     _einit = ABSOLUTE(.);
 
     /* Addresses of memory regions reserved via SOC_RESERVE_MEMORY_REGION() */

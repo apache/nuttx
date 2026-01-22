@@ -228,6 +228,8 @@ static int cryptof_ioctl(FAR struct file *filep,
             case CRYPTO_BLF_CBC:
             case CRYPTO_CAST_CBC:
             case CRYPTO_AES_CBC:
+            case CRYPTO_AES_192_CBC:
+            case CRYPTO_AES_256_CBC:
             case CRYPTO_AES_CMAC:
             case CRYPTO_AES_CTR:
             case CRYPTO_AES_XTS:
@@ -980,6 +982,7 @@ bail:
       kmm_free(cria.cri_key);
     }
 
+  free(fcrd);
   return ret;
 }
 

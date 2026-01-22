@@ -35,6 +35,7 @@
 #include <nuttx/input/uinput.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/net/loopback.h>
+#include <nuttx/net/rpmsgdrv.h>
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
 #include <nuttx/note/note_driver.h>
@@ -265,6 +266,12 @@ void drivers_initialize(void)
   /* Initialize the user socket rpmsg server */
 
   usrsock_rpmsg_server_initialize();
+#endif
+
+#ifdef CONFIG_NET_RPMSG_DRV_SERVER
+  /* Initialize the net rpmsg default server */
+
+  net_rpmsg_drv_server_init();
 #endif
 
 #ifdef CONFIG_SMART_DEV_LOOP
