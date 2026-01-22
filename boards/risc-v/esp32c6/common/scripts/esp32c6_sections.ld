@@ -273,11 +273,28 @@ SECTIONS
     *(.noinit.*)
   } >dram0_0_seg
 
+  .tbss (NOLOAD) :
+  {
+    . = ALIGN(4);
+    _stbss = ABSOLUTE(.);
+    *(.tbss .tbss.* .gnu.linkonce.tb.* .tcommon)
+    _etbss = ABSOLUTE(.);
+    . = ALIGN(4);
+  } >dram0_0_seg
+
   .dram0.data :
   {
     . = ALIGN (16);
     _data_start = ABSOLUTE(.);
+
+    . = ALIGN(4);
+    _stdata = ABSOLUTE(.);
+    *(.tdata .tdata.* .gnu.linkonce.td.*)
+    _etdata = ABSOLUTE(.);
+    . = ALIGN(4);
+
     _sdata = ABSOLUTE(.);
+
     *(.data)
     *(.data.*)
     *(.gnu.linkonce.d.*)
@@ -523,6 +540,7 @@ SECTIONS
     __init_array_start = ABSOLUTE(.);
     KEEP (*(EXCLUDE_FILE (*crtend.* *crtbegin.*) .init_array))
     __init_array_end = ABSOLUTE(.);
+    _einit = ABSOLUTE(.);
 
     /* Addresses of memory regions reserved via SOC_RESERVE_MEMORY_REGION() */
 
@@ -537,8 +555,6 @@ SECTIONS
     _esp_system_init_fn_array_start = ABSOLUTE(.);
     KEEP (*(SORT_BY_INIT_PRIORITY(.esp_system_init_fn.*)))
     _esp_system_init_fn_array_end = ABSOLUTE(.);
-
-    _einit = ABSOLUTE(.);
 
   } >default_rodata_seg AT > ROM
 

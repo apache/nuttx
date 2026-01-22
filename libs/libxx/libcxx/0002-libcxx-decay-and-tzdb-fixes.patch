@@ -1,0 +1,49 @@
+--- libcxx/include/__type_traits/decay.h
++++ libcxx/include/__type_traits/decay.h
+@@ -25,7 +25,7 @@
+
+ _LIBCPP_BEGIN_NAMESPACE_STD
+
+-#if __has_builtin(__decay)
++#if __has_builtin(__decay) && !defined(_LIBCPP_DISABLE_DECAY_BUILTIN)
+ template <class _Tp>
+ using __decay_t _LIBCPP_NODEBUG = __decay(_Tp);
+
+--- libcxx/src/experimental/tzdb.cpp
++++ libcxx/src/experimental/tzdb.cpp
+@@ -50,6 +50,8 @@
+ _LIBCPP_WEAK string_view __libcpp_tzdb_directory() {
+ #if defined(__linux__)
+   return "/usr/share/zoneinfo/";
++#elif defined(CONFIG_LIBC_TZDIR)
++  return CONFIG_LIBC_TZDIR "/";
+ #else
+-#  error "unknown path to the IANA Time Zone Database"
++  return string_view{};
+ #endif
+
+--- libcxx/src/include/overridable_function.h
++++ libcxx/src/include/overridable_function.h
+@@ -96,7 +96,7 @@
+ }
+ _LIBCPP_END_NAMESPACE_STD
+
+-#elif defined(_LIBCPP_OBJECT_FORMAT_ELF)
++#elif defined(_LIBCPP_OBJECT_FORMAT_ELF) && !defined(CONFIG_ESPRESSIF_CHIP_SERIES)
+
+ #  define _LIBCPP_CAN_DETECT_OVERRIDDEN_FUNCTION 1
+ #  define _LIBCPP_MAKE_OVERRIDABLE_FUNCTION_DETECTABLE __attribute__((__section__("__lcxx_override")))
+@@ -121,6 +121,13 @@
+
+ #else
+
++#  ifdef CONFIG_ESPRESSIF_CHIP_SERIES
++// esptool requires every loadable segment to be 4-byte aligned, but the
++// __lcxx_override section can end up with compressed instructions that don't
++// satisfy that constraint on Espressif parts. Skip the detection machinery on
++// those targets and fall back to the generic implementation.
++#  endif
++
+ #  define _LIBCPP_CAN_DETECT_OVERRIDDEN_FUNCTION 0
+ #  define _LIBCPP_MAKE_OVERRIDABLE_FUNCTION_DETECTABLE /* nothing */
+

@@ -76,6 +76,7 @@ config LIBMINIABI
 
 config LIBCXXABI
 	bool "LLVM low level C++ Library"
+	select SCHED_THREAD_LOCAL
 	---help---
 		LLVM "libc++abi" C++ Standard Library
 		https://libcxxabi.llvm.org/
@@ -99,16 +100,16 @@ config LIBCXXABI_VERSION
 	string "Select libcxxabi version"
 	depends on LIBCXXABI
 	default LIBCXX_VERSION if LIBCXX
-	default "17.0.6" if !LIBCXX
+	default "19.1.7" if !LIBCXX
 
 config CXX_STANDARD
 	string "Language standard"
 	default "c++14"   if TRICORE_TOOLCHAIN_TASKING
-	default "gnu++20" if LIBCXX
+	default "gnu++23" if LIBCXX
 	default "gnu++17" if !LIBCXX
 	---help---
 		Possible values:
-		gnu++98/c++98, gnu++11/c++11, gnu++14/c++14, gnu++17/c++17 and gnu++20/c++20
+		gnu++98/c++98, gnu++11/c++11, gnu++14/c++14, gnu++17/c++17, gnu++20/c++20 and gnu++23/c++23
 
 config CXX_EXCEPTION
 	bool "Enable Exception Support"
@@ -146,7 +147,7 @@ endif
 config LIBCXX_VERSION
 	string "Select libcxx version"
 	depends on LIBCXX
-	default "17.0.6"
+	default "19.1.7"
 
 config LIBCXX_TEST
 	bool "LLVM Libcxx Library Test"

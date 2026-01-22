@@ -21,7 +21,7 @@
 #define _LIBCPP_HAS_THREAD_API_PTHREAD 1
 /* #undef _LIBCPP_HAS_THREAD_API_EXTERNAL */
 /* #undef _LIBCPP_HAS_THREAD_API_WIN32 */
-/* #undef _LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS */
+#define _LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS 1
 #define _LIBCPP_HAS_NO_VENDOR_AVAILABILITY_ANNOTATIONS
 /* #undef _LIBCPP_NO_VCRUNTIME */
 /* #undef _LIBCPP_TYPEINFO_COMPARISON_IMPLEMENTATION */
@@ -29,35 +29,45 @@
 /* #undef _LIBCPP_HAS_NO_RANDOM_DEVICE */
 #define _LIBCPP_HAS_NO_CONTENTION_TABLE
 #if defined(CONFIG_CXX_NO_LOCALIZATION)
-#  define _LIBCPP_HAS_NO_LOCALIZATION
+#define _LIBCPP_HAS_NO_LOCALIZATION
 #elif defined(CONFIG_CXX_MINI_LOCALIZATION)
-#  define _LIBCPP_HAS_MINI_LOCALIZATION
+#define _LIBCPP_HAS_MINI_LOCALIZATION
 #endif
 #ifndef CONFIG_CXX_WCHAR
-#  define _LIBCPP_HAS_NO_WIDE_CHARACTERS
+#define _LIBCPP_HAS_NO_WIDE_CHARACTERS
 #endif
 #define _LIBCPP_ENABLE_ASSERTIONS_DEFAULT 0
 
 // PSTL backends
+#define _LIBCPP_PSTL_BACKEND_SERIAL
 #define _LIBCPP_PSTL_CPU_BACKEND_SERIAL
 /* #undef _LIBCPP_PSTL_CPU_BACKEND_THREAD */
 /* #undef _LIBCPP_PSTL_CPU_BACKEND_LIBDISPATCH */
 
+// Force each translation unit to emit the necessary basic_string
+// specializations (avoids missing wide-character dtor symbols).
+#define _LIBCPP_DISABLE_EXTERN_TEMPLATE 1
+
+// Type traits tuning.
+#define _LIBCPP_DISABLE_DECAY_BUILTIN 1
+
 // Hardening.
 #define _LIBCPP_ENABLE_HARDENED_MODE_DEFAULT 0
 #define _LIBCPP_ENABLE_DEBUG_MODE_DEFAULT 0
+#define _LIBCPP_HARDENING_MODE_DEFAULT _LIBCPP_HARDENING_MODE_FAST
+#define _LIBCPP_HARDENING_MODE _LIBCPP_HARDENING_MODE_DEFAULT
 
 #define _LIBCPP_DISABLE_DEPRECATION_WARNINGS 1
 #define _LIBCPP_AVAILABILITY_HAS_NO_VERBOSE_ABORT 1
 
 // __USE_MINGW_ANSI_STDIO gets redefined on MinGW
 #ifdef __clang__
-#  pragma clang diagnostic push
-#  pragma clang diagnostic ignored "-Wmacro-redefined"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmacro-redefined"
 #endif
 
 #ifdef __clang__
-#  pragma clang diagnostic pop
+#pragma clang diagnostic pop
 #endif
 
 #define _SYS_REENT_H_

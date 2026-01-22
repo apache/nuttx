@@ -43,7 +43,7 @@ context:: $(TOPDIR)/include/libcxxabi
 distclean::
 	$(Q) $(DIRUNLINK) $(TOPDIR)/include/libcxxabi
 ifeq ($(wildcard libcxxabi/libcxxabi/.git),)
-	$(Q) $(DELFILE) libcxxabi-$(LIBCXX_VERSION).src.tar.xz
+	$(Q) $(DELFILE) libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
 	$(call DELDIR, libcxxabi/libcxxabi)
 endif
 

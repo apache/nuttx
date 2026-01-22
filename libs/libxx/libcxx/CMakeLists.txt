@@ -45,16 +45,16 @@ if(CONFIG_LIBCXX)
       PATCH_COMMAND
         patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
         ${CMAKE_CURRENT_LIST_DIR}/0001_fix_stdatomic_h_miss_typedef.patch &&
-        patch -p3 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/mbstate_t.patch && patch -p1 -d
-        ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
         ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-remove-mach-time-h.patch && patch
         -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
         ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-fix-ld-errors.patch && patch -p1
         -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
         ${CMAKE_CURRENT_LIST_DIR}/0001-Fix-build-error-about-__GLIBC__.patch &&
         patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-        ${CMAKE_CURRENT_LIST_DIR}/0001-libc-Fix-failures-with-GCC-14-92663.patch
+        ${CMAKE_CURRENT_LIST_DIR}/0002-libcxx-decay-and-tzdb-fixes.patch &&
+        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+        ${CMAKE_CURRENT_LIST_DIR}/mbstate_t.patch
       DOWNLOAD_NO_PROGRESS true
       TIMEOUT 30)
 
@@ -65,6 +65,10 @@ if(CONFIG_LIBCXX)
     endif()
 
   endif()
+
+  configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/../__assertion_handler
+    ${CMAKE_CURRENT_LIST_DIR}/libcxx/include/__assertion_handler COPYONLY)
 
   nuttx_create_symlink(${CMAKE_CURRENT_LIST_DIR}/libcxx/include
                        ${CMAKE_BINARY_DIR}/include/libcxx)
@@ -95,6 +99,7 @@ if(CONFIG_LIBCXX)
   endif()
 
   file(GLOB SRCS ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/*.cpp)
+  list(APPEND SRCS ${CMAKE_CURRENT_LIST_DIR}/nuttx_string_instantiations.cpp)
 
   string(REGEX MATCH "[0-9]+$" CPP_STD_VER "${CONFIG_CXX_STANDARD}")
   if(${CPP_STD_VER} GREATER_EQUAL 20)
@@ -123,12 +128,18 @@ if(CONFIG_LIBCXX)
     file(
       GLOB
       SRCSTMP
+      ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/fstream.cpp
       ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/ios.cpp
       ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/ios.instantiations.cpp
       ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/iostream.cpp
       ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/locale.cpp
+      ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/ostream.cpp
       ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/regex.cpp
-      ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/strstream.cpp)
+      ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/strstream.cpp
+      ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/experimental/chrono_exception.cpp
+      ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/experimental/time_zone.cpp
+      ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/experimental/tzdb.cpp
+      ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/experimental/tzdb_list.cpp)
     list(REMOVE_ITEM SRCS ${SRCSTMP})
   endif()
 

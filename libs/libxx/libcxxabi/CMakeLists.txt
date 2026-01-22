@@ -41,7 +41,11 @@ if(CONFIG_LIBCXXABI)
           ""
           TEST_COMMAND
           ""
-      PATCH_COMMAND ""
+      PATCH_COMMAND
+        patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+        ${CMAKE_CURRENT_LIST_DIR}/0001-libcxxabi-Fix-build-warnings-generated-by-CMake-comp.patch
+        && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+        ${CMAKE_CURRENT_LIST_DIR}/0002-libcxxabi-fix-compilation-errors.patch
       DOWNLOAD_NO_PROGRESS true
       TIMEOUT 30)
 

@@ -32,11 +32,12 @@ libcxx/libcxx: libcxx-$(LIBCXX_VERSION).src.tar.xz
 	         --exclude libcxx-$(LIBCXX_VERSION).src/test/std/pstl
 	$(Q) mv libcxx-$(LIBCXX_VERSION).src $@
 	$(Q) patch -p0 < libcxx/0001_fix_stdatomic_h_miss_typedef.patch -d libcxx
-	$(Q) patch -p2 < libcxx/mbstate_t.patch -d libcxx
 	$(Q) patch -p0 < libcxx/0001-libcxx-remove-mach-time-h.patch -d libcxx
 	$(Q) patch -p0 < libcxx/0001-libcxx-fix-ld-errors.patch -d libcxx
 	$(Q) patch -p0 < libcxx/0001-Fix-build-error-about-__GLIBC__.patch -d libcxx
-	$(Q) patch -p0 < libcxx/0001-libc-Fix-failures-with-GCC-14-92663.patch -d libcxx
+	$(Q) patch -p0 < libcxx/0002-libcxx-decay-and-tzdb-fixes.patch -d libcxx
+	$(Q) patch -p0 < libcxx/mbstate_t.patch -d libcxx
+	$(Q) cp $(CURDIR)/__assertion_handler libcxx/libcxx/include/__assertion_handler
 
 endif
 
@@ -72,6 +73,7 @@ ifeq ($(shell expr "$(GCCVER)" \>= 12), 1)
 endif
 
 CPPSRCS += $(wildcard libcxx/libcxx/src/*.cpp)
+CPPSRCS += libcxx/nuttx_string_instantiations.cpp
 CPP_STD_VER := $(shell echo $(CONFIG_CXX_STANDARD) | sed -E 's/.*\+\+([0-9]+)$$/\1/')
 ifeq ($(shell [ $(CPP_STD_VER) -ge 20 ] && echo true),true)
   CPPSRCS += $(wildcard libcxx/libcxx/src/experimental/*.cpp)
@@ -96,5 +98,11 @@ ifeq ($(CONFIG_CXX_NO_LOCALIZATION),y)
   LOCALE_CPPSRCS += libcxx/libcxx/src/locale.cpp
   LOCALE_CPPSRCS += libcxx/libcxx/src/regex.cpp
   LOCALE_CPPSRCS += libcxx/libcxx/src/strstream.cpp
+  LOCALE_CPPSRCS += libcxx/libcxx/src/fstream.cpp
+  LOCALE_CPPSRCS += libcxx/libcxx/src/ostream.cpp
+  LOCALE_CPPSRCS += libcxx/libcxx/src/experimental/chrono_exception.cpp
+  LOCALE_CPPSRCS += libcxx/libcxx/src/experimental/time_zone.cpp
+  LOCALE_CPPSRCS += libcxx/libcxx/src/experimental/tzdb.cpp
+  LOCALE_CPPSRCS += libcxx/libcxx/src/experimental/tzdb_list.cpp
   CPPSRCS := $(filter-out $(LOCALE_CPPSRCS), $(CPPSRCS))
 endif
