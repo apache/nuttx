@@ -39,6 +39,8 @@ CSRCS += msgctl.c msgget.c msginternal.c msgrcv.c msgsnd.c
 
 endif
 
+CSRCS += msgq.c
+
 # Include mqueue build support
 
 DEPPATH += --dep-path mqueue
