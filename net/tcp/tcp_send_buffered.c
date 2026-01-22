@@ -594,7 +594,7 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
             {
 #ifdef CONFIG_NET_TCP_CC_NEWRENO
               if (conn->dupacks >= TCP_FAST_RETRANSMISSION_THRESH)
-#else
+#elif defined(CONFIG_NET_TCP_FAST_RETRANSMIT)
               /* Duplicate ACK? Retransmit data if need */
 
               if (++TCP_WBNACK(wrb) == TCP_FAST_RETRANSMISSION_THRESH)
@@ -602,21 +602,22 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                 {
                   /* Fast retransmission has been triggered */
 
-#ifndef CONFIG_NET_TCP_CC_NEWRENO
+#if defined(CONFIG_NET_TCP_FAST_RETRANSMIT) && !defined(CONFIG_NET_TCP_CC_NEWRENO)
                   /* Reset counter */
 
                   TCP_WBNACK(wrb) = 0;
 #endif
 
+#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
                   if ((flags & TCP_NEWDATA) != 0)
                     {
                       FAR uint8_t *buf = dev->d_buf;
                       FAR uint8_t *appdata = dev->d_appdata;
                       uint16_t len = dev->d_len;
-#ifdef CONFIG_NET_TCPURGDATA
+#  ifdef CONFIG_NET_TCPURGDATA
                       FAR uint8_t *urgdata = dev->d_urgdata;
                       uint16_t urglen = dev->d_urglen;
-#endif
+#  endif
                       FAR struct iob_s *iob = dev->d_iob;
 
                       dev->d_buf = NULL;
@@ -633,12 +634,13 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                       dev->d_buf = buf;
                       dev->d_appdata = appdata;
                       dev->d_len = len;
-#ifdef CONFIG_NET_TCPURGDATA
+#  ifdef CONFIG_NET_TCPURGDATA
                       dev->d_urgdata = urgdata;
                       dev->d_urglen = urglen;
-#endif
+#  endif
                       return flags;
                     }
+#endif
 
 #ifdef CONFIG_NET_TCP_SELECTIVE_ACK
                   if ((conn->flags & TCP_SACK) &&
