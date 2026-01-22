@@ -76,7 +76,7 @@ config LIBMINIABI
 
 config LIBCXXABI
 	bool "LLVM low level C++ Library"
-	select SCHED_THREAD_LOCAL
+	depends on SCHED_THREAD_LOCAL
 	---help---
 		LLVM "libc++abi" C++ Standard Library
 		https://libcxxabi.llvm.org/
