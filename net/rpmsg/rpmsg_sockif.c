@@ -976,16 +976,6 @@ static int rpmsg_socket_connect_internal(FAR struct socket *psock)
         {
           ret = -ECONNRESET;
         }
-
-      if (ret < 0)
-        {
-          rpmsg_unregister_callback(conn,
-                                    rpmsg_socket_device_created,
-                                    NULL,
-                                    NULL,
-                                    NULL);
-          rpmsg_socket_destroy_ept(conn);
-        }
     }
   else
     {
