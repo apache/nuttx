@@ -832,7 +832,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   udpiplen = udpip_hdrsize(conn);
 
   iob_reserve(wrb->wb_iob, CONFIG_NET_LL_GUARDSIZE);
-  iob_update_pktlen(wrb->wb_iob, udpiplen, true);
+  iob_update_pktlen(wrb->wb_iob, udpiplen, false);
 
   /* Copy the user data into the write buffer.  We cannot wait for
    * buffer space if the socket was opened non-blocking.
@@ -843,12 +843,12 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       if (nonblock)
         {
           ret = iob_trycopyin(wrb->wb_iob, (FAR uint8_t *)buf,
-                              len, udpiplen, true);
+                              len, udpiplen, false);
         }
       else
         {
           ret = iob_copyin(wrb->wb_iob, (FAR uint8_t *)buf,
-                           len, udpiplen, true);
+                           len, udpiplen, false);
         }
 
       if (ret < 0)
@@ -951,7 +951,7 @@ int psock_udp_cansend(FAR struct udp_conn_s *conn)
    * many more.
    */
 
-  if (udp_wrbuffer_test() < 0 || iob_navail(true) <= 0
+  if (udp_wrbuffer_test() < 0 || iob_navail(false) <= 0
 #if CONFIG_NET_SEND_BUFSIZE > 0
       || udp_wrbuffer_inqueue_size(conn) >= conn->sndbufs
 #endif
