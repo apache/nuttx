@@ -36,7 +36,6 @@ endif
 
 $(TOPDIR)/include/libcxxabi: libcxxabi/libcxxabi
 	$(Q) $(DIRLINK) $(CURDIR)/$</include $(TOPDIR)/include/libcxxabi
-	$(Q) cp $(CURDIR)/__config_site $(TOPDIR)/include/libcxxabi/__config_site
 
 context:: $(TOPDIR)/include/libcxxabi
 
