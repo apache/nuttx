@@ -149,7 +149,7 @@ rpmsg_router_edge_get_tx_payload_buffer(FAR struct rpmsg_device *rdev,
   FAR struct rpmsg_device *hubdev = edge->hubdev;
   FAR void *buf;
 
-  if (!hubdev->ops.get_tx_payload_buffer)
+  if (hubdev->ops.get_tx_payload_buffer == NULL)
     {
       return NULL;
     }
@@ -169,7 +169,7 @@ static void rpmsg_router_edge_hold_rx_buffer(FAR struct rpmsg_device *rdev,
   FAR struct rpmsg_router_edge_s *edge = rpmsg_router_edge_from_rdev(rdev);
   FAR struct rpmsg_device *hubdev = edge->hubdev;
 
-  if (!hubdev->ops.hold_rx_buffer)
+  if (hubdev->ops.hold_rx_buffer == NULL)
     {
       return;
     }
@@ -188,7 +188,7 @@ rpmsg_router_edge_release_rx_buffer(FAR struct rpmsg_device *rdev,
   struct rpmsg_router_edge_s *edge = rpmsg_router_edge_from_rdev(rdev);
   struct rpmsg_device *hubdev = edge->hubdev;
 
-  if (!hubdev->ops.release_rx_buffer)
+  if (hubdev->ops.release_rx_buffer == NULL)
     {
       return;
     }
@@ -206,7 +206,7 @@ static int rpmsg_router_edge_release_tx_buffer(FAR struct rpmsg_device *rdev,
   struct rpmsg_router_edge_s *edge = rpmsg_router_edge_from_rdev(rdev);
   struct rpmsg_device *hubdev = edge->hubdev;
 
-  if (!hubdev->ops.release_tx_buffer)
+  if (hubdev->ops.release_tx_buffer == NULL)
     {
       return RPMSG_ERR_PERM;
     }
@@ -225,7 +225,7 @@ static int rpmsg_router_edge_send_nocopy(FAR struct rpmsg_device *rdev,
   struct rpmsg_router_edge_s *edge = rpmsg_router_edge_from_rdev(rdev);
   struct rpmsg_device *hubdev = edge->hubdev;
 
-  if (!hubdev->ops.send_offchannel_nocopy)
+  if (hubdev->ops.send_offchannel_nocopy == NULL)
     {
       return RPMSG_ERR_PARAM;
     }
@@ -284,7 +284,7 @@ static int rpmsg_router_edge_cb(FAR struct rpmsg_endpoint *ept,
 {
   FAR struct rpmsg_endpoint *usr_ept = priv;
 
-  if (!usr_ept)
+  if (usr_ept == NULL)
     {
       return 0;
     }
@@ -312,7 +312,7 @@ static void rpmsg_router_edge_bound(FAR struct rpmsg_endpoint *ept)
 {
   FAR struct rpmsg_endpoint *usr_ept = ept->priv;
 
-  if (!usr_ept)
+  if (usr_ept == NULL)
     {
       rpmsgerr("Try to get user ept failed.\n");
       return;
@@ -340,7 +340,7 @@ static void rpmsg_router_edge_unbind(FAR struct rpmsg_endpoint *ept)
 {
   FAR struct rpmsg_endpoint *usr_ept = ept->priv;
 
-  if (!usr_ept)
+  if (usr_ept == NULL)
     {
       rpmsgerr("Try to get user ept failed.\n");
       return;
@@ -402,7 +402,7 @@ rpmsg_router_edge_send_offchannel_raw(FAR struct rpmsg_device *rdev,
 
   if (dst != RPMSG_NS_EPT_ADDR)
     {
-      if (!hubdev->ops.send_offchannel_raw)
+      if (hubdev->ops.send_offchannel_raw == NULL)
         {
           return RPMSG_ERR_PARAM;
         }
@@ -416,7 +416,7 @@ rpmsg_router_edge_send_offchannel_raw(FAR struct rpmsg_device *rdev,
   metal_mutex_acquire(&rdev->lock);
   usr_ept = rpmsg_get_endpoint(rdev, ns_msg->name, src, dst);
   metal_mutex_release(&rdev->lock);
-  if (!usr_ept)
+  if (usr_ept == NULL)
     {
       rpmsgerr("Try to get user ept failed.\n");
       return RPMSG_ERR_PARAM;
@@ -436,7 +436,7 @@ rpmsg_router_edge_send_offchannel_raw(FAR struct rpmsg_device *rdev,
       ept = rpmsg_get_endpoint(hubdev, ns_msg->name,
                                RPMSG_ADDR_ANY, usr_ept->dest_addr);
       metal_mutex_release(&hubdev->lock);
-      if (!ept)
+      if (ept == NULL)
         {
           rpmsgerr("Try to get router endpoint (r:ept) failed.\n");
           return RPMSG_ERR_PARAM;
@@ -452,7 +452,7 @@ rpmsg_router_edge_send_offchannel_raw(FAR struct rpmsg_device *rdev,
       /* Processing RPMSG_NS_CREATE or RPMSG_NS_CREATE_ACK message */
 
       ept = kmm_zalloc(sizeof(*ept));
-      if (!ept)
+      if (ept == NULL)
         {
           return -ENOMEM;
         }
@@ -590,7 +590,7 @@ rpmsg_router_edge_create(FAR struct rpmsg_device *hubdev,
   /* Create the router edge device */
 
   edge = kmm_zalloc(sizeof(*edge));
-  if (!edge)
+  if (edge == NULL)
     {
       return NULL;
     }
@@ -721,7 +721,7 @@ static int rpmsg_router_cb(FAR struct rpmsg_endpoint *ept,
 
   edge = rpmsg_router_edge_create(ept->rdev, msg,
                                   ept->name + RPMSG_ROUTER_NAME_LEN);
-  if (!edge)
+  if (edge == NULL)
     {
       return -ENODEV;
     }
@@ -746,7 +746,7 @@ static void rpmsg_router_unbind(FAR struct rpmsg_endpoint *ept)
 {
   struct rpmsg_router_edge_s *edge = ept->priv;
 
-  if (edge)
+  if (edge != NULL)
     {
       rpmsg_router_edge_destroy(edge);
       ept->priv = NULL;
