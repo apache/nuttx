@@ -188,6 +188,25 @@ uint32_t tcp_get_recvwindow(FAR struct net_driver_s *dev,
 
       recvwndo = tailroom + (niob_avail * CONFIG_IOB_BUFSIZE);
     }
+#if CONFIG_IOB_THROTTLE > 0
+  else if (conn->readahead == NULL)
+    {
+      /* Advertise maximum segment size for window edge if here is no
+       * available iobs on current "free" connection.
+       *
+       * Note: hopefully, a single mss-sized packet can be queued by
+       * the throttled=false case in tcp_datahandler().
+       */
+
+      int niob_avail_no_throttle = iob_navail(false);
+
+      recvwndo = tcp_rx_mss(dev);
+      if (recvwndo > niob_avail_no_throttle * CONFIG_IOB_BUFSIZE)
+        {
+          recvwndo = niob_avail_no_throttle * CONFIG_IOB_BUFSIZE;
+        }
+    }
+#endif
   else /* niob_avail == 0 */
     {
       /* No IOBs are available.

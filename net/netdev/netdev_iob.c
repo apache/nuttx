@@ -62,7 +62,11 @@ int netdev_iob_prepare(FAR struct net_driver_s *dev, bool throttled,
 
   if (dev->d_iob == NULL)
     {
-      dev->d_iob = net_iobtimedalloc(throttled, timeout);
+      dev->d_iob = net_iobtimedalloc(false, timeout);
+      if (dev->d_iob == NULL && throttled)
+        {
+          dev->d_iob = net_iobtimedalloc(true, timeout);
+        }
     }
 
   if (dev->d_iob == NULL)

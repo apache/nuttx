@@ -1083,7 +1083,7 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
            * the maximum size packet that would fit.
            */
 
-          if (sndlen > iob_navail(true) * CONFIG_IOB_BUFSIZE)
+          if (sndlen > iob_navail(false) * CONFIG_IOB_BUFSIZE)
             {
               nwarn("Running low on iobs, limiting packet size\n");
               sndlen = CONFIG_IOB_BUFSIZE;
