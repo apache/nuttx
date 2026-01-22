@@ -28,6 +28,7 @@
 
 #include <arch/irq.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/signal.h>
