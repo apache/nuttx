@@ -37,7 +37,6 @@
 
 #include <nuttx/compiler.h>
 #include <nuttx/lib/math32.h>
-#include <nuttx/macro.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -160,7 +159,7 @@
  */
 
 #ifdef CONFIG_USEC_PER_TICK
-#  define USEC_PER_TICK       CONCATENATE(CONFIG_USEC_PER_TICK, L)
+#  define USEC_PER_TICK       (0L + CONFIG_USEC_PER_TICK)
 #else
 #  define USEC_PER_TICK       (10000L)
 #endif
