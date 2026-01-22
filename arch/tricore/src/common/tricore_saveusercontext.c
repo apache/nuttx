@@ -67,6 +67,7 @@ int up_saveusercontext(void *saveregs_)
   /* Copy the current upper csa */
 
   regs = tricore_csa2addr(regs[REG_LPCXI]);
+  regs[REG_PSW] &= ~PSW_STATUS_BITS;
   memcpy(saveregs, regs, TC_CONTEXT_SIZE);
 
   __asm("rslcx");

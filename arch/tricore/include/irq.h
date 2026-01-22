@@ -121,6 +121,7 @@
 #  define PSW_IO_USER0      (0 << PSW_IO)
 #  define PSW_IO_USER1      (1 << PSW_IO)
 #  define PSW_IO_SUPERVISOR (2 << PSW_IO)
+#define PSW_STATUS_BITS     (31 << 27) /* Bits 27-31: Execution Effect Status Bits */
 
 /* PCXI: Previous Context Information and Pointer Register */
 
