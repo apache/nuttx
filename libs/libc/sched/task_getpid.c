@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/tls.h>
 
 /****************************************************************************
@@ -53,6 +54,5 @@ pid_t getpid(void)
 {
   FAR struct task_info_s *info = task_get_info();
 
-  DEBUGASSERT(info != NULL);
-  return info->ta_pid;
+  return info ? info->ta_pid : IDLE_PROCESS_ID;
 }
