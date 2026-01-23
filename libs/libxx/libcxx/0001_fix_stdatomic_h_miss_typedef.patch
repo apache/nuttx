@@ -6,6 +6,6 @@
  
 -#elif defined(_LIBCPP_COMPILER_CLANG_BASED)
 +#else
-
+ 
  // Before C++23, we include the next <stdatomic.h> on the path to avoid hijacking
  // the header. We do this because Clang has historically shipped a <stdatomic.h>

@@ -1,11 +1,11 @@
 --- libcxx/include/__mbstate_t.h
 +++ libcxx/include/__mbstate_t.h
-@@ -38,12 +38,12 @@
+@@ -37,12 +37,12 @@
  #if defined(_LIBCPP_HAS_MUSL_LIBC)
  #  define __NEED_mbstate_t
  #  include <bits/alltypes.h>
  #  undef __NEED_mbstate_t
-+#elif !defined(_LIBCPP_HAS_NO_WIDE_CHARACTERS) && __has_include_next(<wchar.h>)
++#elif __has_include_next(<wchar.h>)
 +#  include_next <wchar.h> // fall back to the C standard provider of mbstate_t
  #elif __has_include(<bits/types/mbstate_t.h>)
  #  include <bits/types/mbstate_t.h> // works on most Unixes
