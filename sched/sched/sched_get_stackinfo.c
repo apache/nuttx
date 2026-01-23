@@ -61,7 +61,12 @@ int nxsched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo)
   FAR struct tcb_s *rtcb = this_task();  /* TCB of running task */
   FAR struct tcb_s *qtcb;                /* TCB of queried task */
 
-  DEBUGASSERT(rtcb != NULL && stackinfo != NULL);
+  DEBUGASSERT(stackinfo != NULL);
+
+  if (rtcb == NULL)
+    {
+      return -ENOENT;
+    }
 
   /* Pid of 0 means that we are querying ourself */
 
