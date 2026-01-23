@@ -107,10 +107,9 @@ up_saveusercontext:
 
 #ifdef CONFIG_ARCH_HAVE_SYSCALL
 	/* Save CS and SS if we support syscalls */
-	xor     %rax, %rax
-	mov     %cs, %ax
+	mov     %cs, %eax
 	movq    %rax, (8*REG_CS)(%rdi)
-	mov     %ss, %ax
+	mov     %ss, %eax
 	movq    %rax, (8*REG_SS)(%rdi)
 #endif
 
@@ -133,7 +132,7 @@ up_saveusercontext:
 	 * 'ret' will remove the RIP from the top of the stack.
 	 */
 
-	xor     %rax, %rax
+	xor     %eax, %eax
 	ret
 	.size    up_saveusercontext, . - up_saveusercontext
 	.end
