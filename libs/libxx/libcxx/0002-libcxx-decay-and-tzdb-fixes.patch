@@ -29,21 +29,8 @@
  _LIBCPP_END_NAMESPACE_STD
 
 -#elif defined(_LIBCPP_OBJECT_FORMAT_ELF)
-+#elif defined(_LIBCPP_OBJECT_FORMAT_ELF) && !defined(CONFIG_ESPRESSIF_CHIP_SERIES)
++#elif defined(_LIBCPP_OBJECT_FORMAT_ELF) && !defined(_LIBCPP_DISABLE_OVERRIDABLE_FUNCTION_DETECTION)
 
  #  define _LIBCPP_CAN_DETECT_OVERRIDDEN_FUNCTION 1
  #  define _LIBCPP_MAKE_OVERRIDABLE_FUNCTION_DETECTABLE __attribute__((__section__("__lcxx_override")))
-@@ -121,6 +121,13 @@
-
- #else
-
-+#  ifdef CONFIG_ESPRESSIF_CHIP_SERIES
-+// esptool requires every loadable segment to be 4-byte aligned, but the
-+// __lcxx_override section can end up with compressed instructions that don't
-+// satisfy that constraint on Espressif parts. Skip the detection machinery on
-+// those targets and fall back to the generic implementation.
-+#  endif
-+
- #  define _LIBCPP_CAN_DETECT_OVERRIDDEN_FUNCTION 0
- #  define _LIBCPP_MAKE_OVERRIDABLE_FUNCTION_DETECTABLE /* nothing */
 

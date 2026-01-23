@@ -39,6 +39,13 @@ ARCHPICFLAGS = -fpic
 CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
 CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+
+# Espressif chips: Disable libcxx overridable function detection
+# esptool requires every loadable segment to be 4-byte aligned, but the
+# __lcxx_override section can end up with compressed instructions.
+ifeq ($(CONFIG_LIBCXX),y)
+  CXXFLAGS += -D_LIBCPP_DISABLE_OVERRIDABLE_FUNCTION_DETECTION
+endif
 CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
