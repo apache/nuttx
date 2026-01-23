@@ -767,14 +767,13 @@ irq_common:
 	movq    %rbp, (8*REG_RBP)(%rdi)
 	movq    %rbx, (8*REG_RBX)(%rdi)
 
-	xor     %rax, %rax             /* Reset rax */
-	mov     %ds, %ax               /* Lower 16-bits of rax. */
+	mov     %ds, %eax              /* Lower 16-bits of rax. */
 	movq    %rax, (8*REG_DS)(%rdi) /* Save the data segment descriptor */
-	mov     %es, %ax               /* Lower 16-bits of rax. */
+	mov     %es, %eax              /* Lower 16-bits of rax. */
 	movq    %rax, (8*REG_ES)(%rdi) /* Save the data segment descriptor */
-	mov     %gs, %ax               /* Lower 16-bits of rax. */
+	mov     %gs, %eax              /* Lower 16-bits of rax. */
 	movq    %rax, (8*REG_GS)(%rdi) /* Save the data segment descriptor */
-	mov     %fs, %ax               /* Lower 16-bits of rax. */
+	mov     %fs, %eax              /* Lower 16-bits of rax. */
 	movq    %rax, (8*REG_FS)(%rdi) /* Save the data segment descriptor */
 
 #ifdef CONFIG_SCHED_THREAD_LOCAL

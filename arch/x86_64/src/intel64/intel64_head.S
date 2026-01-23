@@ -272,8 +272,8 @@ start32:
 
 	/* Jump to 64 bit initialization if this is AP core */
 	mov     bsp_done, %eax
-	cmp     $0, %eax
-	jne     start64_init
+	test	%eax, %eax
+	jnz     start64_init
 
 	/* initialize rest of the page directory */
 	lea     g_pd_low, %edi
@@ -383,8 +383,8 @@ start64:
 
 	/* Start BSP or AP */
 	mov     bsp_done, %eax
-	cmp     $0, %eax
-	jne     ap_start
+	test    %eax, %eax
+	jnz     ap_start
 
 	/* Properly setup RSP to idle stack */
 	movabs  $g_idle_topstack,    %rbx
@@ -502,8 +502,8 @@ __enable_sse_avx:
 	/* Configure XSAVE/XRSTOR for user state*/
 	mov     $X86_XCR0_VAL, %eax
 
-	xor     %rdx,  %rdx
-	xor     %rcx,  %rcx
+	xor     %edx,  %edx
+	xor     %ecx,  %ecx
 	xsetbv
 
 #else
