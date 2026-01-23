@@ -76,6 +76,7 @@
 
 struct gdb_state_s
 {
+  uint8_t running_regs[XCPTCONTEXT_SIZE]; /* Registers of running thread */
 #ifdef CONFIG_LIB_GDBSTUB_DEBUG
   struct lib_syslograwstream_s stream;
 #endif
@@ -91,7 +92,6 @@ struct gdb_state_s
   FAR char *pkt_next;                     /* Pointer to next byte in packet */
   char pkt_buf[BUFSIZE];                  /* Packet buffer */
   size_t pkt_len;                         /* Packet send and receive length */
-  FAR uint8_t *running_regs;              /* Registers of running thread */
   size_t size;                            /* Size of registers */
   uintptr_t registers[0];                 /* Registers of other threads */
 };
@@ -2097,19 +2097,20 @@ FAR struct gdb_state_s *gdb_state_init(gdb_send_func_t send,
                                        FAR void *priv)
 {
   size_t size = g_tcbinfo.regs_num * sizeof(uintptr_t);
-  FAR struct gdb_state_s *state = lib_zalloc(sizeof(*state) + size);
+  FAR struct gdb_state_s *state = lib_memalign(XCPTCONTEXT_ALIGN,
+                                               sizeof(*state) + size);
 
   if (state == NULL)
     {
       return NULL;
     }
 
+  memset(state, 0, sizeof(*state) + size);
   state->size = size;
   state->send = send;
   state->recv = recv;
   state->priv = priv;
   state->monitor = monitor;
-  state->running_regs = lib_memalign(XCPTCONTEXT_ALIGN, XCPTCONTEXT_SIZE);
 
 #ifdef CONFIG_LIB_GDBSTUB_DEBUG
   lib_syslograwstream_open(&state->stream);
@@ -2133,7 +2134,6 @@ void gdb_state_uninit(FAR struct gdb_state_s *state)
 {
   if (state != NULL)
     {
-      lib_free(state->running_regs);
       lib_free(state);
     }
 }
