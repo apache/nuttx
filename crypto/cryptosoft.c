@@ -1684,10 +1684,17 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
                 return -ENOBUFS;
               }
 
+            /* If the key is too long, hash it first using ictx */
+
             if (cri->cri_klen / 8 > axf->keysize)
               {
-                swcr_freesession(i);
-                return -EINVAL;
+                axf->init((*swd)->sw_ictx);
+                axf->update((*swd)->sw_ictx,
+                            (FAR uint8_t *)cri->cri_key,
+                            cri->cri_klen / 8);
+                axf->final((unsigned char *)cri->cri_key,
+                           (*swd)->sw_ictx);
+                cri->cri_klen = axf->hashsize * 8;
               }
 
             for (k = 0; k < cri->cri_klen / 8; k++)
