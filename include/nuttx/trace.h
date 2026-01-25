@@ -39,8 +39,7 @@
 #  define trace_beginex(tag, name) sched_note_beginex(tag, name)
 #  define trace_endex(tag, name) sched_note_endex(tag, name)
 #  define trace_mark(tag, s) sched_note_mark(tag, s)
-#  define trace_printf(tag, fmt, ...)
-    sched_note_printf(tag, fmt, ##__VA_ARGS__)
+#  define trace_printf(tag, fmt, ...) sched_note_printf(tag, fmt, ##__VA_ARGS__)
 #else
 #  define trace_begin(tag)
 #  define trace_end(tag)
@@ -56,8 +55,7 @@
 #  define app_trace_beginex(name) trace_beginex(NOTE_TAG_APP, name)
 #  define app_trace_endex(name) trace_endex(NOTE_TAG_APP, name)
 #  define app_trace_mark(s) trace_mark(NOTE_TAG_APP, s)
-#  define app_trace_printf(fmt, ...)
-    sched_note_printf(NOTE_TAG_APP, fmt, ##__VA_ARGS__)
+#  define app_trace_printf(fmt, ...) sched_note_printf(NOTE_TAG_APP, fmt, ##__VA_ARGS__)
 #else
 #  define app_trace_begin()
 #  define app_trace_end()
