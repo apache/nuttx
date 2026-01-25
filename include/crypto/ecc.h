@@ -1,6 +1,8 @@
 /****************************************************************************
  * include/crypto/ecc.h
  *
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
  * Copyright (c) 2013, Kenneth MacKay All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
