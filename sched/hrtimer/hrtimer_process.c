@@ -40,9 +40,10 @@
  *
  * Description:
  *   Process all expired high-resolution timers. This function repeatedly
- *   retrieves the earliest timer from the active timer RB-tree, checks if it
- *   has expired relative to the current time, removes it from the tree,
- *   and invokes its callback function. Processing continues until:
+ *   retrieves the earliest timer from the active timer container, checks
+ *   if it has expired relative to the current time, removes it from the
+ *   container, and invokes its callback function. Processing continues
+ *   until:
  *
  *     1. No additional timers have expired, or
  *     2. The active timer set is empty.
@@ -61,7 +62,7 @@
  *   None.
  *
  * Assumptions/Notes:
- *   - This function acquires a spinlock to protect the timer RB-tree.
+ *   - This function acquires a spinlock to protect the timer container.
  *   - Timer callbacks are invoked with interrupts enabled
  *     to avoid deadlocks.
  *   - DEBUGASSERT ensures that timer callbacks are valid.
@@ -78,7 +79,7 @@ void hrtimer_process(uint64_t now)
   int cpu = this_cpu();
 #endif
 
-  /* Lock the hrtimer RB-tree to protect access */
+  /* Lock the hrtimer container to protect access */
 
   flags = spin_lock_irqsave(&g_hrtimer_spinlock);
 
@@ -103,7 +104,7 @@ void hrtimer_process(uint64_t now)
           break;
         }
 
-      /* Remove the expired timer from the active tree */
+      /* Remove the expired timer from the timer container */
 
       hrtimer_remove(hrtimer);
 
@@ -128,7 +129,7 @@ void hrtimer_process(uint64_t now)
 
       /* If the timer is periodic and has not been rearmed or
        * cancelled concurrently,
-       * compute next expiration and reinsert into RB-tree
+       * compute next expiration and reinsert into container
        */
 
       if (period > 0 && hrtimer->expired == expired)

@@ -54,7 +54,7 @@
  *
  * Assumptions/Notes:
  *   - This function disables interrupts briefly via spinlock to safely
- *     insert the timer into the RB-tree.
+ *     insert the timer into the container.
  *   - Absolute mode sets the timer to expire at the given absolute time.
  *   - Relative mode sets the timer to expire after 'ns'
  *     nanoseconds from the current time.
@@ -69,7 +69,7 @@ int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
 
   DEBUGASSERT(hrtimer != NULL);
 
-  /* Protect RB-tree manipulation with spinlock and disable interrupts */
+  /* Protect container manipulation with spinlock and disable interrupts */
 
   flags = spin_lock_irqsave(&g_hrtimer_spinlock);
 
@@ -95,7 +95,7 @@ int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
 
   DEBUGASSERT(hrtimer->expired >= expired);
 
-  /* Insert the timer into the RB-tree */
+  /* Insert the timer into the container */
 
   hrtimer_insert(hrtimer);
 
