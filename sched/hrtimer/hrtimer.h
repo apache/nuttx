@@ -52,7 +52,7 @@ RB_HEAD(hrtimer_tree_s, hrtimer_node_s);
  * Public Data
  ****************************************************************************/
 
-/* Spinlock protecting access to the hrtimer RB-tree and timer state */
+/* Spinlock protecting access to the hrtimer container and timer state */
 
 extern spinlock_t g_hrtimer_spinlock;
 
@@ -162,7 +162,7 @@ int hrtimer_starttimer(uint64_t ns)
  *
  * Description:
  *   Compare two high-resolution timer nodes to determine their ordering
- *   in the red-black tree. Used internally by the RB-tree macros.
+ *   in the container. Used internally by the RB-tree macros.
  *
  * Input Parameters:
  *   a - Pointer to the first hrtimer node.
@@ -202,7 +202,7 @@ RB_PROTOTYPE(hrtimer_tree_s, hrtimer_node_s, entry, hrtimer_compare);
  * Name: hrtimer_is_armed
  *
  * Description:
- *   Test whether a timer is currently armed (inserted into the RB-tree).
+ *   Test whether a timer is currently armed (inserted into the container).
  *
  * Returned Value:
  *   true if armed, false otherwise.
@@ -217,7 +217,7 @@ static inline_function bool hrtimer_is_armed(FAR hrtimer_t *hrtimer)
  * Name: hrtimer_remove
  *
  * Description:
- *   Remove a timer from the RB-tree and mark it as unarmed.
+ *   Remove a timer from the container and mark it as unarmed.
  ****************************************************************************/
 
 static inline_function void hrtimer_remove(FAR hrtimer_t *hrtimer)
@@ -228,7 +228,7 @@ static inline_function void hrtimer_remove(FAR hrtimer_t *hrtimer)
   list_delete_fast(&hrtimer->node.entry);
 #endif
 
-  /* Explicitly clear parent to mark the timer as unarmed */
+  /* Explicitly mark the timer as unarmed */
 
   hrtimer->func = NULL;
 }
@@ -237,7 +237,8 @@ static inline_function void hrtimer_remove(FAR hrtimer_t *hrtimer)
  * Name: hrtimer_insert
  *
  * Description:
- *   Insert a timer into the RB-tree according to its expiration time.
+ *   Insert a timer into the timer container according to its
+ *   expiration time.
  ****************************************************************************/
 
 static inline_function void hrtimer_insert(FAR hrtimer_t *hrtimer)
@@ -286,9 +287,9 @@ static inline_function FAR hrtimer_t *hrtimer_get_first(void)
  *
  * Description:
  *   Test whether the given high-resolution timer is the earliest
- *   expiring timer in the RB-tree.
+ *   expiring timer in the container.
  *
- *   In a red-black tree ordered by expiration time, the earliest timer
+ *   In a container ordered by expiration time, the earliest timer
  *   is represented by the left-most node. Therefore, a timer is the
  *   earliest one if it has no left child.
  *

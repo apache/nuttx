@@ -42,24 +42,29 @@ FAR hrtimer_t *g_hrtimer_running[CONFIG_SMP_NCPUS];
 
 /* Global spinlock protecting the high-resolution timer subsystem.
  *
- * This spinlock serializes access to the hrtimer red-black tree and
+ * This spinlock serializes access to the hrtimer container and
  * protects timer state transitions. It must be held whenever the
- * timer tree or hrtimer state is modified.
+ * timer container is modified.
  */
 
 spinlock_t g_hrtimer_spinlock = SP_UNLOCKED;
 
-/* Red-black tree containing all active high-resolution timers.
+/* Container for all active high-resolution timers.
  *
- * Only timers in the ARMED state are present in this tree. Timers in
- * the RUNNING, CANCELED, or INACTIVE states must not be inserted.
+ * When CONFIG_HRTIMER_TREE is enabled, timers are stored in a container.
+ * When disabled, timers are stored in a linked list.
  *
- * The tree is ordered by absolute expiration time.
+ * The container is ordered by absolute expiration time in
+ * both configurations.
  */
 
 #ifdef CONFIG_HRTIMER_TREE
+/* Red-black tree for hrtimer storage (requires CONFIG_HRTIMER_TREE) */
+
 struct hrtimer_tree_s g_hrtimer_tree = RB_INITIALIZER(g_hrtimer_tree);
 #else
+/* Linked list for hrtimer storage (fallback when tree is disabled) */
+
 struct list_node g_hrtimer_list = LIST_INITIAL_VALUE(g_hrtimer_list);
 #endif
 
@@ -71,12 +76,14 @@ struct list_node g_hrtimer_list = LIST_INITIAL_VALUE(g_hrtimer_list);
  * Name: RB_GENERATE
  *
  * Description:
- *   Instantiate the red-black tree helper functions for the hrtimer
+ *   Instantiate the container helper functions for the hrtimer
  *   subsystem.
  *
  *   This macro generates the static inline functions required to
- *   manipulate the hrtimer red-black tree, including insertion,
+ *   manipulate the hrtimer container, including insertion,
  *   removal, and lookup operations.
+ *
+ *   Note: This is only compiled when CONFIG_HRTIMER_TREE is enabled.
  *
  * Assumptions/Notes:
  *   - The tree key is the absolute expiration time stored in

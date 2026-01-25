@@ -86,17 +86,15 @@ static inline_function bool hrtimer_is_active(FAR hrtimer_t *hrtimer)
  *   Cancel a high-resolution timer.
  *
  *   If the timer is currently armed, it will be removed from the active
- *   hrtimer red-black tree and will not be executed.
+ *   hrtimer container (tree or list) and will not be executed.
  *
  *   If the timer callback is currently executing, the timer will be marked
- *   as canceled.  The running callback is allowed to complete, but the timer
+ *   as canceled. The running callback is allowed to complete, but the timer
  *   will not be re-armed or executed again.
  *
- *   If the canceled timer was the earliest (head) timer in the tree, the
- *   expiration of the underlying hardware timer will be updated to:
- *
- *     1. The expiration time of the next earliest timer, or
- *     2. A safe default expiration if no timers remain.
+ *   If the canceled timer was the earliest (head) timer in the container,
+ *   the expiration of the underlying hardware timer will be updated to the
+ *   expiration time of the next earliest timer
  *
  *   This function is non-blocking and does not wait for a running callback
  *   to finish.
@@ -108,8 +106,8 @@ static inline_function bool hrtimer_is_active(FAR hrtimer_t *hrtimer)
  *   OK (0) on success; a negated errno value on failure.
  *
  * Assumptions/Notes:
- *   - This function acquires the global hrtimer spinlock to protect both
- *     the red-black tree and the timer state.
+ *   - This function acquires the global hrtimer spinlock to protect
+ *     the container.
  *   - The caller must ensure that the timer structure is not freed until
  *     it is guaranteed that any running callback has returned.
  *
@@ -123,7 +121,7 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer)
 
   DEBUGASSERT(hrtimer != NULL);
 
-  /* Enter critical section to protect the hrtimer tree and state */
+  /* Enter critical section to protect the hrtimer container */
 
   flags = spin_lock_irqsave(&g_hrtimer_spinlock);
 
@@ -162,8 +160,7 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer)
  *   Cancel a high-resolution timer and wait until it becomes inactive.
  *
  *   - Calls hrtimer_cancel() to request timer cancellation.
- *   - If the timer callback is running, waits until it completes and
- *     the timer state transitions to HRTIMER_STATE_INACTIVE.
+ *   - If the timer callback is running, waits until it completes.
  *   - If sleeping is allowed (normal task context), yields CPU briefly
  *     to avoid busy-waiting.
  *   - Otherwise (interrupt or idle task context), spins until completion.
@@ -190,11 +187,10 @@ int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer)
       return ret;
     }
 
-  /* Wait until the timer transitions to the inactive state.
+  /* Wait until all cpu finish running the timer callback.
    *
    * If sleeping is permitted, yield the CPU briefly to avoid
-   * busy-waiting.  Otherwise, spin until the callback completes
-   * and the state becomes inactive.
+   * busy-waiting. Otherwise, spin until the callback completes.
    */
 #ifdef CONFIG_SMP
   while (hrtimer_is_active(hrtimer))
