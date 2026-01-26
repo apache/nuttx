@@ -434,7 +434,7 @@ static int dhtxx_open(FAR struct file *filep)
 static ssize_t dhtxx_read(FAR struct file *filep, FAR char *buffer,
                           size_t buflen)
 {
-  int ret = OK;
+  int ret;
   FAR struct inode                *inode = filep->f_inode;
   FAR struct dhtxx_dev_s          *priv  = inode->i_private;
   FAR struct dhtxx_sensor_data_s  *data  =
@@ -443,13 +443,13 @@ static ssize_t dhtxx_read(FAR struct file *filep, FAR char *buffer,
   if (!buffer)
     {
       snerr("ERROR: Buffer is null.\n");
-      return -1;
+      return -EINVAL;
     }
 
   if (buflen < sizeof(FAR struct dhtxx_sensor_data_s))
     {
       snerr("ERROR: Not enough memory to read data sample.\n");
-      return -ENOSYS;
+      return -EINVAL;
     }
 
   memset(priv->raw_data, 0u, sizeof(priv->raw_data));
@@ -465,32 +465,33 @@ static ssize_t dhtxx_read(FAR struct file *filep, FAR char *buffer,
   if (dht_prepare_reading(priv) != 0)
     {
       data->status = DHTXX_TIMEOUT;
-      ret = -1;
+      ret = -ETIMEDOUT;
       goto out;
     }
 
   if (dht_read_raw_data(priv) != 0)
     {
       data->status = DHTXX_TIMEOUT;
-      ret = -1;
+      ret = -ETIMEDOUT;
       goto out;
     }
 
   if (!dht_verify_checksum(priv))
     {
       data->status = DHTXX_CHECKSUM_ERROR;
-      ret = -1;
+      ret = -EIO;
       goto out;
     }
 
   if (dht_parse_data(priv, data) != 0)
     {
       data->status = DHTXX_READ_ERROR;
-      ret = -1;
+      ret = -EIO;
     }
   else
     {
       data->status = DHTXX_SUCCESS;
+      ret = sizeof(struct dhtxx_sensor_data_s);
     }
 
 out:
