@@ -45,9 +45,6 @@ if(CONFIG_LIBSUPCXX)
             ""
             TEST_COMMAND
             ""
-        PATCH_COMMAND
-          patch -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libstdc++ <
-          ${CMAKE_CURRENT_LIST_DIR}/0001-libsupc-Add-missing-header-files.patch
         DOWNLOAD_NO_PROGRESS true
         TIMEOUT 30)
 
@@ -81,6 +78,7 @@ if(CONFIG_LIBSUPCXX)
   set(BITSDIR ${CMAKE_BINARY_DIR}/include/c++/bits)
 
   # Copy libsupc++ headers
+  file(COPY ${CMAKE_CURRENT_LIST_DIR}/c++config.h DESTINATION ${INCDIR}/bits)
   file(COPY ${SUPDIR}/compare DESTINATION ${CXXDIR})
   file(COPY ${SUPDIR}/exception DESTINATION ${CXXDIR})
   file(COPY ${SUPDIR}/initializer_list DESTINATION ${CXXDIR})
