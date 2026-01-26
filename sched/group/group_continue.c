@@ -79,6 +79,8 @@ static int group_continue_handler(pid_t pid, FAR void *arg)
         {
           up_switch_context(this_task(), tcb);
         }
+
+      nxsched_put_tcb(rtcb);
     }
 
   /* Always return zero.  We need to visit each member of the group */

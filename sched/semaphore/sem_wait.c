@@ -107,7 +107,7 @@ int nxsem_wait_slow(FAR sem_t *sem)
            * from these situations.
            */
 
-          htcb = nxsched_get_tcb(mholder & (~NXSEM_MBLOCKING_BIT));
+          htcb = nxsched_get_tcb_noref(mholder & (~NXSEM_MBLOCKING_BIT));
         }
 
       unlocked = htcb == NULL;

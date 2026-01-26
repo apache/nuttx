@@ -226,6 +226,8 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 
   nxtask_joininit(ptcb);
 
+  nxsem_init(&ptcb->exit_sem, 0, 0);
+
   /* Bind the parent's group to the new TCB (we have not yet joined the
    * group).
    */

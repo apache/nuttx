@@ -70,9 +70,11 @@ void nxsched_foreach(nxsched_foreach_t handler, FAR void *arg)
     {
       /* This test and the function call must be atomic */
 
-      if (g_pidhash[ndx])
+      FAR struct tcb_s *tcb = nxsched_get_tcb(ndx);
+      if (tcb)
         {
-          handler(g_pidhash[ndx], arg);
+          handler(tcb, arg);
+          nxsched_put_tcb(tcb);
         }
     }
 

@@ -1032,6 +1032,8 @@ static void gdb_get_registers(FAR struct gdb_state_s *state)
             *(FAR uintptr_t *)(reg + g_tcbinfo.reg_off.p[i]);
         }
     }
+
+  nxsched_put_tcb(tcb);
 }
 
 /****************************************************************************
@@ -1428,6 +1430,7 @@ static int gdb_query(FAR struct gdb_state_s *state)
                 get_task_name(tcb), thread_state, tcb->sched_priority,
                 tcb->adj_stack_size);
 
+      nxsched_put_tcb(tcb);
       ret = gdb_bin2hex(state->pkt_buf, sizeof(state->pkt_buf),
                         thread_info, strlen(thread_info));
 
@@ -1506,6 +1509,7 @@ static int gdb_is_thread_active(FAR struct gdb_state_s *state)
 
   state->pid = pid - 1;
   gdb_send_ok_packet(state);
+  nxsched_put_tcb(tcb);
   return ret;
 }
 
@@ -1562,6 +1566,7 @@ static int gdb_thread_context(FAR struct gdb_state_s *state)
         }
 
       state->pid = pid - 1;
+      nxsched_put_tcb(tcb);
     }
 
   gdb_send_ok_packet(state);
