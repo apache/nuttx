@@ -82,7 +82,7 @@ int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
 
   DEBUGASSERT(hrtimer != NULL);
 
-  /* Protect container manipulation with spinlock and disable interrupts */
+  /* Acquire the lock and seize the ownership of the hrtimer queue. */
 
   flags = write_seqlock_irqsave(&g_hrtimer_lock);
 
@@ -98,7 +98,7 @@ int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
   hrtimer->func    = func;
   hrtimer->expired = next_expired;
 
-  /* Insert the timer into the container */
+  /* Insert the timer into the hrtimer queue. */
 
   hrtimer_insert(hrtimer);
 
@@ -109,7 +109,7 @@ int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
       hrtimer_reprogram(hrtimer->expired);
     }
 
-  /* Release spinlock and restore interrupts */
+  /* Release the lock and give up the ownership of the hrtimer queue. */
 
   write_sequnlock_irqrestore(&g_hrtimer_lock, flags);
 
