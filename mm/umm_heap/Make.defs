@@ -22,6 +22,7 @@
 
 # User heap allocator
 
+ifeq ($(CONFIG_MM_UMM_CUSTOMIZE_MANAGER),)
 CSRCS += umm_globals.c umm_initialize.c umm_addregion.c umm_malloc_size.c
 CSRCS += umm_brkaddr.c umm_calloc.c umm_extend.c umm_free.c umm_mallinfo.c
 CSRCS += umm_malloc.c umm_memalign.c umm_realloc.c umm_zalloc.c umm_heapmember.c
@@ -39,3 +40,4 @@ endif
 
 DEPPATH += --dep-path umm_heap
 VPATH += :umm_heap
+endif

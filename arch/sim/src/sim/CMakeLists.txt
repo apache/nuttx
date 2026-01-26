@@ -51,7 +51,7 @@ list(
   sim_stackframe.c
   sim_exit.c
   sim_switchcontext.c
-  sim_heap.c
+  sim_ummheap.c
   sim_uart.c
   sim_copyfullstate.c
   sim_registerdump.c

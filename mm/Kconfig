@@ -25,6 +25,13 @@ config MM_CUSTOMIZE_MANAGER
 
 endchoice
 
+config MM_UMM_CUSTOMIZE_MANAGER
+	bool "Customized heap manager"
+	default n
+	---help---
+		Customized memory manager policy. The build will fail
+		if the umm heap module not defined by customer.
+
 config MM_KERNEL_HEAP
 	bool "Kernel dedicated heap"
 	default BUILD_PROTECTED || BUILD_KERNEL

@@ -81,7 +81,7 @@ config SIM_CYGWIN_DECORATED
 config SIM_ASAN
 	bool "Address Sanitizer"
 	default n
-	depends on !MM_KASAN && MM_CUSTOMIZE_MANAGER && FRAME_POINTER
+	depends on !MM_KASAN && MM_UMM_CUSTOMIZE_MANAGER && FRAME_POINTER
 	---help---
 		AddressSanitizer (ASan) is a fast compiler-based tool for detecting memory
 		bugs in native code.
