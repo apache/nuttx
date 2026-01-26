@@ -207,9 +207,23 @@ int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer);
  *   OK on success; a negated errno value on failure.
  ****************************************************************************/
 
+int hrtimer_start_absolute(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
+                           uint64_t expired);
+
+static inline_function
 int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
-                  uint64_t expired,
-                  enum hrtimer_mode_e mode);
+                  uint64_t expired, enum hrtimer_mode_e mode)
+{
+  /* In most cases, the mode can be evaluated at compile time.
+   * The compiler will optimize the code to avoid the branch.
+   */
+
+  uint64_t next_expired = mode == HRTIMER_MODE_ABS ? expired :
+                          clock_systime_nsec() +
+                          (expired <= HRTIMER_MAX_DELAY ?
+                           expired : HRTIMER_MAX_DELAY);
+  return hrtimer_start_absolute(hrtimer, func, next_expired);
+}
 
 /****************************************************************************
  * Name: hrtimer_gettime
