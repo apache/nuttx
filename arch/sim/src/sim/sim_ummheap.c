@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/sim_heap.c
+ * arch/sim/src/sim/sim_ummheap.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -33,13 +33,12 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/atomic.h>
-#include <nuttx/fs/procfs.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/sched_note.h>
 
 #include "sim_internal.h"
 
-#ifdef CONFIG_MM_CUSTOMIZE_MANAGER
+#ifdef CONFIG_MM_UMM_CUSTOMIZE_MANAGER
 
 /****************************************************************************
  * Private Types
@@ -54,34 +53,41 @@ struct mm_delaynode_s
 
 struct mm_heap_s
 {
-  struct mm_delaynode_s *mm_delaylist[CONFIG_SMP_NCPUS];
+  struct mm_delaynode_s *delaylist[CONFIG_SMP_NCPUS];
 
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
-  size_t mm_delaycount[CONFIG_SMP_NCPUS];
+  size_t delaycount[CONFIG_SMP_NCPUS];
 #endif
 
   atomic_t aordblks;
   atomic_t uordblks;
   atomic_t usmblks;
-
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-  struct procfs_meminfo_entry_s mm_procfs;
-#endif
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static void mm_delayfree(struct mm_heap_s *heap, void *mem, bool delay);
+static void delay_free(struct mm_heap_s *heap, void *mem, bool delay);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static struct mm_heap_s g_heap;
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+struct mm_heap_s *g_mmheap = &g_heap;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static void mm_add_delaylist(struct mm_heap_s *heap, void *mem)
+static void add_delaylist(struct mm_heap_s *heap, void *mem)
 {
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   struct mm_delaynode_s *tmp = mem;
   irqstate_t flags;
 
@@ -89,21 +95,19 @@ static void mm_add_delaylist(struct mm_heap_s *heap, void *mem)
 
   flags = up_irq_save();
 
-  tmp->flink = heap->mm_delaylist[this_cpu()];
-  heap->mm_delaylist[this_cpu()] = tmp;
+  tmp->flink = heap->delaylist[this_cpu()];
+  heap->delaylist[this_cpu()] = tmp;
 
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
-  heap->mm_delaycount[this_cpu()]++;
+  heap->delaycount[this_cpu()]++;
 #endif
 
   up_irq_restore(flags);
-#endif
 }
 
 static bool free_delaylist(struct mm_heap_s *heap, bool force)
 {
   bool ret = false;
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   struct mm_delaynode_s *tmp;
   irqstate_t flags;
 
@@ -111,26 +115,26 @@ static bool free_delaylist(struct mm_heap_s *heap, bool force)
 
   flags = up_irq_save();
 
-  tmp = heap->mm_delaylist[this_cpu()];
+  tmp = heap->delaylist[this_cpu()];
 
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
   if (tmp == NULL ||
       (!force &&
-        heap->mm_delaycount[this_cpu()] < CONFIG_MM_FREE_DELAYCOUNT_MAX))
+        heap->delaycount[this_cpu()] < CONFIG_MM_FREE_DELAYCOUNT_MAX))
     {
       up_irq_restore(flags);
       return false;
     }
 
-  heap->mm_delaycount[this_cpu()] = 0;
+  heap->delaycount[this_cpu()] = 0;
 #endif
-  heap->mm_delaylist[this_cpu()] = NULL;
+  heap->delaylist[this_cpu()] = NULL;
 
   up_irq_restore(flags);
 
   /* Test if the delayed is empty */
 
-  ret = tmp != NULL;
+  ret = (tmp != NULL);
 
   while (tmp)
     {
@@ -145,43 +149,38 @@ static bool free_delaylist(struct mm_heap_s *heap, bool force)
        * 'while' condition above.
        */
 
-      mm_delayfree(heap, address, false);
+      delay_free(heap, address, false);
     }
 
-#endif
   return ret;
 }
 
 /****************************************************************************
- * Name: mm_delayfree
+ * Name: delay_free
  *
  * Description:
  *   Delay free memory if `delay` is true, otherwise free it immediately.
  *
  ****************************************************************************/
 
-static void mm_delayfree(struct mm_heap_s *heap, void *mem, bool delay)
+static void delay_free(struct mm_heap_s *heap, void *mem, bool delay)
 {
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   /* Check current environment */
 
   if (up_interrupt_context())
     {
       /* We are in ISR, add to the delay list */
 
-      mm_add_delaylist(heap, mem);
+      add_delaylist(heap, mem);
     }
-  else
-#endif
-
-  if (nxsched_gettid() < 0 || delay)
+  else if (nxsched_gettid() < 0 || delay)
     {
       /* nxsched_gettid() return -ESRCH, means we are in situations
        * during context switching(See nxsched_gettid's comment).
        * Then add to the delay list.
        */
 
-      mm_add_delaylist(heap, mem);
+      add_delaylist(heap, mem);
     }
   else
     {
@@ -193,193 +192,9 @@ static void mm_delayfree(struct mm_heap_s *heap, void *mem, bool delay)
     }
 }
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: mm_initialize_heap
- *
- * Description:
- *   Initialize the selected heap data structures, providing the initial
- *   heap region.
- *
- * Input Parameters:
- *   config - The heap config structure
- *
- * Returned Value:
- *   Return the address of a new heap instance.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-struct mm_heap_s *mm_initialize_heap(const struct mm_heap_config_s *config)
+static void *reallocate(void *oldmem, size_t size)
 {
-  struct mm_heap_s *heap = config->heap;
-  const char *name = config->name;
-  void *heap_start = config->start;
-  size_t heap_size = config->size;
-
-  if (heap == NULL)
-    {
-      heap = host_memalign(sizeof(void *), sizeof(*heap));
-    }
-  else
-    {
-      heap = mm_memalign(heap, MM_ALIGN, sizeof(struct mm_heap_s));
-    }
-
-  if (heap == NULL)
-    {
-      return NULL;
-    }
-
-  memset(heap, 0, sizeof(struct mm_heap_s));
-
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-  heap->mm_procfs.name = name;
-  heap->mm_procfs.heap = heap;
-  procfs_register_meminfo(&heap->mm_procfs);
-#endif
-
-  sched_note_heap(NOTE_HEAP_ADD, heap, heap_start, heap_size, 0);
-  UNUSED(heap_start);
-  UNUSED(heap_size);
-  return heap;
-}
-
-/****************************************************************************
- * Name: mm_uninitialize
- *
- * Description:
- *   Uninitialize the selected heap data structures
- *
- * Input Parameters:
- *   heap      - The selected heap
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-void mm_uninitialize(struct mm_heap_s *heap)
-{
-  sched_note_heap(NOTE_HEAP_REMOVE, heap, NULL, 0, 0);
-
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
-  procfs_unregister_meminfo(&heap->mm_procfs);
-#endif
-  mm_free_delaylist(heap);
-  host_free(heap);
-}
-
-/****************************************************************************
- * Name: mm_addregion
- *
- * Description:
- *   This function adds a region of contiguous memory to the selected heap.
- *
- * Input Parameters:
- *   heap      - The selected heap
- *   heapstart - Start of the heap region
- *   heapsize  - Size of the heap region
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-void mm_addregion(struct mm_heap_s *heap, void *heapstart,
-                  size_t heapsize)
-{
-}
-
-/****************************************************************************
- * Name: mm_malloc
- *
- * Description:
- *  Find the smallest chunk that satisfies the request. Take the memory from
- *  that chunk, save the remaining, smaller chunk (if any).
- *
- *  8-byte alignment of the allocated data is assured.
- *
- ****************************************************************************/
-
-void *mm_malloc(struct mm_heap_s *heap, size_t size)
-{
-  return mm_realloc(heap, NULL, size);
-}
-
-/****************************************************************************
- * Name: mm_free
- *
- * Description:
- *   Returns a chunk of memory to the list of free nodes,  merging with
- *   adjacent free chunks if possible.
- *
- ****************************************************************************/
-
-void mm_free(struct mm_heap_s *heap, void *mem)
-{
-  minfo("Freeing %p\n", mem);
-
-  /* Protect against attempts to free a NULL reference */
-
-  if (mem == NULL)
-    {
-      return;
-    }
-
-  mm_delayfree(heap, mem, CONFIG_MM_FREE_DELAYCOUNT_MAX > 0);
-}
-
-/****************************************************************************
- * Name: mm_free_delaylist
- *
- * Description:
- *   force freeing the delaylist of this heap.
- *
- ****************************************************************************/
-
-void mm_free_delaylist(struct mm_heap_s *heap)
-{
-  if (heap)
-    {
-       free_delaylist(heap, true);
-    }
-}
-
-/****************************************************************************
- * Name: mm_realloc
- *
- * Description:
- *   If the reallocation is for less space, then:
- *
- *     (1) the current allocation is reduced in size
- *     (2) the remainder at the end of the allocation is returned to the
- *         free list.
- *
- *  If the request is for more space and the current allocation can be
- *  extended, it will be extended by:
- *
- *     (1) Taking the additional space from the following free chunk, or
- *     (2) Taking the additional space from the preceding free chunk.
- *     (3) Or both
- *
- *  If the request is for more space but the current chunk cannot be
- *  extended, then malloc a new buffer, copy the data into the new buffer,
- *  and free the old buffer.
- *
- ****************************************************************************/
-
-void *mm_realloc(struct mm_heap_s *heap, void *oldmem,
-                 size_t size)
-{
+  struct mm_heap_s *heap = g_mmheap;
   void *mem;
   int uordblks;
   int usmblks;
@@ -424,7 +239,7 @@ void *mm_realloc(struct mm_heap_s *heap, void *oldmem,
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
   if (mem == NULL && free_delaylist(heap, true))
     {
-      return mm_realloc(heap, oldmem, size);
+      return reallocate(oldmem, size);
     }
 #endif
 
@@ -432,14 +247,104 @@ void *mm_realloc(struct mm_heap_s *heap, void *oldmem,
 }
 
 /****************************************************************************
- * Name: mm_calloc
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: umm_addregion
  *
- * Descriptor:
- *   mm_calloc() calculates the size of the allocation and calls mm_zalloc()
+ * Description:
+ *   This function adds a region of contiguous memory to the selected heap.
+ *
+ * Input Parameters:
+ *   heapstart - Start of the heap region
+ *   heapsize  - Size of the heap region
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
  *
  ****************************************************************************/
 
-void *mm_calloc(struct mm_heap_s *heap, size_t n, size_t elem_size)
+void umm_addregion(void *heapstart, size_t heapsize)
+{
+}
+
+/****************************************************************************
+ * Name: malloc
+ *
+ * Description:
+ *  Find the smallest chunk that satisfies the request. Take the memory from
+ *  that chunk, save the remaining, smaller chunk (if any).
+ *
+ *  8-byte alignment of the allocated data is assured.
+ *
+ ****************************************************************************/
+
+void *malloc(size_t size)
+{
+  return reallocate(NULL, size);
+}
+
+/****************************************************************************
+ * Name: free
+ *
+ * Description:
+ *   Returns a chunk of memory to the list of free nodes,  merging with
+ *   adjacent free chunks if possible.
+ *
+ ****************************************************************************/
+
+void free(void *mem)
+{
+  /* Protect against attempts to free a NULL reference */
+
+  if (mem == NULL)
+    {
+      return;
+    }
+
+  delay_free(g_mmheap, mem, CONFIG_MM_FREE_DELAYCOUNT_MAX > 0);
+}
+
+/****************************************************************************
+ * Name: realloc
+ *
+ * Description:
+ *   If the reallocation is for less space, then:
+ *
+ *     (1) the current allocation is reduced in size
+ *     (2) the remainder at the end of the allocation is returned to the
+ *         free list.
+ *
+ *  If the request is for more space and the current allocation can be
+ *  extended, it will be extended by:
+ *
+ *     (1) Taking the additional space from the following free chunk, or
+ *     (2) Taking the additional space from the preceding free chunk.
+ *     (3) Or both
+ *
+ *  If the request is for more space but the current chunk cannot be
+ *  extended, then malloc a new buffer, copy the data into the new buffer,
+ *  and free the old buffer.
+ *
+ ****************************************************************************/
+
+void *realloc(void *oldmem, size_t size)
+{
+  return reallocate(oldmem, size);
+}
+
+/****************************************************************************
+ * Name: calloc
+ *
+ * Descriptor:
+ *   calloc() calculates the size of the allocation and calls zalloc()
+ *
+ ****************************************************************************/
+
+void *calloc(size_t n, size_t elem_size)
 {
   size_t size = n * elem_size;
 
@@ -448,22 +353,22 @@ void *mm_calloc(struct mm_heap_s *heap, size_t n, size_t elem_size)
       return NULL;
     }
 
-  return mm_zalloc(heap, size);
+  return zalloc(size);
 }
 
 /****************************************************************************
- * Name: mm_zalloc
+ * Name: zalloc
  *
  * Description:
- *   mm_zalloc calls mm_malloc, then zeroes out the allocated chunk.
+ *   zalloc calls malloc, then zeroes out the allocated chunk.
  *
  ****************************************************************************/
 
-void *mm_zalloc(struct mm_heap_s *heap, size_t size)
+void *zalloc(size_t size)
 {
   void *ptr;
 
-  ptr = mm_malloc(heap, size);
+  ptr = malloc(size);
   if (ptr != NULL)
     {
       memset(ptr, 0, size);
@@ -473,7 +378,7 @@ void *mm_zalloc(struct mm_heap_s *heap, size_t size)
 }
 
 /****************************************************************************
- * Name: mm_memalign
+ * Name: memalign
  *
  * Description:
  *   memalign requests more than enough space from malloc, finds a region
@@ -485,8 +390,9 @@ void *mm_zalloc(struct mm_heap_s *heap, size_t size)
  *
  ****************************************************************************/
 
-void *mm_memalign(struct mm_heap_s *heap, size_t alignment, size_t size)
+void *memalign(size_t alignment, size_t size)
 {
+  struct mm_heap_s *heap = g_mmheap;
   void *mem;
   int uordblks;
   int usmblks;
@@ -518,7 +424,7 @@ void *mm_memalign(struct mm_heap_s *heap, size_t alignment, size_t size)
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
   if (mem == NULL && free_delaylist(heap, true))
     {
-      return mm_memalign(heap, alignment, size);
+      return memalign(alignment, size);
     }
 #endif
 
@@ -526,7 +432,7 @@ void *mm_memalign(struct mm_heap_s *heap, size_t alignment, size_t size)
 }
 
 /****************************************************************************
- * Name: mm_heapmember
+ * Name: umm_heapmember
  *
  * Description:
  *   Check if an address lies in the heap.
@@ -542,13 +448,13 @@ void *mm_memalign(struct mm_heap_s *heap, size_t alignment, size_t size)
  *
  ****************************************************************************/
 
-bool mm_heapmember(struct mm_heap_s *heap, void *mem)
+bool umm_heapmember(void *mem)
 {
   return true;
 }
 
 /****************************************************************************
- * Name: mm_brkaddr
+ * Name: umm_brkaddr
  *
  * Description:
  *   Return the break address of a heap region.  Zero is returned if the
@@ -556,13 +462,13 @@ bool mm_heapmember(struct mm_heap_s *heap, void *mem)
  *
  ****************************************************************************/
 
-void *mm_brkaddr(struct mm_heap_s *heap, int region)
+void *umm_brkaddr(int region)
 {
   return NULL;
 }
 
 /****************************************************************************
- * Name: mm_extend
+ * Name: umm_extend
  *
  * Description:
  *   Extend a heap region by add a block of (virtually) contiguous memory
@@ -570,40 +476,42 @@ void *mm_brkaddr(struct mm_heap_s *heap, int region)
  *
  ****************************************************************************/
 
-void mm_extend(struct mm_heap_s *heap, void *mem, size_t size,
-               int region)
+void umm_extend(void *mem, size_t size, int region)
 {
 }
 
 /****************************************************************************
- * Name: mm_mallinfo
+ * Name: mallinfo
  *
  * Description:
  *   mallinfo returns a copy of updated current heap information.
  *
  ****************************************************************************/
 
-struct mallinfo mm_mallinfo(struct mm_heap_s *heap)
+struct mallinfo mallinfo(void)
 {
+  struct mm_heap_s *heap = g_mmheap;
   struct mallinfo info;
 
   memset(&info, 0, sizeof(struct mallinfo));
   info.aordblks = atomic_read(&heap->aordblks);
   info.uordblks = atomic_read(&heap->uordblks);
   info.usmblks  = atomic_read(&heap->usmblks);
+  info.arena    = SIM_HEAP_SIZE;
+  info.fordblks = SIM_HEAP_SIZE - info.uordblks;
+  info.mxordblk = info.fordblks;
   return info;
 }
 
 /****************************************************************************
- * Name: mm_mallinfo_task
+ * Name: mallinfo_task
  *
  * Description:
  *   mallinfo_task returns a copy of updated current task's heap information.
  *
  ****************************************************************************/
 
-struct mallinfo_task mm_mallinfo_task(struct mm_heap_s *heap,
-                                      const struct malltask *task)
+struct mallinfo_task mallinfo_task(const struct malltask *task)
 {
   struct mallinfo_task info =
     {
@@ -614,28 +522,28 @@ struct mallinfo_task mm_mallinfo_task(struct mm_heap_s *heap,
 }
 
 /****************************************************************************
- * Name: mm_memdump
+ * Name: umm_memdump
  *
  * Description:
- *   mm_memdump returns a memory info about specified pid of task/thread.
+ *   umm_memdump returns a memory info about specified pid of task/thread.
  *
  ****************************************************************************/
 
-void mm_memdump(struct mm_heap_s *heap, const struct mm_memdump_s *dump)
+void umm_memdump(const struct mm_memdump_s *dump)
 {
 }
 
 #ifdef CONFIG_DEBUG_MM
 
 /****************************************************************************
- * Name: mm_checkcorruption
+ * Name:umm_checkcorruption
  *
  * Description:
- *   mm_checkcorruption is used to check whether memory heap is normal.
+ *   umm_checkcorruption is used to check whether memory heap is normal.
  *
  ****************************************************************************/
 
-void mm_checkcorruption(struct mm_heap_s *heap)
+void umm_checkcorruption(void)
 {
 }
 
@@ -645,7 +553,7 @@ void mm_checkcorruption(struct mm_heap_s *heap)
  * Name: malloc_size
  ****************************************************************************/
 
-size_t mm_malloc_size(struct mm_heap_s *heap, void *mem)
+size_t malloc_size(void *mem)
 {
   return host_mallocsize(mem);
 }
@@ -668,32 +576,22 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 }
 
 /****************************************************************************
- * Name: mm_heapfree
+ * Name: umm_initialize
  *
  * Description:
- *   Return the total free size (in bytes) in the heap
+ *   Initialize the selected heap data structures, providing the initial
+ *   heap region.
  *
  ****************************************************************************/
 
-size_t mm_heapfree(struct mm_heap_s *heap)
+void umm_initialize(void *heap_start, size_t heap_size)
 {
-  return SIZE_MAX;
+  sched_note_heap(NOTE_HEAP_ADD, g_mmheap, heap_start, heap_size, 0);
+  UNUSED(heap_start);
+  UNUSED(heap_size);
 }
 
-/****************************************************************************
- * Name: mm_heapfree_largest
- *
- * Description:
- *   Return the largest chunk of contiguous memory in the heap
- *
- ****************************************************************************/
-
-size_t mm_heapfree_largest(struct mm_heap_s *heap)
-{
-  return SIZE_MAX;
-}
-
-#else /* CONFIG_MM_CUSTOMIZE_MANAGER */
+#else /* CONFIG_MM_UMM_CUSTOMIZE_MANAGER */
 
 void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
@@ -701,4 +599,4 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
   *heap_size  = SIM_HEAP_SIZE;
 }
 
-#endif /* CONFIG_MM_CUSTOMIZE_MANAGER */
+#endif /* CONFIG_MM_UMM_CUSTOMIZE_MANAGER */
