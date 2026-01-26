@@ -84,6 +84,7 @@ extern seqcount_t g_hrtimer_lock;
 /* Red-Black tree containing all active high-resolution timers */
 
 extern struct hrtimer_tree_s g_hrtimer_tree;
+extern struct hrtimer_s      g_hrtimer_guard;
 extern struct FAR hrtimer_s *g_hrtimer_head;
 #else
 /* List containing all active high-resolution timers */
@@ -262,8 +263,7 @@ static inline_function bool hrtimer_insert(FAR hrtimer_t *hrtimer)
   bool is_head = false;
   RB_INSERT(hrtimer_tree_s, &g_hrtimer_tree, hrtimer);
 
-  if (g_hrtimer_head == NULL ||
-      HRTIMER_TIME_BEFORE(hrtimer->expired, g_hrtimer_head->expired))
+  if (HRTIMER_TIME_BEFORE(hrtimer->expired, g_hrtimer_head->expired))
     {
       g_hrtimer_head = hrtimer;
       is_head        = true;

@@ -84,16 +84,15 @@ void hrtimer_process(uint64_t now)
   /* Fetch the earliest active timer */
 
   hrtimer = hrtimer_get_first();
+  expired = hrtimer->expired;
 
   /* Check if the timer has expired */
 
-  while (hrtimer != NULL && HRTIMER_TIME_BEFORE_EQ(hrtimer->expired, now))
+  while (HRTIMER_TIME_BEFORE_EQ(expired, now))
     {
-      func    = hrtimer->func;
-      expired = hrtimer->expired;
-
       /* Remove the expired timer from the timer queue */
 
+      func = hrtimer->func;
       hrtimer_remove(hrtimer);
 
       hrtimer_mark_running(hrtimer, cpu);
@@ -130,17 +129,18 @@ void hrtimer_process(uint64_t now)
       /* Fetch the next earliest timer */
 
       hrtimer = hrtimer_get_first();
+      expired = hrtimer->expired;
     }
 
   hrtimer_unmark_running(cpu);
 
   /* Schedule the next timer expiration */
 
-  if (hrtimer != NULL)
+  if (expired != now)
     {
       /* Start timer for the next earliest expiration */
 
-      hrtimer_reprogram(hrtimer->expired);
+      hrtimer_reprogram(expired);
     }
 
   /* Release the lock and give up the ownership of the hrtimer queue. */
