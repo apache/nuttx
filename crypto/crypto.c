@@ -344,6 +344,21 @@ int crypto_get_driverid(uint8_t flags)
   return -1;
 }
 
+int crypto_find_driverid(uint8_t flags)
+{
+  int i;
+
+  for (i = 0; i < crypto_drivers_num; i++)
+    {
+      if (crypto_drivers[i].cc_flags & flags)
+        {
+          return i;
+        }
+    }
+
+  return -EINVAL;
+}
+
 /* Register a crypto driver. It should be called once for each algorithm
  * supported by the driver.
  */
