@@ -97,11 +97,11 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer)
 
       if (hrtimer_remove(hrtimer))
         {
+          uint64_t next_expired;
+
           first = hrtimer_get_first();
-          if (first != NULL)
-            {
-              hrtimer_reprogram(first->expired);
-            }
+          next_expired = first != NULL ? first->expired : UINT64_MAX;
+          hrtimer_reprogram(next_expired);
         }
     }
 
