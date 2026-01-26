@@ -1033,6 +1033,9 @@ mm_initialize_heap(FAR const struct mm_heap_config_s *config)
       heap = (FAR struct mm_heap_s *)heapstart;
       heapstart += sizeof(struct mm_heap_s);
       heapsize -= sizeof(struct mm_heap_s);
+
+      memset(heap, 0, sizeof(struct mm_heap_s));
+      heap->mm_curused = sizeof(struct mm_heap_s);
     }
   else
     {
@@ -1041,9 +1044,10 @@ mm_initialize_heap(FAR const struct mm_heap_config_s *config)
         {
           return NULL;
         }
+
+      memset(heap, 0, sizeof(struct mm_heap_s));
     }
 
-  memset(heap, 0, sizeof(struct mm_heap_s));
   heap->mm_nokasan = config->nokasan;
 
   /* Allocate and create TLSF context */
