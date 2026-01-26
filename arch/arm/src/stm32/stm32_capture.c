@@ -1110,8 +1110,8 @@ static int stm32_cap_setchannel(struct stm32_cap_dev_s *dev,
   switch (cfg & STM32_CAP_EDGE_MASK)
     {
       case STM32_CAP_EDGE_DISABLED:
-        regval = 0;
         ccer_en_bit = 0;
+        regval = 0;
         break;
 
       case STM32_CAP_EDGE_RISING:
@@ -1234,6 +1234,14 @@ static uint32_t stm32_cap_getcapture(struct stm32_cap_dev_s *dev,
   return stm32_getreg16(priv, offset);
 }
 
+static uint32_t stm32_cap_rstcounter(struct stm32_cap_dev_s *dev)
+{
+  const struct stm32_cap_priv_s *priv = (const struct stm32_cap_priv_s *)dev;
+
+  stm32_modifyreg16(priv, STM32_BTIM_EGR_OFFSET, 0, BTIM_EGR_UG);
+  return OK;
+}
+
 /****************************************************************************
  * Advanced Functions
  ****************************************************************************/
@@ -1253,7 +1261,8 @@ struct stm32_cap_ops_s stm32_cap_ops =
   .setisr       = &stm32_cap_setisr,
   .enableint    = &stm32_cap_enableint,
   .ackflags     = &stm32_cap_ackflags,
-  .getflags     = &stm32_cap_getflags
+  .getflags     = &stm32_cap_getflags,
+  .rstcounter   = &stm32_cap_rstcounter,
 };
 
 #ifdef CONFIG_STM32_TIM1_CAP
