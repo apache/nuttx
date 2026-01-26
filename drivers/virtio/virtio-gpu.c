@@ -230,7 +230,7 @@ static int virtio_gpu_send_cmd(FAR struct virtqueue *vq,
         {
           virtqueue_kick(vq);
           spin_unlock_irqrestore(&priv->lock, flags);
-          nxsem_wait(&sem);
+          nxsem_wait_uninterruptible(&sem);
         }
       else
         {
