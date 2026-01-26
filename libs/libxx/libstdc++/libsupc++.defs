@@ -31,7 +31,6 @@ libstdc++-v3.tar.gz:
 libstdc++/libstdc++: libstdc++-v3.tar.gz
 	$(Q) mkdir -p $@
 	$(Q) tar -xzf $< -C $@
-	$(Q) patch -p1 < libstdc++/0001-libsupc-Add-missing-header-files.patch -d $@
 endif
 
 C++DIR = $(TOPDIR)/include/c++
@@ -50,6 +49,7 @@ $(BITSDIR): libstdc++/libstdc++
 	$(Q) mkdir -p $(BITSDIR)
 
 copy_headers: $(BITSDIR)
+	$(Q) cp libstdc++/c++config.h $(INCDIR)/bits
 	$(Q) cp $(SUPDIR)/compare $(C++DIR)
 	$(Q) cp $(SUPDIR)/exception $(C++DIR)
 	$(Q) cp $(SUPDIR)/initializer_list $(C++DIR)
@@ -75,6 +75,7 @@ context:: copy_headers
 
 distclean::
 	$(call DELDIR, $(BITSDIR))
+	$(call DELFILE, $(INCDIR)/bits/c++config.h)
 ifeq ($(wildcard libstdc++/libstdc++/.git),)
 	$(call DELDIR, libstdc++)
 	$(call DELFILE, libstdc++.tar.gz)
