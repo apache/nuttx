@@ -127,6 +127,14 @@ config SENSORS_FAKESENSOR
 		2.1234,3.23443,2.23456
 		...
 
+config FAKESENSOR_SCHED_PRIORITY
+	int "fakesensor thread sched priority"
+	default 100
+	depends on SENSORS_FAKESENSOR
+	---help---
+		Priority of the kernel thread that reads the csv file and
+		pushes the fake sensor data.
+
 config SENSORS_GOLDFISH_GNSS
 	bool "Goldfish GNSS Support"
 	depends on SENSORS_GNSS
