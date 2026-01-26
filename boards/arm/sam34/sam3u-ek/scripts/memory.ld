@@ -68,8 +68,8 @@ MEMORY
 {
   /* 256Kb FLASH */
 
-  kflash (rx)  : ORIGIN = 0x00080000, LENGTH = 65K
-  uflash (rx)  : ORIGIN = 0x00090400, LENGTH = 63K
+  kflash (rx)  : ORIGIN = 0x00080000, LENGTH = 80K
+  uflash (rx)  : ORIGIN = 0x00094000, LENGTH = 48K
   xflash (rx)  : ORIGIN = 0x000a0000, LENGTH = 128K
 
   /* 32Kb SRAM */
