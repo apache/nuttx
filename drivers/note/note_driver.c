@@ -1155,10 +1155,10 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-void sched_note_spinlock(FAR struct tcb_s *tcb,
-                         FAR volatile spinlock_t *spinlock,
+void sched_note_spinlock(FAR volatile spinlock_t *spinlock,
                          int type)
 {
+  FAR struct tcb_s *tcb = running_task();
   struct note_spinlock_s note;
   FAR struct note_driver_s **driver;
   bool formatted = false;
@@ -1196,27 +1196,6 @@ void sched_note_spinlock(FAR struct tcb_s *tcb,
       note_add(*driver, &note, sizeof(struct note_spinlock_s));
     }
 }
-
-void sched_note_spinlock_lock(FAR volatile spinlock_t *spinlock)
-{
-  sched_note_spinlock(this_task(), spinlock, NOTE_SPINLOCK_LOCK);
-}
-
-void sched_note_spinlock_locked(FAR volatile spinlock_t *spinlock)
-{
-  sched_note_spinlock(this_task(), spinlock, NOTE_SPINLOCK_LOCKED);
-}
-
-void sched_note_spinlock_abort(FAR volatile spinlock_t *spinlock)
-{
-  sched_note_spinlock(this_task(), spinlock, NOTE_SPINLOCK_ABORT);
-}
-
-void sched_note_spinlock_unlock(FAR volatile spinlock_t *spinlock)
-{
-  sched_note_spinlock(this_task(), spinlock, NOTE_SPINLOCK_UNLOCK);
-}
-
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL

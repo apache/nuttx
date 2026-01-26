@@ -40,6 +40,7 @@
 #include <nuttx/atomic.h>
 
 #include <nuttx/spinlock_type.h>
+#include <nuttx/sched_note.h>
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -53,18 +54,6 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-void sched_note_spinlock_lock(FAR volatile spinlock_t *spinlock);
-void sched_note_spinlock_locked(FAR volatile spinlock_t *spinlock);
-void sched_note_spinlock_abort(FAR volatile spinlock_t *spinlock);
-void sched_note_spinlock_unlock(FAR volatile spinlock_t *spinlock);
-#else
-#  define sched_note_spinlock_lock(spinlock)
-#  define sched_note_spinlock_locked(spinlock)
-#  define sched_note_spinlock_abort(spinlock)
-#  define sched_note_spinlock_unlock(spinlock)
-#endif
 
 /****************************************************************************
  * Public Data Types
@@ -221,7 +210,7 @@ static inline_function void spin_lock(FAR volatile spinlock_t *lock)
 {
   /* Notify that we are waiting for a spinlock */
 
-  sched_note_spinlock_lock(lock);
+  sched_note_spinlock(lock, NOTE_SPINLOCK_LOCK);
 
   /* Lock without trace note */
 
@@ -229,7 +218,7 @@ static inline_function void spin_lock(FAR volatile spinlock_t *lock)
 
   /* Notify that we have the spinlock */
 
-  sched_note_spinlock_locked(lock);
+  sched_note_spinlock(lock, NOTE_SPINLOCK_LOCKED);
 }
 #else
 #  define spin_lock(lock)
@@ -303,7 +292,7 @@ static inline_function bool spin_trylock(FAR volatile spinlock_t *lock)
 
   /* Notify that we are waiting for a spinlock */
 
-  sched_note_spinlock_lock(lock);
+  sched_note_spinlock(lock, NOTE_SPINLOCK_LOCK);
 
   /* Try lock without trace note */
 
@@ -312,13 +301,13 @@ static inline_function bool spin_trylock(FAR volatile spinlock_t *lock)
     {
       /* Notify that we have the spinlock */
 
-      sched_note_spinlock_locked(lock);
+      sched_note_spinlock(lock, NOTE_SPINLOCK_LOCKED);
     }
   else
     {
       /* Notify that we abort for a spinlock */
 
-      sched_note_spinlock_abort(lock);
+      sched_note_spinlock(lock, NOTE_SPINLOCK_ABORT);
     }
 
   return locked;
@@ -389,7 +378,7 @@ static inline_function void spin_unlock(FAR volatile spinlock_t *lock)
 
   /* Notify that we are unlocking the spinlock */
 
-  sched_note_spinlock_unlock(lock);
+  sched_note_spinlock(lock, NOTE_SPINLOCK_UNLOCK);
 }
 #  else
 #    define spin_unlock(l)  do { *(l) = SP_UNLOCKED; } while (0)
@@ -475,7 +464,7 @@ irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
 
   /* Notify that we are waiting for a spinlock */
 
-  sched_note_spinlock_lock(lock);
+  sched_note_spinlock(lock, NOTE_SPINLOCK_LOCK);
 
   /* Lock without trace note */
 
@@ -483,7 +472,7 @@ irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
 
   /* Notify that we have the spinlock */
 
-  sched_note_spinlock_locked(lock);
+  sched_note_spinlock(lock, NOTE_SPINLOCK_LOCKED);
 
   return flags;
 }
@@ -745,7 +734,7 @@ void spin_unlock_irqrestore(FAR volatile spinlock_t *lock, irqstate_t flags)
 
   /* Notify that we are unlocking the spinlock */
 
-  sched_note_spinlock_unlock(lock);
+  sched_note_spinlock(lock, NOTE_SPINLOCK_UNLOCK);
 }
 #else
 #  define spin_unlock_irqrestore(l, f) ((void)(l), up_irq_restore(f))
