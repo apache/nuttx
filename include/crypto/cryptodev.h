@@ -361,6 +361,7 @@ struct cryptocap
 #define CRYPTOCAP_F_ENCRYPT_MAC 0x04 /* Can do encrypt-then-MAC (IPsec) */
 #define CRYPTOCAP_F_MAC_ENCRYPT 0x08 /* Can do MAC-then-encrypt (TLS) */
 #define CRYPTOCAP_F_REMOTE      0x10 /* Remote core driver  */
+#define CRYPTOCAP_F_KEY_MGMT    0x20 /* Key management */
 
   CODE int (*cc_newsession)(FAR uint32_t *, FAR struct cryptoini *);
   CODE int (*cc_process)(FAR struct cryptop *);
@@ -449,6 +450,7 @@ int crypto_kregister(uint32_t, FAR int *,
                      CODE int (*)(FAR struct cryptkop *));
 int crypto_unregister(uint32_t, int);
 int crypto_get_driverid(uint8_t);
+int crypto_find_driverid(uint8_t);
 int crypto_invoke(FAR struct cryptop *);
 int crypto_kinvoke(FAR struct cryptkop *);
 int crypto_getfeat(FAR int *);

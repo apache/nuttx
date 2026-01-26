@@ -37,6 +37,10 @@
 #include <crypto/cryptodev.h>
 #include <crypto/xform.h>
 
+/****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
 /* Software session entry */
 
 struct swcr_data
@@ -92,5 +96,9 @@ int swcr_kprocess(FAR struct cryptkop *);
 int swcr_newsession(FAR uint32_t *, FAR struct cryptoini *);
 int swcr_freesession(uint64_t);
 void swcr_init(void);
+
+/* Software key management */
+
+void swkey_init(void);
 
 #endif /* __INCLUDE_CRYPTO_CRYPTOSOFT_H */
