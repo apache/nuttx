@@ -36,18 +36,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: hrtimer_start
+ * Name: hrtimer_start_absolute
  *
  * Description:
  *   Start a high-resolution timer to expire after a specified duration
- *   in nanoseconds, either as an absolute or relative time.
+ *   in nanoseconds.
  *
  * Input Parameters:
  *   hrtimer - Pointer to the hrtimer structure.
  *   func    - Expiration callback function.
  *   expired - Expiration time in nanoseconds. Interpretation
  *             depends on mode.
- *   mode    - Timer mode (HRTIMER_MODE_ABS or HRTIMER_MODE_REL).
  *
  * Returned Value:
  *   OK (0) on success, or a negated errno value on failure.
@@ -60,25 +59,11 @@
  *     nanoseconds from the current time.
  ****************************************************************************/
 
-int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
-                  uint64_t expired,
-                  enum hrtimer_mode_e mode)
+int hrtimer_start_absolute(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
+                           uint64_t expired)
 {
-  uint64_t next_expired;
   irqstate_t flags;
   int ret = OK;
-
-  /* Compute absolute expiration time */
-
-  if (mode == HRTIMER_MODE_ABS)
-    {
-      next_expired = expired;
-    }
-  else
-    {
-      expired = expired <= HRTIMER_MAX_DELAY ? expired : HRTIMER_MAX_DELAY;
-      next_expired = clock_systime_nsec() + expired;
-    }
 
   DEBUGASSERT(hrtimer != NULL);
 
@@ -96,7 +81,7 @@ int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
     }
 
   hrtimer->func    = func;
-  hrtimer->expired = next_expired;
+  hrtimer->expired = expired;
 
   /* Insert the timer into the hrtimer queue. */
 
