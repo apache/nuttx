@@ -58,15 +58,28 @@ seqcount_t g_hrtimer_lock = SEQLOCK_INITIALIZER;
  * both configurations.
  */
 
+struct hrtimer_s g_hrtimer_guard =
+{
 #ifdef CONFIG_HRTIMER_TREE
-/* Red-black tree for hrtimer storage (requires CONFIG_HRTIMER_TREE) */
-
-struct hrtimer_tree_s g_hrtimer_tree = RB_INITIALIZER(g_hrtimer_tree);
-struct FAR hrtimer_s *g_hrtimer_head;
+  { NULL },
 #else
-/* Linked list for hrtimer storage (fallback when tree is disabled) */
+  { &g_hrtimer_list, &g_hrtimer_list },
+#endif
+  NULL,
+  INT64_MAX
+};
 
-struct list_node g_hrtimer_list = LIST_INITIAL_VALUE(g_hrtimer_list);
+#ifdef CONFIG_HRTIMER_TREE
+struct hrtimer_tree_s g_hrtimer_tree =
+{
+  &g_hrtimer_guard
+};
+struct FAR hrtimer_s *g_hrtimer_head = &g_hrtimer_guard;
+#else
+struct list_node g_hrtimer_list =
+{
+  &g_hrtimer_guard.node, &g_hrtimer_guard.node
+};
 #endif
 
 /****************************************************************************
