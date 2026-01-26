@@ -191,7 +191,7 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
   size_t copysize;
   size_t totalsize;
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0
-  struct timespec alltime;
+  struct timespec all_time;
   clock_t elapsed;
   uint32_t rate;
 #endif
@@ -321,24 +321,24 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
 
   if (g_busywait_total[cpu] > 0)
     {
-      perf_convert(g_busywait_total[cpu], &alltime);
+      perf_convert(g_busywait_total[cpu], &all_time);
     }
   else
     {
-      alltime.tv_sec = 0;
-      alltime.tv_nsec = 0;
+      all_time.tv_sec = 0;
+      all_time.tv_nsec = 0;
     }
 
   elapsed = clock() * CONFIG_USEC_PER_TICK;
-  rate = (uint64_t)(alltime.tv_sec * 1000000 + alltime.tv_nsec / 1000) *
+  rate = (uint64_t)(all_time.tv_sec * 1000000 + all_time.tv_nsec / 1000) *
          1000000 / elapsed;
 
   /* Generate output for all busywait time to enter csection(get spinlock) */
 
   linesize = procfs_snprintf(attr->line, CRITMON_LINELEN, ",%lu.%09lu %2"
                              PRId32 ".%04" PRId32 "%%",
-                             (unsigned long)alltime.tv_sec,
-                             (unsigned long)alltime.tv_nsec,
+                             (unsigned long)all_time.tv_sec,
+                             (unsigned long)all_time.tv_nsec,
                              rate / 10000, rate % 10000);
   copysize = procfs_memcpy(attr->line, linesize, buffer, buflen, offset);
 
