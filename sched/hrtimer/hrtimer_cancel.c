@@ -83,7 +83,7 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer)
 
   DEBUGASSERT(hrtimer != NULL);
 
-  /* Enter critical section to protect the hrtimer container */
+  /* Acquire the lock and seize the ownership of the hrtimer queue. */
 
   flags = write_seqlock_irqsave(&g_hrtimer_lock);
 
@@ -107,7 +107,7 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer)
         }
     }
 
-  /* Leave critical section */
+  /* Release the lock and give up the ownership of the hrtimer queue. */
 
   write_sequnlock_irqrestore(&g_hrtimer_lock, flags);
   return ret;

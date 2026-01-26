@@ -77,7 +77,7 @@ void hrtimer_process(uint64_t now)
   uint64_t period;
   int cpu = this_cpu();
 
-  /* Lock the hrtimer container to protect access */
+  /* Acquire the lock and seize the ownership of the hrtimer queue. */
 
   flags = write_seqlock_irqsave(&g_hrtimer_lock);
 
@@ -102,7 +102,7 @@ void hrtimer_process(uint64_t now)
           break;
         }
 
-      /* Remove the expired timer from the timer container */
+      /* Remove the expired timer from the timer queue */
 
       hrtimer_remove(hrtimer);
 
@@ -121,8 +121,8 @@ void hrtimer_process(uint64_t now)
       flags = write_seqlock_irqsave(&g_hrtimer_lock);
 
       /* If the timer is periodic and has not been rearmed or
-       * cancelled concurrently,
-       * compute next expiration and reinsert into container
+       * cancelled concurrently, calculate next expiration and
+       * re-insert into the timer queue.
        */
 
       if (period != 0u && hrtimer_is_running(hrtimer, cpu))
@@ -153,7 +153,7 @@ void hrtimer_process(uint64_t now)
       hrtimer_reprogram(hrtimer->expired);
     }
 
-  /* Leave critical section */
+  /* Release the lock and give up the ownership of the hrtimer queue. */
 
   write_sequnlock_irqrestore(&g_hrtimer_lock, flags);
 }
