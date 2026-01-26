@@ -28,23 +28,84 @@
 
 #include <assert.h>
 #include <debug.h>
+#include <execinfo.h>
 #include <string.h>
 #include <stdbool.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/atomic.h>
+#include <nuttx/fs/procfs.h>
+#include <nuttx/list.h>
 #include <nuttx/mm/mm.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/sched_note.h>
+#include <nuttx/spinlock.h>
 
 #include "sim_internal.h"
 
 #ifdef CONFIG_MM_UMM_CUSTOMIZE_MANAGER
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if CONFIG_MM_BACKTRACE == 0
+#  define MM_ADD_BACKTRACE(heap, ptr) \
+     do { \
+         FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
+         tmp->pid = _SCHED_GETTID(); \
+         MM_INCSEQNO(tmp); \
+     } while (0)
+
+#elif CONFIG_MM_BACKTRACE > 0
+#  define MM_ADD_BACKTRACE(heap, ptr) \
+     do { \
+         FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
+         FAR struct tcb_s *tcb; \
+         pid_t tid = _SCHED_GETTID(); \
+         tmp->pid = tid; \
+         tcb = nxsched_get_tcb(tid); \
+         if ((heap)->procfs.backtrace || (tcb && tcb->flags & TCB_FLAG_HEAP_DUMP)) { \
+             int n = sched_backtrace(tid, tmp->backtrace, CONFIG_MM_BACKTRACE, \
+                                     CONFIG_MM_BACKTRACE_SKIP); \
+             if (n < CONFIG_MM_BACKTRACE) { \
+                 tmp->backtrace[n] = NULL; \
+             } \
+         } else { \
+             tmp->backtrace[0] = NULL; \
+         } \
+         if (tcb) nxsched_put_tcb(tcb); \
+         MM_INCSEQNO(tmp); \
+     } while (0)
+
+#else
+#  define MM_ADD_BACKTRACE(heap, ptr)
+#endif
+
+#define MM_ALLOCNODE_SIZE    sizeof(struct mm_allocnode_s)
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
-/* This describes one heap (possibly with multiple regions) */
+/* This describes an allocated chunk */
+
+struct mm_allocnode_s
+{
+  struct list_node node;            /* Supports a doubly linked list */
+  size_t size;                      /* Size of this chunk */
+  size_t padding;                   /* Padding size for alignment */
+  void *allocmem;                   /* Start address of this chunk */
+#ifdef CONFIG_MM_RECORD_PID
+  pid_t pid;                        /* The pid for caller */
+#endif
+#ifdef CONFIG_MM_RECORD_SEQNO
+  unsigned long seqno;              /* The sequence of memory malloc */
+#endif
+#ifdef CONFIG_MM_RECORD_STACK
+  void *stack;                      /* The backtrace buffer for caller */
+#endif
+};
 
 struct mm_delaynode_s
 {
@@ -53,10 +114,17 @@ struct mm_delaynode_s
 
 struct mm_heap_s
 {
+  spinlock_t lock;
+
   struct mm_delaynode_s *delaylist[CONFIG_SMP_NCPUS];
+  struct list_node alloclist;
 
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
   size_t delaycount[CONFIG_SMP_NCPUS];
+#endif
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
+  struct procfs_meminfo_entry_s procfs;
 #endif
 
   atomic_t aordblks;
@@ -82,9 +150,70 @@ static struct mm_heap_s g_heap;
 
 struct mm_heap_s *g_mmheap = &g_heap;
 
+#ifdef CONFIG_MM_RECORD_SEQNO
+unsigned long g_mm_seqno;
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static void update_stats(struct mm_heap_s *heap, void *mem, size_t size,
+                         bool alloc)
+{
+  struct mm_allocnode_s *node;
+  irqstate_t flags;
+  size_t uordblks;
+  size_t usmblks;
+
+  node = (struct mm_allocnode_s *)((uintptr_t)mem - MM_ALLOCNODE_SIZE);
+  flags = spin_lock_irqsave(&heap->lock);
+
+  if (alloc)
+    {
+      list_add_tail(&heap->alloclist, &node->node);
+      spin_unlock_irqrestore(&heap->lock, flags);
+
+      atomic_fetch_add(&heap->aordblks, 1);
+      atomic_fetch_add(&heap->uordblks, size);
+      usmblks = atomic_read(&heap->usmblks);
+      do
+        {
+          uordblks = atomic_read(&heap->uordblks);
+          if (uordblks <= usmblks) break;
+        }
+      while (!atomic_try_cmpxchg(&heap->usmblks, &usmblks, uordblks));
+    }
+  else
+    {
+      list_delete(&node->node);
+      spin_unlock_irqrestore(&heap->lock, flags);
+
+      atomic_fetch_sub(&heap->aordblks, 1);
+      atomic_fetch_sub(&heap->uordblks, size);
+    }
+}
+
+static void *init_allocnode(struct mm_heap_s *heap, void *alloc_mem,
+                            size_t aligned_size, size_t padding_size)
+{
+  uintptr_t node_addr;
+  struct mm_allocnode_s *node;
+  void *mem;
+
+  node_addr = (uintptr_t)alloc_mem + padding_size;
+  node = (struct mm_allocnode_s *)node_addr;
+  mem = (void *)(node_addr + MM_ALLOCNODE_SIZE);
+
+  node->size = aligned_size;
+  node->padding = padding_size;
+  node->allocmem = alloc_mem;
+
+  MM_ADD_BACKTRACE(heap, node);
+  update_stats(heap, mem, aligned_size, true);
+
+  return mem;
+}
 
 static void add_delaylist(struct mm_heap_s *heap, void *mem)
 {
@@ -93,7 +222,7 @@ static void add_delaylist(struct mm_heap_s *heap, void *mem)
 
   /* Delay the deallocation until a more appropriate time. */
 
-  flags = up_irq_save();
+  flags = spin_lock_irqsave(&heap->lock);
 
   tmp->flink = heap->delaylist[this_cpu()];
   heap->delaylist[this_cpu()] = tmp;
@@ -102,7 +231,7 @@ static void add_delaylist(struct mm_heap_s *heap, void *mem)
   heap->delaycount[this_cpu()]++;
 #endif
 
-  up_irq_restore(flags);
+  spin_unlock_irqrestore(&heap->lock, flags);
 }
 
 static bool free_delaylist(struct mm_heap_s *heap, bool force)
@@ -113,7 +242,7 @@ static bool free_delaylist(struct mm_heap_s *heap, bool force)
 
   /* Move the delay list to local */
 
-  flags = up_irq_save();
+  flags = spin_lock_irqsave(&heap->lock);
 
   tmp = heap->delaylist[this_cpu()];
 
@@ -122,7 +251,7 @@ static bool free_delaylist(struct mm_heap_s *heap, bool force)
       (!force &&
         heap->delaycount[this_cpu()] < CONFIG_MM_FREE_DELAYCOUNT_MAX))
     {
-      up_irq_restore(flags);
+      spin_unlock_irqrestore(&heap->lock, flags);
       return false;
     }
 
@@ -130,11 +259,11 @@ static bool free_delaylist(struct mm_heap_s *heap, bool force)
 #endif
   heap->delaylist[this_cpu()] = NULL;
 
-  up_irq_restore(flags);
+  spin_unlock_irqrestore(&heap->lock, flags);
 
   /* Test if the delayed is empty */
 
-  ret = (tmp != NULL);
+  ret = !!tmp;
 
   while (tmp)
     {
@@ -165,6 +294,8 @@ static bool free_delaylist(struct mm_heap_s *heap, bool force)
 
 static void delay_free(struct mm_heap_s *heap, void *mem, bool delay)
 {
+  struct mm_allocnode_s *node;
+
   /* Check current environment */
 
   if (up_interrupt_context())
@@ -184,65 +315,109 @@ static void delay_free(struct mm_heap_s *heap, void *mem, bool delay)
     }
   else
     {
-      int size = host_mallocsize(mem);
-      atomic_fetch_sub(&heap->aordblks, 1);
-      atomic_fetch_sub(&heap->uordblks, size);
-      sched_note_heap(NOTE_HEAP_FREE, heap, mem, size, 0);
-      host_free(mem);
+      node = (struct mm_allocnode_s *)((uintptr_t)mem - MM_ALLOCNODE_SIZE);
+      update_stats(heap, mem, node->size, false);
+      sched_note_heap(NOTE_HEAP_FREE, heap, mem, node->size, 0);
+      host_free(node->allocmem);
     }
 }
 
-static void *reallocate(void *oldmem, size_t size)
+static void *reallocate(void *oldmem, size_t alignment, size_t size)
 {
-  struct mm_heap_s *heap = g_mmheap;
-  void *mem;
-  int uordblks;
-  int usmblks;
-  int newsize;
-  int oldsize;
+  size_t aligned_size;
+  size_t padding_size;
+  void *new_alloc_addr;
+  struct mm_allocnode_s *old_node;
+  size_t old_size;
+  void *old_alloc_addr;
+  void *mem = oldmem;
 
-  free_delaylist(heap, false);
+  free_delaylist(g_mmheap, false);
+
+  /* NEW ALLOCATION (MALLOC/MEMALIGN) */
+
+  if (oldmem == NULL)
+    {
+      size = size ? size : 1;
+      if (alignment > MM_ALIGN)  /* CUSTOM ALIGNMENT HANDLING (MEMALIGN) */
+        {
+          if ((alignment & (alignment - 1)) != 0 || alignment > SIZE_MAX / 2)
+            {
+              return NULL;
+            }
+
+          padding_size = (MM_ALLOCNODE_SIZE < alignment)
+                       ? (alignment - MM_ALLOCNODE_SIZE)
+                       : (-MM_ALLOCNODE_SIZE) & (alignment - 1);
+
+          if (padding_size > SIZE_MAX - MM_ALLOCNODE_SIZE - size)
+            {
+              return NULL;
+            }
+
+          aligned_size = padding_size + MM_ALLOCNODE_SIZE + size;
+          new_alloc_addr = host_memalign(alignment, aligned_size);
+        }
+      else  /* DEFAULT ALIGNMENT HANDLING (MALLOC) */
+        {
+          padding_size = ALIGN_UP_MASK(MM_ALLOCNODE_SIZE, MM_ALIGN - 1)
+                         - MM_ALLOCNODE_SIZE;
+          aligned_size = padding_size + MM_ALLOCNODE_SIZE + size;
+          new_alloc_addr = host_realloc(NULL, aligned_size);
+        }
+
+      if (new_alloc_addr == NULL)
+        {
+          return NULL;
+        }
+
+      mem = init_allocnode(g_mmheap, new_alloc_addr, aligned_size,
+                           padding_size);
+      sched_note_heap(NOTE_HEAP_ALLOC, g_mmheap, mem, aligned_size, 0);
+      return mem;
+    }
+
+  /* DEALLOCATION (FREE) */
 
   if (size == 0)
     {
-      size = 1;
+      free(oldmem);
+      return NULL;
     }
 
-  oldsize = host_mallocsize(oldmem);
-  atomic_fetch_sub(&heap->uordblks, oldsize);
-  mem = host_realloc(oldmem, size);
+  /* REALLOCATION (REALLOC) */
 
-  atomic_fetch_add(&heap->aordblks, oldmem == NULL && mem != NULL);
-  newsize = host_mallocsize(mem ? mem : oldmem);
-  atomic_fetch_add(&heap->uordblks, newsize);
-  usmblks = atomic_read(&heap->usmblks);
-  if (mem != NULL)
+  old_node = (struct mm_allocnode_s *)
+             ((uintptr_t)oldmem - MM_ALLOCNODE_SIZE);
+  old_alloc_addr = old_node->allocmem;
+  old_size = old_node->size;
+
+  update_stats(g_mmheap, oldmem, old_size, false);
+
+  padding_size = ALIGN_UP_MASK(MM_ALLOCNODE_SIZE, MM_ALIGN - 1)
+                 - MM_ALLOCNODE_SIZE;
+  aligned_size = padding_size + MM_ALLOCNODE_SIZE + size;
+
+  new_alloc_addr = host_realloc(old_alloc_addr, aligned_size);
+  if (new_alloc_addr == NULL)
     {
-      if (oldmem != NULL)
-        {
-          sched_note_heap(NOTE_HEAP_FREE, heap, oldmem, oldsize, 0);
-        }
-
-      sched_note_heap(NOTE_HEAP_ALLOC, heap, mem, newsize, 0);
+      update_stats(g_mmheap, oldmem, old_size, true);
+      return NULL;
     }
 
-  do
+  if (new_alloc_addr == old_alloc_addr)
     {
-      uordblks = atomic_read(&heap->uordblks);
-      if (uordblks <= usmblks)
-        {
-          break;
-        }
+      old_node->size = aligned_size;
+      old_node->padding = padding_size;
+      MM_ADD_BACKTRACE(g_mmheap, old_node);
+      update_stats(g_mmheap, oldmem, aligned_size, true);
+      sched_note_heap(NOTE_HEAP_ALLOC, g_mmheap, mem, aligned_size, 0);
+      return oldmem;
     }
-  while (atomic_try_cmpxchg(&heap->usmblks, &usmblks, uordblks));
 
-#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
-  if (mem == NULL && free_delaylist(heap, true))
-    {
-      return reallocate(oldmem, size);
-    }
-#endif
-
+  sched_note_heap(NOTE_HEAP_FREE, g_mmheap, oldmem, old_size, 0);
+  mem = init_allocnode(g_mmheap, new_alloc_addr, aligned_size, padding_size);
+  sched_note_heap(NOTE_HEAP_ALLOC, g_mmheap, mem, aligned_size, 0);
   return mem;
 }
 
@@ -284,7 +459,7 @@ void umm_addregion(void *heapstart, size_t heapsize)
 
 void *malloc(size_t size)
 {
-  return reallocate(NULL, size);
+  return reallocate(NULL, 1, size);
 }
 
 /****************************************************************************
@@ -333,7 +508,7 @@ void free(void *mem)
 
 void *realloc(void *oldmem, size_t size)
 {
-  return reallocate(oldmem, size);
+  return reallocate(oldmem, 1, size);
 }
 
 /****************************************************************************
@@ -392,43 +567,7 @@ void *zalloc(size_t size)
 
 void *memalign(size_t alignment, size_t size)
 {
-  struct mm_heap_s *heap = g_mmheap;
-  void *mem;
-  int uordblks;
-  int usmblks;
-
-  free_delaylist(heap, false);
-  mem = host_memalign(alignment, size);
-
-  if (mem == NULL)
-    {
-      return NULL;
-    }
-
-  size = host_mallocsize(mem);
-  sched_note_heap(NOTE_HEAP_ALLOC, heap, mem, size, 0);
-  atomic_fetch_add(&heap->aordblks, 1);
-  atomic_fetch_add(&heap->uordblks, size);
-  usmblks = atomic_read(&heap->usmblks);
-
-  do
-    {
-      uordblks = atomic_read(&heap->uordblks);
-      if (uordblks <= usmblks)
-        {
-          break;
-        }
-    }
-  while (atomic_try_cmpxchg(&heap->usmblks, &usmblks, uordblks));
-
-#if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
-  if (mem == NULL && free_delaylist(heap, true))
-    {
-      return memalign(alignment, size);
-    }
-#endif
-
-  return mem;
+  return reallocate(NULL, alignment, size);
 }
 
 /****************************************************************************
@@ -481,6 +620,30 @@ void umm_extend(void *mem, size_t size, int region)
 }
 
 /****************************************************************************
+ * Name: mallinfo_callback
+ *
+ * Description:
+ *   mallinfo callback function of the procfs filesystem.
+ *
+ ****************************************************************************/
+
+struct mallinfo mallinfo_callback(struct mm_heap_s *heap)
+{
+  struct mallinfo info;
+  memset(&info, 0, sizeof(struct mallinfo));
+
+  info.aordblks = atomic_read(&heap->aordblks);
+  info.ordblks  = 1;
+  info.uordblks = atomic_read(&heap->uordblks);
+  info.usmblks  = atomic_read(&heap->usmblks);
+  info.arena    = SIM_HEAP_SIZE;
+  info.fordblks = SIM_HEAP_SIZE - info.uordblks;
+  info.mxordblk = info.fordblks;
+
+  return info;
+}
+
+/****************************************************************************
  * Name: mallinfo
  *
  * Description:
@@ -490,17 +653,7 @@ void umm_extend(void *mem, size_t size, int region)
 
 struct mallinfo mallinfo(void)
 {
-  struct mm_heap_s *heap = g_mmheap;
-  struct mallinfo info;
-
-  memset(&info, 0, sizeof(struct mallinfo));
-  info.aordblks = atomic_read(&heap->aordblks);
-  info.uordblks = atomic_read(&heap->uordblks);
-  info.usmblks  = atomic_read(&heap->usmblks);
-  info.arena    = SIM_HEAP_SIZE;
-  info.fordblks = SIM_HEAP_SIZE - info.uordblks;
-  info.mxordblk = info.fordblks;
-  return info;
+  return mallinfo_callback(g_mmheap);
 }
 
 /****************************************************************************
@@ -522,6 +675,19 @@ struct mallinfo_task mallinfo_task(const struct malltask *task)
 }
 
 /****************************************************************************
+ * Name: memdump_callback
+ *
+ * Description:
+ *   memdump callback function of the procfs filesystem.
+ *
+ ****************************************************************************/
+
+void memdump_callback(struct mm_heap_s *heap,
+                      const struct mm_memdump_s *dump)
+{
+}
+
+/****************************************************************************
  * Name: umm_memdump
  *
  * Description:
@@ -531,6 +697,7 @@ struct mallinfo_task mallinfo_task(const struct malltask *task)
 
 void umm_memdump(const struct mm_memdump_s *dump)
 {
+  memdump_callback(g_mmheap, dump);
 }
 
 #ifdef CONFIG_DEBUG_MM
@@ -555,7 +722,15 @@ void umm_checkcorruption(void)
 
 size_t malloc_size(void *mem)
 {
-  return host_mallocsize(mem);
+  struct mm_allocnode_s *node;
+
+  if (mem == NULL)
+    {
+      return 0;
+    }
+
+  node = (struct mm_allocnode_s *)((uintptr_t)mem - MM_ALLOCNODE_SIZE);
+  return node->size - MM_ALLOCNODE_SIZE - node->padding;
 }
 
 /****************************************************************************
@@ -589,6 +764,17 @@ void umm_initialize(void *heap_start, size_t heap_size)
   sched_note_heap(NOTE_HEAP_ADD, g_mmheap, heap_start, heap_size, 0);
   UNUSED(heap_start);
   UNUSED(heap_size);
+
+  list_initialize(&g_mmheap->alloclist);
+  spin_lock_init(&g_mmheap->lock);
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
+  g_mmheap->procfs.name = "Umem";
+  g_mmheap->procfs.heap = g_mmheap;
+  g_mmheap->procfs.mallinfo = mallinfo_callback;
+  g_mmheap->procfs.memdump = memdump_callback;
+  procfs_register_meminfo(&g_mmheap->procfs);
+#endif
 }
 
 #else /* CONFIG_MM_UMM_CUSTOMIZE_MANAGER */
