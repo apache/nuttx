@@ -387,6 +387,8 @@ void mm_uninitialize(FAR struct mm_heap_s *heap)
   mempool_multiple_deinit(heap->mm_mpool);
 #endif
 
+  mm_free_delaylist(heap);
+
   for (i = 0; i < CONFIG_MM_REGIONS; i++)
     {
       if (!heap->mm_nokasan)
