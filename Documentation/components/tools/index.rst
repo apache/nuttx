@@ -1,16 +1,14 @@
-=====================
-``/tools`` Host Tools
-=====================
+==========
+Host Tools
+==========
 
-This page discusses the contents of the NuttX tools/ directory.
+This page discusses the ``tools/`` directory containing miscellaneous scripts
+and host C programs that are important parts of the NuttX build system:
 
-The tools/ directory contains miscellaneous scripts and host C programs
-that are necessary parts of the NuttX build system.
-
-.. toctree::
-   :maxdepth: 2
-
-   parsetrace
+.. contents::
+    :local:
+    :backlinks: entry
+    :depth: 2
 
 cmpconfig.c
 -----------
@@ -1233,7 +1231,14 @@ See also indent.sh and nxstyle.c
 parsetrace.py
 -------------
 
-``parsetrace.py`` is a Python script for parsing and converting NuttX trace logs. See :doc:`parsetrace` for details.
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   parsetrace
+
+``parsetrace.py`` is a Python script for parsing and converting NuttX trace
+logs. See dedicated :doc:`parsetrace` section for details.
 
 zds
 ---
