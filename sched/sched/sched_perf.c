@@ -164,10 +164,6 @@ static struct pmu_s g_perf_swevent =
   .ops = &g_perf_swevent_ops,
 };
 
-#ifdef CONFIG_SMP
-static struct smp_call_data_s g_perf_call_data;
-#endif
-
 static const int64_t g_perf_sample_period[PERF_TYPE_MAX]
                      [MAX(PERF_COUNT_HW_MAX, PERF_COUNT_SW_MAX)] =
 {
@@ -895,7 +891,11 @@ perf_event_alloc(FAR struct perf_event_attr_s *attr,
 
   event->attr  = *attr;
   event->cpu   = cpu;
+
+#ifdef CONFIG_SMP
   event->oncpu = -1;
+#endif
+
   event->parent_event = parent_event;
 
   if (group_leader == NULL)
@@ -2353,17 +2353,20 @@ static int perf_swevent_timer_handle_cpu(FAR void *arg)
 {
   FAR struct perf_event_s *event = (FAR struct perf_event_s *)arg;
   struct perf_sample_data_s data;
+  int ret;
 
   /* TODO: ISR thread cannot get pc */
 
-  uintptr_t pc = up_getusrpc(NULL);
-
-  perf_get_event_count(event);
+  ret = perf_get_event_count(event);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   perf_sample_data_init(&data, atomic64_read(&event->hw.last_period));
 
-  perf_event_data_overflow(event, &data, pc);
-  return 0;
+  perf_event_data_overflow(event, &data, up_getusrpc(NULL));
+  return ret;
 }
 
 static void perf_swevent_timer_handle(wdparm_t arg)
@@ -2374,15 +2377,19 @@ static void perf_swevent_timer_handle(wdparm_t arg)
 #ifdef CONFIG_SMP
   int cpu = this_cpu();
 
-  if (event->cpu != -1 && event->cpu != cpu)
+  if (event->oncpu != -1 && event->oncpu != cpu)
     {
-       nxsched_smp_call_init(&g_perf_call_data,
-                             perf_swevent_timer_handle_cpu, event);
-       nxsched_smp_call_single_async(event->cpu, &g_perf_call_data);
+      nxsched_smp_call_single(event->oncpu,
+                              perf_swevent_timer_handle_cpu, event);
     }
-    else
+  else if(event->cpu != -1 && event->cpu != cpu)
     {
-       perf_swevent_timer_handle_cpu(event);
+      nxsched_smp_call_single(event->cpu,
+                              perf_swevent_timer_handle_cpu, event);
+    }
+  else
+    {
+      perf_swevent_timer_handle_cpu(event);
     }
 #else
     perf_swevent_timer_handle_cpu(event);

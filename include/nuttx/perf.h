@@ -241,7 +241,11 @@ struct perf_buffer_s
 struct perf_event_s
 {
   int cpu;                                  /* CPU number this event belongs to */
+
+#ifdef CONFIG_SMP
   int oncpu;                                /* CPU number this event running on */
+#endif
+
   int state;                                /* Event state */
   int attach_state;                         /* Attach states for this event */
   atomic_t count;                           /* Count vaule for this event */
