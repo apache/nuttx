@@ -910,7 +910,6 @@ config SCHED_IRQMONITOR
 config SCHED_CRITMONITOR
 	bool "Enable Critical Section monitoring"
 	default n
-	depends on FS_PROCFS
 	select IRQCOUNT
 	---help---
 		Enables logic that monitors the duration of time that a thread keeps
