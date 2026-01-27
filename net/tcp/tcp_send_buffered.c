@@ -1523,13 +1523,15 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
                     TCP_WBPKTLEN(wrb));
               DEBUGASSERT(TCP_WBPKTLEN(wrb) > 0);
             }
-          else if (nonblock)
-            {
-              wrb = tcp_wrbuffer_tryalloc();
-              ninfo("new wrb %p (non blocking)\n", wrb);
-            }
           else
             {
+              wrb = tcp_wrbuffer_tryalloc();
+              ninfo("new wrb %p (tryalloc)\n", wrb);
+            }
+
+          if (wrb == NULL && !nonblock)
+            {
+              tcp_send_txnotify(psock, conn);
               conn_dev_unlock(&conn->sconn, conn->dev);
               wrb = tcp_wrbuffer_timedalloc(tcp_send_gettimeout(start,
                                                                 timeout));
