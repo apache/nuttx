@@ -36,6 +36,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbdev.h>

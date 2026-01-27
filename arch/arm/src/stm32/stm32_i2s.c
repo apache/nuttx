@@ -48,6 +48,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <nuttx/spinlock.h>
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>

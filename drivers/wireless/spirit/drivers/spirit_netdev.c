@@ -107,6 +107,7 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/wqueue.h>

@@ -38,6 +38,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/spinlock.h>
 #include <avr/io.h>
 
 #include <arch/board/board.h>

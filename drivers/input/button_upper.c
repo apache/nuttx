@@ -46,6 +46,7 @@
 #include <nuttx/random.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/input/buttons.h>
+#include <nuttx/spinlock.h>
 
 #include <nuttx/irq.h>
 

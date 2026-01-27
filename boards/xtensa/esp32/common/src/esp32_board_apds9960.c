@@ -31,6 +31,7 @@
 #include <stdio.h>
 
 #include <nuttx/sensors/apds9960.h>
+#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 
 #include "esp32_i2c.h"

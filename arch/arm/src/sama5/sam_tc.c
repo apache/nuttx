@@ -57,6 +57,7 @@
 #include <inttypes.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
 #include <arch/board/board.h>

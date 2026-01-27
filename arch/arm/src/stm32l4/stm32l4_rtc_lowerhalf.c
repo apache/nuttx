@@ -34,6 +34,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/timers/rtc.h>
 
 #include "chip.h"

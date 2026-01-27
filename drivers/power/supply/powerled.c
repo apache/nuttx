@@ -39,6 +39,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/power/powerled.h>
+#include <nuttx/spinlock.h>
 
 #include <nuttx/irq.h>
 

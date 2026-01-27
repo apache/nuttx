@@ -34,6 +34,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #include "arm_internal.h"
 #include "hardware/nrf52_rtc.h"

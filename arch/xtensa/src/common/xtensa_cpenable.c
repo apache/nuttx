@@ -28,6 +28,7 @@
 
 #include <nuttx/spinlock.h>
 #include <nuttx/sched.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/xtensa/xtensa_coproc.h>
 #include <arch/chip/core-isa.h>

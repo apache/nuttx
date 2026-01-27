@@ -31,6 +31,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/power/pm.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/irq.h>
 

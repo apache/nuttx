@@ -38,6 +38,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/analog/comp.h>
+#include <nuttx/spinlock.h>
 
 #include <nuttx/irq.h>
 

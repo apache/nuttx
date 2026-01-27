@@ -39,6 +39,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/circbuf.h>
 #include <nuttx/rc/lirc_dev.h>
+#include <nuttx/spinlock.h>
 
 /****************************************************************************
  * Pre-processor Definitions

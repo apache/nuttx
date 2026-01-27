@@ -52,6 +52,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mqueue.h>
 #include <nuttx/queue.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wqueue.h>
 
 #include "es8311.h"

@@ -31,6 +31,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <nuttx/spinlock.h>
 #include <arch/chip/backuplog.h>
 #include "chip.h"
 #include "hardware/cxd5602_backupmem.h"

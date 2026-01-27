@@ -31,6 +31,7 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <arch/stm32f7/chip.h>
 
 #include "arm_internal.h"

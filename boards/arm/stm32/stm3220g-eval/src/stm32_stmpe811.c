@@ -36,6 +36,7 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/stmpe811.h>
+#include <nuttx/spinlock.h>
 
 #include <nuttx/irq.h>
 

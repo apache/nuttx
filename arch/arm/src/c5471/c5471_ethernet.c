@@ -45,6 +45,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_NET_PKT
 #  include <nuttx/net/pkt.h>

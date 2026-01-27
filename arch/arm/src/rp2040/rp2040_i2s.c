@@ -46,6 +46,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/i2s.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/board/board.h>
 

@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/timers/oneshot.h>
 
 #include "xtensa_counter.h"

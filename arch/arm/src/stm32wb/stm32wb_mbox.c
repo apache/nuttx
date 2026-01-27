@@ -29,6 +29,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wqueue.h>
 
 #include "arm_internal.h"

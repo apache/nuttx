@@ -33,6 +33,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/wireless/ieee80211/bcmf_gspi.h>
+#include <nuttx/spinlock.h>
 #include <arch/barriers.h>
 
 #include "rp2040_cyw43439.h"

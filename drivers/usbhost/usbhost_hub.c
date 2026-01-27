@@ -35,6 +35,7 @@
 #include <sys/param.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/signal.h>

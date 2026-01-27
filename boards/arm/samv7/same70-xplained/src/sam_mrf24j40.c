@@ -34,6 +34,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 #include <nuttx/wireless/ieee802154/mrf24j40.h>
 

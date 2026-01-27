@@ -30,6 +30,7 @@
 #include <debug.h>
 #include <stdio.h>
 
+#include <nuttx/spinlock.h>
 #include <nuttx/sensors/apds9960.h>
 #include <arch/board/board.h>
 

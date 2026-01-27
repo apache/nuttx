@@ -39,6 +39,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
+#include <nuttx/spinlock.h>
 
 #include "arm_internal.h"
 #include "chip.h"

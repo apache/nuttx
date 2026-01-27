@@ -26,6 +26,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/mm/mm.h>
+#include <nuttx/spinlock.h>
 
 #include <sys/types.h>
 #include <debug.h>

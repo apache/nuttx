@@ -47,6 +47,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
+#include <nuttx/spinlock.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/timers/timer.h>

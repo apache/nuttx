@@ -47,6 +47,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/spi/spi.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/clock.h>
 #include <nuttx/net/enc28j60.h>

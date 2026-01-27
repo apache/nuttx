@@ -34,6 +34,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
 #include <nuttx/timers/rtc.h>
+#include <nuttx/spinlock.h>
 #include "chip.h"
 #include <rx65n_rtc.h>
 #include "renesas_internal.h"

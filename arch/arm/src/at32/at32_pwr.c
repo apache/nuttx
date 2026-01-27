@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include "arm_internal.h"
 #include "at32_pwr.h"

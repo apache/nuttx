@@ -35,6 +35,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
 #include <nuttx/timers/rtc.h>
+#include <nuttx/spinlock.h>
 
 #include "arm_internal.h"
 #include "hardware/lpc54_rtc.h"

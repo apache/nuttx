@@ -36,6 +36,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/fs/automount.h>
+#include <nuttx/spinlock.h>
 
 #include "freedom-k64f.h"
 

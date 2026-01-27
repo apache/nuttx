@@ -232,6 +232,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/power/pm.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/board/board.h>
 

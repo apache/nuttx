@@ -31,6 +31,7 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/arch.h>
 #include <arch/irq.h>
 

@@ -44,6 +44,7 @@
 #include <sys/param.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/mqueue.h>
 #include <nuttx/queue.h>
 #include <nuttx/clock.h>

@@ -31,6 +31,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/power/pm.h>
+#include <nuttx/spinlock.h>
 
 #include <nuttx/irq.h>
 

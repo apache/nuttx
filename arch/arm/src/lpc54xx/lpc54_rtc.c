@@ -36,6 +36,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/timers/rtc.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/board/board.h>
 

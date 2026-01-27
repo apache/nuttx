@@ -43,6 +43,7 @@
 #include <nuttx/mmcsd.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/signal.h>
 #include <arch/board/board.h>
 

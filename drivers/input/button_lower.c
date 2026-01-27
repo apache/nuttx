@@ -33,6 +33,7 @@
 
 #include <nuttx/board.h>
 #include <nuttx/input/buttons.h>
+#include <nuttx/spinlock.h>
 
 #include <nuttx/irq.h>
 

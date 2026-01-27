@@ -55,6 +55,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/xtensa/xtensa_specregs.h>
 #include <arch/xtensa/core_macros.h>

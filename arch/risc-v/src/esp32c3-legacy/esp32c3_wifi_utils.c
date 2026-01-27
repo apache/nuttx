@@ -33,6 +33,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wireless/wireless.h>
+#include <nuttx/spinlock.h>
 
 #include "esp32c3_wifi_adapter.h"
 #include "esp32c3_wifi_utils.h"

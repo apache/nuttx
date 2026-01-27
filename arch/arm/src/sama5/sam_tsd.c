@@ -62,6 +62,7 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/arch.h>
 #if !defined(CONFIG_SAMA5_ADC_PERIODIC_TRIG) && \
     !defined(CONFIG_SAMA5_ADC_CONTINUOUS_TRIG)

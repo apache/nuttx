@@ -30,6 +30,7 @@
 #include <assert.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include "arm_internal.h"
 #include "sam_gclk.h"

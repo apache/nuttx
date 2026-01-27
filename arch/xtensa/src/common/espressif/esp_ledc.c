@@ -34,6 +34,7 @@
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/spinlock.h>
 
 #include "esp_ledc.h"
 #include "xtensa.h"

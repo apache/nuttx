@@ -48,6 +48,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/spinlock.h>
 
 #include <sys/types.h>
 #include <inttypes.h>
@@ -62,6 +63,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/board/board.h>
 

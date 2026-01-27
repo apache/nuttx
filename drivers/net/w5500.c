@@ -46,6 +46,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/signal.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/w5500.h>

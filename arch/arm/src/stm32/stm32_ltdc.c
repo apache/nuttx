@@ -41,6 +41,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/video/fb.h>
 
 #include <arch/board/board.h>

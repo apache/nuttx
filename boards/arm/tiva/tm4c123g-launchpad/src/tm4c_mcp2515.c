@@ -31,6 +31,7 @@
 #include <debug.h>
 
 #include <nuttx/spi/spi.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/can/mcp2515.h>
 
 #include "chip.h"

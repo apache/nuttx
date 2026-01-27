@@ -45,6 +45,7 @@
 #include <nuttx/mmcsd.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
 
 #include <arch/board/board.h>

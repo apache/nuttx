@@ -48,6 +48,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/phy.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>

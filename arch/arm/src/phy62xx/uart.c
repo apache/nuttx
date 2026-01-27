@@ -48,6 +48,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/circbuf.h>
 
 #define UART_TX_BUFFER_SIZE   64

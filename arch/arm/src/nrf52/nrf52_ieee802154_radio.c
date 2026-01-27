@@ -33,6 +33,7 @@
 
 #include <nuttx/wqueue.h>
 #include <nuttx/mm/iob.h>
+#include <nuttx/spinlock.h>
 
 #include "nrf52_ieee802154_radio.h"
 #include "nrf52_ieee802154_trace.h"

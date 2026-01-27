@@ -44,6 +44,7 @@
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbhost_trace.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/spinlock.h>
 
 #include "sim_usbhost.h"
 #include "sim_internal.h"

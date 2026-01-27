@@ -44,6 +44,7 @@
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
 #include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 
 #include "arm_internal.h"
 #include "chip.h"

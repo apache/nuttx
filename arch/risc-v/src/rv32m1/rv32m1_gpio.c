@@ -36,6 +36,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>
+#include <nuttx/spinlock.h>
 
 #include "riscv_internal.h"
 #include "chip.h"

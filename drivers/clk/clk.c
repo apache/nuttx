@@ -31,6 +31,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/list.h>
 #include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 
 #include <debug.h>
 #include <fcntl.h>

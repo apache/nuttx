@@ -35,6 +35,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/clock.h>
+#include <nuttx/spinlock.h>
 
 #include "stm32_freerun.h"
 

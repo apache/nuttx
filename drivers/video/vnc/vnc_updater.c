@@ -29,6 +29,7 @@
 #include <string.h>
 #include <sched.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <pthread.h>
 #include <assert.h>
 #include <errno.h>

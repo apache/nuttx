@@ -33,6 +33,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/irq.h>
 #include <arch/armv7-m/nvicpri.h>

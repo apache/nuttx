@@ -48,6 +48,7 @@
 #include <nuttx/usb/usbhost_trace.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/board/board.h> /* May redefine PIO settings */
 

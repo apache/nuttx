@@ -29,6 +29,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/queue.h>
 #include <nuttx/signal.h>
 #include <nuttx/semaphore.h>

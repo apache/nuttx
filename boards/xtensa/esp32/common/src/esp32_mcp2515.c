@@ -33,6 +33,7 @@
 
 #include <nuttx/spi/spi.h>
 #include <nuttx/can/mcp2515.h>
+#include <nuttx/spinlock.h>
 
 #include "esp32_spi.h"
 #include "esp32-devkitc.h"

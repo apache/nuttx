@@ -32,6 +32,7 @@
 #include <sys/param.h>
 #include <nuttx/irq.h>
 #include <nuttx/efuse/efuse.h>
+#include <nuttx/spinlock.h>
 
 #include "espressif/esp_efuse.h"
 

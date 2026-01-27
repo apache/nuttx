@@ -78,6 +78,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/net/netdev.h>
 
 #ifdef CONFIG_NET_PKT

@@ -70,6 +70,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/power/pm.h>
+#include <nuttx/spinlock.h>
 
 #include "arm_internal.h"
 #include "chip.h"

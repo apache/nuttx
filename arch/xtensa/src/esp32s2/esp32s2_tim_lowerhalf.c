@@ -35,6 +35,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/timers/timer.h>
+#include <nuttx/spinlock.h>
 
 #include "hardware/esp32s2_soc.h"
 

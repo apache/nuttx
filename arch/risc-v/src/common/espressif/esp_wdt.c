@@ -31,6 +31,7 @@
 #include <stdbool.h>
 
 #include <nuttx/timers/watchdog.h>
+#include <nuttx/spinlock.h>
 #include "riscv_internal.h"
 
 #include "esp_irq.h"

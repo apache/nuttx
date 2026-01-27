@@ -39,6 +39,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
+#include <nuttx/spinlock.h>
 
 #include "mips_internal.h"
 #include "hardware/pic32mz_spi.h"

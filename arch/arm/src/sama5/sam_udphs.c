@@ -64,6 +64,7 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include "arm_internal.h"
 #include "sam_periphclks.h"

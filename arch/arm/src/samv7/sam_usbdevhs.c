@@ -58,6 +58,7 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <arch/barriers.h>
 #include <arch/board/board.h>
 

@@ -36,6 +36,7 @@
 
 #include <arch/board/board.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/analog/dac.h>
 
 #include "arm_internal.h"

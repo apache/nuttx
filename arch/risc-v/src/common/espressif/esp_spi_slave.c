@@ -41,6 +41,7 @@
 #include <nuttx/spi/slave.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/board/board.h>
 

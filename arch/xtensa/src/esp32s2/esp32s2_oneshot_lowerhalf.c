@@ -35,6 +35,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/spinlock.h>
 
 #include "esp32s2_oneshot.h"
 

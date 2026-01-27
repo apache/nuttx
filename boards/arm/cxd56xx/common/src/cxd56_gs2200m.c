@@ -33,6 +33,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/irq.h>
 #include <nuttx/wireless/gs2200m.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/chip/pin.h>
 
