@@ -11,3 +11,4 @@ for inter-processor communication in Asymmetric Multiprocessing (AMP) systems.
 
    concepts
    rpmsg_port
+   rpmsg_port_uart
