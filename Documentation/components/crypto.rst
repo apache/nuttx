@@ -136,8 +136,8 @@ Basic Usage Pattern
 
 For more details, refer to the cryptodev.h header file and specific driver documentation.
 
-Asymmetric Cryptography and Key Management
-===========================================
+Asymmetric Cryptography
+=======================
 
 Public Key Algorithms
 ---------------------
@@ -145,8 +145,11 @@ Public Key Algorithms
 **RSA (Rivest-Shamir-Adleman)**
 
 - RSA key pair generation for variable key sizes
-- Digital signature generation and verification
+- Digital signature generation and verification with multiple padding schemes:
+  - PKCS#1 v1.5 padding (CRK_RSA_PKCS15_SIGN, CRK_RSA_PKCS15_VERIFY)
+  - PSS (Probabilistic Signature Scheme) padding (CRK_RSA_PSS_SIGN, CRK_RSA_PSS_VERIFY)
 - Public key encryption and decryption
+- RSA operations accessible via /dev/crypto cryptodev interface
 
 **ECDSA (Elliptic Curve Digital Signature Algorithm)**
 
@@ -161,39 +164,25 @@ NuttX also provides a lightweight ECC implementation and public API in
 secret computation, and ECDSA sign/verify. Public key export is available in
 compressed form (``ECC_BYTES + 1``) as well as X/Y uncompressed form.
 
-Key Management Operations
---------------------------
+RSA Digital Signature Operations
+--------------------------------
 
-The cryptodev module provides comprehensive key management interfaces:
+The cryptodev module supports RSA digital signatures via the cryptokey interface:
 
-**Key Allocation and Validation**
+- **CRK_RSA_PKCS15_SIGN**: Generate RSA signature with PKCS#1 v1.5 padding
+  - Input: message hash, private key ID
+  - Output: RSA signature
 
-- CRK_ALLOCATE_KEY: Request an available key ID from the driver
-- CRK_VALIDATE_KEYID: Check if a specified key ID is available in the driver
+- **CRK_RSA_PKCS15_VERIFY**: Verify RSA signature with PKCS#1 v1.5 padding
+  - Input: message hash, signature, public key ID
+  - Output: verification result
 
-**Key Import and Export**
+- **CRK_RSA_PSS_SIGN**: Generate RSA signature with PSS padding
+  - Input: message hash, private key ID
+  - Output: RSA signature
 
-- CRK_IMPORT_KEY: Import key data into the driver for use in cryptographic operations
-- CRK_EXPORT_KEY: Export raw key data or private key from a keypair
-- CRK_EXPORT_PUBLIC_KEY: Export only the public key portion of a keypair
+- **CRK_RSA_PSS_VERIFY**: Verify RSA signature with PSS padding
+  - Input: message hash, signature, public key ID
+  - Output: verification result
 
-**Key Generation**
-
-- CRK_GENERATE_AES_KEY: Generate AES key data with specified key ID
-- CRK_GENERATE_RSA_KEY: Generate RSA keypair (public and private) with specified key ID
-- CRK_GENERATE_SECP256R1_KEY: Generate ECDSA keypair on SECP256R1 curve with specified key ID
-
-**Key Lifecycle Management**
-
-- CRK_DELETE_KEY: Remove key with specified key ID from the driver
-- CRK_SAVE_KEY: Persist key data to FLASH storage for non-volatile storage
-- CRK_LOAD_KEY: Load previously saved key data from FLASH into RAM
-
-**Cryptographic Operations Using Keys**
-
-Once keys are allocated, generated, or imported, they can be used for:
-
-- Symmetric encryption/decryption operations (AES)
-- RSA signature generation and verification
-- ECDSA digital signature operations
-- Key exchange protocols
+Both padding schemes are supported via the cryptokey ioctl interface accessible through ``/dev/crypto``.
