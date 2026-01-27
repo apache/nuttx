@@ -41,6 +41,7 @@
 struct riscv_mtimer_lowerhalf_s
 {
   struct oneshot_lowerhalf_s lower;
+  int                        irq;
   uintreg_t                  mtime;
   uintreg_t                  mtimecmp;
 };
@@ -87,7 +88,7 @@ static uint64_t riscv_mtimer_get_mtime(struct riscv_mtimer_lowerhalf_s *priv)
 static void riscv_mtimer_set_mtimecmp(struct riscv_mtimer_lowerhalf_s *priv,
                                       uint64_t value)
 {
-  riscv_mtimer_set(priv->mtime, priv->mtimecmp, value);
+  riscv_mtimer_set(priv->mtime, priv->mtimecmp + 8 * up_cpu_index(), value);
 }
 
 static clkcnt_t riscv_mtime_max_delay(struct oneshot_lowerhalf_s *lower)
@@ -141,6 +142,25 @@ static int riscv_mtimer_interrupt(int irq, void *context, void *arg)
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: riscv_mtimer_oneshot_initialize_per_cpu
+ *
+ * Description:
+ *   Initialize the riscv mtimer for secondary CPUs.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void riscv_mtimer_oneshot_initialize_per_cpu(void)
+{
+  struct riscv_mtimer_lowerhalf_s *priv = &g_riscv_mtime_lowerhalf;
+
+  riscv_mtimer_set_mtimecmp(priv, UINT64_MAX);
+  up_enable_irq(priv->irq);
+}
+
 struct oneshot_lowerhalf_s *
 riscv_mtimer_initialize(uintreg_t mtime, uintreg_t mtimecmp,
                         int irq, uint64_t freq)
@@ -148,13 +168,20 @@ riscv_mtimer_initialize(uintreg_t mtime, uintreg_t mtimecmp,
   struct riscv_mtimer_lowerhalf_s *priv = &g_riscv_mtime_lowerhalf;
 
   priv->mtime    = mtime;
+  priv->irq      = irq;
   priv->mtimecmp = mtimecmp;
 
   oneshot_count_init(&priv->lower, freq);
 
-  riscv_mtimer_set_mtimecmp(priv, UINT64_MAX);
-  irq_attach(irq, riscv_mtimer_interrupt, priv);
-  up_enable_irq(irq);
+  irq_attach(priv->irq, riscv_mtimer_interrupt, priv);
+  riscv_mtimer_oneshot_initialize_per_cpu();
 
   return &priv->lower;
 }
+
+#ifdef CONFIG_SMP
+void riscv_timer_secondary_init(void)
+{
+  riscv_mtimer_oneshot_initialize_per_cpu();
+}
+#endif
