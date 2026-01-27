@@ -404,16 +404,16 @@ static void perf_output_sample(FAR struct perf_event_header_s *header,
                         sizeof(data->stream_id));
     }
 
-  if (sample_type & PERF_SAMPLE_PERIOD)
-    {
-      circbuf_overwrite(&(event->buf->rb), &data->period,
-                        sizeof(data->period));
-    }
-
   if (sample_type & PERF_SAMPLE_CPU)
     {
       circbuf_overwrite(&(event->buf->rb), &data->cpu_entry,
                         sizeof(data->cpu_entry));
+    }
+
+  if (sample_type & PERF_SAMPLE_PERIOD)
+    {
+      circbuf_overwrite(&(event->buf->rb), &data->period,
+                        sizeof(data->period));
     }
 
   if (sample_type & PERF_SAMPLE_CALLCHAIN)
