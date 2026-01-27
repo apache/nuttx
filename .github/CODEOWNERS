@@ -22450,7 +22450,6 @@ sched/sched/sched_removeblocked.c alin.jerpelea@sony.com masayuki.ishikawa@gmail
 sched/sched/sched_removereadytorun.c hujun5@xiaomi.com jukka.laitinen@tii.ae masayuki.ishikawa@gmail.com alin.jerpelea@sony.com
 sched/sched/sched_reprioritize.c petro.karashchenko@gmail.com alin.jerpelea@sony.com
 sched/sched/sched_reprioritizertr.c zhangyuan21@xiaomi.com hujun5@xiaomi.com alin.jerpelea@sony.com anchao@lixiang.com
-sched/sched/sched_resumescheduler.c Masayuki.Ishikawa@jp.sony.com alin.jerpelea@sony.com liguiding1@xiaomi.com walker.zeng@transtekcorp.com
 sched/sched/sched_roundrobin.c hujun5@xiaomi.com gustavo.nihei@espressif.com jukka.laitinen@tii.ae zhangyuan21@xiaomi.com
 sched/sched/sched_rrgetinterval.c alin.jerpelea@sony.com yamamoto@midokura.com
 sched/sched/sched_self.c alin.jerpelea@sony.com
