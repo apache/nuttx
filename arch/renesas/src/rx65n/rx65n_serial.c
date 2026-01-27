@@ -39,6 +39,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/spinlock.h>
 #include "rx65n_macrodriver.h"
 #include "arch/rx65n/iodefine.h"
 #include "chip.h"

@@ -441,7 +441,6 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
             {
               errcode = ECHILD;
             }
-
         }
 #endif
     }

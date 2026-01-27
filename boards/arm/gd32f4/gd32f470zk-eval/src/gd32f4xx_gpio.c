@@ -33,6 +33,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/wdog.h>
 #include <nuttx/ioexpander/gpio.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/board/board.h>
 

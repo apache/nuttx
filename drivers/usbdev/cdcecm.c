@@ -51,6 +51,7 @@
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/cdc.h>
 #include <nuttx/usb/usbdev_trace.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_NET_PKT
 #  include <nuttx/net/pkt.h>

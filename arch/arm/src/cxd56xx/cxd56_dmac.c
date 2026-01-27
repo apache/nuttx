@@ -36,6 +36,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/mutex.h>
 
 #include "cxd56_dmac.h"
@@ -313,11 +314,17 @@ static int ch2dmac(int ch)
 {
   switch (ch)
     {
-    case 0: case 1:
+    case 0:
+    case 1:
         return 1;
-    case 2: case 3: case 4: case 5: case 6: /* APP IDMAC */
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6: /* APP IDMAC */
         return 3;
-    case 7: case 8: /* APP SKDMAC */
+    case 7:
+    case 8: /* APP SKDMAC */
         return 2;
     default:
         return 0;
@@ -330,9 +337,12 @@ static struct dmac_register_map *get_device(int ch)
 
   switch (id)
     {
-    case 1: return (struct dmac_register_map *)DMAC1_REG_BASE;
-    case 2: return (struct dmac_register_map *)DMAC2_REG_BASE;
-    case 3: return (struct dmac_register_map *)DMAC3_REG_BASE;
+    case 1:
+      return (struct dmac_register_map *)DMAC1_REG_BASE;
+    case 2:
+      return (struct dmac_register_map *)DMAC2_REG_BASE;
+    case 3:
+      return (struct dmac_register_map *)DMAC3_REG_BASE;
     }
 
     return NULL;
@@ -366,11 +376,17 @@ static int get_pmid(int ch)
 {
   switch (ch)
     {
-    case 0: case 1:
+    case 0:
+    case 1:
         return PM_APP_ADMAC;
-    case 2: case 3: case 4: case 5: case 6:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
         return PM_APP_IDMAC;
-    case 7: case 8:
+    case 7:
+    case 8:
         return PM_APP_SKDMAC;
     default:
         break; /* may not comes here */

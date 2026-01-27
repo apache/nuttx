@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/arch.h>
 
 #include <sys/types.h>

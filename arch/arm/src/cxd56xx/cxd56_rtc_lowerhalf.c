@@ -35,6 +35,7 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/timers/rtc.h>
 
 #include "chip.h"

@@ -42,6 +42,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/mmcsd.h>
+#include <nuttx/spinlock.h>
 
 #include <nuttx/irq.h>
 #include <arch/board/board.h>

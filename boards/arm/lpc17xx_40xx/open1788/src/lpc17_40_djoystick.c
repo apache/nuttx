@@ -33,6 +33,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/input/djoystick.h>
+#include <nuttx/spinlock.h>
 
 #include "lpc17_40_gpio.h"
 #include "open1788.h"
