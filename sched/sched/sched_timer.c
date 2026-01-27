@@ -108,6 +108,16 @@ nxsched_hrtimer_callback(FAR const struct hrtimer_s *hrtimer,
  * Public Functions
  ****************************************************************************/
 
+#if defined(CONFIG_HRTIMER) && defined(CONFIG_SCHED_TICKLESS)
+int nxsched_hrtimer_tick_start(clock_t tick)
+{
+  return hrtimer_start(&g_sched_hrtimer,
+                       nxsched_hrtimer_callback,
+                       tick * NSEC_PER_TICK,
+                       HRTIMER_MODE_ABS);
+}
+#endif
+
 /****************************************************************************
  * Name: nxsched_process_timer
  *

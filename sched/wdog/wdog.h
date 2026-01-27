@@ -114,12 +114,16 @@ static inline_function clock_t wd_adjust_next_tick(clock_t tick)
 static inline_function void wd_timer_start(clock_t tick)
 {
   clock_t next_tick = wd_adjust_next_tick(tick);
-#ifdef CONFIG_SCHED_TICKLESS_ALARM
+
+#ifdef CONFIG_HRTIMER
+  nxsched_hrtimer_tick_start(tick);
+#elif defined(CONFIG_SCHED_TICKLESS_ALARM)
   up_alarm_tick_start(next_tick);
 #else
   up_timer_tick_start(next_tick - clock_systime_ticks());
 #endif
 }
+
 static inline_function void wd_timer_cancel(void)
 {
   struct timespec ts;
