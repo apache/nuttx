@@ -266,7 +266,7 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
 
   if (nonblock)
     {
-      iob = iob_tryalloc(false);
+      iob = iob_tryalloc(true);
     }
   else
     {
@@ -292,7 +292,7 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
     }
 
   iob_reserve(iob, CONFIG_NET_LL_GUARDSIZE);
-  iob_update_pktlen(iob, 0, false);
+  iob_update_pktlen(iob, 0, true);
 
   /* Copy the user data into the write buffer.  We cannot wait for
    * buffer space if the socket was opened non-blocking.
@@ -305,7 +305,7 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
 
   if (nonblock)
     {
-      ret = iob_trycopyin(iob, buf, len, offset, false);
+      ret = iob_trycopyin(iob, buf, len, offset, true);
     }
   else
     {
@@ -315,7 +315,7 @@ ssize_t pkt_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
        */
 
       conn_dev_unlock(&conn->sconn, dev);
-      ret = iob_copyin(iob, buf, len, offset, false);
+      ret = iob_copyin(iob, buf, len, offset, true);
       conn_dev_lock(&conn->sconn, dev);
     }
 

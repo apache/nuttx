@@ -1062,16 +1062,6 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           int ret;
 
           sndlen = TCP_WBPKTLEN(wrb) - TCP_WBSENT(wrb);
-          if (sndlen > conn->mss)
-            {
-              sndlen = conn->mss;
-            }
-
-          remaining_snd_wnd = TCP_SEQ_SUB(snd_wnd_edge, seq);
-          if (sndlen > remaining_snd_wnd)
-            {
-              sndlen = remaining_snd_wnd;
-            }
 
           /* Normally CONFIG_IOB_THROTTLE should ensure that we have enough
            * iob space available for copying the data to a packet buffer.
@@ -1087,6 +1077,17 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
             {
               nwarn("Running low on iobs, limiting packet size\n");
               sndlen = CONFIG_IOB_BUFSIZE;
+            }
+
+          if (sndlen > conn->mss)
+            {
+              sndlen = conn->mss;
+            }
+
+          remaining_snd_wnd = TCP_SEQ_SUB(snd_wnd_edge, seq);
+          if (sndlen > remaining_snd_wnd)
+            {
+              sndlen = remaining_snd_wnd;
             }
 
           ninfo("SEND: wrb=%p seq=%" PRIu32 " pktlen=%u sent=%u sndlen=%zu "
@@ -1523,13 +1524,15 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
                     TCP_WBPKTLEN(wrb));
               DEBUGASSERT(TCP_WBPKTLEN(wrb) > 0);
             }
-          else if (nonblock)
-            {
-              wrb = tcp_wrbuffer_tryalloc();
-              ninfo("new wrb %p (non blocking)\n", wrb);
-            }
           else
             {
+              wrb = tcp_wrbuffer_tryalloc();
+              ninfo("new wrb %p (tryalloc)\n", wrb);
+            }
+
+          if (wrb == NULL && !nonblock)
+            {
+              tcp_send_txnotify(psock, conn);
               conn_dev_unlock(&conn->sconn, conn->dev);
               wrb = tcp_wrbuffer_timedalloc(tcp_send_gettimeout(start,
                                                                 timeout));
