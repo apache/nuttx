@@ -126,6 +126,11 @@ static int rpmsg_ping_once(FAR struct rpmsg_endpoint *ept, int len,
   FAR struct rpmsg_ping_msg_s *msg;
   int ret;
 
+  if (!is_rpmsg_ept_ready(ept))
+    {
+      return -ENOTCONN;
+    }
+
   msg = rpmsg_get_tx_payload_buffer(ept, buf_len, true);
   if (!msg)
     {
@@ -162,7 +167,7 @@ static int rpmsg_ping_once(FAR struct rpmsg_endpoint *ept, int len,
       msg->cookie = (uintptr_t)&sem;
       nxsem_init(&sem, 0, 0);
 
-      ret = rpmsg_send_nocopy(ept, msg, msg->len);
+      ret = rpmsg_sendto_nocopy(ept, msg, msg->len, ept->dest_addr);
       if (ret >= 0)
         {
           nxsem_wait_uninterruptible(&sem);
@@ -172,7 +177,7 @@ static int rpmsg_ping_once(FAR struct rpmsg_endpoint *ept, int len,
     }
   else
     {
-      ret = rpmsg_send_nocopy(ept, msg, msg->len);
+      ret = rpmsg_sendto_nocopy(ept, msg, msg->len, ept->dest_addr);
     }
 
   if (ret < 0)
