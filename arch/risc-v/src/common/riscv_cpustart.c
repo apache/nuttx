@@ -123,6 +123,8 @@ void riscv_cpu_boot(int cpu)
   sched_note_cpu_started(this_task());
 #endif
 
+  riscv_timer_secondary_init();
+
   up_irq_enable();
 
   /* Then transfer control to the IDLE task */

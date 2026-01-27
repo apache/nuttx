@@ -365,6 +365,7 @@ void riscv_color_intstack(void);
 #ifdef CONFIG_SMP
 void riscv_cpu_boot(int cpu);
 int riscv_smp_call_handler(int irq, void *c, void *arg);
+void riscv_timer_secondary_init(void);
 #endif
 
 #ifdef CONFIG_ARCH_RV_CPUID_MAP
