@@ -71,7 +71,7 @@ typedef struct spinlock_s
  * UP_SP_LOCKED and UP_SP_UNLOCKED must be constants of type spinlock_t.
  */
 
-#  include <arch/types.h>
+#  include <arch/spinlock.h>
 #  else
 typedef uint8_t _spinlock_t;
 
