@@ -48,6 +48,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
+#include <nuttx/spinlock.h>
 #include <assert.h>
 #include <debug.h>
 

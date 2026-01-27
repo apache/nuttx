@@ -31,6 +31,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/board.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/board/board.h>
 

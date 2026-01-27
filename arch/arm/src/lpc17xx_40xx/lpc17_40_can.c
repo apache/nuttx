@@ -62,6 +62,7 @@
 #include <arch/board/board.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #if defined(CHRDEV_CAN)
 #  include <nuttx/can/can.h>

@@ -45,6 +45,7 @@
 #include <nuttx/usb/ohci.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbhost_devaddr.h>
+#include <nuttx/spinlock.h>
 
 #include <nuttx/irq.h>
 

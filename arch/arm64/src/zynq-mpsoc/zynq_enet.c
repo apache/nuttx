@@ -41,6 +41,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_NET_PKT
 #  include <nuttx/net/pkt.h>

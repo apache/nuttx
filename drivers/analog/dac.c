@@ -39,6 +39,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/analog/dac.h>
+#include <nuttx/spinlock.h>
 
 #include <nuttx/irq.h>
 

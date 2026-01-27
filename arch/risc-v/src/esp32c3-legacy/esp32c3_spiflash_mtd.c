@@ -38,6 +38,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/init.h>
 #include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/mtd/mtd.h>
 
 #include "esp32c3_attr.h"
