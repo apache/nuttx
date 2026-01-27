@@ -533,16 +533,14 @@ SECTIONS
    * i.e. the lower 16 bits of both the virtual address (address seen by the
    * CPU) and the load address (physical address of the external flash) must
    * be equal.
+   * For the simpleboot format this is done by esptool.
    */
 
-#ifndef CONFIG_ESP32_APP_FORMAT_MCUBOOT
-  .flash.rodata_dummy (NOLOAD) :
-  {
-    . = ALIGN(0x10000);
-  } > ROM
-#endif
-
+#ifdef CONFIG_ESP32_APP_FORMAT_MCUBOOT
   .flash.rodata : ALIGN(0x10000)
+#else
+  .flash.rodata :
+#endif
   {
     _rodata_reserved_start = ABSOLUTE(.);
 
@@ -666,17 +664,14 @@ SECTIONS
    * i.e. the lower 16 bits of both the virtual address (address seen by the
    * CPU) and the load address (physical address of the external flash) must
    * be equal.
+   * For the simpleboot format this is done by esptool.
    */
 
-#ifndef CONFIG_ESP32_APP_FORMAT_MCUBOOT
-  .flash.text_dummy (NOLOAD) :
-  {
-    . += SIZEOF(.flash.rodata);
-    . = ALIGN(0x10000);
-  } >default_code_seg AT> ROM
-#endif
-
+#ifdef CONFIG_ESP32_APP_FORMAT_MCUBOOT
   .flash.text : ALIGN(0x00010000)
+#else
+  .flash.text :
+#endif
   {
     _stext = .;
     _text_start = ABSOLUTE(.);
