@@ -2063,8 +2063,8 @@ int up_alarm_tick_cancel(FAR clock_t *ticks);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HRTIMER) || \
-    defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM)
+#if (defined(CONFIG_HRTIMER) && defined(CONFIG_ALARM_ARCH)) || \
+    (defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM))
 int up_alarm_start(FAR const struct timespec *ts);
 int up_alarm_tick_start(clock_t ticks);
 #endif
@@ -2135,7 +2135,8 @@ int up_timer_tick_cancel(FAR clock_t *ticks);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_TICKLESS_ALARM)
+#if (defined(CONFIG_HRTIMER) && defined(CONFIG_TIMER_ARCH)) || \
+    (defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_TICKLESS_ALARM))
 int up_timer_start(FAR const struct timespec *ts);
 int up_timer_tick_start(clock_t ticks);
 #endif

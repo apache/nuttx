@@ -122,26 +122,29 @@ void hrtimer_process(uint64_t now);
  *   ns - Expiration time in nanoseconds.
  *
  * Returned Value:
- *   OK (0) on success, negated errno on failure.
+ *   None.
+ *
+ * Assumptions:
+ *   The underlying timer start function returns 0 on success.
  ****************************************************************************/
 
 static inline_function void hrtimer_reprogram(uint64_t next_expired)
 {
-#ifdef CONFIG_SCHED_TICKLESS
-  int ret;
+  int ret = 0;
   struct timespec ts;
-#  ifdef CONFIG_SCHED_TICKLESS_ALARM
+
   clock_nsec2time(&ts, next_expired);
+
+#ifdef CONFIG_ALARM_ARCH
   ret = up_alarm_start(&ts);
-#  else
+#else
   struct timespec current;
   up_timer_gettime(&current);
-  clock_nsec2time(&ts, next_expired);
   clock_timespec_subtract(&ts, &current, &ts);
   ret = up_timer_start(&ts);
-#  endif
-  DEBUGASSERT(ret == 0);
 #endif
+
+  DEBUGASSERT(ret == 0);
 }
 
 /****************************************************************************
