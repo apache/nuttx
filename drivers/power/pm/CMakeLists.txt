@@ -37,7 +37,6 @@ if(CONFIG_PM)
     pm_unregister.c
     pm_autoupdate.c
     pm_governor.c
-    pm_lock.c
     pm_idle.c)
 
   if(CONFIG_PM_PROCFS)

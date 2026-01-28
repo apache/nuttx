@@ -35,8 +35,6 @@
 
 #include "pm.h"
 
-#ifdef CONFIG_PM
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -309,10 +307,12 @@ static inline void pm_changeall(int domain, enum pm_state_e newstate)
 
 int pm_changestate(int domain, enum pm_state_e newstate)
 {
+  FAR struct pm_domain_s *pdom;
   irqstate_t flags;
   int ret = OK;
 
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
+  pdom = &g_pmdomains[domain];
 
   /* Disable interrupts throughout this operation... changing driver states
    * could cause additional driver activity that might interfere with the
@@ -320,7 +320,7 @@ int pm_changestate(int domain, enum pm_state_e newstate)
    * re-enabled.
    */
 
-  flags = pm_domain_lock(domain);
+  flags = spin_lock_irqsave(&pdom->lock);
 
   if (newstate != PM_RESTORE)
     {
@@ -367,7 +367,97 @@ int pm_changestate(int domain, enum pm_state_e newstate)
 
   /* Restore the interrupt state */
 
-  pm_domain_unlock(domain, flags);
+  spin_unlock_irqrestore(&pdom->lock, flags);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: pm_updatestate
+ *
+ * Description:
+ *   This function is just combination of pm_checkstate() & pm_changestate(),
+ *   we always call them together and it will cause deadlock if adding lock
+ *   before pm_checkstate() and after pm_changestate(). So here put them
+ *   in one function and use lock only once.
+ *
+ * Input Parameters:
+ *   domain   - Identifies the domain of the new PM state
+ *   newstate - Identifies the new PM state
+ *
+ * Returned Value:
+ *   0 (OK) means that the callback function for all registered drivers
+ *   returned OK (meaning that they accept the state change).  Non-zero
+ *   means that one of the drivers refused the state change.  In this case,
+ *   the system will revert to the preceding state.
+ *
+ ****************************************************************************/
+
+int pm_updatestate(int domain)
+{
+  int ret = OK;
+  irqstate_t flags;
+  FAR struct pm_domain_s *pdom = &g_pmdomains[domain];
+  enum pm_state_e newstate = PM_NORMAL;
+
+  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
+
+  /* We disable interrupts since pm_stay()/pm_relax() could be simultaneously
+   * invoked, which modifies the stay count which we are about to read
+   */
+
+  flags = spin_lock_irqsave(&pdom->lock);
+
+  if (g_pmdomains[domain].governor->checkstate)
+    {
+      newstate = g_pmdomains[domain].governor->checkstate(domain);
+    }
+
+  if (newstate != PM_RESTORE)
+    {
+      /* First, prepare the drivers for the state change.  In this phase,
+       * drivers may refuse the state state change.
+       */
+
+      ret = pm_prepall(domain, newstate, false);
+      if (ret != OK)
+        {
+          /* One or more drivers is not ready for this state change.
+           * Revert to the preceding state.
+           */
+
+          newstate = g_pmdomains[domain].state;
+          pm_prepall(domain, newstate, true);
+        }
+    }
+
+  /* Statistics */
+
+  pm_stats(&g_pmdomains[domain],
+           g_pmdomains[domain].state, newstate);
+
+  /* All drivers have agreed to the state change (or, one or more have
+   * disagreed and the state has been reverted).  Set the new state.
+   */
+
+  pm_changeall(domain, newstate);
+
+  /* Notify governor of (possible) state change */
+
+  if (g_pmdomains[domain].governor->statechanged)
+    {
+      g_pmdomains[domain].governor->statechanged(domain, newstate);
+    }
+
+  /* Domain state update after statechanged done */
+
+  if (newstate != PM_RESTORE)
+    {
+      g_pmdomains[domain].state = newstate;
+    }
+
+  /* Restore the interrupt state */
+
+  spin_unlock_irqrestore(&pdom->lock, flags);
   return ret;
 }
 
@@ -390,5 +480,3 @@ enum pm_state_e pm_querystate(int domain)
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
   return g_pmdomains[domain].state;
 }
-
-#endif /* CONFIG_PM */

@@ -846,6 +846,29 @@ enum pm_state_e pm_checkstate(int domain);
 int pm_changestate(int domain, enum pm_state_e newstate);
 
 /****************************************************************************
+ * Name: pm_updatestate
+ *
+ * Description:
+ *   This function is just combination of pm_checkstate() & pm_changestate(),
+ *   we always call them together and it will cause deadlock if adding lock
+ *   before pm_checkstate() and after pm_changestate(). So here put them
+ *   in one function and use lock only once.
+ *
+ * Input Parameters:
+ *   domain   - Identifies the domain of the new PM state
+ *   newstate - Identifies the new PM state
+ *
+ * Returned Value:
+ *   0 (OK) means that the callback function for all registered drivers
+ *   returned OK (meaning that they accept the state change).  Non-zero
+ *   means that one of the drivers refused the state change.  In this case,
+ *   the system will revert to the preceding state.
+ *
+ ****************************************************************************/
+
+int pm_updatestate(int domain);
+
+/****************************************************************************
  * Name: pm_querystate
  *
  * Description:

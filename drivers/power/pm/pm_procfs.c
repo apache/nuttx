@@ -306,7 +306,7 @@ static ssize_t pm_read_state(FAR struct file *filep, FAR char *buffer,
 
   totalsize += copysize;
 
-  flags = pm_domain_lock(pmfile->domain);
+  flags = spin_lock_irqsave(&dom->lock);
 
   for (state = 0; state < PM_COUNT; state++)
     {
@@ -332,7 +332,7 @@ static ssize_t pm_read_state(FAR struct file *filep, FAR char *buffer,
       sum += wake[state] + sleep[state];
     }
 
-  pm_domain_unlock(pmfile->domain, flags);
+  spin_unlock_irqrestore(&dom->lock, flags);
 
   sum = sum ? sum : 1;
 
@@ -397,7 +397,7 @@ static ssize_t pm_read_wakelock(FAR struct file *filep, FAR char *buffer,
 
   totalsize += copysize;
 
-  flags = pm_domain_lock(pmfile->domain);
+  flags = spin_lock_irqsave(&dom->lock);
 
   entry = dq_peek(&dom->wakelockall);
   for (; entry && totalsize < buflen; entry = dq_next(entry))
@@ -431,7 +431,7 @@ static ssize_t pm_read_wakelock(FAR struct file *filep, FAR char *buffer,
       totalsize += copysize;
     }
 
-  pm_domain_unlock(pmfile->domain, flags);
+  spin_unlock_irqrestore(&dom->lock, flags);
 
   filep->f_pos += totalsize;
   return totalsize;
@@ -481,7 +481,7 @@ static ssize_t pm_read_preparefail(FAR struct file *filep, FAR char *buffer,
                            buflen, &offset);
   totalsize += copysize;
 
-  flags = pm_domain_lock(pmfile->domain);
+  flags = spin_lock_irqsave(&dom->lock);
 
   for (entry = dq_peek(&dom->registry);
        entry; entry = dq_next(entry))
@@ -528,7 +528,7 @@ static ssize_t pm_read_preparefail(FAR struct file *filep, FAR char *buffer,
       totalsize += copysize;
     }
 
-  pm_domain_unlock(pmfile->domain, flags);
+  spin_unlock_irqrestore(&dom->lock, flags);
   filep->f_pos += totalsize;
   return totalsize;
 }

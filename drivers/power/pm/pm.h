@@ -35,8 +35,6 @@
 #include <nuttx/power/pm.h>
 #include <nuttx/wqueue.h>
 
-#ifdef CONFIG_PM
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -169,5 +167,4 @@ void pm_wakelock_global_init(void);
 }
 #endif
 
-#endif /* CONFIG_PM */
 #endif /* #define __DRIVERS_POWER_PM_PM_H */
