@@ -70,6 +70,10 @@
 #include <nuttx/input/buttons.h>
 #endif
 
+#ifdef CONFIG_TIMER_WDOG
+#include <nuttx/timers/timer_wdog.h>
+#endif
+
 #include "sim_internal.h"
 #include "sim.h"
 
@@ -566,6 +570,14 @@ int sim_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: sim_cansock_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_TIMER_WDOG
+  ret = timer_wdog_initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: timer_wdog_initialize failed: %d\n", ret);
     }
 #endif
 

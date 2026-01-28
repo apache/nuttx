@@ -129,6 +129,12 @@ config TIMER_ARCH
 	---help---
 		Implement timer arch API on top of timer driver interface.
 
+config TIMER_WDOG
+	bool "Timer Implementation by watchdog"
+	default n
+	---help---
+		This option allows the timer implementation to be based on the
+		watchdog (wdog) driver interface.
 endif # TIMER
 
 config ONESHOT
