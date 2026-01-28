@@ -68,6 +68,8 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/open-amp)
       ${CMAKE_CURRENT_LIST_DIR}/0014-lib-rpmsg_virtio-use-virtio_alloc_buf-to-alloc-share.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
       ${CMAKE_CURRENT_LIST_DIR}/0015-lib-remoteproc_virtio-optimize-virtqueue_notificatio.patch
+      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0016-lib-rpmsg_virtio-support-release-the-name-service-me.patch
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 

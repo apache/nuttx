@@ -1,0 +1,148 @@
+From abd23c3a7b02837b3200e94bb111c07c288466c5 Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Fri, 19 Jul 2024 15:12:38 +0800
+Subject: [PATCH 16/17] lib/rpmsg_virtio: support release the name service
+ message early
+
+To improve the share memory buffer utilization
+1. Support release the rx buffer early, the ept->cb should return
+   RPMSG_SUCCESS_BUFFER_RETURNED to tell the rpmsg virtio the
+   rx buffer has been released;
+2. Modify name service callback to release the rx name service
+   message early;
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/include/openamp/rpmsg.h |  1 +
+ lib/rpmsg/rpmsg_virtio.c    | 40 +++++++++++++++++++++----------------
+ 2 files changed, 24 insertions(+), 17 deletions(-)
+
+diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
+index 3f4c6c7fc6..5b702339aa 100644
+--- a/lib/include/openamp/rpmsg.h
++++ open-amp/lib/include/openamp/rpmsg.h
+@@ -41,6 +41,7 @@ extern "C" {
+ 
+ /* Error macros. */
+ #define RPMSG_SUCCESS			0
++#define RPMSG_SUCCESS_BUFFER_RELEASED	-1000
+ #define RPMSG_ERROR_BASE		-2000
+ #define RPMSG_ERR_NO_MEM		(RPMSG_ERROR_BASE - 1)
+ #define RPMSG_ERR_NO_BUFF		(RPMSG_ERROR_BASE - 2)
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 8a72d8f8ef..9913d87081 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -559,7 +559,7 @@ static void rpmsg_virtio_rx_callback(struct virtqueue *vq)
+ 	bool last = false;
+ 	uint32_t len;
+ 	uint16_t idx;
+-	int status;
++	int status = RPMSG_SUCCESS;
+ 
+ 	while (!last) {
+ 		/* Process the received data from remote node */
+@@ -594,13 +594,15 @@ static void rpmsg_virtio_rx_callback(struct virtqueue *vq)
+ 			status = ept->cb(ept, RPMSG_LOCATE_DATA(rp_hdr),
+ 					 rp_hdr->len, rp_hdr->src, ept->priv);
+ 
+-			RPMSG_ASSERT(status >= 0,
++			RPMSG_ASSERT(status >= 0 ||
++				     status == RPMSG_SUCCESS_BUFFER_RELEASED,
+ 				     "unexpected callback status\r\n");
+ 		}
+ 
+ 		metal_mutex_acquire(&rdev->lock);
+ 		rpmsg_ept_decref(ept);
+-		if (rpmsg_virtio_buf_held_dec_test(rp_hdr)) {
++		if (status != RPMSG_SUCCESS_BUFFER_RELEASED &&
++			rpmsg_virtio_buf_held_dec_test(rp_hdr)) {
+ 			rpmsg_virtio_release_rx_buffer_nolock(rvdev, rp_hdr);
+ 			if (VIRTIO_ENABLED(VQ_RX_EMPTY_NOTIFY))
+ 				/* Kick will be sent only when last buffer is released */
+@@ -636,26 +638,30 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+ 							       rdev);
+ 	struct metal_io_region *io = rvdev->shbuf_io;
+ 	struct rpmsg_endpoint *_ept;
+-	struct rpmsg_ns_msg *ns_msg;
++	struct rpmsg_ns_msg ns_msg;
+ 	uint32_t dest;
+ 	bool ept_to_release;
+-	char name[RPMSG_NAME_SIZE];
+ 
+ 	(void)ept;
+ 	(void)src;
+ 
+-	ns_msg = data;
+-	if (len != sizeof(*ns_msg))
++	if (len != sizeof(ns_msg))
+ 		/* Returns as the message is corrupted */
+ 		return RPMSG_SUCCESS;
+-	metal_io_block_read(io,
+-			    metal_io_virt_to_offset(io, ns_msg->name),
+-			    &name, sizeof(name));
+-	dest = ns_msg->addr;
++
++	/*
++	 * copy buffer to local ns_msg and release the rx buffer early to
++	 * improve the buffer utilization.
++	 */
++	metal_io_block_read(io, metal_io_virt_to_offset(io, data),
++			    &ns_msg, sizeof(ns_msg));
++	rpmsg_virtio_release_rx_buffer(rdev, data);
++
++	dest = ns_msg.addr;
+ 
+ 	/* check if a Ept has been locally registered */
+ 	metal_mutex_acquire(&rdev->lock);
+-	_ept = rpmsg_get_endpoint(rdev, name, RPMSG_ADDR_ANY, dest);
++	_ept = rpmsg_get_endpoint(rdev, ns_msg.name, RPMSG_ADDR_ANY, dest);
+ 
+ 	/*
+ 	 * If ept-release callback is not implemented, ns_unbind_cb() can free the ept.
+@@ -663,7 +669,7 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+ 	 */
+ 	ept_to_release = _ept && _ept->release_cb;
+ 
+-	if (ns_msg->flags == RPMSG_NS_DESTROY) {
++	if (ns_msg.flags == RPMSG_NS_DESTROY) {
+ 		if (_ept)
+ 			_ept->dest_addr = RPMSG_ADDR_ANY;
+ 		if (ept_to_release)
+@@ -672,13 +678,13 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+ 		if (_ept && _ept->ns_unbind_cb)
+ 			_ept->ns_unbind_cb(_ept);
+ 		if (rdev->ns_unbind_cb)
+-			rdev->ns_unbind_cb(rdev, name, dest);
++			rdev->ns_unbind_cb(rdev, ns_msg.name, dest);
+ 		if (ept_to_release) {
+ 			metal_mutex_acquire(&rdev->lock);
+ 			rpmsg_ept_decref(_ept);
+ 			metal_mutex_release(&rdev->lock);
+ 		}
+-	} else if (ns_msg->flags == RPMSG_NS_CREATE) {
++	} else if (ns_msg.flags == RPMSG_NS_CREATE) {
+ 		if (!_ept) {
+ 			/*
+ 			 * send callback to application, that can
+@@ -688,7 +694,7 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+ 			 */
+ 			metal_mutex_release(&rdev->lock);
+ 			if (rdev->ns_bind_cb)
+-				rdev->ns_bind_cb(rdev, name, dest);
++				rdev->ns_bind_cb(rdev, ns_msg.name, dest);
+ 		} else if (_ept->dest_addr == RPMSG_ADDR_ANY) {
+ 			_ept->dest_addr = dest;
+ 			metal_mutex_release(&rdev->lock);
+@@ -713,7 +719,7 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+ 			metal_mutex_release(&rdev->lock);
+ 	}
+ 
+-	return RPMSG_SUCCESS;
++	return RPMSG_SUCCESS_BUFFER_RELEASED;
+ }
+ 
+ int rpmsg_virtio_get_tx_buffer_size(struct rpmsg_device *rdev)
+-- 
+2.34.1
+

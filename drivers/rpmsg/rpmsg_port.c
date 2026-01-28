@@ -406,7 +406,7 @@ static void rpmsg_port_rx_callback(FAR struct rpmsg_port_s *port,
   FAR struct rpmsg_hdr *rphdr = (FAR struct rpmsg_hdr *)hdr->buf;
   FAR void *data = RPMSG_LOCATE_DATA(rphdr);
   FAR struct rpmsg_endpoint *ept;
-  int status;
+  int status = 0;
 
   metal_mutex_acquire(&rdev->lock);
   ept = rpmsg_get_ept_from_addr(rdev, rphdr->dst);
@@ -422,13 +422,17 @@ static void rpmsg_port_rx_callback(FAR struct rpmsg_port_s *port,
         }
 
       status = ept->cb(ept, data, rphdr->len, rphdr->src, ept->priv);
-      if (status < 0)
+      if (status < 0 && status != RPMSG_SUCCESS_BUFFER_RELEASED)
         {
           RPMSG_ASSERT(0, "unexpected callback status\n");
         }
     }
 
-  rpmsg_port_release_rx_buffer(rdev, data);
+  if (status != RPMSG_SUCCESS_BUFFER_RELEASED)
+    {
+      rpmsg_port_release_rx_buffer(rdev, data);
+    }
+
   metal_mutex_acquire(&rdev->lock);
   rpmsg_ept_decref(ept);
   metal_mutex_release(&rdev->lock);
