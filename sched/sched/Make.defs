@@ -30,7 +30,7 @@ CSRCS += sched_yield.c sched_rrgetinterval.c sched_foreach.c
 CSRCS += sched_lock.c sched_unlock.c sched_lockcount.c
 CSRCS += sched_idletask.c sched_self.c sched_get_stackinfo.c sched_get_tls.c
 CSRCS += sched_sysinfo.c sched_get_stateinfo.c sched_getcpu.c
-CSRCS += sched_switchcontext.c sched_sleep.c sched_timer.c
+CSRCS += sched_switchcontext.c sched_sleep.c
 
 ifneq ($(CONFIG_STACKCHECK_MARGIN),)
   ifneq ($(CONFIG_STACKCHECK_MARGIN),-1)
@@ -79,7 +79,7 @@ endif
 endif
 
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
-CSRCS += sched_tickexpiration.c
+CSRCS += sched_processtickless.c
 else
 CSRCS += sched_processtick.c
 endif
