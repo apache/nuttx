@@ -41,9 +41,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Raw spinlock states */
+
+#define UP_SP_UNLOCKED 0  /* The Un-locked state */
+#define UP_SP_LOCKED   1  /* The Locked state */
+
 /****************************************************************************
  * Type Declarations
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/* The Type of a spinlock */
+
+#ifdef CONFIG_ARCH_HAVE_TESTSET
+typedef _size_t _spinlock_t;
+#endif
+
+#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
  * Public Function Prototypes

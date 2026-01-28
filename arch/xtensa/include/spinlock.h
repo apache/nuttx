@@ -27,34 +27,9 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#  include <stdint.h>
-#endif /* __ASSEMBLY__ */
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define SP_UNLOCKED 0  /* The Un-locked state */
-#define SP_LOCKED   1  /* The Locked state */
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#include <arch/types.h>
 
 #ifndef __ASSEMBLY__
-
-/* The Type of a spinlock.
- *
- * This must be a uint32_ because it will be set using S32C1I instruction.
- * That instruction atomically stores to a memory location only if its
- * current value is the expected one.  The state register (SCOMPARE1) is
- * used to provide the additional comparison operand. Some implementations
- * also have a state register (ATOMCTL) for further control of the atomic
- * operation in cache and on the PIF bus.
- */
-
-typedef uint32_t spinlock_t;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -81,11 +56,11 @@ typedef uint32_t spinlock_t;
  ****************************************************************************/
 
 #if defined(CONFIG_SPINLOCK)
-static inline_function spinlock_t up_testset(volatile spinlock_t *lock)
+static inline_function _spinlock_t up_testset(volatile _spinlock_t *lock)
 {
   /* Perform the 32-bit compare and set operation */
 
-  spinlock_t ret;
+  _spinlock_t ret;
 
   __asm__ __volatile__
   (
@@ -93,7 +68,7 @@ static inline_function spinlock_t up_testset(volatile spinlock_t *lock)
     "S32C1I %0, %1, 0\n"     /* Store the compare value into the lock,
                               * if the lock is the same as compare1.
                               * Otherwise, no write-access */
-    : "=r"(ret) : "r"(lock), "r"(SP_UNLOCKED), "0"(SP_LOCKED)
+    : "=r"(ret) : "r"(lock), "r"(UP_SP_UNLOCKED), "0"(UP_SP_LOCKED)
   );
 
   return ret;

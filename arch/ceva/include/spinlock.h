@@ -27,51 +27,13 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#  include <stdint.h>
-#endif /* __ASSEMBLY__ */
+#include <arch/types.h>
 
 #if defined(CONFIG_ARCH_XC5)
 #  include <arch/xc5/spinlock.h>
 #elif defined(CONFIG_ARCH_XM6)
 #  include <arch/xm6/spinlock.h>
 #endif
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Spinlock states */
-
-#define SP_UNLOCKED 0  /* The Unlocked state */
-#define SP_LOCKED   1  /* The Locked state */
-
-/* Memory barriers for use with NuttX spinlock logic
- *
- * Data Memory Barrier (DMB) acts as a memory barrier. It ensures that all
- * explicit memory accesses that appear in program order before the DMB
- * instruction are observed before any explicit memory accesses that appear
- * in program order after the DMB instruction. It does not affect the
- * ordering of any other instructions executing on the processor
- *
- * Data Synchronization Barrier (DSB) acts as a special kind of memory
- * barrier. No instruction in program order after this instruction executes
- * until this instruction completes. This instruction completes when: (1) All
- * explicit memory accesses before this instruction complete, and (2) all
- * Cache, Branch predictor and TLB maintenance operations before this
- * instruction complete.
- *
- */
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/* The Type of a spinlock. */
-
-typedef uint32_t spinlock_t;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -101,5 +63,4 @@ typedef uint32_t spinlock_t;
 
 /* Include CEVA architecture-specific spinlock definitions */
 
-#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_CEVA_INCLUDE_SPINLOCK_H */

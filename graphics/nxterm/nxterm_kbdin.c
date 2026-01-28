@@ -224,7 +224,7 @@ int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
   FAR struct inode *inode = filep->f_inode;
   FAR struct nxterm_state_s *priv;
   pollevent_t eventset;
-  spinlock_t flags;
+  irqstate_t flags;
   int ret;
   int i;
 

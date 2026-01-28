@@ -67,9 +67,9 @@
  *
  ****************************************************************************/
 
-spinlock_t up_testset(volatile spinlock_t *lock)
+_spinlock_t up_testset(volatile _spinlock_t *lock)
 {
-  spinlock_t ret;
+  _spinlock_t ret;
 
   /* Lock hardware spinlock */
 
@@ -78,9 +78,9 @@ spinlock_t up_testset(volatile spinlock_t *lock)
 
   ret = *lock;
 
-  if (ret == SP_UNLOCKED)
+  if (ret == UP_SP_UNLOCKED)
     {
-      *lock = SP_LOCKED;
+      *lock = UP_SP_LOCKED;
       UP_DMB();
     }
 

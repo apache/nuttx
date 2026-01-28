@@ -27,24 +27,12 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#  include <stdint.h>
-#endif /* __ASSEMBLY__ */
-
+#include <arch/types.h>
 #include <arch/barriers.h>
 
 /* Include RISC-V architecture-specific IRQ definitions (including register
  * save structure and up_irq_save()/up_irq_restore() functions)
  */
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Spinlock states */
-
-#define SP_UNLOCKED 0  /* The Un-locked state */
-#define SP_LOCKED   1  /* The Locked state */
 
 /* Memory barriers for use with NuttX spinlock logic
  *
@@ -68,20 +56,6 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-
-/* The Type of a spinlock.
- *
- * RISC-V architecture (in the standard atomic-instruction extension "A")
- * supports exclusive accesses to memory locations in the form of the
- * Load-Reserved (LR), Store-Conditional (SC) and Atomic Memory Operations
- * (AMO) instructions. For LR and SC, RV64 supports doubleword aligned data
- * only but others supports word aligned data. For AMO, word and doubleword
- * alignments are accepted.
- *
- * RISC-V architecture supports fence instruction to ensure memory ordering.
- */
-
-typedef uintptr_t spinlock_t;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -108,9 +82,9 @@ typedef uintptr_t spinlock_t;
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_RV_ISA_A)
-static inline_function spinlock_t up_testset(volatile spinlock_t *lock)
+static inline_function _spinlock_t up_testset(volatile _spinlock_t *lock)
 {
-  spinlock_t ret = SP_LOCKED;
+  _spinlock_t ret = UP_SP_UNLOCKED;
 
   __asm__ __volatile__
   (

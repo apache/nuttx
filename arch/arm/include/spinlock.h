@@ -27,20 +27,12 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#  include <stdint.h>
-#endif /* __ASSEMBLY__ */
-
+#include <arch/types.h>
 #include <arch/barriers.h>
 
 /****************************************************************************
  * Pre-processor Prototypes
  ****************************************************************************/
-
-/* Spinlock states */
-
-#define SP_UNLOCKED 0  /* The Un-locked state */
-#define SP_LOCKED   1  /* The Locked state */
 
 #ifdef CONFIG_ARM_HAVE_WFE_SEV
 #  ifndef UP_WFE
@@ -56,23 +48,6 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-
-/* The Type of a spinlock.
- *
- * ARMv6 architecture introduced the concept of exclusive accesses to memory
- * locations in the form of the Load-Exclusive (LDREX) and Store-Exclusive
- * (STREX) instructions in ARM and Thumb instruction sets.  ARMv6K extended
- * this to included byte, halfword, and doubleword variants of LDREX and
- * STREX.  ARMv7-M supports byte and halfword, but not the doubleword variant
- * (ARMv6-M does not support exclusive access).
- *
- * ARM architectures prior to ARMv6 supported SWP and SWPB instructions that
- * atomically swap a 32-bit word for byte value between a register and a
- * memory location.  From the ARMv6 architecture, ARM deprecates the use
- * of SWP and SWPB.
- */
-
-typedef uint8_t spinlock_t;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -98,10 +73,11 @@ typedef uint8_t spinlock_t;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_HAVE_TESTSET) && !defined(CONFIG_ARCH_HAVE_CUSTOM_TESTSET)
-static inline_function spinlock_t up_testset(volatile spinlock_t *lock)
+#if defined(CONFIG_ARCH_HAVE_TESTSET) && \
+    !defined(CONFIG_ARCH_HAVE_CUSTOM_TESTSET)
+static inline_function _spinlock_t up_testset(volatile _spinlock_t *lock)
 {
-  spinlock_t ret = SP_UNLOCKED;
+  _spinlock_t ret = UP_SP_UNLOCKED;
 
   __asm__ __volatile__
   (
@@ -115,7 +91,7 @@ static inline_function spinlock_t up_testset(volatile spinlock_t *lock)
     "dmb                   \n"
     "2:                    \n"
     : "+r" (ret)
-    : "r" (SP_LOCKED), "r" (lock)
+    : "r" (UP_SP_LOCKED), "r" (lock)
     : "memory"
   );
 

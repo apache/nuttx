@@ -35,6 +35,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Must match definitions in up_testset.c */
+
+#define UP_SP_UNLOCKED 0 /* The Un-locked state */
+#define UP_SP_LOCKED   1 /* The Locked state */
+
 /****************************************************************************
  * Type Declarations
  ****************************************************************************/
@@ -127,6 +132,12 @@ typedef unsigned long long _size_t;
 #else
 typedef signed int         _ssize_t;
 typedef unsigned int       _size_t;
+#endif
+
+/* Must match definitions in up_testset.c */
+
+#ifdef CONFIG_ARCH_HAVE_TESTSET
+typedef _uint8_t           _spinlock_t;
 #endif
 
 /* This is the size of the interrupt state save returned by
