@@ -762,6 +762,8 @@ static int stm32can_ifup(struct net_driver_s *dev)
 
   priv->dev.d_buf = (uint8_t *)priv->txdesc;
 
+  netdev_carrier_on(dev);
+
   return OK;
 }
 
@@ -792,6 +794,8 @@ static int stm32can_ifdown(struct net_driver_s *dev)
   /* Reset CAN */
 
   stm32can_reset(priv);
+
+  netdev_carrier_off(dev);
 
   return OK;
 }
@@ -2484,4 +2488,3 @@ void arm_netinitialize(void)
 #endif
 }
 #endif
-

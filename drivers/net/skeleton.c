@@ -657,6 +657,9 @@ static int skel_ifup(FAR struct net_driver_s *dev)
   priv->sk_bifup = true;
   up_enable_irq(CONFIG_NET_SKELETON_IRQ);
   spin_unlock_irqrestore(&priv->sk_lock, flags);
+
+  netdev_carrier_on(dev);
+
   return OK;
 }
 
@@ -701,6 +704,9 @@ static int skel_ifdown(FAR struct net_driver_s *dev)
 
   priv->sk_bifup = false;
   spin_unlock_irqrestore(&priv->sk_lock, flags);
+
+  netdev_carrier_off(dev);
+
   return OK;
 }
 

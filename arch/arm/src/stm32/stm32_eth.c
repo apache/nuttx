@@ -2286,6 +2286,9 @@ static int stm32_ifup(struct net_driver_s *dev)
   up_enable_irq(STM32_IRQ_ETH);
 
   stm32_checksetup();
+
+  netdev_carrier_on(dev);
+
   return OK;
 }
 
@@ -2352,6 +2355,9 @@ static int stm32_ifdown(struct net_driver_s *dev)
 
   priv->ifup = false;
   leave_critical_section(flags);
+
+  netdev_carrier_off(dev);
+
   return ret;
 }
 
