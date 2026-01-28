@@ -294,11 +294,11 @@
  */
 
 #  ifdef CONFIG_DEBUG_NOOPT
-#    define always_inline_function inline
-#    define inline_function inline
+#    define always_inline_function __attribute__((no_instrument_function, no_profile_instrument_function)) inline
+#    define inline_function __attribute__((no_instrument_function, no_profile_instrument_function)) inline
 #  else
-#    define always_inline_function __attribute__((always_inline,no_instrument_function)) inline
-#    define inline_function __attribute__((always_inline)) inline
+#    define always_inline_function __attribute__((always_inline,no_instrument_function, no_profile_instrument_function)) inline
+#    define inline_function __attribute__((always_inline,no_instrument_function, no_profile_instrument_function)) inline
 #  endif
 
 #  define noinline_function __attribute__((noinline))
