@@ -79,183 +79,21 @@ static void exited_child(FAR struct tcb_s *rtcb,
 }
 #endif
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: waitid
- *
- * Description:
- *   The waitid() function suspends the calling thread until one child of
- *   the process containing the calling thread changes state. It records the
- *   current state of a child in the structure pointed to by 'info'. If a
- *   child process changed state prior to the call to waitid(), waitid()
- *   returns immediately. If more than one thread is suspended in wait() or
- *   waitpid() waiting termination of the same process, exactly one thread
- *   will return the process status at the time of the target process
- *   termination
- *
- *   The idtype and id arguments are used to specify which children waitid()
- *   will wait for.
- *
- *     If idtype is P_PID, waitid() will wait for the child with a process
- *     ID equal to (pid_t)id.
- *
- *     If idtype is P_PGID, waitid() will wait for any child with a process
- *     group ID equal to (pid_t)id.
- *
- *     If idtype is P_ALL, waitid() will wait for any children and id is
- *     ignored.
- *
- *   The options argument is used to specify which state changes waitid()
- *   will will wait for. It is formed by OR-ing together one or more of the
- *   following flags:
- *
- *     WEXITED - Wait for processes that have exited.
- *     WSTOPPED - Status will be returned for any child that has stopped
- *       upon receipt of a signal.
- *     WCONTINUED - Status will be returned for any child that was stopped
- *       and has been continued.
- *     WNOHANG - Return immediately if there are no children to wait for.
- *     WNOWAIT - Keep the process whose status is returned in 'info' in a
- *       waitable state. This will not affect the state of the process; the
- *       process may be waited for again after this call completes.
- *
- *   The 'info' argument must point to a siginfo_t structure. If waitid()
- *   returns because a child process was found that satisfied the conditions
- *   indicated by the arguments idtype and options, then the structure
- *   pointed to by 'info' will be filled in by the system with the status of
- *   the process. The si_signo member will always be equal to SIGCHLD.
- *
- * Input Parameters:
- *   See description.
- *
- * Returned Value:
- *   If waitid() returns due to the change of state of one of its children,
- *   0 is returned. Otherwise, -1 is returned and errno is set to indicate
- *   the error.
- *
- *   The waitid() function will fail if:
- *
- *     ECHILD - The calling process has no existing unwaited-for child
- *       processes.
- *     EINTR - The waitid() function was interrupted by a signal.
- *     EINVAL - An invalid value was specified for options, or idtype and id
- *       specify an invalid set of processes.
- *
- ****************************************************************************/
-
-int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
+static inline_function
+int waittcb(FAR struct tcb_s *rtcb, idtype_t idtype, int options,
+            id_t id, FAR siginfo_t *info, bool retains)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct tcb_s *ctcb;
 #ifdef CONFIG_SCHED_CHILD_STATUS
   FAR struct child_status_s *child;
-  bool retains;
 #endif
-  irqstate_t flags;
+  int errcode = OK;
   sigset_t set;
-  int errcode = ENOSYS;
   int ret;
 
-  /* waitid() is a cancellation point */
+  /* Create a signal set that contains only SIGCHLD */
 
-  enter_cancellation_point();
-
-  flags = enter_critical_section();
-
-  /* MISSING LOGIC:   If WNOHANG is provided in the options, then this
-   * function should returned immediately.  However, there is no mechanism
-   * available now know if the thread has child:  The children remember
-   * their parents (if CONFIG_SCHED_HAVE_PARENT) but the parents do not
-   * remember their children.
-   */
-
-#ifdef CONFIG_DEBUG_FEATURES
-  /* Only ID types P_PID and P_ALL are supported */
-
-  if ((idtype == P_PID || idtype == P_ALL) &&
-      (options & WEXITED) != 0 &&
-      (options & ~(WEXITED | WNOHANG)) == 0)
-#endif
-    {
-      /* Create a signal set that contains only SIGCHLD */
-
-      sigemptyset(&set);
-      nxsig_addset(&set, SIGCHLD);
-      errcode = OK;
-
-      /* Verify that this task actually has children and that the requested
-       * TCB is actually a child of this task.
-       */
-
-#ifdef CONFIG_SCHED_CHILD_STATUS
-      /* Does this task retain child status? */
-
-      retains = ((rtcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0);
-
-      if (rtcb->group->tg_children == NULL && retains)
-        {
-          /* There are no children */
-
-          errcode = ECHILD;
-        }
-      else if (idtype == P_PID)
-        {
-          /* Get the TCB corresponding to this PID and make sure that the
-           * thread it is our child.
-           */
-
-          ctcb = nxsched_get_tcb((pid_t)id);
-          if (ctcb && ctcb->group)
-            {
-              /* Make sure that the thread it is our child. */
-
-              if (ctcb->group->tg_ppid != rtcb->pid)
-                {
-                  errcode = ECHILD;
-                }
-            }
-
-          /* Does this task retain child status? */
-
-          if (retains && errcode == OK)
-            {
-              /* Check if this specific pid has allocated child status? */
-
-              if (group_find_child(rtcb->group, (pid_t)id) == NULL)
-                {
-                  /* This specific pid is not a child */
-
-                  errcode = ECHILD;
-                }
-            }
-        }
-#else
-      /* Child status is not retained. */
-
-      if (rtcb->group->tg_nchildren == 0)
-        {
-          /* There are no children */
-
-          errcode = ECHILD;
-        }
-      else if (idtype == P_PID)
-        {
-          /* Get the TCB corresponding to this PID and make sure that the
-           * thread is our child.
-           */
-
-          ctcb = nxsched_get_tcb((pid_t)id);
-
-          if (!ctcb || !ctcb->group || ctcb->group->tg_ppid != rtcb->pid)
-            {
-              errcode = ECHILD;
-            }
-        }
-#endif
-    }
+  sigemptyset(&set);
+  nxsig_addset(&set, SIGCHLD);
 
   /* Loop until the child that we are waiting for dies */
 
@@ -435,8 +273,184 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
         }
     }
 
-  leave_critical_section(flags);
+  return errcode;
+}
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: waitid
+ *
+ * Description:
+ *   The waitid() function suspends the calling thread until one child of
+ *   the process containing the calling thread changes state. It records the
+ *   current state of a child in the structure pointed to by 'info'. If a
+ *   child process changed state prior to the call to waitid(), waitid()
+ *   returns immediately. If more than one thread is suspended in wait() or
+ *   waitpid() waiting termination of the same process, exactly one thread
+ *   will return the process status at the time of the target process
+ *   termination
+ *
+ *   The idtype and id arguments are used to specify which children waitid()
+ *   will wait for.
+ *
+ *     If idtype is P_PID, waitid() will wait for the child with a process
+ *     ID equal to (pid_t)id.
+ *
+ *     If idtype is P_PGID, waitid() will wait for any child with a process
+ *     group ID equal to (pid_t)id.
+ *
+ *     If idtype is P_ALL, waitid() will wait for any children and id is
+ *     ignored.
+ *
+ *   The options argument is used to specify which state changes waitid()
+ *   will will wait for. It is formed by OR-ing together one or more of the
+ *   following flags:
+ *
+ *     WEXITED - Wait for processes that have exited.
+ *     WSTOPPED - Status will be returned for any child that has stopped
+ *       upon receipt of a signal.
+ *     WCONTINUED - Status will be returned for any child that was stopped
+ *       and has been continued.
+ *     WNOHANG - Return immediately if there are no children to wait for.
+ *     WNOWAIT - Keep the process whose status is returned in 'info' in a
+ *       waitable state. This will not affect the state of the process; the
+ *       process may be waited for again after this call completes.
+ *
+ *   The 'info' argument must point to a siginfo_t structure. If waitid()
+ *   returns because a child process was found that satisfied the conditions
+ *   indicated by the arguments idtype and options, then the structure
+ *   pointed to by 'info' will be filled in by the system with the status of
+ *   the process. The si_signo member will always be equal to SIGCHLD.
+ *
+ * Input Parameters:
+ *   See description.
+ *
+ * Returned Value:
+ *   If waitid() returns due to the change of state of one of its children,
+ *   0 is returned. Otherwise, -1 is returned and errno is set to indicate
+ *   the error.
+ *
+ *   The waitid() function will fail if:
+ *
+ *     ECHILD - The calling process has no existing unwaited-for child
+ *       processes.
+ *     EINTR - The waitid() function was interrupted by a signal.
+ *     EINVAL - An invalid value was specified for options, or idtype and id
+ *       specify an invalid set of processes.
+ *
+ ****************************************************************************/
+
+int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
+{
+  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *ctcb;
+  bool retains = false;
+  int errcode = ENOSYS;
+  irqstate_t flags;
+  int ret;
+
+  /* waitid() is a cancellation point */
+
+  enter_cancellation_point();
+  flags = enter_critical_section();
+
+  /* MISSING LOGIC:   If WNOHANG is provided in the options, then this
+   * function should returned immediately.  However, there is no mechanism
+   * available now know if the thread has child:  The children remember
+   * their parents (if CONFIG_SCHED_HAVE_PARENT) but the parents do not
+   * remember their children.
+   */
+
+#ifdef CONFIG_DEBUG_FEATURES
+  /* Only ID types P_PID and P_ALL are supported */
+
+  if ((idtype == P_PID || idtype == P_ALL) &&
+      (options & WEXITED) != 0 &&
+      (options & ~(WEXITED | WNOHANG)) == 0)
+#endif
+    {
+      errcode = OK;
+
+      /* Verify that this task actually has children and that the requested
+       * TCB is actually a child of this task.
+       */
+
+#ifdef CONFIG_SCHED_CHILD_STATUS
+      /* Does this task retain child status? */
+
+      retains = ((rtcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0);
+
+      if (rtcb->group->tg_children == NULL && retains)
+        {
+          /* There are no children */
+
+          errcode = ECHILD;
+        }
+      else if (idtype == P_PID)
+        {
+          /* Get the TCB corresponding to this PID and make sure that the
+           * thread it is our child.
+           */
+
+          ctcb = nxsched_get_tcb((pid_t)id);
+          if (ctcb && ctcb->group)
+            {
+              /* Make sure that the thread it is our child. */
+
+              if (ctcb->group->tg_ppid != rtcb->pid)
+                {
+                  errcode = ECHILD;
+                }
+            }
+
+          /* Does this task retain child status? */
+
+          if (retains && errcode == OK)
+            {
+              /* Check if this specific pid has allocated child status? */
+
+              if (group_find_child(rtcb->group, (pid_t)id) == NULL)
+                {
+                  /* This specific pid is not a child */
+
+                  errcode = ECHILD;
+                }
+            }
+        }
+#else
+      /* Child status is not retained. */
+
+      if (rtcb->group->tg_nchildren == 0)
+        {
+          /* There are no children */
+
+          errcode = ECHILD;
+        }
+      else if (idtype == P_PID)
+        {
+          /* Get the TCB corresponding to this PID and make sure that the
+           * thread is our child.
+           */
+
+          ctcb = nxsched_get_tcb((pid_t)id);
+
+          if (!ctcb || !ctcb->group || ctcb->group->tg_ppid != rtcb->pid)
+            {
+              errcode = ECHILD;
+            }
+        }
+#endif
+    }
+
+  if (errcode == OK)
+    {
+      errcode = waittcb(rtcb, idtype, options, id, info, retains);
+    }
+
+  leave_critical_section(flags);
   leave_cancellation_point();
   if (errcode != OK)
     {
