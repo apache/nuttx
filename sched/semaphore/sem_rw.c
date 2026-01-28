@@ -205,23 +205,26 @@ out:
 int down_write_trylock(FAR rw_semaphore_t *rwsem)
 {
   pid_t tid = _SCHED_GETTID();
+  int ret = 1;
 
   nxmutex_lock(&rwsem->protected);
 
   if (rwsem->reader > 0 || (rwsem->writer > 0 && tid != rwsem->holder))
     {
       nxmutex_unlock(&rwsem->protected);
-      return 0;
+      ret = 0;
+    }
+  else
+    {
+      /* The check passes, then we just need the writer reference + 1 */
+
+      rwsem->writer++;
+      rwsem->holder = tid;
+
+      nxmutex_unlock(&rwsem->protected);
     }
 
-  /* The check passes, then we just need the writer reference + 1 */
-
-  rwsem->writer++;
-  rwsem->holder = tid;
-
-  nxmutex_unlock(&rwsem->protected);
-
-  return 1;
+  return ret;
 }
 
 /****************************************************************************
