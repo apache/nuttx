@@ -2207,6 +2207,9 @@ static int at32_ifup(struct net_driver_s *dev)
   up_enable_irq(AT32_IRQ_ETH);
 
   at32_checksetup();
+
+  netdev_carrier_on(dev);
+
   return OK;
 }
 
@@ -2261,6 +2264,9 @@ static int at32_ifdown(struct net_driver_s *dev)
 
   priv->ifup = false;
   leave_critical_section(flags);
+
+  netdev_carrier_off(dev);
+
   return ret;
 }
 

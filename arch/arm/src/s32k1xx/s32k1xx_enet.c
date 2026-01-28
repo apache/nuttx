@@ -1269,7 +1269,13 @@ static int s32k1xx_ifup(struct net_driver_s *dev)
 {
   /* The externally available ifup action includes resetting the phy */
 
-  return s32k1xx_ifup_action(dev, true);
+  int ret = s32k1xx_ifup_action(dev, true);
+  if (ret == OK)
+    {
+      netdev_carrier_on(dev);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1321,6 +1327,9 @@ static int s32k1xx_ifdown(struct net_driver_s *dev)
 
   priv->bifup = false;
   leave_critical_section(flags);
+
+  netdev_carrier_off(dev);
+
   return OK;
 }
 

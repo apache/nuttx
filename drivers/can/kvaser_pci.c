@@ -1023,6 +1023,8 @@ static int kvaser_sock_ifup(FAR struct netdev_lowerhalf_s *dev)
   kvaser_txint(priv, true);
   kvaser_rxint(priv, true);
 
+  netdev_lower_carrier_on(dev);
+
   return OK;
 }
 
@@ -1050,6 +1052,8 @@ static int kvaser_sock_ifdown(FAR struct netdev_lowerhalf_s *dev)
   /* Sleep mode */
 
   kvaser_sleep(priv);
+
+  netdev_lower_carrier_off(dev);
 
   return OK;
 }

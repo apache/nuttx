@@ -1502,6 +1502,8 @@ static int s32k3xx_ifup(struct net_driver_s *dev)
       s32k3xx_gpiowrite(priv->config->led_pin, priv->config->led_high);
     }
 
+  netdev_carrier_on(dev);
+
   return OK;
 }
 
@@ -1536,6 +1538,8 @@ static int s32k3xx_ifdown(struct net_driver_s *dev)
       s32k3xx_pinconfig(priv->config->led_pin);
       s32k3xx_gpiowrite(priv->config->led_pin, !priv->config->led_high);
     }
+
+  netdev_carrier_off(dev);
 
   return OK;
 }

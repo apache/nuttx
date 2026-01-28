@@ -349,4 +349,3 @@ int amebaz_netdev_register(struct amebaz_dev_s *priv)
   dev->d_private = priv;
   return netdev_register(dev, NET_LL_IEEE80211);
 }
-
