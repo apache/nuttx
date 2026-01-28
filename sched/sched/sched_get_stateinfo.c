@@ -37,35 +37,6 @@
  * Pre-processor types
  ****************************************************************************/
 
-/* This is the state info of the task_state field of the TCB */
-
-static FAR const char * const g_statenames[] =
-{
-  "Invalid",
-  "Waiting,Unlock",
-  "Ready",
-#ifdef CONFIG_SMP
-  "Assigned",
-#endif
-  "Running",
-  "Inactive",
-  "Waiting,Semaphore",
-  "Waiting,Signal"
-#ifdef CONFIG_SCHED_EVENTS
-  , "Waiting,Event"
-#endif
-#if !defined(CONFIG_DISABLE_MQUEUE) || !defined(CONFIG_DISABLE_MQUEUE_SYSV)
-  , "Waiting,MQ empty"
-  , "Waiting,MQ full"
-#endif
-#ifdef CONFIG_LEGACY_PAGING
-  , "Waiting,Paging fill"
-#endif
-#ifdef CONFIG_SIG_SIGSTOP_ACTION
-  , "Stopped"
-#endif
-};
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -87,6 +58,32 @@ void nxsched_get_stateinfo(FAR struct tcb_s *tcb, FAR char *state,
                            size_t length)
 {
   irqstate_t flags;
+  static FAR const char * const g_statenames[] =
+    {
+      "Invalid",
+      "Waiting,Unlock",
+      "Ready",
+#ifdef CONFIG_SMP
+      "Assigned",
+#endif
+      "Running",
+      "Inactive",
+      "Waiting,Semaphore",
+      "Waiting,Signal"
+#ifdef CONFIG_SCHED_EVENTS
+      , "Waiting,Event"
+#endif
+#if !defined(CONFIG_DISABLE_MQUEUE) || !defined(CONFIG_DISABLE_MQUEUE_SYSV)
+      , "Waiting,MQ empty"
+      , "Waiting,MQ full"
+#endif
+#ifdef CONFIG_LEGACY_PAGING
+      , "Waiting,Paging fill"
+#endif
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+      , "Stopped"
+#endif
+    };
 
 #ifdef CONFIG_ARCH_ADDRENV
   FAR struct addrenv_s *oldenv;
