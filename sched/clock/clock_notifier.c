@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/sys/timerfd.h
+ * sched/clock/clock_notifier.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,63 +20,68 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_SYS_TIMERFD_H
-#define __INCLUDE_SYS_TIMERFD_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <stdint.h>
-#include <fcntl.h>
-#include <time.h>
+#include <nuttx/clock_notifier.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Data
  ****************************************************************************/
 
-#define TFD_NONBLOCK            O_NONBLOCK
-#define TFD_CLOEXEC             O_CLOEXEC
-#define TFD_TIMER_ABSTIME       TIMER_ABSTIME
-#define TFD_TIMER_CANCEL_ON_SET 2
+static ATOMIC_NOTIFIER_HEAD(g_clock_notifier_list);
 
 /****************************************************************************
- * Public Type Declarations
+ * Public Functions
  ****************************************************************************/
-
-/* Type for timer counter */
-
-/* Type for event counter */
-
-#ifdef __INT64_DEFINED
-typedef uint64_t timerfd_t;
-#else
-typedef uint32_t timerfd_t;
-#endif
 
 /****************************************************************************
- * Public Function Prototypes
+ * Name:  register_clock_notifier
+ *
+ * Description:
+ *   Add notifier to the clock_notifier chain
+ *
+ * Input Parameters:
+ *    nb - New entry in notifier chain
+ *
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
+void register_clock_notifier(FAR struct notifier_block *nb)
 {
-#else
-#define EXTERN extern
-#endif
-
-int timerfd_create(int clockid, int flags);
-
-int timerfd_settime(int fd, int flags,
-                    FAR const struct itimerspec *new_value,
-                    FAR struct itimerspec *old_value);
-
-int timerfd_gettime(int fd, FAR struct itimerspec *curr_value);
-
-#undef EXTERN
-#ifdef __cplusplus
+  atomic_notifier_chain_register(&g_clock_notifier_list, nb);
 }
-#endif
 
-#endif /* __INCLUDE_SYS_TIMERFD_H */
+/****************************************************************************
+ * Name:  unregister_clock_notifier
+ *
+ * Description:
+ *   Remove notifier from the clock_notifier chain
+ *
+ * Input Parameters:
+ *    nb - Entry to remove from notifier chain
+ *
+ ****************************************************************************/
+
+void unregister_clock_notifier(FAR struct notifier_block *nb)
+{
+  atomic_notifier_chain_unregister(&g_clock_notifier_list, nb);
+}
+
+/****************************************************************************
+ * Name:  clock_notifier_call_chain
+ *
+ * Description:
+ *   Call functions in the clock_notifier chain.
+ *
+ * Input Parameters:
+ *    action - Value passed unmodified to notifier function
+ *    tp - Pointer of current timespec passed unmodified to notifier function
+ *
+ ****************************************************************************/
+
+void clock_notifier_call_chain(unsigned long action,
+                               FAR const struct timespec *tp)
+{
+  atomic_notifier_call_chain(&g_clock_notifier_list, action, (FAR void *)tp);
+}
