@@ -170,14 +170,14 @@ static const struct file_operations g_inotify_fops =
 
 static struct inode g_inotify_inode =
 {
-  NULL,
-  NULL,
-  NULL,
-  1,
-  FSNODEFLAG_TYPE_DRIVER,
-  {
-    &g_inotify_fops
-  }
+  .i_crefs = 1,
+  .i_flags = FSNODEFLAG_TYPE_DRIVER,
+  .u.i_ops = &g_inotify_fops,
+#ifdef CONFIG_FS_NOTIFY_INJECT
+  .i_mode  = 0666
+#else
+  .i_mode  = 0444
+#endif
 };
 
 static struct inotify_global_s g_inotify =

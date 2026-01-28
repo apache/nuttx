@@ -166,8 +166,8 @@ config PSEUDOFS_ATTRIBUTES
 	default n
 	depends on !DISABLE_PSEUDOFS_OPERATIONS
 	---help---
-		Enable support for attributes(e.g. mode, uid, gid and time)
-		in the pseudo file system.
+		Enable owner, group and timestamp attributes in the pseudo file
+		system.  File mode bits are always retained.
 
 config FS_PIN
 	bool

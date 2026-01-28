@@ -115,14 +115,10 @@ static const struct file_operations g_eventfd_fops =
 
 static struct inode g_eventfd_inode =
 {
-  NULL,                   /* i_parent */
-  NULL,                   /* i_peer */
-  NULL,                   /* i_child */
-  1,                      /* i_crefs */
-  FSNODEFLAG_TYPE_DRIVER, /* i_flags */
-  {
-    &g_eventfd_fops       /* u */
-  }
+  .i_crefs = 1,
+  .i_flags = FSNODEFLAG_TYPE_DRIVER,
+  .u.i_ops = &g_eventfd_fops,
+  .i_mode  = 0666
 };
 
 /****************************************************************************

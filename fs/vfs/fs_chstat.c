@@ -510,12 +510,12 @@ int inode_chstat(FAR struct inode *inode,
     }
 #endif
 
-#ifdef CONFIG_PSEUDOFS_ATTRIBUTES
   if (flags & CH_STAT_MODE)
     {
       inode->i_mode  = buf->st_mode;
     }
 
+#ifdef CONFIG_PSEUDOFS_ATTRIBUTES
   if (flags & CH_STAT_UID)
     {
       inode->i_owner = buf->st_uid;

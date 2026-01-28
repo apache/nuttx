@@ -95,14 +95,10 @@ static const struct file_operations g_signalfd_fileops =
 
 static struct inode g_signalfd_inode =
 {
-  NULL,                   /* i_parent */
-  NULL,                   /* i_peer */
-  NULL,                   /* i_child */
-  1,                      /* i_crefs */
-  FSNODEFLAG_TYPE_DRIVER, /* i_flags */
-  {
-    &g_signalfd_fileops   /* u */
-  }
+  .i_crefs = 1,
+  .i_flags = FSNODEFLAG_TYPE_DRIVER,
+  .u.i_ops = &g_signalfd_fileops,
+  .i_mode  = 0444
 };
 
 /****************************************************************************
