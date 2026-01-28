@@ -382,17 +382,117 @@ config IMX9_GPIO1_IRQ
 	bool "GPIO1 Interrupt"
 	default n
 
+choice
+	prompt "GPIO1 IRQ output select"
+	depends on IMX9_GPIO1_IRQ
+	default IMX9_GPIO1_IRQ_OUT_LINE1
+	---help---
+		Each IMX9 GPIO controller provides two IRQ output lines. These
+		lines may be shared with other cores or domains in the SoC
+		(e.g. A55 vs M7), so selecting the correct line avoids conflicts.
+
+		By default this subsystem uses IRQ line 1, leaving line 0 available
+		for the A55 or other system components that typically rely on it.
+
+config IMX9_GPIO1_IRQ_OUT_LINE0
+	bool "Use GPIO1 IRQ line 0"
+
+config IMX9_GPIO1_IRQ_OUT_LINE1
+	bool "Use GPIO1 IRQ line 1"
+endchoice
+
 config IMX9_GPIO2_IRQ
 	bool "GPIO2 Interrupt"
 	default n
+
+choice
+	prompt "GPIO2 IRQ output select"
+	depends on IMX9_GPIO2_IRQ
+	default IMX9_GPIO2_IRQ_OUT_LINE1
+	---help---
+		Each IMX9 GPIO controller provides two IRQ output lines. These
+		lines may be shared with other cores or domains in the SoC
+		(e.g. A55 vs M7), so selecting the correct line avoids conflicts.
+
+		By default this subsystem uses IRQ line 1, leaving line 0 available
+		for the A55 or other system components that typically rely on it.
+
+config IMX9_GPIO2_IRQ_OUT_LINE0
+	bool "Use GPIO2 IRQ line 0"
+
+config IMX9_GPIO2_IRQ_OUT_LINE1
+	bool "Use GPIO2 IRQ line 1"
+endchoice
 
 config IMX9_GPIO3_IRQ
 	bool "GPIO3 Interrupt"
 	default n
 
+choice
+	prompt "GPIO3 IRQ output select"
+	depends on IMX9_GPIO3_IRQ
+	default IMX9_GPIO3_IRQ_OUT_LINE1
+	---help---
+		Each IMX9 GPIO controller provides two IRQ output lines. These
+		lines may be shared with other cores or domains in the SoC
+		(e.g. A55 vs M7), so selecting the correct line avoids conflicts.
+
+		By default this subsystem uses IRQ line 1, leaving line 0 available
+		for the A55 or other system components that typically rely on it.
+
+config IMX9_GPIO3_IRQ_OUT_LINE0
+	bool "Use GPIO3 IRQ line 0"
+
+config IMX9_GPIO3_IRQ_OUT_LINE1
+	bool "Use GPIO3 IRQ line 1"
+endchoice
+
 config IMX9_GPIO4_IRQ
 	bool "GPIO4 Interrupt"
 	default n
+
+choice
+	prompt "GPIO4 IRQ output select"
+	depends on IMX9_GPIO4_IRQ
+	default IMX9_GPIO4_IRQ_OUT_LINE1
+	---help---
+		Each IMX9 GPIO controller provides two IRQ output lines. These
+		lines may be shared with other cores or domains in the SoC
+		(e.g. A55 vs M7), so selecting the correct line avoids conflicts.
+
+		By default this subsystem uses IRQ line 1, leaving line 0 available
+		for the A55 or other system components that typically rely on it.
+
+config IMX9_GPIO4_IRQ_OUT_LINE0
+	bool "Use GPIO4 IRQ line 0"
+
+config IMX9_GPIO4_IRQ_OUT_LINE1
+	bool "Use GPIO4 IRQ line 1"
+endchoice
+
+config IMX9_GPIO5_IRQ
+	bool "GPIO5 Interrupt"
+	default n
+
+choice
+	prompt "GPIO5 IRQ output select"
+	depends on IMX9_GPIO5_IRQ
+	default IMX9_GPIO5_IRQ_OUT_LINE1
+	---help---
+		Each IMX9 GPIO controller provides two IRQ output lines. These
+		lines may be shared with other cores or domains in the SoC
+		(e.g. A55 vs M7), so selecting the correct line avoids conflicts.
+
+		By default this subsystem uses IRQ line 1, leaving line 0 available
+		for the A55 or other system components that typically rely on it.
+
+config IMX9_GPIO5_IRQ_OUT_LINE0
+	bool "Use GPIO5 IRQ line 0"
+
+config IMX9_GPIO5_IRQ_OUT_LINE1
+	bool "Use GPIO5 IRQ line 1"
+endchoice
+
 
 endmenu # GPIO Interrupt Configuration
 

@@ -47,6 +47,6 @@
 #define NVIC_SYSH_PRIORITY_MAX        0x00 /* Zero is maximum priority */
 #define NVIC_SYSH_PRIORITY_STEP       0x40 /* Two bits of interrupt pri used */
 
-#define IMX9_GPIO_NPORTS          4
+#define IMX9_GPIO_NPORTS          5
 
 #endif /* __ARCH_ARM_INCLUDE_IMX9_CHIP_H */
