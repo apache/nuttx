@@ -142,30 +142,35 @@ int profil(FAR unsigned short *buf, size_t bufsiz,
   FAR struct profinfo_s *prof = &g_prof;
   irqstate_t flags;
   uintptr_t highpc;
+  int ret = OK;
 
-  if (scale > 65536)
+  if (scale <= 65536)
+    {
+      if (buf != NULL && scale != 0)
+        {
+          memset(buf, 0, bufsiz);
+          highpc = (uintmax_t)bufsiz * 65536 / scale;
+
+          flags = spin_lock_irqsave(&prof->lock);
+          prof->counter = buf;
+          prof->lowpc   = offset;
+          prof->highpc  = offset + highpc;
+          prof->scale   = scale;
+          spin_unlock_irqrestore(&prof->lock, flags);
+
+          wd_start(&prof->timer, PROFTICK, profil_timer_handler,
+                   (wdparm_t)(uintptr_t)prof);
+        }
+      else
+        {
+          wd_cancel(&prof->timer);
+        }
+    }
+  else
     {
       set_errno(EINVAL);
-      return ERROR;
+      ret = ERROR;
     }
 
-  if (buf == NULL || scale == 0)
-    {
-      wd_cancel(&prof->timer);
-      return OK;
-    }
-
-  memset(buf, 0, bufsiz);
-  highpc = (uintmax_t)bufsiz * 65536 / scale;
-
-  flags = spin_lock_irqsave(&prof->lock);
-  prof->counter = buf;
-  prof->lowpc   = offset;
-  prof->highpc  = offset + highpc;
-  prof->scale   = scale;
-  spin_unlock_irqrestore(&prof->lock, flags);
-
-  wd_start(&prof->timer, PROFTICK, profil_timer_handler,
-           (wdparm_t)(uintptr_t)prof);
-  return OK;
+  return ret;
 }
