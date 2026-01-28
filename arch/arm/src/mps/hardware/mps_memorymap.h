@@ -111,7 +111,7 @@
 
 #endif /* CONFIG_MM_REGIONS > 1 */
 
-#elif defined(CONFIG_ARCH_CHIP_MPS2_AN524)
+#elif defined(CONFIG_ARCH_CHIP_MPS3_AN524)
 
 /* Internal SRAM1 (16MB) */
 #define MPS_SRAM1_START    0x20000000
