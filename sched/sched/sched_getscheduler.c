@@ -71,6 +71,7 @@
 int nxsched_get_scheduler(pid_t pid)
 {
   FAR struct tcb_s *tcb;
+  int ret = -ESRCH;
   int policy;
 
   /* Verify that the PID corresponds to a real task */
@@ -84,17 +85,18 @@ int nxsched_get_scheduler(pid_t pid)
       tcb = nxsched_get_tcb(pid);
     }
 
-  if (tcb == NULL)
+  if (tcb != NULL)
     {
-      return -ESRCH;
+      /* Return the scheduling policy from the TCB.  NOTE that the user-
+       * interpretable values are 1 based; the TCB values are zero-based.
+       */
+
+      policy = (tcb->flags & TCB_FLAG_POLICY_MASK) >> TCB_FLAG_POLICY_SHIFT;
+
+      ret = policy + 1;
     }
 
-  /* Return the scheduling policy from the TCB.  NOTE that the user-
-   * interpretable values are 1 based; the TCB values are zero-based.
-   */
-
-  policy = (tcb->flags & TCB_FLAG_POLICY_MASK) >> TCB_FLAG_POLICY_SHIFT;
-  return policy + 1;
+  return ret;
 }
 
 /****************************************************************************
