@@ -50,6 +50,70 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: ipforward_enable
+ *
+ * Description:
+ *   Enable forward function on a network device.
+ *
+ * Input Parameters:
+ *   dev   - The device on which will be enabled forward function.
+ *
+ * Returned Value:
+ *   Zero is returned if forward function is successfully enabled;
+ *   A negated errno value is returned if failed.
+ *
+ ****************************************************************************/
+
+int ipforward_enable(FAR struct net_driver_s *dev)
+{
+  netdev_lock();
+
+  if (IFF_IS_FORWARD(dev->d_flags))
+    {
+      nwarn("WARNING: FORWARD was already enabled for %s!\n", dev->d_ifname);
+      netdev_unlock();
+      return -EEXIST;
+    }
+
+  IFF_SET_FORWARD(dev->d_flags);
+
+  netdev_unlock();
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ipforward_disable
+ *
+ * Description:
+ *   Disable forward function on a network device.
+ *
+ * Input Parameters:
+ *   dev   - The device on which the ipforward function will be disabled.
+ *
+ * Returned Value:
+ *   Zero is returned if ipforward function is successfully disabled;
+ *   A negated errno value is returned if failed.
+ *
+ ****************************************************************************/
+
+int ipforward_disable(FAR struct net_driver_s *dev)
+{
+  netdev_lock();
+
+  if (!IFF_IS_FORWARD(dev->d_flags))
+    {
+      nwarn("WARNING: ipforward was not enabled for %s!\n", dev->d_ifname);
+      netdev_unlock();
+      return -ENODEV;
+    }
+
+  IFF_CLR_FORWARD(dev->d_flags);
+
+  netdev_unlock();
+  return OK;
+}
+
+/****************************************************************************
  * Name: forward_ipselect
  *
  * Description:
