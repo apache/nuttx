@@ -750,9 +750,20 @@ static void rpmsg_rtc_server_sync(FAR struct rpmsg_rtc_server_s *server,
   if (server->lower->ops->rdtime(server->lower, &rtctime) >= 0)
     {
       struct rpmsg_rtc_set_s msg;
+      struct timespec tp;
 
       msg.sec  = timegm((FAR struct tm *)&rtctime);
       msg.nsec = rtctime.tm_nsec;
+
+      /* Synchronize the local g_basetime with the physical
+       * RTC time to ensure that the local time is consistent with
+       * the RTC.
+       */
+
+      tp.tv_sec  = msg.sec;
+      tp.tv_nsec = msg.nsec;
+      clock_synchronize(&tp);
+
       msg.base_sec = g_basetime.tv_sec;
       msg.base_nsec = g_basetime.tv_nsec;
 
