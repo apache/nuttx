@@ -124,8 +124,13 @@ static int imx9_gpio_configinput(gpio_pinset_t pinset)
 {
   uint32_t port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   uint32_t pin  = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+  uint32_t reg;
 
   DEBUGASSERT((unsigned int)port < IMX9_GPIO_NPORTS);
+
+  reg = getreg32(IMX9_GPIO_PCNS(port));
+  reg &= ~(1 << pin);
+  putreg32(reg, IMX9_GPIO_PCNS(port));
 
   /* Configure pin as in input */
 
