@@ -50,6 +50,10 @@
 #  include "esp_rom_uart.h"
 #  include "esp_rom_sys.h"
 #  include "esp_app_format.h"
+#  ifndef CONFIG_ESPRESSIF_SIMPLE_BOOT_IMAGE_OFFSET
+#    define CONFIG_ESPRESSIF_SIMPLE_BOOT_IMAGE_OFFSET \
+            CONFIG_BOOTLOADER_OFFSET_IN_FLASH
+#  endif
 #endif
 
 /****************************************************************************
@@ -167,7 +171,7 @@ int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
   unsigned int segments = 0;
   unsigned int ram_segments = 0;
   unsigned int rom_segments = 0;
-  size_t offset = CONFIG_BOOTLOADER_OFFSET_IN_FLASH;
+  size_t offset = CONFIG_ESPRESSIF_SIMPLE_BOOT_IMAGE_OFFSET;
 
   /* Read image header */
 
