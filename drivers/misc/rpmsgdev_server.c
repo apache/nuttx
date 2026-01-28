@@ -263,37 +263,48 @@ static int rpmsgdev_read_nonblock_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct rpmsgdev_read_s *msg = data;
   FAR struct rpmsgdev_read_s *rsp;
   FAR struct file *filep = (FAR struct file *)(uintptr_t)msg->filep;
+  size_t read = 0;
   uint32_t space;
   ssize_t ret;
 
-  rsp = rpmsg_get_tx_payload_buffer(ept, &space, true);
-  if (rsp == NULL)
+  /* Loop to read data in fragments until complete or error */
+
+  while (read < msg->count)
     {
-      return -ENOMEM;
+      rsp = rpmsg_get_tx_payload_buffer(ept, &space, true);
+      if (rsp == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      *rsp = *msg;
+
+      space -= sizeof(*msg) - 1;
+      if (space > msg->count - read)
+        {
+          space = msg->count - read;
+        }
+
+      ret = file_read(filep, rsp->buf, space);
+      if (ret == -EAGAIN && read == 0 &&
+          msg->header.command == RPMSGDEV_READ)
+        {
+          rpmsg_release_tx_buffer(ept, rsp);
+          return ret;
+        }
+
+      rsp->header.result = ret;
+      rpmsg_send_nocopy(ept, rsp, (ret < 0 ? 0 : ret) + sizeof(*rsp) - 1);
+
+      if (ret <= 0)
+        {
+          break;
+        }
+
+      read += ret;
     }
 
-  *rsp = *msg;
-
-  space -= sizeof(*msg) - 1;
-  if (space > msg->count)
-    {
-      space = msg->count;
-    }
-
-  ret = file_read(filep, rsp->buf, space);
-  if (ret == -EAGAIN && msg->header.command == RPMSGDEV_READ)
-    {
-      rpmsg_release_tx_buffer(ept, rsp);
-      return ret;
-    }
-
-  rsp->header.result = ret;
-  if (ret < 0)
-    {
-      ret = 0;
-    }
-
-  return rpmsg_send_nocopy(ept, rsp, sizeof(*rsp) - 1 + ret);
+  return 0;
 }
 
 /****************************************************************************
