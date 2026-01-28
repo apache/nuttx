@@ -95,7 +95,7 @@ int wd_cancel(FAR struct wdog_s *wdog)
 
               if (!list_is_empty(&g_wdactivelist))
                 {
-                  wd_timer_start(wd_next_expire());
+                  wd_timer_start(wd_next_expire(), false);
                 }
               else
                 {
