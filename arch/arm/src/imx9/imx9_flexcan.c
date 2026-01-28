@@ -733,7 +733,7 @@ static int imx9_transmit(struct imx9_driver_s *priv)
 
       cs.rtr = frame->can_id & FLAGRTR ? 1 : 0;
 
-      cs.dlc = g_len_to_can_dlc[frame->len];
+      cs.dlc = can_bytes2dlc(frame->len);
 
       frame_data_word = (uint32_t *)&frame->data[0];
 
@@ -912,7 +912,7 @@ static void imx9_receive(struct imx9_driver_s *priv,
               frame->can_id |= FLAGRTR;
             }
 
-          frame->len = g_can_dlc_to_len[rf->cs.dlc];
+          frame->len = can_dlc2bytes(rf->cs.dlc);
 
           frame_data_word = (uint32_t *)&frame->data[0];
 
