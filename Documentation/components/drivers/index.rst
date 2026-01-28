@@ -267,7 +267,7 @@ Subdirectories of ``nuttx/drivers``
 
   Video-related drivers.
 
-* ``virtio/`` :doc:`special/virtio`
+* ``virtio/`` :doc:`special/virtio/index`
 
   Virtio Device Support.
 
