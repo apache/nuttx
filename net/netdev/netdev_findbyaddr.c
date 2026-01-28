@@ -347,7 +347,15 @@ FAR struct net_driver_s *netdev_findby_ripv4addr(in_addr_t lipaddr,
            * about that here.
            */
 
-          return netdev_default();
+          dev = netdev_default();
+          if (dev && net_ipv4addr_cmp(dev->d_ipaddr, INADDR_ANY))
+            {
+              return NULL;
+            }
+          else
+            {
+              return dev;
+            }
         }
       else
         {
@@ -393,7 +401,15 @@ FAR struct net_driver_s *netdev_findby_ripv4addr(in_addr_t lipaddr,
    * try the default network device.
    */
 
-  return netdev_default();
+  dev = netdev_default();
+  if (dev && net_ipv4addr_cmp(dev->d_ipaddr, INADDR_ANY))
+    {
+      return NULL;
+    }
+  else
+    {
+      return dev;
+    }
 }
 #endif /* CONFIG_NET_IPv4 */
 
