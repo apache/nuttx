@@ -29,7 +29,9 @@
 #include <debug.h>
 #include <sys/time.h>
 
+#include <nuttx/atomic.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/wdog.h>
 #include <nuttx/timers/timer.h>
 
@@ -40,7 +42,8 @@
 struct timer_wdog_dev_s
 {
   struct timer_lowerhalf_s lower;       /* Lower half operations */
-  struct wdog_period_s     wdog;        /* Software watchdog timer */
+  struct wdog_s            wdog;        /* Software watchdog timer */
+  atomic_t                 period;      /* Period of the timer */
   spinlock_t               lock;
   tccb_t                   callback;    /* used for timer handler */
   FAR void                 *arg;
@@ -101,9 +104,8 @@ static int timer_wdog_start(FAR struct timer_lowerhalf_s *lower)
       return -EINVAL;
     }
 
-  wd_start_period(&priv->wdog, wd_get_period(&priv->wdog),
-                  wd_get_period(&priv->wdog),
-                  timer_wdog_handler, (wdparm_t)priv);
+  wd_start(&priv->wdog, atomic_read(&priv->period),
+           timer_wdog_handler, (wdparm_t)priv);
   return 0;
 }
 
@@ -122,7 +124,7 @@ static int timer_wdog_stop(FAR struct timer_lowerhalf_s *lower)
 
   DEBUGASSERT(priv);
 
-  wd_cancel_period(&priv->wdog);
+  wd_cancel(&priv->wdog);
 
   flags = spin_lock_irqsave(&priv->lock);
   priv->callback = NULL;
@@ -173,7 +175,7 @@ static int timer_wdog_tick_getstatus(FAR struct timer_lowerhalf_s *lower,
   status->flags = 0;
 
   flags = spin_lock_irqsave(&priv->lock);
-  if (WDOG_ISACTIVE(&priv->wdog.wdog))
+  if (WDOG_ISACTIVE(&priv->wdog))
     {
       /* TIMER is running */
 
@@ -189,8 +191,8 @@ static int timer_wdog_tick_getstatus(FAR struct timer_lowerhalf_s *lower,
       status->flags |= TCFLAGS_HANDLER;
     }
 
-  status->timeout  = wd_get_period(&priv->wdog);
-  status->timeleft = wd_gettime(&priv->wdog.wdog);
+  status->timeout  = atomic_read(&priv->period);
+  status->timeleft = wd_gettime(&priv->wdog);
   spin_unlock_irqrestore(&priv->lock, flags);
 
   return 0;
@@ -208,13 +210,10 @@ static int timer_wdog_tick_settimeout(FAR struct timer_lowerhalf_s *lower,
                                       uint32_t timeout)
 {
   FAR struct timer_wdog_dev_s *priv = (FAR struct timer_wdog_dev_s *)lower;
-  irqstate_t flags;
 
   DEBUGASSERT(priv);
 
-  flags = spin_lock_irqsave(&priv->lock);
-  wd_set_period(&priv->wdog, timeout);
-  spin_unlock_irqrestore(&priv->lock, flags);
+  atomic_set(&priv->period, timeout);
 
   return 0;
 }
@@ -230,7 +229,7 @@ static int timer_wdog_tick_settimeout(FAR struct timer_lowerhalf_s *lower,
 static int timer_wdog_tick_maxtimeout(FAR struct timer_lowerhalf_s *lower,
                                       FAR uint32_t *maxtimeout)
 {
-  *maxtimeout = 0xffffffff;
+  *maxtimeout = UINT32_MAX;
   return 0;
 }
 
@@ -248,18 +247,19 @@ static void timer_wdog_handler(wdparm_t arg)
 
   if (priv->callback)
     {
-      uint32_t next_interval_us = wd_get_period(&priv->wdog);
+      uint32_t period = atomic_read(&priv->period);
+      uint32_t next_interval_us = period;
 
       if (priv->callback(&next_interval_us, priv->arg))
         {
           if (next_interval_us)
             {
-              wd_set_period(&priv->wdog, next_interval_us);
+              atomic_set(&priv->period, next_interval_us);
+              period = next_interval_us;
             }
-        }
-      else
-        {
-          wd_cancel_period(&priv->wdog);
+
+          wd_start_next(&priv->wdog, period,
+                        timer_wdog_handler, (wdparm_t)priv);
         }
     }
 }
@@ -289,6 +289,8 @@ int timer_wdog_initialize(int timer_id)
     }
 
   dev->lower.ops = &g_timer_wdog_ops;
+  dev->arg       = NULL;
+  atomic_set(&dev->period, 0);
 
   spin_lock_init(&dev->lock);
 
