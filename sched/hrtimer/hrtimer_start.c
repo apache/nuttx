@@ -43,20 +43,16 @@
  *   in nanoseconds.
  *
  * Input Parameters:
- *   hrtimer - Pointer to the hrtimer structure.
+ *   hrtimer - Pointer to the hrtimer.
  *   func    - Expiration callback function.
- *   expired - Expiration time in nanoseconds. Interpretation
- *             depends on mode.
+ *   expired - Expiration time in nanoseconds.
  *
  * Returned Value:
  *   OK (0) on success, or a negated errno value on failure.
  *
- * Assumptions/Notes:
- *   - This function disables interrupts briefly via spinlock to safely
- *     insert the timer into the container.
- *   - Absolute mode sets the timer to expire at the given absolute time.
- *   - Relative mode sets the timer to expire after 'ns'
- *     nanoseconds from the current time.
+ * Assumptions:
+ *   - hrtimer is not NULL and func is not NULL.
+ *
  ****************************************************************************/
 
 int hrtimer_start_absolute(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
@@ -72,7 +68,7 @@ int hrtimer_start_absolute(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
 
   flags = write_seqlock_irqsave(&g_hrtimer_lock);
 
-  /* Ensure no core can write the hrtimer. */
+  /* Ensure no running core can write the hrtimer. */
 
   hrtimer_cancel_running(hrtimer);
 

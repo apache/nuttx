@@ -116,7 +116,8 @@ extern uintptr_t g_hrtimer_running[CONFIG_SMP_NCPUS];
  *   now - The current time (nsecs).
  *
  * Returned Value:
- *   None
+ *   None.
+ *
  ****************************************************************************/
 
 void hrtimer_process(uint64_t now);
@@ -141,6 +142,7 @@ void hrtimer_process(uint64_t now);
  *
  * Assumptions:
  *   The underlying timer start function returns 0 on success.
+ *
  ****************************************************************************/
 
 static inline_function void hrtimer_reprogram(uint64_t next_expired)
@@ -174,15 +176,21 @@ static inline_function void hrtimer_reprogram(uint64_t next_expired)
  *
  * Description:
  *   Compare two high-resolution timer nodes to determine their ordering
- *   in the container. Used internally by the RB-tree macros.
+ *   in the hrtimer queue. Used internally by the RB-tree macros.
+ *
+ *   Note that RB-tree can not guarantee that timers with the same expired
+ *   time will be processed in a FIFO order. However, this violation
+ *   of the sorted queue invariant is acceptable and can not affect the
+ *   functional correctness for the hrtimer.
  *
  * Input Parameters:
  *   a - Pointer to the first hrtimer node.
  *   b - Pointer to the second hrtimer node.
  *
  * Returned Value:
- *   <0 if a expires before b
- *   >=0 if a expires after b
+ *   <0 if a expires before b.
+ *   >=0 if a expires after b.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_HRTIMER_TREE
@@ -304,6 +312,7 @@ static inline_function bool hrtimer_insert(FAR hrtimer_t *hrtimer)
  *
  * Returned Value:
  *   Pointer to the earliest timer, or NULL if none are pending.
+ *
  ****************************************************************************/
 
 static inline_function FAR hrtimer_t *hrtimer_get_first(void)
@@ -324,7 +333,7 @@ static inline_function FAR hrtimer_t *hrtimer_get_first(void)
  *   of the value you are reading.
  *
  * Input Parameters:
- *   ptr   - The pointer to be read.
+ *   ptr - The pointer to be read.
  *
  * Returned Value:
  *   The value in the queue.
