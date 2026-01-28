@@ -182,6 +182,10 @@ void arm64_mpu_init_regiions(void)
 
   /* User heap base and size */
 
+#ifdef CONFIG_MM_TASK_HEAP
+  g_addrenv_heap_region[0] =
+#endif
+
   mpu_configure_region(ubase, usize,
                        NOT_EXEC | P_RW_U_RW_MSK | SHAREABLE_MSK,
                        MPU_MAIR_INDEX_SRAM);
