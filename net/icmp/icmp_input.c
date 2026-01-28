@@ -153,7 +153,7 @@ static uint16_t icmp_datahandler(FAR struct net_driver_s *dev,
   /* Copy the ICMP message into the I/O buffer chain (without waiting) */
 
   ret = iob_clone_partial(dev->d_iob, dev->d_iob->io_pktlen,
-                          0, iob, 0, true, false);
+                          0, iob, 0, false, false);
   if (ret < 0)
     {
       iob_free_chain(iob);
