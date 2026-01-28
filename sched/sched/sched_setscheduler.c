@@ -40,6 +40,93 @@
 #include "clock/clock.h"
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_SPORADIC
+static inline_function
+int process_sporadic(FAR struct tcb_s *tcb,
+                     FAR const struct sched_param *param)
+{
+  FAR struct sporadic_s *sporadic;
+  sclock_t repl_ticks;
+  sclock_t budget_ticks;
+  int ret = -EINVAL;
+
+  if (param->sched_ss_max_repl >= 1 &&
+      param->sched_ss_max_repl <= CONFIG_SCHED_SPORADIC_MAXREPL)
+    {
+      /* Convert timespec values to system clock ticks */
+
+      repl_ticks = clock_time2ticks(&param->sched_ss_repl_period);
+      budget_ticks = clock_time2ticks(&param->sched_ss_init_budget);
+
+      /* Avoid zero/negative times */
+
+      if (repl_ticks < 1)
+        {
+          repl_ticks = 1;
+        }
+
+      if (budget_ticks < 1)
+        {
+          budget_ticks = 1;
+        }
+
+      /* The replenishment period must be greater than or equal to the
+       * budget period.
+       */
+
+#if 1
+      /* REVISIT: In the current implementation, the budget cannot
+       * exceed half the duty.
+       */
+
+      if (repl_ticks >= (2 * budget_ticks))
+#else
+      if (repl_ticks < budget_ticks)
+#endif
+        {
+          /* Initialize/reset current sporadic scheduling */
+
+          if ((tcb->flags & TCB_FLAG_POLICY_MASK) ==
+              TCB_FLAG_SCHED_SPORADIC)
+            {
+              ret = nxsched_reset_sporadic(tcb);
+            }
+          else
+            {
+              ret = nxsched_initialize_sporadic(tcb);
+            }
+
+          /* Save the sporadic scheduling parameters. */
+
+          if (ret >= 0)
+            {
+              tcb->flags            |= TCB_FLAG_SCHED_SPORADIC;
+              tcb->timeslice         = budget_ticks;
+
+              sporadic               = tcb->sporadic;
+              DEBUGASSERT(sporadic != NULL);
+
+              sporadic->hi_priority  = param->sched_priority;
+              sporadic->low_priority = param->sched_ss_low_priority;
+              sporadic->max_repl     = param->sched_ss_max_repl;
+              sporadic->repl_period  = repl_ticks;
+              sporadic->budget       = budget_ticks;
+
+              /* And restart at the next replenishment interval */
+
+              ret = nxsched_start_sporadic(tcb);
+            }
+        }
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -82,30 +169,7 @@ int nxsched_set_scheduler(pid_t pid, int policy,
 {
   FAR struct tcb_s *tcb;
   irqstate_t flags;
-  int ret;
-
-  /* Check for supported scheduling policy */
-
-  if (policy != SCHED_OTHER
-      && policy != SCHED_FIFO
-#if CONFIG_RR_INTERVAL > 0
-      && policy != SCHED_RR
-#endif
-#ifdef CONFIG_SCHED_SPORADIC
-      && policy != SCHED_SPORADIC
-#endif
-     )
-    {
-      return -EINVAL;
-    }
-
-  /* Verify that the requested priority is in the valid range */
-
-  if (param->sched_priority < SCHED_PRIORITY_MIN ||
-      param->sched_priority > SCHED_PRIORITY_MAX)
-    {
-      return -EINVAL;
-    }
+  int ret = -EINVAL;
 
   /* Check if the task to modify the calling task */
 
@@ -118,173 +182,103 @@ int nxsched_set_scheduler(pid_t pid, int policy,
       tcb = nxsched_get_tcb(pid);
     }
 
-  /* Verify that the pid corresponds to a real task */
-
-  if (!tcb)
-    {
-      return -ESRCH;
-    }
-
   /* Prohibit any context switches while we muck with priority and scheduler
    * settings.
    */
 
   sched_lock();
 
-  /* Further, disable timer interrupts while we set up scheduling policy. */
+  /* Verify that the pid corresponds to a real task */
 
-  flags = enter_critical_section();
-  tcb->flags &= ~TCB_FLAG_POLICY_MASK;
-  switch (policy)
+  if (tcb)
     {
-      default:
-      case SCHED_FIFO:
-        {
+      /* Check for supported scheduling policy */
+
+      if ((policy == SCHED_OTHER
+#if CONFIG_RR_INTERVAL > 0
+           || policy == SCHED_RR
+#endif
 #ifdef CONFIG_SCHED_SPORADIC
-          /* Cancel any on-going sporadic scheduling */
+           || policy == SCHED_SPORADIC
+#endif
+           || policy == SCHED_FIFO) &&
+          param->sched_priority >= SCHED_PRIORITY_MIN &&
+          param->sched_priority <= SCHED_PRIORITY_MAX)
+        {
+          ret = OK;
 
-          if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+          /* Further, disable timer interrupts
+           * while we set up scheduling policy.
+           */
+
+          flags = enter_critical_section();
+          tcb->flags &= ~TCB_FLAG_POLICY_MASK;
+
+          switch (policy)
             {
-              DEBUGVERIFY(nxsched_stop_sporadic(tcb));
-            }
+              case SCHED_FIFO:
+#ifdef CONFIG_SCHED_SPORADIC
+                /* Cancel any on-going sporadic scheduling */
+
+                if ((tcb->flags & TCB_FLAG_POLICY_MASK) ==
+                    TCB_FLAG_SCHED_SPORADIC)
+                  {
+                    DEBUGVERIFY(nxsched_stop_sporadic(tcb));
+                  }
 #endif
 
-          /* Save the FIFO scheduling parameters */
+                /* Save the FIFO scheduling parameters */
 
-          tcb->flags     |= TCB_FLAG_SCHED_FIFO;
+                tcb->flags     |= TCB_FLAG_SCHED_FIFO;
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-          tcb->timeslice  = 0;
+                tcb->timeslice  = 0;
 #endif
-        }
-        break;
+                break;
 
 #if CONFIG_RR_INTERVAL > 0
-      case SCHED_OTHER:
-      case SCHED_RR:
-        {
+              case SCHED_OTHER:
+              case SCHED_RR:
+#  ifdef CONFIG_SCHED_SPORADIC
+                /* Cancel any on-going sporadic scheduling */
+
+                if ((tcb->flags & TCB_FLAG_POLICY_MASK) ==
+                    TCB_FLAG_SCHED_SPORADIC)
+                  {
+                    DEBUGVERIFY(nxsched_stop_sporadic(tcb));
+                  }
+#  endif
+
+                /* Save the round robin scheduling parameters */
+
+                tcb->flags     |= TCB_FLAG_SCHED_RR;
+                tcb->timeslice  = MSEC2TICK(CONFIG_RR_INTERVAL);
+                break;
+#endif
+
 #ifdef CONFIG_SCHED_SPORADIC
-          /* Cancel any on-going sporadic scheduling */
-
-          if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
-            {
-              DEBUGVERIFY(nxsched_stop_sporadic(tcb));
-            }
+              case SCHED_SPORADIC:
+                ret = process_sporadic(tcb, param);
+                break;
 #endif
+            }
 
-          /* Save the round robin scheduling parameters */
-
-          tcb->flags     |= TCB_FLAG_SCHED_RR;
-          tcb->timeslice  = MSEC2TICK(CONFIG_RR_INTERVAL);
+          leave_critical_section(flags);
         }
-        break;
-#endif
-
-#ifdef CONFIG_SCHED_SPORADIC
-      case SCHED_SPORADIC:
-        {
-          FAR struct sporadic_s *sporadic;
-          sclock_t repl_ticks;
-          sclock_t budget_ticks;
-
-          if (param->sched_ss_max_repl < 1 ||
-              param->sched_ss_max_repl > CONFIG_SCHED_SPORADIC_MAXREPL)
-            {
-              ret = -EINVAL;
-              goto errout_with_irq;
-            }
-
-          /* Convert timespec values to system clock ticks */
-
-          repl_ticks = clock_time2ticks(&param->sched_ss_repl_period);
-          budget_ticks = clock_time2ticks(&param->sched_ss_init_budget);
-
-          /* Avoid zero/negative times */
-
-          if (repl_ticks < 1)
-            {
-              repl_ticks = 1;
-            }
-
-          if (budget_ticks < 1)
-            {
-              budget_ticks = 1;
-            }
-
-          /* The replenishment period must be greater than or equal to the
-           * budget period.
-           */
-
-#if 1
-          /* REVISIT: In the current implementation, the budget cannot
-           * exceed half the duty.
-           */
-
-          if (repl_ticks < (2 * budget_ticks))
-#else
-          if (repl_ticks < budget_ticks)
-#endif
-            {
-              ret = -EINVAL;
-              goto errout_with_irq;
-            }
-
-          /* Initialize/reset current sporadic scheduling */
-
-          if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
-            {
-              ret = nxsched_reset_sporadic(tcb);
-            }
-          else
-            {
-              ret = nxsched_initialize_sporadic(tcb);
-            }
-
-          /* Save the sporadic scheduling parameters. */
-
-          if (ret >= 0)
-            {
-              tcb->flags            |= TCB_FLAG_SCHED_SPORADIC;
-              tcb->timeslice         = budget_ticks;
-
-              sporadic               = tcb->sporadic;
-              DEBUGASSERT(sporadic != NULL);
-
-              sporadic->hi_priority  = param->sched_priority;
-              sporadic->low_priority = param->sched_ss_low_priority;
-              sporadic->max_repl     = param->sched_ss_max_repl;
-              sporadic->repl_period  = repl_ticks;
-              sporadic->budget       = budget_ticks;
-
-              /* And restart at the next replenishment interval */
-
-              ret = nxsched_start_sporadic(tcb);
-            }
-
-          /* Handle errors */
-
-          if (ret < 0)
-            {
-              goto errout_with_irq;
-            }
-        }
-        break;
-#endif
     }
-
-  leave_critical_section(flags);
+  else
+    {
+      ret = -ESRCH;
+    }
 
   /* Set the new priority */
 
-  ret = nxsched_reprioritize(tcb, param->sched_priority);
-  sched_unlock();
-  return ret;
+  if (ret >= 0)
+    {
+      ret = nxsched_reprioritize(tcb, param->sched_priority);
+    }
 
-#ifdef CONFIG_SCHED_SPORADIC
-errout_with_irq:
-  leave_critical_section(flags);
   sched_unlock();
   return ret;
-#endif
 }
 
 /****************************************************************************
