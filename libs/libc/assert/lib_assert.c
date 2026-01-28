@@ -28,6 +28,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <syscall.h>
 
 /****************************************************************************
  * Public Functions
@@ -35,6 +36,20 @@
 
 void __assert(FAR const char *filename, int linenum, FAR const char *msg)
 {
-  _assert(filename, linenum, msg, NULL);
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  if (up_interrupt_context())
+    {
+      _assert(filename, linenum, msg, NULL, true);
+    }
+  else
+#endif
+    {
+#ifdef CONFIG_ARCH_HAVE_SYSCALL
+      up_assert(filename, linenum, msg);
+#else
+      _assert(filename, linenum, msg, NULL, false);
+#endif
+    }
+
   abort();
 }

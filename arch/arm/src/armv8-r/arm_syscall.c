@@ -478,6 +478,12 @@ uint32_t *arm_syscall(uint32_t *regs)
         }
         break;
 #endif
+      case SYS_assert_handler:
+        {
+          _assert((const char *)regs[REG_R1], (int)regs[REG_R2],
+                  (const char *)regs[REG_R3], (void *)running_regs(), false);
+        }
+        break;
 
       /* This is not an architecture-specific system call.  If NuttX is built
        * as a standalone kernel with a system call interface, then all of the

@@ -832,7 +832,7 @@ static void reset_board(void)
  ****************************************************************************/
 
 void _assert(FAR const char *filename, int linenum,
-             FAR const char *msg, FAR void *regs)
+             FAR const char *msg, FAR void *regs, bool irq)
 {
   const bool os_ready = OSINIT_OS_READY();
   FAR struct tcb_s *rtcb = running_task();
@@ -853,8 +853,7 @@ void _assert(FAR const char *filename, int linenum,
     }
 
 #if CONFIG_BOARD_RESET_ON_ASSERT < 2
-  if (up_interrupt_context() ||
-      (rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+  if (irq || (rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
 #endif
     {
       /* Fatal error, enter panic state. */
