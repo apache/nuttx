@@ -577,7 +577,7 @@ static inline_function int nxsched_select_cpu(cpu_set_t affinity)
   int i;
 
   minprio = SCHED_PRIORITY_MAX;
-  cpu     = CONFIG_SMP_NCPUS;
+  cpu     = 0xff;
 
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
@@ -600,8 +600,7 @@ static inline_function int nxsched_select_cpu(cpu_set_t affinity)
               DEBUGASSERT(rtcb->sched_priority == 0);
               return i;
             }
-          else if (rtcb->sched_priority <= minprio &&
-                   !nxsched_islocked_tcb(rtcb))
+          else if (rtcb->sched_priority <= minprio)
             {
               DEBUGASSERT(rtcb->sched_priority > 0);
               minprio = rtcb->sched_priority;
@@ -610,6 +609,7 @@ static inline_function int nxsched_select_cpu(cpu_set_t affinity)
         }
     }
 
+  DEBUGASSERT(cpu != 0xff);
   return cpu;
 }
 #  endif

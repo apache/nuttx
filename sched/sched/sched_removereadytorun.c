@@ -162,12 +162,13 @@ static void nxsched_remove_running(FAR struct tcb_s *tcb)
   nxttcb->task_state = TSTATE_TASK_RUNNING;
   g_assignedtasks[cpu] = nxttcb;
   up_update_task(nxttcb);
+
+  nxsched_switch_running(tcb->cpu, false);
 }
 
 void nxsched_remove_self(FAR struct tcb_s *tcb)
 {
   nxsched_remove_running(tcb);
-  nxsched_switch_running(tcb->cpu, false);
 }
 
 bool nxsched_remove_readytorun(FAR struct tcb_s *tcb)

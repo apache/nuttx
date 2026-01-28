@@ -105,7 +105,7 @@ void nxsched_process_delivered(int cpu)
         {
           int target_cpu = tcb->flags & TCB_FLAG_CPU_LOCKED ?
             tcb->cpu : nxsched_select_cpu(tcb->affinity);
-          if (target_cpu < CONFIG_SMP_NCPUS && target_cpu != cpu &&
+          if (target_cpu != cpu &&
               current_task(target_cpu)->sched_priority < tcb->sched_priority)
             {
               nxsched_deliver_task(cpu, target_cpu, priority);
