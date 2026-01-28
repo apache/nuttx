@@ -427,6 +427,8 @@ static int sam_lin_ifup(struct net_driver_s *dev)
                      UART_INT_LINID | UART_INT_LINERR);
     }
 
+  netdev_carrier_on(dev);
+
   return OK;
 }
 
@@ -469,6 +471,8 @@ static int sam_lin_ifdown(struct net_driver_s *dev)
           priv->tx_cache[i].can_id = 0;
         }
     }
+
+  netdev_carrier_off(dev);
 
   return OK;
 }

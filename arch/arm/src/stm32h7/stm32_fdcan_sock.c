@@ -1805,6 +1805,8 @@ static int fdcan_ifup(struct net_driver_s *dev)
 
   priv->bifup = true;
 
+  netdev_carrier_on(dev);
+
   return OK;
 }
 
@@ -1832,6 +1834,8 @@ static int fdcan_ifdown(struct net_driver_s *dev)
   fdcan_reset(priv);
 
   priv->bifup = false;
+
+  netdev_carrier_off(dev);
 
   return OK;
 }
@@ -3041,4 +3045,3 @@ static void fdcan_errint(struct fdcan_driver_s *priv, bool enable)
   putreg32(regval, priv->base + STM32_FDCAN_IE_OFFSET);
 }
 #endif
-

@@ -1592,6 +1592,8 @@ static int mpfs_ifup(struct net_driver_s *dev)
            mpfs_txtimeout_expiry, (wdparm_t)priv);
 #endif
 
+  netdev_carrier_on(dev);
+
   return OK;
 }
 
@@ -1652,6 +1654,9 @@ static int mpfs_ifdown(struct net_driver_s *dev)
 
   priv->ifup = false;
   spin_unlock_irqrestore(&priv->lock, flags);
+
+  netdev_carrier_off(dev);
+
   return OK;
 }
 

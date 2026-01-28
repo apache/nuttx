@@ -1772,6 +1772,8 @@ static int w5500_ifup(FAR struct net_driver_s *dev)
   self->w_bifup = true;
   self->lower->enable(self->lower, true);
 
+  netdev_carrier_on(dev);
+
   return OK;
 }
 
@@ -1818,6 +1820,9 @@ static int w5500_ifdown(FAR struct net_driver_s *dev)
 
   self->w_bifup = false;
   leave_critical_section(flags);
+
+  netdev_carrier_off(dev);
+
   return OK;
 }
 

@@ -680,6 +680,7 @@ static int xbeenet_ifup(FAR struct net_driver_s *dev)
 
       priv->xd_bifup = true;
       ret = OK;
+      netdev_carrier_on(dev);
     }
 
   return ret;
@@ -720,6 +721,9 @@ static int xbeenet_ifdown(FAR struct net_driver_s *dev)
 
   priv->xd_bifup = false;
   leave_critical_section(flags);
+
+  netdev_carrier_off(dev);
+
   return OK;
 }
 

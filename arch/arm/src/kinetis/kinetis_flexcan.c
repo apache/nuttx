@@ -1338,6 +1338,8 @@ static int kinetis_ifup(struct net_driver_s *dev)
 
   up_enable_irq(priv->config->mb_irq);
 
+  netdev_carrier_on(dev);
+
   return OK;
 }
 
@@ -1365,6 +1367,9 @@ static int kinetis_ifdown(struct net_driver_s *dev)
   kinetis_reset(priv);
 
   priv->bifup = false;
+
+  netdev_carrier_off(dev);
+
   return OK;
 }
 
