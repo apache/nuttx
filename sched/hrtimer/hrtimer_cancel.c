@@ -67,11 +67,8 @@
  *   OK (0) on success; a negated errno value on failure.
  *   > 0 on if the timer callback is running.
  *
- * Assumptions/Notes:
- *   - This function acquires the global hrtimer spinlock to protect
- *     the container.
- *   - The caller must ensure that the timer structure is not freed until
- *     it is guaranteed that any running callback has returned.
+ * Assumptions:
+ *   - The hrtimer is not NULL.
  *
  ****************************************************************************/
 

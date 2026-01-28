@@ -42,19 +42,19 @@ uintptr_t g_hrtimer_running[CONFIG_SMP_NCPUS];
 
 /* Global spinlock protecting the high-resolution timer subsystem.
  *
- * This spinlock serializes access to the hrtimer container and
+ * This spinlock serializes access to the hrtimer queue and
  * protects timer state transitions. It must be held whenever the
- * timer container is modified.
+ * timer queue is modified.
  */
 
 seqcount_t g_hrtimer_lock = SEQLOCK_INITIALIZER;
 
-/* Container for all active high-resolution timers.
+/* HRTimer queue for all active high-resolution timers.
  *
- * When CONFIG_HRTIMER_TREE is enabled, timers are stored in a container.
+ * When CONFIG_HRTIMER_TREE is enabled, timers are stored in a queue.
  * When disabled, timers are stored in a linked list.
  *
- * The container is ordered by absolute expiration time in
+ * The queue is ordered by absolute expiration time in
  * both configurations.
  */
 
@@ -90,11 +90,11 @@ struct list_node g_hrtimer_list =
  * Name: RB_GENERATE
  *
  * Description:
- *   Instantiate the container helper functions for the hrtimer
+ *   Instantiate the queue helper functions for the hrtimer
  *   subsystem.
  *
  *   This macro generates the static inline functions required to
- *   manipulate the hrtimer container, including insertion,
+ *   manipulate the hrtimer queue, including insertion,
  *   removal, and lookup operations.
  *
  *   Note: This is only compiled when CONFIG_HRTIMER_TREE is enabled.

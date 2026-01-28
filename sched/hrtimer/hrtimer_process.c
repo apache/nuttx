@@ -40,9 +40,9 @@
  *
  * Description:
  *   Process all expired high-resolution timers. This function repeatedly
- *   retrieves the earliest timer from the active timer container, checks
+ *   retrieves the earliest timer from the active timer queue, checks
  *   if it has expired relative to the current time, removes it from the
- *   container, and invokes its callback function. Processing continues
+ *   queue, and invokes its callback function. Processing continues
  *   until:
  *
  *     1. No additional timers have expired, or
@@ -62,7 +62,7 @@
  *   None.
  *
  * Assumptions/Notes:
- *   - This function acquires a spinlock to protect the timer container.
+ *   - This function acquires a spinlock to protect the timer queue.
  *   - Timer callbacks are invoked with interrupts enabled
  *     to avoid deadlocks.
  *   - DEBUGASSERT ensures that timer callbacks are valid.
