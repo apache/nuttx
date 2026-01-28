@@ -46,6 +46,7 @@
 #include <errno.h>
 #include <debug.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #include "arm.h"
 #include "chip.h"

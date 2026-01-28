@@ -33,6 +33,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/spinlock.h>
 
 #include <errno.h>
 #include <time.h>

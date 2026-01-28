@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/spinlock.h>
 #if defined(CONFIG_NET) && defined(CONFIG_LPC43_ETHERNET)
 
 #include <inttypes.h>

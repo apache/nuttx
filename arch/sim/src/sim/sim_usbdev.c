@@ -43,6 +43,7 @@
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
+#include <nuttx/spinlock.h>
 
 #include "sim_internal.h"
 #include "sim_usbdev.h"

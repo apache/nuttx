@@ -58,6 +58,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/spinlock.h>
 
 #include <sys/ioctl.h>
 #include <stdint.h>
