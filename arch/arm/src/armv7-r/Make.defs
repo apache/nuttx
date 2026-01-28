@@ -67,3 +67,7 @@ ifeq ($(CONFIG_SMP),y)
   CMN_CSRCS += arm_cpustart.c arm_smpcall.c
   CMN_CSRCS += arm_cpuidlestack.c arm_scu.c
 endif
+
+ifeq ($(CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS),y)
+  CMN_UCSRCS += arm_perf.c
+endif
