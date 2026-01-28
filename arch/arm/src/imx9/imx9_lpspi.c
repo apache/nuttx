@@ -1858,6 +1858,12 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 #ifdef GPIO_LPSPI1_CS
           imx9_config_gpio(GPIO_LPSPI1_CS);
 #endif
+#ifdef MUX_LPSPI1_CS1
+          imx9_iomux_configure(MUX_LPSPI1_CS1);
+#endif
+#ifdef GPIO_LPSPI1_CS1
+          imx9_config_gpio(GPIO_LPSPI1_CS1);
+#endif
 #if defined(GPIO_LPSPI1_DC) && defined(CONFIG_SPI_CMDDATA)
           imx9_iomux_configure(GPIO_LPSPI1_DC);
 #endif
@@ -1887,6 +1893,12 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 #ifdef GPIO_LPSPI2_CS
           imx9_config_gpio(GPIO_LPSPI2_CS);
 #endif
+#ifdef MUX_LPSPI2_CS1
+          imx9_iomux_configure(MUX_LPSPI2_CS1);
+#endif
+#ifdef GPIO_LPSPI2_CS1
+          imx9_config_gpio(GPIO_LPSPI2_CS1);
+#endif
 #if defined(GPIO_LPSPI2_DC) && defined(CONFIG_SPI_CMDDATA)
           imx9_iomux_configure(GPIO_LPSPI2_DC);
 #endif
@@ -1915,6 +1927,12 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 #endif
 #ifdef GPIO_LPSPI3_CS
           imx9_config_gpio(GPIO_LPSPI3_CS);
+#endif
+#ifdef MUX_LPSPI3_CS1
+          imx9_iomux_configure(MUX_LPSPI3_CS1);
+#endif
+#ifdef GPIO_LPSPI3_CS1
+          imx9_config_gpio(GPIO_LPSPI3_CS1);
 #endif
 #if defined(GPIO_LPSPI3_DC) && defined(CONFIG_SPI_CMDDATA)
           imx9_iomux_configure(GPIO_LPSPI3_DC);
@@ -1980,6 +1998,12 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 #ifdef GPIO_LPSPI5_CS
           imx9_config_gpio(GPIO_LPSPI5_CS);
 #endif
+#ifdef MUX_LPSPI5_CS1
+          imx9_iomux_configure(MUX_LPSPI5_CS1);
+#endif
+#ifdef GPIO_LPSPI5_CS1
+          imx9_config_gpio(GPIO_LPSPI5_CS1);
+#endif
 #if defined(GPIO_LPSPI5_DC) && defined(CONFIG_SPI_CMDDATA)
           imx9_iomux_configure(GPIO_LPSPI5_DC);
 #endif
@@ -2008,6 +2032,12 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 #endif
 #ifdef GPIO_LPSPI6_CS
           imx9_config_gpio(GPIO_LPSPI6_CS);
+#endif
+#ifdef MUX_LPSPI6_CS1
+          imx9_iomux_configure(MUX_LPSPI6_CS1);
+#endif
+#ifdef GPIO_LPSPI6_CS1
+          imx9_config_gpio(GPIO_LPSPI6_CS1);
 #endif
 #if defined(GPIO_LPSPI6_DC) && defined(CONFIG_SPI_CMDDATA)
           imx9_iomux_configure(GPIO_LPSPI6_DC);
@@ -2038,6 +2068,12 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 #ifdef GPIO_LPSPI7_CS
           imx9_config_gpio(GPIO_LPSPI7_CS);
 #endif
+#ifdef MUX_LPSPI7_CS1
+          imx9_iomux_configure(MUX_LPSPI7_CS1);
+#endif
+#ifdef GPIO_LPSPI7_CS1
+          imx9_config_gpio(GPIO_LPSPI7_CS1);
+#endif
 #if defined(GPIO_LPSPI7_DC) && defined(CONFIG_SPI_CMDDATA)
           imx9_iomux_configure(GPIO_LPSPI7_DC);
 #endif
@@ -2066,6 +2102,12 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 #endif
 #ifdef GPIO_LPSPI8_CS
           imx9_config_gpio(GPIO_LPSPI8_CS);
+#endif
+#ifdef MUX_LPSPI8_CS1
+          imx9_iomux_configure(MUX_LPSPI8_CS1);
+#endif
+#ifdef GPIO_LPSPI8_CS1
+          imx9_config_gpio(GPIO_LPSPI8_CS1);
 #endif
 #if defined(GPIO_LPSPI8_DC) && defined(CONFIG_SPI_CMDDATA)
           imx9_iomux_configure(GPIO_LPSPI8_DC);
