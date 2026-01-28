@@ -161,11 +161,11 @@ int mtd_proxy(FAR const char *mtddev, int mountflags,
       return ret;
     }
 
-  ret = ftl_initialize_by_path(blkdev, mtd->u.i_mtd, mountflags);
+  ret = ftl_initialize(blkdev, mtd->u.i_mtd, mountflags);
   inode_release(mtd);
   if (ret < 0)
     {
-      ferr("ERROR: ftl_initialize_by_path(%s, %s) failed: %d\n",
+      ferr("ERROR: ftl_initialize(%s, %s) failed: %d\n",
            mtddev, blkdev, ret);
       return ret;
     }
