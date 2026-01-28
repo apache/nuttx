@@ -90,7 +90,7 @@ Configuring NuttX and compile:
    $ make
    $ dd if=/dev/zero of=./mydisk-1gb.img bs=1M count=1024
 
-Running with QEMU:
+Running with QEMU (VirtIO-MMIO transport):
 
 .. code:: console
 
@@ -107,6 +107,29 @@ Running with QEMU:
      -drive file=./mydisk-1gb.img,if=none,format=raw,id=hd \
      -device virtio-blk-device,bus=virtio-mmio-bus.3,drive=hd \
      -mon chardev=con,mode=readline -kernel ./nuttx
+
+Running with QEMU (VirtIO-PCI transport):
+
+The netnsh configuration also supports VirtIO-PCI transport. To use VirtIO-PCI
+instead of VirtIO-MMIO, run QEMU with PCI devices:
+
+.. code:: console
+
+   $ qemu-system-aarch64 -cpu cortex-a53 -nographic \
+     -machine virt,virtualization=on,gic-version=3 \
+     -chardev stdio,id=con,mux=on -serial chardev:con \
+     -netdev user,id=u1,hostfwd=tcp:127.0.0.1:10023-10.0.2.15:23,hostfwd=tcp:127.0.0.1:15001-10.0.2.15:5001 \
+     -device virtio-net-pci,netdev=u1 \
+     -device virtio-rng-pci \
+     -drive file=./mydisk-1gb.img,if=none,format=raw,id=hd \
+     -device virtio-blk-pci,drive=hd \
+     -mon chardev=con,mode=readline -kernel ./nuttx
+
+.. note::
+
+   The VirtIO-PCI transport uses PCI bus for device discovery and communication,
+   which is different from the memory-mapped VirtIO-MMIO transport. Both transports
+   are supported simultaneously in the netnsh configuration
 
 ------------------------------------------
 Single Core with virtio gpu driver (GICv3)
