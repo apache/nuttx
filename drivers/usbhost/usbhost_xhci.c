@@ -5666,7 +5666,7 @@ static int xhci_mem_free(FAR struct usbhost_xhci_s *priv)
 
   for (i = 0; i < priv->no_scratch; i++)
     {
-      kmm_free((FAR void *)priv->pg_sb[i]);
+      kmm_free((FAR void *)(uintptr_t)up_addrenv_pa_to_va(priv->pg_sb[i]));
     }
 
   kmm_free(priv->pg_sb);
