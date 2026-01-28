@@ -81,15 +81,20 @@ void hrtimer_process(uint64_t now)
 
   flags = write_seqlock_irqsave(&g_hrtimer_lock);
 
-  /* Fetch the earliest active timer */
-
-  hrtimer = hrtimer_get_first();
-  expired = hrtimer->expired;
-
-  /* Check if the timer has expired */
-
-  while (HRTIMER_TIME_BEFORE_EQ(expired, now))
+  for (; ; )
     {
+      /* Fetch the earliest active timer */
+
+      hrtimer = hrtimer_get_first();
+      expired = hrtimer->expired;
+
+      /* Check if the timer has expired */
+
+      if (!HRTIMER_TIME_BEFORE_EQ(expired, now))
+        {
+          break;
+        }
+
       /* Remove the expired timer from the timer queue */
 
       func = hrtimer->func;
@@ -125,11 +130,6 @@ void hrtimer_process(uint64_t now)
           hrtimer->func    = func;
           hrtimer_insert(hrtimer);
         }
-
-      /* Fetch the next earliest timer */
-
-      hrtimer = hrtimer_get_first();
-      expired = hrtimer->expired;
     }
 
   hrtimer_unmark_running(cpu);
