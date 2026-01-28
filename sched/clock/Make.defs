@@ -30,7 +30,7 @@ CSRCS += clock_perf.c clock_realtime2absticks.c clock_getres.c
 
 ifneq ($(CONFIG_TIMER_ARCH),y)
   ifneq ($(CONFIG_ALARM_ARCH),y)
-    CSRCS += delay.c
+    CSRCS += clock_delay.c
   endif
 endif
 

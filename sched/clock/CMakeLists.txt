@@ -37,7 +37,7 @@ set(SRCS
 # don't want the weak references to conflict.
 
 if(NOT CONFIG_TIMER_ARCH AND NOT CONFIG_ALARM_ARCH)
-  list(APPEND SRCS delay.c)
+  list(APPEND SRCS clock_delay.c)
 endif()
 
 if(CONFIG_CLOCK_TIMEKEEPING)
