@@ -1936,6 +1936,7 @@ static int enc_ifup(struct net_driver_s *dev)
 
       priv->ifstate = ENCSTATE_UP;
       priv->lower->enable(priv->lower);
+      netdev_carrier_on(dev);
     }
 
   /* Un-lock the SPI bus */
@@ -1990,6 +1991,8 @@ static int enc_ifdown(struct net_driver_s *dev)
 
   priv->ifstate = ENCSTATE_DOWN;
   leave_critical_section(flags);
+
+  netdev_carrier_off(dev);
 
   /* Un-lock the SPI bus */
 

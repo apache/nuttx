@@ -1064,6 +1064,9 @@ static int ftmac100_ifup(struct net_driver_s *dev)
 
   priv->ft_bifup = true;
   up_enable_irq(CONFIG_FTMAC100_IRQ);
+
+  netdev_carrier_on(dev);
+
   return OK;
 }
 
@@ -1111,6 +1114,9 @@ static int ftmac100_ifdown(struct net_driver_s *dev)
 
   priv->ft_bifup = false;
   leave_critical_section(flags);
+
+  netdev_carrier_off(dev);
+
   return OK;
 }
 
