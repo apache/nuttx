@@ -135,6 +135,16 @@ static int g_rangecount[RANGE_NUMBER];
 static char g_file_name[PATH_MAX];
 static bool g_skipmixedcase;
 
+/* nxstyle directive state variables:
+ *   g_nxstyle_off_line: line number where 'off' directive was found (-1 = none)
+ *   g_nxstyle_on_line: line number where 'on' directive was found (-1 = none)
+ *   g_nxstyle_ignore_line: line number to ignore (-1 = none)
+ */
+
+static int g_nxstyle_off_line     = -1;
+static int g_nxstyle_on_line      = -1;
+static int g_nxstyle_ignore_line  = -1;
+
 static const struct file_section_s g_section_info[] =
 {
   {
@@ -831,6 +841,60 @@ static int skip(int lineno)
 }
 
 /********************************************************************************
+ * Name: check_nxstyle_directive
+ *
+ * Description:
+ *   Check for nxstyle directives in a line:
+ *   - "nxstyle off"    - Disable checks starting from next line
+ *   - "nxstyle on"     - Re-enable checks starting from next line
+ *   - "nxstyle ignore" - Ignore current line only
+ *
+ ********************************************************************************/
+
+static void check_nxstyle_directive(const char *line, int lineno)
+{
+  const char *ptr;
+  const char *directive;
+
+  /* Look for nxstyle directive in the line */
+
+  ptr = strstr(line, "nxstyle ");
+  if (ptr == NULL)
+    {
+      return;
+    }
+
+  /* Skip "nxstyle " and any following whitespace */
+
+  directive = ptr + 8;
+  while (*directive == ' ' || *directive == '\t')
+    {
+      directive++;
+    }
+
+  /* Check for specific directives */
+
+  if (strncmp(directive, "off", 3) == 0)
+    {
+      /* Disable checks starting from next line */
+
+      g_nxstyle_off_line = lineno;
+    }
+  else if (strncmp(directive, "on", 2) == 0)
+    {
+      /* Re-enable checks starting from next line */
+
+      g_nxstyle_on_line = lineno;
+    }
+  else if (strncmp(directive, "ignore", 6) == 0)
+    {
+      /* Ignore current line only */
+
+      g_nxstyle_ignore_line = lineno;
+    }
+}
+
+/********************************************************************************
  * Name: message
  *
  * Description:
@@ -842,6 +906,32 @@ static int message(enum class_e class, const char *text, int lineno, int ndx)
   FILE *out = stdout;
 
   if (skip(lineno))
+    {
+      return g_status;
+    }
+
+  /* Check if nxstyle checks are disabled via directive.
+   * 'off' takes effect from the line AFTER the directive.
+   * 'on' takes effect from the line AFTER the directive.
+   */
+
+  if (g_nxstyle_off_line >= 0 && lineno > g_nxstyle_off_line)
+    {
+      /* Checks are disabled, but check if 'on' was issued later */
+
+      if (g_nxstyle_on_line < 0 || g_nxstyle_on_line < g_nxstyle_off_line ||
+          lineno <= g_nxstyle_on_line)
+        {
+          return g_status;
+        }
+    }
+
+  /* Check if this specific line should be ignored.
+   * Note: Line length check is NOT skipped by 'nxstyle ignore'.
+   */
+
+  if (lineno == g_nxstyle_ignore_line &&
+      strstr(text, "Long line") == NULL)
     {
       return g_status;
     }
@@ -1399,6 +1489,13 @@ int main(int argc, char **argv, char **envp)
   inasm          = 0;           /* > 0: Within #ifdef __ASSEMBLY__ */
   comment_lineno = -1;          /* Line on which the last comment was closed */
   blank_lineno   = -1;          /* Line number of the last blank line */
+
+  /* Reset nxstyle directive state for each file */
+
+  g_nxstyle_off_line    = -1;   /* No off directive */
+  g_nxstyle_on_line     = -1;   /* No on directive */
+  g_nxstyle_ignore_line = -1;   /* No line to ignore */
+
   noblank_lineno = -1;          /* A blank line is not needed after this line */
   lbrace_lineno  = -1;          /* Line number of last left brace */
   rbrace_lineno  = -1;          /* Last line containing a right brace */
@@ -1409,6 +1506,13 @@ int main(int argc, char **argv, char **envp)
   while (fgets(line, LINE_SIZE, instream))
     {
       lineno++;
+
+      /* Check for nxstyle directives (on/off/ignore) before any other
+       * processing. This allows directives to affect the current line.
+       */
+
+      check_nxstyle_directive(line, lineno);
+
       indent       = 0;
       prevbnest    = bnest;    /* Brace nesting level on the previous line */
       prevdnest    = dnest;    /* Data declaration nesting level on the
@@ -3339,9 +3443,11 @@ int main(int argc, char **argv, char **envp)
            * REVISIT:  Long line checks suppressed on right hand comments
            * for now.  This just prevents a large number of difficult-to-
            * fix complaints that we would have otherwise.
+           * Exception: nxstyle ignore comments should still be checked.
            */
 
-          if (m > g_maxline && !rhcomment)
+          if (m > g_maxline &&
+              (!rhcomment || strstr(line, "nxstyle ignore") != NULL))
             {
               /* Ignore the line 2 (file path) */
 
