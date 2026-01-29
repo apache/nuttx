@@ -1022,6 +1022,17 @@ config IMX9_ENET_HPWORK
 		Use high-priority work-queue for ethernet packet handling.
 		Enable if low-latency ethernet packet handling is required.
 
+config IMX9_ENET_PHYINIT
+	bool "Board-specific PHY Initialization for ENET"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it
+		can be used.  This may include such things as configuring GPIOs,
+		resetting the PHY, etc.  If CONFIG_IMX9_ENET_PHYINIT is defined in
+		the configuration then the board specific logic must provide
+		imx9_phy_boardinitialize();  The i.MX9 ENET driver will call this
+		function one time before it first uses the PHY.
+
 config IMX9_ENET1_OTP_MAC_ADDR
 	hex "MAC address offset in OCOTP"
 	default 0x4ec
@@ -1119,17 +1130,6 @@ config IMX9_ENET1_PHY_FORCE_SPEED
 		if the link partner has got autonegotiation enabled, the
 		duplex mode is not auto-detected by the link partner. Only
 		enable if you really know what you are doing!
-
-config IMX9_ENET1_PHYINIT
-	bool "Board-specific PHY Initialization for ENET1"
-	default n
-	---help---
-		Some boards require specialized initialization of the PHY before it
-		can be used.  This may include such things as configuring GPIOs,
-		resetting the PHY, etc.  If CONFIG_IMX9_ENET_PHYINIT is defined in
-		the configuration then the board specific logic must provide
-		imx9_phy_boardinitialize();  The i.MX9 ENET driver will call this
-		function one time before it first uses the PHY.
 
 endmenu # IMX9_ENET
 
