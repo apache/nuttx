@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sched/sched_tickexpiration.c
+ * sched/sched/sched_processtickless.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -39,6 +39,7 @@
 
 #include "sched/sched.h"
 #include "wdog/wdog.h"
+#include "hrtimer/hrtimer.h"
 #include "clock/clock.h"
 
 #ifdef CONFIG_CLOCK_TIMEKEEPING
@@ -350,20 +351,41 @@ static void nxsched_timer_start(clock_t ticks, clock_t interval)
  * Name: nxsched_process_timer
  *
  * Description:
- *   if CONFIG_SCHED_TICKLESS is defined, then this function is provided by
+ *   If CONFIG_SCHED_TICKLESS is defined, then this function is provided by
  *   the RTOS base code and called from platform-specific code when the
  *   interval timer used to implement the tick-less OS expires.
  *
  * Input Parameters:
+ *   None.
  *
  * Returned Value:
  *   Base code implementation assumes that this function is called from
  *   interrupt handling logic with interrupts disabled.
  *
+ * Note:
+ *   The current SCHED_RR implementation has an issue: if a round-robin task
+ *   is preempted, its timeslice counter does not decrement properly.
+ *   Therefore, we must trigger the scheduler on each timer expiration to
+ *   minimize the occurrence of this problem.
+ *   This workaround can be removed once the SCHED_RR behavior is fixed.
+ *
  ****************************************************************************/
 
-void nxsched_process_tick(void)
+void nxsched_process_timer(void)
 {
+#ifdef CONFIG_HRTIMER
+  uint64_t nsec = clock_systime_nsec();
+  hrtimer_process(nsec);
+
+#  if CONFIG_RR_INTERVAL > 0
+  /* Workaround for SCHED_RR, see the note. */
+
+  irqstate_t flags = enter_critical_section();
+  nxsched_process_event(div_const(nsec, (uint32_t)NSEC_PER_TICK), true);
+  leave_critical_section(flags);
+#  endif
+
+#else
   irqstate_t flags;
   clock_t ticks;
 
@@ -376,12 +398,7 @@ void nxsched_process_tick(void)
   up_timer_gettick(&ticks);
 
 #if CONFIG_RR_INTERVAL > 0
-  /* The current SCHED_RR implementation has an issue: if a round-robin task
-   * is preempted, its timeslice counter does not decrement properly.
-   * Therefore, we must trigger the scheduler on each timer expiration to
-   * minimize the occurrence of this problem.
-   * This workaround can be removed once the SCHED_RR behavior is fixed.
-   */
+  /* Workaround for SCHED_RR, see the note. */
 
   nxsched_process_event(ticks, true);
 #endif
@@ -389,6 +406,7 @@ void nxsched_process_tick(void)
   wd_timer(ticks);
 
   leave_critical_section(flags);
+#endif
 }
 
 /****************************************************************************

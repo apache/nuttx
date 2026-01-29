@@ -185,11 +185,11 @@
 
 /* ?SEC2TIC rounds up */
 
-#define NSEC2TICK(nsec)       div_const_roundup(nsec, NSEC_PER_TICK)
-#define USEC2TICK(usec)       div_const_roundup(usec, USEC_PER_TICK)
+#define NSEC2TICK(nsec)       div_const_roundup(nsec, (uint32_t)NSEC_PER_TICK)
+#define USEC2TICK(usec)       div_const_roundup(usec, (uint32_t)USEC_PER_TICK)
 
 #if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
-#  define MSEC2TICK(msec)     div_const_roundup(msec, MSEC_PER_TICK)
+#  define MSEC2TICK(msec)     div_const_roundup(msec, (uint32_t)MSEC_PER_TICK)
 #else
 #  define MSEC2TICK(msec)     USEC2TICK((msec) * USEC_PER_MSEC)
 #endif

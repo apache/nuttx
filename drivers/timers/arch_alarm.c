@@ -126,7 +126,7 @@ static void ndelay_accurate(unsigned long nanoseconds)
 static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
                              FAR void *arg)
 {
-#if defined(CONFIG_SCHED_TICKLESS) || defined(CONFIG_HRTIMER)
+#if defined(CONFIG_SCHED_TICKLESS)
   nxsched_process_timer();
 #else
   clock_t now;

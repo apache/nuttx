@@ -43,6 +43,7 @@
 
 #include "sched/sched.h"
 #include "wdog/wdog.h"
+#include "hrtimer/hrtimer.h"
 #include "clock/clock.h"
 
 /****************************************************************************
@@ -146,7 +147,7 @@ static inline void nxsched_process_scheduler(void)
 #endif
 
 /****************************************************************************
- * Name:  nxsched_process_tick
+ * Name:  nxsched_process_timer
  *
  * Description:
  *   This function handles system timer events.
@@ -165,7 +166,7 @@ static inline void nxsched_process_scheduler(void)
  *
  ****************************************************************************/
 
-void nxsched_process_tick(void)
+void nxsched_process_timer(void)
 {
 #ifdef CONFIG_CLOCK_TIMEKEEPING
   /* Process wall time */
@@ -185,7 +186,11 @@ void nxsched_process_tick(void)
 
   /* Process watchdogs */
 
+#ifdef CONFIG_HRTIMER
+  hrtimer_process(clock_systime_nsec());
+#else
   wd_timer(clock_systime_ticks());
+#endif
 
 #ifdef CONFIG_SYSTEMTICK_HOOK
   /* Call out to a user-provided function in order to perform board-specific,

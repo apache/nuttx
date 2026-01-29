@@ -36,75 +36,57 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: hrtimer_start
+ * Name: hrtimer_start_absolute
  *
  * Description:
  *   Start a high-resolution timer to expire after a specified duration
- *   in nanoseconds, either as an absolute or relative time.
+ *   in nanoseconds.
  *
  * Input Parameters:
- *   hrtimer - Pointer to the hrtimer structure.
+ *   hrtimer - Pointer to the hrtimer.
  *   func    - Expiration callback function.
- *   expired - Expiration time in nanoseconds. Interpretation
- *             depends on mode.
- *   mode    - Timer mode (HRTIMER_MODE_ABS or HRTIMER_MODE_REL).
+ *   expired - Expiration time in nanoseconds.
  *
  * Returned Value:
  *   OK (0) on success, or a negated errno value on failure.
  *
- * Assumptions/Notes:
- *   - This function disables interrupts briefly via spinlock to safely
- *     insert the timer into the container.
- *   - Absolute mode sets the timer to expire at the given absolute time.
- *   - Relative mode sets the timer to expire after 'ns'
- *     nanoseconds from the current time.
+ * Assumptions:
+ *   - hrtimer is not NULL and func is not NULL.
+ *
  ****************************************************************************/
 
-int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
-                  uint64_t expired,
-                  enum hrtimer_mode_e mode)
+int hrtimer_start_absolute(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
+                           uint64_t expired)
 {
-  uint64_t next_expired;
   irqstate_t flags;
-  int ret = OK;
+  bool       reprogram = false;
+  int        ret       = OK;
 
-  /* Compute absolute expiration time */
-
-  if (mode == HRTIMER_MODE_ABS)
-    {
-      next_expired = expired;
-    }
-  else
-    {
-      expired = expired <= HRTIMER_MAX_DELAY ? expired : HRTIMER_MAX_DELAY;
-      next_expired = clock_systime_nsec() + expired;
-    }
-
-  DEBUGASSERT(hrtimer != NULL);
+  DEBUGASSERT(hrtimer != NULL && func != NULL);
 
   /* Acquire the lock and seize the ownership of the hrtimer queue. */
 
   flags = write_seqlock_irqsave(&g_hrtimer_lock);
 
-  /* Ensure no core can write the hrtimer. */
+  /* Ensure no running core can write the hrtimer. */
 
   hrtimer_cancel_running(hrtimer);
 
-  if (hrtimer_is_armed(hrtimer))
+  if (hrtimer_is_pending(hrtimer))
     {
-      hrtimer_remove(hrtimer);
+      reprogram = hrtimer_remove(hrtimer);
     }
 
   hrtimer->func    = func;
-  hrtimer->expired = next_expired;
+  hrtimer->expired = expired;
 
   /* Insert the timer into the hrtimer queue. */
 
-  hrtimer_insert(hrtimer);
+  reprogram |= hrtimer_insert(hrtimer);
 
   /* If the inserted timer is now the earliest, start hardware timer */
 
-  if (hrtimer_is_first(hrtimer))
+  if (reprogram)
     {
       hrtimer_reprogram(hrtimer->expired);
     }

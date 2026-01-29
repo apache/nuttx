@@ -67,11 +67,8 @@
  *   OK (0) on success; a negated errno value on failure.
  *   > 0 on if the timer callback is running.
  *
- * Assumptions/Notes:
- *   - This function acquires the global hrtimer spinlock to protect
- *     the container.
- *   - The caller must ensure that the timer structure is not freed until
- *     it is guaranteed that any running callback has returned.
+ * Assumptions:
+ *   - The hrtimer is not NULL.
  *
  ****************************************************************************/
 
@@ -91,19 +88,14 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer)
 
   ret = hrtimer_cancel_running(hrtimer);
 
-  if (hrtimer_is_armed(hrtimer))
+  if (hrtimer_is_pending(hrtimer))
     {
-      hrtimer_remove(hrtimer);
-
       /* Update the hardware timer if the queue head changed. */
 
-      if (hrtimer_is_first(hrtimer))
+      if (hrtimer_remove(hrtimer))
         {
           first = hrtimer_get_first();
-          if (first != NULL)
-            {
-              hrtimer_reprogram(first->expired);
-            }
+          hrtimer_reprogram(first->expired);
         }
     }
 

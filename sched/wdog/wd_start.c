@@ -104,7 +104,7 @@
  *
  ****************************************************************************/
 
-static inline_function void wd_expiration(clock_t ticks)
+static inline_function clock_t wd_expiration(clock_t ticks)
 {
   FAR struct wdog_s *wdog;
   irqstate_t         flags;
@@ -156,10 +156,12 @@ static inline_function void wd_expiration(clock_t ticks)
 
   if (next_ticks != ticks)
     {
-      wd_timer_start(next_ticks);
+      wd_timer_start(next_ticks, true);
     }
 
   leave_critical_section(flags);
+
+  return next_ticks;
 }
 
 /****************************************************************************
@@ -283,7 +285,7 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
 
       /* If the wdog is canceling, restarting the wdog is not allowed. */
 
-#ifdef CONFIG_SCHED_TICKLESS
+#if defined(CONFIG_SCHED_TICKLESS) || defined(CONFIG_HRTIMER)
       /* We need to reassess timer if the watchdog
        * list head has changed.
        */
@@ -304,7 +306,7 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
            * changed, then this will pick that new delay.
            */
 
-          wd_timer_start(wd_next_expire());
+          wd_timer_start(wd_next_expire(), false);
         }
 #else
       UNUSED(reassess);
@@ -352,9 +354,21 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_HRTIMER
 void wd_timer(clock_t ticks)
 {
   /* Check if there are any active watchdogs to process */
 
   wd_expiration(ticks);
 }
+#else
+uint64_t wd_timer(const hrtimer_t *timer, uint64_t expired)
+{
+  /* Check if there are any active watchdogs to process */
+
+  clock_t  tick = div_const(expired, NSEC_PER_TICK);
+  clock_t delay = wd_expiration(tick) - tick;
+  uint64_t nsec = TICK2NSEC((uint64_t)delay);
+  return nsec <= HRTIMER_MAX_DELAY ? nsec : HRTIMER_MAX_DELAY;
+}
+#endif

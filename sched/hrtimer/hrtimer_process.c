@@ -40,9 +40,9 @@
  *
  * Description:
  *   Process all expired high-resolution timers. This function repeatedly
- *   retrieves the earliest timer from the active timer container, checks
+ *   retrieves the earliest timer from the active timer queue, checks
  *   if it has expired relative to the current time, removes it from the
- *   container, and invokes its callback function. Processing continues
+ *   queue, and invokes its callback function. Processing continues
  *   until:
  *
  *     1. No additional timers have expired, or
@@ -62,7 +62,7 @@
  *   None.
  *
  * Assumptions/Notes:
- *   - This function acquires a spinlock to protect the timer container.
+ *   - This function acquires a spinlock to protect the timer queue.
  *   - Timer callbacks are invoked with interrupts enabled
  *     to avoid deadlocks.
  *   - DEBUGASSERT ensures that timer callbacks are valid.
@@ -74,36 +74,30 @@ void hrtimer_process(uint64_t now)
   irqstate_t flags;
   hrtimer_entry_t func;
   uint64_t expired;
-  uint64_t period;
+  uint64_t delay;
   int cpu = this_cpu();
 
   /* Acquire the lock and seize the ownership of the hrtimer queue. */
 
   flags = write_seqlock_irqsave(&g_hrtimer_lock);
 
-  /* Fetch the earliest active timer */
-
-  hrtimer = hrtimer_get_first();
-
-  while (hrtimer != NULL)
+  for (; ; )
     {
-      func = hrtimer->func;
+      /* Fetch the earliest active timer */
 
-      /* Ensure the timer callback is valid */
-
-      DEBUGASSERT(func != NULL);
-
+      hrtimer = hrtimer_get_first();
       expired = hrtimer->expired;
 
       /* Check if the timer has expired */
 
-      if (!clock_compare(expired, now))
+      if (!HRTIMER_TIME_BEFORE_EQ(expired, now))
         {
           break;
         }
 
       /* Remove the expired timer from the timer queue */
 
+      func = hrtimer->func;
       hrtimer_remove(hrtimer);
 
       hrtimer_mark_running(hrtimer, cpu);
@@ -114,7 +108,12 @@ void hrtimer_process(uint64_t now)
 
       /* Invoke the timer callback */
 
-      period = func(hrtimer, expired);
+      delay = func(hrtimer, expired);
+
+      /* Ensure the delay is valid. */
+
+      DEBUGASSERT(HRTIMER_TIME_BEFORE_EQ(expired + delay,
+                                         now + HRTIMER_MAX_DELAY));
 
       /* Re-enter critical section to update timer state */
 
@@ -125,32 +124,23 @@ void hrtimer_process(uint64_t now)
        * re-insert into the timer queue.
        */
 
-      if (period != 0u && hrtimer_is_running(hrtimer, cpu))
+      if (delay != 0u && hrtimer_is_running(hrtimer, cpu))
         {
-          hrtimer->expired = expired + period;
-
-          /* Ensure no overflow occurs */
-
-          DEBUGASSERT(hrtimer->expired >= period);
-
-          hrtimer->func = func;
+          hrtimer->expired = expired + delay;
+          hrtimer->func    = func;
           hrtimer_insert(hrtimer);
         }
-
-      /* Fetch the next earliest timer */
-
-      hrtimer = hrtimer_get_first();
     }
 
   hrtimer_unmark_running(cpu);
 
   /* Schedule the next timer expiration */
 
-  if (hrtimer != NULL)
+  if (expired != now)
     {
       /* Start timer for the next earliest expiration */
 
-      hrtimer_reprogram(hrtimer->expired);
+      hrtimer_reprogram(expired);
     }
 
   /* Release the lock and give up the ownership of the hrtimer queue. */

@@ -77,16 +77,11 @@ struct hrtimer_s;
 typedef CODE uint64_t (*hrtimer_entry_t)(FAR const struct hrtimer_s *hrtimer,
                                          uint64_t expired);
 
-/* Hrtimer container node used to order hrtimers by expiration time */
-
-typedef struct hrtimer_node_s
-{
 #ifdef CONFIG_HRTIMER_TREE
-  RB_ENTRY(hrtimer_node_s) entry;  /* RB-tree linkage */
+typedef RB_ENTRY(hrtimer_s) hrtimer_node_t; /* RB-Tree node */
 #else
-  struct list_node entry;  /* List linkage */
+typedef struct list_node    hrtimer_node_t; /* List node */
 #endif
-} hrtimer_node_t;
 
 /* High-resolution timer object
  *
@@ -97,9 +92,9 @@ typedef struct hrtimer_node_s
 
 typedef struct hrtimer_s
 {
-  hrtimer_node_t node;   /* Container node for sorted insertion */
-  hrtimer_entry_t func;  /* Expiration callback function */
-  uint64_t expired;      /* Absolute expiration time (ns) */
+  hrtimer_node_t  node; /* Node for sorted insertion */
+  hrtimer_entry_t func; /* Expiration callback function */
+  uint64_t     expired; /* Absolute expiration time (ns) */
 } hrtimer_t;
 
 /****************************************************************************
@@ -118,17 +113,14 @@ extern "C"
  * Name: hrtimer_init
  *
  * Description:
- *   Initialize a high-resolution timer instance. This function sets the
- *   expiration callback and its argument. The timer is initialized in the
- *   inactive state and is not armed until hrtimer_start() is called.
+ *   Initialize a high-resolution timer instance.
  *
  * Input Parameters:
  *   hrtimer - Pointer to the hrtimer instance to be initialized
- *   func    - Expiration callback function
- *   arg     - Argument passed to the callback
  *
  * Returned Value:
  *   None
+ *
  ****************************************************************************/
 
 #define hrtimer_init(hrtimer) memset(hrtimer, 0, sizeof(hrtimer_t))
@@ -137,14 +129,23 @@ extern "C"
  * Name: hrtimer_cancel
  *
  * Description:
- *   Cancel a high-resolution timer asynchronously. This function set the
+ *   Cancel a high-resolution timer asynchronously.
+ *
+ *   If the timer is currently pending, it will be removed from the
+ *   hrtimer queue and will not be executed.
+ *
+ *   If the timer callback is currently executing. This function set the
  *   timer to the cancelled state. The caller will acquire the limited
  *   ownership of the hrtimer, which allow the caller restart the hrtimer,
- *   but the callback function may still be executing on another CPU, which
- *   prevent the caller from freeing the hrtimer. The caller must call
- *   `hrtimer_cancel` to wait for the callback to be finished. Please use
- *   the function with care. Concurrency errors are prone to occur in this
- *   use case.
+ *   but the callback function may still be executing on another CPU,
+ *   which prevent the caller from freeing the hrtimer.
+ *   The caller must call `hrtimer_cancel_sync` to wait for the callback
+ *   to be finished. Please use the function with care.
+ *   Concurrency errors are prone to occur in this use case.
+ *
+ *   If the canceled timer was the earliest expired timer in the queue,
+ *   the expiration of the underlying hardware timer will be updated to the
+ *   expiration time of the next earliest timer
  *
  *   This function is non-blocking and does not wait for a running callback
  *   to finish.
@@ -156,11 +157,8 @@ extern "C"
  *   OK (0) on success; a negated errno value on failure.
  *   > 0 on if the timer callback is running.
  *
- * Assumptions/Notes:
- *   - This function acquires the global hrtimer spinlock to protect both
- *     the red-black tree and the timer state.
- *   - The caller must ensure that the timer structure is not freed until
- *     it is guaranteed that any running callback has returned.
+ * Assumptions:
+ *   - The hrtimer is not NULL.
  *
  ****************************************************************************/
 
@@ -170,13 +168,16 @@ int hrtimer_cancel(FAR hrtimer_t *hrtimer);
  * Name: hrtimer_cancel_sync
  *
  * Description:
- *   Cancel a high-resolution timer and wait until it becomes inactive.
- *
  *   Cancel a high-resolution timer and synchronously wait the callback to
- *   be finished. This function set the timer to the cancelled state and wait
- *   for all references to be released. The caller will then acquire full
- *   ownership of the hrtimer. After the function returns, the caller can
- *   safely deallocate the hrtimer.
+ *   be finished.
+ *
+ *   If the timer callback is running, this function set the timer to the
+ *   cancelled state and wait for all all references to be released.
+ *   The caller will then acquire full ownership of the hrtimer. After the
+ *   function returns, the caller can safely deallocate the hrtimer.
+ *   - If sleeping is allowed (normal task context), yields CPU briefly
+ *     to avoid busy-waiting.
+ *   - Otherwise (interrupt or idle task context), spins until completion.
  *
  * Input Parameters:
  *   hrtimer - Pointer to the high-resolution timer instance to cancel.
@@ -198,18 +199,33 @@ int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer);
  *   a relative timeout, depending on the selected mode.
  *
  * Input Parameters:
- *   hrtimer - Timer instance to start
+ *   hrtimer - Pointer to high-resolution timer.
  *   func    - Expiration callback function
  *   expired - Expiration time in nanoseconds
  *   mode    - HRTIMER_MODE_ABS or HRTIMER_MODE_REL
  *
  * Returned Value:
  *   OK on success; a negated errno value on failure.
+ *
  ****************************************************************************/
 
+int hrtimer_start_absolute(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
+                           uint64_t expired);
+
+static inline_function
 int hrtimer_start(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
-                  uint64_t expired,
-                  enum hrtimer_mode_e mode);
+                  uint64_t expired, enum hrtimer_mode_e mode)
+{
+  /* In most cases, the mode can be evaluated at compile time.
+   * The compiler will optimize the code to avoid the branch.
+   */
+
+  uint64_t next_expired = mode == HRTIMER_MODE_ABS ? expired :
+                          clock_systime_nsec() +
+                          (expired <= HRTIMER_MAX_DELAY ?
+                           expired : HRTIMER_MAX_DELAY);
+  return hrtimer_start_absolute(hrtimer, func, next_expired);
+}
 
 /****************************************************************************
  * Name: hrtimer_gettime
