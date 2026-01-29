@@ -126,7 +126,13 @@ config HAVE_SECURITY_CORE
 if ARCH_CHIP_TC3XX
 source "arch/tricore/src/tc3xx/Kconfig"
 endif
+if ARCH_CHIP_TC4XX
+source "arch/tricore/src/tc4xx/Kconfig"
+endif
 if ARCH_CHIP_TC397
 source "arch/tricore/src/tc397/Kconfig"
+endif
+if ARCH_CHIP_TC4DA
+source "arch/tricore/src/tc4da/Kconfig"
 endif
 endif # ARCH_TRICORE

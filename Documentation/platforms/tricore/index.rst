@@ -31,8 +31,8 @@ The core Chip implementation is based on Infineon Low Level Drivers (iLLDs).
 The unified API is more friendly to developers familiar with Infineon SDK/HAL.
 We can get more code examples on Infineon's official Github: `AURIX_code_examples <https://github.com/Infineon/AURIX_code_examples>`__
 
-``TC3xx``
-  This is the implementation of NuttX on the Infineon’s AURIX™- TC3xx microcontroller family.
+``TC3xx/TC4xx``
+  This is the implementation of NuttX on the Infineon’s AURIX™- TC3xx/TC4xx microcontroller family.
 
 .. toctree::
    :maxdepth: 1
