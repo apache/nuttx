@@ -53,6 +53,7 @@ int psock_local_bind(FAR struct socket *psock,
   FAR struct local_conn_s *conn = psock->s_conn;
   FAR const struct sockaddr_un *unaddr =
     (FAR const struct sockaddr_un *)addr;
+  FAR struct local_conn_s *found;
   int index;
 #ifdef CONFIG_NET_LOCAL_DGRAM
   int ret;
@@ -77,10 +78,18 @@ int psock_local_bind(FAR struct socket *psock,
       return -EINVAL;
     }
 
-  /* Check if local address is already in use */
+  /* Check if local address is already in use.
+   * Check for LOCAL_STATE_BOUND or LOCAL_STATE_LISTENING connections.
+   * This ensures that a socket that is bound (or listening) will block
+   * new binds. Note that accepted connections are in LOCAL_STATE_CONNECTED
+   * state, so they won't block new binds, allowing server restart.
+   */
 
   local_lock();
-  if (local_findconn(conn, unaddr) != NULL)
+  found = local_findconn(conn, unaddr);
+  if (found != NULL &&
+      (found->lc_state == LOCAL_STATE_BOUND ||
+       found->lc_state == LOCAL_STATE_LISTENING))
     {
       local_unlock();
       return -EADDRINUSE;
