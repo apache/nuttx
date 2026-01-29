@@ -30,33 +30,25 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <elf.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ELF_CLASS              ELFCLASS32
+#ifndef EI_NIDENT
+#  define EI_NIDENT            16     /* Size of e_ident[] */
+#endif
 
 #define ELF32_ST_BIND(i)       ((i) >> 4)
 #define ELF32_ST_TYPE(i)       ((i) & 0xf)
 #define ELF32_ST_INFO(b,t)     (((b) << 4) | ((t) & 0xf))
 #define ELF32_ST_VISIBILITY(o) ((o) & 0x3)
 
-/* Generic macro to abstract ELF32/ELF64 type/bind */
-
-#define ELF_ST_TYPE(a)         ELF32_ST_TYPE(a)
-#define ELF_ST_BIND(a)         ELF32_ST_BIND(a)
-#define ELF_ST_VISIBILITY(o)   ELF32_ST_VISIBILITY(o)
-
 /* Definitions for Elf32_Rel*::r_info */
 
 #define ELF32_R_SYM(i)         ((i) >> 8)
 #define ELF32_R_TYPE(i)        ((i) & 0xff)
 #define ELF32_R_INFO(s,t)      (((s)<< 8) | ((t) & 0xff))
-
-#define ELF_R_SYM(i)           ELF32_R_SYM(i)
-#define ELF_R_TYPE(i)          ELF32_R_TYPE(i)
 
 /****************************************************************************
  * Public Type Definitions
@@ -167,17 +159,5 @@ typedef struct
     Elf32_Addr  d_ptr;
   } d_un;
 } Elf32_Dyn;
-
-typedef Elf32_Addr Elf_Addr;
-typedef Elf32_Ehdr Elf_Ehdr;
-typedef Elf32_Rel  Elf_Rel;
-typedef Elf32_Rela Elf_Rela;
-typedef Elf32_Nhdr Elf_Nhdr;
-typedef Elf32_Phdr Elf_Phdr;
-typedef Elf32_Sym  Elf_Sym;
-typedef Elf32_Shdr Elf_Shdr;
-typedef Elf32_Off  Elf_Off;
-typedef Elf32_Word Elf_Word;
-typedef Elf32_Dyn  Elf_Dyn;
 
 #endif /* __INCLUDE_ELF32_H */
