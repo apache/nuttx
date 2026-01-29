@@ -179,7 +179,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 
 #ifdef CONFIG_BUILD_PROTECTED
   struct mm_heap_s *const *heap =
-    (struct mm_heap_s *const *)USERSPACE->us_heap;
+    (struct mm_heap_s *const *)USERSPACE_HEAP;
   void *const *bssend = (void *const *)USERSPACE->us_bssend;
   void *const *heapend = (void *const *)USERSPACE->us_heapend;
 

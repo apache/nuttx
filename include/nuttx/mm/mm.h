@@ -124,7 +124,7 @@
  * structure from the userspace interface.
  */
 
-#  define USR_HEAP (*USERSPACE->us_heap)
+#  define USR_HEAP (*USERSPACE->us_data->us_heap)
 
 #else
 /* Otherwise, the user heap data structures are in common .bss */

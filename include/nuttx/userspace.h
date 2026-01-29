@@ -77,6 +77,11 @@
 
 struct mm_heap_s; /* Forward reference */
 
+struct userspace_data_s
+{
+  FAR struct mm_heap_s **us_heap;
+};
+
 /* Every user-space blob starts with a header that provides information about
  * the blob.  The form of that header is provided by struct userspace_s. An
  * instance of this is expected to reside at CONFIG_NUTTX_USERSPACE.
@@ -96,9 +101,9 @@ struct userspace_s
   uintptr_t us_bssend;
   uintptr_t us_heapend;
 
-  /* Memory manager heap structure */
+  /* User data memory structure */
 
-  FAR struct mm_heap_s **us_heap;
+  FAR struct userspace_data_s *us_data;
 
   /* Task startup routine */
 
