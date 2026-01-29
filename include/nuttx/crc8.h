@@ -124,6 +124,50 @@ uint8_t crc8rohc(FAR const uint8_t *src, size_t len);
 
 uint8_t crc8rohcincr(uint8_t data_byte, uint8_t crc8val);
 
+/****************************************************************************
+ * Name: crc8h1d_part
+ *
+ * Description:
+ *   Continue CRC calculation on a part of the buffer
+ *   using the 0x1D polynomial.
+ *
+ ****************************************************************************/
+
+uint8_t crc8h1d_part(FAR const uint8_t *src, size_t len, uint8_t crc8val);
+
+/****************************************************************************
+ * Name: crc8h1d
+ *
+ * Description:
+ *   Return a 8-bit CRC of the contents of the 'src' buffer, length 'len'
+ *   using the 0x1D polynomial.
+ *
+ ****************************************************************************/
+
+uint8_t crc8h1d(FAR const uint8_t *src, size_t len);
+
+/****************************************************************************
+ * Name: crc8h2f_part
+ *
+ * Description:
+ *   Continue CRC calculation on a part of the buffer
+ *   using the 0x2F polynomial.
+ *
+ ****************************************************************************/
+
+uint8_t crc8h2f_part(FAR const uint8_t *src, size_t len, uint8_t crc8val);
+
+/****************************************************************************
+ * Name: crc8h2f
+ *
+ * Description:
+ *   Return a 8-bit CRC of the contents of the 'src' buffer, length 'len'
+ *   using the 0x2F polynomial.
+ *
+ ****************************************************************************/
+
+uint8_t crc8h2f(FAR const uint8_t *src, size_t len);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

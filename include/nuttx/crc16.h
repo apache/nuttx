@@ -205,6 +205,52 @@ uint16_t crc16xmodempart(FAR const uint8_t *src, size_t len,
 
 uint16_t crc16xmodem(FAR const uint8_t *src, size_t len);
 
+/****************************************************************************
+ * Name: crc16h1021_part
+ *
+ * Description:
+ *   Continue CRC calculation on a part of the buffer
+ *   using the 0x1021 polynomial.
+ *
+ ****************************************************************************/
+
+uint16_t crc16h1021_part(FAR const uint8_t *src,
+                         size_t len, uint16_t crc16val);
+
+/****************************************************************************
+ * Name: crc16h1021
+ *
+ * Description:
+ *   Return a 16-bit CRC of the contents of the 'src' buffer, length 'len'
+ *   using the 0x1021 polynomial.
+ *
+ ****************************************************************************/
+
+uint16_t crc16h1021(FAR const uint8_t *src, size_t len);
+
+/****************************************************************************
+ * Name: crc16h8005_part
+ *
+ * Description:
+ *   Continue CRC calculation on a part of the buffer
+ *   using the 0x8005 polynomial.
+ *
+ ****************************************************************************/
+
+uint16_t crc16h8005_part(FAR const uint8_t *src,
+                         size_t len, uint16_t crc16val);
+
+/****************************************************************************
+ * Name: crc16h8005
+ *
+ * Description:
+ *   Return a 16-bit CRC of the contents of the 'src' buffer, length 'len'
+ *   using the 0x8005 polynomial.
+ *
+ ****************************************************************************/
+
+uint16_t crc16h8005(FAR const uint8_t *src, size_t len);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
