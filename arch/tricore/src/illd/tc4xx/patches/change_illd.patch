@@ -1,0 +1,49 @@
+diff --git a/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/Infra/Ssw/TC4xx/Tricore/Ifx_Ssw_Infra.c b/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/Infra/Ssw/TC4xx/Tricore/Ifx_Ssw_Infra.c
+index cf3c6c74010..f386599481e 100644
+--- a/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/Infra/Ssw/TC4xx/Tricore/Ifx_Ssw_Infra.c
++++ b/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/Infra/Ssw/TC4xx/Tricore/Ifx_Ssw_Infra.c
+@@ -429,6 +429,7 @@ void Ifx_Ssw_doCppInit(void)
+ {
+     Ifx_Ssw_C_InitInline();
+ 
++#ifndef __NuttX__
+ #ifdef __TASKING__
+     extern void _main(void); /* cpp initialization */
+     _main();
+@@ -451,10 +452,12 @@ void Ifx_Ssw_doCppInit(void)
+ #elif defined(__DCC__)
+     /* Cpp Init part of the init_main called in C Init Inline */
+ #endif
++#endif
+ }
+ 
+ void Ifx_Ssw_doCppExit(int status)
+ {
++#ifndef __NuttX__
+ #ifdef __TASKING__
+     extern void _doexit(void); /* cpp deinitialization */
+     _doexit();
+@@ -474,6 +477,7 @@ void Ifx_Ssw_doCppExit(int status)
+     extern void exit(int); /* cpp deinitialization */
+     exit(0);
+ #endif
++#endif
+ }
+ 
+ 
+diff --git a/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/iLLD/TC4xx/Tricore/Vmt/Std/IfxVmt.c b/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/iLLD/TC4xx/Tricore/Vmt/Std/IfxVmt.c
+index 1a374455afb..a7241ec536c 100644
+--- a/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/iLLD/TC4xx/Tricore/Vmt/Std/IfxVmt.c
++++ b/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/iLLD/TC4xx/Tricore/Vmt/Std/IfxVmt.c
+@@ -113,8 +113,9 @@ void IfxVmt_clearSramStart(IfxVmt_MbistSel mbistSel)
+     {}
+ 
+     /* start init operation */
+-    mc->MCONTROL.U = (1 << IFX_VMT_MC_MCONTROL_SRAM_CLR_OFF) | (1 << IFX_VMT_MC_MCONTROL_START_OFF); /* START = SRAM_CLR = 1 */
+-    mc->MCONTROL.U &= ~(1 << IFX_VMT_MC_MCONTROL_SRAM_CLR_OFF);
++    uint16 mcontrolMask = 0x4000;                                                                                   /* set USERED flag */
++    mc->MCONTROL.U = mcontrolMask | (1 << IFX_VMT_MC_MCONTROL_SRAM_CLR_OFF) | (1 << IFX_VMT_MC_MCONTROL_START_OFF); /* START = SRAM_CLR = 1 */
++    mc->MCONTROL.U = mcontrolMask | (1 << IFX_VMT_MC_MCONTROL_SRAM_CLR_OFF);
+ }
+ 
+ 

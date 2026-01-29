@@ -31,7 +31,7 @@ elseif(CONFIG_ARCH_CHIP_TC4XX)
   set(ARCH_SUBDIR tc4xx)
 endif()
 
-include(chip.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/chip.cmake)
 
 set(TOOLCHAIN_PREFIX tricore-elf)
 set(CMAKE_LIBRARY_ARCHITECTURE ${TOOLCHAIN_PREFIX})

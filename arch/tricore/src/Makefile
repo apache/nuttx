@@ -22,6 +22,7 @@
 
 include $(TOPDIR)/Make.defs
 include chip/Make.defs
+include common/Make.defs
 
 ifeq ($(CONFIG_ARCH_CHIP_TC3XX),y)
 ARCH_SUBDIR = tc3xx

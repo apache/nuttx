@@ -216,7 +216,12 @@ void up_affinity_irq(int irq, cpu_set_t cpuset)
    * so routing to the first cpu in cpuset.
    */
 
+#ifdef CONFIG_ARCH_CHIP_TC3XX
   IfxSrc_init(src, ffs(cpuset) - 1, irq_prio);
+#else
+  IfxSrc_init(src, ffs(cpuset) - 1, irq_prio, IfxSrc_VmId_none);
+#endif
+
   IfxSrc_enable(src);
 }
 
