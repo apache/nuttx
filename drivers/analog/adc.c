@@ -43,6 +43,7 @@
 #include <nuttx/analog/ioctl.h>
 #include <nuttx/random.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/spinlock.h>
 
 #include <nuttx/irq.h>
 

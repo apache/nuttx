@@ -31,6 +31,7 @@
 #include <debug.h>
 
 #include <nuttx/spi/spi.h>
+#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 
 #include "mips_internal.h"

@@ -29,6 +29,7 @@
 #include <sched.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include "signal/signal.h"
 

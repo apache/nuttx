@@ -54,15 +54,8 @@
 void sim_sigdeliver(void)
 {
   struct tcb_s *rtcb = current_task(this_cpu());
-#ifdef CONFIG_SMP
-  /* In the SMP case, we must terminate the critical section while the signal
-   * handler executes, but we also need to restore the irqcount when the
-   * we resume the main thread of the task.
-   */
-
-  int16_t saved_irqcount;
   irqstate_t flags;
-#endif
+
   if (NULL == (rtcb->sigdeliver))
     {
       return;
@@ -72,10 +65,6 @@ void sim_sigdeliver(void)
    * up_irq_enable() up_irq_save() used in other architectures
    */
 
-#ifdef CONFIG_SMP
-  flags = enter_critical_section();
-#endif
-
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
         rtcb, rtcb->sigdeliver, rtcb->sigpendactionq.head);
   DEBUGASSERT(rtcb->sigdeliver != NULL);
@@ -83,25 +72,6 @@ void sim_sigdeliver(void)
   /* NOTE: we do not save the return state for sim */
 
 retry:
-#ifdef CONFIG_SMP
-  /* In the SMP case, up_schedule_sigaction(0) will have incremented
-   * 'irqcount' in order to force us into a critical section.  Save the
-   * pre-incremented irqcount.
-   */
-
-  saved_irqcount = rtcb->irqcount;
-  DEBUGASSERT(saved_irqcount >= 1);
-
-  /* Now we need call leave_critical_section() repeatedly to get the irqcount
-   * to zero, freeing all global spinlocks that enforce the critical section.
-   */
-
-  do
-    {
-      leave_critical_section(flags);
-    }
-  while (rtcb->irqcount > 0);
-#endif /* CONFIG_SMP */
 
   /* Deliver the signal */
 
@@ -117,21 +87,11 @@ retry:
 
   sinfo("Resuming\n");
 
-#ifdef CONFIG_SMP
-  /* Restore the saved 'irqcount' and recover the critical section
-   * spinlocks.
-   */
-
-  DEBUGASSERT(rtcb->irqcount == 0);
-  while (rtcb->irqcount < saved_irqcount)
-    {
-      enter_critical_section();
-    }
-#endif
-
+  flags = enter_critical_section();
   if (!sq_empty(&rtcb->sigpendactionq) &&
       (rtcb->flags & TCB_FLAG_SIGNAL_ACTION) == 0)
     {
+      leave_critical_section(flags);
       goto retry;
     }
 
@@ -141,9 +101,7 @@ retry:
 
   /* NOTE: we leave a critical section here for sim */
 
-#ifdef CONFIG_SMP
   leave_critical_section(flags);
-#endif
 
   /* NOTE: we do not restore the return state for sim */
 }

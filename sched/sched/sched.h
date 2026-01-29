@@ -119,6 +119,31 @@
 #  define CRITMONITOR_PANIC(fmt, ...) _alert(fmt, ##__VA_ARGS__)
 #endif
 
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
+    CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0 || \
+    defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
+void restore_critical_section(uint16_t count);
+#else
+#  ifdef CONFIG_SMP
+#    define restore_critical_section(count) rspin_restorelock(&g_schedlock, count)
+#  else
+#    define restore_critical_section(count)
+#  endif
+#endif
+
+#define nxsched_switch(tcb, rtcb) \
+  do \
+    { \
+      uint16_t count = rspin_lock_count(&g_schedlock); \
+      up_switch_context(tcb, rtcb); \
+      if (!up_interrupt_context()) \
+        { \
+          restore_critical_section(count); \
+        } \
+      UNUSED(count); \
+    } \
+  while (0)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -284,24 +309,6 @@ extern volatile clock_t g_cpuload_total;
  * No special protection is required since only the executing task can
  * modify its lockcount.
  */
-
-#ifdef CONFIG_SMP
-
-/* This is the spinlock that enforces critical sections when interrupts are
- * disabled.
- */
-
-extern volatile spinlock_t g_cpu_irqlock;
-
-/* Used to keep track of which CPU(s) hold the IRQ lock. */
-
-extern volatile cpu_set_t g_cpu_irqset;
-
-/* Used to lock tasklist to prevent from concurrent access */
-
-extern volatile spinlock_t g_cpu_tasklistlock;
-
-#endif /* CONFIG_SMP */
 
 /****************************************************************************
  * Public Function Prototypes

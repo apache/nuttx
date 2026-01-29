@@ -31,6 +31,7 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 
 #include "avr_internal.h"

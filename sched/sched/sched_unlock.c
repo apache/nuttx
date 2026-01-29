@@ -98,7 +98,7 @@ void sched_unlock(void)
           if (ptcb && nxsched_merge_pending())
 #endif
             {
-              up_switch_context(this_task(), rtcb);
+              nxsched_switch(this_task(), rtcb);
             }
 
 #if CONFIG_RR_INTERVAL > 0

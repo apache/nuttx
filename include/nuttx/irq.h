@@ -96,16 +96,6 @@
 #  define NDX_TO_IRQ(ndx) (ndx)
 #endif
 
-#ifdef CONFIG_SMP
-#  define cpu_irqlock_clear() \
-  do \
-    { \
-      g_cpu_irqset = 0; \
-      spin_unlock_notrace(&g_cpu_irqlock); \
-    } \
-  while (0)
-#endif
-
 /* Stack alignment macros */
 
 #ifdef CONFIG_TLS_ALIGNED
@@ -306,117 +296,6 @@ int irq_attach_wqueue(int irq, xcpt_t isr, xcpt_t isrwork,
 int irqchain_detach(int irq, xcpt_t isr, FAR void *arg);
 #else
 #  define irqchain_detach(irq, isr, arg) irq_detach(irq)
-#endif
-
-/****************************************************************************
- * Name: enter_critical_section
- *
- * Description:
- *   If thread-specific IRQ counter is enabled (for SMP or other
- *   instrumentation):
- *
- *     Take the CPU IRQ lock and disable interrupts on all CPUs.  A thread-
- *     specific counter is incremented to indicate that the thread has IRQs
- *     disabled and to support nested calls to enter_critical_section().
- *
- *     NOTE: Most architectures do not support disabling all CPUs from one
- *     CPU.  ARM is an example.  In such cases, logic in
- *     enter_critical_section() will still manage entrance into the
- *     protected logic using spinlocks.
- *
- *   If thread-specific IRQ counter is not enabled:
- *
- *     This function is equivalent to up_irq_save().
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   An opaque, architecture-specific value that represents the state of
- *   the interrupts prior to the call to enter_critical_section();
- *
- ****************************************************************************/
-
-#ifdef CONFIG_IRQCOUNT
-#  if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
-      CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0 || \
-      defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
-irqstate_t enter_critical_section(void) noinstrument_function;
-#  else
-#    define enter_critical_section() enter_critical_section_notrace()
-#  endif
-
-irqstate_t enter_critical_section_notrace(void) noinstrument_function;
-#else
-#  define enter_critical_section() up_irq_save()
-#  define enter_critical_section_notrace() up_irq_save()
-#endif
-
-/****************************************************************************
- * Name: leave_critical_section
- *
- * Description:
- *   If thread-specific IRQ counter is enabled (for SMP or other
- *   instrumentation):
- *
- *     Decrement the IRQ lock count and if it decrements to zero then release
- *     the spinlock and restore the interrupt state as it was prior to the
- *     previous call to enter_critical_section().
- *
- *   If thread-specific IRQ counter is not enabled:
- *
- *     This function is equivalent to up_irq_restore().
- *
- * Input Parameters:
- *   flags - The architecture-specific value that represents the state of
- *           the interrupts prior to the call to enter_critical_section();
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_IRQCOUNT
-#  if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
-      defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
-void leave_critical_section(irqstate_t flags) noinstrument_function;
-#  else
-#    define leave_critical_section(f) leave_critical_section_notrace(f)
-#  endif
-
-void leave_critical_section_notrace(irqstate_t flags) noinstrument_function;
-#else
-#  define leave_critical_section(f) up_irq_restore(f)
-#  define leave_critical_section_notrace(f) up_irq_restore(f)
-#endif
-
-/****************************************************************************
- * Name: restore_critical_section
- *
- * Description:
- *   Restore the critical_section
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SMP
-#  define restore_critical_section(tcb, cpu) \
-   do { \
-       if (tcb->irqcount <= 0) \
-         {\
-           if ((g_cpu_irqset & (1 << cpu)) != 0) \
-             { \
-               cpu_irqlock_clear(); \
-             } \
-         } \
-    } while (0)
-#else
-#  define restore_critical_section(tcb, cpu)
 #endif
 
 #undef EXTERN

@@ -36,6 +36,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/timers/watchdog.h>
+#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 
 #include "hardware/bl602_timer.h"

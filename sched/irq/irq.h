@@ -80,22 +80,6 @@ extern struct irq_info_s g_irqvector[CONFIG_ARCH_NUSER_INTERRUPTS];
 extern struct irq_info_s g_irqvector[NR_IRQS];
 #endif
 
-#ifdef CONFIG_SMP
-/* This is the spinlock that enforces critical sections when interrupts are
- * disabled.
- */
-
-extern volatile spinlock_t g_cpu_irqlock;
-
-/* Used to keep track of which CPU(s) hold the IRQ lock. */
-
-extern volatile cpu_set_t g_cpu_irqset;
-
-/* Handles nested calls to enter_critical section from interrupt handlers */
-
-extern volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

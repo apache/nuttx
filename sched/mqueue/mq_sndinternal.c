@@ -195,7 +195,7 @@ int nxmq_wait_send(FAR struct mqueue_inode_s *msgq,
 
       /* Now, perform the context switch */
 
-      up_switch_context(this_task(), rtcb);
+      nxsched_switch(this_task(), rtcb);
 
       /* When we resume at this point, either (1) the message queue
        * is no longer empty, or (2) the wait has been interrupted by
@@ -300,7 +300,7 @@ void nxmq_notify_send(FAR struct mqueue_inode_s *msgq)
 
       if (nxsched_add_readytorun(btcb))
         {
-          up_switch_context(this_task(), rtcb);
+          nxsched_switch(this_task(), rtcb);
         }
     }
 }

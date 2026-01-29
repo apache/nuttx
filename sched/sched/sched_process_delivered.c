@@ -63,26 +63,11 @@
 void nxsched_process_delivered(int cpu)
 {
   enum task_deliver_e priority;
+  irqstate_t flags;
 
-  DEBUGASSERT(g_cpu_nestcount[cpu] == 0);
   DEBUGASSERT(up_interrupt_context());
 
-  if ((g_cpu_irqset & (1 << cpu)) == 0)
-    {
-      /* If CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0,
-       * start counting time of busy-waiting.
-       */
-
-      nxsched_critmon_busywait(true, return_address(0));
-
-      spin_lock_notrace(&g_cpu_irqlock);
-
-      /* Get the lock, end counting busy-waiting */
-
-      nxsched_critmon_busywait(false, return_address(0));
-
-      g_cpu_irqset |= (1 << cpu);
-    }
+  flags = enter_critical_section();
 
   priority = g_delivertasks[cpu];
   g_delivertasks[cpu] = SWITCH_NONE;
@@ -113,8 +98,5 @@ void nxsched_process_delivered(int cpu)
         }
     }
 
-  if (current_task(cpu)->irqcount <= 0)
-    {
-      cpu_irqlock_clear();
-    }
+  leave_critical_section(flags);
 }

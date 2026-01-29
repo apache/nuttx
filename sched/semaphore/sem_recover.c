@@ -32,6 +32,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/mm/kmap.h>
+#include <nuttx/spinlock.h>
 
 #include "semaphore/semaphore.h"
 

@@ -102,7 +102,7 @@ int xtensa_swint(int irq, void *context, void *arg)
       case SYS_restore_context:
       case SYS_switch_context:
         {
-          restore_critical_section(tcb, this_cpu());
+          break_critical_section();
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
           svcinfo("SYSCALL Return: Context switch!\n");
           up_dump_register(tcb->xcp.regs);

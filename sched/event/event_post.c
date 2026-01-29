@@ -144,7 +144,7 @@ int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
     {
       /* Switch context to the highest priority ready-to-run task */
 
-      up_switch_context(this_task(), rtcb);
+      nxsched_switch(this_task(), rtcb);
     }
 
   leave_critical_section(flags);

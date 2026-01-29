@@ -33,6 +33,7 @@
 #include <errno.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include <chip.h>
 

@@ -29,6 +29,7 @@
 #include <time.h>
 #include <errno.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
 
 #include "altmdm_event.h"

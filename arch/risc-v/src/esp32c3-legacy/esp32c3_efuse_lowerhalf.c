@@ -31,6 +31,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/efuse/efuse.h>
+#include <nuttx/spinlock.h>
 
 #include "hardware/esp32c3_soc.h"
 #include "esp32c3_efuse.h"

@@ -71,9 +71,7 @@ void up_exit(int status)
 
   g_running_tasks[this_cpu()] = tcb;
 
-  /* Restore the cpu lock */
-
-  restore_critical_section(tcb, this_cpu());
+  break_critical_section();
 
   /* Then switch contexts */
 

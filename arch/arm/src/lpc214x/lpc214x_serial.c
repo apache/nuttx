@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/spinlock.h>
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -38,6 +39,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/spinlock.h>
 
 #include "chip.h"
 #include "arm_internal.h"

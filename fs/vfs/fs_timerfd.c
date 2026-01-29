@@ -36,6 +36,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 
 #include <sys/ioctl.h>
 #include <sys/timerfd.h>

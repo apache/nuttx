@@ -36,6 +36,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/timers/watchdog.h>
+#include <nuttx/spinlock.h>
 
 #include "riscv_internal.h"
 #include "hardware/esp32c3_soc.h"

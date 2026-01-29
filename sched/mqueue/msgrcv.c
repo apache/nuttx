@@ -139,7 +139,7 @@ static int msgrcv_wait(FAR struct msgq_s *msgq, FAR struct msgbuf_s **rcvmsg,
 
       /* Now, perform the context switch */
 
-      up_switch_context(this_task(), rtcb);
+      nxsched_switch(this_task(), rtcb);
 
       /* When we resume at this point, either (1) the message queue
        * is no longer empty, or (2) the wait has been interrupted by
@@ -266,7 +266,7 @@ ssize_t msgrcv(int msqid, FAR void *msgp, size_t msgsz, long msgtyp,
 
       if (nxsched_add_readytorun(btcb))
         {
-          up_switch_context(this_task(), rtcb);
+          nxsched_switch(this_task(), rtcb);
         }
     }
 
