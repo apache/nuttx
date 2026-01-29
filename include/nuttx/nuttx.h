@@ -76,6 +76,6 @@
  */
 
 #define container_of(ptr, type, member) \
-  ((type *)((uintptr_t)(ptr) - offsetof(type, member)))
+  ((type *)((FAR char *)(ptr) - offsetof(type, member)))
 
 #endif /* __INCLUDE_NUTTX_NUTTX_H */

@@ -67,7 +67,7 @@
  */
 
 #define list_container_of(ptr, type, member) \
-  ((type *)((uintptr_t)(ptr) - offsetof(type, member)))
+  ((type *)((FAR char *)(ptr) - offsetof(type, member)))
 
 #define LIST_INITIAL_VALUE(list) { &(list), &(list) }
 #define LIST_INITIAL_CLEARED_VALUE { NULL, NULL }
