@@ -1,0 +1,64 @@
+From 502673fc80f0cfc1454b4ea7f106ab667f337b81 Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Wed, 28 Jan 2026 21:37:53 +0800
+Subject: [PATCH 18/18] lib/rpmsg: add priority support for rpmsg endpoint
+
+Add priority field to rpmsg_endpoint structure to support
+message prioritization. This allows different endpoints to
+have different priority levels for scheduling purposes.
+
+Changes:
+- Define priority constants (MIN=0, DEFAULT=127, MAX=255)
+- Add RPMSG_PRIO_RT alias for real-time priority
+- Add priority field to struct rpmsg_endpoint
+- Initialize priority to default value in rpmsg_register_endpoint()
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/include/openamp/rpmsg.h | 8 ++++++++
+ lib/rpmsg/rpmsg.c           | 3 +++
+ 2 files changed, 11 insertions(+)
+
+diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
+index 5b702339aa..2d89084dc4 100644
+--- a/lib/include/openamp/rpmsg.h
++++ open-amp/lib/include/openamp/rpmsg.h
+@@ -53,6 +53,11 @@ extern "C" {
+ #define RPMSG_ERR_PERM			(RPMSG_ERROR_BASE - 8)
+ #define RPMSG_EOPNOTSUPP		(RPMSG_ERROR_BASE - 9)
+ 
++#define RPMSG_PRIO_MIN			0
++#define RPMSG_PRIO_DEFAULT		127
++#define RPMSG_PRIO_MAX			255
++#define RPMSG_PRIO_RT			RPMSG_PRIO_MAX
++
+ struct rpmsg_endpoint;
+ struct rpmsg_device;
+ 
+@@ -102,6 +107,9 @@ struct rpmsg_endpoint {
+ 	/** Endpoint service unbind callback, called when remote ept is destroyed */
+ 	rpmsg_ns_unbind_cb ns_unbind_cb;
+ 
++	/** The priority of current rpmsg endpoint */
++	uint8_t priority;
++
+ 	/** Endpoint node */
+ 	struct metal_list node;
+ 
+diff --git a/lib/rpmsg/rpmsg.c open-amp/lib/rpmsg/rpmsg.c
+index 28a8de61b3..04953d19d1 100644
+--- a/lib/rpmsg/rpmsg.c
++++ open-amp/lib/rpmsg/rpmsg.c
+@@ -318,6 +318,9 @@ void rpmsg_register_endpoint(struct rpmsg_device *rdev,
+ 	ept->ns_unbind_cb = ns_unbind_cb;
+ 	ept->priv = priv;
+ 	ept->rdev = rdev;
++	if (ept->priority == RPMSG_PRIO_MIN)
++		ept->priority = RPMSG_PRIO_DEFAULT;
++
+ 	metal_list_add_tail(&rdev->endpoints, &ept->node);
+ }
+ 
+-- 
+2.34.1
+
