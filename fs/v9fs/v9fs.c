@@ -108,6 +108,20 @@ static int v9fs_vfs_stat(FAR struct inode *mountpt,
 static int v9fs_vfs_chstat(FAR struct inode *mountpt,
                            FAR const char *relpath,
                            FAR const struct stat *buf, int flags);
+#ifdef CONFIG_FS_LINKS
+static int v9fs_vfs_link(FAR struct inode *mountpt,
+                         FAR const char *relpath1,
+                         FAR const char *relpath2);
+static int v9fs_vfs_symlink(FAR struct inode *mountpt,
+                            FAR const char *path1,
+                            FAR const char *relpath2);
+static ssize_t v9fs_vfs_readlink(FAR struct inode *mountpt,
+                                 FAR const char *relpath,
+                                 FAR char *buffer, size_t buflen);
+static int v9fs_vfs_lstat(FAR struct inode *mountpt,
+                          FAR const char *relpath,
+                          FAR struct stat *buf);
+#endif
 static int v9fs_vfs_bind(FAR struct inode *driver, FAR const void *data,
                          FAR void **handle);
 static int v9fs_vfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
@@ -150,7 +164,16 @@ const struct mountpt_operations g_v9fs_operations =
   v9fs_vfs_rmdir,               /* rmdir */
   v9fs_vfs_rename,              /* rename */
   v9fs_vfs_stat,                /* stat */
-  v9fs_vfs_chstat               /* chstat */
+  v9fs_vfs_chstat,              /* chstat */
+  NULL,                         /* syncfs */
+  NULL,                         /* ioctldir */
+  NULL,                         /* permission */
+#ifdef CONFIG_FS_LINKS
+  v9fs_vfs_link,                /* link */
+  v9fs_vfs_symlink,             /* symlink */
+  v9fs_vfs_readlink,            /* readlink */
+  v9fs_vfs_lstat,               /* lstat */
+#endif
 };
 
 /****************************************************************************
@@ -182,7 +205,7 @@ static int v9fs_vfs_open(FAR struct file *filep, FAR const char *relpath,
       return -ENOMEM;
     }
 
-  ret = v9fs_client_walk(client, relpath, NULL);
+  ret = v9fs_client_walk(client, relpath, NULL, false);
   if (ret >= 0)
     {
       file->fid = ret;
@@ -197,7 +220,7 @@ static int v9fs_vfs_open(FAR struct file *filep, FAR const char *relpath,
     {
       /* We expect to create this file */
 
-      ret = v9fs_client_walk(client, relpath, &relpath);
+      ret = v9fs_client_walk(client, relpath, &relpath, false);
       if (ret < 0)
         {
           ferr("ERROR: Can't find the parent fid of relpath: %d\n", ret);
@@ -543,7 +566,7 @@ static int v9fs_vfs_opendir(FAR struct inode *mountpt,
       return -ENOMEM;
     }
 
-  ret = v9fs_client_walk(client, relpath, NULL);
+  ret = v9fs_client_walk(client, relpath, NULL, false);
   if (ret < 0)
     {
       ferr("ERROR: Can't find the fid of the relpath: %d\n", ret);
@@ -726,7 +749,7 @@ static int v9fs_vfs_unlink(FAR struct inode *mountpt,
 
   client = mountpt->i_private;
 
-  ret = v9fs_client_walk(client, relpath, &filename);
+  ret = v9fs_client_walk(client, relpath, &filename, true);
   if (ret < 0)
     {
       ferr("ERROR: Can't find the parent fid of relpath: %d\n", ret);
@@ -742,7 +765,7 @@ static int v9fs_vfs_unlink(FAR struct inode *mountpt,
        * Let's change the protocol to send
        */
 
-      ret = v9fs_client_walk(client, relpath, NULL);
+      ret = v9fs_client_walk(client, relpath, NULL, true);
       if (ret < 0)
         {
           ferr("ERROR: Can't find the fid of relpath: %d\n", ret);
@@ -776,7 +799,7 @@ static int v9fs_vfs_mkdir(FAR struct inode *mountpt,
 
   client = mountpt->i_private;
 
-  ret = v9fs_client_walk(client, relpath, &relpath);
+  ret = v9fs_client_walk(client, relpath, &relpath, false);
   if (ret < 0)
     {
       ferr("ERROR: Can't find the parent fid of relpath: %d\n", ret);
@@ -809,7 +832,7 @@ static int v9fs_vfs_rmdir(FAR struct inode *mountpt,
 
   client = mountpt->i_private;
 
-  ret = v9fs_client_walk(client, relpath, &dirname);
+  ret = v9fs_client_walk(client, relpath, &dirname, true);
   if (ret < 0)
     {
       ferr("ERROR: Can't find the parent fid of relpath: %d\n", ret);
@@ -825,7 +848,7 @@ static int v9fs_vfs_rmdir(FAR struct inode *mountpt,
        * Let's change the protocol to send
        */
 
-      ret = v9fs_client_walk(client, relpath, NULL);
+      ret = v9fs_client_walk(client, relpath, NULL, true);
       if (ret < 0)
         {
           ferr("ERROR: Can't find the fid of relpath: %d\n", ret);
@@ -861,7 +884,7 @@ static int v9fs_vfs_rename(FAR struct inode *mountpt,
 
   client = mountpt->i_private;
 
-  ret = v9fs_client_walk(client, oldrelpath, NULL);
+  ret = v9fs_client_walk(client, oldrelpath, NULL, true);
   if (ret < 0)
     {
       ferr("ERROR: Can't find the fid of the oldrelpath: %d\n", ret);
@@ -869,7 +892,7 @@ static int v9fs_vfs_rename(FAR struct inode *mountpt,
     }
 
   oldfid = ret;
-  ret = v9fs_client_walk(client, newrelpath, &newrelpath);
+  ret = v9fs_client_walk(client, newrelpath, &newrelpath, false);
   if (ret < 0)
     {
       ferr("ERROR: Can't find the new parent fid of the newrelpath: %d\n",
@@ -905,7 +928,7 @@ static int v9fs_vfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   client = mountpt->i_private;
   memset(buf, 0, sizeof(struct stat));
 
-  ret = v9fs_client_walk(client, relpath, NULL);
+  ret = v9fs_client_walk(client, relpath, NULL, false);
   if (ret < 0)
     {
       ferr("ERROR: Can't find the fid of the relpath: %d\n", ret);
@@ -938,7 +961,7 @@ static int v9fs_vfs_chstat(FAR struct inode *mountpt,
 
   client = mountpt->i_private;
 
-  ret = v9fs_client_walk(client, relpath, NULL);
+  ret = v9fs_client_walk(client, relpath, NULL, false);
   if (ret < 0)
     {
       ferr("ERROR: Can't find the fid of the relpath %d\n", ret);
@@ -1001,3 +1024,171 @@ static int v9fs_vfs_bind(FAR struct inode *driver, FAR const void *data,
   *handle = client;
   return ret;
 }
+
+#ifdef CONFIG_FS_LINKS
+/****************************************************************************
+ * Name: v9fs_vfs_link
+ ****************************************************************************/
+
+static int v9fs_vfs_link(FAR struct inode *mountpt,
+                         FAR const char *relpath1,
+                         FAR const char *relpath2)
+{
+  FAR struct v9fs_client_s *client;
+  uint32_t dfid;
+  uint32_t fid;
+  int ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL);
+
+  /* Recover out private data from the struct inode instance */
+
+  client = mountpt->i_private;
+
+  /* Get the fid of the target file */
+
+  ret = v9fs_client_walk(client, relpath1, NULL, false);
+  if (ret < 0)
+    {
+      ferr("ERROR: Can't find the target file: %d\n", ret);
+      return ret;
+    }
+
+  fid = ret;
+
+  /* Get the parent directory fid for the new link */
+
+  ret = v9fs_client_walk(client, relpath2, &relpath2, false);
+  if (ret < 0)
+    {
+      ferr("ERROR: Can't find parent directory: %d\n", ret);
+      v9fs_fid_put(client, fid);
+      return ret;
+    }
+
+  dfid = ret;
+
+  /* Create the hard link */
+
+  ret = v9fs_client_link(client, dfid, fid, relpath2);
+  v9fs_fid_put(client, dfid);
+  v9fs_fid_put(client, fid);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: v9fs_vfs_symlink
+ ****************************************************************************/
+
+static int v9fs_vfs_symlink(FAR struct inode *mountpt,
+                            FAR const char *path1,
+                            FAR const char *relpath2)
+{
+  FAR struct v9fs_client_s *client;
+  uint32_t dfid;
+  int ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL);
+
+  /* Recover out private data from the struct inode instance */
+
+  client = mountpt->i_private;
+
+  /* Get the parent directory fid for the new symlink */
+
+  ret = v9fs_client_walk(client, relpath2, &relpath2, false);
+  if (ret < 0)
+    {
+      ferr("ERROR: Can't find parent directory: %d\n", ret);
+      return ret;
+    }
+
+  dfid = ret;
+
+  /* Create the symbolic link */
+
+  ret = v9fs_client_symlink(client, dfid, relpath2, path1, 0777);
+  v9fs_fid_put(client, dfid);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: v9fs_vfs_readlink
+ ****************************************************************************/
+
+static ssize_t v9fs_vfs_readlink(FAR struct inode *mountpt,
+                                 FAR const char *relpath,
+                                 FAR char *buffer, size_t buflen)
+{
+  FAR struct v9fs_client_s *client;
+  uint32_t fid;
+  ssize_t ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL);
+
+  /* Recover out private data from the struct inode instance */
+
+  client = mountpt->i_private;
+
+  /* Get the fid of the symbolic link */
+
+  ret = v9fs_client_walk(client, relpath, NULL, true);
+  if (ret < 0)
+    {
+      ferr("ERROR: Can't find the symbolic link: %zd\n", ret);
+      return ret;
+    }
+
+  fid = ret;
+
+  /* Read the symbolic link target */
+
+  ret = v9fs_client_readlink(client, fid, buffer, buflen);
+  v9fs_fid_put(client, fid);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: v9fs_vfs_lstat
+ ****************************************************************************/
+
+static int v9fs_vfs_lstat(FAR struct inode *mountpt,
+                          FAR const char *relpath,
+                          FAR struct stat *buf)
+{
+  FAR struct v9fs_client_s *client;
+  uint32_t fid;
+  int ret;
+
+  /* Sanity checks */
+
+  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL);
+
+  /* Recover out private data from the struct inode instance */
+
+  client = mountpt->i_private;
+
+  /* Get the fid of the file (don't follow symlinks) */
+
+  ret = v9fs_client_walk(client, relpath, NULL, true);
+  if (ret < 0)
+    {
+      ferr("ERROR: Can't find the file: %d\n", ret);
+      return ret;
+    }
+
+  fid = ret;
+
+  /* Get file stats without following symlinks */
+
+  ret = v9fs_client_stat(client, fid, buf);
+  v9fs_fid_put(client, fid);
+  return ret;
+}
+#endif /* CONFIG_FS_LINKS */

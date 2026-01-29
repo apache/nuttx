@@ -97,6 +97,18 @@
 
 /* 9P2000.L unlink flags */
 
+/* 9P QID type bits */
+
+#define V9FS_QTDIR             0x80       /* Directory */
+#define V9FS_QTAPPEND          0x40       /* Append only */
+#define V9FS_QTEXCL            0x20       /* Exclusive use */
+#define V9FS_QTMOUNT           0x10       /* Mounted channel */
+#define V9FS_QTAUTH            0x08       /* Authentication file */
+#define V9FS_QTTMP             0x04       /* Temporary file */
+#define V9FS_QTLINK            0x02       /* Symbolic link */
+#define V9FS_QTHARDLINK        0x01       /* hard link */
+#define V9FS_QTFILE            0x00       /* Regular file */
+
 #define V9FS_REMOVEDIR         0x200
 
 /* QID = uint8_t (type) + uint32_t (version) + uint64_t (path) */
@@ -117,8 +129,12 @@ enum v9fs_flags_e
   V9FS_RLOPEN,
   V9FS_TLCREATE = 14,
   V9FS_RLCREATE,
+  V9FS_TSYMLINK = 16,
+  V9FS_RSYMLINK,
   V9FS_TRENAME = 20,
   V9FS_RRENAME,
+  V9FS_TREADLINK = 22,
+  V9FS_RREADLINK,
   V9FS_TGETATTR = 24,
   V9FS_RGETATTR,
   V9FS_TSETATTR = 26,
@@ -127,6 +143,8 @@ enum v9fs_flags_e
   V9FS_RREADDIR,
   V9FS_TFSYNC = 50,
   V9FS_RFSYNC,
+  V9FS_TLINK = 70,
+  V9FS_RLINK,
   V9FS_TMKDIR = 72,
   V9FS_RMKDIR,
   V9FS_TRENAMEAT = 74,
@@ -359,6 +377,38 @@ begin_packed_struct struct v9fs_rstatfs_s
   uint64_t ffree;   /* Free file nodes in fs */
   uint64_t fsid;    /* File system id */
   uint32_t namelen; /* Maximum length of filenames */
+} end_packed_struct;
+
+begin_packed_struct struct v9fs_symlink_s
+{
+  struct v9fs_header_s header;
+  uint32_t fid;
+  uint16_t name_len;
+  uint8_t buffer[V9FS_BIT16SZ + 2 * NAME_MAX + V9FS_BIT32SZ];
+} end_packed_struct;
+
+#define v9fs_rsymlink_s v9fs_rattach_s
+
+begin_packed_struct struct v9fs_link_s
+{
+  struct v9fs_header_s header;
+  uint32_t dfid;
+  uint32_t fid;
+  uint16_t name_len;
+  uint8_t buffer[NAME_MAX];
+} end_packed_struct;
+
+begin_packed_struct struct v9fs_readlink_s
+{
+  struct v9fs_header_s header;
+  uint32_t fid;
+} end_packed_struct;
+
+begin_packed_struct struct v9fs_rreadlink_s
+{
+  struct v9fs_header_s header;
+  uint16_t target_len;
+  uint8_t target[PATH_MAX];
 } end_packed_struct;
 
 struct v9fs_map_s
@@ -1475,17 +1525,111 @@ int v9fs_client_getname(FAR struct v9fs_client_s *client, uint32_t fid,
   return 0;
 }
 
+#ifdef CONFIG_FS_LINKS
 /****************************************************************************
- * v9fs_client_walk
+ * v9fs_is_last_qid_symlink
  ****************************************************************************/
 
-int v9fs_client_walk(FAR struct v9fs_client_s *client, FAR const char *path,
-                     FAR const char **childname)
+static inline bool
+v9fs_is_last_qid_symlink(FAR struct v9fs_rwalk_s *response,
+                         FAR char *response_payload)
+{
+  FAR struct v9fs_qid_s *qids = (FAR struct v9fs_qid_s *)response_payload;
+
+  if (response->nwqid == 1)
+    {
+      return (response->wqid[0].type & V9FS_QTLINK) != 0;
+    }
+
+  if (response->nwqid > 1)
+    {
+      return (qids[response->nwqid - 2].type & V9FS_QTLINK) != 0;
+    }
+
+  return false;
+}
+
+/****************************************************************************
+ * v9fs_build_path_to_component
+ ****************************************************************************/
+
+static int v9fs_build_path_to_component(FAR const char *path,
+                                        int target_comp,
+                                        FAR char *out_path,
+                                        size_t out_size)
+{
+  FAR const char *start = path;
+  FAR const char *end;
+  FAR char *dest = out_path;
+  size_t remaining = out_size;
+  int comp_idx = 0;
+  size_t len;
+
+  while (comp_idx < target_comp && *start != '\0')
+    {
+      while (*start == '/')
+        {
+          start++;
+        }
+
+      end = strchr(start, '/');
+      if (end == NULL)
+        {
+          /* Last component - copy remaining path */
+
+          len = strlen(start);
+          if (len >= remaining)
+            {
+              return -ENAMETOOLONG;
+            }
+
+          memcpy(dest, start, len);
+          dest[len] = '\0';
+          return 0;
+        }
+
+      /* Copy component */
+
+      len = end - start;
+      if (len >= remaining - 1)
+        {
+          return -ENAMETOOLONG;
+        }
+
+      memcpy(dest, start, len);
+      dest += len;
+      remaining -= len;
+      comp_idx++;
+
+      /* Add separator only if not the last component */
+
+      if (comp_idx < target_comp)
+        {
+          *dest++ = '/';
+          remaining--;
+        }
+
+      start = end + 1;
+    }
+
+  *dest = '\0';
+  return 0;
+}
+#endif
+
+/****************************************************************************
+ * v9fs_client_walk_impl
+ ****************************************************************************/
+
+static int v9fs_client_walk_impl(FAR struct v9fs_client_s *client,
+                                 FAR const char *path,
+                                 FAR const char **childname,
+                                 FAR struct v9fs_rwalk_s *response,
+                                 FAR char *response_payload,
+                                 FAR uint16_t *nwname_out)
 {
   struct v9fs_walk_s request;
-  struct v9fs_rwalk_s response;
   FAR char *request_payload;
-  FAR char *response_payload;
   FAR const char *start;
   FAR const char *end;
   struct iovec wiov[2];
@@ -1526,6 +1670,11 @@ int v9fs_client_walk(FAR struct v9fs_client_s *client, FAR const char *path,
       start = end + 1;
     }
 
+  if (nwname_out != NULL)
+    {
+      *nwname_out = nwname;
+    }
+
   /* Request = sizeof(struct v9fs_walk_s) + nwname * sizeof(uint16_t) +
    *           total_len
    * Response = sizeof(struct v9fs_rwalk_s) + V9FS_QIDSZ * (nwname + 1)
@@ -1542,13 +1691,6 @@ int v9fs_client_walk(FAR struct v9fs_client_s *client, FAR const char *path,
   request_payload = lib_get_pathbuffer();
   if (request_payload == NULL)
     {
-      return -ENOMEM;
-    }
-
-  response_payload = lib_get_pathbuffer();
-  if (response_payload == NULL)
-    {
-      lib_put_pathbuffer(request_payload);
       return -ENOMEM;
     }
 
@@ -1603,33 +1745,326 @@ int v9fs_client_walk(FAR struct v9fs_client_s *client, FAR const char *path,
   wiov[0].iov_len = V9FS_HDRSZ + V9FS_BIT32SZ * 2 + V9FS_BIT16SZ;
   wiov[1].iov_base = request_payload;
   wiov[1].iov_len = total_len;
-  riov[0].iov_base = &response;
-  riov[0].iov_len = sizeof(response);
+  riov[0].iov_base = response;
+  riov[0].iov_len = sizeof(*response);
   riov[1].iov_base = response_payload;
-  riov[1].iov_len = V9FS_QIDSZ * (nwname + 1);
+
+  /* First qid is in response.wqid[0], remaining (nwname-1) qids in
+   * response_payload
+   */
+
+  riov[1].iov_len = V9FS_QIDSZ * (nwname - 1);
 
   ret = v9fs_client_rpc(client->transport, wiov, total_len ? 2 : 1,
-                        riov, 2, request.header.tag);
+                        riov, nwname > 1 ? 2 : 1, request.header.tag);
   if (ret < 0)
     {
       v9fs_fid_destroy(client, newfid);
       goto err;
     }
 
-  /* There are differences in different server implementations, so it is
-   * necessary to check whether the returned nwqid satisfies the requested
-   * number.
+  /* Per 9P protocol specification:
+   * - nwqid is either nwname (full success) or the index of the first
+   *   elementwise walk that failed
+   * - nwqid cannot be zero unless nwname is zero
+   * - Only if nwqid == nwname will newfid be affected; otherwise newfid
+   *   should be unaffected (destroyed on client side)
+   *
+   * Walk results:
+   * 1. nwqid == nwname: fully successful, newfid represents the target file
+   * 2. 0 < nwqid < nwname: partial success, walk stopped (possibly at
+   *    symlink or non-existent path), newfid should be destroyed
    */
 
-  if (response.nwqid != nwname)
+  if (response->nwqid != nwname)
     {
       ret = -ENOENT;
+      v9fs_fid_destroy(client, newfid);
     }
 
 err:
   lib_put_pathbuffer(request_payload);
+  return ret < 0 ? ret : newfid;
+}
+
+/****************************************************************************
+ * v9fs_client_walk_internal
+ ****************************************************************************/
+
+static int v9fs_client_walk_internal(FAR struct v9fs_client_s *client,
+                                     FAR const char *path,
+                                     FAR const char **childname,
+                                     bool nofollow,
+                                     int symloop_count)
+{
+  struct v9fs_rwalk_s response;
+  FAR char *response_payload;
+  uint16_t nwname;
+  int fid;
+  int ret;
+#ifdef CONFIG_FS_LINKS
+  FAR char *symlink_path = NULL;
+  FAR char *readlink_buf;
+  FAR char *new_path;
+  bool is_symlink;
+
+  if (symloop_count >= SYMLOOP_MAX)
+    {
+      return -ELOOP;
+    }
+#endif
+
+  response_payload = lib_get_pathbuffer();
+  if (response_payload == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  ret = fid = v9fs_client_walk_impl(client, path, childname,
+                                    &response, response_payload, &nwname);
+
+#ifdef CONFIG_FS_LINKS
+  /* Handle walk failure that might be caused by symlink */
+
+  if (ret < 0)
+    {
+      /* Case 1: Partial walk failed (ENOENT), check if stopped at symlink */
+
+      if (ret == -ENOENT && response.header.type == V9FS_RWALK &&
+          v9fs_is_last_qid_symlink(&response, response_payload))
+        {
+          symlink_path = lib_get_pathbuffer();
+          if (symlink_path == NULL)
+            {
+              ret = -ENOMEM;
+              goto errout_with_response;
+            }
+
+          ret = v9fs_build_path_to_component(path, response.nwqid,
+                                             symlink_path, PATH_MAX);
+          if (ret < 0)
+            {
+              goto errout_with_symlink;
+            }
+
+          fid = v9fs_client_walk_impl(client, symlink_path, NULL,
+                                      &response, response_payload,
+                                      NULL);
+          if (fid < 0)
+            {
+              ret = fid;
+              goto errout_with_symlink;
+            }
+        }
+
+      /* Case 2: ENOTDIR - some servers (e.g., qemu 6.2.0) return lerror
+       * instead of rwalk even on partial success. Any component could be
+       * a symlink, so we need to walk each component to find it.
+       */
+
+      else if (ret == -ENOTDIR)
+        {
+          FAR const char *start = path;
+          FAR const char *end;
+          int comp_count = 0;
+          int comp_idx;
+
+          /* Count path components */
+
+          while (*start != '\0')
+            {
+              while (*start == '/')
+                {
+                  start++;
+                }
+
+              if (*start == '\0')
+                {
+                  break;
+                }
+
+              comp_count++;
+              end = strchr(start, '/');
+              if (end == NULL)
+                {
+                  break;
+                }
+
+              start = end + 1;
+            }
+
+          symlink_path = lib_get_pathbuffer();
+          if (symlink_path == NULL)
+            {
+              ret = -ENOMEM;
+              goto errout_with_response;
+            }
+
+          /* Try walking each component to find the symlink */
+
+          for (comp_idx = 1; comp_idx <= comp_count; comp_idx++)
+            {
+              ret = v9fs_build_path_to_component(path, comp_idx,
+                                                 symlink_path, PATH_MAX);
+              if (ret < 0)
+                {
+                  goto errout_with_symlink;
+                }
+
+              fid = v9fs_client_walk_impl(client, symlink_path, NULL,
+                                          &response, response_payload,
+                                          NULL);
+              if (fid < 0)
+                {
+                  /* Walk failed, no point trying longer paths */
+
+                  break;
+                }
+
+              /* Check if this component is a symlink */
+
+              if (v9fs_is_last_qid_symlink(&response, response_payload))
+                {
+                  /* Found the symlink, process it */
+
+                  break;
+                }
+
+              /* Not a symlink, clean up and try next component */
+
+              v9fs_fid_put(client, fid);
+              fid = -1;
+            }
+
+          if (fid < 0)
+            {
+              /* No symlink found, return the original ENOTDIR error */
+
+              ret = -ENOTDIR;
+              goto errout_with_symlink;
+            }
+        }
+
+      /* Case 3: Other errors */
+
+      else
+        {
+          goto errout_with_response;
+        }
+    }
+
+  /* Check if we need to follow a symlink */
+
+  is_symlink = v9fs_is_last_qid_symlink(&response, response_payload);
+
+  if (is_symlink &&
+      (response.nwqid < nwname || childname != NULL || !nofollow))
+    {
+      FAR const char *start = path;
+      FAR const char *end;
+      int comp_idx = 0;
+
+      readlink_buf = lib_get_pathbuffer();
+      if (readlink_buf == NULL)
+        {
+          ret = -ENOMEM;
+          goto errout_with_fid;
+        }
+
+      new_path = lib_get_pathbuffer();
+      if (new_path == NULL)
+        {
+          ret = -ENOMEM;
+          goto errout_with_readlink;
+        }
+
+      ret = v9fs_client_readlink(client, fid, readlink_buf, PATH_MAX - 1);
+      if (ret < 0)
+        {
+          goto errout_with_newpath;
+        }
+
+      readlink_buf[ret] = '\0';
+
+      /* Only relative symlinks are supported */
+
+      if (readlink_buf[0] == '/')
+        {
+          ret = -ENOTSUP;
+          goto errout_with_newpath;
+        }
+
+      /* Find the end of symlink component in original path */
+
+      while (comp_idx < response.nwqid - 1 && *start != '\0')
+        {
+          end = strchr(start, '/');
+          if (end != start)
+            {
+              comp_idx++;
+            }
+
+          if (end == NULL)
+            {
+              break;
+            }
+
+          start = end + 1;
+        }
+
+      while (*start == '/')
+        {
+          start++;
+        }
+
+      end = strchr(start, '/');
+      if (end == NULL)
+        {
+          end = start + strlen(start);
+        }
+
+      /* Construct: prefix + symlink_target + suffix */
+
+      snprintf(new_path, PATH_MAX, "%.*s%s%s",
+               (int)(start - path), path, readlink_buf, end);
+      ret = v9fs_client_walk_internal(client, new_path, childname,
+                                      nofollow, symloop_count + 1);
+      goto errout_with_newpath;
+    }
+
+  /* Success path */
+
+  goto errout_with_symlink;
+
+errout_with_newpath:
+  lib_put_pathbuffer(new_path);
+
+errout_with_readlink:
+  lib_put_pathbuffer(readlink_buf);
+
+errout_with_fid:
+  v9fs_fid_put(client, fid);
+
+errout_with_symlink:
+  if (symlink_path != NULL)
+    {
+      lib_put_pathbuffer(symlink_path);
+    }
+
+errout_with_response:
+#endif
   lib_put_pathbuffer(response_payload);
-  return ret == 0 ? newfid : ret;
+  return ret;
+}
+
+/****************************************************************************
+ * v9fs_client_walk
+ ****************************************************************************/
+
+int v9fs_client_walk(FAR struct v9fs_client_s *client, FAR const char *path,
+                     FAR const char **childname, bool nofollow)
+{
+  return v9fs_client_walk_internal(client, path, childname, nofollow, 0);
 }
 
 /****************************************************************************
@@ -1855,3 +2290,129 @@ ssize_t v9fs_parse_size(FAR const void *buffer)
 
   return ptr->size;
 }
+
+#ifdef CONFIG_FS_LINKS
+/****************************************************************************
+ * v9fs_client_symlink
+ ****************************************************************************/
+
+int v9fs_client_symlink(FAR struct v9fs_client_s *client, uint32_t fid,
+                        FAR const char *name, FAR const char *symtgt,
+                        int mode)
+{
+  struct v9fs_symlink_s request;
+  struct v9fs_rsymlink_s response;
+  struct iovec wiov[1];
+  struct iovec riov[1];
+  uint32_t gid = getgid();
+  off_t offset = 0;
+  uint16_t symtgt_len;
+
+  /* size[4] Tsymlink tag[2] fid[4] name[s] symtgt[s] gid[4]
+   * size[4] Rsymlink tag[2] qid[13]
+   */
+
+  request.fid = fid;
+  request.name_len = strlen(name);
+  symtgt_len = strlen(symtgt);
+  request.header.size = V9FS_HDRSZ + V9FS_BIT32SZ * 2 + V9FS_BIT16SZ * 2 +
+                        request.name_len + symtgt_len;
+  request.header.type = V9FS_TSYMLINK;
+  request.header.tag = v9fs_get_tagid(client);
+
+  memcpy(&request.buffer[offset], name, request.name_len);
+  offset += request.name_len;
+  memcpy(&request.buffer[offset], &symtgt_len, V9FS_BIT16SZ);
+  offset += V9FS_BIT16SZ;
+  memcpy(&request.buffer[offset], symtgt, symtgt_len);
+  offset += symtgt_len;
+  memcpy(&request.buffer[offset], &gid, V9FS_BIT32SZ);
+
+  wiov[0].iov_base = &request;
+  wiov[0].iov_len = V9FS_HDRSZ + V9FS_BIT32SZ * 2 + V9FS_BIT16SZ * 2 +
+                    request.name_len + symtgt_len;
+  riov[0].iov_base = &response;
+  riov[0].iov_len = V9FS_HDRSZ + V9FS_QIDSZ;
+
+  return v9fs_client_rpc(client->transport, wiov, 1, riov, 1,
+                         request.header.tag);
+}
+
+/****************************************************************************
+ * v9fs_client_link
+ ****************************************************************************/
+
+int v9fs_client_link(FAR struct v9fs_client_s *client, uint32_t dfid,
+                     uint32_t fid, FAR const char *name)
+{
+  struct v9fs_link_s request;
+  struct v9fs_lerror_s response;
+  struct iovec wiov[1];
+  struct iovec riov[1];
+
+  /* size[4] Tlink tag[2] dfid[4] fid[4] name[s]
+   * size[4] Rlink tag[2]
+   */
+
+  request.dfid = dfid;
+  request.fid = fid;
+  request.name_len = strlen(name);
+  request.header.size = V9FS_HDRSZ + V9FS_BIT32SZ * 2 + V9FS_BIT16SZ +
+                        request.name_len;
+  request.header.type = V9FS_TLINK;
+  request.header.tag = v9fs_get_tagid(client);
+  memcpy(&request.buffer, name, request.name_len);
+
+  wiov[0].iov_base = &request;
+  wiov[0].iov_len = V9FS_HDRSZ + V9FS_BIT32SZ * 2 + V9FS_BIT16SZ +
+                    request.name_len;
+  riov[0].iov_base = &response;
+  riov[0].iov_len = V9FS_HDRSZ + V9FS_BIT32SZ;
+
+  return v9fs_client_rpc(client->transport, wiov, 1, riov, 1,
+                         request.header.tag);
+}
+
+/****************************************************************************
+ * v9fs_client_readlink
+ ****************************************************************************/
+
+ssize_t v9fs_client_readlink(FAR struct v9fs_client_s *client, uint32_t fid,
+                             FAR char *buffer, size_t buflen)
+{
+  struct v9fs_readlink_s request;
+  struct v9fs_rreadlink_s response;
+  struct iovec wiov[1];
+  struct iovec riov[1];
+  int ret;
+
+  /* size[4] Treadlink tag[2] fid[4]
+   * size[4] Rreadlink tag[2] target[s]
+   */
+
+  request.fid = fid;
+  request.header.size = V9FS_HDRSZ + V9FS_BIT32SZ;
+  request.header.type = V9FS_TREADLINK;
+  request.header.tag = v9fs_get_tagid(client);
+
+  wiov[0].iov_base = &request;
+  wiov[0].iov_len = V9FS_HDRSZ + V9FS_BIT32SZ;
+  riov[0].iov_base = &response;
+  riov[0].iov_len = sizeof(response);
+
+  ret = v9fs_client_rpc(client->transport, wiov, 1, riov, 1,
+                        request.header.tag);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (response.target_len > buflen)
+    {
+      return -ENAMETOOLONG;
+    }
+
+  memcpy(buffer, response.target, response.target_len);
+  return response.target_len;
+}
+#endif

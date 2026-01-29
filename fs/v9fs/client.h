@@ -116,7 +116,14 @@ int v9fs_client_open(FAR struct v9fs_client_s *client,
 int v9fs_client_getname(FAR struct v9fs_client_s *client, uint32_t fid,
                         FAR char *path);
 int v9fs_client_walk(FAR struct v9fs_client_s *client, FAR const char *path,
-                     FAR const char **childname);
+                     FAR const char **childname, bool nofollow);
+int v9fs_client_symlink(FAR struct v9fs_client_s *client, uint32_t fid,
+                        FAR const char *name, FAR const char *symtgt,
+                        int mode);
+int v9fs_client_link(FAR struct v9fs_client_s *client, uint32_t dfid,
+                     uint32_t fid, FAR const char *name);
+ssize_t v9fs_client_readlink(FAR struct v9fs_client_s *client, uint32_t fid,
+                             FAR char *buffer, size_t buflen);
 int v9fs_client_init(FAR struct v9fs_client_s *client, FAR const char *data);
 int v9fs_client_uninit(FAR struct v9fs_client_s *client);
 int v9fs_transport_create(FAR struct v9fs_transport_s **transport,
