@@ -1,0 +1,264 @@
+/****************************************************************************
+ * boards/tricore/tc4da/triboard_tc4x9_com/scripts/Lcf_Gnuc_Tricore_Tc.lsl.user
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#include "arch/board/board_memorymap.h"
+
+/* Default linker script, for normal executables */
+OUTPUT_FORMAT("elf32-tricore")
+OUTPUT_ARCH("tricore")
+
+LCF_PFLASH_USER_START = GENERATE_CORE_PFLASH_USER_START(CONFIG_CPU_COREID);
+LCF_PFLASH_USER_SIZE  = GENERATE_CORE_PFLASH_USER_SIZE(CONFIG_CPU_COREID);
+LCF_DLMU_USER_START   = GENERATE_CORE_DLMU_USER_START(CONFIG_CPU_COREID);
+LCF_DLMU_USER_SIZE    = GENERATE_CORE_DLMU_USER_SIZE(CONFIG_CPU_COREID);
+LCF_USTACK_START      = GENERATE_CORE_STACK_USER_START(CONFIG_CPU_COREID);
+LCF_USTACK_SIZE       = GENERATE_CORE_STACK_USER_SIZE(CONFIG_CPU_COREID);
+
+MEMORY
+{
+    upfls (rx!p): org = LCF_PFLASH_USER_START, len = LCF_PFLASH_USER_SIZE
+    upfls_nc (rx!p): org = NC_START(LCF_PFLASH_USER_START), len = LCF_PFLASH_USER_SIZE
+
+    cpu_udlmu (w!xp): org = LCF_DLMU_USER_START, len = LCF_DLMU_USER_SIZE
+    cpu_udlmu_nc (w!xp): org = NC_START(LCF_DLMU_USER_START), len = LCF_DLMU_USER_SIZE
+
+    ustack (w!xp): org = LCF_USTACK_START, len = LCF_USTACK_SIZE
+}
+
+/* map cached and non cached addresses */
+REGION_MIRROR("upfls", "upfls_nc")
+REGION_MIRROR("cpu_udlmu", "cpu_udlmu_nc")
+
+/*Un comment one of the below statement groups to enable CpuX DMI RAM to hold global variables*/
+
+/*Code Sections, selectable by toolchain*/
+CORE_ID = GLOBAL;
+SECTIONS
+{
+    .userspace : ALIGN(64)
+    {
+        _suserspace = ABSOLUTE(.);
+        KEEP(*(.userspace))
+        . = ALIGN(64); /* userspace align to 64 to keep the address continuous for MBF */
+        _euserspace = ABSOLUTE(.);
+    } > upfls
+
+    CORE_SEC(.text) : FLAGS(axl)
+    {
+        _stext = ABSOLUTE(.);
+        *(.text)
+        *(.text.*)
+        *(.zrodata)
+        *(.zrodata.*)
+        *(.rodata)
+        *(.rodata.*)
+        *(.gnu.linkonce.r.*)
+        *(.gcc_except_table)
+        *(.gnu.linkonce.t.*)
+        *(.gnu.warning)        /* .gnu.warning sections are handled specially by elf32.em. */
+        . = ALIGN(4);
+        _etext = ABSOLUTE(.);
+    } > upfls
+
+    /*
+     * Code executed before calling main extra section for C++ constructor init
+     *  -------------------------End-----------------------------------------
+     */
+
+    /*
+     * C++ exception handling tables.  NOTE: gcc emits .eh_frame
+     * sections when compiling C sources with debugging enabled (-g).
+     * If you can be sure that your final application consists
+     * exclusively of C objects (i.e., no C++ objects), you may use
+     * the -R option of the "strip" and "objcopy" utilities to remove
+     * the .eh_frame section from the executable.
+     */
+    .eh_frame_hdr : ALIGN(8)
+    {
+        KEEP (*(.eh_frame_hdr))
+        . = ALIGN(8);
+    } > upfls
+
+    .eh_frame : ALIGN(8)
+    {
+        __EH_FRAME_BEGIN__ = . ;
+        KEEP (*(.eh_frame))
+        __EH_FRAME_END__ = . ;
+        . = ALIGN(8);
+    } > upfls
+
+    /*
+     * Constructors and destructors.
+     */
+    .ctors : FLAGS(ar)
+    {
+        _sinit = ABSOLUTE(.);
+        /*
+         * Code executed before calling main extra section for C++ constructor init
+         *  -------------------------Start-----------------------------------------
+         */
+        KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
+        KEEP(*(.init_array EXCLUDE_FILE(*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o) .ctors))
+        /*
+         * Code executed before calling main extra section for C++ constructor init
+         *  -------------------------End-----------------------------------------
+         */
+        _einit = ABSOLUTE(.);
+        . = ALIGN(8);
+    } > upfls
+    .dtors : FLAGS(ar)
+    {
+        __DTOR_LIST__ = . ;
+        LONG((__DTOR_END__ - __DTOR_LIST__) / 4 - 2);
+        /*
+         * Code executed before calling main extra section for C++ destructor init
+         *  -------------------------Start-----------------------------------------
+         */
+        KEEP (*crtbegin.o(.dtors))
+        KEEP (*(EXCLUDE_FILE (*crtend.o ) .dtors))
+        KEEP (*(SORT(.dtors.*)))
+        KEEP (*(.dtors))
+        /*
+         * Code executed before calling main extra section for C++ destructor init
+         *  -------------------------End-----------------------------------------
+         */
+        LONG(0) ;
+        __DTOR_END__ = . ;
+        . = ALIGN(8);
+    } > upfls
+
+    _eronly = ABSOLUTE(.);
+
+    /*
+     * DWARF debug sections.
+     * Symbols in the DWARF debugging sections are relative to the
+     * beginning of the section, so we begin them at 0.
+     */
+    /*
+     * DWARF 1
+     */
+    .comment         0 : { *(.comment) }
+    .debug           0 : { *(.debug) }
+    .line            0 : { *(.line) }
+    /*
+     * GNU DWARF 1 extensions
+     */
+    .debug_srcinfo   0 : { *(.debug_srcinfo) }
+    .debug_sfnames   0 : { *(.debug_sfnames) }
+    /*
+     * DWARF 1.1 and DWARF 2
+     */
+    .debug_aranges   0 : { *(.debug_aranges) }
+    .debug_pubnames  0 : { *(.debug_pubnames) }
+    /*
+     * DWARF 2
+     */
+    .debug_info      0 : { *(.debug_info) }
+    .debug_abbrev    0 : { *(.debug_abbrev) }
+    .debug_line      0 : { *(.debug_line) }
+    .debug_frame     0 : { *(.debug_frame) }
+    .debug_str       0 : { *(.debug_str) }
+    .debug_loc       0 : { *(.debug_loc) }
+    .debug_macinfo   0 : { *(.debug_macinfo) }
+    .debug_ranges    0 : { *(.debug_ranges) }
+    /*
+     * SGI/MIPS DWARF 2 extensions
+     */
+    .debug_weaknames 0 : { *(.debug_weaknames) }
+    .debug_funcnames 0 : { *(.debug_funcnames) }
+    .debug_typenames 0 : { *(.debug_typenames) }
+    .debug_varnames  0 : { *(.debug_varnames) }
+    /*
+     * Optional sections that may only appear when relocating.
+     */
+    /*
+     * Optional sections that may appear regardless of relocating.
+     */
+    .version_info    0 : { *(.version_info) }
+    .boffs           0 : { KEEP (*(.boffs)) }
+}
+
+/*Far Data Sections, selectable by toolchain*/
+CORE_ID = GLOBAL;
+SECTIONS
+{
+    CORE_SEC(.stack) (NOLOAD) : FLAGS(aw)
+    {
+        *(.dtcm_stack)
+        *(.dtcm_stack.*)
+    } > ustack
+
+    CORE_SEC(.data) : FLAGS(awzl)
+    {
+        _sdata = ABSOLUTE(.);
+        *(.data)
+        *(.data.*)
+        *(.zdata)
+        *(.zdata.*)
+        *(.gnu.linkonce.d.*)
+        *(.gnu.linkonce.z.*)
+        . = ALIGN(2);
+        _edata = ABSOLUTE(.);
+    } > cpu_udlmu AT> upfls
+
+    CORE_SEC(.bss) (NOLOAD): FLAGS(awz)
+    {
+        _sbss = ABSOLUTE(.);
+        *(.bss)
+        *(.bss.*)
+        *(.zbss)
+        *(.zbss.*)
+        *(.bbss)
+        *(.bbss.*)
+        *(.gnu.linkonce.zb.*)
+        . = ALIGN(4);
+        _ebss = ABSOLUTE(.);
+    } > cpu_udlmu
+
+    .heap (NOLOAD) : FLAGS(aw)
+    {
+        _sheap = ABSOLUTE(.);
+        _eheap = ABSOLUTE(LCF_DLMU_USER_START + LCF_DLMU_USER_SIZE);
+    } > cpu_udlmu
+
+    _sdata_pflash = LOADADDR(.data);
+}
+
+#if CONFIG_CPU_COREID == 5
+/* This sections is added to reserve last 4 bytes of flash in core5's user
+ * space. This is because the car's diagnostic service will query this area,
+ * and if the area has been erased but not written to, the query will cause
+ * an exception. Since the page size of pflash is 32 bytes, we reserve 32
+ * bytes instead of 4 bytes.
+ */
+
+CORE_ID = GLOBAL;
+SECTIONS
+{
+    .flash_reserve (LCF_PFLASH_USER_START + LCF_PFLASH_USER_SIZE - 32) : {
+        . = ALIGN(32);
+        FILL(0x55);
+        . = . + 28;
+        LONG(0x55555555);
+    } > upfls
+}
+#endif
