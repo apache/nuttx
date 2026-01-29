@@ -54,7 +54,7 @@ config ARCH_FAMILY
 	default "tc1v8"		if ARCH_TC1V8
 
 config ARCH_CHIP_TC3XX
-	bool "infineon aurix tc3xx"
+	bool
 	select ARCH_TC1V6
 	select ARCH_HAVE_ADDRENV
 	select ARCH_HAVE_I2CRESET
@@ -67,7 +67,7 @@ config ARCH_CHIP_TC3XX
 		Infineon aurix tc3xx (six cores)
 
 config ARCH_CHIP_TC4XX
-	bool "infineon aurix tc4xx"
+	bool
 	select ARCH_TC1V8
 	select ARCH_HAVE_ADDRENV
 	select ARCH_HAVE_I2CRESET
@@ -123,10 +123,21 @@ config HAVE_SECURITY_CORE
 	--help--
 		In addition to the 6 cores, tc4xx also has one more security core.
 
+config CPU_COREID
+	int "TRICORE CPU CORE ID"
+	default 0
+	range 0 6
+
 if ARCH_CHIP_TC3XX
 source "arch/tricore/src/tc3xx/Kconfig"
 endif
+if ARCH_CHIP_TC4XX
+source "arch/tricore/src/tc4xx/Kconfig"
+endif
 if ARCH_CHIP_TC397
 source "arch/tricore/src/tc397/Kconfig"
+endif
+if ARCH_CHIP_TC4DA
+source "arch/tricore/src/tc4da/Kconfig"
 endif
 endif # ARCH_TRICORE

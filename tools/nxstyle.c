@@ -724,6 +724,15 @@ static const char *g_white_files[] =
    */
 
   "phy62xx/phyplus_wdt.c",
+
+  /* Skip infineon illd files
+   * Ref:
+   * arch/tricore/src/illd
+   */
+
+  "Ifx_Cfg_Ssw.c",
+  "Ifx_Cfg_Ssw.h",
+  "Ifx_Cfg.h",
   NULL
 };
 

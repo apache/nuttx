@@ -1,0 +1,633 @@
+/****************************************************************************
+ * boards/tricore/tc397/a2g-tc397-5v-tft/scripts/Lcf_Tasking_Tricore_Tc.lsl.kernel
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#include "arch/board/board_memorymap.h"
+
+#define __JOIN2(x,y)            x##y
+#define JOIN2(x,y)              __JOIN2(x,y)
+#define __JOIN3(x,y,z)          x##y##z
+#define JOIN3(x,y,z)            __JOIN3(x,y,z)
+#define __JOIN4(x,y,z,w)        x##y##z##w
+#define JOIN4(x,y,z,w)          __JOIN4(x,y,z,w)
+
+#define LCF_PFLASH_KERNEL_START     GENERATE_CORE_PFLASH_KERNEL_START(CONFIG_CPU_COREID)
+#define LCF_PFLASH_KERNEL_SIZE      GENERATE_CORE_PFLASH_KERNEL_SIZE(CONFIG_CPU_COREID)
+#define LCF_DSPR_KERNEL_START       GENERATE_CORE_DSPR_KERNEL_START(CONFIG_CPU_COREID)
+#define LCF_DSPR_KERNEL_SIZE        GENERATE_CORE_DSPR_KERNEL_SIZE(CONFIG_CPU_COREID)
+#define LCF_PSPR_KERNEL_START       GENERATE_CORE_PSPR_KERNEL_START(CONFIG_CPU_COREID)
+#define LCF_PSPR_KERNEL_SIZE        GENERATE_CORE_PSPR_KERNEL_SIZE(CONFIG_CPU_COREID)
+#define LCF_DLMU_KERNEL_START       GENERATE_CORE_DLMU_KERNEL_START(CONFIG_CPU_COREID)
+#define LCF_DLMU_KERNEL_SIZE        GENERATE_CORE_DLMU_KERNEL_SIZE(CONFIG_CPU_COREID)
+#define LCF_KSTACK_START            GENERATE_CORE_STACK_KERNEL_START(CONFIG_CPU_COREID)
+#define LCF_KSTACK_SIZE             GENERATE_CORE_STACK_KERNEL_SIZE(CONFIG_CPU_COREID)
+
+#if CONFIG_CPU_COREID != 0
+#define LCF_SYSLOG_START            JOIN3(AURIX_RPTUN_CORE0CORE, CONFIG_CPU_COREID, _SYSLOG_START)
+#define LCF_SYSLOG_SIZE             JOIN3(AURIX_RPTUN_CORE0CORE, CONFIG_CPU_COREID, _SYSLOG_SIZE)
+#endif
+
+#define LCF_CSA_SIZE     40k
+#define LCF_USTACK_SIZE  CONFIG_IDLETHREAD_STACKSIZE
+#define LCF_ISTACK_SIZE  CONFIG_ARCH_INTERRUPTSTACK
+
+#define LCF_HEAP_SIZE    4k
+
+#define LCF_CPU0 0
+#define LCF_CPU1 1
+#define LCF_CPU2 2
+#define LCF_CPU3 3
+#define LCF_CPU4 4
+#define LCF_CPU5 5
+
+/*Un comment one of the below statements to enable CpuX DMI RAM to hold global variables*/
+#define LCF_DEFAULT_HOST LCF_CPU0
+
+#define LCF_CSA_OFFSET     (LCF_DSPR_KERNEL_SIZE - 1k - LCF_CSA_SIZE)
+#define LCF_ISTACK_OFFSET  (LCF_CSA_OFFSET - 256 - LCF_ISTACK_SIZE)
+#define LCF_USTACK_OFFSET  (LCF_ISTACK_OFFSET - 256 - LCF_USTACK_SIZE)
+#define LCF_HEAP_OFFSET    (LCF_USTACK_OFFSET - LCF_HEAP_SIZE)
+
+#define LCF_STARTPTR_CPU   LCF_PFLASH_KERNEL_START
+#define LCF_TRAPVEC_START  (LCF_STARTPTR_CPU + 0x20)
+#define LCF_INTVEC_START   (LCF_PFLASH_KERNEL_START + LCF_PFLASH_KERNEL_SIZE - 0x2000)
+
+#define LCF_STARTPTR_NC_CPU0 NC_START(CORE0_PFLASH_KERNEL_START)
+#define LCF_STARTPTR_NC_CPU1 NC_START(CORE1_PFLASH_KERNEL_START)
+#define LCF_STARTPTR_NC_CPU2 NC_START(CORE2_PFLASH_KERNEL_START)
+#define LCF_STARTPTR_NC_CPU3 NC_START(CORE3_PFLASH_KERNEL_START)
+#define LCF_STARTPTR_NC_CPU4 NC_START(CORE4_PFLASH_KERNEL_START)
+#define LCF_STARTPTR_NC_CPU5 NC_START(CORE5_PFLASH_KERNEL_START)
+
+#define INTTAB     (LCF_INTVEC_START)
+
+#define RESET CORE0_PFLASH_KERNEL_START
+
+#include "tc1v1_6_2.lsl"
+
+// Specify a multi-core processor environment (mpe)
+
+processor mpe
+{
+    derivative = tc39;
+}
+
+derivative tc39
+{
+    core tc
+    {
+        architecture = TC1V1.6.2;
+        space_id_offset = 100;           // add 100 to all space IDs in the architecture definition
+        copytable_space = vtc:linear;    // use the copy table in the virtual core for 'bss' and initialized data sections
+    }
+
+    core vtc
+    {
+        architecture = TC1V1.6.2;
+        import tc;                     // add all address spaces of core tc to core vtc for linking and locating
+    }
+
+    bus sri
+    {
+        mau = 8;
+        width = 32;
+
+        // map shared addresses one-to-one to real cores and virtual cores
+        map (dest=bus:tc:fpi_bus, src_offset=0, dest_offset=0, size=0xc0000000);
+        map (dest=bus:vtc:fpi_bus, src_offset=0, dest_offset=0, size=0xc0000000);
+    }
+
+    memory dsram // Data Scratch Pad Ram
+    {
+        mau = 8;
+        size = LCF_DSPR_KERNEL_SIZE;
+        type = ram;
+        map (dest=bus:tc:fpi_bus, dest_offset=DSPR_LOCAL_START, size=LCF_DSPR_KERNEL_SIZE, priority=8);
+        map (dest=bus:sri, dest_offset=LCF_DSPR_KERNEL_START, size=LCF_DSPR_KERNEL_SIZE);
+    }
+
+    memory psram // Program Scratch Pad Ram
+    {
+        mau = 8;
+        size = LCF_PSPR_KERNEL_SIZE;
+        type = ram;
+        map (dest=bus:tc:fpi_bus, dest_offset=PSPR_LOCAL_START, size=LCF_PSPR_KERNEL_SIZE, priority=8);
+        map (dest=bus:sri, dest_offset=LCF_PSPR_KERNEL_START, size=LCF_PSPR_KERNEL_SIZE);
+    }
+
+    memory pfls
+    {
+        mau = 8;
+        size = LCF_PFLASH_KERNEL_SIZE;
+        type = rom;
+        map     cached (dest=bus:sri, dest_offset=LCF_PFLASH_KERNEL_START, size=LCF_PFLASH_KERNEL_SIZE);
+        map not_cached (dest=bus:sri, dest_offset=NC_START(LCF_PFLASH_KERNEL_START), reserved, size=LCF_PFLASH_KERNEL_SIZE);
+    }
+
+    memory ucb
+    {
+        mau = 8;
+        size = 80K;
+        type = rom;
+        map (dest=bus:sri, dest_offset=0xae400000, reserved, size=80K);
+    }
+
+    memory cpu_dlmu
+    {
+        mau = 8;
+        size = LCF_DLMU_KERNEL_SIZE;
+        type = ram;
+        map     cached (dest=bus:sri, dest_offset=LCF_DLMU_KERNEL_START, size=LCF_DLMU_KERNEL_SIZE);
+        map not_cached (dest=bus:sri, dest_offset=NC_START(LCF_DLMU_KERNEL_START), reserved, size=LCF_DLMU_KERNEL_SIZE);
+    }
+
+    memory kstack
+    {
+        mau = 8;
+        size = LCF_KSTACK_SIZE;
+        type = ram;
+        map not_cached (dest=bus:sri, dest_offset=LCF_KSTACK_START, size=LCF_KSTACK_SIZE);
+    }
+
+#if CONFIG_CPU_COREID != 0
+    memory syslog
+    {
+        mau = 8;
+        size = LCF_SYSLOG_SIZE;
+        type = ram;
+        map not_cached (dest=bus:sri, dest_offset=LCF_SYSLOG_START, size=LCF_SYSLOG_SIZE);
+    }
+#endif
+
+    section_setup :vtc:linear
+    {
+        heap "heap1" (min_size = LCF_HEAP_SIZE, align = 4);
+        heap "heap2" (min_size = LCF_HEAP_SIZE, align = 4);
+    }
+
+    section_setup :vtc:linear
+    {
+        start_address
+        (
+#if CONFIG_CPU_COREID == 0
+            symbol = "_START"
+#elif CONFIG_CPU_COREID == 1
+            symbol = "_START1"
+#elif CONFIG_CPU_COREID == 2
+            symbol = "_START2"
+#elif CONFIG_CPU_COREID == 3
+            symbol = "_START3"
+#elif CONFIG_CPU_COREID == 4
+            symbol = "_START4"
+#elif CONFIG_CPU_COREID == 5
+            symbol = "_START5"
+#endif
+        );
+    }
+
+    section_setup :vtc:linear
+    {
+        stack "ustack_tc" (min_size = 1k, fixed, align = 8);
+        stack "istack_tc" (min_size = 1k, fixed, align = 8);
+    }
+
+    /*Section setup for the copy table*/
+    section_setup :vtc:linear
+    {
+        copytable
+        (
+            align = 4,
+            dest = linear,
+            table
+            {
+                symbol = "_lc_ub_table_tc";
+                space = :tc:linear, :tc:abs24, :tc:abs18, :tc:csa;
+            }
+        );
+    }
+
+    /*Sections located at absolute fixed address*/
+
+    section_layout :vtc:linear
+    {
+        /*Fixed memory Allocations for stack memory and CSA*/
+        group (ordered)
+        {
+            group ustack(align = 8, run_addr = mem:dsram[LCF_USTACK_OFFSET])
+            {
+                stack "ustack_tc" (size = LCF_USTACK_SIZE);
+            }
+            "__USTACK"= sizeof(group:ustack) > 0  ? "_lc_ue_ustack_tc" : 0;
+            "__USTACK_END"="_lc_gb_ustack";
+            "__USTACK0":= "__USTACK";
+            "__USTACK1":= "__USTACK";
+            "__USTACK2":= "__USTACK";
+            "__USTACK3":= "__USTACK";
+            "__USTACK4":= "__USTACK";
+            "__USTACK5":= "__USTACK";
+
+            group istack(align = 8, run_addr = mem:dsram[LCF_ISTACK_OFFSET])
+            {
+                stack "istack_tc" (size = LCF_ISTACK_SIZE);
+            }
+            "__ISTACK"= sizeof(group:istack) > 0  ? "_lc_ue_istack_tc" : 0;
+            "__ISTACK_END"="_lc_gb_istack";
+            "__ISTACK0":="__ISTACK";
+            "__ISTACK1":="__ISTACK";
+            "__ISTACK2":="__ISTACK";
+            "__ISTACK3":="__ISTACK";
+            "__ISTACK4":="__ISTACK";
+            "__ISTACK5":="__ISTACK";
+
+            group csa_tc(align = 64, attributes=rw, run_addr=mem:dsram[LCF_CSA_OFFSET])
+            {
+                reserved "csa_tc" (size = LCF_CSA_SIZE);
+            }
+            "__CSA"= "_lc_ub_csa_tc";
+            "__CSA_END"= "_lc_ue_csa_tc";
+            "__CSA0":= "__CSA";
+            "__CSA0_END":= "__CSA_END";
+            "__CSA1":= "__CSA";
+            "__CSA1_END":= "__CSA_END";
+            "__CSA2":= "__CSA";
+            "__CSA2_END":= "__CSA_END";
+            "__CSA3":= "__CSA";
+            "__CSA3_END":= "__CSA_END";
+            "__CSA4":= "__CSA";
+            "__CSA4_END":= "__CSA_END";
+            "__CSA5":= "__CSA";
+            "__CSA5_END":= "__CSA_END";
+        }
+
+        /*Fixed memory Allocations for _START*/
+        group (ordered)
+        {
+          group  interface_const (run_addr=mem:pfls[0x0020])
+          {
+            select "*.interface_const";
+          }
+          "__IF_CONST" := addressof(group:interface_const);
+          "__START0" := CORE0_PFLASH_KERNEL_START;
+          "__START1" := CORE1_PFLASH_KERNEL_START;
+          "__START2" := CORE2_PFLASH_KERNEL_START;
+          "__START3" := CORE3_PFLASH_KERNEL_START;
+          "__START4" := CORE4_PFLASH_KERNEL_START;
+          "__START5" := CORE5_PFLASH_KERNEL_START;
+        }
+
+        /*Fixed memory Allocations for Trap Vector Table*/
+        group (ordered)
+        {
+            group trapvec_tc (align = 8, run_addr=LCF_TRAPVEC_START)
+            {
+                section "trapvec_tc" (size=0x100, attributes=rx, fill=0)
+                {
+#if CONFIG_CPU_COREID == 0
+                    select "(.text.traptab_cpu0*)";
+#elif CONFIG_CPU_COREID == 1
+                    select "(.text.traptab_cpu1*)";
+#elif CONFIG_CPU_COREID == 2
+                    select "(.text.traptab_cpu2*)";
+#elif CONFIG_CPU_COREID == 3
+                    select "(.text.traptab_cpu3*)";
+#elif CONFIG_CPU_COREID == 4
+                    select "(.text.traptab_cpu4*)";
+#elif CONFIG_CPU_COREID == 5
+                    select "(.text.traptab_cpu5*)";
+#endif
+                }
+            }
+            "__TRAPTAB_CPU0" := LCF_TRAPVEC_START;
+            "__TRAPTAB_CPU1" := LCF_TRAPVEC_START;
+            "__TRAPTAB_CPU2" := LCF_TRAPVEC_START;
+            "__TRAPTAB_CPU3" := LCF_TRAPVEC_START;
+            "__TRAPTAB_CPU4" := LCF_TRAPVEC_START;
+            "__TRAPTAB_CPU5" := LCF_TRAPVEC_START;
+        }
+
+        /*Fixed memory Allocations for Start up code*/
+        group (ordered, attributes=rx)
+        {
+            group start_tc (run_addr=(LCF_STARTPTR_CPU))
+            {
+#if CONFIG_CPU_COREID == 0
+                select "(.text.start*)";
+#elif CONFIG_CPU_COREID == 1
+                select "(.text.start_cpu1*)";
+#elif CONFIG_CPU_COREID == 2
+                select "(.text.start_cpu2*)";
+#elif CONFIG_CPU_COREID == 3
+                select "(.text.start_cpu3*)";
+#elif CONFIG_CPU_COREID == 4
+                select "(.text.start_cpu4*)";
+#elif CONFIG_CPU_COREID == 5
+                select "(.text.start_cpu5*)";
+#endif
+            }
+            "__ENABLE_INDIVIDUAL_C_INIT_CPU0" := 0; /* Not used */
+            "__ENABLE_INDIVIDUAL_C_INIT_CPU1" := 1; /* Not used */
+            "__ENABLE_INDIVIDUAL_C_INIT_CPU2" := 1; /* Not used */
+            "__ENABLE_INDIVIDUAL_C_INIT_CPU3" := 1; /* Not used */
+            "__ENABLE_INDIVIDUAL_C_INIT_CPU4" := 1; /* Not used */
+            "__ENABLE_INDIVIDUAL_C_INIT_CPU5" := 1; /* Not used */
+        }
+
+        /*Fixed memory Allocations for Interrupt Vector Table*/
+        group (ordered, attributes=rx)
+        {
+            group int_tab_tc (ordered)
+            {
+                group (run_addr=(INTTAB)+0x1FE0) select ".text.inttab0.intvec.0ff";
+            }
+            "_lc_u_int_tab" = (LCF_INTVEC_START);
+            "__INTTAB_CPU0" = (LCF_INTVEC_START);
+            "__INTTAB_CPU1" = (LCF_INTVEC_START);
+            "__INTTAB_CPU2" = (LCF_INTVEC_START);
+            "__INTTAB_CPU3" = (LCF_INTVEC_START);
+            "__INTTAB_CPU4" = (LCF_INTVEC_START);
+            "__INTTAB_CPU5" = (LCF_INTVEC_START);
+        }
+
+        /*Fixed memory Allocations for BMHD*/
+        group (ordered)
+        {
+            group  bmh_0_orig (run_addr=mem:ucb[0x4800])
+            {
+                select ".rodata.bmhd_0_orig";
+            }
+            group  bmh_1_orig (run_addr=mem:ucb[0x5000])
+            {
+                select ".rodata.bmhd_1_orig";
+            }
+            group  bmh_2_orig (run_addr=mem:ucb[0x5800])
+            {
+                select ".rodata.bmhd_2_orig";
+            }
+            group  bmh_3_orig (run_addr=mem:ucb[0x6000])
+            {
+                select ".rodata.bmhd_3_orig";
+            }
+            group  usercfg_0_org (run_addr=mem:ucb[0x8800])
+            {
+                select ".rodata.usercfg_0_orig";
+            }
+            group  usercfg_0_cpy (run_addr=mem:ucb[0x9000])
+            {
+                select ".rodata.usercfg_0_copy";
+            }
+        }
+    }
+
+    /*Near Abbsolute Addressable Data Sections*/
+    section_layout :vtc:abs18
+    {
+        /*Near Absolute Data, selectable with patterns and user defined sections*/
+        group
+        {
+            group (ordered, attributes=rw, run_addr = mem:cpu_dlmu)
+            {
+                select "(.zdata.zlmudata|.zdata.zlmudata.*)";
+                select "(.zbss.zlmubss|.zbss.zlmubss.*)";
+            }
+        }
+
+        /*Near Absolute Data, selectable by toolchain*/
+        group (ordered, contiguous, align = 4, attributes=rw, run_addr = mem:dsram)
+        {
+            group zdata(attributes=rw)
+            {
+                select "(.zdata|.zdata.*)";
+                select "(.zbss|.zbss.*)";
+            }
+        }
+
+        /*Near Absolute Const, selectable with patterns and user defined sections*/
+        group
+        {
+            group (ordered, contiguous, align = 4, attributes=r, run_addr=mem:pfls)
+            {
+#if CONFIG_CPU_COREID == 0
+                select ".zrodata.Ifx_Ssw_Tc?.*";
+                select ".zrodata.Cpu?_Main.*";
+#elif CONFIG_CPU_COREID == 1
+                select ".zrodata.Ifx_Ssw_Tc1.*";
+                select ".zrodata.Cpu1_Main.*";
+#elif CONFIG_CPU_COREID == 2
+                select ".zrodata.Ifx_Ssw_Tc2.*";
+                select ".zrodata.Cpu2_Main.*";
+#elif CONFIG_CPU_COREID == 3
+                select ".zrodata.Ifx_Ssw_Tc3.*";
+                select ".zrodata.Cpu3_Main.*";
+#elif CONFIG_CPU_COREID == 4
+                select ".zrodata.Ifx_Ssw_Tc4.*";
+                select ".zrodata.Cpu4_Main.*";
+#elif CONFIG_CPU_COREID == 5
+                select ".zrodata.Ifx_Ssw_Tc5.*";
+                select ".zrodata.Cpu5_Main.*";
+#endif
+                /*Near Absolute Const, selectable by toolchain*/
+                select "(.zrodata|.zrodata.*)";
+            }
+        }
+    }
+
+    /*Relative A0/A1/A8/A9 Addressable Sections*/
+    section_layout :vtc:linear
+    {
+        /*Relative A0 Addressable Data, selectable by toolchain*/
+        group a0 (ordered, contiguous, align = 4, attributes=rw, run_addr = mem:dsram)
+        {
+            select "(.sdata|.sdata.*)";
+            select "(.data_a0|.data_a0.*)";
+            select "(.sbss|.sbss.*)";
+            select "(.bss_a0|.bss_a0.*)";
+        }
+        "_SMALL_DATA_" := sizeof(group:a0) > 0 ? addressof(group:a0) : addressof(group:a0) & 0xF0000000 + 32k;
+        "__A0_MEM" = "_SMALL_DATA_";
+
+        /*Relative A1 Addressable Const, selectable by toolchain*/
+        /*Small constant sections, No option given for CPU specific user sections to make generated code portable across Cpus*/
+        group  a1 (ordered, align = 4, attributes=r, run_addr=mem:pfls)
+        {
+          select "(.srodata|.srodata.*)";
+          select "(.ldata|.ldata.*)";
+          select "(.rodata_a1|.rodata_a1.*)";
+        }
+        "_LITERAL_DATA_" := sizeof(group:a1) > 0 ? addressof(group:a1) : addressof(group:a1) & 0xF0000000 + 32k;
+        "__A1_MEM" = "_LITERAL_DATA_";
+
+        /*Relative A9 Addressable Data, selectable with patterns and user defined sections*/
+        group a9 (ordered, align = 4, run_addr=mem:dsram)
+        {
+            select "(.a9sdata|.a9sdata.*)";
+            select "(.data_a9|.data_a9.*)";
+            select "(.a9sbss|.a9sbss.*)";
+            select "(.bss_a9|.bss_a9.*)";
+        }
+        "_A9_DATA_" := sizeof(group:a9) > 0 ? addressof(group:a9) : addressof(group:a9) & 0xF0000000 + 32k;
+        "__A9_MEM" = "_A9_DATA_";
+
+        /*Relative A8 Addressable Const, selectable with patterns and user defined sections*/
+        group  a8 (ordered, align = 4, run_addr=mem:pfls)
+        {
+          select "(.a8srodata|.a8srodata.*)";
+          select "(.rodata_a8|.rodata_a8.*)";
+        }
+        "_A8_DATA_" := sizeof(group:a8) > 0 ? addressof(group:a8) : addressof(group:a8) & 0xF0000000 + 32k;
+        "__A8_MEM" = "_A8_DATA_";
+    }
+
+    /*kstack ram*/
+    section_layout :vtc:linear
+    {
+        group kstack(ordered, contiguous, nocopy, run_addr=mem:kstack)
+        {
+            select "(.dtcm_stack|.dtcm_stack.*)";
+        }
+    }
+
+#if CONFIG_CPU_COREID != 0
+    /*syslog ram*/
+    section_layout :vtc:linear
+    {
+        group syslog(ordered, contiguous, nocopy, run_addr=mem:syslog)
+        {
+            select "(.syslog|.syslog.*)";
+        }
+    }
+#endif
+
+    /*Far Data / Far Const Sections, selectable with patterns and user defined sections*/
+    section_layout :vtc:linear
+    {
+        /*Far Data Sections, selectable with patterns and user defined sections*/
+
+        /*DSRAM sections*/
+        group (ordered, contiguous, align = 4, attributes=rw, run_addr = mem:dsram)
+        {
+            group (attributes=rw)
+            {
+                select ".data.Ifx_Ssw_Tc?.*";
+                select ".data.Cpu?_Main.*";
+                select ".bss.Ifx_Ssw_Tc?.*";
+                select ".bss.Cpu?_Main.*";
+                select ".bss.os_scheduletable_misc.*";
+                select ".bss.iob_initialize.*";
+            }
+
+            /*Heap1*/
+            group heap1(attributes=rw)
+            {
+                heap "heap1" (size = LCF_HEAP_SIZE);
+            }
+            "_sheap":="_lc_ub_heap1";
+            "_eheap":="__USTACK_END";
+        }
+
+        /*LMU Data sections*/
+        group uncached_data(ordered, contiguous, align = 4, attributes=rw, run_addr = mem:cpu_dlmu/not_cached)
+        {
+            select "(.data.uncached.*)";
+            select "(.bss.uncached.*)";
+        }
+
+        group (ordered, contiguous, align = 4, attributes=rw, run_addr=mem:cpu_dlmu)
+        {
+            group lmubss(attributes=rw, nocopy)
+            {
+                select "(.lmubss_cpu?|.lmubss_cpu?.*)";
+            }
+
+            group data(attributes=rw)
+            {
+                select "(.data|.data.*)";
+                select "(.bss|.bss.*)";
+            }
+
+            /*Heap2 allocation*/
+            group heap2(attributes=rw)
+            {
+                heap "heap2" (size = LCF_HEAP_SIZE);
+            }
+            "__DLMUHEAP":="_lc_ge_data";
+            "__DLMUHEAP_END":=LCF_DLMU_KERNEL_START + LCF_DLMU_KERNEL_SIZE;
+        }
+
+        /*Far Const Sections, selectable with patterns and user defined sections*/
+        group
+        {
+            group (ordered, align = 4, attributes=r, run_addr=mem:pfls)
+            {
+                select ".rodata.Ifx_Ssw_Tc?.*";
+                select ".rodata.Cpu?_Main.*";
+            }
+        }
+
+        /*Far Const Sections, selectable by toolchain*/
+        group (ordered, align = 4, run_addr=mem:pfls)
+        {
+            select "(.rodata|.rodata.*)";
+        }
+    }
+
+    /* PSRAM Code selections*/
+    section_layout :vtc:linear
+    {
+        /*Code Sections, selectable with patterns and user defined sections*/
+        group
+        {
+            /*Program Scratchpad Sections*/
+            group
+            {
+                group code_psram0 (ordered, attributes=rwx, copy, run_addr=mem:psram)
+                {
+                    select "(.text.aurix_mtd_flash|.text.aurix_mtd_flash.*)";
+                    select "(.text.aurix_mtd_partition|.text.aurix_mtd_partition.*)";
+                }
+            }
+        }
+    }
+
+    /* FLS Code selections*/
+    section_layout :vtc:linear
+    {
+        /*Code Sections, selectable with patterns and user defined sections*/
+        group
+        {
+            /*Cpu specific PFLASH Sections*/
+            group
+            {
+                group (ordered, align = 4, attributes=rx, run_addr=mem:pfls)
+                {
+                    select ".text.Ifx_Ssw_Tc?.*";
+                    select ".text.Cpu?_Main.*";
+                    select ".text.CompilerTasking.Ifx_C_Init";
+                }
+            }
+        }
+
+        /*Code Sections, selectable by toolchain*/
+        group (ordered, run_addr=mem:pfls)
+        {
+            select "(.text|.text.*)";
+        }
+    }
+}

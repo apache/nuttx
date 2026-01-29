@@ -1,0 +1,189 @@
+/****************************************************************************
+ * boards/tricore/tc397/a2g-tc397-5v-tft/scripts/Lcf_Tasking_Tricore_Tc.lsl.user
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#include "arch/board/board_memorymap.h"
+
+#define LCF_PFLASH_USER_START   GENERATE_CORE_PFLASH_USER_START(CONFIG_CPU_COREID)
+#define LCF_PFLASH_USER_SIZE    GENERATE_CORE_PFLASH_USER_SIZE(CONFIG_CPU_COREID)
+#define LCF_DLMU_USER_START     GENERATE_CORE_DLMU_USER_START(CONFIG_CPU_COREID)
+#define LCF_DLMU_USER_SIZE      GENERATE_CORE_DLMU_USER_SIZE(CONFIG_CPU_COREID)
+#define LCF_USTACK_START        GENERATE_CORE_STACK_USER_START(CONFIG_CPU_COREID)
+#define LCF_USTACK_SIZE         GENERATE_CORE_STACK_USER_SIZE(CONFIG_CPU_COREID)
+
+#define LCF_HEAP_SIZE           4k
+
+#include "tc1v1_6_2.lsl"
+
+// Specify a multi-core processor environment (mpe)
+
+processor mpe
+{
+    derivative = tc39;
+}
+
+derivative tc39
+{
+    core tc
+    {
+        architecture = TC1V1.6.2;
+        space_id_offset = 100;           // add 100 to all space IDs in the architecture definition
+        copytable_space = vtc:linear;    // use the copy table in the virtual core for 'bss' and initialized data sections
+    }
+
+    core vtc
+    {
+        architecture = TC1V1.6.2;
+        import tc;                     // add all address spaces of core tc to core vtc for linking and locating
+    }
+
+    bus sri
+    {
+        mau = 8;
+        width = 32;
+
+        // map shared addresses one-to-one to real cores and virtual cores
+        map (dest=bus:tc:fpi_bus, src_offset=0, dest_offset=0, size=0xc0000000);
+        map (dest=bus:vtc:fpi_bus, src_offset=0, dest_offset=0, size=0xc0000000);
+    }
+
+    memory upfls
+    {
+        mau = 8;
+        size = LCF_PFLASH_USER_SIZE;
+        type = rom;
+        map     cached (dest=bus:sri, dest_offset=LCF_PFLASH_USER_START, size=LCF_PFLASH_USER_SIZE);
+        map not_cached (dest=bus:sri, dest_offset=NC_START(LCF_PFLASH_USER_START), reserved, size=LCF_PFLASH_USER_SIZE);
+    }
+
+    memory cpu_udlmu
+    {
+        mau = 8;
+        size = LCF_DLMU_USER_SIZE;
+        type = ram;
+        map     cached (dest=bus:sri, dest_offset=LCF_DLMU_USER_START, size=LCF_DLMU_USER_SIZE);
+        map not_cached (dest=bus:sri, dest_offset=NC_START(LCF_DLMU_USER_START), reserved, size=LCF_DLMU_USER_SIZE);
+    }
+
+    memory ustack
+    {
+        mau = 8;
+        size = LCF_USTACK_SIZE;
+        type = ram;
+        map not_cached (dest=bus:sri, dest_offset=LCF_USTACK_START, size=LCF_USTACK_SIZE);  
+    }
+
+    /*Section setup for the copy table*/
+    section_setup :vtc:linear
+    {
+        copytable
+        (
+            align = 4,
+            dest = linear,
+            table
+            {
+                symbol = "_lc_ub_table_tc";
+                space = :tc:linear, :tc:abs24, :tc:abs18;
+            }
+        );
+    }
+
+    section_setup :vtc:linear
+    {
+        heap "uheap" (min_size = LCF_HEAP_SIZE, align = 4);
+    }
+
+    /* user stack section */
+    section_layout :vtc:linear
+    {
+        group ustack(ordered, contiguous, nocopy, run_addr=mem:ustack)
+        {
+            select "(.dtcm_stack|.dtcm_stack.*)";
+        }
+    }
+
+    /*Sections located at absolute fixed address*/
+    section_layout :vtc:linear
+    {
+        group userspace(ordered, run_addr=LCF_PFLASH_USER_START)
+        {
+            select "(.userspace|.userspace.*)";
+        }
+        "_suserspace" = "_lc_gb_userspace";
+        "_euserspace" = "_lc_ge_userspace";
+
+        group text(ordered, run_addr=mem:upfls)
+        {
+            select "(.text|.text.*)";
+            select "(.zrodata|.zrodata.*)";
+            select "(.rodata|.rodata.*)";
+        }
+        "_stext" = "_lc_gb_text";
+        "_etext" = "_lc_ge_text";
+    }
+
+    /* Data & Bss section */
+    section_layout :vtc:linear
+    {
+        group uncached_data(ordered, contiguous, align = 4, attributes=rw, run_addr = mem:cpu_udlmu/not_cached)
+        {
+            select "(.data.uncached.*)";
+            select "(.bss.uncached.*)";
+        }
+
+        group (ordered, contiguous, align = 4, attributes=rw, run_addr = mem:cpu_udlmu)
+        {
+            group udata
+            {
+                select "(.data|.data.*)";
+                select "(.zdata|.zdata.*)";
+            }
+            "_sdata" = "_lc_gb_udata";
+            "_edata" = "_lc_ge_udata";
+
+            /* bss section */
+            group ubss
+            {
+                select "(.bss|.bss.*)";
+                select "(.zbss|.zbss.*)";
+                select "(.bbss|.bbss.*)";
+            }
+            "_sbss" = "_lc_gb_ubss";
+            "_ebss" = "_lc_ge_ubss";
+
+            /* heap section */
+            group uheap
+            {
+                heap "uheap" (size = LCF_HEAP_SIZE);
+            }
+            "_sheap" = "_ebss";
+            "_eheap" = LCF_DLMU_USER_START + LCF_DLMU_USER_SIZE;
+        }
+
+        group udata_rom(ordered, contiguous, load_addr=mem:upfls)
+        {
+            select "(.data|.data.*)";
+            select "(.zdata|.zdata.*)";
+        }
+        "_sdata_pflash" = "_lc_gb_udata_rom";
+        #include "symbol_share.ld"
+    }
+}

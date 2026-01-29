@@ -38,7 +38,7 @@
 
 #  include <IfxCpu_reg.h>
 #  include <Ifx_Ssw_Compilers.h>
-#  include <Tricore/Compilers/Compilers.h>
+#  include <Compilers/Compilers.h>
 #  include <IfxCpu_Intrinsics.h>
 #endif
 

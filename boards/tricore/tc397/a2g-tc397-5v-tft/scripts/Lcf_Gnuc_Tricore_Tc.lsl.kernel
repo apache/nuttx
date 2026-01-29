@@ -1,0 +1,554 @@
+/****************************************************************************
+ * boards/tricore/tc397/a2g-tc397-5v-tft/scripts/Lcf_Gnuc_Tricore_Tc.lsl.kernel
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#include "arch/board/board_memorymap.h"
+
+#define __JOIN2(x,y)            x##y
+#define JOIN2(x,y)              __JOIN2(x,y)
+#define __JOIN3(x,y,z)          x##y##z
+#define JOIN3(x,y,z)            __JOIN3(x,y,z)
+#define __JOIN4(x,y,z,w)        x##y##z##w
+#define JOIN4(x,y,z,w)          __JOIN4(x,y,z,w)
+
+#define COREID_LST(x)    JOIN2(x, CONFIG_CPU_COREID)
+#define COREID_MID(x,y)  JOIN3(x, CONFIG_CPU_COREID, y)
+
+/* Default linker script, for normal executables */
+OUTPUT_FORMAT("elf32-tricore")
+OUTPUT_ARCH("tricore")
+#if CONFIG_CPU_COREID == 0
+ENTRY(_START)
+#endif
+
+__TRICORE_DERIVATE_MEMORY_MAP__ = 0x390;
+
+LCF_PFLASH_KERNEL_START = GENERATE_CORE_PFLASH_KERNEL_START(CONFIG_CPU_COREID);
+LCF_PFLASH_KERNEL_SIZE  = GENERATE_CORE_PFLASH_KERNEL_SIZE(CONFIG_CPU_COREID);
+LCF_DSPR_KERNEL_START   = GENERATE_CORE_DSPR_KERNEL_START(CONFIG_CPU_COREID);
+LCF_DSPR_KERNEL_SIZE    = GENERATE_CORE_DSPR_KERNEL_SIZE(CONFIG_CPU_COREID);
+LCF_PSPR_KERNEL_START   = GENERATE_CORE_PSPR_KERNEL_START(CONFIG_CPU_COREID);
+LCF_PSPR_KERNEL_SIZE    = GENERATE_CORE_PSPR_KERNEL_SIZE(CONFIG_CPU_COREID);
+LCF_DLMU_KERNEL_START   = GENERATE_CORE_DLMU_KERNEL_START(CONFIG_CPU_COREID);
+LCF_DLMU_KERNEL_SIZE    = GENERATE_CORE_DLMU_KERNEL_SIZE(CONFIG_CPU_COREID);
+LCF_KSTACK_START        = GENERATE_CORE_STACK_KERNEL_START(CONFIG_CPU_COREID);
+LCF_KSTACK_SIZE         = GENERATE_CORE_STACK_KERNEL_SIZE(CONFIG_CPU_COREID);
+
+LCF_CSA_SIZE = 40k;
+LCF_USTACK_SIZE = CONFIG_IDLETHREAD_STACKSIZE;
+LCF_ISTACK_SIZE = CONFIG_ARCH_INTERRUPTSTACK;
+
+LCF_CSA_OFFSET    = (LCF_DSPR_KERNEL_SIZE - 1k - LCF_CSA_SIZE);
+LCF_ISTACK_OFFSET = (LCF_CSA_OFFSET - 256 - LCF_ISTACK_SIZE);
+LCF_USTACK_OFFSET = (LCF_ISTACK_OFFSET - 256 - LCF_USTACK_SIZE);
+
+LCF_STARTPTR      = LCF_PFLASH_KERNEL_START;
+LCF_STARTPTR_NC   = NC_START(LCF_STARTPTR);
+LCF_TRAPVEC_START = LCF_STARTPTR + 0x100;
+
+COREID_LST(__INTTAB_CPU) = LCF_PFLASH_KERNEL_START;
+
+LCF_STARTPTR_NC_CPU0 = NC_START(CORE0_PFLASH_KERNEL_START);
+LCF_STARTPTR_NC_CPU1 = NC_START(CORE1_PFLASH_KERNEL_START);
+LCF_STARTPTR_NC_CPU2 = NC_START(CORE2_PFLASH_KERNEL_START);
+LCF_STARTPTR_NC_CPU3 = NC_START(CORE3_PFLASH_KERNEL_START);
+LCF_STARTPTR_NC_CPU4 = NC_START(CORE4_PFLASH_KERNEL_START);
+LCF_STARTPTR_NC_CPU5 = NC_START(CORE5_PFLASH_KERNEL_START);
+RESET = CORE0_PFLASH_KERNEL_START;
+
+MEMORY
+{
+    kstack (w!xp): org = LCF_KSTACK_START, len = LCF_KSTACK_SIZE
+
+    dspr (w!xp): org = LCF_DSPR_KERNEL_START, len = LCF_DSPR_KERNEL_SIZE
+    pspr (w!xp): org = LCF_PSPR_KERNEL_START, len = LCF_PSPR_KERNEL_SIZE
+
+    psram_local (w!xp): org = PSPR_LOCAL_START, len = LCF_PSPR_KERNEL_SIZE
+
+    pfls (rx!p): org = LCF_PFLASH_KERNEL_START, len = LCF_PFLASH_KERNEL_SIZE
+    pfls_nc (rx!p): org = NC_START(LCF_PFLASH_KERNEL_START), len = LCF_PFLASH_KERNEL_SIZE
+
+    ucb (rx!p): org = 0xAF400000, len = 24K
+
+    cpu_dlmu (w!xp): org = LCF_DLMU_KERNEL_START, len = LCF_DLMU_KERNEL_SIZE
+    cpu_dlmu_nc (w!xp): org = NC_START(LCF_DLMU_KERNEL_START), len = LCF_DLMU_KERNEL_SIZE
+}
+
+/* map cached and non cached addresses */
+REGION_MIRROR("pfls", "pfls_nc")
+REGION_MIRROR("cpu_dlmu", "cpu_dlmu_nc")
+
+/*Sections located at absolute fixed address*/
+/*Fixed memory Allocations for stack memory*/
+CORE_ID = GLOBAL;
+SECTIONS
+{
+    CORE_SEC(.ustack) (LCF_DSPR_KERNEL_START + LCF_USTACK_OFFSET):
+    {
+        PROVIDE(__USTACK_END = .);
+        PROVIDE(COREID_MID(__USTACK, _END) = .);
+        . = . + LCF_USTACK_SIZE;
+        PROVIDE(__USTACK = .);
+        PROVIDE(COREID_LST(__USTACK) = .);
+    }
+
+    CORE_SEC(.istack) (LCF_DSPR_KERNEL_START + LCF_ISTACK_OFFSET):
+    {
+        PROVIDE(__ISTACK_END = .);
+        PROVIDE(COREID_MID(__ISTACK, _END) = .);
+        . = . + LCF_ISTACK_SIZE;
+        PROVIDE(__ISTACK = .);
+        PROVIDE(COREID_LST(__ISTACK) = .);
+    }
+    CORE_SEC(.csa) (LCF_DSPR_KERNEL_START + LCF_CSA_OFFSET):
+    {
+        PROVIDE(COREID_LST(__CSA) = .);
+        . = . + LCF_CSA_SIZE;
+        PROVIDE(COREID_MID(__CSA, _END) = .);
+    }
+}
+
+/*Fixed memory Allocations for _START*/
+CORE_ID = GLOBAL ;
+SECTIONS
+{
+    .start_tc (LCF_STARTPTR) : FLAGS(rxl)
+    {
+        KEEP (*(.start));
+        KEEP (*(.start_cpu?));
+    } > pfls
+
+    .interface_const (LCF_STARTPTR + 0x20) :
+    {
+        __IF_CONST = .;
+        KEEP (*(.interface_const));
+    } > pfls
+
+    PROVIDE(__START = LCF_STARTPTR);
+    PROVIDE(__ENABLE_INDIVIDUAL_C_INIT_CPU0 = 0);
+    PROVIDE(__ENABLE_INDIVIDUAL_C_INIT_CPU1 = 1);
+    PROVIDE(__ENABLE_INDIVIDUAL_C_INIT_CPU2 = 1);
+    PROVIDE(__ENABLE_INDIVIDUAL_C_INIT_CPU3 = 1);
+    PROVIDE(__ENABLE_INDIVIDUAL_C_INIT_CPU4 = 1);
+    PROVIDE(__ENABLE_INDIVIDUAL_C_INIT_CPU5 = 1);
+}
+
+/*Fixed memory Allocations for Trap Vector Table*/
+CORE_ID = GLOBAL;
+SECTIONS
+{
+    .traptab_tc (LCF_TRAPVEC_START) :
+    {
+        PROVIDE(COREID_LST(__TRAPTAB_CPU) = .);
+        KEEP (*(.COREID_LST(traptab_cpu)));
+    } > pfls
+}
+
+/*Fixed memory Allocations for _START1 to 5 */
+CORE_ID = GLOBAL ;
+SECTIONS
+{
+    PROVIDE(__START1 = CORE1_PFLASH_KERNEL_START);
+    PROVIDE(__START2 = CORE2_PFLASH_KERNEL_START);
+    PROVIDE(__START3 = CORE3_PFLASH_KERNEL_START);
+    PROVIDE(__START4 = CORE4_PFLASH_KERNEL_START);
+    PROVIDE(__START5 = CORE5_PFLASH_KERNEL_START);
+}
+
+/*Fixed memory Allocations for Interrupt Vector Table*/
+SECTIONS
+{
+    /*Interrupt Vector Table*/
+    .COREID_MID(inttab_tc, _0FF) (COREID_LST(__INTTAB_CPU) + 0x1FE0) :
+    {
+        . = ALIGN(8);
+        KEEP (*(.COREID_MID(intvec_tc, _255)));
+        . = ALIGN(0x2000);
+    } > pfls
+}
+
+/* Fixed memory Allocations for BMHD*/
+CORE_ID = GLOBAL;
+SECTIONS
+{
+    .bmhd_0_org (0xaf400000) : FLAGS(arl) { KEEP (*(.bmhd_0_orig)); } > ucb
+    .bmhd_1_org (0xaf400200) : FLAGS(arl) { KEEP (*(.bmhd_1_orig)); } > ucb
+    .bmhd_2_org (0xaf400400) : FLAGS(arl) { KEEP (*(.bmhd_2_orig)); } > ucb
+    .bmhd_3_org (0xaf400600) : FLAGS(arl) { KEEP (*(.bmhd_3_orig)); } > ucb
+}
+
+/*Relative A0/A1/A8/A9 Addressable Sections*/
+CORE_ID = GLOBAL;
+SECTIONS
+{
+    /*Relative A0 Addressable Data, selectable with patterns and user defined sections*/
+    /*Note: A0 addressable area is common, to make the functions callable in any CPU*/
+    /*Relative A0 Addressable Data, selectable by toolchain*/
+    CORE_SEC(.sdata) : FLAGS(awsl)
+    {
+        *(.sdata)
+        *(.sdata.*)
+        . = ALIGN(4);
+    } > dspr AT> pfls
+
+    CORE_SEC(.sbss) (NOLOAD): FLAGS(aws)
+    {
+        *(.sbss)
+        *(.sbss.*)
+    } > dspr
+    _SMALL_DATA_ = SIZEOF(CORE_SEC(.sdata)) ? ADDR(CORE_SEC(.sdata)) : (ADDR(CORE_SEC(.sdata)) & 0xF0000000) + 32k ;
+    __A0_MEM = _SMALL_DATA_;
+}
+
+CORE_ID = GLOBAL;
+SECTIONS
+{
+    /*Relative A1 Addressable Const, selectable with patterns and user defined sections*/
+    /*Note: A1 addressable area is common, to make the functions callable in any CPU*/
+    /*Relative A1 Addressable Const, selectable by toolchain*/
+    CORE_SEC(.sdata2) : FLAGS(arsl)
+    {
+        *(.srodata)
+        *(.srodata.*)
+    } > pfls
+    _SMALL_DATA2_ = SIZEOF(CORE_SEC(.sdata2)) ? ADDR(CORE_SEC(.sdata2)) : (ADDR(CORE_SEC(.sdata2)) & 0xF0000000) + 32k ;
+    __A1_MEM = _SMALL_DATA2_;
+}
+
+CORE_ID = GLOBAL;
+SECTIONS
+{
+    /*Relative A9 Addressable Data, selectable with patterns and user defined sections*/
+    CORE_SEC(.sdata4) :
+    {
+        *(.a9sdata)
+        *(.a9sdata.*)
+        . = ALIGN(4);
+    } > dspr AT> pfls
+
+    CORE_SEC(.sbss4) (NOLOAD) :
+    {
+        *(.a9sbss)
+        *(.a9sbss.*)
+    } > dspr
+
+    _SMALL_DATA4_ = SIZEOF(CORE_SEC(.sdata4)) ? ADDR(CORE_SEC(.sdata4)) : (ADDR(CORE_SEC(.sdata4)) & 0xF0000000) + 32k ;
+    __A9_MEM = _SMALL_DATA4_;
+
+    /*Relative A8 Addressable Const, selectable with patterns and user defined sections*/
+    CORE_SEC(.sdata3) : FLAGS(arsl)
+    {
+        *(.rodata_a8)
+        *(.rodata_a8.*)
+    } > pfls
+
+    _SMALL_DATA3_ = SIZEOF(CORE_SEC(.sdata3)) ? ADDR(CORE_SEC(.sdata3)) : (ADDR(CORE_SEC(.sdata3)) & 0xF0000000) + 32k ;
+    __A8_MEM = _SMALL_DATA3_;
+}
+
+/*kstack*/
+CORE_ID = GLOBAL;
+SECTIONS
+{
+    CORE_SEC(.stack) (NOLOAD) : FLAGS(aw)
+    {
+        *(.dtcm_stack)
+        *(.dtcm_stack.*)
+    } > kstack
+}
+
+/*data&bss*/
+CORE_ID = GLOBAL;
+SECTIONS
+{
+    CORE_SEC(.dspr_data) : FLAGS(awzl)
+    {
+        *Ifx_Ssw_Tc?.* (.data)
+        *Cpu?_Main.* (.data.*)
+        . = ALIGN(4);
+    } > dspr AT> pfls
+
+    CORE_SEC(.dspr_bss) (NOLOAD) : FLAGS(awz)
+    {
+        *Ifx_Ssw_Tc?.* (.bss)
+        *Cpu?_Main.* (.bss.*)
+        . = ALIGN(4);
+    } > dspr
+
+    CORE_SEC(.zdata) : FLAGS(awzl)
+    {
+        *(.zdata)
+        *(.zdata.*)
+        *(.gnu.linkonce.z.*)
+        . = ALIGN(4);
+    } > dspr AT> pfls
+
+    CORE_SEC(.zbss) (NOLOAD) : FLAGS(awz)
+    {
+        *(.zbss)
+        *(.zbss.*)
+        *(.bbss)
+        *(.bbss.*)
+        *(.gnu.linkonce.zb.*)
+    } > dspr
+
+    CORE_SEC(.data) : FLAGS(awl)
+    {
+        *(.data)
+        *(.data.*)
+        *(.gnu.linkonce.d.*)
+        . = ALIGN(4);
+    } > dspr AT> pfls
+
+    CORE_SEC(.bss) (NOLOAD) : FLAGS(aw)
+    {
+        *(.bss)
+        *(.bss.*)
+        *(.lmubss_cpu?)
+        *(.lmubss_cpu?.*)
+        *(.gnu.linkonce.b.*)
+    } > dspr
+}
+
+/*Heap*/
+CORE_ID = GLOBAL;
+SECTIONS
+{
+    .heap (NOLOAD) : FLAGS(aw)
+    {
+        . = ALIGN(4);
+        _sheap = ABSOLUTE(.);
+        _eheap = ABSOLUTE(__USTACK_END);
+    } > dspr
+}
+
+/*rodata*/
+CORE_ID = GLOBAL;
+SECTIONS
+{
+    CORE_SEC(.rodata) : FLAGS(arl)
+    {
+        *(.rodata)
+        *(.rodata.*)
+        *(.gnu.linkonce.r.*)
+        /*
+         * Create the clear and copy tables that tell the startup code
+         * which memory areas to clear and to copy, respectively.
+         */
+        . = ALIGN(4) ;
+        PROVIDE(__clear_table = .);
+        LONG(0 + ADDR(.dspr_bss));            LONG(SIZEOF(.dspr_bss));
+        LONG(0 + ADDR(.zbss));                LONG(SIZEOF(.zbss));
+        LONG(0 + ADDR(.sbss));                LONG(SIZEOF(.sbss));
+        LONG(0 + ADDR(.bss));                 LONG(SIZEOF(.bss));
+        LONG(0 + ADDR(.sbss4));               LONG(SIZEOF(.sbss4));
+        LONG(-1);                                       LONG(-1);
+        PROVIDE(__clear_table_powerOn = .);
+        LONG(-1);                                       LONG(-1);
+        PROVIDE(__copy_table = .);
+        LONG(LOADADDR(.dspr_data));           LONG(0 + ADDR(.dspr_data));           LONG(SIZEOF(.dspr_data));
+        LONG(LOADADDR(.zdata));               LONG(0 + ADDR(.zdata));               LONG(SIZEOF(.zdata));
+        LONG(LOADADDR(.sdata));               LONG(0 + ADDR(.sdata));               LONG(SIZEOF(.sdata));
+        LONG(LOADADDR(.data));                LONG(0 + ADDR(.data));                LONG(SIZEOF(.data));
+        LONG(LOADADDR(.sdata4));              LONG(0 + ADDR(.sdata4));              LONG(SIZEOF(.sdata4));
+        LONG(LOADADDR(.psram_text));          LONG(0 + ADDR(.psram_text));          LONG(SIZEOF(.psram_text));
+        LONG(-1);                                       LONG(-1);                                       LONG(-1);
+        PROVIDE(__copy_table_powerOn = .) ;
+        LONG(-1);                                       LONG(-1);                                       LONG(-1);
+        . = ALIGN(8);
+    } > pfls
+}
+
+/*Code selections*/
+/*Code Sections, selectable with patterns and user defined sections*/
+CORE_ID = GLOBAL;
+SECTIONS
+{
+    CORE_SEC(.zrodata) : FLAGS(arzl)
+    {
+        *Ifx_Ssw_Tc?.* (.zrodata)
+        *Cpu?_Main.* (.zrodata)
+        *(.zrodata_cpu?)
+        *(.zrodata)
+        *(.zrodata.*)
+    } > pfls
+
+    /*
+     * Code executed before calling main extra section for C++ constructor init
+     *  -------------------------Start-----------------------------------------
+     */
+    .init :
+    {
+        PROVIDE(__init_start = .);
+        KEEP(*(.init))
+        KEEP(*(.init*))
+        PROVIDE(__init_end = .);
+        . = ALIGN(8);
+
+    } > pfls
+
+    .fini :
+    {
+        PROVIDE(__fini_start = .);
+        KEEP(*(.fini))
+        KEEP(*(.fini*))
+        PROVIDE(__fini_end = .);
+        . = ALIGN(8);
+    } > pfls
+
+    /*
+     * Code executed before calling main extra section for C++ constructor init
+     *  -------------------------End-----------------------------------------
+     */
+    CORE_SEC(.psram_text)  : FLAGS(awxl)
+    {
+        . = ALIGN(4);
+        *aurix_mtd_flash.*(.text)
+        *aurix_mtd_flash.*(.text.*)
+        *aurix_mtd_partition.*(.text)
+        *aurix_mtd_partition.*(.text.*)
+        . = ALIGN(4);
+    } > pspr AT> pfls
+
+    CORE_SEC(.text) : FLAGS(axl)
+    {
+        . = ALIGN(4);
+        *Ifx_Ssw_Tc?.*(.text)
+        *Cpu?_Main.*(.text)
+        *Ifx_Ssw_Tc?.*(.text.*)
+        *Cpu?_Main.*(.text.*)
+        *(.text)
+        *(.text.*)
+        *(.gcc_except_table)
+        *(.gnu.linkonce.t.*)
+        *(.gnu.warning)        /* .gnu.warning sections are handled specially by elf32.em. */
+        . = ALIGN(8);
+    } > pfls
+
+    /*
+     * C++ exception handling tables.  NOTE: gcc emits .eh_frame
+     * sections when compiling C sources with debugging enabled (-g).
+     * If you can be sure that your final application consists
+     * exclusively of C objects (i.e., no C++ objects), you may use
+     * the -R option of the "strip" and "objcopy" utilities to remove
+     * the .eh_frame section from the executable.
+     */
+    .eh_frame_hdr : ALIGN(8)
+    {
+        KEEP (*(.eh_frame_hdr))
+        . = ALIGN(8);
+    } > pfls
+
+    .eh_frame : ALIGN(8)
+    {
+        __EH_FRAME_BEGIN__ = . ;
+        KEEP (*(.eh_frame))
+        __EH_FRAME_END__ = . ;
+        . = ALIGN(8);
+    } > pfls
+
+    /*
+     * Constructors and destructors.
+     */
+    .ctors : FLAGS(ar)
+    {
+        _sinit = ABSOLUTE(.);
+        /*
+         * Code executed before calling main extra section for C++ constructor init
+         *  -------------------------Start-----------------------------------------
+         */
+        KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
+        KEEP(*(.init_array EXCLUDE_FILE(*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o) .ctors))
+        /*
+         * Code executed before calling main extra section for C++ constructor init
+         *  -------------------------End-----------------------------------------
+         */
+        _einit = ABSOLUTE(.);
+        . = ALIGN(8);
+    } > pfls
+    .dtors : FLAGS(ar)
+    {
+        __DTOR_LIST__ = . ;
+        LONG((__DTOR_END__ - __DTOR_LIST__) / 4 - 2);
+        /*
+         * Code executed before calling main extra section for C++ destructor init
+         *  -------------------------Start-----------------------------------------
+         */
+        KEEP (*crtbegin.o(.dtors))
+        KEEP (*(EXCLUDE_FILE (*crtend.o ) .dtors))
+        KEEP (*(SORT(.dtors.*)))
+        KEEP (*(.dtors))
+        /*
+         * Code executed before calling main extra section for C++ destructor init
+         *  -------------------------End-----------------------------------------
+         */
+        LONG(0) ;
+        __DTOR_END__ = . ;
+        . = ALIGN(8);
+    } > pfls
+    /*
+     * DWARF debug sections.
+     * Symbols in the DWARF debugging sections are relative to the
+     * beginning of the section, so we begin them at 0.
+     */
+    /*
+     * DWARF 1
+     */
+    .comment         0 : { *(.comment) }
+    .debug           0 : { *(.debug) }
+    .line            0 : { *(.line) }
+    /*
+     * GNU DWARF 1 extensions
+     */
+    .debug_srcinfo   0 : { *(.debug_srcinfo) }
+    .debug_sfnames   0 : { *(.debug_sfnames) }
+    /*
+     * DWARF 1.1 and DWARF 2
+     */
+    .debug_aranges   0 : { *(.debug_aranges) }
+    .debug_pubnames  0 : { *(.debug_pubnames) }
+    /*
+     * DWARF 2
+     */
+    .debug_info      0 : { *(.debug_info) }
+    .debug_abbrev    0 : { *(.debug_abbrev) }
+    .debug_line      0 : { *(.debug_line) }
+    .debug_frame     0 : { *(.debug_frame) }
+    .debug_str       0 : { *(.debug_str) }
+    .debug_loc       0 : { *(.debug_loc) }
+    .debug_macinfo   0 : { *(.debug_macinfo) }
+    .debug_ranges    0 : { *(.debug_ranges) }
+    /*
+     * SGI/MIPS DWARF 2 extensions
+     */
+    .debug_weaknames 0 : { *(.debug_weaknames) }
+    .debug_funcnames 0 : { *(.debug_funcnames) }
+    .debug_typenames 0 : { *(.debug_typenames) }
+    .debug_varnames  0 : { *(.debug_varnames) }
+    /*
+     * Optional sections that may only appear when relocating.
+     */
+    /*
+     * Optional sections that may appear regardless of relocating.
+     */
+    .version_info    0 : { *(.version_info) }
+    .boffs           0 : { KEEP (*(.boffs)) }
+}
