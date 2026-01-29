@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/timers/watchdog.h>
 #include <stdint.h>
 #include <sys/types.h>
@@ -53,6 +54,7 @@ struct ameba_lowerhalf_s
   bool     started;                 /* true: The watchdog timer has
                                      * been started
                                      */
+  spinlock_t lock;                  /* Ensure mutually exclusive access */
 };
 
 /****************************************************************************
@@ -113,11 +115,11 @@ static int ameba_start(struct watchdog_lowerhalf_s *lower)
 {
   struct ameba_lowerhalf_s *priv = (struct ameba_lowerhalf_s *)lower;
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   priv->started = true;
   priv->lastreset = clock_systime_ticks();
   hal_misc_wdt_enable();
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return OK;
 }
 
@@ -140,12 +142,12 @@ static int ameba_stop(struct watchdog_lowerhalf_s *lower)
 {
   struct ameba_lowerhalf_s *priv = (struct ameba_lowerhalf_s *)lower;
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   hal_misc_wdt_disable();
   priv->started = false;
   priv->timeout = 0;
   priv->lastreset = 0;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return OK;
 }
 
@@ -176,10 +178,10 @@ static int ameba_keepalive(struct watchdog_lowerhalf_s *lower)
 
   /* Reload the WDT timer */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   priv->lastreset = clock_systime_ticks();
   hal_misc_wdt_refresh();
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return OK;
 }
 
@@ -254,10 +256,10 @@ static int ameba_settimeout(struct watchdog_lowerhalf_s *lower,
 {
   struct ameba_lowerhalf_s *priv = (struct ameba_lowerhalf_s *)lower;
   irqstate_t flags;
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   priv->timeout = timeout;
   hal_misc_wdt_init(timeout * 1000);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return OK;
 }
 
@@ -287,6 +289,7 @@ void ameba_wdt_initialize(void)
   /* Initialize the driver state structure. */
 
   priv->ops = &g_wdgops;
+  spin_lock_init(&priv->lock);
   watchdog_register(CONFIG_WATCHDOG_DEVPATH,
                     (struct watchdog_lowerhalf_s *)priv);
 }

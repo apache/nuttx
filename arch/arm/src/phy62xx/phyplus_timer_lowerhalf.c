@@ -49,7 +49,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/timers/timer.h>
 
 #include <arch/board/board.h>
@@ -78,6 +78,7 @@ struct phyplus_lowerhalf_s
   void                     *arg;     /* Argument to upper half cb    */
   bool                     started;  /* True: Timer has been started */
   uint32_t                 timeout;  /* Current timeout value (us)   */
+  spinlock_t               lock;     /* Ensure mutually exclusive access */
 };
 
 /****************************************************************************
@@ -369,7 +370,7 @@ static void phyplus_setcallback(struct timer_lowerhalf_s *lower,
   struct phyplus_lowerhalf_s *priv =
       (struct phyplus_lowerhalf_s *)lower;
   int ret = OK;
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = spin_lock_irqsave_nopreempt(&priv->lock);
 
   /* Save the new callback */
 
@@ -397,7 +398,7 @@ static void phyplus_setcallback(struct timer_lowerhalf_s *lower,
       ret = phyplus_tim_setisr(priv->tim, NULL, NULL);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
   ASSERT(ret == OK);
 
   /* #if 0
@@ -518,6 +519,8 @@ int phyplus_timer_initialize(const char *devpath, int timer)
       syslog(LOG_ERR, "err2");
       return -EINVAL;
     }
+
+  spin_lock_init(&lower->lock);
 
   /* Register the timer driver as /dev/timerX.  The returned value from
    * timer_register is a handle that could be uswithed  timer_unregister().

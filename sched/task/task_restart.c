@@ -106,6 +106,10 @@ static void nxtask_reset_task(FAR struct tcb_s *tcb, bool remove)
 
 #ifdef HAVE_GROUP_MEMBERS
   group_kill_children(tcb);
+
+  /* Reset the group flags to indicate that the task is no longer exiting. */
+
+  atomic_fetch_and(&tcb->group->tg_flags, ~GROUP_FLAG_EXITING);
 #endif
 
   /* Remove the TCB from whatever list it is in.  After this point, the TCB

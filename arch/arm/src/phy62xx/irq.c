@@ -30,7 +30,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/irq.h>
 
@@ -68,8 +67,6 @@ static void phy62xx_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
-
   irqinfo("NVIC (%s, irq=%d):\n", msg, irq);
   irqinfo("  ISER:       %08x ICER:   %08x\n",
           getreg32(ARMV6M_NVIC_ISER), getreg32(ARMV6M_NVIC_ICER));
@@ -91,8 +88,6 @@ static void phy62xx_dumpnvic(const char *msg, int irq)
           getreg32(ARMV6M_SYSCON_SCR), getreg32(ARMV6M_SYSCON_CCR));
   irqinfo("  SHPR2:      %08x SHPR3:  %08x\n",
           getreg32(ARMV6M_SYSCON_SHPR2), getreg32(ARMV6M_SYSCON_SHPR3));
-
-  leave_critical_section(flags);
 }
 
 #else

@@ -547,6 +547,30 @@ irqstate_t spin_lock_irqsave_nopreempt(FAR volatile spinlock_t *lock)
 }
 
 /****************************************************************************
+ * Name: rspin_lock_is_recursive
+ *
+ * Description:
+ *   This function check whether the recursive spinlock is currently held
+ *   recursively. That is, whether it's locked more than once by the
+ *   current holder.
+ *   Note that this is inherently racy unless the calling thread is
+ *   holding the rspinlock.
+ *
+ * Parameters:
+ *   lock - Recursive spinlock descriptor.
+ *
+ * Return Value:
+ *  If rspinlock has returned to True recursively, otherwise returns false.
+ *
+ ****************************************************************************/
+
+static inline_function
+bool rspin_lock_is_recursive(FAR volatile rspinlock_t *lock)
+{
+  return lock->count > 1;
+}
+
+/****************************************************************************
  * Name: rspin_lock_count
  *
  * Description:

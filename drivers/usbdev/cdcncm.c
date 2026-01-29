@@ -43,6 +43,7 @@
 #include <nuttx/usb/cdc.h>
 #include <nuttx/usb/cdcncm.h>
 #include <nuttx/usb/usbdev_trace.h>
+#include <nuttx/kmalloc.h>
 
 #ifdef CONFIG_BOARD_USBDEV_SERIALSTR
 #  include <nuttx/board.h>
