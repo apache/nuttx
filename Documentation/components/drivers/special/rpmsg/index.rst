@@ -13,3 +13,4 @@ for inter-processor communication in Asymmetric Multiprocessing (AMP) systems.
    rpmsg_port
    rpmsg_port_uart
    rpmsg_ping
+   rpmsg_dump
