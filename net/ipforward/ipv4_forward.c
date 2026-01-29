@@ -217,6 +217,14 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
 #endif
   int ret;
 
+  if (IFF_IS_NODST_FORWARD(fwddev->d_flags))
+    {
+      nwarn("WARNING: IP forwarding disabled on destination device %s\n",
+            fwddev->d_ifname);
+      ret = -EOPNOTSUPP;
+      goto errout;
+    }
+
 #ifdef CONFIG_NET_IPFILTER
   /* Do filter before forwarding, to make sure we drop silently before
    * replying any other errors.
@@ -465,6 +473,14 @@ int ipv4_forward(FAR struct net_driver_s *dev, FAR struct ipv4_hdr_s *ipv4)
   int icmp_reply_code;
 #endif /* CONFIG_NET_ICMP */
 
+  if (IFF_IS_NOSRC_FORWARD(dev->d_flags))
+    {
+      nwarn("WARNING: IP forwarding disabled on source device %s\n",
+            dev->d_ifname);
+      ret = -EOPNOTSUPP;
+      goto drop;
+    }
+
   /* Search for a device that can forward this packet. */
 
   destipaddr = net_ip4addr_conv32(ipv4->destipaddr);
@@ -512,7 +528,7 @@ int ipv4_forward(FAR struct net_driver_s *dev, FAR struct ipv4_hdr_s *ipv4)
 
 #endif
 
-      nwarn("WARNING: Packet forwarding to same device not supportedN\n");
+      nwarn("WARNING: Packet forwarding to same device not supported\n");
       ret = -ENOSYS;
       goto drop;
     }
@@ -545,6 +561,11 @@ drop:
       case -EMULTIHOP:
         icmp_reply_type = ICMP_TIME_EXCEEDED;
         icmp_reply_code = ICMP_EXC_TTL;
+        goto reply;
+
+      case -EOPNOTSUPP:
+        icmp_reply_type = ICMP_DEST_UNREACHABLE;
+        icmp_reply_code = ICMP_HOST_UNREACH;
         goto reply;
 
       default:
@@ -600,11 +621,24 @@ reply:
 void ipv4_forward_broadcast(FAR struct net_driver_s *dev,
                             FAR struct ipv4_hdr_s *ipv4)
 {
+  /* Check if source device supports IP forwarding capability.
+   * Broadcast/multicast forwarding is only allowed if the receiving
+   * device has SRC_FORWARD enabled. This is consistent with the unicast
+   * forwarding policy enforced in ipv4_forward().
+   */
+
+  if (IFF_IS_NOSRC_FORWARD(dev->d_flags))
+    {
+      nwarn("WARNING: IP broadcast forwarding disabled "
+            "on source device %s\n", dev->d_ifname);
+      return;
+    }
+
   /* Don't bother if the TTL would expire */
 
   if (ipv4->ttl > 1)
     {
-      /* Forward the the broadcast/multicast packet to all devices except,
+      /* Forward the broadcast/multicast packet to all devices except,
        * of course, the device that received the packet.
        */
 
