@@ -187,6 +187,7 @@ struct hw_perf_event_s
   int state;                     /* Event status */
   atomic64_t prev_count;         /* Value of the previous count */
   atomic64_t last_period;        /* Last programmed period */
+  atomic64_t left_period;        /* Remaining period until overflow */
   struct wdog_s waitdog;
 };
 

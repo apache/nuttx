@@ -307,20 +307,55 @@ static int arm64pmu_map_cache_event(FAR const unsigned int (*cache_map)
   return mapping;
 }
 
+static void arm64pmu_event_update_period(struct perf_event_s *event)
+{
+  struct arm64_pmu_s *armpmu = to_arm64_pmu(event->pmu);
+  struct hw_perf_event_s *hwc = &event->hw;
+  int64_t left = atomic64_read(&hwc->left_period);
+  int64_t period = event->attr.sample_period;
+  uint64_t max_period;
+
+  max_period = arm64pmu_event_max_period(event);
+  if (predict_false(left <= -period))
+    {
+      left = period;
+      atomic64_set(&hwc->left_period, left);
+      hwc->last_period = period;
+    }
+
+  if (predict_false(left <= 0))
+    {
+      left += period;
+      atomic64_set(&hwc->left_period, left);
+      hwc->last_period = period;
+    }
+
+  if (left > (max_period >> 1))
+    {
+      left = (max_period >> 1);
+    }
+
+  atomic64_set(&hwc->prev_count, (uint64_t)-left);
+
+  armpmu->write_counter(event, (uint64_t)(-left) & max_period);
+}
+
 static uint64_t arm64pmu_event_update(FAR struct perf_event_s *event)
 {
-  FAR struct arm64_pmu_s *arm64pmu = to_arm64_pmu(event->pmu);
-  uint64_t max_period = arm64pmu_event_max_period(event);
+  FAR struct arm64_pmu_s *armpmu = to_arm64_pmu(event->pmu);
+  FAR struct hw_perf_event_s *hwc = &event->hw;
   uint64_t delta;
-  uint64_t new_raw_count;
+  uint64_t now;
 
-  new_raw_count = arm64pmu->read_counter(event);
+  now = armpmu->read_counter(event);
+  delta = (now - atomic64_xchg(&hwc->prev_count, now)) &
+          arm64pmu_event_max_period(event);
 
-  delta = (new_raw_count) & max_period;
+  atomic64_add(&event->count, delta);
+  atomic64_sub(&hwc->left_period, delta);
+  atomic64_set(&hwc->last_period, delta);
 
-  atomic_fetch_add(&event->count, delta);
-
-  return new_raw_count;
+  return now;
 }
 
 static int arm64pmu_map_hw_event(
@@ -380,6 +415,7 @@ static int arm64pmu_start(FAR struct perf_event_s *event, int flags)
   FAR struct hw_perf_event_s *hwc = &event->hw;
 
   hwc->state = 0;
+  arm64pmu_event_update_period(event);
   arm64pmu->enable(event);
 
   return 0;
@@ -669,32 +705,6 @@ static inline uint32_t pmuv3_getreset_flags(void)
   return value;
 }
 
-static void pmuv3_enable_user_access(FAR struct arm64_pmu_s *cpu_pmu)
-{
-  int i;
-  FAR struct pmu_hw_events_s *cpuc = this_cpu_ptr(cpu_pmu->hw_events);
-
-  for (i = 0; i < cpu_pmu->num_events; i++)
-    {
-      if (!test_bit(i, &cpuc->used_mask))
-        {
-          continue;
-        }
-
-      if (i == PMU_IDX_CYCLE_COUNTER)
-        {
-          write_pmccntr(0);
-        }
-      else
-        {
-          write_pmevcntrn(PMU_IDX_TO_COUNTER(i), 0);
-        }
-    }
-
-  write_pmuserenr(0);
-  write_pmuserenr(PMU_USERENR_ER | PMU_USERENR_CR);
-}
-
 static void pmuv3_enable_event(FAR struct perf_event_s *event)
 {
   pmuv3_disable_event_counter(event);
@@ -735,8 +745,6 @@ static void pmuv3_write_counter(FAR struct perf_event_s *event,
 
 static void pmuv3_start(FAR struct arm64_pmu_s *cpu_pmu)
 {
-  pmuv3_enable_user_access(cpu_pmu);
-
   pmuv3_pmcr_write(read_pmcr() | PMU_PMCR_E);
 }
 
@@ -790,6 +798,8 @@ static int pmuv3_handle_irq(FAR struct arm64_pmu_s *cpu_pmu)
         {
           cpu_pmu->disable(event);
         }
+
+      arm64pmu_event_update_period(event);
     }
 
   /* Start the PMU after the interrupt processing is complete */
