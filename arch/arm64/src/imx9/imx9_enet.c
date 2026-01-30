@@ -182,6 +182,7 @@ enum phy_type_t
 struct imx9_driver_s
 {
   struct net_driver_s          dev;         /* Interface understood by the network */
+  int                          intf;        /* Interface number within the driver */
   const uint32_t               base;        /* Base address of ENET controller */
   const int                    clk_gate;    /* Enet clock gate */
   const int                    irq;         /* Enet interrupt */
@@ -2170,6 +2171,17 @@ static int imx9_determine_phy(struct imx9_driver_s *priv)
   int retries;
   int ret;
 
+#ifdef CONFIG_IMX9_ENET_PHYINIT
+  /* Perform any necessary, one-time, board-specific PHY initialization */
+
+  ret = imx9_phy_boardinitialize(priv->intf);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
+      return ret;
+    }
+#endif
+
   for (i = 0; i < priv->n_phys; i++)
     {
       priv->phyaddr = (uint8_t)priv->phy_list[i].address_lo;
@@ -3201,6 +3213,7 @@ int imx9_netinitialize(int intf)
   /* Get the interface structure associated with this interface number. */
 
   priv = &g_enet[intf];
+  priv->intf = intf;
 
   /* Disable the ENET clock */
 
@@ -3290,17 +3303,6 @@ int imx9_netinitialize(int intf)
   mac[4] = (uidl &  0x0000ff00) >> 8;
   mac[5] = (uidl &  0x000000ff);
 
-#endif
-
-#ifdef CONFIG_IMX9_ENET_PHYINIT
-  /* Perform any necessary, one-time, board-specific PHY initialization */
-
-  ret = imx9_phy_boardinitialize(intf);
-  if (ret < 0)
-    {
-      nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
-      return ret;
-    }
 #endif
 
   /* Put the interface in the down state.  This usually amounts to resetting
