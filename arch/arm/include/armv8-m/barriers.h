@@ -35,8 +35,8 @@
 
 #define arm_isb()  __asm__ __volatile__ ("isb " : : : "memory")
 #define arm_dmb()  __asm__ __volatile__ ("dmb " : : : "memory")
-#define arm_rmb()  __asm__ __volatile__ ("dmb ishld" : : : "memory")
-#define arm_wmb()  __asm__ __volatile__ ("dmb ishst" : : : "memory")
+#define arm_rmb()  __asm__ __volatile__ ("dmb " : : : "memory")
+#define arm_wmb()  __asm__ __volatile__ ("dmb " : : : "memory")
 #define arm_dsb(n) __asm__ __volatile__ ("dsb " #n : : : "memory")
 
 #define UP_ISB()  arm_isb()
