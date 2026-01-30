@@ -893,6 +893,7 @@ static void esp32s3_spi_dma_exchange(struct esp32s3_spi_priv_s *priv,
   if (tp == NULL)
     {
       tp = rp;
+      memset(tp, 0, bytes);
     }
 
   esp32s3_spi_set_regbits(SPI_DMA_INT_CLR_REG(priv->config->id),
