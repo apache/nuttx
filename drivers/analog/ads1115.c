@@ -144,27 +144,26 @@ static int ads1115_write_register(FAR struct ads1115_dev_s *priv,
                                   uint16_t value)
 {
   int ret = OK;
-  struct i2c_msg_s i2cmsg[2];
+  struct i2c_msg_s i2cmsg;
+  uint8_t cmd[3];
 
   DEBUGASSERT(priv != NULL);
 
-  /* Write the register into the address pointer register. */
+  /* Setup write cmd */
 
-  i2cmsg[0].frequency = CONFIG_ADC_ADS1115_I2C_FREQUENCY;
-  i2cmsg[0].addr = priv->addr;
-  i2cmsg[0].flags = 0;
-  i2cmsg[0].buffer = &reg;
-  i2cmsg[0].length = sizeof(reg);
+  cmd[0] = (uint8_t)reg;
+  cmd[1] = (uint8_t)(value & 0xff);
+  cmd[2] = (uint8_t)((value >> 8) & 0xff);
 
-  /* Write the value into the register. */
+  /* Write the register  */
 
-  i2cmsg[1].frequency = CONFIG_ADC_ADS1115_I2C_FREQUENCY;
-  i2cmsg[1].addr = priv->addr;
-  i2cmsg[1].flags = I2C_M_NOSTART;
-  i2cmsg[1].buffer = (FAR uint8_t *)&value;
-  i2cmsg[1].length = sizeof(value);
+  i2cmsg.frequency = CONFIG_ADC_ADS1115_I2C_FREQUENCY;
+  i2cmsg.addr = priv->addr;
+  i2cmsg.flags = 0;
+  i2cmsg.buffer = cmd;
+  i2cmsg.length = 3;
 
-  ret = I2C_TRANSFER(priv->i2c, i2cmsg, 2);
+  ret = I2C_TRANSFER(priv->i2c, &i2cmsg, 1);
   if (ret < 0)
     {
       aerr("ADS1115 I2C transfer failed: %d\n", ret);
@@ -212,42 +211,6 @@ static int ads1115_read_register(FAR struct ads1115_dev_s *priv, uint8_t reg,
   i2cmsg[1].length = sizeof(*buf);
 
   ret = I2C_TRANSFER(priv->i2c, i2cmsg, 2);
-  if (ret < 0)
-    {
-      aerr("ADS1115 I2C transfer failed: %d\n", ret);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: ads1115_read_current_register
- *
- * Description:
- *  Reads from the current register in the ADS1115 in big endian.
- *
- * Input Parameters:
- *  priv - An ADS1115 device structure
- *  buf - A pointer to a buffer to store the value read from the register.
- *
- ****************************************************************************/
-
-static int ads1115_read_current_register(FAR struct ads1115_dev_s *priv,
-                                         uint16_t *buf)
-{
-  int ret = OK;
-  struct i2c_msg_s i2cmsg[1];
-
-  DEBUGASSERT(priv != NULL);
-  DEBUGASSERT(buf != NULL);
-
-  i2cmsg[0].frequency = CONFIG_ADC_ADS1115_I2C_FREQUENCY;
-  i2cmsg[0].addr = priv->addr;
-  i2cmsg[0].flags = I2C_M_READ;
-  i2cmsg[0].buffer = (FAR uint8_t *)(buf);
-  i2cmsg[0].length = sizeof(*buf);
-
-  ret = I2C_TRANSFER(priv->i2c, i2cmsg, 1);
   if (ret < 0)
     {
       aerr("ADS1115 I2C transfer failed: %d\n", ret);
@@ -347,10 +310,9 @@ static int cmdbyte_init(FAR struct ads1115_dev_s *priv)
  *   2       AINP = AIN1, AINN = AIN3
  *   3       AINP = AIN2, AINN = AIN3
  *   4       AINP = AIN0, AINN = GND
- *   5       AINP = AIN0, AINN = GND
- *   6       AINP = AIN1, AINN = GND
- *   7       AINP = AIN2, AINN = GND
- *   8       AINP = AIN3, AINN = GND
+ *   5       AINP = AIN1, AINN = GND
+ *   6       AINP = AIN2, AINN = GND
+ *   7       AINP = AIN3, AINN = GND
  ****************************************************************************/
 
 static int ads1115_trigger_conversion(FAR struct ads1115_dev_s *priv,
@@ -475,10 +437,9 @@ static int ads1115_read_conversion(FAR struct ads1115_dev_s *priv,
  *   2               AINP = AIN1, AINN = AIN3
  *   3               AINP = AIN2, AINN = AIN3
  *   4               AINP = AIN0, AINN = GND
- *   5               AINP = AIN0, AINN = GND
- *   6               AINP = AIN1, AINN = GND
- *   7               AINP = AIN2, AINN = GND
- *   8               AINP = AIN3, AINN = GND
+ *   5               AINP = AIN1, AINN = GND
+ *   6               AINP = AIN2, AINN = GND
+ *   7               AINP = AIN3, AINN = GND
  ****************************************************************************/
 
 static int ads1115_readchannel(FAR struct ads1115_dev_s *priv,
