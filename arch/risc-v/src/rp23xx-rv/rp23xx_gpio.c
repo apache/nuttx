@@ -168,15 +168,23 @@ static int rp23xx_gpio_interrupt(int irq, void *context, void *arg)
 
   /* Scan all GPIO interrupt status registers */
 
-  for (i = 0; i < 6; i++)
+  for (i = 0; i < RP23XX_GPIO_NREGS; i++)
     {
       /* Get and clear pending GPIO interrupt status */
 
       stat = getreg32(RP23XX_IO_BANK0_PROC_INTS(i * 8, 0));
-      if (i == 3)
+
+#if (RP23XX_GPIO_NUM & 7) != 0
+      /* Mask reserved bits in the last register.
+       * RP2350A: 30 GPIOs, last register has 6 valid GPIOs (bits 0-23)
+       * RP2350B: 48 GPIOs, all registers fully used (no masking needed)
+       */
+
+      if (i == RP23XX_GPIO_NREGS - 1)
         {
-          stat &= 0x00ffffff;     /* Clear reserved bits */
+          stat &= (1u << ((RP23XX_GPIO_NUM & 7) * 4)) - 1;
         }
+#endif
 
       putreg32(stat, RP23XX_IO_BANK0_INTR(i * 8));
 
@@ -256,7 +264,11 @@ int rp23xx_gpio_get_function_pin(uint32_t func, uint32_t port)
         break;
 
       case RP23XX_GPIO_FUNC_PWM:
+#ifdef CONFIG_RP23XX_RV_RP2350B
+        if (port >= 12)
+#else
         if (port >= 8)
+#endif
           {
             return -1;
           }

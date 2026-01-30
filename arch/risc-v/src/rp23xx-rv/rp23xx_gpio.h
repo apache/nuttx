@@ -48,6 +48,10 @@
 #define RP23XX_GPIO_NUM    30       /* Number of GPIO pins */
 #endif
 
+/* Number of GPIO interrupt status registers */
+
+#define RP23XX_GPIO_NREGS  ((RP23XX_GPIO_NUM + 7) / 8)
+
 /* GPIO function types ******************************************************/
 
 #define RP23XX_GPIO_FUNC_HSTX       RP23XX_IO_BANK0_GPIO_CTRL_FUNCSEL_HSTX
