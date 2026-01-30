@@ -20,4 +20,4 @@
 #
 # ##############################################################################
 
-nuttx_add_aux_library(userspace stm32_userspace.c)
+target_sources(nuttx_user PRIVATE stm32_userspace.c)

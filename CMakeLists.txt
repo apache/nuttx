@@ -628,18 +628,22 @@ process_all_directory_romfs()
 # Get linker script to use
 get_property(ldscript GLOBAL PROPERTY LD_SCRIPT)
 
-# Pre-compile linker script
+# Pre-compile linker script(s)
 if(NOT CONFIG_ARCH_SIM)
-  get_filename_component(LD_SCRIPT_NAME ${ldscript} NAME)
-  set(LD_SCRIPT_TMP "${CMAKE_BINARY_DIR}/${LD_SCRIPT_NAME}.tmp")
+  set(ldscript_tmp_list)
+  foreach(ld ${ldscript})
+    get_filename_component(LD_SCRIPT_NAME ${ld} NAME)
+    set(LD_SCRIPT_TMP "${CMAKE_BINARY_DIR}/${LD_SCRIPT_NAME}.tmp")
 
-  nuttx_generate_preprocess_target(SOURCE_FILE ${ldscript} TARGET_FILE
-                                   ${LD_SCRIPT_TMP})
+    nuttx_generate_preprocess_target(SOURCE_FILE ${ld} TARGET_FILE
+                                     ${LD_SCRIPT_TMP})
 
-  add_custom_target(ldscript_tmp DEPENDS ${LD_SCRIPT_TMP})
-  add_dependencies(nuttx ldscript_tmp)
+    add_custom_target(ldscript_tmp_${LD_SCRIPT_NAME} DEPENDS ${LD_SCRIPT_TMP})
+    add_dependencies(nuttx ldscript_tmp_${LD_SCRIPT_NAME})
 
-  set(ldscript ${LD_SCRIPT_TMP})
+    list(APPEND ldscript_tmp_list -T ${LD_SCRIPT_TMP})
+  endforeach()
+  set(ldscript ${ldscript_tmp_list})
 endif()
 
 # Perform link
@@ -679,7 +683,6 @@ if(NOT CONFIG_ARCH_SIM)
     target_link_libraries(
       nuttx
       PRIVATE ${NUTTX_EXTRA_FLAGS}
-              -T
               ${ldscript}
               $<$<NOT:$<BOOL:${DISABLE_LINK_GROUP}>>:-Wl,--start-group>
               ${nuttx_libs}
@@ -811,14 +814,19 @@ if(CONFIG_BUILD_PROTECTED)
 
   get_property(user_ldscript GLOBAL PROPERTY LD_SCRIPT_USER)
 
-  # Pre-compile linker script
-  get_filename_component(LD_SCRIPT_USER_NAME ${user_ldscript} NAME)
-  set(LD_SCRIPT_USER_TMP "${CMAKE_BINARY_DIR}/${LD_SCRIPT_USER_NAME}.tmp")
-  nuttx_generate_preprocess_target(SOURCE_FILE ${user_ldscript} TARGET_FILE
-                                   ${LD_SCRIPT_USER_TMP})
-  add_custom_target(user_ldscript_tmp DEPENDS ${LD_SCRIPT_USER_TMP})
-  add_dependencies(nuttx_user user_ldscript_tmp)
-  set(user_ldscript ${LD_SCRIPT_USER_TMP})
+  # Pre-compile linker script(s)
+  set(user_ldscript_tmp_list)
+  foreach(ldscript ${user_ldscript})
+    get_filename_component(LD_SCRIPT_USER_NAME ${ldscript} NAME)
+    set(LD_SCRIPT_USER_TMP "${CMAKE_BINARY_DIR}/${LD_SCRIPT_USER_NAME}.tmp")
+    nuttx_generate_preprocess_target(SOURCE_FILE ${ldscript} TARGET_FILE
+                                     ${LD_SCRIPT_USER_TMP})
+    add_custom_target(user_ldscript_tmp_${LD_SCRIPT_USER_NAME}
+                      DEPENDS ${LD_SCRIPT_USER_TMP})
+    add_dependencies(nuttx_user user_ldscript_tmp_${LD_SCRIPT_USER_NAME})
+    list(APPEND user_ldscript_tmp_list -T ${LD_SCRIPT_USER_TMP})
+  endforeach()
+  set(user_ldscript ${user_ldscript_tmp_list})
 
   # reset link options that don't fit userspace
   get_target_property(nuttx_user_LINK_OPTIONS nuttx_user LINK_OPTIONS)
@@ -848,8 +856,7 @@ if(CONFIG_BUILD_PROTECTED)
 
   target_link_libraries(
     nuttx_user
-    PRIVATE -T
-            ${user_ldscript}
+    PRIVATE ${user_ldscript}
             $<$<NOT:$<BOOL:${DISABLE_LINK_GROUP}>>:-Wl,--start-group>
             ${nuttx_system_libs}
             ${nuttx_apps_libs}
