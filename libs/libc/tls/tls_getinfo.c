@@ -75,4 +75,4 @@ FAR struct tls_info_s *tls_get_info(void)
   return info;
 }
 
-#endif /* !defined(up_tls_info) && (defined(__KERNEL__) || !defined(CONFIG_TLS_ALIGNED)) */
+#endif /* !defined(up_tls_info) */
