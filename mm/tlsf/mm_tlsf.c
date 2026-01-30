@@ -52,7 +52,21 @@
  ****************************************************************************/
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD > 0
-#  define MEMPOOL_NPOOLS (CONFIG_MM_HEAP_MEMPOOL_THRESHOLD / tlsf_align_size())
+#  if CONFIG_MM_MIN_BLKSIZE != 0
+#    define MEMPOOL_STEP CONFIG_MM_MIN_BLKSIZE
+#  else
+#    define MEMPOOL_STEP tlsf_align_size()
+#  endif
+
+/* A pool block is reused as a struct mm_delaynode_s by delay free, so
+ * skip the pools whose block is smaller than it.
+ */
+
+#  define MEMPOOL_SKIP \
+     (ALIGN_UP(sizeof(struct mm_delaynode_s), MEMPOOL_STEP) / \
+      MEMPOOL_STEP - 1)
+#  define MEMPOOL_NPOOLS \
+     (CONFIG_MM_HEAP_MEMPOOL_THRESHOLD / tlsf_align_size() - MEMPOOL_SKIP)
 #endif
 
 /****************************************************************************
@@ -62,6 +76,7 @@
 struct mm_delaynode_s
 {
   FAR struct mm_delaynode_s *flink;
+  mm_delaycb_t cb;  /* Optional callback, NULL means free */
 };
 
 struct mm_delayhead_s
@@ -370,7 +385,7 @@ FAR struct mm_delayhead_s *get_delayhead(FAR struct mm_heap_s *heap)
  ****************************************************************************/
 
 static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem,
-                          bool asan_check)
+                          mm_delaycb_t cb, bool asan_check)
 {
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   FAR struct mm_delayhead_s *delay;
@@ -393,6 +408,7 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem,
     }
 
   tmp->flink  = delay->head;
+  tmp->cb     = cb;
   delay->head = tmp;
 
 #  if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
@@ -428,7 +444,7 @@ static void forcefree(FAR struct mm_heap_s *heap, FAR void *mem)
     {
       /* Add to the delay list(see the comment in mm_lock) */
 
-      add_delaylist(heap, mem, false);
+      add_delaylist(heap, mem, NULL, false);
       return;
     }
 
@@ -490,18 +506,15 @@ static bool free_delaylist(FAR struct mm_heap_s *heap, bool force)
 
   while (tmp)
     {
-      FAR void *address;
+      FAR struct mm_delaynode_s *next = tmp->flink;
 
-      /* Get the first delayed deallocation */
+      if (tmp->cb)
+        {
+          tmp->cb(tmp);
+        }
 
-      address = tmp;
-      tmp = tmp->flink;
-
-      /* The address should always be non-NULL since that was checked in the
-       * 'while' condition above.
-       */
-
-      forcefree(heap, address);
+      forcefree(heap, tmp);
+      tmp = next;
     }
 
 #endif
@@ -979,26 +992,29 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
        * be the running thread stack, don't touch it.
        */
 
-      add_delaylist(heap, mem, false);
+      add_delaylist(heap, mem, NULL, false);
       return;
     }
 
   mm_unlock(heap);
-  add_delaylist(heap, mem, true);
+  add_delaylist(heap, mem, NULL, true);
 #else
   forcefree(heap, mem);
 #endif
 }
 
 /****************************************************************************
- * Name: mm_delayfree
+ * Name: mm_delayfreecb
  *
  * Description:
- *   Add mem to delaylist, mem will be freed after a while.
+ *   Add mem to delaylist with optional callback. mem is always freed instead
+ *   heap manager, the callback is for freeing the sub field only.
+ *   If cb is provided, cb(mem) will be called instead.
  *
  ****************************************************************************/
 
-void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem)
+void mm_delayfreecb(FAR struct mm_heap_s *heap, FAR void *mem,
+                    mm_delaycb_t cb)
 {
   minfo("Adding delaylist %p\n", mem);
 
@@ -1010,7 +1026,7 @@ void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem)
     }
 
   DEBUGASSERT(mm_heapmember(heap, mem));
-  add_delaylist(heap, mem, false);
+  add_delaylist(heap, mem, cb, false);
 }
 
 /****************************************************************************
@@ -1170,11 +1186,7 @@ mm_initialize_pool(FAR const struct mm_heap_config_s *config,
 
       for (i = 0; i < MEMPOOL_NPOOLS; i++)
         {
-#  if CONFIG_MM_MIN_BLKSIZE != 0
-          poolsize[i] = (i + 1) * CONFIG_MM_MIN_BLKSIZE;
-#  else
-          poolsize[i] = (i + 1) * tlsf_align_size();
-#  endif
+          poolsize[i] = (i + 1 + MEMPOOL_SKIP) * MEMPOOL_STEP;
         }
 
       def.poolsize        = poolsize;

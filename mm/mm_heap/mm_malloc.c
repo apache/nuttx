@@ -94,18 +94,15 @@ static bool free_delaylist(FAR struct mm_heap_s *heap, bool force)
 
   while (tmp)
     {
-      FAR void *address;
+      FAR struct mm_delaynode_s *next = tmp->flink;
 
-      /* Get the first delayed deallocation */
+      if (tmp->cb)
+        {
+          tmp->cb(tmp);
+        }
 
-      address = tmp;
-      tmp = tmp->flink;
-
-      /* The address should always be non-NULL since that was checked in the
-       * 'while' condition above.
-       */
-
-      mm_forcefree(heap, address);
+      mm_forcefree(heap, tmp);
+      tmp = next;
     }
 
 #endif

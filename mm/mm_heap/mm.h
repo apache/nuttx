@@ -212,6 +212,7 @@ static_assert(MM_ALIGN >= sizeof(uintptr_t) &&
 struct mm_delaynode_s
 {
   FAR struct mm_delaynode_s *flink;
+  mm_delaycb_t cb;  /* Optional callback, NULL just free */
 };
 
 struct mm_delayhead_s
