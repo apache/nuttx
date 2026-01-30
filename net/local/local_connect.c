@@ -148,7 +148,19 @@ errout_with_outfd:
 
 errout_with_conn:
   local_release_fifos(conn);
-  client->lc_state = LOCAL_STATE_BOUND;
+  /* Restore client state: if client was unbound, keep it unbound;
+   * if client was bound, restore to bound state.
+   */
+
+  if (client->lc_type == LOCAL_TYPE_UNNAMED)
+    {
+      client->lc_state = LOCAL_STATE_UNBOUND;
+    }
+  else
+    {
+      client->lc_state = LOCAL_STATE_BOUND;
+    }
+
   local_free(conn);
 
   return ret;
@@ -256,15 +268,7 @@ int psock_local_connect(FAR struct socket *psock,
                 conn->lc_type == type && conn->lc_proto == SOCK_STREAM &&
                 strncmp(conn->lc_path, unpath, UNIX_PATH_MAX - 1) == 0)
               {
-                /* Bind the address and protocol */
-
-                client->lc_type  = conn->lc_type;
-                client->lc_proto = conn->lc_proto;
                 client->lc_instance_id = local_generate_instance_id();
-
-                /* The client is now bound to an address */
-
-                client->lc_state = LOCAL_STATE_BOUND;
 
                 /* We have to do more for the SOCK_STREAM family */
 
