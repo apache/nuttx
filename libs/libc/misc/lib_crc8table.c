@@ -47,11 +47,11 @@ uint8_t crc8table(const uint8_t table[256], const uint8_t *src,
 {
   size_t i;
 
-  crc8val ^= 0xff;
-  for (i = 0; i < len; i++)
+  crc8val ^= 0xffu;
+  for (i = 0u; i < len; i++)
     {
       crc8val = table[crc8val ^ src[i]];
     }
 
-  return crc8val ^ 0xff;
+  return crc8val ^ 0xffu;
 }
