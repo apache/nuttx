@@ -140,13 +140,6 @@ int nxsem_wait(FAR sem_t *sem)
 
   DEBUGASSERT(sem != NULL);
 
-  /* This API should not be called from the idleloop or interrupt */
-
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-  DEBUGASSERT(!OSINIT_IDLELOOP() || !sched_idletask() ||
-              up_interrupt_context());
-#endif
-
   mutex = NXSEM_IS_MUTEX(sem);
 
   /* Disable fast path if priority protection is enabled on the semaphore */
@@ -197,6 +190,13 @@ int nxsem_wait(FAR sem_t *sem)
           return OK;
         }
     }
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  /* This API should not be called from the idleloop or interrupt */
+
+  DEBUGASSERT(!OSINIT_IDLELOOP() || !sched_idletask() ||
+              up_interrupt_context());
+#endif
 
   return nxsem_wait_slow(sem);
 }
