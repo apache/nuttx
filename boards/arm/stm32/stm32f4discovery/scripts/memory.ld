@@ -57,18 +57,19 @@
  *
  * A detailed memory map for the 112KB SRAM region is as follows:
  *
- *   0x20000 0000:  Kernel .data region.  Typical size: 0.1KB
- *   ------- ----   Kernel .bss  region.  Typical size: 1.8KB
- *   0x20000 0800:  Kernel IDLE thread stack (approximate).  Size is
- *                  determined by CONFIG_IDLETHREAD_STACKSIZE and
- *                  adjustments for alignment.  Typical is 1KB.
- *   ------- ----   Padded to 4KB
- *   0x20000 1000:  User .data region.  Size is variable.
- *   ------- ----   User .bss region  Size is variable.
- *   0x20000 2000:  Beginning of kernel heap.  Size determined by
- *                  CONFIG_MM_KERNEL_HEAPSIZE.
- *   ------- ----   Beginning of user heap.  Can vary with other settings.
- *   0x20001 c000:  End+1 of CPU RAM
+ *   0x2000 0000:  Kernel .data region.  Typical size: 0.1KB
+ *   ------ ----   Kernel .bss  region.  Typical size: 1.8KB
+ *   0x2000 0800:  Kernel IDLE thread stack (approximate).  Size is
+ *                 determined by CONFIG_IDLETHREAD_STACKSIZE and
+ *                 adjustments for alignment.  Typical is 1KB.
+ *   ------ ----   Padded to 8KB
+ *   0x2000 2000:  User .data region.  Size is variable.
+ *   ------ ----   User .bss region  Size is variable.
+ *   0x2000 4000:  Beginning of kernel heap.  Size determined by
+ *                 CONFIG_MM_KERNEL_HEAPSIZE which must be set to 16Kb.
+ *   0x2000 8000:  Beginning of 32Kb user heap.
+ *   0x2001 0000:  The remainder of SRAM is, unfortunately, wasted.
+ *   0x2001 c000:  End+1 of CPU RAM
  */
 
 MEMORY
@@ -81,7 +82,7 @@ MEMORY
 
     /* 112Kb of contiguous SRAM */
 
-  ksram (rwx)      : ORIGIN = 0x20000000, LENGTH = 4K
-  usram (rwx)      : ORIGIN = 0x20001000, LENGTH = 4K
-  xsram (rwx)      : ORIGIN = 0x20002000, LENGTH = 104K
+  ksram (rwx)      : ORIGIN = 0x20000000, LENGTH = 16K
+  usram (rwx)      : ORIGIN = 0x20004000, LENGTH = 16K
+  xsram (rwx)      : ORIGIN = 0x20008000, LENGTH = 80K
 }

@@ -177,8 +177,13 @@ endif()
 
 target_sources(board PRIVATE ${SRCS})
 
-# TODO: make this the default and then allow boards to redefine
-set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/ld.script")
+# Set linker script based on build type
+if(CONFIG_BUILD_PROTECTED)
+  set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/memory.ld"
+                               "${NUTTX_BOARD_DIR}/scripts/kernel-space.ld")
+else()
+  set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/ld.script")
+endif()
 
 # TODO:move this to appropriate arch/toolchain level
 set_property(
@@ -195,11 +200,13 @@ set_property(
 # -funwind-tables ARCHCXXFLAGS += -fno-rtti -funwind-tables ifneq
 # ($(CONFIG_DEBUG_NOOPT),y) ARCHOPTIMIZATION += -fno-strength-reduce endif endif
 
-set_property(
-  TARGET nuttx
-  APPEND
-  PROPERTY NUTTX_COMPILE_OPTIONS -funwind-tables)
-set_property(GLOBAL APPEND PROPERTY COMPILE_OPTIONS -fno-strength-reduce)
+if(CONFIG_UNWINDER_ARM)
+  set_property(
+    TARGET nuttx
+    APPEND
+    PROPERTY NUTTX_COMPILE_OPTIONS -funwind-tables)
+  set_property(GLOBAL APPEND PROPERTY COMPILE_OPTIONS -fno-strength-reduce)
+endif()
 
 # TODO: nxflat NXFLATLDFLAGS1 = -r -d -warn-common NXFLATLDFLAGS2 =
 # $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld
