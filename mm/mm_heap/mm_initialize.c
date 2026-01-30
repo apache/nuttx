@@ -42,7 +42,21 @@
  ****************************************************************************/
 
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD > 0
-#  define MEMPOOL_NPOOLS (CONFIG_MM_HEAP_MEMPOOL_THRESHOLD / MM_MIN_CHUNK)
+#  if CONFIG_MM_MIN_BLKSIZE != 0
+#    define MEMPOOL_STEP CONFIG_MM_MIN_BLKSIZE
+#  else
+#    define MEMPOOL_STEP MM_MIN_CHUNK
+#  endif
+
+/* A pool block is reused as a struct mm_delaynode_s by delay free, so
+ * skip the pools whose block is smaller than it.
+ */
+
+#  define MEMPOOL_SKIP \
+     (ALIGN_UP(sizeof(struct mm_delaynode_s), MEMPOOL_STEP) / \
+      MEMPOOL_STEP - 1)
+#  define MEMPOOL_NPOOLS \
+     (CONFIG_MM_HEAP_MEMPOOL_THRESHOLD / MM_MIN_CHUNK - MEMPOOL_SKIP)
 #endif
 
 /****************************************************************************
@@ -337,11 +351,7 @@ mm_initialize_pool(FAR const struct mm_heap_config_s *config,
 
       for (i = 0; i < MEMPOOL_NPOOLS; i++)
         {
-#  if CONFIG_MM_MIN_BLKSIZE != 0
-          poolsize[i] = (i + 1) * CONFIG_MM_MIN_BLKSIZE;
-#  else
-          poolsize[i] = (i + 1) * MM_MIN_CHUNK;
-#  endif
+          poolsize[i] = (i + 1 + MEMPOOL_SKIP) * MEMPOOL_STEP;
         }
 
       def.poolsize        = poolsize;

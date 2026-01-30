@@ -52,20 +52,15 @@ void free(FAR void *mem)
 }
 
 /****************************************************************************
- * Name: umm_delayfree
+ * Name: umm_delayfreecb
  *
  * Description:
- *   Add mem to delaylist, mem will be freed delay a while.
- *
- * Input Parameters:
- *   mem: addr of mem to free delay.
- *
- * Returned Value:
- *   None
+ *   Add mem to delaylist with optional callback. If cb is NULL, mem will be
+ *   freed on next malloc. If cb is provided, cb(mem) will be called instead.
  *
  ****************************************************************************/
 
-void umm_delayfree(FAR void *mem)
+void umm_delayfreecb(FAR void *mem, mm_delaycb_t cb)
 {
-  mm_delayfree(USR_HEAP, mem);
+  mm_delayfreecb(USR_HEAP, mem, cb);
 }

@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 #include <nuttx/userspace.h>
 
 #include <sys/types.h>
@@ -39,6 +40,10 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Callback type for mm_delayfreecb(). */
+
+typedef CODE void (*mm_delaycb_t)(FAR void *mem);
 
 /* Configuration ************************************************************/
 
@@ -351,18 +356,35 @@ size_t kmm_malloc_size(FAR void *mem);
 /* Functions contained in mm_free.c *****************************************/
 
 void mm_free(FAR struct mm_heap_s *heap, FAR void *mem);
-void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem);
+void mm_delayfreecb(FAR struct mm_heap_s *heap, FAR void *mem,
+                    mm_delaycb_t cb);
+
+static inline_function
+void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem)
+{
+  mm_delayfreecb(heap, mem, NULL);
+}
 
 /* Functions contained in kmm_free.c ****************************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP
 void kmm_free(FAR void *mem);
-void kmm_delayfree(FAR void *mem);
+void kmm_delayfreecb(FAR void *mem, mm_delaycb_t cb);
+
+static inline_function void kmm_delayfree(FAR void *mem)
+{
+  kmm_delayfreecb(mem, NULL);
+}
 #endif
 
 /* Functions contained in umm_free.c ****************************************/
 
-void umm_delayfree(FAR void *mem);
+void umm_delayfreecb(FAR void *mem, mm_delaycb_t cb);
+
+static inline_function void umm_delayfree(FAR void *mem)
+{
+  umm_delayfreecb(mem, NULL);
+}
 
 /* Functions contained in mm_realloc.c **************************************/
 

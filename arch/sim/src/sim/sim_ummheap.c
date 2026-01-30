@@ -107,6 +107,7 @@ struct mm_allocnode_s
 struct mm_delaynode_s
 {
   struct mm_delaynode_s *flink;
+  mm_delaycb_t cb;  /* Optional callback, NULL just free */
 };
 
 struct mm_delayhead_s
@@ -273,7 +274,7 @@ struct mm_delayhead_s *get_delayhead(struct mm_heap_s *heap)
 #endif
 }
 
-static void add_delaylist(struct mm_heap_s *heap, void *mem)
+static void add_delaylist(struct mm_heap_s *heap, void *mem, mm_delaycb_t cb)
 {
   struct mm_delayhead_s *delay = get_delayhead(heap);
   struct mm_delaynode_s *tmp = mem;
@@ -284,6 +285,7 @@ static void add_delaylist(struct mm_heap_s *heap, void *mem)
   flags = spin_lock_irqsave(&heap->lock);
 
   tmp->flink  = delay->head;
+  tmp->cb     = cb;
   delay->head = tmp;
 
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
@@ -312,7 +314,7 @@ static void forcefree(struct mm_heap_s *heap, void *mem)
        * running thread stack, add it to the delay list.
        */
 
-      add_delaylist(heap, mem);
+      add_delaylist(heap, mem, NULL);
       return;
     }
 
@@ -359,18 +361,15 @@ static bool free_delaylist(struct mm_heap_s *heap, bool force)
 
   while (tmp)
     {
-      void *address;
+      struct mm_delaynode_s *next = tmp->flink;
 
-      /* Get the first delayed deallocation */
+      if (tmp->cb)
+        {
+          tmp->cb(tmp);
+        }
 
-      address = tmp;
-      tmp = tmp->flink;
-
-      /* The address should always be non-NULL since that was checked in the
-       * 'while' condition above.
-       */
-
-      forcefree(heap, address);
+      forcefree(heap, tmp);
+      tmp = next;
     }
 
   return ret;
@@ -558,27 +557,23 @@ void free(void *mem)
     }
 
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
-  add_delaylist(g_mmheap, mem);
+  add_delaylist(g_mmheap, mem, NULL);
 #else
   forcefree(g_mmheap, mem);
 #endif
 }
 
 /****************************************************************************
- * Name: umm_delayfree
+ * Name: umm_delayfreecb
  *
  * Description:
- *   Add mem to delaylist, mem will be freed delay a while.
- *
- * Input Parameters:
- *   mem: addr of mem to free delay.
- *
- * Returned Value:
- *   None
+ *   Add mem to delaylist with optional callback. mem is always freed instead
+ *   heap manager, the callback is for freeing the sub field only.
+ *   If cb is provided, cb(mem) will be called instead.
  *
  ****************************************************************************/
 
-void umm_delayfree(void *mem)
+void umm_delayfreecb(void *mem, mm_delaycb_t cb)
 {
   /* Protect against attempts to free a NULL reference */
 
@@ -587,7 +582,7 @@ void umm_delayfree(void *mem)
       return;
     }
 
-  add_delaylist(g_mmheap, mem);
+  add_delaylist(g_mmheap, mem, cb);
 }
 
 /****************************************************************************
