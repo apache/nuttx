@@ -41,6 +41,8 @@
 
 /* Include architecture-specific definitions */
 
+#include <arch/barriers.h>
+
 #ifdef CONFIG_ARCH_INTEL64
 #  include <arch/intel64/arch.h>
 #endif

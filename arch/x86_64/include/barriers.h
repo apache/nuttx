@@ -29,5 +29,6 @@
 #define UP_DMB() __asm__ __volatile__ ("mfence" ::: "memory")
 #define UP_RMB() __asm__ __volatile__ ("lfence" ::: "memory")
 #define UP_WMB() __asm__ __volatile__ ("sfence" ::: "memory")
+#define UP_WFE() __asm__ __volatile__ ("pause")
 
 #endif /* __ARCH_X86_64_INCLUDE_BARRIERS_H */
