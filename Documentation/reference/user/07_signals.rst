@@ -12,27 +12,69 @@ priority. The signal handler is a user-supplied function that is bound
 to a specific signal and performs whatever actions are necessary
 whenever the signal is received.
 
-By default, here are no predefined actions for any signal. The default
+By default, there are no predefined actions for any signal. The default
 action for all signals (i.e., when no signal handler has been supplied
 by the user) is to ignore the signal. In this sense, all NuttX are *real
 time* signals by default. If the configuration option
 ``CONFIG_SIG_DEFAULT=y`` is included, some signals will perform their
-default actions dependent upon addition configuration settings as
-summarized in the following table:
+default actions dependent upon additional configuration settings as 
+summarized in the following tables:
 
-=======  ====================   =========================
-Signal 	 Action 	              Additional Configuration
-=======  ====================   =========================
-SIGUSR1  Abnormal Termination 	CONFIG_SIG_SIGUSR1_ACTION
-SIGUSR2  Abnormal Termination 	CONFIG_SIG_SIGUSR2_ACTION
-SIGALRM  Abnormal Termination 	CONFIG_SIG_SIGALRM_ACTION
-SIGPOLL  Abnormal Termination 	CONFIG_SIG_SIGPOLL_ACTION
-SIGSTOP  Suspend task           CONFIG_SIG_SIGSTOP_ACTION
-SIGTSTP  Suspend task           CONFIG_SIG_SIGSTOP_ACTION
-SIGCONT  Resume task            CONFIG_SIG_SIGSTOP_ACTION
-SIGINT   Abnormal Termination 	CONFIG_SIG_SIGKILL_ACTION
-SIGKILL  Abnormal Termination 	CONFIG_SIG_SIGKILL_ACTION
-=======  ====================   =========================
+.. note::
+
+   The default actions listed below reflect the current implementation in
+   ``sched/signal/sig_default.c``.
+
+Abnormal Termination Signals
+----------------------------
+
+==========  ====================   =========================
+Signal      Action                 Additional Configuration
+==========  ====================   =========================
+SIGHUP      Abnormal Termination   CONFIG_SIG_SIGKILL_ACTION
+SIGINT      Abnormal Termination   CONFIG_SIG_SIGKILL_ACTION
+SIGQUIT     Abnormal Termination   CONFIG_SIG_SIGKILL_ACTION
+SIGILL      Abnormal Termination   CONFIG_SIG_SIGKILL_ACTION
+SIGTRAP     Abnormal Termination   CONFIG_SIG_SIGKILL_ACTION
+SIGABRT     Abnormal Termination   CONFIG_SIG_SIGKILL_ACTION
+SIGBUS      Abnormal Termination   CONFIG_SIG_SIGKILL_ACTION
+SIGFPE      Abnormal Termination   CONFIG_SIG_SIGKILL_ACTION
+SIGKILL     Abnormal Termination   CONFIG_SIG_SIGKILL_ACTION
+SIGSEGV     Abnormal Termination   CONFIG_SIG_SIGKILL_ACTION
+SIGTERM     Abnormal Termination   CONFIG_SIG_SIGKILL_ACTION
+SIGXCPU     Abnormal Termination   CONFIG_SIG_SIGKILL_ACTION
+SIGXFSZ     Abnormal Termination   CONFIG_SIG_SIGKILL_ACTION
+SIGSYS      Abnormal Termination   CONFIG_SIG_SIGKILL_ACTION
+SIGUSR1     Abnormal Termination   CONFIG_SIG_SIGUSR1_ACTION
+SIGUSR2     Abnormal Termination   CONFIG_SIG_SIGUSR2_ACTION
+SIGPIPE     Abnormal Termination   CONFIG_SIG_SIGPIPE_ACTION
+SIGALRM     Abnormal Termination   CONFIG_SIG_SIGALRM_ACTION
+SIGVTALRM   Abnormal Termination   CONFIG_SIG_SIGALRM_ACTION
+SIGPROF     Abnormal Termination   CONFIG_SIG_SIGPROF_ACTION
+SIGPOLL     Abnormal Termination   CONFIG_SIG_SIGPOLL_ACTION
+==========  ====================   =========================
+
+Job Control Signals
+-------------------
+
+==========  ====================   =========================
+Signal      Action                 Additional Configuration
+==========  ====================   =========================
+SIGSTOP     Suspend Task           CONFIG_SIG_SIGSTOP_ACTION
+SIGTSTP     Suspend Task           CONFIG_SIG_SIGSTOP_ACTION
+SIGTTIN     Suspend Task           CONFIG_SIG_SIGSTOP_ACTION
+SIGTTOU     Suspend Task           CONFIG_SIG_SIGSTOP_ACTION
+SIGCONT     Resume Task            CONFIG_SIG_SIGSTOP_ACTION
+==========  ====================   =========================
+
+Ignored By Default
+------------------
+
+==========  ====================   =========================
+Signal      Action                 Additional Configuration
+==========  ====================   =========================
+SIGURG      Ignore Signal          CONFIG_SIG_SIGURG_ACTION
+==========  ====================   =========================
 
 Tasks may also suspend themselves and wait until a signal is received.
 
