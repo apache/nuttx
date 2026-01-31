@@ -291,14 +291,12 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
   uintptr_t base;
   uint16_t *hword = (uint16_t *)buf;
   size_t written = count;
-  size_t page;
   int ret;
-
-  page = up_progmem_getpage(addr);
 
 #if defined(STM32_FLASH_DUAL_BANK)
   /* Handle paged FLASH */
 
+  size_t page = up_progmem_getpage(addr);
   if (page >= STM32_FLASH_BANK0_NPAGES)
     {
       base = STM32_FLASHIF1_BASE;
