@@ -23,6 +23,7 @@ import importlib.util
 import os
 import platform
 import re
+import shlex
 import subprocess
 import sys
 
@@ -297,6 +298,11 @@ def get_os_version():
     return sys_id
 
 
+FLAGS_WITH_ARGS = {
+    "-isystem",
+}
+
+
 def get_compilation_flags(flags):
     """
     Gets the compilation flags used to compile the NuttX source code and splits
@@ -310,13 +316,23 @@ def get_compilation_flags(flags):
     """
 
     if not flags:
-        return [""]
+        return []
 
-    flag_list = flags.split(" -")
-    flag_list[0] = flag_list[0][1:]
-    flag_list = ["-" + flag for flag in flag_list]
+    tokens = shlex.split(flags)
+    merged = []
+    i = 0
 
-    return flag_list
+    while i < len(tokens):
+        tok = tokens[i]
+
+        if tok in FLAGS_WITH_ARGS and i + 1 < len(tokens):
+            merged.append(f"{tok} {tokens[i + 1]}")
+            i += 2
+        else:
+            merged.append(tok)
+            i += 1
+
+    return merged
 
 
 def generate_header(args):
@@ -355,13 +371,6 @@ def generate_header(args):
     if args.flags:
         cflags, cxxflags, ldflags = args.flags
 
-        if cflags:
-            cflags = cflags[1:-1]
-        if cxxflags:
-            cxxflags = cxxflags[1:-1]
-        if ldflags:
-            ldflags = ldflags[1:-1]
-
         info["NUTTX_CFLAGS"] = get_compilation_flags(cflags)
         info["NUTTX_CXXFLAGS"] = get_compilation_flags(cxxflags)
         info["NUTTX_LDFLAGS"] = get_compilation_flags(ldflags)
@@ -370,24 +379,27 @@ def generate_header(args):
             len(info["NUTTX_CFLAGS"])
         )
         output += "static const char *NUTTX_CFLAGS[NUTTX_CFLAGS_ARRAY_SIZE] =\n{\n"
-        for i in range(len(info["NUTTX_CFLAGS"])):
-            output += '  "' + info["NUTTX_CFLAGS"][i] + '",\n'
+        for flag in info["NUTTX_CFLAGS"]:
+            flag = flag.replace('"', '\\"')
+            output += '  "' + flag + '",\n'
         output += "};\n\n"
 
         output += "#define NUTTX_CXXFLAGS_ARRAY_SIZE {}\n".format(
             len(info["NUTTX_CXXFLAGS"])
         )
         output += "static const char *NUTTX_CXXFLAGS[NUTTX_CXXFLAGS_ARRAY_SIZE] =\n{\n"
-        for i in range(len(info["NUTTX_CXXFLAGS"])):
-            output += '  "' + info["NUTTX_CXXFLAGS"][i] + '",\n'
+        for flag in info["NUTTX_CXXFLAGS"]:
+            flag = flag.replace('"', '\\"')
+            output += '  "' + flag + '",\n'
         output += "};\n\n"
 
         output += "#define NUTTX_LDFLAGS_ARRAY_SIZE {}\n".format(
             len(info["NUTTX_LDFLAGS"])
         )
         output += "static const char *NUTTX_LDFLAGS[NUTTX_LDFLAGS_ARRAY_SIZE] =\n{\n"
-        for i in range(len(info["NUTTX_LDFLAGS"])):
-            output += '  "' + info["NUTTX_LDFLAGS"][i] + '",\n'
+        for flag in info["NUTTX_LDFLAGS"]:
+            flag = flag.replace('"', '\\"')
+            output += '  "' + flag + '",\n'
         output += "};\n\n"
 
     # NuttX Configuration
@@ -410,8 +422,10 @@ def generate_header(args):
             len(info["NUTTX_CONFIG"])
         )
         output += "static const char *NUTTX_CONFIG[NUTTX_CONFIG_ARRAY_SIZE] =\n{\n"
-        for i in range(len(info["NUTTX_CONFIG"])):
-            output += '  "' + info["NUTTX_CONFIG"][i].replace('"', '\\"') + '",\n'
+        for cfg in info["NUTTX_CONFIG"]:
+            cfg = cfg.replace("\\", "\\\\")
+            cfg = cfg.replace('"', '\\"')
+            output += '  "' + cfg + '",\n'
         output += "};\n\n"
 
     # OS Version

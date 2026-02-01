@@ -631,12 +631,9 @@ checkpython3:
 SYSINFO_PARSE_FLAGS = "$(realpath $(TOPDIR))"
 SYSINFO_PARSE_FLAGS += "-finclude/sysinfo.h"
 
-SYSINFO_FLAGS = "-c"
-SYSINFO_FLAGS += "-p"
-SYSINFO_FLAGS += -f \""$(shell echo '$(CFLAGS)' | sed 's/"/\\\\\\"/g')"\"
-SYSINFO_FLAGS += \""$(shell echo '$(CXXFLAGS)' | sed 's/"/\\\\\\"/g')"\"
-SYSINFO_FLAGS += \""$(shell echo '$(LDFLAGS)' | sed 's/"/\\\\\\"/g')"\"
-SYSINFO_FLAGS += "--target_info"
+SYSINFO_FLAGS = -c
+SYSINFO_FLAGS += -p
+SYSINFO_FLAGS += --target_info
 
 # host_info: Parse nxdiag example output file (sysinfo.h) and print
 
