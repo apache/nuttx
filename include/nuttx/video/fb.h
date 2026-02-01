@@ -313,6 +313,12 @@
 #define FBIOSET_VSYNCOFFSET   _FBIOC(0x001a)  /* Set VSync offset in usec
                                                * Argument:             int */
 
+#define FBIOSET_ROTATION      _FBIOC(0x001e)  /* Set display rotation
+                                               * Argument:             int */
+
+#define FBIOGET_ROTATION      _FBIOC(0x001f)  /* Get display rotation
+                                               * Argument:            int* */
+
 /* Linux Support ************************************************************/
 
 #define FBIOGET_VSCREENINFO   _FBIOC(0x001b)  /* Get video variable info */

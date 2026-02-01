@@ -827,6 +827,14 @@ config LCD_ST7789_DATA_ENDIAN_LITTLE
 
 endif # LCD_ST7789
 
+config LCD_ST7796
+	bool "ST7796 LCD Display"
+	default n
+	depends on SPI
+	depends on LCD_FRAMEBUFFER
+	---help---
+		Enable support for ST7796 LCD display driver.
+
 config LCD_GC9A01
 	bool "Galaxycore GC9A01 TFT Controller"
 	default n
