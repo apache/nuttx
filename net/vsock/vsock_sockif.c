@@ -98,7 +98,7 @@ struct vsock_conn_s
   FAR struct vsock_transport_s *transport;
   struct sockaddr_vm            local_addr;
   struct sockaddr_vm            remote_addr;
-  atomic_int                    ref;
+  atomic_t                      ref;
 
   /* Save bound or connected list node */
 
