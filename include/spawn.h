@@ -48,13 +48,13 @@
  * posix_spawnattr_t object using the posix_spawnattr_setflags() function:"
  */
 
-#define POSIX_SPAWN_RESETIDS      (1 << 0)  /* 1: Reset effective user ID */
-#define POSIX_SPAWN_SETPGROUP     (1 << 1)  /* 1: Set process group */
-#define POSIX_SPAWN_SETSCHEDPARAM (1 << 2)  /* 1: Set task's priority */
-#define POSIX_SPAWN_SETSCHEDULER  (1 << 3)  /* 1: Set task's scheduler policy */
-#define POSIX_SPAWN_SETSIGDEF     (1 << 4)  /* 1: Set default signal actions */
-#define POSIX_SPAWN_SETSIGMASK    (1 << 5)  /* 1: Set sigmask */
-#define POSIX_SPAWN_SETSID        (1 << 7)  /* 1: Create the new session(glibc specific) */
+#define POSIX_SPAWN_RESETIDS      (1u << 0)  /* 1: Reset effective user ID */
+#define POSIX_SPAWN_SETPGROUP     (1u << 1)  /* 1: Set process group */
+#define POSIX_SPAWN_SETSCHEDPARAM (1u << 2)  /* 1: Set task's priority */
+#define POSIX_SPAWN_SETSCHEDULER  (1u << 3)  /* 1: Set task's scheduler policy */
+#define POSIX_SPAWN_SETSIGDEF     (1u << 4)  /* 1: Set default signal actions */
+#define POSIX_SPAWN_SETSIGMASK    (1u << 5)  /* 1: Set sigmask */
+#define POSIX_SPAWN_SETSID        (1u << 7)  /* 1: Create the new session(glibc specific) */
 
 /* NOTE: NuttX provides only one implementation:  If
  * CONFIG_LIBC_ENVPATH is defined, then only posix_spawnp() behavior
