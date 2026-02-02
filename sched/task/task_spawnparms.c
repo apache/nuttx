@@ -158,7 +158,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
   /* Firstly, set the signal mask if requested to do so */
 
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
-  if ((attr->flags & POSIX_SPAWN_SETSIGMASK) != 0)
+  if ((attr->flags & POSIX_SPAWN_SETSIGMASK) != 0u)
     {
       FAR struct tcb_s *tcb = nxsched_get_tcb(pid);
       if (tcb)
@@ -172,7 +172,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
    * to set the priority of the of the new task.
    */
 
-  if ((attr->flags & POSIX_SPAWN_SETSCHEDPARAM) != 0)
+  if ((attr->flags & POSIX_SPAWN_SETSCHEDPARAM) != 0u)
     {
 #ifdef CONFIG_SCHED_SPORADIC
       /* Get the current sporadic scheduling parameters.  Those will not be
@@ -192,7 +192,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
            * then we will call nxsched_set_scheduler() below.
            */
 
-          if ((attr->flags & POSIX_SPAWN_SETSCHEDULER) == 0)
+          if ((attr->flags & POSIX_SPAWN_SETSCHEDULER) == 0u)
             {
               sinfo("Setting priority=%d for pid=%d\n",
                     param.sched_priority, pid);
@@ -207,7 +207,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
    * preparation for the nxsched_set_scheduler() call below.
    */
 
-  else if ((attr->flags & POSIX_SPAWN_SETSCHEDULER) != 0)
+  else if ((attr->flags & POSIX_SPAWN_SETSCHEDULER) != 0u)
     {
       ret = nxsched_get_param(0, &param);
     }
@@ -216,7 +216,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
    * setting determined above.
    */
 
-  if (ret == OK && (attr->flags & POSIX_SPAWN_SETSCHEDULER) != 0)
+  if (ret == OK && (attr->flags & POSIX_SPAWN_SETSCHEDULER) != 0u)
     {
       sinfo("Setting policy=%d priority=%d for pid=%d\n",
             attr->policy, param.sched_priority, pid);
