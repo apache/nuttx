@@ -25,5 +25,5 @@ nuttx_elf_compile_options(-fvisibility=hidden -fno-pic)
 nuttx_elf_compile_options_ifdef(CONFIG_LIBC_ARCH_ELF_64BIT -mcmodel=large)
 
 nuttx_elf_link_options(-r -e main)
-
+nuttx_mod_link_options(-r)
 nuttx_elf_link_options_ifdef(CONFIG_SIM_M32 -melf_i386)
