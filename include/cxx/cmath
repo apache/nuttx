@@ -44,10 +44,15 @@
 
 namespace std
 {
+#if defined(FLT_EVAL_METHOD) && FLT_EVAL_METHOD == 0
   using ::float_t;
   using ::double_t;
+#else
+  typedef float  float_t;
+  typedef double double_t;
+#endif
 
-#ifdef CONFIG_HAVE_FLOAT
+#if defined(CONFIG_HAVE_FLOAT) && defined(FLT_EVAL_METHOD) && FLT_EVAL_METHOD == 0
   using ::acosf;
   using ::asinf;
   using ::atanf;
@@ -82,7 +87,7 @@ namespace std
   signbit(float __x)
   { return __builtin_signbit(__x); }
 
-  constexpr int 
+  constexpr int
   fpclassify(float __x)
   { return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL,
 				FP_SUBNORMAL, FP_ZERO, __x); }
@@ -105,7 +110,7 @@ namespace std
 
 #endif
 
-#ifdef CONFIG_HAVE_DOUBLE
+#if defined(CONFIG_HAVE_DOUBLE) && defined(FLT_EVAL_METHOD) && FLT_EVAL_METHOD == 0
   using ::acos;
   using ::asin;
   using ::atan;
@@ -138,7 +143,7 @@ namespace std
   signbit(double __x)
   { return __builtin_signbit(__x); }
 
-  constexpr int 
+  constexpr int
   fpclassify(double __x)
   { return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL,
 		FP_SUBNORMAL, FP_ZERO, __x); }
@@ -161,7 +166,7 @@ namespace std
 
 #endif
 
-#ifdef CONFIG_HAVE_LONG_DOUBLE
+#if defined(CONFIG_HAVE_LONG_DOUBLE) && defined(FLT_EVAL_METHOD) && FLT_EVAL_METHOD == 0
   using ::acosl;
   using ::asinl;
   using ::atanl;
@@ -192,7 +197,7 @@ namespace std
   signbit(long double __x)
   { return __builtin_signbit(__x); }
 
-  constexpr int 
+  constexpr int
   fpclassify(long double __x)
   { return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL,
 		FP_SUBNORMAL, FP_ZERO, __x); }
