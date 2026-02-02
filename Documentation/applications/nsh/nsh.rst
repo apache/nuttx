@@ -89,23 +89,26 @@ Command Overview
 (NSH) is a simple shell application. NSH supports the following
 commands forms:
 
-===============================   ======================================
+===============================   ==========================================
 Simple command                    ``<cmd>``
-Command with re-directed output   ``<cmd> > <file> <cmd> >> <file>``
+Command with re-directed input    ``<cmd> < <file>``
+Command with re-directed output   ``<cmd> > <file>`` ``<cmd> >> <file>``
+Command with re-directed error    ``<cmd> 2> <file>`` ``<cmd> 2>> <file>``
+Redirect stderr to stdout         ``<cmd> > <file> 2>&1``
 Background command                ``<cmd> &``
-Re-directed background command    ``<cmd> > <file> & <cmd> >> <file> &``
-===============================   ======================================
+Re-directed background command    ``<cmd> > <file> &`` ``<cmd> >> <file> &``
+===============================   ==========================================
 
 Where:
 
   * ``<cmd>`` is any one of the simple commands listed later.
-  * ``<file>`` is the full or relative path to any writable object in the file system name space (file or character driver). Such objects will be referred to simply as files throughout this document.
+  * ``<file>`` is the full or relative path to any readable or writable object in the file system name space (file or character driver). Such objects will be referred to simply as files throughout this document.
 
 ``nice`` **'d Background Commands**. NSH executes at the
 mid-priority (128). Backgrounded commands can be made to execute
 at higher or lower priorities using ``nice``::
 
-  [nice [-d <niceness>>]] <cmd> [> <file>|>> <file>] [&]
+  [nice [-d <niceness>>]] <cmd> [< <file>] [> <file>|>> <file>] [2> <file>|2>> <file>|2>&1] [&]
 
 Where ``<niceness>`` is any value between -20 and 19 where lower
 (more negative values) correspond to higher priorities. The
