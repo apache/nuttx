@@ -99,7 +99,7 @@ struct ctucanfd_can_s
 #ifdef CONFIG_CAN_CTUCANFD_CHARDEV
   struct can_dev_s   dev;
 
-#ifdef CONFIG_CAN_TXCONFIRM
+#if defined(CONFIG_CAN_TXCONFIRM) || defined(CONFIG_CAN_TXCANCEL)
   struct can_hdr_s   tx_idbuf[CTUCANFD_TXBUF_CNT];
 #endif
 #endif
@@ -178,8 +178,10 @@ static bool ctucanfd_chrdev_txempty(FAR struct can_dev_s *dev);
 static int  ctucanfd_chrdev_txconfirm(FAR struct can_dev_s *dev, int idx);
 #endif
 
+#ifdef CONFIG_CAN_TXCANCEL
 static bool ctucanfd_chrdev_cancel(FAR struct can_dev_s *dev,
                                    FAR struct can_msg_s *msg);
+#endif
 static void ctucanfd_chardev_receive(FAR struct ctucanfd_can_s *priv);
 static void ctucanfd_chardev_interrupt(FAR struct ctucanfd_driver_s *priv);
 
@@ -237,7 +239,9 @@ static const struct can_ops_s g_ctucanfd_can_ops =
   .co_send          = ctucanfd_chrdev_send,
   .co_txready       = ctucanfd_chrdev_txready,
   .co_txempty       = ctucanfd_chrdev_txempty,
+#ifdef CONFIG_CAN_TXCANCEL
   .co_cancel        = ctucanfd_chrdev_cancel,
+#endif
 };
 #endif
 
@@ -469,7 +473,7 @@ static int ctucanfd_chrdev_txclear(FAR struct ctucanfd_can_s *priv)
           ctucanfd_putreg(priv, CTUCANFD_TXINFOCMD, setval);
         }
 
-#ifdef CONFIG_CAN_TXCONFIRM
+#if defined(CONFIG_CAN_TXCONFIRM) || defined(CONFIG_CAN_TXCANCEL)
       memset(&priv->tx_idbuf[i], 0, sizeof(struct can_hdr_s));
 #endif
     }
@@ -837,9 +841,9 @@ static int ctucanfd_chrdev_send(FAR struct can_dev_s *dev,
   fmt.s.fdf = msg->cm_hdr.ch_edl;
 #endif
 
-#  ifdef CONFIG_CAN_TXCONFIRM
-      priv->tx_idbuf[txidx] = msg->cm_hdr;
-#  endif
+#if defined(CONFIG_CAN_TXCONFIRM) || defined(CONFIG_CAN_TXCANCEL)
+  priv->tx_idbuf[txidx] = msg->cm_hdr;
+#endif
 
   /* Write frame */
 
@@ -970,6 +974,7 @@ static int ctucanfd_chrdev_txconfirm(struct can_dev_s *dev, int idx)
 }
 #endif
 
+#ifdef CONFIG_CAN_TXCANCEL
 /*****************************************************************************
  * Name: ctucanfd_chrdev_cancel
  *
@@ -989,7 +994,6 @@ static bool ctucanfd_chrdev_cancel(FAR struct can_dev_s *dev,
 {
   FAR struct ctucanfd_can_s *priv = (FAR struct ctucanfd_can_s *)dev;
   uint32_t regval;
-  uint32_t offset;
   uint32_t id;
   int i;
 
@@ -997,8 +1001,7 @@ static bool ctucanfd_chrdev_cancel(FAR struct can_dev_s *dev,
 
   for (i = 0; i < CTUCANFD_TXBUF_CNT; i++)
     {
-      offset = CTUCANFD_TXT1 + CTUCANFD_TXT_SIZE * i;
-      id = ctucanfd_getreg(priv, offset + CTUCANFD_TXBUF_ID);
+      id = priv->tx_idbuf[i].ch_id;
       if (id == msg->cm_hdr.ch_id)
         {
           /* Set abort to TXB */
@@ -1022,9 +1025,9 @@ static bool ctucanfd_chrdev_cancel(FAR struct can_dev_s *dev,
                   ctucanfd_putreg(priv, CTUCANFD_TXINFOCMD, regval);
 
                   /* Cancel success */
-#ifdef CONFIG_CAN_TXCONFIRM
+
                   memset(&priv->tx_idbuf[i], 0, sizeof(struct can_hdr_s));
-#endif
+
                   return true;
                 }
             }
@@ -1033,6 +1036,7 @@ static bool ctucanfd_chrdev_cancel(FAR struct can_dev_s *dev,
 
   return false;
 }
+#endif
 
 /*****************************************************************************
  * Name: ctucanfd_chardev_receive
