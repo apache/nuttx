@@ -63,7 +63,7 @@ int task_setcanceltype(int type, FAR int *oldtype)
 
   if (oldtype != NULL)
     {
-      if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_ASYNC) != 0)
+      if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_ASYNC) != 0u)
         {
           *oldtype = TASK_CANCEL_ASYNCHRONOUS;
         }
@@ -86,8 +86,8 @@ int task_setcanceltype(int type, FAR int *oldtype)
        * cancellation is pending, then exit now.
        */
 
-      if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_PENDING) != 0 &&
-          (tls->tl_cpstate & CANCEL_FLAG_NONCANCELABLE) == 0)
+      if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_PENDING) != 0u &&
+          (tls->tl_cpstate & CANCEL_FLAG_NONCANCELABLE) == 0u)
         {
           tls->tl_cpstate &= ~CANCEL_FLAG_CANCEL_PENDING;
 
