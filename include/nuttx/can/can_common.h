@@ -32,6 +32,20 @@
 #include <stdint.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* CAN payload length and DLC definitions according to ISO 11898-1 */
+
+#define CAN_MAX_DLC 8
+#define CAN_MAX_DLEN 8
+
+/* CAN FD payload length and DLC definitions according to ISO 11898-7 */
+
+#define CANFD_MAX_DLC 15
+#define CANFD_MAX_DLEN 64
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -43,6 +57,19 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Lookup tables convert can_dlc <-> payload len */
+
+EXTERN const uint8_t g_can_dlc_to_len[16];
+EXTERN const uint8_t g_len_to_can_dlc[65];
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: can_bytes2dlc
@@ -62,7 +89,22 @@ extern "C"
  *
  ****************************************************************************/
 
-uint8_t can_bytes2dlc(uint8_t nbytes);
+static inline uint8_t can_bytes2dlc(uint8_t nbytes)
+{
+#if defined(CONFIG_CAN_FD) || defined(CONFIG_NET_CAN_CANFD)
+  if (nbytes > CANFD_MAX_DLEN)
+    {
+      return CANFD_MAX_DLC;
+    }
+#else
+  if (nbytes > CAN_MAX_DLEN)
+    {
+      return CAN_MAX_DLC;
+    }
+#endif
+
+  return g_len_to_can_dlc[nbytes];
+}
 
 /****************************************************************************
  * Name: can_dlc2bytes
@@ -82,7 +124,22 @@ uint8_t can_bytes2dlc(uint8_t nbytes);
  *
  ****************************************************************************/
 
-uint8_t can_dlc2bytes(uint8_t dlc);
+static inline uint8_t can_dlc2bytes(uint8_t dlc)
+{
+#if defined(CONFIG_CAN_FD) || defined(CONFIG_NET_CAN_CANFD)
+  if (dlc > CANFD_MAX_DLC)
+    {
+      return CANFD_MAX_DLEN;
+    }
+#else
+  if (dlc > CAN_MAX_DLC)
+    {
+      return CAN_MAX_DLEN;
+    }
+#endif
+
+  return g_can_dlc_to_len[dlc];
+}
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -75,19 +75,6 @@ struct can_stats_s
 };
 #endif
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifdef CONFIG_NET_CAN_CANFD
-
-/* Lookup tables convert can_dlc <-> payload len */
-
-extern const uint8_t g_can_dlc_to_len[16];
-extern const uint8_t g_len_to_can_dlc[65];
-
-#endif
-
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"

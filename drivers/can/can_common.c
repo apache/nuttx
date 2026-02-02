@@ -26,124 +26,72 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/can.h>
 #include <nuttx/can/can_common.h>
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* DLC to payload length conversion table for CAN and CAN FD
+ *
+ * According to ISO 11898-1 (Classic CAN) and ISO 11898-7 (CAN FD):
+ *
+ * DLC 0-8:  Direct mapping (0-8 bytes) - Valid for both CAN and CAN FD
+ * DLC 9:    12 bytes - CAN FD only (8 bytes in Classic CAN)
+ * DLC 10:   16 bytes - CAN FD only (8 bytes in Classic CAN)
+ * DLC 11:   20 bytes - CAN FD only (8 bytes in Classic CAN)
+ * DLC 12:   24 bytes - CAN FD only (8 bytes in Classic CAN)
+ * DLC 13:   32 bytes - CAN FD only (8 bytes in Classic CAN)
+ * DLC 14:   48 bytes - CAN FD only (8 bytes in Classic CAN)
+ * DLC 15:   64 bytes - CAN FD only (8 bytes in Classic CAN)
+ *
+ * Note: In Classic CAN, DLC values > 8 are treated as 8 by hardware,
+ * but this table provides the CAN FD mapping for software use.
+ */
+
+const uint8_t g_can_dlc_to_len[16] =
+{
+  0, 1, 2, 3, 4, 5, 6, 7, 8,    /* DLC 0-8: Direct mapping */
+  12, 16, 20, 24, 32, 48, 64    /* DLC 9-15: CAN FD extended lengths */
+};
+
+/* Payload length to DLC conversion table
+ *
+ * Maps byte count (0-64) to minimum required DLC value.
+ * For byte counts between standard DLC values, rounds up to next DLC.
+ *
+ * Examples:
+ *   - 0 bytes  -> DLC 0
+ *   - 1-8 bytes -> DLC 1-8 (direct mapping)
+ *   - 9-12 bytes -> DLC 9 (allocates 12 bytes in CAN FD)
+ *   - 13-16 bytes -> DLC 10 (allocates 16 bytes in CAN FD)
+ *   - 17-20 bytes -> DLC 11 (allocates 20 bytes in CAN FD)
+ *   - 21-24 bytes -> DLC 12 (allocates 24 bytes in CAN FD)
+ *   - 25-32 bytes -> DLC 13 (allocates 32 bytes in CAN FD)
+ *   - 33-48 bytes -> DLC 14 (allocates 48 bytes in CAN FD)
+ *   - 49-64 bytes -> DLC 15 (allocates 64 bytes in CAN FD)
+ */
+
+const uint8_t g_len_to_can_dlc[65] =
+{
+  0,                                  /* 0 bytes -> DLC 0 */
+  1, 2, 3, 4, 5, 6, 7, 8,             /* 1-8 bytes -> DLC 1-8 */
+  9, 9, 9, 9,                         /* 9-12 bytes -> DLC 9 */
+  10, 10, 10, 10,                     /* 13-16 bytes -> DLC 10 */
+  11, 11, 11, 11,                     /* 17-20 bytes -> DLC 11 */
+  12, 12, 12, 12,                     /* 21-24 bytes -> DLC 12 */
+  13, 13, 13, 13, 13, 13, 13, 13,     /* 25-32 bytes -> DLC 13 */
+  14, 14, 14, 14, 14, 14, 14, 14,     /* 33-40 bytes -> DLC 14 */
+  14, 14, 14, 14, 14, 14, 14, 14,     /* 41-48 bytes -> DLC 14 */
+  15, 15, 15, 15, 15, 15, 15, 15,     /* 49-56 bytes -> DLC 15 */
+  15, 15, 15, 15, 15, 15, 15, 15      /* 57-64 bytes -> DLC 15 */
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: can_bytes2dlc
- *
- * Description:
- *   In the CAN FD format, the coding of the DLC differs from the standard
- *   CAN format. The DLC codes 0 to 8 have the same coding as in standard
- *   CAN.  But the codes 9 to 15 all imply a data field of 8 bytes with
- *   standard CAN.  In CAN FD mode, the values 9 to 15 are encoded to values
- *   in the range 12 to 64.
- *
- * Input Parameters:
- *   nbytes - the byte count to convert to a DLC value
- *
- * Returned Value:
- *   The encoded DLC value corresponding to at least that number of bytes.
- *
- ****************************************************************************/
-
-uint8_t can_bytes2dlc(uint8_t nbytes)
-{
-  if (nbytes <= 8)
-    {
-      return nbytes;
-    }
-#ifdef CONFIG_CAN_FD
-  else if (nbytes <= 12)
-    {
-      return 9;
-    }
-  else if (nbytes <= 16)
-    {
-      return 10;
-    }
-  else if (nbytes <= 20)
-    {
-      return 11;
-    }
-  else if (nbytes <= 24)
-    {
-      return 12;
-    }
-  else if (nbytes <= 32)
-    {
-      return 13;
-    }
-  else if (nbytes <= 48)
-    {
-      return 14;
-    }
-  else /* if (nbytes <= 64) */
-    {
-      return 15;
-    }
-#else
-  else
-    {
-      return 8;
-    }
-#endif
-}
-
-/****************************************************************************
- * Name: can_dlc2bytes
- *
- * Description:
- *   In the CAN FD format, the coding of the DLC differs from the standard
- *   CAN format. The DLC codes 0 to 8 have the same coding as in standard
- *   CAN.  But the codes 9 to 15 all imply a data field of 8 bytes with
- *   standard CAN.  In CAN FD mode, the values 9 to 15 are encoded to values
- *   in the range 12 to 64.
- *
- * Input Parameters:
- *   dlc    - the DLC value to convert to a byte count
- *
- * Returned Value:
- *   The number of bytes corresponding to the DLC value.
- *
- ****************************************************************************/
-
-uint8_t can_dlc2bytes(uint8_t dlc)
-{
-  if (dlc > 8)
-    {
-#ifdef CONFIG_CAN_FD
-      switch (dlc)
-        {
-          case 9:
-            return 12;
-
-          case 10:
-            return 16;
-
-          case 11:
-            return 20;
-
-          case 12:
-            return 24;
-
-          case 13:
-            return 32;
-
-          case 14:
-            return 48;
-
-          default:
-          case 15:
-            return 64;
-        }
-#else
-      return 8;
-#endif
-    }
-
-  return dlc;
-}

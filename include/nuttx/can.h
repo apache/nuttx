@@ -58,16 +58,6 @@
 #define CAN_MTU (sizeof(struct can_frame))
 #define CANFD_MTU (sizeof(struct canfd_frame))
 
-/* CAN payload length and DLC definitions according to ISO 11898-1 */
-
-#define CAN_MAX_DLC 8
-#define CAN_MAX_DLEN 8
-
-/* CAN FD payload length and DLC definitions according to ISO 11898-7 */
-
-#define CANFD_MAX_DLC 15
-#define CANFD_MAX_DLEN 64
-
 /* Defined bits for canfd_frame.flags
  *
  * The use of struct canfd_frame implies the Extended Data Length (EDL) bit
