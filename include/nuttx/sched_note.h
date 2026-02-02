@@ -498,8 +498,8 @@ struct note_counter_s
   char name[NAME_MAX];
 };
 
-/* This is the type of the argument passed to the NOTECTL_GETMODE and
- * NOTECTL_SETMODE ioctls
+/* This is the type of the argument passed to the NOTE_GETFILTER and
+ * NOTE_SETFILTER ioctls
  */
 
 struct note_filter_mode_s
@@ -516,8 +516,8 @@ struct note_filter_named_mode_s
   struct note_filter_mode_s mode;
 };
 
-/* This is the type of the argument passed to the NOTECTL_GETSYSCALLFILTER
- * and NOTECTL_SETSYSCALLFILTER ioctls
+/* This is the type of the argument passed to the NOTE_GETSYSCALLFILTER
+ * and NOTE_SETSYSCALLFILTER ioctls
  */
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
@@ -533,8 +533,8 @@ struct note_filter_named_syscall_s
 };
 #endif
 
-/* This is the type of the argument passed to the NOTECTL_GETIRQFILTER and
- * NOTECTL_SETIRQFILTER ioctls
+/* This is the type of the argument passed to the NOTE_GETIRQFILTER and
+ * NOTE_SETIRQFILTER ioctls
  */
 
 struct note_filter_irq_s
@@ -689,7 +689,7 @@ void sched_note_printf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
  *
  * Description:
  *   Set and get note filter mode.
- *   (Same as NOTECTL_GETMODE / NOTECTL_SETMODE ioctls)
+ *   (Same as NOTE_GETFILTER / NOTE_SETFILTER ioctls)
  *
  * Input Parameters:
  *   oldm - A writable pointer to struct note_filter_mode_s to get current
@@ -714,7 +714,7 @@ void sched_note_filter_mode(FAR struct note_filter_named_mode_s *oldm,
  *
  * Description:
  *   Set and get syscall filter setting
- *   (Same as NOTECTL_GETSYSCALLFILTER / NOTECTL_SETSYSCALLFILTER ioctls)
+ *   (Same as NOTE_GETSYSCALLFILTER / NOTE_SETSYSCALLFILTER ioctls)
  *
  * Input Parameters:
  *   oldf - A writable pointer to struct note_filter_syscall_s to get
@@ -740,7 +740,7 @@ void sched_note_filter_syscall(FAR struct note_filter_named_syscall_s *oldf,
  *
  * Description:
  *   Set and get IRQ filter setting
- *   (Same as NOTECTL_GETIRQFILTER / NOTECTL_SETIRQFILTER ioctls)
+ *   (Same as NOTE_GETIRQFILTER / NOTE_SETIRQFILTER ioctls)
  *
  * Input Parameters:
  *   oldf - A writable pointer to struct note_filter_irq_s to get

@@ -111,7 +111,7 @@ Notectl Device (``/dev/notectl``)
 ``/dev/notectl`` Ioctls
 -----------------------
 
-.. c:macro:: NOTECTL_GETMODE
+.. c:macro:: NOTE_GETFILTER
 
   Get note filter mode
 
@@ -120,7 +120,7 @@ Notectl Device (``/dev/notectl``)
   :return: If success, 0 (``OK``) is returned and current note filter mode is stored into the given pointer.
     If failed, a negated ``errno`` is returned.
 
-.. c:macro:: NOTECTL_SETMODE
+.. c:macro:: NOTE_SETFILTER
 
   Set note filter mode
 
@@ -129,7 +129,7 @@ Notectl Device (``/dev/notectl``)
   :return: If success, 0 (``OK``) is returned and the given filter mode is set as the current settings.
     If failed, a negated ``errno`` is returned.
 
-.. c:macro:: NOTECTL_GETSYSCALLFILTER
+.. c:macro:: NOTE_GETSYSCALLFILTER
 
   Get syscall filter setting
 
@@ -138,7 +138,7 @@ Notectl Device (``/dev/notectl``)
   :return: If success, 0 (``OK``) is returned and current syscall filter mode is stored into the given pointer.
     If failed, a negated ``errno`` is returned.
 
-.. c:macro:: NOTECTL_SETSYSCALLFILTER
+.. c:macro:: NOTE_SETSYSCALLFILTER
 
   Set syscall filter setting
 
@@ -147,7 +147,7 @@ Notectl Device (``/dev/notectl``)
   :return: If success, 0 (``OK``) is returned and the given syscall filter mode is set as the current settings.
     If failed, a negated ``errno`` is returned.
 
-.. c:macro:: NOTECTL_GETIRQFILTER
+.. c:macro:: NOTE_GETIRQFILTER
 
   Get IRQ filter setting
 
@@ -156,7 +156,7 @@ Notectl Device (``/dev/notectl``)
   :return: If success, 0 (``OK``) is returned and current IRQ filter mode is stored into the given pointer.
     If failed, a negated ``errno`` is returned.
 
-.. c:macro:: NOTECTL_SETIRQFILTER
+.. c:macro:: NOTE_SETIRQFILTER
 
   Set IRQ filter setting
 
@@ -198,7 +198,7 @@ Noteram Device (``/dev/note``)
 ``/dev/note`` Ioctls
 --------------------
 
-.. c:macro:: NOTERAM_CLEAR
+.. c:macro:: NOTE_CLEAR
 
   Clear all contents of the circular buffer
 
@@ -206,29 +206,29 @@ Noteram Device (``/dev/note``)
 
   :return: Always returns 0.
 
-.. c:macro:: NOTERAM_GETMODE
+.. c:macro:: NOTE_GETMODE
 
   Get overwrite mode
 
   :argument: A writable pointer to ``unsigned int``.
     The overwrite mode takes one of the following values.
 
-    .. c:macro:: NOTERAM_MODE_OVERWRITE_DISABLE
+    .. c:macro:: NOTE_MODE_OVERWRITE_DISABLE
 
       Overwrite mode is disabled. When the buffer is full, accepting the data will be stopped.
 
-    .. c:macro:: NOTERAM_MODE_OVERWRITE_ENABLE
+    .. c:macro:: NOTE_MODE_OVERWRITE_ENABLE
 
       Overwrite mode is enabled.
 
-    .. c:macro:: NOTERAM_MODE_OVERWRITE_OVERFLOW
+    .. c:macro:: NOTE_MODE_OVERWRITE_OVERFLOW
 
       Overwrite mode is disabled and the buffer is already full.
 
   :return: If success, 0 (``OK``) is returned and current overwrite mode is stored into the given pointer.
            If failed, a negated ``errno`` is returned.
 
-.. c:macro:: NOTERAM_SETMODE
+.. c:macro:: NOTE_SETMODE
 
   Set overwrite mode
 
@@ -268,7 +268,7 @@ API description
 .. c:function:: void sched_note_filter_mode(struct note_filter_mode_s *oldm, struct note_filter_mode_s *newm);
 
   Set and get note filter mode.
-  (Same as :c:macro:`NOTECTL_GETMODE` / :c:macro:`NOTECTL_SETMODE` ioctls)
+  (Same as :c:macro:`NOTE_GETFILTER` / :c:macro:`NOTE_SETFILTER` ioctls)
 
   :param oldm: A writable pointer to :c:struct:`note_filter_mode_s` to get current filter mode.
     If 0, no data is written.
@@ -280,7 +280,7 @@ API description
 .. c:function:: void sched_note_filter_syscall(struct note_filter_syscall_s *oldf, struct note_filter_syscall_s *newf);
 
   Set and get syscall filter setting.
-  (Same as :c:macro:`NOTECTL_GETSYSCALLFILTER` / :c:macro:`NOTECTL_SETSYSCALLFILTER` ioctls)
+  (Same as :c:macro:`NOTE_GETSYSCALLFILTER` / :c:macro:`NOTE_SETSYSCALLFILTER` ioctls)
 
   :param oldf: A writable pointer to :c:struct:`note_filter_syscall_s` to get current syscall filter setting.
     If 0, no data is written.
@@ -292,7 +292,7 @@ API description
 .. c:function:: void sched_note_filter_irq(struct note_filter_irq_s *oldf, struct note_filter_irq_s *newf);
 
   Set and get IRQ filter setting.
-  (Same as :c:macro:`NOTECTL_GETIRQFILTER` / :c:macro:`NOTECTL_SETIRQFILTER` ioctls)
+  (Same as :c:macro:`NOTE_GETIRQFILTER` / :c:macro:`NOTE_SETIRQFILTER` ioctls)
 
   :param oldf: A writable pointer to :c:struct:`note_filter_irq_s` to get current IRQ filter setting.
     If 0, no data is written.

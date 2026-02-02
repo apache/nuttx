@@ -1819,7 +1819,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
  *
  * Description:
  *   Set and get note filter mode.
- *   (Same as NOTECTL_GETMODE / NOTECTL_SETMODE ioctls)
+ *   (Same as NOTE_GETFILTER / NOTE_SETFILTER ioctls)
  *
  * Input Parameters:
  *   oldm - A writable pointer to struct note_filter_mode_s to get current
@@ -1884,7 +1884,7 @@ void sched_note_filter_mode(FAR struct note_filter_named_mode_s *oldm,
  *
  * Description:
  *   Set and get syscall filter setting
- *   (Same as NOTECTL_GETSYSCALLFILTER / NOTECTL_SETSYSCALLFILTER ioctls)
+ *   (Same as NOTE_GETSYSCALLFILTER / NOTE_SETSYSCALLFILTER ioctls)
  *
  * Input Parameters:
  *   oldf - A writable pointer to struct note_filter_syscall_s to get
@@ -1951,7 +1951,7 @@ void sched_note_filter_syscall(FAR struct note_filter_named_syscall_s *oldf,
  *
  * Description:
  *   Set and get IRQ filter setting
- *   (Same as NOTECTL_GETIRQFILTER / NOTECTL_SETIRQFILTER ioctls)
+ *   (Same as NOTE_GETIRQFILTER / NOTE_SETIRQFILTER ioctls)
  *
  * Input Parameters:
  *   oldf - A writable pointer to struct note_filter_irq_s to get
@@ -2018,7 +2018,6 @@ void sched_note_filter_irq(FAR struct note_filter_named_irq_s *oldf,
  *
  * Description:
  *   Set and get tag filter setting
- *   (Same as NOTECTL_GETDUMPFILTER / NOTECTL_SETDUMPFILTER ioctls)
  *
  * Input Parameters:
  *   oldf - A writable pointer to struct note_filter_tag_s to get
