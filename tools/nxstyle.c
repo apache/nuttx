@@ -712,6 +712,18 @@ static const char *g_white_files[] =
    */
 
   "phy62xx/uart.c",
+
+  /* Skip Mixed case
+   * arch/arm/src/phy62xx/irq.c:194:5: error: Mixed case identifier found
+   */
+
+  "phy62xx/irq.c",
+
+  /* Skip Mixed case
+   * arch/arm/src/phy62xx/phyplus_wdt.c:61:28: error: Mixed case identifier found
+   */
+
+  "phy62xx/phyplus_wdt.c",
   NULL
 };
 
