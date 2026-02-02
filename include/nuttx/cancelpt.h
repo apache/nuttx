@@ -63,9 +63,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define CANCEL_FLAG_NONCANCELABLE   (1 << 0) /* Pthread is non-cancelable */
-#define CANCEL_FLAG_CANCEL_ASYNC    (1 << 1) /* Async (vs deferred) cancellation type */
-#define CANCEL_FLAG_CANCEL_PENDING  (1 << 2) /* Pthread cancel is pending */
+#define CANCEL_FLAG_NONCANCELABLE   (1u << 0) /* Pthread is non-cancelable */
+#define CANCEL_FLAG_CANCEL_ASYNC    (1u << 1) /* Async (vs deferred) cancellation type */
+#define CANCEL_FLAG_CANCEL_PENDING  (1u << 2) /* Pthread cancel is pending */
 
 /****************************************************************************
  * Public Function Prototypes

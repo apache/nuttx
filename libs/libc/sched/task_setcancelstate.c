@@ -71,7 +71,7 @@ int task_setcancelstate(int state, FAR int *oldstate)
 
   if (oldstate != NULL)
     {
-      if ((tls->tl_cpstate & CANCEL_FLAG_NONCANCELABLE) != 0)
+      if ((tls->tl_cpstate & CANCEL_FLAG_NONCANCELABLE) != 0u)
         {
           *oldstate = TASK_CANCEL_DISABLE;
         }
@@ -91,12 +91,12 @@ int task_setcancelstate(int state, FAR int *oldstate)
 
       /* Check if a cancellation was pending */
 
-      if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_PENDING) != 0)
+      if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_PENDING) != 0u)
         {
 #ifdef CONFIG_CANCELLATION_POINTS
           /* If we are using deferred cancellation? */
 
-          if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_ASYNC) != 0)
+          if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_ASYNC) != 0u)
 #endif
             {
               /* No.. We are using asynchronous cancellation.  If the
