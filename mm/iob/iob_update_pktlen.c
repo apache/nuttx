@@ -76,7 +76,7 @@ int iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen,
           remain -= IOB_BUFSIZE(next) - next->io_offset;
         }
 
-      next = next->io_flink;
+      next = IOB_LINK_GET(next);
     }
 
   if (remain > 0)
@@ -113,7 +113,7 @@ int iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen,
           else
             {
               penultimate = next;
-              next = next->io_flink;
+              next = IOB_LINK_GET(next);
             }
         }
     }
@@ -128,7 +128,7 @@ int iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen,
       while (next != NULL && nrequire > ninqueue)
         {
           next->io_flink = iob_tryalloc(throttled);
-          next = next->io_flink;
+          next = IOB_LINK_GET(next);
           ninqueue++;
         }
     }
@@ -151,7 +151,7 @@ int iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen,
 
       next->io_len = len;
       pktlen      -= len;
-      next         = next->io_flink;
+      next         = IOB_LINK_GET(next);
     }
 
   /* Adjust final pktlen if it's not fully increased (e.g. alloc fail) */

@@ -45,7 +45,7 @@ int iob_count(FAR struct iob_s *iob)
   int count;
 
   for (count = 0; iob != NULL;
-       iob = iob->io_flink, count++);
+       iob = IOB_LINK_GET(iob), count++);
 
   return count;
 }

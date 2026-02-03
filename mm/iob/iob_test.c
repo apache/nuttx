@@ -66,7 +66,7 @@ static void dump_chain(struct iob_s *iob)
       printf("%d. len=%d, offset=%d\n", n, iob->io_len, iob->io_offset);
 
       pktlen += iob->io_len;
-      iob = iob->io_flink;
+      iob = IOB_LINK_GET(iob);
       n++;
     }
 

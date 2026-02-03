@@ -79,7 +79,7 @@
 
 FAR struct iob_s *iob_free(FAR struct iob_s *iob)
 {
-  FAR struct iob_s *next = iob->io_flink;
+  FAR struct iob_s *next = IOB_LINK_GET(iob);
   irqstate_t flags;
 #ifdef CONFIG_IOB_NOTIFIER
   int16_t navail;

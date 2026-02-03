@@ -100,7 +100,7 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
 
   /* Dump I/O buffer headers */
 
-  for (; iob; iob = iob->io_flink)
+  for (; iob; iob = IOB_LINK_GET(iob))
     {
       syslog(LOG_DEBUG, "  iob=%p len=%d offset=%d\n",
              iob, iob->io_len, iob->io_offset);

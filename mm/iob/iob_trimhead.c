@@ -77,7 +77,7 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
 
               /* Check if this was the last entry in the chain */
 
-              next = iob->io_flink;
+              next = IOB_LINK_GET(iob);
               if (next == NULL)
                 {
                   /* Yes.. break out of the loop returning the empty

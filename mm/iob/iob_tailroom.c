@@ -45,9 +45,9 @@
 
 unsigned int iob_tailroom(FAR struct iob_s *iob)
 {
-  while (iob->io_flink != NULL)
+  while (IOB_LINK_GET(iob) != NULL)
     {
-      iob = iob->io_flink;
+      iob = IOB_LINK_GET(iob);
     }
 
   return IOB_BUFSIZE(iob) - (iob->io_offset + iob->io_len);

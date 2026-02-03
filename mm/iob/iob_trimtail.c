@@ -69,7 +69,7 @@ FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
           penultimate = NULL;
           last = NULL;
 
-          for (entry = iob; entry; entry = entry->io_flink)
+          for (entry = iob; entry; entry = IOB_LINK_GET(entry))
             {
               /* Remember the last and the next to the last in the chain */
 

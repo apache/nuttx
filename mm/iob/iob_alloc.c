@@ -88,7 +88,7 @@ static FAR struct iob_s *iob_alloc_committed(void)
     {
       /* Remove the I/O buffer from the committed list */
 
-      g_iob_committed = iob->io_flink;
+      g_iob_committed = IOB_LINK_GET(iob);
 
       /* Put the I/O buffer in a known state */
 
@@ -125,7 +125,7 @@ static FAR struct iob_s *iob_tryalloc_internal(bool throttled)
            * IOBs.
            */
 
-          g_iob_freelist = iob->io_flink;
+          g_iob_freelist = IOB_LINK_GET(iob);
 
           g_iob_count--;
           DEBUGASSERT(g_iob_count >= 0);
