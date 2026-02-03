@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-if(APPLE)
+if(APPLE AND CONFIG_SIM_TOOLCHAIN_GCC)
   find_program(CMAKE_C_ELF_COMPILER x86_64-elf-gcc)
   find_program(CMAKE_CXX_ELF_COMPILER x86_64-elf-g++)
 endif()
@@ -121,7 +121,12 @@ if(CONFIG_STACK_USAGE_WARNING)
 endif()
 
 if(CONFIG_COVERAGE_ALL)
-  add_compile_options(-fprofile-arcs -ftest-coverage -fno-inline)
+  if(CONFIG_ARCH_TOOLCHAIN_GCC)
+    add_compile_options(-fprofile-arcs -ftest-coverage -fno-inline)
+  elseif(CONFIG_ARCH_TOOLCHAIN_CLANG)
+    add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
+    add_link_options(-fprofile-instr-generate)
+  endif()
 endif()
 
 if(CONFIG_PROFILE_ALL OR CONFIG_SIM_PROFILE)

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/posix/sim_hosttime.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,8 +38,9 @@
  * Private Data
  ****************************************************************************/
 
+/* Start time of the simulation in nanoseconds (monotonic clock) */
+
 static uint64_t g_start;
-static timer_t  g_timer;
 
 /****************************************************************************
  * Public Functions
@@ -50,18 +53,11 @@ static timer_t  g_timer;
 int host_inittimer(void)
 {
   struct timespec tp;
-  struct sigevent sigev =
-    {
-      0
-    };
 
   clock_gettime(CLOCK_MONOTONIC, &tp);
-
   g_start = 1000000000ull * tp.tv_sec + tp.tv_nsec;
-  sigev.sigev_notify = SIGEV_SIGNAL;
-  sigev.sigev_signo  = SIGALRM;
 
-  return timer_create(CLOCK_MONOTONIC, &sigev, &g_timer);
+  return 0;
 }
 
 /****************************************************************************
@@ -107,31 +103,36 @@ void host_sleepuntil(uint64_t nsec)
  * Name: host_settimer
  *
  * Description:
- *   Set up a timer to send periodic signals.
+ *   Set up a one-shot timer that expires at the specified
+ *   absolute time.
  *
  * Input Parameters:
- *   nsec - timer expire time
+ *   nsec - Expiration time in nanoseconds.
  *
  * Returned Value:
- *   On success, (0) zero value is returned, otherwise a negative value.
+ *   Returns 0 on success; otherwise a negative value.
  *
  ****************************************************************************/
 
 int host_settimer(uint64_t nsec)
 {
-  struct itimerspec tspec =
-    {
-      0
-    };
+  struct itimerval it;
+  uint64_t now;
+  uint64_t usec;
 
-  /* Convert to microseconds and set minimum timer to 1 microsecond. */
+  now = host_gettime(false);
 
-  nsec += g_start;
+  usec = (nsec <= now) ? 1 : (nsec - now + 99) / 1000;
+  
+  it.it_value.tv_sec  = usec / 1000000;
+  it.it_value.tv_usec = usec % 1000000;
 
-  tspec.it_value.tv_sec  = nsec / 1000000000;
-  tspec.it_value.tv_nsec = nsec % 1000000000;
+  /* One-shot timer */
 
-  return timer_settime(g_timer, TIMER_ABSTIME, &tspec, NULL);
+  it.it_interval.tv_sec  = 0;
+  it.it_interval.tv_usec = 0;
+
+  return setitimer(ITIMER_REAL, &it, NULL);
 }
 
 /****************************************************************************
