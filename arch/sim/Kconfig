@@ -939,4 +939,11 @@ config SIM_CUSTOM_DATA_SECTION
 		Custom data section name for Simulator to allow
 		developer to define special data sections.
 
+config SIM_RPMSG_VIRTIO
+	bool "RPMsg-VirtIO for Simulator"
+	default n
+	select RPMSG_VIRTIO_LITE
+	---help---
+		Enable the Sim RPMsg VirtIO Lite Driver Support
+
 endif # ARCH_SIM
