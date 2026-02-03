@@ -29,6 +29,20 @@
 
 	.type	__gnu_mcount_nc, %function
 __gnu_mcount_nc:
+#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_CORTEXM23)
+	/* Cortex-M0/M0+/M23 - ARMv6-M and ARMv8-M Baseline */
+	/* These cores only support limited Thumb-1 instruction set */
+	push	{r0, r1, r2, r3, lr}		/* Save registers */
+	mov	r1, lr
+	movs	r2, #1
+	bics	r1, r2				/* R1 contains callee address, with thumb bit cleared */
+	ldr	r0, [sp, #20]			/* R0 contains caller address */
+	movs	r2, #1
+	bics	r0, r2				/* Clear thumb bit */
+	bl	mcount_internal			/* Jump to internal _mcount() implementation */
+	pop	{r0, r1, r2, r3, pc}		/* Restore r0-r3 and return to caller */
+#else
+	/* ARMv7-M/A/R and higher - Full Thumb-2 support */
 	push	{r0, r1, r2, r3, lr}		/* Save registers */
 	mov	r1, lr
 	bic	r1, r1, #1			/* R1 contains callee address, with thumb bit cleared */
@@ -37,6 +51,7 @@ __gnu_mcount_nc:
 	bl	mcount_internal			/* Jump to internal _mcount() implementation */
 	pop	{r0, r1, r2, r3, ip, lr}	/* Restore saved registers */
 	bx	ip				/* Return to callee */
+#endif
 
 	.size	__gnu_mcount_nc, .-__gnu_mcount_nc
 	.end
