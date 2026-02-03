@@ -55,6 +55,7 @@ following section.
   pipes.rst
   power/index.rst
   ptp.rst
+  vhost/index.rst
   virtio/index.rst
   video.rst
   wireless.rst
