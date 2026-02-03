@@ -37,6 +37,72 @@
 #include "semaphore/semaphore.h"
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static inline_function
+int get_blocking(FAR sem_t *sem, bool mutex, bool *blocking)
+{
+  uint32_t mholder = NXSEM_NO_MHOLDER;
+  int ret = OK;
+
+  if (mutex)
+    {
+      /* Mutex post from interrupt context is not allowed */
+
+      DEBUGASSERT(!up_interrupt_context());
+
+      /* Lock the mutex for us by setting the blocking bit */
+
+      mholder = atomic_fetch_or(NXSEM_MHOLDER(sem), NXSEM_MBLOCKING_BIT);
+
+      /* Mutex post from another thread is not allowed, unless
+       * called from nxsem_reset
+       */
+
+      DEBUGASSERT(mholder == (NXSEM_MBLOCKING_BIT | NXSEM_MRESET) ||
+                  (mholder & (~NXSEM_MBLOCKING_BIT)) == nxsched_gettid());
+
+      *blocking = NXSEM_MBLOCKING(mholder);
+
+      if (!(*blocking))
+        {
+          if (mholder != NXSEM_MRESET)
+            {
+              mholder = NXSEM_NO_MHOLDER;
+            }
+
+          atomic_set(NXSEM_MHOLDER(sem), mholder);
+        }
+    }
+  else
+    {
+      int32_t sem_count;
+
+      /* Check the maximum allowable value */
+
+      sem_count = atomic_read(NXSEM_COUNT(sem));
+      do
+        {
+#ifdef CONFIG_CUSTOM_SEMAPHORE_MAXVALUE
+          if (sem_count >= sem->maxvalue)
+#else
+          if (sem_count >= SEM_VALUE_MAX)
+#endif
+            {
+              ret = -EOVERFLOW;
+              break;
+            }
+        }
+      while (!atomic_try_cmpxchg_release(NXSEM_COUNT(sem), &sem_count,
+                                         sem_count + 1));
+      *blocking = sem_count < 0;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -78,7 +144,6 @@ int nxsem_post_slow(FAR sem_t *sem)
 #endif
   bool blocking = false;
   bool mutex = NXSEM_IS_MUTEX(sem);
-  uint32_t mholder = NXSEM_NO_MHOLDER;
   int ret = OK;
 
   /* The following operations must be performed with interrupts
@@ -88,58 +153,7 @@ int nxsem_post_slow(FAR sem_t *sem)
 
   flags = enter_critical_section();
 
-  if (mutex)
-    {
-      /* Mutex post from interrupt context is not allowed */
-
-      DEBUGASSERT(!up_interrupt_context());
-
-      /* Lock the mutex for us by setting the blocking bit */
-
-      mholder = atomic_fetch_or(NXSEM_MHOLDER(sem), NXSEM_MBLOCKING_BIT);
-
-      /* Mutex post from another thread is not allowed, unless
-       * called from nxsem_reset
-       */
-
-      DEBUGASSERT(mholder == (NXSEM_MBLOCKING_BIT | NXSEM_MRESET) ||
-                  (mholder & (~NXSEM_MBLOCKING_BIT)) == nxsched_gettid());
-
-      blocking = NXSEM_MBLOCKING(mholder);
-
-      if (!blocking)
-        {
-          if (mholder != NXSEM_MRESET)
-            {
-              mholder = NXSEM_NO_MHOLDER;
-            }
-
-          atomic_set(NXSEM_MHOLDER(sem), mholder);
-        }
-    }
-  else
-    {
-      int32_t sem_count;
-
-      /* Check the maximum allowable value */
-
-      sem_count = atomic_read(NXSEM_COUNT(sem));
-      do
-        {
-#ifdef CONFIG_CUSTOM_SEMAPHORE_MAXVALUE
-          if (sem_count >= sem->maxvalue)
-#else
-          if (sem_count >= SEM_VALUE_MAX)
-#endif
-            {
-              ret = -EOVERFLOW;
-              break;
-            }
-        }
-      while (!atomic_try_cmpxchg_release(NXSEM_COUNT(sem), &sem_count,
-                                         sem_count + 1));
-      blocking = sem_count < 0;
-    }
+  ret = get_blocking(sem, mutex, &blocking);
 
   if (ret == OK)
     {
