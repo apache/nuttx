@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/atomic.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/perf.h>
 
@@ -351,8 +352,8 @@ static uint64_t arm64pmu_event_update(FAR struct perf_event_s *event)
   delta = (now - atomic64_xchg(&hwc->prev_count, now)) &
           arm64pmu_event_max_period(event);
 
-  atomic64_add(&event->count, delta);
-  atomic64_sub(&hwc->left_period, delta);
+  atomic64_fetch_add(&event->count, delta);
+  atomic64_fetch_sub(&hwc->left_period, delta);
   atomic64_set(&hwc->last_period, delta);
 
   return now;
@@ -624,7 +625,7 @@ static inline bool pmuv3_event_is_64bit(FAR struct perf_event_s *event)
 static inline void pmuv3_pmcr_write(uint32_t val)
 {
   val &= PMU_PMCR_MASK;
-  arm64_isb();
+  UP_ISB();
   write_pmcr(val);
 }
 
@@ -655,14 +656,14 @@ static inline void pmuv3_enable_event_counter(
 {
   uint32_t mask = BIT(PMU_IDX_TO_COUNTER(event->hw.idx));
 
-  arm64_isb();
+  UP_ISB();
   write_pmcntenset(mask);
 }
 
 static inline void pmuv3_disable_counter(uint32_t mask)
 {
   write_pmcntenclr(mask);
-  arm64_isb();
+  UP_ISB();
 }
 
 static inline void pmuv3_disable_event_counter(
@@ -683,9 +684,9 @@ static inline void pmuv3_enable_event_irq(
 static inline void pmuv3_disable_intens(uint32_t mask)
 {
   write_pmintenclr(mask);
-  arm64_isb();
+  UP_ISB();
   write_pmovsclr(mask);
-  arm64_isb();
+  UP_ISB();
 }
 
 static inline void pmuv3_disable_event_irq(
@@ -839,7 +840,7 @@ static int pmuv3_get_event_idx(FAR struct pmu_hw_events_s *cpuc,
 static void pmuv3_clear_event_idx(FAR struct pmu_hw_events_s *cpuc,
                                      FAR struct perf_event_s *event)
 {
-  __clear_bit(event->hw.idx, &cpuc->used_mask);
+  clear_bit(event->hw.idx, &cpuc->used_mask);
 }
 
 static int pmuv3_event_idx(FAR struct perf_event_s *event)
