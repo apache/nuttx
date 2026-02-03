@@ -435,10 +435,6 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
 
   nxtask_recover(tcb);
 
-#ifdef CONFIG_PERF_EVENTS
-  perf_event_task_exit(tcb);
-#endif
-
   /* Disable the scheduling function to prevent other tasks from
    * being deleted after they are awakened
    */
@@ -478,7 +474,7 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
     }
 #endif
 
-#ifdef CONFIG_SCHED_PERF_EVENTS
+#ifdef CONFIG_PERF_EVENTS
   perf_event_task_exit(tcb);
 #endif
 }
