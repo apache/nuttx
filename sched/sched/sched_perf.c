@@ -30,6 +30,7 @@
 #include <stdbool.h>
 #include <poll.h>
 
+#include <nuttx/atomic.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/perf.h>
@@ -120,7 +121,7 @@ static struct inode g_perf_inode =
   NULL,                   /* i_parent */
   NULL,                   /* i_peer */
   NULL,                   /* i_child */
-  1,                      /* i_crefs */
+  ATOMIC_VAR_INIT(1),     /* i_crefs */
   FSNODEFLAG_TYPE_DRIVER, /* i_flags */
   {
     &g_perf_fops          /* u */
@@ -2088,7 +2089,6 @@ static int perf_close(FAR struct file *filep)
 {
   FAR struct perf_event_s *event = filep->f_priv;
   FAR struct perf_event_context_s *ctx;
-  irqstate_t flags = enter_critical_section();
 
   ASSERT(event != NULL);
 
@@ -2099,7 +2099,6 @@ static int perf_close(FAR struct file *filep)
     }
 
   perf_free_event(event);
-  leave_critical_section(flags);
   return OK;
 }
 
@@ -2183,7 +2182,7 @@ static int perf_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct perf_event_s *out_event;
           int fd = (int) arg;
 
-          ret = fs_getfilep(fd, &out_filep);
+          ret = file_get(fd, &out_filep);
           if (ret < 0)
             {
               return -EINVAL;
@@ -2357,7 +2356,7 @@ static void perf_swevent_timer_handle(wdparm_t arg)
     perf_swevent_timer_handle_cpu(event);
 #endif
 
-  wd_start(&event->hw.waitdog, period, perf_swevent_timer_handle, arg);
+  wd_start_next(&event->hw.waitdog, period, perf_swevent_timer_handle, arg);
 }
 
 /****************************************************************************
@@ -2421,7 +2420,7 @@ static int perf_cpuclock_event_add(FAR struct perf_event_s *event,
 static void perf_cpuclock_event_del(FAR struct perf_event_s *event,
                                     int flags)
 {
-  wd_cancel_irq(&event->hw.waitdog);
+  wd_cancel(&event->hw.waitdog);
 }
 
 /****************************************************************************
@@ -2470,7 +2469,7 @@ static int perf_cpuclock_event_start(FAR struct perf_event_s *event,
 static int perf_cpuclock_event_stop(FAR struct perf_event_s *event,
                                     int flags)
 {
-  wd_cancel_irq(&event->hw.waitdog);
+  wd_cancel(&event->hw.waitdog);
   return 0;
 }
 
@@ -2656,6 +2655,7 @@ int perf_event_open(FAR struct perf_event_attr_s *attr, pid_t pid,
   FAR struct tcb_s *tcb = NULL;
   FAR struct perf_event_context_s *ctx;
   FAR struct pmu_event_context_s *pmu_ctx;
+  FAR struct file *group_file = NULL;
   int event_fd = -1;
   int ret;
 
@@ -2673,8 +2673,7 @@ int perf_event_open(FAR struct perf_event_attr_s *attr, pid_t pid,
 
   if (group_fd >= 0)
     {
-      FAR struct file *group_file;
-      ret = fs_getfilep(group_fd, &group_file);
+      ret = file_get(group_fd, &group_file);
       if (ret < 0)
         {
           serr("perf event group_fd fail:%d\n", group_fd);
@@ -2685,6 +2684,7 @@ int perf_event_open(FAR struct perf_event_attr_s *attr, pid_t pid,
 
       if (group_leader->cpu != cpu)
         {
+          file_put(group_file);
           serr("Event cpu must be same as group leader\n");
           return -EINVAL;
         }
@@ -2704,14 +2704,16 @@ int perf_event_open(FAR struct perf_event_attr_s *attr, pid_t pid,
       if (tcb == NULL)
         {
           serr("perf event pid fail:%d\n", pid);
-          return -ESRCH;
+          ret = -ESRCH;
+          goto exit;
         }
     }
 
   event = perf_event_alloc(attr, cpu, tcb, group_leader, NULL);
   if (event == NULL)
     {
-      return -ENOMEM;
+      ret = -ENOMEM;
+      goto exit;
     }
 
   if (attr->disabled)
@@ -2741,12 +2743,22 @@ int perf_event_open(FAR struct perf_event_attr_s *attr, pid_t pid,
 
   event->pmuctx = pmu_ctx;
 
-  event_fd = file_allocate(&g_perf_inode, O_RDONLY | flags,
-                           0, event, 0, true);
+  event_fd = file_allocate_from_inode(&g_perf_inode, O_RDONLY | flags,
+                                      0, event, 0);
   if (event_fd < 0)
     {
       ret = -EINVAL;
       goto err_with_event;
+    }
+
+  if (pid > 0)
+    {
+      nxsched_put_tcb(tcb);
+    }
+
+  if (group_file != NULL)
+    {
+      file_put(group_file);
     }
 
   perf_add_event_to_count(event, ctx);
@@ -2754,6 +2766,18 @@ int perf_event_open(FAR struct perf_event_attr_s *attr, pid_t pid,
 
 err_with_event:
   perf_free_event(event);
+
+exit:
+  if (pid > 0)
+    {
+      nxsched_put_tcb(tcb);
+    }
+
+  if (group_file != NULL)
+    {
+      file_put(group_file);
+    }
+
   return ret;
 }
 
@@ -2872,7 +2896,7 @@ void perf_event_task_exit(FAR struct tcb_s *tcb)
         {
           perf_context_detach(event, ctx);
 
-          if (event->buf->ref_count > 1)
+          if (event->buf && event->buf->ref_count > 1)
             {
               perf_free_event(event);
             }
@@ -2946,7 +2970,7 @@ void perf_event_task_sched_out(FAR struct tcb_s *tcb)
 {
   FAR struct perf_event_context_s *ctx = tcb->perf_event_ctx;
 
-  perf_swevent(PERF_COUNT_SW_CONTEXT_SWITCHES, SCHED_NOTE_IP);
+  perf_swevent(PERF_COUNT_SW_CONTEXT_SWITCHES, up_getpc());
 
   if (ctx != NULL)
     {
