@@ -60,6 +60,24 @@ This is a configuration of testing the BUILD_KERNEL configuration::
   Hello, World!!
   nsh>
 
+KNSH with VirtIO 9P Filesystem (v9fs)
+-------------------------------------
+
+The VirtIO 9P filesystem allows sharing a host directory with the guest.
+To enable v9fs support, run QEMU with additional options::
+
+  $ qemu-system-arm -semihosting -M virt -m 1024 -nographic \
+    -fsdev local,security_model=none,id=localshared,path=. \
+    -device virtio-9p-device,id=fs0,fsdev=localshared,mount_tag=share \
+    -kernel ./nuttx
+
+Inside NuttX shell, mount the shared filesystem and access host files::
+
+  nsh> mount -t v9fs -o trans=virtio,tag=share /share
+  nsh> ls /share
+
+This will show the files from the host directory specified in the ``path=.`` option.
+
 Inter-VM share memory Device (ivshmem)
 --------------------------------------
 
