@@ -2530,7 +2530,7 @@ static int perf_cpuclock_event_read(FAR struct perf_event_s *event)
   uint64_t now = TICK2NSEC(clock_systime_ticks());
   uint64_t delta = now - atomic64_xchg(&event->hw.prev_count, now);
   atomic64_set(&event->hw.last_period, delta);
-  atomic64_add(&event->count, delta);
+  atomic64_fetch_add(&event->count, delta);
   return 0;
 }
 
@@ -2811,11 +2811,6 @@ int perf_event_open(FAR struct perf_event_attr_s *attr, pid_t pid,
 
   event->id = event_fd;
 
-  if (pid > 0)
-    {
-      nxsched_put_tcb(tcb);
-    }
-
   if (group_file != NULL)
     {
       file_put(group_file);
@@ -2828,10 +2823,6 @@ err_with_event:
   perf_free_event(event);
 
 exit:
-  if (pid > 0)
-    {
-      nxsched_put_tcb(tcb);
-    }
 
   if (group_file != NULL)
     {
