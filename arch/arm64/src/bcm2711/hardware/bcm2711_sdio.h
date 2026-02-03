@@ -100,7 +100,7 @@
  * Controller Simplified Specification.
  */
 
-#define BCM_SDIO_BLKSIZECNT_BLKSIZE_MASK (0x3ff)
+#define BCM_SDIO_BLKSIZECNT_BLKSIZE_MASK (0xfff)
 #define BCM_SDIO_BLKSIZECNT_BLKCNT_SHIFTLEN (16)
 #define BCM_SDIO_BLKSIZECNT_BLKCNT_MASK (0xffff)
 
