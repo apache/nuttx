@@ -71,7 +71,7 @@ int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
   while ((int)(offset - iob->io_len) >= 0)
     {
       offset -= iob->io_len;
-      iob     = iob->io_flink;
+      iob     = IOB_LINK_GET(iob);
       if (iob == NULL)
         {
           /* We have no requested data in iob chain */
@@ -106,7 +106,7 @@ int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
 
       /* Skip to the next I/O buffer in the chain */
 
-      iob = iob->io_flink;
+      iob = IOB_LINK_GET(iob);
       offset = 0;
     }
 

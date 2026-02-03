@@ -55,7 +55,7 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob)
 
   /* Handle special cases, preserve at least one iob. */
 
-  while (iob->io_len <= 0 && iob->io_flink != NULL)
+  while (iob->io_len <= 0 && IOB_LINK_GET(iob) != NULL)
     {
       iob = iob_free(iob);
     }
@@ -68,7 +68,7 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob)
 
   while (iob)
     {
-      next = iob->io_flink;
+      next = IOB_LINK_GET(iob);
 
       /* Eliminate the data offset in this entry */
 

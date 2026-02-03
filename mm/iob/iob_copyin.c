@@ -91,14 +91,14 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
   while ((int)(offset - iob->io_len) > 0)
     {
       offset -= iob->io_len;
-      iob     = iob->io_flink;
+      iob     = IOB_LINK_GET(iob);
     }
 
   /* Then loop until all of the I/O data is copied from the user buffer */
 
   while (len > 0)
     {
-      next = iob->io_flink;
+      next = IOB_LINK_GET(iob);
 
       /* Get the destination I/O buffer address and the amount of data
        * available from that address.
