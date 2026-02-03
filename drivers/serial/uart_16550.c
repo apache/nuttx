@@ -1645,7 +1645,7 @@ static void u16550_txint(struct uart_dev_s *dev, bool enable)
 #ifndef CONFIG_16550_POLLING
       if (priv->irq >= 0)
         {
-          flags = uart_spinlock(dev, false);
+          flags = uart_spinlock(dev, true);
           priv->ier |= UART_IER_ETBEI;
           u16550_serialout(priv, UART_IER_OFFSET, priv->ier);
 
@@ -1654,7 +1654,7 @@ static void u16550_txint(struct uart_dev_s *dev, bool enable)
            */
 
           uart_xmitchars(dev);
-          uart_spinunlock(dev, false, flags);
+          uart_spinunlock(dev, true, flags);
           return;
         }
 #endif
@@ -1672,10 +1672,10 @@ static void u16550_txint(struct uart_dev_s *dev, bool enable)
     }
   else
     {
-      flags = uart_spinlock(dev, false);
+      flags = uart_spinlock(dev, true);
       priv->ier &= ~UART_IER_ETBEI;
       u16550_serialout(priv, UART_IER_OFFSET, priv->ier);
-      uart_spinunlock(dev, false, flags);
+      uart_spinunlock(dev, true, flags);
     }
 }
 
