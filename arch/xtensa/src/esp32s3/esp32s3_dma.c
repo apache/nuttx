@@ -285,10 +285,15 @@ uint32_t esp32s3_dma_setup(struct esp32s3_dmadesc_s *dmadesc, uint32_t num,
         }
 
       dma_size = 0x1000 - alignment;
+      cache_invalidate_addr(pdata, bytes);
     }
   else if(!tx && burst_en)
     {
       dma_size = ESP32S3_DMA_BUFLEN_MAX_4B_ALIGNED;
+    }
+  else if(tx && buffer_in_psram)
+    {
+      cache_writeback_addr(pdata, bytes);
     }
 
   for (i = 0; i < num; i++)
