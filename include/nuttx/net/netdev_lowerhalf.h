@@ -90,10 +90,11 @@ enum netpkt_type_e
 
 enum netdev_rx_e
 {
-  NETDEV_RX_WORK,      /* Use work queue thread */
-  NETDEV_RX_DIRECT,    /* Directly based on the current thread */
-  NETDEV_RX_THREAD,    /* Upper half dedicated thread */
-  NETDEV_RX_THREAD_RSS /* RSS mode, upper half thread */
+  NETDEV_RX_WORK,       /* Use work queue thread */
+  NETDEV_RX_DIRECT,     /* Directly based on the current thread */
+  NETDEV_RX_THREAD,     /* Upper half dedicated thread */
+  NETDEV_RX_THREAD_RSS, /* RSS mode, upper half thread */
+  NETDEV_RX_DEFAULT     /* Inherit real device rxtype for vlan */
 };
 
 /* This structure is the generic form of state structure used by lower half

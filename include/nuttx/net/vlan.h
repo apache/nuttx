@@ -76,6 +76,11 @@ struct vlan_ioctl_args
     } u;
 
   int16_t vlan_qos;
+
+  /* Rx mode setting for vlan device */
+
+  uint8_t rx_type;     /* Value defined in enum netdev_rx_e */
+  uint8_t rx_priority; /* Rx thread priority when rxtype == NETDEV_RX_THREAD */
 };
 
 /****************************************************************************
@@ -108,7 +113,7 @@ extern "C"
  ****************************************************************************/
 
 int vlan_register(FAR struct netdev_lowerhalf_s *real, uint16_t vid,
-                  uint16_t prio);
+                  uint16_t prio, uint8_t rx_type, uint8_t rx_priority);
 
 /****************************************************************************
  * Name: vlan_unregister
