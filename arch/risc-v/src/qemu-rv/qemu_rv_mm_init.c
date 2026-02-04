@@ -82,7 +82,7 @@
 
 #define PGT_L1_SIZE     (512)  /* Enough to map 512 GiB */
 #define PGT_L2_SIZE     (512)  /* Enough to map 1 GiB */
-#define PGT_L3_SIZE     (1024) /* Enough to map 4 MiB (2MiB x 2) */
+#define PGT_L3_SIZE     (2048) /* Enough to map 8 MiB (2MiB x 4) */
 
 #define SLAB_COUNT      (sizeof(m_l3_pgtable) / RV_MMU_PAGE_SIZE)
 
