@@ -420,9 +420,8 @@ static inline_function FAR struct tcb_s *this_task(void)
   FAR struct tcb_s *tcb;
   irqstate_t flags;
 
-  /* If the CPU supports suppression of interprocessor interrupts, then
-   * simple disabling interrupts will provide sufficient protection for
-   * the following operations.
+  /* Use up_irq_save directly to avoid recursion when called from
+   * irq_save() -> nxsched_critmon_csection() -> running_task() path.
    */
 
   flags = up_irq_save();
@@ -482,11 +481,6 @@ void nxsched_critmon_preemption(FAR struct tcb_s *tcb, bool state,
                                 FAR void *caller);
 #else
 #  define nxsched_critmon_preemption(t, s, c)
-#endif
-
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
-void nxsched_critmon_csection(FAR struct tcb_s *tcb, bool state,
-                              FAR void *caller);
 #endif
 
 #ifdef CONFIG_SCHED_CAPABILITIES

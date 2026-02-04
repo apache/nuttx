@@ -789,6 +789,7 @@ struct tcb_s
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
   clock_t crit_start;                    /* Time critical section entered   */
   clock_t crit_max;                      /* Max time in critical section    */
+  int     crit_count;                    /* Nest count of critical section  */
   void   *crit_caller;                   /* Caller of critical section      */
   void   *crit_max_caller;               /* Caller of max critical section  */
 #endif

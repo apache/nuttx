@@ -31,9 +31,10 @@
  * Included Files
  ****************************************************************************/
 
-/* Include NuttX-specific IRQ definitions */
-
-#include <nuttx/irq.h>
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#  include <stdbool.h>
+#endif
 
 /* Include chip-specific IRQ definitions (including IRQ numbers) */
 
