@@ -174,6 +174,14 @@
   ((codec)->ops->output_g_bufsize ? \
    (codec)->ops->output_g_bufsize(priv) : -ENOTTY)
 
+#define CODEC_CAPTURE_G_BUFCNT(codec, priv) \
+  ((codec)->ops->capture_g_bufcnt ? \
+   (codec)->ops->capture_g_bufcnt(priv) : V4L2_REQBUFS_COUNT_MAX)
+
+#define CODEC_OUTPUT_G_BUFCNT(codec, priv) \
+  ((codec)->ops->output_g_bufcnt ? \
+   (codec)->ops->output_g_bufcnt(priv) : V4L2_REQBUFS_COUNT_MAX)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -238,6 +246,9 @@ struct codec_ops_s
 
   CODE size_t (*capture_g_bufsize)(FAR void *priv);
   CODE size_t (*output_g_bufsize)(FAR void *priv);
+
+  CODE size_t (*capture_g_bufcnt)(FAR void *priv);
+  CODE size_t (*output_g_bufcnt)(FAR void *priv);
 
   CODE void *(*alloc_buf)(FAR void *priv, size_t size);
   CODE void (*free_buf)(FAR void *priv, FAR void *addr);
