@@ -51,6 +51,8 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+int rpmsg_virtio_probe_cpuname(FAR struct virtio_device *vdev,
+                               FAR const char *cpuname);
 int rpmsg_virtio_probe(FAR struct virtio_device *vdev);
 void rpmsg_virtio_remove(FAR struct virtio_device *vdev);
 

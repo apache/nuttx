@@ -544,10 +544,20 @@ static void rptun_remove_device(FAR struct rptun_priv_s *priv,
  * Name: rptun_register_device
  ****************************************************************************/
 
-static int rptun_register_device(FAR struct virtio_device *vdev)
+static int rptun_register_device(FAR struct rptun_priv_s *priv,
+                                 FAR struct virtio_device *vdev)
 {
   int ret = -ENODEV;
 
+  if (vdev->id.device == VIRTIO_ID_RPMSG)
+    {
+      ret = rpmsg_virtio_probe_cpuname(vdev, RPTUN_GET_CPUNAME(priv->dev));
+      if (ret < 0)
+        {
+          rptunerr("rpmsg_virtio_probe failed, ret=%d\n", ret);
+        }
+    }
+  else
 #ifdef CONFIG_DRIVERS_VIRTIO
   if (vdev->role == VIRTIO_DEV_DRIVER)
     {
@@ -572,15 +582,6 @@ static int rptun_register_device(FAR struct virtio_device *vdev)
     }
   else
 #endif
-  if (vdev->id.device == VIRTIO_ID_RPMSG)
-    {
-      ret = rpmsg_virtio_probe(vdev);
-      if (ret < 0)
-        {
-          rptunerr("rpmsg_virtio_probe failed, ret=%d\n", ret);
-        }
-    }
-  else
     {
       rptunerr("virtio device id = %"PRIu32" not supported\n",
                vdev->id.device);
@@ -595,6 +596,11 @@ static int rptun_register_device(FAR struct virtio_device *vdev)
 
 static void rptun_unregister_device(FAR struct virtio_device *vdev)
 {
+  if (vdev->id.device == VIRTIO_ID_RPMSG)
+    {
+      rpmsg_virtio_remove(vdev);
+    }
+  else
 #ifdef CONFIG_DRIVERS_VIRTIO
   if (vdev->role == VIRTIO_DEV_DRIVER)
     {
@@ -609,9 +615,9 @@ static void rptun_unregister_device(FAR struct virtio_device *vdev)
     }
   else
 #endif
-  if (vdev->id.device == VIRTIO_ID_RPMSG)
     {
-      rpmsg_virtio_remove(vdev);
+      rptunerr("virtio device id = %"PRIu32" not supported\n",
+               vdev->id.device);
     }
 }
 
@@ -670,7 +676,7 @@ static int rptun_create_devices(FAR struct rptun_priv_s *priv)
           goto err;
         }
 
-      ret = rptun_register_device(vdev);
+      ret = rptun_register_device(priv, vdev);
       if (ret < 0)
         {
           rptunerr("rptun_register_device failed, ret=%d i=%d\n", ret, i);
