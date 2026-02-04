@@ -34,6 +34,7 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/video/v4l2_m2m.h>
 #include <nuttx/video/video.h>
+#include <sys/param.h>
 
 #include "video_framebuff.h"
 
@@ -274,6 +275,7 @@ static int codec_reqbufs(FAR struct file *filep,
   FAR codec_file_t *cfile = filep->f_priv;
   FAR codec_type_inf_t *type_inf;
   uint32_t buf_size;
+  size_t buf_cnt;
   int ret = OK;
 
   if (reqbufs == NULL)
@@ -282,18 +284,18 @@ static int codec_reqbufs(FAR struct file *filep,
     }
 
   reqbufs->mode = V4L2_BUF_MODE_FIFO;
-  if (reqbufs->count > V4L2_REQBUFS_COUNT_MAX)
-    {
-      reqbufs->count = V4L2_REQBUFS_COUNT_MAX;
-    }
 
   if (V4L2_TYPE_IS_OUTPUT(reqbufs->type))
     {
       buf_size = CODEC_OUTPUT_G_BUFSIZE(cmng->codec, cfile->priv);
+      buf_cnt = CODEC_OUTPUT_G_BUFCNT(cmng->codec, cfile->priv);
+      reqbufs->count = MIN(buf_cnt, reqbufs->count);
     }
   else
     {
       buf_size = CODEC_CAPTURE_G_BUFSIZE(cmng->codec, cfile->priv);
+      buf_cnt = CODEC_CAPTURE_G_BUFCNT(cmng->codec, cfile->priv);
+      reqbufs->count = MIN(buf_cnt, reqbufs->count);
     }
 
   if (buf_size == 0)
