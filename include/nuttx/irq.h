@@ -117,10 +117,12 @@
 #define STACK_ALIGN_MASK         (STACK_ALIGNMENT - 1)
 #define STACK_ALIGN_DOWN(a)      ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)        (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
+#define STACK_IS_ALIGNED(a)      (((uintptr_t)(a) & STACK_ALIGN_MASK) == 0)
 
 #define STACKFRAME_ALIGN_MASK    (STACKFRAME_ALIGN - 1)
 #define STACKFRAME_ALIGN_DOWN(a) ((a) & ~STACKFRAME_ALIGN_MASK)
 #define STACKFRAME_ALIGN_UP(a)   (((a) + STACKFRAME_ALIGN_MASK) & ~STACKFRAME_ALIGN_MASK)
+#define STACKFRAME_IS_ALIGNED(a) (((uintptr_t)(a) & STACKFRAME_ALIGN_MASK) == 0)
 
 /* Aligned size of the kernel stack */
 

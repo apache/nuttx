@@ -77,6 +77,12 @@
 #  define __ARM_FEATURE_DSP 1
 #endif
 
+/* For use with EABI and floating point, the stack must be aligned to 8-byte
+ * addresses.
+ */
+
+#define STACKFRAME_ALIGN 8
+
 #ifndef __ASSEMBLY__
 
 #ifndef up_switch_context
@@ -89,12 +95,6 @@
       UNUSED(rtcb);                    \
   } while (0)
 #endif
-
-/* For use with EABI and floating point, the stack must be aligned to 8-byte
- * addresses.
- */
-
-#define STACKFRAME_ALIGN 8
 
 #ifdef __cplusplus
 extern "C"
