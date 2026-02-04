@@ -207,26 +207,30 @@ int riscv_fillpage(int mcause, void *regs, void *args)
     }
 
   satp    = READ_CSR(CSR_SATP);
-  ptprev  = riscv_pgvaddr(mmu_satp_to_paddr(satp));
-  ptlevel = ARCH_SPGTS;
-  paddr   = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, ptprev, vaddr));
-  if (!paddr)
-    {
-      /* Nothing yet, allocate one page for final level page table */
+  paddr   = mmu_satp_to_paddr(satp);
 
-      paddr = mm_pgalloc(1);
+  for (ptlevel = 1; ptlevel <= ARCH_SPGTS; ptlevel++)
+    {
+      ptprev  = riscv_pgvaddr(paddr);
+      paddr   = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, ptprev, vaddr));
       if (!paddr)
         {
-          return -ENOMEM;
+          /* Nothing yet, allocate one page for next level page table */
+
+          paddr = mm_pgalloc(1);
+          if (!paddr)
+            {
+              return -ENOMEM;
+            }
+
+          /* Map the page table to the prior level */
+
+          mmu_ln_setentry(ptlevel, ptprev, paddr, vaddr, MMU_UPGT_FLAGS);
+
+          /* This is then used to map the next level */
+
+          riscv_pgwipe(paddr);
         }
-
-      /* Map the page table to the prior level */
-
-      mmu_ln_setentry(ptlevel, ptprev, paddr, vaddr, MMU_UPGT_FLAGS);
-
-      /* This is then used to map the final level */
-
-      riscv_pgwipe(paddr);
     }
 
   ptlast = riscv_pgvaddr(paddr);
@@ -242,7 +246,7 @@ int riscv_fillpage(int mcause, void *regs, void *args)
 
   /* Then map the virtual address to the physical address */
 
-  mmu_ln_setentry(ptlevel + 1, ptlast, paddr, vaddr, mmuflags);
+  mmu_ln_setentry(ARCH_PGT_MAX_LEVELS, ptlast, paddr, vaddr, mmuflags);
 
   return 0;
 }
