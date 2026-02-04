@@ -33,11 +33,8 @@
 
 #ifndef __ASSEMBLY__
 #  include <stddef.h>
+#  include <stdint.h>
 #endif
-
-/* Include NuttX-specific IRQ definitions */
-
-#include <nuttx/irq.h>
 
 /* Include chip-specific IRQ definitions (including IRQ numbers) */
 

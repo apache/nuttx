@@ -36,6 +36,7 @@
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
+#  include <stdbool.h>
 #  include <arch/syscall.h>
 #  include <nuttx/macro.h>
 #endif
@@ -43,10 +44,6 @@
 /* Include chip-specific IRQ definitions (including IRQ numbers) */
 
 #include <arch/chip/irq.h>
-
-/* Include NuttX-specific IRQ definitions */
-
-#include <nuttx/irq.h>
 
 /****************************************************************************
  * Pre-processor Prototypes

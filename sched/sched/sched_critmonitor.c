@@ -63,7 +63,7 @@
          if (pid > 0 && \
              elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION) \
            { \
-             CRITMONITOR_PANIC("PID %d hold critical section too long " \
+             CRITMONITOR_PANIC("PID %d disable interrupt too long " \
                                "%ju\n", pid, (uintmax_t)elapsed); \
            } \
        } \
@@ -251,33 +251,49 @@ void nxsched_critmon_preemption(FAR struct tcb_s *tcb, bool state,
  * Name: nxsched_critmon_csection
  *
  * Description:
- *   Called when a thread enters or leaves a critical section.
+ *   Called by irq_save/irq_restore wrappers when a thread disables or
+ *   re-enables interrupts.  Covers all IRQ-disabled paths including
+ *   enter_critical_section, spin_lock_irqsave, rspin_lock_irqsave, etc.
  *
  * Assumptions:
- *   - Called within a critical section.
- *   - Never called from an interrupt handler
- *   - Caller is the address of the function that is entering the critical
+ *   - Called with interrupts already disabled (on entry) or about to be
+ *     re-enabled (on exit).
+ *   - Might be called from an interrupt handler
  *
  ****************************************************************************/
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
-void nxsched_critmon_csection(FAR struct tcb_s *tcb, bool state,
-                              FAR void *caller)
+void nxsched_critmon_csection(bool state, bool force, FAR void *caller)
 {
-  clock_t current = perf_gettime();
+  FAR struct tcb_s *tcb = running_task();
+  clock_t current;
 
-  /* Are we entering or leaving the critical section? */
+  /* If tcb is NULL, this means the thread has exited, exited thread
+   * is recorded in nxtask_exit().
+   */
+
+  if (tcb == NULL || (!force && state && tcb->crit_count++ != 0) ||
+      (!force && !state && --tcb->crit_count != 0))
+    {
+      return;
+    }
+
+  /* Call perf_gettime only tcb->crit_count == 0 or 1, prevent recursion. */
+
+  current = perf_gettime();
+
+  /* Are we disabling or enabling interrupts? */
 
   if (state)
     {
-      /* Entering... Save the start time. */
+      /* Disabling... Save the start time. */
 
       tcb->crit_start  = current;
       tcb->crit_caller = caller;
     }
   else
     {
-      /* Leaving .. Check for the max elapsed time */
+      /* Enabling.. Check for the max elapsed time */
 
       clock_t elapsed = current - tcb->crit_start;
       int cpu         = this_cpu();

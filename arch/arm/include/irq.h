@@ -50,10 +50,6 @@
 
 #include <arch/chip/irq.h>
 
-/* Include NuttX-specific IRQ definitions */
-
-#include <nuttx/irq.h>
-
 /* Include ARM architecture-specific IRQ definitions (including register
  * save structure and up_irq_save()/up_irq_restore() functions)
  */

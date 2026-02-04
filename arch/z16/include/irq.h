@@ -36,7 +36,6 @@
 #  include <stdbool.h>
 #endif
 
-#include <nuttx/irq.h>
 #include <arch/chip/irq.h>
 
 /****************************************************************************

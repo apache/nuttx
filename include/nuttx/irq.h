@@ -138,13 +138,6 @@
 
 #define IRQ_WAKE_THREAD 1
 
-/* Disable/restore local interrupts from code above the arch layer */
-
-#ifndef __ASSEMBLY__
-#  define irq_save()          up_irq_save()
-#  define irq_restore(flags)  up_irq_restore(flags)
-#endif
-
 /* Scheduling monitor */
 
 #ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD
@@ -245,6 +238,38 @@ int ndx_to_irq(int ndx);
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: irq_save / irq_restore
+ *
+ * Description:
+ *   Wrapper around up_irq_save/up_irq_restore with IRQ disabled duration
+ *   monitoring via nxsched_critmon_csection.
+ *
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+#  if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
+void nxsched_critmon_csection(bool state, bool force, FAR void *caller);
+
+static inline_function irqstate_t irq_save(void)
+{
+  irqstate_t flags = up_irq_save();
+  nxsched_critmon_csection(true, false, return_address(0));
+  return flags;
+}
+
+static inline_function void irq_restore(irqstate_t flags)
+{
+  nxsched_critmon_csection(false, false, return_address(0));
+  up_irq_restore(flags);
+}
+#  else
+#    define nxsched_critmon_csection(state, force, caller)
+#    define irq_save()          up_irq_save()
+#    define irq_restore(flags)  up_irq_restore(flags)
+#  endif
+#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
  * Name: irq_attach

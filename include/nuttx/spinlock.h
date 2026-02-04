@@ -1118,8 +1118,15 @@ void rspin_unlock_irqrestore(FAR rspinlock_t *lock, irqstate_t flags)
     {
       irq_restore(flags);
     }
+  else
+    {
+      /* Not last unlock, irq_restore is not called, but we need to
+       * balance the crit_count that was incremented by irq_save()
+       * in the corresponding rspin_lock_irqsave().
+       */
 
-  /* If not last rspinlock restore,  irq_restore should not required */
+      nxsched_critmon_csection(false, false, return_address(0));
+    }
 }
 #else
 #  define rspin_unlock_irqrestore(l, f) ((void)(l), irq_restore(f))
@@ -1145,6 +1152,12 @@ uint16_t rspin_breaklock(FAR rspinlock_t *lock)
 
   if (RSPINLOCK_OWNER(val) == owner)
     {
+      /* When context switch, we need to mark that current thread has
+       * enabled interrupt.
+       */
+
+      nxsched_critmon_csection(false, true, return_address(0));
+
       oldcount        = RSPINLOCK_COUNT(val);
       lock->local_val = RSPINLOCK_VALUE(owner, 1u);
       rspin_unlock(lock);
@@ -1162,6 +1175,12 @@ void rspin_restorelock(FAR rspinlock_t *lock, uint16_t count)
       rspin_lock(lock);
       val = lock->local_val;
       lock->local_val = RSPINLOCK_VALUE(RSPINLOCK_OWNER(val), count);
+
+      /* When context switch, we need to mark that current thread has
+       * disabled interrupt.
+       */
+
+      nxsched_critmon_csection(true, true, return_address(0));
     }
 }
 #else
