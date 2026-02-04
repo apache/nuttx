@@ -185,6 +185,11 @@ typedef _int64_t            int64_t;
 typedef _uint64_t           uint64_t;
 #endif
 
+#ifdef __INT128_DEFINED
+typedef _int128_t           int128_t;
+typedef _uint128_t          uint128_t;
+#endif
+
 /* Minimum-width integer types */
 
 typedef _int8_t             int_least8_t;
