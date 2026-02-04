@@ -74,6 +74,12 @@ typedef unsigned long      _uint64_t;
 typedef _int64_t           _intmax_t;
 typedef _uint64_t          _uintmax_t;
 
+#ifdef __SIZEOF_INT128__
+typedef  __int128          _int128_t;
+typedef unsigned __int128  _uint128_t;
+#  define __INT128_DEFINED
+#endif
+
 #if defined(__WCHAR_TYPE__)
 typedef __WCHAR_TYPE__     _wchar_t;
 #else
