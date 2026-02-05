@@ -562,16 +562,34 @@ static void ili9341_selectarea(FAR struct ili9341_lcd_s *lcd,
  *
  * Input Parameters:
  *   lcd_dev - The lcd device
- *   row     - Starting row to write to (range: 0 <= row < yres)
- *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
+ *   row     - Row to write to (range: 0 <= row < yres)
+ *   col     - Starting column to write to (range: 0 <= col < xres)
  *   buffer  - The buffer containing the run to be written to the LCD
- *   npixels - The number of pixels to write to the
- *             (range: 0 < npixels <= xres-col)
+ *   npixels - The number of pixels to write to the LCD, limited by col
+ *             (range: 1 <= npixels <= xres - col)
  *
  * Returned Value:
  *
  *   On success - OK
  *   On error   - -EINVAL
+ *
+ * NOTE: This procedure could be used as putarea's fallback when putarea is
+ *       not implemented. In such a case, the input to the putarea, i.e.:
+ *
+ *       - row_start (0 <= row_start < yres)
+ *       - row_end   (row_start <= row_end < yres)
+ *       - col_start (0 <= col_start < xres)
+ *       - col_end   (col_start <= col_end < xres)
+ *
+ *       needs to be converted to multiple calls to putrun:
+ *
+ *         col = col_start;
+ *         npixels = col_end - col_start + 1;
+ *
+ *         for (row = row_start; row <= row_end; row++)
+ *           {
+ *             putrun(lcd_dev, row, col, buffer, npixels);
+ *           }
  *
  ****************************************************************************/
 
@@ -585,11 +603,37 @@ static int ili9341_putrun(FAR struct lcd_dev_s *lcd_dev, fb_coord_t row,
 
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
-  /* Check if position outside of area */
+  /* Check if position outside of the LCD's area. Fix when possible. */
 
-  if (col + npixels > ili9341_getxres(dev) || row > ili9341_getyres(dev))
+  if (row >= ili9341_getyres(dev))
     {
-      return -EINVAL;
+      lcderr("row >= yres: %d >= %d", row, ili9341_getyres(dev));
+      row = ili9341_getyres(dev) - 1;
+      lcdinfo("row set to %d", row);
+    }
+
+  if (npixels < 1)
+    {
+      lcderr("npixels needs to be at least one, it is %d", npixels);
+      npixels = 1;
+      lcdinfo("npixels set to %d", npixels);
+    }
+
+  if (col + npixels > ili9341_getxres(dev))
+    {
+      lcderr("col + npixels is %d but must be at most %d",
+             (col + npixels),
+             ili9341_getxres(dev));
+      npixels = ili9341_getxres(dev) - col;
+      if (npixels < 1)
+        {
+          lcderr("failed to fix npixels");
+          return -EINVAL;
+        }
+      else
+        {
+          lcdinfo("col is %d, npixels set to %d", col, npixels);
+        }
     }
 
   /* Select lcd driver */
