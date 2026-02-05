@@ -164,7 +164,8 @@ add_custom_target(
     $<$<BOOL:${CONFIG_ARCH_FLOAT_H}>:${CMAKE_BINARY_DIR}/include/float.h>
     $<$<BOOL:${CONFIG_ARCH_SETJMP_H}>:${CMAKE_BINARY_DIR}/include/setjmp.h>
     $<$<BOOL:${CONFIG_ARCH_STDBIT_H}>:${CMAKE_BINARY_DIR}/include/stdbit.h>
-    $<$<BOOL:${CONFIG_LIBC_STDBIT_GENERIC}>:${CMAKE_BINARY_DIR}/include/stdbit.h>)
+    $<$<BOOL:${CONFIG_LIBC_STDBIT_GENERIC}>:${CMAKE_BINARY_DIR}/include/stdbit.h>
+)
 
 # apps_context is a PHONY target used as an intermediate process to control the
 # time order of context preparation actions of app building
