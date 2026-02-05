@@ -67,6 +67,13 @@ config RPMSG_WQUEUE_NUMBER
 		This macro sets the number of rpmsg work queue. It can be
 		customized and the minimum value is 1.
 
+config RPMSG_RECURSIVE_LIMIT
+	int "rpmsg recursive limit"
+	default 8
+	---help---
+		This macro sets the maximum recursion depth allowed in the
+		rpmsg dispatch function.
+
 config RPMSG_TRACE
 	bool "rpmsg trace"
 	default n

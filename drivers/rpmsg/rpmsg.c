@@ -57,8 +57,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define RPMSG_RECURSIVE_LIMIT    8
-
 #ifdef CONFIG_RPMSG_WQUEUE_GLOBAL
 #  define rpmsg_get_wqueues(rpmsg) g_rpmsg_wqueues
 #else
@@ -412,7 +410,7 @@ int rpmsg_tickwait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem,
                */
 
               rpmsg->ops->wait(rpmsg, delay);
-              if (wqueue->recursive < RPMSG_RECURSIVE_LIMIT)
+              if (wqueue->recursive < CONFIG_RPMSG_RECURSIVE_LIMIT)
                 {
                   wqueue->recursive++;
                   work_queue_dispatch(wqueue->kwqueue);
