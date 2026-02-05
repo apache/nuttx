@@ -212,6 +212,15 @@ include/stdarg.h: include/nuttx/lib/stdarg.h
 	$(Q) cp -f include/nuttx/lib/stdarg.h include/stdarg.h
 endif
 
+# Target used to copy include/nuttx/lib/stdbit.h.  If CONFIG_ARCH_STDBIT_H or
+# CONFIG_LIBC_STDBIT_GENERIC is set, copy stdbit.h to include/ for C23 bit
+# utilities.
+
+ifeq ($(firstword $(filter y, $(CONFIG_ARCH_STDBIT_H) $(CONFIG_LIBC_STDBIT_GENERIC))),y)
+include/stdbit.h: include/nuttx/lib/stdbit.h
+	$(Q) cp -f include/nuttx/lib/stdbit.h include/stdbit.h
+endif
+
 # Target used to copy include/nuttx/lib/setjmp.h.  If CONFIG_ARCH_SETJMP_H is
 # defined, then there is an architecture specific setjmp.h header file
 # that will be included indirectly from include/lib/setjmp.h.  But first, we
@@ -468,6 +477,10 @@ endif
 
 ifeq ($(CONFIG_ARCH_STDARG_H),y)
 context: include/stdarg.h
+endif
+
+ifeq ($(firstword $(filter y, $(CONFIG_ARCH_STDBIT_H) $(CONFIG_LIBC_STDBIT_GENERIC))),y)
+context: include/stdbit.h
 endif
 
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
