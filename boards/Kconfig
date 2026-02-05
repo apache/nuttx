@@ -895,6 +895,16 @@ config ARCH_BOARD_IMX95_EVK
 		This is the board configuration for the port of NuttX to the NXP i.MXRT
 		evaluation kit, IMX95-EVK.  This board features the IMX95 MCU.
 
+config ARCH_BOARD_MR_NAVQ95B
+	bool "NXP MR NAVQ95B"
+	depends on ARCH_CHIP_IMX9_CORTEX_M
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is the board configuration for the port of NuttX to the NXP Mobile
+		Robotics NavQ95 board.  This board features the IMX95 MCU.
+
 config ARCH_BOARD_LC823450_XGEVK
 	bool "ON Semiconductor LC823450-XGEVK development board"
 	depends on ARCH_CHIP_LC823450
@@ -3601,6 +3611,7 @@ config ARCH_BOARD
 	default "imxrt1064-evk"                if ARCH_BOARD_IMXRT1064_EVK
 	default "imxrt1170-evk"                if ARCH_BOARD_IMXRT1170_EVK
 	default "imx95-evk"                    if ARCH_BOARD_IMX95_EVK
+	default "mr-navq95b"                   if ARCH_BOARD_MR_NAVQ95B
 	default "kwikstik-k40"                 if ARCH_BOARD_KWIKSTIK_K40
 	default "launchxl-cc1310"              if ARCH_BOARD_LAUNCHXL_CC1310
 	default "launchxl-cc1312r1"            if ARCH_BOARD_LAUNCHXL_CC1312R1
@@ -4041,6 +4052,9 @@ source "boards/arm/imxrt/imxrt1170-evk/Kconfig"
 endif
 if ARCH_BOARD_IMX95_EVK
 source "boards/arm/imx9/imx95-evk/Kconfig"
+endif
+if ARCH_BOARD_MR_NAVQ95B
+source "boards/arm/imx9/mr-navq95b/Kconfig"
 endif
 if ARCH_BOARD_TEENSY_4X
 source "boards/arm/imxrt/teensy-4.x/Kconfig"
