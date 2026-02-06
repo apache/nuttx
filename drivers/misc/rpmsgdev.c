@@ -645,6 +645,9 @@ static ssize_t rpmsgdev_ioctl_arglen(int cmd, unsigned long arg)
                ((FAR struct mouse_vendor_cmd_s *)(uintptr_t)arg)->len;
       case MSIOC_GRAB:
         return 0;
+      case RPMSGDEV_PRIVATE_IOCTL:
+        return sizeof(struct rpmsgdev_private_ioctl) +
+               ((FAR struct rpmsgdev_private_ioctl *)(uintptr_t)arg)->len;
       default:
         return -ENOTTY;
     }
