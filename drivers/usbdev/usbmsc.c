@@ -386,17 +386,19 @@ static void usbmsc_unbind(FAR struct usbdevclass_driver_s *driver,
     }
 #endif
 
-  /* The worker thread should have already been stopped by the
-   * driver un-initialize logic.
-   */
-
-  DEBUGASSERT(priv->thstate == USBMSC_STATE_TERMINATED ||
-              priv->thstate == USBMSC_STATE_NOTSTARTED);
-
   /* Make sure that we are not already unbound */
 
   if (priv != NULL)
     {
+#ifndef CONFIG_USBMSC_COMPOSITE
+      /* The worker thread should have already been stopped by the
+       * driver un-initialize logic if we are not part of a composite
+       * device. Composite device will call this unbind before uninitialize
+       */
+
+      DEBUGASSERT(priv->thstate == USBMSC_STATE_TERMINATED ||
+              priv->thstate == USBMSC_STATE_NOTSTARTED);
+#endif
       /* Make sure that the endpoints have been unconfigured.  If
        * we were terminated gracefully, then the configuration should
        * already have been reset.  If not, then calling usbmsc_resetconfig
