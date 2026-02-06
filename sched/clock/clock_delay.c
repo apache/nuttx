@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/clock/delay.c
+ * sched/clock/clock_delay.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -55,6 +55,17 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#if defined(CONFIG_BOARD_LOOPSPERMSEC) && CONFIG_BOARD_LOOPSPERMSEC == 0
+#warning                                                                       \
+    "CONFIG_BOARD_LOOPSPERMSEC is set to 0 even though this architecture does" \
+    "not rely on timer or alarm drivers for correct timings. up_udelay() and " \
+    "similar delay functions will not work correctly. Please determine an "    \
+    "appropriate value for CONFIG_BOARD_LOOPSPERMSEC using the calib_udelay "  \
+    "application in nuttx-apps. If this configuration is a NuttX provided "    \
+    "configuration, it would be appreciated if you submit a patch with the "   \
+    "new value to apache/nuttx."
+#endif
 
 #define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
 #define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
