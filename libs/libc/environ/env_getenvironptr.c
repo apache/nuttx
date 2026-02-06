@@ -48,7 +48,7 @@
  *
  ****************************************************************************/
 
-FAR char **get_environ_ptr(void)
+FAR char ***get_environ_ptr(void)
 {
-  return task_get_info()->ta_envp;
+  return &(task_get_info()->ta_envp);
 }
