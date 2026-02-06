@@ -516,6 +516,15 @@ static int esp_newsession(uint32_t *sid, struct cryptoini *cri)
                 return -ENOBUFS;
               }
 
+            if (cri->cri_klen / 8 > axf->keysize)
+              {
+                axf->init(data->hw_ictx);
+                axf->update(data->hw_ictx, (uint8_t *)cri->cri_key,
+                            cri->cri_klen / 8);
+                axf->final((uint8_t *)cri->cri_key, data->hw_ictx);
+                cri->cri_klen = axf->hashsize * 8;
+              }
+
             for (k = 0; k < cri->cri_klen / 8; k++)
               {
                 cri->cri_key[k] ^= HMAC_IPAD_VAL;
