@@ -89,7 +89,7 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
 
   /* Make certain that the user provided stack is properly aligned */
 
-  DEBUGASSERT(((uintptr_t)stack & STACK_ALIGN_MASK) == 0);
+  DEBUGASSERT(STACK_IS_ALIGNED(stack));
 
   /* Is there already a stack allocated? */
 

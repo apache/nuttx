@@ -149,7 +149,7 @@ extern "C"
 #define STACK_PTR_TO_FRAME(type, ptr) \
     (type *)STACKFRAME_ALIGN_DOWN((uintptr_t)(ptr) - sizeof(type))
 
-#define INTSTACK_SIZE        (CONFIG_ARCH_INTERRUPTSTACK & ~STACKFRAME_ALIGN_MASK)
+#define INTSTACK_SIZE        STACKFRAME_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK)
 
 #ifdef CONFIG_SMP
 
