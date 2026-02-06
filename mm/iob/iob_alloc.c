@@ -38,11 +38,33 @@
 #include <nuttx/nuttx.h>
 #include <nuttx/mm/iob.h>
 
+#ifdef CONFIG_IOB_OWNER_TRACKING
+#include <nuttx/irq.h>         /* up_interrupt_context() */
+#include <nuttx/sched.h>       /* getpid(), this_cpu() if available */
+#endif
+
 #include "iob.h"
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/* Small helper to stamp owner information */
+#ifdef CONFIG_IOB_OWNER_TRACKING
+static inline void iob_set_owner(FAR struct iob_s *iob, bool is_committed)
+{
+  bool isr = up_interrupt_context();
+  int  pid = isr ? -1 : getpid();           /* Kernel-space getpid is OK */
+ #ifdef CONFIG_SMP
+  iob->io_owner_cpu   = (uint8_t)this_cpu(); /* otherwise 0 on UP */
+ #else
+  iob->io_owner_cpu   = 0;
+ #endif
+  iob->io_owner_pid   = (int16_t)pid;
+  iob->io_owner_flags = 0x1 |
+  (isr ? 0x02 : 0x00) | (is_committed ? 0x04 : 0x00);
+}
+#endif
 
 static clock_t iob_allocwait_gettimeout(clock_t start, unsigned int timeout)
 {
@@ -96,6 +118,9 @@ static FAR struct iob_s *iob_alloc_committed(void)
       iob->io_len    = 0;    /* Length of the data in the entry */
       iob->io_offset = 0;    /* Offset to the beginning of data */
       iob->io_pktlen = 0;    /* Total length of the packet */
+#ifdef CONFIG_IOB_OWNER_TRACKING
+      iob_set_owner(iob, true);
+#endif
     }
 
   spin_unlock_irqrestore(&g_iob_lock, flags);
@@ -135,6 +160,11 @@ static FAR struct iob_s *iob_tryalloc_internal(bool throttled)
           iob->io_len    = 0;    /* Length of the data in the entry */
           iob->io_offset = 0;    /* Offset to the beginning of data */
           iob->io_pktlen = 0;    /* Total length of the packet */
+
+#ifdef CONFIG_IOB_OWNER_TRACKING
+          iob_set_owner(iob, false);
+#endif
+
           return iob;
         }
     }
