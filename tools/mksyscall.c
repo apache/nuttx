@@ -428,6 +428,7 @@ static void generate_stub(int nfixed, int nparms)
           g_parm[0]);
   fprintf(stream, "#include <nuttx/config.h>\n");
   fprintf(stream, "#include <stdint.h>\n");
+  fprintf(stream, "#include <string.h>\n");
 
   if (strlen(g_parm[HEADER_INDEX]) > 0)
     {
@@ -460,6 +461,26 @@ static void generate_stub(int nfixed, int nparms)
     }
 
   fprintf(stream, ")\n{\n");
+
+  /* Fixed union illegal type for cast */
+
+  for (i = 0; i < nparms; i++)
+    {
+     get_formalparmtype(g_parm[PARM1_INDEX + i], formal);
+
+      /* Treat the first argument in the list differently from the others..
+       * It does not need a comma before it.
+       */
+
+      if (is_union(formal))
+        {
+          fprintf(stream, "  %s _parm%d;\n", formal, i + 1);
+          fprintf(stream, "  memcpy((FAR void *)&_parm%d, "
+                          "(FAR void *)&parm%d,\n"
+                          "         sizeof(uintptr_t));\n",
+                          i + 1, i + 1);
+        }
+    }
 
   /* Then call the proxied function.  Functions that have no return value are
    * a special case.
@@ -503,7 +524,7 @@ static void generate_stub(int nfixed, int nparms)
 
       if (is_union(formal))
         {
-          fprintf(stream, "(%s)((%s)parm%d)", formal, actual, i + 1);
+          fprintf(stream, "_parm%d", i + 1);
         }
       else
         {
