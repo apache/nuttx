@@ -131,6 +131,7 @@ static void cap_notify_cb(FAR struct cap_lowerhalf_s *lower, FAR void *priv)
 
   DEBUGASSERT(upper != NULL);
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   for (i = 0; i < upper->nchan; i++)
     {
       if (lower == upper->lower[i])
@@ -147,6 +148,7 @@ static void cap_notify_cb(FAR struct cap_lowerhalf_s *lower, FAR void *priv)
           break;
         }
     }
+#endif
 }
 #endif
 

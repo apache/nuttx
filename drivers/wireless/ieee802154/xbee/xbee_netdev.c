@@ -410,12 +410,14 @@ static int xbeenet_notify(FAR struct xbee_maccb_s *maccb,
           nxsem_post(&priv->xd_eventsem);
         }
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
       if (priv->xd_notify_registered)
         {
           priv->xd_notify_event.sigev_value.sival_int = primitive->type;
           nxsig_notification(priv->xd_notify_pid, &priv->xd_notify_event,
                              SI_QUEUE, &priv->xd_notify_work);
         }
+#endif
 
       nxmutex_unlock(&priv->xd_lock);
       return OK;

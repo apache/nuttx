@@ -258,6 +258,11 @@ static int ft80x_fade(FAR struct ft80x_dev_s *priv,
 static void ft80x_notify(FAR struct ft80x_dev_s *priv,
                          enum ft80x_notify_e id, int value)
 {
+#ifdef CONFIG_DISABLE_ALL_SIGNALS
+    UNUSED(priv);
+    UNUSED(id);
+    UNUSED(value);
+#else
   FAR struct ft80x_eventinfo_s *info = &priv->notify[id];
 
   /* Are notifications enabled for this event? */
@@ -271,6 +276,7 @@ static void ft80x_notify(FAR struct ft80x_dev_s *priv,
       info->event.sigev_value.sival_int = value;
       nxsig_notification(info->pid, &info->event, SI_QUEUE, &info->work);
     }
+#endif
 }
 
 /****************************************************************************
