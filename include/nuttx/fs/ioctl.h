@@ -116,6 +116,7 @@
 #define _DSHOTIOCBASE   (0x4800) /* Dshot device ioctl commands */
 #define _PULSECOUNTBASE (0x4900) /* Pulse count driver ioctl commands */
 #define _RPTUNBASE      (0x5000) /* Remote processor tunneling ioctl commands */
+#define _VIRTIOBASE     (0x5100) /* VirtIO ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 #define _DMABUFBASE     (0x8d00) /* DMA-Buf modules ioctl commands */
 
@@ -864,6 +865,13 @@
 
 #define _RPTUNIOCVALID(c)     (_IOC_TYPE(c)==_RPTUNBASE)
 #define _RPTUNIOC(nr)         _IOC(_RPTUNBASE,nr)
+
+/* VirtIO driver ioctl definitions ******************************************/
+
+/* see nuttx/include/nuttx/virtio/virtio.h */
+
+#define _VIRTIOIOCVALID(c)    (_IOC_TYPE(c)==_VIRTIOBASE)
+#define _VIRTIOIOC(nr)        _IOC(_VIRTIOBASE,nr)
 
 /* DMA-Buf driver ioctl definitions *****************************************/
 
