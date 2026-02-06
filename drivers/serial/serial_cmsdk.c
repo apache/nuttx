@@ -580,6 +580,18 @@ static void uart_cmsdk_rxint(struct uart_dev_s *dev, bool enable)
     {
       uart_cmsdk_serialmodify(priv, UART_CTRL_OFFSET,
         0, UART_CTRL_RX_INT_ENABLE | UART_CTRL_RX_OVERRUN_INT_ENABLE);
+
+      /* If a character arrived before the RX interrupt was enabled
+       * (e.g. during early boot when RX is on but RX_INT is off),
+       * RXFULL is already set but no interrupt was generated.
+       * The CMSDK UART won't accept new characters while RXFULL is
+       * set, so we must drain it here to avoid a permanent stall.
+       */
+
+      if (uart_cmsdk_rxavailable(dev))
+        {
+          uart_recvchars(dev);
+        }
     }
   else
     {
