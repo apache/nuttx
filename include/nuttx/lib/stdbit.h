@@ -59,13 +59,13 @@
  ****************************************************************************/
 
 #  ifdef CONFIG_ENDIAN_BIG
+#    define __STDC_ENDIAN_LITTLE__  1234
+#    define __STDC_ENDIAN_BIG__     4321
 #    define __STDC_ENDIAN_NATIVE__  __STDC_ENDIAN_BIG__
-#    define __STDC_ENDIAN_LITTLE__  1234
-#    define __STDC_ENDIAN_BIG__     4321
 #  else
-#    define __STDC_ENDIAN_NATIVE__  __STDC_ENDIAN_LITTLE__
 #    define __STDC_ENDIAN_LITTLE__  1234
 #    define __STDC_ENDIAN_BIG__     4321
+#    define __STDC_ENDIAN_NATIVE__  __STDC_ENDIAN_LITTLE__
 #  endif
 
 /****************************************************************************
@@ -121,33 +121,53 @@
  * First leading zero/one (bit index from MSB; C23: 0 returns bit width)
  ****************************************************************************/
 
-#  define stdc_first_leading_zero_uc(x)  stdc_leading_zeros_uc(x)
-#  define stdc_first_leading_zero_us(x) stdc_leading_zeros_us(x)
-#  define stdc_first_leading_zero_ui(x) stdc_leading_zeros_ui(x)
-#  define stdc_first_leading_zero_ul(x) stdc_leading_zeros_ul(x)
-#  define stdc_first_leading_zero_ull(x) stdc_leading_zeros_ull(x)
+#  define stdc_first_leading_zero_uc(x) \
+    ((unsigned char)(x) == 0xFF ? 0 : stdc_leading_ones_uc(x) + 1)
+#  define stdc_first_leading_zero_us(x) \
+    ((unsigned short)(x) == 0xFFFF ? 0 : stdc_leading_ones_us(x) + 1)
+#  define stdc_first_leading_zero_ui(x) \
+    ((x) == ~0u ? 0 : stdc_leading_ones_ui(x) + 1)
+#  define stdc_first_leading_zero_ul(x) \
+    ((x) == ~0ul ? 0 : stdc_leading_ones_ul(x) + 1)
+#  define stdc_first_leading_zero_ull(x) \
+    ((x) == ~0ull ? 0 : stdc_leading_ones_ull(x) + 1)
 
-#  define stdc_first_leading_one_uc(x)  stdc_leading_ones_uc(x)
-#  define stdc_first_leading_one_us(x)  stdc_leading_ones_us(x)
-#  define stdc_first_leading_one_ui(x)  stdc_leading_ones_ui(x)
-#  define stdc_first_leading_one_ul(x)  stdc_leading_ones_ul(x)
-#  define stdc_first_leading_one_ull(x) stdc_leading_ones_ull(x)
+#  define stdc_first_leading_one_uc(x) \
+    ((unsigned char)(x) == 0 ? 0 : stdc_leading_zeros_uc(x) + 1)
+#  define stdc_first_leading_one_us(x) \
+    ((unsigned short)(x) == 0 ? 0 : stdc_leading_zeros_us(x) + 1)
+#  define stdc_first_leading_one_ui(x) \
+    ((x) == 0 ? 0 : stdc_leading_zeros_ui(x) + 1)
+#  define stdc_first_leading_one_ul(x) \
+    ((x) == 0 ? 0 : stdc_leading_zeros_ul(x) + 1)
+#  define stdc_first_leading_one_ull(x) \
+    ((x) == 0 ? 0 : stdc_leading_zeros_ull(x) + 1)
 
 /****************************************************************************
  * First trailing zero/one (bit index from LSB; C23: 0 returns bit width)
  ****************************************************************************/
 
-#  define stdc_first_trailing_zero_uc(x)  stdc_trailing_zeros_uc(x)
-#  define stdc_first_trailing_zero_us(x)   stdc_trailing_zeros_us(x)
-#  define stdc_first_trailing_zero_ui(x)   stdc_trailing_zeros_ui(x)
-#  define stdc_first_trailing_zero_ul(x)   stdc_trailing_zeros_ul(x)
-#  define stdc_first_trailing_zero_ull(x) stdc_trailing_zeros_ull(x)
+#  define stdc_first_trailing_zero_uc(x) \
+    ((unsigned char)(x) == 0xFF ? 0 : stdc_trailing_ones_uc(x) + 1)
+#  define stdc_first_trailing_zero_us(x) \
+    ((unsigned short)(x) == 0xFFFF ? 0 : stdc_trailing_ones_us(x) + 1)
+#  define stdc_first_trailing_zero_ui(x) \
+    ((x) == ~0u ? 0 : stdc_trailing_ones_ui(x) + 1)
+#  define stdc_first_trailing_zero_ul(x) \
+    ((x) == ~0ul ? 0 : stdc_trailing_ones_ul(x) + 1)
+#  define stdc_first_trailing_zero_ull(x) \
+    ((x) == ~0ull ? 0 : stdc_trailing_ones_ull(x) + 1)
 
-#  define stdc_first_trailing_one_uc(x)   stdc_trailing_ones_uc(x)
-#  define stdc_first_trailing_one_us(x)   stdc_trailing_ones_us(x)
-#  define stdc_first_trailing_one_ui(x)   stdc_trailing_ones_ui(x)
-#  define stdc_first_trailing_one_ul(x)   stdc_trailing_ones_ul(x)
-#  define stdc_first_trailing_one_ull(x)  stdc_trailing_ones_ull(x)
+#  define stdc_first_trailing_one_uc(x) \
+    ((unsigned char)(x) == 0 ? 0 : stdc_trailing_zeros_uc(x) + 1)
+#  define stdc_first_trailing_one_us(x) \
+    ((unsigned short)(x) == 0 ? 0 : stdc_trailing_zeros_us(x) + 1)
+#  define stdc_first_trailing_one_ui(x) \
+    ((x) == 0 ? 0 : stdc_trailing_zeros_ui(x) + 1)
+#  define stdc_first_trailing_one_ul(x) \
+    ((x) == 0 ? 0 : stdc_trailing_zeros_ul(x) + 1)
+#  define stdc_first_trailing_one_ull(x) \
+    ((x) == 0 ? 0 : stdc_trailing_zeros_ull(x) + 1)
 
 /****************************************************************************
  * Count zeros / ones
@@ -181,15 +201,15 @@
 #  define stdc_has_single_bit_ull(x)  (stdc_count_ones_ull(x) == 1)
 
 #  define stdc_bit_width_uc(x) \
-    ((unsigned char)(x) == 0 ? 0 : 9 - stdc_leading_zeros_uc(x))
+    ((unsigned char)(x) == 0 ? 0 : 8 - stdc_leading_zeros_uc(x))
 #  define stdc_bit_width_us(x) \
-    ((unsigned short)(x) == 0 ? 0 : 17 - stdc_leading_zeros_us(x))
-#  define stdc_bit_width_ui(x)  ((x) == 0 ? 0 : 33 - stdc_leading_zeros_ui(x))
+    ((unsigned short)(x) == 0 ? 0 : 16 - stdc_leading_zeros_us(x))
+#  define stdc_bit_width_ui(x)  ((x) == 0 ? 0 : 32 - stdc_leading_zeros_ui(x))
 #  define stdc_bit_width_ul(x) \
-    ((x) == 0 ? 0 : (int)(8*sizeof(unsigned long) + 1 - \
+    ((x) == 0 ? 0 : (int)(8*sizeof(unsigned long) - \
      stdc_leading_zeros_ul(x)))
 #  define stdc_bit_width_ull(x) \
-    ((x) == 0 ? 0 : (int)(8*sizeof(unsigned long long) + 1 - \
+    ((x) == 0 ? 0 : (int)(8*sizeof(unsigned long long) - \
      stdc_leading_zeros_ull(x)))
 
 #  define stdc_bit_floor_uc(x) \
@@ -206,18 +226,18 @@
      stdc_leading_zeros_ull(x)) : 0ull)
 
 #  define stdc_bit_ceil_uc(x) \
-    ((unsigned char)((x) <= 1 ? 1 : (unsigned char)1 << (9 - \
+    ((unsigned char)((x) <= 1 ? 1 : (unsigned char)1 << (8 - \
      stdc_leading_zeros_uc((unsigned char)(x)-1))))
 #  define stdc_bit_ceil_us(x) \
-    ((unsigned short)((x) <= 1 ? 1 : (unsigned short)1 << (17 - \
+    ((unsigned short)((x) <= 1 ? 1 : (unsigned short)1 << (16 - \
      stdc_leading_zeros_us((unsigned short)(x)-1))))
 #  define stdc_bit_ceil_ui(x) \
-    ((x) <= 1 ? 1u : 1u << (33 - stdc_leading_zeros_ui((x)-1)))
+    ((x) <= 1 ? 1u : 1u << (32 - stdc_leading_zeros_ui((x)-1)))
 #  define stdc_bit_ceil_ul(x) \
-    ((x) <= 1 ? 1ul : 1ul << (8*sizeof(unsigned long) + 1 - \
+    ((x) <= 1 ? 1ul : 1ul << (8*sizeof(unsigned long) - \
      stdc_leading_zeros_ul((x)-1)))
 #  define stdc_bit_ceil_ull(x) \
-    ((x) <= 1 ? 1ull : 1ull << (8*sizeof(unsigned long long) + 1 - \
+    ((x) <= 1 ? 1ull : 1ull << (8*sizeof(unsigned long long) - \
      stdc_leading_zeros_ull((x)-1)))
 
 #endif /* CONFIG_ARCH_STDBIT_H */
