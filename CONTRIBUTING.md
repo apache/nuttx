@@ -349,6 +349,14 @@ Breaking these rules will be punished.
 See: https://github.com/apache/nuttx/blob/master/INVIOLABLES.md
 
 
+### 1.18. Review etiquette.
+
+Reviewers should **NOT** flag a PR or a comment with the thumbs-down emoji. This
+is considered offensive in some cultures.
+
+Instead, mark the PR with a request for changes and state precisely the changes
+needed for the PR. Conversation surrounding code review should be constructive
+and respectful.
 
 
 ## 2. Contribution Templates.
