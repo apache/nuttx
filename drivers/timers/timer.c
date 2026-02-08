@@ -61,8 +61,10 @@ struct timer_upperhalf_s
 
   /* The contained signal info */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   struct timer_notify_s notify;
   struct sigwork_s work;
+#endif
 
   /* The contained lower-half driver */
 
@@ -116,6 +118,7 @@ static const struct file_operations g_timerops =
  *
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
 static bool timer_notifier(FAR uint32_t *next_interval_us, FAR void *arg)
 {
   FAR struct timer_upperhalf_s *upper = (FAR struct timer_upperhalf_s *)arg;
@@ -131,6 +134,7 @@ static bool timer_notifier(FAR uint32_t *next_interval_us, FAR void *arg)
 
   return notify->periodic;
 }
+#endif
 
 /****************************************************************************
  * Name: timer_open
@@ -381,6 +385,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
      * Argument:    signal information
      */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
     case TCIOC_NOTIFICATION:
       {
         FAR struct timer_notify_s *notify =
@@ -398,6 +403,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
       }
       break;
+#endif
 
     /* cmd:         TCIOC_MAXTIMEOUT
      * Description: Get the maximum supported timeout value
