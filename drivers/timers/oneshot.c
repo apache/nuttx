@@ -54,9 +54,11 @@ struct oneshot_dev_s
 
   /* Oneshot timer expiration notification information */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   struct sigevent od_event;                    /* Signal info */
   struct sigwork_s od_work;                    /* Signal work */
   pid_t od_pid;                                /* PID to be notified */
+#endif
 };
 
 /****************************************************************************
@@ -70,8 +72,10 @@ static ssize_t oneshot_write(FAR struct file *filep, FAR const char *buffer,
 static int     oneshot_ioctl(FAR struct file *filep, int cmd,
                  unsigned long arg);
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
 static void    oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
                  FAR void *arg);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -95,6 +99,7 @@ static const struct file_operations g_oneshot_ops =
  * Name: oneshot_callback
  ****************************************************************************/
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
 static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
                              FAR void *arg)
 {
@@ -107,6 +112,7 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
   nxsig_notification(priv->od_pid, &priv->od_event, SI_QUEUE,
                      &priv->od_work);
 }
+#endif
 
 /****************************************************************************
  * Name: oneshot_read
@@ -193,6 +199,7 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
        *               Argument: A reference to struct oneshot_start_s
        */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
       case OSIOC_START:
         {
           FAR struct oneshot_start_s *start;
@@ -234,6 +241,7 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           nxsig_cancel_notification(&priv->od_work);
         }
         break;
+#endif
 
       /* OSIOC_CURRENT - Get the current time
        *                 Argument: A reference to a struct timespec in
@@ -311,8 +319,10 @@ int oneshot_register(FAR const char *devname,
 
   priv->od_lower = lower;
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   lower->callback = oneshot_callback;
   lower->arg      = priv;
+#endif
 
   nxmutex_init(&priv->od_lock);
 
