@@ -106,6 +106,14 @@ if(CONFIG_INPUT)
     list(APPEND SRCS keyboard_upper.c)
   endif()
 
+  if(CONFIG_INPUT_KMATRIX)
+    list(APPEND SRCS kmatrix.c)
+  endif()
+
+  if(CONFIG_INPUT_KMATRIX_I2C)
+    list(APPEND SRCS kmatrix_i2c.c)
+  endif()
+
   if(CONFIG_INPUT_SBUTTON)
     list(APPEND SRCS sbutton.c)
   endif()
