@@ -1,142 +1,83 @@
 =======================
-Keyboard/Keypad Drivers
+Matrix Keypad (KMATRIX)
 =======================
 
-**Keypads vs. Keyboards** Keyboards and keypads are really the
-same devices for NuttX. A keypad is thought of as simply a
-keyboard with fewer keys.
+**What is a Keypad?**
+A keypad is a small keyboard with a limited set of keys, typically
+arranged in a matrix. It is commonly used for numeric input, access
+control, or simple user interfaces.
 
-**Special Commands**. In NuttX, a keyboard/keypad driver is simply
-a character driver that may have an (optional) encoding/decoding
-layer on the data returned by the character driver. A keyboard may
-return simple text data (alphabetic, numeric, and punctuation) or
-control characters (enter, control-C, etc.) when a key is pressed.
-We can think about this the "normal" keyboard data stream.
-However, in addition, most keyboards support actions that cannot
-be represented as text or control data. Such actions include
-things like cursor controls (home, up arrow, page down, etc.),
-editing functions (insert, delete, etc.), volume controls, (mute,
-volume up, etc.) and other special functions. In this case, some
-special encoding may be required to multiplex the normal text data
-and special command key press data streams.
+For example, a typical 12-key numeric keypad looks like this:
 
-**Key Press and Release Events** Sometimes the time that a key is
-released is needed by applications as well. Thus, in addition to
-normal and special key press events, it may also be necessary to
-encode normal and special key release events.
+.. image:: images/keypad-example.png
+  :alt: Example of a 12-key matrix keypad
+  :align: center
+  :width: 200px
 
-**Encoding/Decoding** Layer. An optional encoding/decoding layer
-can be used with the basic character driver to encode the keyboard
-events into the text data stream. The function interfaces that
-comprise that encoding/decoding layer are defined in the header
-file ``include/nuttx/input/kbd_code.h``. These functions provide
-an matched set of (a) driver encoding interfaces, and (b)
-application decoding interfaces.
+**Purpose**. The KMATRIX driver provides a generic keypad
+implementation for boards that expose a switch matrix through GPIOs.
+It periodically scans rows and columns, detects state changes with a
+simple debounce, and emits keyboard events through the common keyboard
+upper-half. This makes the device available as a character driver
+(e.g., ``/dev/keypad0``) using the standard keyboard
+interfaces.
 
-#. **Driver Encoding Interfaces**. These are interfaces used by
-   the keyboard/keypad driver to encode keyboard events and data.
+**Why Polling**. This first version uses polling to be broadly usable
+on any board with available GPIOs, without requiring per-board IRQ
+wiring, pin interrupt capabilities, or expander-specific interrupt
+support. Polling also simplifies early bring-up and makes the driver
+predictable while the keymap and GPIO configuration are validated.
+Future iterations are expected to add interrupt-driven scanning and
+I2C expander variants; the GPIO polling path remains a good baseline
+and fallback.
 
-   -  ``kbd_press()``
+**Driver Overview**. The KMATRIX lower-half scans the matrix and calls
+``keyboard_event()`` when it detects a press or release. The keyboard
+upper-half registers the character device at the requested ``devpath``
+and stores events in a circular buffer. Applications read
+``struct keyboard_event_s`` from the device or use the optional
+kbd-codec layer.
 
-      **Function Prototype:**
+**Board Support**. To support KMATRIX, a board must provide:
 
-      **Description:**
+#. **GPIO Definitions**
 
-      **Input Parameters:**
+   - Define the row and column GPIOs (arrays of pins).
+   - Provide a keymap array indexed by ``row * ncols + col``.
 
-      -  ``ch``: The character to be added to the output stream.
-      -  ``stream``: An instance of ``lib_outstream_s`` to perform
-         the actual low-level put operation.
+#. **Configuration Callbacks**
 
-      **Returned Value:**
+   - ``config_row(pin)``: Configure a row GPIO as output.
+   - ``config_col(pin)``: Configure a column GPIO as input with pull-up
+     or pull-down consistent with the wiring.
+   - ``row_set(pin, active)``: Drive a row active/inactive. For the
+     STM32F4Discovery example, rows are driven low to activate.
+   - ``col_get(pin)``: Read a column and return ``true`` when pressed.
 
-   -  ``kbd_release()``
+#. **Registration Hook**
 
-      **Function Prototype:**
+   - Implement ``board_kmatrix_initialize(const char *devpath)`` to
+     call ``kmatrix_register(&config, devpath)``.
+   - Invoke the board hook during bring-up (for example,
+     ``board_kmatrix_initialize("/dev/keypad0")``).
 
-      **Description:**
+**Reference Implementation (STM32F4Discovery)**. The current reference
+is in ``boards/arm/stm32/common/src/stm32_kmatrix_gpio.c``:
 
-      **Input Parameters:**
+- Rows: ``BOARD_KMATRIX_ROW0..3`` (outputs)
+- Columns: ``BOARD_KMATRIX_COL0..2`` (inputs with pull-up)
+- Keymap: 4x3 phone keypad layout
+- Callbacks: ``km_stm32_config_row``, ``km_stm32_config_col``,
+  ``km_stm32_row_set``, ``km_stm32_col_get``
+- Registration: ``board_kmatrix_initialize()`` calls
+  ``kmatrix_register()``
 
-      -  ``ch``: The character associated with the key that was
-         released.
-      -  ``stream``: An instance of ``lib_outstream_s`` to perform
-         the actual low-level put operation.
+**Data Path Summary**.
 
-      **Returned Value:**
-
-   -  ``kbd_specpress()``
-
-      **Function Prototype:**
-
-      **Description:**
-
-      **Input Parameters:**
-
-      -  ``keycode``: The command to be added to the output
-         stream. The enumeration ``enum kbd_keycode_e keycode``
-         identifies all commands known to the system.
-      -  ``stream``: An instance of ``lib_outstream_s`` to perform
-         the actual low-level put operation.
-
-      **Returned Value:**
-
-   -  ``kbd_specrel()``
-
-      **Function Prototype:**
-
-      **Description:**
-
-      **Input Parameters:**
-
-      -  ``keycode``: The command to be added to the output
-         stream. The enumeration ``enum kbd_keycode_e keycode``
-         identifies all commands known to the system.
-      -  ``stream``: An instance of ``lib_outstream_s`` to perform
-         the actual low-level put operation.
-
-      **Returned Value:**
-
-#. **Application Decoding Interfaces**. These are user interfaces
-   to decode the values returned by the keyboard/keypad driver.
-
-   -  ``kbd_decode()``
-
-      **Function Prototype:**
-
-      **Description:**
-
-      **Input Parameters:**
-
-      -  ``stream``: An instance of ``lib_instream_s`` to perform
-         the actual low-level get operation.
-      -  ``pch``: The location to save the returned value. This
-         may be either a normal, character code or a special
-         command (i.e., a value from ``enum kbd_getstate_s``.
-      -  ``state``: A user provided buffer to support parsing.
-         This structure should be cleared the first time that
-         ``kbd_decode()`` is called.
-
-      **Returned Value:**
-
-      -  ``KBD_PRESS`` (0)**: Indicates the successful receipt
-         of normal, keyboard data. This corresponds to a keypress
-         event. The returned value in ``pch`` is a simple byte of
-         text or control data.
-      -  ``KBD_RELEASE`` (1)**: Indicates a key release event.
-         The returned value in ``pch`` is the byte of text or
-         control data corresponding to the released key.
-      -  ``KBD_SPECPRESS`` (2)**: Indicates the successful
-         receipt of a special keyboard command. The returned value
-         in ``pch`` is a value from ``enum kbd_getstate_s``.
-      -  ``KBD_SPECREL`` (3)**: Indicates a special command key
-         release event. The returned value in ``pch`` is a value
-         from ``enum kbd_getstate_s``.
-      -  ``KBD_ERROR`` (``EOF``)**: An error has getting the
-         next character (reported by the ``stream``). Normally
-         indicates the end of file.
-
-**I/O Streams**. Notice the use of the abstract I/O streams in
-these interfaces. These stream interfaces are defined in
-``include/nuttx/streams.h``.
+- Board calls ``board_kmatrix_initialize("/dev/keypad0")``
+- ``kmatrix_register()`` configures GPIOs and calls
+  ``keyboard_register(&lower, devpath, buflen)``
+- The upper-half registers the device node at ``devpath``
+- ``kmatrix_scan_worker()`` calls ``keyboard_event()`` on press/release
+- Applications read events from the device node
 
