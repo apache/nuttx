@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <assert.h>
 #include <limits.h>
 #include <inttypes.h>
 #include <stdint.h>
@@ -376,6 +377,8 @@ void invdiv_init_param32(uint32_t d, FAR invdiv_param32_t *ip)
   uint64_t t1 = (uint64_t)1 << 32;
   uint64_t t2 = (uint64_t)1 << l;
 
+  DEBUGASSERT(d > 1);
+
   ip->mult  = (t1 * (t2 - d)) / d + 1;
 #if ULONG_MAX == 4294967295UL
   ip->shift = l - 1;
@@ -513,6 +516,8 @@ void invdiv_init_param64(uint64_t d, FAR invdiv_param64_t *ip)
 {
   int      l = log2ceil(d);
   uint64_t t = ((uint64_t)1 << l) - d;
+
+  DEBUGASSERT(d > 1);
 
 #ifndef __SIZEOF_INT128__
   /* If the compiler do not support UINT128 */
