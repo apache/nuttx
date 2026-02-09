@@ -34,8 +34,8 @@
 #include <nuttx/cache.h>
 #include <nuttx/irq.h>
 
-#include "esp_loader.h"
 #include "esp_app_format.h"
+#include "esp_loader.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -80,7 +80,7 @@ static void IRAM_ATTR esp32_boot_loader_stub(void *arg);
 static void IRAM_ATTR esp32_boot_loader_stub(void *arg)
 {
   struct esp32_boot_loader_args_s *args =
-    (struct esp32_boot_loader_args_s *)arg;
+      (struct esp32_boot_loader_args_s *)arg;
   void (*entry_point)(void) = (void (*)(void))args->entry_addr;
 
   /* Disable interrupts */
@@ -107,9 +107,7 @@ static void IRAM_ATTR esp32_boot_loader_stub(void *arg)
 
   /* Should never reach here */
 
-  while (1)
-    {
-    }
+  PANIC();
 }
 
 /****************************************************************************
@@ -172,6 +170,13 @@ int board_boot_image(FAR const char *path, uint32_t hdr_size)
       return -errno;
     }
 
+  /* Skip image header if present (e.g. MCUboot/nxboot header) */
+
+  if (hdr_size > 0)
+    {
+      lseek(fd, hdr_size, SEEK_SET);
+    }
+
   /* Read image header */
 
   ret = read(fd, &image_header, sizeof(esp_image_header_t));
@@ -190,7 +195,7 @@ int board_boot_image(FAR const char *path, uint32_t hdr_size)
     }
 
   args.entry_addr = image_header.entry_addr;
-  current_offset = sizeof(esp_image_header_t);
+  current_offset = hdr_size + sizeof(esp_image_header_t);
 
   /* Parse segments */
 
