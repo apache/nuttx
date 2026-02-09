@@ -30,7 +30,16 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
-#include <math.h>
+#if defined(CONFIG_LIBM_TOOLCHAIN)
+/* In toolchain libm mode, use toolchain <cmath> so it can include_next the
+ * matching C math.h header and populate std::* consistently.
+ */
+
+#  include_next <cmath>
+
+#else
+
+#  include <math.h>
 
 #undef signbit
 #undef fpclassify
@@ -221,5 +230,7 @@ namespace std
 #endif
 
 }
+
+#endif
 
 #endif // __INCLUDE_CXX_CMATH
