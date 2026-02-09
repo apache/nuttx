@@ -451,8 +451,11 @@ config SYSLOG_DEFAULT_PANIC_ONLY
 	default n
 	depends on SYSLOG_IOCTL
 	---help---
-		If enabled, the default SYSLOG device will be used only
-		when panic() is called. It is disabled by default.
+		If enabled, a panic notifier will be registered to
+		re-enable the default SYSLOG channel when panic() is
+		called. This is useful when the default channel is
+		disabled at runtime (e.g. by DFX via SYSLOGIOC_SETFILTER),
+		ensuring serial output is restored during a panic.
 
 endif # SYSLOG_DEFAULT
 
