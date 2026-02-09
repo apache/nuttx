@@ -178,6 +178,8 @@ ifeq ($(CONFIG_ETC_ROMFS),y)
   RCSRCS  = etc/init.d/rc.sysinit etc/init.d/rcS
 endif
 
+CSRCS += esp32_boot_image.c
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src

@@ -24,18 +24,18 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
+#include <errno.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/param.h>
-#include <debug.h>
-#include <stdio.h>
-#include <errno.h>
 
 #include <nuttx/kmalloc.h>
 
-#include "esp32_spiflash.h"
-#include "esp32_partition.h"
 #include "arch/esp32/partition.h"
+#include "esp32_partition.h"
+#include "esp32_spiflash.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -43,28 +43,28 @@
 
 /* Partition table max size */
 
-#define PARTITION_MAX_SIZE    (0xc00)
+#define PARTITION_MAX_SIZE (0xc00)
 
 /* Partition max number */
 
-#define PARTITION_MAX_NUM     (PARTITION_MAX_SIZE / \
-                               sizeof(struct partition_info_priv))
+#define PARTITION_MAX_NUM                                                      \
+  (PARTITION_MAX_SIZE / sizeof(struct partition_info_priv))
 
 /* Partition table header magic value */
 
-#define PARTITION_MAGIC       (0x50aa)
+#define PARTITION_MAGIC (0x50aa)
 
 /* Partition table member label length */
 
-#define PARTITION_LABEL_LEN   (16)
+#define PARTITION_LABEL_LEN (16)
 
 /* OTA data offset in OTA partition */
 
-#define OTA_DATA_OFFSET       (4096)
+#define OTA_DATA_OFFSET (4096)
 
 /* OTA data number */
 
-#define OTA_DATA_NUM          (2)
+#define OTA_DATA_NUM (2)
 
 /* Partition offset in SPI Flash */
 
@@ -76,12 +76,11 @@
 
 /* Partition mount pointer max length */
 
-#define PARTITION_MOUNTPTR_LEN_MAX        (PARTITION_LABEL_LEN + \
-                                           sizeof(g_path_base))
+#define PARTITION_MOUNTPTR_LEN_MAX (PARTITION_LABEL_LEN + sizeof(g_path_base))
 
 /* Partition encrypted flag */
 
-#define PARTITION_FLAG_ENCRYPTED          (1 << 0)
+#define PARTITION_FLAG_ENCRYPTED (1 << 0)
 
 /****************************************************************************
  * Private Types
@@ -89,15 +88,14 @@
 
 /* OTA image state */
 
-enum ota_img_state
-{
+enum ota_img_state {
   /* Monitor the first boot. In bootloader of esp-idf this state is changed
    * to ESP_OTA_IMG_PENDING_VERIFY if this bootloader enable app rollback.
    *
    * So this driver doesn't use this state currently.
    */
 
-  OTA_IMG_NEW             = 0x0,
+  OTA_IMG_NEW = 0x0,
 
   /* First boot for this app was. If while the second boot this state is then
    * it will be changed to ABORTED if this bootloader enable app rollback.
@@ -105,15 +103,15 @@ enum ota_img_state
    * So this driver doesn't use this state currently.
    */
 
-  OTA_IMG_PENDING_VERIFY  = 0x1,
+  OTA_IMG_PENDING_VERIFY = 0x1,
 
   /* App was confirmed as workable. App can boot and work without limits. */
 
-  OTA_IMG_VALID           = 0x2,
+  OTA_IMG_VALID = 0x2,
 
   /* App was confirmed as non-workable. This app will not selected to boot. */
 
-  OTA_IMG_INVALID         = 0x3,
+  OTA_IMG_INVALID = 0x3,
 
   /* App could not confirm the workable or non-workable. In bootloader
    * IMG_PENDING_VERIFY state will be changed to IMG_ABORTED. This app will
@@ -122,59 +120,56 @@ enum ota_img_state
    * So this driver doesn't use this state currently.
    */
 
-  OTA_IMG_ABORTED         = 0x4,
+  OTA_IMG_ABORTED = 0x4,
 
   /* Undefined. App can boot and work without limits in esp-idf.
    *
    * This state is not used.
    */
 
-  OTA_IMG_UNDEFINED       = 0xffffffff,
+  OTA_IMG_UNDEFINED = 0xffffffff,
 };
 
 /* Partition information data */
 
-struct partition_info_priv
-{
-  uint16_t magic;                       /* Partition magic */
-  uint8_t  type;                        /* Partition type */
-  uint8_t  subtype;                     /* Partition sub-type */
+struct partition_info_priv {
+  uint16_t magic;  /* Partition magic */
+  uint8_t type;    /* Partition type */
+  uint8_t subtype; /* Partition sub-type */
 
-  uint32_t offset;                      /* Offset in SPI Flash */
-  uint32_t size;                        /* Size by byte */
+  uint32_t offset; /* Offset in SPI Flash */
+  uint32_t size;   /* Size by byte */
 
-  uint8_t  label[PARTITION_LABEL_LEN];  /* Partition label */
+  uint8_t label[PARTITION_LABEL_LEN]; /* Partition label */
 
-  uint32_t flags;                       /* Partition flags */
+  uint32_t flags; /* Partition flags */
 };
 
 /* Partition device data */
 
-struct mtd_dev_priv
-{
-  struct mtd_dev_s mtd;                 /* MTD data */
+struct mtd_dev_priv {
+  struct mtd_dev_s mtd; /* MTD data */
 
-  uint8_t  type;                        /* Partition type */
-  uint8_t  subtype;                     /* Partition sub-type */
-  uint32_t flags;                       /* Partition flags */
-  uint32_t offset;                      /* Partition offset in SPI Flash */
-  uint32_t size;                        /* Partition size in SPI Flash */
+  uint8_t type;    /* Partition type */
+  uint8_t subtype; /* Partition sub-type */
+  uint32_t flags;  /* Partition flags */
+  uint32_t offset; /* Partition offset in SPI Flash */
+  uint32_t size;   /* Partition size in SPI Flash */
 
-  struct mtd_dev_s *mtd_ll;             /* Low-level MTD data */
+  struct mtd_dev_s *mtd_ll; /* Low-level MTD data */
 
-  struct mtd_dev_s *mtd_part;           /* MTD partition device */
+  struct mtd_dev_s *mtd_part; /* MTD partition device */
 
-  struct mtd_geometry_s   geo;          /* Partition geometry information */
+  struct mtd_geometry_s geo; /* Partition geometry information */
 };
 
 /* OTA data entry */
 
-struct ota_data_entry
-{
-  uint32_t ota_seq;                     /* Boot sequence */
-  uint8_t  seq_label[20];               /* Boot sequence label */
-  uint32_t ota_state;                   /* Boot entry state */
-  uint32_t crc;                         /* Boot ota_seq CRC32 */
+struct ota_data_entry {
+  uint32_t ota_seq;      /* Boot sequence */
+  uint8_t seq_label[20]; /* Boot sequence label */
+  uint32_t ota_state;    /* Boot entry state */
+  uint32_t crc;          /* Boot ota_seq CRC32 */
 };
 
 /****************************************************************************
@@ -203,14 +198,12 @@ const char g_path_base[] = PARTITION_MOUNT_POINT;
  *
  ****************************************************************************/
 
-static bool ota_is_valid(struct ota_data_entry *ota_data)
-{
+static bool ota_is_valid(struct ota_data_entry *ota_data) {
   if ((ota_data->ota_seq == UINT32_MAX) ||
       (ota_data->ota_state != OTA_IMG_VALID) ||
-      (ota_data->crc != crc32_le(UINT32_MAX, (uint8_t *)ota_data, 4)))
-    {
-      return false;
-    }
+      (ota_data->crc != crc32_le(UINT32_MAX, (uint8_t *)ota_data, 4))) {
+    return false;
+  }
 
   return true;
 }
@@ -230,8 +223,7 @@ static bool ota_is_valid(struct ota_data_entry *ota_data)
  *
  ****************************************************************************/
 
-static int ota_get_bootseq(struct mtd_dev_priv *dev, uint32_t *seqptr)
-{
+static int ota_get_bootseq(struct mtd_dev_priv *dev, uint32_t *seqptr) {
   int i;
   int ret;
   uint32_t seq = 0;
@@ -240,37 +232,30 @@ static int ota_get_bootseq(struct mtd_dev_priv *dev, uint32_t *seqptr)
 
   /* Each OTA data locates in independent sector */
 
-  for (i = 0; i < OTA_DATA_NUM; i++)
-    {
-      ret = MTD_READ(dev->mtd_part, i * dev->geo.erasesize,
-                     size, (uint8_t *)&ota_data);
-      if (ret != size)
-        {
-          ferr("ERROR: Failed to read OTA%d data error=%d\n", i, ret);
-          return -EIO;
-        }
-
-      if (ota_is_valid(&ota_data))
-        {
-          seq = MAX(seq, ota_data.ota_seq);
-        }
+  for (i = 0; i < OTA_DATA_NUM; i++) {
+    ret = MTD_READ(dev->mtd_part, i * dev->geo.erasesize, size,
+                   (uint8_t *)&ota_data);
+    if (ret != size) {
+      ferr("ERROR: Failed to read OTA%d data error=%d\n", i, ret);
+      return -EIO;
     }
+
+    if (ota_is_valid(&ota_data)) {
+      seq = MAX(seq, ota_data.ota_seq);
+    }
+  }
 
   finfo("seq=%" PRIu32 "\n", seq);
 
-  if (seq > 0)
-    {
-      ret = (seq - 1) % OTA_DATA_NUM + OTA_IMG_BOOT_OTA_0;
-    }
-  else
-    {
-      ret = OTA_IMG_BOOT_FACTORY;
-    }
+  if (seq > 0) {
+    ret = (seq - 1) % OTA_DATA_NUM + OTA_IMG_BOOT_OTA_0;
+  } else {
+    ret = OTA_IMG_BOOT_FACTORY;
+  }
 
-  if (seqptr)
-    {
-      *seqptr = seq;
-    }
+  if (seqptr) {
+    *seqptr = seq;
+  }
 
   return ret;
 }
@@ -290,8 +275,7 @@ static int ota_get_bootseq(struct mtd_dev_priv *dev, uint32_t *seqptr)
  *
  ****************************************************************************/
 
-static int ota_set_bootseq(struct mtd_dev_priv *dev, int num)
-{
+static int ota_set_bootseq(struct mtd_dev_priv *dev, int num) {
   int ret;
   int size;
   uint8_t *buffer;
@@ -303,104 +287,83 @@ static int ota_set_bootseq(struct mtd_dev_priv *dev, int num)
 
   finfo("INFO: num=%d\n", num);
 
-  switch (num)
-    {
-      case OTA_IMG_BOOT_FACTORY:
+  switch (num) {
+  case OTA_IMG_BOOT_FACTORY:
 
-        /* Erase all OTA data to force use factory app */
+    /* Erase all OTA data to force use factory app */
 
-        ret = MTD_ERASE(dev->mtd_part, 0, OTA_DATA_NUM);
-        if (ret != OTA_DATA_NUM)
-          {
-            ferr("ERROR: Failed to erase OTA data error=%d\n", ret);
-            return -1;
-          }
-
-        break;
-      case OTA_IMG_BOOT_OTA_0:
-      case OTA_IMG_BOOT_OTA_1:
-        ret = ota_get_bootseq(dev, &next_seq);
-        if (ret < 0)
-          {
-            ferr("ERROR: Failed to get boot sequence error=%d\n", ret);
-            return ret;
-          }
-        else if (ret == num)
-          {
-            /* the requested num is already set as next boot partition */
-
-            return OK;
-          }
-        else if (ret == OTA_IMG_BOOT_FACTORY)
-          {
-            next_seq = (uint32_t)num;
-          }
-        else
-          {
-            next_seq++;
-          }
-
-        sec = num - OTA_IMG_BOOT_OTA_0;
-
-        ret = MTD_ERASE(dev->mtd_part, sec, 1);
-        if (ret != 1)
-          {
-            ferr("ERROR: Failed to erase OTA%" PRId32 "data error=%d\n",
-                  sec, ret);
-            return -EIO;
-          }
-
-        ota_data.ota_state = OTA_IMG_VALID;
-        ota_data.ota_seq   = next_seq;
-        ota_data.crc       = crc32_le(UINT32_MAX, (uint8_t *)&ota_data, 4);
-
-        if (dev->flags & PARTITION_FLAG_ENCRYPTED)
-          {
-            blkcnt = sizeof(struct ota_data_entry) / dev->geo.blocksize;
-            size   = sizeof(struct ota_data_entry) % dev->geo.blocksize;
-            if (size)
-              {
-                blkcnt++;
-              }
-
-            size = blkcnt * dev->geo.blocksize;
-            buffer = kmm_malloc(size);
-            if (!buffer)
-              {
-                ferr("ERROR:Failed to allocate %d bytes\n", size);
-                return -ENOMEM;
-              }
-
-            memcpy(buffer, &ota_data, sizeof(struct ota_data_entry));
-
-            blk = sec * dev->geo.erasesize / dev->geo.blocksize;
-            ret = MTD_BWRITE(dev->mtd_part, blk, blkcnt, buffer);
-            kmm_free(buffer);
-            if (ret != blkcnt)
-              {
-                ferr("ERROR: Failed to write OTA%" PRId32 "data error=%d\n",
-                      sec, ret);
-                return -EIO;
-              }
-          }
-        else
-          {
-            ret = MTD_WRITE(dev->mtd_part, sec * dev->geo.erasesize,
-                            sizeof(struct ota_data_entry),
-                            (uint8_t *)&ota_data);
-            if (ret != sizeof(struct ota_data_entry))
-              {
-                ferr("ERROR: Failed to write OTA%" PRId32 "data error=%d\n",
-                      sec, ret);
-                return -1;
-              }
-          }
-
-        break;
-      default:
-        ferr("ERROR: num=%d is error\n", num);
-        return -EINVAL;
+    ret = MTD_ERASE(dev->mtd_part, 0, OTA_DATA_NUM);
+    if (ret != OTA_DATA_NUM) {
+      ferr("ERROR: Failed to erase OTA data error=%d\n", ret);
+      return -1;
     }
+
+    break;
+  case OTA_IMG_BOOT_OTA_0:
+  case OTA_IMG_BOOT_OTA_1:
+    ret = ota_get_bootseq(dev, &next_seq);
+    if (ret < 0) {
+      ferr("ERROR: Failed to get boot sequence error=%d\n", ret);
+      return ret;
+    } else if (ret == num) {
+      /* the requested num is already set as next boot partition */
+
+      return OK;
+    } else if (ret == OTA_IMG_BOOT_FACTORY) {
+      next_seq = (uint32_t)num;
+    } else {
+      next_seq++;
+    }
+
+    sec = num - OTA_IMG_BOOT_OTA_0;
+
+    ret = MTD_ERASE(dev->mtd_part, sec, 1);
+    if (ret != 1) {
+      ferr("ERROR: Failed to erase OTA%" PRId32 "data error=%d\n", sec, ret);
+      return -EIO;
+    }
+
+    ota_data.ota_state = OTA_IMG_VALID;
+    ota_data.ota_seq = next_seq;
+    ota_data.crc = crc32_le(UINT32_MAX, (uint8_t *)&ota_data, 4);
+
+    if (dev->flags & PARTITION_FLAG_ENCRYPTED) {
+      blkcnt = sizeof(struct ota_data_entry) / dev->geo.blocksize;
+      size = sizeof(struct ota_data_entry) % dev->geo.blocksize;
+      if (size) {
+        blkcnt++;
+      }
+
+      size = blkcnt * dev->geo.blocksize;
+      buffer = kmm_malloc(size);
+      if (!buffer) {
+        ferr("ERROR:Failed to allocate %d bytes\n", size);
+        return -ENOMEM;
+      }
+
+      memcpy(buffer, &ota_data, sizeof(struct ota_data_entry));
+
+      blk = sec * dev->geo.erasesize / dev->geo.blocksize;
+      ret = MTD_BWRITE(dev->mtd_part, blk, blkcnt, buffer);
+      kmm_free(buffer);
+      if (ret != blkcnt) {
+        ferr("ERROR: Failed to write OTA%" PRId32 "data error=%d\n", sec, ret);
+        return -EIO;
+      }
+    } else {
+      ret = MTD_WRITE(dev->mtd_part, sec * dev->geo.erasesize,
+                      sizeof(struct ota_data_entry), (uint8_t *)&ota_data);
+      if (ret != sizeof(struct ota_data_entry)) {
+        ferr("ERROR: Failed to write OTA%" PRId32 "data error=%d\n", sec, ret);
+        return -1;
+      }
+    }
+
+    break;
+  default:
+    ferr("ERROR: num=%d is error\n", num);
+    return -EINVAL;
+  }
 
   return OK;
 }
@@ -420,29 +383,25 @@ static int ota_set_bootseq(struct mtd_dev_priv *dev, int num)
  *
  ****************************************************************************/
 
-static int ota_invalidate_bootseq(struct mtd_dev_priv *dev, int num)
-{
+static int ota_invalidate_bootseq(struct mtd_dev_priv *dev, int num) {
   int ret;
   uint32_t sec;
   finfo("INFO: num=%d\n", num);
-  switch (num)
-    {
-      case OTA_IMG_BOOT_OTA_0:
-      case OTA_IMG_BOOT_OTA_1:
-        sec = num - OTA_IMG_BOOT_OTA_0;
-        ret = MTD_ERASE(dev->mtd_part, sec, 1);
-        if (ret != 1)
-          {
-            ferr("ERROR: Failed to erase OTA%" PRId32 "data error=%d\n",
-                  sec, ret);
-            return -EIO;
-          }
-
-        break;
-      default:
-        ferr("ERROR: num=%d is error\n", num);
-        return -EINVAL;
+  switch (num) {
+  case OTA_IMG_BOOT_OTA_0:
+  case OTA_IMG_BOOT_OTA_1:
+    sec = num - OTA_IMG_BOOT_OTA_0;
+    ret = MTD_ERASE(dev->mtd_part, sec, 1);
+    if (ret != 1) {
+      ferr("ERROR: Failed to erase OTA%" PRId32 "data error=%d\n", sec, ret);
+      return -EIO;
     }
+
+    break;
+  default:
+    ferr("ERROR: num=%d is error\n", num);
+    return -EINVAL;
+  }
 
   return OK;
 }
@@ -462,16 +421,13 @@ static int ota_invalidate_bootseq(struct mtd_dev_priv *dev, int num)
  *
  ****************************************************************************/
 
-static int is_currently_mapped_as_text(struct mtd_dev_priv *dev,
-                                       bool *mapped)
-{
+static int is_currently_mapped_as_text(struct mtd_dev_priv *dev, bool *mapped) {
   uint32_t currently_mapped_address;
 
-  if (mapped == NULL)
-    {
-      ferr("ERROR: Invalid argument.\n");
-      return -EINVAL;
-    }
+  if (mapped == NULL) {
+    ferr("ERROR: Invalid argument.\n");
+    return -EINVAL;
+  }
 
   currently_mapped_address = esp32_get_flash_address_mapped_as_text();
 
@@ -498,8 +454,7 @@ static int is_currently_mapped_as_text(struct mtd_dev_priv *dev,
  ****************************************************************************/
 
 static int esp32_part_erase(struct mtd_dev_s *dev, off_t startblock,
-                            size_t nblocks)
-{
+                            size_t nblocks) {
   struct mtd_dev_priv *mtd_priv = (struct mtd_dev_priv *)dev;
 
   return MTD_ERASE(mtd_priv->mtd_ll, startblock, nblocks);
@@ -523,8 +478,7 @@ static int esp32_part_erase(struct mtd_dev_s *dev, off_t startblock,
  ****************************************************************************/
 
 static ssize_t esp32_part_read(struct mtd_dev_s *dev, off_t offset,
-                               size_t nbytes, uint8_t *buffer)
-{
+                               size_t nbytes, uint8_t *buffer) {
   struct mtd_dev_priv *mtd_priv = (struct mtd_dev_priv *)dev;
 
   return MTD_READ(mtd_priv->mtd_ll, offset, nbytes, buffer);
@@ -548,8 +502,7 @@ static ssize_t esp32_part_read(struct mtd_dev_s *dev, off_t offset,
  ****************************************************************************/
 
 static ssize_t esp32_part_bread(struct mtd_dev_s *dev, off_t startblock,
-                                size_t nblocks, uint8_t *buffer)
-{
+                                size_t nblocks, uint8_t *buffer) {
   struct mtd_dev_priv *mtd_priv = (struct mtd_dev_priv *)dev;
 
   return MTD_BREAD(mtd_priv->mtd_ll, startblock, nblocks, buffer);
@@ -573,8 +526,7 @@ static ssize_t esp32_part_bread(struct mtd_dev_s *dev, off_t startblock,
  ****************************************************************************/
 
 static ssize_t esp32_part_write(struct mtd_dev_s *dev, off_t offset,
-                                size_t nbytes, const uint8_t *buffer)
-{
+                                size_t nbytes, const uint8_t *buffer) {
   struct mtd_dev_priv *mtd_priv = (struct mtd_dev_priv *)dev;
 
   return MTD_WRITE(mtd_priv->mtd_ll, offset, nbytes, buffer);
@@ -599,8 +551,7 @@ static ssize_t esp32_part_write(struct mtd_dev_s *dev, off_t offset,
  ****************************************************************************/
 
 static ssize_t esp32_part_bwrite(struct mtd_dev_s *dev, off_t startblock,
-                                 size_t nblocks, const uint8_t *buffer)
-{
+                                 size_t nblocks, const uint8_t *buffer) {
   struct mtd_dev_priv *mtd_priv = (struct mtd_dev_priv *)dev;
 
   return MTD_BWRITE(mtd_priv->mtd_ll, startblock, nblocks, buffer);
@@ -622,97 +573,79 @@ static ssize_t esp32_part_bwrite(struct mtd_dev_s *dev, off_t startblock,
  *
  ****************************************************************************/
 
-static int esp32_part_ioctl(struct mtd_dev_s *dev, int cmd,
-                            unsigned long arg)
-{
+static int esp32_part_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg) {
   int ret = OK;
   struct mtd_dev_priv *mtd_priv = (struct mtd_dev_priv *)dev;
 
   finfo("INFO: cmd=%d(%x) arg=%" PRIx32 "\n", cmd, cmd, arg);
 
-  switch (_IOC_NR(cmd))
-    {
-      case OTA_IMG_GET_BOOT:
-        {
-          ret = ota_get_bootseq(mtd_priv, NULL);
-          if (ret < 0)
-            {
-              ferr("ERROR: Failed to get boot img\n");
-            }
-          else
-            {
-              *(int *)arg = ret;
-            }
-        }
-
-        break;
-      case OTA_IMG_SET_BOOT:
-        {
-          ret = ota_set_bootseq(mtd_priv, arg);
-          if (ret)
-            {
-              ferr("ERROR: Failed to set boot img\n");
-            }
-        }
-
-        break;
-      case OTA_IMG_GET_ENCRYPTED:
-        if (mtd_priv->flags & PARTITION_FLAG_ENCRYPTED)
-          {
-            *(int *)arg = 1;
-          }
-        else
-          {
-            *(int *)arg = 0;
-          }
-
-        break;
-      case OTA_IMG_SET_ENCRYPTED:
-        if (arg)
-          {
-            mtd_priv->flags |= PARTITION_FLAG_ENCRYPTED;
-          }
-        else
-          {
-            mtd_priv->flags &= ~PARTITION_FLAG_ENCRYPTED;
-          }
-
-        break;
-      case OTA_IMG_GET_TYPE:
-        *(int *)arg = mtd_priv->type;
-        break;
-      case OTA_IMG_GET_SUBTYPE:
-        *(int *)arg = mtd_priv->subtype;
-        break;
-      case OTA_IMG_INVALIDATE_BOOT:
-        {
-          ret = ota_invalidate_bootseq(mtd_priv, arg);
-          if (ret < 0)
-            {
-              ferr("ERROR: Failed to invalidate boot img\n");
-            }
-        }
-
-        break;
-      case OTA_IMG_IS_MAPPED_AS_TEXT:
-        {
-          bool *mapped = (bool *)arg;
-
-          ret = is_currently_mapped_as_text(mtd_priv, mapped);
-          if (ret < 0)
-            {
-              ferr("ERROR: Failed to check partition is mapped as text\n");
-            }
-        }
-
-        break;
-      default:
-        {
-          ret = MTD_IOCTL(mtd_priv->mtd_ll, cmd, arg);
-        }
-
-        break;
+  switch (_IOC_NR(cmd)) {
+  case OTA_IMG_GET_BOOT: {
+    ret = ota_get_bootseq(mtd_priv, NULL);
+    if (ret < 0) {
+      ferr("ERROR: Failed to get boot img\n");
+    } else {
+      *(int *)arg = ret;
     }
+  }
+
+  break;
+  case OTA_IMG_SET_BOOT: {
+    ret = ota_set_bootseq(mtd_priv, arg);
+    if (ret) {
+      ferr("ERROR: Failed to set boot img\n");
+    }
+  }
+
+  break;
+  case OTA_IMG_GET_ENCRYPTED:
+    if (mtd_priv->flags & PARTITION_FLAG_ENCRYPTED) {
+      *(int *)arg = 1;
+    } else {
+      *(int *)arg = 0;
+    }
+
+    break;
+  case OTA_IMG_SET_ENCRYPTED:
+    if (arg) {
+      mtd_priv->flags |= PARTITION_FLAG_ENCRYPTED;
+    } else {
+      mtd_priv->flags &= ~PARTITION_FLAG_ENCRYPTED;
+    }
+
+    break;
+  case OTA_IMG_GET_TYPE:
+    *(int *)arg = mtd_priv->type;
+    break;
+  case OTA_IMG_GET_SUBTYPE:
+    *(int *)arg = mtd_priv->subtype;
+    break;
+  case OTA_IMG_INVALIDATE_BOOT: {
+    ret = ota_invalidate_bootseq(mtd_priv, arg);
+    if (ret < 0) {
+      ferr("ERROR: Failed to invalidate boot img\n");
+    }
+  }
+
+  break;
+  case OTA_IMG_IS_MAPPED_AS_TEXT: {
+    bool *mapped = (bool *)arg;
+
+    ret = is_currently_mapped_as_text(mtd_priv, mapped);
+    if (ret < 0) {
+      ferr("ERROR: Failed to check partition is mapped as text\n");
+    }
+  }
+
+  break;
+  case OTA_IMG_GET_OFFSET:
+    *(uint32_t *)arg = mtd_priv->offset;
+    break;
+
+  default: {
+    ret = MTD_IOCTL(mtd_priv->mtd_ll, cmd, arg);
+  } break;
+  }
 
   return ret;
 }
@@ -735,10 +668,8 @@ static int esp32_part_ioctl(struct mtd_dev_s *dev, int cmd,
  ****************************************************************************/
 
 static int partition_create_dev(const struct partition_info_priv *info,
-                                bool encrypt,
-                                struct mtd_dev_s *mtd,
-                                struct mtd_dev_s *mtd_encrypt)
-{
+                                bool encrypt, struct mtd_dev_s *mtd,
+                                struct mtd_dev_s *mtd_encrypt) {
   int ret;
   uint32_t flags;
   struct mtd_dev_s *mtd_ll;
@@ -746,29 +677,25 @@ static int partition_create_dev(const struct partition_info_priv *info,
   struct mtd_geometry_s geo;
   char path[PARTITION_MOUNTPTR_LEN_MAX];
 
-  if (info->magic != PARTITION_MAGIC)
-    {
-      return -EINVAL;
-    }
+  if (info->magic != PARTITION_MAGIC) {
+    return -EINVAL;
+  }
 
-  snprintf(path, PARTITION_MOUNTPTR_LEN_MAX, "%s/%s",
-           g_path_base, info->label);
+  snprintf(path, PARTITION_MOUNTPTR_LEN_MAX, "%s/%s", g_path_base, info->label);
 
   /* If SPI Flash encryption is enable, "APP", "OTA data" and "NVS keys" are
    * force to set as encryption partition.
    */
 
   flags = info->flags;
-  if (encrypt)
-    {
-      if ((info->type == PARTITION_TYPE_DATA &&
-           info->subtype == PARTITION_SUBTYPE_DATA_OTA) ||
-          (info->type == PARTITION_TYPE_DATA &&
-           info->subtype == PARTITION_SUBTYPE_DATA_NVS_KEYS))
-        {
-          flags |= PARTITION_FLAG_ENCRYPTED;
-        }
+  if (encrypt) {
+    if ((info->type == PARTITION_TYPE_DATA &&
+         info->subtype == PARTITION_SUBTYPE_DATA_OTA) ||
+        (info->type == PARTITION_TYPE_DATA &&
+         info->subtype == PARTITION_SUBTYPE_DATA_NVS_KEYS)) {
+      flags |= PARTITION_FLAG_ENCRYPTED;
     }
+  }
 
   finfo("INFO: [label]:   %s\n", info->label);
   finfo("INFO: [type]:    %d\n", info->type);
@@ -777,64 +704,55 @@ static int partition_create_dev(const struct partition_info_priv *info,
   finfo("INFO: [size]:    0x0x08%" PRIx32 "\n", info->size);
   finfo("INFO: [flags]:   0x0x08%" PRIx32 "\n", info->flags);
   finfo("INFO: [mount]:   %s\n", path);
-  if (flags & PARTITION_FLAG_ENCRYPTED)
-    {
-      mtd_ll = mtd_encrypt;
-      finfo("INFO: [encrypted]\n\n");
-    }
-  else
-    {
-      mtd_ll = mtd;
-      finfo("INFO: [no-encrypted]\n\n");
-    }
+  if (flags & PARTITION_FLAG_ENCRYPTED) {
+    mtd_ll = mtd_encrypt;
+    finfo("INFO: [encrypted]\n\n");
+  } else {
+    mtd_ll = mtd;
+    finfo("INFO: [no-encrypted]\n\n");
+  }
 
   ret = MTD_IOCTL(mtd_ll, MTDIOC_GEOMETRY, (unsigned long)&geo);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to get GEOMETRY from mtd_ll\n");
-      return ret;
-    }
+  if (ret < 0) {
+    ferr("ERROR: Failed to get GEOMETRY from mtd_ll\n");
+    return ret;
+  }
 
   mtd_priv = kmm_malloc(sizeof(struct mtd_dev_priv));
-  if (!mtd_priv)
-    {
-      ferr("ERROR: Failed to allocate %d byte\n",
-           sizeof(struct mtd_dev_priv));
-      return -ENOMEM;
-    }
+  if (!mtd_priv) {
+    ferr("ERROR: Failed to allocate %d byte\n", sizeof(struct mtd_dev_priv));
+    return -ENOMEM;
+  }
 
-  mtd_priv->offset  = info->offset;
-  mtd_priv->size    = info->size;
-  mtd_priv->type    = info->type;
+  mtd_priv->offset = info->offset;
+  mtd_priv->size = info->size;
+  mtd_priv->type = info->type;
   mtd_priv->subtype = info->subtype;
-  mtd_priv->flags   = flags;
-  mtd_priv->mtd_ll  = mtd_ll;
+  mtd_priv->flags = flags;
+  mtd_priv->mtd_ll = mtd_ll;
   memcpy(&mtd_priv->geo, &geo, sizeof(geo));
 
-  mtd_priv->mtd.bread  = esp32_part_bread;
+  mtd_priv->mtd.bread = esp32_part_bread;
   mtd_priv->mtd.bwrite = esp32_part_bwrite;
-  mtd_priv->mtd.erase  = esp32_part_erase;
-  mtd_priv->mtd.ioctl  = esp32_part_ioctl;
-  mtd_priv->mtd.read   = esp32_part_read;
-  mtd_priv->mtd.write  = esp32_part_write;
-  mtd_priv->mtd.name   = mtd_priv->mtd_ll->name;
-  mtd_priv->mtd_part   = mtd_partition(&mtd_priv->mtd,
-                                       info->offset / geo.blocksize,
-                                       info->size / geo.blocksize);
-  if (!mtd_priv->mtd_part)
-    {
-      ferr("ERROR: Failed to create MTD partition\n");
-      kmm_free(mtd_priv);
-      return -ENOSPC;
-    }
+  mtd_priv->mtd.erase = esp32_part_erase;
+  mtd_priv->mtd.ioctl = esp32_part_ioctl;
+  mtd_priv->mtd.read = esp32_part_read;
+  mtd_priv->mtd.write = esp32_part_write;
+  mtd_priv->mtd.name = mtd_priv->mtd_ll->name;
+  mtd_priv->mtd_part = mtd_partition(
+      &mtd_priv->mtd, info->offset / geo.blocksize, info->size / geo.blocksize);
+  if (!mtd_priv->mtd_part) {
+    ferr("ERROR: Failed to create MTD partition\n");
+    kmm_free(mtd_priv);
+    return -ENOSPC;
+  }
 
   ret = register_mtddriver(path, mtd_priv->mtd_part, 0777, mtd_priv);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to register MTD @ %s\n", path);
-      kmm_free(mtd_priv);
-      return ret;
-    }
+  if (ret < 0) {
+    ferr("ERROR: Failed to register MTD @ %s\n", path);
+    kmm_free(mtd_priv);
+    return ret;
+  }
 
   return OK;
 }
@@ -854,8 +772,7 @@ static int partition_create_dev(const struct partition_info_priv *info,
  *
  ****************************************************************************/
 
-static int partition_get_offset(const char *label, size_t size)
-{
+static int partition_get_offset(const char *label, size_t size) {
   int i;
   int ret;
   uint8_t *pbuf;
@@ -863,44 +780,37 @@ static int partition_get_offset(const char *label, size_t size)
   const struct partition_info_priv *info;
   DEBUGASSERT(label != NULL);
   struct mtd_dev_s *mtd = esp32_spiflash_encrypt_get_mtd();
-  if (!mtd)
-    {
-      ferr("ERROR: Failed to get SPI flash MTD\n");
-      return -ENOSYS;
-    }
+  if (!mtd) {
+    ferr("ERROR: Failed to get SPI flash MTD\n");
+    return -ENOSYS;
+  }
 
   pbuf = kmm_malloc(PARTITION_MAX_SIZE);
-  if (!pbuf)
-    {
-      ferr("ERROR: Failed to allocate %d byte\n", PARTITION_MAX_SIZE);
-      return -ENOMEM;
-    }
+  if (!pbuf) {
+    ferr("ERROR: Failed to allocate %d byte\n", PARTITION_MAX_SIZE);
+    return -ENOMEM;
+  }
 
-  ret = MTD_READ(mtd, PARTITION_TABLE_OFFSET,
-                 PARTITION_MAX_SIZE, pbuf);
-  if (ret != PARTITION_MAX_SIZE)
-    {
-      ferr("ERROR: Failed to get read data from MTD\n");
-      kmm_free(pbuf);
-      return -EIO;
-    }
+  ret = MTD_READ(mtd, PARTITION_TABLE_OFFSET, PARTITION_MAX_SIZE, pbuf);
+  if (ret != PARTITION_MAX_SIZE) {
+    ferr("ERROR: Failed to get read data from MTD\n");
+    kmm_free(pbuf);
+    return -EIO;
+  }
 
   info = (struct partition_info_priv *)pbuf;
-  for (i = 0; i < PARTITION_MAX_NUM; i++)
-    {
-      if (memcmp(info[i].label, label, size) == 0)
-        {
-          partion_offset = info[i].offset;
-          break;
-        }
+  for (i = 0; i < PARTITION_MAX_NUM; i++) {
+    if (memcmp(info[i].label, label, size) == 0) {
+      partion_offset = info[i].offset;
+      break;
     }
+  }
 
   kmm_free(pbuf);
-  if (i == PARTITION_MAX_NUM)
-    {
-      ferr("ERROR: No %s  partition is created\n", label);
-      return -EPERM;
-    }
+  if (i == PARTITION_MAX_NUM) {
+    ferr("ERROR: No %s  partition is created\n", label);
+    return -EPERM;
+  }
 
   finfo("Get Partition offset: 0x%x\n", partion_offset);
   return partion_offset;
@@ -925,8 +835,7 @@ static int partition_get_offset(const char *label, size_t size)
  *
  ****************************************************************************/
 
-int esp32_partition_init(void)
-{
+int esp32_partition_init(void) {
   int i;
   int ret;
   uint8_t *pbuf;
@@ -936,58 +845,50 @@ int esp32_partition_init(void)
   const struct partition_info_priv *info;
 
   mtd = esp32_spiflash_get_mtd();
-  if (!mtd)
-    {
-      ferr("ERROR: Failed to get SPI flash MTD\n");
-      return -ENOSYS;
-    }
+  if (!mtd) {
+    ferr("ERROR: Failed to get SPI flash MTD\n");
+    return -ENOSYS;
+  }
 
   mtd_encrypt = esp32_spiflash_encrypt_get_mtd();
-  if (!mtd_encrypt)
-    {
-      ferr("ERROR: Failed to get SPI flash encrypted MTD\n");
-      return -ENOSYS;
-    }
+  if (!mtd_encrypt) {
+    ferr("ERROR: Failed to get SPI flash encrypted MTD\n");
+    return -ENOSYS;
+  }
 
   pbuf = kmm_malloc(PARTITION_MAX_SIZE);
-  if (!pbuf)
-    {
-      ferr("ERROR: Failed to allocate %d byte\n", PARTITION_MAX_SIZE);
-      return -ENOMEM;
-    }
+  if (!pbuf) {
+    ferr("ERROR: Failed to allocate %d byte\n", PARTITION_MAX_SIZE);
+    return -ENOMEM;
+  }
 
   /* Even without SPI Flash encryption, we can also use encrypted
    * MTD to read no-encrypted data.
    */
 
-  ret = MTD_READ(mtd_encrypt, PARTITION_TABLE_OFFSET,
-                 PARTITION_MAX_SIZE, pbuf);
-  if (ret != PARTITION_MAX_SIZE)
-    {
-      ferr("ERROR: Failed to get read data from MTD\n");
-      kmm_free(pbuf);
-      return -EIO;
-    }
+  ret = MTD_READ(mtd_encrypt, PARTITION_TABLE_OFFSET, PARTITION_MAX_SIZE, pbuf);
+  if (ret != PARTITION_MAX_SIZE) {
+    ferr("ERROR: Failed to get read data from MTD\n");
+    kmm_free(pbuf);
+    return -EIO;
+  }
 
   info = (struct partition_info_priv *)pbuf;
   encrypt = esp32_flash_encryption_enabled();
 
-  for (i = 0; i < PARTITION_MAX_NUM; i++)
-    {
-      ret = partition_create_dev(&info[i], encrypt, mtd, mtd_encrypt);
-      if (ret != OK)
-        {
-          break;
-        }
+  for (i = 0; i < PARTITION_MAX_NUM; i++) {
+    ret = partition_create_dev(&info[i], encrypt, mtd, mtd_encrypt);
+    if (ret != OK) {
+      break;
     }
+  }
 
   kmm_free(pbuf);
 
-  if (i == 0)
-    {
-      ferr("ERROR: No partition is created\n");
-      return -EPERM;
-    }
+  if (i == 0) {
+    ferr("ERROR: No partition is created\n");
+    return -EPERM;
+  }
 
   return OK;
 }
@@ -1010,32 +911,27 @@ int esp32_partition_init(void)
  ****************************************************************************/
 
 int esp32_partition_read(const char *label, size_t offset, void *buf,
-                         size_t size)
-{
+                         size_t size) {
   int ret;
   int partion_offset;
   DEBUGASSERT(label != NULL && buf != NULL);
   struct mtd_dev_s *mtd = esp32_spiflash_get_mtd();
-  if (!mtd)
-    {
-      ferr("ERROR: Failed to get SPI flash MTD\n");
-      return -ENOSYS;
-    }
+  if (!mtd) {
+    ferr("ERROR: Failed to get SPI flash MTD\n");
+    return -ENOSYS;
+  }
 
   partion_offset = partition_get_offset(label, sizeof(label));
-  if (partion_offset < 0)
-    {
-      ferr("ERROR: Failed to get partition: %s offset\n", label);
-      return partion_offset;
-    }
+  if (partion_offset < 0) {
+    ferr("ERROR: Failed to get partition: %s offset\n", label);
+    return partion_offset;
+  }
 
-  ret = MTD_READ(mtd, partion_offset + offset,
-                 size, (uint8_t *)buf);
-  if (ret != size)
-    {
-      ferr("ERROR: Failed to get read data from MTD\n");
-      return -EIO;
-    }
+  ret = MTD_READ(mtd, partion_offset + offset, size, (uint8_t *)buf);
+  if (ret != size) {
+    ferr("ERROR: Failed to get read data from MTD\n");
+    return -EIO;
+  }
 
   return OK;
 }
@@ -1058,34 +954,29 @@ int esp32_partition_read(const char *label, size_t offset, void *buf,
  ****************************************************************************/
 
 int esp32_partition_read_decrypt(const char *label, size_t offset, void *buf,
-                                 size_t size)
-{
+                                 size_t size) {
   int ret;
   int partion_offset;
   DEBUGASSERT(label != NULL && buf != NULL);
   struct mtd_dev_s *mtd;
 
   partion_offset = partition_get_offset(label, strlen(label));
-  if (partion_offset < 0)
-    {
-      ferr("ERROR: Failed to get partition: %s offset\n", label);
-      return partion_offset;
-    }
+  if (partion_offset < 0) {
+    ferr("ERROR: Failed to get partition: %s offset\n", label);
+    return partion_offset;
+  }
 
   mtd = esp32_spiflash_encrypt_get_mtd();
-  if (!mtd)
-    {
-      ferr("ERROR: Failed to get SPI flash MTD\n");
-      return -ENOSYS;
-    }
+  if (!mtd) {
+    ferr("ERROR: Failed to get SPI flash MTD\n");
+    return -ENOSYS;
+  }
 
-  ret = MTD_READ(mtd, partion_offset + offset,
-                 size, (uint8_t *)buf);
-  if (ret != size)
-    {
-      ferr("ERROR: Failed to get read data from MTD\n");
-      return -EIO;
-    }
+  ret = MTD_READ(mtd, partion_offset + offset, size, (uint8_t *)buf);
+  if (ret != size) {
+    ferr("ERROR: Failed to get read data from MTD\n");
+    return -EIO;
+  }
 
   return OK;
 }
@@ -1108,32 +999,27 @@ int esp32_partition_read_decrypt(const char *label, size_t offset, void *buf,
  ****************************************************************************/
 
 int esp32_partition_write(const char *label, size_t offset, void *buf,
-                          size_t size)
-{
+                          size_t size) {
   int ret;
   int partion_offset;
   DEBUGASSERT(label != NULL && buf != NULL);
   struct mtd_dev_s *mtd = esp32_spiflash_get_mtd();
-  if (!mtd)
-    {
-      ferr("ERROR: Failed to get SPI flash MTD\n");
-      return -ENOSYS;
-    }
+  if (!mtd) {
+    ferr("ERROR: Failed to get SPI flash MTD\n");
+    return -ENOSYS;
+  }
 
   partion_offset = partition_get_offset(label, sizeof(label));
-  if (partion_offset < 0)
-    {
-      ferr("ERROR: Failed to get partition: %s offset\n", label);
-      return partion_offset;
-    }
+  if (partion_offset < 0) {
+    ferr("ERROR: Failed to get partition: %s offset\n", label);
+    return partion_offset;
+  }
 
-  ret = MTD_WRITE(mtd, partion_offset + offset,
-                  size, (uint8_t *)buf);
-  if (ret != size)
-    {
-      ferr("ERROR: Failed to get read data from MTD\n");
-      return -EIO;
-    }
+  ret = MTD_WRITE(mtd, partion_offset + offset, size, (uint8_t *)buf);
+  if (ret != size) {
+    ferr("ERROR: Failed to get read data from MTD\n");
+    return -EIO;
+  }
 
   return OK;
 }
