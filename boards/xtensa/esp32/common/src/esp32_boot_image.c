@@ -34,8 +34,8 @@
 #include <nuttx/cache.h>
 #include <nuttx/irq.h>
 
-#include "esp_app_format.h"
 #include "esp_loader.h"
+#include "esp_app_format.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -47,7 +47,8 @@
  * Private Types
  ****************************************************************************/
 
-struct esp32_boot_loader_args_s {
+struct esp32_boot_loader_args_s
+{
   uint32_t entry_addr;
   uint32_t drom_addr;
   uint32_t drom_vaddr;
@@ -76,9 +77,10 @@ static void IRAM_ATTR esp32_boot_loader_stub(void *arg);
  *
  ****************************************************************************/
 
-static void IRAM_ATTR esp32_boot_loader_stub(void *arg) {
+static void IRAM_ATTR esp32_boot_loader_stub(void *arg)
+{
   struct esp32_boot_loader_args_s *args =
-      (struct esp32_boot_loader_args_s *)arg;
+    (struct esp32_boot_loader_args_s *)arg;
   void (*entry_point)(void) = (void (*)(void))args->entry_addr;
 
   /* Disable interrupts */
@@ -105,8 +107,9 @@ static void IRAM_ATTR esp32_boot_loader_stub(void *arg) {
 
   /* Should never reach here */
 
-  while (1) {
-  }
+  while (1)
+    {
+    }
 }
 
 /****************************************************************************
@@ -128,13 +131,18 @@ static void IRAM_ATTR esp32_boot_loader_stub(void *arg) {
  *
  ****************************************************************************/
 
-int board_boot_image(FAR const char *path, uint32_t hdr_size) {
+int board_boot_image(FAR const char *path, uint32_t hdr_size)
+{
   int fd;
   int ret;
   uint32_t offset;
   esp_image_header_t image_header;
   esp_image_segment_header_t segment_hdr;
-  struct esp32_boot_loader_args_s args = {0};
+  struct esp32_boot_loader_args_s args =
+    {
+      0
+    };
+
   uint32_t current_offset;
   int i;
 
@@ -148,79 +156,88 @@ int board_boot_image(FAR const char *path, uint32_t hdr_size) {
   /* Open the image file */
 
   fd = open(path, O_RDONLY);
-  if (fd < 0) {
-    ferr("ERROR: Failed to open %s: %d\n", path, errno);
-    return -errno;
-  }
+  if (fd < 0)
+    {
+      ferr("ERROR: Failed to open %s: %d\n", path, errno);
+      return -errno;
+    }
 
   /* Get partition offset */
 
   ret = ioctl(fd, OTA_IMG_GET_OFFSET, (unsigned long)&offset);
-  if (ret < 0) {
-    ferr("ERROR: Failed to get partition offset: %d\n", errno);
-    close(fd);
-    return -errno;
-  }
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to get partition offset: %d\n", errno);
+      close(fd);
+      return -errno;
+    }
 
   /* Read image header */
 
   ret = read(fd, &image_header, sizeof(esp_image_header_t));
-  if (ret != sizeof(esp_image_header_t)) {
-    ferr("ERROR: Failed to read image header: %d\n", errno);
-    close(fd);
-    return -errno;
-  }
+  if (ret != sizeof(esp_image_header_t))
+    {
+      ferr("ERROR: Failed to read image header: %d\n", errno);
+      close(fd);
+      return -errno;
+    }
 
-  if (image_header.magic != ESP32_APP_IMAGE_MAGIC) {
-    ferr("ERROR: Invalid image magic: 0x%02x\n", image_header.magic);
-    close(fd);
-    return -EINVAL;
-  }
+  if (image_header.magic != ESP32_APP_IMAGE_MAGIC)
+    {
+      ferr("ERROR: Invalid image magic: 0x%02x\n", image_header.magic);
+      close(fd);
+      return -EINVAL;
+    }
 
   args.entry_addr = image_header.entry_addr;
   current_offset = sizeof(esp_image_header_t);
 
   /* Parse segments */
 
-  for (i = 0; i < image_header.segment_count; i++) {
-    ret = read(fd, &segment_hdr, sizeof(esp_image_segment_header_t));
-    if (ret != sizeof(esp_image_segment_header_t)) {
-      ferr("ERROR: Failed to read segment header: %d\n", errno);
-      close(fd);
-      return -errno;
-    }
-
-    /* Check for IROM/DROM segments */
-
-    if (segment_hdr.load_addr >= 0x3f400000 &&
-        segment_hdr.load_addr < 0x3f800000) /* DROM */
+  for (i = 0; i < image_header.segment_count; i++)
     {
-      args.drom_addr =
-          offset + current_offset + sizeof(esp_image_segment_header_t);
-      args.drom_vaddr = segment_hdr.load_addr;
-      args.drom_size = segment_hdr.data_len;
-    } else if (segment_hdr.load_addr >= 0x400d0000 &&
+      ret = read(fd, &segment_hdr, sizeof(esp_image_segment_header_t));
+      if (ret != sizeof(esp_image_segment_header_t))
+        {
+          ferr("ERROR: Failed to read segment header: %d\n", errno);
+          close(fd);
+          return -errno;
+        }
+
+      /* Check for IROM/DROM segments */
+
+      if (segment_hdr.load_addr >= 0x3f400000 &&
+          segment_hdr.load_addr < 0x3f800000) /* DROM */
+        {
+          args.drom_addr =
+            offset + current_offset + sizeof(esp_image_segment_header_t);
+          args.drom_vaddr = segment_hdr.load_addr;
+          args.drom_size = segment_hdr.data_len;
+        }
+      else if (segment_hdr.load_addr >= 0x400d0000 &&
                segment_hdr.load_addr < 0x40400000) /* IROM */
-    {
-      args.irom_addr =
-          offset + current_offset + sizeof(esp_image_segment_header_t);
-      args.irom_vaddr = segment_hdr.load_addr;
-      args.irom_size = segment_hdr.data_len;
+        {
+          args.irom_addr =
+            offset + current_offset + sizeof(esp_image_segment_header_t);
+          args.irom_vaddr = segment_hdr.load_addr;
+          args.irom_size = segment_hdr.data_len;
+        }
+
+      current_offset += sizeof(esp_image_segment_header_t) +
+        segment_hdr.data_len;
+
+      /* Advance file pointer to next segment */
+
+      lseek(fd, segment_hdr.data_len, SEEK_CUR);
     }
-
-    current_offset += sizeof(esp_image_segment_header_t) + segment_hdr.data_len;
-
-    /* Advance file pointer to next segment */
-
-    lseek(fd, segment_hdr.data_len, SEEK_CUR);
-  }
 
   close(fd);
 
-  finfo("Booting image: entry=0x%08" PRIx32 ", drom=0x%08" PRIx32
-        " (0x%08" PRIx32 "), irom=0x%08" PRIx32 " (0x%08" PRIx32 ")\n",
-        args.entry_addr, args.drom_vaddr, args.drom_size, args.irom_vaddr,
-        args.irom_size);
+  finfo("Booting image: entry=0x%08" PRIx32 "\n", args.entry_addr);
+  finfo("               drom=0x%08" PRIx32 " (0x%08" PRIx32 ")\n",
+        args.drom_vaddr, args.drom_size);
+  finfo("               irom=0x%08" PRIx32 " (0x%08" PRIx32 ")\n",
+        args.irom_vaddr, args.irom_size);
 
   /* Invoke IRAM loader stub */
 
