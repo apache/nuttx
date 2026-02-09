@@ -26,6 +26,9 @@ CSRCS = imx9_boardinit.c imx9_bringup.c
 
 ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += imx9_appinit.c
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += imx9_reset.c
+endif
 endif
 
 include $(TOPDIR)/boards/Board.mk
