@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-r/arm_perf.c
+ * arch/arm/src/arm_a_r/arm_perf.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -28,6 +28,7 @@
 #include <nuttx/clock.h>
 
 #include "arm_internal.h"
+#include "arm_timer.h"
 #include "sctlr.h"
 
 #ifdef CONFIG_ARCH_HAVE_PERF_EVENTS
@@ -36,7 +37,18 @@
  * Private Data
  ****************************************************************************/
 
-static unsigned long g_cpu_freq;
+static unsigned long g_cpu_freq = ULONG_MAX;
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static void arm_perf_start(void)
+{
+  cp15_pmu_uer(PMUER_UME);
+  cp15_pmu_pmcr(PMCR_E);
+  cp15_pmu_cesr(PMCESR_CCES);
+}
 
 /****************************************************************************
  * Public Functions
@@ -66,10 +78,31 @@ void up_perf_init(void *arg)
 {
   g_cpu_freq = (unsigned long)(uintptr_t)arg;
 
-  cp15_pmu_uer(PMUER_UME);
-  cp15_pmu_pmcr(PMCR_E);
-  cp15_pmu_cesr(PMCESR_CCES);
+#ifdef CONFIG_ARMV7A_HAVE_PTM
+  if (g_cpu_freq == ULONG_MAX || g_cpu_freq == 0)
+    {
+      g_cpu_freq = arm_timer_get_freq();
+    }
+#endif
+
+  arm_perf_start();
 }
+
+/****************************************************************************
+ * Name: arm_perf_secondary_init
+ *
+ * Description:
+ *   Start the cycle counter of a secondary CPU.  up_perf_init() runs on
+ *   the boot CPU only, and the cycle counter is a register of each CPU.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_PERF_EVENTS)
+void arm_perf_secondary_init(void)
+{
+  arm_perf_start();
+}
+#endif
 
 unsigned long up_perf_getfreq(void)
 {
@@ -89,4 +122,4 @@ void up_perf_convert(clock_t elapsed, struct timespec *ts)
   left        = elapsed - ts->tv_sec * g_cpu_freq;
   ts->tv_nsec = NSEC_PER_SEC * left / g_cpu_freq;
 }
-#endif /* CONFIG_ARCH_PERF_EVENTS */
+#endif

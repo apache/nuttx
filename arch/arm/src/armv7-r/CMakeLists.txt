@@ -30,7 +30,7 @@ list(APPEND SRCS arm_head.S arm_vectors.S arm_saveusercontext.S)
 
 # Common C source files
 
-list(APPEND SRCS arm_cache.c arm_cpuinfo.c arm_perf.c cp15_cacheops.c)
+list(APPEND SRCS arm_cache.c arm_cpuinfo.c cp15_cacheops.c)
 
 if(NOT CONFIG_ARCH_CHIP STREQUAL tms570)
   list(APPEND SRCS arm_gicv2.c arm_gicv2_dump.c)
@@ -57,8 +57,3 @@ if(CONFIG_SMP)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
-
-if(NOT CONFIG_BUILD_FLAT AND CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS)
-  target_sources(arch_interface PRIVATE arm_perf.c)
-  target_include_directories(arch_interface PRIVATE ${NUTTX_CHIP_ABS_DIR})
-endif()
