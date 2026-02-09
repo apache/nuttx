@@ -33,24 +33,26 @@
 
 /* OTA image operation code */
 
-enum ota_img_ctrl {
-  OTA_IMG_GET_BOOT = 0xe1,
-  OTA_IMG_SET_BOOT = 0xe2,
-  OTA_IMG_SET_ENCRYPTED = 0xe3,
-  OTA_IMG_GET_ENCRYPTED = 0xe4,
-  OTA_IMG_GET_TYPE = 0xe5,
-  OTA_IMG_GET_SUBTYPE = 0xe6,
-  OTA_IMG_INVALIDATE_BOOT = 0xe7,
+enum ota_img_ctrl
+{
+  OTA_IMG_GET_BOOT          = 0xe1,
+  OTA_IMG_SET_BOOT          = 0xe2,
+  OTA_IMG_SET_ENCRYPTED     = 0xe3,
+  OTA_IMG_GET_ENCRYPTED     = 0xe4,
+  OTA_IMG_GET_TYPE          = 0xe5,
+  OTA_IMG_GET_SUBTYPE       = 0xe6,
+  OTA_IMG_INVALIDATE_BOOT   = 0xe7,
   OTA_IMG_IS_MAPPED_AS_TEXT = 0xe8,
-  OTA_IMG_GET_OFFSET = 0xe9,
+  OTA_IMG_GET_OFFSET        = 0xe9,
 };
 
 /* OTA image boot sequency */
 
-enum ota_img_bootseq {
+enum ota_img_bootseq
+{
   OTA_IMG_BOOT_FACTORY = 0,
-  OTA_IMG_BOOT_OTA_0 = 1,
-  OTA_IMG_BOOT_OTA_1 = 2,
+  OTA_IMG_BOOT_OTA_0   = 1,
+  OTA_IMG_BOOT_OTA_1   = 2,
   OTA_IMG_BOOT_SEQ_MAX
 };
 
