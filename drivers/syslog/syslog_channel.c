@@ -189,10 +189,6 @@ static syslog_channel_t g_default_channel =
 #  ifdef CONFIG_SYSLOG_IOCTL
   , "default"
 #  endif
-
-#  ifdef CONFIG_SYSLOG_DEFAULT_PANIC_ONLY
-  , true
-#  endif
 #  ifdef CONFIG_SYSLOG_CONSOLE_LEVEL
   , .sc_dropmask = SYSLOG_CONSOLE_DROPMASK
 #  endif
@@ -276,7 +272,7 @@ g_syslog_channel[CONFIG_SYSLOG_MAX_CHANNELS] =
 static int syslog_default_panic_notifier(FAR struct notifier_block *nb,
                                          unsigned long event, FAR void *data)
 {
-  g_default_channel.sc_state = false;
+  g_default_channel.sc_state &= ~SYSLOG_CHANNEL_DISABLE;
   return OK;
 }
 #endif
