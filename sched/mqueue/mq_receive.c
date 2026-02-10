@@ -145,8 +145,6 @@ ssize_t file_mq_timedreceive_internal(FAR struct file *mq, FAR char *msg,
   irqstate_t flags;
   ssize_t ret = 0;
 
-  DEBUGASSERT(up_interrupt_context() == false);
-
   /* Verify the input parameters */
 
   if (abstime && (abstime->tv_nsec < 0 || abstime->tv_nsec >= 1000000000))
@@ -185,6 +183,14 @@ ssize_t file_mq_timedreceive_internal(FAR struct file *mq, FAR char *msg,
   if (mqmsg == NULL)
     {
       if ((mq->f_oflags & O_NONBLOCK) != 0)
+        {
+          leave_critical_section(flags);
+          return -EAGAIN;
+        }
+
+      /* If we are in interrupt context, return EAGAIN instead of blocking */
+
+      if (up_interrupt_context())
         {
           leave_critical_section(flags);
           return -EAGAIN;
