@@ -17,6 +17,9 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+# Note: NuttX PR Labeler only supports a subset of the
+# `actions/labeler` syntax: `changed-files` and
+# `any-glob-to-any-file`. See .github/workflows/labeler.yml
 
 # add arch labels
 
