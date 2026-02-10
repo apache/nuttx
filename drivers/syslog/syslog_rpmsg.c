@@ -324,6 +324,9 @@ static void syslog_rpmsg_device_created(FAR struct rpmsg_device *rdev,
                              syslog_rpmsg_ept_cb, NULL);
       if (ret == 0)
         {
+          /* The first transfer may run before anything was logged */
+
+          syslog_rpmsg_init_buffer(priv);
           work_queue(HPWORK, &priv->work, syslog_rpmsg_work, priv, 0);
         }
     }
@@ -431,7 +434,6 @@ int syslog_rpmsg_init(void)
     }
 #endif
 
-  syslog_rpmsg_init_buffer(&g_syslog_rpmsg);
   return rpmsg_register_callback(&g_syslog_rpmsg,
                                  syslog_rpmsg_device_created,
                                  syslog_rpmsg_device_destroy,
