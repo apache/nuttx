@@ -5,5 +5,5 @@ HEAD_ASRC = start.S
 
 # Specify our C code within this directory to be included
 CHIP_CSRCS  = mindgrove_lowputc.c mindgrove_start.c mindgrove_irq_dispatch.c
-CHIP_CSRCS += mindgrove_idle.c mindgrove_irq.c mindgrove_serial.c mindgrove_clockconfig.c mindgrove_spi.c  
+CHIP_CSRCS += mindgrove_idle.c mindgrove_irq.c mindgrove_serial.c mindgrove_clockconfig.c mindgrove_spi.c mindgrove_i2c.c
 CHIP_CSRCS += plic_driver.c mindgrove_timerisr.c 

@@ -33,9 +33,15 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/input/buttons.h>
 #include "mindgrove_spi.h"
+#include "mindgrove_i2c.h"
+
 #include <nuttx/spi/spi_transfer.h>
+#include <nuttx/i2c/i2c_master.h>
+
 #include "secure-iot.h"
 #include <nuttx/spi/spi.h>
+#include <nuttx/spi/slave.h>
+
 
 
 
@@ -150,6 +156,7 @@ struct spi_dev_s *spi;
   int ret;
 
 #if defined(CONFIG_MINDGROVE_SPI0)
+#ifdef CONFIG_SPI_MASTER
   spi = mg_spibus_initialize(0);
   if (spi != NULL)
     {
@@ -158,6 +165,7 @@ struct spi_dev_s *spi;
       if (ret < 0) _alert("ERROR: Failed to register SPI0: %d\n", ret);
 #endif
     }
+    #endif
 #endif
 
 #if defined(CONFIG_MINDGROVE_SPI1)
@@ -194,6 +202,39 @@ struct spi_dev_s *spi;
     }
 #endif
 
+#ifdef CONFIG_SPI_SLAVE
+  /* Register SPI Slave character driver(s) */
+
+#if defined(CONFIG_MINDGROVE_SPI0)
+printf("inside");
+  struct spi_slave_ctrlr_s *slv_ctrlr0;
+  slv_ctrlr0 = mg_spislave_initialize(0);
+  if (slv_ctrlr0 != NULL)
+    {
+      ret = spi_slave_register(slv_ctrlr0, 0); /* Creates /dev/spislv0 */
+      if (ret < 0) _alert("ERROR: Failed to register SPI Slave 0: %d\n", ret);
+    }
+
+#endif
+#endif
+
+#ifdef CONFIG_I2C
+#if defined(CONFIG_MINDGROVE_I2C0)
+
+  FAR struct i2c_master_s *i2c0;
+
+  i2c0 = mg_i2c_initialize(0);
+  if (i2c0 != NULL)
+    {
+      ret = i2c_register(i2c0, 0);   /* Creates /dev/i2c0 */
+      if (ret < 0)
+        {
+          _alert("ERROR: Failed to register I2C0: %d\n", ret);
+        }
+    }
+
+#endif
+#endif
 
 //   /* Register the DAC driver at "/dev/dac0" */
 

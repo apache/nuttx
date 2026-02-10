@@ -1,0 +1,55 @@
+#define MG_I2C_S2_OFFSET   0x00
+#define MG_I2C_CTRL_OFFSET 0x08
+#define MG_I2C_S0_OFFSET 0x10
+#define MG_I2C_STATUS_OFFSET 0x18
+#define MG_I2C_SCL_OFFSET 0x38
+
+#define MG_I2C_CTRL_ACK_BIT      (0U)
+#define MG_I2C_CTRL_STO_BIT      (1U)
+#define MG_I2C_CTRL_STA_BIT      (2U)
+#define MG_I2C_CTRL_ENI_BIT      (3U)
+#define MG_I2C_CTRL_ESO_BIT      (6U)
+#define MG_I2C_CTRL_PIN_BIT      (7U)
+
+#define MG_I2C_CTRL_ACK          (1U << MG_I2C_CTRL_ACK_BIT)
+#define MG_I2C_CTRL_STO          (1U << MG_I2C_CTRL_STO_BIT)
+#define MG_I2C_CTRL_STA          (1U << MG_I2C_CTRL_STA_BIT)
+#define MG_I2C_CTRL_ENI          (1U << MG_I2C_CTRL_ENI_BIT)
+#define MG_I2C_CTRL_ESO          (1U << MG_I2C_CTRL_ESO_BIT)
+#define MG_I2C_CTRL_PIN          (1U << MG_I2C_CTRL_PIN_BIT)
+
+#define MG_I2C_STATUS_BB_BIT         (0U)
+#define MG_I2C_STATUS_LAB_BIT        (1U)
+#define MG_I2C_STATUS_AD0_LRB_BIT    (3U)
+#define MG_I2C_STATUS_BER_BIT        (4U)
+#define MG_I2C_STATUS_STS_BIT        (7U)
+
+#define MG_I2C_STATUS_BB          (1U << MG_I2C_STATUS_BB_BIT)
+#define MG_I2C_STATUS_LAB         (1U << MG_I2C_STATUS_LAB_BIT)
+#define MG_I2C_STATUS_AD0_LRB     (1U << MG_I2C_STATUS_AD0_LRB_BIT)
+#define MG_I2C_STATUS_BER         (1U << MG_I2C_STATUS_BER_BIT)
+#define MG_I2C_STATUS_STS         (1U << MG_I2C_STATUS_STS_BIT)
+
+#define MG_I2C0_BASE 0x44000
+#define MG_I2C1_BASE 0x44100
+
+#define CLOCK_FREQUENCY_BASE 35000000
+#define MG_I2C_PRESCALER 1U
+#define MG_I2C_SCL_MASK  0xFFFFFFFFU
+#define MG_I2C_IDLE      (MG_I2C_CTRL_ESO | MG_I2C_CTRL_ACK)
+#define MG_I2C_NACK       (MG_I2C_CTRL_ESO)
+#define MG_I2C_START_BIT   (1U << 1U)
+#define MG_I2C_STOP_BIT    (1U << 2U)
+#define MG_I2C_START      (MG_I2C_CTRL_PIN | MG_I2C_CTRL_ESO | MG_I2C_CTRL_STA | MG_I2C_CTRL_ACK)
+#define MG_I2C_STOP       (MG_I2C_CTRL_PIN | MG_I2C_CTRL_ESO | MG_I2C_CTRL_STO | MG_I2C_CTRL_ACK)
+#define MG_I2C_REPSTART   (MG_I2C_CTRL_ESO | MG_I2C_CTRL_STA | MG_I2C_CTRL_ACK)
+
+#ifndef __ARCH_RISCV_SRC_MINDGROVE_MINDGROVE_I2C_H
+#define __ARCH_RISCV_SRC_MINDGROVE_MINDGROVE_I2C_H
+
+#include <nuttx/i2c/i2c_master.h>
+
+
+FAR struct i2c_master_s *mg_i2c_initialize(int bus);
+
+#endif /* __ARCH_RISCV_SRC_MINDGROVE_MINDGROVE_I2C_H */

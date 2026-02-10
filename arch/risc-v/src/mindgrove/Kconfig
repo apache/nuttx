@@ -102,4 +102,26 @@ config MINDGROVE_SPI3
     select MINDGROVE_SPI
     select SPI_DRIVER
 
+config MINDGROVE_HAVE_I2C0
+    bool
+    default y
+    select ARCH_HAVE_I2C
+
+config MINDGROVE_HAVE_I2C1
+    bool
+    default y
+    select ARCH_HAVE_I2C
+
+config MINDGROVE_I2C0
+    bool "I2C0"
+    default y
+    depends on MINDGROVE_HAVE_I2C0
+    select MINDGROVE_I2C
+
+config MINDGROVE_I2C1
+    bool "I2C1"
+    default y
+    depends on MINDGROVE_HAVE_I2C1
+    select MINDGROVE_I2C
+
 # endmenu

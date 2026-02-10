@@ -5,7 +5,7 @@
  #include <nuttx/config.h>
 
  #include <stdint.h>
- 
+//  #include <stdio.h>
  #include <nuttx/init.h>
  #include <arch/board/board.h>
  #include "chip.h"
@@ -13,6 +13,8 @@
  #include "riscv_internal.h"
 //  #include "riscv_arch.h"
  #include"mindgrove_clockconfig.h"
+ #include <stdio.h>
+
  
  /****************************************************************************
   * Pre-processor Definitions
@@ -34,12 +36,19 @@
    /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
     * certain that there are no issues with the state of global variables.
     */
- 
+  volatile uint32_t i=0;
    for (dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
      {
+      i++;
        *dest++ = 0;
+      //  asm volatile("fence.i");
+      if (i==5580){
+        for (int j=0;j<1000;j++)
+        asm volatile ("nop");
+      }
      }
- 
+
+
    /* Move the initialized data section from his temporary holding spot in
     * FLASH into the correct place in SRAM.  The correct place in SRAM is
     * give by _sdata and _edata.  The temporary location is in FLASH at the
