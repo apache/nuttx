@@ -26,6 +26,8 @@
 
 #include <debug.h>
 #include <fcntl.h>
+#include <inttypes.h>
+#include <stdint.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 
@@ -34,18 +36,42 @@
 #include <nuttx/cache.h>
 #include <nuttx/irq.h>
 
-#include "esp_app_format.h"
 #include "esp_loader.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ESP32_APP_IMAGE_MAGIC 0xE9
+#define ESP32_APP_LOAD_HEADER_MAGIC 0xace637d3
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+struct esp32_load_header_s
+{
+  uint32_t header_magic;
+  uint32_t entry_addr;
+  uint32_t iram_dest_addr;
+  uint32_t iram_flash_offset;
+  uint32_t iram_size;
+  uint32_t dram_dest_addr;
+  uint32_t dram_flash_offset;
+  uint32_t dram_size;
+  uint32_t lp_rtc_iram_dest_addr;
+  uint32_t lp_rtc_iram_flash_offset;
+  uint32_t lp_rtc_iram_size;
+  uint32_t lp_rtc_dram_dest_addr;
+  uint32_t lp_rtc_dram_flash_offset;
+  uint32_t lp_rtc_dram_size;
+  uint32_t irom_map_addr;
+  uint32_t irom_flash_offset;
+  uint32_t irom_size;
+  uint32_t drom_map_addr;
+  uint32_t drom_flash_offset;
+  uint32_t drom_size;
+  uint32_t reserved[4];
+};
 
 struct esp32_boot_loader_args_s
 {
@@ -122,7 +148,7 @@ static void IRAM_ATTR esp32_boot_loader_stub(void *arg)
  *
  * Input Parameters:
  *   path     - Path to the image file/partition
- *   hdr_size - Size of the image header (unused for ESP32)
+ *   hdr_size - Size of the prepended image header (e.g. MCUboot/nxboot)
  *
  * Returned Value:
  *   Does not return on success; returns error code on failure.
@@ -134,20 +160,17 @@ int board_boot_image(FAR const char *path, uint32_t hdr_size)
   int fd;
   int ret;
   uint32_t offset;
-  esp_image_header_t image_header;
-  esp_image_segment_header_t segment_hdr;
+  struct esp32_load_header_s load_header;
   struct esp32_boot_loader_args_s args =
     {
       0
     };
 
-  uint32_t current_offset;
-  int i;
+  /* Legacy/simple boot image formats are not supported */
 
-  /* Check for legacy format (not supported) */
-
-#ifdef CONFIG_ESP32_APP_FORMAT_LEGACY
-  ferr("ERROR: Legacy format not supported for board_boot_image\n");
+#if defined(CONFIG_ESP32_APP_FORMAT_LEGACY) || \
+    defined(CONFIG_ESPRESSIF_SIMPLE_BOOT)
+  ferr("ERROR: Unsupported image format for board_boot_image\n");
   return -ENOTSUP;
 #endif
 
@@ -174,67 +197,39 @@ int board_boot_image(FAR const char *path, uint32_t hdr_size)
 
   if (hdr_size > 0)
     {
-      lseek(fd, hdr_size, SEEK_SET);
+      if (lseek(fd, hdr_size, SEEK_SET) < 0)
+        {
+          ferr("ERROR: Failed to seek load header: %d\n", errno);
+          close(fd);
+          return -errno;
+        }
     }
 
-  /* Read image header */
+  /* Read image load header generated for MCUboot app format */
 
-  ret = read(fd, &image_header, sizeof(esp_image_header_t));
-  if (ret != sizeof(esp_image_header_t))
+  ret = read(fd, &load_header, sizeof(struct esp32_load_header_s));
+  if (ret != sizeof(struct esp32_load_header_s))
     {
-      ferr("ERROR: Failed to read image header: %d\n", errno);
+      ferr("ERROR: Failed to read image load header: %d\n", errno);
       close(fd);
       return -errno;
     }
 
-  if (image_header.magic != ESP32_APP_IMAGE_MAGIC)
+  if (load_header.header_magic != ESP32_APP_LOAD_HEADER_MAGIC)
     {
-      ferr("ERROR: Invalid image magic: 0x%02x\n", image_header.magic);
+      ferr("ERROR: Invalid load header magic: 0x%08" PRIx32 "\n",
+           load_header.header_magic);
       close(fd);
       return -EINVAL;
     }
 
-  args.entry_addr = image_header.entry_addr;
-  current_offset = hdr_size + sizeof(esp_image_header_t);
-
-  /* Parse segments */
-
-  for (i = 0; i < image_header.segment_count; i++)
-    {
-      ret = read(fd, &segment_hdr, sizeof(esp_image_segment_header_t));
-      if (ret != sizeof(esp_image_segment_header_t))
-        {
-          ferr("ERROR: Failed to read segment header: %d\n", errno);
-          close(fd);
-          return -errno;
-        }
-
-      /* Check for IROM/DROM segments */
-
-      if (segment_hdr.load_addr >= 0x3f400000 &&
-          segment_hdr.load_addr < 0x3f800000) /* DROM */
-        {
-          args.drom_addr =
-            offset + current_offset + sizeof(esp_image_segment_header_t);
-          args.drom_vaddr = segment_hdr.load_addr;
-          args.drom_size = segment_hdr.data_len;
-        }
-      else if (segment_hdr.load_addr >= 0x400d0000 &&
-               segment_hdr.load_addr < 0x40400000) /* IROM */
-        {
-          args.irom_addr =
-            offset + current_offset + sizeof(esp_image_segment_header_t);
-          args.irom_vaddr = segment_hdr.load_addr;
-          args.irom_size = segment_hdr.data_len;
-        }
-
-      current_offset += sizeof(esp_image_segment_header_t) +
-        segment_hdr.data_len;
-
-      /* Advance file pointer to next segment */
-
-      lseek(fd, segment_hdr.data_len, SEEK_CUR);
-    }
+  args.entry_addr = load_header.entry_addr;
+  args.drom_addr = offset + load_header.drom_flash_offset;
+  args.drom_vaddr = load_header.drom_map_addr;
+  args.drom_size = load_header.drom_size;
+  args.irom_addr = offset + load_header.irom_flash_offset;
+  args.irom_vaddr = load_header.irom_map_addr;
+  args.irom_size = load_header.irom_size;
 
   close(fd);
 
