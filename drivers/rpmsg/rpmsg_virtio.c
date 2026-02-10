@@ -480,7 +480,6 @@ static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg)
     (FAR struct rpmsg_virtio_priv_s *)rpmsg;
   FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
   FAR struct rpmsg_device *rdev = &rvdev->rdev;
-  bool needunlock = false;
 
   metal_log(METAL_LOG_EMERGENCY,
             "Local: %s Remote: %s Headrx %u Headtx %u\n",
@@ -492,13 +491,7 @@ static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg)
       return;
     }
 
-  if (!up_interrupt_context() && !sched_idletask() &&
-      !metal_mutex_is_acquired(&rdev->lock))
-    {
-      metal_mutex_acquire(&rdev->lock);
-      needunlock = true;
-    }
-
+  metal_mutex_acquire(&rdev->lock);
   metal_log(METAL_LOG_EMERGENCY,
             "Dump rpmsg info between cpu (master: %s)%s <==> %s:\n",
             rpmsg_virtio_get_role(rvdev) == RPMSG_HOST ? "yes" : "no",
@@ -516,10 +509,7 @@ static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg)
   rpmsg_virtio_dump_buffer(rvdev, true);
   rpmsg_virtio_dump_buffer(rvdev, false);
 
-  if (needunlock)
-    {
-      metal_mutex_release(&rdev->lock);
-    }
+  metal_mutex_release(&rdev->lock);
 }
 
 /****************************************************************************
