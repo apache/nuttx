@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
 #include <stdint.h>
@@ -36,7 +37,8 @@
 #include <nuttx/cache.h>
 #include <nuttx/irq.h>
 
-#include "esp_loader.h"
+#include "espressif/esp_loader.h"
+#include "xtensa_attr.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -88,11 +90,79 @@ struct esp32_boot_loader_args_s
  * Private Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_CHIP_ESP32
+extern void cache_read_disable(int cpu);
+extern void cache_flush(int cpu);
+#endif
+
+static int esp32_load_ram_segment(int fd, uint32_t flash_offset,
+                                  uint32_t dest_addr, uint32_t size,
+                                  FAR const char *name);
 static void IRAM_ATTR esp32_boot_loader_stub(void *arg);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32_load_ram_segment
+ *
+ * Description:
+ *   Load a RAM-resident segment from the application image into its
+ *   destination address.
+ *
+ ****************************************************************************/
+
+static int esp32_load_ram_segment(int fd, uint32_t flash_offset,
+                                  uint32_t dest_addr, uint32_t size,
+                                  FAR const char *name)
+{
+  uint8_t *dest;
+  off_t read_offset;
+  ssize_t nread;
+  size_t remaining;
+
+  if (size == 0)
+    {
+      return OK;
+    }
+
+  if (dest_addr == 0)
+    {
+      ferr("ERROR: Invalid %s destination address\n", name);
+      return -EINVAL;
+    }
+
+  finfo("Loading %-12s: dst=0x%08" PRIx32 " off=0x%08" PRIx32
+        " size=0x%08" PRIx32 "\n",
+        name, dest_addr, flash_offset, size);
+
+  dest = (uint8_t *)(uintptr_t)dest_addr;
+  read_offset = (off_t)flash_offset;
+  remaining = (size_t)size;
+
+  while (remaining > 0)
+    {
+      nread = pread(fd, dest, remaining, read_offset);
+      if (nread < 0)
+        {
+          ferr("ERROR: Failed to read %s segment: %d\n", name, errno);
+          return -errno;
+        }
+
+      if (nread == 0)
+        {
+          ferr("ERROR: Unexpected EOF while reading %s segment\n", name);
+          return -EIO;
+        }
+
+      dest += nread;
+      read_offset += nread;
+      remaining -= nread;
+    }
+
+  return OK;
+}
 
 /****************************************************************************
  * Name: esp32_boot_loader_stub
@@ -124,8 +194,15 @@ static void IRAM_ATTR esp32_boot_loader_stub(void *arg)
 
   /* Map new segments */
 
-  map_rom_segments(args->drom_addr, args->drom_vaddr, args->drom_size,
-                   args->irom_addr, args->irom_vaddr, args->irom_size);
+  /* board_boot_image() may boot from non-primary slots, so remap ROM
+   * segments here before entering the new image.
+   */
+
+  if (map_rom_segments(args->drom_addr, args->drom_vaddr, args->drom_size,
+                       args->irom_addr, args->irom_vaddr, args->irom_size))
+    {
+      PANIC();
+    }
 
   /* Jump to entry point */
 
@@ -221,6 +298,46 @@ int board_boot_image(FAR const char *path, uint32_t hdr_size)
            load_header.header_magic);
       close(fd);
       return -EINVAL;
+    }
+
+  /* RAM sections are normally loaded by the ROM bootloader. Since
+   * board_boot_image() chain-boots directly, load these sections here.
+   */
+
+  ret = esp32_load_ram_segment(fd, load_header.iram_flash_offset,
+                               load_header.iram_dest_addr,
+                               load_header.iram_size, "iram");
+  if (ret < 0)
+    {
+      close(fd);
+      return ret;
+    }
+
+  ret = esp32_load_ram_segment(fd, load_header.dram_flash_offset,
+                               load_header.dram_dest_addr,
+                               load_header.dram_size, "dram");
+  if (ret < 0)
+    {
+      close(fd);
+      return ret;
+    }
+
+  ret = esp32_load_ram_segment(fd, load_header.lp_rtc_iram_flash_offset,
+                               load_header.lp_rtc_iram_dest_addr,
+                               load_header.lp_rtc_iram_size, "lp_rtc_iram");
+  if (ret < 0)
+    {
+      close(fd);
+      return ret;
+    }
+
+  ret = esp32_load_ram_segment(fd, load_header.lp_rtc_dram_flash_offset,
+                               load_header.lp_rtc_dram_dest_addr,
+                               load_header.lp_rtc_dram_size, "lp_rtc_dram");
+  if (ret < 0)
+    {
+      close(fd);
+      return ret;
     }
 
   args.entry_addr = load_header.entry_addr;
