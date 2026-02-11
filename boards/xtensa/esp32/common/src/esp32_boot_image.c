@@ -29,15 +29,11 @@
 #include <fcntl.h>
 #include <inttypes.h>
 #include <stdint.h>
-#include <sys/ioctl.h>
 #include <unistd.h>
 
-#include <arch/esp32/partition.h>
 #include <nuttx/board.h>
-#include <nuttx/cache.h>
 #include <nuttx/irq.h>
 
-#include "espressif/esp_loader.h"
 #include "xtensa_attr.h"
 
 /****************************************************************************
@@ -78,22 +74,11 @@ struct esp32_load_header_s
 struct esp32_boot_loader_args_s
 {
   uint32_t entry_addr;
-  uint32_t drom_addr;
-  uint32_t drom_vaddr;
-  uint32_t drom_size;
-  uint32_t irom_addr;
-  uint32_t irom_vaddr;
-  uint32_t irom_size;
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
-
-#ifdef CONFIG_ARCH_CHIP_ESP32
-extern void cache_read_disable(int cpu);
-extern void cache_flush(int cpu);
-#endif
 
 static int esp32_load_ram_segment(int fd, uint32_t flash_offset,
                                   uint32_t dest_addr, uint32_t size,
@@ -183,26 +168,9 @@ static void IRAM_ATTR esp32_boot_loader_stub(void *arg)
 
   up_irq_disable();
 
-  /* Disable cache */
-
-#ifdef CONFIG_ARCH_CHIP_ESP32
-  cache_read_disable(0);
-  cache_flush(0);
-#else
-  cache_hal_disable(CACHE_LL_LEVEL_EXT_MEM, CACHE_TYPE_ALL);
-#endif
-
-  /* Map new segments */
-
-  /* board_boot_image() may boot from non-primary slots, so remap ROM
-   * segments here before entering the new image.
+  /* For location-fixed MCUboot images, ROM mappings are handled by
+   * the image startup path.
    */
-
-  if (map_rom_segments(args->drom_addr, args->drom_vaddr, args->drom_size,
-                       args->irom_addr, args->irom_vaddr, args->irom_size))
-    {
-      PANIC();
-    }
 
   /* Jump to entry point */
 
@@ -236,7 +204,6 @@ int board_boot_image(FAR const char *path, uint32_t hdr_size)
 {
   int fd;
   int ret;
-  uint32_t offset;
   struct esp32_load_header_s load_header;
   struct esp32_boot_loader_args_s args =
     {
@@ -257,16 +224,6 @@ int board_boot_image(FAR const char *path, uint32_t hdr_size)
   if (fd < 0)
     {
       ferr("ERROR: Failed to open %s: %d\n", path, errno);
-      return -errno;
-    }
-
-  /* Get partition offset */
-
-  ret = ioctl(fd, OTA_IMG_GET_OFFSET, (unsigned long)&offset);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to get partition offset: %d\n", errno);
-      close(fd);
       return -errno;
     }
 
@@ -341,20 +298,10 @@ int board_boot_image(FAR const char *path, uint32_t hdr_size)
     }
 
   args.entry_addr = load_header.entry_addr;
-  args.drom_addr = offset + load_header.drom_flash_offset;
-  args.drom_vaddr = load_header.drom_map_addr;
-  args.drom_size = load_header.drom_size;
-  args.irom_addr = offset + load_header.irom_flash_offset;
-  args.irom_vaddr = load_header.irom_map_addr;
-  args.irom_size = load_header.irom_size;
 
   close(fd);
 
   finfo("Booting image: entry=0x%08" PRIx32 "\n", args.entry_addr);
-  finfo("               drom=0x%08" PRIx32 " (0x%08" PRIx32 ")\n",
-        args.drom_vaddr, args.drom_size);
-  finfo("               irom=0x%08" PRIx32 " (0x%08" PRIx32 ")\n",
-        args.irom_vaddr, args.irom_size);
 
   /* Invoke IRAM loader stub */
 
