@@ -6034,6 +6034,25 @@ config BOARD_CRASHDUMP_CUSTOM
 		Enable save crash dump info with custom method. only work with
 		board_crashdump api.
 
+config BOARD_COREDUMP_CPUID
+	int "The Coredump CPU ID"
+	default -1
+	depends on BMP && (!BOARD_CRASHDUMP_NONE || BOARD_CRASHDUMP_CUSTOM)
+	---help---
+		Specify which CPU is responsible for executing coredump in BMP
+		(Bound Multi-Processing) mode. In BMP mode, multiple CPUs may
+		trigger a panic simultaneously. Without this setting, each CPU
+		could attempt to perform a coredump at the same time, leading to
+		output corruption or resource conflicts (e.g., contention on the
+		syslog or storage device).
+
+		By setting this to a valid CPU ID (e.g., 0), only the designated
+		CPU will execute the coredump logic; other CPUs will skip it.
+
+		Set to -1 (default) to allow any CPU to perform the coredump,
+		which preserves the original behavior for single-core or SMP
+		configurations.
+
 config BOARD_COREDUMP_DEVPATH
 	string "Save Core Dump data with device PATH"
 	depends on BOARD_COREDUMP_BLKDEV || BOARD_COREDUMP_MTDDEV

@@ -839,24 +839,29 @@ static void dump_fatal_info(FAR struct tcb_s *rtcb,
 static void dump_core_info(FAR struct tcb_s *rtcb, FAR const char *filename,
                            int linenum, FAR const char *msg, FAR void *regs)
 {
+#if defined(CONFIG_BOARD_COREDUMP_CPUID) && CONFIG_BOARD_COREDUMP_CPUID >= 0
+  if (up_cpu_index() == CONFIG_BOARD_COREDUMP_CPUID)
+#endif
+    {
 #ifdef CONFIG_BOARD_CRASHDUMP_CUSTOM
-  board_crashdump(up_getsp(), rtcb, filename, linenum, msg, regs);
+      board_crashdump(up_getsp(), rtcb, filename, linenum, msg, regs);
 #endif
 
 #ifndef CONFIG_BOARD_CRASHDUMP_NONE
 
-  /* Dump core information */
+      /* Dump core information */
 
 #  ifdef CONFIG_BOARD_COREDUMP_FULL
-  coredump_dump(INVALID_PROCESS_ID);
+      coredump_dump(INVALID_PROCESS_ID);
 #  else
-  coredump_dump(rtcb->pid);
+      coredump_dump(rtcb->pid);
 #  endif
 #endif
 
-  /* Flush any buffered SYSLOG data */
+      /* Flush any buffered SYSLOG data */
 
-  syslog_flush();
+      syslog_flush();
+    }
 }
 
 /****************************************************************************
