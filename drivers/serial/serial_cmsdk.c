@@ -791,8 +791,20 @@ void up_putc(int ch)
   FAR struct uart_cmsdk_s *priv = CONSOLE_DEV.priv;
   uint32_t ier;
 
-  ier = uart_cmsdk_disableuartint(priv);
+  /* Only disable TX interrupts for polled output.  Disabling RX
+   * interrupts here is dangerous: if a character arrives while
+   * RX_INT_ENABLE is cleared, the CMSDK UART sets RX_BUF_FULL but
+   * does NOT set INTSTATUS_RX (the enable is checked at the moment
+   * the character is received).  When we restore the enable bit the
+   * interrupt is never generated and the byte stays in the holding
+   * register forever, blocking all further RX and — because the
+   * console task is now stuck — TX as well.
+   */
+
+  ier = uart_cmsdk_serialmodify(priv, UART_CTRL_OFFSET,
+          UART_CTRL_TX_INT_ENABLE | UART_CTRL_TX_OVERRUN_INT_ENABLE, 0);
   uart_cmsdk_putc(priv, ch);
-  uart_cmsdk_restoreuartint(priv, ier);
+  uart_cmsdk_serialmodify(priv, UART_CTRL_OFFSET, 0,
+          ier & (UART_CTRL_TX_INT_ENABLE | UART_CTRL_TX_OVERRUN_INT_ENABLE));
 }
 #endif
