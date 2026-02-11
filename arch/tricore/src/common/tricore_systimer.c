@@ -303,6 +303,7 @@ tricore_systimer_initialize(volatile void *tbase, int irq, uint64_t freq)
   struct tricore_systimer_lowerhalf_s *priv = &g_tricore_oneshot_lowerhalf;
 
   priv->tbase = tbase;
+  spin_lock_init(&priv->lock);
 
   ASSERT(freq <= UINT32_MAX);
 
