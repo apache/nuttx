@@ -29,7 +29,7 @@ Also is possible for users to control the LEDs from "nsh>" using the "printf" co
 .. code-block:: bash
 
   NuttShell (NSH)
-  nsh> printf \x000000a5 > /dev/userleds
+  nsh> printf \\x000000a5 > /dev/userleds
 
 This command will turn ON the LEDs mapped to bits 0, 2, 5 and 7.
 
