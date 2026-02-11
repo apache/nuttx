@@ -43,7 +43,6 @@ enum ota_img_ctrl
   OTA_IMG_GET_SUBTYPE       = 0xe6,
   OTA_IMG_INVALIDATE_BOOT   = 0xe7,
   OTA_IMG_IS_MAPPED_AS_TEXT = 0xe8,
-  OTA_IMG_GET_OFFSET        = 0xe9,
 };
 
 /* OTA image boot sequency */

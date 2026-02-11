@@ -706,9 +706,6 @@ static int esp32_part_ioctl(struct mtd_dev_s *dev, int cmd,
         }
 
         break;
-      case OTA_IMG_GET_OFFSET:
-        *(uint32_t *)arg = mtd_priv->offset;
-        break;
       default:
         {
           ret = MTD_IOCTL(mtd_priv->mtd_ll, cmd, arg);
