@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/arm_sau.c
+ * arch/arm/src/arm_m/arm_sau.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *

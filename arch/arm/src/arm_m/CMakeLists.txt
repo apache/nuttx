@@ -38,7 +38,7 @@ if(NOT CONFIG_ARCH_ARMV6M)
 endif()
 
 if(CONFIG_ARCH_ARMV8M)
-  list(APPEND SRCS arm_securefault.c)
+  list(APPEND SRCS arm_securefault.c arm_sau.c arm_secure_irq.c)
 endif()
 
 if(CONFIG_ARM_STACKCHECK)

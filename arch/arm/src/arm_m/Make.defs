@@ -43,7 +43,7 @@ ifneq ($(CONFIG_ARCH_ARMV6M),y)
 endif
 
 ifeq ($(CONFIG_ARCH_ARMV8M),y)
-  CMN_CSRCS += arm_securefault.c
+  CMN_CSRCS += arm_securefault.c arm_sau.c arm_secure_irq.c
 endif
 
 ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
