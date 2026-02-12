@@ -675,13 +675,27 @@ static void pl011_send(FAR struct uart_dev_s *dev, int ch)
 
 static void pl011_putc(struct uart_dev_s *dev, int ch)
 {
-  FAR struct pl011_uart_port_s *sport = dev->priv;
+  FAR struct pl011_uart_port_s  *sport  = dev->priv;
+  FAR const struct pl011_config *config = &sport->config;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave_notrace(&sport->lock);
-  while (!pl011_txempty(dev));
-  pl011_send(dev, ch);
-  spin_unlock_irqrestore_notrace(&sport->lock, flags);
+  for (; ; )
+    {
+      flags = spin_lock_irqsave_notrace(&sport->lock);
+
+      if (!(config->uart->fr & PL011_FR_TXFF))
+        {
+          config->uart->dr = ch;
+          spin_unlock_irqrestore_notrace(&sport->lock, flags);
+          break;
+        }
+
+      /* TX FIFO full – release the lock so the interrupt path and
+       * other CPUs can make progress, then retry.
+       */
+
+      spin_unlock_irqrestore_notrace(&sport->lock, flags);
+    }
 }
 
 /***************************************************************************
@@ -719,6 +733,7 @@ static bool pl011_rxavailable(FAR struct uart_dev_s *dev)
 static void pl011_rxint(FAR struct uart_dev_s *dev, bool enable)
 {
   FAR struct pl011_uart_port_s *sport = dev->priv;
+  irqstate_t flags = spin_lock_irqsave(&sport->lock);
 
   if (enable)
     {
@@ -728,6 +743,8 @@ static void pl011_rxint(FAR struct uart_dev_s *dev, bool enable)
     {
       pl011_irq_rx_disable(sport);
     }
+
+  spin_unlock_irqrestore(&sport->lock, flags);
 }
 
 /***************************************************************************
