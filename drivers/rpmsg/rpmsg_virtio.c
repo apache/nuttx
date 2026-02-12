@@ -215,9 +215,10 @@ rpmsg_virtio_pm_action(FAR struct rpmsg_virtio_priv_s *priv, bool stay)
  * Note: this function must be called with the rdev->lock held
  ****************************************************************************/
 
-static int rpmsg_virtio_process_rx_buffer(FAR struct rpmsg_device *rdev,
-                                          FAR struct rpmsg_endpoint *ept,
-                                          FAR struct rpmsg_hdr *hdr)
+static inline_function int
+rpmsg_virtio_process_rx_buffer(FAR struct rpmsg_device *rdev,
+                               FAR struct rpmsg_endpoint *ept,
+                               FAR struct rpmsg_hdr *hdr)
 {
   size_t len = hdr->len + sizeof(*hdr);
   int status;

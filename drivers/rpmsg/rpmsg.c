@@ -91,14 +91,6 @@ struct rpmsg_ioctl_s
   unsigned long   arg;
 };
 
-struct rpmsg_work_s
-{
-  struct work_s       work;
-  rpmsg_worker_t      worker;
-  FAR struct rpmsg_s *rpmsg;
-  FAR void           *arg;
-};
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -296,22 +288,6 @@ rpmsg_get_current_wqueue(FAR struct rpmsg_s *rpmsg)
   return wqueue;
 }
 
-static void rpmsg_rx_worker(FAR void *arg)
-{
-  FAR struct rpmsg_work_s *work = arg;
-  FAR struct rpmsg_s *rpmsg = work->rpmsg;
-  FAR struct rpmsg_device *rdev;
-  rpmsg_worker_t worker = work->worker;
-
-  arg = work->arg;
-  rdev = rpmsg_get_rdev_by_rpmsg(rpmsg);
-  metal_mutex_acquire(&rdev->lock);
-  list_add_tail(&work->rpmsg->freerx, &work->work.node);
-  metal_mutex_release(&rdev->lock);
-  DEBUGASSERT(worker != NULL);
-  worker(rpmsg, arg);
-}
-
 static int rpmsg_create_wqueues(FAR struct rpmsg_wqueue_s *wqueues,
                                 FAR const char *name, uint8_t priority)
 {
@@ -347,6 +323,22 @@ static int rpmsg_create_wqueues(FAR struct rpmsg_wqueue_s *wqueues,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+void rpmsg_rx_worker(FAR void *arg)
+{
+  FAR struct rpmsg_work_s *work = arg;
+  FAR struct rpmsg_s *rpmsg = work->rpmsg;
+  FAR struct rpmsg_device *rdev;
+  rpmsg_worker_t worker = work->worker;
+
+  arg = work->arg;
+  rdev = rpmsg_get_rdev_by_rpmsg(rpmsg);
+  metal_mutex_acquire(&rdev->lock);
+  list_add_tail(&work->rpmsg->freerx, &work->work.node);
+  metal_mutex_release(&rdev->lock);
+  DEBUGASSERT(worker != NULL);
+  worker(rpmsg, arg);
+}
 
 void rpmsg_initialize(void)
 {
@@ -1085,21 +1077,4 @@ int rpmsg_queue_work(FAR struct rpmsg_s *rpmsg, int priority,
 #endif
 
   return work_queue_wq(wqueues[idx].kwqueue, work, worker, arg, 0);
-}
-
-void rpmsg_queue_rx_work(FAR struct rpmsg_s *rpmsg, uint8_t priority,
-                         rpmsg_worker_t worker, FAR void *arg)
-{
-  FAR struct rpmsg_work_s *work;
-
-  /* Called by the transport rx dispatch with rdev->lock held */
-
-  work = list_remove_head_type(&rpmsg->freerx, struct rpmsg_work_s,
-                               work.node);
-  DEBUGASSERT(work != NULL);
-  work->arg = arg;
-  work->rpmsg = rpmsg;
-  work->worker = worker;
-
-  rpmsg_queue_work(rpmsg, priority, &work->work, rpmsg_rx_worker, work);
 }
