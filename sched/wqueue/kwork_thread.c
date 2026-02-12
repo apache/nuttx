@@ -559,14 +559,21 @@ int work_start_highpri(void)
   sinfo("Starting high-priority kernel worker thread(s)\n");
 
 #ifdef SCHED_HPWORKSTACKSECTION
-  static uint8_t hp_work_stack[CONFIG_SCHED_HPNTHREADS]
-                              [CONFIG_SCHED_HPWORKSTACKSIZE]
+  /* Ensure each stack is properly aligned by rounding up the stack size.
+   * This is critical when CONFIG_SCHED_HPNTHREADS > 1 to ensure all
+   * thread stacks start at properly aligned addresses.
+   */
+
+#define HP_WORK_STACK_SIZE STACK_ALIGN_UP(CONFIG_SCHED_HPWORKSTACKSIZE)
+
+  static aligned_data(STACK_ALIGNMENT) uint8_t
+  hp_work_stack[CONFIG_SCHED_HPNTHREADS][HP_WORK_STACK_SIZE]
   locate_data(CONFIG_SCHED_HPWORKSTACKSECTION);
 
   return work_thread_create(HPWORKNAME,
                             CONFIG_SCHED_HPWORKPRIORITY,
                             hp_work_stack,
-                            CONFIG_SCHED_HPWORKSTACKSIZE,
+                            HP_WORK_STACK_SIZE,
                             (FAR struct kwork_wqueue_s *)&g_hpwork);
 #else
   return work_thread_create(HPWORKNAME, CONFIG_SCHED_HPWORKPRIORITY, NULL,
@@ -599,14 +606,21 @@ int work_start_lowpri(void)
   sinfo("Starting low-priority kernel worker thread(s)\n");
 
 #ifdef SCHED_LPWORKSTACKSECTION
-  static uint8_t lp_work_stack[CONFIG_SCHED_LPNTHREADS]
-                              [CONFIG_SCHED_LPWORKSTACKSIZE]
+  /* Ensure each stack is properly aligned by rounding up the stack size.
+   * This is critical when CONFIG_SCHED_LPNTHREADS > 1 to ensure all
+   * thread stacks start at properly aligned addresses.
+   */
+
+#define LP_WORK_STACK_SIZE STACK_ALIGN_UP(CONFIG_SCHED_LPWORKSTACKSIZE)
+
+  static aligned_data(STACK_ALIGNMENT) uint8_t
+  lp_work_stack[CONFIG_SCHED_LPNTHREADS][LP_WORK_STACK_SIZE]
   locate_data(CONFIG_SCHED_LPWORKSTACKSECTION);
 
   return work_thread_create(LPWORKNAME,
                             CONFIG_SCHED_LPWORKPRIORITY,
                             lp_work_stack,
-                            CONFIG_SCHED_LPWORKSTACKSIZE,
+                            LP_WORK_STACK_SIZE,
                             (FAR struct kwork_wqueue_s *)&g_lpwork);
 #else
   return work_thread_create(LPWORKNAME,
