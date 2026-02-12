@@ -312,7 +312,7 @@
 
 /* Region definition data structure */
 
-struct arm_mmu_region
+struct aligned_data(16) arm_mmu_region
 {
   /* Region Base Physical Address */
 
