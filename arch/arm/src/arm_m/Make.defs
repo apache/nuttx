@@ -21,6 +21,7 @@
 # Common ARM_M files
 
 CMN_ASRCS += arm_exception.S arm_saveusercontext.S
+CMN_CSRCS += arm_cpuinfo.c
 
 ifeq ($(CONFIG_ARM_SYSTICK),y)
   CMN_CSRCS += arm_systick.c

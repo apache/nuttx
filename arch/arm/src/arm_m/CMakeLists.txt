@@ -30,6 +30,7 @@ list(
   arm_svcall.c
   arm_initialstate.c
   arm_doirq.c
+  arm_cpuinfo.c
   arm_trigger_irq.c)
 
 if(NOT CONFIG_ARCH_ARMV6M)
