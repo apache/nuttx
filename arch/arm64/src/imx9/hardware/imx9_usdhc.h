@@ -340,6 +340,7 @@
 #  define USDHC_SYSCTL_SDCLKFS_DIV64     (0x20 << USDHC_SYSCTL_SDCLKFS_SHIFT) /* Base clock / 64 */
 #  define USDHC_SYSCTL_SDCLKFS_DIV128    (0x40 << USDHC_SYSCTL_SDCLKFS_SHIFT) /* Base clock / 128 */
 #  define USDHC_SYSCTL_SDCLKFS_DIV256    (0x80 << USDHC_SYSCTL_SDCLKFS_SHIFT) /* Base clock / 256 */
+#  define USDHC_SYSCTL_SDCLKFS_DIV(p)    (((p) >> 1) << USDHC_SYSCTL_SDCLKFS_SHIFT)
 
 #define USDHC_SYSCTL_DTOCV_SHIFT         (16)      /* Bits 16-19: Data Timeout Counter Value */
 #define USDHC_SYSCTL_DTOCV_MASK          (0xf << USDHC_SYSCTL_DTOCV_SHIFT)
