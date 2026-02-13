@@ -2119,7 +2119,14 @@ static FAR struct tm *localsub(FAR const time_t *timep,
 static FAR struct tm *gmtsub(FAR const time_t *timep,
                              int_fast32_t offset, FAR struct tm *tmp)
 {
-  if (!g_gmt_isset)
+  FAR const struct state_s *sp = NULL;
+
+  /* gmtload() may log through syslog, which formats its timestamp with
+   * gmtime_r() and comes back here on the same thread.  Do not load again
+   * in that case, convert as plain UTC instead.
+   */
+
+  if (!g_gmt_isset && !nxrmutex_is_hold(&g_gmt_lock))
     {
       tz_lock(&g_gmt_lock);
 
@@ -2136,9 +2143,14 @@ static FAR struct tm *gmtsub(FAR const time_t *timep,
       tz_unlock(&g_gmt_lock);
     }
 
+  if (g_gmt_isset)
+    {
+      sp = g_gmt_ptr;
+    }
+
   tmp->tm_zone = ((FAR char *)(offset ? g_wildabbr :
-                               g_gmt_ptr ? g_gmt_ptr->chars : g_utc));
-  return timesub(timep, offset, g_gmt_ptr, tmp);
+                               sp ? sp->chars : g_utc));
+  return timesub(timep, offset, sp, tmp);
 }
 
 /* Return the number of leap years through the end of the given year
