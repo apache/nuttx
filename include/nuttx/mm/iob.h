@@ -126,6 +126,12 @@ struct iob_s
 #endif
   unsigned int io_pktlen; /* Total length of the packet */
 
+ #ifdef CONFIG_IOB_OWNER_TRACKING
+  int16_t           io_owner_pid;
+  uint8_t           io_owner_cpu;   /* CPU index (SMP), 0 on UP */
+  uint8_t           io_owner_flags; /* bit0: ISR; bit1: committed; future use */
+#endif
+
 #ifdef CONFIG_IOB_ALLOC
   iob_free_cb_t io_free;  /* Custom free callback */
   FAR uint8_t  *io_data;
@@ -182,6 +188,10 @@ struct iob_stats_s
  ****************************************************************************/
 
 void iob_initialize(void);
+
+#ifdef CONFIG_IOB_OWNER_TRACKING
+struct iob_s *iob_get_iob_by_index(unsigned int index);
+#endif
 
 /****************************************************************************
  * Name: iob_timedalloc
