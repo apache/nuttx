@@ -277,6 +277,8 @@ endif # ESP32_OPENETH
 config ESP32_I2C
 	bool
 	default n
+	select I2C
+	select I2C_DRIVER
 
 config ESP32_TWAI
 	bool
