@@ -34,7 +34,7 @@ ifeq ($(CONFIG_ONESHOT),y)
   CSRCS += esp32_oneshot.c
 endif
 
-ifeq ($(CONFIG_I2C_DRIVER),y)
+ifeq ($(CONFIG_ESP32_I2C),y)
   CSRCS += esp32_board_i2c.c
 endif
 
