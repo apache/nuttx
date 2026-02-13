@@ -512,6 +512,95 @@ On the client (node ``Oxfffe``):
   exit
   nsh>
 
+gpio
+----
+
+This configuration enables the GPIO character device and the gpio tool,
+which provides an easy-to-use way of testing the GPIO peripherals.
+
+Default GPIOs for this board are defined in ``boards/xtensa/esp32/esp32-devkitc/src/esp32_gpio.c``
+file as follows:
+
+========== ===========
+GPIO Type  GPIO Pin
+========== ===========
+Output      15
+Input       18
+Interrupt   22
+========== ===========
+
+After successfully built and flashed, the gpio device will be available at `/dev/gpioX`:
+
+.. code-block :: bash
+
+  nsh> ls /dev
+  /dev:
+    console
+    gpio0
+    gpio1
+    gpio2
+    null
+    ttyS0
+    zero
+
+You can then use the gpio tool to test the GPIO peripherals:
+
+.. code-block :: bash
+
+  nsh> gpio -o 0 /dev/gpio0
+  Driver: /dev/gpio0
+    Output pin:    Value=1
+    Writing:       Value=0
+    Verify:        Value=0
+
+i2c
+---
+
+This configuration enables the I2C character device and the i2c tool,
+which provides an easy-to-use way of testing the I2C peripherals.
+
+``I2C0`` is used by default. It is possible to also select ``I2C1`` by enabling the ``CONFIG_ESP32_I2C1`` option
+in menuconfig.
+
+After successfully built and flashed, the ``i2c0`` device will be available at ``/dev/i2c0``:
+
+.. code-block :: bash
+
+  nsh> ls /dev
+  /dev:
+    console
+    i2c0
+    null
+    ttyS0
+    zero
+
+You can then use the i2c tool to test the I2C peripherals:
+
+.. code-block :: bash
+
+  nsh> i2c bus
+  BUS   EXISTS?
+  Bus 0: YES
+  Bus 1: NO
+
+**I2C0 pinout**
+
+========== ========== ============
+ESP32 Pin  Signal Pin Description
+========== ========== ============
+22          SCL        Clock
+23          SDA        Data
+========== ========== ============
+
+**I2C1 pinout**
+
+========== ========== ============
+ESP32 Pin  Signal Pin Description
+========== ========== ============
+26          SCL        Clock
+25          SDA        Data
+========== ========== ============
+
 i2schar
 -------
 
@@ -1079,6 +1168,59 @@ sotest
 ------
 
 This config is to run ``apps/examples/sotest``.
+
+spi
+---
+
+This configuration enables the SPI character device and the spi tool,
+which provides an easy-to-use way of testing the SPI peripherals.
+
+``SPI2`` is used by default. It is possible to also select ``SPI3`` by enabling the ``CONFIG_ESP32_SPI3`` option
+in menuconfig.
+
+**SPI2 pinout**
+
+========== ========== ===============
+ESP32 Pin  Signal Pin Description
+========== ========== ===============
+14         SCK        SPI2 Clock
+13         MOSI       SPI2 Master Out Slave In
+12         MISO       SPI2 Master In Slave Out
+15         CS         SPI2 Chip Select
+========== ========== ===============
+
+**SPI3 pinout**
+
+========== ========== ===============
+ESP32 Pin  Signal Pin Description
+========== ========== ===============
+18         SCK        SPI3 Clock
+23         MOSI       SPI3 Master Out Slave In
+19         MISO       SPI3 Master In Slave Out
+5          CS         SPI3 Chip Select
+========== ========== ===============
+
+After successfully built and flashed, the spi device will be available at ``/dev/spiX``:
+
+.. code-block :: bash
+
+  nsh> ls /dev
+  /dev:
+    console
+    spi2
+    null
+    ttyS0
+    zero
+
+You can then use the spi tool to test the SPI peripherals:
+
+.. code-block :: bash
+
+  nsh> spi bus
+   BUS   EXISTS?
+  Bus 2: YES
+  Bus 3: NO
+
 
 spiflash
 --------
