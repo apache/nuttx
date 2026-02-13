@@ -317,8 +317,6 @@ int esp32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_I2C_DRIVER
-
 #ifdef CONFIG_ESP32_I2C0
   ret = esp32_i2c_register(0);
 
@@ -335,8 +333,6 @@ int esp32_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize I2C Driver for I2C1: %d\n", ret);
     }
-#endif
-
 #endif
 
 #ifdef CONFIG_ESPRESSIF_I2S

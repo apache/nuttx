@@ -44,8 +44,6 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_I2C_DRIVER
-
 /****************************************************************************
  * Name: esp32_i2c_register
  *
@@ -59,8 +57,6 @@ extern "C"
  ****************************************************************************/
 
 int esp32_i2c_register(int bus);
-
-#endif /* CONFIG_I2C_DRIVER */
 
 #undef EXTERN
 #if defined(__cplusplus)
