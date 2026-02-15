@@ -50,7 +50,7 @@ events as follows:
   LED_SIGNAL           In a signal handler[3]   N/C      ON       N/C      OFF
   LED_ASSERTION        An assertion failed      ON       ON       N/C      OFF
   LED_PANIC            The system has crashed   N/C      N/C      N/C      ON
-  LED_IDLE             STM32 is is sleep mode   
+  LED_IDLE             STM32 is is sleep mode
   ===================  =======================  =======  =======  =======  ======
 
 [1] If LED1, LED2, LED3 are statically on, then NuttX probably failed to boot
@@ -794,7 +794,7 @@ Dependencies::
 Enable the BASIC interpreter.  Other default options should be okay::
 
     CONFIG_INTERPRETERS_BAS=y    : Enables the interpreter
-    CONFIG_INTERPRETER_BAS_VT100=y
+    CONFIG_INTERPRETERS_BAS_VT100=y
 
 The BASIC test suite can be included::
 
@@ -2238,7 +2238,7 @@ Connect the HX711 to the STM32F4 board using the following pins:
 
 ::
 
-    NuttShell (NSH) NuttX-12.10.0 
+    NuttShell (NSH) NuttX-12.10.0
     nsh> hx711 -D
     Current settings for: /dev/hx711_0
     average.............: 1
