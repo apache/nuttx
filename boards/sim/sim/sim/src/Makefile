@@ -56,7 +56,7 @@ endif
 
 ifeq ($(CONFIG_ETC_ROMFS),y)
   RCSRCS = etc/init.d/rc.sysinit etc/init.d/rcS
-  RCRAWS = etc/group etc/passwd
+  RCRAWS = etc/group
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)

@@ -282,6 +282,33 @@ function(process_all_directory_romfs)
   list(PREPEND RCSRCS ${board_rcsrcs} ${dyn_rcsrcs})
   list(PREPEND RCRAWS ${board_rcraws} ${dyn_rcraws})
 
+  # Auto-generate /etc/passwd at build time if configured
+  if(CONFIG_ETC_ROMFS_GENPASSWD)
+    if("${CONFIG_ETC_ROMFS_PASSWD_PASSWORD}" STREQUAL "")
+      message(
+        FATAL_ERROR
+          "CONFIG_ETC_ROMFS_PASSWD_PASSWORD must be set when"
+          " ETC_ROMFS_GENPASSWD is enabled."
+          " Run 'make menuconfig' to set a password.")
+    endif()
+
+    set(GENPASSWD_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/etc/passwd)
+    add_custom_command(
+      OUTPUT ${GENPASSWD_OUTPUT}
+      COMMAND
+        ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/etc
+      COMMAND
+        ${Python3_EXECUTABLE} ${NUTTX_DIR}/tools/mkpasswd.py --user
+        "${CONFIG_ETC_ROMFS_PASSWD_USER}" --password
+        "${CONFIG_ETC_ROMFS_PASSWD_PASSWORD}" --uid
+        ${CONFIG_ETC_ROMFS_PASSWD_UID} --gid ${CONFIG_ETC_ROMFS_PASSWD_GID}
+        --home "${CONFIG_ETC_ROMFS_PASSWD_HOME}" -o ${GENPASSWD_OUTPUT}
+      COMMENT "Generating /etc/passwd from Kconfig values")
+    add_custom_target(generate_passwd DEPENDS ${GENPASSWD_OUTPUT})
+    list(APPEND RCRAWS ${GENPASSWD_OUTPUT})
+    list(APPEND dyn_deps generate_passwd)
+  endif()
+
   # init dynamic dependencies
 
   get_property(
