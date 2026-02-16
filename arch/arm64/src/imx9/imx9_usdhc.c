@@ -3453,7 +3453,7 @@ struct sdio_dev_s *imx9_usdhc_initialize(int slotno)
 
       /* Enable clocks */
 
-      imx9_ccm_configure_root_clock(CCM_CR_USDHC1, SYS_PLL1PFD1, 4);
+      imx9_ccm_configure_root_clock(CCM_CR_USDHC1, SYS_PLL1PFD1, 2);
       imx9_get_rootclock(CCM_CR_USDHC1, &priv->root_clock_freq);
       imx9_ccm_gate_on(CCM_LPCG_USDHC1, true);
 
@@ -3488,7 +3488,7 @@ struct sdio_dev_s *imx9_usdhc_initialize(int slotno)
 
       /* Enable clocks */
 
-      imx9_ccm_configure_root_clock(CCM_CR_USDHC2, SYS_PLL1PFD1, 4);
+      imx9_ccm_configure_root_clock(CCM_CR_USDHC2, SYS_PLL1PFD1, 2);
       imx9_get_rootclock(CCM_CR_USDHC2, &priv->root_clock_freq);
       imx9_ccm_gate_on(CCM_LPCG_USDHC2, true);
 
