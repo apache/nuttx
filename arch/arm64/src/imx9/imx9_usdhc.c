@@ -69,9 +69,11 @@
 #define DCACHE_LINEMASK (ARMV8A_DCACHE_LINESIZE - 1)
 
 #if !defined(CONFIG_ARM64_DCACHE_DISABLE)
+#  define USDHC_DATABUF_ALIGN    ARMV8A_DCACHE_LINESIZE
 #  define cache_aligned_alloc(s) kmm_memalign(ARMV8A_DCACHE_LINESIZE,(s))
 #  define CACHE_ALIGNED_DATA     aligned_data(ARMV8A_DCACHE_LINESIZE)
 #else
+#  define USDHC_DATABUF_ALIGN    sizeof(uint32_t)
 #  define cache_aligned_alloc    kmm_malloc
 #  define CACHE_ALIGNED_DATA
 #endif
@@ -85,12 +87,6 @@
 #  define  IMX9_MAX_SDHC_DEV_SLOTS  2
 #else
 #error Unrecognised number of SDHC slots
-#endif
-
-#if !defined(CONFIG_IMX9_USDHC_DMA)
-#  warning "Large Non-DMA transfer may result in RX overrun failures"
-#elif !defined(CONFIG_SDIO_DMA)
-#  warning CONFIG_SDIO_DMA should be defined with CONFIG_IMX9_USDHC_DMA
 #endif
 
 #if !defined(CONFIG_SCHED_WORKQUEUE) || !defined(CONFIG_SCHED_HPWORK)
@@ -126,7 +122,7 @@
 
 /* Block size for multi-block transfers */
 
-#define SDMMC_MAX_BLOCK_SIZE        (512)
+#define USDHC_MAX_BLOCK_SIZE        (512)
 
 /* Data transfer / Event waiting interrupt mask bits */
 
@@ -202,19 +198,17 @@ struct imx9_dev_s
   size_t remaining;                   /* Number of bytes remaining in the
                                        * transfer */
   uint32_t xfrints;                   /* Interrupt enables for data transfer */
-
-#ifdef CONFIG_IMX9_USDHC_DMA
-  /* DMA data transfer support */
-
   volatile uint8_t xfrflags;          /* Used to synchronize SDIO and DMA
                                        * completion */
                                       /* DMA buffer for unaligned transfers */
-#if !defined(CONFIG_ARM64_DCACHE_DISABLE)
+
+  /* DMA data transfer support */
+
+#if defined(CONFIG_IMX9_USDHC_DMA)
   uint32_t blocksize;                 /* Current block size */
-  uint8_t  rxbuffer[SDMMC_MAX_BLOCK_SIZE]
-                   __attribute__((aligned(ARMV8A_DCACHE_LINESIZE)));
+  uint8_t  rxbuffer[USDHC_MAX_BLOCK_SIZE]
+                   __attribute__((aligned(USDHC_DATABUF_ALIGN)));
   bool     unaligned_rx;              /* buffer is not cache-line aligned */
-#endif
 #endif
 
   /* Card interrupt support for SDIO */
@@ -304,9 +298,8 @@ static void imx9_dataconfig(struct imx9_dev_s *priv, bool bwrite,
 #ifndef CONFIG_IMX9_USDHC_DMA
 static void imx9_transmit(struct imx9_dev_s *priv);
 static void imx9_receive(struct imx9_dev_s *priv);
-#if !defined(CONFIG_ARM64_DCACHE_DISABLE)
+#else
 static void imx9_recvdma(struct imx9_dev_s *priv);
-#endif
 #endif
 
 static void imx9_eventtimeout(wdparm_t arg);
@@ -799,7 +792,7 @@ static void imx9_dataconfig(struct imx9_dev_s *priv, bool bwrite,
   regval |= timeout << USDHC_SYSCTL_DTOCV_SHIFT;
   putreg32(regval, priv->addr + IMX9_USDHC_SYSCTL_OFFSET);
 
-#if defined(CONFIG_IMX9_USDHC_DMA) && !defined(CONFIG_ARM64_DCACHE_DISABLE)
+#if defined(CONFIG_IMX9_USDHC_DMA)
       /* If cache is enabled, and this is an unaligned receive,
        * receive one block at a time to the internal buffer
        */
@@ -1034,14 +1027,14 @@ static void imx9_receive(struct imx9_dev_s *priv)
  *   Receive SDIO data in dma mode
  *
  * Input Parameters:
- *   priv  - Instance of the SDMMC private state structure.
+ *   priv  - Instance of the USDHC private state structure.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-#if defined(CONFIG_IMX9_USDHC_DMA) && !defined(CONFIG_ARM64_DCACHE_DISABLE)
+#if defined(CONFIG_IMX9_USDHC_DMA)
 static void imx9_recvdma(struct imx9_dev_s *priv)
 {
   unsigned int watermark;
@@ -1052,10 +1045,12 @@ static void imx9_recvdma(struct imx9_dev_s *priv)
        * we receive them one-by-one
        */
 
+#  if !defined(CONFIG_ARM64_DCACHE_DISABLE)
       /* Invalidate the cache before receiving next block */
 
       up_invalidate_dcache((uintptr_t)priv->rxbuffer,
                            (uintptr_t)priv->rxbuffer + priv->blocksize);
+#endif
 
       /* Copy the received data to client buffer */
 
@@ -1067,10 +1062,12 @@ static void imx9_recvdma(struct imx9_dev_s *priv)
     }
   else
     {
+#  if !defined(CONFIG_ARM64_DCACHE_DISABLE)
       /* In an aligned case, we have always received all blocks */
 
       up_invalidate_dcache((uintptr_t)priv->buffer,
                            (uintptr_t)priv->buffer + priv->remaining);
+#  endif
       priv->remaining = 0;
     }
 
@@ -1304,7 +1301,7 @@ static int imx9_interrupt(int irq, void *context, void *arg)
       if ((pending & USDHC_INT_TC) != 0)
         {
           /* Terminate the transfer */
-#if defined(CONFIG_IMX9_USDHC_DMA) && !defined(CONFIG_ARM64_DCACHE_DISABLE)
+#if defined(CONFIG_IMX9_USDHC_DMA)
           imx9_recvdma(priv);
 #else
           imx9_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
@@ -2254,7 +2251,7 @@ static void imx9_blocksetup(struct sdio_dev_s *dev,
 
   /* Configure block size for next transfer */
 
-#if !defined(CONFIG_ARM64_DCACHE_DISABLE)
+#ifdef CONFIG_IMX9_USDHC_DMA
   priv->blocksize = blocklen;
 #endif
 
@@ -2981,8 +2978,8 @@ static int imx9_dmapreflight(struct sdio_dev_s *dev,
    */
 
   if (buffer != priv->rxbuffer &&
-      (((uintptr_t)buffer & (ARMV8A_DCACHE_LINESIZE - 1)) != 0 ||
-      ((uintptr_t)(buffer + buflen) & (ARMV8A_DCACHE_LINESIZE - 1)) != 0))
+      (((uintptr_t)buffer & (USDHC_DATABUF_ALIGN - 1)) != 0 ||
+      ((uintptr_t)(buffer + buflen) & (USDHC_DATABUF_ALIGN - 1)) != 0))
     {
       mcerr("dcache unaligned buffer:%p end:%p\n",
             buffer, buffer + buflen - 1);
@@ -3020,8 +3017,7 @@ static int imx9_dmarecvsetup(struct sdio_dev_s *dev,
   struct imx9_dev_s *priv = (struct imx9_dev_s *)dev;
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 
-#if defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT) && \
-   !defined(CONFIG_ARM64_DCACHE_DISABLE)
+#if defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
   /* Normally imx9_dmapreflight is called prior to imx9_dmarecvsetup
    * except for the case where the CSR read is done at initialization.
    *
@@ -3040,27 +3036,29 @@ static int imx9_dmarecvsetup(struct sdio_dev_s *dev,
   imx9_sampleinit();
   imx9_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
-#if !defined(CONFIG_ARM64_DCACHE_DISABLE)
-  if (((uintptr_t)buffer & (ARMV8A_DCACHE_LINESIZE - 1)) != 0 ||
-       (buflen & (ARMV8A_DCACHE_LINESIZE - 1)) != 0)
+  if (((uintptr_t)buffer & (USDHC_DATABUF_ALIGN - 1)) != 0 ||
+       (buflen & (USDHC_DATABUF_ALIGN - 1)) != 0)
     {
-      /* The read buffer is not cache-line aligned, but will fit in
+      /* The read buffer is not aligned, but will fit in
        * the rxbuffer. So read to an internal buffer instead.
        */
 
+#  if !defined(CONFIG_ARM64_DCACHE_DISABLE)
       up_invalidate_dcache((uintptr_t)priv->rxbuffer,
                            (uintptr_t)priv->rxbuffer + priv->blocksize);
+#  endif
 
       priv->unaligned_rx = true;
     }
   else
     {
+#  if !defined(CONFIG_ARM64_DCACHE_DISABLE)
       up_invalidate_dcache((uintptr_t)buffer,
                            (uintptr_t)buffer + buflen);
+#  endif
 
       priv->unaligned_rx = false;
     }
-#endif
 
   /* Save the destination buffer information for use by the interrupt
    * handler
@@ -3076,14 +3074,12 @@ static int imx9_dmarecvsetup(struct sdio_dev_s *dev,
   /* Configure the RX DMA */
 
   imx9_configxfrints(priv, USDHC_DMADONE_INTS);
-#if !defined(CONFIG_ARM64_DCACHE_DISABLE)
   if (priv->unaligned_rx)
     {
       putreg32((uint64_t) priv->rxbuffer,
                priv->addr + IMX9_USDHC_DSADDR_OFFSET);
     }
   else
-#endif
     {
       putreg32((uint64_t) priv->buffer,
                priv->addr + IMX9_USDHC_DSADDR_OFFSET);
@@ -3130,9 +3126,9 @@ static int imx9_dmasendsetup(struct sdio_dev_s *dev,
 
   /* Save the source buffer information for use by the interrupt handler */
 
-#if !defined(CONFIG_ARM64_DCACHE_DISABLE)
   priv->unaligned_rx = false;
 
+#if !defined(CONFIG_ARM64_DCACHE_DISABLE)
   /* Flush cache to physical memory when not in DTCM memory */
 
   up_clean_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
