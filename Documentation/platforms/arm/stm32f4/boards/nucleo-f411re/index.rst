@@ -320,7 +320,6 @@ There is nothing in the configuration that currently uses the joystick.
 For testing, you can add the following configuration options to enable the
 analog joystick example at apps/examples/ajoystick::
 
-    CONFIG_NSH_ARCHINIT=y
     CONFIG_EXAMPLES_AJOYSTICK=y
     CONFIG_EXAMPLES_AJOYSTICK_DEVNAME="/dev/ajoy0"
 
@@ -360,7 +359,7 @@ NOTES:
 
    b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
-          
+
 2. By default, this configuration uses the ARM EABI toolchain
    for Linux.  That can easily be reconfigured, of course.:
 

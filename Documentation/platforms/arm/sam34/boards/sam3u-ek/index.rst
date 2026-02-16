@@ -56,7 +56,7 @@ LED_PANIC           The system has crashed       FLASH   N/C     N/C
    glow is because of timer interrupts that result in the LED being illuminated
    on a small proportion of the time.
 
-.. note:: 
+.. note::
 
    LED2 may also flicker normally if signals are processed.
 
@@ -225,7 +225,7 @@ The ``<subdir>`` that is provided above as an argument to the
 
    a. Build and install the kconfig-mconf tool. See ``nuttx/README.txt``
       see additional README.txt files in the NuttX tools repository.
-   
+
    b. Execute ``make menuconfig`` in ``nuttx/`` in order to start the
       reconfiguration process.
 
@@ -250,7 +250,7 @@ The ``<subdir>`` that is provided above as an argument to the
      Cygwin)
 
    System Type -> Toolchain:
-   
+
    * ``CONFIG_ARM_TOOLCHAIN_BUILDROOT=y``: Buildroot toolchain
    * ``CONFIG_ARM_TOOLCHAIN_BUILDROOT_OABI=y``: Older, OABI toolchain
 
@@ -458,10 +458,6 @@ Configuration enables both the serial and telnetd NSH interfaces.
 
    * ``CONFIG_SCHED_WORKQUEUE=y``: Driver needs work queue support
 
-   Application Configuration -> NSH Library
-
-   * ``CONFIG_NSH_ARCHINIT=y``: NSH board-initialization
-
  .. warning::
 
     * 2013-6-28: The touchscreen is functional.
@@ -501,18 +497,18 @@ The NxWM window manager can be found at ``apps/graphics/NxWidgets/nxwm``.
 
 The NxWM unit test can be found at ``apps/graphics/NxWidgets/UnitTests/nxwm``.
 
-.. warning:: 
+.. warning::
 
    1. 2013-6-28:  Created the configuration but have not yet done
       anything with it.
-   
+
    2. 2013-6-29:  Various changes to get a clean build of this
       configuration. Still untested.
-   
+
    3. 20113-6-30:  I cannot load this program using AtmelStudio6.1.
       The total size with DEBUG on is 138.9 KB.  I have verified
       that the first 128KB may have been written correctly, but then
       the code above 128KB wraps and overwrites the code at the
       beginning of FLASH, trashing the FLASH images.
-   
+
       Bottom line:  Still untested.

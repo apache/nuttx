@@ -139,11 +139,8 @@ int board_app_initialize(uintptr_t arg)
 #else
   /* Perform board-specific initialization */
 
-#ifdef CONFIG_NSH_ARCHINIT
-
   mount(NULL, "/proc", "procfs", 0, NULL);
 
-#endif
   debug_dumps();
   return OK;
 #endif
@@ -189,11 +186,7 @@ void board_late_initialize(void)
     }
 #endif /* CONFIG_BUILD_KERNEL */
 
-#ifdef CONFIG_NSH_ARCHINIT
-
   mount(NULL, "/proc", "procfs", 0, NULL);
-
-#endif
 
 #ifdef CONFIG_RPTUN
 #  ifdef CONFIG_K230_RPTUN_MASTER

@@ -23,7 +23,7 @@ config SAM4S_XPLAINED_PRO_CPULOAD_TIMER_DEVPATH
 config SAM34_NAND_BLOCKMOUNT
 	bool "NAND FLASH auto-mount"
 	default n
-	depends on NSH_ARCHINIT && SAM34_EXTNAND
+	depends on BOARD_LATE_INITIALIZE && SAM34_EXTNAND
 	---help---
 		Automatically initialize the NAND FLASH driver when NSH starts.
 

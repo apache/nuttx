@@ -494,9 +494,6 @@ Temperature Sensor
       CONFIG_SENSORS_LM75=y
       CONFIG_LM75_I2C=y
 
-    Applications -> NSH Library
-      CONFIG_NSH_ARCHINIT=y
-
   Then you can implement logic like the following to use the temperature sensor:
 
     #include <nuttx/sensors/lm75.h>
@@ -523,9 +520,6 @@ Temperature Sensor
     Library
       CONFIG_LIBM=y
       CONFIG_LIBC_FLOATINGPOINT=y
-
-    Applications -> NSH Library
-      CONFIG_NSH_ARCHINIT=y
 
     Applications -> System Add-Ons
       CONFIG_SYSTEM_LM75=y

@@ -7,7 +7,6 @@
 #
 # CONFIG_ARCH_FPU is not set
 # CONFIG_DEV_CONSOLE is not set
-CONFIG_ADC=y
 CONFIG_ANALOG=y
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="nucleo-f303re"

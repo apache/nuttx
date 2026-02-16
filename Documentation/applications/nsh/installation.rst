@@ -6,11 +6,6 @@ Customizing NSH Initialization
 customize the NSH start-up behavior. Here they are presented in order of
 increasing difficulty:
 
-  #. You can extend the initialization logic in
-     ``boards/arm/stm32/stm3240g-eval/src/stm32_appinit.c``. The logic
-     there is called each time that NSH is started and is good place in
-     particular for any device-related initialization.
-
   #. You replace the sample code at ``apps/examples/nsh/nsh_main.c`` with
      whatever start-up logic that you want. NSH is a library at
      ``apps/nshlib``. ``apps.examples/nsh`` is just a tiny, example

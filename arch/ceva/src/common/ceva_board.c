@@ -36,12 +36,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if !defined(CONFIG_BOARD_LATE_INITIALIZE) && !defined(CONFIG_NSH_ARCHINIT)
-#  error CONFIG_BOARD_LATE_INITIALIZE or CONFIG_NSH_ARCHINIT is required for late initialization
-#endif
-
-#if defined(CONFIG_BOARD_LATE_INITIALIZE) && defined(CONFIG_NSH_ARCHINIT)
-#  error CONFIG_BOARD_LATE_INITIALIZE and CONFIG_NSH_ARCHINIT can not be defined at the same time
+#if !defined(CONFIG_BOARD_LATE_INITIALIZE)
+#  error CONFIG_BOARD_LATE_INITIALIZE is required for late initialization
 #endif
 
 /****************************************************************************
@@ -102,7 +98,6 @@ void board_late_initialize(void)
 #ifdef CONFIG_LIB_BOARDCTL
 int board_app_initialize(uintptr_t arg)
 {
-#  ifdef CONFIG_NSH_ARCHINIT
   /* Perform the arch late initialization */
 
   ceva_lateinitialize();
@@ -110,7 +105,6 @@ int board_app_initialize(uintptr_t arg)
   /* Perform the board late initialization */
 
   board_lateinitialize();
-#  endif
 
   return 0;
 }

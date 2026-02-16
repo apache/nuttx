@@ -182,10 +182,6 @@ Device Drivers -> USB Device Driver Support  .
 ===========================================  ===================================================
 Application Configuration -> NSH LIbrary     .
 ``CONFIG_NSH_USBDEV_TRACE=n`` 	             Make sure that any built-in tracing from NSH is disabled.
-``CONFIG_NSH_ARCHINIT=y`` 	                 Enable this option only if your board-specific logic
-.                                            has logic to automatically start the USB monitor.
-.                                            Otherwise the USB monitor can be started or stopped
-.                                            with the usbmon_start and usbmon_stop commands from the NSH console.
 ===========================================  ===================================================
 
 ===============================================   ============================================

@@ -20,7 +20,7 @@ endchoice
 config STM32F103MINIMUM_AT24_BLOCKMOUNT
 	bool "AT24 Serial EEPROM auto-mount"
 	default n
-	depends on NSH_ARCHINIT && STM32_I2C1 && MTD_AT24XX
+	depends on BOARD_LATE_INITIALIZE && STM32_I2C1 && MTD_AT24XX
 	---help---
 		Automatically initialize the AT24 I2C EEPROM driver when NSH starts.
 

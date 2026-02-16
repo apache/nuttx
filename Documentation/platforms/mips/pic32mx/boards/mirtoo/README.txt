@@ -913,7 +913,6 @@ Where <subdir> is one of the following:
          CONFIG_SST25_SECTOR512=y
          CONFIG_DISABLE_MOUNTPOINT=n
          CONFIG_FS_NXFFS=y
-         CONFIG_NSH_ARCHINIT=y
 
     4. Many operating system features are suppressed to produce a smaller
        footprint.
