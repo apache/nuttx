@@ -503,16 +503,14 @@ int scu_i2ctransfer(int port, int slave, uint16_t *inst, uint32_t nr_insts,
 
 /* Initialize SCU
  *
- * warning: This API called from board_app_initialize().
- * Do not call this API from each sensor drivers.
+ * WARNING: Do not call this API from each sensor drivers.
  */
 
 void scu_initialize(void);
 
 /* Uninitialize SCU
  *
- * warning: This API called from board_app_initialize().
- * Do not call this API from each sensor drivers.
+ * WARNING: Do not call this API from each sensor drivers.
  */
 
 void scu_uninitialize(void);

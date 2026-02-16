@@ -112,7 +112,7 @@ config SAMA5D4EK_DRAM_BOOT
 config SAMA5D4EK_NAND_BLOCKMOUNT
 	bool "NAND FLASH auto-mount"
 	default n
-	depends on NSH_ARCHINIT && SAMA5_EBICS3_NAND
+	depends on BOARD_LATE_INITIALIZE && SAMA5_EBICS3_NAND
 	---help---
 		Automatically initialize the NAND FLASH driver when NSH starts.
 
@@ -151,7 +151,7 @@ endchoice # NAND FLASH configuration
 config SAMA5D4EK_AT25_BLOCKMOUNT
 	bool "AT25 serial FLASH auto-mount"
 	default n
-	depends on (NSH_ARCHINIT || SAMA5D4EK_AT25_MAIN) && SAMA5_SPI0 && MTD_AT25
+	depends on (BOARD_LATE_INITIALIZE || SAMA5D4EK_AT25_MAIN) && SAMA5_SPI0 && MTD_AT25
 	---help---
 		Automatically initialize the AT25 SPI FLASH driver when NSH starts.
 

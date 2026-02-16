@@ -8,7 +8,7 @@ USB Host-Side Drivers
    ``struct usbhost_connection_s`` defined in
    ``include/nuttx/usb/usbhost.h``.
 
-   -  ``struct usbhost_driver_s`` provides the interface between 
+   -  ``struct usbhost_driver_s`` provides the interface between
       the USB host driver and the USB host class driver.
 
    -  ``struct usbhost_connection_s`` provides the interface between
@@ -90,9 +90,6 @@ USB Host-Side Drivers
       host controller driver's ``enumerate`` method to bind the
       registered USB host class driver to the USB host controller
       driver.
-
-      **Examples**: The function ``nsh_waiter()`` in the file
-      ``boards/arm/lpc17xx_40xx/olimex-lpc1766stk/src/lpc17_40_appinit.c``.
 
    #. As part of its operation during the binding operation, the
       USB host class driver will register an instances of a

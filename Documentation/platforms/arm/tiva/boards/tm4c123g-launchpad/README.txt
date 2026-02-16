@@ -116,9 +116,6 @@ AT24 Serial EEPROM
       CONFIG_AT24XX_SIZE=512                : Specifies the AT 24C512 part
       CONFIG_AT24XX_ADDR=0x53               : AT24 I2C address
 
-    Application Configuration -> NSH Library
-      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
-
     File systems
       CONFIG_NXFFS=y                        : Enables the NXFFS file system
       CONFIG_NXFFS_PREALLOCATED=y           : Required

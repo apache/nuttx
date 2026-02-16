@@ -55,8 +55,8 @@ controls the LEDs:
     LED_IRQSENABLED      Interrupts enabled       OFF      OFF
     LED_STACKCREATED     Idle stack created       ON       OFF
     LED_INIRQ            In an interrupt          N/C      ON
-    LED_SIGNAL           In a signal handler      N/C      N/C 
-    LED_ASSERTION        An assertion failed      N/C      N/C 
+    LED_SIGNAL           In a signal handler      N/C      N/C
+    LED_ASSERTION        An assertion failed      N/C      N/C
     LED_PANIC            The system has crashed   OFF      Blinking
     LED_IDLE             STM32 is is sleep mode   N/U      N/U
     ===================  =======================  ======== ========
@@ -361,8 +361,6 @@ summarized below:
 
 7. Initialization hooks are provided to enable the MRF24J40 and to
        register the radio character driver.
-
-         CONFIG_NSH_ARCHINIT=y
 
 8. Configuration instructions:  WPAN configuration must be performed
        using the i8sak program.  Detailed instructions are provided in a
@@ -776,7 +774,6 @@ NOTES:
          CONFIG_USBDEV_TRACE=y            : Enable USB trace feature
          CONFIG_USBDEV_TRACE_NRECORDS=128 : Buffer 128 records in memory
          CONFIG_NSH_USBDEV_TRACE=n        : No builtin tracing from NSH
-         CONFIG_NSH_ARCHINIT=y            : Automatically start the USB monitor
          CONFIG_USBMONITOR=y              : Enable the USB monitor daemon
          CONFIG_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
          CONFIG_USBMONITOR_PRIORITY=50    : USB monitor daemon priority

@@ -3216,7 +3216,6 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
 boards/arm/lpc2378/olimex-lpc2378/include/board.h
-boards/arm/lpc2378/olimex-lpc2378/src/lpc2378_appinit.c
 boards/arm/lpc2378/olimex-lpc2378/src/lpc2378_leds.c
 boards/arm/lpc2378/olimex-lpc2378/scripts/ld.script
 =======================================================

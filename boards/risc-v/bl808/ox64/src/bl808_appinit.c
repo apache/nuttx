@@ -142,11 +142,7 @@ int board_app_initialize(uintptr_t arg)
 #else
   /* Perform board-specific initialization */
 
-#ifdef CONFIG_NSH_ARCHINIT
-
   mount(NULL, "/proc", "procfs", 0, NULL);
-
-#endif
 
   return OK;
 #endif
@@ -221,11 +217,7 @@ void board_late_initialize(void)
   bl808_wdt_init();
 #endif
 
-#ifdef CONFIG_NSH_ARCHINIT
-
   mount(NULL, "/proc", "procfs", 0, NULL);
-
-#endif
 
 #ifdef CONFIG_USERLED
   /* Register the LED driver */

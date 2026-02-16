@@ -43,7 +43,7 @@ events as follows:
     LED_SIGNAL           In a signal handler[3]  N/C     ON      N/C     OFF
     LED_ASSERTION        An assertion failed     ON      ON      N/C     OFF
     LED_PANIC            The system has crashed  N/C     N/C     N/C     ON
-    LED_IDLE             STM32 is is sleep mode 
+    LED_IDLE             STM32 is is sleep mode
     ===================  ======================= ======= ======= ======= ======
 
 [1] If LED1, LED2, LED3 are statically on, then NuttX probably failed to boot
@@ -278,7 +278,7 @@ NOTES:
 
    b. Execute 'make menuconfig' in nuttx/ in order to start the
       reconfiguration process.
-          
+
 2. This example assumes that a network is connected.  During its
    initialization, it will try to negotiate the link speed.  If you have
    no network connected when you reset the board, there will be a long
@@ -399,8 +399,6 @@ Enable the application configurations that you want to use.  As examples::
 
        CONFIG_SCHED_WORKQUEUE    : Worker thread support is required for the mass
                                    storage class (both host and device).
-       CONFIG_NSH_ARCHINIT       : Architecture specific USB initialization
-                                   is needed
 
 11. This configuration requires that jumper JP22 be set to enable RS-232 operation.
 

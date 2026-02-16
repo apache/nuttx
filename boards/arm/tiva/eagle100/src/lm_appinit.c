@@ -44,25 +44,10 @@
 
 /* PORT and SLOT number probably depend on the board configuration */
 
-#ifdef CONFIG_NSH_ARCHINIT
-#  undef NSH_HAVEUSBDEV
-#  define NSH_HAVEMMCSD  1
-#  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 0
-#    error "The Eagle100 MMC/SD is on SSI0"
-#    undef CONFIG_NSH_MMCSDSPIPORTNO
-#    define CONFIG_NSH_MMCSDSPIPORTNO 0
-#  endif
-#  if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
-#    error "The Eagle100 MMC/SD is on SSI0 slot 0"
-#    undef CONFIG_NSH_MMCSDSLOTNO
-#    define CONFIG_NSH_MMCSDSLOTNO 0
-#  endif
-#else
 #    undef  CONFIG_NSH_MMCSDSPIPORTNO
 #    define CONFIG_NSH_MMCSDSPIPORTNO 0
 #    undef  CONFIG_NSH_MMCSDSLOTNO
 #    define CONFIG_NSH_MMCSDSLOTNO 0
-#endif
 
 /* Can't support USB features if USB is not enabled */
 
