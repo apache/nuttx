@@ -31,12 +31,15 @@
 #include <inttypes.h>
 #include <string.h>
 #include <stdint.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 
 #include <nuttx/board.h>
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 
+#include "bootloader_flash_priv.h"
 #include "xtensa_attr.h"
 
 /****************************************************************************
@@ -44,7 +47,6 @@
  ****************************************************************************/
 
 #define ESP32_APP_LOAD_HEADER_MAGIC 0xace637d3
-#define ESP32_LOAD_SEGMENT_COUNT    4
 #define ESP32_BOOTLOADER_STACK_SIZE 2048
 
 /****************************************************************************
@@ -76,18 +78,13 @@ struct esp32_load_header_s
   uint32_t reserved[4];
 };
 
-struct esp32_boot_loader_segment_s
-{
-  uint32_t dest_addr;
-  uint32_t size;
-  FAR uint8_t *buffer;
-};
-
 struct esp32_boot_loader_args_s
 {
   uint32_t entry_addr;
   uintptr_t stack_top;
-  struct esp32_boot_loader_segment_s segments[ESP32_LOAD_SEGMENT_COUNT];
+  uint32_t dram_dest_addr;
+  uint32_t dram_size;
+  FAR const void *dram_src;
 };
 
 /****************************************************************************
@@ -96,14 +93,17 @@ struct esp32_boot_loader_args_s
 
 static bool esp32_ranges_overlap(uintptr_t start1, size_t size1,
                                  uintptr_t start2, size_t size2);
-static int esp32_prepare_ram_segment(int fd, uint32_t flash_offset,
-                                     uint32_t dest_addr, uint32_t size,
-                                     FAR const char *name,
-                                     FAR struct esp32_boot_loader_args_s
-                                     *args,
-                                     int index);
-static void esp32_release_ram_segments(FAR struct esp32_boot_loader_args_s
-                                       *args);
+static int esp32_get_partition_offset(int fd, FAR uint32_t *offset);
+static int esp32_flash_offset_add(uint32_t base, uint32_t offset,
+                                  FAR uint32_t *result);
+static int esp32_read_load_header(uint32_t flash_offset,
+                                  FAR struct esp32_load_header_s *header);
+static int esp32_copy_flash_segment(uint32_t flash_offset,
+                                    uint32_t dest_addr, uint32_t size,
+                                    FAR const char *name);
+static int esp32_prepare_dram_handoff(uint32_t flash_offset,
+                                      FAR const struct esp32_load_header_s
+                                      *load_header);
 static void RTC_IRAM_ATTR esp32_copy_segment(FAR const void *src,
                                              uint32_t dest_addr,
                                              uint32_t size);
@@ -137,33 +137,119 @@ static bool esp32_ranges_overlap(uintptr_t start1, size_t size1,
 }
 
 /****************************************************************************
- * Name: esp32_prepare_ram_segment
+ * Name: esp32_get_partition_offset
  *
  * Description:
- *   Read one RAM segment into a temporary buffer that is copied by the final
- *   RTC loader stage.
+ *   Return the byte offset in flash of the opened partition node.
  *
  ****************************************************************************/
 
-static int esp32_prepare_ram_segment(int fd, uint32_t flash_offset,
-                                     uint32_t dest_addr, uint32_t size,
-                                     FAR const char *name,
-                                     FAR struct esp32_boot_loader_args_s
-                                     *args,
-                                     int index)
+static int esp32_get_partition_offset(int fd, FAR uint32_t *offset)
 {
-  FAR uint8_t *buffer;
-  off_t read_offset;
-  ssize_t nread;
-  size_t remaining;
+  struct partition_info_s partinfo;
+  uint64_t partition_offset;
 
-  DEBUGASSERT(index >= 0 && index < ESP32_LOAD_SEGMENT_COUNT);
+  if (offset == NULL)
+    {
+      return -EINVAL;
+    }
+
+  if (ioctl(fd, BIOC_PARTINFO, (unsigned long)((uintptr_t)&partinfo)) < 0)
+    {
+      ferr("ERROR: BIOC_PARTINFO failed: %d\n", errno);
+      return -errno;
+    }
+
+  partition_offset = (uint64_t)partinfo.startsector *
+                     (uint64_t)partinfo.sectorsize;
+  if (partition_offset > UINT32_MAX)
+    {
+      ferr("ERROR: Partition offset overflow: %" PRIu64 "\n",
+           partition_offset);
+      return -EOVERFLOW;
+    }
+
+  *offset = (uint32_t)partition_offset;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp32_flash_offset_add
+ *
+ * Description:
+ *   Safely compute a 32-bit flash offset sum.
+ *
+ ****************************************************************************/
+
+static int esp32_flash_offset_add(uint32_t base, uint32_t offset,
+                                  FAR uint32_t *result)
+{
+  uint64_t sum;
+
+  if (result == NULL)
+    {
+      return -EINVAL;
+    }
+
+  sum = (uint64_t)base + (uint64_t)offset;
+  if (sum > UINT32_MAX)
+    {
+      ferr("ERROR: Flash offset overflow: 0x%08" PRIx32 " + 0x%08" PRIx32
+           "\n", base, offset);
+      return -EOVERFLOW;
+    }
+
+  *result = (uint32_t)sum;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp32_read_load_header
+ *
+ * Description:
+ *   Read the MCUboot load header from flash using ROM mmap routines.
+ *
+ ****************************************************************************/
+
+static int esp32_read_load_header(uint32_t flash_offset,
+                                  FAR struct esp32_load_header_s *header)
+{
+  FAR const void *mapping;
+
+  if (header == NULL)
+    {
+      return -EINVAL;
+    }
+
+  mapping = bootloader_mmap(flash_offset, sizeof(*header));
+  if (mapping == NULL)
+    {
+      ferr("ERROR: Failed to mmap image load header at 0x%08" PRIx32 "\n",
+           flash_offset);
+      return -EIO;
+    }
+
+  memcpy(header, mapping, sizeof(*header));
+  bootloader_munmap(mapping);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp32_copy_flash_segment
+ *
+ * Description:
+ *   Load one segment from flash to RAM via ROM mmap routines.
+ *
+ ****************************************************************************/
+
+static int esp32_copy_flash_segment(uint32_t flash_offset,
+                                    uint32_t dest_addr, uint32_t size,
+                                    FAR const char *name)
+{
+  FAR const void *mapping;
 
   if (size == 0)
     {
-      args->segments[index].dest_addr = 0;
-      args->segments[index].size      = 0;
-      args->segments[index].buffer    = NULL;
       return OK;
     }
 
@@ -173,84 +259,95 @@ static int esp32_prepare_ram_segment(int fd, uint32_t flash_offset,
       return -EINVAL;
     }
 
-  buffer = kmm_malloc(size);
-  if (buffer == NULL)
+  mapping = bootloader_mmap(flash_offset, size);
+  if (mapping == NULL)
     {
-      ferr("ERROR: Failed to allocate %s preload buffer (%" PRIu32 ")\n",
-           name, size);
-      return -ENOMEM;
+      ferr("ERROR: Failed to mmap %s segment\n", name);
+      return -EIO;
     }
 
-  finfo("Preloading %-9s: dst=0x%08" PRIx32 " off=0x%08" PRIx32
+  finfo("Loading %-9s: dst=0x%08" PRIx32 " off=0x%08" PRIx32
         " size=0x%08" PRIx32 "\n",
         name, dest_addr, flash_offset, size);
 
-  read_offset = (off_t)flash_offset;
-  remaining = (size_t)size;
+  esp32_copy_segment(mapping, dest_addr, size);
+  bootloader_munmap(mapping);
 
-  while (remaining > 0)
-    {
-      nread = pread(fd, buffer + (size - remaining), remaining, read_offset);
-      if (nread < 0)
-        {
-          ferr("ERROR: Failed to read %s segment: %d\n", name, errno);
-          kmm_free(buffer);
-          return -errno;
-        }
-
-      if (nread == 0)
-        {
-          ferr("ERROR: Unexpected EOF while reading %s segment\n", name);
-          kmm_free(buffer);
-          return -EIO;
-        }
-
-      read_offset += nread;
-      remaining -= nread;
-    }
-
-  if (esp32_ranges_overlap((uintptr_t)buffer, size,
-                           (uintptr_t)dest_addr, size))
-    {
-      ferr("ERROR: %s preload buffer overlaps destination\n", name);
-      kmm_free(buffer);
-      return -EFAULT;
-    }
-
-  args->segments[index].dest_addr = dest_addr;
-  args->segments[index].size      = size;
-  args->segments[index].buffer    = buffer;
   return OK;
 }
 
 /****************************************************************************
- * Name: esp32_release_ram_segments
+ * Name: esp32_prepare_dram_handoff
  *
  * Description:
- *   Free preloaded segment buffers used by the boot loader handoff.
+ *   Prepare final DRAM copy handoff data. DRAM is copied in the RTC loader
+ *   just before jumping to the new entry point.
  *
  ****************************************************************************/
 
-static void esp32_release_ram_segments(FAR struct esp32_boot_loader_args_s
-                                       *args)
+static int esp32_prepare_dram_handoff(uint32_t flash_offset,
+                                      FAR const struct esp32_load_header_s
+                                      *load_header)
 {
-  int i;
+  uintptr_t stack_buf;
 
-  for (i = 0; i < ESP32_LOAD_SEGMENT_COUNT; i++)
+  DEBUGASSERT(load_header != NULL);
+
+  memset(&g_boot_loader_args, 0, sizeof(g_boot_loader_args));
+
+  g_boot_loader_args.entry_addr     = load_header->entry_addr;
+  g_boot_loader_args.dram_dest_addr = load_header->dram_dest_addr;
+  g_boot_loader_args.dram_size      = load_header->dram_size;
+
+  if (g_boot_loader_args.dram_size == 0)
     {
-      if (args->segments[i].buffer != NULL)
-        {
-          kmm_free(args->segments[i].buffer);
-          args->segments[i].buffer = NULL;
-        }
+      return -EINVAL;
     }
+
+  if (g_boot_loader_args.dram_dest_addr == 0)
+    {
+      return -EINVAL;
+    }
+
+  g_boot_loader_args.dram_src =
+    bootloader_mmap(flash_offset, g_boot_loader_args.dram_size);
+  if (g_boot_loader_args.dram_src == NULL)
+    {
+      ferr("ERROR: Failed to mmap dram segment\n");
+      return -EIO;
+    }
+
+  stack_buf = (uintptr_t)kmm_malloc(ESP32_BOOTLOADER_STACK_SIZE);
+  if (stack_buf == 0)
+    {
+      ferr("ERROR: Failed to allocate boot loader stack\n");
+      bootloader_munmap(g_boot_loader_args.dram_src);
+      g_boot_loader_args.dram_src = NULL;
+      return -ENOMEM;
+    }
+
+  if (esp32_ranges_overlap(stack_buf, ESP32_BOOTLOADER_STACK_SIZE,
+                           g_boot_loader_args.dram_dest_addr,
+                           g_boot_loader_args.dram_size))
+    {
+      ferr("ERROR: Boot loader stack overlaps DRAM destination\n");
+      kmm_free((FAR void *)stack_buf);
+      bootloader_munmap(g_boot_loader_args.dram_src);
+      g_boot_loader_args.dram_src = NULL;
+      return -EFAULT;
+    }
+
+  g_boot_loader_args.stack_top =
+    (stack_buf + ESP32_BOOTLOADER_STACK_SIZE) & ~(uintptr_t)0xf;
+
+  return OK;
 }
 
 /****************************************************************************
  * Name: esp32_copy_segment
  *
  * Description:
- *   Copy one preloaded segment into its destination address.
+ *   Copy one segment into its destination address.
  *
  ****************************************************************************/
 
@@ -272,8 +369,7 @@ static void RTC_IRAM_ATTR esp32_copy_segment(FAR const void *src,
  *
  * Description:
  *   Final loader stage. The routine executes from RTC fast memory and copies
- *   preloaded RAM segments into their target addresses just before jumping
- *   to the new image entry point.
+ *   the DRAM segment just before jumping to the new image entry point.
  *
  ****************************************************************************/
 
@@ -282,9 +378,9 @@ static void RTC_IRAM_ATTR esp32_boot_loader_stub(void)
   FAR const struct esp32_boot_loader_args_s *args = &g_boot_loader_args;
   register uintptr_t stack_top = args->stack_top;
   register uint32_t entry_addr = args->entry_addr;
-  register FAR const void *dram_src = args->segments[3].buffer;
-  register uint32_t dram_dst = args->segments[3].dest_addr;
-  register uint32_t dram_size = args->segments[3].size;
+  register FAR const void *dram_src = args->dram_src;
+  register uint32_t dram_dst = args->dram_dest_addr;
+  register uint32_t dram_size = args->dram_size;
 
   /* Disable interrupts */
 
@@ -296,16 +392,10 @@ static void RTC_IRAM_ATTR esp32_boot_loader_stub(void)
 
   __asm__ __volatile__("mov sp, %0" : : "r"(stack_top));
 
-  /* Copy IRAM and RTC sections first, then DRAM last. This avoids executing
-   * from memory that can be overwritten during the chain-boot transition.
+  /* DRAM must be copied in the final stage to avoid self-overwrite while
+   * still executing from the currently running image.
    */
 
-  esp32_copy_segment(args->segments[0].buffer, args->segments[0].dest_addr,
-                     args->segments[0].size);
-  esp32_copy_segment(args->segments[1].buffer, args->segments[1].dest_addr,
-                     args->segments[1].size);
-  esp32_copy_segment(args->segments[2].buffer, args->segments[2].dest_addr,
-                     args->segments[2].size);
   esp32_copy_segment(dram_src, dram_dst, dram_size);
 
   /* Jump using a register-held entry address to avoid relying on DRAM. */
@@ -340,7 +430,12 @@ int board_boot_image(FAR const char *path, uint32_t hdr_size)
 {
   int fd;
   int ret;
-  uintptr_t stack_buf;
+  uint32_t partition_offset;
+  uint32_t load_header_offset;
+  uint32_t iram_offset;
+  uint32_t dram_offset;
+  uint32_t lp_rtc_iram_offset;
+  uint32_t lp_rtc_dram_offset;
   struct esp32_load_header_s load_header;
 
   /* Legacy/simple boot image formats are not supported */
@@ -360,26 +455,26 @@ int board_boot_image(FAR const char *path, uint32_t hdr_size)
       return -errno;
     }
 
-  /* Skip image header if present (e.g. MCUboot/nxboot header) */
-
-  if (hdr_size > 0)
+  ret = esp32_get_partition_offset(fd, &partition_offset);
+  if (ret < 0)
     {
-      if (lseek(fd, hdr_size, SEEK_SET) < 0)
-        {
-          ferr("ERROR: Failed to seek load header: %d\n", errno);
-          close(fd);
-          return -errno;
-        }
+      close(fd);
+      return ret;
     }
 
-  /* Read image load header generated for MCUboot app format */
-
-  ret = read(fd, &load_header, sizeof(struct esp32_load_header_s));
-  if (ret != sizeof(struct esp32_load_header_s))
+  ret = esp32_flash_offset_add(partition_offset, hdr_size,
+                               &load_header_offset);
+  if (ret < 0)
     {
-      ferr("ERROR: Failed to read image load header: %d\n", errno);
       close(fd);
-      return -errno;
+      return ret;
+    }
+
+  ret = esp32_read_load_header(load_header_offset, &load_header);
+  if (ret < 0)
+    {
+      close(fd);
+      return ret;
     }
 
   if (load_header.header_magic != ESP32_APP_LOAD_HEADER_MAGIC)
@@ -390,78 +485,76 @@ int board_boot_image(FAR const char *path, uint32_t hdr_size)
       return -EINVAL;
     }
 
-  memset(&g_boot_loader_args, 0, sizeof(g_boot_loader_args));
-  g_boot_loader_args.entry_addr = load_header.entry_addr;
-
-  /* Preload segments into temporary buffers. They are copied to destination
-   * addresses by the final RTC-resident loader stage.
-   */
-
-  ret = esp32_prepare_ram_segment(fd, load_header.iram_flash_offset,
-                                  load_header.iram_dest_addr,
-                                  load_header.iram_size, "iram",
-                                  &g_boot_loader_args, 0);
+  ret = esp32_flash_offset_add(partition_offset,
+                               load_header.iram_flash_offset,
+                               &iram_offset);
   if (ret < 0)
     {
       close(fd);
       return ret;
     }
 
-  ret = esp32_prepare_ram_segment(fd, load_header.lp_rtc_iram_flash_offset,
-                                  load_header.lp_rtc_iram_dest_addr,
-                                  load_header.lp_rtc_iram_size,
-                                  "lp_rtc_iram", &g_boot_loader_args, 1);
+  ret = esp32_flash_offset_add(partition_offset,
+                               load_header.dram_flash_offset,
+                               &dram_offset);
   if (ret < 0)
     {
-      esp32_release_ram_segments(&g_boot_loader_args);
       close(fd);
       return ret;
     }
 
-  ret = esp32_prepare_ram_segment(fd, load_header.lp_rtc_dram_flash_offset,
-                                  load_header.lp_rtc_dram_dest_addr,
-                                  load_header.lp_rtc_dram_size,
-                                  "lp_rtc_dram", &g_boot_loader_args, 2);
+  ret = esp32_flash_offset_add(partition_offset,
+                               load_header.lp_rtc_iram_flash_offset,
+                               &lp_rtc_iram_offset);
   if (ret < 0)
     {
-      esp32_release_ram_segments(&g_boot_loader_args);
       close(fd);
       return ret;
     }
 
-  ret = esp32_prepare_ram_segment(fd, load_header.dram_flash_offset,
-                                  load_header.dram_dest_addr,
-                                  load_header.dram_size, "dram",
-                                  &g_boot_loader_args, 3);
+  ret = esp32_flash_offset_add(partition_offset,
+                               load_header.lp_rtc_dram_flash_offset,
+                               &lp_rtc_dram_offset);
   if (ret < 0)
     {
-      esp32_release_ram_segments(&g_boot_loader_args);
       close(fd);
       return ret;
     }
 
-  stack_buf = (uintptr_t)kmm_malloc(ESP32_BOOTLOADER_STACK_SIZE);
-  if (stack_buf == 0)
+  ret = esp32_copy_flash_segment(iram_offset, load_header.iram_dest_addr,
+                                 load_header.iram_size, "iram");
+  if (ret < 0)
     {
-      ferr("ERROR: Failed to allocate boot loader stack\n");
-      esp32_release_ram_segments(&g_boot_loader_args);
       close(fd);
-      return -ENOMEM;
+      return ret;
     }
 
-  if (esp32_ranges_overlap(stack_buf, ESP32_BOOTLOADER_STACK_SIZE,
-                           load_header.dram_dest_addr,
-                           load_header.dram_size))
+  ret = esp32_copy_flash_segment(lp_rtc_iram_offset,
+                                 load_header.lp_rtc_iram_dest_addr,
+                                 load_header.lp_rtc_iram_size,
+                                 "lp_rtc_iram");
+  if (ret < 0)
     {
-      ferr("ERROR: Boot loader stack overlaps DRAM destination\n");
-      esp32_release_ram_segments(&g_boot_loader_args);
-      kmm_free((FAR void *)stack_buf);
       close(fd);
-      return -EFAULT;
+      return ret;
     }
 
-  g_boot_loader_args.stack_top =
-    (stack_buf + ESP32_BOOTLOADER_STACK_SIZE) & ~(uintptr_t)0xf;
+  ret = esp32_copy_flash_segment(lp_rtc_dram_offset,
+                                 load_header.lp_rtc_dram_dest_addr,
+                                 load_header.lp_rtc_dram_size,
+                                 "lp_rtc_dram");
+  if (ret < 0)
+    {
+      close(fd);
+      return ret;
+    }
+
+  ret = esp32_prepare_dram_handoff(dram_offset, &load_header);
+  if (ret < 0)
+    {
+      close(fd);
+      return ret;
+    }
 
   close(fd);
 
