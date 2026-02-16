@@ -88,6 +88,7 @@ clean: clean_context
 	$(call CLEAN)
 
 distclean: clean
+	$(call DELFILE, $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds) $(CXXSRCS:.cxx=.ddx))
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
 

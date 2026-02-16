@@ -128,6 +128,7 @@ clean:
 distclean:: clean
 	$(call DELDIR, bin)
 	$(call DELDIR, kbin)
+	$(call DELFILE, $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds))
 	$(call DELFILE, .depend)
 
 -include bin$(DELIM)Make.dep
