@@ -32,8 +32,11 @@ import subprocess
 import sys
 import traceback
 
-import elftools
-from elftools.elf.elffile import ELFFile
+try:
+    import lief
+except ImportError:
+    print("Please install lief package: pip3 install lief")
+    sys.exit(1)
 
 # ELF section flags
 SHF_WRITE = 0x1
@@ -60,6 +63,31 @@ logger = logging.getLogger()
 # Registers with multiple convenient names can have multiple entries here, one
 # for each name and with the same index.
 reg_table = {
+    "x86_64": {
+        "RAX": 0,
+        "RBX": 1,
+        "RCX": 2,
+        "RDX": 3,
+        "RSI": 4,
+        "RDI": 5,
+        "RBP": 6,
+        "FSP": 7,
+        "R8": 8,
+        "R9": 9,
+        "R10": 10,
+        "R11": 11,
+        "R12": 12,
+        "R13": 13,
+        "R14": 14,
+        "R15": 15,
+        "RIP": 16,
+        "RFLAGS": 17,
+        "CS": 18,
+        "SS": 19,
+        "DS": 20,
+        "ES": 21,
+        "FS": 22,
+    },
     "arm": {
         "R0": 0,
         "R1": 1,
@@ -301,28 +329,21 @@ class DumpELFFile:
 
     def parse(self, load_symbol: bool):
         self.__memories = []
-        elf = ELFFile.load_from_path(self.elffile)
-        self.__arch = elf.get_machine_arch().lower().replace("-", "")
-        self.__xlen = elf.elfclass
+        elf = lief.parse(self.elffile)
+        self.__arch = elf.header.machine_type.name.lower().replace("-", "")
+        if elf.header.identity_class == lief.ELF.Header.CLASS.ELF32:
+            self.__xlen = 32
+        else:
+            self.__xlen = 64
 
-        for section in elf.iter_sections():
-            # REALLY NEED to match exact type as all other sections
-            # (debug, text, etc.) are descendants where
-            # isinstance() would match.
-            if (
-                type(section) is not elftools.elf.sections.Section
-            ):  # pylint: disable=unidiomatic-typecheck
-                continue
-
-            size = section["sh_size"]
-            flags = section["sh_flags"]
-            start = section["sh_addr"]
+        for section in elf.sections:
+            size = section.size
+            flags = section.flags
+            start = section.virtual_address
             end = start + size - 1
-
             store = False
             desc = "?"
-
-            if section["sh_type"] == "SHT_PROGBITS":
+            if section.type == lief.ELF.Section.TYPE.PROGBITS:
                 if (flags & SHF_ALLOC_EXEC) == SHF_ALLOC_EXEC:
                     # Text section
                     store = True
@@ -335,41 +356,35 @@ class DumpELFFile:
                     # Read only data section
                     store = True
                     desc = "read-only data"
-
             if store:
-                memory = pack_memory(start, end, section.data())
+                memory = pack_memory(start, end, bytes(section.content))
                 logger.debug(
                     f"ELF Section: {hex(memory['start'])} to {hex(memory['end'])} of size {len(memory['data'])} ({desc})"
                 )
-
                 self.__memories.append(memory)
 
         # record first text segment address
-        for segment in elf.iter_segments():
-            if segment.header.p_flags & 1 and not self.__text:
+        for segment in elf.segments:
+            if segment.flags == 0x1 and not self.__text:
                 self.__text = segment.header.p_vaddr
 
         self.load_symbol = load_symbol
         if load_symbol:
-            symtab = elf.get_section_by_name(".symtab")
             self.symbol = {}
-            for symbol in symtab.iter_symbols():
-                if symbol["st_info"]["type"] != "STT_OBJECT":
-                    continue
-
-                    if symbol.name in (
-                        "g_tcbinfo",
-                        "g_pidhash",
-                        "g_npidhash",
-                        "g_last_regs",
-                        "g_running_tasks",
-                    ):
-                        self.symbol[symbol.name] = symbol
-                        logger.debug(
-                            f"name:{symbol.name} size:{symbol['st_size']} value:{hex(symbol['st_value'])}"
-                        )
-
-        elf.close()
+            for symbol in elf.symbols:
+                if symbol.name in (
+                    "g_tcbinfo",
+                    "g_pidhash",
+                    "g_npidhash",
+                    "g_last_regs",
+                    "g_running_tasks",
+                ):
+                    self.symbol[symbol.name] = {}
+                    self.symbol[symbol.name]["st_size"] = symbol.size
+                    self.symbol[symbol.name]["st_value"] = symbol.value
+                    logger.debug(
+                        f"name:{symbol.name} size:{symbol.size} value:{hex(symbol.value)}"
+                    )
         return True
 
     def merge(self, other):
@@ -520,28 +535,23 @@ class CoreDumpFile:
         if coredump is None:
             return
 
-        with open(coredump, "rb") as f:
-            elffile = ELFFile(f)
-            for segment in elffile.iter_segments():
-                if segment["p_type"] != "PT_LOAD":
-                    continue
-                logger.debug(f"Segment Flags: {segment['p_flags']}")
+        elf = lief.parse(coredump)
+        for segment in elf.segments:
+            if segment.type == lief.ELF.Segment.TYPE.LOAD:
                 logger.debug(
-                    f"Segment Offset: {segment['p_offset']}",
+                    f"Segment Offset: {segment.file_offset}",
                 )
-                logger.debug(f"Segment Virtual Address: {hex(segment['p_vaddr'])}")
-                logger.debug(f"Segment Physical Address: {hex(segment['p_paddr'])}")
-                logger.debug(f"Segment File Size:{segment['p_filesz']}")
-                logger.debug(f"Segment Memory Size:{segment['p_memsz']}")
-                logger.debug(f"Segment Alignment:{segment['p_align']}")
+                logger.debug(f"Segment Virtual Address: {hex(segment.virtual_address)}")
+                logger.debug(
+                    f"Segment Physical Address: {hex(segment.physical_address)}"
+                )
+                logger.debug(f"Segment File Size:{segment.physical_size}")
+                logger.debug(f"Segment Alignment:{segment.alignment}")
                 logger.debug("=" * 40)
-                f.seek(segment["p_offset"], 0)
-                data = f.read(segment["p_filesz"])
-                self.__memories.append(
-                    pack_memory(
-                        segment["p_vaddr"], segment["p_vaddr"] + len(data), data
-                    )
-                )
+                start = segment.virtual_address
+                end = start + segment.virtual_size
+                data = bytes(segment.content)
+                self.__memories.append(pack_memory(start, end, data))
 
     def get_memories(self):
         return self.__memories
@@ -672,7 +682,6 @@ class GDBStub:
         self.put_gdb_packet(pkt)
 
     def handle_register_group_read_packet(self):
-
         def put_register_packet(regs):
             reg_fmt = self.reg_fmt
             pkt = b""
@@ -703,7 +712,6 @@ class GDBStub:
         logger.debug(f"pkt: {pkt}")
 
         def put_one_register_packet(regs):
-
             reg = int(pkt[1:].decode("utf8"), 16)
             regval = None
 
@@ -812,17 +820,24 @@ class GDBStub:
         self.put_gdb_packet(b"OK")
 
     def handle_thread_context(self, pkt):
-        if b"g" == pkt[1:2]:
-            self.current_thread = int(pkt[2:]) - 1
-        elif b"c" == pkt[1:2]:
-            self.current_thread = int(pkt[3:]) - 1
+        thread = 0
 
-        if self.current_thread == -1:
-            self.current_thread = 0
+        if b"g" == pkt[1:2]:
+            thread = int(pkt[2:]) - 1
+        elif b"c" == pkt[1:2]:
+            thread = int(pkt[2:]) - 1
+
+        if thread < 0:
+            thread = 0
+
+        self.current_thread = thread
         self.put_gdb_packet(b"OK")
 
     def parse_thread(self):
         def unpack_data(addr, fmt, from_elf=False):
+            logger.debug(
+                f"Unpack data from {hex(addr)} with fmt {fmt} from elf {from_elf}"
+            )
             if from_elf:
                 r = self.get_mem_region(addr, self.elffile.get_memories())
             else:
@@ -964,7 +979,6 @@ class GDBStub:
 
             for thread in self.threadinfo:
                 if thread["tcb"]["pid"] == pid:
-
                     pkt_str = "Name: %s, State: %d, Pri: %d, Stack: %x, Size: %d" % (
                         thread["tcb"]["name"],
                         thread["tcb"]["state"],

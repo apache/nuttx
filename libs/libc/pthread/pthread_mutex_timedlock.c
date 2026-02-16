@@ -1,0 +1,140 @@
+/****************************************************************************
+ * libs/libc/pthread/pthread_mutex_timedlock.c
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <unistd.h>
+#include <pthread.h>
+#include <sched.h>
+#include <assert.h>
+#include <errno.h>
+#include <debug.h>
+
+#include <nuttx/sched.h>
+#include <nuttx/pthread.h>
+
+#include "pthread.h"
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: pthread_mutex_timedlock
+ *
+ * Description:
+ *   The pthread_mutex_timedlock() function will lock the mutex object
+ *   referenced by mutex. If the mutex is already locked, the calling
+ *   thread will block until the mutex becomes available as in the
+ *   pthread_mutex_lock() function. If the mutex cannot be locked without
+ *   waiting for another thread to unlock the mutex, this wait will be
+ *   terminated when the specified timeout expires.
+ *
+ *   The timeout will expire when the absolute time specified by
+ *   abs_timeout passes, as measured by the clock on which timeouts are
+ *   based (that is, when the value of that clock equals or exceeds
+ *   abs_timeout), or if the absolute time specified by abs_timeout
+ *   has already been passed at the time of the call.
+ *
+ * Input Parameters:
+ *   mutex - A reference to the mutex to be locked.
+ *   abs_timeout - max wait time (NULL wait forever)
+ *
+ * Returned Value:
+ *   0 on success or an errno value on failure.  Note that the errno EINTR
+ *   is never returned by pthread_mutex_timedlock().
+ *   errno is ETIMEDOUT if mutex could not be locked before the specified
+ *   timeout expired
+ *
+ * Assumptions:
+ *
+ * POSIX Compatibility:
+ *   - This implementation does not return EAGAIN when the mutex could not be
+ *     acquired because the maximum number of recursive locks for mutex has
+ *     been exceeded.
+ *
+ ****************************************************************************/
+
+int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
+                            FAR const struct timespec *abs_timeout)
+{
+  int ret = EINVAL;
+
+  sinfo("mutex=%p\n", mutex);
+  DEBUGASSERT(mutex != NULL);
+
+  if (mutex != NULL)
+    {
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
+      /* All mutex types except for NORMAL (and DEFAULT) will return
+       * an error if the caller does not hold the mutex.
+       */
+
+      if (mutex->type != PTHREAD_MUTEX_NORMAL &&
+          mutex_is_hold(&mutex->mutex))
+        {
+          /* Yes... Is this a recursive mutex? */
+
+          if (mutex->type == PTHREAD_MUTEX_RECURSIVE)
+            {
+              /* Yes... just increment the number of locks held and return
+               * success.
+               */
+
+              ret = pthread_mutex_take(mutex, abs_timeout);
+            }
+          else
+            {
+              /* No, then we would deadlock... return an error (default
+               * behavior is like PTHREAD_MUTEX_ERRORCHECK)
+               *
+               * NOTE: This is the correct behavior for a 'robust', NORMAL
+               * mutex.  Compliant behavior for non-robust mutex should not
+               * include these checks.  In that case, the deadlock condition
+               * should not be detected and the thread should be permitted
+               * to deadlock.
+               */
+
+              serr("ERROR: Returning EDEADLK\n");
+              ret = EDEADLK;
+            }
+        }
+      else
+#endif /* CONFIG_PTHREAD_MUTEX_TYPES */
+
+        {
+          /* Take the underlying semaphore, waiting if necessary.  NOTE that
+           * is required to deadlock for the case of the non-robust NORMAL
+           * or default mutex.
+           */
+
+          ret = pthread_mutex_take(mutex, abs_timeout);
+        }
+    }
+
+  sinfo("Returning %d\n", ret);
+  return ret;
+}

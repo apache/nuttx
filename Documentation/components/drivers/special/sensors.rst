@@ -10,10 +10,14 @@ Currently in NuttX we have 3 different approaches to sensor interfaces:
     sensors/sensors_uorb.rst
     sensors/sensors_legacy.rst
     sensors/sensors_cluster.rst
+    sensors/sensor_monitor.rst
 
 The preferred way for implementing new sensors is
 the :ref:`New sensor framework <new_sensor_framework>`, which provides the most
 general interface.
+
+The :doc:`Sensor Monitor <sensors/sensor_monitor>` provides a dynamic debugging
+tool for monitoring sensor activity at runtime.
 
 .. attach files to avoid warnings, but don't show them here !
 
@@ -30,6 +34,9 @@ general interface.
     sensors/mcp9600.rst
     sensors/mpl115a.rst
     sensors/nau7802.rst
+    sensors/qmi8658.rst
     sensors/sht4x.rst
     sensors/lsm6dso32.rst
     sensors/lis2mdl.rst
+    sensors/l86xxx.rst
+    sensors/gnss_lowerhalf.rst

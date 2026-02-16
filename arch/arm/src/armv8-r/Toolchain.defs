@@ -28,7 +28,11 @@ ifeq ($(CONFIG_ARCH_FPU),y)
   ifeq ($(CONFIG_ARM_NEON),y)
     ARCHCPUFLAGS += -mfpu=neon-fp-armv8
   else
-    ARCHCPUFLAGS += -mfpu=fp-armv8
+    ifeq ($(CONFIG_ARCH_DPFPU),y)
+      ARCHCPUFLAGS += -mfpu=fp-armv8
+    else
+      ARCHCPUFLAGS += -mfpu=fpv5-sp-d16
+    endif
   endif
   ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
     ARCHCPUFLAGS += -mfloat-abi=softfp

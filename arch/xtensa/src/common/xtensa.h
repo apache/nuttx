@@ -84,16 +84,6 @@
 #  define INTSTACK_SIZE         INTSTACK_ALIGNUP(CONFIG_ARCH_INTERRUPTSTACK)
 #endif
 
-/* XTENSA requires at least a 16-byte stack alignment. */
-
-#define STACK_ALIGNMENT     16
-
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
 /* An IDLE thread stack size for CPU0 must be defined */
 
 #if !defined(CONFIG_IDLETHREAD_STACKSIZE)
@@ -332,6 +322,13 @@ int xtensa_swint(int irq, void *context, void *arg);
 #ifdef CONFIG_STACK_COLORATION
 size_t xtensa_stack_check(uintptr_t alloc, size_t size);
 void xtensa_stack_color(void *stackbase, size_t nbytes);
+#endif
+
+#if defined(CONFIG_STACK_COLORATION) && \
+    defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 15
+void xtensa_color_intstack(void);
+#else
+#  define xtensa_color_intstack()
 #endif
 
 #endif /* __ASSEMBLY__ */

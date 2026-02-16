@@ -102,6 +102,7 @@ STRIP = $(CROSSDEV)strip --strip-unneeded
 LD = $(CROSSDEV)ld
 AS = $(CROSSDEV)as
 AR = $(CROSSDEV)ar -r
+UNAR = $(CROSSDEV)ar -x
 OBJCOPY= $(CROSSDEV)objcopy
 
 # File extensions
@@ -222,5 +223,5 @@ LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 CELFFLAGS = $(CFLAGS) -fvisibility=hidden
 CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
 
-LDELFFLAGS = -r -e __start
+LDELFFLAGS = -r -e _start
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)elf$(DELIM)gnu-elf.ld)

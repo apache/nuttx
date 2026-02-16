@@ -148,7 +148,7 @@
  * MX:          0
  * MV:          1
  * ML:          0
- * BGR:         0/1 Depending on endian mode of the mcu?
+ * BGR:         0/1
  * MH:          0
  */
 
@@ -156,10 +156,10 @@
 #define ILI9341_MADCTL_LANDSCAPE_MX     0
 #define ILI9341_MADCTL_LANDSCAPE_MV     ILI9341_MEMORY_ACCESS_CONTROL_MV
 #define ILI9341_MADCTL_LANDSCAPE_ML     0
-#ifdef CONFIG_ENDIAN_BIG
-#  define ILI9341_MADCTL_LANDSCAPE_BGR  0
-#else
+#ifdef CONFIG_ILI9341_BGR
 #  define ILI9341_MADCTL_LANDSCAPE_BGR  ILI9341_MEMORY_ACCESS_CONTROL_BGR
+#else
+#  define ILI9341_MADCTL_LANDSCAPE_BGR  0
 #endif
 #define ILI9341_MADCTL_LANDSCAPE_MH     0
 
@@ -176,7 +176,7 @@
  * MX:          0
  * MV:          0
  * ML:          0
- * BGR:         0/1 Depending on endian mode of the mcu?
+ * BGR:         0/1
  * MH:          0
  */
 
@@ -184,10 +184,10 @@
 #define ILI9341_MADCTL_PORTRAIT_MX      ILI9341_MEMORY_ACCESS_CONTROL_MX
 #define ILI9341_MADCTL_PORTRAIT_MV      0
 #define ILI9341_MADCTL_PORTRAIT_ML      ILI9341_MEMORY_ACCESS_CONTROL_ML
-#ifdef CONFIG_ENDIAN_BIG
-#  define ILI9341_MADCTL_PORTRAIT_BGR   0
-#else
+#ifdef CONFIG_ILI9341_BGR
 #  define ILI9341_MADCTL_PORTRAIT_BGR   ILI9341_MEMORY_ACCESS_CONTROL_BGR
+#else
+#  define ILI9341_MADCTL_PORTRAIT_BGR   0
 #endif
 #define ILI9341_MADCTL_PORTRAIT_MH      0
 
@@ -203,7 +203,7 @@
  * MX:          1
  * MV:          1
  * ML:          0
- * BGR:         0/1 Depending on endian mode of the mcu?
+ * BGR:         0/1
  * MH:          0
  */
 
@@ -211,10 +211,10 @@
 #define ILI9341_MADCTL_RLANDSCAPE_MX    ILI9341_MEMORY_ACCESS_CONTROL_MX
 #define ILI9341_MADCTL_RLANDSCAPE_MV    ILI9341_MEMORY_ACCESS_CONTROL_MV
 #define ILI9341_MADCTL_RLANDSCAPE_ML    0
-#ifdef CONFIG_ENDIAN_BIG
-#  define ILI9341_MADCTL_RLANDSCAPE_BGR 0
-#else
+#ifdef CONFIG_ILI9341_BGR
 #  define ILI9341_MADCTL_RLANDSCAPE_BGR ILI9341_MEMORY_ACCESS_CONTROL_BGR
+#else
+#  define ILI9341_MADCTL_RLANDSCAPE_BGR 0
 #endif
 #define ILI9341_MADCTL_RLANDSCAPE_MH    0
 
@@ -232,7 +232,7 @@
  * MX:          1
  * MV:          0
  * ML:          0
- * BGR:         0/1 Depending on endian mode of the mcu?
+ * BGR:         0/1
  * MH:          0
  *
  */
@@ -241,10 +241,10 @@
 #define ILI9341_MADCTL_RPORTRAIT_MX     0
 #define ILI9341_MADCTL_RPORTRAIT_MV     0
 #define ILI9341_MADCTL_RPORTRAIT_ML     ILI9341_MEMORY_ACCESS_CONTROL_ML
-#ifdef CONFIG_ENDIAN_BIG
-#  define ILI9341_MADCTL_RPORTRAIT_BGR  0
-#else
+#ifdef CONFIG_ILI9341_BGR
 #  define ILI9341_MADCTL_RPORTRAIT_BGR  ILI9341_MEMORY_ACCESS_CONTROL_BGR
+#else
+#  define ILI9341_MADCTL_RPORTRAIT_BGR  0
 #endif
 #define ILI9341_MADCTL_RPORTRAIT_MH     0
 
@@ -562,16 +562,34 @@ static void ili9341_selectarea(FAR struct ili9341_lcd_s *lcd,
  *
  * Input Parameters:
  *   lcd_dev - The lcd device
- *   row     - Starting row to write to (range: 0 <= row < yres)
- *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
+ *   row     - Row to write to (range: 0 <= row < yres)
+ *   col     - Starting column to write to (range: 0 <= col < xres)
  *   buffer  - The buffer containing the run to be written to the LCD
- *   npixels - The number of pixels to write to the
- *             (range: 0 < npixels <= xres-col)
+ *   npixels - The number of pixels to write to the LCD, limited by col
+ *             (range: 1 <= npixels <= xres - col)
  *
  * Returned Value:
  *
  *   On success - OK
  *   On error   - -EINVAL
+ *
+ * NOTE: This procedure could be used as putarea's fallback when putarea is
+ *       not implemented. In such a case, the input to the putarea, i.e.:
+ *
+ *       - row_start (0 <= row_start < yres)
+ *       - row_end   (row_start <= row_end < yres)
+ *       - col_start (0 <= col_start < xres)
+ *       - col_end   (col_start <= col_end < xres)
+ *
+ *       needs to be converted to multiple calls to putrun:
+ *
+ *         col = col_start;
+ *         npixels = col_end - col_start + 1;
+ *
+ *         for (row = row_start; row <= row_end; row++)
+ *           {
+ *             putrun(lcd_dev, row, col, buffer, npixels);
+ *           }
  *
  ****************************************************************************/
 
@@ -585,11 +603,37 @@ static int ili9341_putrun(FAR struct lcd_dev_s *lcd_dev, fb_coord_t row,
 
   DEBUGASSERT(buffer && ((uintptr_t)buffer & 1) == 0);
 
-  /* Check if position outside of area */
+  /* Check if position outside of the LCD's area. Fix when possible. */
 
-  if (col + npixels > ili9341_getxres(dev) || row > ili9341_getyres(dev))
+  if (row >= ili9341_getyres(dev))
     {
-      return -EINVAL;
+      lcderr("row >= yres: %d >= %d", row, ili9341_getyres(dev));
+      row = ili9341_getyres(dev) - 1;
+      lcdinfo("row set to %d", row);
+    }
+
+  if (npixels < 1)
+    {
+      lcderr("npixels needs to be at least one, it is %d", npixels);
+      npixels = 1;
+      lcdinfo("npixels set to %d", npixels);
+    }
+
+  if (col + npixels > ili9341_getxres(dev))
+    {
+      lcderr("col + npixels is %d but must be at most %d",
+             (col + npixels),
+             ili9341_getxres(dev));
+      npixels = ili9341_getxres(dev) - col;
+      if (npixels < 1)
+        {
+          lcderr("failed to fix npixels");
+          return -EINVAL;
+        }
+      else
+        {
+          lcdinfo("col is %d, npixels set to %d", col, npixels);
+        }
     }
 
   /* Select lcd driver */
@@ -727,6 +771,9 @@ static int ili9341_hwinitialize(FAR struct ili9341_dev_s *dev)
   lcdinfo("ili9341 LCD driver: Software Reset\n");
   lcd->sendcmd(lcd, ILI9341_SOFTWARE_RESET);
   up_mdelay(5);
+
+  lcd->deselect(lcd);
+  lcd->select(lcd);
 
   lcdinfo("ili9341 LCD driver: set Memory Access Control: %04x\n",
           dev->orient);
@@ -1040,6 +1087,10 @@ FAR struct lcd_dev_s *
           /* Initialize the LCD driver */
 
           ret = ili9341_hwinitialize(priv);
+
+          /* Clear the display after initialization. */
+
+          ili9341_clear(dev, 0x0000);
 
           if (ret == OK)
             {

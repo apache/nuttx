@@ -66,6 +66,18 @@ static const struct arm_mmu_region g_mmu_regions[] =
                         CONFIG_RAMBANK1_ADDR, CONFIG_RAMBANK1_SIZE,
                         MT_NORMAL | MT_RW | MT_SECURE),
 
+#if defined(CONFIG_ARCH_CHIP_IMX95)
+
+  MMU_REGION_FLAT_ENTRY("PCI_DMA",
+                        CONFIG_PCI_DMA_ADDR, CONFIG_PCI_DMA_SIZE,
+                        MT_NORMAL_NC | MT_RW | MT_SECURE),
+
+  MMU_REGION_FLAT_ENTRY("PCI_OB",
+                        CONFIG_PCI_OB_ADDR, CONFIG_PCI_OB_SIZE,
+                        MT_NORMAL_NC | MT_RW | MT_SECURE),
+#endif
+
+#if defined(CONFIG_ARCH_CHIP_IMX93)
 #ifndef CONFIG_IMX9_DDR_TRAINING /* OCRAM set at arm64_mmu.c */
   MMU_REGION_FLAT_ENTRY("OCRAM",
                         CONFIG_OCRAM_BASE_ADDR, CONFIG_OCRAM_SIZE,
@@ -75,6 +87,7 @@ static const struct arm_mmu_region g_mmu_regions[] =
   MMU_REGION_FLAT_ENTRY("FSPI_PERIPHERAL",
                         CONFIG_FSPI_PER_BASEADDR, CONFIG_FSPI_PER_SIZE,
                         MT_DEVICE_NGNRNE | MT_RW | MT_SECURE),
+#endif
 };
 
 const struct arm_mmu_config g_mmu_config =
@@ -163,6 +176,7 @@ void arm64_el_init(void)
 
 void arm64_chip_boot(void)
 {
+#ifndef CONFIG_ARCH_CHIP_IMX95
 #if defined(CONFIG_IMX9_BOOTLOADER) && CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
   imx9_mix_powerup();
 
@@ -176,6 +190,7 @@ void arm64_chip_boot(void)
 
 #ifdef CONFIG_IMX9_DDR_TRAINING
   imx9_dram_init();
+#endif
 #endif
 #endif
 
@@ -201,12 +216,6 @@ void arm64_chip_boot(void)
   imx9_gpioirq_initialize();
 #endif
 
-  /* Perform board-specific device initialization. This would include
-   * configuration of board specific resources such as GPIOs, LEDs, etc.
-   */
-
-  imx9_board_initialize();
-
 #ifdef USE_EARLYSERIALINIT
   /* Perform early serial initialization if we are going to use the serial
    * driver.
@@ -214,4 +223,10 @@ void arm64_chip_boot(void)
 
   arm64_earlyserialinit();
 #endif
+
+  /* Perform board-specific device initialization. This would include
+   * configuration of board specific resources such as GPIOs, LEDs, etc.
+   */
+
+  imx9_board_initialize();
 }

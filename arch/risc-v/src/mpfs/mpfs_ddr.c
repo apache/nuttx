@@ -3449,6 +3449,7 @@ static int mpfs_training_verify(void)
   if ((LIBERO_SETTING_TRAINING_SKIP_SETTING & ADDCMD_BIT) != ADDCMD_BIT)
     {
       unsigned low_ca_dly_count = 0;
+      unsigned decrease_count = 0;
       uint8_t ca_status[8] =
         {
           ((addcmd_status0) & 0xff),
@@ -3467,21 +3468,28 @@ static int mpfs_training_verify(void)
        * Expected result is increasing numbers, starting at index n and
        * wrapping around. For example:
        *   [0x35, 0x3b, 0x4, 0x14, 0x1b, 0x21, 0x28, 0x2f].
-       *
-       * Also they need to be separated by at least 5
        */
 
       for (i = 0; i < 8; i++)
         {
-          if (ca_status[i] < last + 5)
+          if (ca_status[i] < 5)
             {
               low_ca_dly_count++;
+            }
+
+          if (ca_status[i] <= last)
+            {
+              decrease_count++;
             }
 
           last = ca_status[i];
         }
 
-      if (low_ca_dly_count > 1)
+      /* Check against thresholds. Allow one low and one extra
+       * backwards jump, in addition to the wrap-around point
+       */
+
+      if (low_ca_dly_count > 1 || decrease_count > 2)
         {
           /* Retrain via reset */
 
@@ -3508,17 +3516,32 @@ static int mpfs_training_verify(void)
           t_status |= 0x01;
         }
 
-      /* Check that DQ/DQS calculated window is above 5 taps
-       * and centered with margin
-       */
-
       off_taps = getreg32(MPFS_CFG_DDR_SGMII_PHY_DQDQS_STATUS1);
       width_taps = getreg32(MPFS_CFG_DDR_SGMII_PHY_DQDQS_STATUS2);
 
-      if (width_taps < DQ_DQS_NUM_TAPS ||
-          width_taps + off_taps <= 16 + DQ_DQS_NUM_TAPS / 2)
+      /* Check that DQ/DQS calculated window is above 5 taps */
+
+      if (width_taps < DQ_DQS_NUM_TAPS) /* eye is long enough */
         {
           t_status |= 0x01;
+        }
+
+      /* Check that DQ/DQS calculated window is centered; starts
+       * at > 2 taps left and ends at > 2 taps right from
+       * the center
+       */
+
+      if (width_taps + off_taps <= 16 + DQ_DQS_NUM_TAPS / 2 ||
+          off_taps >= 16 - DQ_DQS_NUM_TAPS / 2)
+        {
+          t_status |= 0x01;
+        }
+
+      /* Check that the calculated window ends within the 32-taps */
+
+      if (off_taps + width_taps > 32)
+        {
+           t_status |= 0x01;
         }
 
       /* Extra checks */

@@ -34,6 +34,7 @@ config ARCH_CHIP_A64
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARM64_HAVE_PSCI
+	select ARCH_HAVE_IRQPRIO
 	---help---
 		Allwinner A64 SoC
 
@@ -44,6 +45,7 @@ config ARCH_CHIP_RK3399
 	select ARCH_HAVE_RESET
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARM64_HAVE_PSCI
+	select ARCH_HAVE_IRQPRIO
 	---help---
 		Rockchip RK3399 SoC
 
@@ -57,6 +59,7 @@ config ARCH_CHIP_QEMU
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_TEXT_HEAP
 	select ARM64_HAVE_PSCI
+	select ARCH_HAVE_IRQPRIO
 	---help---
 		QEMU virt platform (ARMv8a)
 
@@ -72,6 +75,7 @@ config ARCH_CHIP_GOLDFISH
 	select ARCH_HAVE_RESET
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARM64_HAVE_PSCI
+	select ARCH_HAVE_IRQPRIO
 	---help---
 		Android GoldFish platform for NuttX (ARMv8a),
 		based on ARM virt board
@@ -80,6 +84,9 @@ config ARCH_CHIP_FVP_ARMV8R
 	bool "ARM FVP virt platform (ARMv8r)"
 	select ARCH_CORTEX_R82
 	select ARCH_HAVE_IRQTRIGGER
+	select ARCH_HAVE_IRQPRIO
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
 	---help---
 		ARM FVP virt platform (ARMv8r)
 
@@ -88,15 +95,18 @@ config ARCH_CHIP_IMX8
 	select ARCH_HAVE_ADDRENV
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_IRQPRIO
 	---help---
 		NXP i.MX8 (ARMv8a) applications processors
 
 config ARCH_CHIP_IMX9
 	bool "NXP i.MX9 Platform (ARMv8.2a)"
 	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_ELF_EXECUTABLE
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_IRQPRIO
 	---help---
 		NXP i.MX9 (ARMv8.2a) applications processors
 
@@ -108,6 +118,7 @@ config ARCH_CHIP_ZYNQ_MPSOC
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARM64_HAVE_PSCI
+	select ARCH_HAVE_IRQPRIO
 	---help---
 		XilinX ZYNQ MPSOC
 
@@ -121,6 +132,8 @@ config ARCH_CHIP_BCM2711
 	select ARCH_HAVE_MULTICPU
 	select ARCH_USE_MMU # Required for up_testset
 	select ARMV8A_HAVE_GICv2
+	select ARCH_HAVE_SDIO
+	select ARCH_HAVE_IRQPRIO
 	---help---
 		Broadcom BCM2711 quad-core ARM Cortex A72
 
@@ -203,17 +216,6 @@ config ARCH_SINGLE_SECURITY_STATE
 config ARM64_TBI
 	bool "Top Byte Ignore support"
 	default n
-
-config ARM64_SMP_BUSY_WAIT
-	bool "Busy wait when SMP boot"
-	default n
-	depends on SMP
-	---help---
-		Enables busy wait when SMP boot
-
-config ARM64_SMP_BUSY_WAIT_FLAG_ADDR
-	hex "Busy wait flag address"
-	depends on ARM64_SMP_BUSY_WAIT
 
 config ARCH_HAVE_EL3
 	bool
@@ -330,6 +332,7 @@ config ARCH_CORTEX_R82
 	bool
 	default n
 	select ARCH_ARMV8R
+	select ARCH_HAVE_TRUSTZONE
 	select ARCH_DCACHE
 	select ARCH_ICACHE
 	select ARCH_HAVE_MPU
@@ -337,6 +340,7 @@ config ARCH_CORTEX_R82
 	select ARCH_HAVE_CLUSTER_PMU
 	select ARCH_HAVE_TESTSET
 	select ARM64_HAVE_NEON
+	select ARCH_HAVE_PERF_EVENTS_USER_ACCESS if !ARCH_CLUSTER_PMU
 
 config ARCH_CPU_UNKNOWN
 	bool

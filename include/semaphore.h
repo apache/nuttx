@@ -123,6 +123,10 @@ struct sem_s
 
   dq_queue_t waitlist;
 
+#ifdef CONFIG_CUSTOM_SEMAPHORE_MAXVALUE
+  int32_t maxvalue;
+#endif
+
 #ifdef CONFIG_PRIORITY_INHERITANCE
 #  if CONFIG_SEM_PREALLOCHOLDERS > 0
   FAR struct semholder_s *hhead; /* List of holders of semaphore counts */

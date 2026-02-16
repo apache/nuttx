@@ -217,6 +217,16 @@ static const char *g_white_prefix[] =
   "ub32",    /* Ref:  include/fixedmath.h */
   "lua_",    /* Ref:  apps/interpreters/lua/lua-5.x.x/src/lua.h */
   "luaL_",   /* Ref:  apps/interpreters/lua/lua-5.x.x/src/lauxlib.h */
+  "Ba",      /* Ref:  apps/netutils/xedge/BAS/examples/xedge/src/xedge.h */
+  "Thread",  /* Ref:  apps/netutils/xedge/BAS/examples/xedge/src/xedge.h */
+  "LThread", /* Ref:  apps/netutils/xedge/BAS/examples/xedge/src/xedge.h */
+  "Http",    /* Ref:  apps/netutils/xedge/BAS/examples/xedge/src/xedge.h */
+  "Disk",    /* Ref:  apps/netutils/xedge/BAS/examples/xedge/src/xedge.h */
+  "Xedge",   /* Ref:  apps/netutils/xedge/BAS/examples/xedge/src/xedge.h */
+  "tAddr",   /* Ref:  arch/tricore/src */
+  "tClass",  /* Ref:  arch/tricore/src */
+  "tCpu",    /* Ref:  arch/tricore/src */
+  "tId",     /* Ref:  arch/tricore/src */
   NULL
 };
 
@@ -651,6 +661,19 @@ static const char *g_white_content_list[] =
   "timeMid",
   "timeHiAndVersion",
 
+  /* Ref:
+   * apps/netutils/xedge/BAS/examples/xedge/src/xedge.h
+   */
+
+  "ltMgr",
+  "Lt",
+  "setDispExit",
+  "baGetUnixTime",
+  "platformInitDiskIo",
+  "xedgeInitDiskIo",
+  "xedgeOpenAUX",
+  "baParseDate",
+
   NULL
 };
 
@@ -689,6 +712,18 @@ static const char *g_white_files[] =
    */
 
   "phy62xx/uart.c",
+
+  /* Skip Mixed case
+   * arch/arm/src/phy62xx/irq.c:194:5: error: Mixed case identifier found
+   */
+
+  "phy62xx/irq.c",
+
+  /* Skip Mixed case
+   * arch/arm/src/phy62xx/phyplus_wdt.c:61:28: error: Mixed case identifier found
+   */
+
+  "phy62xx/phyplus_wdt.c",
   NULL
 };
 

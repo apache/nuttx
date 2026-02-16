@@ -192,9 +192,10 @@ struct mcpwm_motor_lowerhalf_s
 
 struct mcpwm_capture_event_data_s
 {
-  uint32_t pos_edge_count;
-  uint32_t neg_edge_count;
-  uint32_t last_pos_edge_count;
+  uint32_t pos_edge_count;         /* Counter value on positive edge */
+  uint32_t neg_edge_count;         /* Counter value on negative edge */
+  uint32_t last_pos_edge_count;    /* Last counter value on positive edge */
+  uint32_t pos_edge_square_count;  /* Number of positive edges */
 };
 
 struct mcpwm_cap_channel_lowerhalf_s
@@ -240,6 +241,8 @@ static int esp_capture_getduty(struct cap_lowerhalf_s *lower,
                                uint8_t *duty);
 static int esp_capture_getfreq(struct cap_lowerhalf_s *lower,
                                uint32_t *freq);
+static int esp_capture_getedges(struct cap_lowerhalf_s *lower,
+                                uint32_t *edges);
 #endif
 
 /* MCPWM Motor Control */
@@ -353,6 +356,7 @@ static const struct cap_ops_s mcpwm_cap_ops =
   .stop        = esp_capture_stop,
   .getduty     = esp_capture_getduty,
   .getfreq     = esp_capture_getfreq,
+  .getedges    = esp_capture_getedges,
 };
 
 /* Data structures for the available capture channels */
@@ -1479,6 +1483,7 @@ static int esp_capture_start(struct cap_lowerhalf_s *lower)
   priv->isr_count = 0;
   priv->enabled = true;
   priv->ready = false;
+  priv->data->pos_edge_square_count = 0;
 
   cpinfo("Channel enabled: %d\n", priv->channel_id);
   spin_unlock_irqrestore(&priv->common->mcpwm_spinlock, flags);
@@ -1579,6 +1584,37 @@ static int esp_capture_getfreq(struct cap_lowerhalf_s *lower,
     struct mcpwm_cap_channel_lowerhalf_s *)lower;
   *freq = priv->freq;
   cpinfo("Get freq called from channel %d\n", priv->channel_id);
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: esp_capture_getedges
+ *
+ * Description:
+ *   This function is a requirement of the upper-half driver. Returns
+ *   the last edges count value.
+ *
+ * Input Parameters:
+ *   lower - Pointer to the capture channel lower-half data structure.
+ *   edges - uint32_t pointer where the edges count value is written.
+ *
+ * Returned Value:
+ *   Returns OK on success.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP_MCPWM_CAPTURE
+static int esp_capture_getedges(struct cap_lowerhalf_s *lower,
+                                uint32_t *edges)
+{
+  struct mcpwm_cap_channel_lowerhalf_s *priv = (
+    struct mcpwm_cap_channel_lowerhalf_s *)lower;
+
+  DEBUGASSERT(priv != NULL);
+
+  *edges = priv->data->pos_edge_square_count;
+  cpinfo("Get edges called from channel %d\n", priv->channel_id);
   return OK;
 }
 #endif
@@ -1801,6 +1837,7 @@ static int IRAM_ATTR mcpwm_driver_isr_default(int irq, void *context,
       data->last_pos_edge_count = data->pos_edge_count;
       data->pos_edge_count = cap_value;
       data->neg_edge_count = data->pos_edge_count;
+      data->pos_edge_square_count++;
       mcpwm_ll_capture_enable_negedge(common->hal.dev,
                                       lower->channel_id,
                                       true);

@@ -48,7 +48,7 @@
  *
  ****************************************************************************/
 
-#undef strsep /* See mm/README.txt */
+#undef strsep
 FAR char *strsep(FAR char **strp, FAR const char *delim)
 {
   FAR char *sbegin = *strp;

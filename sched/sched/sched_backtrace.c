@@ -43,8 +43,11 @@ struct backtrace_arg_s
   FAR void **buffer;
   int size;
   int skip;
-  cpu_set_t saved_affinity;
   bool need_restore;
+
+  /* The return value of up_backtrace() */
+
+  int stacksize;
 };
 
 /****************************************************************************
@@ -72,13 +75,14 @@ static int sched_backtrace_handler(FAR void *cookie)
 
   if (arg->need_restore)
     {
-      tcb->affinity = arg->saved_affinity;
       tcb->flags &= ~TCB_FLAG_CPU_LOCKED;
     }
 
   leave_critical_section(flags);
 
-  return up_backtrace(tcb, arg->buffer, arg->size, arg->skip);
+  arg->stacksize = up_backtrace(tcb, arg->buffer, arg->size, arg->skip);
+
+  return OK;
 }
 #endif
 
@@ -113,8 +117,8 @@ int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
       if (tcb != NULL)
         {
 #ifdef CONFIG_SMP
-          if (tcb->task_state == TSTATE_TASK_RUNNING &&
-              g_nx_initstate != OSINIT_PANIC)
+          if (!OSINIT_IS_PANIC() &&
+              tcb->task_state == TSTATE_TASK_RUNNING)
             {
               struct backtrace_arg_s arg;
 
@@ -126,12 +130,8 @@ int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
               else
                 {
                   arg.pid = tcb->pid;
-                  arg.saved_affinity = tcb->affinity;
                   arg.need_restore = true;
-
                   tcb->flags |= TCB_FLAG_CPU_LOCKED;
-                  CPU_ZERO(&tcb->affinity);
-                  CPU_SET(tcb->cpu, &tcb->affinity);
                 }
 
               arg.buffer = buffer;
@@ -139,7 +139,7 @@ int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
               arg.skip = skip;
               ret = nxsched_smp_call_single(tcb->cpu,
                                             sched_backtrace_handler,
-                                            &arg);
+                                            &arg) < 0 ? 0 : arg.stacksize;
             }
           else
 #endif

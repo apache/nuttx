@@ -297,7 +297,7 @@ static inline bool pg_dequeue(void)
 
           if (nxsched_add_readytorun(g_pftcb))
             {
-              up_switch_context(g_pftcb, wtcb);
+              up_switch_context(this_task(), wtcb);
             }
         }
     }
@@ -494,7 +494,7 @@ static inline void pg_fillcomplete(void)
 
   if (nxsched_add_readytorun(g_pftcb))
     {
-      up_switch_context(g_pftcb, wtcb);
+      up_switch_context(this_task(), wtcb);
     }
 }
 
@@ -545,7 +545,7 @@ int pg_worker(int argc, FAR char *argv[])
     {
       /* Wait awhile.  We will wait here until either the configurable
        * timeout elapses or until we are awakened by a signal (which
-       * terminates the nxsig_usleep with an EINTR error).  Note that
+       * terminates the nxsched_usleep with an EINTR error).  Note that
        * interrupts will be re- enabled while this task sleeps.
        *
        * The timeout is a failsafe that will handle any cases where a single
@@ -553,7 +553,7 @@ int pg_worker(int argc, FAR char *argv[])
        * supports timeouts for case of non-blocking, asynchronous fills.
        */
 
-      nxsig_usleep(CONFIG_PAGING_WORKPERIOD);
+      nxsched_usleep(CONFIG_PAGING_WORKPERIOD);
 
       /* The page fill worker thread will be awakened on one of 3 conditions:
        *
@@ -597,7 +597,7 @@ int pg_worker(int argc, FAR char *argv[])
 
               if (nxsched_add_readytorun(g_pftcb))
                 {
-                  up_switch_context(g_pftcb, wtcb);
+                  up_switch_context(this_task(), wtcb);
                 }
 
               /* Yes .. Start the next asynchronous fill.  Check the return
@@ -682,7 +682,7 @@ int pg_worker(int argc, FAR char *argv[])
 
           if (nxsched_add_readytorun(g_pftcb))
             {
-              up_switch_context(g_pftcb, wtcb);
+              up_switch_context(this_task(), wtcb);
             }
         }
 

@@ -34,6 +34,73 @@
 #include "semaphore/semaphore.h"
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static inline_function void reset_mutex(FAR sem_t *sem, int16_t count)
+{
+  /* Support only resetting mutex by removing one waiter */
+
+  DEBUGASSERT(count == 1);
+
+  /* Post the mutex once with holder value set to RESET | BLOCKS
+   * so we know that it is ok in this case to call the post from
+   * another thread.
+   */
+
+  atomic_set(NXSEM_MHOLDER(sem),
+              NXSEM_MRESET | NXSEM_MBLOCKING_BIT);
+
+  if (!dq_empty(SEM_WAITLIST(sem)))
+    {
+      DEBUGVERIFY(nxsem_post(sem));
+    }
+  else
+    {
+      atomic_set(NXSEM_MHOLDER(sem), NXSEM_MRESET);
+    }
+}
+
+static inline_function void reset_sem(FAR sem_t *sem, int16_t count)
+{
+  int32_t semcount;
+
+  /* A negative count indicates that the negated number of threads are
+   * waiting to take a count from the semaphore.  Loop here, handing
+   * out counts to any waiting threads.
+   */
+
+  while (atomic_read(NXSEM_COUNT(sem)) < 0 && count > 0)
+    {
+      /* Give out one counting, waking up one of the waiting threads
+       * and, perhaps, kicking off a lot of priority inheritance
+       * logic (REVISIT).
+       */
+
+      DEBUGVERIFY(nxsem_post(sem));
+      count--;
+    }
+
+  /* We exit the above loop with either (1) no threads waiting for the
+   * (i.e., with sem->semcount >= 0).  In this case, 'count' holds the
+   * the new value of the semaphore count.  OR (2) with threads still
+   * waiting but all of the semaphore counts exhausted:  The current
+   * value of sem->semcount is already correct in this case.
+   */
+
+  semcount = atomic_read(NXSEM_COUNT(sem));
+  do
+    {
+      if (semcount < 0)
+        {
+          break;
+        }
+    }
+  while (!atomic_try_cmpxchg_release(NXSEM_COUNT(sem), &semcount,
+                                    count));
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -65,7 +132,6 @@
 int nxsem_reset(FAR sem_t *sem, int16_t count)
 {
   irqstate_t flags;
-  int32_t semcount;
 
   DEBUGASSERT(sem != NULL && count >= 0);
 
@@ -83,62 +149,11 @@ int nxsem_reset(FAR sem_t *sem, int16_t count)
 
   if (NXSEM_IS_MUTEX(sem))
     {
-      /* Support only resetting mutex by removing one waiter */
-
-      DEBUGASSERT(count == 1);
-
-      /* Post the mutex once with holder value set to RESET | BLOCKS
-       * so we know that it is ok in this case to call the post from
-       * another thread.
-       */
-
-      atomic_set(NXSEM_MHOLDER(sem),
-                 NXSEM_MRESET | NXSEM_MBLOCKING_BIT);
-
-      if (!dq_empty(SEM_WAITLIST(sem)))
-        {
-          DEBUGVERIFY(nxsem_post(sem));
-        }
-      else
-        {
-          atomic_set(NXSEM_MHOLDER(sem), NXSEM_MRESET);
-        }
+      reset_mutex(sem, count);
     }
   else
     {
-      /* A negative count indicates that the negated number of threads are
-       * waiting to take a count from the semaphore.  Loop here, handing
-       * out counts to any waiting threads.
-       */
-
-      while (atomic_read(NXSEM_COUNT(sem)) < 0 && count > 0)
-        {
-          /* Give out one counting, waking up one of the waiting threads
-           * and, perhaps, kicking off a lot of priority inheritance
-           * logic (REVISIT).
-           */
-
-          DEBUGVERIFY(nxsem_post(sem));
-          count--;
-        }
-
-      /* We exit the above loop with either (1) no threads waiting for the
-       * (i.e., with sem->semcount >= 0).  In this case, 'count' holds the
-       * the new value of the semaphore count.  OR (2) with threads still
-       * waiting but all of the semaphore counts exhausted:  The current
-       * value of sem->semcount is already correct in this case.
-       */
-
-      semcount = atomic_read(NXSEM_COUNT(sem));
-      do
-        {
-          if (semcount < 0)
-            {
-              break;
-            }
-        }
-      while (!atomic_try_cmpxchg_release(NXSEM_COUNT(sem), &semcount,
-                                         count));
+      reset_sem(sem, count);
     }
 
   /* Allow any pending context switches to occur now */

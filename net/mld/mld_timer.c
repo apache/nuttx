@@ -120,7 +120,6 @@ static void mld_gendog_work(FAR void *arg)
   ifindex = (intptr_t)arg;
   DEBUGASSERT(ifindex > 0);
 
-  net_lock();
   dev = netdev_findbyindex(ifindex);
   if (dev == NULL)
     {
@@ -132,6 +131,8 @@ static void mld_gendog_work(FAR void *arg)
       net_unlock();
       return;
     }
+
+  netdev_lock(dev);
 
   /* Check for an Other Querier Present Timeout.  This timer is set in non-
    * Querier mode to detect the case where we have lost the Querier.
@@ -158,7 +159,7 @@ static void mld_gendog_work(FAR void *arg)
 
       /* Notify the device that we have a packet to send */
 
-      netdev_txnotify_dev(dev);
+      netdev_txnotify_dev(dev, MLD_POLL);
 
       /* Restart the Querier timer */
 
@@ -171,7 +172,7 @@ static void mld_gendog_work(FAR void *arg)
       mld_start_gentimer(dev, MSEC2TICK(MLD_OQUERY_MSEC));
     }
 
-  net_unlock();
+  netdev_unlock(dev);
 }
 
 /****************************************************************************
@@ -239,7 +240,6 @@ static void mld_v1dog_work(FAR void *arg)
   ifindex = (intptr_t)arg;
   DEBUGASSERT(ifindex > 0);
 
-  net_lock();
   dev = netdev_findbyindex(ifindex);
   if (dev == NULL)
     {
@@ -253,14 +253,14 @@ static void mld_v1dog_work(FAR void *arg)
     {
       /* Exit MLDv1 compatibility mode. */
 
+      netdev_lock(dev);
       CLR_MLD_V1COMPAT(dev->d_mld.flags);
+      netdev_unlock(dev);
 
       /* REVISIT:  Whenever a host changes its compatibility mode, it cancels
        * all of its pending responses and retransmission timers.
        */
     }
-
-  net_unlock();
 }
 
 /****************************************************************************
@@ -329,7 +329,6 @@ static void mld_polldog_work(FAR void *arg)
 
   /* Check if this a new join to the multicast group. */
 
-  net_lock();
   if (IS_MLD_STARTUP(group->flags))
     {
       MLD_STATINCR(g_netstats.mld.report_sched);
@@ -345,13 +344,14 @@ static void mld_polldog_work(FAR void *arg)
 
           fwarn("WARNING: No device associated with ifindex=%d\n",
                 group->ifindex);
-          net_unlock();
           return;
         }
 
       /* Schedule (and forget) the Report. */
 
+      netdev_lock(dev);
       ret = mld_schedmsg(group, mld_report_msgtype(dev));
+      netdev_unlock(dev);
       if (ret < 0)
         {
           mlderr("ERROR: Failed to schedule message: %d\n", ret);
@@ -375,8 +375,6 @@ static void mld_polldog_work(FAR void *arg)
           CLR_MLD_STARTUP(group->flags);
         }
     }
-
-  net_unlock();
 }
 
 /****************************************************************************

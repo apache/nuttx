@@ -44,6 +44,11 @@ ifeq ($(CONFIG_IMX9_USDHC),y)
 CSRCS += imx9_usdhc.c
 endif
 
+ifeq ($(CONFIG_IMX9_DDR_TRAINING),y)
+CSRCS += imx9_ddr_config.c
+endif
+
+
 include $(TOPDIR)/boards/Board.mk
 
 ifeq ($(CONFIG_IMX9_BOOTLOADER),y)

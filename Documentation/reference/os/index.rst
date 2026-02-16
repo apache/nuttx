@@ -23,6 +23,7 @@ in other header files.
   paging.rst
   shm.rst
   smp.rst
+  sleep.rst
   time_clock.rst
   wqueue.rst
   events.rst

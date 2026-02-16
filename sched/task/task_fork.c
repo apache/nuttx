@@ -93,11 +93,11 @@
  *
  ****************************************************************************/
 
-FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
+FAR struct tcb_s *nxtask_setup_fork(start_t retaddr)
 {
   FAR struct tcb_s *ptcb = this_task();
   FAR struct tcb_s *parent;
-  FAR struct task_tcb_s *child;
+  FAR struct tcb_s *child;
   FAR char **argv;
   size_t stack_size;
   uint8_t ttype;
@@ -137,7 +137,7 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
 
   /* Allocate a TCB for the child task. */
 
-  child = kmm_zalloc(sizeof(struct task_tcb_s));
+  child = kmm_zalloc(sizeof(struct tcb_s));
   if (!child)
     {
       serr("ERROR: Failed to allocate TCB\n");
@@ -145,14 +145,26 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
       goto errout;
     }
 
-  child->cmn.flags |= TCB_FLAG_FREE_TCB;
+  child->flags |= TCB_FLAG_FREE_TCB;
+
+  /* Initialize the task join */
+
+  nxtask_joininit(child);
+
+  /* Allocate a new task group with the same privileges as the parent */
+
+  ret = group_allocate(child, ttype);
+  if (ret < 0)
+    {
+      goto errout_with_tcb;
+    }
 
 #if defined(CONFIG_ARCH_ADDRENV)
-  /* Join the parent address environment (REVISIT: vfork() only) */
+  /* Join the parent address environment */
 
   if (ttype != TCB_FLAG_TTYPE_KERNEL)
     {
-      ret = addrenv_join(parent, &child->cmn);
+      ret = addrenv_join(parent, child);
       if (ret < 0)
         {
           goto errout_with_tcb;
@@ -160,25 +172,9 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
     }
 #endif
 
-  /* Initialize the task join */
-
-  nxtask_joininit(&child->cmn);
-
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-  spin_lock_init(&child->cmn.mutex_lock);
-#endif
-
-  /* Allocate a new task group with the same privileges as the parent */
-
-  ret = group_initialize(child, ttype);
-  if (ret < 0)
-    {
-      goto errout_with_tcb;
-    }
-
   /* Duplicate the parent tasks environment */
 
-  ret = env_dup(child->cmn.group, environ);
+  ret = env_dup(child->group, environ);
   if (ret < 0)
     {
       goto errout_with_tcb;
@@ -202,7 +198,7 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
   stack_size = (uintptr_t)ptcb->stack_base_ptr -
                (uintptr_t)ptcb->stack_alloc_ptr + ptcb->adj_stack_size;
 
-  ret = up_create_stack(&child->cmn, stack_size, ttype);
+  ret = up_create_stack(child, stack_size, ttype);
   if (ret < OK)
     {
       goto errout_with_tcb;
@@ -213,21 +209,13 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
 
   if (ttype != TCB_FLAG_TTYPE_KERNEL)
     {
-      ret = up_addrenv_kstackalloc(&child->cmn);
+      ret = up_addrenv_kstackalloc(child);
       if (ret < 0)
         {
           goto errout_with_tcb;
         }
     }
 #endif
-
-  /* Setup thread local storage */
-
-  ret = tls_dup_info(&child->cmn, parent);
-  if (ret < OK)
-    {
-      goto errout_with_tcb;
-    }
 
   /* Get the priority of the parent task */
 
@@ -247,6 +235,14 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
       goto errout_with_tcb;
     }
 
+  /* Setup thread local storage */
+
+  ret = tls_dup_info(child, parent);
+  if (ret < OK)
+    {
+      goto errout_with_tcb;
+    }
+
   /* Setup to pass parameters to the new task */
 
   ret = nxtask_setup_stackargs(child, argv[0], &argv[1]);
@@ -257,7 +253,7 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
 
   /* Now we have enough in place that we can join the group */
 
-  group_postinitialize(child);
+  group_initialize(child);
   sinfo("parent=%p, returning child=%p\n", parent, child);
   return child;
 
@@ -301,7 +297,7 @@ errout:
  *   6) nxtask_start_fork() then executes the child thread.
  *
  * Input Parameters:
- *   child - The task_tcb_s struct instance that created by
+ *   child - The tcb_s struct instance that created by
  *           nxtask_setup_fork() method
  *   wait_child - whether need to wait until the child is running finished
  *
@@ -313,7 +309,7 @@ errout:
  *
  ****************************************************************************/
 
-pid_t nxtask_start_fork(FAR struct task_tcb_s *child)
+pid_t nxtask_start_fork(FAR struct tcb_s *child)
 {
   pid_t pid;
 
@@ -322,11 +318,11 @@ pid_t nxtask_start_fork(FAR struct task_tcb_s *child)
 
   /* Get the assigned pid before we start the task */
 
-  pid = child->cmn.pid;
+  pid = child->pid;
 
   /* Activate the task */
 
-  nxtask_activate((FAR struct tcb_s *)child);
+  nxtask_activate(child);
 
   return pid;
 }
@@ -342,7 +338,7 @@ pid_t nxtask_start_fork(FAR struct task_tcb_s *child)
  *
  ****************************************************************************/
 
-void nxtask_abort_fork(FAR struct task_tcb_s *child, int errcode)
+void nxtask_abort_fork(FAR struct tcb_s *child, int errcode)
 {
   /* The TCB was added to the active task list by nxtask_setup_scheduler() */
 
@@ -350,8 +346,7 @@ void nxtask_abort_fork(FAR struct task_tcb_s *child, int errcode)
 
   /* Release the TCB */
 
-  nxsched_release_tcb((FAR struct tcb_s *)child,
-                      child->cmn.flags & TCB_FLAG_TTYPE_MASK);
+  nxsched_release_tcb(child, child->flags & TCB_FLAG_TTYPE_MASK);
   set_errno(errcode);
 }
 

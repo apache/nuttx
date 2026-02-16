@@ -80,7 +80,8 @@ static const char *imx9_rptun_get_cpuname(struct rptun_dev_s *dev);
 static const char *imx9_rptun_get_firmware(struct rptun_dev_s *dev);
 static const struct rptun_addrenv_s *
 imx9_rptun_get_addrenv(struct rptun_dev_s *dev);
-static struct rptun_rsc_s *imx9_rptun_get_resource(struct rptun_dev_s *dev);
+static struct resource_table *
+imx9_rptun_get_resource(struct rptun_dev_s *dev);
 static bool imx9_rptun_is_autostart(struct rptun_dev_s *dev);
 static bool imx9_rptun_is_master(struct rptun_dev_s *dev);
 static int imx9_rptun_start(struct rptun_dev_s *dev);
@@ -149,14 +150,15 @@ imx9_rptun_get_addrenv(struct rptun_dev_s *dev)
  * Name: imx9_rptun_get_resource
  ****************************************************************************/
 
-static struct rptun_rsc_s *imx9_rptun_get_resource(struct rptun_dev_s *dev)
+static struct resource_table *
+imx9_rptun_get_resource(struct rptun_dev_s *dev)
 {
   struct imx9_rptun_dev_s *priv =
       container_of(dev, struct imx9_rptun_dev_s, rptun);
 
   if (priv->shmem != NULL)
     {
-      return &priv->shmem->rsc;
+      return &priv->shmem->rsc.rsc_tbl_hdr;
     }
 
   priv->shmem = (struct imx9_rptun_shmem_s *)VRING_SHMEM;
@@ -166,7 +168,7 @@ static struct rptun_rsc_s *imx9_rptun_get_resource(struct rptun_dev_s *dev)
       imx9_rsctable_copy();
     }
 
-  return &priv->shmem->rsc;
+  return &priv->shmem->rsc.rsc_tbl_hdr;
 }
 
 /****************************************************************************

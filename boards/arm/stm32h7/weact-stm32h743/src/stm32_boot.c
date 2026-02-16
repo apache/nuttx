@@ -52,6 +52,19 @@
 
 void stm32_boardinitialize(void)
 {
+#if defined(CONFIG_STM32H7_SPI1) || defined(CONFIG_STM32H7_SPI2) || \
+    defined(CONFIG_STM32H7_SPI3) || defined(CONFIG_STM32H7_SPI4) || \
+    defined(CONFIG_STM32H7_SPI6)
+  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak
+   * function stm32_spidev_initialize() has been brought into the link.
+   */
+
+  if (stm32_spidev_initialize)
+    {
+      stm32_spidev_initialize();
+    }
+#endif
+
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 

@@ -45,8 +45,8 @@
  * Private Functions
  ****************************************************************************/
 
-static uint16_t sendto_event(FAR struct net_driver_s *dev,
-                             FAR void *pvpriv, uint16_t flags)
+static uint32_t sendto_event(FAR struct net_driver_s *dev,
+                             FAR void *pvpriv, uint32_t flags)
 {
   FAR struct usrsock_reqstate_s *pstate = pvpriv;
   FAR struct usrsock_conn_s *conn = pstate->conn;
@@ -136,18 +136,19 @@ static uint16_t sendto_event(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 static int do_sendto_request(FAR struct usrsock_conn_s *conn,
-                             FAR struct msghdr *msg, int flags)
+                             FAR const struct msghdr *msg, int flags)
 {
   struct usrsock_request_sendto_s req =
   {
   };
 
   struct iovec bufs[2 + msg->msg_iovlen];
+  socklen_t msg_namelen = msg->msg_namelen;
   int i;
 
-  if (msg->msg_namelen > UINT16_MAX)
+  if (msg_namelen > UINT16_MAX)
     {
-      msg->msg_namelen = UINT16_MAX;
+      msg_namelen = UINT16_MAX;
     }
 
   /* Prepare request for daemon to read. */
@@ -155,7 +156,7 @@ static int do_sendto_request(FAR struct usrsock_conn_s *conn,
   req.head.reqid = USRSOCK_REQUEST_SENDTO;
   req.usockid = conn->usockid;
   req.flags = flags;
-  req.addrlen = msg->msg_namelen;
+  req.addrlen = msg_namelen;
 
   for (i = 0; i < msg->msg_iovlen; i++)
     {
@@ -170,7 +171,7 @@ static int do_sendto_request(FAR struct usrsock_conn_s *conn,
   bufs[0].iov_base = (FAR void *)&req;
   bufs[0].iov_len  = sizeof(req);
   bufs[1].iov_base = msg->msg_name;
-  bufs[1].iov_len  = msg->msg_namelen;
+  bufs[1].iov_len  = msg_namelen;
 
   memcpy(&bufs[2], msg->msg_iov, sizeof(struct iovec) * msg->msg_iovlen);
 
@@ -202,7 +203,7 @@ static int do_sendto_request(FAR struct usrsock_conn_s *conn,
  ****************************************************************************/
 
 ssize_t usrsock_sendmsg(FAR struct socket *psock,
-                        FAR struct msghdr *msg, int flags)
+                        FAR const struct msghdr *msg, int flags)
 {
   FAR struct usrsock_conn_s *conn = psock->s_conn;
   struct usrsock_reqstate_s state =
@@ -211,7 +212,7 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
 
   ssize_t ret;
 
-  net_lock();
+  usrsock_lock();
 
   if (conn->state == USRSOCK_CONN_STATE_UNINITIALIZED ||
       conn->state == USRSOCK_CONN_STATE_ABORTED)
@@ -307,8 +308,8 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
 
           /* Wait for send-ready (or abort, or timeout, or signal). */
 
-          ret = net_sem_timedwait(&state.recvsem,
-                              _SO_TIMEOUT(conn->sconn.s_sndtimeo));
+          ret = usrsock_sem_timedwait(&state.recvsem, true,
+                                      _SO_TIMEOUT(conn->sconn.s_sndtimeo));
           usrsock_teardown_request_callback(&state);
           if (ret < 0)
             {
@@ -324,7 +325,7 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
                 }
               else
                 {
-                  nerr("net_sem_timedwait errno: %zd\n", ret);
+                  nerr("usrsock_sem_timedwait errno: %zd\n", ret);
                   DEBUGPANIC();
                 }
 
@@ -372,7 +373,7 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
         {
           /* Wait for completion of request. */
 
-          net_sem_wait_uninterruptible(&state.recvsem);
+          usrsock_sem_timedwait(&state.recvsem, false, UINT_MAX);
           ret = state.result;
         }
 
@@ -381,7 +382,7 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
   while (ret == -EAGAIN);
 
 errout_unlock:
-  net_unlock();
+  usrsock_unlock();
   return ret;
 }
 

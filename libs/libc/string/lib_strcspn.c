@@ -41,7 +41,8 @@
  *
  ****************************************************************************/
 
-#undef strcspn /* See mm/README.txt */
+#undef strcspn
+no_builtin("strcspn")
 size_t strcspn(const char *s, const char *reject)
 {
   size_t i;

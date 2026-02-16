@@ -147,7 +147,7 @@ int sam_smartfs_initialize(void)
 
               /* Test if this is the config partition */
 
-            #if defined  CONFIG_MTD_CONFIG
+            #ifndef  CONFIG_MTD_CONFIG_NONE
               if (partno == 0)
                 {
                   /* Register the partition as the config device */

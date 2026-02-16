@@ -43,7 +43,6 @@
 #include <nuttx/power/pm.h>
 #include <arch/chip/chip.h>
 
-#include "addrenv.h"
 #include "arm64_arch.h"
 #include "arm64_internal.h"
 #include "chip.h"
@@ -86,9 +85,12 @@ void arm64_new_task(struct tcb_s * tcb)
   xcp->regs[REG_SPSR]      = SPSR_MODE_EL1H;
 #endif
 
-  xcp->regs[REG_SCTLR_EL1] = read_sysreg(sctlr_el1);
 #ifdef CONFIG_ARM64_MTE
-  xcp->regs[REG_SCTLR_EL1] |= SCTLR_TCF1_BIT;
+  xcp->regs[REG_SCTLR_EL1] = read_sysreg(sctlr_el1) | SCTLR_TCF1_BIT;
+#endif
+
+#ifndef CONFIG_ARM64_DECODEFIQ
+  xcp->regs[REG_SPSR]     |= DAIF_FIQ_BIT;
 #endif
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS

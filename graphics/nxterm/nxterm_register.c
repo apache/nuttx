@@ -36,6 +36,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/spinlock.h>
 
 #include "nxterm.h"
 
@@ -84,6 +85,8 @@ FAR struct nxterm_state_s *
 #ifdef CONFIG_NXTERM_NXKBDIN
   nxsem_init(&priv->waitsem, 0, 0);
 #endif
+
+  spin_lock_init(&priv->spinlock);
 
   /* Connect to the font cache for the configured font characteristics */
 

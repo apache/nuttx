@@ -27,6 +27,7 @@
 
 #include "imx9_rsctable.h"
 #include <string.h>
+#include <nuttx/rptun/rptun.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -40,7 +41,8 @@
 #define RESOURCE_TABLE_BASE     0x88220000
 
 #define NO_RESOURCE_ENTRIES     (1)
-#define RSC_VDEV_FEATURE_NS     (1) /* Support name service announcement */
+#define RSC_VDEV_FEATURE        (1 << VIRTIO_RPMSG_F_NS | \
+                                 1 << VIRTIO_RPMSG_F_CPUNAME)
 #define IMX9_RSC_TABLE_VERSION  (1)
 
 /****************************************************************************
@@ -81,7 +83,7 @@ const struct rptun_rsc_s g_imx9_rsc_table =
         RSC_VDEV,
         7,
         2,
-        RSC_VDEV_FEATURE_NS,
+        RSC_VDEV_FEATURE,
         0,
         0,
         0,
@@ -111,7 +113,8 @@ const struct rptun_rsc_s g_imx9_rsc_table =
 
     .config =
     {
-        0
+        .host_cpuname = "netcore",
+        .remote_cpuname = "nuttx"
     }
 };
 

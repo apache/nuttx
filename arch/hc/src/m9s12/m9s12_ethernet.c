@@ -448,6 +448,9 @@ static int emac_ifup(struct net_driver_s *dev)
 
   priv->d_bifup = true;
   up_enable_irq(CONFIG_HCS12_IRQ);
+
+  netdev_carrier_on(dev);
+
   return OK;
 }
 
@@ -491,6 +494,9 @@ static int emac_ifdown(struct net_driver_s *dev)
 
   priv->d_bifup = false;
   leave_critical_section(flags);
+
+  netdev_carrier_off(dev);
+
   return OK;
 }
 

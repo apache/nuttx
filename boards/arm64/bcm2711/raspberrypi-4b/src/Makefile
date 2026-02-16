@@ -22,12 +22,20 @@ include $(TOPDIR)/Make.defs
 
 CSRCS += rpi4b_boardinitialize.c rpi4b_bringup.c
 
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += rpi4b_autoleds.c
+endif
+
 ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += rpi4b_appinit.c
 endif
 
 ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += rpi4b_gpio.c
+endif
+
+ifeq ($(CONFIG_RPI4B_SDMMC),y)
+CSRCS += rpi4b_sdmmc.c
 endif
 
 ifeq ($(CONFIG_BCM2711_I2C_DRIVER),y)

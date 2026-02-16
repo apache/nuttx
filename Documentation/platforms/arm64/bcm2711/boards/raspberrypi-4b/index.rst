@@ -2,7 +2,7 @@
 Raspberry Pi 4B
 ===============
 
-.. tags:: chip:bcm2711, experimental
+.. tags:: arch:arm64, chip:bcm2711, vendor:raspberry-pi, experimental
 
 .. warning::
 
@@ -13,17 +13,6 @@ Raspberry Pi 4B
    found an issue with any of the implementation! See :doc:`the contributing
    guidelines </contributing/index>`.
 
-.. warning::
-
-   The SPI driver implemented for the :doc:`BCM2711 <../../index>` has only been
-   tested on SPI0. It appears that even using the special `overlays
-   <https://github.com/raspberrypi/linux/blob/stable/arch/arm/boot/dts/overlays/README>`_
-   for the device tree passed to the proprietary firmware does not properly
-   initialize the remaining SPI interfaces, and thus they have not been working
-   properly. More effort is required to reverse engineer the magic incantations
-   required to initialize these interfaces, at which point it is assumed that
-   the driver implementation should extend to SPI3-6.
-
 The `Raspberry Pi 4B <https://www.raspberrypi.com/products/raspberry-pi-4-model-b/specifications/>`_ is an ARM64
 hobbyist board created by Raspberry Pi.
 
@@ -33,7 +22,7 @@ hobbyist board created by Raspberry Pi.
    :alt: Raspberry Pi 4B board
 
 Features
-=========
+========
 
 - Broadcom BCM2711 @1.8GHz
 - 1, 2, 4 and 8GB LPDDR4-3200 SDRAM models
@@ -48,8 +37,60 @@ Features
 - 4-pole stereo audio and composite video port
 - Micro SD card slot
 
-ARM64 Toolchain
-===============
+Board Peripheral Support
+========================
+
+SMP is currently unsupported. To see support for chip peripherals (I2C, SPI,
+UART, etc), see the :doc:`BCM2711 page <../../index>`
+
+NuttX for the Raspberry Pi 4 supports these on-board peripherals:
+
+======================== =======
+Peripheral               Support
+======================== =======
+AV port                  No
+HDMI                     Yes, frame buffer support
+WiFi                     No
+Ethernet                 No
+USB 3.0                  No
+USB 2.0                  No
+Bluetooth                No
+microSD card             Yes (see notes in BCM2711 page)
+======================== =======
+
+.. note::
+
+   The HDMI support has been tested using the frame buffer driver for graphics
+   on both HDMI0 and HDMI1. They have not been tested both at the same. They
+   have also only been tested with a single display monitor.
+
+   The current frame-buffer driver is also not very performant; it is basically
+   CPU rendering pixel-by-pixel. This could be improved with DMA or GPU access,
+   but that is yet to be done.
+
+Buttons and LEDs
+================
+
+The board has two LEDs:
+
+* SD card activity (green)
+* Power (red)
+
+These LEDs are controlled by proprietary firmware at the beginning of the boot
+process. Afterwards, NuttX controls them with the ``autoleds`` framework. At
+this time:
+
+* Red LED is solid for assertion failure, or blinks on panic
+* Green LED is solid when NuttX has started
+
+Power Supply
+============
+
+The board can be supplied power either through the USB-C connection (5V) or via
+the 5V power input pin.
+
+Installation
+============
 
 Before building NuttX for the Raspberry Pi 4B, download the ARM64 Toolchain for
 **AArch64 Bare-Metal Target** ``aarch64-none-elf`` from
@@ -70,21 +111,7 @@ Check the ARM64 Toolchain:
 
     $ aarch64-none-elf-gcc -v
 
-Building
-========
-
-To build NuttX for the Raspberry Pi 4B, :doc:`install the prerequisites </quickstart/install>` and :doc:`clone the git
-repositories </quickstart/install>` for ``nuttx`` and ``apps``.
-
-Configure the NuttX project to use the Raspberry Pi 4B and build it (this example uses the ``nsh`` configuration).
-
-.. code:: console
-
-    $ cd nutxx
-    $ tools/configure.sh raspberrypi-4b:nsh
-    $ make
-
-Booting
+Flashing
 ========
 
 In order to boot NuttX on the Raspberry Pi 4B, you will need to have a formatted micro SD card. The SD card should
@@ -152,26 +179,105 @@ appear onscreen:
     NuttShell (NSH) NuttX-12.6.0-RC0
     nsh> uname -a
     NuttX 12.6.0-RC0 c4f3a42131-dirty Aug  6 2024 21:17:01 arm64 raspberrypi-4b
-    nsh> 
+    nsh>
 
-Board Peripheral Support
-========================
+Configurations
+==============
 
-SMP is currently unsupported.
+You can configure NuttX for the Raspberry Pi 4B using the following command:
 
-To see support for general chip peripherals (I2C, SPI, UART, etc), see the
-:doc:`BCM2711 page <../../index>`
+.. code:: console
 
-NuttX for the Raspberry Pi 4 supports these on-board peripherals:
+   $ ./tools/configure.sh raspberrypi-4b:<config>
 
-======================== =======
-Peripheral               Support
-======================== =======
-AV port                  No
-HDMI                     No
-WiFi                     No
-Ethernet                 No
-USB 3.0                  No
-USB 2.0                  No
-Bluetooth                No
-======================== =======
+Where ``<config>`` is one of the configurations listed below.
+
+nsh
+---
+
+A simple configuration with NSH on the Mini-UART console, accessible using a TTL
+cable connected to GPIO 14 & 15.
+
+coremark
+--------
+
+This configuration boots directly into the :doc:`coremark
+</applications/benchmarks/coremark/index>` benchmark and displays the results of
+the test over the serial console.
+
+ostest
+------
+
+This configuration boots directly into :doc:`ostest
+</applications/testing/ostest/index>` and displays the results of the test over
+the serial console. The test runs 5 times.
+
+sd
+--
+
+Configuration which supports the microSD card peripheral on EMMC2. At boot time,
+the microSD card is identified and the boot partition is mounted as a FAT file
+system to ``/sd``. It can be written to and read from.
+
+.. warning::
+
+   There is some instability with the microSD card functionality. Please see
+   :doc:`/platforms/arm64/bcm2711/index` for more information.
+
+.. note::
+
+   This configuration enables BSD components since the :doc:`sdstress
+   </applications/testing/sd_stress/index>` application is BSD licensed.
+
+fb
+--
+
+Configuration with graphics support in the form of a frame buffer driver for the
+two HDMI outputs. This configuration is equipped with the :doc:`fb
+</applications/examples/fb/index>` example, which displays some centered,
+colourful rectangles on the screen.
+
+.. warning::
+
+   This has only been tested with a display plugged into one HDMI interface at a
+   time, not both connected. Whichever HDMI interface is plugged in will be
+   referred to as display 0 (i.e. ``/dev/fb0``).
+
+   The display **must** be plugged in to the Raspberry Pi 4B and powered on at
+   boot time. The BCM2711 VideoCore will refuse to allocate a frame buffer if
+   not, and registering ``/dev/fb0`` will fail.
+
+   The rendered image may exhibit gaps in the pixels. This is because rendering
+   directly to the framebuffer is too slow compared to the HDMI output in some
+   cases. If the image is rendered to a RAM buffer of the same size and then
+   ``memcpy``'d to the frame buffer, the image will be clear. I have not
+   modified the frame buffer example though since this is its own limitation.
+
+.. todo::
+
+   The frame-buffer driver always sets the physical and virtual display
+   resolution to 1080 x 1920 pixels with a depth of 32 bits per pixel. Other
+   options cannot yet be configured via Kconfig, nor is there any kind of
+   negotiation with the display to agree on some maximum quality options.
+
+lvgl
+----
+
+This configuration boots into an LVGL demonstration
+(:doc:`/applications/examples/lvgldemo/index`). It is using the 'widgets'
+variant of the demo. There is currently no way to interact with it since input
+devices aren't supported, but it's pretty! This configuration does nothing else,
+but could be modified to boot into your own LVGL application.
+
+This configuration has the same warnings and limitations as those in the ``fb``
+configuration, with the exception of the pixel gaps. This is because LVGL uses
+the dual-buffer approach to rendering.
+
+cgol
+----
+
+This configuration includes the :doc:`/applications/games/cgol/index` game
+application. It renders a Game of Life simulation to the HDMI video output.
+Since this configuration also enables the frame buffer, it comes with the same
+limitations as those in ``fb``. However, the ``cgol`` application is double
+buffered, so it will not experience any rendering artifacts.

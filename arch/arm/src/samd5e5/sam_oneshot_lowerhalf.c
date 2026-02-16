@@ -58,8 +58,6 @@ struct sam_oneshot_lowerhalf_s
   /* Private lower half data follows */
 
   struct sam_oneshot_s oneshot;  /* SAM-specific oneshot state */
-  oneshot_callback_t callback;   /* internal handler that receives callback */
-  void *arg;                     /* Argument that is passed to the handler */
 };
 
 /****************************************************************************
@@ -71,7 +69,6 @@ static void sam_oneshot_handler(void *arg);
 static int sam_max_delay(struct oneshot_lowerhalf_s *lower,
                          struct timespec *ts);
 static int sam_start(struct oneshot_lowerhalf_s *lower,
-                     oneshot_callback_t callback, void *arg,
                      const struct timespec *ts);
 static int sam_cancel(struct oneshot_lowerhalf_s *lower,
                       struct timespec *ts);
@@ -112,8 +109,6 @@ static void sam_oneshot_handler(void *arg)
 {
   struct sam_oneshot_lowerhalf_s *priv =
     (struct sam_oneshot_lowerhalf_s *)arg;
-  oneshot_callback_t callback;
-  void *cbarg;
 
   DEBUGASSERT(priv != NULL);
 
@@ -121,21 +116,7 @@ static void sam_oneshot_handler(void *arg)
    * sam_cancel?
    */
 
-  if (priv->callback)
-    {
-      /* Sample and nullify BEFORE executing callback (in case the callback
-       * restarts the oneshot).
-       */
-
-      callback       = priv->callback;
-      cbarg          = priv->arg;
-      priv->callback = NULL;
-      priv->arg      = NULL;
-
-      /* Then perform the callback */
-
-      callback(&priv->lh, cbarg);
-    }
+  oneshot_process_callback(&priv->lh);
 }
 
 /****************************************************************************
@@ -199,7 +180,6 @@ static int sam_max_delay(struct oneshot_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int sam_start(struct oneshot_lowerhalf_s *lower,
-                     oneshot_callback_t callback, void *arg,
                      const struct timespec *ts)
 {
   struct sam_oneshot_lowerhalf_s *priv =
@@ -207,15 +187,13 @@ static int sam_start(struct oneshot_lowerhalf_s *lower,
   irqstate_t flags;
   int ret;
 
-  DEBUGASSERT(priv != NULL && callback != NULL && ts != NULL);
+  DEBUGASSERT(priv != NULL && ts != NULL);
 
   /* Save the callback information and start the timer */
 
-  flags          = enter_critical_section();
-  priv->callback = callback;
-  priv->arg      = arg;
-  ret            = sam_oneshot_start(&priv->oneshot, NULL,
-                                       sam_oneshot_handler, priv, ts);
+  flags = enter_critical_section();
+  ret   = sam_oneshot_start(&priv->oneshot, NULL,
+                            sam_oneshot_handler, priv, ts);
   leave_critical_section(flags);
 
   if (ret < 0)
@@ -262,10 +240,8 @@ static int sam_cancel(struct oneshot_lowerhalf_s *lower,
 
   /* Cancel the timer */
 
-  flags          = enter_critical_section();
-  ret            = sam_oneshot_cancel(&priv->oneshot, NULL, ts);
-  priv->callback = NULL;
-  priv->arg      = NULL;
+  flags = enter_critical_section();
+  ret   = sam_oneshot_cancel(&priv->oneshot, NULL, ts);
   leave_critical_section(flags);
 
   if (ret < 0)

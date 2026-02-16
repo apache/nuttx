@@ -48,11 +48,12 @@
 #include "hardware/esp32s3_cache_memory.h"
 #include "hardware/esp32s3_system.h"
 #include "rom/esp32s3_libc_stubs.h"
-#include "rom/opi_flash.h"
-#include "rom/esp32s3_spiflash.h"
+#include "esp_private/spi_flash_os.h"
 #include "espressif/esp_loader.h"
 
 #include "esp_app_desc.h"
+#include "esp_private/esp_mmu_map_private.h"
+#include "esp_flash_internal.h"
 #include "hal/mmu_hal.h"
 #include "hal/mmu_types.h"
 #include "hal/cache_types.h"
@@ -70,6 +71,8 @@
 
 #include "esp_clk_internal.h"
 #include "periph_ctrl.h"
+
+#include "esp_private/startup_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -329,21 +332,6 @@ noinstrument_function void noreturn_function IRAM_ATTR __esp32s3_start(void)
 
   esp32s3_region_protection();
 
-#ifndef CONFIG_ESPRESSIF_SIMPLE_BOOT
-  /* Move CPU0 exception vectors to IRAM */
-
-  __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (_init_start));
-
-  /* Clear .bss. We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
-
-  for (uint32_t *dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
-    {
-      *dest++ = 0;
-    }
-#endif
-
 #ifndef CONFIG_SMP
   /* Make sure that the APP_CPU is disabled for now */
 
@@ -356,6 +344,8 @@ noinstrument_function void noreturn_function IRAM_ATTR __esp32s3_start(void)
    */
 
   esp32s3_wdt_early_deinit();
+
+  esp_flash_app_init();
 
   /* Initialize RTC controller parameters */
 
@@ -452,6 +442,8 @@ noinstrument_function void noreturn_function IRAM_ATTR __esp32s3_start(void)
   showprogress('C');
 #endif
 
+  SYS_STARTUP_FN();
+
   /* Bring up NuttX */
 
   nx_start();
@@ -479,6 +471,10 @@ noinstrument_function void IRAM_ATTR __start(void)
 {
   const esp_app_desc_t *app_desc;
 
+  /* Move CPU0 exception vectors to IRAM */
+
+  __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (_init_start));
+
 #if defined(CONFIG_ESP32S3_APP_FORMAT_MCUBOOT) || \
     defined(CONFIG_ESPRESSIF_SIMPLE_BOOT)
   size_t partition_offset = PRIMARY_SLOT_OFFSET;
@@ -489,21 +485,30 @@ noinstrument_function void IRAM_ATTR __start(void)
   uint32_t app_drom_size  = (uint32_t)_image_drom_size;
   uint32_t app_drom_vaddr = (uint32_t)_image_drom_vma;
 
-#  ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
-  __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (_init_start));
-
+#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
   if (bootloader_init() != 0)
     {
       ets_printf("Hardware init failed, aborting\n");
       while (true);
     }
-#  endif
+#endif
 
   if (map_rom_segments(app_drom_start, app_drom_vaddr, app_drom_size,
                        app_irom_start, app_irom_vaddr, app_irom_size) != 0)
     {
       ets_printf("Failed to setup XIP, aborting\n");
       while (true);
+    }
+#endif
+
+#ifndef CONFIG_ESPRESSIF_SIMPLE_BOOT
+  /* Clear .bss. We'll do this inline (vs. calling memset) just to be
+   * certain that there are no issues with the state of global variables.
+   */
+
+  for (uint32_t *dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
+    {
+      *dest++ = 0;
     }
 #endif
 
@@ -551,6 +556,8 @@ noinstrument_function void IRAM_ATTR __start(void)
    */
 
   spi_flash_init_chip_state();
+
+  esp_mmu_map_init();
 
   __esp32s3_start();
 

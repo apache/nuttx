@@ -196,7 +196,7 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        */
 
       top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size;
-      top_of_stack = STACK_ALIGN_DOWN(top_of_stack);
+      top_of_stack = STACKFRAME_ALIGN_DOWN(top_of_stack);
       size_of_stack = top_of_stack - (uintptr_t)tcb->stack_alloc_ptr;
 
       /* Save the adjusted stack values in the struct tcb_s */
@@ -239,7 +239,7 @@ void ceva_stack_color(void *stackbase, size_t nbytes)
 
   /* Take extra care that we do not write outside the stack boundaries */
 
-  stkptr = (uint32_t *)STACK_ALIGN_UP((uintptr_t)stackbase);
+  stkptr = (uint32_t *)STACKFRAME_ALIGN_UP((uintptr_t)stackbase);
 
   if (nbytes == 0) /* 0: colorize the running stack */
     {
@@ -254,7 +254,7 @@ void ceva_stack_color(void *stackbase, size_t nbytes)
       stkend = (uintptr_t)stackbase + nbytes;
     }
 
-  stkend = STACK_ALIGN_DOWN(stkend);
+  stkend = STACKFRAME_ALIGN_DOWN(stkend);
   nwords = (stkend - (uintptr_t)stkptr) >> 2;
 
   /* Set the entire stack to the coloration value */

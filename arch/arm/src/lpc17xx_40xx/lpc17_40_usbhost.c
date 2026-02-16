@@ -2076,7 +2076,7 @@ static int lpc17_40_rh_enumerate(struct usbhost_connection_s *conn,
 
   /* USB 2.0 spec says at least 50ms delay before port reset */
 
-  nxsig_usleep(100 * 1000);
+  nxsched_usleep(100 * 1000);
 
   /* Put RH port 1 in reset (the LPC176x supports only a single downstream
    * port).
@@ -2094,7 +2094,7 @@ static int lpc17_40_rh_enumerate(struct usbhost_connection_s *conn,
   /* Release RH port 1 from reset and wait a bit */
 
   lpc17_40_putreg(OHCI_RHPORTST_PRSC, LPC17_40_USBHOST_RHPORTST1);
-  nxsig_usleep(200 * 1000);
+  nxsched_usleep(200 * 1000);
   return OK;
 }
 

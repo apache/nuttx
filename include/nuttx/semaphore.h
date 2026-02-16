@@ -66,7 +66,7 @@
 
 /* Mutex related helper macros */
 
-#define NXSEM_MBLOCKING_BIT   (((uint32_t)1) << 31)
+#define NXSEM_MBLOCKING_BIT   ((uint32_t)0x80000000)
 #define NXSEM_NO_MHOLDER      ((uint32_t)0x7ffffffe)
 #define NXSEM_MRESET          ((uint32_t)0x7fffffff)
 
@@ -147,7 +147,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int nxsem_init(FAR sem_t *sem, int pshared, uint32_t value);
+int nxsem_init(FAR sem_t *sem, int pshared, int32_t value);
 
 /****************************************************************************
  * Name: nxsem_destroy
@@ -411,6 +411,27 @@ int nxsem_post_slow(FAR sem_t *sem);
  ****************************************************************************/
 
 int nxsem_get_value(FAR sem_t *sem, FAR int *sval);
+
+#ifdef CONFIG_CUSTOM_SEMAPHORE_MAXVALUE
+/****************************************************************************
+ * Name:  nxsem_setmaxvalue
+ *
+ * Description:
+ *   This function sets the maximum allowed value for a specific semaphore.
+ *
+ * Input Parameters:
+ *   sem - Semaphore descriptor
+ *   maxvalue - The maximum allowed value
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int nxsem_setmaxvalue(FAR sem_t *sem, int32_t maxvalue);
+#endif
 
 /****************************************************************************
  * Name: nxsem_open

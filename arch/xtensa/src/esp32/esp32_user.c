@@ -33,7 +33,7 @@
 #include <debug.h>
 
 #include "xtensa.h"
-#include "esp32_spicache.h"
+#include "esp_private/cache_utils.h"
 
 /****************************************************************************
  * Public Data
@@ -324,19 +324,19 @@ static void advance_pc(uint32_t *regs, int diff)
 
 uint32_t *xtensa_user(int exccause, uint32_t *regs)
 {
-#ifdef CONFIG_ESP32_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
   bool is_cache_reenabled = false;
 
   if (!spi_flash_cache_enabled())
     {
       is_cache_reenabled = true;
 
-      spi_enable_cache(0);
+      spi_flash_restore_cache(0, 0);
 #  ifdef CONFIG_SMP
-      spi_enable_cache(1);
+      spi_flash_restore_cache(1, 0);
 #  endif
     }
-#endif /* CONFIG_ESP32_SPIFLASH */
+#endif /* CONFIG_ESPRESSIF_SPIFLASH */
 
 #ifdef CONFIG_ARCH_USE_TEXT_HEAP
   /* Emulate byte access for module text.
@@ -447,21 +447,21 @@ uint32_t *xtensa_user(int exccause, uint32_t *regs)
         }
 
 return_with_regs:
-#  ifdef CONFIG_ESP32_SPIFLASH
+#  ifdef CONFIG_ESPRESSIF_SPIFLASH
       if (is_cache_reenabled)
         {
-          spi_disable_cache(0);
+          spi_flash_disable_cache(0, 0);
 #    ifdef CONFIG_SMP
-          spi_disable_cache(1);
+          spi_flash_disable_cache(1, 0);
 #    endif
         }
-#  endif /* CONFIG_ESP32_SPIFLASH */
+#  endif /* CONFIG_ESPRESSIF_SPIFLASH */
 
       return regs;
     }
 
 #else
-#  ifdef CONFIG_ESP32_SPIFLASH
+#  ifdef CONFIG_ESPRESSIF_SPIFLASH
   UNUSED(is_cache_reenabled);
 #  endif
 #endif

@@ -118,12 +118,12 @@ menu "FLEXCAN1 Configuration"
 
 config FLEXCAN1_BITRATE
 	int "CAN bitrate"
-	depends on !(NET_CAN_CANFD)
+	depends on !NET_CAN_CANFD
 	default 1000000
 
 config FLEXCAN1_SAMPLEP
 	int "CAN sample point"
-	depends on !(NET_CAN_CANFD)
+	depends on !NET_CAN_CANFD
 	default 80
 
 config FLEXCAN1_ARBI_BITRATE
@@ -153,32 +153,32 @@ menu "FLEXCAN2 Configuration"
 
 config FLEXCAN2_BITRATE
 	int "CAN bitrate"
-	depends on !(NET_CAN_CANFD && IMX9_FLEXCAN2_FD)
+	depends on !NET_CAN_CANFD
 	default 1000000
 
 config FLEXCAN2_SAMPLEP
 	int "CAN sample point"
-	depends on !(NET_CAN_CANFD && IMX9_FLEXCAN2_FD)
+	depends on !NET_CAN_CANFD
 	default 80
 
 config FLEXCAN2_ARBI_BITRATE
 	int "CAN FD Arbitration phase bitrate"
-	depends on NET_CAN_CANFD && IMX9_FLEXCAN2_FD
+	depends on NET_CAN_CANFD
 	default 1000000
 
 config FLEXCAN2_ARBI_SAMPLEP
 	int "CAN FD Arbitration phase sample point"
-	depends on NET_CAN_CANFD && IMX9_FLEXCAN2_FD
+	depends on NET_CAN_CANFD
 	default 80
 
 config FLEXCAN2_DATA_BITRATE
 	int "CAN FD Data phase bitrate"
-	depends on NET_CAN_CANFD && IMX9_FLEXCAN2_FD
+	depends on NET_CAN_CANFD
 	default 4000000
 
 config FLEXCAN2_DATA_SAMPLEP
 	int "CAN FD Data phase sample point"
-	depends on NET_CAN_CANFD && IMX9_FLEXCAN2_FD
+	depends on NET_CAN_CANFD
 	default 90
 
 endmenu # IMX9_FLEXCAN2
@@ -223,12 +223,12 @@ menu "FLEXCAN4 Configuration"
 
 config FLEXCAN4_BITRATE
 	int "CAN bitrate"
-	depends on !(NET_CAN_CANFD)
+	depends on !NET_CAN_CANFD
 	default 4000000
 
 config FLEXCAN4_SAMPLEP
 	int "CAN sample point"
-	depends on !(NET_CAN_CANFD)
+	depends on !NET_CAN_CANFD
 	default 80
 
 config FLEXCAN4_ARBI_BITRATE
@@ -258,12 +258,12 @@ menu "FLEXCAN5 Configuration"
 
 config FLEXCAN5_BITRATE
 	int "CAN bitrate"
-	depends on !(NET_CAN_CANFD)
+	depends on !NET_CAN_CANFD
 	default 5000000
 
 config FLEXCAN5_SAMPLEP
 	int "CAN sample point"
-	depends on !(NET_CAN_CANFD)
+	depends on !NET_CAN_CANFD
 	default 80
 
 config FLEXCAN5_ARBI_BITRATE
@@ -382,17 +382,117 @@ config IMX9_GPIO1_IRQ
 	bool "GPIO1 Interrupt"
 	default n
 
+choice
+	prompt "GPIO1 IRQ output select"
+	depends on IMX9_GPIO1_IRQ
+	default IMX9_GPIO1_IRQ_OUT_LINE1
+	---help---
+		Each IMX9 GPIO controller provides two IRQ output lines. These
+		lines may be shared with other cores or domains in the SoC
+		(e.g. A55 vs M7), so selecting the correct line avoids conflicts.
+
+		By default this subsystem uses IRQ line 1, leaving line 0 available
+		for the A55 or other system components that typically rely on it.
+
+config IMX9_GPIO1_IRQ_OUT_LINE0
+	bool "Use GPIO1 IRQ line 0"
+
+config IMX9_GPIO1_IRQ_OUT_LINE1
+	bool "Use GPIO1 IRQ line 1"
+endchoice
+
 config IMX9_GPIO2_IRQ
 	bool "GPIO2 Interrupt"
 	default n
+
+choice
+	prompt "GPIO2 IRQ output select"
+	depends on IMX9_GPIO2_IRQ
+	default IMX9_GPIO2_IRQ_OUT_LINE1
+	---help---
+		Each IMX9 GPIO controller provides two IRQ output lines. These
+		lines may be shared with other cores or domains in the SoC
+		(e.g. A55 vs M7), so selecting the correct line avoids conflicts.
+
+		By default this subsystem uses IRQ line 1, leaving line 0 available
+		for the A55 or other system components that typically rely on it.
+
+config IMX9_GPIO2_IRQ_OUT_LINE0
+	bool "Use GPIO2 IRQ line 0"
+
+config IMX9_GPIO2_IRQ_OUT_LINE1
+	bool "Use GPIO2 IRQ line 1"
+endchoice
 
 config IMX9_GPIO3_IRQ
 	bool "GPIO3 Interrupt"
 	default n
 
+choice
+	prompt "GPIO3 IRQ output select"
+	depends on IMX9_GPIO3_IRQ
+	default IMX9_GPIO3_IRQ_OUT_LINE1
+	---help---
+		Each IMX9 GPIO controller provides two IRQ output lines. These
+		lines may be shared with other cores or domains in the SoC
+		(e.g. A55 vs M7), so selecting the correct line avoids conflicts.
+
+		By default this subsystem uses IRQ line 1, leaving line 0 available
+		for the A55 or other system components that typically rely on it.
+
+config IMX9_GPIO3_IRQ_OUT_LINE0
+	bool "Use GPIO3 IRQ line 0"
+
+config IMX9_GPIO3_IRQ_OUT_LINE1
+	bool "Use GPIO3 IRQ line 1"
+endchoice
+
 config IMX9_GPIO4_IRQ
 	bool "GPIO4 Interrupt"
 	default n
+
+choice
+	prompt "GPIO4 IRQ output select"
+	depends on IMX9_GPIO4_IRQ
+	default IMX9_GPIO4_IRQ_OUT_LINE1
+	---help---
+		Each IMX9 GPIO controller provides two IRQ output lines. These
+		lines may be shared with other cores or domains in the SoC
+		(e.g. A55 vs M7), so selecting the correct line avoids conflicts.
+
+		By default this subsystem uses IRQ line 1, leaving line 0 available
+		for the A55 or other system components that typically rely on it.
+
+config IMX9_GPIO4_IRQ_OUT_LINE0
+	bool "Use GPIO4 IRQ line 0"
+
+config IMX9_GPIO4_IRQ_OUT_LINE1
+	bool "Use GPIO4 IRQ line 1"
+endchoice
+
+config IMX9_GPIO5_IRQ
+	bool "GPIO5 Interrupt"
+	default n
+
+choice
+	prompt "GPIO5 IRQ output select"
+	depends on IMX9_GPIO5_IRQ
+	default IMX9_GPIO5_IRQ_OUT_LINE1
+	---help---
+		Each IMX9 GPIO controller provides two IRQ output lines. These
+		lines may be shared with other cores or domains in the SoC
+		(e.g. A55 vs M7), so selecting the correct line avoids conflicts.
+
+		By default this subsystem uses IRQ line 1, leaving line 0 available
+		for the A55 or other system components that typically rely on it.
+
+config IMX9_GPIO5_IRQ_OUT_LINE0
+	bool "Use GPIO5 IRQ line 0"
+
+config IMX9_GPIO5_IRQ_OUT_LINE1
+	bool "Use GPIO5 IRQ line 1"
+endchoice
+
 
 endmenu # GPIO Interrupt Configuration
 
@@ -651,6 +751,26 @@ config IMX9_EDMA_NTCD
 		gather DMA.  Make to be set to zero to disable in-memory TCDs in
 		which case only the TCD channel registers will be used and scatter-
 		will not be supported.
+
+config IMX9_EDMA5_CHAN_OFFSET
+	int "Offset of 1st EDMA5 channel"
+	default 30
+	depends on ARCH_CHIP_IMX95_M7
+	---help---
+		The EDMA5 controller on the i.MX95 can be accessed by multiple cores.
+		However, TCD (Transfer Control Descriptor) mappings are not shareable
+		between instances. Instead, each instance must specify its usable TCD
+		channels using an offset and count to define a dedicated range.
+
+config IMX9_EDMA5_CHAN_COUNT
+	int "Number of EDMA5 channels"
+	default 34
+	depends on ARCH_CHIP_IMX95_M7
+	---help---
+		The EDMA5 controller on the i.MX95 can be accessed by multiple cores.
+		However, TCD (Transfer Control Descriptor) mappings are not shareable
+		between instances. Instead, each instance must specify its usable TCD
+		channels using an offset and count to define a dedicated range.
 
 config IMX9_EDMA_ELINK
 	bool "Channeling Linking"

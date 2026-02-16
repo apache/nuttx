@@ -36,6 +36,7 @@
 
 #include "devif/devif.h"
 #include "netdev/netdev.h"
+#include "utils/utils.h"
 #include "icmpv6/icmpv6.h"
 
 /****************************************************************************
@@ -62,15 +63,15 @@
  *
  ****************************************************************************/
 
-static uint16_t icmpv6_poll_eventhandler(FAR struct net_driver_s *dev,
-                                         FAR void *pvpriv, uint16_t flags)
+static uint32_t icmpv6_poll_eventhandler(FAR struct net_driver_s *dev,
+                                         FAR void *pvpriv, uint32_t flags)
 {
   FAR struct icmpv6_poll_s *info = pvpriv;
   FAR struct icmpv6_conn_s *conn;
   FAR struct socket *psock;
   pollevent_t eventset;
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   DEBUGASSERT(info == NULL || info->fds != NULL);
 
@@ -144,19 +145,18 @@ int icmpv6_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   pollevent_t eventset = 0;
   int ret = OK;
 
-  /* Some of the following must be atomic */
-
-  net_lock();
-
   conn = psock->s_conn;
 
   /* Sanity check */
 
   if (!conn || !fds)
     {
-      ret = -EINVAL;
-      goto errout_with_lock;
+      return -EINVAL;
     }
+
+  /* Some of the following must be atomic */
+
+  conn_dev_lock(&conn->sconn, conn->dev);
 
   /* Find a container to hold the poll information */
 
@@ -225,7 +225,7 @@ int icmpv6_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   poll_notify(&fds, 1, eventset);
 
 errout_with_lock:
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, conn->dev);
   return ret;
 }
 
@@ -250,19 +250,18 @@ int icmpv6_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
   FAR struct icmpv6_conn_s *conn;
   FAR struct icmpv6_poll_s *info;
 
-  /* Some of the following must be atomic */
-
-  net_lock();
-
   conn = psock->s_conn;
 
   /* Sanity check */
 
   if (!conn || !fds->priv)
     {
-      net_unlock();
       return -EINVAL;
     }
+
+  /* Some of the following must be atomic */
+
+  conn_dev_lock(&conn->sconn, conn->dev);
 
   /* Recover the socket descriptor poll state info from the poll structure */
 
@@ -284,7 +283,7 @@ int icmpv6_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
       info->psock = NULL;
     }
 
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, conn->dev);
 
   return OK;
 }

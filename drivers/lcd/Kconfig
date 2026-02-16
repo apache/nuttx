@@ -1434,6 +1434,13 @@ config LCD_ILI9341
 		LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
 		LCD_MAXPOWER should be 1:  0=off, 1=on
 
+config LCD_ILI9341_BGR
+	bool "Use BGR order for RGB colors."
+	default n
+	depends on LCD_ILI9341
+	---help---
+		Use BGR color order instead of RGB (Memory Access Control).
+
 config LCD_ILI9341_NINTERFACES
 	int "Number of supported display driver"
 	range 1 2
@@ -1581,6 +1588,17 @@ config LCD_LCDDRV_SPEED
 		SPI Interface speed. According to the specification this is generally
 		quite limited, but people have had success with much faster
 		speeds than the spec sheets say. YMMV.
+
+config LCD_LCDDRV_3WIRE
+	bool "Use 3-wire 9-bit SPI."
+	default n
+	depends on LCD_LCDDRV_SPIIF
+	---help---
+		Specifies whether 3-wire or 4-wire (default) SPI is used.
+
+		3-wire 9-bit SPI uses MSB to distinguish between CMD (0) or
+		DATA (1). 4-wire 8-bit SPI uses dedicated CMD/DATA pin to
+		distinguish between CMD and DATA.
 
 config LCD_RA8875
 	bool "RA8875 LCD Display Controller"

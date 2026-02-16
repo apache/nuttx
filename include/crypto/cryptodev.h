@@ -103,38 +103,40 @@
 #define CRYPTO_MD5_HMAC         4
 #define CRYPTO_SHA1_HMAC        5
 #define CRYPTO_RIPEMD160_HMAC   6
-#define CRYPTO_RIJNDAEL128_CBC  7 /* 128 bit blocksize */
-#define CRYPTO_AES_CBC          7 /* 128 bit blocksize -- the same as above */
-#define CRYPTO_DEFLATE_COMP     8 /* Deflate compression algorithm */
-#define CRYPTO_NULL             9
-#define CRYPTO_SHA2_256_HMAC    11
-#define CRYPTO_SHA2_384_HMAC    12
-#define CRYPTO_SHA2_512_HMAC    13
-#define CRYPTO_AES_CTR          14
-#define CRYPTO_AES_XTS          15
-#define CRYPTO_AES_GCM_16       16
-#define CRYPTO_AES_128_GMAC     17
-#define CRYPTO_AES_192_GMAC     18
-#define CRYPTO_AES_256_GMAC     19
-#define CRYPTO_AES_GMAC         20
-#define CRYPTO_AES_OFB          21
-#define CRYPTO_AES_CFB_8        22
-#define CRYPTO_AES_CFB_128      23
-#define CRYPTO_CHACHA20_POLY1305 24
-#define CRYPTO_CHACHA20_POLY1305_MAC 25
-#define CRYPTO_MD5              26
-#define CRYPTO_POLY1305         27
-#define CRYPTO_RIPEMD160        28
-#define CRYPTO_SHA1             29
-#define CRYPTO_SHA2_224         30
-#define CRYPTO_SHA2_256         31
-#define CRYPTO_SHA2_384         32
-#define CRYPTO_SHA2_512         33
-#define CRYPTO_CRC32            34
-#define CRYPTO_AES_CMAC         35
-#define CRYPTO_AES_128_CMAC     36
-#define CRYPTO_ESN              37 /* Support for Extended Sequence Numbers */
-#define CRYPTO_ALGORITHM_MAX    37 /* Keep updated */
+#define CRYPTO_RIJNDAEL128_CBC  7  /* 128 bit blocksize */
+#define CRYPTO_AES_CBC          7  /* 128 bit blocksize -- the same as above */
+#define CRYPTO_AES_192_CBC      8  /* 192 bit keysize */
+#define CRYPTO_AES_256_CBC      9  /* 256 bit keysize */
+#define CRYPTO_DEFLATE_COMP     10 /* Deflate compression algorithm */
+#define CRYPTO_NULL             11
+#define CRYPTO_SHA2_256_HMAC    12
+#define CRYPTO_SHA2_384_HMAC    13
+#define CRYPTO_SHA2_512_HMAC    14
+#define CRYPTO_AES_CTR          15
+#define CRYPTO_AES_XTS          16
+#define CRYPTO_AES_GCM_16       17
+#define CRYPTO_AES_128_GMAC     18
+#define CRYPTO_AES_192_GMAC     19
+#define CRYPTO_AES_256_GMAC     20
+#define CRYPTO_AES_GMAC         21
+#define CRYPTO_AES_OFB          22
+#define CRYPTO_AES_CFB_8        23
+#define CRYPTO_AES_CFB_128      24
+#define CRYPTO_CHACHA20_POLY1305 25
+#define CRYPTO_CHACHA20_POLY1305_MAC 26
+#define CRYPTO_MD5              27
+#define CRYPTO_POLY1305         28
+#define CRYPTO_RIPEMD160        29
+#define CRYPTO_SHA1             30
+#define CRYPTO_SHA2_224         31
+#define CRYPTO_SHA2_256         32
+#define CRYPTO_SHA2_384         33
+#define CRYPTO_SHA2_512         34
+#define CRYPTO_CRC32            35
+#define CRYPTO_AES_CMAC         36
+#define CRYPTO_AES_128_CMAC     37
+#define CRYPTO_ESN              38 /* Support for Extended Sequence Numbers */
+#define CRYPTO_ALGORITHM_MAX    38 /* Keep updated */
 
 /* Algorithm flags */
 
@@ -150,6 +152,7 @@ struct cryptoini
   int cri_klen;      /* Key length, in bits */
   int cri_rnd;       /* Algorithm rounds, where relevant */
   int cri_sid;
+  int cri_op;
   caddr_t cri_key;   /* key to use */
   union
   {
@@ -198,6 +201,7 @@ struct cryptop
   uint64_t crp_sid;  /* Session ID */
   int crp_ilen;      /* Input data total length */
   int crp_olen;      /* Result total length */
+  int crp_ivlen;     /* IV length */
   int crp_alloctype; /* Type of buf to allocate if needed */
   int crp_etype;     /* Error type (zero means no error).
                       * All error codes except EAGAIN
@@ -218,6 +222,8 @@ struct cryptop
 #define CRYPTO_F_DONE 0x0010    /* request completed */
 #define CRYPTO_F_CBIMM 0x0020   /* Do callback immediately */
 #define CRYPTO_F_CANCEL 0x0040  /* Cancel the current crypto operation */
+
+#define CRYPTO_F_NOT_EXPORTABLE 0x0080 /* Mark key unexportable from secure module */
 
   FAR void *crp_buf;               /* Data to be processed */
   FAR void *crp_opaque;            /* Opaque pointer, passed along */
@@ -256,6 +262,7 @@ struct crypt_kop
   u_int crk_flags;
   struct crparam crk_param[CRK_MAXPARAM];
   uint32_t crk_reqid;
+  FAR void *crk_arg;   /* callback parameter */
 };
 
 #define CRK_MOD_EXP                0
@@ -264,21 +271,54 @@ struct crypt_kop
 #define CRK_DSA_VERIFY             3
 #define CRK_DH_MAKE_PUBLIC         4
 #define CRK_DH_COMPUTE_KEY         5
-#define CRK_RSA_PKCS15_VERIFY      6
-#define CRK_ECDSA_SECP256R1_SIGN   7
-#define CRK_ECDSA_SECP256R1_VERIFY 8
-#define CRK_ECDSA_SECP256R1_GENKEY 9
-#define CRK_ALGORITHM_MAX          9 /* Keep updated */
+#define CRK_RSA_PKCS15_SIGN        6
+#define CRK_RSA_PKCS15_VERIFY      7
+#define CRK_RSA_PSS_SIGN           8
+#define CRK_RSA_PSS_VERIFY         10
+#define CRK_ECDSA_SECP256R1_SIGN   11
+#define CRK_ECDSA_SECP256R1_VERIFY 12
+#define CRK_ECDSA_SECP256R1_GENKEY 13
+
+/* key management */
+
+#define CRK_ALLOCATE_KEY           14 /* Request an available keyid from the driver */
+#define CRK_VALIDATE_KEYID         15 /* Check the specified keyid is available */
+#define CRK_IMPORT_KEY             16 /* Import key data into driver */
+#define CRK_DELETE_KEY             17 /* Request to remove key with specified keyid */
+#define CRK_EXPORT_KEY             18 /* Export raw data or private key if keypair */
+#define CRK_EXPORT_PUBLIC_KEY      19 /* Export public key of keypair */
+#define CRK_GENERATE_AES_KEY       20 /* Generate key data for AES with specified keyid */
+#define CRK_GENERATE_RSA_KEY       21 /* Generate keypair for RSA with specified keyid */
+#define CRK_GENERATE_SECP256R1_KEY 22 /* Generate keypair for ECC256 with specified keyid */
+#define CRK_SAVE_KEY               23 /* Save key data into FLASH */
+#define CRK_LOAD_KEY               24 /* Load key data from FLASH into RAM */
+#define CRK_UNLOAD_KEY             25 /* Unload key data from RAM */
+#define CRK_ALGORITHM_MAX          25 /* Keep updated */
 
 #define CRF_MOD_EXP                (1 << CRK_MOD_EXP)
 #define CRF_MOD_EXP_CRT            (1 << CRK_MOD_EXP_CRT)
 #define CRF_DSA_SIGN               (1 << CRK_DSA_SIGN)
 #define CRF_DSA_VERIFY             (1 << CRK_DSA_VERIFY)
 #define CRF_DH_COMPUTE_KEY         (1 << CRK_DH_COMPUTE_KEY)
+#define CRF_RSA_PKCS15_SIGN        (1 << CRK_RSA_PKCS15_SIGN)
 #define CRF_RSA_PKCS15_VERIFY      (1 << CRK_RSA_PKCS15_VERIFY)
+#define CRF_RSA_PSS_SIGN           (1 << CRK_RSA_PSS_SIGN)
+#define CRF_RSA_PSS_VERIFY         (1 << CRK_RSA_PSS_VERIFY)
 #define CRF_ECDSA_SECP256R1_SIGN   (1 << CRK_ECDSA_SECP256R1_SIGN)
 #define CRF_ECDSA_SECP256R1_VERIFY (1 << CRK_ECDSA_SECP256R1_VERIFY)
 #define CRF_ECDSA_SECP256R1_GENKEY (1 << CRK_ECDSA_SECP256R1_GENKEY)
+#define CRF_ALLOCATE_KEY           (1 << CRK_ALLOCATE_KEY)
+#define CRF_VALIDATE_KEYID         (1 << CRK_VALIDATE_KEYID)
+#define CRF_IMPORT_KEY             (1 << CRK_IMPORT_KEY)
+#define CRF_DELETE_KEY             (1 << CRK_DELETE_KEY)
+#define CRF_EXPORT_KEY             (1 << CRK_EXPORT_KEY)
+#define CRF_EXPORT_PUBLIC_KEY      (1 << CRK_EXPORT_PUBLIC_KEY)
+#define CRF_GENERATE_AES_KEY       (1 << CRK_GENERATE_AES_KEY)
+#define CRF_GENERATE_RSA_KEY       (1 << CRK_GENERATE_RSA_KEY)
+#define CRF_GENERATE_SECP256R1_KEY (1 << CRK_GENERATE_SECP256R1_KEY)
+#define CRF_SAVE_KEY               (1 << CRK_SAVE_KEY)
+#define CRF_LOAD_KEY               (1 << CRK_LOAD_KEY)
+#define CRF_UNLOAD_KEY             (1 << CRK_UNLOAD_KEY)
 
 struct cryptkop
 {
@@ -294,6 +334,7 @@ struct cryptkop
   FAR struct fcrypt *krp_fcr;
   u_int krp_flags;     /* same as cryptop */
   uint32_t krp_reqid;  /* distinguish tasks in asynchronous calling */
+  FAR void *krp_opaque;
 };
 
 /* Crypto capabilities structure */
@@ -319,11 +360,14 @@ struct cryptocap
 #define CRYPTOCAP_F_SOFTWARE    0x02
 #define CRYPTOCAP_F_ENCRYPT_MAC 0x04 /* Can do encrypt-then-MAC (IPsec) */
 #define CRYPTOCAP_F_MAC_ENCRYPT 0x08 /* Can do MAC-then-encrypt (TLS) */
+#define CRYPTOCAP_F_REMOTE      0x10 /* Remote core driver  */
+#define CRYPTOCAP_F_KEY_MGMT    0x20 /* Key management */
 
   CODE int (*cc_newsession)(FAR uint32_t *, FAR struct cryptoini *);
   CODE int (*cc_process)(FAR struct cryptop *);
   CODE int (*cc_freesession)(uint64_t);
   CODE int (*cc_kprocess)(FAR struct cryptkop *);
+  FAR void *priv;
 };
 
 /* ioctl parameter to request creation of a session. */
@@ -331,6 +375,7 @@ struct cryptocap
 struct session_op
 {
   uint32_t cipher;    /* ie. CRYPTO_AES_EBC */
+  uint16_t op;        /* i.e. COP_ENCRYPT */
   uint32_t mac;
   uint32_t keylen;    /* cipher key */
   caddr_t key;
@@ -364,6 +409,8 @@ struct crypt_op
 
   uint16_t flags;
   unsigned len;
+  unsigned olen;
+  unsigned ivlen;
   unsigned aadlen;
   caddr_t src, dst;   /* become iov[] inside kernel */
   caddr_t mac;        /* must be big enough for chosen MAC */
@@ -403,13 +450,12 @@ int crypto_kregister(uint32_t, FAR int *,
                      CODE int (*)(FAR struct cryptkop *));
 int crypto_unregister(uint32_t, int);
 int crypto_get_driverid(uint8_t);
+int crypto_find_driverid(uint8_t);
 int crypto_invoke(FAR struct cryptop *);
 int crypto_kinvoke(FAR struct cryptkop *);
 int crypto_getfeat(FAR int *);
-
-FAR struct cryptop *crypto_getreq(int);
-void crypto_freereq(FAR struct cryptop *);
-
+int crypto_driver_set_priv(uint32_t, FAR void *);
+FAR void *crypto_driver_get_priv(uint32_t);
 #ifdef CONFIG_CRYPTO_CRYPTODEV_HARDWARE
 void hwcr_init(void);
 #endif

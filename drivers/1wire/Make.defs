@@ -28,6 +28,10 @@ ifeq ($(CONFIG_1WIRE_DS28E17),y)
 CSRCS += ds28e17.c
 endif
 
+ifeq ($(CONFIG_1WIRE_EE_DS2XXX),y)
+CSRCS += 1wire_ds2xxx.c
+endif
+
 # Include 1wire device driver build support
 
 DEPPATH += --dep-path 1wire

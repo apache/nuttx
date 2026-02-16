@@ -45,6 +45,37 @@
 #include "arm64_fatal.h"
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: arm64_color_intstack
+ *
+ * Description:
+ *   Set the interrupt stack to a value so that later we can determine how
+ *   much stack space was used by interrupt handling logic
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
+static inline void arm64_color_intstack(void)
+{
+#ifdef CONFIG_SMP
+  int cpu;
+
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
+      arm64_stack_color((void *)up_get_intstackbase(cpu), INTSTACK_SIZE);
+    }
+#else
+  arm64_stack_color((void *)g_interrupt_stack, INTSTACK_SIZE);
+#endif
+}
+#else
+#  define arm64_color_intstack()
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -85,6 +116,8 @@ uint64_t *arm64_doirq(int irq, uint64_t * regs)
 
   if (regs != tcb->xcp.regs)
     {
+      struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+
       /* need to do a context switch */
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -95,19 +128,19 @@ uint64_t *arm64_doirq(int irq, uint64_t * regs)
        */
 
       addrenv_switch(tcb);
+      tcb = this_task();
 #endif
 
       /* Update scheduler parameters */
 
-      nxsched_suspend_scheduler(g_running_tasks[this_cpu()]);
-      nxsched_resume_scheduler(tcb);
+      nxsched_switch_context(*running_task, tcb);
 
       /* Record the new "running" task when context switch occurred.
        * g_running_tasks[] is only used by assertion logic for reporting
        * crashes.
        */
 
-      g_running_tasks[this_cpu()] = tcb;
+      *running_task = tcb;
       regs = tcb->xcp.regs;
     }
 
@@ -148,6 +181,7 @@ void up_irqinitialize(void)
 
   /* And finally, enable interrupts */
 
+  arm64_color_intstack();
   up_irq_enable();
 #endif
 }

@@ -176,19 +176,6 @@ int nxsem_open(FAR sem_t **sem, FAR const char *name, int oflags, ...)
           goto errout_with_search;
         }
 
-      /* Create an inode in the pseudo-filesystem at this path.  The new
-       * inode will be created with a reference count of zero.
-       */
-
-      inode_lock();
-      ret = inode_reserve(fullpath, mode, &inode);
-      inode_unlock();
-
-      if (ret < 0)
-        {
-          goto errout_with_search;
-        }
-
       /* Allocate the semaphore structure (using the appropriate allocator
        * for the group)
        */
@@ -197,22 +184,39 @@ int nxsem_open(FAR sem_t **sem, FAR const char *name, int oflags, ...)
       if (!nsem)
         {
           ret = -ENOMEM;
-          goto errout_with_inode;
+          goto errout_with_search;
         }
 
-      /* Link to the inode */
+      /* Create an inode in the pseudo-filesystem at this path.  The new
+       * inode will be created with a reference count of zero.
+       */
 
-      inode->u.i_nsem = nsem;
-      nsem->ns_inode  = inode;
+      inode_lock();
+      ret = inode_reserve(fullpath, mode, &inode);
+      if (ret >= 0)
+        {
+          /* Link to the inode */
 
-      /* Initialize the inode */
+          inode->u.i_nsem = nsem;
+          nsem->ns_inode  = inode;
 
-      INODE_SET_NAMEDSEM(inode);
-      atomic_fetch_add(&inode->i_crefs, 1);
+          /* Initialize the inode */
 
-      /* Initialize the semaphore */
+          INODE_SET_NAMEDSEM(inode);
+          atomic_fetch_add(&inode->i_crefs, 1);
 
-      nxsem_init(&nsem->ns_sem, 0, value);
+          /* Initialize the semaphore */
+
+          nxsem_init(&nsem->ns_sem, 0, value);
+        }
+
+      inode_unlock();
+
+      if (ret < 0)
+        {
+          group_free(NULL, nsem);
+          goto errout_with_search;
+        }
 
       /* Return a reference to the semaphore */
 

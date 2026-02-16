@@ -58,6 +58,13 @@ struct rpmsgdev_device_s
   struct list_node node;  /* The double-linked list node */
 };
 
+struct rpmsgdev_export_s
+{
+  FAR const char *remotecpu;  /* The client cpu name */
+  FAR const char *prefix;     /* The device prefix */
+  FAR const char *localpath;  /* The device path in the server cpu */
+};
+
 struct rpmsgdev_server_s
 {
   struct rpmsg_endpoint ept;   /* Rpmsg end point */
@@ -68,13 +75,7 @@ struct rpmsgdev_server_s
                                 * operation
                                 */
   struct work_s         work;  /* Poll notify work */
-  FAR void             *priv;
-};
-
-struct rpmsgdev_export_s
-{
-  FAR const char *remotecpu;  /* The client cpu name */
-  FAR const char *localpath;  /* The device path in the server cpu */
+  FAR struct rpmsgdev_export_s *export;
 };
 
 /****************************************************************************
@@ -135,6 +136,8 @@ static const rpmsg_ept_cb g_rpmsgdev_handler[] =
   [RPMSGDEV_POLL]        = rpmsgdev_poll_handler,
 };
 
+static FAR struct kwork_wqueue_s *g_rpmsgdev_wqueue = NULL;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -148,6 +151,7 @@ static int rpmsgdev_open_handler(FAR struct rpmsg_endpoint *ept,
                                  uint32_t src, FAR void *priv)
 {
   FAR struct rpmsgdev_server_s *server = ept->priv;
+  FAR struct rpmsgdev_export_s *export = server->export;
   FAR struct rpmsgdev_open_s *msg = data;
   FAR struct rpmsgdev_device_s *dev;
 
@@ -159,7 +163,8 @@ static int rpmsgdev_open_handler(FAR struct rpmsg_endpoint *ept,
     }
 
   msg->header.result = file_open(&dev->file,
-                                 &ept->name[RPMSGDEV_NAME_PREFIX_LEN],
+                                 export ? export->localpath :
+                                 strchr(ept->name, '/'),
                                  msg->flags, 0);
   if (msg->header.result < 0)
     {
@@ -362,7 +367,8 @@ static void rpmsgdev_poll_cb(FAR struct pollfd *fds)
   DEBUGASSERT(fds != NULL);
 
   server = fds->arg;
-  work_queue(HPWORK, &server->work, rpmsgdev_poll_worker, fds, 0);
+  work_queue_wq(g_rpmsgdev_wqueue, &server->work, rpmsgdev_poll_worker,
+                fds, 0);
 }
 
 /****************************************************************************
@@ -458,12 +464,7 @@ static void rpmsgdev_ept_release(FAR struct rpmsg_endpoint *ept)
 
   nxmutex_unlock(&server->lock);
 
-  if (server->priv)
-    {
-      kmm_free(server->priv);
-      server->priv = NULL;
-    }
-
+  server->export = NULL;
   kmm_free(server);
 }
 
@@ -486,8 +487,8 @@ static void rpmsgdev_ns_bind(FAR struct rpmsg_device *rdev,
 
   list_initialize(&server->head);
   nxmutex_init(&server->lock);
-  server->priv = priv;
   server->ept.priv = server;
+  server->export = priv;
   server->ept.release_cb = rpmsgdev_ept_release;
 
   ret = rpmsg_create_ept(&server->ept, rdev, name,
@@ -520,22 +521,16 @@ static int rpmsgdev_ept_cb(FAR struct rpmsg_endpoint *ept,
 }
 
 static void rpmsgdev_server_created(FAR struct rpmsg_device *rdev,
-                                    FAR void *priv_)
+                                    FAR void *priv)
 {
-  struct rpmsgdev_export_s *priv = priv_;
+  struct rpmsgdev_export_s *export = priv;
   char buf[RPMSG_NAME_SIZE];
 
-  if (strcmp(priv->remotecpu, rpmsg_get_cpuname(rdev)) == 0)
+  if (strcmp(export->remotecpu, rpmsg_get_cpuname(rdev)) == 0)
     {
-      snprintf(buf, sizeof(buf), "%s%s", RPMSGDEV_NAME_PREFIX,
-               priv->localpath);
-      rpmsgdev_ns_bind(rdev, priv, buf, RPMSG_ADDR_ANY);
-
-      rpmsg_unregister_callback(priv,
-                                rpmsgdev_server_created,
-                                NULL,
-                                NULL,
-                                NULL);
+      snprintf(buf, sizeof(buf), "%s%s", export->prefix,
+               strrchr(export->localpath, '/'));
+      rpmsgdev_ns_bind(rdev, export, buf, RPMSG_ADDR_ANY);
     }
 }
 
@@ -543,24 +538,34 @@ static void rpmsgdev_server_created(FAR struct rpmsg_device *rdev,
  * Public Functions
  ****************************************************************************/
 
-int rpmsgdev_export(FAR const char *remotecpu, FAR const char *localpath)
+int rpmsgdev_export_with_prefix(FAR const char *remotecpu,
+                                FAR const char *prefix,
+                                FAR const char *localpath)
 {
-  FAR struct rpmsgdev_export_s *priv;
+  FAR struct rpmsgdev_export_s *export;
 
-  priv = kmm_zalloc(sizeof(*priv));
-  if (priv == NULL)
+  export = kmm_zalloc(sizeof(*export));
+  if (export == NULL)
     {
       return -ENOMEM;
     }
 
-  priv->remotecpu = remotecpu;
-  priv->localpath = localpath;
+  export->remotecpu = remotecpu;
+  export->prefix    = prefix;
+  export->localpath = localpath;
 
-  return rpmsg_register_callback(priv,
+  return rpmsg_register_callback(export,
                                  rpmsgdev_server_created,
                                  NULL,
                                  NULL,
                                  NULL);
+}
+
+int rpmsgdev_export(FAR const char *remotecpu, FAR const char *localpath)
+{
+  return rpmsgdev_export_with_prefix(remotecpu,
+                                     RPMSGDEV_NAME_PREFIX,
+                                     localpath);
 }
 
 /****************************************************************************
@@ -580,6 +585,17 @@ int rpmsgdev_export(FAR const char *remotecpu, FAR const char *localpath)
 
 int rpmsgdev_server_init(void)
 {
+  if (g_rpmsgdev_wqueue == NULL)
+    {
+      g_rpmsgdev_wqueue = work_queue_create("rpmsgdev_server",
+        CONFIG_DEV_RPMSG_SERVER_WORK_PRIORITY, NULL,
+        CONFIG_DEV_RPMSG_SERVER_WORK_STACKSIZE, 1);
+      if (g_rpmsgdev_wqueue == NULL)
+        {
+          return -ENOENT;
+        }
+    }
+
   return rpmsg_register_callback(NULL,
                                  NULL,
                                  NULL,

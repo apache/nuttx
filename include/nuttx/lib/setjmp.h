@@ -38,14 +38,89 @@
 
 #ifdef CONFIG_ARCH_SETJMP_H
 #  include <arch/setjmp.h>
-#endif
+#  include <signal.h>
 
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
 
+struct sigsetjmp_buf_s
+{
+  jmp_buf  jmpbuf;               /* setjmp/longjmp buffer */
+  int      savemask;             /* Flag indicating if mask was saved */
+  sigset_t sigmask;              /* Saved signal mask */
+};
+
+typedef struct sigsetjmp_buf_s sigjmp_buf[1];
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: siglongjmp
+ *
+ * Description:
+ *   Restores the program's execution context previously saved by
+ *   sigsetjmp().
+ *
+ * Input Parameters:
+ *   env - a pointer to a sigjmp_buf structure
+ *   val - return value for sigsetjmp()
+ *
+ * Returned Value:
+ *   This function does not return anything explicitly.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static inline_function void siglongjmp(sigjmp_buf env, int val)
+{
+  if (env->savemask)
+    {
+      sigprocmask(SIG_SETMASK, &env->sigmask, NULL);
+    }
+
+  longjmp(env->jmpbuf, val);
+}
+
+/****************************************************************************
+ * Name: sigsetjmp
+ *       int sigsetjmp(sigjmp_buf env, int savemask)
+ *
+ * Description:
+ *   Saves the current program execution context including. It can
+ *   optionally save the thread's current signal mask if the savemask
+ *   parameter is non-zero.
+ *
+ * REVISIT:
+ *  what if a signal is delivered between sigprocmask() and setjmp() ?
+ *
+ * Input Parameters:
+ *   env - a pointer to a sigjmp_buf structure
+ *   savemask - a flag used to determine if the signal mask is to be saved
+ *
+ * Returned Value:
+ *   0      sigsetjmp called directly
+ *   non-0  we justed returned from a siglongjmp()
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#define sigsetjmp(env, _savemask)                   \
+  ({                                                \
+    int _ret;                                       \
+    env->savemask = _savemask;                      \
+    if (_savemask)                                  \
+      {                                             \
+        sigprocmask(0, NULL, &env->sigmask);        \
+      }                                             \
+    _ret = setjmp(env->jmpbuf);                     \
+    _ret;                                           \
+  })
+
+#endif
 
 #endif /* __INCLUDE_NUTTX_LIB_SETJMP_H */

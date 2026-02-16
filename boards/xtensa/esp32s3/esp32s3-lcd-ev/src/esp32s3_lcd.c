@@ -631,7 +631,7 @@ static void lcd_configure_display(void)
 
   /* Wait until LCD is ready */
 
-  nxsig_usleep(120 * 1000);
+  nxsched_usleep(120 * 1000);
 
   /* Display on */
 
@@ -639,7 +639,7 @@ static void lcd_configure_display(void)
 
   /* Wait until LCD is on */
 
-  nxsig_usleep(20 * 1000);
+  nxsched_usleep(20 * 1000);
 }
 
 /****************************************************************************

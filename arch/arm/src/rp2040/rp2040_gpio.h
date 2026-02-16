@@ -34,6 +34,7 @@
 #include <debug.h>
 
 #include "hardware/rp2040_sio.h"
+#include "hardware/rp2040_address_mapped.h"
 #include "hardware/rp2040_io_bank0.h"
 #include "hardware/rp2040_pads_bank0.h"
 
@@ -70,6 +71,13 @@
 #define RP2040_GPIO_INTR_LEVEL_HIGH (0x2)
 #define RP2040_GPIO_INTR_EDGE_LOW   (0x4)
 #define RP2040_GPIO_INTR_EDGE_HIGH  (0x8)
+
+/* GPIO override modes ******************************************************/
+
+#define RP2040_GPIO_OVERRIDE_NORMAL 0
+#define RP2040_GPIO_OVERRIDE_INVERT 1
+#define RP2040_GPIO_OVERRIDE_LOW    2
+#define RP2040_GPIO_OVERRIDE_HIGH   3
 
 /****************************************************************************
  * Public Types
@@ -187,6 +195,27 @@ static inline void rp2040_gpio_set_drive_strength(uint32_t gpio,
   modbits_reg32(drive_strength,
                 RP2040_PADS_BANK0_GPIO_DRIVE_MASK,
                 RP2040_PADS_BANK0_GPIO(gpio));
+}
+
+/****************************************************************************
+ * Name: rp2040_gpio_set_outover
+ *
+ * Description:
+ *   Set whether the pin's output override will be enabled.
+ *   See the RP2040_GPIO_OVERRIDE_* constants.
+ *
+ ****************************************************************************/
+
+static inline void rp2040_gpio_set_outover(uint32_t gpio, uint32_t outover)
+{
+    DEBUGASSERT(gpio < RP2040_GPIO_NUM);
+    DEBUGASSERT(outover <= RP2040_GPIO_OVERRIDE_HIGH);
+
+    hw_write_masked(
+      (uint32_t *)(RP2040_IO_BANK0_BASE + (0x08 * gpio) + 0x04),
+      outover << RP2040_IO_BANK0_GPIO_CTRL_OUTOVER_SHIFT,
+      RP2040_IO_BANK0_GPIO_CTRL_OUTOVER_MASK
+    );
 }
 
 /****************************************************************************

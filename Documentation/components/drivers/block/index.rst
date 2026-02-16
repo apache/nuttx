@@ -5,7 +5,6 @@ Block Device Drivers
 .. toctree::
   :maxdepth: 1
 
-  eeprom.rst
   ramdisk.rst
 
 

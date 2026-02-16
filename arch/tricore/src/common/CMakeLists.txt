@@ -22,6 +22,7 @@
 
 set(SRCS
     tricore_allocateheap.c
+    tricore_cache.c
     tricore_checkstack.c
     tricore_createstack.c
     tricore_csa.c
@@ -32,23 +33,27 @@ set(SRCS
     tricore_initialstate.c
     tricore_irq.c
     tricore_main.c
-    tricore_mdelay.c
     tricore_nputs.c
     tricore_registerdump.c
     tricore_releasestack.c
     tricore_saveusercontext.c
-    tricore_schedulesigaction.c
-    tricore_sigdeliver.c
     tricore_stackframe.c
     tricore_svcall.c
-    tricore_switchcontext.c
     tricore_tcbinfo.c
     tricore_trapcall.c
     tricore_systimer.c
     tricore_usestack.c)
 
+if(CONFIG_ENABLE_ALL_SIGNALS)
+  list(APPEND SRCS tricore_schedulesigaction.c tricore_sigdeliver.c)
+endif()
+
 if(CONFIG_SPINLOCK)
   list(APPEND SRCS tricore_testset.c)
+endif()
+
+if(CONFIG_ARCH_USE_MPU)
+  list(APPEND SRCS tricore_mpu.c)
 endif()
 
 set(IFXFLAGS -DIFX_CFG_EXTEND_TRAP_HOOKS -DIFX_USE_SW_MANAGED_INT)

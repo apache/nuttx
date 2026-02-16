@@ -44,6 +44,7 @@
 #include "arp/arp.h"
 #include "icmpv6/icmpv6.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
 #include "udp/udp.h"
 
 /****************************************************************************
@@ -143,8 +144,8 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
-                                    FAR void *pvpriv, uint16_t flags)
+static uint32_t sendto_eventhandler(FAR struct net_driver_s *dev,
+                                    FAR void *pvpriv, uint32_t flags)
 {
   FAR struct sendto_s *pstate = pvpriv;
 
@@ -162,7 +163,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
           return flags;
         }
 
-      ninfo("flags: %04x\n", flags);
+      ninfo("flags: %" PRIx32 "\n", flags);
 
       /* If the network device has gone down, then we will have terminate
        * the wait now with an error.
@@ -197,14 +198,30 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
         {
           /* Copy the user data into d_appdata and send it */
 
-          int ret = devif_send(dev, pstate->st_buffer, pstate->st_buflen,
-                               udpip_hdrsize(pstate->st_conn));
-          if (ret <= 0)
+          if (pstate->st_buflen > 0)
             {
-              pstate->st_sndlen = ret;
-              goto end_wait;
+              int ret = devif_send(dev, pstate->st_buffer, pstate->st_buflen,
+                                   udpip_hdrsize(pstate->st_conn));
+              if (ret <= 0)
+                {
+                  pstate->st_sndlen = ret;
+                  goto end_wait;
+                }
+            }
+          else
+            {
+              if (netdev_iob_prepare(dev, false, 0) != OK)
+                {
+                  pstate->st_sndlen = -ENOMEM;
+                  goto end_wait;
+                }
+
+                iob_update_pktlen(dev->d_iob, udpip_hdrsize(pstate->st_conn),
+                                  false);
+                dev->d_sndlen = 0;
             }
 
+          dev->d_len = dev->d_iob->io_pktlen;
 #ifdef NEED_IPDOMAIN_SUPPORT
           /* If both IPv4 and IPv6 support are enabled, then we will need to
            * select which one to use when generating the outgoing packet.
@@ -399,7 +416,6 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
    * ready.
    */
 
-  net_lock();
   memset(&state, 0, sizeof(struct sendto_s));
   nxsem_init(&state.st_sem, 0, 0);
 
@@ -424,7 +440,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       if (ret < 0)
         {
           nerr("ERROR: udp_connect failed: %d\n", ret);
-          goto errout_with_lock;
+          return ret;
         }
     }
 
@@ -436,18 +452,18 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   if (state.st_dev == NULL)
     {
       nerr("ERROR: udp_find_raddr_device failed\n");
-      ret = -ENETUNREACH;
-      goto errout_with_lock;
+      return -ENETUNREACH;
     }
 
   /* Make sure that the device is in the UP state */
 
-  if ((state.st_dev->d_flags & IFF_UP) == 0)
+  if (IFF_IS_RUNNING(state.st_dev->d_flags) == 0)
     {
-      nwarn("WARNING: device is DOWN\n");
-      ret = -EHOSTUNREACH;
-      goto errout_with_lock;
+      nwarn("WARNING: device is not running\n");
+      return -EHOSTUNREACH;
     }
+
+  conn_dev_lock(&conn->sconn, state.st_dev);
 
   /* Set up the callback in the connection */
 
@@ -455,21 +471,22 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
   state.st_cb = udp_callback_alloc(state.st_dev, conn);
   if (state.st_cb)
     {
-      state.st_cb->flags   = (UDP_POLL | NETDEV_DOWN);
-      state.st_cb->priv    = (FAR void *)&state;
-      state.st_cb->event   = sendto_eventhandler;
+      state.st_cb->flags = (UDP_POLL | NETDEV_DOWN);
+      state.st_cb->priv  = (FAR void *)&state;
+      state.st_cb->event = sendto_eventhandler;
 
       /* Notify the device driver of the availability of TX data */
 
-      netdev_txnotify_dev(state.st_dev);
+      netdev_txnotify_dev(state.st_dev, UDP_POLL);
 
       /* Wait for either the receive to complete or for an error/timeout to
-       * occur. NOTES:  net_sem_timedwait will also terminate if a signal
+       * occur. NOTES: conn_dev_sem_timedwait will also terminate if a signal
        * is received.
        */
 
-      ret = net_sem_timedwait(&state.st_sem,
-                          _SO_TIMEOUT(conn->sconn.s_sndtimeo));
+      ret = conn_dev_sem_timedwait(&state.st_sem, true,
+                                   _SO_TIMEOUT(conn->sconn.s_sndtimeo),
+                                   &conn->sconn, state.st_dev);
       if (ret >= 0)
         {
           /* The result of the sendto operation is the number of bytes
@@ -484,15 +501,13 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
       udp_callback_free(state.st_dev, conn, state.st_cb);
     }
 
-errout_with_lock:
-
   /* Release the semaphore */
 
   nxsem_destroy(&state.st_sem);
 
   /* Unlock the network and return the result of the sendto() operation */
 
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, state.st_dev);
   return ret;
 }
 

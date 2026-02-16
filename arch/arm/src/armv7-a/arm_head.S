@@ -179,7 +179,7 @@
 	.type	__start, #function
 
 __start:
-#if defined(CONFIG_SMP) && CONFIG_SMP_NCPUS > 1
+#if CONFIG_NCPUS > 1
 	/* Get cpuindex, cpu0 continue boot, others wait event from cpu0 */
 
 	mrc		CP15_MPIDR(r0)
@@ -187,8 +187,8 @@ __start:
 	cmp		r0, #0
 	beq		__cpu0_start
 
-#ifdef CONFIG_ARMV7A_SMP_BUSY_WAIT
-	ldr		r2, =CONFIG_ARMV7A_SMP_BUSY_WAIT_FLAG_ADDR
+#ifdef CONFIG_ARM_BUSY_WAIT
+	ldr		r2, =CONFIG_ARM_BUSY_WAIT_FLAG_ADDR
 1:
 	ldr		r1, [r2, #0]
 	cmp		r1, #0
@@ -197,19 +197,24 @@ __start:
 	wfe
 #endif
 
+	ldr		r1, =cpu1_start
+	ldr		r1, [r1]
 	cmp		r0, #1
-	beq		__cpu1_start
-#  if CONFIG_SMP_NCPUS > 2
+	bxeq		r1
+#  if CONFIG_NCPUS > 2
+	ldr		r1, =cpu2_start
+	ldr		r1, [r1]
 	cmp		r0, #2
-	beq		__cpu2_start
+	bxeq		r1
 #  endif
-#  if CONFIG_SMP_NCPUS > 3
+#  if CONFIG_NCPUS > 3
+	ldr		r1, =cpu3_start
+	ldr		r1, [r1]
 	cmp		r0, #3
-	beq		__cpu3_start
+	bxeq		r1
 #  endif
-#  if CONFIG_SMP_NCPUS > 4
-	cmp		r0, #4
-	beq		__cpu4_start
+#  if CONFIG_NCPUS > 4
+#    error This logic needs to extended for CONFIG_SMP_NCPUS > 4
 #  endif
 
 __cpu0_start:
@@ -690,8 +695,8 @@ __cpu0_start:
 
 	/* finish busy wait */
 
-#ifdef CONFIG_ARMV7A_SMP_BUSY_WAIT
-	ldr		r0, =CONFIG_ARMV7A_SMP_BUSY_WAIT_FLAG_ADDR
+#ifdef CONFIG_ARM_BUSY_WAIT
+	ldr		r0, =CONFIG_ARM_BUSY_WAIT_FLAG_ADDR
 	mov		r1, #1
 	str		r1, [r0]
 	dsb		sy

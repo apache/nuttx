@@ -340,6 +340,16 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
 #endif
   int ret;
 
+  /* Check if destination device supports IP forwarding capability */
+
+  if (IFF_IS_NODST_FORWARD(fwddev->d_flags))
+    {
+      nwarn("WARNING: IP forwarding disabled on destination device %s\n",
+            fwddev->d_ifname);
+      ret = -EOPNOTSUPP;
+      goto errout;
+    }
+
 #ifdef CONFIG_NET_IPFILTER
   /* Do filter before forwarding, to make sure we drop silently before
    * replying any other errors.
@@ -361,11 +371,11 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
     }
 #endif
 
-  /* If the interface isn't "up", we can't forward. */
+  /* If the interface isn't "running", we can't forward. */
 
-  if ((fwddev->d_flags & IFF_UP) == 0)
+  if (IFF_IS_RUNNING(fwddev->d_flags) == 0)
     {
-      nwarn("WARNING: device is DOWN\n");
+      nwarn("WARNING: device is not running\n");
       ret = -EHOSTUNREACH;
       goto errout;
     }
@@ -510,9 +520,10 @@ static int ipv6_forward_callback(FAR struct net_driver_s *fwddev,
 
   DEBUGASSERT(fwddev != NULL);
 
-  /* Only IFF_UP device and non-loopback device need forward packet */
+  /* Only IFF_RUNNING device and non-loopback device need forward packet */
 
-  if (!IFF_IS_UP(fwddev->d_flags) || fwddev->d_lltype == NET_LL_LOOPBACK)
+  if (!IFF_IS_RUNNING(fwddev->d_flags) ||
+      fwddev->d_lltype == NET_LL_LOOPBACK)
     {
       return OK;
     }
@@ -601,6 +612,16 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
   int icmpv6_reply_code;
   int icmpv6_reply_data;
 #endif /* CONFIG_NET_ICMP */
+
+  /* Check if source device supports IP forwarding capability */
+
+  if (IFF_IS_NOSRC_FORWARD(dev->d_flags))
+    {
+      nwarn("WARNING: IP forwarding disabled on source device %s\n",
+            dev->d_ifname);
+      ret = -EOPNOTSUPP;
+      goto drop;
+    }
 
   /* Search for a device that can forward this packet. */
 
@@ -717,6 +738,12 @@ drop:
         icmpv6_reply_data = 0;
         goto reply;
 
+      case -EOPNOTSUPP:
+        icmpv6_reply_type = ICMPv6_DEST_UNREACHABLE;
+        icmpv6_reply_code = ICMPv6_ADDR_UNREACH;
+        icmpv6_reply_data = 0;
+        goto reply;
+
       default:
         break; /* We don't know how to reply, just go on (to drop). */
     }
@@ -770,11 +797,24 @@ reply:
 void ipv6_forward_broadcast(FAR struct net_driver_s *dev,
                             FAR struct ipv6_hdr_s *ipv6)
 {
+  /* Check if source device supports IP forwarding capability.
+   * Broadcast/multicast forwarding is only allowed if the receiving
+   * device has SRC_FORWARD enabled. This is consistent with the unicast
+   * forwarding policy enforced in ipv6_forward().
+   */
+
+  if (IFF_IS_NOSRC_FORWARD(dev->d_flags))
+    {
+      nwarn("WARNING: IP broadcast forwarding disabled "
+            "on source device %s\n", dev->d_ifname);
+      return;
+    }
+
   /* Don't bother if the TTL would expire */
 
   if (ipv6->ttl > 1)
     {
-      /* Forward the the broadcast/multicast packet to all devices except,
+      /* Forward the broadcast/multicast packet to all devices except,
        * of course, the device that received the packet.
        */
 

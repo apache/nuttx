@@ -92,18 +92,24 @@ uint32_t *arm_syscall(uint32_t *regs)
 
         /* Update scheduler parameters */
 
-        nxsched_resume_scheduler(tcb);
+        nxsched_switch_context(*running_task, tcb);
 
       case SYS_restore_context:
-        nxsched_suspend_scheduler(*running_task);
+#ifdef CONFIG_ARCH_ADDRENV
+        addrenv_switch(tcb);
+        tcb = this_task();
+#endif
+
+        /* No context switch occurs in SYS_restore_context, or the
+         * context switch has been completed, so there is no
+         * need to update scheduler parameters.
+         */
+
         *running_task = tcb;
 
         /* Restore the cpu lock */
 
         restore_critical_section(tcb, cpu);
-#ifdef CONFIG_ARCH_ADDRENV
-        addrenv_switch(tcb);
-#endif
         break;
 
       default:

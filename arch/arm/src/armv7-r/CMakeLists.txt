@@ -39,13 +39,15 @@ list(
   arm_doirq.c
   arm_initialstate.c
   arm_prefetchabort.c
-  arm_schedulesigaction.c
-  arm_sigdeliver.c
   arm_syscall.c
   arm_tcbinfo.c
   arm_undefinedinsn.c
   arm_perf.c
   cp15_cacheops.c)
+
+if(CONFIG_ENABLE_ALL_SIGNALS)
+  list(APPEND SRCS arm_schedulesigaction.c arm_sigdeliver.c)
+endif()
 
 if(NOT CONFIG_ARCH_CHIP STREQUAL tms570)
   list(APPEND SRCS arm_gicv2.c arm_gicv2_dump.c)
@@ -79,3 +81,8 @@ if(CONFIG_SMP)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+if(NOT CONFIG_BUILD_FLAT AND CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS)
+  target_sources(arch_interface PRIVATE arm_perf.c)
+  target_include_directories(arch_interface PRIVATE ${NUTTX_CHIP_ABS_DIR})
+endif()

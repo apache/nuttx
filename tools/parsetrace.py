@@ -133,9 +133,14 @@ class SymbolTables(object):
                     if name == type_name:
                         if "DW_AT_type" in DIE.attributes:
                             type_attr = DIE.attributes["DW_AT_type"]
-                            base_type_die = dwarfinfo.get_DIE_from_refaddr(
-                                type_attr.value + CU.cu_offset
-                            )
+                            if type_attr.form == "DW_FORM_ref_addr":
+                                base_type_die = dwarfinfo.get_DIE_from_refaddr(
+                                    type_attr.value
+                                )
+                            else:
+                                base_type_die = dwarfinfo.get_DIE_from_refaddr(
+                                    type_attr.value + CU.cu_offset
+                                )
                             if base_type_die.tag == "DW_TAG_base_type":
                                 size = base_type_die.attributes["DW_AT_byte_size"].value
                             elif base_type_die.tag == "DW_TAG_typedef":

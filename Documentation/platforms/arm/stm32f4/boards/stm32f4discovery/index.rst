@@ -1970,6 +1970,27 @@ the second dongle you will connect to UART3 (PB10 and PB11).
 In the main NSH console (in USART2) type: "pts_test &". It will create a
 new console in UART3. Just press ENTER and start typing commands on it.
 
+sbutton
+-------
+
+This is a configuration to test the Single Button Dual Action feature.
+To test it just compile and flash nuttx.bin in the board. Then run the
+``kbd`` command inside ``nsh>`` and short press and long press User
+Button (B1) on the board.
+
+You will see something like this::
+
+     NuttShell (NSH) NuttX-12.10.0
+     nsh> kbd
+     kbd_main: nsamples: 0
+     kbd_main: Opening /dev/kbd0
+     Sample  :
+        code : 65
+        type : 0
+     Sample  :
+        code : 66
+        type : 0
+
 sporadic
 --------
 
@@ -2182,3 +2203,60 @@ NOTES:
    Host Compiler:  I use the MingW compiler which can be downloaded from
    http://www.mingw.org/.  If you are using GNUWin32, then it is recommended
    the you not install the optional MSYS components as there may be conflicts.
+
+HX711
+-----
+
+HX711 is a precision 24-bit analog-to-digital converter (ADC)
+designed for weigh scales and industrial control applications.
+It interfaces load cells via a simple two-wire serial interface
+(clock and data) and provides high-resolution digital weight
+measurements.
+
+**Enable the following options using ``make menuconfig``:**
+
+::
+
+    CONFIG_ADC=y
+    CONFIG_ANALOG=y
+    CONFIG_ADC_HX711=y
+    CONFIG_EXAMPLES_HX711=y
+
+**Wiring:**
+
+Connect the HX711 to the STM32F4 board using the following pins:
+
++--------+------+
+| HX711  | PIN  |
++========+======+
+| SCK    | PB1  |
++--------+------+
+| DT     | PB2  |
++--------+------+
+
+**NSH usage:**
+
+::
+
+    NuttShell (NSH) NuttX-12.10.0 
+    nsh> hx711 -D
+    Current settings for: /dev/hx711_0
+    average.............: 1
+    channel.............: a
+    gain................: 128
+    value per unit......: 0
+    nsh> hx711 -v 813 -t 10
+    Taring with *float*g precision
+    nsh> hx711 -r 10
+    -2
+    0
+    0
+    -1
+    -3
+    -3
+    -2
+    -2
+    -4
+    -4
+
+For more details, refer to the official `HX711 NuttX documentation <https://nuttx.apache.org/docs/latest/components/drivers/character/analog/adc/hx711/index.html>`_.

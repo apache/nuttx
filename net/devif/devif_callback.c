@@ -37,6 +37,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/netstats.h>
 
 #include "netdev/netdev.h"
 #include "utils/utils.h"
@@ -48,6 +49,16 @@
 
 #define DEVIF_CB_DONT_FREE  (1 << 0)
 #define DEVIF_CB_PEND_FREE  (1 << 1)
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* IP/TCP/UDP/ICMP statistics for all network interfaces */
+
+#ifdef CONFIG_NET_STATISTICS
+struct net_stats_s g_netstats;
+#endif
 
 /****************************************************************************
  * Private Data
@@ -82,11 +93,10 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
 
   if (cb)
     {
-      net_lock();
-
 #ifdef CONFIG_DEBUG_FEATURES
       /* Check for double freed callbacks */
 
+      NET_BUFPOOL_LOCK(g_cbprealloc);
       curr = (FAR struct devif_callback_s *)g_cbprealloc.freebuffers.head;
 
       while (curr != NULL)
@@ -94,6 +104,8 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
           DEBUGASSERT(cb != curr);
           curr = curr->nxtconn;
         }
+
+      NET_BUFPOOL_UNLOCK(g_cbprealloc);
 #endif
 
       /* Remove the callback structure from the data notification list if
@@ -153,7 +165,6 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
       if (cb->free_flags & DEVIF_CB_DONT_FREE)
         {
           cb->free_flags |= DEVIF_CB_PEND_FREE;
-          net_unlock();
           return;
         }
 
@@ -189,8 +200,6 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
       /* Free the callback structure */
 
       NET_BUFPOOL_FREE(g_cbprealloc, cb);
-
-      net_unlock();
     }
 }
 
@@ -207,30 +216,11 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static bool devif_event_trigger(uint16_t events, uint16_t triggers)
+static inline bool devif_event_trigger(uint32_t events, uint32_t triggers)
 {
-  /* The events are divided into a set of individual bits that may be ORed
-   * together PLUS a field that encodes a single poll event.
-   *
-   * First check if any of the individual event bits will trigger the
-   * callback.
-   */
+  /* check if any of the individual event bits will trigger the callback. */
 
-  if ((events & triggers & ~DEVPOLL_MASK) != 0)
-    {
-      return true;
-    }
-
-  /* No... check the encoded device event. */
-
-  if ((events & DEVPOLL_MASK) == (triggers & DEVPOLL_MASK))
-    {
-      return (triggers & DEVPOLL_MASK) != 0;
-    }
-
-  /* No.. this event set will not generate the callback */
-
-  return false;
+  return (events & triggers) != 0;
 }
 
 /****************************************************************************
@@ -254,13 +244,11 @@ static bool devif_event_trigger(uint16_t events, uint16_t triggers)
  ****************************************************************************/
 
 FAR struct devif_callback_s *
-  devif_callback_alloc(FAR struct net_driver_s *dev,
-                       FAR struct devif_callback_s **list_head,
-                       FAR struct devif_callback_s **list_tail)
+devif_callback_alloc(FAR struct net_driver_s *dev,
+                     FAR struct devif_callback_s **list_head,
+                     FAR struct devif_callback_s **list_tail)
 {
   FAR struct devif_callback_s *ret;
-
-  net_lock();
 
   /* Verify that the device pointer is valid, i.e., that it still
    * points to a registered network device and also that the network
@@ -268,16 +256,16 @@ FAR struct devif_callback_s *
    */
 
   /* Note: dev->d_flags may be asynchronously changed by netdev_ifdown()
-   * (in net/netdev/netdev_ioctl.c). Nevertheless, net_lock() / net_unlock()
-   * are not required in netdev_ifdown() to prevent dev->d_flags from
-   * asynchronous change here. There is not an issue because net_lock() and
-   * net_unlock() present inside of devif_dev_event(). That should be enough
-   * to de-allocate connection callbacks reliably on NETDEV_DOWN event.
+   * (in net/netdev/netdev_ioctl.c). Nevertheless, netdev_lock() /
+   * netdev_unlock() are not required in netdev_ifdown() to prevent
+   * dev->d_flags from asynchronous change here. There is not an issue
+   * because netdev_lock() and netdev_unlock() present inside of
+   * devif_dev_event(). That should be enough to de-allocate connection
+   * callbacks reliably on NETDEV_DOWN event.
    */
 
-  if (dev && !(netdev_verify(dev) && (dev->d_flags & IFF_UP) != 0))
+  if (dev && !netdev_verify(dev))
     {
-      net_unlock();
       return NULL;
     }
 
@@ -328,7 +316,6 @@ FAR struct devif_callback_s *
     }
 #endif
 
-  net_unlock();
   return ret;
 }
 
@@ -446,7 +433,7 @@ void devif_dev_callback_free(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-uint16_t devif_conn_event(FAR struct net_driver_s *dev, uint16_t flags,
+uint32_t devif_conn_event(FAR struct net_driver_s *dev, uint32_t flags,
                           FAR struct devif_callback_s *list)
 {
   FAR struct devif_callback_s *next;
@@ -455,7 +442,6 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, uint16_t flags,
    * set in the flags set.
    */
 
-  net_lock();
   while (list && flags)
     {
       /* Save the pointer to the next callback in the lists.  This is done
@@ -482,7 +468,6 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, uint16_t flags,
       list = next;
     }
 
-  net_unlock();
   return flags;
 }
 
@@ -505,7 +490,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, uint16_t flags,
  *
  ****************************************************************************/
 
-uint16_t devif_dev_event(FAR struct net_driver_s *dev, uint16_t flags)
+uint32_t devif_dev_event(FAR struct net_driver_s *dev, uint32_t flags)
 {
   FAR struct devif_callback_s *cb;
   FAR struct devif_callback_s *next;
@@ -514,7 +499,6 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, uint16_t flags)
    * set in the flags set.
    */
 
-  net_lock();
   for (cb = dev->d_devcb; cb != NULL && flags != 0; cb = next)
     {
       /* Save the pointer to the next callback in the lists.  This is done
@@ -551,7 +535,6 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, uint16_t flags)
         }
     }
 
-  net_unlock();
   return flags;
 }
 

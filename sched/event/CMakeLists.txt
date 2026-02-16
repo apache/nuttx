@@ -30,7 +30,10 @@ if(CONFIG_SCHED_EVENTS)
     event_post.c
     event_reset.c
     event_destroy.c
-    event_wait.c)
+    event_wait.c
+    event_clear.c
+    event_getmask.c
+    event_waitirq.c)
 endif()
 
 target_sources(sched PRIVATE ${CSRCS})

@@ -134,6 +134,7 @@ static void backtrace_init(void)
   size_t i;
 
   sq_init(&bp->freelist);
+  spin_lock_init(&bp->lock);
   memset(bp->bucket, -1, sizeof(bp->bucket));
   for (i = 0; i < nitems(bp->pool); i++)
     {

@@ -1,6 +1,9 @@
 /****************************************************************************
  * libs/libc/string/lib_bsdstrncmp.c
  *
+ * SPDX-License-Identifier: BSD
+ * SPDX-FileCopyrightText: 1994-2009  Red Hat, Inc. All rights reserved
+ *
  * Copyright (c) 1994-2009  Red Hat, Inc. All rights reserved.
  *
  * This copyrighted material is made available to anyone wishing to use,
@@ -52,7 +55,8 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_STRNCMP) && defined(LIBC_BUILD_STRNCMP)
-#undef strncmp /* See mm/README.txt */
+#undef strncmp
+no_builtin("strncmp")
 nosanitize_address
 int strncmp(FAR const char *cs, FAR const char *ct, size_t nb)
 {

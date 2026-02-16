@@ -47,6 +47,7 @@
 #include "netdev/netdev.h"
 #include "socket/socket.h"
 #include "inet/inet.h"
+#include "utils/utils.h"
 #include "tcp/tcp.h"
 
 #ifdef NET_TCP_HAVE_STACK
@@ -71,8 +72,8 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
                                         FAR struct tcp_connect_s *pstate);
 static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
                                      int status);
-static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
-                                           FAR void *pvpriv, uint16_t flags);
+static uint32_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
+                                           FAR void *pvpriv, uint32_t flags);
 
 /****************************************************************************
  * Private Functions
@@ -102,11 +103,11 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
     {
       /* Set up the connection event handler */
 
-      pstate->tc_cb->flags   = (TCP_NEWDATA | TCP_CLOSE | TCP_ABORT |
-                                TCP_TIMEDOUT | TCP_CONNECTED | NETDEV_DOWN);
-      pstate->tc_cb->priv    = (FAR void *)pstate;
-      pstate->tc_cb->event   = psock_connect_eventhandler;
-      ret                    = OK;
+      pstate->tc_cb->flags = (TCP_NEWDATA | TCP_ABORT | TCP_TIMEDOUT |
+                              TCP_CONNECTED | NETDEV_DOWN);
+      pstate->tc_cb->priv  = (FAR void *)pstate;
+      pstate->tc_cb->event = psock_connect_eventhandler;
+      ret                  = OK;
     }
 
   return ret;
@@ -134,7 +135,7 @@ static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
     {
       /* Failed to connect. Stop the connection event monitor */
 
-      tcp_stop_monitor(conn, TCP_CLOSE);
+      tcp_stop_monitor(conn, TCP_ABORT);
     }
 }
 
@@ -158,13 +159,13 @@ static void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
  *
  ****************************************************************************/
 
-static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
-                                           FAR void *pvpriv, uint16_t flags)
+static uint32_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
+                                           FAR void *pvpriv, uint32_t flags)
 {
   struct tcp_connect_s *pstate = pvpriv;
   FAR struct tcp_conn_s *conn;
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 
@@ -183,11 +184,10 @@ static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
        *       busy to accept new connections.
        */
 
-      /* TCP_CLOSE: The remote host has closed the connection
-       * TCP_ABORT: The remote host has aborted the connection
+      /* TCP_ABORT: The remote host has aborted the connection
        */
 
-      if ((flags & (TCP_CLOSE | TCP_ABORT)) != 0)
+      if ((flags & TCP_ABORT) != 0)
         {
           /* Indicate that remote host refused the connection */
 
@@ -240,6 +240,12 @@ static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
         }
 
       ninfo("Resuming: %d\n", pstate->tc_result);
+
+      if (pstate->tc_result != OK)
+        {
+          tcp_removeconn(conn);
+          conn->tcpstateflags = TCP_ALLOCATED;
+        }
 
       /* Stop further callbacks */
 
@@ -298,8 +304,6 @@ int psock_tcp_connect(FAR struct socket *psock,
    * setup.
    */
 
-  net_lock();
-
   conn = psock->s_conn;
 
   /* Get the connection reference from the socket */
@@ -349,10 +353,6 @@ int psock_tcp_connect(FAR struct socket *psock,
         }
 #endif /* CONFIG_NET_IPv4 */
 
-      /* Notify the device driver that new connection is available. */
-
-      netdev_txnotify_dev(conn->dev);
-
       /* Non-blocking connection ? set the socket error
        * and start the monitor
        */
@@ -365,6 +365,7 @@ int psock_tcp_connect(FAR struct socket *psock,
         {
           /* Set up the callbacks in the connection */
 
+          conn_dev_lock(&conn->sconn, conn->dev);
           ret = psock_setup_callbacks(psock, &state);
           if (ret >= 0)
             {
@@ -373,17 +374,22 @@ int psock_tcp_connect(FAR struct socket *psock,
                */
 
               info.tc_conn = conn;
-              info.tc_cb = state.tc_cb;
+              info.tc_cb = &state.tc_cb;
               info.tc_sem = &state.tc_sem;
-              tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
+
+              /* Notify the device driver that new connection is available. */
+
+              netdev_txnotify_dev(conn->dev, TCP_POLL);
 
               /* Wait for either the connect to complete or for an
                * error/timeout to occur.
-               * NOTES:  net_sem_wait will also terminate if a
+               * NOTES:  conn_dev_sem_timedwait will also terminate if a
                * signal is received.
                */
 
-              ret = net_sem_wait(&state.tc_sem);
+              tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
+              ret = conn_dev_sem_timedwait(&state.tc_sem, true, UINT_MAX,
+                                           &conn->sconn, conn->dev);
 
               tls_cleanup_pop(tls_get_info(), 0);
 
@@ -391,7 +397,9 @@ int psock_tcp_connect(FAR struct socket *psock,
 
               nxsem_destroy(&state.tc_sem);
 
-              /* If net_sem_wait failed, negated errno was returned. */
+              /* If conn_dev_sem_timedwait failed, negated errno was
+               * returned.
+               */
 
               if (ret >= 0)
                 {
@@ -406,6 +414,8 @@ int psock_tcp_connect(FAR struct socket *psock,
 
               psock_teardown_callbacks(&state, ret);
             }
+
+          conn_dev_unlock(&conn->sconn, conn->dev);
         }
 
       /* Check if the socket was successfully connected. */
@@ -430,10 +440,13 @@ int psock_tcp_connect(FAR struct socket *psock,
               tcp_stop_monitor(conn, TCP_ABORT);
               ret = ret2;
             }
+
+          /* Notify the device driver that new connection is available. */
+
+          netdev_txnotify_dev(conn->dev, TCP_POLL);
         }
     }
 
-  net_unlock();
   return ret;
 }
 

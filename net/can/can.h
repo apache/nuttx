@@ -57,6 +57,10 @@
 #define can_callback_free(dev,conn,cb) \
   devif_conn_callback_free(dev, cb, &conn->sconn.list, &conn->sconn.list_tail)
 
+#ifndef CONFIG_NET_CAN_NBUFFERS
+#  define CONFIG_NET_CAN_NBUFFERS 0
+#endif
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -90,7 +94,26 @@ struct can_conn_s
   struct iob_queue_s readahead;      /* remove Read-ahead buffering */
 
 #if CONFIG_NET_RECV_BUFSIZE > 0
-  int32_t recv_buffnum;              /* Recv buffer number */
+  int32_t  rcvbufs;                  /* Maximum amount of bytes queued in receive */
+#endif
+
+#if CONFIG_NET_SEND_BUFSIZE > 0
+  int32_t  sndbufs;                  /* Maximum amount of bytes queued in send */
+  sem_t    sndsem;                   /* Semaphore signals send completion */
+#endif
+
+#ifdef CONFIG_NET_CAN_WRITE_BUFFERS
+  /* Write buffering
+   *
+   *   write_q   - The queue of unsent I/O buffers.  The head of this
+   *               list may be partially sent.  FIFO ordering.
+   */
+
+  struct iob_queue_s write_q;        /* Write buffering for can messages */
+
+  /* Callback instance for can send */
+
+  FAR struct devif_callback_s *sndcb;
 #endif
 
   /* CAN-specific content follows */
@@ -101,7 +124,7 @@ struct can_conn_s
    * socket events.
    */
 
-  struct can_poll_s pollinfo[4]; /* FIXME make dynamic */
+  struct can_poll_s pollinfo[CONFIG_NET_CAN_NPOLLWAITERS];
 
 #ifdef CONFIG_NET_CANPROTO_OPTIONS
   struct can_filter filters[CONFIG_NET_CAN_RAW_FILTER_MAX];
@@ -129,19 +152,6 @@ EXTERN const struct sock_intf_s g_can_sockif;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-struct sockaddr_can;  /* Forward reference */
-
-/****************************************************************************
- * Name: can_initialize()
- *
- * Description:
- *   Initialize the NetLink connection structures.  Called once and only
- *   from the networking layer.
- *
- ****************************************************************************/
-
-void can_initialize(void);
 
 /****************************************************************************
  * Name: can_alloc()
@@ -179,6 +189,22 @@ void can_free(FAR struct can_conn_s *conn);
 FAR struct can_conn_s *can_nextconn(FAR struct can_conn_s *conn);
 
 /****************************************************************************
+ * Name: can_conn_list_lock
+ *       can_conn_list_unlock
+ *
+ * Description:
+ *   Lock and unlock the CAN connection list. This is used to protect
+ *   the list of active connections.
+ *
+ * Assumptions:
+ *   This function is called from driver.
+ *
+ ****************************************************************************/
+
+void can_conn_list_lock(void);
+void can_conn_list_unlock(void);
+
+/****************************************************************************
  * Name: can_active()
  *
  * Description:
@@ -211,8 +237,8 @@ FAR struct can_conn_s *can_active(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-uint16_t can_callback(FAR struct net_driver_s *dev,
-                      FAR struct can_conn_s *conn, uint16_t flags);
+uint32_t can_callback(FAR struct net_driver_s *dev,
+                      FAR struct can_conn_s *conn, uint32_t flags);
 
 /****************************************************************************
  * Name: can_datahandler
@@ -228,8 +254,8 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
  *   conn - A pointer to the CAN connection structure
  *
  * Returned Value:
- *   The number of bytes actually buffered is returned.  This will be either
- *   zero or equal to buflen; partial packets are not buffered.
+ *   The number of bytes actually buffered is returned.  This will be
+ *   negative or zero or equal to buflen; partial packets are not buffered.
  *
  * Assumptions:
  * - The caller has checked that CAN_NEWDATA is set in flags and that is no
@@ -238,8 +264,8 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-uint16_t can_datahandler(FAR struct net_driver_s *dev,
-                         FAR struct can_conn_s *conn);
+int can_datahandler(FAR struct net_driver_s *dev,
+                    FAR struct can_conn_s *conn);
 
 /****************************************************************************
  * Name: can_recvmsg
@@ -328,7 +354,7 @@ int psock_can_cansend(FAR struct socket *psock);
  *
  ****************************************************************************/
 
-ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
                     int flags);
 
 /****************************************************************************
@@ -355,6 +381,24 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 #ifdef CONFIG_NET_CAN_NOTIFIER
 void can_readahead_signal(FAR struct can_conn_s *conn);
 #endif
+
+/****************************************************************************
+ * Name: can_sendbuffer_notify
+ *
+ * Description:
+ *   Notify the send buffer semaphore
+ *
+ * Input Parameters:
+ *   conn - The CAN connection of interest
+ *
+ * Assumptions:
+ *   Called from user logic with the network locked.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NET_SEND_BUFSIZE > 0
+void can_sendbuffer_notify(FAR struct can_conn_s *conn);
+#endif /* CONFIG_NET_SEND_BUFSIZE */
 
 /****************************************************************************
  * Name: can_setsockopt

@@ -2404,13 +2404,11 @@ static void hciuart_dma_rxcallback(DMA_HANDLE handle, uint8_t status,
   irqstate_t flags;
   ssize_t nbytes;
 
-  flags = spin_lock_irqsave(&config->lock);
-  sched_lock();
+  flags = spin_lock_irqsave_nopreempt(&config->lock);
 
   if (config.state->rxdmastream == NULL)
     {
-      spin_unlock_irqrestore(&config->lock, flags);
-      sched_unlock();
+      spin_unlock_irqrestore_nopreempt(&config->lock, flags);
       return;
     }
 
@@ -2436,8 +2434,7 @@ static void hciuart_dma_rxcallback(DMA_HANDLE handle, uint8_t status,
       handled = true;
     }
 
-  spin_unlock_irqrestore(&config->lock, flags);
-  sched_unlock();
+  spin_unlock_irqrestore_nopreempt(&config->lock, flags);
 }
 #endif
 
@@ -2469,25 +2466,25 @@ static void hciuart_pm_notify(struct pm_callback_s *cb, int domain,
 {
   switch (pmstate)
     {
-      case(PM_NORMAL):
+      case (PM_NORMAL):
         {
           /* Logic for PM_NORMAL goes here */
         }
         break;
 
-      case(PM_IDLE):
+      case (PM_IDLE):
         {
           /* Logic for PM_IDLE goes here */
         }
         break;
 
-      case(PM_STANDBY):
+      case (PM_STANDBY):
         {
           /* Logic for PM_STANDBY goes here */
         }
         break;
 
-      case(PM_SLEEP):
+      case (PM_SLEEP):
         {
           /* Logic for PM_SLEEP goes here */
         }

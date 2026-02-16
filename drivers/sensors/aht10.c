@@ -208,7 +208,7 @@ static int aht10_initialize(FAR struct aht10_dev_s *priv)
 
   /* wait at least 300ms */
 
-  nxsig_usleep(300000);
+  nxsched_usleep(300000);
 
   buf[0] = 0x08;
   buf[1] = 0x00;
@@ -222,7 +222,7 @@ static int aht10_initialize(FAR struct aht10_dev_s *priv)
 
   /* wait at least 300ms */
 
-  nxsig_usleep(300000);
+  nxsched_usleep(300000);
 
   return ret;
 }

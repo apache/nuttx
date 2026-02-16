@@ -94,6 +94,14 @@ ifeq ($(CONFIG_LIB_COMPILER_RT_HAS_BFLOAT16),)
   CSRCS := $(filter-out $(BFLOAT16_SRCS), $(CSRCS))
 endif
 
+ifeq ($(CONFIG_ARCH_X86_64),)
+  x86_80_BIT_SOURCES := divxc3.c extendxftf2.c fixxfdi.c fixxfti.c fixunsxfdi.c
+  x86_80_BIT_SOURCES += fixunsxfsi.c fixunsxfti.c floatdixf.c floattixf.c floatundixf.c
+  x86_80_BIT_SOURCES += floatuntixf.c mulxc3.c powixf2.c trunctfxf2.c
+  x86_80_BIT_SOURCES := $(addprefix compiler-rt/compiler-rt/lib/builtins/, $(x86_80_BIT_SOURCES))
+  CSRCS := $(filter-out $(x86_80_BIT_SOURCES), $(CSRCS))
+endif
+
 endif
 
 ################# Profile Library #################
@@ -112,6 +120,7 @@ CSRCS += InstrProfilingPlatform.c
 
 else ifeq ($(CONFIG_COVERAGE_MINI)$(CONFIG_ARCH_TOOLCHAIN_CLANG),yy)
 
+FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/lib/profile
 FLAGS += -fno-profile-instr-generate -fno-coverage-mapping
 
 CSRCS += coverage.c

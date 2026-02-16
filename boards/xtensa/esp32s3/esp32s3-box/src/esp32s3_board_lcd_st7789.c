@@ -85,9 +85,9 @@ int board_lcd_initialize(void)
   /* Reset LCD */
 
   esp32s3_gpiowrite(DISPLAY_RST, false);
-  nxsig_usleep(10 * 1000);
+  nxsched_usleep(10 * 1000);
   esp32s3_gpiowrite(DISPLAY_RST, true);
-  nxsig_usleep(10 * 1000);
+  nxsched_usleep(10 * 1000);
 
   /* Turn on LCD backlight */
 

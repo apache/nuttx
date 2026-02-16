@@ -86,10 +86,6 @@ void s698pm_cpu_boot(void)
   sched_note_cpu_started(this_task());
 #endif
 
-  /* Reset scheduler parameters */
-
-  nxsched_resume_scheduler(this_task());
-
   /* And finally, enable cpu interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS

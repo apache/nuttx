@@ -237,6 +237,23 @@ Noteram Device (``/dev/note``)
   :return: If success, 0 (``OK``) is returned and the given overwriter mode is set as the current settings.
     If failed, a negated ``errno`` is returned.
 
+.. c:macro:: FIONREAD
+
+  Get the number of unread bytes in the buffer
+
+  :argument: A writable pointer to ``unsigned int`` to receive the number of unread bytes.
+
+  :return: If success, 0 (``OK``) is returned and the number of unread bytes is stored into the given pointer.
+    If failed, a negated ``errno`` is returned.
+
+.. c:macro:: PIPEIOC_POLLINTHRD
+
+  Set the poll threshold for POLLIN event
+
+  :argument: An unsigned int value specifying the threshold in bytes. When the unread data in the buffer is greater than or equal to this value, POLLIN will be notified.
+
+  :return: If success, 0 (``OK``) is returned and the threshold is set. If failed, a negated ``errno`` is returned.
+
 Filter control APIs
 ===================
 

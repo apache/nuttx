@@ -39,7 +39,8 @@
  */
 
 #if !defined(CONFIG_LIBC_ARCH_STRRCHR) && defined(LIBC_BUILD_STRRCHR)
-#undef strrchr /* See mm/README.txt */
+#undef strrchr
+no_builtin("strrchr")
 FAR char *strrchr(FAR const char *s, int c)
 {
   FAR const char *r = NULL;

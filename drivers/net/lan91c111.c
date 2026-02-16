@@ -31,8 +31,8 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wqueue.h>
 
 #include <nuttx/net/ip.h>
@@ -90,6 +90,7 @@ struct lan91c111_driver_s
   int       irq;                                      /* IRQ number */
   struct work_s irqwork;                              /* For deferring interrupt work to the work queue */
   struct work_s pollwork;                             /* For deferring poll work to the work queue */
+  spinlock_t    lock;                                 /* Spinlock to protect the driver state */
   uint16_t  bank;                                     /* Current bank */
   uint16_t  pktbuf[(MAX_NETDEV_PKTSIZE + 4 + 1) / 2]; /* +4 due to getregs32/putregs32 */
 
@@ -811,7 +812,7 @@ static void lan91c111_interrupt_work(FAR void *arg)
    * thread has been configured.
    */
 
-  net_lock();
+  netdev_lock(dev);
 
   /* Process pending Ethernet interrupts */
 
@@ -872,7 +873,7 @@ static void lan91c111_interrupt_work(FAR void *arg)
         }
     }
 
-  net_unlock();
+  netdev_unlock(dev);
 
   /* Re-enable Ethernet interrupts */
 
@@ -948,7 +949,7 @@ static int lan91c111_ifup(FAR struct net_driver_s *dev)
         dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
 #endif
 
-  net_lock();
+  netdev_lock(dev);
 
   /* Initialize PHYs, Ethernet interface, and setup up Ethernet interrupts */
 
@@ -973,7 +974,7 @@ static int lan91c111_ifup(FAR struct net_driver_s *dev)
 
   copyto16(priv, ADDR0_REG, &dev->d_mac.ether, sizeof(dev->d_mac.ether));
 
-  net_unlock();
+  netdev_unlock(dev);
 
   /* Enable the Ethernet interrupt */
 
@@ -1005,7 +1006,7 @@ static int lan91c111_ifdown(FAR struct net_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   up_disable_irq(priv->irq);
 
   work_cancel(LAN91C111_WORK, &priv->irqwork);
@@ -1023,7 +1024,7 @@ static int lan91c111_ifdown(FAR struct net_driver_s *dev)
   putreg16(priv, CTL_REG, CTL_CLEAR);
   putreg16(priv, CONFIG_REG, CONFIG_CLEAR);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return OK;
 }
 
@@ -1055,7 +1056,7 @@ static void lan91c111_txavail_work(FAR void *arg)
    * thread has been configured.
    */
 
-  net_lock();
+  netdev_lock(dev);
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -1073,7 +1074,7 @@ static void lan91c111_txavail_work(FAR void *arg)
         }
     }
 
-  net_unlock();
+  netdev_unlock(dev);
 }
 
 /****************************************************************************
@@ -1186,9 +1187,9 @@ static int lan91c111_addmac(FAR struct net_driver_s *dev,
 
   /* Add the MAC address to the hardware multicast routing table */
 
-  net_lock();
+  netdev_lock(dev);
   modifyreg16(priv, MCAST_REG1 + off, 0, 1 << bit);
-  net_unlock();
+  netdev_unlock(dev);
 
   return OK;
 }
@@ -1233,9 +1234,9 @@ static int lan91c111_rmmac(FAR struct net_driver_s *dev,
 
   /* Remove the MAC address from the hardware multicast routing table */
 
-  net_lock();
+  netdev_lock(dev);
   modifyreg16(priv, MCAST_REG1 + off, 1 << bit, 0);
-  net_unlock();
+  netdev_unlock(dev);
 
   return OK;
 }
@@ -1268,7 +1269,7 @@ static int lan91c111_ioctl(FAR struct net_driver_s *dev, int cmd,
   FAR struct mii_ioctl_data_s *req = (FAR void *)arg;
   int ret = OK;
 
-  net_lock();
+  netdev_lock(dev);
 
   /* Decode and dispatch the driver-specific IOCTL command */
 
@@ -1291,7 +1292,7 @@ static int lan91c111_ioctl(FAR struct net_driver_s *dev, int cmd,
       ret = -ENOTTY; /* Special return value for this case */
     }
 
-  net_unlock();
+  netdev_unlock(dev);
   return ret;
 }
 #endif
@@ -1363,6 +1364,8 @@ int lan91c111_initialize(uintptr_t base, int irq)
 
       goto err;
     }
+
+  spin_lock_init(&priv->lock);
 
   /* Initialize the driver structure */
 

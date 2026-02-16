@@ -92,6 +92,25 @@ config CAPTURE
 		This selection enables building of the "upper-half" Capture driver.
 		See include/nuttx/timers/capture.h for further Capture driver information.
 
+if CAPTURE
+
+config CAPTURE_NOTIFY
+	bool "Capture Notification Support"
+	default n
+	---help---
+		Some hardware will support notification when a capture event
+		occurs.  If the hardware will support notification, then this
+		configuration should be set to enable the capability.
+
+config FAKE_CAPTURE
+	bool "Fake Capture Driver"
+	default n
+	depends on CAPTURE_NSIGNALS > 0
+	---help---
+		Enables a fake capture driver for testing purposes.
+
+endif # CAPTURE
+
 config TIMER
 	bool "Timer Support"
 	default n
@@ -107,10 +126,15 @@ config TIMER_ARCH
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_TIMEKEEPING
 	select SCHED_TICKLESS_LIMIT_MAX_SLEEP if SCHED_TICKLESS
-	select SCHED_TICKLESS_TICK_ARGUMENT if SCHED_TICKLESS
 	---help---
 		Implement timer arch API on top of timer driver interface.
 
+config TIMER_WDOG
+	bool "Timer Implementation by watchdog"
+	default n
+	---help---
+		This option allows the timer implementation to be based on the
+		watchdog (wdog) driver interface.
 endif # TIMER
 
 config ONESHOT
@@ -123,13 +147,30 @@ config ONESHOT
 
 if ONESHOT
 
+config ONESHOT_COUNT
+	bool
+	default n
+	---help---
+		This option enables the oneshot implementation to be based on the
+		new clock device driver interfaces.
+
+config ONESHOT_FAST_DIVISION
+	bool # Convert Clock Count Using Invariant-divisor Division
+	default n
+	depends on ONESHOT_COUNT
+	---help---
+		This option will enable the invariant-divisor division optimization in
+		the clock device driver implementation, which can improve performance
+		for certain architectures. It is recommended to enable it on 32-bit
+		architecture that do not support hardware division and 64-bit
+		architecture that hardware division is slow.
+
 config ALARM_ARCH
 	bool "Alarm Arch Implementation"
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_TIMEKEEPING
 	select SCHED_TICKLESS_ALARM if SCHED_TICKLESS
 	select SCHED_TICKLESS_LIMIT_MAX_SLEEP if SCHED_TICKLESS
-	select SCHED_TICKLESS_TICK_ARGUMENT if SCHED_TICKLESS
 	---help---
 		Implement alarm arch API on top of oneshot driver interface.
 
@@ -381,13 +422,6 @@ config RTC_RPMSG_SERVER
 	bool "The RTC RPMSG Role"
 	depends on RPMSG
 
-config RTC_RPMSG_SERVER_NAME
-	string "The name of RTC RPMSG Server"
-	depends on RTC_RPMSG
-	---help---
-		The proc name of RTC server. Client requests time from
-		specified name of remote proc.
-
 config RTC_RPMSG_SYNC_BASETIME
 	bool "Update g_basetime from rpmsg."
 	default n
@@ -527,9 +561,33 @@ endif # TIMERS_CS2100CP
 config GOLDFISH_TIMER
 	bool "Enable GOLDFISH_TIMER"
 	default n
+	select ONESHOT_COUNT
 	---help---
 		Goldfish timer is a virtual timer device that is used in the Android
 		emulator. It is used to provide a virtual timer to the guest OS.
 		See: https://android.googlesource.com/platform/external/qemu/+/master/docs/GOLDFISH-VIRTUAL-HARDWARE.TXT
+
+config PTP_CLOCK
+	bool "PTP clock driver"
+	default n
+	---help---
+		The IEEE 1588 standard defines a method to precisely
+		synchronize distributed clocks over Ethernet networks. The
+		standard defines a Precision Time Protocol (PTP), which can
+		be used to achieve synchronization within a few dozen
+		microseconds. In addition, with the help of special hardware
+		time stamping units, it can be possible to achieve
+		synchronization to within a few hundred nanoseconds.
+
+		This driver adds support for PTP clocks as character
+		devices. If you want to use a PTP clock, then you should
+		also enable at least one clock driver as well.
+
+config PTP_CLOCK_DUMMY
+	bool "the dummy test driver for ptp clock"
+	default n
+	select PTP_CLOCK
+	---help---
+		The dummy test driver.
 
 endmenu # Timer Driver Support

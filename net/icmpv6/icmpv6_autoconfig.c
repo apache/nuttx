@@ -92,12 +92,12 @@ static void icmpv6_router_terminate(FAR struct icmpv6_router_s *state,
  * Name: icmpv6_router_eventhandler
  ****************************************************************************/
 
-static uint16_t icmpv6_router_eventhandler(FAR struct net_driver_s *dev,
-                                           FAR void *priv, uint16_t flags)
+static uint32_t icmpv6_router_eventhandler(FAR struct net_driver_s *dev,
+                                           FAR void *priv, uint32_t flags)
 {
   FAR struct icmpv6_router_s *state = (FAR struct icmpv6_router_s *)priv;
 
-  ninfo("flags: %04x sent: %d\n", flags, state->snd_sent);
+  ninfo("flags: %" PRIx32 " sent: %d\n", flags, state->snd_sent);
 
   if (state)
     {
@@ -189,6 +189,13 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
   struct icmpv6_router_s state;
   int ret;
 
+  /* Check whether the link-local address has been overwritten. */
+
+  if (netdev_ipv6_lladdr(dev) == NULL)
+    {
+      return -EADDRNOTAVAIL;
+    }
+
   /* Initialize the state structure with the network locked. */
 
   nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
@@ -224,15 +231,15 @@ static int icmpv6_send_message(FAR struct net_driver_s *dev, bool advertise)
 
   /* Notify the device driver that new TX data is available. */
 
-  netdev_txnotify_dev(dev);
+  netdev_txnotify_dev(dev, ICMPv6_POLL);
 
   /* Wait for the send to complete or an error to occur
-   * net_sem_wait will also terminate if a signal is received.
+   * nxsem_wait will also terminate if a signal is received.
    */
 
   do
     {
-      net_sem_wait(&state.snd_sem);
+      conn_dev_sem_timedwait(&state.snd_sem, true, UINT_MAX, NULL, dev);
     }
   while (!state.snd_sent);
 
@@ -271,6 +278,9 @@ errout_with_semaphore:
  *   Zero (OK) is returned on success; A negated errno value is returned on
  *   any failure.
  *
+ * Assumptions:
+ *   This function must be called with the network locked.
+ *
  ****************************************************************************/
 
 int icmpv6_autoconfig(FAR struct net_driver_s *dev)
@@ -284,22 +294,6 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
   DEBUGASSERT(dev);
   ninfo("Auto-configuring %s\n", dev->d_ifname);
-
-  /* Lock the network.
-   *
-   * NOTE:  Normally it is required that the network be in the "down" state
-   * when re-configuring the network interface.  This is thought not to be
-   * a problem here because.
-   *
-   *   1. The ICMPv6 logic here runs with the network locked so there can be
-   *      no outgoing packets with bad source IP addresses from any
-   *      asynchronous network activity using the device being reconfigured.
-   *   2. Incoming packets depend only upon the MAC filtering.  Network
-   *      drivers do not use the IP address; they filter incoming packets
-   *      using only the MAC address which is not being changed here.
-   */
-
-  net_lock();
 
   /* IPv6 Stateless Autoconfiguration
    * Reference:
@@ -354,7 +348,6 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
           nerr("ERROR: IP conflict\n");
 
-          net_unlock();
           return -EEXIST;
         }
     }
@@ -369,7 +362,6 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
   ret = netdev_ipv6_add(dev, lladdr, net_ipv6_mask2pref(g_ipv6_llnetmask));
   if (ret < 0)
     {
-      net_unlock();
       return ret;
     }
 
@@ -406,7 +398,7 @@ got_lladdr:
 
       /* Wait to receive the Router Advertisement message */
 
-      ret = icmpv6_rwait(&notify, CONFIG_ICMPv6_AUTOCONF_DELAYMSEC);
+      ret = icmpv6_rwait(dev, &notify, CONFIG_ICMPv6_AUTOCONF_DELAYMSEC);
       if (ret != -ETIMEDOUT)
         {
           /* ETIMEDOUT is the only expected failure.  We will retry on that
@@ -463,7 +455,6 @@ got_lladdr:
 
   /* On success, the new address was already set (in icmpv_rnotify()). */
 
-  net_unlock();
   return ret;
 }
 

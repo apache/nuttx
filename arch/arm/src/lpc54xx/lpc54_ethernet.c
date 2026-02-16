@@ -1971,6 +1971,9 @@ static int lpc54_eth_ifup(struct net_driver_s *dev)
 
   priv->eth_bifup = 1;
   up_enable_irq(LPC54_IRQ_ETHERNET);
+
+  netdev_carrier_on(dev);
+
   return OK;
 }
 
@@ -2048,6 +2051,9 @@ static int lpc54_eth_ifdown(struct net_driver_s *dev)
 
   priv->eth_bifup = 0;
   leave_critical_section(flags);
+
+  netdev_carrier_off(dev);
+
   return OK;
 }
 

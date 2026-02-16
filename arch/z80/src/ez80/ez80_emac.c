@@ -1990,6 +1990,8 @@ static int ez80emac_ifup(FAR struct net_driver_s *dev)
       priv->bifup = true;
       outp(EZ80_EMAC_IEN, EMAC_EIN_HANDLED); /* Enable all interrupts */
       ret = OK;
+
+      netdev_carrier_on(dev);
     }
 
   return ret;
@@ -2039,6 +2041,9 @@ static int ez80emac_ifdown(FAR struct net_driver_s *dev)
 
   priv->bifup = false;
   leave_critical_section(flags);
+
+  netdev_carrier_off(dev);
+
   return OK;
 }
 

@@ -72,7 +72,7 @@ else
 endif
 
 ifeq ($(CONFIG_STACK_CANARIES),y)
-  ARCHOPTIMIZATION += -fstack-protector-all
+  ARCHOPTIMIZATION += $(patsubst "%",%,$(CONFIG_STACK_CANARIES_LEVEL))
 endif
 
 ifeq ($(CONFIG_STACK_USAGE),y)
@@ -353,6 +353,7 @@ ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
   LD      = $(CROSSDEV)clang
   STRIP   = $(CROSSDEV)llvm-strip --strip-unneeded
   AR      = $(CROSSDEV)llvm-ar rcs
+  UNAR    = $(CROSSDEV)llvm-ar x
   NM      = $(CROSSDEV)llvm-nm
   OBJCOPY = $(CROSSDEV)llvm-objcopy
   OBJDUMP = $(CROSSDEV)llvm-objdump
@@ -377,6 +378,7 @@ else
   OBJDUMP = $(CROSSDEV)objdump
   LD      = $(CROSSDEV)ld
   AR      = $(CROSSDEV)ar rcs
+  UNAR    = $(CROSSDEV)ar x
   NM      = $(CROSSDEV)nm
 
 # Link Time Optimization
@@ -429,6 +431,10 @@ ifeq ($(CONFIG_LIBSUPCXX_TOOLCHAIN),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a))
 endif
 
+ifeq ($(CONFIG_LIBCXXTOOLCHAIN),y)
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libstdc++.a))
+endif
+
 ifeq ($(CONFIG_COVERAGE_TOOLCHAIN),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcov.a))
 endif
@@ -443,7 +449,7 @@ LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 CELFFLAGS = $(CFLAGS) -fvisibility=hidden
 CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
 
-LDELFFLAGS = -e __start
+LDELFFLAGS = -e _start
 
 ifeq ($(CONFIG_BINFMT_ELF_RELOCATABLE),y)
   LDELFFLAGS += -r
@@ -453,6 +459,13 @@ ifeq ($(CONFIG_ARCH_RV32),y)
   LDELFFLAGS += --oformat elf32-littleriscv
 else
   LDELFFLAGS += --oformat elf64-littleriscv
+endif
+
+ifneq ($(CONFIG_BUILD_KERNEL),y)
+  # Flat build and protected elf entry point use crt0,
+  # Kernel build will use apps/import/scripts/crt0
+
+  LDELFFLAGS += $(TOPDIR)$(DELIM)arch$(DELIM)risc-v$(DELIM)src$(DELIM)crt0.o
 endif
 
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)

@@ -28,6 +28,10 @@ include(nuttx_parse_function_args)
 # compiler options and include path needed by all apps libraries.
 add_custom_target(nuttx_apps_interface)
 
+# "nuttx_target_interface" is a source-less target that hold target information
+# for target debug and dump
+add_custom_target(nuttx_target_interface)
+
 # Macro: nuttx_library
 #
 # Creates a library target with the given name and mode. If MODE is "KERNEL", it
@@ -112,12 +116,38 @@ endfunction()
 function(nuttx_wildcard_sources)
   cmake_parse_arguments(ARGS "" "" EXCLUDE ${ARGN})
 
-  file(GLOB SRCS ${ARGN})
+  # `SRCS` just collect all source files instead of EXCLUDE arguments
+  file(GLOB SRCS ${ARGS_UNPARSED_ARGUMENTS})
   if(ARGS_EXCLUDE)
     file(GLOB RM_SRCS ${ARGS_EXCLUDE})
     list(REMOVE_ITEM SRCS ${RM_SRCS})
   endif()
   nuttx_sources(${SRCS})
+endfunction()
+
+# Function: nuttx_wildcard_sources_ifdef
+#
+# Conditionally adds source files matching a wildcard pattern to the current
+# library target if the given condition is true.
+#
+# Usage: nuttx_wildcard_sources_ifdef(MY_CONDITION "*.c" EXCLUDE "exclude_me.c")
+function(nuttx_wildcard_sources_ifdef cond)
+  if(${cond})
+    nuttx_wildcard_sources(${ARGN})
+  endif()
+endfunction()
+
+# Function: nuttx_wildcard_sources_ifndef
+#
+# Conditionally adds source files matching a wildcard pattern to the current
+# library target if the given condition is false.
+#
+# Usage: nuttx_wildcard_sources_ifndef(MY_CONDITION "*.c" EXCLUDE
+# "exclude_me.c")
+function(nuttx_wildcard_sources_ifndef cond)
+  if(NOT ${cond})
+    nuttx_wildcard_sources(${ARGN})
+  endif()
 endfunction()
 
 # Function: nuttx_include_directories
@@ -127,7 +157,7 @@ endfunction()
 # Usage: nuttx_include_directories("include/path1" "include/path2")
 function(nuttx_include_directories)
   if(TARGET ${NX_CURRENT_LIBRARY})
-    target_include_directories(${NX_CURRENT_LIBRARY} PRIVATE ${ARGN})
+    target_include_directories(${NX_CURRENT_LIBRARY} PUBLIC ${ARGN})
   endif()
 endfunction()
 
@@ -227,6 +257,150 @@ function(nuttx_compile_options_ifndef cond)
   endif()
 endfunction()
 
+# Function: nuttx_elf_compile_options
+#
+# Adds compile options to elf targets
+#
+# Usage: nuttx_elf_compile_options("-O2" "-Wall")
+function(nuttx_elf_compile_options)
+  set_property(
+    TARGET nuttx_global
+    APPEND
+    PROPERTY NUTTX_ELF_APP_COMPILE_OPTIONS ${ARGN})
+endfunction()
+
+# Function: nuttx_elf_compile_options_ifdef
+#
+# Conditionally adds compile options to the elf target if the given condition is
+# true.
+#
+# Usage: nuttx_elf_compile_options_ifdef(MY_CONDITION "-O2" "-Wall")
+function(nuttx_elf_compile_options_ifdef cond)
+  if(${cond})
+    nuttx_elf_compile_options(${ARGN})
+  endif()
+endfunction()
+
+# Function: nuttx_elf_compile_options_ifndef
+#
+# Conditionally adds compile options to the elf target if the given condition is
+# false.
+#
+# Usage: nuttx_elf_compile_options_ifndef(MY_CONDITION "-O2" "-Wall")
+function(nuttx_elf_compile_options_ifndef cond)
+  if(NOT ${cond})
+    nuttx_elf_compile_options(${ARGN})
+  endif()
+endfunction()
+
+# Function: nuttx_elf_link_options
+#
+# Adds link options to elf targets
+#
+# Usage: nuttx_elf_link_options("-r")
+function(nuttx_elf_link_options)
+  set_property(
+    TARGET nuttx_global
+    APPEND
+    PROPERTY NUTTX_ELF_APP_LINK_OPTIONS ${ARGN})
+endfunction()
+
+# Function: nuttx_elf_link_options_ifdef
+#
+# Conditionally adds link options to the elf target if the given condition is
+# true.
+#
+# Usage: nuttx_elf_link_options_ifdef(MY_CONDITION "-r")
+function(nuttx_elf_link_options_ifdef cond)
+  if(${cond})
+    nuttx_elf_link_options(${ARGN})
+  endif()
+endfunction()
+
+# Function: nuttx_elf_link_options_ifndef
+#
+# Conditionally adds link options to the elf target if the given condition is
+# false.
+#
+# Usage: nuttx_elf_link_options_ifndef(MY_CONDITION "-r")
+function(nuttx_elf_link_options_ifndef cond)
+  if(NOT ${cond})
+    nuttx_elf_link_options(${ARGN})
+  endif()
+endfunction()
+
+# Function: nuttx_mod_compile_options
+#
+# Adds compile options to mod targets
+#
+# Usage: nuttx_mod_compile_options("-O2" "-Wall")
+function(nuttx_mod_compile_options)
+  set_property(
+    TARGET nuttx_global
+    APPEND
+    PROPERTY NUTTX_MOD_APP_COMPILE_OPTIONS ${ARGN})
+endfunction()
+
+# Function: nuttx_mod_compile_options_ifdef
+#
+# Conditionally adds compile options to the mod target if the given condition is
+# true.
+#
+# Usage: nuttx_mod_compile_options_ifdef(MY_CONDITION "-O2" "-Wall")
+function(nuttx_mod_compile_options_ifdef cond)
+  if(${cond})
+    nuttx_mod_compile_options(${ARGN})
+  endif()
+endfunction()
+
+# Function: nuttx_mod_compile_options_ifndef
+#
+# Conditionally adds compile options to the mod target if the given condition is
+# false.
+#
+# Usage: nuttx_mod_compile_options_ifndef(MY_CONDITION "-O2" "-Wall")
+function(nuttx_mod_compile_options_ifndef cond)
+  if(NOT ${cond})
+    nuttx_mod_compile_options(${ARGN})
+  endif()
+endfunction()
+
+# Function: nuttx_mod_link_options
+#
+# Adds link options to mod targets
+#
+# Usage: nuttx_mod_link_options("-r")
+function(nuttx_mod_link_options)
+  set_property(
+    TARGET nuttx_global
+    APPEND
+    PROPERTY NUTTX_MOD_APP_LINK_OPTIONS ${ARGN})
+endfunction()
+
+# Function: nuttx_mod_link_options_ifdef
+#
+# Conditionally adds link options to the mod target if the given condition is
+# true.
+#
+# Usage: nuttx_mod_link_options_ifdef(MY_CONDITION "-r")
+function(nuttx_mod_link_options_ifdef cond)
+  if(${cond})
+    nuttx_mod_link_options(${ARGN})
+  endif()
+endfunction()
+
+# Function: nuttx_mod_link_options_ifndef
+#
+# Conditionally adds link options to the mod target if the given condition is
+# false.
+#
+# Usage: nuttx_mod_link_options_ifndef(MY_CONDITION "-r")
+function(nuttx_mod_link_options_ifndef cond)
+  if(NOT ${cond})
+    nuttx_mod_link_options(${ARGN})
+  endif()
+endfunction()
+
 # the visible scope is all the APPS include search path
 function(nuttx_include_directories_for_all_apps)
   set_property(
@@ -251,6 +425,14 @@ function(nuttx_compile_definitions_for_all_apps)
     PROPERTY APPS_COMPILE_DEFINITIONS ${ARGN})
 endfunction()
 
+# all elf link options
+function(nuttx_add_elf_link_options)
+  set_property(
+    TARGET nuttx_global
+    APPEND
+    PROPERTY NUTTX_ELF_APP_LINK_OPTIONS ${ARGN})
+endfunction()
+
 # since we dont call `target_link_libraries` directly, we only inherit their
 # compilation configuration
 function(nuttx_link_libraries)
@@ -271,4 +453,34 @@ function(nuttx_link_libraries)
           $<GENEX_EVAL:$<TARGET_PROPERTY:${dep},INTERFACE_INCLUDE_DIRECTORIES>>)
     endforeach()
   endif()
+endfunction()
+
+# dump targets information
+add_custom_target(
+  dump_targets
+  COMMAND ${CMAKE_COMMAND} -E remove target_dump
+  COMMAND ${CMAKE_COMMAND} -E echo
+          "'$<TARGET_PROPERTY:nuttx_target_interface,ALL_TARGETS>'"
+  COMMAND
+    ${CMAKE_COMMAND} -E echo
+    "'$<TARGET_PROPERTY:nuttx_target_interface,ALL_TARGETS>'" >> target_dump
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+
+# Generate host tools CMake binary directory
+execute_process(COMMAND ${CMAKE_COMMAND} -B ${CMAKE_BINARY_DIR}/bin_host -S
+                        ${CMAKE_SOURCE_DIR}/tools)
+
+# Function: nuttx_build_host_target
+#
+# generate build common tools host target
+#
+# Usage: nuttx_build_host_target(mkdeps)
+function(nuttx_build_host_target target)
+  if(TARGET ${target})
+    return()
+  endif()
+  add_custom_target(
+    ${target}
+    COMMAND cmake --build ${CMAKE_BINARY_DIR}/bin_host --target ${target}
+    SOURCES ${ARGN})
 endfunction()

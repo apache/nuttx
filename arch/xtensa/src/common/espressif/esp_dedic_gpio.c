@@ -55,10 +55,10 @@
 
 #if defined(CONFIG_ARCH_CHIP_ESP32S2)
 #include "soc/dedic_gpio_struct.h"
-#include "hal/dedic_gpio_ll.h"
 #endif
-#include "soc/dedic_gpio_periph.h"
+#include "hal/dedic_gpio_ll.h"
 #include "hal/dedic_gpio_cpu_ll.h"
+#include "soc/dedic_gpio_periph.h"
 #include "soc/gpio_sig_map.h"
 #include "periph_ctrl.h"
 #include "soc/soc_caps.h"
@@ -531,7 +531,12 @@ struct file *esp_dedic_gpio_new_bundle(
 #ifdef CONFIG_ARCH_CHIP_ESP32S2
       dedic_gpio_common[cpu].dev = &DEDIC_GPIO;
 #endif
-      periph_module_enable(dedic_gpio_periph_signals.module);
+      PERIPH_RCC_ATOMIC()
+        {
+          dedic_gpio_ll_enable_bus_clock(true);
+          dedic_gpio_ll_reset_register();
+        }
+
       dedic_gpio_common[cpu].out_occupied_mask =
         UINT32_MAX & ~((1 << SOC_DEDIC_GPIO_OUT_CHANNELS_NUM) - 1);
       dedic_gpio_common[cpu].in_occupied_mask =
@@ -726,7 +731,11 @@ int esp_dedic_gpio_del_bundle(struct file *dev)
 
   if (dedic_gpio_common[cpu].refs == 0)
     {
-      periph_module_disable(dedic_gpio_periph_signals.module);
+      PERIPH_RCC_ATOMIC()
+        {
+          dedic_gpio_ll_enable_bus_clock(false);
+        }
+
 #ifdef CONFIG_ESPRESSIF_DEDICATED_GPIO_IRQ
       dedic_gpio_ll_enable_interrupt(dedic_gpio_common[cpu].dev,
                                      ~0UL,

@@ -31,7 +31,13 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/wdog.h>
 
-#if defined(CONFIG_PERF_OVERFLOW_CORRECTION) && ULONG_MAX != UINT64_MAX
+#ifndef CONFIG_ARCH_PERF_EVENTS_USER_ACCESS
+
+/****************************************************************************
+ * Preprocessors
+ ****************************************************************************/
+
+#  if defined(CONFIG_PERF_OVERFLOW_CORRECTION) && ULONG_MAX != UINT64_MAX
 
 /****************************************************************************
  * Private Types
@@ -42,7 +48,8 @@ struct perf_s
   struct wdog_s wdog;
   spinlock_t lock;
   unsigned long last;
-  unsigned long overflow;
+  clock_t overflow;
+  clock_t timeout;
 };
 
 /****************************************************************************
@@ -61,31 +68,15 @@ static struct perf_s g_perf;
 
 static void perf_update(wdparm_t arg)
 {
-  clock_t tick = (clock_t)LONG_MAX * TICK_PER_SEC / up_perf_getfreq();
+  FAR struct perf_s *perf = (FAR struct perf_s *)arg;
 
   perf_gettime();
-  wd_start_next((FAR struct wdog_s *)arg, tick, perf_update, arg);
+  wd_start_next(&perf->wdog, perf->timeout, perf_update, arg);
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * perf_init
- ****************************************************************************/
-
-void perf_init(void)
-{
-  FAR struct perf_s *perf = &g_perf;
-  clock_t tick = (clock_t)LONG_MAX * TICK_PER_SEC / up_perf_getfreq();
-
-  perf->last = up_perf_gettime();
-
-  /* Periodic check for overflow */
-
-  wd_start(&perf->wdog, tick, perf_update, (wdparm_t)perf);
-}
 
 /****************************************************************************
  * perf_gettime
@@ -94,55 +85,33 @@ void perf_init(void)
 clock_t perf_gettime(void)
 {
   FAR struct perf_s *perf = &g_perf;
-  clock_t now = up_perf_gettime();
   irqstate_t flags = spin_lock_irqsave(&perf->lock);
+  clock_t now = up_perf_gettime();
   clock_t result;
 
-  /* Check if overflow */
+  if (perf->timeout == 0)
+    {
+      perf->timeout =
+        ((clock_t)1 << (CONFIG_ARCH_PERF_COUNT_BITWIDTH - 1)) *
+        TICK_PER_SEC / up_perf_getfreq();
 
-  if (now < perf->last)
+      /* Periodic check for overflow */
+
+      wd_start(&perf->wdog, perf->timeout, perf_update, (wdparm_t)perf);
+    }
+  else if (now < perf->last)
     {
       perf->overflow++;
     }
 
   perf->last = now;
-  result = (clock_t)now | (clock_t)perf->overflow << 32;
+  result = now | (perf->overflow << CONFIG_ARCH_PERF_COUNT_BITWIDTH);
   spin_unlock_irqrestore(&perf->lock, flags);
   return result;
 }
 
-/****************************************************************************
- * perf_convert
- ****************************************************************************/
-
-void perf_convert(clock_t elapsed, FAR struct timespec *ts)
-{
-  unsigned long freq = up_perf_getfreq();
-
-  ts->tv_sec  = elapsed / freq;
-  elapsed -= ts->tv_sec * freq;
-  ts->tv_nsec = NSEC_PER_SEC * elapsed / freq;
-}
-
-/****************************************************************************
- * perf_getfreq
- ****************************************************************************/
-
-unsigned long perf_getfreq(void)
-{
-  return up_perf_getfreq();
-}
-
-#elif defined(CONFIG_ALARM_ARCH) || defined (CONFIG_TIMER_ARCH) || \
-      defined(CONFIG_ARCH_PERF_EVENTS)
-
-/****************************************************************************
- * perf_init
- ****************************************************************************/
-
-void perf_init(void)
-{
-}
+#  elif defined(CONFIG_ALARM_ARCH) || defined (CONFIG_TIMER_ARCH) || \
+        defined(CONFIG_ARCH_PERF_EVENTS)
 
 /****************************************************************************
  * perf_gettime
@@ -152,6 +121,23 @@ clock_t perf_gettime(void)
 {
   return up_perf_gettime();
 }
+
+#  else
+
+/****************************************************************************
+ * perf_gettime
+ ****************************************************************************/
+
+clock_t perf_gettime(void)
+{
+  return clock_systime_ticks();
+}
+
+#  endif
+#endif /* !CONFIG_ARCH_PERF_EVENTS_USER_ACCESS */
+
+#if defined(CONFIG_ALARM_ARCH) || defined (CONFIG_TIMER_ARCH) || \
+    defined(CONFIG_ARCH_PERF_EVENTS)
 
 /****************************************************************************
  * perf_convert
@@ -172,23 +158,6 @@ unsigned long perf_getfreq(void)
 }
 
 #else
-
-/****************************************************************************
- * perf_init
- ****************************************************************************/
-
-void perf_init(void)
-{
-}
-
-/****************************************************************************
- * perf_gettime
- ****************************************************************************/
-
-clock_t perf_gettime(void)
-{
-  return clock_systime_ticks();
-}
 
 /****************************************************************************
  * perf_convert

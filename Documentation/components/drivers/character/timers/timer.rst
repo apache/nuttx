@@ -110,6 +110,9 @@ systems calls. The available ``ioctl`` commands are:
  * :c:macro:`TCIOC_SETTIMEOUT`
  * :c:macro:`TCIOC_NOTIFICATION`
  * :c:macro:`TCIOC_MAXTIMEOUT`
+ * :c:macro:`TCIOC_TICK_GETSTATUS`
+ * :c:macro:`TCIOC_TICK_SETTIMEOUT`
+ * :c:macro:`TCIOC_TICK_MAXTIMEOUT`
 
 These ``ioctl`` commands internally call lower-half layer operations and the
 parameters are forwarded to these ops through the ``ioctl`` system call. The return
@@ -280,7 +283,7 @@ The ``TCIOC_SETTIMEOUT`` command calls the ``settimeout`` operation, which is de
 
 .. c:function:: int settimeout(uint32_t timeout)
 
-  The getstatus operation sets a timeout interval to trigger the alarm and then
+  The settimeout operation sets a timeout interval to trigger the alarm and then
   trigger an interrupt. It defines the timer interval in which the handler will
   be called.
 
@@ -362,7 +365,7 @@ This command may be used like so:
   ret = ioctl(fd, TCIOC_MAXTIMEOUT, (uint32_t*)(&max_timeout));
   if (ret < 0)
     {
-      fprintf(stderr, "ERROR: Failed to reat the timer's maximum timeout: %d\n", errno);
+      fprintf(stderr, "ERROR: Failed to read the timer's maximum timeout: %d\n", errno);
       close(fd);
       return EXIT_FAILURE;
     }
@@ -371,5 +374,174 @@ This command may be used like so:
 
   printf("Maximum supported timeout: %" PRIu32 "\n", max_timeout);
 
+The ``TCIOC_TICK_GETSTATUS`` command invokes the ``getstatus`` lower-half
+operation and returns the current timer status expressed in timer ticks.
+The conversion from microseconds to ticks is performed by the timer
+upper-half driver.
+
+  The ``getstatus`` operation gathers the timer's current information.
+  When invoked via ``TCIOC_TICK_GETSTATUS``, the ``timeout`` and
+  ``timeleft`` fields are converted from microseconds to timer ticks
+  before being returned to the caller.
+
+  :param status: A writable pointer to a struct timer_status_s.
+                 This structure contains the same fields as used by
+                 `TCIOC_GETSTATUS`, but the timeout and timeleft
+                 values are expressed in timer ticks instead of
+                 microseconds.
+  :return: A Linux System Error Code for failing or 0 for success.
+
+This command may be used like so:
+
+.. code-block:: c
+
+  /* Get timer status in ticks */
+
+  ret = ioctl(fd, TCIOC_TICK_GETSTATUS, (unsigned long)((uintptr_t)&status));
+  if (ret < 0)
+    {
+      fprintf(stderr, "ERROR: Failed to get timer tick status: %d\n", errno);
+      close(fd);
+      return EXIT_FAILURE;
+    }
+
+  printf("flags: %08lx timeout(ticks): %lu timeleft(ticks): %lu\n",
+          (unsigned long)status.flags, (unsigned long)status.timeout,
+          (unsigned long)status.timeleft);
+
+The ``TCIOC_TICK_SETTIMEOUT`` command calls the ``settimeout`` operation and
+sets a new timeout value expressed in timer ticks.
+
+  The settimeout operation configures the timer to expire after the specified
+  number of timer ticks and resets the timer. The timeout value is converted
+  from ticks to microseconds by the timer upper-half driver before invoking
+  the lower-half settimeout operation.
+
+  :param timeout: An argument of type uint32_t that specifies the timeout
+                  interval in timer ticks.
+  :return: A Linux System Error Code for failing or 0 for success.
+
+This command may be used like so:
+
+.. code-block:: c
+
+  /* Set timer timeout in ticks */
+
+  printf("Set timer timeout to %lu ticks\n",
+  (unsigned long)timeout_ticks);
+
+  ret = ioctl(fd, TCIOC_TICK_SETTIMEOUT, timeout_ticks);
+  if (ret < 0)
+    {
+      fprintf(stderr, "ERROR: Failed to set timer tick timeout: %d\n", errno);
+      close(fd);
+      return EXIT_FAILURE;
+    }
+
+The ``TCIOC_TICK_MAXTIMEOUT`` command calls the ``maxtimeout`` operation and
+returns the maximum supported timeout value expressed in timer ticks.
+
+  The maxtimeout operation gets the maximum timeout value that can be
+  configured for the timer when using tick-based time units.
+
+  :param maxtimeout: A writable pointer to a variable of uint32_t type in
+                     which the maximum supported timeout (in ticks) will be
+                     stored.
+  :return: A Linux System Error Code for failing or 0 for success.
+
+This command may be used like so:
+
+.. code-block:: c
+
+  /* Get the maximum timer timeout in ticks */
+
+  printf("Get the maximum timer timeout in ticks\n");
+
+  ret = ioctl(fd, TCIOC_TICK_MAXTIMEOUT, (uint32_t *)(&max_timeout));
+  if (ret < 0)
+    {
+      fprintf(stderr, "ERROR: Failed to read timer tick maximum timeout: %d\n", errno);
+      close(fd);
+      return EXIT_FAILURE;
+    }
+
+  /* Print the maximum supported timeout (ticks) */
+
+  printf("Maximum supported timeout (ticks): %" PRIu32 "\n", max_timeout);
+
 Those snippets were taken from the Example which provides a great resource to
 demonstrate how to use those ``ioctl`` commands.
+
+Software Timer Implementation (timer_wdog)
+------------------------------------------
+
+The ``CONFIG_TIMER_WDOG`` option enables a software-based implementation
+of the timer driver interface. Instead of using hardware timer peripherals,
+this implementation leverages the NuttX internal watchdog (wdog) timer
+subsystem to provide timer functionality.
+
+**Concept**
+
+The wdog subsystem is a kernel-level software timer mechanism that
+maintains a queue of pending timeouts. When ``timer_wdog`` is enabled,
+it creates a standard timer device (e.g., ``/dev/timer0``) that internally
+uses ``wd_start()`` and related wdog APIs to schedule and manage timeouts.
+This allows platforms without dedicated hardware timers to still provide
+the standard timer driver interface to applications.
+
+**Enabling timer_wdog**
+
+To enable this feature, set the following configuration options:
+
+.. code-block:: none
+
+   CONFIG_TIMER=y
+   CONFIG_TIMER_WDOG=y
+
+Then call ``timer_wdog_initialize()`` from your board initialization code
+(typically in ``board_late_initialize()`` or ``board_app_initialize()``):
+
+.. code-block:: c
+
+   #include <nuttx/timers/timer_wdog.h>
+
+   #ifdef CONFIG_TIMER_WDOG
+     ret = timer_wdog_initialize(0);  /* Creates /dev/timer0 */
+     if (ret < 0)
+       {
+         syslog(LOG_ERR, "ERROR: timer_wdog_initialize failed: %d\n", ret);
+       }
+   #endif
+
+**Pros**
+
+- **No hardware dependency**: Works on any platform that supports the
+  NuttX wdog subsystem, including the simulator (sim).
+- **Easy to enable**: Requires minimal board-level code; just a single
+  initialization call.
+- **Standard interface**: Applications use the same timer ioctl commands
+  as hardware-based timers, ensuring portability.
+- **Useful for testing**: Ideal for testing timer-dependent application
+  code on the simulator or platforms lacking hardware timers.
+- **Multiple instances**: Multiple software timers can be created by
+  calling ``timer_wdog_initialize()`` with different IDs.
+
+**Cons**
+
+- **Resolution limited by system tick**: The timer resolution is bound
+  to the system tick rate (``CONFIG_USEC_PER_TICK``). For example, with
+  a 10ms tick, the minimum timeout granularity is 10ms.
+- **Less accurate than hardware timers**: Software timers depend on the
+  scheduler and may experience jitter, especially under heavy system load.
+- **Runs in interrupt context**: The timeout callback executes in the
+  context of the system timer interrupt, which may introduce latency for
+  signal delivery to applications.
+- **Not suitable for high-precision timing**: Applications requiring
+  microsecond-level precision should use hardware timer implementations.
+
+**Use Cases**
+
+- Simulator-based development and testing
+- Platforms without available hardware timer peripherals
+- Prototyping timer-based application logic
+- Educational purposes and learning the NuttX timer interface

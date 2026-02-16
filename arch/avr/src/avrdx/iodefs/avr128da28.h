@@ -37,6 +37,27 @@
 #  error "Do not include this file directly, use avrdx_iodefs.h instead"
 #endif
 
+/* PORTMUX.USARTROUTEA */
+
+#define PORTMUX_USART0_DEFAULT_GC (0)
+#define PORTMUX_USART0_ALT1_GC (PORTMUX_USART0_0_bm )
+#define PORTMUX_USART0_NONE_GC (PORTMUX_USART0_1_bm | PORTMUX_USART0_0_bm)
+#define PORTMUX_USART0_GM (PORTMUX_USART0_1_bm | PORTMUX_USART0_0_bm)
+
+#define PORTMUX_USART1_DEFAULT_GC (0)
+#define PORTMUX_USART1_NONE_GC (PORTMUX_USART1_1_bm | PORTMUX_USART1_0_bm)
+#define PORTMUX_USART1_GM (PORTMUX_USART1_1_bm | PORTMUX_USART1_0_bm)
+
+#define PORTMUX_USART2_DEFAULT_GC (0)
+#define PORTMUX_USART2_NONE_GC (PORTMUX_USART2_1_bm | PORTMUX_USART2_0_bm)
+#define PORTMUX_USART2_GM (PORTMUX_USART2_1_bm | PORTMUX_USART2_0_bm)
+
+/* PORTMUX.TWIROUTEA */
+
+#define PORTMUX_TWI0_DEFAULT_GC (0)
+#define PORTMUX_TWI0_ALT2_GC = (PORTMUX_TWI0_1_bm)
+#define PORTMUX_TWI0_GM (PORTMUX_TWI0_1_bm | PORTMUX_TWI0_0_bm)
+
 /* PORT.PINCONFIG */
 
 #define PORT_ISC_GM ( PORT_ISC_0_bm | PORT_ISC_1_bm | PORT_ISC_2_bm )
@@ -90,6 +111,35 @@
 #define USART_CHSIZE_7BIT_GC (USART_CHSIZE_1_bm)
 #define USART_CHSIZE_8BIT_GC (USART_CHSIZE_1_bm | USART_CHSIZE_0_bm)
 
+/* TWI.MCTRLA */
+
+#define TWI_FMPEN_ON_GC (TWI_FMPEN_bm)
+
+#define TWI_SDAHOLD_OFF_GC (0)
+#define TWI_SDAHOLD_50NS_GC (TWI_SDAHOLD_0_bm)
+#define TWI_SDAHOLD_300NS_GC (TWI_SDAHOLD_1_bm)
+#define TWI_SDAHOLD_500NS_GC (TWI_SDAHOLD_1_bm | TWI_SDAHOLD_0_bm)
+
+#define TWI_TIMEOUT_200US_GC (TWI_TIMEOUT_1_bm | TWI_TIMEOUT_0_bm)
+
+/* TWI.MCTRLB */
+
+#define TWI_MCMD_NOACT_GC (0)
+#define TWI_MCMD_REPSTART_GC (TWI_MCMD_0_bm)
+#define TWI_MCMD_RECVTRANS_GC (TWI_MCMD_1_bm)
+#define TWI_MCMD_STOP_GC (TWI_MCMD_0_bm | TWI_MCMD_1_bm)
+
+#define TWI_ACKACT_ACK_GC (0)
+#define TWI_ACKACT_NACK_GC (TWI_ACKACT_bm)
+
+/* TWI.MSTATUS */
+
+#define TWI_BUSSTATE_UNKNOWN_GC (0)
+#define TWI_BUSSTATE_IDLE_GC (TWI_BUSSTATE_0_bm)
+#define TWI_BUSSTATE_OWNER_GC (TWI_BUSSTATE_1_bm)
+#define TWI_BUSSTATE_BUSY_GC (TWI_BUSSTATE_1_bm | TWI_BUSSTATE_0_bm)
+#define TWI_BUSSTATE_GM (TWI_BUSSTATE_1_bm | TWI_BUSSTATE_0_bm)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -114,6 +164,26 @@ typedef struct avr_usart_struct
   register8_t RXPLCTRL; /* IRCOM Receiver Pulse Length Control */
   register8_t reserved_1[1];
 } avr_usart_t;
+
+typedef struct avr_twi_struct
+{
+  register8_t CTRLA;     /* Control A */
+  register8_t DUALCTRL;  /* Dual Control */
+  register8_t DBGCTRL;   /* Debug Control Register */
+  register8_t MCTRLA;    /* Host Control A */
+  register8_t MCTRLB;    /* Host Control B */
+  register8_t MSTATUS;   /* Host Status */
+  register8_t MBAUD;     /* Host Baud Rate Control */
+  register8_t MADDR;     /* Host Address */
+  register8_t MDATA;     /* Host Data */
+  register8_t SCTRLA;    /* Client Control A */
+  register8_t SCTRLB;    /* Client Control B */
+  register8_t SSTATUS;   /* Client Status */
+  register8_t SADDR;     /* Client Address */
+  register8_t SDATA;     /* Client Data */
+  register8_t SADDRMASK; /* Client Address Mask */
+  register8_t reserved_1[1];
+} avr_twi_t;
 
 /****************************************************************************
  * Public Data

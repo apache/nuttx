@@ -104,7 +104,7 @@ static int fdlist_extend(FAR struct fdlist *list, size_t row)
       return 0;
     }
 
-  if (CONFIG_NFILE_DESCRIPTORS_PER_BLOCK * orig_rows > OPEN_MAX)
+  if (CONFIG_NFILE_DESCRIPTORS_PER_BLOCK * (orig_rows + 1) > OPEN_MAX)
     {
       fdlist_dump(list);
       return -EMFILE;
@@ -203,10 +203,11 @@ static void fdlist_uninstall(FAR struct fdlist *list, FAR struct fd *fdp)
 }
 
 static void fdlist_install(FAR struct fdlist *list, int fd,
-                           FAR struct file *filep, int oflags)
+                           FAR struct file *filep, FAR struct fd *fdp,
+                           int oflags, bool copy)
 {
-  FAR struct file *oldfilep;
-  FAR struct fd *fdp;
+  FAR struct file *filep1;
+  FAR struct fd *fdp1;
   irqstate_t flags;
   int l1;
   int l2;
@@ -216,15 +217,24 @@ static void fdlist_install(FAR struct fdlist *list, int fd,
 
   flags = spin_lock_irqsave_notrace(&list->fl_lock);
 
-  fdp = &list->fl_fds[l1][l2];
-  oldfilep = fdp->f_file;
-  fdp->f_file = filep;
+  fdp1 = &list->fl_fds[l1][l2];
+  filep1 = fdp1->f_file;
+  fdp1->f_file = filep;
   file_ref(filep);
-  fdp->f_cloexec = !!(oflags & O_CLOEXEC);
-  FS_ADD_BACKTRACE(fdp);
+  fdp1->f_cloexec = !!(oflags & O_CLOEXEC);
+  FS_ADD_BACKTRACE(fdp1);
+  if (copy)
+    {
+#ifdef CONFIG_FDSAN
+      fdp1->f_tag_fdsan = fdp->f_tag_fdsan;
+#endif
+#ifdef CONFIG_FDCHECK
+      fdp1->f_tag_fdcheck = fdp->f_tag_fdcheck;
+#endif
+    }
 
   spin_unlock_irqrestore_notrace(&list->fl_lock, flags);
-  file_put(oldfilep);
+  file_put(filep1);
 }
 
 /****************************************************************************
@@ -295,6 +305,7 @@ static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
 int fdlist_dup3(FAR struct fdlist *list, int fd1, int fd2, int flags)
 {
   FAR struct file *filep1;
+  FAR struct fd *fdp1;
   int ret;
 
   if (fd1 == fd2)
@@ -323,13 +334,13 @@ int fdlist_dup3(FAR struct fdlist *list, int fd1, int fd2, int flags)
         }
     }
 
-  ret = fdlist_get(list, fd1, &filep1);
+  ret = fdlist_get2(list, fd1, &filep1, &fdp1);
   if (ret < 0)
     {
       return ret;
     }
 
-  fdlist_install(list, fd2, filep1, flags);
+  fdlist_install(list, fd2, filep1, fdp1, flags, false);
   file_put(filep1);
 
 #ifdef CONFIG_FDCHECK
@@ -622,81 +633,6 @@ found:
 }
 
 /****************************************************************************
- * Name: fdlist_allocate
- *
- * Description:
- *   Allocate a struct fd instance and associate it with an empty file
- *   instance. The difference between this function and
- *   file_allocate_from_inode is that this function is only used for
- *   placeholder purposes. Later, the caller will initialize the file entity
- *   through the returned filep.
- *
- *   The fd allocated by this function can be released using fdlist_close.
- *
- *   After the function call is completed, it will hold a reference count
- *   for the filep. Therefore, when the filep is no longer in use, it is
- *   necessary to call file_put to release the reference count, in order
- *   to avoid a race condition where the file might be closed during
- *   this process.
- *
- * Returned Value:
- *   Returns the file descriptor == index into the files array on success;
- *   a negated errno value is returned on any failure.
- *
- ****************************************************************************/
-
-int fdlist_allocate(FAR struct fdlist *list, int oflags,
-                    int minfd, FAR struct file **filep)
-{
-  int fd;
-
-  *filep = fs_heap_zalloc(sizeof(struct file));
-  if (*filep == NULL)
-    {
-      return -ENOMEM;
-    }
-
-  file_ref(*filep);
-  fd = fdlist_dupfile(list, oflags, minfd, *filep);
-  if (fd < 0)
-    {
-      file_put(*filep);
-    }
-
-  return fd;
-}
-
-/****************************************************************************
- * Name: file_allocate
- *
- * Description:
- *   Allocate a struct fd instance and associate it with an empty file
- *   instance. The difference between this function and
- *   file_allocate_from_inode is that this function is only used for
- *   placeholder purposes. Later, the caller will initialize the file entity
- *   through the returned filep.
- *
- *   The fd allocated by this function can be released using nx_close.
- *
- *   After the function call is completed, it will hold a reference count
- *   for the filep. Therefore, when the filep is no longer in use, it is
- *   necessary to call file_put to release the reference count, in order
- *   to avoid a race condition where the file might be closed during
- *   this process.
- *
- * Returned Value:
- *   Returns the file descriptor == index into the files array on success;
- *   a negated errno value is returned on any failure.
- *
- ****************************************************************************/
-
-int file_allocate(int oflags, int minfd, FAR struct file **filep)
-{
-  return fdlist_allocate(nxsched_get_fdlist_from_tcb(this_task()),
-                         oflags, minfd, filep);
-}
-
-/****************************************************************************
  * Name: file_allocate_from_inode
  *
  * Description:
@@ -715,10 +651,10 @@ int file_allocate_from_inode(FAR struct inode *inode, int oflags, off_t pos,
   FAR struct file *filep;
   int fd;
 
-  fd = file_allocate(oflags, minfd, &filep);
-  if (fd < 0)
+  filep = file_allocate();
+  if (filep == NULL)
     {
-      return fd;
+      return -ENOMEM;
     }
 
   inode_addref(inode);
@@ -729,8 +665,12 @@ int file_allocate_from_inode(FAR struct inode *inode, int oflags, off_t pos,
 #if CONFIG_FS_LOCK_BUCKET_SIZE > 0
   filep->f_locked = false;
 #endif
-
-  file_put(filep);
+  fd = file_dup(filep, minfd, oflags);
+  if (fd < 0)
+    {
+      inode_release(inode);
+      file_deallocate(filep);
+    }
 
   return fd;
 }
@@ -820,12 +760,38 @@ int fdlist_copy(FAR struct fdlist *plist, FAR struct fdlist *clist,
 
           /* Assign filep to the child's descriptor list. Omit the flags */
 
-          fdlist_install(clist, fd, filep, 0);
+          fdlist_install(clist, fd, filep, fdp, 0, true);
           file_put(filep);
         }
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: file_allocate
+ *
+ * Description:
+ *   Allocate a file instance and return
+ *
+ ****************************************************************************/
+
+FAR struct file *file_allocate(void)
+{
+  return fs_heap_zalloc(sizeof(struct file));
+}
+
+/****************************************************************************
+ * Name: file_deallocate
+ *
+ * Description:
+ *   Free a file instance.
+ *
+ ****************************************************************************/
+
+void file_deallocate(FAR struct file *filep)
+{
+  fs_heap_free(filep);
 }
 
 /****************************************************************************

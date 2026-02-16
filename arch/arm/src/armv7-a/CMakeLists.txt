@@ -43,13 +43,15 @@ list(
   arm_initialstate.c
   arm_mmu.c
   arm_prefetchabort.c
-  arm_schedulesigaction.c
-  arm_sigdeliver.c
   arm_syscall.c
   arm_tcbinfo.c
   arm_undefinedinsn.c
   arm_perf.c
   cp15_cacheops.c)
+
+if(CONFIG_ENABLE_ALL_SIGNALS)
+  list(APPEND SRCS arm_schedulesigaction.c arm_sigdeliver.c)
+endif()
 
 if(CONFIG_ARMV7A_GICv2M)
   list(APPEND SRCS arm_gicv2m.c)

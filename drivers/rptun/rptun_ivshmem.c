@@ -31,7 +31,6 @@
 #include <stdio.h>
 
 #include <nuttx/nuttx.h>
-#include <nuttx/board.h>
 #include <nuttx/drivers/addrenv.h>
 #include <nuttx/pci/pci_ivshmem.h>
 #include <nuttx/rptun/rptun.h>
@@ -46,20 +45,44 @@
   container_of(ivshmem_get_driver(dev), struct rptun_ivshmem_dev_s, drv)
 
 #define RPTUN_IVSHMEM_SHMEM_BAR   2
-#define RPTUN_IVSHMEM_WDOG_DELAY  MSEC2TICK(1)
+#define RPTUN_IVSHMEM_SHMEM_SIZE  0x10000
+#define RPTUN_IVSHMEM_WDOG_DELAY  USEC2TICK(100)
+
+#define RPTUN_IVSHMEM_VIRTIO_NUM  3
+#define RPTUN_IVSHMEM_RSC_NUM     (2 * RPTUN_IVSHMEM_VIRTIO_NUM)
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
+struct aligned_data(8) rptun_ivshmem_rsc_s
+{
+  struct resource_table      hdr;
+  uint32_t                   offset[RPTUN_IVSHMEM_RSC_NUM];
+  struct fw_rsc_vdev         rng0;
+  struct fw_rsc_vdev_vring   rng0_vring;
+  struct fw_rsc_carveout     rng0_carveout;
+  char                       rng0_shm[RPTUN_IVSHMEM_SHMEM_SIZE];
+  struct fw_rsc_vdev         rng1;
+  struct fw_rsc_vdev_vring   rng1_vring;
+  struct fw_rsc_carveout     rng1_carveout;
+  char                       rng1_shm[RPTUN_IVSHMEM_SHMEM_SIZE];
+  struct fw_rsc_vdev         rpmsg0;
+  struct fw_rsc_vdev_vring   rpmsg0_vring0;
+  struct fw_rsc_vdev_vring   rpmsg0_vring1;
+  struct fw_rsc_config       rpmsg0_config;
+  struct fw_rsc_carveout     rpmsg0_carveout;
+  char                       rpmsg0_shm[RPTUN_IVSHMEM_SHMEM_SIZE];
+};
+
 struct rptun_ivshmem_mem_s
 {
-  volatile uint64_t  basem;
-  volatile uint32_t  seqs;
-  volatile uint32_t  seqm;
-  volatile uint32_t  reserved;
-  volatile uint32_t  rsc_size;
-  struct rptun_rsc_s rsc;
+  volatile uint64_t          basem;
+  volatile uint32_t          seqs;
+  volatile uint32_t          seqm;
+  volatile uint32_t          reserved;
+  volatile uint32_t          rsc_size;
+  struct rptun_ivshmem_rsc_s rsc;
 };
 
 struct rptun_ivshmem_dev_s
@@ -89,7 +112,7 @@ struct rptun_ivshmem_dev_s
 static const char *rptun_ivshmem_get_cpuname(FAR struct rptun_dev_s *dev);
 static const FAR struct rptun_addrenv_s *
 rptun_ivshmem_get_addrenv(FAR struct rptun_dev_s *dev);
-static FAR struct rptun_rsc_s *
+static FAR struct resource_table *
 rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev);
 static bool rptun_ivshmem_is_autostart(FAR struct rptun_dev_s *dev);
 static bool rptun_ivshmem_is_master(FAR struct rptun_dev_s *dev);
@@ -141,21 +164,16 @@ rptun_ivshmem_get_addrenv(FAR struct rptun_dev_s *dev)
   return &priv->raddrenv[0];
 }
 
-static FAR struct rptun_rsc_s *
+static FAR struct resource_table *
 rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
 {
   FAR struct rptun_ivshmem_dev_s *priv =
     (FAR struct rptun_ivshmem_dev_s *)dev;
   FAR struct rptun_cmd_s *cmd = RPTUN_RSC2CMD(&priv->shmem->rsc);
 
-  priv->raddrenv[0].da   = 0;
-  priv->raddrenv[0].size = priv->shmem_size;
-
   if (priv->master)
     {
-      priv->raddrenv[0].pa = (uintptr_t)priv->shmem;
-
-      /* Wait until slave is ready */
+      /* Wait until salve is ready */
 
       while (RPTUN_GET_CMD(cmd->cmd_slave) != RPTUN_CMD_READY)
         {
@@ -167,35 +185,111 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
     }
   else
     {
-      FAR struct rptun_rsc_s *rsc = &priv->shmem->rsc;
+      FAR struct rptun_ivshmem_rsc_s *rsc = &priv->shmem->rsc;
       memset(priv->shmem, 0, priv->shmem_size);
 
-      rsc->rsc_tbl_hdr.ver          = 1;
-      rsc->rsc_tbl_hdr.num          = 1;
-      rsc->offset[0]                = offsetof(struct rptun_rsc_s,
-                                               rpmsg_vdev);
-      rsc->rpmsg_vdev.type          = RSC_VDEV;
-      rsc->rpmsg_vdev.id            = VIRTIO_ID_RPMSG;
-      rsc->rpmsg_vdev.notifyid      = 20;
-      rsc->rpmsg_vdev.dfeatures     = 1 << VIRTIO_RPMSG_F_NS |
-                                      1 << VIRTIO_RPMSG_F_ACK |
-                                      1 << VIRTIO_RPMSG_F_BUFSZ;
-      rsc->rpmsg_vdev.config_len    = sizeof(struct fw_rsc_config);
-      rsc->rpmsg_vdev.num_of_vrings = 2;
-      rsc->rpmsg_vring0.da          = FW_RSC_U32_ADDR_ANY;
-      rsc->rpmsg_vring0.align       = 8;
-      rsc->rpmsg_vring0.num         = CONFIG_RPTUN_IVSHMEM_BUFFNUM;
-      rsc->rpmsg_vring0.notifyid    = RSC_NOTIFY_ID_ANY;
-      rsc->rpmsg_vring1.da          = FW_RSC_U32_ADDR_ANY;
-      rsc->rpmsg_vring1.align       = 8;
-      rsc->rpmsg_vring1.num         = CONFIG_RPTUN_IVSHMEM_BUFFNUM;
-      rsc->rpmsg_vring1.notifyid    = RSC_NOTIFY_ID_ANY;
-      rsc->config.r2h_buf_size      = CONFIG_RPTUN_IVSHMEM_BUFFSIZE;
-      rsc->config.h2r_buf_size      = CONFIG_RPTUN_IVSHMEM_BUFFSIZE;
+      rsc->hdr.ver                    = 1;
+      rsc->hdr.num                    = RPTUN_IVSHMEM_RSC_NUM;
 
-      priv->shmem->rsc_size         = sizeof(struct rptun_rsc_s);
-      cmd->cmd_master               = 0;
-      cmd->cmd_slave                = RPTUN_CMD(RPTUN_CMD_READY, 0);
+      /* Virtio Driver 0, VIRTIO_ID_ENTROPY */
+
+      rsc->offset[0]                  = offsetof(struct rptun_ivshmem_rsc_s,
+                                                 rng0);
+      rsc->rng0.type                  = RSC_VDEV;
+      rsc->rng0.id                    = VIRTIO_ID_ENTROPY;
+      rsc->rng0.notifyid              = RSC_NOTIFY_ID_ANY;
+      rsc->rng0.dfeatures             = 0;
+      rsc->rng0.config_len            = 0;
+      rsc->rng0.num_of_vrings         = 1;
+      rsc->rng0.reserved[0]           = VIRTIO_DEV_DRIVER;
+      rsc->rng0.reserved[1]           = 0;
+      rsc->rng0_vring.align           = 8;
+      rsc->rng0_vring.num             = 8;
+      rsc->rng0_vring.notifyid        = RSC_NOTIFY_ID_ANY;
+      rsc->rng0_vring.da              = FW_RSC_U32_ADDR_ANY;
+
+      /* Virtio Rng0 share memory buffer */
+
+      rsc->offset[1]                  = offsetof(struct rptun_ivshmem_rsc_s,
+                                                 rng0_carveout);
+      rsc->rng0_carveout.type         = RSC_CARVEOUT;
+      rsc->rng0_carveout.da           = offsetof(struct rptun_ivshmem_mem_s,
+                                                 rsc.rng0_shm);
+      rsc->rng0_carveout.pa           = (uint32_t)METAL_BAD_PHYS;
+      rsc->rng0_carveout.len          = sizeof(priv->shmem->rsc.rng0_shm);
+      memcpy(rsc->rng0_carveout.name, "vdev0buffer", 11);
+
+      /* Virtio Driver 1, VIRTIO_ID_ENTROPY */
+
+      rsc->offset[2]                  = offsetof(struct rptun_ivshmem_rsc_s,
+                                                 rng1);
+      rsc->rng1.type                  = RSC_VDEV;
+      rsc->rng1.id                    = VIRTIO_ID_ENTROPY;
+      rsc->rng1.notifyid              = RSC_NOTIFY_ID_ANY;
+      rsc->rng1.dfeatures             = 0;
+      rsc->rng1.config_len            = 0;
+      rsc->rng1.num_of_vrings         = 1;
+      rsc->rng1.reserved[0]           = VIRTIO_DEV_DRIVER;
+      rsc->rng1.reserved[1]           = 0;
+      rsc->rng1_vring.align           = 8;
+      rsc->rng1_vring.num             = 8;
+      rsc->rng1_vring.notifyid        = RSC_NOTIFY_ID_ANY;
+      rsc->rng1_vring.da              = FW_RSC_U32_ADDR_ANY;
+
+      /* Virtio Rng1 share memory buffer */
+
+      rsc->offset[3]                  = offsetof(struct rptun_ivshmem_rsc_s,
+                                                 rng1_carveout);
+      rsc->rng1_carveout.type         = RSC_CARVEOUT;
+      rsc->rng1_carveout.da           = offsetof(struct rptun_ivshmem_mem_s,
+                                                 rsc.rng1_shm);
+      rsc->rng1_carveout.pa           = (uint32_t)METAL_BAD_PHYS;
+      rsc->rng1_carveout.len          = sizeof(priv->shmem->rsc.rng1_shm);
+      memcpy(rsc->rng1_carveout.name, "vdev1buffer", 11);
+
+      /* Virtio Driver 2, VIRTIO_ID_RPMSG */
+
+      rsc->offset[4]                  = offsetof(struct rptun_ivshmem_rsc_s,
+                                                 rpmsg0);
+      rsc->rpmsg0.type                = RSC_VDEV;
+      rsc->rpmsg0.id                  = VIRTIO_ID_RPMSG;
+      rsc->rpmsg0.notifyid            = RSC_NOTIFY_ID_ANY;
+      rsc->rpmsg0.dfeatures           = (1 << VIRTIO_RPMSG_F_NS) |
+                                        (1 << VIRTIO_RPMSG_F_ACK) |
+                                        (1 << VIRTIO_RPMSG_F_BUFSZ) |
+                                        (1 << VIRTIO_RPMSG_F_CPUNAME);
+      rsc->rpmsg0.config_len          = sizeof(struct fw_rsc_config);
+      rsc->rpmsg0.num_of_vrings       = 2;
+      rsc->rpmsg0.reserved[0]         = VIRTIO_DEV_DRIVER;
+      rsc->rpmsg0.reserved[1]         = 0;
+      rsc->rpmsg0_vring0.align        = 8;
+      rsc->rpmsg0_vring0.num          = 8;
+      rsc->rpmsg0_vring0.notifyid     = RSC_NOTIFY_ID_ANY;
+      rsc->rpmsg0_vring0.da           = FW_RSC_U32_ADDR_ANY;
+      rsc->rpmsg0_vring1.align        = 8;
+      rsc->rpmsg0_vring1.num          = 8;
+      rsc->rpmsg0_vring1.notifyid     = RSC_NOTIFY_ID_ANY;
+      rsc->rpmsg0_vring1.da           = FW_RSC_U32_ADDR_ANY;
+      rsc->rpmsg0_config.h2r_buf_size = 0x600;
+      rsc->rpmsg0_config.r2h_buf_size = 0x600;
+      strlcpy((FAR char *)rsc->rpmsg0_config.host_cpuname,
+              priv->cpuname, VIRTIO_RPMSG_CPUNAME_SIZE);
+      strlcpy((FAR char *)rsc->rpmsg0_config.remote_cpuname,
+              CONFIG_RPMSG_LOCAL_CPUNAME, VIRTIO_RPMSG_CPUNAME_SIZE);
+
+      /* Virtio Rpmsg0 share memory buffer */
+
+      rsc->offset[5]                  = offsetof(struct rptun_ivshmem_rsc_s,
+                                                 rpmsg0_carveout);
+      rsc->rpmsg0_carveout.type       = RSC_CARVEOUT;
+      rsc->rpmsg0_carveout.da         = offsetof(struct rptun_ivshmem_mem_s,
+                                                 rsc.rpmsg0_shm);
+      rsc->rpmsg0_carveout.pa         = (uint32_t)METAL_BAD_PHYS;
+      rsc->rpmsg0_carveout.len        = sizeof(priv->shmem->rsc.rpmsg0_shm);
+      memcpy(rsc->rpmsg0_carveout.name, "vdev2buffer", 11);
+
+      priv->shmem->rsc_size           = sizeof(struct rptun_ivshmem_rsc_s);
+      cmd->cmd_slave                  = RPTUN_CMD(RPTUN_CMD_READY, 0);
 
       /* Wait until master is ready, slave needs to use master base to
        * initialize addrenv.
@@ -206,8 +300,6 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
           usleep(1000);
         }
 
-      priv->raddrenv[0].pa  = (uintptr_t)priv->shmem->basem;
-
       priv->addrenv[0].va   = (uint64_t)(uintptr_t)priv->shmem;
       priv->addrenv[0].pa   = priv->shmem->basem;
       priv->addrenv[0].size = priv->shmem_size;
@@ -215,7 +307,12 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
       simple_addrenv_initialize(&priv->addrenv[0]);
     }
 
-  return &priv->shmem->rsc;
+  priv->raddrenv[0].pa   = priv->master ? (uintptr_t)priv->shmem :
+                                          (uintptr_t)priv->shmem->basem;
+  priv->raddrenv[0].da   = 0;
+  priv->raddrenv[0].size = priv->shmem_size;
+
+  return &priv->shmem->rsc.hdr;
 }
 
 static bool rptun_ivshmem_is_autostart(FAR struct rptun_dev_s *dev)
@@ -290,46 +387,12 @@ static int rptun_ivshmem_register_callback(FAR struct rptun_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: rptun_ivshmem_check_cmd
- ****************************************************************************/
-
-static void rptun_ivshmem_check_cmd(FAR struct rptun_ivshmem_dev_s *priv)
-{
-  FAR struct rptun_cmd_s *rptun_cmd = RPTUN_RSC2CMD(&priv->shmem->rsc);
-  uint32_t cmd;
-
-  if (priv->master)
-    {
-      cmd = RPTUN_GET_CMD(rptun_cmd->cmd_slave);
-      rptun_cmd->cmd_slave = RPTUN_CMD(RPTUN_CMD_DEFAULT, 0);
-    }
-  else
-    {
-      cmd = RPTUN_GET_CMD(rptun_cmd->cmd_master);
-      rptun_cmd->cmd_master = RPTUN_CMD(RPTUN_CMD_DEFAULT, 0);
-    }
-
-  switch (cmd)
-    {
-      case RPTUN_CMD_RESTART:
-#ifdef CONFIG_BOARDCTL_RESET
-        board_reset(0);
-#endif
-        break;
-      default:
-        break;
-    }
-}
-
-/****************************************************************************
  * Name: rptun_ivshmem_interrupt
  ****************************************************************************/
 
 static int rptun_ivshmem_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct rptun_ivshmem_dev_s *priv = arg;
-
-  rptun_ivshmem_check_cmd(priv);
 
   if (priv->callback != NULL)
     {
@@ -348,8 +411,6 @@ static void rptun_ivshmem_wdog(wdparm_t arg)
   FAR struct rptun_ivshmem_dev_s *priv =
     (FAR struct rptun_ivshmem_dev_s *)arg;
   bool should_notify = false;
-
-  rptun_ivshmem_check_cmd(priv);
 
   if (priv->master && priv->seq != priv->shmem->seqs)
     {

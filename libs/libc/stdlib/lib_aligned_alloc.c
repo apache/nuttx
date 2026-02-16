@@ -32,7 +32,7 @@
  * Public Functions
  ****************************************************************************/
 
-#undef aligned_alloc /* See mm/README.txt */
+#undef aligned_alloc
 FAR void *aligned_alloc(size_t align, size_t size)
 {
   return lib_memalign(align, size);

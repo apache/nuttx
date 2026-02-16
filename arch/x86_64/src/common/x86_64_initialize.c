@@ -173,5 +173,9 @@ void up_initialize(void)
   acpi_dump();
 #endif
 
+#if defined(CONFIG_ARCH_X86_64_ACPI) && defined(CONFIG_FS_PROCFS_REGISTER)
+  acpi_procfs_register();
+#endif
+
   board_autoled_on(LED_IRQSENABLED);
 }

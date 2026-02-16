@@ -19,7 +19,7 @@
 # the License.
 #
 # ##############################################################################
-set(SRCS a527_boot.c a527_serial.c a527_timer.c)
+set(SRCS a527_boot.c a527_serial.c)
 
 if(CONFIG_ARCH_EARLY_PRINT)
   list(APPEND SRCS a527_lowputc.S)

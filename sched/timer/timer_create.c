@@ -81,7 +81,7 @@ static FAR struct posix_timer_s *timer_allocate(void)
 
       ret = (FAR struct posix_timer_s *)
         kmm_malloc(sizeof(struct posix_timer_s));
-      pt_flags = 0;
+      pt_flags = 0u;
     }
 
   /* If we have a timer, then put it into the allocated timer list */
@@ -158,7 +158,7 @@ static FAR struct posix_timer_s *timer_allocate(void)
 int timer_create(clockid_t clockid, FAR struct sigevent *evp,
                  FAR timer_t *timerid)
 {
-  FAR struct posix_timer_s *ret;
+  FAR struct posix_timer_s *ret = NULL;
   FAR struct tcb_s *tcb = this_task();
 
   /* Sanity checks. */
@@ -169,57 +169,61 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
        !GOOD_SIGNO(evp->sigev_signo)))
     {
       set_errno(EINVAL);
-      return ERROR;
-    }
-
-  /* Allocate a timer instance to contain the watchdog */
-
-  ret = timer_allocate();
-  if (!ret)
-    {
-      set_errno(EAGAIN);
-      return ERROR;
-    }
-
-  /* Initialize the timer instance */
-
-  ret->pt_clock = clockid;
-  ret->pt_crefs = 1;
-  ret->pt_owner = tcb->pid;
-  ret->pt_delay = 0;
-  ret->pt_expected = 0;
-
-  /* Was a struct sigevent provided? */
-
-  if (evp)
-    {
-      /* Yes, copy the entire struct sigevent content */
-
-      memcpy(&ret->pt_event, evp, sizeof(struct sigevent));
     }
   else
     {
-      /* "If the evp argument is NULL, the effect is as if the evp argument
-       *  pointed to a sigevent structure with the sigev_notify member
-       *  having the value SIGEV_SIGNAL, the sigev_signo having a default
-       *  signal number, and the sigev_value member having the value of the
-       *  timer ID."
-       */
+      /* Allocate a timer instance to contain the watchdog */
 
-      ret->pt_event.sigev_notify            = SIGEV_SIGNAL;
-      ret->pt_event.sigev_signo             = SIGALRM;
-      ret->pt_event.sigev_value.sival_ptr   = ret;
+      ret = timer_allocate();
+      if (!ret)
+        {
+          set_errno(EAGAIN);
+        }
+      else
+        {
+          /* Initialize the timer instance */
+
+          ret->pt_clock = clockid;
+          ret->pt_crefs = 1u;
+          ret->pt_owner = tcb->pid;
+          ret->pt_delay = 0u;
+          ret->pt_expected = 0u;
+
+          /* Was a struct sigevent provided? */
+
+          if (evp)
+            {
+              /* Yes, copy the entire struct sigevent content */
+
+              memcpy(&ret->pt_event, evp, sizeof(struct sigevent));
+            }
+          else
+            {
+              /* "If the evp argument is NULL, the effect is as if the evp
+               * argument pointed to a sigevent structure with the
+               * sigev_notify member having the value SIGEV_SIGNAL,
+               * the sigev_signo having a default signal number,
+               * and the sigev_value member having the value of the
+               *  timer ID."
+               */
+
+              ret->pt_event.sigev_notify            = SIGEV_SIGNAL;
+              ret->pt_event.sigev_signo             = SIGALRM;
+              ret->pt_event.sigev_value.sival_ptr   = ret;
 
 #ifdef CONFIG_SIG_EVTHREAD
-      ret->pt_event.sigev_notify_function   = NULL;
-      ret->pt_event.sigev_notify_attributes = NULL;
+              ret->pt_event.sigev_notify_function   = NULL;
+              ret->pt_event.sigev_notify_attributes = NULL;
 #endif
+            }
+
+          /* Return the timer */
+
+          *timerid = ret;
+        }
     }
 
-  /* Return the timer */
-
-  *timerid = ret;
-  return OK;
+  return ret ? OK : ERROR;
 }
 
 #endif /* CONFIG_DISABLE_POSIX_TIMERS */

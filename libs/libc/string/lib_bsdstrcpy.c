@@ -1,6 +1,9 @@
 /****************************************************************************
  * libs/libc/string/lib_bsdstrcpy.c
  *
+ * SPDX-License-Identifier: BSD
+ * SPDX-FileCopyrightText: 1994-2009  Red Hat, Inc. All rights reserved
+ *
  * Copyright (c) 1994-2009  Red Hat, Inc. All rights reserved.
  *
  * This copyrighted material is made available to anyone wishing to use,
@@ -62,8 +65,9 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_STRCPY) && defined(LIBC_BUILD_STRCPY)
-#undef strcpy /* See mm/README.txt */
+#undef strcpy
 nosanitize_address
+no_builtin("strcpy")
 FAR char *strcpy(FAR char *dest, FAR const char *src)
 {
   FAR char *dst0 = dest;

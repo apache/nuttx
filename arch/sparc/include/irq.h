@@ -56,6 +56,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* sparc requires at least a 4-byte stack alignment.  For floating point use,
+ * however, the stack must be aligned to 8-byte addresses.
+ */
+
+#define STACKFRAME_ALIGN 8
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

@@ -34,6 +34,10 @@ if(CONFIG_LEDS_APA102)
   list(APPEND SRCS apa102.c)
 endif()
 
+if(CONFIG_KTD2052)
+  list(APPEND SRCS ktd2052.c)
+endif()
+
 if(CONFIG_LEDS_MAX7219)
   list(APPEND SRCS max7219.c)
 endif()

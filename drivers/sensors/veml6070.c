@@ -193,7 +193,7 @@ static ssize_t veml6070_read(FAR struct file *filep, FAR char *buffer,
 
   /* 1T for Rset 270Kohms is 125ms */
 
-  nxsig_usleep(125000);
+  nxsched_usleep(125000);
 
   /* Read the MSB first */
 

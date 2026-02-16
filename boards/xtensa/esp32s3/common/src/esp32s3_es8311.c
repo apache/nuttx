@@ -65,7 +65,7 @@ static struct es8311_lower_s g_es8311_lower[2];
  *   as /dev/audio/pcm[x] where x is determined by the I2S port number.
  *
  * Input Parameters:
- *   i2c_port  - The I2C port used for the device
+ *   i2c       - The I2C handle used for the device
  *   i2c_addr  - The I2C address used by the device
  *   i2c_freq  - The I2C frequency used for the device
  *   i2s_port  - The I2S port used for the device
@@ -76,17 +76,16 @@ static struct es8311_lower_s g_es8311_lower[2];
  *
  ****************************************************************************/
 
-int esp32s3_es8311_initialize(int i2c_port, uint8_t i2c_addr, int i2c_freq,
-                            int i2s_port)
+int esp32s3_es8311_initialize(struct i2c_master_s *i2c, uint8_t i2c_addr,
+                              int i2c_freq, int i2s_port)
 {
   struct audio_lowerhalf_s *es8311;
   struct i2s_dev_s *i2s;
-  struct i2c_master_s *i2c;
   static bool initialized = false;
   int ret;
 
-  audinfo("i2c_port %d, i2c_addr %d, i2c_freq %d\n",
-          i2c_port, i2c_addr, i2c_freq);
+  audinfo("i2c_addr %d, i2c_freq %d\n",
+           i2c_addr, i2c_freq);
 
   /* Have we already initialized? Since we never uninitialize we must
    * prevent multiple initializations. This is necessary, for example,
@@ -107,10 +106,9 @@ int esp32s3_es8311_initialize(int i2c_port, uint8_t i2c_addr, int i2c_freq,
           goto errout;
         }
 
-      i2c = esp32s3_i2cbus_initialize(i2c_port);
       if (i2c == NULL)
         {
-          auderr("ERROR: Failed to initialize I2C%d\n", i2c_port);
+          auderr("ERROR: I2C handle is NULL\n");
           ret = -ENODEV;
           goto errout;
         }

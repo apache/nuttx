@@ -1,6 +1,9 @@
 /****************************************************************************
  * libs/libc/string/lib_bsdstrcat.c
  *
+ * SPDX-License-Identifier: BSD
+ * SPDX-FileCopyrightText: 1994-2009  Red Hat, Inc. All rights reserved
+ *
  * Copyright (c) 1994-2009  Red Hat, Inc. All rights reserved.
  *
  * This copyrighted material is made available to anyone wishing to use,
@@ -48,7 +51,8 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_STRCAT) && defined(LIBC_BUILD_STRCAT)
-#undef strcat /* See mm/README.txt */
+#undef strcat
+no_builtin("strcat")
 nosanitize_address
 FAR char *strcat(FAR char *dest, FAR const char *src)
 {

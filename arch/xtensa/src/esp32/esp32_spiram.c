@@ -37,12 +37,13 @@
 #include <nuttx/nuttx.h>
 
 #include "esp32_spiram.h"
-#include "esp32_spicache.h"
 #include "esp32_psram.h"
 #include "xtensa.h"
 #include "xtensa_attr.h"
 #include "hardware/esp32_soc.h"
 #include "hardware/esp32_dport.h"
+
+#include "esp_private/cache_utils.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -215,10 +216,10 @@ unsigned int IRAM_ATTR cache_sram_mmu_set(int cpu_no, int pid,
       while (!g_cpu_pause);
     }
 
-  spi_disable_cache(1);
+    spi_flash_disable_cache(1, 0);
 #endif
 
-  spi_disable_cache(0);
+  spi_flash_disable_cache(0, 0);
 
   /* mmu change */
 
@@ -244,9 +245,9 @@ unsigned int IRAM_ATTR cache_sram_mmu_set(int cpu_no, int pid,
       putreg32(regval, DPORT_APP_CACHE_CTRL1_REG);
     }
 
-  spi_enable_cache(0);
+  spi_flash_enable_cache(0);
 #ifdef CONFIG_SMP
-  spi_enable_cache(1);
+  spi_flash_enable_cache(1);
 
   if (os_ready)
     {

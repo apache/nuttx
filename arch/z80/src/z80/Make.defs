@@ -30,12 +30,15 @@ endif
 
 CMN_CSRCS  = z80_allocateheap.c z80_createstack.c z80_doirq.c
 CMN_CSRCS += z80_exit.c z80_initialize.c z80_interruptcontext.c
-CMN_CSRCS += z80_idle.c z80_mdelay.c z80_releasestack.c
+CMN_CSRCS += z80_idle.c z80_releasestack.c
 CMN_CSRCS += z80_switchcontext.c z80_stackframe.c
-CMN_CSRCS += z80_udelay.c z80_usestack.c
+CMN_CSRCS += z80_usestack.c
 
 CHIP_ASRCS  = z80_saveusercontext.asm z80_restoreusercontext.asm
 
 CHIP_CSRCS  = z80_initialstate.c z80_io.c z80_irq.c z80_copystate.c
-CHIP_CSRCS += z80_schedulesigaction.c z80_sigdeliver.c
 CHIP_CSRCS += z80_registerdump.c
+
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+CHIP_CSRCS += z80_schedulesigaction.c z80_sigdeliver.c
+endif

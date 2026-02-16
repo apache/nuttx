@@ -93,6 +93,14 @@
 #include "stm32_bmp180.h"
 #endif
 
+#ifdef CONFIG_SENSORS_MAX31855
+#include "stm32_max31855.h"
+#endif
+
+#ifdef CONFIG_SENSORS_MAX6675
+#include "stm32_max6675.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -182,6 +190,24 @@ int stm32_bringup(void)
   stm32_i2ctool();
 #endif
 
+#ifdef CONFIG_SENSORS_MAX31855
+  /* Register device 0 on spi channel 1 */
+
+  ret = board_max31855_initialize(0, 1);
+  if (ret < 0)
+    {
+      serr("ERROR:  stm32_max31855initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_MAX6675
+  ret = board_max6675_initialize(0, 1);
+  if (ret < 0)
+    {
+      serr("ERROR:  stm32_max6675initialize failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_I2C_EE_24XX
   ret = stm32_at24_init("/dev/eeprom");
   if (ret < 0)
@@ -211,7 +237,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ADC
+#if defined(CONFIG_ADC) && defined(CONFIG_STM32_ADC1)
   /* Initialize ADC and register the ADC driver. */
 
   ret = stm32_adc_setup();
@@ -366,6 +392,14 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize BMP180, error %d\n", ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_ADC_HX711
+  ret = stm32_hx711_initialize();
+  if (ret != OK)
+    {
+      aerr("ERROR: Failed to initialize hx711: %d\n", ret);
     }
 #endif
 

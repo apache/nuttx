@@ -195,6 +195,12 @@ config MPFS_DDR_MANUAL_ADDCMD_TRAINING
 	---help---
 		This adds code for manual addcmd training. To use it also enable bit 1 in LIBERO_SETTING_TRAINING_SKIP_SETTING to skip the automatic one
 
+config MPFS_E51_ENABLE_CACHE
+	bool "Enable L1 cache on E51 core"
+	default y
+	---help---
+		Enables L1 cache for E51 core. Note: if this is disabled, also L2 cache won't work on E51, regardless of cache lane configuration.
+
 config MPFS_ENABLE_CACHE
 	bool "Enable L2 cache"
 	depends on MPFS_BOOTLOADER
@@ -396,6 +402,12 @@ config MPFS_COREMMC_WRCOMPLETE_IRQNUM
 		In case SD card's DAT0 line is connected to an F2H IRQ in the FPGA
 		design, select CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE and configure the
 		correct IRQ line here.
+
+config MPFS_FPGA_FIC0_CLK_FREQ
+	int "FIC0 clk freq"
+	default 125000000
+	---help---
+		Frequency of FPGA FIC0 clock.
 
 config MPFS_IHC_CLIENT
 	bool "IHC slave"
@@ -639,6 +651,37 @@ config MPFS_COREPWM1_NCHANNELS
 	default 2
 	range 1 16
 	depends on MPFS_COREPWM1
+
+comment "MSS CAN 2.0 Options"
+
+config MPFS_MSS_CAN
+	bool
+	default n
+	select CAN
+	select NET_CAN
+	select NET_CAN_HAVE_CANFD
+	select ARCH_HAVE_CAN_ERRORS
+	select NET_CAN_HAVE_TX_DEADLINE
+
+config MPFS_MSS_CAN0
+	bool "Enable MSS CAN block 0"
+	default n
+	select MPFS_MSS_CAN
+
+config MPFS_MSS_CAN1
+	bool "Enable MSS CAN block 1"
+	default n
+	select MPFS_MSS_CAN
+
+config MPFS_MSS_CAN_BITRATE0
+	int "MSS CAN block 0 bitrate"
+	default 1000000
+	depends on MPFS_MSS_CAN0
+
+config MPFS_MSS_CAN_BITRATE1
+	int "MSS CAN block 1 bitrate"
+	default 1000000
+	depends on MPFS_MSS_CAN1
 
 endmenu
 

@@ -28,9 +28,8 @@
 #include <nuttx/nuttx.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/queue.h>
 #include <nuttx/nuttx.h>
-
+#include <nuttx/wqueue.h>
 #include <debug.h>
 #include <sys/param.h>
 
@@ -40,6 +39,12 @@
 #include "sim_offload.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define SIM_AUDIO_PERIOD  MSEC2TICK(CONFIG_SIM_LOOP_INTERVAL)
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -47,9 +52,8 @@ struct sim_audio_s
 {
   struct audio_lowerhalf_s dev;
   struct dq_queue_s pendq;
+  struct work_s work;
   mutex_t pendlock;
-
-  sq_entry_t link;
 
   bool playback;
   bool offload;
@@ -134,8 +138,6 @@ static const struct audio_ops_s g_sim_audio_ops =
   .reserve       = sim_audio_reserve,
   .release       = sim_audio_release,
 };
-
-static sq_queue_t g_sim_audio;
 
 /****************************************************************************
  * Private Functions
@@ -1130,22 +1132,19 @@ fail:
   return 0;
 }
 
+static void sim_audio_work(FAR void *arg)
+{
+  struct sim_audio_s *priv = (struct sim_audio_s *)arg;
+
+  sim_audio_process(priv);
+
+  work_queue_next_wq(g_work_queue, &priv->work, sim_audio_work, priv,
+                     SIM_AUDIO_PERIOD);
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-void sim_audio_loop(void)
-{
-  sq_entry_t *entry;
-
-  for (entry = sq_peek(&g_sim_audio); entry; entry = sq_next(entry))
-    {
-      struct sim_audio_s *priv =
-        container_of(entry, struct sim_audio_s, link);
-
-      sim_audio_process(priv);
-    }
-}
 
 struct audio_lowerhalf_s *sim_audio_initialize(bool playback, bool offload)
 {
@@ -1169,7 +1168,9 @@ struct audio_lowerhalf_s *sim_audio_initialize(bool playback, bool offload)
       return NULL;
     }
 
-  sq_addlast(&priv->link, &g_sim_audio);
+  memset(&priv->work, 0, sizeof(struct work_s));
+  work_queue_wq(g_work_queue, &priv->work, sim_audio_work, priv,
+                SIM_AUDIO_PERIOD);
 
   /* Setting default config */
 
@@ -1181,6 +1182,5 @@ struct audio_lowerhalf_s *sim_audio_initialize(bool playback, bool offload)
   priv->channels    = 2;
   priv->bps         = 16;
   priv->frame_size  = 4;
-
   return &priv->dev;
 }

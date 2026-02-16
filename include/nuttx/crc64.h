@@ -95,6 +95,29 @@ uint64_t crc64part(FAR const uint8_t *src, size_t len, uint64_t crc64val);
 
 uint64_t crc64(FAR const uint8_t *src, size_t len);
 
+/****************************************************************************
+ * Name: crc64emac_part
+ *
+ * Description:
+ *   Continue CRC calculation on a part of the buffer
+ *   using the 0x42F0E1EBA9EA3693 polynomial.
+ *
+ ****************************************************************************/
+
+uint64_t crc64emac_part(FAR const uint8_t *src,
+                        size_t len, uint64_t crc64val);
+
+/****************************************************************************
+ * Name: crc64emac
+ *
+ * Description:
+ *   Return a 64-bit CRC of the contents of the 'src' buffer, length 'len'
+ *   using the 0x42F0E1EBA9EA3693 polynomial.
+ *
+ ****************************************************************************/
+
+uint64_t crc64emac(FAR const uint8_t *src, size_t len);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

@@ -282,8 +282,8 @@ static int apds9922_als_gain(FAR struct apds9922_dev_s *priv, uint8_t gain);
 static int apds9922_autogain(FAR struct apds9922_dev_s *priv, bool enable);
 static int apds9922_als_resolution(FAR struct apds9922_dev_s *priv, int res);
 static int apds9922_als_rate(FAR struct apds9922_dev_s *priv, int rate);
-static int apds9922_als_persistance(FAR struct apds9922_dev_s *priv,
-                                    uint8_t persistance);
+static int apds9922_als_persistence(FAR struct apds9922_dev_s *priv,
+                                    uint8_t persistence);
 static int apds9922_als_variance(FAR struct apds9922_dev_s *priv,
                                  uint8_t variance);
 static int apds9922_als_thresh(FAR struct apds9922_dev_s *priv,
@@ -312,8 +312,8 @@ static int apds9922_ps_thresh(FAR struct apds9922_dev_s *priv,
 static int apds9922_ps_canc_lev(FAR struct apds9922_dev_s *priv,
                                 uint16_t lev);
 static int apds9922_ps_int_mode(FAR struct apds9922_dev_s *priv, int mode);
-static int apds9922_ps_persistance(FAR struct apds9922_dev_s *priv,
-                                   uint8_t persistance);
+static int apds9922_ps_persistence(FAR struct apds9922_dev_s *priv,
+                                   uint8_t persistence);
 static int apds9922_ps_notify_mode(FAR struct apds9922_dev_s *priv,
                                    int notify);
 
@@ -539,7 +539,7 @@ static int apds9922_reset(FAR struct apds9922_dev_s *priv)
   priv->als_setup.thresh.lower = ALS_DEF_THRESHL;
   priv->als_setup.thresh_var   = ALS_DEF_VAR;
   priv->als_setup.int_mode     = ALS_INT_MODE_THRESHOLD;
-  priv->als_setup.persistance  = ALS_DEF_PERSISTANCE;
+  priv->als_setup.persistence  = ALS_DEF_PERSISTANCE;
   priv->als_setup.als_factor   = 1;
   priv->als_setup.range_lim    = 1;
   priv->als_setup.autogain     = false;
@@ -554,13 +554,13 @@ static int apds9922_reset(FAR struct apds9922_dev_s *priv)
   priv->ps_setup.thresh.upper  = PS_DEF_THRESHU;
   priv->ps_setup.thresh.lower  = PS_DEF_THRESHL;
   priv->ps_setup.cancel_lev    = PS_DEF_CANCEL_LVL;
-  priv->ps_setup.persistance   = PS_DEF_PERSISTANCE;
+  priv->ps_setup.persistence   = PS_DEF_PERSISTANCE;
   priv->ps_setup.notify        = PS_ALL_INFO;
   priv->ps_setup.int_mode      = PS_INT_MODE_NORMAL;
 
   /* Wait for device to power up properly after reset */
 
-  nxsig_usleep(50000);
+  nxsched_usleep(50000);
 
   return OK;
 }
@@ -662,7 +662,7 @@ static int apds9922_als_config(FAR struct apds9922_dev_s *priv,
       return ret;
     }
 
-  ret = apds9922_als_persistance(priv, config->persistance);
+  ret = apds9922_als_persistence(priv, config->persistence);
   if (ret < 0)
     {
       return ret;
@@ -981,7 +981,7 @@ static int apds9922_als_variance(FAR struct apds9922_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: apds9922_als_persistance
+ * Name: apds9922_als_persistence
  *
  * Description:
  *   Set the number of consecutive int events needed before int is asserted.
@@ -995,13 +995,13 @@ static int apds9922_als_variance(FAR struct apds9922_dev_s *priv,
  *
  ****************************************************************************/
 
-static int apds9922_als_persistance(FAR struct apds9922_dev_s *priv,
-                                    uint8_t persistance)
+static int apds9922_als_persistence(FAR struct apds9922_dev_s *priv,
+                                    uint8_t persistence)
 {
   uint8_t regval;
   int ret;
 
-  if (persistance > ALS_PERSISTANCE_MAX)
+  if (persistence > ALS_PERSISTANCE_MAX)
     {
       return -EINVAL;
     }
@@ -1013,14 +1013,14 @@ static int apds9922_als_persistance(FAR struct apds9922_dev_s *priv,
     }
 
   regval &= ~ALS_PERSISTANCE_MASK;
-  regval |= ALS_SET_PERSISTANCE(persistance);
+  regval |= ALS_SET_PERSISTANCE(persistence);
   ret = apds9922_i2c_write(priv, APDS9922_INT_PERSIST, &regval, 1);
   if (ret < 0)
     {
       return ret;
     }
 
-  priv->als_setup.persistance = persistance;
+  priv->als_setup.persistence = persistence;
 
   return OK;
 }
@@ -1281,7 +1281,7 @@ static int apds9922_ps_config(FAR struct apds9922_dev_s *priv,
       return ret;
     }
 
-  ret = apds9922_ps_persistance(priv, config->persistance)  ;
+  ret = apds9922_ps_persistence(priv, config->persistence)  ;
   if (ret < 0)
     {
       return ret;
@@ -1710,27 +1710,27 @@ static int apds9922_ps_int_mode(FAR struct apds9922_dev_s *priv, int mode)
 }
 
 /****************************************************************************
- * Name: apds9922_ps_persistance
+ * Name: apds9922_ps_persistence
  *
  * Description:
  *   Set the number of consecutive int events needed before int is asserted.
  *
  * Input Parameters:
  *  priv        - pointer to device structure
- *  persistance - number of values to be out of range before int asserted
+ *  persistence - number of values to be out of range before int asserted
  *
  * Returned Value:
  *   Success or failure
  *
  ****************************************************************************/
 
-static int apds9922_ps_persistance(FAR struct apds9922_dev_s *priv,
-                                   uint8_t persistance)
+static int apds9922_ps_persistence(FAR struct apds9922_dev_s *priv,
+                                   uint8_t persistence)
 {
   uint8_t regval;
   int ret;
 
-  if (persistance > PS_PERSISTANCE_MAX)
+  if (persistence > PS_PERSISTANCE_MAX)
     {
       return -EINVAL;
     }
@@ -1742,14 +1742,14 @@ static int apds9922_ps_persistance(FAR struct apds9922_dev_s *priv,
     }
 
   regval &= ~PS_PERSISTANCE_MASK;
-  regval |= PS_SET_PERSISTANCE(persistance);
+  regval |= PS_SET_PERSISTANCE(persistence);
   ret = apds9922_i2c_write(priv, APDS9922_INT_PERSIST, &regval, 1);
   if (ret < 0)
     {
       return ret;
     }
 
-  priv->ps_setup.persistance = persistance;
+  priv->ps_setup.persistence = persistence;
 
   return OK;
 }

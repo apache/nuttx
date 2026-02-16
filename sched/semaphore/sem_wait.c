@@ -73,7 +73,7 @@ int nxsem_wait_slow(FAR sem_t *sem)
 {
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
-  int ret;
+  int ret = OK;
   bool unlocked;
   FAR struct tcb_s *htcb = NULL;
   bool mutex = NXSEM_IS_MUTEX(sem);
@@ -98,6 +98,11 @@ int nxsem_wait_slow(FAR sem_t *sem)
        */
 
       mholder = atomic_fetch_or(NXSEM_MHOLDER(sem), NXSEM_MBLOCKING_BIT);
+
+      /* Avoid mutex recursion, which is not allowed. */
+
+      DEBUGASSERT((mholder & (~NXSEM_MBLOCKING_BIT)) != nxsched_gettid());
+
       if (NXSEM_MACQUIRED(mholder))
         {
           /* htcb gets NULL if
@@ -121,6 +126,7 @@ int nxsem_wait_slow(FAR sem_t *sem)
     {
       /* It is, let the task take the semaphore. */
 
+#ifdef CONFIG_PRIORITY_PROTECT
       ret = nxsem_protect_wait(sem);
       if (ret < 0)
         {
@@ -136,6 +142,7 @@ int nxsem_wait_slow(FAR sem_t *sem)
           leave_critical_section(flags);
           return ret;
         }
+#endif
 
       /* For mutexes, we only add the holder to the tasks list at the
        * time when a task blocks on the mutex, for priority restoration
@@ -281,37 +288,5 @@ int nxsem_wait_slow(FAR sem_t *sem)
     }
 
   leave_critical_section(flags);
-  return ret;
-}
-
-/****************************************************************************
- * Name: nxsem_wait_uninterruptible
- *
- * Description:
- *   This function is wrapped version of nxsem_wait(), which is
- *   uninterruptible and convenient for use.
- *
- * Parameters:
- *   sem - Semaphore descriptor.
- *
- * Return Value:
- *   Zero(OK)  - On success
- *   EINVAL    - Invalid attempt to get the semaphore
- *   ECANCELED - May be returned if the thread is canceled while waiting.
- *
- ****************************************************************************/
-
-int nxsem_wait_uninterruptible(FAR sem_t *sem)
-{
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(sem);
-    }
-  while (ret == -EINTR);
-
   return ret;
 }

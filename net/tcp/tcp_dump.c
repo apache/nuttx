@@ -50,12 +50,12 @@
 
 void tcp_event_handler_dump(FAR struct net_driver_s *dev,
                             FAR void *pvpriv,
-                            uint16_t flags,
+                            uint32_t flags,
                             FAR struct tcp_conn_s *conn)
 {
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   nerr("ERROR: conn->dev == NULL:"
-       " dev=%p pvpriv=%p flags=0x%04x"
+       " dev=%p pvpriv=%p flags=0x%" PRIx32
        " conn->dev=%p conn->flags=0x%04x tcpstateflags=0x%02x crefs=%d"
        " isn=%" PRIu32 " sndseq=%" PRIu32
        " tx_unacked=%" PRId32 " sent=%" PRId32
@@ -67,7 +67,7 @@ void tcp_event_handler_dump(FAR struct net_driver_s *dev,
        conn, conn->sconn.s_flags);
 #else
   nerr("ERROR: conn->dev == NULL:"
-       " dev=%p pvpriv=%p flags=0x%04x"
+       " dev=%p pvpriv=%p flags=0x%" PRIx32
        " conn->dev=%p conn->flags=0x%04x tcpstateflags=0x%02x crefs=%d"
        " sndseq=%" PRIu32
        " tx_unacked=%" PRId32

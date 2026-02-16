@@ -39,6 +39,13 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcddrv_spiif.h>
 
+/* Define conversions for DATA and CMD when 3-wire 9-bit SPI is used. */
+
+#ifdef CONFIG_LCD_LCDDRV_3WIRE
+#  define LCD_LCDDRV_3WIRE_DATA(wd) ((1 << 8) | (wd))
+#  define LCD_LCDDRV_3WIRE_CMD(wd)  ((0 << 8) | (wd))
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -117,7 +124,9 @@ static void lcddrv_spiif_deselect(FAR struct lcddrv_lcd_s *lcd)
 {
   FAR struct lcddrv_spiif_lcd_s *priv = (FAR struct lcddrv_spiif_lcd_s *)lcd;
 
+#ifndef CONFIG_LCD_LCDDRV_3WIRE
   SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY(0), false);
+#endif
   SPI_SELECT(priv->spi, SPIDEV_DISPLAY(0), false);
   SPI_LOCK(priv->spi, false);
 }
@@ -144,11 +153,21 @@ static int lcddrv_spiif_sendmulti(FAR struct lcddrv_lcd_s *lcd,
   uint32_t t;
   FAR struct lcddrv_spiif_lcd_s *priv = (FAR struct lcddrv_spiif_lcd_s *)lcd;
 
+#ifdef CONFIG_LCD_LCDDRV_3WIRE
+  SPI_SETBITS(priv->spi, 9);
+  for (t = 0; t < nwords; t++)
+    {
+      SPI_SEND(priv->spi, LCD_LCDDRV_3WIRE_DATA((*wd & 0xff00) >> 8));
+      SPI_SEND(priv->spi, LCD_LCDDRV_3WIRE_DATA((*wd & 0x00ff) >> 0));
+      wd++;
+    }
+#else
   SPI_SETBITS(priv->spi, 16);
   for (t = 0; t < nwords; t++)
     {
       SPI_SEND(priv->spi, *wd++);
     }
+#endif
 
   SPI_SETBITS(priv->spi, 8);
 
@@ -175,8 +194,8 @@ static int lcddrv_spiif_recv(FAR struct lcddrv_lcd_s *lcd,
 {
   FAR struct lcddrv_spiif_lcd_s *priv = (FAR struct lcddrv_spiif_lcd_s *)lcd;
 
-  lcdinfo("param=%04x\n", param);
   SPI_RECVBLOCK(priv->spi, param, 1);
+  lcdinfo("param=%04x\n", *param);
   return OK;
 }
 
@@ -201,7 +220,13 @@ static int lcddrv_spiif_send(FAR struct lcddrv_lcd_s *lcd,
   uint8_t r;
   FAR struct lcddrv_spiif_lcd_s *priv = (FAR struct lcddrv_spiif_lcd_s *)lcd;
 
+#ifdef CONFIG_LCD_LCDDRV_3WIRE
+  SPI_SETBITS(priv->spi, 9);
+  r = SPI_SEND(priv->spi, LCD_LCDDRV_3WIRE_DATA(param));
+  SPI_SETBITS(priv->spi, 8);
+#else
   r = SPI_SEND(priv->spi, param);
+#endif
   return r;
 }
 
@@ -227,9 +252,15 @@ static int lcddrv_spiif_sendcmd(FAR struct lcddrv_lcd_s *lcd,
   FAR struct lcddrv_spiif_lcd_s *priv = (FAR struct lcddrv_spiif_lcd_s *)lcd;
 
   lcdinfo("param=%04x\n", param);
+#ifdef CONFIG_LCD_LCDDRV_3WIRE
+  SPI_SETBITS(priv->spi, 9);
+  r = SPI_SEND(priv->spi, LCD_LCDDRV_3WIRE_CMD(param));
+  SPI_SETBITS(priv->spi, 8);
+#else
   SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY(0), true);
   r = SPI_SEND(priv->spi, param);
   SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY(0), false);
+#endif
   return r;
 }
 
@@ -254,7 +285,7 @@ static int lcddrv_spiif_recvmulti(FAR struct lcddrv_lcd_s *lcd,
 {
   FAR struct lcddrv_spiif_lcd_s *priv = (FAR struct lcddrv_spiif_lcd_s *)lcd;
 
-  lcdinfo("wd=%p, nwords=%d\n", wd, nwords);
+  lcdinfo("wd=%p, nwords=%lu\n", wd, nwords);
   SPI_SETBITS(priv->spi, 16);
   SPI_RECVBLOCK(priv->spi, wd, nwords);
   SPI_SETBITS(priv->spi, 8);

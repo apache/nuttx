@@ -2382,6 +2382,9 @@ static void up_dma_shutdown(struct uart_dev_s *dev)
 
       stm32_dmafree(priv->txdma);
       priv->txdma = NULL;
+
+      dev->dmatx.length = 0;
+      dev->dmatx.nlength = 0;
     }
 #endif
 }

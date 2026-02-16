@@ -1,6 +1,9 @@
 /****************************************************************************
  * libs/libc/string/lib_bsdstrchrnul.c
  *
+ * SPDX-License-Identifier: BSD
+ * SPDX-FileCopyrightText: 1994-2009  Red Hat, Inc. All rights reserved
+ *
  * Copyright (c) 1994-2009  Red Hat, Inc. All rights reserved.
  *
  * This copyrighted material is made available to anyone wishing to use,
@@ -45,7 +48,7 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_STRCHRNUL) && defined(LIBC_BUILD_STRCHRNUL)
-#undef strchrnul /* See mm/README.txt */
+#undef strchrnul
 FAR char *strchrnul(FAR const char *s, int c)
 {
   FAR char *s1 = strchr(s, c);

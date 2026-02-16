@@ -44,10 +44,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_NETDEV_WORK_THREAD_POLLING_PERIOD
-#  define CONFIG_NETDEV_WORK_THREAD_POLLING_PERIOD 0
-#endif
-
 /* Layout for net packet:
  *
  * | <-------------- NETPKT_BUFLEN ---------------> |
@@ -91,6 +87,14 @@ enum netpkt_type_e
   NETPKT_TYPENUM
 };
 
+enum netdev_rx_e
+{
+  NETDEV_RX_WORK,      /* Use work queue thread */
+  NETDEV_RX_DIRECT,    /* Directly based on the current thread */
+  NETDEV_RX_THREAD,    /* Upper half dedicated thread */
+  NETDEV_RX_THREAD_RSS /* RSS mode, upper half thread */
+};
+
 /* This structure is the generic form of state structure used by lower half
  * netdev driver. This state structure is passed to the netdev driver when
  * the driver is initialized. Then, on subsequent callbacks into the lower
@@ -117,7 +121,11 @@ struct netdev_lowerhalf_s
 
   /* Max # of buffer held by driver */
 
+  FAR atomic_t *quota_ptr; /* Shared quota, ignore `quota` if ptr is set */
   atomic_t quota[NETPKT_TYPENUM];
+
+  uint8_t rxtype;
+  uint8_t priority;
 
   /* The structure used by net stack.
    * Note: Do not change its fields unless you know what you are doing.
@@ -321,6 +329,44 @@ void netdev_lower_txdone(FAR struct netdev_lowerhalf_s *dev);
  ****************************************************************************/
 
 #define netdev_lower_quota_load(dev, type) atomic_read(&dev->quota[type])
+
+/****************************************************************************
+ * Name: netdev_lower_vlan_add
+ *
+ * Description:
+ *   Add a VLAN device to the network device.
+ *
+ * Input Parameters:
+ *   dev  - The lower half device driver structure
+ *   vid  - VLAN ID
+ *   vlan - The VLAN device to add
+ *
+ * Returned Value:
+ *   0:Success; negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_VLAN
+int netdev_lower_vlan_add(FAR struct netdev_lowerhalf_s *dev, uint16_t vid,
+                          FAR struct netdev_lowerhalf_s *vlan);
+
+/****************************************************************************
+ * Name: netdev_lower_vlan_del
+ *
+ * Description:
+ *   Delete a VLAN device from the network device.
+ *
+ * Input Parameters:
+ *   dev - The lower half device driver structure
+ *   vid - VLAN ID
+ *
+ * Returned Value:
+ *   0:Success; negated errno on failure
+ *
+ ****************************************************************************/
+
+int netdev_lower_vlan_del(FAR struct netdev_lowerhalf_s *dev, uint16_t vid);
+#endif
 
 /****************************************************************************
  * Name: netpkt_alloc

@@ -102,8 +102,8 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
                                  wdparm_t itimer)
 {
   clock_t ticks;
-  sclock_t delay;
-  sclock_t frame;
+  clock_t delay;
+  clock_t frame;
 
   /* If this is a repetitive timer, then restart the watchdog */
 
@@ -128,7 +128,7 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
        */
 
       frame = (delay + timer->pt_delay) / timer->pt_delay;
-      timer->pt_overrun   = frame - 1;
+      timer->pt_overrun   = (int)(frame - 1u);
       timer->pt_expected += frame * timer->pt_delay;
 
       wd_start_abstick(&timer->pt_wdog, timer->pt_expected,
@@ -158,28 +158,26 @@ static void timer_timeout(wdparm_t itimer)
 {
   FAR struct posix_timer_s *timer = timer_gethandle((timer_t)itimer);
 
-  if (timer == NULL)
+  if (timer)
     {
-      return;
-    }
+      /* Send the specified signal to the specified task.   Increment the
+       * reference count on the timer first so that will not be deleted until
+       * after the signal handler returns.
+       */
 
-  /* Send the specified signal to the specified task.   Increment the
-   * reference count on the timer first so that will not be deleted until
-   * after the signal handler returns.
-   */
+      timer->pt_crefs++;
+      timer_signotify(timer);
 
-  timer->pt_crefs++;
-  timer_signotify(timer);
+      /* Release the reference. timer_release will return nonzero if
+       * the timer was not deleted.
+       */
 
-  /* Release the reference.  timer_release will return nonzero if the timer
-   * was not deleted.
-   */
+      if (timer_release(timer))
+        {
+          /* If this is a repetitive timer, the restart the watchdog */
 
-  if (timer_release(timer))
-    {
-      /* If this is a repetitive timer, the restart the watchdog */
-
-      timer_restart(timer, itimer);
+          timer_restart(timer, itimer);
+        }
     }
 }
 
@@ -256,7 +254,7 @@ int timer_settime(timer_t timerid, int flags,
                   FAR struct itimerspec *ovalue)
 {
   FAR struct posix_timer_s *timer = timer_gethandle(timerid);
-  sclock_t delay;
+  clock_t delay;
   int ret = OK;
 
   /* Some sanity checks */
@@ -264,76 +262,80 @@ int timer_settime(timer_t timerid, int flags,
   if (!timer || !value)
     {
       set_errno(EINVAL);
-      return ERROR;
-    }
-
-  if (ovalue)
-    {
-      /* Get the number of ticks before the underlying watchdog expires */
-
-      delay = wd_gettime(&timer->pt_wdog);
-
-      /* Convert that to a struct timespec and return it */
-
-      clock_ticks2time(&ovalue->it_value, delay);
-      clock_ticks2time(&ovalue->it_interval, timer->pt_delay);
-    }
-
-  /* Disarm the timer (in case the timer was already armed when
-   * timer_settime() is called).
-   */
-
-  wd_cancel(&timer->pt_wdog);
-
-  /* Cancel any pending notification */
-
-  nxsig_cancel_notification(&timer->pt_work);
-
-  /* If the it_value member of value is zero, the timer will not be
-   * re-armed
-   */
-
-  if (value->it_value.tv_sec <= 0 && value->it_value.tv_nsec <= 0)
-    {
-      return OK;
-    }
-
-  /* Setup up any repetitive timer */
-
-  if (value->it_interval.tv_sec > 0 || value->it_interval.tv_nsec > 0)
-    {
-      delay = clock_time2ticks(&value->it_interval);
-      timer->pt_delay = delay;
+      ret = -EINVAL;
     }
   else
     {
-      timer->pt_delay = 0;
-    }
+      if (ovalue)
+        {
+          /* Get the number of ticks before the underlying watchdog expires */
 
-  /* Check if abstime is selected */
+          delay = wd_gettime(&timer->pt_wdog);
 
-  if ((flags & TIMER_ABSTIME) != 0)
-    {
-      /* Calculate a delay corresponding to the absolute time in 'value' */
+          /* Convert that to a struct timespec and return it */
 
-      clock_abstime2ticks(timer->pt_clock, &value->it_value, &delay);
-    }
-  else
-    {
-      /* Calculate a delay assuming that 'value' holds the relative time
-       * to wait.  We have internal knowledge that clock_time2ticks always
-       * returns success.
+          clock_ticks2time(&ovalue->it_value, delay);
+          clock_ticks2time(&ovalue->it_interval, timer->pt_delay);
+        }
+
+      /* Disarm the timer (in case the timer was already armed when
+       * timer_settime() is called).
        */
 
-      delay = clock_time2ticks(&value->it_value);
+      wd_cancel(&timer->pt_wdog);
+
+      /* Cancel any pending notification */
+
+      nxsig_cancel_notification(&timer->pt_work);
+
+      /* If the it_value member of value is zero, the timer will not be
+       * re-armed
+       */
+
+      if (value->it_value.tv_sec > 0 || value->it_value.tv_nsec > 0)
+        {
+          /* Setup up any repetitive timer */
+
+          if (value->it_interval.tv_sec > 0 ||
+              value->it_interval.tv_nsec > 0)
+            {
+              delay = clock_time2ticks(&value->it_interval);
+              timer->pt_delay = delay;
+            }
+          else
+            {
+              timer->pt_delay = 0u;
+            }
+
+          /* Check if abstime is selected */
+
+          if ((flags & TIMER_ABSTIME) != 0)
+            {
+              /* Calculate a delay corresponding to the
+               * absolute time in 'value'.
+               */
+
+              clock_abstime2ticks(timer->pt_clock, &value->it_value, &delay);
+            }
+          else
+            {
+              /* Calculate a delay assuming that 'value' holds the
+               * relative time to wait.
+               * We have internal knowledge that clock_time2ticks always
+               * returns success.
+               */
+
+              delay = clock_time2ticks(&value->it_value);
+            }
+
+          timer->pt_expected = clock_delay2abstick(delay);
+
+          /* Then start the watchdog */
+
+          ret = wd_start_abstick(&timer->pt_wdog, timer->pt_expected,
+                                timer_timeout, (wdparm_t)timer);
+        }
     }
-
-  timer->pt_expected = clock_delay2abstick(delay);
-
-  /* Then start the watchdog */
-
-  ret = wd_start_abstick(&timer->pt_wdog, timer->pt_expected,
-                         timer_timeout, (wdparm_t)timer);
 
   if (ret < 0)
     {

@@ -35,10 +35,10 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
 #include "fs_rammap.h"
-#include "fs_anonmap.h"
 
 /****************************************************************************
  * Private Functions
@@ -68,6 +68,7 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
      prot,
      flags,
      { NULL }, /* priv.p */
+     NULL,     /* msync */
      NULL      /* munmap */
     };
 
@@ -78,6 +79,13 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
   /* A flags with MAP_PRIVATE and MAP_SHARED is invalid. */
 
   if ((flags & MAP_PRIVATE) && (flags & MAP_SHARED))
+    {
+      return -EINVAL;
+    }
+
+  /* MAP_PRIVATE or MAP_SHARED must be specified */
+
+  if (((flags & MAP_PRIVATE) == 0) && ((flags & MAP_SHARED) == 0))
     {
       return -EINVAL;
     }
@@ -279,10 +287,9 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
   FAR void *mapped = NULL;
   int ret;
 
-  if (fd != -1 && file_get(fd, &filep) < 0)
+  if (fd != -1 && (ret = file_get(fd, &filep)) < 0)
     {
-      ferr("ERROR: fd:%d referred file whose type is not supported\n", fd);
-      ret = -ENODEV;
+      ferr("ERROR: fd:%d referred file is not valid\n", fd);
       goto errout;
     }
 

@@ -156,6 +156,8 @@
  * Public Types
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
+
 /* Exact-width integer types.  NOTE that these types are defined in
  * architecture-specific logic with leading underscore character. This file
  * typedef's these to the final name without the underscore character.  This
@@ -253,6 +255,8 @@ typedef _uint_farptr_t      uint_farptr_t;
 
 typedef _intmax_t           intmax_t;
 typedef _uintmax_t          uintmax_t;
+
+#endif /* __ASSEMBLY__ */
 
 #endif /* CONFIG_ARCH_STDINT_H */
 #endif /* __INCLUDE_STDINT_H */

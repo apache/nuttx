@@ -47,8 +47,8 @@
  * Private Functions
  ****************************************************************************/
 
-static uint16_t poll_event(FAR struct net_driver_s *dev,
-                           FAR void *pvpriv, uint16_t flags)
+static uint32_t poll_event(FAR struct net_driver_s *dev,
+                           FAR void *pvpriv, uint32_t flags)
 {
   FAR struct usrsock_poll_s *info = pvpriv;
   FAR struct usrsock_conn_s *conn = info->conn;
@@ -83,7 +83,13 @@ static uint16_t poll_event(FAR struct net_driver_s *dev,
 
       /* Remote closed. */
 
-      eventset |= (POLLHUP | POLLIN);
+      eventset |= POLLHUP;
+      if (flags & USRSOCK_EVENT_RECVFROM_AVAIL)
+        {
+          ninfo("socket recv avail.\n");
+
+          eventset |= POLLIN;
+        }
     }
   else
     {
@@ -142,7 +148,7 @@ static int usrsock_pollsetup(FAR struct socket *psock,
     }
 #endif
 
-  net_lock();
+  usrsock_lock();
 
   /* Find a container to hold the poll information */
 
@@ -217,7 +223,13 @@ static int usrsock_pollsetup(FAR struct socket *psock,
 
       /* Remote closed. */
 
-      eventset |= (POLLHUP | POLLIN);
+      eventset |= POLLHUP;
+      if (conn->flags & USRSOCK_EVENT_RECVFROM_AVAIL)
+        {
+          ninfo("socket recv avail.\n");
+
+          eventset |= POLLIN;
+        }
     }
   else
     {
@@ -243,7 +255,7 @@ static int usrsock_pollsetup(FAR struct socket *psock,
   poll_notify(&fds, 1, eventset);
 
 errout_unlock:
-  net_unlock();
+  usrsock_unlock();
   return ret;
 }
 
@@ -278,6 +290,8 @@ static int usrsock_pollteardown(FAR struct socket *psock,
     }
 #endif
 
+  usrsock_lock();
+
   /* Recover the socket descriptor poll state info from the poll structure */
 
   info = (FAR struct usrsock_poll_s *)fds->priv;
@@ -299,6 +313,8 @@ static int usrsock_pollteardown(FAR struct socket *psock,
 
       info->conn = NULL;
     }
+
+  usrsock_unlock();
 
   return OK;
 }

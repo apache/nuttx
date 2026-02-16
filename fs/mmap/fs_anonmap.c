@@ -25,12 +25,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
 #include <assert.h>
 #include <debug.h>
 
-#include "fs_anonmap.h"
 #include "sched/sched.h"
 #include "fs_heap.h"
 

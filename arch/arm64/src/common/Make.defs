@@ -39,7 +39,6 @@ CMN_CSRCS =  arm64_initialize.c arm64_initialstate.c arm64_boot.c
 CMN_CSRCS += arm64_nputs.c arm64_createstack.c
 CMN_CSRCS += arm64_releasestack.c arm64_stackframe.c arm64_usestack.c
 CMN_CSRCS += arm64_exit.c arm64_fork.c
-CMN_CSRCS += arm64_schedulesigaction.c arm64_sigdeliver.c
 CMN_CSRCS += arm64_getintstack.c arm64_registerdump.c
 CMN_CSRCS += arm64_perf.c arm64_tcbinfo.c
 
@@ -48,6 +47,10 @@ CMN_CSRCS += arm64_arch_timer.c arm64_cache.c
 CMN_CSRCS += arm64_doirq.c arm64_fatal.c
 CMN_CSRCS += arm64_syscall.c
 CMN_CSRCS += arm64_modifyreg8.c arm64_modifyreg16.c arm64_modifyreg32.c
+
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+CMN_CSRCS += arm64_schedulesigaction.c arm64_sigdeliver.c
+endif
 
 # Use common heap allocation for now (may need to be customized later)
 CMN_CSRCS += arm64_allocateheap.c
@@ -97,8 +100,11 @@ CMN_CSRCS += arm64_cpuidlestack.c arm64_cpustart.c
 CMN_CSRCS += arm64_smpcall.c
 endif
 
-ifeq ($(CONFIG_BUILD_KERNEL),y)
-CMN_CSRCS += arm64_task_start.c arm64_pthread_start.c arm64_signal_dispatch.c
+ifeq ($(CONFIG_BUILD_PROTECTED)$(CONFIG_BUILD_KERNEL),y)
+CMN_CSRCS += arm64_task_start.c arm64_pthread_start.c
+  ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+    CMN_CSRCS += arm64_signal_dispatch.c
+  endif
 endif
 
 ifeq ($(CONFIG_ARCH_KERNEL_STACK),y)
@@ -106,8 +112,14 @@ CMN_CSRCS += arm64_addrenv_kstack.c
 endif
 
 ifeq ($(CONFIG_ARCH_ADDRENV),y)
-CMN_CSRCS += arm64_addrenv.c arm64_pgalloc.c arm64_addrenv_perms.c
+
+ifeq ($(CONFIG_ARCH_USE_MMU),y)
+CMN_CSRCS += arm64_addrenv_mmu.c arm64_pgalloc.c arm64_addrenv_perms.c
 CMN_CSRCS += arm64_addrenv_utils.c arm64_addrenv_shm.c arm64_addrenv_pgmap.c
+else ifeq ($(CONFIG_ARCH_USE_MPU),y)
+CMN_CSRCS += arm64_addrenv_mpu.c
+endif
+
 ifeq ($(CONFIG_ARCH_STACK_DYNAMIC),y)
 CMN_CSRCS += arm64_addrenv_ustack.c
 endif
@@ -128,4 +140,8 @@ endif
 
 ifeq ($(CONFIG_ARM64_SEMIHOSTING_HOSTFS),y)
   CMN_CSRCS += arm64_hostfs.c
+endif
+
+ifeq ($(CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS),y)
+  CMN_UCSRCS += arm64_perf.c
 endif

@@ -46,4 +46,14 @@ config LIBC_MAX_EXITFUNS
 		Configure the amount of exit functions for atexit/on_exit. The ANSI
 		default is 32, but most likely we don't need as many.
 
+config LIBC_DISABLE_HEXSTR_TO_FLOAT
+	bool "Disable hex-string to float/double conversions"
+	default DEFAULT_SMALL
+	---help---
+		Disables parsing of hexadecimal floating-point constants (C99 %a),
+		e.g., "0x1.fp3", in strtod(), strtof(), strtold(), and sscanf("%a").
+		This saves flash space since hex-float parsing adds significant code
+		and is rarely needed in embedded systems. Decimal float parsing remains
+		available.
+
 endmenu # stdlib Options

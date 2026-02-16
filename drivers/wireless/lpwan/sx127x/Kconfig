@@ -1,0 +1,107 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if LPWAN_SX127X
+
+config LPWAN_SX127X_RFFREQ_DEFAULT
+	int "SX127X default RF frequency"
+	default 433000000
+
+config LPWAN_SX127X_SPIFREQ
+	int "SX127X SPI frequency"
+	default 1000000
+	---help---
+		SX127X SPI frequency up to 10MHz
+
+config LPWAN_SX127X_TXPOWER_DEFAULT
+	int "SX127X default TX power"
+	default 14
+
+config LPWAN_SX127X_PREAMBLE_DEFAULT
+	int "SX127X default preamble length"
+	default 8
+
+config LPWAN_SX127X_MODULATION_DEFAULT
+	int "SX127X default modulation scheme"
+	default 3 if LPWAN_SX127X_LORA
+	default 1 if LPWAN_SX127X_FSKOOK
+	range 1 3
+	---help---
+		1 - FSK, 2 - OOK, 3 - LORA
+
+config LPWAN_SX127X_CRCON
+	int "SX127X CRC ON"
+	range 0 1
+	default 0
+
+config LPWAN_SX127X_RXSUPPORT
+	bool "SX127X RX support"
+	default n
+
+if LPWAN_SX127X_RXSUPPORT
+
+config LPWAN_SX127X_RXFIFO_LEN
+	int "SX127X RX FIFO length"
+	default 5
+
+config LPWAN_SX127X_RXFIFO_DATA_LEN
+	int "SX127X RX FIFO data length"
+	default 64
+
+config LPWAN_SX127X_RX_TIMEOUT
+	int "SX127X RX Timeout in Milliseconds"
+	default 10000
+	---help---
+		If device stopped receiving data for more than
+		LPWAN_SX127X_RX_TIMEOUT milliseconds it means the
+		frequency drift is too high that AFC failed to fix
+		the reception frequency. So if we leave the RX mode,
+		entering in standby and returning will clear the
+		AFC and fix the communication again.
+		If you don't want to use RX timeout set it to -1.
+
+endif #LPWAN_SX127X_RXSUPPORT
+
+config LPWAN_SX127X_TXSUPPORT
+	bool "SX127X TX support"
+	default n
+
+config LPWAN_SX127X_LORA
+	bool "SX127X LORA support"
+	default y
+
+if LPWAN_SX127X_LORA
+
+config LPWAN_SX127X_LORA_IMPHEADER
+	int "SX127X LORA implicit header ON"
+	range 0 1
+	default 0
+
+endif # LPWAN_SX127X_LORA
+
+config LPWAN_SX127X_FSKOOK
+	bool "SX127X FSK/OOK support"
+	default n
+
+if LPWAN_SX127X_FSKOOK
+
+choice
+	prompt "SX127X Bitrate"
+	default LPWAN_SX127X_FSKOOK_4800
+
+config LPWAN_SX127X_FSKOOK_4800
+	bool "4800 BPS"
+
+config LPWAN_SX127X_FSKOOK_38400
+	bool "38400 BPS"
+
+config LPWAN_SX127X_FSKOOK_76800
+	bool "76800 BPS"
+
+endchoice
+
+endif # LPWAN_SX127X_FSKOOK
+
+endif # WL_SX127X

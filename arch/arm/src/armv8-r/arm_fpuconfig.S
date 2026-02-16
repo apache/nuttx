@@ -50,7 +50,9 @@
  ****************************************************************************/
 
 	.text
+#ifndef __ghs__
 	.syntax	unified
+#endif
 	.arm
 
 /****************************************************************************
@@ -66,7 +68,11 @@
  ****************************************************************************/
 
 	.globl	arm_fpuconfig
+#ifdef __ghs__
+	.type	arm_fpuconfig, $function
+#else
 	.type	arm_fpuconfig, %function
+#endif
 
 arm_fpuconfig:
 

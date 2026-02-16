@@ -382,6 +382,8 @@ struct tee_iocl_supp_send_arg
 
 #define TEE_SHM_ALLOC    (1 << 0) /* Kernel-malloced and must freed */
 #define TEE_SHM_REGISTER (1 << 1) /* Registered with TEE OS */
+#define TEE_SHM_USER_MAP (1 << 2) /* Will be used by userspace after mmap */
+#define TEE_SHM_SUPP     (1 << 4) /* Registered by supplicant */
 
 /* struct tee_ioctl_shm_register_data - Shared memory register argument
  * addr:      [in] Start address of shared memory to register

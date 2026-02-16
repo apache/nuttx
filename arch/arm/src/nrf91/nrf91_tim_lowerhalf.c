@@ -50,11 +50,11 @@
 #define NRF91_TIMER_RES (NRF91_TIM_WIDTH_32B)
 #define NRF91_TIMER_MAX (4294967295ul)
 #define NRF91_TIMER_PRE (NRF91_TIM_PRE_1000000)
-#define NRF91_TIMER_PER (1000000)
+#define NRF91_TIMER_PER (1000000ull)
 
 /* Maximum supported timeout */
 
-#define NRF91_TIMER_MAXTIMEOUT (NRF91_TIMER_MAX * (1000000 / NRF91_TIMER_PER))
+#define NRF91_TIMER_MAXTIMEOUT (NRF91_TIMER_MAX * 1000000ull / NRF91_TIMER_PER)
 
 /****************************************************************************
  * Private Types
@@ -373,7 +373,7 @@ static int nrf91_timer_settimeout(struct timer_lowerhalf_s *lower,
       goto errout;
     }
 
-  cc = (timeout * NRF91_TIMER_PER / 1000000);
+  cc = (uint32_t)(timeout * NRF91_TIMER_PER / 1000000);
   NRF91_TIM_SETCC(priv->tim, NRF91_TIMER_CC, cc);
 
 errout:

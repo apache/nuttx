@@ -35,7 +35,7 @@
 
 #include <nuttx/mutex.h>
 #include <nuttx/kmalloc.h>
-#include <rpmsg/rpmsg_internal.h>
+#include <nuttx/wqueue.h>
 
 #include "rpmsg_router.h"
 
@@ -59,6 +59,7 @@
 struct rpmsg_router_hub_s
 {
   struct rpmsg_endpoint ept[2];
+  struct work_s         work;
   char                  cpuname[2][RPMSG_ROUTER_CPUNAME_LEN];
   mutex_t               lock;
 };
@@ -72,15 +73,15 @@ struct rpmsg_router_hub_s
  *
  * Description:
  *   This is the callback function for router core.
- *   It will receive data from source edge core by ept(r:cpu:name), and find
- *   dest edge core communicating with it, send data to dest edge core.
+ *   It will receive data from source edge core by ept(r:peer_cpu:name),
+ *   and send data to peer edge's endpoint.
  *
  * Parameters:
- *   ept - rpmsg_endpoint for communicating with edge core (r:dst_cpu:name)
+ *   ept - endpoint for communicating with edge core (r:peer_cpu:name)
  *   data - received data
  *   len - received data length
  *   src - source address
- *   priv - save dest edge core rpmsg_endpoint (r:src_cpu:name)
+ *   priv - save peer edge core rpmsg_endpoint (r:src_cpu:name)
  *
  * Returned Values:
  *   Returns number of bytes it has sent or negative error value on failure.
@@ -91,16 +92,34 @@ static int rpmsg_router_hub_cb(FAR struct rpmsg_endpoint *ept,
                                FAR void *data, size_t len,
                                uint32_t src, FAR void *priv)
 {
-  FAR struct rpmsg_endpoint *dst_ept = priv;
+  FAR struct rpmsg_endpoint *peer_ept = priv;
 
   /* Retransmit data to dest edge core */
 
-  if (!dst_ept)
+  if (peer_ept == NULL)
     {
       return -EINVAL;
     }
 
-  return rpmsg_send(dst_ept, data, len);
+  rpmsg_send_offchannel_raw(peer_ept, peer_ept->addr,
+                            peer_ept->dest_addr, data, len, true);
+  return 0;
+}
+
+/****************************************************************************
+ * Name: rpmsg_router_hub_ept_release
+ *
+ * Description:
+ *   This is the release endpoint callback function for router core.
+ *
+ * Parameters:
+ *   ept - rpmsg_endpoint for communicating with edge core (r:cpu:name)
+ *
+ ****************************************************************************/
+
+static void rpmsg_router_hub_ept_release(FAR struct rpmsg_endpoint *ept)
+{
+  kmm_free(ept);
 }
 
 /****************************************************************************
@@ -108,6 +127,7 @@ static int rpmsg_router_hub_cb(FAR struct rpmsg_endpoint *ept,
  *
  * Description:
  *   This is the unbind callback function for router core.
+ *   it will send NS_DESTROY to peer endpoint and destroy source endpoint.
  *
  * Parameters:
  *   ept - rpmsg_endpoint for communicating with edge core (r:cpu:name)
@@ -116,20 +136,21 @@ static int rpmsg_router_hub_cb(FAR struct rpmsg_endpoint *ept,
 
 static void rpmsg_router_hub_unbind(FAR struct rpmsg_endpoint *ept)
 {
-  FAR struct rpmsg_endpoint *dst_ept = ept->priv;
-
-  /* Destroy dest edge ept firstly */
-
-  if (dst_ept)
-    {
-      rpmsg_destroy_ept(dst_ept);
-      kmm_free(dst_ept);
-    }
-
-  /* Destroy source edge ept */
+  FAR struct rpmsg_endpoint *peer_ept = ept->priv;
+  FAR struct rpmsg_device *rdev = peer_ept->rdev;
 
   rpmsg_destroy_ept(ept);
-  kmm_free(ept);
+  if (peer_ept->cb)
+    {
+      rpmsg_send_ns_message(peer_ept, RPMSG_NS_DESTROY);
+      metal_mutex_acquire(&rdev->lock);
+      rpmsg_ept_decref(peer_ept);
+      metal_mutex_release(&rdev->lock);
+    }
+  else
+    {
+      kmm_free(peer_ept);
+    }
 }
 
 /****************************************************************************
@@ -137,25 +158,34 @@ static void rpmsg_router_hub_unbind(FAR struct rpmsg_endpoint *ept)
  *
  * Description:
  *   This is the bound callback function for router core.
- *   It will create endpoint to source edge after dest edge
- *   core is bound.
+ *   It will create endpoint to source edge after peer's endpoint is bound.
  *
  * Parameters:
- *   ept - rpmsg_endpoint for communicating with edge core (r:cpu:name)
+ *   ept - peer's endpoint for communicating with edge core (r:src_cpu:name)
  *
  ****************************************************************************/
 
 static void rpmsg_router_hub_bound(FAR struct rpmsg_endpoint *ept)
 {
   FAR struct rpmsg_endpoint *src_ept = ept->priv;
+  FAR struct rpmsg_device *src_rdev = src_ept->rdev;
+  FAR struct rpmsg_device *rdev = ept->rdev;
   int ret;
 
-  /* Create endpoint (r:dst_cpu:name) and send ACK to source edge core */
+  /* Create endpoint (r:peer_cpu:name) and send ACK to source edge core */
 
   ret = rpmsg_create_ept(src_ept, src_ept->rdev, src_ept->name,
                          RPMSG_ADDR_ANY, src_ept->dest_addr,
                          rpmsg_router_hub_cb, rpmsg_router_hub_unbind);
   DEBUGASSERT(ret == RPMSG_SUCCESS);
+
+  metal_mutex_acquire(&rdev->lock);
+  rpmsg_ept_incref(ept);
+  metal_mutex_release(&rdev->lock);
+
+  metal_mutex_acquire(&src_rdev->lock);
+  rpmsg_ept_incref(src_ept);
+  metal_mutex_release(&src_rdev->lock);
 }
 
 /****************************************************************************
@@ -168,7 +198,7 @@ static void rpmsg_router_hub_bound(FAR struct rpmsg_endpoint *ept)
  * Parameters:
  *   rdev - real rpmsg device
  *   priv - rpmsg router hub for router core
- *   name - endpoint name (r:dst_cpu:name)
+ *   name - endpoint name (r:peer_cpu:name)
  *   dest - destination address
  *
  * Returned Values:
@@ -214,14 +244,14 @@ static bool rpmsg_router_hub_match(FAR struct rpmsg_device *rdev,
  *
  * Description:
  *   This function is used to bind the router core device.
- *   It will try to create endpoint (r:src_cpu:name) to another dest cpu.
+ *   It will try to create endpoint (r:src_cpu:name) to peer cpu.
  *   The source endpoint information will be saved in the private field of
- *   the dest endpoint.
+ *   the peer endpoint.
  *
  * Parameters:
  *   rdev - real rpmsg device
  *   priv - rpmsg router hub for router core
- *   name - source edge core endpoint name (r:dst_cpu:name)
+ *   name - source edge core endpoint name (r:peer_cpu:name)
  *   dest - destination address
  *
  ****************************************************************************/
@@ -232,9 +262,9 @@ static void rpmsg_router_hub_bind(FAR struct rpmsg_device *rdev,
 {
   FAR struct rpmsg_router_hub_s *hub = priv;
   FAR struct rpmsg_endpoint *src_ept;
-  FAR struct rpmsg_endpoint *dst_ept;
-  FAR struct rpmsg_device *dst_rdev;
-  char dst_name[RPMSG_NAME_SIZE];
+  FAR struct rpmsg_endpoint *peer_ept;
+  FAR struct rpmsg_device *peer_rdev;
+  char peer_name[RPMSG_NAME_SIZE];
   int ret;
   int i;
 
@@ -261,35 +291,37 @@ static void rpmsg_router_hub_bind(FAR struct rpmsg_device *rdev,
 
   DEBUGASSERT(i < 2);
 
-  dst_rdev = hub->ept[1 - i].rdev;
-  snprintf(dst_name, RPMSG_NAME_SIZE,
+  peer_rdev = hub->ept[1 - i].rdev;
+  snprintf(peer_name, RPMSG_NAME_SIZE,
            RPMSG_ROUTER_NAME_PREFIX"%s%s", hub->cpuname[i],
            name + RPMSG_ROUTER_NAME_PREFIX_LEN +
            strlen(hub->cpuname[1 - i]));
 
   src_ept = kmm_zalloc(sizeof(*src_ept));
-  dst_ept = kmm_zalloc(sizeof(*dst_ept));
+  peer_ept = kmm_zalloc(sizeof(*peer_ept));
 
-  DEBUGASSERT(src_ept && dst_ept);
+  DEBUGASSERT(src_ept && peer_ept);
 
-  /* Save information for the ept(r:dst_cpu:name) of the source cpu */
+  /* Save information for the source ept(r:peer_cpu:name) */
 
-  src_ept->priv = dst_ept;
+  src_ept->priv = peer_ept;
   src_ept->rdev = rdev;
   src_ept->dest_addr = dest;
+  src_ept->release_cb = rpmsg_router_hub_ept_release;
   strlcpy(src_ept->name, name, sizeof(src_ept->name));
 
-  /* Create endpoint (r:src_cpu:name) to another dest cpu */
+  /* Create endpoint (r:src_cpu:name) to the peer cpu */
 
-  dst_ept->priv = src_ept;
-  dst_ept->ns_bound_cb = rpmsg_router_hub_bound;
-  ret = rpmsg_create_ept(dst_ept, dst_rdev, dst_name,
+  peer_ept->priv = src_ept;
+  peer_ept->ns_bound_cb = rpmsg_router_hub_bound;
+  peer_ept->release_cb = rpmsg_router_hub_ept_release;
+  ret = rpmsg_create_ept(peer_ept, peer_rdev, peer_name,
                          RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
                          rpmsg_router_hub_cb,
                          rpmsg_router_hub_unbind);
   if (ret < 0)
     {
-      kmm_free(dst_ept);
+      kmm_free(peer_ept);
       kmm_free(src_ept);
     }
 
@@ -335,12 +367,49 @@ static void rpmsg_router_bound(FAR struct rpmsg_endpoint *ept)
 }
 
 /****************************************************************************
+ * Name: rpmsg_router_notify_edge
+ ****************************************************************************/
+
+static void rpmsg_router_notify_edge(FAR void *arg)
+{
+  FAR struct rpmsg_endpoint *ept = arg;
+  FAR struct rpmsg_router_hub_s *hub = ept->priv;
+  struct rpmsg_router_s msg;
+  int i;
+
+  msg.cmd = rpmsg_is_running(ept->rdev) ?
+            RPMSG_ROUTER_RESUME : RPMSG_ROUTER_SUSPEND;
+  for (i = 0; i < 2; i++)
+    {
+      if (strcmp(rpmsg_get_cpuname(ept->rdev), hub->cpuname[i]))
+        {
+          rpmsg_send(&hub->ept[i], &msg, sizeof(msg));
+        }
+    }
+
+  rpmsg_ept_decref(&hub->ept[0]);
+  rpmsg_ept_decref(&hub->ept[1]);
+}
+
+/****************************************************************************
  * Name: rpmsg_router_cb
  ****************************************************************************/
 
 static int rpmsg_router_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
                            size_t len, uint32_t src, FAR void *priv)
 {
+  FAR struct rpmsg_router_hub_s *hub = ept->priv;
+
+  /* Send pm signal to the other edge core */
+
+  if (data == NULL && is_rpmsg_ept_ready(&hub->ept[0]) &&
+          is_rpmsg_ept_ready(&hub->ept[1]))
+    {
+      rpmsg_ept_incref(&hub->ept[0]);
+      rpmsg_ept_incref(&hub->ept[1]);
+      work_queue(HPWORK, &hub->work, rpmsg_router_notify_edge, ept, 0);
+    }
+
   return 0;
 }
 
@@ -414,8 +483,12 @@ static void rpmsg_router_destroy(FAR struct rpmsg_device *rdev,
 
       /* Notify the other edge core to destroy router device */
 
-      msg.cmd = RPMSG_ROUTER_DESTROY;
-      rpmsg_send(&hub->ept[1 - i], &msg, sizeof(msg));
+      if (is_rpmsg_ept_ready(&hub->ept[1 - i]))
+        {
+          msg.cmd = RPMSG_ROUTER_DESTROY;
+          rpmsg_send(&hub->ept[1 - i], &msg, sizeof(msg));
+        }
+
       break;
     }
 }
@@ -445,13 +518,13 @@ int rpmsg_router_hub_init(FAR const char *edge0,
   FAR struct rpmsg_router_hub_s *hub;
   int ret;
 
-  if (!edge0 || !edge1)
+  if (edge0 == NULL || edge1 == NULL)
     {
       return -EINVAL;
     }
 
   hub = kmm_zalloc(sizeof(*hub));
-  if (!hub)
+  if (hub == NULL)
     {
       return -ENOMEM;
     }

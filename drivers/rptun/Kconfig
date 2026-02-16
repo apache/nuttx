@@ -6,7 +6,7 @@
 menuconfig RPTUN
 	bool "Remote Proc Tunnel Driver Support"
 	default n
-	select RPMSG
+	select RPMSG_VIRTIO
 	---help---
 		RPTUN driver is used for multi-cores' communication.
 
@@ -64,25 +64,12 @@ config RPTUN_STACKSIZE
 	int "rptun stack size"
 	default 4096
 
+config RPTUN_CMD_TIMEOUT_MS
+	int "rptun cmd timeout ms"
+	default 5000
+
 config RPTUN_LOADER
 	bool "rptun loader support"
 	default n
-
-config RPTUN_PM
-	bool "rptun power management"
-	depends on PM
-	default n
-	---help---
-		If TX/RX buffer is supplied and powered by each CPU.
-		And when one CPU in DEEP sleep, then it's buffer will
-		goto RAM-retention mode, can't access from another CPU.
-		So, we provide this method to resolve this.
-
-config RPTUN_PM_AUTORELAX
-	bool "rptun pm autorelax"
-	depends on RPTUN_PM
-	default y
-	---help---
-		use wd_timer to auto relax pm
 
 endif # RPTUN

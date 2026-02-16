@@ -66,13 +66,18 @@ static void arm64_init_signal_process(struct tcb_s *tcb, uint64_t *regs)
   tcb->xcp.regs[REG_SPSR]   = SPSR_MODE_EL1H | DAIF_FIQ_BIT | DAIF_IRQ_BIT;
 #endif
 
+#ifdef CONFIG_ARM64_MTE
+  tcb->xcp.regs[REG_SCTLR_EL1] = read_sysreg(sctlr_el1) | SCTLR_TCF1_BIT;
+#endif
+
 #ifdef CONFIG_ARCH_KERNEL_STACK
   tcb->xcp.regs[REG_SP_EL0] = regs[REG_SP_EL0];
 #else
   tcb->xcp.regs[REG_SP_EL0] = regs[REG_SP_ELX] - XCPTCONTEXT_SIZE * 2;
 #endif
   tcb->xcp.regs[REG_SP_ELX] = regs[REG_SP_ELX] - XCPTCONTEXT_SIZE;
-  tcb->xcp.regs[REG_EXE_DEPTH]  = 1;
+  tcb->xcp.regs[REG_EXE_DEPTH] = 1;
+  tcb->xcp.regs[REG_SCTLR_EL1] = regs[REG_SCTLR_EL1];
 }
 
 /****************************************************************************
@@ -120,30 +125,14 @@ void up_schedule_sigaction(struct tcb_s *tcb)
   sinfo("tcb=%p, rtcb=%p current_regs=%p\n", tcb, this_task(),
         this_task()->xcp.regs);
 
-  /* First, handle some special cases when the signal is
-   * being delivered to the currently executing task.
+  /* Save the return lr and cpsr and one scratch register.  These
+   * will be restored by the signal trampoline after the signals
+   * have been delivered.
    */
 
-  if (tcb == this_task() && !up_interrupt_context())
-    {
-      /* In this case just deliver the signal now.
-       * REVISIT:  Signal handler will run in a critical section!
-       */
+  tcb->xcp.saved_regs = tcb->xcp.regs;
 
-      (tcb->sigdeliver)(tcb);
-      tcb->sigdeliver = NULL;
-    }
-  else
-    {
-      /* Save the return lr and cpsr and one scratch register.  These
-       * will be restored by the signal trampoline after the signals
-       * have been delivered.
-       */
+  /* create signal process context */
 
-      tcb->xcp.saved_regs = tcb->xcp.regs;
-
-      /* create signal process context */
-
-      arm64_init_signal_process(tcb, NULL);
-    }
+  arm64_init_signal_process(tcb, NULL);
 }

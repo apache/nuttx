@@ -75,7 +75,7 @@ static int wdog_daemon(int argc, char *argv[])
 
   while (1)
     {
-      nxsig_usleep((CONFIG_PHOTON_WDG_THREAD_INTERVAL)*1000);
+      nxsched_usleep((CONFIG_PHOTON_WDG_THREAD_INTERVAL)*1000);
 
       /* Send keep alive ioctl */
 

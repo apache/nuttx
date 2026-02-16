@@ -130,7 +130,7 @@ bloaty() {
     cd "${NUTTXTOOLS}"/bloaty-src
     # Due to issues with latest MacOS versions use pinned commit.
     # https://github.com/google/bloaty/pull/326
-    git checkout 52948c107c8f81045e7f9223ec02706b19cfa882
+    # git checkout 52948c107c8f81045e7f9223ec02706b19cfa882
     mkdir -p "${NUTTXTOOLS}"/bloaty
     cmake -B build/bloaty -GNinja -D BLOATY_PREFER_SYSTEM_CAPSTONE=NO -D CMAKE_INSTALL_PREFIX="${NUTTXTOOLS}"/bloaty
     cmake --build build/bloaty
@@ -271,12 +271,12 @@ riscv_gcc_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/riscv-none-elf-gcc/bin/riscv-none-elf-gcc" ]; then
     local basefile
-    basefile=xpack-riscv-none-elf-gcc-13.2.0-2-darwin-arm64
+    basefile=xpack-riscv-none-elf-gcc-14.2.0-3-darwin-arm64
     cd "${NUTTXTOOLS}"
     # Download the latest RISCV GCC toolchain prebuilt by xPack
-    curl -O -L -s https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/${basefile}.tar.gz
+    curl -O -L -s https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v14.2.0-3/${basefile}.tar.gz
     tar zxf ${basefile}.tar.gz
-    mv xpack-riscv-none-elf-gcc-13.2.0-2 riscv-none-elf-gcc
+    mv xpack-riscv-none-elf-gcc-14.2.0-3 riscv-none-elf-gcc
     rm ${basefile}.tar.gz
   fi
 
@@ -305,55 +305,21 @@ zig() {
   command zig cc --version
 }
 
-xtensa_esp32_gcc_toolchain() {
-  add_path "${NUTTXTOOLS}"/xtensa-esp32-elf/bin
+xtensa_esp_gcc_toolchain() {
+  add_path "${NUTTXTOOLS}"/xtensa-esp-elf/bin
 
-  if [ ! -f "${NUTTXTOOLS}/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc" ]; then
+  if [ ! -f "${NUTTXTOOLS}/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc" ]; then
     local basefile
-    basefile=xtensa-esp32-elf-12.2.0_20230208-aarch64-apple-darwin
-    # Download the latest ESP32 GCC toolchain prebuilt by Espressif
+    basefile=xtensa-esp-elf-14.2.0_20241119-aarch64-apple-darwin
+    # Download the latest ESP32, ESP32-S2 and ESP32-S3 GCC toolchain prebuilt by Espressif
     cd "${NUTTXTOOLS}"
-    curl -O -L -s https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
+    curl -O -L -s https://github.com/espressif/crosstool-NG/releases/download/esp-14.2.0_20241119/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
     tar xf ${basefile}.tar
     rm ${basefile}.tar
   fi
 
   command xtensa-esp32-elf-gcc --version
-}
-
-xtensa_esp32s2_gcc_toolchain() {
-  add_path "${NUTTXTOOLS}"/xtensa-esp32s2-elf/bin
-
-  if [ ! -f "${NUTTXTOOLS}/xtensa-esp32s2-elf/bin/xtensa-esp32s2-elf-gcc" ]; then
-    local basefile
-    basefile=xtensa-esp32s2-elf-12.2.0_20230208-aarch64-apple-darwin
-    cd "${NUTTXTOOLS}"
-    # Download the latest ESP32 S2 GCC toolchain prebuilt by Espressif
-    curl -O -L -s https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
-    xz -d ${basefile}.tar.xz
-    tar xf ${basefile}.tar
-    rm ${basefile}.tar
-  fi
-
-  command xtensa-esp32s2-elf-gcc --version
-}
-
-xtensa_esp32s3_gcc_toolchain() {
-  add_path "${NUTTXTOOLS}"/xtensa-esp32s3-elf/bin
-
-  if [ ! -f "${NUTTXTOOLS}/xtensa-esp32s3-elf/bin/xtensa-esp32s3-elf-gcc" ]; then
-    local basefile
-    basefile=xtensa-esp32s3-elf-12.2.0_20230208-aarch64-apple-darwin
-    cd "${NUTTXTOOLS}"
-    # Download the latest ESP32 S3 GCC toolchain prebuilt by Espressif
-    curl -O -L -s https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
-    xz -d ${basefile}.tar.xz
-    tar xf ${basefile}.tar
-    rm ${basefile}.tar
-  fi
-
-  command xtensa-esp32s3-elf-gcc --version
 }
 
 u_boot_tools() {
@@ -432,7 +398,7 @@ install_build_tools() {
   mkdir -p "${NUTTXTOOLS}"
   echo "#!/usr/bin/env sh" > "${NUTTXTOOLS}"/env.sh
 
-  install="ninja_brew autoconf_brew arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain avr_gcc_toolchain binutils bloaty elf_toolchain gen_romfs gperf kconfig_frontends mips_gcc_toolchain python_tools riscv_gcc_toolchain rust dlang zig xtensa_esp32_gcc_toolchain xtensa_esp32s2_gcc_toolchain xtensa_esp32s3_gcc_toolchain u_boot_tools util_linux wasi_sdk c_cache"
+  install="ninja_brew autoconf_brew arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain avr_gcc_toolchain binutils bloaty elf_toolchain gen_romfs gperf kconfig_frontends mips_gcc_toolchain python_tools riscv_gcc_toolchain rust dlang zig xtensa_esp_gcc_toolchain u_boot_tools util_linux wasi_sdk c_cache"
 
   mkdir -p "${NUTTXTOOLS}"/homebrew
   export HOMEBREW_CACHE=${NUTTXTOOLS}/homebrew

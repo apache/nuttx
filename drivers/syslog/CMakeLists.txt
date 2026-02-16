@@ -24,6 +24,10 @@
 
 set(SRCS)
 
+if(CONFIG_ARCH_LOWPUTC)
+  list(APPEND SRCS syslog_early.c)
+endif()
+
 if(CONFIG_SYSLOG)
 
   if(CONFIG_SYSLOG_RFC5424)

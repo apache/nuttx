@@ -31,6 +31,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <sys/param.h>
 
 #ifdef CONFIG_IOB_NOTIFIER
 #  include <nuttx/wqueue.h>
@@ -74,9 +75,7 @@
 
 /* Default config of alignment and head padding size */
 
-#if !defined(CONFIG_IOB_ALIGNMENT)
-#  define CONFIG_IOB_ALIGNMENT      1
-#endif
+#define IOB_ALIGNMENT    MAX(CONFIG_IOB_ALIGNMENT, sizeof(uintptr_t))
 
 /* IOB helpers */
 
@@ -266,6 +265,33 @@ FAR struct iob_s *iob_alloc_dynamic(uint16_t size);
 
 FAR struct iob_s *iob_alloc_with_data(FAR void *data, uint16_t size,
                                       iob_free_cb_t free_cb);
+
+/****************************************************************************
+ * Name: iob_init_with_data
+ *
+ * Description:
+ *   Initialize an I/O buffer and playload
+ *
+ * Input Parameters:
+ *   data    - Make io_data point to a specific address, the caller is
+ *             responsible for the memory management. The caller should
+ *             ensure that the memory is not freed before the iob is freed,
+ *             and caller need to reserve space for alignment.
+ *   size    - The size of the data parameter
+ *   free_cb - Notify the caller when the iob is freed. The caller can
+ *             perform additional operations on the data before it is freed.
+ *
+ *             +---------+
+ *             |   IOB   |
+ *             | io_data |--+
+ *             | buffer  |<-+
+ *             +---------+
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *iob_init_with_data(FAR void *data, uint16_t size,
+                                     iob_free_cb_t free_cb);
+
 #endif
 
 /****************************************************************************
@@ -377,6 +403,19 @@ int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
 
 #if CONFIG_IOB_NCHAINS > 0
 int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+
+/****************************************************************************
+ * Name: iob_concat_queue
+ *
+ * Description:
+ *   Concatenate iob_s queue src to dest
+ *
+ ****************************************************************************/
+
+#if CONFIG_IOB_NCHAINS > 0
+int iob_concat_queue(FAR struct iob_queue_s *dest,
+                     FAR struct iob_queue_s *src);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************

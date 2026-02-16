@@ -48,6 +48,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#include <nuttx/list_type.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -138,20 +140,27 @@
     } \
   while (0)
 
-#define list_delete(item) \
+#define list_delete_fast(item) \
   do \
     { \
       FAR struct list_node *__item = (item); \
       __item->next->prev = __item->prev; \
       __item->prev->next = __item->next; \
-      __item->prev = __item->next = NULL; \
+    } \
+  while (0)
+
+#define list_delete(item) \
+  do \
+    { \
+      list_delete_fast(item); \
+      list_clear_node(item); \
     } \
   while (0)
 
 #define list_delete_init(item) \
   do \
     { \
-      list_delete(item); \
+      list_delete_fast(item); \
       list_initialize(item); \
     } \
   while (0)
@@ -274,6 +283,12 @@
       &entry->member != (list); entry = temp, \
       temp = list_container_of(temp->member.next, type, member))
 
+/* Iterate from a given entry node */
+
+#define list_for_every_entry_from(list, cur, type, member) \
+  for (; &(cur)->member != (list); \
+       (cur) = list_next_entry(cur, type, member))
+
 /* Iterate from a given entry node in a safe way */
 
 #define list_for_every_entry_safe_from(list, cur, temp, type, member) \
@@ -281,10 +296,17 @@
        &(cur)->member != (list); \
        (cur) = (temp), (temp) = list_next_entry(temp, type, member))
 
-#define list_for_every_entry_continue(list, head, type, member)    \
-  for ((list) = list_next_entry(list, type, member); \
-       &(list)->member != (head); \
-       (list) = list_next_entry(list, type, member))
+/* Prepare entry for use in list_for_every_entry_continue() */
+
+#define list_prepare_entry(entry, list, type, member) \
+  ((entry) ? (entry) : list_entry(list, type, member))
+
+/* Continue iteration over list */
+
+#define list_for_every_entry_continue(entry, list, type, member) \
+  for ((entry) = list_next_entry(entry, type, member); \
+       &(entry)->member != (list); \
+       (entry) = list_next_entry(entry, type, member))
 
 /* iterates over the list in reverse order, entry should be the container
  * structure type
@@ -294,16 +316,6 @@
   for(entry = list_container_of((list)->prev, type, member); \
       &entry->member != (list); \
       entry = list_container_of(entry->member.prev, type, member))
-
-/****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
-
-struct list_node
-{
-  FAR struct list_node *prev;
-  FAR struct list_node *next;
-};
 
 /****************************************************************************
  * Inline Functions

@@ -129,10 +129,6 @@ void xtensa_appcpu_start(void)
 
   g_appcpu_started = true;
 
-  /* Reset scheduler parameters */
-
-  nxsched_resume_scheduler(tcb);
-
   /* Move CPU0 exception vectors to IRAM */
 
   __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (_init_start));

@@ -68,7 +68,7 @@ int net_foreachroute_ipv4(route_handler_ipv4_t handler, FAR void *arg)
 
   /* Prevent concurrent access to the routing table */
 
-  net_lock();
+  net_lockroute_ipv4();
 
   /* Visit each entry in the routing table */
 
@@ -82,9 +82,9 @@ int net_foreachroute_ipv4(route_handler_ipv4_t handler, FAR void *arg)
       ret  = handler(&route->entry, arg);
     }
 
-  /* Unlock the network */
+  /* Unlock the g_ipv4_routes */
 
-  net_unlock();
+  net_unlockroute_ipv4();
   return ret;
 }
 #endif
@@ -98,7 +98,7 @@ int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg)
 
   /* Prevent concurrent access to the routing table */
 
-  net_lock();
+  net_lockroute_ipv6();
 
   /* Visit each entry in the routing table */
 
@@ -112,9 +112,9 @@ int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg)
       ret  = handler(&route->entry, arg);
     }
 
-  /* Unlock the network */
+  /* Unlock the g_ipv6_routes */
 
-  net_unlock();
+  net_unlockroute_ipv6();
   return ret;
 }
 #endif

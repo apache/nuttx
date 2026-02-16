@@ -25,6 +25,13 @@ config MM_CUSTOMIZE_MANAGER
 
 endchoice
 
+config MM_UMM_CUSTOMIZE_MANAGER
+	bool "Customized heap manager"
+	default n
+	---help---
+		Customized memory manager policy. The build will fail
+		if the umm heap module not defined by customer.
+
 config MM_KERNEL_HEAP
 	bool "Kernel dedicated heap"
 	default BUILD_PROTECTED || BUILD_KERNEL
@@ -137,6 +144,11 @@ config MM_BACKTRACE_DEFAULT
 	bool "Enable the backtrace record by default"
 	default n
 	depends on MM_BACKTRACE > 0
+
+config MM_BACKTRACE_SEQNO
+	bool "Record sequence number in memory block"
+	default y
+	depends on MM_BACKTRACE >= 0
 
 config MM_DUMP_ON_FAILURE
 	bool "Dump heap info on allocation failure"

@@ -69,12 +69,13 @@
  *
  ****************************************************************************/
 
-ssize_t psock_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+ssize_t psock_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
                        int flags)
 {
   /* Verify that non-NULL pointers were passed */
 
-  if (msg == NULL || msg->msg_iov == NULL || msg->msg_iov->iov_base == NULL)
+  if (msg == NULL || msg->msg_iov == NULL ||
+      (psock->s_type != SOCK_DGRAM && msg->msg_iov->iov_base == NULL))
     {
       return -EINVAL;
     }
@@ -139,7 +140,7 @@ ssize_t psock_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  *
  ****************************************************************************/
 
-ssize_t sendmsg(int sockfd, FAR struct msghdr *msg, int flags)
+ssize_t sendmsg(int sockfd, FAR const struct msghdr *msg, int flags)
 {
   FAR struct socket *psock;
   FAR struct file *filep;

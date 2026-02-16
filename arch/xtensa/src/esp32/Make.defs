@@ -96,28 +96,11 @@ CHIP_CSRCS += esp32_spi_slave.c
 endif
 endif
 
-# SPIFLASH and SPIRAM need spicache.c
-
-ifeq ($(CONFIG_ESP32_SPIFLASH),y)
-CHIP_CSRCS += esp32_spicache.c
-else ifeq ($(CONFIG_ESP32_SPIRAM),y)
-CHIP_CSRCS += esp32_spicache.c
-endif
-
-ifeq ($(CONFIG_ESP32_SPIFLASH),y)
-CHIP_CSRCS += esp32_spiflash.c
-endif
-
 ifeq ($(CONFIG_ESP32_SPIRAM),y)
 CHIP_CSRCS += esp32_spiram.c
 CHIP_CSRCS += esp32_psram.c
 CHIP_CSRCS += esp32_himem.c
 CHIP_CSRCS += esp32_himem_chardev.c
-endif
-
-CHIP_CSRCS += esp32_efuse.c
-ifeq ($(CONFIG_ESP32_EFUSE),y)
-CHIP_CSRCS += esp32_efuse_lowerhalf.c
 endif
 
 ifeq ($(CONFIG_ESP32_EMAC),y)
@@ -157,6 +140,7 @@ CHIP_CSRCS += esp32_freerun.c
 endif
 
 ifeq ($(CONFIG_ESP32_PARTITION_TABLE),y)
+CHIP_CSRCS += esp32_spiflash.c
 CHIP_CSRCS += esp32_partition.c
 endif
 
@@ -228,7 +212,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = e9a78c811578545e2bc673862d885a15bd6cbf67
+	ESP_HAL_3RDPARTY_VERSION = b9472bd56b916cced7447e25c2b2e1390d7e0d90
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -242,11 +226,22 @@ endif
 	GIT_DEPTH_PARAMETER = --depth=$(GIT_DEPTH)
 endif
 
+# When set USE_NXTMPDIR_ESP_REPO_DIRECTLY=y, will directly use esp-hal-3rdparty
+# under nxtmpdir without CHECK_COMMITSHA, reset, checkout and update.
+
+USE_NXTMPDIR_ESP_REPO_DIRECTLY ?= n
+
 ifeq ($(STORAGETMP),y)
+ifeq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
+define CLONE_ESP_HAL_3RDPARTY_REPO
+	$(call COPYDIR, $(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO),chip/$(ESP_HAL_3RDPARTY_REPO))
+endef
+else
 define CLONE_ESP_HAL_3RDPARTY_REPO
 	$(call CHECK_COMMITSHA, $(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO),$(ESP_HAL_3RDPARTY_VERSION))
 	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),chip/$(ESP_HAL_3RDPARTY_REPO),$(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO))
 endef
+endif
 else
 define CLONE_ESP_HAL_3RDPARTY_REPO
 	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),chip/$(ESP_HAL_3RDPARTY_REPO))
@@ -256,8 +251,10 @@ endif
 chip/$(ESP_HAL_3RDPARTY_REPO):
 	$(Q) echo "Cloning Espressif HAL for 3rd Party Platforms"
 	$(Q) $(call CLONE_ESP_HAL_3RDPARTY_REPO)
+ifneq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: ${ESP_HAL_3RDPARTY_VERSION}"
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
+endif
 
 # Silent preprocessor warnings
 
@@ -278,16 +275,21 @@ include chip/hal.mk
 include common/espressif/Make.defs
 
 context:: chip/$(ESP_HAL_3RDPARTY_REPO)
+ifneq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: initializing submodules..."
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/mbedtls/mbedtls components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32 components/esp_coex/lib
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls reset --quiet --hard
+endif
 	$(Q) echo "Applying patches..."
 	$(Q) cd chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls && git apply ../../../nuttx/patches/components/mbedtls/mbedtls/*.patch
 ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
+ifneq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32 components/esp_coex/lib
+endif
 endif
 
 distclean::
 	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
+	$(call DELFILE,../../../vefuse.bin)
 
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif

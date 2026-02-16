@@ -18,7 +18,7 @@
 /* #undef _LIBCPP_HAS_NO_THREADS */
 /* #undef _LIBCPP_HAS_NO_MONOTONIC_CLOCK */
 /* #undef _LIBCPP_HAS_MUSL_LIBC */
-/* #undef _LIBCPP_HAS_THREAD_API_PTHREAD */
+#define _LIBCPP_HAS_THREAD_API_PTHREAD 1
 /* #undef _LIBCPP_HAS_THREAD_API_EXTERNAL */
 /* #undef _LIBCPP_HAS_THREAD_API_WIN32 */
 /* #undef _LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS */
@@ -27,8 +27,11 @@
 /* #undef _LIBCPP_TYPEINFO_COMPARISON_IMPLEMENTATION */
 /* #undef _LIBCPP_HAS_NO_FILESYSTEM */
 /* #undef _LIBCPP_HAS_NO_RANDOM_DEVICE */
-#ifndef CONFIG_CXX_LOCALIZATION
+#define _LIBCPP_HAS_NO_CONTENTION_TABLE
+#if defined(CONFIG_CXX_NO_LOCALIZATION)
 #  define _LIBCPP_HAS_NO_LOCALIZATION
+#elif defined(CONFIG_CXX_MINI_LOCALIZATION)
+#  define _LIBCPP_HAS_MINI_LOCALIZATION
 #endif
 #ifndef CONFIG_CXX_WCHAR
 #  define _LIBCPP_HAS_NO_WIDE_CHARACTERS
@@ -53,13 +56,14 @@
 #  pragma clang diagnostic ignored "-Wmacro-redefined"
 #endif
 
-
-
-
 #ifdef __clang__
 #  pragma clang diagnostic pop
 #endif
 
 #define _SYS_REENT_H_
+
+#ifndef __ULong
+#define __ULong unsigned long
+#endif
 
 #endif // _LIBCPP___CONFIG_SITE

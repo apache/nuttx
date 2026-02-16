@@ -75,10 +75,6 @@
 
 /* Configuration ************************************************************/
 
-/* See boards/arm/stm32/stm3240g-eval/README.txt for an explanation of the
- * configuration settings.
- */
-
 #if STM32_NETHERNET > 1
 #  error "Logic to support multiple Ethernet interfaces is incomplete"
 #endif
@@ -2290,6 +2286,7 @@ static int stm32_ifup(struct net_driver_s *dev)
   up_enable_irq(STM32_IRQ_ETH);
 
   stm32_checksetup();
+  netdev_carrier_on(dev);
   return OK;
 }
 
@@ -2355,6 +2352,7 @@ static int stm32_ifdown(struct net_driver_s *dev)
   /* Mark the device "down" */
 
   priv->ifup = false;
+  netdev_carrier_off(dev);
   leave_critical_section(flags);
   return ret;
 }

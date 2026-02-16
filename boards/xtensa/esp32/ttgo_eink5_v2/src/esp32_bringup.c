@@ -41,9 +41,9 @@
 #  include <nuttx/video/fb.h>
 #endif
 
-#if defined(CONFIG_ESP32_EFUSE)
+#if defined(CONFIG_ESPRESSIF_EFUSE)
 #  include <nuttx/efuse/efuse.h>
-#  include "esp32_efuse.h"
+#  include "espressif/esp_efuse.h"
 #endif
 
 #include <nuttx/fs/fs.h>
@@ -79,7 +79,7 @@
 #  include "esp32_ble.h"
 #endif
 
-#ifdef CONFIG_ESPRESSIF_WLAN
+#ifdef CONFIG_ESPRESSIF_WIFI
 #  include "esp32_board_wlan.h"
 #endif
 
@@ -181,8 +181,8 @@ int esp32_bringup(void)
     }
 #endif
 
-#if defined(CONFIG_ESP32_EFUSE)
-  ret = esp32_efuse_initialize("/dev/efuse");
+#if defined(CONFIG_ESPRESSIF_EFUSE)
+  ret = esp_efuse_initialize("/dev/efuse");
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to init EFUSE: %d\n", ret);
@@ -295,7 +295,7 @@ int esp32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESPRESSIF_WLAN
+#ifdef CONFIG_ESPRESSIF_WIFI
   ret = board_wlan_init();
   if (ret < 0)
     {

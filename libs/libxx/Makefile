@@ -35,8 +35,6 @@ ifeq ($(CONFIG_UCLIBCXX),y)
 include uClibc++/Make.defs
 else ifeq ($(CONFIG_LIBCXX),y)
 include libcxx/Make.defs
-else ifeq ($(CONFIG_LIBCXXMINI),y)
-include libcxxmini/Make.defs
 endif
 
 ifeq ($(CONFIG_ETL),y)
@@ -45,17 +43,21 @@ endif
 
 ifeq ($(CONFIG_LIBCXXABI),y)
 include libcxxabi/Make.defs
+else ifeq ($(CONFIG_LIBMINIABI),y)
+include libminiabi/Make.defs
+else ifeq ($(CONFIG_LIBSUPCXX),y)
+include libstdc++/libsupc++.defs
 endif
 
 # Object Files
 
-AOBJS = $(ASRCS:.S=$(OBJEXT))
-COBJS = $(CSRCS:.c=$(OBJEXT))
-CXXOBJS = $(CXXSRCS:.cxx=$(OBJEXT))
-CPPOBJS = $(CPPSRCS:.cpp=$(OBJEXT))
+AOBJS += $(ASRCS:.S=$(OBJEXT))
+COBJS += $(CSRCS:.c=$(OBJEXT))
+CXXOBJS += $(CXXSRCS:.cxx=$(OBJEXT))
+CPPOBJS += $(CPPSRCS:.cpp=$(OBJEXT))
 
-SRCS = $(ASRCS) $(CSRCS) $(CXXSRCS) $(CPPSRCS)
-OBJS = $(AOBJS) $(COBJS) $(CXXOBJS) $(CPPOBJS)
+SRCS += $(ASRCS) $(CSRCS) $(CXXSRCS) $(CPPSRCS)
+OBJS += $(AOBJS) $(COBJS) $(CXXOBJS) $(CPPOBJS)
 
 BIN = libxx$(LIBEXT)
 

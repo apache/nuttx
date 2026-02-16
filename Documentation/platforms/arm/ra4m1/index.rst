@@ -35,12 +35,12 @@ KINT        No
 ELC         No
 DTC         No
 DMAC        No
-GPT         No
+GPT         Yes      Just PWM
 AGT         No
 RTC         No
 WDT         No
 IWDT        No
-SCI         Yes       Just UART
+SCI         Yes      Just UART
 IIC         No
 SPI         No
 SSIE        No
@@ -71,9 +71,12 @@ Nuttx driver support UART mode (No-FIFO).
 GPIO
 -----
 
-
-
 Pins can be configured/operated using ``ra_gpio_*`` functions.
+
+GPT
+----
+General Purpose Timer (GPT) is a multi-function timer that can be used in various modes such as PWM output, input capture, output compare, and interval timer.
+Nuttx driver support PWM mode.
 
 Supported Boards
 ================

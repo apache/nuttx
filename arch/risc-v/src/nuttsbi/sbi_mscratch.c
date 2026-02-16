@@ -39,7 +39,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STACK_SIZE  (STACK_ALIGN_DOWN(MMODE_IRQSTACK))
+#define STACK_SIZE  (STACKFRAME_ALIGN_DOWN(MMODE_IRQSTACK))
 
 /****************************************************************************
  * Public Data

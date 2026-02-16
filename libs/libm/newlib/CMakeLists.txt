@@ -93,11 +93,9 @@ if(CONFIG_LIBM_NEWLIB)
   file(GLOB_RECURSE COMMON_CSRCS ${NEWLIB_DIR}/newlib/libm/common/*.c)
   file(GLOB_RECURSE COMPLEX_CSRCS ${NEWLIB_DIR}/newlib/libm/complex/*.c)
 
-  if(CONFIG_ARCH_X86_64)
-    file(GLOB_RECURSE ARCH_CSRCS ${NEWLIB_DIR}/newlib/libm/fenv/*.c)
-  endif()
+  file(GLOB_RECURSE FENV_CSRCS ${NEWLIB_DIR}/newlib/libm/fenv/*.c)
 
-  set(CSRCS ${COMMON_CSRCS} ${COMPLEX_CSRCS} ${ARCH_CSRCS})
+  set(CSRCS ${COMMON_CSRCS} ${COMPLEX_CSRCS} ${FENV_CSRCS})
 
   # aggressive optimisation can replace occurrences of sinl() and cosl() with
   # sincosl(), but sincosl() is missing in newlib which causes error. So let's
@@ -123,13 +121,30 @@ if(CONFIG_LIBM_NEWLIB)
     list(APPEND CSRCS ${MATH_CSRCS})
   endif()
 
+  set(ARCH_FILENAMES "")
+  foreach(arch_file ${ARCH_CSRCS})
+    get_filename_component(arch_filename ${arch_file} NAME)
+    list(APPEND ARCH_FILENAMES ${arch_filename})
+  endforeach()
+
+  set(FILTERED_CSRCS "")
+  foreach(file ${CSRCS})
+    get_filename_component(filename ${file} NAME)
+    list(FIND ARCH_FILENAMES ${filename} index)
+    if(index EQUAL -1)
+      list(APPEND FILTERED_CSRCS ${file})
+    endif()
+  endforeach()
+
+  set(CSRCS ${FILTERED_CSRCS} ${ARCH_CSRCS})
+
   # ############################################################################
   # Include Directory
   # ############################################################################
 
   set(INCDIR ${CMAKE_CURRENT_LIST_DIR}/include ${NEWLIB_DIR}/newlib/libm/common)
 
-  if(CONFIG_ARCH_X86_64)
+  if(CONFIG_ARCH_X86_64 OR CONFIG_ARCH_X86)
     list(APPEND INCDIR ${NEWLIB_DIR}/newlib/libc/machine/shared_x86/sys)
   endif()
 

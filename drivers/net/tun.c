@@ -59,7 +59,7 @@
 #endif
 
 #include <nuttx/arch.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/mutex.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/mm/iob.h>
@@ -126,6 +126,7 @@ struct tun_device_s
   struct work_s     work;      /* For deferring poll work to the work queue */
   FAR struct pollfd *poll_fds;
   mutex_t           lock;
+  spinlock_t        spinlock;   /* Spinlock to protect the driver state */
   sem_t             read_wait_sem;
   sem_t             write_wait_sem;
   size_t            read_d_len;
@@ -694,13 +695,16 @@ static int tun_ifdown(FAR struct net_driver_s *dev)
 
   netdev_carrier_off(dev);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&priv->spinlock);
 
   /* Mark the device "down" */
 
   priv->bifup = false;
 
-  leave_critical_section(flags);
+  nxsem_post(&priv->read_wait_sem);
+  nxsem_post(&priv->write_wait_sem);
+
+  spin_unlock_irqrestore_nopreempt(&priv->spinlock, flags);
   return OK;
 }
 
@@ -744,7 +748,7 @@ static void tun_txavail_work(FAR void *arg)
       return;
     }
 
-  net_lock();
+  netdev_lock(&priv->dev);
   if (priv->bifup)
     {
       /* Poll the network for new XMIT data */
@@ -752,7 +756,7 @@ static void tun_txavail_work(FAR void *arg)
       devif_poll(&priv->dev, tun_txpoll);
     }
 
-  net_unlock();
+  netdev_unlock(&priv->dev);
   nxmutex_unlock(&priv->lock);
 }
 
@@ -780,7 +784,7 @@ static int tun_txavail(FAR struct net_driver_s *dev)
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
   irqstate_t flags;
 
-  flags = enter_critical_section(); /* No interrupts */
+  flags = spin_lock_irqsave(&priv->spinlock); /* No interrupts */
 
   /* Schedule to perform the TX poll on the worker thread when priv->bifup
    * is true.
@@ -791,7 +795,7 @@ static int tun_txavail(FAR struct net_driver_s *dev)
       work_queue(TUNWORK, &priv->work, tun_txavail_work, priv, 0);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
 
   return OK;
 }
@@ -886,6 +890,7 @@ static int tun_dev_init(FAR struct tun_device_s *priv,
   /* Initialize the mutual exclusion and wait semaphore */
 
   nxmutex_init(&priv->lock);
+  spin_lock_init(&priv->spinlock);
   nxsem_init(&priv->read_wait_sem, 0, 0);
   nxsem_init(&priv->write_wait_sem, 0, 0);
 
@@ -992,17 +997,23 @@ static ssize_t tun_write(FAR struct file *filep, FAR const char *buffer,
           return ret;
         }
 
+      if (!priv->bifup)
+        {
+          ret = -ENETDOWN;
+          break;
+        }
+
       /* Check if there are free space to write */
 
       if (priv->write_d_len == 0)
         {
-          net_lock();
+          netdev_lock(&priv->dev);
           netdev_iob_release(&priv->dev);
           ret = netdev_iob_prepare(&priv->dev, false, 0);
           priv->dev.d_buf = NULL;
           if (ret < 0)
             {
-              net_unlock();
+              netdev_unlock(&priv->dev);
               break;
             }
 
@@ -1010,14 +1021,14 @@ static ssize_t tun_write(FAR struct file *filep, FAR const char *buffer,
                               buflen, -llhdrlen, false);
           if (ret < 0)
             {
-              net_unlock();
+              netdev_unlock(&priv->dev);
               break;
             }
 
           priv->dev.d_len = buflen;
 
           tun_net_receive(priv);
-          net_unlock();
+          netdev_unlock(&priv->dev);
 
           ret = buflen;
           break;
@@ -1070,6 +1081,12 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
           return ret;
         }
 
+      if (!priv->bifup)
+        {
+          ret = -ENETDOWN;
+          break;
+        }
+
       /* Check if there are data to read in write buffer */
 
       if (priv->write_d_len > 0)
@@ -1111,9 +1128,9 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
           priv->read_buf   = NULL;
           priv->read_d_len = 0;
 
-          net_lock();
+          netdev_lock(&priv->dev);
           tun_txdone(priv);
-          net_unlock();
+          netdev_unlock(&priv->dev);
           break;
         }
 

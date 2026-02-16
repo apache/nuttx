@@ -121,12 +121,12 @@ function arm_gcc_toolchain() {
       if (-not (Test-Path -Path "$NUTTXTOOLS\gcc-arm-none-eabi\bin\arm-none-eabi-gcc.exe")) {
         # Download the file
         Write-Host "Download: ARM GCC toolchain" -ForegroundColor Green
-        $basefile = "arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-arm-none-eabi"
+        $basefile = "xpack-arm-none-eabi-gcc-13.2.1-1.1-win32-x64"
         Set-Location "$NUTTXTOOLS"
-        # Download the latest ARM GCC toolchain prebuilt by ARM
-        Invoke-WebRequest -Uri "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
+        # Download ARM GCC toolchain from xPack
+        Invoke-WebRequest -Uri "https://github.com/xpack-dev-tools/arm-none-eabi-gcc-xpack/releases/download/v13.2.1-1.1/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
         Expand-Archive "$NUTTXTOOLS\$basefile.zip"
-        Move-Item -Path "$basefile\$basefile" -Destination "gcc-arm-none-eabi"
+        Move-Item -Path "$basefile\xpack-arm-none-eabi-gcc-13.2.1-1.1" -Destination "gcc-arm-none-eabi"
         Remove-Item "$basefile*" -Force
       }
     }
@@ -146,12 +146,12 @@ function arm64_gcc_toolchain() {
       if (-not (Test-Path -Path "$NUTTXTOOLS\gcc-aarch64-none-elf\bin\aarch64-none-elf-gcc.exe")) {
         # Download the file
         Write-Host "Download: ARM64 GCC toolchain" -ForegroundColor Green
-        $basefile = "arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-aarch64-none-elf"
+        $basefile = "xpack-aarch64-none-elf-gcc-13.2.1-1.1-win32-x64"
         Set-Location "$NUTTXTOOLS"
-        # Download the latest ARM64 GCC toolchain prebuilt by ARM
-        Invoke-WebRequest -Uri "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
+        # Download ARM64 GCC toolchain from xPack
+        Invoke-WebRequest -Uri "https://github.com/xpack-dev-tools/aarch64-none-elf-gcc-xpack/releases/download/v13.2.1-1.1/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
         Expand-Archive "$NUTTXTOOLS\$basefile.zip"
-        Move-Item -Path "$basefile\$basefile" -Destination "gcc-aarch64-none-elf"
+        Move-Item -Path "$basefile\xpack-aarch64-none-elf-gcc-13.2.1-1.1" -Destination "gcc-aarch64-none-elf"
         Remove-Item "$basefile*" -Force
       }
     }
@@ -223,6 +223,51 @@ function ninja_tool {
   Write-Host ""
 }
 
+function pico_sdk {
+  Write-Host "Check pico-sdk ..." -ForegroundColor Green
+  add_path "$NUTTXTOOLS\pico-sdk"
+  try {
+    if (-not (Test-Path -Path "$NUTTXTOOLS\pico-sdk\pico_sdk_init.cmake")) {
+      Write-Host "Download: pico-sdk package" -ForegroundColor Green
+      # Download the file
+      $basefile = "2.2.0"
+      Set-Location "$NUTTXTOOLS"
+      # Download pico-sdk
+      Invoke-WebRequest -Uri "https://github.com/raspberrypi/pico-sdk/archive/refs/tags/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
+      Expand-Archive "$NUTTXTOOLS\$basefile.zip"
+      Move-Item -Path "$basefile\pico-sdk-2.2.0" -Destination "pico-sdk"
+      Remove-Item "$basefile*" -Force
+      # Configuring the PATH environment variable
+      $env:PICO_SDK_PATH = "$NUTTXTOOLS\pico-sdk"
+      Add-Content -Path "$NUTTXTOOLS\env.ps1" -Value "PICO_SDK_PATH=$NUTTXTOOLS\pico-sdk"
+      Write-Host "File downloaded successfully to pico-sdk"
+    }
+  }
+  catch {
+    Write-Error "Failed to download the file: $_"
+  }
+}
+
+function pico_tool {
+  Write-Host "Check picotool ..." -ForegroundColor Green
+  if (run_command("picotool") -ne 0) {
+    add_path "$NUTTXTOOLS\picotool"
+    if ($null -eq (Get-Command picotool -ErrorAction SilentlyContinue)) {
+      Write-Host "Download: picotool package" -ForegroundColor Green
+      # Download the file
+      $basefile = "picotool-2.2.0-x64-win"
+      Set-Location "$NUTTXTOOLS"
+      # Download tool picotool
+      Invoke-WebRequest -Uri "https://github.com/raspberrypi/pico-sdk-tools/releases/download/v2.2.0-0/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
+      Expand-Archive "$NUTTXTOOLS\$basefile.zip"
+      Move-Item -Path "$basefile\picotool" -Destination "picotool"
+      Remove-Item "$basefile*" -Force -Recurse
+    }
+  }
+  picotool version
+  Write-Host ""
+}
+
 function riscv_gcc_toolchain() {
   Write-Host "Check RISCV GCC toolchain ..." -ForegroundColor Green
   add_path "$NUTTXTOOLS\riscv-none-elf-gcc\bin"
@@ -231,12 +276,12 @@ function riscv_gcc_toolchain() {
       add_path "$NUTTXTOOLS\riscv-none-elf-gcc\bin"
       if (-not (Test-Path -Path "$NUTTXTOOLS\riscv-none-elf-gcc\bin\riscv-none-elf-gcc.exe")) {
         Write-Host "Download: RISCV GCC toolchain" -ForegroundColor Green
-        $basefile = "xpack-riscv-none-elf-gcc-13.2.0-2-win32-x64"
+        $basefile = "xpack-riscv-none-elf-gcc-14.2.0-3-win32-x64"
         Set-Location "$NUTTXTOOLS"
         # Download the latest RISCV GCC toolchain prebuilt by xPack
-        Invoke-WebRequest -Uri "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
+        Invoke-WebRequest -Uri "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v14.2.0-3/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
         Expand-Archive "$NUTTXTOOLS\$basefile.zip"
-        Move-Item -Path "$basefile\xpack-riscv-none-elf-gcc-13.2.0-2" -Destination "riscv-none-elf-gcc"
+        Move-Item -Path "$basefile\xpack-riscv-none-elf-gcc-14.2.0-3" -Destination "riscv-none-elf-gcc"
         Remove-Item "$basefile*" -Force
       }
     }
@@ -292,7 +337,7 @@ function install_build_tools {
   if (-not (Test-Path -Path "$NUTTXTOOLS\env.ps1")) {
     add_envpath "$NUTTXTOOLS\env.ps1"
   }
-  $install = "arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain riscv_gcc_toolchain cmake_tool kconfig_frontends ninja_tool"
+  $install = "arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain riscv_gcc_toolchain pico_sdk pico_tool cmake_tool kconfig_frontends ninja_tool"
 
   $splitArray = $install.Split(" ")
   $oldpath = Get-Location

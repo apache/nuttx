@@ -113,6 +113,7 @@ static const struct sensor_ops_s g_bh1749nuc_sensor_ops =
   NULL,                 /* set_calibvalue */
   NULL,                 /* calibrate */
   NULL,                 /* get_info */
+  NULL,                 /* set_nonwakeup */
   bh1749nuc_control
 };
 
@@ -384,7 +385,7 @@ static int bh1749nuc_thread(int argc, FAR char **argv)
       /* Sleeping thread before fetching the next sensor data */
 
       min_interval = MIN(rgb->interval, ir->interval);
-      nxsig_usleep(min_interval);
+      nxsched_usleep(min_interval);
     }
 
   return OK;

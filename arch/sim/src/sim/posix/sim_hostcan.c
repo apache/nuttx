@@ -184,3 +184,35 @@ bool host_can_avail(struct sim_can_s *can)
 
   return select(can->fd + 1, &fdset, NULL, NULL, &tv) > 0;
 }
+
+/****************************************************************************
+ * Name: host_can_loopback
+ ****************************************************************************/
+
+int host_can_loopback(struct sim_can_s *can, bool enable)
+{
+  int ret;
+  int tmp;
+
+  /* Receive own messages */
+
+  tmp = 1;
+  ret = setsockopt(can->fd, SOL_CAN_RAW, CAN_RAW_RECV_OWN_MSGS,
+                   &tmp, sizeof(tmp));
+  if (ret < 0)
+    {
+      return -errno;
+    }
+
+  /* Set loopback mode */
+
+  tmp = 1;
+  ret = setsockopt(can->fd, SOL_CAN_RAW, CAN_RAW_LOOPBACK, &tmp,
+                   sizeof(tmp));
+  if (ret < 0)
+    {
+      return -errno;
+    }
+
+  return 0;
+}

@@ -102,9 +102,6 @@ void nxsem_release_all(FAR struct tcb_s *stcb);
 #ifdef CONFIG_PRIORITY_PROTECT
 int nxsem_protect_wait(FAR sem_t *sem);
 void nxsem_protect_post(FAR sem_t *sem);
-#else
-#  define nxsem_protect_wait(sem)  0
-#  define nxsem_protect_post(sem)
 #endif
 
 #undef EXTERN

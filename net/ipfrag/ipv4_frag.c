@@ -309,7 +309,7 @@ int32_t ipv4_fragin(FAR struct net_driver_s *dev)
        */
 
       ipv4_fragin_reassemble(node);
-      netdev_iob_replace(dev, node->outgoframe);
+      netdev_iob_replace_l2(dev, node->outgoframe);
 
       /* Free the memory of node */
 
@@ -361,7 +361,7 @@ int32_t ipv4_fragout(FAR struct net_driver_s *dev, uint16_t mtu)
   uint32_t nfrags;
   uint16_t offset = 0;
   uint16_t hdrlen;
-  FAR struct iob_s *frag;
+  FAR struct iob_s *frag = NULL;
   FAR struct ipv4_hdr_s *ref = NULL;
   struct iob_queue_s fragq =
     {
@@ -379,8 +379,14 @@ int32_t ipv4_fragout(FAR struct net_driver_s *dev, uint16_t mtu)
    */
 
   nfrags = ip_fragout_slice(dev->d_iob, PF_INET, mtu, hdrlen, &fragq);
-  ASSERT(nfrags > 1);
   netdev_iob_clear(dev);
+
+  /* No I/O Buffer is the only cause of failure */
+
+  if (nfrags == 0)
+    {
+      goto fail;
+    }
 
   /* Fill the L3 header into the reserved space */
 
@@ -429,7 +435,7 @@ int32_t ipv4_fragout(FAR struct net_driver_s *dev, uint16_t mtu)
   g_netstats.ipv4.sent += nfrags - 1;
 #endif
 
-  netdev_txnotify_dev(dev);
+  netdev_txnotify_dev(dev, IPFRAG_POLL);
 
   return OK;
 

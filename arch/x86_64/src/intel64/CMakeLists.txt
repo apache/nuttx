@@ -34,8 +34,6 @@ set(SRCS
     intel64_rtc.c
     intel64_restore_auxstate.c
     intel64_stackframe.c
-    intel64_schedulesigaction.c
-    intel64_sigdeliver.c
     intel64_usestack.c
     intel64_systemreset.c
     intel64_freq.c
@@ -48,6 +46,14 @@ set(SRCS
     intel64_rng.c
     intel64_check_capability.c
     intel64_cpu.c)
+
+if(CONFIG_ENABLE_ALL_SIGNALS)
+  list(APPEND SRCS intel64_schedulesigaction.c intel64_sigdeliver.c)
+endif()
+
+if(CONFIG_BOARDCTL_POWEROFF)
+  list(APPEND SRCS intel64_systempoweroff.c)
+endif()
 
 if(CONFIG_X86_64_UNWINDER_FRAME_POINTER)
   list(APPEND SRCS intel64_backtrace_fp.c)
@@ -83,11 +89,11 @@ endif()
 
 if(CONFIG_ARCH_INTEL64_HAVE_TSC)
   if(CONFIG_SCHED_TICKLESS)
-    list(APPEND SRCS intel64_tsc_tickless.c)
+    list(APPEND SRCS intel64_tsc_oneshot.c)
   else()
     list(APPEND SRCS intel64_tsc_timerisr.c)
+    list(APPEND SRCS intel64_tsc_ndelay.c)
   endif()
-  list(APPEND SRCS intel64_tsc_ndelay.c)
 endif()
 
 if(CONFIG_INTEL64_HPET)

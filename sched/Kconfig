@@ -73,26 +73,6 @@ config SCHED_TICKLESS
 
 if SCHED_TICKLESS
 
-config SCHED_TICKLESS_TICK_ARGUMENT
-	bool "Scheduler use tick argument"
-	default n
-	---help---
-		Enables use of tick argument in scheduler. If enabled, then the
-		board-specific logic must provide the following functions:
-
-			int up_timer_gettick(FAR clock_t *ticks);
-
-		If SCHED_TICKLESS_ALARM is enabled, then these additional interfaces are
-		expected:
-
-			int up_alarm_tick_cancel(FAR clock_t *ticks);
-			int up_alarm_tick_start(clock_t ticks);
-
-		Otherwise, these additional interfaces are expected:
-
-			int up_timer_tick_cancel(FAR clock_t *ticks);
-			int up_timer_tick_start(FAR clock_t ticks);
-
 config SCHED_TICKLESS_ALARM
 	bool "Tickless alarm"
 	default n
@@ -208,13 +188,16 @@ config ARCH_HAVE_ADJTIME
 config CLOCK_ADJTIME
 	bool "Support adjtime function"
 	default n
-	depends on ARCH_HAVE_ADJTIME || RTC_ADJTIME
+	depends on ARCH_HAVE_ADJTIME || RTC_ADJTIME || PTP_CLOCK
 	---help---
 		Enables usage of adjtime() interface used to correct the system time
 		clock. This requires specific architecture support.
 
 		Adjustment can affect system timer period and/or high-resolution RTC.
 		These are implemented by interfaces up_adjtime() and up_rtc_adjtime().
+
+		Enables usage of clock_adjtime() interface used to correct the system
+		and other ptp time clock. This requires ptp clock support.
 
 		This is not a POSIX interface but derives from 4.3BSD, System V.
 		It is also supported for Linux compatibility.
@@ -653,8 +636,6 @@ config RR_INTERVAL
 config SCHED_SPORADIC
 	bool "Support sporadic scheduling"
 	default n
-	select SCHED_SUSPENDSCHEDULER
-	select SCHED_RESUMESCHEDULER
 	---help---
 		Build in additional logic to support sporadic scheduling
 		(SCHED_SPORADIC).
@@ -847,7 +828,7 @@ config PTHREAD_MUTEX_TYPES
 
 choice
 	prompt "pthread mutex robustness"
-	default PTHREAD_MUTEX_ROBUST if !DEFAULT_SMALL
+	default PTHREAD_MUTEX_BOTH if !DEFAULT_SMALL
 	default PTHREAD_MUTEX_UNSAFE if DEFAULT_SMALL
 
 config PTHREAD_MUTEX_ROBUST
@@ -872,7 +853,7 @@ endchoice # pthread mutex robustness
 
 choice
 	prompt "Default NORMAL mutex robustness"
-	default PTHREAD_MUTEX_DEFAULT_ROBUST
+	default PTHREAD_MUTEX_DEFAULT_UNSAFE
 	depends on PTHREAD_MUTEX_BOTH
 
 config PTHREAD_MUTEX_DEFAULT_ROBUST
@@ -917,14 +898,6 @@ endmenu # Pthread Options
 
 menu "Performance Monitoring"
 
-config SCHED_SUSPENDSCHEDULER
-	bool
-	default n
-
-config SCHED_RESUMESCHEDULER
-	bool
-	default n
-
 config SCHED_IRQMONITOR
 	bool "Enable IRQ monitoring"
 	default n
@@ -937,9 +910,6 @@ config SCHED_IRQMONITOR
 config SCHED_CRITMONITOR
 	bool "Enable Critical Section monitoring"
 	default n
-	depends on FS_PROCFS
-	select SCHED_SUSPENDSCHEDULER
-	select SCHED_RESUMESCHEDULER
 	select IRQCOUNT
 	---help---
 		Enables logic that monitors the duration of time that a thread keeps
@@ -984,6 +954,15 @@ config SCHED_CRITMONITOR_MAXTIME_CSECTION
 		SCHED_CRITMONITOR_MAXTIME_CSECTION, or system will give a warning.
 		For debugging system latency, 0 means disabled.
 
+config SCHED_CRITMONITOR_MAXTIME_BUSYWAIT
+	int "Critical section or spinlock max busy waiting time"
+	default -1
+	---help---
+		Busy waiting time to enter critical section or
+		get spinlock should be smaller than
+		SCHED_CRITMONITOR_MAXTIME_BUSYWAIT, or system will give a warning.
+		For debugging system latency, -1 means disabled.
+
 config SCHED_CRITMONITOR_MAXTIME_IRQ
 	int "IRQ max execution time"
 	default SCHED_CRITMONITOR_MAXTIME_CSECTION
@@ -1010,6 +989,7 @@ config SCHED_CRITMONITOR_MAXTIME_PANIC
 		SCHED_CRITMONITOR_MAXTIME_WQUEUE > 0 || \
 		SCHED_CRITMONITOR_MAXTIME_PREEMPTION > 0 || \
 		SCHED_CRITMONITOR_MAXTIME_CSECTION > 0 || \
+		SCHED_CRITMONITOR_MAXTIME_BUSYWAIT > 0 || \
 		SCHED_CRITMONITOR_MAXTIME_IRQ > 0
 	default n
 	---help---
@@ -1185,8 +1165,6 @@ config SCHED_PROFILE_TICKSPERSEC
 menuconfig SCHED_INSTRUMENTATION
 	bool "System performance monitor hooks"
 	default n
-	select SCHED_SUSPENDSCHEDULER
-	select SCHED_RESUMESCHEDULER
 	---help---
 		Enables instrumentation in scheduler to monitor system performance.
 		If enabled, then the board-specific logic must provide the following
@@ -1578,6 +1556,54 @@ endmenu # RTOS hooks
 
 menu "Signal Configuration"
 
+choice
+	prompt "Signal support level"
+	default ENABLE_ALL_SIGNALS if !DEFAULT_SMALL
+	default ENABLE_PARTIAL_SIGNALS if DEFAULT_SMALL
+
+config ENABLE_ALL_SIGNALS
+	bool "Enable full signal support"
+	---help---
+		Enable full POSIX signal support, including signal handling,
+		thread cancellation, timers, and process-related notifications.
+
+		This option provides the most complete signal functionality,
+		but increases code size and resource usage.
+
+		Typical use cases:
+		  - Applications relying on POSIX signals or timers
+		  - Systems where memory and CPU resources are sufficient
+
+config ENABLE_PARTIAL_SIGNALS
+	bool "Enable partial signal support"
+	---help---
+		Disable process-related signal functionality while keeping
+		basic signal handling support.
+
+		This option provides a balance between reduced resource usage
+		and limited signal functionality.
+
+		Typical use cases:
+		  - Applications using basic signals without fork/exec
+		  - Resource-constrained real-time systems
+
+config DISABLE_ALL_SIGNALS
+	bool "Disable all signal support"
+	select DISABLE_MQUEUE_NOTIFICATION
+	---help---
+		Disable all signal-related functionality, including signal
+		handling, thread cancellation, timers, and process-related
+		notifications.
+
+		This option provides the smallest footprint and maximum
+		resource savings.
+
+		Typical use cases:
+		  - Hard real-time or safety-critical systems
+		  - Applications that do not use POSIX signals or timers
+
+endchoice
+
 config SIG_PREALLOC_ACTIONS
 	int "Number of pre-allocated sigactions"
 	default 4
@@ -1701,6 +1727,15 @@ config SIG_SIGPOLL_ACTION
 		Make sure that your applications are expecting this POSIX behavior.
 		Backward compatible behavior would require that the application use
 		sigaction() to ignore SIGPOLL.
+
+config SIG_SIGURG_ACTION
+	bool "SIGURG"
+	default n
+	---help---
+		Enable the default action for SIGURG (ignore the signal)
+		Make sure that your applications are expecting this POSIX behavior.
+		Backward compatible behavior would require that the application use
+		sigaction() to ignore SIGURG.
 
 endif # SIG_DEFAULT
 
@@ -1829,6 +1864,12 @@ config SCHED_HPWORKSTACKSIZE
 	---help---
 		The stack size allocated for the worker thread.  Default: 2K.
 
+config SCHED_HPWORKSTACKSECTION
+	string "The section where hpwork stack is located"
+	default ""
+	---help---
+		The section where hpwork stack is located.
+
 endif # SCHED_HPWORK
 
 config SCHED_LPWORK
@@ -1928,6 +1969,12 @@ config SCHED_LPWORKSTACKSIZE
 	---help---
 		The stack size allocated for the lower priority worker thread.  Default: 2K.
 
+config SCHED_LPWORKSTACKSECTION
+	string "The section where lpwork stack is located"
+	default ""
+	---help---
+		The section where lpwork stack is located.
+
 endif # SCHED_LPWORK
 endmenu # Work Queue Support
 
@@ -1959,6 +2006,14 @@ config PTHREAD_STACK_DEFAULT
 	default DEFAULT_TASK_STACKSIZE
 	---help---
 		Default pthread stack size
+
+config PTHREAD_GUARDSIZE_DEFAULT
+	int "Default pthread guard area size"
+	default 0
+	---help---
+		This is the default amount of space to reserve at the overflow end of a
+		pthread stack. At this moment this option simply increases the size
+		of thread stacks.
 
 endmenu # Stack and heap information
 
@@ -2019,3 +2074,42 @@ config COREDUMP
 		The memory state embeds a snapshot of all segments mapped in the
 		memory space of the program. The CPU state contains register values
 		when the core dump has been generated.
+
+config CUSTOM_SEMAPHORE_MAXVALUE
+	bool "Custom max value for semaphores"
+	default n
+	---help---
+		Enable to support custom max value for semaphores.
+		When this option is enabled, the max value of a semaphore can be set
+
+config HRTIMER
+	bool "High resolution timer support"
+	depends on SYSTEM_TIME64
+	default n
+	---help---
+		Enable to support high resolution timer
+
+if HRTIMER
+
+choice
+	prompt "HRTimer management data structure type"
+	default HRTIMER_TREE
+
+config HRTIMER_LIST
+	bool "List-based timer management"
+	---help---
+		Use a simple list to manage timers. This method is
+		suitable for systems with a small number of timers.
+		It is more memory-efficient but may become slower
+		as the number of timers increases.
+
+config HRTIMER_TREE
+	bool "RB-tree-based timer management"
+	---help---
+		Use a red-black tree to manage timers. This method
+		provides better performance for systems with many
+		timers, at the cost of slightly higher memory usage.
+
+endchoice
+
+endif # HRTIMER

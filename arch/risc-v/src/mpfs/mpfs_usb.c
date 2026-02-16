@@ -3430,6 +3430,10 @@ static int mpfs_usb_interrupt(int irq, void *context, void *arg)
   uint16_t pending_tx_ep;
   int i;
 
+#ifdef CONFIG_SMP
+  irqstate_t flags = enter_critical_section();
+#endif
+
   /* Get the device interrupts */
 
   isr = getreg8(MPFS_USB_IRQ);
@@ -3455,6 +3459,9 @@ static int mpfs_usb_interrupt(int irq, void *context, void *arg)
       priv->usbdev.dualspeed = 1;
 #endif
 
+#ifdef CONFIG_SMP
+      leave_critical_section(flags);
+#endif
       return OK;
     }
 
@@ -3467,7 +3474,7 @@ static int mpfs_usb_interrupt(int irq, void *context, void *arg)
 
   if (pending_tx_ep != 0)
     {
-      for (i = 1; i < MPFS_USB_NENDPOINTS; i++)
+      for (i = 1; i < (MPFS_USB_NENDPOINTS / 2 + 1); i++)
         {
           if ((pending_tx_ep & (1 << i)) != 0)
             {
@@ -3478,20 +3485,27 @@ static int mpfs_usb_interrupt(int irq, void *context, void *arg)
 
   if (pending_rx_ep != 0)
     {
-      for (i = 0; i < MPFS_USB_NENDPOINTS; i++)
+      for (i = 1; i < (MPFS_USB_NENDPOINTS / 2 + 1); i++)
         {
           /* Check if dead connections are back in business */
 
           if (g_linkdead)
             {
-              /* This releases all, which is a problem if only some
-               * endpoints are closed on the remote; whereas some
-               * are functioning; for example ACM and mass storage;
-               * now the functioning one likely marks the closed ones
-               * as no longer dead.
+              /* This releases all tx counterparts with linkdead flag
+               * set, which is a problem if only some endpoints are
+               * closed on the remote; whereas some are functioning;
+               * for example ACM and mass storage; now the functioning
+               * one likely marks the closed ones as no longer dead.
+               * Please note that tx counterparts have MPFS_EPIN_START
+               * offset on top of the rx eps.
+               *
+               * For clarity, the eplist[] is as follows:
+               * eplist: 0:   ep0,
+               *         1-4: ep1rx, ep2rx, ep3rx, ep4rx,
+               *         5-8: ep1tx, ep2tx, ep3tx, ep4tx
                */
 
-              struct mpfs_ep_s *privep = &priv->eplist[i];
+              struct mpfs_ep_s *privep = &priv->eplist[i + MPFS_EPIN_START];
               privep->linkdead = 0;
             }
 
@@ -3532,6 +3546,9 @@ static int mpfs_usb_interrupt(int irq, void *context, void *arg)
       mpfs_resume(priv);
     }
 
+#ifdef CONFIG_SMP
+  leave_critical_section(flags);
+#endif
   return OK;
 }
 
@@ -3788,7 +3805,7 @@ static void mpfs_hw_shutdown(struct mpfs_usbdev_s *priv)
   /* Force disconnect and give some time to finish it up */
 
   mpfs_modifyreg8(MPFS_USB_POWER, POWER_REG_SOFT_CONN_MASK, 0);
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* Disable all interrupts */
 

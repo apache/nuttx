@@ -31,7 +31,9 @@
 #include <errno.h>
 #include <poll.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/video/v4l2_cap.h>
 #include <nuttx/video/video.h>
 
@@ -172,7 +174,6 @@ struct capture_mng_s
 
   /* Parameter of capture_initialize() */
 
-  mutex_t                lock_open_num;
   uint8_t                open_num;
   capture_type_inf_t     capture_inf;
   capture_type_inf_t     still_inf;
@@ -181,6 +182,8 @@ struct capture_mng_s
   enum v4l2_scene_mode   capture_scene_mode;
   uint8_t                capture_scence_num;
   FAR capture_scene_params_t *capture_scene_param[V4L2_SCENE_MODE_MAX];
+  spinlock_t             lock;
+  mutex_t                mutex;
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   bool                   unlinked;
 #endif
@@ -782,9 +785,21 @@ static int start_capture(FAR struct capture_mng_s *cmng,
                          FAR struct v4l2_fract *interval,
                          uintptr_t bufaddr, uint32_t bufsize)
 {
-  video_format_t c_fmt[MAX_CAPTURE_FMT];
-  imgdata_format_t df[MAX_CAPTURE_FMT];
-  imgsensor_format_t sf[MAX_CAPTURE_FMT];
+  video_format_t c_fmt[MAX_CAPTURE_FMT] =
+    {
+      0
+    };
+
+  imgdata_format_t df[MAX_CAPTURE_FMT] =
+    {
+      0
+    };
+
+  imgsensor_format_t sf[MAX_CAPTURE_FMT] =
+    {
+      0
+    };
+
   imgdata_interval_t di;
   imgsensor_interval_t si;
 
@@ -1263,9 +1278,21 @@ static int validate_frame_setting(FAR capture_mng_t *cmng,
                                   FAR struct v4l2_rect *clip,
                                   FAR struct v4l2_fract *interval)
 {
-  video_format_t c_fmt[MAX_CAPTURE_FMT];
-  imgdata_format_t df[MAX_CAPTURE_FMT];
-  imgsensor_format_t sf[MAX_CAPTURE_FMT];
+  video_format_t c_fmt[MAX_CAPTURE_FMT] =
+    {
+      0
+    };
+
+  imgdata_format_t df[MAX_CAPTURE_FMT] =
+    {
+      0
+    };
+
+  imgsensor_format_t sf[MAX_CAPTURE_FMT] =
+    {
+      0
+    };
+
   imgdata_interval_t di;
   imgsensor_interval_t si;
   int ret;
@@ -1947,10 +1974,17 @@ static int complete_capture(uint8_t err_code,
   FAR vbuf_container_t *container = NULL;
   enum v4l2_buf_type buf_type;
   irqstate_t           flags;
-  imgdata_format_t df[MAX_CAPTURE_FMT];
-  video_format_t c_fmt[MAX_CAPTURE_FMT];
+  imgdata_format_t df[MAX_CAPTURE_FMT] =
+    {
+      0
+    };
 
-  flags = enter_critical_section();
+  video_format_t c_fmt[MAX_CAPTURE_FMT] =
+    {
+      0
+    };
+
+  flags = spin_lock_irqsave_nopreempt(&cmng->lock);
 
   buf_type = cmng->still_inf.state == CAPTURE_STATE_CAPTURE ?
                V4L2_BUF_TYPE_STILL_CAPTURE : V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -1958,7 +1992,7 @@ static int complete_capture(uint8_t err_code,
   type_inf = get_capture_type_inf(cmng, buf_type);
   if (type_inf == NULL)
     {
-      leave_critical_section(flags);
+      spin_unlock_irqrestore_nopreempt(&cmng->lock, flags);
       return -EINVAL;
     }
 
@@ -2041,7 +2075,7 @@ static int complete_capture(uint8_t err_code,
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&cmng->lock, flags);
   return OK;
 }
 
@@ -2139,12 +2173,16 @@ static int capture_reqbufs(FAR struct file *filep,
   FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
   struct imgdata_s *imgdata;
-  irqstate_t flags;
   int ret = OK;
 
   if (cmng == NULL || reqbufs == NULL)
     {
       return -EINVAL;
+    }
+
+  if (reqbufs->count == 0)
+    {
+      return 0;
     }
 
   imgdata  = cmng->imgdata;
@@ -2154,7 +2192,7 @@ static int capture_reqbufs(FAR struct file *filep,
       return -EINVAL;
     }
 
-  flags = enter_critical_section();
+  nxmutex_lock(&cmng->mutex);
 
   if (type_inf->state == CAPTURE_STATE_CAPTURE)
     {
@@ -2205,7 +2243,7 @@ static int capture_reqbufs(FAR struct file *filep,
         }
     }
 
-  leave_critical_section(flags);
+  nxmutex_unlock(&cmng->mutex);
   return ret;
 }
 
@@ -2246,7 +2284,6 @@ static int capture_qbuf(FAR struct file *filep,
   FAR capture_type_inf_t *type_inf;
   FAR vbuf_container_t *container;
   enum capture_state_e next_capture_state;
-  irqstate_t flags;
 
   if (cmng == NULL || buf == NULL)
     {
@@ -2283,11 +2320,8 @@ static int capture_qbuf(FAR struct file *filep,
   video_framebuff_queue_container(&type_inf->bufinf, container);
 
   nxmutex_lock(&type_inf->lock_state);
-  flags = enter_critical_section();
   if (type_inf->state == CAPTURE_STATE_STREAMON)
     {
-      leave_critical_section(flags);
-
       if (buf->type == V4L2_BUF_TYPE_VIDEO_CAPTURE)
         {
           nxmutex_lock(&cmng->still_inf.lock_state);
@@ -2315,10 +2349,6 @@ static int capture_qbuf(FAR struct file *filep,
             }
         }
     }
-  else
-    {
-      leave_critical_section(flags);
-    }
 
   nxmutex_unlock(&type_inf->lock_state);
   return OK;
@@ -2333,7 +2363,6 @@ static int capture_dqbuf(FAR struct file *filep,
   FAR vbuf_container_t *container;
   FAR sem_t *dqbuf_wait_flg;
   enum capture_state_e next_capture_state;
-  irqstate_t flags;
 
   if (cmng == NULL || buf == NULL)
     {
@@ -2366,11 +2395,11 @@ static int capture_dqbuf(FAR struct file *filep,
             {
               /* If start capture condition is satisfied, start capture */
 
-              flags = enter_critical_section();
+              nxmutex_lock(&cmng->mutex);
               next_capture_state =
                 estimate_next_capture_state(cmng, CAUSE_CAPTURE_DQBUF);
               change_capture_state(cmng, next_capture_state);
-              leave_critical_section(flags);
+              nxmutex_unlock(&cmng->mutex);
             }
 
           nxsem_wait_uninterruptible(dqbuf_wait_flg);
@@ -2523,7 +2552,11 @@ static int capture_try_fmt(FAR struct file *filep,
   FAR struct inode *inode = filep->f_inode;
   FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
-  video_format_t vf[MAX_CAPTURE_FMT];
+  video_format_t vf[MAX_CAPTURE_FMT] =
+    {
+      0
+    };
+
   uint8_t nr_fmt;
 
   if (cmng == NULL || fmt == NULL)
@@ -2727,7 +2760,6 @@ static int capture_streamoff(FAR struct file *filep,
   FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
   enum capture_state_e next_capture_state;
-  irqstate_t flags;
   int ret = OK;
 
   if (cmng == NULL || type == NULL)
@@ -2748,7 +2780,7 @@ static int capture_streamoff(FAR struct file *filep,
       return OK;
     }
 
-  flags = enter_critical_section();
+  nxmutex_lock(&cmng->mutex);
 
   if (type_inf->state == CAPTURE_STATE_STREAMOFF)
     {
@@ -2761,7 +2793,7 @@ static int capture_streamoff(FAR struct file *filep,
       change_capture_state(cmng, next_capture_state);
     }
 
-  leave_critical_section(flags);
+  nxmutex_unlock(&cmng->mutex);
 
   return ret;
 }
@@ -2795,7 +2827,6 @@ static int capture_takepict_start(FAR struct file *filep,
   FAR capture_mng_t *cmng = inode->i_private;
   enum capture_state_e next_capture_state;
   FAR vbuf_container_t *container;
-  irqstate_t flags;
   int ret = OK;
 
   if (cmng == NULL)
@@ -2822,13 +2853,13 @@ static int capture_takepict_start(FAR struct file *filep,
 
       /* Control video stream prior to still stream */
 
-      flags = enter_critical_section();
+      nxmutex_lock(&cmng->mutex);
 
       next_capture_state = estimate_next_capture_state(cmng,
                                                    CAUSE_STILL_START);
       change_capture_state(cmng, next_capture_state);
 
-      leave_critical_section(flags);
+      nxmutex_unlock(&cmng->mutex);
 
       container =
         video_framebuff_get_vacant_container(&cmng->still_inf.bufinf);
@@ -2863,7 +2894,6 @@ static int capture_takepict_stop(FAR struct file *filep,
   FAR struct inode *inode = filep->f_inode;
   FAR capture_mng_t *cmng = inode->i_private;
   enum capture_state_e next_capture_state;
-  irqstate_t flags;
   int ret = OK;
 
   if (cmng == NULL)
@@ -2880,13 +2910,13 @@ static int capture_takepict_stop(FAR struct file *filep,
     }
   else
     {
-      flags = enter_critical_section();
+      nxmutex_lock(&cmng->mutex);
       if (cmng->still_inf.state == CAPTURE_STATE_CAPTURE)
         {
           stop_capture(cmng, V4L2_BUF_TYPE_STILL_CAPTURE);
         }
 
-      leave_critical_section(flags);
+      nxmutex_unlock(&cmng->mutex);
 
       cmng->still_inf.state = CAPTURE_STATE_STREAMOFF;
       cmng->still_inf.remaining_capnum = REMAINING_CAPNUM_INFINITY;
@@ -2910,7 +2940,11 @@ static int capture_s_selection(FAR struct file *filep,
   FAR struct inode *inode = filep->f_inode;
   FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
-  uint32_t p_u32[IMGSENSOR_CLIP_NELEM];
+  uint32_t p_u32[IMGSENSOR_CLIP_NELEM] =
+    {
+      0
+    };
+
   imgsensor_value_t val;
   uint32_t id;
   int ret;
@@ -3422,7 +3456,7 @@ static int capture_enum_fmt(FAR struct file *filep,
 
   if (cmng->imgsensor && cmng->imgsensor->fmtdescs)
     {
-      if (f->index > cmng->imgsensor->fmtdescs_num)
+      if (f->index >= cmng->imgsensor->fmtdescs_num)
         {
           return -EINVAL;
         }
@@ -3460,7 +3494,7 @@ static int capture_enum_frmsize(FAR struct file *filep,
 
   if (cmng->imgsensor && cmng->imgsensor->frmsizes)
     {
-      if (f->index > cmng->imgsensor->frmsizes_num)
+      if (f->index >= cmng->imgsensor->frmsizes_num)
         {
           return -EINVAL;
         }
@@ -3505,7 +3539,7 @@ static int capture_enum_frminterval(FAR struct file *filep,
 
   if (cmng->imgsensor && cmng->imgsensor->frmintervals)
     {
-      if (f->index > cmng->imgsensor->frmintervals_num)
+      if (f->index >= cmng->imgsensor->frmintervals_num)
         {
           return -EINVAL;
         }
@@ -3552,7 +3586,7 @@ static int capture_open(FAR struct file *filep)
       return -EINVAL;
     }
 
-  nxmutex_lock(&cmng->lock_open_num);
+  nxmutex_lock(&cmng->mutex);
   if (cmng->open_num == 0)
     {
       /* Only in first execution, open device */
@@ -3579,7 +3613,7 @@ static int capture_open(FAR struct file *filep)
       cmng->open_num++;
     }
 
-  nxmutex_unlock(&cmng->lock_open_num);
+  nxmutex_unlock(&cmng->mutex);
   return ret;
 }
 
@@ -3593,7 +3627,7 @@ static int capture_close(FAR struct file *filep)
       return -EINVAL;
     }
 
-  nxmutex_lock(&cmng->lock_open_num);
+  nxmutex_lock(&cmng->mutex);
 
   if (--cmng->open_num == 0)
     {
@@ -3603,8 +3637,8 @@ static int capture_close(FAR struct file *filep)
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
       if (cmng->unlinked)
         {
-          nxmutex_unlock(&cmng->lock_open_num);
-          nxmutex_destroy(&cmng->lock_open_num);
+          nxmutex_unlock(&cmng->mutex);
+          nxmutex_destroy(&cmng->mutex);
           kmm_free(cmng);
           inode->i_private = NULL;
           return OK;
@@ -3613,7 +3647,7 @@ static int capture_close(FAR struct file *filep)
 #endif
     }
 
-  nxmutex_unlock(&cmng->lock_open_num);
+  nxmutex_unlock(&cmng->mutex);
   return OK;
 }
 
@@ -3667,7 +3701,7 @@ static int capture_poll(FAR struct file *filep,
       return -EINVAL;
     }
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&cmng->lock);
 
   if (setup)
     {
@@ -3682,7 +3716,7 @@ static int capture_poll(FAR struct file *filep,
         }
       else
         {
-          leave_critical_section(flags);
+          spin_unlock_irqrestore_nopreempt(&cmng->lock, flags);
           return -EBUSY;
         }
     }
@@ -3692,7 +3726,7 @@ static int capture_poll(FAR struct file *filep,
       fds->priv     = NULL;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&cmng->lock, flags);
 
   return OK;
 }
@@ -3707,18 +3741,18 @@ static int capture_unlink(FAR struct inode *inode)
       return -EINVAL;
     }
 
-  nxmutex_lock(&cmng->lock_open_num);
+  nxmutex_lock(&cmng->mutex);
   if (cmng->open_num == 0)
     {
-      nxmutex_unlock(&cmng->lock_open_num);
-      nxmutex_destroy(&cmng->lock_open_num);
+      nxmutex_unlock(&cmng->mutex);
+      nxmutex_destroy(&cmng->mutex);
       kmm_free(cmng);
       inode->i_private = NULL;
     }
   else
     {
       cmng->unlinked = true;
-      nxmutex_unlock(&cmng->lock_open_num);
+      nxmutex_unlock(&cmng->mutex);
     }
 
   return OK;
@@ -3779,7 +3813,11 @@ int capture_register(FAR const char *devpath,
 
   /* Initialize mutex */
 
-  nxmutex_init(&cmng->lock_open_num);
+  nxmutex_init(&cmng->mutex);
+
+  /* Initialize spinlock */
+
+  spin_lock_init(&cmng->lock);
 
   /* Register the character driver */
 
@@ -3787,7 +3825,7 @@ int capture_register(FAR const char *devpath,
   if (ret < 0)
     {
       verr("Failed to register driver: %d\n", ret);
-      nxmutex_destroy(&cmng->lock_open_num);
+      nxmutex_destroy(&cmng->mutex);
       kmm_free(cmng);
       return ret;
     }

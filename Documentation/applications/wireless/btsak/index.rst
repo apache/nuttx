@@ -8,7 +8,7 @@ Commands
 help::
 
   Command:      help
-  Description:  Should overall command help
+  Description:  Show overall command help
   Usage:        bt <ifname> help
 
 info::

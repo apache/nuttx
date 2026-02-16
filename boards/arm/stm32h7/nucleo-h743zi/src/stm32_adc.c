@@ -50,13 +50,11 @@
 
 #if defined(CONFIG_STM32H7_ADC1) || defined(CONFIG_STM32H7_ADC2) || \
     defined(CONFIG_STM32H7_ADC3)
-#ifndef CONFIG_STM32H7_ADC1
-#  warning "Channel information only available for ADC1"
-#endif
 
 /* The number of ADC channels in the conversion list */
 
-#define ADC1_NCHANNELS 5
+#define ADC1_NCHANNELS 7
+#define ADC2_NCHANNELS 5
 #define ADC3_NCHANNELS 1
 
 /****************************************************************************
@@ -66,30 +64,46 @@
 #ifdef CONFIG_STM32H7_ADC1
 /* Identifying number of each ADC channel: Variable Resistor.
  *
- * ADC1: {5, 10, 12, 13, 15};
+ * ADC1: {5, 10, 15, 18, 19, 7, 12};
  */
 
-static const uint8_t  g_adc1_chanlist[ADC1_NCHANNELS] =
+static const uint8_t g_adc1_chanlist[ADC1_NCHANNELS] =
 {
-  5, 10, 12, 13, 15
+  5, 10, 15, 18, 19, 7, 12
 };
-
-/* Configurations of pins used by each ADC channels
- *
- * ADC1:
- * {GPIO_ADC12_INP5, GPIO_ADC123_INP10, GPIO_ADC123_INP12, GPIO_ADC12_INP13,
- *  GPIO_ADC12_INP15};
- */
 
 static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS] =
+  {
+    GPIO_ADC12_INP5,
+    GPIO_ADC123_INP10,
+    GPIO_ADC12_INP15,
+    GPIO_ADC12_INP18,
+    GPIO_ADC12_INP19,
+    GPIO_ADC123_INP7,
+    GPIO_ADC123_INP12
+  };
+
+#endif /* CONFIG_STM32H7_ADC1 */
+
+/****************************************************************************
+ * ADC2
+ ****************************************************************************/
+#ifdef CONFIG_STM32H7_ADC2
+
+static const uint8_t g_adc2_chanlist[ADC2_NCHANNELS] =
 {
-  GPIO_ADC12_INP5,
-  GPIO_ADC123_INP10,
-  GPIO_ADC123_INP12,
-  GPIO_ADC12_INP13,
-  GPIO_ADC12_INP15
+  2, 3, 14, 4, 8
 };
-#endif
+
+static const uint32_t g_adc2_pinlist[ADC2_NCHANNELS] =
+{
+  GPIO_ADC2_INP2,
+  GPIO_ADC12_INP3,
+  GPIO_ADC12_INP14,
+  GPIO_ADC12_INP4,
+  GPIO_ADC12_INP8
+};
+#endif /* CONFIG_STM32H7_ADC2 */
 
 #ifdef CONFIG_STM32H7_ADC3
 /* Identifying number of each ADC channel: Variable Resistor.
@@ -99,7 +113,7 @@ static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS] =
 
 static const uint8_t  g_adc3_chanlist[ADC1_NCHANNELS] =
 {
-  6
+  11
 };
 
 /* Configurations of pins used by each ADC channels
@@ -110,7 +124,7 @@ static const uint8_t  g_adc3_chanlist[ADC1_NCHANNELS] =
 
 static const uint32_t g_adc3_pinlist[ADC3_NCHANNELS] =
 {
-  GPIO_ADC3_INP6
+  GPIO_ADC123_INP11,
 };
 #endif
 
@@ -175,6 +189,39 @@ int stm32_adc_setup(void)
 
       devname[8]++;
 #endif
+
+#ifdef CONFIG_STM32H7_ADC2
+      /* Configure the pins as analog inputs for the selected channels */
+
+      for (i = 0; i < ADC2_NCHANNELS; i++)
+        {
+          if (g_adc2_pinlist[i] != 0)
+            {
+              stm32_configgpio(g_adc2_pinlist[i]);
+            }
+        }
+
+      /* Call stm32_adcinitialize() to get an instance of the ADC interface */
+
+      adc = stm32h7_adc_initialize(2, g_adc2_chanlist, ADC2_NCHANNELS);
+      if (adc == NULL)
+        {
+          aerr("ERROR: Failed to get ADC2 interface\n");
+          return -ENODEV;
+        }
+
+      /* Register the ADC driver at "/dev/adc[0-1]" */
+
+      ret = adc_register(devname, adc);
+      if (ret < 0)
+        {
+          aerr("ERROR: adc_register(%s) failed: %d\n", devname, ret);
+          return ret;
+        }
+
+      devname[8]++;
+#endif
+
 #if defined(CONFIG_STM32H7_ADC3)
       /* Configure the pins as analog inputs for the selected channels */
 
@@ -195,7 +242,7 @@ int stm32_adc_setup(void)
           return -ENODEV;
         }
 
-      /* Register the ADC driver at "/dev/adc0 or 1" */
+      /* Register the ADC driver at "/dev/adc[0-2]" */
 
       ret = adc_register(devname, adc);
       if (ret < 0)
@@ -205,7 +252,8 @@ int stm32_adc_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32H7_ADC1) || defined(CONFIG_STM32H7_ADC3)
+#if defined(CONFIG_STM32H7_ADC1) || defined(CONFIG_STM32H7_ADC2) || \
+    defined(CONFIG_STM32H7_ADC3)
       /* Now we are initialized */
 
       initialized = true;

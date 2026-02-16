@@ -30,6 +30,7 @@
 #include <stdbool.h>
 #include <debug.h>
 #include <errno.h>
+#include <endian.h>
 #include <sys/param.h>
 
 #include <nuttx/arch.h>
@@ -420,6 +421,11 @@ static int ili9342c_sendgram(struct ili9341_lcd_s *lcd,
 {
   struct ili9342c_lcd_dev *priv = (struct ili9342c_lcd_dev *)lcd;
 
+  for (uint32_t i = 0; i < nwords; i++)
+    {
+      ((uint16_t *)wd)[i] = swap16(wd[i]);
+    }
+
   lcdinfo("lcd:%p, wd=%p, nwords=%" PRIu32 "\n", lcd, wd, nwords);
 
   SPI_SETBITS(priv->spi_dev, 16);
@@ -488,11 +494,11 @@ static struct ili9341_lcd_s *esp32s3_initializa_ili9342c(int spi_port)
 
   /* Reset LCD */
 
-  nxsig_usleep(10 * 1000);
+  nxsched_usleep(10 * 1000);
   esp32s3_gpiowrite(DISPLAY_RST, true);
-  nxsig_usleep(10 * 1000);
+  nxsched_usleep(10 * 1000);
   esp32s3_gpiowrite(DISPLAY_RST, false);
-  nxsig_usleep(50 * 1000);
+  nxsched_usleep(50 * 1000);
 
   /* Turn on LCD backlight */
 

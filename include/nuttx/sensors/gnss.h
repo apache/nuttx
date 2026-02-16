@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/sensors/sensor.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -98,6 +99,28 @@ struct gnss_ops_s
   CODE int (*set_interval)(FAR struct gnss_lowerhalf_s *lower,
                            FAR struct file *filep,
                            FAR uint32_t *period_us);
+
+  /**************************************************************************
+   * Name: get_info
+   *
+   * With this method, the user can obtain information about the current
+   * device. The name and vendor information cannot exceed
+   * SENSOR_INFO_NAME_SIZE.
+   *
+   * Input Parameters:
+   *   lower   - The instance of lower half sensor driver.
+   *   filep   - The pointer of file, represents each user using sensor.
+   *   info    - Device information structure pointer.
+   *
+   * Returned Value:
+   *   Zero (OK) on success; a negated errno value on failure.
+   *   -ENOTTY - The cmd don't support.
+   *
+   **************************************************************************/
+
+  CODE int (*get_info)(FAR struct gnss_lowerhalf_s *lower,
+                       FAR struct file *filep,
+                       FAR struct sensor_device_info_s *info);
 
   /**************************************************************************
    * Name: control

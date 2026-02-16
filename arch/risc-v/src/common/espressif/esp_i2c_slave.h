@@ -37,13 +37,8 @@
 
 #ifndef __ASSEMBLY__
 
-#ifdef CONFIG_ESPRESSIF_I2C0_SLAVE_MODE
-#  define ESPRESSIF_I2C0_SLAVE 0
-#endif
-
-#ifdef CONFIG_ESPRESSIF_I2C1_SLAVE_MODE
-#  define ESPRESSIF_I2C1_SLAVE 1
-#endif
+#define ESPRESSIF_I2C0_SLAVE 0
+#define ESPRESSIF_I2C1_SLAVE 1
 
 /****************************************************************************
  * Public Function Prototypes

@@ -1,0 +1,232 @@
+=======
+QMI8658
+=======
+
+The QMI8658 is a high-performance 6-axis IMU sensor by QST featuring a 3-axis
+accelerometer and 3-axis gyroscope. It supports both I2C and SPI interfaces,
+although this driver currently supports I2C communication only.
+
+This driver uses the :doc:`uorb
+</components/drivers/special/sensors/sensors_uorb>` interface. It supports the
+self-test capability for both the accelerometer and gyroscope.
+
+The driver supports comprehensive features including multiple full-scale ranges,
+configurable ODR settings, low-pass filters, FIFO buffer management, temperature
+sensing, and device calibration.
+
+.. note::
+   The QMI8658 is a feature-rich sensor with advanced capabilities like
+   tap detection, motion detection, and various low-power modes. This driver
+   implements the core functionality for accelerometer and gyroscope data
+   acquisition with room for future feature extensions.
+
+Application Programming Interface
+=================================
+
+.. code-block:: c
+
+   #include <nuttx/sensors/qmi8658.h>
+
+The QMI8658 driver provides one registration function:
+
+- **uORB Interface**: ``qmi8658_uorb_register()``
+
+Registration
+------------
+
+The uORB interface registers the driver and creates separate uORB topics for
+accelerometer and gyroscope data under ``/dev/uorb/``: ``sensor_accel<n>`` and
+``sensor_gyro<n>``, where ``n`` is the device number.
+
+.. code-block:: c
+
+   /* Example uORB registration */
+
+   ret = qmi8658_uorb_register(0, i2c_bus, QMI8658_I2C_ADDR_DEFAULT);
+   if (ret < 0)
+     {
+       syslog(LOG_ERR, "Couldn't register QMI8658 uORB: %d\n", ret);
+       return ret;
+     }
+
+The uORB interface registers the driver and creates separate uORB topics for
+accelerometer and gyroscope data under ``/dev/uorb/``: ``sensor_accel<n>`` and
+``sensor_gyro<n>``, where ``n`` is the device number.
+
+.. code-block:: c
+
+   /* Example uORB registration */
+
+   ret = qmi8658_uorb_register(0, i2c_bus, QMI8658_I2C_ADDR_DEFAULT);
+   if (ret < 0)
+     {
+       syslog(LOG_ERR, "Couldn't register QMI8658 uORB: %d\n", ret);
+       return ret;
+     }
+
+Configuration Options
+=====================
+
+The QMI8658 driver supports several Kconfig options:
+
+* ``CONFIG_SENSORS_QMI8658``: Enable QMI8658 driver support (requires UORB)
+* ``CONFIG_SENSORS_QMI8658_POLL``: Enable polling mode with configurable interval
+* ``CONFIG_SENSORS_QMI8658_POLL_INTERVAL``: Set polling interval (default 1s)
+* ``CONFIG_QMI8658_I2C_FREQUENCY``: Set I2C communication frequency (default 400kHz)
+
+Supported Features
+==================
+
+Accelerometer
+-------------
+
+* **Full-Scale Ranges**: ±2g, ±4g, ±8g, ±16g
+* **Output Data Rates**: 1000Hz, 500Hz, 250Hz, 125Hz, 62.5Hz, 31.25Hz
+* **Low-Power ODR**: 128Hz, 21Hz, 11Hz, 3Hz
+* **Low-Pass Filters**: 4 different modes + OFF
+
+Gyroscope
+---------
+
+* **Full-Scale Ranges**: ±16, ±32, ±64, ±128, ±256, ±512, ±1024 dps
+* **Output Data Rates**: 7174.4Hz, 3587.2Hz, 1793.6Hz, 896.8Hz, 448.4Hz, 224.2Hz, 112.1Hz, 56.05Hz, 28.025Hz
+* **Low-Pass Filters**: 4 different modes + OFF
+
+Additional Features
+-----------------==
+
+* **Temperature Sensor**: 16-bit temperature data with 256 LSB/°C scale factor
+* **FIFO Buffer**: Configurable FIFO with watermark and interrupt support
+* **Sampling Modes**: Synchronous and asynchronous sampling
+* **Interrupt Support**: Data ready, FIFO watermark, motion detection
+* **Self-Test**: Built-in self-test capability for both sensors
+* **Calibration**: On-demand calibration support
+
+IOCTL Commands
+==============
+
+uORB IOCTLs
+-----------
+
+* ``SNIOC_SETFULLSCALE``: Set full-scale range (argument in g for accel, dps for gyro)
+* ``SNIOC_SET_CALIBVALUE``: Set calibration offsets
+* ``SNIOC_SELFTEST``: Perform sensor self-test
+* ``SNIOC_WHO_AM_I``: Read device ID (should return 0x05)
+
+Scale Factors
+=============
+
+The driver provides predefined scale factors for converting raw sensor data
+to physical units:
+
+Accelerometer Scale Factors (LSB/g):
+
+.. code-block:: c
+
+   #define QMI8658_ACC_SCALE_2G       (16384.0f)
+   #define QMI8658_ACC_SCALE_4G       (8192.0f)
+   #define QMI8658_ACC_SCALE_8G       (4096.0f)
+   #define QMI8658_ACC_SCALE_16G      (2048.0f)
+
+Gyroscope Scale Factors (LSB/dps):
+
+.. code-block:: c
+
+   #define QMI8658_GYRO_SCALE_16DPS   (2048.0f)
+   #define QMI8658_GYRO_SCALE_32DPS   (1024.0f)
+   #define QMI8658_GYRO_SCALE_64DPS   (512.0f)
+   #define QMI8658_GYRO_SCALE_128DPS  (256.0f)
+   #define QMI8658_GYRO_SCALE_256DPS  (128.0f)
+   #define QMI8658_GYRO_SCALE_512DPS  (64.0f)
+   #define QMI8658_GYRO_SCALE_1024DPS (32.0f)
+
+Temperature Scale Factor (LSB/°C):
+
+.. code-block:: c
+
+   #define QMI8658_TEMP_SCALE         (256.0f)
+
+Data Conversion
+===============
+
+To convert raw sensor data to physical units:
+
+.. code-block:: c
+
+   /* Convert accelerometer raw data to g */
+
+   float accel_x_g = (float)raw_accel_x / QMI8658_ACC_SCALE_8G;
+   float accel_y_g = (float)raw_accel_y / QMI8658_ACC_SCALE_8G;
+   float accel_z_g = (float)raw_accel_z / QMI8658_ACC_SCALE_8G;
+
+   /* Convert gyroscope raw data to dps */
+
+   float gyro_x_dps = (float)raw_gyro_x / QMI8658_GYRO_SCALE_512DPS;
+   float gyro_y_dps = (float)raw_gyro_y / QMI8658_GYRO_SCALE_512DPS;
+   float gyro_z_dps = (float)raw_gyro_z / QMI8658_GYRO_SCALE_512DPS;
+
+   /* Convert temperature raw data to °C */
+
+   float temp_c = (float)raw_temp / QMI8658_TEMP_SCALE;
+
+Debugging and Testing
+=====================
+
+To debug the QMI8658 device, you can:
+
+1. **Enable Debug Output**: Set ``CONFIG_DEBUG_SENSORS`` and ``CONFIG_DEBUG_INFO``
+2. **Use uORB Listener**: Include ``uorb_listener`` application to monitor sensor data
+
+Performance Considerations
+==========================
+
+* **I2C Frequency**: Default 400kHz, configurable via ``CONFIG_QMI8658_I2C_FREQUENCY``
+* **Polling Overhead**: Use interrupt-driven mode when possible for better efficiency
+* **FIFO Usage**: Enable FIFO to reduce I2C traffic and CPU overhead
+* **Power Management**: Utilize low-power ODR settings for battery-powered applications
+
+Limitations
+===========
+
+* Currently supports I2C interface only (SPI support can be added)
+* Advanced features like tap detection and motion detection not yet implemented
+* FIFO interrupt handling not fully implemented
+* Some low-power modes require additional configuration
+
+Hardware Connections
+====================
+
+I2C Interface
+--------------
+
+* **VDD**: Power supply (1.71V to 3.6V)
+* **GND**: Ground
+* **SDA/SDI**: I2C Serial Data
+* **SCL/SCLK**: I2C Serial Clock
+* **CS**: Chip Select (connect to VDD for I2C mode)
+* **INT1/INT2**: Interrupt pins (optional)
+
+Typical I2C addresses:
+* **Primary**: 0x6B
+* **Secondary**: 0x6D (when SDO/SA0 pin is high)
+
+.. note::
+   Ensure proper pull-up resistors on SDA and SCL lines (typically 4.7kΩ for 3.3V).
+
+Troubleshooting
+===============
+
+**Device Not Responding**
+* Check I2C address and connections
+* Verify power supply voltage
+* Ensure CS pin is properly configured for I2C mode
+
+**Incorrect Readings**
+* Verify full-scale range settings
+* Check scale factor calculations
+* Ensure sensor is properly calibrated
+
+**Communication Errors**
+* Reduce I2C frequency
+* Check for signal integrity issues
+* Verify pull-up resistor values

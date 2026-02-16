@@ -22,37 +22,6 @@ if NETDEVICES
 
 comment "Upper-half Network Device Driver Options"
 
-choice
-	prompt "Netdev poll worker"
-
-config NETDEV_LPWORK_THREAD
-	bool "Use low-priority worker thread to do netdev poll"
-	depends on SCHED_LPWORK
-
-config NETDEV_HPWORK_THREAD
-	bool "Use high-priority worker thread to do netdev poll"
-	depends on SCHED_HPWORK
-
-config NETDEV_WORK_THREAD
-	bool "Use a dedicated work thread to do netdev poll"
-
-endchoice # Netdev poll worker
-
-config NETDEV_WORK_THREAD_POLLING_PERIOD
-	int "Polling period, the units are microseconds"
-	default 0
-	depends on NETDEV_WORK_THREAD
-	---help---
-		Disable the txdone and rxready interrupt and use polling
-		period to receive packets when the value is not 0.
-
-config NETDEV_WORK_THREAD_PRIORITY
-	int "Priority of work poll thread"
-	default 100
-	depends on NETDEV_WORK_THREAD
-	---help---
-		The priority of work poll thread in netdev.
-
 config NETDEV_WIRELESS_HANDLER
 	bool "Support wireless handler in upper-half driver"
 	default y
@@ -60,13 +29,19 @@ config NETDEV_WIRELESS_HANDLER
 	---help---
 		Enable the wireless handler support in upper-half driver.
 
-config NETDEV_RSS
-	bool "Using hardware RSS (Receive Side Scaling) with network card"
+menuconfig MDIO_BUS
+	bool "Upper-half MDIO Bus Driver Options"
+	default y
+
+if MDIO_BUS
+
+comment "IEEE 802.3 Ethernet MDIO Clauses Support"
+
+config MDIO_CLAUSE_45
+	bool "MDIO bus supports Clause 45"
 	default n
-	depends on SMP && NETDEV_IOCTL && NETDEV_WORK_THREAD
-	---help---
-		When the hardware supports RSS/aRFS function, provide the
-		hash value and CPU ID to the hardware driver.
+
+endif
 
 comment "General Ethernet MAC Driver Options"
 
@@ -90,6 +65,12 @@ config NET_RPMSG_STACKSIZE
 	default DEFAULT_TASK_STACKSIZE
 	---help---
 		The stack size allocated for the net RPMSG task.
+
+config NET_RPMSG_DRV_SERVER
+	bool "Net rpmsg default server"
+	default n
+	---help---
+		Enable the net rpmsg default server.
 
 endif # NET_RPMSG_DRV
 
@@ -286,30 +267,6 @@ config ENC28J60_REGDEBUG
 		CONFIG_DEBUG_FEATURES and CONFIG_DEBUG_NET.
 
 endif # ENC28J60
-
-menuconfig NCV7410
-	bool "onsemi NCV7410 support"
-	default n
-	select SPI
-	select ARCH_HAVE_NETDEV_STATISTICS
-	---help---
-		Enable support for onsemi NCV7410 10BASE-T1S MAC-PHY
-
-if NCV7410
-
-config NCV7410_INT_PIN
-	int "NCV7410 interrupt pin"
-	default 3
-	---help---
-		Number of boarad pin to be connected to NCV7410's interrupt signal
-
-config NCV7410_FREQUENCY
-	int "SPI frequency"
-	default 20000000
-	---help---
-		NCV7410 SPI bus frequency
-
-endif # NCV7410
 
 menuconfig ENCX24J600
 	bool "Microchip ENCX24J600 support"
@@ -815,6 +772,36 @@ config NET_E1000_RXSPARE
 
 endif # NET_E1000
 
+menuconfig NET_IGB
+	bool "Intel IGB support"
+	default n
+	depends on PCI && PCI_MSIX
+	---help---
+		Enable IGB PCI Ethernet driver.
+
+if NET_IGB
+
+config NET_IGB_TXDESC
+	int "Intel IGB TX descriptors"
+	default 256
+
+config NET_IGB_RXDESC
+	int "Intel IGB RX descriptors"
+	default 256
+
+config NET_IGB_RXSPARE
+	int "Intel IGB spare RX buffers"
+	default 8
+
+config NET_IGB_INT_INTERVAL
+	int "Intel IGB interrupt interval"
+	default 100
+	range 1 8191
+	---help---
+		Minimum Inter-interrupt Interval in 1 us increments.
+
+endif # NET_IGB
+
 menuconfig NET_IGC
 	bool "Intel IGC support"
 	default n
@@ -844,5 +831,7 @@ config NET_IGC_INT_INTERVAL
 		Minimum Inter-interrupt Interval in 1 us increments.
 
 endif # NET_IGC
+
+source "drivers/net/oa_tc6/Kconfig"
 
 endif # NETDEVICES

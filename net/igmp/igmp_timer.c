@@ -50,7 +50,6 @@
 #include <debug.h>
 
 #include <nuttx/wdog.h>
-#include <nuttx/irq.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
@@ -114,7 +113,6 @@ static void igmp_timeout_work(FAR void *arg)
    * the timer is cancelled before sending the IGMP_LEAVE_GROUP during leave.
    */
 
-  net_lock();
   if (!IS_IDLEMEMBER(group->flags))
     {
       /* Schedule (and forget) the Membership Report.  NOTE:
@@ -137,8 +135,6 @@ static void igmp_timeout_work(FAR void *arg)
        * once or twice after short delays [Unsolicited Report Interval]..."
        */
     }
-
-  net_unlock();
 }
 
 /****************************************************************************
@@ -231,14 +227,7 @@ void igmp_starttimer(FAR struct igmp_group_s *group, uint8_t decisecs)
 
 bool igmp_cmptimer(FAR struct igmp_group_s *group, int maxticks)
 {
-  irqstate_t flags;
   int remaining;
-
-  /* Disable interrupts so that there is no race condition with the actual
-   * timer expiration.
-   */
-
-  flags = enter_critical_section();
 
   /* Get the timer remaining on the watchdog.  A time of <= zero means that
    * the watchdog was never started.
@@ -257,11 +246,9 @@ bool igmp_cmptimer(FAR struct igmp_group_s *group, int maxticks)
       /* Cancel the watchdog timer and return true */
 
       wd_cancel(&group->wdog);
-      leave_critical_section(flags);
       return true;
     }
 
-  leave_critical_section(flags);
   return false;
 }
 

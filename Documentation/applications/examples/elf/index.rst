@@ -3,7 +3,7 @@
 ==================
 
 This example builds a small ELF loader test case. This includes several test
-programs under ``examples/elf`` tests. These tests are build using the relocatable
+programs under ``examples/elf`` tests. These tests are built using the relocatable
 ELF format and installed in a configurable file system. At run time, the file system
 is mounted and each program is executed. Requires ``CONFIG_ELF``.
 Two distinct types of file systems are supported: internal (included in the NuttX binary)

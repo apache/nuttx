@@ -117,9 +117,9 @@ struct note_startalloc_s
 };
 
 #if CONFIG_TASK_NAME_SIZE > 0
-#  define SIZEOF_NOTE_START(n) (sizeof(struct note_start_s) + (n) - 1)
+#  define SIZEOF_NOTE_START(n) (sizeof(struct note_common_s) + (n))
 #else
-#  define SIZEOF_NOTE_START(n) (sizeof(struct note_start_s))
+#  define SIZEOF_NOTE_START(n) (sizeof(struct note_common_s))
 #endif
 
 #if CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
@@ -171,7 +171,8 @@ FAR static struct note_driver_s *
 static struct note_taskname_s g_note_taskname;
 #endif
 
-#if defined(CONFIG_SCHED_INSTRUMENTATION_FILTER)
+#if defined(CONFIG_SCHED_INSTRUMENTATION_FILTER) || \
+    defined(CONFIG_SCHED_INSTRUMENTATION_PREEMPTION)
 static spinlock_t g_note_lock;
 #endif
 
@@ -290,7 +291,7 @@ static inline int note_isenabled_switch(FAR struct note_driver_s *driver)
 
   return true;
 }
-#endif
+#endif /* CONFIG_SCHED_INSTRUMENTATION_SWITCH */
 
 /****************************************************************************
  * Name: note_isenabled_syscall
@@ -441,9 +442,8 @@ static inline int note_isenabled_dump(FAR struct note_driver_s *driver,
 }
 #endif
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
-#if CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
-
+#if defined(CONFIG_SCHED_INSTRUMENTATION_SWITCH) && \
+    (CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0)
 /****************************************************************************
  * Name: note_find_taskname
  *
@@ -617,6 +617,7 @@ void sched_note_add(FAR const void *data, size_t len)
 }
 #endif
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 /****************************************************************************
  * Name: sched_note_*
  *
@@ -1056,7 +1057,9 @@ void sched_note_preemption(FAR struct tcb_s *tcb, bool locked)
   struct note_preempt_s note;
   FAR struct note_driver_s **driver;
   bool formatted = false;
+  irqstate_t flags;
 
+  flags = spin_lock_irqsave_notrace(&g_note_lock);
   for (driver = g_note_drivers; *driver; driver++)
     {
       if (!note_isenabled(*driver))
@@ -1088,6 +1091,8 @@ void sched_note_preemption(FAR struct tcb_s *tcb, bool locked)
 
       note_add(*driver, &note, sizeof(struct note_preempt_s));
     }
+
+  spin_unlock_irqrestore_notrace(&g_note_lock, flags);
 }
 #endif
 
@@ -1400,7 +1405,7 @@ void sched_note_wdog(uint8_t event, FAR void *handler, FAR const void *arg)
   FAR struct tcb_s *tcb = this_task();
   irqstate_t flags;
 
-  flags = enter_critical_section_wo_note();
+  flags = enter_critical_section_notrace();
   for (driver = g_note_drivers; *driver; driver++)
     {
       if (note_wdog(*driver, event, handler, arg))
@@ -1426,7 +1431,7 @@ void sched_note_wdog(uint8_t event, FAR void *handler, FAR const void *arg)
       note_add(*driver, &note, sizeof(note));
     }
 
-  leave_critical_section_wo_note(flags);
+  leave_critical_section_notrace(flags);
 }
 #endif
 
@@ -1515,6 +1520,7 @@ void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event,
 
           note_common(tcb, &note->nev_cmn, length, event);
           note->nev_ip = ip;
+          note->nev_tag = tag;
           if (buf != NULL)
             {
               memcpy(note->nev_data, buf, length - SIZEOF_NOTE_EVENT(0));
@@ -1528,7 +1534,7 @@ void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event,
 }
 
 void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
-                           uint32_t type, va_list va)
+                           uint32_t type, va_list *va)
 {
   FAR struct note_printf_s *note;
   FAR struct note_driver_s **driver;
@@ -1544,7 +1550,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
           continue;
         }
 
-      if (note_vprintf(*driver, ip, fmt, va))
+      if (note_vprintf(*driver, ip, fmt, *va))
         {
           continue;
         }
@@ -1596,7 +1602,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                     {
                       case NOTE_PRINTF_UINT32:
                         {
-                          var->i = va_arg(va, int);
+                          var->i = va_arg(*va, int);
                           if (next + sizeof(var->i) > length)
                             {
                               break;
@@ -1612,14 +1618,14 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                               break;
                             }
 
-                          var->ll = va_arg(va, long long);
+                          var->ll = va_arg(*va, long long);
                           next += sizeof(var->ll);
                         }
                       break;
                       case NOTE_PRINTF_STRING:
                         {
                           size_t len;
-                          var->s = va_arg(va, FAR const char *);
+                          var->s = va_arg(*va, FAR const char *);
                           len = strlen(var->s) + 1;
                           if (next + len > length)
                             {
@@ -1632,7 +1638,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                       break;
                       case NOTE_PRINTF_DOUBLE:
                         {
-                          var->d = va_arg(va, double);
+                          var->d = va_arg(*va, double);
                           if (next + sizeof(var->d) > length)
                             {
                               break;
@@ -1670,7 +1676,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                               break;
                             }
 
-                          var->im = va_arg(va, intmax_t);
+                          var->im = va_arg(*va, intmax_t);
                           next += sizeof(var->im);
                         }
 #ifdef CONFIG_HAVE_LONG_LONG
@@ -1681,7 +1687,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                               break;
                             }
 
-                          var->ll = va_arg(va, long long);
+                          var->ll = va_arg(*va, long long);
                           next += sizeof(var->ll);
                         }
 #endif
@@ -1692,7 +1698,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                               break;
                             }
 
-                          var->l = va_arg(va, long);
+                          var->l = va_arg(*va, long);
                           next += sizeof(var->l);
                         }
                       else if (*(p - 2) == 'z')
@@ -1702,7 +1708,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                               break;
                             }
 
-                          var->sz = va_arg(va, size_t);
+                          var->sz = va_arg(*va, size_t);
                           next += sizeof(var->sz);
                         }
                       else if (*(p - 2) == 't')
@@ -1712,7 +1718,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                               break;
                             }
 
-                          var->ptr = va_arg(va, ptrdiff_t);
+                          var->ptr = va_arg(*va, ptrdiff_t);
                           next += sizeof(var->ptr);
                         }
                       else
@@ -1722,7 +1728,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                               break;
                             }
 
-                          var->i = va_arg(va, int);
+                          var->i = va_arg(*va, int);
                           next += sizeof(var->i);
                         }
 
@@ -1740,7 +1746,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                               break;
                             }
 
-                          var->ld = va_arg(va, long double);
+                          var->ld = va_arg(*va, long double);
                           next += sizeof(var->ld);
                         }
                       else
@@ -1751,7 +1757,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                               break;
                             }
 
-                          var->d = va_arg(va, double);
+                          var->d = va_arg(*va, double);
                           next += sizeof(var->d);
                         }
 #endif
@@ -1760,13 +1766,13 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                     }
                   else if (c == '*')
                     {
-                      var->i = va_arg(va, int);
+                      var->i = va_arg(*va, int);
                       next += sizeof(var->i);
                     }
                   else if (c == 's')
                     {
                       size_t len;
-                      var->s = va_arg(va, FAR char *);
+                      var->s = va_arg(*va, FAR char *);
                       len = strlen(var->s) + 1;
                       if (next + len > length)
                         {
@@ -1784,7 +1790,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                           break;
                         }
 
-                      var->p = va_arg(va, FAR void *);
+                      var->p = va_arg(*va, FAR void *);
                       next += sizeof(var->p);
                       infmt = false;
                     }
@@ -1794,6 +1800,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
           length = SIZEOF_NOTE_PRINTF(next);
           note_common(tcb, &note->npt_cmn, length, NOTE_DUMP_PRINTF);
           note->npt_ip = ip;
+          note->npt_tag = tag;
           note->npt_fmt = fmt;
           note->npt_type = type;
         }
@@ -1803,16 +1810,6 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
       note_add(*driver, note, length);
     }
 }
-
-void sched_note_printf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
-                          uint32_t type, ...)
-{
-  va_list va;
-  va_start(va, type);
-  sched_note_vprintf_ip(tag, ip, fmt, type, va);
-  va_end(va);
-}
-
 #endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
@@ -2085,8 +2082,6 @@ void sched_note_filter_tag(FAR struct note_filter_named_tag_s *oldf,
 
 #endif /* CONFIG_SCHED_INSTRUMENTATION_FILTER */
 
-#if CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
-
 /****************************************************************************
  * Name: note_get_taskname
  *
@@ -2095,37 +2090,42 @@ void sched_note_filter_tag(FAR struct note_filter_named_tag_s *oldf,
  *
  * Input Parameters:
  *   PID - Task ID
+ *   buf - A writable buffer to hold the task name
+ *   len - The length of the buffer
  *
  * Returned Value:
- *   Return name if task name can be retrieved, otherwise NULL
+ *   Return name if task name can be retrieved, otherwise "<noname>"
+ *
  ****************************************************************************/
 
-FAR const char *note_get_taskname(pid_t pid)
+FAR char *note_get_taskname(pid_t pid, FAR char *buf, size_t len)
 {
-  FAR struct note_taskname_info_s *ti;
-  FAR struct tcb_s *tcb;
-  UNUSED(ti);
+#if CONFIG_TASK_NAME_SIZE > 0
+  FAR struct tcb_s *tcb = nxsched_get_tcb(pid);
 
-  tcb = nxsched_get_tcb(pid);
   if (tcb != NULL)
     {
-      return tcb->name;
+      strlcpy(buf, tcb->name, len);
+      return buf;
     }
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
-  ti = note_find_taskname(pid);
-  if (ti != NULL)
+#  if defined(CONFIG_SCHED_INSTRUMENTATION_SWITCH) && \
+      (CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0)
+  else
     {
-      return ti->name;
+      FAR struct note_taskname_info_s *ti = note_find_taskname(pid);
+
+      if (ti != NULL)
+        {
+          strlcpy(buf, ti->name, len);
+          return buf;
+        }
     }
-
-  return NULL;
-#else
-  return "unknown";
+#  endif
 #endif
+
+  return "<noname>";
 }
-
-#endif
 
 /****************************************************************************
  * Name: note_driver_register

@@ -50,11 +50,11 @@
 #define NRF52_TIMER_RES (NRF52_TIM_WIDTH_32B)
 #define NRF52_TIMER_MAX (4294967295ul)
 #define NRF52_TIMER_PRE (NRF52_TIM_PRE_1000000)
-#define NRF52_TIMER_PER (1000000)
+#define NRF52_TIMER_PER (1000000ull)
 
 /* Maximum supported timeout */
 
-#define NRF52_TIMER_MAXTIMEOUT (NRF52_TIMER_MAX * (1000000 / NRF52_TIMER_PER))
+#define NRF52_TIMER_MAXTIMEOUT (NRF52_TIMER_MAX * 1000000ull / NRF52_TIMER_PER)
 
 /****************************************************************************
  * Private Types
@@ -373,7 +373,7 @@ static int nrf52_timer_settimeout(struct timer_lowerhalf_s *lower,
       goto errout;
     }
 
-  cc = (timeout * NRF52_TIMER_PER / 1000000);
+  cc = (uint32_t)(timeout * NRF52_TIMER_PER / 1000000);
   NRF52_TIM_SETCC(priv->tim, NRF52_TIMER_CC, cc);
 
 errout:

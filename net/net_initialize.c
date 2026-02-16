@@ -77,38 +77,16 @@
 
 void net_initialize(void)
 {
-  /* Initialize the device interface layer */
-
-  devif_initialize();
-
 #ifdef CONFIG_NET_BLUETOOTH
   /* Initialize Bluetooth  socket support */
 
   bluetooth_initialize();
 #endif
 
-#ifdef CONFIG_NET_CAN
-  /* Initialize SocketCAN support */
-
-  can_initialize();
-#endif
-
 #ifdef CONFIG_NET_IEEE802154
   /* Initialize IEEE 802.15.4  socket support */
 
   ieee802154_initialize();
-#endif
-
-#ifdef CONFIG_NET_NETLINK
-  /* Initialize the Netlink IPC support */
-
-  netlink_initialize();
-#endif
-
-#ifdef CONFIG_NET_PKT
-  /* Initialize packet socket support */
-
-  pkt_initialize();
 #endif
 
 #ifdef CONFIG_NET_ROUTE
@@ -124,24 +102,6 @@ void net_initialize(void)
   sixlowpan_initialize();
 #endif
 #endif /* CONFIG_NET_IPv6 */
-
-#ifdef HAVE_FWDALLOC
-  /* Initialize IP forwarding support */
-
-  ipfwd_initialize();
-#endif
-
-#ifdef NET_TCP_HAVE_STACK
-  /* Initialize the TCP/IP connection structures */
-
-  tcp_initialize();
-#endif /* CONFIG_NET_TCP */
-
-#ifdef NET_UDP_HAVE_STACK
-  /* Initialize the UDP connection structures */
-
-  udp_initialize();
-#endif
 
 #ifdef CONFIG_NET_USRSOCK
   /* Initialize the user-space socket API */

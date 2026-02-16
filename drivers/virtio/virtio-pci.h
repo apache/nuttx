@@ -44,10 +44,6 @@
 
 #define VIRTIO_PCI_MSI_NO_VECTOR         0xffff
 
-#define VIRTIO_PCI_INT_CFG               0
-#define VIRTIO_PCI_INT_VQ                1
-#define VIRTIO_PCI_INT_NUM               2
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -69,8 +65,6 @@ struct virtio_pci_ops_s
 {
   CODE uint16_t (*get_queue_len)(FAR struct virtio_pci_device_s *vpdev,
                                  int idx);
-  CODE int (*config_vector)(FAR struct virtio_pci_device_s *vpdev,
-                            bool enable);
   CODE int (*create_virtqueue)(FAR struct virtio_pci_device_s *vpdev,
                                FAR struct virtqueue *vq);
   CODE void (*delete_virtqueue)(FAR struct virtio_device *vdev, int index);
@@ -86,10 +80,13 @@ struct virtio_pci_device_s
                                                * virtqueue use this io.
                                                */
 #if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
-  int                                irq[VIRTIO_PCI_INT_NUM];
+  int                                irq;
+  bool                               intx;    /* INTX irq mode */
 #else
   struct wdog_s                      wdog;
 #endif
+
+  FAR void                          *isr;
 
   /* for modern */
 

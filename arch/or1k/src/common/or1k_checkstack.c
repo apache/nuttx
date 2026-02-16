@@ -53,6 +53,30 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: or1k_color_intstack
+ *
+ * Description:
+ *   Set the interrupt stack to a value so that later we can determine how
+ *   much stack space was used by interrupt handling logic
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+void or1k_color_intstack(void)
+{
+  uint32_t *ptr = (uint32_t *)g_intstackalloc;
+  ssize_t size;
+
+  for (size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
+       size > 0;
+       size -= sizeof(uint32_t))
+    {
+      *ptr++ = STACK_COLOR;
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: or1k_stack_check
  *
  * Description:
@@ -91,7 +115,7 @@ size_t or1k_stack_check(uintptr_t alloc, size_t size)
   size  = end - start;
 
   for (ptr = (uint32_t *)start, mark = (size >> 2);
-       *ptr == STACK_COLOR && mark > 0;
+       mark > 0 && *ptr == STACK_COLOR;
        ptr++, mark--);
 
   /* Return our guess about how much stack space was used */
@@ -115,17 +139,20 @@ size_t or1k_stack_check(uintptr_t alloc, size_t size)
  *
  ****************************************************************************/
 
-size_t up_check_tcbstack(struct tcb_s *tcb)
+size_t up_check_tcbstack(struct tcb_s *tcb, size_t check_size)
 {
-  return or1k_stack_check((uintptr_t)tcb->stack_base_ptr,
-                                     tcb->adj_stack_size);
+  return or1k_stack_check((uintptr_t)tcb->stack_base_ptr, check_size);
 }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-size_t up_check_intstack(int cpu)
+size_t up_check_intstack(int cpu, size_t check_size)
 {
-  return or1k_stack_check((uintptr_t)g_intstackalloc,
-                          (CONFIG_ARCH_INTERRUPTSTACK & ~3));
+  if (check_size == 0)
+    {
+      check_size = CONFIG_ARCH_INTERRUPTSTACK & ~3;
+    }
+
+  return or1k_stack_check((uintptr_t)g_intstackalloc, check_size);
 }
 #endif
 

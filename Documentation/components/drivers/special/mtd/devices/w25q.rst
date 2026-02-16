@@ -1,0 +1,61 @@
+==============
+W25Q NOR Flash
+==============
+
+NuttX provides support for both QSPI and SPI based NOR flashes from W25Q
+family. QSPI based flashes are supported up to 1 Gbit (128 MB) capacity,
+SPI based flashes are supported up to 128 Mbit (16 MB) capacity.
+
+----------
+QSPI flash
+----------
+
+QSPI based flash is enabled by option ``CONFIG_MTD_W25QXXXJV``. It is possible
+to select the QSPI mode with ``CONFIG_W25QXXXJV_QSPIMODE`` option and
+communication frequency with ``CONFIG_W25QXXXJV_QSPI_FREQUENCY`` option.
+
+The flash allows to simulate 512-byte large erase blocks if option
+``CONFIG_W25QXXXJV_SECTOR512`` is enabled.
+
+The size of the flash is set automatically during the device initialization.
+
+The flash memory has to be initialized before used. This is typically done
+from board support package layer during the board's bringup phase. This
+operation is performed by following function.
+
+.. code-block:: C
+
+   #include <nuttx/mtd/mtd.h>
+
+   FAR struct mtd_dev_s *w25qxxxjv_initialize(FAR struct qspi_dev_s *qspi,
+                                              bool unprotect)
+
+---------
+SPI flash
+---------
+
+SPI based flash is enabled by option ``CONFIG_MTD_W25``. It is possible
+to select the SPI mode with ``CONFIG_W25_SPIMODE`` option and
+communication frequency with ``CONFIG_W25_SPIFREQUENCY`` option. Another
+important configuration is the setting of SPI delays. Unlike QSPI in memory
+mode, where all delays are set to 0, SPI peripherals may have different
+default delays. Delays for W25 flash can be set by ``CONFIG_W25_START_DELAY``,
+``CONFIG_W25_STOP_DELAY``, ``CONFIG_W25_CS_DELAY`` and ``CONFIG_W25_IFDELAY``
+options. Default values are set to zero, thus no delays between transfers
+and chip selects.
+
+The flash allows to simulate 512-byte large erase blocks if option
+``CONFIG_W25_SECTOR512`` is enabled. You may also configure the flash
+as read only if ``CONFIG_W25_READONLY`` is set.
+
+The size of the flash is set automatically during the device initialization.
+
+The flash memory has to be initialized before used. This is typically done
+from board support package layer during the board's bringup phase. This
+operation is performed by following function.
+
+.. code-block:: C
+
+   #include <nuttx/mtd/mtd.h>
+
+   FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)

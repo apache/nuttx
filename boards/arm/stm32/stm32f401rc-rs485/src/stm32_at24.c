@@ -34,7 +34,7 @@
 #include <debug.h>
 
 #include <nuttx/i2c/i2c_master.h>
-#include <nuttx/eeprom/i2c_xx24xx.h>
+#include <nuttx/eeprom/eeprom.h>
 
 #include "stm32f401rc-rs485.h"
 

@@ -33,9 +33,10 @@
 
 #include <netinet/in.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/net/net.h>
 
+#include "utils/utils.h"
 #include "icmpv6/icmpv6.h"
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
@@ -55,6 +56,7 @@
 /* List of tasks waiting for Neighbor Discover events */
 
 static struct icmpv6_notify_s *g_icmpv6_waiters;
+static spinlock_t g_icmpv6_notify_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -92,10 +94,10 @@ void icmpv6_wait_setup(const net_ipv6addr_t ipaddr,
 
   /* Add the wait structure to the list with interrupts disabled */
 
-  flags             = enter_critical_section();
-  notify->nt_flink  = g_icmpv6_waiters;
-  g_icmpv6_waiters  = notify;
-  leave_critical_section(flags);
+  flags            = spin_lock_irqsave(&g_icmpv6_notify_lock);
+  notify->nt_flink = g_icmpv6_waiters;
+  g_icmpv6_waiters = notify;
+  spin_unlock_irqrestore(&g_icmpv6_notify_lock, flags);
 }
 
 /****************************************************************************
@@ -123,7 +125,7 @@ int icmpv6_wait_cancel(FAR struct icmpv6_notify_s *notify)
    * head of the list).
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_icmpv6_notify_lock);
   for (prev = NULL, curr = g_icmpv6_waiters;
        curr && curr != notify;
        prev = curr, curr = curr->nt_flink)
@@ -145,7 +147,7 @@ int icmpv6_wait_cancel(FAR struct icmpv6_notify_s *notify)
       ret = OK;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_icmpv6_notify_lock, flags);
   nxsem_destroy(&notify->nt_sem);
   return ret;
 }
@@ -164,13 +166,14 @@ int icmpv6_wait_cancel(FAR struct icmpv6_notify_s *notify)
  *
  ****************************************************************************/
 
-int icmpv6_wait(FAR struct icmpv6_notify_s *notify, unsigned int timeout)
+int icmpv6_wait(FAR struct net_driver_s *dev,
+                FAR struct icmpv6_notify_s *notify, unsigned int timeout)
 {
   int ret;
 
   /* And wait for the Neighbor Advertisement (or a timeout). */
 
-  ret = net_sem_timedwait(&notify->nt_sem, timeout);
+  ret = conn_dev_sem_timedwait(&notify->nt_sem, true, timeout, NULL, dev);
   if (ret >= 0)
     {
       ret = notify->nt_result;
@@ -201,6 +204,9 @@ int icmpv6_wait(FAR struct icmpv6_notify_s *notify, unsigned int timeout)
 void icmpv6_notify(net_ipv6addr_t ipaddr)
 {
   FAR struct icmpv6_notify_s *curr;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave_nopreempt(&g_icmpv6_notify_lock);
 
   /* Find an entry with the matching IP address in the list of waiters */
 
@@ -220,6 +226,8 @@ void icmpv6_notify(net_ipv6addr_t ipaddr)
           break;
         }
     }
+
+  spin_unlock_irqrestore_nopreempt(&g_icmpv6_notify_lock, flags);
 }
 
 #endif /* CONFIG_NET_ICMPv6_NEIGHBOR */

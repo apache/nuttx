@@ -54,6 +54,14 @@
 #endif
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Global protection lock for usrsock socket */
+
+rmutex_t g_usrsock_lock = NXRMUTEX_INITIALIZER;
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -63,7 +71,6 @@ NET_BUFPOOL_DECLARE(g_usrsock_connections, sizeof(struct usrsock_conn_s),
                     CONFIG_NET_USRSOCK_PREALLOC_CONNS,
                     CONFIG_NET_USRSOCK_ALLOC_CONNS,
                     CONFIG_NET_USRSOCK_MAX_CONNS);
-static mutex_t g_free_lock = NXMUTEX_INITIALIZER;
 
 /* A list of all allocated usrsock connections */
 
@@ -88,7 +95,7 @@ FAR struct usrsock_conn_s *usrsock_alloc(void)
 
   /* The free list is protected by a a mutex. */
 
-  nxmutex_lock(&g_free_lock);
+  NET_BUFPOOL_LOCK(g_usrsock_connections);
 
   conn = NET_BUFPOOL_TRYALLOC(g_usrsock_connections);
   if (conn)
@@ -96,6 +103,7 @@ FAR struct usrsock_conn_s *usrsock_alloc(void)
       /* Make sure that the connection is marked as uninitialized */
 
       nxsem_init(&conn->resp.sem, 0, 1);
+      nxrmutex_init(&conn->sconn.s_lock);
       conn->usockid = USRSOCK_USOCKID_INVALID;
       conn->state = USRSOCK_CONN_STATE_UNINITIALIZED;
 
@@ -104,7 +112,7 @@ FAR struct usrsock_conn_s *usrsock_alloc(void)
       dq_addlast(&conn->sconn.node, &g_active_usrsock_connections);
     }
 
-  nxmutex_unlock(&g_free_lock);
+  NET_BUFPOOL_UNLOCK(g_usrsock_connections);
   return conn;
 }
 
@@ -123,7 +131,7 @@ void usrsock_free(FAR struct usrsock_conn_s *conn)
 
   DEBUGASSERT(conn->crefs == 0);
 
-  nxmutex_lock(&g_free_lock);
+  NET_BUFPOOL_LOCK(g_usrsock_connections);
 
   /* Remove the connection from the active list */
 
@@ -132,12 +140,13 @@ void usrsock_free(FAR struct usrsock_conn_s *conn)
   /* Reset structure */
 
   nxsem_destroy(&conn->resp.sem);
+  nxrmutex_destroy(&conn->sconn.s_lock);
 
   /* Free the connection. */
 
   NET_BUFPOOL_FREE(g_usrsock_connections, conn);
 
-  nxmutex_unlock(&g_free_lock);
+  NET_BUFPOOL_UNLOCK(g_usrsock_connections);
 }
 
 /****************************************************************************
@@ -194,7 +203,7 @@ FAR struct usrsock_conn_s *usrsock_active(int16_t usockid)
 int usrsock_setup_request_callback(FAR struct usrsock_conn_s *conn,
                                    FAR struct usrsock_reqstate_s *pstate,
                                    FAR devif_callback_event_t event,
-                                   uint16_t flags)
+                                   uint32_t flags)
 {
   int ret = -EBUSY;
 
@@ -215,7 +224,7 @@ int usrsock_setup_request_callback(FAR struct usrsock_conn_s *conn,
 
       if ((flags & USRSOCK_EVENT_REQ_COMPLETE) != 0)
         {
-          net_sem_wait_uninterruptible(&conn->resp.sem);
+          usrsock_sem_timedwait(&conn->resp.sem, false, UINT_MAX);
           pstate->unlock = true;
         }
 
@@ -239,7 +248,7 @@ int usrsock_setup_data_request_callback(
       FAR struct usrsock_conn_s *conn,
       FAR struct usrsock_data_reqstate_s *pstate,
       FAR devif_callback_event_t event,
-      uint16_t flags)
+      uint32_t flags)
 {
   pstate->valuelen = 0;
   pstate->valuelen_nontrunc = 0;

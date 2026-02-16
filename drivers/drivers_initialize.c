@@ -35,6 +35,7 @@
 #include <nuttx/input/uinput.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/net/loopback.h>
+#include <nuttx/net/rpmsgdrv.h>
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
 #include <nuttx/note/note_driver.h>
@@ -50,6 +51,8 @@
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/syslog/syslog_console.h>
 #include <nuttx/thermal.h>
+#include <nuttx/timers/ptp_clock_dummy.h>
+#include <nuttx/timers/capture.h>
 #include <nuttx/trace.h>
 #include <nuttx/usrsock/usrsock_rpmsg.h>
 #include <nuttx/vhost/vhost.h>
@@ -243,6 +246,10 @@ void drivers_initialize(void)
   sensor_rpmsg_initialize();
 #endif
 
+#ifdef CONFIG_SENSORS_MONITOR
+  sensor_monitor_initialize();
+#endif
+
 #ifdef CONFIG_DEV_RPMSG_SERVER
   rpmsgdev_server_init();
 #endif
@@ -259,6 +266,12 @@ void drivers_initialize(void)
   /* Initialize the user socket rpmsg server */
 
   usrsock_rpmsg_server_initialize();
+#endif
+
+#ifdef CONFIG_NET_RPMSG_DRV_SERVER
+  /* Initialize the net rpmsg default server */
+
+  net_rpmsg_drv_server_init();
 #endif
 
 #ifdef CONFIG_SMART_DEV_LOOP
@@ -291,6 +304,14 @@ void drivers_initialize(void)
 
 #ifdef CONFIG_THERMAL
   thermal_init();
+#endif
+
+#ifdef CONFIG_PTP_CLOCK_DUMMY
+  ptp_clock_dummy_initialize(0);
+#endif
+
+#ifdef CONFIG_FAKE_CAPTURE
+  fake_capture_initialize(2);
 #endif
 
   drivers_trace_end();

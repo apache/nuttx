@@ -39,6 +39,7 @@
  *
  ****************************************************************************/
 
+#ifndef CONFIG_ARM_SEMIHOSTING_SYSLOG
 void up_nputs(const char *str, size_t len)
 {
   while (len-- > 0 && *str)
@@ -46,3 +47,4 @@ void up_nputs(const char *str, size_t len)
       up_putc(*str++);
     }
 }
+#endif

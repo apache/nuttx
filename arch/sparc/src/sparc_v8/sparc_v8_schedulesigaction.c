@@ -85,55 +85,28 @@ void up_schedule_sigaction(struct tcb_s *tcb)
 
   if (tcb == this_task())
     {
-      /* CASE 1:  We are not in an interrupt handler and
-       * a task is signalling itself for some reason.
+      /* Save registers that must be protected while the signal
+       * handler runs. These will be restored by the signal
+       * trampoline after the signal(s) have been delivered.
        */
 
-      if (!up_current_regs())
-        {
-          /* In this case just deliver the signal now. */
+      tcb->xcp.saved_pc     = up_current_regs()[REG_PC];
+      tcb->xcp.saved_npc    = up_current_regs()[REG_NPC];
+      tcb->xcp.saved_status = up_current_regs()[REG_PSR];
 
-          (tcb->sigdeliver)(tcb);
-          tcb->sigdeliver = NULL;
-        }
-
-      /* CASE 2:  We are in an interrupt handler AND the
-       * interrupted task is the same as the one that
-       * must receive the signal, then we will have to modify
-       * the return state as well as the state in the TCB.
-       *
-       * Hmmm... there looks like a latent bug here: The following
-       * logic would fail in the strange case where we are in an
-       * interrupt handler, the thread is signalling itself, but
-       * a context switch to another task has occurred so that
-       * current_regs does not refer to the thread of this_task()!
+      /* Then set up to vector to the trampoline with interrupts
+       * disabled
        */
 
-      else
-        {
-          /* Save registers that must be protected while the signal
-           * handler runs. These will be restored by the signal
-           * trampoline after the signal(s) have been delivered.
-           */
+      up_current_regs()[REG_PC]  = (uint32_t)sparc_sigdeliver;
+      up_current_regs()[REG_NPC] = (uint32_t)sparc_sigdeliver + 4;
+      up_current_regs()[REG_PSR] |= SPARC_PSR_ET_MASK;
 
-          tcb->xcp.saved_pc     = up_current_regs()[REG_PC];
-          tcb->xcp.saved_npc    = up_current_regs()[REG_NPC];
-          tcb->xcp.saved_status = up_current_regs()[REG_PSR];
+      /* And make sure that the saved context in the TCB
+       * is the same as the interrupt return context.
+       */
 
-          /* Then set up to vector to the trampoline with interrupts
-           * disabled
-           */
-
-          up_current_regs()[REG_PC]  = (uint32_t)sparc_sigdeliver;
-          up_current_regs()[REG_NPC] = (uint32_t)sparc_sigdeliver + 4;
-          up_current_regs()[REG_PSR] |= SPARC_PSR_ET_MASK;
-
-          /* And make sure that the saved context in the TCB
-           * is the same as the interrupt return context.
-           */
-
-          sparc_savestate(tcb->xcp.regs);
-        }
+      sparc_savestate(tcb->xcp.regs);
     }
 
   /* Otherwise, we are (1) signaling a task is not running
@@ -167,9 +140,6 @@ void up_schedule_sigaction(struct tcb_s *tcb)
 #ifdef CONFIG_SMP
 void up_schedule_sigaction(struct tcb_s *tcb)
 {
-  int cpu;
-  int me;
-
   sinfo("tcb=%p, rtcb=%p current_regs=%p\n", tcb,
         this_task(), up_current_regs());
 
@@ -179,60 +149,30 @@ void up_schedule_sigaction(struct tcb_s *tcb)
 
   if (tcb->task_state == TSTATE_TASK_RUNNING)
     {
-      me  = this_cpu();
-      cpu = tcb->cpu;
-
-      /* CASE 1:  We are not in an interrupt handler and a task is
-       * signaling itself for some reason.
+      /* Save registers that must be protected while the signal
+       * handler runs. These will be restored by the signal
+       * trampoline after the signal(s) have been delivered.
        */
 
-      if (cpu == me && !up_current_regs())
-        {
-          /* In this case just deliver the signal now.
-           * REVISIT:  Signal handler will run in a critical section!
-           */
+      tcb->xcp.saved_pc     = up_current_regs()[REG_PC];
+      tcb->xcp.saved_npc    = up_current_regs()[REG_NPC];
+      tcb->xcp.saved_status = up_current_regs()[REG_PSR];
 
-          (tcb->sigdeliver)(tcb);
-          tcb->sigdeliver = NULL;
-        }
-
-      /* CASE 2:  The task that needs to receive the signal is running.
-       * This could happen if the task is running on another CPU OR if
-       * we are in an interrupt handler and the task is running on this
-       * CPU.  In the former case, we will have to PAUSE the other CPU
-       * first.  But in either case, we will have to modify the return
-       * state as well as the state in the TCB.
+      /* Then set up vector to the trampoline with interrupts
+       * disabled.  The kernel-space trampoline must run in
+       * privileged thread mode.
        */
 
-      else
-        {
-          /* tcb is running on the same CPU */
-
-          /* Save registers that must be protected while the signal
-           * handler runs. These will be restored by the signal
-           * trampoline after the signal(s) have been delivered.
-           */
-
-          tcb->xcp.saved_pc     = up_current_regs()[REG_PC];
-          tcb->xcp.saved_npc    = up_current_regs()[REG_NPC];
-          tcb->xcp.saved_status = up_current_regs()[REG_PSR];
-
-          /* Then set up vector to the trampoline with interrupts
-           * disabled.  The kernel-space trampoline must run in
-           * privileged thread mode.
-           */
-
-          up_current_regs()[REG_PC]  = (uint32_t)sparc_sigdeliver;
-          up_current_regs()[REG_NPC] = (uint32_t)sparc_sigdeliver
+      up_current_regs()[REG_PC]  = (uint32_t)sparc_sigdeliver;
+      up_current_regs()[REG_NPC] = (uint32_t)sparc_sigdeliver
                                         + 4;
-          up_current_regs()[REG_PSR] |= SPARC_PSR_ET_MASK;
+      up_current_regs()[REG_PSR] |= SPARC_PSR_ET_MASK;
 
-          /* And make sure that the saved context in the TCB is the
-           * same as the interrupt return context.
-           */
+      /* And make sure that the saved context in the TCB is the
+       * same as the interrupt return context.
+       */
 
-          sparc_savestate(tcb->xcp.regs);
-        }
+      sparc_savestate(tcb->xcp.regs);
     }
 
   /* Otherwise, we are (1) signaling a task is not running from an

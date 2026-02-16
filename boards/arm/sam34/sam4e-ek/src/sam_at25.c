@@ -88,17 +88,17 @@ int sam_at25_automount(int minor)
         }
 
 #if defined(CONFIG_SAM4EEK_AT25_FTL)
-      /* And finally, use the FTL layer to wrap the MTD driver as a block
-       * driver at /dev/mtdblockN, where N=minor device number.
-       */
+      /* Register the MTD driver */
 
-      ret = ftl_initialize(minor, mtd);
+      char path[32];
+      snprintf(path, sizeof(path), "/dev/mtdblock%d", minor);
+      ret = register_mtddriver(path, mtd, 0755, NULL);
       if (ret < 0)
         {
-          ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          ferr("ERROR: Failed to register the MTD driver %s, ret %d\n",
+                path, ret);
           return ret;
         }
-
 #elif defined(CONFIG_SAM4EEK_AT25_NXFFS)
       /* Initialize to provide NXFFS on the MTD interface */
 

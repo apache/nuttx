@@ -32,12 +32,13 @@
 #include <nuttx/vhost/vhost.h>
 
 #include "vhost-rng.h"
+#include "vhost-rpmsg.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define VHOST_DEFERED_PROBE_PERIOD 100
+#define VHOST_DEFERED_PROBE_PERIOD MSEC2TICK(100)
 
 /****************************************************************************
  * Private Types
@@ -162,6 +163,52 @@ static void vhost_defered_probe_work(FAR void *arg)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: vhost_get_vq_buf
+ ****************************************************************************/
+
+int vhost_get_vq_buffers(FAR struct virtqueue *vq,
+                         FAR struct virtqueue_buf *vb, size_t vbsize,
+                         FAR size_t *vbcnt)
+{
+  FAR void *buf;
+  uint16_t head;
+  uint16_t idx;
+  uint32_t len;
+  size_t i;
+
+  DEBUGASSERT(vb != NULL && vbsize >= 1 && vbcnt != NULL);
+
+  buf = virtqueue_get_first_avail_buffer(vq, &head, &len);
+  if (buf == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  vb[0].buf = buf;
+  vb[0].len = len;
+
+  for (i = 1, idx = head; ; i++)
+    {
+      buf = virtqueue_get_next_avail_buffer(vq, idx, &idx, &len);
+      if (buf == NULL)
+        {
+          break;
+        }
+      else if (i >= vbsize)
+        {
+          vhosterr("vbsize %zu is not enough\n", vbsize);
+          return -EINVAL;
+        }
+
+      vb[i].buf = buf;
+      vb[i].len = len;
+    }
+
+  *vbcnt = i;
+  return head;
+}
 
 /****************************************************************************
  * Name: vhost_register_driver
@@ -394,6 +441,14 @@ void vhost_register_drivers(void)
   if (ret < 0)
     {
       vhosterr("vhost_register_rng_driver failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_VHOST_RPMSG
+  ret = vhost_register_rpmsg_driver();
+  if (ret < 0)
+    {
+      vhosterr("vhost_register_rpmsg_driver failed, ret=%d\n", ret);
     }
 #endif
 

@@ -303,7 +303,7 @@
 #  define SIG_HOLD      ((_sa_handler_t)1)   /* Used only with sigset() */
 #endif
 
-#define GOOD_SIGNO(s)     (((unsigned)(s)) <= MAX_SIGNO)
+#define GOOD_SIGNO(s)     (((unsigned)(s)) <= ((unsigned)(MAX_SIGNO)))
 #define UNCAUGHT_SIGNO(s) ((s) == SIGKILL || (s) == SIGSTOP)
 
 #define tkill(tid, signo) tgkill((pid_t)-1, tid, signo)
@@ -347,8 +347,8 @@ typedef CODE void (*sigev_notify_function_t)(union sigval value);
 
 typedef struct sigevent
 {
-  uint8_t      sigev_notify; /* Notification method: SIGEV_SIGNAL, SIGEV_NONE, or SIGEV_THREAD */
-  uint8_t      sigev_signo;  /* Notification signal */
+  int          sigev_notify; /* Notification method: SIGEV_SIGNAL, SIGEV_NONE, or SIGEV_THREAD */
+  int          sigev_signo;  /* Notification signal */
   union sigval sigev_value;  /* Data passed with notification */
 
   union
@@ -485,6 +485,11 @@ int  sigsuspend(FAR const sigset_t *sigmask);
 int  sigwaitinfo(FAR const sigset_t *set, FAR struct siginfo *value);
 int  sigaltstack(FAR const stack_t *ss, FAR stack_t *oss);
 int  siginterrupt(int signo, int flag);
+
+/* Pthread signal management APIs */
+
+int pthread_kill(pthread_t thread, int sig);
+int pthread_sigmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
 
 #undef EXTERN
 #ifdef __cplusplus

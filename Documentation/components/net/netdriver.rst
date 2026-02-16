@@ -73,6 +73,16 @@ Here is a guide to do so:
     is set to 5, it means that if the driver has 5 unreleased packets
     (``netpkt_free``), the upper-half will not call ``transmit`` until they
     are released.
+9.  Find a suitable ``rxtype`` for the driver, and set it in the driver
+    initialization function.  There are some types of receive notification
+    methods, defined in ``enum netdev_rx_e``, like ``NETDEV_RX_WORK``,
+    ``NETDEV_RX_THREAD`` and ``NETDEV_RX_THREAD_RSS``.  Choose the one that
+    fits your driver best.
+10. Find a suitable ``priority`` for the driver, and set it in the driver
+    initialization function.  This is the priority for the receive
+    notification work queue or thread. when ``rxtype`` is ``NETDEV_RX_WORK``,
+    it is the work queue ``qid``; when ``rxtype`` is ``NETDEV_RX_THREAD``,
+    it is the thread priority.
 
     -  Note: An exception is that if the net stack is replying for RX packet,
        this replied packet will always be put into ``transmit``, which may
@@ -130,6 +140,8 @@ Here is a guide to do so:
 
       dev->quota[NETPKT_TX] = 1;
       dev->quota[NETPKT_RX] = 1;
+      dev->rxtype           = NETDEV_RX_WORK;
+      dev->priority         = HPWORK;
 
       return netdev_lower_register(dev, NET_LL_ETHERNET);
   }

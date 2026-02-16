@@ -1396,6 +1396,9 @@ static int dm9x_ifup(FAR struct net_driver_s *dev)
 
   priv->dm_bifup = true;
   up_enable_irq(CONFIG_DM9X_IRQ);
+
+  netdev_carrier_on(dev);
+
   return OK;
 }
 
@@ -1442,6 +1445,9 @@ static int dm9x_ifdown(FAR struct net_driver_s *dev)
 
   priv->dm_bifup = false;
   leave_critical_section(flags);
+
+  netdev_carrier_off(dev);
+
   return OK;
 }
 

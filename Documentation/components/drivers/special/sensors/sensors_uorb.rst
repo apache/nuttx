@@ -17,6 +17,12 @@ multiple sensors into one unit, multiple lower halves need to be instantiated
 within the driver, and device nodes are registered separately through the API
 (sensor_register) provided by the upper half.
 
+.. note::
+
+   When writing a uORB driver for GNSS/GPS devices, please use the :doc:`GNSS
+   lower-half driver </components/drivers/special/sensors/gnss_lowerhalf>`. This
+   driver abstracts parsing and advertising of NMEA information.
+
 Naming
 ======
 
@@ -490,6 +496,7 @@ Implemented Drivers
 - mpu9250
 - ms56xx
 - :doc:`nau7802`
+- :doc:`qmi8658`
 - :doc:`sht4x`
 - :doc:`lsm6dso32`
 - wtgahrs2

@@ -62,7 +62,7 @@
  * structure from the userspace interface.
  */
 
-#  define UMM_HEAP(i) ((struct mm_heap_s *const *)USERSPACE->us_heap)[i]
+#  define UMM_HEAP(i) ((struct mm_heap_s *const *)USERSPACE_HEAP)[i]
 
 #else
 /* Otherwise, the user heap data structures are in common .bss */

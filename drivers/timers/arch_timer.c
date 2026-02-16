@@ -26,6 +26,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/timers/arch_timer.h>
@@ -34,8 +36,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM)
-#  error CONFIG_SCHED_TICKLESS_ALARM must be unset to use the arch timer
+#ifndef CONFIG_BOARD_LOOPSPERMSEC
+#  define CONFIG_BOARD_LOOPSPERMSEC 0
 #endif
 
 #define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
@@ -122,6 +124,8 @@ static void udelay_coarse(useconds_t microseconds)
 {
   volatile int i;
 
+  DEBUGASSERT(CONFIG_BOARD_LOOPSPERMSEC != 0);
+
   /* We'll do this a little at a time because we expect that the
    * CONFIG_BOARD_LOOPSPERUSEC is very inaccurate during to truncation in
    * the divisions of its calculation.  We'll use the largest values that
@@ -174,7 +178,7 @@ static bool timer_callback(FAR uint32_t *next_interval, FAR void *arg)
   g_timer.timebase     += *next_interval;
   temp_interval         = g_oneshot_maxticks;
   g_timer.next_interval = &temp_interval;
-  nxsched_timer_expiration();
+  nxsched_process_timer();
   g_timer.next_interval = NULL;
 
   TIMER_TICK_GETSTATUS(g_timer.lower, &status);
@@ -295,7 +299,7 @@ int weak_function up_timer_gettime(struct timespec *ts)
  * Description:
  *   Cancel the interval timer and return the time remaining on the timer.
  *   These two steps need to be as nearly atomic as possible.
- *   nxsched_timer_expiration() will not be called unless the timer is
+ *   nxsched_process_timer() will not be called unless the timer is
  *   restarted with up_timer_start().
  *
  *   If, as a race condition, the timer has already expired when this
@@ -344,14 +348,14 @@ int weak_function up_timer_tick_cancel(FAR clock_t *ticks)
  * Name: up_timer_start
  *
  * Description:
- *   Start the interval timer.  nxsched_timer_expiration() will be called at
+ *   Start the interval timer.  nxsched_process_timer() will be called at
  *   the completion of the timeout (unless up_timer_cancel is called to stop
  *   the timing.
  *
  *   Provided by platform-specific code and called from the RTOS base code.
  *
  * Input Parameters:
- *   ts - Provides the time interval until nxsched_timer_expiration() is
+ *   ts - Provides the time interval until nxsched_process_timer() is
  *        called.
  *
  * Returned Value:

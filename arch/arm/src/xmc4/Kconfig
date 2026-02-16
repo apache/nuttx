@@ -326,6 +326,32 @@ config XMC4_USIC0_CHAN1_ISI2S
 
 endchoice # USIC0 Channel 1 Protocol
 
+config XMC4_USIC0_CHAN0_TX_BUFFER_SIZE
+	int "Channel 0 Tx FIFO Buffer Size (non-UART)"
+	depends on !XMC4_USIC0_CHAN0_ISUART
+	default 16
+	---help---
+		USIC0_CHAN0 is not an UART but user can still set the desired offsets
+		for CHAN1 TX in USIC0 FIFO buffer. The buffer is mapped as follow :
+		CHAN0_TX[CHAN0_TX_BUFFER_SIZE] - CHAN0_RX[CHAN10_RX_BUFFER_SIZE] - CHAN1_TX[CHAN2_TX_BUFFER_SIZE] - CHAN1_RX[CHAN2_RX_BUFFER_SIZE]
+
+		Should be a power of 2 between 2 and 64
+		The sum of Rx and Tx buffers sizes of both
+		channels should be inferior to 64
+
+config XMC4_USIC0_CHAN0_RX_BUFFER_SIZE
+	int "Channel 0 Rx FIFO Buffer Size (non-UART)"
+	depends on !XMC4_USIC0_CHAN0_ISUART
+	default 16
+	---help---
+		USIC0_CHAN0 is not an UART but user can still set the desired offsets
+		for CHAN1 RX in USIC0 FIFO buffer. The buffer is mapped as follow :
+		CHAN0_TX[CHAN0_TX_BUFFER_SIZE] - CHAN0_RX[CHAN10_RX_BUFFER_SIZE] - CHAN1_TX[CHAN2_TX_BUFFER_SIZE] - CHAN1_RX[CHAN2_RX_BUFFER_SIZE]
+
+		Should be a power of 2 between 2 and 64
+		The sum of Rx and Tx buffers sizes of both
+		channels should be inferior to 64
+
 config XMC4_USIC0_CHAN1_TX_BUFFER_SIZE
 	int "Tx Fifo Buffer Size"
 	depends on XMC4_USIC0_CHAN1_ISUART
@@ -466,6 +492,32 @@ config XMC4_USIC1_CHAN1_ISI2S
 
 endchoice # USIC1 Channel 1 Protocol
 
+config XMC4_USIC1_CHAN0_TX_BUFFER_SIZE
+	int "Channel 0 Tx FIFO Buffer Size (non-UART)"
+	depends on !XMC4_USIC1_CHAN0_ISUART
+	default 16
+	---help---
+		USIC1_CHAN0 is not an UART but user can still set the desired offsets
+		for CHAN1 TX in USIC1 FIFO buffer. The buffer is mapped as follow :
+		CHAN0_TX[CHAN0_TX_BUFFER_SIZE] - CHAN0_RX[CHAN10_RX_BUFFER_SIZE] - CHAN1_TX[CHAN2_TX_BUFFER_SIZE] - CHAN1_RX[CHAN2_RX_BUFFER_SIZE]
+
+		Should be a power of 2 between 2 and 64
+		The sum of Rx and Tx buffers sizes of both
+		channels should be inferior to 64
+
+config XMC4_USIC1_CHAN0_RX_BUFFER_SIZE
+	int "Channel 0 Rx FIFO Buffer Size (non-UART)"
+	depends on !XMC4_USIC1_CHAN0_ISUART
+	default 16
+	---help---
+		USIC1_CHAN0 is not an UART but user can still set the desired offsets
+		for CHAN1 RX in USIC1 FIFO buffer. The buffer is mapped as follow :
+		CHAN0_TX[CHAN0_TX_BUFFER_SIZE] - CHAN0_RX[CHAN10_RX_BUFFER_SIZE] - CHAN1_TX[CHAN2_TX_BUFFER_SIZE] - CHAN1_RX[CHAN2_RX_BUFFER_SIZE]
+
+		Should be a power of 2 between 2 and 64
+		The sum of Rx and Tx buffers sizes of both
+		channels should be inferior to 64
+
 config XMC4_USIC1_CHAN1_TX_BUFFER_SIZE
 	int "Tx Fifo Buffer Size"
 	depends on XMC4_USIC1_CHAN1_ISUART
@@ -604,6 +656,32 @@ config XMC4_USIC2_CHAN1_ISI2S
 	---help---
 		Configure USIC2 Channel 1 for I2S audio
 endchoice # USIC2 Channel 1 Protocol
+
+config XMC4_USIC2_CHAN0_TX_BUFFER_SIZE
+	int "Channel 0 Tx FIFO Buffer Size (non-UART)"
+	depends on !XMC4_USIC2_CHAN0_ISUART
+	default 16
+	---help---
+		USIC2_CHAN0 is not an UART but user can still set the desired offsets
+		for CHAN1 TX in USIC2 FIFO buffer. The buffer is mapped as follow :
+		CHAN0_TX[CHAN0_TX_BUFFER_SIZE] - CHAN0_RX[CHAN10_RX_BUFFER_SIZE] - CHAN1_TX[CHAN2_TX_BUFFER_SIZE] - CHAN1_RX[CHAN2_RX_BUFFER_SIZE]
+
+		Should be a power of 2 between 2 and 64
+		The sum of Rx and Tx buffers sizes of both
+		channels should be inferior to 64
+
+config XMC4_USIC2_CHAN0_RX_BUFFER_SIZE
+	int "Channel 0 Rx FIFO Buffer Size (non-UART)"
+	depends on !XMC4_USIC2_CHAN0_ISUART
+	default 16
+	---help---
+		USIC2_CHAN0 is not an UART but user can still set the desired offsets
+		for CHAN1 RX in USIC2 FIFO buffer. The buffer is mapped as follow :
+		CHAN0_TX[CHAN0_TX_BUFFER_SIZE] - CHAN0_RX[CHAN10_RX_BUFFER_SIZE] - CHAN1_TX[CHAN2_TX_BUFFER_SIZE] - CHAN1_RX[CHAN2_RX_BUFFER_SIZE]
+
+		Should be a power of 2 between 2 and 64
+		The sum of Rx and Tx buffers sizes of both
+		channels should be inferior to 64
 
 config XMC4_USIC2_CHAN1_TX_BUFFER_SIZE
 	int "Tx Fifo Buffer Size"

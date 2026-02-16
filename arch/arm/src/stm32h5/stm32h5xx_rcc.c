@@ -89,13 +89,13 @@ static inline void rcc_enableahb1(void)
 
   regval = getreg32(STM32_RCC_AHB1ENR);
 
-#ifdef CONFIG_STM32H5_GPDMA1
+#ifdef CONFIG_STM32H5_DMA1
   /* DMA 1 clock enable */
 
   regval |= RCC_AHB1ENR_GPDMA1EN;
 #endif
 
-#ifdef CONFIG_STM32H5_GPDMA2
+#ifdef CONFIG_STM32H5_DMA2
   /* DMA 2 clock enable */
 
   regval |= RCC_AHB1ENR_GPDMA2EN;
@@ -1119,6 +1119,13 @@ void stm32_stdclockconfig(void)
       putreg32(regval, STM32_RCC_CCIPR5);
 #endif
 
+      /* Configure FDCAN source clock */
+#if defined(STM32_RCC_CCIPR5_FDCANSEL)
+      regval = getreg32(STM32_RCC_CCIPR5);
+      regval &= ~RCC_CCIPR5_FDCANSEL_MASK;
+      regval |= STM32_RCC_CCIPR5_FDCANSEL;
+      putreg32(regval, STM32_RCC_CCIPR5);
+#endif
       /* Configure OCTOSPI1 source clock */
 
 #if defined(STM32_RCC_CCIPR4_OCTOSPI1SEL)

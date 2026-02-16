@@ -292,7 +292,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   struct usbhost_id_s id;
   size_t maxlen;
   unsigned int cfglen;
-  uint8_t maxpacketsize;
+  uint16_t maxpacketsize;
   uint8_t descsize;
   uint8_t funcaddr = 0;
   FAR uint8_t *buffer = NULL;
@@ -331,7 +331,14 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
    *   Data packets following a Setup..."
    */
 
-  if (hport->speed == USB_SPEED_HIGH)
+  if (hport->speed >= USB_SPEED_SUPER)
+    {
+      /* For super-speed, we must use 512 bytes */
+
+      maxpacketsize = 512;
+      descsize      = USB_SIZEOF_DEVDESC;
+    }
+  else if (hport->speed == USB_SPEED_HIGH)
     {
       /* For high-speed, we must use 64 bytes */
 
@@ -370,7 +377,14 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   /* Extract the correct max packetsize from the device descriptor */
 
   maxpacketsize = ((struct usb_devdesc_s *)buffer)->mxpacketsize;
-  uinfo("maxpacksetsize: %d\n", maxpacketsize);
+  if (hport->speed >= USB_SPEED_SUPER && maxpacketsize == 9)
+    {
+      /* For super-speed, we must use 512 bytes */
+
+      maxpacketsize = 512;
+    }
+
+  uinfo("maxpacksetsize: %d speed: %d\n", maxpacketsize, hport->speed);
 
   /* And reconfigure EP0 with the correct maximum packet size */
 
@@ -428,7 +442,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
       goto errout;
     }
 
-  nxsig_usleep(2 * 1000);
+  nxsched_usleep(2 * 1000);
 
   /* Assign the function address to the port */
 
@@ -509,7 +523,7 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
 
   /* Some devices may require some delay before initialization */
 
-  nxsig_usleep(100 * 1000);
+  nxsched_usleep(100 * 1000);
 
   /* Was the class identification information provided in the device
    * descriptor? Or do we need to find it in the interface descriptor(s)?

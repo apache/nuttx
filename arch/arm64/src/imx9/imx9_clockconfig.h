@@ -31,10 +31,18 @@
 
 #include <stdint.h>
 
+#ifdef CONFIG_IMX9_CLK_OVER_SCMI
+
+#include "hardware/imx95/imx95_clock.h"
+#include "imx9_scmi.h"
+
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef CONFIG_IMX9_CLK_OVER_SCMI
 #define PLL_PARMS(_rdiv, _odiv, _mfi, _mfn, _mfd) \
   {                                               \
     .rdiv = (_rdiv),                              \
@@ -146,7 +154,45 @@ void imx9_clockconfig(void);
  ****************************************************************************/
 
 int imx9_get_clock(int clkname, uint32_t *frequency);
+#else
 
+/****************************************************************************
+ * Name: imx9_configure_clock
+ *
+ * Description:
+ *   This function config and enable the clock
+ *
+ * Input Parameters:
+ *   clk_config - The clock config
+ *   enabled    - If enable the clock
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int imx9_configure_clock(clock_config_t clk_config, bool enabled);
+
+/****************************************************************************
+ * Name: imx9_set_clock_freq
+ *
+ * Description:
+ *   This function set the clock frequency of the specified clock.
+ *
+ * Input Parameters:
+ *   clkid     - Identifies the peripheral clock of interest
+ *   frequency - The location where the peripheral clock frequency will be
+ *               set
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int imx9_set_clock_freq(int clock_id, uint32_t frequency);
+#endif
 /****************************************************************************
  * Name: imx9_get_rootclock
  *

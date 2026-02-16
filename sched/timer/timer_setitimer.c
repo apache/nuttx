@@ -97,33 +97,34 @@ int setitimer(int which, FAR const struct itimerval *value,
   if (which != ITIMER_REAL || !value)
     {
       set_errno(EINVAL);
-      return ERROR;
+      ret = ERROR;
     }
-
-  rtcb = this_task();
-
-  nxrmutex_lock(&rtcb->group->tg_mutex);
-
-  if (!rtcb->group->itimer)
+  else
     {
-      ret = timer_create(CLOCK_REALTIME, NULL, &rtcb->group->itimer);
-    }
+      rtcb = this_task();
 
-  nxrmutex_unlock(&rtcb->group->tg_mutex);
+      nxrmutex_lock(&rtcb->group->tg_mutex);
 
-  if (ret != OK)
-    {
-      return ret;
-    }
+      if (!rtcb->group->itimer)
+        {
+          ret = timer_create(CLOCK_REALTIME, NULL, &rtcb->group->itimer);
+        }
 
-  TIMEVAL_TO_TIMESPEC(&value->it_value, &spec.it_value);
-  TIMEVAL_TO_TIMESPEC(&value->it_interval, &spec.it_interval);
+      nxrmutex_unlock(&rtcb->group->tg_mutex);
 
-  ret = timer_settime(rtcb->group->itimer, 0, &spec, ovalue ? &ospec : NULL);
-  if (ret == OK && ovalue)
-    {
-      TIMESPEC_TO_TIMEVAL(&ovalue->it_value, &ospec.it_value);
-      TIMESPEC_TO_TIMEVAL(&ovalue->it_interval, &ospec.it_interval);
+      if (ret == OK)
+        {
+          TIMEVAL_TO_TIMESPEC(&value->it_value, &spec.it_value);
+          TIMEVAL_TO_TIMESPEC(&value->it_interval, &spec.it_interval);
+
+          ret = timer_settime(rtcb->group->itimer, 0, &spec,
+                              ovalue ? &ospec : NULL);
+          if (ret == OK && ovalue)
+            {
+              TIMESPEC_TO_TIMEVAL(&ovalue->it_value, &ospec.it_value);
+              TIMESPEC_TO_TIMEVAL(&ovalue->it_interval, &ospec.it_interval);
+            }
+        }
     }
 
   return ret;

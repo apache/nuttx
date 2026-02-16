@@ -29,6 +29,12 @@ if(WIN32)
   return()
 endif()
 
+if(CONFIG_HOST_LINUX)
+  set(CMAKE_LD ld)
+  set(CMAKE_PREPROCESSOR cc -E -P -x c)
+  set(CMAKE_STRIP strip --strip-unneeded)
+endif()
+
 # LLVM style architecture flags
 if(CONFIG_HOST_X86_64)
   if(CONFIG_SIM_M32)
@@ -103,7 +109,7 @@ else()
 endif()
 
 if(CONFIG_STACK_CANARIES)
-  add_compile_options(-fstack-protector-all)
+  add_compile_options(${CONFIG_STACK_CANARIES_LEVEL})
 endif()
 
 if(CONFIG_STACK_USAGE)
@@ -218,6 +224,10 @@ if(CONFIG_LIBCXX)
   endif()
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-D__GLIBCXX__>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-D_LIBCPP_DISABLE_AVAILABILITY>)
+endif()
+
+if(CONFIG_LIBCXX_TEST)
+  add_link_options(-Wl,-latomic)
 endif()
 
 if(APPLE)

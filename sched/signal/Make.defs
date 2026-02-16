@@ -19,16 +19,18 @@
 # under the License.
 #
 ############################################################################
+ifneq ($(CONFIG_DISABLE_ALL_SIGNALS),y)
+CSRCS += sig_dispatch.c sig_kill.c sig_lowest.c sig_nanosleep.c
+CSRCS += sig_notification.c sig_pause.c sig_ppoll.c sig_procmask.c
+CSRCS += sig_pselect.c sig_queue.c sig_sleep.c sig_suspend.c sig_tgkill.c
+CSRCS += sig_timedwait.c sig_usleep.c sig_waitinfo.c
+endif
 
-CSRCS += sig_initialize.c
-CSRCS += sig_action.c sig_procmask.c sig_pending.c sig_suspend.c
-CSRCS += sig_kill.c sig_tgkill.c sig_queue.c sig_waitinfo.c sig_timedwait.c
-CSRCS += sig_findaction.c sig_allocpendingsigaction.c
-CSRCS += sig_releasependingsigaction.c sig_unmaskpendingsignal.c
-CSRCS += sig_removependingsignal.c sig_releasependingsignal.c sig_lowest.c
-CSRCS += sig_notification.c sig_cleanup.c sig_dispatch.c sig_deliver.c
-CSRCS += sig_pause.c sig_nanosleep.c sig_usleep.c sig_sleep.c
-CSRCS += sig_ppoll.c sig_pselect.c
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+CSRCS += sig_action.c sig_allocpendingsigaction.c sig_cleanup.c sig_deliver.c
+CSRCS += sig_findaction.c sig_initialize.c sig_pending.c sig_releasependingsigaction.c
+CSRCS += sig_releasependingsignal.c sig_removependingsignal.c sig_unmaskpendingsignal.c
+endif
 
 ifeq ($(CONFIG_SIG_DEFAULT),y)
 CSRCS += sig_default.c

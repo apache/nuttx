@@ -1,6 +1,9 @@
 /****************************************************************************
  * libs/libc/string/lib_bsdmemcmp.c
  *
+ * SPDX-License-Identifier: BSD
+ * SPDX-FileCopyrightText: 1994-2009  Red Hat, Inc. All rights reserved
+ *
  * Copyright (c) 1994-2009  Red Hat, Inc. All rights reserved.
  *
  * This copyrighted material is made available to anyone wishing to use,
@@ -48,7 +51,7 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_MEMCMP) && defined(LIBC_BUILD_MEMCMP)
-#undef memcmp /* See mm/README.txt */
+#undef memcmp
 no_builtin("memcmp")
 int memcmp(FAR const void *s1, FAR const void *s2, size_t n)
 {

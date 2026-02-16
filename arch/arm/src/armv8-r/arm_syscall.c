@@ -267,11 +267,16 @@ uint32_t *arm_syscall(uint32_t *regs)
 
         /* Update scheduler parameters */
 
-        nxsched_resume_scheduler(tcb);
+        nxsched_switch_context(*running_task, tcb);
 
       case SYS_restore_context:
-        nxsched_suspend_scheduler(*running_task);
+        /* No context switch occurs in SYS_restore_context, or the
+         * context switch has been completed, so there is no
+         * need to update scheduler parameters.
+         */
+
         *running_task = tcb;
+        g_running_tasks[cpu] = *running_task;
 
         /* Restore the cpu lock */
 

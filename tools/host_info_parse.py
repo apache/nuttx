@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# tools/parse_sysinfo.py
+# tools/host_info_parse.py
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -38,7 +38,7 @@ def parse_information_from_header(file_path):
     """
 
     VARIABLE_NAMES_REGEX = r"static\s+const\s+char\s+\**([A-Za-z0-9_]+)\s*"
-    VARIABLE_VALUES_REGEX = r'"([^"]*)"|{([^}]+)};'
+    VARIABLE_VALUES_REGEX = r'\{([^}]+)\}|=\s*"([^"]*)"'
     result = {}
     var_name_to_print_dict = {
         "NUTTX_CFLAGS": "NuttX CFLAGS",
@@ -75,18 +75,25 @@ def parse_information_from_header(file_path):
 
         # Process values to print it prettier
 
-        for i in range(len(values_array)):
-            tmp_list = []
-            for y in range(len(values_array[i])):
-                tmp_str = values_array[i][y]
-                tmp_str = tmp_str.replace('"', "")
-                tmp_str = tmp_str.replace("\n  ", "", 1)
-                tmp_str = tmp_str.replace(",", "")
+        processed_values = []
 
-                if tmp_str != "":
-                    tmp_list.append(tmp_str)
+        for array_block, single_value in values_array:
+            if array_block:
+                items = []
+                for line in array_block.splitlines():
+                    line = line.strip()
+                    if not line or line == "{":
+                        continue
+                    line = line.rstrip(",")
+                    if line.startswith('"') and line.endswith('"'):
+                        line = line[1:-1]
+                        line = bytes(line, "utf-8").decode("unicode_escape")
+                    items.append(line)
+                processed_values.append(tuple(items))
+            else:
+                processed_values.append((single_value,))
 
-            values_array[i] = tuple(tmp_list)
+            values_array = processed_values
 
         keys_values_to_return = [var_name_to_print_dict[x] for x in keys_array]
         result = dict(zip(keys_values_to_return, values_array))

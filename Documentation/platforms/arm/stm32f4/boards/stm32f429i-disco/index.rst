@@ -4,6 +4,9 @@ ST STM32F429I-DISCO
 
 .. tags:: chip:stm32, chip:stm32f4, chip:stm32f429
 
+.. figure:: stm32f429i-disco.png
+   :align: center
+
 This page discusses issues unique to NuttX configurations for the
 STMicro STM32F429I-DISCO development board featuring the STM32F429ZIT6
 MCU. The STM32F429ZIT6 is a 180MHz Cortex-M4 operation with 2Mbit Flash
@@ -299,8 +302,17 @@ can be selected as follow::
 
 Where <subdir> is one of the following:
 
-extflash:
----------
+bootlogo
+--------
+
+This board configuration enables the framebuffer test (like the 'fb' profile)
+and includes the NuttX NX Logo as boot splash screen.
+
+Note: the Logo seems upside down. It should be nice to have a rotation option
+for the boot logo splash image.
+
+extflash
+--------
 
 This is another NSH example.  If differs from other 'nsh' configurations
 in that this configuration defines an external 8 MByte SPI FLASH (the

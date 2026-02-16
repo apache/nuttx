@@ -39,6 +39,12 @@
 #ifdef CONFIG_NET_NAT
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static mutex_t g_nat_lock = NXMUTEX_INITIALIZER;
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -108,18 +114,15 @@ static uint16_t nat_port_select_without_stack(
 
 int nat_enable(FAR struct net_driver_s *dev)
 {
-  net_lock();
-
+  nat_lock();
   if (IFF_IS_NAT(dev->d_flags))
     {
       nwarn("WARNING: NAT was already enabled for %s!\n", dev->d_ifname);
-      net_unlock();
       return -EEXIST;
     }
 
   IFF_SET_NAT(dev->d_flags);
-
-  net_unlock();
+  nat_unlock();
   return OK;
 }
 
@@ -140,12 +143,11 @@ int nat_enable(FAR struct net_driver_s *dev)
 
 int nat_disable(FAR struct net_driver_s *dev)
 {
-  net_lock();
-
+  nat_lock();
   if (!IFF_IS_NAT(dev->d_flags))
     {
       nwarn("WARNING: NAT was not enabled for %s!\n", dev->d_ifname);
-      net_unlock();
+      nat_unlock();
       return -ENODEV;
     }
 
@@ -159,8 +161,7 @@ int nat_disable(FAR struct net_driver_s *dev)
 #endif
 
   IFF_CLR_NAT(dev->d_flags);
-
-  net_unlock();
+  nat_unlock();
   return OK;
 }
 
@@ -184,23 +185,27 @@ int nat_disable(FAR struct net_driver_s *dev)
 bool nat_port_inuse(uint8_t domain, uint8_t protocol,
                     FAR const union ip_addr_u *ip, uint16_t port)
 {
+  bool ret = false;
+
+  nat_lock();
 #ifdef CONFIG_NET_NAT44
   if (domain == PF_INET)
     {
-      return !!ipv4_nat_inbound_entry_find(protocol, ip->ipv4, port,
-                                           INADDR_ANY, 0, false);
+      ret = !!ipv4_nat_inbound_entry_find(protocol, ip->ipv4, port,
+                                          INADDR_ANY, 0, false);
     }
 #endif
 
 #ifdef CONFIG_NET_NAT66
   if (domain == PF_INET6)
     {
-      return !!ipv6_nat_inbound_entry_find(protocol, ip->ipv6, port,
-                                           g_ipv6_unspecaddr, 0, false);
+      ret = !!ipv6_nat_inbound_entry_find(protocol, ip->ipv6, port,
+                                          g_ipv6_unspecaddr, 0, false);
     }
 #endif
 
-  return false;
+  nat_unlock();
+  return ret;
 }
 
 /****************************************************************************
@@ -401,6 +406,32 @@ uint32_t nat_expire_time(uint8_t protocol)
         nwarn("WARNING: Unsupported protocol %" PRIu8 "\n", protocol);
         return 0;
   }
+}
+
+/****************************************************************************
+ * Name: nat_lock
+ *
+ * Description:
+ *   Lock the NAT lock.
+ *
+ ****************************************************************************/
+
+void nat_lock(void)
+{
+  nxmutex_lock(&g_nat_lock);
+}
+
+/****************************************************************************
+ * Name: nat_unlock
+ *
+ * Description:
+ *   Unlock the NAT lock.
+ *
+ ****************************************************************************/
+
+void nat_unlock(void)
+{
+  nxmutex_unlock(&g_nat_lock);
 }
 
 #endif /* CONFIG_NET_NAT */

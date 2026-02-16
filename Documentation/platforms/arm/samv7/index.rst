@@ -14,14 +14,19 @@ Supported MCUs
 
 The following list includes MCUs from SAM x7 series and indicates whether they are supported in NuttX
 
-=======  =======  ==============  =================
-MCU      Support  Core            Frequency
-=======  =======  ==============  =================
-SAM E70  Yes      Cortex-M7       300 MHz
-SAM S70  No       Cortex-M7       300 MHz
-SAM V70  No       Cortex-M7       300 MHz
-SAM V71  Yes      Cortex-M7       300 MHz
-=======  =======  ==============  =================
+============ =======  ==============  =================
+MCU          Support  Core            Frequency
+============ =======  ==============  =================
+SAM E70      Yes      Cortex-M7       300 MHz
+SAM S70      No       Cortex-M7       300 MHz
+SAM V70      No       Cortex-M7       300 MHz
+SAM V71      Yes      Cortex-M7       300 MHz
+PIC32CZ CA70 Yes      Cortex-M7       300 MHz
+============ =======  ==============  =================
+
+The code base also supports PIC32CZ CA70 series of microcontrollers. These
+are both pin to pin and binary compatible with SAM x7 series, but offer
+more RAM memory.
 
 Data and Instruction Cache
 ==========================

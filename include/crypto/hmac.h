@@ -26,6 +26,9 @@
  ****************************************************************************/
 
 #include <sys/types.h>
+#include <crypto/md5.h>
+#include <crypto/sha1.h>
+#include <crypto/sha2.h>
 
 typedef struct _HMAC_MD5_CTX
 {

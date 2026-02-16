@@ -97,6 +97,22 @@ config ALLOW_ICS_COMPONENTS
 		NOTE: Please check that the license for each enabled
 		component matches your project license.
 
+config ALLOW_CUSTOM_PERMISSIVE_COMPONENTS
+	bool "Use components that have custom permissive licenses"
+	default n
+	---help---
+		When this option is enabled the project will allow the use
+		of components that have custom permissive licenses which
+		are not covered by the standard license options above.
+
+		This includes components with custom permissive licenses
+		that allow free use, modification, and distribution but
+		may have specific attribution or notice requirements.
+
+		NOTE: Please carefully review the license terms for each
+		enabled component to ensure compliance with your project
+		requirements.
+
 endmenu # License Setup
 
 menu "Build Setup"
@@ -2301,7 +2317,7 @@ config DEBUG_RESET_INFO
 endif # DEBUG_RESET
 
 config DEBUG_IPC
-	bool "IPC (Interprocessor communication) Debug Features"
+	bool "IPC (Inter-Process Communication) Debug Features"
 	default n
 	---help---
 		Enable IPC debug features.
@@ -2366,6 +2382,41 @@ config DEBUG_PCI_INFO
 
 endif # DEBUG_PCI
 
+config DEBUG_PTP
+	bool "PTP Debug Features"
+	default n
+	depends on PTP_CLOCK
+	---help---
+		Enable PTP driver debug features.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+if DEBUG_PTP
+
+config DEBUG_PTP_ERROR
+	bool "PTP Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable PTP driver error output to SYSLOG.
+
+config DEBUG_PTP_WARN
+	bool "PTP Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable PTP driver warning output to SYSLOG.
+
+config DEBUG_PTP_INFO
+	bool "PTP Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable PTP driver informational output to SYSLOG.
+
+endif # DEBUG_PTP
+
 config DEBUG_RPMSG
 	bool "RPMSG Debug Features"
 	default n
@@ -2397,6 +2448,38 @@ config DEBUG_RPMSG_INFO
 		Enable RPMSG driver informational output to SYSLOG.
 
 endif # DEBUG_RPMSG
+
+config DEBUG_RPTUN
+	bool "Rptun Debug Features"
+	default n
+	depends on RPTUN
+	---help---
+		Enable rptun debug features.
+
+if DEBUG_RPTUN
+
+config DEBUG_RPTUN_ERROR
+	bool "Rptun Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable rptun error output to SYSLOG.
+
+config DEBUG_RPTUN_WARN
+	bool "Rptun Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable rptun warning output to SYSLOG.
+
+config DEBUG_RPTUN_INFO
+	bool "Rptun Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable rptun informational output to SYSLOG.
+
+endif # DEBUG_RPTUN
 
 config DEBUG_CORESIGHT
 	bool "Coresight Debug Features"
@@ -2455,6 +2538,15 @@ config STACK_COLORATION
 
 		Only supported by a few architectures.
 
+config STACKCHECK_MARGIN
+	int "Stack overflow check size (bytes)"
+	depends on DEBUG_ASSERTIONS
+	default -1
+	---help---
+		Specifies the number of bytes at the end of the stack to check for overflow.
+		A value of -1 disables additional checking. Increase this value for stricter
+		overflow detection, at the cost of additional overhead.
+
 config STACK_CANARIES
 	bool "Compiler stack canaries"
 	depends on ARCH_HAVE_STACKCHECK
@@ -2468,6 +2560,46 @@ config STACK_CANARIES
 		in a fatal error condition for the running entity.
 		Enabling this option can result in a significant increase
 		in footprint and an associated decrease in performance.
+
+choice STACK_CANARIES_LEVEL
+	prompt "Stack Canaries Level Configuration"
+	default STACK_PROTECTOR_ALL
+	depends on STACK_CANARIES
+	---help---
+		Based on the configuration options, configure the stack Canaries Level.
+
+config STACK_PROTECTOR
+	bool "-fstack-protector"
+	---help---
+		Enable basic stack protection.
+
+config STACK_PROTECTOR_STRONG
+	bool "-fstack-protector-strong"
+	---help---
+		Using stronger stack protection mechanisms may involve more complex
+		security checks.
+
+config STACK_PROTECTOR_ALL
+	bool "-fstack-protector-all"
+	---help---
+		Enable stack protection for all functions, including those that are
+		typically not protected.
+
+config STACK_PROTECTOR_EXPLICIT
+	bool "-fstack-protector-explicit"
+	---help---
+		Enable stack protection only for functions explicitly marked as
+		requiring stack protection.
+
+endchoice # Stack Canaries Level Configuration
+
+config STACK_CANARIES_LEVEL
+	string
+	default "-fstack-protector" if STACK_PROTECTOR
+	default "-fstack-protector-strong" if STACK_PROTECTOR_STRONG
+	default "-fstack-protector-all" if STACK_PROTECTOR_ALL
+	default "-fstack-protector-explicit" if STACK_PROTECTOR_EXPLICIT
+	depends on STACK_CANARIES
 
 config STACK_USAGE
 	bool "Generate stack usage information"

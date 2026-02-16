@@ -45,6 +45,8 @@
 #include <nuttx/clock.h>
 #include <nuttx/wdog.h>
 #include <nuttx/circbuf.h>
+#include <nuttx/sched_note.h>
+
 #ifdef CONFIG_VIDEO_FB_SPLASHSCREEN
 #  include <nuttx/signal.h>
 #endif
@@ -1306,6 +1308,12 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      case FBIOGET_PANINFOCNT:
+        {
+          ret = fb_paninfo_count(fb->vtable, (int)arg);
+        }
+        break;
+
       default:
         if (fb->vtable->ioctl != NULL)
           {
@@ -1685,6 +1693,8 @@ void fb_notify_vsync(FAR struct fb_vtable_s *vtable)
   FAR struct fb_priv_s    *priv;
   irqstate_t flags;
 
+  sched_note_mark(NOTE_TAG_GRAPHICS, __func__);
+
   fb = vtable->priv;
   if (fb != NULL)
     {
@@ -1772,6 +1782,8 @@ int fb_remove_paninfo(FAR struct fb_vtable_s *vtable, int overlay)
   irqstate_t               flags;
   ssize_t                  ret;
   bool                     full;
+
+  sched_note_mark(NOTE_TAG_GRAPHICS, __func__);
 
   fb = vtable->priv;
   if (fb == NULL)
@@ -1995,7 +2007,7 @@ int fb_register_device(int display, int plane,
 
   if (SPLASH_SLEEP != 0)
     {
-      nxsig_sleep(SPLASH_SLEEP);
+      nxsched_sleep(SPLASH_SLEEP);
     }
 
 #  ifdef VIDEO_FB_SPLASHSCREEN_CLR_ON_EXIT

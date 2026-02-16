@@ -147,7 +147,6 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       return -EOPNOTSUPP;
     }
 
-  net_lock();
   ret = psock->s_sockif->si_accept(psock, addr, addrlen, newsock, flags);
   if (ret >= 0)
     {
@@ -166,6 +165,5 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       nerr("ERROR: si_accept failed: %d\n", ret);
     }
 
-  net_unlock();
   return ret;
 }

@@ -42,7 +42,9 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   ninja-build \
   nodejs \
   npm \
-  unzip
+  unzip \
+  zip \
+  python3
 
 RUN mkdir -p /tools
 WORKDIR /tools
@@ -66,8 +68,13 @@ RUN cd nuttx-tools/kconfig-frontends \
 RUN mkdir -p /tools/gn \
   && cd /tools/gn \
   && git clone https://gn.googlesource.com/gn gn \
-  && cd gn && ./build/gen.py \
-  && cd out && ninja
+  && cd gn \
+  && git checkout 5d0a4153b0bcc86c5a23310d5b648a587be3c56d \
+  && python3 build/gen.py \
+  && ninja -C out
+
+# Upgrade nodejs to the stable version we need before install zap
+RUN npm install -g n && n 20.10.0 node && hash -r
 
 ENV ZAP_INSTALL_PATH=/tools/zap_release
 RUN mkdir -p $ZAP_INSTALL_PATH \
@@ -290,6 +297,24 @@ RUN mkdir -p wamrc && \
   | tar -C wamrc -xz
 
 ###############################################################################
+# Build image for tool required by Raspberry Pi pico-sdk builds
+###############################################################################
+FROM nuttx-toolchain-base AS nuttx-toolchain-raspberrypi-pico-sdk
+# Download the latest pico-sdk source archive
+RUN mkdir -p pico-sdk && \
+  curl -s -L "https://github.com/raspberrypi/pico-sdk/releases/download/2.2.0/pico-sdk-2.2.0.tar.gz" \
+  | tar -C pico-sdk --strip-components 1 -xz
+
+###############################################################################
+# Build image for tool required by Raspberry Pi picotool builds
+###############################################################################
+FROM nuttx-toolchain-base AS nuttx-toolchain-raspberrypi-picotool
+# Download the prebuilt Raspberry Pi picotool
+RUN mkdir -p picotool && \
+  curl -s -L "https://github.com/raspberrypi/pico-sdk-tools/releases/download/v2.2.0-0/picotool-2.2.0-x86_64-lin.tar.gz" \
+  | tar -C picotool --strip-components 1 -xz
+
+###############################################################################
 # Final Docker image used for running CI system.  This includes all toolchains
 # supported by the CI system.
 ###############################################################################
@@ -352,6 +377,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" TZ=Etc/UTC apt-get in
   file \
   subversion \
   tclsh \
+  zip \
   && rm -rf /var/lib/apt/lists/*
 
 # Set GCC-12 as Default compiler
@@ -396,8 +422,8 @@ RUN pip3 install stringcase
 RUN pip3 install jinja2
 RUN pip3 install coloredlogs
 
-# Upgrade nodejs to the latest version
-RUN npm install -g n && n stable && hash -r
+# Upgrade nodejs to the stable version we need
+RUN npm install -g n && n 20.10.0 node && hash -r
 
 # Used to generate symbol table files
 
@@ -473,6 +499,15 @@ COPY --from=nuttx-toolchain-esp32 /tools/blobs/* /tools/blobs/esp-bins/
 COPY --from=nuttx-toolchain-wasm /tools/wasi-sdk/ wasi-sdk/
 ENV WASI_SDK_PATH="/tools/wasi-sdk"
 ENV PATH="/tools/wamr:$PATH"
+COPY --from=nuttx-toolchain-esp32 /tools/blobs/* /tools/blobs/esp-bins/
+
+# Raspberry Pi pico-sdk source
+COPY --from=nuttx-toolchain-raspberrypi-pico-sdk /tools/pico-sdk/ pico-sdk/
+ENV PICO_SDK_PATH="/tools/pico-sdk"
+
+# Raspberry Pi picotool
+COPY --from=nuttx-toolchain-raspberrypi-picotool /tools/picotool/ picotool/
+ENV PATH="/tools/picotool:$PATH"
 
 # gn tool
 RUN mkdir -p /tools/gn

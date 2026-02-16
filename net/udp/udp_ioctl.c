@@ -38,6 +38,7 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
 
+#include "utils/utils.h"
 #include "udp/udp.h"
 
 /****************************************************************************
@@ -67,25 +68,29 @@ static void udp_path(FAR struct udp_conn_s *conn, FAR char *buf, size_t len)
 
   snprintf(buf, len, "udp:["
            "%s:%" PRIu16 "<->%s:%" PRIu16
-#if CONFIG_NET_SEND_BUFSIZE > 0
            ", tx %" PRIu32 "/%" PRId32
-#endif
-#if CONFIG_NET_RECV_BUFSIZE > 0
            ", rx %u/%" PRId32
-#endif
            ", flg %" PRIx8
            "]",
            inet_ntop(domain, laddr, local, sizeof(local)),
            ntohs(conn->lport),
            inet_ntop(domain, raddr, remote, sizeof(remote)),
            ntohs(conn->rport),
-#if CONFIG_NET_SEND_BUFSIZE > 0
+#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
            udp_wrbuffer_inqueue_size(conn),
-           conn->sndbufs,
+#else
+           (uint32_t)0,
 #endif
-#if CONFIG_NET_RECV_BUFSIZE > 0
+#if CONFIG_NET_SEND_BUFSIZE > 0
+           conn->sndbufs,
+#else
+           (int32_t)0,
+#endif
            (conn->readahead) ? conn->readahead->io_pktlen : 0,
+#if CONFIG_NET_RECV_BUFSIZE > 0
            conn->rcvbufs,
+#else
+           (int32_t)0,
 #endif
            conn->sconn.s_flags
            );
@@ -113,7 +118,7 @@ int udp_ioctl(FAR struct udp_conn_s *conn, int cmd, unsigned long arg)
   FAR struct iob_s *iob;
   int ret = OK;
 
-  net_lock();
+  conn_lock(&conn->sconn);
 
   switch (cmd)
     {
@@ -151,7 +156,7 @@ int udp_ioctl(FAR struct udp_conn_s *conn, int cmd, unsigned long arg)
         break;
     }
 
-  net_unlock();
+  conn_unlock(&conn->sconn);
 
   return ret;
 }

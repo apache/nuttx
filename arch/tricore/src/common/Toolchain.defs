@@ -25,3 +25,12 @@ ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
 else
   include $(TOPDIR)/arch/tricore/src/common/ToolchainGnuc.defs
 endif
+
+ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
+  undefine PREPROCESS
+  define PREPROCESS
+    $(ECHO_BEGIN)"CPP: $1->$2 "
+    $(CPP) $(CPPFLAGS) $1 > $2
+    $(ECHO_END)
+  endef
+endif

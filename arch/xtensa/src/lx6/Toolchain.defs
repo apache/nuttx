@@ -96,7 +96,7 @@ else
 endif
 
 ifeq ($(CONFIG_STACK_CANARIES),y)
-  ARCHOPTIMIZATION += -fstack-protector-all
+  ARCHOPTIMIZATION += $(patsubst "%",%,$(CONFIG_STACK_CANARIES_LEVEL))
 endif
 
 ifeq ($(CONFIG_STACK_USAGE),y)
@@ -191,6 +191,7 @@ endif
 LD = $(CROSSDEV)ld
 STRIP = $(CROSSDEV)strip --strip-unneeded
 AR = $(CROSSDEV)ar rcs
+UNAR = $(CROSSDEV)ar x
 NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
@@ -217,6 +218,10 @@ ifeq ($(CONFIG_LIBSUPCXX_TOOLCHAIN),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a))
 endif
 
+ifeq ($(CONFIG_LIBCXXTOOLCHAIN),y)
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libstdc++.a))
+endif
+
 ifeq ($(CONFIG_COVERAGE_TOOLCHAIN),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcov.a))
 endif
@@ -231,7 +236,7 @@ LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 CELFFLAGS = $(CFLAGS) -fvisibility=hidden -mtext-section-literals
 CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden -mtext-section-literals
 
-LDELFFLAGS = -r -e __start
+LDELFFLAGS = -r -e _start
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)elf$(DELIM)gnu-elf.ld)
 ifneq ($(CONFIG_BUILD_KERNEL),y)
   # Flat build and protected elf entry point use crt0,

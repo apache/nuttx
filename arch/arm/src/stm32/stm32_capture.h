@@ -47,6 +47,7 @@
 #define STM32_CAP_ENABLEINT(d,s,on)             ((d)->ops->enableint(d,s,on))
 #define STM32_CAP_ACKFLAGS(d,f)                 ((d)->ops->ackflags(d,f))
 #define STM32_CAP_GETFLAGS(d)                   ((d)->ops->getflags(d))
+#define STM32_CAP_RSTCOUNTER(d)                 ((d)->ops->rstcounter(d))
 
 /****************************************************************************
  * Public Types
@@ -79,6 +80,8 @@ typedef enum
   STM32_CAP_MAPPED_MASK         = (GTIM_CCMR1_CC1S_MASK),
   STM32_CAP_MAPPED_TI1          = (GTIM_CCMR_CCS_CCIN1),
   STM32_CAP_MAPPED_TI2          = (GTIM_CCMR_CCS_CCIN2),
+  STM32_CAP_MAPPED_TI3          = (GTIM_CCMR_CCS_CCIN1),
+  STM32_CAP_MAPPED_TI4          = (GTIM_CCMR_CCS_CCIN2),
 
 /* TODO STM32_CAP_MAPPED_TRC     = (GTIM_CCMR_CCS_CCINTRC), */
 
@@ -196,6 +199,7 @@ struct stm32_cap_ops_s
                     bool on);
   void (*ackflags)(struct stm32_cap_dev_s *dev, int flags);
   stm32_cap_flags_t (*getflags)(struct stm32_cap_dev_s *dev);
+  uint32_t (*rstcounter)(struct stm32_cap_dev_s *dev);
 };
 
 /****************************************************************************

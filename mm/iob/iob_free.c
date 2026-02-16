@@ -35,6 +35,7 @@
 #ifdef CONFIG_IOB_ALLOC
 #  include <nuttx/kmalloc.h>
 #endif
+#include <nuttx/nuttx.h>
 #include <nuttx/mm/iob.h>
 
 #include "iob.h"
@@ -120,8 +121,18 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
 #ifdef CONFIG_IOB_ALLOC
   if (iob->io_free != NULL)
     {
-      iob->io_free(iob->io_data);
-      kmm_free(iob);
+      FAR uint8_t *io_data = (FAR uint8_t *)ALIGN_UP((uintptr_t)(iob + 1),
+                                                     IOB_ALIGNMENT);
+      if (iob->io_data == io_data)
+        {
+          iob->io_free(iob);
+        }
+      else
+        {
+          iob->io_free(iob->io_data);
+          kmm_free(iob);
+        }
+
       return next;
     }
 #endif

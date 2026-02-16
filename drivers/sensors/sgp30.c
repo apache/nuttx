@@ -628,7 +628,7 @@ static int sgp30_open(FAR struct file *filep)
                       return ret;
                     }
 
-                  nxsig_usleep(CONFIG_SGP30_RESET_DELAY_US);
+                  nxsched_usleep(CONFIG_SGP30_RESET_DELAY_US);
 
                   clock_systime_timespec(&start);
                   ret = sgp30_write_cmd(priv, SGP30_CMD_INIT_AIR_QUALITY,

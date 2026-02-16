@@ -755,8 +755,7 @@ static int virtio_mmio_interrupt(int irq, FAR void *context, FAR void *arg)
       for (i = 0; i < vmdev->vdev.vrings_num; i++)
         {
           vq = vrings_info[i].vq;
-          if (vq->vq_used_cons_idx != vq->vq_ring.used->idx &&
-              vq->callback != NULL)
+          if (vq->callback != NULL && virtqueue_nused(vq) > 0)
             {
               vq->callback(vq);
             }
@@ -853,7 +852,6 @@ static int virtio_mmio_init_device(FAR struct virtio_mmio_device_s *vmdev,
 
   /* Reset the virtio device and set ACK */
 
-  virtio_mmio_set_status(vdev, VIRTIO_CONFIG_STATUS_RESET);
   virtio_mmio_set_status(vdev, VIRTIO_CONFIG_STATUS_ACK);
   return OK;
 }

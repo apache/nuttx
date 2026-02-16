@@ -55,7 +55,7 @@
  * Private Data
  ****************************************************************************/
 
-unsigned long g_x86_64_timer_freq;
+extern unsigned long g_x86_64_timer_freq;
 
 /****************************************************************************
  * Private Functions
@@ -127,4 +127,9 @@ void up_timer_initialize(void)
   __asm__ volatile("mfence" : : : "memory");
 
   apic_timer_set(NS_PER_MSEC);
+}
+
+void intel64_timer_secondary_init(void)
+{
+  /* Secondary CPU initialization is not required. */
 }

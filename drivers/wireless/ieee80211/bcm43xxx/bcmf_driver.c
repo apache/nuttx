@@ -1207,7 +1207,7 @@ int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable)
 
   /* TODO wait for WLC_E_RADIO event */
 
-  nxsig_usleep(3000);
+  nxsched_usleep(3000);
 
   if (ret == OK)
     {

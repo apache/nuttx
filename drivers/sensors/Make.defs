@@ -34,9 +34,16 @@ ifeq ($(CONFIG_SENSORS_RPMSG),y)
   CSRCS += sensor_rpmsg.c
 endif
 
-
 ifeq ($(CONFIG_SENSORS_NAU7802),y)
   CSRCS += nau7802.c
+endif
+
+ifeq ($(CONFIG_SENSORS_L86_XXX),y)
+  CSRCS += l86xxx_uorb.c
+endif
+
+ifeq ($(CONFIG_SENSORS_MONITOR),y)
+CSRCS += sensor_monitor.c
 endif
 
 ifeq ($(CONFIG_SENSORS_GNSS),y)
@@ -329,6 +336,10 @@ ifeq ($(CONFIG_SENSORS_BMM150),y)
   CSRCS += bmm150_uorb.c
 endif
 
+ifeq ($(CONFIG_SENSORS_TMP112),y)
+  CSRCS += tmp112.c
+endif
+
 endif # CONFIG_I2C
 
 # These drivers depend on SPI support
@@ -409,6 +420,12 @@ endif
 
 ifeq ($(CONFIG_SENSORS_MPU9250),y)
   CSRCS += mpu9250_uorb.c
+endif
+
+# QMI8658 6-axis IMU
+
+ifeq ($(CONFIG_SENSORS_QMI8658),y)
+  CSRCS += qmi8658_uorb.c
 endif
 
 # Quadrature encoder upper half

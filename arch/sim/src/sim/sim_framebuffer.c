@@ -432,31 +432,25 @@ static int sim_setpower(struct fb_vtable_s *vtable, int power)
  * Name: sim_x11loop
  ****************************************************************************/
 
+#ifdef CONFIG_SIM_X11FB
 void sim_x11loop(void)
 {
-#ifdef CONFIG_SIM_X11FB
-  static clock_t last;
-  clock_t now = clock_systime_ticks();
   union fb_paninfo_u info;
 
-  if (now - last >= MSEC2TICK(16))
+  fb_notify_vsync(&g_fbobject);
+  if (fb_paninfo_count(&g_fbobject, FB_NO_OVERLAY) > 1)
     {
-      last = now;
-      fb_notify_vsync(&g_fbobject);
-      if (fb_paninfo_count(&g_fbobject, FB_NO_OVERLAY) > 1)
-        {
-          fb_remove_paninfo(&g_fbobject, FB_NO_OVERLAY);
-        }
-
-      if (fb_peek_paninfo(&g_fbobject, &info, FB_NO_OVERLAY) == OK)
-        {
-          sim_x11setoffset(info.planeinfo.yoffset * info.planeinfo.stride);
-        }
-
-      sim_x11update();
+      fb_remove_paninfo(&g_fbobject, FB_NO_OVERLAY);
     }
-#endif
+
+  if (fb_peek_paninfo(&g_fbobject, &info, FB_NO_OVERLAY) == OK)
+    {
+      sim_x11setoffset(info.planeinfo.yoffset * info.planeinfo.stride);
+    }
+
+  sim_x11update();
 }
+#endif
 
 /****************************************************************************
  * Name: up_fbinitialize

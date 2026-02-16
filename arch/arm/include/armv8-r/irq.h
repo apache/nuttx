@@ -259,6 +259,7 @@ struct xcpt_syscall_s
 
 struct xcptcontext
 {
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   /* These are saved copies of the context used during
    * signal processing.
    */
@@ -272,6 +273,7 @@ struct xcptcontext
 
   uint32_t sigreturn;
 #endif
+#endif /* CONFIG_ENABLE_ALL_SIGNALS */
 
   /* Register save area with XCPTCONTEXT_SIZE, only valid when:
    * 1.The task isn't running or
@@ -366,9 +368,10 @@ noinstrument_function static inline_function irqstate_t up_irq_save(void)
   __asm__ __volatile__
     (
       "\tmrs    %0, cpsr\n"
-      "\tcpsid  i\n"
-#if defined(CONFIG_ARCH_HIPRI_INTERRUPT)
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
       "\tcpsid  f\n"
+#else
+      "\tcpsid  i\n"
 #endif
       : "=r" (cpsr)
       :
@@ -387,9 +390,12 @@ static inline_function irqstate_t up_irq_enable(void)
   __asm__ __volatile__
     (
       "\tmrs    %0, cpsr\n"
-      "\tcpsie  i\n"
 #if defined(CONFIG_ARCH_HIPRI_INTERRUPT)
+      "\tcpsie  if\n"
+#elif defined(CONFIG_ARCH_TRUSTZONE_SECURE)
       "\tcpsie  f\n"
+#else
+      "\tcpsie  i\n"
 #endif
       : "=r" (cpsr)
       :
@@ -477,12 +483,12 @@ static inline_function uintptr_t up_getusrsp(void *regs)
 noinstrument_function
 static inline_function void up_set_interrupt_context(bool flag)
 {
-  CP15_MODIFY(flag, 1ul, TPIDRPRW);
+  CP15_MODIFY(flag, 1u, TPIDRPRW);
 }
 
-#define up_this_task()         ((struct tcb_s *)(CP15_GET(TPIDRPRW) & ~1ul))
-#define up_update_task(t)      CP15_MODIFY(t, ~1ul, TPIDRPRW)
-#define up_interrupt_context() (CP15_GET(TPIDRPRW) & 1)
+#define up_this_task()         ((struct tcb_s *)(CP15_GET(TPIDRPRW) & ~1u))
+#define up_update_task(t)      CP15_MODIFY(t, ~1u, TPIDRPRW)
+#define up_interrupt_context() (CP15_GET(TPIDRPRW) & 1u)
 
 /****************************************************************************
  * Public Data

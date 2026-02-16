@@ -50,7 +50,7 @@ int nxsig_lowest(sigset_t *set)
 
   for (signo = MIN_SIGNO; signo <= MAX_SIGNO; signo++)
     {
-      if (nxsig_ismember(set, signo))
+      if (nxsig_ismember(set, signo) == 1)
         {
           return signo;
         }

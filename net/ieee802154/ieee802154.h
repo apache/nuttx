@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #include <netpacket/ieee802154.h>
 
+#include <nuttx/mutex.h>
 #include <nuttx/net/net.h>
 
 #ifdef CONFIG_NET_IEEE802154
@@ -132,6 +133,40 @@ extern "C"
 /* The IEEE 802.15.4 socket interface */
 
 EXTERN const struct sock_intf_s g_ieee802154_sockif;
+
+/* The IEEE 802.15.4 connections rmutex */
+
+extern rmutex_t g_ieee802154_connections_lock;
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: ieee802154_conn_list_lock
+ *
+ * Description:
+ *   Lock the IEEE 802.15.4 connection list.
+ *
+ ****************************************************************************/
+
+static inline_function void ieee802154_conn_list_lock(void)
+{
+  nxrmutex_lock(&g_ieee802154_connections_lock);
+}
+
+/****************************************************************************
+ * Name: ieee802154_conn_list_unlock
+ *
+ * Description:
+ *   Unlock the IEEE 802.15.4 connection list.
+ *
+ ****************************************************************************/
+
+static inline_function void ieee802154_conn_list_unlock(void)
+{
+  nxrmutex_unlock(&g_ieee802154_connections_lock);
+}
 
 /****************************************************************************
  * Public Function Prototypes
@@ -268,9 +303,9 @@ FAR struct ieee802154_conn_s *
  *
  ****************************************************************************/
 
-uint16_t ieee802154_callback(FAR struct radio_driver_s *radio,
+uint32_t ieee802154_callback(FAR struct radio_driver_s *radio,
                              FAR struct ieee802154_conn_s *conn,
-                             uint16_t flags);
+                             uint32_t flags);
 
 /****************************************************************************
  * Name: ieee802154_recvmsg
@@ -366,8 +401,8 @@ void ieee802154_poll(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-ssize_t ieee802154_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
-                           int flags);
+ssize_t ieee802154_sendmsg(FAR struct socket *psock,
+                           FAR const struct msghdr *msg, int flags);
 
 /****************************************************************************
  * Name: ieee802154_container_initialize

@@ -1,0 +1,22 @@
+==============
+MX35 NOR Flash
+==============
+
+NuttX provides support for SPI based NOR flashes from MX35 family
+Supported capacity is up to 2 Gbit (256 MB).
+
+The driver can be enabled by ``CONFIG_MTD_MX35`` option. It is possible
+to select the SPI mode with ``CONFIG_MX35_SPIMODE`` option and
+communication frequency with ``CONFIG_MX35_SPIFREQUENCY`` option.
+
+The size of the flash is set automatically during the device initialization.
+
+The flash memory has to be initialized before used. This is typically done
+from board support package layer during the board's bringup phase. This
+operation is performed by following function.
+
+.. code-block:: C
+
+   #include <nuttx/mtd/mtd.h>
+
+   FAR struct mtd_dev_s *mx35_initialize(FAR struct spi_dev_s *dev)

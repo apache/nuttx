@@ -65,10 +65,9 @@
 /* Configuration */
 
 #if defined(CONFIG_INIT_NONE)
-  /* Kconfig logic will set CONFIG_INIT_NONE if dependencies are not met */
-
-#  error No initialization mechanism selected (CONFIG_INIT_NONE)
-
+#  ifndef CONFIG_BUILD_FLAT
+#    error No initialization mechanism selected (CONFIG_INIT_NONE)
+#  endif
 #else
 #  if !defined(CONFIG_INIT_ENTRY) && !defined(CONFIG_INIT_FILE)
   /* For backward compatibility with older defconfig files when this was
@@ -319,13 +318,23 @@ static inline void nx_start_application(void)
    * configured.
    */
 
+  boards_trace_begin();
   board_late_initialize();
+  boards_trace_end();
 #endif
 
 #ifdef CONFIG_COREDUMP
   coredump_initialize();
 #endif
 
+#ifdef CONFIG_INIT_NONE
+
+  UNUSED(ret);
+
+  /* In a flat build, init thread is not mandatory */
+
+  sinfo("No init thread\n");
+#else
   posix_spawnattr_init(&attr);
   attr.priority  = CONFIG_INIT_PRIORITY;
   attr.stacksize = CONFIG_INIT_STACKSIZE;
@@ -378,6 +387,7 @@ static inline void nx_start_application(void)
 #endif
   posix_spawnattr_destroy(&attr);
   DEBUGASSERT(ret > 0);
+#endif /* CONFIG_INIT_NONE */
 }
 
 /****************************************************************************

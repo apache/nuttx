@@ -1,6 +1,9 @@
 /****************************************************************************
  * libs/libc/string/lib_bsdstpncpy.c
  *
+ * SPDX-License-Identifier: BSD
+ * SPDX-FileCopyrightText: 1994-2009  Red Hat, Inc. All rights reserved
+ *
  * Copyright (c) 1994-2009  Red Hat, Inc. All rights reserved.
  *
  * This copyrighted material is made available to anyone wishing to use,
@@ -77,7 +80,8 @@
  ****************************************************************************/
 
 #ifndef CONFIG_LIBC_ARCH_STPNCPY
-#undef stpncpy /* See mm/README.txt */
+#undef stpncpy
+no_builtin("stpncpy")
 FAR char *stpncpy(FAR char *dest, FAR const char *src, size_t n)
 {
   FAR char *ret = NULL;

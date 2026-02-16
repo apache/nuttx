@@ -125,7 +125,7 @@
 
 /* Clocks and timing */
 
-#define MPFS_FPGA_FIC0_CLK                 (50000000)
+#define MPFS_FPGA_FIC0_CLK                 (CONFIG_MPFS_FPGA_FIC0_CLK_FREQ)
 
 #define COREMMC_CMDTIMEOUT                 (100000)
 #define COREMMC_LONGTIMEOUT                (100000000)
@@ -654,7 +654,7 @@ static void mpfs_recvfifo(struct mpfs_dev_s *priv)
         }
     }
 
-    mcinfo("Read all\n");
+  mcinfo("Read all\n");
 }
 
 /****************************************************************************
@@ -818,6 +818,22 @@ static int mpfs_coremmc_wrcomplete_interrupt(int irq, void *context,
 
   DEBUGASSERT(priv != NULL);
 
+#ifdef CONFIG_SPINLOCK
+  spin_lock(&priv->lock);
+
+  /* Check if the write complete event is enabled */
+
+  if ((priv->waitevents & SDIOWAIT_WRCOMPLETE) == 0)
+    {
+      spin_unlock(&priv->lock);
+      return OK;
+    }
+
+  spin_unlock(&priv->lock);
+#endif
+
+  /* Note: the spin lock must NOT be held when calling mpfs_endwait */
+
   mpfs_endwait(priv, SDIOWAIT_WRCOMPLETE);
 
   return OK;
@@ -845,6 +861,22 @@ static int mpfs_coremmc_interrupt(int irq, void *context, void *arg)
   uint8_t status_xb;
 
   DEBUGASSERT(priv != NULL);
+
+#ifdef CONFIG_SPINLOCK
+  spin_lock(&priv->lock);
+
+  /* Check if any of the interrupt sources are even enabled */
+
+  if (priv->xfrmask == 0 && priv->waitmask == 0 && priv->xfr_blkmask == 0)
+    {
+      spin_unlock(&priv->lock);
+      return OK;
+    }
+
+  spin_unlock(&priv->lock);
+#endif
+
+  /* Note: the spin lock must NOT be held when calling mpfs_endtransfer */
 
   status = getreg8(MPFS_COREMMC_ISR);
 
@@ -1007,19 +1039,19 @@ static bool mpfs_device_reset(struct sdio_dev_s *dev)
 
   modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR, 0, SYSREG_SUBBLK_CLOCK_CR_FIC0);
 
-  nxsig_usleep(100);
+  nxsched_usleep(100);
 
   /* Perform module and slave reset */
 
   mpfs_modifyreg8(MPFS_COREMMC_CTRL, 0, COREMMC_CTRL_SLRST |
                   COREMMC_CTRL_SWRST);
 
-  nxsig_usleep(100);
+  nxsched_usleep(100);
 
   mpfs_modifyreg8(MPFS_COREMMC_CTRL, COREMMC_CTRL_SLRST | COREMMC_CTRL_SWRST,
                   0);
 
-  nxsig_usleep(100);
+  nxsched_usleep(100);
 
   /* Clear interrupt status and disable interrupts */
 
@@ -1035,11 +1067,11 @@ static bool mpfs_device_reset(struct sdio_dev_s *dev)
 
   mpfs_setclkrate(priv, MPFS_MMC_CLOCK_400KHZ);
 
-  nxsig_usleep(100);
+  nxsched_usleep(100);
 
   /* Store fifo size for later to check no fifo overruns occur */
 
-  fifo_size = ((getreg8(MPFS_COREMMC_VR) >> 2) & 0x3);
+  fifo_size = ((getreg8(MPFS_COREMMC_VR) >> 4) & 0x3);
   if (fifo_size == 0)
     {
       priv->fifo_depth = 512;
@@ -1120,6 +1152,11 @@ static sdio_capset_t mpfs_capabilities(struct sdio_dev_s *dev)
   if (priv->onebit)
     {
       caps |= SDIO_CAPS_1BIT_ONLY;
+    }
+
+  if (((getreg8(MPFS_COREMMC_VR) >> 2) & 3) == 0x01)
+    {
+      caps |= SDIO_CAPS_4BIT;
     }
 
   return caps;
@@ -1314,7 +1351,7 @@ static void mpfs_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
     {
       /* Need to settle a bit before issuing this CMD6 after clk change */
 
-      nxsig_usleep(100);
+      nxsched_usleep(100);
 
       mpfs_set_4bit_mode(dev);
     }
@@ -1398,16 +1435,6 @@ static int mpfs_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   uint32_t cmdidx;
-
-  mpfs_reset_lines(priv);
-
-  /* Check if command / data lines are busy */
-
-  if (mpfs_check_lines_busy(priv))
-    {
-      mcerr("Busy!\n");
-      return -EBUSY;
-    }
 
   /* Clear all status interrupts */
 

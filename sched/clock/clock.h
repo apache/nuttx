@@ -39,6 +39,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* 32-bit mask for 64-bit timer values */
+
+#define TIMER_MASK32 0x00000000ffffffff
+
 /* Configuration ************************************************************/
 
 /* If CONFIG_SYSTEM_TIME64 is selected and the CPU supports long long types,
@@ -57,14 +61,6 @@
  * Public Data
  ****************************************************************************/
 
-#if !defined(__HAVE_KERNEL_GLOBALS)
-  /* The system clock exists (CONFIG_SCHED_TICKLESS), but it not prototyped
-   * globally in include/nuttx/clock.h.
-   */
-
-extern volatile clock_t g_system_ticks;
-#endif
-
 #ifndef CONFIG_CLOCK_TIMEKEEPING
 extern struct timespec  g_basetime;
 extern spinlock_t g_basetime_lock;
@@ -77,18 +73,10 @@ extern spinlock_t g_basetime_lock;
 int  clock_basetime(FAR struct timespec *tp);
 
 void clock_initialize(void);
-#if !defined(CONFIG_SCHED_TICKLESS) && \
-    !defined(CONFIG_ALARM_ARCH) && !defined(CONFIG_TIMER_ARCH)
-void clock_timer(void);
-#else
-#  define clock_timer()
-#endif
 
-/****************************************************************************
- * perf_init
- ****************************************************************************/
+void clock_increase_sched_ticks(clock_t ticks);
 
-void perf_init(void);
+clock_t clock_get_sched_ticks(void);
 
 #ifdef CONFIG_SCHED_CPULOAD_SYSCLK
 void cpuload_init(void);

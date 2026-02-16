@@ -30,10 +30,27 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
   endif()
 endif()
 
+# Cmake build provide absolute paths to compile files. If __FILE__ macros are
+# used in the source code(ASSERT), the binary will contain many invalid paths.
+# This saves some memory, stops exposing build systems locations in binaries,
+# make failure logs more deterministic and most importantly makes builds more
+# failure logs more deterministic and most importantly makes builds more
+# deterministic. Debuggers usually have a path mapping feature to ensure the
+# files are still found.
+if((NOT MSVC) AND (NOT CONFIG_ARCH_TOOLCHAIN_GHS))
+  if(CONFIG_OUTPUT_STRIP_PATHS)
+    add_compile_options(-fmacro-prefix-map=${NUTTX_DIR}=)
+    add_compile_options(-fmacro-prefix-map=${NUTTX_APPS_DIR}=)
+    add_compile_options(-fmacro-prefix-map=${NUTTX_BOARD_ABS_DIR}=)
+    add_compile_options(-fmacro-prefix-map=${NUTTX_CHIP_ABS_DIR}=)
+  endif()
+endif()
+
 # Support CMake to define additional configuration options
 
 if(EXTRA_FLAGS)
-  add_compile_options(${EXTRA_FLAGS})
+  separate_arguments(EXTRA_FLAGS_LIST UNIX_COMMAND "${EXTRA_FLAGS}")
+  add_compile_options(${EXTRA_FLAGS_LIST})
 endif()
 
 # ~~~
@@ -75,7 +92,7 @@ if(NOT NUTTX_TOOLCHAIN_PREPROCESS_DEFINED)
 
     add_custom_command(
       OUTPUT ${TARGET_FILE}
-      COMMAND ${PREPROCESS} -I${CMAKE_BINARY_DIR}/include
+      COMMAND ${PREPROCESS} -I${CMAKE_BINARY_DIR}/include -I${NUTTX_DIR}/include
               -I${NUTTX_CHIP_ABS_DIR} ${SOURCE_FILE} > ${TARGET_FILE}
       DEPENDS ${SOURCE_FILE} ${DEPENDS})
 

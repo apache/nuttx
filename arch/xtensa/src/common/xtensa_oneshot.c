@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/timers/oneshot.h>
 
@@ -47,9 +47,8 @@ struct xoneshot_lowerhalf_s
 {
   struct oneshot_lowerhalf_s lh;       /* Lower half operations */
   uint32_t                   freq;     /* Timer working clock frequency(Hz) */
-  oneshot_callback_t         callback; /* Current user interrupt callback */
-  void                      *arg;      /* Argument passed to upper half callback */
   uint32_t                   irq;
+  spinlock_t                 lock;     /* Lock to protect oneshot state */
 };
 
 /****************************************************************************
@@ -59,7 +58,6 @@ struct xoneshot_lowerhalf_s
 static int xtensa_oneshot_maxdelay(struct oneshot_lowerhalf_s *lower,
                                    struct timespec *ts);
 static int xtensa_oneshot_start(struct oneshot_lowerhalf_s *lower,
-                                oneshot_callback_t callback, void *arg,
                                 const struct timespec *ts);
 static int xtensa_oneshot_cancel(struct oneshot_lowerhalf_s *lower,
                                  struct timespec *ts);
@@ -95,7 +93,6 @@ static inline uint64_t sec_to_count(uint32_t sec, uint32_t freq)
 }
 
 static int xtensa_oneshot_start(struct oneshot_lowerhalf_s *lower_,
-                                oneshot_callback_t callback, void *arg,
                                 const struct timespec *ts)
 {
   struct xoneshot_lowerhalf_s *lower =
@@ -103,10 +100,7 @@ static int xtensa_oneshot_start(struct oneshot_lowerhalf_s *lower_,
   uint32_t count;
   irqstate_t flags;
 
-  flags = enter_critical_section();
-
-  lower->callback = callback;
-  lower->arg      = arg;
+  flags = spin_lock_irqsave(&lower->lock);
 
   count = sec_to_count((uint64_t)ts->tv_sec, lower->freq) +
           nsec_to_count((uint64_t)ts->tv_nsec, lower->freq);
@@ -116,7 +110,7 @@ static int xtensa_oneshot_start(struct oneshot_lowerhalf_s *lower_,
 
   up_enable_irq(lower->irq);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&lower->lock, flags);
 
   return 0;
 }
@@ -128,14 +122,11 @@ static int xtensa_oneshot_cancel(struct oneshot_lowerhalf_s *lower_,
     (struct xoneshot_lowerhalf_s *)lower_;
   irqstate_t flags;
 
-  flags = enter_critical_section();
-
-  lower->callback  = NULL;
-  lower->arg       = NULL;
+  flags = spin_lock_irqsave(&lower->lock);
 
   up_disable_irq(lower->irq);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&lower->lock, flags);
 
   return 0;
 }
@@ -157,22 +148,10 @@ static int xtensa_oneshot_maxdelay(struct oneshot_lowerhalf_s *lower_,
 static int xtensa_oneshot_interrupt(int irq, void *context, void *arg)
 {
   struct xoneshot_lowerhalf_s *lower = arg;
-  oneshot_callback_t callback;
-  void *cbarg;
 
   DEBUGASSERT(lower != NULL);
 
-  if (lower->callback != NULL)
-    {
-      callback        = lower->callback;
-      cbarg           = lower->arg;
-      lower->callback = NULL;
-      lower->arg      = NULL;
-
-      /* Then perform the callback */
-
-      callback(&lower->lh, cbarg);
-    }
+  oneshot_process_callback(&lower->lh);
 
   return 0;
 }
@@ -195,6 +174,7 @@ xtensa_oneshot_initialize(uint32_t irq, uint32_t freq)
   lower->freq   = freq;
   lower->irq    = irq;
 
+  spin_lock_init(&lower->lock);
   irq_attach(irq, xtensa_oneshot_interrupt, lower);
 
   return (struct oneshot_lowerhalf_s *)lower;

@@ -189,9 +189,9 @@ struct tcp_conn_s
    * When an callback is executed from 'list', the input flags are normally
    * returned, however, the implementation may set one of the following:
    *
-   *   TCP_CLOSE   - Gracefully close the current connection
-   *   TCP_ABORT   - Abort (reset) the current connection on an error that
-   *                 prevents TCP_CLOSE from working.
+   *   TCP_RXCLOSE - Gracefully close the current connection (RX)
+   *   TCP_TXCLOSE - Gracefully close the current connection (TX)
+   *   TCP_ABORT   - Abort (reset) the current connection
    *
    * And/Or set/clear the following:
    *
@@ -212,14 +212,13 @@ struct tcp_conn_s
   uint8_t  rcvseq[4];     /* The sequence number that we expect to
                            * receive next */
   uint8_t  sndseq[4];     /* The sequence number that was last sent by us */
-#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS) || \
-    defined(CONFIG_NET_SENDFILE)
   uint32_t rexmit_seq;    /* The sequence number to be retrasmitted */
-#endif
   uint8_t  crefs;         /* Reference counts on this instance */
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
   uint8_t  domain;        /* IP domain: PF_INET or PF_INET6 */
 #endif
+  uint8_t  shutdown;      /* Whether the connection is shutdown, SHUT_RD and
+                           * SHUT_WR */
   uint8_t  sa;            /* Retransmission time-out calculation state
                            * variable */
   uint8_t  sv;            /* Retransmission time-out calculation state
@@ -442,7 +441,7 @@ struct tcp_backlog_s
 struct tcp_callback_s
 {
   FAR struct tcp_conn_s *tc_conn;
-  FAR struct devif_callback_s *tc_cb;
+  FAR struct devif_callback_s **tc_cb;
   FAR sem_t *tc_sem;
 };
 
@@ -458,17 +457,6 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: tcp_initialize
- *
- * Description:
- *   Initialize the TCP/IP connection structures.  Called only once and only
- *   from the network layer at start-up.
- *
- ****************************************************************************/
-
-void tcp_initialize(void);
 
 /****************************************************************************
  * Name: tcp_alloc
@@ -503,6 +491,22 @@ void tcp_free_rx_buffers(FAR struct tcp_conn_s *conn);
  ****************************************************************************/
 
 void tcp_free(FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
+ * Name: tcp_conn_cmp
+ *
+ * Description:
+ *   Compare a connection with domain, IP address and port number
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
+bool tcp_conn_cmp(uint8_t domain, FAR const union ip_addr_u *ipaddr,
+                  uint16_t portno, FAR struct tcp_conn_s *conn);
+#else
+bool tcp_conn_cmp(FAR const union ip_addr_u *ipaddr, uint16_t portno,
+                  FAR struct tcp_conn_s *conn);
+#endif
 
 /****************************************************************************
  * Name: tcp_active
@@ -695,6 +699,50 @@ int tcp_connect(FAR struct tcp_conn_s *conn,
                 FAR const struct sockaddr *addr);
 
 /****************************************************************************
+ * Name: tcp_removeconn
+ *
+ * Description:
+ *   remove the connection from the list of active TCP connections
+ *
+ * Assumptions:
+ *   This function is called from network logic with the network locked.
+ *
+ ****************************************************************************/
+
+void tcp_removeconn(FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
+ * Name: tcp_remove_syn_backlog
+ *
+ * Description:
+ *   This function is used to remove the currently SYN_RCVD connection
+ *   created by the listener
+ *
+ ****************************************************************************/
+
+void tcp_remove_syn_backlog(FAR struct tcp_conn_s *listener);
+
+/****************************************************************************
+ * Name: tcp_conn_list_lock
+ *
+ * Description:
+ *   Lock the TCP connection list.
+ *
+ ****************************************************************************/
+
+void tcp_conn_list_lock(void);
+
+/****************************************************************************
+ * Name: tcp_conn_list_unlock
+ *
+ * Description:
+ *   Unlock the TCP connection list.
+ *
+ ****************************************************************************/
+
+void tcp_conn_list_unlock(void);
+
+/****************************************************************************
  * Name: psock_tcp_connect
  *
  * Description:
@@ -758,7 +806,7 @@ int tcp_start_monitor(FAR struct socket *psock);
  *
  ****************************************************************************/
 
-void tcp_stop_monitor(FAR struct tcp_conn_s *conn, uint16_t flags);
+void tcp_stop_monitor(FAR struct tcp_conn_s *conn, uint32_t flags);
 
 /****************************************************************************
  * Name: tcp_lost_connection
@@ -784,7 +832,7 @@ void tcp_stop_monitor(FAR struct tcp_conn_s *conn, uint16_t flags);
  ****************************************************************************/
 
 void tcp_lost_connection(FAR struct tcp_conn_s *conn,
-                         FAR struct devif_callback_s *cb, uint16_t flags);
+                         FAR struct devif_callback_s *cb, uint32_t flags);
 
 /****************************************************************************
  * Name: tcp_close
@@ -1351,8 +1399,8 @@ void tcp_ipv6_input(FAR struct net_driver_s *dev, unsigned int iplen);
  *
  ****************************************************************************/
 
-uint16_t tcp_callback(FAR struct net_driver_s *dev,
-                      FAR struct tcp_conn_s *conn, uint16_t flags);
+uint32_t tcp_callback(FAR struct net_driver_s *dev,
+                      FAR struct tcp_conn_s *conn, uint32_t flags);
 
 /****************************************************************************
  * Name: tcp_datahandler
@@ -1891,7 +1939,7 @@ int tcp_wrbuffer_test(void);
 #ifdef CONFIG_DEBUG_FEATURES
 void tcp_event_handler_dump(FAR struct net_driver_s *dev,
                             FAR void *pvpriv,
-                            uint16_t flags,
+                            uint32_t flags,
                             FAR struct tcp_conn_s *conn);
 #endif
 
@@ -2333,7 +2381,7 @@ void tcp_cc_recv_ack(FAR struct tcp_conn_s *conn, FAR struct tcp_hdr_s *tcp);
  *
  ****************************************************************************/
 
-void tcp_set_zero_probe(FAR struct tcp_conn_s *conn, uint16_t flags);
+void tcp_set_zero_probe(FAR struct tcp_conn_s *conn, uint32_t flags);
 
 #endif /* NET_TCP_HAVE_STACK */
 #endif /* __NET_TCP_TCP_H */

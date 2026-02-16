@@ -161,9 +161,6 @@ static uint16_t
 virtio_pci_modern_get_queue_len(FAR struct virtio_pci_device_s *vpdev,
                                 int idx);
 static int
-virtio_pci_modern_config_vector(FAR struct virtio_pci_device_s *vpdev,
-                                bool enable);
-static int
 virtio_pci_modern_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
                                    FAR struct virtqueue *vq);
 static void
@@ -206,7 +203,6 @@ static const struct virtio_dispatch g_virtio_pci_dispatch =
 static const struct virtio_pci_ops_s g_virtio_pci_modern_ops =
 {
   virtio_pci_modern_get_queue_len,      /* get_queue_len */
-  virtio_pci_modern_config_vector,      /* config_vector */
   virtio_pci_modern_create_virtqueue,   /* create_virtqueue */
   virtio_pci_modern_delete_virtqueue,   /* delete_virtqueue */
 };
@@ -344,14 +340,16 @@ virtio_pci_modern_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
                      up_addrenv_va_to_pa(vq->vq_ring.used));
 
 #if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
-  pci_write_io_word(vpdev->dev, (uintptr_t)&cfg->queue_msix_vector,
-                    VIRTIO_PCI_INT_VQ);
-  pci_read_io_word(vpdev->dev, (uintptr_t)&cfg->queue_msix_vector,
-                   &msix_vector);
-  if (msix_vector == VIRTIO_PCI_MSI_NO_VECTOR)
+  if (!vpdev->intx)
     {
-      vrterr("Msix_vector is no vector\n");
-      return -EBUSY;
+      pci_write_io_word(vpdev->dev, (uintptr_t)&cfg->queue_msix_vector, 0);
+      pci_read_io_word(vpdev->dev, (uintptr_t)&cfg->queue_msix_vector,
+                       &msix_vector);
+      if (msix_vector == VIRTIO_PCI_MSI_NO_VECTOR)
+        {
+          vrterr("Msix_vector is no vector\n");
+          return -EBUSY;
+        }
     }
 #endif
 
@@ -375,30 +373,6 @@ virtio_pci_modern_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
 }
 
 /****************************************************************************
- * Name: virtio_pci_modern_config_vector
- ****************************************************************************/
-
-static int
-virtio_pci_modern_config_vector(FAR struct virtio_pci_device_s *vpdev,
-                                bool enable)
-{
-  FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
-  uint16_t vector = enable ? 0 : VIRTIO_PCI_MSI_NO_VECTOR;
-  uint16_t rvector;
-
-  pci_write_io_word(vpdev->dev, (uintptr_t)&cfg->config_msix_vector,
-                    vector);
-  pci_read_io_word(vpdev->dev, (uintptr_t)&cfg->config_msix_vector,
-                   &rvector);
-  if (rvector != vector)
-    {
-      return -EINVAL;
-    }
-
-  return OK;
-}
-
-/****************************************************************************
  * Name: virtio_pci_modern_delete_virtqueue
  ****************************************************************************/
 
@@ -412,8 +386,11 @@ void virtio_pci_modern_delete_virtqueue(FAR struct virtio_device *vdev,
   pci_write_io_word(vpdev->dev, (uintptr_t)&cfg->queue_select, index);
 
 #if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
-  pci_write_io_word(vpdev->dev, (uintptr_t)&cfg->queue_msix_vector,
-                    VIRTIO_PCI_MSI_NO_VECTOR);
+  if (!vpdev->intx)
+    {
+      pci_write_io_word(vpdev->dev, (uintptr_t)&cfg->queue_msix_vector,
+                        VIRTIO_PCI_MSI_NO_VECTOR);
+    }
 #endif
 }
 
@@ -627,6 +604,7 @@ static int virtio_pci_init_device(FAR struct virtio_pci_device_s *vpdev)
   uint8_t common;
   uint8_t notify;
   uint8_t device;
+  uint8_t isr;
 
   if (dev->device < 0x1040)
     {
@@ -648,29 +626,46 @@ static int virtio_pci_init_device(FAR struct virtio_pci_device_s *vpdev)
   /* Find pci capabilities */
 
   common = virtio_pci_find_capability(dev, VIRTIO_PCI_CAP_COMMON_CFG,
-                                      PCI_RESOURCE_MEM);
+                                      PCI_RESOURCE_MEM |
+                                      PCI_RESOURCE_MEM_64);
   if (common == 0)
     {
       vrtinfo("Leaving for legacy driver\n");
       return -ENODEV;
     }
 
+  isr = virtio_pci_find_capability(dev, VIRTIO_PCI_CAP_ISR_CFG,
+                                   PCI_RESOURCE_MEM | PCI_RESOURCE_MEM_64);
+  if (isr == 0)
+    {
+      vrterr("Missing isr capabilities\n");
+      return -EINVAL;
+    }
+
   notify = virtio_pci_find_capability(dev, VIRTIO_PCI_CAP_NOTIFY_CFG,
-                                      PCI_RESOURCE_MEM);
+                                      PCI_RESOURCE_MEM |
+                                      PCI_RESOURCE_MEM_64);
   if (notify == 0)
     {
-      vrterr("Missing capabilities %d %d\n", common, notify);
+      vrterr("Missing capabilities %d %d %d\n", isr, common, notify);
       return -EINVAL;
     }
 
   device = virtio_pci_find_capability(dev, VIRTIO_PCI_CAP_DEVICE_CFG,
-                                      PCI_RESOURCE_MEM);
+                                      PCI_RESOURCE_MEM |
+                                      PCI_RESOURCE_MEM_64);
 
   /* Map the BAR */
 
   vpdev->common = virtio_pci_map_capability(vpdev, common,
                                             &vpdev->common_len);
   if (vpdev->common == NULL)
+    {
+      return -EINVAL;
+    }
+
+  vpdev->isr = virtio_pci_map_capability(vpdev, isr, NULL);
+  if (vpdev->isr == NULL)
     {
       return -EINVAL;
     }
@@ -714,6 +709,7 @@ int virtio_pci_modern_probe(FAR struct pci_device_s *dev)
 
   if (dev->device < 0x1000 || dev->device > 0x107f)
     {
+      vrtwarn("Device id 0x%04x not supported\n", dev->device);
       return -ENODEV;
     }
 
@@ -722,12 +718,9 @@ int virtio_pci_modern_probe(FAR struct pci_device_s *dev)
   vdev->role = VIRTIO_DEV_DRIVER;
 
   ret = virtio_pci_init_device(vpdev);
-  if (ret < 0)
+  if (ret < 0 && ret != -ENODEV)
     {
-      if (ret != -ENODEV)
-        {
-          pcierr("Virtio pci modern device init failed, ret=%d\n", ret);
-        }
+      vrterr("Virtio pci modern device init failed, ret=%d\n", ret);
     }
 
   return ret;

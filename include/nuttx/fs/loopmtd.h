@@ -75,6 +75,9 @@ struct mtd_losetup_s
   size_t          erasesize;    /* The erase size to use on the file */
   size_t          sectsize;     /* The sector / page size of the file */
   off_t           offset;       /* An offset that may be applied to the device */
+#  ifndef CONFIG_MTD_CONFIG_NONE
+  int             configdata;   /* 1: register mtdconfig device, 2: erase before register */
+#  endif
 };
 #endif
 

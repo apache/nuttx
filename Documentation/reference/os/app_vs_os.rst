@@ -73,13 +73,6 @@ not be used by application logic. Some examples include:
    ``include/nuttx/semaphore.h`` for other internal OS interfaces
    for semaphores).
 
--  ``nxsig_waitinfo()``: functionally
-   equivalent to the standard application interface
-   ``sigwaitinfo()``. However, ``nxsig_waitinfo()`` will not
-   modify the errno value and will not cause a cancellation point
-   (see ``include/nuttx/signal.h`` for other internal OS
-   interfaces for signals).
-
 -  ``nxmq_send()``: functionally equivalent
    to the standard application interface ``mq_send()``. However,
    ``nxmq_send()`` will not modify the errno value and will not

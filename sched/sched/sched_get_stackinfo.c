@@ -60,49 +60,64 @@ int nxsched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo)
 {
   FAR struct tcb_s *rtcb = this_task();  /* TCB of running task */
   FAR struct tcb_s *qtcb;                /* TCB of queried task */
+  int ret = OK;
 
-  DEBUGASSERT(rtcb != NULL && stackinfo != NULL);
+  DEBUGASSERT(stackinfo != NULL);
 
-  /* Pid of 0 means that we are querying ourself */
-
-  if (pid == 0)
+  if (rtcb != NULL)
     {
-      /* We can always query ourself */
+      /* Pid of 0 means that we are querying ourself */
 
-      qtcb = rtcb;
-    }
-  else
-    {
-      /* Get the task to be queried */
-
-      qtcb = nxsched_get_tcb(pid);
-      if (qtcb == NULL)
+      if (pid == 0)
         {
-          return -ENOENT;
+          /* We can always query ourself */
+
+          qtcb = rtcb;
         }
-
-      /* A kernel thread can query any other thread.  Application threads
-       * can only query application threads in the same task group.
-       */
-
-      if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+      else
         {
-          /* It is an application thread.  It is permitted to query
-           * only threads within the same task group.  It is not permitted
-           * to peek into the stacks of either kernel threads or other
-           * applications tasks.
-           */
+          /* Get the task to be queried */
 
-          if (rtcb->group != qtcb->group)
+          qtcb = nxsched_get_tcb(pid);
+          if (qtcb != NULL)
             {
-              return -EACCES;
+              /* A kernel thread can query any other thread.
+               * Application threads can only query application
+               * threads in the same task group.
+               */
+
+              if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) !=
+                  TCB_FLAG_TTYPE_KERNEL)
+                {
+                  /* It is an application thread.  It is permitted to query
+                   * only threads within the same task group. It is not
+                   * permitted to peek into the stacks of either kernel
+                   * threads or other applications tasks.
+                   */
+
+                  if (rtcb->group != qtcb->group)
+                    {
+                      ret = -EACCES;
+                    }
+                }
+            }
+          else
+            {
+              ret = -ENOENT;
             }
         }
     }
+  else
+    {
+      ret = -ENOENT;
+    }
 
-  stackinfo->adj_stack_size  = qtcb->adj_stack_size;
-  stackinfo->stack_alloc_ptr = qtcb->stack_alloc_ptr;
-  stackinfo->stack_base_ptr  = qtcb->stack_base_ptr;
+  if (ret >= 0)
+    {
+      stackinfo->adj_stack_size  = qtcb->adj_stack_size;
+      stackinfo->stack_alloc_ptr = qtcb->stack_alloc_ptr;
+      stackinfo->stack_base_ptr  = qtcb->stack_base_ptr;
+    }
 
-  return OK;
+  return ret;
 }

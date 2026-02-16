@@ -40,13 +40,13 @@
 #  include <nuttx/macro.h>
 #endif
 
-/* Include NuttX-specific IRQ definitions */
-
-#include <nuttx/irq.h>
-
 /* Include chip-specific IRQ definitions (including IRQ numbers) */
 
 #include <arch/chip/irq.h>
+
+/* Include NuttX-specific IRQ definitions */
+
+#include <nuttx/irq.h>
 
 /****************************************************************************
  * Pre-processor Prototypes
@@ -237,13 +237,15 @@
 #define REG_FP              REG_X29
 #define REG_LR              REG_X30
 
-#ifdef CONFIG_ARM64_DECODEFIQ
-#  define IRQ_DAIF_MASK (3)
-#else
-#  define IRQ_DAIF_MASK (2)
-#endif
+#define FIQ_DAIF_MASK       (1)
+#define IRQ_DAIF_MASK       (2)
+#define IRQ_FIQ_DAIF_MASK   (FIQ_DAIF_MASK | IRQ_DAIF_MASK)
 
-#define IRQ_SPSR_MASK (IRQ_DAIF_MASK << 6)
+#define IRQ_SPSR_MASK       (IRQ_DAIF_MASK << 6)
+
+/* AArch64 the stack-pointer must be 128-bit aligned */
+
+#define STACKFRAME_ALIGN    16
 
 #ifndef __ASSEMBLY__
 
@@ -261,7 +263,12 @@ extern "C"
 
 struct xcptcontext
 {
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
+  /* task context, for signal process */
+
+  uint64_t *saved_regs;
+
+#if defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_BUILD_PROTECTED)
   /* This is the saved address to use when returning from a user-space
    * signal handler.
    */
@@ -269,16 +276,13 @@ struct xcptcontext
   uintptr_t sigreturn;
 
 #endif
+#endif /* CONFIG_ENABLE_ALL_SIGNALS */
   /* task stack reg context */
 
   uint64_t *regs;
 #ifndef CONFIG_BUILD_FLAT
   uint64_t *initregs;
 #endif
-
-  /* task context, for signal process */
-
-  uint64_t *saved_regs;
 
 #ifdef CONFIG_ARCH_FPU
   uint64_t *fpu_regs;
@@ -352,7 +356,11 @@ static inline_function irqstate_t up_irq_save(void)
       "mrs %0, daif\n"
       "msr daifset, %1\n"
       : "=r" (flags)
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
+      : "i" (FIQ_DAIF_MASK)
+#else
       : "i" (IRQ_DAIF_MASK)
+#endif
       : "memory"
     );
 
@@ -370,7 +378,13 @@ static inline_function irqstate_t up_irq_enable(void)
       "mrs %0, daif\n"
       "msr daifclr, %1\n"
       : "=r" (flags)
+#if defined(CONFIG_ARCH_HIPRI_INTERRUPT)
+      : "i" (IRQ_FIQ_DAIF_MASK)
+#elif defined(CONFIG_ARCH_TRUSTZONE_SECURE)
+      : "i" (FIQ_DAIF_MASK)
+#else
       : "i" (IRQ_DAIF_MASK)
+#endif
       : "memory"
     );
   return flags;
@@ -466,7 +480,7 @@ static inline_function void up_irq_restore(irqstate_t flags)
  ****************************************************************************/
 
 #define up_getusrpc(regs) \
-    (((uintptr_t *)((regs) ? (regs) : running_regs()))[REG_ELR])
+    (((uintptr_t *)((regs) ? (regs) : (uint64_t *)running_regs()))[REG_ELR])
 
 #ifndef CONFIG_BUILD_KERNEL
 #  define up_getusrsp(regs) \

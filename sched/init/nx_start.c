@@ -101,32 +101,20 @@ dq_queue_t g_readytorun;
  *    and
  *  - Tasks/threads that have not been assigned to a CPU.
  *
- * Otherwise, the TCB will be retained in an assigned task list,
- * g_assignedtasks.  As its name suggests, on 'g_assignedtasks queue for CPU
- * 'n' would contain only tasks/threads that are assigned to CPU 'n'.  Tasks/
+ * Otherwise, the running TCB will be retained in g_assignedtasks vector.
+ * As its name suggests, on 'g_assignedtasks vector for CPU
+ * 'n' would contain the task/thread which is assigned to CPU 'n'.  Tasks/
  * threads would be assigned a particular CPU by one of two mechanisms:
  *
  *  - (Semi-)permanently through an RTOS interfaces such as
  *    pthread_attr_setaffinity(), or
  *  - Temporarily through scheduling logic when a previously unassigned task
  *    is made to run.
- *
- * Tasks/threads that are assigned to a CPU via an interface like
- * pthread_attr_setaffinity() would never go into the g_readytorun list, but
- * would only go into the g_assignedtasks[n] list for the CPU 'n' to which
- * the thread has been assigned.  Hence, the g_readytorun list would hold
- * only unassigned tasks/threads.
- *
- * Like the g_readytorun list in in non-SMP case, each g_assignedtask[] list
- * is prioritized:  The head of the list is the currently active task on this
- * CPU.  Tasks after the active task are ready-to-run and assigned to this
- * CPU. The tail of this assigned task list, the lowest priority task, is
- * always the CPU's IDLE task.
  */
 
 #ifdef CONFIG_SMP
-dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
-FAR struct tcb_s *g_delivertasks[CONFIG_SMP_NCPUS];
+FAR struct tcb_s *g_assignedtasks[CONFIG_SMP_NCPUS];
+enum task_deliver_e g_delivertasks[CONFIG_SMP_NCPUS];
 #endif
 
 /* g_running_tasks[] holds a references to the running task for each CPU.
@@ -141,7 +129,9 @@ FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
  * currently active task has disabled pre-emption.
  */
 
+#ifndef CONFIG_SMP
 dq_queue_t g_pendingtasks;
+#endif
 
 /* This is the list of all tasks that are blocked waiting for a signal */
 
@@ -195,11 +185,7 @@ struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
  * hardware resources may not yet be available to the kernel logic.
  */
 
-volatile uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+volatile enum nx_initstate_e g_nx_initstate;  /* See enum nx_initstate_e */
 
 /* This is an array of task control block (TCB) for the IDLE thread of each
  * CPU.  For the non-SMP case, this is a a single TCB; For the SMP case,
@@ -209,7 +195,11 @@ volatile uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
  * bringing up the rest of the system.
  */
 
-static struct tcb_s g_idletcb[CONFIG_SMP_NCPUS];
+struct tcb_s g_idletcb[CONFIG_SMP_NCPUS];
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 /* This is the name of the idle task */
 
@@ -242,11 +232,6 @@ static void tasklist_initialize(void)
   tlist[TSTATE_TASK_INVALID].list = NULL;
   tlist[TSTATE_TASK_INVALID].attr = 0;
 
-  /* TSTATE_TASK_PENDING */
-
-  tlist[TSTATE_TASK_PENDING].list = list_pendingtasks();
-  tlist[TSTATE_TASK_PENDING].attr = TLIST_ATTR_PRIORITIZED;
-
 #ifdef CONFIG_SMP
 
   /* TSTATE_TASK_READYTORUN */
@@ -254,20 +239,12 @@ static void tasklist_initialize(void)
   tlist[TSTATE_TASK_READYTORUN].list = list_readytorun();
   tlist[TSTATE_TASK_READYTORUN].attr = TLIST_ATTR_PRIORITIZED;
 
-  /* TSTATE_TASK_ASSIGNED */
-
-  tlist[TSTATE_TASK_ASSIGNED].list = list_assignedtasks(0);
-  tlist[TSTATE_TASK_ASSIGNED].attr = TLIST_ATTR_PRIORITIZED |
-                                     TLIST_ATTR_INDEXED |
-                                     TLIST_ATTR_RUNNABLE;
-
-  /* TSTATE_TASK_RUNNING */
-
-  tlist[TSTATE_TASK_RUNNING].list = list_assignedtasks(0);
-  tlist[TSTATE_TASK_RUNNING].attr = TLIST_ATTR_PRIORITIZED |
-                                    TLIST_ATTR_INDEXED |
-                                    TLIST_ATTR_RUNNABLE;
 #else
+
+  /* TSTATE_TASK_PENDING */
+
+  tlist[TSTATE_TASK_PENDING].list = list_pendingtasks();
+  tlist[TSTATE_TASK_PENDING].attr = TLIST_ATTR_PRIORITIZED;
 
   /* TSTATE_TASK_READYTORUN */
 
@@ -293,6 +270,13 @@ static void tasklist_initialize(void)
   tlist[TSTATE_WAIT_SEM].attr = TLIST_ATTR_PRIORITIZED |
                                 TLIST_ATTR_OFFSET;
 
+#ifdef CONFIG_SCHED_EVENTS
+  /* TSTATE_WAIT_EVENT */
+
+  tlist[TSTATE_WAIT_EVENT].list = (FAR void *)offsetof(nxevent_t, waitlist);
+  tlist[TSTATE_WAIT_EVENT].attr = TLIST_ATTR_PRIORITIZED |
+                                  TLIST_ATTR_OFFSET;
+#endif
   /* TSTATE_WAIT_SIG */
 
   tlist[TSTATE_WAIT_SIG].list = list_waitingforsignal();
@@ -344,7 +328,6 @@ static void tasklist_initialize(void)
 static void idle_task_initialize(void)
 {
   FAR struct tcb_s *tcb;
-  FAR dq_queue_t *tasklist;
   int i;
 
   memset(g_idletcb, 0, sizeof(g_idletcb));
@@ -420,11 +403,10 @@ static void idle_task_initialize(void)
        */
 
 #ifdef CONFIG_SMP
-      tasklist = TLIST_HEAD(tcb, i);
+      g_assignedtasks[i] = tcb;
 #else
-      tasklist = TLIST_HEAD(tcb);
+      dq_addfirst((FAR dq_entry_t *)tcb, TLIST_HEAD(tcb));
 #endif
-      dq_addfirst((FAR dq_entry_t *)tcb, tasklist);
 
       /* Mark the idle task as the running task */
 
@@ -463,15 +445,11 @@ static void idle_group_initialize(void)
       /* Allocate the IDLE group */
 
       DEBUGVERIFY(
-        group_initialize((FAR struct task_tcb_s *)tcb, tcb->flags));
+        group_allocate(tcb, tcb->flags));
 
       /* Initialize the task join */
 
       nxtask_joininit(tcb);
-
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-      spin_lock_init(&tcb->mutex_lock);
-#endif
 
 #ifdef CONFIG_SMP
       /* Create a stack for all CPU IDLE threads (except CPU0 which already
@@ -496,7 +474,7 @@ static void idle_group_initialize(void)
        * of child status in the IDLE group.
        */
 
-      group_postinitialize((FAR struct task_tcb_s *)tcb);
+      group_initialize(tcb);
       tcb->group->tg_flags = GROUP_FLAG_NOCLDWAIT | GROUP_FLAG_PRIVILEGED;
     }
 }
@@ -530,6 +508,7 @@ void nx_start(void)
   /* Boot up is complete */
 
   g_nx_initstate = OSINIT_BOOT;
+  sched_trace_mark("BOOT");
 
   /* Initialize task list table *********************************************/
 
@@ -542,6 +521,7 @@ void nx_start(void)
   /* Task lists are initialized */
 
   g_nx_initstate = OSINIT_TASKLISTS;
+  sched_trace_mark("TASKLISTS");
 
   /* Initialize RTOS Data ***************************************************/
 
@@ -635,6 +615,7 @@ void nx_start(void)
   /* The memory manager is available */
 
   g_nx_initstate = OSINIT_MEMORY;
+  sched_trace_mark("MEMORY");
 
   /* Initialize tasking data structures */
 
@@ -662,7 +643,9 @@ void nx_start(void)
 
   /* Initialize the signal facility (if in link) */
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   nxsig_initialize();
+#endif
 
 #if !defined(CONFIG_DISABLE_MQUEUE) || !defined(CONFIG_DISABLE_MQUEUE_SYSV)
   /* Initialize the named message queue facility (if in link) */
@@ -702,12 +685,15 @@ void nx_start(void)
    * that cannot wait until board_late_initialize.
    */
 
+  boards_trace_begin();
   board_early_initialize();
+  boards_trace_end();
 #endif
 
   /* Hardware resources are now available */
 
   g_nx_initstate = OSINIT_HARDWARE;
+  sched_trace_mark("HARDWARE");
 
   /* Setup for Multi-Tasking ************************************************/
 
@@ -723,8 +709,7 @@ void nx_start(void)
         {
           /* Clone stdout, stderr, stdin from the CPU0 IDLE task. */
 
-          DEBUGVERIFY(group_setuptaskfiles(
-            (FAR struct task_tcb_s *)&g_idletcb[i], NULL, true));
+          DEBUGVERIFY(group_setuptaskfiles(&g_idletcb[i], NULL, true));
         }
       else
         {
@@ -755,6 +740,7 @@ void nx_start(void)
   /* The OS is fully initialized and we are beginning multi-tasking */
 
   g_nx_initstate = OSINIT_OSREADY;
+  sched_trace_mark("OSREADY");
 
   /* Create initial tasks and bring-up the system */
 
@@ -763,6 +749,7 @@ void nx_start(void)
   /* Enter to idleloop */
 
   g_nx_initstate = OSINIT_IDLELOOP;
+  sched_trace_mark("IDLELOOP");
 
   /* Let other threads have access to the memory manager */
 

@@ -59,6 +59,10 @@ if(CONFIG_BUILD_PROTECTED)
   list(APPEND SRCS stm32_userspace.c)
 endif()
 
+if(CONFIG_STM32F0L0G0_PROGMEM)
+  list(APPEND SRCS stm32_flash.c)
+endif()
+
 if(CONFIG_STM32F0L0G0_GPIOIRQ)
   list(APPEND SRCS stm32_gpioint.c)
 endif()

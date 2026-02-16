@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <nuttx/tee.h>
 #include <nuttx/nuttx.h>
+#include <nuttx/cache.h>
 #include <nuttx/drivers/optee.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
@@ -35,12 +36,17 @@
 #include <sys/param.h>
 
 #ifdef CONFIG_ARCH_ADDRENV
+#  include <nuttx/addrenv.h>
 #  include <nuttx/pgalloc.h>
 #  include <nuttx/sched.h>
 #  include <nuttx/arch.h>
 #endif
 
 #include "optee.h"
+
+#ifdef CONFIG_DEV_OPTEE_SUPPLICANT
+#  include "optee_supplicant.h"
+#endif
 
 /****************************************************************************
  * The driver's main purpose is to support the porting of the open source
@@ -54,23 +60,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Some GlobalPlatform error codes used in this driver */
-
-#define TEE_SUCCESS                    0x00000000
-#define TEE_ERROR_ACCESS_DENIED        0xFFFF0001
-#define TEE_ERROR_BAD_FORMAT           0xFFFF0005
-#define TEE_ERROR_BAD_PARAMETERS       0xFFFF0006
-#define TEE_ERROR_NOT_SUPPORTED        0xFFFF000A
-#define TEE_ERROR_OUT_OF_MEMORY        0xFFFF000C
-#define TEE_ERROR_BUSY                 0xFFFF000D
-#define TEE_ERROR_COMMUNICATION        0xFFFF000E
-#define TEE_ERROR_SECURITY             0xFFFF000F
-#define TEE_ERROR_SHORT_BUFFER         0xFFFF0010
-#define TEE_ERROR_TIMEOUT              0xFFFF3001
-
-#define TEE_ORIGIN_COMMS               0x00000002
-
 #define OPTEE_DEV_PATH                 "/dev/tee0"
+#define OPTEE_SUPPLICANT_DEV_PATH      "/dev/teepriv0"
 
 /* According to optee_msg.h#OPTEE_MSG_ATTR_NONCONTIG */
 
@@ -137,14 +128,18 @@ struct optee_page_list_entry
  * Private Function Prototypes
  ****************************************************************************/
 
-/* The file operation functions */
+/* File operation functions for /dev/tee* */
 
 static int optee_open(FAR struct file *filep);
 static int optee_close(FAR struct file *filep);
 static int optee_ioctl(FAR struct file *filep, int cmd,
                        unsigned long arg);
 
+/* File operation functions for shm fds. */
+
 static int optee_shm_close(FAR struct file *filep);
+static int optee_shm_mmap(FAR struct file *filep,
+                          FAR struct mm_map_entry_s *map);
 
 /****************************************************************************
  * Private Data
@@ -167,15 +162,8 @@ static const struct file_operations g_optee_ops =
 
 static const struct file_operations g_optee_shm_ops =
 {
-  NULL,            /* open */
-  optee_shm_close, /* close */
-  NULL,            /* read */
-  NULL,            /* write */
-  NULL,            /* seek */
-  NULL,            /* ioctl */
-  NULL,            /* mmap */
-  NULL,            /* truncate */
-  NULL             /* poll */
+  .close = optee_shm_close,
+  .mmap = optee_shm_mmap,
 };
 
 static struct inode g_optee_shm_inode =
@@ -188,35 +176,6 @@ static struct inode g_optee_shm_inode =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-static int optee_convert_error(uint32_t oterr)
-{
-  switch (oterr)
-    {
-      case TEE_SUCCESS:
-        return 0;
-      case TEE_ERROR_ACCESS_DENIED:
-      case TEE_ERROR_SECURITY:
-        return -EACCES;
-      case TEE_ERROR_BAD_FORMAT:
-      case TEE_ERROR_BAD_PARAMETERS:
-        return -EINVAL;
-      case TEE_ERROR_NOT_SUPPORTED:
-        return -EOPNOTSUPP;
-      case TEE_ERROR_OUT_OF_MEMORY:
-        return -ENOMEM;
-      case TEE_ERROR_BUSY:
-        return -EBUSY;
-      case TEE_ERROR_COMMUNICATION:
-        return -ECOMM;
-      case TEE_ERROR_SHORT_BUFFER:
-        return -ENOBUFS;
-      case TEE_ERROR_TIMEOUT:
-        return -ETIMEDOUT;
-      default:
-        return -EIO;
-    }
-}
 
 /****************************************************************************
  * Name: optee_is_valid_range
@@ -308,7 +267,7 @@ optee_shm_to_page_list(FAR struct optee_shm *shm, FAR uintptr_t *list_pa)
   uint32_t list_size;
   uint32_t i = 0;
 
-  pgoff = shm->addr & (pgsize - 1);
+  pgoff = shm->vaddr & (pgsize - 1);
   total_pages = (uint32_t)div_round_up(pgoff + shm->length, pgsize);
   list_size = div_round_up(total_pages, OPTEE_PAGES_ARRAY_LEN)
               * sizeof(struct optee_page_list_entry);
@@ -325,7 +284,7 @@ optee_shm_to_page_list(FAR struct optee_shm *shm, FAR uintptr_t *list_pa)
     }
 
   list_entry = (FAR struct optee_page_list_entry *)list;
-  page = ALIGN_DOWN(shm->addr, pgsize);
+  page = ALIGN_DOWN(shm->vaddr, pgsize);
   while (total_pages)
     {
       list_entry->pages_array[i++] = optee_va_to_pa((FAR const void *)page);
@@ -344,6 +303,10 @@ optee_shm_to_page_list(FAR struct optee_shm *shm, FAR uintptr_t *list_pa)
     {
       *list_pa = optee_va_to_pa(list) | pgoff;
     }
+
+#ifndef CONFIG_ARCH_USE_MMU
+  up_clean_dcache((uintptr_t)list, (uintptr_t)list + list_size);
+#endif
 
   return list;
 }
@@ -399,7 +362,7 @@ static int optee_shm_register(FAR struct optee_priv_data *priv,
 
   if (msg->ret)
     {
-      ret = optee_convert_error(msg->ret);
+      ret = optee_convert_to_errno(msg->ret);
     }
 
 errout_with_list:
@@ -450,7 +413,7 @@ static int optee_shm_unregister(FAR struct optee_priv_data *priv,
 
   if (msg->ret)
     {
-      ret = optee_convert_error(msg->ret);
+      ret = optee_convert_to_errno(msg->ret);
     }
 
 errout_with_msg:
@@ -479,11 +442,64 @@ static int optee_shm_close(FAR struct file *filep)
   if (shm != NULL && shm->id > -1)
     {
       filep->f_priv = NULL;
-      shm->fd = -1;
       optee_shm_free(shm);
     }
 
   return 0;
+}
+
+/****************************************************************************
+ * Name: optee_shm_mmap
+ *
+ * Description:
+ *   shm mmap operation
+ *
+ * Parameters:
+ *   filep  - the file instance
+ *   map    - Filled by the userspace, with the mapping parameters.
+ *
+ * Returned Values:
+ *   OK on success; A negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+static int optee_shm_mmap(FAR struct file *filep,
+                          FAR struct mm_map_entry_s *map)
+{
+  FAR struct optee_shm *shm = filep->f_priv;
+  int32_t ret = OK;
+
+  if ((map->flags & MAP_PRIVATE) && (map->flags & MAP_SHARED))
+    {
+      return -EINVAL;
+    }
+
+  /* Forbid multiple mmaps of the same fd. */
+
+  if (shm->vaddr != 0)
+    {
+      return -EBUSY;
+    }
+
+  /* Forbid allocations with bigger size than what registered with
+   * with optee_ioctl_shm_alloc().
+   */
+
+  if (shm->length < map->length)
+    {
+      return -EINVAL;
+    }
+
+  ret = map_anonymous(map, false);
+
+  if (ret == OK)
+    {
+      DEBUGASSERT(map->vaddr != NULL);
+      shm->vaddr = (uint64_t)map->vaddr;
+      shm->paddr = optee_va_to_pa(map->vaddr);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -503,6 +519,7 @@ static int optee_shm_close(FAR struct file *filep)
 static int optee_open(FAR struct file *filep)
 {
   FAR struct optee_priv_data *priv;
+  enum optee_role_e role = (uintptr_t)filep->f_inode->i_private;
   int ret;
 
   ret = optee_transport_open(&priv);
@@ -511,7 +528,30 @@ static int optee_open(FAR struct file *filep)
       return ret;
     }
 
-  priv->shms = idr_init();
+  priv->role = role;
+
+  if (role == OPTEE_ROLE_CA)
+    {
+      priv->shms = idr_init();
+    }
+#ifdef CONFIG_DEV_OPTEE_SUPPLICANT
+  else if (role == OPTEE_ROLE_SUPPLICANT)
+    {
+      /* Allow only one process to open the device. */
+
+      if (filep->f_inode->i_crefs > 2)
+        {
+          return -EBUSY;
+        }
+
+      optee_supplicant_init(&priv->shms);
+    }
+#endif
+  else
+    {
+      return -EOPNOTSUPP;
+    }
+
   filep->f_priv = priv;
   return 0;
 }
@@ -534,26 +574,29 @@ static int optee_close(FAR struct file *filep)
 {
   FAR struct optee_priv_data *priv = filep->f_priv;
   FAR struct optee_shm *shm;
-  FAR struct file *shm_filep;
   int id = 0;
 
   idr_for_each_entry(priv->shms, shm, id)
     {
-      if (shm->fd > -1 && file_get(shm->fd, &shm_filep) >= 0)
+      /* Here, we only free, unfreed kernel allocations, the rest will be
+       * done by optee_shm_close().
+       */
+
+      if (shm->fd == -1)
         {
-          /* The user did not call close(), prevent vfs auto-close from
-           * double-freeing our SHM
-           */
-
-          shm_filep->f_priv = NULL;
-          file_put(shm_filep);
+          optee_shm_free(shm);
         }
-
-      optee_shm_free(shm);
     }
 
   idr_destroy(priv->shms);
   optee_transport_close(priv);
+#ifdef CONFIG_DEV_OPTEE_SUPPLICANT
+  if (priv->role == OPTEE_ROLE_SUPPLICANT)
+    {
+      optee_supplicant_uninit();
+    }
+#endif
+
   return 0;
 }
 
@@ -563,6 +606,7 @@ static int optee_memref_to_msg_param(FAR struct optee_priv_data *priv,
 {
   FAR struct optee_shm *shm;
   uintptr_t page_list_pa;
+  bool external_vm_context = false;
 
   if (p->c == TEE_MEMREF_NULL)
     {
@@ -577,7 +621,17 @@ static int optee_memref_to_msg_param(FAR struct optee_priv_data *priv,
   shm = idr_find(priv->shms, p->c);
   if (shm == NULL)
     {
-      return -EINVAL;
+#ifdef CONFIG_DEV_OPTEE_SUPPLICANT
+      /* Search also the shared memory registered by the supplicant. */
+
+      shm = optee_supplicant_search_shm(p->c);
+      external_vm_context = true;
+
+      if (shm == NULL)
+#endif
+        {
+          return -EINVAL;
+        }
     }
 
   if (shm->flags & TEE_SHM_REGISTER)
@@ -598,6 +652,15 @@ static int optee_memref_to_msg_param(FAR struct optee_priv_data *priv,
                  TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT;
       mp->attr |= OPTEE_MSG_ATTR_NONCONTIG;
 
+      /* This shouldn't happen, we can't translate vmas from
+       * another vm context.
+       */
+
+      if (external_vm_context)
+        {
+          return -EPROTO;
+        }
+
       shm->page_list = optee_shm_to_page_list(shm, &page_list_pa);
       if (shm->page_list == NULL)
         {
@@ -606,115 +669,12 @@ static int optee_memref_to_msg_param(FAR struct optee_priv_data *priv,
 
       mp->u.tmem.buf_ptr = page_list_pa;
       mp->u.tmem.shm_ref = (uintptr_t)shm;
-      mp->u.tmem.size = shm->length;
+      mp->u.tmem.size = p->b;
     }
 
-  return 0;
-}
-
-static int optee_to_msg_param(FAR struct optee_priv_data *priv,
-                              FAR struct optee_msg_param *mparams,
-                              size_t num_params,
-                              FAR const struct tee_ioctl_param *params)
-{
-  size_t n;
-  int ret;
-
-  for (n = 0; n < num_params; n++)
-    {
-      FAR const struct tee_ioctl_param *p = params + n;
-      FAR struct optee_msg_param *mp = mparams + n;
-
-      if (p->attr & ~TEE_IOCTL_PARAM_ATTR_MASK)
-        {
-          return -EINVAL;
-        }
-
-      switch (p->attr & TEE_IOCTL_PARAM_ATTR_TYPE_MASK)
-        {
-          case TEE_IOCTL_PARAM_ATTR_TYPE_NONE:
-            mp->attr = OPTEE_MSG_ATTR_TYPE_NONE;
-            break;
-          case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INPUT:
-          case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_OUTPUT:
-          case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INOUT:
-            mp->attr = OPTEE_MSG_ATTR_TYPE_VALUE_INPUT + p->attr -
-                       TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INPUT;
-            mp->u.value.a = p->a;
-            mp->u.value.b = p->b;
-            mp->u.value.c = p->c;
-            break;
-          case TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT:
-          case TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_OUTPUT:
-          case TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INOUT:
-            ret = optee_memref_to_msg_param(priv, mp, p);
-            if (ret < 0)
-              {
-                return ret;
-              }
-            break;
-          default:
-            return -EINVAL;
-        }
-    }
-
-  return 0;
-}
-
-static int optee_from_msg_param(FAR struct tee_ioctl_param *params,
-                                size_t num_params,
-                                FAR const struct optee_msg_param *mparams)
-{
-  size_t n;
-
-  for (n = 0; n < num_params; n++)
-    {
-      FAR const struct optee_msg_param *mp = mparams + n;
-      FAR struct tee_ioctl_param *p = params + n;
-      FAR struct optee_shm *shm;
-
-      switch (mp->attr & OPTEE_MSG_ATTR_TYPE_MASK)
-        {
-          case OPTEE_MSG_ATTR_TYPE_NONE:
-            p->attr = TEE_IOCTL_PARAM_ATTR_TYPE_NONE;
-            p->a = 0;
-            p->b = 0;
-            p->c = 0;
-            break;
-          case OPTEE_MSG_ATTR_TYPE_VALUE_INPUT:
-          case OPTEE_MSG_ATTR_TYPE_VALUE_OUTPUT:
-          case OPTEE_MSG_ATTR_TYPE_VALUE_INOUT:
-            p->attr = TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INPUT +
-                      mp->attr - OPTEE_MSG_ATTR_TYPE_VALUE_INPUT;
-            p->a = mp->u.value.a;
-            p->b = mp->u.value.b;
-            p->c = mp->u.value.c;
-            break;
-          case OPTEE_MSG_ATTR_TYPE_TMEM_INPUT:
-          case OPTEE_MSG_ATTR_TYPE_TMEM_OUTPUT:
-          case OPTEE_MSG_ATTR_TYPE_TMEM_INOUT:
-            p->attr = TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT +
-                      mp->attr - OPTEE_MSG_ATTR_TYPE_TMEM_INPUT;
-            p->b = mp->u.tmem.size;
-
-            shm = (FAR struct optee_shm *)(uintptr_t)mp->u.tmem.shm_ref;
-            if (shm && shm->page_list)
-              {
-                kmm_free(shm->page_list);
-                shm->page_list = NULL;
-              }
-            break;
-          case OPTEE_MSG_ATTR_TYPE_RMEM_INPUT:
-          case OPTEE_MSG_ATTR_TYPE_RMEM_OUTPUT:
-          case OPTEE_MSG_ATTR_TYPE_RMEM_INOUT:
-            p->attr = TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT +
-                      mp->attr - OPTEE_MSG_ATTR_TYPE_RMEM_INPUT;
-            p->b = mp->u.rmem.size;
-            break;
-          default:
-            return -EINVAL;
-        }
-    }
+#ifndef CONFIG_ARCH_USE_MMU
+  up_clean_dcache(shm->vaddr, shm->vaddr + shm->length);
+#endif
 
   return 0;
 }
@@ -963,8 +923,6 @@ optee_ioctl_shm_alloc(FAR struct optee_priv_data *priv,
                       FAR struct tee_ioctl_shm_alloc_data *data)
 {
   FAR struct optee_shm *shm;
-  FAR void *addr;
-  int memfd;
   int ret;
 
   if (!optee_is_valid_range(data, sizeof(*data)))
@@ -972,41 +930,63 @@ optee_ioctl_shm_alloc(FAR struct optee_priv_data *priv,
       return -EFAULT;
     }
 
-  memfd = memfd_create(OPTEE_SERVER_PATH, O_CREAT | O_CLOEXEC);
-  if (memfd < 0)
-    {
-      return get_errno();
-    }
-
-  if (ftruncate(memfd, data->size) < 0)
-    {
-      ret = get_errno();
-      goto err;
-    }
-
-  addr = mmap(NULL, data->size, PROT_READ | PROT_WRITE, MAP_SHARED,
-              memfd, 0);
-  if (addr == MAP_FAILED)
-    {
-      ret = get_errno();
-      goto err;
-    }
-
-  ret = optee_shm_alloc(priv, addr, data->size, 0, &shm);
+  ret = optee_shm_alloc(priv, NULL, data->size, TEE_SHM_USER_MAP, &shm);
   if (ret < 0)
     {
-      goto err_with_mmap;
+      return ret;
     }
 
-  data->id = shm->id;
-  return memfd;
+  ret = file_allocate_from_inode(&g_optee_shm_inode,
+                                 O_CLOEXEC | O_RDOK, 0, shm, 0);
 
-err_with_mmap:
-  munmap(addr, data->size);
-err:
-  close(memfd);
+  if (ret < 0)
+    {
+      optee_shm_free(shm);
+      return ret;
+    }
+
+  shm->fd = ret;
+
+  data->id = shm->id;
+  return shm->fd;
+}
+
+#ifdef CONFIG_DEV_OPTEE_SUPPLICANT
+static int
+optee_shm_register_supplicant(FAR struct optee_priv_data *priv,
+                              uintptr_t addr, uint64_t length,
+                              FAR struct optee_shm **shmp)
+{
+  FAR struct optee_shm *shm;
+  uintptr_t page_list_pa;
+  int ret = 0;
+
+  shm = kmm_zalloc(sizeof(struct optee_shm));
+  *shmp = shm;
+  if (shm == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  shm->fd = -1;
+  shm->priv = priv;
+  shm->vaddr = addr;
+  shm->length = length;
+  shm->flags = TEE_SHM_REGISTER | TEE_SHM_SUPP;
+  shm->page_list = optee_shm_to_page_list(shm, &page_list_pa);
+  shm->paddr = page_list_pa;
+  shm->id = idr_alloc(priv->shms, shm, 0, 0);
+
+  if (shm->id < 0)
+    {
+      kmm_free(shm->page_list);
+      kmm_free(shm);
+      return -ENOMEM;
+    }
+
   return ret;
 }
+#endif
 
 static int
 optee_ioctl_shm_register(FAR struct optee_priv_data *priv,
@@ -1031,8 +1011,25 @@ optee_ioctl_shm_register(FAR struct optee_priv_data *priv,
       return -EINVAL;
     }
 
-  ret = optee_shm_alloc(priv, (FAR void *)(uintptr_t)rdata->addr,
-                        rdata->length, TEE_SHM_REGISTER, &shm);
+  if (priv->role == OPTEE_ROLE_CA)
+    {
+      ret = optee_shm_alloc(priv, (FAR void *)(uintptr_t)rdata->addr,
+                            rdata->length, TEE_SHM_REGISTER, &shm);
+    }
+
+#ifdef CONFIG_DEV_OPTEE_SUPPLICANT
+  else if (priv->role == OPTEE_ROLE_SUPPLICANT)
+    {
+      ret = optee_shm_register_supplicant(priv, (uintptr_t)rdata->addr,
+                                          rdata->length, &shm);
+      rdata->flags = shm->flags;
+    }
+#endif
+  else
+    {
+      return -ENODEV;
+    }
+
   if (ret < 0)
     {
       return ret;
@@ -1049,6 +1046,114 @@ optee_ioctl_shm_register(FAR struct optee_priv_data *priv,
   rdata->id = shm->id;
   return ret;
 }
+
+#ifdef CONFIG_DEV_OPTEE_SUPPLICANT
+static int
+optee_ioctl_supplicant_recv(FAR struct optee_priv_data *priv,
+                            FAR struct tee_ioctl_buf_data *data)
+{
+  int n;
+  int ret;
+  FAR struct tee_iocl_supp_recv_arg *arg;
+
+  if (!optee_is_valid_range(data, sizeof(*data)))
+    {
+      return -EFAULT;
+    }
+
+  if (!optee_is_valid_range((FAR void *)data->buf_ptr, data->buf_len))
+    {
+      return -EFAULT;
+    }
+
+  if (data->buf_len > TEE_MAX_ARG_SIZE ||
+      data->buf_len < sizeof(struct tee_iocl_supp_recv_arg))
+    {
+      return -EINVAL;
+    }
+
+  arg = (FAR struct tee_iocl_supp_recv_arg *)(uintptr_t)data->buf_ptr;
+
+  if (sizeof(*arg) + TEE_IOCTL_PARAM_SIZE(arg->num_params) !=
+      data->buf_len)
+    {
+      return -EINVAL;
+    }
+
+  if (arg->num_params > OPTEE_MAX_PARAM_NUM)
+    {
+      return -EINVAL;
+    }
+
+  ret = optee_supplicant_recv(&arg->func, &arg->num_params, arg->params);
+
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  for (n = 0; n < arg->num_params; n++)
+    {
+      FAR struct tee_ioctl_param *p = arg->params + n;
+
+      switch (p->attr & TEE_IOCTL_PARAM_ATTR_TYPE_MASK)
+        {
+          case TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT:
+          case TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_OUTPUT:
+          case TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INOUT:
+            if (!p->b)
+              {
+                p->a = 0;
+                p->c = (uint64_t)-1; /* Invalid shm id. */
+                break;
+              }
+          break;
+        default:
+          break;
+        }
+    }
+
+  return 0;
+}
+
+static int
+optee_ioctl_supplicant_send(FAR struct optee_priv_data *priv,
+                            FAR struct tee_ioctl_buf_data *data)
+{
+  FAR struct tee_iocl_supp_send_arg *arg;
+
+  if (!optee_is_valid_range(data, sizeof(*data)))
+    {
+      return -EFAULT;
+    }
+
+  if (!optee_is_valid_range((FAR void *)data->buf_ptr, data->buf_len))
+    {
+      return -EFAULT;
+    }
+
+  if (data->buf_len > TEE_MAX_ARG_SIZE ||
+      data->buf_len < sizeof(struct tee_iocl_supp_send_arg))
+    {
+      return -EINVAL;
+    }
+
+  arg = (FAR struct tee_iocl_supp_send_arg *)(uintptr_t)data->buf_ptr;
+
+  if (sizeof(*arg) + TEE_IOCTL_PARAM_SIZE(arg->num_params) !=
+      data->buf_len)
+    {
+      return -EINVAL;
+    }
+
+  if (arg->num_params > OPTEE_MAX_PARAM_NUM)
+    {
+      return -EINVAL;
+    }
+
+  return optee_supplicant_send(arg->ret, arg->num_params, arg->params);
+}
+#endif
 
 /****************************************************************************
  * Name: optee_ioctl
@@ -1087,6 +1192,12 @@ static int optee_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         return optee_ioctl_shm_alloc(priv, parg);
       case TEE_IOC_SHM_REGISTER:
         return optee_ioctl_shm_register(priv, parg);
+#ifdef CONFIG_DEV_OPTEE_SUPPLICANT
+      case TEE_IOC_SUPPL_RECV:
+        return optee_ioctl_supplicant_recv(priv, parg);
+      case TEE_IOC_SUPPL_SEND:
+        return optee_ioctl_supplicant_send(priv, parg);
+#endif
       default:
         return -ENOTTY;
     }
@@ -1097,6 +1208,94 @@ static int optee_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: optee_convert_to_errno
+ *
+ * Description:
+ *   Convert TEE errors to errno values
+ *
+ * Parameters:
+ *   oterr - TEE error code.
+ *
+ * Returned Values:
+ *   The converted errno value.
+ *
+ ****************************************************************************/
+
+int optee_convert_to_errno(uint32_t oterr)
+{
+  switch (oterr)
+    {
+      case TEE_SUCCESS:
+        return 0;
+      case TEE_ERROR_ACCESS_DENIED:
+      case TEE_ERROR_SECURITY:
+        return -EACCES;
+      case TEE_ERROR_BAD_FORMAT:
+      case TEE_ERROR_BAD_PARAMETERS:
+        return -EINVAL;
+      case TEE_ERROR_NOT_SUPPORTED:
+        return -EOPNOTSUPP;
+      case TEE_ERROR_OUT_OF_MEMORY:
+        return -ENOMEM;
+      case TEE_ERROR_BUSY:
+        return -EBUSY;
+      case TEE_ERROR_COMMUNICATION:
+        return -ECOMM;
+      case TEE_ERROR_SHORT_BUFFER:
+        return -ENOBUFS;
+      case TEE_ERROR_TIMEOUT:
+        return -ETIMEDOUT;
+      default:
+        return -EIO;
+    }
+}
+
+/****************************************************************************
+ * Name: optee_convert_from_errno
+ *
+ * Description:
+ *   Convert errno values to TEE errors.
+ *
+ * Parameters:
+ *   err - errno value (negative).
+ *
+ * Returned Values:
+ *   The converted TEE error code.
+ *
+ ****************************************************************************/
+
+uint32_t optee_convert_from_errno(int err)
+{
+  /* Make sure we handle negative errno values */
+
+  switch (-err)
+    {
+      case 0:
+        return TEE_SUCCESS;
+      case EACCES:
+        return TEE_ERROR_ACCESS_DENIED;
+      case EINVAL:
+        return TEE_ERROR_BAD_PARAMETERS;
+      case ENOTSUP:
+      case EOPNOTSUPP:
+        return TEE_ERROR_NOT_SUPPORTED;
+      case ENOMEM:
+        return TEE_ERROR_OUT_OF_MEMORY;
+      case EBUSY:
+        return TEE_ERROR_BUSY;
+      case ECOMM:
+      case EPROTO:
+        return TEE_ERROR_COMMUNICATION;
+      case ENOBUFS:
+        return TEE_ERROR_SHORT_BUFFER;
+      case ETIMEDOUT:
+        return TEE_ERROR_TIMEOUT;
+      default:
+        return TEE_ERROR_GENERIC;
+    }
+}
 
 /****************************************************************************
  * Name: optee_va_to_pa
@@ -1201,14 +1400,15 @@ int optee_shm_alloc(FAR struct optee_priv_data *priv, FAR void *addr,
       ptr = addr;
     }
 
-  if (ptr == NULL)
+  if (!(flags & TEE_SHM_USER_MAP) && ptr == NULL)
     {
-      goto err;
+      return -EINVAL;
     }
 
   shm->fd = -1;
   shm->priv = priv;
-  shm->addr = (uintptr_t)ptr;
+  shm->vaddr = (uintptr_t)ptr;
+  shm->paddr = shm->vaddr ? optee_va_to_pa((FAR void *)shm->vaddr) : 0;
   shm->length = size;
   shm->flags = flags;
   shm->id = idr_alloc(priv->shms, shm, 0, 0);
@@ -1264,21 +1464,14 @@ void optee_shm_free(FAR struct optee_shm *shm)
       return;
     }
 
-  if (shm->flags & TEE_SHM_REGISTER)
+  if (!(shm->flags & TEE_SHM_SUPP) && (shm->flags & TEE_SHM_REGISTER))
     {
       optee_shm_unregister(shm->priv, shm);
     }
 
   if (shm->flags & TEE_SHM_ALLOC)
     {
-      kmm_free((FAR void *)(uintptr_t)shm->addr);
-    }
-
-  if (!(shm->flags & (TEE_SHM_ALLOC | TEE_SHM_REGISTER)))
-    {
-      /* allocated by optee_ioctl_shm_alloc(), need to unmap */
-
-      munmap((FAR void *)(uintptr_t)shm->addr, shm->length);
+      kmm_free((FAR void *)(uintptr_t)shm->vaddr);
     }
 
   idr_remove(shm->priv->shms, shm->id);
@@ -1307,5 +1500,181 @@ int optee_register(void)
       return ret;
     }
 
-  return register_driver(OPTEE_DEV_PATH, &g_optee_ops, 0666, NULL);
+#ifdef CONFIG_DEV_OPTEE_SUPPLICANT
+  ret = register_driver(OPTEE_SUPPLICANT_DEV_PATH, &g_optee_ops, 0666,
+                        (FAR void *)OPTEE_ROLE_SUPPLICANT);
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
+
+  return register_driver(OPTEE_DEV_PATH, &g_optee_ops, 0666,
+                         (FAR void *)OPTEE_ROLE_CA);
 }
+
+/****************************************************************************
+ * Name: optee_from_msg_param
+ *
+ * Description:
+ *   Converts and copies the message parameters received by OP-TEE to buffer
+ *   for processing by nuttx.
+ *
+ * Parameters:
+ *   params - Pointer, to copy the received parameters after some processing.
+ *   num_params - Number of these parameters.
+ *   mparams - Pointer to the message parameters received by OP-TEE.
+ *
+ * Returned Values:
+ *   OK on success; A negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int optee_from_msg_param(FAR struct tee_ioctl_param *params,
+                         size_t num_params,
+                         FAR const struct optee_msg_param *mparams)
+{
+  size_t n;
+
+  for (n = 0; n < num_params; n++)
+    {
+      FAR const struct optee_msg_param *mp = mparams + n;
+      FAR struct tee_ioctl_param *p = params + n;
+      FAR struct optee_shm *shm = NULL;
+
+      switch (mp->attr & OPTEE_MSG_ATTR_TYPE_MASK)
+        {
+          case OPTEE_MSG_ATTR_TYPE_NONE:
+            p->attr = TEE_IOCTL_PARAM_ATTR_TYPE_NONE;
+            p->a = 0;
+            p->b = 0;
+            p->c = 0;
+            break;
+          case OPTEE_MSG_ATTR_TYPE_VALUE_INPUT:
+          case OPTEE_MSG_ATTR_TYPE_VALUE_OUTPUT:
+          case OPTEE_MSG_ATTR_TYPE_VALUE_INOUT:
+            p->attr = TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INPUT +
+                      mp->attr - OPTEE_MSG_ATTR_TYPE_VALUE_INPUT;
+            p->a = mp->u.value.a;
+            p->b = mp->u.value.b;
+            p->c = mp->u.value.c;
+            break;
+          case OPTEE_MSG_ATTR_TYPE_TMEM_INPUT:
+          case OPTEE_MSG_ATTR_TYPE_TMEM_OUTPUT:
+          case OPTEE_MSG_ATTR_TYPE_TMEM_INOUT:
+            p->attr = TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT +
+                      mp->attr - OPTEE_MSG_ATTR_TYPE_TMEM_INPUT;
+            p->b = mp->u.tmem.size;
+
+            shm = (FAR struct optee_shm *)(uintptr_t)mp->u.tmem.shm_ref;
+            if (shm && shm->page_list)
+              {
+                kmm_free(shm->page_list);
+                shm->page_list = NULL;
+                p->c = shm->id;
+              }
+            else
+              {
+                p->c = TEE_MEMREF_NULL;
+              }
+            break;
+          case OPTEE_MSG_ATTR_TYPE_RMEM_INPUT:
+          case OPTEE_MSG_ATTR_TYPE_RMEM_OUTPUT:
+          case OPTEE_MSG_ATTR_TYPE_RMEM_INOUT:
+            p->attr = TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT +
+                      mp->attr - OPTEE_MSG_ATTR_TYPE_RMEM_INPUT;
+            p->b = mp->u.rmem.size;
+            p->a = mp->u.rmem.offs;
+            shm = (FAR struct optee_shm *)(uintptr_t)mp->u.tmem.shm_ref;
+            if (shm)
+              {
+                p->c = shm->id;
+              }
+            else
+              {
+                p->c = TEE_MEMREF_NULL;
+              }
+            break;
+          default:
+            return -EINVAL;
+        }
+
+#ifndef CONFIG_ARCH_USE_MMU
+          if (shm)
+            {
+              up_invalidate_dcache(shm->vaddr, shm->vaddr + shm->length);
+            }
+#endif
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: optee_to_msg_param
+ *
+ * Description:
+ *   Converts and copies the processed by nuttx parameters to the shared
+ *   memory area containing the message to/from the OP-TEE.
+ *
+ * Parameters:
+ *   priv - pointer to the driver's optee_priv_data struct
+ *   mparams - Pointer to the message parameters provided by OP-TEE.
+ *   params - Pointer, of the processed by nuttx parameters containing the
+ *            response.
+ *   num_params - Number of these parameters.
+ *
+ * Returned Values:
+ *   OK on success; A negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int optee_to_msg_param(FAR struct optee_priv_data *priv,
+                       FAR struct optee_msg_param *mparams,
+                       size_t num_params,
+                       FAR const struct tee_ioctl_param *params)
+{
+  size_t n;
+  int ret;
+
+  for (n = 0; n < num_params; n++)
+    {
+      FAR const struct tee_ioctl_param *p = params + n;
+      FAR struct optee_msg_param *mp = mparams + n;
+
+      if (p->attr & ~TEE_IOCTL_PARAM_ATTR_MASK)
+        {
+          return -EINVAL;
+        }
+
+      switch (p->attr & TEE_IOCTL_PARAM_ATTR_TYPE_MASK)
+        {
+          case TEE_IOCTL_PARAM_ATTR_TYPE_NONE:
+            mp->attr = OPTEE_MSG_ATTR_TYPE_NONE;
+            break;
+          case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INPUT:
+          case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_OUTPUT:
+          case TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INOUT:
+            mp->attr = OPTEE_MSG_ATTR_TYPE_VALUE_INPUT + p->attr -
+                       TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_INPUT;
+            mp->u.value.a = p->a;
+            mp->u.value.b = p->b;
+            mp->u.value.c = p->c;
+            break;
+          case TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT:
+          case TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_OUTPUT:
+          case TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INOUT:
+            ret = optee_memref_to_msg_param(priv, mp, p);
+            if (ret < 0)
+              {
+                return ret;
+              }
+            break;
+          default:
+            return -EINVAL;
+        }
+    }
+
+  return 0;
+}
+

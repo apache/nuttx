@@ -53,11 +53,17 @@
 #if !defined(CONFIG_UART0_OFLOWCONTROL)
 #  define CONFIG_UART0_OFLOWCONTROL 0
 #endif
+#if !defined(CONFIG_UART0_RS485CONTROL)
+#  define CONFIG_UART0_RS485CONTROL 0
+#endif
 #if !defined(CONFIG_UART1_IFLOWCONTROL)
 #  define CONFIG_UART1_IFLOWCONTROL 0
 #endif
 #if !defined(CONFIG_UART1_OFLOWCONTROL)
 #  define CONFIG_UART1_OFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_UART1_RS485CONTROL)
+#  define CONFIG_UART1_RS485CONTROL 0
 #endif
 #if !defined(CONFIG_UART2_IFLOWCONTROL)
 #  define CONFIG_UART2_IFLOWCONTROL 0
@@ -65,11 +71,17 @@
 #if !defined(CONFIG_UART2_OFLOWCONTROL)
 #  define CONFIG_UART2_OFLOWCONTROL 0
 #endif
+#if !defined(CONFIG_UART2_RS485CONTROL)
+#  define CONFIG_UART2_RS485CONTROL 0
+#endif
 #if !defined(CONFIG_UART3_IFLOWCONTROL)
 #  define CONFIG_UART3_IFLOWCONTROL 0
 #endif
 #if !defined(CONFIG_UART3_OFLOWCONTROL)
 #  define CONFIG_UART3_OFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_UART3_RS485CONTROL)
+#  define CONFIG_UART3_RS485CONTROL 0
 #endif
 #if !defined(CONFIG_UART4_IFLOWCONTROL)
 #  define CONFIG_UART4_IFLOWCONTROL 0
@@ -77,11 +89,17 @@
 #if !defined(CONFIG_UART4_OFLOWCONTROL)
 #  define CONFIG_UART4_OFLOWCONTROL 0
 #endif
+#if !defined(CONFIG_UART4_RS485CONTROL)
+#  define CONFIG_UART4_RS485CONTROL 0
+#endif
 #if !defined(CONFIG_UART5_IFLOWCONTROL)
 #  define CONFIG_UART5_IFLOWCONTROL 0
 #endif
 #if !defined(CONFIG_UART5_OFLOWCONTROL)
 #  define CONFIG_UART5_OFLOWCONTROL 0
+#endif
+#if !defined(CONFIG_UART5_RS485CONTROL)
+#  define CONFIG_UART5_RS485CONTROL 0
 #endif
 
 #if !defined(CONFIG_LPUART0_IFLOWCONTROL)
@@ -127,6 +145,7 @@
 #    define CONSOLE_PARITY   CONFIG_UART0_PARITY
 #    define CONSOLE_IFLOW    CONFIG_UART0_IFLOWCONTROL
 #    define CONSOLE_OFLOW    CONFIG_UART0_OFLOWCONTROL
+#    define CONSOLE_RS485CONTROL    CONFIG_UART0_RS485CONTROL
 #  elif defined(CONFIG_UART1_SERIAL_CONSOLE)
 #    define CONSOLE_BASE     KINETIS_UART1_BASE
 #    define CONSOLE_FREQ     BOARD_CORECLK_FREQ
@@ -136,6 +155,7 @@
 #    define CONSOLE_PARITY   CONFIG_UART1_PARITY
 #    define CONSOLE_IFLOW    CONFIG_UART1_IFLOWCONTROL
 #    define CONSOLE_OFLOW    CONFIG_UART1_OFLOWCONTROL
+#    define CONSOLE_RS485CONTROL    CONFIG_UART1_RS485CONTROL
 #  elif defined(CONFIG_UART2_SERIAL_CONSOLE)
 #    define CONSOLE_BASE     KINETIS_UART2_BASE
 #    define CONSOLE_FREQ     BOARD_BUS_FREQ
@@ -145,6 +165,7 @@
 #    define CONSOLE_PARITY   CONFIG_UART2_PARITY
 #    define CONSOLE_IFLOW    CONFIG_UART2_IFLOWCONTROL
 #    define CONSOLE_OFLOW    CONFIG_UART2_OFLOWCONTROL
+#    define CONSOLE_RS485CONTROL    CONFIG_UART2_RS485CONTROL
 #  elif defined(CONFIG_UART3_SERIAL_CONSOLE)
 #    define CONSOLE_BASE     KINETIS_UART3_BASE
 #    define CONSOLE_FREQ     BOARD_BUS_FREQ
@@ -154,6 +175,7 @@
 #    define CONSOLE_PARITY   CONFIG_UART3_PARITY
 #    define CONSOLE_IFLOW    CONFIG_UART3_IFLOWCONTROL
 #    define CONSOLE_OFLOW    CONFIG_UART3_OFLOWCONTROL
+#    define CONSOLE_RS485CONTROL    CONFIG_UART3_RS485CONTROL
 #  elif defined(CONFIG_UART4_SERIAL_CONSOLE)
 #    define CONSOLE_BASE     KINETIS_UART4_BASE
 #    define CONSOLE_FREQ     BOARD_BUS_FREQ
@@ -163,6 +185,7 @@
 #    define CONSOLE_PARITY   CONFIG_UART4_PARITY
 #    define CONSOLE_IFLOW    CONFIG_UART4_IFLOWCONTROL
 #    define CONSOLE_OFLOW    CONFIG_UART4_OFLOWCONTROL
+#    define CONSOLE_RS485CONTROL    CONFIG_UART4_RS485CONTROL
 #  elif defined(CONFIG_UART5_SERIAL_CONSOLE)
 #    define CONSOLE_BASE     KINETIS_UART5_BASE
 #    define CONSOLE_FREQ     BOARD_BUS_FREQ
@@ -172,6 +195,7 @@
 #    define CONSOLE_PARITY   CONFIG_UART5_PARITY
 #    define CONSOLE_IFLOW    CONFIG_UART5_IFLOWCONTROL
 #    define CONSOLE_OFLOW    CONFIG_UART5_OFLOWCONTROL
+#    define CONSOLE_RS485CONTROL    CONFIG_UART5_RS485CONTROL
 #  elif defined(HAVE_UART_CONSOLE)
 #    error "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
 #  endif
@@ -440,7 +464,7 @@ void kinetis_lowsetup(void)
 
   kinetis_uartconfigure(CONSOLE_BASE, CONSOLE_BAUD, CONSOLE_FREQ, \
                         CONSOLE_PARITY, CONSOLE_BITS, CONSOLE_2STOP, \
-                        CONSOLE_IFLOW, CONSOLE_OFLOW);
+                        CONSOLE_IFLOW, CONSOLE_OFLOW, CONSOLE_RS485CONTROL);
 #  endif
 #endif /* HAVE_UART_DEVICE */
 
@@ -593,7 +617,7 @@ void kinetis_lpuartreset(uintptr_t uart_base)
 void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
                            uint32_t clock, unsigned int parity,
                            unsigned int nbits, unsigned int stop2,
-                           bool iflow, bool oflow)
+                           bool iflow, bool oflow, bool rs485control)
 {
   uint32_t     sbr;
   uint32_t     brfa;
@@ -753,10 +777,22 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
   regval &= ~(UART_MODEM_TXCTSE | UART_MODEM_RXRTSE);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
+#ifdef CONFIG_SERIAL_RS485CONTROL
+  if (iflow && rs485control)
+    {
+      regval |= UART_MODEM_TXRTSE;
+      regval |= UART_MODEM_TXRTSPOL;
+    }
+  else
+    {
+      regval |= UART_MODEM_RXRTSE;
+    }
+#else
   if (iflow)
     {
       regval |= UART_MODEM_RXRTSE;
     }
+#endif
 #endif
 
 #ifdef CONFIG_SERIAL_OFLOWCONTROL

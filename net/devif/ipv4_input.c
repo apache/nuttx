@@ -94,6 +94,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/net/ipopt.h>
 
 #include "arp/arp.h"
 #include "inet/inet.h"
@@ -117,6 +118,53 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: ipv4_check_opt
+ *
+ * Description:
+ *   Check the IP options length.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_FEATURES
+static int ipv4_check_opt(FAR struct ipv4_hdr_s *ipv4)
+{
+  FAR uint8_t *opt = (FAR uint8_t *)(ipv4 + 1);
+  int optlen;
+
+  optlen = ((ipv4->vhl & IPv4_HLMASK) << 2) - IPv4_HDRLEN;
+  while (optlen > 0)
+    {
+      if (opt[0] == IPOPT_END_TYPE)
+        {
+          break;
+        }
+      else if (opt[0] == IPOPT_NOOP_TYPE)
+        {
+          opt++;
+          optlen--;
+        }
+      else if (optlen > 1)
+        {
+          int len = opt[1];
+          if (len > optlen)
+            {
+              return -EINVAL;
+            }
+
+          opt += len;
+          optlen -= len;
+        }
+      else
+        {
+          return -EINVAL;
+        }
+    }
+
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: ipv4_in
@@ -187,7 +235,9 @@ static int ipv4_in(FAR struct net_driver_s *dev)
 
   /* Get the size of the packet minus the size of link layer header */
 
-  if (IPv4_HDRLEN > dev->d_len)
+  dev->d_len -= NET_LL_HDRLEN(dev);
+
+  if (((ipv4->vhl & IPv4_HLMASK) << 2) > dev->d_len)
     {
       nwarn("WARNING: Packet shorter than IPv4 header\n");
       goto drop;
@@ -214,6 +264,9 @@ static int ipv4_in(FAR struct net_driver_s *dev)
     }
   else if (totlen > dev->d_len)
     {
+#ifdef CONFIG_NET_STATISTICS
+      g_netstats.ipv4.drop++;
+#endif
       nwarn("WARNING: IP packet shorter than length in IP header\n");
       goto drop;
     }
@@ -236,6 +289,17 @@ static int ipv4_in(FAR struct net_driver_s *dev)
       nwarn("WARNING: IP fragment dropped\n");
       goto drop;
     }
+
+#ifdef CONFIG_DEBUG_FEATURES
+  if (ipv4_check_opt(ipv4) != OK)
+    {
+#ifdef CONFIG_NET_STATISTICS
+      g_netstats.ipv4.drop++;
+#endif
+      nwarn("WARNING: IP options error\n");
+      goto drop;
+    }
+#endif
 
 #ifdef CONFIG_NET_NAT44
   /* Try NAT inbound, rule matching will be performed in NAT module. */
@@ -383,7 +447,8 @@ static int ipv4_in(FAR struct net_driver_s *dev)
 #endif
 
 #ifdef CONFIG_NET_IPV4_CHECKSUMS
-  if (ipv4_chksum(IPv4BUF) != 0xffff)
+  if (((dev->d_features & NETDEV_RX_CSUM) == 0)
+      && (ipv4_chksum(IPv4BUF) != 0xffff))
     {
       /* Compute and check the IP header checksum. */
 
@@ -443,7 +508,12 @@ static int ipv4_in(FAR struct net_driver_s *dev)
 #endif
 
         nwarn("WARNING: Unrecognized IP protocol\n");
+#if defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_NO_STACK)
+        icmp_reply(dev, ICMP_DEST_UNREACHABLE, ICMP_PROT_UNREACH);
+        goto done;
+#else
         goto drop;
+#endif
     }
 
 #ifdef CONFIG_NET_IPFILTER
@@ -451,7 +521,8 @@ static int ipv4_in(FAR struct net_driver_s *dev)
 #endif
 
 #if defined(CONFIG_NET_IPFORWARD) || defined(CONFIG_NET_IPFILTER) || \
-    (defined(CONFIG_NET_BROADCAST) && defined(NET_UDP_HAVE_STACK))
+    (defined(CONFIG_NET_BROADCAST) && defined(NET_UDP_HAVE_STACK)) || \
+    defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_NO_STACK)
 done:
 #endif
 
@@ -503,6 +574,8 @@ int ipv4_input(FAR struct net_driver_s *dev)
   FAR uint8_t *buf;
   int ret;
 
+  netdev_lock(dev);
+
   /* Store reception timestamp if enabled and not provided by hardware. */
 
 #if defined(CONFIG_NET_TIMESTAMP) && !defined(CONFIG_ARCH_HAVE_NETDEV_TIMESTAMP)
@@ -520,10 +593,13 @@ int ipv4_input(FAR struct net_driver_s *dev)
 
       dev->d_buf = buf;
 
+      netdev_unlock(dev);
       return ret;
     }
 
-  return netdev_input(dev, ipv4_in, true);
+  ret = netdev_input(dev, ipv4_in, true);
+  netdev_unlock(dev);
+  return ret;
 }
 
 #endif /* CONFIG_NET_IPv4 */

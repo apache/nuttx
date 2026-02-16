@@ -22,6 +22,8 @@
  * This file is divided into two sections.
  * 1. Formatting of messages.
  * 2. Requests from normal world
+ * 3. Requests from secure world, Remote Procedure Call (RPC), handled by
+ *    tee-supplicant
  */
 
 /****************************************************************************
@@ -351,5 +353,137 @@ struct optee_msg_arg
 #define OPTEE_MSG_CMD_DO_BOTTOM_HALF    6
 #define OPTEE_MSG_CMD_STOP_ASYNC_NOTIF  7
 #define OPTEE_MSG_FUNCID_CALL_WITH_ARG  0x0004
+
+/****************************************************************************
+ * Part 3 - Requests from secure world, RPC
+ ****************************************************************************/
+
+/* All RPC is done with a struct optee_msg_arg as bearer of information,
+ * struct optee_msg_arg::arg holds values defined by OPTEE_MSG_RPC_CMD_*
+ * below
+ *
+ * RPC communication with tee-supplicant is reversed compared to normal
+ * client communication described above. The supplicant receives requests
+ * and sends responses.
+ *
+ * Load a TA into memory, defined in tee-supplicant
+ */
+
+#define OPTEE_MSG_RPC_CMD_LOAD_TA       0
+
+/* Reserved */
+
+#define OPTEE_MSG_RPC_CMD_RPMB          1
+
+/* File system access, defined in tee-supplicant */
+
+#define OPTEE_MSG_RPC_CMD_FS            2
+
+/* Get time
+ *
+ * Returns number of seconds and nano seconds since the Epoch,
+ * 1970-01-01 00:00:00 +0000 (UTC).
+ *
+ * [out] param[0].u.value.a Number of seconds
+ * [out] param[0].u.value.b Number of nano seconds.
+ */
+
+#define OPTEE_MSG_RPC_CMD_GET_TIME      3
+
+/* Wait queue primitive, helper for secure world to implement a wait queue.
+ *
+ * If secure world need to wait for a secure world mutex it issues a sleep
+ * request instead of spinning in secure world. Conversely is a wakeup
+ * request issued when a secure world mutex with a thread waiting thread is
+ * unlocked.
+ *
+ * Waiting on a key
+ * [in] param[0].u.value.a OPTEE_MSG_RPC_WAIT_QUEUE_SLEEP
+ * [in] param[0].u.value.b wait key
+ *
+ * Waking up a key
+ * [in] param[0].u.value.a OPTEE_MSG_RPC_WAIT_QUEUE_WAKEUP
+ * [in] param[0].u.value.b wakeup key
+ */
+
+#define OPTEE_MSG_RPC_CMD_WAIT_QUEUE    4
+#define OPTEE_MSG_RPC_WAIT_QUEUE_SLEEP  0
+#define OPTEE_MSG_RPC_WAIT_QUEUE_WAKEUP 1
+
+/* Suspend execution
+ *
+ * [in] param[0].value  .a number of milliseconds to suspend
+ */
+
+#define OPTEE_MSG_RPC_CMD_SUSPEND       5
+
+/* Allocate a piece of shared memory
+ *
+ * Shared memory can optionally be fragmented, to support that additional
+ * spare param entries are allocated to make room for eventual fragments.
+ * The spare param entries has .attr = OPTEE_MSG_ATTR_TYPE_NONE when
+ * unused. All returned temp memrefs except the last should have the
+ * OPTEE_MSG_ATTR_FRAGMENT bit set in the attr field.
+ *
+ * [in]  param[0].u.value.a   type of memory one of
+ *          OPTEE_MSG_RPC_SHM_TYPE_* below
+ * [in]  param[0].u.value.b   requested size
+ * [in]  param[0].u.value.c   required alignment
+ *
+ * [out] param[0].u.tmem.buf_ptr  physical address (of first fragment)
+ * [out] param[0].u.tmem.size   size (of first fragment)
+ * [out] param[0].u.tmem.shm_ref  shared memory reference
+ * ...
+ * [out] param[n].u.tmem.buf_ptr  physical address
+ * [out] param[n].u.tmem.size   size
+ * [out] param[n].u.tmem.shm_ref  shared memory reference (same value
+ *          as in param[n-1].u.tmem.shm_ref)
+ */
+
+#define OPTEE_MSG_RPC_CMD_SHM_ALLOC     6
+
+/* Memory that can be shared with a non-secure user space application */
+
+#define OPTEE_MSG_RPC_SHM_TYPE_APPL     0
+
+/* Memory only shared with non-secure kernel */
+
+#define OPTEE_MSG_RPC_SHM_TYPE_KERNEL   1
+
+/* Free shared memory previously allocated with OPTEE_MSG_RPC_CMD_SHM_ALLOC
+ *
+ * [in]  param[0].u.value.a   type of memory one of
+ *          OPTEE_MSG_RPC_SHM_TYPE_* above
+ * [in]  param[0].u.value.b   value of shared memory reference
+ *          returned in param[0].u.tmem.shm_ref
+ *          above
+ */
+
+#define OPTEE_MSG_RPC_CMD_SHM_FREE      7
+
+/* Access a device on an i2c bus
+ *
+ * [in]  param[0].u.value.a   mode: RD(0), WR(1)
+ * [in]  param[0].u.value.b   i2c adapter
+ * [in]  param[0].u.value.c   i2c chip
+ *
+ * [in]  param[1].u.value.a   i2c control flags
+ *
+ * [in/out] memref[2]     buffer to exchange the transfer data
+ *          with the secure world
+ *
+ * [out]  param[3].u.value.a    bytes transferred by the driver
+ */
+
+#define OPTEE_MSG_RPC_CMD_I2C_TRANSFER  21
+
+/* I2C master transfer modes */
+
+#define OPTEE_MSG_RPC_CMD_I2C_TRANSFER_RD 0
+#define OPTEE_MSG_RPC_CMD_I2C_TRANSFER_WR 1
+
+/* I2C master control flags */
+
+#define OPTEE_MSG_RPC_CMD_I2C_FLAGS_TEN_BIT  BIT(0)
 
 #endif /* __DRIVERS_MISC_OPTEE_MSG_H */

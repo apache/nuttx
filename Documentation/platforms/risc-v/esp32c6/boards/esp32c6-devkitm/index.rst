@@ -99,6 +99,21 @@ You can check that the sensor is working by using the ``bmp180`` application::
     Pressure value = 91526
     Pressure value = 91525
 
+buttons
+-------
+
+This configuration shows the use of the buttons subsystem. It can be used by executing
+the ``buttons`` application and pressing the ``BOOT`` button on the board::
+
+    nsh> buttons
+    buttons_main: Starting the button_daemon
+    buttons_main: button_daemon started
+    button_daemon: Running
+    button_daemon: Opening /dev/buttons
+    button_daemon: Supported BUTTONs 0x01
+    nsh> Sample = 1
+    Sample = 0
+
 coremark
 --------
 
@@ -210,6 +225,11 @@ You can scan for all I2C devices using the following command::
 
     nsh> i2c dev 0x00 0x7f
 
+To use LP_I2C, you can enable `ESPRESSIF_LP_I2C0` option.  When this option is enabled,
+LP_I2C operates on GPIO7 as SCL and GPIO6 as SDA. These pins are fixed and cannot be changed.
+Also enabling LP_I2C will change the default pins of I2C0 due to LP_I2C pin limitation.
+The default I2C0 pins will be remapped to GPIO23 for SCL and GPIO5 for SDA.
+
 To use slave mode, you can enable `ESPRESSIF_I2C0_SLAVE_MODE` option.
 To use slave mode driver following snippet demonstrates how write to i2c bus
 using slave driver:
@@ -262,6 +282,32 @@ nsh
 
 Basic configuration to run the NuttShell (nsh).
 
+oa_tc6
+------
+
+This configuration features the network driver for 10BASE-T1S and 10BASE-T1L SPI MAC-PHYs
+that follow the `OPEN Alliance 10BASE-T1x MAC-PHY Serial Interface` specification (OA-TC6).
+
+Among such MAC-PHYs are e.g. Microchip LAN865x, Onsemi NCV7410 (NCN26010), Analog Devices ADIN1110.
+See the build configuration utility (e.g. ``make menuconfig``) to find out which ones are currently supported.
+
+The OA-TC6 defines a 5 signal connection between the MAC-PHY and the host MCU. These are 4 lines for the standard SPI and 1 line for the interrupt signal from the MAC-PHY to the MCU.
+
+**Default pinout**
+
+============ ========== =========================================
+ESP32-C6 Pin Signal Pin Description
+============ ========== =========================================
+0            CS         SPI Chip Select
+2            MISO       SPI Master In Slave Out
+5            INT        MAC-PHY interrupt signal
+6            CLK        SPI Clock
+7            MOSI       SPI Master Out Slave In
+============ ========== =========================================
+
+The ``oa_tc6`` configuration is additionally equipped with the ``plcatool`` utility. This allows configuration of the Physical Layer Collision Avoidance (PLCA) functionality
+in 10BASE-T1S PHYs.
+
 ostest
 ------
 
@@ -307,6 +353,59 @@ This same configuration enables the usage of the RMT peripheral and the example
 Please note that this board contains an on-board WS2812 LED connected to GPIO8
 and, by default, this config configures the RMT transmitter in the same pin.
 
+romfs
+-----
+
+This configuration demonstrates the use of ROMFS (Read-Only Memory File System) to provide
+automated system initialization and startup scripts. ROMFS allows embedding a read-only
+filesystem directly into the NuttX binary, which is mounted at ``/etc`` during system startup.
+
+**What ROMFS provides:**
+
+* **System initialization script** (``/etc/init.d/rc.sysinit``): Executed after board bring-up
+* **Startup script** (``/etc/init.d/rcS``): Executed after system init, typically used to start applications
+
+**Default behavior:**
+
+When this configuration is used, NuttX will:
+
+1. Create a read-only RAM disk containing the ROMFS filesystem
+2. Mount the ROMFS at ``/etc``
+3. Execute ``/etc/init.d/rc.sysinit`` during system initialization
+4. Execute ``/etc/init.d/rcS`` for application startup
+
+**Customizing startup scripts:**
+
+The startup scripts are located in:
+``boards/risc-v/esp32c6/common/src/etc/init.d/``
+
+* ``rc.sysinit`` - System initialization script
+* ``rcS`` - Application startup script
+
+To customize these scripts:
+
+1. **Edit the script files** in ``boards/risc-v/esp32c6/common/src/etc/init.d/``
+2. **Add your initialization commands** using any NSH-compatible commands
+
+**Example customizations:**
+
+* **rc.sysinit** - Set up system services, mount additional filesystems, configure network.
+* **rcS** - Start your application, launch daemons, configure peripherals. This is executed after the rc.sysinit script.
+
+Example output::
+
+    *** Booting NuttX ***
+    [...]
+    rc.sysinit is called!
+    rcS file is called!
+    NuttShell (NSH) NuttX-12.8.0
+    nsh> ls /etc/init.d
+    /etc/init.d:
+    .
+    ..
+    rc.sysinit
+    rcS
+
 rtc
 ---
 
@@ -322,6 +421,39 @@ You can set an alarm, check its progress and receive a notification after it exp
     Opening /dev/rtc0
     Alarm 0 is active with 10 seconds to expiration
     nsh> alarm_daemon: alarm 0 received
+
+sdmmc_spi
+---------
+
+This configuration is used to mount a FAT/FAT32 SD Card into the OS' filesystem.
+It uses SPI to communicate with the SD Card, defaulting to SPI2.
+
+The SD slot number, SPI port number and minor number can be modified in ``Application Configuration → NSH Library``.
+
+To access the card's files, make sure ``/dev/mmcsd0`` exists and then execute the following commands::
+
+    nsh> ls /dev
+    /dev:
+    console
+    mmcsd0
+    null
+    ttyS0
+    zero
+    nsh> mount -t vfat /dev/mmcsd0 /mnt
+
+This will mount the SD Card to ``/mnt``. Now, you can use the SD Card as a normal filesystem.
+For example, you can read a file and write to it::
+
+    nsh> ls /mnt
+    /mnt:
+    hello.txt
+    nsh> cat /mnt/hello.txt
+    Hello World
+    nsh> echo 'NuttX RTOS' >> /mnt/hello.txt
+    nsh> cat /mnt/hello.txt
+    Hello World!
+    NuttX RTOS
+    nsh>
 
 spi
 --------

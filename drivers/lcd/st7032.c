@@ -154,7 +154,7 @@ static inline void st7032_write_inst(FAR struct st7032_dev_s *priv,
 
   /* Delay 30us */
 
-  nxsig_usleep(30);
+  nxsched_usleep(30);
 }
 
 /****************************************************************************
@@ -195,7 +195,7 @@ static inline void st7032_write_data(FAR struct st7032_dev_s *priv,
 
   /* Delay 30us */
 
-  nxsig_usleep(30);
+  nxsched_usleep(30);
 }
 
 static inline void st7032_setcontrast(FAR struct st7032_dev_s *priv,

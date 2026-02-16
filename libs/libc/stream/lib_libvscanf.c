@@ -44,6 +44,18 @@
 #  undef CONFIG_LIBC_LONG_LONG
 #endif
 
+#ifdef CONFIG_LIBC_SCANSET
+#  define SCANSET_MODS "["
+#else
+#  define SCANSET_MODS
+#endif
+
+#ifdef CONFIG_LIBC_FLOATINGPOINT
+#  define FLOATINGPOINT_MODS "aAfFeEgG"
+#else
+#  define FLOATINGPOINT_MODS
+#endif
+
 #define MAXLN   128
 
 #define HH_MOD -2
@@ -297,11 +309,10 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
           fmt++;
           for (; fmt_char(fmt); fmt++)
             {
-#ifdef CONFIG_LIBC_SCANSET
-              if (strchr("diboupxXcseEfFgGaAn[%", fmt_char(fmt)))
-#else
-              if (strchr("diboupxXcseEfFgGaAn%", fmt_char(fmt)))
-#endif
+              if (strchr("diboupxXcsn"
+                         FLOATINGPOINT_MODS
+                         SCANSET_MODS
+                         "%", fmt_char(fmt)))
                 {
                   if (fmt_char(fmt) != '%')
                     {
@@ -936,6 +947,7 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                 }
             }
 
+#ifdef CONFIG_LIBC_FLOATINGPOINT
           /* Process %a, %A, %f, %F, %e, %E, %g, and %G: Floating point
            * conversions.
            */
@@ -976,8 +988,6 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                     }
 #endif
                 }
-
-#ifdef CONFIG_LIBC_FLOATINGPOINT
 
               /* Skip over any white space before the real string */
 
@@ -1138,8 +1148,8 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
 
                   count++;
                 }
-#endif
             }
+#endif
 
           /* Process %n: Character count */
 

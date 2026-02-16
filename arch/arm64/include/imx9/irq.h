@@ -35,6 +35,8 @@
 
 #if defined(CONFIG_ARCH_CHIP_IMX93)
 #  include <arch/imx9/imx93_irq.h>
+#elif defined(CONFIG_ARCH_CHIP_IMX95)
+#  include <arch/imx9/imx95_irq.h>
 #else
 #  error "Unrecognized i.MX9 architecture"
 #endif

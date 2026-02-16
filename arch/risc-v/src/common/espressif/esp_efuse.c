@@ -103,6 +103,13 @@ static struct esp_efuse_lowerhalf_s g_esp_efuse_lowerhalf =
  * Description:
  *   Read value from EFUSE, writing it into an array.
  *
+ *   The field[0]->bit_offset received from the upper half represents
+ *   the bit offset taking into consideration that each block is 256 bits.
+ *   This is necessary as we have multiple blocks of 256 bits.
+ *
+ *   Example: To read data from USER_DATA (EFUSE_BLK3), from bit 16 onwards,
+ *   then bit_offset should be 3*256 + 16.
+
  * Input Parameters:
  *   lower    - A pointer the publicly visible representation of
  *              the "lower-half" driver state structure
@@ -120,10 +127,27 @@ static int esp_efuse_lowerhalf_read(struct efuse_lowerhalf_s *lower,
                                     uint8_t *data, size_t bits_len)
 {
   int ret = OK;
+  uint8_t blk_num = field[0]->bit_offset / ESP_EFUSE_BLK_LEN;
+
+  esp_efuse_desc_t recv =
+    {
+      .efuse_block = blk_num,
+      .bit_start = field[0]->bit_offset - blk_num * ESP_EFUSE_BLK_LEN,
+      .bit_count = field[0]->bit_count
+    };
+
+  const esp_efuse_desc_t *desc[] =
+    {
+      &recv,
+      NULL
+    };
+
+  minfo("read from blk_num: %d, bit_start: %d, bit_count: %d\n",
+        blk_num, recv.bit_start, recv.bit_count);
 
   /* Read the requested field */
 
-  ret = esp_efuse_read_field_blob((const esp_efuse_desc_t**)field,
+  ret = esp_efuse_read_field_blob((const esp_efuse_desc_t**)&desc,
                                   data,
                                   bits_len);
 
@@ -135,6 +159,13 @@ static int esp_efuse_lowerhalf_read(struct efuse_lowerhalf_s *lower,
  *
  * Description:
  *   Write array to EFUSE.
+ *
+ *   The field[0]->bit_offset received from the upper half represents
+ *   the bit offset taking into consideration that each block is 256 bits.
+ *   This is necessary as we have multiple blocks of 256 bits.
+ *
+ *   Example: To write data to USER_DATA (EFUSE_BLK3), from bit 16 onwards,
+ *   then bit_offset should be 3*256 + 16.
  *
  * Input Parameters:
  *   lower    - A pointer the publicly visible representation of
@@ -155,10 +186,26 @@ static int esp_efuse_lowerhalf_write(struct efuse_lowerhalf_s *lower,
 {
   irqstate_t flags;
   int ret = OK;
+  uint8_t blk_num = field[0]->bit_offset / ESP_EFUSE_BLK_LEN;
+  esp_efuse_desc_t recv =
+    {
+      .efuse_block = blk_num,
+      .bit_start = field[0]->bit_offset - blk_num * ESP_EFUSE_BLK_LEN,
+      .bit_count = field[0]->bit_count
+    };
+
+  const esp_efuse_desc_t *desc[] =
+    {
+      &recv,
+      NULL
+    };
+
+  minfo("write to blk_num: %d, bit_start: %d, bit_count: %d\n",
+        blk_num, recv.bit_start, recv.bit_count);
 
   flags = enter_critical_section();
 
-  ret = esp_efuse_write_field_blob((const esp_efuse_desc_t**)field,
+  ret = esp_efuse_write_field_blob((const esp_efuse_desc_t**)&desc,
                                    data,
                                    bits_len);
 
@@ -256,6 +303,7 @@ int esp_efuse_initialize(const char *devpath)
     }
 
 #ifdef CONFIG_ESPRESSIF_EFUSE_VIRTUAL
+  mwarn("Virtual E-Fuses are enabled\n");
   esp_efuse_utility_update_virt_blocks();
 #endif
 

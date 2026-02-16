@@ -29,6 +29,10 @@
 
 #include <nuttx/config.h>
 
+/****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
@@ -91,6 +95,13 @@ typedef union rspinlock_u
       uint16_t count;
     };
 } rspinlock_t;
+
+#define SEQLOCK_INITIALIZER { 0u }
+
+typedef struct seqcount_s
+{
+  uint32_t sequence;
+} seqcount_t;
 
 #undef EXTERN
 #if defined(__cplusplus)

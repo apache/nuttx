@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS devif_initialize.c devif_callback.c)
+set(SRCS devif_callback.c)
 
 # Device driver IP packet receipt interfaces
 

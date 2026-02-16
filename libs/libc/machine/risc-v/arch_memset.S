@@ -22,6 +22,8 @@
 .global ARCH_LIBCFUN(memset)
 .type	ARCH_LIBCFUN(memset), @function
 ARCH_LIBCFUN(memset):
+	.cfi_sections .debug_frame
+	.cfi_startproc
 	li t1, 15
 	move a4, a0
 	bleu a2, t1, .Ltiny
@@ -108,6 +110,7 @@ ARCH_LIBCFUN(memset):
 	add a2, a2, a5
 	bleu a2, t1, .Ltiny
 	j .Laligned
+	.cfi_endproc
 	.size	ARCH_LIBCFUN(memset), .-ARCH_LIBCFUN(memset)
 
 #endif

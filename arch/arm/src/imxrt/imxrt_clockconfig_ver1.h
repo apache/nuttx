@@ -21,7 +21,7 @@
  ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_IMXRT_CLOCKCONFIG_VER1_H
-#define __ARCH_ARM_SRC_IMXRT_IMXRT_CLOCKCONFIG_VER2_H
+#define __ARCH_ARM_SRC_IMXRT_IMXRT_CLOCKCONFIG_VER1_H
 
 /****************************************************************************
  * Included Files

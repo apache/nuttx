@@ -37,6 +37,12 @@ ifeq ($(CONFIG_LEDS_APA102),y)
   LEDVPATH = :leds
 endif
 
+ifeq ($(CONFIG_KTD2052),y)
+  CSRCS += ktd2052.c
+  LEDDEPATH = --dep-path leds
+  LEDVPATH = :leds
+endif
+
 ifeq ($(CONFIG_LEDS_MAX7219),y)
   CSRCS += max7219.c
   LEDDEPATH = --dep-path leds

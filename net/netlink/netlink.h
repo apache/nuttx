@@ -301,17 +301,6 @@ extern "C"
 EXTERN const struct sock_intf_s g_netlink_sockif;
 
 /****************************************************************************
- * Name: netlink_initialize()
- *
- * Description:
- *   Initialize the NetLink connection structures.  Called once and only
- *   from the networking layer.
- *
- ****************************************************************************/
-
-void netlink_initialize(void);
-
-/****************************************************************************
  * Name: netlink_alloc()
  *
  * Description:
@@ -641,6 +630,26 @@ void netlink_conntrack_notify(uint8_t type, uint8_t domain,
                               FAR const void *nat_entry);
 
 #endif /* CONFIG_NETLINK_NETFILTER */
+
+/****************************************************************************
+ * Name: netlink_lock
+ *
+ * Description:
+ *   Take the global netlink lock
+ *
+ ****************************************************************************/
+
+void netlink_lock(void);
+
+/****************************************************************************
+ * Name: netlink_unlock
+ *
+ * Description:
+ *   Release the global netlink lock
+ *
+ ****************************************************************************/
+
+void netlink_unlock(void);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -23,9 +23,9 @@
 # Add the sched C files to the build
 
 CSRCS += sched_getprioritymax.c sched_getprioritymin.c
-CSRCS += clock_getcpuclockid.c clock_getres.c
 CSRCS += task_cancelpt.c task_setcancelstate.c task_setcanceltype.c
-CSRCS += task_testcancel.c task_gettid.c
+CSRCS += task_testcancel.c task_gettid.c task_getpid.c
+CSRCS += clock_getcpuclockid.c
 
 ifeq ($(CONFIG_SMP),y)
 CSRCS += sched_cpucount.c
@@ -38,6 +38,10 @@ endif
 ifneq ($(CONFIG_BUILD_KERNEL),y)
 CSRCS += task_startup.c
 endif # CONFIG_BUILD_KERNEL
+
+ifeq ($(CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS),y)
+  CSRCS += clock_perf.c
+endif
 
 # Add the sched directory to the build
 

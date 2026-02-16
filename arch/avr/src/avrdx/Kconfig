@@ -8,17 +8,55 @@ comment "AVR DA/DB Configuration Options"
 
 # Hidden configuration options selected by specific chip
 # Available serial ports
-config AVR_HAS_USART_2
+config AVR_HAVE_USART_2
 	bool
 	default n
+	---help---
+		Chip has USART 2 (and also 0 and 1)
 
-config AVR_HAS_USART_4
+config AVR_HAVE_USART_4
 	bool
 	default n
+	---help---
+		Chip has USART 4 (and also 3)
 
-config AVR_HAS_USART_5
+config AVR_HAVE_USART_5
 	bool
 	default n
+	---help---
+		Chip has USART 5
+
+# Available alternate pinouts for serial ports
+# USART0 omitted, all chips have that
+config AVR_HAVE_USART1_ALT1
+	bool
+	default n
+	---help---
+		Chip has alternate pin position for USART 1
+
+config AVR_HAVE_USART2_ALT1
+	bool
+	default n
+	---help---
+		Chip has alternate pin position for USART 2
+
+config AVR_HAVE_USART3_ALT1
+	bool
+	default n
+	---help---
+		Chip has alternate pin position for USART 3
+
+config AVR_HAVE_USART4_ALT1
+	bool
+	default n
+	---help---
+		Chip has alternate pin position for USART 4
+
+config AVR_HAVE_USART5_ALT1
+	bool
+	default n
+	---help---
+		Chip has alternate pin position for USART 5
 
 # Available I/O ports (only those not common for all devices)
 config AVR_HAS_PORTB
@@ -33,6 +71,23 @@ config AVR_HAS_PORTG
 	bool
 	default n
 
+# Available TWI interfaces and their options (not common for all devices)
+config AVR_HAVE_TWI0_ALT1
+	bool
+	default n
+	---help---
+		Chip has alternate pin configuration 1 for TWI0
+
+config AVR_HAVE_TWI1
+	bool
+	default n
+
+config AVR_HAVE_TWI1_ALT1
+	bool
+	default n
+	---help---
+		Chip has alternate pin configuration 1 for TW1
+
 choice
 	prompt "Atmel AVR DA/DB chip selection"
 	default ARCH_CHIP_AVR128DA28
@@ -40,31 +95,47 @@ choice
 config ARCH_CHIP_AVR128DA28
 	bool "AVR128DA28"
 	select AVR_HAS_RAMPZ
-	select AVR_HAS_USART_2
+	select AVR_HAVE_USART_2
 	---help---
 		Atmel AVR128DA28 8-bit AVR.
 
 config ARCH_CHIP_AVR128DA64
 	bool "AVR128DA64"
 	select AVR_HAS_RAMPZ
-	select AVR_HAS_USART_2
-	select AVR_HAS_USART_4
-	select AVR_HAS_USART_5
+	select AVR_HAVE_USART_2
+	select AVR_HAVE_USART1_ALT1
+	select AVR_HAVE_USART2_ALT1
+	select AVR_HAVE_USART_4
+	select AVR_HAVE_USART3_ALT1
+	select AVR_HAVE_USART4_ALT1
+	select AVR_HAVE_USART_5
+	select AVR_HAVE_USART5_ALT1
 	select AVR_HAS_PORTB
 	select AVR_HAS_PORTE
 	select AVR_HAS_PORTG
+	select AVR_HAVE_TWI0_ALT1
+	select AVR_HAVE_TWI1
+	select AVR_HAVE_TWI1_ALT1
 	---help---
 		Atmel AVR128DA64 8-bit AVR.
 
 config ARCH_CHIP_AVR128DB64
 	bool "AVR128DB64"
 	select AVR_HAS_RAMPZ
-	select AVR_HAS_USART_2
-	select AVR_HAS_USART_4
-	select AVR_HAS_USART_5
+	select AVR_HAVE_USART_2
+	select AVR_HAVE_USART1_ALT1
+	select AVR_HAVE_USART2_ALT1
+	select AVR_HAVE_USART_4
+	select AVR_HAVE_USART3_ALT1
+	select AVR_HAVE_USART4_ALT1
+	select AVR_HAVE_USART_5
+	select AVR_HAVE_USART5_ALT1
 	select AVR_HAS_PORTB
 	select AVR_HAS_PORTE
 	select AVR_HAS_PORTG
+	select AVR_HAVE_TWI0_ALT1
+	select AVR_HAVE_TWI1
+	select AVR_HAVE_TWI1_ALT1
 	---help---
 		Atmel AVR128DB64 8-bit AVR.
 
@@ -87,97 +158,365 @@ config AVR_USART0
 	bool "Enable serial driver for USART0"
 	select USART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
-	depends on AVR_HAS_USART_2
+	depends on AVR_HAVE_USART_2
 	depends on SERIAL
 	---help---
 		Enable serial driver on USART0
 
-config AVR_USART0_ALT
-	bool "Activate USART0 alternative pinout"
+choice AVR_USART0_MUX
+	prompt "USART0 pin selection"
 	depends on AVR_USART0
+	default AVR_USART0_DEFAULT
+	---help---
+		Select which I/O pins will be driven by USART0 interface.
+		Refer to I/O Multiplexing and Port Multiplexer sections
+		in chip documentation for specifics.
+
+config AVR_USART0_DEFAULT
+	bool "Default USART0 pinout"
+
+config AVR_USART0_ALT
+	bool "Alternate USART0 pinout"
 	---help---
 		Board is wired to use alternative I/O pins,
 		4-5 instead of 0-1 for TxD/RxD
+
+config AVR_USART0_NONE
+	bool "Not connected"
+
+endchoice
 
 config AVR_USART1
 	bool "Enable serial driver for USART1"
 	select USART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
-	depends on AVR_HAS_USART_2
+	depends on AVR_HAVE_USART_2
 	depends on SERIAL
 	---help---
 		Enable serial driver on USART1
 
-config AVR_USART1_ALT
-	bool "Activate USART1 alternative pinout"
+choice AVR_USART1_MUX
+	prompt "USART1 pin selection"
 	depends on AVR_USART1
+	default AVR_USART1_DEFAULT
+	---help---
+		Select which I/O pins will be driven by USART1 interface.
+		Refer to I/O Multiplexing and Port Multiplexer sections
+		in chip documentation for specifics.
+
+config AVR_USART1_DEFAULT
+	bool "Default USART1 pinout"
+
+config AVR_USART1_ALT
+	depends on AVR_HAVE_USART1_ALT1
+	bool "Alternate USART1 pinout"
 	---help---
 		Board is wired to use alternative I/O pins,
 		4-5 instead of 0-1 for TxD/RxD
+
+config AVR_USART1_NONE
+	bool "Not connected"
+
+endchoice
 
 config AVR_USART2
 	bool "Enable serial driver for USART2"
 	select USART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
-	depends on AVR_HAS_USART_2
+	depends on AVR_HAVE_USART_2
 	depends on SERIAL
 	---help---
 		Enable serial driver on USART2
 
-config AVR_USART2_ALT
-	bool "Activate USART2 alternative pinout"
+choice AVR_USART2_MUX
+	prompt "USART2 pin selection"
 	depends on AVR_USART2
+	default AVR_USART2_DEFAULT
+	---help---
+		Select which I/O pins will be driven by USART2 interface.
+		Refer to I/O Multiplexing and Port Multiplexer sections
+		in chip documentation for specifics.
+
+config AVR_USART2_DEFAULT
+	bool "Default USART2 pinout"
+
+config AVR_USART2_ALT
+	depends on AVR_HAVE_USART2_ALT1
+	bool "Alternate USART2 pinout"
 	---help---
 		Board is wired to use alternative I/O pins,
 		4-5 instead of 0-1 for TxD/RxD
+
+config AVR_USART2_NONE
+	bool "Not connected"
+
+endchoice
 
 config AVR_USART3
 	bool "Enable serial driver for USART3"
 	select USART3_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
-	depends on AVR_HAS_USART_4
+	depends on AVR_HAVE_USART_4
 	depends on SERIAL
 	---help---
 		Enable serial driver on USART3
 
-config AVR_USART3_ALT
-	bool "Activate USART3 alternative pinout"
+choice AVR_USART3_MUX
+	prompt "USART3 pin selection"
 	depends on AVR_USART3
+	default AVR_USART3_DEFAULT
+	---help---
+		Select which I/O pins will be driven by USART3 interface.
+		Refer to I/O Multiplexing and Port Multiplexer sections
+		in chip documentation for specifics.
+
+config AVR_USART3_DEFAULT
+	bool "Default USART3 pinout"
+
+config AVR_USART3_ALT
+	depends on AVR_HAVE_USART3_ALT1
+	bool "Alternate USART3 pinout"
 	---help---
 		Board is wired to use alternative I/O pins,
 		4-5 instead of 0-1 for TxD/RxD
+
+config AVR_USART3_NONE
+	bool "Not connected"
+
+endchoice
 
 config AVR_USART4
 	bool "Enable serial driver for USART4"
 	select USART4_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
-	depends on AVR_HAS_USART_4
+	depends on AVR_HAVE_USART_4
 	depends on SERIAL
 	---help---
 		Enable serial driver on USART1
 
-config AVR_USART4_ALT
-	bool "Activate USART4 alternative pinout"
+choice AVR_USART4_MUX
+	prompt "USART4 pin selection"
 	depends on AVR_USART4
+	default AVR_USART4_DEFAULT
+	---help---
+		Select which I/O pins will be driven by USART4 interface.
+		Refer to I/O Multiplexing and Port Multiplexer sections
+		in chip documentation for specifics.
+
+config AVR_USART4_DEFAULT
+	bool "Default USART4 pinout"
+
+config AVR_USART4_ALT
+	depends on AVR_HAVE_USART4_ALT1
+	bool "Alternate USART4 pinout"
 	---help---
 		Board is wired to use alternative I/O pins,
 		4-5 instead of 0-1 for TxD/RxD
+
+config AVR_USART4_NONE
+	bool "Not connected"
+
+endchoice
 
 config AVR_USART5
 	bool "Enable serial driver for USART5"
 	select USART5_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
-	depends on AVR_HAS_USART_5
+	depends on AVR_HAVE_USART_5
 	depends on SERIAL
 	---help---
 		Enable serial driver on USART5
 
-config AVR_USART5_ALT
-	bool "Activate USART5 alternative pinout"
+choice AVR_USART5_MUX
+	prompt "USART5 pin selection"
 	depends on AVR_USART5
+	default AVR_USART5_DEFAULT
+	---help---
+		Select which I/O pins will be driven by USART5 interface.
+		Refer to I/O Multiplexing and Port Multiplexer sections
+		in chip documentation for specifics.
+
+config AVR_USART5_DEFAULT
+	bool "Default USART5 pinout"
+
+config AVR_USART5_ALT
+	depends on AVR_HAVE_USART5_ALT1
+	bool "Alternate USART5 pinout"
 	---help---
 		Board is wired to use alternative I/O pins,
 		4-5 instead of 0-1 for TxD/RxD
+
+config AVR_USART5_NONE
+	bool "Not connected"
+
+endchoice
+
+config AVR_TWI0
+	bool "Enable TWI (I2C) driver for interface 0"
+	depends on I2C
+	---help---
+		Enable driver for TWI0
+
+choice AVR_TWI0_ALT
+	prompt "TWI0 pin selection"
+	depends on AVR_TWI0
+	default AVR_TWI0_ALT0
+	---help---
+		Select which I/O pins will be driven by TWI0 interface.
+		Refer to I/O Multiplexing and Port Multiplexer sections
+		in chip documentation for specifics.
+
+config AVR_TWI0_ALT0
+	bool "Default TWI0 pinout"
+
+config AVR_TWI0_ALT1
+	bool "Alternate TWI0 pinout 1"
+	depends on AVR_HAVE_TWI0_ALT1
+
+config AVR_TWI0_ALT2
+	bool "Alternate TWI0 pinout 2"
+
+endchoice
+
+choice AVR_TWI0_MODE
+	prompt "TWI0 mode selection"
+	depends on AVR_TWI0
+	default AVR_TWI0_MODE_STD
+	---help---
+		Select TWI0 operating mode.
+
+config AVR_TWI0_MODE_STD
+	bool "Standard mode"
+
+config AVR_TWI0_MODE_FAST
+	bool "Fast mode"
+
+config AVR_TWI0_MODE_FASTPLUS
+	bool "Fast plus mode"
+
+endchoice
+
+choice AVR_TWI0_SDAHOLD
+	prompt "SDA hold time selection"
+	depends on AVR_TWI0
+	default AVR_TWI0_SDAHOLD_OFF
+	---help---
+		Select TWI0 SDA hold time. Refer to Electrical Characteristics
+		in chip documentation for details
+
+config AVR_TWI0_SDAHOLD_OFF
+	bool "Hold time OFF"
+
+config AVR_TWI0_SDAHOLD_50NS
+	bool "50ns (short)"
+
+config AVR_TWI0_SDAHOLD_300NS
+	bool "300ns (meets SMBus 2.0 specs under typical conditions)"
+
+config AVR_TWI0_SDAHOLD_500NS
+	bool "500ns (meets SMBus 2.0 specs across all corners)"
+
+endchoice
+
+config AVR_TWI1
+	bool "Enable TWI (I2C) driver for interface 1"
+	depends on I2C
+	depends on AVR_HAVE_TWI1
+	---help---
+		Enable driver for TWI0
+
+choice AVR_TWI1_ALT
+	prompt "TWI0 pin selection"
+	depends on AVR_TWI1
+	default AVR_TWI1_ALT0
+	---help---
+		Select which I/O pins will be driven by TWI1 interface.
+		Refer to I/O Multiplexing and Port Multiplexer sections
+		in chip documentation for specifics.
+
+config AVR_TWI1_ALT0
+	bool "Default TWI1 pinout"
+
+config AVR_TWI1_ALT1
+	bool "Alternate TWI1 pinout 1"
+	depends on AVR_HAVE_TWI1_ALT1
+
+config AVR_TWI1_ALT2
+	bool "Alternate TWI1 pinout 2"
+
+endchoice
+
+choice AVR_TWI1_MODE
+	prompt "TWI1 mode selection"
+	depends on AVR_TWI1
+	default AVR_TWI1_MODE_STD
+	---help---
+		Select TWI1 operating mode.
+
+config AVR_TWI1_MODE_STD
+	bool "Standard mode"
+
+config AVR_TWI1_MODE_FAST
+	bool "Fast mode"
+
+config AVR_TWI1_MODE_FASTPLUS
+	bool "Fast plus mode"
+
+endchoice
+
+choice AVR_TWI1_SDAHOLD
+	prompt "SDA hold time selection"
+	depends on AVR_TWI1
+	default AVR_TWI1_SDAHOLD_OFF
+	---help---
+		Select TWI1 SDA hold time. Refer to Electrical Characteristics
+		in chip documentation for details.
+
+config AVR_TWI1_SDAHOLD_OFF
+	bool "Hold time OFF"
+
+config AVR_TWI1_SDAHOLD_50NS
+	bool "50ns (short)"
+
+config AVR_TWI1_SDAHOLD_300NS
+	bool "300ns (meets SMBus 2.0 specs under typical conditions)"
+
+config AVR_TWI1_SDAHOLD_500NS
+	bool "500ns (meets SMBus 2.0 specs across all corners)"
+
+endchoice
+
+if AVR_TWI0 || AVR_TWI1
+
+config AVR_TWI_QCEN
+	bool "Quick command enabled"
+	default false
+	---help---
+		Enable Quick Command mode. In this mode, messages with
+		zero-length data are interpreted as SMBus quick commands
+		which use R/non-W bit as a single bit of data transmitted
+		(written) to the target device.
+
+		If not enabled, attempt to transmit message with zero-length
+		is an error rejected with EINVAL.
+
+config AVR_TWI_FORBID_NOSTART
+	bool "Forbid I2C NOSTART to save flash space"
+	default false
+	---help---
+		NuttX I2C message can be submitted with a flag that indicates
+		that the caller does want that message processed without
+		issuing start condition on the BUS (presumably with previous
+		message set to not issue STOP nor REPEATED START condition.)
+
+		Since not many drivers require this, it is possible to exclude
+		support for this flag from the build. Any I2C device driver
+		that attempt to submit such message will receive EINVAL.
+
+		If you know that your system's drivers do not use I2C_M_NOSTART,
+		you can enable this option to save around 120 bytes of flash space.
+
+endif
 
 endmenu # AVR DA/DB Peripheral Selections
 

@@ -173,12 +173,12 @@ static void sendto_request(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
-                                    FAR void *pvpriv, uint16_t flags)
+static uint32_t sendto_eventhandler(FAR struct net_driver_s *dev,
+                                    FAR void *pvpriv, uint32_t flags)
 {
   FAR struct icmp_sendto_s *pstate = pvpriv;
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   if (pstate != NULL)
     {
@@ -265,7 +265,7 @@ end_wait:
  *
  ****************************************************************************/
 
-ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+ssize_t icmp_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
                      int flags)
 {
   FAR const void *buf = msg->msg_iov->iov_base;
@@ -350,10 +350,12 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   if (psock->s_type != SOCK_RAW && (icmp->type != ICMP_ECHO_REQUEST ||
       icmp->id != conn->id || dev != conn->dev))
     {
+      conn_lock(&conn->sconn);
       conn->id  = 0;
       conn->dev = NULL;
 
       iob_free_queue(&conn->readahead);
+      conn_unlock(&conn->sconn);
     }
 
 #ifdef CONFIG_NET_ARP_SEND
@@ -379,7 +381,7 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   state.snd_buflen = len;                     /* Size of the ICMP header +
                                                * data payload */
 
-  net_lock();
+  conn_dev_lock(&conn->sconn, dev);
 
   /* Set up the callback */
 
@@ -401,14 +403,15 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
       /* Notify the device driver of the availability of TX data */
 
-      netdev_txnotify_dev(dev);
+      netdev_txnotify_dev(dev, ICMP_POLL);
 
       /* Wait for either the send to complete or for timeout to occur.
-       * net_sem_timedwait will also terminate if a signal is received.
+       * conn_dev_sem_timedwait will also terminate if a signal is received.
        */
 
-      ret = net_sem_timedwait(&state.snd_sem,
-                          _SO_TIMEOUT(conn->sconn.s_sndtimeo));
+      ret = conn_dev_sem_timedwait(&state.snd_sem, true,
+                                   _SO_TIMEOUT(conn->sconn.s_sndtimeo),
+                                   &conn->sconn, dev);
       if (ret < 0)
         {
           if (ret == -ETIMEDOUT)
@@ -442,7 +445,7 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   nxsem_destroy(&state.snd_sem);
 
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, dev);
 
   /* Return the negated error number in the event of a failure, or the
    * number of bytes sent on success.
@@ -458,10 +461,12 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   return len;
 
 errout:
+  conn_lock(&conn->sconn);
   conn->id  = 0;
   conn->dev = NULL;
 
   iob_free_queue(&conn->readahead);
+  conn_unlock(&conn->sconn);
   return ret;
 }
 

@@ -248,7 +248,7 @@ int rpmsg_ping(FAR struct rpmsg_endpoint *ept,
 
       if (ping->sleep > 0)
         {
-          nxsig_usleep(ping->sleep * USEC_PER_MSEC);
+          nxsched_usleep(ping->sleep * USEC_PER_MSEC);
         }
     }
 

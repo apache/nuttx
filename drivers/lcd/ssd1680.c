@@ -457,7 +457,7 @@ static void ssd1680_reset(struct ssd1680_dev_s *priv)
     {
       lcdinfo("Hardware reset\n");
       priv->board_priv->set_rst(false);
-      nxsig_usleep(10);
+      nxsched_usleep(10);
       priv->board_priv->set_rst(true);
     }
   else
@@ -511,7 +511,7 @@ static int ssd1680_setpower(FAR struct lcd_dev_s *dev, int power)
 
           lcdinfo("Set Pwr Ctrl Linepower ON\n");
           priv->board_priv->set_vcc(true);
-          nxsig_usleep(10000);
+          nxsched_usleep(10000);
         }
       else
         {
@@ -934,12 +934,12 @@ static int ssd1680_busy_wait(FAR struct ssd1680_dev_s *priv)
     {
       while (priv->board_priv->check_busy() && max_wait_time-- > 0)
         {
-          nxsig_usleep(1000);
+          nxsched_usleep(1000);
         }
     }
   else
     {
-      nxsig_usleep(max_wait_time * 1000);
+      nxsched_usleep(max_wait_time * 1000);
     }
 
   if (max_wait_time == 0)

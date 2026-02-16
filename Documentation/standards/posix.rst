@@ -15,27 +15,27 @@ POSIX PSE51 - Minimal
 
 Units of Functionality Requirements:
 
-+------------------------------+----------------+---------+
-| Symbol                       | Support        | Remarks |
-+==============================+================+=========+
-| POSIX_ADA_LANG_SUPPORT       | No             |         |
-+------------------------------+----------------+---------+
-| `POSIX_C_LANG_JUMP`_         | Yes            |         |
-+------------------------------+----------------+---------+
-| `POSIX_C_LANG_SUPPORT`_      | 94/105 [#fn1]_ |         |
-+------------------------------+----------------+---------+
-| `POSIX_DEVICE_IO`_           | Yes            |         |
-+------------------------------+----------------+---------+
-| `POSIX_FILE_LOCKING`_        | Yes            |         |
-+------------------------------+----------------+---------+
-| `POSIX_SINGLE_PROCESS`_      | 7/9            |         |
-+------------------------------+----------------+---------+
-| `POSIX_THREADS_BASE`_        | Yes            |         |
-+------------------------------+----------------+---------+
-| `POSIX_THREADS_EXT`_ [#fn2]_ | 2/4            |         |
-+------------------------------+----------------+---------+
-| `XSI_THREADS_EXT`_           | 2/4            |         |
-+------------------------------+----------------+---------+
++------------------------------+----------------+--------------------------+
+| Symbol                       | Support        | Remarks                  |
++==============================+================+==========================+
+| POSIX_ADA_LANG_SUPPORT       | No             |                          |
++------------------------------+----------------+--------------------------+
+| `POSIX_C_LANG_JUMP`_         | Yes            | ``CONFIG_ARCH_SETJMP_H`` |
++------------------------------+----------------+--------------------------+
+| `POSIX_C_LANG_SUPPORT`_      | 94/105 [#fn1]_ |                          |
++------------------------------+----------------+--------------------------+
+| `POSIX_DEVICE_IO`_           | Yes            |                          |
++------------------------------+----------------+--------------------------+
+| `POSIX_FILE_LOCKING`_        | Yes            |                          |
++------------------------------+----------------+--------------------------+
+| `POSIX_SINGLE_PROCESS`_      | 8/9            |                          |
++------------------------------+----------------+--------------------------+
+| `POSIX_THREADS_BASE`_        | Yes            |                          |
++------------------------------+----------------+--------------------------+
+| `POSIX_THREADS_EXT`_ [#fn2]_ | Yes            |                          |
++------------------------------+----------------+--------------------------+
+| `XSI_THREADS_EXT`_           | Yes            |                          |
++------------------------------+----------------+--------------------------+
 
 .. [#fn1] ``fenv.h`` related functions not supported.
 .. [#fn2] In older revisions this was called ``XSI_THREAD_MUTEX_EXT``
@@ -94,8 +94,8 @@ POSIX.1 Option Requirements:
           ``_POSIX_MEMLOCK_RANGE`` which is sufficient for devices without MMU,
           but doesn't meet the requirement for devices with MMU.
 .. [#fn4] Deprecated in new revisions of POSIX. Merged into other base options.
-.. [#fn5] Requred only for the development platform.
-          For PSE54 this requirement is also for execution platform whis is
+.. [#fn5] Required only for the development platform.
+          For PSE54 this requirement is also for execution platform which is
           not supported.
 
 Requirements for Other Standards:
@@ -152,19 +152,19 @@ The Dedicated Realtime System Profile (PSE53) includes all features from PSE52 a
 
 Units of Functionality Requirements:
 
-+-----------------------------+---------+------------------+
-| Symbol                      | Support | Remarks          |
-+=============================+=========+==================+
-| POSIX_EVENT_MGMT [#fn8]_    | Yes     |                  |
-+-----------------------------+---------+------------------+
-| `POSIX_MULTI_PROCESS`_      | 25/29   |                  |
-+-----------------------------+---------+------------------+
-| `POSIX_NETWORKING`_         | Yes     | ``CONFIG_NET``   |
-+-----------------------------+---------+------------------+
-| `POSIX_PIPE`_               | Yes     | ``CONFIG_PIPES`` |
-+-----------------------------+---------+------------------+
-| `POSIX_SIGNAL_JUMP`_        | No      |                  |
-+-----------------------------+---------+------------------+
++-----------------------------+---------+--------------------------+
+| Symbol                      | Support | Remarks                  |
++=============================+=========+==========================+
+| POSIX_EVENT_MGMT [#fn8]_    | Yes     |                          |
++-----------------------------+---------+--------------------------+
+| `POSIX_MULTI_PROCESS`_      | 25/29   |                          |
++-----------------------------+---------+--------------------------+
+| `POSIX_NETWORKING`_         | Yes     | ``CONFIG_NET``           |
++-----------------------------+---------+--------------------------+
+| `POSIX_PIPE`_               | Yes     | ``CONFIG_PIPES``         |
++-----------------------------+---------+--------------------------+
+| `POSIX_SIGNAL_JUMP`_        | Yes     | ``CONFIG_ARCH_SETJMP_H`` |
++-----------------------------+---------+--------------------------+
 
 .. [#fn8] Deprecated in new revisions of POSIX.
           Merged into ``POSIX_DEVICE_IO``.
@@ -631,7 +631,7 @@ Single Process:
 +--------------------------------+---------+
 | API                            | Support |
 +================================+=========+
-| confstr()                      | No      |
+| confstr()                      | Yes     |
 +--------------------------------+---------+
 | environ                        | Yes     |
 +--------------------------------+---------+
@@ -754,17 +754,17 @@ POSIX_THREADS_EXT
 
 Extended Threads:
 
-+-------------------------------------+---------+
-| API                                 | Support |
-+=====================================+=========+
-| pthread_attr_getguardsize()         | No      |
-+-------------------------------------+---------+
-| pthread_attr_setguardsize()         | No      |
-+-------------------------------------+---------+
-| :c:func:`pthread_mutexattr_gettype` | Yes     |
-+-------------------------------------+---------+
-| :c:func:`pthread_mutexattr_settype` | Yes     |
-+-------------------------------------+---------+
++--------------------------------------+---------+
+| API                                  | Support |
++======================================+=========+
+| :c:func:`pthread_attr_getguardsize`  | Yes     |
++--------------------------------------+---------+
+| :c:func:`pthread_attr_setguardsize`  | Yes     |
++--------------------------------------+---------+
+| :c:func:`pthread_mutexattr_gettype`  | Yes     |
++--------------------------------------+---------+
+| :c:func:`pthread_mutexattr_settype`  | Yes     |
++--------------------------------------+---------+
 
 POSIX_C_LANG_MATH
 -----------------
@@ -1614,9 +1614,9 @@ Signal Jump Functions:
 +--------------------------------+---------+
 | API                            | Support |
 +================================+=========+
-| siglongjmp()                   | No      |
+| siglongjmp()                   | Yes     |
 +--------------------------------+---------+
-| sigsetjmp()                    | No      |
+| sigsetjmp()                    | Yes     |
 +--------------------------------+---------+
 
 POSIX_C_LANG_WIDE_CHAR
@@ -2450,17 +2450,17 @@ XSI_THREADS_EXT
 
 XSI Threads Extensions:
 
-+---------------------------------+---------+
-| API                             | Support |
-+=================================+=========+
-| :c:func:`pthread_attr_getstack` | Yes     |
-+---------------------------------+---------+
-| :c:func:`pthread_attr_setstack` | Yes     |
-+---------------------------------+---------+
-| pthread_getconcurrency()        | No      |
-+---------------------------------+---------+
-| pthread_setconcurrency()        | No      |
-+---------------------------------+---------+
++----------------------------------+---------+
+| API                              | Support |
++==================================+=========+
+| :c:func:`pthread_attr_getstack`  | Yes     |
++----------------------------------+---------+
+| :c:func:`pthread_attr_setstack`  | Yes     |
++----------------------------------+---------+
+| :c:func:`pthread_getconcurrency` | Yes     |
++----------------------------------+---------+
+| :c:func:`pthread_setconcurrency` | Yes     |
++----------------------------------+---------+
 
 XSI_TIMERS
 ----------
@@ -2568,7 +2568,7 @@ _POSIX_MEMLOCK
 +--------------------------------+----------------+
 
 .. [#fn14] The function returns a success value but doesn't implement
-           the requred functionality.
+           the required functionality.
 
 _POSIX_MEMLOCK_RANGE
 --------------------
@@ -2582,7 +2582,7 @@ _POSIX_MEMLOCK_RANGE
 +--------------------------------+----------------+
 
 .. [#fn15] The function returns a success value but doesn't implement
-           the requred functionality.
+           the required functionality.
 
 _POSIX_MONOTONIC_CLOCK
 ----------------------
@@ -2920,7 +2920,7 @@ _POSIX_MEMORY_PROTECTION
 +--------------------------------+----------------+
 
 .. [#fn17] The function returns a success value but doesn't implement
-           the requred functionality.
+           the required functionality.
 
 _POSIX_PRIORITIZED_IO
 ---------------------

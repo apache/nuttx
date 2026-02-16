@@ -62,7 +62,6 @@
 NET_BUFPOOL_DECLARE(g_icmp_connections, sizeof(struct icmp_conn_s),
                     CONFIG_NET_ICMP_PREALLOC_CONNS,
                     CONFIG_NET_ICMP_ALLOC_CONNS, CONFIG_NET_ICMP_MAX_CONNS);
-static mutex_t g_free_lock = NXMUTEX_INITIALIZER;
 
 /* A list of all allocated IPPROTO_ICMP socket connections */
 
@@ -85,23 +84,20 @@ static dq_queue_t g_active_icmp_connections;
 FAR struct icmp_conn_s *icmp_alloc(void)
 {
   FAR struct icmp_conn_s *conn = NULL;
-  int ret;
 
   /* The free list is protected by a mutex. */
 
-  ret = nxmutex_lock(&g_free_lock);
-  if (ret >= 0)
+  NET_BUFPOOL_LOCK(g_icmp_connections);
+
+  conn = NET_BUFPOOL_TRYALLOC(g_icmp_connections);
+  if (conn != NULL)
     {
-      conn = NET_BUFPOOL_TRYALLOC(g_icmp_connections);
-      if (conn != NULL)
-        {
-          /* Enqueue the connection into the active list */
+      /* Enqueue the connection into the active list */
 
-          dq_addlast(&conn->sconn.node, &g_active_icmp_connections);
-        }
-
-      nxmutex_unlock(&g_free_lock);
+      dq_addlast(&conn->sconn.node, &g_active_icmp_connections);
     }
+
+  NET_BUFPOOL_UNLOCK(g_icmp_connections);
 
   return conn;
 }
@@ -123,30 +119,22 @@ void icmp_free(FAR struct icmp_conn_s *conn)
 
   /* Take the mutex (perhaps waiting) */
 
-  nxmutex_lock(&g_free_lock);
+  NET_BUFPOOL_LOCK(g_icmp_connections);
 
-  /* Is this the last reference on the connection?  It might not be if the
-   * socket was cloned.
-   */
+  /* free any read-ahead data */
 
-  if (conn->crefs > 1)
-    {
-      /* No.. just decrement the reference count */
+  iob_free_queue(&conn->readahead);
 
-      conn->crefs--;
-    }
-  else
-    {
-      /* Remove the connection from the active list */
+  /* Remove the connection from the active list */
 
-      dq_rem(&conn->sconn.node, &g_active_icmp_connections);
+  dq_rem(&conn->sconn.node, &g_active_icmp_connections);
+  nxrmutex_destroy(&conn->sconn.s_lock);
 
-      /* Free the connection. */
+  /* Free the connection. */
 
-      NET_BUFPOOL_FREE(g_icmp_connections, conn);
-    }
+  NET_BUFPOOL_FREE(g_icmp_connections, conn);
 
-  nxmutex_unlock(&g_free_lock);
+  NET_BUFPOOL_UNLOCK(g_icmp_connections);
 }
 
 /****************************************************************************
@@ -209,6 +197,29 @@ FAR struct icmp_conn_s *icmp_nextconn(FAR struct icmp_conn_s *conn)
 }
 
 /****************************************************************************
+ * Name: icmp_conn_list_lock
+ *       icmp_conn_list_unlock
+ *
+ * Description:
+ *   Lock and unlock the ICMP connection list.  This is used to protect the
+ *   list of active connections.
+ *
+ * Assumptions:
+ *   This function is called from driver.
+ *
+ ****************************************************************************/
+
+void icmp_conn_list_lock(void)
+{
+  NET_BUFPOOL_LOCK(g_icmp_connections);
+}
+
+void icmp_conn_list_unlock(void)
+{
+  NET_BUFPOOL_UNLOCK(g_icmp_connections);
+}
+
+/****************************************************************************
  * Name: icmp_findconn
  *
  * Description:
@@ -225,6 +236,7 @@ FAR struct icmp_conn_s *icmp_findconn(FAR struct net_driver_s *dev,
 {
   FAR struct icmp_conn_s *conn;
 
+  NET_BUFPOOL_LOCK(g_icmp_connections);
   for (conn = icmp_nextconn(NULL); conn != NULL; conn = icmp_nextconn(conn))
     {
       if (conn->id == id && conn->dev == dev)
@@ -233,6 +245,7 @@ FAR struct icmp_conn_s *icmp_findconn(FAR struct net_driver_s *dev,
         }
     }
 
+  NET_BUFPOOL_UNLOCK(g_icmp_connections);
   return conn;
 }
 
@@ -254,6 +267,7 @@ int icmp_foreach(icmp_callback_t callback, FAR void *arg)
   FAR struct icmp_conn_s *conn;
   int ret = 0;
 
+  NET_BUFPOOL_LOCK(g_icmp_connections);
   if (callback != NULL)
     {
       for (conn = icmp_nextconn(NULL); conn != NULL;
@@ -267,6 +281,7 @@ int icmp_foreach(icmp_callback_t callback, FAR void *arg)
         }
     }
 
+  NET_BUFPOOL_UNLOCK(g_icmp_connections);
   return ret;
 }
 #endif /* CONFIG_NET_ICMP */

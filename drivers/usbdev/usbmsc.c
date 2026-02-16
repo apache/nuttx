@@ -171,6 +171,84 @@ static void usbmsc_ep0incomplete(FAR struct usbdev_ep_s *ep,
 }
 
 /****************************************************************************
+ * Name: usbmsc_sync_wait
+ *
+ * Description:
+ *   Wait for the worker thread to obtain the USB MSC state data
+ *
+ ****************************************************************************/
+
+static int usbmsc_sync_wait(FAR struct usbmsc_dev_s *priv)
+{
+  return nxsem_wait_uninterruptible(&priv->thsynch);
+}
+
+/****************************************************************************
+ * Name: usbmsc_working_thread_exit
+ *
+ * Description:
+ *   Command working thread to exit
+ *
+ ****************************************************************************/
+
+static void usbmsc_working_thread_exit(FAR struct usbmsc_dev_s *priv)
+{
+  irqstate_t flags;
+  int ret;
+
+  /* If the thread hasn't already exited, tell it to exit now */
+
+  if (priv->thstate != USBMSC_STATE_NOTSTARTED)
+    {
+      /* Get exclusive access to SCSI state data */
+
+      do
+        {
+          ret = nxmutex_lock(&priv->thlock);
+
+          /* nxmutex_lock() will fail with ECANCELED, only
+           * if this thread is canceled.  At this point, we
+           * have no option but to continue with the teardown.
+           */
+
+          DEBUGASSERT(ret == OK || ret == -ECANCELED);
+        }
+      while (ret < 0);
+
+      /* The thread was started.. Is it still running? */
+
+      if (priv->thstate != USBMSC_STATE_TERMINATED)
+        {
+          /* Yes.. Ask the thread to stop */
+
+          flags = enter_critical_section();
+          priv->theventset |= USBMSC_EVENT_TERMINATEREQUEST;
+          usbmsc_scsi_signal(priv);
+          leave_critical_section(flags);
+        }
+
+      nxmutex_unlock(&priv->thlock);
+
+      /* Wait for the thread to exit */
+
+      while ((priv->theventset & USBMSC_EVENT_TERMINATEREQUEST) != 0)
+        {
+          ret = usbmsc_sync_wait(priv);
+          if (ret < 0)
+            {
+              /* Just break out and continue if the thread has been
+               * canceled.
+               */
+
+              break;
+            }
+        }
+    }
+
+  priv->thpid = 0;
+}
+
+/****************************************************************************
  * Name: usbmsc_bind
  *
  * Description:
@@ -321,9 +399,9 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
       reqcontainer->req->priv     = reqcontainer;
       reqcontainer->req->callback = usbmsc_wrcomplete;
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&priv->spinlock);
       sq_addlast((FAR sq_entry_t *)reqcontainer, &priv->wrreqlist);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->spinlock, flags);
     }
 
   /* Report if we are selfpowered (unless we are part of a composite
@@ -386,17 +464,27 @@ static void usbmsc_unbind(FAR struct usbdevclass_driver_s *driver,
     }
 #endif
 
-  /* The worker thread should have already been stopped by the
-   * driver un-initialize logic.
-   */
-
-  DEBUGASSERT(priv->thstate == USBMSC_STATE_TERMINATED ||
-              priv->thstate == USBMSC_STATE_NOTSTARTED);
-
   /* Make sure that we are not already unbound */
 
   if (priv != NULL)
     {
+#ifndef CONFIG_USBMSC_COMPOSITE
+      /* The worker thread should have already been stopped by the
+       * driver un-initialize logic if we are not part of a composite
+       * device.
+       */
+
+      DEBUGASSERT(priv->thstate == USBMSC_STATE_TERMINATED ||
+              priv->thstate == USBMSC_STATE_NOTSTARTED);
+#else
+      /* Composite device will call this unbind before uninitialize so
+       * stop working thread here because it might access endpoints which
+       * are deallocated here
+       */
+
+      usbmsc_working_thread_exit(priv);
+#endif
+
       /* Make sure that the endpoints have been unconfigured.  If
        * we were terminated gracefully, then the configuration should
        * already have been reset.  If not, then calling usbmsc_resetconfig
@@ -441,17 +529,22 @@ static void usbmsc_unbind(FAR struct usbdevclass_driver_s *driver,
        * of them
        */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&priv->spinlock);
       while (!sq_empty(&priv->wrreqlist))
         {
           reqcontainer = (struct usbmsc_req_s *)
             sq_remfirst(&priv->wrreqlist);
+          spin_unlock_irqrestore(&priv->spinlock, flags);
 
           if (reqcontainer->req != NULL)
             {
               usbdev_freereq(priv->epbulkin, reqcontainer->req);
             }
+
+          flags = spin_lock_irqsave(&priv->spinlock);
         }
+
+      spin_unlock_irqrestore(&priv->spinlock, flags);
 
       /* Free the bulk IN endpoint */
 
@@ -460,8 +553,6 @@ static void usbmsc_unbind(FAR struct usbdevclass_driver_s *driver,
           DEV_FREEEP(dev, priv->epbulkin);
           priv->epbulkin = NULL;
         }
-
-      leave_critical_section(flags);
     }
 }
 
@@ -726,8 +817,8 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
                      * state.
                      */
 
-                     priv->theventset |= USBMSC_EVENT_RESET;
-                     usbmsc_scsi_signal(priv);
+                    priv->theventset |= USBMSC_EVENT_RESET;
+                    usbmsc_scsi_signal(priv);
 
                     /* Return here... the response will be provided later by
                      * the worker thread.
@@ -844,14 +935,14 @@ static void usbmsc_disconnect(FAR struct usbdevclass_driver_s *driver,
 
   /* Reset the configuration */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&priv->spinlock);
   usbmsc_resetconfig(priv);
 
   /* Signal the worker thread */
 
   priv->theventset |= USBMSC_EVENT_DISCONNECT;
   usbmsc_scsi_signal(priv);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&priv->spinlock, flags);
 
   /* Perform the soft connect function so that we will we can be
    * re-enumerated (unless we are part of a composite device)
@@ -1050,9 +1141,9 @@ void usbmsc_wrcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Return the write request to the free list */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
   sq_addlast((FAR sq_entry_t *)privreq, &priv->wrreqlist);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
 
   /* Process the received data unless this is some unusual condition */
 
@@ -1074,8 +1165,10 @@ void usbmsc_wrcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Inform the worker thread that a write request has been returned */
 
+  flags = spin_lock_irqsave_nopreempt(&priv->spinlock);
   priv->theventset |= USBMSC_EVENT_WRCOMPLETE;
   usbmsc_scsi_signal(priv);
+  spin_unlock_irqrestore_nopreempt(&priv->spinlock, flags);
 }
 
 /****************************************************************************
@@ -1120,9 +1213,8 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep,
 
         /* Add the filled read request from the rdreqlist */
 
-        flags = enter_critical_section();
+        flags = spin_lock_irqsave_nopreempt(&priv->spinlock);
         sq_addlast((FAR sq_entry_t *)privreq, &priv->rdreqlist);
-        leave_critical_section(flags);
 
         /* Signal the worker thread that there is received data to be
          * processed.
@@ -1130,6 +1222,7 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep,
 
         priv->theventset |= USBMSC_EVENT_RDCOMPLETE;
         usbmsc_scsi_signal(priv);
+        spin_unlock_irqrestore_nopreempt(&priv->spinlock, flags);
       }
       break;
 
@@ -1233,19 +1326,6 @@ void usbmsc_deferredresponse(FAR struct usbmsc_dev_s *priv, bool failed)
 }
 
 /****************************************************************************
- * Name: usbmsc_sync_wait
- *
- * Description:
- *   Wait for the worker thread to obtain the USB MSC state data
- *
- ****************************************************************************/
-
-static int usbmsc_sync_wait(FAR struct usbmsc_dev_s *priv)
-{
-  return nxsem_wait_uninterruptible(&priv->thsynch);
-}
-
-/****************************************************************************
  * Name: usbmsc_configure
  *
  * Description:
@@ -1300,6 +1380,7 @@ int usbmsc_configure(unsigned int nluns, FAR void **handle)
   nxsem_init(&priv->thsynch, 0, 0);
   nxmutex_init(&priv->thlock);
   nxsem_init(&priv->thwaitsem, 0, 0);
+  spin_lock_init(&priv->spinlock);
 
   sq_init(&priv->wrreqlist);
   priv->nluns = nluns;
@@ -1698,10 +1779,10 @@ int usbmsc_exportluns(FAR void *handle)
   /* Signal to start the thread */
 
   uinfo("Signalling for the SCSI worker thread\n");
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&priv->spinlock);
   priv->theventset |= USBMSC_EVENT_READY;
   usbmsc_scsi_signal(priv);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&priv->spinlock, flags);
 
 errout_with_lock:
   nxmutex_unlock(&priv->thlock);
@@ -1771,8 +1852,6 @@ void usbmsc_uninitialize(FAR void *handle)
 {
   FAR struct usbmsc_alloc_s *alloc = handle;
   FAR struct usbmsc_dev_s *priv;
-  irqstate_t flags;
-  int ret;
   int i;
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -1785,56 +1864,7 @@ void usbmsc_uninitialize(FAR void *handle)
 
   priv = &alloc->dev;
 
-  /* If the thread hasn't already exited, tell it to exit now */
-
-  if (priv->thstate != USBMSC_STATE_NOTSTARTED)
-    {
-      /* Get exclusive access to SCSI state data */
-
-      do
-        {
-          ret = nxmutex_lock(&priv->thlock);
-
-          /* nxmutex_lock() will fail with ECANCELED, only
-           * if this thread is canceled.  At this point, we
-           * have no option but to continue with the teardown.
-           */
-
-          DEBUGASSERT(ret == OK || ret == -ECANCELED);
-        }
-      while (ret < 0);
-
-      /* The thread was started.. Is it still running? */
-
-      if (priv->thstate != USBMSC_STATE_TERMINATED)
-        {
-          /* Yes.. Ask the thread to stop */
-
-          flags = enter_critical_section();
-          priv->theventset |= USBMSC_EVENT_TERMINATEREQUEST;
-          usbmsc_scsi_signal(priv);
-          leave_critical_section(flags);
-        }
-
-      nxmutex_unlock(&priv->thlock);
-
-      /* Wait for the thread to exit */
-
-      while ((priv->theventset & USBMSC_EVENT_TERMINATEREQUEST) != 0)
-        {
-          ret = usbmsc_sync_wait(priv);
-          if (ret < 0)
-            {
-              /* Just break out and continue if the thread has been
-               * canceled.
-               */
-
-              break;
-            }
-        }
-    }
-
-  priv->thpid = 0;
+  usbmsc_working_thread_exit(priv);
 
   /* Unregister the driver (unless we are a part of a composite device) */
 

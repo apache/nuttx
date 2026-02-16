@@ -173,6 +173,35 @@ Ioctls for IP Addresses
   to manage IPv6 addresses, by which you don't need to care about the
   slot it stored.
 
+Hardware Checksum Offload
+=========================
+
+The structure :c:struct:`net_driver_s` includes fields to support hardware
+checksum offloading. This feature allows the network stack to delegate
+checksum calculation to the network device hardware, improving performance.
+
+Implementation Details
+----------------------
+
+Drivers that support hardware checksum offloading should use the
+following helper functions to retrieve checksum offload information:
+
+* :c:func:`netdev_checksum_start`: Get the offset from the beginning of the
+  packet to the start of the L4 header (checksum calculation start).
+* :c:func:`netdev_checksum_offset`: Get the offset from the start of the L4
+  header to the checksum field.
+* :c:func:`netdev_upperlayer_header_checksum`: Calculate the pseudo-header
+  checksum.
+
+.. code-block:: c
+
+   int netdev_checksum_start(FAR struct net_driver_s *dev);
+   int netdev_checksum_offset(FAR struct net_driver_s *dev);
+   uint16_t netdev_upperlayer_header_checksum(FAR struct net_driver_s *dev);
+
+Drivers that support hardware checksum offloading should use these functions
+to configure the hardware accordingly before transmitting the packet.
+
   [1]: https://man7.org/linux/man-pages/man7/netdevice.7.html
   [2]: e.g. 'eth0:0' stands for the secondary address on eth0
 

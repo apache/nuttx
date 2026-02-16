@@ -92,7 +92,7 @@
 pid_t x86_64_fork(const struct fork_s *context)
 {
   struct tcb_s *parent = this_task();
-  struct task_tcb_s *child;
+  struct tcb_s *child;
   uint64_t newsp;
   uint64_t newfp;
   uint64_t newtop;
@@ -140,15 +140,15 @@ pid_t x86_64_fork(const struct fork_s *context)
    * effort is overkill.
    */
 
-  newtop = (uint64_t)XCP_ALIGN_DOWN((uintptr_t)child->cmn.stack_base_ptr +
-                                    child->cmn.adj_stack_size -
+  newtop = (uint64_t)XCP_ALIGN_DOWN((uintptr_t)child->stack_base_ptr +
+                                    child->adj_stack_size -
                                     XCPTCONTEXT_SIZE);
 
   newsp = newtop - stackutil;
 
   /* Move the register context (from parent) to newtop. */
 
-  memcpy(child->cmn.xcp.regs, parent->xcp.regs, XCPTCONTEXT_SIZE);
+  memcpy(child->xcp.regs, parent->xcp.regs, XCPTCONTEXT_SIZE);
 
   memcpy((void *)newsp, (const void *)context->rsp, stackutil);
 
@@ -178,18 +178,18 @@ pid_t x86_64_fork(const struct fork_s *context)
    * child thread.
    */
 
-  child->cmn.xcp.regs[REG_RAX]    = 0;            /* Parent proc return 0 */
-  child->cmn.xcp.regs[REG_R12]    = context->r12; /* Non-volatile register r12 */
-  child->cmn.xcp.regs[REG_R13]    = context->r13; /* Non-volatile register r13 */
-  child->cmn.xcp.regs[REG_R14]    = context->r14; /* Non-volatile register r14 */
-  child->cmn.xcp.regs[REG_R15]    = context->r15; /* Non-volatile register r15 */
-  child->cmn.xcp.regs[REG_RBX]    = context->rbx; /* Non-volatile register rbx */
-  child->cmn.xcp.regs[REG_SS]     = context->ss;  /* SS */
-  child->cmn.xcp.regs[REG_CS]     = context->cs;  /* CS */
-  child->cmn.xcp.regs[REG_RFLAGS] = context->rflags;
-  child->cmn.xcp.regs[REG_RIP]    = context->rip;
-  child->cmn.xcp.regs[REG_RSP]    = newsp; /* Stack pointer */
-  child->cmn.xcp.regs[REG_RBP]    = newfp; /* Like registers */
+  child->xcp.regs[REG_RAX]    = 0;            /* Parent proc return 0 */
+  child->xcp.regs[REG_R12]    = context->r12; /* Non-volatile register r12 */
+  child->xcp.regs[REG_R13]    = context->r13; /* Non-volatile register r13 */
+  child->xcp.regs[REG_R14]    = context->r14; /* Non-volatile register r14 */
+  child->xcp.regs[REG_R15]    = context->r15; /* Non-volatile register r15 */
+  child->xcp.regs[REG_RBX]    = context->rbx; /* Non-volatile register rbx */
+  child->xcp.regs[REG_SS]     = context->ss;  /* SS */
+  child->xcp.regs[REG_CS]     = context->cs;  /* CS */
+  child->xcp.regs[REG_RFLAGS] = context->rflags;
+  child->xcp.regs[REG_RIP]    = context->rip;
+  child->xcp.regs[REG_RSP]    = newsp; /* Stack pointer */
+  child->xcp.regs[REG_RBP]    = newfp; /* Like registers */
 
   /* And, finally, start the child task.  On a failure, nxtask_start_fork()
    * will discard the TCB by calling nxtask_abort_fork().

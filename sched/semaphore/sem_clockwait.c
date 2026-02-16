@@ -94,7 +94,7 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
 {
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
-  int ret = ERROR;
+  int ret = -EINVAL;
 
   DEBUGASSERT(sem != NULL && abstime != NULL);
   DEBUGASSERT(up_interrupt_context() == false);
@@ -107,94 +107,46 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
    * enabled while we are blocked waiting for the semaphore.
    */
 
-  flags = enter_critical_section();
-
-  /* Try to take the semaphore without waiting. */
-
-  ret = nxsem_trywait(sem);
-  if (ret == OK)
+  if (abstime->tv_nsec >= 0 && abstime->tv_nsec < 1000000000)
     {
-      /* We got it! */
+      flags = enter_critical_section();
 
-      goto out;
+      /* Try to take the semaphore without waiting. */
+
+      ret = nxsem_trywait(sem);
+      if (ret != OK)
+        {
+          /* We will have to wait for the semaphore.  Make sure that
+           * we were provided with a valid timeout.
+           */
+
+          if (clockid == CLOCK_REALTIME)
+            {
+              wd_start_realtime(&rtcb->waitdog, abstime,
+                                nxsem_timeout, (uintptr_t)rtcb);
+            }
+          else
+            {
+              wd_start_abstime(&rtcb->waitdog, abstime,
+                               nxsem_timeout, (uintptr_t)rtcb);
+            }
+
+          /* Now perform the blocking wait.  If nxsem_wait() fails, the
+           * negated errno value will be returned below.
+           */
+
+          ret = nxsem_wait(sem);
+
+          /* Stop the watchdog timer */
+
+          wd_cancel(&rtcb->waitdog);
+        }
+
+      /* We can now restore interrupts and delete the watchdog */
+
+      leave_critical_section(flags);
     }
 
-  /* We will have to wait for the semaphore.  Make sure that we were provided
-   * with a valid timeout.
-   */
-
-#ifdef CONFIG_DEBUG_FEATURES
-  if (abstime->tv_nsec < 0 || abstime->tv_nsec >= 1000000000)
-    {
-      ret = -EINVAL;
-      goto out;
-    }
-#endif
-
-  if (clockid == CLOCK_REALTIME)
-    {
-      wd_start_realtime(&rtcb->waitdog, abstime,
-                        nxsem_timeout, (uintptr_t)rtcb);
-    }
-  else
-    {
-      wd_start_abstime(&rtcb->waitdog, abstime,
-                       nxsem_timeout, (uintptr_t)rtcb);
-    }
-
-  /* Now perform the blocking wait.  If nxsem_wait() fails, the
-   * negated errno value will be returned below.
-   */
-
-  ret = nxsem_wait(sem);
-
-  /* Stop the watchdog timer */
-
-  wd_cancel(&rtcb->waitdog);
-
-  /* We can now restore interrupts and delete the watchdog */
-
-out:
-  leave_critical_section(flags);
   return ret;
 }
 
-/****************************************************************************
- * Name: nxsem_clockwait_uninterruptible
- *
- * Description:
- *   This function is wrapped version of nxsem_clockwait(), which is
- *   uninterruptible and convenient for use.
- *
- * Input Parameters:
- *   sem     - Semaphore object
- *   clockid - The timing source to use in the conversion
- *   abstime - The absolute time to wait until a timeout is declared.
- *
- * Returned Value:
- *   EINVAL    The sem argument does not refer to a valid semaphore.  Or the
- *             thread would have blocked, and the abstime parameter specified
- *             a nanoseconds field value less than zero or greater than or
- *             equal to 1000 million.
- *   ETIMEDOUT The semaphore could not be locked before the specified timeout
- *             expired.
- *   EDEADLK   A deadlock condition was detected.
- *   ECANCELED May be returned if the thread is canceled while waiting.
- *
- ****************************************************************************/
-
-int nxsem_clockwait_uninterruptible(FAR sem_t *sem, clockid_t clockid,
-                                    FAR const struct timespec *abstime)
-{
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_clockwait(sem, clockid, abstime);
-    }
-  while (ret == -EINTR);
-
-  return ret;
-}

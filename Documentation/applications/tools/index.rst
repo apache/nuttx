@@ -38,8 +38,8 @@ image in this case. Here is what can be done:
 ``apps/tools`` and one in ``nuttx/tools``.
 
 **A**: The version of ``mkromfsimg.sh`` in ``nuttx/tools`` is a generic
-tool to simplify creation of ROMFS file system from any directory contain
-content that you would like to access within the the target.
+tool to simplify creation of ROMFS file system from any directory containing
+content that you would like to access within the target.
 
 The version in ``apps/tools``, on the other hand, has a very special purpose.
 It is part of the support that can be used in the KERNEL build mode.
@@ -54,7 +54,7 @@ See :doc:`/implementation/processes_vs_tasks`.
 One consequence of that is that functions like ``task_create()`` and friends
 cannot be used in the KERNEL build mode. Instead, all processes must be loaded
 into a virtual address space from an ELF or NxFLAT file residing in the file
-system. ROMFS is one of many file system, but one that is particularly usable
+system. ROMFS is one of many file systems, but one that is particularly usable
 for this purpose in deeply embedded systems.
 
 KERNEL Build Differences

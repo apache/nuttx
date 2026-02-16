@@ -592,9 +592,30 @@ extern "C"
 #endif
 
 #ifdef CONFIG_NET_IPv6
-bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
-                          const net_ipv6addr_t addr2,
-                          const net_ipv6addr_t mask);
+static inline_function bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
+                                                 const net_ipv6addr_t addr2,
+                                                 const net_ipv6addr_t mask)
+{
+  int i;
+
+  /* Start from the "bottom" where the addresses will most likely differ */
+
+  for (i = 7; i >= 0; i--)
+    {
+      /* Same? */
+
+      if ((addr1[i] & mask[i]) != (addr2[i] & mask[i]))
+        {
+          /* No.. the addresses are different */
+
+          return false;
+        }
+    }
+
+  /* The addresses are the same */
+
+  return true;
+}
 #endif
 
 /****************************************************************************

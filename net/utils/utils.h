@@ -32,6 +32,7 @@
 
 #include <stdlib.h>
 
+#include <nuttx/mutex.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
@@ -97,6 +98,7 @@
       dynalloc, \
       -(int)(nodesize), \
       SEM_INITIALIZER(NET_BUFPOOL_MAX(prealloc, dynalloc, maxalloc)), \
+      NXRMUTEX_INITIALIZER, \
       { NULL, NULL } \
     };
 
@@ -105,6 +107,9 @@
 #define NET_BUFPOOL_ALLOC(p)        net_bufpool_timedalloc(&p, UINT_MAX)
 #define NET_BUFPOOL_FREE(p,n)       net_bufpool_free(&p, n)
 #define NET_BUFPOOL_TEST(p)         net_bufpool_test(&p)
+#define NET_BUFPOOL_NAVAIL(p)       net_bufpool_navail(&p)
+#define NET_BUFPOOL_LOCK(p)         net_bufpool_lock(&p)
+#define NET_BUFPOOL_UNLOCK(p)       net_bufpool_unlock(&p)
 
 /****************************************************************************
  * Public Types
@@ -132,6 +137,7 @@ struct net_bufpool_s
 
   sem_t      sem;      /* The semaphore for waiting for free buffers */
 
+  rmutex_t   lock;     /* The lock for the pool */
   sq_queue_t freebuffers;
 };
 
@@ -146,6 +152,69 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: conn_lock, conn_unlock, conn_dev_lock, conn_dev_unlock
+ *
+ * Description:
+ *   Lock and unlock the connection and device.
+ *
+ ****************************************************************************/
+
+static inline_function void conn_lock(FAR struct socket_conn_s *sconn)
+{
+  nxrmutex_lock(&sconn->s_lock);
+}
+
+static inline_function void conn_unlock(FAR struct socket_conn_s *sconn)
+{
+  nxrmutex_unlock(&sconn->s_lock);
+}
+
+static inline_function void conn_dev_lock(FAR struct socket_conn_s *sconn,
+                                          FAR struct net_driver_s *dev)
+{
+  if (dev != NULL)
+    {
+      netdev_lock(dev);
+    }
+
+  nxrmutex_lock(&sconn->s_lock);
+}
+
+static inline_function void conn_dev_unlock(FAR struct socket_conn_s *sconn,
+                                            FAR struct net_driver_s *dev)
+{
+  nxrmutex_unlock(&sconn->s_lock);
+
+  if (dev != NULL)
+    {
+      netdev_unlock(dev);
+    }
+}
+
+/****************************************************************************
+ * Name: conn_dev_sem_timedwait
+ *
+ * Description:
+ *   Wait on the connection semaphore, unlocking the device and connection
+ *   locks while waiting.
+ *
+ ****************************************************************************/
+
+static inline_function int
+conn_dev_sem_timedwait(FAR sem_t *sem, bool interruptible,
+                       unsigned int timeout, FAR struct socket_conn_s *sconn,
+                       FAR struct net_driver_s *dev)
+{
+  return net_sem_timedwait2(sem, interruptible, timeout,
+                            sconn ? &sconn->s_lock : NULL,
+                            dev ? &dev->d_lock : NULL);
+}
 
 /****************************************************************************
  * Public Function Prototypes
@@ -414,6 +483,45 @@ void net_bufpool_free(FAR struct net_bufpool_s *pool, FAR void *node);
  ****************************************************************************/
 
 int net_bufpool_test(FAR struct net_bufpool_s *pool);
+
+/****************************************************************************
+ * Name: net_bufpool_navail
+ *
+ * Description:
+ *   Return the number of available buffers in the buffer pool.
+ *
+ * Assumptions:
+ *   None.
+ *
+ ****************************************************************************/
+
+int net_bufpool_navail(FAR struct net_bufpool_s *pool);
+
+/****************************************************************************
+ * Name: net_bufpool_lock
+ *
+ * Description:
+ *   Use the bufpool lock to protect the node of the buffer pool.
+ *
+ * Input Parameters:
+ *   pool - The lock of pool to be locked.
+ *
+ ****************************************************************************/
+
+void net_bufpool_lock(FAR struct net_bufpool_s *pool);
+
+/****************************************************************************
+ * Name: net_bufpool_unlock
+ *
+ * Description:
+ *   Finish using the bufpool lock to protect the node of the buffer pool.
+ *
+ * Input Parameters:
+ *   pool - The lock of pool to be unlocked.
+ *
+ ****************************************************************************/
+
+void net_bufpool_unlock(FAR struct net_bufpool_s *pool);
 
 /****************************************************************************
  * Name: net_chksum_adjust

@@ -20,114 +20,104 @@
  *
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include "memory.ld"
 
 OUTPUT_ARCH(aarch64)
 
 ENTRY(__start)
 
-PHDRS
-{
-  text PT_LOAD ;
-}
-
 SECTIONS
 {
-  . = 0x00000000;  /* load address */
-  _start = .;
+  /* where the global variable out-of-bounds detection information located */
   .text : {
-        _stext = .;            /* Text section */
-       *(.start .start.*)      /* Place __start here */
-       *(.text)
-       *(.text.cold)
-       *(.text.unlikely)
-       *(.fixup)
-       *(.gnu.warning)
-  } :text = 0x9090
+      . = ALIGN(64);
+      _stext = .;            /* Text section */
+      *(.start .start.*)
+      *(.vectors*)
+      *(.exc_vector_table*)
+      *(.text*)
+      *(.fixup)
+      *(.gnu.warning)
+      . = ALIGN(64);
+      _etext = .; /* End_1 of .text */
+      _sztext = _etext - _stext;
+  } > ksram
 
-  . = ALIGN(4096);
+  .ARM.extab :
+  {
+      *(.ARM.extab*)
+  } > ksram
 
-  .init_section : {
-        _sinit = ABSOLUTE(.);
-        KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
-        KEEP(*(.init_array EXCLUDE_FILE(*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o) .ctors))
-        _einit = ABSOLUTE(.);
-  }
+  /* .ARM.exidx is sorted, so has to go in its own output section.  */
 
-  . = ALIGN(4096);
-
-  .vector : {
-        _vector_start = .;
-        KEEP(*(.exc_vector_table))
-        KEEP(*(".exc_vector_table.*"))
-        KEEP(*(.vectors))
-       _vector_end = .;
-  } :text
-  . = ALIGN(4096);
-  _etext = .; /* End_1 of .text */
-  _sztext = _etext - _stext;
-
-  . = ALIGN(4096);
-  .rodata : {
-        _srodata = .;          /* Read-only data */
-       *(.rodata)
-       *(.rodata.*)
-       *(.data.rel.ro)
-       *(.data.rel.ro.*)
-  } :text
-  . = ALIGN(4096);
-  _erodata = .;                /* End of read-only data */
-  _szrodata = _erodata - _srodata;
-  _eronly = .;  /* End of read-only data */
-
-  . = ALIGN(4096);
-  .data : {                    /* Data */
-        _sdata = .;
-       *(.data.page_aligned)
-       *(.data)
-       . = ALIGN(8);
-        __start_impls = .;
-        *(.impls)
-        KEEP(*(.impls))
-        . = ALIGN(4);
-        __stop_impls = .;
-       *(.data.rel)
-       *(.data.rel.*)
-       CONSTRUCTORS
-  } :text
-  _edata = .; /* End+1 of .data */
-
-#if defined(CONFIG_SMP) && defined(CONFIG_ARM64_SMP_BUSY_WAIT)
-  . = CONFIG_ARM64_SMP_BUSY_WAIT_FLAG_ADDR + 4;
-#endif
+  PROVIDE_HIDDEN (__exidx_start = .);
+  .ARM.exidx :
+  {
+      *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+  } > ksram
+  PROVIDE_HIDDEN (__exidx_end = .);
 
   .bss : {                     /* BSS */
-       . = ALIGN(8);
-       _sbss = .;
-       *(.bss)
-       . = ALIGN(8);
-  } :text
-  . = ALIGN(4096);
-  _ebss = .;
+       . = ALIGN(64);
+       _sbss = . ;
+       *(.bss*)
+       . = ALIGN(4096);
+       _ebss = .;
+  } > ksram
+
   _szbss = _ebss - _sbss;
 
+  .init_section : {
+      _sinit = ABSOLUTE(.);
+      KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
+      KEEP(*(.init_array EXCLUDE_FILE(*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o) .ctors))
+      _einit = ABSOLUTE(.);
+      . = ALIGN(4096);
+  } > ksram
+
+  .rodata : {
+      _srodata = .;          /* Read-only data */
+      *(.rodata*)
+      *(.data.rel.ro*)
+      KEEP(*(SORT(.scattered_array*)));
+      . = ALIGN(4096);
+      _erodata = .;
+  } > ksram
+
+  .data : {                    /* Data */
+      _sdata = .;
+      *(.data*)
+      . = ALIGN(8);
+      __start_impls = .;
+      *(.impls)
+      KEEP(*(.impls))
+      . = ALIGN(4);
+      __stop_impls = .;
+      _edata = .;
+  } > ksram
+
+  .noinit : {
+      _snoinit = ABSOLUTE(.);
+      *(.noinit*)
+      _enoinit = ABSOLUTE(.);
+      . =  + 60;
+  } > ksram
+
+ . = ALIGN(4096);
   .initstack : {             /* INIT STACK */
        _s_initstack = .;
        *(.initstack)
        . = ALIGN(16);
-  } :text
+  } > ksram
   . = ALIGN(4096);
   _e_initstack = . ;
   g_idle_topstack = . ;
-
-  _szdata = _e_initstack - _sdata;
 
   /* Sections to be discarded */
   /DISCARD/ : {
        *(.exit.text)
        *(.exit.data)
        *(.exitcall.exit)
-       *(.eh_frame)
   }
 
   /* Stabs debugging sections.  */
@@ -138,5 +128,33 @@ SECTIONS
   .stab.index 0 : { *(.stab.index) }
   .stab.indexstr 0 : { *(.stab.indexstr) }
   .comment 0 : { *(.comment) }
-}
 
+    /* DWARF debug sections.
+         Symbols in the DWARF debugging sections are relative to the beginning
+         of the section so we begin them at 0.  */
+
+    /* DWARF 1 */
+
+    .debug 0            : { *(.debug) }
+    .line 0             : { *(.line) }
+
+    /* GNU DWARF 1 extensions */
+
+    .debug_srcinfo 0    : { *(.debug_srcinfo) }
+    .debug_sfnames 0    : { *(.debug_sfnames) }
+
+    /* DWARF 1.1 and DWARF 2 */
+
+    .debug_aranges 0    : { *(.debug_aranges) }
+    .debug_pubnames 0   : { *(.debug_pubnames) }
+
+    /* DWARF 2 */
+
+    .debug_info 0       : { *(.debug_info) *(.gnu.linkonce.wi.*) }
+    .debug_abbrev 0     : { *(.debug_abbrev) }
+    .debug_line 0       : { *(.debug_line) }
+    .debug_frame 0      : { *(.debug_frame) }
+    .debug_str 0        : { *(.debug_str) }
+    .debug_loc 0        : { *(.debug_loc) }
+    .debug_macinfo 0    : { *(.debug_macinfo) }
+}

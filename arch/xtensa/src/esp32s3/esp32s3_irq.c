@@ -523,6 +523,7 @@ void up_irqinitialize(void)
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And finally, enable interrupts.  Also clears PS.EXCM */
 
+  xtensa_color_intstack();
   up_irq_enable();
 #endif
 
@@ -804,7 +805,7 @@ int esp32s3_setup_irq(int cpu, int periphid, int priority, int flags)
       return -EINVAL;
     }
 
-  if (priority > XCHAL_SYSCALL_LEVEL)
+  if (priority > XCHAL_EXCM_LEVEL)
     {
       irqerr("Invalid priority %d\n", priority);
       return -EINVAL;

@@ -259,7 +259,7 @@ int msgsnd(int msqid, FAR const void *msgp, size_t msgsz, int msgflg)
 
           if (nxsched_add_readytorun(btcb))
             {
-              up_switch_context(btcb, rtcb);
+              up_switch_context(this_task(), rtcb);
             }
         }
     }

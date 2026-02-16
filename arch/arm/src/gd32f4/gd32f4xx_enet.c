@@ -78,10 +78,6 @@
 
 /* Configuration ************************************************************/
 
-/* See boards/arm/gd32/gd3240g-eval/README.txt for an explanation of the
- * configuration settings.
- */
-
 #if GD32_NETHERNET > 1
 #  error "Logic to support multiple Ethernet interfaces is incomplete"
 #endif
@@ -2268,6 +2264,8 @@ static int gd32_ifup(struct net_driver_s *dev)
   priv->ifup = true;
   up_enable_irq(GD32_IRQ_ENET);
 
+  netdev_carrier_on(dev);
+
   return OK;
 }
 
@@ -2323,6 +2321,9 @@ static int gd32_ifdown(struct net_driver_s *dev)
 
   priv->ifup = false;
   leave_critical_section(flags);
+
+  netdev_carrier_off(dev);
+
   return ret;
 }
 

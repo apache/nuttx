@@ -74,18 +74,6 @@
 #  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
-/* For use with EABI and floating point, the stack must be aligned to 8-byte
- * addresses.
- */
-
-#define STACK_ALIGNMENT     8
-
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
 #define or1k_savestate(regs)  or1k_copyfullstate(regs, up_current_regs())
 #define or1k_restorestate(regs) or1k_copyfullstate(up_current_regs(), regs)
 
@@ -323,6 +311,13 @@ void or1k_usbuninitialize(void);
 #ifdef CONFIG_STACK_COLORATION
 size_t or1k_stack_check(uintptr_t alloc, size_t size);
 void or1k_stack_color(void *stackbase, size_t nbytes);
+#endif
+
+#if defined(CONFIG_STACK_COLORATION) && \
+    defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+void or1k_color_intstack(void);
+#else
+#  define or1k_color_intstack()
 #endif
 
 #undef EXTERN

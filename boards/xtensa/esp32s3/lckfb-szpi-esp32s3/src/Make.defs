@@ -41,14 +41,6 @@ DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board
 
-ifeq ($(CONFIG_ETC_ROMFS),y)
-RCSRCS  = etc/init.d/rc.sysinit etc/init.d/rcS
-
-ifeq ($(CONFIG_TXTABLE_PARTITION),y)
-RCRAWS  = etc/txtable.txt
-endif # CONFIG_TXTABLE_PARTITION
-endif
-
 ifeq ($(CONFIG_IOEXPANDER_PCA9557),y)
 CSRCS += esp32s3_pca9557.c
 endif
@@ -59,4 +51,8 @@ endif
 
 ifeq ($(CONFIG_INPUT_FT5X06),y)
 CSRCS += esp32s3_ft5x06.c
+endif
+
+ifeq ($(CONFIG_SENSORS_QMI8658),y)
+CSRCS += esp32s3_qmi8658.c
 endif

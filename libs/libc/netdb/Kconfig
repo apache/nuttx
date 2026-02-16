@@ -140,7 +140,7 @@ config NETDB_DNSCLIENT_MAXRESPONSE
 
 config NETDB_DNSCLIENT_RECV_TIMEOUT
 	int "DNS receive timeout"
-	default 30
+	default 5
 	---help---
 		This is the timeout value when DNS receives response after
 		dns_send_query, unit: seconds
@@ -151,6 +151,15 @@ config NETDB_DNSCLIENT_SEND_TIMEOUT
 	---help---
 		This is the timeout value when DNS send request on dns_send_query,
 		unit: seconds
+
+config NETDB_DNSCLIENT_MAX_TIMEOUT
+	int "DNS maximum timeout"
+	default 30
+	---help---
+		Maximum timeout value in seconds when using exponential backoff
+		for DNS retries. The timeout grows exponentially with each retry
+		(base_timeout * 2^retry_count) but is capped at this maximum value.
+		Set to 0 to disable the cap.
 
 config NETDB_DNSCLIENT_RETRIES
 	int "Number of retries for DNS request"

@@ -261,7 +261,7 @@
  *
  * The STM32F4 Discovery has no on-board serial devices, but the console is
  * brought out to PA2 (TX) and PA3 (RX) for connection to an external serial
- * device. (See the README.txt file for other options)
+ * device.
  *
  * These pins selections, however, conflict with pin usage on the
  * STM32F4DIS-BB.
@@ -384,7 +384,7 @@
 #define GPIO_I2C1_SCL     GPIO_I2C1_SCL_1
 #define GPIO_I2C1_SDA     GPIO_I2C1_SDA_2
 
-/* Timer Inputs/Outputs (see the README.txt file for options) */
+/* Timer Inputs/Outputs */
 
 #define GPIO_TIM2_CH1IN   GPIO_TIM2_CH1IN_2
 #define GPIO_TIM2_CH2IN   GPIO_TIM2_CH2IN_1
@@ -465,8 +465,83 @@
 
 #define BOARD_XEN1210_GPIO_INT  GPIO_XEN1210_INT
 
+#define BOARD_SBUTTON_GPIO_INT (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|\
+                                GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN0)
+
 /* Define what timer to use as XEN1210 CLK (will use channel 1) */
 
 #define BOARD_XEN1210_PWMTIMER   1
+
+/* Keyboard Matrix Configuration */
+
+/* Define keyboard matrix row pins (outputs) */
+
+#define GPIO_KMATRIX_ROW0  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                            GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN7)
+#define GPIO_KMATRIX_ROW1  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                            GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN8)
+#define GPIO_KMATRIX_ROW2  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                            GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN9)
+#define GPIO_KMATRIX_ROW3  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                            GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN10)
+
+/* Row pins as inputs with pull-up for early diagnostics */
+
+#define GPIO_KMATRIX_ROW0_IN (GPIO_INPUT|GPIO_PULLUP|GPIO_SPEED_50MHz|\
+                              GPIO_PORTE|GPIO_PIN7)
+#define GPIO_KMATRIX_ROW1_IN (GPIO_INPUT|GPIO_PULLUP|GPIO_SPEED_50MHz|\
+                              GPIO_PORTE|GPIO_PIN8)
+#define GPIO_KMATRIX_ROW2_IN (GPIO_INPUT|GPIO_PULLUP|GPIO_SPEED_50MHz|\
+                              GPIO_PORTE|GPIO_PIN9)
+#define GPIO_KMATRIX_ROW3_IN (GPIO_INPUT|GPIO_PULLUP|GPIO_SPEED_50MHz|\
+                              GPIO_PORTE|GPIO_PIN10)
+
+/* Define keyboard matrix column pins (inputs) */
+
+#define GPIO_KMATRIX_COL0  (GPIO_INPUT|GPIO_PULLUP|GPIO_SPEED_50MHz|\
+                            GPIO_PORTE|GPIO_PIN11)
+#define GPIO_KMATRIX_COL1  (GPIO_INPUT|GPIO_PULLUP|GPIO_SPEED_50MHz|\
+                            GPIO_PORTE|GPIO_PIN13)
+#define GPIO_KMATRIX_COL2  (GPIO_INPUT|GPIO_PULLUP|GPIO_SPEED_50MHz|\
+                            GPIO_PORTE|GPIO_PIN14)
+
+/* Column pins as outputs for diagnostics only */
+
+#define GPIO_KMATRIX_COL0_OUT (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                               GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN11)
+#define GPIO_KMATRIX_COL1_OUT (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                               GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN13)
+#define GPIO_KMATRIX_COL2_OUT (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                               GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN14)
+
+/* Board-level KMATRIX pin definitions */
+
+#define BOARD_KMATRIX_ROW0  GPIO_KMATRIX_ROW0
+#define BOARD_KMATRIX_ROW1  GPIO_KMATRIX_ROW1
+#define BOARD_KMATRIX_ROW2  GPIO_KMATRIX_ROW2
+#define BOARD_KMATRIX_ROW3  GPIO_KMATRIX_ROW3
+
+#define BOARD_KMATRIX_ROW0_IN  GPIO_KMATRIX_ROW0_IN
+#define BOARD_KMATRIX_ROW1_IN  GPIO_KMATRIX_ROW1_IN
+#define BOARD_KMATRIX_ROW2_IN  GPIO_KMATRIX_ROW2_IN
+#define BOARD_KMATRIX_ROW3_IN  GPIO_KMATRIX_ROW3_IN
+
+#define BOARD_KMATRIX_COL0  GPIO_KMATRIX_COL0
+#define BOARD_KMATRIX_COL1  GPIO_KMATRIX_COL1
+#define BOARD_KMATRIX_COL2  GPIO_KMATRIX_COL2
+
+#define BOARD_KMATRIX_COL0_OUT  GPIO_KMATRIX_COL0_OUT
+#define BOARD_KMATRIX_COL1_OUT  GPIO_KMATRIX_COL1_OUT
+#define BOARD_KMATRIX_COL2_OUT  GPIO_KMATRIX_COL2_OUT
+
+#ifdef CONFIG_INPUT_KMATRIX
+int board_kmatrix_diag(int loops, int delay_ms);
+#endif
+
+/* Keyboard Matrix I2C Configuration */
+
+#define CONFIG_STM32_KMATRIX_I2C_BUS   1         /* I2C1 */
+#define CONFIG_STM32_KMATRIX_I2C_ADDR  0x20      /* MCP23X08/PCA9538 address */
+#define CONFIG_STM32_KMATRIX_I2C_FREQ  400000    /* 400 kHz */
 
 #endif /* __BOARDS_ARM_STM32_STM32F4DISCOVERY_INCLUDE_BOARD_H */

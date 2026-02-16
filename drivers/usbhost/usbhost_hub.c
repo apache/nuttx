@@ -32,6 +32,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <sys/param.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
@@ -184,7 +185,7 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *hubclass);
  * used to associate the USB host hub class to a connected USB hub.
  */
 
-static const struct usbhost_id_s g_id[2] =
+static const struct usbhost_id_s g_id[] =
 {
   {
       USB_CLASS_HUB,  /* base         */
@@ -196,7 +197,14 @@ static const struct usbhost_id_s g_id[2] =
   {
       USB_CLASS_HUB,  /* base         */
       0,              /* subclass     */
-      1,              /* proto HS hub */
+      1,              /* proto Single TT HS hub */
+      0,              /* vid          */
+      0               /* pid          */
+  },
+  {
+      USB_CLASS_HUB,  /* base         */
+      0,              /* subclass     */
+      2,              /* proto Multiple TT HS hub */
       0,              /* vid          */
       0               /* pid          */
   }
@@ -208,7 +216,7 @@ static struct usbhost_registry_s g_hub =
 {
   NULL,                   /* flink    */
   usbhost_create,         /* create   */
-  2,                      /* nids     */
+  nitems(g_id),           /* nids     */
   g_id                    /* id[]     */
 };
 
@@ -870,7 +878,7 @@ static void usbhost_hub_event(FAR void *arg)
                 }
 
               debouncetime += 25;
-              nxsig_usleep(25 * 1000);
+              nxsched_usleep(25 * 1000);
             }
 
           if (ret < 0 || debouncetime >= 1500)
@@ -898,7 +906,7 @@ static void usbhost_hub_event(FAR void *arg)
                   continue;
                 }
 
-              nxsig_usleep(100 * 1000);
+              nxsched_usleep(100 * 1000);
 
               ctrlreq->type = USB_REQ_DIR_IN | USBHUB_REQ_TYPE_PORT;
               ctrlreq->req  = USBHUB_REQ_GETSTATUS;

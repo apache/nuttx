@@ -176,5 +176,12 @@ void avr_usbuninitialize(void);
 size_t avr_stack_check(uintptr_t alloc, size_t size);
 #endif
 
+#if defined(CONFIG_STACK_COLORATION) && \
+    defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+void avr_color_intstack(void);
+#else
+#  define avr_color_intstack()
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_AVR_SRC_COMMON_UP_INTERNAL_H */

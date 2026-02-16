@@ -60,7 +60,6 @@ list(
   xtensa_initialstate.c
   xtensa_irqdispatch.c
   xtensa_lowputs.c
-  xtensa_mdelay.c
   xtensa_modifyreg8.c
   xtensa_modifyreg16.c
   xtensa_modifyreg32.c
@@ -70,14 +69,15 @@ list(
   xtensa_perf.c
   xtensa_releasestack.c
   xtensa_registerdump.c
-  xtensa_sigdeliver.c
   xtensa_swint.c
   xtensa_stackframe.c
   xtensa_saveusercontext.c
-  xtensa_schedsigaction.c
-  xtensa_udelay.c
   xtensa_usestack.c
   xtensa_tcbinfo.c)
+
+if(CONFIG_ENABLE_ALL_SIGNALS)
+  list(APPEND SRCS xtensa_schedsigaction.c xtensa_sigdeliver.c)
+endif()
 
 # Configuration-dependent common Xtensa files
 
@@ -108,8 +108,10 @@ endif()
 if(CONFIG_BUILD_PROTECTED)
   target_sources(arch_interface PRIVATE xtensa_signal_handler.S)
   list(APPEND SRCS xtensa_dispatch_syscall.S)
-  list(APPEND SRCS xtensa_signal_dispatch.c xtensa_task_start.c
-       xtensa_pthread_start.c)
+  list(APPEND SRCS xtensa_task_start.c xtensa_pthread_start.c)
+  if(CONFIG_ENABLE_ALL_SIGNALS)
+    list(APPEND SRCS xtensa_signal_dispatch.c)
+  endif()
 endif()
 
 target_sources(arch PRIVATE ${SRCS})

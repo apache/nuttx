@@ -30,6 +30,7 @@
 
 #ifdef CONFIG_ARCH_HAVE_PERF_EVENTS
 
+#  if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -64,15 +65,6 @@ unsigned long up_perf_getfreq(void)
   return g_cpu_freq;
 }
 
-clock_t up_perf_gettime(void)
-{
-#ifdef CONFIG_ARCH_CLUSTER_PMU
-  return pmu_get_cluccntr();
-#else
-  return pmu_get_ccntr();
-#endif
-}
-
 void up_perf_convert(clock_t elapsed, struct timespec *ts)
 {
   clock_t left;
@@ -81,4 +73,15 @@ void up_perf_convert(clock_t elapsed, struct timespec *ts)
   left        = elapsed - ts->tv_sec * g_cpu_freq;
   ts->tv_nsec = NSEC_PER_SEC * left / g_cpu_freq;
 }
+#  endif /* CONFIG_BUILD_FLAT || __KERNEL__ */
+
+clock_t up_perf_gettime(void)
+{
+#  ifdef CONFIG_ARCH_CLUSTER_PMU
+  return pmu_get_cluccntr();
+#  else
+  return pmu_get_ccntr();
+#  endif
+}
+
 #endif

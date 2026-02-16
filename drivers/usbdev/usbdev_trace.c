@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/spinlock.h>
 
 #include <sys/types.h>
 #include <stdarg.h>
@@ -72,6 +73,7 @@ static uint16_t g_tail = 0;
 
 #if defined(CONFIG_USBDEV_TRACE) || (defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_USB))
 static usbtrace_idset_t g_maskedidset = CONFIG_USBDEV_TRACE_INITIALIDSET;
+static spinlock_t g_lock = SP_UNLOCKED;
 #endif
 
 /****************************************************************************
@@ -129,10 +131,10 @@ usbtrace_idset_t usbtrace_enable(usbtrace_idset_t idset)
 
   /* The following read and write must be atomic */
 
-  flags         = enter_critical_section();
+  flags         = spin_lock_irqsave(&g_lock);
   ret           = g_maskedidset;
   g_maskedidset = idset;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
   return ret;
 }
 #endif /* CONFIG_USBDEV_TRACE || CONFIG_DEBUG_FEATURES && CONFIG_DEBUG_USB */
@@ -155,7 +157,7 @@ void usbtrace(uint16_t event, uint16_t value)
 
   /* Check if tracing is enabled for this ID */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
   if ((g_maskedidset & TRACE_ID2BIT(event)) != 0)
     {
 #ifdef CONFIG_USBDEV_TRACE
@@ -178,14 +180,19 @@ void usbtrace(uint16_t event, uint16_t value)
               g_tail = 0;
             }
         }
+
+      spin_unlock_irqrestore(&g_lock, flags);
 #else
       /* Just print the data using syslog */
 
+      spin_unlock_irqrestore(&g_lock, flags);
       usbtrace_trprintf(usbtrace_syslog, event, value);
 #endif
     }
-
-  leave_critical_section(flags);
+  else
+    {
+      spin_unlock_irqrestore(&g_lock, flags);
+    }
 }
 #endif /* CONFIG_USBDEV_TRACE || CONFIG_DEBUG_FEATURES && CONFIG_DEBUG_USB */
 

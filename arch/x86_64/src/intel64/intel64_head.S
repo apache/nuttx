@@ -80,7 +80,7 @@
 	.global    __enable_sse_avx
 	.global    __enable_pcid
 	.global    __revoke_low_memory
-#ifdef CONFIG_LIB_SYSCALL
+#ifdef CONFIG_ARCH_HAVE_SYSCALL
 	.global    x86_64_syscall_entry
 	.global    x86_64_syscall
 #endif
@@ -272,8 +272,8 @@ start32:
 
 	/* Jump to 64 bit initialization if this is AP core */
 	mov     bsp_done, %eax
-	cmp     $0, %eax
-	jne     start64_init
+	test	%eax, %eax
+	jnz     start64_init
 
 	/* initialize rest of the page directory */
 	lea     g_pd_low, %edi
@@ -348,7 +348,7 @@ start64_init:
 
 	movl    $MSR_EFER,  %ecx
 	rdmsr
-#ifdef CONFIG_LIB_SYSCALL
+#ifdef CONFIG_ARCH_HAVE_SYSCALL
 	or      $(EFER_LME | EFER_SCE),  %eax
 #else
 	or      $EFER_LME,  %eax
@@ -383,8 +383,8 @@ start64:
 
 	/* Start BSP or AP */
 	mov     bsp_done, %eax
-	cmp     $0, %eax
-	jne     ap_start
+	test    %eax, %eax
+	jnz     ap_start
 
 	/* Properly setup RSP to idle stack */
 	movabs  $g_idle_topstack,    %rbx
@@ -456,7 +456,6 @@ __revoke_low_memory:
 	lea     g_pd_low, %edi
 	add     %rcx, %rdi
 	lea     g_pt_low, %esi
-	add     %rcx, %rsi
 
 	/* for ecx = 0...64 : Loop and setup 64x 2MB page directories */
 	mov     $64,   %ecx
@@ -503,8 +502,8 @@ __enable_sse_avx:
 	/* Configure XSAVE/XRSTOR for user state*/
 	mov     $X86_XCR0_VAL, %eax
 
-	xor     %rdx,  %rdx
-	xor     %rcx,  %rcx
+	xor     %edx,  %edx
+	xor     %ecx,  %ecx
 	xsetbv
 
 #else
@@ -536,7 +535,7 @@ __enable_pcid:
 
 	.size   __enable_pcid, . - __enable_pcid
 
-#ifdef CONFIG_LIB_SYSCALL
+#ifdef CONFIG_ARCH_HAVE_SYSCALL
   /****************************************************************************
   * Name: x86_64_syscall_entry
   *
@@ -696,6 +695,10 @@ no_kstack_switch:
 
 syscall_no_ring3:
 #  endif
+	/* Restore the value of RFLAGS from R11 */
+	pushq   %r11
+	popfq
+
 	/* Return to address pointed in RCX - must be on stack */
 	pushq   %rcx
 	ret

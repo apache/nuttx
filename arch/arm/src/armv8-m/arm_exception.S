@@ -205,9 +205,11 @@ exception_common:
 	 */
 	tst		r14, #EXC_RETURN_THREAD_MODE		/* Nonzero if context on thread mode */
 	beq		3f					/* Branch if context already on the handle mode */
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
 	sub		r2, r1, #XCPTCONTEXT_SIZE		/* Reserve signal context */
 	bic		r2, r2, #7				/* Get the stack pointer with 8-byte alignment */
 	mov		sp, r2					/* Instantiate the aligned stack */
+#endif
 3:
 #endif
 	mov		fp,	r1

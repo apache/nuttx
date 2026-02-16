@@ -145,7 +145,7 @@ static void local_recvctl(FAR struct local_conn_s *conn,
   int *fds;
   int i;
 
-  net_lock();
+  local_lock();
 
   if (conn->lc_peer == NULL)
     {
@@ -177,8 +177,7 @@ static void local_recvctl(FAR struct local_conn_s *conn,
     {
       fds[i] = file_dup(peer->lc_cfps[i], 0,
                         flags & MSG_CMSG_CLOEXEC ? O_CLOEXEC : 0);
-      file_close(peer->lc_cfps[i]);
-      kmm_free(peer->lc_cfps[i]);
+      file_put(peer->lc_cfps[i]);
       peer->lc_cfps[i] = NULL;
       peer->lc_cfpcount--;
       if (fds[i] < 0)
@@ -198,7 +197,7 @@ static void local_recvctl(FAR struct local_conn_s *conn,
     }
 
 out:
-  net_unlock();
+  local_unlock();
 }
 #endif /* CONFIG_NET_LOCAL_SCM */
 
@@ -539,18 +538,10 @@ errout_with_halfduplex:
 ssize_t local_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                       int flags)
 {
-  FAR struct local_conn_s *conn = psock->s_conn;
   FAR socklen_t *fromlen = &msg->msg_namelen;
   FAR struct sockaddr *from = msg->msg_name;
   FAR void *buf = msg->msg_iov->iov_base;
   size_t len = msg->msg_iov->iov_len;
-
-  /* Check shutdown state */
-
-  if (conn->lc_infile.f_inode == NULL)
-    {
-      return 0;
-    }
 
   if (msg->msg_iovlen != 1)
     {

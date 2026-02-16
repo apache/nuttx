@@ -1,0 +1,14 @@
+{
+    "module": {
+        "include_module": [],
+        "exclude_module":
+        [
+            "Nuttx_System_Driver_Pm",
+            "Nuttx_System_Fs_Fs"
+        ],
+        "order": []
+    },
+    "args": {
+        "kv": []
+    }
+}

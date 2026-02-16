@@ -810,7 +810,7 @@ static ssize_t cfi_write_unalign(FAR struct cfi_dev_s *cfi, off_t offset,
 
   /* handle unaligned start */
 
-  if ((delta = offset - wp) == 0)
+  if ((delta = offset - wp) == 0 && nbytes >= cfi->bankwidth)
     {
       return 0;
     }
@@ -969,8 +969,9 @@ int cfi_check(FAR struct cfi_dev_s *cfi)
 
               cfi->cfi_offset = g_cfi_query_address[i];
               cfi->dev_num = cfi->bankwidth / cfi->dev_width;
-              cfi->page_size = (1 << info->max_write_bytes_num) *
-                               cfi->dev_num;
+              cfi->page_size = MIN(CONFIG_MTD_CFI_PAGE_SIZE,
+                                   (1 << info->max_write_bytes_num) *
+                                   cfi->dev_num);
 
               /* fix amd feature */
 
@@ -1096,7 +1097,7 @@ int cfi_write(FAR struct cfi_dev_s *cfi, off_t offset, size_t nbytes,
 
           if (size > nbytes)
             {
-              size = nbytes;
+              size = ALIGN_DOWN(nbytes, cfi->bankwidth);
             }
 
           ret = cfi_write_buffer(cfi, offset, size, buffer);

@@ -57,8 +57,6 @@ struct stm32_oneshot_lowerhalf_s
   /* Private lower half data follows */
 
   struct stm32_oneshot_s oneshot; /* STM32-specific oneshot state */
-  oneshot_callback_t callback;    /* Internal handler that receives callback */
-  void *arg;                      /* Argument that is passed to the handler */
 };
 
 /****************************************************************************
@@ -70,7 +68,6 @@ static void stm32_oneshot_handler(void *arg);
 static int stm32_max_delay(struct oneshot_lowerhalf_s *lower,
                            struct timespec *ts);
 static int stm32_start(struct oneshot_lowerhalf_s *lower,
-                       oneshot_callback_t callback, void *arg,
                        const struct timespec *ts);
 static int stm32_cancel(struct oneshot_lowerhalf_s *lower,
                         struct timespec *ts);
@@ -111,8 +108,6 @@ static void stm32_oneshot_handler(void *arg)
 {
   struct stm32_oneshot_lowerhalf_s *priv =
     (struct stm32_oneshot_lowerhalf_s *)arg;
-  oneshot_callback_t callback;
-  void *cbarg;
 
   DEBUGASSERT(priv != NULL);
 
@@ -120,21 +115,7 @@ static void stm32_oneshot_handler(void *arg)
    * stm32_cancel?
    */
 
-  if (priv->callback)
-    {
-      /* Sample and nullify BEFORE executing callback (in case the callback
-       * restarts the oneshot).
-       */
-
-      callback       = priv->callback;
-      cbarg          = priv->arg;
-      priv->callback = NULL;
-      priv->arg      = NULL;
-
-      /* Then perform the callback */
-
-      callback(&priv->lh, cbarg);
-    }
+  oneshot_process_callback(&priv->lh);
 }
 
 /****************************************************************************
@@ -198,7 +179,6 @@ static int stm32_max_delay(struct oneshot_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int stm32_start(struct oneshot_lowerhalf_s *lower,
-                       oneshot_callback_t callback, void *arg,
                        const struct timespec *ts)
 {
   struct stm32_oneshot_lowerhalf_s *priv =
@@ -206,15 +186,13 @@ static int stm32_start(struct oneshot_lowerhalf_s *lower,
   irqstate_t flags;
   int ret;
 
-  DEBUGASSERT(priv != NULL && callback != NULL && ts != NULL);
+  DEBUGASSERT(priv != NULL && ts != NULL);
 
   /* Save the callback information and start the timer */
 
-  flags          = enter_critical_section();
-  priv->callback = callback;
-  priv->arg      = arg;
-  ret            = stm32_oneshot_start(&priv->oneshot,
-                                       stm32_oneshot_handler, priv, ts);
+  flags = enter_critical_section();
+  ret   = stm32_oneshot_start(&priv->oneshot,
+                              stm32_oneshot_handler, priv, ts);
   leave_critical_section(flags);
 
   if (ret < 0)
@@ -261,10 +239,8 @@ static int stm32_cancel(struct oneshot_lowerhalf_s *lower,
 
   /* Cancel the timer */
 
-  flags          = enter_critical_section();
-  ret            = stm32_oneshot_cancel(&priv->oneshot, ts);
-  priv->callback = NULL;
-  priv->arg      = NULL;
+  flags = enter_critical_section();
+  ret   = stm32_oneshot_cancel(&priv->oneshot, ts);
   leave_critical_section(flags);
 
   if (ret < 0)

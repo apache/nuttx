@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/irq.h>
 #include <arch/arch.h>
 #include <arch/irq.h>
 #include <arch/mode.h>
@@ -239,7 +240,9 @@ handle_irq:
   REGSTORE   s0, 0(sp)
   add        s0, sp, (INT_REG_SIZE * 2)
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   addi       sp, sp, -XCPTCONTEXT_SIZE
+#endif
 
   /* Call interrupt handler in C */
 
@@ -249,9 +252,11 @@ handle_irq:
   REGLOAD    s0, 0(sp)
   add        sp, sp, (INT_REG_SIZE * 2)
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   /* Restore sp */
 
   addi       sp, sp, XCPTCONTEXT_SIZE
+#endif
 #endif
 
 return_from_exception:
@@ -356,8 +361,8 @@ riscv_jump_to_user:
   .type   g_intstackalloc, object
   .type   g_intstacktop, object
 g_intstackalloc:
-  .skip  STACK_ALIGN_UP(STACK_ALLOC_SIZE)
+  .skip  STACKFRAME_ALIGN_UP(STACK_ALLOC_SIZE)
 g_intstacktop:
   .size  g_intstacktop, 0
-  .size  g_intstackalloc, STACK_ALIGN_DOWN(STACK_ALLOC_SIZE)
+  .size  g_intstackalloc, STACKFRAME_ALIGN_DOWN(STACK_ALLOC_SIZE)
 #endif

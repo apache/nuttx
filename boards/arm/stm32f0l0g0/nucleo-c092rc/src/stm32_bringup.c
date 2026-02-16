@@ -78,7 +78,7 @@ int stm32_bringup(void)
   stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
 #endif
 
-#ifdef HAVE_LEDS
+#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
   /* Register the LED driver */
 
   ret = userled_lower_initialize(LED_DRIVER_PATH);

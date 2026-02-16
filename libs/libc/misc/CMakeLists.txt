@@ -28,6 +28,7 @@ list(
   SRCS
   lib_bitmap.c
   lib_circbuf.c
+  lib_creat.c
   lib_mknod.c
   lib_umask.c
   lib_utsname.c
@@ -80,13 +81,20 @@ list(
   lib_fnmatch.c
   lib_debug.c
   lib_crc64.c
+  lib_crc64emac.c
   lib_crc32.c
+  lib_crc32h04c11db7.c
+  lib_crc32hf4acfb13.c
   lib_crc16.c
   lib_crc16ccitt.c
   lib_crc16ibm.c
   lib_crc16xmodem.c
+  lib_crc16h1021.c
+  lib_crc16h8005.c
   lib_crc8.c
   lib_crc8ccitt.c
+  lib_crc8h1d.c
+  lib_crc8h2f.c
   lib_crc8rohc.c
   lib_crc8table.c
   lib_glob.c
@@ -119,6 +127,10 @@ endif()
 
 if(CONFIG_FDCHECK)
   list(APPEND SRCS lib_fdcheck.c)
+endif()
+
+if(CONFIG_SCHED_INSTRUMENTATION_DUMP)
+  list(APPEND SRCS lib_note.c)
 endif()
 
 if(NOT CONFIG_LIBC_UNAME_DISABLE_TIMESTAMP)

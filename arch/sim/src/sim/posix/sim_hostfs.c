@@ -37,23 +37,11 @@
 #include <errno.h>
 
 #include "hostfs.h"
+#include "sim_internal.h"
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: host_errno_convert
- ****************************************************************************/
-
-static int host_errno_convert(int errcode)
-{
-  /* Provide a common interface, which should have different conversions
-   * on different platforms.
-   */
-
-  return errcode;
-}
 
 /****************************************************************************
  * Name: host_stat_convert

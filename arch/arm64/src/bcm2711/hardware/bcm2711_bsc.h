@@ -40,17 +40,20 @@
 #define BCM_BSC1                                                             \
   (BCM_PERIPHERAL_BASEADDR + 0x000804000) /* BSC/I2C interface 1 */
 #define BCM_BSC3                                                             \
-  (BCM_PERIPHERAL_BASEADDR + 0x000205600) /* BSC/I2C interface 2 */
+  (BCM_PERIPHERAL_BASEADDR + 0x000205600) /* BSC/I2C interface 3 */
 #define BCM_BSC4                                                             \
-  (BCM_PERIPHERAL_BASEADDR + 0x000205800) /* BSC/I2C interface 3 */
+  (BCM_PERIPHERAL_BASEADDR + 0x000205800) /* BSC/I2C interface 4 */
 #define BCM_BSC5                                                             \
-  (BCM_PERIPHERAL_BASEADDR + 0x000205a80) /* BSC/I2C interface 4 */
+  (BCM_PERIPHERAL_BASEADDR + 0x000205a80) /* BSC/I2C interface 5 */
 #define BCM_BSC6                                                             \
-  (BCM_PERIPHERAL_BASEADDR + 0x000205c00) /* BSC/I2C interface 5 */
+  (BCM_PERIPHERAL_BASEADDR + 0x000205c00) /* BSC/I2C interface 6 */
 
-/* Number of BSC interfaces. */
+/* Number of BSC interfaces.
+ * NOTE: this considers all interfaces. BSC2 and BSC7 are not meant to be
+ * user controllable, they are dedicated for use by the HDMI interfaces.
+ */
 
-#define BCM_BSCS_NUM 7
+#define BCM_BSCS_NUM 8
 
 /* BSC register offsets */
 
@@ -82,9 +85,7 @@
 #define BCM_BSC_C_INTT (1 << 9)     /* Interrupt on TX */
 #define BCM_BSC_C_INTD (1 << 8)     /* Interrupt on DONE */
 #define BCM_BSC_C_ST (1 << 7)       /* Start transfer */
-#define BCM_BSC_C_CLRMSK (0x3 << 3) /* FIFO clear mask */
-#define BCM_BSC_C_NOCLR (0 << 3)    /* No clear action */
-#define BCM_BSC_C_CLRFIFO (1 << 3)  /* Clear FIFO one shot */
+#define BCM_BSC_C_CLEAR (0x3 << 3)  /* FIFO clear mask */
 #define BCM_BSC_C_READ (1 << 0)     /* Read = 1, Write = 0 */
 
 #define BCM_BSC_S_CLKT (1 << 9) /* CLK stretch detected */

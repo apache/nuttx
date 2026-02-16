@@ -42,24 +42,7 @@ set(CMAKE_RANLIB llvm-ranlib)
 # built-in functions, refer: https://github.com/apache/incubator-nuttx/pull/5971
 
 add_compile_options(-fno-builtin)
-
-if(TOOLCHAIN_CLANG_CONFIG)
-  execute_process(COMMAND clang --version
-                  OUTPUT_VARIABLE clang_full_version_string)
-
-  string(REGEX REPLACE ".*clang version ([0-9]+\\.[0-9]+\.[0-9]+).*" "\\1"
-                       CLANGVER ${clang_full_version_string})
-
-  if(CLANGVER STREQUAL "14.0")
-    set(TOOLCHAIN_CLANG_CONFIG ${TOOLCHAIN_CLANG_CONFIG}_nosys)
-  elseif(CLANGVER STRGREATER_EQUAL "17.0")
-    set(TOOLCHAIN_CLANG_OPTION -target)
-    add_compile_options(--target=arm-none-eabi)
-  else()
-    set(TOOLCHAIN_CLANG_OPTION --config)
-  endif()
-  add_compile_options(${TOOLCHAIN_CLANG_OPTION} ${TOOLCHAIN_CLANG_CONFIG}.cfg)
-endif()
+add_compile_options(--target=arm-none-eabi)
 
 # override the ARCHIVE command
 
@@ -108,7 +91,7 @@ else()
 endif()
 
 if(CONFIG_STACK_CANARIES)
-  add_compile_options(-fstack-protector-all)
+  add_compile_options(${CONFIG_STACK_CANARIES_LEVEL})
 endif()
 
 if(CONFIG_STACK_USAGE)
@@ -244,17 +227,15 @@ set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)
 set(NUTTX_FIND_TOOLCHAIN_LIB_DEFINED true)
 
 if(CONFIG_BUILTIN_TOOLCHAIN)
-  if(ARGN)
-    function(nuttx_find_toolchain_lib)
+  function(nuttx_find_toolchain_lib)
+    if(ARGN)
       execute_process(
         COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
                 --print-file-name=${ARGN}
         OUTPUT_STRIP_TRAILING_WHITESPACE
         OUTPUT_VARIABLE extra_lib_path)
       nuttx_add_extra_library(${extra_lib_path})
-    endfunction()
-  else()
-    function(nuttx_find_toolchain_lib)
+    else()
       execute_process(
         COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
                 --print-libgcc-file-name
@@ -267,8 +248,8 @@ if(CONFIG_BUILTIN_TOOLCHAIN)
         OUTPUT_STRIP_TRAILING_WHITESPACE
         OUTPUT_VARIABLE libgcc)
       nuttx_add_extra_library(${libgcc})
-    endfunction()
-  endif()
+    endif()
+  endfunction()
 else()
   function(nuttx_find_toolchain_lib)
     if(ARGN)

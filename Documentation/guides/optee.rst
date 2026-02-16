@@ -14,8 +14,16 @@ not officially supported by NuttX, and is out of the scope of this guide.
 
 The driver supports opening and closing sessions, allocating and registering
 shared memory, and invoking functions on OP-TEE Trusted Applications (TAs).
-It does not (yet) support reverse direction commands (TA -> Normal World)
-to something like a TEE supplicant.
+The driver also supports, reverse direction commands called RPCs
+(TA -> Normal World). Some of the RPCs are handled completely by the kernel
+driver while others require the TEE supplicant userspace process to be running
+by having opened (``/dev/teepriv#``). Similarly to libteec, the supplicant
+is not officially supported.
+
+.. note::
+   ``/dev/teepriv#`` is reserved solely for the supplicant and shouldn't be
+   used by any other NuttX application.
+
 
 Enabling the OP-TEE Driver
 ==========================
@@ -27,16 +35,14 @@ The driver is enabled using one of:
 - ``CONFIG_DEV_OPTEE_SMC``
 
 All of the above require also ``CONFIG_ALLOW_BSD_COMPONENTS`` and
-``CONFIG_LIBC_MEMFD_SHMFS``, which in turn requires ``CONFIG_FS_SHMFS``. So,
-at a bare minimum, to enable the driver one would need something like the
-following:
+``CONFIG_FS_ANONMAP``. So, at a bare minimum, to enable the driver
+one would need something like the following:
 
 .. code-block::
 
   CONFIG_ALLOW_BSD_COMPONENTS=y
   CONFIG_DEV_OPTEE_SMC=y
-  CONFIG_FS_SHMFS=y
-  CONFIG_LIBC_MEMFD_SHMFS=y
+  CONFIG_FS_ANONMAP=y
 
 Each implementation (local, RPMsg, or SMC) may have further dependencies
 (e.g. RPMsg requires ``CONFIG_NET_RPMSG`` and more) and may have further
@@ -49,10 +55,13 @@ parameters to configure (e.g. RPMsg remote CPU name through
   encounter issues with shared memory depending on the state of the data
   cache in Secure World.
 
+If ``CONFIG_DEV_OPTEE_SMC`` is enabled we can also enable the kernel driver
+for the TEE supplicant by using ``CONFIG_DEV_OPTEE_SUPPLICANT``.
+
 Successful registration of the driver can be verified by looking into
-``/dev/tee0``. For instance, incompatibility with the TEE OS running in the
-system, will prevent the ``/dev/tee0`` character device from being
-registered.
+``/dev/tee0`` and ``/dev/teepriv0`` (for the supplicant). For instance,
+incompatibility with the TEE OS running in the system, will prevent the
+``/dev/tee0`` character device from being registered.
 
 IOCTLs supported
 ================
@@ -129,6 +138,26 @@ on success unless otherwise specified (see ``TEE_IOC_SHM_ALLOC``).
     memory to register and ``.size`` shall indicate its size. One may use the
     returned ``.id`` field when specifying shared memory references
     (``tee_ioctl_param.c`` field).
+
+- ``TEE_IOC_SUPPL_RECV`` : Receive an RPC request from the OP-TEE that needs userspace interaction from the supplicant.
+
+  - Expects a pointer to a ``struct tee_ioctl_buf_data`` instance where the
+    ``.buf_ptr`` field points to a user allocated buffer that must hold a
+    ``struct tee_iocl_supp_send/recv_arg`` followed by a number of
+    ``struct tee_ioctl_param`` parameters.  The ``.buf_len`` field communicates
+    to the kernel the length of that buffer.  If the user passes a bigger number
+    of parameters than ``OPTEE_MAX_PARAM_NUM`` or smaller number of parameters than
+    the number sent by OP-TEE, the ioctl will fail. The TEE supplicant by default
+    uses 5 ``struct tee_ioctl_param`` parameters.
+
+- ``TEE_IOC_SUPPL_SEND`` : Respond to an RPC request from the OP-TEE that needed userspace interaction from the supplicant.
+
+  - Expects a pointer to a ``struct tee_ioctl_buf_data`` instance where the
+    ``.buf_ptr`` field points to a user allocated buffer that must hold a
+    ``struct tee_iocl_supp_send/recv_arg`` followed by a number of
+    ``struct tee_ioctl_param`` parameters.  The ``.buf_len`` field communicates
+    to the kernel the length of that buffer. The number of parameters depends on
+    the size of expected RPC response by the OP-TEE.
 
 Typical usage
 =============
@@ -307,3 +336,37 @@ Typical usage
        }
 
      /* use result (if any) in ioc_args->params */
+
+#. OP-TEE secure storage support through TEE supplicant
+
+   .. code-block:: shell
+
+     optee_supplicant -f /data/tee > /dev/null &
+
+This runs the OP-TEE supplicant in the background, using ``/data/tee`` as the
+directory for the TEE file system. Output is redirected to ``/dev/null`` to
+suppress standard output. Make sure that the userspace support for the
+supplicant is enabled and that ``/data`` is mounted as read/write.
+
+With the supplicant running, secure storage objects can be created, retrieved,
+and managed by Trusted Applications (TAs). In a typical workflow, a Client
+Application (CA) running on NuttX invokes a command in a TA that may need to
+read from or create persistent objects. In such cases, certain RPCs generated
+by OP-TEE are routed from the CA to the TEE supplicant for handling (provided
+the supplicant is running in the background). Once the supplicant has processed
+the request, it responds using ``TEE_IOC_SUPPL_SEND``, and the kernel driver
+delivers this response back to the CA in its context.
+
+#. OP-TEE REE time request
+
+In this scenario, the userspace supplicant isn't needed, as the response can be
+handled directly by the kernel driver.
+
+An OP-TEE application can request the current time from the NuttX clock using:
+
+   .. code-block:: c
+
+     TEE_GetREETime(&t);
+
+The NuttX kernel driver will respond to the TA with the ``CLOCK_REALTIME``
+which represents the machine's best-guess as to the current wall-clock.

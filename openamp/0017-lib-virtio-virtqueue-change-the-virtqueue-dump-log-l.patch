@@ -1,0 +1,29 @@
+From 73c39d417b7bf435267de7f55f4877218288b65e Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Wed, 28 Jan 2026 22:31:00 +0800
+Subject: [PATCH 17/18] lib/virtio/virtqueue: change the virtqueue dump log
+ level to emergency
+
+To avoid the dump log can't be output.
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/virtio/virtqueue.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/virtio/virtqueue.c open-amp/lib/virtio/virtqueue.c
+index 69e3572cd1..4c7fe3b225 100644
+--- a/lib/virtio/virtqueue.c
++++ open-amp/lib/virtio/virtqueue.c
+@@ -351,7 +351,7 @@ void virtqueue_dump(struct virtqueue *vq)
+ 	VRING_INVALIDATE(&vq->vq_ring.avail, sizeof(vq->vq_ring.avail));
+ 	VRING_INVALIDATE(&vq->vq_ring.used, sizeof(vq->vq_ring.used));
+ 
+-	metal_log(METAL_LOG_DEBUG,
++	metal_log(METAL_LOG_EMERGENCY,
+ 		  "VQ: %s - size=%d; free=%d; queued=%d; desc_head_idx=%d; "
+ 		  "available_idx=%d; avail.idx=%d; used_cons_idx=%d; "
+ 		  "used.idx=%d; avail.flags=0x%x; used.flags=0x%x\r\n",
+-- 
+2.34.1
+

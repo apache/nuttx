@@ -478,7 +478,7 @@ static int virtio_snd_query_info(FAR struct virtio_snd_s *priv,
   req->count = count;
   req->size = size;
 
-  resp = virtio_alloc_buf(priv->vdev, sizeof(*resp), 16);
+  resp = virtio_malloc_buf(priv->vdev, sizeof(*resp), 16);
   if (resp == NULL)
     {
       vrterr("virtio audio driver cmd response alloc failed\n");
@@ -562,7 +562,7 @@ static int virtio_snd_set_params(FAR struct virtio_snd_dev_s *sdev,
   req->buffer_bytes = req->period_bytes *
                       CONFIG_DRIVERS_VIRTIO_SND_BUFFER_COUNT;
 
-  resp = virtio_alloc_buf(priv->vdev, sizeof(*resp), 16);
+  resp = virtio_malloc_buf(priv->vdev, sizeof(*resp), 16);
   if (resp == NULL)
     {
       vrterr("zalloc for request error\n");
@@ -609,7 +609,7 @@ static int virtio_snd_send_cmd(FAR struct virtio_snd_dev_s *sdev,
   struct virtqueue_buf vb[2];
   int ret;
 
-  req = virtio_alloc_buf(vdev, sizeof(*req), 16);
+  req = virtio_malloc_buf(vdev, sizeof(*req), 16);
   if (req == NULL)
     {
       vrterr("zalloc for request error\n");
@@ -619,7 +619,7 @@ static int virtio_snd_send_cmd(FAR struct virtio_snd_dev_s *sdev,
   req->hdr.code = cmd;
   req->stream_id = sdev->index;
 
-  resp = virtio_alloc_buf(vdev, sizeof(*resp), 16);
+  resp = virtio_malloc_buf(vdev, sizeof(*resp), 16);
   if (resp == NULL)
     {
       vrterr("zalloc for request error\n");
@@ -1107,15 +1107,19 @@ static int virtio_snd_init(FAR struct virtio_snd_s *priv)
 
   virtio_set_status(priv->vdev, VIRTIO_CONFIG_STATUS_DRIVER_OK);
 
-  virtio_read_config(priv->vdev, 0, &priv->config,
-                     sizeof(struct virtio_snd_config));
+  virtio_read_config_member(priv->vdev, struct virtio_snd_config, jacks,
+                            &priv->config.jacks);
+  virtio_read_config_member(priv->vdev, struct virtio_snd_config, streams,
+                            &priv->config.streams);
+  virtio_read_config_member(priv->vdev, struct virtio_snd_config, chmaps,
+                            &priv->config.chmaps);
   vrtinfo("jacks:%"PRIu32" streams:%"PRIu32" chmap:%"PRIu32"\n",
            priv->config.jacks, priv->config.streams, priv->config.chmaps);
 
-  priv->info = virtio_alloc_buf(priv->vdev,
-                                priv->config.streams *
-                                sizeof(struct virtio_snd_pcm_info),
-                                16);
+  priv->info = virtio_malloc_buf(priv->vdev,
+                                 priv->config.streams *
+                                 sizeof(struct virtio_snd_pcm_info),
+                                 16);
   if (priv->info == NULL)
     {
       vrterr("virtio audio driver query pcm info alloc failed\n");

@@ -804,9 +804,9 @@ static int bl602_net_soft_reset(void)
   int idx;
 
   wifi_mgmr_sta_disconnect();
-  nxsig_sleep(1);
+  nxsched_sleep(1);
   wifi_mgmr_api_ap_stop();
-  nxsig_sleep(1);
+  nxsched_sleep(1);
   wifi_mgmr_api_idle();
   wifi_mgmr_reset();
 
@@ -1302,7 +1302,7 @@ static int bl602_ioctl_wifi_stop(struct bl602_net_driver_s *priv,
         }
 
       wifi_mgmr_sta_disconnect();
-      nxsig_sleep(1);
+      nxsched_sleep(1);
       wifi_mgmr_api_idle();
     }
   else if (priv->current_mode == IW_MODE_MASTER)
@@ -1313,7 +1313,7 @@ static int bl602_ioctl_wifi_stop(struct bl602_net_driver_s *priv,
         }
 
       wifi_mgmr_api_ap_stop();
-      nxsig_sleep(1);
+      nxsched_sleep(1);
       wifi_mgmr_api_idle();
     }
 

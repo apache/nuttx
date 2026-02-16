@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <nuttx/compiler.h>
 #include <nuttx/kmalloc.h>
@@ -613,8 +614,9 @@ static void virtio_net_set_macaddr(FAR struct virtio_net_priv_s *priv)
 
   if (virtio_has_feature(vdev, VIRTIO_NET_F_MAC))
     {
-      virtio_read_config(vdev, offsetof(struct virtio_net_config_s, mac),
-                         mac, IFHWADDRLEN);
+      virtio_read_config_bytes(vdev,
+                               offsetof(struct virtio_net_config_s, mac),
+                               mac, IFHWADDRLEN);
     }
   else
     {
@@ -624,20 +626,8 @@ static void virtio_net_set_macaddr(FAR struct virtio_net_priv_s *priv)
        *        conflicts with something else on the network.
        */
 
-      srand(time(NULL) +
-#ifdef CONFIG_NETDEV_IFINDEX
-            dev->d_ifindex
-#else
-            (uintptr_t)dev % 256
-#endif
-          );
-
       mac[0] = 0x42;
-      mac[1] = rand() % 256;
-      mac[2] = rand() % 256;
-      mac[3] = rand() % 256;
-      mac[4] = rand() % 256;
-      mac[5] = rand() % 256;
+      arc4random_buf(mac + 1, 5);
     }
 }
 

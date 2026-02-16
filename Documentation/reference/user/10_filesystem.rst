@@ -446,7 +446,7 @@ Pipes and FIFOs
 -------------------------------------
 
 NuttX operates in a flat open address space and is focused on MCUs that
-do support Memory Management Units (MMUs). Therefore, NuttX generally
+do not support Memory Management Units (MMUs). Therefore, NuttX generally
 does not require ``mmap()`` functionality and the MCUs generally cannot
 support true memory-mapped files.
 

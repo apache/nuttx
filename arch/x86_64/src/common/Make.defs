@@ -34,7 +34,7 @@ CMN_CSRCS += x86_64_fork.c
 CMN_ASRCS += fork.S
 endif
 
-ifeq ($(CONFIG_LIB_SYSCALL),y)
+ifeq ($(CONFIG_ARCH_HAVE_SYSCALL),y)
 CMN_CSRCS += x86_64_syscall.c
 endif
 
@@ -44,6 +44,7 @@ endif
 
 ifeq ($(CONFIG_ARCH_X86_64_ACPI),y)
 CMN_CSRCS += x86_64_acpi.c
+CMN_CSRCS += x86_64_acpi_procfs.c
 endif
 
 ifeq ($(CONFIG_SCHED_THREAD_LOCAL),y)
@@ -65,12 +66,10 @@ endif
 ifneq ($(CONFIG_BUILD_FLAT),y)
 CMN_CSRCS  += x86_64_task_start.c
 CMN_CSRCS  += x86_64_pthread_start.c
-CMN_CSRCS  += x86_64_signal_dispatch.c
 CMN_UASRCS += x86_64_signal_handler.S
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+  CMN_CSRCS += x86_64_signal_dispatch.c
 endif
-
-ifndef CONFIG_ALARM_ARCH
-CMN_CSRCS += x86_64_udelay.c x86_64_mdelay.c
 endif
 
 ifeq ($(CONFIG_ARCH_HAVE_DEBUG),y)

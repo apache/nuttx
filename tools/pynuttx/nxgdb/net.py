@@ -128,11 +128,11 @@ class NetStats(gdb.Command):
             size = utils.get_symbol_value("CONFIG_IOB_BUFSIZE")
             ntotal = utils.get_symbol_value("CONFIG_IOB_NBUFFERS")
 
-            nfree = gdb.parse_and_eval("g_iob_sem")["semcount"]
+            nfree = gdb.parse_and_eval("g_iob_sem")["val"]["semcount"]
             nwait, nfree = (0, nfree) if nfree >= 0 else (-nfree, 0)
 
             nthrottle = (
-                gdb.parse_and_eval("g_throttle_sem")["semcount"]
+                gdb.parse_and_eval("g_throttle_sem")["val"]["semcount"]
                 if utils.get_symbol_value("CONFIG_IOB_THROTTLE") > 0
                 else 0
             )
@@ -293,9 +293,9 @@ class NetCheck(gdb.Command):
         result = NetCheckResult.PASS
         message = []
         try:
-            nfree = gdb.parse_and_eval("g_iob_sem")["semcount"]
+            nfree = gdb.parse_and_eval("g_iob_sem")["val"]["semcount"]
             nthrottle = (
-                gdb.parse_and_eval("g_throttle_sem")["semcount"]
+                gdb.parse_and_eval("g_throttle_sem")["val"]["semcount"]
                 if utils.get_symbol_value("CONFIG_IOB_THROTTLE") > 0
                 else 0
             )

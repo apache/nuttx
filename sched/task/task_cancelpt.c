@@ -67,6 +67,7 @@
 #include "signal/signal.h"
 #include "mqueue/mqueue.h"
 #include "task/task.h"
+#include "event/event.h"
 
 /****************************************************************************
  * Public Functions
@@ -108,7 +109,7 @@ bool nxnotify_cancellation(FAR struct tcb_s *tcb)
   /* Check to see if this task has the non-cancelable bit set. */
 
   if ((tcb->flags & TCB_FLAG_FORCED_CANCEL) == 0 &&
-      (tls->tl_cpstate & CANCEL_FLAG_NONCANCELABLE) != 0)
+      (tls->tl_cpstate & CANCEL_FLAG_NONCANCELABLE) != 0u)
     {
       /* Then we cannot cancel the thread now.  Here is how this is
        * supposed to work:
@@ -124,14 +125,13 @@ bool nxnotify_cancellation(FAR struct tcb_s *tcb)
        */
 
       tls->tl_cpstate |= CANCEL_FLAG_CANCEL_PENDING;
-      leave_critical_section(flags);
-      return true;
+      ret = true;
     }
 
 #ifdef CONFIG_CANCELLATION_POINTS
   /* Check if this task supports deferred cancellation */
 
-  if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_ASYNC) == 0)
+  if (!ret && (tls->tl_cpstate & CANCEL_FLAG_CANCEL_ASYNC) == 0u)
     {
       /* Then we cannot cancel the task asynchronously. */
 
@@ -162,8 +162,19 @@ bool nxnotify_cancellation(FAR struct tcb_s *tcb)
 
           else if (tcb->task_state == TSTATE_WAIT_SIG)
             {
-              nxsig_wait_irq(tcb, ECANCELED);
+              nxsig_wait_irq(tcb, SIG_CANCEL_TIMEOUT, SI_USER, ECANCELED);
             }
+
+#ifdef CONFIG_SCHED_EVENTS
+          /* If the thread is blocked waiting on a event, then the
+           * thread must be unblocked to handle the cancellation.
+           */
+
+          else if (tcb->task_state == TSTATE_WAIT_EVENT)
+            {
+              nxevent_wait_irq(tcb, ECANCELED);
+            }
+#endif
 
 #if !defined(CONFIG_DISABLE_MQUEUE) || !defined(CONFIG_DISABLE_MQUEUE_SYSV)
           /* If the thread is blocked waiting on a message queue, then

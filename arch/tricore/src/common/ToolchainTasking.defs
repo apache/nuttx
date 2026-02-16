@@ -44,12 +44,16 @@ endif
 
 # Tasking toolchain
 
+TASKING_COMPILER_PATH := $(shell which ctc)
+C_COMPILER_DIR := $(dir $(TASKING_COMPILER_PATH))
+
 CC                = cctc
 CXX               = cctc
-CPP               = cctc $(ARCHOPTIMIZATION)
+CPP               = ctc -E -I$(C_COMPILER_DIR)/../include.lsl
 LD                = cctc
 STRIP             = strip --strip-unneeded
 AR                = artc -r
+UNAR              = artc -x
 NM                = nm
 OBJCOPY           = echo
 OBJDUMP           = elfdump
@@ -76,7 +80,7 @@ ARCHOPTIMIZATION += --tradeoff=2
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION += --debug-info=default
   ARCHOPTIMIZATION += --keep-temporary-files
-  LDFLAGS          += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
+  ARCHOPTIMIZATION += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
 endif
 
 # merge source code with assembly output
@@ -100,11 +104,20 @@ ARCHOPTIMIZATION += --branch-target-align
 #   3                               alias for --fp-model=cflnrSTz (fast-sp)
 
 ARCHOPTIMIZATION += --fp-model=2
+LDFLAGS          += --no-default-libraries
 LDFLAGS          += --fp-model=2
 LDFLAGS          += -lfp_fpu
 
-LDFLAGS          += --hex-format=s -Wl-OtxYcL -Wl-mcrfiklsmnoduq
+LDFLAGS          += -Wl-OtxYcL -Wl-mcrfiklsmnoduq
 LDFLAGS          += -lrt
+
+ifeq ($(CONFIG_INTELHEX_BINARY),y)
+  LDFLAGS        += -Wl-o${TOPDIR}/nuttx.hex:IHEX:4 --hex-format=s
+endif
+
+ifeq ($(CONFIG_MOTOROLA_SREC),y)
+  LDFLAGS        += -Wl-o${TOPDIR}/nuttx.srec:SREC:4
+endif
 
 # ctc W500: ["stdio/lib_libvsprintf.c" 884/29] expression without effect
 # ctc W507: ["mm_heap/mm_malloc.c" 238/64] variable "nodesize" is possibly uninitialized
@@ -138,5 +151,5 @@ LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 CELFFLAGS = $(CFLAGS) -fvisibility=hidden
 CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
 
-LDELFFLAGS = -r -e __start
+LDELFFLAGS = -r -e _start
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)elf$(DELIM)gnu-elf.ld)

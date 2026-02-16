@@ -32,6 +32,7 @@
 #include <nuttx/virtio/virtio-pci.h>
 #include <nuttx/net/e1000.h>
 #include <nuttx/net/igc.h>
+#include <nuttx/net/igb.h>
 #include <nuttx/can/kvaser_pci.h>
 #include <nuttx/can/ctucanfd_pci.h>
 #include <nuttx/usb/xhci_pci.h>
@@ -160,6 +161,16 @@ int pci_register_drivers(void)
   if (ret < 0)
     {
       pcierr("pci_igc_init failed, ret=%d\n", ret);
+    }
+#endif
+
+  /* Initialization igb driver */
+
+#ifdef CONFIG_NET_IGB
+  ret = pci_igb_init();
+  if (ret < 0)
+    {
+      pcierr("pci_igb_init failed, ret=%d\n", ret);
     }
 #endif
 

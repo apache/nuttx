@@ -67,6 +67,26 @@ The above are all standard interfaces as defined at
 Those interfaces are available for use by application software.
 The remaining interfaces discussed in this section are non-standard, OS-internal interfaces.
 
+Early Syslog Interfaces
+-----------------------
+
+Provides a minimal SYSLOG output facility that can be used during the
+very early boot phase or when the system is in a down state, before the
+full SYSLOG subsystem or scheduler becomes available.
+
+.. c::function:: void early_syslog(FAR const char *fmt, ...);
+
+  See ``include/nuttx/syslog/syslog.h``.
+  This function provides basic formatted output similar to printf(),
+  and writes the resulting characters directly to the low-level output
+  device via up_putc(). It is primarily intended for debugging or
+  diagnostic messages in early system contexts, where interrupts may
+  be disabled and locking mechanisms are not yet available.
+
+  The function automatically appends a newline character ('\n') if
+  the formatted message does not already end with one, ensuring proper
+  alignment of log output in serial consoles or early boot traces.
+
 Debug Interfaces
 ----------------
 
@@ -518,6 +538,73 @@ Other miscellaneous settings
 
 -  ``CONFIG_RAMLOG_NPOLLWAITERS``: The maximum number of threads
    that may be waiting on the poll method.
+
+RAMLOG Rate Limiting
+--------------------
+
+The RAMLOG SYSLOG channel supports rate limiting to prevent log flooding.
+You can set or get the rate limit using the following IOCTLs:
+
+- ``SYSLOGIOC_SETRATELIMIT``: Set the rate limit.
+- ``SYSLOGIOC_GETRATELIMIT``: Get the current rate limit.
+
+The argument is a pointer to:
+
+.. code-block:: c
+
+   struct syslog_ratelimit_s
+   {
+     unsigned int interval; /* The interval in seconds */
+     unsigned int burst;    /* The max allowed log entries during interval */
+   };
+
+**Example (C code):**
+
+.. code-block:: c
+
+   struct syslog_ratelimit_s limit = { .interval = 1, .burst = 100 };
+   ioctl(fd, SYSLOGIOC_SETRATELIMIT, (unsigned long)&limit);
+
+**NSH Tool Example: setlograte**
+
+You can implement a simple NSH command to control the RAMLOG rate limit at runtime, similar to setlogmask:
+
+.. code-block:: c
+
+   int cmd_setlograte(int argc, char **argv)
+   {
+     int fd;
+     struct syslog_ratelimit_s limit;
+
+     if (argc != 3)
+       {
+         printf("Usage: setlograte <interval_sec> <burst>\n");
+         return -1;
+       }
+
+     limit.interval = atoi(argv[1]);
+     limit.burst = atoi(argv[2]);
+
+     fd = open("/dev/ramlog", O_RDWR);
+     if (fd < 0)
+       {
+         printf("Failed to open /dev/ramlog\n");
+         return -1;
+       }
+
+     if (ioctl(fd, SYSLOGIOC_SETRATELIMIT, (unsigned long)&limit) < 0)
+       {
+         printf("Failed to set rate limit\n");
+         close(fd);
+         return -1;
+       }
+
+     printf("Set RAMLOG rate limit: interval=%u sec, burst=%u\n", limit.interval, limit.burst);
+     close(fd);
+     return 0;
+   }
+
+This command allows you to set the maximum number of log entries (burst) allowed in a given interval (seconds) for the RAMLOG device at runtime.
 
 SYSLOG Protocol (RFC 5424)
 ==========================

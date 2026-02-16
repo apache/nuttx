@@ -86,28 +86,25 @@ sigset_t nxsig_pendingset(FAR struct tcb_s *stcb)
 
   if (stcb == NULL)
     {
-      group = this_task()->group;
-    }
-  else
-    {
-      group = stcb->group;
+      stcb = this_task();
     }
 
+  group = stcb->group;
   DEBUGASSERT(group);
 
   sigemptyset(&sigpendset);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&group->tg_lock);
   for (sigpend = (FAR sigpendq_t *)group->tg_sigpendingq.head;
        (sigpend); sigpend = sigpend->flink)
     {
-      if (stcb == NULL || sigpend->tcb == NULL || stcb == sigpend->tcb)
+      if (sigpend->tcb == NULL || stcb == sigpend->tcb)
         {
           nxsig_addset(&sigpendset, sigpend->info.si_signo);
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&group->tg_lock, flags);
 
   return sigpendset;
 }

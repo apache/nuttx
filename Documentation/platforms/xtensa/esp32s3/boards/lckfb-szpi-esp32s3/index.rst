@@ -454,3 +454,35 @@ Then run the lvgldemo command::
  [LVGL] [User]   (6.560, +0)      lv_nuttx_lcd_create: lcd /dev/lcd0 open success lv_nuttx_lcd.c:84
  [LVGL] [Warn]   (6.570, +10)     lv_demo_widgets: LV_FONT_MONTSERRAT_18 is not enabled for the widgets demo. Using LV_FONT_DEFAULT instead. lv_demo_widgets.c:156
  [LVGL] [Warn]   (6.580, +10)     lv_demo_widgets: LV_FONT_MONTSERRAT_12 is not enabled for the widgets demo. Using LV_FONT_DEFAULT instead. lv_demo_widgets.c:161
+
+qmi8658
+-------
+
+Basic NuttShell configuration console and QMI8658 6-axis IMU sensor enabled.
+
+The QMI8658 is a 6-axis IMU sensor that combines a 3-axis accelerometer and 3-axis gyroscope.
+This configuration enables the sensor on I2C0 at address 0x6A and registers uORB devices:
+
+- ``/dev/uorb/sensor_accel0`` for accelerometer data
+- ``/dev/uorb/sensor_gyro0`` for gyroscope data
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh lckfb-szpi-esp32s3:qmi8658
+  $ make flash -j$(nproc) ESPTOOL_PORT=/dev/ttyUSB0
+
+Then test the IMU sensor::
+
+  # Check available sensor devices
+  nsh> ls /dev/uorb/
+  /dev/uorb:
+   sensor_accel0
+   sensor_gyro0
+
+  nsh> uorb_listener
+
+  Monitor objects num:2
+  object_name:sensor_gyro, object_instance:0
+  object_name:sensor_accel, object_instance:0
+  sensor_gyro(now:113510000):timestamp:113510000,x:1.468750,y:1.562500,z:-0.093750,temperature:22.855469
+  sensor_accel(now:113510000):timestamp:113510000,x:-0.810913,y:0.027343,z:0.571167,temperature:22.855469

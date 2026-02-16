@@ -276,6 +276,7 @@ endmenu # Cache config
 config ESP32S3_ULP_COPROC_ENABLED
 	bool "Enable Ultra Low Power (ULP) Coprocessor"
 	default n
+	select ESPRESSIF_USE_ULP_RISCV_CORE
 	---help---
 		Set to 'y' if you plan to load a firmware for the coprocessor.
 
@@ -675,16 +676,13 @@ config ESP32S3_SPI
 	bool
 	default n
 
+config ESP32S3_EFUSE
+	bool
+	select ESPRESSIF_EFUSE
+
 config ESP32S3_WDT
 	bool
 	default n
-
-config ESP32S3_EFUSE
-	bool "EFUSE support"
-	select EFUSE
-	default n
-	---help---
-		Enable ESP32-S3 efuse support.
 
 config ESP32S3_RNG
 	bool "Random Number Generator (RNG)"
@@ -755,9 +753,16 @@ config ESP32S3_I2C1
 	select ESP32S3_I2C
 	select I2C
 
+config ESP32S3_RTC_I2C
+	bool "RTC I2C"
+	default n
+	select ESP32S3_I2C
+	select I2C
+
 config ESP32S3_I2C_PERIPH_MASTER_MODE
 	bool
-	depends on (ESP32S3_I2C0_MASTER_MODE || ESP32S3_I2C1_MASTER_MODE)
+	depends on (ESP32S3_I2C0_MASTER_MODE || ESP32S3_I2C1_MASTER_MODE || ESP32S3_RTC_I2C)
+	default y if ESP32S3_RTC_I2C
 	default n
 	select ESPRESSIF_I2C_PERIPH_MASTER_MODE
 
@@ -1090,9 +1095,12 @@ choice ESP32S3_SPIRAM_HEAP
 
 config ESP32S3_SPIRAM_COMMON_HEAP
 	bool "Additional region to kernel heap"
+	depends on !ESP32S3_SPIFLASH && !ESPRESSIF_WIFI && !BUILD_PROTECTED
 
 config ESP32S3_SPIRAM_USER_HEAP
 	bool "Separated userspace heap"
+	depends on SCHED_LPWORK
+	select ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK if ESP32S3_SPIFLASH
 	select MM_KERNEL_HEAP
 
 endchoice # ESP32S3_SPIRAM_HEAP
@@ -1290,6 +1298,24 @@ endmenu # SPI configuration
 menu "UART Configuration"
 	depends on ESP32S3_UART
 
+config ESP32S3_RX_FIFO_THRD
+	int "RX Fifo full threshold"
+	default 120
+	---help---
+		Set how many received bytes must accumulate in the hardware RX FIFO
+		before an RX FIFO full interrupt is generated. The ESP32-S3 UART FIFO
+		can hold 128 bytes, so leaving some headroom here helps prevent overflow
+		while the interrupt handler drains the buffer.
+
+config ESP32S3_RX_FIFO_TOUT
+	int "RX Fifo timeout"
+	default 10
+	---help---
+		Generate an RX timeout interrupt when the UART RX line stays idle for
+		this many bit periods and the FIFO has not reached the full threshold.
+		Lower values move data to the software FIFO sooner; higher values reduce
+		the interrupt rate on continuous transfers.
+
 if ESP32S3_UART0
 
 config ESP32S3_UART0_RS485
@@ -1480,6 +1506,45 @@ config ESP32S3_I2C1_SDAPIN
 
 endif # ESP32S3_I2C1
 
+if ESP32S3_RTC_I2C
+
+choice
+	prompt "RTC I2C SCL Pin"
+	default ESP32S3_RTC_I2C_SCLPIN_0 if ESP32S3_I2C0
+	default ESP32S3_RTC_I2C_SCLPIN_2 if !ESP32S3_I2C0
+
+config ESP32S3_RTC_I2C_SCLPIN_0
+	bool "Use GPIO0 as RTC I2C SCL Pin"
+
+config ESP32S3_RTC_I2C_SCLPIN_2
+	bool "Use GPIO2 as RTC I2C SCL Pin"
+
+endchoice # RTC I2C SCL Pin
+
+config ESP32S3_RTC_I2C_SCLPIN
+	int
+	default 0 if ESP32S3_RTC_I2C_SCLPIN_0
+	default 2 if ESP32S3_RTC_I2C_SCLPIN_2
+
+choice
+	prompt "RTC I2C SDA Pin"
+	default ESP32S3_RTC_I2C_SDAPIN_3
+
+config ESP32S3_RTC_I2C_SDAPIN_1
+	bool "Use GPIO1 as RTC I2C SDA Pin"
+
+config ESP32S3_RTC_I2C_SDAPIN_3
+	bool "Use GPIO3 as RTC I2C SDA Pin"
+
+endchoice # RTC I2C SDA Pin
+
+config ESP32S3_RTC_I2C_SDAPIN
+	int
+	default 1 if ESP32S3_RTC_I2C_SDAPIN_1
+	default 3 if ESP32S3_RTC_I2C_SDAPIN_3
+
+endif # ESP32S3_RTC_I2C
+
 config ESP32S3_I2CTIMEOSEC
 	int "Timeout seconds"
 	default 0
@@ -1584,18 +1649,19 @@ choice ESP32S3_UNIVERSAL_MAC_ADDRESSES
 		a custom universal MAC address range, the correct setting will depend on the allocation of MAC
 		addresses in this range (either 2 or 4 per device.)
 
-	config ESP32S3_UNIVERSAL_MAC_ADDRESSES_TWO
-		bool "Two"
-		select ESP_MAC_ADDR_UNIVERSE_WIFI_STA
-		select ESP_MAC_ADDR_UNIVERSE_BT
+config ESP32S3_UNIVERSAL_MAC_ADDRESSES_TWO
+	bool "Two"
+	select ESP_MAC_ADDR_UNIVERSE_WIFI_STA
+	select ESP_MAC_ADDR_UNIVERSE_BT
 
-	config ESP32S3_UNIVERSAL_MAC_ADDRESSES_FOUR
-		bool "Four"
-		select ESP_MAC_ADDR_UNIVERSE_WIFI_STA
-		select ESP_MAC_ADDR_UNIVERSE_WIFI_AP
-		select ESP_MAC_ADDR_UNIVERSE_BT
-		select ESP_MAC_ADDR_UNIVERSE_ETH
-endchoice
+config ESP32S3_UNIVERSAL_MAC_ADDRESSES_FOUR
+	bool "Four"
+	select ESP_MAC_ADDR_UNIVERSE_WIFI_STA
+	select ESP_MAC_ADDR_UNIVERSE_WIFI_AP
+	select ESP_MAC_ADDR_UNIVERSE_BT
+	select ESP_MAC_ADDR_UNIVERSE_ETH
+
+endchoice # ESP32S3_UNIVERSAL_MAC_ADDRESSES
 
 config ESP32S3_UNIVERSAL_MAC_ADDRESSES
 	int
@@ -1758,6 +1824,7 @@ config ESP32S3_TICKLESS
 
 config ESP32S3_SPIFLASH
 	bool "SPI Flash MTD Partition"
+	select ESPRESSIF_SPIFLASH if !ESP32S3_PARTITION_TABLE && !ESP32S3_SPIRAM
 	default n
 
 menu "SPI Flash configuration"
@@ -1830,7 +1897,7 @@ endchoice # ESP32S3_FLASH_SAMPLE_MODE
 
 config ESP32S3_SPI_FLASH_DONT_USE_ROM_CODE
 	bool "Don't use SPI flash driver in ROM"
-	default n
+	default y
 	---help---
 		Use source code for SPI flash driver instead of functions
 		in ROM.
@@ -1850,22 +1917,23 @@ choice ESP32S3_FLASH_SIZE
 	depends on ARCH_CHIP_ESP32S3CUSTOM
 	default ESP32S3CUSTOM_FLASH_4M
 
-	config ESP32S3CUSTOM_FLASH_4M
-		bool "ESP32S3 Flash 4MB"
-		select ESP32S3_FLASH_4M
+config ESP32S3CUSTOM_FLASH_4M
+	bool "ESP32S3 Flash 4MB"
+	select ESP32S3_FLASH_4M
 
-	config ESP32S3CUSTOM_FLASH_8M
-		bool "ESP32S3 Flash 8MB"
-		select ESP32S3_FLASH_8M
+config ESP32S3CUSTOM_FLASH_8M
+	bool "ESP32S3 Flash 8MB"
+	select ESP32S3_FLASH_8M
 
-	config ESP32S3CUSTOM_FLASH_16M
-		bool "ESP32S3 Flash 16MB"
-		select ESP32S3_FLASH_16M
+config ESP32S3CUSTOM_FLASH_16M
+	bool "ESP32S3 Flash 16MB"
+	select ESP32S3_FLASH_16M
 
-	config ESP32S3CUSTOM_FLASH_32M
-		bool "ESP32S3 Flash 32MB"
-		select ESP32S3_FLASH_32M
-		select ESP32S3_SPI_FLASH_USE_32BIT_ADDRESS
+config ESP32S3CUSTOM_FLASH_32M
+	bool "ESP32S3 Flash 32MB"
+	select ESP32S3_FLASH_32M
+	select ESP32S3_SPI_FLASH_USE_32BIT_ADDRESS
+
 endchoice # ESP32S3_FLASH_SIZE
 
 config ESP32S3_HAVE_OTA_PARTITION
@@ -1878,7 +1946,7 @@ comment "Application Image OTA Update support"
 
 config ESP32S3_OTA_PRIMARY_SLOT_OFFSET
 	hex "Application image primary slot offset"
-	default 0x10000
+	default 0x20000
 
 config ESP32S3_OTA_PRIMARY_SLOT_DEVPATH
 	string "Application image primary slot device path"
@@ -1886,7 +1954,7 @@ config ESP32S3_OTA_PRIMARY_SLOT_DEVPATH
 
 config ESP32S3_OTA_SECONDARY_SLOT_OFFSET
 	hex "Application image secondary slot offset"
-	default 0x110000
+	default 0x120000
 
 config ESP32S3_OTA_SECONDARY_SLOT_DEVPATH
 	string "Application image secondary slot device path"
@@ -1898,7 +1966,7 @@ config ESP32S3_OTA_SLOT_SIZE
 
 config ESP32S3_OTA_SCRATCH_OFFSET
 	hex "Scratch partition offset"
-	default 0x210000
+	default 0x220000
 
 config ESP32S3_OTA_SCRATCH_SIZE
 	hex "Scratch partition size"
@@ -1920,6 +1988,7 @@ config ESP32S3_MTD
 	select MTD
 	select MTD_BYTE_WRITE
 	select MTD_PARTITION
+	select ESPRESSIF_MTD if !ESP32S3_PARTITION_TABLE && !ESP32S3_SPIRAM
 	---help---
 		Initialize an MTD driver for the ESP32-S3 SPI Flash, which will
 		add an entry at /dev for application access from userspace.
@@ -1949,10 +2018,7 @@ config ESP32S3_SPIFLASH_OP_TASK_STACKSIZE
 		to be finished.
 
 config ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
-	bool "Support PSRAM As Task Stack"
-	default n
-	depends on ESP32S3_SPIRAM
-	select SCHED_LPWORK
+	bool
 	---help---
 		Enable this option, Tasks which use PSRAM as stack
 		can do SPI Flash read/write/erase/map/unmap. Otherwise,
@@ -2722,7 +2788,7 @@ endchoice
 
 config ESP32S3_MCUBOOT_VERSION
 	string "MCUboot version"
-	default "20f98e0a975c24864872e0df5701eb1082e9c957"
+	default "8a07053d42e592c85cb35b79c4de1b7749943387"
 	depends on ESP32S3_APP_FORMAT_MCUBOOT
 
 config ESP32S3_APP_MCUBOOT_HEADER_SIZE

@@ -77,22 +77,21 @@ if(CONFIG_LIBCXXABI)
     cxa_vector.cpp
     cxa_virtual.cpp)
   add_compile_definitions(_LIBCPP_BUILDING_LIBRARY)
-  if(CONFIG_LIBSUPCXX_TOOLCHAIN)
-    add_compile_definitions(__GLIBCXX__)
-  endif()
+  add_compile_definitions(LIBCXXABI_BAREMETAL)
 
-  if(CONFIG_LIBSUPCXX)
-    add_compile_definitions(__GLIBCXX__)
-  endif()
   # C++ STL files
   list(APPEND SRCS stdlib_exception.cpp stdlib_new_delete.cpp
-       stdlib_stdexcept.cpp stdlib_typeinfo.cpp)
-
+       stdlib_stdexcept.cpp)
   # Internal files
-  list(APPEND SRCS abort_message.cpp fallback_malloc.cpp private_typeinfo.cpp)
+  list(APPEND SRCS abort_message.cpp fallback_malloc.cpp)
 
   if(CONFIG_CXX_EXCEPTION)
-    list(APPEND SRCS cxa_exception.cpp cxa_personality.cpp)
+    list(APPEND SRCS cxa_exception.cpp cxa_exception_storage.cpp
+         cxa_personality.cpp)
+  endif()
+
+  if(CONFIG_CXX_RTTI)
+    list(APPEND SRCS private_typeinfo.cpp stdlib_typeinfo.cpp)
   endif()
 
   if(CONFIG_LIBCXXABI)
@@ -104,9 +103,6 @@ if(CONFIG_LIBCXXABI)
     list(APPEND TARGET_SRCS ${src})
   endforeach()
 
-  # RTTI is required for building the libcxxabi library
-  target_compile_options(libcxxabi PRIVATE -frtti)
-
   if(CONFIG_SIM_UBSAN OR CONFIG_MM_UBSAN)
     target_compile_options(libcxxabi PRIVATE -fno-sanitize=vptr)
   endif()
@@ -114,7 +110,7 @@ if(CONFIG_LIBCXXABI)
   # Fix compilation error on ARM32:libcxxabi/src/cxa_personality.cpp:594:22:
   # error: '_URC_FATAL_PHASE1_ERROR' was not declared in this scope 594 |
   # results.reason = _URC_FATAL_PHASE1_ERROR;
-  if(CONFIG_ARCH_ARM)
+  if(CONFIG_ARCH_ARM AND NOT CONFIG_ARCH_TOOLCHAIN_CLANG)
     target_compile_definitions(libcxxabi
                                PRIVATE _URC_FATAL_PHASE2_ERROR=_URC_FAILURE)
     target_compile_definitions(libcxxabi

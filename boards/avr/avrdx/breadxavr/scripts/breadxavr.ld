@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/avr/atmega/mega1284p-xplained/scripts/ld.script
+ * boards/avr/avrdx/breadxavr/scripts/breadxavr.ld
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -30,11 +30,55 @@
  * *Memory configuration A
  */
 
+/* Use this instead of repeated magical number */
+__CHIP_FLASH_SIZE__ = 128K;
+
+/* VMA above 0x800000, must not collide with anything else,
+ * arbitrary value otherwise.
+ */
+__RODATA_VMA__ = 0xa00000;
+/* Application configuration is supposed to pass this value
+ * to linker so the default should not be used.
+ */
+__RODATA_SIZE__ = DEFINED(__RODATA_SIZE__) ? __RODATA_SIZE__ : 4K;
+/* Size increment matches chip's memory organization (boot, application
+ * code and application data can be sized with 512B increments.)
+ */
+ASSERT (__RODATA_SIZE__ % 512 == 0,
+        "__RODATA_SIZE__ must be a multiple of 512")
+/* Only 32kB of flash is mapped to data memory */
+ASSERT (__RODATA_SIZE__ <= 32K,
+        "__RODATA_SIZE__ must not be larger than 32kB")
+
+/* Same as for __RODATA_SIZE__ */
+__RODATA_OFFSET__ = DEFINED(__RODATA_OFFSET__) ? __RODATA_OFFSET__ : 0;
+/* Size increment matches chip's memory organization (boot, application
+ * code and application data can be sized with 512B increments.)
+ */
+ASSERT (__RODATA_OFFSET__ % 512 == 0,
+        "__RODATA_OFFSET__ must be a multiple of 512")
+/* Only 32kB of flash is mapped to data memory */
+ASSERT (__RODATA_OFFSET__ <= 31K,
+        "__RODATA_OFFSET__ must not be larger than 31kB")
+
+/* Also verify sum of size and offset */
+ASSERT (__RODATA_SIZE__ + __RODATA_OFFSET__ <= 32K,
+        "Sum of __RODATA_SIZE__ and __RODATA_OFFSET__ must not be larger than 32kB")
+
+/* Set the origin to the very end of flash. 64K is a magical number
+ * that constitutes of 32K (start of memory-mapped flash in data
+ * memory address space) and 32K (end of the area, size of the rodata
+ * section is subtracted from it.)
+ */
+__RODATA_ORIGIN__ = __RODATA_VMA__ + 64K - __RODATA_SIZE__ - __RODATA_OFFSET__;
+__RODATA_FLASH_START = __CHIP_FLASH_SIZE__ - __RODATA_SIZE__ - __RODATA_OFFSET__;
+
 MEMORY
 {
-  flash    (rx) : ORIGIN = 0, LENGTH = 128K
+  flash    (rx) : ORIGIN = 0, LENGTH = __CHIP_FLASH_SIZE__
   sram   (rw!x) : ORIGIN = 0x804000, LENGTH = 16K
   eeprom (rw!x) : ORIGIN = 0x801400, LENGTH = 512
+  rodata  (r!x) : ORIGIN = __RODATA_ORIGIN__, LENGTH = __RODATA_SIZE__
 }
 
 ENTRY(__start)
@@ -129,8 +173,6 @@ SECTIONS
   {
     _sdata = ABSOLUTE(.);
     *(.data .data.*)
-    *(.rodata)
-    *(.rodata*)
     *(.gnu.linkonce.d.*)
     CONSTRUCTORS
     _edata = ABSOLUTE(.);
@@ -153,6 +195,14 @@ SECTIONS
     *(.noinit*)
     _enoinit = ABSOLUTE(.);
   } > sram
+
+  .rodata ABSOLUTE(__RODATA_ORIGIN__) : AT (ABSOLUTE(__RODATA_FLASH_START))
+  {
+    *(.rodata)
+    *(.rodata*)
+    *(.gnu.linkonce.r*)
+    _rodata_end = ABSOLUTE(.);
+  } > rodata
 
   .eeprom     :
   {

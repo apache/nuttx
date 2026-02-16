@@ -1581,7 +1581,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
       putreg32(~USB_DEVS_SOF, USB_DEVS);
 
-      nxsig_usleep(100000);
+      nxsched_usleep(100000);
 
       /* SOF is not arrived & D+/D- is HIGH */
 

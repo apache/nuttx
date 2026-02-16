@@ -213,37 +213,54 @@
   }
 
 #ifdef CONFIG_SMP
-#  define REGION_RAM_ATTR                                        \
-    {                                                            \
-      /* AP, XN, SH */                                           \
-      .rbar = (NOT_EXEC | P_RW_U_NA_MSK | INNER_SHAREABLE_MSK) , \
-      /* Cache-ability */                                        \
-      .mair_idx = MPU_MAIR_INDEX_SRAM,                           \
-    }
+# define SHAREABLE_MSK INNER_SHAREABLE_MSK
 #else
-#  define REGION_RAM_ATTR                                   \
-    {                                                       \
-      /* AP, XN, SH */                                      \
-      .rbar = NOT_EXEC | P_RW_U_NA_MSK | NON_SHAREABLE_MSK, \
-      /* Cache-ability */                                   \
-      .mair_idx = MPU_MAIR_INDEX_SRAM,                      \
-    }
+# define SHAREABLE_MSK NON_SHAREABLE_MSK
 #endif
 
-#define REGION_RAM_TEXT_ATTR                   \
-  {                                            \
-    /* AP, XN, SH */                           \
-    .rbar = P_RO_U_RO_MSK | NON_SHAREABLE_MSK, \
-    /* Cache-ability */                        \
-    .mair_idx = MPU_MAIR_INDEX_SRAM,           \
+#define REGION_RW_NA_ATTR                             \
+  {                                                   \
+    /* AP, XN, SH */                                  \
+    .rbar = NOT_EXEC | P_RW_U_NA_MSK | SHAREABLE_MSK, \
+    /* Cache-ability */                               \
+    .mair_idx = MPU_MAIR_INDEX_SRAM,                  \
+  }
+#define REGION_RW_RW_ATTR                             \
+  {                                                   \
+    /* AP, XN, SH */                                  \
+    .rbar = NOT_EXEC | P_RW_U_RW_MSK | SHAREABLE_MSK, \
+    /* Cache-ability */                               \
+    .mair_idx = MPU_MAIR_INDEX_SRAM,                  \
+  }
+#define REGION_RO_RO_ATTR                             \
+  {                                                   \
+    /* AP, XN, SH */                                  \
+    .rbar = NOT_EXEC | P_RO_U_RO_MSK | SHAREABLE_MSK, \
+    /* Cache-ability */                               \
+    .mair_idx = MPU_MAIR_INDEX_SRAM,                  \
+  }
+#define REGION_RO_NA_ATTR                             \
+  {                                                   \
+    /* AP, XN, SH */                                  \
+    .rbar = NOT_EXEC | P_RO_U_NA_MSK | SHAREABLE_MSK, \
+    /* Cache-ability */                               \
+    .mair_idx = MPU_MAIR_INDEX_SRAM,                  \
   }
 
-#define REGION_RAM_RO_ATTR                                \
-  {                                                       \
-    /* AP, XN, SH */                                      \
-    .rbar = NOT_EXEC | P_RO_U_RO_MSK | NON_SHAREABLE_MSK, \
-    /* Cache-ability */                                   \
-    .mair_idx = MPU_MAIR_INDEX_SRAM,                      \
+#define REGION_KTEXT_ATTR                  \
+  {                                        \
+    /* AP, XN, SH */                       \
+    /* Cache-ability */                    \
+    .rbar = P_RO_U_NA_MSK | SHAREABLE_MSK, \
+    .mair_idx = MPU_MAIR_INDEX_SRAM,       \
+  }
+
+#define REGION_UTEXT_ATTR                  \
+  {                                        \
+    /* AP, XN, SH */                       \
+    .rbar = P_RO_U_RO_MSK | SHAREABLE_MSK, \
+    /* Cache-ability */                    \
+    .mair_idx = MPU_MAIR_INDEX_SRAM,       \
   }
 
 #ifndef __ASSEMBLY__
@@ -269,7 +286,7 @@ struct arm64_mpu_region
 
   /* Region limit Address */
 
-  uint64_t limit;
+  uint64_t size;
 
   /* Region Name */
 
@@ -293,11 +310,11 @@ struct arm64_mpu_config
   const struct arm64_mpu_region *mpu_regions;
 };
 
-#define MPU_REGION_ENTRY(_name, _base, _limit, _attr) \
+#define MPU_REGION_ENTRY(_name, _base, _size, _attr)  \
   {                                                   \
     .name   = _name,                                  \
     .base   = _base,                                  \
-    .limit  = _limit,                                 \
+    .size   = _size,                                  \
     .attr   = _attr,                                  \
   }
 
@@ -345,6 +362,22 @@ unsigned int mpu_allocregion(void);
  ****************************************************************************/
 
 void mpu_freeregion(unsigned int region);
+
+/****************************************************************************
+ * Name: mpu_allocregion
+ *
+ * Description:
+ *   Get the number of MPU region used
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The the number of MPU region used
+ *
+ ****************************************************************************/
+
+unsigned int mpu_usedregion(void);
 
 /****************************************************************************
  * Name: arm64_mpu_enable
@@ -401,16 +434,18 @@ void mpu_dump_region(void);
  *
  * Input Parameters:
  *   region - The index of the MPU region to modify.
- *   table  - Pointer to a struct containing the configuration
- *            parameters for the region.
+ *   base   - The base address of the region.
+ *   size   - The size of the region.
+ *   flags1 - Additional flags for the region.
+ *   flags2 - Additional flags for the region.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void mpu_modify_region(unsigned int region,
-                       const struct arm64_mpu_region *table);
+void mpu_modify_region(unsigned int region, uintptr_t base, size_t size,
+                       uint32_t flags1, uint32_t flags2);
 
 /****************************************************************************
  * Name: mpu_configure_region
@@ -419,16 +454,18 @@ void mpu_modify_region(unsigned int region,
  *   Configure a region for privileged, strongly ordered memory
  *
  * Input Parameters:
- *   table - Pointer to a struct containing the configuration
- *           parameters for the region.
+ *   base   - The base address of the region.
+ *   size   - The size of the region.
+ *   flags1 - Additional flags for the region.
+ *   flags2 - Additional flags for the region.
  *
  * Returned Value:
  *   The region number allocated for the configured region.
  *
  ****************************************************************************/
 
-unsigned int mpu_configure_region(const struct arm64_mpu_region *
-                                  table);
+unsigned int mpu_configure_region(uintptr_t base, size_t size,
+                                  uint32_t flags1, uint32_t flags2);
 
 /****************************************************************************
  * Name: arm64_mpu_init
@@ -440,6 +477,13 @@ unsigned int mpu_configure_region(const struct arm64_mpu_region *
  ****************************************************************************/
 
 void arm64_mpu_init(bool is_primary_core);
+
+/****************************************************************************
+ * Name: arm64_mpu_init_regiions
+ *
+ ****************************************************************************/
+
+void arm64_mpu_init_regiions(void);
 
 #endif  /* __ASSEMBLY__ */
 

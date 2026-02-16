@@ -27,7 +27,8 @@
  * Driver usage notes:
  *
  * This driver supports the Common Sensor Register Interface.
- * See drivers/sensors/README.txt for details.
+ * See Documentation/components/drivers/special/sensors/sensors_cluster.rst
+ * for details.
  *
  ****************************************************************************/
 

@@ -132,9 +132,9 @@ static int local_sockif_alloc(FAR struct socket *psock)
   /* Allocate the local connection structure */
 
   FAR struct local_conn_s *conn;
-  net_lock();
+  local_lock();
   conn = local_alloc();
-  net_unlock();
+  local_unlock();
   if (conn == NULL)
     {
       /* Failed to reserve a connection structure */
@@ -202,17 +202,6 @@ static int local_setup(FAR struct socket *psock)
 
         return local_sockif_alloc(psock);
 #endif /* CONFIG_NET_LOCAL_DGRAM */
-
-      case SOCK_CTRL:
-        if (psock->s_proto == 0 || psock->s_proto == IPPROTO_TCP ||
-            psock->s_proto == IPPROTO_UDP)
-          {
-            /* Allocate and attach the local connection structure */
-
-            return local_sockif_alloc(psock);
-          }
-
-        return -EPROTONOSUPPORT;
 
       default:
         return -EPROTONOSUPPORT;
@@ -306,7 +295,6 @@ static int local_bind(FAR struct socket *psock,
 #ifdef CONFIG_NET_LOCAL_DGRAM
       case SOCK_DGRAM:
 #endif
-      case SOCK_CTRL:
         {
           /* Bind the Unix domain connection structure */
 
@@ -667,7 +655,7 @@ static int local_setsockopt(FAR struct socket *psock, int level, int option,
                   return -EINVAL;
                 }
 
-              net_lock();
+              local_lock();
 
               /* Only SOCK_STREAM sockets need set the send buffer size */
 
@@ -693,7 +681,7 @@ static int local_setsockopt(FAR struct socket *psock, int level, int option,
                 }
 #endif
 
-              net_unlock();
+              local_unlock();
 
               return ret;
             }
@@ -708,7 +696,7 @@ static int local_setsockopt(FAR struct socket *psock, int level, int option,
                   return -EINVAL;
                 }
 
-              net_lock();
+              local_lock();
 
               rcvsize = *(FAR const int *)value;
 #ifdef CONFIG_NET_LOCAL_DGRAM
@@ -752,7 +740,7 @@ static int local_setsockopt(FAR struct socket *psock, int level, int option,
                   conn->lc_rcvsize = rcvsize;
                 }
 
-              net_unlock();
+              local_unlock();
 
               return ret;
             }
@@ -839,12 +827,6 @@ static int local_connect(FAR struct socket *psock,
         break;
 #endif /* CONFIG_NET_LOCAL_DGRAM */
 
-      case SOCK_CTRL:
-        {
-          return -ENOSYS;
-        }
-        break;
-
       default:
         return -EBADF;
     }
@@ -915,7 +897,6 @@ static int local_close(FAR struct socket *psock)
 #ifdef CONFIG_NET_LOCAL_DGRAM
       case SOCK_DGRAM:
 #endif
-      case SOCK_CTRL:
         {
           /* Is this the last reference to the connection structure (there
            * could be more if the socket was dup'ed).
@@ -1176,8 +1157,6 @@ static int local_shutdown(FAR struct socket *psock, int how)
       case SOCK_DGRAM:
         return -EOPNOTSUPP;
 #endif
-      case SOCK_CTRL:
-        return -EOPNOTSUPP;
       default:
         return -EBADF;
     }

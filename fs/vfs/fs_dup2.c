@@ -87,9 +87,10 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
       return ret;
     }
 
-  filep2->f_priv  = NULL;
-  filep2->f_pos   = filep1->f_pos;
-  filep2->f_inode = inode;
+  filep2->f_oflags = filep1->f_oflags;
+  filep2->f_priv   = NULL;
+  filep2->f_pos    = filep1->f_pos;
+  filep2->f_inode  = inode;
 
   /* Call the open method on the file, driver, mountpoint so that it
    * can maintain the correct open counts.

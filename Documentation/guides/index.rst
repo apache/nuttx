@@ -7,6 +7,7 @@ Guides
 
 .. toctree::
   nfs.rst
+  nix_flake.rst
   usbtrace.rst
   simulator.rst
   rndis.rst
@@ -15,7 +16,6 @@ Guides
   pysimcoder.rst
   customboards.rst
   customapps.rst
-  citests.rst
   zerolatencyinterrupts.rst
   fortify.rst
   nestedinterrupts.rst
@@ -59,4 +59,6 @@ Guides
   remove_device_drivers_nsh.rst
   rust.rst
   optee.rst
+  qemu_tips.rst
+  lwl.rst
 

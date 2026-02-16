@@ -300,7 +300,7 @@ void nxmq_notify_send(FAR struct mqueue_inode_s *msgq)
 
       if (nxsched_add_readytorun(btcb))
         {
-          up_switch_context(btcb, rtcb);
+          up_switch_context(this_task(), rtcb);
         }
     }
 }

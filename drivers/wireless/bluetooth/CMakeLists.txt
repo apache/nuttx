@@ -42,6 +42,10 @@ if(CONFIG_DRIVERS_BLUETOOTH)
     endif()
   endif()
 
+  if(CONFIG_BLUETOOTH_BRIDGE)
+    list(APPEND SRCS bt_bridge.c)
+  endif()
+
   if(CONFIG_BLUETOOTH_NULL)
     list(APPEND SRCS bt_null.c)
   endif()
@@ -54,8 +58,8 @@ if(CONFIG_DRIVERS_BLUETOOTH)
     list(APPEND SRCS bt_rpmsghci.c)
   endif()
 
-  if(CONFIG_BLUETOOTH_BRIDGE)
-    list(APPEND SRCS bt_bridge.c)
+  if(CONFIG_BLUETOOTH_SLIP)
+    list(APPEND SRCS bt_slip.c)
   endif()
 
   target_sources(drivers PRIVATE ${SRCS})

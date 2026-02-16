@@ -89,13 +89,12 @@ static void vhost_rng_work(FAR void *arg)
   irqstate_t flags;
   uint16_t idx;
   uint32_t len;
-  ssize_t ret;
 
   vq = priv->hdev->vrings_info[0].vq;
   flags = spin_lock_irqsave(&priv->lock);
   for (; ; )
     {
-      buf = virtqueue_get_available_buffer(vq, &idx, &len);
+      buf = virtqueue_get_first_avail_buffer(vq, &idx, &len);
       if (buf == NULL)
         {
           break;
@@ -105,7 +104,7 @@ static void vhost_rng_work(FAR void *arg)
       arc4random_buf(buf, len);
 
       flags = spin_lock_irqsave(&priv->lock);
-      virtqueue_add_consumed_buffer(vq, idx, (uint32_t)ret);
+      virtqueue_add_consumed_buffer(vq, idx, len);
       virtqueue_kick(vq);
     }
 

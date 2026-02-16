@@ -569,7 +569,7 @@ int bcmf_core_upload_firmware(FAR bcmf_interface_dev_t *ibus)
         DEBUGPANIC();
     }
 
-  nxsig_usleep(50 * 1000);
+  nxsched_usleep(50 * 1000);
 
   /* Flash chip firmware */
 
@@ -616,12 +616,12 @@ int bcmf_core_upload_firmware(FAR bcmf_interface_dev_t *ibus)
       case SDIO_DEVICE_ID_BROADCOM_43362:
       case SDIO_DEVICE_ID_BROADCOM_43430:
       case SDIO_DEVICE_ID_INFINEON_CYW43439:
-        nxsig_usleep(10 * 1000);
+        nxsched_usleep(10 * 1000);
         bcmf_core_reset(ibus, WLAN_ARMCM3_CORE_ID, 0, 0, 0);
 
         /* Check ARMCM3 core is running */
 
-        nxsig_usleep(10 * 1000);
+        nxsched_usleep(10 * 1000);
         if (!bcmf_core_isup(ibus, WLAN_ARMCM3_CORE_ID))
           {
             wlerr("Cannot start ARMCM3 core\n");
@@ -660,7 +660,7 @@ int bcmf_core_upload_firmware(FAR bcmf_interface_dev_t *ibus)
 
         /* Check ARMCR4 core is running */
 
-        nxsig_usleep(10 * 1000);
+        nxsched_usleep(10 * 1000);
         if (!bcmf_core_isup(ibus, WLAN_ARMCR4_CORE_ID))
           {
             wlerr("Cannot start ARMCR4 core\n");
@@ -729,7 +729,7 @@ void bcmf_core_disable(FAR bcmf_interface_dev_t *ibus,
 
       /*  Ensure no backplane operation is pending */
 
-      nxsig_usleep(10 * 1000);
+      nxsched_usleep(10 * 1000);
 
       bcmf_write_sbregw(ibus,
                         base + BCMA_IOCTL,

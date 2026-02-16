@@ -83,12 +83,15 @@ int timer_getoverrun(timer_t timerid)
   if (!timer)
     {
       set_errno(EINVAL);
-      return ERROR;
+      ret = ERROR;
+    }
+  else
+    {
+      ret = timer->pt_overrun;
+      ret = ret > DELAYTIMER_MAX ? DELAYTIMER_MAX : ret;
     }
 
-  ret = timer->pt_overrun;
-
-  return ret > DELAYTIMER_MAX ? DELAYTIMER_MAX : ret;
+  return ret;
 }
 
 #endif /* CONFIG_DISABLE_POSIX_TIMERS */

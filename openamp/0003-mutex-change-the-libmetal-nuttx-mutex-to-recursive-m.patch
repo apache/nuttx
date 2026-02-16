@@ -1,0 +1,80 @@
+From ef06cf5ac9be793200783f24996d529db715ac43 Mon Sep 17 00:00:00 2001
+From: Bowen Wang <wangbowen6@xiaomi.com>
+Date: Mon, 25 Nov 2024 23:07:10 +0800
+Subject: [PATCH 3/3] mutex: change the libmetal nuttx mutex to recursive mutex
+
+To avoid the crash when lock are acquired twice, one case is in the
+destroy process:
+we hold the rdev->lock to iterate the rdev->endpoints to destroy all
+the endpoints, but rpmsg_destroy_ept() may send the name service message,
+and need acquire the rdev->lock again to lead crash.
+
+Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
+---
+ lib/system/nuttx/mutex.h | 18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/lib/system/nuttx/mutex.h libmetal/lib/system/nuttx/mutex.h
+index 26ec4f9..d13c9c5 100644
+--- a/lib/system/nuttx/mutex.h
++++ libmetal/lib/system/nuttx/mutex.h
+@@ -22,47 +22,47 @@
+ extern "C" {
+ #endif
+ 
+-typedef mutex_t metal_mutex_t;
++typedef rmutex_t metal_mutex_t;
+ 
+ /*
+  * METAL_MUTEX_INIT - used for initializing an mutex element in a static struct
+  * or global
+  */
+-#define METAL_MUTEX_INIT(m) NXMUTEX_INITIALIZER
++#define METAL_MUTEX_INIT(m) NXRMUTEX_INITIALIZER
+ /*
+  * METAL_MUTEX_DEFINE - used for defining and initializing a global or
+  * static singleton mutex
+  */
+-#define METAL_MUTEX_DEFINE(m) metal_mutex_t m = NXMUTEX_INITIALIZER
++#define METAL_MUTEX_DEFINE(m) metal_mutex_t m = NXRMUTEX_INITIALIZER
+ 
+ static inline void __metal_mutex_init(metal_mutex_t *mutex)
+ {
+-	nxmutex_init(mutex);
++	nxrmutex_init(mutex);
+ }
+ 
+ static inline void __metal_mutex_deinit(metal_mutex_t *mutex)
+ {
+-	nxmutex_destroy(mutex);
++	nxrmutex_destroy(mutex);
+ }
+ 
+ static inline int __metal_mutex_try_acquire(metal_mutex_t *mutex)
+ {
+-	return nxmutex_trylock(mutex);
++	return nxrmutex_trylock(mutex);
+ }
+ 
+ static inline void __metal_mutex_acquire(metal_mutex_t *mutex)
+ {
+-	nxmutex_lock(mutex);
++	nxrmutex_lock(mutex);
+ }
+ 
+ static inline void __metal_mutex_release(metal_mutex_t *mutex)
+ {
+-	nxmutex_unlock(mutex);
++	nxrmutex_unlock(mutex);
+ }
+ 
+ static inline int __metal_mutex_is_acquired(metal_mutex_t *mutex)
+ {
+-	return nxmutex_is_locked(mutex);
++	return nxrmutex_is_locked(mutex);
+ }
+ 
+ #ifdef __cplusplus
+-- 
+2.34.1
+

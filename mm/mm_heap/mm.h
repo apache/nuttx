@@ -78,7 +78,7 @@
        { \
          FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
          tmp->pid = _SCHED_GETTID(); \
-         tmp->seqno = g_mm_seqno++; \
+         MM_INCSEQNO(tmp); \
        } \
      while (0)
 #elif CONFIG_MM_BACKTRACE > 0
@@ -102,7 +102,7 @@
            { \
              tmp->backtrace[0] = NULL; \
            } \
-         tmp->seqno = g_mm_seqno++; \
+         MM_INCSEQNO(tmp); \
        } \
      while (0)
 #else
@@ -178,7 +178,9 @@ struct mm_allocnode_s
   mmsize_t size;                            /* Size of this chunk */
 #if CONFIG_MM_BACKTRACE >= 0
   pid_t pid;                                /* The pid for caller */
+#  ifdef CONFIG_MM_BACKTRACE_SEQNO
   unsigned long seqno;                      /* The sequence of memory malloc */
+#  endif
 #  if CONFIG_MM_BACKTRACE > 0
   FAR void *backtrace[CONFIG_MM_BACKTRACE]; /* The backtrace buffer for caller */
 #  endif
@@ -268,6 +270,10 @@ struct mm_heap_s
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
   struct procfs_meminfo_entry_s mm_procfs;
 #endif
+
+  /* Kasan is disable or enable for this heap */
+
+  bool mm_nokasan;
 };
 
 /* This describes the callback for mm_foreach */
@@ -299,6 +305,10 @@ void mm_foreach(FAR struct mm_heap_s *heap, mm_node_handler_t handler,
 /* Functions contained in mm_free.c *****************************************/
 
 void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay);
+
+/* Functions contained in mm_malloc.c ***************************************/
+
+void mm_free_delaylist(FAR struct mm_heap_s *heap);
 
 /****************************************************************************
  * Inline Functions

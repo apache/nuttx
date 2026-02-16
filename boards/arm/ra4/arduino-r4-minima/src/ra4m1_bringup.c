@@ -45,6 +45,10 @@
 #  define HAVE_LEDS 1
 #endif
 
+#ifdef CONFIG_PWM
+extern int ra4m1_pwm_setup(void);
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -72,6 +76,16 @@ int ra4m1_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = ra4m1_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: ra4m1_pwm_setup() failed: %d\n", ret);
     }
 #endif
 

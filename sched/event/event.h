@@ -30,23 +30,14 @@
 #include <nuttx/config.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/list.h>
-#include <nuttx/semaphore.h>
-
+#include <nuttx/queue.h>
 #include <nuttx/event.h>
+#include <nuttx/sched.h>
 
 /****************************************************************************
- * Public Type Definitions
+ * Public Function Definitions
  ****************************************************************************/
 
-typedef struct nxevent_wait_s nxevent_wait_t;
-
-struct nxevent_wait_s
-{
-  struct list_node        node;    /* Wait node of current task */
-  nxevent_mask_t          expect;  /* Expect events of wait task */
-  nxevent_flags_t         eflags;  /* Event flags of wait task */
-  sem_t                   sem;     /* Wait sem of current task */
-};
+void nxevent_wait_irq(FAR struct tcb_s *wtcb, int errcode);
 
 #endif /* __SCHED_EVENT_EVENT_H */

@@ -30,7 +30,9 @@
 	.file	"arm_saveusercontext.S"
 
 	.text
+#ifndef __ghs__
 	.syntax	unified
+#endif
 	.arm
 
 /****************************************************************************
@@ -54,7 +56,11 @@
 
 	.globl	up_saveusercontext
 	.globl	up_saveusercontext
+#ifdef __ghs__
+	.type	up_saveusercontext, $function
+#else
 	.type	up_saveusercontext, %function
+#endif
 
 up_saveusercontext:
 

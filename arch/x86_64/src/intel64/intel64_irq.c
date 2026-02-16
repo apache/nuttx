@@ -433,7 +433,7 @@ static inline void up_idtinit(void)
 }
 
 /****************************************************************************
- * Name: arm_color_intstack
+ * Name: x86_64_color_intstack
  *
  * Description:
  *   Set the interrupt stack to a value so that later we can determine how
@@ -504,10 +504,6 @@ void up_irqinitialize(void)
 
   x86_64_cpu_tss_init(cpu);
 
-  /* Colorize the interrupt stack */
-
-  x86_64_color_intstack();
-
   /* Initialize the APIC */
 
   up_apic_init();
@@ -536,6 +532,7 @@ void up_irqinitialize(void)
   /* And finally, enable interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
+  x86_64_color_intstack();
   up_irq_restore(X86_64_RFLAGS_IF);
 #endif
 
@@ -547,6 +544,12 @@ void up_irqinitialize(void)
   irq_attach(ISR13, x86_64_fault_panic_isr, NULL);
   irq_attach(ISR14, x86_64_fault_panic_isr, NULL);
   irq_attach(ISR16, x86_64_fault_kill_isr, NULL);
+
+#ifdef CONFIG_SMP
+  /* Attach TLB shootdown handler */
+
+  irq_attach(SMP_IPI_TLBSHOOTDOWN_IRQ, x86_64_tlb_handler, NULL);
+#endif
 }
 
 /****************************************************************************
@@ -792,4 +795,53 @@ int up_connect_irq(const int *irq, int num, uintptr_t *mar, uint32_t *mdr)
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: up_set_irq_type
+ *
+ * Description:
+ *   Config an IRQ trigger type.
+ *
+ ****************************************************************************/
+
+int up_set_irq_type(int irq, int mode)
+{
+  enum ioapic_trigger_mode trigger_mode = 0;
+  uint32_t maxintr;
+  uint32_t data;
+
+  /* Setup the IO-APIC, remap the interrupt to 32~ */
+
+  maxintr = (up_ioapic_read(IOAPIC_REG_VER) >> 16) & 0xff;
+  if (irq < 0 || irq - IRQ0 > maxintr)
+    {
+      return -EINVAL;
+    }
+
+  if (mode == IRQ_RISING_EDGE)
+    {
+      trigger_mode = TRIGGER_RISING_EDGE;
+    }
+  else if (mode == IRQ_FALLING_EDGE)
+    {
+      trigger_mode = TRIGGER_FALLING_EDGE;
+    }
+  else if (mode == IRQ_HIGH_LEVEL)
+    {
+      trigger_mode = TRIGGER_LEVEL_ACTIVE_HIGH;
+    }
+  else if (mode == IRQ_LOW_LEVEL)
+    {
+      trigger_mode = TRIGGER_LEVEL_ACTIVE_LOW;
+    }
+
+  data = up_ioapic_read(IOAPIC_REG_TABLE + (irq - IRQ0) * 2);
+
+  data &= ~TRIGGER_MODE_MASK;
+  data |= trigger_mode;
+
+  up_ioapic_write(IOAPIC_REG_TABLE + (irq - IRQ0) * 2, data);
+
+  return 0;
 }

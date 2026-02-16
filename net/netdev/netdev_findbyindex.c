@@ -72,7 +72,7 @@ FAR struct net_driver_s *netdev_findbyindex(int ifindex)
 
 #endif
 
-  net_lock();
+  netdev_list_lock();
 
 #ifdef CONFIG_NETDEV_IFINDEX
   /* Check if this index has been assigned */
@@ -81,7 +81,7 @@ FAR struct net_driver_s *netdev_findbyindex(int ifindex)
     {
       /* This index has not been assigned */
 
-      net_unlock();
+      netdev_list_unlock();
       return NULL;
     }
 #endif
@@ -104,12 +104,12 @@ FAR struct net_driver_s *netdev_findbyindex(int ifindex)
       if (++i == ifindex)
 #endif
         {
-          net_unlock();
+          netdev_list_unlock();
           return dev;
         }
     }
 
-  net_unlock();
+  netdev_list_unlock();
   return NULL;
 }
 
@@ -141,7 +141,7 @@ int netdev_nextindex(int ifindex)
 
   if (ifindex >= 0 && ifindex < MAX_IFINDEX)
     {
-      net_lock();
+      netdev_list_lock();
       for (; ifindex < MAX_IFINDEX; ifindex++)
         {
           if ((g_devset & (1UL << ifindex)) != 0)
@@ -150,12 +150,12 @@ int netdev_nextindex(int ifindex)
                * mean no-index in the POSIX standards.
                */
 
-              net_unlock();
+              netdev_list_unlock();
               return ifindex + 1;
             }
         }
 
-      net_unlock();
+      netdev_list_unlock();
     }
 
   return -ENODEV;

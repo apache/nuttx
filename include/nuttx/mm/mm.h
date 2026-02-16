@@ -124,7 +124,7 @@
  * structure from the userspace interface.
  */
 
-#  define USR_HEAP (*USERSPACE->us_heap)
+#  define USR_HEAP (*USERSPACE->us_data->us_heap)
 
 #else
 /* Otherwise, the user heap data structures are in common .bss */
@@ -133,8 +133,10 @@
 #endif
 
 #ifdef CONFIG_MM_KERNEL_HEAP
+#  define KRN_HEAP               g_kmmheap
 #  define MM_INTERNAL_HEAP(heap) ((heap) == USR_HEAP || (heap) == g_kmmheap)
 #else
+#  define KRN_HEAP               USR_HEAP
 #  define MM_INTERNAL_HEAP(heap) ((heap) == USR_HEAP)
 #endif
 
@@ -142,8 +144,12 @@
 #  define MM_DUMP_ALLOC(dump, node) \
     ((node) != NULL && (dump)->pid == PID_MM_ALLOC && \
      (node)->pid != PID_MM_MEMPOOL)
-#  define MM_DUMP_SEQNO(dump, node) \
+#  ifdef CONFIG_MM_BACKTRACE_SEQNO
+#    define MM_DUMP_SEQNO(dump, node) \
     ((node)->seqno >= (dump)->seqmin && (node)->seqno <= (dump)->seqmax)
+#  else
+#    define MM_DUMP_SEQNO(dump,node)  (true)
+#  endif
 #  define MM_DUMP_ASSIGN(dump, node) \
     ((node) != NULL && (dump)->pid == (node)->pid)
 #  define MM_DUMP_LEAK(dump, node) \
@@ -166,11 +172,31 @@
 #define MM_ALLOC_MAGIC   0xaa
 #define MM_FREE_MAGIC    0x55
 
+#ifdef CONFIG_MM_BACKTRACE_SEQNO
+#  define MM_INCSEQNO(p) ((p)->seqno = g_mm_seqno++)
+#else
+#  define MM_INCSEQNO(p)
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 struct mm_heap_s; /* Forward reference */
+
+struct mm_heap_config_s
+{
+  /* If heap == NULL, means use the heap memory ([start, start + size])
+   * to construct the heap struct.
+   * If heap != NULL, means malloc struct mm_heap_s from this heap.
+   */
+
+  FAR struct mm_heap_s *heap;
+  FAR const char       *name;
+  FAR void             *start;
+  size_t                size;
+  bool                  nokasan;
+};
 
 struct mempool_init_s
 {
@@ -195,7 +221,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#if CONFIG_MM_BACKTRACE >= 0
+#ifdef CONFIG_MM_BACKTRACE_SEQNO
 extern unsigned long g_mm_seqno;
 #endif
 
@@ -240,18 +266,29 @@ EXTERN FAR struct mm_heap_s *g_kmmheap;
 
 /* Functions contained in mm_initialize.c ***********************************/
 
-FAR struct mm_heap_s *mm_initialize(FAR const char *name,
-                                    FAR void *heap_start, size_t heap_size);
+FAR struct mm_heap_s *
+mm_initialize_heap(FAR const struct mm_heap_config_s *config);
+
+static inline_function FAR struct mm_heap_s *
+mm_initialize(FAR const char *name, FAR void *heapstart, size_t heapsize)
+{
+  struct mm_heap_config_s config;
+
+  memset(&config, 0, sizeof(config));
+  config.name  = name;
+  config.start = heapstart;
+  config.size  = heapsize;
+
+  return mm_initialize_heap(&config);
+}
 
 #ifdef CONFIG_MM_HEAP_MEMPOOL
 FAR struct mm_heap_s *
-mm_initialize_pool(FAR const char *name,
-                   FAR void *heap_start, size_t heap_size,
+mm_initialize_pool(FAR const struct mm_heap_config_s *config,
                    FAR const struct mempool_init_s *init);
 
 #else
-#  define mm_initialize_pool(name, heap_start, heap_size, init) \
-          mm_initialize(name, heap_start, heap_size)
+#  define mm_initialize_pool(config, init) mm_initialize_heap(config)
 #endif
 
 void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
@@ -281,8 +318,6 @@ void kmm_addregion(FAR void *heapstart, size_t heapsize);
 /* Functions contained in mm_malloc.c ***************************************/
 
 FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size) malloc_like1(2);
-
-void mm_free_delaylist(FAR struct mm_heap_s *heap);
 
 /* Functions contained in kmm_malloc.c **************************************/
 
@@ -436,12 +471,12 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap);
 
 /* Functions contained in umm_checkcorruption.c *****************************/
 
-FAR void umm_checkcorruption(void);
+void umm_checkcorruption(void);
 
 /* Functions contained in kmm_checkcorruption.c *****************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP
-FAR void kmm_checkcorruption(void);
+void kmm_checkcorruption(void);
 #else
 #define kmm_checkcorruption()  umm_checkcorruption()
 #endif

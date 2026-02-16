@@ -24,6 +24,8 @@
 .globl ARCH_LIBCFUN(strcmp)
 .type  ARCH_LIBCFUN(strcmp), @function
 ARCH_LIBCFUN(strcmp):
+	.cfi_sections .debug_frame
+	.cfi_startproc
 	or    a4, a0, a1
 	li    t2, -1
 	and   a4, a4, SZREG-1
@@ -182,6 +184,7 @@ ARCH_LIBCFUN(strcmp):
 	foundnull 1 3
 	foundnull 2 3
 #endif
+	.cfi_endproc
 .size	ARCH_LIBCFUN(strcmp), .-ARCH_LIBCFUN(strcmp)
 
 #if SZREG == 8

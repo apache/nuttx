@@ -72,8 +72,8 @@ size_t x86_64_stack_check(void *stackbase, size_t nbytes)
 
   /* Take extra care that we do not check outside the stack boundaries */
 
-  start = STACK_ALIGN_UP((uintptr_t)stackbase);
-  end   = STACK_ALIGN_DOWN((uintptr_t)stackbase + nbytes);
+  start = STACKFRAME_ALIGN_UP((uintptr_t)stackbase + X86_64_RED_ZONE);
+  end   = STACKFRAME_ALIGN_DOWN((uintptr_t)stackbase + nbytes);
 
   /* Get the adjusted size based on the top and bottom of the stack */
 
@@ -86,7 +86,7 @@ size_t x86_64_stack_check(void *stackbase, size_t nbytes)
    */
 
   for (ptr = (uint32_t *)start, mark = (nbytes >> 2);
-       *ptr == STACK_COLOR && mark > 0;
+       mark > 0 && *ptr == STACK_COLOR;
        ptr++, mark--);
 
   /* Return our guess about how much stack space was used */
@@ -111,7 +111,7 @@ void x86_64_stack_color(void *stackbase, size_t nbytes)
 
   /* Take extra care that we do not write outside the stack boundaries */
 
-  stkptr = (uint32_t *)STACK_ALIGN_UP(
+  stkptr = (uint32_t *)STACKFRAME_ALIGN_UP(
     (uintptr_t)(stackbase + X86_64_RED_ZONE));
 
   if (nbytes == 0) /* 0: colorize the running stack */
@@ -127,7 +127,7 @@ void x86_64_stack_color(void *stackbase, size_t nbytes)
       stkend = (uintptr_t)stackbase + nbytes;
     }
 
-  stkend = STACK_ALIGN_DOWN(stkend);
+  stkend = STACKFRAME_ALIGN_DOWN(stkend);
   nwords = (stkend - (uintptr_t)stkptr) >> 2;
 
   /* Set the entire stack to the coloration value */
@@ -154,7 +154,7 @@ void x86_64_stack_color(void *stackbase, size_t nbytes)
  *
  ****************************************************************************/
 
-size_t up_check_tcbstack(struct tcb_s *tcb)
+size_t up_check_tcbstack(struct tcb_s *tcb, size_t check_size)
 {
   size_t size;
 
@@ -167,7 +167,7 @@ size_t up_check_tcbstack(struct tcb_s *tcb)
     }
 #endif
 
-  size = x86_64_stack_check(tcb->stack_base_ptr, tcb->adj_stack_size);
+  size = x86_64_stack_check(tcb->stack_base_ptr, check_size);
 
 #ifdef CONFIG_ARCH_ADDRENV
   if (tcb->addrenv_own != NULL)
@@ -180,10 +180,14 @@ size_t up_check_tcbstack(struct tcb_s *tcb)
 }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-size_t up_check_intstack(int cpu)
+size_t up_check_intstack(int cpu, size_t check_size)
 {
-  return x86_64_stack_check((void *)up_get_intstackbase(cpu),
-                            STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
+  if (check_size == 0)
+    {
+      check_size = STACKFRAME_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK);
+    }
+
+  return x86_64_stack_check((void *)up_get_intstackbase(cpu), check_size);
 }
 #endif
 

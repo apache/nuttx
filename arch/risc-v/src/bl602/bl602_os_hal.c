@@ -518,7 +518,9 @@ int bl_os_msleep(long msec)
 {
   useconds_t usec = msec * 1000;
 
-  return nxsig_usleep(usec);
+  nxsched_usleep(usec);
+
+  return 0;
 }
 
 /****************************************************************************
@@ -534,7 +536,9 @@ int bl_os_msleep(long msec)
 
 int bl_os_sleep(unsigned int seconds)
 {
-  return nxsig_sleep(seconds);
+  nxsched_sleep(seconds);
+
+  return 0;
 }
 
 /****************************************************************************

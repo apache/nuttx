@@ -34,16 +34,21 @@ set(SRCS
     arm_memfault.c
     arm_perf.c
     arm_sau.c
-    arm_schedulesigaction.c
     arm_securefault.c
     arm_secure_irq.c
-    arm_sigdeliver.c
     arm_svcall.c
     arm_systemreset.c
     arm_tcbinfo.c
     arm_trigger_irq.c
-    arm_usagefault.c
-    arm_vectors.c)
+    arm_usagefault.c)
+
+if(CONFIG_ENABLE_ALL_SIGNALS)
+  list(APPEND SRCS arm_schedulesigaction.c arm_sigdeliver.c)
+endif()
+
+if(NOT CONFIG_ARCH_HAVE_CUSTOM_VECTORS)
+  list(APPEND SRCS arm_vectors.c)
+endif()
 
 if(CONFIG_ARMV8M_SYSTICK)
   list(APPEND SRCS arm_systick.c)
@@ -75,6 +80,10 @@ endif()
 
 if(CONFIG_ARM_COREDUMP_REGION)
   list(APPEND SRCS arm_dumpnvic.c)
+endif()
+
+if(CONFIG_LIB_SYSCALL)
+  list(APPEND SRCS arm_dispatch_syscall.S)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})

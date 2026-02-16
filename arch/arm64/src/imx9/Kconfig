@@ -23,9 +23,21 @@ config ARCH_CHIP_IMX93
 		EL3/OCRAM is a bad combination for atomic instructions, they don't work.
 		Instead, use A53 that will have no atomic instruction set available.
 
+config ARCH_CHIP_IMX95
+	bool "i.MX9 Application Processor"
+	select ARCH_HAVE_MULTICPU
+	select ARMV8A_HAVE_GICv3
+	select ARCH_CORTEX_A55
+	select ARCH_HAVE_RESET
+	select IMX9_HAVE_MU
+
 endchoice # i.MX9 Chip Selection
 
 endmenu # "i.MX9 Chip Selection"
+
+config IMX9_HAVE_MU
+	bool
+	default n
 
 config IMX9_BIN_ROMFS
 	bool "Register the /bin ROMFS file system at /dev/ram0"
@@ -504,6 +516,28 @@ config IMX9_LPSPI
 	bool "LPSPI support"
 	default n
 
+config IMX9_MU
+	bool "Mailbox support"
+	default y
+	depends on IMX9_HAVE_MU
+
+config IMX9_SCMI
+	bool "SCMI Interface"
+	default y
+	depends on IMX9_MU
+
+if IMX9_SCMI
+
+config IMX9_CLK_OVER_SCMI
+	bool "Configure CLK over SCMI"
+	default y
+
+config IMX9_IOMUX_OVER_SCMI
+	bool "Configure IOMUX over SCMI"
+	default y
+
+endif
+
 menu "LPI2C Peripherals"
 
 menuconfig IMX9_LPI2C1
@@ -980,6 +1014,26 @@ config IMX9_ENET_USE_OTP_MAC
 	default n
 	depends on IMX9_ENET
 
+config IMX9_ENET_HPWORK
+	bool "Use high priority work queue for ethernet"
+	depends on IMX9_ENET
+	depends on SCHED_HPWORK
+	default n
+	---help---
+		Use high-priority work-queue for ethernet packet handling.
+		Enable if low-latency ethernet packet handling is required.
+
+config IMX9_ENET_PHYINIT
+	bool "Board-specific PHY Initialization for ENET"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it
+		can be used.  This may include such things as configuring GPIOs,
+		resetting the PHY, etc.  If CONFIG_IMX9_ENET_PHYINIT is defined in
+		the configuration then the board specific logic must provide
+		imx9_phy_boardinitialize();  The i.MX9 ENET driver will call this
+		function one time before it first uses the PHY.
+
 config IMX9_ENET1_OTP_MAC_ADDR
 	hex "MAC address offset in OCOTP"
 	default 0x4ec
@@ -1077,17 +1131,6 @@ config IMX9_ENET1_PHY_FORCE_SPEED
 		if the link partner has got autonegotiation enabled, the
 		duplex mode is not auto-detected by the link partner. Only
 		enable if you really know what you are doing!
-
-config IMX9_ENET1_PHYINIT
-	bool "Board-specific PHY Initialization for ENET1"
-	default n
-	---help---
-		Some boards require specialized initialization of the PHY before it
-		can be used.  This may include such things as configuring GPIOs,
-		resetting the PHY, etc.  If CONFIG_IMX9_ENET_PHYINIT is defined in
-		the configuration then the board specific logic must provide
-		imx9_phy_boardinitialize();  The i.MX9 ENET driver will call this
-		function one time before it first uses the PHY.
 
 endmenu # IMX9_ENET
 

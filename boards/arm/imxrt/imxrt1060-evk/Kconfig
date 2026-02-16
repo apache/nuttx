@@ -17,4 +17,8 @@ config IMXRT1060_EVK_QSPI_FLASH
 
 endchoice # Boot Flash
 
+config IMXRT1060_EVK_TOUCHSCREEN_SWAPXY
+	bool "IMXRT1060 EVK Touchscreen sway X/Y"
+	depends on INPUT_TOUCHSCREEN
+
 endif

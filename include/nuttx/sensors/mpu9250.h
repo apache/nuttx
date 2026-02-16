@@ -159,13 +159,17 @@ struct mpu9250_config_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mpu60x0_register
+ * Name: mpu9250_register
  *
  * Description:
- *   Declares the existence of an mpu9250 chip, wired according to
- *   config; creates an interface to it at path.
+ *   Registers the mpu9250 character device
  *
- * Returns 0 on success, or negative errno.
+ * Input Parameters:
+ *   devno   - Instance number for driver
+ *   config  - Configuration information
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 

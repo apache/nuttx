@@ -56,9 +56,9 @@ void up_bt_enable(int enable)
   if (enable)
     {
       lc823450_gpio_write(BT_POWER, 0);
-      nxsig_usleep(100 * 1000);
+      nxsched_usleep(100 * 1000);
       lc823450_gpio_write(BT_POWER, 1);
-      nxsig_usleep(100 * 1000);
+      nxsched_usleep(100 * 1000);
     }
   else
     {

@@ -225,6 +225,7 @@ struct xcpt_syscall_s
 
 struct xcptcontext
 {
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   /* These are saved copies of the context used during
    * signal processing.
    */
@@ -239,6 +240,7 @@ struct xcptcontext
   uint32_t sigreturn;
 
 #endif
+#endif /* CONFIG_ENABLE_ALL_SIGNALS */
 
 #ifdef CONFIG_LIB_SYSCALL
   /* The following array holds the return address and the exc_return value

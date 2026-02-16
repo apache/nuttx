@@ -77,7 +77,9 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
 {
   FAR struct group_signal_s *info = (FAR struct group_signal_s *)arg;
   FAR struct tcb_s *tcb;
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   FAR sigactq_t *sigact;
+#endif
   int ret;
 
   /* Get the TCB associated with the group member */
@@ -127,7 +129,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
 
   /* Is this signal unblocked on this thread? */
 
-  if (!nxsig_ismember(&tcb->sigprocmask, info->siginfo->si_signo) &&
+  if ((nxsig_ismember(&tcb->sigprocmask, info->siginfo->si_signo) != 1) &&
       !info->ptcb && tcb != info->atcb)
     {
       /* Yes.. remember this TCB if we have not encountered any
@@ -141,6 +143,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
 
       /* Is there also a action associated with the task group? */
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
       sigact = nxsig_find_action(tcb->group, info->siginfo->si_signo);
       if (sigact)
         {
@@ -164,6 +167,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
               return 1; /* Terminate the search */
             }
         }
+#endif
     }
 
   return 0; /* Keep searching */

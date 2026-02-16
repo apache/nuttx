@@ -44,6 +44,7 @@
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
+#include <semaphore.h>
 
 #include <nuttx/mutex.h>
 #include <nuttx/kmalloc.h>
@@ -76,7 +77,12 @@
 struct i2schar_dev_s
 {
   FAR struct i2s_dev_s *i2s;  /* The lower half i2s driver */
-  mutex_t lock;               /* Assures mutually exclusive access */
+  mutex_t rx_lock;            /* Assures mutually exclusive access to RX operations */
+  mutex_t tx_lock;            /* Assures mutually exclusive access to TX operations */
+  sem_t rx_sem;               /* Semaphore for blocking read operations */
+  sem_t tx_sem;               /* Semaphore for blocking write operations */
+  int rx_result;              /* Result of the last read operation */
+  int tx_result;              /* Result of the last write operation */
 };
 
 /****************************************************************************
@@ -124,16 +130,28 @@ static const struct file_operations g_i2schar_fops =
  * Name: i2schar_rxcallback
  *
  * Description:
- *   I2S RX transfer complete callback.
+ *   Callback function invoked upon completion of an I2S RX (receive)
+ *   transfer. This function is called by the lower-half I2S driver when
+ *   the reception of an audio buffer is complete.
  *
- *   NOTE: In this test driver, the RX is simply dumped in the bit bucket.
- *   You would not do this in a real application. You would return the
- *   received data to the caller via some IPC.
+ *   In this test driver implementation, the received buffer is simply
+ *   freed. This is acceptable if this driver has the sole reference to the
+ *   buffer; in that case, the buffer will be freed. Otherwise, this may
+ *   result in a memory leak. A more efficient design would recycle the
+ *   audio buffers for future use.
  *
- *   Also, the test buffer is simply freed.  This will work if this driver
- *   has the sole reference to buffer; in that case the buffer will be freed.
- *   Otherwise -- memory leak!  A more efficient design would recycle the
- *   audio buffers.
+ *   In a real application, the received data would typically be returned
+ *   to the caller or passed to another subsystem via IPC or a queue.
+ *
+ * Input Parameters:
+ *   dev    - Pointer to the I2S device structure
+ *   apb    - Pointer to the audio buffer structure that was received
+ *   arg    - Pointer to the private data structure (i2schar_dev_s)
+ *   result - The result of the transfer (OK on success, negated errno on
+ *            failure)
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
@@ -144,9 +162,16 @@ static void i2schar_rxcallback(FAR struct i2s_dev_s *dev,
   FAR struct i2schar_dev_s *priv = (FAR struct i2schar_dev_s *)arg;
 
   DEBUGASSERT(priv != NULL && apb != NULL);
-  UNUSED(priv);
 
   i2sinfo("apb=%p nbytes=%d result=%d\n", apb, apb->nbytes, result);
+
+  /* Store the result and signal completion */
+
+  priv->rx_result = result;
+
+  /* Signal that the read operation has completed */
+
+  nxsem_post(&priv->rx_sem);
 
   /* REVISIT: If you want this to actually do something other than
    * test I2S data transfer, then this is the point where you would
@@ -165,12 +190,25 @@ static void i2schar_rxcallback(FAR struct i2s_dev_s *dev,
  * Name: i2schar_txcallback
  *
  * Description:
- *   I2S TX transfer complete callback
+ *   Callback function invoked upon completion of an I2S TX (transmit)
+ *   transfer. This function is called by the lower-half I2S driver when
+ *   the transmission of an audio buffer is complete.
  *
- *   NOTE: The test buffer is simply freed.  This will work if this driver
- *   has the sole reference to buffer; in that case the buffer will be freed.
- *   Otherwise -- memory leak!  A more efficient design would recycle the
- *   audio buffers.
+ *   In this test driver implementation, the transmitted buffer is simply
+ *   freed. This is acceptable if this driver has the sole reference to the
+ *   buffer; in that case, the buffer will be freed. Otherwise, this may
+ *   result in a memory leak. A more efficient design would recycle the
+ *   audio buffers for future use.
+ *
+ * Input Parameters:
+ *   dev    - Pointer to the I2S device structure
+ *   apb    - Pointer to the audio buffer structure that was transmitted
+ *   arg    - Pointer to the private data structure (i2schar_dev_s)
+ *   result - The result of the transfer (OK on success, negated errno on
+ *            failure)
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
@@ -181,13 +219,20 @@ static void i2schar_txcallback(FAR struct i2s_dev_s *dev,
   FAR struct i2schar_dev_s *priv = (FAR struct i2schar_dev_s *)arg;
 
   DEBUGASSERT(priv != NULL && apb != NULL);
-  UNUSED(priv);
 
   i2sinfo("apb=%p nbytes=%d result=%d\n", apb, apb->nbytes, result);
 
+  /* Store the result and signal completion */
+
+  priv->tx_result = result;
+
+  /* Signal that the write operation has completed */
+
+  nxsem_post(&priv->tx_sem);
+
   /* REVISIT: If you want this to actually do something other than
    * test I2S data transfer, then this is the point where you would
-   * want to let some application know that the transfer has complete.
+   * want to let some application know that the transfer has completed.
    */
 
   /* Release our reference to the audio buffer.  Hopefully it will be freed
@@ -202,7 +247,26 @@ static void i2schar_txcallback(FAR struct i2s_dev_s *dev,
  * Name: i2schar_read
  *
  * Description:
- *   Standard character driver read method
+ *   Standard character driver read method. This function reads audio data
+ *   from the I2S character device. The data is expected to be provided in
+ *   the form of a single, correctly sized audio buffer (struct ap_buffer_s
+ *   followed by audio data). The function adds a reference to the buffer,
+ *   passes it to the lower-half I2S driver for reception, and waits for the
+ *   transfer to complete via a callback. Upon completion, the function
+ *   returns the number of bytes read or a negated errno value on failure.
+ *
+ * Input Parameters:
+ *   filep  - Pointer to the file structure instance
+ *   buffer - Pointer to the buffer where the received audio data will be
+ *            stored. This must point to a struct ap_buffer_s followed by
+ *            sufficient space for the audio data.
+ *   buflen - The length of the buffer in bytes. Must be at least the size of
+ *            struct ap_buffer_s plus the number of audio data bytes.
+ *
+ * Returned Value:
+ *   On success, returns the number of bytes read (including the
+ *   struct ap_buffer_s header and the audio data). On failure, returns
+ *   a negated errno value indicating the error.
  *
  ****************************************************************************/
 
@@ -240,7 +304,7 @@ static ssize_t i2schar_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access to i2c character driver */
 
-  ret = nxmutex_lock(&priv->lock);
+  ret = nxmutex_lock(&priv->rx_lock);
   if (ret < 0)
     {
       i2serr("ERROR: nxsem_wait returned: %d\n", ret);
@@ -257,16 +321,34 @@ static ssize_t i2schar_read(FAR struct file *filep, FAR char *buffer,
       goto errout_with_reference;
     }
 
-  /* Lie to the caller and tell them that all of the bytes have been
-   * received
-   */
+  /* Wait for the RX callback to signal completion */
 
-  nxmutex_unlock(&priv->lock);
-  return sizeof(struct ap_buffer_s) + nbytes;
+  ret = nxsem_wait(&priv->rx_sem);
+  if (ret < 0)
+    {
+      i2serr("ERROR: nxsem_wait returned: %d\n", ret);
+      goto errout_with_reference;
+    }
+
+  /* Get the result from the private data */
+
+  ret = priv->rx_result;
+
+  /* If the operation was successful, return the number of bytes received */
+
+  if (ret >= 0)
+    {
+      ret = sizeof(struct ap_buffer_s) + apb->nbytes;
+    }
+
+  /* Release our reference to the audio buffer */
+
+  nxmutex_unlock(&priv->rx_lock);
+  return ret;
 
 errout_with_reference:
   apb_free(apb);
-  nxmutex_unlock(&priv->lock);
+  nxmutex_unlock(&priv->rx_lock);
   return ret;
 }
 
@@ -274,7 +356,26 @@ errout_with_reference:
  * Name: i2schar_write
  *
  * Description:
- *   Standard character driver write method
+ *   Standard character driver write method. This function writes audio data
+ *   to the I2S character device. The data must be provided in the form of a
+ *   single, correctly sized audio buffer (struct ap_buffer_s followed by
+ *   audio data). The function adds a reference to the buffer, sends it to
+ *   the lower-half I2S driver for transmission, and waits for the transfer
+ *   to complete via a callback. Upon completion, the function returns the
+ *   number of bytes written or a negated errno value on failure.
+ *
+ * Input Parameters:
+ *   filep  - Pointer to the file structure instance
+ *   buffer - Pointer to the buffer containing the audio data to be written.
+ *            This must point to a struct ap_buffer_s followed by the audio
+ *            data.
+ *   buflen - The length of the buffer in bytes. Must be at least the size of
+ *            struct ap_buffer_s plus the number of audio data bytes.
+ *
+ * Returned Value:
+ *   On success, returns the number of bytes written (including the
+ *   struct ap_buffer_s header and the audio data). On failure, returns
+ *   a negated errno value indicating the error.
  *
  ****************************************************************************/
 
@@ -312,7 +413,7 @@ static ssize_t i2schar_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Get exclusive access to i2c character driver */
 
-  ret = nxmutex_lock(&priv->lock);
+  ret = nxmutex_lock(&priv->tx_lock);
   if (ret < 0)
     {
       i2serr("ERROR: nxsem_wait returned: %d\n", ret);
@@ -329,24 +430,56 @@ static ssize_t i2schar_write(FAR struct file *filep, FAR const char *buffer,
       goto errout_with_reference;
     }
 
-  /* Lie to the caller and tell them that all of the bytes have been
-   * sent.
-   */
+  /* Wait for the TX callback to signal completion */
 
-  nxmutex_unlock(&priv->lock);
-  return sizeof(struct ap_buffer_s) + nbytes;
+  ret = nxsem_wait(&priv->tx_sem);
+  if (ret < 0)
+    {
+      i2serr("ERROR: nxsem_wait returned: %d\n", ret);
+      goto errout_with_reference;
+    }
+
+  /* Get the result from the private data */
+
+  ret = priv->tx_result;
+
+  /* If the operation was successful, return the number of bytes sent */
+
+  if (ret >= 0)
+    {
+      ret = sizeof(struct ap_buffer_s) + apb->nbytes;
+    }
+
+  /* Release our reference to the audio buffer */
+
+  nxmutex_unlock(&priv->tx_lock);
+  return ret;
 
 errout_with_reference:
   apb_free(apb);
-  nxmutex_unlock(&priv->lock);
+  nxmutex_unlock(&priv->tx_lock);
   return ret;
 }
 
 /****************************************************************************
- * Name: i2char_ioctl
+ * Name: i2schar_ioctl
  *
  * Description:
- *   Perform I2S device ioctl if exists
+ *   Perform device-specific operations on the I2S character device via ioctl
+ *   commands. This function handles a set of standard I2S ioctl commands for
+ *   getting and setting data width, channel count, and sample rate for both
+ *   RX and TX directions. If the command is not recognized, it is forwarded
+ *   to the lower-half I2S driver's i2s_ioctl method if available.
+ *
+ * Input Parameters:
+ *   filep - Pointer to the file structure instance
+ *   cmd   - The ioctl command to be performed
+ *   arg   - The argument accompanying the ioctl command (may be a pointer or
+ *           a value, depending on the command)
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success; a negated errno value on failure.
+ *   If the command is not supported, returns -ENOTTY.
  *
  ****************************************************************************/
 
@@ -354,7 +487,7 @@ static int i2schar_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode;
   FAR struct i2schar_dev_s *priv;
-  int ret = -ENOTTY;
+  int ret = OK;
 
   /* Get our private data structure */
 
@@ -363,9 +496,92 @@ static int i2schar_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   priv = inode->i_private;
   DEBUGASSERT(priv != NULL && priv->i2s && priv->i2s->ops);
 
-  if (priv->i2s->ops->i2s_ioctl)
+  switch (cmd)
     {
-      ret = priv->i2s->ops->i2s_ioctl(priv->i2s, cmd, arg);
+      case I2SIOC_GRXDATAWIDTH:
+        {
+          *(FAR uint32_t *)arg = I2S_RXDATAWIDTH(priv->i2s, 0);
+          break;
+        }
+
+      case I2SIOC_GTXDATAWIDTH:
+        {
+          *(FAR uint32_t *)arg = I2S_TXDATAWIDTH(priv->i2s, 0);
+        }
+        break;
+
+      case I2SIOC_GRXCHANNELS:
+        {
+          *(FAR int *)arg = I2S_RXCHANNELS(priv->i2s, 0);
+        }
+        break;
+
+      case I2SIOC_GTXCHANNELS:
+        {
+          *(FAR int *)arg = I2S_TXCHANNELS(priv->i2s, 0);
+        }
+        break;
+
+      case I2SIOC_GRXSAMPLERATE:
+        {
+          *(FAR uint32_t *)arg = I2S_RXSAMPLERATE(priv->i2s, 0);
+        }
+        break;
+
+      case I2SIOC_GTXSAMPLERATE:
+        {
+          *(FAR uint32_t *)arg = I2S_TXSAMPLERATE(priv->i2s, 0);
+        }
+        break;
+
+      case I2SIOC_SRXDATAWIDTH:
+        {
+          *(FAR uint32_t *)arg = I2S_RXDATAWIDTH(priv->i2s, arg);
+          break;
+        }
+
+      case I2SIOC_STXDATAWIDTH:
+        {
+          *(FAR uint32_t *)arg = I2S_TXDATAWIDTH(priv->i2s, arg);
+        }
+        break;
+
+      case I2SIOC_SRXCHANNELS:
+        {
+          *(FAR int *)arg = I2S_RXCHANNELS(priv->i2s, arg);
+        }
+        break;
+
+      case I2SIOC_STXCHANNELS:
+        {
+          *(FAR int *)arg = I2S_TXCHANNELS(priv->i2s, arg);
+        }
+        break;
+
+      case I2SIOC_SRXSAMPLERATE:
+        {
+          *(FAR uint32_t *)arg = I2S_RXSAMPLERATE(priv->i2s, arg);
+        }
+        break;
+
+      case I2SIOC_STXSAMPLERATE:
+        {
+          *(FAR uint32_t *)arg = I2S_TXSAMPLERATE(priv->i2s, arg);
+        }
+        break;
+
+      default:
+        {
+          if (priv->i2s->ops->i2s_ioctl)
+            {
+              ret = priv->i2s->ops->i2s_ioctl(priv->i2s, cmd, arg);
+            }
+          else
+            {
+              ret = -ENOTTY;
+            }
+        }
+        break;
     }
 
   return ret;
@@ -417,7 +633,12 @@ int i2schar_register(FAR struct i2s_dev_s *i2s, int minor)
       /* Initialize the I2S character device structure */
 
       priv->i2s = i2s;
-      nxmutex_init(&priv->lock);
+      nxmutex_init(&priv->rx_lock);
+      nxmutex_init(&priv->tx_lock);
+      nxsem_init(&priv->rx_sem, 0, 0);
+      nxsem_init(&priv->tx_sem, 0, 0);
+      priv->rx_result = 0;
+      priv->tx_result = 0;
 
       /* Create the character device name */
 
@@ -429,7 +650,10 @@ int i2schar_register(FAR struct i2s_dev_s *i2s, int minor)
            * device.
            */
 
-          nxmutex_destroy(&priv->lock);
+          nxsem_destroy(&priv->tx_sem);
+          nxsem_destroy(&priv->rx_sem);
+          nxmutex_destroy(&priv->rx_lock);
+          nxmutex_destroy(&priv->tx_lock);
           kmm_free(priv);
           return ret;
         }

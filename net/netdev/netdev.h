@@ -107,23 +107,6 @@ typedef int (*netdev_callback_t)(FAR struct net_driver_s *dev,
 bool netdev_verify(FAR struct net_driver_s *dev);
 
 /****************************************************************************
- * Name: netdev_findbyname
- *
- * Description:
- *   Find a previously registered network device using its assigned
- *   network interface name
- *
- * Input Parameters:
- *   ifname The interface name of the device of interest
- *
- * Returned Value:
- *  Pointer to driver on success; null on failure
- *
- ****************************************************************************/
-
-FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname);
-
-/****************************************************************************
  * Name: netdev_foreach
  *
  * Description:
@@ -242,24 +225,6 @@ FAR struct net_driver_s *netdev_findby_ripv6addr(
 #endif
 
 /****************************************************************************
- * Name: netdev_findbyindex
- *
- * Description:
- *   Find a previously registered network device by assigned interface index.
- *
- * Input Parameters:
- *   ifindex - The interface index.  This is a one-based index and must be
- *             greater than zero.
- *
- * Returned Value:
- *  Pointer to driver on success; NULL on failure.  This function will return
- *  NULL only if there is no device corresponding to the provided index.
- *
- ****************************************************************************/
-
-FAR struct net_driver_s *netdev_findbyindex(int ifindex);
-
-/****************************************************************************
  * Name: netdev_nextindex
  *
  * Description:
@@ -310,8 +275,9 @@ FAR struct net_driver_s *netdev_default(void);
  *   data is available.
  *
  * Input Parameters:
- *   lipaddr - The local address bound to the socket
- *   ripaddr - The remote address to send the data
+ *   lipaddr  - The local address bound to the socket
+ *   ripaddr  - The remote address to send the data
+ *   polltype - The type of poll to be triggered for the device.
  *
  * Returned Value:
  *  None
@@ -319,7 +285,8 @@ FAR struct net_driver_s *netdev_default(void);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr);
+void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr,
+                          uint32_t polltype);
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
@@ -330,8 +297,9 @@ void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr);
  *   data is available.
  *
  * Input Parameters:
- *   lipaddr - The local address bound to the socket
- *   ripaddr - The remote address to send the data
+ *   lipaddr  - The local address bound to the socket
+ *   ripaddr  - The remote address to send the data
+ *   polltype - The type of poll to be triggered for the device.
  *
  * Returned Value:
  *  None
@@ -340,7 +308,8 @@ void netdev_ipv4_txnotify(in_addr_t lipaddr, in_addr_t ripaddr);
 
 #ifdef CONFIG_NET_IPv6
 void netdev_ipv6_txnotify(FAR const net_ipv6addr_t lipaddr,
-                          FAR const net_ipv6addr_t ripaddr);
+                          FAR const net_ipv6addr_t ripaddr,
+                          uint32_t polltype);
 #endif /* CONFIG_NET_IPv6 */
 
 /****************************************************************************
@@ -352,14 +321,15 @@ void netdev_ipv6_txnotify(FAR const net_ipv6addr_t lipaddr,
  *   packet will be routed.
  *
  * Input Parameters:
- *   dev - The network device driver state structure.
+ *   dev      - The network device driver state structure.
+ *   polltype - The type of poll to be triggered for the device.
  *
  * Returned Value:
  *  None
  *
  ****************************************************************************/
 
-void netdev_txnotify_dev(FAR struct net_driver_s *dev);
+void netdev_txnotify_dev(FAR struct net_driver_s *dev, uint32_t polltype);
 
 /****************************************************************************
  * Name: netdev_count
@@ -532,6 +502,120 @@ void netdev_notify_recvcpu(FAR struct net_driver_s *dev,
                            FAR const void *src_addr, uint16_t src_port,
                            FAR const void *dst_addr, uint16_t dst_port);
 #endif
+
+#ifdef CONFIG_NET_IPv4
+
+/****************************************************************************
+ * Name: ipv4_upperlayer_header_chksum
+ *
+ * Description:
+ *   Perform the checksum calculation over the IPv4, protocol headers,
+ *   IP source and destination addresses
+ *
+ * Input Parameters:
+ *   dev   - The network driver instance. The packet data is in the d_buf
+ *           of the device.
+ *   proto - The protocol being supported
+ *
+ * Returned Value:
+ *   The calculated checksum with pseudo-header and IP source and
+ *   destination addresses
+ *
+ ****************************************************************************/
+
+uint16_t ipv4_upperlayer_header_chksum(FAR struct net_driver_s *dev,
+                                       uint8_t proto);
+
+/****************************************************************************
+ * Name: ipv4_upperlayer_payload_chksum
+ *
+ * Description:
+ *   Perform the checksum calculation over the iob data payload
+ *
+ * Input Parameters:
+ *   dev   - The network driver instance. The packet data is in the d_buf
+ *           of the device.
+ *   sum   - The default checksum
+ *
+ * Returned Value:
+ *   The calculated checksum with iob data payload and default checksum
+ *
+ ****************************************************************************/
+
+uint16_t ipv4_upperlayer_payload_chksum(FAR struct net_driver_s *dev,
+                                        uint16_t sum);
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+
+/****************************************************************************
+ * Name: ipv6_upperlayer_header_chksum
+ *
+ * Description:
+ *   Perform the checksum calculation over the IPv6, protocol headers,
+ *   IP source and destination addresses.
+ *
+ * Input Parameters:
+ *   dev   - The network driver instance.  The packet data is in the d_buf
+ *           of the device.
+ *   proto - The protocol being supported
+ *   iplen - The size of the IPv6 header.  This may be larger than
+ *           IPv6_HDRLEN the IPv6 header if IPv6 extension headers are
+ *           present.
+ *
+ * Returned Value:
+ *   The calculated checksum
+ *
+ ****************************************************************************/
+
+uint16_t ipv6_upperlayer_header_chksum(FAR struct net_driver_s *dev,
+                                       uint8_t proto, unsigned int iplen);
+
+/****************************************************************************
+ * Name: ipv6_upperlayer_payload_chksum
+ *
+ * Description:
+ *   Perform the checksum calculation over the iob data payload and
+ *   default checksum.
+ *
+ * Input Parameters:
+ *   dev   - The network driver instance.  The packet data is in the d_buf
+ *           of the device.
+ *   proto - The protocol being supported
+ *   iplen - The size of the IPv6 header.  This may be larger than
+ *           IPv6_HDRLEN the IPv6 header if IPv6 extension headers are
+ *           present.
+ *
+ * Returned Value:
+ *   The calculated checksum
+ *
+ ****************************************************************************/
+
+uint16_t ipv6_upperlayer_payload_chksum(FAR struct net_driver_s *dev,
+                                        unsigned int iplen, uint16_t sum);
+
+#endif /* CONFIG_NET_IPv6 */
+
+/****************************************************************************
+ * Name: netdev_list_lock
+ *
+ * Description:
+ *   Lock the network device list.  This is used to protect the network
+ *   device list from concurrent access.
+ *
+ ****************************************************************************/
+
+void netdev_list_lock(void);
+
+/****************************************************************************
+ * Name: netdev_list_unlock
+ *
+ * Description:
+ *   Unlock the network device list.
+ *
+ ****************************************************************************/
+
+void netdev_list_unlock(void);
 
 #undef EXTERN
 #ifdef __cplusplus

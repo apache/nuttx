@@ -46,6 +46,7 @@
 
 #include "chip.h"
 #include "exc_return.h"
+#include "ghs_compat.S"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -113,7 +114,7 @@
  */
 
 	.text
-	.section    .text.exception_common
+	.section    .text.exception_common, "ax"
 #ifdef __ghs__
 	.type	exception_common, $function
 #else

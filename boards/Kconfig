@@ -94,6 +94,7 @@ config ARCH_BOARD_AVRDX_BREADXAVR
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select AVR_HAVE_BOARD_FLMAP
 	---help---
 		This is a board used to make something use an AVRnDx core
 		so it can be developed and tested.
@@ -278,6 +279,15 @@ config ARCH_BOARD_ESP32_DEVKITC
 		of two CPUs is symmetric, meaning they use the same addresses to
 		access the same memory.
 
+config ARCH_BOARD_HELTEC_WIFI_LORA32
+	bool "Heltec WiFi LoRa32"
+	depends on ARCH_CHIP_ESP32WROOM32 || ARCH_CHIP_ESP32WROOM32_8MB || ARCH_CHIP_ESP32WROOM32_16MB || ARCH_CHIP_ESP32WROVER || ARCH_CHIP_ESP32SOLO1
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
+	---help---
+		This is a Heltec board with ESP32 and a SX1276 LoRa transceiver.
+
 config ARCH_BOARD_TLSR8278ADK80D
 	bool "Telink tlsr8278adk80d board"
 	depends on ARCH_CHIP_TLSR82
@@ -405,8 +415,8 @@ config ARCH_BOARD_TTGO_T_DISPLAY_ESP32
 		This port is for board version 1.1, more info:
 		https://github.com/Xinyuan-LilyGO/TTGO-T-Display
 
-config ARCH_BOARD_ESP32C3_DEVKIT
-	bool "Espressif ESP32-C3 DevKit"
+config ARCH_BOARD_ESP32C3_LEGACY_DEVKIT
+	bool "Espressif ESP32-C3 DevKit (Legacy)"
 	depends on ARCH_CHIP_ESP32C3MINI1 || ARCH_CHIP_ESP32C3WROOM02
 	---help---
 		The ESP32-C3 DevKit features the ESP32-C3 CPU with a RISC-V core.
@@ -414,8 +424,8 @@ config ARCH_BOARD_ESP32C3_DEVKIT
 		The ESP32-C3-DevKitM-1 version contains the ESP32-C3-MINI-1 module and the
 		ESP32-C3-DevKitC-02 version the ESP32-C3-WROOM-02.
 
-config ARCH_BOARD_ESP32C3_DEVKIT_RUST1
-	bool "Espressif ESP32-C3-RUST-1 board"
+config ARCH_BOARD_ESP32C3_LEGACY_DEVKIT_RUST1
+	bool "Espressif ESP32-C3-RUST-1 board (Legacy)"
 	depends on ARCH_CHIP_ESP32C3MINI1
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
@@ -424,9 +434,9 @@ config ARCH_BOARD_ESP32C3_DEVKIT_RUST1
 		This board includes the ESP32-C3-MINI-1 module, a 6DoF IMU, a temperature
 		and humidity sensor, a Li-Ion battery charger, and a Type-C USB.
 
-config ARCH_BOARD_ESP32C3_GENERIC
-	bool "Espressif ESP32-C3 Generic DevKit"
-	depends on ESPRESSIF_ESP32C3
+config ARCH_BOARD_ESP32C3_DEVKIT
+	bool "Espressif ESP32-C3 DevKit"
+	depends on ARCH_CHIP_ESP32C3
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
@@ -437,11 +447,20 @@ config ARCH_BOARD_ESP32C3_GENERIC
 
 config ARCH_BOARD_ESP32C3_XIAO
 	bool "Seeed Studio XIAO ESP32-C3"
-	depends on ESPRESSIF_ESP32C3
+	depends on ARCH_CHIP_ESP32C3
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		The XIAO-ESP32C3 from Seeed Studio features the ESP32-C3 CPU with a RISC-V core,
+		supporting IEEE 802.11 b/g/n WiFi, and Bluetooth 5 (BLE) protocols.
+
+config ARCH_BOARD_ESP32_C3_ZERO
+	bool "Waveshare ESP32-C3-Zero"
+	depends on ARCH_CHIP_ESP32C3
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		The ESP32-C3-Zero from Waveshare features the ESP32-C3 CPU with a RISC-V core,
 		supporting IEEE 802.11 b/g/n WiFi, and Bluetooth 5 (BLE) protocols.
 
 config ARCH_BOARD_ESP32S2_KALUGA_1
@@ -610,7 +629,7 @@ config ARCH_BOARD_ESP32C6_XIAO
 
 config ARCH_BOARD_ESP32H2_DEVKIT
 	bool "Espressif ESP32-H2 Generic DevKit"
-	depends on ESPRESSIF_ESP32H2
+	depends on ARCH_CHIP_ESP32H2
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
@@ -830,6 +849,17 @@ config ARCH_BOARD_IMXRT1050_EVK
 		This is the board configuration for the port of NuttX to the NXP i.MXRT
 		evaluation kit, MIMXRT1050-EVKB.  This board features the MIMXRT1052DVL6A MCU.
 
+config ARCH_BOARD_ARCX_SOCKET_GRID
+	bool "ARCX Socket Grid board"
+	depends on ARCH_CHIP_MIMXRT1052DVL6A
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_PHY_INTERRUPT
+	---help---
+		This is the board configuration for the port of NuttX for
+		ARC Socket Grid board.
+
 config ARCH_BOARD_IMXRT1060_EVK
 	bool "NXP i.MX RT 1060 EVK"
 	depends on ARCH_CHIP_MIMXRT1062DVL6A
@@ -871,6 +901,16 @@ config ARCH_BOARD_IMX95_EVK
 	---help---
 		This is the board configuration for the port of NuttX to the NXP i.MXRT
 		evaluation kit, IMX95-EVK.  This board features the IMX95 MCU.
+
+config ARCH_BOARD_MR_NAVQ95B
+	bool "NXP MR NAVQ95B"
+	depends on ARCH_CHIP_IMX9_CORTEX_M
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is the board configuration for the port of NuttX to the NXP Mobile
+		Robotics NavQ95 board.  This board features the IMX95 MCU.
 
 config ARCH_BOARD_LC823450_XGEVK
 	bool "ON Semiconductor LC823450-XGEVK development board"
@@ -1865,6 +1905,15 @@ config ARCH_BOARD_WEACT_STM32H743
 	---help---
 		This is WeAct MiniSTM32H7xx (STM32H743VIT6) board.
 
+config ARCH_BOARD_WEACT_STM32H750
+	bool "WeAct Studio STM32H750"
+	depends on ARCH_CHIP_STM32H750VB
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is WeAct MiniSTM32H7xx (STM32H750VB) board.
+
 config ARCH_BOARD_NUCLEO_H743ZI
 	bool "STM32H743 Nucleo H743ZI"
 	depends on ARCH_CHIP_STM32H743ZI
@@ -1902,9 +1951,9 @@ config ARCH_BOARD_STM32H745I_DISCO
 
 config ARCH_BOARD_STM32H750B_DK
 	bool "STM32H750B-DK board"
-	depends on ARCH_CHIP_STM32H750B
+	depends on ARCH_CHIP_STM32H750XB
 	---help---
-		STMicro STM32H750B-DK board based on the STMicro STM32H750B MCU.
+		STMicro STM32H750B-DK board based on the STMicro STM32H750XB MCU.
 
 config ARCH_BOARD_LINUM_STM32H753BI
 	bool "Linum (STM32H753BI) board"
@@ -1919,6 +1968,13 @@ config ARCH_BOARD_OPENH743I
 	depends on ARCH_CHIP_STM32H743II
 	---help---
 		Waveshare OpenH743I board based on the STMicro STM32H743II MCU.
+
+config ARCH_BOARD_PORTENTA_H7
+	bool "Arduino Portenta H7"
+	depends on ARCH_CHIP_STM32H747XI
+	select ARCH_HAVE_LEDS
+	---help---
+		Arduino Portenta H7 board based on STMicro STM32H747XI MCU.
 
 config ARCH_BOARD_NUCLEO_L152RE
 	bool "STM32L152 Nucleo L152RE"
@@ -2031,6 +2087,7 @@ config ARCH_BOARD_RASPBERRYPI_PICO_W
 config ARCH_BOARD_RASPBERRYPI_4B
 	bool "Raspberry Pi Model 4B"
 	depends on ARCH_CHIP_BCM2711
+	select ARCH_HAVE_LEDS
 	---help---
 		This is a port to the Raspberry Pi Model 4B.
 
@@ -2077,6 +2134,13 @@ config ARCH_BOARD_RASPBERRYPI_PICO_2
 	select ARCH_HAVE_LEDS
 	---help---
 		This is a port to the Raspberry Pi Pico 2 board.
+
+config ARCH_BOARD_RASPBERRYPI_PICO_2_RV
+	bool "Raspberry Pi Pico 2 board RISC-V (not Pico, not W)"
+	depends on ARCH_CHIP_RP23XX_RV
+	select ARCH_HAVE_LEDS
+	---help---
+		This is a port to the Raspberry Pi Pico 2 RISC-V board.
 
 config ARCH_BOARD_XIAO_RP2350
 	bool "Seeed Xiao RP2350"
@@ -2319,7 +2383,7 @@ config ARCH_BOARD_SABRE_6QUAD
 		This options selects support for NuttX on the NXP/Freescale Sabre
 		board featuring the iMX 6Quad CPU.
 
-config ARCH_BOARD_TC397
+config ARCH_BOARD_A2G_TC397_5V_TFT
 	bool "Infineon's AURIX TC397 board: KIT_A2G_TC397_5V_TFT"
 	depends on ARCH_CHIP_TC397
 	---help---
@@ -2407,6 +2471,14 @@ config ARCH_BOARD_IMX93_EVK
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This options selects support for NuttX on the NXP i.MX93 CPUs EVK
+		board with ARM Cortex-A55.
+
+config ARCH_BOARD_IMX95_A55_EVK
+	bool "NXP i.MX95 CPUs EVK board"
+	depends on ARCH_CHIP_IMX95
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP i.MX95 CPUs EVK
 		board with ARM Cortex-A55.
 
 config ARCH_BOARD_AVAOTA_A1
@@ -2614,6 +2686,19 @@ config ARCH_BOARD_SAMV71_XULT
 	select ARCH_PHY_INTERRUPT
 	---help---
 		The port of NuttX to the Atmel SAMV71 Xplained Ultra evaluation board.
+
+config ARCH_BOARD_PIC32CZCA70_CURIOSITY
+	bool "Microchip PIC32CZ CA70 Curiosity Ultra Evaluation Board"
+	depends on ARCH_CHIP_PIC32CZCA70144
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_PHY_INTERRUPT
+	---help---
+		The port of NuttX to the PIC32CZ CA70 Curiosity Ultra Evaluation
+		Board. The used microcontroller is pin to pin and binary compatible
+		with SAMV70/SAME70 series, but the evaluation board's pinout differs
+		from Xplained evaluation kits.
 
 config ARCH_BOARD_SHENZHOU
 	bool "Shenzhou STM32F107 board"
@@ -2893,7 +2978,6 @@ config ARCH_BOARD_B_G474E_DPOW1
 	---help---
 		ST Micro B-G474E-DPOW1 Discovery Kit, based on the STM32G474RET6
 		MCU, a Cortex-M4 with FPU, 170 MHz, 128 KB SRAM, 512 KB code.
-		See boards/arm/stm32/b-g474e-dpow1/README.txt.
 
 config ARCH_BOARD_B_G431B_ESC1
 	bool "ST Micro B-G431B-ESC1 Discovery Kit"
@@ -2929,7 +3013,6 @@ config ARCH_BOARD_NUCLEO_G474RE
 	---help---
 		STMicro Nucleo-G474RE board based on the STMicro STM32G474RET6
 		MCU, a Cortex-M4 with FPU, 170 MHz, 128 KB SRAM, 512 KB code.
-		See boards/arm/stm32/nucleo-g474re/README.txt.
 
 config ARCH_BOARD_B_L072Z_LRWAN1
 	bool "B-L072Z-LRWAN1"
@@ -3388,7 +3471,7 @@ config ARCH_BOARD_CUSTOM
 		Don't see the board you want?  You must first select the exact MCU part
 		number, then the boards supporting that part will be available for selection.
 
-endchoice
+endchoice # Select target board
 
 if ARCH_BOARD_CUSTOM
 menu "Custom Board Configuration"
@@ -3444,7 +3527,7 @@ config BOARD_CUSTOM_INTERRUPT
 	select ARCH_PHY_INTERRUPT
 
 endmenu # Custom Board Configuration
-endif #ARCH_BOARD_CUSTOM
+endif # ARCH_BOARD_CUSTOM
 
 config ARCH_BOARD
 	string
@@ -3903,8 +3986,8 @@ endif
 if ARCH_BOARD_SABRE_6QUAD
 source "boards/arm/imx6/sabre-6quad/Kconfig"
 endif
-if ARCH_BOARD_TC397
-source "boards/tricore/tc3xx/tc397/Kconfig"
+if ARCH_BOARD_A2G_TC397_5V_TFT
+source "boards/tricore/tc397/a2g-tc397-5v-tft/Kconfig"
 endif
 if ARCH_BOARD_MPS2_AN500
 source "boards/arm/mps/mps2-an500/Kconfig"
@@ -3939,6 +4022,9 @@ endif
 if ARCH_BOARD_IMX93_EVK
 source "boards/arm64/imx9/imx93-evk/Kconfig"
 endif
+if ARCH_BOARD_IMX95_A55_EVK
+source "boards/arm64/imx9/imx95-a55-evk/Kconfig"
+endif
 if ARCH_BOARD_AVAOTA_A1
 source "boards/arm64/a527/avaota-a1/Kconfig"
 endif
@@ -3951,6 +4037,9 @@ endif
 if ARCH_BOARD_IMXRT1050_EVK
 source "boards/arm/imxrt/imxrt1050-evk/Kconfig"
 endif
+if ARCH_BOARD_ARCX_SOCKET_GRID
+source "boards/arm/imxrt/arcx-socket-grid/Kconfig"
+endif
 if ARCH_BOARD_IMXRT1060_EVK
 source "boards/arm/imxrt/imxrt1060-evk/Kconfig"
 endif
@@ -3962,6 +4051,9 @@ source "boards/arm/imxrt/imxrt1170-evk/Kconfig"
 endif
 if ARCH_BOARD_IMX95_EVK
 source "boards/arm/imx9/imx95-evk/Kconfig"
+endif
+if ARCH_BOARD_MR_NAVQ95B
+source "boards/arm/imx9/mr-navq95b/Kconfig"
 endif
 if ARCH_BOARD_TEENSY_4X
 source "boards/arm/imxrt/teensy-4.x/Kconfig"
@@ -4245,6 +4337,9 @@ endif
 if ARCH_BOARD_SAMV71_XULT
 source "boards/arm/samv7/samv71-xult/Kconfig"
 endif
+if ARCH_BOARD_PIC32CZCA70_CURIOSITY
+source "boards/arm/samv7/pic32czca70-curiosity/Kconfig"
+endif
 if ARCH_BOARD_B_G474E_DPOW1
 source "boards/arm/stm32/b-g474e-dpow1/Kconfig"
 endif
@@ -4323,6 +4418,9 @@ endif
 if ARCH_BOARD_WEACT_STM32H743
 source "boards/arm/stm32h7/weact-stm32h743/Kconfig"
 endif
+if ARCH_BOARD_WEACT_STM32H750
+source "boards/arm/stm32h7/weact-stm32h750/Kconfig"
+endif
 if ARCH_BOARD_NUCLEO_H743ZI
 source "boards/arm/stm32h7/nucleo-h743zi/Kconfig"
 endif
@@ -4335,7 +4433,7 @@ endif
 if ARCH_BOARD_STM32H745I_DISCO
 source "boards/arm/stm32h7/stm32h745i-disco/Kconfig"
 endif
-if ARCH_BOARD_STM32H750B_DB
+if ARCH_BOARD_STM32H750B_DK
 source "boards/arm/stm32h7/stm32h750b-dk/Kconfig"
 endif
 if ARCH_BOARD_LINUM_STM32H753BI
@@ -4343,6 +4441,9 @@ source "boards/arm/stm32h7/linum-stm32h753bi/Kconfig"
 endif
 if ARCH_BOARD_OPENH743I
 source "boards/arm/stm32h7/openh743i/Kconfig"
+endif
+if ARCH_BOARD_PORTENTA_H7
+source "boards/arm/stm32h7/portenta-h7/Kconfig"
 endif
 if ARCH_BOARD_B_L475E_IOT01A
 source "boards/arm/stm32l4/b-l475e-iot01a/Kconfig"
@@ -4713,17 +4814,20 @@ endif
 if ARCH_BOARD_EIC7700X_STARPRO64
 source "boards/risc-v/eic7700x/starpro64/Kconfig"
 endif
+if ARCH_BOARD_ESP32C3_LEGACY_DEVKIT
+source "boards/risc-v/esp32c3-legacy/esp32c3-legacy-devkit/Kconfig"
+endif
+if ARCH_BOARD_ESP32C3_LEGACY_DEVKIT_RUST1
+source "boards/risc-v/esp32c3-legacy/esp32c3-legacy-devkit-rust-1/Kconfig"
+endif
 if ARCH_BOARD_ESP32C3_DEVKIT
-source "boards/risc-v/esp32c3-legacy/esp32c3-devkit/Kconfig"
-endif
-if ARCH_BOARD_ESP32C3_DEVKIT_RUST1
-source "boards/risc-v/esp32c3-legacy/esp32c3-devkit-rust-1/Kconfig"
-endif
-if ARCH_BOARD_ESP32C3_GENERIC
-source "boards/risc-v/esp32c3/esp32c3-generic/Kconfig"
+source "boards/risc-v/esp32c3/esp32c3-devkit/Kconfig"
 endif
 if ARCH_BOARD_ESP32C3_XIAO
 source "boards/risc-v/esp32c3/esp32c3-xiao/Kconfig"
+endif
+if ARCH_BOARD_ESP32_C3_ZERO
+source "boards/risc-v/esp32c3/esp32-c3-zero/Kconfig"
 endif
 if ARCH_BOARD_ESP32S2_KALUGA_1
 source "boards/xtensa/esp32s2/esp32s2-kaluga-1/Kconfig"
@@ -4783,7 +4887,7 @@ if ARCH_BOARD_QEMU_I486
 source "boards/x86/qemu/qemu-i486/Kconfig"
 endif
 if ARCH_BOARD_INTEL64_QEMU
-source "boards/x86_64/intel64/qemu-intel64/Kconfig"
+source "boards/x86_64/qemu/qemu-intel64/Kconfig"
 endif
 if ARCH_BOARD_RX65N
 source "boards/renesas/rx65n/rx65n/Kconfig"
@@ -4802,6 +4906,9 @@ source "boards/xtensa/esp32/esp32-audio-kit/Kconfig"
 endif
 if ARCH_BOARD_ESP32_DEVKITC
 source "boards/xtensa/esp32/esp32-devkitc/Kconfig"
+endif
+if ARCH_BOARD_HELTEC_WIFI_LORA32
+source "boards/xtensa/esp32/heltec_wifi_lora32/Kconfig"
 endif
 if ARCH_BOARD_TTGO_T5V2_ESP32
 source "boards/xtensa/esp32/ttgo_eink5_v2/Kconfig"
@@ -4896,6 +5003,9 @@ endif
 if ARCH_BOARD_FRDM_MCXN236
 source "boards/arm/mcx-nxxx/frdm-mcxn236/Kconfig"
 endif
+if ARCH_BOARD_RASPBERRYPI_PICO_2_RV
+source "boards/risc-v/rp23xx-rv/raspberrypi-pico-2-rv/Kconfig"
+endif
 
 comment "Board-Common Options"
 
@@ -4915,10 +5025,10 @@ endif
 if ARCH_CHIP_ESP32S3
 source "boards/xtensa/esp32s3/common/Kconfig"
 endif
-if ARCH_CHIP_ESP32C3
+if ARCH_CHIP_ESP32C3_LEGACY
 source "boards/risc-v/esp32c3-legacy/common/Kconfig"
 endif
-if ARCH_CHIP_ESP32C3_GENERIC
+if ARCH_CHIP_ESP32C3
 source "boards/risc-v/esp32c3/common/Kconfig"
 endif
 if ARCH_CHIP_ESP32C6
@@ -4954,6 +5064,10 @@ endif
 if ARCH_CHIP_NRF91
 source "boards/arm/nrf91/common/Kconfig"
 endif
+if ARCH_CHIP_RP23XX_RV
+source "boards/risc-v/rp23xx-rv/common/Kconfig"
+endif
+
 endif
 
 choice
@@ -5222,6 +5336,14 @@ config BOARDCTL_START_CPU
 	---help---
 		Enables support for the BOARDIOC_START_CPU boardctl() command.
 		Architecture specific logic must provide the board_start_cpu()
+		interface.
+
+config BOARDCTL_MACADDR
+	bool "Get network MAC address"
+	default n
+	---help---
+		Enables support for the BOARDIOC_MACADDR boardctl() command.
+		Architecture specific logic must provide the board_macaddr()
 		interface.
 
 config BOARDCTL_IOCTL

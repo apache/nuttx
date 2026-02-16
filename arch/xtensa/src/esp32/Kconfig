@@ -207,6 +207,19 @@ config ESP32_RUN_IRAM
 		This loads all of NuttX inside IRAM.  Used to test somewhat small
 		images that can fit entirely in IRAM.
 
+config ESP32_IGNORE_CHIP_REVISION_CHECK
+	bool "Ignore CHIP Revision Check"
+	default n
+	---help---
+		Some old ESP32 chips (before ESP32 ECO V3) has some issues
+		related to PSRAM Cache Bug, 32KHz crystal stability and
+		fault injection regarding security boot. So it is always
+		recommended to use an ESP32 ECO V3 or new chip. However some
+		old boards are still available in the market or in some users'
+		hand and in this case it is necessary to enable this bypass to
+		use this boards.
+		WARNING: Use it only for your own board, not in a product.
+
 menu "ESP32 Peripheral Selection"
 
 source "arch/xtensa/src/common/espressif/Kconfig"
@@ -231,10 +244,8 @@ config ESP32_BT
 		No yet implemented
 
 config ESP32_EFUSE
-	bool "EFUSE support"
-	default n
-	---help---
-		Enable ESP32 efuse support.
+	bool
+	select ESPRESSIF_EFUSE
 
 config ESP32_EMAC
 	bool "Ethernet MAC"
@@ -599,6 +610,7 @@ config ESP32_SPIFLASH
 	select MTD
 	select MTD_BYTE_WRITE
 	select MTD_PARTITION
+	select ESPRESSIF_SPIFLASH
 
 config ESP32_SPI2
 	bool "SPI 2"
@@ -738,7 +750,7 @@ config ESP32_I2C1
 	default n
 	select ESP32_I2C
 
-	config ESP32_I2C_PERIPH_MASTER_MODE
+config ESP32_I2C_PERIPH_MASTER_MODE
 	bool
 	depends on (ESP32_I2C0_MASTER_MODE || ESP32_I2C1_MASTER_MODE)
 	default n
@@ -1831,13 +1843,13 @@ if ESP32_HAVE_OTA_PARTITION
 comment "Application Image OTA Update support"
 
 config ESP32_OTA_PARTITION_ENCRYPT
-	bool "Encrypt OTA partitions"
-	default y
-	depends on ESP32_SECURE_FLASH_ENC_ENABLED
+	bool
+	---help---
+		This option is deprecated.
 
 config ESP32_OTA_PRIMARY_SLOT_OFFSET
 	hex "Application image primary slot offset"
-	default 0x10000
+	default 0x20000
 
 config ESP32_OTA_PRIMARY_SLOT_DEVPATH
 	string "Application image primary slot device path"
@@ -1845,7 +1857,7 @@ config ESP32_OTA_PRIMARY_SLOT_DEVPATH
 
 config ESP32_OTA_SECONDARY_SLOT_OFFSET
 	hex "Application image secondary slot offset"
-	default 0x110000
+	default 0x120000
 
 config ESP32_OTA_SECONDARY_SLOT_DEVPATH
 	string "Application image secondary slot device path"
@@ -1857,7 +1869,7 @@ config ESP32_OTA_SLOT_SIZE
 
 config ESP32_OTA_SCRATCH_OFFSET
 	hex "Scratch partition offset"
-	default 0x210000
+	default 0x220000
 
 config ESP32_OTA_SCRATCH_SIZE
 	hex "Scratch partition size"
@@ -1874,14 +1886,14 @@ if ESP32_SPIFLASH
 comment "General storage MTD Configuration"
 
 config ESP32_STORAGE_MTD_ENCRYPT
-	bool "Encrypt Storage MTD partition"
-	default y
-	depends on ESP32_SECURE_FLASH_ENC_ENABLED
+	bool
+	---help---
+		This option is deprecated.
 
 config ESP32_STORAGE_MTD_OFFSET
 	hex "Storage MTD base address in SPI Flash"
 	default 0x180000 if !ESP32_HAVE_OTA_PARTITION
-	default 0x250000 if ESP32_HAVE_OTA_PARTITION
+	default 0x260000 if ESP32_HAVE_OTA_PARTITION
 	---help---
 		MTD base address in SPI Flash.
 
@@ -2795,7 +2807,7 @@ endchoice
 config ESP32_MCUBOOT_VERSION
 	string "MCUboot version"
 	depends on ESP32_APP_FORMAT_MCUBOOT
-	default "20f98e0a975c24864872e0df5701eb1082e9c957"
+	default "8a07053d42e592c85cb35b79c4de1b7749943387"
 
 config ESP32_APP_MCUBOOT_HEADER_SIZE
 	int "Application image header size (in bytes)"

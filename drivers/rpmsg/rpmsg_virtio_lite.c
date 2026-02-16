@@ -37,7 +37,8 @@
 #include <nuttx/power/pm.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/rpmsg/rpmsg_virtio_lite.h>
-#include <rpmsg/rpmsg_internal.h>
+
+#include "rpmsg.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -83,10 +84,6 @@ static int rpmsg_virtio_lite_wait(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
 static int rpmsg_virtio_lite_post(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
 static void rpmsg_virtio_lite_panic(FAR struct rpmsg_s *rpmsg);
 static void rpmsg_virtio_lite_dump(FAR struct rpmsg_s *rpmsg);
-static FAR const char *
-rpmsg_virtio_lite_get_local_cpuname(FAR struct rpmsg_s *rpmsg);
-static FAR const char *
-rpmsg_virtio_lite_get_cpuname(FAR struct rpmsg_s *rpmsg);
 
 static int
 rpmsg_virtio_lite_create_virtqueues_(FAR struct virtio_device *vdev,
@@ -114,8 +111,6 @@ static const struct rpmsg_ops_s g_rpmsg_virtio_lite_ops =
   .post               = rpmsg_virtio_lite_post,
   .panic              = rpmsg_virtio_lite_panic,
   .dump               = rpmsg_virtio_lite_dump,
-  .get_local_cpuname  = rpmsg_virtio_lite_get_local_cpuname,
-  .get_cpuname        = rpmsg_virtio_lite_get_cpuname,
 };
 
 static const struct virtio_dispatch g_rpmsg_virtio_lite_dispatch =
@@ -482,8 +477,8 @@ static void rpmsg_virtio_lite_dump(FAR struct rpmsg_s *rpmsg)
 {
   FAR struct rpmsg_virtio_lite_priv_s *priv =
       (FAR struct rpmsg_virtio_lite_priv_s *)rpmsg;
+  FAR struct rpmsg_device *rdev = rpmsg_get_rdev_by_rpmsg(rpmsg);
   FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
-  FAR struct rpmsg_device *rdev = rpmsg->rdev;
   FAR struct rpmsg_endpoint *ept;
   FAR struct metal_list *node;
   bool needlock = true;
@@ -496,8 +491,7 @@ static void rpmsg_virtio_lite_dump(FAR struct rpmsg_s *rpmsg)
       return;
     }
 
-  if (up_interrupt_context() || sched_idletask() ||
-      nxmutex_is_hold(&rdev->lock))
+  if (up_interrupt_context() || sched_idletask())
     {
       needlock = false;
     }
@@ -541,24 +535,6 @@ static void rpmsg_virtio_lite_dump(FAR struct rpmsg_s *rpmsg)
   /* Nothing */
 }
 #endif
-
-static FAR const char *
-rpmsg_virtio_lite_get_local_cpuname(FAR struct rpmsg_s *rpmsg)
-{
-  FAR struct rpmsg_virtio_lite_priv_s *priv =
-    (FAR struct rpmsg_virtio_lite_priv_s *)rpmsg;
-
-  return RPMSG_VIRTIO_LITE_GET_LOCAL_CPUNAME(priv->dev);
-}
-
-static FAR const char *
-rpmsg_virtio_lite_get_cpuname(FAR struct rpmsg_s *rpmsg)
-{
-  FAR struct rpmsg_virtio_lite_priv_s *priv =
-    (FAR struct rpmsg_virtio_lite_priv_s *)rpmsg;
-
-  return RPMSG_VIRTIO_LITE_GET_CPUNAME(priv->dev);
-}
 
 static void
 rpmsg_virtio_lite_wakeup_rx(FAR struct rpmsg_virtio_lite_priv_s *priv)
@@ -635,7 +611,7 @@ static int rpmsg_virtio_lite_notify_wait(FAR struct rpmsg_device *rdev,
 
   if (!rpmsg_virtio_lite_is_recursive(priv))
     {
-      return -EAGAIN;
+      return RPMSG_EOPNOTSUPP;
     }
 
   /* Wait to wakeup */
@@ -786,8 +762,8 @@ int rpmsg_virtio_lite_initialize(FAR struct rpmsg_virtio_lite_s *dev)
 {
   FAR struct rpmsg_virtio_lite_priv_s *priv;
   FAR char *argv[3];
+  char name[64];
   char arg1[32];
-  char name[32];
   int ret;
 
   priv = kmm_zalloc(sizeof(struct rpmsg_virtio_lite_priv_s));
@@ -799,9 +775,13 @@ int rpmsg_virtio_lite_initialize(FAR struct rpmsg_virtio_lite_s *dev)
   priv->dev = dev;
   nxsem_init(&priv->semrx, 0, 0);
   nxsem_init(&priv->semtx, 0, 0);
+  strlcpy(priv->rpmsg.cpuname, RPMSG_VIRTIO_LITE_GET_CPUNAME(dev),
+          sizeof(priv->rpmsg.cpuname));
+  strlcpy(priv->rpmsg.local_cpuname,
+          RPMSG_VIRTIO_LITE_GET_LOCAL_CPUNAME(dev),
+          sizeof(priv->rpmsg.local_cpuname));
 
-  snprintf(name, sizeof(name), "/dev/rpmsg/%s",
-           RPMSG_VIRTIO_LITE_GET_CPUNAME(dev));
+  snprintf(name, sizeof(name), "/dev/rpmsg/%s", priv->rpmsg.cpuname);
   ret = rpmsg_register(name, &priv->rpmsg, &g_rpmsg_virtio_lite_ops);
   if (ret < 0)
     {
@@ -809,7 +789,7 @@ int rpmsg_virtio_lite_initialize(FAR struct rpmsg_virtio_lite_s *dev)
     }
 
   snprintf(arg1, sizeof(arg1), "%p", priv);
-  argv[0] = (FAR char *)RPMSG_VIRTIO_LITE_GET_CPUNAME(dev);
+  argv[0] = (FAR char *)priv->rpmsg.cpuname;
   argv[1] = arg1;
   argv[2] = NULL;
 
@@ -820,6 +800,11 @@ int rpmsg_virtio_lite_initialize(FAR struct rpmsg_virtio_lite_s *dev)
     {
       goto err_thread;
     }
+
+#ifdef CONFIG_RPMSG_VIRTIO_LITE_PM
+  snprintf(name, sizeof(name), "rpmsg-virtio-%s", priv->rpmsg.cpuname);
+  pm_wakelock_init(&priv->wakelock, name, PM_IDLE_DOMAIN, PM_IDLE);
+#endif
 
   return OK;
 

@@ -73,6 +73,8 @@
 #  define FLASH_SIZE        0x1000000
 #endif
 
+#define RESERVE_RTC_MEM     24
+
 MEMORY
 {
   metadata (RX) :   org = 0x0, len = 0x30
@@ -82,7 +84,7 @@ MEMORY
   /* Instruction RAM */
 
   UIRAM (RWX) :     org = SRAM_IRAM_ORG, len = 16K
-  KIRAM (RWX) :     org = ORIGIN(UIRAM) + LENGTH(UIRAM), len = 48K
+  KIRAM (RWX) :     org = ORIGIN(UIRAM) + LENGTH(UIRAM), len = 64K
 
   /* Flash mapped instruction data. */
 
@@ -115,5 +117,30 @@ MEMORY
 
   KDROM (R)  :      org = 0x3c000020, len = CONFIG_ESP32S3_KERNEL_IMAGE_SIZE - 0x20
   UDROM (R)  :      org = ORIGIN(KDROM) + LENGTH(KDROM) + ORIGIN(ROM), len = FLASH_SIZE - LENGTH(KDROM) - ORIGIN(ROM)
-}
 
+  /* RTC fast memory (executable). Persists over deep sleep. */
+
+  rtc_iram_seg(RWX) :                org = 0x600fe000, len = 0x2000 - RESERVE_RTC_MEM
+
+  /* RTC fast memory (same block as above), viewed from data bus */
+
+  rtc_data_seg(RW)  :                org = 0x600fe000, len = 0x2000 - RESERVE_RTC_MEM
+
+  /* We reduced the size of rtc_iram_seg by RESERVE_RTC_MEM value.
+   * It reserves the amount of RTC fast memory that we use for this memory segment.
+   * This segment is intended for keeping:
+   *   - (lower addr) rtc timer data (s_rtc_timer_retain_mem, see esp_clk.c files).
+   *   - (higher addr) bootloader rtc data (s_bootloader_retain_mem, when a Kconfig option is on).
+   * The aim of this is to keep data that will not be moved around and have a fixed address.
+   */
+
+  rtc_reserved_seg(RW) :             org = 0x600fe000 + 0x2000 - RESERVE_RTC_MEM, len = RESERVE_RTC_MEM
+
+  /* RTC slow memory (data accessible). Persists over deep sleep.
+   * Start of RTC slow memory is reserved for ULP co-processor code + data,
+   * if enabled.
+   */
+
+  rtc_slow_seg(RW)  :    org = 0x50000000 + CONFIG_ESP32S3_ULP_COPROC_RESERVE_MEM,
+                         len = 0x2000 - CONFIG_ESP32S3_ULP_COPROC_RESERVE_MEM
+}

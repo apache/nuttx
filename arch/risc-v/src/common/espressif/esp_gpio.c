@@ -52,6 +52,7 @@
 
 /* HAL */
 
+#include "soc/interrupts.h"
 #include "esp_rom_gpio.h"
 #include "hal/gpio_hal.h"
 
@@ -73,15 +74,24 @@ static int g_gpio_cpuint;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gpio_dispatch
+ * Name: gpio_isr_loop
  *
  * Description:
- *   Second level dispatch for GPIO interrupt handling.
+ *   Processes all pending GPIO interrupts indicated by the given status
+ *   bitmask. For each set bit in 'status', this function:
+ *     1. Calculates the GPIO pin number using 'gpio_num_start' as the base
+ *        offset.
+ *     2. Clears the interrupt status bit for that GPIO pin using
+ *        gpio_hal_clear_intr_status_bit().
+ *     3. Dispatches the interrupt to the NuttX IRQ subsystem by calling
+ *        irq_dispatch() with the correct IRQ number and register context.
  *
  * Input Parameters:
- *   irq           - GPIO IRQ number.
- *   status        - Value from the GPIO interrupt status clear register.
- *   regs          - Saved CPU context.
+ *   status         - Bitmask indicating which GPIO pins have pending
+ *                    interrupts.
+ *   gpio_num_start - The starting GPIO number (used as an offset).
+ *   regs           - Pointer to the register context to pass to
+ *                    irq_dispatch().
  *
  * Returned Value:
  *   None.
@@ -89,16 +99,24 @@ static int g_gpio_cpuint;
  ****************************************************************************/
 
 #ifdef CONFIG_ESPRESSIF_GPIO_IRQ
-static void gpio_dispatch(int irq, uint32_t status, uint32_t *regs)
+static void gpio_isr_loop(uint32_t status,
+                          const uint32_t gpio_num_start,
+                          uint32_t *regs)
 {
-  int i;
+  int nbit;
+  int gpio_num;
 
-  /* Check set bits in the status register */
-
-  while ((i = __builtin_ffs(status)) > 0)
+  while (status != 0)
     {
-      irq_dispatch(irq + i - 1, regs);
-      status >>= i;
+      nbit = __builtin_ffs(status) - 1;
+      status &= ~(1 << nbit);
+      gpio_num = gpio_num_start + nbit;
+
+      /* Dispatch pending interrupts in the lower GPIO status register */
+
+      gpio_hal_clear_intr_status_bit(&g_gpio_hal, gpio_num);
+
+      irq_dispatch(ESP_FIRST_GPIOIRQ + gpio_num, regs);
     }
 }
 #endif
@@ -124,24 +142,25 @@ static void gpio_dispatch(int irq, uint32_t status, uint32_t *regs)
 static int gpio_interrupt(int irq, void *context, void *arg)
 {
   int i;
-  uint32_t status;
-  uint32_t intr_bitmask;
+  uint32_t gpio_intr_status;
+  uint32_t gpio_intr_status_h;
   int cpu = this_cpu();
 
   /* Read the lower GPIO interrupt status */
 
-  gpio_hal_get_intr_status(&g_gpio_hal, cpu, &status);
-  intr_bitmask = status;
+  gpio_hal_get_intr_status(&g_gpio_hal, cpu, &gpio_intr_status);
 
-  while ((i = __builtin_ffs(intr_bitmask)) > 0)
+  if (gpio_intr_status)
     {
-      gpio_hal_clear_intr_status_bit(&g_gpio_hal, (i - 1));
-      intr_bitmask >>= i;
+      gpio_isr_loop(gpio_intr_status, 0, (uint32_t *)context);
     }
 
-  /* Dispatch pending interrupts in the lower GPIO status register */
+  gpio_hal_get_intr_status_high(&g_gpio_hal, cpu, &gpio_intr_status_h);
 
-  gpio_dispatch(ESP_FIRST_GPIOIRQ, status, (uint32_t *)context);
+  if (gpio_intr_status_h)
+    {
+      gpio_isr_loop(gpio_intr_status_h, 32, (uint32_t *)context);
+    }
 
   return OK;
 }
@@ -364,15 +383,16 @@ void esp_gpioirqinitialize(void)
 {
   /* Setup the GPIO interrupt. */
 
-  g_gpio_cpuint = esp_setup_irq(GPIO_INTR_SOURCE,
+  g_gpio_cpuint = esp_setup_irq(GPIO_LL_INTR_SOURCE0,
                                 ESP_IRQ_PRIORITY_DEFAULT,
                                 ESP_IRQ_TRIGGER_LEVEL);
-  DEBUGASSERT(g_gpio_cpuint >= 0);
+  VERIFY(g_gpio_cpuint);
 
   /* Attach and enable the interrupt handler */
 
-  DEBUGVERIFY(irq_attach(ESP_IRQ_GPIO, gpio_interrupt, NULL));
-  up_enable_irq(ESP_IRQ_GPIO);
+  VERIFY(irq_attach(ESP_SOURCE2IRQ(GPIO_LL_INTR_SOURCE0), gpio_interrupt,
+                    NULL));
+  up_enable_irq(ESP_SOURCE2IRQ(GPIO_LL_INTR_SOURCE0));
 }
 #endif
 
@@ -407,7 +427,7 @@ void esp_gpioirqenable(int irq, gpio_intrtype_t intrtype)
 
   /* Disable the GPIO interrupt during the configuration. */
 
-  up_disable_irq(ESP_IRQ_GPIO);
+  up_disable_irq(ESP_SOURCE2IRQ(GPIO_LL_INTR_SOURCE0));
 
   /* Enable interrupt for this pin on the current core */
 
@@ -417,7 +437,7 @@ void esp_gpioirqenable(int irq, gpio_intrtype_t intrtype)
 
   /* Configuration done. Re-enable the GPIO interrupt. */
 
-  up_enable_irq(ESP_IRQ_GPIO);
+  up_enable_irq(ESP_SOURCE2IRQ(GPIO_LL_INTR_SOURCE0));
 }
 #endif
 
@@ -450,7 +470,7 @@ void esp_gpioirqdisable(int irq)
 
   /* Disable the GPIO interrupt during the configuration. */
 
-  up_disable_irq(ESP_IRQ_GPIO);
+  up_disable_irq(ESP_SOURCE2IRQ(GPIO_LL_INTR_SOURCE0));
 
   /* Disable the interrupt for this pin */
 
@@ -458,6 +478,6 @@ void esp_gpioirqdisable(int irq)
 
   /* Configuration done. Re-enable the GPIO interrupt. */
 
-  up_enable_irq(ESP_IRQ_GPIO);
+  up_enable_irq(ESP_SOURCE2IRQ(GPIO_LL_INTR_SOURCE0));
 }
 #endif

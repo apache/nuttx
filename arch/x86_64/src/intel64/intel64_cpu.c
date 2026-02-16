@@ -244,7 +244,7 @@ void x86_64_cpu_init(void)
           g_cpu_priv[i].loapic_id = lapic->apic_id;
           g_cpu_priv[i].id        = i;
           g_cpu_priv[i].ready     = false;
-#ifdef CONFIG_LIB_SYSCALL
+#ifdef CONFIG_ARCH_HAVE_SYSCALL
           g_cpu_priv[i].ustack    = NULL;
           g_cpu_priv[i].uvbase    = (uint64_t *)CONFIG_ARCH_TEXT_VBASE;
 #endif
@@ -366,14 +366,7 @@ bool x86_64_cpu_ready_get(uint8_t cpu)
 
 uint8_t x86_64_cpu_count_get(void)
 {
-  irqstate_t flags;
-  uint8_t count;
-
-  flags = spin_lock_irqsave(&g_ap_boot);
-  count = g_cpu_count;
-  spin_unlock_irqrestore(&g_ap_boot, flags);
-
-  return count;
+  return g_cpu_count;
 }
 
 /****************************************************************************
@@ -390,7 +383,7 @@ void x86_64_cpu_priv_set(uint8_t cpu)
 
   write_gsbase((uintptr_t)&g_cpu_priv[cpu]);
 
-#ifdef CONFIG_LIB_SYSCALL
+#ifdef CONFIG_ARCH_HAVE_SYSCALL
   /* Configure SYSCALL instruction entry point */
 
   write_msr(MSR_LSTAR, (uintptr_t)x86_64_syscall_entry);
@@ -424,11 +417,5 @@ void x86_64_cpu_priv_set(uint8_t cpu)
   /* Mask applied to RFLAGS when making a syscall */
 
   write_msr(MSR_FMASK, X86_64_RFLAGS_IF | X86_64_RFLAGS_DF);
-#endif
-
-#ifdef CONFIG_SMP
-  /* Attach TLB shootdown handler */
-
-  irq_attach(SMP_IPI_TLBSHOOTDOWN_IRQ, x86_64_tlb_handler, NULL);
 #endif
 }

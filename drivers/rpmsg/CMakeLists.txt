@@ -31,8 +31,6 @@ if(CONFIG_RPMSG)
 
   if(CONFIG_RPMSG_PORT)
     list(APPEND SRCS rpmsg_port.c)
-    target_include_directories(drivers
-                               PRIVATE ${NUTTX_DIR}/openamp/open-amp/lib)
   endif()
 
   if(CONFIG_RPMSG_PORT_SPI)
@@ -47,6 +45,10 @@ if(CONFIG_RPMSG)
     list(APPEND SRCS rpmsg_port_uart.c)
   endif()
 
+  if(CONFIG_RPMSG_VIRTIO)
+    list(APPEND SRCS rpmsg_virtio.c)
+  endif()
+
   if(CONFIG_RPMSG_VIRTIO_LITE)
     list(APPEND SRCS rpmsg_virtio_lite.c)
   endif()
@@ -57,6 +59,10 @@ if(CONFIG_RPMSG)
 
   if(CONFIG_RPMSG_ROUTER)
     list(APPEND SRCS rpmsg_router_hub.c rpmsg_router_edge.c)
+  endif()
+
+  if(CONFIG_RPMSG_TEST)
+    list(APPEND SRCS rpmsg_test.c)
   endif()
 
   target_include_directories(drivers PRIVATE ${NUTTX_DIR}/openamp/open-amp/lib)

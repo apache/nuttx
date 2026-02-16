@@ -42,6 +42,7 @@
 #include <nuttx/list.h>
 #include <nuttx/mutex.h>
 #include <nuttx/signal.h>
+#include <nuttx/tls.h>
 
 #include "inode/inode.h"
 #include "fs_heap.h"
@@ -200,6 +201,16 @@ static int epoll_do_close(FAR struct file *filep)
       list_for_every_entry(&eph->setup, epn, epoll_node_t, node)
         {
           file_poll(epn->filep, &epn->pfd, false);
+          file_put(epn->filep);
+        }
+
+      list_for_every_entry(&eph->teardown, epn, epoll_node_t, node)
+        {
+          file_put(epn->filep);
+        }
+
+      list_for_every_entry(&eph->oneshot, epn, epoll_node_t, node)
+        {
           file_put(epn->filep);
         }
 
@@ -382,6 +393,19 @@ static int epoll_teardown(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
 
   nxmutex_unlock(&eph->lock);
   return i;
+}
+
+/****************************************************************************
+ * Name: epoll_cleanup
+ *
+ * Description:
+ *   Cleanup the epoll operation.
+ *
+ ****************************************************************************/
+
+static void epoll_cleanup(FAR void *arg)
+{
+  file_put(arg);
 }
 
 /****************************************************************************
@@ -744,6 +768,12 @@ retry:
 
   nxsig_procmask(SIG_SETMASK, sigmask, &oldsigmask);
 
+  /* Push a cancellation point onto the stack.  This will be called if
+   * the thread is canceled.
+   */
+
+  tls_cleanup_push(tls_get_info(), epoll_cleanup, filep);
+
   if (timeout == 0)
     {
       ret = -ETIMEDOUT;
@@ -756,6 +786,10 @@ retry:
     {
       ret = nxsem_wait(&eph->sem);
     }
+
+  /* Pop the cancellation point */
+
+  tls_cleanup_pop(tls_get_info(), 0);
 
   nxsig_procmask(SIG_SETMASK, &oldsigmask, NULL);
   if (ret < 0 && ret != -ETIMEDOUT)
@@ -815,6 +849,12 @@ retry:
       goto err;
     }
 
+  /* Push a cancellation point onto the stack.  This will be called if
+   * the thread is canceled.
+   */
+
+  tls_cleanup_push(tls_get_info(), epoll_cleanup, filep);
+
   /* Wait the poll ready */
 
   if (timeout == 0)
@@ -829,6 +869,10 @@ retry:
     {
       ret = nxsem_wait(&eph->sem);
     }
+
+  /* Pop the cancellation point */
+
+  tls_cleanup_pop(tls_get_info(), 0);
 
   if (ret < 0 && ret != -ETIMEDOUT)
     {

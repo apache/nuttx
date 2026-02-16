@@ -21,7 +21,7 @@
  ****************************************************************************/
 
     .syntax	unified
-    .section	.text.stub
+    .section	.text.stub, "ax"
     .align	1
 1:
     push    {r0-r3}
@@ -193,7 +193,7 @@ _modulelist_power_mgr:
     .word   0
 
     .syntax	unified
-    .section	.text.stub
+    .section	.text.stub, "ax"
     .align	1
 1:
     push    {r0-r3}
@@ -319,7 +319,7 @@ _modulelist_flash_mgr:
     .word   0
 
     .syntax	unified
-    .section	.text.stub
+    .section	.text.stub, "ax"
     .align	1
 1:
     push    {r0-r3}
@@ -389,7 +389,7 @@ _modulelist_rtc_mgr:
     .word   0
 
     .syntax	unified
-    .section	.text.stub
+    .section	.text.stub, "ax"
     .align	1
 1:
     push    {r0-r3}
@@ -551,7 +551,7 @@ _modulelist_gnss_pwr:
     .word   0
 
     .syntax	unified
-    .section	.text.stub
+    .section	.text.stub, "ax"
     .align	1
 1:
     push    {r0-r3}
@@ -591,7 +591,7 @@ _modulelist_aca:
     .word   0
 
     .syntax	unified
-    .section	.text.stub
+    .section	.text.stub, "ax"
     .align	1
 1:
     push    {r0-r3}
@@ -631,7 +631,7 @@ _modulelist_pinconfig:
     .word   0
 
     .syntax	unified
-    .section	.text.stub
+    .section	.text.stub, "ax"
     .align	1
 1:
     push    {r0-r3}
@@ -707,7 +707,7 @@ _modulelist_uart:
     .word   0
 
     .syntax	unified
-    .section	.text.stub
+    .section	.text.stub, "ax"
     .align	1
 1:
     push    {r0-r3}
@@ -783,7 +783,7 @@ _modulelist_update_mgr:
     .word   0
 
     .syntax	unified
-    .section	.text.stub
+    .section	.text.stub, "ax"
     .align	1
 1:
     push    {r0-r3}

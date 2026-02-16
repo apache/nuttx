@@ -61,6 +61,8 @@ int posix_spawnattr_init(posix_spawnattr_t *attr)
 
   DEBUGASSERT(attr);
 
+  memset(attr, 0, sizeof(*attr));
+
   /* Flags: None */
 
   attr->flags = 0;
@@ -87,7 +89,9 @@ int posix_spawnattr_init(posix_spawnattr_t *attr)
 
   /* Empty signal mask */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   sigemptyset(&attr->sigmask);
+#endif
 
 #ifdef CONFIG_SCHED_SPORADIC
   /* Sporadic scheduling parameters */

@@ -33,10 +33,30 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Onboard LEDs */
+
+#define STATUS_LED (42) /* Green LED */
+#define POWER_LED (130) /* Red LED */
+
+/* Auto-LED definitions */
+
+#define LED_STARTED              0
+#define LED_HEAPALLOCATE         0
+#define LED_IRQSENABLED          0
+#define LED_STACKCREATED         1
+#define LED_INIRQ                2
+#define LED_SIGNAL               2
+#define LED_ASSERTION            3
+#define LED_PANIC                4
+
 /* TODO: define all the GPIO pins properly */
 
 #define BOARD_NGPIOOUT 1
 #define BOARD_NGPIOIN 1
 #define BOARD_NGPIOINT 0
+
+/* Micro SD card slot number to use */
+
+#define MICROSD_SLOTNO 0
 
 #endif /* __BOARDS_ARM64_BCM2711_RPI4B_INCLUDE_BOARD_H */

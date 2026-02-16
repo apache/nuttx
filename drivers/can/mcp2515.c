@@ -1210,7 +1210,7 @@ static void mcp2515_reset_lowlevel(FAR struct mcp2515_can_s *priv)
 
   /* Wait 1ms to let MCP2515 restart */
 
-  nxsig_usleep(1000);
+  nxsched_usleep(1000);
 
   /* Make sure that all buffers are released. */
 
@@ -2457,7 +2457,7 @@ static int mcp2515_hw_initialize(struct mcp2515_can_s *priv)
   regval = (regval & ~CANCTRL_REQOP_MASK) | (CANCTRL_REQOP_NORMAL);
   mcp2515_writeregs(priv, MCP2515_CANCTRL, &regval, 1);
 
-  nxsig_usleep(100);
+  nxsched_usleep(100);
 
   /* Read the CANINTF */
 

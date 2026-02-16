@@ -53,47 +53,59 @@
 #define IFF_IPv6           (1 << 3)  /* Configured for IPv6 packet (vs ARP or IPv4) */
 #define IFF_LOOPBACK       (1 << 5)  /* Is a loopback net */
 #define IFF_POINTOPOINT    (1 << 6)  /* Is point-to-point link */
-#define IFF_NOARP          (1 << 7)  /* ARP is not required for this packet */
+#define IFF_NOARP          (1 << 7)  /* ARP is not required for this interface */
 #define IFF_NAT            (1 << 8)  /* NAT is enabled for this interface */
 #define IFF_SLAVE          (1 << 11) /* Slave of a load balancer. */
 #define IFF_MULTICAST      (1 << 12) /* Supports multicast. */
 #define IFF_BROADCAST      (1 << 13) /* Broadcast address valid. */
 #define IFF_DYNAMIC        (1 << 15) /* Dialup device with changing addresses. */
+#define IFF_DEBUG          (1 << 16) /* Turn on debugging. */
+#define IFF_NOTRAILERS     (1 << 17) /* Avoid use of trailers. */
+#define IFF_PROMISC        (1 << 18) /* Receive all packets. */
+#define IFF_ALLMULTI       (1 << 19) /* Receive all multicast packets. */
+#define IFF_NOSRC_FORWARD  (1 << 20) /* Device prohibits forwarding packets inputs */
+#define IFF_NODST_FORWARD  (1 << 21) /* Device prohibits forwarding packets outputs */
 
 /* Interface flag helpers */
 
-#define IFF_SET_UP(f)          do { (f) |= IFF_UP; } while (0)
-#define IFF_SET_RUNNING(f)     do { (f) |= IFF_RUNNING; } while (0)
-#define IFF_SET_NOARP(f)       do { (f) |= IFF_NOARP; } while (0)
-#define IFF_SET_NAT(f)         do { (f) |= IFF_NAT; } while (0)
-#define IFF_SET_LOOPBACK(f)    do { (f) |= IFF_LOOPBACK; } while (0)
-#define IFF_SET_POINTOPOINT(f) do { (f) |= IFF_POINTOPOINT; } while (0)
-#define IFF_SET_MULTICAST(f)   do { (f) |= IFF_MULTICAST; } while (0)
-#define IFF_SET_BROADCAST(f)   do { (f) |= IFF_BROADCAST; } while (0)
-#define IFF_SET_SLAVE(f)       do { (f) |= IFF_SLAVE; } while (0)
-#define IFF_SET_DYNAMIC(f)     do { (f) |= IFF_DYNAMIC; } while (0)
+#define IFF_SET_UP(f)            do { (f) |= IFF_UP; } while (0)
+#define IFF_SET_RUNNING(f)       do { (f) |= IFF_RUNNING; } while (0)
+#define IFF_SET_NOARP(f)         do { (f) |= IFF_NOARP; } while (0)
+#define IFF_SET_NAT(f)           do { (f) |= IFF_NAT; } while (0)
+#define IFF_SET_LOOPBACK(f)      do { (f) |= IFF_LOOPBACK; } while (0)
+#define IFF_SET_POINTOPOINT(f)   do { (f) |= IFF_POINTOPOINT; } while (0)
+#define IFF_SET_MULTICAST(f)     do { (f) |= IFF_MULTICAST; } while (0)
+#define IFF_SET_BROADCAST(f)     do { (f) |= IFF_BROADCAST; } while (0)
+#define IFF_SET_SLAVE(f)         do { (f) |= IFF_SLAVE; } while (0)
+#define IFF_SET_DYNAMIC(f)       do { (f) |= IFF_DYNAMIC; } while (0)
+#define IFF_SET_NOSRC_FORWARD(f) do { (f) |= IFF_NOSRC_FORWARD; } while (0)
+#define IFF_SET_NODST_FORWARD(f) do { (f) |= IFF_NODST_FORWARD; } while (0)
 
-#define IFF_CLR_UP(f)          do { (f) &= ~IFF_UP; } while (0)
-#define IFF_CLR_RUNNING(f)     do { (f) &= ~IFF_RUNNING; } while (0)
-#define IFF_CLR_NOARP(f)       do { (f) &= ~IFF_NOARP; } while (0)
-#define IFF_CLR_NAT(f)         do { (f) &= ~IFF_NAT; } while (0)
-#define IFF_CLR_LOOPBACK(f)    do { (f) &= ~IFF_LOOPBACK; } while (0)
-#define IFF_CLR_POINTOPOINT(f) do { (f) &= ~IFF_POINTOPOINT; } while (0)
-#define IFF_CLR_MULTICAST(f)   do { (f) &= ~IFF_MULTICAST; } while (0)
-#define IFF_CLR_BROADCAST(f)   do { (f) &= ~IFF_BROADCAST; } while (0)
-#define IFF_CLR_SLAVE(f)       do { (f) &= ~IFF_SLAVE; } while (0)
-#define IFF_CLR_DYNAMIC(f)     do { (f) &= ~IFF_DYNAMIC; } while (0)
+#define IFF_CLR_UP(f)            do { (f) &= ~IFF_UP; } while (0)
+#define IFF_CLR_RUNNING(f)       do { (f) &= ~IFF_RUNNING; } while (0)
+#define IFF_CLR_NOARP(f)         do { (f) &= ~IFF_NOARP; } while (0)
+#define IFF_CLR_NAT(f)           do { (f) &= ~IFF_NAT; } while (0)
+#define IFF_CLR_LOOPBACK(f)      do { (f) &= ~IFF_LOOPBACK; } while (0)
+#define IFF_CLR_POINTOPOINT(f)   do { (f) &= ~IFF_POINTOPOINT; } while (0)
+#define IFF_CLR_MULTICAST(f)     do { (f) &= ~IFF_MULTICAST; } while (0)
+#define IFF_CLR_BROADCAST(f)     do { (f) &= ~IFF_BROADCAST; } while (0)
+#define IFF_CLR_SLAVE(f)         do { (f) &= ~IFF_SLAVE; } while (0)
+#define IFF_CLR_DYNAMIC(f)       do { (f) &= ~IFF_DYNAMIC; } while (0)
+#define IFF_CLR_NOSRC_FORWARD(f) do { (f) &= ~IFF_NOSRC_FORWARD; } while (0)
+#define IFF_CLR_NODST_FORWARD(f) do { (f) &= ~IFF_NODST_FORWARD; } while (0)
 
-#define IFF_IS_UP(f)          (((f) & IFF_UP) != 0)
-#define IFF_IS_RUNNING(f)     (((f) & IFF_RUNNING) != 0)
-#define IFF_IS_NOARP(f)       (((f) & IFF_NOARP) != 0)
-#define IFF_IS_NAT(f)         (((f) & IFF_NAT) != 0)
-#define IFF_IS_LOOPBACK(f)    (((f) & IFF_LOOPBACK) != 0)
-#define IFF_IS_POINTOPOINT(f) (((f) & IFF_POINTOPOINT) != 0)
-#define IFF_IS_MULTICAST(f)   (((f) & IFF_MULTICAST) != 0)
-#define IFF_IS_BROADCAST(f)   (((f) & IFF_BROADCAST) != 0)
-#define IFF_IS_SLAVE(f)       (((f) & IFF_SLAVE) != 0)
-#define IFF_IS_DYNAMIC(f)     (((f) & IFF_DYNAMIC) != 0)
+#define IFF_IS_UP(f)            (((f) & IFF_UP) != 0)
+#define IFF_IS_RUNNING(f)       (((f) & IFF_RUNNING) != 0)
+#define IFF_IS_NOARP(f)         (((f) & IFF_NOARP) != 0)
+#define IFF_IS_NAT(f)           (((f) & IFF_NAT) != 0)
+#define IFF_IS_LOOPBACK(f)      (((f) & IFF_LOOPBACK) != 0)
+#define IFF_IS_POINTOPOINT(f)   (((f) & IFF_POINTOPOINT) != 0)
+#define IFF_IS_MULTICAST(f)     (((f) & IFF_MULTICAST) != 0)
+#define IFF_IS_BROADCAST(f)     (((f) & IFF_BROADCAST) != 0)
+#define IFF_IS_SLAVE(f)         (((f) & IFF_SLAVE) != 0)
+#define IFF_IS_DYNAMIC(f)       (((f) & IFF_DYNAMIC) != 0)
+#define IFF_IS_NOSRC_FORWARD(f) (((f) & IFF_NOSRC_FORWARD) != 0)
+#define IFF_IS_NODST_FORWARD(f) (((f) & IFF_NODST_FORWARD) != 0)
 
 /* We only need to manage the IPv6 bit if both IPv6 and IPv4 are supported.
  * Otherwise, we can save a few bytes by ignoring it.
@@ -126,6 +138,17 @@
 #  define IFF_CLR_IPv4(f)
 #  define IFF_IS_IPv4(f)   (1)
 #endif
+
+/* MDIO Manageable Device (MMD) support with SIOCxMIIREG ioctl commands */
+
+#define MDIO_PHY_ID_C45      0x8000
+#define MDIO_PHY_ID_PRTAD    0x03E0
+#define MDIO_PHY_ID_DEVAD    0x001F
+#define MDIO_PHY_ID_C45_MASK \
+    (MDIO_PHY_ID_C45 | MDIO_PHY_ID_PRTAD | MDIO_PHY_ID_DEVAD)
+
+#define mdio_phy_id_c45(prtad, devad) \
+    ((uint16_t)(MDIO_PHY_ID_C45 | ((prtad) << 5) | (devad)))
 
 /* RFC 2863 operational status */
 
@@ -225,7 +248,6 @@ struct can_ioctl_state_s
 struct lifreq
 {
   char                         lifr_name[IFNAMSIZ];  /* Network device name (e.g. "eth0") */
-  int16_t                      lifr_ifindex;         /* Interface index */
   union
   {
     struct sockaddr_storage    lifru_addr;           /* IP Address */
@@ -234,6 +256,7 @@ struct lifreq
     struct sockaddr_storage    lifru_netmask;        /* Netmask */
     struct sockaddr            lifru_hwaddr;         /* MAC address */
     int                        lifru_count;          /* Number of devices */
+    int                        lifru_ivalue;         /* Value for ifindex/metric/bandwidth and so on */
     int                        lifru_mtu;            /* MTU size */
     uint32_t                   lifru_flags;          /* Interface flags */
     struct mii_ioctl_notify_s  llfru_mii_notify;     /* PHY event notification */
@@ -249,6 +272,10 @@ struct lifreq
 #define lifr_broadaddr        lifr_ifru.lifru_broadaddr        /* Broadcast address */
 #define lifr_netmask          lifr_ifru.lifru_netmask          /* Interface net mask */
 #define lifr_hwaddr           lifr_ifru.lifru_hwaddr           /* MAC address */
+#define lifr_ifindex          lifr_ifru.lifru_ivalue           /* Interface index */
+#define lifr_metric           lifr_ifru.lifru_ivalue           /* metric */
+#define lifr_bandwidth        lifr_ifru.lifru_ivalue           /* link bandwidth */
+#define lifr_qlen             lifr_ifru.lifru_ivalue           /* Queue length */
 #define lifr_mtu              lifr_ifru.lifru_mtu              /* MTU */
 #define lifr_count            lifr_ifru.lifru_count            /* Number of devices */
 #define lifr_flags            lifr_ifru.lifru_flags            /* interface flags */
@@ -279,7 +306,6 @@ struct lifconf
 struct ifreq
 {
   char                         ifr_name[IFNAMSIZ];  /* Network device name (e.g. "eth0") */
-  int16_t                      ifr_ifindex;         /* Interface index */
   union
   {
     struct sockaddr            ifru_addr;           /* IP Address */
@@ -288,6 +314,7 @@ struct ifreq
     struct sockaddr            ifru_netmask;        /* Netmask */
     struct sockaddr            ifru_hwaddr;         /* MAC address */
     int                        ifru_count;          /* Number of devices */
+    int                        ifru_ivalue;         /* Value for ifindex/metric/bandwidth and so on */
     int                        ifru_mtu;            /* MTU size */
     uint32_t                   ifru_flags;          /* Interface flags */
     struct mii_ioctl_notify_s  ifru_mii_notify;     /* PHY event notification */
@@ -304,6 +331,10 @@ struct ifreq
 #define ifr_broadaddr         ifr_ifru.ifru_broadaddr        /* Broadcast address */
 #define ifr_netmask           ifr_ifru.ifru_netmask          /* Interface net mask */
 #define ifr_hwaddr            ifr_ifru.ifru_hwaddr           /* MAC address */
+#define ifr_ifindex           ifr_ifru.ifru_ivalue           /* Interface index */
+#define ifr_metric            ifr_ifru.ifru_ivalue           /* metric */
+#define ifr_bandwidth         ifr_ifru.ifru_ivalue           /* link bandwidth */
+#define ifr_qlen              ifr_ifru.ifru_ivalue           /* Queue length */
 #define ifr_mtu               ifr_ifru.ifru_mtu              /* MTU */
 #define ifr_count             ifr_ifru.ifru_count            /* Number of devices */
 #define ifr_flags             ifr_ifru.ifru_flags            /* interface flags */

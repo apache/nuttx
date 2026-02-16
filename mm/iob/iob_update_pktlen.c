@@ -138,7 +138,7 @@ int iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen,
   /* Update size of each iob */
 
   next = iob;
-  while (next != NULL && pktlen > 0)
+  while (next != NULL && pktlen >= 0)
     {
       if (pktlen + next->io_offset > IOB_BUFSIZE(next))
         {

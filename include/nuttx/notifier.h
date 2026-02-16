@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 #include <nuttx/mutex.h>
-#include <nuttx/spinlock_type.h>
+#include <nuttx/spinlock.h>
 
 #include <debug.h>
 #include <errno.h>
@@ -41,7 +41,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ATOMIC_NOTIFIER_INIT(name) {NULL}
+#define ATOMIC_NOTIFIER_INIT(name) {NULL, RSPINLOCK_INITIALIZER}
 
 #define ATOMIC_NOTIFIER_HEAD(name) \
   struct atomic_notifier_head name = ATOMIC_NOTIFIER_INIT(name)
@@ -81,6 +81,7 @@ struct notifier_block
 struct atomic_notifier_head
 {
   FAR struct notifier_block *head;
+  rspinlock_t lock;
 };
 
 struct blocking_notifier_head
@@ -179,9 +180,9 @@ extern "C"
     { \
       FAR struct atomic_notifier_head *nh = (nhead); \
       irqstate_t flags; \
-      flags = enter_critical_section(); \
+      flags = rspin_lock_irqsave_nopreempt(&nh->lock); \
       notifier_chain_register(nh->head, (nb), false); \
-      leave_critical_section(flags); \
+      rspin_unlock_irqrestore_nopreempt(&nh->lock, flags); \
     } \
   while(0)
 
@@ -190,9 +191,9 @@ extern "C"
     { \
       FAR struct atomic_notifier_head *nh = (nhead); \
       irqstate_t flags; \
-      flags = enter_critical_section(); \
+      flags = rspin_lock_irqsave_nopreempt(&nh->lock); \
       notifier_chain_register(nh->head, (nb), true); \
-      leave_critical_section(flags); \
+      rspin_unlock_irqrestore_nopreempt(&nh->lock, flags); \
     } \
   while(0)
 
@@ -201,9 +202,9 @@ extern "C"
     { \
       FAR struct atomic_notifier_head *nh = (nhead); \
       irqstate_t flags; \
-      flags = enter_critical_section(); \
+      flags = rspin_lock_irqsave_nopreempt(&nh->lock); \
       notifier_chain_unregister(nh->head, (nb)); \
-      leave_critical_section(flags); \
+      rspin_unlock_irqrestore_nopreempt(&nh->lock, flags); \
     } \
   while(0)
 
@@ -211,10 +212,12 @@ extern "C"
   do \
     { \
       FAR struct atomic_notifier_head *nh = (nhead); \
-      irqstate_t flags; \
-      flags = enter_critical_section(); \
-      notifier_call_chain(nh->head, (val), (v), -1, NULL); \
-      leave_critical_section(flags); \
+      if (nh != NULL && nh->head != NULL) \
+        { \
+          irqstate_t flags = rspin_lock_irqsave_nopreempt(&nh->lock); \
+          notifier_call_chain(nh->head, (val), (v), -1, NULL); \
+          rspin_unlock_irqrestore_nopreempt(&nh->lock, flags); \
+        } \
     } \
   while(0)
 
@@ -261,12 +264,15 @@ extern "C"
   do \
     { \
       FAR struct blocking_notifier_head *nh = (nhead); \
-      if (nxmutex_lock(&nh->mutex) < 0) \
+      if (nh != NULL && nh->head != NULL) \
         { \
-          break; \
+          if (nxmutex_lock(&nh->mutex) < 0) \
+            { \
+              break; \
+            } \
+          notifier_call_chain(nh->head, (val), (v), -1, NULL); \
+          nxmutex_unlock(&nh->mutex);\
         } \
-      notifier_call_chain(nh->head, (val), (v), -1, NULL); \
-      nxmutex_unlock(&nh->mutex);\
     } \
   while(0)
 

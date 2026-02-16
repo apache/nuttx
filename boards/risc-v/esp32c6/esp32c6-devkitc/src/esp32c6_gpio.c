@@ -47,6 +47,7 @@
 #ifdef CONFIG_ESPRESSIF_DEDICATED_GPIO
 #include "espressif/esp_dedic_gpio.h"
 #endif
+#include "espressif/esp_rtc_gpio.h"
 
 /* Board */
 
@@ -86,6 +87,9 @@
 #define GPIO_DEDIC2       5
 #define GPIO_DEDIC_COUNT  2
 
+#define GPIO_RTC1         0
+#define GPIO_RTC_COUNT    1
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -121,6 +125,8 @@ static int gpint_enable(struct gpio_dev_s *dev, bool enable);
 static int gpint_setpintype(struct gpio_dev_s *dev,
                             enum gpio_pintype_e pintype);
 #endif
+static int gprtc_read(struct gpio_dev_s *dev, bool *value);
+static int gprtc_write(struct gpio_dev_s *dev, bool value);
 
 /****************************************************************************
  * Private Data
@@ -193,9 +199,79 @@ struct esp_dedic_gpio_config_s dedic_gpio_conf =
 struct file *dedicated_gpio = NULL;
 #endif
 
+static const struct gpio_operations_s gprtc_ops =
+{
+  .go_read   = gprtc_read,
+  .go_write  = gprtc_write,
+  .go_attach = NULL,
+  .go_enable = NULL,
+  .go_setpintype = NULL,
+};
+
+/* This array maps the GPIO pins used as OUTPUT */
+
+static const uint32_t g_gpiortc[GPIO_RTC_COUNT] =
+{
+  GPIO_RTC1
+};
+
+static struct espgpio_dev_s g_gprtc[GPIO_RTC_COUNT];
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: gprtc_read
+ *
+ * Description:
+ *   Read a RTC digital output pin.
+ *
+ * Parameters:
+ *   dev   - A pointer to the gpio driver struct.
+ *   value - A pointer to store the state of the pin.
+ *
+ * Returned Value:
+ *   Zero (OK).
+ *
+ ****************************************************************************/
+
+static int gprtc_read(struct gpio_dev_s *dev, bool *value)
+{
+  struct espgpio_dev_s *espgpio = (struct espgpio_dev_s *)dev;
+
+  DEBUGASSERT(espgpio != NULL && value != NULL);
+  gpioinfo("Reading...\n");
+
+  *value = esp_rtcio_read(g_gpiortc[espgpio->id]);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gprtc_write
+ *
+ * Description:
+ *   Write to a RTC digital output pin.
+ *
+ * Parameters:
+ *   dev   - A pointer to the gpio driver struct.
+ *   value - The value to be written.
+ *
+ * Returned Value:
+ *   Zero (OK).
+ *
+ ****************************************************************************/
+
+static int gprtc_write(struct gpio_dev_s *dev, bool value)
+{
+  struct espgpio_dev_s *espgpio = (struct espgpio_dev_s *)dev;
+
+  DEBUGASSERT(espgpio != NULL);
+  gpioinfo("Writing %d\n", (int)value);
+
+  esp_rtcio_write(g_gpiortc[espgpio->id], value);
+  return OK;
+}
 
 /****************************************************************************
  * Name: gpout_read
@@ -552,6 +628,21 @@ int esp_gpio_init(void)
 
   pincount++;
 #endif
+
+  for (i = 0; i < GPIO_RTC_COUNT; i++)
+    {
+      /* Setup and register the GPIO pin */
+
+      g_gprtc[i].gpio.gp_pintype = GPIO_OUTPUT_PIN;
+      g_gprtc[i].gpio.gp_ops     = &gprtc_ops;
+      g_gprtc[i].id              = i;
+      gpio_pin_register(&g_gprtc[i].gpio, pincount);
+
+      /* Configure the pins that will be used as input/output */
+
+      esp_rtcio_config_gpio(g_gpiortc[i], ESP_RTC_GPIO_MODE_INPUT_OUTPUT);
+      pincount++;
+    }
 
   return OK;
 }

@@ -131,7 +131,7 @@ static struct simgpint_dev_s g_gpint =
  * Private Functions
  ****************************************************************************/
 
-static int sim_interrupt(wdparm_t arg)
+static void sim_interrupt(wdparm_t arg)
 {
   struct simgpint_dev_s *simgpint = (struct simgpint_dev_s *)arg;
 
@@ -139,7 +139,6 @@ static int sim_interrupt(wdparm_t arg)
   gpioinfo("Interrupt! callback=%p\n", simgpint->callback);
 
   simgpint->callback(&simgpint->simgpio.gpio, simgpint->simgpio.id);
-  return OK;
 }
 
 static int gpin_read(struct gpio_dev_s *dev, bool *value)

@@ -36,5 +36,5 @@
 
 void sm_sleep(uint32_t msec)
 {
-  nxsig_usleep(1000 * msec);
+  nxsched_usleep(1000 * msec);
 }

@@ -30,7 +30,7 @@
 #include <debug.h>
 #include <assert.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/clock.h>
 #include <nuttx/timers/watchdog.h>
 #include <arch/board/board.h>
@@ -102,6 +102,7 @@ struct phyplus_lowerhalf_s
   bool     started;                  /* true: The watchdog timer has been started */
   bool     intr_mode;                /* 0: not use intr_callback handle, 1: use intr_callback handle */
   WDG_CYCLE_Type_e wdt_cycle;
+  spinlock_t lock;                   /* Ensure mutually exclusive access */
 };
 
 static struct phyplus_lowerhalf_s g_wdgdev;
@@ -240,10 +241,10 @@ static int phyplus_wdt_start(struct watchdog_lowerhalf_s *lower)
        * option bits, the watchdog is automatically enabled at power-on.
        */
 
-      flags           = enter_critical_section();
+      flags         = spin_lock_irqsave_nopreempt(&priv->lock);
       pp_watchdog_start(priv->intr_mode, priv->wdt_cycle);
-      priv->started   = true;
-      leave_critical_section(flags);
+      priv->started = true;
+      spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
     }
 
   return OK;
@@ -307,11 +308,11 @@ static int phyplus_wdt_keepalive(struct watchdog_lowerhalf_s *lower)
 
   wdinfo("wdt_feed\n");
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&lower->lock);
 
   pp_watchdog_feed();
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&lower->lock, flags);
 
   return OK;
 }
@@ -456,6 +457,7 @@ void phyplus_wdt_initialize(const char *devpath)
   priv->started = false;
   priv->intr_mode = false;
   priv->wdt_cycle = WDG_2S;
+  spin_lock_init(&priv->lock);
 
   pp_watchdog_init();
 

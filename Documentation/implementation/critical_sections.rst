@@ -257,6 +257,14 @@ and preemption operations. Only have instructions when scheduler triggers contex
 * >= 0 to enable critical section entered time statistic, data will be in critmon procfs.
 * > 0 to also do alert log when critical section entered time above the configuration ticks.
 
+**Critical section pre-entry busywait time**::
+
+  CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT=-1
+
+* Default -1 to disable critical section pre-entry busywait time statistic.
+* >= 0 to enable critical section pre-entry busywait time statistic, data will be in critmon procfs.
+* > 0 to also do alert log when critical section pre-entry busywait time above the configuration ticks.
+
 **Irq executing time**::
 
   CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQ=-1

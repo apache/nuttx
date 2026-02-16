@@ -36,6 +36,9 @@
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
+#include "udp/udp.h"
+#include "utils/utils.h"
+#include "socket/socket.h"
 
 #include "sixlowpan/sixlowpan_internal.h"
 
@@ -99,12 +102,12 @@ struct sixlowpan_send_s
  *
  ****************************************************************************/
 
-static uint16_t send_eventhandler(FAR struct net_driver_s *dev,
-                                  FAR void *pvpriv, uint16_t flags)
+static uint32_t send_eventhandler(FAR struct net_driver_s *dev,
+                                  FAR void *pvpriv, uint32_t flags)
 {
   FAR struct sixlowpan_send_s *sinfo = pvpriv;
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   /* Verify that this is a compatible network driver. */
 
@@ -133,7 +136,7 @@ static uint16_t send_eventhandler(FAR struct net_driver_s *dev,
 
   if ((flags & WPAN_NEWDATA) == 0)
     {
-      DEBUGASSERT((flags & WPAN_POLL) != 0);
+      DEBUGASSERT((flags & UDP_POLL) != 0);
 
       /* Transfer the frame list to the IEEE802.15.4 MAC device */
 
@@ -142,7 +145,7 @@ static uint16_t send_eventhandler(FAR struct net_driver_s *dev,
                                sinfo->s_ipv6hdr, sinfo->s_buf, sinfo->s_len,
                                sinfo->s_destmac);
 
-      flags &= ~WPAN_POLL;
+      flags &= ~UDP_POLL;
       neighbor_reachable(dev);
       goto end_wait;
     }
@@ -202,16 +205,14 @@ end_wait:
  *
  ****************************************************************************/
 
-int sixlowpan_send(FAR struct net_driver_s *dev,
-                   FAR struct devif_callback_s **list,
-                   FAR struct devif_callback_s **list_tail,
+int sixlowpan_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
                    FAR const struct ipv6_hdr_s *ipv6hdr, FAR const void *buf,
-                   size_t len, FAR const struct netdev_varaddr_s *destmac,
-                   unsigned int timeout)
+                   size_t len, FAR const struct netdev_varaddr_s *destmac)
 {
   struct sixlowpan_send_s sinfo;
 
-  ninfo("len=%lu timeout=%u\n", (unsigned long)len, timeout);
+  ninfo("len=%lu timeout=%u\n", (unsigned long)len,
+        (unsigned int)_SO_TIMEOUT(conn->sconn.s_sndtimeo));
 
   /* Initialize the send state structure */
 
@@ -223,7 +224,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
   sinfo.s_buf     = buf;
   sinfo.s_len     = len;
 
-  net_lock();
+  conn_dev_lock(&conn->sconn, dev);
   if (len > 0)
     {
       /* Allocate resources to receive a callback.
@@ -232,28 +233,32 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
        * device related events, no connect-related events.
        */
 
-      sinfo.s_cb = devif_callback_alloc(dev, list, list_tail);
+      sinfo.s_cb = devif_callback_alloc(dev, &conn->sconn.list,
+                                        &conn->sconn.list_tail);
       if (sinfo.s_cb != NULL)
         {
           int ret;
 
           /* Set up the callback in the connection */
 
-          sinfo.s_cb->flags = (NETDEV_DOWN | WPAN_POLL);
+          sinfo.s_cb->flags = (NETDEV_DOWN | UDP_POLL);
           sinfo.s_cb->priv  = (FAR void *)&sinfo;
           sinfo.s_cb->event = send_eventhandler;
 
           /* Notify the IEEE802.15.4 MAC that we have data to send. */
 
-          netdev_txnotify_dev(dev);
+          netdev_txnotify_dev(dev, UDP_POLL);
 
           /* Wait for the send to complete or an error to occur.
-           * net_sem_timedwait will also terminate if a signal is received.
+           * conn_dev_sem_timedwait will also terminate if a signal is
+           * received.
            */
 
           ninfo("Wait for send complete\n");
 
-          ret = net_sem_timedwait(&sinfo.s_waitsem, timeout);
+          ret = conn_dev_sem_timedwait(&sinfo.s_waitsem, true,
+                                       _SO_TIMEOUT(conn->sconn.s_sndtimeo),
+                                       &conn->sconn, dev);
           if (ret < 0)
             {
               if (ret == -ETIMEDOUT)
@@ -267,12 +272,13 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
 
           /* Make sure that no further events are processed */
 
-          devif_conn_callback_free(dev, sinfo.s_cb, list, list_tail);
+          devif_conn_callback_free(dev, sinfo.s_cb, &conn->sconn.list,
+                                   &conn->sconn.list_tail);
         }
     }
 
   nxsem_destroy(&sinfo.s_waitsem);
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, dev);
 
   return (sinfo.s_result < 0 ? sinfo.s_result : len);
 }

@@ -232,7 +232,7 @@ static void ip_fragin_timerwork(FAR void *arg)
             {
               FAR struct net_driver_s *dev = node->dev;
 
-              net_lock();
+              netdev_lock(dev);
 
               netdev_iob_replace(dev, node->frags->frag);
               node->frags->frag = NULL;
@@ -263,10 +263,10 @@ static void ip_fragin_timerwork(FAR void *arg)
 
                   ninfo("Send Time Exceeded ICMP%s Message to source "
                         "host\n", node->frags->isipv4 ? "v4" : "v6");
-                  netdev_txnotify_dev(dev);
+                  netdev_txnotify_dev(dev, IPFRAG_POLL);
                 }
 
-              net_unlock();
+              netdev_unlock(dev);
             }
 #endif
 
@@ -1078,7 +1078,7 @@ int32_t ip_frag_uninit(void)
 
   /* Release frag processing resources of each NIC */
 
-  net_lock();
+  netdev_list_lock();
   for (dev = g_netdevices; dev; dev = dev->flink)
     {
       /* Is the interface in the "up" state? */
@@ -1089,7 +1089,7 @@ int32_t ip_frag_uninit(void)
         }
     }
 
-  net_unlock();
+  netdev_list_unlock();
 
   return OK;
 }
@@ -1209,7 +1209,7 @@ void ip_frag_remallfrags(void)
 
   /* Drop all unsent outgoing fragments */
 
-  net_lock();
+  netdev_list_lock();
   for (dev = g_netdevices; dev; dev = dev->flink)
     {
       /* Is the interface in the "up" state? */
@@ -1220,7 +1220,7 @@ void ip_frag_remallfrags(void)
         }
     }
 
-  net_unlock();
+  netdev_list_unlock();
 }
 
 /****************************************************************************

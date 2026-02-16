@@ -107,6 +107,12 @@ uint32_t g_devfreed;
 #endif
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static mutex_t g_netdevices_lock = NXMUTEX_INITIALIZER;
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -215,6 +221,33 @@ static int get_ifindex(void)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: netdev_list_lock
+ *
+ * Description:
+ *   Lock the network device list.  This is used to protect the network
+ *   device list from concurrent access.
+ *
+ ****************************************************************************/
+
+void netdev_list_lock(void)
+{
+  nxmutex_lock(&g_netdevices_lock);
+}
+
+/****************************************************************************
+ * Name: netdev_list_unlock
+ *
+ * Description:
+ *   Unlock the network device list.
+ *
+ ****************************************************************************/
+
+void netdev_list_unlock(void)
+{
+  nxmutex_unlock(&g_netdevices_lock);
+}
 
 /****************************************************************************
  * Name: netdev_register
@@ -392,15 +425,19 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
       dev->d_conncb_tail = NULL;
       dev->d_devcb = NULL;
 
+      dev->d_polltype = 0;
+
+      nxrmutex_init(&dev->d_lock);
+
       /* We need exclusive access for the following operations */
 
-      net_lock();
+      netdev_list_lock();
 
 #ifdef CONFIG_NETDEV_IFINDEX
       ifindex = get_ifindex();
       if (ifindex < 0)
         {
-          net_unlock();
+          netdev_list_unlock();
           return ifindex;
         }
 
@@ -475,7 +512,12 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #ifdef CONFIG_NET_MLD
       /* Configure the device for MLD support */
 
-      mld_devinit(dev);
+      if ((flags & IFF_MULTICAST) != 0)
+        {
+          /* MLD is only supported on multicast capable devices */
+
+          mld_devinit(dev);
+        }
 #endif
 
 #ifdef NET_ICMPv6_HAVE_STACK
@@ -484,7 +526,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
       icmpv6_devinit(dev);
 #endif
 
-      net_unlock();
+      netdev_list_unlock();
 
 #if defined(CONFIG_NET_ETHERNET) || defined(CONFIG_DRIVERS_IEEE80211)
       ninfo("Registered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",

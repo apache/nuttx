@@ -1,6 +1,6 @@
-===============
-ST Nucle H743ZI
-===============
+================
+ST Nucleo H743ZI
+================
 
 .. tags:: chip:stm32, chip:stm32h7, chip:stm32h743
 

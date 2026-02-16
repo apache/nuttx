@@ -29,39 +29,19 @@
 
 #include <stdint.h>
 
-#include <nuttx/compiler.h>
 #include <nuttx/list.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/virtio/virtio-config.h>
 
-#ifdef CONFIG_DRIVERS_VIRTIO
+#ifdef CONFIG_OPENAMP
 
 #include <openamp/open_amp.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Virtio common feature bits */
-
-#define VIRTIO_F_ANY_LAYOUT   27
-
-/* Virtio helper functions */
-
-#define virtio_has_feature(vdev, fbit) \
-      (((vdev)->features & (1ULL << (fbit))) != 0)
-
-#define virtio_read_config_member(vdev, structname, member, ptr) \
-      virtio_read_config((vdev), offsetof(structname, member), \
-                         (ptr), sizeof(*(ptr)));
-
-#define virtio_write_config_member(vdev, structname, member, ptr) \
-      virtio_write_config((vdev), offsetof(structname, member), \
-                          (ptr), sizeof(*(ptr)));
 
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_DRIVERS_VIRTIO
 struct virtio_driver
 {
   struct list_node   node;
@@ -69,6 +49,7 @@ struct virtio_driver
   CODE int         (*probe)(FAR struct virtio_device *vdev);
   CODE void        (*remove)(FAR struct virtio_device *vdev);
 };
+#endif
 
 /****************************************************************************
  * Inline functions
@@ -126,7 +107,7 @@ virtqueue_get_available_buffer_lock(FAR struct virtqueue *vq,
   FAR void *ret;
 
   flags = spin_lock_irqsave(lock);
-  ret = virtqueue_get_available_buffer(vq, avail_idx, len);
+  ret = virtqueue_get_first_avail_buffer(vq, avail_idx, len);
   spin_unlock_irqrestore(lock, flags);
 
   return ret;
@@ -196,6 +177,37 @@ static inline_function void virtqueue_kick_lock(FAR struct virtqueue *vq,
   spin_unlock_irqrestore(lock, flags);
 }
 
+static inline_function FAR void *
+virtio_malloc_buf(FAR struct virtio_device *vdev, size_t size, size_t align)
+{
+  FAR void *buf;
+
+  if (virtio_alloc_buf(vdev, &buf, size, align) < 0)
+    {
+      return NULL;
+    }
+
+  return buf;
+}
+
+static inline_function FAR void *
+virtio_zalloc_buf(FAR struct virtio_device *vdev, size_t size, size_t align)
+{
+  FAR void *buf;
+
+  if (virtio_alloc_buf(vdev, &buf, size, align) < 0)
+    {
+      return NULL;
+    }
+
+  memset(buf, 0, size);
+  return buf;
+}
+
+#endif /* CONFIG_OPENAMP */
+
+#ifdef CONFIG_DRIVERS_VIRTIO
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -207,18 +219,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
-static inline_function FAR void *
-virtio_zalloc_buf(FAR struct virtio_device *vdev, size_t size, size_t align)
-{
-  FAR void *buf = virtio_alloc_buf(vdev, size, align);
-  if (buf != NULL)
-    {
-      memset(buf, 0, size);
-    }
-
-  return buf;
-}
 
 /* Driver and device register/unregister function */
 

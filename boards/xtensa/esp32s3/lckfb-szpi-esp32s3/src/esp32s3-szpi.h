@@ -40,11 +40,14 @@
 #define GPIO_LCD_RST        (-1)
 #define SZPI_LCD_CS_PATH    "/dev/gpio0"
 #define SZPI_LCD_PWM_PATH   "/dev/pwm0"
-#define SZPI_LCD_PWM_FREQ   (100)
+#define SZPI_LCD_PWM_FREQ   (10000)
 #define SZPI_LCD_PWM_DUTY   (0xe666)       /* 0x1 ~ 0xffff */
 
 #define FT5X06_I2C_ADDRESS  (0x38)
 #define FT5X06_FREQUENCY    (400000)
+
+#define QMI8658_I2C_PORT    (0)
+#define QMI8658_I2C_ADDR    (0x6A)
 
 /****************************************************************************
  * Public Types
@@ -121,25 +124,6 @@ int board_i2c_init(void);
 #endif
 
 /****************************************************************************
- * Name: board_bmp180_initialize
- *
- * Description:
- *   Initialize and register the BMP180 Pressure Sensor driver.
- *
- * Input Parameters:
- *   devno - The device number, used to build the device path as /dev/pressN
- *   busno - The I2C bus number
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SENSORS_BMP180
-int board_bmp180_initialize(int devno, int busno);
-#endif
-
-/****************************************************************************
  * Name: board_i2sdev_initialize
  *
  * Description:
@@ -163,27 +147,6 @@ int board_bmp180_initialize(int devno, int busno);
 int board_i2sdev_initialize(int port, bool enable_tx, bool enable_rx);
 #endif
 
-/****************************************************************************
- * Name: esp32s3_cs4344_initialize
- *
- * Description:
- *   This function is called by platform-specific, setup logic to configure
- *   and register the CS4344 device.  This function will register the driver
- *   as /dev/audio/pcm[x] where x is determined by the I2S port number.
- *
- * Input Parameters:
- *   port - The I2S port used for the device
- *
- * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is
- *   returned to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_AUDIO_CS4344
-int esp32s3_cs4344_initialize(int port);
-#endif
-
 #ifdef CONFIG_ESP32S3_OPENETH
 int esp_openeth_initialize(void);
 #endif
@@ -194,6 +157,10 @@ int esp32s3_pca9557_initialize(void);
 
 #ifdef CONFIG_INPUT_FT5X06
 int esp32s3_ft5x06_initialize(void);
+#endif
+
+#ifdef CONFIG_SENSORS_QMI8658
+int esp32s3_qmi8658_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

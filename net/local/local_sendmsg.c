@@ -65,17 +65,15 @@ static void local_freectl(FAR struct local_conn_s *conn, int count)
 
   while (count-- > 0)
     {
-      file_close(peer->lc_cfps[--peer->lc_cfpcount]);
-      kmm_free(peer->lc_cfps[peer->lc_cfpcount]);
+      file_put(peer->lc_cfps[--peer->lc_cfpcount]);
       peer->lc_cfps[peer->lc_cfpcount] = NULL;
     }
 }
 
 static int local_sendctl(FAR struct local_conn_s *conn,
-                         FAR struct msghdr *msg)
+                         FAR const struct msghdr *msg)
 {
   FAR struct local_conn_s *peer;
-  FAR struct file *filep2;
   FAR struct file *filep;
   FAR struct cmsghdr *cmsg;
   int count = 0;
@@ -83,7 +81,7 @@ static int local_sendctl(FAR struct local_conn_s *conn,
   int ret;
   int i = 0;
 
-  net_lock();
+  local_lock();
   peer = conn->lc_peer;
   if (peer == NULL)
     {
@@ -117,32 +115,16 @@ static int local_sendctl(FAR struct local_conn_s *conn,
               goto fail;
             }
 
-          filep2 = kmm_zalloc(sizeof(*filep2));
-          if (!filep2)
-            {
-              file_put(filep);
-              ret = -ENOMEM;
-              goto fail;
-            }
-
-          ret = file_dup2(filep, filep2);
-          file_put(filep);
-          if (ret < 0)
-            {
-              kmm_free(filep2);
-              goto fail;
-            }
-
-          peer->lc_cfps[peer->lc_cfpcount++] = filep2;
+          peer->lc_cfps[peer->lc_cfpcount++] = filep;
         }
     }
 
-  net_unlock();
+  local_unlock();
   return count;
 
 fail:
   local_freectl(conn, i);
-  net_unlock();
+  local_unlock();
   return ret;
 }
 #endif /* CONFIG_NET_LOCAL_SCM */
@@ -311,17 +293,17 @@ static ssize_t local_sendto(FAR struct socket *psock,
       return -EISCONN;
     }
 
-  net_lock();
+  local_lock();
 
   server = local_findconn(conn, unaddr);
   if (server == NULL)
     {
-      net_unlock();
+      local_unlock();
       nerr("ERROR: No such file or directory\n");
       return -ENOENT;
     }
 
-  net_unlock();
+  local_unlock();
 
   /* Make sure that dgram is sent safely */
 
@@ -428,23 +410,16 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+ssize_t local_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
                       int flags)
 {
-  FAR struct local_conn_s *conn = psock->s_conn;
   FAR const struct sockaddr *to = msg->msg_name;
   FAR const struct iovec *buf = msg->msg_iov;
   socklen_t tolen = msg->msg_namelen;
   size_t len = msg->msg_iovlen;
 
-  /* Check shutdown state */
-
-  if (conn->lc_outfile.f_inode == NULL)
-    {
-      return -EPIPE;
-    }
-
 #ifdef CONFIG_NET_LOCAL_SCM
+  FAR struct local_conn_s *conn = psock->s_conn;
   int count = 0;
 
   if (msg->msg_control &&
@@ -462,9 +437,9 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   if (len < 0 && count > 0)
     {
-      net_lock();
+      local_lock();
       local_freectl(conn, count);
-      net_unlock();
+      local_unlock();
     }
 #else
   len = to ? local_sendto(psock, buf, len, flags, to, tolen) :

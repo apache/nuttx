@@ -433,12 +433,12 @@ static int sst39vf_chiperase(FAR struct sst39vf_dev_s *priv)
 
       /* No, wait one system clock tick */
 
-      nxsig_usleep(USEC_PER_TICK);
+      nxsched_usleep(USEC_PER_TICK);
     }
 #else
   /* Delay the maximum amount of time for the chip erase to complete. */
 
-  nxsig_usleep(SST39VF_TSCE_MSEC * USEC_PER_MSEC);
+  nxsched_usleep(SST39VF_TSCE_MSEC * USEC_PER_MSEC);
 #endif
 
   return OK;
@@ -509,12 +509,12 @@ static int sst39vf_sectorerase(FAR struct sst39vf_dev_s *priv,
 
       /* No, wait one system clock tick */
 
-      nxsig_usleep(USEC_PER_TICK);
+      nxsched_usleep(USEC_PER_TICK);
     }
 #else
   /* Delay the maximum amount of time for the sector erase to complete. */
 
-  nxsig_usleep(SST39VF_TSE_MSEC * USEC_PER_MSEC);
+  nxsched_usleep(SST39VF_TSE_MSEC * USEC_PER_MSEC);
 #endif
 
   return OK;

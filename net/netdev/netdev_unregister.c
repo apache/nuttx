@@ -37,6 +37,7 @@
 #include <net/ethernet.h>
 #include <nuttx/net/netdev.h>
 
+#include "mld/mld.h"
 #include "utils/utils.h"
 #include "netdev/netdev.h"
 
@@ -117,7 +118,7 @@ int netdev_unregister(FAR struct net_driver_s *dev)
 
   if (dev)
     {
-      net_lock();
+      netdev_list_lock();
 
       /* Find the device in the list of known network devices */
 
@@ -150,7 +151,19 @@ int netdev_unregister(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NETDEV_IFINDEX
       free_ifindex(dev->d_ifindex);
 #endif
-      net_unlock();
+
+#ifdef CONFIG_NET_MLD
+      if ((dev->d_flags & IFF_MULTICAST) != 0)
+        {
+          /* MLD is only supported on multicast capable devices */
+
+          mld_grpfree_all(dev);
+        }
+#endif
+
+      netdev_list_unlock();
+
+      nxrmutex_destroy(&dev->d_lock);
 
 #if CONFIG_NETDEV_STATISTICS_LOG_PERIOD > 0
       work_cancel_sync(NETDEV_STATISTICS_WORK, &dev->d_statistics.logwork);

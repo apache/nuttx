@@ -5,7 +5,7 @@ Raspberry Pi Pico 2
 .. tags:: chip:rp2350
 
 The `Raspberry Pi Pico 2 <https://www.raspberrypi.com/products/raspberry-pi-pico-2/>`_ is a general purpose board supplied by
-the Raspberry Pi Foundation.
+Raspberry Pi.
 
 .. figure:: pico-2.png
    :align: center
@@ -155,7 +155,6 @@ There is currently no direct user mode access to these RP2350 hardware features:
 
 * SPI Slave Mode
 * SSI
-* RTC
 * Timers
 
 Installation
@@ -165,17 +164,23 @@ Installation
 
 .. code-block:: console
 
-  $ git clone -b 2.1.1 https://github.com/raspberrypi/pico-sdk.git
+  $ git clone -b 2.2.0 --recurse-submodules https://github.com/raspberrypi/pico-sdk.git
 
-2. Download and install picotool
+2. Download and install ``picotool``
 
-  Instructions can be found here: https://github.com/raspberrypi/picotool
+   .. note::
 
-  If you are on Arch Linux, you can install the picotool through the AUR:
+      If not found at build time, this tool will also be automatically compiled
+      from the SDK sources. Manually downloading or compiling it is
+      `preferred <https://github.com/raspberrypi/pico-sdk/issues/1827>`__, though.
 
-.. code-block:: console
+   Instructions can be found here: https://github.com/raspberrypi/picotool
 
-  $ yay -S picotool
+   If you are on Arch Linux, you can also install ``picotool`` through the AUR:
+
+   .. code-block:: console
+
+      $ yay -S picotool
 
 3. Set PICO_SDK_PATH environment variable
 
@@ -191,7 +196,7 @@ Installation
   $ git clone https://github.com/apache/nuttx-apps.git apps
   $ cd nuttx
   $ make distclean
-  $ ./tools/configure.sh raspberrypi-pico:nsh
+  $ ./tools/configure.sh raspberrypi-pico-2:nsh
   $ make V=1
 
 5. Connect Raspberry Pi Pico 2 board to USB port while pressing BOOTSEL.
@@ -213,6 +218,12 @@ nsh
 ---
 
 Basic NuttShell configuration (console enabled in UART0, at 115200 bps).
+
+usbnsh
+------
+
+Basic NuttShell configuration (console enabled via USB CDC/ACM).
+
 
 smp
 ---

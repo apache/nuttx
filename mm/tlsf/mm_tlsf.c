@@ -112,6 +112,10 @@ struct mm_heap_s
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
   struct procfs_meminfo_entry_s mm_procfs;
 #endif
+
+  /* Kasan is disable or enable for this heap */
+
+  bool mm_nokasan;
 };
 
 #if CONFIG_MM_BACKTRACE >= 0
@@ -218,8 +222,16 @@ static void memdump_allocnode(FAR void *ptr, size_t size)
   FAR struct memdump_backtrace_s *buf =
     ptr + size - sizeof(struct memdump_backtrace_s);
 
-  syslog(LOG_INFO, "%6d%12zu%12lu%*p\n",
-         buf->pid, size, buf->seqno, BACKTRACE_PTR_FMT_WIDTH, ptr);
+  syslog(LOG_INFO, "%6d%12zu"
+#  ifdef CONFIG_MM_BACKTRACE_SEQNO
+         "%12lu"
+#  endif
+         "%*p\n",
+         buf->pid, size,
+#  ifdef CONFIG_MM_BACKTRACE_SEQNO
+         buf->seqno,
+#  endif
+         BACKTRACE_PTR_FMT_WIDTH, ptr);
 #else
   char tmp[BACKTRACE_BUFFER_SIZE(CONFIG_MM_BACKTRACE)];
   FAR struct memdump_backtrace_s *buf =
@@ -228,8 +240,16 @@ static void memdump_allocnode(FAR void *ptr, size_t size)
   backtrace_format(tmp, sizeof(tmp), buf->backtrace,
                    CONFIG_MM_BACKTRACE);
 
-  syslog(LOG_INFO, "%6d%12zu%12lu%*p %s\n",
-         buf->pid, size, buf->seqno, BACKTRACE_PTR_FMT_WIDTH,
+  syslog(LOG_INFO, "%6d%12zu"
+#  ifdef CONFIG_MM_BACKTRACE_SEQNO
+         "%12lu"
+#  endif
+         "%*p %s\n",
+         buf->pid, size,
+#  ifdef CONFIG_MM_BACKTRACE_SEQNO
+         buf->seqno,
+#  endif
+         BACKTRACE_PTR_FMT_WIDTH,
          ptr, tmp);
 #endif
 }
@@ -299,7 +319,7 @@ static void memdump_backtrace(FAR struct mm_heap_s *heap,
 #  endif
 
   buf->pid = _SCHED_GETTID();
-  buf->seqno = g_mm_seqno++;
+  MM_INCSEQNO(buf);
 #  if CONFIG_MM_BACKTRACE > 0
   tcb = nxsched_get_tcb(buf->pid);
   if (heap->mm_procfs.backtrace ||
@@ -714,7 +734,10 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
   /* Register to KASan for access check */
 
-  kasan_register(heapstart, &heapsize);
+  if (!heap->mm_nokasan)
+    {
+      kasan_register(heapstart, &heapsize);
+    }
 
   DEBUGVERIFY(mm_lock(heap));
 
@@ -809,6 +832,8 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
 #else
 #  define region 0
 #endif
+
+  free_delaylist(heap, true);
 
   /* Visit each region */
 
@@ -975,38 +1000,55 @@ bool mm_heapmember(FAR struct mm_heap_s *heap, FAR void *mem)
 }
 
 /****************************************************************************
- * Name: mm_initialize
+ * Name: mm_initialize_heap
  *
  * Description:
  *   Initialize the selected heap data structures, providing the initial
  *   heap region.
  *
  * Input Parameters:
- *   heap      - The selected heap
- *   heapstart - Start of the initial heap region
- *   heapsize  - Size of the initial heap region
+ *   config - The heap config structure
  *
  * Returned Value:
- *   None
+ *   Return the address of a new heap instance.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-FAR struct mm_heap_s *mm_initialize(FAR const char *name,
-                                    FAR void *heapstart, size_t heapsize)
+FAR struct mm_heap_s *
+mm_initialize_heap(FAR const struct mm_heap_config_s *config)
 {
-  FAR struct mm_heap_s *heap;
+  FAR struct mm_heap_s *heap = config->heap;
+  FAR const char *name = config->name;
+  FAR void *heapstart = config->start;
+  size_t heapsize = config->size;
 
   minfo("Heap: name=%s start=%p size=%zu\n", name, heapstart, heapsize);
+  if (heap == NULL)
+    {
+      /* Reserve a block space for mm_heap_s context */
 
-  /* Reserve a block space for mm_heap_s context */
+      DEBUGASSERT(heapsize > sizeof(struct mm_heap_s));
+      heap = (FAR struct mm_heap_s *)heapstart;
+      heapstart += sizeof(struct mm_heap_s);
+      heapsize -= sizeof(struct mm_heap_s);
 
-  DEBUGASSERT(heapsize > sizeof(struct mm_heap_s));
-  heap = (FAR struct mm_heap_s *)heapstart;
-  memset(heap, 0, sizeof(struct mm_heap_s));
-  heapstart += sizeof(struct mm_heap_s);
-  heapsize -= sizeof(struct mm_heap_s);
+      memset(heap, 0, sizeof(struct mm_heap_s));
+      heap->mm_curused = sizeof(struct mm_heap_s);
+    }
+  else
+    {
+      heap = mm_memalign(heap, MM_ALIGN, sizeof(struct mm_heap_s));
+      if (heap == NULL)
+        {
+          return NULL;
+        }
+
+      memset(heap, 0, sizeof(struct mm_heap_s));
+    }
+
+  heap->mm_nokasan = config->nokasan;
 
   /* Allocate and create TLSF context */
 
@@ -1041,12 +1083,10 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
 
 #ifdef CONFIG_MM_HEAP_MEMPOOL
 FAR struct mm_heap_s *
-mm_initialize_pool(FAR const char *name,
-                   FAR void *heap_start, size_t heap_size,
+mm_initialize_pool(FAR const struct mm_heap_config_s *config,
                    FAR const struct mempool_init_s *init)
 {
   FAR struct mm_heap_s *heap;
-
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD > 0
   size_t poolsize[MEMPOOL_NPOOLS];
   struct mempool_init_s def;
@@ -1077,15 +1117,15 @@ mm_initialize_pool(FAR const char *name,
     }
 #endif
 
-  heap = mm_initialize(name, heap_start, heap_size);
+  heap = mm_initialize_heap(config);
 
   /* Initialize the multiple mempool in heap */
 
   if (init != NULL && init->poolsize != NULL && init->npools != 0)
     {
       heap->mm_threshold = init->threshold;
-      heap->mm_mpool     = mempool_multiple_init(name, init->poolsize,
-                               init->npools,
+      heap->mm_mpool     = mempool_multiple_init(config->name,
+                               init->poolsize, init->npools,
                                (mempool_multiple_alloc_t)mempool_memalign,
                                (mempool_multiple_alloc_size_t)mm_malloc_size,
                                (mempool_multiple_free_t)mm_free, heap,
@@ -1118,6 +1158,8 @@ struct mallinfo mm_mallinfo(FAR struct mm_heap_s *heap)
 #endif
 
   memset(&info, 0, sizeof(struct mallinfo));
+
+  free_delaylist(heap, true);
 
   /* Visit each region */
 
@@ -1162,6 +1204,8 @@ struct mallinfo_task mm_mallinfo_task(FAR struct mm_heap_s *heap,
 #else
 #define region 0
 #endif
+
+  free_delaylist(heap, true);
 
 #ifdef CONFIG_MM_HEAP_MEMPOOL
   info = mempool_multiple_info_task(heap->mm_mpool, task);
@@ -1209,6 +1253,8 @@ void mm_memdump(FAR struct mm_heap_s *heap,
 
   memset(&priv, 0, sizeof(struct mm_memdump_priv_s));
   priv.dump = dump;
+
+  free_delaylist(heap, true);
 
   if (pid == PID_MM_MEMPOOL)
     {
@@ -1646,9 +1692,15 @@ void mm_uninitialize(FAR struct mm_heap_s *heap)
   mempool_multiple_deinit(heap->mm_mpool);
 #endif
 
+  free_delaylist(heap, true);
+
   for (i = 0; i < CONFIG_MM_REGIONS; i++)
     {
-      kasan_unregister(heap->mm_heapstart[i]);
+      if (!heap->mm_nokasan)
+        {
+          kasan_unregister(heap->mm_heapstart[i]);
+        }
+
       sched_note_heap(NOTE_HEAP_REMOVE, heap, heap->mm_heapstart[i],
                       (uintptr_t)heap->mm_heapend[i] -
                       (uintptr_t)heap->mm_heapstart[i], heap->mm_curused);
@@ -1684,22 +1736,6 @@ FAR void *mm_zalloc(FAR struct mm_heap_s *heap, size_t size)
 }
 
 /****************************************************************************
- * Name: mm_free_delaylist
- *
- * Description:
- *   force freeing the delaylist of this heap.
- *
- ****************************************************************************/
-
-void mm_free_delaylist(FAR struct mm_heap_s *heap)
-{
-  if (heap)
-    {
-       free_delaylist(heap, true);
-    }
-}
-
-/****************************************************************************
  * Name: mm_heapfree
  *
  * Description:
@@ -1709,6 +1745,7 @@ void mm_free_delaylist(FAR struct mm_heap_s *heap)
 
 size_t mm_heapfree(FAR struct mm_heap_s *heap)
 {
+  free_delaylist(heap, true);
   return heap->mm_heapsize - heap->mm_curused;
 }
 

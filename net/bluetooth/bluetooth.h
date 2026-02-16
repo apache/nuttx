@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#include <nuttx/mutex.h>
 #include <nuttx/net/net.h>
 
 #include <nuttx/wireless/bluetooth/bt_hci.h>
@@ -118,6 +119,40 @@ extern "C"
 /* The Bluetooth socket interface */
 
 EXTERN const struct sock_intf_s g_bluetooth_sockif;
+
+/* The Bluetooth connections rmutex */
+
+extern rmutex_t g_bluetooth_connections_lock;
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: bluetooth_conn_list_lock
+ *
+ * Description:
+ *   Lock the Bluetooth connection list.
+ *
+ ****************************************************************************/
+
+static inline_function void bluetooth_conn_list_lock(void)
+{
+  nxrmutex_lock(&g_bluetooth_connections_lock);
+}
+
+/****************************************************************************
+ * Name: bluetooth_conn_list_unlock
+ *
+ * Description:
+ *   Unlock the Bluetooth connection list.
+ *
+ ****************************************************************************/
+
+static inline_function void bluetooth_conn_list_unlock(void)
+{
+  nxrmutex_unlock(&g_bluetooth_connections_lock);
+}
 
 /****************************************************************************
  * Public Function Prototypes
@@ -254,9 +289,9 @@ FAR struct bluetooth_conn_s *
  *
  ****************************************************************************/
 
-uint16_t bluetooth_callback(FAR struct radio_driver_s *radio,
-                             FAR struct bluetooth_conn_s *conn,
-                             uint16_t flags);
+uint32_t bluetooth_callback(FAR struct radio_driver_s *radio,
+                            FAR struct bluetooth_conn_s *conn,
+                            uint32_t flags);
 
 /****************************************************************************
  * Name: bluetooth_recvmsg
@@ -352,8 +387,8 @@ void bluetooth_poll(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-ssize_t bluetooth_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
-                          int flags);
+ssize_t bluetooth_sendmsg(FAR struct socket *psock,
+                          FAR const struct msghdr *msg, int flags);
 
 /****************************************************************************
  * Name: bluetooth_container_initialize

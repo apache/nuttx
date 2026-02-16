@@ -45,6 +45,30 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: ceva_color_intstack
+ *
+ * Description:
+ *   Set the interrupt stack to a value so that later we can determine how
+ *   much stack space was used by interrupt handling logic
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+void ceva_color_intstack(void)
+{
+  uint32_t *ptr = (uint32_t *)g_intstackalloc;
+  ssize_t size;
+
+  for (size = g_intstackbase - g_intstackalloc;
+       size > 0;
+       size -= sizeof(uint32_t))
+    {
+      *ptr++ = STACK_COLOR;
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: ceva_stack_check
  *
  * Description:
@@ -76,7 +100,7 @@ size_t ceva_stack_check(uintptr_t alloc, size_t size)
    */
 
   for (ptr = (uint32_t *)alloc, mark = nwords;
-       *ptr == STACK_COLOR && mark > 0;
+       mark > 0 && *ptr == STACK_COLOR;
        ptr++, mark--);
 
   /* If the stack is completely used, then this might mean that the stack
@@ -139,16 +163,19 @@ size_t ceva_stack_check(uintptr_t alloc, size_t size)
  *
  ****************************************************************************/
 
-size_t up_check_tcbstack(struct tcb_s *tcb)
+size_t up_check_tcbstack(struct tcb_s *tcb, size_t check_size)
 {
-  return ceva_stack_check((uintptr_t)tcb->stack_alloc_ptr,
-                          tcb->adj_stack_size);
+  return ceva_stack_check((uintptr_t)tcb->stack_alloc_ptr, check_size);
 }
 
-size_t up_check_intstack(int cpu)
+size_t up_check_intstack(int cpu, size_t check_size)
 {
-  return ceva_stack_check((uintptr_t)g_intstackalloc,
-                          g_intstackbase - g_intstackalloc);
+  if (check_size == 0)
+    {
+      check_size = g_intstackbase - g_intstackalloc;
+    }
+
+  return ceva_stack_check((uintptr_t)g_intstackalloc, check_size);
 }
 
 #endif /* CONFIG_STACK_COLORATION */

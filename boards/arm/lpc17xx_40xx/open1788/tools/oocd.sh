@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #
-# See boards/open1788/README.txt for information about
-# this file.
+# See board documentation page for information about this file.
 
 TOPDIR=$1
 USAGE="$0 <TOPDIR> [-d]"

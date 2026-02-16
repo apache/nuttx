@@ -208,7 +208,7 @@ begin_packed_struct struct ctucanfd_frame_fmt_s
   uint32_t lbpf:1;              /* Loop-back frame */
   uint32_t brs:1;               /* Bit rate shift */
   uint32_t esi_rsv:1;           /* Error state indicator */
-  uint32_t rwcnt:4;             /* Size without FRAME_FORMAT WORD */
+  uint32_t rwcnt:5;             /* Size without FRAME_FORMAT WORD */
   uint32_t erf_pos:4;           /* Error frame position */
   uint32_t erf_erp:1;           /* Error passive state */
   uint32_t erf_type:3;          /* Error frame type */

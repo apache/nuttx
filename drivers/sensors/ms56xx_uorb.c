@@ -122,8 +122,6 @@ static uint32_t ms56xx_compensate_press(FAR struct ms56xx_dev_s *priv,
                                         uint32_t press, uint32_t dt,
                                         int32_t *temp);
 
-static unsigned long ms56xx_curtime(void);
-
 /* Sensor methods */
 
 static int ms56xx_set_interval(FAR struct sensor_lowerhalf_s *lower,
@@ -151,24 +149,6 @@ static const struct sensor_ops_s g_sensor_ops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: ms56xx_curtime
- *
- * Description: Helper to get current timestamp.
- *
- * Return:
- *   Timestamp in microseconds
- *
- ****************************************************************************/
-
-static unsigned long ms56xx_curtime(void)
-{
-  struct timespec ts;
-
-  clock_systime_timespec(&ts);
-  return 1000000ull * ts.tv_sec + ts.tv_nsec / 1000;
-}
 
 /****************************************************************************
  * Name: ms56xx_sendcmd
@@ -286,7 +266,7 @@ static inline void baro_measure_read(FAR struct ms56xx_dev_s *priv,
 
   /* Wait data acquisition */
 
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
 
   /* Send command to start a read sequence */
 
@@ -323,7 +303,7 @@ static inline void baro_measure_read(FAR struct ms56xx_dev_s *priv,
 
   /* Wait data acquisition */
 
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
 
   /* Send command to start a read sequence */
 
@@ -358,7 +338,7 @@ static inline void baro_measure_read(FAR struct ms56xx_dev_s *priv,
   temp = ms56xx_compensate_temp(priv, temp_raw, &deltat);
   press = ms56xx_compensate_press(priv, press, deltat, &temp);
 
-  baro->timestamp = ms56xx_curtime();
+  baro->timestamp = sensor_get_timestamp();
   baro->pressure = press / 100.0f;
   baro->temperature = temp / 100.0f;
 }
@@ -404,7 +384,7 @@ static int ms56xx_thread(int argc, char **argv)
 
       /* Sleeping thread before fetching the next sensor data */
 
-      nxsig_usleep(priv->interval);
+      nxsched_usleep(priv->interval);
     }
 
   return OK;
@@ -437,7 +417,7 @@ static int ms56xx_initialize(FAR struct ms56xx_dev_s *priv)
 
   /* We have to wait before the prom is ready is be read */
 
-  nxsig_usleep(10000);
+  nxsched_usleep(10000);
 
   for (i = 0; i < 8; i++)
     {

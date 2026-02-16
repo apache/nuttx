@@ -84,6 +84,17 @@ ifeq ($(CONFIG_ESPRESSIF_DEDICATED_GPIO),y)
 CHIP_CSRCS += esp_dedic_gpio.c
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_SHA_ACCELERATOR),y)
+CHIP_CSRCS += esp_sha.c
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
+CHIP_CSRCS += esp_crypto.c
+endif
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_USE_ULP_RISCV_CORE), y)
+CHIP_CSRCS += esp_ulp.c
+endif
+
 ifeq ($(CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL),y)
 CHIP_CSRCS += esp_nxdiag.c
 endif
@@ -91,8 +102,10 @@ endif
 ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
 CHIP_CSRCS += esp_wireless.c
 CHIP_CSRCS += esp_wifi_utils.c
-ifeq ($(CONFIG_ESPRESSIF_WLAN),y)
-CHIP_CSRCS += esp_wlan.c
+ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
+CHIP_CSRCS += esp_wifi_event_handler.c
+CHIP_CSRCS += esp_wlan_netdev.c
+CHIP_CSRCS += esp_wifi_api.c
 endif
 ifeq ($(CONFIG_ESPRESSIF_ESPNOW_PKTRADIO), y)
 CHIP_CSRCS += esp_espnow_pktradio.c
@@ -102,6 +115,23 @@ endif
 
 ifeq ($(CONFIG_ESPRESSIF_ADC),y)
 CHIP_CSRCS += esp_adc.c
+endif
+
+ifneq ($(CONFIG_ARCH_CHIP_ESP32),y)
+ifeq ($(CONFIG_PM),y)
+ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
+CHIP_CSRCS += esp_pm_initialize.c
+endif
+CHIP_CSRCS += esp_pm.c
+LDFLAGS += -u esp_timer_init_include_func
+endif
+endif
+
+CHIP_CSRCS += esp_efuse.c
+
+LDFLAGS += -u esp_system_include_startup_funcs
+ifeq ($(CONFIG_ESPRESSIF_EFUSE),y)
+LDFLAGS    += -u esp_efuse_startup_include_func
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)

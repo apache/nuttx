@@ -59,6 +59,7 @@
 #define BATIOC_GET_VOLTAGE   _BATIOC(0x0012)
 #define BATIOC_VOLTAGE_INFO  _BATIOC(0x0013)
 #define BATIOC_GET_PROTOCOL  _BATIOC(0x0014)
+#define BATIOC_SET_DEBOUNCE  _BATIOC(0x0015)
 
 /* Special input values for BATIOC_INPUT_CURRENT that may optionally
  * be supported by lower-half driver:
@@ -77,6 +78,7 @@
 #define BATTERY_CELLVOLTAGE_CHANGED     (1U << 6)
 #define BATTERY_TEMPERATURE_CHANGED     (1U << 7)
 #define BATTERY_COULOMBS_CHANGED        (1U << 8)
+#define BATTERY_OPERATE_CHANGED         (1U << 9)
 
 /****************************************************************************
  * Public Types
@@ -151,6 +153,8 @@ enum batio_operate_e
   BATIO_OPRTN_CAPACITY,
   BATIO_OPRTN_CHARGER_STATE,
   BATIO_OPRTN_HEALTH,
+  BATIO_OPRTN_CYCLE_COUNT,
+  BATIO_OPRTN_CYCLE_LEVEL,
   BATIO_OPRTN_END
 };
 

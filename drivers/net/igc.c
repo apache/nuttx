@@ -151,6 +151,10 @@ struct igc_driver_s
 
   FAR uint32_t *mta;
 #endif
+
+  /* A spinlock for protecting the driving state */
+
+  spinlock_t lock;
 };
 
 /*****************************************************************************
@@ -231,6 +235,10 @@ static const struct pci_device_id_s g_igc_id_table[] =
 {
   {
     PCI_DEVICE(0x8086, 0x15f2),
+    .driver_data = (uintptr_t)&g_igc_i225lm
+  },
+  {
+    PCI_DEVICE(0x8086, 0x15f3),
     .driver_data = (uintptr_t)&g_igc_i225lm
   },
   {
@@ -644,7 +652,7 @@ static FAR netpkt_t *igc_receive(FAR struct netdev_lowerhalf_s *dev)
   if (rx->errors)
     {
       nerr("RX error reported (%"PRIu8")\n", rx->errors);
-      NETDEV_RXERRORS(&priv->dev);
+      NETDEV_RXERRORS(&priv->dev.netdev);
       netpkt_free(dev, pkt, NETPKT_RX);
       return NULL;
     }
@@ -683,7 +691,7 @@ static void igc_txdone(FAR struct netdev_lowerhalf_s *dev)
       if (!(priv->tx[priv->tx_done].status & IGC_TDESC_STATUS_DD))
         {
           nerr("tx failed: 0x%" PRIx32 "\n", priv->tx[priv->tx_done].status);
-          NETDEV_TXERRORS(priv->dev);
+          NETDEV_TXERRORS(&priv->dev.netdev);
         }
 
       /* Free net packet */
@@ -876,12 +884,12 @@ static int igc_ifup(FAR struct netdev_lowerhalf_s *dev)
         dev->netdev.d_ipv6addr[6], dev->netdev.d_ipv6addr[7]);
 #endif
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   /* Enable the Ethernet */
 
   igc_enable(priv);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   /* Update link status in case link status interrupt is missing */
 
@@ -912,7 +920,7 @@ static int igc_ifdown(FAR struct netdev_lowerhalf_s *dev)
   FAR struct igc_driver_s *priv = (FAR struct igc_driver_s *)dev;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the igc_ifup() always
@@ -923,7 +931,7 @@ static int igc_ifdown(FAR struct netdev_lowerhalf_s *dev)
 
   /* Mark the device "down" */
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return OK;
 }
 
@@ -1431,6 +1439,8 @@ static int igc_probe(FAR struct pci_device_s *dev)
       nerr("igc_initialize failed %d\n", ret);
       return ret;
     }
+
+  spin_lock_init(&priv->lock);
 
   /* Register the network device */
 

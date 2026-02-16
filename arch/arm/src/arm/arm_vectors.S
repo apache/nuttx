@@ -182,7 +182,7 @@ arm_vectorirq:
 	/* Call arm_decodeirq() on the interrupt stack */
 
 	ldr	sp, .Lirqstacktop	/* SP = interrupt stack top */
-#else
+#elif defined(CONFIG_ENABLE_ALL_SIGNALS)
 	/* Call arm_decodeirq() on the user stack */
 
 	/* If the interrupt stack is disabled, reserve xcpcontext to ensure

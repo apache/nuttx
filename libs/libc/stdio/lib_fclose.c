@@ -36,6 +36,8 @@
 #  include <android/fdsan.h>
 #endif
 
+#include <nuttx/queue.h>
+
 #include "libc.h"
 
 /****************************************************************************
@@ -69,6 +71,33 @@ int fclose(FAR FILE *stream)
 
   if (stream)
     {
+      bool stdstream = (stream == stdin || stream == stdout ||
+                        stream == stderr);
+      bool found = stdstream;
+      FAR sq_entry_t *curr;
+
+      slist = lib_get_streams();
+
+      nxmutex_lock(&slist->sl_lock);
+
+      /* Verify that the stream pointer is valid. */
+
+      for (curr = sq_peek(&slist->sl_queue); curr && !found;
+           curr = sq_next(curr))
+        {
+          if (stream == (FAR FILE *)curr)
+            {
+              found = true;
+            }
+        }
+
+      if (!found)
+        {
+          nxmutex_unlock(&slist->sl_lock);
+          errcode = EINVAL;
+          goto done;
+        }
+
       ret = OK;
 
       /* If the stream was opened for writing, then flush the stream */
@@ -81,15 +110,13 @@ int fclose(FAR FILE *stream)
 
       /* Skip close the builtin streams(stdin, stdout and stderr) */
 
-      if (stream == stdin || stream == stdout || stream == stderr)
+      if (stdstream)
         {
+          nxmutex_unlock(&slist->sl_lock);
           goto done;
         }
 
       /* Remove FILE structure from the stream list */
-
-      slist = lib_get_streams();
-      nxmutex_lock(&slist->sl_lock);
 
       sq_rem(&stream->fs_entry, &slist->sl_queue);
 

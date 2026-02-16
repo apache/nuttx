@@ -486,11 +486,7 @@ static int scd30_read_values(FAR struct scd30_dev_s *priv, FAR float *temp,
                   return ret;
                 }
 
-              ret = nxsig_usleep(500 * 1000);
-              if (ret == -EINTR)
-                {
-                  return ret;
-                }
+              nxsched_usleep(500 * 1000);
             }
           else
             {

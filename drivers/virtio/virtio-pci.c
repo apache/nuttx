@@ -99,8 +99,7 @@ static void virtio_pci_vq_callback(FAR struct virtio_pci_device_s *vpdev)
   for (i = 0; i < vpdev->vdev.vrings_num; i++)
     {
       vq = vrings_info[i].vq;
-      if (vq->vq_used_cons_idx != vq->vq_ring.used->idx &&
-          vq->callback != NULL)
+      if (vq->callback != NULL && virtqueue_nused(vq) > 0)
         {
           vq->callback(vq);
         }
@@ -115,20 +114,18 @@ static void virtio_pci_vq_callback(FAR struct virtio_pci_device_s *vpdev)
 static int virtio_pci_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct virtio_pci_device_s *vpdev = arg;
+  uint8_t isr;
+
+  if (vpdev->intx)
+    {
+      pci_read_io_byte(vpdev->dev, (uintptr_t)vpdev->isr, &isr);
+      if (isr == 0)
+        {
+          return OK;
+        }
+    }
 
   virtio_pci_vq_callback(vpdev);
-  return OK;
-}
-
-/****************************************************************************
- * Name: virtio_pci_config_changed
- ****************************************************************************/
-
-static int virtio_pci_config_changed(int irq, FAR void *context,
-                                     FAR void *arg)
-{
-  /* TODO: not support config changed notification */
-
   return OK;
 }
 
@@ -182,7 +179,7 @@ static int virtio_pci_probe(FAR struct pci_device_s *dev)
 
   if (dev->device < 0x1000 || dev->device > 0x107f)
     {
-      pcierr("Pci device id err, id=%d\n", dev->device);
+      vrterr("Pci device id err, id=%d\n", dev->device);
       return -ENODEV;
     }
 
@@ -217,7 +214,7 @@ static int virtio_pci_probe(FAR struct pci_device_s *dev)
       ret = virtio_pci_legacy_probe(dev);
       if (ret < 0)
         {
-          vrterr("Virtio pci legacy probe failed\n");
+          vrterr("Virtio pci legacy probe failed %d\n", ret);
           goto err_with_enable;
         }
     }
@@ -226,32 +223,37 @@ static int virtio_pci_probe(FAR struct pci_device_s *dev)
 
   /* Irq init */
 
-  ret = pci_alloc_irq(vpdev->dev, vpdev->irq, VIRTIO_PCI_INT_NUM);
-  if (ret != VIRTIO_PCI_INT_NUM)
+  ret = pci_alloc_irq(vpdev->dev, &vpdev->irq, 1);
+  if (ret != 1)
     {
       vrterr("Failed to allocate MSI, ret=%d\n", ret);
       goto err_with_enable;
     }
 
-  vrtinfo("Interrupt mode: attaching MSI %d to %p, %d to %p\n",
-          vpdev->irq[VIRTIO_PCI_INT_CFG], virtio_pci_config_changed,
-          vpdev->irq[VIRTIO_PCI_INT_VQ], virtio_pci_interrupt);
+  vrtinfo("Interrupt mode: attaching MSI %d to %p\n",
+          vpdev->irq, virtio_pci_interrupt);
 
-  ret = pci_connect_irq(vpdev->dev, vpdev->irq, VIRTIO_PCI_INT_NUM);
+  ret = pci_connect_irq(vpdev->dev, &vpdev->irq, 1);
   if (ret < 0)
     {
-      vrterr("Failed to connect MSI %d\n", ret);
-      goto err_with_irq;
+      vrterr("Failed to connect MSI %d, try legacy irq mode\n", ret);
+      pci_release_irq(vpdev->dev, &vpdev->irq, 1);
+      ret = pci_get_irq(vpdev->dev);
+      if (ret < 0)
+        {
+          vrterr("Failed to get legacy irq %d\n", ret);
+          goto err_with_enable;
+        }
+
+      vpdev->irq = ret;
+      vpdev->intx = true;
     }
 
-  irq_attach(vpdev->irq[VIRTIO_PCI_INT_CFG],
-             virtio_pci_config_changed, vpdev);
-  irq_attach(vpdev->irq[VIRTIO_PCI_INT_VQ], virtio_pci_interrupt, vpdev);
+  irq_attach(vpdev->irq, virtio_pci_interrupt, vpdev);
 #else
   vrtinfo("Polling mode\n");
 #endif
 
-  virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_RESET);
   virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_ACK);
 
   ret = virtio_register_device(&vpdev->vdev);
@@ -265,10 +267,12 @@ static int virtio_pci_probe(FAR struct pci_device_s *dev)
 
 err_with_attach:
 #if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
-  irq_detach(vpdev->irq[VIRTIO_PCI_INT_CFG]);
-  irq_detach(vpdev->irq[VIRTIO_PCI_INT_VQ]);
-err_with_irq:
-  pci_release_irq(vpdev->dev, vpdev->irq, VIRTIO_PCI_INT_NUM);
+  irq_detach(vpdev->irq);
+  if (!vpdev->intx)
+    {
+      pci_release_irq(vpdev->dev, &vpdev->irq, 1);
+    }
+
 #endif
 err_with_enable:
   pci_clear_master(dev);
@@ -289,9 +293,11 @@ static void virtio_pci_remove(FAR struct pci_device_s *dev)
   virtio_unregister_device(&vpdev->vdev);
 
 #if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
-  irq_detach(vpdev->irq[VIRTIO_PCI_INT_CFG]);
-  irq_detach(vpdev->irq[VIRTIO_PCI_INT_VQ]);
-  pci_release_irq(vpdev->dev, vpdev->irq, VIRTIO_PCI_INT_NUM);
+  irq_detach(vpdev->irq);
+  if (!vpdev->intx)
+    {
+      pci_release_irq(vpdev->dev, &vpdev->irq, 1);
+    }
 #endif
 
   pci_clear_master(dev);
@@ -407,21 +413,13 @@ int virtio_pci_create_virtqueues(FAR struct virtio_device *vdev,
     }
 
 #if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
-  ret = vpdev->ops->config_vector(vpdev, true);
-  if (ret < 0)
-    {
-      vrterr("Config vector failed, vector=%u\n", ret);
-      goto err;
-    }
-
-  up_enable_irq(vpdev->irq[VIRTIO_PCI_INT_CFG]);
-  up_enable_irq(vpdev->irq[VIRTIO_PCI_INT_VQ]);
+  up_enable_irq(vpdev->irq);
 #else
   ret = wd_start(&vpdev->wdog, VIRTIO_PCI_WORK_DELAY, virtio_pci_wdog,
                 (wdparm_t)vpdev);
   if (ret < 0)
     {
-      pcierr("Wd_start failed: %d\n", ret);
+      vrterr("Wd_start failed: %d\n", ret);
       goto err;
     }
 #endif
@@ -445,9 +443,7 @@ void virtio_pci_delete_virtqueues(FAR struct virtio_device *vdev)
   unsigned int i;
 
 #if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
-  up_disable_irq(vpdev->irq[VIRTIO_PCI_INT_CFG]);
-  up_disable_irq(vpdev->irq[VIRTIO_PCI_INT_VQ]);
-  vpdev->ops->config_vector(vpdev, false);
+  up_disable_irq(vpdev->irq);
 #else
   wd_cancel(&vpdev->wdog);
 #endif

@@ -87,6 +87,119 @@
 #define FLASH_ACR_DBGSWEN           (1 << 18) /* Bit 18: Debug access software enable */
                                               /* Bits 19-31: Reserved */
 
-/* TODO */
+/* Flash Status Register (SR) */
+
+#define FLASH_SR_EOP                 (1)       /* Bit 0: End of operation */
+#define FLASH_SR_OPERR               (1 << 1)  /* Bit 1: Operation error */
+                                               /* Bit 2: Reserved */
+#define FLASH_SR_PROGERR             (1 << 3)  /* Bit 3: Programming error */
+#define FLASH_SR_WRPERR              (1 << 4)  /* Bit 4: Write protection error */
+#define FLASH_SR_PGAERR              (1 << 5)  /* Bit 5: Programming alignment error */
+#define FLASH_SR_SIZERR              (1 << 6)  /* Bit 6: Size error */
+#define FLASH_SR_PGSERR              (1 << 7)  /* Bit 7: Programming sequence error */
+#define FLASH_SR_MISSERR             (1 << 8)  /* Bit 8: Fast programming data miss error */
+#define FLASH_SR_FASTERR             (1 << 9)  /* Bit 9: Fast programming error */
+                                               /* Bits 10-13: Reserved */
+#define FLASH_SR_RDERR               (1 << 14) /* Bit 14: PCROP read error */
+#define FLASH_SR_OPTVERR             (1 << 15) /* Bit 15: Option and engineering bits loading validity error */
+#define FLASH_SR_BSY1                (1 << 16) /* Bit 16: Busy */
+                                               /* Bit 17: Reserved */
+#define FLASH_SR_CFGBSY              (1 << 18) /* Bit 18: Programming or erase configuration busy */
+                                               /* Bits 19-31: Reserved */
+
+/* Flash Control Register (CR) */
+
+#define FLASH_CR_PG                  (1)      /* Bit 0: Flash memory programming enable */
+#define FLASH_CR_PER                 (1 << 1) /* Bit 1: Page erase enable */
+#define FLASH_CR_MER1                (1 << 2) /* Bit 2: Mass erase */
+#define FLASH_CR_PNB_SHIFT           (3)      /* Bits 3-9: Page number selection */
+#define FLASH_CR_PNB_MASK            (0x7f << FLASH_CR_PNB_SHIFT)
+#  define FLASH_CR_PNB(n)            ((n) << FLASH_CR_PNB_SHIFT)
+
+#define FLASH_CR_STRT                (1 << 16) /* Bit 16: Start erase operation */
+#define FLASH_CR_OPTSTRT             (1 << 17) /* Bit 17: Start of modification of option bytes */
+#define FLASH_CR_FSTPG               (1 << 18) /* Bit 18: Fast programming enable */
+                                               /* Bits 19-23: Reserved */
+#define FLASH_CR_EOPIE               (1 << 24) /* Bit 24: End-of-operation interrupt enable */
+#define FLASH_CR_ERRIE               (1 << 25) /* Bit 25: Error interrupt enable */
+#define FLASH_CR_RDERRIE             (1 << 26) /* Bit 26: PCROP read error interrupt enable */
+#define FLASH_CR_OBL_LAUNCH          (1 << 27) /* Bit 27: Option byte load launch */
+#define FLASH_CR_SEC_PROT            (1 << 28) /* Bit 28: Securable memory area protection enable */
+                                               /* Bit 29: Reserved */
+#define FLASH_CR_OPTLOCK             (1 << 30) /* Bit 30: Options Lock */
+#define FLASH_CR_LOCK                (1 << 31) /* Bit 31: FLASH_CR Lock */
+
+/* Flash Option Register (OPTR) */
+
+#define FLASH_OPTR_RDP_SHIFT         (0)
+#define FLASH_OPTR_RDP_MASK          (0xff << FLASH_OPTR_RDP_SHIFT)
+#define FLASH_OPTR_BOR_EN            (1 << 8) /* Brown out reset enable */
+#define FLASH_OPTR_BORR_LEV_SHIFT    (9)      /* BOR threshold at rising Vdd supply */
+#define FLASH_OPTR_BORR_LEV_MASK     (0x3 << FLASH_OPTR_BORR_LEV_SHIFT)
+#define FLASH_OPTR_BORF_LEV_SHIFT    (11)     /* BOR thresholda t falling Vdd supply */
+#define FLASH_OPTR_BORF_LEV_MASK     (0x3 << FLASH_OPTR_BORF_LEV_SHIFT)
+#define FLASH_OPTR_NRST_STOP         (1 << 13)
+#define FLASH_OPTR_NRST_STDBY        (1 << 14)
+#define FLASH_OPTR_NRSTS_SHDW        (1 << 15)
+#define FLASH_OPTR_IDWG_SW           (1 << 16) /* Bit 16: Independent watchdog selection */
+#define FLASH_OPTR_IDWG_STOP         (1 << 17) /* Bit 17: Independent watchdog counter freeze in stop mode */
+#define FLASH_OPTR_IDWG_STDBY        (1 << 18) /* Bit 18: Independent watchdog counter freeze in Standby mode */
+#define FLASH_OPTR_WWDG_SW           (1 << 19) /* Bit 19: Window watchdog selection */
+                                               /* Bit 20: Reserved */
+#define FLASH_OPTR_HSE_NOT_REMAPPED  (1 << 21) /* Bit 21: HSE remapping enable/disable */
+#define FLASH_OPTR_RAM_PARITY_CHECK  (1 << 22) /* Bit 22: SRAM parity check control */
+#define FLASH_OPTR_SECURE_MUXING_EN  (1 << 23) /* Bit 23: Multiple-bonding security */
+                                               /* Bit 23: Reserved */
+#define FLASH_OPTR_NBOOT_SEL         (1 << 24) /* Bit 24: BOOT0 signal source selection */
+#define FLASH_OPTR_NBOOT1            (1 << 25) /* Bit 25: NBOOT1 boot configuration */
+#define FLASH_OPTR_NBOOT0            (1 << 26) /* Bit 26: NBOOT0 option bit */
+#define FLASH_OPTR_NRST_MODE_SHIFT   (27)      /* Bits 27-28: PF2-NRST pin configuration */
+#define FLASH_OPTR_NRST_MODE_MASK    (0x3 << FLASH_OPTR_NRST_MODE_SHIFT)
+#define FLASH_OPTR_IRHEN             (1 << 29) /* Bit 29: Internal reset holder enable */
+#define FLASH_OPTR_FDCAN_BLCK_SHIFT  (30)      /* Bits 30-31: FDCAN bootloader clock source */
+#define FLASH_OPTR_FDCAN_BLCK_MASK   (0x3 << FLASH_OPTR_FDCAN_BLCK_SHIFT)
+
+/* Flash PCROP area A start address register (PCROP1ASR) */
+
+#define FLASH_PCROP1ASR_STRT_SHIFT          (0)
+#define FLASH_PCROP1ASR_STRT_MASK           (0x1ff << FLASH_PCROP1ASR_STRT_SHIFT)
+
+/* Flash PCROP area A end address register (PCROP1AER) */
+
+#define FLASH_PCROP1AER_PCROP1A_END_SHIFT   (0)
+#define FLASH_PCROP1AER_PCROP1A_END_MASK    (0x1ff << FLASH_PCROP1AER_PCROP1A_END_SHIFT)
+#define FLASH_PCROP1AER_PCROP_RDP           (1 << 31)
+
+/* Flash WRP area A address register (WRP1AR) */
+
+#define FLASH_WRP1AR_WRP1A_STRT_SHIFT       (0)
+#define FLASH_WRP1AR_WRP1A_STRT_MASK        (0x7f << FLASH_WRP1AR_WRP1A_STRT_SHIFT)
+#define FLASH_WRP1AR_WRP1A_END_SHIFT        (16)
+#define FLASH_WRP1AR_WRP1A_END_MASK         (0x7f << FLASH_WRP1AR_WRP1A_END_SHIFT)
+
+/* Flash WRP area B address register (WRP1BR) */
+
+#define FLASH_WRP1BR_WRP1B_STRT_SHIFT       (0)
+#define FLASH_WRP1BR_WRP1B_STRT_MASK        (0x7f << FLASH_WRP1BR_WRP1B_STRT_SHIFT)
+#define FLASH_WRP1BR_WRP1B_END_SHIFT        (16)
+#define FLASH_WRP1BR_WRP1B_END_MASK         (0x7f << FLASH_WRP1BR_WRP1B_END_SHIFT)
+
+/* Flash PCROP area B start address register (PCROP1BSR) */
+
+#define FLASH_PCROP1BSR_PCROP1B_STRT_SHIFT  (0)
+#define FLASH_PCROP1BSR_PCROP1B_STRT_MASK   (0x1ff << FLASH_PCROP1BSR_PCROP1B_STRT_SHIFT)
+
+/* Flash PCROP area B end address register (PCROP1BER) */
+
+#define FLASH_PCROP1BER_PCROP1B_END_SHIFT   (0)
+#define FLASH_PCROP1BER_PCROP1B_END_MASK    (0x1ff << FLASH_PCROP1BER_PCROP1B_END_SHIFT)
+
+/* Flash Security register (SECR) */
+
+#define FLASH_SECR_SEC_SIZE_SHIFT           (0)       /* Bits 0-7: Securable memory area size */
+#define FLASH_SECR_SEC_SIZE_MASK            (0xff << FLASH_SECR_SEC_SIZE_SHIFT)
+                                                      /* Bits 8-15: Reserved */
+#define FLASH_SECR_BOOT_LOCK                (1 << 16) /* Bit 16: Used to force boot from user area */
+                                                      /* Bits 20-31: Reserved */
 
 #endif /* __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32C0_FLASH_H */

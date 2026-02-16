@@ -20,10 +20,6 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_ARCH_CHIP_TC397),y)
-  -include tc3xx/tc397/Make.defs
-endif
-
 CHIP_CSRCS += tc3xx_timerisr.c
 CHIP_CSRCS += tc3xx_serial.c
 
@@ -52,28 +48,3 @@ EXTRA_LIBS += libos$(LIBEXT)
 endif
 
 LIBPATHS   += $(CURDIR)
-
-TC397_UNPACK  = tc397
-TC397_COMMIT  = master
-TC397_URL     = https://github.com/anchao/tc397_sdk/archive/refs/heads
-TC397_TARBALL = tc3xx/$(TC397_UNPACK).tar.gz
-TC397_DIR     = tc397_sdk-master
-
-$(TC397_TARBALL):
-	$(call DOWNLOAD,$(TC397_URL),$(TC397_COMMIT).tar.gz,$(TC397_TARBALL))
-
-tc3xx/.tc397_unpack: $(TC397_TARBALL)
-	$(Q) echo "Unpacking: TC397"
-	$(Q) tar xzf $(TC397_TARBALL) -C tc3xx
-	$(Q) mv tc3xx/$(TC397_DIR) tc3xx/$(TC397_UNPACK)
-	$(Q) touch tc3xx/.tc397_unpack
-
-
-ifeq ($(wildcard tc3xx/$(TC397_UNPACK)/.git),)
-context:: .tc397_unpack
-
-distclean::
-	$(call DELFILE, tc3xx/.tc397_unpack)
-	$(call DELFILE, $(TC397_TARBALL))
-	$(call DELDIR, tc3xx/$(TC397_UNPACK))
-endif

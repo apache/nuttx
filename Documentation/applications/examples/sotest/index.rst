@@ -34,7 +34,7 @@ system. At run time, the shared library is installed and exercised. Requires
 
    If you use GCC to link, you make also need to include ``-nostdlib``.
 
-3. This example also requires ``genromfs``. ``genromfs`` can be build as part of the
+3. This example also requires ``genromfs``. ``genromfs`` can be built as part of the
    nuttx toolchain. Or can built from the ``genromfs`` sources that can be found
    in the NuttX tools repository (``genromfs-0.5.2.tar.gz``). In any event, the
    ``PATH`` variable must include the path to the ``genromfs`` executable.
@@ -49,9 +49,9 @@ system. At run time, the shared library is installed and exercised. Requires
    Windows-native binary format.
 
    If you really want to do this, you can create a NuttX x86 buildroot toolchain
-   and use that be build the ELF executables for the ROMFS file system.
+   and use that to build the ELF executables for the ROMFS file system.
 
-6. Linker scripts. You might also want to use a linker scripts to combine
+6. Linker scripts. You might also want to use a linker script to combine
    sections better. An example linker script is at
    ``nuttx/libc/elf/gnu-elf.ld``. That example might have to be tuned for your
    particular linker output to position additional sections correctly. The GNU

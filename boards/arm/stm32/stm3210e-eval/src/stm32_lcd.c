@@ -1135,7 +1135,7 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb, int domain,
 
   switch (pmstate)
     {
-      case (PM_NORMAL):
+      case PM_NORMAL:
         {
           /* Restore normal LCD operation */
 
@@ -1152,7 +1152,7 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb, int domain,
         }
         break;
 
-      case (PM_IDLE):
+      case PM_IDLE:
         {
           /* Entering IDLE mode - Reduce LCD light */
 
@@ -1172,7 +1172,7 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb, int domain,
         }
         break;
 
-      case (PM_STANDBY):
+      case PM_STANDBY:
         {
           /* Entering STANDBY mode - Turn display backlight off */
 
@@ -1182,7 +1182,7 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb, int domain,
         }
         break;
 
-      case (PM_SLEEP):
+      case PM_SLEEP:
         {
           /* Entering SLEEP mode - Turn off LCD */
 

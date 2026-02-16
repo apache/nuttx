@@ -800,7 +800,7 @@ static int mcp9600_thread(int argc, char **argv)
 
       /* Sleep before next fetch */
 
-      nxsig_usleep(dev->interval);
+      nxsched_usleep(dev->interval);
     }
 
   return OK;

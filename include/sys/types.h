@@ -317,11 +317,60 @@ typedef CODE int (*main_t)(int argc, FAR char *argv[]);
 
 /* POSIX-like OS return values: */
 
+#ifdef OK
+#  undef OK
+#endif
+
 enum
 {
   ERROR = -1,
   OK = 0
 };
+
+#ifndef __PTHREAD_ATTR_T_DEFINED
+struct pthread_attr_s;
+typedef struct pthread_attr_s pthread_attr_t;
+#  define __PTHREAD_ATTR_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_COND_T_DEFINED
+struct pthread_cond_s;
+typedef struct pthread_cond_s pthread_cond_t;
+#  define __PTHREAD_COND_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_CONDATTR_T_DEFINED
+typedef struct pthread_condattr_s pthread_condattr_t;
+#  define __PTHREAD_CONDATTR_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_KEY_T_DEFINED
+typedef int pthread_key_t;
+#  define __PTHREAD_KEY_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_MUTEX_T_DEFINED
+struct pthread_mutex_s;
+typedef struct pthread_mutex_s pthread_mutex_t;
+#  define __PTHREAD_MUTEX_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_MUTEXATTR_T_DEFINED
+struct pthread_mutexattr_s;
+typedef struct pthread_mutexattr_s pthread_mutexattr_t;
+#  define __PTHREAD_MUTEXATTR_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_T_DEFINED
+typedef pid_t pthread_t;
+#  define __PTHREAD_T_DEFINED 1
+#endif
+
+#ifndef __PTHREAD_ONCE_T_DEFINED
+struct pthread_once_s;
+typedef struct pthread_once_s pthread_once_t;
+#  define __PTHREAD_ONCE_T_DEFINED 1
+#endif
 
 /****************************************************************************
  * Public Function Prototypes

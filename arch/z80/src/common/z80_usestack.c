@@ -75,10 +75,20 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
   size_t size_of_stack;
 
 #ifdef CONFIG_TLS_ALIGNED
+  /* The allocated stack size must not exceed the maximum possible for the
+   * TLS feature.
+   */
+
+  DEBUGASSERT(stack_size <= TLS_MAXSTACK);
+  if (stack_size >= TLS_MAXSTACK)
+    {
+      stack_size = TLS_MAXSTACK;
+    }
+#endif
+
   /* Make certain that the user provided stack is properly aligned */
 
-  DEBUGASSERT(((uintptr_t)stack & TLS_STACK_MASK) == 0);
-#endif
+  DEBUGASSERT(((uintptr_t)stack & STACK_ALIGN_MASK) == 0);
 
   /* Is there already a stack allocated? */
 
@@ -92,6 +102,11 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
   /* Save the new stack allocation */
 
   tcb->stack_alloc_ptr = stack;
+  tcb->stack_base_ptr  = (void *)STACKFRAME_ALIGN_UP((uintptr_t)stack);
+
+  top_of_stack = STACKFRAME_ALIGN_DOWN((uintptr_t)stack + stack_size);
+  size_of_stack = top_of_stack - (uintptr_t)tcb->stack_base_ptr;
+  tcb->adj_stack_size  = size_of_stack;
 
   /* If stack debug is enabled, then fill the stack with a recognizable value
    * that we can use later to test for high water marks.
@@ -100,26 +115,6 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 #ifdef CONFIG_STACK_COLORATION
   memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
 #endif
-
-  /* The Z80 uses a push-down stack:  the stack grows toward lower
-   * addresses in memory.  The stack pointer register, points to the
-   * lowest, valid work address (the "top" of the stack).  Items on
-   * the stack are* referenced as positive word offsets from sp.
-   */
-
-  top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size;
-
-  /* The Z80 stack does not need to be aligned.  Here is is aligned at
-   * word (4 byte) boundary.
-   */
-
-  top_of_stack &= ~3;
-  size_of_stack = top_of_stack - (uintptr_t)tcb->stack_alloc_ptr;
-
-  /* Save the adjusted stack values in the struct tcb_s */
-
-  tcb->stack_base_ptr = tcb->stack_alloc_ptr;
-  tcb->adj_stack_size = size_of_stack;
 
   return OK;
 }

@@ -3696,7 +3696,7 @@ static int kinetis_rh_enumerate(struct usbhost_connection_s *conn,
    * reset for 50Msec, not wait 50Msec before resetting.
    */
 
-  nxsig_usleep(100 * 1000);
+  nxsched_usleep(100 * 1000);
 
   /* Paragraph 2.3.9:
    *
@@ -3800,7 +3800,7 @@ static int kinetis_rh_enumerate(struct usbhost_connection_s *conn,
    */
 
   while ((kinetis_getreg(regaddr) & EHCI_PORTSC_RESET) != 0);
-  nxsig_usleep(200 * 1000);
+  nxsched_usleep(200 * 1000);
 
   /* EHCI Paragraph 4.2.2:
    *

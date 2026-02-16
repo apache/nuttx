@@ -168,8 +168,8 @@
 
 /* Set the type of each parameter */
 
-#define NOTE_PRINTF_TYPE(arg, index) + ((NOTE_PRINTF_ARG_TYPE(arg) << (index) * 2))
-#define NOTE_PRINTF_TYPES(...)       FOREACH_ARG(NOTE_PRINTF_TYPE, ##__VA_ARGS__)
+#define NOTE_PRINTF_TYPE(_, arg, index) + ((NOTE_PRINTF_ARG_TYPE(arg) << (index) * 2))
+#define NOTE_PRINTF_TYPES(...)          FOREACH_ARG(NOTE_PRINTF_TYPE, _, ##__VA_ARGS__)
 
 /* Using macro expansion to calculate the expression of tag, tag will
  * be a constant at compile time, which will reduce the number of
@@ -185,7 +185,7 @@
 #define sched_note_event(tag, event, buf, len) \
         sched_note_event_ip(tag, SCHED_NOTE_IP, event, buf, len)
 #define sched_note_vprintf(tag, fmt, va) \
-        sched_note_vprintf_ip(tag, SCHED_NOTE_IP, fmt, 0, va)
+        sched_note_vprintf_ip(tag, SCHED_NOTE_IP, fmt, 0, &(va))
 
 #ifdef CONFIG_DRIVERS_NOTE_STRIP_FORMAT
 #  define sched_note_printf(tag, fmt, ...) \
@@ -271,6 +271,7 @@ enum note_type_e
   NOTE_DUMP_BEGIN,
   NOTE_DUMP_END,
   NOTE_DUMP_MARK,
+  NOTE_DUMP_BINARY,
   NOTE_DUMP_COUNTER,
 
   /* Always last */
@@ -322,16 +323,6 @@ struct note_common_s
   uint8_t nc_cpu;              /* CPU thread/task running on */
   pid_t   nc_pid;              /* ID of the thread/task */
   clock_t nc_systime;          /* Time when note was buffered */
-};
-
-/* This is the specific form of the NOTE_START note */
-
-struct note_start_s
-{
-  struct note_common_s nst_cmn; /* Common note parameters */
-#if CONFIG_TASK_NAME_SIZE > 0
-  char    nst_name[1];          /* Start of the name of the thread/task */
-#endif
 };
 
 /* This is the specific form of the NOTE_STOP note */
@@ -482,6 +473,7 @@ struct note_printf_s
   struct note_common_s npt_cmn; /* Common note parameters */
   uintptr_t npt_ip;             /* Instruction pointer called from */
   FAR const char *npt_fmt;      /* Printf format string */
+  uint32_t npt_tag;             /* Printf tag */
   uint32_t npt_type;            /* Printf parameter type */
   char npt_data[1];             /* Print arguments */
 };
@@ -493,6 +485,7 @@ struct note_event_s
 {
   struct note_common_s nev_cmn;      /* Common note parameters */
   uintptr_t nev_ip;                  /* Instruction pointer called from */
+  uint32_t nev_tag;                  /* Event tag */
   uint8_t nev_data[1];               /* Event data */
 };
 
@@ -680,7 +673,7 @@ void sched_note_heap(uint8_t event, FAR void *heap, FAR void *mem,
 void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event,
                          FAR const void *buf, size_t len);
 void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
-                           uint32_t type, va_list va) printf_like(3, 0);
+                           uint32_t type, va_list *va) printf_like(3, 0);
 void sched_note_printf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                           uint32_t type, ...) printf_like(3, 5);
 #else

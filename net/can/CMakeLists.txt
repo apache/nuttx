@@ -23,7 +23,13 @@ if(CONFIG_NET_CAN)
   set(SRCS)
 
   # Socket layer
-  list(APPEND SRCS can_sockif.c can_sendmsg.c can_recvmsg.c)
+  list(APPEND SRCS can_sockif.c can_recvmsg.c)
+
+  if(CONFIG_NET_CAN_WRITE_BUFFERS)
+    list(APPEND SRCS can_sendmsg_buffered.c)
+  else()
+    list(APPEND SRCS can_sendmsg.c)
+  endif()
 
   if(CONFIG_NET_CAN_NOTIFIER)
     list(APPEND SRCS can_notifier.c)
@@ -31,6 +37,10 @@ if(CONFIG_NET_CAN)
 
   if(CONFIG_NET_CANPROTO_OPTIONS)
     list(APPEND SRCS can_setsockopt.c can_getsockopt.c)
+  endif()
+
+  if(CONFIG_NET_CAN_NBUFFERS GREATER 0)
+    list(APPEND SRCS can_bufpool.c)
   endif()
 
   list(APPEND SRCS can_conn.c can_input.c can_callback.c can_poll.c)

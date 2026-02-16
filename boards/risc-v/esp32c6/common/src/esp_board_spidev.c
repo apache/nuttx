@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #include <nuttx/spi/spi_transfer.h>
@@ -63,10 +63,8 @@
 #ifdef CONFIG_ESPRESSIF_SPI_BITBANG
 static int spi_bitbang_driver_init(int port)
 {
-  int ret;
   struct spi_dev_s *spi;
-
-  syslog(LOG_INFO, "Initializing /dev/spi%d...\n", port);
+  int ret = OK;
 
   /* Initialize SPI device */
 
@@ -78,12 +76,16 @@ static int spi_bitbang_driver_init(int port)
       return -ENODEV;
     }
 
+#ifdef CONFIG_SPI_DRIVER
+  syslog(LOG_INFO, "Initializing /dev/spi%d...\n", port);
+
   ret = spi_register(spi, port);
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to register /dev/spi%d: %d\n", port, ret);
       esp_spi_bitbang_uninitialize(spi);
     }
+#endif
 
   return ret;
 }
@@ -107,10 +109,8 @@ static int spi_bitbang_driver_init(int port)
 #ifdef CONFIG_ESPRESSIF_SPI_PERIPH
 static int spi_driver_init(int port)
 {
-  int ret = OK;
   struct spi_dev_s *spi;
-
-  syslog(LOG_INFO, "Initializing /dev/spi%d...\n", port);
+  int ret = OK;
 
   /* Initialize SPI device */
 
@@ -122,12 +122,16 @@ static int spi_driver_init(int port)
       return -ENODEV;
     }
 
+#ifdef CONFIG_SPI_DRIVER
+  syslog(LOG_INFO, "Initializing /dev/spi%d...\n", port);
+
   ret = spi_register(spi, port);
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to register /dev/spi%d: %d\n", port, ret);
       esp_spibus_uninitialize(spi);
     }
+#endif
 
   return ret;
 }
@@ -184,7 +188,7 @@ int board_spidev_initialize(int port)
 
     default:
       {
-        wderr("ERROR: unsupported SPI %d\n", port);
+        syslog(LOG_ERR, "ERROR: unsupported SPI %d\n", port);
         return ERROR;
       }
     }

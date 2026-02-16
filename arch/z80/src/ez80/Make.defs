@@ -22,9 +22,9 @@
 
 CMN_CSRCS  = z80_allocateheap.c z80_createstack.c z80_doirq.c
 CMN_CSRCS += z80_exit.c z80_interruptcontext.c z80_idle.c
-CMN_CSRCS += z80_initialize.c z80_mdelay.c z80_nputs.c
+CMN_CSRCS += z80_initialize.c z80_nputs.c
 CMN_CSRCS += z80_releasestack.c z80_switchcontext.c
-CMN_CSRCS += z80_stackframe.c z80_udelay.c z80_usestack.c
+CMN_CSRCS += z80_stackframe.c z80_usestack.c
 
 CHIP_ASRCS  = ez80_startup.asm ez80_io.asm ez80_irqsave.asm
 CHIP_ASRCS += ez80_irqcommon.asm
@@ -55,8 +55,11 @@ CHIP_ASRCS += ez80_getsp.asm
 endif
 
 CHIP_CSRCS  = ez80_clock.c ez80_initialstate.c ez80_irq.c ez80_copystate.c
-CHIP_CSRCS += ez80_schedulesigaction.c ez80_sigdeliver.c
 CHIP_CSRCS += ez80_timerisr.c ez80_serial.c
+
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+CHIP_CSRCS += ez80_schedulesigaction.c ez80_sigdeliver.c
+endif
 
 ifeq ($(CONFIG_ARCH_STACKDUMP),y)
 CHIP_CSRCS += ez80_registerdump.c

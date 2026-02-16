@@ -58,8 +58,8 @@
 
 /* Packet buffer size */
 
-#define E1000_PKTBUF_SIZE       2048
-#define E1000_RCTL_BSIZE        E1000_RCTL_BSIZE_2048
+#define E1000_PKTBUF_SIZE     2048
+#define E1000_RCTL_BSIZE      E1000_RCTL_BSIZE_2048
 
 /* TX and RX descriptors */
 
@@ -73,8 +73,8 @@
  * It's hard to tell how many spare buffers is needed, for now it's set to 8.
  */
 
-#define E1000_TX_QUOTA          (E1000_TX_DESC - 1)
-#define E1000_RX_QUOTA          (E1000_RX_DESC + CONFIG_NET_E1000_RXSPARE)
+#define E1000_TX_QUOTA        E1000_TX_DESC
+#define E1000_RX_QUOTA        (E1000_RX_DESC + CONFIG_NET_E1000_RXSPARE)
 
 /* NOTE: CONFIG_IOB_ALIGNMENT must match system D-CACHE line size */
 
@@ -88,39 +88,30 @@
 
 /* PCI BARs */
 
-#define E1000_MMIO_BAR          0
-#define E1000_FLASH_BAR         1
-#define E1000_IO_BAR            2
-#define E1000_MSIX_BAR          3
+#define E1000_MMIO_BAR        0
+#define E1000_FLASH_BAR       1
+#define E1000_IO_BAR          2
+#define E1000_MSIX_BAR        3
 
 /* E1000 interrupts */
 
-#if CONFIG_NETDEV_WORK_THREAD_POLLING_PERIOD > 0
-#  define E1000_INTERRUPTS      (E1000_IC_LSC)
-#else
-#  define E1000_INTERRUPTS      (E1000_IC_RXO    | E1000_IC_RXT0 |  \
-                                 E1000_IC_RXDMT0 | E1000_IC_LSC |   \
-                                 E1000_IC_TXDW)
-#endif
+#define E1000_INTERRUPTS      (E1000_IC_RXO    | E1000_IC_RXT0 |  \
+                               E1000_IC_RXDMT0 | E1000_IC_LSC |   \
+                               E1000_IC_TXDW)
 
 /* For MSI-X we allocate all interrupts to MSI-X vector 0 */
 
-#if CONFIG_NETDEV_WORK_THREAD_POLLING_PERIOD > 0
-#  define E1000_MSIX_INTERRUPTS (E1000_IC_OTHER)
-#  define E1000_MSIX_IVAR       (E1000_IVAR_OTHER_EN)
-#else
-#  define E1000_MSIX_INTERRUPTS (E1000_IC_RXQ0 |   \
-                                 E1000_IC_TXQ0 |   \
-                                 E1000_IC_OTHER)
-#  define E1000_MSIX_IVAR       (E1000_IVAR_RXQ0_EN | \
-                                 E1000_IVAR_TXQ0_EN | \
-                                 E1000_IVAR_OTHER_EN)
-#endif
+#define E1000_MSIX_INTERRUPTS (E1000_IC_RXQ0 |   \
+                               E1000_IC_TXQ0 |   \
+                               E1000_IC_OTHER)
+#define E1000_MSIX_IVAR       (E1000_IVAR_RXQ0_EN | \
+                               E1000_IVAR_TXQ0_EN | \
+                               E1000_IVAR_OTHER_EN)
 
 /* NIC specific Flags */
 
-#define E1000_RESET_BROKEN      (1 << 0)
-#define E1000_HAS_MSIX          (1 << 1)
+#define E1000_RESET_BROKEN    (1 << 0)
+#define E1000_HAS_MSIX        (1 << 1)
 
 /*****************************************************************************
  * Private Types
@@ -171,6 +162,10 @@ struct e1000_driver_s
 
   FAR uint32_t *mta;
 #endif
+
+  /* A spinlock for protecting the driving state */
+
+  spinlock_t lock;
 };
 
 /*****************************************************************************
@@ -267,7 +262,27 @@ static const struct e1000_type_s g_e1000_82574l =
 static const struct pci_device_id_s g_e1000_id_table[] =
 {
   {
+    PCI_DEVICE(0x8086, 0x1a1c),
+    .driver_data = (uintptr_t)&g_e1000_i219
+  },
+  {
     PCI_DEVICE(0x8086, 0x1a1e),
+    .driver_data = (uintptr_t)&g_e1000_i219
+  },
+  {
+    PCI_DEVICE(0x8086, 0x0d4c),
+    .driver_data = (uintptr_t)&g_e1000_i219
+  },
+  {
+    PCI_DEVICE(0x8086, 0x0d4d),
+    .driver_data = (uintptr_t)&g_e1000_i219
+  },
+  {
+    PCI_DEVICE(0x8086, 0x15b8),
+    .driver_data = (uintptr_t)&g_e1000_i219
+  },
+  {
+    PCI_DEVICE(0x8086, 0x15bb),
     .driver_data = (uintptr_t)&g_e1000_i219
   },
   {
@@ -296,9 +311,6 @@ static const struct netdev_ops_s g_e1000_ops =
 #ifdef CONFIG_NET_MCASTGROUP
   .addmac   = e1000_addmac,
   .rmmac    = e1000_rmmac,
-#endif
-#if CONFIG_NETDEV_WORK_THREAD_POLLING_PERIOD > 0
-  .reclaim  = e1000_txdone,
 #endif
 };
 
@@ -995,12 +1007,12 @@ static int e1000_ifup(FAR struct netdev_lowerhalf_s *dev)
         dev->netdev.d_ipv6addr[6], dev->netdev.d_ipv6addr[7]);
 #endif
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   /* Enable the Ethernet */
 
   e1000_enable(priv);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   /* Update link status in case link status interrupt is missing */
 
@@ -1031,7 +1043,7 @@ static int e1000_ifdown(FAR struct netdev_lowerhalf_s *dev)
   FAR struct e1000_driver_s *priv = (FAR struct e1000_driver_s *)dev;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   /* Put the EMAC in its reset, non-operational state.  This should be
    * a known configuration that will guarantee the e1000_ifup() always
@@ -1042,7 +1054,7 @@ static int e1000_ifdown(FAR struct netdev_lowerhalf_s *dev)
 
   /* Mark the device "down" */
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return OK;
 }
 
@@ -1533,6 +1545,8 @@ static int e1000_probe(FAR struct pci_device_s *dev)
       nerr("e1000_initialize failed %d\n", ret);
       goto errout;
     }
+
+  spin_lock_init(&priv->lock);
 
   /* Register the network device */
 

@@ -116,6 +116,10 @@ static const struct memory_region_s g_memory_region[] =
 };
 #endif
 
+#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_HAVE_DEBUG)
+static struct smp_call_data_s g_call_data;
+#endif
+
 /****************************************************************************
  * Private Functions Prototypes
  ****************************************************************************/
@@ -1889,8 +1893,9 @@ int gdb_debugpoint_add(int type, FAR void *addr, size_t size,
   point.size = size;
   point.callback = callback;
   point.arg = arg;
-  return nxsched_smp_call((1 << CONFIG_SMP_NCPUS) - 1,
-                          gdb_smp_debugpoint_add, &point);
+
+  nxsched_smp_call_init(&g_call_data, gdb_smp_debugpoint_add, &point);
+  return nxsched_smp_call_async((1 << CONFIG_SMP_NCPUS) - 1, &g_call_data);
 #else
   return up_debugpoint_add(type, addr, size, callback, arg);
 #endif
@@ -1908,8 +1913,8 @@ int gdb_debugpoint_remove(int type, FAR void *addr, size_t size)
   point.addr = addr;
   point.size = size;
 
-  return nxsched_smp_call((1 << CONFIG_SMP_NCPUS) - 1,
-                          gdb_smp_debugpoint_remove, &point);
+  nxsched_smp_call_init(&g_call_data, gdb_smp_debugpoint_remove, &point);
+  return nxsched_smp_call_async((1 << CONFIG_SMP_NCPUS) - 1, &g_call_data);
 #else
   return up_debugpoint_remove(type, addr, size);
 #endif

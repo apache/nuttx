@@ -71,10 +71,10 @@ else ifeq ($(CONFIG_ARCH_CHIP_AVR128DA28),y)
   ARCHCPUFLAGS += -mmcu=avr128da28
   LDFLAGS += -mavrxmega4
 else ifeq ($(CONFIG_ARCH_CHIP_AVR128DA64),y)
-  ARCHCPUFLAGS += -mmcu=avr128da28
+  ARCHCPUFLAGS += -mmcu=avr128da64
   LDFLAGS += -mavrxmega4
 else ifeq ($(CONFIG_ARCH_CHIP_AVR128DB64),y)
-  ARCHCPUFLAGS += -mmcu=avr128da28
+  ARCHCPUFLAGS += -mmcu=avr128db64
   LDFLAGS += -mavrxmega4
 else ifeq ($(CONFIG_ARCH_CHIP_AT90USB646),y)
   ARCHCPUFLAGS += -mmcu=at90usb646
@@ -104,6 +104,16 @@ endif
 ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
   LDFLAGS          += --gc-sections
   ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
+endif
+
+# .rodata size for FLMAP configuration
+ifeq ($(CONFIG_AVR_CONST_TO_FLMAP),y)
+  LDFLAGS += --defsym=__RODATA_SIZE__=$(CONFIG_AVR_FLMAP_RODATA_SIZE)
+endif
+
+# .rodata offset for FLMAP configuration
+ifeq ($(CONFIG_AVR_CONST_TO_FLMAP),y)
+  LDFLAGS += --defsym=__RODATA_OFFSET__=$(CONFIG_AVR_FLMAP_RODATA_OFFSET)
 endif
 
 ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
@@ -178,6 +188,7 @@ CPP = $(CROSSDEV)gcc -E -P -x c
 LD = $(CROSSDEV)ld
 STRIP = $(CROSSDEV)strip --strip-unneeded
 AR = $(CROSSDEV)ar rcs
+UNAR = $(CROSSDEV)ar x
 NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
@@ -194,6 +205,10 @@ ifeq ($(CONFIG_LIBSUPCXX_TOOLCHAIN),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a))
 endif
 
+ifeq ($(CONFIG_LIBCXXTOOLCHAIN),y)
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libstdc++.a))
+endif
+
 # Loadable module definitions
 
 CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden
@@ -204,5 +219,5 @@ LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 CELFFLAGS = $(CFLAGS) -fvisibility=hidden
 CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
 
-LDELFFLAGS = -r -e __start
+LDELFFLAGS = -r -e _start
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)elf$(DELIM)gnu-elf.ld)

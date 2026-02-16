@@ -39,7 +39,7 @@ set(SRCS
 # IPv6 utilities
 
 if(CONFIG_NET_IPv6)
-  list(APPEND SRCS net_ipv6_maskcmp.c net_ipv6_pref2mask.c net_ipv6_payload.c)
+  list(APPEND SRCS net_ipv6_pref2mask.c net_ipv6_payload.c)
 endif()
 
 # TCP utilities

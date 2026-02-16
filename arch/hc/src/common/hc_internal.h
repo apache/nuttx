@@ -73,18 +73,6 @@
 #  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
-/* The CPU12 stack should be aligned at half-word (2 byte) boundaries. If
- * necessary frame_size must be rounded up to the next boundary
- */
-
-#define STACK_ALIGNMENT     2
-
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
 #define getreg8(a)          (*(volatile uint8_t *)(a))
 #define putreg8(v,a)        (*(volatile uint8_t *)(a) = (v))
 #define getreg16(a)         (*(volatile uint16_t *)(a))

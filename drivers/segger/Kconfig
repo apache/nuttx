@@ -14,6 +14,12 @@ config SEGGER_RTT
 
 if SEGGER_RTT
 
+config SEGGER_SYSVIEW_TARGET_SOURCE
+	string "Segger SystemView target sources version"
+	default "356"
+	---help---
+		The Segger SystemView target sources version to use.
+
 config SEGGER_RTT_SECTION
 	string "Segger RTT Control Block Section"
 	default ""

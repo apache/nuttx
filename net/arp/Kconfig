@@ -28,6 +28,14 @@ config NET_ARP_MAXAGE
 		The maximum age of ARP table entries measured in deciseconds.  The
 		default value of 120 corresponds to 20 minutes (BSD default).
 
+config NET_ARP_MAXAGE_UNREACHABLE
+	int "Max unreachable ARP entry age"
+	default 1
+	---help---
+		The maximum age of unreachable ARP table entries measured in
+		deciseconds. During unreachable period not send a retry ARP
+		request for the same destination.
+
 config NET_ARP_IPIN
 	bool "ARP address harvesting"
 	default n
@@ -41,14 +49,31 @@ config NET_ARP_IPIN
 		time and the MAC addresses that you want will get flushed from
 		the table often.
 
+config NET_ARP_GRATUITOUS
+	bool "Gratuitous ARP address accept"
+	default n
+	---help---
+		Accept IP/MAC address mappings from the ARP table from incoming
+		Gratuitous ARP packets.  If this option is selected,
+		CONFIG_NET_ARTAB_SIZE should be large enough to hold the hosts
+		on the network.
+
 config NET_ARP_SEND
 	bool "ARP send"
-	default y
+	default !NET_ARP_SEND_QUEUE
 	---help---
 		Enable logic to send ARP requests if the target IP address mapping
 		does not appear in the ARP table.
 
-if NET_ARP_SEND
+config NET_ARP_SEND_QUEUE
+	bool "Iob queue in arp entry support"
+	default n
+	depends on IOB_NCHAINS > 0
+	---help---
+		Enable queue iob to arp entry when arp_out failed to wait for arp
+		finished, then resend queue iobs.
+
+if NET_ARP_SEND || NET_ARP_SEND_QUEUE
 
 config ARP_SEND_MAXTRIES
 	int "ARP send retries"

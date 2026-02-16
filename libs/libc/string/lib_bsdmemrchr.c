@@ -1,6 +1,9 @@
 /****************************************************************************
  * libs/libc/string/lib_bsdmemrchr.c
  *
+ * SPDX-License-Identifier: BSD
+ * SPDX-FileCopyrightText: 1994-2009  Red Hat, Inc. All rights reserved
+ *
  * Copyright (c) 1994-2009  Red Hat, Inc. All rights reserved.
  *
  * This copyrighted material is made available to anyone wishing to use,
@@ -70,7 +73,7 @@
  *
  ****************************************************************************/
 
-#undef memrchr /* See mm/README.txt */
+#undef memrchr
 FAR void *memrchr(FAR const void *s, int c, size_t n)
 {
   FAR const unsigned char *src0 =

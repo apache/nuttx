@@ -266,7 +266,7 @@ ssize_t msgrcv(int msqid, FAR void *msgp, size_t msgsz, long msgtyp,
 
       if (nxsched_add_readytorun(btcb))
         {
-          up_switch_context(btcb, rtcb);
+          up_switch_context(this_task(), rtcb);
         }
     }
 

@@ -34,8 +34,10 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/netstats.h>
+#include <nuttx/net/can.h>
 
 #include "devif/devif.h"
+#include "utils/utils.h"
 #include "can/can.h"
 
 #ifdef CONFIG_NET_TIMESTAMP
@@ -60,13 +62,17 @@
  *
  ****************************************************************************/
 
-static inline uint16_t
+static inline uint32_t
 can_data_event(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn,
-               uint16_t flags)
+               uint32_t flags)
 {
   int buflen = dev->d_len;
-  uint16_t recvlen;
-  uint16_t ret;
+  int recvlen;
+  uint32_t ret;
+
+#ifdef CONFIG_NET_TIMESTAMP
+  buflen -= sizeof(struct timeval);
+#endif
 
   ret = (flags & ~CAN_NEWDATA);
 
@@ -112,8 +118,8 @@ can_data_event(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn,
  *
  ****************************************************************************/
 
-uint16_t can_callback(FAR struct net_driver_s *dev,
-                      FAR struct can_conn_s *conn, uint16_t flags)
+uint32_t can_callback(FAR struct net_driver_s *dev,
+                      FAR struct can_conn_s *conn, uint32_t flags)
 {
   /* Some sanity checking */
 
@@ -144,13 +150,9 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
             }
 #endif
 
-      /* Try to lock the network when successful send data to the listener */
-
-      if (net_trylock() == OK)
-        {
-          flags = devif_conn_event(dev, flags, conn->sconn.list);
-          net_unlock();
-        }
+      conn_lock(&conn->sconn);
+      flags = devif_conn_event(dev, flags, conn->sconn.list);
+      conn_unlock(&conn->sconn);
 
       /* Either we did not get the lock or there is no application listening
        * If we did not get a lock we store the frame in the read-ahead buffer
@@ -191,20 +193,26 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-uint16_t can_datahandler(FAR struct net_driver_s *dev,
-                         FAR struct can_conn_s *conn)
+int can_datahandler(FAR struct net_driver_s *dev,
+                    FAR struct can_conn_s *conn)
 {
   FAR struct iob_s *iob = dev->d_iob;
   int ret = 0;
 
+  conn_lock(&conn->sconn);
 #if CONFIG_NET_RECV_BUFSIZE > 0
+#  if CONFIG_NET_CAN_NBUFFERS > 0
+  int bufnum = div_const_roundup(conn->rcvbufs, NET_CAN_PKTSIZE);
+#  else
+  int bufnum = div_const_roundup(conn->rcvbufs, CONFIG_IOB_BUFSIZE);
+#  endif
   /* Check the frame count pending on conn->readahead */
 
-  if (iob_get_queue_entry_count(&conn->readahead) >= conn->recv_buffnum)
+  if (iob_get_queue_entry_count(&conn->readahead) >= bufnum)
     {
       nwarn("WARNING: There are no free receive buffer to retain the data. "
             "Receive buffer number:%"PRId32", received frames:%"PRIuPTR" \n",
-            conn->recv_buffnum, iob_get_queue_entry_count(&conn->readahead));
+            bufnum, iob_get_queue_entry_count(&conn->readahead));
       goto errout;
     }
 #endif
@@ -234,10 +242,12 @@ uint16_t can_datahandler(FAR struct net_driver_s *dev,
       goto errout;
     }
 
+  conn_unlock(&conn->sconn);
   return ret;
 
 errout:
   netdev_iob_release(dev);
+  conn_unlock(&conn->sconn);
   return ret;
 }
 

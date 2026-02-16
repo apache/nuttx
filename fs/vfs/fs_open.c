@@ -202,10 +202,11 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
       /* Get the file structure of the opened character driver proxy */
 
 #ifdef CONFIG_BCH_DEVICE_READONLY
-      ret = block_proxy(filep, path, O_RDOK);
-#else
-      ret = block_proxy(filep, path, oflags);
+      oflags &= ~O_RDWR;
+      oflags |= O_RDOK;
 #endif
+
+      ret = block_proxy(filep, path, oflags);
 #ifdef CONFIG_FS_NOTIFY
       if (ret >= 0)
         {
@@ -314,22 +315,24 @@ static int nx_vopen(FAR struct fdlist *list,
   int ret;
   int fd;
 
-  /* Allocate a new file descriptor for the inode */
-
-  fd = fdlist_allocate(list, oflags, 0, &filep);
-  if (fd < 0)
+  filep = file_allocate();
+  if (filep == NULL)
     {
-      return fd;
+      return -ENOMEM;
     }
 
-  /* Let file_vopen() do all of the work */
-
   ret = file_vopen(filep, path, oflags, getumask(), ap);
-  file_put(filep);
   if (ret < 0)
     {
-      fdlist_close(list, fd);
+      file_deallocate(filep);
       return ret;
+    }
+
+  fd = fdlist_dupfile(list, oflags, 0, filep);
+  if (fd < 0)
+    {
+      file_close(filep);
+      file_deallocate(filep);
     }
 
   return fd;
@@ -371,6 +374,11 @@ int file_open(FAR struct file *filep, FAR const char *path, int oflags, ...)
   va_start(ap, oflags);
   ret = file_vopen(filep, path, oflags, 0, ap);
   va_end(ap);
+
+  if (ret >= OK)
+    {
+      atomic_fetch_add(&filep->f_refs, 1);
+    }
 
   return ret;
 }

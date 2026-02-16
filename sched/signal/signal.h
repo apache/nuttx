@@ -41,6 +41,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* These are special values of si_signo that mean that either the wait was
+ * awakened with a timeout, or the wait was canceled... not the receipt of a
+ * signal.
+ */
+
+#define SIG_CANCEL_TIMEOUT 0xfe
+#define SIG_WAIT_TIMEOUT   0xff
+
 /* The following definition determines the number of signal structures to
  * allocate in a block
  */
@@ -108,6 +116,14 @@ typedef struct sigq_s sigq_t;
  * Public Data
  ****************************************************************************/
 
+/* The g_sigactions data structure a pool of pre-allocated signal action
+ * structures buffers structures.
+ */
+
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
+extern  sigactq_t  g_sigactions[CONFIG_SIG_PREALLOC_ACTIONS];
+#endif
+
 /* The g_sigfreeaction data structure is a list of available signal action
  * structures.
  */
@@ -150,7 +166,9 @@ struct task_group_s;
 
 /* sig_initializee.c */
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
 void               nxsig_initialize(void);
+#endif
 
 /* sig_action.c */
 
@@ -176,14 +194,15 @@ int                nxsig_dispatch(pid_t pid, FAR siginfo_t *info,
 
 /* sig_cleanup.c */
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
 void               nxsig_cleanup(FAR struct tcb_s *stcb);
 void               nxsig_release(FAR struct task_group_s *group);
+#endif
 
 /* sig_timedwait.c */
 
-#ifdef CONFIG_CANCELLATION_POINTS
-void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode);
-#endif
+void nxsig_wait_irq(FAR struct tcb_s *wtcb, uint8_t signo,
+                    uint8_t code, int errcode);
 
 /* In files of the same name */
 

@@ -27,8 +27,15 @@ ifeq ($(CONFIG_NET_PKT),y)
 # Socket layer
 
 SOCK_CSRCS += pkt_sockif.c
-SOCK_CSRCS += pkt_sendmsg.c
+ifeq ($(CONFIG_NET_PKT_WRITE_BUFFERS),y)
+SOCK_CSRCS += pkt_sendmsg_buffered.c
+else
+SOCK_CSRCS += pkt_sendmsg_unbuffered.c
+endif
 SOCK_CSRCS += pkt_recvmsg.c
+ifeq ($(CONFIG_NET_PKTPROTO_OPTIONS),y)
+SOCK_CSRCS += pkt_setsockopt.c pkt_getsockopt.c
+endif
 
 # Transport layer
 
@@ -36,6 +43,7 @@ NET_CSRCS += pkt_conn.c
 NET_CSRCS += pkt_input.c
 NET_CSRCS += pkt_callback.c
 NET_CSRCS += pkt_poll.c
+NET_CSRCS += pkt_netpoll.c
 NET_CSRCS += pkt_finddev.c
 
 # Include packet socket build support

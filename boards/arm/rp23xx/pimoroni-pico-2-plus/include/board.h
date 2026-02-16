@@ -30,6 +30,7 @@
 #include "rp23xx_i2cdev.h"
 #include "rp23xx_spidev.h"
 #include "rp23xx_i2sdev.h"
+#include "rp23xx_spisd.h"
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
@@ -53,6 +54,7 @@
 #define BOARD_PERI_FREQ         (150 * MHZ)
 #define BOARD_USB_FREQ          (48 * MHZ)
 #define BOARD_ADC_FREQ          (48 * MHZ)
+#define BOARD_HSTX_FREQ         (150 * MHZ)
 
 #define BOARD_UART_BASEFREQ     BOARD_PERI_FREQ
 

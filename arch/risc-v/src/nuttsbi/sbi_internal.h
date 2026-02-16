@@ -62,18 +62,11 @@
 #define MTIMER_TIME_BASE    (CONFIG_NUTTSBI_MTIME_BASE)
 #define MTIMER_CMP_BASE     (CONFIG_NUTTSBI_MTIMECMP_BASE)
 
-/* For stack alignment */
-
-#define STACK_ALIGNMENT     16
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
 /* Temporary stack placement and size */
 
 #define TEMP_STACK_BASE     (_ebss)
 #define TEMP_STACK          (1024)
-#define TEMP_STACK_SIZE     (STACK_ALIGN_DOWN(TEMP_STACK))
+#define TEMP_STACK_SIZE     (STACKFRAME_ALIGN_DOWN(TEMP_STACK))
 
 /****************************************************************************
  * Public Function Prototypes

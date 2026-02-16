@@ -206,7 +206,7 @@ static void mpl115a_read_press_temp(FAR struct mpl115a_dev_s *priv)
 
   /* Delay 5ms */
 
-  nxsig_usleep(5000);
+  nxsched_usleep(5000);
 
   priv->mpl115a_pressure =
     mpl115a_getreg8(priv, MPL115A_BASE_CMD | (MPL115A_PADC_MSB << 1)) << 8;

@@ -142,6 +142,18 @@ if(CONFIG_TIMER)
   list(APPEND SRCS stm32_tim_lowerhalf.c)
 endif()
 
+if(CONFIG_STM32H7_TIMX_CAP)
+  list(APPEND SRCS stm32_capture.c)
+endif()
+
+if(CONFIG_CAPTURE)
+  list(APPEND SRCS stm32_capture_lowerhalf.c)
+endif()
+
+if(CONFIG_STM32H7_LTDC)
+  list(APPEND SRCS stm32_ltdc.c)
+endif()
+
 if(CONFIG_USBDEV)
   list(APPEND SRCS stm32_otgdev.c)
 endif()
@@ -171,6 +183,10 @@ endif()
 
 if(CONFIG_STM32H7_ETHMAC)
   list(APPEND SRCS stm32_ethernet.c)
+endif()
+
+if(CONFIG_MDIO_BUS)
+  list(APPEND SRCS stm32_mdio.c)
 endif()
 
 if(CONFIG_SENSORS_QENCODER)

@@ -52,7 +52,8 @@
  * string haystack. Returns NULL if needle was not found.
  */
 
-#undef strstr /* See mm/README.txt */
+#undef strstr
+no_builtin("strstr")
 FAR char *strstr(FAR const char *haystack, FAR const char *needle)
 {
 #ifdef CONFIG_ALLOW_MIT_COMPONENTS

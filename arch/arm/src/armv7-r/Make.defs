@@ -34,13 +34,16 @@ HEAD_ASRC += arm_vectortab.S
 CMN_CSRCS += arm_cache.c arm_cpuinfo.c arm_dataabort.c
 CMN_CSRCS += arm_doirq.c arm_gicv2.c arm_gicv2_dump.c
 CMN_CSRCS += arm_initialstate.c arm_prefetchabort.c
-CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
 CMN_CSRCS += arm_syscall.c arm_tcbinfo.c arm_undefinedinsn.c
 CMN_CSRCS += arm_perf.c cp15_cacheops.c
 
 # Common C source files
 
 CMN_ASRCS += arm_head.S arm_vectors.S arm_saveusercontext.S
+
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
+endif
 
 ifeq ($(CONFIG_ARMV7R_HAVE_PTM), y)
   CMN_CSRCS += arm_timer.c
@@ -63,4 +66,8 @@ ifeq ($(CONFIG_SMP),y)
   CMN_ASRCS += arm_cpuhead.S
   CMN_CSRCS += arm_cpustart.c arm_smpcall.c
   CMN_CSRCS += arm_cpuidlestack.c arm_scu.c
+endif
+
+ifeq ($(CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS),y)
+  CMN_UCSRCS += arm_perf.c
 endif

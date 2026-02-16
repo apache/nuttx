@@ -138,7 +138,7 @@ static bool udp_is_broadcast(FAR struct net_driver_s *dev)
 static int udp_input_conn(FAR struct net_driver_s *dev,
                           FAR struct udp_conn_s *conn, unsigned int udpiplen)
 {
-  uint16_t flags;
+  uint32_t flags;
 
   /* Set-up for the application callback */
 
@@ -215,8 +215,9 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
   FAR struct iob_s *iob;
 #endif
   unsigned int udpiplen;
+  unsigned int udpdatalen = dev->d_len - iplen;
 #ifdef CONFIG_NET_UDP_CHECKSUMS
-  uint16_t chksum;
+  uint16_t chksum = 0;
 #endif
   int ret = OK;
 
@@ -232,6 +233,16 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 
   udp = IPBUF(iplen);
 
+  /* Check the UDP packet length */
+
+  if (udpdatalen < UDP_HDRLEN || ntohs(udp->udplen) != udpdatalen)
+    {
+      nwarn("WARNING: UDP length invalid: hdr=%u actual=%u\n",
+            ntohs(udp->udplen), udpdatalen);
+      dev->d_len = 0;
+      return ret;
+    }
+
   /* Get the size of the IP header and the UDP header */
 
   udpiplen = iplen + UDP_HDRLEN;
@@ -245,7 +256,11 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
   dev->d_appdata = IPBUF(udpiplen);
 
 #ifdef CONFIG_NET_UDP_CHECKSUMS
-  chksum = udp->udpchksum;
+  if ((dev->d_features & NETDEV_RX_CSUM) == 0)
+    {
+      chksum = udp->udpchksum;
+    }
+
   if (chksum != 0)
     {
 #ifdef CONFIG_NET_IPv6
@@ -286,6 +301,7 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
        * that, however.
        */
 
+      udp_conn_list_lock();
       conn = udp_active(dev, NULL, udp);
       if (conn)
         {
@@ -378,6 +394,8 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 #  endif /* CONFIG_NET_IPv6*/
 #endif
         }
+
+      udp_conn_list_unlock();
     }
 
   return ret;

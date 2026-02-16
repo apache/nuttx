@@ -37,6 +37,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
+#include <termios.h>
 
 #include <arpa/inet.h>
 
@@ -299,7 +300,7 @@ static void slip_transmit(FAR struct slip_driver_s *self)
                            self->txlen - self->txsent);
           if (ssz <= 0)
             {
-              nxsig_usleep(10000);
+              nxsched_usleep(10000);
               i++;
               continue;
             }
@@ -750,7 +751,7 @@ static void slip_interrupt_work(FAR void *arg)
    * thread has been configured.
    */
 
-  net_lock();
+  netdev_lock(&self->dev);
 
   /* Process pending Ethernet interrupts */
 
@@ -798,7 +799,7 @@ static void slip_interrupt_work(FAR void *arg)
       slip_txdone(self);
     }
 
-  net_unlock();
+  netdev_unlock(&self->dev);
 }
 
 /****************************************************************************
@@ -836,6 +837,8 @@ static int slip_ifup(FAR struct net_driver_s *dev)
 
   self->bifup = true;
 
+  netdev_carrier_on(dev);
+
   return OK;
 }
 
@@ -869,6 +872,8 @@ static int slip_ifdown(FAR struct net_driver_s *dev)
 
   self->bifup = false;
 
+  netdev_carrier_off(dev);
+
   return OK;
 }
 
@@ -899,7 +904,7 @@ static void slip_txavail_work(FAR void *arg)
    * thread has been configured.
    */
 
-  net_lock();
+  netdev_lock(&self->dev);
 
   /* Ignore the notification if the interface is not yet up */
 
@@ -917,7 +922,7 @@ static void slip_txavail_work(FAR void *arg)
         }
     }
 
-  net_unlock();
+  netdev_unlock(&self->dev);
 }
 
 /****************************************************************************
@@ -984,6 +989,9 @@ static int slip_txavail(FAR struct net_driver_s *dev)
 int slip_initialize(int intf, FAR const char *devname)
 {
   FAR struct slip_driver_s *self;
+#ifdef CONFIG_SERIAL_TERMIOS
+  struct termios termios;
+#endif
   int ret;
 
   /* Get the interface structure associated with this interface number. */
@@ -1005,6 +1013,22 @@ int slip_initialize(int intf, FAR const char *devname)
       nerr("ERROR: Failed to open %s: %d\n", devname, ret);
       return ret;
     }
+
+#ifdef CONFIG_SERIAL_TERMIOS
+  ret = file_ioctl(&self->tty, TCGETS, &termios);
+  if (ret >= 0)
+    {
+      cfmakeraw(&termios);
+      ret = file_ioctl(&self->tty, TCSETS, &termios);
+    }
+
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to get termios: %d\n", ret);
+      file_close(&self->tty);
+      return ret;
+    }
+#endif
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling slip_ifdown().

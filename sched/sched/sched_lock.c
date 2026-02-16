@@ -76,23 +76,23 @@ void sched_lock(void)
        * integer type.
        */
 
-      DEBUGASSERT(rtcb == NULL || rtcb->lockcount < MAX_LOCK_COUNT);
+      DEBUGASSERT(rtcb && rtcb->lockcount < MAX_LOCK_COUNT);
 
       /* A counter is used to support locking. This allows nested lock
        * operations on this thread (on any CPU)
        */
 
-      if (rtcb != NULL && rtcb->lockcount++ == 0)
+      if (rtcb->lockcount++ == 0)
         {
 #if (CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0) || \
     defined(CONFIG_SCHED_INSTRUMENTATION_PREEMPTION)
-          irqstate_t flags = enter_critical_section_wo_note();
+          irqstate_t flags = enter_critical_section_notrace();
 
           /* Note that we have pre-emption locked */
 
           nxsched_critmon_preemption(rtcb, true, return_address(0));
           sched_note_preemption(rtcb, true);
-          leave_critical_section_wo_note(flags);
+          leave_critical_section_notrace(flags);
 #endif
         }
     }

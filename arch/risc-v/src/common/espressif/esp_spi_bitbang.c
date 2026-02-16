@@ -73,6 +73,23 @@
 #define SPI_BITBANG_DISABLEMODE2 1
 #endif
 
+#if CONFIG_ESPRESSIF_SPI2_SLAVE && \
+  (CONFIG_ESPRESSIF_SPI_BITBANG_CSPIN == CONFIG_ESPRESSIF_SPI2_CSPIN) && \
+  (CONFIG_ESPRESSIF_SPI_BITBANG_MOSIPIN == CONFIG_ESPRESSIF_SPI2_MOSIPIN) && \
+  (CONFIG_ESPRESSIF_SPI_BITBANG_MISOPIN == CONFIG_ESPRESSIF_SPI2_MISOPIN) && \
+  (CONFIG_ESPRESSIF_SPI_BITBANG_CLKPIN == CONFIG_ESPRESSIF_SPI2_CLKPIN)
+#  warning "SPI slave driver is in auto-test mode with SPI master provided by bit-bang driver"
+#  define CSPIN_FUNCTION   (OUTPUT_FUNCTION_2 | INPUT_FUNCTION_2)
+#  define MOSIPIN_FUNCTION (OUTPUT_FUNCTION_2 | INPUT_FUNCTION_2 | PULLUP)
+#  define MISOPIN_FUNCTION (INPUT_FUNCTION_2  | OUTPUT_FUNCTION_2 | PULLUP)
+#  define CLKPIN_FUNCTION  (OUTPUT_FUNCTION_2 | INPUT_FUNCTION_2)
+#else
+#  define CSPIN_FUNCTION   (OUTPUT_FUNCTION_2)
+#  define MOSIPIN_FUNCTION (OUTPUT_FUNCTION_2)
+#  define MISOPIN_FUNCTION (INPUT_FUNCTION_2 | PULLUP)
+#  define CLKPIN_FUNCTION  (OUTPUT_FUNCTION_2)
+#endif
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -211,21 +228,19 @@ struct spi_dev_s *esp_spi_bitbang_init(void)
   esp_gpiowrite(CONFIG_ESPRESSIF_SPI_BITBANG_MOSIPIN, true);
   esp_gpiowrite(CONFIG_ESPRESSIF_SPI_BITBANG_CLKPIN, true);
 
-#if CONFIG_ESPRESSIF_SPI_SWCS
-  esp_configgpio(CONFIG_ESPRESSIF_SPI_BITBANG_CSPIN, OUTPUT_FUNCTION_1);
+  esp_configgpio(CONFIG_ESPRESSIF_SPI_BITBANG_CSPIN, CSPIN_FUNCTION);
   esp_gpio_matrix_out(CONFIG_ESPRESSIF_SPI_BITBANG_CSPIN, SIG_GPIO_OUT_IDX,
                       0, 0);
-#endif
-  esp_configgpio(CONFIG_ESPRESSIF_SPI_BITBANG_MOSIPIN, OUTPUT_FUNCTION_1);
+
+  esp_configgpio(CONFIG_ESPRESSIF_SPI_BITBANG_MOSIPIN, MOSIPIN_FUNCTION);
   esp_gpio_matrix_out(CONFIG_ESPRESSIF_SPI_BITBANG_MOSIPIN, SIG_GPIO_OUT_IDX,
                       0, 0);
 
-  esp_configgpio(CONFIG_ESPRESSIF_SPI_BITBANG_MISOPIN,
-                 INPUT_FUNCTION_1 | PULLUP);
-  esp_gpio_matrix_out(CONFIG_ESPRESSIF_SPI_BITBANG_MISOPIN, SIG_GPIO_OUT_IDX,
-                      0, 0);
+  esp_configgpio(CONFIG_ESPRESSIF_SPI_BITBANG_MISOPIN, MISOPIN_FUNCTION);
+  esp_gpio_matrix_in(CONFIG_ESPRESSIF_SPI_BITBANG_MISOPIN, SIG_GPIO_OUT_IDX,
+                     0);
 
-  esp_configgpio(CONFIG_ESPRESSIF_SPI_BITBANG_CLKPIN, OUTPUT_FUNCTION_1);
+  esp_configgpio(CONFIG_ESPRESSIF_SPI_BITBANG_CLKPIN, CLKPIN_FUNCTION);
   esp_gpio_matrix_out(CONFIG_ESPRESSIF_SPI_BITBANG_CLKPIN, SIG_GPIO_OUT_IDX,
                       0, 0);
 

@@ -40,6 +40,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/input/touchscreen.h>
 
 #ifdef CONFIG_INPUT_FT5X06
 
@@ -81,6 +82,7 @@ struct ft5x06_config_s
 {
   /* Device characterization */
 
+  struct touch_lowerhalf_s lower;
   uint8_t  address;    /* 7-bit I2C address (only bits 0-6 used) */
   uint32_t frequency;  /* Default I2C frequency */
 

@@ -38,7 +38,7 @@ if(CONFIG_ARCH_HAVE_FORK)
   list(APPEND SRCS x86_64_fork.c fork.S)
 endif()
 
-if(CONFIG_LIB_SYSCALL)
+if(CONFIG_ARCH_HAVE_SYSCALL)
   list(APPEND SRCS x86_64_syscall.c)
 endif()
 
@@ -48,6 +48,7 @@ endif()
 
 if(CONFIG_ARCH_X86_64_ACPI)
   list(APPEND SRCS x86_64_acpi.c)
+  list(APPEND SRCS x86_64_acpi_procfs.c)
 endif()
 
 if(CONFIG_SCHED_THREAD_LOCAL)
@@ -63,21 +64,14 @@ if(CONFIG_ARCH_ADDRENV)
 endif()
 
 if(NOT CONFIG_BUILD_FLAT)
-  list(APPEND SRCS x86_64_task_start.c x86_64_pthread_start.c
-       x86_64_signal_dispatch.c)
-endif()
-
-if(NOT CONFIG_ALARM_ARCH)
-  list(APPEND SRCS x86_64_udelay.c x86_64_mdelay.c)
+  list(APPEND SRCS x86_64_task_start.c x86_64_pthread_start.c)
+  if(CONFIG_ENABLE_ALL_SIGNALS)
+    list(APPEND SRCS x86_64_signal_dispatch.c)
+  endif()
 endif()
 
 if(CONFIG_ARCH_KERNEL_STACK)
   list(APPEND SRCS x86_64_addrenv_kstack.c)
-endif()
-
-if(NOT CONFIG_BUILD_FLAT)
-  list(APPEND SRCS x86_64_task_start.c x86_64_pthread_start.c
-       x86_64_signal_dispatch.c)
 endif()
 
 if(CONFIG_ARCH_HAVE_DEBUG)
@@ -85,3 +79,10 @@ if(CONFIG_ARCH_HAVE_DEBUG)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+nuttx_add_aux_library(STARTUP_OBJS crt0.c)
+
+target_compile_options(
+  STARTUP_OBJS
+  PRIVATE
+    $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_global,NUTTX_ELF_APP_COMPILE_OPTIONS>>)

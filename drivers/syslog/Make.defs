@@ -23,6 +23,10 @@
 ############################################################################
 # Include SYSLOG Infrastructure
 
+ifeq ($(CONFIG_ARCH_LOWPUTC),y)
+  CSRCS += syslog_early.c
+endif
+
 ifeq ($(CONFIG_SYSLOG),y)
 
 ifeq ($(CONFIG_SYSLOG_RFC5424),y)

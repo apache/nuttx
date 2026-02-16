@@ -211,8 +211,7 @@ static int work_thread(int argc, FAR char *argv[])
        * so ourselves, and (2) there will be no changes to the work queue
        */
 
-      flags = spin_lock_irqsave(&wqueue->lock);
-      sched_lock();
+       flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
 
       /* If the wqueue timer is expired and non-active, it indicates that
        * there might be expired work in the pending queue.
@@ -247,16 +246,14 @@ static int work_thread(int argc, FAR char *argv[])
 
           kworker->work = work;
 
-          spin_unlock_irqrestore(&wqueue->lock, flags);
-          sched_unlock();
+          spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
 
           /* Do the work.  Re-enable interrupts while the work is being
            * performed... we don't have any idea how long this will take!
            */
 
           CALL_WORKER(worker, arg);
-          flags = spin_lock_irqsave(&wqueue->lock);
-          sched_lock();
+          flags = spin_lock_irqsave_nopreempt(&wqueue->lock);
 
           /* Mark the thread un-busy */
 
@@ -271,8 +268,7 @@ static int work_thread(int argc, FAR char *argv[])
             }
         }
 
-      spin_unlock_irqrestore(&wqueue->lock, flags);
-      sched_unlock();
+      spin_unlock_irqrestore_nopreempt(&wqueue->lock, flags);
 
       /* Wait for the semaphore to be posted by the wqueue timer. */
 
@@ -312,6 +308,7 @@ static int work_thread_create(FAR const char *name, int priority,
   char arg1[32];
   int wndx;
   int pid;
+  FAR void *stack = NULL;
 
   /* Don't permit any of the threads to run until we have fully initialized
    * all of them.
@@ -329,8 +326,15 @@ static int work_thread_create(FAR const char *name, int priority,
       argv[1] = arg1;
       argv[2] = NULL;
 
-      pid = kthread_create_with_stack(name, priority, stack_addr, stack_size,
-                                      work_thread, argv);
+      /* In case of the stack_addr is NULL */
+
+      if (stack_addr)
+        {
+          stack = (FAR void *)((uintptr_t)stack_addr + wndx * stack_size);
+        }
+
+      pid = kthread_create_with_stack(name, priority, stack,
+                                      stack_size, work_thread, argv);
 
       DEBUGASSERT(pid > 0);
       if (pid < 0)
@@ -554,9 +558,21 @@ int work_start_highpri(void)
 
   sinfo("Starting high-priority kernel worker thread(s)\n");
 
+#ifdef SCHED_HPWORKSTACKSECTION
+  static uint8_t hp_work_stack[CONFIG_SCHED_HPNTHREADS]
+                              [CONFIG_SCHED_HPWORKSTACKSIZE]
+  locate_data(CONFIG_SCHED_HPWORKSTACKSECTION);
+
+  return work_thread_create(HPWORKNAME,
+                            CONFIG_SCHED_HPWORKPRIORITY,
+                            hp_work_stack,
+                            CONFIG_SCHED_HPWORKSTACKSIZE,
+                            (FAR struct kwork_wqueue_s *)&g_hpwork);
+#else
   return work_thread_create(HPWORKNAME, CONFIG_SCHED_HPWORKPRIORITY, NULL,
                             CONFIG_SCHED_HPWORKSTACKSIZE,
                             (FAR struct kwork_wqueue_s *)&g_hpwork);
+#endif
 }
 #endif /* CONFIG_SCHED_HPWORK */
 
@@ -582,9 +598,22 @@ int work_start_lowpri(void)
 
   sinfo("Starting low-priority kernel worker thread(s)\n");
 
-  return work_thread_create(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY, NULL,
+#ifdef SCHED_LPWORKSTACKSECTION
+  static uint8_t lp_work_stack[CONFIG_SCHED_LPNTHREADS]
+                              [CONFIG_SCHED_LPWORKSTACKSIZE]
+  locate_data(CONFIG_SCHED_LPWORKSTACKSECTION);
+
+  return work_thread_create(LPWORKNAME,
+                            CONFIG_SCHED_LPWORKPRIORITY,
+                            lp_work_stack,
                             CONFIG_SCHED_LPWORKSTACKSIZE,
                             (FAR struct kwork_wqueue_s *)&g_lpwork);
+#else
+  return work_thread_create(LPWORKNAME,
+                            CONFIG_SCHED_LPWORKPRIORITY, NULL,
+                            CONFIG_SCHED_LPWORKSTACKSIZE,
+                            (FAR struct kwork_wqueue_s *)&g_lpwork);
+#endif
 }
 #endif /* CONFIG_SCHED_LPWORK */
 

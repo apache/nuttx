@@ -44,6 +44,7 @@
 #include "inet/inet.h"
 #include "neighbor/neighbor.h"
 #include "route/route.h"
+#include "utils/utils.h"
 #include "icmpv6/icmpv6.h"
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
@@ -74,12 +75,12 @@ struct icmpv6_neighbor_s
  * Name: icmpv6_neighbor_eventhandler
  ****************************************************************************/
 
-static uint16_t icmpv6_neighbor_eventhandler(FAR struct net_driver_s *dev,
-                                             FAR void *priv, uint16_t flags)
+static uint32_t icmpv6_neighbor_eventhandler(FAR struct net_driver_s *dev,
+                                             FAR void *priv, uint32_t flags)
 {
   FAR struct icmpv6_neighbor_s *state = (FAR struct icmpv6_neighbor_s *)priv;
 
-  ninfo("flags: %04x sent: %d\n", flags, state->snd_sent);
+  ninfo("flags: %" PRIx32 " sent: %d\n", flags, state->snd_sent);
 
   if (state)
     {
@@ -257,6 +258,19 @@ int icmpv6_neighbor(FAR struct net_driver_s *dev,
 
       net_ipv6addr_copy(lookup, dev->d_ipv6draddr);
 #endif
+
+      if (net_is_addr_unspecified(lookup))
+        {
+          return -EHOSTUNREACH;
+        }
+    }
+
+  /* No ARP packet if this device do not support ARP */
+
+  if (IFF_IS_NOARP(dev->d_flags))
+    {
+      ninfo("ARP not supported on %s, no send!\n", dev->d_ifname);
+      return -EHOSTUNREACH;
     }
 
   /* Allocate resources to receive a callback.  This and the following
@@ -264,7 +278,7 @@ int icmpv6_neighbor(FAR struct net_driver_s *dev,
    * want anything to happen until we are ready.
    */
 
-  net_lock();
+  netdev_lock(dev);
   state.snd_cb = devif_callback_alloc((dev),
                                       &(dev)->d_conncb,
                                       &(dev)->d_conncb_tail);
@@ -323,15 +337,15 @@ int icmpv6_neighbor(FAR struct net_driver_s *dev,
 
       /* Notify the device driver that new TX data is available. */
 
-      netdev_txnotify_dev(dev);
+      netdev_txnotify_dev(dev, ICMPv6_POLL);
 
       /* Wait for the send to complete or an error to occur.
-       * net_sem_wait will also terminate if a signal is received.
+       * nxsem_wait will also terminate if a signal is received.
        */
 
       do
         {
-          net_sem_wait(&state.snd_sem);
+          conn_dev_sem_timedwait(&state.snd_sem, true, UINT_MAX, NULL, dev);
         }
       while (!state.snd_sent);
 
@@ -339,7 +353,7 @@ int icmpv6_neighbor(FAR struct net_driver_s *dev,
        * received.
        */
 
-      ret = icmpv6_wait(&notify, CONFIG_ICMPv6_NEIGHBOR_DELAYMSEC);
+      ret = icmpv6_wait(dev, &notify, CONFIG_ICMPv6_NEIGHBOR_DELAYMSEC);
 
       /* icmpv6_wait will return OK if and only if the matching Neighbor
        * Advertisement is received.  Otherwise, it will return -ETIMEDOUT.
@@ -359,7 +373,7 @@ int icmpv6_neighbor(FAR struct net_driver_s *dev,
   devif_dev_callback_free(dev, state.snd_cb);
 
 errout_with_lock:
-  net_unlock();
+  netdev_unlock(dev);
 
 errout:
   return ret;

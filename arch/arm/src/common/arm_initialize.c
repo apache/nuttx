@@ -39,37 +39,6 @@
 volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: arm_color_intstack
- *
- * Description:
- *   Set the interrupt stack to a value so that later we can determine how
- *   much stack space was used by interrupt handling logic
- *
- ****************************************************************************/
-
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
-static inline void arm_color_intstack(void)
-{
-#ifdef CONFIG_SMP
-  int cpu;
-
-  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
-    {
-      arm_stack_color((void *)up_get_intstackbase(cpu), INTSTACK_SIZE);
-    }
-#else
-  arm_stack_color((void *)g_intstackalloc, INTSTACK_SIZE);
-#endif
-}
-#else
-#  define arm_color_intstack()
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -97,10 +66,6 @@ void up_initialize(void)
 
   arm_initialize_stack();
 #endif
-
-  /* Colorize the interrupt stack */
-
-  arm_color_intstack();
 
   /* Add any extra memory fragments to the memory manager */
 

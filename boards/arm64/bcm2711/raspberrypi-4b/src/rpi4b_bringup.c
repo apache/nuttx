@@ -22,14 +22,30 @@
  * Included Files
  ****************************************************************************/
 
-#include "rpi4b.h"
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <syslog.h>
+#include <debug.h>
+
+#include <arch/board/board.h>
 
 #if defined(CONFIG_BCM2711_I2C_DRIVER)
 #include "bcm2711_i2cdev.h"
 #endif /* defined(CONFIG_BCM2711_I2C) */
+
+#ifdef CONFIG_BCM2711_I2C
+#include "bcm2711_i2c.h"
+#endif
+
+#ifdef CONFIG_RPI4B_MOUNT_BOOT
+#include <nuttx/fs/fs.h>
+#endif
+
+#ifdef CONFIG_RPI4B_FRAMEBUFFER
+#include <nuttx/video/fb.h>
+#endif
+
+#include "rpi4b.h"
 
 /****************************************************************************
  * Public Functions
@@ -57,7 +73,7 @@ int rpi4b_bringup(void)
     }
 #endif // defined(CONFIG_DEV_GPIO)
 
-  /* Initialize I2C interfaces. */
+  /* Initialize I2C character drivers. */
 
 #if defined(CONFIG_BCM2711_I2C)
 
@@ -118,6 +134,26 @@ int rpi4b_bringup(void)
 #endif /* defined(CONFIG_BCM2711_I2C6) */
 
 #endif /* defined(CONFIG_BCM2711_I2C) */
+
+#ifdef CONFIG_RPI4B_SDMMC
+  /* Mount SD card file system */
+
+  ret = rpi4b_sdmmc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Couldn't initialize SDMMC: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RPI4B_FRAMEBUFFER
+  /* Initialize and register the frame buffer driver */
+
+  ret = fb_register(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Couldn't register framebuffer driver: %d", ret);
+    }
+#endif
 
   return ret;
 }

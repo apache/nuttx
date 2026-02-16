@@ -29,7 +29,7 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/list.h>
+#include <nuttx/queue.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -37,7 +37,8 @@
 
 /* Initializers */
 
-#define NXEVENT_INITIALIZER(e, v) {LIST_INITIAL_VALUE((e).list), (v)}
+#define EVENT_WAITLIST_INITIALIZER {NULL, NULL}
+#define NXEVENT_INITIALIZER(e, v) {EVENT_WAITLIST_INITIALIZER, (v)}
 
 /* Event Wait Flags */
 
@@ -50,6 +51,8 @@
 #define NXEVENT_POST_ALL     (1 << 0) /* Bit 0: Post ALL */
 #define NXEVENT_POST_SET     (1 << 1) /* Bit 1: Set event after post */
 
+#define EVENT_WAITLIST(event)  (&((event)->waitlist))
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -57,11 +60,10 @@
 typedef struct nxevent_s      nxevent_t;
 typedef unsigned long         nxevent_mask_t;
 typedef unsigned long         nxevent_flags_t;
-
 struct nxevent_s
 {
-  struct list_node         list;    /* Waiting list of nxevent_wait_t */
-  volatile nxevent_mask_t  events;  /* Pending Events */
+  dq_queue_t             waitlist; /* Waiting list of nxevent_wait_t */
+  volatile nxevent_mask_t  events; /* Pending Events */
 };
 
 #ifdef CONFIG_FS_NAMED_EVENTS
@@ -262,6 +264,50 @@ nxevent_mask_t nxevent_tickwait(FAR nxevent_t *event, nxevent_mask_t events,
 
 nxevent_mask_t nxevent_trywait(FAR nxevent_t *event, nxevent_mask_t events,
                                nxevent_flags_t eflags);
+
+/****************************************************************************
+ * Name: nxevent_clear
+ *
+ * Description:
+ *   Clear specific bits from the event mask of the given event object.
+ *
+ * Input Parameters:
+ *   event - Address of the event object
+ *   mask  - Bit mask specifying which event flags should be cleared
+ *
+ * Returned Value:
+ *   Returns the previous event mask value of the event object before
+ *   applying the clear operation.
+ *
+ * Notes:
+ *   - This is an internal OS interface and must not be invoked directly
+ *     by user applications.
+ *   - This function is safe to call from an interrupt handler.
+ *
+ ****************************************************************************/
+
+nxevent_mask_t nxevent_clear(FAR nxevent_t *event, nxevent_mask_t mask);
+
+/****************************************************************************
+ * Name: nxevent_getmask
+ *
+ * Description:
+ *   Get the event mask of the given event object.
+ *
+ * Input Parameters:
+ *   event - Address of the event object
+ *
+ * Returned Value:
+ *   Returns the event mask value of the event object.
+ *
+  * Notes:
+ *   - This is an internal OS interface and must not be invoked directly
+ *     by user applications.
+ *   - This function is safe to call from an interrupt handler.
+ *
+ ****************************************************************************/
+
+nxevent_mask_t nxevent_getmask(FAR nxevent_t *event);
 
 /****************************************************************************
  * Name: nxevent_open

@@ -29,6 +29,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/timex.h>
 #include <sys/types.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -91,44 +92,48 @@
  * CLOCK_PROCESS_CPUTIME_ID - 2
  * CLOCK_THREAD_CPUTIME_ID  - 3
  * CLOCK_BOOTTIME           - 4
- * bit 3~32: the pid or tid value
+ * CLOCK_FD                 - 5
+ *
+ * if the clockid value exceeds CLOCK_MASK, it indicates a dynamic clockid.
+ * bit 3~32: the fd, pid or tid value
  *
  * The CLOCK_MASK are using to extract the clock_type from the clockid_t
  */
 
+#define CLOCK_FD              5
 #define CLOCK_MASK            7
 #define CLOCK_SHIFT           3
 
 /* Timing constants *********************************************************/
 
-#define NSEC_PER_SEC          1000000000UL /* Seconds */
-#define USEC_PER_SEC             1000000UL
-#define MSEC_PER_SEC                1000UL
-#define DSEC_PER_SEC                  10
-#define HSEC_PER_SEC                   2
+#define NSEC_PER_SEC          1000000000L /* Seconds */
+#define USEC_PER_SEC             1000000L
+#define MSEC_PER_SEC                1000L
+#define DSEC_PER_SEC                  10L
+#define HSEC_PER_SEC                   2L
 
-#define NSEC_PER_HSEC          500000000UL /* Half seconds */
-#define USEC_PER_HSEC             500000UL
-#define MSEC_PER_HSEC                500
-#define DSEC_PER_HSEC                  5
+#define NSEC_PER_HSEC          500000000L /* Half seconds */
+#define USEC_PER_HSEC             500000L
+#define MSEC_PER_HSEC                500L
+#define DSEC_PER_HSEC                  5L
 
-#define NSEC_PER_DSEC          100000000UL /* Deciseconds */
-#define USEC_PER_DSEC             100000UL
-#define MSEC_PER_DSEC                100
+#define NSEC_PER_DSEC          100000000L /* Deciseconds */
+#define USEC_PER_DSEC             100000L
+#define MSEC_PER_DSEC                100L
 
-#define NSEC_PER_MSEC            1000000UL /* Milliseconds */
-#define USEC_PER_MSEC               1000UL
+#define NSEC_PER_MSEC            1000000L /* Milliseconds */
+#define USEC_PER_MSEC               1000L
 
-#define NSEC_PER_USEC               1000UL /* Microseconds */
+#define NSEC_PER_USEC               1000L /* Microseconds */
 
-#define SEC_PER_MIN                   60
+#define SEC_PER_MIN                   60L
 #define NSEC_PER_MIN           (NSEC_PER_SEC * SEC_PER_MIN)
 #define USEC_PER_MIN           (USEC_PER_SEC * SEC_PER_MIN)
 #define MSEC_PER_MIN           (MSEC_PER_SEC * SEC_PER_MIN)
 #define DSEC_PER_MIN           (DSEC_PER_SEC * SEC_PER_MIN)
 #define HSEC_PER_MIN           (HSEC_PER_SEC * SEC_PER_MIN)
 
-#define MIN_PER_HOUR                  60
+#define MIN_PER_HOUR                  60L
 #define NSEC_PER_HOUR          (NSEC_PER_MIN * MIN_PER_HOUR)
 #define USEC_PER_HOUR          (USEC_PER_MIN * MIN_PER_HOUR)
 #define MSEC_PER_HOUR          (MSEC_PER_MIN * MIN_PER_HOUR)
@@ -136,7 +141,7 @@
 #define HSEC_PER_HOUR          (HSEC_PER_MIN * MIN_PER_HOUR)
 #define SEC_PER_HOUR           (SEC_PER_MIN  * MIN_PER_HOUR)
 
-#define HOURS_PER_DAY                 24
+#define HOURS_PER_DAY                 24L
 #define SEC_PER_DAY            (HOURS_PER_DAY * SEC_PER_HOUR)
 
 /* If CONFIG_SCHED_TICKLESS is not defined, then the interrupt interval of
@@ -154,9 +159,9 @@
  */
 
 #ifdef CONFIG_USEC_PER_TICK
-#  define USEC_PER_TICK       (CONFIG_USEC_PER_TICK)
+#  define USEC_PER_TICK       (0L + CONFIG_USEC_PER_TICK)
 #else
-#  define USEC_PER_TICK       (10000)
+#  define USEC_PER_TICK       (10000L)
 #endif
 
 /* MSEC_PER_TICK can be very inaccurate if CONFIG_USEC_PER_TICK is not an
@@ -180,11 +185,11 @@
 
 /* ?SEC2TIC rounds up */
 
-#define NSEC2TICK(nsec)       div_const_roundup(nsec, NSEC_PER_TICK)
-#define USEC2TICK(usec)       div_const_roundup(usec, USEC_PER_TICK)
+#define NSEC2TICK(nsec)       div_const_roundup(nsec, (uint32_t)NSEC_PER_TICK)
+#define USEC2TICK(usec)       div_const_roundup(usec, (uint32_t)USEC_PER_TICK)
 
 #if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
-#  define MSEC2TICK(msec)     div_const_roundup(msec, MSEC_PER_TICK)
+#  define MSEC2TICK(msec)     div_const_roundup(msec, (uint32_t)MSEC_PER_TICK)
 #else
 #  define MSEC2TICK(msec)     USEC2TICK((msec) * USEC_PER_MSEC)
 #endif
@@ -199,30 +204,34 @@
 #if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
 #  define TICK2MSEC(tick)     ((tick) * MSEC_PER_TICK)
 #else
-#  define TICK2MSEC(tick)     div_const(((tick) * USEC_PER_TICK), USEC_PER_MSEC)
+#  define TICK2MSEC(tick)     div_const(((tick) * USEC_PER_TICK), (uint32_t)USEC_PER_MSEC)
 #endif
 
 /* TIC2?SEC rounds to nearest */
 
-#define TICK2DSEC(tick)       div_const_roundnearest(tick, TICK_PER_DSEC)
-#define TICK2HSEC(tick)       div_const_roundnearest(tick, TICK_PER_HSEC)
-#define TICK2SEC(tick)        div_const_roundnearest(tick, TICK_PER_SEC)
+#define TICK2DSEC(tick)       div_const_roundnearest(tick, (uint32_t)TICK_PER_DSEC)
+#define TICK2HSEC(tick)       div_const_roundnearest(tick, (uint32_t)TICK_PER_HSEC)
+#define TICK2SEC(tick)        div_const_roundnearest(tick, (uint32_t)TICK_PER_SEC)
 
 /* MSEC2SEC */
 
-#define MSEC2SEC(usec)        div_const(msec, MSEC_PER_SEC)
+#define MSEC2SEC(usec)        div_const(msec, (uint32_t)MSEC_PER_SEC)
+
+/* USEC2MSEC */
+
+#define USEC2MSEC(usec)       div_const(usec, (uint32_t)USEC_PER_MSEC)
 
 /* USEC2SEC */
 
-#define USEC2SEC(usec)        div_const(usec, USEC_PER_SEC)
+#define USEC2SEC(usec)        div_const(usec, (uint32_t)USEC_PER_SEC)
 
 /* NSEC2USEC */
 
-#define NSEC2USEC(nsec)       div_const(nsec, NSEC_PER_USEC)
+#define NSEC2USEC(nsec)       div_const(nsec, (uint32_t)NSEC_PER_USEC)
 
 /* NSEC2MSEC */
 
-#define NSEC2MSEC(nsec)       div_const(nsec, NSEC_PER_MSEC)
+#define NSEC2MSEC(nsec)       div_const(nsec, (uint32_t)NSEC_PER_MSEC)
 
 #if defined(CONFIG_DEBUG_SCHED) && defined(CONFIG_SYSTEM_TIME64) && \
     !defined(CONFIG_SCHED_TICKLESS)
@@ -324,18 +333,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* Access to raw system clock ***********************************************/
-
-/* Direct access to the system timer/counter is supported only if (1) the
- * system timer counter is available (i.e., we are not configured to use
- * a hardware periodic timer), and (2) the execution environment has direct
- * access to kernel global data
- */
-
-#ifdef __HAVE_KERNEL_GLOBALS
-EXTERN volatile clock_t g_system_ticks;
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -343,25 +340,26 @@ EXTERN volatile clock_t g_system_ticks;
 #define clock_ticks2time(ts, tick) \
   do \
     { \
-      clock_t _tick = (clock_t)(tick); \
-      (ts)->tv_sec = (time_t)div_const(_tick, TICK_PER_SEC); \
-      _tick -= (clock_t)(ts)->tv_sec * TICK_PER_SEC; \
+      clock_t _tick = tick; \
+      (ts)->tv_sec = (time_t)div_const(_tick, (uint32_t)TICK_PER_SEC); \
+      _tick -= (clock_t)((ts)->tv_sec * TICK_PER_SEC); \
       (ts)->tv_nsec = (long)_tick * NSEC_PER_TICK; \
     } \
   while (0)
 
 #define clock_time2ticks(ts) \
-  ((clock_t)(ts)->tv_sec * TICK_PER_SEC + NSEC2TICK((uint32_t)(ts)->tv_nsec))
+  ((clock_t)((ts)->tv_sec * TICK_PER_SEC) + \
+   (clock_t)div_const_roundup((uint64_t)(ts)->tv_nsec, (uint32_t)NSEC_PER_TICK))
 
 #define clock_time2ticks_floor(ts) \
   ((clock_t)(ts)->tv_sec * TICK_PER_SEC + \
-   div_const((uint32_t)(ts)->tv_nsec, NSEC_PER_TICK))
+   div_const((uint32_t)(ts)->tv_nsec, (uint32_t)NSEC_PER_TICK))
 
 #define clock_usec2time(ts, usec) \
   do \
     { \
       uint64_t _usec = (usec); \
-      (ts)->tv_sec = (time_t)div_const(_usec, USEC_PER_SEC); \
+      (ts)->tv_sec = (time_t)div_const(_usec, (uint32_t)USEC_PER_SEC); \
       _usec -= (uint64_t)(ts)->tv_sec * USEC_PER_SEC; \
       (ts)->tv_nsec = (long)_usec * NSEC_PER_USEC; \
     } \
@@ -369,13 +367,13 @@ EXTERN volatile clock_t g_system_ticks;
 
 #define clock_time2usec(ts) \
   ((uint64_t)(ts)->tv_sec * USEC_PER_SEC + \
-   div_const((uint32_t)(ts)->tv_nsec, NSEC_PER_USEC))
+   div_const((uint32_t)(ts)->tv_nsec, (uint32_t)NSEC_PER_USEC))
 
 #define clock_nsec2time(ts, nsec) \
   do \
     { \
       uint64_t _nsec = (nsec); \
-      (ts)->tv_sec = (time_t)div_const(_nsec, NSEC_PER_SEC); \
+      (ts)->tv_sec = (time_t)div_const(_nsec, (uint32_t)NSEC_PER_SEC); \
       _nsec -= (uint64_t)(ts)->tv_sec * NSEC_PER_SEC; \
       (ts)->tv_nsec = (long)_nsec; \
     } \
@@ -404,7 +402,7 @@ EXTERN volatile clock_t g_system_ticks;
  * current_tick + 1, which is not enough for at least 1 tick.
  */
 
-#define clock_delay2abstick(delay) (clock_systime_ticks() + (delay) + 1)
+#define clock_delay2abstick(delay) (clock_systime_ticks() + (delay) + 1u)
 
 /****************************************************************************
  * Name:  clock_timespec_add
@@ -731,13 +729,35 @@ clock_t clock_systime_ticks(void);
  *   ts - Location to return the time
  *
  * Returned Value:
- *   OK (0) on success; a negated errno value on failure.
+ *   None
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int clock_systime_timespec(FAR struct timespec *ts);
+void clock_systime_timespec(FAR struct timespec *ts);
+
+/****************************************************************************
+ * Name: clock_systime_nsec
+ *
+ * Description:
+ *   Return the current value of the system timer counter as
+ *   uint64_t nanoseconds.
+ *
+ * Input Parameters:
+ *   ts - Location to return the time
+ *
+ * Returned Value:
+ *   The current system time in nanoseconds.
+ *
+ ****************************************************************************/
+
+static inline_function uint64_t clock_systime_nsec(void)
+{
+  struct timespec ts;
+  clock_systime_timespec(&ts);
+  return clock_time2nsec(&ts);
+}
 
 /****************************************************************************
  * Name:  clock_cpuload
@@ -825,19 +845,6 @@ void perf_convert(clock_t elapsed, FAR struct timespec *ts);
 unsigned long perf_getfreq(void);
 
 /****************************************************************************
- * Name: nxclock_settime
- *
- * Description:
- *   Clock Functions based on POSIX APIs
- *
- *   CLOCK_REALTIME - POSIX demands this to be present. This is the wall
- *   time clock.
- *
- ****************************************************************************/
-
-void nxclock_settime(clockid_t clock_id, FAR const struct timespec *tp);
-
-/****************************************************************************
  * Name: nxclock_gettime
  *
  * Description:
@@ -845,7 +852,19 @@ void nxclock_settime(clockid_t clock_id, FAR const struct timespec *tp);
  *
  ****************************************************************************/
 
-void nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp);
+int nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp);
+
+/****************************************************************************
+ * Name: nxclock_adjtime
+ *
+ * Description:
+ *   Adjust the frequency and/or phase of a clock.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CLOCK_ADJTIME
+int nxclock_adjtime(clockid_t clock_id, FAR struct timex *buf);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

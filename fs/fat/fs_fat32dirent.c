@@ -362,6 +362,13 @@ static inline int fat_parsesfname(FAR const char **path,
 #ifdef CONFIG_FAT_LCNAMES
           dirinfo->fd_ntflags = ntlcfound & ntlcenable;
 #endif
+          /* Ignore sequences of //... in the filename */
+
+          while (node && *node == '/')
+            {
+              node++;
+            }
+
           *terminator = ch;
           *path       = node;
           return OK;
@@ -599,6 +606,13 @@ static inline int fat_parselfname(FAR const char **path,
           /* Null terminate the string */
 
           dirinfo->fd_lfname[ndx] = '\0';
+
+          /* Ignore sequences of //... in the filename */
+
+          while (node && *node == '/')
+            {
+              node++;
+            }
 
           /* Return the remaining sub-string and the terminating character. */
 

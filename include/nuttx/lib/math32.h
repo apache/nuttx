@@ -28,7 +28,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
+#include <limits.h>
 #include <inttypes.h>
 #include <stdint.h>
 #include <strings.h>
@@ -97,6 +99,18 @@ struct uint64_s
   uint32_t ms;
 #endif
 };
+
+typedef struct invdiv_param32_s
+{
+  uint32_t mult;
+  uint8_t  shift;
+} invdiv_param32_t;
+
+typedef struct invdiv_param64_s
+{
+  uint64_t mult;
+  uint8_t  shift;
+} invdiv_param64_t;
 
 /****************************************************************************
  * Public Data
@@ -340,6 +354,238 @@ extern "C"
 #  define div_const_roundup(n, base) (((n) + (base) - 1) / (base))
 #  define div_const_roundnearest(n, base) (((n) + ((base) / 2)) / (base))
 #endif
+
+/* Division optimizing method proposed by T. Granlund and L. Montgomery.
+ * This method converts the runtime-invariant integer division
+ * into multiplication and right-shifting.
+ *
+ * Usage:
+ * If you want to do n/d division where d is an invariant integer,
+ * initialize the param by `invdiv_init_param(d, param)` first,
+ * then do the division by `invdiv(n, param)`.
+ */
+
+/****************************************************************************
+ * Name: invdiv_init_param32
+ *
+ * Description:
+ *   Calculate the triple (multiplier, right shift number 1, right shift
+ * number 2) during initialization.
+ *
+ * Input Parameters:
+ *   d - The divisor (unsigned integer). d != 0 and d != 1 is required.
+ *
+ * Output Parameters:
+ *   param - The invariant division parameter to be cached.
+ *
+ ****************************************************************************/
+
+static inline_function
+void invdiv_init_param32(uint32_t d, FAR invdiv_param32_t *param)
+{
+  int      l  = log2ceil(d);
+  uint64_t t1 = (uint64_t)1 << 32;
+  uint64_t t2 = (uint64_t)1 << l;
+
+  param->mult  = (t1 * (t2 - d)) / d + 1;
+#if ULONG_MAX == 4294967295UL
+  param->shift = l - 1;
+#else
+  param->shift = l;
+#endif
+}
+
+/****************************************************************************
+ * Name: invdiv_u32
+ *
+ * Description:
+ *   Return the result of `n / d`
+ *   The division is realized by multiplication and right shift,
+ *   where d is already converted to invdiv_param_t.
+ *
+ * Input Parameters:
+ *   n - The dividend (uint32_t).
+ *   param - The invariant division parameter already cached.
+ *
+ * Returned Value:
+ *  The result of `n / d`
+ *
+ ****************************************************************************/
+
+static inline_function
+uint64_t invdiv_u32(uint32_t n, FAR const invdiv_param32_t *param)
+{
+  uint8_t  sh = param->shift;
+#if ULONG_MAX == 4294967295UL
+  uint32_t m  = param->mult;
+  uint32_t t1 = ((uint64_t)m * n) >> 32; /* UMULH if supported */
+  uint32_t t2 = (n - t1) >> 1;
+#else
+  /* This division can be 25% faster using 64-bit register. */
+
+  uint64_t m  = param->mult;
+  uint64_t t1 = (m * n) >> 32;
+  uint32_t t2 = n;
+#endif
+
+  return (t1 + t2) >> sh;
+}
+
+/* Helper function to do n bits integer division. */
+
+#define invdiv_udiv_soft(arr, n, q, d) \
+do \
+{ \
+    uint32_t idx; \
+    uint32_t bits_per_idx = sizeof(uint64_t) * 8; \
+    uint32_t bits_max = bits_per_idx * n; \
+    uint64_t reminder = 0ull; \
+    uint64_t high_rem = 0ull; \
+    for (idx = 0; idx < bits_max; idx++) \
+      { \
+        uint32_t bits = bits_max - idx - 1; \
+        uint32_t bits_idx = bits / bits_per_idx; \
+        uint32_t bits_idx_off = bits % bits_per_idx; \
+        reminder <<= 1u; \
+        reminder |= ((arr)[bits_idx] >> bits_idx_off) & 1u; \
+        if (reminder >= (d)) \
+          { \
+            reminder    -= (d); \
+            q[bits_idx] |= (1ull << bits_idx_off); \
+          } \
+        else if (high_rem != 0) \
+          { \
+            uint64_t c   = 0ull - (d); \
+            high_rem    -= 1; \
+            reminder    += c; \
+            q[bits_idx] |= (1ull << bits_idx_off); \
+          } \
+        high_rem += (reminder >> (bits_per_idx - 1)) & 1u; \
+      } \
+} \
+while(0)
+
+/* Helper function to calculate 2 64-bit unsigned integers multiplication
+ * The result is the highest half of the 128-bit unsigned integer.
+ */
+
+static inline_function uint64_t invdiv_umulh64(uint64_t a, uint64_t b)
+{
+#ifndef __SIZEOF_INT128__
+  /* If the compiler do not support uint128_t */
+
+  uint64_t al = a & UINT32_MAX;
+  uint64_t ah = a >> 32;
+  uint64_t bl = b & UINT32_MAX;
+  uint64_t bh = b >> 32;
+
+  uint64_t m1 = al * bl;
+  uint64_t m2 = ah * bl;
+  uint64_t m3 = al * bh;
+  uint64_t m4 = ah * bh;
+
+  uint64_t c = (m1 >> 32) + (m2 & UINT32_MAX) + (m3 & UINT32_MAX);
+
+  return m4 + (m2 >> 32) + (m3 >> 32) + (c >> 32);
+#else
+  /* This code will be compiled to UMULH instruction
+   * on the architectures like x86_64 and AArch64.
+   * The UMULH instruction can calculate the highest half
+   * of the 128-bit multiplication result.
+   * It is faster than any of software implementation.
+   * If the compiler do not support uint128_t, it is better to manually
+   * implement this function using UMULH instructions via
+   * the inline assembly.
+   */
+
+  __uint128_t res128 = (__uint128_t)a * b;
+  return res128 >> 64;
+#endif
+}
+
+/****************************************************************************
+ * Name: invdiv_init_param64
+ *
+ * Description:
+ *   Calculate the triple (multiplier, right shift number 1, right shift
+ * number 2) during initialization.
+ *
+ * Input Parameters:
+ *   d - The divisor (unsigned integer), d != 0 and d != 1 is required.
+ *
+ * Output Parameters:
+ *   param - The invariant division parameter to be cached.
+ *
+ ****************************************************************************/
+
+static inline_function
+void invdiv_init_param64(uint64_t d, FAR invdiv_param64_t *param)
+{
+  int      l = log2ceil(d);
+  uint64_t t = ((uint64_t)1 << l) - d;
+
+#ifndef __SIZEOF_INT128__
+  /* If the compiler do not support UINT128 */
+
+  uint64_t q[2];
+  uint64_t mres[2];
+
+  /* Calculate the mult via 2^64 * (2^l - d) / d + 1
+   * It is equal to ((2^l - d) << 64) / d + 1. So...
+   */
+
+  mres[1] = t;
+  mres[0] = 0;
+  q[0] = 0;
+  q[1] = 0;
+
+  /* Then, do the 128-bit division. */
+
+  invdiv_udiv_soft(mres, 2, q, d);
+
+  param->mult = q[0] + 1;
+#else
+  param->mult  = ((__uint128_t)1 << 64) * t / d + 1;
+#endif
+  param->shift = l - 1;
+}
+
+/****************************************************************************
+ * Name: invdiv_u64
+ *
+ * Description:
+ *   Return the result of `n / d`
+ *   The division is realized by multiplication and right shift,
+ *   where d is already converted to invdiv_param_t.
+ *
+ * Input Parameters:
+ *   n - The dividend (uint64_t).
+ *   param - The invariant division parameter already cached.
+ *
+ * Returned Value:
+ *  The result of `n / d`
+ *
+ ****************************************************************************/
+
+static inline_function
+uint64_t invdiv_u64(uint64_t n, FAR const invdiv_param64_t *param)
+{
+  uint64_t t1;
+  uint64_t t2;
+  uint64_t m   = param->mult;
+  uint8_t  sh1 = 1;
+  uint8_t  sh2 = param->shift;
+
+  /* Calculate the 128-bit mres = 64-bit n * 64-bit m, where t1 = mres >> 64.
+   * Please do not use `umul64_const` or `umul64` here.
+   * The `invdiv_umulh64` has significant better performance over them.
+   */
+
+  t1 = invdiv_umulh64(n, m);
+  t2 = (n - t1) >> sh1;
+
+  return (t1 + t2) >> sh2;
+}
 
 /****************************************************************************
  * Name: uneg64

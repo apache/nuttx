@@ -35,12 +35,28 @@ if(CONFIG_IOEXPANDER)
     list(APPEND SRCS ioe_dummy.c)
   endif()
 
+  if(CONFIG_IOEXPANDER_ICJX)
+    list(APPEND SRCS icjx.c)
+  endif()
+
+  if(CONFIG_IOEXPANDER_ISO1H812G)
+    list(APPEND SRCS iso1h812g.c)
+  endif()
+
+  if(CONFIG_IOEXPANDER_ISO1I813T)
+    list(APPEND SRCS iso1i813t.c)
+  endif()
+
   if(CONFIG_IOEXPANDER_PCA9555)
     list(APPEND SRCS pca9555.c)
   endif()
 
   if(CONFIG_IOEXPANDER_PCA9538)
     list(APPEND SRCS pca9538.c)
+  endif()
+
+  if(CONFIG_IOEXPANDER_PCA9557)
+    list(APPEND SRCS pca9557.c)
   endif()
 
   if(CONFIG_IOEXPANDER_TCA64XX)
@@ -55,12 +71,20 @@ if(CONFIG_IOEXPANDER)
     list(APPEND SRCS pcf8575.c)
   endif()
 
+  if(CONFIG_IOEXPANDER_MCP23X08)
+    list(APPEND SRCS mcp23x08.c)
+  endif()
+
   if(CONFIG_IOEXPANDER_MCP23X17)
     list(APPEND SRCS mcp23x17.c)
   endif()
 
   if(CONFIG_IOEXPANDER_SX1509)
     list(APPEND SRCS sx1509.c)
+  endif()
+
+  if(CONFIG_IOEXPANDER_AW9523B)
+    list(APPEND SRCS aw9523b.c)
   endif()
 endif()
 

@@ -71,44 +71,52 @@ ACRN hypervisor but won't work with Jailhouse hypervisor which uses ``ivshmem-v2
 Please refer to the official `Qemu ivshmem documentation
 <https://www.qemu.org/docs/master/system/devices/ivshmem.html>`_ for more information.
 
-This is an example implementation for OpenAMP based on the Inter-VM share memory(ivshmem)::
+This is an example implementation for OpenAMP that supports multiple transport
+mechanisms including Inter-VM shared memory (ivshmem) and RPMSG port UART::
 
-  rpproxy_ivshmem:  Remote slave(client) proxy process.
-  rpserver_ivshmem: Remote master(host) server process.
+  rpproxy:  Remote slave(client) proxy process.
+  rpserver: Remote master(host) server process.
 
-Steps for Using NuttX as IVSHMEM host and guest
+Steps for Using NuttX as OpenAMP host and guest
 
 1. Build images
 
-  a. Build rpserver_ivshmem::
+  a. Build rpserver::
 
-      $ cmake -B server -DBOARD_CONFIG=qemu-armv7a:rpserver_ivshmem -GNinja
+      $ cmake -B server -DBOARD_CONFIG=qemu-armv7a:rpserver -GNinja
       $ cmake --build server
 
-  b. Build rpproxy_ivshmem::
+  b. Build rpproxy::
 
-      $ cmake -B proxy -DBOARD_CONFIG=qemu-armv7a:rpproxy_ivshmem -GNinja
+      $ cmake -B proxy -DBOARD_CONFIG=qemu-armv7a:rpproxy -GNinja
       $ cmake --build proxy
 
 2. Bringup firmware via Qemu:
 
-  The Inter-VM Shared Memory device basic syntax is::
+  The configuration supports both ivshmem and RPMSG port UART transports.
+  For ivshmem, use the following device syntax::
 
       -device ivshmem-plain,id=shmem0,memdev=shmmem-shmem0,addr=0xb \
       -object memory-backend-file,id=shmmem-shmem0,mem-path=/dev/shm/ivshmem0,size=4194304,share=yes
 
-  a. Start rpserver_ivshmem::
+  a. Start rpserver::
 
       $ qemu-system-arm -cpu cortex-a7 -nographic -machine virt,highmem=off \
         -object memory-backend-file,id=shmmem-shmem0,mem-path=/dev/shm/ivshmem0,size=4194304,share=yes \
         -device ivshmem-plain,id=shmem0,memdev=shmmem-shmem0,addr=0xb \
+        -device virtio-serial-device,bus=virtio-mmio-bus.0 \
+        -chardev socket,path=/tmp/rpmsg_port_uart_socket,server=on,wait=off,id=foo \
+        -device virtconsole,chardev=foo \
         -kernel server/nuttx -nographic
 
-  b. Start rpproxy_ivshmem::
+  b. Start rpproxy::
 
       $ qemu-system-arm -cpu cortex-a7 -nographic -machine virt,highmem=off \
         -object memory-backend-file,discard-data=on,id=shmmem-shmem0,mem-path=/dev/shm/ivshmem0,size=4194304,share=yes \
         -device ivshmem-plain,id=shmem0,memdev=shmmem-shmem0,addr=0xb \
+        -device virtio-serial-device,bus=virtio-mmio-bus.0 \
+        -chardev socket,path=/tmp/rpmsg_port_uart_socket,server=off,id=foo \
+        -device virtconsole,chardev=foo \
         -kernel proxy/nuttx -nographic
 
   c. Check the RPMSG Syslog in rpserver shell:
@@ -211,3 +219,41 @@ The command that starts QEMU and enables the QEMU EDU device looks like this::
   -machine virt,highmem=off,virtualization=off,gic-version=2 \
   -chardev stdio,id=con,mux=on -serial chardev:con -mon chardev=con,mode=readline \
   -kernel nuttx -device edu
+
+
+Gdbstub support
+===============
+The Qemu version must be above 9.2 to support two serial ports.
+
+One window::
+
+  $ ./tools/configure.sh qemu-armv7a:gdbstub; make -j25
+  qemu-system-arm -cpu cortex-a7 -nographic -machine virt,virtualization=off,gic-version=2 -net none -kernel ./nuttx  -serial mon:stdio -serial pty
+  char device redirected to /dev/pts/26 (label serial1)
+  nx_start: Entry
+  uart_register: Registering /dev/console
+  uart_register: Registering /dev/ttyS0
+
+Another window::
+
+  $ gdb-multiarch nuttx -ex "target remote /dev/pts/26"
+  GNU gdb (Ubuntu 15.0.50.20240403-0ubuntu1) 15.0.50.20240403-git
+  Copyright (C) 2024 Free Software Foundation, Inc.
+  License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+  This is free software: you are free to change and redistribute it.
+  There is NO WARRANTY, to the extent permitted by law.
+  Type "show copying" and "show warranty" for details.
+  This GDB was configured as "x86_64-linux-gnu".
+  Type "show configuration" for configuration details.
+  For bug reporting instructions, please see:
+  <https://www.gnu.org/software/gdb/bugs/>.
+  Find the GDB manual and other documentation resources online at:
+  <http://www.gnu.org/software/gdb/documentation/>.
+
+  For help, type "help".
+  Type "apropos word" to search for commands related to "word"...
+  Reading symbols from nuttx...
+  Remote debugging using /dev/pts/26
+  gdb_get_registers (state=0x402052f8) at gdbstub/lib_gdbstub.c:1020
+  1020              reg = state->running_regs;
+  (gdb) c

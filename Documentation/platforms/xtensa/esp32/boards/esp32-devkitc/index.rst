@@ -588,6 +588,22 @@ to demonstrate the use of the userleds subsystem::
     led_daemon: LED set 0x00
     led_daemon: LED set 0x01
 
+match4
+------
+
+This configuration enables match4 game using led matrix (ws2812) and gpio pins.
+Alternatively, you can use serial console for input with enabling `GAMES_MATCH4_USE_CONSOLEKEY`
+option.
+
+You can run the game by using ``match`` command::
+
+    nsh> match
+
+Here is the sample wiring diagram that demonstrates how to wire ws2812 with buttons for match4 example:
+
+.. figure:: esp32-brickmatch-game-schematic.jpg
+    :align: center
+
 max6675
 -------
 
@@ -633,11 +649,19 @@ The MCP2515 interrupt (INT) pin is connected to the pin 22 of the
 ESP32-Devkit.
 
 mcuboot_nsh
---------------------
+-----------
 
 This configuration is the same as the ``nsh`` configuration, but it generates the application
 image in a format that can be used by MCUboot. It also makes the ``make bootloader`` command to
 build the MCUboot bootloader image using the Espressif HAL.
+
+mcuboot_update_agent
+--------------------
+
+This configuration is used to represent an MCUboot image that contains an update agent
+to perform over-the-air (OTA) updates. Wi-Fi settings are already enabled and image confirmation program is included.
+
+Follow the instructions in the :ref:`MCUBoot and OTA Update <MCUBoot and OTA Update ESP32>` section to execute OTA update.
 
 mcuboot_slot_confirm
 --------------------
@@ -647,28 +671,6 @@ after flashing. The image can be confirmed by using the following command::
 
     nsh> mcuboot_confirm
     Application Image successfully confirmed!
-
-For more information, check `this demo <https://www.youtube.com/watch?v=Vzy0rl-ixbc>`_.
-
-mcuboot_update_agent
---------------------
-
-This configuration is used to represent an MCUboot image that contains an update agent
-to perform OTA updates. First, you will have to setup a HTTP server to provide the update
-image. To do that, we can run a simple Python server on the same folder that contains our
-binary file on the computer::
-
-    sudo python -m http.server 8080
-
-After this, we can use NSH to connect to our network and use the agent to perform the firmware
-update::
-
-    nsh> ifup wlan0
-    nsh> wapi mode wlan0 2
-    nsh> wapi psk wlan0 mypasswd 3
-    nsh> wapi essid wlan0 myssid 1
-    nsh> renew wlan0
-    nsh> mcuboot_agent http://<SERVER_IP>:8080/nuttx.bin
 
 For more information, check `this demo <https://www.youtube.com/watch?v=Vzy0rl-ixbc>`_.
 
@@ -921,6 +923,59 @@ To test the module connect a Data pin of RGB LED compatible with WS2812
 to ESP32 GPIO 4 and run::
 
     nsh> ws2812esp32 0 <number_of_leds_on_strip>
+
+romfs
+-----
+
+This configuration demonstrates the use of ROMFS (Read-Only Memory File System) to provide
+automated system initialization and startup scripts. ROMFS allows embedding a read-only
+filesystem directly into the NuttX binary, which is mounted at ``/etc`` during system startup.
+
+**What ROMFS provides:**
+
+* **System initialization script** (``/etc/init.d/rc.sysinit``): Executed after board bring-up
+* **Startup script** (``/etc/init.d/rcS``): Executed after system init, typically used to start applications
+
+**Default behavior:**
+
+When this configuration is used, NuttX will:
+
+1. Create a read-only RAM disk containing the ROMFS filesystem
+2. Mount the ROMFS at ``/etc``
+3. Execute ``/etc/init.d/rc.sysinit`` during system initialization
+4. Execute ``/etc/init.d/rcS`` for application startup
+
+**Customizing startup scripts:**
+
+The startup scripts are located in:
+``boards/xtensa/esp32/common/src/etc/init.d/``
+
+* ``rc.sysinit`` - System initialization script
+* ``rcS`` - Application startup script
+
+To customize these scripts:
+
+1. **Edit the script files** in ``boards/xtensa/esp32/common/src/etc/init.d/``
+2. **Add your initialization commands** using any NSH-compatible commands
+
+**Example customizations:**
+
+* **rc.sysinit** - Set up system services, mount additional filesystems, configure network.
+* **rcS** - Start your application, launch daemons, configure peripherals. This is executed after the rc.sysinit script.
+
+Example output::
+
+    *** Booting NuttX ***
+    [...]
+    rc.sysinit is called!
+    rcS file is called!
+    NuttShell (NSH) NuttX-12.8.0
+    nsh> ls /etc/init.d
+    /etc/init.d:
+    .
+    ..
+    rc.sysinit
+    rcS
 
 rtc
 ---

@@ -133,7 +133,7 @@ int can_setsockopt(FAR struct socket *psock, int level, int option,
             return -EINVAL;
           }
 
-        conn->err_mask = *(FAR can_err_mask_t *)value & CAN_ERR_MASK;
+        conn->err_mask = *(FAR can_err_mask_t *)value;
         break;
 #endif
 
@@ -158,7 +158,7 @@ int can_setsockopt(FAR struct socket *psock, int level, int option,
          * options.
          */
 
-        net_lock();
+        conn_lock(&conn->sconn);
 
         /* Set or clear the option bit */
 
@@ -171,7 +171,7 @@ int can_setsockopt(FAR struct socket *psock, int level, int option,
             _SO_CLROPT(conn->sconn.s_options, option);
           }
 
-        net_unlock();
+        conn_unlock(&conn->sconn);
         break;
 
 #if CONFIG_NET_RECV_BUFSIZE > 0
@@ -199,10 +199,37 @@ int can_setsockopt(FAR struct socket *psock, int level, int option,
 #if CONFIG_NET_MAX_RECV_BUFSIZE > 0
           buffersize = MIN(buffersize, CONFIG_NET_MAX_RECV_BUFSIZE);
 #endif
+          conn->rcvbufs = buffersize;
 
-          conn->recv_buffnum = (buffersize + CONFIG_IOB_BUFSIZE - 1)
-                              / CONFIG_IOB_BUFSIZE;
+          break;
+        }
+#endif
 
+#if CONFIG_NET_SEND_BUFSIZE > 0
+      case SO_SNDBUF:
+        {
+          int buffersize;
+
+          /* Verify options */
+
+          if (value_len != sizeof(int))
+            {
+              return -EINVAL;
+            }
+
+          buffersize = *(FAR int *)value;
+          if (buffersize < 0)
+            {
+              return -EINVAL;
+            }
+
+#   if CONFIG_NET_MAX_SEND_BUFSIZE > 0
+          /* Limit the size of the send buffer */
+
+          buffersize = MIN(buffersize, CONFIG_NET_MAX_SEND_BUFSIZE);
+#   endif
+
+          conn->sndbufs = buffersize;
           break;
         }
 #endif

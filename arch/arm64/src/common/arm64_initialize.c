@@ -100,33 +100,6 @@ uintptr_t up_get_intstackbase(int cpu)
 #endif
 
 /****************************************************************************
- * Name: up_color_intstack
- *
- * Description:
- *   Set the interrupt stack to a value so that later we can determine how
- *   much stack space was used by interrupt handling logic
- *
- ****************************************************************************/
-
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
-static void up_color_intstack(void)
-{
-#ifdef CONFIG_SMP
-  int cpu;
-
-  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
-    {
-      arm64_stack_color((void *)up_get_intstackbase(cpu), INTSTACK_SIZE);
-    }
-#else
-  arm64_stack_color((void *)g_interrupt_stack, INTSTACK_SIZE);
-#endif
-}
-#else
-#  define up_color_intstack()
-#endif
-
-/****************************************************************************
  * Name: arm64_panic_disable_fpu
  *
  * Description:
@@ -162,10 +135,6 @@ int arm64_panic_disable_fpu(struct notifier_block *block,
 
 void up_initialize(void)
 {
-  /* Initialize global variables */
-
-  up_color_intstack();
-
   /* Add any extra memory fragments to the memory manager */
 
   arm64_addregion();

@@ -293,19 +293,6 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
   size_t written = count;
   int ret;
 
-#if defined(STM32_FLASH_DUAL_BANK)
-  /* Handle paged FLASH */
-
-  if (page >= STM32_FLASH_BANK0_NPAGES)
-    {
-      base = STM32_FLASHIF1_BASE;
-    }
-  else
-#endif
-    {
-      base = STM32_FLASHIF_BASE;
-    }
-
   /* STM32 requires half-word access */
 
   if (count & 1)
@@ -323,6 +310,21 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
   if ((addr + count) > STM32_FLASH_SIZE)
     {
       return -EFAULT;
+    }
+
+#if defined(STM32_FLASH_DUAL_BANK)
+  /* Handle paged FLASH */
+
+  size_t page = addr / STM32_FLASH_PAGESIZE;
+
+  if (page >= STM32_FLASH_BANK0_NPAGES)
+    {
+      base = STM32_FLASHIF1_BASE;
+    }
+  else
+#endif
+    {
+      base = STM32_FLASHIF_BASE;
     }
 
   ret = nxmutex_lock(&g_lock);

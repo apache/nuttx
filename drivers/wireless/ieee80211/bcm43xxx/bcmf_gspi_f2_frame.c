@@ -329,7 +329,7 @@ int bcmf_gspi_send_f2_frame(FAR struct bcmf_dev_s *priv)
       /* TODO handle this case */
 
       wlwarn("No credit to send frame\n");
-      nxsig_usleep(10 * 1000);
+      nxsched_usleep(10 * 1000);
     }
 
   if (nxmutex_lock(&gbus->queue_lock) < 0)

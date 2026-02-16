@@ -33,12 +33,8 @@ Running
 When the compilation finishes it will create a ``nuttx`` binary, then run it::
 
     $ ./nuttx 
-    login: admin
-    password: Administrator
-    User Logged-in!
 
-    NuttShell (NSH) NuttX-10.1.0
-    MOTD: username=admin password=Administrator
+    NuttShell (NSH) NuttX-12.10.0
     nsh> ?
     help usage:  help [-v] [<cmd>]
 

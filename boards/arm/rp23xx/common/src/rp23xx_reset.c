@@ -25,6 +25,9 @@
 #include <nuttx/config.h>
 #include <nuttx/board.h>
 #include <nuttx/arch.h>
+#include "debug.h"
+
+#include "rp23xx_rom.h"
 
 #ifdef CONFIG_BOARDCTL_RESET
 
@@ -54,7 +57,24 @@
 
 int board_reset(int status)
 {
-  up_systemreset();
+  syslog(LOG_INFO, "reboot status=%d\n", status);
+
+  rom_reboot_fn reboot = (rom_reboot_fn)rom_func_lookup(ROM_FUNC_REBOOT);
+
+  if (status == 3)
+    {
+      reboot(REBOOT2_FLAG_REBOOT_TYPE_BOOTSEL |
+             REBOOT2_FLAG_NO_RETURN_ON_SUCCESS,
+          10, 0, 0);
+    }
+  else
+    {
+      up_systemreset();
+    }
+
+  /* Wait for the reset */
+
+  for (; ; );
   return 0;
 }
 

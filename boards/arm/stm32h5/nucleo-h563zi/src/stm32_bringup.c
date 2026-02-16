@@ -110,6 +110,45 @@ int stm32_bringup(void)
     }
 #endif /* CONFIG_ADC*/
 
+#ifdef CONFIG_STM32H5_DTS
+  /* devno == 0 creates /dev/sensor_temp0 */
+
+  ret = stm32_dts_setup(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_STM32H5_FDCAN_CHARDRIVER
+  /* Initialize CAN and register the CAN driver. */
+# ifdef CONFIG_STM32H5_FDCAN1
+  ret = stm32_can_setup(1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: FDCAN1 stm32_fdcan_setup failed: %d\n", ret);
+    }
+# endif
+
+# ifdef CONFIG_STM32H5_FDCAN2
+  ret = stm32_can_setup(2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: FDCAN2 stm32_fdcan_setup failed: %d\n", ret);
+    }
+# endif
+#endif
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

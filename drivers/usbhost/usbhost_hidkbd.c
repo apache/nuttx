@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/spinlock.h>
 
 #include <sys/types.h>
 #include <stdbool.h>
@@ -190,6 +191,7 @@ struct usbhost_state_s
   volatile bool           waiting;      /* TRUE: waiting for keyboard data */
   uint8_t                 ifno;         /* Interface number */
   int16_t                 crefs;        /* Reference count on the driver instance */
+  spinlock_t              spinlock;     /* Used to protect critical section */
   mutex_t                 lock;         /* Used to maintain mutual exclusive access */
   sem_t                   waitsem;      /* Used to wait for keyboard data */
   FAR uint8_t            *tbuffer;      /* The allocated transfer buffer */
@@ -389,10 +391,7 @@ static const struct file_operations g_hidkbd_fops =
 
 static uint32_t g_devinuse;
 
-/* The following are used to managed the class creation operation */
-
-static mutex_t g_lock = NXMUTEX_INITIALIZER;
-static FAR struct usbhost_state_s *g_priv;
+static spinlock_t g_lock = SP_UNLOCKED;
 
 /* Global caps lock status */
 
@@ -617,7 +616,7 @@ static const uint8_t ucmap[USBHID_NUMSCANCODES] =
   0,    0,       0,      0,      0,    0,    0,      0,    /* 0xa0-0xa7: Out,Oper,Clear,CrSel,Excel,(reserved) */
   0,    0,       0,      0,      0,    0,    0,      0,    /* 0xa8-0xaf: (reserved) */
   0,    0,       0,      0,      0,    0,    '(',    ')',  /* 0xb0-0xb7: 00,000,ThouSeparator,DecSeparator,CurrencyUnit,SubUnit,(,) */
-  '{',  '}',    '\t',    \177,   'A',  'B',  'C',    'D',  /* 0xb8-0xbf: {,},tab,backspace,A-D */
+  '{',  '}',    '\t',    '\177', 'A',  'B',  'C',    'D',  /* 0xb8-0xbf: {,},tab,backspace,A-D */
   'F',  'F',     0,      '^',    '%',  '<', '>',     '&',  /* 0xc0-0xc7: E-F,XOR,^,%,<,>,& */
   0,    '|',     0,      ':',    '%',  ' ', '@',     '!',  /* 0xc8-0xcf: &&,|,||,:,#, ,@,! */
   0,    0,       0,      0,      0,    0,   0,       0,    /* 0xd0-0xd7: Memory Store,Recall,Clear,Add,Subtract,Multiply,Divide,+/- */
@@ -735,7 +734,7 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
   irqstate_t flags;
   int devno;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
   for (devno = 0; devno < 26; devno++)
     {
       uint32_t bitno = 1 << devno;
@@ -743,12 +742,12 @@ static int usbhost_allocdevno(FAR struct usbhost_state_s *priv)
         {
           g_devinuse |= bitno;
           priv->devchar = 'a' + devno;
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(&g_lock, flags);
           return OK;
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
   return -EMFILE;
 }
 
@@ -758,9 +757,9 @@ static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
 
   if (devno >= 0 && devno < 26)
     {
-      irqstate_t flags = enter_critical_section();
+      irqstate_t flags = spin_lock_irqsave(&g_lock);
       g_devinuse &= ~(1 << devno);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_lock, flags);
     }
 }
 
@@ -1047,9 +1046,9 @@ static inline bool usbhost_get_capslock(void)
   irqstate_t flags;
   bool retval;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
   retval = g_caps_lock;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 
   return retval;
 }
@@ -1072,9 +1071,9 @@ static inline void usbhost_toggle_capslock(void)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
   g_caps_lock = !g_caps_lock;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 }
 
 /****************************************************************************
@@ -1371,8 +1370,6 @@ static void usbhost_kbd_callback(FAR void *arg, ssize_t nbytes)
 static int usbhost_kbdpoll(int argc, FAR char *argv[])
 {
   FAR struct usbhost_state_s *priv;
-  irqstate_t flags;
-
 #if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
   unsigned int npolls = 0;
 #endif
@@ -1393,12 +1390,12 @@ static int usbhost_kbdpoll(int argc, FAR char *argv[])
    * decrement when this thread exits.
    */
 
-  priv = g_priv;
+  priv = (FAR struct usbhost_state_s *)strtoul(argv[1], NULL, 16);
   DEBUGASSERT(priv != NULL && priv->usbclass.hport);
 
   priv->polling = true;
   nxsem_post(&priv->syncsem);
-  nxsig_sleep(1);
+  nxsched_sleep(1);
 
   /* Loop here until the device is disconnected */
 
@@ -1532,7 +1529,7 @@ static int usbhost_kbdpoll(int argc, FAR char *argv[])
           delay = CONFIG_HIDKBD_POLLUSEC;
         }
 
-      nxsig_usleep(delay);
+      nxsched_usleep(delay);
     }
 
   /* We get here when the driver is removed.. or when too many errors have
@@ -1553,7 +1550,6 @@ static int usbhost_kbdpoll(int argc, FAR char *argv[])
 
   uinfo("Keyboard removed, polling halted\n");
 
-  flags = enter_critical_section();
   priv->polling = false;
 
   /* Decrement the reference count held by this thread. */
@@ -1588,7 +1584,6 @@ static int usbhost_kbdpoll(int argc, FAR char *argv[])
       nxmutex_unlock(&priv->lock);
     }
 
-  leave_critical_section(flags);
   return 0;
 }
 
@@ -1880,8 +1875,10 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 {
   char devname[DEV_NAMELEN];
-  int ret;
+  FAR char *argv[2];
+  char arg1[16];
   uint8_t leds;
+  int ret;
 #ifdef CONFIG_HIDKBD_NOGETREPORT
   FAR struct usbhost_hubport_s *hport;
   hport = priv->usbclass.hport;
@@ -1964,33 +1961,19 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
   uinfo("Start poll task\n");
 
-  /* The inputs to a task started by kthread_create() are very awkward for
-   * this purpose.  They are really designed for command line tasks
-   * (argc/argv).  So the following is kludge pass binary data when the
-   * keyboard poll task is started.
-   *
-   * First, make sure we have exclusive access to g_priv (what is the
-   * likelihood of this being used?  About zero, but we protect it anyway).
-   */
+  snprintf(arg1, sizeof(arg1), "%p", priv);
 
-  ret = nxmutex_lock(&g_lock);
-  if (ret < 0)
-    {
-      usbhost_tdfree(priv);
-      goto errout;
-    }
-
-  g_priv = priv;
+  argv[0] = arg1;
+  argv[1] = NULL;
 
   ret = kthread_create("kbdpoll", CONFIG_HIDKBD_DEFPRIO,
-                       CONFIG_HIDKBD_STACKSIZE, usbhost_kbdpoll, NULL);
+                       CONFIG_HIDKBD_STACKSIZE, usbhost_kbdpoll, argv);
   if (ret < 0)
     {
       /* Failed to started the poll thread...
        * probably due to memory resources
        */
 
-      nxmutex_unlock(&g_lock);
       goto errout;
     }
 
@@ -1999,8 +1982,6 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
   /* Now wait for the poll task to get properly initialized */
 
   ret = nxsem_wait_uninterruptible(&priv->syncsem);
-  nxmutex_unlock(&g_lock);
-
   if (ret < 0)
     {
       goto errout;
@@ -2316,6 +2297,7 @@ usbhost_create(FAR struct usbhost_hubport_s *hport,
           nxmutex_init(&priv->lock);
           nxsem_init(&priv->waitsem, 0, 0);
           nxsem_init(&priv->syncsem, 0, 0);
+          spin_lock_init(&priv->spinlock);
 
           priv->empty = true;
 
@@ -2518,7 +2500,7 @@ static int usbhost_open(FAR struct file *filep)
    * disconnect events.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
   if (priv->disconnected)
     {
       /* No... the driver is no longer bound to the class.  That means that
@@ -2537,7 +2519,7 @@ static int usbhost_open(FAR struct file *filep)
       ret        = OK;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->spinlock, flags);
 
   nxmutex_unlock(&priv->lock);
   return ret;
@@ -2575,7 +2557,7 @@ static int usbhost_close(FAR struct file *filep)
    * asynchronous poll or disconnect events.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
   priv->crefs--;
 
   /* Check if the USB mouse device is still connected.  If the device is
@@ -2615,11 +2597,11 @@ static int usbhost_close(FAR struct file *filep)
                * and free the driver class instance.
                */
 
+              spin_unlock_irqrestore(&priv->spinlock, flags);
               usbhost_destroy(priv);
 
               /* Skip giving the semaphore... it is no longer valid */
 
-              leave_critical_section(flags);
               return OK;
             }
           else /* if (priv->crefs == 1) */
@@ -2634,8 +2616,8 @@ static int usbhost_close(FAR struct file *filep)
         }
     }
 
+  spin_unlock_irqrestore(&priv->spinlock, flags);
   nxmutex_unlock(&priv->lock);
-  leave_critical_section(flags);
   return OK;
 }
 

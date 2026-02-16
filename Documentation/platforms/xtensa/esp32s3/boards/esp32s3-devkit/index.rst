@@ -195,6 +195,24 @@ disables the NuttShell to get the best possible score.
 .. note:: As the NSH is disabled, the application will start as soon as the
   system is turned on.
 
+crypto
+------
+
+This configuration enables support for the cryptographic hardware and
+the ``/dev/crypto`` device file. Currently, we are supporting SHA-1,
+SHA-224 and SHA-256 algorithms using hardware.
+To test hardware acceleration, you can use `hmac` example and following output
+should look like this::
+
+    nsh> hmac
+    ...
+    hmac sha1 success
+    hmac sha1 success
+    hmac sha1 success
+    hmac sha256 success
+    hmac sha256 success
+    hmac sha256 success
+
 cxx
 ---
 Development environment ready for C++ applications. You can check if the setup
@@ -374,6 +392,123 @@ Flash and PSRAM).
 .. warning:: The World Controller and Permission Control **do not** prevent
   the application from accessing CPU System Registers.
 
+mbedtls
+-------
+
+This configuration is to test mbedtls.
+
+A benchmark result::
+
+  MD5                      :      13300 KiB/s,          0 cycles/byte
+  RIPEMD160                :       5658 KiB/s,          0 cycles/byte
+  SHA-1                    :       6460 KiB/s,          0 cycles/byte
+  SHA-256                  :       3358 KiB/s,          0 cycles/byte
+  SHA-512                  :       1519 KiB/s,          0 cycles/byte
+  SHA3-224                 :        473 KiB/s,          2 cycles/byte
+  SHA3-256                 :        472 KiB/s,          2 cycles/byte
+  SHA3-384                 :        382 KiB/s,          2 cycles/byte
+  SHA3-512                 :        256 KiB/s,          3 cycles/byte
+  3DES                     :        712 KiB/s,          1 cycles/byte
+  DES                      :       1743 KiB/s,          0 cycles/byte
+  3DES-CMAC                :        665 KiB/s,          1 cycles/byte
+  AES-CBC-128              :       3002 KiB/s,          0 cycles/byte
+  AES-CBC-192              :       2656 KiB/s,          0 cycles/byte
+  AES-CBC-256              :       2365 KiB/s,          0 cycles/byte
+  AES-CFB128-128           :       2815 KiB/s,          0 cycles/byte
+  AES-CFB128-192           :       2499 KiB/s,          0 cycles/byte
+  AES-CFB128-256           :       2262 KiB/s,          0 cycles/byte
+  AES-CFB8-128             :        207 KiB/s,          4 cycles/byte
+  AES-CFB8-192             :        181 KiB/s,          5 cycles/byte
+  AES-CFB8-256             :        161 KiB/s,          6 cycles/byte
+  AES-CTR-128              :       2894 KiB/s,          0 cycles/byte
+  AES-CTR-192              :       2567 KiB/s,          0 cycles/byte
+  AES-CTR-256              :       2317 KiB/s,          0 cycles/byte
+  AES-XTS-128              :       2827 KiB/s,          0 cycles/byte
+  AES-XTS-256              :       2261 KiB/s,          0 cycles/byte
+  AES-GCM-128              :        643 KiB/s,          1 cycles/byte
+  AES-GCM-192              :        627 KiB/s,          1 cycles/byte
+  AES-GCM-256              :        612 KiB/s,          1 cycles/byte
+  AES-CCM-128              :       1350 KiB/s,          0 cycles/byte
+  AES-CCM-192              :       1207 KiB/s,          0 cycles/byte
+  AES-CCM-256              :       1087 KiB/s,          0 cycles/byte
+  ChaCha20-Poly1305        :       2093 KiB/s,          0 cycles/byte
+  AES-CMAC-128             :       2654 KiB/s,          0 cycles/byte
+  AES-CMAC-192             :       2376 KiB/s,          0 cycles/byte
+  AES-CMAC-256             :       2134 KiB/s,          0 cycles/byte
+  AES-CMAC-PRF-128         :       2644 KiB/s,          0 cycles/byte
+  ARIA-CBC-128             :       1329 KiB/s,          0 cycles/byte
+  ARIA-CBC-192             :       1140 KiB/s,          0 cycles/byte
+  ARIA-CBC-256             :       1015 KiB/s,          0 cycles/byte
+  CAMELLIA-CBC-128         :       1904 KiB/s,          0 cycles/byte
+  CAMELLIA-CBC-192         :       1515 KiB/s,          0 cycles/byte
+  CAMELLIA-CBC-256         :       1518 KiB/s,          0 cycles/byte
+  ChaCha20                 :       2732 KiB/s,          0 cycles/byte
+  Poly1305                 :      11615 KiB/s,          0 cycles/byte
+  CTR_DRBG (NOPR)          :       2336 KiB/s,          0 cycles/byte
+  CTR_DRBG (PR)            :       1607 KiB/s,          0 cycles/byte
+  HMAC_DRBG SHA-1 (NOPR)   :        441 KiB/s,          2 cycles/byte
+  HMAC_DRBG SHA-1 (PR)     :        408 KiB/s,          2 cycles/byte
+  HMAC_DRBG SHA-256 (NOPR) :        339 KiB/s,          2 cycles/byte
+  HMAC_DRBG SHA-256 (PR)   :        342 KiB/s,          2 cycles/byte
+  RSA-2048                 :      42  public/s
+  RSA-2048                 :       2 private/s
+  RSA-3072                 :      20  public/s
+  RSA-3072                 :       1 private/s
+  RSA-4096                 :      11  public/s
+  RSA-4096                 :       0 private/s
+  DHE-2048                 :       0 handshake/s
+  DH-2048                  :       0 handshake/s
+  DHE-3072                 :       0 handshake/s
+  DH-3072                  :       0 handshake/s
+  ECDSA-secp521r1          :       4 sign/s
+  ECDSA-brainpoolP512r1    :       1 sign/s
+  ECDSA-secp384r1          :       5 sign/s
+  ECDSA-brainpoolP384r1    :       1 sign/s
+  ECDSA-secp256r1          :      11 sign/s
+  ECDSA-secp256k1          :       9 sign/s
+  ECDSA-brainpoolP256r1    :       2 sign/s
+  ECDSA-secp224r1          :      16 sign/s
+  ECDSA-secp224k1          :      11 sign/s
+  ECDSA-secp192r1          :      21 sign/s
+  ECDSA-secp192k1          :      13 sign/s
+  ECDSA-secp521r1          :       2 verify/s
+  ECDSA-brainpoolP512r1    :       0 verify/s
+  ECDSA-secp384r1          :       3 verify/s
+  ECDSA-brainpoolP384r1    :       1 verify/s
+  ECDSA-secp256r1          :       6 verify/s
+  ECDSA-secp256k1          :       5 verify/s
+  ECDSA-brainpoolP256r1    :       1 verify/s
+  ECDSA-secp224r1          :       8 verify/s
+  ECDSA-secp224k1          :       6 verify/s
+  ECDSA-secp192r1          :      11 verify/s
+  ECDSA-secp192k1          :       7 verify/s
+  ECDHE-secp521r1          :       2 ephemeral handshake/s
+  ECDHE-brainpoolP512r1    :       0 ephemeral handshake/s
+  ECDHE-secp384r1          :       3 ephemeral handshake/s
+  ECDHE-brainpoolP384r1    :       1 ephemeral handshake/s
+  ECDHE-secp256r1          :       6 ephemeral handshake/s
+  ECDHE-secp256k1          :       5 ephemeral handshake/s
+  ECDHE-brainpoolP256r1    :       1 ephemeral handshake/s
+  ECDHE-secp224r1          :       8 ephemeral handshake/s
+  ECDHE-secp224k1          :       6 ephemeral handshake/s
+  ECDHE-secp192r1          :      12 ephemeral handshake/s
+  ECDHE-secp192k1          :       7 ephemeral handshake/s
+  ECDHE-x25519             :       6 ephemeral handshake/s
+  ECDHE-x448               :       2 ephemeral handshake/s
+  ECDH-secp521r1           :       4 static handshake/s
+  ECDH-brainpoolP512r1     :       1 static handshake/s
+  ECDH-secp384r1           :       6 static handshake/s
+  ECDH-brainpoolP384r1     :       1 static handshake/s
+  ECDH-secp256r1           :      11 static handshake/s
+  ECDH-secp256k1           :      10 static handshake/s
+  ECDH-brainpoolP256r1     :       2 static handshake/s
+  ECDH-secp224r1           :      17 static handshake/s
+  ECDH-secp224k1           :      11 static handshake/s
+  ECDH-secp192r1           :      23 static handshake/s
+  ECDH-secp192k1           :      14 static handshake/s
+  ECDH-x25519              :      12 static handshake/s
+  ECDH-x448                :       5 static handshake/s
+
 motor
 -------
 
@@ -392,6 +527,14 @@ mcuboot_nsh
 This configuration is the same as the ``nsh`` configuration, but it generates the application
 image in a format that can be used by MCUboot. It also makes the ``make bootloader`` command to
 build the MCUboot bootloader image using the Espressif HAL.
+
+mcuboot_update_agent
+--------------------
+
+This configuration is used to represent an MCUboot image that contains an update agent
+to perform over-the-air (OTA) updates. Wi-Fi settings are already enabled and image confirmation program is included.
+
+Follow the instructions in the :ref:`MCUBoot and OTA Update <MCUBoot and OTA Update S3>` section to execute OTA update.
 
 nsh
 ---
@@ -470,6 +613,12 @@ To test it, just run the ``oneshot`` example::
     Waiting...
     Finished
 
+ostest
+------
+
+This is the NuttX test at apps/testing/ostest that is run against all new
+architecture ports to assure a correct implementation of the OS.
+
 qencoder
 ---
 
@@ -493,6 +642,20 @@ Enables PM support. You can define standby mode and sleep mode delay time::
            (0)  PM_STANDBY delay (nanoseconds)
            (20) PM_SLEEP delay (seconds)
            (0)  PM_SLEEP delay (nanoseconds)
+
+You can also define an EXT1 wakeup for both sleep modes by selecting which RTC
+GPIO will be used and the logic level that will trigger it::
+
+    $ make menuconfig
+    -> Board Selection
+        -> [*] PM EXT1 Wakeup
+                  PM EXT1 Wakeup Sources  --->
+                    [ ] RTC_GPIO<N>
+              (0) PM EXT1 Wakeup Trigger Mode
+
+To enable ULP coprocessor wakeup ``CONFIG_PM_ULP_WAKEUP`` option needs to be enabled.
+After that, ULP core can wake up HP core using ``ulp_riscv_wakeup_main_processor`` function
+which needs to be called in the ULP app.
 
 Before switching PM status, you need to query the current PM status::
 
@@ -676,6 +839,59 @@ Please note that this board contains an on-board WS2812 LED connected to GPIO48
 (or GPIO38, depending on the board version) and, by default, this config
 configures the RMT transmitter in the same pin.
 
+romfs
+-----
+
+This configuration demonstrates the use of ROMFS (Read-Only Memory File System) to provide
+automated system initialization and startup scripts. ROMFS allows embedding a read-only
+filesystem directly into the NuttX binary, which is mounted at ``/etc`` during system startup.
+
+**What ROMFS provides:**
+
+* **System initialization script** (``/etc/init.d/rc.sysinit``): Executed after board bring-up
+* **Startup script** (``/etc/init.d/rcS``): Executed after system init, typically used to start applications
+
+**Default behavior:**
+
+When this configuration is used, NuttX will:
+
+1. Create a read-only RAM disk containing the ROMFS filesystem
+2. Mount the ROMFS at ``/etc``
+3. Execute ``/etc/init.d/rc.sysinit`` during system initialization
+4. Execute ``/etc/init.d/rcS`` for application startup
+
+**Customizing startup scripts:**
+
+The startup scripts are located in:
+``boards/xtensa/esp32s3/common/src/etc/init.d/``
+
+* ``rc.sysinit`` - System initialization script
+* ``rcS`` - Application startup script
+
+To customize these scripts:
+
+1. **Edit the script files** in ``boards/xtensa/esp32s3/common/src/etc/init.d/``
+2. **Add your initialization commands** using any NSH-compatible commands
+
+**Example customizations:**
+
+* **rc.sysinit** - Set up system services, mount additional filesystems, configure network.
+* **rcS** - Start your application, launch daemons, configure peripherals. This is executed after the rc.sysinit script.
+
+Example output::
+
+    *** Booting NuttX ***
+    [...]
+    rc.sysinit is called!
+    rcS file is called!
+    NuttShell (NSH) NuttX-12.8.0
+    nsh> ls /etc/init.d
+    /etc/init.d:
+    .
+    ..
+    rc.sysinit
+    rcS
+
 rtc
 ---
 
@@ -820,6 +1036,26 @@ Once booted you can use the following commands to mount the file system::
 
 Note that mksmartfs is only needed the first time.
 
+spislv
+------
+
+This configuration enables the SPI2 peripheral in **slave mode** and
+provides the ``spislv`` example application to test data exchange with an
+external SPI master.
+
+After building and flashing the firmware, run the following command on the
+board terminal::
+
+    nsh> spislv -x 5 1a2b3c4d5e
+
+This command enqueues the data sequence ``1a2b3c4d5e`` in the slave buffer.
+On the next transfer, the external SPI master should receive this data back
+from the slave.
+
+By default, SPI2 pins are used for the slave interface. The exact pin mapping
+depends on the ESP32-S3 DevKit version and can be adjusted through
+``menuconfig`` under *System type → SPI configuration*.
+
 sta_softap
 ----------
 
@@ -924,6 +1160,47 @@ the ``Device Drivers -> CAN Driver Support -> CAN loopback mode`` option and run
       TSEG2: 4
         SJW: 3
       ID:    1 DLC: 1
+
+ulp
+---
+
+This configuration enables the support for the ULP RISC-V core coprocessor.
+To get more information about LP Core please check :ref:`ULP LP Core Coprocessor docs. <esp32s3_ulp>`
+
+Configuration uses a pre-built binary in ``Documentation/platforms/xtensa/esp32s3/boards/esp32s3-devkit/ulp_riscv_blink.bin``
+which is a blink example for GPIO0. After flashing operation, GPIO0 pin will blink.
+
+Prebuild binary runs this code:
+
+.. code-block:: C
+
+   #include <stdio.h>
+   #include <stdint.h>
+   #include <stdbool.h>
+   #include "ulp_riscv.h"
+   #include "ulp_riscv_utils.h"
+   #include "ulp_riscv_gpio.h"
+
+   #define GPIO_PIN 0
+
+   #define nop() __asm__ __volatile__ ("nop")
+
+   bool gpio_level_previous = true;
+
+   int main (void)
+    {
+       while (1)
+           {
+           ulp_riscv_gpio_output_level(GPIO_PIN, gpio_level_previous);
+           gpio_level_previous = !gpio_level_previous;
+           for (int i = 0; i < 10000; i++)
+             {
+               nop();
+             }
+           }
+
+       return 0;
+    }
 
 usbnsh
 ------

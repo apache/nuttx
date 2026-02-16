@@ -48,7 +48,6 @@
 struct restart_arg_s
 {
   pid_t pid;
-  cpu_set_t saved_affinity;
   bool need_restore;
 };
 
@@ -78,7 +77,6 @@ static int restart_handler(FAR void *cookie)
 
   if (arg->need_restore)
     {
-      tcb->affinity = arg->saved_affinity;
       tcb->flags &= ~TCB_FLAG_CPU_LOCKED;
     }
 
@@ -121,8 +119,12 @@ static void nxtask_reset_task(FAR struct tcb_s *tcb, bool remove)
 
   /* Deallocate anything left in the TCB's signal queues */
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   nxsig_cleanup(tcb);             /* Deallocate Signal lists */
+#endif
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   sigemptyset(&tcb->sigprocmask); /* Reset sigprocmask */
+#endif
 
   /* Reset the current task priority  */
 
@@ -237,12 +239,8 @@ static int nxtask_restart(pid_t pid)
       else
         {
           arg.pid = tcb->pid;
-          arg.saved_affinity = tcb->affinity;
           arg.need_restore = true;
-
           tcb->flags |= TCB_FLAG_CPU_LOCKED;
-          CPU_ZERO(&tcb->affinity);
-          CPU_SET(tcb->cpu, &tcb->affinity);
         }
 
       nxsched_smp_call_single(tcb->cpu, restart_handler, &arg);

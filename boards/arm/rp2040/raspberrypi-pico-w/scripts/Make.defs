@@ -26,9 +26,9 @@ include $(TOPDIR)/tools/rp2040/Config.mk
 include $(TOPDIR)/arch/arm/src/armv6-m/Toolchain.defs
 
 ifeq ($(CONFIG_RP2040_FLASH_BOOT),y)
-  LDSCRIPT = raspberrypi-pico-flash.ld
+  LDSCRIPT = raspberrypi-pico-w-flash.ld
 else
-  LDSCRIPT = raspberrypi-pico-sram.ld
+  LDSCRIPT = raspberrypi-pico-w-sram.ld
 endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)

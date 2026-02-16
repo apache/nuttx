@@ -51,14 +51,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* These are special values of si_signo that mean that either the wait was
- * awakened with a timeout, or the wait was canceled... not the receipt of a
- * signal.
- */
-
-#define SIG_CANCEL_TIMEOUT 0xfe
-#define SIG_WAIT_TIMEOUT   0xff
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -93,32 +85,7 @@ static void nxsig_timeout(wdparm_t arg)
 
   if (wtcb->task_state == TSTATE_WAIT_SIG)
     {
-      FAR struct tcb_s *rtcb = this_task();
-
-      if (wtcb->sigunbinfo != NULL)
-        {
-          wtcb->sigunbinfo->si_signo           = SIG_WAIT_TIMEOUT;
-          wtcb->sigunbinfo->si_code            = SI_TIMER;
-          wtcb->sigunbinfo->si_errno           = ETIMEDOUT;
-          wtcb->sigunbinfo->si_value.sival_int = 0;
-#ifdef CONFIG_SCHED_HAVE_PARENT
-          wtcb->sigunbinfo->si_pid             = 0;  /* Not applicable */
-          wtcb->sigunbinfo->si_status          = OK;
-#endif
-        }
-
-      /* Remove the task from waiting list */
-
-      dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
-
-      /* Add the task to ready-to-run task list, and
-       * perform the context switch if one is needed
-       */
-
-      if (nxsched_add_readytorun(wtcb))
-        {
-          up_switch_context(wtcb, rtcb);
-        }
+      nxsig_wait_irq(wtcb, SIG_WAIT_TIMEOUT, SI_TIMER, ETIMEDOUT);
     }
 
   leave_critical_section(flags);
@@ -137,63 +104,36 @@ static void nxsig_timeout(wdparm_t arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CANCELLATION_POINTS
-void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode)
+void nxsig_wait_irq(FAR struct tcb_s *wtcb, uint8_t signo,
+                    uint8_t code, int errcode)
 {
-#ifdef CONFIG_SMP
-  irqstate_t flags;
+  FAR struct tcb_s *rtcb = this_task();
 
-  /* We must be in a critical section in order to call up_switch_context()
-   * below.  If we are running on a single CPU architecture, then we know
-   * interrupts a disabled an there is no need to explicitly call
-   * enter_critical_section().  However, in the SMP case,
-   * enter_critical_section() does much more than just disable interrupts on
-   * the local CPU; it also manages spinlocks to assure the stability of the
-   * TCB that we are manipulating.
-   */
-
-  flags = enter_critical_section();
-#endif
-
-  /* There may be a race condition -- make sure the task is
-   * still waiting for a signal
-   */
-
-  if (wtcb->task_state == TSTATE_WAIT_SIG)
+  if (wtcb->sigunbinfo != NULL)
     {
-      FAR struct tcb_s *rtcb = this_task();
-
-      if (wtcb->sigunbinfo != NULL)
-        {
-          wtcb->sigunbinfo->si_signo           = SIG_CANCEL_TIMEOUT;
-          wtcb->sigunbinfo->si_code            = SI_USER;
-          wtcb->sigunbinfo->si_errno           = errcode;
-          wtcb->sigunbinfo->si_value.sival_int = 0;
+      wtcb->sigunbinfo->si_signo           = signo;
+      wtcb->sigunbinfo->si_code            = code;
+      wtcb->sigunbinfo->si_errno           = errcode;
+      wtcb->sigunbinfo->si_value.sival_int = 0;
 #ifdef CONFIG_SCHED_HAVE_PARENT
-          wtcb->sigunbinfo->si_pid             = 0;  /* Not applicable */
-          wtcb->sigunbinfo->si_status          = OK;
+      wtcb->sigunbinfo->si_pid             = 0;  /* Not applicable */
+      wtcb->sigunbinfo->si_status          = OK;
 #endif
-        }
-
-      /* Remove the task from waiting list */
-
-      dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
-
-      /* Add the task to ready-to-run task list, and
-       * perform the context switch if one is needed
-       */
-
-      if (nxsched_add_readytorun(wtcb))
-        {
-          up_switch_context(wtcb, rtcb);
-        }
     }
 
-#ifdef CONFIG_SMP
-  leave_critical_section(flags);
-#endif
+  /* Remove the task from waiting list */
+
+  dq_rem((FAR dq_entry_t *)wtcb, list_waitingforsignal());
+
+  /* Add the task to ready-to-run task list, and
+   * perform the context switch if one is needed
+   */
+
+  if (nxsched_add_readytorun(wtcb))
+    {
+      up_switch_context(this_task(), rtcb);
+    }
 }
-#endif /* CONFIG_CANCELLATION_POINTS */
 
 /****************************************************************************
  * Name: nxsig_clockwait
@@ -246,8 +186,8 @@ int nxsig_clockwait(int clockid, int flags,
 {
   FAR struct tcb_s *rtcb;
   irqstate_t        iflags;
-  clock_t expect = 0;
-  clock_t stop;
+  clock_t expect = 0u;
+  clock_t stop   = 0u;
 
   if (rqtp && (rqtp->tv_nsec < 0 || rqtp->tv_nsec >= 1000000000))
     {
@@ -298,19 +238,25 @@ int nxsig_clockwait(int clockid, int flags,
       if ((flags & TIMER_ABSTIME) == 0)
         {
           expect = clock_delay2abstick(clock_time2ticks(rqtp));
-          wd_start_abstick(&rtcb->waitdog, expect,
-                           nxsig_timeout, (uintptr_t)rtcb);
         }
       else if (clockid == CLOCK_REALTIME)
         {
-          wd_start_realtime(&rtcb->waitdog, rqtp,
-                            nxsig_timeout, (uintptr_t)rtcb);
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+          clock_t delay;
+
+          clock_abstime2ticks(CLOCK_REALTIME, rqtp, &delay);
+          expect = clock_delay2abstick(delay);
+#else
+          clock_realtime2absticks(rqtp, &expect);
+#endif
         }
       else
         {
-          wd_start_abstime(&rtcb->waitdog, rqtp,
-                           nxsig_timeout, (uintptr_t)rtcb);
+          expect = clock_time2ticks(rqtp);
         }
+
+        wd_start_abstick(&rtcb->waitdog, expect,
+                         nxsig_timeout, (uintptr_t)rtcb);
     }
 
   /* Remove the tcb task from the ready-to-run list. */
@@ -320,7 +266,7 @@ int nxsig_clockwait(int clockid, int flags,
   /* Add the task to the specified blocked task list */
 
   rtcb->task_state = TSTATE_WAIT_SIG;
-  dq_addlast((FAR dq_entry_t *)rtcb, &g_waitingforsignal);
+  dq_addlast((FAR dq_entry_t *)rtcb, list_waitingforsignal());
 
   /* Now, perform the context switch if one is needed */
 
@@ -330,7 +276,6 @@ int nxsig_clockwait(int clockid, int flags,
 
   if (rqtp)
     {
-      wd_cancel(&rtcb->waitdog);
       stop = clock_systime_ticks();
     }
 
@@ -338,7 +283,8 @@ int nxsig_clockwait(int clockid, int flags,
 
   if (rqtp && rmtp && expect)
     {
-      clock_ticks2time(rmtp, expect > stop ? expect - stop : 0);
+      clock_ticks2time(rmtp,
+                       clock_compare(stop, expect) ? expect - stop : 0);
     }
 
   return 0;
@@ -388,13 +334,15 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
                     FAR const struct timespec *timeout)
 {
   FAR struct tcb_s *rtcb;
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   sigset_t intersection;
   FAR sigpendq_t *sigpend;
+#endif
   irqstate_t flags;
   siginfo_t unbinfo;
   int ret;
 
-  DEBUGASSERT(set != NULL);
+  DEBUGASSERT(set != NULL && up_interrupt_context() == false);
 
   /* Several operations must be performed below:  We must determine if any
    * signal is pending and, if not, wait for the signal.  Since signals can
@@ -405,6 +353,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
   flags = enter_critical_section();
   rtcb  = this_task();
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   /* Check if there is a pending signal corresponding to one of the
    * signals in the pending signal set argument.
    */
@@ -441,6 +390,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
   /* We will have to wait for a signal to be posted to this task. */
 
   else
+#endif
     {
       rtcb->sigunbinfo = (info == NULL) ? &unbinfo : info;
 
@@ -473,7 +423,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
            * that we were waiting for?
            */
 
-          if (nxsig_ismember(set, rtcb->sigunbinfo->si_signo))
+          if (nxsig_ismember(set, rtcb->sigunbinfo->si_signo) == 1)
             {
               /* Yes.. the return value is the number of the signal that
                * awakened us.

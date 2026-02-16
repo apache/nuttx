@@ -20,6 +20,12 @@
 #
 ############################################################################
 
+# MCUBoot requires a region in flash for the E-Fuse virtual mode.
+# To avoid erasing this region, flash a dummy empty file to the
+# virtual E-Fuse offset.
+
+VIRTUAL_EFUSE_BIN := vefuse.bin
+
 # These are the macros that will be used in the NuttX make system to compile
 # and assemble source files and to insert the resulting object files into an
 # archive.  These replace the default definitions at tools/Config.mk
@@ -56,6 +62,12 @@ endif
 
 ESPTOOL_FLASH_OPTS := -fs $(FLASH_SIZE) -fm $(FLASH_MODE) -ff $(FLASH_FREQ)
 
+define MAKE_VIRTUAL_EFUSE_BIN
+	$(Q)if [ ! -f "$(VIRTUAL_EFUSE_BIN)" ]; then \
+		dd if=/dev/zero of=$(VIRTUAL_EFUSE_BIN) count=0 status=none; \
+	fi
+endef
+
 # Configure the variables according to build environment
 
 ESPTOOL_MIN_VERSION := 4.8.0
@@ -82,6 +94,9 @@ ifeq ($(CONFIG_ESP32S3_APP_FORMAT_LEGACY),y)
 	APP_IMAGE      := nuttx.bin
 	FLASH_APP      := $(APP_OFFSET) $(APP_IMAGE)
 else ifeq ($(CONFIG_ESP32S3_APP_FORMAT_MCUBOOT),y)
+
+	ESPTOOL_BINS += $(CONFIG_ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH_OFFSET) $(VIRTUAL_EFUSE_BIN)
+
 	ifeq ($(CONFIG_ESP32S3_ESPTOOL_TARGET_PRIMARY),y)
 		VERIFIED   := --confirm
 		APP_OFFSET := $(CONFIG_ESP32S3_OTA_PRIMARY_SLOT_OFFSET)
@@ -92,7 +107,19 @@ else ifeq ($(CONFIG_ESP32S3_APP_FORMAT_MCUBOOT),y)
 
 	APP_IMAGE      := nuttx.bin
 	FLASH_APP      := $(APP_OFFSET) $(APP_IMAGE)
-	IMGTOOL_ALIGN_ARGS := --align 4
+
+	ifeq ($(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_ENABLED),y)
+		ifeq ($(CONFIG_ESPRESSIF_SPIFLASH),y)
+			ENC_APP := $(CONFIG_ESP32S3_STORAGE_MTD_OFFSET) enc_mtd.bin
+		endif
+	endif
+
+	ifeq ($(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_ENABLED),y)
+		IMGTOOL_ALIGN_ARGS := --align 32 --max-align 32
+	else
+		IMGTOOL_ALIGN_ARGS := --align 4
+	endif
+
 	IMGTOOL_SIGN_ARGS  := --pad $(VERIFIED) $(IMGTOOL_ALIGN_ARGS) -v 0 -s auto \
 		-H $(CONFIG_ESP32S3_APP_MCUBOOT_HEADER_SIZE) --pad-header \
 		-S $(CONFIG_ESP32S3_OTA_SLOT_SIZE)
@@ -105,7 +132,7 @@ else
 	ESPTOOL_BINDIR := .
 endif
 
-ESPTOOL_BINS += $(FLASH_APP)
+ESPTOOL_BINS += $(FLASH_APP) $(ENC_APP)
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 	# Check the operating system
@@ -118,6 +145,75 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 		ESPTOOL_BINS += $(shell printf "%#x\n" $$(( $(CONFIG_ESP32S3_KERNEL_OFFSET) + $(CONFIG_ESP32S3_KERNEL_IMAGE_SIZE) ))) nuttx_user.bin
 	endif
 endif
+
+# Commands for colored and formatted output
+
+RED    = \033[1;31m
+YELLOW = \033[1;33m
+BOLD   = \033[1m
+RST    = \033[0m
+
+# Flash encryption procedure
+
+define FLASH_ENC
+	$(Q) echo -e "$(YELLOW)Flash Encryption is enabled!$(RST)";
+
+	$(Q) if [ "$(CONFIG_ESPRESSIF_EFUSE_VIRTUAL)" = "y" ]; then \
+		echo -e "$(YELLOW)WARN: Virtual E-Fuses are enabled! E-Fuses will not be burned. $(RST)"; \
+	fi
+
+	$(Q) if [ "$(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_USE_HOST_KEY)" = "y" ]; then \
+		if [ ! -f "$(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_HOST_KEY_NAME)" ]; then \
+			echo -e "$(RED)FLASH ENCRYPTION error: Key file '$(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_HOST_KEY_NAME)' not found.$(RST)"; \
+			echo -e "$(YELLOW)Generate the encryption key using: espsecure.py generate_flash_encryption_key <key_name.bin>$(RST)"; \
+			echo -e "$(YELLOW)Refer to the documentation on flash encryption before proceeding.$(RST)"; \
+			exit 1; \
+		fi; \
+	fi
+
+	$(Q) if [ "$(CONFIG_ESPRESSIF_SPIFLASH)" = "y" ]; then \
+		echo "Applying encryption to user MTD partition on flash."; \
+		if [ ! -f "$(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_HOST_KEY_NAME)" ]; then \
+			echo -e "$(RED)Flash encryption key is required for user MTD partition encryption. Key file: '$(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_HOST_KEY_NAME)'$(RST)"; \
+			echo -e "$(RED)Make sure CONFIG_ESPRESSIF_SECURE_FLASH_ENC_HOST_KEY_NAME is set or disable SPI Flash.$(RST)"; \
+			exit 1; \
+		fi; \
+		size_int=$$(( $(CONFIG_ESP32S3_STORAGE_MTD_SIZE) )); \
+		echo -e "Encrypting user MTD partition offset: $(CONFIG_ESP32S3_STORAGE_MTD_OFFSET), size: $(CONFIG_ESP32S3_STORAGE_MTD_SIZE) ($$size_int)"; \
+		dd if=/dev/zero ibs=1 count=$$size_int | LC_ALL=C tr "\000" "\377" > blank_mtd.bin; \
+        espsecure.py encrypt_flash_data --aes_xts --keyfile $(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_HOST_KEY_NAME) --address 0 --output enc_mtd.bin blank_mtd.bin; \
+		rm blank_mtd.bin; \
+	fi
+
+endef
+
+# BURN_EFUSES -- Burn the flash encryption key E-Fuses if: not already burned, not virtual, not device already encrypted
+
+define BURN_EFUSES
+	$(Q) if [ "$(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_FLASH_DEVICE_ENCRYPTED)" = "y" ]; then \
+		echo -e "$(YELLOW)WARN: Device is already encrypted. Skipping flash encryption key burning. $(RST)"; \
+	elif [ "$(CONFIG_ESPRESSIF_EFUSE_VIRTUAL)" = "y" ]; then \
+		echo -e "$(YELLOW)WARN: Virtual E-Fuses are enabled! Skipping flash encryption key burning. $(RST)"; \
+	else \
+		if [ "$(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_USE_HOST_KEY)" = "y" ]; then \
+			echo -e "$(YELLOW)Proceeding will burn the flash encryption key E-Fuses using: $(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_HOST_KEY_NAME).$(RST)"; \
+		else \
+			echo -e "$(YELLOW)Proceeding will burn a *randomly generated* flash encryption key (NOT user-provided).$(RST)"; \
+		fi; \
+		echo -e "$(YELLOW)This operation is NOT REVERSIBLE! Make sure to have read the documentation.$(RST)"; \
+		efuse_summary=$$(espefuse.py --port $(ESPTOOL_PORT) summary | grep -A 1 BLOCK1); \
+		if echo "$$efuse_summary" | grep -q '?? ??'; then \
+			echo -e "$(YELLOW)Encryption key already burned. Skipping...$(RST)"; \
+		else \
+			echo -e "$(YELLOW)Burning flash encryption key...$(RST)"; \
+			if [ -z "$(NOCHECK)" ] ; then \
+				espefuse.py --port $(ESPTOOL_PORT) burn_key BLOCK_KEY0 $(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_HOST_KEY_NAME) XTS_AES_128_KEY; \
+			else \
+				espefuse.py --do-not-confirm --port $(ESPTOOL_PORT) burn_key BLOCK_KEY0 $(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_HOST_KEY_NAME) XTS_AES_128_KEY; \
+			fi; \
+		fi; \
+	fi
+endef
 
 # MERGEBIN -- Merge raw binary files into a single file
 
@@ -138,7 +234,7 @@ define MERGEBIN
 			$(ESPTOOL_FLASH_OPTS)                                                \
 		)                                                                        \
 	)
-	esptool.py -c esp32s3 merge_bin --output nuttx.merged.bin $(ESPTOOL_MERGEBIN_OPTS) $(ESPTOOL_BINS)
+	esptool.py -c esp32s3 merge_bin $(ESPTOOL_MERGEBIN_OPTS) --output nuttx.merged.bin $(ESPTOOL_BINS)
 	$(Q) echo nuttx.merged.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.merged.bin"
 endef
@@ -200,6 +296,8 @@ endif
 
 define POSTBUILD
 	$(call MKIMAGE)
+	$(if $(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),$(call MAKE_VIRTUAL_EFUSE_BIN))
+	$(if $(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_ENABLED),$(call FLASH_ENC))
 	$(if $(CONFIG_ESP32S3_MERGE_BINS),$(call MERGEBIN))
 endef
 
@@ -215,6 +313,7 @@ define FLASH
 		echo "USAGE: make flash ESPTOOL_PORT=<port> [ ESPTOOL_BAUD=<baud> ] [ ESPTOOL_BINDIR=<dir> ]"; \
 		exit 1; \
 	fi
+	$(if $(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_ENABLED),$(call BURN_EFUSES))
 	$(eval ESPTOOL_OPTS := -c esp32s3 -p $(ESPTOOL_PORT) -b $(ESPTOOL_BAUD) $(if $(CONFIG_ESP32S3_ESPTOOLPY_NO_STUB),--no-stub))
 	esptool.py $(ESPTOOL_OPTS) write_flash $(ESPTOOL_WRITEFLASH_OPTS) $(ESPTOOL_BINS)
 endef

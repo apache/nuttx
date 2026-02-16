@@ -436,7 +436,7 @@ static int audio_fake_process_buffer(FAR struct audio_lowerhalf_s *dev,
 
   sleep_time = frame_time - diff_time;
 
-  nxsig_usleep(sleep_time);
+  nxsched_usleep(sleep_time);
 
   ret = OK;
 

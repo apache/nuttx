@@ -26,9 +26,10 @@ config ARCH_ARM
 config ARCH_ARM64
 	bool "ARM64"
 	select ALARM_ARCH
+	select ARCH_64BIT
 	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_INTERRUPTSTACK
-	select ARCH_HAVE_FORK if !BUILD_KERNEL
+	select ARCH_HAVE_FORK if !BUILD_KERNEL && !BUILD_PROTECTED
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_STDARG_H
@@ -39,7 +40,7 @@ config ARCH_ARM64
 	select ARCH_HAVE_THREAD_LOCAL
 	select ARCH_HAVE_PERF_EVENTS
 	select ONESHOT
-	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
+	select ONESHOT_COUNT
 	---help---
 		The ARM64 architectures
 
@@ -118,6 +119,7 @@ config ARCH_SIM
 	select ARCH_SETJMP_H
 	select ALARM_ARCH
 	select ONESHOT
+	select ONESHOT_COUNT
 	select SERIAL_CONSOLE
 	select SERIAL_IFLOWCONTROL
 	select SCHED_HPWORK
@@ -133,6 +135,7 @@ config ARCH_X86
 
 config ARCH_X86_64
 	bool "x86_64"
+	select ARCH_64BIT
 	select ARCH_HAVE_TCBINFO
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
@@ -142,12 +145,12 @@ config ARCH_X86_64
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_THREAD_LOCAL
 	select PCI_LATE_DRIVERS_REGISTER if PCI
-	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	select ARCH_TOOLCHAIN_GNU
 	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_FORK if !BUILD_KERNEL
 	select ARCH_HAVE_SETJMP
 	select ARCH_HAVE_PERF_EVENTS
+	select ARCH_HAVE_POWEROFF
 	---help---
 		x86-64 architectures.
 
@@ -196,8 +199,10 @@ config ARCH_TRICORE
 	bool "Infineon TriCore"
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_STACKCHECK
+	select ARCH_HAVE_SYSCALL_HOOKS
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_TCBINFO
+	select ARCH_HAVE_REGCPY
 	---help---
 		Infineon 32-bit AURIX TriCore architectures
 
@@ -223,23 +228,57 @@ config ARCH
 	default "sparc"   if ARCH_SPARC
 	default "tricore" if ARCH_TRICORE
 
+if ARCH_ARM
 source "arch/arm/Kconfig"
+endif
+if ARCH_ARM64
 source "arch/arm64/Kconfig"
+endif
+if ARCH_AVR
 source "arch/avr/Kconfig"
+endif
+if ARCH_HC
 source "arch/hc/Kconfig"
+endif
+if ARCH_MIPS
 source "arch/mips/Kconfig"
+endif
+if ARCH_MISOC
 source "arch/misoc/Kconfig"
+endif
+if ARCH_RENESAS
 source "arch/renesas/Kconfig"
+endif
+if ARCH_RISCV
 source "arch/risc-v/Kconfig"
+endif
+if ARCH_SIM
 source "arch/sim/Kconfig"
+endif
+if ARCH_X86
 source "arch/x86/Kconfig"
+endif
+if ARCH_X86_64
 source "arch/x86_64/Kconfig"
+endif
+if ARCH_XTENSA
 source "arch/xtensa/Kconfig"
+endif
+if ARCH_Z16
 source "arch/z16/Kconfig"
+endif
+if ARCH_Z80
 source "arch/z80/Kconfig"
+endif
+if ARCH_OR1K
 source "arch/or1k/Kconfig"
+endif
+if ARCH_SPARC
 source "arch/sparc/Kconfig"
+endif
+if ARCH_TRICORE
 source "arch/tricore/Kconfig"
+endif
 
 config ARCH_CHIP_CUSTOM
 	bool "Custom Chip Support"
@@ -281,6 +320,11 @@ source "$BINDIR/arch/dummy/Kconfig"
 
 config ARCH_TOOLCHAIN_GNU
 	bool
+	default n
+
+config ARCH_TOOLCHAIN_ARMCLANG
+	bool
+	select ARCH_TOOLCHAIN_GNU
 	default n
 
 config ARCH_TOOLCHAIN_CLANG
@@ -329,6 +373,12 @@ config ARCH_INSTRUMENT_ALL
 		to register the instrument function.
 
 comment "Architecture Options"
+
+config ARCH_64BIT
+	bool
+	default n
+	---help---
+		Indicates that the current architecture is 64-bit.
 
 config ARCH_NOINTC
 	bool
@@ -556,6 +606,13 @@ config ARCH_HAVE_PERF_EVENTS
 	---help---
 		The architecture supports hardware performance counting.
 
+config ARCH_HAVE_PERF_EVENTS_USER_ACCESS
+	bool
+	default n
+	select ARCH_HAVE_PERF_EVENTS
+	---help---
+		Select if hardware allows userspace perf counter access.
+
 config ARCH_PERF_EVENTS
 	bool "Configure hardware performance counting"
 	default y if SCHED_CRITMONITOR || SCHED_IRQMONITOR || RPMSG_PING || SEGGER_SYSVIEW
@@ -564,6 +621,15 @@ config ARCH_PERF_EVENTS
 	---help---
 		Enable hardware performance counter support for perf events. If
 		disabled, perf events will use software events only.
+
+config ARCH_PERF_COUNT_BITWIDTH
+	int "Bit width of the perf count"
+	default 31 if ARCH_TRICORE
+	default 32 if !ARCH_TRICORE
+	depends on PERF_OVERFLOW_CORRECTION
+	---help---
+		Bit width of the perf count. When arch is tricore, the value is 31.
+		When arch is not tricore, the value is 32.
 
 config ARCH_HAVE_BOOTLOADER
 	bool
@@ -737,16 +803,19 @@ if ARCH_ADDRENV && ARCH_NEED_ADDRENV_MAPPING
 
 config ARCH_TEXT_VBASE
 	hex "Virtual .text base"
+	default 0x0
 	---help---
 		The virtual address of the beginning the .text region
 
 config ARCH_DATA_VBASE
 	hex "Virtual .bss/.data base"
+	default 0x0
 	---help---
 		The virtual address of the beginning of the .bss/.data region.
 
 config ARCH_HEAP_VBASE
 	hex "Virtual heap base"
+	default 0x0
 	---help---
 		The virtual address of the beginning of the heap region.
 
@@ -859,7 +928,7 @@ endif # ARCH_STACK_DYNAMIC
 config ARCH_KERNEL_STACK
 	bool "Kernel process stack"
 	default LIBC_EXECFUNCS
-	depends on BUILD_KERNEL
+	depends on BUILD_KERNEL || BUILD_PROTECTED
 	---help---
 		It this option is selected, then every user process will have two
 		stacks:  A large, potentially dynamically sized user stack and small
@@ -927,6 +996,14 @@ config ARCH_PGPOOL_SIZE
 
 endif # ARCH_PGPOOL_MAPPING
 endif # ARCH_ADDRENV && ARCH_NEED_ADDRENV_MAPPING
+
+config NCPUS
+	int "Number of CPUs we will use"
+	default SMP_NCPUS if SMP
+	default 1
+	range 1 32
+	---help---
+		Number of CPUs we will use.
 
 config PAGING
 	bool "On-demand paging"
@@ -1087,6 +1164,12 @@ config ARCH_STACKDUMP
 	---help---
 		Enable to do stack dumps after assertions
 
+config ARCH_HAVE_REGCPY
+	bool "common copy of cpu regs"
+	default n
+	---help---
+		Supports context data copying with different architectures
+
 config ARCH_STACKDUMP_MAX_LENGTH
 	int "The maximum length for dump stack on assertions"
 	depends on ARCH_STACKDUMP
@@ -1212,6 +1295,19 @@ config ARCH_MINIMAL_VECTORTABLE_DYNAMIC
 	depends on ARCH_MINIMAL_VECTORTABLE
 	---help---
 		Use a minimum amount of RAM for the vector table.
+
+config ARCH_IRQ_TO_NDX
+	bool "IRQ to index mapping"
+	default n
+	depends on ARCH_MINIMAL_VECTORTABLE_DYNAMIC
+	---help---
+		Use architecture-specific up_irq_to_ndx() interface to map IRQ
+		numbers to vector table indices, instead of using a RAM-based
+		g_irqmap[] array.
+
+		This feature allows architectures to leverage hardware resources
+		(such as registers or other storage) to maintain the IRQ-to-index
+		mapping, significantly reducing RAM usage.
 
 config ARCH_NUSER_INTERRUPTS
 	int "Number of interrupts"

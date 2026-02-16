@@ -84,20 +84,10 @@ Subdirectories of ``nuttx/drivers``
 
   DMA drivers support.
 
-* ``eeprom/`` :doc:`block/eeprom`
+* ``eeprom/`` :doc:`character/eeprom`
 
-  An EEPROM is a form of Memory Technology Device (see ``drivers/mtd``).
-  EEPROMs are non-volatile memory like FLASH, but differ in underlying
-  memory technology and differ in usage in many respects: They may not
-  be organized into blocks (at least from the standpoint of the user)
-  and it is not necessary to erase the EEPROM memory before re-writing
-  it.  In addition, EEPROMs tend to be much smaller than FLASH parts,
-  usually only a few kilobytes vs megabytes for FLASH.  EEPROM tends to
-  be used to retain a small amount of device configuration information;
-  FLASH tends to be used for program or massive data storage. For these
-  reasons, it may not be convenient to use the more complex MTD
-  interface but instead use the simple character interface provided by
-  the EEPROM drivers.
+  EEPROM support as character drivers. Support as Memory Technology Device
+  (MTD) is located in the ``mtd/`` directory.
 
 * ``efuse/`` :doc:`character/efuse`
 
@@ -169,7 +159,7 @@ Subdirectories of ``nuttx/drivers``
 
   Motor control drivers.
 
-* ``mtd/`` :doc:`special/mtd`
+* ``mtd/`` :doc:`special/mtd/index`
 
   Memory Technology Device (MTD) drivers.  Some simple drivers for
   memory technologies like FLASH, EEPROM, NVRAM, etc.
@@ -216,7 +206,7 @@ Subdirectories of ``nuttx/drivers``
 
   RF Device Support.
 
-* ``rptun/`` :doc:`special/rptun`
+* ``rptun/`` :doc:`special/rptun/index`
 
   Remote Proc Tunnel Driver Support.
 
@@ -277,7 +267,7 @@ Subdirectories of ``nuttx/drivers``
 
   Video-related drivers.
 
-* ``virtio/`` :doc:`special/virtio`
+* ``virtio/`` :doc:`special/virtio/index`
 
   Virtio Device Support.
 

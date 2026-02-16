@@ -1507,6 +1507,9 @@ static int lpc17_40_ifup(struct net_driver_s *dev)
 #else
   up_enable_irq(LPC17_40_IRQ_ETH);
 #endif
+
+  netdev_carrier_on(dev);
+
   return OK;
 }
 
@@ -1546,6 +1549,9 @@ static int lpc17_40_ifdown(struct net_driver_s *dev)
   lpc17_40_ethreset(priv);
   priv->lp_ifup = false;
   leave_critical_section(flags);
+
+  netdev_carrier_off(dev);
+
   return OK;
 }
 
@@ -2488,7 +2494,7 @@ static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv)
 
   while ((lpc17_40_phyread(phyaddr, MII_DP83848C_STS) & 0x0001) == 0)
     {
-      nxsig_usleep(40000);
+      nxsched_usleep(40000);
     }
 #endif
 

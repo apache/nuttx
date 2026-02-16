@@ -73,11 +73,11 @@ int netdown_notifier_setup(worker_t worker, FAR struct net_driver_s *dev,
 
   DEBUGASSERT(worker != NULL);
 
-  /* If network driver is already down, then return zero without setting up
-   * the notification.
+  /* If network driver is already not yet running,
+   * then return zero without setting up the notification.
    */
 
-  if ((dev->d_flags & IFF_UP) == 0)
+  if (IFF_IS_RUNNING(dev->d_flags) == 0)
     {
       return 0;
     }

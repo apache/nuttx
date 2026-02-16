@@ -470,18 +470,25 @@
 
 /* SysTick reload value register (SYSTICK_RELOAD) */
 
+/* The armv7-m systick RELOAD regitser has 24 bits
+ * ranging from 0x1 ~ 0x00ffffff
+ * noting that, setting reload to 0 is valid but doesn't have any effects
+ */
+
+#define NVIC_MIN_SYSTICK_CNT            (0x00000001)
+#define NVIC_MAX_SYSTICK_CNT            (0x00ffffff)
 #define NVIC_SYSTICK_RELOAD_SHIFT       0         /* Bits 23-0: Timer reload value */
-#define NVIC_SYSTICK_RELOAD_MASK        (0x00ffffff << NVIC_SYSTICK_RELOAD_SHIFT)
+#define NVIC_SYSTICK_RELOAD_MASK        (NVIC_MAX_SYSTICK_CNT << NVIC_SYSTICK_RELOAD_SHIFT)
 
 /* SysTick current value register (SYSTICK_CURRENT) */
 
 #define NVIC_SYSTICK_CURRENT_SHIFT      0         /* Bits 23-0: Timer current value */
-#define NVIC_SYSTICK_CURRENT_MASK       (0x00ffffff << NVIC_SYSTICK_RELOAD_SHIFT)
+#define NVIC_SYSTICK_CURRENT_MASK       (NVIC_MAX_SYSTICK_CNT << NVIC_SYSTICK_RELOAD_SHIFT)
 
 /* SysTick calibration value register (SYSTICK_CALIB) */
 
 #define NVIC_SYSTICK_CALIB_TENMS_SHIFT  0         /* Bits 23-0: Calibration value */
-#define NVIC_SYSTICK_CALIB_TENMS_MASK   (0x00ffffff << NVIC_SYSTICK_CALIB_TENMS_SHIFT)
+#define NVIC_SYSTICK_CALIB_TENMS_MASK   (NVIC_MAX_SYSTICK_CNT << NVIC_SYSTICK_CALIB_TENMS_SHIFT)
 #define NVIC_SYSTICK_CALIB_SKEW         (1 << 30) /* Bit 30: Calibration value inexact */
 #define NVIC_SYSTICK_CALIB_NOREF        (1 << 31) /* Bit 31: No external reference clock */
 

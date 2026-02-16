@@ -23,7 +23,7 @@ increasing difficulty:
   #. NSH also supports a start-up script that executed when NSH first
      runs. This mechanism has the advantage that the start-up script can
      contain any NSH commands and so can do a lot of work with very little
-     coding. The disadvantage is that is is considerably more complex to
-     create the start-up script. It is sufficiently complex that is
+     coding. The disadvantage is that it is considerably more complex to
+     create the start-up script. It is sufficiently complex that it
      deserves its own paragraph
 

@@ -51,13 +51,11 @@
 #include "hardware/esp32s3_rtccntl.h"
 #include "hardware/esp32s3_syscon.h"
 #include "hardware/wdev_reg.h"
-#include "rom/esp32s3_spiflash.h"
 #include "xtensa.h"
 #include "esp_attr.h"
 #include "esp32s3_irq.h"
 #include "esp32s3_rt_timer.h"
 #include "esp32s3_rtc.h"
-#include "esp32s3_spiflash.h"
 #include "espressif/esp_wireless.h"
 
 #include "esp_bt.h"
@@ -67,6 +65,7 @@
 #include "esp_private/esp_clk.h"
 #include "esp_private/phy.h"
 #include "esp_private/wifi.h"
+#include "esp_private/cache_utils.h"
 #include "esp_random.h"
 #include "esp_timer.h"
 #include "esp_rom_sys.h"
@@ -74,6 +73,7 @@
 #include "rom/ets_sys.h"
 #include "soc/soc_caps.h"
 #include "private/esp_coexist_internal.h"
+#include "soc/clk_tree_defs.h"
 
 #include "esp32s3_ble_adapter.h"
 
@@ -101,7 +101,7 @@
 
 #define BLE_PWR_HDL_INVL                 0xffff
 
-#ifdef CONFIG_ESP32S3_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
 #  define BLE_TASK_EVENT_QUEUE_ITEM_SIZE  8
 #  define BLE_TASK_EVENT_QUEUE_LEN        8
 #endif
@@ -305,7 +305,7 @@ enum btdm_wakeup_src_e
 struct bt_sem_s
 {
   sem_t sem;
-#ifdef CONFIG_ESP32S3_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
   struct esp_semcache_s sc;
 #endif
 };
@@ -649,7 +649,7 @@ static struct irqstate_list_s g_ble_int_flags[NR_IRQSTATE_FLAGS];
 
 /* Cached queue control variables */
 
-#ifdef CONFIG_ESP32S3_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
 static struct esp_queuecache_s g_esp_queuecache;
 static uint8_t g_esp_queuecache_buffer[BLE_TASK_EVENT_QUEUE_ITEM_SIZE];
 #endif
@@ -962,7 +962,7 @@ static void *semphr_create_wrapper(uint32_t max, uint32_t init)
       return NULL;
     }
 
-#ifdef CONFIG_ESP32S3_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
   esp_init_semcache(&bt_sem->sc, &bt_sem->sem);
 #endif
 
@@ -1033,7 +1033,7 @@ static int IRAM_ATTR semphr_give_from_isr_wrapper(void *semphr, void *hptw)
   int ret;
   struct bt_sem_s *bt_sem = (struct bt_sem_s *)semphr;
 
-#ifdef CONFIG_ESP32S3_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
   if (spi_flash_cache_enabled())
     {
       ret = semphr_give_wrapper(bt_sem);
@@ -1275,7 +1275,7 @@ static void *queue_create_wrapper(uint32_t queue_len, uint32_t item_size)
 
   mq_adpt->msgsize = item_size;
 
-#ifdef CONFIG_ESP32S3_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
   if (queue_len <= BLE_TASK_EVENT_QUEUE_LEN &&
       item_size == BLE_TASK_EVENT_QUEUE_ITEM_SIZE)
     {
@@ -2272,7 +2272,7 @@ static IRAM_ATTR int32_t esp_queue_send_generic(void *queue, void *item,
   struct timespec timeout;
   struct mq_adpt_s *mq_adpt = (struct mq_adpt_s *)queue;
 
-#ifdef CONFIG_ESP32S3_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
   if (!spi_flash_cache_enabled())
     {
       esp_send_queuecache(&g_esp_queuecache, item, mq_adpt->msgsize);
@@ -3163,6 +3163,71 @@ uint32_t get_ble_controller_free_heap_size(void)
  * Other Functions
  ****************************************************************************/
 
+int32_t esp_ble_to_errno(int err)
+{
+  int ret;
+
+  if (err < ESP_ERR_WIFI_BASE)
+    {
+      /* Unmask component error bits */
+
+      ret = err & 0xfff;
+
+      switch (ret)
+        {
+          case ESP_OK:
+            ret = OK;
+            break;
+          case ESP_ERR_NO_MEM:
+            ret = -ENOMEM;
+            break;
+
+          case ESP_ERR_INVALID_ARG:
+            ret = -EINVAL;
+            break;
+
+          case ESP_ERR_INVALID_STATE:
+            ret = -EIO;
+            break;
+
+          case ESP_ERR_INVALID_SIZE:
+            ret = -EINVAL;
+            break;
+
+          case ESP_ERR_NOT_FOUND:
+            ret = -ENOSYS;
+            break;
+
+          case ESP_ERR_NOT_SUPPORTED:
+            ret = -ENOSYS;
+            break;
+
+          case ESP_ERR_TIMEOUT:
+            ret = -ETIMEDOUT;
+            break;
+
+          case ESP_ERR_INVALID_MAC:
+            ret = -EINVAL;
+            break;
+
+          default:
+            ret = ERROR;
+            break;
+        }
+    }
+  else
+    {
+      ret = ERROR;
+    }
+
+  if (ret != OK)
+    {
+      wlerr("ERROR: %s\n", esp_err_to_name(err));
+    }
+
+  return ret;
+}
+
 /****************************************************************************
  * Name: esp32s3_bt_controller_init
  *
@@ -3305,7 +3370,7 @@ int esp32s3_bt_controller_init(void)
 
   g_btdm_controller_status = ESP_BT_CONTROLLER_STATUS_INITED;
 
-#ifdef CONFIG_ESP32S3_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
   if (esp_wireless_init() != OK)
     {
       return -EIO;
@@ -3318,7 +3383,7 @@ error:
 
   bt_controller_deinit_internal ();
 
-  return esp_wifi_to_errno(err);
+  return esp_ble_to_errno(err);
 }
 
 /****************************************************************************
@@ -3511,7 +3576,7 @@ int esp32s3_bt_controller_disable(void)
   async_wakeup_request(BTDM_ASYNC_WAKEUP_SRC_DISA);
   while (!btdm_power_state_active())
     {
-      nxsig_usleep(1000); /* wait */
+      nxsched_usleep(1000); /* wait */
     }
 
   btdm_controller_disable();

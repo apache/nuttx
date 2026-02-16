@@ -39,6 +39,7 @@
 #include <nuttx/crc32.h>
 #include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/mutex.h>
+#include <nuttx/sched.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/ioctl.h>
 
@@ -170,7 +171,8 @@ static int        rpmsg_socket_accept(FAR struct socket *psock,
 static int        rpmsg_socket_poll(FAR struct socket *psock,
                                     FAR struct pollfd *fds, bool setup);
 static ssize_t    rpmsg_socket_sendmsg(FAR struct socket *psock,
-                                       FAR struct msghdr *msg, int flags);
+                                       FAR const struct msghdr *msg,
+                                       int flags);
 static ssize_t    rpmsg_socket_recvmsg(FAR struct socket *psock,
                                        FAR struct msghdr *msg, int flags);
 static int        rpmsg_socket_close(FAR struct socket *psock);
@@ -477,7 +479,7 @@ static void rpmsg_socket_ns_unbind(FAR struct rpmsg_endpoint *ept)
   conn->unbind = true;
   rpmsg_socket_post(&conn->sendsem);
   rpmsg_socket_post(&conn->recvsem);
-  rpmsg_socket_poll_notify(conn, POLLIN | POLLOUT);
+  rpmsg_socket_poll_notify(conn, POLLIN | POLLOUT | POLLHUP | POLLERR);
 
   nxmutex_unlock(&conn->recvlock);
 }
@@ -776,6 +778,10 @@ static int rpmsg_socket_connect_internal(FAR struct socket *psock)
 
       ret = net_sem_timedwait(&conn->sendsem,
                               _SO_TIMEOUT(conn->sconn.s_sndtimeo));
+      if (!conn->ept.rdev || conn->unbind)
+        {
+          ret = -ECONNRESET;
+        }
 
       if (ret < 0)
         {
@@ -1181,7 +1187,7 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
 }
 
 static ssize_t rpmsg_socket_sendmsg(FAR struct socket *psock,
-                                    FAR struct msghdr *msg, int flags)
+                                    FAR const struct msghdr *msg, int flags)
 {
   FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
   FAR const struct iovec *buf = msg->msg_iov;

@@ -37,7 +37,7 @@
  ****************************************************************************/
 
 #if !defined(CONFIG_LIBC_ARCH_STRNCASECMP) && defined(LIBC_BUILD_STRNCASECMP)
-#undef strncasecmp /* See mm/README.txt */
+#undef strncasecmp
 int strncasecmp(FAR const char *cs, FAR const char *ct, size_t nb)
 {
   register int result = 0;

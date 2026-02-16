@@ -97,8 +97,8 @@ functions required to boot the device are built within NuttX. Simple boot does n
 require any specific configuration (it is selectable by default if no other
 2nd stage bootloader is used).
 
-If other features, like `Secure Boot and Flash Encryption`_, are required, an
-externally-built 2nd stage bootloader is needed. The bootloader is built using
+If features like `Flash Encryption`_ are required, an externally-built
+2nd stage bootloader is needed. The MCUBoot bootloader is built using
 the ``make bootloader`` command. This command generates the firmware in the
 ``nuttx`` folder. The ``ESPTOOL_BINDIR`` is used in the ``make flash`` command
 to specify the path to the bootloader. For compatibility among other SoCs and
@@ -138,7 +138,7 @@ This example shows how to build and flash the ``nsh`` defconfig for the ESP32-C3
 
     $ cd nuttx
     $ make distclean
-    $ ./tools/configure.sh esp32c3-generic:nsh
+    $ ./tools/configure.sh esp32c3-devkit:nsh
     $ make -j$(nproc)
 
 When the build is complete, the firmware can be flashed to the board using the command::
@@ -176,7 +176,7 @@ Now opening the serial port with a terminal emulator should show the NuttX conso
   $ picocom -b 115200 /dev/ttyUSB0
   NuttShell (NSH) NuttX-12.8.0
   nsh> uname -a
-  NuttX 12.8.0 759d37b97c-dirty Mar  5 2025 19:58:56 risc-v esp32c3-generic
+  NuttX 12.8.0 759d37b97c-dirty Mar  5 2025 19:58:56 risc-v esp32c3-devkit
 
 Debugging
 =========
@@ -365,7 +365,7 @@ RMT          Yes
 RNG          Yes
 RSA          No
 RTC          Yes
-SHA          No
+SHA          Yes
 SPI          Yes
 SPIFLASH     Yes
 SPIRAM       No
@@ -408,36 +408,94 @@ Then, it can be customized in the menu :menuselection:`System Type --> ADC Confi
 
 .. warning:: Maximum measurable voltage may saturate around 2900 mV.
 
-Secure Boot and Flash Encryption
-================================
+.. _MCUBoot and OTA Update C3:
 
-Secure Boot
------------
+MCUBoot and OTA Update
+======================
 
-Secure Boot protects a device from running any unauthorized (i.e., unsigned) code by checking that
-each piece of software that is being booted is signed. On an ESP32-C3, these pieces of software include
-the second stage bootloader and each application binary. Note that the first stage bootloader does not
-require signing as it is ROM code thus cannot be changed. This is achieved using specific hardware in
-conjunction with MCUboot (read more about MCUboot `here <https://docs.mcuboot.com/>`__).
+The ESP32-C3 supports over-the-air (OTA) updates using MCUBoot.
 
-The Secure Boot process on the ESP32-C3 involves the following steps performed:
+Read more about the MCUBoot for Espressif devices `here <https://docs.mcuboot.com/readme-espressif.html>`__.
 
-1. The first stage bootloader verifies the second stage bootloader's RSA-PSS signature. If the verification is successful,
-   the first stage bootloader loads and executes the second stage bootloader.
+Executing OTA Update
+--------------------
 
-2. When the second stage bootloader loads a particular application image, the application's signature (RSA, ECDSA or ED25519) is verified
-   by MCUboot.
-   If the verification is successful, the application image is executed.
+This section describes how to execute OTA update using MCUBoot.
 
-.. warning:: Once enabled, Secure Boot will not boot a modified bootloader. The bootloader will only boot an
-   application firmware image if it has a verified digital signature. There are implications for reflashing
-   updated images once Secure Boot is enabled. You can find more information about the ESP32-C3's Secure boot
-   `here <https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/security/secure-boot-v2.html>`__.
+1. First build the default ``mcuboot_update_agent`` config. This image defaults to the primary slot and already comes with Wi-Fi settings enabled::
 
-.. note:: As the bootloader image is built on top of the Hardware Abstraction Layer component
-   of `ESP-IDF <https://github.com/espressif/esp-idf>`_, the
-   `API port by Espressif <https://docs.mcuboot.com/readme-espressif.html>`_ will be used
-   by MCUboot rather than the original NuttX port.
+    ./tools/configure.sh esp32c3-devkit:mcuboot_update_agent
+
+2. Build the MCUBoot bootloader::
+
+    make bootloader
+
+3. Finally, build the application image::
+
+    make
+
+Flash the image to the board and verify it boots ok.
+It should show the message "This is MCUBoot Update Agent image" before NuttShell is ready.
+
+At this point, the board should be able to connect to Wi-Fi so we can download a new binary from our network::
+
+  NuttShell (NSH) NuttX-12.4.0
+  This is MCUBoot Update Agent image
+  nsh>
+  nsh> wapi psk wlan0 <wifi_ssid> 3
+  nsh> wapi essid wlan0 <wifi_password> 1
+  nsh> renew wlan0
+
+Now, keep the board as is and execute the following commands to **change the MCUBoot target slot to the 2nd slot**
+and modify the message of the day (MOTD) as a mean to verify the new image is being used.
+
+1. Change the MCUBoot target slot to the 2nd slot::
+
+    kconfig-tweak -d CONFIG_ESPRESSIF_ESPTOOL_TARGET_PRIMARY
+    kconfig-tweak -e CONFIG_ESPRESSIF_ESPTOOL_TARGET_SECONDARY
+    kconfig-tweak --set-str CONFIG_NSH_MOTD_STRING "This is MCUBoot UPDATED image!"
+    make olddefconfig
+
+  .. note::
+    The same changes can be accomplished through ``menuconfig`` in :menuselection:`System Type --> Bootloader and Image Configuration --> Target slot for image flashing`
+    for MCUBoot target slot and in :menuselection:`System Type --> Bootloader and Image Configuration --> Search (motd) --> NSH Library --> Message of the Day` for the MOTD.
+
+2. Rebuild the application image::
+
+    make
+
+At this point the board is already connected to Wi-Fi and has the primary image flashed.
+The new image configured for the 2nd slot is ready to be downloaded.
+
+To execute OTA, create a simple HTTP server on the NuttX directory so we can access the binary remotely::
+
+  cd nuttxspace/nuttx
+  python3 -m http.server
+   Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
+
+On the board, execute the update agent, setting the IP address to the one on the host machine. Wait until image is transferred and the board should reboot automatically::
+
+  nsh> mcuboot_agent http://10.42.0.1:8000/nuttx.bin
+  MCUboot Update Agent example
+  Downloading from http://10.42.0.1:8000/nuttx.bin
+  Firmware Update size: 1048576 bytes
+  Received: 512      of 1048576 bytes [0%]
+  Received: 1024     of 1048576 bytes [0%]
+  Received: 1536     of 1048576 bytes [0%]
+  [.....]
+  Received: 1048576  of 1048576 bytes [100%]
+  Application Image successfully downloaded!
+  Requested update for next boot. Restarting...
+
+NuttShell should now show the new MOTD, meaning the new image is being used::
+
+  NuttShell (NSH) NuttX-12.4.0
+  This is MCUBoot UPDATED image!
+  nsh>
+
+Finally, the image is loaded but not confirmed.
+To make sure it won't rollback to the previous image, you must confirm with ``mcuboot_confirm`` and reboot the board.
+The OTA is now complete.
 
 Flash Encryption
 ----------------
@@ -446,69 +504,216 @@ Flash encryption is intended for encrypting the contents of the ESP32-C3's off-c
 firmware is flashed as plaintext, and then the data is encrypted in place on the first boot. As a result, physical readout
 of flash will not be sufficient to recover most flash contents.
 
-.. warning::  After enabling Flash Encryption, an encryption key is generated internally by the device and
-   cannot be accessed by the user for re-encrypting data and re-flashing the system, hence it will be permanently encrypted.
-   Re-flashing an encrypted system is complicated and not always possible. You can find more information about the ESP32-C3's Flash Encryption
-   `here <https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/security/flash-encryption.html>`__.
+The current state of flash encryption for ESP32-C3 allows the use of Virtual E-Fuses and development mode, which permit users to evaluate and test the firmware before making definitive changes such as burning E-Fuses.
 
-Prerequisites
--------------
+Flash encryption supports the following features:
 
-First of all, we need to install ``imgtool`` (the MCUboot utility application to manipulate binary
-images)::
+  .. list-table::
+    :header-rows: 1
 
-  $ pip install imgtool
+    * - Feature
+      - Description
+    * - **Flash Encryption with Virtual E-Fuses**
+      - Use flash encryption without burning E-Fuses. Default selection when flash encryption is enabled.
+    * - **Flash Encryption in Development mode**
+      - Allows reflashing an encrypted device by appending the ``--encrypt`` argument to the ``esptool.py write_flash`` command. This is done automatically if ``ESPRESSIF_SECURE_FLASH_ENC_FLASH_DEVICE_ENCRYPTED`` is set.
+    * - **Flash Encryption in Release mode**
+      - Does not allow reflashing the device. This is a permanent setting.
+    * - **Flash Encryption key**
+      - A user-generated key is required by default. Alternatively, a device-generated key is possible, but it will not be recoverable by the user (not recommended). See ``ESPRESSIF_SECURE_FLASH_ENC_USE_HOST_KEY``.
+    * - **Encrypted MTD Partition**
+      - If SPI Flash is enabled, an empty user MTD partition will be automatically encrypted on first flash.
 
-We also need to make sure that the python modules are added to ``PATH``::
+.. note::
 
-  $ echo "PATH=$PATH:/home/$USER/.local/bin" >> ~/.bashrc
+   It is **strongly suggested** to read the following before working on flash encryption:
 
-Now, we will create a folder to store the generated keys (such as ``~/signing_keys``)::
+   - `MCUBoot Flash Encryption <https://docs.mcuboot.com/readme-espressif.html#flash-encryption>`_
+   - `General E-Fuse documentation <https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/api-reference/system/efuse.html>`_
+   - `Flash Encryption Relevant E-Fuses <https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/security/flash-encryption.html#relevant-efuses>`_
 
-  $ mkdir ~/signing_keys && cd ~/signing_keys
+Flash Encryption Requirements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-With all set up, we can now generate keys to sign the bootloader and application binary images,
-respectively, of the compiled project::
+Flash encryption requires burning E-Fuses to enable it on chip. This is not a reversible operation and should be done with caution.
+There is, however, a way to test the flash encryption by simulating them on flash. Both paths are described below.
 
-  $ espsecure.py generate_signing_key --version 2 bootloader_signing_key.pem
-  $ imgtool keygen --key app_signing_key.pem --type rsa-3072
+Build System Features
+'''''''''''''''''''''
 
-.. important:: The contents of the key files must be stored securely and kept secret.
+The build system contains some safeguards to avoid accidentally burning E-Fuses and automations for convenience. Those are summarized below:
 
-Enabling Secure Boot and Flash Encryption
------------------------------------------
+  1. A yellow warning will show up during build alerting that flash encryption is enabled (same for Virtual E-Fuses).
+  2. If ``ESPRESSIF_SECURE_FLASH_ENC_USE_HOST_KEY`` is set, build will fail if the flash encryption key is not found.
+  3. If SPI Flash is enabled, the user MTD partition is automatically encrypted with the provided encryption key.
+  4. ``make flash`` command will prompt the user for confirmation before burning the E-Fuse, if Virtual E-Fuses are disabled.
 
-To enable Secure Boot for the current project, go to the project's NuttX directory, execute ``make menuconfig`` and the following steps:
 
-  1. Enable experimental features in :menuselection:`Build Setup --> Show experimental options`;
-  2. Enable MCUboot in :menuselection:`Application Configuration --> Bootloader Utilities --> MCUboot`;
-  3. Change image type to ``MCUboot-bootable format`` in :menuselection:`System Type --> Application Image Configuration --> Application Image Format`;
-  4. Enable building MCUboot from the source code by selecting ``Build binaries from source``;
-     in :menuselection:`System Type --> Application Image Configuration --> Source for bootloader binaries`;
-  5. Enable Secure Boot in :menuselection:`System Type --> Application Image Configuration --> Enable hardware Secure Boot in bootloader`;
-  6. If you want to protect the SPI Bus against data sniffing, you can enable Flash Encryption in
-     :menuselection:`System Type --> Application Image Configuration --> Enable Flash Encryption on boot`.
+Simulating Flash Encryption with Virtual E-Fuses
+'''''''''''''''''''''''''''''''''''''''''''''''''
 
-Now you can design an update and confirm agent to your application. Check the `MCUboot design guide <https://docs.mcuboot.com/design.html>`_ and the
-`MCUboot Espressif port documentation <https://docs.mcuboot.com/readme-espressif.html>`_ for
-more information on how to apply MCUboot. Also check some `notes about the NuttX MCUboot port <https://github.com/mcu-tools/mcuboot/blob/main/docs/readme-nuttx.md>`_,
-the `MCUboot porting guide <https://github.com/mcu-tools/mcuboot/blob/main/docs/PORTING.md>`_ and some
-`examples of MCUboot applied in NuttX applications <https://github.com/apache/nuttx-apps/tree/master/examples/mcuboot>`_.
+It is highly recommended to use this method for testing the flash encryption before actually burning the E-Fuses.
+The E-Fuses are stored in flash and persist between reboots. No real E-Fuses are changed.
 
-After you developed an application which implements all desired functions, you need to flash it into the primary image slot
-of the device (it will automatically be in the confirmed state, you can learn more about image
-confirmation `here <https://docs.mcuboot.com/design.html#image-swapping>`_).
-To flash to the primary image slot, select ``Application image primary slot`` in
-:menuselection:`System Type --> Application Image Configuration --> Target slot for image flashing`
-and compile it using ``make -j ESPSEC_KEYDIR=~/signing_keys``.
+To enable virtual E-Fuses for flash encryption testing, open ``menuconfig`` and:
+  1. Enable flash encryption on boot on: :menuselection:`System Type --> Bootloader and Image Configuration`
+  2. Verify Virtual E-Fuses are enabled (this is done by default): :menuselection:`System Type --> Peripheral Support --> E-Fuse support`
 
-When creating update images, make sure to change :menuselection:`System Type --> Application Image Configuration --> Target slot for image flashing`
-to ``Application image secondary slot``.
+.. note:: On ESP32-C3, testing is possible with QEMU. If that is the case, on step 2 disable Virtual E-Fuse and use normal E-Fuse support.
+  See `ESP32-C3 QEMU <https://github.com/espressif/esp-toolchain-docs/tree/main/qemu/esp32c3>`_.
 
-.. important:: When deploying your application, make sure to disable UART Download Mode by selecting ``Permanently disabled`` in
-   :menuselection:`System Type --> Application Image Configuration --> UART ROM download mode`
-   and change usage mode to ``Release`` in `System Type --> Application Image Configuration --> Enable usage mode`.
-   **After disabling UART Download Mode you will not be able to flash other images through UART.**
+Now build the bootloader and the firmware. Flashing the device (or opening on QEMU) will trigger the following:
+  1. On the first boot, the bootloader will encrypt the flash::
+
+      ...
+      [esp32c3] [WRN] eFuse virtual mode is enabled. If Secure boot or Flash encryption is enabled then it does not provide any security. FOR TESTING ONLY!
+      [esp32c3] [WRN] [efuse] [Virtual] try loading efuses from flash: 0x10000 (offset)
+      ...
+      [esp32c3] [INF] [flash_encrypt] Encrypting bootloader...
+      [esp32c3] [INF] [flash_encrypt] Bootloader encrypted successfully
+      [esp32c3] [INF] [flash_encrypt] Encrypting primary slot...
+      [esp32c3] [INF] [flash_encrypt] Encrypting remaining flash...
+      [esp32c3] [INF] [flash_encrypt] Flash encryption completed
+      ...
+      [esp32c3] [INF] Resetting with flash encryption enabled...
+
+  2. Device will reset and it should be now operating similar to an actual encrypted device::
+
+      ...
+      [esp32c3] [INF] Checking flash encryption...
+      [esp32c3] [INF] [flash_encrypt] flash encryption is enabled (1 plaintext flashes left)
+      [esp32c3] [INF] Disabling RNG early entropy source...
+      [esp32c3] [INF] br_image_off = 0x20000
+      [esp32c3] [INF] ih_hdr_size = 0x20
+      [esp32c3] [INF] Loading image 0 - slot 0 from flash, area id: 1
+      ...
+      NuttShell (NSH) NuttX-12.8.0
+      nsh>
+
+Actual encryption and burning E-Fuses
+'''''''''''''''''''''''''''''''''''''
+
+E-Fuses are burned by esptool and the bootloader on the first boot after flashing with encryption enabled.
+This process is automated on NuttX build system.
+
+.. warning::  Burning E-Fuses is NOT a reversible operation and should be done with caution.
+
+To build a firmware with E-Fuse support and flash encryption enabled, open ``menuconfig`` and:
+  1. Enable flash encryption on boot on: :menuselection:`System Type --> Bootloader and Image Configuration`
+  2. Disable Virtual E-Fuses :menuselection:`System Type --> Peripheral Support --> E-Fuse support`
+  3. Check usage mode is Development (this allows reflashing, while Release mode does not).
+
+.. note::  If using development mode of flash encryption (see menuconfig and documentation above), it is still possible to re-flash the device with esptool by
+  setting ``ESPRESSIF_SECURE_FLASH_ENC_FLASH_DEVICE_ENCRYPTED`` which adds ``--encrypt`` argument to the ``esptool.py write_flash`` command.
+  This will apply the burned encryption key to the image while flashing.
+
+Flash Allocation for MCUBoot
+----------------------------
+
+When MCUBoot is enabled on ESP32-C3, the flash memory is organized as follows
+based on the default KConfig values:
+
+**Flash Layout (MCUBoot Enabled)**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 20 20
+   :align: left
+
+   * - Region
+     - Offset
+     - Size
+   * - Bootloader
+     - 0x000000
+     - 64KB
+   * - E-Fuse Virtual (see Note)
+     - 0x010000
+     - 64KB
+   * - Primary Application Slot (/dev/ota0)
+     - 0x020000
+     - 1MB
+   * - Secondary Application Slot (/dev/ota1)
+     - 0x120000
+     - 1MB
+   * - Scratch Partition (/dev/otascratch)
+     - 0x220000
+     - 256KB
+   * - Storage MTD (optional)
+     - 0x260000
+     - 1MB
+   * - Available Flash
+     - 0x360000+
+     - Remaining
+
+.. raw:: html
+
+   <div style="clear: both"></div>
+
+
+**Note**: The E-Fuse Virtual region is optional and only used when
+``ESPRESSIF_EFUSE_VIRTUAL_KEEP_IN_FLASH`` is enabled. However, this 64KB
+location is always allocated in the memory layout to prevent accidental
+erasure during board flashing operations, ensuring data preservation if
+virtual E-Fuses are later enabled.
+
+.. code-block:: text
+
+    Memory Map (Addresses in hex):
+
+    0x000000  ┌─────────────────────────────┐
+              │                             │
+              │      MCUBoot Bootloader     │
+              │           (64KB)            │
+              │                             │
+    0x010000  ├─────────────────────────────┤
+              │       E-Fuse Virtual        │
+              │           (64KB)            │
+    0x020000  ├─────────────────────────────┤
+              │                             │
+              │      Primary App Slot       │
+              │            (1MB)            │
+              │          /dev/ota0          │
+              │                             │
+    0x120000  ├─────────────────────────────┤
+              │                             │
+              │     Secondary App Slot      │
+              │            (1MB)            │
+              │          /dev/ota1          │
+              │                             │
+    0x220000  ├─────────────────────────────┤
+              │                             │
+              │      Scratch Partition      │
+              │           (256KB)           │
+              │       /dev/otascratch       │
+              │                             │
+    0x260000  ├─────────────────────────────┤
+              │                             │
+              │   Storage MTD (optional)    │
+              │            (1MB)            │
+              │                             │
+    0x360000  ├─────────────────────────────┤
+              │                             │
+              │       Available Flash       │
+              │         (Remaining)         │
+              │                             │
+              └─────────────────────────────┘
+
+The key KConfig options that control this layout:
+
+- ``ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET`` (default: 0x20000)
+- ``ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET`` (default: 0x120000)
+- ``ESPRESSIF_OTA_SLOT_SIZE`` (default: 0x100000)
+- ``ESPRESSIF_OTA_SCRATCH_OFFSET`` (default: 0x220000)
+- ``ESPRESSIF_OTA_SCRATCH_SIZE`` (default: 0x40000)
+- ``ESPRESSIF_STORAGE_MTD_OFFSET`` (default: 0x260000 when MCUBoot enabled)
+- ``ESPRESSIF_STORAGE_MTD_SIZE`` (default: 0x100000)
+
+For MCUBoot operation:
+
+- The **Primary Slot** contains the currently running application
+- The **Secondary Slot** receives OTA updates
+- The **Scratch Partition** is used by MCUBoot for image swapping during updates
+- MCUBoot manages image validation, confirmation, and rollback functionality
 
 
 _`Managing esptool on virtual environment`

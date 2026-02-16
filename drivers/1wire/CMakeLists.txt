@@ -27,5 +27,10 @@ if(CONFIG_1WIRE)
     list(APPEND SRCS ds28e17.c)
   endif()
 
+  # Include the 1WIRE driver for DS2XXX EEPROMs
+  if(CONFIG_1WIRE_EE_DS2XXX)
+    list(APPEND SRCS 1wire_ds2xxx.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()

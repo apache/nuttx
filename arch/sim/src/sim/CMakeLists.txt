@@ -50,17 +50,19 @@ list(
   sim_releasestack.c
   sim_stackframe.c
   sim_exit.c
-  sim_schedulesigaction.c
   sim_switchcontext.c
-  sim_heap.c
+  sim_ummheap.c
   sim_uart.c
   sim_copyfullstate.c
-  sim_sigdeliver.c
   sim_registerdump.c
   sim_saveusercontext.c
   sim_tcbinfo.c
   sim_sectionheap.c
   sim_checkhostfstypes.c)
+
+if(CONFIG_ENABLE_ALL_SIGNALS)
+  list(APPEND SRCS sim_schedulesigaction.c sim_sigdeliver.c)
+endif()
 
 if(CONFIG_HOST_X86_64)
   if(CONFIG_SIM_M32)
@@ -135,7 +137,6 @@ if(CONFIG_SIM_SOUND_ALSA)
   list(APPEND SRCS posix/sim_alsa.c)
   list(APPEND SRCS sim_offload.c)
   list(APPEND STDLIBS asound)
-  list(APPEND STDLIBS mad)
 endif()
 
 # host sources ###############################################################
@@ -213,6 +214,11 @@ if(CONFIG_SIM_X11FB)
   endif()
 endif()
 
+if(NOT ${CONFIG_SIM_WIFIDEV_NUMBER} EQUAL 0)
+  add_compile_options(-DTOPDIR=$(TOPDIR))
+  list(APPEND SRCS sim_wifihost.c)
+endif()
+
 if(CONFIG_SIM_NETDEV_TAP)
   list(APPEND SRCS sim_netdriver.c)
 
@@ -249,6 +255,11 @@ if(CONFIG_SIM_SPI_LINUX)
   list(APPEND HOSTSRCS sim_linuxspi.c)
 endif()
 
+if(CONFIG_SIM_GPIOCHIP_LINUX)
+  list(APPEND SRCS sim_gpiochip.c)
+  list(APPEND HOSTSRCS sim_linux_gpiochip.c)
+endif()
+
 if(CONFIG_SIM_USB_DEV)
   list(APPEND SRCS sim_usbdev.c)
   if(CONFIG_SIM_USB_RAW_GADGET)
@@ -278,6 +289,8 @@ endif()
 
 list(APPEND HOSTSRCS sim_hostfs.c)
 list(APPEND HOST_DEFINITIONS CONFIG_NAME_MAX=${CONFIG_NAME_MAX})
+
+list(APPEND HOSTSRCS sim_errno.c)
 
 configure_file(${NUTTX_DIR}/include/nuttx/fs/hostfs.h
                ${CMAKE_CURRENT_BINARY_DIR}/hostfs.h COPYONLY)

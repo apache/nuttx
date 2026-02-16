@@ -26,6 +26,7 @@
 
 #include <errno.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/bits.h>
 #include <nuttx/spinlock.h>
@@ -132,7 +133,7 @@ int up_alloc_irq_msi(uint8_t busno, uint32_t devfn, int *pirq, int num)
   irq = g_v2m.spi_start + offset;
   for (i = 0; i < num; i++)
     {
-      arm64_gicv_irq_trigger(i + irq, true);
+      up_set_irq_type(i + irq, IRQ_RISING_EDGE);
       pirq[i] = irq + i;
     }
 

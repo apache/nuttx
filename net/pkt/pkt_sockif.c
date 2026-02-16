@@ -39,7 +39,9 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 
+#include "devif/devif.h"
 #include "netdev/netdev.h"
+#include "utils/utils.h"
 #include <socket/socket.h>
 #include "pkt/pkt.h"
 
@@ -53,7 +55,10 @@ static int        pkt_setup(FAR struct socket *psock);
 static sockcaps_t pkt_sockcaps(FAR struct socket *psock);
 static void       pkt_addref(FAR struct socket *psock);
 static int        pkt_bind(FAR struct socket *psock,
-                    FAR const struct sockaddr *addr, socklen_t addrlen);
+                           FAR const struct sockaddr *addr,
+                           socklen_t addrlen);
+static int        pkt_netpoll(FAR struct socket *psock,
+                              FAR struct pollfd *fds, bool setup);
 static int        pkt_close(FAR struct socket *psock);
 
 /****************************************************************************
@@ -71,10 +76,17 @@ const struct sock_intf_s g_pkt_sockif =
   NULL,            /* si_listen */
   NULL,            /* si_connect */
   NULL,            /* si_accept */
-  NULL,            /* si_poll */
+  pkt_netpoll,     /* si_poll */
   pkt_sendmsg,     /* si_sendmsg */
   pkt_recvmsg,     /* si_recvmsg */
-  pkt_close        /* si_close */
+  pkt_close,       /* si_close */
+  NULL,            /* si_ioctl */
+  NULL,            /* si_socketpair */
+  NULL             /* si_shutdown */
+#if defined(CONFIG_NET_SOCKOPTS) && defined(CONFIG_NET_PKTPROTO_OPTIONS)
+  , pkt_getsockopt /* si_getsockopt */
+  , pkt_setsockopt /* si_setsockopt */
+#endif
 };
 
 /****************************************************************************
@@ -110,6 +122,19 @@ static int pkt_sockif_alloc(FAR struct socket *psock)
   DEBUGASSERT(conn->crefs == 0);
   conn->crefs = 1;
 
+  /* Save the protocol in the connection structure */
+
+  conn->type = psock->s_proto;
+
+#ifdef CONFIG_NET_PKT_WRITE_BUFFERS
+#  if CONFIG_NET_SEND_BUFSIZE > 0
+  conn->sndbufs = CONFIG_NET_SEND_BUFSIZE;
+#  endif
+  nxsem_init(&conn->sndsem, 0, 0);
+#endif
+
+  nxrmutex_init(&conn->sconn.s_lock);
+
   /* Save the pre-allocated connection in the socket structure */
 
   psock->s_conn = conn;
@@ -140,10 +165,10 @@ static int pkt_setup(FAR struct socket *psock)
    * connection structure, it is unallocated at this point.  It will not
    * actually be initialized until the socket is connected.
    *
-   * SOCK_RAW and SOCK_CTRL are supported.
+   * SOCK_RAW is supported.
    */
 
-  if (psock->s_type == SOCK_RAW || psock->s_type == SOCK_CTRL)
+  if (psock->s_type == SOCK_DGRAM || psock->s_type == SOCK_RAW)
     {
       return pkt_sockif_alloc(psock);
     }
@@ -192,7 +217,7 @@ static void pkt_addref(FAR struct socket *psock)
 {
   FAR struct pkt_conn_s *conn;
 
-  DEBUGASSERT(psock->s_type == SOCK_RAW || psock->s_type == SOCK_CTRL);
+  DEBUGASSERT(psock->s_type == SOCK_RAW);
 
   conn = psock->s_conn;
   DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
@@ -222,8 +247,6 @@ static void pkt_addref(FAR struct socket *psock)
 static int pkt_bind(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen)
 {
-  int ifindex;
-
   /* Verify that a valid address has been provided */
 
   if (addr->sa_family != AF_PACKET || addrlen < sizeof(struct sockaddr_ll))
@@ -235,14 +258,15 @@ static int pkt_bind(FAR struct socket *psock,
 
   /* Bind a raw socket to a network device. */
 
-  if (psock->s_type == SOCK_RAW || psock->s_type == SOCK_CTRL)
+  if (psock->s_type == SOCK_DGRAM || psock->s_type == SOCK_RAW)
     {
       FAR struct pkt_conn_s *conn = psock->s_conn;
       FAR struct net_driver_s *dev;
 
       /* Look at the addr and identify the network interface */
 
-      ifindex = ((FAR struct sockaddr_ll *)addr)->sll_ifindex;
+      int ifindex = ((FAR struct sockaddr_ll *)addr)->sll_ifindex;
+      int protocol = ((FAR struct sockaddr_ll *)addr)->sll_protocol;
 
       /* Check if we have that interface */
 
@@ -255,12 +279,52 @@ static int pkt_bind(FAR struct socket *psock,
       /* Put ifindex into connection */
 
       conn->ifindex = ifindex;
+      if (protocol != 0)
+        {
+          conn->type = protocol;
+        }
 
       return OK;
     }
   else
     {
       return -EBADF;
+    }
+}
+
+/****************************************************************************
+ * Name: pkt_netpoll
+ *
+ * Description:
+ *   The standard poll() operation redirects operations on pkt socket
+ *
+ * Input Parameters:
+ *   psock - An instance of the internal socket structure.
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *   setup - true: Setup up the poll; false: Teardown the poll
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+static int pkt_netpoll(FAR struct socket *psock, FAR struct pollfd *fds,
+                       bool setup)
+{
+  /* Check if we are setting up or tearing down the poll */
+
+  if (setup)
+    {
+      /* Perform the PKT poll() setup */
+
+      return pkt_pollsetup(psock, fds);
+    }
+  else
+    {
+      /* Perform the PKT poll() teardown */
+
+      return pkt_pollteardown(psock, fds);
     }
 }
 
@@ -286,10 +350,11 @@ static int pkt_close(FAR struct socket *psock)
 
   switch (psock->s_type)
     {
+      case SOCK_DGRAM:
       case SOCK_RAW:
-      case SOCK_CTRL:
         {
           FAR struct pkt_conn_s *conn = psock->s_conn;
+          FAR struct net_driver_s *dev = pkt_find_device(conn);
 
           /* Is this the last reference to the connection structure (there
            * could be more if the socket was dup'ed).
@@ -297,13 +362,39 @@ static int pkt_close(FAR struct socket *psock)
 
           if (conn->crefs <= 1)
             {
+              conn_dev_lock(&conn->sconn, dev);
+
               /* Yes... free any read-ahead data */
 
               iob_free_queue(&conn->readahead);
 
+#ifdef CONFIG_NET_PKT_WRITE_BUFFERS
+              /* Free write buffer callback. */
+
+              if (conn->sndcb != NULL)
+                {
+                  int ret;
+
+                  while (iob_get_queue_entry_count(&conn->write_q) != 0)
+                    {
+                      ret = conn_dev_sem_timedwait(&conn->sndsem, false,
+                                         _SO_TIMEOUT(conn->sconn.s_sndtimeo),
+                                         &conn->sconn, dev);
+                      if (ret < 0)
+                        {
+                          break;
+                        }
+                    }
+
+                  pkt_callback_free(dev, conn, conn->sndcb);
+                  conn->sndcb = NULL;
+                }
+#endif
+
               /* Then free the connection structure */
 
               conn->crefs = 0;          /* No more references on the connection */
+              conn_dev_unlock(&conn->sconn, dev);
               pkt_free(psock->s_conn);  /* Free network resources */
             }
           else

@@ -236,7 +236,7 @@ void arp_acd_update(FAR struct net_driver_s *dev)
 
 void arp_acd_setup(FAR struct net_driver_s *dev)
 {
-  if (dev->d_acd.need_announce == false)
+  if (!dev->d_acd.need_announce || IFF_IS_NOARP(dev->d_flags))
     {
       return;
     }
@@ -270,7 +270,7 @@ void arp_acd_set_addr(FAR struct net_driver_s *dev)
   if (!net_ipv4addr_cmp(dev->d_ipaddr, INADDR_ANY))
     {
       dev->d_acd.need_announce = true;
-      if (IFF_IS_UP(dev->d_flags))
+      if (IFF_IS_RUNNING(dev->d_flags))
         {
           arp_acd_setup(dev);
         }

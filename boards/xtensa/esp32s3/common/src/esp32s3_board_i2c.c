@@ -82,7 +82,7 @@ static int i2c_bitbang_driver_init(int bus)
 static int i2c_driver_init(int bus)
 {
   struct i2c_master_s *i2c;
-  int ret;
+  int ret = OK;
 
   i2c = esp32s3_i2cbus_initialize(bus);
   if (i2c == NULL)
@@ -153,6 +153,10 @@ int board_i2c_init(void)
 
 #  ifdef CONFIG_ESP32S3_I2C1_MASTER_MODE
   ret = i2c_driver_init(ESP32S3_I2C1);
+#  endif
+
+#  ifdef CONFIG_ESP32S3_RTC_I2C
+  ret = i2c_driver_init(ESP32S3_RTC_I2C);
 #  endif
 #endif
 

@@ -45,9 +45,6 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-#if CONFIG_MM_PGSIZE != 4096
-#  error Only pages sizes of 4096 are currently supported (CONFIG_ARCH_ADDRENV)
-#endif
 
 /* All implementations have 4 levels of page tables */
 

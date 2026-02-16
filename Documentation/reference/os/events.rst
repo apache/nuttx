@@ -116,6 +116,21 @@ Notifier Chain Interfaces
   :param events: Set of events to wait, 0 will indicate wait from any events
   :param eflags: Events flags
 
+.. c:function:: nxevent_mask_t nxevent_clear(FAR nxevent_t *event, nxevent_mask_t mask)
+
+  This function is used to clear specific bits from the event mask of the given event object.
+
+  :param event: Address of the event object
+  :param mask: Bit mask specifying which event flags should be cleared
+
+.. c:function:: nxevent_mask_t nxevent_getmask(FAR nxevent_t *event)
+
+  This function returns the event mask value of the current event object.
+
+  :param event: Location to return the event group reference.
+
+  :return: The event mask value of the current event object.
+
 .. c:function:: int nxevent_open(FAR nxevent_t **event, FAR const char *name, int oflags, ...)
 
   This function establishes a connection between named event groups and a

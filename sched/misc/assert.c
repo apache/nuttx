@@ -45,6 +45,7 @@
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/usb/usbdev_trace.h>
 #include <nuttx/mm/kasan.h>
+#include <nuttx/trace.h>
 
 #include <assert.h>
 #include <debug.h>
@@ -296,7 +297,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
                      intstack_base,
                      intstack_size,
 #ifdef CONFIG_STACK_COLORATION
-                     up_check_intstack(cpu)
+                     up_check_intstack(cpu, 0)
 #else
                      0
 #endif
@@ -335,7 +336,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
                      tcbstack_base,
                      tcbstack_size,
 #ifdef CONFIG_STACK_COLORATION
-                     up_check_tcbstack(rtcb)
+                     up_check_tcbstack(rtcb, rtcb->adj_stack_size)
 #else
                      0
 #endif
@@ -376,7 +377,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 #endif
 
 #ifdef CONFIG_STACK_COLORATION
-  stack_used = up_check_tcbstack(tcb);
+  stack_used = up_check_tcbstack(tcb, tcb->adj_stack_size);
   if (tcb->adj_stack_size > 0 && stack_used > 0)
     {
       /* Use fixed-point math with one decimal place */
@@ -405,7 +406,9 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 #endif
          " %3d %-8s %-7s %-3c"
          " %-18s"
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
          " " SIGSET_FMT
+#endif
          " %p"
          "   %7zu"
 #ifdef CONFIG_STACK_COLORATION
@@ -427,11 +430,13 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
                         >> TCB_FLAG_TTYPE_SHIFT]
          , tcb->flags & TCB_FLAG_EXIT_PROCESSING ? 'P' : '-'
          , state
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
          , SIGSET_ELEM(&tcb->sigprocmask)
+#endif
          , tcb->stack_base_ptr
          , tcb->adj_stack_size
 #ifdef CONFIG_STACK_COLORATION
-         , up_check_tcbstack(tcb)
+         , up_check_tcbstack(tcb, tcb->adj_stack_size)
          , stack_filled / 10, stack_filled % 10
          , (stack_filled >= 10 * 80 ? '!' : ' ')
 #endif
@@ -500,7 +505,7 @@ static void dump_tasks(void)
   for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
     {
 #  ifdef CONFIG_STACK_COLORATION
-      size_t stack_used = up_check_intstack(cpu);
+      size_t stack_used = up_check_intstack(cpu, 0);
       size_t stack_filled = 0;
 
       if (stack_used > 0)
@@ -611,7 +616,8 @@ static void dump_deadlock(void)
 
 static noreturn_function int pause_cpu_handler(FAR void *arg)
 {
-  memcpy(g_last_regs[this_cpu()], running_regs(), sizeof(g_last_regs[0]));
+  up_regs_memcpy(g_last_regs[this_cpu()], running_regs(),
+                 sizeof(g_last_regs[0]));
   g_cpu_paused[this_cpu()] = true;
   up_flush_dcache_all();
   while (1);
@@ -833,7 +839,7 @@ void _assert(FAR const char *filename, int linenum,
   struct panic_notifier_s notifier_data;
   irqstate_t flags;
 
-  if (g_nx_initstate == OSINIT_PANIC)
+  if (OSINIT_IS_PANIC())
     {
       /* Already in fatal state, reset board directly. */
 
@@ -843,8 +849,7 @@ void _assert(FAR const char *filename, int linenum,
   flags = 0; /* suppress GCC warning */
   if (os_ready)
     {
-      flags = spin_lock_irqsave(&g_assert_lock);
-      sched_lock();
+      flags = spin_lock_irqsave_nopreempt(&g_assert_lock);
     }
 
 #if CONFIG_BOARD_RESET_ON_ASSERT < 2
@@ -855,6 +860,7 @@ void _assert(FAR const char *filename, int linenum,
       /* Fatal error, enter panic state. */
 
       g_nx_initstate = OSINIT_PANIC;
+      sched_trace_mark("PANIC");
 
       /* Disable KASAN to avoid false positive */
 
@@ -877,7 +883,8 @@ void _assert(FAR const char *filename, int linenum,
     }
   else
     {
-      memcpy(g_last_regs[this_cpu()], regs, sizeof(g_last_regs[0]));
+      up_regs_memcpy(g_last_regs[this_cpu()], regs, sizeof(g_last_regs[0]));
+      regs = g_last_regs[this_cpu()];
     }
 
   notifier_data.rtcb = rtcb;
@@ -885,7 +892,7 @@ void _assert(FAR const char *filename, int linenum,
   notifier_data.filename = filename;
   notifier_data.linenum = linenum;
   notifier_data.msg = msg;
-  panic_notifier_call_chain(g_nx_initstate == OSINIT_PANIC
+  panic_notifier_call_chain(OSINIT_IS_PANIC()
                             ? PANIC_KERNEL : PANIC_TASK,
                             &notifier_data);
 #ifdef CONFIG_ARCH_LEDS
@@ -902,7 +909,7 @@ void _assert(FAR const char *filename, int linenum,
   dump_assert_info(rtcb, filename, linenum, msg, regs);
 #endif
 
-  if (g_nx_initstate == OSINIT_PANIC)
+  if (OSINIT_IS_PANIC())
     {
       /* Dump fatal info of assertion. */
 
@@ -917,7 +924,6 @@ void _assert(FAR const char *filename, int linenum,
 
   if (os_ready)
     {
-      spin_unlock_irqrestore(&g_assert_lock, flags);
-      sched_unlock();
+      spin_unlock_irqrestore_nopreempt(&g_assert_lock, flags);
     }
 }

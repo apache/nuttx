@@ -84,8 +84,10 @@ SECTION_FUNC(text, up_saveusercontext)
 #endif
     stp    x4,  x5,  [x0, #8 * REG_ELR]
 
+#ifdef CONFIG_ARM64_MTE
     mrs    x4,  sctlr_el1
     str    x4,  [x0, #8 * REG_SCTLR_EL1]
+#endif
 
     ret
 
@@ -105,21 +107,26 @@ SECTION_FUNC(text, up_saveusercontext)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_BUILD_FLAT
+#if defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_BUILD_PROTECTED)
 GTEXT(arm64_jump_to_user)
 SECTION_FUNC(text, arm64_jump_to_user)
     msr daifset, #IRQ_DAIF_MASK
-    mov sp,  x4
+    mov sp,  x5
     str x0,  [sp, #8 * REG_ELR]
     str x1,  [sp, #8 * REG_X0]
     str x2,  [sp, #8 * REG_X1]
-    str x3,  [sp, #8 * REG_SP_EL0]
+    str x3,  [sp, #8 * REG_X2]
+    str x4,  [sp, #8 * REG_SP_EL0]
     mrs x0,  spsr_el1
     and x0,  x0, #~SPSR_MODE_MASK
     #orr x0, x0, #SPSR_MODE_EL0T # EL0T=0x00, out of range for orr
     str x0,  [sp, #8 * REG_SPSR]
+
+#ifdef CONFIG_ARM64_MTE
     mrs x0,  sctlr_el1
     str x0,  [sp, #8 * REG_SCTLR_EL1]
+#endif
+
     b arm64_exit_exception
 #endif
 
@@ -310,7 +317,7 @@ SECTION_FUNC(text, arm64_fiq_handler)
      * with interrupts disabled
      */
 
-    bl     arm64_decodeirq
+    bl     arm64_decodefiq
 
     mov    sp, x0
     b      arm64_exit_exception

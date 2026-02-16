@@ -91,19 +91,17 @@
 #define BOARD_ENABLE_PLL          1   /* enable the PLL */
 #define CPU_FREQ                  120 /* MHz */
 
-/* TODO: Automate PLL calculations */
-
 #if CPU_FREQ == 120
 
 /*      120 MHz
  *
- * fVCO = 12MHz * 40 / 2  = 480MHz
- * fPLL = 480MHz / 2  = 240MHz
- * fSYS = fPLL / 2    = 120MHz
- * fCCU = fSYS / 2    =  60MHz
- * fCPU = fSYS / 1    = 120MHz
- * fPB  = fCPU / 2    =  60MHz
- * fETH = fSYS / 2    =  60MHz
+ * fVCO = 12MHz * 40 / 1 = 480MHz
+ * fPLL = 480MHz / 4     = 120MHz
+ * fSYS = fPLL / 1       = 120MHz
+ * fCCU = fSYS / 2       =  60MHz
+ * fCPU = fSYS / 1       = 120MHz
+ * fPERIPH  = fCPU / 2   =  60MHz
+ * fETH = fSYS / 2       =  60MHz
  */
 
 #  define BOARD_PLL_NDIV            40
@@ -156,9 +154,6 @@
 #  define BOARD_WDTDIV              1
 #  define BOARD_WDT_FREQUENCY       24000000
 
-#  define BOARD_EXT_SOURCE          EXT_CLKSRC_FPLL
-#  define BOARD_PLL_ECKDIV          480     /* [1,512] */
-
 #  define kHz_1     1000
 #  define MHz_1     (kHz_1 * kHz_1)
 #  define MHz_50    ( 50 * MHz_1)
@@ -195,19 +190,17 @@
 
 /* EXT clock settings */
 
-#define BOARD_EXTCKL_ENABLE         1   /* 0 disables output */
+#define BOARD_EXTCKL_ENABLE         0   /* 0 disables output, P0.12 taken by ECAT */
 
 #if BOARD_EXTCKL_ENABLE
 #  define EXTCLK_PIN_P0_8           8
 #  define EXTCLK_PIN_P1_15          15
 #  define BOARD_EXTCLK_PIN          EXTCLK_PIN_P0_8
 #  define BOARD_EXT_SOURCE          EXT_CLKSRC_FPLL
-#  define BOARD_EXT_FREQUENCY       (250 * kHz_1)   /* Desired output freq */
-#  define BOARD_EXTDIV              (BOARD_PLL_FREQUENCY / BOARD_EXT_FREQUENCY)
+#  define BOARD_PLL_ECKDIV          480     /* [1,512] */
 
 /* range check EXTDIV */
-
-#  if BOARD_EXTDIV > 512
+#  if BOARD_PLL_ECKDIV > 512
 #    error "EXTCLK Divisor out of range!"
 #  endif
 #endif
@@ -224,15 +217,27 @@
 
 /* USB PLL settings.
  *
- *   fUSBPLL = 48MHz and fUSBPLLVCO = 384 MHz
+ *   fUSBPLLVCO = fXTAL * N / P = 12M * 100 / 3 = 400MHz
+ *   fUSBPLL = fUSBPLLVCO / 2 = 200MHz
  *
  * Note: Implicit divider of 2 and fUSBPLLVCO >= 260 MHz and
  * fUSBPLLVCO <= 520 MHz
  */
 
-#define  BOARD_ENABLE_USBPLL
-#define BOARD_USB_PDIV            3
-#define BOARD_USB_NDIV            100
+#define BOARD_ENABLE_USBPLL
+#define BOARD_USBPLL_PDIV            3
+#define BOARD_USBPLL_NDIV            100
+
+/* ECAT clock
+ *
+ * fECAT = fUSBPLL / (ECATDIV + 1) = 200M / 2 = 100MHz
+ */
+
+#define BOARD_ECAT_DIV 1
+
+#  if BOARD_ECAT_DIV > 3
+#    error "ECADIV out of range! [0-3]"
+#  endif
 
 /* FLASH wait states */
 
@@ -301,7 +306,7 @@
 #define BUTTON_0_BIT      (1 << BUTTON_0)
 #define BUTTON_1_BIT      (1 << BUTTON_1)
 
-/* USIC0 ********************************************************************/
+/* Peripherals definitions **************************************************/
 
 /* USIC0 CH0 is used as UART0
  *
@@ -325,7 +330,9 @@
 #define GPIO_SPI4_MISO    (GPIO_U2C0_DX0C)
 #define GPIO_SPI4_SCLK    (GPIO_U2C0_SCLKOUT_1 | GPIO_PADA2_STRONGMEDIUM)
 
-/* ECAT0 configuration */
+/* ECAT0 configuration
+ * See XMC4800 Relax Board user manual for associated pinout.
+ */
 
 #define ECAT_CLK_25          GPIO_ECAT_CLK_25_1
 #define ECAT_LED_ERR         GPIO_ECAT_LED_ERR

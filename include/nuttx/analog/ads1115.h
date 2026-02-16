@@ -36,28 +36,32 @@
  ****************************************************************************/
 
 /* IOCTL Commands
- * Cmd: ANIOC_ADS1115_SET_PGA         Arg: enum ads1115_pga_e
- * Cmd: ANIOC_ADS1115_SET_MODE        Arg: enum ads1115_mode_e
- * Cmd: ANIOC_ADS1115_SET_DR          Arg: enum ads1115_dr_e
- * Cmd: ANIOC_ADS1115_SET_COMP_MODE   Arg: enum ads1115_comp_mode_e
- * Cmd: ANIOC_ADS1115_SET_COMP_POL    Arg: enum ads1115_comp_pol_e
- * Cmd: ANIOC_ADS1115_SET_COMP_LAT    Arg: enum ads1115_comp_lat_e
- * Cmd: ANIOC_ADS1115_SET_COMP_QUEUE  Arg: enum ads1115_comp_queue_e
- * Cmd: ANIOC_ADS1115_READ_CHANNEL    Arg: struct adc_msg_s *channel
- * Cmd: ANIOC_ADS1115_SET_HI_THRESH   Arg: uint16_t value
- * Cmd: ANIOC_ADS1115_SET_LO_THRESH   Arg: uint16_t value
+ * Cmd: ANIOC_ADS1115_SET_PGA            Arg: enum ads1115_pga_e
+ * Cmd: ANIOC_ADS1115_SET_MODE           Arg: enum ads1115_mode_e
+ * Cmd: ANIOC_ADS1115_SET_DR             Arg: enum ads1115_dr_e
+ * Cmd: ANIOC_ADS1115_SET_COMP_MODE      Arg: enum ads1115_comp_mode_e
+ * Cmd: ANIOC_ADS1115_SET_COMP_POL       Arg: enum ads1115_comp_pol_e
+ * Cmd: ANIOC_ADS1115_SET_COMP_LAT       Arg: enum ads1115_comp_lat_e
+ * Cmd: ANIOC_ADS1115_SET_COMP_QUEUE     Arg: enum ads1115_comp_queue_e
+ * Cmd: ANIOC_ADS1115_READ_CHANNEL       Arg: struct adc_msg_s *channel
+ * Cmd: ANIOC_ADS1115_SET_HI_THRESH      Arg: uint16_t value
+ * Cmd: ANIOC_ADS1115_SET_LO_THRESH      Arg: uint16_t value
+ * Cmd: ANIOC_ADS1115_TRIGGER_CONVERSION Arg: struct adc_msg_s
+ * Cmd: ANIOC_ADS1115_READ_CHANNEL_NO_CONVERSION Arg: struct adc_msg_s
  */
 
-#define ANIOC_ADS1115_SET_PGA _ANIOC(AN_ADS1115_FIRST + 0)
-#define ANIOC_ADS1115_SET_MODE _ANIOC(AN_ADS1115_FIRST + 1)
-#define ANIOC_ADS1115_SET_DR _ANIOC(AN_ADS1115_FIRST + 2)
-#define ANIOC_ADS1115_SET_COMP_MODE _ANIOC(AN_ADS1115_FIRST + 3)
-#define ANIOC_ADS1115_SET_COMP_POL _ANIOC(AN_ADS1115_FIRST + 4)
-#define ANIOC_ADS1115_SET_COMP_LAT _ANIOC(AN_ADS1115_FIRST + 5)
-#define ANIOC_ADS1115_SET_COMP_QUEUE _ANIOC(AN_ADS1115_FIRST + 6)
-#define ANIOC_ADS1115_READ_CHANNEL _ANIOC(AN_ADS1115_FIRST + 7)
-#define ANIOC_ADS1115_SET_HI_THRESH _ANIOC(AN_ADS1115_FIRST + 8)
-#define ANIOC_ADS1115_SET_LO_THRESH _ANIOC(AN_ADS1115_FIRST + 9)
+#define ANIOC_ADS1115_SET_PGA                    _ANIOC(AN_ADS1115_FIRST + 0)
+#define ANIOC_ADS1115_SET_MODE                   _ANIOC(AN_ADS1115_FIRST + 1)
+#define ANIOC_ADS1115_SET_DR                     _ANIOC(AN_ADS1115_FIRST + 2)
+#define ANIOC_ADS1115_SET_COMP_MODE              _ANIOC(AN_ADS1115_FIRST + 3)
+#define ANIOC_ADS1115_SET_COMP_POL               _ANIOC(AN_ADS1115_FIRST + 4)
+#define ANIOC_ADS1115_SET_COMP_LAT               _ANIOC(AN_ADS1115_FIRST + 5)
+#define ANIOC_ADS1115_SET_COMP_QUEUE             _ANIOC(AN_ADS1115_FIRST + 6)
+#define ANIOC_ADS1115_READ_CHANNEL               _ANIOC(AN_ADS1115_FIRST + 7)
+#define ANIOC_ADS1115_SET_HI_THRESH              _ANIOC(AN_ADS1115_FIRST + 8)
+#define ANIOC_ADS1115_SET_LO_THRESH              _ANIOC(AN_ADS1115_FIRST + 9)
+#define ANIOC_ADS1115_TRIGGER_CONVERSION         _ANIOC(AN_ADS1115_FIRST + 10)
+#define ANIOC_ADS1115_READ_CHANNEL_NO_CONVERSION _ANIOC(AN_ADS1115_FIRST + 11)
 
 /****************************************************************************
  * Public Types

@@ -336,7 +336,7 @@ static bool gd5f_waitstatus(FAR struct gd5f_dev_s *priv,
       /* Deselect the FLASH */
 
       SPI_SELECT(priv->dev, SPIDEV_FLASH(priv->spi_devid), false);
-      nxsig_usleep(1000);
+      nxsched_usleep(1000);
     }
   while ((status & GD5F_SR_OIP) != 0);
 

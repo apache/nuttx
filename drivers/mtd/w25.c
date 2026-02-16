@@ -354,6 +354,11 @@ static void w25_lock(FAR struct spi_dev_s *spi)
   SPI_SETBITS(spi, 8);
   SPI_HWFEATURES(spi, 0);
   SPI_SETFREQUENCY(spi, CONFIG_W25_SPIFREQUENCY);
+#ifdef CONFIG_SPI_DELAY_CONTROL
+  SPI_SETDELAY(spi, CONFIG_W25_START_DELAY,
+               CONFIG_W25_STOP_DELAY, CONFIG_W25_CS_DELAY,
+               CONFIG_W25_IFDELAY);
+#endif
 }
 
 /****************************************************************************
@@ -579,7 +584,7 @@ static uint8_t w25_waitwritecomplete(struct w25_dev_s *priv)
       if (priv->prev_instr != W25_PP && (status & W25_SR_BUSY) != 0)
         {
           w25_unlock(priv->spi);
-          nxsig_usleep(1000);
+          nxsched_usleep(1000);
           w25_lock(priv->spi);
         }
     }

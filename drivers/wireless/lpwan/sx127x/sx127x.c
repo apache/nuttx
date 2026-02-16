@@ -77,6 +77,8 @@
 
 #define SX127X_FREQ_CALIBRATION       (CONFIG_LPWAN_SX127X_RFFREQ_DEFAULT)
 
+#ifdef CONFIG_LPWAN_SX127X_FSKOOK_4800
+
 /* FSK default frequency deviation is 5kHz */
 
 #define SX127X_FDEV_DEFAULT           (5000)
@@ -89,6 +91,42 @@
 
 #define SX127X_FSKOOK_RXBW_DEFAULT    FSKOOK_BANDWIDTH_15P6KHZ
 #define SX127X_FSKOOK_AFCBW_DEFAULT   FSKOOK_BANDWIDTH_20P8KHZ
+
+#endif /* CONFIG_LPWAN_SX127X_FSKOOK_4800 */
+
+#ifdef CONFIG_LPWAN_SX127X_FSKOOK_38400
+
+/* FSK frequency deviation for 38400 is 20kHz */
+
+#define SX127X_FDEV_DEFAULT           (20000)
+
+/* FSK/OOK bitrate default */
+
+#define SX127X_FOM_BITRATE_DEFAULT    (38400)
+
+/* FSK/OOK bandwidth for 38400 */
+
+#define SX127X_FSKOOK_RXBW_DEFAULT    FSKOOK_BANDWIDTH_250KHZ
+#define SX127X_FSKOOK_AFCBW_DEFAULT   FSKOOK_BANDWIDTH_250KHZ
+
+#endif /* CONFIG_LPWAN_SX127X_FSKOOK_38400 */
+
+#ifdef CONFIG_LPWAN_SX127X_FSKOOK_76800
+
+/* FSK frequency deviation for 76800 is 75kHz */
+
+#define SX127X_FDEV_DEFAULT           (75000)
+
+/* FSK/OOK bitrate default */
+
+#define SX127X_FOM_BITRATE_DEFAULT    (76800)
+
+/* FSK/OOK bandwidth for 76800 */
+
+#define SX127X_FSKOOK_RXBW_DEFAULT    FSKOOK_BANDWIDTH_250KHZ
+#define SX127X_FSKOOK_AFCBW_DEFAULT   FSKOOK_BANDWIDTH_250KHZ
+
+#endif /* CONFIG_LPWAN_SX127X_FSKOOK_76800 */
 
 /* Default LORA bandwidth */
 
@@ -278,10 +316,12 @@ struct sx127x_dev_s
   bool     pa_force;              /* Force PA BOOST pin select */
 #endif
 #ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
-  uint32_t rx_timeout;            /* RX timeout (not supported) */
+  uint32_t rx_timeout;            /* RX timeout in milliseconds */
   uint16_t rx_fifo_len;           /* Number of bytes stored in fifo */
   uint16_t nxt_read;              /* Next read index */
   uint16_t nxt_write;             /* Next write index */
+  clock_t  last_rx_tick;          /* Ticks since last RX event to detect timeout */
+  struct work_s rx_watchdog;      /* Watchdog to detect timeout */
 
   /* Circular RX packet buffer */
 
@@ -1239,6 +1279,51 @@ errout:
 }
 
 /****************************************************************************
+ * Name: sx127x_rx_watchdog
+ *
+ * Description:
+ *   Watchdog to detect SX127x RX communication stall
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_LPWAN_SX127X_RXSUPPORT) && \
+    CONFIG_LPWAN_SX127X_RX_TIMEOUT > 0
+static void sx127x_rx_watchdog(FAR void *arg)
+{
+  FAR struct sx127x_dev_s *dev = (FAR struct sx127x_dev_s *)arg;
+  clock_t now = clock_systime_ticks();
+
+  if (dev->opmode == SX127X_OPMODE_RX &&
+      (now - dev->last_rx_tick) > MSEC2TICK(dev->rx_timeout))
+    {
+      wlerr("RX stall detected, restarting RX\n");
+
+      /* Leave RX mode to clear AFC + bit sync */
+
+      sx127x_opmode_set(dev, SX127X_OPMODE_STANDBY);
+
+      /* datasheet-safe delay */
+
+      nxsched_usleep(100);
+
+      /* Re-enter RX */
+
+      sx127x_opmode_set(dev, SX127X_OPMODE_RX);
+
+      /* Avoid using old RX tick, otherwise it always will fail */
+
+      dev->last_rx_tick = now;
+    }
+
+  /* Reschedule watchdog */
+
+  work_queue(LPWORK, &dev->rx_watchdog,
+             sx127x_rx_watchdog, dev,
+             MSEC2TICK(dev->rx_timeout));
+}
+#endif /* CONFIG_LPWAN_SX127X_RXSUPPORT && CONFIG_LPWAN_SX127X_RX_TIMEOUT > 0 */
+
+/****************************************************************************
  * Name: sx127x_lora_isr0_process
  *
  * Description:
@@ -1433,6 +1518,23 @@ static int sx127x_fskook_isr0_process(FAR struct sx127x_dev_s *dev)
               ret = sx127x_fskook_rxhandle(dev);
               if (ret > 0)
                 {
+                  /* Should we take care of RX timeout? */
+
+#if CONFIG_LPWAN_SX127X_RX_TIMEOUT > 0
+                  if (dev->rx_timeout > 0)
+                    {
+                      /* Keep a track of last RX time to detect timeout */
+
+                      dev->last_rx_tick = clock_systime_ticks();
+
+                      /* Prepare the work queue to take care of RX timeout */
+
+                      work_queue(LPWORK, &dev->rx_watchdog,
+                                 sx127x_rx_watchdog, dev,
+                                 MSEC2TICK(dev->rx_timeout));
+                    }
+#endif
+
                   if (dev->pfd)
                     {
                       /* Data available for input */
@@ -2882,7 +2984,7 @@ static int sx127x_lora_opmode_set(FAR struct sx127x_dev_s *dev,
 
   /* Wait for mode ready. REVISIT: do we need this ? */
 
-  nxsig_usleep(250);
+  nxsched_usleep(250);
 
 errout:
   sx127x_unlock(dev->spi);
@@ -3685,7 +3787,7 @@ static bool sx127x_channel_scan(FAR struct sx127x_dev_s *dev,
 
       /* Wait some time */
 
-      nxsig_usleep(1000);
+      nxsched_usleep(1000);
     }
   while (tstart.tv_sec + chanscan->stime > tnow.tv_sec);
 
@@ -4046,7 +4148,7 @@ static int sx127x_calibration(FAR struct sx127x_dev_s *dev, uint32_t freq)
     {
       /* Wait 10ms */
 
-      nxsig_usleep(10000);
+      nxsched_usleep(10000);
 
       /* Get register */
 
@@ -4165,6 +4267,14 @@ static int sx127x_init(FAR struct sx127x_dev_s *dev)
 static int sx127x_deinit(FAR struct sx127x_dev_s *dev)
 {
   wlinfo("Deinit sx127x dev\n");
+
+#ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
+  /* Cancel any running watchdog */
+
+#  if CONFIG_LPWAN_SX127X_RX_TIMEOUT > 0
+  work_cancel(LPWORK, &dev->rx_watchdog);
+#  endif
+#endif
 
   /* Enter SLEEP mode */
 
@@ -4521,6 +4631,9 @@ static int sx127x_unregister(FAR struct sx127x_dev_s *dev)
   nxsem_destroy(&dev->tx_sem);
 #endif
 #ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
+#  if CONFIG_LPWAN_SX127X_RX_TIMEOUT > 0
+  work_cancel(LPWORK, &dev->rx_watchdog);
+#  endif
   nxsem_destroy(&dev->rx_sem);
   nxmutex_destroy(&dev->rx_buffer_lock);
 #endif
@@ -4576,6 +4689,9 @@ int sx127x_register(FAR struct spi_dev_s *spi,
   dev->crcon          = CONFIG_LPWAN_SX127X_CRCON;
 #ifdef CONFIG_LPWAN_SX127X_FSKOOK
   dev->fskook.fixlen  = false;
+#  ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
+  dev->rx_timeout     = CONFIG_LPWAN_SX127X_RX_TIMEOUT;
+#  endif
 #endif
 #ifdef CONFIG_LPWAN_SX127X_LORA
   dev->lora.invert_iq = false;

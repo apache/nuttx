@@ -985,7 +985,7 @@ static int w25qxxxjv_erase_sector(FAR struct w25qxxxjv_dev_s *priv,
           return -EBUSY;
         }
 
-      nxsig_usleep(priv->erasetime * 1000);
+      nxsched_usleep(priv->erasetime * 1000);
       status = w25qxxxjv_read_status(priv);
     }
 
@@ -1008,7 +1008,7 @@ static int w25qxxxjv_erase_sector(FAR struct w25qxxxjv_dev_s *priv,
   status = w25qxxxjv_read_status(priv);
   while ((status & STATUS_BUSY_MASK) != 0)
     {
-      nxsig_usleep(priv->erasetime * 1000);
+      nxsched_usleep(priv->erasetime * 1000);
       status = w25qxxxjv_read_status(priv);
     }
 
@@ -1042,7 +1042,7 @@ static int w25qxxxjv_erase_chip(FAR struct w25qxxxjv_dev_s *priv)
   status = w25qxxxjv_read_status(priv);
   while ((status & STATUS_BUSY_MASK) != 0)
     {
-      nxsig_usleep(200 * 1000);
+      nxsched_usleep(200 * 1000);
       status = w25qxxxjv_read_status(priv);
     }
 

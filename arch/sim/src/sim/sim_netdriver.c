@@ -70,11 +70,14 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev_lowerhalf.h>
 #include <nuttx/net/pkt.h>
+#include <nuttx/net/wifi_sim.h>
 
 #include "sim_internal.h"
+#include "sim_wifihost.h"
 
 #define SIM_NETDEV_BUFSIZE (CONFIG_SIM_NETDEV_MTU + ETH_HDRLEN + \
                             CONFIG_NET_GUARDSIZE)
+#define SIM_NETDEV_PERIOD  MSEC2TICK(CONFIG_SIM_LOOP_INTERVAL)
 
 /* We don't know packet length before receiving, so we can only offload it
  * when netpkt's buffer is long enough.
@@ -89,19 +92,24 @@
 #define DEVIDX(p) ((struct sim_netdev_s *)(p) - g_sim_dev)
 #define DEVBUF(p) (((struct sim_netdev_s *)(p))->buf)
 
-#if CONFIG_SIM_WIFIDEV_NUMBER != 0
-#  include "sim_wifidriver.c"
-#else
+#define IDXDEV(i) ((struct netdev_lowerhalf_s *)(&g_sim_dev[i].dev))
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 struct sim_netdev_s
 {
+#if defined(CONFIG_SIM_WIFIDEV_HOST)
+  struct sim_wifihost_lowerhalf_s dev;
+#elif defined(CONFIG_SIM_WIFIDEV_PSEUDO)
+  struct wifi_sim_lowerhalf_s dev;
+#else
   struct netdev_lowerhalf_s dev;
-  uint8_t buf[SIM_NETDEV_BUFSIZE]; /* Used when packet buffer is fragmented */
-};
 #endif
+  uint8_t buf[SIM_NETDEV_BUFSIZE]; /* Used when packet buffer is fragmented */
+  struct work_s work;
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -111,6 +119,12 @@ static int netdriver_send(struct netdev_lowerhalf_s *dev, netpkt_t *pkt);
 static netpkt_t *netdriver_recv(struct netdev_lowerhalf_s *dev);
 static int netdriver_ifup(struct netdev_lowerhalf_s *dev);
 static int netdriver_ifdown(struct netdev_lowerhalf_s *dev);
+#ifdef CONFIG_NET_MCASTGROUP
+static int netdriver_addmac(struct netdev_lowerhalf_s *dev,
+                            const uint8_t *mac);
+static int netdriver_rmmac(struct netdev_lowerhalf_s *dev,
+                           const uint8_t *mac);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -125,6 +139,10 @@ static const struct netdev_ops_s g_ops =
   netdriver_ifdown, /* ifdown */
   netdriver_send,   /* transmit */
   netdriver_recv    /* receive */
+#ifdef CONFIG_NET_MCASTGROUP
+  , netdriver_addmac,
+  netdriver_rmmac   /* addmac, rmmac */
+#endif
 };
 
 /****************************************************************************
@@ -199,7 +217,11 @@ static int netdriver_ifup(struct netdev_lowerhalf_s *dev)
 #if CONFIG_SIM_WIFIDEV_NUMBER != 0
   if (DEVIDX(dev) < CONFIG_SIM_WIFIDEV_NUMBER)
     {
-      if (wifidriver_connected(dev))
+#  if defined(CONFIG_SIM_WIFIDEV_HOST)
+      if (sim_wifihost_connected((struct sim_wifihost_lowerhalf_s *)dev))
+#  elif defined(CONFIG_SIM_WIFIDEV_PSEUDO)
+      if (wifi_sim_connected((struct wifi_sim_lowerhalf_s *)dev))
+#  endif
         {
           netdev_lower_carrier_on(dev);
         }
@@ -220,6 +242,20 @@ static int netdriver_ifdown(struct netdev_lowerhalf_s *dev)
   return OK;
 }
 
+#ifdef CONFIG_NET_MCASTGROUP
+static int netdriver_addmac(struct netdev_lowerhalf_s *dev,
+                            const uint8_t *mac)
+{
+  return OK;
+}
+
+static int netdriver_rmmac(struct netdev_lowerhalf_s *dev,
+                           const uint8_t *mac)
+{
+  return OK;
+}
+#endif
+
 static void netdriver_txdone_interrupt(void *priv)
 {
   struct netdev_lowerhalf_s *dev = (struct netdev_lowerhalf_s *)priv;
@@ -230,6 +266,20 @@ static void netdriver_rxready_interrupt(void *priv)
 {
   struct netdev_lowerhalf_s *dev = (struct netdev_lowerhalf_s *)priv;
   netdev_lower_rxready(dev);
+}
+
+static void sim_netdev_work(void *arg)
+{
+  struct sim_netdev_s *priv = (struct sim_netdev_s *)arg;
+  struct netdev_lowerhalf_s *dev = (struct netdev_lowerhalf_s *)&priv->dev;
+
+  if (sim_netdev_avail(DEVIDX(dev)))
+    {
+      netdev_lower_rxready(dev);
+    }
+
+  work_queue_next_wq(g_work_queue, &priv->work, sim_netdev_work, arg,
+                     SIM_NETDEV_PERIOD);
 }
 
 /****************************************************************************
@@ -243,7 +293,7 @@ int sim_netdriver_init(void)
 
   for (devidx = 0; devidx < CONFIG_SIM_NETDEV_NUMBER; devidx++)
     {
-      dev = &g_sim_dev[devidx].dev;
+      dev = IDXDEV(devidx);
 
       /* Internal initialization */
 
@@ -260,7 +310,17 @@ int sim_netdriver_init(void)
 #if CONFIG_SIM_WIFIDEV_NUMBER != 0
       if (devidx < CONFIG_SIM_WIFIDEV_NUMBER)
         {
-          wifidriver_init(dev, devidx);
+          int ret =
+#  if defined(CONFIG_SIM_WIFIDEV_HOST)
+          sim_wifihost_init((struct sim_wifihost_lowerhalf_s *)dev,
+                            devidx);
+#  elif defined(CONFIG_SIM_WIFIDEV_PSEUDO)
+          wifi_sim_init((struct wifi_sim_lowerhalf_s *)dev);
+#  endif
+          if (ret < 0)
+            {
+              return ret;
+            }
         }
 #endif
 
@@ -270,6 +330,9 @@ int sim_netdriver_init(void)
 
       netdev_lower_register(dev, devidx < CONFIG_SIM_WIFIDEV_NUMBER ?
                                  NET_LL_IEEE80211 : NET_LL_ETHERNET);
+      work_queue_wq(g_work_queue, &g_sim_dev[devidx].work,
+                    sim_netdev_work, &g_sim_dev[devidx],
+                    SIM_NETDEV_PERIOD);
     }
 
   return OK;
@@ -277,13 +340,13 @@ int sim_netdriver_init(void)
 
 void sim_netdriver_setmacaddr(int devidx, unsigned char *macaddr)
 {
-  memcpy(g_sim_dev[devidx].dev.netdev.d_mac.ether.ether_addr_octet, macaddr,
+  memcpy(IDXDEV(devidx)->netdev.d_mac.ether.ether_addr_octet, macaddr,
          IFHWADDRLEN);
 }
 
 void sim_netdriver_setmtu(int devidx, int mtu)
 {
-  g_sim_dev[devidx].dev.netdev.d_pktsize = MIN(SIM_NETDEV_BUFSIZE,
+  IDXDEV(devidx)->netdev.d_pktsize = MIN(SIM_NETDEV_BUFSIZE,
                                                mtu + ETH_HDRLEN);
 }
 
@@ -294,7 +357,7 @@ void sim_netdriver_loop(void)
     {
       if (sim_netdev_avail(devidx))
         {
-          netdev_lower_rxready(&g_sim_dev[devidx].dev);
+          netdev_lower_rxready(IDXDEV(devidx));
         }
     }
 }

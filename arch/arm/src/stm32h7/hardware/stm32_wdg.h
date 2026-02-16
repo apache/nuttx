@@ -118,12 +118,16 @@
 
 #define WWDG_CFR_W_SHIFT         (0)       /* Bits 6:0 W[6:0] 7-bit window value */
 #define WWDG_CFR_W_MASK          (0x7f << WWDG_CFR_W_SHIFT)
-#define WWDG_CFR_WDGTB_SHIFT     (7)       /* Bits 8:7 [1:0]: Timer Base */
-#define WWDG_CFR_WDGTB_MASK      (3 << WWDG_CFR_WDGTB_SHIFT)
-#  define WWDG_CFR_PCLK1         (0 << WWDG_CFR_WDGTB_SHIFT) /* 00: CK Counter Clock (PCLK1 div 4096) div 1 */
-#  define WWDG_CFR_PCLK1d2       (1 << WWDG_CFR_WDGTB_SHIFT) /* 01: CK Counter Clock (PCLK1 div 4096) div 2 */
-#  define WWDG_CFR_PCLK1d4       (2 << WWDG_CFR_WDGTB_SHIFT) /* 10: CK Counter Clock (PCLK1 div 4096) div 4 */
-#  define WWDG_CFR_PCLK1d8       (3 << WWDG_CFR_WDGTB_SHIFT) /* 11: CK Counter Clock (PCLK1 div 4096) div 8 */
+#define WWDG_CFR_WDGTB_SHIFT     (11)       /* Bits 13:11 [2:0]: Timer Base */
+#define WWDG_CFR_WDGTB_MASK      (7 << WWDG_CFR_WDGTB_SHIFT)
+#  define WWDG_CFR_PCLK1         (0 << WWDG_CFR_WDGTB_SHIFT) /* 000: CK Counter Clock (PCLK1 div 4096) div 1 */
+#  define WWDG_CFR_PCLK1d2       (1 << WWDG_CFR_WDGTB_SHIFT) /* 001: CK Counter Clock (PCLK1 div 4096) div 2 */
+#  define WWDG_CFR_PCLK1d4       (2 << WWDG_CFR_WDGTB_SHIFT) /* 010: CK Counter Clock (PCLK1 div 4096) div 4 */
+#  define WWDG_CFR_PCLK1d8       (3 << WWDG_CFR_WDGTB_SHIFT) /* 011: CK Counter Clock (PCLK1 div 4096) div 8 */
+#  define WWDG_CFR_PCLK1d16      (4 << WWDG_CFR_WDGTB_SHIFT) /* 100: CK Counter Clock (PCLK1 div 4096) div 16 */
+#  define WWDG_CFR_PCLK1d32      (5 << WWDG_CFR_WDGTB_SHIFT) /* 101: CK Counter Clock (PCLK1 div 4096) div 32 */
+#  define WWDG_CFR_PCLK1d64      (6 << WWDG_CFR_WDGTB_SHIFT) /* 110: CK Counter Clock (PCLK1 div 4096) div 64 */
+#  define WWDG_CFR_PCLK1d128     (7 << WWDG_CFR_WDGTB_SHIFT) /* 111: CK Counter Clock (PCLK1 div 4096) div 128 */
 
 #define WWDG_CFR_EWI             (1 << 9)  /* Bit 9: Early Wakeup Interrupt */
 

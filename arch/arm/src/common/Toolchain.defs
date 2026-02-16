@@ -63,7 +63,7 @@ else
 endif
 
 ifeq ($(CONFIG_STACK_CANARIES),y)
-  ARCHOPTIMIZATION += -fstack-protector-all
+  ARCHOPTIMIZATION += $(patsubst "%",%,$(CONFIG_STACK_CANARIES_LEVEL))
 endif
 
 ifeq ($(CONFIG_STACK_USAGE),y)
@@ -214,6 +214,7 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
   LD      = ld.lld -m armelf
   STRIP   = llvm-strip --strip-unneeded
   AR      = llvm-ar rcs
+  UNAR    = llvm-ar x
   NM      = llvm-nm
   OBJCOPY = llvm-objcopy
   OBJDUMP = llvm-objdump
@@ -224,25 +225,13 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
 
   ARCHOPTIMIZATION += -fno-builtin
 
-  ifneq ($(TOOLCHAIN_CLANG_CONFIG),)
-    ifeq ($(CLANGVER),)
-      export CLANGVER := $(shell $(CC) --version | grep "clang version" | sed -E "s/.* ([0-9]+\.[0-9]+\.[0-9]+).*/\1/")
-    endif
+  ifeq ($(CLANGVER),)
+    export CLANGVER := $(shell $(CC) --version | grep "clang version" | sed -E "s/.* ([0-9]+\.[0-9]+\.[0-9]+).*/\1/")
+  endif
 
-    ifeq ($(CLANGVER),14.0)
-      TOOLCHAIN_CLANG_CONFIG := $(TOOLCHAIN_CLANG_CONFIG)_nosys
-    endif
-
-    ifeq "17.0" "$(word 1, $(sort 17.0 $(CLANGVER)))"
-      TOOLCHAIN_CLANG_OPTION = -target
-      ARCHCPUFLAGS += --target=arm-none-eabi
-
-      LDFLAGS += --print-memory-usage
-    else
-      TOOLCHAIN_CLANG_OPTION = --config
-    endif
-
-    ARCHCPUFLAGS := $(TOOLCHAIN_CLANG_OPTION) $(TOOLCHAIN_CLANG_CONFIG).cfg $(ARCHCPUFLAGS)
+  ifeq "17.0" "$(word 1, $(sort 17.0 $(CLANGVER)))"
+    ARCHCPUFLAGS += --target=arm-none-eabi
+    LDFLAGS += --print-memory-usage
   endif
 
   LDFLAGS += --entry=__start
@@ -257,6 +246,7 @@ else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
   LD      = armlink
   STRIP   = llvm-strip --strip-unneeded
   AR      = armar -rcs
+  UNAR    = armar -x
   NM      = llvm-nm
   OBJCOPY = llvm-objcopy
   OBJDUMP = llvm-objdump
@@ -314,15 +304,17 @@ else
   LD      = $(CROSSDEV)ld
   STRIP   = $(CROSSDEV)strip --strip-unneeded
   AR      = $(CROSSDEV)ar rcs
+  UNAR    = $(CROSSDEV)ar x
   NM      = $(CROSSDEV)nm
   OBJCOPY = $(CROSSDEV)objcopy
   OBJDUMP = $(CROSSDEV)objdump
 
   ifeq ($(CONFIG_LTO_FULL),y)
     ifeq ($(CONFIG_ARM_TOOLCHAIN_GNU_EABI),y)
-      LD := $(CROSSDEV)gcc
-      AR := $(CROSSDEV)gcc-ar rcs
-      NM := $(CROSSDEV)gcc-nm
+      LD   := $(CROSSDEV)gcc
+      AR   := $(CROSSDEV)gcc-ar rcs
+      UNAR := $(CROSSDEV)gcc-ar x
+      NM   := $(CROSSDEV)gcc-nm
       ARCHOPTIMIZATION += -fno-builtin
     endif
   endif
@@ -406,7 +398,14 @@ ARCHOPTIMIZATION += --no_commons
 else
 ARCHOPTIMIZATION += -fno-common
 endif
-ARCHOPTIMIZATION += -Wall -Wshadow -Wundef
+
+ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+  ARCHOPTIMIZATION += --ghstd=last
+else
+  ARCHOPTIMIZATION += -Wall
+endif
+
+ARCHOPTIMIZATION += -Wshadow -Wundef
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
   ARCHOPTIMIZATION += -nostdlib
@@ -432,10 +431,13 @@ ZIGFLAGS = -target $(ZARCH)-freestanding-$(ZEABI) $(ZARCHCPUFLAGS)
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
   ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
-    ifeq ($(CONFIG_ARCH_TOOLCHAIN_GHS),)
+    ifeq ($(CONFIG_ARCH_TOOLCHAIN_GHS),y)
+      # instruct the exlr deletet the unused functions during link procedure
+      LDFLAGS += -delete
+    else
       LDFLAGS          += --gc-sections
-      ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
     endif
+    ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
   endif
 endif
 
@@ -450,6 +452,15 @@ endif
 ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
   ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
     LDFLAGS += -map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
+    # instruct the compiler to keep the temp files generated at
+    # compile time after they are used
+    ARCHOPTIMIZATION += -keeptempfiles
+
+    # instruct the compiler to generate a source listing of the asm file
+    ARCHOPTIMIZATION += -list
+
+    # instruct the exlr the contents that needs to be contained in the generated map file
+    LDFLAGS += -map_eofn_symbols -Mn -Mx -Ms -Mu -Ml
   else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
     LDFLAGS += --cref -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
   else
@@ -465,8 +476,32 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
       LDFLAGS += --debug
     endif
   else
-    ARCHOPTIMIZATION += -G -gdwarf-2
+    # instruct the exlr to ignore relocations from DWARF debug sections when using -delete
+    LDFLAGS += -ignore_debug_references
+
+    # instruct the exlr to dump verbose information during link procedure
+    LDFLAGS += -v
+
+    # instruct the gsize to generate a "*.siz" file that contains the detailed section size
+    LDFLAGS += -gsize
+
+    ARCHOPTIMIZATION += -G -dual_debug
   endif
+endif
+
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GHS),y)
+
+  # instruct the compiler to treat the functions referenced or called when no prototype has
+  # been provided as error
+  ARCHCFLAGS += --prototype_errors
+  ARCHCXXFLAGS += --prototype_errors
+
+  # instruct the compiler to treat #pragma directives that using wrong syntax as warnings
+  ARCHCFLAGS += --incorrect_pragma_warnings
+  ARCHCXXFLAGS += --incorrect_pragma_warnings
+
+  # instruct the exlr do not link the start files into executable
+  LDFLAGS += -nostartfiles
 endif
 
 # Add the builtin library
@@ -568,7 +603,7 @@ ifneq ($(CONFIG_BUILD_KERNEL),y)
   LDELFFLAGS += $(TOPDIR)$(DELIM)arch$(DELIM)arm$(DELIM)src$(DELIM)crt0.o
 endif
 
-LDELFFLAGS += -e __start -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)elf$(DELIM)gnu-elf.ld)
+LDELFFLAGS += -e _start -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)elf$(DELIM)gnu-elf.ld)
 
 # Zig toolchain
 

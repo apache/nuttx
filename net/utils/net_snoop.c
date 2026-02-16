@@ -146,7 +146,7 @@ begin_packed_struct struct snoop_packet_header_s
   {
     uint32_t flags;     /* Packet Flags: 1 hci cmd , eg: btsnoop */
     uint32_t rec_len;   /* length of record */
-  };
+  } u1;
   uint32_t cum_drops;   /* cumulative number of dropped packets */
   union
   {
@@ -156,7 +156,7 @@ begin_packed_struct struct snoop_packet_header_s
       uint32_t ts_sec;  /* timestamp seconds */
       uint32_t ts_usec; /* timestamp microseconds */
     } ts;
-  };
+  } u2;
 } end_packed_struct;
 
 /****************************************************************************
@@ -185,8 +185,8 @@ static void snoop_fill_packet_header(FAR struct snoop_s *snoop,
       case SNOOP_DATALINK_HCI_BSCP:
       case SNOOP_DATALINK_HCI_SERIAL:
         gettimeofday(&tv, NULL);
-        header->ts_usec = htobe64(SNOOP_EPOCH_USEC(tv));
-        header->flags = htobe32(flags);
+        header->u2.ts_usec = htobe64(SNOOP_EPOCH_USEC(tv));
+        header->u1.flags = htobe32(flags);
         break;
 
       case SNOOP_DATALINK_TYPE_TOKENBUS:
@@ -199,9 +199,9 @@ static void snoop_fill_packet_header(FAR struct snoop_s *snoop,
       case SNOOP_DATALINK_TYPE_FDDI:
       case SNOOP_DATALINK_TYPE_OTHER:
         gettimeofday(&tv, NULL);
-        header->ts.ts_sec = htobe32(tv.tv_sec);
-        header->ts.ts_usec = htobe32(tv.tv_usec);
-        header->rec_len = htobe32(flags);
+        header->u2.ts.ts_sec = htobe32(tv.tv_sec);
+        header->u2.ts.ts_usec = htobe32(tv.tv_usec);
+        header->u1.rec_len = htobe32(flags);
         break;
 
       default:

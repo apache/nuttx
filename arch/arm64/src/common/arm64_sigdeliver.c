@@ -158,9 +158,7 @@ retry:
 #ifdef CONFIG_SMP
   /* We need to keep the IRQ lock until task switching */
 
-  rtcb->irqcount++;
-  leave_critical_section(flags);
-  rtcb->irqcount--;
+  leave_critical_section(up_irq_save());
 #endif
 
   arm64_fullcontextrestore();

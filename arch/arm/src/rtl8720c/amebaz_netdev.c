@@ -296,14 +296,13 @@ static int amebaz_ifdown(struct net_driver_s *dev)
 {
   int ret = 0;
   struct amebaz_dev_s *priv = (struct amebaz_dev_s *)dev->d_private;
-  irqstate_t flags;
   if (priv->devnum == 0 && rltk_wlan_running(1))
     {
       printf("must ifdown wlan 1 first\r\n");
       return ERROR;
     }
 
-  flags = enter_critical_section();
+  nxmutex_lock(&priv->lock);
   if (IFF_IS_UP(dev->d_flags))
     {
       if (priv->curr)
@@ -333,7 +332,7 @@ static int amebaz_ifdown(struct net_driver_s *dev)
         }
     }
 
-  leave_critical_section(flags);
+  nxmutex_unlock(&priv->lock);
   return ret;
 }
 
@@ -343,10 +342,10 @@ int amebaz_netdev_register(struct amebaz_dev_s *priv)
   dev->d_ifup    = amebaz_ifup;
   dev->d_ifdown  = amebaz_ifdown;
   dev->d_txavail = amebaz_txavail;
+  nxmutex_init(priv->lock);
 #ifdef CONFIG_NETDEV_IOCTL
   dev->d_ioctl   = amebaz_ioctl;
 #endif
   dev->d_private = priv;
   return netdev_register(dev, NET_LL_IEEE80211);
 }
-

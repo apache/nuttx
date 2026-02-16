@@ -333,7 +333,7 @@ const struct enc_xform enc_xform_null =
 const struct auth_hash auth_hash_hmac_md5_96 =
 {
   CRYPTO_MD5_HMAC, "HMAC-MD5",
-  16, 16, 12, sizeof(MD5_CTX), HMAC_MD5_BLOCK_LEN,
+  HMAC_MD5_BLOCK_LEN, 16, 12, sizeof(MD5_CTX), HMAC_MD5_BLOCK_LEN,
   (void (*) (FAR void *)) md5init, NULL, NULL,
   md5update_int,
   (void (*) (FAR uint8_t *, FAR void *)) md5final
@@ -342,7 +342,7 @@ const struct auth_hash auth_hash_hmac_md5_96 =
 const struct auth_hash auth_hash_hmac_sha1_96 =
 {
   CRYPTO_SHA1_HMAC, "HMAC-SHA1",
-  20, 20, 12, sizeof(SHA1_CTX), HMAC_SHA1_BLOCK_LEN,
+  HMAC_SHA1_BLOCK_LEN, 20, 12, sizeof(SHA1_CTX), HMAC_SHA1_BLOCK_LEN,
   (void (*) (FAR void *)) sha1init, NULL, NULL,
   sha1update_int,
   (void (*) (FAR uint8_t *, FAR void *)) sha1final
@@ -360,7 +360,7 @@ const struct auth_hash auth_hash_hmac_ripemd_160_96 =
 const struct auth_hash auth_hash_hmac_sha2_256_128 =
 {
   CRYPTO_SHA2_256_HMAC, "HMAC-SHA2-256",
-  32, 32, 16, sizeof(SHA2_CTX), HMAC_SHA2_256_BLOCK_LEN,
+  HMAC_SHA2_256_BLOCK_LEN, 32, 16, sizeof(SHA2_CTX), HMAC_SHA2_256_BLOCK_LEN,
   (void (*)(FAR void *)) sha256init, NULL, NULL,
   sha256update_int,
   (void (*)(FAR uint8_t *, FAR void *)) sha256final
@@ -369,7 +369,7 @@ const struct auth_hash auth_hash_hmac_sha2_256_128 =
 const struct auth_hash auth_hash_hmac_sha2_384_192 =
 {
   CRYPTO_SHA2_384_HMAC, "HMAC-SHA2-384",
-  48, 48, 24, sizeof(SHA2_CTX), HMAC_SHA2_384_BLOCK_LEN,
+  HMAC_SHA2_384_BLOCK_LEN, 48, 24, sizeof(SHA2_CTX), HMAC_SHA2_384_BLOCK_LEN,
   (void (*)(FAR void *)) sha384init, NULL, NULL,
   sha384update_int,
   (void (*)(FAR uint8_t *, FAR void *)) sha384final
@@ -378,7 +378,7 @@ const struct auth_hash auth_hash_hmac_sha2_384_192 =
 const struct auth_hash auth_hash_hmac_sha2_512_256 =
 {
   CRYPTO_SHA2_512_HMAC, "HMAC-SHA2-512",
-  64, 64, 32, sizeof(SHA2_CTX), HMAC_SHA2_512_BLOCK_LEN,
+  HMAC_SHA2_512_BLOCK_LEN, 64, 32, sizeof(SHA2_CTX), HMAC_SHA2_512_BLOCK_LEN,
   (void (*)(FAR void *)) sha512init, NULL, NULL,
   sha512update_int,
   (void (*)(FAR uint8_t *, FAR void *)) sha512final

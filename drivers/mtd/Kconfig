@@ -142,14 +142,29 @@ if MTD_PROGMEM
 
 endif #MTD_PROGMEM
 
+choice
+	prompt "Select MTD config solution"
+	default MTD_CONFIG_NONE
+
 config MTD_CONFIG
 	bool "Enable Dev Config (MTD based) device"
-	default n
 	---help---
 		Provides a /dev/config device for saving / restoring application
 		configuration data to a standard MTD device or partition.
 
-if MTD_CONFIG
+config MTD_CONFIG_NVS
+	bool "NVS"
+	---help---
+		NVS is a lightweight KV storage mechanism which supports classical
+		on-chip NorFlash, it implements basic KV write, read, and delete
+		functions, and supports power down protection.
+
+config MTD_CONFIG_NONE
+	bool "None MTD config"
+
+endchoice
+
+if !MTD_CONFIG_NONE
 
 config MTD_CONFIG_RAM_CONSOLIDATE
 	bool "Always use RAM consolidation method (work in progress)"
@@ -186,30 +201,29 @@ config MTD_CONFIG_NAME_LEN
 	---help---
 		Sets the maximum length of config item names.
 
-config MTD_CONFIG_FAIL_SAFE
-	bool "Enable Fail Safe MTD Config"
-	default n
-	depends on MTD_BYTE_WRITE
-	---help---
-		Enable the new storage layout to support the resilient to power loss.
-		This replaces the drivers/mtd/mtd_config, which
-		is resilient to power loss.
-
-config MTD_WRITE_ALIGN_SIZE
-	int "align size [1,2,4,8,16] for per write operation"
-	default 1
-	depends on MTD_CONFIG_FAIL_SAFE
-	---help---
-		align size will be one of 1,2,4,8,16
-
-config MTD_BLOCKSIZE_MULTIPLE
+config MTD_CONFIG_BLOCKSIZE_MULTIPLE
 	int "Set NVS blocksize multiple"
 	default 1
-	depends on MTD_CONFIG_FAIL_SAFE
+	depends on MTD_CONFIG_NVS
 	---help---
 		The size of a multiple of blocksize compared to erasize
 
-endif # MTD_CONFIG
+config MTD_CONFIG_CACHE_SIZE
+	int "Non-volatile Storage lookup cache size"
+	default 0
+	depends on MTD_CONFIG_NVS
+	---help---
+		Number of entries in Non-volatile Storage lookup cache.
+		It is recommended that it be a power of 2.
+
+config MTD_CONFIG_BUFFER_SIZE
+	int "Buffer size on the stack"
+	default 0
+	---help---
+		Define a fixed size buffer on the stack instead of using a
+		variable length array.
+
+endif
 
 comment "MTD Device Drivers"
 
@@ -516,11 +530,16 @@ config MTD_AT25EE
 	default n
 	select SPI
 	select MTD_BYTE_WRITE
+	select EEPROM
+	select SPI_EE_25XX
 	---help---
 		Build support for SPI-based AT25xx type EEPROMs. MTD on EEPROM can
 		perform poorly, so it is possible only usable if the EEPROM has a
 		clock speed 10MHz or higher. EEPROMs that use the same commands as
 		the 25AA160 should work OK.
+
+		This is a convenience wrapper around the eeprom/spi_xx25xx driver.
+		It can be configured from the "EEPROM support" menu.
 
 if MTD_AT25EE
 
@@ -563,46 +582,6 @@ config AT25EE_ENABLE_BLOCK_ERASE
 		applications (e.g if an erase verify is wanted, or if a particular
 		file system requires this) block erase (i.e. writing each byte to
 		0xff) can be enabled here.
-
-config AT25EE_SPIMODE
-	int "AT25EE SPI Mode"
-	default 0
-
-config AT25EE_SPIFREQUENCY
-	int "AT25EE SPI Frequency"
-	default 10000000
-
-config AT25EE_START_DELAY
-	int "AT25EE startdelay"
-	---help---
-		The delay between CS active and first CLK. In ns.
-	depends on SPI_DELAY_CONTROL
-	range 0 1000000
-	default 5000
-
-config AT25EE_STOP_DELAY
-	int "AT25EE stopdelay"
-	---help---
-		The delay between last CLK and CS inactive. In ns.
-	depends on SPI_DELAY_CONTROL
-	range 0 1000000
-	default 5000
-
-config AT25EE_CS_DELAY
-	int "AT25EE csdelay"
-	---help---
-		The delay between CS inactive and CS active again. In ns.
-	depends on SPI_DELAY_CONTROL
-	range 0 1000000
-	default 5000
-
-config AT25EE_IFDELAY
-	int "AT25EE ifdelay"
-	---help---
-		The delay between frames. In ns.
-	depends on SPI_DELAY_CONTROL
-	range 0 1000000
-	default 5000
 
 endif # MTD_AT25EE
 
@@ -1352,6 +1331,38 @@ config W25_SPIFREQUENCY
 	int "W25 SPI Frequency"
 	default 20000000
 
+config W25_START_DELAY
+	int "W25 SPI start delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 0
+	---help---
+		The delay between CS active and first CLK. In ns.
+
+config W25_STOP_DELAY
+	int "W25 SPI stop delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 0
+	---help---
+		The delay between last CLK and CS inactive. In ns.
+
+config W25_CS_DELAY
+	int "W25 SPI chip select delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 0
+	---help---
+		The delay between CS inactive and CS active again. In ns.
+
+config W25_IFDELAY
+	int "W25 SPI frames delay"
+	depends on SPI_DELAY_CONTROL
+	range 0 1000000
+	default 0
+	---help---
+		The delay between consecutive frames. In ns.
+
 config W25_READONLY
 	bool "W25 Read-Only FLASH"
 	default n
@@ -1444,6 +1455,28 @@ config GD5F_SPIFREQUENCY
 
 endif # MTD_GD5F
 
+config MTD_W25N
+	bool "SPI-based W25N NAND FLASH"
+	default n
+	select SPI
+	---help---
+		Enable support for Winbond W25N SPI NAND flash.
+		Currently only W25N01GV (1Gbit/128MB) is supported.
+
+if MTD_W25N
+
+config W25N_SPIMODE
+	int "W25N SPI Mode"
+	default 0
+
+config W25N_SPIFREQUENCY
+	int "W25N SPI Frequency"
+	default 20000000
+	---help---
+		W25N01GV supports up to 104 MHz.
+
+endif # MTD_W25N
+
 config MTD_DHARA
 	bool "MTD Nandflash use dhara map"
 	default n
@@ -1459,10 +1492,42 @@ config DHARA_READ_NCACHES
 	default 4
 endif
 
+config MTD_NVBLK
+	bool "MTD using Non Volatile BLock driver"
+	default n
+
+if MTD_NVBLK
+
+config MTD_NVBLK_DEFAULT_LBS
+	int "nvblk (logical) block size"
+	default 256
+
+config MTD_NVBLK_DEFAULT_IOBS
+	int "nvblk io block size (block device sector size)"
+	default 512
+
+config MTD_NVBLK_DEFAULT_SPEB
+	int "nvblk spare erase blocks"
+	default 1
+endif
+
 config MTD_CFI
 	bool "CFI(common flash interface) NOR FLASH"
 	default n
 	---help---
 		Support CFI(common flash interface) NOR FLASH.
 
+config MTD_CFI_PAGE_SIZE
+	int "Page Size of MTD CFI NOR FLASH (bytes)"
+	default 16
+	range 1 524288
+	depends on MTD_CFI
+	---help---
+		Configure the write page size (in bytes) used by the CFI NOR Flash
+		driver. The value must be at least 1 and should not exceed the maximum
+		write buffer size supported by the CFI device.
+		In the driver, this capability is typically exposed as the device's
+		"write page size" parameter for each write, so this configuration
+		value should be chosen such that it is equal to write page size for
+		the target flash.
 endif # MTD

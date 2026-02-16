@@ -435,23 +435,14 @@
  * Argument:     Heater configuration.
  */
 
-#define SNIOC_HEAT             _SNIOC(0x009B)
+#define SNIOC_HEAT                    _SNIOC(0x009B)
 
 /* Command:      SNIOC_GET_INFO
  * Description:  Get device information.
  * Argument:     This is the device info pointer.
  */
 
-#define SNIOC_GET_INFO                _SNIOC(0x009B)
-
-#ifdef CONFIG_USENSOR
-/* Command:      SNIOC_SET_INFO
- * Description:  Set device information. Only used by user space.
- * Argument:     This is the device info pointer.
- */
-
-#  define SNIOC_SET_INFO              _SNIOC(0x009C)
-#endif
+#define SNIOC_GET_INFO                _SNIOC(0x009C)
 
 /* Command:      SNIOC_FLUSH
  * Description:  Flush sensor hardware fifo buffer.
@@ -497,6 +488,26 @@
  */
 
 #define SNIOC_GET_CALIBVALUE          _SNIOC(0x00A3)
+
+/* Command:      SNIOC_SET_BAUD
+ * Description:  Sets the baud rate of the sensor.
+ */
+
+#define SNIOC_SET_BAUD                _SNIOC(0x00A4)      
+
+/* IOCTL commands unique to the L86XXX and other GNSS modules */
+
+#define SNIOC_HOT_START               _SNIOC(0X00A5)
+#define SNIOC_WARM_START              _SNIOC(0X00A6)
+#define SNIOC_COLD_START              _SNIOC(0X00A7)
+#define SNIOC_FULL_COLD_START         _SNIOC(0X00A8)
+
+/* Command:      SNIOC_SET_NONWAKEUP
+ * Description:  Set non-wakeup flag for user.
+ * Argument:     True is non-wakeup, false is wakeup.
+ */
+
+#define SNIOC_SET_NONWAKEUP           _SNIOC(0x00A9)
 
 /****************************************************************************
  * Public types

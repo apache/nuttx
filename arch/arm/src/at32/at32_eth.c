@@ -73,10 +73,6 @@
 
 /* Configuration ************************************************************/
 
-/* See boards/arm/at32/at3240g-eval/README.txt for an explanation of the
- * configuration settings.
- */
-
 #if AT32_NETHERNET > 1
 #  error "Logic to support multiple Ethernet interfaces is incomplete"
 #endif
@@ -2211,6 +2207,9 @@ static int at32_ifup(struct net_driver_s *dev)
   up_enable_irq(AT32_IRQ_ETH);
 
   at32_checksetup();
+
+  netdev_carrier_on(dev);
+
   return OK;
 }
 
@@ -2265,6 +2264,9 @@ static int at32_ifdown(struct net_driver_s *dev)
 
   priv->ifup = false;
   leave_critical_section(flags);
+
+  netdev_carrier_off(dev);
+
   return ret;
 }
 

@@ -66,6 +66,7 @@ struct child_pool_s
  ****************************************************************************/
 
 static struct child_pool_s g_child_pool;
+static spinlock_t g_child_pool_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -169,17 +170,21 @@ void task_initialize(void)
 FAR struct child_status_s *group_alloc_child(void)
 {
   FAR struct child_status_s *ret;
+  irqstate_t flags;
 
   /* Return the status block at the head of the free list */
 
+  flags = spin_lock_irqsave(&g_child_pool_lock);
   ret = g_child_pool.freelist;
   if (ret)
     {
       g_child_pool.freelist = ret->flink;
       ret->flink            = NULL;
+      spin_unlock_irqrestore(&g_child_pool_lock, flags);
     }
   else
     {
+      spin_unlock_irqrestore(&g_child_pool_lock, flags);
       ret = kmm_zalloc(sizeof(*ret));
     }
 
@@ -206,12 +211,16 @@ FAR struct child_status_s *group_alloc_child(void)
 
 void group_free_child(FAR struct child_status_s *child)
 {
+  irqstate_t flags;
+
   /* Return the child status structure to the free list  */
 
   if (child)
     {
+      flags = spin_lock_irqsave(&g_child_pool_lock);
       child->flink          = g_child_pool.freelist;
       g_child_pool.freelist = child;
+      spin_unlock_irqrestore(&g_child_pool_lock, flags);
     }
 }
 
@@ -271,19 +280,23 @@ FAR struct child_status_s *group_find_child(FAR struct task_group_s *group,
                                             pid_t pid)
 {
   FAR struct child_status_s *child;
+  irqstate_t flags;
 
   DEBUGASSERT(group);
 
   /* Find the status structure with the matching PID  */
 
+  flags = spin_lock_irqsave(&group->tg_lock);
   for (child = group->tg_children; child; child = child->flink)
     {
       if (child->ch_pid == pid)
         {
+          spin_unlock_irqrestore(&group->tg_lock, flags);
           return child;
         }
     }
 
+  spin_unlock_irqrestore(&group->tg_lock, flags);
   return NULL;
 }
 
@@ -309,17 +322,21 @@ FAR struct child_status_s *group_find_child(FAR struct task_group_s *group,
 FAR struct child_status_s *group_exit_child(FAR struct task_group_s *group)
 {
   FAR struct child_status_s *child;
+  irqstate_t flags;
 
   /* Find the status structure of any child task that has exited. */
 
+  flags = spin_lock_irqsave(&group->tg_lock);
   for (child = group->tg_children; child; child = child->flink)
     {
       if ((child->ch_flags & CHILD_FLAG_EXITED) != 0)
         {
+          spin_unlock_irqrestore(&group->tg_lock, flags);
           return child;
         }
     }
 
+  spin_unlock_irqrestore(&group->tg_lock, flags);
   return NULL;
 }
 
@@ -350,11 +367,13 @@ FAR struct child_status_s *group_remove_child(FAR struct task_group_s *group,
 {
   FAR struct child_status_s *curr;
   FAR struct child_status_s *prev;
+  irqstate_t flags;
 
   DEBUGASSERT(group);
 
   /* Find the status structure with the matching PID */
 
+  flags = spin_lock_irqsave(&group->tg_lock);
   for (prev = NULL, curr = group->tg_children;
        curr;
        prev = curr, curr = curr->flink)
@@ -381,9 +400,12 @@ FAR struct child_status_s *group_remove_child(FAR struct task_group_s *group,
         }
 
       curr->flink = NULL;
+      spin_unlock_irqrestore(&group->tg_lock, flags);
       group_dump_children(group, "group_remove_child");
+      return curr;
     }
 
+  spin_unlock_irqrestore(&group->tg_lock, flags);
   return curr;
 }
 
@@ -409,11 +431,13 @@ void group_remove_children(FAR struct task_group_s *group)
 {
   FAR struct child_status_s *curr;
   FAR struct child_status_s *next;
+  irqstate_t flags;
 
   /* Remove all child structures for the TCB and return them to the
    * freelist.
    */
 
+  flags = spin_lock_irqsave(&group->tg_lock);
   for (curr = group->tg_children; curr; curr = next)
     {
       next = curr->flink;
@@ -421,6 +445,8 @@ void group_remove_children(FAR struct task_group_s *group)
     }
 
   group->tg_children = NULL;
+  spin_unlock_irqrestore(&group->tg_lock, flags);
+
   group_dump_children(group, "group_remove_children");
 }
 

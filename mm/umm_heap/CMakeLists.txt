@@ -22,29 +22,31 @@
 
 # User heap allocator
 
-set(SRCS
-    umm_globals.c
-    umm_initialize.c
-    umm_addregion.c
-    umm_malloc_size.c
-    umm_brkaddr.c
-    umm_calloc.c
-    umm_extend.c
-    umm_free.c
-    umm_mallinfo.c
-    umm_malloc.c
-    umm_memalign.c
-    umm_realloc.c
-    umm_zalloc.c
-    umm_heapmember.c
-    umm_memdump.c)
+if(NOT CONFIG_MM_UMM_CUSTOMIZE_MANAGER)
+  set(SRCS
+      umm_globals.c
+      umm_initialize.c
+      umm_addregion.c
+      umm_malloc_size.c
+      umm_brkaddr.c
+      umm_calloc.c
+      umm_extend.c
+      umm_free.c
+      umm_mallinfo.c
+      umm_malloc.c
+      umm_memalign.c
+      umm_realloc.c
+      umm_zalloc.c
+      umm_heapmember.c
+      umm_memdump.c)
 
-if(CONFIG_BUILD_KERNEL)
-  list(APPEND SRCS umm_sbrk.c)
+  if(CONFIG_BUILD_KERNEL)
+    list(APPEND SRCS umm_sbrk.c)
+  endif()
+
+  if(CONFIG_DEBUG_MM)
+    list(APPEND SRCS umm_checkcorruption.c)
+  endif()
+
+  target_sources(mm PRIVATE ${SRCS})
 endif()
-
-if(CONFIG_DEBUG_MM)
-  list(APPEND SRCS umm_checkcorruption.c)
-endif()
-
-target_sources(mm PRIVATE ${SRCS})

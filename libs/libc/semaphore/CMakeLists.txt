@@ -36,6 +36,10 @@ if(CONFIG_FS_NAMED_SEMAPHORES)
   list(APPEND SRCS sem_open.c sem_close.c sem_unlink.c)
 endif()
 
+if(CONFIG_CUSTOM_SEMAPHORE_MAXVALUE)
+  list(APPEND SRCS sem_setmaxvalue.c)
+endif()
+
 if(CONFIG_PRIORITY_PROTECT)
   list(APPEND SRCS sem_getprioceiling.c sem_setprioceiling.c)
 endif()

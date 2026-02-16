@@ -76,10 +76,6 @@ struct userled_open_s
   /* Supports a singly linked list */
 
   FAR struct userled_open_s *bo_flink;
-
-  /* The following will be true if we are closing */
-
-  volatile bool bo_closing;
 };
 
 /****************************************************************************
@@ -174,8 +170,6 @@ static int userled_close(FAR struct file *filep)
   FAR struct userled_open_s *opriv;
   FAR struct userled_open_s *curr;
   FAR struct userled_open_s *prev;
-  irqstate_t flags;
-  bool closing;
   int ret;
 
   DEBUGASSERT(filep->f_priv);
@@ -183,28 +177,6 @@ static int userled_close(FAR struct file *filep)
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
   priv  = inode->i_private;
-
-  /* Handle an improbable race conditions with the following atomic test
-   * and set.
-   *
-   * This is actually a pretty feeble attempt to handle this.  The
-   * improbable race condition occurs if two different threads try to
-   * close the LED driver at the same time.  The rule:  don't do
-   * that!  It is feeble because we do not really enforce stale pointer
-   * detection anyway.
-   */
-
-  flags = enter_critical_section();
-  closing = opriv->bo_closing;
-  opriv->bo_closing = true;
-  leave_critical_section(flags);
-
-  if (closing)
-    {
-      /* Another thread is doing the close */
-
-      return OK;
-    }
 
   /* Get exclusive access to the driver structure */
 

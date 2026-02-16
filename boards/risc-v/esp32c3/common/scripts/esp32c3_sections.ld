@@ -120,6 +120,13 @@ SECTIONS
 
     *libcoexist.a:(.coexiram .coexiram.*)
 
+    *libpp.a:wifi_iram.*(.literal .text .literal.* .text.*)
+    *libpp.a:wifi_rx_iram.*(.literal .text .literal.* .text.*)
+    *libpp.a:wifi_extra_iram.*(.literal .text .literal.* .text.*)
+    *libpp.a:wifi_slp_iram.*(.literal .text .literal.* .text.*)
+    *libpp.a:wifi_or_slp_iram.*(.literal .text .literal.* .text.*)
+    *libpp.a:wifi_slp_rx_iram.*(.literal .text .literal.* .text.*)
+
     *libsched.a:irq_dispatch.*(.text .text.* .literal .literal.*)
     *libsched.a:sched_lock.*(.text .text.* .literal .literal.*)
     *libsched.a:sched_unlock.*(.text .text.* .literal .literal.*)
@@ -175,11 +182,7 @@ SECTIONS
     *libarch.a:*esp_rom_uart.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_rom_sys.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_rom_spiflash.*(.text .text.* .literal .literal.*)
-    *libarch.a:*esp_efuse_fields.*(.text .text.* .literal .literal.*)
-    *libarch.a:*esp_efuse_api_key.*(.text .text.* .literal .literal.*)
-    *libarch.a:*esp_efuse_utility.*(.text .text.* .literal .literal.*)
     *libarch.a:*efuse_hal.*(.text .text.* .literal .literal.*)
-    *libarch.a:esp_spiflash.*(.literal .text .literal.* .text.*)
     *libarch.a:*apm_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*log.*(.text .text.* .literal .literal.*)
     *libarch.a:*log_lock.*(.literal .literal.* .text .text.*)
@@ -190,6 +193,20 @@ SECTIONS
     *libarch.a:*log_write.*(.literal.esp_log_write .text.esp_log_write)
     *libarch.a:*log_write.*(.literal.esp_log_writev .text.esp_log_writev)
     *libarch.a:*interrupt_intc.*(.literal .literal.* .text .text.*)
+    *libarch.a:esp_spiflash.*(.literal .text .literal.* .text.*)
+    *libarch.a:esp_flash_api.*(.text .text.* .literal .literal.*)
+    *libarch.a:esp_flash_spi_init.*(.text .text.* .literal .literal.*)
+    *libarch.a:spi_flash_hal_iram.*(.literal .literal.* .text .text.*)
+    *libarch.a:spi_flash_encrypt_hal_iram.*(.text .text.* .literal .literal.*)
+    *libarch.a:spi_flash_hal_gpspi.*(.literal .literal.* .text .text.*)
+    *libarch.a:spi_flash_chip*.*(.literal .literal.* .text .text.*)
+    *libarch.a:spi_flash_wrap.*(.literal .literal.* .text .text.*)
+    *libarch.a:spi_flash_os_func_noos.*(.literal .literal.* .text .text.*)
+    *libarch.a:spi_flash_os_func_app.*(.literal .literal.* .text .text.*)
+    *libarch.a:flash_brownout_hook.*(.literal .literal.* .text .text.*)
+    *libarch.a:esp_cache.*(.literal .literal.* .text .text.*)
+    *libarch.a:cache_utils.*(.literal .literal.* .text .text.*)
+    *libarch.a:memspi_host_driver.*(.literal .literal.* .text .text.*)
 
     *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
 
@@ -306,14 +323,23 @@ SECTIONS
     *libarch.a:*esp_rom_uart.*(.rodata .rodata.*)
     *libarch.a:*esp_rom_sys.*(.rodata .rodata.*)
     *libarch.a:*esp_rom_spiflash.*(.rodata .rodata.*)
-    *libarch.a:*esp_efuse_fields.*(.rodata .rodata.*)
-    *libarch.a:*esp_efuse_api_key.*(.rodata .rodata.*)
-    *libarch.a:*esp_efuse_utility.*(.rodata .rodata.*)
     *libarch.a:*efuse_hal.*(.rodata .rodata.*)
     *libarch.a:*log.*(.rodata .rodata.*)
     *libarch.a:*log_noos.*(.rodata .rodata.*)
     *libarch.a:esp_spiflash.*(.rodata .rodata.*)
-
+    *libarch.a:esp_flash_api.*(.rodata .rodata.*)
+    *libarch.a:esp_flash_spi_init.*(.rodata .rodata.*)
+    *libarch.a:spi_flash_hal_iram.*(.rodata .rodata.*)
+    *libarch.a:spi_flash_encrypt_hal_iram.*(.rodata .rodata.*)
+    *libarch.a:spi_flash_hal_gpspi.*(.rodata .rodata.*)
+    *libarch.a:spi_flash_chip*.*(.rodata .rodata.*)
+    *libarch.a:spi_flash_wrap.*(.rodata .rodata.*)
+    *libarch.a:spi_flash_os_func_noos.*(.rodata .rodata.*)
+    *libarch.a:spi_flash_os_func_app.*(.rodata .rodata.*)
+    *libarch.a:flash_brownout_hook.*(.rodata .rodata.*)
+    *libarch.a:esp_cache.*(.rodata .rodata.*)
+    *libarch.a:cache_utils.*(.rodata .rodata.*)
+    *libarch.a:memspi_host_driver.*(.rodata .rodata.*)
     esp_head.*(.rodata .rodata.*)
     esp_start.*(.rodata .rodata.*)
 
@@ -543,7 +569,8 @@ SECTIONS
   .rtc.text :
   {
     . = ALIGN(4);
-    *(.rtc.literal .rtc.text)
+    *(.rtc.literal .rtc.literal.*)
+    *(.rtc.text .rtc.text.*)
     *(.rtc.entry.text)
     . += 16;
     . = ALIGN(4);

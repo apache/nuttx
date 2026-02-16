@@ -955,7 +955,7 @@ static int litex_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
       if (ev & LITEX_EV_CMDDONE)
         break;
 
-      nxsig_usleep(10);
+      nxsched_usleep(10);
     }
 
   if (ev & LITEX_EV_WRERROR)

@@ -401,7 +401,7 @@ static int hts221_config_ctrl_reg2(FAR struct hts221_dev_s *priv,
               break;
             }
 
-          nxsig_usleep(10 * 1000);
+          nxsched_usleep(10 * 1000);
           retries--;
         }
       while (retries);

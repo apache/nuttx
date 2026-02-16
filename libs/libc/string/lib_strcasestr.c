@@ -34,7 +34,7 @@
  * Private Functions
  ****************************************************************************/
 
-#undef strcasechr /* See mm/README.txt */
+#undef strcasechr
 static FAR char *strcasechr(FAR const char *s, int uc)
 {
   register char ch;

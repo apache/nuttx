@@ -62,6 +62,7 @@ extensions = [
     "sphinx_tags",
     "sphinx_design",
     "sphinx_collapse",
+    "sphinxcontrib.plantuml",
 ]
 
 source_suffix = [".rst", ".md"]
@@ -80,7 +81,13 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "legacy_README.md", "venv"]
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    "legacy_README.md",
+    "venv",
+]
 
 # list of documentation versions to offer (besides latest). this will be
 # overridden by command line option but we can provide a sane default

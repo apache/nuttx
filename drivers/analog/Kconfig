@@ -257,6 +257,23 @@ config ADC_MCP3008_DIFFERENTIAL
 
 endif # ADC_MCP3008
 
+config ADC_ADS7046
+	bool "TI ADS7046 support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the Texas Instruments ADS7046 12-bit ADC.
+
+if ADC_ADS7046
+
+config ADS7046_FREQUENCY
+	int "TI ADS7046 SPI frequency"
+	default 1000000
+	---help---
+		ADS7046 SPI frequency. Maximum is 60 MHz.
+
+endif # ADC_ADS7046
+
 config ADC_ADS1115
 	bool "ADS1115 support"
 	default n
@@ -264,15 +281,15 @@ config ADC_ADS1115
 	---help---
 		Enable driver support for the Texas Instruments ADS1115 16-bit ADC.
 		Currently support is experimental, especially the comparator and ALRT/RDY
-		pin functions. 
+		pin functions.
 
-if ADC_ADS1115 
+if ADC_ADS1115
 
 config ADC_ADS1115_I2C_FREQUENCY
 	int "ADS1115 I2C frequency"
 	default 100000
 	---help---
-		ADS1115 I2C frequency. 
+		ADS1115 I2C frequency.
 
 config ADC_ADS1115_ADDR
 	hex "ADS1115 I2C address"
@@ -285,12 +302,12 @@ config ADC_ADS1115_CHANNEL
 	default 0
 	range 0 7
 	---help---
-		Default ADS1115 channel/mux configuration. 
-		0-3 are the differential channels. 
+		Default ADS1115 channel/mux configuration.
+		0-3 are the differential channels.
 		4-7 are the single ended channels for A0 to A3
 		See the datasheet or ads1115.h for more info.
 
-config ADC_ADS1115_PGA 
+config ADC_ADS1115_PGA
 	int "ADS1115 PGA"
 	default 2
 	range 0 7
@@ -299,7 +316,7 @@ config ADC_ADS1115_PGA
 		0 is +/-6.144V, 1 is +/-4.096V, 2 is +/-2.048V, 3 is +/-1.024V,
 		4 is +/-0.512V, 5 is +/-0.256V, 6 is +/-0.256V, 7 is +/-0.256V.
 
-config ADC_ADS1115_CONTINOUS 
+config ADC_ADS1115_CONTINOUS
 	bool "ADS1115 continuous mode"
 	default n
 	---help---
@@ -312,7 +329,7 @@ config ADC_ADS1115_DR
 	default 4
 	range 0 7
 	---help---
-		ADS1115 data rate. 
+		ADS1115 data rate.
 		0 is 8sps, 1 is 16sps, 2 is 32sps, 3 is 64sps,
 		4 is 128sps, 5 is 250sps, 6 is 475sps, 7 is 860sps.
 
@@ -320,7 +337,7 @@ config ADC_ADS1115_COMP_MODE
 	bool "ADS1115 window comparator mode"
 	default n
 	---help---
-		ADS1115 window comparator mode. 
+		ADS1115 window comparator mode.
 
 config ADC_ADS1115_COMP_POL
 	bool "ADS1115 comparator polarity"
@@ -340,9 +357,9 @@ config ADC_ADS1115_COMP_QUE
 	default 3
 	range 0 3
 	---help---
-		ADS1115 comparator queue. 0 is assert after 1 conversion, 1, is 
-		assert after 2 conversions, 2 is assert after 4 conversions, 3 
-		is disable comparator, and set ALERT/RDY to high-impedence. 
+		ADS1115 comparator queue. 0 is assert after 1 conversion, 1, is
+		assert after 2 conversions, 2 is assert after 4 conversions, 3
+		is disable comparator, and set ALERT/RDY to high-impedence.
 
 config ADC_ADS1115_HI_THRESH
 	int "ADS1115 high threshold"

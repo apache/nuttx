@@ -152,8 +152,9 @@ endif
 
 ifeq ($(CONFIG_ESP_WIRELESS),y)
 	ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
-		CHIP_CSRCS += esp_wifi_init.c
-		CHIP_CSRCS += esp_wlan.c
+		CHIP_CSRCS += esp_wifi_event_handler.c
+		CHIP_CSRCS += esp_wifi_api.c
+		CHIP_CSRCS += esp_wlan_netdev.c
 	endif
 	CHIP_CSRCS += esp_wifi_utils.c
 endif
@@ -170,6 +171,34 @@ ifeq ($(CONFIG_ESPRESSIF_ADC),y)
 CHIP_CSRCS += esp_adc.c
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_SHA_ACCELERATOR),y)
+	CHIP_CSRCS += esp_sha.c
+endif
+
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
+	CHIP_CSRCS += esp_crypto.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_USE_LP_CORE), y)
+	CHIP_CSRCS += esp_ulp.c
+endif
+
+ifeq ($(CONFIG_PM),y)
+	ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
+		CHIP_CSRCS += esp_pm_initialize.c
+	endif
+	CHIP_CSRCS += esp_pm.c
+	LDFLAGS += -u esp_timer_init_include_func
+endif
+
+# Required for initialization hooks on common code
+
+LDFLAGS += -u esp_system_include_startup_funcs
+
+ifeq ($(CONFIG_ESPRESSIF_EFUSE),y)
+	LDFLAGS += -u esp_efuse_startup_include_func
+endif
+
 #############################################################################
 # Espressif HAL for 3rd Party Platforms
 #############################################################################
@@ -178,7 +207,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = e9a78c811578545e2bc673862d885a15bd6cbf67
+	ESP_HAL_3RDPARTY_VERSION = bb255ca422f4b4d60c9f4f74dbdf51316dc2b669
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -192,11 +221,22 @@ endif
 	GIT_DEPTH_PARAMETER = --depth=$(GIT_DEPTH)
 endif
 
+# When set USE_NXTMPDIR_ESP_REPO_DIRECTLY=y, will directly use esp-hal-3rdparty
+# under nxtmpdir without CHECK_COMMITSHA, reset, checkout and update.
+
+USE_NXTMPDIR_ESP_REPO_DIRECTLY ?= n
+
 ifeq ($(STORAGETMP),y)
+ifeq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
+define CLONE_ESP_HAL_3RDPARTY_REPO
+	$(call COPYDIR, $(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO),chip/$(ESP_HAL_3RDPARTY_REPO))
+endef
+else
 define CLONE_ESP_HAL_3RDPARTY_REPO
 	$(call CHECK_COMMITSHA, $(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO),$(ESP_HAL_3RDPARTY_VERSION))
 	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),chip/$(ESP_HAL_3RDPARTY_REPO),$(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO))
 endef
+endif
 else
 define CLONE_ESP_HAL_3RDPARTY_REPO
 	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),chip/$(ESP_HAL_3RDPARTY_REPO))
@@ -206,13 +246,17 @@ endif
 chip/$(ESP_HAL_3RDPARTY_REPO):
 	$(Q) echo "Cloning Espressif HAL for 3rd Party Platforms"
 	$(Q) $(call CLONE_ESP_HAL_3RDPARTY_REPO)
+ifneq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: ${ESP_HAL_3RDPARTY_VERSION}"
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/mbedtls/mbedtls
+endif
 ifeq ($(CONFIG_ESP_WIRELESS),y)
+ifneq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: initializing submodules..."
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32c3_family components/esp_coex/lib
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls reset --quiet --hard
+endif
 	$(Q) echo "Applying patches..."
 	$(Q) cd chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls && git apply ../../../nuttx/patches/components/mbedtls/mbedtls/*.patch
 endif
@@ -240,7 +284,11 @@ context:: chip/$(ESP_HAL_3RDPARTY_REPO)
 distclean::
 	$(call DELFILE,../include/chip/gpio_sig_map.h)
 	$(call DELFILE,../include/chip/irq.h)
+	$(call DELFILE,../../../vefuse.bin)
 	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
+ifeq ($(CONFIG_ESPRESSIF_USE_LP_CORE),y)
+	$(call DELDIR,chip/ulp)
+endif
 
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif$(DELIM)platform_include

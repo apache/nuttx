@@ -570,7 +570,7 @@ static int usbhost_xboxcontroller_poll(int argc, FAR char *argv[])
 
   priv->polling = true;
   nxsem_post(&g_syncsem);
-  nxsig_sleep(1);
+  nxsched_sleep(1);
 
   /* Loop here until the device is disconnected */
 

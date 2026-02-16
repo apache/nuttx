@@ -102,7 +102,7 @@ For the upper half driver:
 
 And for the lower half driver:
 
-* The lower-half side of the interface to the the upper0half driver, and
+* The lower-half side of the interface to the the upper-half driver, and
 
 * The low-level interface to the hardware that is managed by the lower half
   device driver.
@@ -113,7 +113,7 @@ One to Many: Encapsulation and Polymorphism
 These modular upper- and lower-half drivers have certain properties that you
 would associate with an object oriented design: Encapsulation, data abstraction,
 and polymorphism certainly.
-Because of this encapsulation, the upper-half driver is complete unaware of any
+Because of this encapsulation, the upper-half driver is completely unaware of any
 implementation details within the lower-half driver.
 Everything needed for the upper- and lower-half drivers to integrate is provided
 by the defined interface between between those two things.

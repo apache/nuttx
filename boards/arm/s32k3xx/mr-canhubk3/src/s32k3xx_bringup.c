@@ -88,12 +88,11 @@ struct mtd_dev_s *g_mtd_fs;
 int s32k3xx_bringup(void)
 {
   int ret = OK;
-#if defined(CONFIG_BCH) || defined(HAVE_MX25L_LITTLEFS)
+#if defined(HAVE_MX25L_LITTLEFS)
   char blockdev[32];
-#  if !defined(HAVE_MX25L_LITTLEFS) && !defined(HAVE_MX25L_NXFFS)
-  char chardev[32];
-#  endif /* !HAVE_MX25L_LITTLEFS && !HAVE_MX25L_NXFFS */
-#endif /* CONFIG_BCH || HAVE_MX25L_LITTLEFS */
+#elif defined(HAVE_MX25L_CHARDEV)
+  char mtddev[32];
+#endif /* HAVE_MX25L_LITTLEFS */
 
 #ifdef CONFIG_S32K3XX_LPSPI
   /* Initialize SPI driver */
@@ -285,38 +284,17 @@ int s32k3xx_bringup(void)
             }
 
 #  else /* if defined(HAVE_MX25L_CHARDEV) */
-          /* Use the FTL layer to wrap the MTD driver as a block driver */
+          /* Use the minor number to create device paths */
 
-          ret = ftl_initialize(MX25L_MTD_MINOR, g_mtd_fs);
+          snprintf(mtddev, sizeof(mtddev), "/dev/mtd%d", MX25L_MTD_MINOR);
+
+          /* Register the MTD driver */
+
+          ret = register_mtddriver(mtddev, g_mtd_fs, 0755, NULL);
           if (ret < 0)
             {
-              _err("ftl_initialize() failed: %d\n", ret);
+              _err("register_mtddriver for %s failed: %d\n", mtddev, ret);
             }
-#    ifdef CONFIG_BCH
-          else
-            {
-              _info("ftl_initialize() successful\n");
-
-              /* Use the minor number to create device paths */
-
-              snprintf(blockdev, sizeof(blockdev), "/dev/mtdblock%d",
-                       MX25L_MTD_MINOR);
-              snprintf(chardev, sizeof(chardev), "/dev/mtd%d",
-                       MX25L_MTD_MINOR);
-
-              /* Now create a character device on the block device */
-
-              ret = bchdev_register(blockdev, chardev, false);
-              if (ret < 0)
-                {
-                  _err("bchdev_register %s failed: %d\n", chardev, ret);
-                }
-              else
-                {
-                  _info("bchdev_register %s successful\n", chardev);
-                }
-            }
-#    endif /* CONFIG_BCH */
 #  endif
         }
     }

@@ -28,6 +28,20 @@ else()
   list(APPEND SRCS stm32_userleds.c)
 endif()
 
+if(CONFIG_VIDEO_FB)
+  if(CONFIG_LCD_ST7735)
+    list(APPEND SRCS stm32_lcd_st7735.c)
+  endif()
+endif()
+
+if(CONFIG_STM32H7_SDMMC)
+  list(APPEND SRCS stm32_sdmmc.c)
+endif()
+
+if(CONFIG_FAT_DMAMEMORY)
+  list(APPEND SRCS stm32_dma_alloc.c)
+endif()
+
 if(CONFIG_BOARDCTL)
   list(APPEND SRCS stm32_appinitialize.c)
 endif()

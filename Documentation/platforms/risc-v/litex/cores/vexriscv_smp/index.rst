@@ -6,6 +6,12 @@ The vexrisc_smp core supports a two-pass build, producing the kernel (nuttx.bin)
 compiled into the apps/bin directory. In the standard configuration, the applications are loaded to the FPGA in a RAMdisk. 
 Although, for custom boards this could be extended to loading from SDCards, flash, or other mediums.
 
+Configuration
+-------------
+
+For VexRISCV_SMP cores, the gateware requires the `--with-rvc` configuration to enable compressed
+instructions.  Please consult the appropriate board documentation for flashing gateware.
+
 Building
 --------
 
@@ -45,7 +51,7 @@ Create a file, 'boot.json' in the Nuttx root directory, with the following conte
   {
     "romfs.img":   "0x40C00000",
     "nuttx.bin":   "0x40000000",
-    "board.dtb":   "0x41ec0000",
+    "board.dtb":   "0x40EF0000",
     "opensbi.bin": "0x40f00000"
   }
 

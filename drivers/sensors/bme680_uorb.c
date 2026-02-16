@@ -430,6 +430,7 @@ static const struct sensor_ops_s g_sensor_ops =
   NULL,             /* set_calibvalue */
   bme680_calibrate, /* calibrate */
   NULL,             /* get_info */
+  NULL,             /* set_nonwakeup */
   bme680_control    /* control */
 };
 
@@ -1601,7 +1602,7 @@ static int bme680_thread(int argc, char **argv)
         }
 
     thread_sleep:
-      nxsig_usleep(CONFIG_SENSORS_BME680_POLL_INTERVAL);
+      nxsched_usleep(CONFIG_SENSORS_BME680_POLL_INTERVAL);
     }
 
   return OK;

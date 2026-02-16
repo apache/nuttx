@@ -1210,14 +1210,14 @@ static int set_drive_mode(FAR isx019_dev_t *priv)
 #endif
     };
 
-  nxsig_usleep(TRANSITION_TIME_TO_STARTUP);
+  nxsched_usleep(TRANSITION_TIME_TO_STARTUP);
 
   isx019_i2c_write(priv, CAT_CONFIG, MODE_SENSSEL,      &drv[INDEX_SENS], 1);
   isx019_i2c_write(priv, CAT_CONFIG, MODE_POSTSEL,      &drv[INDEX_POST], 1);
   isx019_i2c_write(priv,
     CAT_CONFIG, MODE_SENSPOST_SEL, &drv[INDEX_SENSPOST], 1);
 
-  nxsig_usleep(TRANSITION_TIME_TO_STREAMING);
+  nxsched_usleep(TRANSITION_TIME_TO_STREAMING);
 
   return OK;
 }
@@ -1230,11 +1230,7 @@ static bool try_repeat(int sec, int usec, FAR isx019_dev_t *priv,
   struct timespec now;
   struct timespec delta;
 
-  ret = clock_systime_timespec(&start);
-  if (ret < 0)
-    {
-      return false;
-    }
+  clock_systime_timespec(&start);
 
   while (1)
     {
@@ -1245,12 +1241,7 @@ static bool try_repeat(int sec, int usec, FAR isx019_dev_t *priv,
         }
       else
         {
-          ret = clock_systime_timespec(&now);
-          if (ret < 0)
-            {
-              return false;
-            }
-
+          clock_systime_timespec(&now);
           clock_timespec_subtract(&now, &start, &delta);
           if ((delta.tv_sec > sec) ||
               ((delta.tv_sec == sec) &&
@@ -2602,18 +2593,18 @@ static int calc_spot_position_regval(uint16_t val,
 static int set_spot_position(FAR isx019_dev_t *priv,
                              imgsensor_value_t val)
 {
-  uint8_t regval;
-  uint8_t reg_x;
-  uint8_t reg_y;
-  uint16_t w;
-  uint16_t h;
-  uint16_t clip_w;
-  uint16_t clip_h;
-  uint16_t offset_x;
-  uint16_t offset_y;
+  uint8_t regval = 0;
+  uint8_t reg_x = 0;
+  uint8_t reg_y = 0;
+  uint16_t w = 0;
+  uint16_t h = 0;
+  uint16_t clip_w = 0;
+  uint16_t clip_h = 0;
+  uint16_t offset_x = 0;
+  uint16_t offset_y = 0;
   uint16_t x = (uint16_t)(val.value32 >> 16);
   uint16_t y = (uint16_t)(val.value32 & 0xffff);
-  int split;
+  int split = 0;
 
   /* Spot position of ISX019 is divided into 9x7 sections.
    * - Horizontal direction is divided into 9 sections.
@@ -2934,7 +2925,7 @@ static int set_jpg_quality(FAR isx019_dev_t *priv,
 
   /* Wait for swap of non-active side and active side. */
 
-  nxsig_usleep(DELAY_TIME_JPEGDQT_SWAP);
+  nxsched_usleep(DELAY_TIME_JPEGDQT_SWAP);
 
   /* Update non-active side in preparation for other activation trigger. */
 
@@ -3328,18 +3319,18 @@ static uint32_t restore_spot_position(uint16_t regval,
 static int get_spot_position(FAR isx019_dev_t *priv,
                              FAR imgsensor_value_t *val)
 {
-  uint8_t regval;
-  uint8_t regx;
-  uint8_t regy;
-  uint16_t w;
-  uint16_t h;
-  uint32_t x;
-  uint32_t y;
-  uint16_t clip_w;
-  uint16_t clip_h;
-  uint16_t offset_x;
-  uint16_t offset_y;
-  int split;
+  uint8_t regval = 0;
+  uint8_t regx = 0;
+  uint8_t regy = 0;
+  uint16_t w = 0;
+  uint16_t h = 0;
+  uint32_t x = 0;
+  uint32_t y = 0;
+  uint16_t clip_w = 0;
+  uint16_t clip_h = 0;
+  uint16_t offset_x = 0;
+  uint16_t offset_y = 0;
+  int split = 0;
 
   isx019_i2c_read(priv, CAT_CATAE, SPOT_FRM_NUM, &regval, 1);
 

@@ -33,8 +33,10 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/can.h>
 #include <nuttx/net/netstats.h>
+#include <nuttx/net/net.h>
 
 #include "devif/devif.h"
+#include "utils/utils.h"
 #include "can/can.h"
 
 /****************************************************************************
@@ -157,7 +159,7 @@ const uint8_t g_len_to_can_dlc[65] =
 static int can_input_conn(FAR struct net_driver_s *dev,
                           FAR struct can_conn_s *conn)
 {
-  uint16_t flags;
+  uint32_t flags;
   uint16_t buflen = dev->d_len;
   int ret = OK;
 
@@ -218,6 +220,16 @@ static int can_in(FAR struct net_driver_s *dev)
 {
   FAR struct can_conn_s *conn = can_active(dev, NULL);
   FAR struct can_conn_s *nextconn;
+  int ret;
+
+  if (conn == NULL)
+    {
+      /* There is no listener on the dev.  Just drop the packet. */
+
+      return OK;
+    }
+
+  can_conn_list_lock();
 
   /* Do we have second connection that can hold this packet? */
 
@@ -227,7 +239,7 @@ static int can_in(FAR struct net_driver_s *dev)
        * We need to clone the packet and deliver it to each listener.
        */
 
-      FAR struct iob_s *iob = netdev_iob_clone(dev, false);
+      FAR struct iob_s *iob = can_iob_clone(dev);
 
       if (iob == NULL)
         {
@@ -243,7 +255,11 @@ static int can_in(FAR struct net_driver_s *dev)
 
   /* We can deliver the packet directly to the last listener. */
 
-  return can_input_conn(dev, conn);
+  ret = can_input_conn(dev, conn);
+
+  can_conn_list_unlock();
+
+  return ret;
 }
 
 /****************************************************************************
@@ -274,6 +290,7 @@ int can_input(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.can.recv++;
 #endif
+  netdev_lock(dev);
 
   if (dev->d_iob != NULL)
     {
@@ -286,6 +303,7 @@ int can_input(FAR struct net_driver_s *dev)
 
       dev->d_buf = buf;
 
+      netdev_unlock(dev);
       return ret;
     }
 
@@ -297,6 +315,7 @@ int can_input(FAR struct net_driver_s *dev)
 #endif
     }
 
+  netdev_unlock(dev);
   return ret;
 }
 

@@ -25,7 +25,7 @@
  * controller
  */
 
-/* LCD pin mapping (see boards/sure-pic32mx/README.txt)
+/* LCD pin mapping
  *
  *  --------------------- ---------- ----------------------------------
  *  PIC32                  Sure JP1   Sure Signal Description

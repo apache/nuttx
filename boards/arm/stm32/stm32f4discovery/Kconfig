@@ -120,4 +120,23 @@ config PM_SLEEP_WAKEUP_NSEC
 		Number of additional nanoseconds to wait in PM_SLEEP before going to
 		PM_STANDBY mode.
 
+if INPUT_KMATRIX_I2C
+
+config STM32_KMATRIX_I2C_BUS
+	int "I2C Bus Number"
+	default 1
+	---help---
+		I2C bus number to use for the keyboard matrix GPIO expander.
+		Common values: 1 or 2 (depends on available I2C interfaces).
+
+config STM32_KMATRIX_I2C_ADDR
+	hex "I2C Slave Address of GPIO Expander"
+	default 0x20
+	---help---
+		I2C slave address of the GPIO expander (PCF8574 or MCP23017).
+		PCF8574/MCP23017 default addresses (7-bit):
+		  0x20-0x27: varies with A0-A2 pins (default is 0x20)
+
+endif # INPUT_KMATRIX_I2C
+
 endif

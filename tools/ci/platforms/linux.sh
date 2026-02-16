@@ -163,12 +163,12 @@ riscv_gcc_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/riscv-none-elf-gcc/bin/riscv-none-elf-gcc" ]; then
     local basefile
-    basefile=xpack-riscv-none-elf-gcc-13.2.0-2-linux-x64
+    basefile=xpack-riscv-none-elf-gcc-14.2.0-3-linux-x64
     cd "${NUTTXTOOLS}"
     # Download the latest RISCV GCC toolchain prebuilt by xPack
-    wget --quiet https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/${basefile}.tar.gz
+    wget --quiet https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v14.2.0-3/${basefile}.tar.gz
     tar zxf ${basefile}.tar.gz
-    mv xpack-riscv-none-elf-gcc-13.2.0-2 riscv-none-elf-gcc
+    mv xpack-riscv-none-elf-gcc-14.2.0-3 riscv-none-elf-gcc
     rm ${basefile}.tar.gz
   fi
   command riscv-none-elf-gcc --version
@@ -251,55 +251,21 @@ sparc_gcc_toolchain() {
   command sparc-gaisler-elf-gcc --version
 }
 
-xtensa_esp32_gcc_toolchain() {
-  add_path "${NUTTXTOOLS}"/xtensa-esp32-elf/bin
+xtensa_esp_gcc_toolchain() {
+  add_path "${NUTTXTOOLS}"/xtensa-esp-elf/bin
 
-  if [ ! -f "${NUTTXTOOLS}/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc" ]; then
+  if [ ! -f "${NUTTXTOOLS}/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc" ]; then
     local basefile
-    basefile=xtensa-esp32-elf-12.2.0_20230208-x86_64-linux-gnu
+    basefile=xtensa-esp-elf-14.2.0_20241119-x86_64-linux-gnu
     cd "${NUTTXTOOLS}"
-    # Download the latest ESP32 GCC toolchain prebuilt by Espressif
-    curl -O -L -s https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
+    # Download the latest ESP32, ESP32-S2 and ESP32-S3 GCC toolchain prebuilt by Espressif
+    curl -O -L -s https://github.com/espressif/crosstool-NG/releases/download/esp-14.2.0_20241119/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
     tar xf ${basefile}.tar
     rm ${basefile}.tar
   fi
 
   command xtensa-esp32-elf-gcc --version
-}
-
-xtensa_esp32s2_gcc_toolchain() {
-  add_path "${NUTTXTOOLS}"/xtensa-esp32s2-elf/bin
-
-  if [ ! -f "${NUTTXTOOLS}/xtensa-esp32s2-elf/bin/xtensa-esp32s2-elf-gcc" ]; then
-    local basefile
-    basefile=xtensa-esp32s2-elf-12.2.0_20230208-x86_64-linux-gnu
-    cd "${NUTTXTOOLS}"
-    # Download the latest ESP32 S2 GCC toolchain prebuilt by Espressif
-    curl -O -L -s https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
-    xz -d ${basefile}.tar.xz
-    tar xf ${basefile}.tar
-    rm ${basefile}.tar
-  fi
-
-  command xtensa-esp32s2-elf-gcc --version
-}
-
-xtensa_esp32s3_gcc_toolchain() {
-  add_path "${NUTTXTOOLS}"/xtensa-esp32s3-elf/bin
-
-  if [ ! -f "${NUTTXTOOLS}/xtensa-esp32s3-elf/bin/xtensa-esp32s3-elf-gcc" ]; then
-    local basefile
-    basefile=xtensa-esp32s3-elf-12.2.0_20230208-x86_64-linux-gnu
-    cd "${NUTTXTOOLS}"
-    # Download the latest ESP32 S3 GCC toolchain prebuilt by Espressif
-    curl -O -L -s https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
-    xz -d ${basefile}.tar.xz
-    tar xf ${basefile}.tar
-    rm ${basefile}.tar
-  fi
-
-  command xtensa-esp32s3-elf-gcc --version
 }
 
 wasi_sdk() {
@@ -331,6 +297,27 @@ wasi_sdk() {
 
   command "${WASI_SDK_PATH}"/bin/clang --version
   command wamrc --version
+}
+
+raspberrypi_pico_sdk() {
+  if [ ! -f "${NUTTXTOOLS}/pico-sdk" ]; then
+    local release
+    local basefile
+    release="2.2.0"
+    basefile="pico-sdk-${release}"
+    cd "${NUTTXTOOLS}"
+    mkdir -p pico-sdk
+
+    # Download the latest pico-sdk source archive
+    curl -O -L -s https://github.com/raspberrypi/pico-sdk/releases/download/${release}/${basefile}.tar.gz
+    tar xzf "${basefile}.tar.gz"
+    mv "${basefile}" pico-sdk
+    rm "${basefile}.tar.gz"
+
+  fi
+
+  export PICO_SDK_PATH="${NUTTXTOOLS}/pico-sdk"
+  echo "export PICO_SDK_PATH=${NUTTXTOOLS}/pico-sdk" >> "${NUTTXTOOLS}"/env.sh
 }
 
 setup_links() {
@@ -368,7 +355,7 @@ install_build_tools() {
   mkdir -p "${NUTTXTOOLS}"
   echo "#!/usr/bin/env sh" > "${NUTTXTOOLS}"/env.sh
 
-  install="arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain bloaty kconfig_frontends mips_gcc_toolchain python_tools riscv_gcc_toolchain rx_gcc_toolchain sparc_gcc_toolchain xtensa_esp32_gcc_toolchain xtensa_esp32s2_gcc_toolchain xtensa_esp32s3_gcc_toolchain util_linux wasi_sdk"
+  install="arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain bloaty kconfig_frontends mips_gcc_toolchain python_tools riscv_gcc_toolchain rx_gcc_toolchain sparc_gcc_toolchain xtensa_esp_gcc_toolchain util_linux wasi_sdk raspberrypi_pico_sdk"
 
   oldpath=$(cd . && pwd -P)
   for func in ${install}; do

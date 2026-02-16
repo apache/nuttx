@@ -6,6 +6,8 @@
 
 /arm/stm32/nucleo-f411re/configs/nsh,CONFIG_ARM_TOOLCHAIN_CLANG
 
+/arm/rp2040/raspberrypi-pico/configs/nsh,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+
 # ARM64
 
 # /arm64/qemu/qemu-armv8a/configs/nsh_smp
@@ -22,5 +24,6 @@
 
 CMake,nucleo-l152re:nsh
 CMake,nucleo-f411re:nsh
+CMake,raspberrypi-pico:nsh
 CMake,rv-virt:nsh
 CMake,sim:windows

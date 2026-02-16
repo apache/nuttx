@@ -298,7 +298,7 @@
 #define GPIO_MPL115A_CS   (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
                            GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN6)
 
-/* FT80x GUI Discrete I/O (See README.txt for details):
+/* FT80x GUI Discrete I/O:
  *
  * ------ ----------- --------------------
  * NAME   VIEWTOOL    STM32
@@ -323,7 +323,7 @@
 #define GPIO_FT80_PD      (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
                            GPIO_OUTPUT_CLEAR | GPIO_PORTC| GPIO_PIN5)
 
-/* MAX3421E USB HOST Discrete I/O (See README.txt for details):
+/* MAX3421E USB HOST Discrete I/O:
  *
  * ------ ----------- --------------------
  * NAME   VIEWTOOL    STM32

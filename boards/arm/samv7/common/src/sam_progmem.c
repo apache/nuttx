@@ -66,40 +66,25 @@
 static int sam_progmem_register_driver(int minor, struct mtd_dev_s *mtd,
                                        const char *devpath)
 {
-#ifdef CONFIG_BCH
-  char blockdev[18];
-  char chardev[12];
-#endif
+  char mtddev[12];
   int ret = OK;
 
-  /* Use the FTL layer to wrap the MTD driver as a block driver */
-
-  ret = ftl_initialize(minor, mtd);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
-      return ret;
-    }
-
-#ifdef CONFIG_BCH
   /* Use the minor number to create device paths */
 
-  snprintf(blockdev, sizeof(blockdev), "/dev/mtdblock%d", minor);
   if (devpath == NULL)
     {
-      snprintf(chardev, sizeof(chardev), "/dev/mtd%d", minor);
-      devpath = chardev;
+      snprintf(mtddev, sizeof(mtddev), "/dev/mtd%d", minor);
+      devpath = mtddev;
     }
 
-  /* Now create a character device on the block device */
+  /* Register the MTD driver */
 
-  ret = bchdev_register(blockdev, devpath, false);
+  ret = register_mtddriver(devpath, mtd, 0755, NULL);
   if (ret < 0)
     {
-      ferr("ERROR: bchdev_register %s failed: %d\n", devpath, ret);
+      ferr("ERROR: register_mtddriver %s failed: %d\n", devpath, ret);
       return ret;
     }
-#endif
 
   return ret;
 }

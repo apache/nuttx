@@ -29,6 +29,10 @@ if(CONFIG_NET)
     list(APPEND SRCS netdev_upperhalf.c)
   endif()
 
+  if(CONFIG_MDIO_BUS)
+    list(APPEND SRCS mdio.c)
+  endif()
+
   if(CONFIG_NET_LOOPBACK)
     list(APPEND SRCS loopback.c)
   endif()
@@ -49,10 +53,6 @@ if(CONFIG_NET)
     list(APPEND SRCS enc28j60.c)
   endif()
 
-  if(CONFIG_NCV7410)
-    list(APPEND SRCS ncv7410.c)
-  endif()
-
   if(CONFIG_ENCX24J600)
     list(APPEND SRCS encx24j600.c)
   endif()
@@ -63,6 +63,10 @@ if(CONFIG_NET)
 
   if(CONFIG_NET_TUN)
     list(APPEND SRCS tun.c)
+  endif()
+
+  if(CONFIG_NET_VLAN)
+    list(APPEND SRCS vlan.c)
   endif()
 
   if(CONFIG_NET_FTMAC100)
@@ -85,8 +89,19 @@ if(CONFIG_NET)
     list(APPEND SRCS lan9250.c)
   endif()
 
+  if(CONFIG_NET_KSZ9477)
+    list(APPEND SRCS ksz9477.c)
+    if(CONFIG_NET_KSZ9477_I2C)
+      list(APPEND SRCS ksz9477_i2c.c)
+    endif()
+  endif()
+
   if(CONFIG_NET_E1000)
     list(APPEND SRCS e1000.c)
+  endif()
+
+  if(CONFIG_NET_IGB)
+    list(APPEND SRCS igb.c)
   endif()
 
   if(CONFIG_NET_IGC)
@@ -102,4 +117,6 @@ if(CONFIG_NET)
   endif()
 
   target_sources(drivers PRIVATE ${SRCS})
+
+  nuttx_add_subdirectory()
 endif()

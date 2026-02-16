@@ -22,7 +22,11 @@
 
 CSRCS += group_create.c group_join.c group_leave.c
 CSRCS += group_setupidlefiles.c group_setuptaskfiles.c
-CSRCS += group_foreachchild.c group_killchildren.c group_signal.c
+CSRCS += group_foreachchild.c group_killchildren.c
+
+ifneq ($(CONFIG_DISABLE_ALL_SIGNALS),y)
+CSRCS += group_signal.c
+endif
 
 ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)
 ifeq ($(CONFIG_SCHED_CHILD_STATUS),y)
@@ -41,10 +45,6 @@ endif
 
 ifeq ($(CONFIG_SIG_SIGSTOP_ACTION),y)
 CSRCS += group_suspendchildren.c group_continue.c
-endif
-
-ifeq ($(CONFIG_BINFMT_LOADABLE),y)
-CSRCS += group_exitinfo.c
 endif
 
 ifeq ($(CONFIG_MM_KERNEL_HEAP),y)

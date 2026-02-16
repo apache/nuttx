@@ -37,7 +37,7 @@
 
 /* Register Base Address ****************************************************/
 
-#ifdef CONFIG_LITEX_CORE_VEXRISCV_SMP
+#if defined(CONFIG_LITEX_CORE_VEXRISCV_SMP) || defined(CONFIG_LITEX_CORE_VEXIIRISCV)
     #define LITEX_CLINT_BASE        0xf0010000
     #define LITEX_PLIC_BASE         0xf0c00000
     #define LITEX_ETHMAC_BASE       0xf0002000

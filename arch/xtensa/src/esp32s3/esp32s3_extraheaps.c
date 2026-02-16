@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/arch.h>
 #include <nuttx/mm/mm.h>
 
 #ifdef CONFIG_ESP32S3_RTC_HEAP

@@ -30,6 +30,7 @@
 #include <debug.h>
 
 #include <nuttx/bits.h>
+#include <nuttx/mm/mm.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/lib/math32.h>
 #include <nuttx/pci/pci_epc.h>
@@ -967,6 +968,8 @@ void pci_epc_bme_notify(FAR struct pci_epc_ctrl_s *epc)
  * Input Parameters:
  *   name        - EPC name strings
  *   priv        - The epc priv data
+ *   dma_addr    - Used for inbound address
+ *   dma_len     - The dma memory len
  *   ops         - Function pointers for performing EPC operations
  *
  * Returned Value:
@@ -975,8 +978,8 @@ void pci_epc_bme_notify(FAR struct pci_epc_ctrl_s *epc)
  ****************************************************************************/
 
 FAR struct pci_epc_ctrl_s *
-pci_epc_create(FAR const char *name, FAR void *priv,
-               FAR const struct pci_epc_ops_s *ops)
+pci_epc_create(FAR const char *name, FAR void *priv, FAR void *dma_addr,
+               size_t dma_len, FAR const struct pci_epc_ops_s *ops)
 {
   FAR struct pci_epc_ctrl_s *epc;
   size_t len;
@@ -993,6 +996,16 @@ pci_epc_create(FAR const char *name, FAR void *priv,
       return NULL;
     }
 
+  if (dma_addr != NULL && dma_len != 0)
+    {
+      epc->dmaheap = mm_initialize_pool("pci_dma", dma_addr, dma_len, NULL);
+      if (epc->dmaheap == NULL)
+        {
+          pcierr("Create DMA heap error \n");
+          goto free_epc;
+        }
+    }
+
   epc->priv = priv;
   memcpy(epc->name, name, len);
   nxmutex_init(&epc->lock);
@@ -1004,6 +1017,10 @@ pci_epc_create(FAR const char *name, FAR void *priv,
   nxmutex_unlock(&g_pci_epc_lock);
 
   return epc;
+
+free_epc:
+  kmm_free(epc);
+  return NULL;
 }
 
 /****************************************************************************
@@ -1035,4 +1052,93 @@ void pci_epc_destroy(FAR struct pci_epc_ctrl_s *epc)
 
   nxmutex_destroy(&epc->lock);
   kmm_free(epc);
+}
+
+/****************************************************************************
+ * Name: pci_epc_dma_alloc
+ *
+ * Description:
+ *   This function is used to create a new endpoint controller (EPC) device.
+ *
+ *   Invoke to destroy the PCI EPC device.
+ *
+ * Input Parameters:
+ *   epc  - The EPC device that has to be destroyed
+ *   size - The dma memory size
+ *
+ * Returned Value:
+ *   The point of dma memory if success, NULL if failed
+ *
+ ****************************************************************************/
+
+FAR void *pci_epc_dma_alloc(FAR struct pci_epc_ctrl_s *epc, size_t size)
+{
+  if (epc->dmaheap != NULL)
+    {
+      return mm_malloc(epc->dmaheap, size);
+    }
+  else
+    {
+      return kmm_malloc(size);
+    }
+}
+
+/****************************************************************************
+ * Name: pci_epc_dma_memalign
+ *
+ * Description:
+ *   This function is used to create a new endpoint controller (EPC) device.
+ *
+ *   Invoke to destroy the PCI EPC device.
+ *
+ * Input Parameters:
+ *   epc       - The EPC device that has to be destroyed
+ *   alignment - Alignment size
+ *   size      - The dma memory size
+ *
+ * Returned Value:
+ *   The point of dma memory if success, NULL if failed
+ *
+ ****************************************************************************/
+
+FAR void *pci_epc_dma_memalign(FAR struct pci_epc_ctrl_s *epc,
+                               size_t alignment, size_t size)
+{
+  if (epc->dmaheap != NULL)
+    {
+      return mm_memalign(epc->dmaheap, alignment, size);
+    }
+  else
+    {
+      return kmm_memalign(alignment, size);
+    }
+}
+
+/****************************************************************************
+ * Name: pci_epc_dma_free
+ *
+ * Description:
+ *   This function is used to create a new endpoint controller (EPC) device.
+ *
+ *   Invoke to destroy the PCI EPC device.
+ *
+ * Input Parameters:
+ *   epc       - The EPC device that has to be destroyed
+ *   mem       - The dma memory need ed to be free
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void pci_epc_dma_free(FAR struct pci_epc_ctrl_s *epc, FAR void *mem)
+{
+  if (epc->dmaheap != NULL)
+    {
+      mm_free(epc->dmaheap, mem);
+    }
+  else
+    {
+      kmm_free(mem);
+    }
 }

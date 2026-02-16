@@ -32,7 +32,9 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/net/usrsock.h>
+#include <nuttx/wqueue.h>
 
+#include "sim_internal.h"
 #include "sim_hostusrsock.h"
 
 /****************************************************************************
@@ -40,6 +42,7 @@
  ****************************************************************************/
 
 #define SIM_USRSOCK_BUFSIZE (400 * 1024)
+#define SIM_USRSOCK_PERIOD  MSEC2TICK(CONFIG_SIM_LOOP_INTERVAL)
 
 /****************************************************************************
  * Private Types
@@ -49,6 +52,7 @@ struct usrsock_s
 {
   uint8_t in[SIM_USRSOCK_BUFSIZE];
   uint8_t out[SIM_USRSOCK_BUFSIZE];
+  struct work_s work;
 };
 
 /****************************************************************************
@@ -391,6 +395,12 @@ static const usrsock_handler_t g_usrsock_handler[] =
   [USRSOCK_REQUEST_SHUTDOWN]    = usrsock_shutdown_handler,
 };
 
+static void sim_usrsock_work(void *arg)
+{
+  work_queue_next_wq(g_work_queue, &g_usrsock.work, sim_usrsock_work,
+                     NULL, SIM_USRSOCK_PERIOD);
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -402,6 +412,8 @@ int usrsock_event_callback(int16_t usockid, uint16_t events)
 
 void usrsock_register(void)
 {
+  work_queue_wq(g_work_queue, &g_usrsock.work, sim_usrsock_work,
+                NULL, SIM_USRSOCK_PERIOD);
 }
 
 /****************************************************************************

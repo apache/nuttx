@@ -83,6 +83,26 @@ easily changed by modifying the configuration.
     SWD-8                TXD1
     ==================   ============
 
+PWM Outputs
+===============
+
+The R7FA4M1ABxCFM has a GPT (General Purpose Timer) that can be used for PWM output.
+
+Any of the Arduino-r4-minima PWM outputs can be used. By default, it is disabled in all configurations.
+This can be easily changed by modifying the configuration.
+
+    ==================   ============
+    Arduino R4 Minima    R7FA4M1ABxCFM
+    Pin (Label)          SCI Mapping
+    ==================   ============
+    ~3                   GTIOC1B_P104
+    ~5                   GTIOC2B_P102
+    ~6                   GTIOC0B_P106
+    ~9                   GTIOC7B_P303
+    ~10                  GTIOC3B_P112
+    ~11                  GTIOC1A_P109
+    ==================   ============
+
 Loading Code
 ============
 

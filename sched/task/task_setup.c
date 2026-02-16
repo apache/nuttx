@@ -461,7 +461,9 @@ static int nxthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
        * inherit the signal mask of the parent thread.
        */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
       tcb->sigprocmask = rtcb->sigprocmask;
+#endif
 
       /* Initialize the task state.  It does not get a valid state
        * until it is activated.
@@ -516,7 +518,7 @@ static int nxthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
  *
  ****************************************************************************/
 
-int nxtask_setup_stackargs(FAR struct task_tcb_s *tcb,
+int nxtask_setup_stackargs(FAR struct tcb_s *tcb,
                            FAR const char *name,
                            FAR char * const argv[])
 {
@@ -527,12 +529,13 @@ int nxtask_setup_stackargs(FAR struct task_tcb_s *tcb,
   int nbytes;
   int argc;
   int i;
+  int ret = OK;
 
   /* Give a name to the unnamed tasks */
 
   if (!name)
     {
-      name = (FAR char *)g_noname;
+      name = g_noname;
     }
 
   /* Get the size of the task name (including the NUL terminator) */
@@ -557,80 +560,94 @@ int nxtask_setup_stackargs(FAR struct task_tcb_s *tcb,
            */
 
           strtablen += (strlen(argv[argc]) + 1);
-          DEBUGASSERT(strtablen < tcb->cmn.adj_stack_size);
-          if (strtablen >= tcb->cmn.adj_stack_size)
+          DEBUGASSERT(strtablen < tcb->adj_stack_size);
+          if (strtablen >= tcb->adj_stack_size)
             {
-              return -ENAMETOOLONG;
+              ret = -ENAMETOOLONG;
             }
-
-          /* Increment the number of args.  Here is a sanity check to
-           * prevent running away with an unterminated argv[] list.
-           * MAX_STACK_ARGS should be sufficiently large that this never
-           * happens in normal usage.
-           */
-
-          DEBUGASSERT(argc <= MAX_STACK_ARGS);
-          if (++argc > MAX_STACK_ARGS)
+          else
             {
-              return -E2BIG;
+              /* Increment the number of args.  Here is a sanity check to
+               * prevent running away with an unterminated argv[] list.
+               * MAX_STACK_ARGS should be sufficiently large that this never
+               * happens in normal usage.
+               */
+
+              DEBUGASSERT(argc <= MAX_STACK_ARGS);
+              if (++argc > MAX_STACK_ARGS)
+                {
+                  ret = -E2BIG;
+                }
             }
         }
     }
 
-  /* Allocate a stack frame to hold argv[] array and the strings.  NOTE
-   * that argc + 2 entries are needed:  The number of arguments plus the
-   * task name plus a NULL argv[] entry to terminate the list.
-   */
-
-  argvlen   = (argc + 2) * sizeof(FAR char *);
-  stackargv = (FAR char **)up_stack_frame(&tcb->cmn, argvlen + strtablen);
-
-  DEBUGASSERT(stackargv != NULL);
-  if (stackargv == NULL)
+  if (ret == OK)
     {
-      return -ENOMEM;
-    }
-
-  /* Get the address of the string table that will lie immediately after
-   * the argv[] array and mark it as a null string.
-   */
-
-  str = (FAR char *)stackargv + argvlen;
-
-  /* Copy the task name.  Increment str to skip over the task name and its
-   * NUL terminator in the string buffer.
-   */
-
-  stackargv[0] = str;
-  nbytes       = strlen(name) + 1;
-  strlcpy(str, name, strtablen);
-  str         += nbytes;
-  strtablen   -= nbytes;
-
-  /* Copy each argument */
-
-  for (i = 0; i < argc; i++)
-    {
-      /* Save the pointer to the location in the string buffer and copy
-       * the argument into the buffer.  Increment str to skip over the
-       * argument and its NUL terminator in the string buffer.
+      /* Allocate a stack frame to hold argv[] array and the strings.  NOTE
+       * that argc + 2 entries are needed:  The number of arguments plus the
+       * task name plus a NULL argv[] entry to terminate the list.
        */
 
-      stackargv[i + 1] = str;
-      nbytes           = strlen(argv[i]) + 1;
-      strlcpy(str, argv[i], strtablen);
-      str             += nbytes;
-      strtablen       -= nbytes;
+      argvlen   = (argc + 2) * sizeof(FAR char *);
+      stackargv = (FAR char **)up_stack_frame(tcb, argvlen + strtablen);
+
+      DEBUGASSERT(stackargv != NULL);
+      if (stackargv == NULL)
+        {
+          ret = -ENOMEM;
+        }
+      else
+        {
+          /* Get the address of the string table that will lie immediately
+           * after the argv[] array and mark it as a null string.
+           */
+
+          str = (FAR char *)stackargv + argvlen;
+
+          /* Copy the task name.  Increment str to skip over the task name
+           * and its NUL terminator in the string buffer.
+           */
+
+          stackargv[0] = str;
+          nbytes       = strlen(name) + 1;
+          strlcpy(str, name, strtablen);
+          str         += nbytes;
+          strtablen   -= nbytes;
+
+          /* Copy each argument */
+
+          for (i = 0; i < argc; i++)
+            {
+              /* Save the pointer to the location in the string buffer and
+               * copy the argument into the buffer. Increment str to skip
+               * over the argument and its NUL terminator in the string
+               * buffer.
+               */
+
+              stackargv[i + 1] = str;
+              nbytes           = strlen(argv[i]) + 1;
+              strlcpy(str, argv[i], strtablen);
+              str             += nbytes;
+              strtablen       -= nbytes;
+            }
+
+          /* Put a terminator entry at the end of the argv[] array. Then
+           * save the argv[] array pointer in the TCB where it will be
+           * recovered later by nxtask_start().
+           */
+
+          stackargv[argc + 1] = NULL;
+
+          /* Initialize argv last to avoid accessing the partial initialized
+           * fields
+           */
+
+          nxsched_get_tls(tcb)->tl_argv = stackargv;
+        }
     }
 
-  /* Put a terminator entry at the end of the argv[] array.  Then save the
-   * argv[] array pointer in the TCB where it will be recovered later by
-   * nxtask_start().
-   */
-
-  stackargv[argc + 1] = NULL;
-
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -658,13 +675,12 @@ int nxtask_setup_stackargs(FAR struct task_tcb_s *tcb,
  *
  ****************************************************************************/
 
-int nxtask_setup_scheduler(FAR struct task_tcb_s *tcb, int priority,
+int nxtask_setup_scheduler(FAR struct tcb_s *tcb, int priority,
                            start_t start, main_t main, uint8_t ttype)
 {
   /* Perform common thread setup */
 
-  return nxthread_setup_scheduler((FAR struct tcb_s *)tcb, priority,
-                                  start, (CODE void *)main, ttype);
+  return nxthread_setup_scheduler(tcb, priority, start, main, ttype);
 }
 
 /****************************************************************************
@@ -692,13 +708,12 @@ int nxtask_setup_scheduler(FAR struct task_tcb_s *tcb, int priority,
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PTHREAD
-int pthread_setup_scheduler(FAR struct pthread_tcb_s *tcb, int priority,
+int pthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
                             start_t start, pthread_startroutine_t entry)
 {
   /* Perform common thread setup */
 
-  return nxthread_setup_scheduler((FAR struct tcb_s *)tcb, priority,
-                                  start, (CODE void *)entry,
+  return nxthread_setup_scheduler(tcb, priority, start, entry,
                                   TCB_FLAG_TTYPE_PTHREAD);
 }
 #endif
@@ -719,9 +734,9 @@ int pthread_setup_scheduler(FAR struct pthread_tcb_s *tcb, int priority,
  ****************************************************************************/
 
 #if CONFIG_TASK_NAME_SIZE > 0
-void nxtask_setup_name(FAR struct task_tcb_s *tcb, FAR const char *name)
+void nxtask_setup_name(FAR struct tcb_s *tcb, FAR const char *name)
 {
-  FAR char *dst = tcb->cmn.name;
+  FAR char *dst = tcb->name;
   int i;
 
   /* Give a name to the unnamed tasks */

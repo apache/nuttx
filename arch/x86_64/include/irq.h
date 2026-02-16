@@ -51,9 +51,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define X86_64_CPUPRIV_USTACK_OFFSET      (16)
-#define X86_64_CPUPRIV_UVBASE_OFFSET      (24)
-#define X86_64_CPUPRIV_KTOPSTK_OFFSET     (32)
+#define X86_64_CPUPRIV_USTACK_OFFSET  16
+#define X86_64_CPUPRIV_UVBASE_OFFSET  24
+#define X86_64_CPUPRIV_KTOPSTK_OFFSET 32
+
+/* The initial stack point is aligned at 16 bytes boundaries. If
+ * necessary frame_size must be rounded up to the next boundary to retain
+ * this alignment.
+ */
+
+#define STACKFRAME_ALIGN              16
 
 /****************************************************************************
  * Public Data
@@ -76,7 +83,7 @@ struct intel64_cpu_s
 
   struct tcb_s *this_task;
 
-#ifdef CONFIG_LIB_SYSCALL
+#ifdef CONFIG_ARCH_HAVE_SYSCALL
   /* Current user RSP for syscall */
 
   uint64_t *ustack;
@@ -143,7 +150,7 @@ static inline_function bool up_interrupt_context(void)
 {
   bool flag;
   __asm__ volatile("movb %%gs:(%c1), %0"
-                   : "=qm" (flag)
+                   : "=qr" (flag)
                    : "i" (offsetof(struct intel64_cpu_s,
                                    interrupt_context)));
   return flag;

@@ -32,13 +32,10 @@ CMN_CSRCS  = or1k_initialize.c \
              or1k_stackframe.c \
              or1k_initialstate.c \
              or1k_switchcontext.c \
-             or1k_schedulesigaction.c \
              or1k_copyfullstate.c \
              or1k_registerdump.c \
              or1k_getintstack.c \
              or1k_exit.c \
-             or1k_udelay.c \
-             or1k_mdelay.c \
              or1k_idle.c \
              or1k_irq.c \
              or1k_nputs.c \
@@ -46,6 +43,10 @@ CMN_CSRCS  = or1k_initialize.c \
              or1k_doirq.c \
              or1k_cpuinfo.c \
              mor1kx_start.c
+
+ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
+CMN_CSRCS += or1k_schedulesigaction.c
+endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += or1k_task_start.c or1k_pthread_start.c

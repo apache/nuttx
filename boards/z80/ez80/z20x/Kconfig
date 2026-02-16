@@ -68,22 +68,11 @@ config Z20X_W25_PROGSIZE
 		this program must run from SRAM, there would be no purpose int
 		making this size any larger than the size of the internal SRAM.
 
-choice
-	prompt "Winbond W25 Usage"
-	default Z20X_W25_CHARDEV
-	depends on EZ80_SPI && MTD_W25
-
 config Z20X_W25_CHARDEV
 	bool "Character device"
+	depends on EZ80_SPI && MTD_W25
 	select BCH
-
-config Z20X_W25_BLOCKDEV
-	bool "Block device"
-
-config Z20X_W25_MTDDEV
-	bool "MTD device"
-
-endchoice
+	default y
 
 config Z20X_W25_MINOR
 	int "W25 device minor number"

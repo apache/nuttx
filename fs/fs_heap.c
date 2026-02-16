@@ -42,6 +42,7 @@ static FAR struct mm_heap_s *g_fs_heap;
 
 void fs_heap_initialize(void)
 {
+  struct mm_heap_config_s config;
 #ifdef FS_HEAPBUF_SECTION
   static uint8_t buf[CONFIG_FS_HEAPSIZE] locate_data(FS_HEAPBUF_SECTION);
 #else
@@ -49,7 +50,11 @@ void fs_heap_initialize(void)
 #endif
 
   DEBUGASSERT(buf != NULL);
-  g_fs_heap = mm_initialize("heapfs", buf, CONFIG_FS_HEAPSIZE);
+  memset(&config, 0, sizeof(config));
+  config.name  = "heapfs";
+  config.start = buf;
+  config.size  = CONFIG_FS_HEAPSIZE;
+  g_fs_heap = mm_initialize_pool(&config, NULL);
 }
 
 FAR void *fs_heap_zalloc(size_t size)

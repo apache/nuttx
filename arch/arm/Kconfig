@@ -45,7 +45,7 @@ config ARM_TOOLCHAIN_CLANG
 
 config ARM_TOOLCHAIN_ARMCLANG
 	bool "ARM Compiler Clang toolchain"
-	select ARCH_TOOLCHAIN_CLANG
+	select ARCH_TOOLCHAIN_ARMCLANG
 
 config ARM_TOOLCHAIN_GHS
 	bool "ARM Compiler Green Hills Software toolchain"
@@ -1005,6 +1005,7 @@ config ARCH_ARMV7R
 	default n
 	select ARCH_HAVE_CPUINFO
 	select ARCH_HAVE_PERF_EVENTS
+	select ARCH_HAVE_PERF_EVENTS_USER_ACCESS
 
 config ARCH_CORTEXR4
 	bool
@@ -1134,6 +1135,7 @@ config ARCH_ARMV8R
 	select ARCH_HAVE_CPUINFO
 	select ARCH_HAVE_PERF_EVENTS
 	select ONESHOT
+	select ONESHOT_COUNT
 	select ALARM_ARCH
 
 
@@ -1278,6 +1280,26 @@ config ARM_FPU_ABI_SOFT
 	depends on ARCH_HAVE_FPU
 	---help---
 		Pass float value via integer register (-mfloat-abi=softfp)
+
+config ARM_BUSY_WAIT
+	bool "Busy wait when boot"
+	default n
+	depends on ARCH_HAVE_MULTICPU
+	---help---
+		On a system with multiple CPU cores, when the system is powered on,
+		multiple cores may start running simultaneously. In this case, software
+		is required to handle the startup logic for multi-core synchronization.
+		One approach is to use global variables.
+		however, the global variable region may not have been initialized yet.
+		In such scenarios, we can use a busywait flag to
+		implement the synchronization strategy.
+
+config ARM_BUSY_WAIT_FLAG_ADDR
+	hex "Busy wait flag address"
+	depends on ARM_BUSY_WAIT
+	---help---
+		The busywait address is typically a region that is initialized to 0
+		during the boot phase.
 
 config ARM_DPFPU32
 	bool "FPU with 32 double-precision register"

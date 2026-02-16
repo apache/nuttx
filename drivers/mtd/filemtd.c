@@ -42,6 +42,9 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/fs/loopmtd.h>
 #include <nuttx/mtd/mtd.h>
+#ifndef CONFIG_MTD_CONFIG_NONE
+#  include <nuttx/mtd/configdata.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -551,8 +554,14 @@ static int filemtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
  ****************************************************************************/
 
 #ifdef CONFIG_MTD_LOOP
+#  ifndef CONFIG_MTD_CONFIG_NONE
+static int mtd_loop_setup(FAR const char *devname, FAR const char *filename,
+                          int sectsize, int erasesize, off_t offset,
+                          int configdata)
+#  else
 static int mtd_loop_setup(FAR const char *devname, FAR const char *filename,
                           int sectsize, int erasesize, off_t offset)
+#  endif
 {
   FAR struct mtd_dev_s *mtd;
   int ret;
@@ -563,7 +572,29 @@ static int mtd_loop_setup(FAR const char *devname, FAR const char *filename,
       return -ENOENT;
     }
 
-  ret = register_mtddriver(devname, mtd, 0755, NULL);
+#  ifndef CONFIG_MTD_CONFIG_NONE
+  if (configdata)
+    {
+      if (configdata == 2)
+        {
+          /* Try to erase the entire device, before register */
+
+          FAR struct file_dev_s *fdev = (FAR struct file_dev_s *)mtd;
+          mtd->erase(mtd, offset / erasesize, fdev->nblocks);
+        }
+
+      ret = mtdconfig_register_by_path(mtd, devname);
+      if (ret == -EDEADLK)
+        {
+          ferr("ERROR: mtdconfig_register_by_path failed: %d\n", ret);
+        }
+    }
+  else
+#  endif
+    {
+      ret = register_mtddriver(devname, mtd, 0755, NULL);
+    }
+
   if (ret != OK)
     {
       filemtd_teardown(mtd);
@@ -615,7 +646,17 @@ static int mtd_loop_teardown(FAR const char *devname)
   /* Now teardown the filemtd */
 
   filemtd_teardown(&dev->mtd);
-  unregister_mtddriver(devname);
+
+#  ifndef CONFIG_MTD_CONFIG_NONE
+  if (inode->i_private)
+    {
+      mtdconfig_unregister_by_path(devname);
+    }
+  else
+#  endif
+    {
+      unregister_mtddriver(devname);
+    }
 
   return OK;
 }
@@ -674,9 +715,15 @@ static int mtd_loop_ioctl(FAR struct file *filep, int cmd,
           }
         else
           {
+#  ifndef CONFIG_MTD_CONFIG_NONE
+            ret = mtd_loop_setup(setup->devname, setup->filename,
+                                 setup->sectsize, setup->erasesize,
+                                 setup->offset, setup->configdata);
+#  else
             ret = mtd_loop_setup(setup->devname, setup->filename,
                                  setup->sectsize, setup->erasesize,
                                  setup->offset);
+#  endif
           }
       }
       break;

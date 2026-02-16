@@ -106,13 +106,13 @@ bool enter_cancellation_point(void)
    * nesting level.
    */
 
-  if (((tls->tl_cpstate & CANCEL_FLAG_NONCANCELABLE) == 0 &&
-       (tls->tl_cpstate & CANCEL_FLAG_CANCEL_ASYNC) == 0) ||
+  if (((tls->tl_cpstate & CANCEL_FLAG_NONCANCELABLE) == 0u &&
+       (tls->tl_cpstate & CANCEL_FLAG_CANCEL_ASYNC) == 0u) ||
       tls->tl_cpcount > 0)
     {
       /* Check if there is a pending cancellation */
 
-      if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_PENDING) != 0)
+      if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_PENDING) != 0u)
         {
           /* Yes... return true (if we don't exit here) */
 
@@ -194,7 +194,7 @@ void leave_cancellation_point(void)
            * the type of the thread.
            */
 
-          if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_PENDING) != 0)
+          if ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_PENDING) != 0u)
             {
 #ifndef CONFIG_DISABLE_PTHREAD
               pthread_exit(PTHREAD_CANCELED);
@@ -245,13 +245,13 @@ bool check_cancellation_point(void)
    * cancellation and will true if there is a pending cancellation.
    */
 
-  if (((tls->tl_cpstate & CANCEL_FLAG_NONCANCELABLE) == 0 &&
-       (tls->tl_cpstate & CANCEL_FLAG_CANCEL_ASYNC) == 0) ||
+  if (((tls->tl_cpstate & CANCEL_FLAG_NONCANCELABLE) == 0u &&
+       (tls->tl_cpstate & CANCEL_FLAG_CANCEL_ASYNC) == 0u) ||
       tls->tl_cpcount > 0)
     {
       /* Check if there is a pending cancellation.  If so, return true. */
 
-      ret = ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_PENDING) != 0);
+      ret = ((tls->tl_cpstate & CANCEL_FLAG_CANCEL_PENDING) != 0u);
     }
 
   return ret;

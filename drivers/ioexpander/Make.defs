@@ -82,6 +82,10 @@ ifeq ($(CONFIG_IOEXPANDER_SX1509),y)
   CSRCS += sx1509.c
 endif
 
+ifeq ($(CONFIG_IOEXPANDER_AW9523B),y)
+  CSRCS += aw9523b.c
+endif
+
 endif # CONFIG_IOEXPANDER
 
 # GPIO test device driver (independent of IOEXPANDERS)

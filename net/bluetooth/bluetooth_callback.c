@@ -37,6 +37,7 @@
 #include <nuttx/net/bluetooth.h>
 
 #include "devif/devif.h"
+#include "utils/utils.h"
 #include "bluetooth/bluetooth.h"
 
 #ifdef CONFIG_NET_BLUETOOTH
@@ -59,11 +60,11 @@
  *
  ****************************************************************************/
 
-uint16_t bluetooth_callback(FAR struct radio_driver_s *radio,
-                             FAR struct bluetooth_conn_s *conn,
-                             uint16_t flags)
+uint32_t bluetooth_callback(FAR struct radio_driver_s *radio,
+                            FAR struct bluetooth_conn_s *conn,
+                            uint32_t flags)
 {
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   /* Some sanity checking */
 
@@ -71,7 +72,9 @@ uint16_t bluetooth_callback(FAR struct radio_driver_s *radio,
     {
       /* Perform the callback */
 
+      conn_lock(&conn->bc_conn);
       flags = devif_conn_event(&radio->r_dev, flags, conn->bc_conn.list);
+      conn_unlock(&conn->bc_conn);
     }
 
   return flags;

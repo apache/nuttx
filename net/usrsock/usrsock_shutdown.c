@@ -45,8 +45,8 @@
  * Private Functions
  ****************************************************************************/
 
-static uint16_t shutdown_event(FAR struct net_driver_s *dev,
-                               FAR void *pvpriv, uint16_t flags)
+static uint32_t shutdown_event(FAR struct net_driver_s *dev,
+                               FAR void *pvpriv, uint32_t flags)
 {
   FAR struct usrsock_reqstate_s *pstate = pvpriv;
   FAR struct usrsock_conn_s *conn = pstate->conn;
@@ -145,7 +145,7 @@ int usrsock_shutdown(FAR struct socket *psock, int how)
 
   int ret;
 
-  net_lock();
+  usrsock_lock();
 
   if (conn->state == USRSOCK_CONN_STATE_UNINITIALIZED ||
       conn->state == USRSOCK_CONN_STATE_ABORTED)
@@ -176,14 +176,14 @@ int usrsock_shutdown(FAR struct socket *psock, int how)
     {
       /* Wait for completion of request. */
 
-      net_sem_wait_uninterruptible(&state.recvsem);
+      usrsock_sem_timedwait(&state.recvsem, false, UINT_MAX);
       ret = state.result;
     }
 
   usrsock_teardown_request_callback(&state);
 
 errout:
-  net_unlock();
+  usrsock_unlock();
   return ret;
 }
 

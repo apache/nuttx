@@ -51,6 +51,8 @@ if(NOT CONFIG_DISABLE_PTHREAD)
     pthread_attr_getschedparam.c
     pthread_attr_setscope.c
     pthread_attr_getscope.c
+    pthread_attr_setguardsize.c
+    pthread_attr_getguardsize.c
     pthread_barrierattr_init.c
     pthread_barrierattr_destroy.c
     pthread_barrierattr_getpshared.c
@@ -64,10 +66,15 @@ if(NOT CONFIG_DISABLE_PTHREAD)
     pthread_condattr_setpshared.c
     pthread_condattr_setclock.c
     pthread_condattr_getclock.c
+    pthread_condbroadcast.c
+    pthread_condclockwait.c
     pthread_condinit.c
     pthread_conddestroy.c
     pthread_condtimedwait.c
+    pthread_condsignal.c
+    pthread_condwait.c
     pthread_create.c
+    pthread_equal.c
     pthread_exit.c
     pthread_kill.c
     pthread_setname_np.c
@@ -86,9 +93,15 @@ if(NOT CONFIG_DISABLE_PTHREAD)
     pthread_mutexattr_getrobust.c
     pthread_mutexattr_setprioceiling.c
     pthread_mutexattr_getprioceiling.c
+    pthread_mutex.c
+    pthread_mutex_destroy.c
+    pthread_mutex_getprioceiling.c
+    pthread_mutex_init.c
     pthread_mutex_lock.c
     pthread_mutex_setprioceiling.c
-    pthread_mutex_getprioceiling.c
+    pthread_mutex_timedlock.c
+    pthread_mutex_trylock.c
+    pthread_mutex_unlock.c
     pthread_once.c
     pthread_yield.c
     pthread_atfork.c
@@ -104,7 +117,12 @@ if(NOT CONFIG_DISABLE_PTHREAD)
     pthread_testcancel.c
     pthread_getcpuclockid.c
     pthread_self.c
-    pthread_gettid_np.c)
+    pthread_gettid_np.c
+    pthread_concurrency.c)
+
+  if(NOT CONFIG_PTHREAD_MUTEX_UNSAFE)
+    list(APPEND SRCS pthread_mutex_consistent.c pthread_mutex_inconsistent.c)
+  endif()
 
   if(CONFIG_SMP)
     list(APPEND SRCS pthread_attr_getaffinity.c pthread_attr_setaffinity.c)

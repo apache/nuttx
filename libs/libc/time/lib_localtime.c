@@ -346,7 +346,7 @@ static FAR const char *getnum(FAR const char *strp, FAR int *nump,
 static FAR const char *getsecs(FAR const char *strp,
               FAR int_fast32_t *secsp);
 static FAR const char *getoffset(FAR const char *strp,
-              FAR int_fast32_t *offsetp);
+              FAR int_fast32_t *poffset);
 static FAR const char *getrule(FAR const char *strp,
               FAR struct rule_s *rulep);
 static void gmtload(FAR struct state_s *sp);
@@ -392,7 +392,7 @@ static int  tzparse(FAR const char *name, FAR struct state_s *sp,
 
 static inline void tz_lock(FAR rmutex_t *lock)
 {
-#ifndef __KERNEL__
+#if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
   if (up_interrupt_context() || (sched_idletask() && OSINIT_IDLELOOP()))
     {
       return;
@@ -404,7 +404,7 @@ static inline void tz_lock(FAR rmutex_t *lock)
 
 static inline void tz_unlock(FAR rmutex_t *lock)
 {
-#ifndef __KERNEL__
+#if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
   if (up_interrupt_context() || (sched_idletask() && OSINIT_IDLELOOP()))
     {
       return;
@@ -1274,7 +1274,7 @@ static FAR const char *getsecs(FAR const char *strp,
  */
 
 static FAR const char *getoffset(FAR const char *strp,
-                                 FAR int_fast32_t *offsetp)
+                                 FAR int_fast32_t *poffset)
 {
   int neg = FALSE;
 
@@ -1288,7 +1288,7 @@ static FAR const char *getoffset(FAR const char *strp,
       ++strp;
     }
 
-  strp = getsecs(strp, offsetp);
+  strp = getsecs(strp, poffset);
   if (strp == NULL)
     {
       return NULL; /* illegal time */
@@ -1296,7 +1296,7 @@ static FAR const char *getoffset(FAR const char *strp,
 
   if (neg)
     {
-      *offsetp = -*offsetp;
+      *poffset = -*poffset;
     }
 
   return strp;

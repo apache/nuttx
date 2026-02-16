@@ -35,10 +35,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define TFD_NONBLOCK O_NONBLOCK
-#define TFD_CLOEXEC  O_CLOEXEC
-
-#define TFD_TIMER_ABSTIME TIMER_ABSTIME
+#define TFD_NONBLOCK            O_NONBLOCK
+#define TFD_CLOEXEC             O_CLOEXEC
+#define TFD_TIMER_ABSTIME       TIMER_ABSTIME
+#define TFD_TIMER_CANCEL_ON_SET 2
 
 /****************************************************************************
  * Public Type Declarations

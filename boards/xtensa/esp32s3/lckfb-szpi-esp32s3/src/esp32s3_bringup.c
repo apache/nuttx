@@ -81,8 +81,8 @@
 #include <nuttx/video/fb.h>
 #endif
 
-#ifdef CONFIG_ESP32S3_EFUSE
-#  include "esp32s3_efuse.h"
+#ifdef CONFIG_ESPRESSIF_EFUSE
+#  include "espressif/esp_efuse.h"
 #endif
 
 #ifdef CONFIG_ESPRESSIF_LEDC
@@ -111,6 +111,10 @@
 
 #ifdef CONFIG_ESP32S3_AES_ACCELERATOR
 #  include "esp32s3_aes.h"
+#endif
+
+#ifdef CONFIG_SENSORS_QMI8658
+#  include <nuttx/sensors/qmi8658.h>
 #endif
 
 #ifdef CONFIG_ESP32S3_ADC
@@ -153,8 +157,7 @@
 int esp32s3_bringup(void)
 {
   int ret;
-#if (defined(CONFIG_ESPRESSIF_I2S0) && !defined(CONFIG_AUDIO_CS4344)) || \
-    defined(CONFIG_ESPRESSIF_I2S1)
+#if defined(CONFIG_ESPRESSIF_I2S0) || defined(CONFIG_ESPRESSIF_I2S1)
   bool i2s_enable_tx;
   bool i2s_enable_rx;
 #endif
@@ -194,8 +197,8 @@ int esp32s3_bringup(void)
   #endif /* CONFIG_ESPRESSIF_SPI_BITBANG */
 #endif /* CONFIG_ESP32S3_SPI && CONFIG_SPI_DRIVER*/
 
-#if defined(CONFIG_ESP32S3_EFUSE)
-  ret = esp32s3_efuse_initialize("/dev/efuse");
+#if defined(CONFIG_ESPRESSIF_EFUSE)
+  ret = esp_efuse_initialize("/dev/efuse");
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to init EFUSE: %d\n", ret);
@@ -307,6 +310,16 @@ int esp32s3_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SENSORS_QMI8658
+  /* Register QMI8658 IMU sensor */
+
+  ret = esp32s3_qmi8658_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register QMI8658 IMU: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_IOEXPANDER_PCA9557
   ret = esp32s3_pca9557_initialize();
   if (ret < 0)
@@ -323,30 +336,7 @@ int esp32s3_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_SENSORS_BMP180
-  /* Try to register BMP180 device in I2C0 */
-
-  ret = board_bmp180_initialize(0, ESP32S3_I2C0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "Failed to initialize BMP180 driver for I2C0: %d\n", ret);
-    }
-#endif
-
 #ifdef CONFIG_ESPRESSIF_I2S
-
-#ifdef CONFIG_AUDIO_CS4344
-
-  /* Configure CS4344 audio on I2S0 */
-
-  ret = esp32s3_cs4344_initialize(ESP32S3_I2S0);
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "Failed to initialize CS4344 audio: %d\n", ret);
-    }
-#else
-
 #ifdef CONFIG_ESPRESSIF_I2S0_TX
   i2s_enable_tx = true;
 #else
@@ -366,7 +356,6 @@ int esp32s3_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize I2S0 driver: %d\n", ret);
     }
-#endif /* CONFIG_AUDIO_CS4344 */
 
 #ifdef CONFIG_ESPRESSIF_I2S1
 

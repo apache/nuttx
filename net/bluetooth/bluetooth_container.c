@@ -133,17 +133,17 @@ FAR struct bluetooth_container_s *bluetooth_container_allocate(void)
 
   /* Try the free list first */
 
-  net_lock();
+  bluetooth_conn_list_lock();
   if (g_free_container != NULL)
     {
       container        = g_free_container;
       g_free_container = container->bn_flink;
       pool             = BLUETOOTH_POOL_PREALLOCATED;
-      net_unlock();
+      bluetooth_conn_list_unlock();
     }
   else
     {
-      net_unlock();
+      bluetooth_conn_list_unlock();
       container = (FAR struct bluetooth_container_s *)
         kmm_malloc((sizeof(struct bluetooth_container_s)));
       pool = BLUETOOTH_POOL_DYNAMIC;
@@ -188,12 +188,12 @@ void bluetooth_container_free(FAR struct bluetooth_container_s *container)
    * in the free list.
    */
 
-  net_lock();
+  bluetooth_conn_list_lock();
   if (container->bn_pool == BLUETOOTH_POOL_PREALLOCATED)
     {
       container->bn_flink = g_free_container;
       g_free_container    = container;
-      net_unlock();
+      bluetooth_conn_list_unlock();
     }
   else
     {
@@ -201,7 +201,7 @@ void bluetooth_container_free(FAR struct bluetooth_container_s *container)
 
       /* Otherwise, deallocate it. */
 
-      net_unlock();
+      bluetooth_conn_list_unlock();
       kmm_free(container);
     }
 }

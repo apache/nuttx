@@ -42,8 +42,9 @@
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
-#include "tcp/tcp.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
+#include "tcp/tcp.h"
 
 /****************************************************************************
  * Private Types
@@ -169,9 +170,9 @@ static size_t tcp_recvfrom_newdata(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static inline uint16_t tcp_newdata(FAR struct net_driver_s *dev,
+static inline uint32_t tcp_newdata(FAR struct net_driver_s *dev,
                                    FAR struct tcp_recvfrom_s *pstate,
-                                   uint16_t flags)
+                                   uint32_t flags)
 {
   FAR struct tcp_conn_s *conn = pstate->ir_conn;
 
@@ -208,10 +209,11 @@ static inline uint16_t tcp_newdata(FAR struct net_driver_s *dev,
 
   if (recvlen < dev->d_len)
     {
-      /* Clear the TCP_CLOSE because we effectively dropped the FIN as well.
+      /* Clear the TCP_RXCLOSE because we effectively dropped the FIN as
+       * well.
        */
 
-      flags &= ~TCP_CLOSE;
+      flags &= ~TCP_RXCLOSE;
     }
 
   net_incr32(conn->rcvseq, recvlen);
@@ -389,13 +391,13 @@ static inline void tcp_sender(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
-                                FAR void *pvpriv, uint16_t flags)
+static uint32_t tcp_recvhandler(FAR struct net_driver_s *dev,
+                                FAR void *pvpriv, uint32_t flags)
 {
   FAR struct tcp_recvfrom_s *pstate = pvpriv;
   FAR struct iob_s *iob = NULL;
 
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 
@@ -478,7 +480,6 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
       /* Check for a loss of connection.
        *
        * TCP_DISCONN_EVENTS:
-       *   TCP_CLOSE:    The remote host has closed the connection
        *   TCP_ABORT:    The remote host has aborted the connection
        *   TCP_TIMEDOUT: Connection aborted due to too many retransmissions.
        *   NETDEV_DOWN:  The network device went down
@@ -503,24 +504,16 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
               tcp_lost_connection(conn, pstate->ir_cb, flags);
             }
 
-          /* Check if the peer gracefully closed the connection. */
-
-          if ((flags & TCP_CLOSE) != 0)
-            {
-              /* This case should always return success (zero)! The value of
-               * ir_recvlen, if zero, will indicate that the connection was
-               * gracefully closed.
-               */
-
-              pstate->ir_result = 0;
-            }
-          else
-            {
-              pstate->ir_result = -ENOTCONN;
-            }
+          pstate->ir_result = -ENOTCONN;
 
           /* Wake up the waiting thread */
 
+          nxsem_post(&pstate->ir_sem);
+        }
+      else if ((flags & TCP_RXCLOSE) != 0)
+        {
+          ninfo("TCP_RXCLOSE\n");
+          pstate->ir_result = 0;
           nxsem_post(&pstate->ir_sem);
         }
     }
@@ -583,7 +576,7 @@ static void tcp_recvfrom_initialize(FAR struct tcp_conn_s *conn,
  *   Evaluate the result of the recv operations
  *
  * Input Parameters:
- *   result   The result of the net_sem_timedwait operation
+ *   result   The result of the conn_dev_sem_timedwait operation
  *            (may indicate EINTR)
  *   pstate   A pointer to the state structure to be initialized
  *
@@ -718,7 +711,8 @@ static ssize_t tcp_recvfrom_one(FAR struct tcp_conn_s *conn, FAR void *buf,
 
   /* Verify that the SOCK_STREAM has been and still is connected */
 
-  if (!_SS_ISCONNECTED(conn->sconn.s_flags))
+  if (!_SS_ISCONNECTED(conn->sconn.s_flags) ||
+      (conn->shutdown & SHUT_RD) != 0)
     {
       /* Was any data transferred from the readahead buffer after we were
        * disconnected?  If so, then return the number of bytes received.
@@ -731,7 +725,8 @@ static ssize_t tcp_recvfrom_one(FAR struct tcp_conn_s *conn, FAR void *buf,
        * recvfrom() will get an end-of-file indication.
        */
 
-      if (ret <= 0 && !_SS_ISCLOSED(conn->sconn.s_flags))
+      if (ret <= 0 && !_SS_ISCLOSED(conn->sconn.s_flags) &&
+          (conn->shutdown & SHUT_RD) == 0)
         {
           /* Nothing was previously received from the read-ahead buffers.
            * The SOCK_STREAM must be (re-)connected in order to receive
@@ -793,7 +788,8 @@ static ssize_t tcp_recvfrom_one(FAR struct tcp_conn_s *conn, FAR void *buf,
       state.ir_cb = tcp_callback_alloc(conn);
       if (state.ir_cb)
         {
-          state.ir_cb->flags   = (TCP_NEWDATA | TCP_DISCONN_EVENTS);
+          state.ir_cb->flags   = (TCP_NEWDATA | TCP_RXCLOSE |
+                                  TCP_DISCONN_EVENTS);
           state.ir_cb->flags  |= (flags & MSG_WAITALL) ? TCP_WAITALL : 0;
           state.ir_cb->priv    = (FAR void *)&state;
           state.ir_cb->event   = tcp_recvhandler;
@@ -803,17 +799,18 @@ static ssize_t tcp_recvfrom_one(FAR struct tcp_conn_s *conn, FAR void *buf,
            */
 
           info.tc_conn = conn;
-          info.tc_cb   = state.ir_cb;
+          info.tc_cb   = &state.ir_cb;
           info.tc_sem  = &state.ir_sem;
           tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
 
           /* Wait for either the receive to complete or for an
-           * error/timeout to occur.  net_sem_timedwait will also
+           * error/timeout to occur.  conn_dev_sem_timedwait will also
            * terminate if a signal is received.
            */
 
-          ret = net_sem_timedwait(&state.ir_sem,
-                              _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
+          ret = conn_dev_sem_timedwait(&state.ir_sem, true,
+                                       _SO_TIMEOUT(conn->sconn.s_rcvtimeo),
+                                       &conn->sconn, conn->dev);
           tls_cleanup_pop(tls_get_info(), 0);
           if (ret == -ETIMEDOUT)
             {
@@ -839,7 +836,7 @@ static ssize_t tcp_recvfrom_one(FAR struct tcp_conn_s *conn, FAR void *buf,
 
   if (tcp_should_send_recvwindow(conn))
     {
-      netdev_txnotify_dev(conn->dev);
+      netdev_txnotify_dev(conn->dev, TCP_POLL);
     }
 
   tcp_notify_recvcpu(conn);
@@ -880,9 +877,8 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
   ssize_t                ret     = 0;
   int                    i;
 
-  net_lock();
-
   conn = psock->s_conn;
+  conn_dev_lock(&conn->sconn, conn->dev);
   for (i = 0; i < msg->msg_iovlen; i++)
     {
       FAR void *buf = msg->msg_iov[i].iov_base;
@@ -909,7 +905,7 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
         }
     }
 
-  net_unlock();
+  conn_dev_unlock(&conn->sconn, conn->dev);
   return nrecv ? nrecv : ret;
 }
 

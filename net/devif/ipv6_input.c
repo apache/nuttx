@@ -224,6 +224,8 @@ static int ipv6_in(FAR struct net_driver_s *dev)
 
   /* Get the size of the packet minus the size of link layer header */
 
+  dev->d_len -= NET_LL_HDRLEN(dev);
+
   if (IPv6_HDRLEN > dev->d_len)
     {
       nwarn("WARNING: Packet shorter than IPv6 header\n");
@@ -675,6 +677,8 @@ int ipv6_input(FAR struct net_driver_s *dev)
   FAR uint8_t *buf;
   int ret;
 
+  netdev_lock(dev);
+
   /* Store reception timestamp if enabled and not provided by hardware. */
 
 #if defined(CONFIG_NET_TIMESTAMP) && !defined(CONFIG_ARCH_HAVE_NETDEV_TIMESTAMP)
@@ -692,9 +696,12 @@ int ipv6_input(FAR struct net_driver_s *dev)
 
       dev->d_buf = buf;
 
+      netdev_unlock(dev);
       return ret;
     }
 
-  return netdev_input(dev, ipv6_in, true);
+  ret = netdev_input(dev, ipv6_in, true);
+  netdev_unlock(dev);
+  return ret;
 }
 #endif /* CONFIG_NET_IPv6 */

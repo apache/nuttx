@@ -70,63 +70,67 @@
 int sched_rr_get_interval(pid_t pid, struct timespec *interval)
 {
   FAR struct tcb_s *rrtcb;
+  int status = OK;
 
   /* If pid is zero, the timeslice for the calling process is written
    * into 'interval.'
    */
 
-  if (pid == 0)
+  if (pid >= 0)
     {
-      rrtcb = this_task();
-    }
-
-  /* Return a special error code on invalid PID */
-
-  else if (pid < 0)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-
-  /* Otherwise, lookup the TCB associated with this PID */
-
-  else
-    {
-      rrtcb = nxsched_get_tcb(pid);
-      if (rrtcb == NULL)
+      if (interval != NULL)
         {
-          set_errno(ESRCH);
-          return ERROR;
+          if (pid == 0)
+            {
+              rrtcb = this_task();
+            }
+          else
+            {
+              rrtcb = nxsched_get_tcb(pid);
+            }
+
+          if (rrtcb != NULL)
+            {
+#if CONFIG_RR_INTERVAL > 0
+              /* The thread has a timeslice ONLY if it is
+               * configured for round-robin scheduling.
+               */
+
+              if ((rrtcb->flags & TCB_FLAG_POLICY_MASK) ==
+                  TCB_FLAG_SCHED_RR)
+                {
+                  /* Convert the timeslice value from ticks to a timespec */
+
+                  interval->tv_sec  =  CONFIG_RR_INTERVAL / MSEC_PER_SEC;
+                  interval->tv_nsec = (CONFIG_RR_INTERVAL % MSEC_PER_SEC) *
+                                      NSEC_PER_MSEC;
+                }
+              else
+#endif
+                {
+                  /* Return {0,0} meaning that the time slice is indefinite */
+
+                  interval->tv_sec  = 0;
+                  interval->tv_nsec = 0;
+                }
+            }
+          else
+            {
+              set_errno(ESRCH);
+              status = ERROR;
+            }
+        }
+      else
+        {
+          set_errno(EFAULT);
+          status = ERROR;
         }
     }
-
-  if (interval == NULL)
-    {
-      set_errno(EFAULT);
-      return ERROR;
-    }
-
-#if CONFIG_RR_INTERVAL > 0
-  /* The thread has a timeslice ONLY if it is configured for round-robin
-   * scheduling.
-   */
-
-  if ((rrtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
-    {
-      /* Convert the timeslice value from ticks to a timespec */
-
-      interval->tv_sec  =  CONFIG_RR_INTERVAL / MSEC_PER_SEC;
-      interval->tv_nsec = (CONFIG_RR_INTERVAL % MSEC_PER_SEC) *
-                          NSEC_PER_MSEC;
-    }
   else
-#endif
     {
-      /* Return {0,0} meaning that the time slice is indefinite */
-
-      interval->tv_sec  = 0;
-      interval->tv_nsec = 0;
+      set_errno(EINVAL);
+      status = ERROR;
     }
 
-  return OK;
+  return status;
 }

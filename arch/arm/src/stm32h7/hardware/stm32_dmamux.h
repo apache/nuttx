@@ -203,7 +203,9 @@
 
 /* Import DMAMUX map */
 
-#if defined(CONFIG_STM32H7_STM32H7X3XX)
+#if defined(CONFIG_STM32H7_STM32H7X0XX)
+#  include "hardware/stm32h7x3xx_dmamux.h"
+#elif defined(CONFIG_STM32H7_STM32H7X3XX)
 #  include "hardware/stm32h7x3xx_dmamux.h"
 #elif defined(CONFIG_STM32H7_STM32H7B3XX)
 #  include "hardware/stm32h7x3xx_dmamux.h"

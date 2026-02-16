@@ -179,9 +179,6 @@ int note_initialize(void);
 
 #endif /* defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT) */
 
-#if defined(CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE) && \
-    CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
-
 /****************************************************************************
  * Name: note_get_taskname
  *
@@ -190,17 +187,15 @@ int note_initialize(void);
  *
  * Input Parameters:
  *   PID - Task ID
+ *   buf - A writable buffer to hold the task name
+ *   len - The length of the buffer
  *
  * Returned Value:
- *   Return name if task name can be retrieved, otherwise NULL
+ *   Return name if task name can be retrieved, otherwise "<noname>"
  *
  ****************************************************************************/
 
-FAR const char *note_get_taskname(pid_t pid);
-
-#endif /* defined(CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE) && \
-        * CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
-        */
+FAR char *note_get_taskname(pid_t pid, FAR char *buf, size_t len);
 
 /****************************************************************************
  * Name: note_driver_register

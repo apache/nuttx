@@ -108,6 +108,11 @@ result.
 Semaphore does not support priority inheritance by default. If you need to
 use a semaphore as a mutex you need to change its default behavior.
 
+Each semaphore is assigned a default maximum value defined by SEM_VALUE_MAX.
+If ``CONFIG_CUSTOM_SEMAPHORE_MAXVALUE`` is enabled, applications may override this limit.
+In such cases, the function ``nxsem_setmaxvalue()`` can be used to specify a custom maximum value
+for an individual semaphore.
+
 In user space, it is recommended to use pthread_mutex instead of
 semaphore for resource protection
 

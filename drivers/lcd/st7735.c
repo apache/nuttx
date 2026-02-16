@@ -203,8 +203,10 @@ static void st7735_setarea(FAR struct st7735_dev_s *dev,
 static void st7735_bpp(FAR struct st7735_dev_s *dev, int bpp);
 static void st7735_wrram(FAR struct st7735_dev_s *dev,
                          FAR const uint16_t *buff, size_t size);
+#ifndef CONFIG_LCD_NOGETRUN
 static void st7735_rdram(FAR struct st7735_dev_s *dev,
                          FAR uint16_t *buff, size_t size);
+#endif
 static void st7735_fill(FAR struct st7735_dev_s *dev, uint16_t color);
 
 /* LCD Data Transfer Methods */
@@ -497,6 +499,7 @@ static void st7735_wrram(FAR struct st7735_dev_s *dev,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_LCD_NOGETRUN
 static void st7735_rdram(FAR struct st7735_dev_s *dev,
                          FAR uint16_t *buff, size_t size)
 {
@@ -506,6 +509,7 @@ static void st7735_rdram(FAR struct st7735_dev_s *dev,
   SPI_RECVBLOCK(dev->spi, buff, size);
   st7735_deselect(dev->spi);
 }
+#endif
 
 /****************************************************************************
  * Name: st7735_fill

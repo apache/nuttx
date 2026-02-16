@@ -33,7 +33,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_LITEX_CORE_VEXRISCV_SMP
+#if defined(CONFIG_LITEX_CORE_VEXRISCV_SMP) || defined(CONFIG_LITEX_CORE_VEXIIRISCV)
 #  define LITEX_PLIC_PRIORITY    (LITEX_PLIC_BASE + 0x000000)
 #  define LITEX_PLIC_PENDING1    (LITEX_PLIC_BASE + 0x001000)
 

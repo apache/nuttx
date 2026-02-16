@@ -28,7 +28,49 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip.h"
-#include "hardware/stm32_dts.h"
+#include <nuttx/sensors/sensor.h>      /* For struct sensor_lowerhalf_s */
+#include <nuttx/sensors/ioctl.h>       /* SNIOC_* if needed */
+#include <nuttx/uorb.h>               /* SENSOR_TYPE_AMBIENT_TEMPERATURE */
 
+#ifndef __ASSEMBLY__
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct stm32_dts_cal_s
+{
+  uint16_t fmt0;
+  uint16_t ramp;
+  float t0;
+};
+
+struct stm32_dts_cfg_s
+{
+  uint8_t samples;
+  bool lse;
+  uint32_t clk_frequency;
+};
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+int stm32h5_dts_register(int devno);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_STM32H5_STM32_DTS_H */

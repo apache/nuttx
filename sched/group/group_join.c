@@ -61,15 +61,15 @@
  *
  ****************************************************************************/
 
-void group_bind(FAR struct pthread_tcb_s *tcb)
+void group_bind(FAR struct tcb_s *tcb)
 {
   FAR struct tcb_s *ptcb = this_task();
 
-  DEBUGASSERT(ptcb && tcb && ptcb->group && !tcb->cmn.group);
+  DEBUGASSERT(ptcb && tcb && ptcb->group && !tcb->group);
 
   /* Copy the group reference from the parent to the child */
 
-  tcb->cmn.group = ptcb->group;
+  tcb->group = ptcb->group;
 }
 
 /****************************************************************************
@@ -89,21 +89,21 @@ void group_bind(FAR struct pthread_tcb_s *tcb)
  *
  ****************************************************************************/
 
-void group_join(FAR struct pthread_tcb_s *tcb)
+void group_join(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group;
   irqstate_t flags;
 
-  DEBUGASSERT(tcb && tcb->cmn.group);
+  DEBUGASSERT(tcb && tcb->group);
 
   /* Get the group from the TCB */
 
-  group = tcb->cmn.group;
+  group = tcb->group;
 
   /* Add the member to the group */
 
   flags = spin_lock_irqsave(&group->tg_lock);
-  sq_addfirst(&tcb->cmn.member, &group->tg_members);
+  sq_addfirst(&tcb->member, &group->tg_members);
   spin_unlock_irqrestore(&group->tg_lock, flags);
 }
 

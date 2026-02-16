@@ -33,7 +33,7 @@
 
 #include <arch/board/board.h>
 
-#include "rp23xx_pico.h"
+#include "rp23xx_common_pico.h"
 #include "rp23xx_common_bringup.h"
 
 #ifdef CONFIG_RP23XX_PWM

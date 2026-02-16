@@ -35,8 +35,9 @@
 #include <nuttx/net/udp.h>
 
 #include "devif/devif.h"
-#include "udp/udp.h"
 #include "socket/socket.h"
+#include "utils/utils.h"
+#include "udp/udp.h"
 
 /****************************************************************************
  * Public Functions
@@ -66,8 +67,6 @@ int udp_close(FAR struct socket *psock)
   int ret;
 
   /* Lock the network to avoid race conditions */
-
-  net_lock();
 
   conn = psock->s_conn;
   DEBUGASSERT(conn != NULL);
@@ -112,8 +111,10 @@ int udp_close(FAR struct socket *psock)
 
   if (conn->sndcb != NULL)
     {
+      conn_dev_lock(&conn->sconn, conn->dev);
       udp_callback_free(conn->dev, conn, conn->sndcb);
       conn->sndcb = NULL;
+      conn_dev_unlock(&conn->sconn, conn->dev);
     }
 #endif
 
@@ -121,7 +122,7 @@ int udp_close(FAR struct socket *psock)
 
   conn->crefs = 0;
   udp_free(psock->s_conn);
-  net_unlock();
+
   return OK;
 }
 

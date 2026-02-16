@@ -55,12 +55,26 @@
 #endif
 
 #include "esp_clk_tree.h"
+#include "esp_private/uart_share_hw_ctrl.h"
+#include "esp_private/esp_clk_tree_common.h"
 #include "hal/uart_hal.h"
+#include "soc/uart_periph.h"
 #include "soc/clk_tree_defs.h"
+#include "periph_ctrl.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_LP_UART
+#  define LP_UART_SRC_CLK_ATOMIC()    PERIPH_RCC_ATOMIC()
+#  define LP_UART_BUS_CLK_ATOMIC()    PERIPH_RCC_ATOMIC()
+#  define LP_UART_RXBUFSIZE           SOC_LP_UART_FIFO_LEN
+#  define LP_UART_TXBUFSIZE           SOC_LP_UART_FIFO_LEN
+#  define ESP_LP_UART0_ID             LP_UART_NUM_0
+#else
+#  define ESP_LP_UART0_ID             UART_NUM_MAX
+#endif
 
 /* The console is enabled and it's not the syslog device, so it should be a
  * serial device.
@@ -89,15 +103,22 @@
 #    define CONSOLE_DEV         g_uart1_dev  /* UART1 is console */
 #    define TTYS0_DEV           g_uart1_dev  /* UART1 is ttyS0 */
 #    define UART1_ASSIGNED      1
+#  elif defined(CONFIG_LPUART0_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_lp_uart0_dev  /* LPUART0 is console */
+#    define TTYS0_DEV           g_lp_uart0_dev  /* LPUART0 is ttyS0 */
+#    define LPUART0_ASSIGNED    1
 #  endif /* CONFIG_UART0_SERIAL_CONSOLE */
 #else /* No UART console */
 #  undef  CONSOLE_DEV
 #  if defined(CONFIG_ESPRESSIF_UART0)
-#    define TTYS0_DEV           g_uart0_dev  /* UART0 is ttyS0 */
+#    define TTYS0_DEV           g_uart0_dev   /* UART0 is ttyS0 */
 #    define UART0_ASSIGNED      1
 #  elif defined(CONFIG_ESPRESSIF_UART1)
-#    define TTYS0_DEV           g_uart1_dev  /* UART1 is ttyS0 */
+#    define TTYS0_DEV           g_uart1_dev   /* UART1 is ttyS0 */
 #    define UART1_ASSIGNED      1
+#  elif defined(CONFIG_ESPRESSIF_LP_UART0)
+#    define TTYS0_DEV           g_lp_uart0_dev /* LPUART0 is ttyS0 */
+#    define LPUART0_ASSIGNED    1
 #  endif
 #endif /* CONSOLE_UART */
 
@@ -114,6 +135,22 @@
 #elif defined(CONFIG_ESPRESSIF_UART1) && !defined(UART1_ASSIGNED)
 #  define TTYS1_DEV           g_uart1_dev  /* UART1 is ttyS1 */
 #  define UART1_ASSIGNED      1
+#elif defined(CONFIG_ESPRESSIF_LP_UART0) && !defined(LPUART0_ASSIGNED)
+#  define TTYS1_DEV           g_lp_uart0_dev  /* LPUART0 is ttyS1 */
+#  define LPUART0_ASSIGNED    1
+#endif
+
+/* Pick ttyS2 */
+
+#if defined(CONFIG_ESPRESSIF_UART0) && !defined(UART0_ASSIGNED)
+#  define TTYS2_DEV           g_uart0_dev  /* UART0 is ttyS2 */
+#  define UART0_ASSIGNED      1
+#elif defined(CONFIG_ESPRESSIF_UART1) && !defined(UART1_ASSIGNED)
+#  define TTYS2_DEV           g_uart1_dev  /* UART1 is ttyS2 */
+#  define UART1_ASSIGNED      1
+#elif defined(CONFIG_ESPRESSIF_LP_UART0) && !defined(LPUART0_ASSIGNED)
+#  define TTYS2_DEV           g_lp_uart0_dev  /* LPUART0 is ttyS2 */
+#  define LPUART0_ASSIGNED    1
 #endif
 
 #ifdef HAVE_UART_DEVICE
@@ -237,7 +274,46 @@ static uart_dev_t g_uart1_dev =
 
 #endif
 
+/* LP UART */
+
+#ifdef CONFIG_ESPRESSIF_LP_UART0
+
+static char g_lp_uart0_rxbuffer[LP_UART_RXBUFSIZE];
+static char g_lp_uart0_txbuffer[LP_UART_TXBUFSIZE];
+
+/* Fill only the requested fields */
+
+static uart_dev_t g_lp_uart0_dev =
+{
+#ifdef CONFIG_LPUART0_SERIAL_CONSOLE
+  .isconsole = true,
+#else
+  .isconsole = false,
+#endif
+  .xmit =
+    {
+      .size   = LP_UART_TXBUFSIZE,
+      .buffer = g_lp_uart0_txbuffer,
+    },
+  .recv =
+    {
+      .size   = LP_UART_RXBUFSIZE,
+      .buffer = g_lp_uart0_rxbuffer,
+    },
+
+  .ops = &g_uart_ops,
+  .priv = &g_lp_uart0_config
+};
+
+#endif
+
 #endif /* CONFIG_ESPRESSIF_UART */
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+extern uart_context_t g_uart_context[UART_NUM_MAX];
 
 /****************************************************************************
  * Private Functions
@@ -386,22 +462,51 @@ static void set_stop_length(const struct esp_uart_s *priv)
 static int esp_setup(uart_dev_t *dev)
 {
   struct esp_uart_s *priv = dev->priv;
+  soc_module_clk_t src_clk;
   uint32_t sclk_freq;
+  bool success = false;
 
   /* Enable the UART Clock */
 
-  esp_lowputc_enable_sysclk(priv);
+  esp_lowputc_uart_module_enable(priv);
 
-  esp_clk_tree_src_get_freq_hz((soc_module_clk_t)UART_SCLK_DEFAULT,
-                           ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED,
-                           &sclk_freq);
+  uart_hal_get_sclk(priv->hal, &src_clk);
+
+  esp_clk_tree_src_get_freq_hz(src_clk,
+                               ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED,
+                               &sclk_freq);
+
+  esp_os_enter_critical(&(g_uart_context[priv->id].spinlock));
 
   /* Initialize UART module */
+#ifdef CONFIG_ESPRESSIF_LP_UART
+  if (priv->id >= LP_UART_NUM_0)
+    {
+      /* Enable LP UART bus clock */
+
+      LP_UART_SRC_CLK_ATOMIC()
+        {
+          lp_uart_ll_enable_bus_clock(0, true);
+          lp_uart_ll_set_source_clk(priv->hal->dev, sclk_freq);
+          lp_uart_ll_sclk_enable(0);
+        }
+    }
+#endif
 
   uart_hal_init(priv->hal, priv->id);
+
   uart_hal_set_mode(priv->hal, UART_MODE_UART);
-  uart_hal_set_sclk(priv->hal, UART_SCLK_DEFAULT);
-  uart_hal_set_baudrate(priv->hal, priv->baud, sclk_freq);
+
+  if (priv->id < SOC_UART_HP_NUM)
+    {
+      esp_clk_tree_enable_src(UART_SCLK_XTAL, true);
+      HP_UART_SRC_CLK_ATOMIC()
+        {
+          uart_hal_set_sclk(priv->hal, UART_SCLK_XTAL);
+          success = uart_hal_set_baudrate(priv->hal, priv->baud, sclk_freq);
+        }
+    }
+
   uart_hal_set_parity(priv->hal, priv->parity);
   set_data_length(priv);
   set_stop_length(priv);
@@ -461,6 +566,13 @@ static int esp_setup(uart_dev_t *dev)
     }
   else
 #endif
+
+  esp_os_exit_critical(&(g_uart_context[priv->id].spinlock));
+
+  if (success == false)
+    {
+      return -EIO;
+    }
 
   /* Clear FIFOs */
 
@@ -522,24 +634,27 @@ static int esp_attach(uart_dev_t *dev)
 {
   struct esp_uart_s *priv = dev->priv;
   int ret;
+  int source;
 
   DEBUGASSERT(priv->cpuint == -ENOMEM);
 
   /* Set up to receive peripheral interrupts */
 
-  priv->cpuint = esp_setup_irq(priv->source, priv->int_pri,
+  source = uart_periph_signal[priv->id].irq;
+
+  priv->cpuint = esp_setup_irq(source, priv->int_pri,
                                ESP_IRQ_TRIGGER_LEVEL);
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, uart_handler, dev);
+  ret = irq_attach(ESP_SOURCE2IRQ(source), uart_handler, dev);
   if (ret == OK)
     {
-      up_enable_irq(priv->irq);
+      up_enable_irq(ESP_SOURCE2IRQ(source));
     }
   else
     {
-      up_disable_irq(priv->irq);
+      up_disable_irq(ESP_SOURCE2IRQ(source));
     }
 
   return ret;
@@ -564,17 +679,20 @@ static int esp_attach(uart_dev_t *dev)
 static void esp_detach(uart_dev_t *dev)
 {
   struct esp_uart_s *priv = dev->priv;
+  int source;
 
   DEBUGASSERT(priv->cpuint != -ENOMEM);
 
+  source = uart_periph_signal[priv->id].irq;
+
   /* Disable and detach the CPU interrupt */
 
-  up_disable_irq(priv->irq);
-  irq_detach(priv->irq);
+  up_disable_irq(ESP_SOURCE2IRQ(source));
+  irq_detach(ESP_SOURCE2IRQ(source));
 
   /* Disassociate the peripheral interrupt from the CPU interrupt */
 
-  esp_teardown_irq(priv->source, priv->cpuint);
+  esp_teardown_irq(source, priv->cpuint);
   priv->cpuint = -ENOMEM;
 }
 
@@ -1136,12 +1254,20 @@ void riscv_earlyserialinit(void)
   esp_lowputc_disable_all_uart_int(TTYS1_DEV.priv, NULL);
 #endif
 
+#ifdef TTYS2_DEV
+  esp_lowputc_disable_all_uart_int(TTYS2_DEV.priv, NULL);
+#endif
+
   /* Configure console in early step.
    * Setup for other serials will be performed when the serial driver is
    * open.
    */
 
-#ifdef CONSOLE_UART
+#if defined(CONSOLE_UART) && !defined(CONFIG_LPUART0_SERIAL_CONSOLE)
+  /* To use LPUART as console properly, device
+   * needs finish booting process completely
+   */
+
   esp_setup(&CONSOLE_DEV);
 #endif
 }
@@ -1166,6 +1292,13 @@ void riscv_earlyserialinit(void)
 void riscv_serialinit(void)
 {
 #ifdef HAVE_SERIAL_CONSOLE
+#  ifdef CONFIG_LPUART0_SERIAL_CONSOLE
+  /* To use LPUART as console properly, device
+   * needs finish booting process completely
+   */
+
+  esp_setup(&CONSOLE_DEV);
+#  endif
   uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 
@@ -1175,6 +1308,10 @@ void riscv_serialinit(void)
 
 #ifdef TTYS1_DEV
   uart_register("/dev/ttyS1", &TTYS1_DEV);
+#endif
+
+#ifdef TTYS2_DEV
+  uart_register("/dev/ttyS2", &TTYS2_DEV);
 #endif
 
 #ifdef CONFIG_ESPRESSIF_USBSERIAL

@@ -6,14 +6,6 @@
 if ARCH_X86_64
 comment "x86_64 Configuration Options"
 
-config ARCH
-	string
-	default "x86_64"
-
-choice
-	prompt "x86_64 arch selection"
-	default ARCH_INTEL64
-
 config ARCH_INTEL64
 	bool "Intel x86_64"
 	select ARCH_HAVE_MMU
@@ -43,13 +35,39 @@ config ARCH_INTEL64
 	---help---
 		Intel x86_64 architecture
 
+choice
+	prompt "x86_64 chip selection"
+	default ARCH_CHIP_INTEL64_QEMU
+
+config ARCH_CHIP_INTEL64_QEMU
+	bool "QEMU x86_64 chip"
+	select ARCH_INTEL64
+	---help---
+		Select this option when building NuttX to run on QEMU x86_64
+		virtual machine emulator. This configuration is primarily used
+		for development, testing, and debugging purposes. Choose this
+		if you plan to use 'qemu-system-x86_64' to run the NuttX image.
+
+config ARCH_CHIP_INTEL64
+	bool "Intel64 x86_64 chip"
+	select ARCH_INTEL64
+	---help---
+		Select this option when building NuttX to run on real Intel64
+		x86_64 hardware platforms. This includes modern Intel processors
+		with 64-bit architecture support. Choose this for physical Intel
+		servers, workstations, or embedded x86_64 systems. 
+
 config ARCH_CHIP_X86_64_CUSTOM
 	bool "Custom x86_64 chip"
-	select ARCH_CHIP_CUSTOM
 	---help---
 		Select this option if there is no directory for the chip under arch/x86_64/src/.
 
 endchoice
+
+config ARCH_CHIP
+	string
+	default "qemu"              if ARCH_CHIP_INTEL64_QEMU
+	default "intel64"           if ARCH_CHIP_INTEL64
 
 if SCHED_BACKTRACE
 choice
@@ -119,12 +137,11 @@ source "arch/x86_64/src/common/Kconfig"
 
 if ARCH_INTEL64
 source "arch/x86_64/src/intel64/Kconfig"
-
-config ARCH_CHIP
-	string
-	default "intel64"
-
 endif # ARCH_INTEL64
+
+if ARCH_CHIP_INTEL64_QEMU
+source "arch/x86_64/src/qemu/Kconfig"
+endif
 
 config ARCH_MULTIBOOT1
 	bool "Enable ELF32/Multiboot1"

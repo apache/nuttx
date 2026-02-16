@@ -126,6 +126,11 @@
 #define AN_MCP47X6_FIRST (AN_ADS1115_FIRST + AN_ADS1115_NCMDS)
 #define AN_MCP47X6_NCMDS 3
 
+/* See include/nuttx/analog/ads7046.h */
+
+#define AN_ADS7046_FIRST  (AN_MCP47X6_FIRST + AN_MCP47X6_NCMDS)
+#define AN_ADS7046_NCMDS  3
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

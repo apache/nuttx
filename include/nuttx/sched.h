@@ -42,10 +42,10 @@
 #include <nuttx/irq.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/event.h>
 #include <nuttx/queue.h>
 #include <nuttx/wdog.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/net/net.h>
 #include <nuttx/mm/map.h>
 #include <nuttx/tls.h>
 #include <nuttx/spinlock_type.h>
@@ -253,6 +253,9 @@ enum tstate_e
   TSTATE_TASK_INACTIVE,       /* BLOCKED      - Initialized but not yet activated */
   TSTATE_WAIT_SEM,            /* BLOCKED      - Waiting for a semaphore */
   TSTATE_WAIT_SIG,            /* BLOCKED      - Waiting for a signal */
+#ifdef CONFIG_SCHED_EVENTS
+  TSTATE_WAIT_EVENT,          /* BLOCKED      - Waiting for a event */
+#endif
 #if !defined(CONFIG_DISABLE_MQUEUE) || !defined(CONFIG_DISABLE_MQUEUE_SYSV)
   TSTATE_WAIT_MQNOTEMPTY,     /* BLOCKED      - Waiting for a MQ to become not empty. */
   TSTATE_WAIT_MQNOTFULL,      /* BLOCKED      - Waiting for a MQ to become not full. */
@@ -264,7 +267,8 @@ enum tstate_e
   TSTATE_TASK_STOPPED,        /* BLOCKED      - Waiting for SIGCONT */
 #endif
 
-  NUM_TASK_STATES             /* Must be last */
+  NUM_TASK_STATES,
+  TSTATE_SLEEPING = TSTATE_WAIT_SIG /* Map TSTATE_SLEEPING to TSTATE_WAIT_SIG */
 };
 
 typedef enum tstate_e tstate_t;
@@ -510,8 +514,10 @@ struct task_group_s
 
   /* POSIX Signal Control Fields ********************************************/
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   sq_queue_t tg_sigactionq;         /* List of actions for signals              */
   sq_queue_t tg_sigpendingq;        /* List of pending signals                  */
+#endif /* CONFIG_ENABLE_ALL_SIGNALS */
 #ifdef CONFIG_SIG_DEFAULT
   sigset_t tg_sigdefault;           /* Set of signals set to the default action */
 #endif
@@ -599,7 +605,7 @@ struct tcb_s
   start_t  start;                        /* Thread start function           */
   entry_t  entry;                        /* Entry Point into the thread     */
 
-  uint8_t  task_state;                   /* Current state of the thread     */
+  tstate_t task_state;                   /* Current state of the thread     */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
   uint8_t  boost_priority;               /* Boosted priority of the thread  */
@@ -649,19 +655,23 @@ struct tcb_s
 
   FAR void *waitobj;                     /* Object thread waiting on        */
 
+#ifdef CONFIG_SCHED_EVENTS
+  nxevent_mask_t expect;                 /* expected event mask */
+  nxevent_flags_t eflags;                /* event wait flags */
+#endif
+
   /* POSIX Signal Control Fields ********************************************/
 
-  sigset_t   sigprocmask;                /* Signals that are blocked        */
-  sigset_t   sigwaitmask;                /* Waiting for pending signals     */
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
+  sig_deliver_t sigdeliver;
   sq_queue_t sigpendactionq;             /* List of pending signal actions  */
   sq_queue_t sigpostedq;                 /* List of posted signals          */
+#endif /* CONFIG_ENABLE_ALL_SIGNALS*/
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+  sigset_t   sigprocmask;                /* Signals that are blocked        */
+  sigset_t   sigwaitmask;                /* Waiting for pending signals     */
   siginfo_t  *sigunbinfo;                /* Signal info when task unblocked */
-
-  /* Robust mutex support ***************************************************/
-
-#if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
-  FAR struct pthread_mutex_s *mhead;     /* List of mutexes held by thread  */
-#endif
+#endif /* !CONFIG_DISABLE_ALL_SIGNALS */
 
   /* CPU load monitoring support ********************************************/
 
@@ -691,17 +701,20 @@ struct tcb_s
   void   *crit_max_caller;               /* Caller of max critical section  */
 #endif
 
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0
+  clock_t busywait_start;                /* Time when thread busywait       */
+  clock_t busywait_max;                  /* Max time of busywait            */
+  clock_t busywait_total;                /* Total time of busywait          */
+  void   *busywait_caller;               /* Caller of busywait              */
+  void   *busywait_max_caller;           /* Caller of max busywait          */
+#endif
+
   /* State save areas *******************************************************/
 
   /* The form and content of these fields are platform-specific.            */
 
   struct xcptcontext xcp;                /* Interrupt register save area    */
 
-  /* The following function pointer is non-zero if there are pending signals
-   * to be processed.
-   */
-
-  sig_deliver_t sigdeliver;
 #if CONFIG_TASK_NAME_SIZE > 0
   char name[CONFIG_TASK_NAME_SIZE + 1];  /* Task name (with NUL terminator) */
 #endif
@@ -716,33 +729,6 @@ struct tcb_s
   size_t level_deepest;
   size_t level;
 #endif
-
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-  spinlock_t mutex_lock;
-#endif
-};
-
-/* struct task_tcb_s ********************************************************/
-
-/* This is the particular form of the task control block (TCB) structure used
- * by tasks (and kernel threads).  There are two TCB forms:  one for pthreads
- * and one for tasks.
- * Both share the common TCB fields (which must appear at the top of the
- * structure) plus additional fields unique to tasks and threads.
- * Having separate structures for tasks and pthreads adds some complexity,
- * but saves memory in that it prevents pthreads from being burdened with the
- * overhead required for tasks (and vice versa).
- */
-
-struct task_tcb_s
-{
-  /* Common TCB fields ******************************************************/
-
-  struct tcb_s cmn;                      /* Common TCB fields               */
-
-  /* Task Group *************************************************************/
-
-  struct task_group_s group;             /* Shared task group data          */
 };
 
 /* struct pthread_tcb_s *****************************************************/
@@ -757,12 +743,8 @@ struct task_tcb_s
  */
 
 #ifndef CONFIG_DISABLE_PTHREAD
-struct pthread_tcb_s
+struct pthread_entry_s
 {
-  /* Common TCB fields ******************************************************/
-
-  struct tcb_s cmn;                      /* Common TCB fields               */
-
   /* Task Management Fields *************************************************/
 
   pthread_trampoline_t trampoline;       /* User-space startup function     */
@@ -846,6 +828,11 @@ EXTERN clock_t g_preemp_max[CONFIG_SMP_NCPUS];
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
 EXTERN clock_t g_crit_max[CONFIG_SMP_NCPUS];
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 */
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0
+EXTERN clock_t g_busywait_max[CONFIG_SMP_NCPUS];
+EXTERN clock_t g_busywait_total[CONFIG_SMP_NCPUS];
+#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0 */
 
 /* g_running_tasks[] holds a references to the running task for each CPU.
  * It is valid only when up_interrupt_context() returns true.
@@ -1006,7 +993,7 @@ FAR struct fdlist *nxsched_get_fdlist(void);
  *
  ****************************************************************************/
 
-int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
+int nxtask_init(FAR struct tcb_s *tcb, const char *name, int priority,
                 FAR void *stack, uint32_t stack_size, main_t entry,
                 FAR char * const argv[], FAR char * const envp[],
                 FAR const posix_spawn_file_actions_t *actions);
@@ -1030,7 +1017,7 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
  *
  ****************************************************************************/
 
-void nxtask_uninit(FAR struct task_tcb_s *tcb);
+void nxtask_uninit(FAR struct tcb_s *tcb);
 
 /****************************************************************************
  * Name: nxtask_create
@@ -1166,9 +1153,9 @@ void nxtask_startup(main_t entrypt, int argc, FAR char *argv[]);
  *
  ****************************************************************************/
 
-FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr);
-pid_t nxtask_start_fork(FAR struct task_tcb_s *child);
-void nxtask_abort_fork(FAR struct task_tcb_s *child, int errcode);
+FAR struct tcb_s *nxtask_setup_fork(start_t retaddr);
+pid_t nxtask_start_fork(FAR struct tcb_s *child);
+void nxtask_abort_fork(FAR struct tcb_s *child, int errcode);
 
 /****************************************************************************
  * Name: nxtask_argvstr
@@ -1188,77 +1175,6 @@ void nxtask_abort_fork(FAR struct task_tcb_s *child, int errcode);
  ****************************************************************************/
 
 size_t nxtask_argvstr(FAR struct tcb_s *tcb, FAR char *args, size_t size);
-
-/****************************************************************************
- * Name: group_exitinfo
- *
- * Description:
- *   This function may be called to when a task is loaded into memory.  It
- *   will setup the to automatically unload the module when the task exits.
- *
- * Input Parameters:
- *   pid     - The task ID of the newly loaded task
- *   bininfo - This structure allocated with kmm_malloc().  This memory
- *             persists until the task exits and will be used unloads
- *             the module from memory.
- *
- * Returned Value:
- *   This is a NuttX internal function so it follows the convention that
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BINFMT_LOADABLE
-struct binary_s;  /* Forward reference */
-int group_exitinfo(pid_t pid, FAR struct binary_s *bininfo);
-#endif
-
-/****************************************************************************
- * Name: nxsched_resume_scheduler
- *
- * Description:
- *   Called by architecture specific implementations that block task
- *   execution.
- *   This function prepares the scheduler for the thread that is about to be
- *   restarted.
- *
- * Input Parameters:
- *   tcb - The TCB of the thread to be restarted.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SCHED_RESUMESCHEDULER)
-void nxsched_resume_scheduler(FAR struct tcb_s *tcb);
-#else
-#  define nxsched_resume_scheduler(tcb)
-#endif
-
-/****************************************************************************
- * Name: nxsched_suspend_scheduler
- *
- * Description:
- *   Called by architecture specific implementations to resume task
- *   execution.
- *   This function performs scheduler operations for the thread that is about
- *   to be suspended.
- *
- * Input Parameters:
- *   tcb - The TCB of the thread to be restarted.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SCHED_SUSPENDSCHEDULER
-void nxsched_suspend_scheduler(FAR struct tcb_s *tcb);
-#else
-#  define nxsched_suspend_scheduler(tcb)
-#endif
 
 /****************************************************************************
  * Name: nxsched_get_param
@@ -1759,6 +1675,126 @@ int nxsched_smp_call_single_async(int cpuid,
 int nxsched_smp_call_async(cpu_set_t cpuset,
                            FAR struct smp_call_data_s *data);
 #endif
+
+/****************************************************************************
+ * Name: nxsched_ticksleep
+ *
+ * Description:
+ *   The nxsched_ticksleep() function will cause the calling thread to be
+ *   suspended from execution for the specified number of system ticks.
+ *
+ *   It can only be resumed through scheduler operations.
+ *
+ * Input Parameters:
+ *   ticks - The number of system ticks to sleep.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxsched_ticksleep(unsigned int ticks);
+
+/****************************************************************************
+ * Name: nxsched_wakeup
+ *
+ * Description:
+ *   The nxsched_wakeup() function is used to wake up a task that is
+ *   currently in the sleeping state before its timeout expires.
+ *
+ *   This function can be used by internal scheduler logic or by
+ *   system-level components that need to resume a sleeping task early.
+ *
+ * Input Parameters:
+ *   tcb - Pointer to the TCB of the task to be awakened.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxsched_wakeup(FAR struct tcb_s *tcb);
+
+/****************************************************************************
+ * Name: nxsched_usleep
+ *
+ * Description:
+ *   The nxsched_usleep() function will cause the calling thread to be
+ *   suspended from execution for the specified number of microseconds.
+ *
+ *   It can only be resumed through scheduler.
+ *
+ * Input Parameters:
+ *   usec - The number of microseconds to sleep.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxsched_usleep(useconds_t usec);
+
+/****************************************************************************
+ * Name: nxsched_msleep
+ *
+ * Description:
+ *   The nxsched_msleep() function will cause the calling thread to be
+ *   suspended from execution for the specified number of milliseconds.
+ *
+ *   It can only be resumed through scheduler.
+ *
+ * Input Parameters:
+ *   msec - The number of milliseconds to sleep.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxsched_msleep(unsigned int msec);
+
+/****************************************************************************
+ * Name: nxsched_sleep
+ *
+ * Description:
+ *   The nxsched_sleep() function will cause the calling thread to be
+ *   suspended from execution for the specified number of seconds.
+ *
+ *   It can only be resumed through scheduler.
+ *
+ * Input Parameters:
+ *   sec - The number of seconds to sleep.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxsched_sleep(unsigned int sec);
+
+/****************************************************************************
+ * Name: nxsched_nanosleep
+ *
+ * Description:
+ *   Internal nanosleep implementation used by the scheduler. This function
+ *   converts the requested sleep interval into system ticks, performs a
+ *   tick-based blocking sleep, and optionally returns the remaining time if
+ *   the sleep is interrupted by a signal.
+ *
+ * Input Parameters:
+ *   rqtp - Requested sleep interval (may be NULL)
+ *   rmtp - If the rmtp argument is non-NULL, the timespec structure
+ *          referenced by it is updated to contain the amount of time
+ *          remaining.
+ *
+ * Returned Value:
+ *   Returns OK (0) on success.  Returns -EINVAL for an invalid timespec
+ *   argument and -EAGAIN for a zero-length timeout, as required by POSIX.
+ *
+ ****************************************************************************/
+
+int nxsched_nanosleep(FAR const struct timespec *rqtp,
+                      FAR struct timespec *rmtp);
 
 #undef EXTERN
 #if defined(__cplusplus)

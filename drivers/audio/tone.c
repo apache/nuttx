@@ -390,7 +390,7 @@ static void next_note(FAR struct tone_upperhalf_s *upper)
       ts.tv_sec = (time_t) sec;
       ts.tv_nsec = (unsigned long)nsec;
 
-      ONESHOT_START(upper->oneshot, oneshot_callback, upper, &ts);
+      ONESHOT_START(upper->oneshot, &ts);
 
       g_silence_length = 0;
       return;
@@ -524,7 +524,7 @@ static void next_note(FAR struct tone_upperhalf_s *upper)
           ts.tv_sec = (time_t) sec;
           ts.tv_nsec = (unsigned long)nsec;
 
-          ONESHOT_START(upper->oneshot, oneshot_callback, upper, &ts);
+          ONESHOT_START(upper->oneshot, &ts);
           return;
 
           /* Change tempo */
@@ -567,7 +567,7 @@ static void next_note(FAR struct tone_upperhalf_s *upper)
               ts.tv_sec = (time_t) sec;
               ts.tv_nsec = (unsigned long)nsec;
 
-              ONESHOT_START(upper->oneshot, oneshot_callback, upper, &ts);
+              ONESHOT_START(upper->oneshot, &ts);
 
               return;
             }
@@ -651,7 +651,7 @@ static void next_note(FAR struct tone_upperhalf_s *upper)
 
   /* And arrange a callback when the note should stop */
 
-  ONESHOT_START(upper->oneshot, oneshot_callback, upper, &ts);
+  ONESHOT_START(upper->oneshot, &ts);
   return;
 
   /* Tune looks bad (unexpected EOF, bad character, etc.) */
@@ -957,6 +957,9 @@ int tone_register(FAR const char *path, FAR struct pwm_lowerhalf_s *tone,
 #ifdef CONFIG_PWM_MULTICHAN
   upper->channel = (uint8_t)channel;
 #endif
+
+  upper->oneshot->callback = oneshot_callback;
+  upper->oneshot->arg = upper;
 
   /* Register the PWM device */
 

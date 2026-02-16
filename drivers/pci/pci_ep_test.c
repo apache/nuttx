@@ -542,9 +542,13 @@ static bool pci_ep_test_free_irq(FAR struct pci_ep_test_s *test)
 {
   up_disable_irq(test->irq);
   irq_detach(test->irq);
-  if (test->irq_type != PCI_EP_TEST_IRQ_TYPE_LEGACY)
+  if (test->irq_type >= PCI_EP_TEST_IRQ_TYPE_MSI)
     {
       pci_release_irq(test->pdev, &test->irq, 1);
+    }
+  else if (test->irq_type == PCI_EP_TEST_IRQ_TYPE_LEGACY)
+    {
+      pci_disable_irq(test->pdev);
     }
 
   return true;
@@ -624,6 +628,10 @@ static int pci_ep_test_alloc_irq(FAR struct pci_ep_test_s *test,
           pcierr("Failed to connect MSI %d\n", ret);
           return ret;
         }
+    }
+  else if (irq_type == PCI_EP_TEST_IRQ_TYPE_LEGACY)
+    {
+      pci_enable_irq(pdev, test->irq);
     }
 
   ret = irq_attach(test->irq, pci_ep_test_handler, test);

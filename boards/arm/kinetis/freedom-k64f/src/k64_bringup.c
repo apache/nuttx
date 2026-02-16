@@ -38,6 +38,13 @@
 #  include "kinetis_alarm.h"
 #endif
 
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
+
+#include <nuttx/spi/spi_transfer.h>
+
+#include "kinetis_spi.h"
 #include "freedom-k64f.h"
 
 #if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
@@ -61,6 +68,17 @@ int k64_bringup(void)
   struct rtc_lowerhalf_s *lower;
 #endif
 
+#ifdef HAVE_LEDS
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef HAVE_PROC
   /* Mount the proc filesystem */
 
@@ -79,6 +97,19 @@ int k64_bringup(void)
   /* Initialize I2C buses */
 
   k64_i2cdev_initialize();
+#endif
+
+#ifdef CONFIG_KINETIS_SPI0
+  struct spi_dev_s *spi0;
+  spi0 = kinetis_spibus_initialize(0);
+
+  if (!spi0)
+    {
+      syslog(LOG_ERR, "ERROR:FAILED to initialize SPI port 0\n");
+      return -ENODEV;
+    }
+
+  spi_register(spi0, 0);
 #endif
 
 #ifdef HAVE_MMCSD

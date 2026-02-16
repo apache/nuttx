@@ -149,7 +149,7 @@ static int signalfd_file_close(FAR struct file *filep)
 
   for (signo = MIN_SIGNO; signo <= MAX_SIGNO; signo++)
     {
-      if (nxsig_ismember(&dev->sigmask, signo))
+      if (nxsig_ismember(&dev->sigmask, signo) == 1)
         {
           signal(signo, SIG_DFL);
         }
@@ -195,7 +195,7 @@ static ssize_t signalfd_file_read(FAR struct file *filep,
   siginfo = (FAR struct signalfd_siginfo *)buffer;
   do
     {
-      ret = nxsig_waitinfo(&pendmask, &info);
+      ret = nxsig_timedwait(&pendmask, &info, NULL);
       if (ret < 0)
         {
           goto errout;
@@ -379,7 +379,7 @@ int signalfd(int fd, FAR const sigset_t *mask, int flags)
       dev = filep->f_priv;
       for (signo = MIN_SIGNO; signo <= MAX_SIGNO; signo++)
         {
-          if (nxsig_ismember(&dev->sigmask, signo))
+          if (nxsig_ismember(&dev->sigmask, signo) == 1)
             {
               signal(signo, SIG_DFL);
             }
@@ -394,7 +394,7 @@ int signalfd(int fd, FAR const sigset_t *mask, int flags)
   act.sa_user = dev;
   for (signo = MIN_SIGNO; signo <= MAX_SIGNO; signo++)
     {
-      if (nxsig_ismember(&dev->sigmask, signo))
+      if (nxsig_ismember(&dev->sigmask, signo) == 1)
         {
           nxsig_action(signo, &act, NULL, false);
         }

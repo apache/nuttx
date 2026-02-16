@@ -54,12 +54,6 @@ struct irq_thread_info_s
 };
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static pid_t g_irq_thread_pid[NR_IRQS];
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -67,13 +61,16 @@ static pid_t g_irq_thread_pid[NR_IRQS];
  * Useful for oneshot interrupts.
  */
 
-static int irq_default_handler(int irq, FAR void *regs, FAR void *arg)
+static int irq_thread_default_handler(int irq, FAR void *context,
+                                      FAR void *arg)
 {
   FAR struct irq_thread_info_s *info = arg;
   int ret = IRQ_WAKE_THREAD;
 
-  DEBUGASSERT(info->handler != NULL);
-  ret = info->handler(irq, regs, info->arg);
+  if (info->handler != NULL)
+    {
+      ret = info->handler(irq, context, info->arg);
+    }
 
   if (ret == IRQ_WAKE_THREAD)
     {
@@ -89,7 +86,7 @@ static int isr_thread_main(int argc, FAR char *argv[])
   int irq = atoi(argv[1]);
   xcpt_t isr = (xcpt_t)((uintptr_t)strtoul(argv[2], NULL, 16));
   xcpt_t isrthread = (xcpt_t)((uintptr_t)strtoul(argv[3], NULL, 16));
-  FAR void *arg = (FAR void *)((uintptr_t)strtoul(argv[4], NULL, 16));
+  FAR void *arg = (FAR char *)((uintptr_t)strtoul(argv[4], NULL, 16));
   struct irq_thread_info_s info;
   sem_t sem;
 
@@ -97,9 +94,9 @@ static int isr_thread_main(int argc, FAR char *argv[])
   info.arg = arg;
   info.handler = isr;
 
-  nxsem_init(&sem, 0, 0);
+  nxsem_init(&sem, 0, 0u);
 
-  irq_attach(irq, irq_default_handler, &info);
+  irq_attach(irq, irq_thread_default_handler, &info);
 
 #if !defined(CONFIG_ARCH_NOINTC)
   up_enable_irq(irq);
@@ -133,7 +130,7 @@ static int isr_thread_main(int argc, FAR char *argv[])
  *   irq - Irq num
  *   isr - Function to be called when the IRQ occurs, called in interrupt
  *   context.
- *   If isr is NULL the default handler is installed(irq_default_handler).
+ *   If isr is NULL, isrthread will be called.
  *   isrthread - called in thread context, If the isrthread is NULL,
  *   then the ISR is being detached.
  *   arg - privdate data
@@ -148,63 +145,56 @@ static int isr_thread_main(int argc, FAR char *argv[])
 int irq_attach_thread(int irq, xcpt_t isr, xcpt_t isrthread, FAR void *arg,
                       int priority, int stack_size)
 {
+  int ret = OK;
 #if NR_IRQS > 0
+  static pid_t irq_thread_pid[NR_IRQS];
+
   FAR char *argv[5];
   char arg1[32];  /* irq */
   char arg2[32];  /* isr */
   char arg3[32];  /* isrthread */
   char arg4[32];  /* arg */
   pid_t pid;
-  int ndx;
-
-  if ((unsigned)irq >= NR_IRQS)
-    {
-      return -EINVAL;
-    }
-
-  ndx = IRQ_TO_NDX(irq);
+  int ndx = IRQ_TO_NDX(irq);
   if (ndx < 0)
     {
-      return ndx;
+      ret = ndx;
     }
-
-  /* If the isrthread is NULL, then the ISR is being detached. */
-
-  if (isrthread == NULL)
+  else if(isrthread == NULL)
     {
+      /* If the isrthread is NULL, then the ISR is being detached. */
+
       irq_detach(irq);
-      DEBUGASSERT(g_irq_thread_pid[ndx] != 0);
-      kthread_delete(g_irq_thread_pid[ndx]);
-      g_irq_thread_pid[ndx] = 0;
-
-      return OK;
+      DEBUGASSERT(irq_thread_pid[ndx] != 0);
+      kthread_delete(irq_thread_pid[ndx]);
+      irq_thread_pid[ndx] = 0;
     }
-
-  if (g_irq_thread_pid[ndx] != 0)
+  else if(irq_thread_pid[ndx] != 0)
     {
-      return -EINVAL;
+      ret = -EINVAL;
     }
-
-  snprintf(arg1, sizeof(arg1), "%d", irq);
-  snprintf(arg2, sizeof(arg2), "%p", isr);
-  snprintf(arg3, sizeof(arg3), "%p", isrthread);
-  snprintf(arg4, sizeof(arg4), "%p", arg);
-  argv[0] = arg1;
-  argv[1] = arg2;
-  argv[2] = arg3;
-  argv[3] = arg4;
-  argv[4] = NULL;
-
-  pid = kthread_create("isr_thread", priority, stack_size,
-                        isr_thread_main, argv);
-  if (pid < 0)
+  else
     {
-      return pid;
+      snprintf(arg1, sizeof(arg1), "%d", irq);
+      snprintf(arg2, sizeof(arg2), "%p", isr);
+      snprintf(arg3, sizeof(arg3), "%p", isrthread);
+      snprintf(arg4, sizeof(arg4), "%p", arg);
+      argv[0] = arg1;
+      argv[1] = arg2;
+      argv[2] = arg3;
+      argv[3] = arg4;
+      argv[4] = NULL;
+
+      pid = kthread_create("isr_thread", priority, stack_size,
+                            isr_thread_main, argv);
+      if (pid < 0)
+        {
+          ret = pid;
+        }
+
+      irq_thread_pid[ndx] = pid;
     }
-
-  g_irq_thread_pid[ndx] = pid;
-
 #endif /* NR_IRQS */
 
-  return OK;
+  return ret;
 }

@@ -140,10 +140,39 @@ This configuration configures ADC1_IN3 and ADC1_IN10, which can be
 accessed at the CN9 A0 and A1 pins respectively. Modify
 nucleo-h563zi/src/stm32_adc.c to enable more channels.
 
+pwm:
+--------
+
+This configuration configures TIM1_CH1OUT, which can be
+accessed at pin D6 on the CN10 A0 connector. TIM1_CH1 is configured
+as a pwm output at /dev/pwm0, and can be tested with the example pwm
+application.
+
+adc_watchdog:
+--------------
+
+Test Procedure:
+
+1. Build and flash NuttX with the above Kconfig. Register /dev/adc0 via the board init.
+2. Start continuous conversions (DMA circular enabled) and run the adc example to sanity-check normal operation.
+3. Tie both CH3 and CH10 to GND → verified no AWD interrupts and ADC continues normally.
+4. Tie either CH3 or CH10 to 3.3 V with AWD1 set to “all channels” → ISR fires as expected; conversions continue; AWD1 IRQ is disabled by the ISR.
+5. Switch to single-channel AWD1.
+6. Select CH3: drive CH3 above the window → ISR fires; drive CH10 above the window → no ISR.
+7. Select CH10: mirror the above.
+8. Re-enable the watchdog interrupt using the driver IOCTL; confirm subsequent out-of-window events retrigger the ISR.
+
 usbnsh:
 --------
 
 This configuration provides a basic NuttShell through the USB User interface.
+
+dts:
+--------
+
+This configuration configures the digital temperature sensor (DTS) 
+at /dev/uorb/sensor_temp0 and provides the test application 
+sensortest. E.g. sensortest -n 10 temp0
 
 References
 ===========

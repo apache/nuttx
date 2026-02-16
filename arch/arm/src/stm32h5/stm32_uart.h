@@ -443,8 +443,7 @@
     defined(CONFIG_UART8_RXDMA)   || defined(CONFIG_UART9_RXDMA)  || \
     defined(CONFIG_USART10_RXDMA)  || defined(CONFIG_USART11_RXDMA) || \
     defined(CONFIG_USART12_RXDMA)
-#  define SERIAL_HAVE_DMA 0
-#  warning Serial DMA has not been implemented for STM32H5 chips.
+#  define SERIAL_HAVE_DMA 1
 #endif
 
 /* Is DMA used on the console UART? */

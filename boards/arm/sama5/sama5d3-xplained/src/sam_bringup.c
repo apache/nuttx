@@ -166,7 +166,7 @@ int sam_bringup(void)
         {
           /* Wait for mmc block driver to be registered. */
 
-          nxsig_sleep(1);
+          nxsched_sleep(1);
 
           /* Mount the volume on HSMCI0 */
 

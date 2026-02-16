@@ -2,7 +2,8 @@
  * include/nuttx/net/ethernet.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2007, 2009-2012, 2015 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2007, 2009-2012, 2015 Gregory Nutt. All rights
+ *                         reserved.
  * SPDX-FileCopyrightText: 2001-2003, Adam Dunkels. All rights reserved.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Adam Dunkels <adam@dunkels.com>
@@ -62,6 +63,16 @@
  */
 
 #define TPID_8021QVLAN   ETHERTYPE_VLAN
+
+/* These are some control information associated with QVLAN tagged
+ * Ethernet packets.
+ */
+
+#define VLAN_PRIO_MASK   0xe000 /* Priority Code Point */
+#define VLAN_PRIO_SHIFT  13
+#define VLAN_CFI_MASK    0x1000 /* Canonical Format Indicator / Drop Eligible Indicator */
+#define VLAN_VID_MASK    0x0fff /* VLAN Identifier */
+#define VLAN_N_VID       4096
 
 /* These are some of the types associated with QVLAN tagged
  * Ethernet packets.

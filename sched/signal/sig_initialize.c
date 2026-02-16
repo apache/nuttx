@@ -51,6 +51,12 @@ struct sigpool_s
  * Public Data
  ****************************************************************************/
 
+/* This is a pool of pre-allocated signal action structures buffers */
+
+#if CONFIG_SIG_PREALLOC_ACTIONS > 0
+sigactq_t  g_sigactions[CONFIG_SIG_PREALLOC_ACTIONS];
+#endif
+
 /* The g_sigfreeaction data structure is a list of available signal
  * action structures.
  */
@@ -93,6 +99,22 @@ static struct sigpool_s g_sigpool;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#if CONFIG_SIG_PREALLOC_ACTIONS > 0
+static void nxsig_init_signalactionblock(sq_queue_t *siglist,
+                                         FAR sigactq_t *sigact,
+                                         uint16_t nsigs)
+{
+  int i;
+
+  for (i = 0; i < nsigs; i++)
+    {
+      sq_addlast((FAR sq_entry_t *)sigact++, siglist);
+    }
+}
+#else
+#  define nxsig_init_signalactionblock(x, y, z)
+#endif
 
 /****************************************************************************
  * Name: nxsig_init_block
@@ -168,6 +190,9 @@ void nxsig_initialize(void)
   sq_init(&g_sigpendingsignal);
   sq_init(&g_sigpendingirqsignal);
 
+  nxsig_init_signalactionblock(&g_sigfreeaction,
+                               g_sigactions,
+                               CONFIG_SIG_PREALLOC_ACTIONS);
   sigpool = nxsig_init_block(&g_sigpendingaction, sigpool,
                              NUM_PENDING_ACTIONS, SIG_ALLOC_FIXED);
   sigpool = nxsig_init_block(&g_sigpendingirqaction, sigpool,

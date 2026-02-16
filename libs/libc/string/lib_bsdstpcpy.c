@@ -1,6 +1,9 @@
 /****************************************************************************
  * libs/libc/string/lib_bsdstpcpy.c
  *
+ * SPDX-License-Identifier: BSD
+ * SPDX-FileCopyrightText: 1994-2009  Red Hat, Inc. All rights reserved
+ *
  * Copyright (c) 1994-2009  Red Hat, Inc. All rights reserved.
  *
  * This copyrighted material is made available to anyone wishing to use,
@@ -61,7 +64,8 @@
  ****************************************************************************/
 
 #ifndef CONFIG_LIBC_ARCH_STPCPY
-#undef stpcpy /* See mm/README.txt */
+#undef stpcpy
+no_builtin("stpcpy")
 nosanitize_address
 FAR char *stpcpy(FAR char *dest, FAR const char *src)
 {

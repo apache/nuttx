@@ -61,7 +61,7 @@ void stm32_dfumode(void)
 {
 #ifdef CONFIG_DEBUG_WARN
   _warn("Entering DFU mode...\n");
-  nxsig_sleep(1);
+  nxsched_sleep(1);
 #endif
 
   asm("ldr r0, =0x40023844\n\t"    /* RCC_APB2ENR */

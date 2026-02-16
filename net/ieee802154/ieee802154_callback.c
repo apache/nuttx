@@ -33,6 +33,7 @@
 #include <nuttx/net/ieee802154.h>
 
 #include "devif/devif.h"
+#include "utils/utils.h"
 #include "ieee802154/ieee802154.h"
 
 #ifdef CONFIG_NET_IEEE802154
@@ -55,11 +56,11 @@
  *
  ****************************************************************************/
 
-uint16_t ieee802154_callback(FAR struct radio_driver_s *radio,
+uint32_t ieee802154_callback(FAR struct radio_driver_s *radio,
                              FAR struct ieee802154_conn_s *conn,
-                             uint16_t flags)
+                             uint32_t flags)
 {
-  ninfo("flags: %04x\n", flags);
+  ninfo("flags: %" PRIx32 "\n", flags);
 
   /* Some sanity checking */
 
@@ -67,7 +68,9 @@ uint16_t ieee802154_callback(FAR struct radio_driver_s *radio,
     {
       /* Perform the callback */
 
+      conn_lock(&conn->sconn);
       flags = devif_conn_event(&radio->r_dev, flags, conn->sconn.list);
+      conn_unlock(&conn->sconn);
     }
 
   return flags;

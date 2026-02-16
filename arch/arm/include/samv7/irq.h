@@ -65,7 +65,7 @@
 
 #define SAM_IRQ_EXTINT        (16) /* Vector number of the first external interrupt */
 
-#if defined(CONFIG_ARCH_CHIP_SAMV71)
+#if defined(CONFIG_ARCH_CHIP_SAMV71) || defined(CONFIG_ARCH_CHIP_PIC32CZCA70)
 #  include <arch/samv7/samv71_irq.h>
 #elif defined(CONFIG_ARCH_CHIP_SAME70)
 #  include <arch/samv7/same70_irq.h>

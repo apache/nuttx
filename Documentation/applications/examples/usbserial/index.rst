@@ -6,7 +6,7 @@ Target configuration
 --------------------
 
 This is another implementation of "Hello, World" but this one uses a USB serial
-driver. Configuration options can be used to simply the test. These options
+driver. Configuration options can be used to simplify the test. These options
 include:
 
 -  ``CONFIG_EXAMPLES_USBSERIAL_INONLY`` – Only verify IN (device-to-host) data
@@ -66,5 +66,5 @@ This will generate a small program called ``host``. Usage:
      (for the PL2303 emulation) or ``/dev/ttyACM0`` (for the CDC/ACM serial
      device).
 
-The host and target will exchange are variety of very small and very large
+The host and target will exchange a variety of very small and very large
 serial messages.

@@ -150,20 +150,6 @@ void arp_out(FAR struct net_driver_s *dev)
       return;
     }
 
-#if defined(CONFIG_NET_PKT) || defined(CONFIG_NET_ARP_SEND)
-  /* Skip sending ARP requests when the frame to be transmitted was
-   * written into a packet socket.
-   */
-
-  if (IFF_IS_NOARP(dev->d_flags))
-    {
-      /* Clear the indication and let the packet continue on its way. */
-
-      IFF_CLR_NOARP(dev->d_flags);
-      return;
-    }
-#endif
-
   /* Find the destination IP address in the ARP table and construct
    * the Ethernet header. If the destination IP address isn't on the
    * local network, we use the default router's IP address instead.
@@ -238,6 +224,12 @@ void arp_out(FAR struct net_driver_s *dev)
 
       net_ipv4addr_copy(ipaddr, dev->d_draddr);
 #endif
+
+      if (ipaddr == INADDR_ANY)
+        {
+          dev->d_len = 0;
+          return;
+        }
     }
 
   /* The destination address is on the local network.  Check if it is
@@ -265,7 +257,42 @@ void arp_out(FAR struct net_driver_s *dev)
   ret = arp_find(ipaddr, ethaddr.ether_addr_octet, dev);
   if (ret < 0)
     {
+      /* No send ARP if the interface forbidden */
+
+      if (IFF_IS_NOARP(dev->d_flags) || ret == -ENETUNREACH)
+        {
+          ninfo("ARP not supported on %s, no send!\n", dev->d_ifname);
+          dev->d_len = 0;
+          return;
+        }
+
       ninfo("ARP request for IP %08lx\n", (unsigned long)ipaddr);
+
+      if (ret == -EINPROGRESS)
+        {
+          /* The destination address was not in our ARP table, and
+           * the last arp request is in progress, directly drop the packet
+           * to prevent arp flood.
+           */
+
+#ifdef CONFIG_NET_ARP_SEND_QUEUE
+          arp_queue_iob(dev, ipaddr, dev->d_iob);
+          netdev_iob_clear(dev);
+#else
+          dev->d_len = 0;
+#endif
+          return;
+        }
+
+      /* MAC address marked with all zeros to limit concurrent task
+       * send ARP request for same destination.
+       */
+
+      arp_update(dev, ipaddr, NULL, 0);
+#ifdef CONFIG_NET_ARP_SEND_QUEUE
+      arp_queue_iob(dev, ipaddr, dev->d_iob);
+      netdev_iob_clear(dev);
+#endif
 
       /* The destination address was not in our ARP table, so we overwrite
        * the IP packet with an ARP request.

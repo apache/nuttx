@@ -1,11 +1,89 @@
-=====================
-``/tools`` Host Tools
-=====================
+==========
+Host Tools
+==========
 
-This page discusses the contents of the NuttX tools/ directory.
+This page discusses the ``tools/`` directory containing miscellaneous scripts
+and host C programs that are important parts of the NuttX build system:
 
-The tools/ directory contains miscellaneous scripts and host C programs
-that are necessary parts of the NuttX build system.
+.. contents::
+    :local:
+    :backlinks: entry
+    :depth: 2
+
+abi_check.py
+------------
+
+``abi_check.py`` is a Python tool for checking binary compatibility based on
+DWARF debug information.
+
+It supports three related workflows:
+
+1. Given one or more static libraries (``.a``) and an ELF file, collect the
+   undefined (external) symbols referenced by the libraries, locate those
+   functions in the ELF file, and write their function signatures to a JSON
+   file.
+2. Generate two JSON files from two different ELF files (for example, an old
+   build and a new build), and compare the signatures of functions with the
+   same name (return type, parameters, and for structs also size, member
+   offsets, member types, etc.).
+3. Given a single ELF file, detect structs with the same name but different
+   members.
+
+Prerequisites:
+
+- Python 3
+- ``pyelftools`` (used to read ELF/DWARF)
+- ``ar`` (used to extract object files from ``.a`` archives)
+- ``pahole`` (only for ``--struct_check``)
+
+.. note::
+
+   Although the help text mentions ``.so``, the current implementation uses
+   ``ar x`` on each ``--lib`` input, so it expects ``.a`` archives.
+
+Help message::
+
+  $ python3 tools/abi_check.py -h
+  usage: abi_check.py [-h] [-a LIB [LIB ...]] [-e ELF] [-c] [-d] [-j JSON] [-s]
+                      [-i INPUT_JSON INPUT_JSON]
+
+  This tool is used to check the binary compatibility of static libraries and has the following features:
+      1. The input consists of multiple static libraries and an ELF file. The tool searches
+         for external APIs used by the static libraries, then locates these API function signatures
+         in the ELF file, and outputs the results as a JSON file.
+      2. Using the first feature, with the static libraries unchanged,
+         the tool can take a new ELF file and an old ELF file as input, output two JSON files,
+         and compare the function signatures of functions with the same name in the two JSON files.
+         The comparison includes return values, parameters, and if they are structures,
+         it also compares the structure size, member offsets, member types, etc.
+      3.When the input is a single ELF file, the tool can check if structures with the same name have different members.
+
+  options:
+    -h, --help            show this help message and exit
+    -a LIB [LIB ...], --lib LIB [LIB ...]
+                          Path to liba.so or lib.a
+    -e ELF, --elf ELF     Path to elf file
+    -c, --check           If the static library contains debug information,
+                          try to find the function in the static library,
+                          and output the result to lib_<json> file
+    -d, --dump            Dump result
+    -j JSON, --json JSON  Save result to json file
+    -s, --struct_check    Dump struct different
+    -i INPUT_JSON INPUT_JSON, --input_json INPUT_JSON INPUT_JSON
+                          Diff two json files
+
+Examples::
+
+  # 1) Extract signatures for external APIs referenced by one or more archives
+  $ python3 tools/abi_check.py -a libfoo.a libbar.a -e nuttx -j out.json
+
+  # 2) Compare signatures across two ELF files
+  $ python3 tools/abi_check.py -a libfoo.a libbar.a -e nuttx_old -j old.json
+  $ python3 tools/abi_check.py -a libfoo.a libbar.a -e nuttx_new -j new.json
+  $ python3 tools/abi_check.py -i old.json new.json
+
+  # 3) Find struct definition mismatches within a single ELF
+  $ python3 tools/abi_check.py -e nuttx -s
 
 cmpconfig.c
 -----------
@@ -13,18 +91,47 @@ cmpconfig.c
 This C file can be used to build a utility for comparing two NuttX
 configuration files.
 
-Config.mk
----------
+checkkconfig.py
+---------------
 
-Config.mk contains common definitions used by many configuration files.
-This file (along with <nuttx>/.config) must be included at the top of
-each configuration-specific Make.defs file like::
+``checkkconfig.py`` is a Python script that simulates the effects of modifying a CONFIG item.
+It can be used to check whether my config changes are what I expected.
 
-    include $(TOPDIR)/.config
-    include $(TOPDIR)/tools/Config.mk
+Help message::
 
-Subsequent logic within the configuration-specific Make.defs file may then
-override these default definitions as necessary.
+  $ tools/checkkconfig.py -h
+  usage: checkkconfig.py [-h] -f FILE (-s CONFIG VALUE | -d DIFF)
+
+  optional arguments:
+    -h, --help            show this help message and exit
+    -f FILE, --file FILE  Path to the input defconfig file
+    -s CONFIG_XXX VALUE, --single CONFIG VALUE
+                          Analyze single change: CONFIG_NAME y/m/n
+    -d DIFF, --diff DIFF  Analyze changes from diff file
+
+  example: ./tools/checkkconfig.py -f defconfig -s ELF n
+
+  outputs:
+  Change report for ELF=n
+  Config Option                            Old                  New
+  ----------------------------------------------------------------------
+  BINFMT_LOADABLE                          y                    n
+  ELF                                      y                    n
+  ELF_STACKSIZE                            8192                 <unset>
+  LIBC_ARCH_ELF                            y                    n
+  LIBC_MODLIB                              y                    n
+  MODLIB_ALIGN_LOG2                        2                    <unset>
+  MODLIB_BUFFERINCR                        32                   <unset>
+  MODLIB_BUFFERSIZE                        32                   <unset>
+  MODLIB_MAXDEPEND                         2                    <unset>
+  MODLIB_RELOCATION_BUFFERCOUNT            256                  <unset>
+  MODLIB_SYMBOL_CACHECOUNT                 256                  <unset>
+
+As we can see, we can clearly know that
+if I turn off ELF in defconfig at this time,
+it will bring about the following configuration linkage changes
+
+It can also parse diff files, which can be used to check the changes of multiple configs.
 
 checkpatch.sh
 -------------
@@ -740,6 +847,8 @@ these problems::
      -   option env="APPSDIR"
      +   default "../apps"
 
+.. _build_system_linking:
+
 link.sh, link.bat, copydir.sh, copydir.bat, unlink.sh, and unlink.bat
 ---------------------------------------------------------------------
 
@@ -780,6 +889,8 @@ this case.  link.bat will attempt to create a symbolic link using the
 NTFS mklink.exe command instead of copying files.  That logic, however,
 has not been verified as of this writing.
 
+.. _makefile_host:
+
 Makefile.host
 -------------
 
@@ -800,6 +911,8 @@ may be mounted under /etc in the NuttX pseudo file system.
 
 TIP: Edit the resulting header file and mark the generated data values
 as 'const' so that they will be stored in FLASH.
+
+.. _mkdeps:
 
 mkdeps.c, cnvwindeps.c, mkwindeps.sh, and mknulldeps.sh
 -------------------------------------------------------
@@ -850,6 +963,28 @@ General usage:
 This has been tested on the SAMA5D3-Xplained board; see
 `Documentation/platforms/arm/sama5/boards/sama5d3-xplained/README.txt`
 for more information on how to configure the CDC ECM driver for that board.
+
+nxtagspkgsfetch.sh
+------------------
+
+This script downloads all NuttX RTOS and Application snapshot packages
+from the upstream git repository based on the provided git tags list.
+These are NOT official release packages as checksum will differ.
+When launched from the local NuttX git repository clone the script will
+obtain all available tags to be downloaded, otherwise list of tags needs
+to be provided manually (or when just selected tag is required).
+This script uses ``wget`` underneath, make sure this tool is installed.
+Fetch log file is created with a timestamp in name next to the packages.
+
+Having all tags packaged is important for changes comparison
+between specific versions, testing a specific version, compatibility
+checks, searching for a feature introduction timeline, etc.
+
+Usage: ``./nxtagspkgsfetch.sh [download_path] [tags_list_space_separated]``
+
+You can provide optional download path (default ``../../nuttx-packages``)
+and tags list to get packages for (default all tags from local git clone).
+When providing tags you also need to provide download path.
 
 refresh.sh
 ----------
@@ -1167,6 +1302,18 @@ Binaries for both Windows and Linux are available at:
     https://sourceforge.net/projects/uncrustify/files/
 
 See also indent.sh and nxstyle.c
+
+parsetrace.py
+-------------
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   parsetrace
+
+``parsetrace.py`` is a Python script for parsing and converting NuttX trace
+logs. See dedicated :doc:`parsetrace` section for details.
 
 zds
 ---

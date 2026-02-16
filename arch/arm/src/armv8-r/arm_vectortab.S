@@ -40,7 +40,9 @@
 	.eabi_attribute Tag_ABI_align_preserved, 1
 #endif
 
+#ifndef __ghs__
 	.syntax	unified
+#endif
 	.arm
 
 	.globl		_sys_vector_start
@@ -110,13 +112,13 @@ _sys_vector_end:
 
 _hyp_vector_start:
 	ldr		pc, .Lhypresethandler	/* 0x00: Reset */
-	b		$+0x0					/* 0x04: Undefined instruction */
-	b		$+0x0					/* 0x08: Software interrupt */
-	b		$+0x0					/* 0x0c: Prefetch abort */
-	b		$+0x0					/* 0x10: Data abort */
-	b		$+0x0					/* 0x14: Address exception (reserved) */
-	b		$+0x0					/* 0x18: IRQ */
-	b		$+0x0					/* 0x1c: FIQ */
+	b		.					/* 0x04: Undefined instruction */
+	b		.					/* 0x08: Software interrupt */
+	b		.					/* 0x0c: Prefetch abort */
+	b		.					/* 0x10: Data abort */
+	b		.					/* 0x14: Address exception (reserved) */
+	b		.					/* 0x18: IRQ */
+	b		.					/* 0x1c: FIQ */
 
 	.globl	__start
 

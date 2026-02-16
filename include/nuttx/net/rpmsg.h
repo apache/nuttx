@@ -33,7 +33,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NET_RPMSG_EPT_NAME              "rpmsg-%s"
+#define NET_RPMSG_EPT_PREFIX            "rpmsg-net-"
 
 #define NET_RPMSG_IFUP                  0 /* IP-->LINK */
 #define NET_RPMSG_IFDOWN                1 /* IP-->LINK */
@@ -42,6 +42,10 @@
 #define NET_RPMSG_DEVIOCTL              4 /* IP-->LINK */
 #define NET_RPMSG_SOCKIOCTL             5 /* IP<--LINK */
 #define NET_RPMSG_TRANSFER              6 /* IP<->LINK */
+
+#define NET_RPMSG_RESPONSE              (1 << 31)
+#define NET_RPMSG_IS_RESPONSE(cmd)      (!!((cmd) & NET_RPMSG_RESPONSE))
+#define NET_RPMSG_GET_COMMAND(cmd)      ((cmd) & ~NET_RPMSG_RESPONSE)
 
 /****************************************************************************
  * Public Types

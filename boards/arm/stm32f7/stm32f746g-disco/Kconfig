@@ -17,4 +17,8 @@ config STM32F746GDISCO_FLASH
 	---help---
 		Configures an MTD device for use with the onboard flash
 
+config STM32F746GDISCO_TOUCHSCREEN_SWAPXY
+	bool "STM32F746G DISCO Touchscreen sway X/Y"
+	depends on INPUT_TOUCHSCREEN
+
 endif # ARCH_BOARD_STM32F746G_DISCO

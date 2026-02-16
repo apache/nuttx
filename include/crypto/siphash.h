@@ -75,20 +75,20 @@ typedef struct
 
 void siphash_init(FAR SIPHASH_CTX *, FAR const SIPHASH_KEY *);
 void siphash_update(FAR SIPHASH_CTX *, int, int, FAR const void *, size_t);
-uint64_t siphash_end(FAR SIPHASH_CTX *, int, int);
+uint64_t siphash_finish(FAR SIPHASH_CTX *, int, int);
 void siphash_final(FAR void *, FAR SIPHASH_CTX *, int, int);
 uint64_t siphash(FAR const SIPHASH_KEY *,
                  int, int, FAR const void *, size_t);
 
 #define SipHash24_Init(_c, _k)        siphash_init((_c), (_k))
 #define SipHash24_Update(_c, _p, _l)  siphash_update((_c), 2, 4, (_p), (_l))
-#define SipHash24_End(_d)             siphash_end((_d), 2, 4)
+#define SipHash24_Finish(_d)          siphash_finish((_d), 2, 4)
 #define SipHash24_Final(_d, _c)       siphash_final((_d), (_c), 2, 4)
 #define SipHash24(_k, _p, _l)         siphash((_k), 2, 4, (_p), (_l))
 
 #define SipHash48_Init(_c, _k)        siphash_init((_c), (_k))
 #define SipHash48_Update(_c, _p, _l)  siphash_update((_c), 4, 8, (_p), (_l))
-#define SipHash48_End(_d)             siphash_end((_d), 4, 8)
+#define SipHash48_Finish(_d)          siphash_finish((_d), 4, 8)
 #define SipHash48_Final(_d, _c)       siphash_final((_d), (_c), 4, 8)
 #define SipHash48(_k, _p, _l)         siphash((_k), 4, 8, (_p), (_l))
 

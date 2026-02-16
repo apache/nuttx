@@ -102,13 +102,12 @@ void irq_dispatch(int irq, FAR void *context)
 #endif
   xcpt_t vector = irq_unexpected_isr;
   FAR void *arg = NULL;
-  unsigned int ndx = irq;
+  int ndx = IRQ_TO_NDX(irq);
 
 #if NR_IRQS > 0
-  if ((unsigned)irq < NR_IRQS)
+  if (ndx >= 0)
     {
 #ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
-      ndx = g_irqmap[irq];
       if (ndx < CONFIG_ARCH_NUSER_INTERRUPTS)
         {
           if (g_irqvector[ndx].handler)
@@ -156,5 +155,11 @@ void irq_dispatch(int irq, FAR void *context)
     {
       kmm_checkcorruption();
     }
+#endif
+
+#if defined(CONFIG_STACKCHECK_MARGIN) && (CONFIG_STACKCHECK_MARGIN > 0) && \
+    defined(CONFIG_ARCH_INTERRUPTSTACK) && (CONFIG_ARCH_INTERRUPTSTACK > 0)
+    DEBUGASSERT(up_check_intstack(this_cpu(),
+                                  CONFIG_STACKCHECK_MARGIN) == 0);
 #endif
 }

@@ -5,7 +5,7 @@ Raspberry Pi Pico
 .. tags:: chip:rp2040
 
 The `Raspberry Pi Pico <https://www.raspberrypi.com/products/raspberry-pi-pico/>`_ is a general purpose board supplied by
-the Raspberry Pi Foundation.
+Raspberry Pi.
 
 .. figure:: RaspberryPiPico.png
    :align: center
@@ -48,34 +48,34 @@ Pad   Signal     Notes
 ===== ========== ==========
 1     GPIO0      Default TX for UART0 serial console
 2     GPIO1      Default RX for UART0 serial console
-3     Ground                                         
-4     GPIO2                                          
-5     GPIO3                                          
+3     Ground
+4     GPIO2
+5     GPIO3
 6     GPIO4      Default SDA for I2C0
 7     GPIO5      Default SCL for I2C0
-8     Ground                                         
+8     Ground
 9     GPIO6      Default SDA for I2C1
 10    GPIO7      Default SCL for I2C1
 11    GPIO8      Default RX for SPI1
 12    GPIO9      Default CSn for SPI1
-13    Ground                                         
+13    Ground
 14    GPIO10     Default SCK for SPI1
 15    GPIO11     Default TX for SPI1
-16    GPIO12                                         
-17    GPIO13                                         
-18    Ground                                         
-19    GPIO14                                         
-20    GPIO15                                         
+16    GPIO12
+17    GPIO13
+18    Ground
+19    GPIO14
+20    GPIO15
 21    GPIO16     Default RX for SPI0
 22    GPIO17     Default CSn for SPI0
-23    Ground                                         
+23    Ground
 24    GPIO18     Default SCK for SPI0
 25    GPIO19     Default TX for SPI0
 26    GPIO20     Default TX for UART1 serial console
 27    GPIO21     Default RX for UART1 serial console
-28    Ground                                         
-29    GPIO22                                         
-30    Run                                            
+28    Ground
+29    GPIO22
+30    Run
 31    GPIO26     ADC0
 32    GPIO27     ADC1
 33    AGND       Analog Ground
@@ -83,7 +83,7 @@ Pad   Signal     Notes
 35    ADC_VREF   Analog reference voltage
 36    3V3        Power output to peripherals
 37    3V3_EN     Pull to ground to turn off.
-38    Ground                                         
+38    Ground
 39    VSYS       +5V Supply to board
 40    VBUS       Connected to USB +5V
 ===== ========== ==========
@@ -132,6 +132,34 @@ the ``nuttx`` directory (again, consult the main :doc:`RP2040 documentation
 .. code:: console
 
    $ ./tools/configure.sh raspberrypi-pico:<configname>
+
+ads7046
+-------
+
+NuttShell configuration (console enabled in USB Port, at 115200 bps) with support for Texas Instruments ADS7046 ADC:
+
+.. list-table:: ADS7046 connections
+   :widths: auto
+   :header-rows: 1
+
+   * - ADS7046
+     - Raspberry Pi Pico
+   * - GND
+     - GND (Pin 3 or 38 or ...)
+   * - DVDD
+     - 3V3 OUT (Pin 36)
+   * - SCLK
+     - GP10 (SPI1 SCK) (Pin 14)
+   * - CS
+     - GP13 (SPI1 CSn) (Pin 17)
+   * - SDO
+     - GP12 (SPI1 RX) (Pin 16)
+
+.. code-block:: console
+
+   nsh> ads7046
+   ADS7046: hex=106, dec=262, adc_percentage=6%
+   nsh>
 
 audiopack
 ---------
@@ -217,7 +245,7 @@ LCD1602 Segment LCD Display (I2C).
    :widths: auto
    :header-rows: 1
 
-   * - PCF8574 BackPack 
+   * - PCF8574 BackPack
      - Raspberry Pi Pico
    * - GND
      - GND (Pin 3 or 38 or ...)
@@ -263,7 +291,7 @@ card support enabled.
 
    * - SD card slot
      - Raspberry Pi Pico
-   * - DAT2          
+   * - DAT2
      - Not connected
    * - DAT3/CS
      - GP17 (SPI0 CSn) (Pin 22)
@@ -277,7 +305,7 @@ card support enabled.
      - GND (Pin 3 or 38 or ...)
    * - DAT0/DO
      - GP16 (SPI0 RX)  (Pin 21)
-   * - DAT1          
+   * - DAT1
      - Not connected
 
 Card hot swapping is not supported.
@@ -300,7 +328,7 @@ for SSD1306 OLED display (I2C) test configuration.
      - 3V3 OUT (Pin 36)
    * - SDA
      - GP4 (I2C0 SDA) (Pin 6)
-   * - SCL   
+   * - SCL
      - GP5 (I2C0 SCL) (Pin 7)
 
 st7735
@@ -331,6 +359,34 @@ ST7735 SPI LCD.
      - GP11 (Pin 15)
    * - RESET
      - GP10 (Pin 14)
+
+tmp112
+------
+
+NuttShell configuration (console enabled in USB Port, at 115200 bps) with support for Texas Instruments TMP112 sensor:
+
+.. list-table:: TMP112 connections
+   :widths: auto
+   :header-rows: 1
+
+   * - TMP112
+     - Raspberry Pi Pico
+   * - GND
+     - GND (Pin 3 or 38 or ...)
+   * - VCC
+     - 3V3 OUT (Pin 36)
+   * - SDA
+     - GP4 (I2C0 SDA) (Pin 6)
+   * - SCL
+     - GP5 (I2C0 SCL) (Pin 7)
+   * - ADD0
+     - GND (Pin 3 or 38 or ...)
+
+.. code-block:: console
+
+   nsh> tmp112
+   Sensor #1 = 27.688 degrees Celsius
+   nsh>
 
 usbmsc
 ------

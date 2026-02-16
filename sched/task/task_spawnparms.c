@@ -146,7 +146,7 @@ static inline int nxspawn_open(FAR struct tcb_s *tcb,
 int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
 {
   struct sched_param param;
-  int ret;
+  int ret = OK;
 
   DEBUGASSERT(attr);
 
@@ -157,7 +157,8 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
 
   /* Firstly, set the signal mask if requested to do so */
 
-  if ((attr->flags & POSIX_SPAWN_SETSIGMASK) != 0)
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+  if ((attr->flags & POSIX_SPAWN_SETSIGMASK) != 0u)
     {
       FAR struct tcb_s *tcb = nxsched_get_tcb(pid);
       if (tcb)
@@ -165,12 +166,13 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
           tcb->sigprocmask = attr->sigmask;
         }
     }
+#endif
 
   /* If we are only setting the priority, then call sched_setparm()
    * to set the priority of the of the new task.
    */
 
-  if ((attr->flags & POSIX_SPAWN_SETSCHEDPARAM) != 0)
+  if ((attr->flags & POSIX_SPAWN_SETSCHEDPARAM) != 0u)
     {
 #ifdef CONFIG_SCHED_SPORADIC
       /* Get the current sporadic scheduling parameters.  Those will not be
@@ -178,29 +180,24 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
        */
 
       ret = nxsched_get_param(pid, &param);
-      if (ret < 0)
-        {
-          return ret;
-        }
 #endif
 
-      /* Get the priority from the attributes */
-
-      param.sched_priority = attr->priority;
-
-      /* If we are setting *both* the priority and the scheduler,
-       * then we will call nxsched_set_scheduler() below.
-       */
-
-      if ((attr->flags & POSIX_SPAWN_SETSCHEDULER) == 0)
+      if (ret == OK)
         {
-          sinfo("Setting priority=%d for pid=%d\n",
-                param.sched_priority, pid);
+          /* Get the priority from the attributes */
 
-          ret = nxsched_set_param(pid, &param);
-          if (ret < 0)
+          param.sched_priority = attr->priority;
+
+          /* If we are setting *both* the priority and the scheduler,
+           * then we will call nxsched_set_scheduler() below.
+           */
+
+          if ((attr->flags & POSIX_SPAWN_SETSCHEDULER) == 0u)
             {
-              return ret;
+              sinfo("Setting priority=%d for pid=%d\n",
+                    param.sched_priority, pid);
+
+              ret = nxsched_set_param(pid, &param);
             }
         }
     }
@@ -210,20 +207,16 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
    * preparation for the nxsched_set_scheduler() call below.
    */
 
-  else if ((attr->flags & POSIX_SPAWN_SETSCHEDULER) != 0)
+  else if ((attr->flags & POSIX_SPAWN_SETSCHEDULER) != 0u)
     {
       ret = nxsched_get_param(0, &param);
-      if (ret < 0)
-        {
-          return ret;
-        }
     }
 
   /* Are we setting the scheduling policy?  If so, use the priority
    * setting determined above.
    */
 
-  if ((attr->flags & POSIX_SPAWN_SETSCHEDULER) != 0)
+  if (ret == OK && (attr->flags & POSIX_SPAWN_SETSCHEDULER) != 0u)
     {
       sinfo("Setting policy=%d priority=%d for pid=%d\n",
             attr->policy, param.sched_priority, pid);
@@ -241,7 +234,7 @@ int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
       nxsched_set_scheduler(pid, attr->policy, &param);
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -326,11 +319,12 @@ spawn_file_is_duplicateable(FAR const posix_spawn_file_actions_t *actions,
   FAR struct spawn_close_file_action_s *close;
   FAR struct spawn_open_file_action_s *open;
   FAR struct spawn_dup2_file_action_s *dup2;
+  int dup = -1;
 
   /* check each file action */
 
   for (entry = (FAR struct spawn_general_file_action_s *)actions;
-       entry != NULL;
+       entry != NULL && dup < 0;
        entry = entry->flink)
     {
       switch (entry->action)
@@ -339,7 +333,7 @@ spawn_file_is_duplicateable(FAR const posix_spawn_file_actions_t *actions,
             close = (FAR struct spawn_close_file_action_s *)entry;
             if (close->fd == fd)
               {
-                return false;
+                dup = 0;
               }
             break;
 
@@ -347,11 +341,11 @@ spawn_file_is_duplicateable(FAR const posix_spawn_file_actions_t *actions,
             dup2 = (FAR struct spawn_dup2_file_action_s *)entry;
             if (dup2->fd1 == fd)
               {
-                return true;
+                dup = 1;
               }
             else if (dup2->fd2 == fd)
               {
-                return false;
+                dup = 0;
               }
             break;
 
@@ -359,7 +353,7 @@ spawn_file_is_duplicateable(FAR const posix_spawn_file_actions_t *actions,
             open = (FAR struct spawn_open_file_action_s *)entry;
             if (open->fd == fd)
               {
-                return false;
+                dup = 0;
               }
             break;
 
@@ -368,10 +362,10 @@ spawn_file_is_duplicateable(FAR const posix_spawn_file_actions_t *actions,
         }
     }
 
-  if (cloexec)
+  if (dup < 0)
     {
-      return false;
+      dup = cloexec ? 0 : 1;
     }
 
-  return true;
+  return dup > 0;
 }

@@ -135,8 +135,8 @@ errout_with_cancelpt:
 
 int nxsem_wait(FAR sem_t *sem)
 {
-  bool mutex;
   bool fastpath = true;
+  bool mutex;
 
   DEBUGASSERT(sem != NULL);
 
@@ -147,51 +147,46 @@ int nxsem_wait(FAR sem_t *sem)
               up_interrupt_context());
 #endif
 
-  /* We don't do atomic fast path in case of LIBC_ARCH_ATOMIC because that
-   * uses spinlocks, which can't be called from userspace. Also in the kernel
-   * taking the slow path directly is faster than locking first in here
-   */
-
-#ifndef CONFIG_LIBC_ARCH_ATOMIC
-
   mutex = NXSEM_IS_MUTEX(sem);
 
   /* Disable fast path if priority protection is enabled on the semaphore */
 
-#  ifdef CONFIG_PRIORITY_PROTECT
+#ifdef CONFIG_PRIORITY_PROTECT
   if ((sem->flags & SEM_PRIO_MASK) == SEM_PRIO_PROTECT)
     {
       fastpath = false;
     }
-#  endif
+#endif
 
   /* Disable fast path on a counting semaphore with priority inheritance */
 
-#  ifdef CONFIG_PRIORITY_INHERITANCE
+#ifdef CONFIG_PRIORITY_INHERITANCE
   if (!mutex && (sem->flags & SEM_PRIO_MASK) != SEM_PRIO_NONE)
     {
       fastpath = false;
     }
-#  endif
+#endif
 
-  if (fastpath)
+  while (fastpath)
     {
-      int32_t old;
-      int32_t new;
       FAR atomic_t *val = mutex ? NXSEM_MHOLDER(sem) : NXSEM_COUNT(sem);
+      int32_t old = atomic_read(val);
+      int32_t new;
 
       if (mutex)
         {
-          old = NXSEM_NO_MHOLDER;
+          if (old != NXSEM_NO_MHOLDER)
+            {
+              break;
+            }
+
           new = _SCHED_GETTID();
         }
       else
         {
-          old = atomic_read(val);
-
           if (old < 1)
             {
-              goto out;
+              break;
             }
 
           new = old - 1;
@@ -203,12 +198,77 @@ int nxsem_wait(FAR sem_t *sem)
         }
     }
 
-out:
-
-#else
-  UNUSED(mutex);
-  UNUSED(fastpath);
-#endif
-
   return nxsem_wait_slow(sem);
+}
+
+/****************************************************************************
+ * Name: nxsem_wait_uninterruptible
+ *
+ * Description:
+ *   This function is wrapped version of nxsem_wait(), which is
+ *   uninterruptible and convenient for use.
+ *
+ * Parameters:
+ *   sem - Semaphore descriptor.
+ *
+ * Return Value:
+ *   Zero(OK)  - On success
+ *   EINVAL    - Invalid attempt to get the semaphore
+ *   ECANCELED - May be returned if the thread is canceled while waiting.
+ *
+ ****************************************************************************/
+
+int nxsem_wait_uninterruptible(FAR sem_t *sem)
+{
+  int ret;
+
+  do
+    {
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait(sem);
+    }
+  while (ret == -EINTR);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nxsem_clockwait_uninterruptible
+ *
+ * Description:
+ *   This function is wrapped version of nxsem_clockwait(), which is
+ *   uninterruptible and convenient for use.
+ *
+ * Input Parameters:
+ *   sem     - Semaphore object
+ *   clockid - The timing source to use in the conversion
+ *   abstime - The absolute time to wait until a timeout is declared.
+ *
+ * Returned Value:
+ *   EINVAL    The sem argument does not refer to a valid semaphore.  Or the
+ *             thread would have blocked, and the abstime parameter specified
+ *             a nanoseconds field value less than zero or greater than or
+ *             equal to 1000 million.
+ *   ETIMEDOUT The semaphore could not be locked before the specified timeout
+ *             expired.
+ *   EDEADLK   A deadlock condition was detected.
+ *   ECANCELED May be returned if the thread is canceled while waiting.
+ *
+ ****************************************************************************/
+
+int nxsem_clockwait_uninterruptible(FAR sem_t *sem, clockid_t clockid,
+                                    FAR const struct timespec *abstime)
+{
+  int ret;
+
+  do
+    {
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_clockwait(sem, clockid, abstime);
+    }
+  while (ret == -EINTR);
+
+  return ret;
 }

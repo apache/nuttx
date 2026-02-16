@@ -837,6 +837,15 @@ static int nand_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
+      case MTDIOC_ISBAD:
+        {
+          FAR struct mtd_bad_block_s *bad_block =
+                                     (FAR struct mtd_bad_block_s *)arg;
+          bad_block->bad_flag = nand_isbad(dev, bad_block->block_num);
+          ret = OK;
+        }
+        break;
+
       default:
         ret = -ENOTTY; /* Bad command */
         break;

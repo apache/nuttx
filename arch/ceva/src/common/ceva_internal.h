@@ -73,12 +73,6 @@
 #  define USE_SERIALDRIVER 1
 #endif
 
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (sizeof(uint32_t) - 1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
 /* Linker defined section addresses */
 
 #define _START_TEXT    _stext
@@ -305,6 +299,13 @@ void ceva_usbuninitialize(void);
 #ifdef CONFIG_STACK_COLORATION
 size_t ceva_stack_check(uintptr_t alloc, size_t size);
 void ceva_stack_color(void *stackbase, size_t nbytes);
+#endif
+
+#if defined(CONFIG_STACK_COLORATION) && \
+    defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+void ceva_color_intstack(void);
+#else
+#  define ceva_color_intstack()
 #endif
 
 #undef EXTERN

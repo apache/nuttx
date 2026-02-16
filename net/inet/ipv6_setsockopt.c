@@ -40,6 +40,7 @@
 #include "inet/inet.h"
 #include "socket/socket.h"
 #include "udp/udp.h"
+#include "utils/utils.h"
 
 #if defined(CONFIG_NET_IPv6) && defined(CONFIG_NET_SOCKOPTS)
 
@@ -83,7 +84,7 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
       return -EINVAL;
     }
 
-  net_lock();
+  conn_lock(psock->s_conn);
   switch (option)
     {
 #ifdef CONFIG_NET_MLD
@@ -231,7 +232,7 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
         break;
     }
 
-  net_unlock();
+  conn_unlock(psock->s_conn);
   return ret;
 }
 

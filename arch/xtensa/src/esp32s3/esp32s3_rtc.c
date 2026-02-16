@@ -2431,6 +2431,18 @@ int IRAM_ATTR esp32s3_rtc_sleep_start(uint32_t wakeup_opt,
   return reject;
 }
 
+void esp32s3_rtc_ext1_prepare(uint32_t trigger_mode, uint32_t rtc_gpio_mask)
+{
+  if (rtc_gpio_mask > 0)
+    {
+      modifyreg32(RTC_CNTL_RTC_EXT_WAKEUP1_REG, 0 ,
+                  RTC_CNTL_EXT_WAKEUP1_STATUS_CLR | rtc_gpio_mask);
+      modifyreg32(RTC_CNTL_RTC_EXT_WAKEUP_CONF_REG, 0,
+                  (trigger_mode << RTC_CNTL_EXT_WAKEUP1_LV_S) | \
+                  RTC_CNTL_GPIO_WAKEUP_FILTER);
+    }
+}
+
 /****************************************************************************
  * Name: esp32s3_rtc_clk_cpu_freq_set_config
  *

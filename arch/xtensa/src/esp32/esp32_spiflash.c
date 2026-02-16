@@ -40,6 +40,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/mutex.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/signal.h>
 
 #include "sched/sched.h"
 
@@ -225,6 +226,8 @@ inline void IRAM_ATTR
 esp32_spiflash_opstart(void);
 inline void IRAM_ATTR
 esp32_spiflash_opdone(void);
+static inline void IRAM_ATTR
+esp32_spiflash_oposyield(void);
 
 static bool IRAM_ATTR spiflash_pagecached(uint32_t phypage);
 static void IRAM_ATTR spiflash_flushmapped(size_t start, size_t size);
@@ -662,6 +665,28 @@ static void IRAM_ATTR spiflash_flushmapped(size_t start, size_t size)
 }
 
 /****************************************************************************
+ * Name: esp32_spiflash_oposyield
+ *
+ * Description:
+ *   Yield to other tasks, called during erase operations.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static inline void IRAM_ATTR esp32_spiflash_oposyield(void)
+{
+  /* Delay 1 tick */
+
+  useconds_t us = TICK2USEC(1);
+  nxsched_usleep(us);
+}
+
+/****************************************************************************
  * Name: esp32_set_read_opt
  *
  * Description:
@@ -967,6 +992,11 @@ static int IRAM_ATTR esp32_erasesector(struct esp32_spiflash_s *priv,
 
   for (offset = 0; offset < size; offset += MTD_ERASESIZE(priv))
     {
+      if (offset > 0)
+        {
+          esp32_spiflash_oposyield();
+        }
+
       esp32_spiflash_opstart();
 
       if (esp32_enable_write(priv) != OK)
@@ -1732,7 +1762,7 @@ static int esp32_async_op(enum spiflash_op_code_e opcode,
   ret = work_queue(LPWORK, &g_work, esp32_spiflash_work, &work_arg, 0);
   if (ret == 0)
     {
-      nxsem_wait(&work_arg.sem);
+      nxsem_wait_uninterruptible(&work_arg.sem);
       ret = work_arg.ret;
     }
 
@@ -2530,8 +2560,8 @@ static int spi_flash_op_block_task(int argc, char *argv[])
 
 int spiflash_init_spi_flash_op_block_task(int cpu)
 {
-  int pid;
-  int ret = OK;
+  FAR struct tcb_s *tcb;
+  int ret;
   char *argv[2];
   char arg1[32];
   cpu_set_t cpuset;
@@ -2540,28 +2570,40 @@ int spiflash_init_spi_flash_op_block_task(int cpu)
   argv[0] = arg1;
   argv[1] = NULL;
 
-  pid = kthread_create("spiflash_op",
-                       SCHED_PRIORITY_MAX,
-                       CONFIG_ESP32_SPIFLASH_OP_TASK_STACKSIZE,
-                       spi_flash_op_block_task,
-                       argv);
-  if (pid > 0)
+  /* Allocate a TCB for the new task. */
+
+  tcb = kmm_zalloc(sizeof(struct tcb_s));
+  if (!tcb)
     {
-      if (cpu < CONFIG_SMP_NCPUS)
-        {
-          CPU_ZERO(&cpuset);
-          CPU_SET(cpu, &cpuset);
-          ret = nxsched_set_affinity(pid, sizeof(cpuset), &cpuset);
-          if (ret < 0)
-            {
-              return ret;
-            }
-        }
+      serr("ERROR: Failed to allocate TCB\n");
+      return -ENOMEM;
     }
-  else
+
+  /* Setup the task type */
+
+  tcb->flags = TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_FREE_TCB;
+
+  /* Initialize the task */
+
+  ret = nxtask_init(tcb, "spiflash_op",
+                    SCHED_PRIORITY_MAX,
+                    NULL, CONFIG_ESP32_SPIFLASH_OP_TASK_STACKSIZE,
+                    spi_flash_op_block_task, argv, environ, NULL);
+  if (ret < OK)
     {
-      return -EPERM;
+      kmm_free(tcb);
+      return ret;
     }
+
+  /* Set the affinity */
+
+  CPU_ZERO(&cpuset);
+  CPU_SET(cpu, &cpuset);
+  tcb->affinity = cpuset;
+
+  /* Activate the task */
+
+  nxtask_activate(tcb);
 
   return ret;
 }

@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/spinlock.h>
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -106,6 +107,7 @@ struct cdcacm_dev_s
 #endif
   bool rxenabled;                      /* true: UART RX "interrupts" enabled */
   bool ispolling;
+  spinlock_t lock;
 
   struct cdc_linecoding_s linecoding;  /* Buffered line status */
   cdcacm_callback_t callback;          /* Serial event callback function */
@@ -114,7 +116,9 @@ struct cdcacm_dev_s
   FAR struct usbdev_ep_s *epbulkin;    /* Bulk IN endpoint structure */
   FAR struct usbdev_ep_s *epbulkout;   /* Bulk OUT endpoint structure */
   FAR struct usbdev_req_s *ctrlreq;    /* Allocated control request */
+#ifndef CONFIG_CDCACM_DISABLE_RXBUF
   struct wdog_s rxfailsafe;            /* Failsafe timer to prevent RX stalls */
+#endif
   struct sq_queue_s txfree;            /* Available write request containers */
   struct sq_queue_s rxpending;         /* Pending read request containers */
 
@@ -171,7 +175,9 @@ static void    cdcacm_rcvpacket(FAR struct cdcacm_dev_s *priv);
 static int     cdcacm_requeue_rdrequest(FAR struct cdcacm_dev_s *priv,
                  FAR struct cdcacm_rdreq_s *rdcontainer);
 static int     cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv);
+#ifndef CONFIG_CDCACM_DISABLE_RXBUF
 static void    cdcacm_rxtimeout(wdparm_t arg);
+#endif
 
 /* Flow Control *************************************************************/
 
@@ -313,6 +319,10 @@ static const struct uart_ops_s g_uartops =
   cdcuart_sendbuf        /* sendbuf */
 };
 
+/* Mutex to protect device initialization / uninitialization*****************/
+
+static mutex_t g_init_lock = NXMUTEX_INITIALIZER;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -356,6 +366,7 @@ static ssize_t cdcuart_sendbuf(FAR struct uart_dev_s *dev,
   FAR struct usbdev_ep_s *ep = priv->epbulkin;
   FAR struct cdcacm_wrreq_s *wrcontainer;
   FAR struct usbdev_req_s *req;
+  irqstate_t flags;
   size_t reqlen;
   size_t nbytes;
   int ret;
@@ -366,9 +377,11 @@ static ssize_t cdcuart_sendbuf(FAR struct uart_dev_s *dev,
 
   /* Peek at the request in the container at the head of the list */
 
+  flags = spin_lock_irqsave(&priv->lock);
   wrcontainer = (FAR struct cdcacm_wrreq_s *)sq_remfirst(&priv->txfree);
   req = wrcontainer->req;
   priv->nwrq--;
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   /* Fill the request with serial TX data */
 
@@ -411,10 +424,9 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
   FAR struct uart_dev_s *dev = &priv->serdev;
   FAR struct cdcacm_wrreq_s *wrcontainer;
   FAR struct usbdev_req_s *req;
+  irqstate_t flags;
   int ret;
 #endif
-
-  irqstate_t flags;
 
 #ifdef CONFIG_DEBUG_FEATURES
   if (priv == NULL)
@@ -424,7 +436,6 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
     }
 #endif
 
-  flags = enter_critical_section();
   if (priv->ispolling)
     {
       goto out;
@@ -450,15 +461,17 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
         {
           usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_SUBMITFAIL),
                    (uint16_t)-ret);
+          flags = spin_lock_irqsave_nopreempt(&priv->lock);
           dev->xmit.head = 0;
           dev->xmit.tail = 0;
           uart_datasent(dev);
+          spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
           goto out;
         }
-
-      priv->wrcontainer = NULL;
     }
 
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
+  priv->wrcontainer = NULL;
   if (!sq_empty(&priv->txfree))
     {
       priv->wrcontainer = (FAR struct cdcacm_wrreq_s *)
@@ -469,6 +482,8 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
       dev->xmit.tail = 0;
       uart_datasent(dev);
     }
+
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
 #else
   if (!sq_empty(&priv->txfree))
     {
@@ -477,7 +492,6 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
 #endif
 
 out:
-  leave_critical_section(flags);
   return OK;
 }
 
@@ -609,7 +623,7 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
    * must be disabled throughout the following.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
 
   if (priv->ispolling)
     {
@@ -618,7 +632,9 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
 
   /* Cancel any pending failsafe timer */
 
+#ifndef CONFIG_CDCACM_DISABLE_RXBUF
   wd_cancel(&priv->rxfailsafe);
+#endif
 
   /* If RX "interrupts" are enabled and if input flow control is not in
    * effect, then pass the packet at the head of the pending RX packet list
@@ -663,16 +679,20 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
    * that data cannot stall in priv->rxpending.
    */
 
+#ifndef CONFIG_CDCACM_DISABLE_RXBUF
   if (!sq_empty(&priv->rxpending))
     {
       wd_start(&priv->rxfailsafe, CDCACM_RXDELAY,
                cdcacm_rxtimeout, (wdparm_t)priv);
     }
+#endif
 
 out:
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
   return ret;
 }
+
+#ifndef CONFIG_CDCACM_DISABLE_RXBUF
 
 /****************************************************************************
  * Name: cdcacm_rxtimeout
@@ -693,6 +713,8 @@ static void cdcacm_rxtimeout(wdparm_t arg)
   DEBUGASSERT(priv != NULL);
   cdcacm_release_rxpending(priv);
 }
+
+#endif
 
 /****************************************************************************
  * Name: cdcacm_serialstate
@@ -735,24 +757,26 @@ static int cdcacm_serialstate(FAR struct cdcacm_dev_s *priv)
 
   usbtrace(CDCACM_CLASSAPI_FLOWCONTROL, (uint16_t)priv->serialstate);
 
-  flags = enter_critical_section();
-
   /* Use our interrupt IN endpoint for the transfer */
 
   ep = priv->epintin;
 
   /* Remove the next container from the request list */
 
+  flags = spin_lock_irqsave(&priv->lock);
+
   wrcontainer = (FAR struct cdcacm_wrreq_s *)sq_remfirst(&priv->txfree);
   if (wrcontainer == NULL)
     {
       ret = -ENOMEM;
+      spin_unlock_irqrestore(&priv->lock, flags);
       goto errout_with_flags;
     }
 
   /* Decrement the count of write requests */
 
   priv->nwrq--;
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   /* Format the SerialState notification */
 
@@ -792,7 +816,6 @@ errout_with_flags:
 
   priv->serialstate &= CDC_UART_CONSISTENT;
 
-  leave_critical_section(flags);
   return ret;
 }
 #endif
@@ -1045,7 +1068,6 @@ static void cdcacm_rdcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Process the received data unless this is some unusual condition */
 
-  flags = enter_critical_section();
   switch (req->result)
     {
     case 0: /* Normal completion */
@@ -1054,8 +1076,10 @@ static void cdcacm_rdcomplete(FAR struct usbdev_ep_s *ep,
 
         /* Place the incoming packet at the end of pending RX packet list. */
 
+        flags = spin_lock_irqsave(&priv->lock);
         rdcontainer->offset = 0;
         sq_addlast((FAR sq_entry_t *)rdcontainer, &priv->rxpending);
+        spin_unlock_irqrestore(&priv->lock, flags);
 
         /* Then process all pending RX packet starting at the head of the
          * list
@@ -1068,10 +1092,13 @@ static void cdcacm_rdcomplete(FAR struct usbdev_ep_s *ep,
     case -ESHUTDOWN: /* Disconnection */
       {
         usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSHUTDOWN), 0);
+        flags = spin_lock_irqsave(&priv->lock);
         if (priv->nrdq != 0)
           {
             priv->nrdq--;
           }
+
+        spin_unlock_irqrestore(&priv->lock, flags);
       }
       break;
 
@@ -1083,8 +1110,6 @@ static void cdcacm_rdcomplete(FAR struct usbdev_ep_s *ep,
         break;
       }
     }
-
-  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1120,10 +1145,10 @@ static void cdcacm_wrcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Return the write request to the free list */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   sq_addlast((FAR sq_entry_t *)wrcontainer, &priv->txfree);
   priv->nwrq++;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   /* Send the next packet unless this was some unusual termination
    * condition
@@ -1365,18 +1390,20 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
       wrcontainer->req->priv     = wrcontainer;
       wrcontainer->req->callback = cdcacm_wrcomplete;
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&priv->lock);
       sq_addlast((FAR sq_entry_t *)wrcontainer, &priv->txfree);
       priv->nwrq++;     /* Count of write requests available */
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
     }
 
 #ifdef CONFIG_CDCACM_DISABLE_TXBUF
+  flags = spin_lock_irqsave(&priv->lock);
   priv->wrcontainer = (FAR struct cdcacm_wrreq_s *)
                       sq_remfirst(&priv->txfree);
   priv->serdev.xmit.buffer = (FAR char *)priv->wrcontainer->req->buf;
   priv->serdev.xmit.size   = reqlen + 1;
   priv->nwrq--;
+  spin_unlock_irqrestore(&priv->lock, flags);
 #endif
 
   /* Report if we are selfpowered (unless we are part of a
@@ -1480,8 +1507,23 @@ static void cdcacm_unbind(FAR struct usbdevclass_driver_s *driver,
        * of them)
        */
 
-      flags = enter_critical_section();
+#ifdef CONFIG_CDCACM_DISABLE_TXBUF
+      nxmutex_lock(&priv->serdev.xmit.lock);
+#endif
+
+      flags = spin_lock_irqsave(&priv->lock);
+
+#ifdef CONFIG_CDCACM_DISABLE_TXBUF
+      DEBUGASSERT(priv->nwrq >= CONFIG_CDCACM_NWRREQS - 1);
+      if (priv->wrcontainer)
+        {
+          sq_addlast((FAR sq_entry_t *)priv->wrcontainer, &priv->txfree);
+          priv->wrcontainer = NULL;
+          priv->nwrq++;
+        }
+#else
       DEBUGASSERT(priv->nwrq == CONFIG_CDCACM_NWRREQS);
+#endif
 
       while (!sq_empty(&priv->txfree))
         {
@@ -1494,7 +1536,11 @@ static void cdcacm_unbind(FAR struct usbdevclass_driver_s *driver,
         }
 
       DEBUGASSERT(priv->nwrq == 0);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
+
+#ifdef CONFIG_CDCACM_DISABLE_TXBUF
+      nxmutex_unlock(&priv->serdev.xmit.lock);
+#endif
 
 #ifdef CONFIG_CDCACM_HAVE_EPINTIN
       /* Free the interrupt IN endpoint */
@@ -1973,7 +2019,6 @@ static void cdcacm_disconnect(FAR struct usbdevclass_driver_s *driver,
    * connection.
    */
 
-  flags = enter_critical_section();
 #ifdef CONFIG_SERIAL_REMOVABLE
   uart_connected(&priv->serdev, false);
 #endif
@@ -1984,9 +2029,10 @@ static void cdcacm_disconnect(FAR struct usbdevclass_driver_s *driver,
 
   /* Clear out all outgoing data in the circular buffer */
 
+  flags = spin_lock_irqsave(&priv->lock);
   priv->serdev.xmit.head = 0;
   priv->serdev.xmit.tail = 0;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   /* Perform the soft connect function so that we will we can be
    * re-enumerated (unless we are part of a composite device)
@@ -2196,7 +2242,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         FAR sq_entry_t *entry;
         int count;
 
-        irqstate_t flags = enter_critical_section();
+        irqstate_t flags = spin_lock_irqsave(&priv->lock);
 
         /* Determine the number of bytes available in the RX buffer */
 
@@ -2208,7 +2254,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             count += rdcontainer->req->xfrd;
           }
 
-        leave_critical_section(flags);
+        spin_unlock_irqrestore(&priv->lock, flags);
 
         *(FAR int *)((uintptr_t)arg) = count;
       }
@@ -2227,7 +2273,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         int count;
         int i;
 
-        irqstate_t flags = enter_critical_section();
+        irqstate_t flags = spin_lock_irqsave(&priv->lock);
 
         /* Determine the number of bytes waiting in the TX buffer */
 
@@ -2252,7 +2298,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               }
           }
 
-        leave_critical_section(flags);
+        spin_unlock_irqrestore(&priv->lock, flags);
 
         *(FAR int *)((uintptr_t)arg) = count;
       }
@@ -2265,7 +2311,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         FAR sq_entry_t *entry;
         int count = 0;
 
-        irqstate_t flags = enter_critical_section();
+        irqstate_t flags = spin_lock_irqsave(&priv->lock);
 
         /* Determine the number of bytes free in the TX buffer */
 
@@ -2279,7 +2325,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             count += serdev->xmit.size - 1;
           }
 
-        leave_critical_section(flags);
+        spin_unlock_irqrestore(&priv->lock, flags);
 
         *(FAR int *)((uintptr_t)arg) = count;
       }
@@ -2298,7 +2344,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             FAR struct cdcacm_rdreq_s *rdcontainer;
             ret = OK;
 
-            irqstate_t flags = enter_critical_section();
+            irqstate_t flags = spin_lock_irqsave(&priv->lock);
 
             if (priv->rdcontainer)
               {
@@ -2317,19 +2363,20 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             serdev->recv.head = 0;
             serdev->recv.tail = 0;
 
+            spin_unlock_irqrestore(&priv->lock, flags);
+
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
             /* De-activate RX flow control. */
 
             uart_rxflowcontrol(serdev, 0, false);
 #endif
-            leave_critical_section(flags);
           }
 #endif
 
 #ifdef CONFIG_CDCACM_DISABLE_TXBUF
         if (arg == TCOFLUSH || arg == TCIOFLUSH)
           {
-            irqstate_t flags = enter_critical_section();
+            irqstate_t flags = spin_lock_irqsave_nopreempt(&priv->lock);
             ret = OK;
 
             if (priv->wrcontainer)
@@ -2358,7 +2405,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                 ret = -EBUSY;
               }
 
-            leave_critical_section(flags);
+            spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
           }
 #endif
       }
@@ -2626,19 +2673,21 @@ static void cdcuart_rxint(FAR struct uart_dev_s *dev, bool enable)
    * in the following.
    */
 
-  flags = enter_critical_section();
   if (enable)
     {
       /* RX "interrupts" are enabled.  Is this a transition from disabled
        * to enabled state?
        */
 
+      flags = spin_lock_irqsave(&priv->lock);
       if (!priv->rxenabled)
         {
           /* Yes.. RX "interrupts are no longer disabled */
 
           priv->rxenabled = true;
         }
+
+      spin_unlock_irqrestore(&priv->lock, flags);
 
       /* During the time that RX interrupts was disabled, incoming
        * packets were queued in priv->rxpending.  We must now process
@@ -2657,10 +2706,10 @@ static void cdcuart_rxint(FAR struct uart_dev_s *dev, bool enable)
 
   else
     {
+      flags = spin_lock_irqsave(&priv->lock);
       priv->rxenabled = false;
+      spin_unlock_irqrestore(&priv->lock, flags);
     }
-
-  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -2888,11 +2937,11 @@ static bool cdcuart_txempty(FAR struct uart_dev_s *dev)
     }
 #endif
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   if (dev->disconnected)
     {
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
       return true;
     }
 
@@ -2904,6 +2953,8 @@ static bool cdcuart_txempty(FAR struct uart_dev_s *dev)
    * txfree, then there is no longer any TX data in flight.
    */
 
+  flags = spin_lock_irqsave(&priv->lock);
+
 #ifdef CONFIG_CDCACM_DISABLE_TXBUF
   /* dev->xmit.buffer always take one req, so just compare
    * CONFIG_CDCACM_NWRREQS - 1.
@@ -2913,7 +2964,7 @@ static bool cdcuart_txempty(FAR struct uart_dev_s *dev)
 #else
   empty = priv->nwrq >= CONFIG_CDCACM_NWRREQS;
 #endif
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return empty;
 }
@@ -2935,7 +2986,9 @@ static int cdcuart_release(FAR struct uart_dev_s *dev)
 
   /* And free the memory resources. */
 
+#ifndef CONFIG_CDCACM_DISABLE_RXBUF
   wd_cancel(&priv->rxfailsafe);
+#endif
   kmm_free(priv);
   return OK;
 }
@@ -2957,6 +3010,7 @@ static void cdcuart_dmasend(FAR struct uart_dev_s *dev)
   FAR struct usbdev_ep_s *ep = priv->epbulkin;
   FAR struct cdcacm_wrreq_s *wrcontainer;
   FAR struct usbdev_req_s *req;
+  irqstate_t flags;
   size_t nbytes;
   size_t reqlen;
   int ret;
@@ -2967,9 +3021,11 @@ static void cdcuart_dmasend(FAR struct uart_dev_s *dev)
 
   /* Peek at the request in the container at the head of the list */
 
+  flags = spin_lock_irqsave(&priv->lock);
   wrcontainer = (FAR struct cdcacm_wrreq_s *)sq_remfirst(&priv->txfree);
   req = wrcontainer->req;
   priv->nwrq--;
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   /* Fill the request with serial TX data */
 
@@ -2978,8 +3034,12 @@ static void cdcuart_dmasend(FAR struct uart_dev_s *dev)
   req->len = nbytes;
 
   nbytes = MIN(reqlen - nbytes, xfer->nlength);
-  memcpy(req->buf + req->len, xfer->nbuffer, nbytes);
-  req->len += nbytes;
+  if (nbytes)
+    {
+      memcpy(req->buf + req->len, xfer->nbuffer, nbytes);
+      req->len += nbytes;
+    }
+
   xfer->nbytes = req->len;
 
   uart_xmitchars_done(dev);
@@ -3132,14 +3192,10 @@ ssize_t cdcacm_write(FAR const char *buffer, size_t buflen)
 
   while (len < buflen)
     {
-      irqstate_t flags;
-
-      if (!priv || !priv->ctrlline)
+      if (!priv || !(priv->ctrlline & CDC_DTE_PRESENT))
         {
           return -EINVAL;
         }
-
-      flags = enter_critical_section();
 
       if (cdcuart_txready(&priv->serdev))
         {
@@ -3148,14 +3204,11 @@ ssize_t cdcacm_write(FAR const char *buffer, size_t buflen)
                                         buflen - len);
           if (ret < 0)
             {
-              leave_critical_section(flags);
               return ret;
             }
 
           len += ret;
         }
-
-      leave_critical_section(flags);
     }
 
   return buflen;
@@ -3228,6 +3281,7 @@ int cdcacm_classobject(int minor, FAR struct usbdev_devinfo_s *devinfo,
   memset(priv, 0, sizeof(struct cdcacm_dev_s));
   sq_init(&priv->txfree);
   sq_init(&priv->rxpending);
+  spin_lock_init(&priv->lock);
 
   priv->minor               = minor;
 
@@ -3377,9 +3431,16 @@ int cdcacm_initialize(int minor, FAR void **handle)
   devinfo.epno[CDCACM_EP_BULKIN_IDX]  = CONFIG_CDCACM_EPBULKIN;
   devinfo.epno[CDCACM_EP_BULKOUT_IDX] = CONFIG_CDCACM_EPBULKOUT;
 
+  ret = nxmutex_lock(&g_init_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Get an instance of the serial driver class object */
 
   ret = cdcacm_classobject(minor, &devinfo, &drvr);
+
   if (ret == OK)
     {
       /* Register the USB serial class driver */
@@ -3391,6 +3452,8 @@ int cdcacm_initialize(int minor, FAR void **handle)
                    (uint16_t)-ret);
         }
     }
+
+  nxmutex_unlock(&g_init_lock);
 
   /* Return the driver instance (if any) if the caller has requested it
    * by provided a pointer to the location to return it.
@@ -3430,8 +3493,60 @@ void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev)
 {
   FAR struct cdcacm_driver_s *drvr = (FAR struct cdcacm_driver_s *)classdev;
   FAR struct cdcacm_dev_s    *priv = drvr->dev;
-  char devname[CDCACM_DEVNAME_SIZE];
+
+  cdcacm_uninitialize_instance(priv->minor, classdev);
+}
+
+/****************************************************************************
+ * Name: cdcacm_uninitialize_instance
+ *
+ * Description:
+ *   Function to uninitialize specific cdcacm instance
+ *
+ * Input Parameters:
+ *   minor - CDCACM node minor number
+ *
+ * Returned Value:
+ *   OK when successful, -ENODEV if cdcacm is not initialized
+ *
+ ****************************************************************************/
+
+int cdcacm_uninitialize_instance(int minor,
+                                 FAR struct usbdevclass_driver_s *classdev)
+{
   int ret;
+  FAR struct cdcacm_driver_s *drvr = (FAR struct cdcacm_driver_s *)classdev;
+  FAR struct cdcacm_dev_s *priv;
+  char devname[CDCACM_DEVNAME_SIZE];
+
+  /* Create device node path from minor number */
+
+  snprintf(devname, sizeof(devname), CDCACM_DEVNAME_FORMAT, minor);
+
+  ret = nxmutex_lock(&g_init_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* If classdev is not provided, find it from the file system */
+
+  if (classdev == NULL)
+    {
+      FAR struct cdcacm_alloc_s *cdcacm_alloc = find_driver(devname);
+      if (cdcacm_alloc != NULL)
+        {
+          drvr = &cdcacm_alloc->drvr;
+          classdev = &drvr->drvr;
+        }
+      else
+        {
+          ret = -ENODEV;
+          goto out;
+        }
+    }
+
+  priv = drvr->dev;
 
 #ifdef CONFIG_SYSLOG_CDCACM
   if (g_syslog_cdcacm == priv)
@@ -3445,18 +3560,21 @@ void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev)
   cdcacm_disconnect(classdev, priv->usbdev);
 
 #ifndef CONFIG_CDCACM_COMPOSITE
-  usbdev_unregister(&drvr->drvr);
+  usbdev_unregister(classdev);
 #endif
 
   /* Un-register the CDC/ACM TTY device */
 
-  snprintf(devname, sizeof(devname), CDCACM_DEVNAME_FORMAT, priv->minor);
   ret = unregister_driver(devname);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UARTUNREGISTER),
                (uint16_t)-ret);
     }
+
+out:
+  nxmutex_unlock(&g_init_lock);
+  return ret;
 }
 
 /****************************************************************************

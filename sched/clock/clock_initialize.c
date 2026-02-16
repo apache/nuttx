@@ -38,6 +38,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
+#include <nuttx/clock_notifier.h>
 #include <nuttx/trace.h>
 
 #include <nuttx/spinlock.h>
@@ -50,11 +51,6 @@
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-#if !defined(CONFIG_SCHED_TICKLESS) && \
-    !defined(CONFIG_ALARM_ARCH) && !defined(CONFIG_TIMER_ARCH)
-volatile clock_t g_system_ticks = INITIAL_SYSTEM_TIMER_TICKS;
-#endif
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
 struct timespec   g_basetime;
@@ -141,7 +137,7 @@ int clock_basetime(FAR struct timespec *tp)
 
   /* Set the base time as seconds into this julian day. */
 
-  tp->tv_sec  = jdn * SEC_PER_DAY;
+  tp->tv_sec  = jdn * (time_t)SEC_PER_DAY;
   tp->tv_nsec = 0;
   return OK;
 }
@@ -156,7 +152,6 @@ int clock_basetime(FAR struct timespec *tp)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RTC
 static void clock_inittime(FAR const struct timespec *tp)
 {
   /* (Re-)initialize the time value to match the RTC */
@@ -188,11 +183,11 @@ static void clock_inittime(FAR const struct timespec *tp)
     }
 
   spin_unlock_irqrestore(&g_basetime_lock, flags);
+  clock_notifier_call_chain(CLOCK_REALTIME, &g_basetime);
 #else
   clock_inittimekeeping(tp);
 #endif
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -225,15 +220,14 @@ void clock_initialize(void)
 
   up_rtc_initialize();
 
-#if !defined(CONFIG_RTC_EXTERNAL)
+#endif
+
+#if !defined(CONFIG_RTC_EXTERNAL) || \
+    !defined(CONFIG_RTC)
   /* Initialize the time value to match the RTC */
 
   clock_inittime(NULL);
 #endif
-
-#endif
-
-  perf_init();
 
 #ifdef CONFIG_SCHED_CPULOAD_SYSCLK
   cpuload_init();
@@ -379,35 +373,7 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
       clock_t diff_ticks = SEC2TICK(rtc_diff->tv_sec) +
                            NSEC2TICK(rtc_diff->tv_nsec);
 
-#ifdef CONFIG_SYSTEM_TIME64
-      atomic64_fetch_add((FAR atomic64_t *)&g_system_ticks, diff_ticks);
-#else
-      atomic_fetch_add((FAR atomic_t *)&g_system_ticks, diff_ticks);
-#endif
+      clock_increase_sched_ticks(diff_ticks);
     }
-}
-#endif
-
-/****************************************************************************
- * Name: clock_timer
- *
- * Description:
- *   This function must be called once every time the real time clock
- *   interrupt occurs.  The interval of this clock interrupt must be
- *   USEC_PER_TICK
- *
- ****************************************************************************/
-
-#if !defined(CONFIG_SCHED_TICKLESS) && \
-    !defined(CONFIG_ALARM_ARCH) && !defined(CONFIG_TIMER_ARCH)
-void clock_timer(void)
-{
-  /* Increment the per-tick system counter */
-
-#ifdef CONFIG_SYSTEM_TIME64
-  atomic64_fetch_add((FAR atomic64_t *)&g_system_ticks, 1);
-#else
-  atomic_fetch_add((FAR atomic_t *)&g_system_ticks, 1);
-#endif
 }
 #endif

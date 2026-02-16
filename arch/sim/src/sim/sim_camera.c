@@ -26,6 +26,7 @@
 
 #include <errno.h>
 #include <string.h>
+#include <nuttx/wdog.h>
 #include <nuttx/video/imgsensor.h>
 #include <nuttx/video/imgdata.h>
 #include <nuttx/video/video.h>
@@ -36,6 +37,8 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define SIM_CAMERA_PERIOD    MSEC2TICK(CONFIG_SIM_LOOP_INTERVAL)
 
 /****************************************************************************
  * Private Types
@@ -51,6 +54,7 @@ typedef struct
   uint8_t  *next_buf;
   struct timeval *next_ts;
   struct host_video_dev_s *vdev;
+  struct wdog_s wdog;
 } sim_camera_priv_t;
 
 /****************************************************************************
@@ -134,6 +138,14 @@ static const struct v4l2_frmsizeenum g_frmsizes[] =
   }
 };
 
+static struct v4l2_fmtdesc g_fmts[] =
+{
+  {
+    .pixelformat = V4L2_PIX_FMT_YUV420,
+    .description = "YUV420",
+  }
+};
+
 static sim_camera_priv_t g_sim_camera_priv =
 {
   .data =
@@ -145,6 +157,8 @@ static sim_camera_priv_t g_sim_camera_priv =
     .ops = &g_sim_camera_ops,
     .frmsizes_num = 1,
     .frmsizes = g_frmsizes,
+    .fmtdescs_num = 1,
+    .fmtdescs = g_fmts,
   }
 };
 
@@ -345,22 +359,9 @@ static int sim_camera_data_stop_capture(struct imgdata_s *data)
   return host_video_stop_capture(priv->vdev);
 }
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-int sim_camera_initialize(void)
+static void sim_camera_interrupt(wdparm_t arg)
 {
-  sim_camera_priv_t *priv = &g_sim_camera_priv;
-
-  imgsensor_register(&priv->sensor);
-  imgdata_register(&priv->data);
-  return 0;
-}
-
-void sim_camera_loop(void)
-{
-  sim_camera_priv_t *priv = &g_sim_camera_priv;
+  sim_camera_priv_t *priv = (sim_camera_priv_t *)arg;
   struct timespec ts;
   struct timeval tv;
   int ret;
@@ -375,4 +376,21 @@ void sim_camera_loop(void)
           priv->capture_cb(0, ret, &tv, priv->capture_arg);
         }
     }
+
+  wd_start_next(&priv->wdog, SIM_CAMERA_PERIOD, sim_camera_interrupt, arg);
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+int sim_camera_initialize(void)
+{
+  sim_camera_priv_t *priv = &g_sim_camera_priv;
+
+  imgsensor_register(&priv->sensor);
+  imgdata_register(&priv->data);
+
+  wd_start(&priv->wdog, 0, sim_camera_interrupt, (wdparm_t)priv);
+  return 0;
 }

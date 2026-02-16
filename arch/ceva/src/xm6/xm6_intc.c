@@ -215,5 +215,6 @@ void up_irqinitialize(void)
 
   /* And finally, enable interrupts */
 
+  ceva_color_intstack();
   up_irq_enable();
 }

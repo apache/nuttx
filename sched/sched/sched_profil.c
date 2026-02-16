@@ -34,7 +34,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PROFTICK NSEC2TICK(NSEC_PER_SEC / CONFIG_SCHED_PROFILE_TICKSPERSEC)
+#define PROFTICK NSEC2TICK((clock_t)(NSEC_PER_SEC / CONFIG_SCHED_PROFILE_TICKSPERSEC))
 
 /****************************************************************************
  * Private Types
@@ -58,9 +58,8 @@ static int profil_timer_handler_cpu(FAR void *arg);
  * Private Data
  ****************************************************************************/
 
-static struct profinfo_s g_prof;
-
 #ifdef CONFIG_SMP
+static struct profinfo_s g_prof;
 static struct smp_call_data_s g_call_data =
 SMP_CALL_INITIALIZER(profil_timer_handler_cpu, &g_prof);
 #endif
@@ -137,33 +136,41 @@ static void profil_timer_handler(wdparm_t arg)
 int profil(FAR unsigned short *buf, size_t bufsiz,
            size_t offset, unsigned int scale)
 {
+#ifndef CONFIG_SMP
+  static struct profinfo_s g_prof;
+#endif
   FAR struct profinfo_s *prof = &g_prof;
   irqstate_t flags;
   uintptr_t highpc;
+  int ret = OK;
 
-  if (scale > 65536)
+  if (scale <= 65536)
+    {
+      if (buf != NULL && scale != 0)
+        {
+          memset(buf, 0, bufsiz);
+          highpc = (uintmax_t)bufsiz * 65536 / scale;
+
+          flags = spin_lock_irqsave(&prof->lock);
+          prof->counter = buf;
+          prof->lowpc   = offset;
+          prof->highpc  = offset + highpc;
+          prof->scale   = scale;
+          spin_unlock_irqrestore(&prof->lock, flags);
+
+          wd_start(&prof->timer, PROFTICK, profil_timer_handler,
+                   (wdparm_t)(uintptr_t)prof);
+        }
+      else
+        {
+          wd_cancel(&prof->timer);
+        }
+    }
+  else
     {
       set_errno(EINVAL);
-      return ERROR;
+      ret = ERROR;
     }
 
-  if (buf == NULL || scale == 0)
-    {
-      wd_cancel(&prof->timer);
-      return OK;
-    }
-
-  memset(buf, 0, bufsiz);
-  highpc = (uintmax_t)bufsiz * 65536 / scale;
-
-  flags = spin_lock_irqsave(&prof->lock);
-  prof->counter = buf;
-  prof->lowpc   = offset;
-  prof->highpc  = offset + highpc;
-  prof->scale   = scale;
-  spin_unlock_irqrestore(&prof->lock, flags);
-
-  wd_start(&prof->timer, PROFTICK, profil_timer_handler,
-           (wdparm_t)(uintptr_t)prof);
-  return OK;
+  return ret;
 }

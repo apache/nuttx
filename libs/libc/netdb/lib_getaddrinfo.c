@@ -139,7 +139,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
   int proto = 0;
   int socktype = 0;
   FAR char *hostbuffer;
-  FAR struct hostent_s host;
+  struct hostent_s host;
   FAR struct ai_s *ai;
   FAR struct ai_s *prev_ai = NULL;
   const int valid_flags = AI_PASSIVE | AI_CANONNAME | AI_NUMERICHOST |

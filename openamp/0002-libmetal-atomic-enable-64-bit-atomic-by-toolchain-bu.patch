@@ -1,7 +1,7 @@
-From 61756465a3dc241297b7a12d5500ac36a5ffa070 Mon Sep 17 00:00:00 2001
+From 4aaf8a78da2ac2e9627fcbbefa72db7330a57909 Mon Sep 17 00:00:00 2001
 From: chao an <anchao@lixiang.com>
 Date: Sat, 29 Jun 2024 09:40:26 +0800
-Subject: [PATCH 2/5] libmetal/atomic: enable 64-bit atomic by toolchain
+Subject: [PATCH 2/3] libmetal/atomic: enable 64-bit atomic by toolchain
  builtin flags
 
 Fix compile error:

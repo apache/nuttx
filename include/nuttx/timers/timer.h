@@ -68,6 +68,13 @@
  *                      struct timer_notify_s.
  * TCIOC_MAXTIMEOUT   - Get the maximum supported timeout value
  *                      Argument: A 32-bit timeout value in microseconds.
+ * TCIOC_TICK_GETSTATUS  - Get the status of the timer.
+ *                         Argument:  A writeable pointer to struct
+ *                         timer_status_s.
+ * TCIOC_TICK_SETTIMEOUT - Reset the timer timeout to this value
+ *                         Argument: A 32-bit timeout value in ticks.
+ * TCIOC_TICK_MAXTIMEOUT - Get the maximum supported timeout value
+ *                         Argument: A 32-bit timeout value in ticks.
  *
  * WARNING: May change TCIOC_SETTIMEOUT to pass pointer to 64bit nanoseconds
  * or timespec structure.
@@ -78,12 +85,15 @@
  * range.
  */
 
-#define TCIOC_START        _TCIOC(0x0001)
-#define TCIOC_STOP         _TCIOC(0x0002)
-#define TCIOC_GETSTATUS    _TCIOC(0x0003)
-#define TCIOC_SETTIMEOUT   _TCIOC(0x0004)
-#define TCIOC_NOTIFICATION _TCIOC(0x0005)
-#define TCIOC_MAXTIMEOUT   _TCIOC(0x0006)
+#define TCIOC_START           _TCIOC(0x0001)
+#define TCIOC_STOP            _TCIOC(0x0002)
+#define TCIOC_GETSTATUS       _TCIOC(0x0003)
+#define TCIOC_SETTIMEOUT      _TCIOC(0x0004)
+#define TCIOC_NOTIFICATION    _TCIOC(0x0005)
+#define TCIOC_MAXTIMEOUT      _TCIOC(0x0006)
+#define TCIOC_TICK_GETSTATUS  _TCIOC(0x0007)
+#define TCIOC_TICK_SETTIMEOUT _TCIOC(0x0008)
+#define TCIOC_TICK_MAXTIMEOUT _TCIOC(0x0009)
 
 /* Bit Settings *************************************************************/
 
@@ -111,7 +121,7 @@
   ((l)->ops->settimeout ? (l)->ops->settimeout(l,t) : timer_settimeout(l,t))
 
 #define TIMER_TICK_SETTIMEOUT(l,t) \
-  ((l)->ops->tick_setttimeout ? (l)->ops->tick_setttimeout(l,t) : timer_tick_settimeout(l,t))
+  ((l)->ops->tick_settimeout ? (l)->ops->tick_settimeout(l,t) : timer_tick_settimeout(l,t))
 
 #define TIMER_MAXTIMEOUT(l,t) \
   ((l)->ops->maxtimeout ? (l)->ops->maxtimeout(l,t) : timer_maxtimeout(l,t))
@@ -209,7 +219,7 @@ struct timer_ops_s
 
   /* Set a new tick timeout value of (and reset the timer) */
 
-  CODE int (*tick_setttimeout)(FAR struct timer_lowerhalf_s *lower,
+  CODE int (*tick_settimeout)(FAR struct timer_lowerhalf_s *lower,
                                uint32_t timeout);
 
   /* Get the maximum supported tick timeout value */
@@ -276,12 +286,12 @@ static inline
 int timer_settimeout(FAR struct timer_lowerhalf_s *lower,
                      uint32_t timeout)
 {
-  if (lower->ops->tick_setttimeout == NULL)
+  if (lower->ops->tick_settimeout == NULL)
     {
       return -ENOTSUP;
     }
 
-  return lower->ops->tick_setttimeout(lower, USEC2TICK(timeout));
+  return lower->ops->tick_settimeout(lower, USEC2TICK(timeout));
 }
 
 static inline

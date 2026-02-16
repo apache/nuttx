@@ -24,12 +24,12 @@ set(SRCS
     sched_getprioritymax.c
     sched_getprioritymin.c
     clock_getcpuclockid.c
-    clock_getres.c
     task_cancelpt.c
     task_setcancelstate.c
     task_setcanceltype.c
     task_testcancel.c
-    task_gettid.c)
+    task_gettid.c
+    task_getpid.c)
 
 if(CONFIG_SMP)
   list(APPEND SRCS sched_cpucount.c)
@@ -41,6 +41,10 @@ endif()
 
 if(NOT CONFIG_BUILD_KERNEL)
   list(APPEND SRCS task_startup.c)
+endif()
+
+if(CONFIG_ARCH_HAVE_PERF_EVENTS_USER_ACCESS)
+  list(APPEND SRCS clock_perf.c)
 endif()
 
 target_sources(c PRIVATE ${SRCS})
