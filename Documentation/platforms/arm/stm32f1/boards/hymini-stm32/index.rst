@@ -417,8 +417,6 @@ Differences between the two NSH configurations::
              nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard # Restore the mount
 
            Failure to do this could result in corruption of the SD card format.
-       (5) Option CONFIG_NSH_ARCHINIT must be enabled in order to call the SDIO slot
-           initialization code.
 
 usbmsc
 ------
@@ -454,7 +452,6 @@ NOTES:
        CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
        CONFIG_USBDEV_TRACE_NRECORDS=128        : Buffer 128 records in memory
        CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
-       CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
        CONFIG_USBMONITOR=y              : Enable the USB monitor daemon
        CONFIG_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
        CONFIG_USBMONITOR_PRIORITY=50    : USB monitor daemon priority

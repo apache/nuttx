@@ -124,8 +124,6 @@ int board_app_initialize(uintptr_t arg)
 #else
   /* Perform board-specific initialization */
 
-#ifdef CONFIG_NSH_ARCHINIT
-
 #ifdef CONFIG_FS_PROCFS
   mount(NULL, "/proc", "procfs", 0, NULL);
 #endif
@@ -157,7 +155,6 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
   return OK;
-#endif
 }
 
 /****************************************************************************
@@ -198,11 +195,7 @@ void board_late_initialize(void)
     }
 #endif /* CONFIG_BUILD_KERNEL && !CONFIG_RISCV_SEMIHOSTING_HOSTFS */
 
-#ifdef CONFIG_NSH_ARCHINIT
-
   mount(NULL, "/proc", "procfs", 0, NULL);
-
-#endif
 
 #ifdef CONFIG_USERLED
   /* Register the LED driver */

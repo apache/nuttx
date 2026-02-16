@@ -1176,9 +1176,6 @@ AT25 Serial FLASH
   a lot, but at 20MHz, the behavior is not the same with all CM modules.  This
   lower rate gives more predictable performance.
 
-    Application Configuration -> NSH Library
-      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
-
     Board Selection
       CONFIG_SAMA5D3XEK_AT25_BLOCKMOUNT=y   : Mounts AT25 for NSH
       CONFIG_SAMA5D3XEK_AT25_FTL=y          : Create block driver for FAT
@@ -1275,9 +1272,6 @@ HSMCI Card Slots
 
     Library Routines
       CONFIG_SCHED_WORKQUEUE=y              : Driver needs work queue support
-
-    Application Configuration -> NSH Library
-      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
     Using the SD card
     -----------------
@@ -1418,9 +1412,6 @@ USB High-Speed Device
     System Type -> ATSAMA5 Peripheral Support
       CONFIG_SAMA5_UDPHS=y                  : Enable UDPHS High Speed USB device
 
-    Application Configuration -> NSH Library
-      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
-
   Mass Storage Class
   ------------------
 
@@ -1508,7 +1499,6 @@ USB High-Speed Device
 
     Application Configuration -> NSH LIbrary:
       CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
-      CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
 
     Application Configuration -> System NSH Add-Ons:
       CONFIG_USBMONITOR=y              : Enable the USB monitor daemon
@@ -1552,9 +1542,6 @@ USB High-Speed Host
       CONFIG_SCHED_WORKQUEUE=y             : High priority worker thread support is required
       CONFIG_SCHED_HPWORK=y                :
 
-    Application Configuration -> NSH Library
-      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
-
   EHCI
   ----
 
@@ -1583,9 +1570,6 @@ USB High-Speed Host
     RTOS Features -> Work Queue Support
       CONFIG_SCHED_WORKQUEUE=y             : High priority worker thread support is required
       CONFIG_SCHED_HPWORK=y                :
-
-    Application Configuration -> NSH Library
-      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
   USB Hub Support
   ----------------
@@ -1692,7 +1676,6 @@ USB High-Speed Host
 
     Application Configuration -> NSH LIbrary:
       CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
-      CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
 
     Application Configuration -> System NSH Add-Ons:
       CONFIG_USBMONITOR=y              : Enable the USB monitor daemon
@@ -1882,9 +1865,6 @@ NAND Support
       CONFIG_SAMA5_EBICS3_SWECC=y       : Use S/W ECC calculation
 
       Defaults for ROM page table addresses should be okay
-
-    Application Configuration -> NSH Library
-      CONFIG_NSH_ARCHINIT=y             : Use architecture-specific initialization
 
     NOTES:
 
@@ -2223,9 +2203,6 @@ AT24 Serial EEPROM
       CONFIG_MTD_AT24XX=y                   : Enable the AT24 driver
       CONFIG_AT24XX_SIZE=512                : Specifies the AT 24C512 part
       CONFIG_AT24XX_ADDR=0x53               : AT24 I2C address
-
-    Application Configuration -> NSH Library
-      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
     File systems
       CONFIG_NXFFS=y                        : Enables the NXFFS file system

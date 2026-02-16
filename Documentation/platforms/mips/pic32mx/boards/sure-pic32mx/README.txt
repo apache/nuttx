@@ -738,9 +738,6 @@ Where <subdir> is one of the following:
 
        To enable apps/examples/slcd to test the LCD:
 
-       Application Configuration -> NSH Library:
-         CONFIG_NSH_ARCHINIT=y      : Needed to initialize the SLCD
-
        Application Configuration -> Examples:
          CONFIG_EXAMPLES_SLCD=y     : Enable apps/examples/slcd use /dev/lcd1602
          CONFIG_EXAMPLES_SLCD_DEVNAME="/dev/lcd1602"
@@ -855,7 +852,6 @@ Where <subdir> is one of the following:
 
         Application Configuration -> NSH LIbrary:
           CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
-          CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
 
         Application Configuration -> System NSH Add-Ons:
           CONFIG_USBMONITOR=y              : Enable the USB monitor daemon

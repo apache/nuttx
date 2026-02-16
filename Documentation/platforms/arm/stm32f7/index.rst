@@ -17,7 +17,7 @@ Peripheral  Support  Notes
 ==========  =======  =====
 FLASH       Yes
 PM          ?
-RCC         Yes      
+RCC         Yes
 GPIO        Yes
 SYSCFG      Yes
 DMA         Yes
@@ -192,7 +192,7 @@ CAN
 - CONFIG_CAN_TXFIFOSIZE - The size of the circular tx buffer
   of CAN messages.
   Default: 8
-   
+
 - CONFIG_CAN_RXFIFOSIZE - The size of the circular rx buffer
   of CAN messages.
   Default: 8
@@ -382,7 +382,6 @@ The builtin SPI test facility can be enabled with the following settings::
     +CONFIG_NUCLEO_SPI3_TEST_MODE3=y
 
     +CONFIG_BOARDCTL=y
-    +CONFIG_NSH_ARCHINIT=y
 
 Development Environment
 =======================

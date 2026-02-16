@@ -23,7 +23,7 @@ Contents
 Summary for Those Who Don't Like to Read
 ========================================
 
-To use, in your board_app_initialize(),
+To use:
 
 1)  instantiate an I2C bus:
 

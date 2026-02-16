@@ -73,28 +73,12 @@
 /* MMC/SD configuration */
 
 #ifdef NSH_HAVE_MMCSD
-#  ifdef CONFIG_NSH_ARCHINIT
-#    if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 2
-#      warning "The Sure PIC32MX MMC/SD is on SPI2"
-#      undef CONFIG_NSH_MMCSDSPIPORTNO
-#      define CONFIG_NSH_MMCSDSPIPORTNO 2
-#    endif
-#    if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
-#      error "The Sure PIC32MX MMC/SD has only one slot (0)"
-#      warning CONFIG_NSH_MMCSDSLOTNO
-#      define CONFIG_NSH_MMCSDSLOTNO 0
-#    endif
-#    ifndef CONFIG_NSH_MMCSDMINOR
-#      define CONFIG_NSH_MMCSDMINOR 0
-#    endif
-#  else
 #    undef  CONFIG_NSH_MMCSDSPIPORTNO
 #    define CONFIG_NSH_MMCSDSPIPORTNO 2
 #    undef  CONFIG_NSH_MMCSDSLOTNO
 #    define CONFIG_NSH_MMCSDSLOTNO 0
 #    undef  CONFIG_NSH_MMCSDMINOR
 #    define CONFIG_NSH_MMCSDMINOR 0
-#  endif
 #endif
 
 /* USB Host */

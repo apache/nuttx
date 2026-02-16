@@ -1134,9 +1134,6 @@ AT25 Serial FLASH
   a lot, but at 20MHz, the behavior is not the same with all CM modules.  This
   lower rate gives more predictable performance.
 
-    Application Configuration -> NSH Library
-      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
-
     Board Selection
       CONFIG_SAMA5D3XPLAINED_AT25_AUTOMOUNT=y         : Mounts AT25 for NSH
       CONFIG_SAMA5D3XPLAINED_AT25_FTL=y               : Create block driver for FAT
@@ -1230,9 +1227,6 @@ HSMCI Card Slots
 
     Library Routines
       CONFIG_SCHED_WORKQUEUE=y              : Driver needs work queue support
-
-    Application Configuration -> NSH Library
-      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
     Using the SD card
     -----------------
@@ -1374,9 +1368,6 @@ USB High-Speed Device
     System Type -> ATSAMA5 Peripheral Support
       CONFIG_SAMA5_UDPHS=y                  : Enable UDPHS High Speed USB device
 
-    Application Configuration -> NSH Library
-      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
-
   Mass Storage Class
   ------------------
 
@@ -1471,7 +1462,6 @@ USB High-Speed Device
 
     Application Configuration -> NSH LIbrary:
       CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
-      CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
 
     Application Configuration -> System NSH Add-Ons:
       CONFIG_USBMONITOR=y              : Enable the USB monitor daemon
@@ -1515,8 +1505,6 @@ USB High-Speed Host
       CONFIG_SCHED_WORKQUEUE=y             : High priority worker thread support is required
       CONFIG_SCHED_HPWORK=y                :
 
-    Application Configuration -> NSH Library
-      CONFIG_NSH_ARCHINIT=y                : NSH board-initialization
 file1: CONFIG_USBHOST_ISOC_DISABLE=y
 
   NOTE:  When OHCI is selected, the SAMA5 will operate at 384MHz instead of
@@ -1552,9 +1540,6 @@ file1: CONFIG_USBHOST_ISOC_DISABLE=y
     RTOS Features -> Work Queue Support
       CONFIG_SCHED_WORKQUEUE=y             : High priority worker thread support is required
       CONFIG_SCHED_HPWORK=y                :
-
-    Application Configuration -> NSH Library
-      CONFIG_NSH_ARCHINIT=y                : NSH board-initialization
 
   USB Hub Support
   ----------------
@@ -1665,7 +1650,6 @@ file1: CONFIG_USBHOST_ISOC_DISABLE=y
 
     Application Configuration -> NSH LIbrary:
       CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
-      CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
 
     Application Configuration -> System NSH Add-Ons:
       CONFIG_USBMONITOR=y              : Enable the USB monitor daemon
@@ -1820,9 +1804,6 @@ NAND Support
       CONFIG_SAMA5_EBICS3_SWECC=y       : Use S/W ECC calculation
 
       Defaults for ROM page table addresses should be okay
-
-    Application Configuration -> NSH Library
-      CONFIG_NSH_ARCHINIT=y             : Use architecture-specific initialization
 
     NOTES:
 
@@ -2868,7 +2849,6 @@ Shields
   For testing, you can add the following configuration options to enable the
   analog joystick example at apps/examples/ajoystick:
 
-    CONFIG_NSH_ARCHINIT=y
     CONFIG_EXAMPLES_AJOYSTICK=y
     CONFIG_EXAMPLES_AJOYSTICK_DEVNAME="/dev/ajoy0"
 

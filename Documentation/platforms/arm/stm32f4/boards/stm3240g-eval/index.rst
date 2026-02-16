@@ -601,8 +601,6 @@ NOTES:
         CONFIG_STM32_SYSCFG=y    : Needed for all USB OTF FS support
         CONFIG_SCHED_WORKQUEUE=y : Worker thread support is required for the mass
                                   storage class driver.
-        CONFIG_NSH_ARCHINIT=y    : Architecture specific USB initialization
-                                  is needed for NSH
         CONFIG_FS_FAT=y          : Needed by the USB host mass storage class.
 
     With those changes, you can use NSH with a FLASH pen driver as shown
