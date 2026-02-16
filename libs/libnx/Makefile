@@ -267,6 +267,7 @@ clean:
 distclean: clean
 	$(call DELDIR, bin)
 	$(call DELDIR, kbin)
+	$(call DELFILE, $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds))
 	$(call DELFILE, .depend)
 	$(Q) $(MAKE) -C nxfonts -f Makefile.sources distclean EXTRAFLAGS="$(EXTRAFLAGS)"
 
