@@ -1475,7 +1475,7 @@ static void imxrt_lpspi_exchange(struct spi_dev_s *dev,
 
   /* Convert the number of word to a number of bytes */
 
-  nbytes = (priv->nbits > 8) ? nwords << 2 : nwords;
+  nbytes = (priv->nbits > 8) ? nwords << 1 : nwords;
 
   /* Invalid DMA channels fall back to non-DMA method. */
 
@@ -1526,7 +1526,7 @@ static void imxrt_lpspi_exchange(struct spi_dev_s *dev,
   config.daddr  = (uint32_t) (rxbuffer ? rxbuffer : rxdummy);
   config.soff   = 0;
   config.doff   = rxbuffer ? adjust : 0;
-  config.iter   = nbytes;
+  config.iter   = nwords;
   config.flags  = EDMA_CONFIG_LINKTYPE_LINKNONE;
   config.ssize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
   config.dsize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
@@ -1540,7 +1540,7 @@ static void imxrt_lpspi_exchange(struct spi_dev_s *dev,
   config.daddr  = priv->spibase + IMXRT_LPSPI_TDR_OFFSET;
   config.soff   = txbuffer ? adjust : 0;
   config.doff   = 0;
-  config.iter   = nbytes;
+  config.iter   = nwords;
   config.flags  = EDMA_CONFIG_LINKTYPE_LINKNONE;
   config.ssize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
   config.dsize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
