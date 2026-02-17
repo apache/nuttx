@@ -61,6 +61,7 @@
 #include "chip.h"
 #include "hardware/imx9_enet.h"
 #include "imx9_enet.h"
+#include "imx9_clockconfig.h"
 
 #include "imx9_ccm.h"
 #include "imx9_iomuxc.h"
@@ -127,16 +128,6 @@
 /* PHY reset tim in loop counts */
 
 #define PHY_RESET_WAIT_COUNT (10)
-
-/* Estimate the MII_SPEED in order to get an MDC close to 2.5MHz,
- * based on the internal module (ENET) clock:
-
- * MII clock frequency = 133 MHz / ((26 + 1) x 2) = 2.5 MHz
- *
- * TODO: This is hard-coded for now, could be properly calculated
- */
-
-#define IMX9_MII_SPEED  26
 
 /* Interrupt groups */
 
@@ -1928,12 +1919,43 @@ static int imx9_phyintenable(struct imx9_driver_s *priv)
 
 static void imx9_initmii(struct imx9_driver_s *priv)
 {
-  /* Speed is based on the peripheral (bus) clock; hold time is 2 module
-   * clock.  This hold time value may need to be increased on some platforms
+  uint32_t divider;
+  uint32_t freq = 0;
+
+  /* Wakeup_axi_clk is root clock for MII */
+
+  imx9_get_rootclock(CCM_WAKEUP_AXI_CLK_ROOT, &freq);
+  if (!freq)
+    {
+       nerr("Root clock is zero\n");
+       return;
+    }
+
+  /* MII clock frequency must be <= 2,5 MHz
+   *
+   * Divider = (root clock / (2 * 2,5MHZ)) - 1
+   *
+   */
+
+  divider = freq / 5000000;
+
+  /* round up */
+
+  if (freq % 5000000)
+    {
+      divider++;
+    }
+
+  divider--;
+
+  DEBUGASSERT(divider > 0 && divider < 64);
+
+  /* Hold time is 2 module clock.  This hold time value may need
+   * to be increased on some platforms
    */
 
   imx9_enet_putreg32(priv, ENET_MSCR_HOLDTIME_2CYCLES |
-                      IMX9_MII_SPEED << ENET_MSCR_MII_SPEED_SHIFT,
+                      divider << ENET_MSCR_MII_SPEED_SHIFT,
                       IMX9_ENET_MSCR_OFFSET);
 }
 
