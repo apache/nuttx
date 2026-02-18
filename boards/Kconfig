@@ -1921,6 +1921,7 @@ config ARCH_BOARD_NUCLEO_H743ZI2
 	depends on ARCH_CHIP_STM32H743ZI
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		STMicro Nucleo H743ZI2 board based on the STMicro STM32H743ZI MCU.
 
