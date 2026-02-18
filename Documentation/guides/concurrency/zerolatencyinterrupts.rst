@@ -307,3 +307,45 @@ You can find an example that tests the high priority, nested interrupts in the N
 * ``nuttx/boards/arm/stm32f1/viewtool-stm32f107/src/stm32_highpri`` Test
   driver.
 
+AVR DA/DB implementation
+========================
+
+Implementation of high priority interrupts allows the user to bypass the generic
+interrupt handling. There is, however, no mechanism described in the "Getting Back
+into the Game" section.
+
+This AVR family only has one interrupt vector that can be declared as high-priority.
+Nevertheless, you can disable the generic handler for multiple vectors - they will
+execute with regular priority though.
+
+AVR DA/DB Configuration Options
+-------------------------------
+
+High priority interrupts are enabled in
+:menuselection:`System type --> Enable high priority interrupts`
+
+Enabling this option allows fine-grained selection of interrupt handlers
+which should have their default implementation disabled.
+
+Interrupt handlers that relate to hardware controlled by drivers must
+not be overridden this way.
+
+Non-default interrupt handling
+------------------------------
+
+With GCC, interrupt handler is defined using the following code:
+
+.. code:: c
+
+   void __vector_avrdx_usart2_dre (void) \
+        __attribute__ ((__signal__,__used__, __externally_visible__));
+   void __vector_avrdx_usart2_dre (void)
+   {
+     /* your implementation */
+   }
+
+The compiled code will preserve contents of all registers (not just call-preserved ones
+like in regular functions) and return using ``reti`` (return from interrupt) instruction.
+
+The function name always corresponds to interrupt name as specified in datasheet
+for the chip in question.

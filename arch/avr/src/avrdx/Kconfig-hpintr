@@ -1,0 +1,434 @@
+config AVRDX_HIGH_PRIO_BOD_VLM
+	bool "BOD_VLM"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_RTC_PIT
+	bool "RTC_PIT"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_CCL_CCL
+	bool "CCL_CCL"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_PORTA_PORT
+	bool "PORTA_PORT"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+		Note that since it is impossible to determine which I/O ports
+		are used by board code for input drivers (e.g. button),
+		no mutual exclusion is in place for this configuration option
+		with regards to drivers. Caution is advised.
+
+config AVRDX_HIGH_PRIO_TCA0_OVF
+	bool "TCA0_OVF"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_TCA0_HUNF
+	bool "TCA0_HUNF"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_TCA0_CMP0
+	bool "TCA0_CMP0"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_TCA0_CMP1
+	bool "TCA0_CMP1"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_TCA0_CMP2
+	bool "TCA0_CMP2"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_TCB0_INT
+	bool "TCB0_INT"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_TCB1_INT
+	bool "TCB1_INT"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_TCD0_OVF
+	bool "TCD0_OVF"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_TCD0_TRIG
+	bool "TCD0_TRIG"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_TWI0_TWIS
+	bool "TWI0_TWIS"
+	depends on !AVR_TWI0
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_TWI0_TWIM
+	bool "TWI0_TWIM"
+	depends on !AVR_TWI0
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_SPI0_INT
+	bool "SPI0_INT"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_USART0_RXC
+	bool "USART0_RXC"
+	depends on !AVR_USART0
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_USART0_DRE
+	bool "USART0_DRE"
+	depends on !AVR_USART0
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_USART0_TXC
+	bool "USART0_TXC"
+	depends on !AVR_USART0
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_PORTD_PORT
+	bool "PORTD_PORT"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+		Note that since it is impossible to determine which I/O ports
+		are used by board code for input drivers (e.g. button),
+		no mutual exclusion is in place for this configuration option
+		with regards to drivers. Caution is advised.
+
+config AVRDX_HIGH_PRIO_AC0_AC
+	bool "AC0_AC"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_ADC0_RESRDY
+	bool "ADC0_RESRDY"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_ADC0_WCMP
+	bool "ADC0_WCMP"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_ZCD0_ZCD
+	bool "ZCD0_ZCD"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_PTC_PTC
+	bool "PTC_PTC"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_AC1_AC
+	bool "AC1_AC"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_PORTC_PORT
+	bool "PORTC_PORT"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+		Note that since it is impossible to determine which I/O ports
+		are used by board code for input drivers (e.g. button),
+		no mutual exclusion is in place for this configuration option
+		with regards to drivers. Caution is advised.
+
+config AVRDX_HIGH_PRIO_TCB2_INT
+	bool "TCB2_INT"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_USART1_RXC
+	bool "USART1_RXC"
+	depends on !AVR_USART1
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_USART1_DRE
+	bool "USART1_DRE"
+	depends on !AVR_USART1
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_USART1_TXC
+	bool "USART1_TXC"
+	depends on !AVR_USART1
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_PORTF_PORT
+	bool "PORTF_PORT"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+		Note that since it is impossible to determine which I/O ports
+		are used by board code for input drivers (e.g. button),
+		no mutual exclusion is in place for this configuration option
+		with regards to drivers. Caution is advised.
+
+config AVRDX_HIGH_PRIO_NVMCTRL_EE
+	bool "NVMCTRL_EE"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_SPI1_INT
+	bool "SPI1_INT"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_USART2_RXC
+	bool "USART2_RXC"
+	depends on !AVR_USART2
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_USART2_DRE
+	bool "USART2_DRE"
+	depends on !AVR_USART2
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_USART2_TXC
+	bool "USART2_TXC"
+	depends on !AVR_USART2
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_AC2_AC
+	bool "AC2_AC"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_TCB3_INT
+	bool "TCB3_INT"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_TWI1_TWIS
+	bool "TWI1_TWIS"
+	depends on !AVR_TWI1 && AVR_HAVE_TWI1
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_TWI1_TWIM
+	bool "TWI1_TWIM"
+	depends on !AVR_TWI1 && AVR_HAVE_TWI1
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_PORTB_PORT
+	bool "PORTB_PORT"
+	depends on AVR_HAVE_PORTB
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+		Note that since it is impossible to determine which I/O ports
+		are used by board code for input drivers (e.g. button),
+		no mutual exclusion is in place for this configuration option
+		with regards to drivers. Caution is advised.
+
+config AVRDX_HIGH_PRIO_PORTE_PORT
+	bool "PORTE_PORT"
+	depends on AVR_HAVE_PORTE
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+		Note that since it is impossible to determine which I/O ports
+		are used by board code for input drivers (e.g. button),
+		no mutual exclusion is in place for this configuration option
+		with regards to drivers. Caution is advised.
+
+config AVRDX_HIGH_PRIO_TCA1_OVF
+	bool "TCA1_OVF"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_TCA1_HUNF
+	bool "TCA1_HUNF"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_TCA1_CMP0
+	bool "TCA1_CMP0"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_TCA1_CMP1
+	bool "TCA1_CMP1"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_TCA1_CMP2
+	bool "TCA1_CMP2"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_ZCD1_ZCD
+	bool "ZCD1_ZCD"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_USART3_RXC
+	bool "USART3_RXC"
+	depends on AVR_HAVE_USART_4
+	depends on !AVR_USART3
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_USART3_DRE
+	bool "USART3_DRE"
+	depends on AVR_HAVE_USART_4
+	depends on !AVR_USART3
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_USART3_TXC
+	bool "USART3_TXC"
+	depends on AVR_HAVE_USART_4
+	depends on !AVR_USART3
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_USART4_RXC
+	bool "USART4_RXC"
+	depends on AVR_HAVE_USART_4
+	depends on !AVR_USART4
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_USART4_DRE
+	bool "USART4_DRE"
+	depends on AVR_HAVE_USART_4
+	depends on !AVR_USART4
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_USART4_TXC
+	bool "USART4_TXC"
+	depends on AVR_HAVE_USART_4
+	depends on !AVR_USART4
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_PORTG_PORT
+	bool "PORTG_PORT"
+	depends on AVR_HAVE_PORTG
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+		Note that since it is impossible to determine which I/O ports
+		are used by board code for input drivers (e.g. button),
+		no mutual exclusion is in place for this configuration option
+		with regards to drivers. Caution is advised.
+
+config AVRDX_HIGH_PRIO_ZCD2_ZCD
+	bool "ZCD2_ZCD"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_TCB4_INT
+	bool "TCB4_INT"
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_USART5_RXC
+	bool "USART5_RXC"
+	depends on AVR_HAVE_USART_5
+	depends on !AVR_USART5
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_USART5_DRE
+	bool "USART5_DRE"
+	depends on AVR_HAVE_USART_5
+	depends on !AVR_USART5
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
+
+config AVRDX_HIGH_PRIO_USART5_TXC
+	bool "USART5_TXC"
+	depends on AVR_HAVE_USART_5
+	depends on !AVR_USART5
+	default n
+	---help---
+		Disable generic interrupt handler for this interrupt vector.
