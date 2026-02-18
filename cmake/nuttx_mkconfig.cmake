@@ -43,42 +43,12 @@ if(COMPARE_RESULT EQUAL 0 AND EXISTS ${CONFIG_H})
 endif()
 
 set(BASE_DEFCONFIG "${NUTTX_BOARD}/${NUTTX_CONFIG}")
-# Mirror tools/Unix.mk:258-263: compare .config to .config.orig after stripping
-# CONFIG_BASE_DEFCONFIG lines so our own write of that value does not spuriously
-# trigger -dirty on subsequent runs.
-file(READ ${CMAKE_BINARY_DIR}/.config CONFIG_FOR_DIRTY)
-file(READ ${CMAKE_BINARY_DIR}/.config.orig CONFIG_ORIG_FOR_DIRTY)
-# Strip CONFIG_BASE_DEFCONFIG line (with optional trailing newline for last line)
-string(REGEX REPLACE "\nCONFIG_BASE_DEFCONFIG=\"[^\"]*\"\n?" "\n"
-       CONFIG_FOR_DIRTY "${CONFIG_FOR_DIRTY}")
-string(REGEX REPLACE "^CONFIG_BASE_DEFCONFIG=\"[^\"]*\"\n?" ""
-       CONFIG_FOR_DIRTY "${CONFIG_FOR_DIRTY}")
-string(REGEX REPLACE "\nCONFIG_BASE_DEFCONFIG=\"[^\"]*\"\n?" "\n"
-       CONFIG_ORIG_FOR_DIRTY "${CONFIG_ORIG_FOR_DIRTY}")
-string(REGEX REPLACE "^CONFIG_BASE_DEFCONFIG=\"[^\"]*\"\n?" ""
-       CONFIG_ORIG_FOR_DIRTY "${CONFIG_ORIG_FOR_DIRTY}")
-if(CONFIG_FOR_DIRTY STREQUAL CONFIG_ORIG_FOR_DIRTY)
-  set(COMPARE_RESULT 0)
-else()
-  set(COMPARE_RESULT 1)
-endif()
+execute_process(
+  COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_BINARY_DIR}/.config
+          ${CMAKE_BINARY_DIR}/.config.orig RESULT_VARIABLE COMPARE_RESULT)
 if(COMPARE_RESULT)
   string(APPEND BASE_DEFCONFIG "-dirty")
 endif()
-
-# Write CONFIG_BASE_DEFCONFIG to .config so it matches Make behavior
-file(READ ${CMAKE_BINARY_DIR}/.config CONFIG_CONTENT)
-string(REGEX REPLACE "CONFIG_BASE_DEFCONFIG=\".*\""
-       "CONFIG_BASE_DEFCONFIG=\"${BASE_DEFCONFIG}\"" CONFIG_CONTENT
-       "${CONFIG_CONTENT}")
-if(NOT CONFIG_CONTENT MATCHES "CONFIG_BASE_DEFCONFIG=")
-  string(APPEND CONFIG_CONTENT "\nCONFIG_BASE_DEFCONFIG=\"${BASE_DEFCONFIG}\"\n")
-endif()
-file(WRITE ${CMAKE_BINARY_DIR}/.config "${CONFIG_CONTENT}")
-execute_process(
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/.config
-          ${CMAKE_BINARY_DIR}/.config.prev
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 set(DEQUOTELIST
     # NuttX
