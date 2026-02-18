@@ -642,4 +642,33 @@ config AVRDX_ARCH_UDELAY_NO_OSC32K
 
 		Say Y if your board does not use 32.768kHz clock.
 
+menuconfig AVRDX_HIGH_PRIO_INTERRUPTS
+	bool "Enable high priority interrupts"
+	default n
+	---help---
+		Enabling this option unlocks fine grained selection of interrupt handlers
+		to be excluded from generic interrupt handling. Instead, your application/board
+		code will provide handler suited to your specific needs.
+
+		Generic interrupt handling always saves context of the process that was interrupted
+		and then calls into the operating system common code which takes care of driver
+		code invocation, scheduling etc. This takes time which may not be desirable
+		for interrupts that execute often or need to have strict response times.
+
+		However, since (if) your implementation does not do that, your interrupt handler
+		must not communicate with the operating system. It is also not possible to disable
+		generic interrupt handling for interrupt vectors used by enabled drivers.
+
+		More comprehensive information can be found in Documentation, in the guide article
+		named High Performance: Zero Latency Interrupts, Maskable Nested Interrupts.
+
+		Interrupt handlers to be excluded from generic interrupt handling are specified
+		by "Peripheral source" codes from the datasheet.
+
+if AVRDX_HIGH_PRIO_INTERRUPTS
+
+source "arch/avr/src/avrdx/Kconfig-hpintr"
+
+endif # AVRDX_HIGH_PRIO_INTERRUPTS
+
 endif # if ARCH_CHIP_AVRDX
