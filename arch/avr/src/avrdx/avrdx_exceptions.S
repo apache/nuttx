@@ -96,15 +96,11 @@
 	HANDLER avrdx_rtc_pit, AVRDX_IRQ_RTC_PIT, excpt_common
 	HANDLER avrdx_ccl_ccl, AVRDX_IRQ_CCL_CCL, excpt_common
 	HANDLER avrdx_porta_port, AVRDX_IRQ_PORTA_PORT, excpt_common
-	HANDLER avrdx_tca0_lunf, AVRDX_IRQ_TCA0_LUNF, excpt_common
 	HANDLER avrdx_tca0_ovf, AVRDX_IRQ_TCA0_OVF, excpt_common
 	HANDLER avrdx_tca0_hunf, AVRDX_IRQ_TCA0_HUNF, excpt_common
 	HANDLER avrdx_tca0_cmp0, AVRDX_IRQ_TCA0_CMP0, excpt_common
-	HANDLER avrdx_tca0_lcmp0, AVRDX_IRQ_TCA0_LCMP0, excpt_common
 	HANDLER avrdx_tca0_cmp1, AVRDX_IRQ_TCA0_CMP1, excpt_common
-	HANDLER avrdx_tca0_lcmp1, AVRDX_IRQ_TCA0_LCMP1, excpt_common
 	HANDLER avrdx_tca0_cmp2, AVRDX_IRQ_TCA0_CMP2, excpt_common
-	HANDLER avrdx_tca0_lcmp2, AVRDX_IRQ_TCA0_LCMP2, excpt_common
 	HANDLER avrdx_tcb0_int, AVRDX_IRQ_TCB0_INT, excpt_common
 	HANDLER avrdx_tcb1_int, AVRDX_IRQ_TCB1_INT, excpt_common
 	HANDLER avrdx_tcd0_ovf, AVRDX_IRQ_TCD0_OVF, excpt_common
@@ -139,15 +135,11 @@
 	HANDLER avrdx_twi1_twim, AVRDX_IRQ_TWI1_TWIM, excpt_common
 	HANDLER avrdx_portb_port, AVRDX_IRQ_PORTB_PORT, excpt_common
 	HANDLER avrdx_porte_port, AVRDX_IRQ_PORTE_PORT, excpt_common
-	HANDLER avrdx_tca1_lunf, AVRDX_IRQ_TCA1_LUNF, excpt_common
 	HANDLER avrdx_tca1_ovf, AVRDX_IRQ_TCA1_OVF, excpt_common
 	HANDLER avrdx_tca1_hunf, AVRDX_IRQ_TCA1_HUNF, excpt_common
 	HANDLER avrdx_tca1_cmp0, AVRDX_IRQ_TCA1_CMP0, excpt_common
-	HANDLER avrdx_tca1_lcmp0, AVRDX_IRQ_TCA1_LCMP0, excpt_common
 	HANDLER avrdx_tca1_cmp1, AVRDX_IRQ_TCA1_CMP1, excpt_common
-	HANDLER avrdx_tca1_lcmp1, AVRDX_IRQ_TCA1_LCMP1, excpt_common
 	HANDLER avrdx_tca1_cmp2, AVRDX_IRQ_TCA1_CMP2, excpt_common
-	HANDLER avrdx_tca1_lcmp2, AVRDX_IRQ_TCA1_LCMP2, excpt_common
 	HANDLER avrdx_zcd1_zcd, AVRDX_IRQ_ZCD1_ZCD, excpt_common
 	HANDLER avrdx_usart3_rxc, AVRDX_IRQ_USART3_RXC, excpt_common
 	HANDLER avrdx_usart3_dre, AVRDX_IRQ_USART3_DRE, excpt_common
@@ -170,15 +162,11 @@
 	HANDLER avrdx_rtc_pit, AVRDX_IRQ_RTC_PIT, excpt_common
 	HANDLER avrdx_ccl_ccl, AVRDX_IRQ_CCL_CCL, excpt_common
 	HANDLER avrdx_porta_port, AVRDX_IRQ_PORTA_PORT, excpt_common
-	HANDLER avrdx_tca0_lunf, AVRDX_IRQ_TCA0_LUNF, excpt_common
 	HANDLER avrdx_tca0_ovf, AVRDX_IRQ_TCA0_OVF, excpt_common
 	HANDLER avrdx_tca0_hunf, AVRDX_IRQ_TCA0_HUNF, excpt_common
 	HANDLER avrdx_tca0_cmp0, AVRDX_IRQ_TCA0_CMP0, excpt_common
-	HANDLER avrdx_tca0_lcmp0, AVRDX_IRQ_TCA0_LCMP0, excpt_common
 	HANDLER avrdx_tca0_cmp1, AVRDX_IRQ_TCA0_CMP1, excpt_common
-	HANDLER avrdx_tca0_lcmp1, AVRDX_IRQ_TCA0_LCMP1, excpt_common
 	HANDLER avrdx_tca0_cmp2, AVRDX_IRQ_TCA0_CMP2, excpt_common
-	HANDLER avrdx_tca0_lcmp2, AVRDX_IRQ_TCA0_LCMP2, excpt_common
 	HANDLER avrdx_tcb0_int, AVRDX_IRQ_TCB0_INT, excpt_common
 	HANDLER avrdx_tcb1_int, AVRDX_IRQ_TCB1_INT, excpt_common
 	HANDLER avrdx_tcd0_ovf, AVRDX_IRQ_TCD0_OVF, excpt_common
@@ -212,15 +200,11 @@
 	HANDLER avrdx_tcb3_int, AVRDX_IRQ_TCB3_INT, excpt_common
 	HANDLER avrdx_portb_port, AVRDX_IRQ_PORTB_PORT, excpt_common
 	HANDLER avrdx_porte_port, AVRDX_IRQ_PORTE_PORT, excpt_common
-	HANDLER avrdx_tca1_lunf, AVRDX_IRQ_TCA1_LUNF, excpt_common
 	HANDLER avrdx_tca1_ovf, AVRDX_IRQ_TCA1_OVF, excpt_common
 	HANDLER avrdx_tca1_hunf, AVRDX_IRQ_TCA1_HUNF, excpt_common
 	HANDLER avrdx_tca1_cmp0, AVRDX_IRQ_TCA1_CMP0, excpt_common
-	HANDLER avrdx_tca1_lcmp0, AVRDX_IRQ_TCA1_LCMP0, excpt_common
 	HANDLER avrdx_tca1_cmp1, AVRDX_IRQ_TCA1_CMP1, excpt_common
-	HANDLER avrdx_tca1_lcmp1, AVRDX_IRQ_TCA1_LCMP1, excpt_common
 	HANDLER avrdx_tca1_cmp2, AVRDX_IRQ_TCA1_CMP2, excpt_common
-	HANDLER avrdx_tca1_lcmp2, AVRDX_IRQ_TCA1_LCMP2, excpt_common
 	HANDLER avrdx_zcd1_zcd, AVRDX_IRQ_ZCD1_ZCD, excpt_common
 	HANDLER avrdx_usart3_rxc, AVRDX_IRQ_USART3_RXC, excpt_common
 	HANDLER avrdx_usart3_dre, AVRDX_IRQ_USART3_DRE, excpt_common
