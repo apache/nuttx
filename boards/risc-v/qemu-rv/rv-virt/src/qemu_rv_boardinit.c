@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/sg2000/milkv_duos/src/sg2000_appinit.c
+ * boards/risc-v/qemu-rv/rv-virt/src/qemu_rv_boardinit.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -30,105 +30,67 @@
 #include <stdio.h>
 #include <syslog.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/board.h>
 #include <nuttx/drivers/ramdisk.h>
+#include <nuttx/virtio/virtio-mmio.h>
+
 #include <sys/mount.h>
-#include <sys/boardctl.h>
-#include <arch/board/board_memorymap.h>
+
+#include "hardware/qemu_rv_memorymap.h"
+#include "qemu_rv_memorymap.h"
+#include "qemu_rv_rptun.h"
+
+#include "riscv_sbi.h"
+#include "romfs.h"
+
+#ifdef CONFIG_USERLED
+#include <nuttx/leds/userled.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Ramdisk Definition */
+#define QEMU_VIRTIO_MMIO_BASE    0x10001000
+#define QEMU_VIRTIO_MMIO_REGSIZE 0x1000
+#ifdef CONFIG_ARCH_USE_S_MODE
+#  define QEMU_VIRTIO_MMIO_IRQ   26
+#else
+#  define QEMU_VIRTIO_MMIO_IRQ   28
+#endif
+#define QEMU_VIRTIO_MMIO_NUM     8
 
 #define SECTORSIZE   512
 #define NSECTORS(b)  (((b) + SECTORSIZE - 1) / SECTORSIZE)
-#define RAMDISK_DEVICE_MINOR 0
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mount_ramdisk
- *
- * Description:
- *  Mount a ramdisk defined in the ld.script to /dev/ramX.  The ramdisk is
- *  intended to contain a romfs with applications which can be spawned at
- *  runtime.
- *
- * Returned Value:
- *   OK is returned on success.
- *   -ERRORNO is returned on failure.
- *
+ * Name: qemu_virtio_register_mmio_devices
  ****************************************************************************/
 
-static int mount_ramdisk(void)
+#ifdef CONFIG_DRIVERS_VIRTIO_MMIO
+static void qemu_virtio_register_mmio_devices(void)
 {
-  int ret;
-  struct boardioc_romdisk_s desc;
+  uintptr_t virtio = (uintptr_t)QEMU_VIRTIO_MMIO_BASE;
+  size_t size = QEMU_VIRTIO_MMIO_REGSIZE;
+  int irq = QEMU_VIRTIO_MMIO_IRQ;
+  int i;
 
-  desc.minor    = RAMDISK_DEVICE_MINOR;
-  desc.nsectors = NSECTORS((ssize_t)__ramdisk_size);
-  desc.sectsize = SECTORSIZE;
-  desc.image    = __ramdisk_start;
-
-  ret = boardctl(BOARDIOC_ROMDISK, (uintptr_t)&desc);
-  if (ret < 0)
+  for (i = 0; i < QEMU_VIRTIO_MMIO_NUM; i++)
     {
-      syslog(LOG_ERR, "Ramdisk register failed: %s\n", strerror(errno));
-      syslog(LOG_ERR, "Ramdisk mountpoint /dev/ram%d\n",
-             RAMDISK_DEVICE_MINOR);
-      syslog(LOG_ERR, "Ramdisk length %lu, origin %lx\n",
-             (ssize_t)__ramdisk_size, (uintptr_t)__ramdisk_start);
+      virtio_register_mmio_device((void *)(virtio + size * i), irq + i);
     }
-
-  return ret;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: board_app_initialize
- *
- * Description:
- *   Perform architecture specific initialization
- *
- * Input Parameters:
- *   arg - The boardctl() argument is passed to the board_app_initialize()
- *         implementation without modification.  The argument has no
- *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initialization logic and the
- *         matching application logic.  The value could be such things as a
- *         mode enumeration value, a set of DIP switch switch settings, a
- *         pointer to configuration data read from a file or serial FLASH,
- *         or whatever you would like to do with it.  Every implementation
- *         should accept zero/NULL as a default configuration.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-int board_app_initialize(uintptr_t arg)
-{
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-  /* Board initialization already performed by board_late_initialize() */
-
-  return OK;
-#else
-  /* Perform board-specific initialization */
-
-  mount(NULL, "/proc", "procfs", 0, NULL);
-
-  return OK;
-#endif
-}
 
 /****************************************************************************
  * Name: board_late_initialize
@@ -151,11 +113,69 @@ int board_app_initialize(uintptr_t arg)
 
 void board_late_initialize(void)
 {
-  /* Mount the RAM Disk */
-
-  mount_ramdisk();
-
   /* Perform board-specific initialization */
 
+#if defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_RISCV_SEMIHOSTING_HOSTFS)
+  /* Create ROM disk for mount in nx_start_application */
+
+  if (NSECTORS(romfs_img_len) > 1)
+    {
+      int ret = OK;
+      ret = romdisk_register(0, romfs_img, NSECTORS(romfs_img_len),
+        SECTORSIZE);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to register romfs: %d\n", -ret);
+        }
+    }
+#endif /* CONFIG_BUILD_KERNEL && !CONFIG_RISCV_SEMIHOSTING_HOSTFS */
+
+#ifdef CONFIG_FS_PROCFS
   mount(NULL, "/proc", "procfs", 0, NULL);
+#endif
+
+#ifdef CONFIG_FS_TMPFS
+  mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
+#endif
+
+#ifdef CONFIG_DRIVERS_VIRTIO_MMIO
+#ifndef CONFIG_BOARD_EARLY_INITIALIZE
+  qemu_virtio_register_mmio_devices();
+#endif
+#endif
+
+#ifdef CONFIG_RPTUN
+  qemu_rptun_init();
+#endif
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  int ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
 }
+
+void board_early_initialize(void)
+{
+#ifdef CONFIG_DRIVERS_VIRTIO_MMIO
+  qemu_virtio_register_mmio_devices();
+#endif
+}
+
+#ifdef CONFIG_BOARDCTL_POWEROFF
+int board_power_off(int status)
+{
+#if defined(CONFIG_BUILD_KERNEL) && ! defined(CONFIG_NUTTSBI)
+  riscv_sbi_system_reset(SBI_SRST_TYPE_SHUTDOWN, SBI_SRST_REASON_NONE);
+#else
+  *(volatile uint32_t *)QEMU_RV_RESET_BASE = QEMU_RV_RESET_DONE;
+#endif
+
+  UNUSED(status);
+  return 0;
+}
+#endif
