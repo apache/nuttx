@@ -26,10 +26,6 @@ if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS stm32_autoleds.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinitialize.c)
-endif()
-
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7)

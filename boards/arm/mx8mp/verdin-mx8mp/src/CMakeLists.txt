@@ -22,10 +22,6 @@
 
 set(SRCS mx8mp_boot.c mx8mp_bringup.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS mx8mp_appinit.c)
-endif()
-
 if(CONFIG_SENSORS_INA219)
   list(APPEND SRCS mx8mp_ina219.c)
 endif()

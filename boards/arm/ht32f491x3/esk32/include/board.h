@@ -118,8 +118,6 @@
 void ht32f491x3_clockconfig(void);
 void ht32f491x3_boardinitialize(void);
 
-int board_app_initialize(uintptr_t arg);
-
 #ifdef CONFIG_PWM
 int ht32_pwm_setup(void);
 #endif

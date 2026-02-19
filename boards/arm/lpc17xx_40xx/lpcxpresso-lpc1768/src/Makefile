@@ -32,10 +32,6 @@ ifeq ($(CONFIG_ADC),y)
 CSRCS += lpc17_40_adc.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += lpc17_40_appinit.c
-endif
-
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
 CSRCS += lpc17_40_oled.c
 endif

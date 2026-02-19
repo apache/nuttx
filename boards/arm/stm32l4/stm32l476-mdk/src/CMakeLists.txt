@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS stm32_boot.c stm32_bringup.c stm32_spi.c stm32_userleds.c)
+set(SRCS stm32_boot.c stm32_spi.c stm32_userleds.c)
 
 if(CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG)
   list(APPEND SRCS stm32_clockconfig.c)
@@ -32,10 +32,6 @@ endif()
 
 if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
-endif()
-
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})

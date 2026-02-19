@@ -22,10 +22,6 @@
 
 set(SRCS lpc17_40_boot.c lpc17_40_leds.c lpc17_40_ssp.c lpc17_40_dac.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS lpc17_40_appinit.c)
-endif()
-
 if(CONFIG_PWM)
   list(APPEND SRCS lpc17_40_pwm.c)
 endif()

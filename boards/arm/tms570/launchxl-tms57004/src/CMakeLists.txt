@@ -32,10 +32,6 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS tms570_buttons.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS tms570_appinit.c)
-endif()
-
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT

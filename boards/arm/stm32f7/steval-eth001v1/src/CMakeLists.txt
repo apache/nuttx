@@ -22,10 +22,6 @@
 
 set(SRCS stm32_boot.c stm32_bringup.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_STM32F7_FOC)
   list(APPEND SRCS stm32_foc.c)
 endif()

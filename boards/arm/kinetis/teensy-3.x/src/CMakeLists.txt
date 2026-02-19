@@ -31,10 +31,6 @@ if(CONFIG_KINETIS_USBOTG)
   list(APPEND SRCS k20_usbdev.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS k20_appinit.c)
-endif()
-
 if(CONFIG_PWM)
   list(APPEND SRCS k20_pwm.c)
 endif()

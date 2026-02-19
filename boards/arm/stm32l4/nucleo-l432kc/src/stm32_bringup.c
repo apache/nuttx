@@ -196,8 +196,7 @@ int stm32_bringup(void)
 
 #ifdef CONFIG_SPI_DRIVER
   stm32l4_spiregister();
-  /* driver registering must be processed in appinit.
-   * If called it during board_init,
+  /* If called it during board_init,
    * registering failed due to heap doesn't be initialized yet.
    */
 #endif

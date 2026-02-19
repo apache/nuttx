@@ -36,10 +36,6 @@ if(CONFIG_STM32F0L0G0_SPI)
   list(APPEND SRCS stm32_spi.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_LPWAN_SX127X)
   list(APPEND SRCS stm32_sx127x.c)
 endif()

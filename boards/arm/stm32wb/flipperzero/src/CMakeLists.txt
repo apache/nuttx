@@ -22,10 +22,6 @@
 
 set(SRCS stm32_boot.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_SPI)
   list(APPEND SRCS stm32_spi.c)
 endif()

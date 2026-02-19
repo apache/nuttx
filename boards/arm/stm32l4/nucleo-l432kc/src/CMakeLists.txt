@@ -76,11 +76,8 @@ if(CONFIG_TIMER)
   list(APPEND SRCS stm32_timer.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-  if(CONFIG_BOARDCTL_IOCTL)
-    list(APPEND SRCS stm32_ioctl.c)
-  endif()
+if(CONFIG_BOARDCTL_IOCTL)
+  list(APPEND SRCS stm32_ioctl.c)
 endif()
 
 if(CONFIG_BOARDCTL_UNIQUEID)

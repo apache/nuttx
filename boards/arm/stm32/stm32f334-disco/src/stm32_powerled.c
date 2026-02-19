@@ -555,8 +555,6 @@ static int powerled_ioctl(struct powerled_dev_s *dev, int cmd,
  * Description:
  *  Initialize POWERLED driver.
  *
- *  This function should be call by board_app_initialize().
- *
  * Returned Value:
  *  0 on success, a negated errno value on failure
  *

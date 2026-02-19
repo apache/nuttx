@@ -22,12 +22,8 @@
 
 set(SRCS)
 
-set(SRCS cxd56_main.c cxd56_clock.c cxd56_bringup.c)
-
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS cxd56_appinit.c)
-  list(APPEND SRCS cxd56_power.c)
-endif()
+set(SRCS cxd56_main.c cxd56_clock.c cxd56_bringup.c cxd56_boardinit.c
+         cxd56_power.c)
 
 if(CONFIG_BOARDCTL_IOCTL)
   list(APPEND SRCS cxd56_ioctl.c)

@@ -24,10 +24,6 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = sam_boot.c sam_bringup.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += sam_appinit.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += sam_autoleds.c
 else

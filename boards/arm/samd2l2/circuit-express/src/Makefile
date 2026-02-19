@@ -32,10 +32,6 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += sam_buttons.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += sam_appinit.c
-endif
-
 ifeq ($(CONFIG_USBDEV),y)
 CSRCS += sam_usb.c
 endif

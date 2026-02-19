@@ -20,13 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS sam_boot.c)
-
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS sam_appinit.c sam_bringup.c)
-elseif(CONFIG_BOARD_LATE_INITIALIZE)
-  list(APPEND SRCS sam_bringup.c)
-endif()
+set(SRCS sam_boot.c sam_bringup.c)
 
 target_sources(board PRIVATE ${SRCS})
 

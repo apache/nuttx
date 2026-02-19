@@ -26,10 +26,6 @@ if(CONFIG_STM32_SPI)
   list(APPEND SRCS stm32_spi.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_STM32_FOC)
   list(APPEND SRCS stm32_foc.c)
 endif()

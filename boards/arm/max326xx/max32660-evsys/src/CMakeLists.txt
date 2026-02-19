@@ -22,9 +22,7 @@
 
 set(SRCS max326_boot.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS max326_appinit.c max326_bringup.c)
-elseif(CONFIG_BOARD_LATE_INITIALIZE)
+if(CONFIG_BOARD_LATE_INITIALIZE)
   list(APPEND SRCS max326_bringup.c)
 endif()
 

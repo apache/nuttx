@@ -24,10 +24,6 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = lm_boot.c lm_leds.c lm_ethernet.c lm_ssi.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += lm_appinit.c
-endif
-
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
 CSRCS += lm_oled.c
 endif

@@ -260,9 +260,7 @@ void weak_function k64_usbinitialize(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
 int k64_bringup(void);
-#endif
 
 /****************************************************************************
  * Name: k64_sdhc_initialize

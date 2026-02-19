@@ -103,6 +103,6 @@ void stm32l4_board_initialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-  board_app_initialize(0);
+  stm32_bringup();
 }
 #endif

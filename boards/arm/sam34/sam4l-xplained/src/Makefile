@@ -38,10 +38,6 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += sam_buttons.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += sam_appinit.c
-endif
-
 ifeq ($(CONFIG_SAM34_LCDCA),y)
 ifeq ($(CONFIG_SAM4L_XPLAINED_SLCD1MODULE),y)
 CSRCS += sam_slcd.c

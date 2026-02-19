@@ -30,10 +30,6 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS sam_buttons.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS sam_appinit.c)
-endif()
-
 if(CONFIG_USBDEV)
   list(APPEND SRCS sam_usb.c)
 endif()

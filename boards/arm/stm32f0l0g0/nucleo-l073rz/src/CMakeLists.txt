@@ -36,10 +36,6 @@ if(CONFIG_STM32F0L0G0_SPI)
   list(APPEND SRCS stm32_spi.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_WL_NRF24L01)
   list(APPEND SRCS stm32_nrf24l01.c)
 endif()

@@ -30,10 +30,6 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS k60_buttons.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS k60_appinit.c)
-endif()
-
 if(CONFIG_USBDEV)
   list(APPEND SRCS k60_usbdev.c)
 endif()

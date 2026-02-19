@@ -22,10 +22,6 @@
 
 set(SRCS imx_boardinit.c imx_bringup.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS imx_appinit.c)
-endif()
-
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS imx_autoleds.c)
 else()

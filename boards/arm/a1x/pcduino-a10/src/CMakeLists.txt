@@ -22,10 +22,6 @@
 
 set(SRCS a1x_boot.c a1x_bringup.c a1x_leds.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS a1x_appinit.c)
-endif()
-
 if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS a1x_buttons.c)
 endif()

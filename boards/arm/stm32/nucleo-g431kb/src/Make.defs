@@ -35,10 +35,6 @@ ifeq ($(CONFIG_PWM),y)
 CSRCS += stm32_pwm.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinit.c
-endif
-
 ifeq ($(CONFIG_STM32_COMP),y)
 CSRCS += stm32_comp.c
 endif

@@ -22,10 +22,6 @@
 
 set(SRCS lpc43_boot.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS lpc43_appinit.c)
-endif()
-
 if(CONFIG_LPC43_ADC0)
   list(APPEND SRCS lpc43_adc.c)
 endif()

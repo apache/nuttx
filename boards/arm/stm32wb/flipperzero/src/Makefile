@@ -24,10 +24,6 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = stm32_boot.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinit.c
-endif
-
 ifeq ($(CONFIG_SPI),y)
 CSRCS += stm32_spi.c
 endif

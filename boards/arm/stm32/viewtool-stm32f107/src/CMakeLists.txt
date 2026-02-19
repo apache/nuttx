@@ -46,10 +46,6 @@ if(CONFIG_LCD_SSD1289)
   list(APPEND SRCS stm32_ssd1289.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_USBMSC)
   list(APPEND SRCS stm32_usbmsc.c)
 endif()

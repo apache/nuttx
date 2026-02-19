@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS k64_boot.c k64_spi.c)
+set(SRCS k64_boot.c k64_spi.c k64_bringup.c)
 
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS k64_autoleds.c)
@@ -30,12 +30,6 @@ endif()
 
 if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS k64_buttons.c)
-endif()
-
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS k64_appinit.c k64_bringup.c)
-elseif(CONFIG_BOARD_LATE_INITIALIZE)
-  list(APPEND SRCS k64_bringup.c)
 endif()
 
 if(CONFIG_I2C)

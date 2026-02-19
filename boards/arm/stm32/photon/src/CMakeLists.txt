@@ -26,10 +26,6 @@ if(CONFIG_PHOTON_DFU_BOOTLOADER)
   list(APPEND SRCS dfu_signature.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_INPUT_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
 endif()

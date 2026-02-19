@@ -66,10 +66,6 @@ if(CONFIG_DAC)
   list(APPEND SRCS stm32_dac.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_BOARD_STM32_IHM08M1)
   list(APPEND SRCS stm32_foc_ihm08m1.c)
 endif()

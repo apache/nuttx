@@ -111,9 +111,7 @@ int sam_bringup(void)
   int ret = sam_sdinitialize(CONFIG_NSH_MMCSDMINOR);
   if (ret < 0)
     {
-      syslog(LOG_ERR,
-             "board_app_initialize: Failed to initialize MMC/SD slot: %d\n",
-             ret);
+      syslog(LOG_ERR, "Failed to initialize MMC/SD slot: %d\n", ret);
       return ret;
     }
 #endif

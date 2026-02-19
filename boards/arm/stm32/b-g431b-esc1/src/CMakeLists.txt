@@ -32,10 +32,6 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_STM32_FOC)
   list(APPEND SRCS stm32_foc.c)
 endif()

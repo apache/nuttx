@@ -36,10 +36,6 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_ENC28J60)
   list(APPEND SRCS stm32_enc28j60.c)
 endif()

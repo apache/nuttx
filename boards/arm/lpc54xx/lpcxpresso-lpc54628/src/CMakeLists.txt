@@ -30,10 +30,6 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS lpc54_buttons.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS lpc54_appinit.c)
-endif()
-
 if(CONFIG_LPC54_HAVE_I2C_MASTER)
   list(APPEND SRCS lpc54_i2c.c)
 endif()

@@ -28,8 +28,4 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinitialize.c
-endif
-
 include $(TOPDIR)/boards/Board.mk

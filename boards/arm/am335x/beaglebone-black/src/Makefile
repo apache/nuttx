@@ -24,10 +24,6 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = am335x_boot.c am335x_bringup.c am335x_leds.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += am335x_appinit.c
-endif
-
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += am335x_buttons.c
 endif

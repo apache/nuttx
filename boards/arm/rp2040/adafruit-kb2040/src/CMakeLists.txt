@@ -26,10 +26,6 @@ if(CONFIG_DEV_GPIO)
   list(APPEND SRCS rp2040_gpio.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS rp2040_appinit.c)
-endif()
-
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_RP2040_FLASH_BOOT)

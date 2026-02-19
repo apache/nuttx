@@ -22,15 +22,10 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = lc823450_boot.c lc823450_mux.c
+CSRCS = lc823450_boot.c lc823450_mux.c lc823450_bringup.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += lc823450_appinit.c lc823450_bringup.c
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += lc823450_reset.c
-endif
-else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
-CSRCS += lc823450_bringup.c
 endif
 
 ifeq ($(CONFIG_LC823450_SDIF),y)

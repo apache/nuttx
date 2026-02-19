@@ -92,10 +92,6 @@ endif
 endif
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += sam_appinit.c
-endif
-
 ifeq ($(CONFIG_ADC),y)
 CSRCS += sam_adc.c
 endif

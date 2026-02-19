@@ -49,16 +49,21 @@ void stm32_boardinitialize(void)
 }
 
 /****************************************************************************
- * Name: board_app_initialize
+ * Name: board_late_initialize
  *
  * Description:
- *   Initializes upper half drivers with board specific settings
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_late_initialize().  board_late_initialize() will
+ *   be called immediately after up_initialize() is called and just before
+ *   the initial application is started.  This additional initialization
+ *   phase may be used, for example, to initialize board-specific device
+ *   drivers.
  *
- * Returned Value:
- *   0 on success or errno value of failed init function.
  ****************************************************************************/
 
-int board_app_initialize(uintptr_t arg)
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void)
 {
   int ret = 0;
 
@@ -67,7 +72,7 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize SD slot: %d\n", ret);
-      return ret;
+      return;
     }
 #endif
 
@@ -76,7 +81,7 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
-      return ret;
+      return;
     }
 #endif
 
@@ -91,5 +96,5 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
   UNUSED(ret);
-  return ret;
 }
+#endif

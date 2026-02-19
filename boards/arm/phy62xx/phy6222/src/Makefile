@@ -27,8 +27,6 @@ CSRCS += userleds.c
 
 CSRCS += buttons.c
 
-CSRCS += appinit.c
-
 CSRCS += reset.c
 
 ifeq ($(CONFIG_ETC_ROMFS),y)

@@ -74,10 +74,6 @@ ifeq ($(CONFIG_LCD_SSD1306),y)
 CSRCS += stm32_ssd1306.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinitialize.c
-endif
-
 ifeq ($(CONFIG_STM32H7_PROGMEM),y)
 CSRCS += stm32_progmem.c
 endif

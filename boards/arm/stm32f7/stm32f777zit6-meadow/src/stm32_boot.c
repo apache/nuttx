@@ -179,15 +179,7 @@ void board_late_initialize(void)
     }
 
 #endif
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_BOARDCTL)
-  /* Perform NSH initialization here instead of from the NSH.  This
-   * alternative NSH initialization is necessary when NSH is ran in
-   * user-space but the initialization function must run in kernel space.
-   */
 
-  board_app_initialize();
-#else
   stm32_bringup();
-#endif
 }
 #endif

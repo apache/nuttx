@@ -99,13 +99,18 @@ void kl_boardinitialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-  /* Perform NSH initialization here instead of from the NSH.  This
-   * alternative NSH initialization is necessary when NSH is ran in
-   * user-space but the initialization function must run in kernel space.
-   */
+  int ret;
 
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_BOARDCTL)
-  board_app_initialize(0);
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = kl_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: kl_pwm_setup() failed: %d\n", ret);
+    }
 #endif
+
+  UNUSED(ret);
 }
 #endif

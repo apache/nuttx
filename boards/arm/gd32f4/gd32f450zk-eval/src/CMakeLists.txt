@@ -22,9 +22,7 @@
 
 set(SRCS gd32f4xx_boot.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS gd32f4xx_appinit.c gd32f4xx_bringup.c)
-elseif(CONFIG_BOARD_LATE_INITIALIZE)
+if(CONFIG_BOARD_LATE_INITIALIZE)
   list(APPEND SRCS gd32f4xx_bringup.c)
 endif()
 

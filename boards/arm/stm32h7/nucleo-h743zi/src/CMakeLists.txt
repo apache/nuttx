@@ -72,10 +72,6 @@ if(CONFIG_LCD_SSD1306)
   list(APPEND SRCS stm32_ssd1306.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinitialize.c)
-endif()
-
 if(CONFIG_STM32H7_PROGMEM)
   list(APPEND SRCS stm32_progmem.c)
 endif()

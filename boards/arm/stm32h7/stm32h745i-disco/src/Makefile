@@ -34,10 +34,6 @@ ifeq ($(CONFIG_STM32H7_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinitialize.c
-endif
-
 ifeq ($(CONFIG_TESTING_OSTEST),y)
 CSRCS += stm32_ostest.c
 endif

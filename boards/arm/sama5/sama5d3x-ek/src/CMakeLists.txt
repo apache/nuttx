@@ -90,10 +90,6 @@ if(CONFIG_AUDIO_WM8904)
   endif()
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS sam_appinit.c)
-endif()
-
 if(CONFIG_ADC)
   list(APPEND SRCS sam_adc.c)
 endif()

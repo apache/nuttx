@@ -28,8 +28,4 @@ ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
 CSRCS += dm320_boardinit.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += dm320_appinit.c
-endif
-
 include $(TOPDIR)/boards/Board.mk

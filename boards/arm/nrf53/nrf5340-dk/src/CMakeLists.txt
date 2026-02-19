@@ -22,10 +22,6 @@
 
 set(SRCS nrf53_boot.c nrf53_bringup.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS nrf53_appinit.c)
-endif()
-
 if(CONFIG_NRF53_APPCORE)
   list(APPEND SRCS nrf53_cpunet_boot.c)
 endif()

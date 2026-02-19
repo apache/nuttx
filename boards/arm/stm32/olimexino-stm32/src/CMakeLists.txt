@@ -26,10 +26,6 @@ if(CONFIG_STM32_CAN_CHARDRIVER)
   list(APPEND SRCS stm32_can.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_USBMSC)
   list(APPEND SRCS stm32_usbmsc.c)
 endif()

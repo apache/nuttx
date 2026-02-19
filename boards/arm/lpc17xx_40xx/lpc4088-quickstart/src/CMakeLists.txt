@@ -37,10 +37,6 @@ if(CONFIG_LPC17_40_EXTNAND)
   list(APPEND SRCS lpc17_40_nandinitialize.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS lpc17_40_appinit.c)
-endif()
-
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS lpc17_40_autoleds.c)
 else()

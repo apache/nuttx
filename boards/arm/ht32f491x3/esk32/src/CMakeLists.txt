@@ -22,8 +22,8 @@
 
 set(SRCS ht32_boot.c)
 
-if(CONFIG_BOARDCTL OR CONFIG_BOARD_LATE_INITIALIZE)
-  list(APPEND SRCS ht32_appinit.c)
+if(CONFIG_BOARD_LATE_INITIALIZE)
+  list(APPEND SRCS ht32_bringup.c)
 endif()
 
 if(CONFIG_USERLED)

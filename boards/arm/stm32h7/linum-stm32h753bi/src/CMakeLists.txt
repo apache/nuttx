@@ -30,10 +30,6 @@ if(CONFIG_USERLED)
   list(APPEND SRCS stm32_userled.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinitialize.c)
-endif()
-
 if(CONFIG_STM32H7_OTGFS)
   list(APPEND SRCS stm32_usb.c)
 endif()

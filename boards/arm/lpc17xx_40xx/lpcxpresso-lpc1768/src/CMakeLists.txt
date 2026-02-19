@@ -30,10 +30,6 @@ if(CONFIG_ADC)
   list(APPEND SRCS lpc17_40_adc.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS lpc17_40_appinit.c)
-endif()
-
 if(CONFIG_NX_LCDDRIVER)
   list(APPEND SRCS lpc17_40_oled.c)
 endif()

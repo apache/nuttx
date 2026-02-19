@@ -26,10 +26,6 @@ if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS lpc17_40_leds.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS lpc17_40_appinit.c)
-endif()
-
 if(CONFIG_USBDEV_COMPOSITE)
   list(APPEND SRCS lpc17_40_composite.c)
 endif()

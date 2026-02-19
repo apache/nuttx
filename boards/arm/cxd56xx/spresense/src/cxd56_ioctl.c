@@ -85,7 +85,6 @@ int board_ioctl(unsigned int cmd, uintptr_t arg)
        *                and supply current value.
        * ARG:           None
        * CONFIGURATION: CONFIG_BOARDCTL
-       * DEPENDENCIES:  Board logic must provide board_app_initialization
        */
 
       case BOARDIOC_USBDEV_SETNOTIFYSIG:

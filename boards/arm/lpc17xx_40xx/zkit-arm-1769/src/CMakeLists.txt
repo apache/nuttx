@@ -23,10 +23,6 @@
 set(SRCS lpc17_40_boot.c lpc17_40_leds.c lpc17_40_ssp.c lpc17_40_buttons.c
          lpc17_40_lcd.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS lpc17_40_appinit.c)
-endif()
-
 if(CONFIG_USBMSC)
   list(APPEND SRCS lpc17_40_usbmsc.c)
 endif()

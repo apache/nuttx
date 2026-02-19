@@ -26,10 +26,6 @@ if(CONFIG_SENSORS_MAX31855)
   list(APPEND SRCS lpc43_max31855.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS lpc43_appinit.c)
-endif()
-
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS lpc43_autoleds.c)
 else()

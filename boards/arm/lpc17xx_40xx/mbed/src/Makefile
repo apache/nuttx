@@ -28,10 +28,6 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += lpc17_40_leds.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += lpc17_40_appinit.c
-endif
-
 ifeq ($(CONFIG_USBMSC),y)
 CSRCS += lpc17_40_usbmsc.c
 endif

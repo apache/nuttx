@@ -40,10 +40,6 @@ if(CONFIG_SAMD2L2_ADC)
   list(APPEND SRCS sam_adc.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS sam_appinit.c)
-endif()
-
 if(CONFIG_USBDEV)
   list(APPEND SRCS sam_usb.c)
 endif()

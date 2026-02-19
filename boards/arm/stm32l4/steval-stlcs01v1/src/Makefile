@@ -28,10 +28,6 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinit.c
-endif
-
 ifeq ($(CONFIG_STM32L4_OTGFS),y)
 CSRCS += stm32_usb.c
 endif

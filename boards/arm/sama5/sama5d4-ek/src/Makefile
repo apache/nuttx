@@ -22,7 +22,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = sam_boot.c
+CSRCS = sam_boot.c sam_bringup.c
 
 ifeq ($(CONFIG_SAMA5_SPI0),y)
 CSRCS += sam_spi.c
@@ -96,14 +96,6 @@ endif
 
 ifeq ($(CONFIG_INPUT_MXT),y)
 CSRCS += sam_maxtouch.c
-endif
-
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += sam_appinit.c sam_bringup.c
-else
-ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
-CSRCS += sam_bringup.c
-endif
 endif
 
 ifeq ($(CONFIG_ADC),y)

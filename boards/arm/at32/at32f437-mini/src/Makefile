@@ -24,10 +24,6 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = at32_boot.c at32_bringup.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-	CSRCS += at32_appinit.c
-endif
-
 ifeq ($(CONFIG_DEV_GPIO),y)
 	CSRCS += at32_gpio.c
 endif

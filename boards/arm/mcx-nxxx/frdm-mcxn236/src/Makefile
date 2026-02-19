@@ -24,8 +24,4 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = n23x_boardinit.c n23x_bringup.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += n23x_appinit.c
-endif
-
 include $(TOPDIR)/boards/Board.mk

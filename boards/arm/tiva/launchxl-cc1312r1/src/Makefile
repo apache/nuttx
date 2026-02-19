@@ -22,13 +22,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = cc1312_boot.c cc1312_pinconfig.c
-
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += cc1312_appinit.c cc1312_bringup.c
-else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
-CSRCS += cc1312_bringup.c
-endif
+CSRCS = cc1312_boot.c cc1312_pinconfig.c cc1312_bringup.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += cc1312_autoleds.c

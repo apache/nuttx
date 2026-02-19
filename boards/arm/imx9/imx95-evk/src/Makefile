@@ -25,10 +25,6 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = imx95_boardinit.c imx95_bringup.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += imx95_appinit.c
-endif
-
 ifeq ($(CONFIG_PWM),y)
 CSRCS += imx95_pwm.c
 endif

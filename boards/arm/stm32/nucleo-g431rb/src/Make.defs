@@ -35,10 +35,6 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += stm32_buttons.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinit.c
-endif
-
 ifneq ($(CONFIG_STM32_FOC),y)
 ifeq ($(CONFIG_PWM),y)
 CSRCS += stm32_pwm.c

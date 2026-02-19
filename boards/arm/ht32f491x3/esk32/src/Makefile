@@ -24,10 +24,8 @@ include $(TOPDIR)/Make.defs
 
 CSRCS += ht32_boot.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += ht32_appinit.c
-else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
-CSRCS += ht32_appinit.c
+ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
+CSRCS += ht32_bringup.c
 endif
 
 ifeq ($(CONFIG_USERLED),y)

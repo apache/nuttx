@@ -32,10 +32,6 @@ if(CONFIG_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_STM32_COMP)
   list(APPEND SRCS stm32_comp.c)
 endif()

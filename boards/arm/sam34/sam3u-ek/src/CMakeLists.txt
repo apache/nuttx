@@ -26,10 +26,6 @@ if(CONFIG_LCD)
   list(APPEND SRCS sam_lcd.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS sam_appinit.c)
-endif()
-
 if(CONFIG_SAM34_HSMCI)
   list(APPEND SRCS sam_mmcsd.c)
 endif()
