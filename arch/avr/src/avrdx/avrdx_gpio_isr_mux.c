@@ -295,7 +295,7 @@ int avrdx_irq_attach_gpio_mux(uint8_t port_idx, uint8_t pins,
 
   /* One way or the other, if we got here, pins are now serviced
    * by an interrupt handler. Except the hardware is not configured
-   * to to that yet. Do it now, clear existing interrupt flags first
+   * to do that yet. Do it now, clear existing interrupt flags first
    */
 
   AVRDX_PORT(port_idx).INTFLAGS = pins;
