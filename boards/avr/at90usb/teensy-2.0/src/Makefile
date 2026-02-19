@@ -28,10 +28,6 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += at90usb_leds.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += at90usb_appinit.c
-endif
-
 ifeq ($(CONFIG_USBMSC),y)
 CSRCS += at90usb_usbmsc.c
 endif
