@@ -25,11 +25,8 @@
 ASRCS =
 CSRCS = bm3803_boot.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += bm3803_appinit.c
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += bm3803_reset.c
-endif
 endif
 
 ifeq ($(CONFIG_MTD_AM29LV),y)
