@@ -24,6 +24,6 @@ include $(TOPDIR)/Make.defs
 
 RCSRCS = etc/init.d/rc.sysinit etc/init.d/rcS
 
-CSRCS = jh7110_appinit.c
+CSRCS = jh7110_boardinit.c
 
 include $(TOPDIR)/boards/Board.mk

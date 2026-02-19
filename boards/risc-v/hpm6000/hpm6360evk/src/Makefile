@@ -24,10 +24,6 @@ include $(TOPDIR)/Make.defs
 
 CSRCS  = hpm6360_bringup.c hpm6360_boot.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += hpm6360_appinit.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += hpm6360_autoleds.c
 endif

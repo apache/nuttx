@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS qemu_rv_appinit.c)
+set(SRCS qemu_rv_boardinit.c)
 
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS qemu_rv_autoleds.c)

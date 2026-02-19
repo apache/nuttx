@@ -22,10 +22,6 @@
 
 set(SRCS fe310_bringup.c fe310_boot.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS fe310_appinit.c)
-endif()
-
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS fe310_autoleds.c)
 endif()

@@ -25,7 +25,7 @@ include $(TOPDIR)/Make.defs
 CSRCS  = bl602_bringup.c bl602_boot.c
 
 ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += bl602_appinit.c
+CSRCS += bl602_boardctl.c
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += bl602_reset.c
 endif

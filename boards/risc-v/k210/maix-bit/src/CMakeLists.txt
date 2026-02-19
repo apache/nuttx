@@ -22,10 +22,6 @@
 
 set(SRCS k210_bringup.c k210_boot.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS k210_appinit.c)
-endif()
-
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS k210_leds.c)
 endif()

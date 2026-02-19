@@ -20,13 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS hpm6360_bringup.c hpm6360_boot.c hpm6360_appinit.c)
-
-if(CONFIG_BOARDCTL)
-  if(EXISTS hpm6360_appinit.c)
-    list(APPEND SRCS hpm6360_appinit.c)
-  endif()
-endif()
+set(SRCS hpm6360_bringup.c hpm6360_boot.c)
 
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS hpm6360_autoleds.c)

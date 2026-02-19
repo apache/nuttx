@@ -23,8 +23,6 @@
 set(SRCS esp32h2_boot.c esp32h2_bringup.c)
 
 if(CONFIG_BOARDCTL)
-  list(APPEND SRCS esp32h2_appinit.c)
-
   if(CONFIG_BOARDCTL_RESET)
     list(APPEND SRCS esp32h2_reset.c)
   endif()
