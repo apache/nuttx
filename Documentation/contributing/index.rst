@@ -9,6 +9,7 @@ to NuttX codebase (from small bugfixes to large new features) and documentation
 .. toctree::
    :maxdepth: 2
 
+   Contributing Guide <guide.rst>
    workflow.rst
    making-changes.rst
    coding_style.rst
