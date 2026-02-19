@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS tc397_appinit.c tc397_boardinit.c tc397_bringup.c)
+set(SRCS tc397_boardinit.c tc397_bringup.c)
 
 target_sources(board PRIVATE ${SRCS})
 
