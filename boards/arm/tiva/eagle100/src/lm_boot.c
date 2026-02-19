@@ -169,6 +169,5 @@ void board_late_initialize(void)
   syslog(LOG_INFO, "Successfully bound SPI port %d to MMC/SD slot %d\n",
          CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
 #endif
-
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */
