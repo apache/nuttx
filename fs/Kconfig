@@ -46,6 +46,7 @@ config FS_AUTOMOUNTER_DRIVER
 	bool "Auto-mounter driver"
 	default n
 	depends on FS_AUTOMOUNTER
+	depends on !DISABLE_ALL_SIGNALS
 	---help---
 		Enabling this option will lead to registering of a character driver
 		on FS_AUTOMOUNTER_VFS_PATH + mount point path for auto-mounter.

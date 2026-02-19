@@ -90,6 +90,7 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
            * nxsched_get_tcb() does.
            */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
           if (pthread_kill(pid, 0) != 0)
             {
               /* The thread associated with the PID no longer exists */
@@ -121,6 +122,7 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
                 }
             }
           else
+#endif
             {
               ret = EBUSY;
             }

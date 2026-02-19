@@ -76,7 +76,6 @@ if(NOT CONFIG_DISABLE_PTHREAD)
     pthread_create.c
     pthread_equal.c
     pthread_exit.c
-    pthread_kill.c
     pthread_setname_np.c
     pthread_getname_np.c
     pthread_get_stackaddr_np.c
@@ -130,6 +129,10 @@ if(NOT CONFIG_DISABLE_PTHREAD)
 
   if(CONFIG_PTHREAD_SPINLOCKS)
     list(APPEND SRCS pthread_spinlock.c)
+  endif()
+
+  if(NOT CONFIG_DISABLE_ALL_SIGNALS)
+    list(APPEND SRCS pthread_kill.c)
   endif()
 
   if(NOT CONFIG_TLS_NCLEANUP EQUAL 0)

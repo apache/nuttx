@@ -7,6 +7,7 @@ config FS_AIO
 	bool "Asynchronous I/O support"
 	default n
 	depends on SCHED_WORKQUEUE
+	depends on !DISABLE_ALL_SIGNALS
 	---help---
 		Enable support for asynchronous I/O.  This selection enables the
 		interfaces declared in include/aio.h.

@@ -97,6 +97,7 @@ if CAPTURE
 config CAPTURE_NOTIFY
 	bool "Capture Notification Support"
 	default n
+	depends on !DISABLE_ALL_SIGNALS
 	---help---
 		Some hardware will support notification when a capture event
 		occurs.  If the hardware will support notification, then this
@@ -239,6 +240,7 @@ endif # !RTC_DATETIME
 config RTC_ALARM
 	bool "RTC Alarm Support"
 	default n
+	depends on !DISABLE_ALL_SIGNALS
 	---help---
 		Enable if the RTC hardware supports setting of an alarm.  A callback
 		function will be executed when the alarm goes off.
@@ -269,6 +271,7 @@ config RTC_ARCH
 config RTC_PERIODIC
 	bool "RTC Periodic Interrupts"
 	default n
+	depends on !DISABLE_ALL_SIGNALS
 	---help---
 		Add interrupt controls for RTCs that support periodic interrupts.
 
