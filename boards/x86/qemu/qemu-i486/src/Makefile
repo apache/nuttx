@@ -24,9 +24,6 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = qemu_boot.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-  CSRCS += qemu_appinit.c
-endif
 ifeq ($(CONFIG_QEMU_VGA),y)
   CSRCS += qemu_vga_lcd.c
 endif
