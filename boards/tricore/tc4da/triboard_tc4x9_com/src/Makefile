@@ -24,8 +24,4 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = tc4da_boardinit.c tc4da_bringup.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += tc4da_appinit.c
-endif
-
 include $(TOPDIR)/boards/Board.mk

@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS tc4da_appinit.c tc4da_boardinit.c tc4da_bringup.c)
+set(SRCS tc4da_boardinit.c tc4da_bringup.c)
 
 target_sources(board PRIVATE ${SRCS})
 
