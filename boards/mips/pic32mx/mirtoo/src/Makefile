@@ -32,8 +32,4 @@ ifeq ($(CONFIG_PIC32MX_ADC),y)
 CSRCS += pic32_adc.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += pic32_appinit.c
-endif
-
 include $(TOPDIR)/boards/Board.mk
