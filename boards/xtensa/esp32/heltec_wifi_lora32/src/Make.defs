@@ -22,10 +22,6 @@
 
 CSRCS = esp32_boot.c esp32_bringup.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += esp32_appinit.c
-endif
-
 ifeq ($(CONFIG_LPWAN_SX127X),y)
 CSRCS += esp32_sx127x.c
 endif
