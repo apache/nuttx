@@ -24,7 +24,12 @@ import os
 import re
 import subprocess
 import sys
-import telnetlib
+try:
+    import telnetlib
+except ImportError:
+    telnetlib = None
+    # telnetlib was removed in Python 3.13
+
 import time
 
 import xmodem
