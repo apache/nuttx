@@ -1,4 +1,4 @@
-# Apache NuttX RTOS Contributing Guidelines
+# Apache NuttX RTOS Contributing Guide
 
 Thank you for your interest in contributing to Apache NuttX RTOS :-)
 
@@ -6,29 +6,36 @@ If you haven't yet read
 [The Inviolable Principles of NuttX]( https://github.com/apache/nuttx/blob/master/INVIOLABLES.md)
 please do so first.
 
-Please note that NuttX supports over 15 different architectures, 360+ boards,
+Apache NuttX RTOS supports over 15 different architectures, 360+ boards,
 and 1600+ configurations, that are used in various projects and products around
 the world. Remember that any code change may affect different users and their
 businesses. Please try to keep your contributions high quality and compatible.
 
 To help us process your contributions smoothly, it is very important that you
-follow the guidelines. NuttX is maintained by a small team of volunteers from
+follow this guide. NuttX is maintained by a small team of volunteers from
 around the world. These rules are based on daily experiences and help us
 to preserve long term self-compatibility and maintenance of the project.
 
 This document is split into two main parts:
 
- 1. Contribution Rules.
- 2. Contribution Templates.
+ 1. Contributing Rules.
+ 2. Contributing Templates.
 
 If you need more information please read the
-[Full Contributing Documentation](https://nuttx.apache.org/docs/latest/contributing/index.html)
+[NuttX Documentation](https://nuttx.apache.org/docs/latest),
+[Contributing Documentation](https://nuttx.apache.org/docs/latest/contributing/index.html),
+[Security Documentation](https://nuttx.apache.org/docs/latest/security.html),
 or ask questions at our [Social Media channels](https://nuttx.apache.org/community).
+Mailing list is our main and preferred communication channel.
+
+This NuttX Contributing Guide is part of both
+[Git Repository](https://github.com/apache/nuttx/blob/master/CONTRIBUTING.md)
+and [NuttX Documentation](https://nuttx.apache.org/docs/latest/contributing/guide.html).
 
 
 
 
-## 1. Contribution Rules.
+## 1. Contributing Rules.
 
 ### 1.1. Goals.
 
@@ -285,8 +292,15 @@ We avoid breaking changes unless absolutely necessary and unavoidable
  8. Change must be well documented (build / runtime test logs, pr, git
     commit, documentation, release notes, etc) with clear notes on how to
     fix the introduced problems.
- 9. Breaking Change must be clearly marked with a `[BREAKING]` tag in the
-    git commit topic and PR title that will propagate to Release Notes.
+ 9. **All breaking changes must be clearly marked both in git commits and
+    pull requests**:
+    1. Put `!` (exclamation mark) as first character of the each breaking
+       git commit and pull request title.
+    2. Put `BREAKING CHANGE:` in the git commit and pull request body with
+       a brief change description and the **quick-fix** instructions.
+
+    This helps users identify areas that need an update on their side,
+    grep git logs, and auto-generate release notes.
 
 See: https://github.com/apache/nuttx/blob/master/INVIOLABLES.md
 
@@ -351,7 +365,7 @@ See: https://github.com/apache/nuttx/blob/master/INVIOLABLES.md
 
 
 
-## 2. Contribution Templates.
+## 2. Contributing Templates.
 
 ### 2.1. Source Code.
 
@@ -386,6 +400,22 @@ improving code readability and maintainability.
 Signed-off-by: AuthorName <Valid@EmailAddress>
 ```
 
+This template provides breaking change git commit example as described in requirement 1.13:
+
+```
+!interpreters/bas: Align naming of Kconfig options.
+
+Aligns `CONFIG_INTERPRETER_*` options to `CONFIG_INTERPRETERS_*` options
+to be consistent with other interpreters.
+
+BREAKING CHANGE: All configurations using `CONFIG_INTERPRETER_BAS_*`
+options will no longer compile due to missing symbol errors. The fix is
+very quick: any configurations using this options should add a trailing
+S following INTERPRETER in the affected Kconfig variables.
+
+Signed-off-by: AuthorName <Valid@EmailAddress>
+```
+
 Note that first line of the commit message (topic) will be automatically
 used as pull request title and the rest is added as description.
 Use it as a starting point to describe your Pull-Request (PR).
@@ -397,6 +427,8 @@ This template uses MarkDown and provides example Pull Request content
 as described in requirement 1.7.
 
 ````
+functional/area: Self explanatory pull request title.
+
 ## Summary
 
   * Why change is necessary (fix, update, new feature)?
@@ -443,3 +475,15 @@ as described in requirement 1.7.
   * [ ] My PR is still work in progress (not ready for review).
   * [ ] My PR is ready for review and can be safely merged into a codebase.
 ````
+
+Breaking changes marking requirement 1.13 implies additional `!` (exclamation
+mark) as the first character of the pull request title and the
+`BREAKING CHANGES:` brief change description with a quick-fix instructions.
+
+```
+!functional/area: Self explanatory pull request title.
+
+## Summary
+
+  * BREAKING CHANGE: Brief change description with a quick-fix instructions.
+```
