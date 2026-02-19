@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/samv7/same70-xplained/src/sam_boarctl.c
+ * boards/arm/samv7/same70-xplained/src/sam_boardctl.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *

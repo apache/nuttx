@@ -64,5 +64,5 @@ if(NOT CONFIG_BUILD_FLAT)
   add_subdirectory(${NUTTX_BOARD_DIR}/kernel)
   set_property(
     GLOBAL PROPERTY LD_SCRIPT_USER ${NUTTX_BOARD_DIR}/scripts/memory.ld
-    ${NUTTX_BOARD_DIR}/scripts/user-space.ld)
+                    ${NUTTX_BOARD_DIR}/scripts/user-space.ld)
 endif()
