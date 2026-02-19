@@ -20,13 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS cc1312_boot.c cc1312_pinconfig.c)
-
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS cc1312_appinit.c cc1312_bringup.c)
-elseif(CONFIG_BOARD_LATE_INITIALIZE)
-  list(APPEND SRCS cc1312_bringup.c)
-endif()
+set(SRCS cc1312_boot.c cc1312_pinconfig.c cc1312_bringup.c)
 
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS cc1312_autoleds.c)

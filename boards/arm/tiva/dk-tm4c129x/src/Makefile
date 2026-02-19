@@ -42,10 +42,6 @@ ifeq ($(CONFIG_DK_TM4C129X_TIMER),y)
 CSRCS += tm4c_timer.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += tm4c_appinit.c
-endif
-
 ifeq ($(CONFIG_LM75_I2C),y)
 ifeq ($(CONFIG_TIVA_I2C6),y)
 CSRCS += tm4c_tmp100.c

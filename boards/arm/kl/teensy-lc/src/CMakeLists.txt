@@ -22,10 +22,6 @@
 
 set(SRCS kl_boardinitialize.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS kl_appinit.c)
-endif()
-
 if(CONFIG_KL_SPI0)
   list(APPEND SRCS kl_spi.c)
 else()

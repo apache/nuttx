@@ -32,10 +32,6 @@ else()
   list(APPEND SRCS rp2040_userleds.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS rp2040_appinit.c)
-endif()
-
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_RP2040_FLASH_BOOT)

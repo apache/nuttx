@@ -22,10 +22,6 @@
 
 set(SRCS stm32_boot.c stm32_spi.c stm32_dma_alloc.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinitialize.c)
-endif()
-
 if(CONFIG_STM32F7_OTGFS)
   list(APPEND SRCS stm32_usb.c)
 endif()

@@ -22,10 +22,6 @@
 
 set(SRCS nrf91_boot.c nrf91_bringup.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS nrf91_appinit.c)
-endif()
-
 if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS nrf91_buttons.c)
 endif()

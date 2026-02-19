@@ -27,14 +27,74 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
 
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/spi/spi.h>
+#include <nuttx/mmcsd.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
 #include "lpc17_40_gpio.h"
 #include "lpc17_40_ssp.h"
 #include "u-blox-c027.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+#ifdef CONFIG_BOARDCTL
+
+/* PORT and SLOT number probably depend on the board configuration */
+
+#ifdef CONFIG_ARCH_BOARD_U_BLOX_C027
+#  define NSH_HAVEUSBDEV 1
+#  ifdef CONFIG_LPC17_40_SSP0
+#    define NSH_HAVEMMCSD 1
+#  else
+#    undef NSH_HAVEMMCSD
+#  endif
+#else
+#  error "Unrecognized board"
+#  undef NSH_HAVEUSBDEV
+#  undef NSH_HAVEMMCSD
+#endif
+
+/* Do we have SPI support for MMC/SD? */
+
+#ifdef NSH_HAVEMMCSD
+#    undef  CONFIG_NSH_MMCSDSPIPORTNO
+#    define CONFIG_NSH_MMCSDSPIPORTNO 0
+#    undef  CONFIG_NSH_MMCSDSLOTNO
+#    define CONFIG_NSH_MMCSDSLOTNO 0
+#endif
+
+/* Can't support USB device features if USB device is not enabled */
+
+#ifndef CONFIG_USBDEV
+#  undef NSH_HAVEUSBDEV
+#endif
+
+/* Can't support MMC/SD features if mountpoints are disabled */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT)
+#  undef NSH_HAVEMMCSD
+#endif
+
+#ifndef CONFIG_NSH_MMCSDMINOR
+#  define CONFIG_NSH_MMCSDMINOR 0
+#endif
+
+/* Currnently MMC/SD support is available only for NSH configurations */
+
+#else
+#  undef NSH_HAVEMMCSD
+#endif /* CONFIG_BOARDCTL */
 
 /****************************************************************************
  * Public Functions
@@ -89,19 +149,79 @@ void lpc17_40_boardinitialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
+  int ret;
+
 #ifdef CONFIG_MODEM_U_BLOX
   lpc17_40_ubxmdm_init(false);
 #endif
 
-#if 0
-  lpc17_40_configgpio(C027_MDMEN     | GPIO_VALUE_ZERO); /* Modem disabled */
-  lpc17_40_configgpio(C027_MDMRST    | GPIO_VALUE_ONE);  /* Modem reset on */
-  lpc17_40_configgpio(C027_MDMPWR    | GPIO_VALUE_ONE);  /* Modem power off */
-  lpc17_40_configgpio(C027_GPSEN     | GPIO_VALUE_ZERO); /* GPS disabled */
-  lpc17_40_configgpio(C027_GPSRST    | GPIO_VALUE_ONE);  /* GPS reset on */
-  lpc17_40_configgpio(C027_MDMLVLOE  | GPIO_VALUE_ONE);  /* UART shifter disabled */
-  lpc17_40_configgpio(C027_MDMILVLOE | GPIO_VALUE_ZERO); /* I2C shifter disabled */
-  lpc17_40_configgpio(C027_MDMUSBDET | GPIO_VALUE_ZERO); /* USB sense off */
+#ifdef CONFIG_FS_PROCFS
+  /* mount the proc filesystem */
+
+  syslog(LOG_INFO, "Mounting procfs to /proc\n");
+
+  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to mount the PROC filesystem: %d\n", ret);
+      return;
+    }
 #endif
+
+#ifdef NSH_HAVEMMCSD
+  struct spi_dev_s *ssp;
+
+  /* Get the SSP port */
+
+  ssp = lpc17_40_sspbus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
+  if (!ssp)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SSP port %d\n",
+             CONFIG_NSH_MMCSDSPIPORTNO);
+      return;
+    }
+
+  syslog(LOG_INFO, "Successfully initialized SSP port %d\n",
+         CONFIG_NSH_MMCSDSPIPORTNO);
+
+  /* Bind the SSP port to the slot */
+
+  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR,
+                                CONFIG_NSH_MMCSDSLOTNO, ssp);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to bind SSP port %d to MMC/SD slot %d: %d\n",
+             CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO, ret);
+      return;
+    }
+
+  syslog(LOG_INFO, "Successfully bound SSP port %d to MMC/SD slot %d\n",
+         CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
+#endif
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = lpc17_40_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lpc17_40_pwm_setup() failed: %d\n", ret);
+      return;
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = lpc17_40_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lpc17_40_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */

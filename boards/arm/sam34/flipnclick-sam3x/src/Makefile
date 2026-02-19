@@ -30,10 +30,6 @@ else
 CSRCS += sam_userleds.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += sam_appinit.c
-endif
-
 ifeq ($(CONFIG_SAM34_SPI0),y)
 CSRCS += sam_spi0.c
 endif

@@ -22,10 +22,6 @@
 
 set(SRCS stm32_boot.c stm32_spi.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_STM32_CAN_CHARDRIVER)
   list(APPEND SRCS stm32_can.c)
 endif()

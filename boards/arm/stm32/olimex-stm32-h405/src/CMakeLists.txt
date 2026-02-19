@@ -36,10 +36,6 @@ if(CONFIG_STM32_OTGFS)
   list(APPEND SRCS stm32_usb.c)
 endif()
 
-if(CONFIG_NSH_LIBRARY)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_ADC)
   list(APPEND SRCS stm32_adc.c)
 endif()

@@ -23,8 +23,5 @@
 include $(TOPDIR)/Make.defs
 
 CSRCS = lm_boot.c lm_leds.c lm_ethernet.c lm_ssi.c
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += lm_appinit.c
-endif
 
 include $(TOPDIR)/boards/Board.mk

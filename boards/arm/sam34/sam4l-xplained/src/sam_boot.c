@@ -27,6 +27,8 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <stdio.h>
+#include <syslog.h>
 
 #include <nuttx/board.h>
 
@@ -35,6 +37,28 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
+/* Support for the SD card slot on the I/O1 module */
+
+/* Verify NSH PORT and SLOT settings */
+
+#  define SAM34_MMCSDSLOTNO    0 /* There is only one slot */
+
+#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != SAM34_MMCSDSLOTNO
+#    error Only one MMC/SD slot:  Slot 0 (CONFIG_NSH_MMCSDSLOTNO)
+#  endif
+
+#  if defined(CONFIG_NSH_MMCSDSPIPORTNO) && CONFIG_NSH_MMCSDSPIPORTNO != SD_CSNO
+#    error CONFIG_NSH_MMCSDSPIPORTNO must have the same value as SD_CSNO
+#  endif
+
+/* Default MMC/SD minor number */
+
+#  ifndef CONFIG_NSH_MMCSDMINOR
+#    define CONFIG_NSH_MMCSDMINOR 0
+#  endif
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -74,3 +98,45 @@ void sam_boardinitialize(void)
   board_autoled_initialize();
 #endif
 }
+
+/****************************************************************************
+ * Name: board_late_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_late_initialize(). board_late_initialize() will be
+ *   called immediately after up_initialize() is called and just before the
+ *   initial application is started.  This additional initialization phase
+ *   may be used, for example, to initialize board-specific device drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void)
+{
+#if defined(CONFIG_SAM34_LCDCA) && defined(CONFIG_SAM4L_XPLAINED_SLCD1MODULE)
+  /* Initialize the SLCD and register the SLCD device as /dev/slcd0 */
+
+  int ret = sam_slcd_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize the LCD: %d\n",
+             ret);
+      return;
+    }
+#endif
+#if defined(CONFIG_SAM34_SPI0) && defined(CONFIG_SAM4L_XPLAINED_IOMODULE)
+
+  /* Initialize the SPI-based MMC/SD slot */
+
+  int ret = sam_sdinitialize(CONFIG_NSH_MMCSDMINOR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize MMC/SD slot: %d\n",
+             ret);
+      return;
+    }
+#endif
+}
+#endif

@@ -27,6 +27,9 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <sys/types.h>
+#include <stdio.h>
+#include <syslog.h>
 
 #include <nuttx/board.h>
 #include <arch/board/board.h>
@@ -106,13 +109,26 @@ void kl_boardinitialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-  /* Perform NSH initialization here instead of from the NSH.  This
-   * alternative NSH initialization is necessary when NSH is ran in
-   * user-space but the initialization function must run in kernel space.
-   */
+  int ret;
 
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_BOARDCTL)
-  board_app_initialize(0);
+  #if defined(CONFIG_SENSORS_ADXL345)
+  ret = adxl345_archinitialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: adxl345_archinitialize failed: %d\n", ret);
+    }
 #endif
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = kl_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: k64_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
 }
 #endif

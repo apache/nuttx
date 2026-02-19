@@ -33,10 +33,6 @@ else()
   list(APPEND SRCS s32k3xx_userleds.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS s32k3xx_appinit.c)
-endif()
-
 if(CONFIG_S32K3XX_LPI2C)
   list(APPEND SRCS s32k3xx_i2c.c)
 endif()

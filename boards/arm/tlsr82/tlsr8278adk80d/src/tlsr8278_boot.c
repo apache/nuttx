@@ -26,7 +26,23 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+
 #include "tlsr8278adk80d.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define TELINK_LIB_VAR_PASTE(v)  tl_multi_addr_##v
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+uint16_t TELINK_LIB_VAR_PASTE(L);
+uint16_t TELINK_LIB_VAR_PASTE(H);
 
 /****************************************************************************
  * Public Functions
@@ -38,5 +54,18 @@ void board_late_initialize(void)
   /* Perform board-specific initialization */
 
   tlsr8278_bringup();
+}
+#endif
+
+#ifdef CONFIG_BOARDCTL_IOCTL
+int board_ioctl(unsigned int cmd, uintptr_t arg)
+{
+  switch (cmd)
+    {
+      default:
+        return -EINVAL;
+    }
+
+    return OK;
 }
 #endif

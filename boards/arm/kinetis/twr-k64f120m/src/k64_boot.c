@@ -27,10 +27,20 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
 
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#ifdef CONFIG_KINETIS_SDHC
+#  include <nuttx/sdio.h>
+#  include <nuttx/mmcsd.h>
+#endif
+
+#include "kinetis.h"
 #include "arm_internal.h"
 #include "twrk64.h"
 
@@ -88,3 +98,44 @@ void kinetis_boardinitialize(void)
   board_autoled_initialize();
 #endif
 }
+
+/****************************************************************************
+ * Name: board_late_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_late_initialize().  board_late_initialize() will
+ *   be called immediately after up_intitialize() is called and just before
+ *   the initial application is started.  This additional initialization
+ *   phase may be used, for example, to initialize board-specific device
+ *   drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void)
+{
+  int ret;
+
+#ifdef HAVE_PROC
+  /* Mount the proc filesystem */
+
+  syslog(LOG_INFO, "Mounting procfs to /proc\n");
+
+  ret = nx_mount(NULL, PROCFS_MOUNTPOUNT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to mount the PROC filesystem: %d\n",  ret);
+      return;
+    }
+#endif
+
+#ifdef HAVE_MMCSD
+  /* Initialize the MMC/SD driver and possible automount */
+
+  k64_sdhc_initialize();
+#endif
+}
+#endif /* CONFIG_BOARD_LATE_INITIALIZE */

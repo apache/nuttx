@@ -26,13 +26,65 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <debug.h>
+#include <syslog.h>
 
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/leds/userled.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
 #include "nucleo-144.h"
+
+#ifdef CONFIG_STM32_ROMFS
+#include "stm32_romfs.h"
+#endif
+
+#ifdef CONFIG_SENSORS_AMG88XX
+#include "stm32_amg88xx.h"
+#endif
+
+#if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
+#  include "stm32_i2c.h"
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_i2c_register
+ *
+ * Description:
+ *   Register one I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
+static void stm32_i2c_register(int bus)
+{
+  struct i2c_master_s *i2c;
+  int ret;
+
+  i2c = stm32_i2cbus_initialize(bus);
+  if (i2c == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", bus);
+    }
+  else
+    {
+      ret = i2c_register(i2c, bus);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
+                 bus, ret);
+          stm32_i2cbus_uninitialize(i2c);
+        }
+    }
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -85,13 +137,115 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_BOARDCTL)
-  /* Perform NSH initialization here instead of from the NSH.  This
-   * alternative NSH initialization is necessary when NSH is ran in
-   * user-space but the initialization function must run in kernel space.
-   */
+  int ret;
 
-  board_app_initialize(0);
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = nx_mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at %s: %d\n",
+             STM32_PROCFS_MOUNTPOINT, ret);
+    }
 #endif
+
+#ifdef CONFIG_STM32_ROMFS
+  /* Mount the romfs partition */
+
+  ret = stm32_romfs_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount romfs at %s: %d\n",
+             CONFIG_STM32_ROMFS_MOUNTPOINT, ret);
+    }
+#endif
+
+#ifdef CONFIG_DEV_GPIO
+  /* Register the GPIO driver */
+
+  ret = stm32_gpio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+      return;
+    }
+#endif
+
+#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize(LED_DRIVER_PATH);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = stm32_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_STM32_BBSRAM
+  /* Initialize battery-backed RAM */
+
+  stm32_bbsram_int();
+#endif
+
+#if defined(CONFIG_FAT_DMAMEMORY)
+  if (stm32_dma_alloc_init() < 0)
+    {
+      syslog(LOG_ERR, "DMA alloc FAILED");
+    }
+#endif
+
+#if defined(CONFIG_NUCLEO_SPI_TEST)
+  /* Create SPI interfaces */
+
+  ret = stm32_spidev_bus_test();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI interfaces: %d\n",
+             ret);
+      return;
+    }
+#endif
+
+#if defined(CONFIG_MMCSD)
+  /* Initialize the SDIO block driver */
+
+  ret = stm32_sdio_initialize();
+  if (ret != OK)
+    {
+      ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
+      return;
+    }
+#endif
+
+#if defined(CONFIG_PWM)
+  /* Initialize PWM and register the PWM device */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
+  stm32_i2c_register(1);
+#endif
+
+#ifdef CONFIG_SENSORS_AMG88XX
+  board_amg88xx_initialize(1);
+#endif
+
+  UNUSED(ret);
 }
 #endif

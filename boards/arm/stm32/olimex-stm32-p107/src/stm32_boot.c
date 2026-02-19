@@ -28,6 +28,11 @@
 #include <debug.h>
 #include <arch/board/board.h>
 
+#include <stdbool.h>
+#include <syslog.h>
+#include <errno.h>
+
+#include "stm32.h"
 #include "arm_internal.h"
 #include "olimex-stm32-p107.h"
 
@@ -59,3 +64,36 @@ void stm32_boardinitialize(void)
     }
 #endif
 }
+
+/****************************************************************************
+ * Name: board_late_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_late_initialize().  board_late_initialize() will
+ *   be called immediately after up_initialize() is called and just before
+ *   the initial application is started.
+ *   This additional initialization phase may be used, for example, to
+ *   initialize board-specific device drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void)
+{
+  int ret;
+
+#ifdef CONFIG_STM32_CAN_CHARDRIVER
+  /* Initialize CAN and register the CAN driver. */
+
+  ret = stm32_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
+}
+#endif

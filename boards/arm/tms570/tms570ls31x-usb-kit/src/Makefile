@@ -24,10 +24,6 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = tms570_initialize.c tms570_bringup.c tms570_spi.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-  CSRCS += tms570_appinit.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
   CSRCS += tms570_autoleds.c
 else

@@ -26,10 +26,6 @@ if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS lm4f_autoleds.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS lm4f_appinit.c)
-endif()
-
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT
