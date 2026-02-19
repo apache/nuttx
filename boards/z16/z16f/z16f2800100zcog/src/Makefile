@@ -24,8 +24,4 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = z16f_boot.c z16f_leds.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += z16f_appinit.c
-endif
-
 include $(TOPDIR)/boards/Board.mk
