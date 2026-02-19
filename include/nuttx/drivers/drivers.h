@@ -274,6 +274,16 @@ void lwlconsole_init(void);
 
 void rpmsg_serialinit(void);
 
+/****************************************************************************
+ * Name: rpmsg_serialrawinit
+ *
+ * Description:
+ *   Register rpmsg serial driver
+ *
+ ****************************************************************************/
+
+void rpmsg_serialrawinit(void);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

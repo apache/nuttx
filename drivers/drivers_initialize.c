@@ -71,7 +71,8 @@
 
 #if (defined(CONFIG_LWL_CONSOLE) + defined(CONFIG_SERIAL_CONSOLE) + \
      defined(CONFIG_CDCACM_CONSOLE) + defined(CONFIG_PL2303_CONSOLE) + \
-     defined(CONFIG_SERIAL_RTT_CONSOLE) + defined(CONFIG_RPMSG_UART_CONSOLE)) > 1
+     defined(CONFIG_SERIAL_RTT_CONSOLE) + defined(CONFIG_RPMSG_UART_CONSOLE) + \
+     defined(CONFIG_RPMSG_UART_RAW_CONSOLE) ) > 1
 #  error More than one console driver selected. Check your configuration !
 #endif
 
@@ -172,6 +173,10 @@ void drivers_initialize(void)
 
 #ifdef CONFIG_RPMSG_UART
   rpmsg_serialinit();
+#endif
+
+#ifdef CONFIG_RPMSG_UART_RAW
+  rpmsg_serialrawinit();
 #endif
 
 #ifdef CONFIG_RAM_UART
