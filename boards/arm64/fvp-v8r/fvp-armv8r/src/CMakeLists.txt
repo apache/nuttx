@@ -21,8 +21,4 @@
 # ##############################################################################
 set(SRCS fvp_boardinit.c fvp_bringup.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS fvp_appinit.c)
-endif()
-
 target_sources(board PRIVATE ${SRCS})
