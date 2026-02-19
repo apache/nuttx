@@ -23,7 +23,6 @@
 set(SRCS pinephone_boardinit.c pinephone_bringup.c pinephone_pmic.c)
 
 if(CONFIG_BOARDCTL)
-  list(APPEND SRCS pinephone_appinit.c)
   if(CONFIG_BOARDCTL_RESET)
     list(APPEND SRCS pinephone_reset.c)
   endif()

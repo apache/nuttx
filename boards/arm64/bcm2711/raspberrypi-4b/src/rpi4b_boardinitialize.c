@@ -27,8 +27,12 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <sys/types.h>
+#include <syslog.h>
 
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
+#include <arch/board/board.h>
 
 #include "rpi4b.h"
 
@@ -104,8 +108,32 @@ void bcm2711_board_initialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
+  int ret = 0;
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the proc file system */
+
+  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+    }
+#endif
+
   /* Perform board initialization */
 
-  rpi4b_bringup();
+  ret = rpi4b_bringup();
+
+#ifdef CONFIG_RPI4B_MOUNT_BOOT
+  /* Mount SD card file system (currently just the boot (first) partition).
+   * Assumes /dev/mmcsd0 exists, but if it doesn't it will fail gracefully.
+   */
+
+  ret = nx_mount("/dev/mmcsd0", "/sd", "vfat", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Could not mount SD card FAT partition: %d\n", ret);
+    }
+#endif
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */

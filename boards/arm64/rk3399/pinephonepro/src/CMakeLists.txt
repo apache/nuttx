@@ -23,7 +23,6 @@
 set(SRCS pinephonepro_boardinit.c pinephonepro_bringup.c)
 
 if(CONFIG_BOARDCTL)
-  list(APPEND SRCS pinephonepro_appinit.c)
   if(CONFIG_BOARDCTL_RESET)
     list(APPEND SRCS pinephonepro_reset.c)
   endif()

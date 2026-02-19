@@ -22,10 +22,6 @@
 
 set(SRCS imx8_boardinit.c imx8_bringup.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS imx8_appinit.c)
-endif()
-
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/dramboot.ld")
