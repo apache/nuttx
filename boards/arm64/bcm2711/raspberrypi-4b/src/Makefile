@@ -26,10 +26,6 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += rpi4b_autoleds.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += rpi4b_appinit.c
-endif
-
 ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += rpi4b_gpio.c
 endif
