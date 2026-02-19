@@ -20,11 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS qemu_boot.c qemu_bringup.c qemu_net.c)
-
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS qemu_appinit.c)
-endif()
+set(SRCS qemu_boot.c qemu_bringup.c qemu_net.c qemu_boardinit.c)
 
 if(CONFIG_BOARDCTL_RESET)
   list(APPEND SRCS qemu_reset.c)
