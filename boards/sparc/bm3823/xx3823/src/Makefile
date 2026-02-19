@@ -25,10 +25,6 @@
 ASRCS =
 CSRCS = bm3823_boot.c bm3823_leds.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
-CSRCS += bm3823_appinit.c
-endif
-
 ifeq ($(CONFIG_MTD_AM29LV),y)
 CSRCS += bm3823_am29lv.c
 endif
