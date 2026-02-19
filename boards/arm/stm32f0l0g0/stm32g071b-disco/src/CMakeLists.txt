@@ -27,10 +27,6 @@ if(CONFIG_USERLED)
   list(APPEND SRCS stm32_userleds.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_SPI)
   list(APPEND SRCS stm32_spi.c)
 endif()

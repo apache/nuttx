@@ -46,11 +46,8 @@ ifeq ($(CONFIG_ADC),y)
 #CSRCS += stm32_adc.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinit.c
 ifeq ($(CONFIG_BOARDCTL_IOCTL),y)
 CSRCS += stm32_ioctl.c
-endif
 endif
 
 ifeq ($(CONFIG_ETC_ROMFS),y)

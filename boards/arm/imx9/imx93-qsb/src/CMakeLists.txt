@@ -22,10 +22,6 @@
 
 set(SRCS imx93_boardinit.c imx93_bringup.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS imx93_appinit.c)
-endif()
-
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_IMX93_RUN_FROM_ITCM)

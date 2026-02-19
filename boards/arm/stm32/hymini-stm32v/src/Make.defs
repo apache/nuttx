@@ -32,10 +32,6 @@ CSRCS += stm32_r61505u.c
 endif
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinit.c
-endif
-
 ifeq ($(CONFIG_INPUT),y)
 CSRCS += stm32_ts.c
 endif

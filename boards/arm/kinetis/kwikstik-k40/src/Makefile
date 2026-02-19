@@ -32,10 +32,6 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += k40_buttons.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += k40_appinit.c
-endif
-
 ifeq ($(CONFIG_USBDEV),y)
 CSRCS += k40_usbdev.c
 endif

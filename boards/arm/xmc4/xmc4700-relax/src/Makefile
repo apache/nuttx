@@ -38,8 +38,4 @@ ifeq ($(CONFIG_XMC4_USCI_SPI),y)
 CSRCS += xmc4_spi.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += xmc4_appinit.c
-endif
-
 include $(TOPDIR)/boards/Board.mk

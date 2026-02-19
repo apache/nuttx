@@ -18,7 +18,7 @@
 #
 # ##############################################################################
 
-set(SRCS ra4m1_boot.c ra4m1_bringup.c ra4m1_appinit.c)
+set(SRCS ra4m1_boot.c ra4m1_bringup.c)
 
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS ra4m1_autoleds.c)

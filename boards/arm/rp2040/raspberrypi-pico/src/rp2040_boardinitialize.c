@@ -38,6 +38,8 @@
 #include "rp2040_common_initialize.h"
 #endif /* CONFIG_ARCH_BOARD_COMMON */
 
+#include "rp2040_pico.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -87,3 +89,29 @@ void rp2040_boardinitialize(void)
 
   /* --- Place any board specific initialization here --- */
 }
+
+/****************************************************************************
+ * Name: board_late_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_late_initialize().  board_late_initialize() will
+ *   be called after up_initialize() and board_early_initialize() and just
+ *   before the initial application is started.  This additional
+ *   initialization phase may be used, for example, to initialize board-
+ *   specific device drivers for which board_early_initialize() is not
+ *   suitable.
+ *
+ *   Waiting for events, use of I2C, SPI, etc are permissible in the context
+ *   of board_late_initialize().  That is because board_late_initialize()
+ *   will run on a temporary, internal kernel thread.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void)
+{
+  rp2040_bringup();
+}
+#endif

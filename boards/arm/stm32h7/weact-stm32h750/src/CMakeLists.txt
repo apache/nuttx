@@ -50,11 +50,8 @@ if(CONFIG_FAT_DMAMEMORY)
   list(APPEND SRCS stm32_dma_alloc.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinitialize.c)
-  if(CONFIG_BOARDCTL_IOCTL)
-    list(APPEND SRCS stm32_ioctl.c)
-  endif()
+if(CONFIG_BOARDCTL_IOCTL)
+  list(APPEND SRCS stm32_ioctl.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})

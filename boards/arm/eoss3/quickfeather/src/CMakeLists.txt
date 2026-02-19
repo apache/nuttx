@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS eoss3_boot.c eoss3_bringup.c eoss3_appinit.c)
+set(SRCS eoss3_boot.c eoss3_bringup.c)
 
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS eoss3_autoleds.c)

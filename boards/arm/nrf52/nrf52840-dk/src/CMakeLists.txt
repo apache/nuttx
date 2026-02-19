@@ -22,10 +22,6 @@
 
 set(SRCS nrf52_boot.c nrf52_bringup.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS nrf52_appinit.c)
-endif()
-
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS nrf52_autoleds.c)
 else()
@@ -82,6 +78,10 @@ endif()
 
 if(CONFIG_NRF52_QSPI)
   list(APPEND SRCS nrf52_mx25.c)
+endif()
+
+if(CONFIG_NRF52_TIMER)
+  list(APPEND SRCS nrf52_timer.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})

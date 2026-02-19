@@ -22,10 +22,6 @@
 
 set(SRCS lm_boot.c lm_leds.c lm_ethernet.c lm_ssi.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS lm_appinit.c)
-endif()
-
 if(CONFIG_NX_LCDDRIVER)
   list(APPEND SRCS lm_oled.c)
 endif()

@@ -54,10 +54,6 @@ ifeq ($(CONFIG_STM32_CAN_CHARDRIVER),y)
 CSRCS += stm32_can.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinit.c
-endif
-
 ifeq ($(CONFIG_INPUT_STMPE811),y)
 CSRCS += stm32_stmpe811.c
 endif

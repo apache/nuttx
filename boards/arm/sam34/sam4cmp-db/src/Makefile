@@ -22,12 +22,6 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = sam_boot.c
-
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += sam_appinit.c sam_bringup.c
-else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
-CSRCS += sam_bringup.c
-endif
+CSRCS = sam_boot.c sam_bringup.c
 
 include $(TOPDIR)/boards/Board.mk

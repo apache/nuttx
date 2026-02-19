@@ -26,16 +26,39 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
 #include <debug.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
-#include <nuttx/spi/spi.h>
-
 #include <arch/board/board.h>
+#include <nuttx/spi/spi.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/drivers/drivers.h>
 
 #include "arm_internal.h"
+#include "stm32l4.h"
+#include "stm32l4_uid.h"
 #include "stm32l476-mdk.h"
+
+/* Conditional logic in stm32l476-mdk.h will determine if certain features
+ * are supported.  Tests for these features need to be made after including
+ * stm32l476-mdk.h.
+ */
+
+#ifdef HAVE_RTC_DRIVER
+#  include <nuttx/timers/rtc.h>
+#  include "stm32l4_rtc.h"
+#endif
+
+#ifdef HAVE_USERLED_DRIVER
+#  include <nuttx/leds/userled.h>
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -87,8 +110,77 @@ void stm32l4_board_initialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-  /* Perform board-specific initialization */
+#ifdef HAVE_RTC_DRIVER
+  struct rtc_lowerhalf_s *rtclower;
+#endif
+  int ret;
 
-  stm32_bringup();
+#ifdef HAVE_PROC
+  /* mount the proc filesystem */
+
+  syslog(LOG_INFO, "Mounting procfs to /proc\n");
+
+  ret = nx_mount(NULL, CONFIG_NSH_PROC_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to mount the PROC filesystem: %d\n", ret);
+      return;
+    }
+#endif
+
+#ifdef HAVE_RTC_DRIVER
+  /* Instantiate the STM32 lower-half RTC driver */
+
+  rtclower = stm32l4_rtc_lowerhalf();
+  if (!rtclower)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to instantiate the RTC lower-half driver\n");
+      return;
+    }
+  else
+    {
+      /* Bind the lower half driver and register the combined RTC driver
+       * as /dev/rtc0
+       */
+
+      ret = rtc_initialize(0, rtclower);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR,
+                 "ERROR: Failed to bind/register the RTC driver: %d\n",
+                 ret);
+          return;
+        }
+    }
+#endif
+
+#ifdef HAVE_USERLED_DRIVER
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n",
+             ret);
+      return;
+    }
+#endif
+
+  UNUSED(ret);
+}
+#endif
+
+#if defined(CONFIG_BOARDCTL_UNIQUEID)
+int board_uniqueid(uint8_t *uniqueid)
+{
+  if (uniqueid == NULL)
+    {
+      return -EINVAL;
+    }
+
+  stm32l4_get_uniqueid(uniqueid);
+  return OK;
 }
 #endif

@@ -27,8 +27,16 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <errno.h>
+#include <syslog.h>
 
 #include <nuttx/board.h>
+
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
+#endif
 
 #include "sam_sckc.h"
 #include "sama5d3-xplained.h"
@@ -135,6 +143,6 @@ void sam_boardinitialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-  board_app_initialize(0);
+  sam_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */

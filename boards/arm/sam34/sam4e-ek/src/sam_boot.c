@@ -27,9 +27,17 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <errno.h>
+#include <syslog.h>
 
 #include <nuttx/board.h>
 #include <arch/board/board.h>
+
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
+#endif
 
 #include "arm_internal.h"
 #include "sam4e-ek.h"
@@ -130,13 +138,49 @@ void sam_boardinitialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-  /* Perform NSH initialization here instead of from the NSH.
-   * This alternative NSH initialization is necessary when NSH is ran in
-   * user-space but the initialization function must run in kernel space.
-   */
+  int ret;
 
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_BOARDCTL)
-  board_app_initialize(0);
+#ifdef HAVE_AT25
+  /* Initialize the AT25 driver */
+
+  ret = sam_at25_automount(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_at25_automount() failed: %d\n", ret);
+      return;
+    }
+#endif
+
+#ifdef HAVE_HSMCI
+  /* Initialize the HSMCI driver */
+
+  ret = sam_hsmci_initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_hsmci_initialize(0) failed: %d\n", ret);
+      return;
+    }
+#endif
+
+#ifdef CONFIG_INPUT_ADS7843E
+  /* Initialize the touchscreen */
+
+  ret = sam_tsc_setup(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_tsc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef HAVE_USBMONITOR
+  /* Start the USB Monitor */
+
+  ret = usbmonitor_start();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
+      return;
+    }
 #endif
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */

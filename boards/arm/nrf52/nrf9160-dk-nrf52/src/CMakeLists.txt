@@ -22,10 +22,6 @@
 
 set(SRCS nrf52_boot.c nrf52_bringup.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS nrf52_appinit.c)
-endif()
-
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_ARCH_BOARD_COMMON)

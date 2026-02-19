@@ -35,9 +35,6 @@ endif
 ifeq ($(CONFIG_LPC31_SPI),y)
 CSRCS += lpc31_spi.c
 endif
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += lpc31_appinit.c
-endif
 ifeq ($(CONFIG_LEGACY_PAGING),y)
 CSRCS += lpc31_fillpage.c
 endif

@@ -93,8 +93,7 @@ int stm32_bringup(void);
 int board_usbmsc_initialize(int port)
 {
   /* If system/usbmsc is built as an NSH command, then SD slot should
-   * already have been initialized in board_app_initialize()
-   * (see stm32_appinit.c).
+   * already have been initialized.
    * In this case, there is nothing further to be done here.
    */
 

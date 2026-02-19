@@ -28,10 +28,6 @@ else()
   list(APPEND SRCS sam_userleds.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS sam_appinit.c)
-endif()
-
 if(CONFIG_SAM34_SPI0)
   list(APPEND SRCS sam_spi0.c)
 endif()

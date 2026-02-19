@@ -36,10 +36,6 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS rp23xx_buttons.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS rp23xx_appinit.c)
-endif()
-
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_BOOT_RUNFROMFLASH)

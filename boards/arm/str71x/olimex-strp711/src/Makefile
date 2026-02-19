@@ -22,10 +22,8 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = str71_spi.c str71_leds.c str71_buttons.c
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += str71_appinit.c
-endif
+CSRCS = str71_spi.c str71_leds.c str71_buttons.c str71_boardinit.c
+
 ifeq ($(CONFIG_ENC28J60),y)
 CSRCS += str71_enc28j60.c
 endif

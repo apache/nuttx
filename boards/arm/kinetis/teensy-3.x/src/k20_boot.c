@@ -27,10 +27,13 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <sys/types.h>
+#include <syslog.h>
 
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "kinetis_usbotg.h"
 #include "arm_internal.h"
 #include "teensy-3x.h"
 
@@ -69,11 +72,39 @@ void kinetis_boardinitialize(void)
 #endif
 }
 
-#if defined(CONFIG_BOARD_LATE_INITIALIZE)
+/****************************************************************************
+ * Name: board_late_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_late_initialize().  board_late_initialize() will
+ *   be called immediately after up_intitialize() is called and just before
+ *   the initial application is started.  This additional initialization
+ *   phase may be used, for example, to initialize board-specific device
+ *   drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
+  int ret;
+
 #if defined(CONFIG_KINETIS_I2C0) || defined(CONFIG_KINETIS_I2C1)
   kinetis_i2cdev_initialize();
 #endif
-}
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = kinetis_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: kinetis_pwm_setup() failed: %d\n", ret);
+    }
 #endif
+
+  UNUSED(ret);
+}
+#endif /* CONFIG_BOARD_LATE_INITIALIZE */

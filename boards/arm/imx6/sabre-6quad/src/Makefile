@@ -24,10 +24,6 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = imx_boardinit.c imx_bringup.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += imx_appinit.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += imx_autoleds.c
 else

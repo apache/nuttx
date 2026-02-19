@@ -28,10 +28,6 @@ else
 CSRCS += ra4m1_userleds.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += ra4m1_appinit.c
-endif
-
 ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += ra4m1_gpio.c
 endif

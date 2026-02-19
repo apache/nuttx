@@ -32,11 +32,8 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinitialize.c)
-  if(CONFIG_BOARDCTL_IOCTL)
-    list(APPEND SRCS stm32_ioctl.c)
-  endif()
+if(CONFIG_BOARDCTL_IOCTL)
+  list(APPEND SRCS stm32_ioctl.c)
 endif()
 
 if(CONFIG_SPI)

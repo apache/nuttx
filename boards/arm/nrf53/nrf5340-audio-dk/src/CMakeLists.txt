@@ -22,10 +22,6 @@
 
 set(SRCS nrf53_boot.c nrf53_bringup.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS nrf53_appinit.c)
-endif()
-
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS nrf53_autoleds.c)
 else()

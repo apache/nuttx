@@ -78,11 +78,8 @@ ifeq ($(CONFIG_TIMER),y)
 CSRCS += stm32_timer.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinit.c
 ifeq ($(CONFIG_BOARDCTL_IOCTL),y)
 CSRCS += stm32_ioctl.c
-endif
 endif
 
 ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)

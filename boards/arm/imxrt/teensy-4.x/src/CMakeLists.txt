@@ -20,13 +20,8 @@
 #
 # ##############################################################################
 
-set(SRCS imxrt_boot.c imxrt_flexspi_nor_boot.c imxrt_flexspi_nor_flash.c)
-
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS imxrt_appinit.c imxrt_bringup.c)
-elseif(CONFIG_BOARD_LATE_INITIALIZE)
-  list(APPEND SRCS imxrt_bringup.c)
-endif()
+set(SRCS imxrt_boot.c imxrt_flexspi_nor_boot.c imxrt_flexspi_nor_flash.c
+         imxrt_bringup.c)
 
 if(CONFIG_BOARDCTL_RESET)
   list(APPEND SRCS imxrt_reset.c)

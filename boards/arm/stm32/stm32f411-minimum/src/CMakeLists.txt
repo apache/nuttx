@@ -22,10 +22,6 @@
 
 set(SRCS stm32_boot.c stm32_bringup.c)
 
-if(CONFIG_NSH_LIBRARY)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS stm32_autoleds.c)
 endif()

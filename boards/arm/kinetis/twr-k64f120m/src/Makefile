@@ -33,10 +33,6 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 #CSRCS += k64_buttons.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += k64_appinit.c
-endif
-
 ifeq ($(CONFIG_KINETIS_SDHC),y)
 CSRCS += k64_sdhc.c
 ifeq ($(CONFIG_FS_AUTOMOUNTER),y)
