@@ -24,6 +24,6 @@ include $(TOPDIR)/Make.defs
 
 RCSRCS = etc/init.d/rc.sysinit etc/init.d/rcS
 
-CSRCS = eic7700x_appinit.c
+CSRCS = eic7700x_boardinit.c
 
 include $(TOPDIR)/boards/Board.mk

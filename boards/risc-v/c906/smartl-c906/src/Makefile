@@ -24,10 +24,6 @@ include $(TOPDIR)/Make.defs
 
 CSRCS  = c906_bringup.c c906_boot.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += c906_appinit.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += c906_leds.c
 endif

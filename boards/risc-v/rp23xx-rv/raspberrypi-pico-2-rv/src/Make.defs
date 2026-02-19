@@ -21,7 +21,6 @@
 include $(TOPDIR)/Make.defs
 
 CSRCS = rp23xx_boardinitialize.c
-CSRCS += rp23xx_appinit.c
 CSRCS += rp23xx_bringup.c
 
 ifeq ($(CONFIG_DEV_GPIO),y)

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/jh7110/star64/src/jh7110_appinit.c
+ * boards/risc-v/eic7700x/starpro64/src/eic7700x_boardinit.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -41,7 +41,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Ramdisk Definition */
+/* RAM Disk Definition */
 
 #define SECTORSIZE   512
 #define NSECTORS(b)  (((b) + SECTORSIZE - 1) / SECTORSIZE)
@@ -55,8 +55,8 @@
  * Name: mount_ramdisk
  *
  * Description:
- *  Mount a ramdisk defined in the ld.script to /dev/ramX.  The ramdisk is
- *  intended to contain a romfs with applications which can be spawned at
+ *  Mount a RAM Disk defined in ld.script to /dev/ramX.  The RAM Disk
+ *  contains a ROMFS filesystem with applications that can be spawned at
  *  runtime.
  *
  * Returned Value:
@@ -65,7 +65,7 @@
  *
  ****************************************************************************/
 
-int mount_ramdisk(void)
+static int mount_ramdisk(void)
 {
   int ret;
   struct boardioc_romdisk_s desc;
@@ -93,44 +93,6 @@ int mount_ramdisk(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_app_initialize
- *
- * Description:
- *   Perform architecture specific initialization
- *
- * Input Parameters:
- *   arg - The boardctl() argument is passed to the board_app_initialize()
- *         implementation without modification.  The argument has no
- *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initialization logic and the
- *         matching application logic.  The value could be such things as a
- *         mode enumeration value, a set of DIP switch switch settings, a
- *         pointer to configuration data read from a file or serial FLASH,
- *         or whatever you would like to do with it.  Every implementation
- *         should accept zero/NULL as a default configuration.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-int board_app_initialize(uintptr_t arg)
-{
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-  /* Board initialization already performed by board_late_initialize() */
-
-  return OK;
-#else
-  /* Perform board-specific initialization */
-
-  mount(NULL, "/proc", "procfs", 0, NULL);
-
-  return OK;
-#endif
-}
-
-/****************************************************************************
  * Name: board_late_initialize
  *
  * Description:
@@ -149,6 +111,7 @@ int board_app_initialize(uintptr_t arg)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
   /* Mount the RAM Disk */
@@ -159,3 +122,4 @@ void board_late_initialize(void)
 
   mount(NULL, "/proc", "procfs", 0, NULL);
 }
+#endif /* CONFIG_BOARD_LATE_INITIALIZE */
