@@ -161,7 +161,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_INPUT_BUTTONS
+#if defined(CONFIG_INPUT_BUTTONS_LOWER)
   /* Register the BUTTON driver */
 
   ret = btn_lower_initialize("/dev/buttons");
