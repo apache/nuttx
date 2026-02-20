@@ -1296,6 +1296,107 @@ static int up_interrupts(int irq, void *context, void *arg)
           uart_xmitchars(dev);
           handled = true;
         }
+
+      if ((s1 & UART_S1_TC) == 0)
+        {
+          /* TC cleared, transmission started. */
+
+#if defined(CONFIG_UART0_RS485CONTROL_RTSISGPIO)
+          if (&g_uart0priv == priv)
+            {
+              kinetis_gpiowrite(g_uart0priv.rts_gpio, 1);
+              handled = true;
+            }
+
+#endif
+#if defined(CONFIG_UART1_RS485CONTROL_RTSISGPIO)
+          if (&g_uart1priv == priv)
+            {
+              kinetis_gpiowrite(g_uart1priv.rts_gpio, 1);
+              handled = true;
+            }
+
+#endif
+#if defined(CONFIG_UART2_RS485CONTROL_RTSISGPIO)
+          if (&g_uart2priv == priv)
+            {
+              kinetis_gpiowrite(g_uart2priv.rts_gpio, 1);
+              handled = true;
+            }
+
+#endif
+#if defined(CONFIG_UART3_RS485CONTROL_RTSISGPIO)
+          if (&g_uart3priv == priv)
+            {
+              kinetis_gpiowrite(g_uart3priv.rts_gpio, 1);
+              handled = true;
+            }
+
+#endif
+#if defined(CONFIG_UART4_RS485CONTROL_RTSISGPIO)
+          if (&g_uart4priv == priv)
+            {
+              kinetis_gpiowrite(g_uart4priv.rts_gpio, 1);
+              handled = true;
+            }
+
+#endif
+#if defined(CONFIG_UART5_RS485CONTROL_RTSISGPIO)
+          if (&g_uart5priv == priv)
+            {
+              kinetis_gpiowrite(g_uart5priv.rts_gpio, 1);
+              handled = true;
+            }
+
+#endif
+        }
+      else
+        {
+          /* Transmission complete. Do not set handle, exit immediately. */
+
+#if defined(CONFIG_UART0_RS485CONTROL_RTSISGPIO)
+          if (&g_uart0priv == priv)
+            {
+              kinetis_gpiowrite(g_uart0priv.rts_gpio, 0);
+            }
+
+#endif
+#if defined(CONFIG_UART1_RS485CONTROL_RTSISGPIO)
+          if (&g_uart1priv == priv)
+            {
+              kinetis_gpiowrite(g_uart1priv.rts_gpio, 0);
+            }
+
+#endif
+#if defined(CONFIG_UART2_RS485CONTROL_RTSISGPIO)
+          if (&g_uart2priv == priv)
+            {
+              kinetis_gpiowrite(g_uart2priv.rts_gpio, 0);
+            }
+
+#endif
+#if defined(CONFIG_UART3_RS485CONTROL_RTSISGPIO)
+          if (&g_uart3priv == priv)
+            {
+              kinetis_gpiowrite(g_uart3priv.rts_gpio, 0);
+            }
+
+#endif
+#if defined(CONFIG_UART4_RS485CONTROL_RTSISGPIO)
+          if (&g_uart4priv == priv)
+            {
+              kinetis_gpiowrite(g_uart4priv.rts_gpio, 0);
+            }
+
+#endif
+#if defined(CONFIG_UART5_RS485CONTROL_RTSISGPIO)
+          if (&g_uart5priv == priv)
+            {
+              kinetis_gpiowrite(g_uart5priv.rts_gpio, 0);
+            }
+
+#endif
+        }
     }
 
   return OK;
@@ -1919,6 +2020,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       priv->ie |= UART_C2_TIE;
+      priv->ie |= UART_C2_TCIE;
       up_setuartint(priv);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
@@ -1933,6 +2035,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       /* Disable the TX interrupt */
 
       priv->ie &= ~UART_C2_TIE;
+      priv->ie &= ~UART_C2_TCIE;
       up_setuartint(priv);
     }
 
