@@ -36,7 +36,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_BOARD_LOOPSPERMSEC
+/* If no value is given, we proceed with 0 since a one-shot timer is used for
+ * accurate delays. A runtime DEBUGASSERT catches the case where the one-shot
+ * timer lower-half isn't registered in time.
+ */
+
+#if CONFIG_BOARD_LOOPSPERMSEC == -1
+#  undef  CONFIG_BOARD_LOOPSPERMSEC
 #  define CONFIG_BOARD_LOOPSPERMSEC 0
 #endif
 

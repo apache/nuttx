@@ -44,6 +44,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
+              "Configure BOARD_LOOPSPERMSEC to non-default value.");
+
 /* Allow 2 milliseconds for the IRC16M to become ready. */
 
 #define IRC16M_STARTUP_TIMEOUT   (2 * CONFIG_BOARD_LOOPSPERMSEC)

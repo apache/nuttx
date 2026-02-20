@@ -1365,11 +1365,12 @@ comment "Board Settings"
 
 config BOARD_LOOPSPERMSEC
 	int "Delay loops per millisecond"
-	default 5000
+	default -1
 	---help---
 		Simple delay loops are used by some logic, especially during boot-up,
-		driver initialization.  These delay loops must be calibrated for each
-		board in order to assure accurate timing by the delay loops.
+		driver initialization. These delay loops must be calibrated for each
+		board in order to assure accurate timing by the delay loops. You can
+		do so with `calib_udelay` (EXAMPLES_CALIB_UDELAY).
 
 comment "Interrupt options"
 
