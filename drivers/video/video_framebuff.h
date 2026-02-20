@@ -38,8 +38,9 @@
 
 struct vbuf_container_s
 {
-  struct v4l2_buffer       buf;   /* Buffer information */
-  struct vbuf_container_s *next;  /* Pointer to next buffer */
+  struct v4l2_buffer       buf;                      /* Buffer information */
+  struct v4l2_plane        planes[VIDEO_MAX_PLANES]; /* Buffer planes */
+  struct vbuf_container_s *next;                     /* Pointer to next buffer */
 };
 
 typedef struct vbuf_container_s vbuf_container_t;
@@ -89,5 +90,7 @@ void              video_framebuff_capture_done
                        (video_framebuff_t *fbuf);
 void              video_framebuff_change_mode
                        (video_framebuff_t *fbuf, enum v4l2_buf_mode mode);
+vbuf_container_t *video_framebuff_find_container
+                       (video_framebuff_t *fbuf, uint32_t index);
 
 #endif  /* __DRIVERS_VIDEO_VIDEO_FRAMEBUFF_H */
