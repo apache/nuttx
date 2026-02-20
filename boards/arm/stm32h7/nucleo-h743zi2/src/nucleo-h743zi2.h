@@ -88,6 +88,19 @@
 #define GPIO_LED_ORANGE GPIO_LD2
 #define GPIO_LED_RED    GPIO_LD3
 
+/* BUTTONS
+ *
+ * The Blue pushbutton B1, labeled "User", is connected to GPIO PC13.
+ * A high value will be sensed when the button is depressed.
+ * Note:
+ *    1) That the EXTI is included in the definition to enable an interrupt
+ *       on this IO.
+ *    2) The following definitions assume the default Solder Bridges are
+ *       installed.
+ */
+
+#define GPIO_BTN_USER  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
+
 #define GPIO_OTGFS_VBUS   (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz| \
                            GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN9)
 

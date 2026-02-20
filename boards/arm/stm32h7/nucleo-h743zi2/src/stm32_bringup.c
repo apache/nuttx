@@ -49,6 +49,10 @@
 
 #include "nucleo-h743zi2.h"
 
+#ifdef CONFIG_INPUT_BUTTONS
+#  include <nuttx/input/buttons.h>
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -156,6 +160,16 @@ int stm32_bringup(void)
         }
     }
 #endif
+
+#if defined(CONFIG_INPUT_BUTTONS_LOWER)
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif /* CONFIG_INPUT_BUTTONS */
 
 #ifdef HAVE_USBHOST
   /* Initialize USB host operation.  stm32_usbhost_initialize()
