@@ -2383,6 +2383,13 @@ config ARCH_BOARD_A2G_TC397_5V_TFT
 		This options selects support for NuttX on the Infineon's AURIX board
 		board featuring the TC397 6Quad CPU.
 
+config ARCH_BOARD_TRIBOARD_TC4X9_COM
+	bool "Infineon's AURIX TC4DA board: TRIBOARD_TC4X9_COM"
+	depends on ARCH_CHIP_TC4DA
+	---help---
+		This options selects support for NuttX on the Infineon's AURIX board
+		board featuring the TC4DA 6Quad CPU.
+
 config ARCH_BOARD_QEMU_ARMV7A
 	bool "Qemu ARMv7a CPUs board"
 	depends on ARCH_CHIP_QEMU_ARM
@@ -3773,6 +3780,7 @@ config ARCH_BOARD
 	default "starpro64"                    if ARCH_BOARD_EIC7700X_STARPRO64
 	default "sabre-6quad"                  if ARCH_BOARD_SABRE_6QUAD
 	default "a2g-tc397-5v-tft"             if ARCH_BOARD_A2G_TC397_5V_TFT
+	default "triboard_tc4x9_com"           if ARCH_BOARD_TRIBOARD_TC4X9_COM
 	default "qemu-armv7a"                  if ARCH_BOARD_QEMU_ARMV7A
 	default "qemu-armv7r"                  if ARCH_BOARD_QEMU_ARMV7R
 	default "qemu-armv8a"                  if ARCH_BOARD_QEMU_ARMV8A

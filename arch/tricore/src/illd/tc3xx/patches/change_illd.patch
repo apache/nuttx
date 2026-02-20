@@ -1,0 +1,47 @@
+diff --git a/arch/tricore/src/illd/tc3xx/Libraries/src/Libraries/Infra/Ssw/TC3xx/Tricore/Ifx_Ssw_Infra.c b/arch/tricore/src/illd/tc3xx/Libraries/src/Libraries/Infra/Ssw/TC3xx/Tricore/Ifx_Ssw_Infra.c
+index f893b3e7e4b..e86811079d2 100644
+--- a/arch/tricore/src/illd/tc3xx/Libraries/src/Libraries/Infra/Ssw/TC3xx/Tricore/Ifx_Ssw_Infra.c
++++ b/arch/tricore/src/illd/tc3xx/Libraries/src/Libraries/Infra/Ssw/TC3xx/Tricore/Ifx_Ssw_Infra.c
+@@ -45,6 +45,12 @@
+ /*-------------------------Infrastructure Functions---------------------------*/
+ /******************************************************************************/
+ 
++IFX_SSW_WEAK void hardware_init_hook(void)
++{}
++
++IFX_SSW_WEAK void software_init_hook(void)
++{}
++
+ unsigned short Ifx_Ssw_getCpuWatchdogPassword(Ifx_SCU_WDTCPU *watchdog)
+ {
+     return Ifx_Ssw_getCpuWatchdogPasswordInline(watchdog);
+@@ -200,6 +206,7 @@ void Ifx_Ssw_doCppInit(void)
+ {
+     Ifx_Ssw_C_InitInline();
+ 
++#ifndef __NuttX__
+ 	#ifdef __TASKING__
+ 		extern void _main(void); /* cpp initialization */
+ 		_main();
+@@ -219,10 +226,12 @@ void Ifx_Ssw_doCppInit(void)
+ 		extern void _main(void); /* cpp initialization */
+ 		_main();
+ 	#endif
++#endif /* __NuttX__ */
+ }
+ 
+ void Ifx_Ssw_doCppExit(int status)
+ {
++#ifndef __NuttX__
+ 	#ifdef __TASKING__
+ 		extern void _doexit(void); /* cpp deinitialization */
+ 		_doexit();
+@@ -239,7 +248,7 @@ void Ifx_Ssw_doCppExit(int status)
+ 		extern void exit(int); /* cpp deinitialization */
+ 		exit(0);
+ 	#endif
+-
++#endif /* __NuttX__ */
+ }
+ 
+ 

@@ -68,6 +68,6 @@
 
 void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
-  *heap_start = _edata;
-  *heap_size = (size_t)((uintptr_t)_eheap - (uintptr_t)_edata);
+  *heap_start = _sheap;
+  *heap_size = (size_t)((uintptr_t)_eheap - (uintptr_t)_sheap);
 }

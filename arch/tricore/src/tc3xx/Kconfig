@@ -15,4 +15,9 @@ config TC3XX_UART0
 	select UART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config CPU_COREID
+	int "TRICORE CPU CORE ID"
+	default 0
+	range 0 6
+
 endmenu
