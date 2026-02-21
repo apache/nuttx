@@ -29,6 +29,8 @@
 #include <nuttx/irq.h>
 #include <assert.h>
 
+#include <arch/barriers.h>
+
 #include "arm_internal.h"
 #include "irq/irq.h"
 
@@ -70,8 +72,6 @@ static void intr_clear_irq(uint32_t int_num);
 static void intr_set_irq_pri(uint32_t int_num, uint32_t priority);
 static uint32_t intr_get_irq_vec_addr(void);
 static void intr_set_irq_vec_addr(uint32_t int_num, uintptr_t vec_addr);
-
-static void utils_data_and_instruction_barrier(void);
 
 /****************************************************************************
  * Private Data
@@ -186,33 +186,6 @@ static void intr_set_irq_vec_addr(uint32_t int_num, uintptr_t vec_addr)
 }
 
 /****************************************************************************
- * Name: utils_data_and_instruction_barrier
- *
- * Description:
- *   Enforces CPU memory ordering by executing an Instruction Synchronization
- *   Barrier (ISB) followed by a Data Synchronization Barrier (DSB),
- *   ensuring all previous instructions complete and memory accesses are
- *   synchronized before continuing execution.
- *
- ****************************************************************************/
-
-static void utils_data_and_instruction_barrier(void)
-{
-  __asm__ __volatile__(
-    " isb"
-    "\n\t"
-    :
-    :
-    : "memory");
-  __asm__ __volatile__(
-    " dsb"
-    "\n\t"
-    :
-    :
-    : "memory");
-}
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -236,7 +209,7 @@ void up_enable_irq(int int_num)
 {
   uint32_t bit_pos;
 
-  utils_data_and_instruction_barrier();
+  UP_MB();
 
   bit_pos = VIM_BIT_POS(int_num);
 
@@ -261,7 +234,7 @@ void up_disable_irq(int int_num)
   putreg32(((uint32_t)0x1 << bit_pos),
            INTRC_BASE_ADDR + VIM_INT_DIS(int_num));
 
-  utils_data_and_instruction_barrier();
+  UP_MB();
 }
 
 /****************************************************************************
