@@ -2008,24 +2008,22 @@ mounted at ``/etc`` and will look like this at run-time:
    nsh>
 
 ``/etc/init.d/rc.sysinit`` is system init script; ``/etc/init.d/rcS`` is the
-start-up script; ``/etc/passwd`` is a the password file. It supports a single
-user:
+start-up script; ``/etc/passwd`` is the password file.
 
-.. code:: text
+The ``/etc/passwd`` file is auto-generated at build time when
+``CONFIG_ETC_ROMFS_GENPASSWD`` is enabled.  To configure the admin user and
+password, run ``make menuconfig`` and set:
 
-   USERNAME:  admin
-   PASSWORD:  Administrator
+* ``CONFIG_ETC_ROMFS_GENPASSWD=y``
+* ``CONFIG_ETC_ROMFS_PASSWD_USER`` (default: ``admin``)
+* ``CONFIG_ETC_ROMFS_PASSWD_PASSWORD`` (required, build fails if empty)
 
-.. code:: console
+The password is hashed with TEA at build time using
+``tools/mkpasswd.py``; the plaintext is **not** stored in the firmware.
 
-   nsh> cat /etc/passwd
-   admin:8Tv+Hbmr3pLVb5HHZgd26D:0:0:/
-
-The encrypted passwords in the provided passwd file are only valid if the
-TEA key is set to: 012345678 9abcdef0 012345678 9abcdef0.
-
-Changes to either the key or the password word will require regeneration of the
-``nsh_romfimg.h`` header file.
+The encrypted passwords are only valid if the TEA key matches the one
+configured in ``CONFIG_FSUTILS_PASSWD_KEY1..4`` (default:
+``012345678 9abcdef0 012345678 9abcdef0``).
 
 The format of the password file is:
 

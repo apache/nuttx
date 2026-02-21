@@ -35,6 +35,19 @@ $(ETCSRC): $(foreach raw,$(RCRAWS), $(if $(wildcard $(BOARD_DIR)$(DELIM)src$(DEL
 	  $(shell rm -rf $(ETCDIR)$(DELIM)$(raw)) \
 	  $(shell mkdir -p $(dir $(ETCDIR)$(DELIM)$(raw))) \
 	  $(shell cp -rfp $(if $(wildcard $(BOARD_DIR)$(DELIM)src$(DELIM)$(raw)), $(BOARD_DIR)$(DELIM)src$(DELIM)$(raw), $(if $(wildcard $(BOARD_COMMON_DIR)$(DELIM)$(raw)), $(BOARD_COMMON_DIR)$(DELIM)$(raw), $(BOARD_DIR)$(DELIM)src$(DELIM)$(raw))) $(ETCDIR)$(DELIM)$(raw)))
+ifeq ($(CONFIG_ETC_ROMFS_GENPASSWD),y)
+ifeq ($(CONFIG_ETC_ROMFS_PASSWD_PASSWORD),)
+	$(error CONFIG_ETC_ROMFS_PASSWD_PASSWORD must be set when ETC_ROMFS_GENPASSWD is enabled. Run 'make menuconfig' to set a password.)
+endif
+	$(Q) mkdir -p $(ETCDIR)$(DELIM)$(CONFIG_ETC_ROMFSMOUNTPT)
+	$(Q) python3 $(TOPDIR)$(DELIM)tools$(DELIM)mkpasswd.py \
+		--user $(CONFIG_ETC_ROMFS_PASSWD_USER) \
+		--password $(CONFIG_ETC_ROMFS_PASSWD_PASSWORD) \
+		--uid $(CONFIG_ETC_ROMFS_PASSWD_UID) \
+		--gid $(CONFIG_ETC_ROMFS_PASSWD_GID) \
+		--home $(CONFIG_ETC_ROMFS_PASSWD_HOME) \
+		-o $(ETCDIR)$(DELIM)$(CONFIG_ETC_ROMFSMOUNTPT)$(DELIM)passwd
+endif
 	$(Q) genromfs -f romfs.img -d $(ETCDIR)$(DELIM)$(CONFIG_ETC_ROMFSMOUNTPT) -V "NSHInitVol"
 	$(Q) echo "#include <nuttx/compiler.h>" > $@
 	$(Q) xxd -i romfs.img | sed -e "s/^unsigned char/const unsigned char aligned_data(4)/g" >> $@
