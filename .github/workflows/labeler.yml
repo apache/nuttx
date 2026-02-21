@@ -108,7 +108,10 @@ jobs:
                   .split('.').join('\\.')            // .  becomes \.
                   .split('*').join('[^/]*')          // *  becomes [^/]*
                   .split('[^/]*[^/]*').join('.*');   // ** becomes .*
-                archLabels.push({ label, pattern });
+                archLabels.push({
+                  label,                        // Arch: arm
+                  pattern: '^' + pattern + '$'  // Match the Line Start and Line End
+                });
 
               } else {
                 // We don't support all rules of `actions/labeler`
