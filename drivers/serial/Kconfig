@@ -169,6 +169,30 @@ config RPMSG_UART_CONSOLE
 		NOTE: support for this option must be implemented in the board logic by
 		setting the \"isconsole\" argument in the uart_rpmsg_init() function to true.
 
+config RPMSG_UART_RAW
+	bool "UART RPMSG RAW support"
+	default n
+	depends on RPMSG
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select SERIAL_RXDMA
+	select SERIAL_TXDMA
+	select SERIAL_REMOVABLE
+	---help---
+		Similar to RPMSG_UART but using data transfer without encapsulation or
+		flow control. This implementation is compatible with the upstream linux
+		implementation of tty_rpmsg. This connects to a static service name
+		(rpmsg-tty), independent from the local name.
+
+config RPMSG_UART_RAW_CONSOLE
+	bool "UART RPMSG RAW console support"
+	default n
+	depends on RPMSG_UART_RAW
+	---help---
+		Register the RAW UART RPMSG device as /dev/console so that is will be used
+		as the console device.
+		NOTE: support for this option must be implemented in the board logic by
+		setting the \"isconsole\" argument in the uart_rpmsg_raw_init() function to true.
+
 #
 # Standard serial driver configuration
 #
