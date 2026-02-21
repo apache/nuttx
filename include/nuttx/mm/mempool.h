@@ -30,7 +30,6 @@
 #include <sys/types.h>
 #include <stdbool.h>
 
-#include <nuttx/list.h>
 #include <nuttx/queue.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/nuttx.h>
