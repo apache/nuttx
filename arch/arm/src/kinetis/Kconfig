@@ -1409,6 +1409,17 @@ config UART0_RS485CONTROL
 	---help---
 		Enable RS-485 transmit enable on UART0.
 
+config UART0_RS485CONTROL_RTSISGPIO
+	bool "RTS pin of the UART0 is GPIO"
+	default n
+	depends on UART0_RS485CONTROL
+	---help---
+		RTS pin of the UART0 is wired to something else than the chip's
+		ALT pin with UART0 RTS functionality.
+
+		The GPIO, to which the UART0's RTS pin is wired to, is set to
+		high when sending data and low otherwise.
+
 config UART1_RS485CONTROL
 	bool "Use UART1 RTS as RS-485 transmit enable"
 	default n
@@ -1416,6 +1427,17 @@ config UART1_RS485CONTROL
 	depends on KINETIS_UART1 && UART1_IFLOWCONTROL
 	---help---
 		Enable RS-485 transmit enable on UART1.
+
+config UART1_RS485CONTROL_RTSISGPIO
+	bool "RTS pin of the UART1 is GPIO"
+	default n
+	depends on UART1_RS485CONTROL
+	---help---
+		RTS pin of the UART1 is wired to something else than the chip's
+		ALT pin with UART1 RTS functionality.
+
+		The GPIO, to which the UART1's RTS pin is wired to, is set to
+		high when sending data and low otherwise.
 
 config UART2_RS485CONTROL
 	bool "Use UART2 RTS as RS-485 transmit enable"
@@ -1425,6 +1447,17 @@ config UART2_RS485CONTROL
 	---help---
 		Enable RS-485 transmit enable on UART2.
 
+config UART2_RS485CONTROL_RTSISGPIO
+	bool "RTS pin of the UART2 is GPIO"
+	default n
+	depends on UART2_RS485CONTROL
+	---help---
+		RTS pin of the UART2 is wired to something else than the chip's
+		ALT pin with UART2 RTS functionality.
+
+		The GPIO, to which the UART2's RTS pin is wired to, is set to
+		high when sending data and low otherwise.
+
 config UART3_RS485CONTROL
 	bool "Use UART3 RTS as RS-485 transmit enable"
 	default n
@@ -1432,6 +1465,17 @@ config UART3_RS485CONTROL
 	depends on KINETIS_UART3 && UART3_IFLOWCONTROL
 	---help---
 		Enable RS-485 transmit enable on UART3.
+
+config UART3_RS485CONTROL_RTSISGPIO
+	bool "RTS pin of the UART3 is GPIO"
+	default n
+	depends on UART3_RS485CONTROL
+	---help---
+		RTS pin of the UART3 is wired to something else than the chip's
+		ALT pin with UART3 RTS functionality.
+
+		The GPIO, to which the UART3's RTS pin is wired to, is set to
+		high when sending data and low otherwise.
 
 config UART4_RS485CONTROL
 	bool "Use UART4 RTS as RS-485 transmit enable"
@@ -1441,6 +1485,17 @@ config UART4_RS485CONTROL
 	---help---
 		Enable RS-485 transmit enable on UART4.
 
+config UART4_RS485CONTROL_RTSISGPIO
+	bool "RTS pin of the UART4 is GPIO"
+	default n
+	depends on UART4_RS485CONTROL
+	---help---
+		RTS pin of the UART4 is wired to something else than the chip's
+		ALT pin with UART4 RTS functionality.
+
+		The GPIO, to which the UART4's RTS pin is wired to, is set to
+		high when sending data and low otherwise.
+
 config UART5_RS485CONTROL
 	bool "Use UART5 RTS as RS-485 transmit enable"
 	default n
@@ -1448,6 +1503,17 @@ config UART5_RS485CONTROL
 	depends on KINETIS_UART5 && UART5_IFLOWCONTROL
 	---help---
 		Enable RS-485 transmit enable on UART5.
+
+config UART5_RS485CONTROL_RTSISGPIO
+	bool "RTS pin of the UART5 is GPIO"
+	default n
+	depends on UART5_RS485CONTROL
+	---help---
+		RTS pin of the UART5 is wired to something else than the chip's
+		ALT pin with UART5 RTS functionality.
+
+		The GPIO, to which the UART5's RTS pin is wired to, is set to
+		high when sending data and low otherwise.
 
 endmenu # Kinetis RS485 transmit driver support
 
