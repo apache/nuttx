@@ -25,10 +25,6 @@
 ASRCS =
 CSRCS = s698pm_boot.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += s698pm_appinit.c
-endif
-
 ifeq ($(CONFIG_S698PM_WDG),y)
 CSRCS += s698pm_wdt.c
 endif

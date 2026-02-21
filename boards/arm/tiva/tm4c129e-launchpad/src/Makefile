@@ -42,10 +42,6 @@ ifeq ($(CONFIG_DK_TM4C129X_TIMER),y)
 CSRCS += tm4c_timer.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += tm4c_appinit.c
-endif
-
 ifeq ($(CONFIG_TIVA_HCIUART),y)
 ifeq ($(CONFIG_BLUETOOTH_UART),y)
 CSRCS += tm4c_hciuart.c

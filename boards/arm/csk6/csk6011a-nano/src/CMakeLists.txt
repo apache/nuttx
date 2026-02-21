@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS csk6011a_nano_appinit.c)
+set(SRCS csk6011a_nano_boardinit.c)
 
 target_sources(board PRIVATE ${SRCS})
 

@@ -32,10 +32,6 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += lpc54_buttons.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += lpc54_appinit.c
-endif
-
 ifeq ($(CONFIG_LPC54_HAVE_I2C_MASTER),y)
 CSRCS += lpc54_i2c.c
 endif

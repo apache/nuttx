@@ -114,8 +114,6 @@ void tc397_board_initialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-  /* Perform board initialization */
-
   tc397_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */

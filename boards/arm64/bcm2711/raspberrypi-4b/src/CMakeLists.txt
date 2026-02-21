@@ -24,10 +24,6 @@ if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS rpi4b_autoleds.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS rpi4b_appinit.c)
-endif()
-
 if(CONFIG_DEV_GPIO)
   list(APPEND SRCS rpi4b_gpio.c)
 endif()

@@ -48,10 +48,6 @@ if(CONFIG_BOARDCTL_UNIQUEID)
   list(APPEND SRCS stm32_uid.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinitialize.c)
-endif()
-
 if(CONFIG_STM32H7_SDMMC)
   list(APPEND SRCS stm32_sdmmc.c)
 endif()
@@ -68,5 +64,5 @@ if(NOT CONFIG_BUILD_FLAT)
   add_subdirectory(${NUTTX_BOARD_DIR}/kernel)
   set_property(
     GLOBAL PROPERTY LD_SCRIPT_USER ${NUTTX_BOARD_DIR}/scripts/memory.ld
-    ${NUTTX_BOARD_DIR}/scripts/user-space.ld)
+                    ${NUTTX_BOARD_DIR}/scripts/user-space.ld)
 endif()

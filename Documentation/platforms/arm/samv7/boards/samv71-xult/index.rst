@@ -263,7 +263,6 @@ enabled with the following settings:
 
   ``Application Configuration -> NSH Library``::
 
-    CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization, OR
     CONFIG_BOARD_LATE_INITIALIZE=y
 
 Using the SD card
@@ -2007,7 +2006,7 @@ mxtxplnd
 --------
 
   Configures the NuttShell (``nsh``) located at ``examples/nsh``.
-  
+
   There are five very similar NSH configurations:
 
     - ``knsh``.  This is a somewhat simplified version of the nsh configuration

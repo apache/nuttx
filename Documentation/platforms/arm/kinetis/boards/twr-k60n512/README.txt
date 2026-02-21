@@ -490,5 +490,3 @@ Where <subdir> is one of the following:
       CONFIG_KINETIS_PORTEINTS=y           : Enable PortE GPIO interrupts
 
       CONFIG_SCHED_WORKQUEUE=y             : Enable the NuttX workqueue
-
-      CONFIG_NSH_ARCHINIT=y                : Provide NSH initialization logic

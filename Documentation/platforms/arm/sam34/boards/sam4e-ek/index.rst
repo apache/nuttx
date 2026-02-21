@@ -161,7 +161,7 @@ LED_ASSERTION       An assertion failed               FLASH   N/C     N/C
 LED_PANIC           The system has crashed            FLASH   N/C     N/C
 =================== ================================= ======= ======= =======
 
-.. note:: 
+.. note::
 
    If D2 and D4 are statically on, then NuttX probably failed to boot and these
    LEDs will give you some indication of where the failure was
@@ -378,7 +378,7 @@ You can also log into the NSH from the host PC like this:
 
    This delay will be especially long if the board is not connected to a network
    because additional time will be required to fail with timeout errors.
-   
+
    This delay will be especially long if the board is not connected to a
    network. On the order of a minute! You will probably think that NuttX has
    crashed! And then, when it finally does come up, the network will not be
@@ -473,10 +473,6 @@ FLASH:
      Use care if you plan to use FAT long file name feature in a product; There
      are issues with certain Microsoft patents on the long file name technology.
 
-  Application Configuration -> NSH Library
-
-  * ``CONFIG_NSH_ARCHINIT=y``: NSH board-initialization
-
   Board Selection
 
   * ``CONFIG_SAM4EEK_AT25_BLOCKMOUNT=y``: Mounts AT25 for NSH
@@ -519,10 +515,6 @@ Device Drivers -> USB Device Driver Support
 System Type -> ATSAM3/4 Peripheral Support
 
 * ``CONFIG_SAM34_UDP=y``: Enable UDP Full Speed USB device
-
-Application Configuration -> NSH Library
-
-* ``CONFIG_NSH_ARCHINIT=y``: NSH board-initialization
 
 Mass Storage Class
 ------------------
@@ -693,10 +685,9 @@ serial console in this configuration):
   Application Configuration -> NSH LIbrary:
 
   * ``CONFIG_NSH_USBDEV_TRACE=n``: No builtin tracing from NSH
-  * ``CONFIG_NSH_ARCHINIT=y``: Automatically start the USB monitor
 
   Application Configuration -> System NSH Add-Ons:
-  
+
   * ``CONFIG_USBMONITOR=y``: Enable the USB monitor daemon
   * ``CONFIG_USBMONITOR_STACKSIZE=2048``: USB monitor daemon stack size
   * ``CONFIG_USBMONITOR_PRIORITY=50``: USB monitor daemon priority
@@ -747,7 +738,6 @@ for the SD slot can be enabled with the following settings:
 
   Application Configuration -> NSH Library
 
-  * ``CONFIG_NSH_ARCHINIT=y``: NSH board-initialization
   * ``CONFIG_NSH_MMCSDSLOTNO=0``: Only one slot, slot 0
 
 After an SD card is successfully initialized, the block device ``/dev/mmcsd0``
@@ -792,7 +782,7 @@ following ways:
   * ``CONFIG_ADS7843E_THRESHY=39``
 
   System Type -> Peripherals:
-  
+
   * ``CONFIG_SAM34_SPI0=y``: Enable support for SPI
 
   System Type:
@@ -865,13 +855,13 @@ PIN  PIO    SIGNAL    NOTES
  27         IM1       Grounded
  28         GND
  29  [PC13] LED-A     Backlight controls: PC13 enables AAT3155 charge pump that drives the backlight LEDs
- 30  [PC13] LEDK1    
- 31  [PC13] LEDK2     
+ 30  [PC13] LEDK1
+ 31  [PC13] LEDK2
  32  [PC13] LEDK3
  33  [PC13] LEDK4
  34  [PC13] LEDK1
  35         Y+        These go to the ADS7843 touchscreen controller.
- 36         Y-        
+ 36         Y-
  37         X+
  38         X-
  39         NC
@@ -929,57 +919,57 @@ SAM4E-EK-specific Configuration Options
 
 * ``CONFIG_ARCH``: Identifies the ``arch/`` subdirectory.  This should be set
   to:
- 
+
   * ``CONFIG_ARCH=arm``
- 
+
 * ``CONFIG_ARCH_family``: For use in C code:
- 
+
   * ``CONFIG_ARCH_ARM=y``
- 
+
 * ``CONFIG_ARCH_architecture``: For use in C code:
- 
+
   * ``CONFIG_ARCH_CORTEXM3=y``
- 
+
 * ``CONFIG_ARCH_CHIP``: Identifies the ``arch/*/chip`` subdirectory
- 
+
   * ``CONFIG_ARCH_CHIP="sam34"``
- 
+
 * ``CONFIG_ARCH_CHIP_name``: For use in C code to identify the exact chip:
- 
+
   * ``CONFIG_ARCH_CHIP_SAM34``
   * ``CONFIG_ARCH_CHIP_SAM3U``
   * ``CONFIG_ARCH_CHIP_ATSAM3U4``
- 
+
 * ``CONFIG_ARCH_BOARD``: Identifies the ``boards/`` subdirectory and hence, the
   board that supports the particular chip or SoC.
- 
+
   * ``CONFIG_ARCH_BOARD=sam4e:ek`` (for the SAM4E-EK development board)
- 
+
 * ``CONFIG_ARCH_BOARD_name``: For use in C code
- 
+
   * ``CONFIG_ARCH_BOARD_SAM4EEK=y``
- 
+
 * ``CONFIG_ARCH_LOOPSPERMSEC``: Must be calibrated for correct operation of
   delay loops
- 
+
 * ``CONFIG_ENDIAN_BIG``: define if big endian (default is little endian)
- 
+
 * ``CONFIG_RAM_SIZE``: Describes the installed DRAM (SRAM in this case):
- 
+
   * ``CONFIG_RAM_SIZE=0x00020000`` (128Kb)
- 
+
 * ``CONFIG_RAM_START``: The start address of installed DRAM
- 
+
   * ``CONFIG_RAM_START=0x20000000``
- 
+
 * ``CONFIG_ARCH_LEDS``: Use LEDs to show state. Unique to boards that have LEDs
- 
+
 * ``CONFIG_ARCH_INTERRUPTSTACK``: This architecture supports an interrupt stack.
   If defined, this symbol is the size of the interrupt stack in bytes. If not
   defined, the user task stacks will be used during interrupt handling.
- 
+
 * ``CONFIG_ARCH_STACKDUMP``: Do stack dumps after assertions
- 
+
 * ``CONFIG_ARCH_LEDS``:  Use LEDs to show state. Unique to board architecture.
 
 Individual subsystems can be enabled:
@@ -1447,5 +1437,5 @@ The NxWM unit test can be found at ``apps/graphics/NxWidgets/UnitTests/nxwm``
 
    2014-08-20. I have seen the demo work well but it is not thoroughly
    exercised.  I suspect some touchscreen issues.
-   
+
    2014-10-11. Today's build crashes in nxwm_main on startup.

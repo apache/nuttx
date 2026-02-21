@@ -24,7 +24,6 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = stm32_boot.c stm32_leds.c
 
-CSRCS-$(CONFIG_BOARDCTL) += stm32_appinit.c
 CSRCS-$(CONFIG_ARCH_BUTTONS) += stm32_buttons.c
 CSRCS-$(CONFIG_ARCH_BOARD_FLASH_MOUNT) += stm32_flash.c
 CSRCS-$(CONFIG_SPI_DRIVER) += stm32_spi.c

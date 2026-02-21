@@ -44,8 +44,4 @@ ifeq ($(CONFIG_FAT_DMAMEMORY),y)
 CSRCS += stm32_dma_alloc.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinitialize.c
-endif
-
 include $(TOPDIR)/boards/Board.mk

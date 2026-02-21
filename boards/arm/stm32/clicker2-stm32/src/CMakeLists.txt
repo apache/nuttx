@@ -36,10 +36,6 @@ if(CONFIG_STM32_OTGFS)
   list(APPEND SRCS stm32_usb.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_IEEE802154_MRF24J40)
   list(APPEND SRCS stm32_mrf24j40.c)
 endif()

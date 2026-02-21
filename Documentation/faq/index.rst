@@ -149,12 +149,10 @@ Why after putting my application on ENTRYPOINT it stops to work?
 ----------------------------------------------------------------
 
 When you replace the ENTRYPOINT from "nsh_main" to your application some
-initialization flow are changed, for instance the NSH_ARCHINIT is not
-executed anymore and so some drivers initialization that are called from
-it also stops to work.
+initialization flow are changed.
 
-You can fix it enabling the Board Late Initialization that will replace the
-NSH_ARCHINIT to call those drivers initialization. Just enable it::
+You can fix it enabling the Board Late Initialization that will
+perform driver initialization. Just enable it::
 
     RTOS Features --->
         RTOS hooks --->

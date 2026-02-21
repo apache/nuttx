@@ -68,10 +68,6 @@ ifeq ($(CONFIG_CL_MFRC522),y)
   CSRCS += stm32_mfrc522.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinitialize.c
-endif
-
 ifeq ($(CONFIG_STM32H7_LTDC),y)
 CSRCS += stm32_lcd.c
 endif

@@ -136,15 +136,8 @@
  * Description:
  *   Perform architecture specific initialization
  *
- *   CONFIG_BOARDCTL=y:
- *     If CONFIG_NSH_ARCHINIT=y:
- *       Called from the NSH library (or other application)
- *     Otherwise, assumed to be called from some other application.
- *
- *   Otherwise CONFIG_BOARD_LATE_INITIALIZE=y:
+ *   CONFIG_BOARD_LATE_INITIALIZE=y:
  *     Called from board_late_initialize().
- *
- *   Otherwise, bad news:  Never called
  *
  ****************************************************************************/
 
@@ -348,15 +341,8 @@ void gd32_i2c_initialize(void);
  * Description:
  *   Perform architecture specific initialization
  *
- *   CONFIG_BOARDCTL=y:
- *     If CONFIG_NSH_ARCHINIT=y:
- *       Called from the NSH library (or other application)
- *     Otherwise, assumed to be called from some other application.
- *
- *   Otherwise CONFIG_BOARD_LATE_INITIALIZE=y:
+ *   CONFIG_BOARD_LATE_INITIALIZE=y:
  *     Called from board_late_initialize().
- *
- *   Otherwise, bad news:  Never called
  *
  ****************************************************************************/
 

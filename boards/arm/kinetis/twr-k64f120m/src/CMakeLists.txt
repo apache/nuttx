@@ -26,10 +26,6 @@ if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS k64_leds.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS k64_appinit.c)
-endif()
-
 if(CONFIG_KINETIS_SDHC)
   list(APPEND SRCS k64_sdhc.c)
   if(CONFIG_FS_AUTOMOUNTER)

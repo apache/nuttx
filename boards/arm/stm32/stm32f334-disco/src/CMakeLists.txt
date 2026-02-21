@@ -26,10 +26,6 @@ if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS stm32_autoleds.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_STM32_CAN_CHARDRIVER)
   list(APPEND SRCS stm32_can.c)
 endif()

@@ -8,7 +8,7 @@ if ARCH_BOARD_TM4C123G_LAUNCHPAD
 config TM4C123G_LAUNCHPAD_AT24_BLOCKMOUNT
 	bool "AT24 Serial EEPROM auto-mount"
 	default n
-	depends on NSH_ARCHINIT && TIVA_I2C0 && MTD_AT24XX
+	depends on BOARD_LATE_INITIALIZE && TIVA_I2C0 && MTD_AT24XX
 	---help---
 		Automatically initialize the AT24 SPI EEPROM driver when NSH starts.
 

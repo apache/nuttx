@@ -22,10 +22,6 @@
 
 set(SRCS stm32_boot.c stm32_bringup.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_STM32_FMC)
   list(APPEND SRCS stm32_extmem.c)
 endif()

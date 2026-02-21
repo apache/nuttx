@@ -40,10 +40,6 @@ if(CONFIG_DAC)
   list(APPEND SRCS stm32_dac.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT

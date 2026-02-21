@@ -144,7 +144,7 @@ TTL to RS-232 converter connection:
     Nucleo CN10 STM32F4x1RE
     =========== ============
     Pin 21 PA9  USART1_RX
-    Pin 33 PA10 USART1_TX    
+    Pin 33 PA10 USART1_TX
     Pin 20 GND
     Pin 8  U5V
     =========== ============
@@ -181,7 +181,7 @@ TTL to RS-232 converter connection:
     Nucleo CN9  STM32F4x1RE
     =========== ============
     Pin 1  PA3  USART2_RX
-    Pin 2  PA2  USART2_TX    
+    Pin 2  PA2  USART2_TX
     =========== ============
 
     Warning you make need to reverse RX/TX on some RS-232 converters
@@ -336,7 +336,6 @@ There is nothing in the configuration that currently uses the joystick.
 For testing, you can add the following configuration options to enable the
 analog joystick example at apps/examples/ajoystick::
 
-    CONFIG_NSH_ARCHINIT=y
     CONFIG_EXAMPLES_AJOYSTICK=y
     CONFIG_EXAMPLES_AJOYSTICK_DEVNAME="/dev/ajoy0"
 

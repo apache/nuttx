@@ -22,6 +22,6 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = csk6011a_nano_appinit.c
+CSRCS = csk6011a_nano_boardinit.c
 
 include $(TOPDIR)/boards/Board.mk

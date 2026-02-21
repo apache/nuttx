@@ -33,10 +33,6 @@ else()
   list(APPEND SRCS s32k3xx_userleds.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS s32k3xx_appinit.c)
-endif()
-
 if(CONFIG_FAT_DMAMEMORY)
   list(APPEND SRCS s32k3xx_dma_alloc.c)
 endif()

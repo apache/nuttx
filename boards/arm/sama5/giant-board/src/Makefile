@@ -22,7 +22,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = sam_boot.c
+CSRCS = sam_boot.c sam_bringup.c
 
 ifeq ($(CONFIG_SAMA5_SPI0),y)
 CSRCS += sam_spi.c
@@ -58,11 +58,6 @@ else
 ifeq ($(CONFIG_SAMA5_UDPHS),y)
 CSRCS += sam_usb.c
 endif
-endif
-
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += sam_appinit.c
-CSRCS += sam_bringup.c
 endif
 
 ifeq ($(CONFIG_ADC),y)

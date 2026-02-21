@@ -85,7 +85,7 @@ Problems with both boards:
 - No user button
 
 This is the board pinout based on its form-factor for the Blue board:
-  
+
 ..
               USB
               ___
@@ -537,7 +537,7 @@ The STM32F103C8 has a USB Device controller, then we can use NuttX support
 to USB Device. We can the console over USB enabling these options:
 
 ::
-    
+
      System Type  --->
        STM32 Peripheral Support  --->
          [*] USB Device
@@ -854,7 +854,6 @@ NOTES:
        CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
        CONFIG_USBDEV_TRACE_NRECORDS=128        : Buffer 128 records in memory
        CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
-       CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
        CONFIG_USBMONITOR=y              : Enable the USB monitor daemon
        CONFIG_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
        CONFIG_USBMONITOR_PRIORITY=50    : USB monitor daemon priority

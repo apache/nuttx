@@ -1486,7 +1486,7 @@ config BOARD_EARLY_INITIALIZE
 
 config BOARD_LATE_INITIALIZE
 	bool "Custom board late initialization"
-	default n
+	default y
 	---help---
 		There are three points in time where you can insert custom,
 		board-specific initialization logic:

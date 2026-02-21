@@ -40,10 +40,6 @@ if(CONFIG_SENSORS_MAX6675)
   list(APPEND SRCS xmc4_max6675.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS xmc4_appinit.c)
-endif()
-
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flash.ld")

@@ -28,10 +28,6 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += tm4c_autoleds.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += tm4c_appinit.c
-endif
-
 ifeq ($(CONFIG_TIVA_TIMER),y)
 CSRCS += tm4c_timer.c
 endif

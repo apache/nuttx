@@ -419,7 +419,7 @@ The ``<subdir>`` that is provided above as an argument to the
 
    1. Build and install the kconfig-mconf tool.  See nuttx/README.txt
       see additional README.txt files in the NuttX tools repository.
-   
+
    2. Execute 'make menuconfig' in nuttx/ in order to start the
       reconfiguration process.
 
@@ -428,7 +428,7 @@ The ``<subdir>`` that is provided above as an argument to the
 
    a. Build and install the kconfig-mconf tool. See nuttx/README.txt
       see additional README.txt files in the NuttX tools repository.
-   
+
    b. Execute ``make menuconfig`` in nuttx/ in order to start the
       reconfiguration process.
 
@@ -502,7 +502,7 @@ nsh
 
 This configuration directory will built the NuttShell.
 
-.. note:: 
+.. note::
 
    If you get a compilation error like:
 
@@ -557,10 +557,6 @@ Board Selection -> SAM4L Xplained Pro Modules
 * ``CONFIG_SAM4L_XPLAINED_IOMODULE=y``: I/O1 module is connected
 * ``CONFIG_SAM4L_XPLAINED_IOMODULE_EXT1=y``: In EXT1, or EXT2
 * ``CONFIG_SAM4L_XPLAINED_IOMODULE_EXT2=y``
-
-Application Configuration -> NSH Library
-
-* ``CONFIG_NSH_ARCHINIT=y``: Board has architecture-specific initialization
 
 .. note::
 
@@ -617,7 +613,7 @@ The NX graphics subsystem also needs to be configured:
 * ``CONFIG_NXFONTS_CHARBITS=7``: 7-bit fonts
 * ``CONFIG_NXFONT_SANS17X23B=y``: Pick a font (any that will fit)
 
-.. note:: 
+.. note::
 
    This orientation will put the buttons "above" the LCD. The reverse landscape
    configuration (CONFIG_LCD_RLANDSCAPE) will "flip" the display so that the
@@ -640,18 +636,18 @@ setup for the graphic "Hello, World!" example:
 * ``CONFIG_EXAMPLES_NXHELLO_BPP=1``: One bit per pixel
 * ``CONFIG_EXAMPLES_NXHELLO_EXTERNINIT=y``: Special initialization is required.
 
-.. note:: 
+.. note::
 
    The OLED is monochrome so the only "colors" are black and white. The default
    "colors" will give you while text on a black background. You can override the
    faults it you want black text on a while background.
 
-.. warning:: 
+.. warning::
 
    One issue that I have seen with the NXHello example when running as an NSH
    command is that it only works the first time. So, after you run the 'nxhello'
    command one time, you will have to reset the board before you run it again.
-   
+
    This is clearly some issue with initializing, un-initializing, and then
    re-initializing. If you want to fix this, patches are quite welcome.
 
@@ -686,10 +682,6 @@ Application Configuration -> Examples
 * ``CONFIG_EXAMPLES_SLCD=y``
 * ``CONFIG_EXAMPLES_SLCD_DEVNAME="/dev/slcd0"``
 * ``CONFIG_EXAMPLES_SLCD_BUFSIZE=64``
-
-Application Configuration -> NSH Library
-
-* ``CONFIG_NSH_ARCHINIT=y``
 
 .. note::
 

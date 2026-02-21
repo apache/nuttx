@@ -591,8 +591,6 @@ Where <subdir> is one of the following:
 
       CONFIG_SCHED_WORKQUEUE=y             : Enable the NuttX workqueue
 
-      CONFIG_NSH_ARCHINIT=y                : Provide NSH initialization logic
-
   netnsh:
   ------
     This is the same config then nsh, but it adds Ethernet support with the

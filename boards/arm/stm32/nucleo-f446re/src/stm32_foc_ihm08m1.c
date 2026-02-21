@@ -177,8 +177,6 @@ static struct stm32_foc_adc_s g_adc_cfg =
  * Description:
  *   Initialize FOC driver.
  *
- *   This function should be call by board_app_initialize().
- *
  * Returned Value:
  *   0 on success, a negated errno value on failure
  *

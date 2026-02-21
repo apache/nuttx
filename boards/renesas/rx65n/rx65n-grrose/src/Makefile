@@ -22,6 +22,6 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = rx65n_appinit.c rx65n_bringup.c rx65n_sbram.c rx65n_gpio.c
+CSRCS = rx65n_bringup.c rx65n_sbram.c rx65n_gpio.c
 
 include $(TOPDIR)/boards/Board.mk

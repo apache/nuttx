@@ -22,7 +22,7 @@
 set(SRCS a527_boardinit.c a527_bringup.c)
 
 if(CONFIG_BOARDCTL)
-  list(APPEND SRCS a527_appinit.c a527_power.c)
+  list(APPEND SRCS a527_power.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})
