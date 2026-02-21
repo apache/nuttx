@@ -52,6 +52,8 @@
 
 #define AM67_DDR_SIZE             (2ul * 1024 * 1024 * 1024)
 
+#define AM67_SCTLR_BG_REGION_EN (1 << 17)
+
 /* REGISTER_REGION
  *   Not Cacheable
  *   Not Bufferable
@@ -135,7 +137,7 @@
 static inline void am67_mpu_disable_br(void)
 {
   unsigned int sctlr = cp15_rdsctlr();
-  sctlr &= ~(1 << 17);  /* Clear bit 17 (disable background region) */
+  sctlr &= ~AM67_SCTLR_BG_REGION_EN;  /* Clear bit 17 (disable background region) */
   cp15_wrsctlr(sctlr);
 }
 
