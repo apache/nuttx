@@ -49,7 +49,7 @@ ifeq ($(CONFIG_ARMV7R_HAVE_PTM), y)
   CMN_CSRCS += arm_timer.c
 endif
 
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
+ifneq ($(filter y,$(CONFIG_ARM_MPU) $(CONFIG_BUILD_PROTECTED)),)
   CMN_CSRCS += arm_mpu.c
 endif
 
