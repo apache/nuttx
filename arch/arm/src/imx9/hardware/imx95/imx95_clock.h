@@ -37,6 +37,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define XTAL_FREQ 24000000u
+#define ROOT_CLOCK_OFFSET 41
+
 typedef enum
 {
     EXT_CLK  = 0,
