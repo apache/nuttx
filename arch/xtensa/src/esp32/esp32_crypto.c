@@ -98,7 +98,7 @@ const struct auth_hash g_auth_hash_sha2_512_esp32 =
 const struct auth_hash g_auth_hash_hmac_sha1_esp32 =
 {
   CRYPTO_SHA1_HMAC, "HMAC-SHA1",
-  20, 20, 12, sizeof(struct esp32_sha_context_s),
+  HMAC_SHA1_BLOCK_LEN, 20, 12, sizeof(struct esp32_sha_context_s),
   HMAC_SHA1_BLOCK_LEN,
   sha1_init, NULL, NULL,
   sha_update,
@@ -108,7 +108,7 @@ const struct auth_hash g_auth_hash_hmac_sha1_esp32 =
 const struct auth_hash g_auth_hash_hmac_sha256_esp32 =
 {
   CRYPTO_SHA2_256_HMAC, "HMAC-SHA2-256",
-  32, 32, 16, sizeof(struct esp32_sha_context_s),
+  HMAC_SHA2_256_BLOCK_LEN, 32, 16, sizeof(struct esp32_sha_context_s),
   HMAC_SHA2_256_BLOCK_LEN,
   sha256_init, NULL, NULL,
   sha_update,
@@ -493,6 +493,19 @@ static int esp32_newsession(uint32_t *sid, struct cryptoini *cri)
                 kmm_free(data->hw_ictx);
                 kmm_free(data);
                 return -ENOBUFS;
+              }
+
+            /* If the key is too long, hash it first using ictx */
+
+            if (cri->cri_klen / 8 > axf->keysize)
+              {
+                axf->init(data->hw_ictx);
+                axf->update(data->hw_ictx,
+                            (FAR uint8_t *)cri->cri_key,
+                            cri->cri_klen / 8);
+                axf->final((unsigned char *)cri->cri_key,
+                           data->hw_ictx);
+                cri->cri_klen = axf->hashsize * 8;
               }
 
             for (k = 0; k < cri->cri_klen / 8; k++)
