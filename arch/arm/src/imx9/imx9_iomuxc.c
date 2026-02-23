@@ -196,7 +196,7 @@ int imx9_iomux_gpio(iomux_cfg_t cfg, bool sion)
   /* Based on pad number, either ALT0/ALT5 sets the pad as GPIO */
 
   if ((cfg.padcfg.ctlregoff >= IOMUXC_MUX_CTL_GPIO_IO00_OFFSET)
-      && (cfg.padcfg.ctlregoff <= IOMUXC_MUX_CTL_GPIO_IO37_OFFSET))
+      && (cfg.padcfg.ctlregoff <= IOMUXC_MUX_CTL_GPIO_LASTIO_OFFSET))
     {
       putreg32(IOMUXC_MUX_MODE_ALT0 | reg_sion,
                IMX9_IOMUXC_BASE + cfg.padcfg.ctlregoff);
