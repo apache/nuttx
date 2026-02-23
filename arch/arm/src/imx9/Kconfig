@@ -49,6 +49,7 @@ endif
 config IMX9_WFI_AWAKES_AT_SYSTICK
 	bool "WFI awakes at systick interrupts"
 	default y
+	depends on ARCH_CHIP_IMX95_M7
 	---help---
 	Configure the GPC to wake up from systick interrupts at WFI
 	instruction

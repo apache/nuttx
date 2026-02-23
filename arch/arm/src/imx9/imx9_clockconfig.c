@@ -37,19 +37,17 @@
 #include <arch/barriers.h>
 
 #include "arm_internal.h"
+
+#ifdef CONFIG_IMX9_WFI_AWAKES_AT_SYSTICK
 #include "hardware/imx9_gpc.h"
+#endif
+
 #include "imx9_clockconfig.h"
 #include "imx9_scmi.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* The base oscillator frequency is 24MHz */
-
-#define XTAL_FREQ 24000000u
-
-#define ROOT_CLOCK_OFFSET 41
 
 /****************************************************************************
  * Public Functions
@@ -87,7 +85,7 @@ void imx9_clockconfig(void)
 }
 
 #ifdef CONFIG_IMX9_CLK_OVER_SCMI
-int imx9_sm_setrootclock(sm_clock_t *sm_clk)
+static int imx9_sm_setrootclock(sm_clock_t *sm_clk)
 {
   scmi_clock_rate_t rate = /* clang-format off */
     {
@@ -156,7 +154,7 @@ int imx9_sm_setrootclock(sm_clock_t *sm_clk)
   return OK;
 }
 
-int imx9_sm_getipfreq(sm_clock_t *sm_clk)
+static int imx9_sm_getipfreq(sm_clock_t *sm_clk)
 {
   scmi_clock_rate_t rate = /* clang-format off */
     {
