@@ -184,9 +184,12 @@ void __start(void)
   stm32h7_waitfor_cm7();
 #endif
 
-  /* If enabled reset the MPU */
 
+#ifdef CONFIG_ARM_MPU_EARLY_RESET
+  /* If enabled reset the MPU */
+  
   mpu_early_reset();
+#endif
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
@@ -230,9 +233,9 @@ void __start(void)
   arm_stack_check_init();
 #endif
 
-  /* Configure the UART so that we can get debug output as soon as possible */
-
+#ifdef CONFIG_ARCH_FPU
   arm_fpuconfig();
+#endif
 
 #ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM7
   /* Enable/disable tightly coupled memories */

@@ -1570,12 +1570,13 @@ static inline void up_setusartint(struct up_dev_s *priv, uint16_t ie)
   up_serialout(priv, STM32_USART_CR3_OFFSET, cr);
 }
 
+#if !defined(SERIAL_HAVE_ONLY_DMA) || defined(CONFIG_PM) || \
+    defined(HAVE_RS485)
+
 /****************************************************************************
  * Name: up_restoreusartint
  ****************************************************************************/
 
-#if !defined(SERIAL_HAVE_ONLY_DMA) || defined(CONFIG_PM) || \
-    defined(HAVE_RS485)
 static void up_restoreusartint(struct up_dev_s *priv, uint16_t ie)
 {
   irqstate_t flags;
@@ -1643,6 +1644,8 @@ static void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
   spin_unlock_irqrestore(&priv->lock, flags);
 }
 
+#ifdef SERIAL_HAVE_RXDMA
+
 /****************************************************************************
  * Name: up_dma_nextrx
  *
@@ -1652,7 +1655,6 @@ static void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
  *
  ****************************************************************************/
 
-#ifdef SERIAL_HAVE_RXDMA
 static int up_dma_nextrx(struct up_dev_s *priv)
 {
   size_t dmaresidual;
@@ -1663,6 +1665,8 @@ static int up_dma_nextrx(struct up_dev_s *priv)
 }
 #endif
 
+#ifdef CONFIG_PM
+
 /****************************************************************************
  * Name: up_setsuspend
  *
@@ -1671,7 +1675,6 @@ static int up_dma_nextrx(struct up_dev_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PM
 static void up_setsuspend(struct uart_dev_s *dev, bool suspend)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
@@ -1776,6 +1779,8 @@ static void up_setsuspend(struct uart_dev_s *dev, bool suspend)
 }
 #endif
 
+#ifdef CONFIG_PM
+
 /****************************************************************************
  * Name: up_pm_setsuspend
  *
@@ -1784,7 +1789,6 @@ static void up_setsuspend(struct uart_dev_s *dev, bool suspend)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PM
 static void up_pm_setsuspend(bool suspend)
 {
   int n;
@@ -2766,6 +2770,8 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
   return ret;
 }
 
+#ifndef SERIAL_HAVE_ONLY_RXDMA
+
 /****************************************************************************
  * Name: up_receive
  *
@@ -2776,7 +2782,6 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-#ifndef SERIAL_HAVE_ONLY_RXDMA
 static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
@@ -2797,6 +2802,8 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 }
 #endif
 
+#ifndef SERIAL_HAVE_ONLY_RXDMA
+
 /****************************************************************************
  * Name: up_rxint
  *
@@ -2805,7 +2812,6 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
  *
  ****************************************************************************/
 
-#ifndef SERIAL_HAVE_ONLY_RXDMA
 static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
@@ -2856,6 +2862,8 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 }
 #endif
 
+#ifndef SERIAL_HAVE_ONLY_RXDMA
+
 /****************************************************************************
  * Name: up_rxavailable
  *
@@ -2864,13 +2872,14 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-#ifndef SERIAL_HAVE_ONLY_RXDMA
 static bool up_rxavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   return ((up_serialin(priv, STM32_USART_ISR_OFFSET) & USART_ISR_RXNE) != 0);
 }
 #endif
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
 
 /****************************************************************************
  * Name: up_rxflowcontrol
@@ -2895,7 +2904,6 @@ static bool up_rxavailable(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
 static bool up_rxflowcontrol(struct uart_dev_s *dev,
                              unsigned int nbuffered, bool upper)
 {
@@ -2968,6 +2976,8 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
 }
 #endif
 
+#ifdef SERIAL_HAVE_RXDMA
+
 /****************************************************************************
  * Name: up_dma_receive
  *
@@ -2978,7 +2988,6 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
  *
  ****************************************************************************/
 
-#ifdef SERIAL_HAVE_RXDMA
 static int up_dma_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
@@ -3305,6 +3314,8 @@ static void up_send(struct uart_dev_s *dev, int ch)
   up_serialout(priv, STM32_USART_TDR_OFFSET, (uint32_t)ch);
 }
 
+
+#ifdef SERIAL_HAVE_TXDMA
 /****************************************************************************
  * Name: up_dma_txint
  *
@@ -3313,7 +3324,7 @@ static void up_send(struct uart_dev_s *dev, int ch)
  *
  ****************************************************************************/
 
-#ifdef SERIAL_HAVE_TXDMA
+
 static void up_dma_txint(struct uart_dev_s *dev, bool enable)
 {
   /* Nothing to do. */
