@@ -406,8 +406,8 @@ static int32_t imx9_smt_tx(uint32_t smtchannel, uint32_t len, bool callee,
         case SMT_CRC_CRC32:
           buf->imp_crc = imx9_crc32((const uint8_t *)&buf->header, len);
           break;
-        default:; /* Intentional empty while */
-
+        default:
+          ; /* Intentional empty while */
           break;
         }
 
@@ -427,7 +427,7 @@ static int32_t imx9_smt_tx(uint32_t smtchannel, uint32_t len, bool callee,
 
       /* Trigger GI interrupt */
 
-      imx95_mu_trigger_interrupts(g_mudev, 1 << db);
+      imx9_mu_trigger_interrupts(g_mudev, 1 << db);
     }
 
   /* Return status */
@@ -495,8 +495,8 @@ static int32_t imx9_smt_rx(uint32_t smtchannel, uint32_t *len, bool callee)
             }
 
           break;
-        default:; /* Intentional empty while */
-
+        default:
+          ; /* Intentional empty while */
           break;
         }
     }
@@ -1041,7 +1041,7 @@ void imx9_scmi_initialize()
 
   /* Configure MU */
 
-  g_mudev = imx95_mu_init(5);
+  g_mudev = imx9_mu_init(5);
 }
 
 #endif /* CONFIG_IMX9_SCMI */

@@ -1003,20 +1003,23 @@ if IMX9_MU
 config IMX9_MU5
 	bool "MU5 M7 <-> M33"
 	default y
+	depends on ARCH_CHIP_IMX95_M7
 	---help---
 		Enable mailbox 5 that operates between M7 and M33 cores
 
 config IMX9_MU7
 	bool "MU7 M7 <-> A55"
 	default n
+	depends on ARCH_CHIP_IMX95_M7
 	---help---
 		Enable mailbox 7 that operates between M7 and A55 cores
 
 config IMX9_MU8
 	bool "MU8 M7 <-> A55"
 	default n
+	depends on ARCH_CHIP_IMX95_M7
 	---help---
-		Enable mailbox 5 that operates between M7 and A55 cores
+		Enable mailbox 8 that operates between M7 and A55 cores
 
 endif # IMX9_MU Configuration
 
