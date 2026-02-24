@@ -885,6 +885,14 @@ config ARCH_BOARD_IMXRT1170_EVK
 		This is the board configuration for the port of NuttX to the NXP i.MXRT
 		evaluation kit, MIMXRT1170-EVK.  This board features the MIMXRT1176DVMAA MCU.
 
+config ARCH_BOARD_IMX93_QSB
+	bool "NXP i.MX 93 QSB (Cortex M33)"
+	depends on ARCH_CHIP_IMX9_CORTEX_M
+	select ARCH_HAVE_LEDS
+	---help---
+		This is the board configuration for the port of NuttX to the NXP i.MX93 QSB
+		(Quick Start Board), targeting the M33 core of the i.MX93 MCU.
+
 config ARCH_BOARD_IMX95_EVK
 	bool "NXP i.MX 95 EVK"
 	depends on ARCH_CHIP_IMX9_CORTEX_M
@@ -3611,6 +3619,7 @@ config ARCH_BOARD
 	default "imxrt1060-evk"                if ARCH_BOARD_IMXRT1060_EVK
 	default "imxrt1064-evk"                if ARCH_BOARD_IMXRT1064_EVK
 	default "imxrt1170-evk"                if ARCH_BOARD_IMXRT1170_EVK
+	default "imx93-qsb"                    if ARCH_BOARD_IMX93_QSB
 	default "imx95-evk"                    if ARCH_BOARD_IMX95_EVK
 	default "mr-navq95b"                   if ARCH_BOARD_MR_NAVQ95B
 	default "kwikstik-k40"                 if ARCH_BOARD_KWIKSTIK_K40
@@ -4050,6 +4059,9 @@ source "boards/arm/imxrt/imxrt1064-evk/Kconfig"
 endif
 if ARCH_BOARD_IMXRT1170_EVK
 source "boards/arm/imxrt/imxrt1170-evk/Kconfig"
+endif
+if ARCH_BOARD_IMX93_QSB
+source "boards/arm/imx9/imx93-qsb/Kconfig"
 endif
 if ARCH_BOARD_IMX95_EVK
 source "boards/arm/imx9/imx95-evk/Kconfig"
