@@ -106,5 +106,12 @@ void up_initialize(void)
 
   xtensa_usbinitialize();
 
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
+  if (xtensa_soc_initialize)
+#endif
+    {
+      xtensa_soc_initialize();
+    }
+
   board_autoled_on(LED_IRQSENABLED);
 }

@@ -266,6 +266,10 @@ void xtensa_clrpend_irq(int irq);
 void weak_function xtensa_dma_initialize(void);
 #endif
 
+/* SoC-specific CPU initialization */
+
+void weak_function xtensa_soc_initialize(void);
+
 /* Memory management */
 
 #if CONFIG_MM_REGIONS > 1
