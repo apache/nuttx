@@ -259,7 +259,7 @@ mm_initialize_heap(FAR const struct mm_heap_config_s *config)
     }
   else
     {
-      heap = mm_memalign(heap, MM_ALIGN, sizeof(struct mm_heap_s));
+      heap = mm_malloc(heap, sizeof(struct mm_heap_s));
       if (heap == NULL)
         {
           return NULL;
