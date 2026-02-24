@@ -154,7 +154,7 @@ void up_irq_enable(void)
   UP_ISB();
 #endif
 
-  __asm__ volatile ("enable" : : : "memory");
+  __asm__ __volatile__ ("enable" : : : "memory");
 }
 
 /****************************************************************************

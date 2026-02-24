@@ -231,7 +231,8 @@ noinstrument_function static inline_function uintptr_t up_getpc(void)
   return (uintptr_t)__mfcr(TRICORE_CPU_PC);
 #else
   uintptr_t pc;
-  __asm__ volatile ("mfcr %0,%1": "=d" (pc) :"i"(TRICORE_CPU_PC): "memory");
+  __asm__ __volatile__ ("mfcr %0,%1": "=d" (pc) :"i"(TRICORE_CPU_PC):
+                        "memory");
   return pc;
 #endif
 }
@@ -283,7 +284,7 @@ noinstrument_function static inline_function irqstate_t up_irq_save(void)
 #else
   irqstate_t flags;
 
-  __asm__ volatile ("disable %0" : "=d"(flags) : : "memory");
+  __asm__ __volatile__ ("disable %0" : "=d"(flags) : : "memory");
   return flags;
 #endif
 }
@@ -313,7 +314,7 @@ void up_irq_restore(irqstate_t flags)
       UP_ISB();
     }
 #else
-  __asm__ volatile ("restore %0" : : "d"(flags) : "memory");
+  __asm__ __volatile__ ("restore %0" : : "d"(flags) : "memory");
 #endif
 }
 

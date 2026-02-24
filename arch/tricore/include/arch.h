@@ -47,16 +47,16 @@
 
 /* MTCR and MFCR - move to / from Core Special Function Register */
 
-#define tricore_mtcr(reg, val)                                         \
-  ({                                                                   \
-    __asm__ volatile ("mtcr %0,%1\n\t"::"i"(reg),"d"(val):"memory");   \
+#define tricore_mtcr(reg, val)                                             \
+  ({                                                                       \
+    __asm__ __volatile__ ("mtcr %0,%1\n\t"::"i"(reg),"d"(val):"memory");   \
   })
 
-#define tricore_mfcr(reg)                                              \
-  ({                                                                   \
-    uint32_t __val;                                                    \
-    __asm__ volatile ("mfcr %0,%1": "=d" (__val) :"i"(reg): "memory"); \
-    __val;                                                             \
+#define tricore_mfcr(reg)                                                  \
+  ({                                                                       \
+    uint32_t __val;                                                        \
+    __asm__ __volatile__ ("mfcr %0,%1": "=d" (__val) :"i"(reg): "memory"); \
+    __val;                                                                 \
   })
 
 /* Return from a handler that the trap or interrupt vector entered with
@@ -64,9 +64,11 @@
  */
 
 #ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
-#  define tricore_jump_backto_link() __asm__ volatile ("ji a11" : : : "a11")
+#  define tricore_jump_backto_link() \
+     __asm__ __volatile__ ("ji a11" : : : "a11")
 #else
-#  define tricore_jump_backto_link() __asm__ volatile ("ji %a11")
+#  define tricore_jump_backto_link() \
+     __asm__ __volatile__ ("ji %a11")
 #endif
 
 /****************************************************************************

@@ -60,7 +60,7 @@ int up_saveusercontext(void *saveregs)
 
   /* to unify the trap processing, extra save lowcsa */
 
-  __asm("svlcx");
+  __asm__("svlcx");
 
   regs = tricore_csa2addr(tricore_mfcr(TRICORE_CPU_PCXI));
   memcpy(saveregs, regs, csa_size);
@@ -73,7 +73,7 @@ int up_saveusercontext(void *saveregs)
 
   ((uintptr_t *)saveregs)[REG_LPCXI] = pcxi & (~PCXI_UL);
 
-  __asm("rslcx");
+  __asm__("rslcx");
 
   return 0;
 }

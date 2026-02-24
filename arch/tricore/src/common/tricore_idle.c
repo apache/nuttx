@@ -37,9 +37,9 @@
  ****************************************************************************/
 
 #if defined(__TASKING__)
-#  define tricore_idle_loop() __asm__ volatile ("1: loopu 1p")
+#  define tricore_idle_loop() __asm__ __volatile__ ("1: loopu 1p")
 #else
-#  define tricore_idle_loop() __asm__ volatile ("1: loopu 1b")
+#  define tricore_idle_loop() __asm__ __volatile__ ("1: loopu 1b")
 #endif
 
 /****************************************************************************
