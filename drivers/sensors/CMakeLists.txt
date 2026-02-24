@@ -288,6 +288,10 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS ina226.c)
     endif()
 
+    if(CONFIG_SENSORS_INA260)
+      list(APPEND SRCS ina260.c)
+    endif()
+
     if(CONFIG_SENSORS_INA3221)
       list(APPEND SRCS ina3221.c)
     endif()

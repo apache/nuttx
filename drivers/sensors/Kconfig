@@ -1119,6 +1119,19 @@ config INA226_I2C_FREQUENCY
 	default 400000
 	depends on SENSORS_INA226
 
+config SENSORS_INA260
+	bool "INA260 current, voltage, and power monitor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Texas Instruments INA260 current,
+		voltage, and power monitor with integrated shunt resistor.
+
+config INA260_I2C_FREQUENCY
+	int "INA260 I2C frequency"
+	default 400000
+	depends on SENSORS_INA260
+
 config SENSORS_INA3221
 	bool "INA3221 current and voltage monitor"
 	default n

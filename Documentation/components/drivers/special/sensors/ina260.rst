@@ -1,0 +1,55 @@
+======
+INA260
+======
+
+.. tags:: experimental
+
+I2C driver for the Texas Instruments INA260 current/voltage/power monitor.
+
+.. warning::
+   This driver only supports polling mode.
+
+Driver Interface
+================
+
+The driver registers a character device. Each ``read`` returns one or more
+``struct ina260_s`` samples:
+
+.. code-block:: c
+
+   #include <nuttx/sensors/ina260.h>
+
+   struct ina260_s
+   {
+     uint32_t voltage;  /* Bus voltage in millivolts */
+     int32_t  current;  /* Current in milliamperes (signed) */
+     uint32_t power;    /* Power in milliwatts */
+   };
+
+Registration
+============
+
+Register the driver from board-level code:
+
+.. code-block:: c
+
+   #include <nuttx/sensors/ina260.h>
+
+   #if defined(CONFIG_SENSORS_INA260)
+     /* Register INA260 on I2C1 with address 0x40 and default configuration */
+
+     ret = ina260_register("/dev/ina260-0", i2c1, 0x40, 0);
+     if (ret < 0) {
+       syslog(LOG_ERR, "Failed to register INA260: %d\n", ret);
+     }
+
+The last argument to ``ina260_register`` is the configuration. Please refer to
+the datasheet for more details on the configuration options (table 5).
+
+A software reset is issued during registration before applying the
+configuration.
+
+Example
+=======
+
+Please refer to ina260 from nuttx-apps for example code.
