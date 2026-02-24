@@ -412,15 +412,15 @@ noinstrument_function void tricore_fcu_recover(void)
   /* A11 is the trap return address, from the saved upper context */
 
 #ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
-  __asm__ volatile ("ld.a a11, [%0]12\n\t"
-                    "mov d15, #4\n\t"
-                    "mov d5, #3\n\t"
-                    "j tricore_trap_entry\n\t" : : "a"(csa));
+  __asm__ __volatile__ ("ld.a a11, [%0]12\n\t"
+                        "mov d15, #4\n\t"
+                        "mov d5, #3\n\t"
+                        "j tricore_trap_entry\n\t" : : "a"(csa));
 #else
-  __asm__ volatile ("ld.a %%a11, [%0]12\n\t"
-                    "mov %%d15, 4\n\t"
-                    "mov %%d5, 3\n\t"
-                    "j tricore_trap_entry\n\t" : : "a"(csa));
+  __asm__ __volatile__ ("ld.a %%a11, [%0]12\n\t"
+                        "mov %%d15, 4\n\t"
+                        "mov %%d5, 3\n\t"
+                        "j tricore_trap_entry\n\t" : : "a"(csa));
 #endif
 
   for (; ; );
