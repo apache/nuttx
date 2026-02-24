@@ -47,6 +47,10 @@
 
 static IfxCpu_Trap g_trapinfo;
 
+/* Bus trap hook for safety test modules (e.g., BusMonTst). */
+
+static tricore_bustrap_hook_t g_bustrap_hook;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -64,6 +68,27 @@ static void tricore_trapinfo(volatile void *trap)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: tricore_bustrap_register_hook
+ *
+ * Description:
+ *   Register a hook function for bus trap handling. This allows safety test
+ *   modules (e.g., BusMonTst) to intercept and handle expected bus errors
+ *   during self-tests without triggering a system panic.
+ *
+ * Input Parameters:
+ *   hook - The hook function to register, or NULL to unregister
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void tricore_bustrap_register_hook(tricore_bustrap_hook_t hook)
+{
+  g_bustrap_hook = hook;
+}
 
 int weak_function tricore_nmitrap(uint32_t tid, void *context, void *arg)
 {
@@ -247,6 +272,23 @@ int tricore_contexmnttrap(uint32_t tid, void *context, void *arg)
 
 int tricore_bustrap(uint32_t tid, void *context, void *arg)
 {
+  /* First, let the registered hook try to handle the trap.
+   * This is used by safety test modules (e.g., BusMonTst) to handle
+   * expected bus errors during self-tests.
+   */
+
+  if (g_bustrap_hook != NULL)
+    {
+      if (g_bustrap_hook(tid, context) == OK)
+        {
+          /* Hook handled the trap, return normally */
+
+          return OK;
+        }
+    }
+
+  /* Hook did not handle or no hook registered, proceed with panic */
+
   _alert("PANIC!!! System Bus Trap:\n");
   _alert("\tClass %d TID: %" PRId32 " regs: %p\n", IfxCpu_Trap_Class_bus,
          tid, context);
@@ -333,6 +375,7 @@ int tricore_assertiontrap(uint32_t tid, void *context, void *arg)
 void tricore_trapcall(volatile void *trap)
 {
   uintptr_t *regs;
+  bool was_interrupt_context;
 
   IfxCpu_Trap *ctrap = (IfxCpu_Trap *)trap;
   IfxCpu_Trap_Class tclass = (IfxCpu_Trap_Class)ctrap->tClass;
@@ -342,14 +385,15 @@ void tricore_trapcall(volatile void *trap)
 
   regs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
 
-  if (!up_interrupt_context())
+  was_interrupt_context = up_interrupt_context();
+  if (!was_interrupt_context)
     {
+      up_set_interrupt_context(true);
+
       /* Update the current task's regs */
 
       g_running_tasks[this_cpu()]->xcp.regs = regs;
     }
-
-  up_set_interrupt_context(true);
 
   if (tclass == IfxCpu_Trap_Class_nonMaskableInterrupt)
     {
@@ -384,7 +428,22 @@ void tricore_trapcall(volatile void *trap)
 
   if (tclass == IfxCpu_Trap_Class_bus)
     {
-      tricore_bustrap(tid, regs, NULL);
+      if (tricore_bustrap(tid, regs, NULL) == OK)
+        {
+          /* Bus trap was handled by hook */
+
+          if (!was_interrupt_context)
+            {
+              up_set_interrupt_context(false);
+
+              /* g_running_tasks[]->xcp.regs is about to become invalid
+               * and will be marked as NULL to avoid misusage.
+               */
+
+              g_running_tasks[this_cpu()]->xcp.regs = NULL;
+            }
+        }
+
       __jumpBackToLink();
     }
 
