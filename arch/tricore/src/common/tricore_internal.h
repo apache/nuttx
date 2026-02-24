@@ -128,6 +128,12 @@
 
 #ifndef __ASSEMBLY__
 typedef void (*up_vector_t)(void);
+
+/* Bus trap hook function type for safety test modules.
+ * Returns OK if the trap was handled, ERROR otherwise.
+ */
+
+typedef int (*tricore_bustrap_hook_t)(uint32_t tid, void *context);
 #endif
 
 /****************************************************************************
@@ -186,6 +192,7 @@ void tricore_sigdeliver(void);
 void tricore_svcall(volatile void *trap);
 void tricore_trapcall(volatile void *trap);
 void tricore_trapinit(void);
+void tricore_bustrap_register_hook(tricore_bustrap_hook_t hook);
 
 /* Context Save Areas *******************************************************/
 
