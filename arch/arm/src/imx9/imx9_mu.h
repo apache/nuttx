@@ -38,24 +38,24 @@ typedef void (*imx9_mu_gpi_callback_t)(int id, void *arg);
  * Public Function Prototypes
  ****************************************************************************/
 
-struct imx9_mudev_s *imx95_mu_init(int index);
-void imx95_mu_subscribe_msg(struct imx9_mudev_s *priv,
-                            uint32_t msg_int_bitfield,
-                            imx9_mu_msg_callback_t callback);
-void imx95_mu_subscribe_gpi(struct imx9_mudev_s *priv,
-                            uint32_t gpi_int_enable,
-                            imx9_mu_gpi_callback_t callback);
+struct imx9_mudev_s *imx9_mu_init(int index);
+void imx9_mu_subscribe_msg(struct imx9_mudev_s *priv,
+                           uint32_t msg_int_bitfield,
+                           imx9_mu_msg_callback_t callback);
+void imx9_mu_subscribe_gpi(struct imx9_mudev_s *priv,
+                           uint32_t gpi_int_enable,
+                           imx9_mu_gpi_callback_t callback);
 
-void imx95_mu_deinit(struct imx9_mudev_s *priv);
-int imx95_mu_send_msg_non_blocking(struct imx9_mudev_s *priv,
-                                   uint32_t reg_index, uint32_t msg);
-void imx95_mu_send_msg(struct imx9_mudev_s *priv, uint32_t reg_index,
-                       uint32_t msg);
-int imx95_mu_has_received_msg(struct imx9_mudev_s *priv, uint32_t reg_index);
-uint32_t imx95_mu_receive_msg_non_blocking(struct imx9_mudev_s *priv,
-                                           uint32_t reg_index);
-uint32_t imx95_mu_receive_msg(struct imx9_mudev_s *priv, uint32_t reg_index);
-int imx95_mu_trigger_interrupts(struct imx9_mudev_s *priv,
-                                uint32_t interrupts);
+void imx9_mu_deinit(struct imx9_mudev_s *priv);
+int imx9_mu_send_msg_non_blocking(struct imx9_mudev_s *priv,
+                                  uint32_t reg_index, uint32_t msg);
+void imx9_mu_send_msg(struct imx9_mudev_s *priv, uint32_t reg_index,
+                      uint32_t msg);
+int imx9_mu_has_received_msg(struct imx9_mudev_s *priv, uint32_t reg_index);
+uint32_t imx9_mu_receive_msg_non_blocking(struct imx9_mudev_s *priv,
+                                          uint32_t reg_index);
+uint32_t imx9_mu_receive_msg(struct imx9_mudev_s *priv, uint32_t reg_index);
+int imx9_mu_trigger_interrupts(struct imx9_mudev_s *priv,
+                               uint32_t interrupts);
 
 #endif /* __ARCH_ARM_SRC_IMX9_IMX9_MU_H */

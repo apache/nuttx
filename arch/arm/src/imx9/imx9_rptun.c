@@ -217,8 +217,8 @@ static int imx9_rptun_notify(struct rptun_dev_s *dev, uint32_t vqid)
 
   ipcinfo("Rptun notify vqid=%ld\n", vqid);
 
-  imx95_mu_send_msg(priv->mu, RPMSG_MU_CHANNEL,
-                    vqid << MU_MSG_VQID_BITOFFSET);
+  imx9_mu_send_msg(priv->mu, RPMSG_MU_CHANNEL,
+                   vqid << MU_MSG_VQID_BITOFFSET);
 
   return 0;
 }
@@ -277,14 +277,14 @@ int imx9_rptun_init(const char *shmemname, const char *cpuname)
 
   /* Subscribe to MU */
 
-  dev->mu = imx95_mu_init(MU_INSTANCE);
+  dev->mu = imx9_mu_init(MU_INSTANCE);
   if (!dev->mu)
     {
       ipcerr("ERROR: cannot init mailbox %i!\n", MU_INSTANCE);
       return ret;
     }
 
-  imx95_mu_subscribe_msg(dev->mu, (1 << RPMSG_MU_CHANNEL), imx9_mu_callback);
+  imx9_mu_subscribe_msg(dev->mu, (1 << RPMSG_MU_CHANNEL), imx9_mu_callback);
 
   /* Configure device */
 
