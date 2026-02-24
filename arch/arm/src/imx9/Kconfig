@@ -5,10 +5,8 @@
 
 if ARCH_CHIP_IMX9_CORTEX_M
 
-menu "i.MX9 Chip Selection"
-
 choice
-	prompt "i.MX9 Core Configuration"
+	prompt "i.MX9 Core Selection"
 	default ARCH_CHIP_IMX95_M7
 
 config ARCH_CHIP_IMX95_M7
@@ -21,9 +19,7 @@ config ARCH_CHIP_IMX95_M7
 	select ARMV7M_HAVE_DTCM
 	select IMX9_HAVE_MU
 
-endchoice # i.MX9 Chip Selection
-
-endmenu # "i.MX9 Chip Selection"
+endchoice # i.MX9 Core Selection
 
 config IMX9_HAVE_MU
 	bool
