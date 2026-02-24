@@ -1,0 +1,687 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 800 680"
+   width="800"
+   height="680"
+   font-family="monospace"
+   font-size="11px"
+   version="1.1"
+   id="svg256"
+   sodipodi:docname="imx93-qsb-blockdiagram.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs260" />
+  <sodipodi:namedview
+     id="namedview258"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="0.98163059"
+     inkscape:cx="573.53551"
+     inkscape:cy="427.85953"
+     inkscape:window-width="1920"
+     inkscape:window-height="1131"
+     inkscape:window-x="0"
+     inkscape:window-y="32"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg256" />
+  <!-- Title -->
+  <!-- ===== CENTER: i.MX93 SoC ===== -->
+  <!-- CPU block -->
+  <!-- ML block -->
+  <!-- Peripherals labels on SoC edges -->
+  <!-- Left side labels -->
+  <!-- Right side labels -->
+  <!-- Bottom labels -->
+  <g
+     id="g791"
+     transform="translate(682.84779,227.84759)">
+    <g
+       id="g755"
+       transform="translate(-792.7724,-275.27833)">
+      <rect
+         x="347.15228"
+         y="93.204559"
+         width="305.69543"
+         height="459.83179"
+         rx="7.0545096"
+         fill="#1a6b9a"
+         stroke="#4ab0e0"
+         stroke-width="2.16825"
+         id="rect6" />
+      <text
+         x="500"
+         y="120"
+         fill="#ffffff"
+         font-size="15px"
+         font-weight="bold"
+         text-anchor="middle"
+         id="text8">NXP i.MX 93</text>
+      <line
+         x1="390"
+         y1="130"
+         x2="610"
+         y2="130"
+         stroke="#4ab0e0"
+         stroke-width="1"
+         id="line10" />
+    </g>
+    <g
+       id="g598"
+       transform="translate(-789.68874,-120.0555)">
+      <rect
+         x="395.53775"
+         y="8.1722107"
+         width="220.14615"
+         height="43.714706"
+         rx="4.0026569"
+         fill="#0d4f70"
+         stroke="#4ab0e0"
+         stroke-width="0.853852"
+         id="rect12" />
+      <text
+         x="500.94708"
+         y="27.546413"
+         fill="#ffffff"
+         font-size="11px"
+         font-weight="bold"
+         text-anchor="middle"
+         id="text14">Application core</text>
+      <text
+         x="504.89542"
+         y="42.094856"
+         fill="#cccccc"
+         font-size="10px"
+         text-anchor="middle"
+         id="text16">2x Cortex-A55 (1.7GHz)</text>
+    </g>
+    <g
+       id="g598-3"
+       transform="translate(-789.68874,-60.691192)">
+      <rect
+         x="395.53775"
+         y="8.1722107"
+         width="220.14615"
+         height="43.714706"
+         rx="4.0026569"
+         fill="#0d4f70"
+         stroke="#4ab0e0"
+         stroke-width="0.853852"
+         id="rect12-6" />
+      <text
+         x="501.58539"
+         y="28.604755"
+         fill="#ffffff"
+         font-size="11px"
+         font-weight="bold"
+         text-anchor="middle"
+         id="text14-7">Realtime core</text>
+      <text
+         x="505.49158"
+         y="42.087036"
+         fill="#cccccc"
+         font-size="10px"
+         text-anchor="middle"
+         id="text16-5">1x Cortex-M33 (250MHz)</text>
+    </g>
+    <g
+       id="g705"
+       transform="matrix(1.0000719,0,0,0.96854157,-799.12289,-204.46297)">
+      <rect
+         x="405"
+         y="215"
+         width="220"
+         height="45"
+         rx="4"
+         fill="#0d4f70"
+         stroke="#4ab0e0"
+         stroke-width="1"
+         id="rect20" />
+      <text
+         x="515"
+         y="235"
+         fill="#ffffff"
+         font-size="11px"
+         font-weight="bold"
+         text-anchor="middle"
+         id="text22">ML / NPU</text>
+      <text
+         x="515"
+         y="250"
+         fill="#cccccc"
+         font-size="10px"
+         text-anchor="middle"
+         id="text24">0.5 TOPs Ethos-U65 (1GHz)</text>
+    </g>
+  </g>
+  <!-- ===== LEFT SIDE BLOCKS ===== -->
+  <!-- PMIC -->
+  <g
+     id="g796"
+     transform="translate(-34.923323,-15.082545)">
+    <rect
+       x="60"
+       y="88.347672"
+       width="130"
+       height="45"
+       rx="4"
+       fill="#2d5a27"
+       stroke="#5dba54"
+       stroke-width="1.5"
+       id="rect62" />
+    <text
+       x="125"
+       y="106"
+       fill="#ffffff"
+       font-size="11px"
+       font-weight="bold"
+       text-anchor="middle"
+       id="text64">PMIC</text>
+    <text
+       x="125"
+       y="120"
+       fill="#cccccc"
+       font-size="9px"
+       text-anchor="middle"
+       id="text66">NXP PCA9451A</text>
+  </g>
+  <!-- arrow -->
+  <!-- SYS PWR label -->
+  <!-- DRAM -->
+  <g
+     id="g801"
+     transform="translate(-34.923323,-15.082545)">
+    <rect
+       x="60"
+       y="155"
+       width="130"
+       height="45"
+       rx="4"
+       fill="#2d5a27"
+       stroke="#5dba54"
+       stroke-width="1.5"
+       id="rect78" />
+    <text
+       x="125"
+       y="176"
+       fill="#ffffff"
+       font-size="11px"
+       font-weight="bold"
+       text-anchor="middle"
+       id="text80">DRAM</text>
+    <text
+       x="125"
+       y="190"
+       fill="#cccccc"
+       font-size="9px"
+       text-anchor="middle"
+       id="text82">LPDDR4/X 2GB ×16b</text>
+  </g>
+  <!-- eMMC -->
+  <g
+     id="g806"
+     transform="translate(-34.923323,-15.082545)">
+    <rect
+       x="60"
+       y="225"
+       width="130"
+       height="45"
+       rx="4"
+       fill="#2d5a27"
+       stroke="#5dba54"
+       stroke-width="1.5"
+       id="rect90" />
+    <text
+       x="125"
+       y="246"
+       fill="#ffffff"
+       font-size="11px"
+       font-weight="bold"
+       text-anchor="middle"
+       id="text92">eMMC 5.1</text>
+    <text
+       x="125"
+       y="260"
+       fill="#cccccc"
+       font-size="9px"
+       text-anchor="middle"
+       id="text94">16GB HS400</text>
+  </g>
+  <!-- Sensor group -->
+  <g
+     id="g811"
+     transform="translate(-34.923323,-15.082545)">
+    <rect
+       x="61.472355"
+       y="295"
+       width="130"
+       height="45"
+       rx="4"
+       fill="#2d5a27"
+       stroke="#5dba54"
+       stroke-width="1.5"
+       id="rect106" />
+    <text
+       x="125"
+       y="316"
+       fill="#ffffff"
+       font-size="11px"
+       font-weight="bold"
+       text-anchor="middle"
+       id="text108">IMU</text>
+    <text
+       x="125"
+       y="330"
+       fill="#cccccc"
+       font-size="9px"
+       text-anchor="middle"
+       id="text110">ST LSM6DSOXTR</text>
+  </g>
+  <!-- Sensor label -->
+  <!-- ADC -->
+  <g
+     id="g816"
+     transform="translate(-34.923323,-15.082545)">
+    <rect
+       x="60"
+       y="365"
+       width="130"
+       height="45"
+       rx="4"
+       fill="#2d5a27"
+       stroke="#5dba54"
+       stroke-width="1.5"
+       id="rect120" />
+    <text
+       x="125"
+       y="386"
+       fill="#ffffff"
+       font-size="11px"
+       font-weight="bold"
+       text-anchor="middle"
+       id="text122">ADC</text>
+    <text
+       x="125"
+       y="400"
+       fill="#cccccc"
+       font-size="9px"
+       text-anchor="middle"
+       id="text124">×12 bit</text>
+  </g>
+  <!-- AUX I²C -->
+  <g
+     id="g821"
+     transform="translate(-34.923323,-15.082545)">
+    <rect
+       x="60"
+       y="435"
+       width="130"
+       height="45"
+       rx="4"
+       fill="#2d5a27"
+       stroke="#5dba54"
+       stroke-width="1.5"
+       id="rect130" />
+    <text
+       x="125"
+       y="456"
+       fill="#ffffff"
+       font-size="11px"
+       font-weight="bold"
+       text-anchor="middle"
+       id="text132">AUX I²C</text>
+    <text
+       x="125"
+       y="470"
+       fill="#cccccc"
+       font-size="9px"
+       text-anchor="middle"
+       id="text134">I²C/GPIO</text>
+  </g>
+  <!-- ===== RIGHT SIDE BLOCKS ===== -->
+  <!-- M.2 NGFF -->
+  <g
+     id="g868"
+     transform="translate(-173.95426,-13.738307)">
+    <rect
+       x="790"
+       y="85"
+       width="150"
+       height="45"
+       rx="4"
+       fill="#5a3a27"
+       stroke="#e0844a"
+       stroke-width="1.5"
+       id="rect140" />
+    <text
+       x="865"
+       y="106"
+       fill="#ffffff"
+       font-size="11px"
+       font-weight="bold"
+       text-anchor="middle"
+       id="text142">M.2 NGFF</text>
+    <text
+       x="865"
+       y="120"
+       fill="#cccccc"
+       font-size="9px"
+       text-anchor="middle"
+       id="text144">KEY-E: WiFi/BT</text>
+  </g>
+  <!-- WiFi symbol -->
+  <!-- USB 2.0 -->
+  <g
+     id="g863"
+     transform="translate(-173.95426,-13.738307)">
+    <rect
+       x="790"
+       y="155"
+       width="150"
+       height="45"
+       rx="4"
+       fill="#5a3a27"
+       stroke="#e0844a"
+       stroke-width="1.5"
+       id="rect152" />
+    <text
+       x="865"
+       y="176"
+       fill="#ffffff"
+       font-size="11px"
+       font-weight="bold"
+       text-anchor="middle"
+       id="text154">USB 2.0</text>
+    <text
+       x="865"
+       y="190"
+       fill="#cccccc"
+       font-size="9px"
+       text-anchor="middle"
+       id="text156">USB Type-C</text>
+  </g>
+  <!-- ENET -->
+  <g
+     id="g858"
+     transform="translate(-173.95426,-13.738307)">
+    <rect
+       x="790"
+       y="225"
+       width="150"
+       height="45"
+       rx="4"
+       fill="#5a3a27"
+       stroke="#e0844a"
+       stroke-width="1.5"
+       id="rect164" />
+    <text
+       x="865"
+       y="246"
+       fill="#ffffff"
+       font-size="11px"
+       font-weight="bold"
+       text-anchor="middle"
+       id="text166">ENET</text>
+    <text
+       x="865"
+       y="260"
+       fill="#cccccc"
+       font-size="9px"
+       text-anchor="middle"
+       id="text168">Realtek RTL8211</text>
+  </g>
+  <!-- RS232 -->
+  <g
+     id="g853"
+     transform="translate(-173.95426,-13.738307)">
+    <rect
+       x="790"
+       y="295"
+       width="150"
+       height="55"
+       rx="4"
+       fill="#5a3a27"
+       stroke="#e0844a"
+       stroke-width="1.5"
+       id="rect176" />
+    <text
+       x="865"
+       y="316"
+       fill="#ffffff"
+       font-size="11px"
+       font-weight="bold"
+       text-anchor="middle"
+       id="text178">RS232</text>
+    <text
+       x="865"
+       y="330"
+       fill="#cccccc"
+       font-size="9px"
+       text-anchor="middle"
+       id="text180">FTDI XCVR</text>
+    <text
+       x="865"
+       y="344"
+       fill="#aaaaaa"
+       font-size="8px"
+       text-anchor="middle"
+       id="text182">Cortex-A55/M33 Debug</text>
+  </g>
+  <!-- CAN -->
+  <g
+     id="g847"
+     transform="translate(-173.95426,-13.738307)">
+    <rect
+       x="790"
+       y="370"
+       width="150"
+       height="45"
+       rx="4"
+       fill="#5a3a27"
+       stroke="#e0844a"
+       stroke-width="1.5"
+       id="rect188" />
+    <text
+       x="865"
+       y="391"
+       fill="#ffffff"
+       font-size="11px"
+       font-weight="bold"
+       text-anchor="middle"
+       id="text190">CAN</text>
+    <text
+       x="865"
+       y="405"
+       fill="#cccccc"
+       font-size="9px"
+       text-anchor="middle"
+       id="text192">NXP TJA1051T/3</text>
+  </g>
+  <!-- CODEC -->
+  <g
+     id="g842"
+     transform="translate(-173.95426,-13.738307)">
+    <rect
+       x="790"
+       y="435"
+       width="150"
+       height="55"
+       rx="4"
+       fill="#5a3a27"
+       stroke="#e0844a"
+       stroke-width="1.5"
+       id="rect198" />
+    <text
+       x="865"
+       y="456"
+       fill="#ffffff"
+       font-size="11px"
+       font-weight="bold"
+       text-anchor="middle"
+       id="text200">CODEC</text>
+    <text
+       x="865"
+       y="470"
+       fill="#cccccc"
+       font-size="9px"
+       text-anchor="middle"
+       id="text202">Cirrus Logic WM8962B</text>
+    <text
+       x="865"
+       y="482"
+       fill="#aaaaaa"
+       font-size="8px"
+       text-anchor="middle"
+       id="text204">HP OUT/MIC · SPK OUT</text>
+  </g>
+  <!-- Connectivity label -->
+  <!-- ===== BOTTOM BLOCKS ===== -->
+  <!-- MicroSD -->
+  <g
+     id="g826"
+     transform="translate(-172.31427,-31.640295)">
+    <rect
+       x="380"
+       y="580"
+       width="100"
+       height="45"
+       rx="4"
+       fill="#3a3a5a"
+       stroke="#9090cc"
+       stroke-width="1.5"
+       id="rect212" />
+    <text
+       x="430"
+       y="601"
+       fill="#ffffff"
+       font-size="10px"
+       font-weight="bold"
+       text-anchor="middle"
+       id="text214">MicroSD</text>
+    <text
+       x="430"
+       y="615"
+       fill="#cccccc"
+       font-size="9px"
+       text-anchor="middle"
+       id="text216">SD3.0</text>
+  </g>
+  <!-- JTAG/SWD -->
+  <g
+     id="g831"
+     transform="translate(-156.5567,-30.177859)">
+    <rect
+       x="495"
+       y="580"
+       width="110"
+       height="45"
+       rx="4"
+       fill="#3a3a5a"
+       stroke="#9090cc"
+       stroke-width="1.5"
+       id="rect222" />
+    <text
+       x="550"
+       y="601"
+       fill="#ffffff"
+       font-size="10px"
+       font-weight="bold"
+       text-anchor="middle"
+       id="text224">JTAG/SWD</text>
+    <text
+       x="550"
+       y="615"
+       fill="#cccccc"
+       font-size="9px"
+       text-anchor="middle"
+       id="text226">DEBUG</text>
+  </g>
+  <!-- EXP CN -->
+  <g
+     id="g836"
+     transform="translate(-137.66425,-30.177859)">
+    <rect
+       x="620"
+       y="580"
+       width="110"
+       height="45"
+       rx="4"
+       fill="#3a3a5a"
+       stroke="#9090cc"
+       stroke-width="1.5"
+       id="rect232" />
+    <text
+       x="675"
+       y="601"
+       fill="#ffffff"
+       font-size="10px"
+       font-weight="bold"
+       text-anchor="middle"
+       id="text234">EXP CN</text>
+    <text
+       x="675"
+       y="615"
+       fill="#cccccc"
+       font-size="9px"
+       text-anchor="middle"
+       id="text236">UART/I2C/SPI...</text>
+  </g>
+  <!-- Legend -->
+  <rect
+     x="190.90736"
+     y="622.4007"
+     width="12"
+     height="8"
+     fill="#2d5a27"
+     stroke="#5dba54"
+     stroke-width="1"
+     id="rect242" />
+  <text
+     x="206.90736"
+     y="631.4007"
+     fill="#aaaaaa"
+     font-size="9px"
+     id="text244"
+     style="fill:#000000;fill-opacity:1">On-board components</text>
+  <rect
+     x="334.12622"
+     y="625.06281"
+     width="12"
+     height="8"
+     fill="#5a3a27"
+     stroke="#e0844a"
+     stroke-width="1"
+     id="rect246" />
+  <text
+     x="350.12622"
+     y="634.06281"
+     fill="#aaaaaa"
+     font-size="9px"
+     id="text248"
+     style="fill:#000000;fill-opacity:1">Connectivity / I/O</text>
+  <rect
+     x="490.98392"
+     y="624.77277"
+     width="12"
+     height="8"
+     fill="#3a3a5a"
+     stroke="#9090cc"
+     stroke-width="1"
+     id="rect250" />
+  <text
+     x="506.98395"
+     y="633.77277"
+     fill="#aaaaaa"
+     font-size="9px"
+     id="text252"
+     style="fill:#000000;fill-opacity:1">Debug / Expansion</text>
+</svg>
