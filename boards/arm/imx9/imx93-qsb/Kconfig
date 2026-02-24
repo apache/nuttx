@@ -1,0 +1,22 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+choice IMX93_CODE_LOCATION
+	prompt "Code location"
+
+config IMX93_RUN_FROM_ITCM
+	bool "Run from Tightly Coupled Memory (128kB) (ITCM)"
+	depends on BOOT_RUNFROMISRAM
+
+config IMX93_RUN_FROM_DDR
+	bool "Run from SDRAM (DDR)"
+	depends on BOOT_RUNFROMSDRAM
+
+endchoice
+
+config IMX93_START_NSH_ON_RPMSG
+	bool "Start NSH session on /dev/tty-nsh"
+	default y
+	depends on RPMSG_UART_RAW && NSH_LIBRARY
