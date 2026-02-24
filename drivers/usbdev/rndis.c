@@ -2753,6 +2753,22 @@ static void usbclass_resetconfig(FAR struct rndis_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: rndis_carrier_on_work
+ *
+ * Description:
+ *   Schedule to work queue because netdev_carrier_on API can't be used in
+ *   interrupt context
+ *
+ ****************************************************************************/
+
+static void rndis_carrier_on_work(FAR void *arg)
+{
+  FAR struct rndis_dev_s *priv = arg;
+
+  netdev_carrier_on(&priv->netdev);
+}
+
+/****************************************************************************
  * Name: usbclass_setconfig
  *
  * Description:
@@ -2860,10 +2876,16 @@ static int usbclass_setconfig(FAR struct rndis_dev_s *priv, uint8_t config)
   /* We are successfully configured */
 
   priv->config = config;
-  if (priv->netdev.d_ifup(&priv->netdev) == OK)
-    {
-      priv->netdev.d_flags |= IFF_UP;
-    }
+
+  priv->netdev.d_flags |= IFF_UP;
+
+  /* Schedule to work queue because netdev_carrier_on API can't be used in
+   * interrupt context. Since the current network card is not yet RUNNING,
+   * it will not be selected to trigger rndis_txavail, so pollwork can be
+   * reused.
+   */
+
+  work_queue(LPWORK, &priv->pollwork, rndis_carrier_on_work, priv, 0);
 
   return OK;
 
