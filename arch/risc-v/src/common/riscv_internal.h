@@ -315,6 +315,10 @@ void riscv_pminitialize(void);
 void weak_function riscv_dma_initialize(void);
 #endif
 
+/* SoC-specific CPU initialization ******************************************/
+
+void weak_function riscv_soc_initialize(void);
+
 /* Low level serial output **************************************************/
 
 void riscv_lowputc(char ch);

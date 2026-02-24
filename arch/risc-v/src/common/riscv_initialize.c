@@ -98,5 +98,12 @@ void up_initialize(void)
 
   riscv_netinitialize();
 
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
+  if (riscv_soc_initialize)
+#endif
+    {
+      riscv_soc_initialize();
+    }
+
   board_autoled_on(LED_IRQSENABLED);
 }
