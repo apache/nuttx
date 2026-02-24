@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include "imx9_rsctable.h"
+#include "hardware/imx9_rsctable.h"
 #include <string.h>
 #include <nuttx/rptun/rptun.h>
 
@@ -37,8 +38,6 @@
 #define RL_BUFFER_COUNT         0x100
 #define VRING_ALIGN             0x1000
 #define VRING_SIZE              0x8000
-#define VDEV0_VRING_BASE        0x88000000
-#define RESOURCE_TABLE_BASE     0x88220000
 
 #define NO_RESOURCE_ENTRIES     (1)
 #define RSC_VDEV_FEATURE        (1 << VIRTIO_RPMSG_F_NS | \
