@@ -60,6 +60,7 @@ usage() {
   echo "-m Check commit message (coupled with -g)"
   echo "-b Enforce breaking change format when checking commit message (requires -m -g; use when PR has breaking change label)"
   echo "-g <commit list>"
+  echo "  Use --stdin as the only argument with -m -g to read commit message from stdin (message-only check, no patch/diff)."
   echo "-f <file list>"
   echo "-x format supported files (only .py, requires: pip install black)"
   echo "-  read standard input mainly used by git pre-commit hook as below:"
@@ -286,6 +287,7 @@ check_patch() {
 check_msg() {
   signedoffby_found=0
   num_lines=0
+  # Commit subject line length limit (50/72 are common; NuttX uses 80)
   max_line_len=80
   min_num_lines=5
   breaking_change_found=0
@@ -420,6 +422,9 @@ while [ ! -z "$1" ]; do
   -h )
     usage 0
     ;;
+  --stdin )
+    break
+    ;;
   -p )
     check=check_patch
     ;;
@@ -437,7 +442,12 @@ while [ ! -z "$1" ]; do
 done
 
 for arg in $@; do
-  $check $arg
+  if [ "$arg" = "--stdin" ] && [ "$check" = "check_commit" ]; then
+    msg=$(cat)
+    check_msg <<< "$msg"
+  else
+    $check $arg
+  fi
 done
 
 if [ $fail == 1 ]; then
