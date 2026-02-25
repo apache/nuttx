@@ -97,7 +97,7 @@ int nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp)
       return -EINVAL;
     }
 
-  if (clock_id == CLOCK_MONOTONIC || clock_id == CLOCK_BOOTTIME)
+  if (clock_id == CLOCK_MONOTONIC)
     {
       /* The the time elapsed since the timer was initialized at power on
        * reset, excluding the time that the system is suspended.
