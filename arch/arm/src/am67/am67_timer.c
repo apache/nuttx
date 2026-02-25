@@ -397,7 +397,7 @@ int timer_tick_isr(int irq, void *context, void *arg)
   am67_timer_clear_overflow_int(AM67_DMTIMER1_1MS_TIMER0_VADDR);
 
   nxsched_process_timer();
-  return 0;
+  return OK;
 }
 
 /****************************************************************************
@@ -435,7 +435,16 @@ int timer_tick_isr(int irq, void *context, void *arg)
 
 int up_timer_gettime(struct timespec *ts)
 {
-  return am67_timer_get_count(AM67_DMTIMER1_1MS_TIMER0_VADDR);
+  uint64_t internal_timer;
+
+  DEBUGASSERT(ts != NULL);
+
+  internal_timer = am67_timer_get_count(AM67_DMTIMER1_1MS_TIMER0_VADDR);
+
+  ts->tv_nsec = (uint32_t)(internal_timer * 1000000);
+  ts->tv_sec = (uint32_t)(internal_timer / 1000);
+
+  return OK;
 }
 
 /****************************************************************************
@@ -448,8 +457,9 @@ int up_timer_gettime(struct timespec *ts)
 
 int up_timer_start(struct timespec const *ts)
 {
+  DEBUGASSERT(ts != NULL);
   am67_timer_start(AM67_DMTIMER1_1MS_TIMER0_VADDR);
-  return 0;
+  return OK;
 }
 
 /****************************************************************************
@@ -462,8 +472,9 @@ int up_timer_start(struct timespec const *ts)
 
 int up_timer_cancel(struct timespec *ts)
 {
+  DEBUGASSERT(ts != NULL);
   am67_timer_stop(AM67_DMTIMER1_1MS_TIMER0_VADDR);
-  return 0;
+  return OK;
 }
 
 /****************************************************************************
