@@ -162,6 +162,10 @@ FAR struct netlink_conn_s *netlink_alloc(void)
   conn = NET_BUFPOOL_TRYALLOC(g_netlink_connections);
   if (conn != NULL)
     {
+      /* Use conn_init to initialize the connection structure */
+
+      conn_init(&conn->sconn);
+
       /* Enqueue the connection into the active list */
 
       dq_addlast(&conn->sconn.s_node, &g_active_netlink_connections);
