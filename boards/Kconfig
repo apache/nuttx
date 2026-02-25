@@ -2816,6 +2816,13 @@ config ARCH_BOARD_A2G_TC375_LITE
 		Infineon AURIX Lite Kit evaluation board (KIT_A2G_TC375_LITE)
 		with the TC375 SoC.
 
+config ARCH_BOARD_A2G_TC397XA_3V3_TFT
+	bool "Infineon AURIX Application Kit (TC397XA 3V3 TFT)"
+	depends on TC3X_CHIP_TC397
+	---help---
+		Infineon AURIX TC397 Application Kit (KIT_A2G_TC397XA_3V3_TFT)
+		with the TC397XA SoC.
+
 config ARCH_BOARD_QEMU_ARMV7A
 	bool "Qemu ARMv7a CPUs board"
 	depends on ARCH_CHIP_QEMU_ARM
@@ -4375,6 +4382,7 @@ config ARCH_BOARD
 	default "eic7700-evb"                  if ARCH_BOARD_EIC7700X_EVB
 	default "sabre-6quad"                  if ARCH_BOARD_SABRE_6QUAD
 	default "a2g-tc375-lite"               if ARCH_BOARD_A2G_TC375_LITE
+	default "a2g-tc397xa-3v3-tft"          if ARCH_BOARD_A2G_TC397XA_3V3_TFT
 	default "qemu-armv7a"                  if ARCH_BOARD_QEMU_ARMV7A
 	default "rtl8730e_evb"                     if ARCH_BOARD_RTL8730E_EVB
 	default "qemu-armv7r"                  if ARCH_BOARD_QEMU_ARMV7R
@@ -4617,6 +4625,9 @@ source "boards/arm/imx6/sabre-6quad/Kconfig"
 endif
 if ARCH_BOARD_A2G_TC375_LITE
 source "boards/tricore/tc3x/a2g-tc375-lite/Kconfig"
+endif
+if ARCH_BOARD_A2G_TC397XA_3V3_TFT
+source "boards/tricore/tc3x/a2g-tc397xa-3v3-tft/Kconfig"
 endif
 if ARCH_BOARD_MPS2_AN500
 source "boards/arm/mps/mps2-an500/Kconfig"
