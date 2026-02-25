@@ -51,6 +51,7 @@ functions.  So we have::
   sched     - sched.h
   search    - search.h
   semaphore - semaphore.h
+  stdbit    - stdbit.h (optional C23)
   stdio     - stdio.h
   stdlib    - stdlib.h
   string    - string.h (and legacy strings.h and non-standard nuttx/b2c.h)
@@ -155,5 +156,6 @@ Implementation Details
    :caption: Contents:
    
    search.rst
+   stdbit.rst
    stream.rst
    zoneinfo.rst
