@@ -625,6 +625,31 @@ config ARCH_STDARG_H
 		ARCH_STDARG_H=y and providing. If ARCH_STDARG_H, is not defined, then
 		the stdarg.h header file will stay out-of-the-way in include/nuttx/.
 
+config ARCH_HAVE_STDBIT_H
+	bool
+	default n
+	---help---
+		Selected by architecture specific logic if the architecture
+		provides a stdbit.h header file.
+
+config ARCH_STDBIT_H
+	bool "stdbit.h"
+	depends on ARCH_HAVE_STDBIT_H
+	default n
+	---help---
+		Redirecting stdbit.h lives at include/nuttx/lib/stdbit.h. When
+		this is set, the build copies it to include/stdbit.h and it
+		includes arch/stdbit.h if the architecture provides one.
+
+config LIBC_STDBIT_GENERIC
+	bool "stdbit.h (generic C23)"
+	default n
+	---help---
+		Use generic C23 stdbit implementation. When set, copy
+		include/nuttx/lib/stdbit.h to include/stdbit.h. No arch
+		header is used; builtins (e.g. __builtin_clz) must be
+		available (see CONFIG_HAVE_BUILTIN_* in compiler.h).
+
 config ARCH_HAVE_SETJMP
 	bool
 	default n
