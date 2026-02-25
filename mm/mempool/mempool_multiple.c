@@ -463,6 +463,7 @@ mempool_multiple_init(FAR const char *name,
       pools[i].alloc = mempool_multiple_alloc_callback;
       pools[i].free = mempool_multiple_free_callback;
       pools[i].check = mempool_multiple_check;
+      pools[i].wait = false;
 
       ret = mempool_init(pools + i, name);
       if (ret < 0)
