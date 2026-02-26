@@ -817,10 +817,27 @@ int cc1101_checkpart(struct cc1101_dev_s *dev)
 
   wlinfo("CC1101 cc1101_checkpart 0x%X 0x%X\n", partnum, version);
 
+#ifndef CONFIG_WL_CC1101_IGNORE_VERSION
+  /* Strict official silicon validation */
+
   if (partnum == CC1101_PARTNUM_VALUE && version == CC1101_VERSION_VALUE)
     {
       return OK;
     }
+#else
+  /* Bypass for third-party clone silicon (e.g., VERSION == 0x00) */
+
+  if (partnum == CC1101_PARTNUM_VALUE)
+    {
+      if (version != CC1101_VERSION_VALUE)
+        {
+          wlwarn("WARNING: Unofficial CC1101 version 0x%02x detected.\\n",
+            version);
+        }
+
+      return OK;
+    }
+#endif
 
   return -ENOTSUP;
 }

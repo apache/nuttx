@@ -28,6 +28,19 @@ config CC1101_SPIDEV
 
 endif
 
+config WL_CC1101_IGNORE_VERSION
+	bool "Ignore CC1101 Version Check (Allow Clone Chips)"
+	default n
+	depends on WL_CC1101
+	---help---
+		Some third-party CC1101 clone silicon hardcodes the VERSION
+		register to 0x00. Enabling this option bypasses the strict
+		version verification, allowing these compatible chips to
+		initialize.
+
+		Warning: Enabling this may cause false-positives if the SPI
+		MISO line is shorted to GND.
+
 config WL_GS2200M
 	bool "Telit GS2200M Wi-Fi support"
 	default n
