@@ -114,6 +114,14 @@ if UART_PL011
 source "drivers/serial/Kconfig-pl011"
 endif
 
+menuconfig UART_XLNXPS
+	bool "Xilinx UART Peripheral System (XUARTPS) Chip support"
+	default n
+
+if UART_XLNXPS
+source "drivers/serial/Kconfig-xlnxps"
+endif # UART_XLNXPS
+
 menuconfig CMSDK_UART
 	bool "CMSDK UART Chip support"
 	select ARCH_HAVE_SERIAL_TERMIOS

@@ -1,0 +1,128 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if UART_XLNXPS
+
+config XLNXPS_SERIAL_DISABLE_REORDERING
+	bool "Disable reordering of ttySx devices."
+	default n
+	---help---
+		NuttX per default reorders the serial ports (/dev/ttySx) so that the
+		console is always on /dev/ttyS0. If more than one UART is in use this
+		can, however, have the side-effect that all port mappings
+		(hardware USART1 -> /dev/ttyS0) change if the console is moved to another
+		UART.  This option disables that re-ordering for XLNXPS UARTs.
+
+config UART_XLNXPS0
+	bool "XLNXPS UART0"
+	default n
+
+if UART_XLNXPS0
+
+config UART_XLNXPS0_BASE
+	hex "XLNXPS UART0 base address"
+	default 0x0
+
+config UART_XLNXPS0_CLOCK
+	int "XLNXPS UART0 clock"
+	default 0
+
+config UART_XLNXPS0_IRQ
+	int "XLNXPS UART0 IRQ number"
+	default 0
+
+config UART_XLNXPS0_BAUD
+	int "XLNXPS UART0 BAUD"
+	default 115200
+
+config UART_XLNXPS0_PARITY
+	int "XLNXPS UART0 parity"
+	default 0
+	range 0 2
+	---help---
+		XLNXPS UART0 parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config UART_XLNXPS0_BITS
+	int "XLNXPS UART0 number of bits"
+	default 8
+	---help---
+		XLNXPS UART0 number of bits.  Default: 8
+
+config UART_XLNXPS0_2STOP
+	int "XLNXPS UART0 two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+config UART_XLNXPS0_RX_TRIGGER
+  int "XLNXPS UART0 RX interrupt trigger level"
+	default 2
+	range 0 3
+
+config UART_XLNXPS0_RXBUFSIZE
+	int "XLNXPS UART0 Rx buffer size"
+	default 256
+	---help---
+		XLNXPS UART0 Rx buffer size.  Default: 256
+
+config UART_XLNXPS0_TXBUFSIZE
+	int "XLNXPS UART0 Tx buffer size"
+	default 256
+	---help---
+		XLNXPS UART0 Tx buffer size.  Default: 256
+
+config UART_XLNXPS0_IFLOWCONTROL
+	bool "XLNXPS UART0 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable XLNXPS UART0 RTS flow control
+
+config UART_XLNXPS0_OFLOWCONTROL
+	bool "XLNXPS UART0 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable XLNXPS UART0 CTS flow control
+
+endif # UART_XLNXPS0
+
+choice
+	prompt "XLNXPS Serial Console"
+	default XLNXPS_NO_SERIAL_CONSOLE
+	depends on DEV_CONSOLE
+
+config UART_XLNXPS0_SERIAL_CONSOLE
+	bool "XLNXPS UART0 serial console"
+	depends on UART_XLNXPS0
+	select SERIAL_CONSOLE
+
+config XLNXPS_NO_SERIAL_CONSOLE
+	bool "No XLNXPS serial console"
+
+endchoice # XLNXPS Serial Console
+
+config XLNXPS_SUPRESS_CONFIG
+	bool "Suppress XLNXPS configuration"
+	default n
+
+config XLNXPS_SUPRESS_INITIAL_CONFIG
+	bool "Suppress initial XLNXPS configuration"
+	depends on !XLNXPS_SUPRESS_CONFIG
+	default n
+	---help---
+		This option is useful, for example, if you are using a bootloader
+		that configures the UART_XLNXPS.  In that case, you may want to
+		just leave the existing console configuration in place.  Default: n
+
+config SERIAL_UART_ARCH_MMIO
+	bool "Platform access register through the memory mapping"
+	default n
+
+config SERIAL_UART_ARCH_IOCTL
+	bool "Platform has own custom IOCTL"
+	default n
+
+endif # UART_XLNXPS
