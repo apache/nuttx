@@ -74,20 +74,42 @@ static void nxsched_timeout(wdparm_t arg)
 
 void nxsched_ticksleep(unsigned int ticks)
 {
-  FAR struct tcb_s *rtcb;
-  irqstate_t flags;
-
   if (ticks == 0)
     {
       sched_yield();
       return;
     }
 
+  nxsched_abstick_sleep(clock_delay2abstick(ticks));
+}
+
+/****************************************************************************
+ * Name: nxsched_abstick_sleep
+ *
+ * Description:
+ *   The nxsched_abstick_sleep() function will cause the calling thread to be
+ *   suspended from execution to the specified ticks.
+ *
+ *   It can only be resumed through scheduler operations.
+ *
+ * Input Parameters:
+ *   ticks - Absolute time in clock ticks.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxsched_abstick_sleep(clock_t ticks)
+{
+  FAR struct tcb_s *rtcb;
+  irqstate_t flags;
+
   flags = enter_critical_section();
 
   rtcb = this_task();
 
-  wd_start(&rtcb->waitdog, ticks, nxsched_timeout, (uintptr_t)rtcb);
+  wd_start_abstick(&rtcb->waitdog, ticks, nxsched_timeout, (uintptr_t)rtcb);
 
   /* Remove the tcb task from the ready-to-run list. */
 

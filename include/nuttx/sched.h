@@ -1677,6 +1677,25 @@ int nxsched_smp_call_async(cpu_set_t cpuset,
 #endif
 
 /****************************************************************************
+ * Name: nxsched_abstick_sleep
+ *
+ * Description:
+ *   The nxsched_abstick_sleep() function will cause the calling thread to be
+ *   suspended from execution to the specified ticks.
+ *
+ *   It can only be resumed through scheduler operations.
+ *
+ * Input Parameters:
+ *   ticks - Absolute time in clock ticks.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxsched_abstick_sleep(clock_t ticks);
+
+/****************************************************************************
  * Name: nxsched_ticksleep
  *
  * Description:
