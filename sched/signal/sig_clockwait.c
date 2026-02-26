@@ -109,17 +109,23 @@ void nxsig_wait_irq(FAR struct tcb_s *wtcb, uint8_t signo,
 {
   FAR struct tcb_s *rtcb = this_task();
 
+#ifdef CONFIG_DISABLE_ALL_SIGNALS
+  UNUSED(signo);
+  UNUSED(code);
+  UNUSED(errcode);
+#else
   if (wtcb->sigunbinfo != NULL)
     {
       wtcb->sigunbinfo->si_signo           = signo;
       wtcb->sigunbinfo->si_code            = code;
       wtcb->sigunbinfo->si_errno           = errcode;
       wtcb->sigunbinfo->si_value.sival_int = 0;
-#ifdef CONFIG_SCHED_HAVE_PARENT
+#  ifdef CONFIG_SCHED_HAVE_PARENT
       wtcb->sigunbinfo->si_pid             = 0;  /* Not applicable */
       wtcb->sigunbinfo->si_status          = OK;
-#endif
+#  endif
     }
+#endif
 
   /* Remove the task from waiting list */
 
