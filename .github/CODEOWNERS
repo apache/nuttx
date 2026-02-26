@@ -849,6 +849,7 @@ arch/arm/include/imx1/irq.h alin.jerpelea@sony.com 59230071+hartmannathan@users.
 arch/arm/include/imx6/chip.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com
 arch/arm/include/imx6/irq.h alin.jerpelea@sony.com acassis@gmail.com 59230071+hartmannathan@users.noreply.github.com xiaoxiang@xiaomi.com
 arch/arm/include/imx9/chip.h andre.heinemans@nxp.com
+arch/arm/include/imx9/imx93_irq.h maarten@zanders.be
 arch/arm/include/imx9/imx95_irq.h andre.heinemans@nxp.com
 arch/arm/include/imx9/irq.h andre.heinemans@nxp.com
 arch/arm/include/imxrt/chip.h ivanucherdjiev@gmail.com alin.jerpelea@sony.com dave@marples.net david_s5@nscdg.com
@@ -1940,8 +1941,9 @@ arch/arm/src/imx6/imx_pgalloc.c masayuki.ishikawa@gmail.com xiaoxiang@xiaomi.com
 arch/arm/src/imx6/imx_serial.c masayuki.ishikawa@gmail.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com mark@mjs.pw
 arch/arm/src/imx6/imx_serial.h alin.jerpelea@sony.com devel@sumpfralle.de
 arch/arm/src/imx6/imx_timerisr.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com masayuki.ishikawa@gmail.com anchao@xiaomi.com
-arch/arm/src/imx9/Kconfig andre.heinemans@nxp.com peter.vanderperk@nxp.com devel@sumpfralle.de
+arch/arm/src/imx9/Kconfig andre.heinemans@nxp.com peter.vanderperk@nxp.com devel@sumpfralle.de maarten@zanders.be
 arch/arm/src/imx9/chip.h andre.heinemans@nxp.com
+arch/arm/src/imx9/hardware/imx93/* maarten@zanders.be
 arch/arm/src/imx9/hardware/imx95/imx95_clock.h andre.heinemans@nxp.com
 arch/arm/src/imx9/hardware/imx95/imx95_dmamux.h andre.heinemans@nxp.com
 arch/arm/src/imx9/hardware/imx95/imx95_edma.h andre.heinemans@nxp.com peter.vanderperk@nxp.com
@@ -1949,6 +1951,7 @@ arch/arm/src/imx9/hardware/imx95/imx95_gpio.h andre.heinemans@nxp.com
 arch/arm/src/imx9/hardware/imx95/imx95_iomuxc.h andre.heinemans@nxp.com
 arch/arm/src/imx9/hardware/imx95/imx95_memorymap.h andre.heinemans@nxp.com
 arch/arm/src/imx9/hardware/imx95/imx95_pinmux.h andre.heinemans@nxp.com
+arch/arm/src/imx9/hardware/imx9_ccm.h maarten@zanders.be
 arch/arm/src/imx9/hardware/imx9_clock.h andre.heinemans@nxp.com
 arch/arm/src/imx9/hardware/imx9_dmamux.h andre.heinemans@nxp.com
 arch/arm/src/imx9/hardware/imx9_edma.h andre.heinemans@nxp.com
@@ -1964,10 +1967,15 @@ arch/arm/src/imx9/hardware/imx9_lpuart.h andre.heinemans@nxp.com
 arch/arm/src/imx9/hardware/imx9_memorymap.h andre.heinemans@nxp.com
 arch/arm/src/imx9/hardware/imx9_mu.h andre.heinemans@nxp.com
 arch/arm/src/imx9/hardware/imx9_pinmux.h andre.heinemans@nxp.com
+arch/arm/src/imx9/hardware/imx9_rptun.h maarten@zanders.be
+arch/arm/src/imx9/hardware/imx9_rsctable.h maarten@zanders.be
 arch/arm/src/imx9/hardware/imx9_tpm.h andre.heinemans@nxp.com
 arch/arm/src/imx9/hardware/imx9_tstmr.h andre.heinemans@nxp.com
+arch/arm/src/imx9/hardware/imx9_xcache.h maarten@zanders.be
 arch/arm/src/imx9/imx9_allocateheap.c andre.heinemans@nxp.com
-arch/arm/src/imx9/imx9_clockconfig.c andre.heinemans@nxp.com lipengfei28@xiaomi.com devel@sumpfralle.de
+arch/arm/src/imx9/imx9_ccm.c maarten@zanders.be
+arch/arm/src/imx9/imx9_ccm.h maarten@zanders.be
+arch/arm/src/imx9/imx9_clockconfig.c andre.heinemans@nxp.com lipengfei28@xiaomi.com devel@sumpfralle.de maarten@zanders.be
 arch/arm/src/imx9/imx9_clockconfig.h andre.heinemans@nxp.com
 arch/arm/src/imx9/imx9_edma.c andre.heinemans@nxp.com hujun5@xiaomi.com peter.vanderperk@nxp.com xiaoxiang@xiaomi.com wangzhi16@xiaomi.com
 arch/arm/src/imx9/imx9_edma.h andre.heinemans@nxp.com devel@sumpfralle.de
@@ -1990,12 +1998,12 @@ arch/arm/src/imx9/imx9_lpspi.h andre.heinemans@nxp.com devel@sumpfralle.de
 arch/arm/src/imx9/imx9_lpuart.c andre.heinemans@nxp.com hujun5@xiaomi.com devel@sumpfralle.de
 arch/arm/src/imx9/imx9_mpuinit.c andre.heinemans@nxp.com lipengfei28@xiaomi.com
 arch/arm/src/imx9/imx9_mpuinit.h andre.heinemans@nxp.com
-arch/arm/src/imx9/imx9_mu.c andre.heinemans@nxp.com
-arch/arm/src/imx9/imx9_mu.h andre.heinemans@nxp.com
-arch/arm/src/imx9/imx9_rptun.c andre.heinemans@nxp.com
-arch/arm/src/imx9/imx9_rptun.h andre.heinemans@nxp.com
-arch/arm/src/imx9/imx9_rsctable.c andre.heinemans@nxp.com
-arch/arm/src/imx9/imx9_rsctable.h andre.heinemans@nxp.com
+arch/arm/src/imx9/imx9_mu.c andre.heinemans@nxp.com maarten@zanders.be
+arch/arm/src/imx9/imx9_mu.h andre.heinemans@nxp.com maarten@zanders.be
+arch/arm/src/imx9/imx9_rptun.c andre.heinemans@nxp.com maarten@zanders.be
+arch/arm/src/imx9/imx9_rptun.h andre.heinemans@nxp.com maarten@zanders.be
+arch/arm/src/imx9/imx9_rsctable.c andre.heinemans@nxp.com maarten@zanders.be
+arch/arm/src/imx9/imx9_rsctable.h andre.heinemans@nxp.com maarten@zanders.be
 arch/arm/src/imx9/imx9_scmi.c andre.heinemans@nxp.com
 arch/arm/src/imx9/imx9_scmi.h andre.heinemans@nxp.com
 arch/arm/src/imx9/imx9_serial.h andre.heinemans@nxp.com
@@ -2004,6 +2012,7 @@ arch/arm/src/imx9/imx9_start.h andre.heinemans@nxp.com
 arch/arm/src/imx9/imx9_timerisr.c andre.heinemans@nxp.com
 arch/arm/src/imx9/imx9_userspace.c andre.heinemans@nxp.com
 arch/arm/src/imx9/imx9_userspace.h andre.heinemans@nxp.com
+arch/arm/src/imx9/imx9_xcache.c maarten@zanders.be
 arch/arm/src/imxrt/Kconfig michallenc@seznam.cz nicholasc@arcx.com ivanucherdjiev@gmail.com peter.vanderperk@nxp.com
 arch/arm/src/imxrt/chip.h ivanucherdjiev@gmail.com alin.jerpelea@sony.com
 arch/arm/src/imxrt/hardware/imxrt_adc.h peter.vanderperk@nxp.com thomas.axelsson@actia.se alin.jerpelea@sony.com
@@ -6977,7 +6986,9 @@ boards/arm/eoss3/quickfeather/src/quickfeather.h bashton@brennanashton.com alin.
 boards/arm/fvp-v8r-aarch32/* alexander.merkle@lauterbach.com alin.jerpelea@sony.com
 boards/arm/gd32f4/gd32f450zk-* wangshuai26@xiaomi.com alin.jerpelea@sony.com jie.xu@gigadevice.com anchao@xiaomi.com
 boards/arm/imx6/sabre-6quad/* anchao@xiaomi.com anjiahao@xiaomi.com mazhuang@xiaomi.com xiaoxiang@xiaomi.com hujun5@xiaomi.com
-boards/arm/imx9/* andre.heinemans@nxp.com
+boards/arm/imx9/imx93-qsb/* maarten@zanders.be
+boards/arm/imx9/imx95-evk/* andre.heinemans@nxp.com
+boards/arm/imx9/mr-navq95b/* andre.heinemans@nxp.com
 boards/arm/imxrt/arcx-socket-grid/* acassis@gmail.com
 
 boards/arm/imxrt/imxrt1020-evk/Kconfig dave@marples.net petro.karashchenko@gmail.com
