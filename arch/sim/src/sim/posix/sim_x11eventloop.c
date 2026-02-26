@@ -128,6 +128,7 @@ void sim_x11events(void)
             break;
           #endif
 
+          #ifdef CONFIG_SIM_TOUCHSCREEN
           case MotionNotify : /* Enabled by ButtonMotionMask */
             {
               sim_buttonevent(event.xmotion.x, event.xmotion.y,
@@ -143,6 +144,7 @@ void sim_x11events(void)
                                           event.xbutton.button));
             }
             break;
+          #endif
 
           default:
             break;
