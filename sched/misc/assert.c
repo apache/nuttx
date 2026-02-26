@@ -576,7 +576,7 @@ static void dump_lockholder(pid_t tid)
   backtrace_format(buf, sizeof(buf), mutex->backtrace,
                    CONFIG_LIBC_MUTEX_BACKTRACE);
 
-  _alert("Mutex holder(%d) backtrace:%s\n", mutex->holder, buf);
+  _alert("Mutex holder(%d) backtrace:%s\n", nxmutex_get_holder(mutex), buf);
 }
 #else
 #  define dump_lockholder(tid)
