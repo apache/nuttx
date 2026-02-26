@@ -413,6 +413,8 @@ struct xlnxps_port_s
 
 static void xlnxps_rxint(struct uart_dev_s *dev, bool enable);
 static void xlnxps_txint(struct uart_dev_s *dev, bool enable);
+static bool xlnxps_txready(struct uart_dev_s *dev);
+static void xlnxps_wait_send(struct uart_dev_s *dev, int ch);
 
 /***************************************************************************
  * Private Functions
@@ -983,6 +985,26 @@ static void xlnxps_send(struct uart_dev_s *dev, int ch)
 }
 
 /***************************************************************************
+ * Name: xlnxps_sendbuf
+ *
+ * Description:
+ *   This method will send a buffer of bytes on the UART
+ *
+ ***************************************************************************/
+
+static ssize_t xlnxps_sendbuf(struct uart_dev_s *dev,
+                              const void *buffer, size_t size)
+{
+  for (size_t i = 0; i < size; i++)
+    {
+      while (!xlnxps_txready(dev));
+      xlnxps_send(dev, ((const unsigned char *)buffer)[i]);
+    }
+
+  return (ssize_t)size;
+}
+
+/***************************************************************************
  * Name: xlnxps_txint
  *
  * Description:
@@ -1003,33 +1025,41 @@ static void xlnxps_txint(struct uart_dev_s *dev, bool enable)
   struct xlnxps_config *config = &port->config;
   irqstate_t flags;
 
-  flags = enter_critical_section();
-
   /* Write to Interrupt Enable Register (UART_IER) */
 
   if (enable)
     {
+#ifdef CONFIG_UART_XLNXPS_POLLING
+      /* In polling mode, we loop until the buffer is empty */
+
+      uart_xmitchars(dev);
+#else
+      flags = enter_critical_section();
+
       /* Set XUARTPS_IXR_TXEMPTY bit (Enable Tx Fifo Empty Interrupt) */
 
       modreg32(XUARTPS_IXR_TXEMPTY, XUARTPS_IXR_TXEMPTY,
                config->uart + XUARTPS_IER_OFFSET);
 
       modreg32(0, XUARTPS_IXR_TXEMPTY, config->uart + XUARTPS_IDR_OFFSET);
+      leave_critical_section(flags);
 
       /* Fake a TX interrupt */
 
       uart_xmitchars(dev);
+#endif
     }
   else
     {
+      flags = enter_critical_section();
+
       /* Clear XUARTPS_IXR_TXEMPTY bit (Disable Tx Fifo Empty Interrupt) */
 
       modreg32(0, XUARTPS_IXR_TXEMPTY, config->uart + XUARTPS_IER_OFFSET);
       modreg32(XUARTPS_IXR_TXEMPTY, XUARTPS_IXR_TXEMPTY,
                config->uart + XUARTPS_IDR_OFFSET);
+      leave_critical_section(flags);
     }
-
-  leave_critical_section(flags);
 }
 
 /***************************************************************************
@@ -1124,6 +1154,7 @@ static const struct uart_ops_s g_uart_ops =
   .txint    = xlnxps_txint,
   .txready  = xlnxps_txready,
   .txempty  = xlnxps_txempty,
+  .sendbuf  = xlnxps_sendbuf,
 };
 
 #ifdef CONFIG_UART_XLNXPS0
