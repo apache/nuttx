@@ -5,6 +5,14 @@
 
 if UART_XLNXPS
 
+config UART_XLNXPS_POLLING
+	bool "Force polling mode for TX"
+	default n
+	---help---
+		Force using polling mode for transmission. This avoids using TX interrupts
+		and potentially reduces interrupt latency, at the cost of blocking execution
+		during transmission.
+
 config XLNXPS_SERIAL_DISABLE_REORDERING
 	bool "Disable reordering of ttySx devices."
 	default n
