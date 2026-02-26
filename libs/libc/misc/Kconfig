@@ -164,3 +164,11 @@ config LIBC_MUTEX_BACKTRACE
 	---help---
 		Config the depth of backtrace, dumping the backtrace of thread which
 		last acquired the mutex. Disable mutex backtrace by 0.
+
+config LIBC_MUTEX_BACKTRACE_SKIP
+	int "Number of initial addresses to skip in mutex backtrace"
+	depends on LIBC_MUTEX_BACKTRACE > 0
+	default 2
+	---help---
+		Configure how many initial addresses to skip when dumping mutex backtraces.
+		When generating a backtrace, the first skip addresses will be skipped.

@@ -53,8 +53,9 @@ void nxmutex_add_backtrace(FAR mutex_t *mutex)
 {
   int n;
 
-  n = sched_backtrace(nxmutex_get_holder(&mutex), mutex->backtrace,
-                      CONFIG_LIBC_MUTEX_BACKTRACE, 0);
+  n = sched_backtrace(nxmutex_get_holder(mutex), mutex->backtrace,
+                      CONFIG_LIBC_MUTEX_BACKTRACE,
+                      CONFIG_LIBC_MUTEX_BACKTRACE_SKIP);
   if (n < CONFIG_LIBC_MUTEX_BACKTRACE)
     {
       mutex->backtrace[n] = NULL;
