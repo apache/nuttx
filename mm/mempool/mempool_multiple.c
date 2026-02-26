@@ -463,8 +463,11 @@ mempool_multiple_init(FAR const char *name,
       pools[i].alloc = mempool_multiple_alloc_callback;
       pools[i].free = mempool_multiple_free_callback;
       pools[i].check = mempool_multiple_check;
+#ifdef CONFIG_MM_HEAP_MEMPOOL_WAIT_RELEASE
+      pools[i].wait = true;
+#else
       pools[i].wait = false;
-
+#endif
       ret = mempool_init(pools + i, name);
       if (ret < 0)
         {
