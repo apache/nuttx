@@ -149,7 +149,7 @@ static int elf_emit(FAR struct elf_dumpinfo_s *cinfo,
   while (total > 0)
     {
       ret = lib_stream_puts(cinfo->stream, ptr, total);
-      if (ret < 0)
+      if (ret <= 0)
         {
           break;
         }
