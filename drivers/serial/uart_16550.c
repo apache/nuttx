@@ -108,6 +108,8 @@ static void u16550_dmarxfree(FAR struct uart_dev_s *dev);
 static void u16550_dmarxconfig(FAR struct uart_dev_s *dev);
 #endif
 static void u16550_send(FAR struct uart_dev_s *dev, int ch);
+static ssize_t u16550_sendbuf(struct uart_dev_s *dev,
+                              const void *buffer, size_t size);
 static void u16550_txint(FAR struct uart_dev_s *dev, bool enable);
 static bool u16550_txready(FAR struct uart_dev_s *dev);
 static bool u16550_txempty(FAR struct uart_dev_s *dev);
@@ -154,6 +156,7 @@ static const struct uart_ops_s g_uart_ops =
   .txint          = u16550_txint,
   .txready        = u16550_txready,
   .txempty        = u16550_txempty,
+  .sendbuf        = u16550_sendbuf,
 };
 
 /* I/O buffers */
@@ -1569,6 +1572,26 @@ static void u16550_send(struct uart_dev_s *dev, int ch)
 }
 
 /****************************************************************************
+ * Name: u16550_sendbuf
+ *
+ * Description:
+ *   This method will send a buffer of bytes on the UART
+ *
+ ****************************************************************************/
+
+static ssize_t u16550_sendbuf(struct uart_dev_s *dev,
+                              const void *buffer, size_t size)
+{
+  for (size_t i = 0; i < size; i++)
+    {
+      while (!u16550_txready(dev));
+      u16550_send(dev, ((const unsigned char *)buffer)[i]);
+    }
+
+  return (ssize_t)size;
+}
+
+/****************************************************************************
  * Name: u16550_txint
  *
  * Description:
@@ -1588,9 +1611,14 @@ static void u16550_txint(struct uart_dev_s *dev, bool enable)
     }
 #endif
 
-  flags = enter_critical_section();
   if (enable)
     {
+#ifdef CONFIG_16550_POLLING
+      /* In polling mode, we loop until the buffer is empty */
+
+      uart_xmitchars(dev);
+#else
+      flags = enter_critical_section();
       priv->ier |= UART_IER_ETBEI;
       u16550_serialout(priv, UART_IER_OFFSET, priv->ier);
 
@@ -1599,14 +1627,16 @@ static void u16550_txint(struct uart_dev_s *dev, bool enable)
        */
 
       uart_xmitchars(dev);
+      leave_critical_section(flags);
+#endif
     }
   else
     {
+      flags = enter_critical_section();
       priv->ier &= ~UART_IER_ETBEI;
       u16550_serialout(priv, UART_IER_OFFSET, priv->ier);
+      leave_critical_section(flags);
     }
-
-  leave_critical_section(flags);
 }
 
 /****************************************************************************
