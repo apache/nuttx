@@ -58,6 +58,10 @@ ifeq ($(CONFIG_UART_HOSTFS),y)
   CSRCS += uart_hostfs.c
 endif
 
+ifeq ($(CONFIG_UART_XLNXPS),y)
+  CSRCS += uart_xlnx_ps.c
+endif
+
 # Pseudo-terminal support
 
 ifeq ($(CONFIG_PSEUDOTERM),y)
