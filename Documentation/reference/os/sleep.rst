@@ -2,7 +2,7 @@
 Sleep
 =====
 
-NuttX provides three different types of sleep interfaces. 
+NuttX provides three different types of sleep interfaces.
 
 Common Sleep Interfaces
 =======================
@@ -13,8 +13,14 @@ Scheduled Sleep Interfaces (tick-based)
 Suspend the calling thread for a specified amount of time until the time expires
 or the thread is explicitly woken up through scheduler operations.
 
+.. c:function:: void nxsched_abstick_sleep(clock_t ticks)
+
+    Suspends the calling thread from execution until the specified absolute time in clock ticks.
+
+    :param ticks: Absolute time in clock ticks.
+
 .. c:function:: void nxsched_ticksleep(unsigned int ticks)
-    
+
     Suspends the calling thread from execution for the specified number of system ticks.
 
     :param ticks: The number of system ticks to sleep.
@@ -46,7 +52,7 @@ or the thread is explicitly woken up through scheduler operations.
     :param rqtp: The amount of time to be suspended from execution.
     :param rmtp: If the rmtp argument is non-NULL, the timespec structure referenced
      by it is updated to contain the amount of time remaining.
-    
+
     :return: 0 (OK), or negated errno if unsuccessful.
 
 .. c:function:: void nxsched_wakeup(struct tcb_s *tcb)
@@ -60,14 +66,14 @@ Signal-based Sleep Interfaces (timespec-based)
 ----------------------------------------------
 
 Suspend the calling thread for a specified amount of time until the
-time expires or a signal is delivered to the calling thread. 
+time expires or a signal is delivered to the calling thread.
 
     .. note::
         Implementations are dependent on the signal framework and based on standard
         timespec conversion.
 
 .. c:function:: void nxsig_usleep(useconds_t usec)
-    
+
     Suspends the calling thread from execution for the specified number of microseconds.
 
     :param usec: The number of microseconds to sleep.
@@ -87,7 +93,7 @@ time expires or a signal is delivered to the calling thread.
     :param rqtp: The amount of time to be suspended from execution.
     :param rmtp: If the rmtp argument is non-NULL, the timespec structure referenced
      by it is updated to contain the amount of time remaining.
-    
+
     :return: 0 (OK), or negated errno if unsuccessful.
 
 Busy Sleep Interfaces
