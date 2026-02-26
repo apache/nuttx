@@ -268,7 +268,7 @@ static void sim_bthcisock_interrupt(wdparm_t arg)
 {
   struct bthcisock_s *dev = (struct bthcisock_s *)arg;
 
-  if (host_bthcisock_avail(dev->fd))
+  while (host_bthcisock_avail(dev->fd))
     {
       bthcisock_receive(&dev->drv);
     }
