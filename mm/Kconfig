@@ -194,6 +194,16 @@ config MM_HEAP_MEMPOOL_THRESHOLD
 
 if MM_HEAP_MEMPOOL_THRESHOLD > 0
 
+config MM_HEAP_MEMPOOL_WAIT_RELEASE
+    bool "If wait for other tasks to release memory"
+    default n
+    ---help---
+        If the macro is set to true, when the memory pool fails to allocate
+        available memory, the current task will block and wait for other tasks
+        to release memory. Once memory is released by other tasks, the blocked
+        task will be awakened and re-attempt to allocate memory from
+        the memory pool.
+
 config MM_HEAP_MEMPOOL_EXPAND_SIZE
 	int "The expand size for each mempool in multiple mempool"
 	default 4096
