@@ -166,6 +166,11 @@ static inline Display *sim_x11createframe(void)
   gcval.graphics_exposures = 0;
   g_gc = XCreateGC(display, g_window, GCGraphicsExposures, &gcval);
 
+  /* Map the window to make it visible on the display after it has been
+   * created and configured
+   */
+
+  XMapWindow(display, g_window);
   return display;
 }
 
