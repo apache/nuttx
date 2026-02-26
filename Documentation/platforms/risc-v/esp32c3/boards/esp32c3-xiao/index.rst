@@ -127,7 +127,7 @@ D1/GPIO3   Input    /dev/gpio1
     Output pin:    Value=1
     Writing:       Value=1
     Verify:        Value=1
-  nsh> 
+  nsh>
   nsh> gpio -o 0 /dev/gpio0
   Driver: /dev/gpio0
     Output pin:    Value=1
@@ -140,7 +140,7 @@ D1/GPIO3   Input    /dev/gpio1
 
 wifi
 ----
-This configuration enables a wlan network interface that can be configured and initialized 
+This configuration enables a wlan network interface that can be configured and initialized
 using below commands::
 
     nsh> ifup wlan0
@@ -159,28 +159,28 @@ the result by running ``ifconfig`` afterwards.
   NuttX  12.9.0 6b4bc72626-dirty Apr 26 2025 17:40:37 risc-v esp32c3-xiao
   nsh> ?
   help usage:  help [-v] [<cmd>]
-  
-      .           cp          expr        pkill       pwd         uname       
-      [           cmp         false       ls          rm          umount      
-      ?           dirname     fdinfo      mkdir       rmdir       unset       
-      alias       date        free        mkrd        set         uptime      
-      unalias     df          help        mount       sleep       usleep      
-      arp         dmesg       hexdump     mv          source      watch       
-      basename    echo        ifconfig    nslookup    test        xd          
-      break       env         ifdown      pidof       time        wait        
-      cat         exec        ifup        printf      true        
-      cd          exit        kill        ps          truncate    
-  
+
+      .           cp          expr        pkill       pwd         uname
+      [           cmp         false       ls          rm          umount
+      ?           dirname     fdinfo      mkdir       rmdir       unset
+      alias       date        free        mkrd        set         uptime
+      unalias     df          help        mount       sleep       usleep
+      arp         dmesg       hexdump     mv          source      watch
+      basename    echo        ifconfig    nslookup    test        xd
+      break       env         ifdown      pidof       time        wait
+      cat         exec        ifup        printf      true
+      cd          exit        kill        ps          truncate
+
   Builtin Apps:
-      dd           getprime     ostest       rand         sh           
-      dumpstack    nsh          ping         renew        wapi         
+      dd           getprime     ostest       rand         sh
+      dumpstack    nsh          ping         renew        wapi
   nsh> wapi psk wlan0 nuttxpwd 3
   nsh> wapi essid wlan0 nuttxnw 1
   nsh> renew wlan0
   nsh> ifconfig
   wlan0   Link encap:Ethernet HWaddr a0:85:e3:0e:4a:30 at RUNNING mtu 576
           inet addr:192.168.59.144 DRaddr:192.168.59.134 Mask:255.255.255.0
-  
+
   nsh> ping 8.8.8.8
   PING 8.8.8.8 56 bytes of data
   56 bytes from 8.8.8.8: icmp_seq=0 time=50.0 ms
@@ -199,7 +199,7 @@ the result by running ``ifconfig`` afterwards.
   Host: google.com Addr: 142.251.128.238
   nsh> nslookup nuttx.apache.org
   Host: nuttx.apache.org Addr: 151.101.2.132
-  nsh> 
+  nsh>
 
 ble
 ---
@@ -232,6 +232,19 @@ ESP32-C3 chip.
    5.     addr:            a0:46:5a:22:ea:c4 type: 0
           rssi:            -97
           response type:   0
-          advertiser data: 02 01 02 19 16 f1 fc 04 f9 6e e8 58 e6 33 58 26        
+          advertiser data: 02 01 02 19 16 f1 fc 04 f9 6e e8 58 e6 33 58 26
 
+nimble
+------
+
+This configuration can be used to test BLE using the NimBLE library. The
+:doc:`NimBLE example </applications/examples/nimble/index>` starts advertising
+and can be connected to or disconnected from. Before starting the NimBLE example
+make sure the ``bnep0`` interface is up.
+
+.. code:: console
+
+   nsh> ifup bnep0
+   ifup bnep0...OK
+   nsh> nimble &
 
