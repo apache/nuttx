@@ -33,6 +33,7 @@ if(NOT CONFIG_DISABLE_ALL_SIGNALS)
       sig_notification.c
       sig_dispatch.c
       sig_pause.c
+      sig_clockwait.c
       sig_nanosleep.c
       sig_usleep.c
       sig_sleep.c
