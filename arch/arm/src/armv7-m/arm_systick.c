@@ -255,8 +255,11 @@ static int systick_interrupt(int irq, void *context, void *arg)
   if (lower->callback && systick_is_running())
     {
       uint32_t reload = getreg32(NVIC_SYSTICK_RELOAD);
-      uint32_t interval = usec_from_count(
-        RELOAD2TIMEOUT(reload), lower->freq);
+
+      /* Convert count to us then to tick for callback parameter */
+
+      uint32_t interval = USEC2TICK(usec_from_count(
+        RELOAD2TIMEOUT(reload), lower->freq));
       uint32_t next_interval = interval;
 
       lower->next_interval = &next_interval;
@@ -264,8 +267,10 @@ static int systick_interrupt(int irq, void *context, void *arg)
         {
           if (next_interval && next_interval != interval)
             {
+              /* Recover tick to us then to count for register writing */
+
               reload = TIMEOUT2RELOAD(
-                usec_to_count(next_interval, lower->freq));
+                usec_to_count(TICK2USEC(next_interval), lower->freq));
               putreg32(CLAMP_RELOAD(reload), NVIC_SYSTICK_RELOAD);
               putreg32(0, NVIC_SYSTICK_CURRENT);
             }
