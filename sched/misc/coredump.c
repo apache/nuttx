@@ -429,6 +429,13 @@ static void elf_emit_tcb_stack(FAR struct elf_dumpinfo_s *cinfo,
   len = ALIGN_UP(len + (buf - sp), PROGRAM_ALIGNMENT);
   buf = sp;
 
+  /* Avoid out-of-bounds access */
+
+  if (buf + len > (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size)
+    {
+      len = (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size - buf;
+    }
+
   elf_emit(cinfo, (FAR void *)buf, len);
 
   /* Align to page */
