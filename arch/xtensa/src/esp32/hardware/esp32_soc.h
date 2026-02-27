@@ -30,12 +30,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "xtensa_attr.h"
-#include "hardware/esp32_efuse.h"
-
 #include <nuttx/bits.h>
 
 #include "soc/soc.h"
+#include "soc/efuse_reg.h"
+#include "soc/hwcrypto_reg.h"
+#include "esp_attr.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -247,59 +247,6 @@ extern int rom_i2c_writereg(int block, int block_id, int reg_add,
 
 #define RTC_CNTL_STORE4_REG         (DR_REG_RTCCNTL_BASE + 0xb0)
 #define RTC_XTAL_FREQ_REG           RTC_CNTL_STORE4_REG
-
-/* Approximate mapping of voltages to RTC_CNTL_DBIAS_WAK, RTC_CNTL_DBIAS_SLP,
- * RTC_CNTL_DIG_DBIAS_WAK, RTC_CNTL_DIG_DBIAS_SLP values.
- * Valid if RTC_CNTL_DBG_ATTEN is 0.
- */
-
-#define RTC_CNTL_DBIAS_1V00         2
-#define RTC_CNTL_DBIAS_1V10         4
-#define RTC_CNTL_DBIAS_1V25         7
-
-/* RTC_CNTL_DIG_DBIAS_WAK : R/W ;bitpos:[13:11] ;default: 3'd4 ; */
-
-#define RTC_CNTL_DIG_DBIAS_WAK      0x00000007
-#define RTC_CNTL_DIG_DBIAS_WAK_M    ((RTC_CNTL_DIG_DBIAS_WAK_V) << (RTC_CNTL_DIG_DBIAS_WAK_S))
-#define RTC_CNTL_DIG_DBIAS_WAK_V    0x7
-#define RTC_CNTL_DIG_DBIAS_WAK_S    11
-
-/* RTC_CNTL_SOC_CLK_SEL : R/W ;bitpos:[28:27] ;default: 2'd0 ;
- * description: SOC clock sel. 0: XTAL  1: PLL  2: CK8M  3: APLL
- */
-
-#define RTC_CNTL_SOC_CLK_SEL        0x00000003
-#define RTC_CNTL_SOC_CLK_SEL_M      ((RTC_CNTL_SOC_CLK_SEL_V) << (RTC_CNTL_SOC_CLK_SEL_S))
-#define RTC_CNTL_SOC_CLK_SEL_V      0x3
-#define RTC_CNTL_SOC_CLK_SEL_S      27
-#define RTC_CNTL_SOC_CLK_SEL_XTL    0
-#define RTC_CNTL_SOC_CLK_SEL_PLL    1
-#define RTC_CNTL_SOC_CLK_SEL_8M     2
-#define RTC_CNTL_SOC_CLK_SEL_APLL   3
-
-/* Core voltage needs to be increased in two cases:
- * 1. running at 240 MHz
- * 2. running with 80MHz Flash frequency
- * There is a record in efuse which indicates the
- * proper voltage for these two cases.
- */
-
-#define RTC_CNTL_DBIAS_HP_VOLT      (RTC_CNTL_DBIAS_1V25 - \
-                                    (REG_GET_FIELD(EFUSE_BLK0_RDATA5_REG, \
-                                     EFUSE_RD_VOL_LEVEL_HP_INV)))
-
-#ifdef CONFIG_ESP32_FLASH_FREQ_80M
-#define DIG_DBIAS_80M_160M          RTC_CNTL_DBIAS_HP_VOLT
-#else
-#define DIG_DBIAS_80M_160M          RTC_CNTL_DBIAS_1V10
-#endif
-#define DIG_DBIAS_240M              RTC_CNTL_DBIAS_HP_VOLT
-#define DIG_DBIAS_XTAL              RTC_CNTL_DBIAS_1V10
-#define DIG_DBIAS_2M                RTC_CNTL_DBIAS_1V00
-
-#define DIG_DBIAS_240M              RTC_CNTL_DBIAS_HP_VOLT
-#define DIG_DBIAS_XTAL              RTC_CNTL_DBIAS_1V10
-#define DIG_DBIAS_2M                RTC_CNTL_DBIAS_1V00
 
 #define DELAY_PLL_DBIAS_RAISE       3
 #define DELAY_PLL_ENABLE_WITH_150K  80

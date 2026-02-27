@@ -37,7 +37,7 @@
 #include "chip.h"
 #include "xtensa.h"
 #include "esp_attr.h"
-#include "esp32s3_irq.h"
+#include "esp_irq.h"
 #include "esp32s3_userspace.h"
 #include "hardware/esp32s3_apb_ctrl.h"
 #include "hardware/esp32s3_cache_memory.h"
@@ -1861,24 +1861,14 @@ void esp32s3_userspace(void)
 
 void esp32s3_pmsirqinitialize(void)
 {
-  VERIFY(esp32s3_setup_irq(0,
-                           ESP32S3_PERIPH_CORE_0_IRAM0_PMS_MONITOR_VIOLATE,
-                           1, ESP32S3_CPUINT_LEVEL));
-  VERIFY(esp32s3_setup_irq(0,
-                           ESP32S3_PERIPH_CORE_0_DRAM0_PMS_MONITOR_VIOLATE,
-                           1, ESP32S3_CPUINT_LEVEL));
-  VERIFY(esp32s3_setup_irq(0, ESP32S3_PERIPH_CACHE_CORE0_ACS, 1,
-                           ESP32S3_CPUINT_LEVEL));
-  VERIFY(esp32s3_setup_irq(0, ESP32S3_PERIPH_CORE_0_PIF_PMS_MONITOR_VIOLATE,
-                           1, ESP32S3_CPUINT_LEVEL));
-
-  VERIFY(irq_attach(ESP32S3_IRQ_CORE_0_IRAM0_PMS_MONITOR_VIOLATE,
-                    pms_violation_isr, NULL));
-  VERIFY(irq_attach(ESP32S3_IRQ_CORE_0_DRAM0_PMS_MONITOR_VIOLATE,
-                    pms_violation_isr, NULL));
-  VERIFY(irq_attach(ESP32S3_IRQ_CACHE_CORE0_ACS, pms_violation_isr, NULL));
-  VERIFY(irq_attach(ESP32S3_IRQ_CORE_0_PIF_PMS_MONITOR_VIOLATE,
-                    pms_violation_isr, NULL));
+  VERIFY(esp_setup_irq(ESP32S3_PERIPH_CORE_0_IRAM0_PMS_MONITOR_VIOLATE,
+                       1, ESP_IRQ_TRIGGER_LEVEL, pms_violation_isr, NULL));
+  VERIFY(esp_setup_irq(ESP32S3_PERIPH_CORE_0_DRAM0_PMS_MONITOR_VIOLATE,
+                       1, ESP_IRQ_TRIGGER_LEVEL, pms_violation_isr, NULL));
+  VERIFY(esp_setup_irq(ESP32S3_PERIPH_CACHE_CORE0_ACS,
+                       1, ESP_IRQ_TRIGGER_LEVEL, pms_violation_isr, NULL));
+  VERIFY(esp_setup_irq(ESP32S3_PERIPH_CORE_0_PIF_PMS_MONITOR_VIOLATE,
+                       1, ESP_IRQ_TRIGGER_LEVEL, pms_violation_isr, NULL));
 
   up_enable_irq(ESP32S3_IRQ_CORE_0_IRAM0_PMS_MONITOR_VIOLATE);
   up_enable_irq(ESP32S3_IRQ_CORE_0_DRAM0_PMS_MONITOR_VIOLATE);

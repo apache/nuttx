@@ -39,7 +39,7 @@
 
 #include <arch/board/board.h>
 
-#include "esp32_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "esp32_spi.h"
 
 #ifdef CONFIG_LCD_SSD1680
@@ -86,7 +86,7 @@ static struct ssd1680_priv_s g_ssd1680_priv =
 #ifdef DISPLAY_VCC
 static bool ssd1680_set_vcc(bool state)
 {
-  esp32_gpiowrite(DISPLAY_VCC, state);
+  esp_gpiowrite(DISPLAY_VCC, state);
   return true;
 }
 #endif
@@ -94,7 +94,7 @@ static bool ssd1680_set_vcc(bool state)
 #ifdef DISPLAY_RST
 static bool ssd1680_set_rst(bool state)
 {
-  esp32_gpiowrite(DISPLAY_RST, state);
+  esp_gpiowrite(DISPLAY_RST, state);
   return true;
 }
 #endif
@@ -102,7 +102,7 @@ static bool ssd1680_set_rst(bool state)
 #ifdef DISPLAY_BUSY
 static bool ssd1680_check_busy(void)
 {
-  return esp32_gpioread(DISPLAY_BUSY);
+  return esp_gpioread(DISPLAY_BUSY);
 }
 #endif
 
@@ -131,24 +131,24 @@ int board_lcd_initialize(void)
 
   /* Initialize additional I/O for e-ink display */
 
-  esp32_configgpio(DISPLAY_DC, OUTPUT);
+  esp_configgpio(DISPLAY_DC, OUTPUT);
 
 #ifdef DISPLAY_VCC
-  esp32_configgpio(DISPLAY_VCC, OUTPUT);
+  esp_configgpio(DISPLAY_VCC, OUTPUT);
   lcdinfo("Using pin %d as VCC control\n", DISPLAY_VCC);
 #else
   lcdinfo("VCC line is disabled\n");
 #endif
 
 #ifdef DISPLAY_RST
-  esp32_configgpio(DISPLAY_RST, OUTPUT);
+  esp_configgpio(DISPLAY_RST, OUTPUT);
   lcdinfo("Using pin %d as RESET\n", DISPLAY_RST);
 #else
   lcdinfo("RESET line is disabled\n");
 #endif
 
 #ifdef DISPLAY_BUSY
-  esp32_configgpio(DISPLAY_BUSY, INPUT | PULLUP);
+  esp_configgpio(DISPLAY_BUSY, INPUT | PULLUP);
   lcdinfo("Using pin %d for reading busy state\n",
           DISPLAY_BUSY);
 #else

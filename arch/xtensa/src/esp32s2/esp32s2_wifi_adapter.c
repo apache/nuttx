@@ -43,11 +43,15 @@
 
 #include "xtensa.h"
 #include "esp_attr.h"
+#include "esp_irq.h"
+#include "esp_cpu.h"
 #include "hardware/esp32s2_system.h"
-#include "hardware/esp32s2_rtccntl.h"
+#include "soc/rtc_cntl_reg.h"
+#include "rom/rtc.h"
 
 #include "espressif/esp_wireless.h"
 #include "espressif/esp_wifi_utils.h"
+#include "platform/os.h"
 
 #include "periph_ctrl.h"
 
@@ -64,23 +68,6 @@
  * Private Types
  ****************************************************************************/
 
-/* Wi-Fi interrupt adapter private data */
-
-struct irq_adpt
-{
-  void (*func)(void *arg);  /* Interrupt callback function */
-  void *arg;                /* Interrupt private data */
-};
-
-/* Wi-Fi message queue private data */
-
-struct mq_adpt
-{
-  struct file mq;           /* Message queue handle */
-  uint32_t    msgsize;      /* Message size */
-  char        name[16];     /* Message queue name */
-};
-
 /* Wi-Fi time private data */
 
 struct time_adpt
@@ -89,17 +76,34 @@ struct time_adpt
   suseconds_t usec;         /* Micro second value */
 };
 
+typedef struct shared_vector_desc_t shared_vector_desc_t;
+typedef struct vector_desc_t vector_desc_t;
+
+typedef struct intr_handle_data_t
+{
+  vector_desc_t *vector_desc;
+  shared_vector_desc_t *shared_vector_desc;
+} intr_handle_data_t;
+
+struct vector_desc_t
+{
+  int flags: 16;
+  unsigned int cpu: 1;
+  unsigned int intno: 5;
+  int source: 16;
+  shared_vector_desc_t *shared_vec_info;
+  vector_desc_t *next;
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
 static bool wifi_env_is_chip(void);
-static void wifi_set_intr(int32_t cpu_no, uint32_t intr_source,
+static void set_intr_wrapper(int32_t cpu_no, uint32_t intr_source,
                           uint32_t intr_num, int32_t intr_prio);
-static void wifi_clear_intr(uint32_t intr_source, uint32_t intr_num);
-static void esp_set_isr(int32_t n, void *f, void *arg);
-static void esp32s2_ints_on(uint32_t mask);
-static void esp32s2_ints_off(uint32_t mask);
+static void clear_intr_wrapper(uint32_t intr_source, uint32_t intr_num);
+static void set_isr_wrapper(int32_t n, void *f, void *arg);
 static bool wifi_is_from_isr(void);
 static void *esp_spin_lock_create(void);
 static void esp_spin_lock_delete(void *lock);
@@ -257,11 +261,11 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
 {
   ._version = ESP_WIFI_OS_ADAPTER_VERSION,
   ._env_is_chip = wifi_env_is_chip,
-  ._set_intr = wifi_set_intr,
-  ._clear_intr = wifi_clear_intr,
-  ._set_isr = esp_set_isr,
-  ._ints_on = esp32s2_ints_on,
-  ._ints_off = esp32s2_ints_off,
+  ._set_intr = set_intr_wrapper,
+  ._clear_intr = clear_intr_wrapper,
+  ._set_isr = set_isr_wrapper,
+  ._ints_on = esp_cpu_intr_enable,
+  ._ints_off = esp_cpu_intr_disable,
   ._is_from_isr = wifi_is_from_isr,
   ._spin_lock_create = esp_spin_lock_create,
   ._spin_lock_delete = esp_spin_lock_delete,
@@ -387,29 +391,6 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp_int_adpt_cb
- *
- * Description:
- *   Wi-Fi interrupt adapter callback function
- *
- * Input Parameters:
- *   arg - interrupt adapter private data
- *
- * Returned Value:
- *   0 on success
- *
- ****************************************************************************/
-
-static int esp_int_adpt_cb(int irq, void *context, void *arg)
-{
-  struct irq_adpt *adapter = (struct irq_adpt *)arg;
-
-  adapter->func(adapter->arg);
-
-  return 0;
-}
-
-/****************************************************************************
  * Name: esp_thread_semphr_free
  *
  * Description:
@@ -455,7 +436,7 @@ static void esp_update_time(struct timespec *timespec, uint32_t ticks)
 }
 
 /****************************************************************************
- * Name: esp_set_isr
+ * Name: set_isr_wrapper
  *
  * Description:
  *   Register interrupt function
@@ -470,98 +451,9 @@ static void esp_update_time(struct timespec *timespec, uint32_t ticks)
  *
  ****************************************************************************/
 
-static void esp_set_isr(int32_t n, void *f, void *arg)
+static void set_isr_wrapper(int32_t n, void *f, void *arg)
 {
-  int ret;
-  uint32_t tmp;
-  struct irq_adpt *adapter;
-  int irq = n + XTENSA_IRQ_FIRSTPERIPH;
-
-  wlinfo("n=%ld f=%p arg=%p", n, f, arg);
-
-  if (g_irqvector[irq].handler &&
-      g_irqvector[irq].handler != irq_unexpected_isr)
-    {
-      wlinfo("irq=%d has been set handler=%p\n", irq,
-             g_irqvector[irq].handler);
-      return;
-    }
-
-  tmp = sizeof(struct irq_adpt);
-  adapter = kmm_malloc(tmp);
-  if (!adapter)
-    {
-      wlerr("Failed to alloc %" PRIu32 " memory\n", tmp);
-      PANIC();
-      return;
-    }
-
-  adapter->func = f;
-  adapter->arg = arg;
-
-  ret = irq_attach(ESP32S2_IRQ_MAC, esp_int_adpt_cb, adapter);
-  if (ret)
-    {
-      wlerr("Failed to attach IRQ %d\n", irq);
-      PANIC();
-      return;
-    }
-
-  ret = irq_attach(ESP32S2_IRQ_PWR, esp_int_adpt_cb, adapter);
-  if (ret)
-    {
-      wlerr("Failed to attach IRQ %d\n", irq);
-      PANIC();
-      return;
-    }
-}
-
-/****************************************************************************
- * Name: esp32s2_ints_on
- *
- * Description:
- *   Enable Wi-Fi interrupt
- *
- * Input Parameters:
- *   mask - No mean
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void esp32s2_ints_on(uint32_t mask)
-{
-  int irq = __builtin_ffs(mask) - 1;
-
-  wlinfo("INFO mask=%08lx irq=%d\n", mask, irq);
-
-  up_enable_irq(ESP32S2_IRQ_MAC);
-  up_enable_irq(ESP32S2_IRQ_PWR);
-}
-
-/****************************************************************************
- * Name: esp32s2_ints_off
- *
- * Description:
- *   Disable Wi-Fi interrupt
- *
- * Input Parameters:
- *   mask - No mean
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void esp32s2_ints_off(uint32_t mask)
-{
-  uint32_t irq = __builtin_ffs(mask) - 1;
-
-  wlinfo("INFO mask=%08" PRIu32 " irq=%" PRIu32 "\n", mask, irq);
-
-  up_disable_irq(ESP32S2_IRQ_MAC);
-  up_disable_irq(ESP32S2_IRQ_PWR);
+  xt_set_interrupt_handler(n, (xt_handler)f, arg);
 }
 
 /****************************************************************************
@@ -1709,7 +1601,7 @@ static bool wifi_env_is_chip(void)
 }
 
 /****************************************************************************
- * Name: wifi_set_intr
+ * Name: set_intr_wrapper
  *
  * Description:
  *   Do nothing
@@ -1725,23 +1617,54 @@ static bool wifi_env_is_chip(void)
  *
  ****************************************************************************/
 
-static void wifi_set_intr(int32_t cpu_no, uint32_t intr_source,
+static void set_intr_wrapper(int32_t cpu_no, uint32_t intr_source,
                           uint32_t intr_num, int32_t intr_prio)
 {
+  intr_handle_t handle;
+  int irq = ESP_SOURCE2IRQ(intr_source);
+
   wlinfo("cpu_no=%" PRId32 ", intr_source=%" PRIu32
          ", intr_num=%" PRIu32 ", intr_prio=%" PRId32 "\n",
          cpu_no, intr_source, intr_num, intr_prio);
+
+  esp_rom_route_intr_matrix(cpu_no, intr_source, intr_num);
+
+  handle = kmm_calloc(1, sizeof(intr_handle_data_t));
+  if (handle == NULL)
+    {
+      wlerr("Failed to kmm_calloc\n");
+      return;
+    }
+
+  handle->vector_desc = kmm_calloc(1, sizeof(vector_desc_t));
+  if (handle->vector_desc == NULL)
+    {
+      wlerr("Failed to kmm_calloc\n");
+      kmm_free(handle);
+      return;
+    }
+
+  handle->vector_desc->intno = intr_num;
+  handle->vector_desc->cpu = cpu_no;
+  handle->vector_desc->source = intr_source;
+  handle->vector_desc->shared_vec_info = NULL;
+  handle->vector_desc->next = NULL;
+  handle->shared_vector_desc = NULL;
+
+  /* Register the handle - it contains all needed information (cpuint, cpu) */
+
+  esp_set_handle(cpu_no, irq, handle);
 }
 
 /****************************************************************************
- * Name: wifi_clear_intr
+ * Name: clear_intr_wrapper
  *
  * Description:
  *   Don't support
  *
  ****************************************************************************/
 
-static void IRAM_ATTR wifi_clear_intr(uint32_t intr_source,
+static void IRAM_ATTR clear_intr_wrapper(uint32_t intr_source,
                                       uint32_t intr_num)
 {
 }
@@ -2146,7 +2069,7 @@ static void wifi_clock_disable(void)
 
 int64_t esp32s2_timer_get_time(void)
 {
-  return (int64_t)rt_timer_time_us();
+  return (int64_t)esp_hr_timer_time_us();
 }
 
 /****************************************************************************

@@ -47,8 +47,8 @@
 #include <arch/board/board.h>
 
 #include "esp32_i2c.h"
-#include "esp32_gpio.h"
-#include "esp32_irq.h"
+#include "esp_gpio.h"
+#include "esp_irq.h"
 
 #include "xtensa.h"
 #include "hardware/esp32_gpio_sigmap.h"
@@ -648,22 +648,19 @@ static void esp32_i2c_init(struct esp32_i2c_priv_s *priv)
 {
   const struct esp32_i2c_config_s *config = priv->config;
 
-  esp32_gpiowrite(config->scl_pin, 1);
-  esp32_gpiowrite(config->sda_pin, 1);
+  esp_gpiowrite(config->scl_pin, 1);
+  esp_gpiowrite(config->sda_pin, 1);
 
-  esp32_configgpio(config->scl_pin, INPUT |
+  esp_configgpio(config->scl_pin, INPUT | OPEN_DRAIN | FUNCTION_3);
+  esp_gpio_matrix_out(config->scl_pin, config->scl_outsig, 0, 0);
+  esp_gpio_matrix_in(config->scl_pin, config->scl_insig, 0);
+
+  esp_configgpio(config->sda_pin, INPUT |
                                     OUTPUT |
                                     OPEN_DRAIN |
                                     FUNCTION_3);
-  esp32_gpio_matrix_out(config->scl_pin, config->scl_outsig, 0, 0);
-  esp32_gpio_matrix_in(config->scl_pin, config->scl_insig, 0);
-
-  esp32_configgpio(config->sda_pin, INPUT |
-                                    OUTPUT |
-                                    OPEN_DRAIN |
-                                    FUNCTION_3);
-  esp32_gpio_matrix_out(config->sda_pin, config->sda_outsig, 0, 0);
-  esp32_gpio_matrix_in(config->sda_pin, config->sda_insig, 0);
+  esp_gpio_matrix_out(config->sda_pin, config->sda_outsig, 0, 0);
+  esp_gpio_matrix_in(config->sda_pin, config->sda_insig, 0);
 
   modifyreg32(DPORT_PERIP_CLK_EN_REG, 0, config->clk_bit);
   modifyreg32(DPORT_PERIP_RST_EN_REG, config->rst_bit, 0);
@@ -1008,19 +1005,19 @@ static int esp32_i2c_clear_bus(struct esp32_i2c_priv_s *priv)
 
   /* Use GPIO configuration to un-wedge the bus */
 
-  esp32_configgpio(config->scl_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
-  esp32_gpio_matrix_out(config->scl_pin, SIG_GPIO_OUT_IDX, 0, 0);
-  esp32_configgpio(config->sda_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
-  esp32_gpio_matrix_out(config->sda_pin, SIG_GPIO_OUT_IDX, 0, 0);
+  esp_configgpio(config->scl_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
+  esp_gpio_matrix_out(config->scl_pin, SIG_GPIO_OUT_IDX, 0, 0);
+  esp_configgpio(config->sda_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
+  esp_gpio_matrix_out(config->sda_pin, SIG_GPIO_OUT_IDX, 0, 0);
 
   /* Set SDA to high */
 
-  esp32_gpiowrite(config->sda_pin, 1);
+  esp_gpiowrite(config->sda_pin, 1);
 
   /* Clock the bus until any slaves currently driving it let it go. */
 
   clock_count = 0;
-  while (!esp32_gpioread(config->sda_pin))
+  while (!esp_gpioread(config->sda_pin))
     {
       /* Give up if we have tried too hard */
 
@@ -1036,7 +1033,7 @@ static int esp32_i2c_clear_bus(struct esp32_i2c_priv_s *priv)
        */
 
       stretch_count = 0;
-      while (!esp32_gpioread(config->scl_pin))
+      while (!esp_gpioread(config->scl_pin))
         {
           /* Give up if we have tried too hard */
 
@@ -1051,12 +1048,12 @@ static int esp32_i2c_clear_bus(struct esp32_i2c_priv_s *priv)
 
       /* Drive SCL low */
 
-      esp32_gpiowrite(config->scl_pin, 0);
+      esp_gpiowrite(config->scl_pin, 0);
       up_udelay(10);
 
       /* Drive SCL high again */
 
-      esp32_gpiowrite(config->scl_pin, 1);
+      esp_gpiowrite(config->scl_pin, 1);
       up_udelay(10);
     }
 
@@ -1064,13 +1061,13 @@ static int esp32_i2c_clear_bus(struct esp32_i2c_priv_s *priv)
    * state machines.
    */
 
-  esp32_gpiowrite(config->sda_pin, 0);
+  esp_gpiowrite(config->sda_pin, 0);
   up_udelay(10);
-  esp32_gpiowrite(config->scl_pin, 0);
+  esp_gpiowrite(config->scl_pin, 0);
   up_udelay(10);
-  esp32_gpiowrite(config->scl_pin, 1);
+  esp_gpiowrite(config->scl_pin, 1);
   up_udelay(10);
-  esp32_gpiowrite(config->sda_pin, 1);
+  esp_gpiowrite(config->sda_pin, 1);
   up_udelay(10);
 
   ret = OK;
@@ -1501,8 +1498,11 @@ struct i2c_master_s *esp32_i2cbus_initialize(int port)
   /* Set up to receive peripheral interrupts on the current CPU */
 
   priv->cpu = this_cpu();
-  priv->cpuint = esp32_setup_irq(priv->cpu, config->periph,
-                                 1, ESP32_CPUINT_LEVEL);
+  priv->cpuint = esp_setup_irq(config->periph,
+                               1,
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               esp32_i2c_irq,
+                               priv);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type */
@@ -1510,16 +1510,6 @@ struct i2c_master_s *esp32_i2cbus_initialize(int port)
       priv->refs--;
       nxmutex_unlock(&priv->lock);
 
-      return NULL;
-    }
-
-  ret = irq_attach(config->irq, esp32_i2c_irq, priv);
-  if (ret != OK)
-    {
-      esp32_teardown_irq(priv->cpu, config->periph, priv->cpuint);
-      priv->refs--;
-
-      nxmutex_unlock(&priv->lock);
       return NULL;
     }
 
@@ -1560,7 +1550,7 @@ int esp32_i2cbus_uninitialize(struct i2c_master_s *dev)
 
 #ifndef CONFIG_I2C_POLLED
   up_disable_irq(priv->config->irq);
-  esp32_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
+  esp_teardown_irq(priv->config->periph, priv->cpuint);
 #endif
 
   esp32_i2c_deinit(priv);

@@ -34,7 +34,7 @@
 #include <arch/board/board.h>
 
 #include "esp32_i2c.h"
-#include "esp32_gpio.h"
+#include "espressif/esp_gpio.h"
 
 #include "esp32_board_apds9960.h"
 
@@ -102,7 +102,6 @@ static int apds9960_irq_attach(struct apds9960_config_s *state,
 {
   irqstate_t flags;
   int ret;
-  int irq = ESP32_PIN2IRQ(GPIO_APDS9960_INT);
 
   sninfo("apds9960_irq_attach\n");
 
@@ -110,13 +109,13 @@ static int apds9960_irq_attach(struct apds9960_config_s *state,
 
   /* Configure the pins that will be used as interrupt input */
 
-  esp32_configgpio(GPIO_APDS9960_INT, INPUT_FUNCTION_3 | PULLUP);
+  esp_configgpio(GPIO_APDS9960_INT, INPUT_FUNCTION_3 | PULLUP | FALLING);
 
   /* Make sure the interrupt is disabled */
 
-  esp32_gpioirqdisable(irq);
+  esp_gpioirqdisable(ESP_PIN2IRQ(GPIO_APDS9960_INT));
 
-  ret = irq_attach(irq, isr, arg);
+  ret = esp_gpio_irq(GPIO_APDS9960_INT, isr, arg);
   if (ret < 0)
     {
       leave_critical_section(flags);
@@ -126,7 +125,7 @@ static int apds9960_irq_attach(struct apds9960_config_s *state,
 
   /* Setup interrupt for Falling Edge */
 
-  esp32_gpioirqenable(irq, FALLING);
+  esp_gpioirqenable(GPIO_APDS9960_INT);
 
   leave_critical_section(flags);
 

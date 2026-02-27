@@ -35,10 +35,17 @@
 
 #include "esp32s3_start.h"
 #include "esp32s3_lowputc.h"
-#include "esp32s3_clockconfig.h"
+#include "esp_clk.h"
 #include "esp32s3_region.h"
-#include "esp32s3_rtc.h"
 #include "esp32s3_spiram.h"
+
+#include "esp_clk_internal.h"
+
+/* Undefine macros that conflict with HAL definitions */
+
+#undef RTC_FAST_CLK_FREQ_8M
+
+#include "soc/rtc.h"
 #include "esp32s3_wdt.h"
 #include "esp32s3_dma.h"
 #ifdef CONFIG_BUILD_PROTECTED
@@ -71,6 +78,7 @@
 
 #include "esp_clk_internal.h"
 #include "periph_ctrl.h"
+#include "rom/ets_sys.h"
 
 #include "esp_private/startup_internal.h"
 
@@ -175,7 +183,11 @@ extern uintptr_t _ext_ram_bss_start;
 extern uintptr_t _ext_ram_bss_end;
 #endif
 
-/* Address of the CPU0 IDLE thread */
+/* Address of the IDLE thread stacks.
+ * In SMP mode, we only use g_idlestack[0] for CPU0's IDLE stack.
+ * CPU1+ IDLE stacks are allocated dynamically by up_cpu_idlestack().
+ * The array is sized for 1 CPU to minimize BSS usage.
+ */
 
 uint32_t g_idlestack[IDLETHREAD_STACKWORDS]
   aligned_data(16) locate_data(".noinit");
@@ -347,14 +359,9 @@ noinstrument_function void noreturn_function IRAM_ATTR __esp32s3_start(void)
 
   esp_flash_app_init();
 
-  /* Initialize RTC controller parameters */
+  /* Initialize RTC controller and set CPU frequency */
 
-  esp32s3_rtc_init();
-  esp32s3_rtc_clk_set();
-
-  /* Set CPU frequency configured in board.h */
-
-  esp32s3_clockconfig();
+  esp_clk_init();
 
   /* Initialize peripherals parameters */
 
@@ -373,14 +380,6 @@ noinstrument_function void noreturn_function IRAM_ATTR __esp32s3_start(void)
 #endif
 
   showprogress('A');
-
-  /* The PLL provided by bootloader is not stable enough, do calibration
-   * again here so that we can use better clock for the timing tuning.
-   */
-
-#ifdef CONFIG_ESP32S3_SYSTEM_BBPLL_RECALIB
-  esp32s3_rtc_recalib_bbpll();
-#endif
 
   esp32s3_spi_timing_set_mspi_flash_tuning();
 #if defined(CONFIG_ESP32S3_SPIRAM_BOOT_INIT)
@@ -442,8 +441,6 @@ noinstrument_function void noreturn_function IRAM_ATTR __esp32s3_start(void)
   showprogress('C');
 #endif
 
-  SYS_STARTUP_FN();
-
   /* Bring up NuttX */
 
   nx_start();
@@ -453,6 +450,48 @@ noinstrument_function void noreturn_function IRAM_ATTR __esp32s3_start(void)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: xtensa_soc_initialize
+ *
+ * Description:
+ *   Initialize SoC-specific initialization.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void weak_function xtensa_soc_initialize(void)
+{
+  sys_startup_fn();
+}
+
+/****************************************************************************
+ * Name: sys_startup_fn
+ *
+ * Description:
+ *   Execute the system layer startup function for the current CPU core.
+ *   This function calls the appropriate startup function from the per-CPU
+ *   startup function array (g_startup_fn) based on the current core ID.
+ *   The SYS_STARTUP_FN() macro retrieves the core ID, indexes into the
+ *   g_startup_fn array, and invokes the corresponding startup function.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sys_startup_fn(void)
+{
+  SYS_STARTUP_FN();
+}
 
 /****************************************************************************
  * Name: __start

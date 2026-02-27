@@ -42,39 +42,26 @@
 #include <nuttx/spinlock.h>
 
 #include "esp_sdm.h"
+#include "hal/gpio_ll.h"
 #if defined(CONFIG_ARCH_CHIP_ESP32S3)
-#include "esp32s3_gpio.h"
+#include "esp_gpio.h"
 #include "hardware/esp32s3_soc.h"
 #elif defined(CONFIG_ARCH_CHIP_ESP32S2)
-#include "esp32s2_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "hardware/esp32s2_soc.h"
 #elif defined(CONFIG_ARCH_CHIP_ESP32)
-#include "esp32_gpio.h"
-#include "hardware/esp32_soc.h"
+#include "esp_gpio.h"
 #endif
 
 #include "esp_clk_tree.h"
 #include "hal/sdm_hal.h"
 #include "hal/sdm_ll.h"
-#include "soc/sdm_periph.h"
+#include "hal/sdm_periph.h"
+#include "hal/sdm_caps.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#if defined(CONFIG_ARCH_CHIP_ESP32S3)
-#define esp_configgpio            esp32s3_configgpio
-#define esp_gpio_matrix_in        esp32s3_gpio_matrix_in
-#define esp_gpio_matrix_out       esp32s3_gpio_matrix_out
-#elif defined(CONFIG_ARCH_CHIP_ESP32S2)
-#define esp_configgpio            esp32s2_configgpio
-#define esp_gpio_matrix_in        esp32s2_gpio_matrix_in
-#define esp_gpio_matrix_out       esp32s2_gpio_matrix_out
-#elif defined(CONFIG_ARCH_CHIP_ESP32)
-#define esp_configgpio            esp32_configgpio
-#define esp_gpio_matrix_in        esp32_gpio_matrix_in
-#define esp_gpio_matrix_out       esp32_gpio_matrix_out
-#endif
 
 /****************************************************************************
  * Private Types
@@ -92,18 +79,18 @@ struct esp_sdm_channel_priv_s
 
 struct esp_sdm_group_priv_s
 {
-  int group_id;                                                         /* Group ID, index from 0 */
-  spinlock_t spinlock;                                                  /* Spinlock for protecting concurrent operations */
-  sdm_hal_context_t hal;                                                /* Common layer context */
-  soc_periph_sdm_clk_src_t clk_src;                                     /* Clock source */
-  struct esp_sdm_channel_priv_s *channels[SOC_SDM_CHANNELS_PER_GROUP];  /* Array of SDM channels */
+  int group_id;                                                           /* Group ID, index from 0 */
+  spinlock_t spinlock;                                                    /* Spinlock for protecting concurrent operations */
+  sdm_hal_context_t hal;                                                  /* Common layer context */
+  soc_periph_sdm_clk_src_t clk_src;                                       /* Clock source */
+  struct esp_sdm_channel_priv_s *channels[SDM_CAPS_GET(CHANS_PER_INST)];  /* Array of SDM channels */
 };
 
 struct esp_sdm_priv_s
 {
-  rmutex_t lock;                                       /* Lock for protecting concurrent operations */
-  struct esp_sdm_group_priv_s *groups[SOC_SDM_GROUPS]; /* SDM group pool */
-  int group_ref_counts[SOC_SDM_GROUPS];                /* Reference count used to protect group install/uninstall */
+  rmutex_t lock;                                                /* Lock for protecting concurrent operations */
+  struct esp_sdm_group_priv_s *groups[SDM_CAPS_GET(INST_NUM)];  /* SDM group pool */
+  int group_ref_counts[SDM_CAPS_GET(INST_NUM)];                 /* Reference count used to protect group install/uninstall */
 };
 
 /****************************************************************************
@@ -382,7 +369,7 @@ struct esp_sdm_channel_priv_s *esp_sdm_create_config_channel(
 
   esp_configgpio(config.gpio_num, attr);
   esp_gpio_matrix_out(config.gpio_num,
-      sigma_delta_periph_signals.channels[ret->chan_id].sd_sig,
+      soc_sdm_signals[group_id].channels[ret->chan_id].sig_id_matrix,
       (config.flags && INVERT_OUT), false);
 
   esp_clk_tree_src_get_freq_hz(g_esp_sdm.groups[ret->group_id]->clk_src,
@@ -431,7 +418,7 @@ static struct esp_sdm_group_priv_s *esp_sdm_init(
 
   DEBUGASSERT(GPIO_IS_VALID_GPIO(config.gpio_num));
 
-  for (i = 0; i < SOC_SDM_GROUPS; i++)
+  for (i = 0; i < SDM_CAPS_GET(INST_NUM); i++)
     {
       nxrmutex_lock(&(g_esp_sdm.lock));
       if (g_esp_sdm.groups[i] == NULL)
@@ -445,16 +432,21 @@ static struct esp_sdm_group_priv_s *esp_sdm_init(
             }
           else
             {
+              sdm_hal_init_config_t hal_config =
+                {
+                  .group_id = group_id,
+                };
+
               g_esp_sdm.groups[i]->group_id = i;
               g_esp_sdm.groups[i]->clk_src = SDM_CLK_SRC_DEFAULT;
               group_id = i;
-              sdm_hal_init(&g_esp_sdm.groups[i]->hal, i);
+              sdm_hal_init(&g_esp_sdm.groups[i]->hal, &hal_config);
               sdm_ll_enable_clock(g_esp_sdm.groups[i]->hal.dev, true);
               ainfo("new group (%d) at %p\n", i, g_esp_sdm.groups[i]);
               break;
             }
         }
-      else if (g_esp_sdm.group_ref_counts[i] < SOC_SDM_CHANNELS_PER_GROUP)
+      else if (g_esp_sdm.group_ref_counts[i] < SDM_CAPS_GET(CHANS_PER_INST))
         {
           group_id = i;
           break;
@@ -462,7 +454,7 @@ static struct esp_sdm_group_priv_s *esp_sdm_init(
     }
 
   if (g_esp_sdm.group_ref_counts[group_id] >=
-        SOC_SDM_CHANNELS_PER_GROUP)
+        SDM_CAPS_GET(CHANS_PER_INST))
     {
       aerr("ERROR! No free slot available\n");
       return NULL;
@@ -473,7 +465,7 @@ static struct esp_sdm_group_priv_s *esp_sdm_init(
   nxrmutex_unlock(&(g_esp_sdm.lock));
 
   flags = spin_lock_irqsave(&group->spinlock);
-  for (j = 0; j < SOC_SDM_CHANNELS_PER_GROUP; j++)
+  for (j = 0; j < SDM_CAPS_GET(CHANS_PER_INST); j++)
     {
       if (group->channels[j] == NULL)
         {
@@ -541,7 +533,7 @@ int esp_sdm_create_channel(struct esp_sdm_chan_config_s config,
 
   DEBUGASSERT(GPIO_IS_VALID_GPIO(config.gpio_num));
 
-  for (i = 0; i < SOC_SDM_CHANNELS_PER_GROUP; i++)
+  for (i = 0; i < SDM_CAPS_GET(CHANS_PER_INST); i++)
     {
       if (group->channels[i] == NULL)
         {
@@ -602,7 +594,7 @@ struct dac_dev_s *esp_sdminitialize(struct esp_sdm_chan_config_s config)
     {
       ret->ad_priv = (void *)sdm;
       ret->ad_ops = &ops;
-      ret->ad_nchannel = SOC_SDM_CHANNELS_PER_GROUP;
+      ret->ad_nchannel = SDM_CAPS_GET(CHANS_PER_INST);
     }
 
   return (struct dac_dev_s *)ret;

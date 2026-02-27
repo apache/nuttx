@@ -30,7 +30,7 @@
 #include <nuttx/board.h>
 
 #include "xtensa.h"
-#include "hardware/esp32s3_rtccntl.h"
+#include "soc/rtc_cntl_reg.h"
 #include "esp32s3_systemreset.h"
 
 /****************************************************************************
@@ -142,7 +142,7 @@ void up_shutdown_handler(void)
 
 void up_systemreset(void)
 {
-  putreg32(RTC_CNTL_SW_SYS_RST, RTC_CNTL_RTC_OPTIONS0_REG);
+  putreg32(RTC_CNTL_SW_SYS_RST, RTC_CNTL_OPTIONS0_REG);
 
   /* Wait for the reset */
 

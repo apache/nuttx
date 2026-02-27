@@ -34,8 +34,8 @@
 #include "hardware/esp32s3_tim.h"
 
 #include "esp32s3_tim.h"
-#include "esp32s3_irq.h"
-#include "esp32s3_gpio.h"
+#include "esp_irq.h"
+#include "esp_gpio.h"
 
 #include "soc/periph_defs.h"
 #include "esp_private/periph_ctrl.h"
@@ -731,8 +731,7 @@ static int tim_setisr(struct esp32s3_tim_dev_s *dev, xcpt_t handler,
            */
 
           up_disable_irq(priv->irq);
-          esp32s3_teardown_irq(priv->core, priv->periph, priv->cpuint);
-          irq_detach(priv->irq);
+          esp_teardown_irq(priv->periph, priv->cpuint);
 
           priv->cpuint = -ENOMEM;
           priv->core   = -ENODEV;
@@ -753,22 +752,14 @@ static int tim_setisr(struct esp32s3_tim_dev_s *dev, xcpt_t handler,
       /* Set up to receive peripheral interrupts on the current CPU */
 
       priv->core = this_cpu();
-      priv->cpuint = esp32s3_setup_irq(priv->core, priv->periph,
-                                       priv->priority, ESP32S3_CPUINT_LEVEL);
+      priv->cpuint = esp_setup_irq(priv->periph,
+                                   priv->priority,
+                                   ESP_IRQ_TRIGGER_LEVEL,
+                                   handler, arg);
       if (priv->cpuint < 0)
         {
           tmrerr("ERROR: No CPU Interrupt available");
           ret = priv->cpuint;
-          goto errout;
-        }
-
-      /* Associate an IRQ Number (from the timer) to an ISR */
-
-      ret = irq_attach(priv->irq, handler, arg);
-      if (ret != OK)
-        {
-          esp32s3_teardown_irq(priv->core, priv->periph, priv->cpuint);
-          tmrerr("ERROR: Failed to associate an IRQ Number");
           goto errout;
         }
 

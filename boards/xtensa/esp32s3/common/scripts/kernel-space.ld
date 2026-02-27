@@ -22,6 +22,8 @@
 
 /* Provide these so there is no need for using config files for this */
 
+#include "esp32s3_aliases.ld"
+
 __uirom_start = ORIGIN(UIROM);
 __uirom_size = LENGTH(UIROM);
 __uirom_end = ORIGIN(UIROM) + LENGTH(UIROM);
@@ -114,6 +116,9 @@ SECTIONS
     *libkarch.a:xtensa_interruptcontext.*(.literal .text .literal.* .text.*)
     *libkarch.a:xtensa_testset.*(.literal .text .literal.* .text.*)
     *libkarch.a:esp_app_desc.*(.literal .text .literal.* .text.*)
+    *libkarch.a:intr_alloc.*(.literal.esp_intr_get_intno .text.esp_intr_get_intno)
+    *libkarch.a:xtensa_intr.*(.literal.xt_get_interrupt_handler .text.xt_get_interrupt_handler)
+    *libkarch.a:xtensa_intr.*(.literal.xt_get_interrupt_handler_arg .text.xt_get_interrupt_handler_arg)
     *libkarch.a:esp_spiflash.*(.literal .text .literal.* .text.*)
     *libkarch.a:esp_flash_api.*(.text .text.* .literal .literal.*)
     *libkarch.a:esp_flash_spi_init.*(.text .text.* .literal .literal.*)
@@ -125,6 +130,7 @@ SECTIONS
     *libkarch.a:spi_flash_os_func_noos.*(.literal .literal.* .text .text.*)
     *libkarch.a:spi_flash_os_func_app.*(.literal .literal.* .text .text.*)
     *libkarch.a:flash_brownout_hook.*(.literal .literal.* .text .text.*)
+    *libkarch.a:esp_cache_utils.*(.literal .literal.* .text .text.*)
     *libkarch.a:esp_cache.*(.literal .literal.* .text .text.*)
     *libkarch.a:cache_utils.*(.literal .literal.* .text .text.*)
     *libkarch.a:memspi_host_driver.*(.literal .literal.* .text .text.*)
@@ -252,6 +258,7 @@ SECTIONS
     *libsched.a:irq_dispatch.*(.rodata  .rodata.*)
 
     *libc.a:*lib_instrument.*(.rodata  .rodata.*)
+    *libc.a:arch_atomic.*(.rodata .rodata.*)
 
     . = ALIGN(4);
     _edata = ABSOLUTE(.);

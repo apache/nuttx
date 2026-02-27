@@ -1,5 +1,7 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s2/esp32s2_gpio.h
+ * arch/xtensa/src/common/espressif/esp_gpio.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,14 +20,15 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_GPIO_H
-#define __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_GPIO_H
+#ifndef __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_GPIO_H
+#define __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_GPIO_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/irq.h>
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -34,17 +37,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define MATRIX_DETACH_OUT_SIG     0x100  /* Detach an OUTPUT signal */
-#define MATRIX_DETACH_IN_LOW_PIN  0x3c   /* Detach non-inverted INPUT sig */
-#define MATRIX_DETACH_IN_LOW_HIGH 0x38   /* Detach inverted INPUT signal */
+ #define MATRIX_DETACH_OUT_SIG     0x100  /* Detach an OUTPUT signal */
+ #define MATRIX_DETACH_IN_LOW_PIN  0x3c   /* Detach non-inverted INPUT signal */
+ #define MATRIX_DETACH_IN_LOW_HIGH 0x38   /* Detach inverted INPUT signal */
 
-/* Bit-encoded input to esp32s2_configgpio() ********************************/
+/* Bit-encoded input to esp_configgpio() ************************************/
 
-/* Encoded pin attributes used with esp32s2_configgpio()
+/* Encoded pin attributes used with esp_configgpio()
  *
- * 8  7  6  5  4  3  2  1  0
- * -- -- -- -- -- -- -- -- --
- * FN FN FN OD PD PU F  O  I
+ * 14 13 12 11 10 9  8  7  6  5  4  3  2  1  0
+ * -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+ * IT IT IT DR DR DR FN FN FN OD PD PU F  O  I
  */
 
 #define MODE_SHIFT          0
@@ -75,6 +78,15 @@
 #  define DRIVE_2           (3 << DRIVE_SHIFT)
 #  define DRIVE_3           (4 << DRIVE_SHIFT)
 
+#define INTR_TYPE_SHIFT     12
+#define INTR_TYPE_MASK      (7 << INTR_TYPE_SHIFT)
+#  define DISABLED          (0 << INTR_TYPE_SHIFT)
+#  define RISING            (1 << INTR_TYPE_SHIFT)
+#  define FALLING           (2 << INTR_TYPE_SHIFT)
+#  define CHANGE            (3 << INTR_TYPE_SHIFT)
+#  define ONLOW             (4 << INTR_TYPE_SHIFT)
+#  define ONHIGH            (5 << INTR_TYPE_SHIFT)
+
 #define INPUT_PULLUP        (INPUT | PULLUP)
 #define INPUT_PULLDOWN      (INPUT | PULLDOWN)
 #define OUTPUT_OPEN_DRAIN   (OUTPUT | OPEN_DRAIN)
@@ -92,33 +104,6 @@
 #  define OUTPUT_FUNCTION_4 (OUTPUT_FUNCTION | FUNCTION_4)
 #  define OUTPUT_FUNCTION_5 (OUTPUT_FUNCTION | FUNCTION_5)
 #  define OUTPUT_FUNCTION_6 (OUTPUT_FUNCTION | FUNCTION_6)
-
-/* Interrupt type used with esp32s2_gpioirqenable() */
-
-#define DISABLED          0x00
-#define RISING            0x01
-#define FALLING           0x02
-#define CHANGE            0x03
-#define ONLOW             0x04
-#define ONHIGH            0x05
-
-/* Check whether it is a valid GPIO number */
-
-#define GPIO_IS_VALID_GPIO(gpio_num)   ((gpio_num >= 0) && \
-                                        (((1ULL << (gpio_num)) & \
-                                         SOC_GPIO_VALID_GPIO_MASK) != 0))
-
-/* Check whether it can be a valid GPIO number of output mode */
-
-#define GPIO_IS_VALID_OUTPUT_GPIO(gpio_num) \
-  ((gpio_num >= 0) && \
-      (((1ULL << (gpio_num)) & SOC_GPIO_VALID_OUTPUT_GPIO_MASK) != 0))
-
-/* Check whether it can be a valid digital I/O pad */
-
-#define GPIO_IS_VALID_DIGITAL_IO_PAD(gpio_num) \
-  ((gpio_num >= 0) && \
-    (((1ULL << (gpio_num)) & SOC_GPIO_VALID_DIGITAL_IO_PAD_MASK) != 0))
 
 /****************************************************************************
  * Public Types
@@ -149,28 +134,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32s2_gpioirqinitialize
- *
- * Description:
- *   Initialize logic to support a second level of interrupt decoding for
- *   GPIO pins.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32S2_GPIO_IRQ
-void esp32s2_gpioirqinitialize(void);
-#else
-#  define esp32s2_gpioirqinitialize()
-#endif
-
-/****************************************************************************
- * Name: esp32s2_configgpio
+ * Name: esp_configgpio
  *
  * Description:
  *   Configure a GPIO pin based on encoded pin attributes.
@@ -191,86 +155,10 @@ void esp32s2_gpioirqinitialize(void);
  *
  ****************************************************************************/
 
-int esp32s2_configgpio(int pin, gpio_pinattr_t attr);
+int esp_configgpio(int pin, gpio_pinattr_t attr);
 
 /****************************************************************************
- * Name: esp32s2_gpiowrite
- *
- * Description:
- *   Write one or zero to the selected GPIO pin.
- *
- * Input Parameters:
- *   pin           - GPIO pin to be written.
- *   value         - Value to be written to the GPIO pin. True will output
- *                   1 (one) to the GPIO, while false will output 0 (zero).
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void esp32s2_gpiowrite(int pin, bool value);
-
-/****************************************************************************
- * Name: esp32s2_gpioread
- *
- * Description:
- *   Read one or zero from the selected GPIO pin.
- *
- * Input Parameters:
- *   pin           - GPIO pin to be read.
- *
- * Returned Value:
- *   True in case the read value is 1 (one). If 0 (zero), then false will be
- *   returned.
- *
- ****************************************************************************/
-
-bool esp32s2_gpioread(int pin);
-
-/****************************************************************************
- * Name: esp32s2_gpioirqenable
- *
- * Description:
- *   Enable the interrupt for the specified GPIO IRQ.
- *
- * Input Parameters:
- *   irq           - Identifier of the interrupt request.
- *   intrtype      - Interrupt type, select from gpio_intrtype_t.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32S2_GPIO_IRQ
-void esp32s2_gpioirqenable(int irq, gpio_intrtype_t intrtype);
-#else
-#  define esp32s2_gpioirqenable(irq,intrtype)
-#endif
-
-/****************************************************************************
- * Name: esp32s2_gpioirqdisable
- *
- * Description:
- *   Disable the interrupt for the specified GPIO IRQ.
- *
- * Input Parameters:
- *   irq           - Identifier of the interrupt request.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32S2_GPIO_IRQ
-void esp32s2_gpioirqdisable(int irq);
-#else
-#  define esp32s2_gpioirqdisable(irq)
-#endif
-
-/****************************************************************************
- * Name: esp32s2_gpio_matrix_in
+ * Name: esp_gpio_matrix_in
  *
  * Description:
  *   Set GPIO input to a signal.
@@ -291,10 +179,10 @@ void esp32s2_gpioirqdisable(int irq);
  *
  ****************************************************************************/
 
-void esp32s2_gpio_matrix_in(uint32_t pin, uint32_t signal_idx, bool inv);
+void esp_gpio_matrix_in(uint32_t pin, uint32_t signal_idx, bool inv);
 
 /****************************************************************************
- * Name: esp32s2_gpio_matrix_out
+ * Name: esp_gpio_matrix_out
  *
  * Description:
  *   Set signal output to GPIO.
@@ -313,8 +201,127 @@ void esp32s2_gpio_matrix_in(uint32_t pin, uint32_t signal_idx, bool inv);
  *
  ****************************************************************************/
 
-void esp32s2_gpio_matrix_out(uint32_t pin, uint32_t signal_idx, bool out_inv,
-                             bool oen_inv);
+void esp_gpio_matrix_out(uint32_t pin, uint32_t signal_idx, bool out_inv,
+                         bool oen_inv);
+
+/****************************************************************************
+ * Name: esp_gpiowrite
+ *
+ * Description:
+ *   Write one or zero to the selected GPIO pin
+ *
+ * Input Parameters:
+ *   pin           - GPIO pin to be modified.
+ *   value         - The value to be written (0 or 1).
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_gpiowrite(int pin, bool value);
+
+/****************************************************************************
+ * Name: esp_gpioread
+ *
+ * Description:
+ *   Read one or zero from the selected GPIO pin
+ *
+ * Input Parameters:
+ *   pin           - GPIO pin to be read.
+ *
+ * Returned Value:
+ *   The boolean representation of the input value (true/false).
+ *
+ ****************************************************************************/
+
+bool esp_gpioread(int pin);
+
+/****************************************************************************
+ * Name: esp_gpioirqinitialize
+ *
+ * Description:
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   GPIO pins.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
+void esp_gpioirqinitialize(void);
+#else
+#  define esp_gpioirqinitialize()
+#endif
+
+/****************************************************************************
+ * Name: esp_gpioirqenable
+ *
+ * Description:
+ *   Enable the interrupt for specified GPIO
+ *
+ * Input Parameters:
+ *   id           - GPIO to be enabled.
+ *
+ * Returned Value:
+ *   Zero (OK) on success, or -1 (ERROR) in case of failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
+int esp_gpioirqenable(int id);
+#else
+#  define esp_gpioirqenable(id)
+#endif
+
+/****************************************************************************
+ * Name: esp_gpioirqdisable
+ *
+ * Description:
+ *   Disable the interrupt for specified GPIO
+ *
+ * Input Parameters:
+ *   id           - GPIO to be disabled.
+ *
+ * Returned Value:
+ *   Zero (OK) on success, or -1 (ERROR) in case of failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
+int esp_gpioirqdisable(int id);
+#else
+#  define esp_gpioirqdisable(id)
+#endif
+
+/****************************************************************************
+ * Name: esp_gpio_irq
+ *
+ * Description:
+ *   Register or unregister a button interrupt handler for the specified
+ *   button ID. Passing a non-NULL handler attaches and enables the ISR for
+ *   the button; passing NULL disables the interrupt and removes any
+ *   previously registered handler.
+ *
+ * Input Parameters:
+ *   id           - Identifies the button to be monitored.
+ *   irqhandler   - The handler to be called when the interrupt occurs.
+ *                  Set to NULL to disable the interrupt.
+ *   arg          - Pointer to the argument that will be provided to the
+ *                  interrupt handler.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
+int esp_gpio_irq(int id, xcpt_t irqhandler, void *arg);
+#endif
 
 #ifdef __cplusplus
 }
@@ -322,4 +329,4 @@ void esp32s2_gpio_matrix_out(uint32_t pin, uint32_t signal_idx, bool out_inv,
 #undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_GPIO_H */
+#endif /* __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_GPIO_H */

@@ -36,6 +36,12 @@
 #include <errno.h>
 #include <nuttx/board.h>
 
+#include "esp32_start.h"
+
+#ifdef CONFIG_ESPRESSIF_HR_TIMER
+#  include "espressif/esp_hr_timer.h"
+#endif
+
 #include "heltec_wifi_lora32.h"
 
 /****************************************************************************
@@ -90,6 +96,14 @@ int esp32_bringup(void)
              ret);
     }
 #endif /* CONFIG_LPWAN_SX127X */
+
+#ifdef CONFIG_ESPRESSIF_HR_TIMER
+  ret = esp_hr_timer_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_hr_timer_init() failed: %d\n", ret);
+    }
+#endif
 
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced

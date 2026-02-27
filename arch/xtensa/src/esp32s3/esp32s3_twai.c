@@ -40,10 +40,10 @@
 
 #include "xtensa.h"
 
-#include "esp32s3_gpio.h"
+#include "esp_gpio.h"
 #include "esp32s3_twai.h"
-#include "esp32s3_irq.h"
-#include "esp32s3_clockconfig.h"
+#include "esp_irq.h"
+#include "esp_clk.h"
 
 #include "periph_ctrl.h"
 
@@ -473,25 +473,16 @@ static int esp32s3twai_setup(struct can_dev_s *dev)
     }
 
   priv->cpu = this_cpu();
-  priv->cpuint = esp32s3_setup_irq(priv->cpu, priv->periph,
-                                   1, ESP32S3_CPUINT_LEVEL);
+  priv->cpuint = esp_setup_irq(priv->periph,
+                               1,
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               esp32s3twai_interrupt,
+                               dev);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type. */
 
       ret = priv->cpuint;
-      spin_unlock_irqrestore(&priv->lock, flags);
-
-      return ret;
-    }
-
-  ret = irq_attach(priv->irq, esp32s3twai_interrupt, dev);
-  if (ret != OK)
-    {
-      /* Failed to attach IRQ, so CPU interrupt must be freed. */
-
-      esp32s3_teardown_irq(priv->cpu, priv->periph, priv->cpuint);
-      priv->cpuint = -ENOMEM;
       spin_unlock_irqrestore(&priv->lock, flags);
 
       return ret;
@@ -535,13 +526,9 @@ static void esp32s3twai_shutdown(struct can_dev_s *dev)
 
       up_disable_irq(priv->irq);
 
-      /* Dissociate the IRQ from the ISR */
-
-      irq_detach(priv->irq);
-
       /* Free cpu interrupt that is attached to this peripheral */
 
-      esp32s3_teardown_irq(priv->cpu, priv->periph, priv->cpuint);
+      esp_teardown_irq(priv->periph, priv->cpuint);
       priv->cpuint = -ENOMEM;
     }
 }
@@ -1239,19 +1226,13 @@ struct can_dev_s *esp32s3_twaiinitialize(void)
 
   flags = spin_lock_irqsave(&g_twaipriv.lock);
 
-  /* Enable power to the TWAI module and
-   * Enable clocking to the TWAI module
-   */
-
-  periph_module_enable(PERIPH_TWAI_MODULE);
-
   /* Configure CAN GPIO pins */
 
-  esp32s3_configgpio(CONFIG_ESP32S3_TWAI_TXPIN, OUTPUT_FUNCTION_2);
-  esp32s3_gpio_matrix_out(CONFIG_ESP32S3_TWAI_TXPIN, TWAI_TX_IDX, 0, 0);
+  esp_configgpio(CONFIG_ESP32S3_TWAI_TXPIN, OUTPUT_FUNCTION_2);
+  esp_gpio_matrix_out(CONFIG_ESP32S3_TWAI_TXPIN, TWAI_TX_IDX, 0, 0);
 
-  esp32s3_configgpio(CONFIG_ESP32S3_TWAI_RXPIN, INPUT_FUNCTION_2);
-  esp32s3_gpio_matrix_in(CONFIG_ESP32S3_TWAI_RXPIN, TWAI_RX_IDX, 0);
+  esp_configgpio(CONFIG_ESP32S3_TWAI_RXPIN, INPUT_FUNCTION_2);
+  esp_gpio_matrix_in(CONFIG_ESP32S3_TWAI_RXPIN, TWAI_RX_IDX, 0);
 
   spin_unlock_irqrestore(&g_twaipriv.lock, flags);
 #endif

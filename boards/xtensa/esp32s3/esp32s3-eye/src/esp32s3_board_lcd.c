@@ -40,7 +40,7 @@
 
 #include <arch/board/board.h>
 
-#include "esp32s3_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "esp32s3_spi.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
 
@@ -78,12 +78,12 @@ int board_lcd_initialize(void)
 {
   /* Initialize non-SPI GPIOs */
 
-  esp32s3_configgpio(ESP32S3_EYE_DISPLAY_DC, OUTPUT);
-  esp32s3_configgpio(ESP32S3_EYE_DISPLAY_BCKL, OUTPUT);
+  esp_configgpio(ESP32S3_EYE_DISPLAY_DC, OUTPUT);
+  esp_configgpio(ESP32S3_EYE_DISPLAY_BCKL, OUTPUT);
 
   /* Turn on LCD backlight */
 
-  esp32s3_gpiowrite(ESP32S3_EYE_DISPLAY_BCKL, false);
+  esp_gpiowrite(ESP32S3_EYE_DISPLAY_BCKL, false);
 
   g_spidev = esp32s3_spibus_initialize(ESP32S3_EYE_DISPLAY_SPI);
   if (!g_spidev)

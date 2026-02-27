@@ -20,6 +20,8 @@
 #
 ############################################################################
 
+WIFI_WPA_SUPPLICANT = chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)wpa_supplicant
+
 ifeq ($(CONFIG_ARCH_CHIP_ESP32),y)
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)include$(DELIM)$(CHIP_SERIES)$(DELIM)include
 endif
@@ -27,6 +29,7 @@ ifeq ($(CONFIG_ARCH_CHIP_ESP32S3),y)
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)bt$(DELIM)include$(DELIM)esp32c3$(DELIM)include
 endif
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_coex$(DELIM)include
+INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_wifi$(DELIM)$(DELIM)wifi_apps$(DELIM)roaming_app$(DELIM)include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)soc$(DELIM)$(CHIP_SERIES)$(DELIM)include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)$(CHIP_SERIES)$(DELIM)include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)include$(DELIM)esp_wifi
@@ -59,20 +62,31 @@ ifeq ($(CONFIG_WPA_WAPI_PSK),y)
 EXTRA_LIBS += -lwapi
 endif
 
+INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)$(WIFI_WPA_SUPPLICANT)$(DELIM)include
+INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)$(WIFI_WPA_SUPPLICANT)$(DELIM)src
+INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)$(WIFI_WPA_SUPPLICANT)$(DELIM)esp_supplicant$(DELIM)include
+
+CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_wifi$(DELIM)src$(DELIM)wifi_init.c
+
 ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
 
 ## ESP-IDF's mbedTLS
 
-
 VPATH += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)mbedtls$(DELIM)library
 
-INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)mbedtls$(DELIM)include
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)mbedtls$(DELIM)library
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)port$(DELIM)include
+INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)port$(DELIM)include$(DELIM)aes
+INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)port$(DELIM)psa_driver$(DELIM)include
+INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)mbedtls$(DELIM)tf-psa-crypto$(DELIM)drivers$(DELIM)builtin$(DELIM)include
+INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)mbedtls$(DELIM)tf-psa-crypto$(DELIM)drivers$(DELIM)builtin$(DELIM)src
+INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)include$(DELIM)mbedtls
 
 ### Define Espressif's configs for mbedTLS
 
 CFLAGS += $(DEFINE_PREFIX)MBEDTLS_CONFIG_FILE="<mbedtls/esp_config.h>"
+
+VPATH += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)mbedtls$(DELIM)tf-psa-crypto$(DELIM)drivers$(DELIM)builtin$(DELIM)src
 
 CHIP_CSRCS += aes.c
 CHIP_CSRCS += aria.c
@@ -110,20 +124,47 @@ CHIP_CSRCS += hmac_drbg.c
 CHIP_CSRCS += rsa_alt_helpers.c
 CHIP_CSRCS += ecdh.c
 CHIP_CSRCS += pk_ecc.c
+CHIP_CSRCS += pk_rsa.c
+CHIP_CSRCS += psa_util.c
+CHIP_CSRCS += psa_crypto_ffdh.c
+CHIP_CSRCS += psa_crypto_ecp.c
+CHIP_CSRCS += psa_crypto_rsa.c
+CHIP_CSRCS += psa_crypto_cipher.c
+CHIP_CSRCS += psa_crypto_mac.c
+CHIP_CSRCS += psa_crypto_hash.c
+
+VPATH += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)mbedtls$(DELIM)tf-psa-crypto$(DELIM)core
+
+CHIP_CSRCS += psa_crypto_client.c
+CHIP_CSRCS += psa_crypto_driver_wrappers_no_static.c
+CHIP_CSRCS += psa_crypto_slot_management.c
+CHIP_CSRCS += psa_crypto_storage.c
+CHIP_CSRCS += psa_crypto.c
+CHIP_CSRCS += psa_its_file.c
+CHIP_CSRCS += tf_psa_crypto_config.c
+CHIP_CSRCS += tf_psa_crypto_version.c
 
 VPATH += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)port
+
+CHIP_CSRCS += esp_psa_crypto_init.c
 
 CHIP_CSRCS += esp_hardware.c
 CHIP_CSRCS += esp_mem.c
 CHIP_CSRCS += esp_timing.c
 
-VPATH += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)port$(DELIM)md
+# Ensure PSA crypto initialization is included in the build
 
-CHIP_CSRCS += esp_md.c
+LDFLAGS += -u mbedtls_psa_crypto_init_include_impl
+
+VPATH += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)port$(DELIM)psa_driver$(DELIM)esp_mac
+ifneq ($(CONFIG_ARCH_CHIP_ESP32),y)
+CHIP_CSRCS += psa_crypto_driver_esp_hmac_opaque.c
+endif
+
+VPATH += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)port$(DELIM)psa_driver$(DELIM)esp_md
+CHIP_CSRCS += psa_crypto_driver_esp_md5.c
 
 ## WPA Supplicant
-
-WIFI_WPA_SUPPLICANT = chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)wpa_supplicant
 
 CFLAGS += $(DEFINE_PREFIX)__ets__
 CFLAGS += $(DEFINE_PREFIX)CONFIG_CRYPTO_MBEDTLS
@@ -132,13 +173,17 @@ CFLAGS += $(DEFINE_PREFIX)CONFIG_IEEE80211W
 CFLAGS += $(DEFINE_PREFIX)CONFIG_WPA3_SAE
 CFLAGS += $(DEFINE_PREFIX)EAP_PEER_METHOD
 CFLAGS += $(DEFINE_PREFIX)ESP_PLATFORM=1
+CFLAGS += $(DEFINE_PREFIX)TF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls/esp_config.h\"
 CFLAGS += $(DEFINE_PREFIX)ESP_SUPPLICANT
 CFLAGS += $(DEFINE_PREFIX)ESPRESSIF_USE
 CFLAGS += $(DEFINE_PREFIX)IEEE8021X_EAPOL
 CFLAGS += $(DEFINE_PREFIX)USE_WPA2_TASK
 CFLAGS += $(DEFINE_PREFIX)CONFIG_SHA256
-CFLAGS += $(DEFINE_PREFIX)CONFIG_SAE
 CFLAGS += $(DEFINE_PREFIX)USE_WPS_TASK
+
+ifeq ($(CONFIG_ESPRESSIF_WIFI_SOFTAP_SAE_SUPPORT),y)
+CFLAGS += $(DEFINE_PREFIX)CONFIG_SAE
+endif
 
 ifeq ($(CONFIG_ESPRESSIF_WIFI_ENABLE_SAE_PK),y)
 CFLAGS += $(DEFINE_PREFIX)CONFIG_SAE_PK
@@ -159,9 +204,6 @@ endif
 ifeq ($(CONFIG_ESPRESSIF_WIFI_GMAC_SUPPORT),y)
 CFLAGS += $(DEFINE_PREFIX)CONFIG_GMAC
 endif
-
-INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)$(WIFI_WPA_SUPPLICANT)$(DELIM)include
-INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)$(WIFI_WPA_SUPPLICANT)$(DELIM)src
 
 VPATH += $(WIFI_WPA_SUPPLICANT)$(DELIM)src$(DELIM)ap
 
@@ -193,7 +235,6 @@ VPATH += $(WIFI_WPA_SUPPLICANT)$(DELIM)src$(DELIM)crypto
 
 CHIP_CSRCS += aes-ccm.c
 CHIP_CSRCS += aes-gcm.c
-CHIP_CSRCS += aes-omac1.c
 CHIP_CSRCS += aes-unwrap.c
 CHIP_CSRCS += aes-wrap.c
 CHIP_CSRCS += ccmp.c
@@ -246,8 +287,6 @@ CHIP_CSRCS += os_xtensa.c
 
 ## ESP Supplicant (Espressif's WPA supplicant extension)
 
-INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)$(WIFI_WPA_SUPPLICANT)$(DELIM)esp_supplicant$(DELIM)include
-
 VPATH += $(WIFI_WPA_SUPPLICANT)$(DELIM)esp_supplicant$(DELIM)src
 
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)$(WIFI_WPA_SUPPLICANT)$(DELIM)esp_supplicant$(DELIM)src
@@ -272,7 +311,6 @@ CHIP_CSRCS += crypto_mbedtls.c
 CHIP_CSRCS += tls_mbedtls.c
 CHIP_CSRCS += aes-siv.c
 
-CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_wifi$(DELIM)src$(DELIM)wifi_init.c
 CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_wifi$(DELIM)src$(DELIM)lib_printf.c
 CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_wifi$(DELIM)regulatory$(DELIM)esp_wifi_regulatory.c
 

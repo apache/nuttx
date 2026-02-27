@@ -46,9 +46,9 @@
 
 #include <arch/board/board.h>
 
-#include "esp32s3_gpio.h"
+#include "esp_gpio.h"
 #include "esp32s3_i2c.h"
-#include "esp32s3_irq.h"
+#include "esp_irq.h"
 
 #include "xtensa.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
@@ -781,15 +781,15 @@ static void i2c_init(struct esp32s3_i2c_priv_s *priv)
   const struct esp32s3_i2c_config_s *config = priv->config;
   if (priv->id != ESP32S3_RTC_I2C)
     {
-      esp32s3_gpiowrite(config->scl_pin, 1);
-      esp32s3_configgpio(config->scl_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
-      esp32s3_gpio_matrix_out(config->scl_pin, config->scl_outsig, 0, 0);
-      esp32s3_gpio_matrix_in(config->scl_pin, config->scl_insig, 0);
+      esp_gpiowrite(config->scl_pin, 1);
+      esp_configgpio(config->scl_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
+      esp_gpio_matrix_out(config->scl_pin, config->scl_outsig, 0, 0);
+      esp_gpio_matrix_in(config->scl_pin, config->scl_insig, 0);
 
-      esp32s3_gpiowrite(config->sda_pin, 1);
-      esp32s3_configgpio(config->sda_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
-      esp32s3_gpio_matrix_out(config->sda_pin, config->sda_outsig, 0, 0);
-      esp32s3_gpio_matrix_in(config->sda_pin, config->sda_insig, 0);
+      esp_gpiowrite(config->sda_pin, 1);
+      esp_configgpio(config->sda_pin, INPUT_PULLUP | OUTPUT_OPEN_DRAIN);
+      esp_gpio_matrix_out(config->sda_pin, config->sda_outsig, 0, 0);
+      esp_gpio_matrix_in(config->sda_pin, config->sda_insig, 0);
 
       /* Enable I2C hardware */
 
@@ -1731,8 +1731,11 @@ struct i2c_master_s *esp32s3_i2cbus_initialize(int port)
       /* Set up to receive peripheral interrupts on the current CPU */
 
       priv->cpu = this_cpu();
-      priv->cpuint = esp32s3_setup_irq(priv->cpu, config->periph,
-                                       1, ESP32S3_CPUINT_LEVEL);
+      priv->cpuint = esp_setup_irq(config->periph,
+                                  1,
+                                  ESP_IRQ_TRIGGER_LEVEL,
+                                  i2c_irq,
+                                  priv);
       if (priv->cpuint < 0)
         {
           /* Failed to allocate a CPU interrupt of this type */
@@ -1740,16 +1743,6 @@ struct i2c_master_s *esp32s3_i2cbus_initialize(int port)
           priv->refs--;
           nxmutex_unlock(&priv->lock);
 
-          return NULL;
-        }
-
-      ret = irq_attach(config->irq, i2c_irq, priv);
-      if (ret != OK)
-        {
-          esp32s3_teardown_irq(priv->cpu, config->periph, priv->cpuint);
-          priv->refs--;
-
-          nxmutex_unlock(&priv->lock);
           return NULL;
         }
 
@@ -1801,7 +1794,7 @@ int esp32s3_i2cbus_uninitialize(struct i2c_master_s *dev)
     {
 #ifndef CONFIG_I2C_POLLED
       up_disable_irq(priv->config->irq);
-      esp32s3_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
+      esp_teardown_irq(priv->config->periph, priv->cpuint);
 #endif
 
       i2c_deinit(priv);

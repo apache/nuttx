@@ -35,7 +35,7 @@
 #include <arch/board/board.h>
 #include <nuttx/sensors/zerocross.h>
 
-#include "esp32_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "hardware/esp32_gpio_sigmap.h"
 #include "esp32-wrover-kit.h"
 #include "esp32_zerocross.h"
@@ -82,7 +82,6 @@ static void zcross_enable(const struct zc_lowerhalf_s *lower,
                           zc_interrupt_t handler, void *arg)
 {
   irqstate_t flags;
-  int irq = ESP32_PIN2IRQ(GPIO_ZERO_CROSS_IRQ);
   int ret;
 
   flags = enter_critical_section();
@@ -95,16 +94,16 @@ static void zcross_enable(const struct zc_lowerhalf_s *lower,
 
   /* Start with all interrupts disabled */
 
-  esp32_gpioirqdisable(irq);
+  esp_gpioirqdisable(irq);
 
-  ret = irq_attach(irq, zcross_interrupt, NULL);
+  ret = esp_gpio_irq(GPIO_ZERO_CROSS_IRQ, zcross_interrupt, NULL);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: zcross_enable() failed: %d\n", ret);
       leave_critical_section(flags);
     }
 
-  esp32_gpioirqenable(irq, RISING);
+  esp_gpioirqenable(GPIO_ZERO_CROSS_IRQ);
 
   leave_critical_section(flags);
 }
@@ -142,7 +141,7 @@ static int zcross_interrupt(int irq, void *context, void *arg)
 
 int board_zerocross_initialize(int devno)
 {
-  esp32_configgpio(GPIO_ZERO_CROSS_IRQ, INPUT_FUNCTION_3 | PULLUP);
+  esp_configgpio(GPIO_ZERO_CROSS_IRQ, INPUT_FUNCTION_3 | PULLUP | RISING);
 
   /* Register the zero cross device as /dev/zc0 */
 

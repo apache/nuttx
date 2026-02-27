@@ -29,7 +29,7 @@
 
 #include "xtensa.h"
 
-#include "esp32s3_gpio.h"
+#include "esp_gpio.h"
 #include "esp32s3_psram.h"
 #include "esp32s3_spi_timing.h"
 

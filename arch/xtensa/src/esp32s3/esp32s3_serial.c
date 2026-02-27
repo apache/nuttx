@@ -43,9 +43,9 @@
 
 #include "xtensa.h"
 #include "esp32s3_config.h"
-#include "esp32s3_irq.h"
+#include "esp_irq.h"
 #include "esp32s3_lowputc.h"
-#include "esp32s3_gpio.h"
+#include "esp_gpio.h"
 #include "hardware/esp32s3_uart.h"
 #include "hardware/esp32s3_system.h"
 
@@ -323,8 +323,7 @@ static int uart_handler(int irq, void *context, void *arg)
     {
       if (dev->xmit.tail == dev->xmit.head)
         {
-          esp32s3_gpiowrite(priv->rs485_dir_gpio,
-                            !priv->rs485_dir_polarity);
+          esp_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
         }
     }
 #endif
@@ -545,15 +544,14 @@ static void esp32s3_shutdown(struct uart_dev_s *dev)
 static int esp32s3_attach(struct uart_dev_s *dev)
 {
   struct esp32s3_uart_s *priv = dev->priv;
-  int ret;
 
   DEBUGASSERT(priv->cpuint == -ENOMEM);
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
   priv->cpu = this_cpu();
-  priv->cpuint = esp32s3_setup_irq(priv->cpu, priv->periph, priv->int_pri,
-                                   ESP32S3_CPUINT_LEVEL);
+  priv->cpuint = esp_setup_irq(priv->periph, priv->int_pri,
+                               ESP_IRQ_TRIGGER_LEVEL, uart_handler, dev);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type */
@@ -561,19 +559,9 @@ static int esp32s3_attach(struct uart_dev_s *dev)
       return priv->cpuint;
     }
 
-  /* Attach and enable the IRQ */
+  up_enable_irq(priv->irq);
 
-  ret = irq_attach(priv->irq, uart_handler, dev);
-  if (ret == OK)
-    {
-      /* Enable the CPU interrupt (RX and TX interrupts are still disabled
-       * in the UART
-       */
-
-      up_enable_irq(priv->irq);
-    }
-
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -598,11 +586,10 @@ static void esp32s3_detach(struct uart_dev_s *dev)
   /* Disable and detach the CPU interrupt */
 
   up_disable_irq(priv->irq);
-  irq_detach(priv->irq);
 
   /* Disassociate the peripheral interrupt from the CPU interrupt */
 
-  esp32s3_teardown_irq(priv->cpu, priv->periph, priv->cpuint);
+  esp_teardown_irq(priv->periph, priv->cpuint);
   priv->cpuint = -ENOMEM;
 }
 
@@ -793,7 +780,7 @@ static void esp32s3_send(struct uart_dev_s *dev, int ch)
 #ifdef HAVE_RS485
   if (priv->rs485_dir_gpio != 0)
     {
-      esp32s3_gpiowrite(priv->rs485_dir_gpio, priv->rs485_dir_polarity);
+      esp_gpiowrite(priv->rs485_dir_gpio, priv->rs485_dir_polarity);
     }
 #endif
 

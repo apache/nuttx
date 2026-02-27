@@ -31,7 +31,6 @@
 
 #include "esp32s2_board_wdt.h"
 #include "esp32s2_wdt_lowerhalf.h"
-#include "esp32s2_wdt.h"
 
 /****************************************************************************
  * Pre-processor Definitions

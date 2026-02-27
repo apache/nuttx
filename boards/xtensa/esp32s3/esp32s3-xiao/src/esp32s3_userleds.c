@@ -33,7 +33,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "esp32s3_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "esp32s3-xiao.h"
 
 /****************************************************************************
@@ -61,7 +61,7 @@ uint32_t board_userled_initialize(void)
 
   for (i = 0; i < BOARD_NLEDS; i++)
     {
-      esp32s3_configgpio(g_ledcfg[i], OUTPUT);
+      esp_configgpio(g_ledcfg[i], OUTPUT);
     }
 
   return BOARD_NLEDS;
@@ -75,7 +75,7 @@ void board_userled(int led, bool ledon)
 {
   if ((unsigned)led < BOARD_NLEDS)
     {
-      esp32s3_gpiowrite(g_ledcfg[led], ledon);
+      esp_gpiowrite(g_ledcfg[led], ledon);
     }
 }
 
@@ -88,6 +88,5 @@ void board_userled_all(uint32_t ledset)
   bool ledon;
 
   ledon = ((ledset & BOARD_LED_L_BIT) != 0);
-  esp32s3_gpiowrite(ledset, ledon);
+  esp_gpiowrite(ledset, ledon);
 }
-

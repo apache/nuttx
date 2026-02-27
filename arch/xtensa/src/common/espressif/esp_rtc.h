@@ -1,5 +1,7 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/esp32_clockconfig.h
+ * arch/xtensa/src/common/espressif/esp_rtc.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_CLOCKCONFIG_H
-#define __ARCH_XTENSA_SRC_ESP32_ESP32_CLOCKCONFIG_H
+#ifndef __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_RTC_H
+#define __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_RTC_H
 
 /****************************************************************************
  * Included Files
@@ -27,56 +29,25 @@
 
 #include <nuttx/config.h>
 
-#include "esp_private/esp_clk.h"
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  esp32_update_cpu_freq
+ * Name: esp_rtc_driverinit
  *
  * Description:
- *   Set the real CPU ticks per us to the ets, so that ets_delay_us
- *   will be accurate. Call this function when CPU frequency is changed.
+ *   Initialize and register an RTC lower half driver.
  *
  * Input Parameters:
- *   ticks_per_us - CPU ticks per us
+ *   None.
  *
  * Returned Value:
- *   None
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on any failure.
  *
  ****************************************************************************/
 
-void esp32_update_cpu_freq(uint32_t ticks_per_us);
+int esp_rtc_driverinit(void);
 
-/****************************************************************************
- * Name: esp32_set_cpu_freq
- *
- * Description:
- *   Switch to one of PLL-based frequencies.
- *   Current frequency can be XTAL or PLL.
- *
- * Input Parameters:
- *   cpu_freq_mhz      - new CPU frequency
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32_set_cpu_freq(int cpu_freq_mhz);
-
-/****************************************************************************
- * Name: esp32_clockconfig
- *
- * Description:
- *   Called to initialize the ESP32.  This does whatever setup is needed to
- *   put the  SoC in a usable state.  This includes the initialization of
- *   clocking using the settings in board.h.
- *
- ****************************************************************************/
-
-void esp32_clockconfig(void);
-
-#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_CLOCKCONFIG_H */
+#endif /* __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_RTC_H */

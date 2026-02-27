@@ -38,12 +38,13 @@
 #include "xtensa.h"
 
 #include "hardware/esp32_dport.h"
-#include "hardware/esp32_rtccntl.h"
+#include "soc/rtc_cntl_reg.h"
 
 #include "esp32_region.h"
-#include "esp32_irq.h"
+#include "espressif/esp_irq.h"
 #include "esp32_smp.h"
-#include "esp32_gpio.h"
+#include "esp32_start.h"
+#include "espressif/esp_gpio.h"
 
 /****************************************************************************
  * Private Data
@@ -63,20 +64,23 @@ extern void ets_set_appcpu_boot_addr(uint32_t start);
 
 /****************************************************************************
  * Name: xtensa_attach_fromcpu0_interrupt
+ *
+ * Description:
+ *   Attach the inter-CPU interrupt for CPU1 to receive from CPU0.
+ *   This is called during early CPU1 boot.
+ *
  ****************************************************************************/
 
-static inline void xtensa_attach_fromcpu0_interrupt(void)
+static inline void IRAM_ATTR xtensa_attach_fromcpu0_interrupt(void)
 {
   int cpuint;
 
   /* Connect all CPU peripheral source to allocated CPU interrupt */
 
-  cpuint = esp32_setup_irq(1, ESP32_PERIPH_CPU_CPU0, 1, ESP32_CPUINT_LEVEL);
+  cpuint = esp_setup_irq(ESP32_PERIPH_CPU_CPU0, 1,
+                         ESP_IRQ_TRIGGER_LEVEL, esp32_fromcpu0_interrupt,
+                         NULL);
   DEBUGASSERT(cpuint >= 0);
-
-  /* Attach the inter-CPU interrupt. */
-
-  irq_attach(ESP32_IRQ_CPU_CPU0, (xcpt_t)esp32_fromcpu0_interrupt, NULL);
 
   /* Enable the inter 0 CPU interrupts. */
 
@@ -126,10 +130,6 @@ void IRAM_ATTR xtensa_appcpu_start(void)
   sched_note_cpu_started(tcb);
 #endif
 
-  /* Signal to the PRO CPU that the APP CPU has started. */
-
-  g_appcpu_started = true;
-
   /* Move CPU0 exception vectors to IRAM */
 
   __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (_init_start));
@@ -140,28 +140,16 @@ void IRAM_ATTR xtensa_appcpu_start(void)
 
   /* Initialize CPU interrupts */
 
-  esp32_cpuint_initialize();
-
-  /* Attach and enable internal interrupts */
+  esp_cpuint_initialize();
 
   /* Attach and enable the inter-CPU interrupt */
 
   xtensa_attach_fromcpu0_interrupt();
 
-  /* Enable the software interrupt */
-
-  up_enable_irq(XTENSA_IRQ_SWINT);
-
   /* Dump registers so that we can see what is going to happen on return */
 
 #if 0
   up_dump_register(tcb->xcp.regs);
-#endif
-
-#ifdef CONFIG_ESP32_GPIO_IRQ
-  /* Initialize GPIO interrupt support */
-
-  esp32_gpioirqinitialize(1);
 #endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
@@ -173,6 +161,12 @@ void IRAM_ATTR xtensa_appcpu_start(void)
 #if XCHAL_CP_NUM > 0
   xtensa_set_cpenable(CONFIG_XTENSA_CP_INITSET);
 #endif
+
+  sys_startup_fn();
+
+  /* Signal to the PRO CPU that the APP CPU has started. */
+
+  g_appcpu_started = true;
 
   /* Then switch contexts. This instantiates the exception context of the
    * tcb at the head of the assigned task list.  In this case, this should
@@ -275,4 +269,3 @@ int up_cpu_start(int cpu)
 
   return OK;
 }
-

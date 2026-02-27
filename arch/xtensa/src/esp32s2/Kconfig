@@ -233,7 +233,7 @@ config ESP32S2_I2S
 	default n
 	select I2S
 	select ARCH_DMA
-	select ESP32S2_GPIO_IRQ
+	select ESPRESSIF_GPIO_IRQ
 	select ESPRESSIF_I2S0
 	---help---
 		This is a deprecated Kconfig macro. Its kept for retrocompatibility only.
@@ -550,9 +550,11 @@ config ESP32S2_LEDC
 		Enable support to PWM on ESP32S2 using LEDC peripheral.
 
 config ESP32S2_RT_TIMER
-	bool "Real-time Timer"
-	select ESP32S2_TIMER
+	bool "Real-Time Timer"
 	default n
+	select ESPRESSIF_HR_TIMER
+	---help---
+		Deprecated: Use ESPRESSIF_HR_TIMER instead.
 
 endmenu # ESP32-S2 Peripheral Selection
 
@@ -577,8 +579,10 @@ endmenu # Memory Configuration
 
 config ESP32S2_GPIO_IRQ
 	bool "GPIO pin interrupts"
+	select ESPRESSIF_GPIO_IRQ
 	---help---
-		Enable support for interrupting GPIO pins.
+		This is a deprecated Kconfig macro. Its kept for retrocompatibility only.
+		Use "CONFIG_ESPRESSIF_GPIO_IRQ" instead.
 
 config ESP32S2_RTCIO_IRQ
 	bool "RTC IO interrupts"
@@ -606,7 +610,7 @@ config ESP32S2_SPI2_SLAVE
 	bool "SPI2 Slave mode"
 	default n
 	depends on SPI_SLAVE && ESP32S2_SPI2
-	select ESP32S2_GPIO_IRQ
+	select ESPRESSIF_GPIO_IRQ
 	---help---
 		Configure SPI2 to operate in Slave mode.
 
@@ -619,7 +623,7 @@ config ESP32S2_SPI3_SLAVE
 	bool "SPI3 Slave mode"
 	default n
 	depends on SPI_SLAVE && ESP32S2_SPI3
-	select ESP32S2_GPIO_IRQ
+	select ESPRESSIF_GPIO_IRQ
 	---help---
 		Configure SPI3 to operate in Slave mode.
 

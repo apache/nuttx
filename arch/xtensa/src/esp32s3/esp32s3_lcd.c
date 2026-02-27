@@ -37,10 +37,10 @@
 
 #include <arch/board/board.h>
 
-#include "esp32s3_clockconfig.h"
-#include "esp32s3_gpio.h"
+#include "esp_clk.h"
+#include "esp_gpio.h"
 #include "esp32s3_dma.h"
-#include "esp32s3_irq.h"
+#include "esp_irq.h"
 
 #include "xtensa.h"
 #include "hardware/esp32s3_system.h"
@@ -823,8 +823,8 @@ static void esp32s3_lcd_gpio_config(void)
     {
       const struct pin_config_s *pins_config = &config->pins_config[i];
 
-      esp32s3_configgpio(pins_config->num, OUTPUT);
-      esp32s3_gpio_matrix_out(pins_config->num, pins_config->signal, 0, 0);
+      esp_configgpio(pins_config->num, OUTPUT);
+      esp_gpio_matrix_out(pins_config->num, pins_config->signal, 0, 0);
     }
 }
 
@@ -969,13 +969,15 @@ static int esp32s3_lcd_config(void)
   flags = spin_lock_irqsave(&priv->lock);
 
   priv->cpu = this_cpu();
-  priv->cpuint = esp32s3_setup_irq(priv->cpu,
-                                   ESP32S3_PERIPH_LCD_CAM,
-                                   ESP32S3_INT_PRIO_DEF,
-                                   ESP32S3_CPUINT_LEVEL);
-  DEBUGASSERT(priv->cpuint >= 0);
-
-  DEBUGASSERT(irq_attach(ESP32S3_IRQ_LCD_CAM, lcd_interrupt, priv) == 0);
+  priv->cpuint = esp_setup_irq(ESP32S3_PERIPH_LCD_CAM,
+                               ESP32S3_INT_PRIO_DEF,
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               lcd_interrupt,
+                               priv);
+  if (priv->cpuint < 0)
+    {
+      return ERROR;
+    }
 
   spin_unlock_irqrestore(&priv->lock, flags);
 

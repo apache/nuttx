@@ -39,7 +39,7 @@
 #include <nuttx/signal.h>
 #include <arch/irq.h>
 
-#include "esp32s2_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "esp32s2_touch.h"
 
 #include "esp32s2-kaluga-1.h"
@@ -175,7 +175,7 @@ uint32_t board_button_initialize(void)
   esp32s2_touchsetthreshold(TP_VOLDN_CHANNEL, TOUCHPAD_THRESHOLD);
 
 #endif
-  esp32s2_configgpio(BUTTON_BOOT, INPUT_FUNCTION_3 | PULLUP);
+  esp_configgpio(BUTTON_BOOT, INPUT_FUNCTION_3 | PULLUP);
   return NUM_BUTTONS;
 }
 
@@ -211,13 +211,14 @@ uint32_t board_buttons(void)
         }
       else
         {
-          b0 = esp32s2_gpioread(button_info.input.gpio);
+          int i;
+          b0 = esp_gpioread(button_info.input.gpio);
 
-          for (int i = 0; i < 10; i++)
+          for (i = 0; i < 10; i++)
             {
               up_mdelay(1);
 
-              b1 = esp32s2_gpioread(button_info.input.gpio);
+              b1 = esp_gpioread(button_info.input.gpio);
 
               if (b0 == b1)
                 {
@@ -282,11 +283,11 @@ int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 
           esp32s2_touchirqdisable(irq);
 
-          esp32s2_touchregisterreleasecb(irqhandler);
-          ret = irq_attach(irq, irqhandler, arg);
+          ret = esp32s2_touchirqattach(irq, irqhandler, arg);
           if (ret < 0)
             {
-              syslog(LOG_ERR, "ERROR: irq_attach() failed: %d\n", ret);
+              syslog(LOG_ERR, "ERROR: esp32_touchirqattach() failed: %d\n",
+                     ret);
               return ret;
             }
 
@@ -307,37 +308,7 @@ int board_button_irq(int id, xcpt_t irqhandler, void *arg)
   else
 #endif
     {
-      int pin = button_info.input.gpio;
-      int irq = ESP32S2_PIN2IRQ(pin);
-
-      if (NULL != irqhandler)
-        {
-          /* Make sure the interrupt is disabled */
-
-          esp32s2_gpioirqdisable(irq);
-
-          ret = irq_attach(irq, irqhandler, arg);
-          if (ret < 0)
-            {
-              syslog(LOG_ERR, "ERROR: irq_attach() failed: %d\n", ret);
-              return ret;
-            }
-
-          gpioinfo("Attach %p to pin %d\n", irqhandler, pin);
-
-          gpioinfo("Enabling the interrupt\n");
-
-          /* Configure the interrupt for rising and falling edges */
-
-          esp32s2_gpioirqenable(irq, CHANGE);
-        }
-      else
-        {
-          gpioinfo("Disabled interrupts from pin %d\n", pin);
-          esp32s2_gpioirqdisable(irq);
-        }
-
-      return OK;
+      return esp_gpio_irq(button_info.input.gpio, irqhandler, arg);
     }
 }
 #endif

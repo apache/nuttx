@@ -37,8 +37,9 @@
 
 #include "xtensa.h"
 
-#include "esp32s3_gpio.h"
-#include "esp32s3_irq.h"
+#include "esp_gpio.h"
+#include "esp_irq.h"
+#include "espressif/esp_hr_timer.h"
 #include "esp32s3_touch.h"
 #include "esp32s3_touch_lowerhalf.h"
 
@@ -64,6 +65,14 @@ struct touch_config_meas_mode_s
   enum touch_cnt_slope_e slope;
   enum touch_tie_opt_e tie_opt;
 };
+
+#ifdef CONFIG_ESP32S3_TOUCH_IRQ
+struct touchirq_handler_s
+{
+  xcpt_t handler;
+  void  *arg;
+};
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -92,9 +101,11 @@ static uint32_t touch_pad_logic_threshold[TOUCH_SENSOR_PINS];
 static uint16_t touch_pad_isr_enabled = 0x0000;
 static enum touch_intr_mask_e touch_pad_isr_types = 0x0000;
 static int touch_last_irq = -1;
+static struct touchirq_handler_s
+  g_touchirq_handlers[ESP32S3_NIRQ_RTCIO_TOUCHPAD];
 static int (*touch_release_cb)(int, void *, void *) = NULL;
-static struct rt_timer_args_s irq_timer_args;
-static struct rt_timer_s *irq_timer_handler = NULL;
+static struct esp_hr_timer_args_s irq_timer_args;
+static struct esp_hr_timer_s *irq_timer_handler = NULL;
 #endif
 
 /****************************************************************************
@@ -128,9 +139,9 @@ static int touch_interrupt(int irq, void *context, void *arg)
 
   touch_lh_intr_disable(touch_pad_isr_types);
 
-  rt_timer_start(irq_timer_handler,
-                 CONFIG_ESP32S3_TOUCH_IRQ_INTERVAL_MS * USEC_PER_MSEC,
-                 false);
+  esp_hr_timer_start_once(irq_timer_handler,
+                          CONFIG_ESP32S3_TOUCH_IRQ_INTERVAL_MS * \
+                          USEC_PER_MSEC);
 
   /* Read and clear the touch interrupt status */
 
@@ -144,7 +155,14 @@ static int touch_interrupt(int irq, void *context, void *arg)
     {
       if ((touch_pad_isr_enabled >> pad_num) & 0x1)
         {
-          irq_dispatch(touch_last_irq, context);
+          if (pad_num >= 0 && pad_num < ESP32S3_NIRQ_RTCIO_TOUCHPAD &&
+              g_touchirq_handlers[pad_num].handler != NULL)
+            {
+              g_touchirq_handlers[pad_num].handler(
+                touch_last_irq,
+                context,
+                g_touchirq_handlers[pad_num].arg);
+            }
         }
     }
 
@@ -170,13 +188,25 @@ static int touch_interrupt(int irq, void *context, void *arg)
 #ifdef CONFIG_ESP32S3_TOUCH_IRQ
 static void touch_restore_irq(void *arg)
 {
-  if (touch_last_irq > 0 && touch_release_cb != NULL)
+  if (touch_last_irq >= ESP32S3_FIRST_RTCIOIRQ_TOUCHPAD &&
+      touch_last_irq <= ESP32S3_LAST_RTCIOIRQ_TOUCHPAD)
     {
-      /* Call the button interrupt handler again so we can detect touch pad
-       * releases
-       */
+      int bit = ESP32S3_IRQ2TOUCHPAD(touch_last_irq);
 
-      touch_release_cb(touch_last_irq, NULL, NULL);
+      if (bit >= 0 && bit < ESP32S3_NIRQ_RTCIO_TOUCHPAD &&
+          g_touchirq_handlers[bit].handler != NULL)
+        {
+          /* Call the button interrupt handler again so we can detect touch
+           * pad releases.
+           */
+
+          g_touchirq_handlers[bit].handler(touch_last_irq, NULL,
+                                          g_touchirq_handlers[bit].arg);
+        }
+      else if (touch_release_cb != NULL)
+        {
+          touch_release_cb(touch_last_irq, NULL, NULL);
+        }
     }
 
   touch_lh_intr_enable(touch_pad_isr_types);
@@ -265,7 +295,13 @@ static void touch_init(struct touch_config_s *config)
 #ifdef CONFIG_ESP32S3_TOUCH_IRQ
   irq_timer_args.arg = NULL;
   irq_timer_args.callback = touch_restore_irq;
-  rt_timer_create(&(irq_timer_args), &(irq_timer_handler));
+  irq_timer_args.name = "touch_irq";
+  irq_timer_args.skip_unhandled_events = false;
+
+  if (esp_hr_timer_create(&irq_timer_args, &irq_timer_handler) != OK)
+    {
+      ierr("ERROR: esp_hr_timer_create(irq) failed\n");
+    }
 
   touch_pad_isr_types = TOUCH_INTR_MASK_ACTIVE |
                         TOUCH_INTR_MASK_INACTIVE |
@@ -639,6 +675,84 @@ void esp32s3_touchirqdisable(int irq)
 #endif
 
 /****************************************************************************
+ * Name: esp32s3_touchirqattach
+ *
+ * Description:
+ *   Attach an interrupt handler to a specified touch pad IRQ.
+ *
+ * Input Parameters:
+ *   irq     - Touch pad IRQ number to attach the handler to
+ *   handler - Interrupt handler function
+ *   arg     - Argument to pass to the handler
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_TOUCH_IRQ
+int esp32s3_touchirqattach(int irq, xcpt_t handler, void *arg)
+{
+  int bit;
+
+  DEBUGASSERT(irq >= ESP32S3_FIRST_RTCIOIRQ_TOUCHPAD &&
+              irq <= ESP32S3_LAST_RTCIOIRQ_TOUCHPAD);
+
+  bit = ESP32S3_IRQ2TOUCHPAD(irq);
+  if (bit < 0 || bit >= ESP32S3_NIRQ_RTCIO_TOUCHPAD)
+    {
+      return -EINVAL;
+    }
+
+  g_touchirq_handlers[bit].handler = handler;
+  g_touchirq_handlers[bit].arg = arg;
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp32s3_touchirqdetach
+ *
+ * Description:
+ *   Detach the interrupt handler for the specified touch pad IRQ and
+ *   disable the interrupt.
+ *
+ * Input Parameters:
+ *   irq - Touch pad IRQ number to detach.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+int esp32s3_touchirqdetach(int irq)
+{
+  int bit;
+
+  DEBUGASSERT(irq >= ESP32S3_FIRST_RTCIOIRQ_TOUCHPAD &&
+              irq <= ESP32S3_LAST_RTCIOIRQ_TOUCHPAD);
+
+  bit = ESP32S3_IRQ2TOUCHPAD(irq);
+  if (bit < 0 || bit >= ESP32S3_NIRQ_RTCIO_TOUCHPAD)
+    {
+      return -EINVAL;
+    }
+
+  touch_lh_intr_disable(touch_pad_isr_types);
+
+  g_touchirq_handlers[bit].handler = NULL;
+  g_touchirq_handlers[bit].arg = NULL;
+  touch_pad_isr_enabled &= (~(UINT32_C(1) << bit));
+
+  touch_lh_intr_enable(touch_pad_isr_types);
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: esp32s3_touchregisterreleasecb
  *
  * Description:
@@ -652,9 +766,11 @@ void esp32s3_touchirqdisable(int irq)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ESP32S3_TOUCH_IRQ
 void esp32s3_touchregisterreleasecb(int (*func)(int, void *, void *))
 {
   DEBUGASSERT(func != NULL);
 
   touch_release_cb = func;
 }
+#endif

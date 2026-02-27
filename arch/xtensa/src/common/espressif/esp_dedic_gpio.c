@@ -46,19 +46,14 @@
 
 #include "chip.h"
 #include "esp_dedic_gpio.h"
-#if defined(CONFIG_ARCH_CHIP_ESP32S3)
-#include "esp32s3_gpio.h"
-#elif defined(CONFIG_ARCH_CHIP_ESP32S2)
-#include "esp32s2_irq.h"
-#include "esp32s2_gpio.h"
-#endif
-
+#include "espressif/esp_gpio.h"
 #if defined(CONFIG_ARCH_CHIP_ESP32S2)
 #include "soc/dedic_gpio_struct.h"
 #endif
 #include "hal/dedic_gpio_ll.h"
 #include "hal/dedic_gpio_cpu_ll.h"
-#include "soc/dedic_gpio_periph.h"
+#include "hal/dedic_gpio_periph.h"
+#include "hal/dedic_gpio_caps.h"
 #include "soc/gpio_sig_map.h"
 #include "periph_ctrl.h"
 #include "soc/soc_caps.h"
@@ -71,19 +66,11 @@
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_ESP32S3)
-#define esp_configgpio            esp32s3_configgpio
-#define esp_gpio_matrix_in        esp32s3_gpio_matrix_in
-#define esp_gpio_matrix_out       esp32s3_gpio_matrix_out
 #define ESP_IRQ_PRIORITY_DEFAULT  ESP32S3_INT_PRIO_DEF
-#define ESP_IRQ_TRIGGER_LEVEL     ESP32S3_CPUINT_LEVEL
+#define ESP_IRQ_TRIGGER_LEVEL     ESP_IRQ_TRIGGER_LEVEL
 #elif defined(CONFIG_ARCH_CHIP_ESP32S2)
-#define esp_setup_irq             esp32s2_setup_irq
-#define esp_teardown_irq          esp32s2_teardown_irq
-#define esp_configgpio            esp32s2_configgpio
-#define esp_gpio_matrix_in        esp32s2_gpio_matrix_in
-#define esp_gpio_matrix_out       esp32s2_gpio_matrix_out
 #define ESP_IRQ_PRIORITY_DEFAULT  ESP32S2_INT_PRIO_DEF
-#define ESP_IRQ_TRIGGER_LEVEL     ESP32S2_CPUINT_LEVEL
+#define ESP_IRQ_TRIGGER_LEVEL     ESP_IRQ_TRIGGER_LEVEL
 #endif
 
 /****************************************************************************
@@ -252,7 +239,7 @@ static int IRAM_ATTR esp_dedic_gpio_isr_default(int irq, void *context,
 }
 
 /****************************************************************************
- * Name: esp_pcnt_isr_register
+ * Name: esp_dedic_gpio_isr_register
  *
  * Description:
  *   This function registers an interrupt service routine (ISR) for the
@@ -271,26 +258,20 @@ static int IRAM_ATTR esp_dedic_gpio_isr_default(int irq, void *context,
 static int esp_dedic_gpio_isr_register(void)
 {
   int cpuint;
+#ifndef CONFIG_ARCH_CHIP_ESP32S2
   int ret;
+#endif
   int cpu = this_cpu();
   uint32_t status;
 
   cpuint = esp_setup_irq(dedic_gpio_periph_signals.irq,
                          ESP_IRQ_PRIORITY_DEFAULT,
-                         ESP_IRQ_TRIGGER_LEVEL);
+                         ESP_IRQ_TRIGGER_LEVEL,
+                         esp_dedic_gpio_isr_default,
+                         &dedic_gpio_common[cpu]);
   if (cpuint < 0)
     {
       cperr("Failed to allocate a CPU interrupt.\n");
-      return ERROR;
-    }
-
-  ret = irq_attach(dedic_gpio_periph_signals.irq + XTENSA_IRQ_FIRSTPERIPH,
-                   esp_dedic_gpio_isr_default,
-                   &dedic_gpio_common[cpu]);
-  if (ret < 0)
-    {
-      cperr("Couldn't attach IRQ to handler.\n");
-      esp_teardown_irq(dedic_gpio_periph_signals.irq, cpuint);
       return ERROR;
     }
 
@@ -538,9 +519,9 @@ struct file *esp_dedic_gpio_new_bundle(
         }
 
       dedic_gpio_common[cpu].out_occupied_mask =
-        UINT32_MAX & ~((1 << SOC_DEDIC_GPIO_OUT_CHANNELS_NUM) - 1);
+        UINT32_MAX & ~((1 << DEDIC_GPIO_CAPS_GET(OUT_CHANS_PER_CPU)) - 1);
       dedic_gpio_common[cpu].in_occupied_mask =
-        UINT32_MAX & ~((1 << SOC_DEDIC_GPIO_IN_CHANNELS_NUM) - 1);
+        UINT32_MAX & ~((1 << DEDIC_GPIO_CAPS_GET(IN_CHANS_PER_CPU)) - 1);
 
       spin_unlock_irqrestore(&dedic_gpio_common[cpu].spinlock, flags);
     }
@@ -557,11 +538,12 @@ struct file *esp_dedic_gpio_new_bundle(
       out_offset = 0;
       if (config->flags->output_enable)
         {
-          if (config->array_size > SOC_DEDIC_GPIO_OUT_CHANNELS_NUM)
+          if (config->array_size > DEDIC_GPIO_CAPS_GET(OUT_CHANS_PER_CPU))
             {
-              gpioerr("ERROR: array size(%d) exceeds maximum supported out\
+              gpioerr("ERROR: array size(%d) exceeds maximum supported out \
                        channels(%d)\n",
-                       config->array_size, SOC_DEDIC_GPIO_OUT_CHANNELS_NUM);
+                      config->array_size,
+                      DEDIC_GPIO_CAPS_GET(OUT_CHANS_PER_CPU));
               free(priv);
               return NULL;
             }
@@ -569,8 +551,9 @@ struct file *esp_dedic_gpio_new_bundle(
           flags = spin_lock_irqsave(&dedic_gpio_common[cpu].spinlock);
 
           for (int i = 0;
-                i <= SOC_DEDIC_GPIO_OUT_CHANNELS_NUM - config->array_size;
-                  i++)
+               i <= (DEDIC_GPIO_CAPS_GET(OUT_CHANS_PER_CPU) - \
+                     config->array_size);
+               i++)
             {
               if ((dedic_gpio_common[cpu].out_occupied_mask & (pattern << i))
                    == 0)
@@ -608,11 +591,12 @@ struct file *esp_dedic_gpio_new_bundle(
 
       if (config->flags->input_enable)
         {
-          if (config->array_size > SOC_DEDIC_GPIO_IN_CHANNELS_NUM)
+          if (config->array_size > DEDIC_GPIO_CAPS_GET(IN_CHANS_PER_CPU))
             {
               gpioerr("ERROR: array size(%d) exceeds maximum supported in\
                        channels(%d)\n",
-                       config->array_size, SOC_DEDIC_GPIO_IN_CHANNELS_NUM);
+                      config->array_size,
+                      DEDIC_GPIO_CAPS_GET(IN_CHANS_PER_CPU));
               free(priv);
               return NULL;
             }
@@ -620,8 +604,9 @@ struct file *esp_dedic_gpio_new_bundle(
           flags = spin_lock_irqsave(&dedic_gpio_common[cpu].spinlock);
 
           for (int i = 0;
-                i <= SOC_DEDIC_GPIO_IN_CHANNELS_NUM - config->array_size;
-                  i++)
+               i <= (DEDIC_GPIO_CAPS_GET(IN_CHANS_PER_CPU) - \
+                     config->array_size);
+               i++)
             {
               if ((dedic_gpio_common[cpu].in_occupied_mask &
                     (pattern << i)) == 0)

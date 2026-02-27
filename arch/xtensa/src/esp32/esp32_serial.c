@@ -53,8 +53,10 @@
 #include "hardware/esp32_uhci.h"
 #include "hardware/esp32_dma.h"
 #include "esp32_config.h"
-#include "esp32_gpio.h"
-#include "esp32_irq.h"
+#include "driver/uart_wakeup.h"
+#include "esp_sleep.h"
+#include "espressif/esp_gpio.h"
+#include "espressif/esp_irq.h"
 #include "esp32_dma.h"
 #include "hardware/esp32_dport.h"
 
@@ -401,6 +403,7 @@ static struct esp32_dev_s g_uart0priv =
   .parity         = CONFIG_UART0_PARITY,
   .bits           = CONFIG_UART0_BITS,
   .stopbits2      = CONFIG_UART0_2STOP,
+  .cpuint         = -ENOMEM,
 #ifdef CONFIG_SERIAL_TXDMA
 #  ifdef CONFIG_ESP32_UART0_TXDMA
   .txdma          = true,    /* TX DMA enabled for this UART */
@@ -488,6 +491,7 @@ static struct esp32_dev_s g_uart1priv =
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
   .stopbits2      = CONFIG_UART1_2STOP,
+  .cpuint         = -ENOMEM,
 #ifdef CONFIG_SERIAL_TXDMA
 #  ifdef CONFIG_ESP32_UART1_TXDMA
   .txdma          = true,    /* TX DMA enabled for this UART */
@@ -575,6 +579,7 @@ static struct esp32_dev_s g_uart2priv =
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
   .stopbits2      = CONFIG_UART2_2STOP,
+  .cpuint         = -ENOMEM,
 #ifdef CONFIG_SERIAL_TXDMA
 #  ifdef CONFIG_ESP32_UART2_TXDMA
   .txdma          = true,    /* TX DMA enabled for this UART */
@@ -997,6 +1002,7 @@ static int esp32_setup(struct uart_dev_s *dev)
 #endif
 
 #endif
+
   return OK;
 }
 
@@ -1052,13 +1058,13 @@ static void esp32_shutdown(struct uart_dev_s *dev)
 static int esp32_attach(struct uart_dev_s *dev)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
-  int ret = OK;
+
+  DEBUGASSERT(priv->cpuint == -ENOMEM);
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-  priv->cpu = this_cpu();
-  priv->cpuint = esp32_setup_irq(priv->cpu, priv->config->periph,
-                                 1, ESP32_CPUINT_LEVEL);
+  priv->cpuint = esp_setup_irq(priv->config->periph, 1,
+                               ESP_IRQ_TRIGGER_LEVEL, esp32_interrupt, dev);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type */
@@ -1066,19 +1072,13 @@ static int esp32_attach(struct uart_dev_s *dev)
       return priv->cpuint;
     }
 
-  /* Attach and enable the IRQ */
+  /* Enable the CPU interrupt (RX and TX interrupts are still disabled
+   * in the UART)
+   */
 
-  ret = irq_attach(priv->config->irq, esp32_interrupt, dev);
-  if (ret == OK)
-    {
-      /* Enable the CPU interrupt (RX and TX interrupts are still disabled
-       * in the UART
-       */
+  up_enable_irq(priv->config->irq);
 
-      up_enable_irq(priv->config->irq);
-    }
-
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -1095,15 +1095,11 @@ static void esp32_detach(struct uart_dev_s *dev)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
 
-  /* Disable and detach the CPU interrupt */
+  /* Disable and teardown the CPU interrupt */
 
   up_disable_irq(priv->config->irq);
-  irq_detach(priv->config->irq);
-
-  /* Disassociate the peripheral interrupt from the CPU interrupt */
-
-  esp32_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
-  priv->cpuint = -1;
+  esp_teardown_irq(priv->config->periph, priv->cpuint);
+  priv->cpuint = -ENOMEM;
 }
 
 #ifdef CONFIG_SERIAL_TXDMA
@@ -1160,8 +1156,6 @@ static inline void dma_disable_int(uint8_t dma_chan)
 static void dma_attach(uint8_t dma_chan)
 {
   int dma_cpuint;
-  int cpu;
-  int ret;
   int periph;
   int irq;
 
@@ -1186,8 +1180,8 @@ static void dma_attach(uint8_t dma_chan)
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-  cpu = this_cpu();
-  dma_cpuint = esp32_setup_irq(cpu, periph, 1, ESP32_CPUINT_LEVEL);
+  dma_cpuint = esp_setup_irq(periph, 1, ESP_IRQ_TRIGGER_LEVEL,
+                             esp32_interrupt_dma, NULL);
   if (dma_cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type */
@@ -1196,17 +1190,9 @@ static void dma_attach(uint8_t dma_chan)
       return;
     }
 
-  ret = irq_attach(irq, esp32_interrupt_dma, NULL);
-  if (ret == OK)
-    {
-      /* Enable the CPU interrupt */
+  /* Enable the CPU interrupt */
 
-      up_enable_irq(irq);
-    }
-  else
-    {
-      dmaerr("Couldn't attach IRQ to handler.\n");
-    }
+  up_enable_irq(irq);
 }
 
 /****************************************************************************
@@ -1399,7 +1385,7 @@ static int esp32_interrupt(int cpuint, void *context, void *arg)
           nfifo = REG_MASK(status, UART_TXFIFO_CNT);
           if (nfifo == 0)
             {
-              esp32_gpiowrite(priv->config->rs485_dir_gpio,
+              esp_gpiowrite(priv->config->rs485_dir_gpio,
                               !priv->config->rs485_dir_polarity);
             }
         }
@@ -1757,7 +1743,7 @@ static void esp32_send(struct uart_dev_s *dev, int ch)
 #ifdef HAVE_RS485
   if (priv->config->rs485_dir_gpio != 0)
     {
-      esp32_gpiowrite(priv->config->rs485_dir_gpio,
+      esp_gpiowrite(priv->config->rs485_dir_gpio,
                       priv->config->rs485_dir_polarity);
     }
 #endif
@@ -1888,18 +1874,18 @@ static void esp32_config_pins(struct esp32_dev_s *priv)
    * This "?" is the Unicode replacement character (U+FFFD)
    */
 
-  esp32_gpiowrite(priv->config->txpin, true);
-  esp32_configgpio(priv->config->txpin, OUTPUT_FUNCTION_3);
-  esp32_gpio_matrix_out(priv->config->txpin, priv->config->txsig, 0, 0);
+  esp_gpiowrite(priv->config->txpin, true);
+  esp_configgpio(priv->config->txpin, OUTPUT_FUNCTION_3);
+  esp_gpio_matrix_out(priv->config->txpin, priv->config->txsig, 0, 0);
 
-  esp32_configgpio(priv->config->rxpin, INPUT_FUNCTION_3);
-  esp32_gpio_matrix_in(priv->config->rxpin, priv->config->rxsig, 0);
+  esp_configgpio(priv->config->rxpin, INPUT_FUNCTION_3);
+  esp_gpio_matrix_in(priv->config->rxpin, priv->config->rxsig, 0);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   if (priv->iflow)
     {
-      esp32_configgpio(priv->config->rtspin, OUTPUT_FUNCTION_3);
-      esp32_gpio_matrix_out(priv->config->rtspin, priv->config->rtssig,
+      esp_configgpio(priv->config->rtspin, OUTPUT_FUNCTION_3);
+      esp_gpio_matrix_out(priv->config->rtspin, priv->config->rtssig,
                             0, 0);
     }
 
@@ -1907,18 +1893,18 @@ static void esp32_config_pins(struct esp32_dev_s *priv)
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   if (priv->oflow)
     {
-      esp32_configgpio(priv->config->ctspin, INPUT_FUNCTION_3);
-      esp32_gpio_matrix_in(priv->config->ctspin, priv->config->ctssig, 0);
+      esp_configgpio(priv->config->ctspin, INPUT_FUNCTION_3);
+      esp_gpio_matrix_in(priv->config->ctspin, priv->config->ctssig, 0);
     }
 #endif
 
 #ifdef HAVE_RS485
   if (priv->config->rs485_dir_gpio != 0)
     {
-      esp32_configgpio(priv->config->rs485_dir_gpio, OUTPUT_FUNCTION_3);
-      esp32_gpio_matrix_out(priv->config->rs485_dir_gpio,
+      esp_configgpio(priv->config->rs485_dir_gpio, OUTPUT_FUNCTION_3);
+      esp_gpio_matrix_out(priv->config->rs485_dir_gpio,
                             SIG_GPIO_OUT_IDX, 0, 0);
-      esp32_gpiowrite(priv->config->rs485_dir_gpio,
+      esp_gpiowrite(priv->config->rs485_dir_gpio,
                       !priv->config->rs485_dir_polarity);
     }
 #endif

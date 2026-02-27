@@ -36,9 +36,9 @@
 #include <nuttx/clock.h>
 #include <nuttx/spinlock.h>
 
-#include "esp32s3_clockconfig.h"
+#include "esp_clk.h"
 #include "esp32s3_freerun.h"
-#include "esp32s3_gpio.h"
+#include "esp_gpio.h"
 
 #ifdef CONFIG_ESP32S3_FREERUN
 

@@ -30,7 +30,7 @@
 #include <nuttx/board.h>
 
 #include "xtensa.h"
-#include "hardware/esp32s3_rtccntl.h"
+#include "soc/rtc_cntl_reg.h"
 
 #include "esp32s3_reset_reasons.h"
 
@@ -52,7 +52,7 @@ soc_reset_reason_t esp32s3_reset_reasons(int cpu)
   uint32_t regshift;
   uint32_t regval;
 
-  regval = getreg32(RTC_CNTL_RTC_RESET_STATE_REG);
+  regval = getreg32(RTC_CNTL_RESET_STATE_REG);
 
 #ifdef CONFIG_SMP
   if (cpu != 0)

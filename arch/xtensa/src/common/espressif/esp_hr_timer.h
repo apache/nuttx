@@ -1,5 +1,7 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s3/esp32s3_rtc_lowerhalf.h
+ * arch/xtensa/src/common/espressif/esp_hr_timer.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,39 +20,15 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_RTC_LOWERHALF_H
-#define __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_RTC_LOWERHALF_H
+#ifndef __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_HR_TIMER_H
+#define __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_HR_TIMER_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+/* This is a compatibility wrapper for the new ESP-HAL timer adapter */
 
-#ifdef CONFIG_RTC_DRIVER
+#include "esp_timer_adapter.h"
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: esp32s3_rtc_driverinit
- *
- * Description:
- *   Bind the configuration timer to a timer lower half instance and register
- *   the timer drivers at 'devpath'
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned
- *   to indicate the nature of any failure.
- *
- ****************************************************************************/
-
-int esp32s3_rtc_driverinit(void);
-
-#endif /* CONFIG_RTC_DRIVER */
-
-#endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_RTC_LOWERHALF_H */
+#endif /* __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_HR_TIMER_H */

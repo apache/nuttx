@@ -45,8 +45,8 @@
 #include <arch/board/board.h>
 
 #include "esp32s2_spi.h"
-#include "esp32s2_irq.h"
-#include "esp32s2_gpio.h"
+#include "espressif/esp_irq.h"
+#include "espressif/esp_gpio.h"
 
 #ifdef CONFIG_ESP32S2_SPI_DMA
 #include "esp32s2_dma.h"
@@ -217,7 +217,7 @@ struct spislave_priv_s
 /* SPI Slave controller interrupt handlers */
 
 static int spislave_cs_interrupt(int irq, void *context, void *arg);
-static int spislave_periph_interrupt(int irq, void *context, void *arg);
+static void spislave_periph_interrupt(void *arg);
 
 /* SPI Slave controller internal functions */
 
@@ -947,7 +947,7 @@ static void spislave_prepare_next_tx(struct spislave_priv_s *priv)
  *
  ****************************************************************************/
 
-static int spislave_periph_interrupt(int irq, void *context, void *arg)
+static void spislave_periph_interrupt(void *arg)
 {
   struct spislave_priv_s *priv = (struct spislave_priv_s *)arg;
   uint32_t regval = getreg32(SPI_SLAVE1_REG(priv->config->id));
@@ -983,7 +983,7 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg)
 
   spislave_prepare_next_tx(priv);
 
-  if (priv->is_processing && esp32s2_gpioread(priv->config->cs_pin))
+  if (priv->is_processing && esp_gpioread(priv->config->cs_pin))
     {
       priv->is_processing = false;
       SPIS_DEV_SELECT(priv->dev, false);
@@ -992,8 +992,6 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg)
   /* Clear the trans_done interrupt flag */
 
   setbits(int_clear, SPI_DMA_INT_CLR_REG(priv->config->id));
-
-  return 0;
 }
 
 /****************************************************************************
@@ -1066,16 +1064,16 @@ static void spislave_initializ_iomux(struct spislave_priv_s *priv)
   uint32_t attr = INPUT_FUNCTION_5 | DRIVE_0;
   const struct spislave_config_s *config = priv->config;
 
-  esp32s2_configgpio(config->cs_pin,  attr);
-  esp32s2_configgpio(config->clk_pin, attr);
+  esp_configgpio(config->cs_pin, attr | RISING);
+  esp_configgpio(config->clk_pin, attr);
 
-  esp32s2_gpio_matrix_out(config->cs_pin,   SIG_GPIO_OUT_IDX, 0, 0);
-  esp32s2_gpio_matrix_out(config->clk_pin,  SIG_GPIO_OUT_IDX, 0, 0);
-  esp32s2_gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
-  esp32s2_gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->cs_pin,   SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->clk_pin,  SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
 
-  esp32s2_configgpio(config->mosi_pin, attr);
-  esp32s2_configgpio(config->miso_pin, OUTPUT_FUNCTION_5);
+  esp_configgpio(config->mosi_pin, attr);
+  esp_configgpio(config->miso_pin, OUTPUT_FUNCTION_5);
 }
 #endif
 
@@ -1099,17 +1097,17 @@ static void spislave_initializ_iomatrix(struct spislave_priv_s *priv)
   uint32_t attr = INPUT | DRIVE_0;
   const struct spislave_config_s *config = priv->config;
 
-  esp32s2_configgpio(config->cs_pin, attr);
-  esp32s2_gpio_matrix_in(config->cs_pin, config->cs_insig, 0);
+  esp_configgpio(config->cs_pin, attr | RISING);
+  esp_gpio_matrix_in(config->cs_pin, config->cs_insig, 0);
 
-  esp32s2_configgpio(config->clk_pin, attr);
-  esp32s2_gpio_matrix_in(config->clk_pin, config->clk_insig, 0);
+  esp_configgpio(config->clk_pin, attr);
+  esp_gpio_matrix_in(config->clk_pin, config->clk_insig, 0);
 
-  esp32s2_configgpio(config->mosi_pin, attr);
-  esp32s2_gpio_matrix_in(config->mosi_pin, config->mosi_insig, 0);
+  esp_configgpio(config->mosi_pin, attr);
+  esp_gpio_matrix_in(config->mosi_pin, config->mosi_insig, 0);
 
-  esp32s2_configgpio(config->miso_pin, OUTPUT);
-  esp32s2_gpio_matrix_out(config->miso_pin, config->miso_outsig, 0, 0);
+  esp_configgpio(config->miso_pin, OUTPUT);
+  esp_gpio_matrix_out(config->miso_pin, config->miso_outsig, 0, 0);
 }
 #endif
 
@@ -1205,7 +1203,7 @@ static void spislave_initialize(struct spi_slave_ctrlr_s *ctrlr)
   spislave_dma_init(priv);
 #endif
 
-  esp32s2_gpioirqenable(ESP32S2_PIN2IRQ(config->cs_pin), RISING);
+  esp_gpioirqenable(config->cs_pin);
 
   /* Force a transaction done interrupt.
    * This interrupt won't fire yet because we initialized the SPI interrupt
@@ -1237,7 +1235,7 @@ static void spislave_deinitialize(struct spi_slave_ctrlr_s *ctrlr)
 {
   struct spislave_priv_s *priv = (struct spislave_priv_s *)ctrlr;
 
-  esp32s2_gpioirqdisable(ESP32S2_PIN2IRQ(priv->config->cs_pin));
+  esp_gpioirqdisable(priv->config->cs_pin);
 
   /* Disable the trans_done interrupt */
 
@@ -1374,7 +1372,7 @@ static void spislave_unbind(struct spi_slave_ctrlr_s *ctrlr)
 
   up_disable_irq(priv->config->irq);
 
-  esp32s2_gpioirqdisable(ESP32S2_PIN2IRQ(priv->config->cs_pin));
+  esp_gpioirqdisable(priv->config->cs_pin);
 
   /* Disable the trans_done interrupt */
 
@@ -1596,6 +1594,7 @@ struct spi_slave_ctrlr_s *esp32s2_spislave_ctrlr_initialize(int port)
   struct spi_slave_ctrlr_s *spislave_dev;
   struct spislave_priv_s *priv;
   irqstate_t flags;
+  int ret;
 
   switch (port)
     {
@@ -1626,28 +1625,25 @@ struct spi_slave_ctrlr_s *esp32s2_spislave_ctrlr_initialize(int port)
 
   /* Attach IRQ for CS pin interrupt */
 
-  DEBUGVERIFY(irq_attach(ESP32S2_PIN2IRQ(priv->config->cs_pin),
-                         spislave_cs_interrupt,
-                         priv));
+  ret = esp_gpio_irq(priv->config->cs_pin,
+                     spislave_cs_interrupt,
+                     priv);
+  if (ret < 0)
+    {
+      spierr("esp_gpio_irq() failed: %d\n", ret);
+      leave_critical_section(flags);
+      return NULL;
+    }
 
   priv->cpu = this_cpu();
-  priv->cpuint = esp32s2_setup_irq(priv->config->periph,
-                                   ESP32S2_INT_PRIO_DEF,
-                                   ESP32S2_CPUINT_LEVEL);
+  priv->cpuint = esp_setup_irq(priv->config->periph,
+                               ESP32S2_INT_PRIO_DEF,
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               spislave_periph_interrupt, priv);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type. */
 
-      leave_critical_section(flags);
-
-      return NULL;
-    }
-
-  if (irq_attach(priv->config->irq, spislave_periph_interrupt, priv) != OK)
-    {
-      /* Failed to attach IRQ, so CPU interrupt must be freed. */
-
-      esp32s2_teardown_irq(priv->config->periph, priv->cpuint);
       leave_critical_section(flags);
 
       return NULL;
@@ -1695,7 +1691,7 @@ int esp32s2_spislave_ctrlr_uninitialize(struct spi_slave_ctrlr_s *ctrlr)
     }
 
   up_disable_irq(priv->config->irq);
-  esp32s2_teardown_irq(priv->config->periph, priv->cpuint);
+  esp_teardown_irq(priv->config->periph, priv->cpuint);
   priv->cpuint = -ENOMEM;
 
   spislave_deinitialize(ctrlr);

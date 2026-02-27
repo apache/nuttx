@@ -33,16 +33,16 @@
 #include <nuttx/kmalloc.h>
 
 #include "espressif/esp_i2c_bitbang.h"
+#include "espressif/esp_gpio.h"
 
-#if defined(CONFIG_ARCH_CHIP_ESP32S3)
-#include "esp32s3_gpio.h"
-#include "hardware/esp32s3_gpio_sigmap.h"
+#if defined(CONFIG_ARCH_CHIP_ESP32)
+#  include "esp32_gpio_sigmap.h"
 #elif defined(CONFIG_ARCH_CHIP_ESP32S2)
-#include "esp32s2_gpio.h"
-#include "esp32s2_gpio_sigmap.h"
+#  include "esp32s2_gpio_sigmap.h"
+#elif defined(CONFIG_ARCH_CHIP_ESP32S3)
+#  include "esp32s3_gpio_sigmap.h"
 #else
-#include "esp32_gpio.h"
-#include "esp32_gpio_sigmap.h"
+#  error "Unsupported chip"
 #endif
 
 /****************************************************************************
@@ -50,23 +50,23 @@
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_ESP32S3)
-#define CONFIG_GPIO(pin, attr)                 esp32s3_configgpio(pin, attr)
-#define GPIO_MATRIX_OUT(pin, idx, inv, en_inv) esp32s3_gpio_matrix_out(pin, \
+#define CONFIG_GPIO(pin, attr)                 esp_configgpio(pin, attr)
+#define GPIO_MATRIX_OUT(pin, idx, inv, en_inv) esp_gpio_matrix_out(pin, \
                                                           idx, inv, en_inv)
-#define GPIO_WRITE(pin, value)                 esp32s3_gpiowrite(pin, value)
-#define GPIO_READ(pin)                         esp32s3_gpioread(pin)
+#define GPIO_WRITE(pin, value)                 esp_gpiowrite(pin, value)
+#define GPIO_READ(pin)                         esp_gpioread(pin)
 #elif defined(CONFIG_ARCH_CHIP_ESP32S2)
-#define CONFIG_GPIO(pin, attr)                 esp32s2_configgpio(pin, attr)
-#define GPIO_MATRIX_OUT(pin, idx, inv, en_inv) esp32s2_gpio_matrix_out(pin, \
+#define CONFIG_GPIO(pin, attr)                 esp_configgpio(pin, attr)
+#define GPIO_MATRIX_OUT(pin, idx, inv, en_inv) esp_gpio_matrix_out(pin, \
                                                           idx, inv, en_inv)
-#define GPIO_WRITE(pin, value)                 esp32s2_gpiowrite(pin, value)
-#define GPIO_READ(pin)                         esp32s2_gpioread(pin)
+#define GPIO_WRITE(pin, value)                 esp_gpiowrite(pin, value)
+#define GPIO_READ(pin)                         esp_gpioread(pin)
 #else
-#define CONFIG_GPIO(pin, attr)                 esp32_configgpio(pin, attr)
-#define GPIO_MATRIX_OUT(pin, idx, inv, en_inv) esp32_gpio_matrix_out(pin,   \
+#define CONFIG_GPIO(pin, attr)                 esp_configgpio(pin, attr)
+#define GPIO_MATRIX_OUT(pin, idx, inv, en_inv) esp_gpio_matrix_out(pin,   \
                                                           idx, inv, en_inv)
-#define GPIO_WRITE(pin, value)                 esp32_gpiowrite(pin, value)
-#define GPIO_READ(pin)                         esp3_gpioread(pin)
+#define GPIO_WRITE(pin, value)                 esp_gpiowrite(pin, value)
+#define GPIO_READ(pin)                         esp_gpioread(pin)
 #endif
 
 /****************************************************************************

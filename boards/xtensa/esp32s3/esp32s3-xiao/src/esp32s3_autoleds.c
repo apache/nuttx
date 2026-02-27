@@ -33,7 +33,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "esp32s3_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "esp32s3-xiao.h"
 
 #ifdef CONFIG_ARCH_LEDS
@@ -79,7 +79,7 @@ void board_autoled_initialize(void)
 {
   /* Configure RX and TX LED GPIOs for output */
 
-  esp32s3_configgpio(GPIO_LED1, OUTPUT);
+  esp_configgpio(GPIO_LED1, OUTPUT);
 }
 
 /****************************************************************************
@@ -106,7 +106,7 @@ void board_autoled_on(int led)
 
   /* High illuminates */
 
-  esp32s3_gpiowrite(GPIO_LED1, ledon);
+  esp_gpiowrite(GPIO_LED1, ledon);
 }
 
 /****************************************************************************
@@ -128,7 +128,7 @@ void board_autoled_off(int led)
 
   /* High illuminates */
 
-  esp32s3_gpiowrite(GPIO_LED1, false);
+  esp_gpiowrite(GPIO_LED1, false);
 }
 
 #endif /* CONFIG_ARCH_LEDS */

@@ -26,7 +26,7 @@
 #include <nuttx/power/pm.h>
 
 #include "xtensa.h"
-#include "esp32_pm.h"
+#include "espressif/esp_pm.h"
 
 #ifdef CONFIG_PM
 

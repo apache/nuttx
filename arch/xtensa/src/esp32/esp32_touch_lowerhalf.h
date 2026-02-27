@@ -33,11 +33,11 @@
 #include "xtensa.h"
 
 #include "hardware/esp32_rtc_io.h"
-#include "hardware/esp32_rtccntl.h"
+#include "soc/rtc_cntl_reg.h"
 #include "hardware/esp32_touch.h"
 #include "hardware/esp32_sens.h"
 
-#include "esp32_rt_timer.h"
+#include "esp_hr_timer.h"
 #include "esp32_rtc_gpio.h"
 
 /****************************************************************************

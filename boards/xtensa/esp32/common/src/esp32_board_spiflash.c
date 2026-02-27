@@ -109,8 +109,9 @@ static int init_ota_partitions(void)
 {
   struct mtd_dev_s *mtd;
   int ret = OK;
+  int i;
 
-  for (int i = 0; i < nitems(g_ota_partition_table); ++i)
+  for (i = 0; i < nitems(g_ota_partition_table); ++i)
     {
       const struct partition_s *part = &g_ota_partition_table[i];
       mtd = esp_spiflash_alloc_mtdpart(part->firstblock, part->blocksize);
@@ -440,12 +441,6 @@ static int init_storage_partition(void)
 int board_spiflash_init(void)
 {
   int ret = OK;
-
-  ret = esp_spiflash_init();
-  if (ret < 0)
-    {
-      return ret;
-    }
 
 #ifdef CONFIG_ESP32_HAVE_OTA_PARTITION
   ret = init_ota_partitions();

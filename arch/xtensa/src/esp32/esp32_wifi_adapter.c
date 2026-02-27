@@ -43,20 +43,21 @@
 #include <nuttx/tls.h>
 
 #include "xtensa.h"
-#include "xtensa_attr.h"
 #include "hardware/esp32_dport.h"
 #include "hardware/esp32_emac.h"
 #include "espressif/esp_wireless.h"
 #include "esp32_wifi_adapter.h"
-#include "esp32_rt_timer.h"
-
+#include "esp_hr_timer.h"
+#include "esp_irq.h"
+#include "esp_cpu.h"
 #include "espressif/esp_wireless.h"
 #include "espressif/esp_wifi_utils.h"
+#include "platform/os.h"
 
 #include "periph_ctrl.h"
 
 #ifdef CONFIG_PM
-#  include "esp32_pm.h"
+#  include "espressif/esp_pm.h"
 #endif
 
 #ifdef CONFIG_ESPRESSIF_BLE
@@ -78,29 +79,31 @@
  * Private Types
  ****************************************************************************/
 
-/* Wi-Fi interrupt adapter private data */
-
-struct irq_adpt
-{
-  void (*func)(void *arg);  /* Interrupt callback function */
-  void *arg;                /* Interrupt private data */
-};
-
-/* Wi-Fi message queue private data */
-
-struct mq_adpt
-{
-  struct file mq;           /* Message queue handle */
-  uint32_t    msgsize;      /* Message size */
-  char        name[16];     /* Message queue name */
-};
-
 /* Wi-Fi time private data */
 
 struct time_adpt
 {
   time_t      sec;          /* Second value */
   suseconds_t usec;         /* Micro second value */
+};
+
+typedef struct shared_vector_desc_t shared_vector_desc_t;
+typedef struct vector_desc_t vector_desc_t;
+
+typedef struct intr_handle_data_t
+{
+  vector_desc_t *vector_desc;
+  shared_vector_desc_t *shared_vector_desc;
+} intr_handle_data_t;
+
+struct vector_desc_t
+{
+  int flags: 16;
+  unsigned int cpu: 1;
+  unsigned int intno: 5;
+  int source: 16;
+  shared_vector_desc_t *shared_vec_info;
+  vector_desc_t *next;
 };
 
 /****************************************************************************
@@ -116,12 +119,12 @@ static int is_in_isr_wrapper(void);
 #endif /* CONFIG_ESPRESSIF_WIFI_BT_COEXIST */
 
 static bool wifi_env_is_chip(void);
-static void wifi_set_intr(int32_t cpu_no, uint32_t intr_source,
-                          uint32_t intr_num, int32_t intr_prio);
-static void wifi_clear_intr(uint32_t intr_source, uint32_t intr_num);
-static void esp_set_isr(int32_t n, void *f, void *arg);
-static void esp32_ints_on(uint32_t mask);
-static void esp32_ints_off(uint32_t mask);
+static void set_intr_wrapper(int32_t cpu_no, uint32_t intr_source,
+                             uint32_t intr_num, int32_t intr_prio);
+static void clear_intr_wrapper(uint32_t intr_source, uint32_t intr_num);
+static void set_isr_wrapper(int32_t n, void *f, void *arg);
+static void esp_cpu_intr_enable(uint32_t mask);
+static void esp_cpu_intr_disable(uint32_t mask);
 static bool wifi_is_from_isr(void);
 static void *esp_spin_lock_create(void);
 static void esp_spin_lock_delete(void *lock);
@@ -180,8 +183,8 @@ static uint32_t esp_get_free_heap_size(void);
 static uint32_t esp_rand(void);
 static void esp_dport_access_stall_other_cpu_start(void);
 static void esp_dport_access_stall_other_cpu_end(void);
-static void wifi_apb80m_request(void);
-static void wifi_apb80m_release(void);
+static void wifi_apb80m_request_wrapper(void);
+static void wifi_apb80m_release_wrapper(void);
 static void esp_phy_enable_wrapper(void);
 static void esp_phy_disable_wrapper(void);
 static int esp_wifi_read_mac(uint8_t *mac, unsigned int type);
@@ -268,6 +271,13 @@ static int coex_schm_flexible_period_set_wrapper(uint8_t period);
 static uint8_t coex_schm_flexible_period_get_wrapper(void);
 static void * coex_schm_get_phase_by_idx_wrapper(int phase_idx);
 
+extern vector_desc_t *get_desc_for_int(int intno, int cpu);
+
+#ifdef CONFIG_PM_ENABLE
+extern void wifi_apb80m_request(void);
+extern void wifi_apb80m_release(void);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -311,11 +321,11 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
 {
   ._version = ESP_WIFI_OS_ADAPTER_VERSION,
   ._env_is_chip = wifi_env_is_chip,
-  ._set_intr = wifi_set_intr,
-  ._clear_intr = wifi_clear_intr,
-  ._set_isr = esp_set_isr,
-  ._ints_on = esp32_ints_on,
-  ._ints_off = esp32_ints_off,
+  ._set_intr = set_intr_wrapper,
+  ._clear_intr = clear_intr_wrapper,
+  ._set_isr = set_isr_wrapper,
+  ._ints_on = esp_cpu_intr_enable,
+  ._ints_off = esp_cpu_intr_disable,
   ._is_from_isr = wifi_is_from_isr,
   ._spin_lock_create = esp_spin_lock_create,
   ._spin_lock_delete = esp_spin_lock_delete,
@@ -361,8 +371,8 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
       esp_dport_access_stall_other_cpu_start,
   ._dport_access_stall_other_cpu_end_wrap =
       esp_dport_access_stall_other_cpu_end,
-  ._wifi_apb80m_request = wifi_apb80m_request,
-  ._wifi_apb80m_release = wifi_apb80m_release,
+  ._wifi_apb80m_request = wifi_apb80m_request_wrapper,
+  ._wifi_apb80m_release = wifi_apb80m_release_wrapper,
   ._phy_disable = esp_phy_disable_wrapper,
   ._phy_enable = esp_phy_enable_wrapper,
   ._phy_common_clock_enable = esp_phy_common_clock_enable,
@@ -442,31 +452,6 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp_int_adpt_cb
- *
- * Description:
- *   Wi-Fi interrupt adapter callback function
- *
- * Input Parameters:
- *   irq     - Number of the IRQ that generated the interrupt
- *   context - Interrupt register state save info (not used)
- *   arg     - Argument passed to the interrupt callback
- *
- * Returned Value:
- *   OK
- *
- ****************************************************************************/
-
-static int esp_int_adpt_cb(int irq, void *context, void *arg)
-{
-  struct irq_adpt *adapter = (struct irq_adpt *)arg;
-
-  adapter->func(adapter->arg);
-
-  return 0;
-}
-
-/****************************************************************************
  * Name: esp_thread_semphr_free
  *
  * Description:
@@ -512,7 +497,7 @@ static void esp_update_time(struct timespec *timespec, uint32_t ticks)
 }
 
 /****************************************************************************
- * Name: esp_set_isr
+ * Name: set_isr_wrapper
  *
  * Description:
  *   Register interrupt function
@@ -527,88 +512,9 @@ static void esp_update_time(struct timespec *timespec, uint32_t ticks)
  *
  ****************************************************************************/
 
-static void esp_set_isr(int32_t n, void *f, void *arg)
+static void set_isr_wrapper(int32_t n, void *f, void *arg)
 {
-  int ret;
-  uint32_t tmp;
-  struct irq_adpt *adapter;
-  int irq = n + XTENSA_IRQ_FIRSTPERIPH;
-
-  wlinfo("n=%" PRId32 " f=%p arg=%p irq=%d\n", n, f, arg, irq);
-
-  if (g_irqvector[irq].handler &&
-      g_irqvector[irq].handler != irq_unexpected_isr)
-    {
-      wlinfo("irq=%d has been set handler=%p\n", irq,
-             g_irqvector[irq].handler);
-      return;
-    }
-
-  tmp = sizeof(struct irq_adpt);
-  adapter = kmm_malloc(tmp);
-  if (!adapter)
-    {
-      wlerr("Failed to alloc %" PRIu32 " memory\n", tmp);
-      PANIC();
-      return;
-    }
-
-  adapter->func = f;
-  adapter->arg = arg;
-
-  ret = irq_attach(irq, esp_int_adpt_cb, adapter);
-  if (ret)
-    {
-      wlerr("Failed to attach IRQ %d\n", irq);
-      PANIC();
-      return;
-    }
-}
-
-/****************************************************************************
- * Name: esp32_ints_on
- *
- * Description:
- *   Enable Wi-Fi interrupt
- *
- * Input Parameters:
- *   mask - No mean
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void esp32_ints_on(uint32_t mask)
-{
-  int irq = __builtin_ffs(mask) - 1;
-
-  wlinfo("INFO mask=0x08%" PRIx32 " irq=%d\n", mask, irq);
-
-  up_enable_irq(ESP32_IRQ_MAC);
-}
-
-/****************************************************************************
- * Name: esp32_ints_off
- *
- * Description:
- *   Disable Wi-Fi interrupt
- *
- * Input Parameters:
- *   mask - No mean
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void esp32_ints_off(uint32_t mask)
-{
-  uint32_t irq = __builtin_ffs(mask) - 1;
-
-  wlinfo("INFO mask=0x08%" PRIx32 " irq=%" PRIu32 "\n", mask, irq);
-
-  up_disable_irq(ESP32_IRQ_MAC);
+  xt_set_interrupt_handler(n, (xt_handler)f, arg);
 }
 
 /****************************************************************************
@@ -1843,7 +1749,7 @@ static bool wifi_env_is_chip(void)
 }
 
 /****************************************************************************
- * Name: wifi_set_intr
+ * Name: set_intr_wrapper
  *
  * Description:
  *   Do nothing
@@ -1859,24 +1765,43 @@ static bool wifi_env_is_chip(void)
  *
  ****************************************************************************/
 
-static void wifi_set_intr(int32_t cpu_no, uint32_t intr_source,
+static void set_intr_wrapper(int32_t cpu_no, uint32_t intr_source,
                           uint32_t intr_num, int32_t intr_prio)
 {
+  intr_handle_t handle;
+  int irq = ESP_SOURCE2IRQ(intr_source);
+
   wlinfo("cpu_no=%" PRId32 ", intr_source=%" PRIu32
          ", intr_num=%" PRIu32 ", intr_prio=%" PRId32 "\n",
          cpu_no, intr_source, intr_num, intr_prio);
+
+  esp_rom_route_intr_matrix(cpu_no, intr_source, intr_num);
+
+  handle = kmm_calloc(1, sizeof(intr_handle_data_t));
+  if (handle == NULL)
+    {
+      wlerr("Failed to kmm_calloc\n");
+      return;
+    }
+
+  handle->vector_desc = get_desc_for_int(intr_num, cpu_no);
+  handle->vector_desc->source = intr_source;
+
+  /* Register the handle - it contains all needed information (cpuint, cpu) */
+
+  esp_set_handle(cpu_no, irq, handle);
 }
 
 /****************************************************************************
- * Name: wifi_clear_intr
+ * Name: clear_intr_wrapper
  *
  * Description:
  *   Don't support
  *
  ****************************************************************************/
 
-static void IRAM_ATTR wifi_clear_intr(uint32_t intr_source,
-                                      uint32_t intr_num)
+static void IRAM_ATTR clear_intr_wrapper(uint32_t intr_source,
+                                         uint32_t intr_num)
 {
 }
 
@@ -1971,10 +1896,10 @@ static void esp_dport_access_stall_other_cpu_end(void)
  *
  ****************************************************************************/
 
-static void wifi_apb80m_request(void)
+static void IRAM_ATTR wifi_apb80m_request_wrapper(void)
 {
-#ifdef CONFIG_ESP32_AUTO_SLEEP
-  esp32_pm_lockacquire();
+#ifdef CONFIG_PM_ENABLE
+  wifi_apb80m_request();
 #endif
 }
 
@@ -1986,10 +1911,10 @@ static void wifi_apb80m_request(void)
  *
  ****************************************************************************/
 
-static void wifi_apb80m_release(void)
+static void IRAM_ATTR wifi_apb80m_release_wrapper(void)
 {
-#ifdef CONFIG_ESP32_AUTO_SLEEP
-  esp32_pm_lockrelease();
+#ifdef CONFIG_PM_ENABLE
+  wifi_apb80m_release();
 #endif
 }
 
@@ -2320,7 +2245,7 @@ static void wifi_rtc_disable_iso(void)
 
 int64_t esp32_timer_get_time(void)
 {
-  return (int64_t)rt_timer_time_us();
+  return (int64_t)esp_hr_timer_time_us();
 }
 
 /****************************************************************************

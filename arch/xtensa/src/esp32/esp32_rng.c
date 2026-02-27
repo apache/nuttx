@@ -40,9 +40,8 @@
 #include <arch/xtensa/core_macros.h>
 
 #include "xtensa.h"
-#include "xtensa_attr.h"
+
 #include "hardware/wdev_reg.h"
-#include "esp32_clockconfig.h"
 
 #include "esp_random.h"
 

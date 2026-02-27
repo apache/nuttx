@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/irq.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -205,6 +206,51 @@ void esp32_touchirqenable(int irq);
 void esp32_touchirqdisable(int irq);
 #else
 #  define esp32_touchirqdisable(irq)
+#endif
+
+/****************************************************************************
+ * Name: esp32_touchirqattach
+ *
+ * Description:
+ *   Attach an interrupt handler to a specified touch pad IRQ.
+ *
+ * Input Parameters:
+ *   irq     - Touch pad IRQ number to attach the handler to
+ *   handler - Interrupt handler function
+ *   arg     - Argument to pass to the handler
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_TOUCH_IRQ
+int esp32_touchirqattach(int irq, xcpt_t handler, void *arg);
+#else
+#  define esp32_touchirqattach(irq, handler, arg) -EINVAL
+#endif
+
+/****************************************************************************
+ * Name: esp32_touchirqdetach
+ *
+ * Description:
+ *   Detach the interrupt handler for the specified touch pad IRQ and
+ *   disable the interrupt.
+ *
+ * Input Parameters:
+ *   irq - Touch pad IRQ number to detach.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_TOUCH_IRQ
+int esp32_touchirqdetach(int irq);
+#else
+#  define esp32_touchirqdetach(irq) (-EINVAL)
 #endif
 
 /****************************************************************************

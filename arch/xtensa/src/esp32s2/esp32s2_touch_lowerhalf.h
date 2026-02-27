@@ -33,11 +33,10 @@
 #include "xtensa.h"
 
 #include "hardware/esp32s2_rtc_io.h"
-#include "hardware/esp32s2_rtccntl.h"
+#include "soc/rtc_cntl_reg.h"
 #include "hardware/esp32s2_touch.h"
 #include "hardware/esp32s2_sens.h"
 
-#include "esp32s2_rt_timer.h"
 #include "esp32s2_rtc_gpio.h"
 
 /****************************************************************************
@@ -990,35 +989,35 @@ static inline void touch_lh_intr_enable(enum touch_intr_mask_e int_mask)
 {
   if (int_mask & TOUCH_INTR_MASK_DONE)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_REG,
+      REG_SET_FIELD(RTC_CNTL_INT_ENA_REG,
                     RTC_CNTL_TOUCH_DONE_INT_ENA,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_ACTIVE)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_REG,
+      REG_SET_FIELD(RTC_CNTL_INT_ENA_REG,
                     RTC_CNTL_TOUCH_ACTIVE_INT_ENA,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_INACTIVE)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_REG,
+      REG_SET_FIELD(RTC_CNTL_INT_ENA_REG,
                     RTC_CNTL_TOUCH_INACTIVE_INT_ENA,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_SCAN_DONE)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_REG,
+      REG_SET_FIELD(RTC_CNTL_INT_ENA_REG,
                     RTC_CNTL_TOUCH_SCAN_DONE_INT_ENA,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_TIMEOUT)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_REG,
+      REG_SET_FIELD(RTC_CNTL_INT_ENA_REG,
                     RTC_CNTL_TOUCH_TIMEOUT_INT_ENA,
                     true);
     }
@@ -1042,35 +1041,35 @@ static inline void touch_lh_intr_disable(enum touch_intr_mask_e int_mask)
 {
   if (int_mask & TOUCH_INTR_MASK_DONE)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_REG,
+      REG_SET_FIELD(RTC_CNTL_INT_ENA_REG,
                     RTC_CNTL_TOUCH_DONE_INT_ENA,
                     false);
     }
 
   if (int_mask & TOUCH_INTR_MASK_ACTIVE)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_REG,
+      REG_SET_FIELD(RTC_CNTL_INT_ENA_REG,
                     RTC_CNTL_TOUCH_ACTIVE_INT_ENA,
                     false);
     }
 
   if (int_mask & TOUCH_INTR_MASK_INACTIVE)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_REG,
+      REG_SET_FIELD(RTC_CNTL_INT_ENA_REG,
                     RTC_CNTL_TOUCH_INACTIVE_INT_ENA,
                     false);
     }
 
   if (int_mask & TOUCH_INTR_MASK_SCAN_DONE)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_REG,
+      REG_SET_FIELD(RTC_CNTL_INT_ENA_REG,
                     RTC_CNTL_TOUCH_SCAN_DONE_INT_ENA,
                     false);
     }
 
   if (int_mask & TOUCH_INTR_MASK_TIMEOUT)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_REG,
+      REG_SET_FIELD(RTC_CNTL_INT_ENA_REG,
                     RTC_CNTL_TOUCH_TIMEOUT_INT_ENA,
                     false);
     }
@@ -1094,35 +1093,35 @@ static inline void touch_lh_intr_clear(enum touch_intr_mask_e int_mask)
 {
   if (int_mask & TOUCH_INTR_MASK_DONE)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_CLR_RTC_REG,
+      REG_SET_FIELD(RTC_CNTL_INT_CLR_REG,
                     RTC_CNTL_TOUCH_DONE_INT_CLR,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_ACTIVE)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_CLR_RTC_REG,
+      REG_SET_FIELD(RTC_CNTL_INT_CLR_REG,
                     RTC_CNTL_TOUCH_ACTIVE_INT_CLR,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_INACTIVE)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_CLR_RTC_REG,
+      REG_SET_FIELD(RTC_CNTL_INT_CLR_REG,
                     RTC_CNTL_TOUCH_INACTIVE_INT_CLR,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_SCAN_DONE)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_CLR_RTC_REG,
+      REG_SET_FIELD(RTC_CNTL_INT_CLR_REG,
                     RTC_CNTL_TOUCH_SCAN_DONE_INT_CLR,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_TIMEOUT)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_CLR_RTC_REG,
+      REG_SET_FIELD(RTC_CNTL_INT_CLR_REG,
                     RTC_CNTL_TOUCH_TIMEOUT_INT_CLR,
                     true);
     }
@@ -1144,7 +1143,7 @@ static inline void touch_lh_intr_clear(enum touch_intr_mask_e int_mask)
 
 static inline uint32_t touch_lh_read_intr_status_mask(void)
 {
-  uint32_t intr_st = getreg32(RTC_CNTL_INT_ST_RTC_REG);
+  uint32_t intr_st = getreg32(RTC_CNTL_INT_ST_REG);
   uint32_t intr_msk = 0;
 
   if (intr_st & RTC_CNTL_TOUCH_DONE_INT_ST_M)
@@ -1526,19 +1525,19 @@ static inline void touch_lh_filter_set_noise_thres(uint32_t noise_thr)
   /* config2 in IDF */
 
   REG_SET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
-                RTC_CNTL_TOUCH_NEG_NOISE_THRES,
+                RTC_CNTL_TOUCH_CONFIG2,
                 noise_thr);
 
   /* config1 in IDF */
 
   REG_SET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
-                RTC_CNTL_TOUCH_NEG_NOISE_LIMIT,
+                RTC_CNTL_TOUCH_CONFIG1,
                 0xf);
 
   /* config3 in IDF */
 
   REG_SET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
-                RTC_CNTL_TOUCH_HYSTERESIS,
+                RTC_CNTL_TOUCH_CONFIG3,
                 2);
 }
 

@@ -38,10 +38,10 @@
 
 #include "xtensa.h"
 #include "esp32s3_wdt.h"
-#include "esp32s3_rtc.h"
 #include "esp32s3_wdt_lowerhalf.h"
 #include "hardware/esp32s3_soc.h"
 
+#include "soc/rtc.h"
 #include "soc/periph_defs.h"
 #include "esp_private/periph_ctrl.h"
 
@@ -94,13 +94,6 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-enum wdt_peripheral_e
-{
-  RTC,
-  TIMER,
-  XTAL32K,
-};
 
 /* This structure provides the private representation of the "lower-half"
  * driver state structure.  This structure must be cast-compatible with the
@@ -248,18 +241,18 @@ static int wdt_lh_start(struct watchdog_lowerhalf_s *lower)
 
       if (priv->handler == NULL)
         {
-             /* Then configure it to reset on wdt expiration */
+          /* Then configure it to reset on wdt expiration */
 
-            if (priv->peripheral == TIMER)
-              {
-                ESP32S3_WDT_STG_CONF(priv->wdt, ESP32S3_WDT_STAGE0,
-                                     ESP32S3_WDT_STAGE_ACTION_RESET_SYSTEM);
-              }
-            else if (priv->peripheral == RTC)
-              {
-                ESP32S3_WDT_STG_CONF(priv->wdt, ESP32S3_WDT_STAGE0,
-                                     ESP32S3_WDT_STAGE_ACTION_RESET_RTC);
-              }
+          if (priv->peripheral == TIMER)
+            {
+              ESP32S3_WDT_STG_CONF(priv->wdt, ESP32S3_WDT_STAGE0,
+                                    ESP32S3_WDT_STAGE_ACTION_RESET_SYSTEM);
+            }
+          else if (priv->peripheral == RTC)
+            {
+              ESP32S3_WDT_STG_CONF(priv->wdt, ESP32S3_WDT_STAGE0,
+                                    ESP32S3_WDT_STAGE_ACTION_RESET_RTC);
+            }
         }
 
       /* User handler was already provided */
@@ -289,7 +282,7 @@ static int wdt_lh_start(struct watchdog_lowerhalf_s *lower)
       ESP32S3_WDT_LOCK(priv->wdt);
     }
 
-    return OK;
+  return OK;
 }
 
 /****************************************************************************
@@ -913,7 +906,7 @@ int esp32s3_wdt_initialize(const char *devpath, enum esp32s3_wdt_inst_e wdt)
       /* Estimate frequency of internal RTC oscillator */
 
       uint32_t rtc_clk_period_us =
-        esp32s3_rtc_clk_cal(RTC_CAL_INTERNAL_OSC, XT_WDT_CLK_CAL_CYCLES);
+        rtc_clk_cal(CLK_CAL_RC_SLOW, XT_WDT_CLK_CAL_CYCLES);
 
       uint32_t rtc_clk_frequency_khz = wdt_lh_clk_freq_cal(rtc_clk_period_us)
         / 1000;

@@ -178,6 +178,7 @@ SECTIONS
     *libarch.a:*esp_loader.*(.text .text.* .literal .literal.*)
 
     *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
+    *libc.a:arch_atomic.*(.literal .text .literal.* .text.*)
 
     *(.wifirxiram .wifirxiram.*)
     *(.wifirxiram .wifi0iram.*)
@@ -254,6 +255,7 @@ SECTIONS
     *libarch.a:*esp_loader.*(.rodata .rodata.*)
     *libarch.a:*mmu_hal.*(.rodata .rodata.*)
     *libarch.a:*uart_hal.*(.rodata .rodata.*)
+    *libc.a:arch_atomic.*(.rodata .rodata.*)
     _edata = ABSOLUTE(.);
     . = ALIGN(4);
 

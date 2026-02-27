@@ -39,7 +39,7 @@
 
 #include "hardware/esp32_soc.h"
 
-#include "esp32_clockconfig.h"
+#include "esp_clk.h"
 #include "esp32_tim.h"
 
 /****************************************************************************

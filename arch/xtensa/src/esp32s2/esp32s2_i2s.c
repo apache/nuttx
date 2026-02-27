@@ -50,8 +50,8 @@
 #include <arch/board/board.h>
 
 #include "esp32s2_i2s.h"
-#include "esp32s2_gpio.h"
-#include "esp32s2_irq.h"
+#include "espressif/esp_gpio.h"
+#include "espressif/esp_irq.h"
 #include "esp32s2_dma.h"
 
 #include "xtensa.h"
@@ -1252,9 +1252,9 @@ static void i2s_configure(struct esp32s2_i2s_s *priv)
 
   if (priv->config->dout_pin != I2S_GPIO_UNUSED)
     {
-      esp32s2_gpiowrite(priv->config->dout_pin, 1);
-      esp32s2_configgpio(priv->config->dout_pin, OUTPUT_FUNCTION_2);
-      esp32s2_gpio_matrix_out(priv->config->dout_pin,
+      esp_gpiowrite(priv->config->dout_pin, 1);
+      esp_configgpio(priv->config->dout_pin, OUTPUT_FUNCTION_2);
+      esp_gpio_matrix_out(priv->config->dout_pin,
                               priv->config->dout_outsig, 0, 0);
     }
 
@@ -1262,8 +1262,8 @@ static void i2s_configure(struct esp32s2_i2s_s *priv)
 
   if (priv->config->din_pin != I2S_GPIO_UNUSED)
     {
-      esp32s2_configgpio(priv->config->din_pin, INPUT_FUNCTION_2);
-      esp32s2_gpio_matrix_in(priv->config->din_pin,
+      esp_configgpio(priv->config->din_pin, INPUT_FUNCTION_2);
+      esp_gpio_matrix_in(priv->config->din_pin,
                              priv->config->din_insig, 0);
     }
 
@@ -1273,14 +1273,14 @@ static void i2s_configure(struct esp32s2_i2s_s *priv)
         {
           /* For "tx + slave" mode, select TX signal index for ws and bck */
 
-          esp32s2_gpiowrite(priv->config->ws_pin, 1);
-          esp32s2_configgpio(priv->config->ws_pin, INPUT_FUNCTION_2);
-          esp32s2_gpio_matrix_in(priv->config->ws_pin,
+          esp_gpiowrite(priv->config->ws_pin, 1);
+          esp_configgpio(priv->config->ws_pin, INPUT_FUNCTION_2);
+          esp_gpio_matrix_in(priv->config->ws_pin,
                                  priv->config->ws_out_insig, 0);
 
-          esp32s2_gpiowrite(priv->config->bclk_pin, 1);
-          esp32s2_configgpio(priv->config->bclk_pin, INPUT_FUNCTION_2);
-          esp32s2_gpio_matrix_in(priv->config->bclk_pin,
+          esp_gpiowrite(priv->config->bclk_pin, 1);
+          esp_configgpio(priv->config->bclk_pin, INPUT_FUNCTION_2);
+          esp_gpio_matrix_in(priv->config->bclk_pin,
                                  priv->config->bclk_out_insig, 0);
         }
       else
@@ -1289,14 +1289,14 @@ static void i2s_configure(struct esp32s2_i2s_s *priv)
            * index for ws and bck.
            */
 
-          esp32s2_gpiowrite(priv->config->ws_pin, 1);
-          esp32s2_configgpio(priv->config->ws_pin, INPUT_FUNCTION_2);
-          esp32s2_gpio_matrix_in(priv->config->ws_pin,
+          esp_gpiowrite(priv->config->ws_pin, 1);
+          esp_configgpio(priv->config->ws_pin, INPUT_FUNCTION_2);
+          esp_gpio_matrix_in(priv->config->ws_pin,
                                  priv->config->ws_in_insig, 0);
 
-          esp32s2_gpiowrite(priv->config->bclk_pin, 1);
-          esp32s2_configgpio(priv->config->bclk_pin, INPUT_FUNCTION_2);
-          esp32s2_gpio_matrix_in(priv->config->bclk_pin,
+          esp_gpiowrite(priv->config->bclk_pin, 1);
+          esp_configgpio(priv->config->bclk_pin, INPUT_FUNCTION_2);
+          esp_gpio_matrix_in(priv->config->bclk_pin,
                                  priv->config->bclk_in_insig, 0);
         }
     }
@@ -1311,9 +1311,9 @@ static void i2s_configure(struct esp32s2_i2s_s *priv)
           i2sinfo("Configuring GPIO%" PRIu8 " to output master clock\n",
                   priv->config->mclk_pin);
 
-          esp32s2_gpiowrite(priv->config->mclk_pin, 1);
-          esp32s2_configgpio(priv->config->mclk_pin, OUTPUT_FUNCTION_2);
-          esp32s2_gpio_matrix_out(priv->config->mclk_pin,
+          esp_gpiowrite(priv->config->mclk_pin, 1);
+          esp_configgpio(priv->config->mclk_pin, OUTPUT_FUNCTION_2);
+          esp_gpio_matrix_out(priv->config->mclk_pin,
                                   priv->config->mclk_out_sig, 0, 0);
         }
 
@@ -1321,14 +1321,14 @@ static void i2s_configure(struct esp32s2_i2s_s *priv)
         {
           /* For "tx + master" mode, select TX signal index for ws and bck */
 
-          esp32s2_gpiowrite(priv->config->ws_pin, 1);
-          esp32s2_configgpio(priv->config->ws_pin, OUTPUT_FUNCTION_2);
-          esp32s2_gpio_matrix_out(priv->config->ws_pin,
+          esp_gpiowrite(priv->config->ws_pin, 1);
+          esp_configgpio(priv->config->ws_pin, OUTPUT_FUNCTION_2);
+          esp_gpio_matrix_out(priv->config->ws_pin,
                                   priv->config->ws_out_outsig, 0, 0);
 
-          esp32s2_gpiowrite(priv->config->bclk_pin, 1);
-          esp32s2_configgpio(priv->config->bclk_pin, OUTPUT_FUNCTION_2);
-          esp32s2_gpio_matrix_out(priv->config->bclk_pin,
+          esp_gpiowrite(priv->config->bclk_pin, 1);
+          esp_configgpio(priv->config->bclk_pin, OUTPUT_FUNCTION_2);
+          esp_gpio_matrix_out(priv->config->bclk_pin,
                                   priv->config->bclk_out_outsig, 0, 0);
         }
       else
@@ -1337,14 +1337,14 @@ static void i2s_configure(struct esp32s2_i2s_s *priv)
            * index for ws and bck.
            */
 
-          esp32s2_gpiowrite(priv->config->ws_pin, 1);
-          esp32s2_configgpio(priv->config->ws_pin, OUTPUT_FUNCTION_2);
-          esp32s2_gpio_matrix_out(priv->config->ws_pin,
+          esp_gpiowrite(priv->config->ws_pin, 1);
+          esp_configgpio(priv->config->ws_pin, OUTPUT_FUNCTION_2);
+          esp_gpio_matrix_out(priv->config->ws_pin,
                                   priv->config->ws_in_outsig, 0, 0);
 
-          esp32s2_gpiowrite(priv->config->bclk_pin, 1);
-          esp32s2_configgpio(priv->config->bclk_pin, OUTPUT_FUNCTION_2);
-          esp32s2_gpio_matrix_out(priv->config->bclk_pin,
+          esp_gpiowrite(priv->config->bclk_pin, 1);
+          esp_configgpio(priv->config->bclk_pin, OUTPUT_FUNCTION_2);
+          esp_gpio_matrix_out(priv->config->bclk_pin,
                                   priv->config->bclk_in_outsig, 0, 0);
         }
     }
@@ -2002,16 +2002,14 @@ static void i2s_rx_channel_stop(struct esp32s2_i2s_s *priv)
  *   Common I2S DMA interrupt handler
  *
  * Input Parameters:
- *   irq     - Number of the IRQ that generated the interrupt
- *   context - Interrupt register state save info
  *   arg     - I2S controller private data
  *
  * Returned Value:
- *   Standard interrupt return value.
+ *   None.
  *
  ****************************************************************************/
 
-static int i2s_interrupt(int irq, void *context, void *arg)
+static void i2s_interrupt(void *arg)
 {
   struct esp32s2_i2s_s *priv = (struct esp32s2_i2s_s *)arg;
   struct esp32s2_dmadesc_s *cur = NULL;
@@ -2049,8 +2047,6 @@ static int i2s_interrupt(int irq, void *context, void *arg)
         }
     }
 #endif /* I2S_HAVE_RX */
-
-  return 0;
 }
 
 /****************************************************************************
@@ -2645,23 +2641,19 @@ static int i2s_dma_setup(struct esp32s2_i2s_s *priv)
 
   putreg32(UINT32_MAX, I2S_INT_CLR_REG);
 
-  /* Set up to receive peripheral interrupts on the current CPU */
+  /* Set up to receive peripheral interrupts on the current CPU.
+   * With ARCH_MINIMAL_VECTORTABLE, the handler must be passed directly
+   * to esp_setup_irq() so it gets stored in the HAL's interrupt table.
+   */
 
   priv->cpu = this_cpu();
-  priv->cpuint = esp32s2_setup_irq(priv->config->periph, 1,
-                                   ESP32S2_CPUINT_LEVEL);
+  priv->cpuint = esp_setup_irq(priv->config->periph, 1,
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               i2s_interrupt, priv);
   if (priv->cpuint < 0)
     {
       i2serr("Failed to allocate a CPU interrupt.\n");
       return priv->cpuint;
-    }
-
-  ret = irq_attach(priv->config->irq, i2s_interrupt, priv);
-  if (ret != OK)
-    {
-      i2serr("Couldn't attach IRQ to handler.\n");
-      esp32s2_teardown_irq(priv->config->periph, priv->cpuint);
-      return ret;
     }
 
   return OK;

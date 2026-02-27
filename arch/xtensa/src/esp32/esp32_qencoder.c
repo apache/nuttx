@@ -38,8 +38,8 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "esp32_gpio.h"
-#include "esp32_irq.h"
+#include "esp_gpio.h"
+#include "esp_irq.h"
 
 #include "xtensa.h"
 #include "hardware/esp32_soc.h"
@@ -608,19 +608,19 @@ static int esp32_setup(struct qe_lowerhalf_s *lower)
 
   /* Configure GPIO pins as Input with Pull-Up enabled */
 
-  esp32_configgpio(priv->config->ch0_gpio, INPUT_FUNCTION_3 | PULLUP);
-  esp32_configgpio(priv->config->ch1_gpio, INPUT_FUNCTION_3 | PULLUP);
+  esp_configgpio(priv->config->ch0_gpio, INPUT_FUNCTION_3 | PULLUP);
+  esp_configgpio(priv->config->ch1_gpio, INPUT_FUNCTION_3 | PULLUP);
 
   /* Connect Channel A (ch0_gpio) and Channel B (ch1_gpio) crossed for X4 */
 
-  esp32_gpio_matrix_in(priv->config->ch0_gpio,
+  esp_gpio_matrix_in(priv->config->ch0_gpio,
                        priv->config->ch0_pulse_sig, 0);
-  esp32_gpio_matrix_in(priv->config->ch1_gpio,
+  esp_gpio_matrix_in(priv->config->ch1_gpio,
                        priv->config->ch0_ctrl_sig, 0);
 
-  esp32_gpio_matrix_in(priv->config->ch1_gpio,
+  esp_gpio_matrix_in(priv->config->ch1_gpio,
                        priv->config->ch1_pulse_sig, 0);
-  esp32_gpio_matrix_in(priv->config->ch0_gpio,
+  esp_gpio_matrix_in(priv->config->ch0_gpio,
                        priv->config->ch1_ctrl_sig, 0);
 
   /* Clear the Reset bit to enable the Pulse Counter */

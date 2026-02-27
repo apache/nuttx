@@ -79,7 +79,6 @@ SECTIONS
     *(.iram1 .iram1.*)
 
     *libarch.a:esp32s3_cpuindex.*(.literal .text .literal.* .text.*)
-    *libarch.a:esp32s3_irq.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32s3_user.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32s3_spiflash.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_assert.*(.literal .text .literal.* .text.*)
@@ -110,6 +109,7 @@ SECTIONS
     *libsched.a:stack_record.*(.literal .text .literal.* .text.*)
 
     *libc.a:*lib_instrument.*(.literal .text .literal.* .text.*)
+    *libc.a:arch_atomic.*(.literal .text .literal.* .text.*)
 
 #ifdef CONFIG_ESP32S3_SPEED_UP_ISR
     *libarch.a:xtensa_switchcontext.*(.literal.up_switch_context .text.up_switch_context)
@@ -263,7 +263,7 @@ SECTIONS
     *libarch.a:spi_flash_os_func*.*(.rodata .rodata.*)
     *libarch.a:flash_brownout_hook.*(.rodata .rodata.*)
     *libarch.a:memspi_host_driver.*(.rodata .rodata.*)
-
+    *libc.a:arch_atomic.*(.rodata .rodata.*)
     _edata = ABSOLUTE(.);
     . = ALIGN(4);
 

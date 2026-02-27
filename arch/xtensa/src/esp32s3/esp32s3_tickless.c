@@ -60,7 +60,7 @@
 
 #include "xtensa.h"
 #include "chip.h"
-#include "esp32s3_irq.h"
+#include "esp_irq.h"
 #include "hardware/esp32s3_systimer.h"
 #include "hardware/esp32s3_system.h"
 #include "hardware/esp32s3_soc.h"
@@ -472,14 +472,10 @@ void up_timer_initialize(void)
 
   g_timer_started = false;
 
-  cpuint = esp32s3_setup_irq(0, ESP32S3_PERIPH_SYSTIMER_TARGET0, 1,
-                             ESP32S3_CPUINT_LEVEL);
+  cpuint = esp_setup_irq(ESP32S3_PERIPH_SYSTIMER_TARGET0, 1,
+                         ESP_IRQ_TRIGGER_LEVEL, tickless_isr, NULL);
 
   DEBUGASSERT(cpuint >= 0);
-
-  /* Attach the timer interrupt. */
-
-  irq_attach(ESP32S3_IRQ_SYSTIMER_TARGET0, tickless_isr, NULL);
 
   /* Enable the allocated CPU interrupt. */
 

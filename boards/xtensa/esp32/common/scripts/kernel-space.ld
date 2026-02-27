@@ -125,12 +125,39 @@ SECTIONS
     *libkarch.a:xtensa_testset.*(.literal .text .literal.* .text.*)
     *libkarch.a:esp_app_desc.*(.literal .text .literal.* .text.*)
 
+    *libc.a:arch_atomic.*(.literal .text .literal.* .text.*)
+
     *libsched.a:sched_suspendscheduler.*(.literal .text .literal.* .text.*)
     *libsched.a:sched_note.*(.literal .text .literal.* .text.*)
     *libsched.a:sched_thistask.*(.literal .text .literal.* .text.*)
     *libsched.a:spinlock.*(.literal .text .literal.* .text.*)
     *libsched.a:irq_csection.*(.literal .text .literal.* .text.*)
     *libsched.a:irq_dispatch.*(.literal .text .literal.* .text.*)
+    *libkarch.a:esp_spiflash.*(.literal .text .literal.* .text.*)
+    *libkarch.a:esp_flash_api.*(.text .text.* .literal .literal.*)
+    *libkarch.a:esp_flash_spi_init.*(.text .text.* .literal .literal.*)
+    *libkarch.a:spi_flash_hal_iram.*(.literal .literal.* .text .text.*)
+    *libkarch.a:spi_flash_encrypt_hal_iram.*(.text .text.* .literal .literal.*)
+    *libkarch.a:spi_flash_hal_gpspi.*(.literal .literal.* .text .text.*)
+    *libkarch.a:spi_flash_chip*.*(.literal .literal.* .text .text.*)
+    *libkarch.a:spi_flash_wrap.*(.literal .literal.* .text .text.*)
+    *libkarch.a:spi_flash_os_func_noos.*(.literal .literal.* .text .text.*)
+    *libkarch.a:spi_flash_os_func_app.*(.literal .literal.* .text .text.*)
+    *libkarch.a:flash_brownout_hook.*(.literal .literal.* .text .text.*)
+    *libkarch.a:esp_cache_utils.*(.literal .literal.* .text .text.*)
+    *libkarch.a:cache_esp32.*(.literal .literal.* .text .text.*)
+    *libkarch.a:cache_hal_esp32.*(.literal .literal.* .text .text.*)
+    *libkarch.a:cache_utils.*(.literal .literal.* .text .text.*)
+    *libkarch.a:memspi_host_driver.*(.literal .literal.* .text .text.*)
+    *libkarch.a:critical_section.*(.literal .literal.* .text .text.*)
+    *libkarch.a:os.*(.literal.nuttx_enter_critical .text.nuttx_enter_critical)
+    *libkarch.a:os.*(.literal.nuttx_exit_critical .text.nuttx_exit_critical)
+    *libkarch.a:intr_alloc.*(.literal.esp_intr_get_intno .text.esp_intr_get_intno)
+    *libkarch.a:intr_alloc.*(.literal.esp_intr_get_cpu .text.esp_intr_get_cpu)
+    *libkarch.a:interrupt.*(.literal.intr_handler_get .text.intr_handler_get)
+    *libkarch.a:interrupt.*(.literal.intr_handler_get_arg .text.intr_handler_get_arg)
+    *libkarch.a:interrupt.*(.literal.intr_get_item .text.intr_get_item)
+    *libkarch.a:interrupt.*(.literal.intr_handler_get_arg .text.intr_handler_get_arg)
 
     *(.wifirxiram .wifirxiram.*)
     *(.wifi0iram  .wifi0iram.*)
@@ -231,12 +258,17 @@ SECTIONS
     KEEP (*(.jcr))
     *(.dram1 .dram1.*)
     *libphy.a:(.rodata  .rodata.*)
+    *libkarch.a:esp_cache_utils.*(.rodata .rodata.*)
     *libkarch.a:esp_spiflash.*(.rodata  .rodata.*)
     *libkarch.a:*esp_clk.*(.rodata .rodata.*)
     *libkarch.a:xtensa_cpupause.*(.rodata  .rodata.*)
     *libkarch.a:xtensa_copystate.*(.rodata  .rodata.*)
     *libkarch.a:xtensa_interruptcontext.*(.rodata  .rodata.*)
     *libkarch.a:xtensa_testset.*(.rodata  .rodata.*)
+    *libkarch.a:spi_flash_chip*.*(.rodata .rodata.*)
+    *libkarch.a:critical_section.*(.rodata .rodata.*)
+    *libkarch.a:os.*(.rodata.g_int_flags_count .rodata.g_int_flags)
+    *libkc.a:arch_atomic.*(.rodata .rodata.*)
 
     *libsched.a:sched_suspendscheduler.*(.rodata  .rodata.*)
     *libsched.a:sched_thistask.*(.rodata  .rodata.*)
@@ -335,20 +367,85 @@ SECTIONS
     _etext = .;
   } >KIROM
 
-  /*
-    * This section holds RTC data that should have fixed addresses.
-    * The data are not initialized at power-up and are retained during deep sleep.
-    */
-  .rtc_reserved (NOLOAD):
+  .rtc.text :
   {
     . = ALIGN(4);
-    _rtc_reserved_start = ABSOLUTE(.);
+    _rtc_data_start = ABSOLUTE(.);
+    *(.rtc.literal .rtc.text)
+  } >rtc_iram_seg AT>ROM
+
+  .rtc.data :
+  {
+    *(.rtc.data)
+    *(.rtc.data.*)
+    *(.rtc.rodata)
+    *(.rtc.rodata.*)
+
+   /* Whatever is left from the RTC memory is used as a special heap. */
+
+    . = ALIGN (4);
+    _srtcheap = ABSOLUTE(.);
+  } >rtc_slow_seg AT>ROM
+
+  .rtc.force_slow :
+  {
+    . = ALIGN(4);
+    _rtc_force_slow_start = ABSOLUTE(.);
+    *(.rtc.force_slow .rtc.force_slow.*)
+    . = ALIGN(4);
+    _rtc_force_slow_end = ABSOLUTE(.);
+  } >rtc_slow_seg AT>ROM
+
+  /* This section holds RTC FAST data that should have fixed addresses.
+   * The data are not initialized at power-up and are retained during deep
+   * sleep.
+   */
+
+  .rtc_fast_reserved (NOLOAD):
+  {
+    . = ALIGN(4);
+    _rtc_fast_reserved_start = ABSOLUTE(.);
+
     /* New data can only be added here to ensure existing data are not moved.
-        Because data have adhered to the end of the segment and code is relied on it.
-        >> put new data here << */
+     * Because data have adhered to the end of the segment and code is relied
+     * on it.
+     * >> put new data here <<
+     */
+
+    KEEP(*(.bootloader_data_rtc_mem .bootloader_data_rtc_mem.*))
+
+    _rtc_fast_reserved_end = ABSOLUTE(.);
+  } > rtc_fast_reserved_seg
+
+  _rtc_fast_reserved_length = _rtc_fast_reserved_end - _rtc_fast_reserved_start;
+  ASSERT((_rtc_fast_reserved_length <= LENGTH(rtc_fast_reserved_seg)),
+          "RTC FAST reserved segment data does not fit.")
+
+  /* This section holds RTC SLOW data that should have fixed addresses.
+   * The data are not initialized at power-up and are retained during deep
+   * sleep.
+   */
+
+  .rtc_slow_reserved (NOLOAD):
+  {
+    . = ALIGN(4);
+    _rtc_slow_reserved_start = ABSOLUTE(.);
+
+    /* New data can only be added here to ensure existing data are not moved.
+     * Because data have adhered to the end of the segment and code is relied
+     * on it.
+     * >> put new data here <<
+     */
 
     *(.rtc_timer_data_in_rtc_mem .rtc_timer_data_in_rtc_mem.*)
-    KEEP(*(.bootloader_data_rtc_mem .bootloader_data_rtc_mem.*))
-    _rtc_reserved_end = ABSOLUTE(.);
-  } > rtc_reserved_seg
+
+    _rtc_slow_reserved_end = ABSOLUTE(.);
+  } > rtc_slow_reserved_seg
+
+  _rtc_slow_reserved_length = _rtc_slow_reserved_end - _rtc_slow_reserved_start;
+  _rtc_reserved_length = _rtc_slow_reserved_length;
+
+  /* Get size of rtc slow data */
+
+  _rtc_slow_length = (_rtc_force_slow_end - _rtc_data_start);
 }

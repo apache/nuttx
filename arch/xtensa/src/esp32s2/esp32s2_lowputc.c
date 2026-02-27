@@ -37,9 +37,9 @@
 #include <nuttx/spinlock.h>
 
 #include "xtensa.h"
-#include "esp32s2_clockconfig.h"
 #include "esp32s2_config.h"
-#include "esp32s2_gpio.h"
+#include "espressif/esp_gpio.h"
+#include "esp_clk.h"
 #include "esp32s2_lowputc.h"
 #include "hardware/esp32s2_gpio_sigmap.h"
 #include "hardware/esp32s2_soc.h"
@@ -716,33 +716,33 @@ void esp32s2_lowputc_config_pins(const struct esp32s2_uart_s *priv)
    * This "?" is the Unicode replacement character (U+FFFD)
    */
 
-  esp32s2_gpiowrite(priv->txpin, true);
+  esp_gpiowrite(priv->txpin, true);
 
   /* Route UART TX signal to the selected TX pin */
 
-  esp32s2_gpio_matrix_out(priv->txpin, priv->txsig, 0, 0);
+  esp_gpio_matrix_out(priv->txpin, priv->txsig, 0, 0);
 
   /* Select the GPIO function to the TX pin and
    * configure as output.
    */
 
-  esp32s2_configgpio(priv->txpin, OUTPUT_FUNCTION_1);
+  esp_configgpio(priv->txpin, OUTPUT_FUNCTION_1);
 
   /* Select the GPIO function to the RX pin and
    * configure as input.
    */
 
-  esp32s2_configgpio(priv->rxpin, INPUT_FUNCTION_1);
+  esp_configgpio(priv->rxpin, INPUT_FUNCTION_1);
 
   /* Route UART RX signal to the selected RX pin */
 
-  esp32s2_gpio_matrix_in(priv->rxpin, priv->rxsig, 0);
+  esp_gpio_matrix_in(priv->rxpin, priv->rxsig, 0);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   if (priv->iflow)
     {
-      esp32s2_configgpio(priv->rtspin, OUTPUT_FUNCTION_1);
-      esp32s2_gpio_matrix_out(priv->rtspin, priv->rtssig,
+      esp_configgpio(priv->rtspin, OUTPUT_FUNCTION_1);
+      esp_gpio_matrix_out(priv->rtspin, priv->rtssig,
                               0, 0);
     }
 
@@ -750,17 +750,17 @@ void esp32s2_lowputc_config_pins(const struct esp32s2_uart_s *priv)
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   if (priv->oflow)
     {
-      esp32s2_configgpio(priv->ctspin, INPUT_FUNCTION_1);
-      esp32s2_gpio_matrix_in(priv->ctspin, priv->ctssig, 0);
+      esp_configgpio(priv->ctspin, INPUT_FUNCTION_1);
+      esp_gpio_matrix_in(priv->ctspin, priv->ctssig, 0);
     }
 #endif
 
 #ifdef HAVE_RS485
   if (priv->rs485_dir_gpio != 0)
     {
-      esp32s2_configgpio(priv->rs485_dir_gpio, OUTPUT);
-      esp32s2_gpio_matrix_out(priv->rs485_dir_gpio, SIG_GPIO_OUT_IDX, 0, 0);
-      esp32s2_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
+      esp_configgpio(priv->rs485_dir_gpio, OUTPUT);
+      esp_gpio_matrix_out(priv->rs485_dir_gpio, SIG_GPIO_OUT_IDX, 0, 0);
+      esp_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
     }
 #endif
 }

@@ -38,6 +38,9 @@
 #include <errno.h>
 #include <nuttx/fs/fs.h>
 
+#include "espressif/esp_gpio.h"
+#include "esp32s2_start.h"
+
 #ifdef CONFIG_USERLED
 #  include <nuttx/leds/userled.h>
 #endif
@@ -56,10 +59,6 @@
 
 #ifdef CONFIG_ESP32S2_I2C
 #  include "esp32s2_i2c.h"
-#endif
-
-#ifdef CONFIG_ESP32S2_RT_TIMER
-#  include "esp32s2_rt_timer.h"
 #endif
 
 #ifdef CONFIG_ESPRESSIF_EFUSE
@@ -89,7 +88,11 @@
 #endif
 
 #ifdef CONFIG_RTC_DRIVER
-#  include "esp32s2_rtc_lowerhalf.h"
+#  include "espressif/esp_rtc.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_HR_TIMER
+#  include "espressif/esp_hr_timer.h"
 #endif
 
 #ifdef CONFIG_ESP_RMT
@@ -266,6 +269,14 @@ int esp32s2_bringup(void)
 # endif
 #endif
 
+#ifdef CONFIG_ESPRESSIF_HR_TIMER
+  ret = esp_hr_timer_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_hr_timer_init() failed: %d\n", ret);
+    }
+#endif
+
   /* Register the timer drivers */
 
 #ifdef CONFIG_TIMER
@@ -316,14 +327,6 @@ int esp32s2_bringup(void)
 
 #endif /* CONFIG_TIMER */
 
-#ifdef CONFIG_ESP32S2_RT_TIMER
-  ret = esp32s2_rt_timer_init();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize RT timer: %d\n", ret);
-    }
-
-#endif
   /* Now register one oneshot driver */
 
 #if defined(CONFIG_ONESHOT) && defined(CONFIG_ESP32S2_TIMER0)
@@ -437,13 +440,13 @@ int esp32s2_bringup(void)
 #endif /* CONFIG_ESPRESSIF_I2S || CONFIG_ESPRESSIF_I2S */
 
 #ifdef CONFIG_ESP_RMT
-  ret = board_rmt_txinitialize(RMT_TXCHANNEL, RMT_OUTPUT_PIN);
+  ret = board_rmt_txinitialize(RMT_OUTPUT_PIN);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_rmt_txinitialize() failed: %d\n", ret);
     }
 
-  ret = board_rmt_rxinitialize(RMT_RXCHANNEL, RMT_INPUT_PIN);
+  ret = board_rmt_rxinitialize(RMT_INPUT_PIN);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_rmt_txinitialize() failed: %d\n", ret);
@@ -488,7 +491,7 @@ int esp32s2_bringup(void)
 #ifdef CONFIG_RTC_DRIVER
   /* Instantiate the ESP32 RTC driver */
 
-  ret = esp32s2_rtc_driverinit();
+  ret = esp_rtc_driverinit();
   if (ret < 0)
     {
       syslog(LOG_ERR,

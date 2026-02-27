@@ -47,20 +47,20 @@
 #include "esp_pcnt.h"
 #include "chip.h"
 #if defined(CONFIG_ARCH_CHIP_ESP32S3)
-#include "esp32s3_irq.h"
-#include "esp32s3_gpio.h"
+#include "esp_irq.h"
+#include "esp_gpio.h"
 #elif defined(CONFIG_ARCH_CHIP_ESP32S2)
-#include "esp32s2_irq.h"
-#include "esp32s2_gpio.h"
+#include "espressif/esp_irq.h"
+#include "espressif/esp_gpio.h"
 #elif defined(CONFIG_ARCH_CHIP_ESP32)
-#include "esp32_irq.h"
-#include "esp32_gpio.h"
+#include "esp_irq.h"
+#include "esp_gpio.h"
 #endif
 
 #include "hal/pcnt_hal.h"
 #include "hal/pcnt_ll.h"
 #include "periph_ctrl.h"
-#include "soc/pcnt_periph.h"
+#include "hal/pcnt_periph.h"
 #include "soc/pcnt_reg.h"
 #include "soc/pcnt_struct.h"
 #include "soc/gpio_pins.h"
@@ -70,32 +70,23 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PCNT_UNIT_COUNT                             SOC_PCNT_GROUPS * SOC_PCNT_UNITS_PER_GROUP
-#define GET_UNIT_ID_FROM_RET_CHAN(chan_id)          (int)(chan_id/SOC_PCNT_CHANNELS_PER_UNIT)
-#define GET_CHAN_ID_FROM_RET_CHAN(unit_id, chan_id) (chan_id - (SOC_PCNT_CHANNELS_PER_UNIT * unit_id))
-#define CREATE_RET_CHAN_ID(unit_id, chan_id)        ((SOC_PCNT_CHANNELS_PER_UNIT * unit_id) + chan_id)
+#define PCNT_UNIT_COUNT                             PCNT_LL_GET(INST_NUM) * PCNT_LL_GET(UNITS_PER_INST)
+#define GET_UNIT_ID_FROM_RET_CHAN(chan_id)          (int)(chan_id / PCNT_LL_GET(CHANS_PER_UNIT))
+#define GET_CHAN_ID_FROM_RET_CHAN(unit_id, chan_id) (chan_id - (PCNT_LL_GET(CHANS_PER_UNIT) * unit_id))
+#define CREATE_RET_CHAN_ID(unit_id, chan_id)        ((PCNT_LL_GET(CHANS_PER_UNIT) * unit_id) + chan_id)
 
 #if defined(CONFIG_ARCH_CHIP_ESP32S3)
-#define esp_setup_irq             esp32s3_setup_irq
-#define esp_teardown_irq          esp32s3_teardown_irq
-#define esp_configgpio            esp32s3_configgpio
-#define esp_gpio_matrix_in        esp32s3_gpio_matrix_in
 #define ESP_IRQ_PRIORITY_DEFAULT  ESP32S3_INT_PRIO_DEF
-#define ESP_IRQ_TRIGGER_LEVEL     ESP32S3_CPUINT_LEVEL
 #elif defined(CONFIG_ARCH_CHIP_ESP32S2)
-#define esp_setup_irq             esp32s2_setup_irq
-#define esp_teardown_irq          esp32s2_teardown_irq
-#define esp_configgpio            esp32s2_configgpio
-#define esp_gpio_matrix_in        esp32s2_gpio_matrix_in
 #define ESP_IRQ_PRIORITY_DEFAULT  ESP32S2_INT_PRIO_DEF
-#define ESP_IRQ_TRIGGER_LEVEL     ESP32S2_CPUINT_LEVEL
 #elif defined(CONFIG_ARCH_CHIP_ESP32)
-#define esp_setup_irq             esp32_setup_irq
-#define esp_teardown_irq          esp32_teardown_irq
-#define esp_configgpio            esp32_configgpio
-#define esp_gpio_matrix_in        esp32_gpio_matrix_in
 #define ESP_IRQ_PRIORITY_DEFAULT  1
-#define ESP_IRQ_TRIGGER_LEVEL     ESP32_CPUINT_LEVEL
+#endif
+
+#if !SOC_RCC_IS_INDEPENDENT
+#  define PCNT_RCC_ATOMIC() PERIPH_RCC_ATOMIC()
+#else
+#  define PCNT_RCC_ATOMIC()
 #endif
 
 /****************************************************************************
@@ -136,7 +127,7 @@ struct esp_pcnt_priv_s
   spinlock_t lock;                                                      /* Device specific lock. */
   int (*cb)(int, void *, void *);                                       /* User defined callback */
   uint32_t accum_value;                                                 /* Accumulator value of overflowed PCNT unit */
-  bool channels[SOC_PCNT_CHANNELS_PER_UNIT];                            /* Channel information of PCNT unit */
+  bool channels[PCNT_LL_GET(CHANS_PER_UNIT)];                           /* Channel information of PCNT unit */
   struct esp_pcnt_watch_point_priv_s watchers[PCNT_LL_WATCH_EVENT_MAX]; /* array of PCNT watchers */
 };
 
@@ -148,8 +139,7 @@ static int esp_pcnt_open(struct cap_lowerhalf_s *dev);
 static int esp_pcnt_close(struct cap_lowerhalf_s *dev);
 static int IRAM_ATTR esp_pcnt_isr_default(int irq, void *context,
                                           void *arg);
-static int esp_pcnt_isr_register(int (*fn)(int, void *, void *),
-                                 int intr_alloc_flags);
+static int esp_pcnt_isr_register(int (*fn)(int, void *, void *), void *arg);
 static int esp_pcnt_ioctl(struct cap_lowerhalf_s *dev, int cmd,
                           unsigned long arg);
 static int esp_pcnt_unit_enable(struct cap_lowerhalf_s *dev);
@@ -405,13 +395,13 @@ static int IRAM_ATTR esp_pcnt_isr_default(int irq, void *context,
   struct esp_pcnt_watch_event_data_s data;
   irqstate_t flags;
 
-  for (unit_id = 0; unit_id < SOC_PCNT_UNITS_PER_GROUP; unit_id++)
+  for (unit_id = 0; unit_id < PCNT_LL_GET(UNITS_PER_INST); unit_id++)
     {
       if (intr_status & PCNT_LL_UNIT_WATCH_EVENT(unit_id))
         break;
     }
 
-  if (unit_id < SOC_PCNT_UNITS_PER_GROUP)
+  if (unit_id < PCNT_LL_GET(UNITS_PER_INST))
     {
       unit = &pcnt_units[unit_id];
       pcnt_ll_clear_intr_status(ctx.dev, PCNT_LL_UNIT_WATCH_EVENT(unit_id));
@@ -461,7 +451,7 @@ static int IRAM_ATTR esp_pcnt_isr_default(int irq, void *context,
  *
  * Input Parameters:
  *   fn               - Pointer to the ISR function.
- *   intr_alloc_flags - Flags for the interrupt allocation.
+ *   arg              - Pointer to the argument to be passed to the ISR.
  *
  * Returned Value:
  *   Returns OK on successful registration of the ISR; a negated errno value
@@ -469,44 +459,29 @@ static int IRAM_ATTR esp_pcnt_isr_default(int irq, void *context,
  *
  ****************************************************************************/
 
-static int esp_pcnt_isr_register(int (*fn)(int, void *, void *),
-                                 int intr_alloc_flags)
+static int esp_pcnt_isr_register(int (*fn)(int, void *, void *), void *arg)
 {
+  struct intr_adapter_from_nuttx *adapter;
   int cpuint;
+#ifndef CONFIG_ARCH_CHIP_ESP32S2
   int ret;
   int cpu = this_cpu();
+#endif
 
   DEBUGASSERT(fn);
-
-  cpuint = esp_setup_irq(
-#ifndef CONFIG_ARCH_CHIP_ESP32S2
-                        cpu,
-#endif
-                         pcnt_periph_signals.groups[0].irq,
+  cpuint = esp_setup_irq(soc_pcnt_signals[0].irq_id,
                          ESP_IRQ_PRIORITY_DEFAULT,
-                         ESP_IRQ_TRIGGER_LEVEL);
+                         ESP_IRQ_TRIGGER_LEVEL,
+                         fn,
+                         arg);
+
   if (cpuint < 0)
     {
       cperr("Failed to allocate a CPU interrupt.\n");
       return ERROR;
     }
 
-  ret = irq_attach((pcnt_periph_signals.groups[0].irq +
-                   XTENSA_IRQ_FIRSTPERIPH),
-                   fn,
-                   0);
-  if (ret < 0)
-    {
-      cperr("Couldn't attach IRQ to handler.\n");
-      esp_teardown_irq(
-#ifndef CONFIG_ARCH_CHIP_ESP32S2
-                       cpu,
-#endif
-                       pcnt_periph_signals.groups[0].irq, cpuint);
-      return ERROR;
-    }
-
-  up_enable_irq(pcnt_periph_signals.groups[0].irq + XTENSA_IRQ_FIRSTPERIPH);
+  up_enable_irq(soc_pcnt_signals[0].irq_id + XTENSA_IRQ_FIRSTPERIPH);
   return OK;
 }
 
@@ -878,8 +853,12 @@ struct cap_lowerhalf_s *esp_pcnt_new_unit(
 
   if (g_pcnt_refs++ == 0)
     {
-      periph_module_enable(PERIPH_PCNT_MODULE);
-      periph_module_reset(PERIPH_PCNT_MODULE);
+      PCNT_RCC_ATOMIC()
+        {
+          pcnt_ll_enable_bus_clock(0, true);
+          pcnt_ll_reset_register(0);
+        }
+
       pcnt_hal_init(&ctx, 0);
     }
 
@@ -985,7 +964,7 @@ int esp_pcnt_del_unit(struct cap_lowerhalf_s *dev)
       return ERROR;
     }
 
-  for (i = 0; i < SOC_PCNT_CHANNELS_PER_UNIT; i++)
+  for (i = 0; i < PCNT_LL_GET(CHANS_PER_UNIT); i++)
     {
       if (!priv->channels[i])
         {
@@ -1009,12 +988,12 @@ int esp_pcnt_del_unit(struct cap_lowerhalf_s *dev)
   g_pcnt_refs--;
   if (g_pcnt_refs == 0)
     {
-      periph_module_disable(PERIPH_PCNT_MODULE);
-      esp_teardown_irq(
-#ifndef CONFIG_ARCH_CHIP_ESP32S2
-                       cpu,
-#endif
-                       pcnt_periph_signals.groups[0].irq, -ENOMEM);
+      PCNT_RCC_ATOMIC()
+        {
+          pcnt_ll_enable_bus_clock(0, false);
+        }
+
+      esp_teardown_irq(soc_pcnt_signals[0].irq_id, -ENOMEM);
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
@@ -1124,7 +1103,7 @@ int esp_pcnt_unit_add_watch_point(struct cap_lowerhalf_s *dev,
 
   else
     {
-      int thres_num = SOC_PCNT_THRES_POINT_PER_UNIT - 1;
+      int thres_num = PCNT_LL_GET(THRES_POINT_PER_UNIT) - 1;
       switch (thres_num)
         {
           case 1:
@@ -1279,7 +1258,6 @@ int esp_pcnt_new_channel(struct cap_lowerhalf_s *dev,
   int gpio_mode;
   int virt_gpio;
   int ret_id = 0;
-  const pcnt_signal_conn_t *chan;
 
   if (!config)
     {
@@ -1299,7 +1277,7 @@ int esp_pcnt_new_channel(struct cap_lowerhalf_s *dev,
       return ERROR;
     }
 
-  for (int i = 0; i < SOC_PCNT_CHANNELS_PER_UNIT; i++)
+  for (int i = 0; i < PCNT_LL_GET(CHANS_PER_UNIT); i++)
     {
       if (!priv->channels[i])
         {
@@ -1318,13 +1296,13 @@ int esp_pcnt_new_channel(struct cap_lowerhalf_s *dev,
       (config->flags && ESP_PCNT_CHAN_IO_LOOPBACK ? OUTPUT_FUNCTION : 0);
   virt_gpio = (config->flags && ESP_PCNT_CHAN_VIRT_LVL_IO_LVL) ?
       GPIO_MATRIX_CONST_ONE_INPUT : GPIO_MATRIX_CONST_ZERO_INPUT;
-  chan = &pcnt_periph_signals;
 
   if (config->edge_gpio_num >= 0)
     {
       esp_configgpio(config->edge_gpio_num, gpio_mode);
       esp_gpio_matrix_in(config->edge_gpio_num,
-        chan->groups[0].units[unit_id].channels[channel_id].pulse_sig,
+        soc_pcnt_signals[0].units[unit_id].channels[channel_id].\
+        pulse_sig_id_matrix,
         (config->flags && ESP_PCNT_CHAN_INVERT_EDGE_IN));
     }
   else
@@ -1332,7 +1310,8 @@ int esp_pcnt_new_channel(struct cap_lowerhalf_s *dev,
       /* using virtual IO */
 
       esp_gpio_matrix_in(virt_gpio,
-        chan->groups[0].units[unit_id].channels[channel_id].pulse_sig,
+        soc_pcnt_signals[0].units[unit_id].channels[channel_id].\
+        pulse_sig_id_matrix,
         (config->flags && ESP_PCNT_CHAN_INVERT_EDGE_IN));
     }
 
@@ -1340,7 +1319,8 @@ int esp_pcnt_new_channel(struct cap_lowerhalf_s *dev,
     {
       esp_configgpio(config->level_gpio_num, gpio_mode);
       esp_gpio_matrix_in(config->level_gpio_num,
-        chan->groups[0].units[unit_id].channels[channel_id].control_sig,
+        soc_pcnt_signals[0].units[unit_id].channels[channel_id].\
+        ctl_sig_id_matrix,
         (config->flags && ESP_PCNT_CHAN_INVERT_LVL_IN));
     }
   else
@@ -1348,7 +1328,8 @@ int esp_pcnt_new_channel(struct cap_lowerhalf_s *dev,
       /* using virtual IO */
 
       esp_gpio_matrix_in(virt_gpio,
-        chan->groups[0].units[unit_id].channels[channel_id].control_sig,
+        soc_pcnt_signals[0].units[unit_id].channels[channel_id].\
+        ctl_sig_id_matrix,
         (config->flags && ESP_PCNT_CHAN_INVERT_LVL_IN));
     }
 

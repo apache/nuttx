@@ -32,7 +32,7 @@
 
 #include <nuttx/spi/spi.h>
 
-#include "esp32s3_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "esp32s3-devkit.h"
 
 /****************************************************************************
@@ -77,7 +77,7 @@ int esp32s3_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
        *  data bits are data or a command.
        */
 
-      esp32s3_gpiowrite(GPIO_LCD_DC, !cmd);
+      esp_gpiowrite(GPIO_LCD_DC, !cmd);
 
       return OK;
     }
@@ -124,7 +124,7 @@ int esp32s3_spi3_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
        *  data bits are data or a command.
        */
 
-      esp32s3_gpiowrite(CONFIG_ESP32S3_SPI3_MISOPIN, !cmd);
+      esp_gpiowrite(CONFIG_ESP32S3_SPI3_MISOPIN, !cmd);
 
       return OK;
     }

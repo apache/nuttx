@@ -29,18 +29,42 @@
 #include <debug.h>
 #include "xtensa.h"
 #include "hardware/esp32_tim.h"
-#include "hardware/esp32_rtccntl.h"
+#include "soc/rtc_cntl_reg.h"
+#include "hal/rwdt_ll.h"
 #include "esp32_wdt.h"
-#include "esp32_irq.h"
-#include "esp32_rtc.h"
+#include "espressif/esp_irq.h"
+#include "soc/rtc.h"
 #include "esp32_rtc_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Offset relative to each watchdog timer instance memory base */
+
+#define RWDT_CONFIG0_OFFSET         0x0098
+#define XTWDT_CONFIG0_OFFSET        0x0060
+
+/* RWDT */
+
+#define RWDT_STAGE0_TIMEOUT_OFFSET  0x009C
+#define RWDT_STAGE1_TIMEOUT_OFFSET  0x00A0
+#define RWDT_STAGE2_TIMEOUT_OFFSET  0x00A4
+#define RWDT_STAGE3_TIMEOUT_OFFSET  0x00A8
+#define RWDT_FEED_OFFSET            0x00AC
+#define RWDT_WP_REG                 0x00B0
+#define RWDT_INT_ENA_REG_OFFSET     0x0040
+#define RWDT_INT_CLR_REG_OFFSET     0x004c
+
+/* XTWDT */
+
+#define XTWDT_TIMEOUT_OFFSET        0x00f8
+#define XTWDT_CLK_PRESCALE_OFFSET   0x00f4
+#define XTWDT_INT_ENA_REG_OFFSET    0x0040
+
 /* Helpers for converting from Q13.19 fixed-point format to float */
 
+#define SLOW_CLK_CAL_CYCLES 1024
 #define N 19
 #define Q_TO_FLOAT(x) ((float)x/(float)(1<<N))
 
@@ -511,7 +535,7 @@ static int esp32_wdt_pre(struct esp32_wdt_dev_s *dev, uint16_t pre)
 
 static uint16_t esp32_rtc_clk(struct esp32_wdt_dev_s *dev)
 {
-  enum esp32_rtc_slow_freq_e slow_clk_rtc;
+  soc_rtc_slow_clk_src_t slow_clk_rtc;
   uint32_t period_13q19;
   float period;
   float cycles_ms;
@@ -521,23 +545,23 @@ static uint16_t esp32_rtc_clk(struct esp32_wdt_dev_s *dev)
    * used to calibrate this source.
    */
 
-  static const enum esp32_rtc_cal_sel_e cal_map[] =
+  static const soc_clk_freq_calculation_src_t cal_map[] =
   {
-    RTC_CAL_RTC_MUX,
-    RTC_CAL_32K_XTAL,
-    RTC_CAL_8MD256
+    CLK_CAL_RTC_SLOW,
+    CLK_CAL_32K_XTAL,
+    CLK_CAL_RC_FAST_D256
   };
 
   DEBUGASSERT(dev);
 
   /* Check which clock is sourcing the slow_clk_rtc */
 
-  slow_clk_rtc = esp32_rtc_get_slow_clk();
+  slow_clk_rtc = rtc_clk_slow_src_get();
 
   /* Get the slow_clk_rtc period in us in Q13.19 fixed point format */
 
-  period_13q19 = esp32_rtc_clk_cal(cal_map[slow_clk_rtc],
-                                   SLOW_CLK_CAL_CYCLES);
+  period_13q19 = rtc_clk_cal(cal_map[slow_clk_rtc],
+                             SLOW_CLK_CAL_CYCLES);
 
   /* Assert no error happened during the calibration */
 
@@ -715,29 +739,27 @@ static int esp32_wdt_setisr(struct esp32_wdt_dev_s *dev, xcpt_t handler,
     {
       /* If a CPU Interrupt was previously allocated, then deallocate it */
 
+      if (wdt->cpuint >= 0)
+        {
 #ifdef CONFIG_ESP32_RWDT
-      if (wdt->irq == ESP32_IRQ_RTC_WDT)
-        {
-          esp32_rtcioirqdisable(wdt->irq);
-          irq_detach(wdt->irq);
-        }
-      else
+          if (wdt->irq == ESP32_IRQ_RTC_WDT)
+            {
+              esp32_rtcioirqdisable(wdt->irq);
+              esp32_rtcioirqdetach(wdt->irq);
+            }
+          else
 #endif
-        {
-          if (wdt->cpuint >= 0)
             {
               /* Disable CPU Interrupt, free a previously allocated
                * CPU Interrupt
                */
 
               up_disable_irq(wdt->irq);
-              esp32_teardown_irq(wdt->cpu, wdt->periph, wdt->cpuint);
-              irq_detach(wdt->irq);
-              wdt->cpuint = -ENOMEM;
+              esp_teardown_irq(wdt->periph, wdt->cpuint);
             }
-
-          goto errout;
         }
+
+      goto errout;
     }
 
   /* Otherwise set callback and enable interrupt */
@@ -749,7 +771,9 @@ static int esp32_wdt_setisr(struct esp32_wdt_dev_s *dev, xcpt_t handler,
 #ifdef CONFIG_ESP32_RWDT
       if (wdt->irq == ESP32_IRQ_RTC_WDT)
         {
-          ret = irq_attach(wdt->irq, handler, arg);
+          /* RTC interrupts use special RTC IRQ handling */
+
+          ret = esp32_rtcioirqattach(wdt->irq, handler, arg);
 
           if (ret != OK)
             {
@@ -763,9 +787,9 @@ static int esp32_wdt_setisr(struct esp32_wdt_dev_s *dev, xcpt_t handler,
       else
 #endif
         {
-          wdt->cpu = this_cpu();
-          wdt->cpuint = esp32_setup_irq(wdt->cpu, wdt->periph,
-                                        1, ESP32_CPUINT_LEVEL);
+          wdt->cpuint = esp_setup_irq(wdt->periph, 1,
+                                      ESP_IRQ_TRIGGER_LEVEL,
+                                      handler, arg);
           if (wdt->cpuint < 0)
             {
               tmrerr("ERROR: No CPU Interrupt available");
@@ -773,18 +797,7 @@ static int esp32_wdt_setisr(struct esp32_wdt_dev_s *dev, xcpt_t handler,
               goto errout;
             }
 
-          /* Associate an IRQ Number (from the WDT) to an ISR */
-
-          ret = irq_attach(wdt->irq, handler, arg);
-
-          if (ret != OK)
-            {
-              esp32_teardown_irq(wdt->cpu, wdt->periph, wdt->cpuint);
-              tmrerr("ERROR: Failed to associate an IRQ Number");
-              goto errout;
-            }
-
-          /* Enable the CPU Interrupt that is linked to the wdt */
+          /* Enable the CPU Interrupt that is linked to the WDT */
 
           up_enable_irq(wdt->irq);
         }
@@ -956,17 +969,6 @@ struct esp32_wdt_dev_s *esp32_wdt_init(uint8_t wdt_id)
         {
           wdt = &g_esp32_rwdt_priv;
 
-          /* If RTC was not initialized in a previous
-           * stage by the PM or by clock_initialize()
-           * Then, init the RTC clock configuration here.
-           */
-
-#if !defined(CONFIG_PM) && !defined(CONFIG_RTC)
-          /* Initialize RTC controller parameters */
-
-          esp32_rtc_init();
-          esp32_rtc_clk_set();
-#endif
           break;
         }
 

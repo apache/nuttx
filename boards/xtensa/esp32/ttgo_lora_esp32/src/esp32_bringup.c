@@ -46,6 +46,8 @@
 #include "espressif/esp_efuse.h"
 #endif
 #include "esp32_partition.h"
+#include "espressif/esp_gpio.h"
+#include "esp32_start.h"
 
 #ifdef CONFIG_USERLED
 #  include <nuttx/leds/userled.h>
@@ -95,16 +97,16 @@
 #  include "esp32_aes.h"
 #endif
 
-#ifdef CONFIG_ESP32_RT_TIMER
-#  include "esp32_rt_timer.h"
-#endif
-
 #ifdef CONFIG_INPUT_BUTTONS
 #  include <nuttx/input/buttons.h>
 #endif
 
 #ifdef CONFIG_RTC_DRIVER
-#  include "esp32_rtc_lowerhalf.h"
+#  include "espressif/esp_rtc.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_HR_TIMER
+#  include "espressif/esp_hr_timer.h"
 #endif
 
 #ifdef CONFIG_SPI_DRIVER
@@ -192,14 +194,6 @@ int esp32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32_RT_TIMER
-  ret = esp32_rt_timer_init();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize RT timer: %d\n", ret);
-    }
-#endif
-
 #ifdef CONFIG_LPWAN_SX127X
   ret = esp32_lpwaninitialize();
   if (ret < 0)
@@ -228,13 +222,21 @@ int esp32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESPRESSIF_HR_TIMER
+  ret = esp_hr_timer_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_hr_timer_init() failed: %d\n", ret);
+    }
+#endif
+
 /* First, register the timer drivers and let timer 1 for oneshot
  * if it is enabled.
  */
 
 #ifdef CONFIG_TIMER
 
-#if defined(CONFIG_ESP32_TIMER0) && !defined(CONFIG_ESP32_RT_TIMER)
+#if defined(CONFIG_ESP32_TIMER0) && !defined(CONFIG_ESPRESSIF_HR_TIMER)
   ret = esp32_timer_initialize("/dev/timer0", TIMER0);
   if (ret < 0)
     {
@@ -390,7 +392,7 @@ int esp32_bringup(void)
 #ifdef CONFIG_RTC_DRIVER
   /* Instantiate the ESP32 RTC driver */
 
-  ret = esp32_rtc_driverinit();
+  ret = esp_rtc_driverinit();
   if (ret < 0)
     {
       syslog(LOG_ERR,

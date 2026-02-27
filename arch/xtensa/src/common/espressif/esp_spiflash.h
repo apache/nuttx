@@ -106,22 +106,6 @@ int esp_spiflash_erase(uint32_t address, uint32_t length);
 int esp_spiflash_write(uint32_t address, const void *buffer,
                        uint32_t length);
 
-/****************************************************************************
- * Name: esp_spiflash_init
- *
- * Description:
- *   Initialize ESP SPI flash driver.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   OK if success or a negative value if fail.
- *
- ****************************************************************************/
-
-int esp_spiflash_init(void);
-
 #ifdef __cplusplus
 }
 #endif

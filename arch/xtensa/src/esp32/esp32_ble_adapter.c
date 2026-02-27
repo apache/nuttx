@@ -52,12 +52,12 @@
 #include "hardware/esp32_dport.h"
 #include "hardware/wdev_reg.h"
 #include "xtensa.h"
-#include "xtensa_attr.h"
+
 #include "utils/memory_reserve.h"
-#include "esp32_rt_timer.h"
+#include "esp_hr_timer.h"
 #include "espressif/esp_wireless.h"
 #include "espressif/esp_wifi_utils.h"
-#include "esp32_irq.h"
+#include "esp_irq.h"
 
 #include "esp_bt.h"
 #include "esp_log.h"
@@ -126,12 +126,6 @@
 #ifdef CONFIG_ESPRESSIF_SPIFLASH
 #  define BLE_TASK_EVENT_QUEUE_ITEM_SIZE    8
 #  define BLE_TASK_EVENT_QUEUE_LEN          8
-#endif
-
-#ifdef CONFIG_ESPRESSIF_BLE_INTERRUPT_SAVE_STATUS
-#  define NR_IRQSTATE_FLAGS   CONFIG_ESPRESSIF_BLE_INTERRUPT_SAVE_STATUS
-#else
-#  define NR_IRQSTATE_FLAGS   3
 #endif
 
 #define RTC_CLK_CAL_FRACT  19  /* Number of fractional bits in values returned by rtc_clk_cal */
@@ -297,9 +291,30 @@ struct irqstate_list_s
   irqstate_t flags;
 };
 
+typedef struct shared_vector_desc_t shared_vector_desc_t;
+typedef struct vector_desc_t vector_desc_t;
+
+typedef struct intr_handle_data_t
+{
+  vector_desc_t *vector_desc;
+  shared_vector_desc_t *shared_vector_desc;
+} intr_handle_data_t;
+
+struct vector_desc_t
+{
+  int flags: 16;
+  unsigned int cpu: 1;
+  unsigned int intno: 5;
+  int source: 16;
+  shared_vector_desc_t *shared_vec_info;
+  vector_desc_t *next;
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+extern vector_desc_t *get_desc_for_int(int intno, int cpu);
 
 /****************************************************************************
  * Functions to be registered to struct osi_funcs_s
@@ -313,7 +328,6 @@ struct irqstate_list_s
  */
 
 static xt_handler ble_set_isr(int n, xt_handler f, void *arg);
-static void ints_on(unsigned int mask);
 static void IRAM_ATTR interrupt_disable(void);
 static void IRAM_ATTR interrupt_restore(void);
 static void IRAM_ATTR task_yield_from_isr(void);
@@ -409,7 +423,6 @@ static void IRAM_ATTR cause_sw_intr(void *arg);
 static void btdm_slp_tmr_customer_callback(void * arg);
 static void IRAM_ATTR btdm_slp_tmr_callback(void *arg);
 #endif
-static int IRAM_ATTR esp_int_adpt_cb(int irq, void *context, void *arg);
 static void btdm_wakeup_request_callback(void * arg);
 static void btdm_controller_mem_init(void);
 static uint32_t btdm_config_mask_load(void);
@@ -507,7 +520,7 @@ static struct osi_funcs_s g_osi_funcs_ro =
 {
   ._version = OSI_VERSION,
   ._set_isr = ble_set_isr,
-  ._ints_on = ints_on,
+  ._ints_on = xt_ints_on,
   ._interrupt_disable = interrupt_disable,
   ._interrupt_restore = interrupt_restore,
   ._task_yield = task_yield_from_isr,
@@ -683,11 +696,9 @@ static DRAM_ATTR bool g_btdm_allow_light_sleep;
 
 /* BT interrupt private data */
 
-static sq_queue_t g_ble_int_flags_free;
+irqstate_t g_ble_int_flags;
 
-static sq_queue_t g_ble_int_flags_used;
-
-static struct irqstate_list_s g_ble_int_flags[NR_IRQSTATE_FLAGS];
+static int g_ble_int_count = 0;
 
 /* Cached queue control variables */
 
@@ -827,75 +838,55 @@ static inline void btdm_check_and_init_bb(void)
 static xt_handler ble_set_isr(int n, xt_handler f, void *arg)
 {
   int ret;
-  uint32_t tmp;
-  struct irq_adpt_s *adapter;
-  int irq = esp32_getirq(0, n);
-
-  wlinfo("n=%d f=%p arg=%p irq=%d\n", n, f, arg, irq);
-
-  if (g_irqvector[irq].handler &&
-      g_irqvector[irq].handler != irq_unexpected_isr)
-    {
-      wlinfo("irq=%d has been set handler=%p\n", irq,
-             g_irqvector[irq].handler);
-      return NULL;
-    }
-
-  tmp = sizeof(struct irq_adpt_s);
-  adapter = kmm_malloc(tmp);
-  if (!adapter)
-    {
-      wlerr("Failed to alloc %" PRIu32 " memory\n", tmp);
-      DEBUGPANIC();
-      return NULL;
-    }
-
-  adapter->func = f;
-  adapter->arg = arg;
-
-  ret = irq_attach(irq, esp_int_adpt_cb, adapter);
-  if (ret)
-    {
-      wlerr("Failed to attach IRQ %d\n", irq);
-      DEBUGPANIC();
-      return NULL;
-    }
-
-  return NULL;
-}
-
-/****************************************************************************
- * Name: ints_on
- *
- * Description:
- *   Enable BLE interrupt
- *
- * Input Parameters:
- *   mask - Mask used to indicate the bits to enable interrupt.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void ints_on(unsigned int mask)
-{
-  uint32_t bit;
+  intr_handle_t handle;
   int irq;
 
-  for (int i = 0; i < 32; i++)
+  switch (n)
     {
-      bit = 1 << i;
-      if (bit & mask)
+      case 5:
         {
-          irq = esp32_getirq(0, i);
-          DEBUGVERIFY(esp32_irq_set_iram_isr(irq));
-          up_enable_irq(irq);
-          wlinfo("Enabled bit %d\n", irq);
+          irq = ESP_SOURCE2IRQ(ETS_RWBT_INTR_SOURCE);
+        }
+        break;
+
+      case 7:
+        {
+          irq = ETS_INTERNAL_SW0_INTR_SOURCE + \
+                ETS_INTERNAL_INTR_SOURCE_OFF;
+        }
+        break;
+
+      case 8:
+        {
+          irq = ESP_SOURCE2IRQ(ETS_BT_BB_INTR_SOURCE);
+        }
+        break;
+
+      default:
+        {
+          wlerr("ERROR: Invalid interrupt number %d\n", n);
+          return NULL;
         }
     }
 
-  UNUSED(irq);
+  wlinfo("n=%d f=%p arg=%p irq=%d\n", n, f, arg, irq);
+
+  handle = kmm_calloc(1, sizeof(intr_handle_data_t));
+  if (handle == NULL)
+    {
+      wlerr("Failed to kmm_calloc\n");
+      return NULL;
+    }
+
+  handle->vector_desc = get_desc_for_int(n, this_cpu());
+
+  /* Register the handle - it contains all needed information (cpuint, cpu) */
+
+  esp_set_handle(this_cpu(), irq, handle);
+
+  xt_set_interrupt_handler(n, (xt_handler)f, arg);
+
+  return NULL;
 }
 
 /****************************************************************************
@@ -917,13 +908,12 @@ static void IRAM_ATTR interrupt_disable(void)
 {
   struct irqstate_list_s *irqstate;
 
-  irqstate = (struct irqstate_list_s *)sq_remlast(&g_ble_int_flags_free);
+  if (g_ble_int_count == 0)
+    {
+      g_ble_int_flags = enter_critical_section();
+    }
 
-  ASSERT(irqstate != NULL);
-
-  irqstate->flags = enter_critical_section();
-
-  sq_addlast((sq_entry_t *)irqstate, &g_ble_int_flags_used);
+  g_ble_int_count++;
 }
 
 /****************************************************************************
@@ -945,13 +935,12 @@ static void IRAM_ATTR interrupt_restore(void)
 {
   struct irqstate_list_s *irqstate;
 
-  irqstate = (struct irqstate_list_s *)sq_remlast(&g_ble_int_flags_used);
+  g_ble_int_count--;
 
-  ASSERT(irqstate != NULL);
-
-  leave_critical_section(irqstate->flags);
-
-  sq_addlast((sq_entry_t *)irqstate, &g_ble_int_flags_free);
+  if (g_ble_int_count == 0)
+    {
+      leave_critical_section(g_ble_int_flags);
+    }
 }
 
 /****************************************************************************
@@ -2568,31 +2557,6 @@ static void IRAM_ATTR btdm_slp_tmr_callback(void *arg)
 #endif
 
 /****************************************************************************
- * Name: esp_int_adpt_cb
- *
- * Description:
- *   BT interrupt adapter callback function
- *
- * Input Parameters:
- *   irq     - Number of the IRQ that generated the interrupt
- *   context - Interrupt register state save info (not used)
- *   arg     - Argument passed to the interrupt callback
- *
- * Returned Value:
- *   OK
- *
- ****************************************************************************/
-
-static int IRAM_ATTR esp_int_adpt_cb(int irq, void *context, void *arg)
-{
-  struct irq_adpt_s *adapter = (struct irq_adpt_s *)arg;
-
-  adapter->func(adapter->arg);
-
-  return OK;
-}
-
-/****************************************************************************
  * Name: btdm_wakeup_request_callback
  *
  * Description:
@@ -2905,17 +2869,7 @@ int esp32_bt_controller_init(void)
       return -EIO;
     }
 
-  /* Initialize list of interrupt flags to enable chained critical sections
-   * to return successfully.
-   */
-
-  sq_init(&g_ble_int_flags_free);
-  sq_init(&g_ble_int_flags_used);
-
-  for (i = 0; i < NR_IRQSTATE_FLAGS; i++)
-    {
-      sq_addlast((sq_entry_t *)&g_ble_int_flags[i], &g_ble_int_flags_free);
-    }
+  g_ble_int_count = 0;
 
 #ifdef CONFIG_ESPRESSIF_SPIFLASH
 

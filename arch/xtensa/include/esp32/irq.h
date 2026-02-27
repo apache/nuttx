@@ -39,7 +39,7 @@
 
 /* CPU interrupt flags:
  *   These flags can be used to specify which interrupt qualities the
- *   code calling esp32_setup_irq needs.
+ *   code calling esp_setup_irq needs.
  */
 
 #define ESP32_CPUINT_FLAG_LEVEL   (1 << 0) /* Level-triggered interrupt */
@@ -190,24 +190,39 @@
  */
 
 /* IRQ numbers for internal interrupts that are dispatched like peripheral
- * interrupts
+ * interrupts. These use negative source IDs for internal CPU interrupts.
  */
+
+#define ETS_INTERNAL_TIMER0_INTR_SOURCE     -1 /* Platform timer 0 interrupt source */
+#define ETS_INTERNAL_TIMER1_INTR_SOURCE     -2 /* Platform timer 1 interrupt source */
+#define ETS_INTERNAL_TIMER2_INTR_SOURCE     -3 /* Platform timer 2 interrupt source */
+#define ETS_INTERNAL_SW0_INTR_SOURCE        -4 /* Software int source 1 */
+#define ETS_INTERNAL_SW1_INTR_SOURCE        -5 /* Software int source 2 */
+#define ETS_INTERNAL_PROFILING_INTR_SOURCE  -6 /* Int source for profiling */
+
+#define ETS_INTERNAL_INTR_SOURCE_OFF        (-ETS_INTERNAL_PROFILING_INTR_SOURCE)
+
+#define XTENSA_NIRQ_INTERNAL        ETS_INTERNAL_INTR_SOURCE_OFF      /* Number of dispatch internal interrupts */
+#define XTENSA_IRQ_DEMUX            ETS_INTERNAL_INTR_SOURCE_OFF + 0  /* Demultiplexing IRQ for peripheral interrupts */
+#define XTENSA_IRQ_SYSCALL          ETS_INTERNAL_INTR_SOURCE_OFF + 1  /* User interrupt w/EXCCAUSE=syscall */
+#define XTENSA_IRQ_FIRSTPERIPH      ETS_INTERNAL_INTR_SOURCE_OFF + 2  /* First peripheral IRQ number */
+
+/* Legacy definitions for compatibility */
 
 #define XTENSA_IRQ_TIMER0           0  /* INTERRUPT, bit 6 */
 #define XTENSA_IRQ_TIMER1           1  /* INTERRUPT, bit 15 */
 #define XTENSA_IRQ_TIMER2           2  /* INTERRUPT, bit 16 */
-#define XTENSA_IRQ_SYSCALL          3  /* User interrupt w/EXCCAUSE=syscall */
 #define XTENSA_IRQ_SWINT            4  /* Software interrupt */
-
-#define XTENSA_NIRQ_INTERNAL        5  /* Number of dispatch internal interrupts */
-#define XTENSA_IRQ_FIRSTPERIPH      5  /* First peripheral IRQ number */
 
 /* IRQ numbers for peripheral interrupts coming through the Interrupt
  * Matrix.
  */
 
-#define ESP32_IRQ2PERIPH(irq)       ((irq)-XTENSA_IRQ_FIRSTPERIPH)
-#define ESP32_PERIPH2IRQ(id)        ((id)+XTENSA_IRQ_FIRSTPERIPH)
+#define ESP32_IRQ2PERIPH(irq)       ((irq) - XTENSA_IRQ_FIRSTPERIPH)
+#define ESP32_PERIPH2IRQ(id)        ((id) + XTENSA_IRQ_FIRSTPERIPH)
+
+#define ESP_IRQ2SOURCE(irq)         ESP32_IRQ2PERIPH(irq)
+#define ESP_SOURCE2IRQ(id)          ESP32_PERIPH2IRQ(id)
 
 /* PRO_INTR_STATUS_REG_0 / APP_INTR_STATUS_REG_0 */
 
@@ -299,7 +314,7 @@
 
 #define ESP32_NIRQ_PERIPH           ESP32_NPERIPHERALS
 
-#ifdef CONFIG_ESP32_GPIO_IRQ
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
 
 /* The PRO and APP CPU have different interrupts sources for the GPIO
  * peripheral.  Each CPU needs to allocate a separate interrupt and attach
@@ -325,6 +340,8 @@
 #  define ESP32_LAST_GPIOIRQ        (ESP32_FIRST_GPIOIRQ+ESP32_NIRQ_GPIO-1)
 #  define ESP32_PIN2IRQ(p)          ((p) + ESP32_FIRST_GPIOIRQ)
 #  define ESP32_IRQ2PIN(i)          ((i) - ESP32_FIRST_GPIOIRQ)
+#  define ESP_PIN2IRQ(p)            ESP32_PIN2IRQ(p)
+#  define ESP_IRQ2PIN(i)            ESP32_IRQ2PIN(i)
 #else
 #  define ESP32_NIRQ_GPIO           0
 #endif
@@ -477,7 +494,7 @@
  * Inline functions
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32_GPIO_IRQ
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
 #ifdef CONFIG_SMP
 static inline_function int esp32_irq_gpio(int cpu)
 {

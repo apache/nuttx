@@ -33,16 +33,8 @@
 #include <nuttx/config.h>
 #include <nuttx/list.h>
 
-#ifdef CONFIG_ARCH_CHIP_ESP32
-#include "xtensa_attr.h"
-#include "esp32_rt_timer.h"
-#elif CONFIG_ARCH_CHIP_ESP32S2
 #include "esp_attr.h"
-#include "esp32s2_rt_timer.h"
-#elif CONFIG_ARCH_CHIP_ESP32S3
-#include "esp_attr.h"
-#include "esp32s3_rt_timer.h"
-#endif
+#include "esp_hr_timer.h"
 
 #ifdef CONFIG_ESPRESSIF_WIFI
 #  include "os.h"

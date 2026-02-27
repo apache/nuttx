@@ -39,34 +39,32 @@
 #include <arch/irq.h>
 
 #include "xtensa.h"
+#include "esp_gpio.h"
+#include "esp_irq.h"
 #include "esp_i2s.h"
-#if defined(CONFIG_ARCH_CHIP_ESP32S3)
-#include "esp32s3_gpio.h"
-#include "hardware/esp32s3_gpio_sigmap.h"
-#include "esp32s3_dma.h"
-#include "hardware/esp32s3_dma.h"
-#include "esp32s3_irq.h"
+
+#if defined(CONFIG_ARCH_CHIP_ESP32)
+#  include "esp32_dma.h"
 #elif defined(CONFIG_ARCH_CHIP_ESP32S2)
-#include "esp32s2_gpio.h"
-#include "hardware/esp32s2_gpio_sigmap.h"
-#include "esp32s2_dma.h"
-#include "esp32s2_irq.h"
-#else
-#include "esp32_gpio.h"
-#include "esp32_dma.h"
-#include "esp32_irq.h"
+#  include "espressif/esp_gpio.h"
+#  include "hardware/esp32s2_gpio_sigmap.h"
+#  include "esp32s2_dma.h"
+#elif defined(CONFIG_ARCH_CHIP_ESP32S3)
+#  include "hardware/esp32s3_gpio_sigmap.h"
+#  include "esp32s3_dma.h"
+#  include "hardware/esp32s3_dma.h"
 #endif
 
 #include "hal/i2s_hal.h"
 #include "hal/i2s_ll.h"
-#include "soc/i2s_periph.h"
+#include "hal/i2s_periph.h"
 #include "soc/i2s_reg.h"
 #include "hal/i2s_types.h"
 #include "soc/gpio_sig_map.h"
 #include "periph_ctrl.h"
 #if defined(CONFIG_ARCH_CHIP_ESP32S3)
 #  include "soc/gdma_reg.h"
-#  include "soc/gdma_periph.h"
+#  include "hal/gdma_periph.h"
 #  include "hal/gdma_ll.h"
 #endif
 
@@ -82,49 +80,27 @@
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_ESP32S3)
-#define esp_setup_irq             esp32s3_setup_irq
-#define esp_teardown_irq          esp32s3_teardown_irq
-#define esp_configgpio            esp32s3_configgpio
-#define esp_gpio_matrix_in        esp32s3_gpio_matrix_in
-#define esp_gpio_matrix_out       esp32s3_gpio_matrix_out
-#define esp_gpiowrite             esp32s3_gpiowrite
 #define esp_dma_init              esp32s3_dma_init
 #define esp_dma_request           esp32s3_dma_request
 #define esp_dma_setup             esp32s3_dma_setup
 #define esp_dma_load              esp32s3_dma_load
 #define esp_dma_enable            esp32s3_dma_enable
 #define ESP_IRQ_PRIORITY_DEFAULT  ESP32S3_INT_PRIO_DEF
-#define ESP_IRQ_TRIGGER_LEVEL     ESP32S3_CPUINT_LEVEL
+#define ESP_IRQ_TRIGGER_LEVEL     ESP_IRQ_TRIGGER_LEVEL
 #define ESPRESSIF_DMA_BUFLEN_MAX  ESP32S3_DMA_BUFLEN_MAX
 #define ESPRESSIF_DMA_PERIPH_I2S  ESP32S3_DMA_PERIPH_I2S1
-#define ESP_SOURCE2IRQ            ESP32S3_PERIPH2IRQ
 #define esp_dmadesc_s             esp32s3_dmadesc_s
 #elif defined(CONFIG_ARCH_CHIP_ESP32S2)
-#define esp_setup_irq             esp32s2_setup_irq
-#define esp_teardown_irq          esp32s2_teardown_irq
-#define esp_configgpio            esp32s2_configgpio
-#define esp_gpio_matrix_in        esp32s2_gpio_matrix_in
-#define esp_gpio_matrix_out       esp32s2_gpio_matrix_out
-#define esp_gpiowrite             esp32s2_gpiowrite
 #define esp_dma_setup             esp32s2_dma_init
-#define ESP_SOURCE2IRQ            ESP32S2_PERIPH2IRQ
 #define esp_dmadesc_s             esp32s2_dmadesc_s
 #define ESPRESSIF_DMA_BUFLEN_MAX  ESP32S2_DMA_DATALEN_MAX
 #define ESP_IRQ_PRIORITY_DEFAULT  ESP32S2_INT_PRIO_DEF
-#define ESP_IRQ_TRIGGER_LEVEL     ESP32S2_CPUINT_LEVEL
 #define I2S0O_SD_OUT_IDX          I2S0O_DATA_OUT23_IDX
 #define I2S0I_SD_IN_IDX           I2S0I_DATA_IN15_IDX
 #define I2S0_MCLK_OUT_IDX         CLK_I2S_MUX_IDX
 #elif defined(CONFIG_ARCH_CHIP_ESP32)
-#define esp_setup_irq             esp32_setup_irq
-#define esp_teardown_irq          esp32_teardown_irq
-#define esp_configgpio            esp32_configgpio
-#define esp_gpio_matrix_in        esp32_gpio_matrix_in
-#define esp_gpio_matrix_out       esp32_gpio_matrix_out
-#define esp_gpiowrite             esp32_gpiowrite
 #define esp_dma_setup             esp32_dma_init
 #define esp_dmadesc_s             esp32_dmadesc_s
-#define ESP_SOURCE2IRQ            ESP32_PERIPH2IRQ
 #define ESPRESSIF_DMA_BUFLEN_MAX  ESP32_DMA_DATALEN_MAX
 #define I2S0O_SD_OUT_IDX          I2S0O_DATA_OUT23_IDX
 #define I2S0I_SD_IN_IDX           I2S0I_DATA_IN15_IDX
@@ -133,7 +109,6 @@
 #define I2S1I_SD_IN_IDX           I2S1I_DATA_IN15_IDX
 #define I2S1_MCLK_OUT_IDX         -1
 #define ESP_IRQ_PRIORITY_DEFAULT  1
-#define ESP_IRQ_TRIGGER_LEVEL     ESP32_CPUINT_LEVEL
 #endif
 
 #if defined(CONFIG_ESPRESSIF_I2S0_DATA_BIT_WIDTH_8BIT) ||     \
@@ -343,7 +318,6 @@ typedef enum
 struct esp_i2s_config_s
 {
   uint32_t port;                    /* I2S port */
-  periph_module_t module;           /* I2S peripheral module */
   uint32_t role;                    /* I2S port role (master or slave) */
   uint8_t data_width;               /* I2S sample data width */
   uint32_t rate;                    /* I2S sample-rate */
@@ -588,7 +562,6 @@ i2s_hal_clock_info_t clk_info_i2s0 =
 static const struct esp_i2s_config_s esp_i2s0_config =
 {
   .port             = 0,
-  .module           = PERIPH_I2S0_MODULE,
 #ifdef CONFIG_ESPRESSIF_I2S0_ROLE_MASTER
   .role             = I2S_ROLE_MASTER,
 #else
@@ -662,7 +635,6 @@ i2s_hal_clock_info_t clk_info_i2s1 =
 static const struct esp_i2s_config_s esp_i2s1_config =
 {
   .port             = 1,
-  .module           = PERIPH_I2S1_MODULE,
 #ifdef CONFIG_ESPRESSIF_I2S1_ROLE_MASTER
   .role             = I2S_ROLE_MASTER,
 #else
@@ -1583,8 +1555,6 @@ static void i2s_configure(struct esp_i2s_s *priv)
     };
 
   /* Set peripheral clock and clear reset */
-
-  periph_module_enable(priv->config->module);
 
   i2s_hal_init(priv->config->ctx, priv->config->port);
   I2S_RCC_ATOMIC()
@@ -3094,9 +3064,11 @@ static int i2s_dma_setup(struct esp_i2s_s *priv)
     {
       periph =
         gdma_periph_signals.groups[0].pairs[priv->dma_channel].tx_irq_id;
-      int cpuint = esp_setup_irq(priv->cpu,
-                                 periph, 1,
-                                 ESP_IRQ_TRIGGER_LEVEL);
+
+      ASSERT(this_cpu() == priv->cpu);
+      int cpuint = esp_setup_irq(periph, 1,
+                                 ESP_IRQ_TRIGGER_LEVEL,
+                                 i2s_interrupt, priv);
       if (cpuint < 0)
         {
           i2serr("Failed to allocate a CPU interrupt.\n");
@@ -3104,15 +3076,6 @@ static int i2s_dma_setup(struct esp_i2s_s *priv)
         }
 
       priv->tx_irq = ESP_SOURCE2IRQ(periph);
-      ret = irq_attach(priv->tx_irq, i2s_interrupt, priv);
-      if (ret != OK)
-        {
-          i2serr("Couldn't attach IRQ to handler.\n");
-          esp_teardown_irq(priv->cpu,
-                           periph,
-                           cpuint);
-          return ret;
-        }
     }
 #  endif /* I2S_HAVE_TX */
 
@@ -3121,9 +3084,11 @@ static int i2s_dma_setup(struct esp_i2s_s *priv)
     {
       periph =
         gdma_periph_signals.groups[0].pairs[priv->dma_channel].rx_irq_id;
-      int cpuint = esp_setup_irq(priv->cpu,
-                                 periph, 1,
-                                 ESP_IRQ_TRIGGER_LEVEL);
+
+      ASSERT(this_cpu() == priv->cpu);
+      int cpuint = esp_setup_irq(periph, 1,
+                                 ESP_IRQ_TRIGGER_LEVEL,
+                                 i2s_interrupt, priv);
       if (cpuint < 0)
         {
           i2serr("Failed to allocate a CPU interrupt.\n");
@@ -3131,15 +3096,6 @@ static int i2s_dma_setup(struct esp_i2s_s *priv)
         }
 
       priv->rx_irq = ESP_SOURCE2IRQ(periph);
-      ret = irq_attach(priv->rx_irq, i2s_interrupt, priv);
-      if (ret != OK)
-        {
-          i2serr("Couldn't attach IRQ to handler.\n");
-          esp_teardown_irq(priv->cpu,
-                           periph,
-                           cpuint);
-          return ret;
-        }
     }
 #  endif /* I2S_HAVE_RX */
 #else
@@ -3153,30 +3109,14 @@ static int i2s_dma_setup(struct esp_i2s_s *priv)
   priv->cpu = this_cpu();
   periph = i2s_periph_signal[priv->config->port].irq;
 
-  int cpuint = esp_setup_irq(
-#  ifndef CONFIG_ARCH_CHIP_ESP32S2
-                              priv->cpu,
-#  endif
-                              periph, 1,
-                              ESP_IRQ_TRIGGER_LEVEL);
+  int cpuint = esp_setup_irq(periph,
+                             ESP_IRQ_PRIORITY_DEFAULT,
+                             ESP_IRQ_TRIGGER_LEVEL,
+                             i2s_interrupt, priv);
   if (cpuint < 0)
     {
       i2serr("Failed to allocate a CPU interrupt.\n");
       return ERROR;
-    }
-
-  int irq = ESP_SOURCE2IRQ(periph);
-  ret = irq_attach(irq, i2s_interrupt, priv);
-  if (ret != OK)
-    {
-      i2serr("Couldn't attach IRQ to handler.\n");
-      esp_teardown_irq(
-#ifndef CONFIG_ARCH_CHIP_ESP32S2
-                        priv->cpu,
-#endif
-                        periph,
-                        cpuint);
-      return ret;
     }
 #endif
 

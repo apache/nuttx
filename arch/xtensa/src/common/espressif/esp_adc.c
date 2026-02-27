@@ -45,16 +45,16 @@
 #include "hal/adc_oneshot_hal.h"
 #include "hal/adc_ll.h"
 #include "hal/sar_ctrl_ll.h"
-#include "soc/adc_periph.h"
+#include "hal/adc_periph.h"
 #include "soc/periph_defs.h"
 #include "esp_clk_tree.h"
 
 #ifdef CONFIG_ARCH_CHIP_ESP32
-#include "esp32_gpio.h"
+#include "esp_gpio.h"
 #elif defined(CONFIG_ARCH_CHIP_ESP32S2)
-#include "esp32s2_gpio.h"
+#include "espressif/esp_gpio.h"
 #elif defined(CONFIG_ARCH_CHIP_ESP32S3)
-#include "esp32s3_gpio.h"
+#include "esp_gpio.h"
 #endif
 
 /****************************************************************************
@@ -66,15 +66,12 @@
 #endif
 
 #ifdef CONFIG_ARCH_CHIP_ESP32
-#  define esp_configgpio       esp32_configgpio
 #  define GPIO_ADC_FUNCTION    FUNCTION_3
 #endif
 #ifdef CONFIG_ARCH_CHIP_ESP32S2
-#  define esp_configgpio       esp32s2_configgpio
 #  define GPIO_ADC_FUNCTION    FUNCTION_2
 #endif
 #ifdef CONFIG_ARCH_CHIP_ESP32S3
-#  define esp_configgpio       esp32s3_configgpio
 #  define GPIO_ADC_FUNCTION    FUNCTION_2
 #endif
 

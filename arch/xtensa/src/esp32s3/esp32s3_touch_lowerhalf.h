@@ -33,11 +33,11 @@
 #include "xtensa.h"
 
 #include "hardware/esp32s3_rtc_io.h"
-#include "hardware/esp32s3_rtccntl.h"
+#include "soc/rtc_cntl_reg.h"
 #include "hardware/esp32s3_touch.h"
 #include "hardware/esp32s3_sens.h"
 
-#include "esp32s3_rt_timer.h"
+#include "espressif/esp_hr_timer.h"
 #include "esp32s3_rtc_gpio.h"
 
 /****************************************************************************
@@ -145,13 +145,13 @@ static inline void touch_lh_set_meas_time(uint16_t meas_time)
 {
   /* Touch sensor measure time = meas_cycle / 8Mhz */
 
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL1_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL1_REG,
                 RTC_CNTL_TOUCH_MEAS_NUM,
                 meas_time);
 
   /* The waiting cycles (in 8MHz) between TOUCH_START and TOUCH_XPD */
 
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                 RTC_CNTL_TOUCH_XPD_WAIT,
                 TOUCH_MEASURE_WAIT_MAX);
 }
@@ -172,7 +172,7 @@ static inline void touch_lh_set_meas_time(uint16_t meas_time)
 
 static inline uint16_t touch_lh_get_meas_time(void)
 {
-  return REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL1_REG,
+  return REG_GET_FIELD(RTC_CNTL_TOUCH_CTRL1_REG,
                        RTC_CNTL_TOUCH_MEAS_NUM);
 }
 
@@ -194,7 +194,7 @@ static inline void touch_lh_set_sleep_time(uint16_t sleep_time)
 {
   /* Touch sensor sleep cycle Time = sleep_cycle / RTC_SLOW_CLK (150k) */
 
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL1_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL1_REG,
                 RTC_CNTL_TOUCH_SLEEP_CYCLES,
                 sleep_time);
 }
@@ -215,7 +215,7 @@ static inline void touch_lh_set_sleep_time(uint16_t sleep_time)
 
 static inline uint16_t touch_lh_get_sleep_time(void)
 {
-  return REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL1_REG,
+  return REG_GET_FIELD(RTC_CNTL_TOUCH_CTRL1_REG,
                        RTC_CNTL_TOUCH_SLEEP_CYCLES);
 }
 
@@ -235,7 +235,7 @@ static inline uint16_t touch_lh_get_sleep_time(void)
 
 static inline void touch_lh_set_voltage_high(enum touch_high_volt_e refh)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG, RTC_CNTL_TOUCH_DREFH, refh);
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG, RTC_CNTL_TOUCH_DREFH, refh);
 }
 
 /****************************************************************************
@@ -255,7 +255,7 @@ static inline void touch_lh_set_voltage_high(enum touch_high_volt_e refh)
 static inline enum touch_high_volt_e touch_lh_get_voltage_high(void)
 {
   return (enum touch_high_volt_e)
-    REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG, RTC_CNTL_TOUCH_DREFH);
+    REG_GET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG, RTC_CNTL_TOUCH_DREFH);
 }
 
 /****************************************************************************
@@ -274,7 +274,7 @@ static inline enum touch_high_volt_e touch_lh_get_voltage_high(void)
 
 static inline void touch_lh_set_voltage_low(enum touch_low_volt_e refl)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG, RTC_CNTL_TOUCH_DREFL, refl);
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG, RTC_CNTL_TOUCH_DREFL, refl);
 }
 
 /****************************************************************************
@@ -294,7 +294,7 @@ static inline void touch_lh_set_voltage_low(enum touch_low_volt_e refl)
 static inline enum touch_low_volt_e touch_lh_get_voltage_low(void)
 {
   return (enum touch_low_volt_e)
-    REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG, RTC_CNTL_TOUCH_DREFL);
+    REG_GET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG, RTC_CNTL_TOUCH_DREFL);
 }
 
 /****************************************************************************
@@ -314,7 +314,7 @@ static inline enum touch_low_volt_e touch_lh_get_voltage_low(void)
 static inline void
   touch_lh_set_voltage_attenuation(enum touch_volt_atten_e atten)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG, RTC_CNTL_TOUCH_DRANGE, atten);
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG, RTC_CNTL_TOUCH_DRANGE, atten);
 }
 
 /****************************************************************************
@@ -334,7 +334,7 @@ static inline void
 static inline enum touch_volt_atten_e touch_lh_get_voltage_attenuation(void)
 {
   return (enum touch_volt_atten_e)
-    REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG, RTC_CNTL_TOUCH_DRANGE);
+    REG_GET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG, RTC_CNTL_TOUCH_DRANGE);
 }
 
 /****************************************************************************
@@ -473,7 +473,7 @@ static inline enum touch_tie_opt_e
 
 static inline void touch_lh_set_fsm_mode(enum touch_fsm_mode_e mode)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                 RTC_CNTL_TOUCH_START_FORCE,
                 mode);
 }
@@ -495,7 +495,7 @@ static inline void touch_lh_set_fsm_mode(enum touch_fsm_mode_e mode)
 static inline enum touch_fsm_mode_e touch_lh_get_fsm_mode(void)
 {
   return (enum touch_fsm_mode_e)
-    REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG, RTC_CNTL_TOUCH_START_FORCE);
+    REG_GET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG, RTC_CNTL_TOUCH_START_FORCE);
 }
 
 /****************************************************************************
@@ -514,7 +514,7 @@ static inline enum touch_fsm_mode_e touch_lh_get_fsm_mode(void)
 
 static inline void touch_lh_clkgate(bool enable)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                 RTC_CNTL_TOUCH_CLKGATE_EN,
                 enable);
 }
@@ -535,7 +535,7 @@ static inline void touch_lh_clkgate(bool enable)
 
 static inline bool touch_lh_clkgate_get_state(void)
 {
-  return (bool) REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  return (bool) REG_GET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                               RTC_CNTL_TOUCH_CLKGATE_EN);
 }
 
@@ -557,11 +557,11 @@ static inline bool touch_lh_clkgate_get_state(void)
 
 static inline void touch_lh_timer_force_done(void)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                 RTC_CNTL_TOUCH_TIMER_FORCE_DONE,
                 TOUCH_LH_TIMER_FORCE_DONE);
 
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                 RTC_CNTL_TOUCH_TIMER_FORCE_DONE,
                 TOUCH_LH_TIMER_DONE);
 }
@@ -582,17 +582,17 @@ static inline void touch_lh_timer_force_done(void)
 
 static inline void touch_lh_start_fsm(void)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                 RTC_CNTL_TOUCH_TIMER_FORCE_DONE,
                 TOUCH_LH_TIMER_FORCE_DONE);
 
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                 RTC_CNTL_TOUCH_TIMER_FORCE_DONE,
                 TOUCH_LH_TIMER_DONE);
 
   bool reg_val = (touch_lh_get_fsm_mode() == TOUCH_FSM_MODE_TIMER) ? 1 : 0;
 
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                 RTC_CNTL_TOUCH_SLP_TIMER_EN,
                 reg_val);
 }
@@ -613,19 +613,19 @@ static inline void touch_lh_start_fsm(void)
 
 static inline void touch_lh_stop_fsm(void)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                 RTC_CNTL_TOUCH_START_EN,
                 false);
 
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                 RTC_CNTL_TOUCH_SLP_TIMER_EN,
                 false);
 
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                 RTC_CNTL_TOUCH_TIMER_FORCE_DONE,
                 TOUCH_LH_TIMER_FORCE_DONE);
 
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                 RTC_CNTL_TOUCH_TIMER_FORCE_DONE,
                 TOUCH_LH_TIMER_DONE);
 }
@@ -646,7 +646,7 @@ static inline void touch_lh_stop_fsm(void)
 
 static inline bool touch_lh_get_fsm_state(void)
 {
-  return (bool) REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  return (bool) REG_GET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                               RTC_CNTL_TOUCH_SLP_TIMER_EN);
 }
 
@@ -666,11 +666,11 @@ static inline bool touch_lh_get_fsm_state(void)
 
 static inline void touch_lh_start_sw_meas(void)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                 RTC_CNTL_TOUCH_START_EN,
                 false);
 
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                 RTC_CNTL_TOUCH_START_EN,
                 true);
 }
@@ -748,7 +748,7 @@ static inline uint16_t touch_lh_get_threshold(enum touch_pad_e tp)
 
 static inline void touch_lh_set_channel_mask(uint16_t enable_mask)
 {
-  setbits(RTC_CNTL_RTC_TOUCH_SCAN_CTRL_REG,
+  setbits(RTC_CNTL_TOUCH_SCAN_CTRL_REG,
           (enable_mask & ((1 << TOUCH_SENSOR_PINS) - 1)) <<
           RTC_CNTL_TOUCH_SCAN_PAD_MAP_S);
 
@@ -773,7 +773,7 @@ static inline void touch_lh_set_channel_mask(uint16_t enable_mask)
 
 static inline uint16_t touch_lh_get_channel_mask(void)
 {
-  return (REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_SCAN_CTRL_REG,
+  return (REG_GET_FIELD(RTC_CNTL_TOUCH_SCAN_CTRL_REG,
                         RTC_CNTL_TOUCH_SCAN_PAD_MAP) &
           REG_GET_FIELD(SENS_SAR_TOUCH_CONF_REG,
                         SENS_TOUCH_OUTEN));
@@ -795,7 +795,7 @@ static inline uint16_t touch_lh_get_channel_mask(void)
 
 static inline void touch_lh_clear_channel_mask(uint16_t disable_mask)
 {
-  resetbits(RTC_CNTL_RTC_TOUCH_SCAN_CTRL_REG,
+  resetbits(RTC_CNTL_TOUCH_SCAN_CTRL_REG,
             (disable_mask & ((1 << TOUCH_SENSOR_PINS) - 1)) <<
             RTC_CNTL_TOUCH_SCAN_PAD_MAP_S);
 
@@ -906,15 +906,15 @@ static inline bool touch_lh_meas_is_done(void)
 
 static inline void touch_lh_reset(void)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                 RTC_CNTL_TOUCH_RESET,
                 false);
 
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                 RTC_CNTL_TOUCH_RESET,
                 true);
 
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                 RTC_CNTL_TOUCH_RESET,
                 false);
 }
@@ -945,7 +945,7 @@ static inline void touch_lh_reset(void)
 static inline void
   touch_lh_set_idle_channel_connect(enum touch_conn_type_e type)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_SCAN_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_SCAN_CTRL_REG,
                 RTC_CNTL_TOUCH_INACTIVE_CONNECTION,
                 type);
 }
@@ -977,7 +977,7 @@ static inline enum touch_conn_type_e
   touch_lh_get_idle_channel_connect(void)
 {
   return (enum touch_conn_type_e)
-    REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_SCAN_CTRL_REG,
+    REG_GET_FIELD(RTC_CNTL_TOUCH_SCAN_CTRL_REG,
                   RTC_CNTL_TOUCH_INACTIVE_CONNECTION);
 }
 
@@ -1022,42 +1022,42 @@ static inline void touch_lh_intr_enable(enum touch_intr_mask_e int_mask)
   if (int_mask & TOUCH_INTR_MASK_DONE)
     {
       REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_W1TS_REG,
-                    RTC_CNTL_RTC_TOUCH_DONE_INT_ENA_W1TS,
+                    RTC_CNTL_TOUCH_DONE_INT_ENA_W1TS,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_ACTIVE)
     {
       REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_W1TS_REG,
-                    RTC_CNTL_RTC_TOUCH_ACTIVE_INT_ENA_W1TS,
+                    RTC_CNTL_TOUCH_ACTIVE_INT_ENA_W1TS,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_INACTIVE)
     {
       REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_W1TS_REG,
-                    RTC_CNTL_RTC_TOUCH_INACTIVE_INT_ENA_W1TS,
+                    RTC_CNTL_TOUCH_INACTIVE_INT_ENA_W1TS,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_SCAN_DONE)
     {
       REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_W1TS_REG,
-                    RTC_CNTL_RTC_TOUCH_SCAN_DONE_INT_ENA_W1TS,
+                    RTC_CNTL_TOUCH_SCAN_DONE_INT_ENA_W1TS,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_TIMEOUT)
     {
       REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_W1TS_REG,
-                    RTC_CNTL_RTC_TOUCH_TIMEOUT_INT_ENA_W1TS,
+                    RTC_CNTL_TOUCH_TIMEOUT_INT_ENA_W1TS,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_PROXI_MEAS_DONE)
     {
       REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_W1TS_REG,
-                    RTC_CNTL_RTC_TOUCH_APPROACH_LOOP_DONE_INT_ENA_W1TS,
+                    RTC_CNTL_TOUCH_APPROACH_LOOP_DONE_INT_ENA_W1TS,
                     true);
     }
 }
@@ -1081,42 +1081,42 @@ static inline void touch_lh_intr_disable(enum touch_intr_mask_e int_mask)
   if (int_mask & TOUCH_INTR_MASK_DONE)
     {
       REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_W1TC_REG,
-                    RTC_CNTL_RTC_TOUCH_DONE_INT_ENA_W1TC,
+                    RTC_CNTL_TOUCH_DONE_INT_ENA_W1TC,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_ACTIVE)
     {
       REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_W1TC_REG,
-                    RTC_CNTL_RTC_TOUCH_ACTIVE_INT_ENA_W1TC,
+                    RTC_CNTL_TOUCH_ACTIVE_INT_ENA_W1TC,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_INACTIVE)
     {
       REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_W1TC_REG,
-                    RTC_CNTL_RTC_TOUCH_INACTIVE_INT_ENA_W1TC,
+                    RTC_CNTL_TOUCH_INACTIVE_INT_ENA_W1TC,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_SCAN_DONE)
     {
       REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_W1TC_REG,
-                    RTC_CNTL_RTC_TOUCH_SCAN_DONE_INT_ENA_W1TC,
+                    RTC_CNTL_TOUCH_SCAN_DONE_INT_ENA_W1TC,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_TIMEOUT)
     {
       REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_W1TC_REG,
-                    RTC_CNTL_RTC_TOUCH_TIMEOUT_INT_ENA_W1TC,
+                    RTC_CNTL_TOUCH_TIMEOUT_INT_ENA_W1TC,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_PROXI_MEAS_DONE)
     {
       REG_SET_FIELD(RTC_CNTL_INT_ENA_RTC_W1TC_REG,
-                    RTC_CNTL_RTC_TOUCH_APPROACH_LOOP_DONE_INT_ENA_W1TC,
+                    RTC_CNTL_TOUCH_APPROACH_LOOP_DONE_INT_ENA_W1TC,
                     true);
     }
 }
@@ -1139,43 +1139,43 @@ static inline void touch_lh_intr_clear(enum touch_intr_mask_e int_mask)
 {
   if (int_mask & TOUCH_INTR_MASK_DONE)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_CLR_RTC_REG,
-                    RTC_CNTL_RTC_TOUCH_DONE_INT_CLR,
+      REG_SET_FIELD(RTC_CNTL_INT_CLR_REG,
+                    RTC_CNTL_TOUCH_DONE_INT_CLR,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_ACTIVE)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_CLR_RTC_REG,
-                    RTC_CNTL_RTC_TOUCH_ACTIVE_INT_CLR,
+      REG_SET_FIELD(RTC_CNTL_INT_CLR_REG,
+                    RTC_CNTL_TOUCH_ACTIVE_INT_CLR,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_INACTIVE)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_CLR_RTC_REG,
-                    RTC_CNTL_RTC_TOUCH_INACTIVE_INT_CLR,
+      REG_SET_FIELD(RTC_CNTL_INT_CLR_REG,
+                    RTC_CNTL_TOUCH_INACTIVE_INT_CLR,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_SCAN_DONE)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_CLR_RTC_REG,
-                    RTC_CNTL_RTC_TOUCH_SCAN_DONE_INT_CLR,
+      REG_SET_FIELD(RTC_CNTL_INT_CLR_REG,
+                    RTC_CNTL_TOUCH_SCAN_DONE_INT_CLR,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_TIMEOUT)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_CLR_RTC_REG,
-                    RTC_CNTL_RTC_TOUCH_TIMEOUT_INT_CLR,
+      REG_SET_FIELD(RTC_CNTL_INT_CLR_REG,
+                    RTC_CNTL_TOUCH_TIMEOUT_INT_CLR,
                     true);
     }
 
   if (int_mask & TOUCH_INTR_MASK_PROXI_MEAS_DONE)
     {
-      REG_SET_FIELD(RTC_CNTL_INT_CLR_RTC_REG,
-                    RTC_CNTL_RTC_TOUCH_APPROACH_LOOP_DONE_INT_CLR,
+      REG_SET_FIELD(RTC_CNTL_INT_CLR_REG,
+                    RTC_CNTL_TOUCH_APPROACH_LOOP_DONE_INT_CLR,
                     true);
     }
 }
@@ -1196,35 +1196,35 @@ static inline void touch_lh_intr_clear(enum touch_intr_mask_e int_mask)
 
 static inline uint32_t touch_lh_read_intr_status_mask(void)
 {
-  uint32_t intr_st = getreg32(RTC_CNTL_INT_ST_RTC_REG);
+  uint32_t intr_st = getreg32(RTC_CNTL_INT_ST_REG);
   uint32_t intr_msk = 0;
 
-  if (intr_st & RTC_CNTL_RTC_TOUCH_DONE_INT_ST_M)
+  if (intr_st & RTC_CNTL_TOUCH_DONE_INT_ST_M)
     {
       intr_msk |= TOUCH_INTR_MASK_DONE;
     }
 
-  if (intr_st & RTC_CNTL_RTC_TOUCH_ACTIVE_INT_ST_M)
+  if (intr_st & RTC_CNTL_TOUCH_ACTIVE_INT_ST_M)
     {
       intr_msk |= TOUCH_INTR_MASK_ACTIVE;
     }
 
-  if (intr_st & RTC_CNTL_RTC_TOUCH_INACTIVE_INT_ST_M)
+  if (intr_st & RTC_CNTL_TOUCH_INACTIVE_INT_ST_M)
     {
       intr_msk |= TOUCH_INTR_MASK_INACTIVE;
     }
 
-  if (intr_st & RTC_CNTL_RTC_TOUCH_SCAN_DONE_INT_ST_M)
+  if (intr_st & RTC_CNTL_TOUCH_SCAN_DONE_INT_ST_M)
     {
       intr_msk |= TOUCH_INTR_MASK_SCAN_DONE;
     }
 
-  if (intr_st & RTC_CNTL_RTC_TOUCH_TIMEOUT_INT_ST_M)
+  if (intr_st & RTC_CNTL_TOUCH_TIMEOUT_INT_ST_M)
     {
       intr_msk |= TOUCH_INTR_MASK_TIMEOUT;
     }
 
-  if (intr_st & RTC_CNTL_RTC_TOUCH_APPROACH_LOOP_DONE_INT_ST_M)
+  if (intr_st & RTC_CNTL_TOUCH_APPROACH_LOOP_DONE_INT_ST_M)
     {
       intr_msk |= TOUCH_INTR_MASK_PROXI_MEAS_DONE;
     }
@@ -1253,7 +1253,7 @@ static inline uint32_t touch_lh_read_intr_status_mask(void)
 
 static inline void touch_lh_timeout_enable(void)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_TIMEOUT_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_TIMEOUT_CTRL_REG,
                 RTC_CNTL_TOUCH_TIMEOUT_EN,
                 true);
 }
@@ -1279,7 +1279,7 @@ static inline void touch_lh_timeout_enable(void)
 
 static inline void touch_lh_timeout_disable(void)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_TIMEOUT_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_TIMEOUT_CTRL_REG,
                 RTC_CNTL_TOUCH_TIMEOUT_EN,
                 false);
 }
@@ -1301,7 +1301,7 @@ static inline void touch_lh_timeout_disable(void)
 
 static inline void touch_lh_timeout_set_threshold(uint32_t threshold)
 {
-  return REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_TIMEOUT_CTRL_REG,
+  return REG_SET_FIELD(RTC_CNTL_TOUCH_TIMEOUT_CTRL_REG,
                        RTC_CNTL_TOUCH_TIMEOUT_NUM,
                        threshold);
 }
@@ -1323,7 +1323,7 @@ static inline void touch_lh_timeout_set_threshold(uint32_t threshold)
 
 static inline uint32_t touch_lh_timeout_get_threshold(void)
 {
-  return REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_TIMEOUT_CTRL_REG,
+  return REG_GET_FIELD(RTC_CNTL_TOUCH_TIMEOUT_CTRL_REG,
                        RTC_CNTL_TOUCH_TIMEOUT_NUM);
 }
 
@@ -1435,7 +1435,7 @@ static inline void touch_lh_reset_benchmark(enum touch_pad_e tp)
 static inline void
   touch_lh_filter_set_filter_mode(enum touch_filter_mode_e mode)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_FILTER_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
                 RTC_CNTL_TOUCH_FILTER_MODE,
                 mode);
 }
@@ -1460,7 +1460,7 @@ static inline enum touch_filter_mode_e
   touch_lh_filter_get_filter_mode(void)
 {
   return (enum touch_filter_mode_e)
-    REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_FILTER_CTRL_REG,
+    REG_GET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
                   RTC_CNTL_TOUCH_FILTER_MODE);
 }
 
@@ -1483,7 +1483,7 @@ static inline enum touch_filter_mode_e
 static inline void
   touch_lh_filter_set_smooth_mode(enum touch_smooth_mode_e mode)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_FILTER_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
                 RTC_CNTL_TOUCH_SMOOTH_LVL,
                 mode);
 }
@@ -1508,7 +1508,7 @@ static inline enum touch_smooth_mode_e
   touch_lh_filter_get_smooth_mode(void)
 {
   return (enum touch_smooth_mode_e)
-    REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_FILTER_CTRL_REG,
+    REG_GET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
                   RTC_CNTL_TOUCH_SMOOTH_LVL);
 }
 
@@ -1530,7 +1530,7 @@ static inline enum touch_smooth_mode_e
 
 static inline void touch_lh_filter_set_debounce(uint32_t dbc_cnt)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_FILTER_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
                 RTC_CNTL_TOUCH_DEBOUNCE,
                 dbc_cnt);
 }
@@ -1553,7 +1553,7 @@ static inline void touch_lh_filter_set_debounce(uint32_t dbc_cnt)
 
 static inline uint32_t touch_lh_filter_get_debounce(void)
 {
-  return REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_FILTER_CTRL_REG,
+  return REG_GET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
                        RTC_CNTL_TOUCH_DEBOUNCE);
 }
 
@@ -1576,25 +1576,25 @@ static inline uint32_t touch_lh_filter_get_debounce(void)
 
 static inline void touch_lh_filter_set_noise_thres(uint32_t noise_thr)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_FILTER_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
                 RTC_CNTL_TOUCH_NOISE_THRES,
                 noise_thr);
 
   /* config2 in IDF */
 
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_FILTER_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
                 RTC_CNTL_TOUCH_NEG_NOISE_THRES,
                 noise_thr);
 
   /* config1 in IDF */
 
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_FILTER_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
                 RTC_CNTL_TOUCH_NEG_NOISE_LIMIT,
                 0xf);
 
   /* config3 in IDF */
 
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_FILTER_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
                 RTC_CNTL_TOUCH_HYSTERESIS,
                 2);
 }
@@ -1618,7 +1618,7 @@ static inline void touch_lh_filter_set_noise_thres(uint32_t noise_thr)
 
 static inline uint32_t touch_lh_filter_get_noise_thres(void)
 {
-  return REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_FILTER_CTRL_REG,
+  return REG_GET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
                        RTC_CNTL_TOUCH_NOISE_THRES);
 }
 
@@ -1639,7 +1639,7 @@ static inline uint32_t touch_lh_filter_get_noise_thres(void)
 
 static inline void touch_lh_filter_set_jitter_step(uint32_t step)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_FILTER_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
                 RTC_CNTL_TOUCH_JITTER_STEP,
                 step);
 }
@@ -1661,7 +1661,7 @@ static inline void touch_lh_filter_set_jitter_step(uint32_t step)
 
 static inline uint32_t touch_lh_filter_get_jitter_step(void)
 {
-  return REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_FILTER_CTRL_REG,
+  return REG_GET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
                        RTC_CNTL_TOUCH_JITTER_STEP);
 }
 
@@ -1681,7 +1681,7 @@ static inline uint32_t touch_lh_filter_get_jitter_step(void)
 
 static inline void touch_lh_filter_enable(void)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_FILTER_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
                 RTC_CNTL_TOUCH_FILTER_EN,
                 true);
 }
@@ -1702,7 +1702,7 @@ static inline void touch_lh_filter_enable(void)
 
 static inline void touch_lh_filter_disable(void)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_FILTER_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
                 RTC_CNTL_TOUCH_FILTER_EN,
                 false);
 }
@@ -1730,7 +1730,7 @@ static inline void touch_lh_filter_disable(void)
 
 static inline void touch_lh_denoise_enable(void)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_FILTER_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
                 RTC_CNTL_TOUCH_DENOISE_EN,
                 true);
 }
@@ -1758,7 +1758,7 @@ static inline void touch_lh_denoise_enable(void)
 
 static inline void touch_lh_denoise_disable(void)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_FILTER_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_FILTER_CTRL_REG,
                 RTC_CNTL_TOUCH_DENOISE_EN,
                 false);
 }
@@ -1783,7 +1783,7 @@ static inline void touch_lh_denoise_disable(void)
 static inline void
   touch_lh_denoise_set_cap_level(enum touch_denoise_cap_e cap_level)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                 RTC_CNTL_TOUCH_REFC,
                 cap_level);
 }
@@ -1808,7 +1808,7 @@ static inline void
 static inline enum touch_denoise_cap_e touch_lh_denoise_get_cap_level(void)
 {
   return (enum touch_denoise_cap_e)
-    REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG, RTC_CNTL_TOUCH_REFC);
+    REG_GET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG, RTC_CNTL_TOUCH_REFC);
 }
 
 /****************************************************************************
@@ -1829,7 +1829,7 @@ static inline enum touch_denoise_cap_e touch_lh_denoise_get_cap_level(void)
 static inline void
   touch_lh_denoise_set_grade(enum touch_denoise_grade_e grade)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_SCAN_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_SCAN_CTRL_REG,
                 RTC_CNTL_TOUCH_DENOISE_RES,
                 grade);
 }
@@ -1852,7 +1852,7 @@ static inline void
 static inline enum touch_denoise_grade_e touch_lh_denoise_get_grade(void)
 {
   return (enum touch_denoise_grade_e)
-    REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_SCAN_CTRL_REG,
+    REG_GET_FIELD(RTC_CNTL_TOUCH_SCAN_CTRL_REG,
                   RTC_CNTL_TOUCH_DENOISE_RES);
 }
 
@@ -1891,7 +1891,7 @@ static inline uint32_t touch_lh_denoise_read_data(void)
 
 static inline void touch_lh_waterproof_set_guard_pad(enum touch_pad_e tp)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_SCAN_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_SCAN_CTRL_REG,
                 RTC_CNTL_TOUCH_OUT_RING,
                 tp);
 }
@@ -1913,7 +1913,7 @@ static inline void touch_lh_waterproof_set_guard_pad(enum touch_pad_e tp)
 static inline enum touch_pad_e touch_lh_waterproof_get_guard_pad(void)
 {
   return (enum touch_pad_e)
-    REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_SCAN_CTRL_REG, RTC_CNTL_TOUCH_OUT_RING);
+    REG_GET_FIELD(RTC_CNTL_TOUCH_SCAN_CTRL_REG, RTC_CNTL_TOUCH_OUT_RING);
 }
 
 /****************************************************************************
@@ -1935,7 +1935,7 @@ static inline enum touch_pad_e touch_lh_waterproof_get_guard_pad(void)
 static inline void
   touch_lh_waterproof_set_sheild_driver(enum touch_shield_driver_e level)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_SCAN_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_SCAN_CTRL_REG,
                 RTC_CNTL_TOUCH_BUFDRV,
                 level);
 }
@@ -1960,7 +1960,7 @@ static inline enum touch_shield_driver_e
   touch_lh_waterproof_get_sheild_driver(void)
 {
   return (enum touch_shield_driver_e)
-    REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_SCAN_CTRL_REG, RTC_CNTL_TOUCH_BUFDRV);
+    REG_GET_FIELD(RTC_CNTL_TOUCH_SCAN_CTRL_REG, RTC_CNTL_TOUCH_BUFDRV);
 }
 
 /****************************************************************************
@@ -1987,7 +1987,7 @@ static inline enum touch_shield_driver_e
 
 static inline void touch_lh_waterproof_enable(void)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_SCAN_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_SCAN_CTRL_REG,
                 RTC_CNTL_TOUCH_SHIELD_PAD_EN,
                 true);
 }
@@ -2016,7 +2016,7 @@ static inline void touch_lh_waterproof_enable(void)
 
 static inline void touch_lh_waterproof_disable(void)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_SCAN_CTRL_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_SCAN_CTRL_REG,
                 RTC_CNTL_TOUCH_SHIELD_PAD_EN,
                 false);
 }
@@ -2096,7 +2096,7 @@ static inline void
 
 static inline void touch_lh_proximity_set_meas_times(uint32_t times)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_APPROACH_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_APPROACH_REG,
                 RTC_CNTL_TOUCH_APPROACH_MEAS_TIME,
                 times);
 }
@@ -2117,7 +2117,7 @@ static inline void touch_lh_proximity_set_meas_times(uint32_t times)
 
 static inline uint32_t touch_lh_proximity_get_meas_times(void)
 {
-  return REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_APPROACH_REG,
+  return REG_GET_FIELD(RTC_CNTL_TOUCH_APPROACH_REG,
                        RTC_CNTL_TOUCH_APPROACH_MEAS_TIME);
 }
 
@@ -2206,7 +2206,7 @@ static inline bool touch_lh_proximity_pad_check(enum touch_pad_e tp)
 
 static inline void touch_lh_sleep_set_channel_num(enum touch_pad_e tp)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_SLP_THRES_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_SLP_THRES_REG,
                 RTC_CNTL_TOUCH_SLP_PAD,
                 tp);
 }
@@ -2229,7 +2229,7 @@ static inline void touch_lh_sleep_set_channel_num(enum touch_pad_e tp)
 static inline enum touch_pad_e touch_lh_sleep_get_channel_num(void)
 {
   return (enum touch_pad_e)
-    REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_SLP_THRES_REG, RTC_CNTL_TOUCH_SLP_PAD);
+    REG_GET_FIELD(RTC_CNTL_TOUCH_SLP_THRES_REG, RTC_CNTL_TOUCH_SLP_PAD);
 }
 
 /****************************************************************************
@@ -2253,7 +2253,7 @@ static inline enum touch_pad_e touch_lh_sleep_get_channel_num(void)
 
 static inline void touch_lh_sleep_set_threshold(uint32_t touch_thres)
 {
-  return REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_SLP_THRES_REG,
+  return REG_SET_FIELD(RTC_CNTL_TOUCH_SLP_THRES_REG,
                        RTC_CNTL_TOUCH_SLP_TH,
                        touch_thres);
 }
@@ -2279,7 +2279,7 @@ static inline void touch_lh_sleep_set_threshold(uint32_t touch_thres)
 
 static inline uint32_t touch_lh_sleep_get_threshold(void)
 {
-  return REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_SLP_THRES_REG,
+  return REG_GET_FIELD(RTC_CNTL_TOUCH_SLP_THRES_REG,
                        RTC_CNTL_TOUCH_SLP_TH);
 }
 
@@ -2299,7 +2299,7 @@ static inline uint32_t touch_lh_sleep_get_threshold(void)
 
 static inline void touch_lh_sleep_enable_approach(void)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_SLP_THRES_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_SLP_THRES_REG,
                 RTC_CNTL_TOUCH_SLP_APPROACH_EN,
                 true);
 }
@@ -2320,7 +2320,7 @@ static inline void touch_lh_sleep_enable_approach(void)
 
 static inline void touch_lh_sleep_disable_approach(void)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_SLP_THRES_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_SLP_THRES_REG,
                 RTC_CNTL_TOUCH_SLP_APPROACH_EN,
                 false);
 }
@@ -2341,7 +2341,7 @@ static inline void touch_lh_sleep_disable_approach(void)
 
 static inline bool touch_lh_sleep_get_approach_status(void)
 {
-  return (bool) REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_SLP_THRES_REG,
+  return (bool) REG_GET_FIELD(RTC_CNTL_TOUCH_SLP_THRES_REG,
                               RTC_CNTL_TOUCH_SLP_APPROACH_EN);
 }
 
@@ -2408,7 +2408,7 @@ static inline uint32_t touch_lh_sleep_read_smooth(void)
 
 static inline uint32_t touch_lh_sleep_read_data(void)
 {
-  uint32_t tp = REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_SLP_THRES_REG,
+  uint32_t tp = REG_GET_FIELD(RTC_CNTL_TOUCH_SLP_THRES_REG,
                               RTC_CNTL_TOUCH_SLP_PAD);
 
   REG_SET_FIELD(SENS_SAR_TOUCH_CONF_REG,
@@ -2438,7 +2438,7 @@ static inline uint32_t touch_lh_sleep_read_data(void)
 
 static inline void touch_lh_sleep_reset_benchmark(void)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_APPROACH_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_APPROACH_REG,
                 RTC_CNTL_TOUCH_SLP_CHANNEL_CLR,
                 true);
 }
@@ -2459,7 +2459,7 @@ static inline void touch_lh_sleep_reset_benchmark(void)
 
 static inline void touch_lh_sleep_low_power(bool is_low_power)
 {
-  REG_SET_FIELD(RTC_CNTL_RTC_TOUCH_CTRL2_REG,
+  REG_SET_FIELD(RTC_CNTL_TOUCH_CTRL2_REG,
                 RTC_CNTL_TOUCH_DBIAS,
                 is_low_power);
 }
@@ -2521,7 +2521,7 @@ static inline uint32_t touch_lh_sleep_read_proximity_cnt(void)
 static inline enum touch_pad_e touch_lh_get_wakeup_status(void)
 {
   return (enum touch_pad_e)
-    REG_GET_FIELD(RTC_CNTL_RTC_TOUCH_SLP_THRES_REG,
+    REG_GET_FIELD(RTC_CNTL_TOUCH_SLP_THRES_REG,
                   RTC_CNTL_TOUCH_SLP_PAD);
 }
 

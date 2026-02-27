@@ -61,7 +61,8 @@
 
 /* Peripheral Clock */
 
-#define  RTC_CLK_FREQ                                (20*1000000)
+#define RTC_CLK_FREQ    (20 * 1000000)
+#define XTAL_CLK_FREQ   (40 * 1000000)
 
 /* Core voltage needs to be increased in two cases:
  * 1. running at 240 MHz
@@ -88,8 +89,6 @@
 #define DPORT_SOC_CLK_SEL_XTAL      0
 #define DPORT_SOC_CLK_SEL_PLL       1
 #define DPORT_SOC_CLK_SEL_8M        2
-
-#define RTC_FAST_CLK_FREQ_8M        8500000
 
 #ifndef __ASSEMBLY__
 

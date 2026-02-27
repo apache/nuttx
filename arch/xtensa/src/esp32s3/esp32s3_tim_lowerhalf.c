@@ -41,7 +41,7 @@
 
 #include "esp32s3_tim.h"
 #include "esp32s3_tim_lowerhalf.h"
-#include "esp32s3_clockconfig.h"
+#include "esp_clk.h"
 
 /****************************************************************************
  * Pre-processor Definitions

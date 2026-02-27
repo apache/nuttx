@@ -33,9 +33,7 @@
 #include <nuttx/irq.h>
 
 #include "xtensa.h"
-#include "xtensa_attr.h"
 
-#include "esp32_clockconfig.h"
 #include "esp32_region.h"
 #include "esp32_start.h"
 #include "esp32_spiram.h"
@@ -44,11 +42,16 @@
 #  include "esp32_userspace.h"
 #endif
 #include "hardware/esp32_dport.h"
-#include "hardware/esp32_rtccntl.h"
+#include "soc/rtc_cntl_reg.h"
+#include "rom/rtc.h"
+#include "esp_rom_sys.h"
 #include "rom/esp32_libc_stubs.h"
 #include "espressif/esp_loader.h"
 #include "espressif/esp_efuse.h"
 #include "esp_private/startup_internal.h"
+#include "esp_clk_internal.h"
+#include "esp_cpu.h"
+#include "esp_sleep.h"
 #include "esp_private/spi_flash_os.h"
 #include "esp_private/esp_mmu_map_private.h"
 #include "bootloader_flash_config.h"
@@ -81,6 +84,16 @@
                                 __attribute__((used))
 
 #endif
+
+/* On chips with different virtual address space for flash and PSRAM, code in
+ * flash is not available before XIP is initialized. Hence, these functions
+ * have to be in the IRAM.
+ */
+
+#define MSPI_INIT_ATTR NOINLINE_ATTR static
+
+#define RWDT_RESET           RESET_REASON_CORE_RTC_WDT
+#define MWDT_RESET           RESET_REASON_CORE_MWDT0
 
 /****************************************************************************
  * Private Types
@@ -142,8 +155,88 @@ uint32_t g_idlestack[IDLETHREAD_STACKWORDS]
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: sys_rtc_init
+ *
+ * Description:
+ *   Initialize RTC and power-related hardware early in the startup path.
+ *   When CONFIG_BOOTLOADER_WDT_ENABLE is not set, if the reset was caused
+ *   by the RTC watchdog (RWDT) or main system watchdog (MWDT) on any core
+ *   (e.g. from a panic handler), the RTC WDT is disabled so the system can
+ *   continue. Then esp_rtc_init() is called to configure power/RTC; after
+ *   this, MSPI timing tuning can be performed.
+ *
+ * Input Parameters:
+ *   rst_reas - Array of reset reasons per CPU core (indexed by core id).
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+MSPI_INIT_ATTR void sys_rtc_init(const soc_reset_reason_t *rst_reas)
+{
+#ifndef CONFIG_BOOTLOADER_WDT_ENABLE
+  /* From panic handler we can be reset by RWDT or TG0WDT */
+
+  if (rst_reas[0] == RWDT_RESET || rst_reas[0] == MWDT_RESET
+#ifdef CONFIG_SMP
+      || rst_reas[1] == RWDT_RESET || rst_reas[1] == MWDT_RESET
+#endif
+      )
+    {
+      wdt_hal_context_t rtc_wdt_ctx = RWDT_HAL_CONTEXT_DEFAULT();
+      wdt_hal_write_protect_disable(&rtc_wdt_ctx);
+      wdt_hal_disable(&rtc_wdt_ctx);
+      wdt_hal_write_protect_enable(&rtc_wdt_ctx);
+    }
+#endif
+
+  /* Configure the power related stuff. After this the MSPI timing tuning can
+   * be done.
+   */
+
+  esp_rtc_init();
+}
+
+/****************************************************************************
+ * Name: get_reset_reason
+ *
+ * Description:
+ *   Fill the given array with the reset reason for each CPU core from ROM.
+ *   Core 0 is always filled; when CONFIG_SMP is set, core 1 is also filled.
+ *
+ * Input Parameters:
+ *   rst_reas - Array to receive reset reasons (indexed by core id).
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+FORCE_INLINE_ATTR IRAM_ATTR
+void get_reset_reason(soc_reset_reason_t *rst_reas)
+{
+  rst_reas[0] = esp_rom_get_reset_reason(0);
+#ifdef CONFIG_SMP
+  rst_reas[1] = esp_rom_get_reset_reason(1);
+#endif
+}
+
 static noreturn_function void __esp32_start(void)
 {
+#ifdef CONFIG_SMP
+  soc_reset_reason_t rst_reas[SOC_CPU_CORES_NUM] =
+    {
+      [0 ... SOC_CPU_CORES_NUM - 1] = RESET_REASON_CHIP_POWER_ON
+    };
+#else
+  soc_reset_reason_t rst_reas[1] =
+    {
+      RESET_REASON_CHIP_POWER_ON
+    };
+#endif
+
   uint32_t regval unused_data;
   uint32_t chip_rev;
 #ifndef CONFIG_ESPRESSIF_SIMPLE_BOOT
@@ -214,6 +307,10 @@ static noreturn_function void __esp32_start(void)
   putreg32(regval, DPORT_APPCPU_CTRL_B_REG);
 #endif
 
+  get_reset_reason(rst_reas);
+
+  sys_rtc_init(rst_reas);
+
   /* The 2nd stage bootloader enables RTC WDT to check on startup sequence
    * related issues in application. Hence disable that as we are about to
    * start the NuttX environment.
@@ -221,9 +318,9 @@ static noreturn_function void __esp32_start(void)
 
   esp32_wdt_early_deinit();
 
-  /* Set CPU frequency configured in board.h */
+  /* Initialize RTC controller and set CPU frequency */
 
-  esp32_clockconfig();
+  esp_clk_init();
 
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
   /* Configure the UART so we can get debug output */
@@ -289,10 +386,6 @@ static noreturn_function void __esp32_start(void)
   showprogress('C');
 #endif
 
-  SYS_STARTUP_FN();
-
-  showprogress('D');
-
   chip_rev = esp_efuse_hal_chip_revision();
 
   _info("ESP32 chip revision is v%" PRId32 ".%01ld\n",
@@ -324,6 +417,48 @@ static noreturn_function void __esp32_start(void)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: xtensa_soc_initialize
+ *
+ * Description:
+ *   Initialize SoC-specific initialization.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void weak_function xtensa_soc_initialize(void)
+{
+  sys_startup_fn();
+}
+
+/****************************************************************************
+ * Name: sys_startup_fn
+ *
+ * Description:
+ *   Execute the system layer startup function for the current CPU core.
+ *   This function calls the appropriate startup function from the per-CPU
+ *   startup function array (g_startup_fn) based on the current core ID.
+ *   The SYS_STARTUP_FN() macro retrieves the core ID, indexes into the
+ *   g_startup_fn array, and invokes the corresponding startup function.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sys_startup_fn(void)
+{
+  SYS_STARTUP_FN();
+}
 
 /****************************************************************************
  * Name: __start

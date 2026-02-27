@@ -47,11 +47,11 @@ extern "C"
 #include <nuttx/spi/spi.h>
 #include <nuttx/spi/spi_bitbang.h>
 #if defined(CONFIG_ARCH_CHIP_ESP32S3)
-#include "esp32s3_gpio.h"
+#include "esp_gpio.h"
 #elif defined(CONFIG_ARCH_CHIP_ESP32S2)
-#include "esp32s2_gpio.h"
+#include "espressif/esp_gpio.h"
 #else
-#include "esp32_gpio.h"
+#include "esp_gpio.h"
 #endif
 
 /****************************************************************************
@@ -59,13 +59,13 @@ extern "C"
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_ESP32S3)
-#define GPIO_WRITE(pin, value) esp32s3_gpiowrite(pin, value)
-#define GPIO_READ(pin)         esp32s3_gpioread(pin)
+#define GPIO_WRITE(pin, value) esp_gpiowrite(pin, value)
+#define GPIO_READ(pin)         esp_gpioread(pin)
 #elif defined(CONFIG_ARCH_CHIP_ESP32S2)
-#define GPIO_WRITE(pin, value) esp32s2_gpiowrite(pin, value)
-#define GPIO_READ(pin)         esp32s2_gpioread(pin)
+#define GPIO_WRITE(pin, value) esp_gpiowrite(pin, value)
+#define GPIO_READ(pin)         esp_gpioread(pin)
 #else
-#define GPIO_WRITE(pin, value) esp32_gpiowrite(pin, value)
+#define GPIO_WRITE(pin, value) esp_gpiowrite(pin, value)
 #define GPIO_READ(pin)         esp3_gpioread(pin)
 #endif
 

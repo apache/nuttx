@@ -40,7 +40,7 @@
 
 #include <arch/board/board.h>
 
-#include "esp32_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "esp32_spi.h"
 #include "hardware/esp32_gpio_sigmap.h"
 
@@ -371,21 +371,21 @@ int board_lcd_initialize(void)
 
       /* Initialize non-SPI GPIOs */
 
-      esp32_configgpio(DISPLAY_DC, OUTPUT_FUNCTION_3);
-      esp32_gpio_matrix_out(DISPLAY_DC, SIG_GPIO_OUT_IDX, 0, 0);
+      esp_configgpio(DISPLAY_DC, OUTPUT_FUNCTION_3);
+      esp_gpio_matrix_out(DISPLAY_DC, SIG_GPIO_OUT_IDX, 0, 0);
 
-      esp32_configgpio(DISPLAY_RST, INPUT_FUNCTION_3);
-      esp32_gpio_matrix_out(DISPLAY_RST, SIG_GPIO_OUT_IDX, 0, 0);
+      esp_configgpio(DISPLAY_RST, INPUT_FUNCTION_3);
+      esp_gpio_matrix_out(DISPLAY_RST, SIG_GPIO_OUT_IDX, 0, 0);
 
-      esp32_configgpio(DISPLAY_BCKL, OUTPUT_FUNCTION_3);
-      esp32_gpio_matrix_out(DISPLAY_BCKL, SIG_GPIO_OUT_IDX, 0, 0);
+      esp_configgpio(DISPLAY_BCKL, OUTPUT_FUNCTION_3);
+      esp_gpio_matrix_out(DISPLAY_BCKL, SIG_GPIO_OUT_IDX, 0, 0);
 
       /* Reset ILI9341 */
 
       up_mdelay(10);
-      esp32_gpiowrite(DISPLAY_RST, false);
+      esp_gpiowrite(DISPLAY_RST, false);
       up_mdelay(10);
-      esp32_gpiowrite(DISPLAY_RST, true);
+      esp_gpiowrite(DISPLAY_RST, true);
       up_mdelay(50);
 
       /* Configure SPI */

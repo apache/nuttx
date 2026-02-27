@@ -37,7 +37,7 @@
 #include <nuttx/wireless/lpwan/sx127x.h>
 #include <arch/board/board.h>
 
-#include "esp32_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "esp32_spi.h"
 #include "hardware/esp32_gpio_sigmap.h"
 
@@ -120,8 +120,8 @@ static void sx127x_chip_reset(void)
 
   /* Configure reset as output */
 
-  esp32_gpio_matrix_out(GPIO_SX127X_RESET, SIG_GPIO_OUT_IDX, 0, 0);
-  esp32_configgpio(GPIO_SX127X_RESET, OUTPUT_FUNCTION_3 | INPUT_FUNCTION_3);
+  esp_gpio_matrix_out(GPIO_SX127X_RESET, SIG_GPIO_OUT_IDX, 0, 0);
+  esp_configgpio(GPIO_SX127X_RESET, OUTPUT_FUNCTION_3 | INPUT_FUNCTION_3);
 
   /* Set pin to zero */
 
@@ -203,7 +203,7 @@ int esp32_lpwaninitialize(void)
 
   /* Setup DIO0 */
 
-  esp32_configgpio(GPIO_SX127X_DIO0, INPUT_FUNCTION_3 | PULLDOWN);
+  esp_configgpio(GPIO_SX127X_DIO0, INPUT_FUNCTION_3 | PULLDOWN);
 
   /* Init SPI bus */
 

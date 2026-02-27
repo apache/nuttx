@@ -36,7 +36,7 @@
 
 #include "esp32_spi.h"
 #include "esp32-devkitc.h"
-#include "esp32_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "hardware/esp32_gpio_sigmap.h"
 
 #if defined(CONFIG_SPI) && defined(CONFIG_ESP32_SPI3) && \
@@ -48,7 +48,7 @@
 
 #define MCP2515_SPI_PORTNO    3   /* On SPI3 */
 
-#if !defined(CONFIG_ESP32_GPIO_IRQ)
+#if !defined(CONFIG_ESPRESSIF_GPIO_IRQ)
 #  error "GPIO interrupts aren't enabled and it is required"
 #endif
 
@@ -145,7 +145,6 @@ static int mcp2515_attach(struct mcp2515_config_s *state,
   struct esp32_mcp2515config_s *priv =
              (struct esp32_mcp2515config_s *)state;
   irqstate_t flags;
-  int irq = ESP32_PIN2IRQ(GPIO_MCP2515_IRQ);
   int ret;
 
   caninfo("Saving handler %p\n", handler);
@@ -157,9 +156,9 @@ static int mcp2515_attach(struct mcp2515_config_s *state,
 
   /* Configure the interrupt */
 
-  esp32_gpioirqdisable(irq);
+  esp_gpioirqdisable(ESP_PIN2IRQ(GPIO_MCP2515_IRQ));
 
-  ret = irq_attach(irq, mcp2515_interrupt, priv);
+  ret = esp_gpio_irq(GPIO_MCP2515_IRQ, mcp2515_interrupt, priv);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: gpint_attach() failed: %d\n", ret);
@@ -167,7 +166,7 @@ static int mcp2515_attach(struct mcp2515_config_s *state,
       return ret;
     }
 
-  esp32_gpioirqenable(irq, FALLING);
+  esp_gpioirqenable(GPIO_MCP2515_IRQ);
 
   leave_critical_section(flags);
 
@@ -208,7 +207,8 @@ int board_mcp2515_initialize(int devno)
 
       /* Configure the MCP2515 interrupt pin as an input */
 
-      esp32_configgpio(GPIO_MCP2515_IRQ, INPUT_FUNCTION_3 | PULLDOWN);
+      esp_configgpio(GPIO_MCP2515_IRQ,
+                     INPUT_FUNCTION_3 | PULLDOWN | FALLING);
 
       spi = esp32_spibus_initialize(MCP2515_SPI_PORTNO);
       if (!spi)

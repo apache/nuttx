@@ -186,7 +186,6 @@ SECTIONS
 
     *libarch.a:*esp_loader.*(.text .text.* .literal .literal.*)
     *libarch.a:esp32s3_cpuindex.*(.literal .text .literal.* .text.*)
-    *libarch.a:esp32s3_irq.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32s3_user.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32s3_spiflash.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_assert.*(.literal .text .literal.* .text.*)
@@ -201,6 +200,7 @@ SECTIONS
     *libarch.a:*mmu_hal.*(.text .text.* .literal .literal.*)
 
     *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
+    *libc.a:arch_atomic.*(.literal .text .literal.* .text.*)
 
     *libdrivers.a:syslog_flush.*(.literal .text .literal.* .text.*)
 
@@ -347,6 +347,8 @@ SECTIONS
      defined(CONFIG_ESP32S3_SPIRAM))
     *libc.a:lib_stackchk.*(.rodata  .rodata.*)
 #endif
+
+    *libc.a:arch_atomic.*(.rodata .rodata.*)
 
     _edata = ABSOLUTE(.);
     . = ALIGN(4);

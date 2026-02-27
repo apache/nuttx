@@ -40,10 +40,10 @@
 
 #include "xtensa.h"
 
-#include "esp32s2_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "esp32s2_twai.h"
-#include "esp32s2_irq.h"
-#include "esp32s2_clockconfig.h"
+#include "espressif/esp_irq.h"
+#include "esp_clk.h"
 
 #include "hardware/esp32s2_system.h"
 #include "hardware/esp32s2_gpio_sigmap.h"
@@ -467,26 +467,15 @@ static int esp32s2twai_setup(struct can_dev_s *dev)
       up_disable_irq(priv->irq);
     }
 
-  priv->cpuint = esp32s2_setup_irq(priv->periph,
-                                   ESP32S2_INT_PRIO_DEF,
-                                   ESP32S2_CPUINT_LEVEL);
+  priv->cpuint = esp_setup_irq(priv->periph,
+                               ESP32S2_INT_PRIO_DEF,
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               esp32s2twai_interrupt, dev);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type. */
 
       ret = priv->cpuint;
-      leave_critical_section(flags);
-
-      return ret;
-    }
-
-  ret = irq_attach(priv->irq, esp32s2twai_interrupt, dev);
-  if (ret != OK)
-    {
-      /* Failed to attach IRQ, so CPU interrupt must be freed. */
-
-      esp32s2_teardown_irq(priv->periph, priv->cpuint);
-      priv->cpuint = -ENOMEM;
       leave_critical_section(flags);
 
       return ret;
@@ -530,13 +519,9 @@ static void esp32s2twai_shutdown(struct can_dev_s *dev)
 
       up_disable_irq(priv->irq);
 
-      /* Dissociate the IRQ from the ISR */
-
-      irq_detach(priv->irq);
-
       /* Free cpu interrupt that is attached to this peripheral */
 
-      esp32s2_teardown_irq(priv->periph, priv->cpuint);
+      esp_teardown_irq(priv->periph, priv->cpuint);
       priv->cpuint = -ENOMEM;
     }
 }
@@ -1243,11 +1228,11 @@ struct can_dev_s *esp32s2_twaiinitialize(void)
 
   /* Configure CAN GPIO pins */
 
-  esp32s2_configgpio(CONFIG_ESP32S2_TWAI_TXPIN, OUTPUT_FUNCTION_2);
-  esp32s2_gpio_matrix_out(CONFIG_ESP32S2_TWAI_TXPIN, TWAI_TX_IDX, 0, 0);
+  esp_configgpio(CONFIG_ESP32S2_TWAI_TXPIN, OUTPUT_FUNCTION_2);
+  esp_gpio_matrix_out(CONFIG_ESP32S2_TWAI_TXPIN, TWAI_TX_IDX, 0, 0);
 
-  esp32s2_configgpio(CONFIG_ESP32S2_TWAI_RXPIN, INPUT_FUNCTION_2);
-  esp32s2_gpio_matrix_in(CONFIG_ESP32S2_TWAI_RXPIN, TWAI_RX_IDX, 0);
+  esp_configgpio(CONFIG_ESP32S2_TWAI_RXPIN, INPUT_FUNCTION_2);
+  esp_gpio_matrix_in(CONFIG_ESP32S2_TWAI_RXPIN, TWAI_RX_IDX, 0);
 
   leave_critical_section(flags);
 #endif
