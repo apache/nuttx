@@ -25,6 +25,8 @@
 
 #if defined(CONFIG_ARCH_CHIP_IMX95_M7)
 #  define MU_INSTANCE      7
+#elif defined(CONFIG_ARCH_CHIP_IMX93_M33)
+#  define MU_INSTANCE      1
 #else
 #  error Unrecognized i.MX9 architecture
 #endif

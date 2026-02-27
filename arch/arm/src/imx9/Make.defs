@@ -21,7 +21,11 @@
 #
 ############################################################################
 
-include armv7-m/Make.defs
+ifeq ($(CONFIG_ARCH_ARMV7M),y)
+  include armv7-m/Make.defs
+else ifeq ($(CONFIG_ARCH_ARMV8M),y)
+  include armv8-m/Make.defs
+endif
 
 # i.MX9-specific C source files
 
@@ -30,6 +34,12 @@ CHIP_CSRCS = imx9_allocateheap.c imx9_start.c imx9_clockconfig.c imx9_gpio.c imx
 ifeq ($(CONFIG_IMX9_SCMI),y)
   CHIP_CSRCS += imx9_scmi.c
   # NXP SDK SCMI interface for pinctrl and clocking
+else
+  CHIP_CSRCS += imx9_ccm.c
+endif
+
+ifeq ($(CONFIG_IMX9_XCACHE),y)
+  CHIP_CSRCS += imx9_xcache.c
 endif
 
 ifeq ($(CONFIG_RPTUN),y)

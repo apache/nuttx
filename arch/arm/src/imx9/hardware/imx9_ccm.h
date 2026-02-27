@@ -1,8 +1,7 @@
 /****************************************************************************
- * arch/arm/src/imx9/hardware/imx9_pinmux.h
+ * arch/arm/src/imx9/hardware/imx9_ccm.h
  *
  * SPDX-License-Identifier: Apache-2.0
- * SPDX-FileCopyrightText: 2024 NXP
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -21,21 +20,21 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMX9_HARDWARE_IMX9_PINMUX_H
-#define __ARCH_ARM_SRC_IMX9_HARDWARE_IMX9_PINMUX_H
+#ifndef __ARCH_ARM_SRC_IMX9_HARDWARE_IMX9_CCM_H
+#define __ARCH_ARM_SRC_IMX9_HARDWARE_IMX9_CCM_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include "hardware/imx9_memorymap.h"
 
-#if defined(CONFIG_ARCH_CHIP_IMX95_M7)
-#  include "hardware/imx95/imx95_pinmux.h"
-#elif defined(CONFIG_ARCH_CHIP_IMX93_M33)
-#  include "hardware/imx93/imx93_pinmux.h"
+#if defined(CONFIG_ARCH_CHIP_IMX93_M33)
+#  include "hardware/imx93/imx93_ccm.h"
+#  include "hardware/imx93/imx93_pll.h"
 #else
 #  error Unrecognized i.MX9 architecture
 #endif
 
-#endif /* __ARCH_ARM_SRC_IMX9_HARDWARE_IMX9_PINMUX_H */
+#endif /* __ARCH_ARM_SRC_IMX9_HARDWARE_IMX9_CCM_H_ */

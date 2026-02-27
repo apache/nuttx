@@ -287,7 +287,23 @@ static int imx9_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
         }
       else
 #endif
-#if IMX9_IRQ_NEXTINT > 218
+#if IMX9_IRQ_NEXTINT > 224
+      if (extint < 256)
+        {
+           *regaddr = (NVIC_IRQ_ENABLE(224) + offset);
+           *bit     = 1 << (extint - 224);
+        }
+      else
+#endif
+#if IMX9_IRQ_NEXTINT > 256
+      if (extint < 288)
+        {
+           *regaddr = (NVIC_IRQ_ENABLE(256) + offset);
+           *bit     = 1 << (extint - 256);
+        }
+      else
+#endif
+#if IMX9_IRQ_NEXTINT > 288
 #  error Missing logic
 #endif
         {

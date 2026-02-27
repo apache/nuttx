@@ -26,6 +26,9 @@
 #if defined(CONFIG_ARCH_CHIP_IMX95_M7)
 #  define VDEV0_VRING_BASE        0x88000000
 #  define RESOURCE_TABLE_BASE     0x88220000
+#elif defined(CONFIG_ARCH_CHIP_IMX93_M33)
+#  define VDEV0_VRING_BASE        0xA4000000
+#  define RESOURCE_TABLE_BASE     0x2001E000
 #else
 #  error Unrecognized i.MX9 architecture
 #endif
