@@ -76,7 +76,7 @@ void sched_lock(void)
        * integer type.
        */
 
-      DEBUGASSERT(rtcb && rtcb->lockcount < MAX_LOCK_COUNT);
+      DEBUGASSERT(rtcb->lockcount < MAX_LOCK_COUNT);
 
       /* A counter is used to support locking. This allows nested lock
        * operations on this thread (on any CPU)
