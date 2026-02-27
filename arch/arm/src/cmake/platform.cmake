@@ -87,6 +87,9 @@ endif()
 
 if(CONFIG_LIBCXXTOOLCHAIN)
   nuttx_find_toolchain_lib(libstdc++.a)
+endif()
+
+if(CONFIG_LIBMINIABI)
   list(APPEND CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${NUTTX_DIR}/include/cxx)
 endif()
 
