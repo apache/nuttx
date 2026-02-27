@@ -45,8 +45,8 @@
 #include <arch/board/board.h>
 
 #include "esp32s3_spi.h"
-#include "esp32s3_irq.h"
-#include "esp32s3_gpio.h"
+#include "esp_irq.h"
+#include "esp_gpio.h"
 
 #ifdef CONFIG_ESP32S3_SPI_DMA
 #include "esp32s3_dma.h"
@@ -1085,7 +1085,7 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg)
     }
 #endif
 
-  if (priv->is_processing && esp32s3_gpioread(priv->config->cs_pin))
+  if (priv->is_processing && esp_gpioread(priv->config->cs_pin))
     {
       priv->is_processing = false;
       SPIS_DEV_SELECT(priv->dev, false);
@@ -1196,27 +1196,27 @@ static void spislave_initializ_iomux(struct spislave_priv_s *priv)
   uint32_t attr = INPUT_FUNCTION_5 | DRIVE_0;
   const struct spislave_config_s *config = priv->config;
 
-  esp32s3_configgpio(config->cs_pin,  attr);
-  esp32s3_configgpio(config->clk_pin, attr);
+  esp_configgpio(config->cs_pin,  attr);
+  esp_configgpio(config->clk_pin, attr);
 
-  esp32s3_gpio_matrix_out(config->cs_pin,   SIG_GPIO_OUT_IDX, 0, 0);
-  esp32s3_gpio_matrix_out(config->clk_pin,  SIG_GPIO_OUT_IDX, 0, 0);
-  esp32s3_gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
-  esp32s3_gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->cs_pin,   SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->clk_pin,  SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
 
 #ifdef CONFIG_ESP32S3_SPI_IO_QIO
   attr |= OUTPUT;
 
-  esp32s3_configgpio(config->mosi_pin, attr);
-  esp32s3_configgpio(config->miso_pin, attr);
-  esp32s3_configgpio(config->io2_pin,  attr);
-  esp32s3_configgpio(config->io3_pin,  attr);
+  esp_configgpio(config->mosi_pin, attr);
+  esp_configgpio(config->miso_pin, attr);
+  esp_configgpio(config->io2_pin,  attr);
+  esp_configgpio(config->io3_pin,  attr);
 
-  esp32s3_gpio_matrix_out(config->io2_pin, SIG_GPIO_OUT_IDX, 0, 0);
-  esp32s3_gpio_matrix_out(config->io3_pin, SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->io2_pin, SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->io3_pin, SIG_GPIO_OUT_IDX, 0, 0);
 #else
-  esp32s3_configgpio(config->mosi_pin, attr);
-  esp32s3_configgpio(config->miso_pin, OUTPUT_FUNCTION_5);
+  esp_configgpio(config->mosi_pin, attr);
+  esp_configgpio(config->miso_pin, OUTPUT_FUNCTION_5);
 #endif
 }
 #endif
@@ -1241,36 +1241,36 @@ static void spislave_initializ_iomatrix(struct spislave_priv_s *priv)
   uint32_t attr = INPUT | DRIVE_0;
   const struct spislave_config_s *config = priv->config;
 
-  esp32s3_configgpio(config->cs_pin, attr);
-  esp32s3_gpio_matrix_in(config->cs_pin, config->cs_insig, 0);
+  esp_configgpio(config->cs_pin, attr | RISING);
+  esp_gpio_matrix_in(config->cs_pin, config->cs_insig, 0);
 
-  esp32s3_configgpio(config->clk_pin, attr);
-  esp32s3_gpio_matrix_in(config->clk_pin, config->clk_insig, 0);
+  esp_configgpio(config->clk_pin, attr);
+  esp_gpio_matrix_in(config->clk_pin, config->clk_insig, 0);
 
 #  ifdef CONFIG_ESP32S3_SPI_IO_QIO
   attr |= OUTPUT;
 
-  esp32s3_configgpio(config->mosi_pin, attr);
-  esp32s3_gpio_matrix_in(config->mosi_pin, config->mosi_insig, 0);
-  esp32s3_gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
+  esp_configgpio(config->mosi_pin, attr);
+  esp_gpio_matrix_in(config->mosi_pin, config->mosi_insig, 0);
+  esp_gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
 
-  esp32s3_configgpio(config->miso_pin, attr);
-  esp32s3_gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
-  esp32s3_gpio_matrix_out(config->miso_pin, config->miso_outsig, 0, 0);
+  esp_configgpio(config->miso_pin, attr);
+  esp_gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
+  esp_gpio_matrix_out(config->miso_pin, config->miso_outsig, 0, 0);
 
-  esp32s3_configgpio(config->io2_pin, attr);
-  esp32s3_gpio_matrix_in(config->io2_pin, config->io2_insig, 0);
-  esp32s3_gpio_matrix_out(config->io2_pin, config->io2_outsig, 0, 0);
+  esp_configgpio(config->io2_pin, attr);
+  esp_gpio_matrix_in(config->io2_pin, config->io2_insig, 0);
+  esp_gpio_matrix_out(config->io2_pin, config->io2_outsig, 0, 0);
 
-  esp32s3_configgpio(config->io3_pin, attr);
-  esp32s3_gpio_matrix_in(config->io3_pin, config->io3_insig, 0);
-  esp32s3_gpio_matrix_out(config->io3_pin, config->io3_outsig, 0, 0);
+  esp_configgpio(config->io3_pin, attr);
+  esp_gpio_matrix_in(config->io3_pin, config->io3_insig, 0);
+  esp_gpio_matrix_out(config->io3_pin, config->io3_outsig, 0, 0);
 #  else
-  esp32s3_configgpio(config->mosi_pin, attr);
-  esp32s3_gpio_matrix_in(config->mosi_pin, config->mosi_insig, 0);
+  esp_configgpio(config->mosi_pin, attr);
+  esp_gpio_matrix_in(config->mosi_pin, config->mosi_insig, 0);
 
-  esp32s3_configgpio(config->miso_pin, OUTPUT);
-  esp32s3_gpio_matrix_out(config->miso_pin, config->miso_outsig, 0, 0);
+  esp_configgpio(config->miso_pin, OUTPUT);
+  esp_gpio_matrix_out(config->miso_pin, config->miso_outsig, 0, 0);
 #  endif
 }
 #endif
@@ -1376,7 +1376,7 @@ static int spislave_initialize(struct spi_slave_ctrlr_s *ctrlr)
     }
 #endif
 
-  esp32s3_gpioirqenable(ESP32S3_PIN2IRQ(config->cs_pin), RISING);
+  esp_gpioirqenable(config->cs_pin);
 
   /* Force a transaction done interrupt.
    * This interrupt won't fire yet because we initialized the SPI interrupt
@@ -1414,7 +1414,7 @@ static void spislave_deinitialize(struct spi_slave_ctrlr_s *ctrlr)
 {
   struct spislave_priv_s *priv = (struct spislave_priv_s *)ctrlr;
 
-  esp32s3_gpioirqdisable(ESP32S3_PIN2IRQ(priv->config->cs_pin));
+  esp_gpioirqdisable(priv->config->cs_pin);
 
   /* Disable the trans_done interrupt */
 
@@ -1555,7 +1555,7 @@ static void spislave_unbind(struct spi_slave_ctrlr_s *ctrlr)
 
   up_disable_irq(priv->config->irq);
 
-  esp32s3_gpioirqdisable(ESP32S3_PIN2IRQ(priv->config->cs_pin));
+  esp_gpioirqdisable(priv->config->cs_pin);
 
   /* Disable the trans_done interrupt */
 
@@ -1785,6 +1785,7 @@ struct spi_slave_ctrlr_s *esp32s3_spislave_ctrlr_initialize(int port)
   struct spi_slave_ctrlr_s *spislave_dev;
   struct spislave_priv_s *priv;
   irqstate_t flags;
+  int ret;
 
   switch (port)
     {
@@ -1815,29 +1816,26 @@ struct spi_slave_ctrlr_s *esp32s3_spislave_ctrlr_initialize(int port)
 
   /* Attach IRQ for CS pin interrupt */
 
-  DEBUGVERIFY(irq_attach(ESP32S3_PIN2IRQ(priv->config->cs_pin),
-                         spislave_cs_interrupt,
-                         priv));
+  ret = esp_gpio_irq(priv->config->cs_pin,
+                     spislave_cs_interrupt,
+                     priv);
+  if (ret < 0)
+    {
+      spierr("esp_gpio_irq() failed: %d\n", ret);
+      leave_critical_section(flags);
+      return NULL;
+    }
 
   priv->cpu = this_cpu();
-  priv->cpuint = esp32s3_setup_irq(priv->cpu,
-                                   priv->config->periph,
-                                   ESP32S3_INT_PRIO_DEF,
-                                   ESP32S3_CPUINT_LEVEL);
+  priv->cpuint = esp_setup_irq(priv->config->periph,
+                               ESP32S3_INT_PRIO_DEF,
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               spislave_periph_interrupt,
+                               priv);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type. */
 
-      spin_unlock_irqrestore(&priv->lock, flags);
-
-      return NULL;
-    }
-
-  if (irq_attach(priv->config->irq, spislave_periph_interrupt, priv) != OK)
-    {
-      /* Failed to attach IRQ, so CPU interrupt must be freed. */
-
-      esp32s3_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
       spin_unlock_irqrestore(&priv->lock, flags);
 
       return NULL;
@@ -1885,7 +1883,7 @@ int esp32s3_spislave_ctrlr_uninitialize(struct spi_slave_ctrlr_s *ctrlr)
     }
 
   up_disable_irq(priv->config->irq);
-  esp32s3_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
+  esp_teardown_irq(priv->config->periph, priv->cpuint);
   priv->cpuint = -ENOMEM;
 
   spislave_deinitialize(ctrlr);

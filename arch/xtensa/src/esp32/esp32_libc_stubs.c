@@ -35,6 +35,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/mutex.h>
 #include <nuttx/lib/lib.h>
+#include <nuttx/sched.h>
 
 #include "rom/esp32_libc_stubs.h"
 
@@ -165,6 +166,11 @@ void _raise_r(struct _reent *r)
 
 void _lock_init(_lock_t *lock)
 {
+  if (sched_idletask())
+    {
+      return;
+    }
+
   *lock = 0;
 
   mutex_t *mutex = (mutex_t *)kmm_malloc(sizeof(mutex_t));
@@ -176,6 +182,11 @@ void _lock_init(_lock_t *lock)
 
 void _lock_init_recursive(_lock_t *lock)
 {
+  if (sched_idletask())
+    {
+      return;
+    }
+
   *lock = 0;
 
   rmutex_t *rmutex = (rmutex_t *)kmm_malloc(sizeof(rmutex_t));
@@ -187,6 +198,11 @@ void _lock_init_recursive(_lock_t *lock)
 
 void _lock_close(_lock_t *lock)
 {
+  if (sched_idletask())
+    {
+      return;
+    }
+
   mutex_t *mutex = (mutex_t *)(*lock);
 
   nxmutex_destroy(mutex);
@@ -196,6 +212,11 @@ void _lock_close(_lock_t *lock)
 
 void _lock_close_recursive(_lock_t *lock)
 {
+  if (sched_idletask())
+    {
+      return;
+    }
+
   rmutex_t *rmutex = (rmutex_t *)(*lock);
 
   nxrmutex_destroy(rmutex);
@@ -205,6 +226,11 @@ void _lock_close_recursive(_lock_t *lock)
 
 void _lock_acquire(_lock_t *lock)
 {
+  if (sched_idletask())
+    {
+      return;
+    }
+
   if ((*lock) == 0)
     {
       mutex_t *mutex = (mutex_t *)kmm_malloc(sizeof(mutex_t));
@@ -219,6 +245,11 @@ void _lock_acquire(_lock_t *lock)
 
 void _lock_acquire_recursive(_lock_t *lock)
 {
+  if (sched_idletask())
+    {
+      return;
+    }
+
   if ((*lock) == 0)
     {
       rmutex_t *rmutex = (rmutex_t *)kmm_malloc(sizeof(rmutex_t));
@@ -233,6 +264,11 @@ void _lock_acquire_recursive(_lock_t *lock)
 
 int _lock_try_acquire(_lock_t *lock)
 {
+  if (sched_idletask())
+    {
+      return -EPERM;
+    }
+
   if ((*lock) == 0)
     {
       mutex_t *mutex = (mutex_t *)kmm_malloc(sizeof(mutex_t));
@@ -247,6 +283,11 @@ int _lock_try_acquire(_lock_t *lock)
 
 int _lock_try_acquire_recursive(_lock_t *lock)
 {
+  if (sched_idletask())
+    {
+      return -EPERM;
+    }
+
   if ((*lock) == 0)
     {
       rmutex_t *rmutex = (rmutex_t *)kmm_malloc(sizeof(rmutex_t));
@@ -261,6 +302,11 @@ int _lock_try_acquire_recursive(_lock_t *lock)
 
 void _lock_release(_lock_t *lock)
 {
+  if (sched_idletask())
+    {
+      return;
+    }
+
   mutex_t *mutex = (mutex_t *)(*lock);
 
   nxmutex_unlock(mutex);
@@ -268,6 +314,11 @@ void _lock_release(_lock_t *lock)
 
 void _lock_release_recursive(_lock_t *lock)
 {
+  if (sched_idletask())
+    {
+      return;
+    }
+
   rmutex_t *rmutex = (rmutex_t *)(*lock);
 
   nxrmutex_unlock(rmutex);

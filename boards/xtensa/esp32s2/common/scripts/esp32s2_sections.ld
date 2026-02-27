@@ -170,6 +170,7 @@ SECTIONS
     *libarch.a:*clk.*(.text .text.* .literal .literal.*)
     *libarch.a:*efuse_hal.*(.literal.is_eco0 .text.is_eco0)
     *libarch.a:*efuse_hal.*(.text .text.* .literal .literal.*)
+    *libarch.a:*efuse_utility.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_clk.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_clk_tree.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_clk_tree_common.*(.text .text.* .literal .literal.*)
@@ -238,11 +239,26 @@ SECTIONS
     *libarch.a:spi_flash_os_func_noos.*(.literal .literal.* .text .text.*)
     *libarch.a:spi_flash_os_func_app.*(.literal .literal.* .text .text.*)
     *libarch.a:flash_brownout_hook.*(.literal .literal.* .text .text.*)
-    *libarch.a:esp_cache.*(.literal .literal.* .text .text.*)
+    *libarch.a:esp_cache_utils.*(.literal .literal.* .text .text.*)
     *libarch.a:cache_utils.*(.literal .literal.* .text .text.*)
     *libarch.a:memspi_host_driver.*(.literal .literal.* .text .text.*)
+    *libarch.a:critical_section.*(.literal .literal.* .text .text.*)
+    *libarch.a:os.*(.literal.nuttx_enter_critical .text.nuttx_enter_critical)
+    *libarch.a:os.*(.literal.nuttx_exit_critical .text.nuttx_exit_critical)
+    *libarch.a:esp_irq.*(.literal .literal.* .text .text.*)
+    *libarch.a:esp_xtensa_intr.*(.literal .literal.* .text .text.*)
+    *libarch.a:intr_alloc.*(.literal .literal.* .text .text.*)
+    *libarch.a:xtensa_intr.*(.literal .literal.* .text .text.*)
+    *libarch.a:*sleep_modes.*(.literal.esp_sleep_sub_mode_force_disable* .text.esp_sleep_sub_mode_force_disable*)
+    *libarch.a:intr_alloc.*(.literal.esp_intr_get_intno .text.esp_intr_get_intno)
+    *libarch.a:intr_alloc.*(.literal.esp_intr_get_cpu .text.esp_intr_get_cpu)
+    *libarch.a:interrupt.*(.literal.intr_handler_get .text.intr_handler_get)
+    *libarch.a:interrupt.*(.literal.intr_handler_get_arg .text.intr_handler_get_arg)
+    *libarch.a:interrupt.*(.literal.intr_get_item .text.intr_get_item)
+    *libarch.a:interrupt.*(.literal.intr_handler_get_arg .text.intr_handler_get_arg)
 
     *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
+    *libc.a:arch_atomic.*(.text .text.* .literal .literal.*)
 
     *libsched.a:irq_dispatch.*(.text .text.* .literal .literal.*)
     *libsched.a:sched_lock.*(.text .text.* .literal .literal.*)
@@ -390,6 +406,7 @@ SECTIONS
     *libarch.a:*esp_rom_cache_esp32s2_esp32s3.*(.rodata .rodata.*)
     *libarch.a:*esp_rom_wdt.*(.rodata .rodata.*)
     *libarch.a:*efuse_hal.*(.rodata .rodata.*)
+    *libarch.a:*efuse_utility.*(.rodata .rodata.*)
     *libarch.a:*log.*(.rodata .rodata.*)
     *libarch.a:*log_noos.*(.rodata .rodata.*)
     *libarch.a:*cpu_region_protect.*(.rodata .rodata.*)
@@ -404,13 +421,22 @@ SECTIONS
     *libarch.a:spi_flash_os_func_noos.*(.rodata .rodata.*)
     *libarch.a:spi_flash_os_func_app.*(.rodata .rodata.*)
     *libarch.a:flash_brownout_hook.*(.rodata .rodata.*)
-    *libarch.a:esp_cache.*(.rodata .rodata.*)
+    *libarch.a:esp_cache_utils.*(.rodata .rodata.*)
     *libarch.a:cache_utils.*(.rodata .rodata.*)
     *libarch.a:memspi_host_driver.*(.rodata .rodata.*)
+    *libarch.a:critical_section.*(.rodata .rodata.*)
+    *libarch.a:os.*(.rodata.g_int_flags_count .rodata.g_int_flags)
+    *libarch.a:esp_irq.*(.rodata .rodata.*)
+    *libarch.a:esp_xtensa_intr.*(.rodata .rodata.*)
+    *libarch.a:intr_alloc.*(.rodata .rodata.*)
+    *libarch.a:xtensa_intr.*(.rodata .rodata.*)
+    *libarch.a:*sleep_modes.*(.rodata.esp_sleep_sub_mode_force_disable*)
 
     *libsched.a:irq_dispatch.*(.rodata .rodata.*)
     *libsched.a:sched_lock.*(.rodata .rodata.*)
     *libsched.a:sched_unlock.*(.rodata .rodata.*)
+
+    *libc.a:arch_atomic.*(.rodata .rodata.*)
 
     . = ALIGN(4);
     _edata = ABSOLUTE(.);
@@ -526,9 +552,7 @@ SECTIONS
 
     . = ALIGN(4);
     _sinit = ABSOLUTE(.);
-    __init_array_start = ABSOLUTE(.);
     KEEP (*(EXCLUDE_FILE (*crtend.* *crtbegin.*) .ctors SORT(.ctors.*)))
-    __init_array_end = ABSOLUTE(.);
     _einit = ABSOLUTE(.);
 
     /* Addresses of memory regions reserved via SOC_RESERVE_MEMORY_REGION() */
@@ -626,12 +650,14 @@ SECTIONS
   {
     *(.rtc.bss)
     *(.rtc.bss*)
+
   } >rtc_slow_seg
 
   .rtc.data :
   {
     . = ALIGN(4);
     _rtc_data_start = ABSOLUTE(.);
+    *(.rtc.force_slow .rtc.force_slow.*)
     *(.rtc.data)
     *(.rtc.data.*)
     *(.rtc.rodata)

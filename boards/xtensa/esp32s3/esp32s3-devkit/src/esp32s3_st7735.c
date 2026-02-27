@@ -39,7 +39,7 @@
 #include <nuttx/lcd/st7735.h>
 
 #include "esp32s3_spi.h"
-#include "esp32s3_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "esp32s3-devkit.h"
 
 /****************************************************************************
@@ -80,15 +80,15 @@ int board_lcd_initialize(void)
 
   /* Data/Control PIN */
 
-  esp32s3_configgpio(GPIO_LCD_DC, OUTPUT);
-  esp32s3_gpiowrite(GPIO_LCD_DC, true);
+  esp_configgpio(GPIO_LCD_DC, OUTPUT);
+  esp_gpiowrite(GPIO_LCD_DC, true);
 
   /* Reset device */
 
-  esp32s3_configgpio(GPIO_LCD_RST, OUTPUT);
-  esp32s3_gpiowrite(GPIO_LCD_RST, false);
+  esp_configgpio(GPIO_LCD_RST, OUTPUT);
+  esp_gpiowrite(GPIO_LCD_RST, false);
   nxsched_usleep(10000);
-  esp32s3_gpiowrite(GPIO_LCD_RST, true);
+  esp_gpiowrite(GPIO_LCD_RST, true);
   nxsched_usleep(100000);
 
   return OK;

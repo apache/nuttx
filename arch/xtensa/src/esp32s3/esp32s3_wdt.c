@@ -30,18 +30,51 @@
 #include <debug.h>
 
 #include "xtensa.h"
-#include "hardware/esp32s3_rtccntl.h"
+#include "soc/rtc_cntl_reg.h"
 #include "hardware/esp32s3_tim.h"
-#include "hardware/esp32s3_efuse.h"
+#include "soc/efuse_reg.h"
+#include "hal/rwdt_ll.h"
 
-#include "esp32s3_irq.h"
+#include "espressif/esp_irq.h"
 #include "esp32s3_rtc_gpio.h"
 #include "esp32s3_wdt.h"
-#include <esp32s3_rtc.h>
+
+/* Undefine macros that conflict with HAL definitions */
+
+#undef RTC_CNTL_MIN_SLP_VAL_MIN
+#undef RTC_FAST_CLK_FREQ_8M
+
+#include "soc/rtc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Offset relative to each watchdog timer instance memory base */
+
+#define RWDT_CONFIG0_OFFSET         0x0098
+#define XTWDT_CONFIG0_OFFSET        0x0060
+
+/* RWDT */
+
+#define RWDT_STAGE0_TIMEOUT_OFFSET  0x009C
+#define RWDT_STAGE1_TIMEOUT_OFFSET  0x00A0
+#define RWDT_STAGE2_TIMEOUT_OFFSET  0x00A4
+#define RWDT_STAGE3_TIMEOUT_OFFSET  0x00A8
+#define RWDT_FEED_OFFSET            0x00AC
+#define RWDT_WP_REG                 0x00B0
+#define RWDT_INT_ENA_REG_OFFSET     0x0040
+#define RWDT_INT_CLR_REG_OFFSET     0x004c
+
+/* XTWDT */
+
+#define XTWDT_TIMEOUT_OFFSET        0x00f8
+#define XTWDT_CLK_PRESCALE_OFFSET   0x00f4
+#define XTWDT_INT_ENA_REG_OFFSET    0x0040
+
+/* Number of cycles for RTC_SLOW_CLK calibration */
+
+#define SLOW_CLK_CAL_CYCLES 1024
 
 /* Helpers for converting from Q13.19 fixed-point format to float */
 
@@ -64,12 +97,7 @@
  * Private Types
  ****************************************************************************/
 
-enum wdt_peripheral_e
-{
-  RTC,
-  TIMER,
-  XTAL32K,
-};
+/* ESP32-S3 WDT private data */
 
 struct esp32s3_wdt_priv_s
 {
@@ -178,7 +206,7 @@ struct esp32s3_wdt_priv_s g_esp32s3_mwdt1_priv =
 struct esp32s3_wdt_priv_s g_esp32s3_rwdt_priv =
 {
   .ops    = &esp32s3_wdt_ops,
-  .base   = RTC_CNTL_RTC_OPTIONS0_REG,
+  .base   = RTC_CNTL_OPTIONS0_REG,
   .periph = ESP32S3_PERIPH_RTC_CORE,
   .irq    = ESP32S3_IRQ_RTC_WDT,
   .cpuint = -ENOMEM,
@@ -191,7 +219,7 @@ struct esp32s3_wdt_priv_s g_esp32s3_rwdt_priv =
 struct esp32s3_wdt_priv_s g_esp32s3_xtwdt_priv =
 {
   .ops    = &esp32s3_wdt_ops,
-  .base   = RTC_CNTL_RTC_OPTIONS0_REG,
+  .base   = RTC_CNTL_OPTIONS0_REG,
   .periph = ESP32S3_PERIPH_RTC_CORE,
   .irq    = ESP32S3_IRQ_RTC_XTAL32K_DEAD,
   .cpuint = -ENOMEM,
@@ -483,7 +511,7 @@ static void wdt_disablewp(struct esp32s3_wdt_dev_s *dev)
 
   if (IS_RWDT(dev))
     {
-      wdt_putreg(dev, RWDT_WP_REG, RTC_CNTL_WDT_WKEY_VALUE);
+      wdt_putreg(dev, RWDT_WP_REG, TIMG_WDT_WKEY_VALUE);
     }
   else if (IS_MWDT(dev))
     {
@@ -647,7 +675,7 @@ static void wdt_feed(struct esp32s3_wdt_dev_s *dev)
 
   if (IS_RWDT(dev))
     {
-      wdt_modifyreg32(dev, RWDT_FEED_OFFSET, 0, RTC_CNTL_RTC_WDT_FEED);
+      wdt_modifyreg32(dev, RWDT_FEED_OFFSET, 0, RTC_CNTL_WDT_FEED);
     }
   else if (IS_MWDT(dev))
     {
@@ -672,7 +700,7 @@ static void wdt_feed(struct esp32s3_wdt_dev_s *dev)
 
 static uint16_t wdt_rtc_clk(struct esp32s3_wdt_dev_s *dev)
 {
-  enum esp32s3_rtc_slow_freq_e slow_clk_rtc;
+  soc_rtc_slow_clk_src_t slow_clk_rtc;
   uint32_t period_13q19;
   float period;
   float cycles_ms;
@@ -682,23 +710,23 @@ static uint16_t wdt_rtc_clk(struct esp32s3_wdt_dev_s *dev)
    * used to calibrate this source.
    */
 
-  static const enum esp32s3_rtc_cal_sel_e cal_map[] =
+  static const soc_clk_freq_calculation_src_t cal_map[] =
   {
-    RTC_CAL_RTC_MUX,
-    RTC_CAL_32K_XTAL,
-    RTC_CAL_8MD256
+    CLK_CAL_RTC_SLOW,
+    CLK_CAL_32K_XTAL,
+    CLK_CAL_RC_FAST_D256
   };
 
   DEBUGASSERT(dev);
 
   /* Check which clock is sourcing the slow_clk_rtc */
 
-  slow_clk_rtc = esp32s3_rtc_get_slow_clk();
+  slow_clk_rtc = rtc_clk_slow_src_get();
 
   /* Get the slow_clk_rtc period in us in Q13.19 fixed point format */
 
-  period_13q19 = esp32s3_rtc_clk_cal(cal_map[slow_clk_rtc],
-                                     SLOW_CLK_CAL_CYCLES);
+  period_13q19 = rtc_clk_cal(cal_map[slow_clk_rtc],
+                             SLOW_CLK_CAL_CYCLES);
 
   /* Assert no error happened during the calibration */
 
@@ -762,7 +790,7 @@ static int32_t wdt_setisr(struct esp32s3_wdt_dev_s *dev, xcpt_t handler,
               wdt->irq == ESP32S3_IRQ_RTC_XTAL32K_DEAD)
             {
               esp32s3_rtcioirqdisable(wdt->irq);
-              irq_detach(wdt->irq);
+              esp32s3_rtcioirqdetach(wdt->irq);
             }
           else
 #endif
@@ -772,8 +800,7 @@ static int32_t wdt_setisr(struct esp32s3_wdt_dev_s *dev, xcpt_t handler,
                */
 
               up_disable_irq(wdt->irq);
-              esp32s3_teardown_irq(wdt->cpu, wdt->periph, wdt->cpuint);
-              irq_detach(wdt->irq);
+              esp_teardown_irq(wdt->periph, wdt->cpuint);
               wdt->cpuint = -ENOMEM;
             }
         }
@@ -791,7 +818,7 @@ static int32_t wdt_setisr(struct esp32s3_wdt_dev_s *dev, xcpt_t handler,
       if (wdt->irq == ESP32S3_IRQ_RTC_WDT ||
           wdt->irq == ESP32S3_IRQ_RTC_XTAL32K_DEAD)
         {
-          ret = irq_attach(wdt->irq, handler, arg);
+          ret = esp32s3_rtcioirqattach(wdt->irq, handler, arg);
 
           if (ret != OK)
             {
@@ -806,22 +833,13 @@ static int32_t wdt_setisr(struct esp32s3_wdt_dev_s *dev, xcpt_t handler,
 #endif
         {
           wdt->cpu = this_cpu();
-          wdt->cpuint = esp32s3_setup_irq(wdt->cpu, wdt->periph,
-                                          1, ESP32S3_CPUINT_LEVEL);
+          wdt->cpuint = esp_setup_irq(wdt->periph,
+                                      1, ESP_IRQ_TRIGGER_LEVEL,
+                                      handler, arg);
           if (wdt->cpuint < 0)
             {
               wderr("ERROR: No CPU Interrupt available");
               ret = wdt->cpuint;
-              goto errout;
-            }
-
-          /* Associate an IRQ Number (from the WDT) to an ISR */
-
-          ret = irq_attach(wdt->irq, handler, arg);
-          if (ret != OK)
-            {
-              esp32s3_teardown_irq(wdt->cpu, wdt->periph, wdt->cpuint);
-              wderr("ERROR: Failed to associate an IRQ Number");
               goto errout;
             }
 
@@ -853,7 +871,7 @@ static void wdt_enableint(struct esp32s3_wdt_dev_s *dev)
   if (IS_RWDT(dev))
     {
       wdt_modifyreg32(dev, RWDT_INT_ENA_REG_OFFSET, 0,
-                      RTC_CNTL_RTC_WDT_INT_ENA);
+                      RTC_CNTL_WDT_INT_ENA);
     }
   else if (IS_MWDT(dev))
     {
@@ -862,7 +880,7 @@ static void wdt_enableint(struct esp32s3_wdt_dev_s *dev)
   else
     {
       wdt_modifyreg32(dev, XTWDT_INT_ENA_REG_OFFSET, 0,
-                      RTC_CNTL_RTC_XTAL32K_DEAD_INT_ENA);
+                      RTC_CNTL_XTAL32K_DEAD_INT_ENA);
     }
 }
 
@@ -883,7 +901,7 @@ static void wdt_disableint(struct esp32s3_wdt_dev_s *dev)
 
   if (IS_RWDT(dev))
     {
-      wdt_modifyreg32(dev, RWDT_INT_ENA_REG_OFFSET, RTC_CNTL_RTC_WDT_INT_ENA,
+      wdt_modifyreg32(dev, RWDT_INT_ENA_REG_OFFSET, RTC_CNTL_WDT_INT_ENA,
                       0);
     }
   else if (IS_MWDT(dev))
@@ -893,7 +911,7 @@ static void wdt_disableint(struct esp32s3_wdt_dev_s *dev)
   else
     {
       wdt_modifyreg32(dev, XTWDT_INT_ENA_REG_OFFSET,
-                      RTC_CNTL_RTC_XTAL32K_DEAD_INT_ENA, 0);
+                      RTC_CNTL_XTAL32K_DEAD_INT_ENA, 0);
     }
 }
 
@@ -914,7 +932,7 @@ static void wdt_ackint(struct esp32s3_wdt_dev_s *dev)
 
   if (IS_RWDT(dev))
     {
-      wdt_putreg(dev, RWDT_INT_CLR_REG_OFFSET, RTC_CNTL_RTC_WDT_INT_CLR);
+      wdt_putreg(dev, RWDT_INT_CLR_REG_OFFSET, RTC_CNTL_WDT_INT_CLR);
     }
   else if (IS_MWDT(dev))
     {
@@ -923,7 +941,7 @@ static void wdt_ackint(struct esp32s3_wdt_dev_s *dev)
   else
     {
       wdt_putreg(dev, MWDT_INT_CLR_REG_OFFSET,
-                 RTC_CNTL_RTC_XTAL32K_DEAD_INT_CLR);
+                 RTC_CNTL_XTAL32K_DEAD_INT_CLR);
     }
 }
 
@@ -1058,11 +1076,10 @@ errout:
 void esp32s3_wdt_early_deinit(void)
 {
   uint32_t regval;
-  putreg32(RTC_CNTL_WDT_WKEY_VALUE, RTC_CNTL_RTC_WDTWPROTECT_REG);
-  regval  = getreg32(RTC_CNTL_RTC_WDTCONFIG0_REG);
+  regval  = getreg32(RTC_CNTL_WDTCONFIG0_REG);
   regval &= ~RTC_CNTL_WDT_EN;
-  putreg32(regval, RTC_CNTL_RTC_WDTCONFIG0_REG);
-  putreg32(0, RTC_CNTL_RTC_WDTWPROTECT_REG);
+  putreg32(regval, RTC_CNTL_WDTCONFIG0_REG);
+  putreg32(0, RTC_CNTL_WDTWPROTECT_REG);
 }
 
 /****************************************************************************

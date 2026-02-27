@@ -43,13 +43,13 @@
 #include <nuttx/spi/spi_bitbang.c>
 
 #if defined(CONFIG_ARCH_CHIP_ESP32S3)
-#include "esp32s3_gpio.h"
+#include "esp_gpio.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
 #elif defined(CONFIG_ARCH_CHIP_ESP32S2)
-#include "esp32s2_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "esp32s2_gpio_sigmap.h"
 #else
-#include "esp32_gpio.h"
+#include "esp_gpio.h"
 #include "esp32_gpio_sigmap.h"
 #endif
 
@@ -58,16 +58,17 @@
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_ESP32S3)
-#define CONFIG_GPIO(pin, attr)                 esp32s3_configgpio(pin, attr)
-#define GPIO_MATRIX_OUT(pin, idx, inv, en_inv) esp32s3_gpio_matrix_out(pin, \
+#define CONFIG_GPIO(pin, attr)                 esp_configgpio(pin, attr)
+#define GPIO_MATRIX_OUT(pin, idx, inv, en_inv) esp_gpio_matrix_out(pin, \
                                                           idx, inv, en_inv)
 #elif defined(CONFIG_ARCH_CHIP_ESP32S2)
-#define CONFIG_GPIO(pin, attr)                 esp32s2_configgpio(pin, attr)
-#define GPIO_MATRIX_OUT(pin, idx, inv, en_inv) esp32s2_gpio_matrix_out(pin, \
+#define CONFIG_GPIO(pin, attr)                 esp_configgpio(pin, attr)
+#define GPIO_MATRIX_OUT(pin, idx, inv, en_inv) esp_gpio_matrix_out(pin, \
                                                           idx, inv, en_inv)
-#else
-#define CONFIG_GPIO(pin, attr)                 esp32_configgpio(pin, attr)
-#define GPIO_MATRIX_OUT(pin, idx, inv, en_inv) esp32_gpio_matrix_out(pin,   \
+#else#if defined(CONFIG_ARCH_CHIP_ESP32)
+#endif
+#define CONFIG_GPIO(pin, attr)                 esp_configgpio(pin, attr)
+#define GPIO_MATRIX_OUT(pin, idx, inv, en_inv) esp_gpio_matrix_out(pin,   \
                                                           idx, inv, en_inv)
 #endif
 
@@ -231,11 +232,10 @@ struct spi_dev_s *esp_spi_bitbang_init(void)
   GPIO_WRITE(CONFIG_ESPRESSIF_SPI_BITBANG_MOSIPIN, true);
   GPIO_WRITE(CONFIG_ESPRESSIF_SPI_BITBANG_CLKPIN, true);
 
-#if CONFIG_ESPRESSIF_SPI_SWCS
   CONFIG_GPIO(CONFIG_ESPRESSIF_SPI_BITBANG_CSPIN, OUTPUT_FUNCTION_1);
   GPIO_MATRIX_OUT(CONFIG_ESPRESSIF_SPI_BITBANG_CSPIN, SIG_GPIO_OUT_IDX,
                       0, 0);
-#endif
+
   CONFIG_GPIO(CONFIG_ESPRESSIF_SPI_BITBANG_MOSIPIN, OUTPUT_FUNCTION_1);
   GPIO_MATRIX_OUT(CONFIG_ESPRESSIF_SPI_BITBANG_MOSIPIN, SIG_GPIO_OUT_IDX,
                       0, 0);

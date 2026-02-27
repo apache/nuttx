@@ -36,8 +36,8 @@
 #define RAM_IRAM_START    0x40020000
 #define RAM_DRAM_START    0x3ffb0000
 
-#define DATA_RAM_END      0x3ffe0000  /* 2nd stage bootloader iram_loader_seg
-                                       * starts at SRAM block 14 (reclaimed
+#define DATA_RAM_END      0x3ffde000  /* 2nd stage bootloader iram_loader_seg
+                                       * starts at SRAM block 13 (reclaimed
                                        * after app boots)
                                        */
 

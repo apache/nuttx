@@ -37,9 +37,12 @@
 
 #include "xtensa.h"
 #include "esp32s2_wdt.h"
-#include "esp32s2_rtc.h"
+
 #include "esp32s2_wdt_lowerhalf.h"
 #include "hardware/esp32s2_soc.h"
+
+#include "soc/periph_defs.h"
+#include "esp_private/periph_ctrl.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -90,13 +93,6 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-enum wdt_peripheral_e
-{
-  RTC,
-  TIMER,
-  XTAL32K,
-};
 
 /* This structure provides the private representation of the "lower-half"
  * driver state structure.  This structure must be cast-compatible with the
@@ -706,6 +702,8 @@ static int wdt_handler(int irq, void *context, void *arg)
 {
   struct esp32s2_wdt_lowerhalf_s *priv =
     (struct esp32s2_wdt_lowerhalf_s *)arg;
+  struct esp32s2_wdt_priv_s *wdt =
+    (struct esp32s2_wdt_priv_s *)priv->wdt;
 
   /* Run the user callback */
 

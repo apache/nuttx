@@ -181,6 +181,7 @@ SECTIONS
     *libarch.a:*mmu_hal.*(.text .text.* .literal .literal.*)
 
     *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
+    *libc.a:arch_atomic.*(.literal .text .literal.* .text.*)
 
     /* align + add 16B for CPU dummy speculative instr. fetch */
 
@@ -261,6 +262,8 @@ SECTIONS
     *libarch.a:*uart_hal.*(.rodata .rodata.*)
     *libarch.a:*mpu_hal.*(.rodata .rodata.*)
     *libarch.a:*mmu_hal.*(.rodata .rodata.*)
+
+    *libc.a:arch_atomic.*(.rodata .rodata.*)
 
     _edata = ABSOLUTE(.);
     . = ALIGN(4);

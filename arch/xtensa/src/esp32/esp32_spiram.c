@@ -39,7 +39,7 @@
 #include "esp32_spiram.h"
 #include "esp32_psram.h"
 #include "xtensa.h"
-#include "xtensa_attr.h"
+
 #include "hardware/esp32_soc.h"
 #include "hardware/esp32_dport.h"
 

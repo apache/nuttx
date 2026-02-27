@@ -197,14 +197,19 @@
  * interrupts
  */
 
-#define XTENSA_IRQ_TIMER0           0  /* INTERRUPT, bit 6 */
-#define XTENSA_IRQ_TIMER1           1  /* INTERRUPT, bit 15 */
-#define XTENSA_IRQ_TIMER2           2  /* INTERRUPT, bit 16 */
-#define XTENSA_IRQ_SYSCALL          3  /* User interrupt w/EXCCAUSE=syscall */
-#define XTENSA_IRQ_SWINT            4  /* Software interrupt */
+#define ETS_INTERNAL_TIMER0_INTR_SOURCE     -1 /* Platform timer 0 interrupt source */
+#define ETS_INTERNAL_TIMER1_INTR_SOURCE     -2 /* Platform timer 1 interrupt source */
+#define ETS_INTERNAL_TIMER2_INTR_SOURCE     -3 /* Platform timer 2 interrupt source */
+#define ETS_INTERNAL_SW0_INTR_SOURCE        -4 /* Software int source 1 */
+#define ETS_INTERNAL_SW1_INTR_SOURCE        -5 /* Software int source 2 */
+#define ETS_INTERNAL_PROFILING_INTR_SOURCE  -6 /* Int source for profiling */
 
-#define XTENSA_NIRQ_INTERNAL        5  /* Number of dispatch internal interrupts */
-#define XTENSA_IRQ_FIRSTPERIPH      5  /* First peripheral IRQ number */
+#define ETS_INTERNAL_INTR_SOURCE_OFF        (-ETS_INTERNAL_PROFILING_INTR_SOURCE)
+
+#define XTENSA_NIRQ_INTERNAL        ETS_INTERNAL_INTR_SOURCE_OFF      /* Number of dispatch internal interrupts */
+#define XTENSA_IRQ_DEMUX            ETS_INTERNAL_INTR_SOURCE_OFF + 0  /* Demultiplexing IRQ for peripheral interrupts */
+#define XTENSA_IRQ_SYSCALL          ETS_INTERNAL_INTR_SOURCE_OFF + 1  /* User interrupt w/EXCCAUSE=syscall */
+#define XTENSA_IRQ_FIRSTPERIPH      ETS_INTERNAL_INTR_SOURCE_OFF + 2  /* First peripheral IRQ number */
 
 /* IRQ numbers for peripheral interrupts coming through the Interrupt
  * Matrix.
@@ -212,6 +217,9 @@
 
 #define ESP32S2_IRQ2PERIPH(irq)       ((irq) - XTENSA_IRQ_FIRSTPERIPH)
 #define ESP32S2_PERIPH2IRQ(id)        ((id) + XTENSA_IRQ_FIRSTPERIPH)
+
+#define ESP_IRQ2SOURCE(irq)           ESP32S2_IRQ2PERIPH(irq)
+#define ESP_SOURCE2IRQ(id)            ESP32S2_PERIPH2IRQ(id)
 
 #define ESP32S2_IRQ_MAC               (XTENSA_IRQ_FIRSTPERIPH + ESP32S2_PERIPH_MAC)
 #define ESP32S2_IRQ_MAC_NMI           (XTENSA_IRQ_FIRSTPERIPH + ESP32S2_PERIPH_MAC_NMI)
@@ -304,12 +312,14 @@
  * interrupt handler. The second to the decoded GPIO interrupt handler.
  */
 
-#ifdef CONFIG_ESP32S2_GPIO_IRQ
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
 #  define ESP32S2_NIRQ_GPIO           47
 #  define ESP32S2_FIRST_GPIOIRQ       (XTENSA_NIRQ_INTERNAL + ESP32S2_NIRQ_PERIPH)
 #  define ESP32S2_LAST_GPIOIRQ        (ESP32S2_FIRST_GPIOIRQ + ESP32S2_NIRQ_GPIO - 1)
 #  define ESP32S2_PIN2IRQ(p)          ((p) + ESP32S2_FIRST_GPIOIRQ)
 #  define ESP32S2_IRQ2PIN(i)          ((i) - ESP32S2_FIRST_GPIOIRQ)
+#  define ESP_PIN2IRQ(p)              ESP32S2_PIN2IRQ(p)
+#  define ESP_IRQ2PIN(i)              ESP32S2_IRQ2PIN(i)
 #else
 #  define ESP32S2_NIRQ_GPIO           0
 #endif
@@ -360,7 +370,7 @@
 
 /* Total number of interrupts */
 
-#define NR_IRQS                     (XTENSA_NIRQ_INTERNAL + ESP32S2_NIRQ_PERIPH + ESP32S2_NIRQ_GPIO + ESP32S2_NIRQ_RTCIO)
+#define NR_IRQS                     (XTENSA_IRQ_FIRSTPERIPH + ESP32S2_NIRQ_PERIPH + ESP32S2_NIRQ_GPIO + ESP32S2_NIRQ_RTCIO)
 
 /* Xtensa CPU Interrupts.
  *

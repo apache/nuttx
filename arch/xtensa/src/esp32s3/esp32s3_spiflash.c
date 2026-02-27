@@ -43,10 +43,10 @@
 
 #include "xtensa.h"
 #include "esp_attr.h"
-#include "hardware/esp32s3_efuse.h"
+#include "soc/efuse_reg.h"
 #include "hardware/esp32s3_cache_memory.h"
 #include "rom/esp32s3_spiflash.h"
-#include "esp32s3_irq.h"
+#include "esp_irq.h"
 #include "esp32s3_spiflash.h"
 
 #include "spi_flash_defs.h"
@@ -384,7 +384,7 @@ void spiflash_start(void)
 
   nxsched_set_priority(tcb, saved_priority);
 
-  esp32s3_irq_noniram_disable();
+  esp_intr_noniram_disable();
 
   spiflash_suspend_cache();
 }
@@ -418,7 +418,7 @@ void spiflash_end(void)
 
   g_flash_op_complete = true;
 
-  esp32s3_irq_noniram_enable();
+  esp_intr_noniram_enable();
 
   sched_unlock();
 
@@ -948,7 +948,7 @@ static int spi_flash_op_block_task(int argc, char *argv[])
 
       sched_lock();
 
-      esp32s3_irq_noniram_disable();
+      esp_intr_noniram_disable();
 
       /* g_flash_op_complete flag is cleared on *this* CPU, otherwise the
        * other CPU may reset the flag back to false before this task has a
@@ -971,7 +971,7 @@ static int spi_flash_op_block_task(int argc, char *argv[])
 
       /* Restore interrupts that aren't located in IRAM */
 
-      esp32s3_irq_noniram_enable();
+      esp_intr_noniram_enable();
 
       sched_unlock();
     }

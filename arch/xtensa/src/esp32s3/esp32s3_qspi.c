@@ -52,8 +52,8 @@
 #include "hardware/esp32s3_soc.h"
 #include "hardware/esp32s3_system.h"
 
-#include "esp32s3_irq.h"
-#include "esp32s3_gpio.h"
+#include "esp_irq.h"
+#include "esp_gpio.h"
 #include "esp32s3_qspi.h"
 
 #ifdef CONFIG_ESP32S3_SPI_DMA
@@ -1257,22 +1257,22 @@ static void esp32s3_qspi_init_iomux(struct esp32s3_qspi_priv_s *priv)
   uint32_t attr = OUTPUT_FUNCTION_5;
   const struct esp32s3_qspi_config_s *config = priv->config;
 
-  esp32s3_configgpio(config->cs_pin,  attr);
-  esp32s3_configgpio(config->clk_pin, attr);
+  esp_configgpio(config->cs_pin,  attr);
+  esp_configgpio(config->clk_pin, attr);
 
   attr |= INPUT;
 
-  esp32s3_configgpio(config->mosi_pin, attr);
-  esp32s3_configgpio(config->miso_pin, attr);
-  esp32s3_configgpio(config->io2_pin,  attr);
-  esp32s3_configgpio(config->io3_pin,  attr);
+  esp_configgpio(config->mosi_pin, attr);
+  esp_configgpio(config->miso_pin, attr);
+  esp_configgpio(config->io2_pin,  attr);
+  esp_configgpio(config->io3_pin,  attr);
 
-  esp32s3_gpio_matrix_out(config->cs_pin,   SIG_GPIO_OUT_IDX, 0, 0);
-  esp32s3_gpio_matrix_out(config->clk_pin,  SIG_GPIO_OUT_IDX, 0, 0);
-  esp32s3_gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
-  esp32s3_gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
-  esp32s3_gpio_matrix_out(config->io2_pin,  SIG_GPIO_OUT_IDX, 0, 0);
-  esp32s3_gpio_matrix_out(config->io3_pin,  SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->cs_pin,   SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->clk_pin,  SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->mosi_pin, SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->miso_pin, SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->io2_pin,  SIG_GPIO_OUT_IDX, 0, 0);
+  esp_gpio_matrix_out(config->io3_pin,  SIG_GPIO_OUT_IDX, 0, 0);
 }
 #endif
 
@@ -1296,29 +1296,29 @@ static void esp32s3_qspi_init_iomatrix(struct esp32s3_qspi_priv_s *priv)
   uint32_t attr = OUTPUT;
   const struct esp32s3_qspi_config_s *config = priv->config;
 
-  esp32s3_configgpio(config->cs_pin, OUTPUT);
-  esp32s3_gpio_matrix_out(config->cs_pin, config->cs_outsig, 0, 0);
+  esp_configgpio(config->cs_pin, OUTPUT);
+  esp_gpio_matrix_out(config->cs_pin, config->cs_outsig, 0, 0);
 
-  esp32s3_configgpio(config->clk_pin, OUTPUT);
-  esp32s3_gpio_matrix_out(config->clk_pin, config->clk_outsig, 0, 0);
+  esp_configgpio(config->clk_pin, OUTPUT);
+  esp_gpio_matrix_out(config->clk_pin, config->clk_outsig, 0, 0);
 
   attr |= INPUT;
 
-  esp32s3_configgpio(config->mosi_pin, attr);
-  esp32s3_gpio_matrix_in(config->mosi_pin, config->mosi_insig, 0);
-  esp32s3_gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
+  esp_configgpio(config->mosi_pin, attr);
+  esp_gpio_matrix_in(config->mosi_pin, config->mosi_insig, 0);
+  esp_gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
 
-  esp32s3_configgpio(config->miso_pin, attr);
-  esp32s3_gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
-  esp32s3_gpio_matrix_out(config->miso_pin, config->miso_outsig, 0, 0);
+  esp_configgpio(config->miso_pin, attr);
+  esp_gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
+  esp_gpio_matrix_out(config->miso_pin, config->miso_outsig, 0, 0);
 
-  esp32s3_configgpio(config->io2_pin, attr);
-  esp32s3_gpio_matrix_in(config->io2_pin, config->io2_insig, 0);
-  esp32s3_gpio_matrix_out(config->io2_pin, config->io2_outsig, 0, 0);
+  esp_configgpio(config->io2_pin, attr);
+  esp_gpio_matrix_in(config->io2_pin, config->io2_insig, 0);
+  esp_gpio_matrix_out(config->io2_pin, config->io2_outsig, 0, 0);
 
-  esp32s3_configgpio(config->io3_pin, attr);
-  esp32s3_gpio_matrix_in(config->io3_pin, config->io3_insig, 0);
-  esp32s3_gpio_matrix_out(config->io3_pin, config->io3_outsig, 0, 0);
+  esp_configgpio(config->io3_pin, attr);
+  esp_gpio_matrix_in(config->io3_pin, config->io3_insig, 0);
+  esp_gpio_matrix_out(config->io3_pin, config->io3_outsig, 0, 0);
 }
 #endif
 
@@ -1629,27 +1629,16 @@ struct qspi_dev_s *esp32s3_qspibus_initialize(int port)
   /* Set up to receive peripheral interrupts on the current CPU */
 
   priv->cpu = this_cpu();
-  priv->cpuint = esp32s3_setup_irq(priv->cpu, priv->config->periph,
-                                   ESP32S3_INT_PRIO_DEF,
-                                   ESP32S3_CPUINT_LEVEL);
+  priv->cpuint = esp_setup_irq(priv->config->periph,
+                               ESP32S3_INT_PRIO_DEF,
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               esp32s3_qspi_interrupt,
+                               priv);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type. */
 
       nxmutex_unlock(&priv->lock);
-      return NULL;
-    }
-
-  /* Attach and enable the IRQ */
-
-  if (irq_attach(priv->config->irq, esp32s3_qspi_interrupt, priv) != OK)
-    {
-      /* Failed to attach IRQ, so CPU interrupt must be freed. */
-
-      esp32s3_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
-      priv->cpuint = -ENOMEM;
-      nxmutex_unlock(&priv->lock);
-
       return NULL;
     }
 
@@ -1662,8 +1651,7 @@ struct qspi_dev_s *esp32s3_qspibus_initialize(int port)
     {
 #ifdef CONFIG_ESP32S3_SPI_DMA
       up_disable_irq(priv->config->irq);
-      esp32s3_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
-      irq_detach(priv->config->irq);
+      esp_teardown_irq(priv->config->periph, priv->cpuint);
       priv->cpuint = -ENOMEM;
 #endif
       nxmutex_unlock(&priv->lock);
@@ -1709,9 +1697,7 @@ int esp32s3_qspibus_uninitialize(struct qspi_dev_s *dev)
 
 #ifdef CONFIG_ESP32S3_SPI_DMA
   up_disable_irq(priv->config->irq);
-  esp32s3_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
-  irq_detach(priv->config->irq);
-
+  esp_teardown_irq(priv->config->periph, priv->cpuint);
   priv->cpuint = -ENOMEM;
 #endif
 

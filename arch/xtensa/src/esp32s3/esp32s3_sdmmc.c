@@ -44,8 +44,8 @@
 #endif
 
 #include "xtensa.h"
-#include "esp32s3_gpio.h"
-#include "esp32s3_irq.h"
+#include "esp_gpio.h"
+#include "esp_irq.h"
 #include "hardware/esp32s3_sdmmc.h"
 #include "hardware/esp32s3_system.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
@@ -547,16 +547,16 @@ static int esp32s3_ciu_sendcmd(uint32_t cmd, uint32_t arg)
 static void configure_pin(uint8_t gpio_pin, uint8_t sdio_pin,
                           gpio_pinattr_t attr)
 {
-  esp32s3_configgpio(gpio_pin, attr);
+  esp_configgpio(gpio_pin, attr);
 
   if (attr & INPUT)
     {
-      esp32s3_gpio_matrix_in(gpio_pin, sdio_pin, false);
+      esp_gpio_matrix_in(gpio_pin, sdio_pin, false);
     }
 
   if (attr & OUTPUT)
     {
-      esp32s3_gpio_matrix_out(gpio_pin, sdio_pin, false, false);
+      esp_gpio_matrix_out(gpio_pin, sdio_pin, false, false);
     }
 }
 
@@ -1632,38 +1632,38 @@ static int esp32s3_attach(struct sdio_dev_s *dev)
   uint32_t regval;
   struct esp32s3_dev_s *priv = (struct esp32s3_dev_s *)dev;
 
-  ret = esp32s3_setup_irq(this_cpu(), ESP32S3_PERIPH_SDIO_HOST,
-                          1, ESP32S3_CPUINT_LEVEL);
-  DEBUGASSERT(ret >= 0);
-
-  /* Attach the SDIO interrupt handler */
-
-  ret = irq_attach(ESP32S3_IRQ_SDIO_HOST, esp32s3_interrupt, dev);
-  if (ret == OK)
+  ret = esp_setup_irq(ESP32S3_PERIPH_SDIO_HOST,
+                      1,
+                      ESP_IRQ_TRIGGER_LEVEL,
+                      esp32s3_interrupt,
+                      dev);
+  if (ret < 0)
     {
-      /* Disable all interrupts at the SD card controller and clear static
-       * interrupt flags
-       */
-
-      esp32s3_putreg(0, ESP32S3_SDMMC_INTMASK);
-      esp32s3_putreg(SDMMC_INT_ALL(priv->slot), ESP32S3_SDMMC_RINTSTS);
-
-      /* Enable Interrupts to happen when the INTMASK is activated */
-
-      regval  = esp32s3_getreg(ESP32S3_SDMMC_CTRL);
-      regval |= SDMMC_CTRL_INTENABLE;
-      esp32s3_putreg(regval, ESP32S3_SDMMC_CTRL);
-
-      /* Enable card detection interrupts */
-
-      esp32s3_putreg(SDCARD_INT_CDET, ESP32S3_SDMMC_INTMASK);
-
-      /* Enable SD card interrupts at the NVIC.  They can now be enabled at
-       * the SD card controller as needed.
-       */
-
-      up_enable_irq(ESP32S3_IRQ_SDIO_HOST);
+      return -ENOMEM;
     }
+
+  /* Disable all interrupts at the SD card controller and clear static
+   * interrupt flags
+   */
+
+  esp32s3_putreg(0, ESP32S3_SDMMC_INTMASK);
+  esp32s3_putreg(SDMMC_INT_ALL(priv->slot), ESP32S3_SDMMC_RINTSTS);
+
+  /* Enable Interrupts to happen when the INTMASK is activated */
+
+  regval  = esp32s3_getreg(ESP32S3_SDMMC_CTRL);
+  regval |= SDMMC_CTRL_INTENABLE;
+  esp32s3_putreg(regval, ESP32S3_SDMMC_CTRL);
+
+  /* Enable card detection interrupts */
+
+  esp32s3_putreg(SDCARD_INT_CDET, ESP32S3_SDMMC_INTMASK);
+
+  /* Enable SD card interrupts at the NVIC.  They can now be enabled at
+   * the SD card controller as needed.
+   */
+
+  up_enable_irq(ESP32S3_IRQ_SDIO_HOST);
 
   return ret;
 }
@@ -2966,11 +2966,11 @@ struct sdio_dev_s *sdio_initialize(int slotno)
   configure_pin(CONFIG_ESP32S3_SDMMC_D0, priv->sdio_pins->d0,
                 INPUT | OUTPUT | PULLUP);
 
-  esp32s3_gpio_matrix_in(GPIO_MATRIX_CONST_ONE_INPUT,
+  esp_gpio_matrix_in(GPIO_MATRIX_CONST_ONE_INPUT,
                          priv->slot_info->card_int, false);
-  esp32s3_gpio_matrix_in(GPIO_MATRIX_CONST_ZERO_INPUT,
+  esp_gpio_matrix_in(GPIO_MATRIX_CONST_ZERO_INPUT,
                          priv->slot_info->card_detect, false);
-  esp32s3_gpio_matrix_in(GPIO_MATRIX_CONST_ONE_INPUT,
+  esp_gpio_matrix_in(GPIO_MATRIX_CONST_ONE_INPUT,
                          priv->slot_info->write_protect, true);
 
   return &priv->dev;

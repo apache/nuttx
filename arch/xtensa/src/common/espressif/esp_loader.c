@@ -47,7 +47,7 @@
 #  include "bootloader_flash_priv.h"
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
 #  include "bootloader_init.h"
-#  include "esp_rom_uart.h"
+#  include "esp_rom_serial_output.h"
 #  include "esp_rom_sys.h"
 #  include "esp_app_format.h"
 #endif

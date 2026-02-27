@@ -40,6 +40,9 @@
 #include <nuttx/himem/himem.h>
 #include <arch/board/board.h>
 
+#include "espressif/esp_gpio.h"
+#include "esp32s3_start.h"
+
 #ifdef CONFIG_ESP32S3_TIMER
 #  include "esp32s3_board_tim.h"
 #endif
@@ -54,10 +57,6 @@
 
 #ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
 #  include "esp32s3_wifi_adapter.h"
-#endif
-
-#ifdef CONFIG_ESP32S3_RT_TIMER
-#  include "esp32s3_rt_timer.h"
 #endif
 
 #ifdef CONFIG_ESP32S3_I2C
@@ -77,7 +76,11 @@
 #endif
 
 #ifdef CONFIG_RTC_DRIVER
-#  include "esp32s3_rtc_lowerhalf.h"
+#  include "espressif/esp_rtc.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_HR_TIMER
+#  include "espressif/esp_hr_timer.h"
 #endif
 
 #ifdef CONFIG_VIDEO_FB
@@ -198,6 +201,14 @@ int esp32s3_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESPRESSIF_HR_TIMER
+  ret = esp_hr_timer_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_hr_timer_init() failed: %d\n", ret);
+    }
+#endif
+
 #if defined(CONFIG_ESP32S3_SPI) && defined(CONFIG_SPI_DRIVER)
 
   #if defined(CONFIG_SPI_SLAVE_DRIVER) && defined(CONFIG_ESP32S3_SPI2)
@@ -214,7 +225,7 @@ int esp32s3_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize SPI%d Slave driver: %d\n",
-             ESP32S3_SPI2, ret);
+             ESP32S3_SPI3, ret);
     }
   #endif
 
@@ -326,22 +337,14 @@ int esp32s3_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32S3_RT_TIMER
-  ret = esp32s3_rt_timer_init();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize RT timer: %d\n", ret);
-    }
-#endif
-
 #ifdef CONFIG_ESP_RMT
-  ret = board_rmt_txinitialize(RMT_TXCHANNEL, RMT_OUTPUT_PIN);
+  ret = board_rmt_txinitialize(RMT_OUTPUT_PIN);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_rmt_txinitialize() failed: %d\n", ret);
     }
 
-  ret = board_rmt_rxinitialize(RMT_RXCHANNEL, RMT_INPUT_PIN);
+  ret = board_rmt_rxinitialize(RMT_INPUT_PIN);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_rmt_txinitialize() failed: %d\n", ret);
@@ -359,9 +362,9 @@ int esp32s3_bringup(void)
 #endif
 
 #ifdef CONFIG_RTC_DRIVER
-  /* Instantiate the ESP32-S3 RTC driver */
+  /* Instantiate the RTC driver */
 
-  ret = esp32s3_rtc_driverinit();
+  ret = esp_rtc_driverinit();
   if (ret < 0)
     {
       syslog(LOG_ERR,

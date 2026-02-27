@@ -31,24 +31,30 @@
 #include <debug.h>
 
 #include "esp_pm.h"
+#include "esp_hr_timer.h"
+
 #ifdef CONFIG_SCHED_TICKLESS
-#  include "esp_tickless.h"
+#  if defined(CONFIG_ARCH_CHIP_ESP32)
+#    include "esp32_tickless.h"
+#  elif defined(CONFIG_ARCH_CHIP_ESP32S2)
+#    include "esp32s2_tickless.h"
+#  elif defined(CONFIG_ARCH_CHIP_ESP32S3)
+#    include "esp32s3_tickless.h"
+#  endif
 #endif
 #include "esp_sleep.h"
 #include "soc/rtc.h"
 #include "esp_sleep_internal.h"
 #include "esp_pmu.h"
+#include "esp_attr.h"
+#include "esp_private/pm_impl.h"
 #ifdef CONFIG_PM_EXT1_WAKEUP
 #  include "driver/rtc_io.h"
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP
 #  include "driver/gpio.h"
 #  include "hal/gpio_types.h"
-#  if defined(CONFIG_ARCH_CHIP_ESP32S3)
-#    include "esp32s3_gpio.h"
-#  elif defined(CONFIG_ARCH_CHIP_ESP32S2)
-#    include "esp32s2_gpio.h"
-#endif
+#  include "esp_gpio.h"
 #endif
 #ifdef CONFIG_PM_UART_WAKEUP
 #  include "driver/uart_wakeup.h"
@@ -60,11 +66,17 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#if defined(CONFIG_ARCH_CHIP_ESP32S3)
-#define esp_configgpio            esp32s3_configgpio
-#elif defined(CONFIG_ARCH_CHIP_ESP32S2)
-#define esp_configgpio            esp32s2_configgpio
+#ifdef CONFIG_PM_EXT0_WAKEUP
+#  define EXT0_WAIT_TIME_US 5000000
+#endif
+#ifdef CONFIG_PM_EXT1_WAKEUP
+#  define EXT1_WAIT_TIME_US 5000000
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP
+#  define GPIO_WAIT_TIME_US 5000000
+#endif
+#ifdef CONFIG_PM_UART_WAKEUP
+#  define UART_WAIT_TIME_US 5000000
 #endif
 
 /****************************************************************************
@@ -92,7 +104,9 @@ const char *g_wakeup_reasons[] =
   ""
 };
 
-static _Atomic uint32_t pm_wakelock = 0;
+static esp_sleep_wakeup_cause_t g_last_wakeup_reason =
+                                  ESP_SLEEP_WAKEUP_UNDEFINED;
+static uint64_t g_last_wakeup_time = 0;
 
 /****************************************************************************
  * Private Functions
@@ -360,7 +374,60 @@ static uint64_t IRAM_ATTR esp_pm_get_gpio_mask(void)
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO30
   io_mask |= BIT(30);
 #endif
-
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO31
+  io_mask |= BIT(31);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO32
+  io_mask |= BIT(32);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO33
+  io_mask |= BIT(33);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO34
+  io_mask |= BIT(34);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO35
+  io_mask |= BIT(35);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO36
+  io_mask |= BIT(36);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO37
+  io_mask |= BIT(37);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO38
+  io_mask |= BIT(38);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO39
+  io_mask |= BIT(39);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO40
+  io_mask |= BIT(40);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO41
+  io_mask |= BIT(41);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO42
+  io_mask |= BIT(42);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO43
+  io_mask |= BIT(43);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO44
+  io_mask |= BIT(44);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO45
+  io_mask |= BIT(45);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO46
+  io_mask |= BIT(46);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO47
+  io_mask |= BIT(47);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO48
+  io_mask |= BIT(48);
+#endif
   return io_mask;
 }
 
@@ -435,6 +502,161 @@ static void IRAM_ATTR esp_pm_uart_wakeup_prepare(void)
 }
 #endif /* CONFIG_PM_UART_WAKEUP */
 
+#ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
+
+/****************************************************************************
+ * Name: esp_pm_skip_light_sleep
+ *
+ * Description:
+ *   Callback for the power manager's "skip light sleep" hook. This function
+ *   checks if the system should defer entering light sleep after waking up
+ *   from any supported wakeup source (EXT0, EXT1, GPIO, UART). It compares
+ *   the current time to the last wakeup time for each source. If the system
+ *   is still within the configured guard window for any wakeup source, it
+ *   returns true to skip light sleep and let peripheral activity finish. If
+ *   the guard window has elapsed or there was no wakeup, it returns false
+ *   and allows light sleep to proceed.
+ *
+ *   Placed in IRAM because it runs in timing-critical power management
+ *   decision paths.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   true  - Skip light sleep (recent EXT0, EXT1, GPIO, or UART wakeup still
+ *           within the configured guard window).
+ *   false - Allow light sleep (no relevant wakeup or guard window elapsed).
+ *
+ ****************************************************************************/
+
+static bool IRAM_ATTR esp_pm_skip_light_sleep(void)
+{
+  bool skip = false;
+#if defined(CONFIG_PM_EXT0_WAKEUP) || \
+    defined(CONFIG_PM_EXT1_WAKEUP) || \
+    defined(CONFIG_PM_GPIO_WAKEUP) || \
+    defined(CONFIG_PM_UART_WAKEUP)
+  uint64_t current_time = esp_hr_timer_time_us();
+#endif
+
+#ifdef CONFIG_PM_EXT0_WAKEUP
+  if (g_last_wakeup_reason == ESP_SLEEP_WAKEUP_EXT0 &&
+      current_time < (g_last_wakeup_time + EXT0_WAIT_TIME_US))
+    {
+      pwrinfo("EXT0 wakeup still within guard window\n");
+      skip = true;
+    }
+#endif
+
+#ifdef CONFIG_PM_EXT1_WAKEUP
+  if (g_last_wakeup_reason == ESP_SLEEP_WAKEUP_EXT1 &&
+      current_time < (g_last_wakeup_time + EXT1_WAIT_TIME_US))
+    {
+      pwrinfo("EXT1 wakeup still within guard window\n");
+      skip = true;
+    }
+#endif
+
+#ifdef CONFIG_PM_GPIO_WAKEUP
+  if (g_last_wakeup_reason == ESP_SLEEP_WAKEUP_GPIO &&
+      current_time < (g_last_wakeup_time + GPIO_WAIT_TIME_US))
+    {
+      pwrinfo("GPIO wakeup still within guard window\n");
+      skip = true;
+    }
+#endif
+
+#ifdef CONFIG_PM_UART_WAKEUP
+  if (g_last_wakeup_reason == ESP_SLEEP_WAKEUP_UART &&
+      current_time < (g_last_wakeup_time + UART_WAIT_TIME_US))
+    {
+      pwrinfo("UART wakeup still within guard window\n");
+      skip = true;
+    }
+#endif
+
+  return skip;
+}
+
+/****************************************************************************
+ * Name: esp_pm_light_sleep_exit_cb
+ *
+ * Description:
+ *   Store wakeup reason and timestamp on light sleep exit.
+ *
+ * Input Parameters:
+ *   sleep_time_us - Actual sleep time in microseconds (unused).
+ *   arg           - User callback argument (unused).
+ *
+ * Returned Value:
+ *   ESP_OK
+ *
+ ****************************************************************************/
+
+static esp_err_t IRAM_ATTR esp_pm_light_sleep_exit_cb(int64_t sleep_time_us,
+                                                      void *arg)
+{
+  esp_sleep_wakeup_cause_t wc;
+  uint64_t tw;
+
+  UNUSED(sleep_time_us);
+  UNUSED(arg);
+
+  wc = esp_sleep_get_wakeup_cause();
+  tw = esp_hr_timer_time_us();
+
+  esp_pm_wakeup_set_last_reason((int32_t)wc);
+  esp_pm_wakeup_set_last_time(tw);
+
+  return ESP_OK;
+}
+#endif /* CONFIG_ESPRESSIF_AUTO_SLEEP */
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp_pm_wakeup_set_last_reason
+ *
+ * Description:
+ *   Store the sleep exit wakeup cause after light sleep.
+ *
+ * Input Parameters:
+ *   reason - Value from esp_sleep_get_wakeup_cause().
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_pm_wakeup_set_last_reason(int32_t reason)
+{
+  g_last_wakeup_reason = reason;
+}
+
+/****************************************************************************
+ * Name: esp_pm_wakeup_set_last_time
+ *
+ * Description:
+ *   Store the high-resolution timestamp (microseconds) for the last light
+ *   sleep exit, together with the cause from
+ *   esp_pm_wakeup_set_last_reason().
+ *
+ * Input Parameters:
+ *   time_us - Time from esp_hr_timer_time_us() at exit from light sleep.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_pm_wakeup_set_last_time(uint64_t time_us)
+{
+  g_last_wakeup_time = time_us;
+}
+
 /****************************************************************************
  * Name: esp_pm_sleep_enable_timer_wakeup
  *
@@ -449,14 +671,10 @@ static void IRAM_ATTR esp_pm_uart_wakeup_prepare(void)
  *
  ****************************************************************************/
 
-static void esp_pm_sleep_enable_timer_wakeup(uint64_t time_in_us)
+void esp_pm_sleep_enable_timer_wakeup(uint64_t time_in_us)
 {
   esp_sleep_enable_timer_wakeup(time_in_us);
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Name: esp_pm_light_sleep_start
@@ -601,59 +819,85 @@ void esp_pmsleep(uint64_t time_in_us)
   esp_pm_deep_sleep_start();
 }
 
+#ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
+
 /****************************************************************************
- * Name: esp_pm_lockacquire
+ * Name: esp_pmconfigure
  *
  * Description:
- *   Take a power management lock
+ *   Configure power manager.
  *
  * Input Parameters:
- *   None
+ *   None.
  *
  * Returned Value:
- *   None
+ *   Returns OK on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-void IRAM_ATTR esp_pm_lockacquire(void)
+int esp_pmconfigure(void)
 {
-  ++pm_wakelock;
+  int ret;
+  esp_err_t err = ESP_OK;
+#ifdef CONFIG_PM_EXT1_WAKEUP
+  int64_t ext1_mask;
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP
+  int64_t gpio_mask;
+#endif
+  esp_pm_config_t pm_config =
+    {
+      .max_freq_mhz = CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ,
+      .min_freq_mhz = CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ,
+#ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
+      .light_sleep_enable = true
+#endif
+    };
+
+  ret = esp_pm_configure(&pm_config);
+  if (ret != OK)
+    {
+      return ret;
+    }
+
+#ifdef CONFIG_PM_EXT0_WAKEUP
+  esp_pm_ext0_wakeup_prepare();
+#endif
+#ifdef CONFIG_PM_EXT1_WAKEUP
+  esp_pm_ext1_wakeup_prepare();
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP
+  esp_pm_gpio_wakeup_prepare();
+#endif
+#ifdef CONFIG_PM_UART_WAKEUP
+  esp_pm_uart_wakeup_prepare();
+#endif /* CONFIG_PM_UART_WAKEUP */
+
+  err = esp_pm_register_skip_light_sleep_callback(
+          esp_pm_skip_light_sleep);
+  if (err != ESP_OK)
+    {
+      pwrerr("Failed to register skip light sleep callback: %d\n", err);
+      return -ENOMEM;
+    }
+
+  esp_pm_sleep_cbs_register_config_t sleep_cbs =
+    {
+      .enter_cb = NULL,
+      .exit_cb = esp_pm_light_sleep_exit_cb,
+      .enter_cb_user_arg = NULL,
+      .exit_cb_user_arg = NULL,
+      .enter_cb_prior = 0,
+      .exit_cb_prior = 0,
+    };
+
+  err = esp_pm_light_sleep_register_cbs(&sleep_cbs);
+  if (err != ESP_OK)
+    {
+      pwrerr("Failed to register light sleep callbacks: %d\n", err);
+      return -ENOMEM;
+    }
+
+  return ret;
 }
-
-/****************************************************************************
- * Name: esp_pm_lockrelease
- *
- * Description:
- *   Release the lock taken using esp_pm_lockacquire.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void IRAM_ATTR esp_pm_lockrelease(void)
-{
-  --pm_wakelock;
-}
-
-/****************************************************************************
- * Name: esp_pm_lockstatus
- *
- * Description:
- *   Return power management lock status.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Current pm_wakelock count
- *
- ****************************************************************************/
-
-uint32_t IRAM_ATTR esp_pm_lockstatus(void)
-{
-  return pm_wakelock;
-}
+#endif /* CONFIG_ESPRESSIF_AUTO_SLEEP */

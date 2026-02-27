@@ -34,7 +34,6 @@
 #include <errno.h>
 
 #include "xtensa.h"
-#include "xtensa_attr.h"
 
 #include "hardware/esp32_soc.h"
 #include "hardware/esp32_spi.h"

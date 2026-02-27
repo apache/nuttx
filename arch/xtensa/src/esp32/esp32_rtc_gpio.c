@@ -34,7 +34,7 @@
 #include <nuttx/arch.h>
 
 #include "xtensa.h"
-#include "esp32_irq.h"
+#include "espressif/esp_irq.h"
 #include "esp32_rtc_gpio.h"
 #include "hardware/esp32_pinmap.h"
 #include "hardware/esp32_rtc_io.h"
@@ -57,6 +57,14 @@ enum rtcio_lh_out_mode_e
   RTCIO_OUTPUT_OD = 0x1,      /* RTCIO output mode is open-drain. */
 };
 
+/* Structure to store RTC GPIO interrupt handlers */
+
+struct rtcio_handler_s
+{
+  xcpt_t        handler;      /* User interrupt handler */
+  void          *arg;         /* Argument for handler */
+};
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -64,6 +72,7 @@ enum rtcio_lh_out_mode_e
 #ifdef CONFIG_ESP32_RTCIO_IRQ
 static int g_rtcio_cpuint;
 static uint32_t last_status;
+static struct rtcio_handler_s g_rtcio_handlers[ESP32_NIRQ_RTCIO_PERIPH];
 #endif
 
 static const uint32_t rtc_gpio_to_addr[] =
@@ -119,6 +128,7 @@ static inline bool is_valid_rtc_gpio(uint32_t rtcio_num)
  *
  * Input Parameters:
  *   irq - The IRQ number;
+ *   context - The interrupt context;
  *   reg_status - Pointer to a copy of the interrupt status register.
  *
  * Returned Value:
@@ -127,7 +137,7 @@ static inline bool is_valid_rtc_gpio(uint32_t rtcio_num)
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32_RTCIO_IRQ
-static void rtcio_dispatch(int irq, uint32_t *reg_status)
+static void rtcio_dispatch(int irq, void *context, uint32_t *reg_status)
 {
   uint32_t status = *reg_status;
   uint32_t mask;
@@ -142,11 +152,14 @@ static void rtcio_dispatch(int irq, uint32_t *reg_status)
       mask = (UINT32_C(1) << i);
       if ((status & mask) != 0)
         {
-          /* Yes... perform the second level dispatch. The IRQ context will
-           * contain the contents of the status register.
-           */
+          /* Call the registered handler if one exists */
 
-          irq_dispatch(irq + i, (void *)reg_status);
+          if (g_rtcio_handlers[i].handler != NULL)
+            {
+              g_rtcio_handlers[i].handler(irq,
+                                          (void *)reg_status,
+                                          g_rtcio_handlers[i].arg);
+            }
 
           /* Clear the bit in the status so that we might execute this loop
            * sooner.
@@ -184,7 +197,7 @@ static int rtcio_interrupt(int irq, void *context, void *arg)
 
   /* Dispatch pending interrupts in the RTC status register */
 
-  rtcio_dispatch(ESP32_FIRST_RTCIOIRQ_PERIPH, &last_status);
+  rtcio_dispatch(irq, context, &last_status);
 
   return OK;
 }
@@ -327,7 +340,7 @@ int esp32_configrtcio(int rtcio_num, rtcio_pinattr_t attr)
 }
 
 /****************************************************************************
- * Name: esp32_rtcioirqinitialize
+ * Name: esp_rtcioirqinitialize
  *
  * Description:
  *   Initialize logic to support a second level of interrupt decoding for
@@ -336,18 +349,27 @@ int esp32_configrtcio(int rtcio_num, rtcio_pinattr_t attr)
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32_RTCIO_IRQ
-void esp32_rtcioirqinitialize(void)
+void esp_rtcioirqinitialize(void)
 {
-  /* Setup the RTCIO interrupt. */
+  int i;
 
-  int cpu = this_cpu();
-  g_rtcio_cpuint = esp32_setup_irq(cpu, ESP32_PERIPH_RTC_CORE,
-                                   1, ESP32_CPUINT_LEVEL);
+  /* Initialize handler array */
+
+  for (i = 0; i < ESP32_NIRQ_RTCIO_PERIPH; i++)
+    {
+      g_rtcio_handlers[i].handler = NULL;
+      g_rtcio_handlers[i].arg = NULL;
+    }
+
+  /* Setup the RTCIO interrupt with handler. */
+
+  g_rtcio_cpuint = esp_setup_irq(ESP32_PERIPH_RTC_CORE,
+                                 1, ESP_IRQ_TRIGGER_LEVEL,
+                                 rtcio_interrupt, NULL);
   DEBUGASSERT(g_rtcio_cpuint >= 0);
 
-  /* Attach and enable the interrupt handler */
+  /* Enable the interrupt */
 
-  DEBUGVERIFY(irq_attach(ESP32_IRQ_RTC_CORE, rtcio_interrupt, NULL));
   up_enable_irq(ESP32_IRQ_RTC_CORE);
 }
 #endif
@@ -415,5 +437,83 @@ void esp32_rtcioirqdisable(int irq)
   putreg32(regval, regaddr);
 
   up_enable_irq(ESP32_IRQ_RTC_CORE);
+}
+#endif
+
+/****************************************************************************
+ * Name: esp32_rtcioirqattach
+ *
+ * Description:
+ *   Attach an interrupt handler to a specified RTC IRQ
+ *
+ * Input Parameters:
+ *   irq     - RTC IRQ number to attach the handler to
+ *   handler - Interrupt handler function
+ *   arg     - Argument to pass to the handler
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_RTCIO_IRQ
+int esp32_rtcioirqattach(int irq, xcpt_t handler, void *arg)
+{
+  int bit;
+
+  DEBUGASSERT(irq >= ESP32_FIRST_RTCIOIRQ_PERIPH &&
+              irq <= ESP32_LAST_RTCIOIRQ_PERIPH);
+
+  /* Convert the IRQ number to the corresponding bit */
+
+  bit = irq - ESP32_FIRST_RTCIOIRQ_PERIPH;
+
+  DEBUGASSERT(bit >= 0 && bit < ESP32_NIRQ_RTCIO_PERIPH);
+
+  /* Store the handler and argument */
+
+  g_rtcio_handlers[bit].handler = handler;
+  g_rtcio_handlers[bit].arg = arg;
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: esp32_rtcioirqdetach
+ *
+ * Description:
+ *   Detach an interrupt handler from a specified RTC IRQ
+ *
+ * Input Parameters:
+ *   irq - RTC IRQ number to detach the handler from
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_RTCIO_IRQ
+int esp32_rtcioirqdetach(int irq)
+{
+  int bit;
+
+  DEBUGASSERT(irq >= ESP32_FIRST_RTCIOIRQ_PERIPH &&
+              irq <= ESP32_LAST_RTCIOIRQ_PERIPH);
+
+  /* Convert the IRQ number to the corresponding bit */
+
+  bit = irq - ESP32_FIRST_RTCIOIRQ_PERIPH;
+
+  DEBUGASSERT(bit >= 0 && bit < ESP32_NIRQ_RTCIO_PERIPH);
+
+  /* Clear the handler and argument */
+
+  g_rtcio_handlers[bit].handler = NULL;
+  g_rtcio_handlers[bit].arg = NULL;
+
+  return OK;
 }
 #endif

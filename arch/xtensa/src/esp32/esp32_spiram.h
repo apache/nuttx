@@ -28,7 +28,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "xtensa_attr.h"
+#include "esp_attr.h"
 
 /****************************************************************************
  * Pre-processor Definitions

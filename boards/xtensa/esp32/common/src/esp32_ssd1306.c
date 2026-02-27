@@ -39,7 +39,7 @@
 #  include <nuttx/video/fb.h>
 #endif
 
-#include "esp32_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "esp32_i2c.h"
 #include "hardware/esp32_gpio_sigmap.h"
 
@@ -87,14 +87,14 @@ int board_lcd_initialize(void)
    * putting the OLED into reset state.
    */
 
-  esp32_gpio_matrix_out(GPIO_SSD1306_RST, SIG_GPIO_OUT_IDX, 0, 0);
-  esp32_configgpio(GPIO_SSD1306_RST, OUTPUT_FUNCTION_3 | INPUT_FUNCTION_3);
-  esp32_gpiowrite(GPIO_SSD1306_RST, 0);
+  esp_gpio_matrix_out(GPIO_SSD1306_RST, SIG_GPIO_OUT_IDX, 0, 0);
+  esp_configgpio(GPIO_SSD1306_RST, OUTPUT_FUNCTION_3 | INPUT_FUNCTION_3);
+  esp_gpiowrite(GPIO_SSD1306_RST, 0);
 
   /* Wait a bit then release the OLED from the reset state */
 
   up_mdelay(20);
-  esp32_gpiowrite(GPIO_SSD1306_RST, 1);
+  esp_gpiowrite(GPIO_SSD1306_RST, 1);
 
   /* Initialize I2C */
 

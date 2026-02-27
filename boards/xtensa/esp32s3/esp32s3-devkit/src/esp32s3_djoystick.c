@@ -34,7 +34,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/input/djoystick.h>
 
-#include "esp32s3_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
 #include "esp32s3-devkit.h"
 
@@ -143,7 +143,7 @@ static djoy_buttonset_t djoy_sample(const struct djoy_lowerhalf_s *lower)
 
   for (i = 0; i < DJOY_NGPIOS; i++)
     {
-      bool released = esp32s3_gpioread(g_joygpio[i]);
+      bool released = esp_gpioread(g_joygpio[i]);
       if (!released)
         {
            ret |= (1 << i);
@@ -170,6 +170,7 @@ static void djoy_enable(const struct djoy_lowerhalf_s *lower,
   irqstate_t flags;
   djoy_buttonset_t either = press | release;
   djoy_buttonset_t bit;
+  uint32_t attr;
   bool rising;
   bool falling;
   int i;
@@ -199,15 +200,11 @@ static void djoy_enable(const struct djoy_lowerhalf_s *lower,
         {
           int ret;
 
-          /* Get the irq associated to each pin */
-
-          int irq = ESP32S3_PIN2IRQ(g_joygpio[i]);
-
           /* Make sure the interrupt is disabled */
 
-          esp32s3_gpioirqdisable(irq);
+          esp_gpioirqdisable(g_joygpio[i]);
 
-          ret = irq_attach(irq, djoy_interrupt, arg);
+          ret = esp_gpio_irq(g_joygpio[i], djoy_interrupt, arg);
           if (ret < 0)
             {
               leave_critical_section(flags);
@@ -220,6 +217,7 @@ static void djoy_enable(const struct djoy_lowerhalf_s *lower,
            */
 
           bit = (1 << i);
+
           if ((either & bit) != 0)
             {
               /* Active low so a press corresponds to a falling edge and
@@ -234,16 +232,20 @@ static void djoy_enable(const struct djoy_lowerhalf_s *lower,
 
               if (falling != 0 && rising != 0)
                 {
-                  esp32s3_gpioirqenable(irq, CHANGE);
+                  attr = INPUT_FUNCTION_2 | PULLUP | CHANGE;
                 }
               else if (falling != 0)
                 {
-                  esp32s3_gpioirqenable(irq, GPIO_INTR_NEGEDGE);
+                  attr = INPUT_FUNCTION_2 | PULLUP | FALLING;
                 }
               else
                 {
-                  esp32s3_gpioirqenable(irq, RISING);
+                  attr = INPUT_FUNCTION_2 | PULLUP | RISING;
                 }
+
+              esp_configgpio(g_joygpio[i], attr);
+
+              esp_gpioirqenable(g_joygpio[i]);
             }
         }
     }
@@ -269,13 +271,9 @@ static void djoy_disable(void)
   flags = enter_critical_section();
   for (i = 0; i < DJOY_NGPIOS; i++)
     {
-      /* Get the irq associated to each pin */
-
-      int irq = ESP32S3_PIN2IRQ(g_joygpio[i]);
-
       /* Disable the interrupt */
 
-      esp32s3_gpioirqdisable(irq);
+      esp_gpioirqdisable(g_joygpio[i]);
     }
 
   leave_critical_section(flags);
@@ -325,7 +323,7 @@ int esp32s3_djoy_initialize(void)
 
   for (i = 0; i < DJOY_NGPIOS; i++)
     {
-      esp32s3_configgpio(g_joygpio[i], INPUT_FUNCTION_2 | PULLUP);
+      esp_configgpio(g_joygpio[i], INPUT_FUNCTION_2 | PULLUP);
     }
 
   /* Make sure that all interrupts are disabled */

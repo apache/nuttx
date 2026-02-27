@@ -30,7 +30,7 @@
 #include <nuttx/board.h>
 
 #include "xtensa.h"
-#include "hardware/esp32s2_rtccntl.h"
+#include "soc/rtc_cntl_reg.h"
 #include "esp32s2_systemreset.h"
 
 /****************************************************************************

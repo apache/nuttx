@@ -38,16 +38,18 @@
 #include <errno.h>
 #include <nuttx/fs/fs.h>
 
+#include "esp32s2_start.h"
+
 #ifdef CONFIG_TIMER
 #  include "esp32s2_tim_lowerhalf.h"
 #endif
 
-#ifdef CONFIG_ESP32S2_RT_TIMER
-#  include "esp32s2_rt_timer.h"
-#endif
-
 #ifdef CONFIG_WATCHDOG
 #  include "esp32s2_board_wdt.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_HR_TIMER
+#  include "espressif/esp_hr_timer.h"
 #endif
 
 #include "franzininho-wifi.h"
@@ -105,6 +107,14 @@ int esp32s2_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESPRESSIF_HR_TIMER
+  ret = esp_hr_timer_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_hr_timer_init() failed: %d\n", ret);
+    }
+#endif
+
   /* Register the timer drivers */
 
 #ifdef CONFIG_TIMER
@@ -155,14 +165,6 @@ int esp32s2_bringup(void)
 
 #endif /* CONFIG_TIMER */
 
-#ifdef CONFIG_ESP32S2_RT_TIMER
-  ret = esp32s2_rt_timer_init();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize RT timer: %d\n", ret);
-    }
-
-#endif
   /* Now register one oneshot driver */
 
 #if defined(CONFIG_ONESHOT) && defined(CONFIG_ESP32S2_TIMER0)

@@ -27,7 +27,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include "esp32s3_gpio.h"
+#include "esp_gpio.h"
 #include "esp32s3_psram.h"
 #include "esp32s3_spi_timing.h"
 
@@ -358,12 +358,12 @@ static void psram_gpio_config(void)
 
   if (cs1_io == SPI_CS1_GPIO_NUM)
     {
-      esp32s3_gpio_matrix_out(cs1_io, SPICS1_OUT_IDX, 0, 0);
+      esp_gpio_matrix_out(cs1_io, SPICS1_OUT_IDX, 0, 0);
     }
   else
     {
-      esp32s3_configgpio(cs1_io, OUTPUT);
-      esp32s3_gpio_matrix_out(cs1_io, SIG_GPIO_OUT_IDX, 0, 0);
+      esp_configgpio(cs1_io, OUTPUT);
+      esp_gpio_matrix_out(cs1_io, SIG_GPIO_OUT_IDX, 0, 0);
     }
 
   g_psram_cs_io = cs1_io;

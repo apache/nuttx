@@ -49,10 +49,10 @@
 #include "hardware/esp32s3_system.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
 #include "hardware/esp32s3_usb_wrap.h"
-#include "hardware/esp32s3_rtccntl.h"
+#include "soc/rtc_cntl_reg.h"
 #include "hardware/esp32s3_pinmap.h"
-#include "esp32s3_gpio.h"
-#include "esp32s3_irq.h"
+#include "esp_gpio.h"
+#include "esp_irq.h"
 #include "esp32s3_otg.h"
 
 /****************************************************************************
@@ -5309,9 +5309,9 @@ static void esp32s3_hwinitialize(struct esp32s3_usbdev_s *priv)
 
   /* Configure USB PHY */
 
-  regval  = esp32s3_getreg(RTC_CNTL_RTC_USB_CONF_REG);
+  regval  = esp32s3_getreg(RTC_CNTL_USB_CONF_REG);
   regval |= RTC_CNTL_SW_HW_USB_PHY_SEL | RTC_CNTL_SW_USB_PHY_SEL;
-  esp32s3_putreg(regval, RTC_CNTL_RTC_USB_CONF_REG);
+  esp32s3_putreg(regval, RTC_CNTL_USB_CONF_REG);
 
   /* Set USB DM and DP pin pull-down */
 
@@ -5608,8 +5608,8 @@ void xtensa_usbinitialize(void)
 
   /* Configure OTG alternate function pins */
 
-  esp32s3_configgpio(USB_IOMUX_DM, DRIVE_3);
-  esp32s3_configgpio(USB_IOMUX_DP, DRIVE_3);
+  esp_configgpio(USB_IOMUX_DM, DRIVE_3);
+  esp_configgpio(USB_IOMUX_DP, DRIVE_3);
 
   /* USB_OTG_IDDIG_IN_IDX:     connected connector is mini-B side
    * USB_SRP_BVALID_IN_IDX:    HIGH to force USB device mode
@@ -5617,16 +5617,16 @@ void xtensa_usbinitialize(void)
    * USB_OTG_AVALID_IN_IDX:    HIGH to force USB host mode
    */
 
-  esp32s3_gpio_matrix_in(MATRIX_DETACH_IN_LOW_HIGH,
+  esp_gpio_matrix_in(MATRIX_DETACH_IN_LOW_HIGH,
                          USB_OTG_IDDIG_IN_IDX,
                          false);
-  esp32s3_gpio_matrix_in(MATRIX_DETACH_IN_LOW_HIGH,
+  esp_gpio_matrix_in(MATRIX_DETACH_IN_LOW_HIGH,
                          USB_SRP_BVALID_IN_IDX,
                          false);
-  esp32s3_gpio_matrix_in(MATRIX_DETACH_IN_LOW_HIGH,
+  esp_gpio_matrix_in(MATRIX_DETACH_IN_LOW_HIGH,
                          USB_OTG_VBUSVALID_IN_IDX,
                          false);
-  esp32s3_gpio_matrix_in(MATRIX_DETACH_IN_LOW_PIN,
+  esp_gpio_matrix_in(MATRIX_DETACH_IN_LOW_PIN,
                          USB_OTG_AVALID_IN_IDX,
                          false);
 
@@ -5643,12 +5643,12 @@ void xtensa_usbinitialize(void)
   /* Attach the OTG interrupt handler */
 
   priv->cpu = this_cpu();
-  priv->cpuint = esp32s3_setup_irq(priv->cpu, ESP32S3_PERIPH_USB,
-                                   1, ESP32S3_CPUINT_LEVEL);
+  priv->cpuint = esp_setup_irq(ESP32S3_PERIPH_USB,
+                               1,
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               esp32s3_usbinterrupt,
+                               NULL);
   DEBUGASSERT(priv->cpuint >= 0);
-
-  ret = irq_attach(ESP32S3_IRQ_USB, esp32s3_usbinterrupt, NULL);
-  DEBUGASSERT(ret == 0);
 
   /* Initialize the USB OTG core */
 
@@ -5701,7 +5701,6 @@ void xtensa_usbuninitialize(void)
   /* Disable and detach IRQs */
 
   up_disable_irq(ESP32S3_IRQ_USB);
-  irq_detach(ESP32S3_IRQ_USB);
 
   /* Disable all endpoint interrupts */
 

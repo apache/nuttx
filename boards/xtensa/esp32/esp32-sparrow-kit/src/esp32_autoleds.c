@@ -33,7 +33,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "esp32_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "esp32-sparrow-kit.h"
 
 #ifdef CONFIG_ARCH_LEDS
@@ -82,17 +82,17 @@ static inline void led_clrbits(unsigned int clrbits)
 {
   if ((clrbits & BOARD_LED1_BIT) != 0)
     {
-      esp32_gpiowrite(GPIO_LED1, false);
+      esp_gpiowrite(GPIO_LED1, false);
     }
 
   if ((clrbits & BOARD_LED2_BIT) != 0)
     {
-      esp32_gpiowrite(GPIO_LED2, false);
+      esp_gpiowrite(GPIO_LED2, false);
     }
 
   if ((clrbits & BOARD_LED3_BIT) != 0)
     {
-      esp32_gpiowrite(GPIO_LED3, false);
+      esp_gpiowrite(GPIO_LED3, false);
     }
 }
 
@@ -100,17 +100,17 @@ static inline void led_setbits(unsigned int setbits)
 {
   if ((setbits & BOARD_LED1_BIT) != 0)
     {
-      esp32_gpiowrite(GPIO_LED1, true);
+      esp_gpiowrite(GPIO_LED1, true);
     }
 
   if ((setbits & BOARD_LED2_BIT) != 0)
     {
-      esp32_gpiowrite(GPIO_LED2, true);
+      esp_gpiowrite(GPIO_LED2, true);
     }
 
   if ((setbits & BOARD_LED3_BIT) != 0)
     {
-      esp32_gpiowrite(GPIO_LED3, true);
+      esp_gpiowrite(GPIO_LED3, true);
     }
 }
 
@@ -126,9 +126,9 @@ void board_autoled_initialize(void)
 {
   /* Configure LED1-4 GPIOs for output */
 
-  esp32_configgpio(GPIO_LED1, OUTPUT);
-  esp32_configgpio(GPIO_LED2, OUTPUT);
-  esp32_configgpio(GPIO_LED3, OUTPUT);
+  esp_configgpio(GPIO_LED1, OUTPUT);
+  esp_configgpio(GPIO_LED2, OUTPUT);
+  esp_configgpio(GPIO_LED3, OUTPUT);
 }
 
 /****************************************************************************
@@ -141,13 +141,13 @@ void board_autoled_on(int led)
   switch (led)
     {
       case LED_CPU0:
-        esp32_gpiowrite(GPIO_LED1, true);
+        esp_gpiowrite(GPIO_LED1, true);
         break;
       case LED_CPU1:
-        esp32_gpiowrite(GPIO_LED2, true);
+        esp_gpiowrite(GPIO_LED2, true);
         break;
       case LED_HEAPALLOCATE:
-        esp32_gpiowrite(GPIO_LED3, true);
+        esp_gpiowrite(GPIO_LED3, true);
         break;
       default:
         break;
@@ -168,13 +168,13 @@ void board_autoled_off(int led)
   switch (led)
     {
       case LED_CPU0:
-        esp32_gpiowrite(GPIO_LED1, false);
+        esp_gpiowrite(GPIO_LED1, false);
         break;
       case LED_CPU1:
-        esp32_gpiowrite(GPIO_LED2, false);
+        esp_gpiowrite(GPIO_LED2, false);
         break;
       case LED_HEAPALLOCATE:
-        esp32_gpiowrite(GPIO_LED3, false);
+        esp_gpiowrite(GPIO_LED3, false);
         break;
       default:
         break;

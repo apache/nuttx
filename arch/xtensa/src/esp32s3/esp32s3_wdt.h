@@ -30,6 +30,10 @@
 #include <stdint.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/timers/watchdog.h>
+
+#include "esp32s3_wdt_lowerhalf.h"
+#include "esp_irq.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -75,16 +79,6 @@
  * Public Types
  ****************************************************************************/
 
-/* Instances of Watchdog Timer  */
-
-enum esp32s3_wdt_inst_e
-{
-  ESP32S3_WDT_MWDT0 = 0,  /* Main System Watchdog Timer (MWDT) of Timer Group 0 */
-  ESP32S3_WDT_MWDT1,      /* Main System Watchdog Timer (MWDT) of Timer Group 1 */
-  ESP32S3_WDT_RWDT,       /* RTC Watchdog Timer (RWDT) */
-  ESP32S3_WDT_XTWDT       /* XTAL32K Watchdog Timer (XTWDT) */
-};
-
 /* Stages of a Watchdog Timer. A WDT has 4 stages. */
 
 enum esp32s3_wdt_stage_e
@@ -113,6 +107,15 @@ enum esp32s3_wdt_stage_action_e
   ESP32S3_WDT_STAGE_ACTION_RESET_RTC = 4      /* Reset the main system and the RTC when the stage expires.
                                                * ONLY AVAILABLE FOR RWDT.
                                                */
+};
+
+/* Type of the WDT Peripheral */
+
+enum wdt_peripheral_e
+{
+  RTC,
+  TIMER,
+  XTAL32K,
 };
 
 /* ESP32-S3 WDT device */
@@ -150,7 +153,8 @@ struct esp32s3_wdt_ops_s
 
   /* WDT interrupts */
 
-  int32_t (*setisr)(struct esp32s3_wdt_dev_s *dev, xcpt_t handler,
+  int32_t (*setisr)(struct esp32s3_wdt_dev_s *dev,
+                    xcpt_t handler,
                     void *arg);
   void (*enableint)(struct esp32s3_wdt_dev_s *dev);
   void (*disableint)(struct esp32s3_wdt_dev_s *dev);

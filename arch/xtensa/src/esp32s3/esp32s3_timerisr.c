@@ -33,9 +33,10 @@
 #include <nuttx/arch.h>
 
 #include "chip.h"
-#include "esp32s3_irq.h"
+#include "esp_irq.h"
 #include "hardware/esp32s3_system.h"
 #include "hardware/esp32s3_systimer.h"
+#include "periph_ctrl.h"
 #include "xtensa.h"
 
 /****************************************************************************
@@ -101,22 +102,28 @@ void up_timer_initialize(void)
   uint32_t regval;
   int cpuint;
 
-  cpuint = esp32s3_setup_irq(0, ESP32S3_PERIPH_SYSTIMER_TARGET0, 1,
-                             ESP32S3_CPUINT_LEVEL);
+  cpuint = esp_setup_irq(ETS_SYSTIMER_TARGET0_INTR_SOURCE,
+                         ESP_IRQ_PRIORITY_1,
+                         ESP_IRQ_TRIGGER_LEVEL,
+                         systimer_isr,
+                         NULL);
   DEBUGASSERT(cpuint >= 0);
-
-  /* Attach the timer interrupt. */
-
-  irq_attach(ESP32S3_IRQ_SYSTIMER_TARGET0, systimer_isr, NULL);
 
   /* Enable the allocated CPU interrupt. */
 
-  up_enable_irq(ESP32S3_IRQ_SYSTIMER_TARGET0);
+  up_enable_irq(ESP_SOURCE2IRQ(ETS_SYSTIMER_TARGET0_INTR_SOURCE));
 
-  /* Enable timer clock */
+  /* Acquire SYSTIMER peripheral and enable clock/reset only if first user */
 
-  modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, 0, SYSTEM_SYSTIMER_CLK_EN);
-  modifyreg32(SYSTEM_PERIP_RST_EN0_REG, SYSTEM_SYSTIMER_RST, 0);
+  PERIPH_RCC_ACQUIRE_ATOMIC(PERIPH_SYSTIMER_MODULE, ref_count)
+    {
+      if (ref_count == 0)
+        {
+          modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, 0, SYSTEM_SYSTIMER_CLK_EN);
+          modifyreg32(SYSTEM_PERIP_RST_EN0_REG, SYSTEM_SYSTIMER_RST, 0);
+        }
+    }
+
   modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_CLK_EN);
 
   /* Configure alarm 0 (Comparator 0) */

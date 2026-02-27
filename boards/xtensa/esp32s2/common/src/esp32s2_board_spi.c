@@ -32,7 +32,7 @@
 
 #include <nuttx/spi/spi.h>
 
-#include "esp32s2_gpio.h"
+#include "espressif/esp_gpio.h"
 
 /****************************************************************************
  * Private Functions
@@ -76,7 +76,7 @@ int esp32s2_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
        *  data bits are data or a command.
        */
 
-      esp32s2_gpiowrite(CONFIG_ESP32S2_SPI2_MISOPIN, !cmd);
+      esp_gpiowrite(CONFIG_ESP32S2_SPI2_MISOPIN, !cmd);
 
       return OK;
     }
@@ -123,7 +123,7 @@ int esp32s2_spi3_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
        *  data bits are data or a command.
        */
 
-      esp32s2_gpiowrite(CONFIG_ESP32S2_SPI3_MISOPIN, !cmd);
+      esp_gpiowrite(CONFIG_ESP32S2_SPI3_MISOPIN, !cmd);
 
       return OK;
     }

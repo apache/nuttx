@@ -37,15 +37,15 @@
 
 #include "esp_ledc.h"
 #include "xtensa.h"
-#if defined(CONFIG_ARCH_CHIP_ESP32S3)
-#include "esp32s3_gpio.h"
-#include "hardware/esp32s3_gpio_sigmap.h"
+#if defined(CONFIG_ARCH_CHIP_ESP32)
+#  include "esp_gpio.h"
+#  include "hardware/esp32_gpio_sigmap.h"
 #elif defined(CONFIG_ARCH_CHIP_ESP32S2)
-#include "esp32s2_gpio.h"
-#include "hardware/esp32s2_gpio_sigmap.h"
-#else
-#include "esp32_gpio.h"
-#include "hardware/esp32_gpio_sigmap.h"
+#  include "espressif/esp_gpio.h"
+#  include "hardware/esp32s2_gpio_sigmap.h"
+#elif defined(CONFIG_ARCH_CHIP_ESP32S3)
+#  include "esp_gpio.h"
+#  include "hardware/esp32s3_gpio_sigmap.h"
 #endif
 
 #include "esp_private/periph_ctrl.h"
@@ -61,8 +61,6 @@
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_ESP32S3)
-#  define esp_configgpio            esp32s3_configgpio
-#  define esp_gpio_matrix_out       esp32s3_gpio_matrix_out
 #  ifdef CONFIG_ESP32S3_LEDC
 #    define CONFIG_ESPRESSIF_LEDC_CHANNEL0_PIN CONFIG_ESP32S3_LEDC_CHANNEL0_PIN
 #    define CONFIG_ESPRESSIF_LEDC_CHANNEL1_PIN CONFIG_ESP32S3_LEDC_CHANNEL1_PIN
@@ -94,8 +92,6 @@
 #    endif /* CONFIG_ESP32S3_LEDC_TIM3 */
 #  endif /* CONFIG_ESP32S3_LEDC */
 #elif defined(CONFIG_ARCH_CHIP_ESP32S2)
-#  define esp_configgpio            esp32s2_configgpio
-#  define esp_gpio_matrix_out       esp32s2_gpio_matrix_out
 #  ifdef CONFIG_ESP32S2_LEDC
 #    define CONFIG_ESPRESSIF_LEDC_CHANNEL0_PIN CONFIG_ESP32S2_LEDC_CHANNEL0_PIN
 #    define CONFIG_ESPRESSIF_LEDC_CHANNEL1_PIN CONFIG_ESP32S2_LEDC_CHANNEL1_PIN
@@ -540,7 +536,6 @@ static bool ledc_ctx_create(void)
           ledc_hal_init(&(ledc_new_mode_obj->ledc_hal), LEDC_LOW_SPEED_MODE);
           ledc_new_mode_obj->glb_clk = LEDC_SLOW_CLK_UNINIT;
           p_ledc_obj = ledc_new_mode_obj;
-          periph_module_enable(PERIPH_LEDC_MODULE);
       }
   }
 
@@ -1235,7 +1230,7 @@ static int ledc_channel_output_enable(ledc_channel_t channel)
     }
 
   ledc_hal_set_sig_out_en(&(p_ledc_obj->ledc_hal), channel, true);
-  ledc_hal_set_duty_start(&(p_ledc_obj->ledc_hal), channel, true);
+  ledc_hal_set_duty_start(&(p_ledc_obj->ledc_hal), channel);
 
   return OK;
 }
@@ -1270,7 +1265,7 @@ static int ledc_channel_output_disable(ledc_channel_t channel)
 
   ledc_hal_set_idle_level(&(p_ledc_obj->ledc_hal), channel, 0);
   ledc_hal_set_sig_out_en(&(p_ledc_obj->ledc_hal), channel, false);
-  ledc_hal_set_duty_start(&(p_ledc_obj->ledc_hal), channel, false);
+  ledc_hal_set_duty_start(&(p_ledc_obj->ledc_hal), channel);
 
   leave_critical_section(flags);
   return OK;
@@ -1532,10 +1527,19 @@ static int pwm_shutdown(struct pwm_lowerhalf_s *dev)
 
   if (p_ledc_obj != NULL)
     {
-      periph_module_disable(PERIPH_LEDC_MODULE);
       kmm_free(p_ledc_obj);
       p_ledc_obj = NULL;
       s_ledc_slow_clk_rc_fast_freq = 0;
+      LEDC_BUS_CLOCK_ATOMIC()
+        {
+          ledc_ll_enable_bus_clock(false);
+          ledc_ll_enable_reset_reg(true);
+        }
+
+      LEDC_FUNC_CLOCK_ATOMIC()
+        {
+          ledc_ll_enable_clock(LEDC_LL_GET_HW(), false);
+        }
     }
   else
     {

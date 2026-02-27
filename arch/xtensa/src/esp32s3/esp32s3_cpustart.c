@@ -33,14 +33,21 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/sched_note.h>
+#include <arch/chip/irq.h>
 
 #include "sched/sched.h"
 #include "xtensa.h"
-#include "esp32s3_irq.h"
+#include "esp_irq.h"
 #include "esp32s3_region.h"
 #include "esp32s3_smp.h"
-#include "hardware/esp32s3_rtccntl.h"
+#include "esp32s3_start.h"
+#include "soc/rtc_cntl_reg.h"
 #include "hardware/esp32s3_system.h"
+
+#include "esp_attr.h"
+#include "esp_cpu.h"
+#include "rom/ets_sys.h"
+#include "soc/interrupt_core1_reg.h"
 
 /****************************************************************************
  * Private Data
@@ -60,22 +67,24 @@ extern void ets_set_appcpu_boot_addr(uint32_t start);
 
 /****************************************************************************
  * Name: xtensa_attach_fromcpu0_interrupt
+ *
+ * Description:
+ *   Attach the inter-CPU interrupt for CPU1 WITHOUT using malloc.
+ *   This is called during early CPU1 boot when malloc is not available.
+ *   We use direct register programming instead of esp_intr_alloc.
+ *
  ****************************************************************************/
 
-static inline void xtensa_attach_fromcpu0_interrupt(void)
+static inline void IRAM_ATTR xtensa_attach_fromcpu0_interrupt(void)
 {
   int cpuint;
 
   /* Connect all CPU peripheral source to allocated CPU interrupt */
 
-  cpuint = esp32s3_setup_irq(1, ESP32S3_PERIPH_INT_FROM_CPU0, 1,
-                             ESP32S3_CPUINT_LEVEL);
+  cpuint = esp_setup_irq(ESP32S3_PERIPH_INT_FROM_CPU0, 1,
+                         ESP_IRQ_TRIGGER_LEVEL, esp32s3_fromcpu0_interrupt,
+                         NULL);
   DEBUGASSERT(cpuint >= 0);
-
-  /* Attach the inter-CPU interrupt. */
-
-  irq_attach(ESP32S3_IRQ_INT_FROM_CPU0, (xcpt_t)esp32s3_fromcpu0_interrupt,
-             NULL);
 
   /* Enable the inter 0 CPU interrupts. */
 
@@ -102,7 +111,7 @@ static inline void xtensa_attach_fromcpu0_interrupt(void)
  *
  ****************************************************************************/
 
-void xtensa_appcpu_start(void)
+void IRAM_ATTR xtensa_appcpu_start(void)
 {
   struct tcb_s *tcb = this_task();
   register uint32_t sp;
@@ -125,10 +134,6 @@ void xtensa_appcpu_start(void)
   sched_note_cpu_started(tcb);
 #endif
 
-  /* Signal to the PRO CPU that the APP CPU has started. */
-
-  g_appcpu_started = true;
-
   /* Move CPU0 exception vectors to IRAM */
 
   __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (_init_start));
@@ -139,15 +144,13 @@ void xtensa_appcpu_start(void)
 
   /* Initialize CPU interrupts */
 
-  esp32s3_cpuint_initialize();
+  esp_cpuint_initialize();
 
   /* Attach and enable the inter-CPU interrupt */
 
   xtensa_attach_fromcpu0_interrupt();
 
-  /* Enable the software interrupt */
-
-  up_enable_irq(XTENSA_IRQ_SWINT);
+  /* NOTE: Intentionally not enabling the software interrupt here */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And Enable interrupts */
@@ -158,6 +161,12 @@ void xtensa_appcpu_start(void)
 #if XCHAL_CP_NUM > 0
   xtensa_set_cpenable(CONFIG_XTENSA_CP_INITSET);
 #endif
+
+  sys_startup_fn();
+
+  /* Signal to the PRO CPU that the APP CPU has started. */
+
+  g_appcpu_started = true;
 
   /* Then switch contexts. This instantiates the exception context of the
    * tcb at the head of the assigned task list.  In this case, this should
@@ -218,13 +227,13 @@ int up_cpu_start(int cpu)
   regval = getreg32(SYSTEM_CORE_1_CONTROL_0_REG);
   if ((regval & SYSTEM_CONTROL_CORE_1_CLKGATE_EN) == 0)
     {
-      regval  = getreg32(RTC_CNTL_RTC_SW_CPU_STALL_REG);
+      regval  = getreg32(RTC_CNTL_SW_CPU_STALL_REG);
       regval &= ~RTC_CNTL_SW_STALL_APPCPU_C1_M;
-      putreg32(regval, RTC_CNTL_RTC_SW_CPU_STALL_REG);
+      putreg32(regval, RTC_CNTL_SW_CPU_STALL_REG);
 
-      regval  = getreg32(RTC_CNTL_RTC_OPTIONS0_REG);
+      regval  = getreg32(RTC_CNTL_OPTIONS0_REG);
       regval &= ~RTC_CNTL_SW_STALL_APPCPU_C0_M;
-      putreg32(regval, RTC_CNTL_RTC_OPTIONS0_REG);
+      putreg32(regval, RTC_CNTL_OPTIONS0_REG);
 
       /* Enable clock gating for the APP CPU */
 
@@ -259,4 +268,3 @@ int up_cpu_start(int cpu)
 
   return OK;
 }
-

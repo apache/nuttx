@@ -61,8 +61,9 @@
 #include <arch/board/board.h>
 
 #include "xtensa.h"
-#include "xtensa_attr.h"
 #include "xtensa_counter.h"
+#include "esp_irq.h"
+#include "esp_attr.h"
 
 #ifdef CONFIG_SCHED_TICKLESS
 
@@ -494,11 +495,16 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt */
 
-  irq_attach(XTENSA_IRQ_TIMER0, (xcpt_t)up_timer_expire, NULL);
+  esp_setup_irq(ETS_INTERNAL_TIMER0_INTR_SOURCE,
+                ESP_IRQ_PRIORITY_1,
+                0,
+                up_timer_expire,
+                NULL);
 
   /* Enable the timer 0 CPU interrupt. */
 
-  up_enable_irq(XTENSA_IRQ_TIMER0);
+  up_enable_irq(ETS_INTERNAL_TIMER0_INTR_SOURCE +
+                ETS_INTERNAL_INTR_SOURCE_OFF);
 }
 
 /****************************************************************************

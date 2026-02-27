@@ -36,7 +36,7 @@
 #include <nuttx/video/fb.h>
 #include <nuttx/signal.h>
 
-#include "esp32s3_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "esp32s3-8048S043.h"
 
 /****************************************************************************
@@ -81,8 +81,8 @@ int board_lcd_initialize(void)
 {
   int ret;
 
-  esp32s3_configgpio(ESP32S3_DISPLAY_BCKL, OUTPUT);
-  esp32s3_gpiowrite(ESP32S3_DISPLAY_BCKL, true);
+  esp_configgpio(ESP32S3_DISPLAY_BCKL, OUTPUT);
+  esp_gpiowrite(ESP32S3_DISPLAY_BCKL, true);
 
 #ifdef CONFIG_VIDEO_FB
   /* Initialize and register the framebuffer driver */

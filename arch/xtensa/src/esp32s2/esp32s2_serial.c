@@ -43,9 +43,9 @@
 
 #include "xtensa.h"
 #include "esp32s2_config.h"
-#include "esp32s2_irq.h"
+#include "espressif/esp_irq.h"
 #include "esp32s2_lowputc.h"
-#include "esp32s2_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "hardware/esp32s2_uart.h"
 #include "hardware/esp32s2_system.h"
 
@@ -244,7 +244,7 @@ static int uart_handler(int irq, void *context, void *arg)
     {
       if (dev->xmit.tail == dev->xmit.head)
         {
-          esp32s2_gpiowrite(priv->rs485_dir_gpio,
+          esp_gpiowrite(priv->rs485_dir_gpio,
                             !priv->rs485_dir_polarity);
         }
     }
@@ -464,14 +464,13 @@ static void esp32s2_shutdown(struct uart_dev_s *dev)
 static int esp32s2_attach(struct uart_dev_s *dev)
 {
   struct esp32s2_uart_s *priv = dev->priv;
-  int ret;
 
   DEBUGASSERT(priv->cpuint == -ENOMEM);
 
-  /* Set up to receive peripheral interrupts */
+  /* Set up to receive peripheral interrupts on the current CPU */
 
-  priv->cpuint = esp32s2_setup_irq(priv->periph, priv->int_pri,
-                                   ESP32S2_CPUINT_LEVEL);
+  priv->cpuint = esp_setup_irq(priv->periph, priv->int_pri,
+                               ESP_IRQ_TRIGGER_LEVEL, uart_handler, dev);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type */
@@ -479,19 +478,13 @@ static int esp32s2_attach(struct uart_dev_s *dev)
       return priv->cpuint;
     }
 
-  /* Attach and enable the IRQ */
+  /* Enable the CPU interrupt (RX and TX interrupts are still disabled
+   * in the UART)
+   */
 
-  ret = irq_attach(priv->irq, uart_handler, dev);
-  if (ret == OK)
-    {
-      /* Enable the CPU interrupt (RX and TX interrupts are still disabled
-       * in the UART
-       */
+  up_enable_irq(priv->irq);
 
-      up_enable_irq(priv->irq);
-    }
-
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -513,14 +506,15 @@ static void esp32s2_detach(struct uart_dev_s *dev)
 
   DEBUGASSERT(priv->cpuint != -ENOMEM);
 
-  /* Disable and detach the CPU interrupt */
+  /* Disable the CPU interrupt */
 
   up_disable_irq(priv->irq);
-  irq_detach(priv->irq);
 
-  /* Disassociate the peripheral interrupt from the CPU interrupt */
+  /* Disassociate the peripheral interrupt from the CPU interrupt.
+   * This also clears the handler from the HAL's interrupt table.
+   */
 
-  esp32s2_teardown_irq(priv->periph, priv->cpuint);
+  esp_teardown_irq(priv->periph, priv->cpuint);
   priv->cpuint = -ENOMEM;
 }
 
@@ -705,7 +699,7 @@ static void esp32s2_send(struct uart_dev_s *dev, int ch)
 #ifdef HAVE_RS485
   if (priv->rs485_dir_gpio != 0)
     {
-      esp32s2_gpiowrite(priv->rs485_dir_gpio, priv->rs485_dir_polarity);
+      esp_gpiowrite(priv->rs485_dir_gpio, priv->rs485_dir_polarity);
     }
 #endif
 

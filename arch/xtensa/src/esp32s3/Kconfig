@@ -444,7 +444,7 @@ config ESP32S3_I2S0
 	bool "I2S 0"
 	default n
 	select ESP32S3_DMA
-	select ESP32S3_GPIO_IRQ
+	select ESPRESSIF_GPIO_IRQ
 	select SCHED_HPWORK
 	select ESPRESSIF_I2S0
 
@@ -555,7 +555,7 @@ config ESP32S3_I2S1
 	bool "I2S 1"
 	default n
 	select ESP32S3_DMA
-	select ESP32S3_GPIO_IRQ
+	select ESPRESSIF_GPIO_IRQ
 	select SCHED_HPWORK
 	select ESPRESSIF_I2S1
 
@@ -700,7 +700,7 @@ config ESP32S3_SPI2
 	default n
 	select ESP32S3_SPI
 	select SPI
-	select ESP32S3_GPIO_IRQ if SPI_SLAVE
+	select ESPRESSIF_GPIO_IRQ if SPI_SLAVE
 	select ESPRESSIF_SPI_PERIPH
 
 config ESP32S3_SPI3
@@ -708,7 +708,7 @@ config ESP32S3_SPI3
 	default n
 	select ESP32S3_SPI
 	select SPI
-	select ESP32S3_GPIO_IRQ if SPI_SLAVE
+	select ESPRESSIF_GPIO_IRQ if SPI_SLAVE
 	select ESPRESSIF_SPI_PERIPH
 
 config ESP32S3_DMA
@@ -913,8 +913,12 @@ config ESP32S3_XTWDT_BACKUP_CLK_ENABLE
 config ESP32S3_RT_TIMER
 	bool "Real-Time Timer"
 	default n
+	select ESPRESSIF_HR_TIMER
 	---help---
-		Real-Time Timer is relying upon the Systimer 1.
+		Deprecated: Use ESPRESSIF_HR_TIMER instead.
+		This option is kept for backward compatibility and automatically
+		selects the common ESPRESSIF_HR_TIMER configuration.
+
 
 config ESP32S3_WCL
 	bool "World Controller"
@@ -954,11 +958,15 @@ menu "Interrupt Configuration"
 config ESP32S3_IRAM_ISR_DEBUG
 	bool "Enable debugging of the IRAM-enabled interrupts"
 	default n
+	select ESPRESSIF_IRAM_ISR_DEBUG
 	---help---
 		This option enables keeping track of the IRAM-enabled interrupts by
 		registering its execution when non-IRAM interrupts are disabled. It
 		keeps track of the IRQ executed and register how many times since
 		boot it was executed.
+
+		This option is kept for backwards compatibility and automatically
+		selects CONFIG_ESPRESSIF_IRAM_ISR_DEBUG.
 
 endmenu # Interrupt Configuration
 
@@ -1173,9 +1181,11 @@ endmenu # Memory Configuration
 
 config ESP32S3_GPIO_IRQ
 	bool "GPIO pin interrupts"
+	select ESPRESSIF_GPIO_IRQ
 	default n
 	---help---
-		Enable support for interrupting GPIO pins.
+		This is a deprecated Kconfig macro. Its kept for retrocompatibility only.
+		Use "CONFIG_ESPRESSIF_GPIO_IRQ" instead.
 
 config ESP32S3_RTCIO_IRQ
 	bool "RTC IO interrupts"
@@ -1241,6 +1251,8 @@ config ESP32S3_SPI_SLAVE_BUFSIZE
 	default 2048
 	depends on SPI_SLAVE
 
+if ESP32S3_SPI2
+
 config ESP32S3_SPI2_CSPIN
 	int "SPI2 CS Pin"
 	default 10
@@ -1273,6 +1285,10 @@ config ESP32S3_SPI2_IO3PIN
 	range 0 48
 	depends on ESP32S3_SPI_IO_QIO
 
+endif # ESP32S3_SPI2
+
+if ESP32S3_SPI3
+
 config ESP32S3_SPI3_CSPIN
 	int "SPI3 CS Pin"
 	default 10
@@ -1304,6 +1320,8 @@ config ESP32S3_SPI3_IO3PIN
 	default 4
 	range 0 48
 	depends on ESP32S3_SPI_IO_QIO
+
+endif # ESP32S3_SPI3
 
 endmenu # SPI configuration
 
@@ -1806,27 +1824,6 @@ config ESP32S3_SYSTEM_BBPLL_RECALIB
 		Disable this when your bootloader is built with ESP-IDF version v5.2 and above.
 
 endmenu # "RTC Configuration"
-
-
-menu "Real-Time Timer Configuration"
-	depends on ESP32S3_RT_TIMER
-
-config ESP32S3_RT_TIMER_TASK_NAME
-	string "Real-Time Timer task name"
-	default "rt_timer"
-
-config ESP32S3_RT_TIMER_TASK_PRIORITY
-	int "Real-Time Timer task priority"
-	default 223
-	---help---
-		Priority level of the RT Timer task.
-		Must be lower than the SCHED_HPWORKPRIORITY.
-
-config ESP32S3_RT_TIMER_TASK_STACK_SIZE
-	int "Real-Time Timer task stack size"
-	default 2048
-
-endmenu # Real-Time Timer Configuration
 
 config ESP32S3_TICKLESS
 	bool "Enable Tickless OS"

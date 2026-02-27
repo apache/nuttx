@@ -49,8 +49,8 @@
 #include <arch/board/board.h>
 
 #include "esp32_spi.h"
-#include "esp32_gpio.h"
-#include "esp32_irq.h"
+#include "esp_gpio.h"
+#include "esp_irq.h"
 #include "esp32_dma.h"
 
 #include "xtensa.h"
@@ -874,7 +874,7 @@ static int esp32_spislv_interrupt(int irq, void *context, void *arg)
     }
 #endif
 
-  if (priv->process == true && esp32_gpioread(priv->config->cs_pin))
+  if (priv->process == true && esp_gpioread(priv->config->cs_pin))
     {
       priv->process = false;
       SPIS_DEV_SELECT(priv->dev, false);
@@ -905,61 +905,61 @@ static void esp32_spislv_initialize(struct spi_slave_ctrlr_s *ctrlr)
   const struct esp32_spislv_config_s *config = priv->config;
   uint32_t regval;
 
-  esp32_gpiowrite(config->cs_pin, 1);
-  esp32_gpiowrite(config->clk_pin, 1);
+  esp_gpiowrite(config->cs_pin, 1);
+  esp_gpiowrite(config->clk_pin, 1);
 
   if (config->flags & ESP32_SPI_IO_R)
     {
-      esp32_gpiowrite(config->mosi_pin, 1);
+      esp_gpiowrite(config->mosi_pin, 1);
     }
 
 #ifdef ESP32_SPI_SLAVE_HAS_TX
   if (config->flags & ESP32_SPI_IO_W)
     {
-      esp32_gpiowrite(config->miso_pin, 1);
+      esp_gpiowrite(config->miso_pin, 1);
     }
 #endif
 
   if (esp32_spi_iomux(priv))
     {
-      esp32_configgpio(config->cs_pin, INPUT_FUNCTION_2 | PULLUP);
-      esp32_configgpio(config->clk_pin, INPUT_FUNCTION_2 | PULLUP);
+      esp_configgpio(config->cs_pin, INPUT_FUNCTION_2 | PULLUP);
+      esp_configgpio(config->clk_pin, INPUT_FUNCTION_2 | PULLUP);
 
 #ifdef ESP32_SPI_SLAVE_HAS_TX
       if (config->flags & ESP32_SPI_IO_W)
         {
-          esp32_configgpio(config->miso_pin, OUTPUT_FUNCTION_2);
+          esp_configgpio(config->miso_pin, OUTPUT_FUNCTION_2);
         }
 #endif
 
       if (config->flags & ESP32_SPI_IO_R)
         {
-          esp32_configgpio(config->mosi_pin, INPUT_FUNCTION_2 | PULLUP);
+          esp_configgpio(config->mosi_pin, INPUT_FUNCTION_2 | PULLUP);
         }
     }
   else
     {
-      esp32_configgpio(config->cs_pin, INPUT_FUNCTION_3 | PULLUP);
-      esp32_gpio_matrix_out(config->cs_pin, config->cs_outsig, 0, 0);
-      esp32_gpio_matrix_in(config->cs_pin, config->cs_insig, 0);
+      esp_configgpio(config->cs_pin, INPUT_FUNCTION_3 | PULLUP);
+      esp_gpio_matrix_out(config->cs_pin, config->cs_outsig, 0, 0);
+      esp_gpio_matrix_in(config->cs_pin, config->cs_insig, 0);
 
-      esp32_configgpio(config->clk_pin, INPUT_FUNCTION_3 | PULLUP);
-      esp32_gpio_matrix_out(config->clk_pin, config->clk_outsig, 0, 0);
-      esp32_gpio_matrix_in(config->clk_pin, config->clk_insig, 0);
+      esp_configgpio(config->clk_pin, INPUT_FUNCTION_3 | PULLUP);
+      esp_gpio_matrix_out(config->clk_pin, config->clk_outsig, 0, 0);
+      esp_gpio_matrix_in(config->clk_pin, config->clk_insig, 0);
 
       if (config->flags & ESP32_SPI_IO_R)
         {
-          esp32_configgpio(config->mosi_pin, INPUT_FUNCTION_3 | PULLUP);
-          esp32_gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
-          esp32_gpio_matrix_in(config->mosi_pin, config->mosi_insig, 0);
+          esp_configgpio(config->mosi_pin, INPUT_FUNCTION_3 | PULLUP);
+          esp_gpio_matrix_out(config->mosi_pin, config->mosi_outsig, 0, 0);
+          esp_gpio_matrix_in(config->mosi_pin, config->mosi_insig, 0);
         }
 
 #ifdef ESP32_SPI_SLAVE_HAS_TX
       if (config->flags & ESP32_SPI_IO_W)
         {
-          esp32_configgpio(config->miso_pin, OUTPUT_FUNCTION_3);
-          esp32_gpio_matrix_out(config->miso_pin, config->miso_outsig, 0, 0);
-          esp32_gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
+          esp_configgpio(config->miso_pin, OUTPUT_FUNCTION_3);
+          esp_gpio_matrix_out(config->miso_pin, config->miso_outsig, 0, 0);
+          esp_gpio_matrix_in(config->miso_pin, config->miso_insig, 0);
         }
 #endif
     }
@@ -1027,7 +1027,7 @@ static void esp32_spislv_initialize(struct spi_slave_ctrlr_s *ctrlr)
   esp32_spi_set_regbits(priv, SPI_SLAVE_OFFSET, SPI_SYNC_RESET_M);
   esp32_spi_reset_regbits(priv, SPI_SLAVE_OFFSET, SPI_SYNC_RESET_M);
 
-  esp32_gpioirqenable(ESP32_PIN2IRQ(config->cs_pin), RISING);
+  esp_gpioirqenable(ESP32_PIN2IRQ(config->cs_pin), RISING);
 
   esp32_spi_reset_regbits(priv, SPI_SLAVE_OFFSET, SPI_TRANS_DONE_M);
 }
@@ -1050,7 +1050,7 @@ static void esp32_spislv_deinit(struct spi_slave_ctrlr_s *ctrlr)
 {
   struct esp32_spislv_priv_s *priv = (struct esp32_spislv_priv_s *)ctrlr;
 
-  esp32_gpioirqdisable(ESP32_PIN2IRQ(priv->config->cs_pin));
+  esp_gpioirqdisable(ESP32_PIN2IRQ(priv->config->cs_pin));
   esp32_spi_reset_regbits(priv, SPI_SLAVE_OFFSET, SPI_INT_EN_M);
 
   if (priv->dma_chan)
@@ -1163,7 +1163,7 @@ static void esp32_spislv_unbind(struct spi_slave_ctrlr_s *ctrlr)
 
   up_disable_irq(priv->config->irq);
 
-  esp32_gpioirqdisable(ESP32_PIN2IRQ(priv->config->cs_pin));
+  esp_gpioirqdisable(ESP32_PIN2IRQ(priv->config->cs_pin));
   esp32_spi_reset_regbits(priv, SPI_SLAVE_OFFSET, SPI_INT_EN_M);
   if (priv->dma_chan)
     {
@@ -1400,25 +1400,26 @@ struct spi_slave_ctrlr_s *esp32_spislv_ctrlr_initialize(int port)
       priv->dma_chan = 0;
     }
 
-  DEBUGVERIFY(irq_attach(ESP32_PIN2IRQ(priv->config->cs_pin),
-                         esp32_io_interrupt,
-                         priv));
+  /* Attach IRQ for CS pin interrupt */
+
+  ret = esp_gpio_irq(priv->config->cs_pin,
+                     esp32_io_interrupt,
+                     priv);
+  if (ret < 0)
+    {
+      spierr("esp_gpio_irq() failed: %d\n", ret);
+      spin_unlock_irqrestore(&priv->lock, flags);
+      return NULL;
+    }
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
   priv->cpu = this_cpu();
-  priv->cpuint = esp32_setup_irq(priv->cpu, priv->config->periph,
-                                 1, ESP32_CPUINT_LEVEL);
-
-  ret = irq_attach(priv->config->irq, esp32_spislv_interrupt, priv);
-  if (ret != OK)
-    {
-      esp32_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
-
-      spin_unlock_irqrestore(&priv->lock, flags);
-
-      return NULL;
-    }
+  priv->cpuint = esp_setup_irq(priv->config->periph,
+                                 1,
+                                 ESP_IRQ_TRIGGER_LEVEL,
+                                 esp32_spislv_interrupt,
+                                 priv);
 
   priv->refs++;
 
@@ -1462,7 +1463,7 @@ int esp32_spislv_ctrlr_uninitialize(struct spi_slave_ctrlr_s *ctrlr)
     }
 
   up_disable_irq(priv->config->irq);
-  esp32_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
+  esp_teardown_irq(priv->config->periph, priv->cpuint);
   esp32_spislv_deinit(ctrlr);
 
   spin_unlock_irqrestore(&priv->lock, flags);

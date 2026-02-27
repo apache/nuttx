@@ -47,8 +47,8 @@
 
 #include "periph_ctrl.h"
 
-#include "esp32s3_clockconfig.h"
-#include "esp32s3_gpio.h"
+#include "esp_clk.h"
+#include "esp_gpio.h"
 
 #include "esp32s3_lowputc.h"
 
@@ -706,7 +706,10 @@ void esp32s3_lowputc_send_byte(const struct esp32s3_uart_s *priv,
 
 void esp32s3_lowputc_enable_sysclk(const struct esp32s3_uart_s *priv)
 {
-  periph_module_enable(PERIPH_UART0_MODULE + priv->id);
+  if (priv->id > 0)
+    {
+      periph_module_enable(PERIPH_UART1_MODULE + (priv->id - 1));
+    }
 }
 
 /****************************************************************************
@@ -880,55 +883,55 @@ void esp32s3_lowputc_config_pins(const struct esp32s3_uart_s *priv)
    * This "?" is the Unicode replacement character (U+FFFD)
    */
 
-  esp32s3_gpiowrite(priv->txpin, true);
+  esp_gpiowrite(priv->txpin, true);
 
   if (uart_is_iomux(priv))
     {
-      esp32s3_gpio_matrix_out(priv->txpin, SIG_GPIO_OUT_IDX, 0, 0);
-      esp32s3_configgpio(priv->txpin, priv->id == 1 ? OUTPUT_FUNCTION_3 :
+      esp_gpio_matrix_out(priv->txpin, SIG_GPIO_OUT_IDX, 0, 0);
+      esp_configgpio(priv->txpin, priv->id == 1 ? OUTPUT_FUNCTION_3 :
                                                       OUTPUT_FUNCTION_1);
 
-      esp32s3_configgpio(priv->rxpin, priv->id == 1 ? INPUT_FUNCTION_3 :
+      esp_configgpio(priv->rxpin, priv->id == 1 ? INPUT_FUNCTION_3 :
                                                       INPUT_FUNCTION_1);
-      esp32s3_gpio_matrix_out(priv->rxpin, SIG_GPIO_OUT_IDX, 0, 0);
+      esp_gpio_matrix_out(priv->rxpin, SIG_GPIO_OUT_IDX, 0, 0);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
       if (priv->iflow)
         {
-          esp32s3_configgpio(priv->rtspin, OUTPUT_FUNCTION_3);
-          esp32s3_gpio_matrix_out(priv->rtspin, SIG_GPIO_OUT_IDX, 0, 0);
+          esp_configgpio(priv->rtspin, OUTPUT_FUNCTION_3);
+          esp_gpio_matrix_out(priv->rtspin, SIG_GPIO_OUT_IDX, 0, 0);
         }
 
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
       if (priv->oflow)
         {
-          esp32s3_configgpio(priv->ctspin, INPUT_FUNCTION_3);
-          esp32s3_gpio_matrix_out(priv->ctspin, SIG_GPIO_OUT_IDX, 0, 0);
+          esp_configgpio(priv->ctspin, INPUT_FUNCTION_3);
+          esp_gpio_matrix_out(priv->ctspin, SIG_GPIO_OUT_IDX, 0, 0);
         }
 #endif
     }
   else
     {
-      esp32s3_gpio_matrix_out(priv->txpin, priv->txsig, 0, 0);
-      esp32s3_configgpio(priv->txpin, OUTPUT_FUNCTION_2);
+      esp_gpio_matrix_out(priv->txpin, priv->txsig, 0, 0);
+      esp_configgpio(priv->txpin, OUTPUT_FUNCTION_2);
 
-      esp32s3_configgpio(priv->rxpin, INPUT_FUNCTION_2);
-      esp32s3_gpio_matrix_in(priv->rxpin, priv->rxsig, 0);
+      esp_configgpio(priv->rxpin, INPUT_FUNCTION_2);
+      esp_gpio_matrix_in(priv->rxpin, priv->rxsig, 0);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
       if (priv->iflow)
         {
-          esp32s3_configgpio(priv->rtspin, OUTPUT_FUNCTION_2);
-          esp32s3_gpio_matrix_out(priv->rtspin, priv->rtssig, 0, 0);
+          esp_configgpio(priv->rtspin, OUTPUT_FUNCTION_2);
+          esp_gpio_matrix_out(priv->rtspin, priv->rtssig, 0, 0);
         }
 
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
       if (priv->oflow)
         {
-          esp32s3_configgpio(priv->ctspin, INPUT_FUNCTION_2);
-          esp32s3_gpio_matrix_in(priv->ctspin, priv->ctssig, 0);
+          esp_configgpio(priv->ctspin, INPUT_FUNCTION_2);
+          esp_gpio_matrix_in(priv->ctspin, priv->ctssig, 0);
         }
 #endif
     }
@@ -936,9 +939,9 @@ void esp32s3_lowputc_config_pins(const struct esp32s3_uart_s *priv)
 #ifdef HAVE_RS485
   if (priv->rs485_dir_gpio != 0)
     {
-      esp32s3_configgpio(priv->rs485_dir_gpio, OUTPUT);
-      esp32s3_gpio_matrix_out(priv->rs485_dir_gpio, SIG_GPIO_OUT_IDX, 0, 0);
-      esp32s3_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
+      esp_configgpio(priv->rs485_dir_gpio, OUTPUT);
+      esp_gpio_matrix_out(priv->rs485_dir_gpio, SIG_GPIO_OUT_IDX, 0, 0);
+      esp_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
     }
 #endif
 }
@@ -959,11 +962,11 @@ void esp32s3_lowputc_restore_pins(const struct esp32s3_uart_s *priv)
 {
   /* Configure the pins */
 
-  esp32s3_configgpio(priv->txpin, INPUT);
-  esp32s3_gpio_matrix_out(priv->txpin, MATRIX_DETACH_OUT_SIG, false, false);
+  esp_configgpio(priv->txpin, INPUT);
+  esp_gpio_matrix_out(priv->txpin, MATRIX_DETACH_OUT_SIG, false, false);
 
-  esp32s3_configgpio(priv->rxpin, INPUT);
-  esp32s3_gpio_matrix_in(priv->rxpin, MATRIX_DETACH_IN_LOW_PIN, false);
+  esp_configgpio(priv->rxpin, INPUT);
+  esp_gpio_matrix_in(priv->rxpin, MATRIX_DETACH_IN_LOW_PIN, false);
 }
 
 /****************************************************************************

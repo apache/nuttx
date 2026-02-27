@@ -1,3 +1,73 @@
+menu "Espressif Log Level"
+	visible if DEBUG_FEATURES
+
+config ESPRESSIF_LOG_LEVEL_NONE
+	bool "NONE"
+	depends on !DEBUG_FEATURES && !DEBUG_ERROR && !DEBUG_WARN && !DEBUG_INFO
+	default y
+	---help---
+		No log output from Espressif log messages.
+
+config ESPRESSIF_LOG_LEVEL_ERROR
+	bool "ERROR"
+	depends on DEBUG_ERROR
+	default y
+	---help---
+		Display critical errors from Espressif log messages.
+
+config ESPRESSIF_LOG_LEVEL_WARN
+	bool "WARN"
+	depends on DEBUG_WARN
+	default y
+	---help---
+		Display warning messages from Espressif log messages.
+
+config ESPRESSIF_LOG_LEVEL_INFO
+	bool "INFO"
+	depends on DEBUG_INFO
+	default y
+	---help---
+		Display information messages from Espressif log messages.
+
+config ESPRESSIF_LOG_LEVEL_DEBUG
+	bool "DEBUG"
+	depends on DEBUG_INFO
+	default n
+	---help---
+		Display extra information from Espressif log messages.
+
+config ESPRESSIF_LOG_LEVEL_VERBOSE
+	bool "VERBOSE"
+	depends on DEBUG_INFO
+	default n
+	---help---
+		Display bigger chunks of debugging information, or frequent messages
+		which can potentially flood the output from Espressif log messages.
+
+config ESPRESSIF_LOG_LEVEL
+	int
+	default 5 if ESPRESSIF_LOG_LEVEL_VERBOSE
+	default 4 if ESPRESSIF_LOG_LEVEL_DEBUG
+	default 3 if ESPRESSIF_LOG_LEVEL_INFO
+	default 2 if ESPRESSIF_LOG_LEVEL_WARN
+	default 1 if ESPRESSIF_LOG_LEVEL_ERROR
+	default 0 if ESPRESSIF_LOG_LEVEL_NONE
+
+endmenu # Espressif Log Level
+
+menu "Interrupt Configuration"
+
+config ESPRESSIF_IRAM_ISR_DEBUG
+	bool "Enable debugging of the IRAM-enabled interrupts"
+	default n
+	---help---
+		This option enables keeping track of the IRAM-enabled interrupts by
+		registering its execution when non-IRAM interrupts are disabled. It
+		keeps track of the IRQ executed and register how many times since
+		boot it was executed.
+
+endmenu # Interrupt Configuration
+
 config ESP_RMT
 	bool "Remote Control Module (RMT)"
 	default n
@@ -132,9 +202,9 @@ config ESPRESSIF_I2S0
 	select ESPRESSIF_I2S
 	select I2S
 	select ESP32S3_DMA if ARCH_CHIP_ESP32S3
-	select ESP32S3_GPIO_IRQ if ARCH_CHIP_ESP32S3
-	select ESP32S2_GPIO_IRQ if ARCH_CHIP_ESP32S2
-	select ESP32_GPIO_IRQ if ARCH_CHIP_ESP32
+	select ESPRESSIF_GPIO_IRQ if ARCH_CHIP_ESP32S3
+	select ESPRESSIF_GPIO_IRQ if ARCH_CHIP_ESP32S2
+	select ESPRESSIF_GPIO_IRQ if ARCH_CHIP_ESP32
 	select SCHED_HPWORK
 	select ARCH_DMA
 
@@ -145,8 +215,8 @@ config ESPRESSIF_I2S1
 	select ESPRESSIF_I2S
 	select I2S
 	select ESP32S3_DMA if ARCH_CHIP_ESP32S3
-	select ESP32S3_GPIO_IRQ if ARCH_CHIP_ESP32S3
-	select ESP32_GPIO_IRQ if ARCH_CHIP_ESP32
+	select ESPRESSIF_GPIO_IRQ if ARCH_CHIP_ESP32S3
+	select ESPRESSIF_GPIO_IRQ if ARCH_CHIP_ESP32
 	select SCHED_HPWORK
 	select ARCH_DMA
 
@@ -218,6 +288,12 @@ config ESPRESSIF_DEDICATED_GPIO
 		applications like simulate serial/parallel interfaces in a bit-banging way.
 		It can work as pin grouping and you can use any pin up to 8 pins for
 		input and 8 pins for output for dedicated gpio in total.
+
+config ESPRESSIF_GPIO_IRQ
+	bool "GPIO pin interrupts"
+	default n
+	---help---
+		Enable support for interrupting GPIO pins.
 
 config ESPRESSIF_DEDICATED_GPIO_IRQ
 	bool "Dedicated GPIO IRQ"
@@ -520,7 +596,17 @@ endmenu # LP Core (Low-power core) Coprocessor Configuration
 
 menu "PM Configuration"
 
-if PM && !ARCH_CHIP_ESP32
+config ESPRESSIF_AUTO_SLEEP
+	bool "Auto-sleep"
+	depends on !ARCH_CHIP_ESP32H2
+	default n
+	select PM
+	select ESPRESSIF_HR_TIMER
+	select ESP32_TICKLESS if ARCH_CHIP_ESP32
+	---help---
+		Enable Auto-sleep
+
+if PM
 
 config PM_EXT1_WAKEUP
 	bool "PM EXT1 Wakeup"
@@ -643,18 +729,28 @@ config PM_EXT1_WAKEUP_RTC_GPIO17
 
 config PM_EXT1_WAKEUP_RTC_GPIO18
 	bool "RTC_GPIO18"
+	depends on ARCH_CHIP_ESP32S2 || ARCH_CHIP_ESP32S3
 	default n
 	---help---
 		Enable RTC GPIO18 as an EXT1 wakeup source.
 
 config PM_EXT1_WAKEUP_RTC_GPIO19
 	bool "RTC_GPIO19"
+	depends on ARCH_CHIP_ESP32S2 || ARCH_CHIP_ESP32S3
 	default n
 	---help---
 		Enable RTC GPIO19 as an EXT1 wakeup source.
 
 config PM_EXT1_WAKEUP_RTC_GPIO20
 	bool "RTC_GPIO20"
+	depends on ARCH_CHIP_ESP32S2 || ARCH_CHIP_ESP32S3
+	default n
+	---help---
+		Enable RTC GPIO20 as an EXT1 wakeup source.
+
+config PM_EXT1_WAKEUP_RTC_GPIO21
+	bool "RTC_GPIO21"
+	depends on ARCH_CHIP_ESP32S2 || ARCH_CHIP_ESP32S3
 	default n
 	---help---
 		Enable RTC GPIO20 as an EXT1 wakeup source.
@@ -688,7 +784,8 @@ config PM_EXT0_WAKEUP_GPIO
 	int "EXT0 Wakeup GPIO"
 	depends on PM_EXT0_WAKEUP
 	default 0
-	range 0 20
+	range 0 17 if ARCH_CHIP_ESP32
+	range 0 21 if ARCH_CHIP_ESP32S2 ||  ARCH_CHIP_ESP32S3
 	---help---
 		GPIO to wake the device up from PM_STANDBY or PM_SLEEP using as EXT0 wakeup GPIO
 
@@ -708,6 +805,7 @@ endmenu # PM_EXT0_WAKEUP_SOURCES
 
 config PM_ULP_WAKEUP
 	bool "PM ULP Wakeup"
+	depends on !ARCH_CHIP_ESP32
 	default n
 	---help---
 		Enable ULP coprocessor wakeup functionality.
@@ -725,6 +823,12 @@ config PM_GPIO_WAKEUP
 
 menu "PM GPIO Wakeup Sources"
 	depends on PM_GPIO_WAKEUP
+
+config PM_GPIO_WAKEUP_GPIO0
+	bool "GPIO0"
+	default n
+	---help---
+		Enable GPIO0 as an GPIO wakeup source.
 
 config PM_GPIO_WAKEUP_GPIO1
 	bool "GPIO1"
@@ -854,66 +958,174 @@ config PM_GPIO_WAKEUP_GPIO21
 
 config PM_GPIO_WAKEUP_GPIO22
 	bool "GPIO22"
-	depends on !ARCH_CHIP_ESP32C3_GENERIC
 	default n
 	---help---
 		Enable GPIO22 as an GPIO wakeup source.
 
 config PM_GPIO_WAKEUP_GPIO23
 	bool "GPIO23"
-	depends on !ARCH_CHIP_ESP32C3_GENERIC
 	default n
 	---help---
 		Enable GPIO23 as an GPIO wakeup source.
 
 config PM_GPIO_WAKEUP_GPIO24
 	bool "GPIO24"
-	depends on !ARCH_CHIP_ESP32C3_GENERIC
 	default n
 	---help---
 		Enable GPIO24 as an GPIO wakeup source.
 
 config PM_GPIO_WAKEUP_GPIO25
 	bool "GPIO25"
-	depends on !ARCH_CHIP_ESP32C3_GENERIC
 	default n
 	---help---
 		Enable GPIO25 as an GPIO wakeup source.
 
 config PM_GPIO_WAKEUP_GPIO26
 	bool "GPIO26"
-	depends on !ARCH_CHIP_ESP32C3_GENERIC
 	default n
 	---help---
 		Enable GPIO26 as an GPIO wakeup source.
 
 config PM_GPIO_WAKEUP_GPIO27
 	bool "GPIO27"
-	depends on !ARCH_CHIP_ESP32C3_GENERIC
 	default n
 	---help---
 		Enable GPIO27 as an GPIO wakeup source.
 
 config PM_GPIO_WAKEUP_GPIO28
 	bool "GPIO28"
-	depends on ARCH_CHIP_ESP32C6
 	default n
 	---help---
 		Enable GPIO28 as an GPIO wakeup source.
 
 config PM_GPIO_WAKEUP_GPIO29
 	bool "GPIO29"
-	depends on ARCH_CHIP_ESP32C6
 	default n
 	---help---
 		Enable GPIO29 as an GPIO wakeup source.
 
 config PM_GPIO_WAKEUP_GPIO30
 	bool "GPIO30"
-	depends on ARCH_CHIP_ESP32C6
 	default n
 	---help---
 		Enable GPIO30 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO31
+	bool "GPIO31"
+	default n
+	---help---
+		Enable GPIO31 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO32
+	bool "GPIO32"
+	default n
+	---help---
+		Enable GPIO32 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO33
+	bool "GPIO33"
+	default n
+	---help---
+		Enable GPIO33 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO34
+	bool "GPIO34"
+	default n
+	---help---
+		Enable GPIO34 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO35
+	bool "GPIO35"
+	default n
+	---help---
+		Enable GPIO35 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO36
+	bool "GPIO36"
+	default n
+	---help---
+		Enable GPIO36 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO37
+	bool "GPIO37"
+	default n
+	---help---
+		Enable GPIO37 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO38
+	bool "GPIO38"
+	default n
+	---help---
+		Enable GPIO38 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO39
+	bool "GPIO39"
+	default n
+	---help---
+		Enable GPIO39 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO40
+	bool "GPIO40"
+	depends on ARCH_CHIP_ESP32S2 || ARCH_CHIP_ESP32S3
+	default n
+	---help---
+		Enable GPIO40 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO41
+	bool "GPIO41"
+	depends on ARCH_CHIP_ESP32S2 || ARCH_CHIP_ESP32S3
+	default n
+	---help---
+		Enable GPIO41 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO42
+	bool "GPIO42"
+	depends on ARCH_CHIP_ESP32S2 || ARCH_CHIP_ESP32S3
+	default n
+	---help---
+		Enable GPIO42 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO43
+	bool "GPIO43"
+	depends on ARCH_CHIP_ESP32S2 || ARCH_CHIP_ESP32S3
+	default n
+	---help---
+		Enable GPIO43 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO44
+	bool "GPIO44"
+	depends on ARCH_CHIP_ESP32S2 || ARCH_CHIP_ESP32S3
+	default n
+	---help---
+		Enable GPIO44 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO45
+	bool "GPIO45"
+	depends on ARCH_CHIP_ESP32S2 || ARCH_CHIP_ESP32S3
+	default n
+	---help---
+		Enable GPIO45 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO46
+	bool "GPIO46"
+	depends on ARCH_CHIP_ESP32S2 || ARCH_CHIP_ESP32S3
+	default n
+	---help---
+		Enable GPIO46 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO47
+	bool "GPIO47"
+	depends on ARCH_CHIP_ESP32S3
+	default n
+	---help---
+		Enable GPIO47 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO48
+	bool "GPIO48"
+	depends on ARCH_CHIP_ESP32S3
+	default n
+	---help---
+		Enable GPIO48 as an GPIO wakeup source.
 
 choice PM_GPIO_WAKEUP_TRIGGER_MODE
 	prompt "PM GPIO Wakeup Trigger Mode"
@@ -931,7 +1143,7 @@ endmenu # PM_GPIO_WAKEUP_SOURCES
 
 config PM_UART_WAKEUP
 	bool "PM UART Wakeup"
-	depends on ESP32S3_UART0 || ESP32S3_UART1
+	depends on ESP32_UART0 || ESP32_UART1 || ESP32S3_UART0 || ESP32S3_UART1
 	default n
 	---help---
 		Enable UART wakeup functionality.
@@ -943,15 +1155,17 @@ menu "PM UART Wakeup Sources"
 
 choice PM_UART_WAKEUP_UART_NUM
 	prompt "PM UART Wakeup UART Number"
+	default PM_UART_WAKEUP_UART0 if ESP32_UART0
+	default PM_UART_WAKEUP_UART1 if ESP32_UART1
 	default PM_UART_WAKEUP_UART0 if ESP32S3_UART0
 	default PM_UART_WAKEUP_UART1 if ESP32S3_UART1
 
 config PM_UART_WAKEUP_UART0
-	depends on ESP32S3_UART0
+	depends on ESP32_UART0 || ESP32S3_UART0
 	bool "Wake the chip up when UART0 gets a data"
 
 config PM_UART_WAKEUP_UART1
-	depends on ESP32S3_UART1
+	depends on ESP32_UART1 || ESP32S3_UART1
 	bool "Wake the chip up when UART1 gets a data"
 
 endchoice # PM_UART_WAKEUP_UART_NUM
@@ -986,7 +1200,7 @@ config PM_SLEEP_WAKEUP_NSEC
 	---help---
 		Number of additional nanoseconds to wait in PM_SLEEP.
 
-endif # PM && !ARCH_CHIP_ESP32
+endif # PM
 
 endmenu # PM Configuration
 
@@ -2262,3 +2476,12 @@ config ESPRESSIF_BLE_INTERRUPT_SAVE_STATUS
 		Number of interrupt save status variables to keep track. Increase it if any related bug is found.
 
 endmenu # BLE Configuration
+
+config ESPRESSIF_HR_TIMER
+	bool
+	default RTC_DRIVER
+	---help---
+		A high-resolution hardware timer for supporting the management of
+		kernel events.
+		The HR Timer is built on top of the System Timer (SYSTIMER) peripheral.
+		Timer callbacks are dispatched from a high-priority kernel task.

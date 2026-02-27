@@ -39,7 +39,7 @@
 #include "hardware/esp32s2_soc.h"
 
 #include "esp32s2_tim.h"
-#include "esp32s2_clockconfig.h"
+#include "esp_clk.h"
 
 /****************************************************************************
  * Pre-processor Definitions

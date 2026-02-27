@@ -32,7 +32,7 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "esp32_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "esp32_backlight.h"
 
 /****************************************************************************
@@ -65,19 +65,19 @@
 int esp32_set_backlight(uint8_t level)
 {
   #ifdef HAVE_BACKLIGHT
-  esp32_configgpio(DISPLAY_BCKL, OUTPUT);
+  esp_configgpio(DISPLAY_BCKL, OUTPUT);
 
   /* TODO: use PWM to set the display brightness */
 
   if (level == 0)
     {
-      esp32_gpiowrite(DISPLAY_BCKL, false);
+      esp_gpiowrite(DISPLAY_BCKL, false);
     }
   else
     {
       /* Set full brightness */
 
-      esp32_gpiowrite(DISPLAY_BCKL, true);
+      esp_gpiowrite(DISPLAY_BCKL, true);
     }
   #endif
 

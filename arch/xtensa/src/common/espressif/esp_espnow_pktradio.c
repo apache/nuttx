@@ -47,7 +47,7 @@
 #include <nuttx/wdog.h>
 
 #include "xtensa.h"
-#include "xtensa_attr.h"
+
 #include "esp_now.h"
 #include "esp_mac.h"
 #include "esp_espnow_pktradio.h"

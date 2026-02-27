@@ -31,8 +31,6 @@
 #include <stdint.h>
 #include <nuttx/mtd/mtd.h>
 
-#include "xtensa_attr.h"
-
 #ifndef __ASSEMBLY__
 
 #undef EXTERN

@@ -40,10 +40,9 @@
 
 #include <arch/board/board.h>
 
-#include "esp32s3_clockconfig.h"
-#include "esp32s3_gpio.h"
 #include "esp32s3_dma.h"
-#include "esp32s3_irq.h"
+#include "espressif/esp_gpio.h"
+#include "espressif/esp_irq.h"
 
 #include "xtensa.h"
 #include "hardware/esp32s3_system.h"
@@ -281,61 +280,50 @@ static void esp32s3_cam_gpio_config(void)
 {
   /* Data pins D0-D7 as input via GPIO matrix */
 
-  esp32s3_configgpio(CONFIG_ESP32S3_CAM_D0_PIN, INPUT);
-  esp32s3_gpio_matrix_in(CONFIG_ESP32S3_CAM_D0_PIN,
-                         CAM_DATA_IN0_IDX, false);
+  esp_configgpio(CONFIG_ESP32S3_CAM_D0_PIN, INPUT);
+  esp_gpio_matrix_in(CONFIG_ESP32S3_CAM_D0_PIN, CAM_DATA_IN0_IDX, false);
 
-  esp32s3_configgpio(CONFIG_ESP32S3_CAM_D1_PIN, INPUT);
-  esp32s3_gpio_matrix_in(CONFIG_ESP32S3_CAM_D1_PIN,
-                         CAM_DATA_IN1_IDX, false);
+  esp_configgpio(CONFIG_ESP32S3_CAM_D1_PIN, INPUT);
+  esp_gpio_matrix_in(CONFIG_ESP32S3_CAM_D1_PIN, CAM_DATA_IN1_IDX, false);
 
-  esp32s3_configgpio(CONFIG_ESP32S3_CAM_D2_PIN, INPUT);
-  esp32s3_gpio_matrix_in(CONFIG_ESP32S3_CAM_D2_PIN,
-                         CAM_DATA_IN2_IDX, false);
+  esp_configgpio(CONFIG_ESP32S3_CAM_D2_PIN, INPUT);
+  esp_gpio_matrix_in(CONFIG_ESP32S3_CAM_D2_PIN, CAM_DATA_IN2_IDX, false);
 
-  esp32s3_configgpio(CONFIG_ESP32S3_CAM_D3_PIN, INPUT);
-  esp32s3_gpio_matrix_in(CONFIG_ESP32S3_CAM_D3_PIN,
-                         CAM_DATA_IN3_IDX, false);
+  esp_configgpio(CONFIG_ESP32S3_CAM_D3_PIN, INPUT);
+  esp_gpio_matrix_in(CONFIG_ESP32S3_CAM_D3_PIN, CAM_DATA_IN3_IDX, false);
 
-  esp32s3_configgpio(CONFIG_ESP32S3_CAM_D4_PIN, INPUT);
-  esp32s3_gpio_matrix_in(CONFIG_ESP32S3_CAM_D4_PIN,
-                         CAM_DATA_IN4_IDX, false);
+  esp_configgpio(CONFIG_ESP32S3_CAM_D4_PIN, INPUT);
+  esp_gpio_matrix_in(CONFIG_ESP32S3_CAM_D4_PIN, CAM_DATA_IN4_IDX, false);
 
-  esp32s3_configgpio(CONFIG_ESP32S3_CAM_D5_PIN, INPUT);
-  esp32s3_gpio_matrix_in(CONFIG_ESP32S3_CAM_D5_PIN,
-                         CAM_DATA_IN5_IDX, false);
+  esp_configgpio(CONFIG_ESP32S3_CAM_D5_PIN, INPUT);
+  esp_gpio_matrix_in(CONFIG_ESP32S3_CAM_D5_PIN, CAM_DATA_IN5_IDX, false);
 
-  esp32s3_configgpio(CONFIG_ESP32S3_CAM_D6_PIN, INPUT);
-  esp32s3_gpio_matrix_in(CONFIG_ESP32S3_CAM_D6_PIN,
-                         CAM_DATA_IN6_IDX, false);
+  esp_configgpio(CONFIG_ESP32S3_CAM_D6_PIN, INPUT);
+  esp_gpio_matrix_in(CONFIG_ESP32S3_CAM_D6_PIN, CAM_DATA_IN6_IDX, false);
 
-  esp32s3_configgpio(CONFIG_ESP32S3_CAM_D7_PIN, INPUT);
-  esp32s3_gpio_matrix_in(CONFIG_ESP32S3_CAM_D7_PIN,
-                         CAM_DATA_IN7_IDX, false);
+  esp_configgpio(CONFIG_ESP32S3_CAM_D7_PIN, INPUT);
+  esp_gpio_matrix_in(CONFIG_ESP32S3_CAM_D7_PIN, CAM_DATA_IN7_IDX, false);
 
   /* PCLK input */
 
-  esp32s3_configgpio(CONFIG_ESP32S3_CAM_PCLK_PIN, INPUT);
-  esp32s3_gpio_matrix_in(CONFIG_ESP32S3_CAM_PCLK_PIN,
-                         CAM_PCLK_IDX, false);
+  esp_configgpio(CONFIG_ESP32S3_CAM_PCLK_PIN, INPUT);
+  esp_gpio_matrix_in(CONFIG_ESP32S3_CAM_PCLK_PIN, CAM_PCLK_IDX, false);
 
   /* VSYNC input */
 
-  esp32s3_configgpio(CONFIG_ESP32S3_CAM_VSYNC_PIN, INPUT);
-  esp32s3_gpio_matrix_in(CONFIG_ESP32S3_CAM_VSYNC_PIN,
-                         CAM_V_SYNC_IDX, false);
+  esp_configgpio(CONFIG_ESP32S3_CAM_VSYNC_PIN, INPUT);
+  esp_gpio_matrix_in(CONFIG_ESP32S3_CAM_VSYNC_PIN, CAM_V_SYNC_IDX, false);
 
   /* HREF (H_ENABLE) input */
 
-  esp32s3_configgpio(CONFIG_ESP32S3_CAM_HREF_PIN, INPUT);
-  esp32s3_gpio_matrix_in(CONFIG_ESP32S3_CAM_HREF_PIN,
-                         CAM_H_ENABLE_IDX, false);
+  esp_configgpio(CONFIG_ESP32S3_CAM_HREF_PIN, INPUT);
+  esp_gpio_matrix_in(CONFIG_ESP32S3_CAM_HREF_PIN, CAM_H_ENABLE_IDX, false);
 
   /* XCLK output to sensor */
 
-  esp32s3_configgpio(CONFIG_ESP32S3_CAM_XCLK_PIN, OUTPUT);
-  esp32s3_gpio_matrix_out(CONFIG_ESP32S3_CAM_XCLK_PIN,
-                          CAM_CLK_IDX, false, false);
+  esp_configgpio(CONFIG_ESP32S3_CAM_XCLK_PIN, OUTPUT);
+  esp_gpio_matrix_out(CONFIG_ESP32S3_CAM_XCLK_PIN,
+                      CAM_CLK_IDX, false, false);
 }
 
 /****************************************************************************
@@ -463,16 +451,13 @@ static int esp32s3_cam_config(struct esp32s3_cam_s *priv)
 
   /* 1) Map peripheral → CPU interrupt (creates IRQ mapping) */
 
-  priv->cpuint = esp32s3_setup_irq(priv->cpu,
-                                   ESP32S3_PERIPH_LCD_CAM,
-                                   ESP32S3_INT_PRIO_DEF,
-                                   ESP32S3_CPUINT_LEVEL);
+  priv->cpuint = esp_setup_irq(ESP32S3_PERIPH_LCD_CAM,
+                               ESP_IRQ_PRIORITY_DEFAULT,
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               cam_interrupt,
+                               priv);
   DEBUGASSERT(priv->cpuint >= 0);
 
-  /* 2) Attach handler (mapping now exists, so IRQ is valid) */
-
-  ret = irq_attach(ESP32S3_IRQ_LCD_CAM, cam_interrupt, priv);
-  DEBUGASSERT(ret == 0);
   UNUSED(ret);
 
   /* 3) Clear any spurious interrupt that fired during setup */
@@ -544,7 +529,7 @@ static int esp32s3_cam_uninit(struct imgdata_s *data)
 
   up_disable_irq(ESP32S3_IRQ_LCD_CAM);
   irq_detach(ESP32S3_IRQ_LCD_CAM);
-  esp32s3_teardown_irq(priv->cpu, ESP32S3_PERIPH_LCD_CAM, priv->cpuint);
+  esp_teardown_irq(ESP32S3_IRQ_LCD_CAM, priv->cpuint);
 
   /* Release DMA */
 
@@ -799,9 +784,9 @@ struct imgdata_s *esp32s3_cam_initialize(void)
    * sensor I2C communication (e.g. gc0308_initialize).
    */
 
-  esp32s3_configgpio(CONFIG_ESP32S3_CAM_XCLK_PIN, OUTPUT);
-  esp32s3_gpio_matrix_out(CONFIG_ESP32S3_CAM_XCLK_PIN,
-                          CAM_CLK_IDX, false, false);
+  esp_configgpio(CONFIG_ESP32S3_CAM_XCLK_PIN, OUTPUT);
+  esp_gpio_matrix_out(CONFIG_ESP32S3_CAM_XCLK_PIN,
+                      CAM_CLK_IDX, false, false);
   esp32s3_cam_enableclk();
 
   return &g_cam_priv.data;

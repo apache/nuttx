@@ -35,13 +35,11 @@
 
 #include "hardware/esp32s2_cache_memory.h"
 #include "rom/esp32s2_libc_stubs.h"
-#include "esp32s2_clockconfig.h"
 #include "esp32s2_region.h"
 #include "esp32s2_spiram.h"
 #include "esp32s2_start.h"
 #include "esp32s2_lowputc.h"
 #include "esp32s2_wdt.h"
-#include "esp32s2_rtc.h"
 #include "espressif/esp_loader.h"
 
 #include "soc/extmem_reg.h"
@@ -128,6 +126,8 @@ extern void cache_allocate_sram(cache_layout_t sram0_layout,
                                 cache_layout_t sram3_layout);
 extern void esp_config_data_cache_mode(void);
 extern void cache_enable_dcache(uint32_t autoload);
+extern void esp_config_instruction_cache_mode(void);
+extern void esp_config_data_cache_mode(void);
 
 /****************************************************************************
  * Private Function Prototypes
@@ -159,59 +159,6 @@ uint32_t g_idlestack[IDLETHREAD_STACKWORDS]
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: configure_cpu_caches
- *
- * Description:
- *   Configure the Instruction and Data CPU caches.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-static void IRAM_ATTR configure_cpu_caches(void)
-{
-  cache_size_t cache_size;
-  cache_ways_t cache_ways;
-  cache_line_size_t cache_line_size;
-
-  /* Configure the mode of instruction cache: cache size, cache associated
-   * ways, cache line size.
-   */
-
-#ifdef CONFIG_ESP32S2_INSTRUCTION_CACHE_8KB
-  cache_allocate_sram(CACHE_MEMORY_ICACHE_LOW, CACHE_MEMORY_INVALID,
-                      CACHE_MEMORY_INVALID, CACHE_MEMORY_INVALID);
-  cache_size = CACHE_SIZE_HALF;
-#else
-  cache_allocate_sram(CACHE_MEMORY_ICACHE_LOW, CACHE_MEMORY_ICACHE_HIGH,
-                      CACHE_MEMORY_INVALID, CACHE_MEMORY_INVALID);
-  cache_size = CACHE_SIZE_FULL;
-#endif
-
-  cache_ways = CACHE_4WAYS_ASSOC;
-
-#if defined(CONFIG_ESP32S2_INSTRUCTION_CACHE_LINE_16B)
-  cache_line_size = CACHE_LINE_SIZE_16B;
-#else
-  cache_line_size = CACHE_LINE_SIZE_32B;
-#endif
-
-  cache_suspend_icache();
-  cache_set_icache_mode(cache_size, cache_ways, cache_line_size);
-  cache_invalidate_icache_all();
-  cache_resume_icache(0);
-
-#if defined(CONFIG_ESP32S2_SPIRAM_BOOT_INIT)
-  esp_config_data_cache_mode();
-  cache_enable_dcache(0);
-#endif
-}
 
 /****************************************************************************
  * Name: __esp32s2_start
@@ -287,20 +234,17 @@ static void noreturn_function IRAM_ATTR __esp32s2_start(void)
 
   esp32s2_wdt_early_deinit();
 
-  /* Initialize RTC parameters */
+  /* Initialize RTC controller and set CPU frequency */
 
-  esp32s2_rtc_init();
-  esp32s2_rtc_clk_set();
+  esp_clk_init();
 
-  /* Set CPU frequency configured in board.h */
-
-  esp32s2_clockconfig();
-
-#ifndef CONFIG_SUPPRESS_UART_CONFIG
   /* Configure the UART so we can get debug output */
 
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
   esp32s2_lowsetup();
 #endif
+
+  esp_perip_clk_init();
 
 #ifdef USE_EARLYSERIALINIT
   /* Perform early serial initialization */
@@ -342,10 +286,6 @@ static void noreturn_function IRAM_ATTR __esp32s2_start(void)
 
   showprogress('B');
 
-  SYS_STARTUP_FN();
-
-  showprogress('C');
-
   /* Bring up NuttX */
 
   nx_start();
@@ -355,6 +295,48 @@ static void noreturn_function IRAM_ATTR __esp32s2_start(void)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: xtensa_soc_initialize
+ *
+ * Description:
+ *   Initialize SoC-specific initialization.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void weak_function xtensa_soc_initialize(void)
+{
+  sys_startup_fn();
+}
+
+/****************************************************************************
+ * Name: sys_startup_fn
+ *
+ * Description:
+ *   Execute the system layer startup function for the current CPU core.
+ *   This function calls the appropriate startup function from the per-CPU
+ *   startup function array (g_startup_fn) based on the current core ID.
+ *   The SYS_STARTUP_FN() macro retrieves the core ID, indexes into the
+ *   g_startup_fn array, and invokes the corresponding startup function.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sys_startup_fn(void)
+{
+  SYS_STARTUP_FN();
+}
 
 /****************************************************************************
  * Name: __start
@@ -398,7 +380,21 @@ noreturn_function void IRAM_ATTR __start(void)
 
 #endif
 
-  configure_cpu_caches();
+  /* Configure the mode of instruction cache : cache size, cache associated
+   * ways, cache line size.
+   */
+
+  esp_config_instruction_cache_mode();
+
+  /* If we need use SPIRAM, we should use data cache, or if we want to access
+   * rodata, we also should use data cache.
+   * Configure the mode of data : cache size, cache associated ways, cache
+   * line size.
+   * Enable data cache, so if we don't use SPIRAM, it just works.
+   */
+
+  esp_config_data_cache_mode();
+  cache_enable_dcache(0);
 
   __esp32s2_start();
 

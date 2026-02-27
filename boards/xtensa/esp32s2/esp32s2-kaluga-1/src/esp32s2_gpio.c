@@ -39,7 +39,7 @@
 #include <arch/board/board.h>
 
 #include "esp32s2-kaluga-1.h"
-#include "esp32s2_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "hardware/esp32s2_gpio_sigmap.h"
 
 #if defined(CONFIG_DEV_GPIO) && !defined(CONFIG_GPIO_LOWER_HALF)
@@ -54,15 +54,15 @@
 #define GPIO_OUT2  2
 #define GPIO_IN1   4
 
-#if !defined(CONFIG_ESP32S2_GPIO_IRQ) && BOARD_NGPIOINT > 0
+#if !defined(CONFIG_ESPRESSIF_GPIO_IRQ) && BOARD_NGPIOINT > 0
 #  error "NGPIOINT is > 0 and GPIO interrupts aren't enabled"
 #endif
 
-/* Interrupt pins.  GPIO9 is used as an example, any other inputs could be
- * used.
+/* Interrupt pins.  GPIO0 is used as an example, any other inputs could be
+ * used. This is the BOOT button.
  */
 
-#define GPIO_IRQPIN  9
+#define GPIO_IRQPIN  0
 
 /****************************************************************************
  * Private Types
@@ -190,7 +190,7 @@ static int gpout_read(struct gpio_dev_s *dev, bool *value)
   DEBUGASSERT(esp32s2gpio->id < BOARD_NGPIOOUT);
   gpioinfo("Reading...\n");
 
-  *value = esp32s2_gpioread(g_gpiooutputs[esp32s2gpio->id]);
+  *value = esp_gpioread(g_gpiooutputs[esp32s2gpio->id]);
   return OK;
 }
 
@@ -218,7 +218,7 @@ static int gpout_write(struct gpio_dev_s *dev, bool value)
   DEBUGASSERT(esp32s2gpio->id < BOARD_NGPIOOUT);
   gpioinfo("Writing %d\n", (int)value);
 
-  esp32s2_gpiowrite(g_gpiooutputs[esp32s2gpio->id], value);
+  esp_gpiowrite(g_gpiooutputs[esp32s2gpio->id], value);
   return OK;
 }
 #endif
@@ -248,13 +248,13 @@ static int gpin_read(struct gpio_dev_s *dev, bool *value)
   DEBUGASSERT(esp32s2gpio->id < BOARD_NGPIOIN);
   gpioinfo("Reading...\n");
 
-  *value = esp32s2_gpioread(g_gpioinputs[esp32s2gpio->id]);
+  *value = esp_gpioread(g_gpioinputs[esp32s2gpio->id]);
   return OK;
 }
 #endif
 
 /****************************************************************************
- * Name: esp32s2gpio_interrupt
+ * Name: espgpio_interrupt
  *
  * Description:
  *   Digital Input ISR.
@@ -299,7 +299,7 @@ static int gpint_read(struct gpio_dev_s *dev, bool *value)
   DEBUGASSERT(esp32s2gpint->esp32s2gpio.id < BOARD_NGPIOINT);
   gpioinfo("Reading int pin...\n");
 
-  *value = esp32s2_gpioread(g_gpiointinputs[esp32s2gpint->esp32s2gpio.id]);
+  *value = esp_gpioread(g_gpiointinputs[esp32s2gpint->esp32s2gpio.id]);
   return OK;
 }
 
@@ -325,22 +325,26 @@ static int gpint_attach(struct gpio_dev_s *dev,
 {
   struct esp32s2gpint_dev_s *esp32s2gpint =
     (struct esp32s2gpint_dev_s *)dev;
-  int irq = ESP32S2_PIN2IRQ(g_gpiointinputs[esp32s2gpint->esp32s2gpio.id]);
   int ret;
 
   gpioinfo("Attaching the callback\n");
 
   /* Make sure the interrupt is disabled */
 
-  esp32s2_gpioirqdisable(irq);
-  ret = irq_attach(irq,
-                   esp32s2gpio_interrupt,
-                   &g_gpint[esp32s2gpint->esp32s2gpio.id]);
+  esp_gpioirqdisable(g_gpiointinputs[esp32s2gpint->esp32s2gpio.id]);
+
+  ret = esp_gpio_irq(g_gpiointinputs[esp32s2gpint->esp32s2gpio.id],
+                     esp32s2gpio_interrupt,
+                     &g_gpint[esp32s2gpint->esp32s2gpio.id]);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: gpint_attach() failed: %d\n", ret);
       return ret;
     }
+
+  /* Make sure the interrupt is disabled */
+
+  esp_gpioirqdisable(g_gpiointinputs[esp32s2gpint->esp32s2gpio.id]);
 
   gpioinfo("Attach %p\n", callback);
   esp32s2gpint->callback = callback;
@@ -366,7 +370,6 @@ static int gpint_enable(struct gpio_dev_s *dev, bool enable)
 {
   struct esp32s2gpint_dev_s *esp32s2gpint =
     (struct esp32s2gpint_dev_s *)dev;
-  int irq = ESP32S2_PIN2IRQ(g_gpiointinputs[esp32s2gpint->esp32s2gpio.id]);
 
   if (enable)
     {
@@ -376,13 +379,13 @@ static int gpint_enable(struct gpio_dev_s *dev, bool enable)
 
           /* Configure the interrupt for rising edge */
 
-          esp32s2_gpioirqenable(irq, RISING);
+          esp_gpioirqenable(g_gpiointinputs[esp32s2gpint->esp32s2gpio.id]);
         }
     }
   else
     {
       gpioinfo("Disable the interrupt\n");
-      esp32s2_gpioirqdisable(irq);
+      esp_gpioirqdisable(g_gpiointinputs[esp32s2gpint->esp32s2gpio.id]);
     }
 
   return OK;
@@ -407,9 +410,10 @@ static int gpint_enable(struct gpio_dev_s *dev, bool enable)
 int esp32s2_gpio_init(void)
 {
   int pincount = 0;
+  int i;
 
 #if BOARD_NGPIOOUT > 0
-  for (int i = 0; i < BOARD_NGPIOOUT; i++)
+  for (i = 0; i < BOARD_NGPIOOUT; i++)
     {
       /* Setup and register the GPIO pin */
 
@@ -420,17 +424,16 @@ int esp32s2_gpio_init(void)
 
       /* Configure the pins that will be used as output */
 
-      esp32s2_gpio_matrix_out(g_gpiooutputs[i], SIG_GPIO_OUT_IDX, 0, 0);
-      esp32s2_configgpio(g_gpiooutputs[i], OUTPUT_FUNCTION_1 |
-                         INPUT_FUNCTION_1);
-      esp32s2_gpiowrite(g_gpiooutputs[i], 0);
+      esp_gpio_matrix_out(g_gpiooutputs[i], SIG_GPIO_OUT_IDX, 0, 0);
+      esp_configgpio(g_gpiooutputs[i], OUTPUT_FUNCTION_1 | INPUT_FUNCTION_1);
+      esp_gpiowrite(g_gpiooutputs[i], 0);
 
       pincount++;
     }
 #endif
 
 #if BOARD_NGPIOIN > 0
-  for (int i = 0; i < BOARD_NGPIOIN; i++)
+  for (i = 0; i < BOARD_NGPIOIN; i++)
     {
       /* Setup and register the GPIO pin */
 
@@ -441,14 +444,14 @@ int esp32s2_gpio_init(void)
 
       /* Configure the pins that will be used as interrupt input */
 
-      esp32s2_configgpio(g_gpioinputs[i], INPUT_FUNCTION_1 | PULLDOWN);
+      esp_configgpio(g_gpioinputs[i], INPUT_FUNCTION_1 | PULLDOWN);
 
       pincount++;
     }
 #endif
 
 #if BOARD_NGPIOINT > 0
-  for (int i = 0; i < BOARD_NGPIOINT; i++)
+  for (i = 0; i < BOARD_NGPIOINT; i++)
     {
       /* Setup and register the GPIO pin */
 
@@ -457,9 +460,12 @@ int esp32s2_gpio_init(void)
       g_gpint[i].esp32s2gpio.id              = i;
       gpio_pin_register(&g_gpint[i].esp32s2gpio.gpio, pincount);
 
-      /* Configure the pins that will be used as interrupt input */
+      /* Configure the pins that will be used as interrupt input with
+       * falling edge.
+       */
 
-      esp32s2_configgpio(g_gpiointinputs[i], INPUT_FUNCTION_1 | PULLDOWN);
+      esp_configgpio(g_gpiointinputs[i],
+                     INPUT_FUNCTION_1 | PULLUP | FALLING);
 
       pincount++;
     }

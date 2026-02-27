@@ -79,7 +79,6 @@ SECTIONS
     *libc.a:lib_stackchk.*(.literal .text .literal.* .text.*)
 #endif
     *libarch.a:esp32_cpuindex.*(.literal .text .literal.* .text.*)
-    *libarch.a:esp32_irq.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32_spicache.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32_spiflash.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32_user.*(.literal .text .literal.* .text.*)
@@ -95,6 +94,7 @@ SECTIONS
     *libc.a:lib_assert.*(.literal .text .literal.* .text.*)
     *libc.a:lib_utsname.*(.literal .text .literal.* .text.*)
     *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
+    *libc.a:arch_atomic.*(.literal .text .literal.* .text.*)
 
     *libdrivers.a:syslog_flush.*(.literal .text .literal.* .text.*)
 
@@ -286,6 +286,8 @@ SECTIONS
     *libsched.a:spinlock.*(.rodata  .rodata.*)
     *libsched.a:irq_csection.*(.rodata  .rodata.*)
     *libsched.a:irq_dispatch.*(.rodata  .rodata.*)
+
+    *libc.a:arch_atomic.*(.rodata .rodata.*)
 
     . = ALIGN(4);
     _edata = ABSOLUTE(.);

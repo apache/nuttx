@@ -25,11 +25,19 @@
  * Included Files
  ****************************************************************************/
 
-#include "esp32s3_wdt.h"
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* Instances of Watchdog Timer  */
+
+enum esp32s3_wdt_inst_e
+{
+  ESP32S3_WDT_MWDT0 = 0,  /* Main System Watchdog Timer (MWDT) of Timer Group 0 */
+  ESP32S3_WDT_MWDT1,      /* Main System Watchdog Timer (MWDT) of Timer Group 1 */
+  ESP32S3_WDT_RWDT,       /* RTC Watchdog Timer (RWDT) */
+  ESP32S3_WDT_XTWDT       /* XTAL32K Watchdog Timer (XTWDT) */
+};
 
 /****************************************************************************
  * Public Function Prototypes

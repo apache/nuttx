@@ -30,14 +30,15 @@
 #include <debug.h>
 
 #include "xtensa.h"
-#include "esp32s2_irq.h"
+#include "espressif/esp_irq.h"
 #include "esp32s2_rtc_gpio.h"
-#include "esp32s2_rtc.h"
-#include "esp32s2_wdt.h"
-#include "hardware/esp32s2_efuse.h"
-#include "hardware/esp32s2_rtccntl.h"
+#include "soc/efuse_reg.h"
+#include "soc/rtc_cntl_reg.h"
+#include "hal/rwdt_ll.h"
 #include "hardware/esp32s2_tim.h"
 
+#include "esp32s2_wdt.h"
+#include "soc/rtc.h"
 #include "soc/periph_defs.h"
 #include "esp_private/periph_ctrl.h"
 
@@ -45,7 +46,31 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Helpers for converting from Q13.19 fixed-point format to float */
+/* Offset relative to each watchdog timer instance memory base */
+
+#define RWDT_CONFIG0_OFFSET         0x0094
+#define XTWDT_CONFIG0_OFFSET        0x0060
+
+/* RWDT */
+
+#define RWDT_STAGE0_TIMEOUT_OFFSET  0x0098
+#define RWDT_STAGE1_TIMEOUT_OFFSET  0x009c
+#define RWDT_STAGE2_TIMEOUT_OFFSET  0x00a0
+#define RWDT_STAGE3_TIMEOUT_OFFSET  0x00a4
+#define RWDT_FEED_OFFSET            0x00a8
+#define RWDT_WP_REG                 0x00ac
+#define RWDT_INT_ENA_REG_OFFSET     0x0040
+#define RWDT_INT_CLR_REG_OFFSET     0x004c
+
+/* XTWDT */
+
+#define XTWDT_TIMEOUT_OFFSET        0x00f4
+#define XTWDT_CLK_PRESCALE_OFFSET   0x00f0
+#define XTWDT_INT_ENA_REG_OFFSET    0x0040
+
+/* Number of cycles for RTC_SLOW_CLK calibration */
+
+#define SLOW_CLK_CAL_CYCLES 1024
 
 #define N 19
 #define Q_TO_FLOAT(x) ((float)x/(float)(1<<N))
@@ -66,12 +91,7 @@
  * Private Types
  ****************************************************************************/
 
-enum wdt_peripheral_e
-{
-  RTC,
-  TIMER,
-  XTAL32K,
-};
+/* ESP32-S2 WDT private data */
 
 struct esp32s2_wdt_priv_s
 {
@@ -673,7 +693,7 @@ static void wdt_feed(struct esp32s2_wdt_dev_s *dev)
 
 static uint16_t wdt_rtc_clk(struct esp32s2_wdt_dev_s *dev)
 {
-  enum esp32s2_rtc_slow_freq_e slow_clk_rtc;
+  soc_rtc_slow_clk_src_t slow_clk_rtc;
   uint32_t period_13q19;
   float period;
   float cycles_ms;
@@ -683,23 +703,23 @@ static uint16_t wdt_rtc_clk(struct esp32s2_wdt_dev_s *dev)
    * used to calibrate this source.
    */
 
-  static const enum esp32s2_rtc_cal_sel_e cal_map[] =
+  static const soc_clk_freq_calculation_src_t cal_map[] =
   {
-    RTC_CAL_RTC_MUX,
-    RTC_CAL_32K_XTAL,
-    RTC_CAL_8MD256
+    CLK_CAL_RTC_SLOW,
+    CLK_CAL_32K_XTAL,
+    CLK_CAL_RC_FAST_D256
   };
 
   DEBUGASSERT(dev);
 
   /* Check which clock is sourcing the slow_clk_rtc */
 
-  slow_clk_rtc = esp32s2_rtc_get_slow_clk();
+  slow_clk_rtc = rtc_clk_slow_src_get();
 
   /* Get the slow_clk_rtc period in us in Q13.19 fixed point format */
 
-  period_13q19 = esp32s2_rtc_clk_cal(cal_map[slow_clk_rtc],
-                                     SLOW_CLK_CAL_CYCLES);
+  period_13q19 = rtc_clk_cal(cal_map[slow_clk_rtc],
+                             SLOW_CLK_CAL_CYCLES);
 
   /* Assert no error happened during the calibration */
 
@@ -763,7 +783,7 @@ static int32_t wdt_setisr(struct esp32s2_wdt_dev_s *dev, xcpt_t handler,
               wdt->irq == ESP32S2_IRQ_RTC_XTAL32K_DEAD)
             {
               esp32s2_rtcioirqdisable(wdt->irq);
-              irq_detach(wdt->irq);
+              esp32s2_rtcioirqdetach(wdt->irq);
             }
           else
 #endif
@@ -773,8 +793,7 @@ static int32_t wdt_setisr(struct esp32s2_wdt_dev_s *dev, xcpt_t handler,
                */
 
               up_disable_irq(wdt->irq);
-              esp32s2_teardown_irq(wdt->periph, wdt->cpuint);
-              irq_detach(wdt->irq);
+              esp_teardown_irq(wdt->periph, wdt->cpuint);
             }
         }
 
@@ -791,7 +810,9 @@ static int32_t wdt_setisr(struct esp32s2_wdt_dev_s *dev, xcpt_t handler,
       if (wdt->irq == ESP32S2_IRQ_RTC_WDT ||
           wdt->irq == ESP32S2_IRQ_RTC_XTAL32K_DEAD)
         {
-          ret = irq_attach(wdt->irq, handler, arg);
+          /* RTC interrupts use special RTC IRQ handling */
+
+          ret = esp32s2_rtcioirqattach(wdt->irq, handler, arg);
 
           if (ret != OK)
             {
@@ -805,22 +826,13 @@ static int32_t wdt_setisr(struct esp32s2_wdt_dev_s *dev, xcpt_t handler,
       else
 #endif
         {
-          wdt->cpuint = esp32s2_setup_irq(wdt->periph, 1,
-                                          ESP32S2_CPUINT_LEVEL);
+          wdt->cpuint = esp_setup_irq(wdt->periph, 1,
+                                      ESP_IRQ_TRIGGER_LEVEL,
+                                      handler, arg);
           if (wdt->cpuint < 0)
             {
               wderr("ERROR: No CPU Interrupt available");
               ret = wdt->cpuint;
-              goto errout;
-            }
-
-          /* Associate an IRQ Number (from the WDT) to an ISR */
-
-          ret = irq_attach(wdt->irq, handler, arg);
-          if (ret != OK)
-            {
-              esp32s2_teardown_irq(wdt->periph, wdt->cpuint);
-              wderr("ERROR: Failed to associate an IRQ Number");
               goto errout;
             }
 

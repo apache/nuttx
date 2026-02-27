@@ -40,8 +40,7 @@
 #include <nuttx/spinlock.h>
 
 #include "chip.h"
-#include "esp32s3_irq.h"
-#include "hardware/esp32s3_uart.h"
+#include "esp_irq.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
 
 #include "esp32s3_config.h"

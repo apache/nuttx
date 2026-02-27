@@ -49,6 +49,8 @@
 #define RTC_TIMER_RESERVE_RTC (24)
 #define RESERVE_RTC_MEM       (RTC_TIMER_RESERVE_RTC)
 
+#define ESP_BOOTLOADER_RESERVE_RTC (0x0)
+
 MEMORY
 {
 #ifdef CONFIG_ESP32_APP_FORMAT_MCUBOOT
@@ -148,15 +150,32 @@ MEMORY
 
   rtc_iram_seg (RWX) :   org = 0x400c0000, len = 0x2000
 
+  /* RTC fast memory (same block as above, rtc_iram_seg), viewed from
+   * data bus.
+   */
+
+  rtc_data_seg(RW) :     org = 0x3ff80000, len = 0x2000 - RESERVE_RTC_MEM
+
   /* RTC slow memory (data accessible). Persists over deep sleep.
    * Start of RTC slow memory is reserved for ULP co-processor code + data,
    * if enabled.
    */
 
+  /* We reduced the size of rtc_iram_seg and rtc_data_seg by
+   * ESP_BOOTLOADER_RESERVE_RTC value. It reserves the amount of RTC fast
+   * memory that we use for this memory segment.
+   * This segment is intended for keeping bootloader rtc data
+   * (s_bootloader_retain_mem, when a Kconfig option is on). The aim of this
+   * is to keep data that will not be moved around and have a fixed address.
+   * org = 0x3ff80000 + 0x2000 - ESP_BOOTLOADER_RESERVE_RTC == SOC_RTC_DRAM_HIGH - sizeof(rtc_retain_mem_t)
+   */
+
+  rtc_fast_reserved_seg(RW) :        org = 0x3ff80000 + 0x2000 - ESP_BOOTLOADER_RESERVE_RTC, len = ESP_BOOTLOADER_RESERVE_RTC
+
   rtc_slow_seg (RW) :    org = 0x50000000 + CONFIG_ESP32_ULP_COPROC_RESERVE_MEM,
                          len = 0x1000 - CONFIG_ESP32_ULP_COPROC_RESERVE_MEM
 
-  rtc_reserved_seg(RW) : org = 0x50000000 + 0x2000 - RESERVE_RTC_MEM, len = RESERVE_RTC_MEM
+  rtc_slow_reserved_seg(RW) : org = 0x50000000 + 0x2000 - RESERVE_RTC_MEM, len = RESERVE_RTC_MEM
 
   /* External memory, including data and text */
 

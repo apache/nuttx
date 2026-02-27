@@ -36,8 +36,6 @@
 #include <nuttx/clock.h>
 
 #include "esp32s2_freerun.h"
-#include "esp32s2_clockconfig.h"
-#include "esp32s2_gpio.h"
 
 #ifdef CONFIG_ESP32S2_FREERUN
 

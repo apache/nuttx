@@ -32,9 +32,9 @@ endif
 
 # Required ESP32 files (arch/xtensa/src/esp32)
 
-CHIP_CSRCS  = esp32_allocateheap.c esp32_clockconfig.c esp32_gpio.c
+CHIP_CSRCS  = esp32_allocateheap.c
 CHIP_CSRCS += esp32_systemreset.c esp32_resetcause.c
-CHIP_CSRCS += esp32_irq.c esp32_region.c esp32_rtc_gpio.c
+CHIP_CSRCS += esp32_region.c esp32_rtc_gpio.c
 CHIP_CSRCS += esp32_user.c esp32_libc_stubs.c
 CHIP_CSRCS += esp32_dma.c
 
@@ -53,13 +53,6 @@ ifeq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += esp32_tickless.c
 else
 CHIP_CSRCS += esp32_timerisr.c
-endif
-
-ifeq ($(CONFIG_PM),y)
-ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
-CHIP_CSRCS += esp32_pminitialize.c
-endif
-CHIP_CSRCS += esp32_pm.c
 endif
 
 ifeq ($(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP),y)
@@ -164,10 +157,6 @@ ifeq ($(CONFIG_ARCH_USE_TEXT_HEAP),y)
 CHIP_CSRCS += esp32_textheap.c
 endif
 
-ifeq ($(CONFIG_ESP32_RT_TIMER),y)
-CHIP_CSRCS += esp32_rt_timer.c
-endif
-
 ifeq ($(CONFIG_ESP32_TOUCH),y)
 CHIP_CSRCS += esp32_touch.c
 endif
@@ -182,13 +171,6 @@ endif
 
 ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
 CHIP_CSRCS += esp32_crypto.c
-endif
-
-ifeq ($(CONFIG_ESP32_RTC),y)
-CHIP_CSRCS += esp32_rtc.c
-ifeq ($(CONFIG_RTC_DRIVER),y)
-CHIP_CSRCS += esp32_rtc_lowerhalf.c
-endif
 endif
 
 ifeq ($(CONFIG_ESP32_OPENETH),y)
@@ -212,7 +194,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = b9472bd56b916cced7447e25c2b2e1390d7e0d90
+	ESP_HAL_3RDPARTY_VERSION = 6c272b562a73107a852d44b9c6fb5df57245cbd7
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -252,13 +234,16 @@ chip/$(ESP_HAL_3RDPARTY_REPO):
 	$(Q) echo "Cloning Espressif HAL for 3rd Party Platforms"
 	$(Q) $(call CLONE_ESP_HAL_3RDPARTY_REPO)
 ifneq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
+	$(Q) echo "Espressif HAL for 3rd Party Platforms: cleaning current repository..."
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) clean -ffdx
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) reset --quiet --hard --recurse-submodules || true
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: ${ESP_HAL_3RDPARTY_VERSION}"
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
 endif
 
 # Silent preprocessor warnings
 
-CFLAGS += -Wno-undef -Wno-unused-variable -fno-jump-tables -fno-tree-switch-conversion
+CFLAGS += -Wno-undef -Wno-unused-variable -fno-jump-tables -fno-tree-switch-conversion -Wno-deprecated-declarations
 
 # Enable strict volatile bitfield access
 

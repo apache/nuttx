@@ -124,8 +124,9 @@ static int init_ota_partitions(void)
 {
   struct mtd_dev_s *mtd;
   int ret = OK;
+  int i;
 
-  for (int i = 0; i < nitems(g_ota_partition_table); ++i)
+  for (i = 0; i < nitems(g_ota_partition_table); ++i)
     {
       const struct partition_s *part = &g_ota_partition_table[i];
 #if defined(CONFIG_ESP32S3_SPIRAM) || defined(CONFIG_ESP32S3_PARTITION_TABLE)
@@ -451,8 +452,6 @@ int board_spiflash_init(void)
 
 #if defined(CONFIG_ESP32S3_SPIRAM) || defined(CONFIG_ESP32S3_PARTITION_TABLE)
   ret = esp32s3_spiflash_init();
-#else
-  ret = esp_spiflash_init();
 #endif
   if (ret < 0)
     {

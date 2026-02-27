@@ -40,7 +40,7 @@
 #include <arch/board/board.h>
 
 #include "esp32_spi.h"
-#include "esp32_gpio.h"
+#include "espressif/esp_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -86,21 +86,21 @@ int board_lcd_initialize(void)
 
   /* SPI RX is not used. Same pin is used as LCD Data/Command control */
 
-  esp32_configgpio(DISPLAY_DC, OUTPUT);
-  esp32_gpiowrite(DISPLAY_DC, true);
+  esp_configgpio(DISPLAY_DC, OUTPUT);
+  esp_gpiowrite(DISPLAY_DC, true);
 
   /* Pull LCD_RESET high */
 
-  esp32_configgpio(DISPLAY_RST, OUTPUT);
-  esp32_gpiowrite(DISPLAY_RST, false);
+  esp_configgpio(DISPLAY_RST, OUTPUT);
+  esp_gpiowrite(DISPLAY_RST, false);
   up_mdelay(1);
-  esp32_gpiowrite(DISPLAY_RST, true);
+  esp_gpiowrite(DISPLAY_RST, true);
   up_mdelay(10);
 
   /* Set full brightness */
 
-  esp32_configgpio(DISPLAY_BCKL, OUTPUT);
-  esp32_gpiowrite(DISPLAY_BCKL, true);
+  esp_configgpio(DISPLAY_BCKL, OUTPUT);
+  esp_gpiowrite(DISPLAY_BCKL, true);
 
   lcdinfo("LCD successfully initialized");
 

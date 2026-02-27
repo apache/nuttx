@@ -48,15 +48,16 @@
 #include <nuttx/sched.h>
 #include <nuttx/signal.h>
 
-#include "hardware/esp32s3_rtccntl.h"
+#include "soc/rtc_cntl_reg.h"
 #include "hardware/esp32s3_syscon.h"
 #include "hardware/wdev_reg.h"
 #include "xtensa.h"
 #include "esp_attr.h"
-#include "esp32s3_irq.h"
-#include "esp32s3_rt_timer.h"
-#include "esp32s3_rtc.h"
+#include "esp_irq.h"
+#include "esp_hr_timer.h"
 #include "espressif/esp_wireless.h"
+
+#include "soc/rtc.h"
 
 #include "esp_bt.h"
 #include "esp_log.h"
@@ -99,44 +100,14 @@
 #define OSI_VERSION                      0x0001000a
 #define OSI_MAGIC_VALUE                  0xfadebead
 
-#define BLE_PWR_HDL_INVL                 0xffff
-
 #ifdef CONFIG_ESPRESSIF_SPIFLASH
 #  define BLE_TASK_EVENT_QUEUE_ITEM_SIZE  8
 #  define BLE_TASK_EVENT_QUEUE_LEN        8
 #endif
 
-#ifdef CONFIG_ESPRESSIF_BLE_INTERRUPT_SAVE_STATUS
-#  define NR_IRQSTATE_FLAGS   CONFIG_ESPRESSIF_BLE_INTERRUPT_SAVE_STATUS
-#else
-#  define NR_IRQSTATE_FLAGS   3
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-/* Pack using bitfields for better memory use */
-
-typedef struct vector_desc_s vector_desc_t;
-
-struct vector_desc_s
-{
-  int flags: 16;
-  unsigned int cpu: 1;
-  unsigned int intno: 5;
-  int source: 8;
-  void *shared_vec_info;
-  vector_desc_t *next;
-};
-
-/** Interrupt handler associated data structure */
-
-struct intr_handle_data_t
-{
-  vector_desc_t *vector_desc;
-  void *shared_vector_desc;
-};
 
 /* VHCI function interface */
 
@@ -145,16 +116,6 @@ typedef struct vhci_host_callback_s
   void (*notify_host_send_available)(void);               /* callback used to notify that the host can send packet to controller */
   int (*notify_host_recv)(uint8_t *data, uint16_t len);   /* callback used to notify that the controller has a packet to send to the host */
 } vhci_host_callback_t;
-
-typedef struct
-{
-  int source;               /* ISR source */
-  int flags;                /* ISR alloc flag */
-  void (*fn)(void *);       /* ISR function */
-  void *arg;                /* ISR function args */
-  intr_handle_t *handle;    /* ISR handle */
-  esp_err_t ret;
-} btdm_isr_alloc_t;
 
 /* BLE OS function */
 
@@ -479,9 +440,6 @@ extern int api_vhci_host_register_callback(const vhci_host_callback_t
 
 /* TX power */
 
-extern int ble_txpwr_set(int power_type, uint16_t handle, int power_level);
-extern int ble_txpwr_get(int power_type, uint16_t handle);
-
 extern int coex_core_ble_conn_dyn_prio_get(bool *low, bool *high);
 extern void coex_pti_v2(void);
 
@@ -641,11 +599,9 @@ static DRAM_ATTR void * g_light_sleep_pm_lock;
 
 /* BT interrupt private data */
 
-static sq_queue_t g_ble_int_flags_free;
+irqstate_t g_ble_int_flags;
 
-static sq_queue_t g_ble_int_flags_used;
-
-static struct irqstate_list_s g_ble_int_flags[NR_IRQSTATE_FLAGS];
+static int g_ble_int_count = 0;
 
 /* Cached queue control variables */
 
@@ -763,9 +719,7 @@ static int interrupt_alloc_wrapper(int cpu_id,
                                    void *arg,
                                    void **ret_handle)
 {
-  btdm_isr_alloc_t *p;
-  struct intr_handle_data_t *handle;
-  vector_desc_t *vd;
+  struct intr_adapter_to_nuttx *isr_adapter_args;
   int ret = OK;
   int cpuint;
   int irq;
@@ -773,57 +727,24 @@ static int interrupt_alloc_wrapper(int cpu_id,
   wlinfo("cpu_id=%d , source=%d , handler=%p, arg=%p, ret_handle=%p\n",
          cpu_id, source, handler, arg, ret_handle);
 
-  p = kmm_calloc(1, sizeof(btdm_isr_alloc_t));
-  if (p == NULL)
+  isr_adapter_args = kmm_calloc(1, sizeof(struct intr_adapter_to_nuttx));
+  if (isr_adapter_args == NULL)
     {
-      return ESP_ERR_NOT_FOUND;
+      irqerr("Failed to kmm_calloc\n");
+      return ESP_ERR_NO_MEM;
     }
 
-  handle = kmm_calloc(1, sizeof(struct intr_handle_data_t));
-  if (handle == NULL)
-    {
-      free(p);
-      return ESP_ERR_NOT_FOUND;
-    }
+  isr_adapter_args->handler = handler;
+  isr_adapter_args->arg = arg;
 
-  p->source = source;
-  p->flags = ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM;
-  p->fn = handler;
-  p->arg = arg;
-  p->handle = (intr_handle_t *)ret_handle;
-
-  cpuint = esp32s3_setup_irq(cpu_id, source, 2, ESP32S3_CPUINT_LEVEL);
+  cpuint = esp_setup_irq(source, 2, ESP_IRQ_TRIGGER_LEVEL, esp_int_adpt_cb,
+                         isr_adapter_args);
   if (cpuint < 0)
     {
-      kmm_free(handle);
       return ESP_ERR_NOT_FOUND;
     }
 
-  vd = kmm_calloc(1, sizeof(vector_desc_t));
-  if (vd == NULL)
-    {
-      kmm_free(handle);
-      return ESP_ERR_NOT_FOUND;
-    }
-
-  vd->intno = cpuint;
-  vd->cpu = cpu_id;
-  vd->source = source;
-
-  irq = esp32s3_getirq(cpu_id, cpuint);
-
-  handle->vector_desc = vd;
-  handle->shared_vector_desc = vd->shared_vec_info;
-
-  *(p->handle) = handle;
-
-  ret = irq_attach(irq, esp_int_adpt_cb, p);
-  if (ret != OK)
-    {
-      kmm_free(p);
-      kmm_free(handle);
-      return ESP_ERR_NOT_FOUND;
-    }
+  (*ret_handle) = (void *)esp_get_handle(cpu_id, ESP_SOURCE2IRQ(source));
 
   return ESP_OK;
 }
@@ -868,13 +789,12 @@ static void IRAM_ATTR global_interrupt_disable(void)
 {
   struct irqstate_list_s *irqstate;
 
-  irqstate = (struct irqstate_list_s *)sq_remlast(&g_ble_int_flags_free);
+  if (g_ble_int_count == 0)
+    {
+      g_ble_int_flags = enter_critical_section();
+    }
 
-  ASSERT(irqstate != NULL);
-
-  irqstate->flags = enter_critical_section();
-
-  sq_addlast((sq_entry_t *)irqstate, &g_ble_int_flags_used);
+  g_ble_int_count++;
 }
 
 /****************************************************************************
@@ -896,13 +816,12 @@ static void IRAM_ATTR global_interrupt_restore(void)
 {
   struct irqstate_list_s *irqstate;
 
-  irqstate = (struct irqstate_list_s *)sq_remlast(&g_ble_int_flags_used);
+  g_ble_int_count--;
 
-  ASSERT(irqstate != NULL);
-
-  leave_critical_section(irqstate->flags);
-
-  sq_addlast((sq_entry_t *)irqstate, &g_ble_int_flags_free);
+  if (g_ble_int_count == 0)
+    {
+      leave_critical_section(g_ble_int_flags);
+    }
 }
 
 /****************************************************************************
@@ -1001,7 +920,7 @@ static void semphr_delete_wrapper(void *semphr)
  *   hptw   - Unused.
  *
  * Returned Value:
- *   True if success or false if fail
+ *   True
  *
  ****************************************************************************/
 
@@ -2039,30 +1958,7 @@ static void * coex_schm_curr_phase_get_wrapper(void)
 
 static int interrupt_enable_wrapper(void *handle)
 {
-  intr_handle_t isr = (intr_handle_t)handle;
-  int ret = ESP_OK;
-  int cpuint;
-  int irq;
-
-  cpuint = isr->vector_desc->intno;
-
-  irq = esp32s3_getirq(0, cpuint);
-  if (irq == 127)
-    {
-      wlerr("CPU interrupt is not assigned!\n");
-      return ESP_ERR_INVALID_ARG;
-    }
-
-  ret = esp32s3_irq_set_iram_isr(irq);
-  if (ret != ESP_OK)
-    {
-      wlerr("Failed to set IRAM ISR\n");
-      return ESP_ERR_INVALID_ARG;
-    }
-
-  up_enable_irq(irq);
-
-  return ret == OK ? ESP_OK : ESP_ERR_INVALID_ARG;
+  return esp_intr_enable((intr_handle_t)handle);
 }
 
 /****************************************************************************
@@ -2083,23 +1979,7 @@ static int interrupt_enable_wrapper(void *handle)
 
 static int interrupt_disable_wrapper(void *handle)
 {
-  intr_handle_t isr = (intr_handle_t)handle;
-  int ret = ESP_OK;
-  int cpuint;
-  int irq;
-
-  cpuint = isr->vector_desc->intno;
-
-  irq = esp32s3_getirq(0, cpuint);
-  if (irq == 127)
-    {
-      wlerr("CPU interrupt is not assigned!\n");
-      return ESP_ERR_INVALID_ARG;
-    }
-
-  up_disable_irq(irq);
-
-  return ret == OK ? ESP_OK : ESP_ERR_INVALID_ARG;
+  return esp_intr_disable((intr_handle_t)handle);
 }
 
 /****************************************************************************
@@ -2326,7 +2206,7 @@ static IRAM_ATTR int32_t esp_queue_send_generic(void *queue, void *item,
  *   Transform ticks to time and add this time to timespec value
  *
  * Input Parameters:
- *   ticks    - System ticks
+ *   ticks - System ticks
  *
  * Output Parameters:
  *   timespec - Input timespec data pointer
@@ -2373,7 +2253,10 @@ static void IRAM_ATTR btdm_slp_tmr_callback(void *arg)
  *   BT interrupt adapter callback function
  *
  * Input Parameters:
- *   arg - interrupt adapter private data
+ *   irq     - IRQ associated to that interrupt.
+ *   context - Interrupt register state save info.
+ *   arg     - A pointer to the argument provided when the interrupt
+ *             was registered.
  *
  * Returned Value:
  *   NuttX error code
@@ -2382,9 +2265,11 @@ static void IRAM_ATTR btdm_slp_tmr_callback(void *arg)
 
 static int IRAM_ATTR esp_int_adpt_cb(int irq, void *context, void *arg)
 {
-  btdm_isr_alloc_t *p = (btdm_isr_alloc_t *)arg;
+  struct intr_adapter_to_nuttx *isr_adapter_args;
 
-  p->fn(p->arg);
+  isr_adapter_args = (struct intr_adapter_to_nuttx *)arg;
+
+  isr_adapter_args->handler(isr_adapter_args->arg);
 
   return OK;
 }
@@ -2572,7 +2457,7 @@ static esp_err_t btdm_low_power_mode_init(esp_bt_controller_config_t *cfg)
             {
               /* check whether or not EXT_CRYS is working */
 
-              if (esp32s3_rtc_clk_slow_freq_get() !=
+              if (rtc_clk_slow_src_get() !=
                   SOC_RTC_SLOW_CLK_SRC_XTAL32K)
                 {
                   wlwarn("32.768kHz XTAL not detected, fall back to main"
@@ -2587,7 +2472,7 @@ static esp_err_t btdm_low_power_mode_init(esp_bt_controller_config_t *cfg)
             {
               /* Internal 136kHz RC oscillator */
 
-              if (esp32s3_rtc_clk_slow_freq_get() ==
+              if (rtc_clk_slow_src_get() ==
                   SOC_RTC_SLOW_CLK_SRC_RC_SLOW)
                 {
                   wlwarn("Internal 136kHz RC oscillator. The accuracy of "
@@ -3082,7 +2967,7 @@ static void coex_bt_wakeup_request_end(void)
 
 static IRAM_ATTR int64_t get_time_us_wrapper(void)
 {
-  return (int64_t)esp32s3_rt_timer_time_us();
+  return (int64_t)esp_hr_timer_time_us();
 }
 
 /****************************************************************************
@@ -3160,75 +3045,6 @@ uint32_t get_ble_controller_free_heap_size(void)
 }
 
 /****************************************************************************
- * Other Functions
- ****************************************************************************/
-
-int32_t esp_ble_to_errno(int err)
-{
-  int ret;
-
-  if (err < ESP_ERR_WIFI_BASE)
-    {
-      /* Unmask component error bits */
-
-      ret = err & 0xfff;
-
-      switch (ret)
-        {
-          case ESP_OK:
-            ret = OK;
-            break;
-          case ESP_ERR_NO_MEM:
-            ret = -ENOMEM;
-            break;
-
-          case ESP_ERR_INVALID_ARG:
-            ret = -EINVAL;
-            break;
-
-          case ESP_ERR_INVALID_STATE:
-            ret = -EIO;
-            break;
-
-          case ESP_ERR_INVALID_SIZE:
-            ret = -EINVAL;
-            break;
-
-          case ESP_ERR_NOT_FOUND:
-            ret = -ENOSYS;
-            break;
-
-          case ESP_ERR_NOT_SUPPORTED:
-            ret = -ENOSYS;
-            break;
-
-          case ESP_ERR_TIMEOUT:
-            ret = -ETIMEDOUT;
-            break;
-
-          case ESP_ERR_INVALID_MAC:
-            ret = -EINVAL;
-            break;
-
-          default:
-            ret = ERROR;
-            break;
-        }
-    }
-  else
-    {
-      ret = ERROR;
-    }
-
-  if (ret != OK)
-    {
-      wlerr("ERROR: %s\n", esp_err_to_name(err));
-    }
-
-  return ret;
-}
-
-/****************************************************************************
  * Name: esp32s3_bt_controller_init
  *
  * Description:
@@ -3250,13 +3066,7 @@ int esp32s3_bt_controller_init(void)
   int i;
   int err;
 
-  sq_init(&g_ble_int_flags_free);
-  sq_init(&g_ble_int_flags_used);
-
-  for (i = 0; i < NR_IRQSTATE_FLAGS; i++)
-    {
-      sq_addlast((sq_entry_t *)&g_ble_int_flags[i], &g_ble_int_flags_free);
-    }
+  g_ble_int_count = 0;
 
   if (g_btdm_controller_status != ESP_BT_CONTROLLER_STATUS_IDLE)
     {
@@ -3381,9 +3191,9 @@ int esp32s3_bt_controller_init(void)
 
 error:
 
-  bt_controller_deinit_internal ();
+  bt_controller_deinit_internal();
 
-  return esp_ble_to_errno(err);
+  return esp_wifi_to_errno(err);
 }
 
 /****************************************************************************

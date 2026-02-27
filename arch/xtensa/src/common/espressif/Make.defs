@@ -20,6 +20,10 @@
 #
 ############################################################################
 
+# Silent preprocessor warnings
+
+CFLAGS += -Wno-shadow -Wno-undef
+
 ifeq ($(CONFIG_ESP_RMT),y)
 CHIP_CSRCS += esp_rmt.c
 ifeq ($(CONFIG_WS2812_NON_SPI_DRIVER),y)
@@ -124,19 +128,26 @@ ifeq ($(CONFIG_ESPRESSIF_ADC),y)
 CHIP_CSRCS += esp_adc.c
 endif
 
-ifneq ($(CONFIG_ARCH_CHIP_ESP32),y)
 ifeq ($(CONFIG_PM),y)
 ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
 CHIP_CSRCS += esp_pm_initialize.c
 endif
 CHIP_CSRCS += esp_pm.c
-LDFLAGS += -u esp_timer_init_include_func
-endif
 endif
 
-CHIP_CSRCS += esp_efuse.c
+CHIP_CSRCS += esp_efuse.c esp_irq.c esp_xtensa_intr.c esp_gpio.c
+
+ifeq ($(CONFIG_RTC_DRIVER),y)
+CHIP_CSRCS += esp_rtc.c
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_HR_TIMER),y)
+CHIP_CSRCS += esp_timer_adapter.c
+endif
 
 LDFLAGS += -u esp_system_include_startup_funcs
+LDFLAGS += -u esp_timer_init_include_func
+
 ifeq ($(CONFIG_ESPRESSIF_EFUSE),y)
 LDFLAGS    += -u esp_efuse_startup_include_func
 endif

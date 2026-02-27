@@ -36,7 +36,7 @@
 #include <nuttx/input/touchscreen.h>
 
 #include "esp32s3_i2c.h"
-#include "esp32s3_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
 
 #include "esp32s3-box.h"

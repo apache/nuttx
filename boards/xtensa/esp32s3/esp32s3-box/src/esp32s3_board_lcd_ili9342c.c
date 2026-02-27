@@ -42,7 +42,7 @@
 
 #include <arch/board/board.h>
 
-#include "esp32s3_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "esp32s3_spi.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
 
@@ -488,21 +488,21 @@ static struct ili9341_lcd_s *esp32s3_initializa_ili9342c(int spi_port)
 
   /* Initialize non-SPI GPIOs */
 
-  esp32s3_configgpio(DISPLAY_DC, OUTPUT);
-  esp32s3_configgpio(DISPLAY_RST, OUTPUT);
-  esp32s3_configgpio(DISPLAY_BCKL, OUTPUT);
+  esp_configgpio(DISPLAY_DC, OUTPUT);
+  esp_configgpio(DISPLAY_RST, OUTPUT);
+  esp_configgpio(DISPLAY_BCKL, OUTPUT);
 
   /* Reset LCD */
 
   nxsched_usleep(10 * 1000);
-  esp32s3_gpiowrite(DISPLAY_RST, true);
+  esp_gpiowrite(DISPLAY_RST, true);
   nxsched_usleep(10 * 1000);
-  esp32s3_gpiowrite(DISPLAY_RST, false);
+  esp_gpiowrite(DISPLAY_RST, false);
   nxsched_usleep(50 * 1000);
 
   /* Turn on LCD backlight */
 
-  esp32s3_gpiowrite(DISPLAY_BCKL, true);
+  esp_gpiowrite(DISPLAY_BCKL, true);
 
   g_lcddev.spi_dev = esp32s3_spibus_initialize(spi_port);
   if (!g_lcddev.spi_dev)
@@ -547,7 +547,9 @@ static void ili9342c_configure(struct ili9341_lcd_s *lcd,
   lcd->sendcmd(lcd, cmd);
   if (data_bytes)
     {
-      for (int i = 0; i < data_bytes; i++)
+      int i;
+
+      for (i = 0; i < data_bytes; i++)
         {
           lcd->sendparam(lcd, data[i]);
         }
@@ -576,6 +578,7 @@ static void ili9342c_configure(struct ili9341_lcd_s *lcd,
 int board_lcd_initialize(void)
 {
   struct ili9341_lcd_s *ili9342c_lcd;
+  int i;
 
   ili9342c_lcd = esp32s3_initializa_ili9342c(DISPLAY_SPI);
   if (!ili9342c_lcd)
@@ -591,7 +594,7 @@ int board_lcd_initialize(void)
       return -ENODEV;
     }
 
-  for (int i = 0; i < nitems(g_lcd_config); i++)
+  for (i = 0; i < nitems(g_lcd_config); i++)
     {
       ili9342c_configure(ili9342c_lcd,
                          g_lcd_config[i].cmd,

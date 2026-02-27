@@ -36,7 +36,7 @@
 #include <nuttx/video/fb.h>
 #include <nuttx/signal.h>
 
-#include "esp32s3_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "esp32s3-lcd-ev.h"
 
 /****************************************************************************
@@ -614,12 +614,14 @@ static void lcd_initialize_spi(void)
 
 static void lcd_configure_display(void)
 {
+  int i;
+
   /* Pull-up V-SYNC pin to start configuring LCD */
 
-  esp32s3_configgpio(CONFIG_ESP32S3_LCD_VSYNC_PIN, OUTPUT | PULLUP);
-  esp32s3_gpiowrite(CONFIG_ESP32S3_LCD_VSYNC_PIN, 1);
+  esp_configgpio(CONFIG_ESP32S3_LCD_VSYNC_PIN, OUTPUT | PULLUP);
+  esp_gpiowrite(CONFIG_ESP32S3_LCD_VSYNC_PIN, 1);
 
-  for (int i = 0; i < nitems(g_lcd_config); i++)
+  for (i = 0; i < nitems(g_lcd_config); i++)
     {
       send_cmd(g_lcd_config[i].cmd);
 

@@ -37,7 +37,7 @@
 #include <nuttx/irq.h>
 #include <arch/irq.h>
 
-#include "esp32_gpio.h"
+#include "espressif/esp_gpio.h"
 
 #include "lilygo_tbeam_lora_gps.h"
 
@@ -58,7 +58,7 @@
 
 uint32_t board_button_initialize(void)
 {
-  esp32_configgpio(BUTTON_BOOT, INPUT_FUNCTION_3 | PULLUP);
+  esp_configgpio(BUTTON_BOOT, INPUT_FUNCTION_3 | PULLUP | CHANGE);
   return 1;
 }
 
@@ -79,13 +79,13 @@ uint32_t board_buttons(void)
   int i = 0;
   int n = 0;
 
-  bool b0 = esp32_gpioread(BUTTON_BOOT);
+  bool b0 = esp_gpioread(BUTTON_BOOT);
 
   for (i = 0; i < 10; i++)
     {
       up_mdelay(1); /* TODO */
 
-      bool b1 = esp32_gpioread(BUTTON_BOOT);
+      bool b1 = esp_gpioread(BUTTON_BOOT);
 
       if (b0 == b1)
         {
@@ -131,38 +131,6 @@ uint32_t board_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 {
-  int ret;
-  DEBUGASSERT(id == 0);
-
-  int irq = ESP32_PIN2IRQ(BUTTON_BOOT);
-
-  if (NULL != irqhandler)
-    {
-      /* Make sure the interrupt is disabled */
-
-      esp32_gpioirqdisable(irq);
-
-      ret = irq_attach(irq, irqhandler, arg);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: irq_attach() failed: %d\n", ret);
-          return ret;
-        }
-
-      gpioinfo("Attach %p\n", irqhandler);
-
-      gpioinfo("Enabling the interrupt\n");
-
-      /* Configure the interrupt for rising and falling edges */
-
-      esp32_gpioirqenable(irq, CHANGE);
-    }
-  else
-    {
-      gpioinfo("Disable the interrupt\n");
-      esp32_gpioirqdisable(irq);
-    }
-
-  return OK;
+  return esp_gpio_irq(BUTTON_BOOT, irqhandler, arg);
 }
 #endif

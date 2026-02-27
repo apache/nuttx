@@ -33,7 +33,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "esp32_gpio.h"
+#include "espressif/esp_gpio.h"
 #include "esp32-wrover-kit.h"
 
 /****************************************************************************
@@ -84,7 +84,7 @@ uint32_t board_userled_initialize(void)
 
   for (i = 0; i < BOARD_NLEDS; i++)
     {
-      esp32_configgpio(g_ledcfg[i], OUTPUT);
+      esp_configgpio(g_ledcfg[i], OUTPUT);
     }
 
   return BOARD_NLEDS;
@@ -98,7 +98,7 @@ void board_userled(int led, bool ledon)
 {
   if ((unsigned)led < BOARD_NLEDS)
     {
-      esp32_gpiowrite(g_ledcfg[led], ledon);
+      esp_gpiowrite(g_ledcfg[led], ledon);
     }
 }
 
@@ -112,7 +112,6 @@ void board_userled_all(uint32_t ledset)
 
   for (i = 0; i < BOARD_NLEDS; i++)
     {
-      esp32_gpiowrite(g_ledcfg[i], (ledset & (1 << i)) != 0);
+      esp_gpiowrite(g_ledcfg[i], (ledset & (1 << i)) != 0);
     }
 }
-

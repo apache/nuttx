@@ -31,8 +31,8 @@
 #include <debug.h>
 #include <errno.h>
 
-#include "esp32_clockconfig.h"
-#include "esp32_gpio.h"
+#include "esp_clk.h"
+#include "esp_gpio.h"
 #include "esp32_ledc.h"
 
 #include "xtensa.h"
@@ -576,8 +576,8 @@ static int pwm_setup(struct pwm_lowerhalf_s *dev)
       pwminfo("channel%d --> pin%d\n", priv->chans[i].num,
               priv->chans[i].pin);
 
-      esp32_configgpio(priv->chans[i].pin, OUTPUT | PULLUP);
-      esp32_gpio_matrix_out(priv->chans[i].pin,
+      esp_configgpio(priv->chans[i].pin, OUTPUT | PULLUP);
+      esp_gpio_matrix_out(priv->chans[i].pin,
                               LEDC_LS_SIG_OUT0_IDX + priv->chans[i].num,
                               0, 0);
     }

@@ -35,7 +35,6 @@
 
 #include "chip.h"
 #include "xtensa.h"
-#include "xtensa_attr.h"
 #ifdef CONFIG_ESP32_USER_DATA_EXTMEM
 #include "esp32_spiram.h"
 #endif

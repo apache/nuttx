@@ -61,8 +61,7 @@
 #include "hal/regi2c_ctrl.h"
 #include "hal/temperature_sensor_ll.h"
 #include "hal/temperature_sensor_types.h"
-#include "soc/temperature_sensor_periph.h"
-#include "esp_efuse_rtc_calib.h"
+#include "hal/temperature_sensor_periph.h"
 #include "hal/adc_ll.h"
 
 /****************************************************************************
@@ -105,7 +104,6 @@ struct esp_temp_priv_s
   const temperature_sensor_attribute_t *tsens_attribute; /* Attribute struct of the common layer */
   struct esp_temp_sensor_config_t cfg;                   /* Configuration struct of the common layer */
   temperature_sensor_clk_src_t clk_src;                  /* Clock source to use */
-  int module;                                            /* Peripheral module */
   int refs;                                              /* Reference count */
   mutex_t lock;                                          /* Mutual exclusion mutex */
 #ifdef CONFIG_ESPRESSIF_TEMP_UORB
@@ -197,7 +195,6 @@ struct esp_temp_priv_s esp_temp_priv =
     0
   },
   .clk_src = TEMPERATURE_SENSOR_CLK_SRC_DEFAULT,
-  .module = PERIPH_TEMPSENSOR_MODULE,
   .refs = 0,
   .lock = NXMUTEX_INITIALIZER,
 #ifdef CONFIG_ESPRESSIF_TEMP_UORB
@@ -321,11 +318,10 @@ static int temperature_sensor_choose_best_range(struct esp_temp_priv_s *priv)
 
 static int temperature_sensor_read_delta_t(void)
 {
-  if (esp_efuse_rtc_calib_get_tsens_val(&g_delta_t) != OK)
+  g_delta_t = temperature_sensor_ll_load_calib_param();
+  if (g_delta_t == 0)
     {
-      snwarn("Calibration failed");
-      g_delta_t = 0;
-      return ERROR;
+      snwarn("No calibration param in eFuse");
     }
 
   sninfo("delta_T = %f", g_delta_t);

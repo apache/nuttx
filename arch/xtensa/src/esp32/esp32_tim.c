@@ -33,7 +33,7 @@
 
 #include "hardware/esp32_tim.h"
 
-#include "esp32_irq.h"
+#include "espressif/esp_irq.h"
 
 #include "esp32_tim.h"
 
@@ -530,8 +530,8 @@ static int esp32_tim_setisr(struct esp32_tim_dev_s *dev, xcpt_t handler,
            */
 
           up_disable_irq(tim->irq);
-          esp32_teardown_irq(tim->core, tim->periph, tim->cpuint);
-          irq_detach(tim->irq);
+          esp_teardown_irq(tim->periph, tim->cpuint);
+
           tim->cpuint = -ENOMEM;
           tim->core = -ENODEV;
         }
@@ -551,22 +551,14 @@ static int esp32_tim_setisr(struct esp32_tim_dev_s *dev, xcpt_t handler,
       /* Set up to receive peripheral interrupts on the current CPU */
 
       tim->core = this_cpu();
-      tim->cpuint = esp32_setup_irq(tim->core, tim->periph,
-                                    tim->priority, ESP32_CPUINT_LEVEL);
+      tim->cpuint = esp_setup_irq(tim->periph,
+                                  tim->priority,
+                                  ESP_IRQ_TRIGGER_LEVEL,
+                                  handler, arg);
       if (tim->cpuint < 0)
         {
           tmrerr("ERROR: No CPU Interrupt available");
           ret = tim->cpuint;
-          goto errout;
-        }
-
-      /* Associate an IRQ Number (from the timer) to an ISR */
-
-      ret = irq_attach(tim->irq, handler, arg);
-      if (ret != OK)
-        {
-          esp32_teardown_irq(tim->core, tim->periph, tim->cpuint);
-          tmrerr("ERROR: Failed to associate an IRQ Number");
           goto errout;
         }
 

@@ -43,7 +43,7 @@
 #include "xtensa.h"
 #include "esp_attr.h"
 #include "hardware/wdev_reg.h"
-#include "esp32s3_clockconfig.h"
+#include "esp_clk.h"
 
 #include "esp_random.h"
 

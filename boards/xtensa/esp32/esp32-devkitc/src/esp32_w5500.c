@@ -42,8 +42,8 @@
 
 #include "esp32-devkitc.h"
 #include "esp32_spi.h"
-#include "esp32_gpio.h"
-#include "hardware/esp32_gpio_sigmap.h"
+#include "espressif/esp_gpio.h"
+#include "hardware/esp_gpio_sigmap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -135,25 +135,22 @@ static void up_enable(const struct w5500_lower_s *lower, bool enable)
 {
   struct esp32_lower_s *priv = (struct esp32_lower_s *)lower;
 
-  int irq = ESP32_PIN2IRQ(GPIO_W5500_INTR);
-  int ret;
-
   /* Make sure the interrupt is disabled */
 
-  esp32_gpioirqdisable(irq);
+  esp_gpioirqdisable(irq);
 
   DEBUGASSERT(priv->handler);
   if (enable)
     {
-      ret = irq_attach(irq, priv->handler, priv->arg);
+      int ret = esp_gpio_irq(GPIO_W5500_INTR, priv->handler, priv->arg);
       if (ret < 0)
         {
-          syslog(LOG_ERR, "ERROR: irq_attach() failed: %d\n", ret);
+          syslog(LOG_ERR, "ERROR: esp_gpio_irq() failed: %d\n", ret);
         }
 
       /* IRQ on rising edge */
 
-      esp32_gpioirqenable(irq, RISING);
+      esp_gpioirqenable(GPIO_W5500_INTR);
     }
   else
     {
@@ -170,7 +167,7 @@ static void up_reset(const struct w5500_lower_s *lower, bool reset)
 {
   /* Take W5500 out of reset (active low) */
 
-  esp32_gpiowrite(GPIO_W5500_RESET, !reset);
+  esp_gpiowrite(GPIO_W5500_RESET, !reset);
 }
 
 /****************************************************************************
@@ -188,13 +185,12 @@ void riscv_netinitialize(void)
 
   /* Configure the interrupt pin */
 
-  esp32_configgpio(GPIO_W5500_INTR, INPUT_FUNCTION_1 | PULLDOWN);
+  esp_configgpio(GPIO_W5500_INTR, INPUT_FUNCTION_1 | PULLDOWN | RISING);
 
   /* Configure the reset pin as output */
 
-  esp32_gpio_matrix_out(GPIO_W5500_RESET, SIG_GPIO_OUT_IDX, 0, 0);
-  esp32_configgpio(GPIO_W5500_RESET, OUTPUT_FUNCTION_1 |
-                     INPUT_FUNCTION_1);
+  esp_gpio_matrix_out(GPIO_W5500_RESET, SIG_GPIO_OUT_IDX, 0, 0);
+  esp_configgpio(GPIO_W5500_RESET, OUTPUT_FUNCTION_1 | INPUT_FUNCTION_1);
 
   /* Assumptions:
    * 1) W5500 pins were configured in up_spi.c early in the boot-up phase.
@@ -222,4 +218,3 @@ void riscv_netinitialize(void)
   ninfo("Bound SPI port %d to W5500 device %d\n",
         W5500_SPI_PORTNO, W5500_DEVNO);
 }
-

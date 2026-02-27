@@ -35,6 +35,7 @@
 #include "clock/clock.h"
 #include "xtensa.h"
 #include "xtensa_counter.h"
+#include "esp_irq.h"
 
 /****************************************************************************
  * Private data
@@ -65,7 +66,7 @@ static uint32_t g_tick_divisor;
  *
  ****************************************************************************/
 
-static int esp32s2_timerisr(int irq, uint32_t *regs, void *arg)
+static int esp32s2_timerisr(int irq, void *regs, void *arg)
 {
   uint32_t divisor;
   uint32_t compare;
@@ -131,9 +132,14 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt */
 
-  irq_attach(XTENSA_IRQ_TIMER0, (xcpt_t)esp32s2_timerisr, NULL);
+  esp_setup_irq(ETS_INTERNAL_TIMER0_INTR_SOURCE,
+                ESP_IRQ_PRIORITY_1,
+                0,
+                esp32s2_timerisr,
+                NULL);
 
   /* Enable the timer 0 CPU interrupt. */
 
-  up_enable_irq(XTENSA_IRQ_TIMER0);
+  up_enable_irq(ETS_INTERNAL_TIMER0_INTR_SOURCE +
+                ETS_INTERNAL_INTR_SOURCE_OFF);
 }

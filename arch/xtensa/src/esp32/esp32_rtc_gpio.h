@@ -25,9 +25,8 @@
  * Included Files
  ****************************************************************************/
 
-#include "hardware/esp32_gpio.h"
 #include "hardware/esp32_rtc_io.h"
-#include "hardware/esp32_rtccntl.h"
+#include "soc/rtc_cntl_reg.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -162,50 +161,6 @@ typedef uint16_t rtcio_pinattr_t;
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-static const int g_gpio_to_rtcio_map[GPIO_PIN_COUNT + 1] =
-{
-  RTCIO_GPIO0_CHANNEL,        /* GPIO0 */
-  -1,                         /* GPIO1 not supported */
-  RTCIO_GPIO2_CHANNEL,        /* GPIO2 */
-  -1,                         /* GPIO3 not supported */
-  RTCIO_GPIO4_CHANNEL,        /* GPIO4 */
-  -1,                         /* GPIO5 not supported */
-  -1,                         /* GPIO6 not supported */
-  -1,                         /* GPIO7 not supported */
-  -1,                         /* GPIO8 not supported */
-  -1,                         /* GPIO9 not supported */
-  -1,                         /* GPIO10 not supported */
-  -1,                         /* GPIO11 not supported */
-  RTCIO_GPIO12_CHANNEL,       /* GPIO12 */
-  RTCIO_GPIO13_CHANNEL,       /* GPIO13 */
-  RTCIO_GPIO14_CHANNEL,       /* GPIO14 */
-  RTCIO_GPIO15_CHANNEL,       /* GPIO15 */
-  -1,                         /* GPIO16 not supported */
-  -1,                         /* GPIO17 not supported */
-  -1,                         /* GPIO18 not supported */
-  -1,                         /* GPIO19 not supported */
-  -1,                         /* GPIO20 not supported */
-  -1,                         /* GPIO21 not supported */
-  -1,                         /* GPIO22 not supported */
-  -1,                         /* GPIO23 not supported */
-  -1,                         /* GPIO24 not supported */
-  RTCIO_GPIO25_CHANNEL,       /* GPIO25 */
-  RTCIO_GPIO26_CHANNEL,       /* GPIO26 */
-  RTCIO_GPIO27_CHANNEL,       /* GPIO27 */
-  -1,                         /* GPIO28 not supported */
-  -1,                         /* GPIO29 not supported */
-  -1,                         /* GPIO30 not supported */
-  -1,                         /* GPIO31 not supported */
-  RTCIO_GPIO32_CHANNEL,       /* GPIO32 */
-  RTCIO_GPIO33_CHANNEL,       /* GPIO33 */
-  RTCIO_GPIO34_CHANNEL,       /* GPIO34 */
-  RTCIO_GPIO35_CHANNEL,       /* GPIO35 */
-  RTCIO_GPIO36_CHANNEL,       /* GPIO36 */
-  RTCIO_GPIO37_CHANNEL,       /* GPIO37 */
-  RTCIO_GPIO38_CHANNEL,       /* GPIO38 */
-  RTCIO_GPIO39_CHANNEL        /* GPIO39 */
-};
 
 static const rtc_io_desc_t g_rtc_io_desc[RTC_GPIO_NUMBER] =
 {
@@ -542,7 +497,7 @@ static const rtc_io_desc_t g_rtc_io_desc[RTC_GPIO_NUMBER] =
 int esp32_configrtcio(int rtcio_num, rtcio_pinattr_t attr);
 
 /****************************************************************************
- * Name: esp32_rtcioirqinitialize
+ * Name: esp_rtcioirqinitialize
  *
  * Description:
  *   Initialize logic to support a second level of interrupt decoding for
@@ -551,9 +506,9 @@ int esp32_configrtcio(int rtcio_num, rtcio_pinattr_t attr);
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32_RTCIO_IRQ
-void esp32_rtcioirqinitialize(void);
+void esp_rtcioirqinitialize(void);
 #else
-#  define esp32_rtcioirqinitialize()
+#  define esp_rtcioirqinitialize()
 #endif
 
 /****************************************************************************
@@ -582,6 +537,49 @@ void esp32_rtcioirqenable(int irq);
 void esp32_rtcioirqdisable(int irq);
 #else
 #  define esp32_rtcioirqdisable(irq)
+#endif
+
+/****************************************************************************
+ * Name: esp32_rtcioirqattach
+ *
+ * Description:
+ *   Attach an interrupt handler to a specified RTC IRQ
+ *
+ * Input Parameters:
+ *   irq     - RTC IRQ number to attach the handler to
+ *   handler - Interrupt handler function
+ *   arg     - Argument to pass to the handler
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_RTCIO_IRQ
+int esp32_rtcioirqattach(int irq, xcpt_t handler, void *arg);
+#else
+#  define esp32_rtcioirqattach(irq, handler, arg) (-ENOSYS)
+#endif
+/****************************************************************************
+ * Name: esp32_rtcioirqdetach
+ *
+ * Description:
+ *   Detach an interrupt handler from a specified RTC IRQ
+ *
+ * Input Parameters:
+ *   irq - RTC IRQ number to detach the handler from
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_RTCIO_IRQ
+int esp32_rtcioirqdetach(int irq);
+#else
+#  define esp32_rtcioirqdetach(irq) (-ENOSYS)
 #endif
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_RTC_GPIO_H */

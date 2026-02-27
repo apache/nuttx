@@ -30,12 +30,11 @@
 #include <debug.h>
 #include <assert.h>
 
-#include "esp32s2_gpio.h"
 #include "esp32s2_psram.h"
 
 #include "rom/esp32s2_spiflash.h"
 #include "rom/esp32s2_opi_flash.h"
-#include "hardware/esp32s2_efuse.h"
+#include "soc/efuse_reg.h"
 #include "hardware/esp32s2_spi.h"
 #include "hardware/esp32s2_spi_mem_reg.h"
 #include "hardware/esp32s2_iomux.h"

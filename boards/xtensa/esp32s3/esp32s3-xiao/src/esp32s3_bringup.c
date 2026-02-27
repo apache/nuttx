@@ -40,6 +40,13 @@
 #include <nuttx/himem/himem.h>
 #include <arch/board/board.h>
 
+#include "espressif/esp_gpio.h"
+#include "esp32s3_start.h"
+
+#ifdef CONFIG_ESPRESSIF_HR_TIMER
+#  include "espressif/esp_hr_timer.h"
+#endif
+
 #include "esp32s3-xiao.h"
 
 #ifdef CONFIG_USERLED
@@ -67,6 +74,14 @@
 int esp32s3_bringup(void)
 {
   int ret;
+
+#ifdef CONFIG_ESPRESSIF_HR_TIMER
+  ret = esp_hr_timer_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_hr_timer_init() failed: %d\n", ret);
+    }
+#endif
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
