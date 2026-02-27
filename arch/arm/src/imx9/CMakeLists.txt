@@ -33,10 +33,16 @@ set(SRCS
 if(CONFIG_IMX9_SCMI)
   list(APPEND SRCS imx9_scmi.c)
   # NXP SDK SCMI interface for pinctrl and clocking
+else()
+  list(APPEND SRCS imx9_ccm.c)
 endif()
 
 if(CONFIG_RPTUN)
   list(APPEND SRCS imx9_rsctable.c imx9_rptun.c)
+endif()
+
+if(CONFIG_IMX9_XCACHE)
+  list(APPEND SRCS imx9_xcache.c)
 endif()
 
 if(CONFIG_IMX9_MU)

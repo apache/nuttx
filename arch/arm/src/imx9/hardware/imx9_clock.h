@@ -33,6 +33,8 @@
 
 #if defined(CONFIG_ARCH_CHIP_IMX95_M7)
 #  include "hardware/imx95/imx95_clock.h"
+#elif defined(CONFIG_ARCH_CHIP_IMX93_M33)
+#  include "hardware/imx93/imx93_clock.h"
 #else
 #  error Unrecognized i.MX9 architecture
 #endif

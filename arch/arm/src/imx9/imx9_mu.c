@@ -61,6 +61,22 @@ struct imx9_mudev_s
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_IMX9_MU1
+static struct imx9_mudev_s g_mu1_dev = /* clang-format off */
+{
+  .mubase = IMX9_MU1_MUA_BASE,
+  .irq = IMX9_IRQ_MU1_A
+}; /* clang-format on */
+#endif
+
+#ifdef CONFIG_IMX9_MU2
+static struct imx9_mudev_s g_mu2_dev = /* clang-format off */
+{
+  .mubase = IMX9_MU2_MUA_BASE,
+  .irq = IMX9_IRQ_MU2_A
+}; /* clang-format on */
+#endif
+
 #ifdef CONFIG_IMX9_MU5
 static struct imx9_mudev_s g_mu5_dev = /* clang-format off */
 {
@@ -149,6 +165,22 @@ struct imx9_mudev_s *imx9_mu_init(int index)
 {
   struct imx9_mudev_s *priv;
 
+#ifdef CONFIG_IMX9_MU1
+  if ((index == 1))
+    {
+      priv = &g_mu1_dev;
+    }
+
+  else
+#endif
+#ifdef CONFIG_IMX9_MU2
+  if ((index == 2))
+    {
+      priv = &g_mu2_dev;
+    }
+
+  else
+#endif
 #ifdef CONFIG_IMX9_MU5
   if ((index == 5))
     {
