@@ -35,13 +35,13 @@
 
 enum ota_img_ctrl
 {
-  OTA_IMG_GET_BOOT          = 0xe1,
-  OTA_IMG_SET_BOOT          = 0xe2,
-  OTA_IMG_SET_ENCRYPTED     = 0xe3,
-  OTA_IMG_GET_ENCRYPTED     = 0xe4,
-  OTA_IMG_GET_TYPE          = 0xe5,
-  OTA_IMG_GET_SUBTYPE       = 0xe6,
-  OTA_IMG_INVALIDATE_BOOT   = 0xe7,
+  OTA_IMG_GET_BOOT = 0xe1,
+  OTA_IMG_SET_BOOT = 0xe2,
+  OTA_IMG_SET_ENCRYPTED = 0xe3,
+  OTA_IMG_GET_ENCRYPTED = 0xe4,
+  OTA_IMG_GET_TYPE = 0xe5,
+  OTA_IMG_GET_SUBTYPE = 0xe6,
+  OTA_IMG_INVALIDATE_BOOT = 0xe7,
   OTA_IMG_IS_MAPPED_AS_TEXT = 0xe8,
 };
 
@@ -49,9 +49,9 @@ enum ota_img_ctrl
 
 enum ota_img_bootseq
 {
-  OTA_IMG_BOOT_FACTORY = 0,
-  OTA_IMG_BOOT_OTA_0   = 1,
-  OTA_IMG_BOOT_OTA_1   = 2,
+  OTA_IMG_BOOT_FACTORY    = 0,
+  OTA_IMG_BOOT_OTA_0      = 1,
+  OTA_IMG_BOOT_OTA_1      = 2,
   OTA_IMG_BOOT_SEQ_MAX
 };
 
@@ -72,7 +72,7 @@ enum ota_img_bootseq
  *
  ****************************************************************************/
 
-int esp32_partition_read_decrypt(const char *label, size_t offset, void *buf,
-                                 size_t size);
+int esp32_partition_read_decrypt(const char *label, size_t offset,
+                                 void *buf, size_t size);
 
 #endif /* __ARCH_XTENSA_INCLUDE_ESP32_PARTITION_H */
