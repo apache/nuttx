@@ -394,6 +394,7 @@ retry:
               blk = mempool_remove_queue(pool, &pool->queue);
             }
           else if (!pool->wait ||
+                   pool->expandsize > 0 ||
                    nxsem_wait_uninterruptible(&pool->waitsem) < 0)
             {
               return NULL;
